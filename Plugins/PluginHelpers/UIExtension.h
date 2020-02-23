@@ -215,10 +215,8 @@ namespace Abstractspoon
 				ref class SelectionRect
 				{
 				public:
-					SelectionRect();
-
-					bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy);
-					bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused);
+					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy);
+					static bool Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused);
 
 				private:
 					Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerSelected;

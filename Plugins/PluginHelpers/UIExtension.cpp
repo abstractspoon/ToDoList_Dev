@@ -446,7 +446,7 @@ bool UIExtension::TaskIcon::Get(UInt32 dwTaskID)
 	return false;
 }
 
-bool UIExtension::TaskIcon::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y)
+bool UIExtension::TaskIcon::Draw(Graphics^ dc, Int32 x, Int32 y)
 {
 	if ((m_hilTaskImages == NULL) || (m_iImage == -1))
 		return false;
@@ -470,7 +470,7 @@ UIExtension::ShortcutOverlay::ShortcutOverlay() : m_hIcon(NULL)
 
 }
 
-bool UIExtension::ShortcutOverlay::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
+bool UIExtension::ShortcutOverlay::Draw(Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
 {
 	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
 	bool bRes = false;
@@ -486,60 +486,30 @@ bool UIExtension::ShortcutOverlay::Draw(Drawing::Graphics^ dc, Int32 x, Int32 y,
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-UIExtension::SelectionRect::SelectionRect()
-{
-	const int LVP_LISTITEM = 1;
-	const int LISS_MORESELECTED = 6;
-
-	if (VisualStyleRenderer::IsSupported)
-	{
-		auto visElm = VisualStyleElement::CreateElement("Explorer::ListView", LVP_LISTITEM, LISS_MORESELECTED);
-
-		if (visElm && VisualStyleRenderer::IsElementDefined(visElm))
-			m_visExplorerSelected = gcnew VisualStyleRenderer(visElm);
-	}
-}
-
-bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
 {
 	HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
 	bool focused = (::GetFocus() == hWndRef);
 
-	return Draw(dc, x, y, cx, cy, focused);
+	return Draw(hwnd, dc, x, y, cx, cy, focused);
 }
 
-bool UIExtension::SelectionRect::Draw(Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
 {
-	if (m_visExplorerSelected)
+	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
+	bool bRes = false;
+
+	if (hDC != NULL)
 	{
-		dc->FillRectangle(Brushes::White, x, y, cx, cy);
+		HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
+		CRect rect(x, y, (x + cx), (y + cy));
+		GM_ITEMSTATE state = (focused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 
-		auto rect = gcnew Drawing::Rectangle(x, y, cx, cy);
-
-		m_visExplorerSelected->DrawBackground(dc, *rect);
-
-		if (focused)
-			m_visExplorerSelected->DrawBackground(dc, *rect);
-	}
-	else
-	{
-		auto fillColour = Drawing::Color::FromArgb(255, 175, 195, 240);
-		auto textColour = Drawing::Color::FromArgb(255, 50, 105, 200);
-
-		if (!focused)
-		{
-			fillColour = Drawing::Color::FromArgb(GetSysColor(COLOR_3DFACE));
-			textColour = Drawing::Color::FromArgb(GetSysColor(COLOR_3DSHADOW));
-		}
-
-		auto brush = gcnew SolidBrush(fillColour);
-		auto pen = gcnew Pen(textColour);
-
-		dc->FillRectangle(brush, x, y, cx, cy);
-		dc->DrawRectangle(pen, x, y, cx, cy);
+		bRes = (FALSE != GraphicsMisc::DrawExplorerItemBkgnd(CDC::FromHandle(hDC), hWndRef, state, rect, GMIB_THEMECLASSIC));
+		dc->ReleaseHdc();
 	}
 
-	return false;
+	return bRes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -585,7 +555,7 @@ Windows::Forms::Cursor^ UIExtension::HandCursor()
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool UIExtension::SaveImageToFile(Drawing::Bitmap^ image, String^ filepath)
+bool UIExtension::SaveImageToFile(Bitmap^ image, String^ filepath)
 {
 	if (image == nullptr)
 		return false;
@@ -596,23 +566,23 @@ bool UIExtension::SaveImageToFile(Drawing::Bitmap^ image, String^ filepath)
 	{
 		if (ext == L".png")
 		{
-			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Png);
+			image->Save(filepath, Imaging::ImageFormat::Png);
 		}
 		else if (ext == L".bmp")
 		{
-			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Bmp);
+			image->Save(filepath, Imaging::ImageFormat::Bmp);
 		}
 		else if (ext == L".tif")
 		{
-			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Tiff);
+			image->Save(filepath, Imaging::ImageFormat::Tiff);
 		}
 		else if ((ext == L".jpg") || (ext == L".jpeg"))
 		{
-			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Jpeg);
+			image->Save(filepath, Imaging::ImageFormat::Jpeg);
 		}
 		else if (ext == L".gif")
 		{
-			image->Save(filepath, System::Drawing::Imaging::ImageFormat::Gif);
+			image->Save(filepath, Imaging::ImageFormat::Gif);
 		}
 		else
 		{

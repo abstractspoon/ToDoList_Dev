@@ -25,7 +25,6 @@ namespace WordCloudUIExtension
 
 		// -------------------------------------------------------------
 
-		private UIExtension.SelectionRect m_SelectionRect;
 		private UIExtension.TaskIcon m_TaskIcons;
 
 		private ImageList m_ilItemHeight;
@@ -39,7 +38,6 @@ namespace WordCloudUIExtension
 
 		public TaskMatchesListView(IntPtr hwndParent)
 		{
-			m_SelectionRect = new UIExtension.SelectionRect();
 			m_TaskIcons = new UIExtension.TaskIcon(hwndParent);
 
 			m_ilItemHeight = new ImageList();
@@ -426,20 +424,14 @@ namespace WordCloudUIExtension
 		{
 			Rectangle textRect = new Rectangle(labelRect.Location, labelRect.Size);
 
-			textRect.Width += (textRect.X - 2);
 			textRect.X = 2;
-
-			// adjust for completion checkbox
 			textRect.X += CheckboxOffset;
-			textRect.Width -= CheckboxOffset;
-
-			// adjust for icon
 			textRect.X += TextIconOffset;
-			textRect.Width -= TextIconOffset;
 
-			// adjust for ID column
-			if (!includeIdColumn)
-				textRect.Width -= Columns[1].Width;
+			textRect.Width = (Columns[0].Width - textRect.X);
+
+            if (includeIdColumn)
+                textRect.Width += Columns[1].Width;
 
 			return textRect;
 		}
@@ -648,7 +640,7 @@ namespace WordCloudUIExtension
 				// Selection rect just around text label
 				Rectangle labelRect = LabelTextRect(e.Bounds, true);
 
-				m_SelectionRect.Draw(Handle, e.Graphics, labelRect.X, labelRect.Y, labelRect.Width, labelRect.Height);
+				UIExtension.SelectionRect.Draw(Handle, e.Graphics, labelRect.X, labelRect.Y, labelRect.Width, labelRect.Height);
 			}
 
 			// Draw subitems

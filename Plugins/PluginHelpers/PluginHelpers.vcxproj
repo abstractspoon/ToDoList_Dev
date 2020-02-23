@@ -122,9 +122,6 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <None Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="ColorUtil.h" />
     <ClInclude Include="CommandHandling.h" />
     <ClInclude Include="DateUtil.h" />

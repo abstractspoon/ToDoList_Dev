@@ -103,9 +103,42 @@ namespace MindMapUIExtension
         private int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
 		private int LabelPadding { get { return ScaleByDPIFactor(2); } }
         private int GraphPadding { get { return ScaleByDPIFactor(6); } }
+        private int DefaultExpansionButtonSize { get { return ScaleByDPIFactor(8); } }
 
-		private int DefaultExpansionButtonSize { get { return ScaleByDPIFactor(8); } }
-		private int DefaultExpansionButtonSeparation { get { return ScaleByDPIFactor(2); } }
+		private int ExpansionButtonSize 
+        { 
+            get 
+            {
+                if (VisualStyleRenderer.IsSupported)
+                {
+                    if (m_ThemedGlyphSize == 0)
+                    {
+                        var renderer = new VisualStyleRenderer(VisualStyleElement.TreeView.Glyph.Opened);
+
+                        using (var graphics = Graphics.FromHwnd(this.Handle))
+                        {
+                            m_ThemedGlyphSize = renderer.GetPartSize(graphics, ThemeSizeType.Draw).Width;
+                        }
+                    }
+
+                    return m_ThemedGlyphSize;
+                }
+
+                return DefaultExpansionButtonSize; 
+            } 
+        }
+		private int ExpansionButtonSeparation 
+        { 
+            get 
+            { 
+                int separation = ScaleByDPIFactor(2);
+
+                if (VisualStyleRenderer.IsSupported)
+                    separation -= (ExpansionButtonSize - DefaultExpansionButtonSize);
+
+                return separation; 
+            } 
+        }
 
 		protected enum NodeDrawState
 		{
@@ -138,13 +171,11 @@ namespace MindMapUIExtension
 		private Color m_ConnectionColor = Color.Magenta;
 		private int m_LastDragTick = 0;
 
-		private int m_ExpansionButtonSize = 0;
-		private int m_ExpansionButtonSeparation = 0;
+        private int m_ThemedGlyphSize = 0;
 
 		private bool m_FirstPaint = true;
         private bool m_HoldRedraw = false;
         private bool m_IsSavingToImage = false;
-		private bool m_UsingVisualStyles = false;
 
 		// Public ------------------------------------------------------------------------
 
@@ -156,28 +187,6 @@ namespace MindMapUIExtension
             m_DrawOffset = new Point(0, 0);
 			m_DropTarget = null;
             m_DropPos = DropPos.None;
-			m_ExpansionButtonSize = DefaultExpansionButtonSize;
-			m_ExpansionButtonSeparation = DefaultExpansionButtonSeparation;
-
-			try
-			{
-				m_UsingVisualStyles = VisualStyleRenderer.IsElementDefined(VisualStyleElement.TreeView.Glyph.Opened);
-			}
-			catch (Exception)
-			{
-				m_UsingVisualStyles = false;
-			}
-
-			if (m_UsingVisualStyles)
-			{
-				var renderer = new VisualStyleRenderer(VisualStyleElement.TreeView.Glyph.Opened);
-
-				using (var graphics = Graphics.FromHwnd(this.Handle))
-				{
-					m_ExpansionButtonSize = renderer.GetPartSize(graphics, ThemeSizeType.Draw).Width;
-					m_ExpansionButtonSeparation -= (m_ExpansionButtonSize - DefaultExpansionButtonSize);
-				}
-			}
 
 			InitializeComponent();
 		}
@@ -1474,7 +1483,7 @@ namespace MindMapUIExtension
             int horzOffset = (node.Bounds.Width + ItemHorzSeparation + GetExtraWidth(node));
 
             if (!IsRoot(node))
-                horzOffset += m_ExpansionButtonSize;
+                horzOffset += ExpansionButtonSize;
 
             return horzOffset;
         }
@@ -1510,7 +1519,7 @@ namespace MindMapUIExtension
                     RecalculatePositions(graphics, rightFrom, rightTo, horzOffset, 0);
 
 				    // Left side
-                    horzOffset = (ItemHorzSeparation - m_ExpansionButtonSize);
+                    horzOffset = (ItemHorzSeparation - ExpansionButtonSize);
 
 				    TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
                     TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
@@ -1699,7 +1708,7 @@ namespace MindMapUIExtension
             itemBounds.Width = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeFont(node))).Width;
 
 			if (IsParent(node) && !IsRoot(node))
-                itemBounds.Width += (m_ExpansionButtonSize + m_ExpansionButtonSeparation);
+                itemBounds.Width += (ExpansionButtonSize + ExpansionButtonSeparation);
 
 			itemBounds.Width += GetExtraWidth(node);
 
@@ -2026,23 +2035,23 @@ namespace MindMapUIExtension
 			MindMapItem item = Item(node);
 			Rectangle labelRect = GetItemDrawRect(item.ItemBounds);
 
-			int buttonLeft = 1, buttonTop = (labelRect.Top + ((labelRect.Height - m_ExpansionButtonSize) / 2));
+			int buttonLeft = 0;
 
-			if (item.IsFlipped)
+			if (item.IsFlipped) // Place the button to the right of the label
 			{
-				// Place the button to the right of the label
-				buttonLeft = (labelRect.Right - m_ExpansionButtonSize - LabelPadding);
+				buttonLeft = (labelRect.Right - ExpansionButtonSize - LabelPadding);
 			}
-			else
+			else // Place the button to the left of the label
 			{
-				// Place the button to the left of the label
 				buttonLeft = (labelRect.Left + LabelPadding - 1);
 			}
 
-			return Rectangle.FromLTRB(buttonLeft, 
-										buttonTop,
-										buttonLeft + m_ExpansionButtonSize, 
-										buttonTop + m_ExpansionButtonSize);
+            int buttonTop = (labelRect.Top + ((labelRect.Height - ExpansionButtonSize) / 2));
+
+            if (VisualStyleRenderer.IsSupported)
+                buttonTop++;
+
+			return new Rectangle(buttonLeft, buttonTop, ExpansionButtonSize, ExpansionButtonSize);
 		}
 
 		private void RedrawExpansionButton(TreeNode node, bool update = true)
@@ -2078,8 +2087,8 @@ namespace MindMapUIExtension
 
 			if (!button.IsEmpty)
 			{
-				if (m_UsingVisualStyles)
-				{
+                if (VisualStyleRenderer.IsSupported)
+                {
 					var renderer = new VisualStyleRenderer(node.IsExpanded ? 
 						VisualStyleElement.TreeView.Glyph.Opened : VisualStyleElement.TreeView.Glyph.Closed);
 
@@ -2110,8 +2119,6 @@ namespace MindMapUIExtension
 						}
 					}
 				}
-
-
 			}
 		}
 
@@ -2224,7 +2231,7 @@ namespace MindMapUIExtension
 
 				if ((item != null) && IsParent(node) && !IsRoot(node))
 				{
-					int offset = (m_ExpansionButtonSize + m_ExpansionButtonSeparation);
+					int offset = (ExpansionButtonSize + ExpansionButtonSeparation);
 
 					if (!item.IsFlipped)
 						itemRect.X += offset;

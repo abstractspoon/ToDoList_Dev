@@ -15,8 +15,6 @@ namespace DayViewUIExtension
 {
     class TDLRenderer : Calendar.AbstractRenderer
     {
-		private UIExtension.SelectionRect m_SelectionRect;
-		private VisualStyleRenderer m_HeaderNormal, m_HeaderHot;
 		private UITheme m_theme;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private IntPtr m_hWnd;
@@ -26,21 +24,6 @@ namespace DayViewUIExtension
 
 		public TDLRenderer(IntPtr hWnd, UIExtension.TaskIcon taskIcons)
 		{
-            // One time initialisation
-            if (m_SelectionRect == null)
-            {
-                m_SelectionRect = new UIExtension.SelectionRect();
-
-                if (VisualStyleRenderer.IsSupported)
-                {
-                    if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Normal))
-                        m_HeaderNormal = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
-
-                    if (VisualStyleRenderer.IsElementDefined(VisualStyleElement.Header.Item.Hot))
-                        m_HeaderHot = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
-                }
-            }
-
 			m_TaskIcons = taskIcons;
 			m_hWnd = hWnd;
 
@@ -207,9 +190,10 @@ namespace DayViewUIExtension
             {
                 rHeader.Width += 1;
 
-                if (m_HeaderHot != null)
+                if (VisualStyleRenderer.IsSupported)
                 {
-                    m_HeaderHot.DrawBackground(g, rHeader);
+                    var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
+                    renderer.DrawBackground(g, rHeader);
                 }
                 else
                 {
@@ -221,9 +205,10 @@ namespace DayViewUIExtension
             {
                 rHeader.X += 1;
 
-                if (m_HeaderNormal != null)
+                if (VisualStyleRenderer.IsSupported)
                 {
-                    m_HeaderNormal.DrawBackground(g, rHeader);
+                    var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
+                    renderer.DrawBackground(g, rHeader);
                 }
                 else
                 {
@@ -338,7 +323,7 @@ namespace DayViewUIExtension
                     // Draw the background of the appointment
 					if (isSelected)
 					{
-						m_SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height);
+                        UIExtension.SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height);
 					}
 					else
 					{

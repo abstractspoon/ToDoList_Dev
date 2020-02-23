@@ -204,7 +204,6 @@ namespace WordCloudUIExtension
 	public class TdlGraphicEngine : GdiGraphicEngine
 	{
 		private string m_SelectedItem;
-		private UIExtension.SelectionRect m_SelectionRect;
 		private Control m_Ctrl;
 
 		public TdlGraphicEngine(Control ctrl, Graphics graphics, FontFamily fontFamily, FontStyle fontStyle, Color[] palette, 
@@ -214,7 +213,6 @@ namespace WordCloudUIExtension
 			base(graphics, fontFamily, fontStyle, palette, minFontSize, maxFontSize, minWordWeight, maxWordWeight)
 		{
 			m_SelectedItem = selectedItem;
-			m_SelectionRect = new UIExtension.SelectionRect();
 			m_Ctrl = ctrl;
 		}
 
@@ -236,7 +234,7 @@ namespace WordCloudUIExtension
 		private void DrawSelected(LayoutItem layoutItem)
 		{
 			Rectangle rect = Rectangle.Inflate(Rectangle.Round(layoutItem.Rectangle), -1, -1);
-			m_SelectionRect.Draw(m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, m_Ctrl.Focused);
+			UIExtension.SelectionRect.Draw(m_Ctrl.Handle, m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, m_Ctrl.Focused);
 
 			DrawEmphasizedText(layoutItem, true);
 		}

@@ -188,8 +188,6 @@ namespace MindMapUIExtension
 		// From Parent
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
-
-		private UIExtension.SelectionRect m_SelectionRect;
 		private Dictionary<UInt32, MindMapTaskItem> m_Items;
 
 		private Boolean m_ShowParentAsFolder;
@@ -211,7 +209,6 @@ namespace MindMapUIExtension
 			m_Trans = trans;
 			m_TaskIcons = icons;
 
-			m_SelectionRect = new UIExtension.SelectionRect();
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
 			m_Shortcut = new UIExtension.ShortcutOverlay();
 
@@ -957,11 +954,11 @@ namespace MindMapUIExtension
 			switch (nodeState)
 			{
 				case NodeDrawState.Selected:
-                    m_SelectionRect.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height, this.Focused);
+                    UIExtension.SelectionRect.Draw(this.Handle, graphics, rect.X, rect.Y, rect.Width, rect.Height, this.Focused);
 					break;
 
 				case NodeDrawState.DropTarget:
-                    m_SelectionRect.Draw(graphics, rect.X, rect.Y, rect.Width, rect.Height, false);
+                    UIExtension.SelectionRect.Draw(this.Handle, graphics, rect.X, rect.Y, rect.Width, rect.Height, false);
 					break;
 
                 case NodeDrawState.None:
