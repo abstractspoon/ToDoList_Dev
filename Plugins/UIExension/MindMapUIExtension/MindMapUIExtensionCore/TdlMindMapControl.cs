@@ -947,7 +947,11 @@ namespace MindMapUIExtension
 				{
 					textColor = DrawingColor.SetLuminance(realItem.TextColor, 0.3f);
 				}
-			}
+                else
+                {
+                    textColor = realItem.TextColor;
+                }
+            }
 
 			switch (nodeState)
 			{
