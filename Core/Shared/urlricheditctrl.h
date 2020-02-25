@@ -103,7 +103,6 @@ protected:
 	void TrackDragCursor();
 	BOOL AppendSourceUrls(LPCTSTR szUrl);
 	BOOL GetUrlTooltip(const CString& sUrl, CString& sTooltip) const;
-	BOOL EnableAutoUrlDetection();
 	void Initialise();
 	BOOL FindStartOfUrl(LPCTSTR szText, int nTextLen, LPCTSTR& szPos) const;
 	BOOL WantFollowLink(BOOL bCtrl, BOOL bShift) const;

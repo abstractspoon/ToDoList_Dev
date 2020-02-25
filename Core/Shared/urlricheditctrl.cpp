@@ -74,17 +74,6 @@ int CUrlRichEditCtrl::AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify)
 	return m_parser.AddProtocol(szProtocol, bWantNotify);
 }
 
-BOOL CUrlRichEditCtrl::EnableAutoUrlDetection()
-{
-	if (!m_parser.HasProtocols())
-		return CRichEditBaseCtrl::EnableAutoUrlDetection();
-
-	CStringArray aProtocols;
-	VERIFY(m_parser.GetProtocols(aProtocols));
-
-	return CRichEditBaseCtrl::EnableAutoUrlDetection(aProtocols);
-}
-
 BOOL CUrlRichEditCtrl::OnChangeText() 
 {
 	if (!IsAutoUrlDetectionEnabled())
@@ -130,13 +119,17 @@ void CUrlRichEditCtrl::Initialise()
 	CRichEditBaseCtrl::Initialise();
 
 	SetEventMask(GetEventMask() | ENM_CHANGE | ENM_DROPFILES | ENM_DRAGDROPDONE | ENM_LINK);
-	DragAcceptFiles();
-
-	// enable multilevel undo
 	SendMessage(EM_SETTEXTMODE, TM_MULTILEVELUNDO);
 
-	// Enable custom protocol handling
-	EnableAutoUrlDetection();
+	DragAcceptFiles();
+
+	if (m_parser.HasProtocols())
+	{
+		CStringArray aProtocols;
+
+		VERIFY(m_parser.GetProtocols(aProtocols));
+		VERIFY(CRichEditBaseCtrl::EnableAutoUrlDetection(aProtocols));
+	}
 
 	m_ncBorder.Initialize(GetSafeHwnd());
 }
