@@ -2300,6 +2300,19 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		return dtSimpleDue;
 	}
 
+	// Tasks whose current and new dates do not have times 
+	// and whose units are not TDCU_WEEKDAYS are also kept simple
+	if (nUnits != TDCU_WEEKDAYS)
+	{
+		if (!CDateHelper::DateHasTime(dtCurStart) && 
+			!CDateHelper::DateHasTime(dtCurDue) &&
+			!CDateHelper::DateHasTime(dtNewStart))
+		{
+			ASSERT(!CDateHelper::DateHasTime(dtSimpleDue));
+			return dtSimpleDue;
+		}
+	}
+
 	// Tasks whose time estimate has not changed are also kept simple
 	double dCurDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
 	double dNewDuration = CalcDuration(dtNewStart, dtSimpleDue, nUnits);
@@ -2312,7 +2325,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	}
 	
 	// We need to calculate it 'fully'
-	return AddDuration(dtNewStart, dCurDuration, nUnits, TRUE); // updates dtNewStart
+	return AddDuration(dtNewStart, dCurDuration, nUnits, TRUE); // May update dtNewStart
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date, BOOL bAndSubtasks)
