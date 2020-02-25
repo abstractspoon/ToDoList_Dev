@@ -2288,26 +2288,10 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 
 COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart)
 {
+	// Tasks whose current and new dates fall wholly within a single day are kept simple
 	double dSimpleDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
 	ASSERT(dSimpleDuration > 0.0);
 
-	// If the move is whole days keep it simple
-	double dOffset = CalcDuration(dtCurStart, dtNewStart, TDCU_DAYS);
-	ASSERT(dOffset > 0.0);
-
-	if (dOffset == (int)dOffset)
-	{
-		COleDateTime dtNewDue(dtCurDue);
-		DH_UNITS nDHUnits = ((nUnits == TDCU_WEEKDAYS) ? DHU_WEEKDAYS : DHU_DAYS);
-
-		VERIFY(CDateHelper().OffsetDate(dtNewDue, (int)dOffset, nDHUnits));
-
-		// Leave dtNewStart untouched
-		return dtNewDue;
-	}
-
-	// Tasks whose current and new dates fall wholly within 
-	// a single day are also kept simple
 	COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
 	
 	if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) &&
