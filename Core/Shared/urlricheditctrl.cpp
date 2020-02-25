@@ -127,6 +127,8 @@ LRESULT CUrlRichEditCtrl::OnDropFiles(WPARAM wp, LPARAM /*lp*/)
 
 void CUrlRichEditCtrl::Initialise()
 {
+	CRichEditBaseCtrl::Initialise();
+
 	SetEventMask(GetEventMask() | ENM_CHANGE | ENM_DROPFILES | ENM_DRAGDROPDONE | ENM_LINK);
 	DragAcceptFiles();
 
