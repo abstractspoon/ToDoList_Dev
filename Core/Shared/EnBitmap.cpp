@@ -754,7 +754,7 @@ BOOL CEnBitmap::ProcessImage(C32BIPArray& aProcessors, COLORREF crMask)
 				}
 			}
 
-			::ReleaseDC(NULL, hdc);
+			VERIFY(::ReleaseDC(NULL, hdc));
 
 			if (!bRes)
 				GraphicsMisc::VerifyDeleteObject(hbmSrc);
@@ -785,7 +785,7 @@ RGBX* CEnBitmap::GetDIBits32()
 		pBits = NULL;
 	}
 
-	::ReleaseDC(NULL, hdc);
+	VERIFY(::ReleaseDC(NULL, hdc));
 
 	return (RGBX*)pBits;
 }
@@ -846,7 +846,7 @@ BOOL CEnBitmap::CopyImage(HBITMAP hBitmap)
 		}
 	}
 
-	::ReleaseDC(NULL, hdc);
+	VERIFY(::ReleaseDC(NULL, hdc));
 	delete [] pBits;
 
 	return bRes;
@@ -932,7 +932,8 @@ BOOL CEnBitmap::Copy(HIMAGELIST hImageList)
 	
 	// cleanup
 	::SelectObject(hdcMem, hBMOld);
-	DeleteDC(hdcMem);
-	
+	VERIFY(DeleteDC(hdcMem));
+	VERIFY(::ReleaseDC(NULL, hdc));
+
 	return Attach(hbmDest);
 }
