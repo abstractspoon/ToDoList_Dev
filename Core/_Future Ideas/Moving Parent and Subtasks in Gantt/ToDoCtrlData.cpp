@@ -2296,22 +2296,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	// Tasks whose current and new dates fall wholly within a single day are kept simple
 	double dSimpleDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
 	ASSERT(dSimpleDuration > 0.0);
-/*
-	// If the move is whole days keep it simple
-	double dOffset = CalcDuration(dtCurStart, dtNewStart, TDCU_DAYS);
-	ASSERT(dOffset > 0.0);
 
-	if (dOffset == (int)dOffset)
-	{
-		COleDateTime dtNewDue(dtCurDue);
-		DH_UNITS nDHUnits = ((nUnits == TDCU_WEEKDAYS) ? DHU_WEEKDAYS : DHU_DAYS);
-
-		VERIFY(CDateHelper().OffsetDate(dtNewDue, (int)dOffset, nDHUnits));
-
-		// Leave dtNewStart untouched
-		return dtNewDue;
-	}
-*/
 	// Tasks whose current and new dates fall wholly within 
 	// a single day are also kept simple
 	COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
@@ -2321,20 +2306,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	{
 		return dtSimpleDue;
 	}
-/*
-	// Tasks whose current and new dates do not have times 
-	// and whose units are not TDCU_WEEKDAYS are also kept simple
-	if (nUnits != TDCU_WEEKDAYS)
-	{
-		if (!CDateHelper::DateHasTime(dtCurStart) && 
-			!CDateHelper::DateHasTime(dtCurDue) &&
-			!CDateHelper::DateHasTime(dtNewStart))
-		{
-			ASSERT(!CDateHelper::DateHasTime(dtSimpleDue));
-			return dtSimpleDue;
-		}
-	}
-*/
+
 	// Tasks whose time estimate has not changed are also kept simple
 	double dCurDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
 	double dNewDuration = CalcDuration(dtNewStart, dtSimpleDue, nUnits);
