@@ -179,10 +179,10 @@ BOOL CRemoteFileDialog::OnInitDialog()
 
 	// set up list image lists
  	if (m_silLarge.Initialize())
- 		m_lcFiles.SetImageList(m_silLarge.GetImageList(), LVSIL_NORMAL);
+ 		m_lcFiles.SendMessage(LVM_SETIMAGELIST, LVSIL_NORMAL, (LPARAM)m_silLarge.GetHImageList());
  
  	if (m_silSmall.Initialize())
- 		m_lcFiles.SetImageList(m_silSmall.GetImageList(), LVSIL_SMALL);
+ 		m_lcFiles.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)m_silSmall.GetHImageList());
 
 	// init multi selection
 	if (m_dwOptions & RFD_MULTISELECT)

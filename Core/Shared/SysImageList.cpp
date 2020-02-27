@@ -8,6 +8,7 @@
 #include "filemisc.h"
 #include "webmisc.h"
 #include "misc.h"
+#include "graphicsmisc.h"
 #include "enimagelist.h"
 
 #include <shlwapi.h>
@@ -31,7 +32,7 @@ CSysImageList::CSysImageList(BOOL bLargeIcons) :
 	m_hImageList(NULL),
 	m_nRemoteFolderImage(-1),
 	m_nUnknownTypeImage(-1),
-	m_nImageSize(-1)
+	m_nImageSize(GraphicsMisc::ScaleByDPIFactor(bLargeIcons ? 32 : 16))
 {
 	
 }
@@ -60,7 +61,8 @@ BOOL CSysImageList::Initialize()
 		m_hImageList = hIL;
 		
 		m_nFolderImage = sfi.iIcon;
-		m_nImageSize = CEnImageList::GetImageSize(m_hImageList);
+
+		ASSERT(m_nImageSize == CEnImageList::GetImageSize(m_hImageList));
 		
 		// intialize html and remote folder images on demand
 	}
@@ -71,8 +73,6 @@ BOOL CSysImageList::Initialize()
 
 int CSysImageList::GetImageSize() const
 {
-	ASSERT(m_hImageList);
-
 	return m_nImageSize;
 }
 
@@ -85,7 +85,7 @@ BOOL CSysImageList::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, UINT nStyle, BO
 
 BOOL CSysImageList::Draw(CDC* pDC, int nImage, POINT pt, UINT nStyle)
 {
-	return GetImageList()->Draw(pDC, nImage, pt, nStyle);
+	return ImageList_Draw(GetHImageList(), nImage, *pDC, pt.x, pt.y, nStyle);
 }
 
 int CSysImageList::GetImageIndex(LPCTSTR szFile)
@@ -283,34 +283,7 @@ HICON CSysImageList::ExtractFolderIcon()
 	return ImageList_GetIcon(m_hImageList, m_nFolderImage, 0);
 }
 
-const CImageList* CSysImageList::GetImageList() const
-{ 
-	CImageList* pIL = CImageList::FromHandle(m_hImageList); 
-	
-	if (pIL)
-		return pIL;
-	
-	// else
-	static CImageList il;
-	return &il;
-}
-
-CImageList* CSysImageList::GetImageList() 
-{ 
-	if (!m_hImageList)
-		Initialize();
-	
-	CImageList* pIL = CImageList::FromHandle(m_hImageList); 
-	
-	if (pIL)
-		return pIL;
-	
-	// else backup plan
-	static CImageList il;
-	return &il;
-}
-
-HIMAGELIST CSysImageList::GetHImageList() 
+HIMAGELIST CSysImageList::GetHImageList()
 { 
 	if (!m_hImageList)
 		Initialize();

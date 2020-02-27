@@ -119,7 +119,7 @@ void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 		
 		if (nImage != -1)
 		{
-			m_ilImages.GetImageList()->Draw(&dc, nImage, ptDraw, ILD_TRANSPARENT);
+			m_ilImages.Draw(&dc, nImage, ptDraw, ILD_TRANSPARENT);
 		}
 	}
 

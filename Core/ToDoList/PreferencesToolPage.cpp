@@ -138,7 +138,7 @@ void CPreferencesToolPage::OnFirstShow()
 	VERIFY(InitializeToolbar());
 
 	m_ilSys.Initialize();
-	m_lcTools.SetImageList(m_ilSys.GetImageList(), LVSIL_SMALL);
+	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)m_ilSys.GetHImageList());
 
 	m_eToolPath.SetCurrentFolder(FileMisc::GetAppFolder());
 	m_eIconPath.SetCurrentFolder(FileMisc::GetAppFolder());
@@ -448,7 +448,7 @@ void CPreferencesToolPage::OnChangeToolpath()
 void CPreferencesToolPage::RebuildListCtrlImages()
 {
 	m_ilSys.Initialize();
-	m_lcTools.SetImageList(m_ilSys.GetImageList(), LVSIL_SMALL);
+	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)m_ilSys.GetHImageList());
 
 	int nTool = m_lcTools.GetItemCount();
 
@@ -477,7 +477,7 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 
 			if (hIcon)
 			{
-				lvi.iImage = m_ilSys.GetImageList()->Add(hIcon);
+				lvi.iImage = ImageList_AddIcon(m_ilSys.GetHImageList(), hIcon);
 				::DestroyIcon(hIcon);
 			}
 			else

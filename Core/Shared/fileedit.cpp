@@ -351,7 +351,7 @@ void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rI
 		}
 		
 		if (nImage != -1)
-			m_ilSys.GetImageList()->Draw(pDC, nImage, rIcon.TopLeft(), ILD_TRANSPARENT);
+			m_ilSys.Draw(pDC, nImage, rIcon.TopLeft(), ILD_TRANSPARENT);
 	}
 }
 

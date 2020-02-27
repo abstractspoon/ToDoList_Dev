@@ -16,13 +16,10 @@ class CSysImageList
 public:
 	CSysImageList(BOOL bLargeIcons = FALSE);
 	virtual ~CSysImageList();
-	
-	const CImageList* GetImageList() const; // temporary. should not be stored
-	CImageList* GetImageList(); // temporary. should not be stored
-	HIMAGELIST GetHImageList();
-	
+		
 	BOOL Initialize();
 	int GetImageSize() const;
+	HIMAGELIST GetHImageList();
 	
 	int GetFileImageIndex(LPCTSTR szFilePath, BOOL bFailUnKnown = FALSE); // will call Initialize if nec.
 	int GetFolderImageIndex(); // will call Initialize if nec.
