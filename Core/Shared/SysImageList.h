@@ -29,6 +29,7 @@ public:
 	HICON ExtractFileIcon(LPCTSTR szFilePath);
 	HICON ExtractFolderIcon();
 
+	static BOOL Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLarge, UINT nStyle = ILD_TRANSPARENT, BOOL bFailUnKnown = FALSE);
 	BOOL Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, UINT nStyle = ILD_TRANSPARENT, BOOL bFailUnKnown = FALSE);
 	BOOL Draw(CDC* pDC, int nImage, POINT pt, UINT nStyle = ILD_TRANSPARENT);
 	

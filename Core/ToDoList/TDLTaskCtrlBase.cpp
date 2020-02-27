@@ -517,7 +517,7 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 			AdjustSplitterToFitAttributeColumns();
 
 		// Delay-loaded to avoid resource leaks
-		VERIFY(m_ilFileRef.Initialize());
+		//VERIFY(m_ilFileRef.Initialize());
 	}
 }
 
@@ -3067,6 +3067,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 
 	case 1:
 		// TDCS_SHOWNONFILEREFSASTEXT only works for one file
+/*
 		if (HasStyle(TDCS_SHOWNONFILEREFSASTEXT))
 		{
 			CString sFileRef = aFileLinks[0];
@@ -3078,6 +3079,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 				break;
 			}
 		}
+*/
 		// else fall thru
 		
 	default:
@@ -3117,7 +3119,8 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 					}
 					else
 					{
-						m_ilFileRef.Draw(pDC, sFileRef, rIcon.TopLeft());
+						//m_ilFileRef.Draw(pDC, sFileRef, rIcon.TopLeft());
+						CSysImageList::Draw(pDC, sFileRef, rIcon.TopLeft(), FALSE);
 					}
 				}
 			}

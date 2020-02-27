@@ -76,6 +76,19 @@ int CSysImageList::GetImageSize() const
 	return m_nImageSize;
 }
 
+BOOL CSysImageList::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLarge, UINT nStyle, BOOL bFailUnKnown)
+{
+	SHFILEINFO sfi;
+
+	UINT nFlags = SHGFI_SYSICONINDEX | SHGFI_SMALLICON;
+	HIMAGELIST hIL = (HIMAGELIST)SHGetFileInfo(szFilePath, 0, &sfi, sizeof(sfi), nFlags);
+
+	if ((hIL == NULL) || (sfi.iIcon == -1))
+		return FALSE;
+
+	return ImageList_Draw(hIL, sfi.iIcon, *pDC, pt.x, pt.y, nStyle);
+}
+
 BOOL CSysImageList::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, UINT nStyle, BOOL bFailUnKnown)
 {
 	int nImage = GetFileImageIndex(szFilePath, bFailUnKnown);
