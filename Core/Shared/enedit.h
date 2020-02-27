@@ -86,6 +86,7 @@ protected:
 		BOOL bChecked;
 		BOOL bDropMenu;
 		BOOL bSymbol;
+		HICON hIcon;
 		int iImage;
 	};
 
@@ -151,6 +152,7 @@ protected:
 	void ForceRedraw();
 
 	virtual BOOL InitializeTooltips();
+	virtual BOOL InitializeImageLists();
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 	static void DrawText(CDC* pDC, const CPoint& ptTopLeft, const CString& sText, 

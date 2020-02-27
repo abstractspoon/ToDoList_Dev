@@ -34,7 +34,8 @@ CEnEdit::EDITBTN::EDITBTN()
 	bChecked(FALSE),
 	bDropMenu(FALSE),
 	bSymbol(FALSE),
-	iImage(-1)
+	iImage(-1),
+	hIcon(NULL)
 {
 }
 
@@ -159,22 +160,6 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 	if (!nID || !hIcon)
 		return FALSE;
 	
-	// Create imagelists first time
-	int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
-
-	if (!m_ilBtns.GetSafeHandle())
-	{
-		ASSERT(!m_ilDisabledBtns.GetSafeHandle());
-
-		if (!m_ilBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1) ||
-			!m_ilDisabledBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1))
-		{
-			return FALSE;
-		}
-	}
-
-	ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
-
 	nPos = max(nPos, 0);
 	nPos = min(nPos, GetButtonCount());
 	
@@ -182,21 +167,25 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 	
 	eb.nID = nID;
 	eb.sTip = szTip;
-	eb.iImage = m_ilBtns.Add(hIcon);
-
-#ifdef _DEBUG
-	int nCount = m_ilBtns.GetImageCount();
-#endif
 
 	if (nWidth != DEF_BTNWIDTH)
 		eb.nWidth = GraphicsMisc::ScaleByDPIFactor(nWidth);
 	else
-		eb.nWidth = (nImageSize + 4); // 2 px padding
+		eb.nWidth = (GraphicsMisc::ScaleByDPIFactor(16) + 4); // 2 px padding
 
-	CIcon iconDisabled(CEnBitmapEx::CreateDisabledIcon(hIcon));
-	VERIFY(m_ilDisabledBtns.Add(iconDisabled) == eb.iImage);
+	if (m_ilBtns.GetSafeHandle())
+	{
+		eb.iImage = m_ilBtns.Add(hIcon);
+
+		CIcon iconDisabled(CEnBitmapEx::CreateDisabledIcon(hIcon));
+		VERIFY(m_ilDisabledBtns.Add(iconDisabled) == eb.iImage);
 	
-	ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
+		ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
+	}
+	else
+	{
+		eb.hIcon = hIcon;
+	}
 
 	m_aButtons.InsertAt(nPos, eb);
 	
@@ -212,6 +201,44 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 			SetWindowPos(NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER); 
 	}
 	
+	return TRUE;
+}
+
+BOOL CEnEdit::InitializeImageLists()
+{
+	if (!m_ilBtns.GetSafeHandle() && !m_ilDisabledBtns.GetSafeHandle())
+	{
+		int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
+
+		for (int nBtn = 0; nBtn < m_aButtons.GetSize(); nBtn++)
+		{
+			EDITBTN& eb = m_aButtons[nBtn];
+
+			if (eb.hIcon)
+			{
+				if (!m_ilBtns.GetSafeHandle())
+				{
+					ASSERT(!m_ilDisabledBtns.GetSafeHandle());
+
+					if (!m_ilBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1) ||
+						!m_ilDisabledBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1))
+					{
+						return FALSE;
+					}
+				}
+
+				eb.iImage = m_ilBtns.Add(eb.hIcon);
+
+				CIcon iconDisabled(CEnBitmapEx::CreateDisabledIcon(eb.hIcon));
+
+				VERIFY(m_ilDisabledBtns.Add(iconDisabled) == eb.iImage);
+				ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
+
+				eb.hIcon = NULL;
+			}
+		}
+	}
+
 	return TRUE;
 }
 
@@ -392,7 +419,8 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 
 	// The only reliable place to initialise tooltips
 	InitializeTooltips();
-		
+	InitializeImageLists();
+
 	// update tool rects
 	RecalcBtnHotRects();
 }
@@ -403,6 +431,8 @@ void CEnEdit::OnDestroy()
 
 	m_tooltip.DestroyWindow();
 	m_hotTrack.Reset();
+	m_ilBtns.DeleteImageList();
+	m_ilDisabledBtns.DeleteImageList();
 }
 
 BOOL CEnEdit::InitializeTooltips()

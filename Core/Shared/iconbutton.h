@@ -22,7 +22,7 @@ public:
 	void SetIcon(HICON hIcon, BOOL bCleanup = TRUE);
 
 protected:
-	CEnImageList m_ilIcon;
+	HICON m_hIcon;
 	int m_nSize;
 
 protected:

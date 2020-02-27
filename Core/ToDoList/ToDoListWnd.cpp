@@ -230,6 +230,10 @@ CToDoListWnd::~CToDoListWnd()
 {
 	delete m_pPrefs;
 
+	m_fontComments.DeleteObject();
+	m_fontMain.DeleteObject();
+	m_fontTree.DeleteObject();
+
 	// cleanup temp files
 	// Note: Due task notifications are removed by CToDoCtrlMgr
 	FileMisc::DeleteFile(TEMP_CLIPBOARD_FILEPATH, TRUE);

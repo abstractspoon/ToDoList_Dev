@@ -14,13 +14,16 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CIconButton
 
-CIconButton::CIconButton(int nSize) : m_nSize(GraphicsMisc::ScaleByDPIFactor(nSize))
+CIconButton::CIconButton(int nSize) 
+	: 
+	m_nSize(GraphicsMisc::ScaleByDPIFactor(nSize)), 
+	m_hIcon(NULL)
 {
 }
 
 CIconButton::~CIconButton()
 {
-	m_ilIcon.DeleteImageList();
+	::DestroyIcon(m_hIcon);
 }
 
 
@@ -34,22 +37,20 @@ END_MESSAGE_MAP()
 
 void CIconButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 {
-	if (m_ilIcon.GetSafeHandle() && (m_ilIcon.GetImageCount() == 1))
-		m_ilIcon.Draw(pDC, 0, rExtra.TopLeft(), ILD_TRANSPARENT);
+	if (m_hIcon)
+		::DrawIconEx(*pDC, rExtra.left, rExtra.top, m_hIcon, m_nSize, m_nSize, 0, NULL, DI_NORMAL);
 }
 
 void CIconButton::SetIcon(HICON hIcon, BOOL bCleanup)
 { 
-	m_ilIcon.DeleteImageList();
+	::DestroyIcon(m_hIcon);
 
 	if (hIcon)
 	{
-		m_ilIcon.Create(m_nSize, m_nSize, (ILC_COLOR32 | ILC_MASK), 0, 1);
-
-		VERIFY(m_ilIcon.Add(hIcon) == 0);
-
 		if (bCleanup)
-			::DestroyIcon(hIcon);
+			m_hIcon = hIcon;
+		else
+			m_hIcon = ::CopyIcon(hIcon);
 	}
 	
 	if (GetSafeHwnd())
