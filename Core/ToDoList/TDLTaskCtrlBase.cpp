@@ -515,6 +515,9 @@ void CTDLTaskCtrlBase::OnSize(UINT nType, int cx, int cy)
 
 		if (m_bAutoFitSplitter)
 			AdjustSplitterToFitAttributeColumns();
+
+		// Delay-loaded to avoid resource leaks
+		VERIFY(m_ilFileRef.Initialize());
 	}
 }
 
@@ -1306,8 +1309,6 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	CClientDC dc(&m_lcColumns);
 
 	int nPrevTotalWidth = m_hdrColumns.CalcTotalItemWidth();
-
-	VERIFY(m_ilFileRef.Initialize());
 
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(&dc, m_lcColumns);
 	BOOL bVisibleTasksOnly = IsTreeList();

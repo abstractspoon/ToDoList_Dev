@@ -603,9 +603,6 @@ BOOL CToDoCtrl::OnInitDialog()
 	
 	m_dtTree.Register(&m_taskTree.Tree(), this);
 	m_dtFileRef.Register(&m_cbFileRef, this); 
-
-	// task icon image list
-	LoadTaskIcons();
 	
 	// custom font
 	if (m_hFontTree)
@@ -5495,7 +5492,9 @@ DWORD CToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	switch (nStyle)
 	{
 	case TDCS_SHOWDEFAULTTASKICONS:
-		LoadTaskIcons();
+		// Reload only if they've already been initialised
+		if (m_ilTaskIcons.GetSafeHandle())
+			LoadTaskIcons();
 		break;
 
 	case TDCS_SHOWDATESINISO:
@@ -6318,7 +6317,9 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			log.LogTimeElapsed(_T("CToDoCtrl::Load(LoadTasks)"));
 			///////////////////////////////////////////////////////////////////
 
-			LoadTaskIcons();
+			// Reload only if they've already been initialised
+			if (m_ilTaskIcons.GetSafeHandle())
+				LoadTaskIcons();
 					
 			// PERMANENT LOGGING //////////////////////////////////////////////
 			log.LogTimeElapsed(_T("CToDoCtrl::Load(LoadTaskIcons)"));
@@ -10631,7 +10632,15 @@ void CToDoCtrl::OnShowWindow(BOOL bShow, UINT nStatus)
 	CRuntimeDlg::OnShowWindow(bShow, nStatus);
 	
 	if (!bShow)
+	{
 		m_findReplace.DestroyDialog();
+	}
+	else if (!m_ilTaskIcons.GetSafeHandle())
+	{
+		// Delay-loading of resources else image lists seem to result 
+		// in memory leaks inside of system dlls
+		LoadTaskIcons();
+	}
 }
 
 LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)

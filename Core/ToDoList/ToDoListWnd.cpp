@@ -725,10 +725,15 @@ void CToDoListWnd::SetUITheme(const CString& sThemeFile)
 		m_cbQuickFind.DestroyWindow();
 		m_tbHelperMain.Release();
 		m_toolbarMain.DestroyWindow();
-		m_toolbarCustom.DestroyWindow();
 
 		InitMainToolbar();
-		InitCustomToolbar();
+
+		// Only reload if already initialised
+		if (m_toolbarCustom.GetSafeHwnd())
+		{
+			m_toolbarCustom.DestroyWindow();
+			InitCustomToolbar();
+		}
 
 		// reinitialize the menu icon manager
 		m_mgrMenuIcons.Release();
@@ -834,8 +839,7 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (!InitMainToolbar())
 		return -1;
 
-	if (Prefs().HasCustomToolbar() && !InitCustomToolbar())
-		return -1;
+	// Toolbars are delay loaded to avoid memory leaks
 	
 	if (!InitStatusbar())
 		return -1;
@@ -889,19 +893,9 @@ BOOL CToDoListWnd::InitTabCtrl()
 		BOOL bStackTabbar = Prefs().GetStackTabbarItems();
 		
 		m_tabCtrl.ModifyStyle(bStackTabbar ? 0 : TCS_MULTILINE, bStackTabbar ? TCS_MULTILINE : 0);
-		
-		if (m_ilTabCtrl.Create(16, 16, ILC_COLOR32 | ILC_MASK, 4, 1))
-		{
-			CBitmap bm;
-			bm.LoadBitmap(IDB_SOURCECONTROL_STD);
-			
-			m_ilTabCtrl.Add(&bm, RGB(255, 0, 255));
-			m_ilTabCtrl.ScaleByDPIFactor();
 
-			m_tabCtrl.SetImageList(&m_ilTabCtrl);
-			
-			return TRUE;
-		}
+		// Delay image list creation to avoid resource leaks
+		return TRUE;
 	}
 	
 	// else
@@ -6037,7 +6031,21 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 
 	if (bVisible && m_toolbarMain.GetSafeHwnd())
 	{
-		//TRACE(_T("CToDoListWnd::OnSize(%d, %d)\n"), cx, cy);
+		// Delay-loading of resources else image lists seem to result 
+		// in memory leaks inside of system dlls
+		InitCustomToolbar();
+
+		if (!m_ilTabCtrl.GetSafeHandle() && 
+			m_ilTabCtrl.Create(16, 16, ILC_COLOR32 | ILC_MASK, 4, 1))
+		{
+			CBitmap bm;
+			bm.LoadBitmap(IDB_SOURCECONTROL_STD);
+
+			m_ilTabCtrl.Add(&bm, RGB(255, 0, 255));
+			m_ilTabCtrl.ScaleByDPIFactor();
+
+			m_tabCtrl.SetImageList(&m_ilTabCtrl);
+		}
 
 		Resize(cx, cy, (nType == SIZE_MAXIMIZED));
 		
@@ -12085,15 +12093,16 @@ BOOL CToDoListWnd::PreCreateWindow(CREATESTRUCT& cs)
 
 			// Need to preset the icon otherwise the function GetIconWndClass
 			// calling us will overwrite our class.
-			VERIFY(m_iconClass.Load(IDR_MAINFRAME));
-			wndcls.hIcon = m_iconClass;
+			//VERIFY(m_iconClass.Load(IDR_MAINFRAME));
+			//wndcls.hIcon = m_iconClass;
+			wndcls.hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 
 			// Register our class now and check the outcome
 			if (!::RegisterClass(&wndcls))
 			{
 				ASSERT(0);
 
-				m_iconClass.Destroy();
+				//m_iconClass.Destroy();
 				return FALSE;
 			}
 		}
