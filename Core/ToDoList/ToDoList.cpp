@@ -202,7 +202,7 @@ BOOL CToDoListApp::InitInstance()
 
 	// Set up icons that might be required during startup
 	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE) && m_iconGo.Load(IDI_FILEEDIT_GO))
-		CFileEdit::SetDefaultButtonImages(m_iconBrowse, m_iconBrowse);
+		CFileEdit::SetDefaultButtonImages(m_iconBrowse, m_iconGo);
 	
 	if (m_iconHelp.Load(IDI_HELPBUTTON))
 		CWinHelpButton::SetDefaultIcon(m_iconHelp);
