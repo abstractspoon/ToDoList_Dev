@@ -184,7 +184,7 @@ BOOL CEnEdit::InsertButton(int nPos, UINT nID, HICON hIcon, LPCTSTR szTip, int n
 	}
 	else
 	{
-		eb.hIcon = hIcon;
+		eb.hIcon = ::CopyIcon(hIcon); // for later imagelist creation
 	}
 
 	m_aButtons.InsertAt(nPos, eb);
@@ -234,6 +234,7 @@ BOOL CEnEdit::InitializeImageLists()
 				VERIFY(m_ilDisabledBtns.Add(iconDisabled) == eb.iImage);
 				ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
 
+				::DestroyIcon(eb.hIcon);
 				eb.hIcon = NULL;
 			}
 		}
