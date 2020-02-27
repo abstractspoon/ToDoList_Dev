@@ -14,6 +14,7 @@
 #include "clipboard.h"
 #include "icon.h"
 #include "msoutlookhelper.h"
+#include "FileIcons.h"
 
 #include <shlwapi.h>
 
@@ -297,62 +298,62 @@ HBRUSH CFileEdit::GetBackgroundBrush(CDC* pDC) const
 
 void CFileEdit::DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon)
 {
-	if (!sFilePath.IsEmpty())
+	if (sFilePath.IsEmpty())
+		return;
+
+	if (HasStyle(FES_FOLDERS))
 	{
-		int nImage = -1;
-		int nImageSize = m_ilSys.GetImageSize();
-		
-		if (HasStyle(FES_FOLDERS))
-		{
-			nImage = m_ilSys.GetFolderImageIndex();
-		}
-		else
-		{
-			// try parent for override
-			HICON hIcon = (HICON)GetParent()->SendMessage(WM_FE_GETFILEICON, GetDlgCtrlID(), 
-																(LPARAM)(LPCTSTR)sFilePath);
-
-			if (hIcon)
-			{
-				ClearImageIcon();
-
-				VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL));
-				return;
-			}
-
-			// Make fullpath unless it's a URL
-			CString sFullPath(sFilePath);
-			
-			if (!WebMisc::IsURL(sFilePath))
-				FileMisc::MakeFullPath(sFullPath, m_sCurFolder);
-
-			if (HasStyle(FES_DISPLAYSIMAGES) && CEnBitmap::IsSupportedImageFile(sFullPath))
-			{
-				if (m_ilImageIcon.GetSafeHandle() == NULL)
-					VERIFY(m_ilImageIcon.Create(nImageSize, nImageSize, (ILC_COLOR32 | ILC_MASK), 1, 1));
-
-				if (m_ilImageIcon.GetImageCount() == 0)
-				{
-					CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), nImageSize, nImageSize));
-
-					if (icon.IsValid())
-						m_ilImageIcon.Add(icon);
-				}
-
-				if (m_ilImageIcon.GetImageCount() > 0)
-				{
-					VERIFY(m_ilImageIcon.Draw(pDC, 0, rIcon.TopLeft(), ILD_TRANSPARENT));
-					return;
-				}
-			}
-
-			// All else
-			nImage = m_ilSys.GetFileImageIndex(sFullPath);
-		}
-		
-		if (nImage != -1)
-			m_ilSys.Draw(pDC, nImage, rIcon.TopLeft(), ILD_TRANSPARENT);
+		CFileIcons::DrawFolder(pDC, rIcon.TopLeft());
+		return;
 	}
+
+	int nImage = -1;
+	int nImageSize = CFileIcons::GetImageSize();
+
+	// try parent for override
+	HICON hIcon = (HICON)GetParent()->SendMessage(WM_FE_GETFILEICON, GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFilePath);
+
+	if (hIcon)
+	{
+		ClearImageIcon();
+
+		VERIFY(::DrawIconEx(pDC->GetSafeHdc(), rIcon.left, rIcon.top, hIcon, nImageSize, nImageSize, 0, NULL, DI_NORMAL));
+		return;
+	}
+
+	// Make fullpath unless it's a URL
+	CString sFullPath(sFilePath);
+
+	if (!WebMisc::IsURL(sFilePath))
+		FileMisc::MakeFullPath(sFullPath, m_sCurFolder);
+
+	if (HasStyle(FES_DISPLAYSIMAGES) && CEnBitmap::IsSupportedImageFile(sFullPath))
+	{
+		if (m_ilImageIcon.GetSafeHandle() == NULL)
+			VERIFY(m_ilImageIcon.Create(nImageSize, nImageSize, (ILC_COLOR32 | ILC_MASK), 1, 1));
+
+		if (m_ilImageIcon.GetImageCount() == 0)
+		{
+			CIcon icon(CEnBitmap::LoadImageFileAsIcon(sFullPath, GetSysColor(COLOR_WINDOW), nImageSize, nImageSize));
+
+			if (icon.IsValid())
+				m_ilImageIcon.Add(icon);
+		}
+
+		if (m_ilImageIcon.GetImageCount() > 0)
+		{
+			VERIFY(m_ilImageIcon.Draw(pDC, 0, rIcon.TopLeft(), ILD_TRANSPARENT));
+			return;
+		}
+	}
+
+	// All else
+	CFileIcons::Draw(pDC, sFullPath, rIcon.TopLeft());
+}
+
+HICON CFileEdit::GetFileIcon(LPCTSTR szPath)
+{
+	return CFileIcons::ExtractIcon(szPath);
 }
 
 void CFileEdit::ClearImageIcon()
@@ -555,7 +556,7 @@ void CFileEdit::OnNcCalcSize(BOOL bCalcValidRects, NCCALCSIZE_PARAMS FAR* lpncsp
 
 	if (bCalcValidRects)
 	{
-		lpncsp->rgrc[0].left += m_ilSys.GetImageSize();
+		lpncsp->rgrc[0].left += CFileIcons::GetImageSize();
 
 		if (m_bParentIsCombo)
 			lpncsp->rgrc[0].left += 3;
@@ -577,7 +578,7 @@ CRect CFileEdit::GetIconRect() const
 	GetClientRect(rButton);
 
 	rButton.right = rButton.left;
-	rButton.left -= (m_ilSys.GetImageSize() + 2);
+	rButton.left -= (CFileIcons::GetImageSize() + 2);
 	rButton.top -= m_nTopBorder;
 	rButton.bottom += m_nBottomBorder;
 
@@ -609,8 +610,6 @@ void CFileEdit::PreSubclassWindow()
 {
 	CEnEdit::PreSubclassWindow();
 	
-	m_ilSys.Initialize();
-
 	EnableButton(FEBTN_GO, GetWindowTextLength());
 	m_bFirstShow = TRUE;
 }

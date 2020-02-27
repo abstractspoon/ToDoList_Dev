@@ -8,7 +8,6 @@
 //
 
 #include "enedit.h"
-#include "sysimagelist.h"
 #include "stringres.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -64,7 +63,7 @@ public:
 	CString GetCurrentFolder() const { return m_sCurFolder; }
 	void SetBrowseTitle(LPCTSTR szTitle) { m_sBrowseTitle = szTitle; }
 
-	HICON GetFileIcon(LPCTSTR szPath) { return m_ilSys.ExtractFileIcon(szPath); }
+	HICON GetFileIcon(LPCTSTR szPath);
 
 	static void SetDefaultButtonTips(LPCTSTR szBrowse, LPCTSTR szGo);
 	static void SetDefaultBrowseTitles(LPCTSTR szBrowseFiles, LPCTSTR szBrowseFolders);
@@ -76,7 +75,6 @@ public:
 // Attributes
 protected:
 	BOOL m_bTipNeeded;
-	CSysImageList m_ilSys;
 	CString m_sFilter, m_sSaveAsFileExt;
 	int m_nStyle;
 	CString m_sCurFolder;

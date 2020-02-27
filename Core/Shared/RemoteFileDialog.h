@@ -10,6 +10,7 @@
 #include "fileedit.h"
 #include "runtimedlg.h"
 #include "sizegrip.h"
+#include "sysimagelist.h"
 
 #include <afxinet.h>
 #include <afxtempl.h>
@@ -110,7 +111,6 @@ protected:
 	typedef CMap<int, int, FILEITEM, FILEITEM&> CFileMap;
 	CFileMap m_mapItems;
 	BOOL m_bRoot;
-	CSysImageList m_silLarge, m_silSmall;
 	BOOL m_bInitReport;
 
 // Overrides

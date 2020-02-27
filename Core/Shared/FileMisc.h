@@ -230,6 +230,7 @@ namespace FileMisc
 	CString GetWindowsSystemFolder();
 
 	BOOL GetSpecialFolder(int nCSIDL, CString& sFolder, BOOL bAutoCreate = FALSE);
+	CString GetSpecialFolder(int nCSIDL);
 	BOOL GetSpecialFilePath(int nCSIDL, const CString& sFileName, CString& sFilePath);
 	BOOL IsAppInProgramFiles();
 	BOOL IsPathInProgramFiles(const CString& sFilePath);

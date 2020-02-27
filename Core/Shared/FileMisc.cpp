@@ -2315,6 +2315,16 @@ BOOL FileMisc::GetSpecialFolder(int nCSIDL, CString& sFolder, BOOL bAutoCreate)
 	return bRes;
 }
 
+CString FileMisc::GetSpecialFolder(int nCSIDL)
+{
+	CString sFolder;
+	
+	if (!GetSpecialFolder(nCSIDL, sFolder, FALSE))
+		sFolder.Empty();
+
+	return sFolder;
+}
+
 BOOL FileMisc::GetSpecialFilePath(int nCSIDL, const CString& sFileName, CString& sFilePath)
 {
 	if (GetSpecialFolder(nCSIDL, sFilePath))

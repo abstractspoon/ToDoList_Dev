@@ -32,6 +32,7 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\BrowserDlg.h"
+#include "..\shared\FileIcons.h"
 
 #include "..\3rdparty\xmlnodewrapper.h"
 #include "..\3rdparty\ini.h"
@@ -199,6 +200,9 @@ BOOL CToDoListApp::InitInstance()
 	// .NET plugins require VS2010 redistributable to be installed
 	if (!HasVS2010Redistributable())
 		return FALSE;
+
+	// Initialise the shell image lists once only
+	CFileIcons::Initialise();
 
 	// Set up icons that might be required during startup
 	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE) && m_iconGo.Load(IDI_FILEEDIT_GO))

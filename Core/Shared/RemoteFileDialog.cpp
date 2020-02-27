@@ -6,7 +6,7 @@
 
 #include "deferwndmove.h"
 #include "dlgunits.h"
-#include "sysimagelist.h"
+#include "FileIcons.h"
 #include "autoflag.h"
 #include "misc.h"
 #include "filemisc.h"
@@ -78,8 +78,6 @@ CRemoteFileDialog::CRemoteFileDialog(CFtpConnection* pConnection, LPCTSTR szServ
 	  m_eFilename(FES_NOBROWSE), 
 	  m_bRoot(FALSE),
 	  m_dwFileSize(0),
- 	  m_silLarge(TRUE), 
- 	  m_silSmall(FALSE),
 	  m_bInitReport(FALSE),
 	  m_dwOptions(0),
 	  m_bFilling(FALSE),
@@ -178,11 +176,15 @@ BOOL CRemoteFileDialog::OnInitDialog()
 		SetDlgItemText(IDC_FILENAMELABEL, _T("Remote folder &name:"));
 
 	// set up list image lists
- 	if (m_silLarge.Initialize())
- 		m_lcFiles.SendMessage(LVM_SETIMAGELIST, LVSIL_NORMAL, (LPARAM)m_silLarge.GetHImageList());
+	HIMAGELIST hILLarge = CFileIcons::GetHImageList(TRUE);
+ 	
+	if (hILLarge)
+ 		m_lcFiles.SendMessage(LVM_SETIMAGELIST, LVSIL_NORMAL, (LPARAM)hILLarge);
  
- 	if (m_silSmall.Initialize())
- 		m_lcFiles.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)m_silSmall.GetHImageList());
+	HIMAGELIST hILSmall = CFileIcons::GetHImageList(FALSE);
+
+ 	if (hILSmall)
+ 		m_lcFiles.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)hILSmall);
 
 	// init multi selection
 	if (m_dwOptions & RFD_MULTISELECT)
@@ -447,7 +449,7 @@ void CRemoteFileDialog::FillFileList()
 
 				if (ff.IsDirectory())
 				{
-					AddFileItem(sPath, RFDT_FOLDER, nID++, 0, NULL, m_silLarge.GetFolderImageIndex());
+					AddFileItem(sPath, RFDT_FOLDER, nID++, 0, NULL, CFileIcons::GetFolderIndex());
 				}
 				else if (!FolderSelect()) // check extension matches filter
 				{
@@ -502,7 +504,7 @@ int CRemoteFileDialog::GetFirstSelectedItem()
 int CRemoteFileDialog::AddFileItem(LPCTSTR szFileName, int nType, UINT nUniqueID, DWORD dwFileSize, const FILETIME* pLastMod, int nImage)
 {
 	if (nImage == -1)
-		nImage = CSysImageList().GetFileImageIndex(szFileName);
+		nImage = CFileIcons::GetIndex(szFileName);
 				
 	int nItem = m_lcFiles.InsertItem(LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM,
 									0, szFileName, 0, 0, nImage, nUniqueID);

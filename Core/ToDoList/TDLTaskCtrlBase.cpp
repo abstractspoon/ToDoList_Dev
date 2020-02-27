@@ -23,6 +23,7 @@
 #include "..\shared\enbitmap.h"
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\ScopedTimer.h"
+#include "..\shared\FileIcons.h"
 
 #include "..\3rdparty\colordef.h"
 
@@ -3119,8 +3120,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 					}
 					else
 					{
-						//m_ilFileRef.Draw(pDC, sFileRef, rIcon.TopLeft());
-						CSysImageList::Draw(pDC, sFileRef, rIcon.TopLeft(), FALSE);
+						CFileIcons::Draw(pDC, sFileRef, rIcon.TopLeft());
 					}
 				}
 			}
@@ -3175,7 +3175,7 @@ CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImage
 
 BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage, int nCount) const
 {
-	int nImageSize = m_ilFileRef.GetImageSize();
+	int nImageSize = CFileIcons::GetImageSize();
 
 	rIcon = CRect(CalcColumnIconTopLeft(rSubItem, nImageSize, nImage, nCount), CSize(nImageSize, nImageSize));
 
@@ -5389,7 +5389,7 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 
 			if (nMaxCount >= 1)
 			{
-				nColWidth = ((nMaxCount * (m_ilFileRef.GetImageSize() + COL_ICON_SPACING)) - COL_ICON_SPACING);
+				nColWidth = ((nMaxCount * (CFileIcons::GetImageSize() + COL_ICON_SPACING)) - COL_ICON_SPACING);
 
 				// compensate for extra padding we don't want 
 				nColWidth -= (2 * LV_COLPADDING);

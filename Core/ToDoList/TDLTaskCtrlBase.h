@@ -22,7 +22,6 @@
 #include "..\Shared\TreeListSyncer.h"
 #include "..\Shared\Treeselectionhelper.h"
 #include "..\Shared\runtimedlg.h"
-#include "..\shared\sysimagelist.h"
 #include "..\shared\iconcache.h"
 #include "..\shared\fontcache.h"
 #include "..\shared\graphicsmisc.h"
@@ -279,7 +278,6 @@ protected:
 	CDWordArray m_aPriorityColors;
 	CTDCColorMap m_mapAttribColors;
 	TDC_ATTRIBUTE m_nColorByAttrib;
-	CSysImageList m_ilFileRef;
 	CBrush m_brDue, m_brDueToday;
 	CFontCache m_fonts;
 	CEnImageList m_ilCheckboxes, m_ilColSymbols;
