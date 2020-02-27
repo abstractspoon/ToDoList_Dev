@@ -6,12 +6,13 @@
 #include "resource.h"
 #include "TDCImageList.h"
 
-#include "..\shared\sysimagelist.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enbitmap.h"
 #include "..\shared\misc.h"
 #include "..\shared\icon.h"
 #include "..\shared\graphicsmisc.h"
+
+#include "..\3rdParty\shellicons.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -32,6 +33,10 @@ enum
 //////////////////////////////////////////////////////////////////////
 
 CTDCImageList::CTDCImageList()
+	:
+	m_bWantToolbars(FALSE), 
+	m_bWantDefaultIcons(FALSE),
+	m_crTransparent(CLR_NONE)
 {
 
 }
@@ -46,10 +51,37 @@ BOOL CTDCImageList::LoadDefaultImages(BOOL bWantToolbars)
 	return LoadImages(_T(""), TDCIL_MAGENTA, TRUE, bWantToolbars);
 }
 
+BOOL CTDCImageList::NeedLoadImages(const CString& sTaskList, COLORREF crTransparent,
+									BOOL bWantDefaultIcons, BOOL bWantToolbars) const
+{
+	if (GetSafeHandle() == NULL)
+		return TRUE;
+
+	if (!FileMisc::IsSamePath(sTaskList, m_sTasklistPath))
+		return TRUE;
+
+	if ((bWantToolbars && !m_bWantToolbars) || (!bWantToolbars && m_bWantToolbars))
+		return TRUE;
+
+	if ((bWantDefaultIcons && !m_bWantDefaultIcons) || (!bWantDefaultIcons && m_bWantDefaultIcons))
+		return TRUE;
+
+	if ((bWantDefaultIcons || bWantToolbars) && (crTransparent != m_crTransparent))
+		return TRUE;
+
+	return FALSE;
+}
+
 BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 							   BOOL bWantDefaultIcons, BOOL bWantToolbars)
 {
-	DeleteImageList(); // always
+	if (!NeedLoadImages(sTaskList, crTransparent, bWantDefaultIcons, bWantToolbars))
+	{
+		ASSERT(GetSafeHandle());
+		return TRUE;
+	}
+
+	DeleteImageList();
 	
 	if (Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 200))
 	{
@@ -118,7 +150,12 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		ScaleByDPIFactor();
 		
 		// Replace the first image with the actual folder icon
-		VERIFY(Replace(0, CIcon(CSysImageList().ExtractFolderIcon())) == 0);
+		VERIFY(Replace(0, ShellIcons::ExtractIcon(ShellIcons::SI_FOLDER_CLOSED)) == 0);
+
+		m_sTasklistPath = sTasklistPath;
+		m_crTransparent = crTransparent;
+		m_bWantDefaultIcons = bWantDefaultIcons;
+		m_bWantToolbars = bWantToolbars;
 	}
 	
 	return (GetSafeHandle() != NULL);

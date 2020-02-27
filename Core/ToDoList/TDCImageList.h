@@ -38,8 +38,14 @@ protected:
 	CMapStringToInt m_mapNameToIndex;
 	CMapIntToString m_mapIndexToName;
 
+	BOOL m_bWantToolbars, m_bWantDefaultIcons;
+	CString m_sTasklistPath;
+	COLORREF m_crTransparent;
+
 protected:
 	void MapImage(int nIndex, const CString& sName);
+	BOOL NeedLoadImages(const CString& sTaskList, COLORREF crTransparent,
+						BOOL bWantDefaultIcons, BOOL bWantToolbars) const;
 
 	static DWORD LoadImagesFromFolder(const CString& sFolder, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex);
 	static BOOL LoadImage(const CString& sImageFile, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex);
