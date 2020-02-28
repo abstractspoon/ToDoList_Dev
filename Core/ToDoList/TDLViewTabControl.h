@@ -54,29 +54,32 @@ public:
 protected:
 	struct TDCVIEW
 	{
-		TDCVIEW(HWND hWnd = NULL, FTC_VIEW view = FTCV_UNSET, LPCTSTR szLabel = NULL, int nImg = -1, void* data = NULL) 
+		TDCVIEW(HWND hWnd = NULL, FTC_VIEW view = FTCV_UNSET, LPCTSTR szLabel = NULL, HICON icon = NULL, void* data = NULL) 
 			: 
 			hwndView(hWnd), 
 			nView(view), 
 			sViewLabel(szLabel), 
 			pData(data),
-			nImage(nImg)
+			hIcon(NULL)
 		{
 			// add space for close button
 			sViewLabel += "   ";
+
+			if (icon)
+				hIcon = ::CopyIcon(icon);
 		}
 
 		HWND hwndView;
 		FTC_VIEW nView;
 		CString sViewLabel;
-		int nImage;
+		HICON hIcon;
 		void* pData;
 	};
 
 	CArray<TDCVIEW, TDCVIEW&> m_aViews;
 	DWORD m_dwStyles;
 	int m_nSelTab;
-	CImageList m_ilTabs;
+	CImageList m_ilSpacer;
 	BOOL m_bShowingTabs;
 
 // Overrides
@@ -114,6 +117,7 @@ protected:
 
 	BOOL DoTabChange(int nOldTab, int nNewTab, BOOL bNotify);
 	BOOL WantTabCloseButton(int nTab) const; // virtual
+	void PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip); // virtual
 };
 
 /////////////////////////////////////////////////////////////////////////////
