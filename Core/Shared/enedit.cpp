@@ -57,13 +57,13 @@ CEnEdit::CEnEdit(BOOL bComboStyle, LPCTSTR szMask, DWORD dwFlags) :
 
 CEnEdit::~CEnEdit()
 {
-	// cleanup fonts
+	// cleanup fonts and icons
 	int nBtn = GetButtonCount();
 	
 	while (nBtn--)
 	{
-		HFONT hFont = m_aButtons[nBtn].hFont;
-		GraphicsMisc::VerifyDeleteObject(hFont);
+		GraphicsMisc::VerifyDeleteObject(m_aButtons[nBtn].hFont);
+		::DestroyIcon(m_aButtons[nBtn].hIcon);
 	}
 }
 
@@ -234,7 +234,7 @@ BOOL CEnEdit::InitializeImageLists()
 				VERIFY(m_ilDisabledBtns.Add(iconDisabled) == eb.iImage);
 				ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
 
-				::DestroyIcon(eb.hIcon);
+				VERIFY(::DestroyIcon(eb.hIcon));
 				eb.hIcon = NULL;
 			}
 		}
