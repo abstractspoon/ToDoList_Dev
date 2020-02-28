@@ -4,6 +4,25 @@
 
 #include <afxtempl.h>
 
+// maintain a static list of large and small icons
+typedef CMap<ShellIcons::SHELLICON, ShellIcons::SHELLICON, HICON, HICON> CIconMap;
+
+CIconMap iconsLarge, iconsSmall;
+
+void DeleteIcons(CIconMap& icons)
+{
+	POSITION pos = icons.GetStartPosition();
+
+	while (pos)
+	{
+		ShellIcons::SHELLICON key;
+		HICON hIcon;
+
+		icons.GetNextAssoc(pos, key, hIcon);
+		VERIFY(::DestroyIcon(hIcon));
+	}
+}
+
 HICON ShellIcons::ExtractIcon(SHELLICON nIndex, bool bLarge)
 {
 	HICON hIcon = NULL;
@@ -88,4 +107,11 @@ BOOL ShellIcons::DrawIcon(CDC* pDC, SHELLICON nIndex, const CPoint& ptTopLeft, b
 
 	// else
 	return FALSE;
+}
+
+void ShellIcons::Release()
+{
+	// Cleanup cached icons
+	DeleteIcons(iconsLarge);
+	DeleteIcons(iconsSmall);
 }

@@ -76,6 +76,7 @@
 #include "..\shared\FileIcons.h"
 
 #include "..\3rdparty\gui.h"
+#include "..\3rdparty\ShellIcons.h"
 
 #include "..\Interfaces\spellcheckdlg.h"
 #include "..\Interfaces\uiextensionhelper.h"
@@ -233,6 +234,8 @@ CToDoListWnd::~CToDoListWnd()
 	m_fontComments.DeleteObject();
 	m_fontMain.DeleteObject();
 	m_fontTree.DeleteObject();
+
+	ShellIcons::Release();
 
 	// cleanup temp files
 	// Note: Due task notifications are removed by CToDoCtrlMgr
