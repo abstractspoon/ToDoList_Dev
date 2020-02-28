@@ -59,7 +59,6 @@ void CPreferencesUITasklistPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_HIDEUNDEFINEDTIMEST, m_bHideZeroTimeCost);
 	DDX_Check(pDX, IDC_HIDESTARTDUEFORDONETASKS, m_bHideStartDueForDoneTasks);
 	DDX_Check(pDX, IDC_ROUNDTIMEFRACTIONS, m_bRoundTimeFractions);
-	DDX_Check(pDX, IDC_SHOWNONFILEREFSASTEXT, m_bShowNonFilesAsText);
 	DDX_Check(pDX, IDC_USEHMSTIMEFORMAT, m_bUseHMSTimeFormat);
 	DDX_Check(pDX, IDC_SHOWPERCENTPROGRESSBAR, m_bShowPercentAsProgressbar);
 	DDX_Check(pDX, IDC_HIDEPERCENTFORDONETASKS, m_bHidePercentForDoneTasks);
@@ -163,7 +162,6 @@ void CPreferencesUITasklistPage::LoadPreferences(const IPreferences* pPrefs, LPC
 	m_bHideZeroTimeCost = pPrefs->GetProfileInt(szKey, _T("HideZeroTimeEst"), TRUE);
 	m_bShowPercentAsProgressbar = pPrefs->GetProfileInt(szKey, _T("ShowPercentAsProgressbar"), FALSE);
 	m_bRoundTimeFractions = pPrefs->GetProfileInt(szKey, _T("RoundTimeFractions"), FALSE);
-	m_bShowNonFilesAsText = pPrefs->GetProfileInt(szKey, _T("ShowNonFilesAsText"), FALSE);
 	m_bUseHMSTimeFormat = pPrefs->GetProfileInt(szKey, _T("UseHMSTimeFormat"), FALSE);
 	m_bAutoFocusTasklist = pPrefs->GetProfileInt(szKey, _T("AutoFocusTasklist"), FALSE);
 	m_bShowColumnsOnRight = pPrefs->GetProfileInt(szKey, _T("ShowColumnsOnRight"), TRUE);
@@ -199,7 +197,6 @@ void CPreferencesUITasklistPage::SavePreferences(IPreferences* pPrefs, LPCTSTR s
 	pPrefs->WriteProfileInt(szKey, _T("HideZeroTimeEst"), m_bHideZeroTimeCost);
 	pPrefs->WriteProfileInt(szKey, _T("ShowPercentAsProgressbar"), m_bShowPercentAsProgressbar);
 	pPrefs->WriteProfileInt(szKey, _T("RoundTimeFractions"), m_bRoundTimeFractions);
-	pPrefs->WriteProfileInt(szKey, _T("ShowNonFilesAsText"), m_bShowNonFilesAsText);
 	pPrefs->WriteProfileInt(szKey, _T("UseHMSTimeFormat"), m_bUseHMSTimeFormat);
 	pPrefs->WriteProfileInt(szKey, _T("AutoFocusTasklist"), m_bAutoFocusTasklist);
 	pPrefs->WriteProfileInt(szKey, _T("ShowColumnsOnRight"), m_bShowColumnsOnRight);

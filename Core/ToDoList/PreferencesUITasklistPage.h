@@ -35,7 +35,6 @@ public:
 	BOOL GetHideStartDueForDoneTasks() const { return m_bHideStartDueForDoneTasks; }
 	BOOL GetShowPercentAsProgressbar() const { return m_bShowPercentAsProgressbar; }
 	BOOL GetRoundTimeFractions() const { return m_bRoundTimeFractions; }
-	BOOL GetShowNonFilesAsText() const { return m_bShowNonFilesAsText; }
 	BOOL GetUseHMSTimeFormat() const { return m_bUseHMSTimeFormat; }
 	BOOL GetAutoFocusTasklist() const { return m_bAutoFocusTasklist; }
 	BOOL GetShowColumnsOnRight() const { return m_bShowColumnsOnRight; }
@@ -80,7 +79,6 @@ protected:
 	BOOL	m_bHideZeroTimeCost;
 	BOOL	m_bHideStartDueForDoneTasks;
 	BOOL	m_bRoundTimeFractions;
-	BOOL	m_bShowNonFilesAsText;
 	BOOL	m_bUseHMSTimeFormat;
 	BOOL	m_bShowPercentAsProgressbar;
 	BOOL	m_bHidePercentForDoneTasks;

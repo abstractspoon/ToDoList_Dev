@@ -262,7 +262,6 @@ public:
 	BOOL GetHideStartDueForDoneTasks() const { return m_pageUITasklist.GetHideStartDueForDoneTasks(); }
 	BOOL GetShowPercentAsProgressbar() const { return m_pageUITasklist.GetShowPercentAsProgressbar(); }
 	BOOL GetRoundTimeFractions() const { return m_pageUITasklist.GetRoundTimeFractions(); }
-	BOOL GetShowNonFilesAsText() const { return m_pageUITasklist.GetShowNonFilesAsText(); }
 	BOOL GetUseHMSTimeFormat() const { return m_pageUITasklist.GetUseHMSTimeFormat(); }
 	BOOL GetAutoFocusTasklist() const { return m_pageUITasklist.GetAutoFocusTasklist(); }
 	BOOL GetShowColumnsOnRight() const { return m_pageUITasklist.GetShowColumnsOnRight(); }

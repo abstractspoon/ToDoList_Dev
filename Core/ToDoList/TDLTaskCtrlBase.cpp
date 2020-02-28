@@ -608,11 +608,6 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 				bInvalidateAll = TRUE;
 			break;
 
-		case TDCS_SHOWNONFILEREFSASTEXT:
-			if (IsColumnShowing(TDCC_FILEREF))
-				bRecalcUntrackedCols = TRUE;
-			break;
-
 		case TDCS_USEPERCENTDONEINTIMEEST:
 			if (IsColumnShowing(TDCC_TIMEEST))
 				bRecalcUntrackedCols = TRUE;
@@ -3014,7 +3009,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			break;
 			
 		case TDCC_FILEREF:
-			DrawColumnFileLinks(pDC, pTDI->aFileLinks, rSubItem, crText);
+			DrawColumnFileLinks(pDC, pTDI->aFileLinks, rSubItem);
 			break;
 			
 		case TDCC_DONE:
@@ -3057,75 +3052,47 @@ int CTDLTaskCtrlBase::GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE
 	return nIcon;
 }
 
-void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect, COLORREF crText)
+void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect)
 {
 	int nNumFiles = aFileLinks.GetSize();
 
-	switch (nNumFiles)
+	for (int nFile = 0; nFile < nNumFiles; nFile++)
 	{
-	case 0:
-		break;
+		CRect rIcon;
 
-	case 1:
-		// TDCS_SHOWNONFILEREFSASTEXT only works for one file
-/*
-		if (HasStyle(TDCS_SHOWNONFILEREFSASTEXT))
+		if (!CalcFileIconRect(rect, rIcon, nFile, nNumFiles))
+			break; // out of bounds
+
+		// first check for a tdl://
+		CString sFileRef = aFileLinks[nFile];
+
+		if (TODOITEM::IsTaskLink(sFileRef, TRUE))
 		{
-			CString sFileRef = aFileLinks[0];
-			int nImage = m_ilFileRef.GetFileImageIndex(sFileRef, TRUE);
-			
-			if (nImage == -1)
+			// draw our app icon 
+			if (m_imageIcons.HasIcon(APP_ICON) ||
+				m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE)))
 			{
-				DrawColumnText(pDC, sFileRef, rect, DT_LEFT, crText);
-				break;
+				m_imageIcons.Draw(pDC, APP_ICON, rIcon.TopLeft());
 			}
 		}
-*/
-		// else fall thru
-		
-	default:
+		else
 		{
-			// Everything else
-			for (int nFile = 0; nFile < nNumFiles; nFile++)
+			// get the associated image, failing if necessary
+			sFileRef.Remove('\"'); // remove double-quotes
+			FileMisc::MakeFullPath(sFileRef, m_sTasklistFolder);
+
+			if (m_imageIcons.HasIcon(sFileRef) ||
+				(CEnBitmap::IsSupportedImageFile(sFileRef) &&
+					FileMisc::PathExists(sFileRef) &&
+					m_imageIcons.Add(sFileRef, sFileRef)))
 			{
-				CRect rIcon;
-				
-				if (!CalcFileIconRect(rect, rIcon, nFile, nNumFiles))
-					break; // out of bounds
-				
-				// first check for a tdl://
-				CString sFileRef = aFileLinks[nFile];
-				
-				if (TODOITEM::IsTaskLink(sFileRef, TRUE))
-				{
-					// draw our app icon 
-					if (m_imageIcons.HasIcon(APP_ICON) || 
-						m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE)))
-					{
-						m_imageIcons.Draw(pDC, APP_ICON, rIcon.TopLeft());
-					}
-				}
-				else
-				{
-					// get the associated image, failing if necessary
-					sFileRef.Remove('\"'); // remove double-quotes
-					FileMisc::MakeFullPath(sFileRef, m_sTasklistFolder);
-					
-					if (m_imageIcons.HasIcon(sFileRef) || 
-						(CEnBitmap::IsSupportedImageFile(sFileRef) && 
-						FileMisc::PathExists(sFileRef) &&
-						m_imageIcons.Add(sFileRef, sFileRef)))
-					{
-						m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft());
-					}
-					else
-					{
-						CFileIcons::Draw(pDC, sFileRef, rIcon.TopLeft());
-					}
-				}
+				m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft());
+			}
+			else
+			{
+				CFileIcons::Draw(pDC, sFileRef, rIcon.TopLeft());
 			}
 		}
-		break;
 	}
 }
 
@@ -3300,7 +3267,7 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 			CStringArray aItems;
 			
 			if (data.AsArray(aItems))
-				DrawColumnFileLinks(pDC, aItems, rSubItem, crText);
+				DrawColumnFileLinks(pDC, aItems, rSubItem);
 		}
 		break;
 
@@ -5379,11 +5346,6 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 		break; 
 		
 	case TDCC_FILEREF:
-		if (HasStyle(TDCS_SHOWNONFILEREFSASTEXT))
-		{
-			nColWidth = 60; 
-		}
-		else
 		{
 			int nMaxCount = m_find.GetLargestFileLinkCount(bVisibleTasksOnly);
 

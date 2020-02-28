@@ -110,7 +110,6 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	styles[TDCS_SHOWDEFAULTTASKICONS] = prefs.GetShowDefaultTaskIcons();
 	styles[TDCS_SHOWFIRSTCOMMENTLINEINLIST] = prefs.GetDisplayFirstCommentLine();
 	styles[TDCS_SHOWINFOTIPS] = prefs.GetShowInfoTips();
-	styles[TDCS_SHOWNONFILEREFSASTEXT] = prefs.GetShowNonFilesAsText();
 	styles[TDCS_SHOWPARENTSASFOLDERS] = prefs.GetShowParentsAsFolders();
 	styles[TDCS_SHOWPATHINHEADER] = prefs.GetShowPathInHeader();
 	styles[TDCS_SHOWPERCENTASPROGRESSBAR] = prefs.GetShowPercentAsProgressbar();

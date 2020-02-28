@@ -643,7 +643,7 @@ BEGIN
                     WS_TABSTOP,363,10,25,17
 END
 
-IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 517
+IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 495
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -717,21 +717,19 @@ BEGIN
     CONTROL         "Sh&ow columns on the right of the task tree",
                     IDC_RIGHTSIDECOLUMNS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,405,378,10
-    CONTROL         "Show &non-file links as text",IDC_SHOWNONFILEREFSASTEXT,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,420,378,10
     CONTROL         "Set fo&cus to tasklist whenever ToDoList is activated",
                     IDC_AUTOFOCUSTASKLIST,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,435,378,10
+                    WS_TABSTOP,7,420,378,10
     CONTROL         "&Display the selected task's path in the header bar",
                     IDC_DISPLAYPATHINHEADER,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,450,378,10
+                    WS_TABSTOP,7,435,378,10
     CONTROL         "&Limit width of columns to:",IDC_LIMITCOLWIDTHS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,465,378,10
-    EDITTEXT        IDC_COLWIDTHS,18,477,79,12,ES_AUTOHSCROLL
-    LTEXT           "pixels",IDC_STATIC,103,479,283,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,450,378,10
+    EDITTEXT        IDC_COLWIDTHS,18,462,79,12,ES_AUTOHSCROLL
+    LTEXT           "pixels",IDC_STATIC,103,464,283,8
     CONTROL         "&Always hide parent tasks in List View",
                     IDC_HIDELISTPARENTS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,495,379,10
+                    WS_TABSTOP,7,480,379,10
 END
 
 IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 608
