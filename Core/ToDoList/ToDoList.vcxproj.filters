@@ -875,9 +875,6 @@
     <None Include="res\fileedit_browse.ico">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\app_extra_metro.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\app_extra_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
@@ -885,9 +882,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\app_toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\app_toolbar_metro.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\app_toolbar_std.bmp">
@@ -903,9 +897,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\custattrib_toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\custattrib_toolbar_metro.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\custattrib_toolbar_std.bmp">
@@ -927,9 +918,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\find_toolbar_std.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\find_toolbar_metro.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\find_dialog_std.ico">
@@ -1047,9 +1035,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\udtprefs_toolbar.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\udtprefs_toolbar_metro.bmp">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\udtprefs_toolbar_std.bmp">

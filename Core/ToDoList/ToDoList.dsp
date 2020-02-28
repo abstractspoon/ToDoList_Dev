@@ -1283,10 +1283,6 @@ SOURCE=.\res\abstractspoon.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\app_extra_metro.bmp
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\app_extra_std.bmp
 # End Source File
 # Begin Source File
@@ -1300,10 +1296,6 @@ SOURCE=.\res\app_timetrack.ico
 # Begin Source File
 
 SOURCE=.\res\app_toolbar.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\app_toolbar_metro.bmp
 # End Source File
 # Begin Source File
 
@@ -1339,10 +1331,6 @@ SOURCE=.\res\custattrib_toolbar.bmp
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\custattrib_toolbar_metro.bmp
-# End Source File
-# Begin Source File
-
 SOURCE=.\res\custattrib_toolbar_std.bmp
 # End Source File
 # Begin Source File
@@ -1372,10 +1360,6 @@ SOURCE=.\res\find_dialog_std.ico
 # Begin Source File
 
 SOURCE=.\res\find_toolbar.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\find_toolbar_metro.bmp
 # End Source File
 # Begin Source File
 
