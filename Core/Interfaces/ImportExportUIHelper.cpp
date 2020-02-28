@@ -6,8 +6,8 @@
 #include "ImportExportUIHelper.h"
 #include "ImportExportmgr.h"
 
-#include "..\shared\sysimagelist.h"
 #include "..\shared\MenuIconMgr.h"
+#include "..\shared\fileicons.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -49,8 +49,6 @@ void CImportExportUIHelper::UpdateExportMenu(CCmdUI* pCmdUI, int nMaxCount, BOOL
 
 		if (nNumExporters)
 		{
-			CSysImageList sil;
-
 			int nPos = 0;
 			UINT nFlags = MF_BYPOSITION | MF_STRING | (bEnabled ? 0 : MF_GRAYED);
 			
@@ -69,8 +67,8 @@ void CImportExportUIHelper::UpdateExportMenu(CCmdUI* pCmdUI, int nMaxCount, BOOL
 				// icon
 				CString sExt = m_mgrImpExp.GetExporterFileExtension(nTool, TRUE);
 
-				HICON hIcon = sil.ExtractFileIcon(sExt);
-				m_mgrIcon.SetImage(nStartID + nTool, hIcon);
+				// Icon manager will free the icon
+				m_mgrIcon.SetImage(nStartID + nTool, CFileIcons::ExtractIcon(sExt));
 				
 				nPos++;
 			}

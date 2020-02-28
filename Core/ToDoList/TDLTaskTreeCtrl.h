@@ -23,7 +23,6 @@
 #include "..\Shared\TreeListSyncer.h"
 #include "..\Shared\Treeselectionhelper.h"
 #include "..\Shared\runtimedlg.h"
-#include "..\shared\sysimagelist.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

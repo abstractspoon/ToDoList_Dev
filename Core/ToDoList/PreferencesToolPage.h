@@ -11,7 +11,6 @@
 #include "TDCToolsHelper.h"
 
 #include "..\shared\fileedit.h"
-#include "..\shared\sysimagelist.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\menubutton.h"
 #include "..\shared\ToolbarHelper.h"
@@ -50,7 +49,6 @@ protected:
 	//{{AFX_DATA(CPreferencesToolPage)
 	enum { IDD = IDD_PREFTOOLS_PAGE };
 	//}}AFX_DATA
-	CSysImageList m_ilSys;
 	CMenuButton	m_btnArgMenu;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;

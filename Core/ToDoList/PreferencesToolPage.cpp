@@ -14,6 +14,7 @@
 #include "..\shared\enmenu.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\themed.h"
+#include "..\shared\fileicons.h"
 
 #include "..\3rdparty\ini.h"
 
@@ -137,8 +138,7 @@ void CPreferencesToolPage::OnFirstShow()
 
 	VERIFY(InitializeToolbar());
 
-	m_ilSys.Initialize();
-	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)m_ilSys.GetHImageList());
+	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)CFileIcons::GetImageList());
 
 	m_eToolPath.SetCurrentFolder(FileMisc::GetAppFolder());
 	m_eIconPath.SetCurrentFolder(FileMisc::GetAppFolder());
@@ -447,8 +447,7 @@ void CPreferencesToolPage::OnChangeToolpath()
 
 void CPreferencesToolPage::RebuildListCtrlImages()
 {
-	m_ilSys.Initialize();
-	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)m_ilSys.GetHImageList());
+//	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)m_ilSys.GetHImageList());
 
 	int nTool = m_lcTools.GetItemCount();
 
@@ -467,7 +466,7 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 			CString sToolPath = m_lcTools.GetItemText(nTool, 1);
 
 			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE))
-				lvi.iImage = m_ilSys.GetFileImageIndex(sToolPath);	
+				lvi.iImage = CFileIcons::GetIndex(sToolPath);	
 		}
 		else
 		{
@@ -477,12 +476,12 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 
 			if (hIcon)
 			{
-				lvi.iImage = ImageList_AddIcon(m_ilSys.GetHImageList(), hIcon);
+				lvi.iImage = ImageList_AddIcon(CFileIcons::GetImageList(), hIcon);
 				::DestroyIcon(hIcon);
 			}
 			else
 			{
-				lvi.iImage = m_ilSys.GetFileImageIndex(sIconPath);
+				lvi.iImage = CFileIcons::GetIndex(sIconPath);
 			}
 		}
 		
@@ -759,7 +758,7 @@ LRESULT CPreferencesToolPage::OnGetFileIcon(WPARAM wParam, LPARAM lParam)
 			
 			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, TRUE))
 			{
-				static HICON hIcon = m_ilSys.ExtractFileIcon(sToolPath);
+				static HICON hIcon = CFileIcons::ExtractIcon(sToolPath);
 				return (LRESULT)hIcon;
 			}
 		}

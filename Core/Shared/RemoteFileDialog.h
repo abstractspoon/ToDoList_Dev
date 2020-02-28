@@ -10,7 +10,6 @@
 #include "fileedit.h"
 #include "runtimedlg.h"
 #include "sizegrip.h"
-#include "sysimagelist.h"
 
 #include <afxinet.h>
 #include <afxtempl.h>

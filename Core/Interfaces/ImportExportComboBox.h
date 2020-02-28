@@ -9,7 +9,6 @@
 
 #include "importexportmgr.h"
 
-#include "..\shared\sysimagelist.h"
 #include "..\shared\ownerdrawcomboboxbase.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -34,7 +33,6 @@ protected:
 
 	BOOL m_bImporting, m_bFileBasedOnly;
 	CStringArray m_aFileExt;
-	CSysImageList m_ilImages;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -176,12 +176,12 @@ BOOL CRemoteFileDialog::OnInitDialog()
 		SetDlgItemText(IDC_FILENAMELABEL, _T("Remote folder &name:"));
 
 	// set up list image lists
-	HIMAGELIST hILLarge = CFileIcons::GetHImageList(TRUE);
+	HIMAGELIST hILLarge = CFileIcons::GetImageList(TRUE);
  	
 	if (hILLarge)
  		m_lcFiles.SendMessage(LVM_SETIMAGELIST, LVSIL_NORMAL, (LPARAM)hILLarge);
  
-	HIMAGELIST hILSmall = CFileIcons::GetHImageList(FALSE);
+	HIMAGELIST hILSmall = CFileIcons::GetImageList(FALSE);
 
  	if (hILSmall)
  		m_lcFiles.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)hILSmall);

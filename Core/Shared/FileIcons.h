@@ -1,4 +1,4 @@
-// SysImageList.h: interface for the CFileIcons class.
+// FileIcons.h: interface for the CFileIcons class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,10 +14,10 @@
 class CFileIcons  
 {
 public:
-	// Call once only per process
-	static BOOL Initialise(BOOL bReInit = FALSE); 
+	// Call in response to a WM_SETTINGCHANGE message when the SPI_SETNONCLIENTMETRICS flag is set
+	static BOOL Reinitialise() { return Initialise(TRUE); }
 
-	static HIMAGELIST GetHImageList(BOOL bLargeIcons = FALSE);
+	static HIMAGELIST GetImageList(BOOL bLargeIcons = FALSE);
 	static int GetImageSize(BOOL bLargeIcons = FALSE);
 	
 	// caller is responsible for clean up
@@ -26,21 +26,19 @@ public:
 	static int GetIndex(LPCTSTR szFilePath, BOOL bLargeIcon = FALSE);
 	static int GetFolderIndex(BOOL bLargeIcon = FALSE);
 
-	static BOOL Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon = FALSE, UINT nStyle = ILD_TRANSPARENT, BOOL bFailUnKnown = FALSE);
-	static BOOL DrawFolder(CDC* pDC, POINT pt, BOOL bLargeIcon = FALSE);
+	static BOOL Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon = FALSE, UINT nStyle = ILD_TRANSPARENT);
+	static BOOL DrawFolder(CDC* pDC, POINT pt, BOOL bLargeIcon = FALSE, UINT nStyle = ILD_TRANSPARENT);
 	
 protected:
-	static BOOL s_bInitialised;
-
-protected:
-	static BOOL GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, BOOL bFailUnKnown, HIMAGELIST& hIL, int& nIndex);
+	static BOOL Initialise(BOOL bReInit = FALSE);
+	static BOOL GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex);
 		
 	// raw version that resolves directly to SHGetFileInfo
 	static BOOL GetImage(LPCTSTR szFile, BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex);
+	static BOOL GetFolderImage(BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex);
 
 	static BOOL GetWebImage(BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex);
 	static BOOL GetRemoteFolderImage(BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex);
-	static BOOL GetUnknownTypeImage(BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex);
 	
 	static BOOL IsPath(LPCTSTR szText);
 };

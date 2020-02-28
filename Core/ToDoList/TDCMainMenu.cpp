@@ -17,6 +17,7 @@
 #include "..\Shared\TabCtrlEx.h"
 #include "..\Shared\MSOutlookHelper.h"
 #include "..\Shared\Localizer.h"
+#include "..\shared\fileicons.h"
 
 #include "..\Interfaces\UIExtensionHelper.h"
 #include "..\Interfaces\UIExtensionMgr.h"
@@ -715,9 +716,6 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 
 	if (aTools.GetSize())
 	{
-		CSysImageList sil; // for menu icons
-		VERIFY(sil.Initialize());
-
 		int nNumTools = min(aTools.GetSize(), MAX_NUM_TOOLS);
 
 		for (nTool = 0; nTool < nNumTools; nTool++)
@@ -733,7 +731,8 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 			pMenu->InsertMenu(MENUSTARTPOS + nTool, MF_BYPOSITION | MF_STRING,
 							  MENUSTARTID + nTool, sMenuItem);
 
-			mgrMenuIcons.SetImage(MENUSTARTID + nTool, CTDCToolsHelper::GetToolIcon(sil, tool));
+			// Icon manager will free the icon
+			mgrMenuIcons.SetImage(MENUSTARTID + nTool, CTDCToolsHelper::GetToolIcon(tool));
 		}
 	}
 	else // if nothing to add just re-add placeholder

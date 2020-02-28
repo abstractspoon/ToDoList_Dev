@@ -48,7 +48,6 @@ struct USERTOOLARGS
 
 //////////////////////////////////////////////////////////////////////
 
-class CSysImageList;
 class CPreferencesDlg;
 class CEnToolBar;
 
@@ -72,7 +71,7 @@ public:
 	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
 						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline);
 
-	static HICON GetToolIcon(CSysImageList& sil, const USERTOOL& tool);
+	static HICON GetToolIcon(const USERTOOL& tool);
 	static CString GetToolPath(const USERTOOL& tool);
 	
 protected:

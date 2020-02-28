@@ -1,4 +1,4 @@
-// SysImageList.cpp: implementation of the CFileIcons class.
+// FileIcons.cpp: implementation of the CFileIcons class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -24,34 +24,36 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-BOOL CFileIcons::s_bInitialised = FALSE;
-
-//////////////////////////////////////////////////////////////////////
-
 int CFileIcons::GetImageSize(BOOL bLargeIcons)
 {
 	return GraphicsMisc::ScaleByDPIFactor(bLargeIcons ? 32 : 16);
 }
 
-BOOL CFileIcons::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon, UINT nStyle, BOOL bFailUnKnown)
+BOOL CFileIcons::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon, UINT nStyle)
 {
 	HIMAGELIST hIL = NULL;
 	int nIndex = -1;
 	
-	if (!GetFileImage(szFilePath, bLargeIcon, bFailUnKnown, hIL, nIndex))
+	if (!GetFileImage(szFilePath, bLargeIcon, hIL, nIndex))
 		return FALSE;
 
 	return ImageList_Draw(hIL, nIndex, *pDC, pt.x, pt.y, nStyle);
 }
 
-BOOL CFileIcons::DrawFolder(CDC* pDC, POINT pt, BOOL bLargeIcon)
+BOOL CFileIcons::DrawFolder(CDC* pDC, POINT pt, BOOL bLargeIcon, UINT nStyle)
 {
-	return ShellIcons::DrawIcon(pDC, ShellIcons::SI_FOLDER_CLOSED, pt, (bLargeIcon != FALSE));
+	HIMAGELIST hIL = NULL;
+	int nIndex = -1;
+
+	if (!GetFolderImage(bLargeIcon, hIL, nIndex))
+		return FALSE;
+
+	return ImageList_Draw(hIL, nIndex, *pDC, pt.x, pt.y, nStyle);
 }
 
 BOOL CFileIcons::GetImage(LPCTSTR szFile, BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex)
 {
-	//ASSERT(s_bInitialised);
+	Initialise();
 
 	if (Misc::IsEmpty(szFile) || !IsPath(szFile))
 		return FALSE;
@@ -71,7 +73,20 @@ BOOL CFileIcons::GetImage(LPCTSTR szFile, BOOL bLargeIcon, HIMAGELIST& hIL, int&
 	return (hIL && (nIndex != -1));
 }
 
-BOOL CFileIcons::GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, BOOL bFailUnKnown, HIMAGELIST& hIL, int& nIndex)
+BOOL CFileIcons::GetFolderImage(BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex)
+{
+	Initialise();
+
+	SHFILEINFO sfi = { 0 };
+	UINT nFlags = (SHGFI_SYSICONINDEX | (bLargeIcon ? SHGFI_ICON : SHGFI_SMALLICON));
+
+	hIL = (HIMAGELIST)SHGetFileInfo(_T(""), FILE_ATTRIBUTE_DIRECTORY, &sfi, sizeof(sfi), nFlags);
+	nIndex = sfi.iIcon;
+
+	return (hIL && (nIndex != -1));
+}
+
+BOOL CFileIcons::GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex)
 {
 	if (WebMisc::IsURL(szFilePath))
 	{
@@ -116,7 +131,7 @@ BOOL CFileIcons::GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, BOOL bFailUnK
 				if (FileMisc::ResolveShortcut(szFilePath, sReferencedFile))
 				{
 					// RECURSIVE call to handle remote paths, etc
-					VERIFY(GetFileImage(sReferencedFile, bLargeIcon, bFailUnKnown, hIL, nIndex)); 
+					VERIFY(GetFileImage(sReferencedFile, bLargeIcon, hIL, nIndex)); 
 				}
 				else
 				{
@@ -130,18 +145,10 @@ BOOL CFileIcons::GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, BOOL bFailUnK
 				VERIFY(GetImage(sExt, bLargeIcon, hIL, nIndex));
 			}
 
-			int nUnknownType = -1;
-
-			if ((nIndex == -1) || (GetUnknownTypeImage(bLargeIcon, hIL, nUnknownType) && (nIndex == nUnknownType)))
+			if ((nIndex == -1) && sFName.IsEmpty() || sExt.IsEmpty())
 			{
-				if (bFailUnKnown && !IsPath(szFilePath))
-					return FALSE;
-
-				if (sFName.IsEmpty() || sExt.IsEmpty()) 
-				{
-					// else assume it's a folder unless it looks like a file
-					nIndex = GetFolderIndex(bLargeIcon);
-				}
+				// else assume it's a folder unless it looks like a file
+				nIndex = GetFolderIndex(bLargeIcon);
 			}
 		}
 	}
@@ -159,11 +166,6 @@ BOOL CFileIcons::GetRemoteFolderImage(BOOL bLargeIcon, HIMAGELIST& hIL, int& nIn
 	return GetImage(_T("\\\\dummy\\."), bLargeIcon, hIL, nIndex);
 }
 
-BOOL CFileIcons::GetUnknownTypeImage(BOOL bLargeIcon, HIMAGELIST& hIL, int& nIndex)
-{
-	return GetImage(_T(".6553BB15-9369-4227-BCA0-F523A35F1DAB"), bLargeIcon, hIL, nIndex);
-}
-
 BOOL CFileIcons::IsPath(LPCTSTR szText)
 {
 	// check for back slashes
@@ -175,12 +177,10 @@ BOOL CFileIcons::IsPath(LPCTSTR szText)
 
 HICON CFileIcons::ExtractIcon(LPCTSTR szFilePath, BOOL bLargeIcon)
 {
-	//ASSERT(s_bInitialised);
-
 	HIMAGELIST hIL = NULL;
 	int nIndex = -1;
 
-	if (GetFileImage(szFilePath, bLargeIcon, FALSE, hIL, nIndex))
+	if (GetFileImage(szFilePath, bLargeIcon, hIL, nIndex))
 		return ImageList_GetIcon(hIL, nIndex, ILD_TRANSPARENT);
 	
 	return NULL;
@@ -188,12 +188,10 @@ HICON CFileIcons::ExtractIcon(LPCTSTR szFilePath, BOOL bLargeIcon)
 
 int CFileIcons::GetIndex(LPCTSTR szFilePath, BOOL bLargeIcon)
 {
-	//ASSERT(s_bInitialised);
-
 	HIMAGELIST hUnused = NULL;
 	int nIndex = -1;
 
-	if (GetFileImage(szFilePath, bLargeIcon, FALSE, hUnused, nIndex))
+	if (GetFileImage(szFilePath, bLargeIcon, hUnused, nIndex))
 		return nIndex;
 
 	return -1;
@@ -201,25 +199,18 @@ int CFileIcons::GetIndex(LPCTSTR szFilePath, BOOL bLargeIcon)
 
 int CFileIcons::GetFolderIndex(BOOL bLargeIcon)
 {
-	//ASSERT(s_bInitialised);
+	HIMAGELIST hUnused = NULL;
+	int nIndex = -1;
 
-	//static CString sWindows = FileMisc::GetSpecialFolder(CSIDL_WINDOWS);
+	if (GetFolderImage(bLargeIcon, hUnused, nIndex))
+		return nIndex;
 
-	SHFILEINFO sfi = { 0 };
-	UINT nFlags = (SHGFI_SYSICONINDEX | (bLargeIcon ? SHGFI_ICON : SHGFI_SMALLICON));
-
-#ifdef _DEBUG
-	nFlags |= SHGFI_TYPENAME;
-#endif
-
-	HIMAGELIST hUnused = (HIMAGELIST)SHGetFileInfo(_T(".."), FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(sfi), nFlags);
-
-	return sfi.iIcon;
+	return -1;
 }
 
-HIMAGELIST CFileIcons::GetHImageList(BOOL bLargeIcons) 
+HIMAGELIST CFileIcons::GetImageList(BOOL bLargeIcons) 
 { 
-	//ASSERT(s_bInitialised);
+	Initialise();
 
 	// From <commoncontrols.h>
 	// {46EB5926-582E-4017-9FDF-E8998DAA0950}
@@ -236,17 +227,17 @@ HIMAGELIST CFileIcons::GetHImageList(BOOL bLargeIcons)
 
 BOOL CFileIcons::Initialise(BOOL bReInit)
 {
-	ASSERT(!s_bInitialised || bReInit);
+	static BOOL bInitialised = FALSE;
 
-	if (!s_bInitialised || bReInit)
+	if (!bInitialised || bReInit)
 	{
 		typedef BOOL(WINAPI* PFNFILEICONINIT)(BOOL fFullInit);
 
 		PFNFILEICONINIT pfnFileIconInit = (PFNFILEICONINIT)GetProcAddress(LoadLibrary(_T("shell32.dll")), (LPCSTR)660);
 
 		if (pfnFileIconInit)
-			s_bInitialised = pfnFileIconInit(TRUE);
+			bInitialised = pfnFileIconInit(TRUE);
 	}
 	
-	return s_bInitialised;
+	return bInitialised;
 }

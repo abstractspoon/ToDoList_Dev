@@ -8,7 +8,6 @@
 #include "TDLToolsUserInputDlg.h"
 
 #include "..\shared\holdredraw.h"
-#include "..\shared\SysImageList.h"
 #include "..\shared\enfiledialog.h"
 #include "..\shared\enstring.h"
 #include "..\shared\enbitmap.h"
@@ -17,6 +16,7 @@
 #include "..\shared\webmisc.h"
 #include "..\shared\messagebox.h"
 #include "..\shared\entoolbar.h"
+#include "..\shared\fileicons.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -156,7 +156,7 @@ BOOL CTDCToolsHelper::GetToolPaths(const USERTOOL& tool, CString& sToolPath, CSt
 	return !sToolPath.IsEmpty();
 }
 
-HICON CTDCToolsHelper::GetToolIcon(CSysImageList& sil, const USERTOOL& tool)
+HICON CTDCToolsHelper::GetToolIcon(const USERTOOL& tool)
 {
 	HICON hIcon = NULL;
 
@@ -167,7 +167,7 @@ HICON CTDCToolsHelper::GetToolIcon(CSysImageList& sil, const USERTOOL& tool)
 	{
 		if (tool.sIconPath.IsEmpty())
 		{
-			hIcon = sil.ExtractFileIcon(sToolPath);	
+			hIcon = CFileIcons::ExtractIcon(sToolPath);	
 		}
 		else // try for supported image
 		{
@@ -175,7 +175,7 @@ HICON CTDCToolsHelper::GetToolIcon(CSysImageList& sil, const USERTOOL& tool)
 
 			// All else/Fallback
 			if (hIcon == NULL)
-				hIcon = sil.ExtractFileIcon(sIconPath);
+				hIcon = CFileIcons::ExtractIcon(sIconPath);
 		}
 	}
 
@@ -343,9 +343,6 @@ void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CEnTool
 		CSize sizeBtn(toolbar.GetToolBarCtrl().GetButtonSize());
 		sizeBtn -= CSize(7, 7); // btn borders from BarTool.cpp
 
-		CSysImageList sil((sizeBtn.cx > 16));
-		VERIFY(sil.Initialize());
-		
 		// start adding after the pref button
 		CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
 		int nStartPos = toolbar.CommandToIndex(nCmdAfter) + 1;
@@ -354,7 +351,7 @@ void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CEnTool
 		for (int nTool = 0; nTool < aTools.GetSize(); nTool++)
 		{
 			const USERTOOL& tool = aTools[nTool];
-			HICON hIcon = GetToolIcon(sil, tool);
+			HICON hIcon = GetToolIcon(tool);
 				
 			if (hIcon)
 			{

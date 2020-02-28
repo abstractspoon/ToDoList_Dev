@@ -307,9 +307,6 @@
     <ClCompile Include="symbolbutton.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SysImageList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tabbedcombobox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -820,9 +817,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SysColors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SysImageList.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tabbedcombobox.h">

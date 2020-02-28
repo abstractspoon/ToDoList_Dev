@@ -7,6 +7,7 @@
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\Misc.h"
 #include "..\shared\DialogHelper.h"
+#include "..\shared\fileicons.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -107,20 +108,9 @@ void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 	else // fallback on file handler icon
 	{
 		CString sFileExt = GetImpExpFileExtension(nImpExp);
-		int nImage = -1;
 		
 		if (!sFileExt.IsEmpty())
-		{
-			CString sDummyFile;
-			sDummyFile.Format(_T("dummy.%s"), sFileExt);
-			
-			nImage = m_ilImages.GetFileImageIndex(sDummyFile, TRUE);
-		}
-		
-		if (nImage != -1)
-		{
-			m_ilImages.Draw(&dc, nImage, ptDraw, ILD_TRANSPARENT);
-		}
+			CFileIcons::Draw(&dc, sFileExt, ptDraw, FALSE);
 	}
 
 	// draw text

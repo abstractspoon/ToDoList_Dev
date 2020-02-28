@@ -58,7 +58,6 @@
 #include "..\shared\editshortcutMgr.h"
 #include "..\shared\dlgunits.h"
 #include "..\shared\passworddialog.h"
-#include "..\shared\sysimagelist.h"
 #include "..\shared\regkey.h"
 #include "..\shared\remotefile.h"
 #include "..\shared\serverdlg.h"
@@ -74,6 +73,7 @@
 #include "..\shared\sendfiletoEx.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\WorkingWeek.h"
+#include "..\shared\FileIcons.h"
 
 #include "..\3rdparty\gui.h"
 
@@ -5084,10 +5084,11 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 
 		// Custom toolbar
 		CToolbarButtonArray aOldButtons, aNewButtons;
-		int nNumOldBtns = oldPrefs.GetCustomToolbarButtons(aOldButtons);
-		int nNumNewBtns = newPrefs.GetCustomToolbarButtons(aNewButtons);
+
+		oldPrefs.GetCustomToolbarButtons(aOldButtons);
+		newPrefs.GetCustomToolbarButtons(aNewButtons);
 		
-		BOOL bCustomToolbarChange = ((nNumNewBtns != nNumOldBtns) || !Misc::MatchAllT(aOldButtons, aNewButtons, TRUE));
+		BOOL bCustomToolbarChange = !Misc::MatchAllT(aOldButtons, aNewButtons, TRUE);
 
 		if (bCustomToolbarChange)
 		{
@@ -5118,21 +5119,14 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		{
 			CUserToolArray aOldTools, aNewTools;
 
-			int nNumOldTools = oldPrefs.GetUserTools(aOldTools);
-			int nNumNewTools = newPrefs.GetUserTools(aNewTools);
+			oldPrefs.GetUserTools(aOldTools);
+			newPrefs.GetUserTools(aNewTools);
 
-			bUDTChange = ((nNumOldTools != nNumNewTools) || !Misc::MatchAllT(aOldTools, aNewTools, TRUE));
+			bUDTChange = !Misc::MatchAllT(aOldTools, aNewTools, TRUE);
 		}
 
 		if (bUDTChange)
-		{
-			// don't ask me for the full details on this but it seems as
-			// though the CSysImageList class is waiting to process a 
-			// message before we can switch image sizes so we put it
-			// right at the end after everything is done.
-			//Misc::ProcessMsgLoop();
 			UpdateUDTsInToolbar(UDT_PREFERENCES);
-		}
 	}
 	
 	// finally set or terminate the various status check timers
@@ -12950,11 +12944,14 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 		UpdateTrayIcon();
 		m_dlgTimeTracker.SetWindowIcons(m_icons.GetBigIcon(), m_icons.GetSmallIcon());
 	}
-		
 	else if (StrCmp(lpszSection, _T("ImmersiveColorSet")) == 0)
 	{
 		// Windows 10 theme has changed from "light" to "dark" or vice versa
 		UpdateTrayIcon();
+	}
+	else if (uFlags == SPI_SETNONCLIENTMETRICS)
+	{
+		CFileIcons::Reinitialise();
 	}
 		
 	CFrameWnd::OnSettingChange(uFlags, lpszSection);
