@@ -60,7 +60,7 @@ protected:
 
 	void BuildCombo();
 	CString GetImpExpMenuText(int nImpExp) const;
-	CString GetImpExpFileExtension(int nImpExp) const;
+	CString GetImpExpFileExtension(int nImpExp, BOOL bWithDot) const;
 	HICON GetImpExpIcon(int nImpExp) const;
 
 };

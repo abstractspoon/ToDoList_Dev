@@ -7,7 +7,7 @@
 #include "..\shared\GraphicsMisc.h"
 #include "..\shared\Misc.h"
 #include "..\shared\DialogHelper.h"
-#include "..\shared\fileicons.h"
+#include "..\shared\FileIcons.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -107,10 +107,11 @@ void CImportExportComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, 
 	}
 	else // fallback on file handler icon
 	{
-		CString sFileExt = GetImpExpFileExtension(nImpExp);
+		CString sFileExt = GetImpExpFileExtension(nImpExp, TRUE);
+		int nImage = -1;
 		
 		if (!sFileExt.IsEmpty())
-			CFileIcons::Draw(&dc, sFileExt, ptDraw, FALSE);
+			CFileIcons::Draw(&dc, sFileExt, ptDraw);
 	}
 
 	// draw text
@@ -137,7 +138,7 @@ void CImportExportComboBox::BuildCombo()
 
 	for (int nImpExp = 0; nImpExp < nNumImpExp; nImpExp++)
 	{
-		CString sExt = GetImpExpFileExtension(nImpExp);
+		CString sExt = GetImpExpFileExtension(nImpExp, FALSE);
 
 		if (m_bFileBasedOnly)
 		{
@@ -168,13 +169,13 @@ CString CImportExportComboBox::GetImpExpMenuText(int nImpExp) const
 	return m_mgrImpExp.GetExporterMenuText(nImpExp);
 }
 
-CString CImportExportComboBox::GetImpExpFileExtension(int nImpExp) const
+CString CImportExportComboBox::GetImpExpFileExtension(int nImpExp, BOOL bWithDot) const
 {
 	if (m_bImporting)
-		return m_mgrImpExp.GetImporterFileExtension(nImpExp, FALSE);
+		return m_mgrImpExp.GetImporterFileExtension(nImpExp, bWithDot);
 
 	// else
-	return m_mgrImpExp.GetExporterFileExtension(nImpExp, FALSE);
+	return m_mgrImpExp.GetExporterFileExtension(nImpExp, bWithDot);
 }
 
 HICON CImportExportComboBox::GetImpExpIcon(int nImpExp) const
