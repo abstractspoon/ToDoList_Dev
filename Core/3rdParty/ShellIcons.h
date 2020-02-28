@@ -59,6 +59,7 @@ namespace ShellIcons
 	};
 	
 	HICON ExtractIcon(SHELLICON nIndex, bool bLarge = false);
+	HICON GetIcon(SHELLICON nIndex, bool bLarge = false);
 	BOOL DrawIcon(CDC* pDC, SHELLICON nIndex, const CPoint& ptTopLeft, bool bLarge = false);
 
 	void Release();

@@ -150,7 +150,7 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		ScaleByDPIFactor();
 		
 		// Replace the first image with the actual folder icon
-		VERIFY(Replace(0, ShellIcons::ExtractIcon(ShellIcons::SI_FOLDER_CLOSED)) == 0);
+		VERIFY(Replace(0, ShellIcons::GetIcon(ShellIcons::SI_FOLDER_CLOSED)) == 0);
 
 		m_sTasklistPath = sTasklistPath;
 		m_crTransparent = crTransparent;

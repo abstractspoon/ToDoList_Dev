@@ -69,18 +69,15 @@ HICON ShellIcons::ExtractIcon(SHELLICON nIndex, bool bLarge)
 	return hIcon;
 }
 
-BOOL ShellIcons::DrawIcon(CDC* pDC, SHELLICON nIndex, const CPoint& ptTopLeft, bool bLarge)
+HICON ShellIcons::GetIcon(SHELLICON nIndex, bool bLarge)
 {
-	// maintain a static list of large and small icons
-	static CMap<SHELLICON, SHELLICON, HICON, HICON> mapLarge, mapSmall;
-
 	// try lookup first
 	HICON hIcon = NULL;
 
 	if (bLarge)
-		mapLarge.Lookup(nIndex, hIcon);
+		iconsLarge.Lookup(nIndex, hIcon);
 	else
-		mapSmall.Lookup(nIndex, hIcon);
+		iconsSmall.Lookup(nIndex, hIcon);
 
 	// else extract
 	if (hIcon == NULL)
@@ -90,23 +87,27 @@ BOOL ShellIcons::DrawIcon(CDC* pDC, SHELLICON nIndex, const CPoint& ptTopLeft, b
 
 	if (hIcon)
 	{
-		// Scale image by DPI
-		double dScale = (pDC->GetDeviceCaps(LOGPIXELSY) / 96.0);
-		int nSize = (int)((bLarge ? 32 : 16) * dScale);
-
-		if (DrawIconEx(*pDC, ptTopLeft.x, ptTopLeft.y, hIcon, nSize, nSize, 0, NULL, DI_NORMAL))
-		{
-			if (bLarge)
-				mapLarge[nIndex] = hIcon;
-			else
-				mapSmall[nIndex] = hIcon;
-
-			return TRUE;
-		}
+		if (bLarge)
+			iconsLarge[nIndex] = hIcon;
+		else
+			iconsSmall[nIndex] = hIcon;
 	}
 
-	// else
-	return FALSE;
+	return hIcon;
+}
+
+BOOL ShellIcons::DrawIcon(CDC* pDC, SHELLICON nIndex, const CPoint& ptTopLeft, bool bLarge)
+{
+	HICON hIcon = GetIcon(nIndex, bLarge); // cached
+
+	if (hIcon == NULL)
+		return FALSE;
+
+	// Scale image by DPI
+	double dScale = (pDC->GetDeviceCaps(LOGPIXELSY) / 96.0);
+	int nSize = (int)((bLarge ? 32 : 16) * dScale);
+
+	return DrawIconEx(*pDC, ptTopLeft.x, ptTopLeft.y, hIcon, nSize, nSize, 0, NULL, DI_NORMAL);
 }
 
 void ShellIcons::Release()

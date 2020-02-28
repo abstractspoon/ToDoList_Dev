@@ -1987,7 +1987,7 @@ BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)
 	{
 		// Try first for small version of high-res shortcut
 		UINT nFlags = ILC_MASK;
-		HICON hIcon = ShellIcons::ExtractIcon(ShellIcons::SI_SHORTCUTNEW, false);
+		HICON hIcon = ShellIcons::GetIcon(ShellIcons::SI_SHORTCUTNEW, false);
 
 		if (hIcon)
 		{
@@ -1997,14 +1997,13 @@ BOOL GraphicsMisc::DrawShortcutOverlay(CDC* pDC, LPCRECT pRect)
 		else
 		{
 			// Full size version of low-res shortcut
-			hIcon = ShellIcons::ExtractIcon(ShellIcons::SI_SHORTCUT, true);
+			hIcon = ShellIcons::GetIcon(ShellIcons::SI_SHORTCUT, true);
 			nSize = 32; // full size
 			nFlags |= ILC_COLOR32; // transparent
 		}
 
 		VERIFY(ilShortcut.Create(nSize, nSize, nFlags, 0, 1));
 		VERIFY(ilShortcut.Add(hIcon) == 0);
-		VERIFY(::DestroyIcon(hIcon));
 	}
 	else
 	{
