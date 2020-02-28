@@ -56,10 +56,9 @@ BOOL CMenuIconMgr::Initialize(CWnd* pWnd)
 void CMenuIconMgr::Release()
 {
 	if (IsHooked())
-	{
-		ClearImages();
 		CSubclassWnd::HookWindow(NULL);
-	}
+
+	ClearImages();
 }
 
 void CMenuIconMgr::ClearImages(BOOL bNormal)
