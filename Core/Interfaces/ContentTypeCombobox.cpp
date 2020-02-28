@@ -62,19 +62,10 @@ void CContentTypeComboBox::FillCombo()
 
 	if (m_pContentMgr)
 	{
-		VERIFY(m_ilContent.Create(IMAGESIZE, IMAGESIZE, (ILC_MASK | ILC_COLOR32), 1, 1));
-		
 		for (int nContent = 0; nContent < m_pContentMgr->GetNumContent(); nContent++)
 		{
 			CString sItem = m_pContentMgr->GetContentDescription(nContent);
 			VERIFY(CDialogHelper::AddString(*this, sItem, nContent) != CB_ERR);
-
-			HICON hIcon = m_pContentMgr->GetContentIcon(nContent);
-
-			if (hIcon == NULL)
-				hIcon = m_iconNull;
-
-			VERIFY(m_ilContent.Add(hIcon) == nContent);
 		}
 	}
 
@@ -128,15 +119,21 @@ void CContentTypeComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	// Draw image
 	if (nItem != CB_ERR)
 	{
-		int nImage = (int)dwItemData;
+		int nContent = (int)dwItemData;
 	
-		if (nImage != -1)
+		if (nContent != -1)
 		{
 			CRect rImage(rect);
-			rImage.bottom = rImage.top + IMAGESIZE;
+			rImage.bottom = (rImage.top + IMAGESIZE);
 
 			GraphicsMisc::CentreRect(rImage, rect, FALSE, TRUE);
-			m_ilContent.Draw(&dc, nImage, rImage.TopLeft(), ILD_TRANSPARENT);
+			
+			HICON hIcon = m_pContentMgr->GetContentIcon(nContent);
+
+			if (hIcon == NULL)
+				hIcon = m_iconNull;
+
+			::DrawIconEx(dc, rImage.left, rImage.top, hIcon, IMAGESIZE, IMAGESIZE, 0, NULL, DI_NORMAL);
 		}
 	}
 

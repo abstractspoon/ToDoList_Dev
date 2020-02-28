@@ -31,7 +31,6 @@ public:
 // Attributes
 protected:
 	const CContentMgr* m_pContentMgr;
-	CImageList m_ilContent;
 	CIcon m_iconNull;
 
 // Operations
