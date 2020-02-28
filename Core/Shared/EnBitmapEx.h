@@ -37,6 +37,7 @@ public:
 	BOOL TintImage(COLORREF color, int nAmount, COLORREF crMask = -1);
 	BOOL RemapSysColors(); // just like AfxLoadSysColorBitmap does
 	BOOL GrayScale(COLORREF crMask = GetSysColor(COLOR_3DFACE));
+	BOOL Disable(COLORREF crMask);
 	
 	static BOOL GrayScale(CBitmap& bitmap, COLORREF crMask = GetSysColor(COLOR_3DFACE));
 	static HICON CreateDisabledIcon(HICON hIcon);

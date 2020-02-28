@@ -162,10 +162,14 @@ HICON CEnBitmapEx::CreateDisabledIcon(HICON hIcon)
 	const COLORREF crMask = RGB(255, 0, 255);
 	
 	hbmDisabled.CopyImage(hIcon, crMask, 16, 16);
-	hbmDisabled.GrayImage(crMask);
-	hbmDisabled.LightenImage(0.3, TRUE, crMask);
+	hbmDisabled.Disable(crMask);
 	
 	return hbmDisabled.ExtractIcon(crMask, 16, 16);
+}
+
+BOOL CEnBitmapEx::Disable(COLORREF crMask)
+{
+	return (GrayImage(crMask) && LightenImage(0.3, TRUE, crMask));
 }
 
 BOOL CEnBitmapEx::CreateDisabledImageList(const CImageList& ilSrc, CImageList& ilDest)
