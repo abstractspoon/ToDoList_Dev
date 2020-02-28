@@ -738,9 +738,8 @@ void CToDoListWnd::SetUITheme(const CString& sThemeFile)
 			InitCustomToolbar();
 		}
 
-		// reinitialize the menu icon manager
-		m_mgrMenuIcons.Release();
-		InitMenuIconManager();
+		// Repopulate the menu icon manager
+		m_mgrMenuIcons.ClearImages();
 	}
 	else
 	{
@@ -1012,13 +1011,14 @@ void CToDoListWnd::InitShortcutManager()
 	}
 }
 
-void CToDoListWnd::InitMenuIconManager()
+void CToDoListWnd::PopulateMenuIconManager()
 {
-	if (!m_mgrMenuIcons.Initialize(this))
+	if (!m_mgrMenuIcons.IsInitialized())
+	{
+		ASSERT(0);
 		return;
+	}
 	
-	m_mgrMenuIcons.ClearImages();
-
 	// Toolbar images
 	UINT nToolbarImageID = IDB_APP_TOOLBAR_STD;
 	CUIntArray aCmdIDs;
@@ -2412,7 +2412,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	CLocalizer::SetMenuPostTranslationCallback(*this);
 
 	InitShortcutManager();
-	InitMenuIconManager();
+	m_mgrMenuIcons.Initialize(this); // Populated on demand
 
 	// reminders
 	m_reminders.Initialize(this);
@@ -7375,6 +7375,9 @@ void CToDoListWnd::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu
 {
 	if (!bSysMenu)
 	{
+		// On-demand initialisation
+		PopulateMenuIconManager();
+
 		m_menubar.HandleInitMenuPopup(pPopupMenu,
 									  GetToDoCtrl(),
 									  Prefs(),
@@ -12181,7 +12184,7 @@ void CToDoListWnd::OnSysColorChange()
 {
 	CFrameWnd::OnSysColorChange();
 	
-	InitMenuIconManager();
+	m_mgrMenuIcons.ClearImages(); // repopulated on demand
 
 	SetUITheme(m_sThemeFile);
 }

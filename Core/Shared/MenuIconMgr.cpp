@@ -46,16 +46,21 @@ const CMapID2HICON& CMenuIconMgr::ImageMap(BOOL bNormal) const
 
 BOOL CMenuIconMgr::Initialize(CWnd* pWnd)
 {
-	if (!IsHooked())
+	if (!IsInitialized())
 		return HookWindow(pWnd->GetSafeHwnd());
 	
 	// else
 	return TRUE;
 }
 
+BOOL CMenuIconMgr::IsInitialized() const
+{
+	return IsHooked();
+}
+
 void CMenuIconMgr::Release()
 {
-	if (IsHooked())
+	if (IsInitialized())
 		CSubclassWnd::HookWindow(NULL);
 
 	ClearImages();

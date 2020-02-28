@@ -22,6 +22,7 @@ public:
 	virtual ~CMenuIconMgr();
 	
 	BOOL Initialize(CWnd* pWnd);
+	BOOL IsInitialized() const;
 	void Release();
 
 	BOOL AddImage(UINT nCmdID, HICON hIcon, BOOL bNormal = TRUE); // hIcon will be copied
