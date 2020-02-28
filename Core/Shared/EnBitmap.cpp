@@ -297,17 +297,41 @@ BOOL CEnBitmap::CopyImage(HICON hIcon, COLORREF crBack, int cx, int cy)
 		cy = size.cy;
 	}
 
-	CImageList il;
+	CClientDC dcDesktop(CWnd::GetDesktopWindow());
+	ASSERT_VALID(&dcDesktop);
 
-	if (il.Create(cx, cy, (ILC_COLOR32 | ILC_MASK), 1, 1))
+	CBitmap bmMem;
+	CDC dcMem;
+
+	if (dcMem.CreateCompatibleDC(&dcDesktop))
 	{
-		il.Add(hIcon);
+		if (bmMem.CreateCompatibleBitmap(&dcDesktop, cx, cy))
+		{
+			CBitmap* pOldBM = dcMem.SelectObject(&bmMem);
 
-		HBITMAP hbm = ExtractBitmap(il, crBack, cx, cy);
-		ASSERT(hbm);
+			if (crBack != CLR_NONE)
+				dcMem.FillSolidRect(0, 0, cx, cy, crBack);
 
-		VERIFY (Attach(hbm));
+			VERIFY(::DrawIconEx(dcMem, 0, 0, hIcon, cx, cy, 0, NULL, DI_NORMAL));
+
+			// cleanup
+			dcMem.SelectObject(pOldBM);
+
+	 		VERIFY(Attach(bmMem.Detach()));
+		}
 	}
+
+// 	CImageList il;
+// 
+// 	if (il.Create(cx, cy, (ILC_COLOR32 | ILC_MASK), 1, 1))
+// 	{
+// 		il.Add(hIcon);
+// 
+// 		HBITMAP hbm = ExtractBitmap(il, crBack, cx, cy);
+// 		ASSERT(hbm);
+// 
+// 		VERIFY (Attach(hbm));
+// 	}
 
 	return (GetSafeHandle() != NULL);
 }
