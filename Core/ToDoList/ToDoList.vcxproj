@@ -749,6 +749,8 @@ unicode_release\TDLTest.exe
     <ClInclude Include="ToDoListWnd.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\TDLUpdate\RES\TDLUpdate.ico" />
+    <None Include="..\TDLUpdate\res\TDLUpdate_wiz_header.bmp" />
     <None Include="res\abstractspoon.ico" />
     <None Include="res\app_extra_std.bmp" />
     <None Include="res\app_std.ico" />

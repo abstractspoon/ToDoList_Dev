@@ -1064,6 +1064,12 @@
     <None Include="res\app_tray_dark.ico">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="..\TDLUpdate\RES\TDLUpdate.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="..\TDLUpdate\res\TDLUpdate_wiz_header.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
