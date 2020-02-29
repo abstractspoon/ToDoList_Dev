@@ -150,6 +150,8 @@ protected:
 						LPCTSTR szFont, BOOL bSymbolFont);
 	void RedrawButtonByIndex(int nBtn);
 	void ForceRedraw();
+	void FreeButtonResources();
+	void FreeButtonResources(int nBtn);
 
 	virtual BOOL InitializeTooltips();
 	virtual BOOL InitializeImageLists();

@@ -13,6 +13,7 @@
 #include "..\shared\enbitmap.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\graphicsmisc.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\messagebox.h"
 #include "..\shared\entoolbar.h"
@@ -180,6 +181,31 @@ HICON CTDCToolsHelper::GetToolIcon(const USERTOOL& tool)
 	}
 
 	return hIcon;
+}
+
+BOOL CTDCToolsHelper::GetToolIcon(const USERTOOL& tool, CBitmap& bmp, COLORREF crBkgnd)
+{
+	bmp.DeleteObject();
+
+	// Check valid tool path. Note: could also be url
+	CString sToolPath, sIconPath;
+	
+	if (GetToolPaths(tool, sToolPath, sIconPath))
+	{
+		if (tool.sIconPath.IsEmpty())
+			return CFileIcons::GetImage(sToolPath, bmp, crBkgnd);	
+		
+		// else try for supported image
+		int nSize = GraphicsMisc::ScaleByDPIFactor(16);
+		CEnBitmap ebmp;
+
+		if (ebmp.LoadImage(sIconPath, crBkgnd, nSize, nSize))
+			return bmp.Attach(ebmp.Detach());
+
+		return CFileIcons::GetImage(sIconPath, bmp, crBkgnd);
+	}
+
+	return FALSE;
 }
 
 BOOL CTDCToolsHelper::PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
@@ -351,11 +377,11 @@ void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CEnTool
 		for (int nTool = 0; nTool < aTools.GetSize(); nTool++)
 		{
 			const USERTOOL& tool = aTools[nTool];
-			HICON hIcon = GetToolIcon(tool);
-				
-			if (hIcon)
+			CBitmap bmp;
+
+			if (GetToolIcon(tool, bmp, 255))
 			{
-				int nImage = pIL->Add(hIcon);
+				int nImage = pIL->Add(&bmp, 255);
 				
 				TBBUTTON tbb = { nImage, nTool + m_nStartID, 0, TBSTYLE_BUTTON, 0, 0, (UINT)-1 };
 				
@@ -363,9 +389,6 @@ void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CEnTool
 					nAdded++;
 				else
 					pIL->Remove(nImage);
-				
-				// cleanup
-				::DestroyIcon(hIcon);
 			}
 		}
 		

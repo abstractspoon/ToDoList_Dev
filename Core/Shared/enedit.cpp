@@ -57,14 +57,7 @@ CEnEdit::CEnEdit(BOOL bComboStyle, LPCTSTR szMask, DWORD dwFlags) :
 
 CEnEdit::~CEnEdit()
 {
-	// cleanup fonts and icons
-	int nBtn = GetButtonCount();
-	
-	while (nBtn--)
-	{
-		GraphicsMisc::VerifyDeleteObject(m_aButtons[nBtn].hFont);
-		::DestroyIcon(m_aButtons[nBtn].hIcon);
-	}
+	FreeButtonResources();
 }
 
 
@@ -250,6 +243,9 @@ BOOL CEnEdit::DeleteButton(UINT nID)
 	if (nBtn == -1)
 		return FALSE;
 
+	// Cleanup hIcons
+	FreeButtonResources(nBtn);
+
 	m_aButtons.RemoveAt(nBtn);
 	m_hotTrack.DeleteRect(nBtn);
 
@@ -261,6 +257,8 @@ BOOL CEnEdit::DeleteButton(UINT nID)
 
 void CEnEdit::DeleteAllButtons()
 {
+	FreeButtonResources();
+
 	m_aButtons.RemoveAll();
 	m_hotTrack.Reset();
 
@@ -1114,4 +1112,26 @@ int CEnEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	// else
 	return CMaskEdit::OnToolHitTest(point, pTI);
+}
+
+void CEnEdit::FreeButtonResources()
+{
+	// cleanup fonts and icons
+	int nBtn = GetButtonCount();
+
+	while (nBtn--)
+		FreeButtonResources(nBtn);
+}
+
+void CEnEdit::FreeButtonResources(int nBtn)
+{
+	ASSERT((nBtn >= 0) && (nBtn <= GetButtonCount()));
+
+	EDITBTN& btn = m_aButtons[nBtn];
+
+	GraphicsMisc::VerifyDeleteObject(btn.hFont);
+	btn.hFont = NULL;
+
+	::DestroyIcon(btn.hIcon);
+	btn.hIcon = NULL;
 }

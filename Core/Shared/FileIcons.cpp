@@ -9,6 +9,7 @@
 #include "webmisc.h"
 #include "misc.h"
 #include "graphicsmisc.h"
+#include "enbitmap.h"
 
 #include "..\3rdParty\ShellIcons.h"
 
@@ -180,10 +181,27 @@ HICON CFileIcons::ExtractIcon(LPCTSTR szFilePath, BOOL bLargeIcon)
 	HIMAGELIST hIL = NULL;
 	int nIndex = -1;
 
-	if (GetFileImage(szFilePath, bLargeIcon, hIL, nIndex))
-		return ImageList_GetIcon(hIL, nIndex, ILD_TRANSPARENT);
-	
-	return NULL;
+	if (!GetFileImage(szFilePath, bLargeIcon, hIL, nIndex))
+		return NULL;
+
+	// else
+	return ImageList_GetIcon(hIL, nIndex, ILD_TRANSPARENT);
+}
+
+BOOL CFileIcons::GetImage(LPCTSTR szFilePath, CBitmap& bmp, COLORREF crBkgnd, BOOL bLargeIcon)
+{
+	HIMAGELIST hIL = NULL;
+	int nIndex = -1;
+
+	if (!GetFileImage(szFilePath, bLargeIcon, hIL, nIndex))
+		return FALSE;
+
+	CEnBitmap ebmp;
+
+	if (!ebmp.CopyImage(hIL, nIndex, crBkgnd))
+		return FALSE;
+
+	return bmp.Attach(ebmp.Detach());
 }
 
 int CFileIcons::GetIndex(LPCTSTR szFilePath, BOOL bLargeIcon)

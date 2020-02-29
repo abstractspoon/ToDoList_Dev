@@ -209,7 +209,8 @@ CToDoListWnd::CToDoListWnd()
 	m_bIgnoreNextResize(FALSE),
 	m_bAllowForcedCheckOut(FALSE),
 	m_nContextColumnID(TDCC_NONE),
-	m_nContextMenuID(0)
+	m_nContextMenuID(0),
+	m_bFirstEraseBkgnd(TRUE)
 {
 	// must do this before initializing any controls
 	SetupUIStrings();
@@ -2339,7 +2340,6 @@ void CToDoListWnd::SaveSettings()
 
 LRESULT CToDoListWnd::OnUpdateUDTsInToolbar(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	Misc::ProcessMsgLoop();
 	UpdateUDTsInToolbar(UDT_INIT);
 
 	return 0L;
@@ -2506,9 +2506,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 			}
 		}
 		
-		// process all pending messages
-		Misc::ProcessMsgLoop();
-
 		// if the last active tasklist could not be loaded then we need to find another
 		if (GetTDCCount())
 		{
@@ -2566,11 +2563,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	{
 		PostMessage(WM_DOINITIALDUETASKNOTIFY);
 	}
-
-	// refresh toolbar 'tools' buttons unless minimized because
-	// we must handle it when we're first shown
-	if (AfxGetApp()->m_nCmdShow != SW_SHOWMINIMIZED)
-		UpdateUDTsInToolbar(UDT_INIT);
 
 	// current focus
 	PostMessage(WM_FW_FOCUSCHANGE, (WPARAM)::GetFocus(), 0L);
@@ -3057,9 +3049,9 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	// main window is visible. so in the case of starting hidden
 	// or starting minimized we must wait until we become visible before
 	// adding the tools to the toolbar.
-	if (m_bStartHidden)
+	if (m_bFirstEraseBkgnd)
 	{
-		m_bStartHidden = FALSE;
+		m_bFirstEraseBkgnd = FALSE;
 		PostMessage(WM_UPDATEUDTSINTOOLBAR);
 	}
 
@@ -12077,6 +12069,7 @@ BOOL CToDoListWnd::PreCreateWindow(CREATESTRUCT& cs)
 {
 	if (CFrameWnd::PreCreateWindow(cs))
 	{
+		cs.style |= CS_OWNDC;
 		cs.dwExStyle &= ~WS_EX_CLIENTEDGE;
 
 		// Check if our class is already defined

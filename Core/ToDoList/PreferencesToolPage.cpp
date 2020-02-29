@@ -758,8 +758,9 @@ LRESULT CPreferencesToolPage::OnGetFileIcon(WPARAM wParam, LPARAM lParam)
 			
 			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, TRUE))
 			{
-				static HICON hIcon = CFileIcons::ExtractIcon(sToolPath);
-				return (LRESULT)hIcon;
+				// This is the application icon
+				static CIcon icon(IDR_MAINFRAME_STD, 16);
+				return (LRESULT)(HICON)icon;
 			}
 		}
 		break;

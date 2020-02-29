@@ -165,7 +165,8 @@ protected:
 	BOOL m_bReshowTimeTrackerOnEnable;
 	BOOL m_bSettingAttribDefs;
 	BOOL m_bAllowForcedCheckOut;
-	BOOL m_bIgnoreNextResize;	
+	BOOL m_bIgnoreNextResize;
+	BOOL m_bFirstEraseBkgnd;
 	
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
 	BOOL m_bPromptRegionalSettingsRestartOnActivate;
@@ -687,7 +688,7 @@ protected:
 	
 	enum UDTCHANGETYPE
 	{
-		UDT_INIT,
+		UDT_INIT = 0,
 		UDT_MAINTOOLBAR,
 		UDT_CUSTOMTOOLBAR,
 		UDT_PREFERENCES

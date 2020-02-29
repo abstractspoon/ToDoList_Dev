@@ -22,6 +22,7 @@ public:
 	
 	// caller is responsible for clean up
 	static HICON ExtractIcon(LPCTSTR szFilePath, BOOL bLargeIcon = FALSE);
+	static BOOL GetImage(LPCTSTR szFilePath, CBitmap& bmp, COLORREF crBkgnd, BOOL bLargeIcon = FALSE);
 
 	static int GetIndex(LPCTSTR szFilePath, BOOL bLargeIcon = FALSE);
 	static int GetFolderIndex(BOOL bLargeIcon = FALSE);

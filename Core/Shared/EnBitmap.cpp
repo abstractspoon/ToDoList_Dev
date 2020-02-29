@@ -289,6 +289,12 @@ BOOL CEnBitmap::CopyImage(HICON hIcon, COLORREF crBack, int cx, int cy)
 	if (m_hObject != NULL)
 		return FALSE;
 
+	if (!HasBackgroundColor(crBack))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	if ((cx == 0) || (cy == 0))
 	{
 		CSize size = GraphicsMisc::GetIconSize(hIcon);
@@ -309,29 +315,14 @@ BOOL CEnBitmap::CopyImage(HICON hIcon, COLORREF crBack, int cx, int cy)
 		{
 			CBitmap* pOldBM = dcMem.SelectObject(&bmMem);
 
-			if (crBack != CLR_NONE)
-				dcMem.FillSolidRect(0, 0, cx, cy, crBack);
-
+			VERIFY(FillBackground(&dcMem, cx, cy, crBack));
 			VERIFY(::DrawIconEx(dcMem, 0, 0, hIcon, cx, cy, 0, NULL, DI_NORMAL));
+			VERIFY(Attach(bmMem.Detach()));
 
 			// cleanup
 			dcMem.SelectObject(pOldBM);
-
-	 		VERIFY(Attach(bmMem.Detach()));
 		}
 	}
-
-// 	CImageList il;
-// 
-// 	if (il.Create(cx, cy, (ILC_COLOR32 | ILC_MASK), 1, 1))
-// 	{
-// 		il.Add(hIcon);
-// 
-// 		HBITMAP hbm = ExtractBitmap(il, crBack, cx, cy);
-// 		ASSERT(hbm);
-// 
-// 		VERIFY (Attach(hbm));
-// 	}
 
 	return (GetSafeHandle() != NULL);
 }
@@ -508,36 +499,6 @@ HBITMAP CEnBitmap::ExtractBitmap(IPicture* pPicture, COLORREF crBack, int cx, in
 		}
 	}
 
-	return (HBITMAP)bmMem.Detach();
-}
-
-HBITMAP CEnBitmap::ExtractBitmap(const CImageList& il, COLORREF crBack, int cx, int cy)
-{
-	ASSERT(il.GetSafeHandle());
-	ASSERT(cx && cy);
-
-	CClientDC dcDesktop(CWnd::GetDesktopWindow());
-	ASSERT_VALID(&dcDesktop);
-	
-	CBitmap bmMem;
-	CDC dcMem;
-
-	if (dcMem.CreateCompatibleDC(&dcDesktop))
-	{
-		if (bmMem.CreateCompatibleBitmap(&dcDesktop, cx, cy))
-		{
-			CBitmap* pOldBM = dcMem.SelectObject(&bmMem);
-			
-			if (crBack != CLR_NONE)
-				dcMem.FillSolidRect(0, 0, cx, cy, crBack);
-			
-			ImageList_Draw(il, 0, dcMem, 0, 0, ILD_TRANSPARENT);
-			
-			// cleanup
-			dcMem.SelectObject(pOldBM);
-		}
-	}
-	
 	return (HBITMAP)bmMem.Detach();
 }
 
@@ -890,11 +851,13 @@ BOOL CEnBitmap::Fill(RGBX* pPixels, CSize size, COLORREF color)
 		return FALSE;
 
 	if (color == CLR_NONE || color == RGB(255, 255, 255))
+	{
 		FillMemory(pPixels, size.cx * 4 * size.cy, 255); // white
-
+	}
 	else if (color == 0)
+	{
 		FillMemory(pPixels, size.cx * 4 * size.cy, 0); // black
-
+	}
 	else
 	{
 		// fill the first line with the color
@@ -934,30 +897,80 @@ BOOL CEnBitmap::Fill(RGBX* pPixels, CSize size, COLORREF color)
 	return TRUE;
 }
 
-BOOL CEnBitmap::Copy(HIMAGELIST hImageList)
+BOOL CEnBitmap::CopyImages(HIMAGELIST hImageList, COLORREF crBack)
 {
+	return CopyImage(hImageList, -1, crBack);
+}
+
+BOOL CEnBitmap::CopyImage(HIMAGELIST hImageList, int iImage, COLORREF crBack)
+{
+	ASSERT(m_hObject == NULL);      // only attach once, detach on destroy
+
+	if (m_hObject != NULL)
+		return FALSE;
+
+	if (!HasBackgroundColor(crBack))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	GraphicsMisc::VerifyDeleteObject(*this);
 	
 	int nWidth = 0, nHeight = 0;
-	int nCount = ImageList_GetImageCount(hImageList);
+	int nCount = (iImage == -1 ? ImageList_GetImageCount(hImageList) : 1);
 	
 	ImageList_GetIconSize(hImageList, &nWidth, &nHeight);
 	
-	HDC hdc = GetDC(NULL);
-	HBITMAP hbmDest = ::CreateCompatibleBitmap(hdc, nWidth * nCount, nHeight);
-	HDC hdcMem = CreateCompatibleDC(hdc);
+	CClientDC dc(CWnd::GetDesktopWindow());
 	
-	HBITMAP hBMOld = (HBITMAP)::SelectObject(hdcMem, hbmDest);
-	
-	for (int nIcon = 0; nIcon < nCount; nIcon++)
+	CBitmap bmp;
+	bmp.CreateCompatibleBitmap(&dc, nWidth * nCount, nHeight);
+
+	CDC dcMem;
+	dcMem.CreateCompatibleDC(&dc);
+
+	CBitmap* pBMOld = dcMem.SelectObject(&bmp);
+	VERIFY(FillBackground(&dcMem, nWidth, nHeight, crBack));
+
+	if (iImage == -1)
 	{
-		VERIFY (ImageList_Draw(hImageList, nIcon, hdcMem, nIcon * nWidth, 0, ILD_NORMAL));
+		for (int nIcon = 0; nIcon < nCount; nIcon++)
+		{
+			VERIFY(ImageList_Draw(hImageList, nIcon, dcMem, nIcon * nWidth, 0, ILD_TRANSPARENT));
+		}
 	}
+	else
+	{
+		VERIFY(ImageList_Draw(hImageList, iImage, dcMem, 0, 0, ILD_TRANSPARENT));
+	}
+
+	VERIFY(Attach(bmp.Detach()));
 	
 	// cleanup
-	::SelectObject(hdcMem, hBMOld);
-	VERIFY(DeleteDC(hdcMem));
-	VERIFY(::ReleaseDC(NULL, hdc));
+	dcMem.SelectObject(pBMOld);
 
-	return Attach(hbmDest);
+	return (GetSafeHandle() != NULL);
+}
+
+BOOL CEnBitmap::FillBackground(CDC* pDC, int cx, int cy, COLORREF crBkgnd)
+{
+	if (crBkgnd == CLR_NONE)
+	{
+		crBkgnd = m_crBkgnd;
+
+		if (crBkgnd == CLR_NONE)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+	}
+
+	pDC->FillSolidRect(0, 0, cx, cy, crBkgnd);
+	return TRUE;
+}
+
+BOOL CEnBitmap::HasBackgroundColor(COLORREF crAltBack) const
+{
+	return ((crAltBack != CLR_NONE) || (m_crBkgnd != CLR_NONE));
 }

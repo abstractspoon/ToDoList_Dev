@@ -60,7 +60,8 @@ public:
 	BOOL CopyImage(HBITMAP hBitmap);
 	BOOL CopyImage(CBitmap* pBitmap);
 	BOOL CopyImage(HICON hIcon, COLORREF crBack = CLR_NONE, int cx = 0, int cy = 0);
-	BOOL Copy(HIMAGELIST hImageList);
+	BOOL CopyImages(HIMAGELIST hImageList, COLORREF crBack = CLR_NONE);
+	BOOL CopyImage(HIMAGELIST hImageList, int iImage, COLORREF crBack = CLR_NONE);
 
 	static BOOL CopyImageFileToClipboard(HWND hWnd, LPCTSTR szImagePath, COLORREF crBack = CLR_NONE, WORD nBpp = 0);
 	static BOOL CopyToClipboard(HWND hWnd, const CBitmap& bm, WORD nBpp = 0);
@@ -91,10 +92,11 @@ protected:
 protected:
 	RGBX* GetDIBits32();
 	BOOL PrepareBitmapInfo32(BITMAPINFO& bi, HBITMAP hBitmap = NULL);
+	BOOL FillBackground(CDC* pDC, int cx, int cy, COLORREF crBkgnd = CLR_NONE);
+	BOOL HasBackgroundColor(COLORREF crAltBack) const;
 
 	static BOOL Fill(RGBX* pPixels, CSize size, COLORREF color);
 	static HBITMAP ExtractBitmap(IPicture* pPicture, COLORREF crBack, int cx, int cy);
-	static HBITMAP ExtractBitmap(const CImageList& il, COLORREF crBack, int cx, int cy);
 };
 
 #endif // !defined(AFX_ENBITMAP_H__1FDE0A4E_8AB4_11D6_95AD_EFA89432A428__INCLUDED_)

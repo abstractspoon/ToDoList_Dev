@@ -72,6 +72,7 @@ public:
 						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline);
 
 	static HICON GetToolIcon(const USERTOOL& tool);
+	static BOOL GetToolIcon(const USERTOOL& tool, CBitmap& bmp, COLORREF crBkgnd);
 	static CString GetToolPath(const USERTOOL& tool);
 	
 protected:
