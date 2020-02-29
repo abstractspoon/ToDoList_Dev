@@ -260,6 +260,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 
 					BOOL bTrackingEnds = (m_bTracking && !bPressed);
 
+					// Fade the colour using semi-transparency
 					if (!bPressed && (bTrackingEnds || !bHot))
 					{
 						CGdiPlusBrush brush(RGB(255, 255, 255), (bTrackingEnds ? 96 : 128));
