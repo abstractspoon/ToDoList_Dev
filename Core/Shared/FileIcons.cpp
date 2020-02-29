@@ -14,6 +14,7 @@
 #include "..\3rdParty\ShellIcons.h"
 
 #include <shlwapi.h>
+#include <shellapi.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -230,14 +231,22 @@ HIMAGELIST CFileIcons::GetImageList(BOOL bLargeIcons)
 { 
 	Initialise();
 
+	HIMAGELIST hIL = NULL;
+
+#if _MSC_VER <= 1200
+	// VC6 compatible version
+	int nUnused = -1;
+
+	if (GetFolderImage(bLargeIcons, hIL, nUnused))
+		return hIL;
+#else
 	// From <commoncontrols.h>
 	// {46EB5926-582E-4017-9FDF-E8998DAA0950}
 	static const GUID IID_IIMAGELIST = { 0x46EB5926, 0x582E, 0x4017, { 0x9F, 0xDF, 0xE8, 0x99, 0x8D, 0xAA, 0x09, 0x50 } };
 
-	HIMAGELIST hIL = NULL;
-
 	if (S_OK == SHGetImageList((bLargeIcons ? SHIL_LARGE : SHIL_SMALL), IID_IIMAGELIST, reinterpret_cast<void**>(&hIL)))
 		return reinterpret_cast<HIMAGELIST>(hIL);
+#endif
 
 	ASSERT(0);
 	return FALSE; 
