@@ -37,6 +37,7 @@
 #include "..\3rdparty\ini.h"
 #include "..\3rdparty\base64coder.h"
 #include "..\3rdparty\LimitSingleInstance.h"
+#include "..\3rdparty\gdiplus.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -1401,6 +1402,8 @@ int CToDoListApp::ExitInstance()
 {
 	CLocalizer::Release();
 	CPreferences::Release();
+
+	CGdiPlus::Free();
 
 	return CWinApp::ExitInstance();
 }

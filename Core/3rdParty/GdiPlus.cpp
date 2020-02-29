@@ -330,7 +330,7 @@ BOOL CGdiPlus::Initialize()
 
 void CGdiPlus::Free()
 {
-	if (s_hGdiPlus)
+	if (s_hGdiPlus && (s_hGdiPlus != HMODULE(-1)))
 	{
 		ASSERT(s_GdiToken);
 

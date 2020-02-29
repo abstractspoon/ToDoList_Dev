@@ -9,6 +9,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 
+#include "..\3rdParty\GdiPlus.h"
+
 #include "..\Interfaces\iuiextension.h"
 
 #ifdef _DEBUG
@@ -47,7 +49,7 @@ CBurndownExtApp::CBurndownExtApp()
 
 CBurndownExtApp::~CBurndownExtApp()
 {
-
+	CGdiPlus::Free();
 }
 
 void CBurndownExtApp::Release()

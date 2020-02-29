@@ -9,6 +9,8 @@
 #include "..\shared\Localizer.h"
 #include "..\shared\TimeHelper.h"
 
+#include "..\3rdParty\GdiPlus.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -49,6 +51,8 @@ CKanbanExtApp::~CKanbanExtApp()
 
 void CKanbanExtApp::Release()
 {
+	// Don't delete because we are a static instance
+	CGdiPlus::Free();
 }
 
 IUIExtensionWindow* CKanbanExtApp::CreateExtWindow(UINT nCtrlID, DWORD nStyle, 

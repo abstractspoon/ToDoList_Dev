@@ -268,6 +268,8 @@ public:
 class CGdiPlus  
 {
 public:
+	static void Free(); // Initialized on demand
+
 	// Native GDI+
 	static BOOL CreateBitmapFromStream(IStream* stream, gdix_Bitmap **bitmap);
 	static BOOL CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap);
@@ -318,7 +320,6 @@ protected:
 
 protected:
 	static BOOL Initialize(); // initialize on demand
-	static void Free();
 
 	static BOOL GetImageMimeType(const WCHAR* filename, CString& sMimeType);
 	static BOOL GetImageEncoders(UINT numEncoders, UINT sizeEncoderArray, IMAGECODECINFO* pEncoders);

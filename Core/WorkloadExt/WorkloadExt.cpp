@@ -9,6 +9,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 
+#include "..\3rdParty\GdiPlus.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -50,7 +52,8 @@ CWorkloadExtApp::~CWorkloadExtApp()
 
 void CWorkloadExtApp::Release()
 {
-	// don't delete because we are static
+	// Don't delete because we are a static instance
+	CGdiPlus::Free();
 }
 
 IUIExtensionWindow* CWorkloadExtApp::CreateExtWindow(UINT nCtrlID, DWORD nStyle, 

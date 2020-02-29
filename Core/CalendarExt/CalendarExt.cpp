@@ -9,6 +9,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 
+#include "..\3rdParty\GdiPlus.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -49,7 +51,8 @@ CCalendarExtApp::~CCalendarExtApp()
 
 void CCalendarExtApp::Release()
 {
-	// do nothing
+	// Don't delete because we are a static instance
+	CGdiPlus::Free();
 }
 
 IUIExtensionWindow* CCalendarExtApp::CreateExtWindow(UINT nCtrlID, DWORD nStyle, 
