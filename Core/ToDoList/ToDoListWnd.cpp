@@ -114,6 +114,8 @@ const UINT ONE_MINUTE = 10000;
 const UINT ONE_MINUTE = 60000;
 #endif
 
+const COLORREF MAGENTA = RGB(255, 0, 255);
+
 /////////////////////////////////////////////////////////////////////////////
 
 const LPCTSTR SETTINGS_KEY	= _T("Settings");
@@ -1019,7 +1021,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 		ASSERT(0);
 		return;
 	}
-	
+
 	// Toolbar images
 	UINT nToolbarImageID = IDB_APP_TOOLBAR_STD;
 	CUIntArray aCmdIDs;
@@ -1059,7 +1061,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	}
 	else
 	{
-		m_mgrMenuIcons.AddImages(aCmdIDs, nToolbarImageID, RGB(255, 0, 255));
+		m_mgrMenuIcons.AddImages(aCmdIDs, nToolbarImageID, MAGENTA);
 	}
 
 	// extra
@@ -1071,6 +1073,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_TOOLS_REMOVEFROMSOURCECONTROL);
 	aCmdIDs.Add(ID_VIEW_INCREMENTTASKVIEWFONTSIZE);
 	aCmdIDs.Add(ID_VIEW_DECREMENTTASKVIEWFONTSIZE);
+	aCmdIDs.Add(ID_EXIT);
 
 	if (m_theme.HasToolbarImageFile(_T("TODOLIST_EXTRA")))
 	{
@@ -1081,7 +1084,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	}
 	else
 	{
-		m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_EXTRA_STD, RGB(255, 0, 255));
+		m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_EXTRA_STD, MAGENTA);
 	}
 
 	// social images
@@ -1090,7 +1093,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_HELP_WIKI);
 	aCmdIDs.Add(ID_HELP_FORUM);
 
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, RGB(255, 0, 255));
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, MAGENTA);
 }
 
 void CToDoListWnd::OnShowKeyboardshortcuts() 
@@ -1344,7 +1347,6 @@ BOOL CToDoListWnd::InitMainToolbar()
 	}
 	else 
 	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
 		m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, MAGENTA);
 	}
 	
