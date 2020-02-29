@@ -285,6 +285,10 @@ SOURCE=.\fileedit.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\FileIcons.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\FileMisc.cpp
 # End Source File
 # Begin Source File
@@ -606,10 +610,6 @@ SOURCE=.\Subclass.cpp
 # Begin Source File
 
 SOURCE=.\symbolbutton.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\SysImageList.cpp
 # End Source File
 # Begin Source File
 
@@ -946,6 +946,10 @@ SOURCE=.\FileComboBox.h
 # Begin Source File
 
 SOURCE=.\fileedit.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\FileIcons.h
 # End Source File
 # Begin Source File
 
@@ -1302,10 +1306,6 @@ SOURCE=.\symbolbutton.h
 # Begin Source File
 
 SOURCE=.\SysColors.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\SysImageList.h
 # End Source File
 # Begin Source File
 
