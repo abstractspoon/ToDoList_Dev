@@ -49,6 +49,8 @@ using mshtmlEventObject = MSHTML.IHTMLEventObj;
 using Pavonis.COM;
 using Pavonis.COM.IOleCommandTarget;
 
+using Command.Handling;
+
 #endregion
 
 namespace MSDN.Html.Editor
@@ -640,25 +642,88 @@ namespace MSDN.Html.Editor
 		/// </summary>
 		private void DocumentKeyPress(object sender, EventArgs e)
         {
-            // define the event object being processes and review the key being pressed
-            mshtmlEventObject eventObject = document.parentWindow.@event;
-            if (eventObject.keyCode == (int)Keys.F5) //Refresh (116)
-            {
-                // Test the keypress and cancel Refresh
-                eventObject.returnValue = false;
-                eventObject.keyCode = 0;
-            }
-            else if (eventObject.keyCode == (int)Keys.F && eventObject.ctrlKey) //Ctrl+F (70)
-            {
-                // Test the keypress and cancel Refresh
-                eventObject.returnValue = false;
-                eventObject.keyCode = 0;
-                // Show custom Find and Replace dialog
-                FindReplacePrompt();
-            }
+			// define the event object being processes and review the key being pressed
+			mshtmlEventObject eventObject = document.parentWindow.@event;
 
-        } //DocumentKeyPress
+			if (OnDocumentKeyPress(GetKeyPress(eventObject)))
+			{
+				eventObject.returnValue = false;
+				eventObject.keyCode = 0;
+			}
 
+		} //DocumentKeyPress
+
+		virtual protected bool OnDocumentKeyPress(Keys keyPress)
+		{
+			if (CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items))
+				return true;
+
+			switch (keyPress)
+			{
+				case Keys.F5: // Refresh (116)
+					return true; // ignore
+
+				case Keys.F | Keys.Control: // Ctrl+F (70)
+					FindReplacePrompt();
+					return true;
+
+				case Keys.Tab:
+					SelectedHtml = "&emsp;";
+					return true;
+
+				case Keys.Left | Keys.Control:
+					{
+						var range = GetTextRange();
+
+						if (range != null)
+						{
+							range.move("word", -1);
+							range.collapse();
+							range.select();
+						}
+					}
+					return true;
+
+				case Keys.Right | Keys.Control:
+					{
+						var range = GetTextRange();
+
+						if (range != null)
+						{
+							range.move("word", 1);
+							range.collapse();
+							range.select();
+						}
+					}
+					return true;
+
+				case Keys.Oemcomma | Keys.Control:
+					FormatFontDecrease();
+					return true;
+
+				case Keys.OemPeriod | Keys.Control:
+					FormatFontIncrease();
+					return true;
+			}
+
+			return false;
+		}
+
+		protected Keys GetKeyPress(mshtmlEventObject eventObject)
+		{
+			Keys keyPress = (Keys)eventObject.keyCode;
+
+			if (eventObject.ctrlKey)
+				keyPress |= Keys.Control;
+
+			if (eventObject.shiftKey)
+				keyPress |= Keys.Shift;
+
+			if (eventObject.altKey)
+				keyPress |= Keys.Alt;
+
+			return keyPress;
+		}
 
         /// <summary>
         /// Method used to navigate to the required page
@@ -3928,7 +3993,7 @@ namespace MSDN.Html.Editor
 					hResult = Marshal.GetHRForException(ex);
 				}
 			}
-			catch (Exception e)
+			catch (Exception)
 			{
 			}
 

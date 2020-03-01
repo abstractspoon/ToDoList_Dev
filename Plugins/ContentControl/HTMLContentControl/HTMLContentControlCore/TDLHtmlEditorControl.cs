@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Command.Handling;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -320,50 +321,7 @@ namespace HTMLContentControl
 							if ((modifiers & Keys.Alt) == Keys.Alt)
 								keyPress |= Keys.Alt;
 
-							if (CommandHandling.ProcessMenuShortcut(keyPress, ContextMenu.Items))
-								return true;
-
-							// Pick up any stragglers
-							switch (keyPress)
-							{
-								case Keys.Tab:
-									SelectedHtml = "&emsp;";
-									return true;
-
-								case Keys.Left | Keys.Control:
-									{
-										var range = GetTextRange();
-
-										if (range != null)
-										{
-											range.move("word", -1);
-											range.collapse();
-											range.select();
-										}
-									}
-									return true;
-
-								case Keys.Right | Keys.Control:
-									{
-										var range = GetTextRange();
-
-										if (range != null)
-										{
-											range.move("word", 1);
-											range.collapse();
-											range.select();
-										}
-									}
-									return true;
-
-								case Keys.Oemcomma | Keys.Control:
-									FormatFontDecrease();
-									return true;
-
-								case Keys.OemPeriod | Keys.Control:
-									FormatFontIncrease();
-									return true;
-							}
+							return base.OnDocumentKeyPress(keyPress);
 						}
 					}
 					break;

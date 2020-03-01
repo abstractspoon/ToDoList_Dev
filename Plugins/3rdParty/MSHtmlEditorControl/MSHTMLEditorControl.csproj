@@ -284,6 +284,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\CommandHandling\CommandHandling.csproj">
+      <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
+      <Name>CommandHandling</Name>
+    </ProjectReference>
     <ProjectReference Include="..\RichEditExtensions\RichEditExtensions.csproj">
       <Project>{106d75d9-0012-416e-8c25-85124406171d}</Project>
       <Name>RichEditExtensions</Name>

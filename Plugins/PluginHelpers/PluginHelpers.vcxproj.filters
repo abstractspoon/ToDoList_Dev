@@ -51,9 +51,6 @@
     <ClInclude Include="DateUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CommandHandling.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="DPIScaling.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -114,9 +111,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DateUtil.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CommandHandling.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DPIScaling.cpp">

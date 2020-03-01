@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "UITheme.h"
 #include "Win32.h"
-#include "CommandHandling.h"
 #include "DPIScaling.h"
 #include "Translator.h"
 #include "FormsUtil.h"
@@ -16,6 +15,7 @@ using namespace System::Windows::Forms;
 
 using namespace MSDN::Html::Editor;
 using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace Command::Handling;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -105,11 +105,10 @@ void HtmlEditorControlEx::InitialiseFeatures(bool hideDocumentCommands)
 		CommandHandling::HideCommand("toolstripDocumentPrint", ToolBar->Items);
 		CommandHandling::HideCommand("toolstripDocumentHelp", ToolBar->Items);
 		// 
-		//             CommandHandling::SetMenuShortcut("contextFormatStrikeout", Keys::Control | Keys::Subtract, ContextMenu::Items);
-		//             CommandHandling::SetMenuShortcut("contextFormatIncrease", Keys::Control | Keys::Decimal, ContextMenu::Items);
-		//             CommandHandling::SetMenuShortcut("contextFormatDecrease", Keys::Control | Keys::Oemcomma, ContextMenu::Items);
+		// CommandHandling::SetMenuShortcut("contextFormatStrikeout", Keys::Control | Keys::Subtract, ContextMenu::Items);
+		// CommandHandling::SetMenuShortcut("contextFormatIncrease", Keys::Control | Keys::Decimal, ContextMenu::Items);
+		// CommandHandling::SetMenuShortcut("contextFormatDecrease", Keys::Control | Keys::Oemcomma, ContextMenu::Items);
 		// TODO
-
 	}
 }
 

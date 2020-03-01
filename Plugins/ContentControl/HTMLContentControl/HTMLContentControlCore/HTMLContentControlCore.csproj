@@ -97,6 +97,10 @@
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
       <Name>WebBrowserEx</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\CommandHandling\CommandHandling.csproj">
+      <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
+      <Name>CommandHandling</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="html.ico" />

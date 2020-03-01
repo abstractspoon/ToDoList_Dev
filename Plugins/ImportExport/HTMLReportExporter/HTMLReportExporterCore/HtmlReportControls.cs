@@ -13,6 +13,8 @@ using MSDN.Html.Editor;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
+using Command.Handling;
+
 namespace HTMLReportExporter
 {
 	partial class TableHeaderRowOptionCombobox : ComboBox
