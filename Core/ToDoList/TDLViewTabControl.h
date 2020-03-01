@@ -111,13 +111,14 @@ protected:
 	void GetViewRect(TDCVIEW& view, CRect& rPos) const;
 	BOOL SwitchToTab(int nNewIndex);
 	BOOL CalcTabViewRects(const CRect& rPos, CRect& rTabs, CRect& rView);
+	BOOL DoTabChange(int nOldTab, int nNewTab, BOOL bNotify);
 
 	int IndexToTab(int nIndex) const;
 	int TabToIndex(int nTab) const;
 
-	BOOL DoTabChange(int nOldTab, int nNewTab, BOOL bNotify);
-	BOOL WantTabCloseButton(int nTab) const; // virtual
-	void PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip); // virtual
+	// Virtual overrides
+	BOOL WantTabCloseButton(int nTab) const;
+	void PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip);
 };
 
 /////////////////////////////////////////////////////////////////////////////

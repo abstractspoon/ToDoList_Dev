@@ -174,9 +174,7 @@ protected:
 	CDWordArray m_aRecreatedRecurringTasks;
 
 	static CStringArray s_aDefTaskViews;
-
-	// private message
-	static UINT WM_TDC_RESTORELASTTASKVIEW;
+	static UINT WM_TDC_RESTORELASTTASKVIEW;	// private message
 
 // Overrides
 protected:
