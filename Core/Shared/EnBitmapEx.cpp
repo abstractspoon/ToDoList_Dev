@@ -122,7 +122,7 @@ BOOL CEnBitmapEx::RemapSysColors()
 	return ProcessImage(&proc);
 }
 
-BOOL CEnBitmapEx::GrayScale(COLORREF crMask)
+BOOL CEnBitmapEx::Disable(COLORREF crMask)
 {
 	// create 'nice' disabled image
 	C32BIPArray aProcessors;
@@ -139,7 +139,7 @@ BOOL CEnBitmapEx::GrayScale(COLORREF crMask)
 	return ProcessImage(aProcessors, crMask);
 }
 
-BOOL CEnBitmapEx::GrayScale(CBitmap& bitmap, COLORREF crMask)
+BOOL CEnBitmapEx::Disable(CBitmap& bitmap, COLORREF crMask)
 {
 	ASSERT(bitmap.GetSafeHandle());
 
@@ -149,7 +149,7 @@ BOOL CEnBitmapEx::GrayScale(CBitmap& bitmap, COLORREF crMask)
 	CEnBitmapEx bmpEnhanced(crMask);
 	bmpEnhanced.Attach(bitmap.Detach());
 	
-	if (bmpEnhanced.GrayScale(crMask))
+	if (bmpEnhanced.Disable(crMask))
 		bitmap.Attach(bmpEnhanced.Detach());
 
 	// else
@@ -161,15 +161,10 @@ HICON CEnBitmapEx::CreateDisabledIcon(HICON hIcon)
 	CEnBitmapEx hbmDisabled;
 	const COLORREF crMask = RGB(255, 0, 255);
 	
-	hbmDisabled.CopyImage(hIcon, crMask);
+	hbmDisabled.CopyImage(hIcon, crMask, 16, 16);
 	hbmDisabled.Disable(crMask);
 	
-	return hbmDisabled.ExtractIcon(crMask);
-}
-
-BOOL CEnBitmapEx::Disable(COLORREF crMask)
-{
-	return (GrayImage(crMask) && LightenImage(0.3, TRUE, crMask));
+	return hbmDisabled.ExtractIcon(crMask, 16, 16);
 }
 
 BOOL CEnBitmapEx::CreateDisabledImageList(const CImageList& ilSrc, CImageList& ilDest)

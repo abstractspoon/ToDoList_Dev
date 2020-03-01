@@ -163,24 +163,32 @@ int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, const CImageList& il, con
 
 int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, UINT nIDBitmap, COLORREF crMask)
 {
-	CBitmap bm, bmDis;
+	CBitmap bm;
+	
+	if (!bm.LoadBitmap(nIDBitmap))
+		return 0;
 
-	bm.LoadBitmap(nIDBitmap);
+	// Disabled image handled by menu in Vista+
+	CEnBitmapEx bmDis;
 
-	if (bmDis.LoadBitmap(nIDBitmap))
-		CEnBitmapEx::GrayScale(bmDis, crMask);
+	if (!m_bVistaPlus)
+	{
+		VERIFY(bmDis.LoadBitmap(nIDBitmap));
+		bmDis.Disable(crMask);
+	}
 
 	return AddImages(aCmdIDs, bm, bmDis, crMask);
 }
 
 int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, const CString& sImagePath, COLORREF crMask)
 {
-	CEnBitmap bm, bmDis;
-
+	CEnBitmap bm;
 	bm.LoadImage(sImagePath, crMask);
 
-	if (bmDis.LoadImage(sImagePath, crMask))
-		CEnBitmapEx::GrayScale(bmDis, crMask);
+	CEnBitmapEx bmDis;
+
+	if (!m_bVistaPlus && bmDis.LoadImage(sImagePath, crMask))
+		bmDis.Disable(crMask);
 
 	return AddImages(aCmdIDs, bm, bmDis, crMask);
 }

@@ -232,7 +232,7 @@ LRESULT CEnToolBar::OnRefreshButtonStates(WPARAM /*wp*/, LPARAM /*lp*/)
 void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask) 
 {
 	// create 'nice' disabled imagelist 
-	if (pBitmap->GrayScale(crMask))
+	if (pBitmap->Disable(crMask))
 	{
 		if (crMask == CLR_NONE) // map 3d colors
 			pBitmap->RemapSysColors();
@@ -268,7 +268,7 @@ void CEnToolBar::RefreshDisabledImageList()
 		CEnBitmapEx bmpImage;
 		bmpImage.CopyImage(CIcon(m_ilNormal.ExtractIcon(nImage)), crMask);
 
-		if (bmpImage.GrayScale(crMask))
+		if (bmpImage.Disable(crMask))
 			m_ilDisabled.Add(&bmpImage, crMask);
 	}
 
