@@ -166,7 +166,6 @@
 #define IDD_TASKLISTSAVEAS_DIALOG       314
 #define IDI_TRAY_LIGHT                  316
 #define IDI_TRAY_TIMETRACK_LIGHT        317
-#define IDB_TRAYICON_STD                318
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004

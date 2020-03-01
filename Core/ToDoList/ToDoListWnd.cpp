@@ -1100,12 +1100,8 @@ void CToDoListWnd::PopulateMenuIconManager()
 	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, MAGENTA);
 
 	// Tray icon
-	aCmdIDs.RemoveAll();
-	
-	aCmdIDs.Add(ID_TRAYICON_CREATETASK);
-	aCmdIDs.Add(ID_TRAYICON_CLOSE);
-
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_TRAYICON_STD, MAGENTA);
+	m_mgrMenuIcons.AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID());
+	m_mgrMenuIcons.AddImage(ID_TRAYICON_CLOSE, ID_EXIT);
 }
 
 void CToDoListWnd::OnShowKeyboardshortcuts() 

@@ -2718,7 +2718,6 @@ IDB_UDTPREFS_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar_std.bmp"
 IDR_UDTPREFS_TOOLBAR    BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar.bmp"
 IDB_OUTLOOKTYPES        BITMAP  MOVEABLE PURE   "res\\outlooktypes.bmp"
 IDB_TDLUPDATE_WIZ_HEADER BITMAP  DISCARDABLE     "..\\TDLUpdate\\res\\TDLUpdate_wiz_header.bmp"
-IDB_TRAYICON_STD        BITMAP  DISCARDABLE     "res\\trayicon_std.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
