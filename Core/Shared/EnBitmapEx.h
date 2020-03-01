@@ -17,7 +17,6 @@ class CEnBitmapEx : public CEnBitmap
 {
 public:
 	CEnBitmapEx(COLORREF crBkgnd = RGB(255, 255, 255));
-	CEnBitmapEx(int cx, int cy, COLORREF crBkgnd = RGB(255, 255, 255));
 	virtual ~CEnBitmapEx();
 
 	BOOL LoadSysBitmap(UINT nID);
