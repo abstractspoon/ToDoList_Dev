@@ -1021,6 +1021,10 @@ void CToDoListWnd::PopulateMenuIconManager()
 		ASSERT(0);
 		return;
 	}
+	else if (m_mgrMenuIcons.HasImages())
+	{
+		return;
+	}
 
 	// Toolbar images
 	UINT nToolbarImageID = IDB_APP_TOOLBAR_STD;

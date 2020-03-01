@@ -39,6 +39,7 @@ public:
 	
 	void DeleteImage(UINT nCmdID);
 	void ClearImages();
+	BOOL HasImages() const;
 	
 protected:
 	CMapID2HICON m_mapID2Icon, m_mapID2DisabledIcon;

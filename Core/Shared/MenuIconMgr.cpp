@@ -90,6 +90,11 @@ void CMenuIconMgr::ClearImages()
 	CleanupBitmaps();
 }
 
+BOOL CMenuIconMgr::HasImages() const
+{
+	return (ImageMap(TRUE).GetCount() > 0);
+}
+
 void CMenuIconMgr::CleanupBitmaps()
 {
 	POSITION pos = m_mapIcon2Bmp.GetStartPosition();
