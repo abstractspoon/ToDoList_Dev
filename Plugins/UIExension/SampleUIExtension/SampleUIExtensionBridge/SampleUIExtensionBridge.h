@@ -85,6 +85,6 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
 {
-   return new CSampleUIExtensionBridge();
+   return nullptr;//new CSampleUIExtensionBridge();
 }
 
