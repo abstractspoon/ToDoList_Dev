@@ -1586,7 +1586,7 @@ namespace Calendar
 
                             if (drawnItems.IndexOf(appointment) < 0)
                             {
-                                Rectangle appRect = rect;
+                                Rectangle apptRect = rect;
                                 int appointmentWidth;
                                 AppointmentView view;
 
@@ -1608,10 +1608,10 @@ namespace Calendar
                                 if ((lastX + (appointmentWidth * 2)) > (rect.X + rect.Width))
                                     lastX = 0;
 
-                                appRect.Width = appointmentWidth/* - 5*/;
+                                apptRect.Width = appointmentWidth/* - 5*/;
 
                                 if (lastX > 0)
-                                    appRect.X = lastX + appointmentWidth;
+                                    apptRect.X = lastX + appointmentWidth;
 
                                 DateTime appstart = appointment.StartDate;
                                 DateTime append = appointment.EndDate;
@@ -1670,10 +1670,10 @@ namespace Calendar
                                         append = append.AddMinutes((60 / slotsPerHour));
                                 }
 
-                                appRect = GetHourRangeRectangle(appstart, append, appRect);
+                                apptRect = GetHourRangeRectangle(appstart, append, apptRect);
 
                                 view = new AppointmentView();
-                                view.Rectangle = appRect;
+                                view.Rectangle = apptRect;
                                 view.Appointment = appointment;
 
                                 appointmentViews[appointment] = view;
@@ -1684,12 +1684,12 @@ namespace Calendar
                                     appointment.DrawBorder = true;
 
                                 // Procedure for gripper rectangle is always the same
-                                Rectangle gripRect = GetHourRangeRectangle(appointment.StartDate, appointment.EndDate, appRect);
+                                Rectangle gripRect = GetHourRangeRectangle(appointment.StartDate, appointment.EndDate, apptRect);
                                 gripRect.Width = appointmentGripWidth;
 
 								bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
 
-                                DrawAppointment(e.Graphics, appRect, appointment, isSelected, gripRect);
+                                DrawAppointment(e.Graphics, apptRect, appointment, isSelected, gripRect);
 
                                 e.Graphics.ResetClip();
 

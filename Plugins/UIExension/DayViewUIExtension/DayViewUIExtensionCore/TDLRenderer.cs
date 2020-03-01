@@ -329,13 +329,12 @@ namespace DayViewUIExtension
 					{
 						using (SolidBrush brush = new SolidBrush(fillColor))
 							g.FillRectangle(brush, rect);
-					}
 
-					//  Draw appointment border if needed
-					if (!isSelected && taskItem.DrawBorder)
-					{
-						using (Pen pen = new Pen(borderColor, 1))
-                            g.DrawRectangle(pen, rect);
+						if (taskItem.DrawBorder)
+						{
+							using (Pen pen = new Pen(borderColor, 1))
+								g.DrawRectangle(pen, rect);
+						}
 					}
 
 					// Draw appointment icon
@@ -357,7 +356,7 @@ namespace DayViewUIExtension
                             rectIcon = new Rectangle(rect.Left + TextPadding, rect.Top + TextPadding, imageSize, imageSize);
 						}
 
-                        if (Rectangle.Round(g.VisibleClipBounds).Contains(rectIcon) && m_TaskIcons.Get(taskItem.Id))
+                        if (g.IsVisible(rectIcon) && m_TaskIcons.Get(taskItem.Id))
                         {
 							if (longAppt)
 							{
@@ -369,13 +368,22 @@ namespace DayViewUIExtension
                                 gripRect.Height -= (imageSize + TextPadding);
 							}
 
+							var clipRgn = g.Clip;
+
+							if (rect.Bottom < (rectIcon.Y + imageSize))
+								g.Clip = new Region(RectangleF.Intersect(rect, g.ClipBounds));
+
 							m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
+
+							g.Clip = clipRgn;
 							
                             hasIcon = true;
                             taskItem.IconRect = rectIcon;
 
 							rect.Width -= (rectIcon.Right - rect.Left);
 							rect.X = rectIcon.Right;
+
+
 						}
                     }
 

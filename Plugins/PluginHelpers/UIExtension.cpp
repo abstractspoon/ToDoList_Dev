@@ -451,13 +451,19 @@ bool UIExtension::TaskIcon::Draw(Graphics^ dc, Int32 x, Int32 y)
 	if ((m_hilTaskImages == NULL) || (m_iImage == -1))
 		return false;
 
+	// Must retrieve clip rect before getting HDC
+	Drawing::Rectangle rClip = Rectangle::Truncate(dc->ClipBounds);
 	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
 
 	if (hDC == NULL)
 		return false;
 
+	int saveHdc = ::SaveDC(hDC);
+	::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
+
 	bool bRes = (ImageList_Draw(m_hilTaskImages, m_iImage, hDC, x, y, ILD_TRANSPARENT) != FALSE);
 
+	::RestoreDC(hDC, saveHdc);
 	dc->ReleaseHdc();
 
 	return bRes;
@@ -491,16 +497,25 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ dc, Int32 x, Int32 
 
 bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused)
 {
+	// Must retrieve clip rect before getting HDC
+	Drawing::Rectangle rClip = Rectangle::Truncate(dc->ClipBounds);
 	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
+
 	bool bRes = false;
 
 	if (hDC != NULL)
 	{
 		HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
-		CRect rect(x, y, (x + cx), (y + cy));
 		GM_ITEMSTATE state = (focused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 
-		bRes = (FALSE != GraphicsMisc::DrawExplorerItemBkgnd(CDC::FromHandle(hDC), hWndRef, state, rect, GMIB_THEMECLASSIC));
+		int saveHdc = ::SaveDC(hDC);
+		::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
+
+		CRect rSel(x, y, (x + cx), (y + cy));
+
+		bRes = (FALSE != GraphicsMisc::DrawExplorerItemBkgnd(CDC::FromHandle(hDC), hWndRef, state, rSel, GMIB_THEMECLASSIC));
+
+		::RestoreDC(hDC, saveHdc);
 		dc->ReleaseHdc();
 	}
 
