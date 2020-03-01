@@ -25,9 +25,10 @@ public:
 	BOOL IsInitialized() const;
 	void Release();
 
-	BOOL AddImage(UINT nCmdID, HICON hIcon, BOOL bNormal = TRUE); // hIcon will be copied
-	BOOL SetImage(UINT nCmdID, HICON hIcon, BOOL bNormal = TRUE); // hIcon will be cleaned up
-	BOOL AddImage(UINT nCmdID, const CImageList& il, int nImage, BOOL bNormal = TRUE);
+	BOOL SetImage(UINT nCmdID, HICON hIcon); // hIcon will be cleaned up
+	BOOL AddImage(UINT nCmdID, HICON hIcon); // hIcon will be copied
+	BOOL AddImage(UINT nCmdID, UINT nCmdIDToCopy);
+	BOOL AddImage(UINT nCmdID, const CImageList& il, int nImage);
 
 	int AddImages(const CToolBar& toolbar);
 	int AddImages(const CUIntArray& aCmdIDs, const CImageList& il, const CImageList* pILDisabled = NULL);
@@ -51,11 +52,13 @@ protected:
 	BOOL OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpmis);
 	
 	void ClearImages(BOOL bNormal);
+	BOOL SetImage(UINT nCmdID, HICON hIcon, BOOL bNormal); // hIcon will be cleaned up
 	int AddImages(const CUIntArray& aCmdIDs, CBitmap& bm, CBitmap& bmDis, COLORREF crMask);
-	static int AddImages(const CUIntArray& aCmdIDs, CBitmap& bm, CImageList& il, COLORREF crMask);
 
 	HICON LoadItemIcon(UINT nCmdID, BOOL bNormal) const;
-	HANDLE LoadItemImage(UINT nCmdID, BOOL bNormal);
+	HANDLE LoadItemImage(UINT nCmdID);
+
+	static int AddImages(const CUIntArray& aCmdIDs, CBitmap& bm, CImageList& il, COLORREF crMask);
 
 private:
 	CMapID2HICON& ImageMap(BOOL bNormal);

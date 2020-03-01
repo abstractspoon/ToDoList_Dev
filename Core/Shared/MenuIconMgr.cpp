@@ -25,6 +25,9 @@
 
 CMenuIconMgr::CMenuIconMgr()
 {
+	// Vista and above assigns ARGB bitmaps to menu items
+	// and lets the menu do the drawing.
+	// Below Vista uses owner-draw.
 	m_bVistaPlus = (COSVersion() >= OSV_VISTA);
 }
 
@@ -119,7 +122,7 @@ int CMenuIconMgr::AddImages(const CToolBar& toolbar)
 	int nBtnCount = tbc.GetButtonCount(), nImage = 0;
 
 	CImageList* pIL = tbc.GetImageList();
-	CImageList* pILDis = tbc.GetDisabledImageList();
+	CImageList* pILDis = (m_bVistaPlus ? NULL : tbc.GetDisabledImageList());
 	
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
@@ -141,26 +144,29 @@ int CMenuIconMgr::AddImages(const CToolBar& toolbar)
 
 int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, const CImageList& il, const CImageList* pILDisabled)
 {
-	ASSERT (aCmdIDs.GetSize() == il.GetImageCount());
-	ASSERT (!pILDisabled || (aCmdIDs.GetSize() == pILDisabled->GetImageCount()) || pILDisabled->GetImageCount() == 0);
-	
 	if (aCmdIDs.GetSize() != il.GetImageCount())
+	{
+		ASSERT(0);
 		return 0;
+	}
 	
-	if (pILDisabled && pILDisabled->GetImageCount() && aCmdIDs.GetSize() != pILDisabled->GetImageCount())
-		return 0;
-	
+	if (!m_bVistaPlus)
+	{
+		if (pILDisabled && pILDisabled->GetImageCount() && aCmdIDs.GetSize() != pILDisabled->GetImageCount())
+		{
+			ASSERT(0);
+			return 0;
+		}
+	}
+
 	int nBtnCount = aCmdIDs.GetSize();
 
-	CImageList* pIL = const_cast<CImageList*>(&il);
-	CImageList* pILDis = const_cast<CImageList*>(pILDisabled);
-	
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
-		SetImage(aCmdIDs[nBtn], pIL->ExtractIcon(nBtn), TRUE);
+		SetImage(aCmdIDs[nBtn], ImageList_GetIcon(il, nBtn, ILD_TRANSPARENT), TRUE);
 
-		if (pILDis && pILDis->GetImageCount())
-			SetImage(aCmdIDs[nBtn], pILDis->ExtractIcon(nBtn), FALSE);
+		if (!m_bVistaPlus && pILDisabled && pILDisabled->GetImageCount())
+			SetImage(aCmdIDs[nBtn], ImageList_GetIcon(*pILDisabled, nBtn, ILD_TRANSPARENT), FALSE);
 	}
 	   
 	return nBtnCount;
@@ -202,10 +208,20 @@ int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, CBitmap& bm, CBitmap& bmD
 {
 	if (bm.GetSafeHandle())
 	{
-		CImageList il, ilDis;
+		CImageList il;
 
-		if (AddImages(aCmdIDs, bm, il, crMask) && AddImages(aCmdIDs, bmDis, ilDis, crMask))
-			return AddImages(aCmdIDs, il, &ilDis);
+		if (AddImages(aCmdIDs, bm, il, crMask))
+		{
+			// Add normal icons
+			if (m_bVistaPlus || !bmDis.GetSafeHandle())
+				return AddImages(aCmdIDs, il);
+
+			// Add disabled icons
+			CImageList ilDis;
+
+			if (AddImages(aCmdIDs, bmDis, ilDis, crMask))
+				return AddImages(aCmdIDs, il, &ilDis);
+		}
 	}
 	
 	return 0;
@@ -261,7 +277,7 @@ int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, CBitmap& bm, CImageList& 
 
 BOOL CMenuIconMgr::HasImageID(UINT nCmdID) const
 {
-	return (LoadItemIcon(nCmdID, TRUE) || LoadItemIcon(nCmdID, FALSE));
+	return (LoadItemIcon(nCmdID, TRUE) != NULL);
 }
 
 BOOL CMenuIconMgr::ChangeImageID(UINT nCmdID, UINT nNewCmdID)
@@ -297,15 +313,15 @@ HICON CMenuIconMgr::LoadItemIcon(UINT nCmdID, BOOL bNormal) const
 	ImageMap(bNormal).Lookup(nCmdID, hIcon);
 
 	// fallback for disabled icon
-	if (hIcon == NULL && !bNormal)
+	if ((hIcon == NULL) && !bNormal)
 		ImageMap(TRUE).Lookup(nCmdID, hIcon);
 
 	return hIcon;
 }
 
-HANDLE CMenuIconMgr::LoadItemImage(UINT nCmdID, BOOL bNormal) 
+HANDLE CMenuIconMgr::LoadItemImage(UINT nCmdID) 
 {
-	HICON hIcon = LoadItemIcon(nCmdID, bNormal);
+	HICON hIcon = LoadItemIcon(nCmdID, TRUE);
 	
 	if (hIcon && m_bVistaPlus)
 	{
@@ -331,25 +347,59 @@ HANDLE CMenuIconMgr::LoadItemImage(UINT nCmdID, BOOL bNormal)
 	return hIcon;
 }
 
-BOOL CMenuIconMgr::AddImage(UINT nCmdID, HICON hIcon, BOOL bNormal)
+BOOL CMenuIconMgr::AddImage(UINT nCmdID, HICON hIcon)
 {
-	// we copy the icon's small image
-	CImageList il;
-	
-	if (il.Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 1))
+	// Resize the icon if it is not the right size
+	int nSize = GraphicsMisc::ScaleByDPIFactor(16);
+
+	if (GraphicsMisc::GetIconSize(hIcon).cx != nSize)
 	{
+		CImageList il;
+
+		if (!il.Create(16, 16, ILC_COLOR32 | ILC_MASK, 0, 1))
+			return FALSE;
+
 		il.Add(hIcon);
-		return SetImage(nCmdID, il.ExtractIcon(0), bNormal);
+		hIcon = il.ExtractIcon(0);
 	}
+	else
+	{
+		hIcon = ::CopyIcon(hIcon);
+	}
+
+	// Add normal icon
+	VERIFY(SetImage(nCmdID, hIcon, TRUE));
+
+	// Add disabled icon
+	if (!m_bVistaPlus)
+		SetImage(nCmdID, CEnBitmapEx::CreateDisabledIcon(hIcon), FALSE);
 	
 	return FALSE;
 }
 
-BOOL CMenuIconMgr::AddImage(UINT nCmdID, const CImageList& il, int nImage, BOOL bNormal)
+BOOL CMenuIconMgr::AddImage(UINT nCmdID, UINT nCmdIDToCopy)
 {
-	CImageList* pIL = const_cast<CImageList*>(&il);
+	HICON hIcon = LoadItemIcon(nCmdIDToCopy, TRUE);
 
-	return SetImage(nCmdID, pIL->ExtractIcon(nImage), bNormal);
+	if (!hIcon)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Copy normal icon
+	ImageMap(TRUE)[nCmdID] = hIcon;
+
+	// Copy disabled icon
+	if (!m_bVistaPlus)
+		ImageMap(FALSE)[nCmdID] = LoadItemIcon(nCmdIDToCopy, FALSE);
+
+	return TRUE;
+}
+
+BOOL CMenuIconMgr::AddImage(UINT nCmdID, const CImageList& il, int nImage)
+{
+	return SetImage(nCmdID, ImageList_GetIcon(il, nImage, ILD_TRANSPARENT));
 }
 
 void CMenuIconMgr::DeleteImage(UINT nCmdID)
@@ -358,24 +408,43 @@ void CMenuIconMgr::DeleteImage(UINT nCmdID)
 	SetImage(nCmdID, NULL, FALSE);
 }
 
+BOOL CMenuIconMgr::SetImage(UINT nCmdID, HICON hIcon)
+{
+	// Set normal icon
+	if (!SetImage(nCmdID, hIcon, TRUE))
+		return FALSE;
+
+	if (!m_bVistaPlus)
+	{
+		if (!hIcon)
+			return SetImage(nCmdID, hIcon, FALSE); // remove disabled icon
+
+		// Set disabled icon
+		return SetImage(nCmdID, CEnBitmapEx::CreateDisabledIcon(hIcon), FALSE);
+	}
+
+	return TRUE;
+}
+
 BOOL CMenuIconMgr::SetImage(UINT nCmdID, HICON hIcon, BOOL bNormal)
 {
-	if (nCmdID)
+	if (!nCmdID)
 	{
-		if (hIcon)
-		{
-			ImageMap(bNormal)[nCmdID] = hIcon;
-		}
-		else
-		{
-			::DestroyIcon(LoadItemIcon(nCmdID, bNormal));
-			ImageMap(bNormal).RemoveKey(nCmdID);
-		}
-
-		return TRUE;
+		ASSERT(0);
+		return FALSE;
 	}
 	
-	return FALSE;
+	if (hIcon)
+	{
+		ImageMap(bNormal)[nCmdID] = hIcon;
+	}
+	else
+	{
+		::DestroyIcon(LoadItemIcon(nCmdID, bNormal));
+		ImageMap(bNormal).RemoveKey(nCmdID);
+	}
+
+	return TRUE;
 }
 
 LRESULT CMenuIconMgr::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM lp)
@@ -427,15 +496,18 @@ void CMenuIconMgr::OnInitMenuPopup(CMenu* pMenu)
 		
 		if (!(minfo.fType & MFT_OWNERDRAW))
 		{
-			HANDLE hImage = LoadItemImage(minfo.wID, TRUE);
-			minfo.fMask = MIIM_BITMAP | MIIM_DATA;
-			
-			if (hImage && !m_bVistaPlus)
-				minfo.hbmpItem = HBMMENU_CALLBACK;
-			else
-				minfo.hbmpItem = (HBITMAP)hImage;
-			
-			::SetMenuItemInfo(pMenu->GetSafeHmenu(), pos, TRUE, &minfo);
+			HANDLE hImage = LoadItemImage(minfo.wID);
+
+			if (hImage)
+			{
+				if (m_bVistaPlus)
+					minfo.hbmpItem = (HBITMAP)hImage;
+				else
+					minfo.hbmpItem = HBMMENU_CALLBACK;
+
+				minfo.fMask = MIIM_BITMAP;
+				::SetMenuItemInfo(pMenu->GetSafeHmenu(), pos, TRUE, &minfo);
+			}
 		}
     }
 }
@@ -454,11 +526,7 @@ BOOL CMenuIconMgr::OnDrawItem(int /*nIDCtl*/, LPDRAWITEMSTRUCT lpdis)
 	
     if (hIcon)
     {
-        CSize sIcon = GraphicsMisc::GetIconSize(hIcon);
-		
-        ::DrawIconEx(lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top, hIcon, 
-					sIcon.cx, sIcon.cy, 0, NULL, DI_IMAGE | DI_MASK);
-	
+        ::DrawIconEx(lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top, hIcon, 0, 0, 0, NULL, DI_NORMAL);
 		return TRUE;
     }
 	
