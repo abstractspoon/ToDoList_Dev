@@ -284,7 +284,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\CommandHandling\CommandHandling.csproj">
+    <ProjectReference Include="..\CommandHandling\CommandHandling.csproj">
       <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
       <Name>CommandHandling</Name>
     </ProjectReference>

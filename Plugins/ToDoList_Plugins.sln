@@ -166,7 +166,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RichEditExtensions", "3rdPa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolStripEx", "3rdParty\ToolStripEx\ToolStripEx.csproj", "{8193B99D-4913-4574-BA3C-A7EF4E2B8627}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandHandling", "CommandHandling\CommandHandling.csproj", "{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandHandling", "3rdParty\CommandHandling\CommandHandling.csproj", "{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

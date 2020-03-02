@@ -107,6 +107,10 @@
     <EmbeddedResource Include="Resources\ToolbarFileSave.bmp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\CommandHandling\CommandHandling.csproj">
+      <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
+      <Name>CommandHandling</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
       <Name>ToolStripEx</Name>
@@ -114,10 +118,6 @@
     <ProjectReference Include="..\..\..\3rdParty\WebBrowserEx\WebBrowserEx.csproj">
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
       <Name>WebBrowserEx</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\..\CommandHandling\CommandHandling.csproj">
-      <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
-      <Name>CommandHandling</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
