@@ -130,10 +130,10 @@ int CMenuIconMgr::AddImages(const CToolBar& toolbar)
 		
 		if (nCmdID != ID_SEPARATOR)
 		{
-			m_mapID2Icon[nCmdID] = pIL->ExtractIcon(nImage);
+			VERIFY(SetImage(nCmdID, pIL->ExtractIcon(nImage), TRUE));
 
 			if (pILDis)
-				m_mapID2DisabledIcon[nCmdID] = pILDis->ExtractIcon(nImage);
+				VERIFY(SetImage(nCmdID, pILDis->ExtractIcon(nImage), FALSE));
 
 			nImage++;
 		}
@@ -149,24 +149,28 @@ int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, const CImageList& il, con
 		ASSERT(0);
 		return 0;
 	}
-	
-	if (!m_bVistaPlus)
+
+	if (pILDisabled)
 	{
-		if (pILDisabled && pILDisabled->GetImageCount() && aCmdIDs.GetSize() != pILDisabled->GetImageCount())
+		if (m_bVistaPlus || !pILDisabled->GetImageCount())
+		{
+			pILDisabled = NULL;
+		}
+		else if (aCmdIDs.GetSize() != pILDisabled->GetImageCount())
 		{
 			ASSERT(0);
 			return 0;
 		}
 	}
-
+	
 	int nBtnCount = aCmdIDs.GetSize();
 
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
-		SetImage(aCmdIDs[nBtn], ImageList_GetIcon(il, nBtn, ILD_TRANSPARENT), TRUE);
+		VERIFY(SetImage(aCmdIDs[nBtn], ImageList_GetIcon(il, nBtn, ILD_TRANSPARENT), TRUE));
 
-		if (!m_bVistaPlus && pILDisabled && pILDisabled->GetImageCount())
-			SetImage(aCmdIDs[nBtn], ImageList_GetIcon(*pILDisabled, nBtn, ILD_TRANSPARENT), FALSE);
+		if (pILDisabled)
+			VERIFY(SetImage(aCmdIDs[nBtn], ImageList_GetIcon(*pILDisabled, nBtn, ILD_TRANSPARENT), FALSE));
 	}
 	   
 	return nBtnCount;
@@ -388,11 +392,16 @@ BOOL CMenuIconMgr::AddImage(UINT nCmdID, UINT nCmdIDToCopy)
 	}
 
 	// Copy normal icon
-	ImageMap(TRUE)[nCmdID] = hIcon;
+	VERIFY(SetImage(nCmdID, ::CopyIcon(hIcon), TRUE));
 
 	// Copy disabled icon
 	if (!m_bVistaPlus)
-		ImageMap(FALSE)[nCmdID] = LoadItemIcon(nCmdIDToCopy, FALSE);
+	{
+		hIcon = LoadItemIcon(nCmdIDToCopy, FALSE);
+		ASSERT(hIcon);
+
+		VERIFY(SetImage(nCmdID, ::CopyIcon(hIcon), FALSE));
+	}
 
 	return TRUE;
 }
@@ -434,15 +443,14 @@ BOOL CMenuIconMgr::SetImage(UINT nCmdID, HICON hIcon, BOOL bNormal)
 		return FALSE;
 	}
 	
+	// Always cleanup existing icon
+	::DestroyIcon(LoadItemIcon(nCmdID, bNormal));
+
+	// Set or clear new icon
 	if (hIcon)
-	{
 		ImageMap(bNormal)[nCmdID] = hIcon;
-	}
 	else
-	{
-		::DestroyIcon(LoadItemIcon(nCmdID, bNormal));
 		ImageMap(bNormal).RemoveKey(nCmdID);
-	}
 
 	return TRUE;
 }
