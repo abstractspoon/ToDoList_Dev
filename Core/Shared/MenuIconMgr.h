@@ -34,7 +34,11 @@ public:
 	int AddImages(const CUIntArray& aCmdIDs, const CImageList& il, const CImageList* pILDisabled = NULL);
 	int AddImages(const CUIntArray& aCmdIDs, UINT nIDBitmap, COLORREF crMask);
 	int AddImages(const CUIntArray& aCmdIDs, const CString& sImagePath, COLORREF crMask = CLR_NONE);
-	
+
+	void RemoveImage(UINT nCmdID);
+	void RemoveImages(const CToolBar& toolbar);
+	void RemoveImages(const CUIntArray& aCmdIDs);
+		
 	BOOL HasImageID(UINT nCmdID) const;
 	BOOL ChangeImageID(UINT nCmdID, UINT nNewCmdID);
 	

@@ -126,16 +126,19 @@ int CMenuIconMgr::AddImages(const CToolBar& toolbar)
 	
 	for (int nBtn = 0; nBtn < nBtnCount; nBtn++)
 	{
-		UINT nCmdID = toolbar.GetItemID(nBtn);
-		
+		UINT nCmdID = 0, nStyle = 0;
+		int iImage = -1;
+
+		toolbar.GetButtonInfo(nBtn, nCmdID, nStyle, iImage);
+
 		if (nCmdID != ID_SEPARATOR)
 		{
-			VERIFY(SetImage(nCmdID, pIL->ExtractIcon(nImage), TRUE));
+			ASSERT(iImage != -1);
+
+			VERIFY(SetImage(nCmdID, pIL->ExtractIcon(iImage), TRUE));
 
 			if (pILDis)
-				VERIFY(SetImage(nCmdID, pILDis->ExtractIcon(nImage), FALSE));
-
-			nImage++;
+				VERIFY(SetImage(nCmdID, pILDis->ExtractIcon(iImage), FALSE));
 		}
 	}
 	
@@ -563,4 +566,35 @@ BOOL CMenuIconMgr::OnMeasureItem(int /*nIDCtl*/, LPMEASUREITEMSTRUCT lpmis)
     }
 	
 	return FALSE;
+}
+
+void CMenuIconMgr::RemoveImage(UINT nCmdID)
+{
+	if (nCmdID != 0)
+	{
+		::DestroyIcon(LoadItemIcon(nCmdID, TRUE));
+		ImageMap(TRUE).RemoveKey(nCmdID);
+
+		if (!m_bVistaPlus)
+		{
+			::DestroyIcon(LoadItemIcon(nCmdID, FALSE));
+			ImageMap(FALSE).RemoveKey(nCmdID);
+		}
+	}
+}
+
+void CMenuIconMgr::RemoveImages(const CToolBar& toolbar)
+{
+	int nBtn = toolbar.GetToolBarCtrl().GetButtonCount();
+
+	while (nBtn--)
+		RemoveImage(toolbar.GetItemID(nBtn));
+}
+
+void CMenuIconMgr::RemoveImages(const CUIntArray& aCmdIDs)
+{
+	int nCmd = aCmdIDs.GetSize();
+
+	while (nCmd--)
+		RemoveImage(aCmdIDs[nCmd]);
 }

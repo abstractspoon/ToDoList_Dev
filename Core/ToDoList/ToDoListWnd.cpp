@@ -1102,6 +1102,9 @@ void CToDoListWnd::PopulateMenuIconManager()
 	// Tray icon
 	m_mgrMenuIcons.AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID());
 	m_mgrMenuIcons.AddImage(ID_TRAYICON_CLOSE, ID_EXIT);
+
+	// Custom toolbar
+	m_mgrMenuIcons.AddImages(m_toolbarCustom);
 }
 
 void CToDoListWnd::OnShowKeyboardshortcuts() 
@@ -5097,8 +5100,14 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 
 		if (bCustomToolbarChange)
 		{
+			if (m_mgrMenuIcons.HasImages())
+				m_mgrMenuIcons.RemoveImages(m_toolbarCustom);
+
 			m_toolbarCustom.DestroyWindow();
 			InitCustomToolbar();
+
+			if (m_mgrMenuIcons.HasImages())
+				m_mgrMenuIcons.AddImages(m_toolbarCustom);
 		}
 		
 		if (bResizeDlg)
