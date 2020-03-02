@@ -34,7 +34,7 @@ struct TOOLBARBUTTON
 
 	BOOL IsSeparator() const
 	{
-		return (nMenuID == 0);
+		return (nMenuID == ID_SEPARATOR);
 	}
 	
 	UINT nMenuID;

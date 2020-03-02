@@ -216,6 +216,10 @@ void CTDLToolbarButtonListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 {
 	if ((nCol == IMAGE_COL) && !IsPrompt(nRow))
 	{
+		// Don't draw images for separators
+		if (GetItemData(nRow) == ID_SEPARATOR)
+			return;
+
 		int nImage = m_ilImages.GetImageIndex(sText);
 				
 		if (nImage != -1)
@@ -227,19 +231,18 @@ void CTDLToolbarButtonListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 
 			m_ilImages.Draw(pDC, nImage, rImage.TopLeft(), ILD_TRANSPARENT);
 		}
-			
-		return;
 	}
-	
-	// all else
-	CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+	else
+	{
+		CInputListCtrl::DrawCellText(pDC, nRow, nCol, rText, sText, crText, nDrawTextFlags);
+	}
 }
 
 BOOL CTDLToolbarButtonListCtrl::CanEditCell(int nRow, int nCol) const
 {
 	if ((nCol == IMAGE_COL) && !IsPrompt(nRow))
 	{
-		return (GetItemData(nRow) != 0);
+		return (GetItemData(nRow) != ID_SEPARATOR);
 	}
 
 	return CInputListCtrl::CanEditCell(nRow, nCol);
