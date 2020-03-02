@@ -16,8 +16,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage dialog
 
-#define PSP_SHORTCUTCOLUMNID (OTC_POSCOLUMNID - 1)
-
 class CPreferencesShortcutsPage : public CPreferencesPageBase 
 {
 // Construction
@@ -79,7 +77,6 @@ protected:
 	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos);
 	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
 	void AddMiscShortcuts();
-	void AddCommandIDsToTree(HTREEITEM hti, BOOL bAdd);
 	BOOL CopyItem(HTREEITEM hti, CString& sOutput);
 
 	static BOOL IsMiscCommandID(UINT nCmdID);

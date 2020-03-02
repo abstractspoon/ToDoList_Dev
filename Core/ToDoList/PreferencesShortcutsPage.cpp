@@ -24,6 +24,11 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+#define PSP_SHORTCUTCOLUMNID	(OTC_POSCOLUMNID - 1)
+#define PSP_COMMANDIDCOLUMNID	(OTC_POSCOLUMNID - 2)
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage property page
 
 CPreferencesShortcutsPage::CPreferencesShortcutsPage(CShortcutManager* pMgr) 
@@ -37,10 +42,12 @@ CPreferencesShortcutsPage::CPreferencesShortcutsPage(CShortcutManager* pMgr)
 	//}}AFX_DATA_INIT
 
 	m_tcCommands.AddGutterColumn(PSP_SHORTCUTCOLUMNID, CEnString(IDS_PSP_SHORTCUT));
+	m_tcCommands.AddGutterColumn(PSP_COMMANDIDCOLUMNID, _T("ID"), 0, DT_RIGHT);
 	m_tcCommands.SetGutterColumnHeaderTitle(NCG_CLIENTCOLUMNID, CEnString(IDS_PSP_MENUITEM));
 	m_tcCommands.ShowGutterPosColumn(FALSE);
 	m_tcCommands.SetGridlineColor(OTC_GRIDCOLOR);
 	m_tcCommands.EnableGutterColumnHeaderClicking(PSP_SHORTCUTCOLUMNID, FALSE);
+	m_tcCommands.EnableGutterColumnHeaderClicking(PSP_COMMANDIDCOLUMNID, FALSE);
 	m_tcCommands.EnableGutterColumnHeaderClicking(NCG_CLIENTCOLUMNID, FALSE);
 	
 }
@@ -121,7 +128,8 @@ void CPreferencesShortcutsPage::OnFirstShow()
 		m_tcCommands.SetRedraw(TRUE);
 
 		if (m_bShowCommandIDs)
-			AddCommandIDsToTree(TVI_ROOT, TRUE);
+			m_tcCommands.RecalcGutterColumn(PSP_COMMANDIDCOLUMNID);
+			//AddCommandIDsToTree(TVI_ROOT, TRUE);
 
 		// add miscellaneous un-editable shortcuts
 		AddMiscShortcuts();
@@ -428,7 +436,7 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 {
 	NCGDRAWITEM* pNCGDI = (NCGDRAWITEM*)lParam;
 
-	if (pNCGDI->nColID == PSP_SHORTCUTCOLUMNID)
+	if (pNCGDI->nColID != OTC_POSCOLUMNID)
 	{
 		CRect rItem(pNCGDI->rItem);
 		HTREEITEM hti = (HTREEITEM)pNCGDI->dwItem;
@@ -440,7 +448,12 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		if (bThemedSel)
 		{
 			BOOL bFocused = (GetFocus() == &m_tcCommands);
-			GraphicsMisc::DrawExplorerItemBkgnd(pNCGDI->pDC, m_tcCommands, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), rItem, GMIB_CLIPRIGHT, &rItem);
+			DWORD dwFlags = GMIB_CLIPRIGHT;
+
+			if (pNCGDI->nColID == PSP_COMMANDIDCOLUMNID)
+				dwFlags |= GMIB_CLIPLEFT;
+
+			GraphicsMisc::DrawExplorerItemBkgnd(pNCGDI->pDC, m_tcCommands, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), rItem, dwFlags, &rItem);
 		}
 		else if (bParentItem)
 		{
@@ -452,31 +465,49 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		if (!bParentItem)
 		{
 			UINT nCmdID = m_tcCommands.GetItemData(hti);
-			DWORD dwShortcut = 0;
-		
-			m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
+			pNCGDI->pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-			if (dwShortcut)
+			switch (pNCGDI->nColID)
 			{
-				rItem.left += 3;
+			case PSP_SHORTCUTCOLUMNID:
+				{
+					DWORD dwShortcut = 0;
 
-				// test for reserved shortcut and mark in red
-				if (CToDoCtrl::IsReservedShortcut(dwShortcut) && !IsMiscCommandID(nCmdID))
-					pNCGDI->pDC->SetTextColor(255);
+					m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
 
-				CString sText = m_pShortcutMgr->GetShortcutText(dwShortcut);
+					if (dwShortcut)
+					{
+						CString sText = m_pShortcutMgr->GetShortcutText(dwShortcut);
 
-				if (!sText.IsEmpty())
-					pNCGDI->pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
+						// test for reserved shortcut and mark in red
+						if (!sText.IsEmpty())
+						{
+							if (CToDoCtrl::IsReservedShortcut(dwShortcut) && !IsMiscCommandID(nCmdID))
+								pNCGDI->pDC->SetTextColor(255);
 
-				rItem.left -= 3;
+							rItem.left += 3;
+							pNCGDI->pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_LEFT | DT_NOPREFIX));
+							rItem.left -= 3;
+						}
+					}
+				}
+				break;
+
+			case PSP_COMMANDIDCOLUMNID:
+				if (nCmdID != 0)
+				{
+					CString sText = Misc::Format((DWORD)nCmdID);
+
+					rItem.right -= 3;
+					pNCGDI->pDC->DrawText(sText, rItem, (DT_SINGLELINE | DT_VCENTER | DT_RIGHT | DT_NOPREFIX));
+					rItem.right += 3;
+				}
+				break;
 			}
 			
 			// vertical divider
-			if (bThemedSel)
-				rItem.DeflateRect(0, 1);
-
-			pNCGDI->pDC->FillSolidRect(rItem.right - 1, rItem.top, 1, rItem.Height(), m_tcCommands.GetGridlineColor());
+			if (!bThemedSel)
+				pNCGDI->pDC->FillSolidRect(rItem.right - 1, rItem.top, 1, rItem.Height(), m_tcCommands.GetGridlineColor());
 		}
 
 		// horz divider
@@ -504,25 +535,36 @@ LRESULT CPreferencesShortcutsPage::OnGutterRecalcColWidth(WPARAM /*wParam*/, LPA
 	{
 		NCGRECALCCOLUMN* pNCRC = (NCGRECALCCOLUMN*)lParam;
 
-		if (pNCRC->nColID == PSP_SHORTCUTCOLUMNID)
+		switch (pNCRC->nColID)
 		{
-			int nLongest = 0;
-			HTREEITEM hti = m_tcCommands.GetNextItem(TVI_ROOT, TVGN_CHILD);
-
-			while (hti)
+		case PSP_SHORTCUTCOLUMNID:
 			{
-				int nWidth = GetLongestShortcutText(hti, pNCRC->pDC);
-				nLongest = max(nLongest, nWidth);
+				int nLongest = 0;
+				HTREEITEM hti = m_tcCommands.GetNextItem(TVI_ROOT, TVGN_CHILD);
 
-				hti = m_tcCommands.GetNextItem(hti, TVGN_NEXT);
+				while (hti)
+				{
+					int nWidth = GetLongestShortcutText(hti, pNCRC->pDC);
+					nLongest = max(nLongest, nWidth);
+
+					hti = m_tcCommands.GetNextItem(hti, TVGN_NEXT);
+				}
+
+				if (nLongest)
+					nLongest += 6; // some padding
+
+				pNCRC->nWidth = max(40, nLongest);
+				return TRUE; // we handled it
 			}
+			break;
 
-			if (nLongest)
-				nLongest += 6; // some padding
-
-			pNCRC->nWidth = max(40, nLongest);
-
-			return TRUE; // we handled it
+		case PSP_COMMANDIDCOLUMNID:
+			if (m_bShowCommandIDs)
+			{
+				pNCRC->nWidth = pNCRC->pDC->GetTextExtent(_T("00000")).cx;
+				return TRUE; // we handled it
+			}
+			break;
 		}
 	}
 
@@ -692,44 +734,7 @@ void CPreferencesShortcutsPage::OnShowCmdIDs()
 	GetDlgItem(IDC_COPYALL)->ShowWindow(m_bShowCommandIDs ? SW_SHOW : SW_HIDE);
 	GetDlgItem(IDC_COPYALL)->EnableWindow(m_bShowCommandIDs);
 
-	AddCommandIDsToTree(TVI_ROOT, m_bShowCommandIDs);
-}
-
-void CPreferencesShortcutsPage::AddCommandIDsToTree(HTREEITEM hti, BOOL bAdd)
-{
-	if (!hti)
-		return;
-
-	if (hti != TVI_ROOT)
-	{
-		CString sItem = m_tcCommands.GetItemText(hti);
-		UINT nCmdID = m_tcCommands.GetItemData(hti);
-
-		if (nCmdID && !IsMiscCommandID(nCmdID))
-		{
-			CString sCmdID;
-			sCmdID.Format(_T(" (%u)"), nCmdID);
-
-			if (bAdd)
-			{
-				m_tcCommands.SetItemText(hti, sItem + sCmdID);
-			}
-			else
-			{
-				// strip off command ID
-				int nFind = sItem.Find(sCmdID);
-				ASSERT(nFind != -1);
-
-				m_tcCommands.SetItemText(hti, sItem.Left(nFind));
-			}
-		}
-
-		// siblings
-		AddCommandIDsToTree(m_tcCommands.GetNextItem(hti, TVGN_NEXT), bAdd);
-	}
-
-	// children
-	AddCommandIDsToTree(m_tcCommands.GetChildItem(hti), bAdd);
+	m_tcCommands.RecalcGutter();
 }
 
 void CPreferencesShortcutsPage::OnCopyall() 
@@ -753,7 +758,9 @@ BOOL CPreferencesShortcutsPage::CopyItem(HTREEITEM hti, CString& sOutput)
 		if (!m_tcCommands.ItemHasChildren(hti))
 		{
 			// ignore Reserved menu commands
-			if (IsMiscCommandID(m_tcCommands.GetItemData(hti)))
+			DWORD dwCmdID = m_tcCommands.GetItemData(hti);
+			
+			if (IsMiscCommandID(dwCmdID))
 				return FALSE;
 
 			CString sItem = m_tcCommands.GetItemText(hti);
@@ -776,6 +783,8 @@ BOOL CPreferencesShortcutsPage::CopyItem(HTREEITEM hti, CString& sOutput)
 					htiParent = m_tcCommands.GetParentItem(htiParent);
 				}
 
+				sOutput += Misc::Format(dwCmdID);
+				sOutput += _T(" : ");
 				sOutput += sItem;
 				sOutput += _T("\r\n");
 			}
