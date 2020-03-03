@@ -9,6 +9,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\autoflag.h"
+#include "..\shared\Wndprompt.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -140,4 +141,16 @@ FILTER_DATE CTDLFilterDateComboBox::GetSelectedFilter() const
 BOOL CTDLFilterDateComboBox::SelectFilter(FILTER_DATE nFilter)
 {
 	return (CB_ERR != CDialogHelper::SelectItemByData(*this, (DWORD)nFilter));
+}
+
+void CTDLFilterDateComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+	DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
+{
+	if (!(nItemState & ODS_SELECTED) && !bList && (dwItemData == FD_ANY))
+	{
+		// Display <any> in window prompt colour if nothing is checked
+		crText = CWndPrompt::GetTextColor(*this);
+	}
+	
+	CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 }

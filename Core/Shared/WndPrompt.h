@@ -19,9 +19,12 @@ public:
 	virtual ~CWndPrompt();
 
 	BOOL Initialize(HWND hWnd, LPCTSTR szPrompt, UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
+	
 	void SetPrompt(LPCTSTR szPrompt, BOOL bCentred = -1);
+	CString GetPrompt() const { return m_sPrompt; }
 
 	static void DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc = NULL, BOOL bCentred = FALSE, LPCTSTR szClass = NULL);
+	static COLORREF GetTextColor(HWND hWnd);
 
 protected:
 	CString m_sPrompt;
@@ -35,8 +38,6 @@ protected:
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
 	BOOL WantPrompt(BOOL bCheckFocus = TRUE);
 	void DrawPrompt(HDC hdc);
-
-	static COLORREF GetTextColor(HWND hWnd);
 };
 
 class CWndPromptManager
@@ -54,6 +55,9 @@ public:
 					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
 	BOOL SetPrompt(HWND hWnd, UINT nIDPrompt, 
 					UINT nCheckMsg, LRESULT lCheckRes = 0, BOOL bCentred = FALSE, BOOL bIncReadonlyEdit = FALSE);
+
+	CString GetPrompt(UINT nIDCtrl, HWND hwndParent) const;
+	CString GetPrompt(HWND hWnd) const;
 
 	// special cases
 	BOOL SetEditPrompt(UINT nIDEdit, HWND hwndParent, LPCTSTR szPrompt, BOOL bIncReadonly = FALSE);

@@ -5,6 +5,7 @@
 #include "TDLReminderPeriodComboBox.h"
 
 #include "..\shared\DialogHelper.h"
+#include "..\shared\Wndprompt.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -63,7 +64,7 @@ const UINT NUM_DATA = (sizeof(data) / sizeof(LEADINDATA));
 
 /////////////////////////////////////////////////////////////////////////////
 
-IMPLEMENT_DYNAMIC(CTDLReminderPeriodComboBox, CComboBox)
+IMPLEMENT_DYNAMIC(CTDLReminderPeriodComboBox, COwnerdrawComboBoxBase)
 
 CTDLReminderPeriodComboBox::CTDLReminderPeriodComboBox(DWORD dwShow)
 	:
@@ -77,7 +78,7 @@ CTDLReminderPeriodComboBox::~CTDLReminderPeriodComboBox()
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLReminderPeriodComboBox, CComboBox)
+BEGIN_MESSAGE_MAP(CTDLReminderPeriodComboBox, COwnerdrawComboBoxBase)
 	ON_WM_CREATE()
 END_MESSAGE_MAP()
 
@@ -85,11 +86,10 @@ END_MESSAGE_MAP()
 
 void CTDLReminderPeriodComboBox::PreSubclassWindow()
 {
-	CComboBox::PreSubclassWindow();
+	COwnerdrawComboBoxBase::PreSubclassWindow();
 
-	// Remove CBS_SORT before populating
+	// Remove CBS_SORT
 	ModifyStyle(CBS_SORT, 0, 0);
-
 	BuildCombo();
 }
 
@@ -98,7 +98,7 @@ int CTDLReminderPeriodComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// Remove CBS_SORT
 	lpCreateStruct->style &= ~CBS_SORT;
 
-	if (CComboBox::OnCreate(lpCreateStruct) == -1)
+	if (COwnerdrawComboBoxBase::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
 	// else
@@ -165,4 +165,17 @@ void CTDLReminderPeriodComboBox::DDX(CDataExchange* pDX, int& nMinutes)
 		nMinutes = GetSelectedPeriod();
 	else
 		SetSelectedPeriod(nMinutes);
+}
+
+void CTDLReminderPeriodComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+	DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
+{
+	// Draw <none> in window prompt color
+	if ((dwItemData == TDLRPC_NOREMINDER) && !(nItemState & ODS_SELECTED) && !bList)
+	{
+		crText = CWndPrompt::GetTextColor(*this);
+	}
+
+	// all else
+	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 }

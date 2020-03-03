@@ -76,15 +76,15 @@ protected:
 	CString GetItemText(int nItem, const CString& sHint = _T("")) const;
 	BOOL HasIcon() const { return m_bMultiSel; }
 
-	BOOL HasItemNone() const { return (GetNoneIndex() != CB_ERR); }
-	int GetNoneIndex() const;
-	BOOL IsNoneIndex(int nItem) const;
-	BOOL IsNoneChecked() const;
+	BOOL HasItemNone() const { return (GetItemNoneIndex() != CB_ERR); }
+	int GetItemNoneIndex() const;
+	BOOL IsItemNoneIndex(int nItem) const;
+	BOOL IsItemNoneChecked() const;
 
-	BOOL HasItemAny() const { return (GetAnyIndex() != CB_ERR); }
-	int GetAnyIndex() const;
-	BOOL IsAnyIndex(int nItem) const;
-	BOOL IsAnyChecked() const;
+	BOOL HasItemAny() const { return (GetItemAnyIndex() != CB_ERR); }
+	int GetItemAnyIndex() const;
+	BOOL IsItemAnyIndex(int nItem) const;
+	BOOL IsItemAnyChecked() const;
 
 #ifdef _DEBUG
 	void TraceCheckStates() const;

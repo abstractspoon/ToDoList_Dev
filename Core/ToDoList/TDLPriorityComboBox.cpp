@@ -8,6 +8,7 @@
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\EnString.h"
+#include "..\shared\Wndprompt.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -187,6 +188,12 @@ void CTDLPriorityComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, U
 	if (nItem == -1)
 		return;
 
+	// Draw <any> or <none> in window prompt color
+	if (!(nItemState & ODS_SELECTED) && !bList && (nItem == 0))
+	{
+		crText = CWndPrompt::GetTextColor(*this);
+	}
+	
 	// Don't indent 'non-color' items
 	if ((dwItemData == CLR_NONE) && !Misc::HasFlag(m_dwFlags, CCBS_DRAWNOCOLOR))
 	{

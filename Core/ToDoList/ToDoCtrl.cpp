@@ -644,17 +644,20 @@ void CToDoCtrl::LoadTaskIcons()
 
 void CToDoCtrl::InitEditPrompts()
 {
+	// Specific
 	m_mgrPrompts.SetEditPrompt(IDC_PROJECTNAME, *this, IDS_TDC_EDITPROMPT_PROJECT);
-	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_EDITPROMPT_EXTID);
-	m_mgrPrompts.SetEditPrompt(m_eDependency, IDS_TDC_EDITPROMPT_DEPENDS); 
-
 	m_mgrPrompts.SetComboPrompt(m_cbFileRef, IDS_TDC_EDITPROMPT_FILEREF);
-	m_mgrPrompts.SetComboPrompt(m_cbAllocBy, IDS_TDC_EDITPROMPT_NAME);
-	m_mgrPrompts.SetComboPrompt(m_cbAllocTo, IDS_TDC_EDITPROMPT_NAME);
-	m_mgrPrompts.SetComboPrompt(m_cbCategory, IDS_TDC_EDITPROMPT_CATEGORY);
-	m_mgrPrompts.SetComboPrompt(m_cbTags, IDS_TDC_EDITPROMPT_TAGS);
-	m_mgrPrompts.SetComboPrompt(m_cbStatus, IDS_TDC_EDITPROMPT_STATUS);
-	m_mgrPrompts.SetComboPrompt(m_cbVersion, IDS_TDC_EDITPROMPT_VER);
+
+	// Generic
+	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_NONE);
+	m_mgrPrompts.SetEditPrompt(m_eDependency, IDS_TDC_NONE);
+
+	m_mgrPrompts.SetComboPrompt(m_cbAllocBy, IDS_TDC_NOBODY);
+	m_mgrPrompts.SetComboPrompt(m_cbAllocTo, IDS_TDC_NOBODY);
+	m_mgrPrompts.SetComboPrompt(m_cbCategory, IDS_TDC_NONE);
+	m_mgrPrompts.SetComboPrompt(m_cbTags, IDS_TDC_NONE);
+	m_mgrPrompts.SetComboPrompt(m_cbStatus, IDS_TDC_NONE);
+	m_mgrPrompts.SetComboPrompt(m_cbVersion, IDS_TDC_NONE);
 	
 	m_mgrPrompts.SetComboPrompt(m_cbTimeDue.GetSafeHwnd(), CTimeHelper::FormatClockTime(23, 59));
 	m_mgrPrompts.SetComboPrompt(m_cbTimeStart.GetSafeHwnd(), CTimeHelper::FormatClockTime(0, 0));
@@ -2523,14 +2526,17 @@ BOOL CToDoCtrl::SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const
 {
 	BOOL bWasReadOnly = !CDialogHelper::ComboHasEdit(combo);
 
-	CStringArray aContent;
-	CDialogHelper::GetComboBoxItems(combo, aContent);
-
-	if (!CDialogHelper::SetAutoComboReadOnly(combo, TRUE, bReadOnly, COMBODROPHEIGHT))
-		return FALSE;
-
 	if ((bReadOnly && !bWasReadOnly) || (!bReadOnly && bWasReadOnly))
 	{
+		// cache the current state
+		CString sWndPrompt = m_mgrPrompts.GetPrompt(combo);
+
+		CStringArray aContent;
+		CDialogHelper::GetComboBoxItems(combo, aContent);
+
+		if (!CDialogHelper::SetAutoComboReadOnly(combo, TRUE, bReadOnly, COMBODROPHEIGHT))
+			return FALSE;
+
 		CHoldRedraw hr(combo);
 
 		// if switching TO readonly restore to default items
@@ -2545,7 +2551,7 @@ BOOL CToDoCtrl::SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const
 		if (bAddEmpty)
 			combo.AddEmptyString();
 
-		m_mgrPrompts.SetComboPrompt(combo, IDS_TDC_EDITPROMPT_NAME);
+		m_mgrPrompts.SetComboPrompt(combo, sWndPrompt);
 
 		// restore selected task items
 		UpdateData(FALSE);

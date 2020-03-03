@@ -1,5 +1,6 @@
 #pragma once
 
+#include "..\Shared\ownerdrawcomboboxbase.h"
 
 // CTDLReminderleadinComboBox
 
@@ -11,7 +12,7 @@ enum
 
 const UINT TDLRPC_NOREMINDER = (UINT)-1; // for SetSelectedLeadin
 
-class CTDLReminderPeriodComboBox : public CComboBox
+class CTDLReminderPeriodComboBox : public COwnerdrawComboBoxBase
 {
 	DECLARE_DYNAMIC(CTDLReminderPeriodComboBox)
 
@@ -37,6 +38,9 @@ protected:
 protected:
 	void BuildCombo();
 	void ValidateLeadin(UINT& nMinutes);
+
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+		DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };
 
 

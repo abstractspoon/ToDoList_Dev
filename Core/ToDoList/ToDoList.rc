@@ -460,7 +460,8 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,103,275,288,10
     LTEXT           "&Reminder",IDC_STATIC,7,293,87,8
     COMBOBOX        IDC_DEFREMINDER,103,290,122,30,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
     COMBOBOX        IDC_DEFREMINDERDATE,231,290,122,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Comments",IDC_STATIC,7,310,94,10
@@ -4487,11 +4488,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDC_EDITPROMPT_VER  "Specify a Version"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     ID_NEWTASK_BEFORESELECTEDTASK "\tNew Task"
     ID_NEWSUBTASK_ATTOP     "\nNew Subtask"
     ID_EDIT_TASKTEXT        "\nEdit Task Title"
@@ -4553,9 +4549,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_PSP_CURRENTLYASSIGNED "Currently assigned to:\n\n'%s'"
     IDS_PTDP_COLOR          "Colour"
-    IDS_PTDP_NAMEPROMPT     "Type a name"
-    IDS_PTDP_STATUSPROMPT   "Type a status"
-    IDS_PTDP_CATEGORYPROMPT "Type a category"
     IDS_FTD_RESULTS         "&Results"
     IDS_FTD_SOMERESULTS     "&Results (%d found):"
 END
@@ -4811,22 +4804,14 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDC_EDITPROMPT_NAME "Select a name"
-    IDS_TDC_EDITPROMPT_COMMENTS "Type some comments"
-    IDS_TDC_EDITPROMPT_STATUS "Select a status"
-    IDS_TDC_EDITPROMPT_CATEGORY "Select a category"
     IDS_TDC_EDITPROMPT_FILEREF 
                             "Can be a file, folder, website, email, or task link"
     IDS_TDC_EDITPROMPT_PROJECT "Type a descriptive name for your tasklist"
-    IDS_TDC_EDITPROMPT_EXTID "Type an ID"
     IDS_TDC_TASKLISTPROMPT  "This tasklist contains no tasks"
     IDS_TDC_FILTEREDTASKLISTPROMPT 
                             "There are no tasks matching the selected filter"
-    IDS_TDC_EDITPROMPT_CUSTOMEDIT "Type a value"
-    IDS_TDC_EDITPROMPT_CUSTOMCOMBO "Select a value"
     IDS_TDC_FIELD_COST      "C&ost"
     IDS_TDC_COLUMN_COST     "Cost"
-    IDS_TDC_EDITPROMPT_DEPENDS "Type a task ID"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5271,8 +5256,6 @@ BEGIN
     IDS_FILTER_SHOWALLSUB   "Show all subtasks"
     IDS_TASKLISTATTACHED    "<Tasklist Attached>"
     IDS_FILTER_SELECTED     "Selected Tasks"
-    IDS_TDC_EDITPROMPT_TAGS "Select a tag"
-    IDS_PTDP_TAGSPROMPT     "Type a tag"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5499,7 +5482,6 @@ BEGIN
     IDS_TIMETRACKREMINDER_BALLOONTITLE "Time Tracking Reminder"
     IDS_START_TRACKING      "Start Tracking"
     IDS_STOP_TRACKING       "Stop Tracking"
-    IDS_PTDP_VERSIONPROMPT  "Type a version"
     IDS_REMINDER_TASKCOL    "Task"
     IDS_REMINDER_TASKLISTCOL "Tasklist"
     IDS_REMINDER_WHENCOL    "Notification"

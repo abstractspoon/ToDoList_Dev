@@ -8,6 +8,7 @@
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\EnString.h"
+#include "..\shared\Wndprompt.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -145,4 +146,17 @@ void CTDLRiskComboBox::DDX(CDataExchange* pDX, int& nRisk)
 		nRisk = GetSelectedRisk();
 	else
 		SetSelectedRisk(nRisk);
+}
+
+void CTDLRiskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+	DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
+{
+	// Draw <any> or <none> in window prompt color
+	if (!(nItemState & ODS_SELECTED) && !bList && (nItem == 0))
+	{
+		crText = CWndPrompt::GetTextColor(*this);
+	}
+
+	// all else
+	COwnerdrawComboBoxBase::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
 }

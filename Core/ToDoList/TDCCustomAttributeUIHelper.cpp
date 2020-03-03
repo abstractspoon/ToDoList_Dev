@@ -437,11 +437,11 @@ void CTDCCustomAttributeUIHelper::AddWindowPrompts(const CTDCCustomControlArray&
 		{
 			if (pCtrl->IsKindOf(RUNTIME_CLASS(CEdit)))
 			{
-				mgrPrompts.SetEditPrompt(*pCtrl, IDS_TDC_EDITPROMPT_CUSTOMEDIT);
+				mgrPrompts.SetEditPrompt(*pCtrl, IDS_TDC_NONE);
 			}
 			else if (pCtrl->IsKindOf(RUNTIME_CLASS(CComboBox)))
 			{
-				mgrPrompts.SetComboPrompt(*pCtrl, IDS_TDC_EDITPROMPT_CUSTOMCOMBO);
+				mgrPrompts.SetComboPrompt(*pCtrl, IDS_TDC_NONE);
 			}
 		}
 	}

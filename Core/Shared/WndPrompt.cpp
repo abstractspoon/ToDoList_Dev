@@ -319,6 +319,26 @@ BOOL CWndPromptManager::SetPrompt(UINT nIDCtrl, HWND hwndParent, UINT nIDPrompt,
 	return SetPrompt(nIDCtrl, hwndParent, CEnString(nIDPrompt), nCheckMsg, lCheckRes, bCentred, bIncReadonlyEdit);
 }
 
+CString CWndPromptManager::GetPrompt(UINT nIDCtrl, HWND hwndParent) const
+{
+	return GetPrompt(::GetDlgItem(hwndParent, nIDCtrl));
+}
+
+CString CWndPromptManager::GetPrompt(HWND hWnd) const
+{
+	CWndPrompt* pWnd = NULL;
+
+	if (m_mapWnds.Lookup(hWnd, pWnd) && pWnd)
+		return pWnd->GetPrompt();
+	
+	if (CWinClasses::IsComboBox(hWnd))
+	{
+		// Try embedded edit control
+		return GetPrompt(1001, hWnd); // RECURSIVE CALL
+	}
+
+	return _T("");
+}
 // -------------------------------------------------------------------------------
 
 BOOL CWndPromptManager::SetEditPrompt(UINT nIDEdit, HWND hwndParent, LPCTSTR szPrompt, BOOL bIncReadonly)

@@ -124,12 +124,12 @@ void CPreferencesTaskDef2Page::OnFirstShow()
 	}
 	UpdateCustomAttributeInfoVisibility();
 
-	m_mgrPrompts.SetEditPrompt(IDC_ALLOCTOLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
-	m_mgrPrompts.SetEditPrompt(IDC_ALLOCBYLIST, *this, CEnString(IDS_PTDP_NAMEPROMPT));
-	m_mgrPrompts.SetEditPrompt(IDC_STATUSLIST, *this, CEnString(IDS_PTDP_STATUSPROMPT));
-	m_mgrPrompts.SetEditPrompt(IDC_CATEGORYLIST, *this, CEnString(IDS_PTDP_CATEGORYPROMPT));
- 	m_mgrPrompts.SetEditPrompt(IDC_VERSIONLIST, *this, CEnString(IDS_PTDP_VERSIONPROMPT));
- 	m_mgrPrompts.SetEditPrompt(IDC_TAGLIST, *this, CEnString(IDS_PTDP_TAGSPROMPT));
+	m_mgrPrompts.SetEditPrompt(IDC_ALLOCTOLIST, *this, CEnString(IDS_TDC_NOBODY));
+	m_mgrPrompts.SetEditPrompt(IDC_ALLOCBYLIST, *this, CEnString(IDS_TDC_NOBODY));
+	m_mgrPrompts.SetEditPrompt(IDC_STATUSLIST, *this, CEnString(IDS_TDC_NONE));
+	m_mgrPrompts.SetEditPrompt(IDC_CATEGORYLIST, *this, CEnString(IDS_TDC_NONE));
+ 	m_mgrPrompts.SetEditPrompt(IDC_VERSIONLIST, *this, CEnString(IDS_TDC_NONE));
+ 	m_mgrPrompts.SetEditPrompt(IDC_TAGLIST, *this, CEnString(IDS_TDC_NONE));
 }
 
 void CPreferencesTaskDef2Page::OnOK() 
