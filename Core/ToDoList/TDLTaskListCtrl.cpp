@@ -579,13 +579,19 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 			// don't let the selection to be set to -1
 			// when clicking below the last item
-			if (m_lcTasks.HitTest(lp) == -1)
+			UINT nHitFlags = 0;
+
+			if (m_lcTasks.HitTest(lp, &nHitFlags) == -1)
 				return 0; // eat it
 
-			if ((msg == WM_LBUTTONDBLCLK) && CTreeListSyncer::HasStyle(hRealWnd, LVS_EDITLABELS, FALSE))
+			if (msg == WM_LBUTTONDBLCLK)
 			{
-				NotifyParentOfColumnEditClick(TDCC_CLIENT, GetSelectedTaskID());
-				return 0L; // eat it
+				if (CTreeListSyncer::HasStyle(hRealWnd, LVS_EDITLABELS, FALSE) &&
+					(nHitFlags & (LVHT_ONITEMLABEL | LVHT_TORIGHT)))
+				{
+					NotifyParentOfColumnEditClick(TDCC_CLIENT, GetSelectedTaskID());
+					return 0L; // eat it
+				}
 			}
 		}
 		break;

@@ -824,9 +824,10 @@ BOOL CTDLTaskTreeCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 
 					return TRUE;
 				}
-
-				// else
-				nClickCol = TDCC_CLIENT;
+				else if (nHitFlags & (TVHT_ONITEMLABEL | TVHT_ONITEMRIGHT))
+				{
+					nClickCol = TDCC_CLIENT;
+				}
 			}
 
 			if ((nClickCol != TDCC_NONE) && !SelectionHasLocked(FALSE))
