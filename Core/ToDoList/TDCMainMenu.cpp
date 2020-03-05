@@ -690,7 +690,7 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 		return;
 
 	const UINT MENUSTARTID = ID_TOOLS_USERTOOL1;
-	const int MENUSTARTPOS = CEnMenu::GetMenuItemPos(*pMenu, ID_TOOLS_USERTOOL1);
+	const int MENUSTARTPOS = CEnMenu::FindMenuItem(*pMenu, ID_TOOLS_USERTOOL1);
 
 	// delete existing tool entries and their icons first
 	int nTool = MAX_NUM_TOOLS;
