@@ -5096,7 +5096,8 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		oldPrefs.GetCustomToolbarButtons(aOldButtons);
 		newPrefs.GetCustomToolbarButtons(aNewButtons);
 		
-		BOOL bCustomToolbarChange = !Misc::MatchAllT(aOldButtons, aNewButtons, TRUE);
+		BOOL bCustomToolbarChange = ((oldPrefs.GetDisplayUDTsInToolbar() != newPrefs.GetDisplayUDTsInToolbar()) || 
+									!Misc::MatchAllT(aOldButtons, aNewButtons, TRUE));
 
 		if (bCustomToolbarChange)
 		{
@@ -7143,8 +7144,8 @@ void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI)
 {
 	if (m_bShowingMainToolbar && (pCmdUI->m_pMenu == NULL)) 
 	{
+		ASSERT(CTDCToolsHelper::IsToolCmdID(pCmdUI->m_nID));
 		int nTool = (pCmdUI->m_nID - ID_TOOLS_USERTOOL1);
-		ASSERT (nTool >= 0 && nTool < MAX_NUM_TOOLS);
 
 		USERTOOL tool;
 		pCmdUI->Enable(Prefs().GetUserTool(nTool, tool));
@@ -7153,8 +7154,8 @@ void CToDoListWnd::OnUpdateUserTool(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnUserTool(UINT nCmdID) 
 {
+	ASSERT(CTDCToolsHelper::IsToolCmdID(nCmdID));
 	int nTool = (nCmdID - ID_TOOLS_USERTOOL1);
-	ASSERT (nTool >= 0 && nTool < MAX_NUM_TOOLS);
 
 	const CPreferencesDlg& prefs = Prefs();
 	USERTOOL tool;
@@ -7169,9 +7170,7 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 		}
 
 		CTDCToolsHelper th(prefs.GetEnableTDLExtension(), 
-						   prefs.GetDisplayDatesInISO(),
-						   ID_TOOLS_USERTOOL1, 
-						   MAX_NUM_TOOLS);
+						   prefs.GetDisplayDatesInISO());
 		USERTOOLARGS args;
 		PopulateToolArgs(args);
 
@@ -7451,12 +7450,10 @@ void CToDoListWnd::OnUpdateViewCustomToolbar(CCmdUI* pCmdUI)
 void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 {
 	const CPreferencesDlg& prefs = Prefs();
-
-	CTDCToolsHelper th(FALSE, FALSE, ID_TOOLS_USERTOOL1, MAX_NUM_TOOLS);
+	CTDCToolsHelper th(FALSE, FALSE);
 
 	BOOL bRemoveFromMainToolbar = FALSE, bRemoveFromCustomToolbar = FALSE;
 	BOOL bAddToMainToolbar = FALSE, bAddToCustomToolbar = FALSE;
-	BOOL bWantInToolbar = prefs.GetDisplayUDTsInToolbar();
 
 	switch (nChange)
 	{
@@ -7525,10 +7522,12 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 		break;
 	}
 
-	if (bRemoveFromMainToolbar)
+	BOOL bWantInToolbar = prefs.GetDisplayUDTsInToolbar();
+
+	if (!bWantInToolbar || bRemoveFromMainToolbar)
 		th.RemoveToolsFromToolbar(m_toolbarMain, ID_PREFERENCES);
 
-	if (bRemoveFromCustomToolbar)
+	if (!bWantInToolbar || bRemoveFromCustomToolbar)
 		th.RemoveToolsFromToolbar(m_toolbarCustom, prefs.GetLastCustomToolbarButtonID());
 
 	if (bWantInToolbar && (bAddToMainToolbar || bAddToCustomToolbar))
@@ -7538,7 +7537,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 
 		if (bAddToMainToolbar)
 		{
-			th.AppendToolsToToolbar(aTools, m_toolbarMain, ID_PREFERENCES, FALSE);
+			th.AddToolsToToolbar(aTools, m_toolbarMain, ID_PREFERENCES, TRUE);
 
 			// refresh tooltips
 			m_tbHelperMain.Release();
@@ -7546,7 +7545,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 		}
 		else
 		{
-			th.AppendToolsToToolbar(aTools, m_toolbarCustom, prefs.GetLastCustomToolbarButtonID(), FALSE);
+			th.AddToolsToToolbar(aTools, m_toolbarCustom, prefs.GetLastCustomToolbarButtonID(), TRUE);
 		}
 	}
 
@@ -9268,10 +9267,8 @@ LRESULT CToDoListWnd::OnPreferencesTestTool(WPARAM /*wp*/, LPARAM lp)
 		const CPreferencesDlg& prefs = Prefs();
 		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-		CTDCToolsHelper th(prefs.GetEnableTDLExtension(),
-						   prefs.GetDisplayDatesInISO(),
-						   ID_TOOLS_USERTOOL1,
-						   MAX_NUM_TOOLS);
+		CTDCToolsHelper th(prefs.GetEnableTDLExtension(), prefs.GetDisplayDatesInISO());
+
 		USERTOOLARGS args;
 		PopulateToolArgs(args);
 

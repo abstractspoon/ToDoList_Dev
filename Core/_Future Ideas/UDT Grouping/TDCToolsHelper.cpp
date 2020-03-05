@@ -18,6 +18,7 @@
 #include "..\shared\messagebox.h"
 #include "..\shared\entoolbar.h"
 #include "..\shared\fileicons.h"
+#include "..\shared\enmenu.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -30,6 +31,13 @@
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+//////////////////////////////////////////////////////////////////////
+
+const int MAX_NUM_TOOLS = 50;
+
+const UINT FIRST_TOOLID = ID_TOOLS_USERTOOL1;
+const UINT LAST_TOOLID = (ID_TOOLS_USERTOOL1 + MAX_NUM_TOOLS - 1);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -46,10 +54,8 @@ BOOL USERTOOL::operator==(const USERTOOL& other) const
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCToolsHelper::CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates, UINT nStart, int nSize)
+CTDCToolsHelper::CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates)
 	: 
-	m_nStartID(nStart), 
-	m_nSize(nSize), 
 	m_bTDLEnabled(bTDLEnabled),
 	m_bISODates(bISODates)
 {
@@ -59,6 +65,11 @@ CTDCToolsHelper::CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates, UINT nStart, 
 CTDCToolsHelper::~CTDCToolsHelper()
 {
 	
+}
+
+BOOL CTDCToolsHelper::IsToolCmdID(UINT nCmdID)
+{
+	return ((nCmdID >= FIRST_TOOLID) && (nCmdID <= LAST_TOOLID));
 }
 
 BOOL CTDCToolsHelper::RunTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs)
@@ -322,19 +333,20 @@ CString CTDCToolsHelper::EscapeCharacters(const CString& sValue, BOOL bWebTool)
 	return sEscaped;
 }
 
-void CTDCToolsHelper::RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter)
+int CTDCToolsHelper::RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter)
 {
 	int nRemoved = 0;
-	
-	TBBUTTON tbb;
 	CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
+
+	int nNumPos = toolbar.GetToolBarCtrl().GetButtonCount();
 	
-	for (UINT nToolID = m_nStartID; nToolID <= m_nStartID + m_nSize; nToolID++)
+	for (UINT nToolID = FIRST_TOOLID; nToolID <= LAST_TOOLID; nToolID++)
 	{
 		int nBtn = toolbar.CommandToIndex(nToolID);
 		
 		if (nBtn != -1)
 		{
+			TBBUTTON tbb;
 			VERIFY(toolbar.GetToolBarCtrl().GetButton(nBtn, &tbb));
 			
 			if (toolbar.GetToolBarCtrl().DeleteButton(nBtn))
@@ -347,65 +359,123 @@ void CTDCToolsHelper::RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter
 		}
 	}
 	
-	// remove separator
+	// Cleanup extra separator added in AddToolsToToolbar
 	if (nRemoved)
-	{
-		if (nCmdAfter > 0)
-			toolbar.DeleteItem(toolbar.CommandToIndex(nCmdAfter) + 1);
-		else
-			toolbar.GetToolBarCtrl().DeleteButton(0);
-	}
+		toolbar.RemoveDuplicateSeparators(toolbar.CommandToIndex(nCmdAfter) + 1);
+
+	return nRemoved;
 }
 
-void CTDCToolsHelper::AppendToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped)
+void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped)
 {
 	// remove tools first
 	RemoveToolsFromToolbar(toolbar, nCmdAfter);
 	
 	// then re-add
 	CToolIndexArray aIndices;
+	int nNumItems = BuildToolIndexArray(aTools, aIndices, bGrouped, TRUE);
 
-	if (BuildToolIndexArray(aTools, aIndices, bGrouped))
+	if (nNumItems == 0)
+		return;
+
+	// figure out if we want the large or small images
+	CSize sizeBtn(toolbar.GetToolBarCtrl().GetButtonSize());
+	sizeBtn -= CSize(7, 7); // btn borders from BarTool.cpp
+
+	// start adding after the pref button
+	CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
+	int nStartPos = toolbar.CommandToIndex(nCmdAfter) + 1;
+
+	// Make sure we start after a separator
+	if (!toolbar.IsItemSeparator(nStartPos))
+		toolbar.InsertSeparator(nStartPos);
+
+	nStartPos++;
+
+	int nAdded = 0, nBtnsAdded = 0;
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
 	{
-		// figure out if we want the large or small images
-		CSize sizeBtn(toolbar.GetToolBarCtrl().GetButtonSize());
-		sizeBtn -= CSize(7, 7); // btn borders from BarTool.cpp
+		const int nTool = aIndices[nItem];
 
-		// start adding after the pref button
-		CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
-		int nStartPos = toolbar.CommandToIndex(nCmdAfter) + 1;
-		int nAdded = 0;
-		
-		for (int nIndex = 0; nIndex < aIndices.GetSize(); nIndex++)
+		if (nTool == -1)
 		{
-			const USERTOOL& tool = aTools[nIndex];
+			if (toolbar.InsertSeparator(nStartPos + nAdded))
+				nAdded++;
+		}
+		else
+		{
+			CBitmap bmp;
 
-			if (nIndex == -1)
+			if (GetToolIcon(aTools[nTool], bmp, 255))
 			{
-				if (toolbar.InsertSeparator(nStartPos + nAdded))
-					nAdded++;
-			}
-			else
-			{
-				CBitmap bmp;
+				int nImage = pIL->Add(&bmp, 255);
 
-				if (GetToolIcon(tool, bmp, 255))
+				TBBUTTON tbb = { nImage, (nTool + FIRST_TOOLID), 0, TBSTYLE_BUTTON, 0, 0, (UINT)-1 };
+
+				if (toolbar.GetToolBarCtrl().InsertButton(nStartPos + nAdded, &tbb))
 				{
-					int nImage = pIL->Add(&bmp, 255);
-				
-					TBBUTTON tbb = { nImage, (nIndex + m_nStartID), 0, TBSTYLE_BUTTON, 0, 0, (UINT)-1 };
-				
-					if (toolbar.GetToolBarCtrl().InsertButton(nStartPos + nAdded, &tbb))
-						nAdded++;
-					else
-						pIL->Remove(nImage);
+					nAdded++;
+					nBtnsAdded++;
+				}
+				else
+				{
+					pIL->Remove(nImage);
 				}
 			}
 		}
-		
-		// add a separator if any buttons added
-		if (nAdded)
-			toolbar.InsertSeparator(nStartPos);
+	}
+}
+
+void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped)
+{
+	// Before deleting, work out where we will re-insert
+	const int MENUSTARTPOS = CEnMenu::FindFirstMenuItem(menu, FIRST_TOOLID, LAST_TOOLID);
+	const UINT MENUSTARTID = menu.GetMenuItemID(MENUSTARTPOS);
+
+	// delete existing tool entries and their icons
+	int nTool = MAX_NUM_TOOLS;
+
+	while (nTool--)
+	{
+		menu.DeleteMenu(FIRST_TOOLID + nTool, MF_BYCOMMAND);
+		mgrMenuIcons.DeleteImage(FIRST_TOOLID + nTool);
+	}
+
+	CEnMenu::RemoveDuplicateSeparators(menu, MENUSTARTPOS);
+
+	// if we have any tools to add we do it here
+	CToolIndexArray aIndices;
+	int nNumItems = CTDCToolsHelper::BuildToolIndexArray(aTools, aIndices, bGrouped, FALSE);
+
+	if (nNumItems)
+	{
+		for (int nItem = 0; nItem < nNumItems; nItem++)
+		{
+			const int nTool = aIndices[nItem];
+
+			if (nTool == -1)
+			{
+				menu.InsertMenu(MENUSTARTPOS + nItem, MF_BYPOSITION | MF_SEPARATOR);
+			}
+			else
+			{
+				const USERTOOL& tool = aTools[nTool];
+				CString sMenuItem(tool.sToolName);
+
+				if (nTool < 9)
+					sMenuItem.Format(_T("&%d %s"), nTool + 1, tool.sToolName); // add accelerator
+
+				menu.InsertMenu(MENUSTARTPOS + nItem, MF_BYPOSITION | MF_STRING, MENUSTARTID + nTool, sMenuItem);
+
+				// Icon manager will free the icon
+				mgrMenuIcons.SetImage(MENUSTARTID + nTool, CTDCToolsHelper::GetToolIcon(tool));
+			}
+		}
+	}
+	else // if nothing to add just re-add placeholder
+	{
+		menu.InsertMenu(MENUSTARTPOS, MF_BYPOSITION | MF_STRING | MF_GRAYED, MENUSTARTID, CEnString(IDS_USERDEFINEDTOOLS));
 	}
 }
 
@@ -425,19 +495,18 @@ LPCTSTR CTDCToolsHelper::GetDefaultFileExt()
 	return m_bTDLEnabled ? TDLEXT : XMLEXT;
 }
 
-int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped)
+int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped, BOOL bIncTrailingSeparator)
 {
 	aIndices.RemoveAll();
 
 	int nNumTools = aTools.GetSize();
+	nNumTools = min(nNumTools, MAX_NUM_TOOLS);
 
-	if (!bGrouped || (nNumTools <= 2))
-	{
-		// As-is
-		for (int nTool = 0; nTool < nNumTools; nTool++)
-			aIndices.Add(nTool);
-	}
-	else // Grouped
+	// Default
+	for (int nTool = 0; nTool < nNumTools; nTool++)
+		aIndices.Add(nTool);
+
+	if (bGrouped && (nNumTools > 2))
 	{
 		// Separate tools by type
 		CMapStringToContainer<CToolIndexArray> mapTools;
@@ -453,7 +522,7 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 			CString sGroup(sExt); // default
 
 			// Special case: Group executables by filename
-			if (sExt == _T("exe"))
+			if (sExt == _T(".exe"))
 				sGroup = (sFileName + sExt);
 				
 			CToolIndexArray* pIndices = mapTools.GetAddMapping(sGroup);
@@ -482,6 +551,8 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 			Misc::SortArrayT(aIndexArrays, IndexArraySortProc);
 
 			// Build final index array with separators between groups
+			aIndices.RemoveAll();
+
 			for (int nGroup = 0; nGroup < nNumGroups; nGroup++)
 			{
 				aIndices.Append(*aIndexArrays[nGroup]);
@@ -489,6 +560,22 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 				int nSeparator = -1;
 				aIndices.Add(nSeparator);
 			}
+		}
+	}
+
+	if (bIncTrailingSeparator)
+	{
+		if (aIndices[aIndices.GetSize() - 1] != -1)
+		{
+			int nSeparator = -1;
+			aIndices.Add(nSeparator);
+		}
+	}
+	else
+	{
+		if (aIndices[aIndices.GetSize() - 1] == -1)
+		{
+			aIndices.RemoveAt(aIndices.GetSize() - 1);
 		}
 	}
 
