@@ -2401,13 +2401,15 @@ void Misc::SortArray(CDWordArray& array, SORTPROC pSortProc)
 
 //////////////////////////////////////////////////////////////
 
-void Misc::Copy(const CMapStringToString& mapSrc, CMapStringToString& mapDest)
+int Misc::Copy(const CMapStringToString& mapSrc, CMapStringToString& mapDest)
 {
 	mapDest.RemoveAll();
 	Append(mapSrc, mapDest);
+
+	return mapDest.GetCount();
 }
 
-void Misc::Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest)
+int Misc::Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest)
 {
 	if (mapSrc.GetCount())
 	{
@@ -2420,6 +2422,8 @@ void Misc::Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest)
 			mapDest[sKey] = sValue;
 		}
 	}
+
+	return mapDest.GetCount();
 }
 
 BOOL Misc::MatchAll(const CMapStringToString& map1, const CMapStringToString& map2)

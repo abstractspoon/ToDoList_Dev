@@ -310,15 +310,15 @@ namespace Misc
 		qsort(array.GetData(), array.GetSize(), sizeof(T), pSortProc);
 	}
 
-	void Copy(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
+	int Copy(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
+	int Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
 	BOOL MatchAll(const CMapStringToString& map1, const CMapStringToString& map2);
 	BOOL HasKey(const CMapStringToString& map, const CString& sKey);
 	CString GetNextKey(const CMapStringToString& map, POSITION& pos);
 	int GetKeys(const CMapStringToString& map, CStringArray& aKeys);
-	void Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
 
 	template <class S, class T> 
-	void CopyT(const CMap<S, S, T, T&>& mapSrc, CMap<S, S, T, T&>& mapDest)
+	int CopyT(const CMap<S, S, T, T&>& mapSrc, CMap<S, S, T, T&>& mapDest)
 	{
 		mapDest.RemoveAll();
 
@@ -334,10 +334,12 @@ namespace Misc
 				mapDest[key] = value;
 			}
 		}
+
+		return mapDest.GetCount();
 	}
 
 	template <class T> 
-	void CopyStrT(const CMap<CString, LPCTSTR, T, T&>& mapSrc, CMap<CString, LPCTSTR, T, T&>& mapDest)
+	int CopyStrT(const CMap<CString, LPCTSTR, T, T&>& mapSrc, CMap<CString, LPCTSTR, T, T&>& mapDest)
 	{
 		mapDest.RemoveAll();
 
@@ -353,6 +355,8 @@ namespace Misc
 				mapDest[sKey] = value;
 			}
 		}
+
+		return mapDest.GetCount();
 	}
 
 	template <class S, class T> 
