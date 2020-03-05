@@ -58,6 +58,17 @@ CRecurrence::CRecurrence()
 {
 }
 
+CRecurrence::CRecurrence(const CRecurrence& tr)
+{
+	ASSERT(IsValidRegularity(tr.m_nRegularity, tr.m_dwSpecific1, tr.m_dwSpecific2));
+
+	m_nRegularity = tr.m_nRegularity;
+	m_dwSpecific1 = tr.m_dwSpecific1;
+	m_dwSpecific2 = tr.m_dwSpecific2;
+	m_nNumOccur = tr.m_nNumOccur;
+	m_nRemainingOccur = tr.m_nRemainingOccur;
+}
+
 BOOL CRecurrence::operator==(const CRecurrence& tr) const
 {
 	return Matches(tr, TRUE);
@@ -408,26 +419,29 @@ int CRecurrence::CalcNextOccurences(const COleDateTime& dtFrom, COleDateTimeRang
 		return 0;
 	}
 
+	// Take a copy of ourselves because we need to able
+	// to modify the remaining recurrence count
+	CRecurrence tr(*this);
 	COleDateTime dtNext;
 
-	if (!CalcNextOccurence(dtFrom, dtNext)) // starting point
+	// Move to start of range
+	if (!tr.GetNextOccurence(dtFrom, dtNext))
 		return 0;
 
 	aDates.RemoveAll();
 
-	// Move to start of range
 	while (dtNext < range.GetStart())
 	{
-		if (!CalcNextOccurence(dtNext, dtNext))
+		if (!tr.GetNextOccurence(dtNext, dtNext))
 			return 0;
 	}
 
-	// Process range
+	// Process range itself
 	while (dtNext < range.GetEnd())
 	{
 		aDates.Add(dtNext.m_dt);
 
-		if (!CalcNextOccurence(dtNext, dtNext))
+		if (!tr.GetNextOccurence(dtNext, dtNext))
 			break;
 	}
 

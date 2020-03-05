@@ -65,6 +65,7 @@ struct CRecurrence
 	//													HIWORD = DOW (1-7)		
 
 	CRecurrence();
+	CRecurrence(const CRecurrence& tr);
 
 	BOOL operator==(const CRecurrence& tr) const;
 	BOOL operator!=(const CRecurrence& tr) const;
