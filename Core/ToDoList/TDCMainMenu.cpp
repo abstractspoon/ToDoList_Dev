@@ -111,7 +111,7 @@ void CTDCMainMenu::LoadMenuCommon()
 		CMenu* pSubMenu = GetSubMenu(AM_HELP);
 		ASSERT(pSubMenu);
 
-		int nPos = CEnMenu::GetMenuItemPos(*pSubMenu, ID_HELP_RECORDBUGREPORT);
+		int nPos = CEnMenu::FindMenuItem(*pSubMenu, ID_HELP_RECORDBUGREPORT);
 		ASSERT(nPos != -1);
 
 		pSubMenu->DeleteMenu(nPos, MF_BYPOSITION);
@@ -236,7 +236,7 @@ void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
 	// Remove 'Email Tasks' if Outlook is not installed
 	if (!CMSOutlookHelper::IsOutlookInstalled())
 	{
-		int nPos = CEnMenu::GetMenuItemPos(*pMenu, ID_SENDTASKS);
+		int nPos = CEnMenu::FindMenuItem(*pMenu, ID_SENDTASKS);
 
 		if (nPos != -1)
 		{
@@ -568,7 +568,7 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 	if (tdc.GetCustomAttributeDefs(aAttribDefs))
 	{
-		int nInsert = CEnMenu::GetMenuItemPos(*pMenu, ID_SORTBY_NONE) - 1;
+		int nInsert = CEnMenu::FindMenuItem(*pMenu, ID_SORTBY_NONE) - 1;
 		ASSERT(nInsert >= 0);
 
 		for (int nCol = 0; nCol < aAttribDefs.GetSize(); nCol++)

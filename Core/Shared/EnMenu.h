@@ -38,8 +38,8 @@ public:
 	BOOL DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct); 
 	BOOL MeasureMDIButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct); 
 
-	int GetMenuItemPos(UINT nCmdID) const;
-	int GetMenuItemPos(HMENU hSubMenu) const;
+	int FindMenuItem(UINT nCmdID) const;
+	int FindMenuItem(HMENU hSubMenu) const;
 
 	int GetMenuString(UINT nIDItem,	CString& sItem, UINT nFlags) const;
 	CString GetMenuString(UINT nIDItem,	UINT nFlags) const;
@@ -69,10 +69,10 @@ public:
 	static TCHAR EnsureUniqueAccelerator(CString& sText, HMENU hMenu);
 	static BOOL EnsureUniqueAccelerators(HMENU hMenu);
 
-	static int GetMenuItemPos(HMENU hMenu, UINT nCmdID);
-	static int GetMenuItemPos(HMENU hMenu, UINT nCmdID, HMENU& hParentMenu);
-	static int GetMenuItemPos(HMENU hMenu, HMENU hSubMenu);
-	static int GetMenuItemPos(HMENU hMenu, HMENU hSubMenu, HMENU& hParentMenu);
+	static int FindMenuItem(HMENU hMenu, UINT nCmdID);
+	static int FindMenuItem(HMENU hMenu, UINT nCmdID, HMENU& hParentMenu);
+	static int FindMenuItem(HMENU hMenu, HMENU hSubMenu);
+	static int FindMenuItem(HMENU hMenu, HMENU hSubMenu, HMENU& hParentMenu);
 
 	static HMENU GetSubMenu(HMENU hMenu, UINT nCmdID);
 	static HMENU GetParentMenu(HMENU hMenu, HMENU hSubMenu);
@@ -105,7 +105,7 @@ protected:
 
 protected:
 	static BOOL IsThemed();
-	static int GetMenuItemPos(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bItemIsMenu);
+	static int FindMenuItem(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bItemIsMenu);
 	static void DoCleanUp(HMENU hMenu, HMENU hCmdMenu, int nCmdPos);
 	static int MenuSortProc(const void* v1, const void* v2);
 

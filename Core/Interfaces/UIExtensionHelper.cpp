@@ -147,7 +147,7 @@ void CUIExtensionHelper::AddExtensionsToMenu(CMenu* pMenu, const CUIExtensionMgr
 	int nPos = -1, nExt;
 
 	for (nExt = 0; (nExt < m_nMaxNumExtensions) && (nPos == -1); nExt++)
-		nPos = CEnMenu::GetMenuItemPos(*pMenu, m_nFirstMenuID + nExt);
+		nPos = CEnMenu::FindMenuItem(*pMenu, m_nFirstMenuID + nExt);
 
 	if (nPos == -1)
 	{

@@ -234,14 +234,14 @@ BOOL CEnMenu::LoadMenu(UINT nMenuResID, HWND hWndRef, BOOL bTranslate, BOOL bRec
 	return FALSE;
 }
 
-int CEnMenu::GetMenuItemPos(UINT nCmdID) const
+int CEnMenu::FindMenuItem(UINT nCmdID) const
 {
-	return GetMenuItemPos(m_hMenu, nCmdID);
+	return FindMenuItem(m_hMenu, nCmdID);
 }
 
-int CEnMenu::GetMenuItemPos(HMENU hSubMenu) const
+int CEnMenu::FindMenuItem(HMENU hSubMenu) const
 {
-	return GetMenuItemPos(m_hMenu, hSubMenu);
+	return FindMenuItem(m_hMenu, hSubMenu);
 }
 
 BOOL CEnMenu::DeleteSubMenu(HMENU hSubMenu, BOOL bAutoCleanUp)
@@ -355,7 +355,7 @@ void CEnMenu::SetLocalizer(ITransText* pTT)
 BOOL CEnMenu::DeleteSubMenu(HMENU hMenu, HMENU hSubMenu, BOOL bAutoCleanUp)
 {
 	HMENU hItemMenu = NULL;
-	int nPos = GetMenuItemPos(hMenu, hSubMenu, hItemMenu);
+	int nPos = FindMenuItem(hMenu, hSubMenu, hItemMenu);
 
 	if (nPos != -1)
 	{
@@ -373,10 +373,10 @@ BOOL CEnMenu::DeleteSubMenu(HMENU hMenu, HMENU hSubMenu, BOOL bAutoCleanUp)
 	return FALSE;
 }
 
-int CEnMenu::GetMenuItemPos(HMENU hMenu, UINT nCmdID)
+int CEnMenu::FindMenuItem(HMENU hMenu, UINT nCmdID)
 {
 	HMENU hItemMenu = NULL;
-	int nPos = GetMenuItemPos(hMenu, nCmdID, hItemMenu);
+	int nPos = FindMenuItem(hMenu, nCmdID, hItemMenu);
 
 	if (hItemMenu == hMenu)
 		return nPos;
@@ -385,23 +385,23 @@ int CEnMenu::GetMenuItemPos(HMENU hMenu, UINT nCmdID)
 	return -1;
 }
 
-int CEnMenu::GetMenuItemPos(HMENU hMenu, UINT nCmdID, HMENU& hParentMenu)
+int CEnMenu::FindMenuItem(HMENU hMenu, UINT nCmdID, HMENU& hParentMenu)
 {
-	return GetMenuItemPos(hMenu, (DWORD)nCmdID, hParentMenu, FALSE);
+	return FindMenuItem(hMenu, (DWORD)nCmdID, hParentMenu, FALSE);
 }
 
 HMENU CEnMenu::GetSubMenu(HMENU hMenu, UINT nCmdID)
 {
 	HMENU hSubMenu = NULL;
-	GetMenuItemPos(hMenu, nCmdID, hSubMenu);
+	FindMenuItem(hMenu, nCmdID, hSubMenu);
 
 	return hSubMenu;
 }
 
-int CEnMenu::GetMenuItemPos(HMENU hMenu, HMENU hSubMenu)
+int CEnMenu::FindMenuItem(HMENU hMenu, HMENU hSubMenu)
 {
 	HMENU hItemMenu = NULL;
-	int nPos = GetMenuItemPos(hMenu, hSubMenu, hItemMenu);
+	int nPos = FindMenuItem(hMenu, hSubMenu, hItemMenu);
 
 	if (hItemMenu == hMenu)
 		return nPos;
@@ -410,43 +410,44 @@ int CEnMenu::GetMenuItemPos(HMENU hMenu, HMENU hSubMenu)
 	return -1;
 }
 
-int CEnMenu::GetMenuItemPos(HMENU hMenu, HMENU hSubMenu, HMENU& hParentMenu)
+int CEnMenu::FindMenuItem(HMENU hMenu, HMENU hSubMenu, HMENU& hParentMenu)
 {
-	return GetMenuItemPos(hMenu, (DWORD)hSubMenu, hParentMenu, TRUE);
+	return FindMenuItem(hMenu, (DWORD)hSubMenu, hParentMenu, TRUE);
 }
 
-int CEnMenu::GetMenuItemPos(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bItemIsMenu)
+int CEnMenu::FindMenuItem(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bItemIsMenu)
 {
 	hParentMenu = NULL;
 
 	// sanity checks
-	ASSERT(hMenu && (dwItem > 0));
-
-	if (hMenu && (dwItem > 0))
+	if (!hMenu || (dwItem == 0))
 	{
-		// search recursively
-		int nPos = ::GetMenuItemCount(hMenu);
+		ASSERT(0);
+		return -1;
+	}
 
-		while (nPos--)
+	// search recursively
+	int nPos = ::GetMenuItemCount(hMenu);
+
+	while (nPos--)
+	{
+		UINT nMenuID = ::GetMenuItemID(hMenu, nPos);
+		HMENU hSubMenu = ::GetSubMenu(hMenu, nPos);
+
+		if ((bItemIsMenu && (hSubMenu == (HMENU)dwItem)) ||
+			(!bItemIsMenu && (nMenuID == (UINT)dwItem)))
 		{
-			UINT nMenuID = ::GetMenuItemID(hMenu, nPos);
-			HMENU hSubMenu = ::GetSubMenu(hMenu, nPos);
+			hParentMenu = hMenu;
+			return nPos;
+		}
+		else if (hSubMenu) // search recursively
+		{
+			int nSubPos = FindMenuItem(hSubMenu, dwItem, hParentMenu, bItemIsMenu);
 
-			if ((bItemIsMenu && (hSubMenu == (HMENU)dwItem)) || 
-				(!bItemIsMenu && (nMenuID == (UINT)dwItem)))
+			if (nSubPos != -1)
 			{
-				hParentMenu = hMenu;
-				return nPos;
-			}
-			else if (hSubMenu) // search recursively
-			{
-				int nSubPos = GetMenuItemPos(hSubMenu, dwItem, hParentMenu, bItemIsMenu);
-
-				if (nSubPos != -1)
-				{
-					ASSERT(hParentMenu != NULL);
-					return nSubPos;
-				}
+				ASSERT(hParentMenu != NULL);
+				return nSubPos;
 			}
 		}
 	}
@@ -467,7 +468,7 @@ BOOL CEnMenu::DeleteMenu(HMENU hMenu, UINT nPosition, UINT nFlags, BOOL bAutoCle
 	BOOL bByCommand = ((nFlags & MF_BYPOSITION) == 0);
 
 	if (bByCommand)
-		nCmdPos = GetMenuItemPos(hMenu, nPosition, hCmdMenu);
+		nCmdPos = FindMenuItem(hMenu, nPosition, hCmdMenu);
 	
 	// then do a standard delete
 	BOOL bRes = ::DeleteMenu(hCmdMenu, nCmdPos, MF_BYPOSITION);
@@ -487,7 +488,7 @@ void CEnMenu::DoCleanUp(HMENU hMenu, HMENU hCmdMenu, int nCmdPos)
 
 	if (nCount == 0)
 	{
-		int nMenuPos = CEnMenu::GetMenuItemPos(hMenu, hCmdMenu, hCmdMenu);
+		int nMenuPos = CEnMenu::FindMenuItem(hMenu, hCmdMenu, hCmdMenu);
 		
 		if (::DeleteMenu(hCmdMenu, nMenuPos, MF_BYPOSITION))
 		{
@@ -530,7 +531,7 @@ HMENU CEnMenu::GetParentMenu(HMENU hMenu, HMENU hSubMenu)
 	ASSERT(hMenu && hSubMenu);
 
 	if (hMenu && hSubMenu && (hMenu != hSubMenu))
-		GetMenuItemPos(hMenu, hSubMenu, hParentMenu);
+		FindMenuItem(hMenu, hSubMenu, hParentMenu);
 
 	return hParentMenu;
 }
@@ -743,7 +744,7 @@ BOOL CEnMenu::SortMenuStrings(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
 		mapTextToItem[sSortString] = msi;
 		
 		// Find the start position
-		int nItemPos = GetMenuItemPos(hMenu, nCmdID);
+		int nItemPos = FindMenuItem(hMenu, nCmdID);
 		
 		if (nStartPos == -1)
 			nStartPos = nItemPos;

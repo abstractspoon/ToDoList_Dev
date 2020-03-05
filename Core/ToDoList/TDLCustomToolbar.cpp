@@ -88,7 +88,7 @@ BOOL CTDLCustomToolbar::SetButtons(const CToolbarButtonArray& aButtons,
 		if (tb.nMenuID > 0)
 		{
 			HMENU hItemMenu = NULL;
-			int nPos = CEnMenu::GetMenuItemPos(mainMenu, tb.nMenuID, hItemMenu);
+			int nPos = CEnMenu::FindMenuItem(mainMenu, tb.nMenuID, hItemMenu);
 			ASSERT((nPos != -1) && (hItemMenu != NULL));
 			
 			CString sTooltip = CEnMenu::GetMenuString(hItemMenu, nPos, MF_BYPOSITION);

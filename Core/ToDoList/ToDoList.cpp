@@ -1802,13 +1802,13 @@ BOOL CToDoListApp::CommandRequiresUI(UINT nCmdID)
 	mainMenu.LoadMenu(IDR_MAINFRAME);
 
 	HMENU hSubMenu = NULL;
-	int nPos = CEnMenu::GetMenuItemPos(mainMenu, nCmdID, hSubMenu);
+	int nPos = CEnMenu::FindMenuItem(mainMenu, nCmdID, hSubMenu);
 
 	ASSERT((nPos != -1) && hSubMenu);
 
 	// We want the top-level sub-menu
 	while ((nPos != -1) && (hSubMenu != mainMenu))
-		nPos = CEnMenu::GetMenuItemPos(mainMenu, hSubMenu, hSubMenu);
+		nPos = CEnMenu::FindMenuItem(mainMenu, hSubMenu, hSubMenu);
 
 	ASSERT(nPos != -1);
 	ASSERT(hSubMenu);

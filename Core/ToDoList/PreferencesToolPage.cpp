@@ -606,7 +606,7 @@ void CPreferencesToolPage::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL 
 {
 	// Replace user-variable placeholder text with actual variable names
 	// in the order they appear so we can reverse-lookup their names
-	if (CEnMenu::GetMenuItemPos(*pPopupMenu, ID_TOOLARG_USERVAR1) == 0)
+	if (CEnMenu::FindMenuItem(*pPopupMenu, ID_TOOLARG_USERVAR1) == 0)
 	{
 		ASSERT(pPopupMenu->GetMenuItemCount() == 16);
 	
@@ -640,7 +640,7 @@ void CPreferencesToolPage::OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL 
 		CEnMenu::SortMenuStrings(*pPopupMenu, ID_TOOLARG_USERVAR1, ID_TOOLARG_USERVAR16);
 	}
 	// Likewise for custom attributes
-	else if (CEnMenu::GetMenuItemPos(*pPopupMenu, ID_TOOLARG_CUSTOMATTRIB1) == 0)
+	else if (CEnMenu::FindMenuItem(*pPopupMenu, ID_TOOLARG_CUSTOMATTRIB1) == 0)
 	{
 		ASSERT(pPopupMenu->GetMenuItemCount() == 16);
 	
