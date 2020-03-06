@@ -50,7 +50,7 @@ BOOL Misc::Is64BitWindows()
     // 32-bit programs run on both 32-bit and 64-bit Windows
 	typedef BOOL (WINAPI *PFNISWOW64PROCESS)(HANDLE, PBOOL);
 	
-	// load user32.dll once only
+	// load dll once only
 	static HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
 	
 	if (hKernel32)
