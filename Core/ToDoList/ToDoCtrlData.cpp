@@ -4078,3 +4078,127 @@ BOOL CToDoCtrlData::TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib,
 	return FALSE;
 }
 
+TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID,
+													 const COleDateTime& dtNext, BOOL bDueDate)
+{
+	TDC_SET nRes = SET_NOCHANGE;
+
+	// we need to move both the due date and the start date forward
+	// so we first cache the old dates
+	COleDateTime dtStart = GetTaskDate(dwPrevTaskID, TDCD_START);
+	COleDateTime dtDue = GetTaskDate(dwPrevTaskID, TDCD_DUE);
+
+	BOOL bHasStart = CDateHelper::IsDateSet(dtStart);
+	BOOL bHasDue = CDateHelper::IsDateSet(dtDue);
+
+	BOOL bWantInheritStart = WantUpdateInheritedAttibute(TDCA_STARTDATE);
+	BOOL bWantInheritDue = WantUpdateInheritedAttibute(TDCA_DUEDATE);
+
+	if (bDueDate) // dtNext is the new due date
+	{
+		int nOffsetDays = (bHasDue ? ((int)dtNext - (int)dtDue) : 0);
+
+		if (bWantInheritDue)
+		{
+			if (SetTaskDate(dwNewTaskID, TDCD_DUE, dtNext) == SET_CHANGE)
+			{
+				ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
+				nRes = SET_CHANGE;
+			}
+		}
+		else // bump dates by required amount
+		{
+			if (bHasDue)
+			{
+				// Before we offset, make sure all subtasks have valid due dates
+				// And make sure the new date fits the recurring scheme
+				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
+
+				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE) == SET_CHANGE)
+					nRes = SET_CHANGE;
+			}
+			else
+			{
+				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_DUE, dtNext, TRUE);
+			}
+		}
+
+		// adjust start dates similarly
+		if (bHasStart)
+		{
+			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
+			if (bWantInheritStart)
+			{
+				// don't offset children
+				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, FALSE, FALSE) == SET_CHANGE)
+				{
+					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
+					nRes = SET_CHANGE;
+				}
+			}
+			else // offset children
+			{
+				// Before we offset, make sure all subtasks have valid start dates
+				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
+
+				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE) == SET_CHANGE)
+					nRes = SET_CHANGE;
+			}
+		}
+	}
+	else // dtNext is the new start date
+	{
+		int nOffsetDays = (bHasStart ? ((int)dtNext - (int)dtStart) : 0);
+
+		if (bWantInheritStart)
+		{
+			if (SetTaskDate(dwNewTaskID, TDCD_START, dtNext) == SET_CHANGE)
+			{
+				ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
+				nRes = SET_CHANGE;
+			}
+		}
+		else // bump dates by required amount
+		{
+			if (bHasStart)
+			{
+				// Before we offset, make sure all subtasks have valid start dates
+				// And make sure the new date fits the recurring scheme
+				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
+
+				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE) == SET_CHANGE)
+					nRes = SET_CHANGE;
+			}
+			else
+			{
+				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_START, dtNext, TRUE);
+			}
+		}
+
+		// adjust due dates similarly
+		if (bHasDue)
+		{
+			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
+			if (bWantInheritDue)
+			{
+				// don't update children
+				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, FALSE, FALSE) == SET_CHANGE)
+				{
+					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
+					nRes = SET_CHANGE;
+				}
+			}
+			else // bump
+			{
+				// Before we offset, make sure all subtasks have valid due dates
+				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
+
+				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE) == SET_CHANGE)
+					nRes = SET_CHANGE;
+			}
+		}
+	}
+
+	return nRes;
+}
+
