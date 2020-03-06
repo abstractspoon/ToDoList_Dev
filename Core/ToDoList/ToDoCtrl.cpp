@@ -9325,20 +9325,26 @@ BOOL CToDoCtrl::AddTreeItemAndParentToTaskFile(HTREEITEM hti, CTaskFile& tasks, 
 
 	if (htiParent)
 	{
+		BOOL bParentAdded = FALSE;
+
 		// Note: we never want parent's subtasks, so we pass FALSE
 		if (bAllParents)
 		{
-			VERIFY(AddTreeItemAndParentToTaskFile(htiParent, tasks, filter, TRUE, FALSE));
+			bParentAdded = AddTreeItemAndParentToTaskFile(htiParent, tasks, filter, TRUE, FALSE); // RECURSIVE CALL
 		}
 		else
 		{
 			DWORD dwGrandParentID = m_taskTree.GetTaskParentID(htiParent);
 			HTASKITEM hGrandParent = tasks.FindTask(dwGrandParentID);
 
-			VERIFY(AddTreeItemToTaskFile(htiParent, 0, tasks, hGrandParent, filter, FALSE, dwGrandParentID));
+			bParentAdded = AddTreeItemToTaskFile(htiParent, 0, tasks, hGrandParent, filter, FALSE, dwGrandParentID);
 		}
 
-		// now find the parent we just added
+		// If we didn't add the parent then we won't be adding adding subtasks
+		if (!bParentAdded)
+			return FALSE;
+
+		// else find the just added parent
 		dwParentID = GetTaskID(htiParent);
 		
 		hParent = tasks.FindTask(dwParentID);
