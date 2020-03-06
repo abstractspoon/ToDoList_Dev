@@ -4202,3 +4202,46 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	return nRes;
 }
 
+BOOL CToDoCtrlData::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate, const CString& sDefStatus)
+{
+	if (!HasTask(dwPrevTaskID) || !HasTask(dwNewTaskID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// we need to move both the due date and the start date forward
+	AdjustNewRecurringTasksDates(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate);
+
+	// Clear certain attributes
+	ClearTaskAttribute(dwNewTaskID, TDCA_TIMESPENT, TRUE);
+	ClearTaskAttribute(dwNewTaskID, TDCA_PERCENT, TRUE);
+
+	// Set some defaults
+	SetTaskStatus(dwNewTaskID, sDefStatus);
+
+	// Reset number of occurrences
+	ResetRecurringSubtaskOccurrences(dwNewTaskID);
+
+	// Special handling for recreated tasks
+	if (dwNewTaskID != dwPrevTaskID)
+	{
+		// the task ID has effectively changed so fix up those
+		// tasks that previously had a dependency
+		FixupTaskLocalDependentsIDs(dwNewTaskID, dwPrevTaskID);
+
+		// Restore previous comments format
+		CONTENTFORMAT cfComments;
+		const CBinaryData& customComments = GetTaskCustomComments(dwPrevTaskID, cfComments);
+
+		SetTaskCommentsType(dwNewTaskID, cfComments);
+	}
+
+	// optionally clear the comments
+	TDCRECURRENCE tr;
+
+	if (!GetTaskRecurrence(dwNewTaskID, tr) || !tr.bPreserveComments)
+		ClearTaskAttribute(dwNewTaskID, TDCA_COMMENTS, TRUE);
+
+	return TRUE;
+}
