@@ -120,6 +120,47 @@ void CScopedLogTimer::LogStart()
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+CScopedConsoleTimer::CScopedConsoleTimer()
+	: 
+	CScopedTimer()
+{
+}
+
+CScopedConsoleTimer::CScopedConsoleTimer(LPCTSTR szScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
+	:
+	CScopedTimer(szScope, szArg1, szArg2, szArg3)
+{
+}
+	
+CScopedConsoleTimer::~CScopedConsoleTimer()
+{
+	if (!m_sScope.IsEmpty())
+		_tprintf(FormatTimeElapsed(m_sScope, m_dwTickStart, m_bStartLogged));
+}
+
+void CScopedConsoleTimer::OutputTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1, LPCTSTR szArg2, LPCTSTR szArg3)
+{
+	if (!Misc::IsEmpty(szSubScope))
+	{
+		CString sScope = Format(szSubScope, szArg1, szArg2, szArg3);
+		CString sMessage = FormatTimeElapsed(sScope, m_dwIntermediateStart, FALSE);
+
+		_tprintf(sMessage);
+	}
+}
+
+void CScopedConsoleTimer::OutputStart()
+{
+	if (!m_sScope.IsEmpty())
+	{
+		_tprintf(FormatStart());
+
+		m_bStartLogged = TRUE;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 CScopedTraceTimer::CScopedTraceTimer()
 	: 
 	CScopedTimer()

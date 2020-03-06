@@ -56,5 +56,18 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
+class CScopedConsoleTimer : public CScopedTimer
+{
+public:
+	CScopedConsoleTimer();
+	CScopedConsoleTimer(LPCTSTR szScope, LPCTSTR szArg1 = NULL, LPCTSTR szArg2 = NULL, LPCTSTR szArg3 = NULL);
+	~CScopedConsoleTimer();
+
+	void OutputStart();
+	void OutputTimeElapsed(LPCTSTR szSubScope, LPCTSTR szArg1 = NULL, LPCTSTR szArg2 = NULL, LPCTSTR szArg3 = NULL);
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 #endif // AFX_SCOPEDTIME_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_
