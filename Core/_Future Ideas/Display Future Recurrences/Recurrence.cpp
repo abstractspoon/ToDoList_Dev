@@ -411,7 +411,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtFrom, COleDateTime& dt
 	return TRUE;
 }
 	
-int CRecurrence::CalcNextOccurences(const COleDateTime& dtFrom, COleDateTimeRange& range, CArray<double>& aDates) const
+int CRecurrence::CalcNextOccurences(const COleDateTime& dtFrom, COleDateTimeRange& range, CArray<double, double&>& aDates) const
 {
 	if (!range.IsValid())
 	{

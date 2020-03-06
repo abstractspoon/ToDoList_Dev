@@ -9,6 +9,7 @@
 #include "..\todolist\tdcrecurrence.h"
 
 #include "..\shared\datehelper.h"
+#include "..\shared\misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -35,7 +36,7 @@ TESTRESULT CTDCRECURRENCETest::Run()
 	ClearTotals();
 
 	TestSetRegularity();
-	TestGetNextOccurrencePerformance();
+	TestCalcNextOccurrencesPerformance();
 
 	return GetTotals();
 }
@@ -172,14 +173,17 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	EndTest();
 }
 
-void CTDCRECURRENCETest::TestGetNextOccurrencePerformance()
+void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 {
 	if (!m_utils.HasCommandlineFlag('p'))
+	{
+		_tprintf(_T("Add '-p' to run CTDCRECURRENCETest::CalcNextOccurrencesPerformance\n"));
 		return;
+	}
 
-	BeginTest(_T("CTDCRECURRENCETest::SetRegularity"));
+	BeginTest(_T("CTDCRECURRENCETest::CalcNextOccurrencesPerformance"));
 
-	TDCRECURRENCE RECURRENCES[] = 
+	const TDCRECURRENCE RECURRENCES[] = 
 	{
 		//	TDIR_DAY_EVERY_NDAYS 
 		TDCRECURRENCE(TDIR_DAY_EVERY_NDAYS, 2, 0),
@@ -226,27 +230,48 @@ void CTDCRECURRENCETest::TestGetNextOccurrencePerformance()
 	const int NUM_RECURRENCE = (sizeof(RECURRENCES) / sizeof(RECURRENCES[0]));
 
 	COleDateTime date(CDateHelper::GetDate(DHD_TODAY));
-	COleDateTimeRange range(date.m_dt + 365, date.m_dt + (2 * 365));
+	CArray<double, double&> aRecurrences;
+
+#ifdef _DEBUG
+	COleDateTimeRange range(DHD_ENDTHISYEAR, 1, DHU_YEARS);
+#else
+	COleDateTimeRange range(DHD_ENDNEXTYEAR, 4, DHU_YEARS);
+#endif
 
 	for (int nRecur = 0; nRecur < NUM_RECURRENCE; nRecur++)
 	{
+		// Run test
 		DWORD dwTickStart = GetTickCount();
+		const TDCRECURRENCE& tr = RECURRENCES[nRecur];
 
-		CArray<double> aRecurrences;
-		int nNumRecur = RECURRENCES[nRecur].CalcNextOccurences(date, range, aRecurrences);
+		int nNumRecur = tr.CalcNextOccurences(date, range, aRecurrences);
 
-		DWORD dwTickEnd = GetTickCount();
+		DWORD dwDuration = (GetTickCount() - dwTickStart);
 
-		DWORD dwSpecific1 = 0, dwSpecific2 = 0;
-		TDC_REGULARITY nRegularity = RECURRENCES[nRecur].GetRegularity(dwSpecific1, dwSpecific2);
-
-		CString sRegularity = TDCRECURRENCE::GetRegularityText(nRegularity, FALSE);
-
+		// Output results
 		if (nNumRecur == 0)
-			_tprintf(_T("Recurrence (%s, %ld, %ld) failed to produce any recurrences\n"), sRegularity, dwSpecific1, dwSpecific2);
+		{
+			_tprintf(_T("Recurrence (%s) failed to produce any recurrences for the range: %s\n"), FormatRecurrenceRegularity(tr), range.Format());
+		}
 		else
-			_tprintf(_T("Recurrence (%s, %ld, %ld) took %ld ms to calculate %d recurrences\n"), sRegularity, dwSpecific1, dwSpecific2, (dwTickEnd - dwTickStart), nNumRecur);
+		{
+			_tprintf(_T("Recurrence (%s) took %ld ms to calculate %d recurrences for the range: %s\n"), FormatRecurrenceRegularity(tr), dwDuration, nNumRecur, range.Format());
+		}
 	}
 
 	EndTest();
+}
+
+CString CTDCRECURRENCETest::FormatRecurrenceRegularity(const TDCRECURRENCE& tr)
+{
+	DWORD dwSpecific1 = 0, dwSpecific2 = 0;
+	TDC_REGULARITY nRegularity = tr.GetRegularity(dwSpecific1, dwSpecific2);
+
+	CString sRegularity = TDCRECURRENCE::GetRegularityText(nRegularity, FALSE);
+
+	if (dwSpecific1 > 0xffff)
+		return Misc::Format(_T("%s, (%ld, %ld), %ld"), sRegularity, LOWORD(dwSpecific1), HIWORD(dwSpecific1), dwSpecific2);
+
+	// else
+	return Misc::Format(_T("%s, %ld, %ld"), sRegularity, dwSpecific1, dwSpecific2);
 }

@@ -11,6 +11,12 @@
 
 #include "TDLTestBase.h"
 
+//////////////////////////////////////////////////////////////////////
+
+struct TDCRECURRENCE;
+
+//////////////////////////////////////////////////////////////////////
+
 class CTDCRECURRENCETest : public CTDLTestBase  
 {
 public:
@@ -21,7 +27,9 @@ public:
 
 protected:
 	void TestSetRegularity();
-	void TestGetNextOccurrencePerformance();
+	void TestCalcNextOccurrencesPerformance();
+
+	static CString FormatRecurrenceRegularity(const TDCRECURRENCE& tr);
 };
 
 #endif // !defined(AFX_TDCRECURRENCETEST_H__C3A4504B_65B5_43B1_8B97_8E6053066724__INCLUDED_)

@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <afxtempl.h>
+
 /////////////////////////////////////////////////////////////////////////////
 
 class COleDateTimeRange;
@@ -78,7 +80,7 @@ struct CRecurrence
 	BOOL FitDayToScheme(COleDateTime& dtRecur) const;
 	
 	BOOL CalcNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtNext) const;
-	int CalcNextOccurences(const COleDateTime& dtFrom, COleDateTimeRange& range, CArray<double>& aDates) const;
+	int CalcNextOccurences(const COleDateTime& dtFrom, COleDateTimeRange& range, CArray<double, double&>& aDates) const;
 
 	BOOL SetRegularity(RECURRENCE_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 	RECURRENCE_REGULARITY GetRegularity(DWORD& dwSpecific1, DWORD& dwSpecific2) const;
