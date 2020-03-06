@@ -82,7 +82,7 @@ public:
 	BOOL MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL FixupParentCompletion(DWORD dwParentID, BOOL bClearStatus);
-	BOOL CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits);
+	BOOL CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits) const;
 
 	// undo/redo
 	BOOL BeginNewUndoAction(TDC_UNDOACTIONTYPE nType);
