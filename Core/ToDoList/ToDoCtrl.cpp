@@ -3329,106 +3329,6 @@ BOOL CToDoCtrl::SetSelectedTaskDone(BOOL bDone)
 	return SetSelectedTaskDone(date, FALSE);
 }
 
-void CToDoCtrl::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID, 
-											 const COleDateTime& dtNext, BOOL bDueDate)
-{
-	// we need to move both the due date and the start date forward
-	// so we first cache the old dates
-	COleDateTime dtStart = m_data.GetTaskDate(dwPrevTaskID, TDCD_START);
-	COleDateTime dtDue = m_data.GetTaskDate(dwPrevTaskID, TDCD_DUE);
-
-	BOOL bHasStart = CDateHelper::IsDateSet(dtStart);
-	BOOL bHasDue = CDateHelper::IsDateSet(dtDue);
-
-	BOOL bWantInheritStart = m_data.WantUpdateInheritedAttibute(TDCA_STARTDATE);
-	BOOL bWantInheritDue = m_data.WantUpdateInheritedAttibute(TDCA_DUEDATE);
-	
-	if (bDueDate) // dtNext is the new due date
-	{
-		int nOffsetDays = (bHasDue ? ((int)dtNext - (int)dtDue) : 0);
-		
-		if (bWantInheritDue)
-		{
-			m_data.SetTaskDate(dwNewTaskID, TDCD_DUE, dtNext);
-			m_data.ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
-		}
-		else // bump dates by required amount
-		{
-			if (bHasDue)
-			{
-				// Before we offset, make sure all subtasks have valid due dates
-				// And make sure the new date fits the recurring scheme
-				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE);
-			}
-			else
-			{
-				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_DUE, dtNext, TRUE);
-			}
-		}
-
-		// adjust start dates similarly
-		if (bHasStart)
-		{
-			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
-			if (bWantInheritStart)
-			{
-				// don't offset children
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, FALSE, FALSE);
-				m_data.ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
-			}
-			else // offset children
-			{
-				// Before we offset, make sure all subtasks have valid start dates
-				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE);
-			}
-		}
-	}
-	else // dtNext is the new start date
-	{
-		int nOffsetDays = (bHasStart ? ((int)dtNext - (int)dtStart) : 0);
-
-		if (bWantInheritStart)
-		{
-			m_data.SetTaskDate(dwNewTaskID, TDCD_START, dtNext);
-			m_data.ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
-		}
-		else // bump dates by required amount
-		{
-			if (bHasStart)
-			{
-				// Before we offset, make sure all subtasks have valid start dates
-				// And make sure the new date fits the recurring scheme
-				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE);
-			}
-			else
-			{
-				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_START, dtNext, TRUE);
-			}
-		}
-
-		// adjust due dates similarly
-		if (bHasDue)
-		{
-			// BUT DON'T FIT THE NEW DATE TO THE RECURRING SCHEME
-			if (bWantInheritDue)
-			{
-				// don't update children
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, FALSE, FALSE);
-				m_data.ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
-			}
-			else // bump
-			{
-				// Before we offset, make sure all subtasks have valid due dates
-				m_data.InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
-				m_data.OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE);
-			}
-		}
-	}
-}
-
 BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 {
 	ASSERT(m_aRecreateTaskIDs.GetSize() == 0);
@@ -3545,7 +3445,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		}
 
 		// FALSE == Don't update the dates of any already-completed subtasks
-		TDC_SET nItemRes = SetTaskDone(dwTaskID, dtDone, bAndSubtasks, FALSE, FALSE);
+		TDC_SET nItemRes = SetTaskDone(dwTaskID, dtDone, bAndSubtasks, FALSE);
 
 		if (nItemRes == SET_CHANGE)
 		{
@@ -3722,42 +3622,15 @@ DWORD CToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDa
 void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate)
 {
 	// reset new task(s) state to 'undone' including all children
-	SetTaskDone(dwNewTaskID, 0.0, TRUE, TRUE, FALSE);
+	SetTaskDone(dwNewTaskID, 0.0, TRUE, TRUE);
 
-	// we need to move both the due date and the start date forward
-	AdjustNewRecurringTasksDates(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate);
+	VERIFY(m_data.InitialiseNewRecurringTask(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate));
 
-	// Clear certain attributes
-	m_data.ClearTaskAttribute(dwNewTaskID, TDCA_TIMESPENT, TRUE); 
-	m_data.ClearTaskAttribute(dwNewTaskID, TDCA_PERCENT, TRUE);
-
-	// Set some defaults
-	m_data.SetTaskStatus(dwNewTaskID, m_tdiDefault.sStatus);
-
-	// Reset number of occurrences
-	m_data.ResetRecurringSubtaskOccurrences(dwNewTaskID);
-
-	// Special handling for recreated tasks
-	if (dwNewTaskID != dwPrevTaskID)
-	{
-		// the task ID has effectively changed so fix up those
-		// tasks that previously had a dependency
-		m_data.FixupTaskLocalDependentsIDs(dwNewTaskID, dwPrevTaskID);
-
-		// Restore previous comments format
-		CONTENTFORMAT cfComments;
-		const CBinaryData& customComments = m_data.GetTaskCustomComments(dwPrevTaskID, cfComments);
-
-		m_data.SetTaskCommentsType(dwNewTaskID, cfComments);
-	}
-
-	// optionally clear the comments
+	// optionally clear the comments field
 	TDCRECURRENCE tr;
 
 	if (!m_data.GetTaskRecurrence(dwNewTaskID, tr) || !tr.bPreserveComments)
 	{
-		m_data.ClearTaskAttribute(dwNewTaskID, TDCA_COMMENTS, TRUE);
-
 		m_sTextComments.Empty();
 		m_customComments.Empty();
 
@@ -3765,63 +3638,16 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 	}
 }
 
-TDC_SET CToDoCtrl::SetTaskDone(DWORD dwTaskID, const COleDateTime& date, 
-								BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates, BOOL bIsSubtask)
+TDC_SET CToDoCtrl::SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates)
 {
-	ASSERT(bAndSubtasks || !bIsSubtask);
-	ASSERT(!CDateHelper::IsDateSet(date) || !bUpdateAllSubtaskDates);
-
-	TDC_SET nRes = SET_NOCHANGE;
-
-	// If bUpdateAllSubtaskDates == FALSE, we only update a subtask's 
-	// completion date if its completion state has also changed
-	BOOL bDone = CDateHelper::IsDateSet(date);
-	BOOL bWasDone = m_data.IsTaskDone(dwTaskID);
-	BOOL bStateChange = ((bDone && !bWasDone) || (!bDone && bWasDone));
-	BOOL bDateChange = bStateChange;
+	TDC_SET nRes = m_data.SetTaskDone(dwTaskID, date, bAndSubtasks, bUpdateAllSubtaskDates);
 	
-	if (!bDateChange && bDone && bWasDone)
-		bDateChange = (date != m_data.GetTaskDate(dwTaskID, TDCD_DONE));
-	
-	if (bDateChange && (!bIsSubtask || bUpdateAllSubtaskDates || bStateChange))
+	if ((nRes == SET_CHANGE) && m_timeTracking.IsTrackingTask(dwTaskID, FALSE))
 	{
-		if (m_data.SetTaskDate(dwTaskID, TDCD_DONE, date) == SET_CHANGE)
-		{
-			nRes = SET_CHANGE;
+		ASSERT(CDateHelper::IsDateSet(date));
 
-			// update 'status' if done status has switched
-			if (bStateChange && !m_sCompletionStatus.IsEmpty())
-			{
-				if (bDone)
-				{
-					m_data.SetTaskStatus(dwTaskID, m_sCompletionStatus);
-				}
-				else
-				{
-					m_data.SetTaskStatus(dwTaskID, _T(""));
-				}
-			}
-		}
-	}
-		
-	if (m_timeTracking.IsTrackingTask(dwTaskID, FALSE))
-	{
 		EndTimeTracking(TRUE, TRUE);
 		UpdateControls(FALSE); // don't update comments
-	}
-
-	if (bAndSubtasks && m_data.TaskHasSubtasks(dwTaskID))
-	{
-		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-		ASSERT(pTDS);
-
-		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
-		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
-
-			if (SetTaskDone(dwSubtaskID, date, TRUE, bUpdateAllSubtaskDates, TRUE) == SET_CHANGE)
-				nRes = SET_CHANGE;
-		}
 	}
 
 	return nRes;
@@ -5769,7 +5595,9 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 	if (sStatus != m_sCompletionStatus)
 	{
 		m_sCompletionStatus = sStatus; 
+
 		m_taskTree.SetCompletionStatus(sStatus);
+		m_data.SetCompletionStatus(sStatus);
 	}
 }
 
@@ -11033,6 +10861,7 @@ void CToDoCtrl::SetDefaultTaskAttributeValues(const TODOITEM& tdi)
 
 	m_data.SetDefaultCommentsFormat(m_cfDefault);
 	m_data.SetDefaultTimeUnits(tdi.timeEstimate.nUnits, tdi.timeSpent.nUnits);
+	m_data.SetDefaultStatus(tdi.sStatus);
 	
 	TODOITEM::SetModifierName(tdi.sCreatedBy); // 'this' user
 

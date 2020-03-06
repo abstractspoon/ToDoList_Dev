@@ -1986,7 +1986,7 @@ TDC_SET CToDoCtrlData::SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset)
 // external version
 TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
 {
-	return SetTaskDate(dwTaskID, NULL, nDate, date);
+	return SetTaskDate(dwTaskID, NULL, nDate, date, TRUE); // Recalc time estimate
 }
 
 // internal version
@@ -2222,7 +2222,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 				pTDI->trRecurrence.FitDayToScheme(date);
 		}
 
-		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date);
+		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
 	}
 
 	// children
@@ -2281,7 +2281,7 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 	ASSERT(nRes != SET_FAILED);
 
 	if (nRes == SET_CHANGE)
-		SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue);
+		SetTaskDate(dwTaskID, pTDI, TDCD_DUE, dtNewDue, TRUE); // Recalc time estimate
 
 	return nRes;
 }
@@ -2324,7 +2324,7 @@ TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const
 	TDC_SET nRes = SET_NOCHANGE;
 
 	if (!CDateHelper::IsDateSet(dtTask))
-		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date);
+		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
 	
 	// children
 	if (bAndSubtasks)
@@ -4202,7 +4202,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 	return nRes;
 }
 
-BOOL CToDoCtrlData::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate, const CString& sDefStatus)
+BOOL CToDoCtrlData::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate)
 {
 	if (!HasTask(dwPrevTaskID) || !HasTask(dwNewTaskID))
 	{
@@ -4218,7 +4218,7 @@ BOOL CToDoCtrlData::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTa
 	ClearTaskAttribute(dwNewTaskID, TDCA_PERCENT, TRUE);
 
 	// Set some defaults
-	SetTaskStatus(dwNewTaskID, sDefStatus);
+	SetTaskStatus(dwNewTaskID, m_sDefaultStatus);
 
 	// Reset number of occurrences
 	ResetRecurringSubtaskOccurrences(dwNewTaskID);
@@ -4245,3 +4245,64 @@ BOOL CToDoCtrlData::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTa
 
 	return TRUE;
 }
+
+// External version
+TDC_SET CToDoCtrlData::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
+								   BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates)
+{
+	return SetTaskDone(dwTaskID, date, bAndSubtasks, bUpdateAllSubtaskDates, FALSE);
+}
+
+// Internal version
+TDC_SET CToDoCtrlData::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
+							   BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates, BOOL bIsSubtask)
+{
+	ASSERT(bAndSubtasks || !bIsSubtask);
+	ASSERT(!CDateHelper::IsDateSet(date) || !bUpdateAllSubtaskDates);
+
+	TDC_SET nRes = SET_NOCHANGE;
+
+	// If bUpdateAllSubtaskDates == FALSE, we only update a subtask's 
+	// completion date if its completion state has also changed
+	BOOL bDone = CDateHelper::IsDateSet(date);
+	BOOL bWasDone = IsTaskDone(dwTaskID);
+	BOOL bStateChange = ((bDone && !bWasDone) || (!bDone && bWasDone));
+	BOOL bDateChange = bStateChange;
+
+	if (!bDateChange && bDone && bWasDone)
+		bDateChange = (date != GetTaskDate(dwTaskID, TDCD_DONE));
+
+	if (bDateChange && (!bIsSubtask || bUpdateAllSubtaskDates || bStateChange))
+	{
+		if (SetTaskDate(dwTaskID, TDCD_DONE, date) == SET_CHANGE)
+		{
+			nRes = SET_CHANGE;
+
+			// update 'status' if done status has switched
+			if (bStateChange && !m_sCompletionStatus.IsEmpty())
+			{
+				if (bDone)
+					SetTaskStatus(dwTaskID, m_sCompletionStatus);
+				else
+					SetTaskStatus(dwTaskID, _T(""));
+			}
+		}
+	}
+
+	if (bAndSubtasks && TaskHasSubtasks(dwTaskID))
+	{
+		const TODOSTRUCTURE* pTDS = LocateTask(dwTaskID);
+		ASSERT(pTDS);
+
+		for (int nSubtask = 0; nSubtask < pTDS->GetSubTaskCount(); nSubtask++)
+		{
+			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubtask);
+
+			if (SetTaskDone(dwSubtaskID, date, TRUE, bUpdateAllSubtaskDates, TRUE) == SET_CHANGE)
+				nRes = SET_CHANGE;
+		}
+	}
+
+	return nRes;
+}
+

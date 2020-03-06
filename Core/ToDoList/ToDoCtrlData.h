@@ -173,6 +173,7 @@ public:
 	TDC_SET SetTaskAttributes(DWORD dwTaskID, const TODOITEM& tdi);
 	
 	TDC_SET SetTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date);
+	TDC_SET SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates);
 	TDC_SET SetTaskColor(DWORD dwTaskID, COLORREF color);
 	TDC_SET SetTaskIcon(DWORD dwTaskID, const CString& sIcon);
 	TDC_SET SetTaskComments(DWORD dwTaskID, const CString& sComments, const CBinaryData& customComments = _T(""));
@@ -219,8 +220,8 @@ public:
 	TDC_SET RenameTasksAttributeValue(const CString& sAttribID, const CString& sFrom, const CString& sTo, BOOL bCaseSensitive, BOOL bWholeWord);
 
 	TDC_SET AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
-	BOOL InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate, const CString& sDefStatus);
 
+	BOOL InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate);
 	BOOL ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank = TRUE);
 	BOOL ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	BOOL ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
@@ -233,19 +234,24 @@ public:
 	TDC_UNITS GetDefaultTimeSpentUnits() const { return m_nDefTimeSpentUnits; }
 	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	BOOL WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const;
+	void SetCompletionStatus(const CString& sStatus) { m_sCompletionStatus = sStatus; }
+	void SetDefaultStatus(const CString& sStatus) { m_sDefaultStatus = sStatus; }
 
 protected:
 	CToDoCtrlDataItems m_items; // the real data
 	CToDoCtrlUndo m_undo;
 	CToDoCtrlDataStructure m_struct;
-	BOOL m_bUndoRedoing;
 
 	const CTDCStyleMap& m_styles;
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CString m_cfDefault;
+	CString m_sDefaultStatus, m_sCompletionStatus;
+
 	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
 	CTDCAttributeMap m_mapParentAttribs; // inheritable attribs
+
+	BOOL m_bUndoRedoing;
 	BOOL m_bUpdateInheritAttrib; // update as changes are made to parents
 
 protected:
@@ -263,7 +269,8 @@ protected:
 	BOOL CalcNewTaskDependencyStartDate(DWORD dwTaskID, TDC_DATE nDate, COleDateTime& dtNewStart) const;
 	BOOL RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent, DWORD dwDependID);
 	TDC_SET RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate);
-	TDC_SET SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate, const COleDateTime& date, BOOL bRecalcTimeEstimate = TRUE);
+	TDC_SET SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate, const COleDateTime& date, BOOL bRecalcTimeEstimate);
+	TDC_SET SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates, BOOL bIsSubtask);
 	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
 	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;
 
