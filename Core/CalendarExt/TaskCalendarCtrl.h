@@ -91,6 +91,7 @@ protected:
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
+	CDWordSet m_mapRecurringTaskIDs;
 	
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPosContinuous, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;

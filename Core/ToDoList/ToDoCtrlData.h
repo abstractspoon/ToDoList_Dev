@@ -125,7 +125,7 @@ public:
 	BOOL IsTaskDone(DWORD dwTaskID) const;
 	BOOL GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const;
 	BOOL IsTaskRecurring(DWORD dwTaskID, BOOL bCheckRemaining) const;
-	BOOL GetTaskNextOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue);
+	BOOL GetNextTaskOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue);
 	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
 	BOOL CanTaskRecur(DWORD dwTaskID) const;

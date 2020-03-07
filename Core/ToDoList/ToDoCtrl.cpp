@@ -3456,7 +3456,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 				{
 					bSomeRecurred = TRUE;
 
-					VERIFY (m_data.GetTaskNextOccurrence(dwTaskID, dtNext, bDueDate));
+					VERIFY (m_data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate));
 
 					InitialiseNewRecurringTask(dwTaskID, dwTaskID, dtNext, bDueDate);
 
@@ -3565,7 +3565,7 @@ LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
 		COleDateTime dtNext;
 		BOOL bDueDate = TRUE;
 
-		if (!m_data.GetTaskNextOccurrence(dwTaskID, dtNext, bDueDate))
+		if (!m_data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate))
 			continue;
 
 		CTaskFile task;
