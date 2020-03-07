@@ -748,9 +748,6 @@ int CFPSMiniCalendarCtrl::DrawHeader(CDC &dc, int iY, int iLeftX, int iMonthRow,
 		int iX1 = iLeftX + 6;
 		int iX2 = iX1 + ((m_iHeaderHeight / 4));
 
-		//int iLeftX = 10;
-		//int iRightX = 10 + (m_iHeaderHeight / 4);
-
 		for (int iLineY = iTop; iLineY <= iBottom; iLineY++)
 		{
 			dc.MoveTo(iX1, iMiddle);
