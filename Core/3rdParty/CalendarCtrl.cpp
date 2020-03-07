@@ -416,11 +416,16 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 					bSelected = ((tmax >= tcur) && (tcur >= tmin));
 				}
 
+				int nSaveDC = pDC->SaveDC();
+				pDC->IntersectClipRect(rCell);
+
 				DrawCell(pDC, pCell, rCell, bSelected, bToday, bShowMonth);
 
 				// focus rect
 				if (m_SelectionRange[2] == tcur)
 					DrawCellFocus(pDC, pCell, rCell);
+
+				pDC->RestoreDC(nSaveDC);
 			}
 		}
 	}

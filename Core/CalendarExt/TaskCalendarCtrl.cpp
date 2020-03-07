@@ -692,8 +692,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	int nTaskHeight = GetTaskHeight();
 	int nStart = (bVScrolled ? m_nCellVScrollPos : 0);
 	
-	int nSaveDC = pDC->SaveDC();
-	
 	for (int nTask = nStart; nTask < nNumTasks; nTask++)
 	{
 		const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
@@ -746,7 +744,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwFlags);
 		}
 		
-		// draw icon if there is enough space
+		// draw icon
 		if ((nTaskHeight >= DEF_TASK_HEIGHT) && pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
 		{
 			// draw at the start only
@@ -799,8 +797,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				break;
 		}
 	}
-	
-	pDC->RestoreDC(nSaveDC);
 }
 
 CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
