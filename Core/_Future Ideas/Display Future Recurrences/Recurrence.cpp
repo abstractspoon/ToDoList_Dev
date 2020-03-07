@@ -411,9 +411,9 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtFrom, COleDateTime& dt
 	return TRUE;
 }
 	
-int CRecurrence::CalcNextOccurences(const COleDateTime& dtFrom, COleDateTimeRange& range, CArray<double, double&>& aDates) const
+int CRecurrence::CalcNextOccurences(const COleDateTime& dtFrom, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const
 {
-	if (!range.IsValid())
+	if (!dtRange.IsValid())
 	{
 		ASSERT(0);
 		return 0;
@@ -430,14 +430,14 @@ int CRecurrence::CalcNextOccurences(const COleDateTime& dtFrom, COleDateTimeRang
 
 	aDates.RemoveAll();
 
-	while (dtNext < range.GetStart())
+	while (dtNext < dtRange.GetStart())
 	{
 		if (!tr.GetNextOccurence(dtNext, dtNext))
 			return 0;
 	}
 
 	// Process range itself
-	while (dtNext < range.GetEnd())
+	while (dtNext < dtRange.GetEnd())
 	{
 		aDates.Add(dtNext.m_dt);
 
