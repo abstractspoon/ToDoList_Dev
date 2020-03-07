@@ -76,20 +76,21 @@ protected:
 	BOOL m_bReadOnly;
 	BOOL m_bStrikeThruDone;
 	BOOL m_bSavingToImage;
+	BOOL m_bSortAscending;
+
+	CScrollBar m_sbCellVScroll;
+	CToolTipCtrlEx m_tooltip;
 
 	DWORD m_dwSelectedTaskID;
 	DWORD m_dwOptions;
 	TASKCALITEM m_tciPreDrag;
 	CPoint m_ptDragOrigin;
 	int m_nCellVScrollPos;
-	CScrollBar m_sbCellVScroll;
 	CFont m_fontAltText;
-	CToolTipCtrlEx m_tooltip;
 	CFontCache m_fonts;
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
-	BOOL m_bSortAscending;
 	
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPosContinuous, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
