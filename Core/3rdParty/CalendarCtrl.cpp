@@ -362,7 +362,7 @@ void CCalendarCtrl::DrawGrid(CDC* pDC)
 
 	int i;
 
-	for(i=1; i<CALENDAR_NUM_COLUMNS; i++)
+	for(i=0; i<CALENDAR_NUM_COLUMNS; i++)
 	{
 		pDC->MoveTo(i*nWidth, m_nHeaderHeight);
 		pDC->LineTo(i*nWidth, rc.Height());
@@ -465,16 +465,19 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 							 BOOL bSelected, BOOL bToday, BOOL bShowMonth)
 {
 	CRect rBkgnd(rCell);
-	COLORREF crBkgnd = GetCellBackgroundColor(pCell, bSelected, bToday);
-	COLORREF crHeader = GetCellHeaderColor(pCell, bSelected, bToday);
+	COLORREF crBkgnd = GetCellBkgndColor(pCell, bSelected, bToday);
+	COLORREF crHeader = GetCellHeaderBkgndColor(pCell, bSelected, bToday);
+
+	if (!m_bDrawGridOverCells)
+		rBkgnd.DeflateRect(1, 1, 0, 0);
 	
+	CRect rHeader(rBkgnd);
+	rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
+
 	if (crHeader != CLR_NONE)
 	{
-		CRect rHeader(rCell);
-		rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
-
 		pDC->FillSolidRect(rHeader, crHeader);
-		rBkgnd.top = (rHeader.bottom + 1);
+		rBkgnd.top = (rHeader.bottom);
 	}
 
 	if (crBkgnd != CLR_NONE)
@@ -507,13 +510,11 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 		csDay.Format(_T("%d"), nDay);
 	}
 	
-	if (bSelected/* && !bToday*/)
-		pDC->SetTextColor(RGB(255,104,4));
-	else
-		pDC->SetTextColor(RGB(0,0,0));
+	rHeader.DeflateRect(0, 1, 2, 0); // padding
 	
+	pDC->SetTextColor(GetCellHeaderTextColor(pCell, bSelected, bToday));
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rCell, DT_RIGHT|DT_TOP);
+	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rHeader, DT_RIGHT|DT_VCENTER);
 
 	// draw inside...
 	CRect rContent(rCell);
@@ -522,7 +523,16 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
 }
 
-COLORREF CCalendarCtrl::GetCellBackgroundColor(const CCalendarCell* pCell, BOOL bSelected, BOOL /*bToday*/) const
+COLORREF CCalendarCtrl::GetCellHeaderTextColor(const CCalendarCell* /*pCell*/, BOOL bSelected, BOOL /*bToday*/) const
+{
+	if (bSelected/* && !bToday*/)
+		return RGB(255,104,4);
+
+	// else
+	return RGB(0,0,0);
+}
+
+COLORREF CCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL /*bToday*/) const
 {
 	// Draw the selection
 	if (bSelected)
@@ -546,7 +556,7 @@ COLORREF CCalendarCtrl::GetCellBackgroundColor(const CCalendarCell* pCell, BOOL 
 	return CLR_NONE;
 }
 
-COLORREF CCalendarCtrl::GetCellHeaderColor(const CCalendarCell* pCell, BOOL /*bSelected*/, BOOL bToday) const
+COLORREF CCalendarCtrl::GetCellHeaderBkgndColor(const CCalendarCell* pCell, BOOL /*bSelected*/, BOOL bToday) const
 {
 	if (bToday)
 		return m_crTheme;

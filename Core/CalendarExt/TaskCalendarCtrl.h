@@ -60,6 +60,9 @@ public:
 	void SetOption(DWORD dwOption, BOOL bSet);
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
+	void SetGridLineColor(COLORREF crGrid);
+	void SetWeekendColor(COLORREF crWeekend);
+
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 
@@ -92,6 +95,7 @@ protected:
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
 	CDWordSet m_mapRecurringTaskIDs;
+	COLORREF m_crWeekend; // Grid color handled by base class
 	
 	mutable CMap<DWORD, DWORD, int, int> m_mapVertPosContinuous, m_mapTextOffset;
 	mutable int m_nMaxDayTaskCount;
@@ -136,8 +140,9 @@ protected:
 	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell,
 									BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
-	virtual COLORREF GetCellBackgroundColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
-	virtual COLORREF GetCellHeaderColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
+	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
+	virtual COLORREF GetCellHeaderBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
+	virtual COLORREF GetCellHeaderTextColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
 	
 	int RebuildCellTasks(CCalendarCell* pCell) const;
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
@@ -159,6 +164,7 @@ protected:
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
+	BOOL HasWeekendColor() const { return (m_crWeekend != CLR_NONE); }
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;

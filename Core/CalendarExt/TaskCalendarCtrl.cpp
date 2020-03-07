@@ -32,6 +32,8 @@ const int PADDING = 3;
 const int DEF_TASK_HEIGHT = (GraphicsMisc::ScaleByDPIFactor(16) + 3); // Effective height is 1 less
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 
+const COLORREF DEF_WEEKENDCOLOR = RGB(224, 224, 224);
+
 /////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl
 
@@ -51,7 +53,8 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_bSavingToImage(FALSE),
 	m_nTaskHeight(DEF_TASK_HEIGHT),
 	m_nSortBy(TDCA_NONE),
-	m_bSortAscending(-1)
+	m_bSortAscending(-1),
+	m_crWeekend(DEF_WEEKENDCOLOR)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
@@ -618,16 +621,35 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 	CCalendarCtrlEx::DrawCells(pDC);
 }
 
-COLORREF CTaskCalendarCtrl::GetCellBackgroundColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
+void CTaskCalendarCtrl::SetGridLineColor(COLORREF crGrid)
 {
-	COLORREF crBkgnd = CCalendarCtrlEx::GetCellBackgroundColor(pCell, bSelected, bToday);
+	if (crGrid != m_crGrid)
+	{
+		m_crGrid = crGrid;
+
+		if (GetSafeHwnd())
+			Invalidate();
+	}
+}
+
+void CTaskCalendarCtrl::SetWeekendColor(COLORREF crWeekend)
+{
+	if (crWeekend != m_crWeekend)
+	{
+		m_crWeekend = crWeekend;
+
+		if (GetSafeHwnd())
+			Invalidate();
+	}
+}
+
+COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
+{
+	COLORREF crBkgnd = CCalendarCtrlEx::GetCellBkgndColor(pCell, bSelected, bToday);
 
 	if (CWeekend().IsWeekend(pCell->date))
 	{
-		crBkgnd = m_crTheme;
-
-		if (bSelected)
-			crBkgnd = GraphicsMisc::Darker(crBkgnd, 0.02, FALSE);
+		crBkgnd = m_crWeekend;
 	}
 	else if (bSelected)
 	{
@@ -637,18 +659,38 @@ COLORREF CTaskCalendarCtrl::GetCellBackgroundColor(const CCalendarCell* pCell, B
 	return crBkgnd;
 }
 
-COLORREF CTaskCalendarCtrl::GetCellHeaderColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
+COLORREF CTaskCalendarCtrl::GetCellHeaderTextColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
+{
+	COLORREF crText = GetSysColor(COLOR_WINDOWTEXT); // default
+
+	if (bSelected)
+	{
+		crText = GraphicsMisc::Darker(m_crTheme, 0.3, FALSE);
+
+		if (HasWeekendColor() && CWeekend().IsWeekend(pCell->date))
+		{
+			if (bToday)
+				crText = GraphicsMisc::Darker(crText, 0.2, FALSE);
+			else
+				crText = GraphicsMisc::Darker(crText, 0.1, FALSE);
+		}
+	}
+
+	return crText;
+}
+
+COLORREF CTaskCalendarCtrl::GetCellHeaderBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
 {
 	COLORREF crHeader = CLR_NONE; // == same as background color
 
-	if (CWeekend().IsWeekend(pCell->date))
+	if (HasWeekendColor() && CWeekend().IsWeekend(pCell->date))
 	{
 		if (bToday)
 		{
-			crHeader = GraphicsMisc::Darker(m_crTheme, 0.02, FALSE);
+			crHeader = GraphicsMisc::Darker(m_crWeekend, 0.05, FALSE);
 
 			if (bSelected)
-				crHeader = GraphicsMisc::Darker(crHeader, 0.02, FALSE);
+				crHeader = GraphicsMisc::Darker(crHeader, 0.05, FALSE);
 		}
 	}
 	else if (bToday)
