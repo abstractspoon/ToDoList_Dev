@@ -33,12 +33,6 @@ const int DEF_TASK_HEIGHT = (GraphicsMisc::ScaleByDPIFactor(16) + 3); // Effecti
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 
 /////////////////////////////////////////////////////////////////////////////
-
-// Used temporarily by CompareTCItems
-static TDC_ATTRIBUTE s_nSortBy = TDCA_NONE;
-static BOOL s_bSortAscending = TRUE;
-
-/////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl
 
 CTaskCalendarCtrl::CTaskCalendarCtrl() 
@@ -1141,16 +1135,7 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell) const
 		}
 	}
 
-	if (pTasks->GetSize() > 1)
-	{
-		s_nSortBy = m_nSortBy;
-		s_bSortAscending = m_bSortAscending;
-
-		qsort(pTasks->GetData(), pTasks->GetSize(), sizeof(TASKCALITEM*), CompareTCItems);
-
-		s_nSortBy = TDCA_NONE;
-		s_bSortAscending = -1;
-	}
+	pTasks->SortItems(m_nSortBy, m_bSortAscending);
 
 	// now go thru the list and set the position of each item 
 	// if not already done
@@ -1184,60 +1169,6 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell) const
 	}
 	
 	return pTasks->GetSize();
-}
-
-int CTaskCalendarCtrl::CompareTCItems(const void* pV1, const void* pV2)
-{
-	typedef TASKCALITEM* PTASKCALITEM;
-
-	const TASKCALITEM* pTCI1 = *(static_cast<const PTASKCALITEM*>(pV1));
-	const TASKCALITEM* pTCI2 = *(static_cast<const PTASKCALITEM*>(pV2));
-
-	// special case: Not drawing tasks continuous means that
-	// the same task can appear twice
-	if (pTCI1->GetTaskID() == pTCI2->GetTaskID())
-		return 0;
-	
-	// earlier start date
-	if (pTCI1->GetAnyStartDate() < pTCI2->GetAnyStartDate())
-		return -1;
-
-	if (pTCI1->GetAnyStartDate() > pTCI2->GetAnyStartDate())
-		return 1;
-
-	// equal so test for later end date
-	if (pTCI1->GetAnyEndDate() > pTCI2->GetAnyEndDate())
-		return -1;
-
-	if (pTCI1->GetAnyEndDate() < pTCI2->GetAnyEndDate())
-		return 1;
-
-	// equal so test for sort attribute
-	int nCompare = 0;
-
-	switch (s_nSortBy)
-	{
-	case TDCA_TASKNAME:
-		ASSERT(s_bSortAscending != -1);
-		nCompare = pTCI1->GetName(FALSE).CompareNoCase(pTCI2->GetName(FALSE));
-		break;
-
-	case TDCA_ID:
-		ASSERT(s_bSortAscending != -1);
-		// fall thru
-
-	case TDCA_NONE:
-		nCompare = ((pTCI1->GetTaskID() < pTCI2->GetTaskID()) ? -1 : 1);
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	if (!s_bSortAscending && (nCompare != 0) && (s_nSortBy != TDCA_NONE))
-		nCompare = -nCompare;
-
-	return nCompare;
 }
 
 DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient) const

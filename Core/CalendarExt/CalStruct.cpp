@@ -473,6 +473,81 @@ void TASKCALITEM::ReformatName()
 
 /////////////////////////////////////////////////////////////////////////////
 
+// Used temporarily by CompareItems
+static TDC_ATTRIBUTE s_nSortBy = TDCA_NONE;
+static BOOL s_bSortAscending = TRUE;
+
+void CTaskCalItemArray::SortItems(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending)
+{
+	if (GetSize() > 1)
+	{
+		s_nSortBy = nSortBy;
+		s_bSortAscending = bSortAscending;
+
+		Misc::SortArrayT(*this, CompareItems);
+
+		s_nSortBy = TDCA_NONE;
+		s_bSortAscending = -1;
+	}
+}
+
+int CTaskCalItemArray::CompareItems(const void* pV1, const void* pV2)
+{
+	typedef TASKCALITEM* PTASKCALITEM;
+
+	const TASKCALITEM* pTCI1 = *(static_cast<const PTASKCALITEM*>(pV1));
+	const TASKCALITEM* pTCI2 = *(static_cast<const PTASKCALITEM*>(pV2));
+
+	// special case: Not drawing tasks continuous means that
+	// the same task can appear twice
+	if (pTCI1->GetTaskID() == pTCI2->GetTaskID())
+		return 0;
+
+	// earlier start date
+	if (pTCI1->GetAnyStartDate() < pTCI2->GetAnyStartDate())
+		return -1;
+
+	if (pTCI1->GetAnyStartDate() > pTCI2->GetAnyStartDate())
+		return 1;
+
+	// equal so test for later end date
+	if (pTCI1->GetAnyEndDate() > pTCI2->GetAnyEndDate())
+		return -1;
+
+	if (pTCI1->GetAnyEndDate() < pTCI2->GetAnyEndDate())
+		return 1;
+
+	// equal so test for sort attribute
+	int nCompare = 0;
+
+	switch (s_nSortBy)
+	{
+	case TDCA_TASKNAME:
+		ASSERT(s_bSortAscending != -1);
+		nCompare = pTCI1->GetName(FALSE).CompareNoCase(pTCI2->GetName(FALSE));
+		break;
+
+	case TDCA_ID:
+		ASSERT(s_bSortAscending != -1);
+		// fall thru
+
+	case TDCA_NONE:
+		nCompare = ((pTCI1->GetTaskID() < pTCI2->GetTaskID()) ? -1 : 1);
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	if (!s_bSortAscending && (nCompare != 0) && (s_nSortBy != TDCA_NONE))
+		nCompare = -nCompare;
+
+	return nCompare;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+
 CHeatMap::CHeatMap(int nMinHeatCutoff) 
 	: 
 	m_nMinHeatCutoff(nMinHeatCutoff),

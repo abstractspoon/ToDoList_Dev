@@ -192,7 +192,6 @@ protected:
 	void RecalcDataRange();
 
 	// helpers
-	static int CompareTCItems(const void* pV1, const void* pV2);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew);
 

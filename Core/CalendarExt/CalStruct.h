@@ -81,8 +81,18 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-typedef CArray<TASKCALITEM*, TASKCALITEM*&> CTaskCalItemArray;
-typedef CArray<const TASKCALITEM*, const TASKCALITEM*&> CTaskCalItemConstArray;
+class CTaskCalItemArray : public CArray<TASKCALITEM*, TASKCALITEM*&>
+{
+public:
+	void SortItems(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending);
+
+protected:
+	static int CompareItems(const void* pV1, const void* pV2);
+
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 typedef CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&> CTaskCalItemMap;
 typedef CSet<double> CSpecialDateSet;
 
