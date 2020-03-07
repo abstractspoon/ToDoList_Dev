@@ -329,7 +329,6 @@ protected:
 	void FireNotifyClick();
 	void FireNotifyHScroll(int nDirection);
 	void FireTodayButton();
-	CFPSMiniCalendarCtrlFontInfo& GetFontInfo(FMC_FONT_TYPE nFont);
 
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;
 	virtual void GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd) const;
