@@ -724,8 +724,8 @@ int CFPSMiniCalendarCtrl::DrawHeader(CDC &dc, int iY, int iLeftX, int iMonthRow,
 
 	GetClientRect(ClientRect);
 
-	dc.FillSolidRect(iLeftX, iY, m_szMonthSize.cx-1, m_iHeaderHeight, ::GetSysColor(COLOR_BTNFACE));
-	dc.Draw3dRect(iLeftX, iY, m_szMonthSize.cx-1, m_iHeaderHeight, ::GetSysColor(COLOR_WINDOW), ::GetSysColor(COLOR_3DSHADOW));
+	dc.FillSolidRect(iLeftX, iY, m_szMonthSize.cx, m_iHeaderHeight, ::GetSysColor(COLOR_BTNFACE));
+	dc.Draw3dRect(iLeftX, iY, m_szMonthSize.cx, m_iHeaderHeight, ::GetSysColor(COLOR_WINDOW), ::GetSysColor(COLOR_3DSHADOW));
 
 	CFont* pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_HEADER].m_pFont);
 	dc.SetBkColor(::GetSysColor(COLOR_BTNFACE));

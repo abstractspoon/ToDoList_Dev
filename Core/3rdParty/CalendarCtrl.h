@@ -169,6 +169,7 @@ protected:
 	BOOL			m_bEnableMultiSel;
 	COLORREF		m_crTheme, m_crGrid;
 	int				m_nHeaderHeight, m_nDayHeaderHeight;
+	BOOL			m_bDrawGridOverCells;
 
 	LPFN_CALENDAR_DATA_CALLBACK	m_pfnDataCallback;
 };

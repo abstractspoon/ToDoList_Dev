@@ -54,6 +54,8 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_bSortAscending(-1)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
+
+	m_bDrawGridOverCells = FALSE;
 }
 
 CTaskCalendarCtrl::~CTaskCalendarCtrl()
@@ -715,7 +717,11 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
  			CRect rClip(rCell);
 
 			if (rTask.left <= rCellTrue.left)
+			{
+				rTask.left--; // draw over gridline
+				rClip.left--;
 				dwSelFlags |= GMIB_CLIPLEFT;
+			}
 
 			if (rTask.right >= rCellTrue.right)
 				dwSelFlags |= GMIB_CLIPRIGHT;
@@ -731,6 +737,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			
 			if (rTask.left > rCellTrue.left)
 				dwFlags |= GMDR_LEFT;
+			else
+				rTask.left--; // draw over gridline
 			
 			if (rTask.right < rCellTrue.right)
 				dwFlags |= GMDR_RIGHT;
@@ -782,7 +790,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				pDC->ExtTextOut(nLeft, nTop, ETO_CLIPPED, rTask, sTitle, NULL);
 				
 				// update text pos
-				nOffset += (rTask.Width() + 1); // +1 for the cell border
+				nOffset += rTask.Width();
 				
 				// if the offset now exceeds the text extent we can stop
 				int nExtent = pDC->GetTextExtent(sTitle).cx;

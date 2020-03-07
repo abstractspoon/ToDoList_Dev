@@ -43,6 +43,7 @@ CCalendarCtrl::CCalendarCtrl()
 	: 
 	m_nVisibleWeeks(6), 
 	m_bEnableMultiSel(FALSE),
+	m_bDrawGridOverCells(TRUE),
 	m_crGrid(RGB(125,175,255)),
 	m_nHeaderHeight(CALENDAR_MIN_HEADER_HEIGHT),
 	m_nDayHeaderHeight(CALENDAR_MIN_DAY_HEADER_HEIGHT)
@@ -259,8 +260,17 @@ void CCalendarCtrl::OnPaint()
 	
 	// Draw calendar elements
 	DrawHeader(&MemDC);			
-	DrawCells(&MemDC);	
-	DrawGrid(&MemDC);
+
+	if (m_bDrawGridOverCells)
+	{
+		DrawCells(&MemDC);
+		DrawGrid(&MemDC);
+	}
+	else
+	{
+		DrawGrid(&MemDC);
+		DrawCells(&MemDC);
+	}
 
 	// Render
 	dc.BitBlt(rc.left, rc.top, rc.Width(), rc.Height(), &MemDC, 0, 0, SRCCOPY);
