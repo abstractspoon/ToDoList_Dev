@@ -132,7 +132,6 @@ protected:
 	//{{AFX_VIRTUAL(CTaskCalendarCtrl)
 	//}}AFX_VIRTUAL
 	virtual void DrawHeader(CDC* pDC);
-	virtual void DrawGrid(CDC* pDC);
 	virtual void DrawCells(CDC* pDC);
 	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell,
 									BOOL bSelected, BOOL bToday);

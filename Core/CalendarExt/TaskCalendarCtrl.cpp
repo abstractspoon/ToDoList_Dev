@@ -572,11 +572,6 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 	pDC->SelectObject(pOldFont);
 }
 
-void CTaskCalendarCtrl::DrawGrid(CDC* pDC)
-{
-	CCalendarCtrlEx::DrawGrid(pDC);
-}
-
 void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 {
 	UpdateCellScrollBarVisibility();
