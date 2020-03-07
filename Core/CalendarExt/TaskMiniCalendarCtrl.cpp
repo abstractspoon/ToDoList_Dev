@@ -28,7 +28,8 @@ static char THIS_FILE[] = __FILE__;
 CTaskMiniCalendarCtrl::CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData) 
 	: 
 	m_mapData(mapData), 
-	m_nHeatMapAttribute(TDCA_NONE)
+	m_nHeatMapAttribute(TDCA_NONE),
+	m_crBorder(CLR_NONE)
 {
 }
 
@@ -62,6 +63,17 @@ void CTaskMiniCalendarCtrl::SetOptions(DWORD dwOptions)
 		}
 	
 		RecalcHeatMap();
+	}
+}
+
+void CTaskMiniCalendarCtrl::SetBorderColor(COLORREF crBorder)
+{
+	if (crBorder != m_crBorder)
+	{
+		m_crBorder = crBorder;
+
+		if (GetSafeHwnd())
+			Invalidate(FALSE);
 	}
 }
 
@@ -171,4 +183,19 @@ int CTaskMiniCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	}
 
 	return CMiniCalendarCtrl::OnToolHitTest(point, pTI);
+}
+
+void CTaskMiniCalendarCtrl::Draw(CDC& dc, const CRect& rDraw)
+{
+	// Draw a border on our RHS
+	if (m_crBorder != CLR_NONE)
+	{
+		CRect rBorder(rDraw);
+		rBorder.left = (rBorder.right - 1);
+
+		dc.FillSolidRect(rBorder, m_crBorder);
+	}
+
+	// Then default
+	CFPSMiniCalendarCtrl::Draw(dc, rDraw);
 }

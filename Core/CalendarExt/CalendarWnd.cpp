@@ -249,6 +249,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		crGrid = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("GridLines"), DEF_GRIDLINECOLOR);
 
 	m_BigCalendar.SetGridLineColor(crGrid);
+	m_MiniCalendar.SetBorderColor(crGrid);
 
 	// calendar specific preferences
 	if (!bAppOnly)

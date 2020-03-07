@@ -654,11 +654,7 @@ void CFPSMiniCalendarCtrl::OnPaint()
 		ComputeSize();
 
 	GetClientRect(ClientRect);
-
 	dcDraw.FillSolidRect(0, 0, ClientRect.Width(), ClientRect.Height(), m_cBackColor);
-
-	int iStartY = 4;
-	int iStartX = 4;
 
 	if (m_bShow3dBorder)
 	{
@@ -666,29 +662,31 @@ void CFPSMiniCalendarCtrl::OnPaint()
 		dcDraw.Draw3dRect(1, 1, ClientRect.Width()-2, ClientRect.Height()-2, ::GetSysColor(COLOR_WINDOW), ::GetSysColor(COLOR_3DSHADOW));
 		dcDraw.Draw3dRect(2, 2, ClientRect.Width()-4, ClientRect.Height()-4, ::GetSysColor(COLOR_BTNFACE), ::GetSysColor(COLOR_BTNFACE));
 		dcDraw.Draw3dRect(3, 3, ClientRect.Width()-6, ClientRect.Height()-6, ::GetSysColor(COLOR_3DSHADOW), ::GetSysColor(COLOR_WINDOW));
-	}
-	else
-	{
-		iStartX = 0;
-		iStartY = 0;
+
+		ClientRect.DeflateRect(4, 4);
 	}
 
-	int iY = iStartY;
+	Draw(dcDraw, ClientRect);
+}
+
+void CFPSMiniCalendarCtrl::Draw(CDC& dc, const CRect& rDraw)
+{
+	int iY = rDraw.top;
 	int iMonth = m_iCurrentMonth;
 	int iYear = m_iCurrentYear;
 
 	// draw each row/column individually
 	for (int iRow = 1; iRow <= m_iRows; iRow++)
 	{		
-		int iCurrentX = iStartX;
+		int iCurrentX = rDraw.left;
 
 		for (int iCol = 1; iCol <= m_iCols; iCol++)
 		{
 			int iCurrentY = iY;
 
-			iCurrentY += DrawHeader(dcDraw, iCurrentY, iCurrentX, iRow, iCol, iMonth, iYear);
-			iCurrentY += DrawDaysOfWeek(dcDraw, iCurrentY, iCurrentX, iRow, iCol);
-			iCurrentY += DrawDays(dcDraw, iCurrentY, iCurrentX, iRow, iCol, iMonth, iYear);
+			iCurrentY += DrawHeader(dc, iCurrentY, iCurrentX, iRow, iCol, iMonth, iYear);
+			iCurrentY += DrawDaysOfWeek(dc, iCurrentY, iCurrentX, iRow, iCol);
+			iCurrentY += DrawDays(dc, iCurrentY, iCurrentX, iRow, iCol, iMonth, iYear);
 
 			iCurrentX += m_szMonthSize.cx;
 
@@ -703,7 +701,7 @@ void CFPSMiniCalendarCtrl::OnPaint()
 		iY += m_szMonthSize.cy;
 	}
 
-	iY += DrawTodayButton(dcDraw, iY);
+	DrawTodayButton(dc, iY);
 }
 
 BOOL CFPSMiniCalendarCtrl::OnEraseBkgnd(CDC*) 

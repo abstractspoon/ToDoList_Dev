@@ -317,6 +317,7 @@ protected:
 	BOOL IsToday(COleDateTime& dt);
 	CString CStr(long lValue);
 	void CreateFontObjects();
+	virtual void Draw(CDC& dc, const CRect& rDraw);
 	virtual int DrawHeader(CDC& dc, int iY, int iLeftX, int iRow, int iCol, int iMonth, int iYear);
 	virtual int DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol, int iMonth, int iYear);
 	virtual int DrawDaysOfWeek(CDC& dc, int iY, int iLeftX, int iRow, int iCol);

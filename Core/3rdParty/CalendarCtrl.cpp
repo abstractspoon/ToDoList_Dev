@@ -362,7 +362,7 @@ void CCalendarCtrl::DrawGrid(CDC* pDC)
 
 	int i;
 
-	for(i=0; i<CALENDAR_NUM_COLUMNS; i++)
+	for(i=1; i<CALENDAR_NUM_COLUMNS; i++)
 	{
 		pDC->MoveTo(i*nWidth, m_nHeaderHeight);
 		pDC->LineTo(i*nWidth, rc.Height());

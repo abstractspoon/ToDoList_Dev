@@ -30,7 +30,9 @@ public:
 
 	void EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttrib);
 	void DisableHeatMap();
+
 	void SetOptions(DWORD dwOptions);
+	void SetBorderColor(COLORREF crBorder);
 
 	void OnUpdateTasks();
 	void FilterToolTipMessage(MSG* pMsg);
@@ -44,6 +46,7 @@ protected:
 	
 	TDC_ATTRIBUTE m_nHeatMapAttribute;
 	DWORD m_dwOptions;
+	COLORREF m_crBorder;
 
 	// Generated message map functions
 protected:
@@ -57,6 +60,7 @@ protected:
 	//{{AFX_VIRTUAL(CTaskMiniCalendarCtrl)
 	//}}AFX_VIRTUAL
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
+	virtual void Draw(CDC& dc, const CRect& rDraw);
 
 	// helpers
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;
