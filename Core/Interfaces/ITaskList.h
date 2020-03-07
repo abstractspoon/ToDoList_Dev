@@ -413,6 +413,7 @@ class ITaskList17 : public ITaskList16
 public:
 	virtual LPCWSTR GetFileName(bool bFullPath) const = 0;
 
+	virtual bool IsTaskRecurring(HTASKITEM hTask) const = 0;
 	virtual bool IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const = 0;
 	virtual bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc = false, bool bDisplay = false) const = 0;
 

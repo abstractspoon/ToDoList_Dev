@@ -241,6 +241,7 @@ public:
 	// ITaskList17 implementation 
 	LPCTSTR GetFileName(bool bFullPath) const;
 
+	bool IsTaskRecurring(HTASKITEM hTask) const;
 	bool IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const;
 	bool TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const;
 	LPCTSTR GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay) const;

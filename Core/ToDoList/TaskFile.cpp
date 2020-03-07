@@ -2603,6 +2603,14 @@ bool CTaskFile::IsTaskLocked(HTASKITEM hTask, bool bCalc) const
 	return (GetTaskUChar(hTask, TDL_TASKLOCK) > 0);
 }
 
+bool CTaskFile::IsTaskRecurring(HTASKITEM hTask) const
+{
+	const CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, false);
+
+	return (pXITask->GetItem(TDL_TASKRECURRENCE) != NULL);
+}
+
 unsigned long CTaskFile::GetTaskColor(HTASKITEM hTask) const
 {
 	return GetTaskULong(hTask, TDL_TASKCOLOR);
