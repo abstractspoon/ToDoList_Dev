@@ -2242,7 +2242,7 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 		{
 			PrepareTaskfileForTasks(tasks, filter);
 
-			// we return exactly what's selected in the list and in the same order
+			// we return exactly what's selected as a flat list and in the same order
 			POSITION pos = m_taskList.List().GetFirstSelectedItemPosition();
 
 			while (pos)
@@ -2251,7 +2251,6 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 
 				DWORD dwTaskID = GetTaskID(nItem);
 				DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
-				HTASKITEM htParent = NULL;
 				
 				// Add immediate parent as required.
 				// Note: we can assume that the selected task is always added successfully
@@ -2259,8 +2258,8 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 				{
 					DWORD dwParentsParentID = m_data.GetTaskParentID(dwParentID);
 					
-					if (CToDoCtrl::AddTreeItemToTaskFile(NULL, dwParentID, tasks, NULL, filter, FALSE, dwParentsParentID))  // FALSE == no subtasks
-						htParent = tasks.FindTask(dwParentID);
+					// Note: this may fail if the filter excludes it
+					CToDoCtrl::AddTreeItemToTaskFile(NULL, dwParentID, tasks, NULL, filter, FALSE, dwParentsParentID);  // FALSE == no subtasks
 				}
 
 				VERIFY(CToDoCtrl::AddTreeItemToTaskFile(NULL, dwTaskID, tasks, NULL, filter, FALSE, dwParentID)); // FALSE == no subtasks
