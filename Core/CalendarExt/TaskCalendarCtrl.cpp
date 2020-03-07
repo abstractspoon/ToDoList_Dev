@@ -32,8 +32,6 @@ const int PADDING = 3;
 const int DEF_TASK_HEIGHT = (GraphicsMisc::ScaleByDPIFactor(16) + 3); // Effective height is 1 less
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 
-const COLORREF DEF_WEEKENDCOLOR = RGB(224, 224, 224);
-
 /////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl
 
@@ -54,7 +52,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_nTaskHeight(DEF_TASK_HEIGHT),
 	m_nSortBy(TDCA_NONE),
 	m_bSortAscending(-1),
-	m_crWeekend(DEF_WEEKENDCOLOR)
+	m_crWeekend(CLR_NONE)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 

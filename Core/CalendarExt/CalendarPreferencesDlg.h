@@ -10,6 +10,7 @@
 #include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 #include "..\Shared\ColorBrewerComboBox.h"
+#include "..\Shared\ColorButton.h"
 
 #include "..\Interfaces\IUIExtension.h"
 
@@ -30,6 +31,8 @@ public:
 	BOOL GetAdjustTaskHeights() const { return m_bAdjustTaskHeights; }
 	BOOL GetTreatOverdueAsDueToday() const { return m_bTreatOverdueAsDueToday; }
 	BOOL GetHideParentTasks() const { return m_bHideParentTasks; }
+
+	COLORREF GetWeekendColor() const;
 
 	BOOL GetDisplayAsContinuous() const { return m_bShowTasksContinuous; }
 	BOOL GetDisplayStart() const { return m_bShowStartDates; }
@@ -65,16 +68,19 @@ protected:
 	BOOL	m_bAdjustTaskHeights;
 	BOOL	m_bShowDoneDates;
 	BOOL	m_bTreatOverdueAsDueToday;
+	BOOL	m_bSpecifyWeekendColor;
 	//}}AFX_DATA
 	int		m_nCalcMissingStartDates;
 	int		m_nCalcMissingDueDates;
 	BOOL	m_bHideParentTasks;
 
+	CColorButton m_btWeekendColor;
 	CComboBox m_cbHeatMapAttribute;
 	CColorBrewerComboBox m_cbHeatMapPalette;
 	CDWordArray m_aSelPalette;
 	TDC_ATTRIBUTE m_nHeatMapAttrib;
 	COLORREF m_crThemeBkgnd;
+	COLORREF m_crWeekend;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -94,6 +100,7 @@ protected:
 	afx_msg void OnShowStartDates();
 	afx_msg void OnShowDueDates();
 	afx_msg void OnShowMiniCalendar();
+	afx_msg void OnWeekendColor();
 	//}}AFX_MSG
 	afx_msg void OnSelChangeHeatMapPalette();
 	DECLARE_MESSAGE_MAP()
@@ -112,6 +119,8 @@ public:
 	BOOL GetAdjustTaskHeights() const { return m_page.GetAdjustTaskHeights(); }
 	BOOL GetTreatOverdueAsDueToday() const { return m_page.GetTreatOverdueAsDueToday(); }
 	BOOL GetHideParentTasks() const { return m_page.GetHideParentTasks(); }
+
+	COLORREF GetWeekendColor() const { return m_page.GetWeekendColor(); }
 
 	BOOL GetDisplayAsContinuous() const { return m_page.GetDisplayAsContinuous(); }
 	BOOL GetDisplayStart() const { return m_page.GetDisplayStart(); }

@@ -26,6 +26,7 @@
 #define IDC_HIDEPARENTTASKS             1042
 #define IDC_ENABLEHEATMAP               1043
 #define IDC_HEATMAPATTRIBUTE            1044
+#define IDC_SETWEEKENDCOLOR             1072
 #define IDC_SHOWMINICALENDAR            2001
 #define IDC_SHOWTASKSCONTINUOUS         2002
 #define IDC_SHOWSTARTDATES              2003
@@ -36,7 +37,9 @@
 #define IDC_USESTARTFORDUE              2008
 #define IDC_USESTARTORTODAYFORDUE       2009
 #define IDC_SHOWDONEDATES               2010
+#define IDC_WEEKENDCOLOR                16004
 #define IDR_TOOLBAR                     16006
+#define IDC_COLORSGROUP                 16008
 #define IDC_TB_PLACEHOLDER              16024
 #define IDC_ATTRIBUTES_LABEL            16043
 #define IDD_PREFERENCES_DIALOG          17002

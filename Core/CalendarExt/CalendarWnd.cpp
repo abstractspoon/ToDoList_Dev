@@ -301,6 +301,8 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	m_BigCalendar.SetOptions(dwOptions);
 	m_MiniCalendar.SetOptions(dwOptions);
 
+	m_BigCalendar.SetWeekendColor(m_dlgPrefs.GetWeekendColor());
+
 	CDWordArray aHeatMapPalette;
 	TDC_ATTRIBUTE nHeatMapAttrib = TDCA_NONE;
 

@@ -182,7 +182,7 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 348, 333
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 348, 370
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -214,25 +214,29 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,18,140,323,10
     CONTROL         "Display task 'Completion' dates",IDC_SHOWDONEDATES,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,155,334,10
-    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,187,
-                    334,62
-    CONTROL         "The task's 'Creation' date",IDC_USECREATIONFORSTART,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,201,316,10
-    CONTROL         "The task's 'Due' date",IDC_USEDUEFORSTART,"Button",
-                    BS_AUTORADIOBUTTON,16,216,316,10
-    CONTROL         "The earlier of the task's 'Due' date and 'Today'",
-                    IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
-                    231,316,10
-    GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,255,
-                    334,46
-    CONTROL         "The task's 'Start' date",IDC_USESTARTFORDUE,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,269,316,10
-    CONTROL         "The later of the task's 'Start' date and 'Today'",
-                    IDC_USESTARTORTODAYFORDUE,"Button",BS_AUTORADIOBUTTON,16,
-                    284,316,10
     CONTROL         "Treat overdue tasks as being due 'Today'",
                     IDC_SHOWOVERDUEASDUETODAY,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,170,334,10
+    LTEXT           "Colours",IDC_COLORSGROUP,7,185,333,8
+    CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,200,167,10
+    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,199,52,13,BS_RIGHT
+    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,215,
+                    334,62
+    CONTROL         "The task's 'Creation' date",IDC_USECREATIONFORSTART,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,229,316,10
+    CONTROL         "The task's 'Due' date",IDC_USEDUEFORSTART,"Button",
+                    BS_AUTORADIOBUTTON,16,244,316,10
+    CONTROL         "The earlier of the task's 'Due' date and 'Today'",
+                    IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
+                    259,316,10
+    GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,283,
+                    334,46
+    CONTROL         "The task's 'Start' date",IDC_USESTARTFORDUE,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,16,297,316,10
+    CONTROL         "The later of the task's 'Start' date and 'Today'",
+                    IDC_USESTARTORTODAYFORDUE,"Button",BS_AUTORADIOBUTTON,16,
+                    313,316,10
 END
 
 
@@ -263,7 +267,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 341
         TOPMARGIN, 7
-        BOTTOMMARGIN, 326
+        BOTTOMMARGIN, 363
     END
 END
 #endif    // APSTUDIO_INVOKED
