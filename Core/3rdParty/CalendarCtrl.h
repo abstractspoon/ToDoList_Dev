@@ -72,9 +72,6 @@ public:
 	BOOL SetVisibleWeeks(int nWeeks);
 	int GetVisibleWeeks() const { return m_nVisibleWeeks; }
 
-	void ShowWeekends(BOOL bShow);
-	BOOL WantShowWeekends() const { return m_bShowWeekends; }
-
 	void EnableMultiSelection(BOOL bEnable) { m_bEnableMultiSel = bEnable; }
 	BOOL IsMultiSelectionEnabled() const { return m_bEnableMultiSel; }
 
@@ -169,7 +166,6 @@ protected:
 	int				m_nVscrollPos;
 	int				m_nVscrollMax;
 	int				m_nVisibleWeeks;
-	BOOL			m_bShowWeekends;
 	BOOL			m_bEnableMultiSel;
 	COLORREF		m_crTheme, m_crGrid;
 	int				m_nHeaderHeight, m_nDayHeaderHeight;

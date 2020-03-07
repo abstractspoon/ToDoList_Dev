@@ -42,7 +42,6 @@ COleDateTime NullDate()
 CCalendarCtrl::CCalendarCtrl() 
 	: 
 	m_nVisibleWeeks(6), 
-	m_bShowWeekends(TRUE), 
 	m_bEnableMultiSel(FALSE),
 	m_crGrid(RGB(125,175,255)),
 	m_nHeaderHeight(CALENDAR_MIN_HEADER_HEIGHT),
