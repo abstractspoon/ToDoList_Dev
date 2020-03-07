@@ -231,6 +231,7 @@ BOOL CTaskCalendarCtrl::WantEditUpdate(TDC_ATTRIBUTE nEditAttrib)
 	case TDCA_COLOR:
 	case TDCA_DEPENDENCY:
 	case TDCA_ICON:
+	case TDCA_RECURRENCE:
 		return true;
 	}
 	
