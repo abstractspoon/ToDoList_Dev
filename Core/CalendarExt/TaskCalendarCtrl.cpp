@@ -130,19 +130,6 @@ int CTaskCalendarCtrl::GetDefaultTaskHeight()
 	return DEF_TASK_HEIGHT;
 }
 
-void CTaskCalendarCtrl::SetOption(DWORD dwOption, BOOL bSet)
-{
-	if (dwOption)
-	{
-		DWORD dwNewOptions = m_dwOptions;
-
-		if (bSet)
-			SetOptions(m_dwOptions | dwOption);
-		else
-			SetOptions(m_dwOptions & ~dwOption);
-	}
-}
-
 BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
 {
 	return ((dwOld & TCCO_DATEDISPLAYOPTIONS) == (dwNew & TCCO_DATEDISPLAYOPTIONS));
@@ -161,6 +148,7 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 		FixupSelection(bScrollToTask);
 
 		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
+		m_bDrawGridOverCells = !HasOption(TCCO_DISPLAYCONTINUOUS);
 	}
 }
 
@@ -648,6 +636,10 @@ COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL b
 	if (CWeekend().IsWeekend(pCell->date))
 	{
 		crBkgnd = m_crWeekend;
+
+		if (bSelected)
+			crBkgnd = GraphicsMisc::Darker(crBkgnd, 0.05);
+
 	}
 	else if (bSelected)
 	{
@@ -663,15 +655,13 @@ COLORREF CTaskCalendarCtrl::GetCellHeaderTextColor(const CCalendarCell* pCell, B
 
 	if (bSelected)
 	{
-		crText = GraphicsMisc::Darker(m_crTheme, 0.3, FALSE);
-
 		if (HasWeekendColor() && CWeekend().IsWeekend(pCell->date))
-		{
-			if (bToday)
-				crText = GraphicsMisc::Darker(crText, 0.2, FALSE);
-			else
-				crText = GraphicsMisc::Darker(crText, 0.1, FALSE);
-		}
+			crText = GraphicsMisc::Darker(m_crTheme, 0.5, FALSE);
+		else
+			crText = GraphicsMisc::Darker(m_crTheme, 0.3, FALSE);
+
+		if (bToday)
+			crText = GraphicsMisc::Darker(crText, 0.5, FALSE);
 	}
 
 	return crText;
@@ -685,7 +675,7 @@ COLORREF CTaskCalendarCtrl::GetCellHeaderBkgndColor(const CCalendarCell* pCell, 
 	{
 		if (bToday)
 		{
-			crHeader = GraphicsMisc::Darker(m_crWeekend, 0.05, FALSE);
+			crHeader = GraphicsMisc::Darker(m_crWeekend, 0.1, FALSE);
 
 			if (bSelected)
 				crHeader = GraphicsMisc::Darker(crHeader, 0.05, FALSE);
@@ -758,8 +748,12 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 			if (rTask.left <= rCellTrue.left)
 			{
-				rTask.left--; // draw over gridline
-				rClip.left--;
+				if (!m_bDrawGridOverCells)
+				{
+					rTask.left--; // draw over gridline
+					rClip.left--;
+				}
+
 				dwSelFlags |= GMIB_CLIPLEFT;
 			}
 
@@ -776,9 +770,13 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			DWORD dwFlags = GMDR_TOP;
 			
 			if (rTask.left > rCellTrue.left)
+			{
 				dwFlags |= GMDR_LEFT;
-			else
+			}
+			else if (!m_bDrawGridOverCells)
+			{
 				rTask.left--; // draw over gridline
+			}
 			
 			if (rTask.right < rCellTrue.right)
 				dwFlags |= GMDR_RIGHT;

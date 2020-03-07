@@ -229,17 +229,21 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	// app preferences
-	m_BigCalendar.SetOption(TCCO_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
-	m_BigCalendar.SetOption(TCCO_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
-	m_BigCalendar.SetOption(TCCO_PREVENTDEPENDENTDRAGGING, pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE));
-	m_BigCalendar.SetOption(TCCO_SHOWPARENTTASKSASFOLDER, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE));
-	m_BigCalendar.SetOption(TCCO_ENABLELABELTIPS, !pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
+	DWORD dwPrefs = m_BigCalendar.GetOptions(); // preserve calendar-specific prefs
+
+	Misc::SetFlag(dwPrefs, TCCO_TASKTEXTCOLORISBKGND, pPrefs->GetProfileInt(_T("Preferences"), _T("ColorTaskBackground"), FALSE));
+	Misc::SetFlag(dwPrefs, TCCO_STRIKETHRUDONETASKS, pPrefs->GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), TRUE));
+	Misc::SetFlag(dwPrefs, TCCO_PREVENTDEPENDENTDRAGGING, pPrefs->GetProfileInt(_T("Preferences"), _T("AutoAdjustDependents"), TRUE));
+	Misc::SetFlag(dwPrefs, TCCO_SHOWPARENTTASKSASFOLDER, pPrefs->GetProfileInt(_T("Preferences"), _T("ShowParentsAsFolders"), TRUE));
+	Misc::SetFlag(dwPrefs, TCCO_ENABLELABELTIPS, !pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
+
+	m_BigCalendar.SetOptions(dwPrefs);
 
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	CWeekend::Initialise(dwWeekends);
 
 	// get grid line color from app prefs
-	COLORREF crGrid = CLR_NONE;
+	COLORREF crGrid = DEF_GRIDLINECOLOR;
 
 	if (pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyGridColor"), TRUE))
 		crGrid = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("GridLines"), DEF_GRIDLINECOLOR);

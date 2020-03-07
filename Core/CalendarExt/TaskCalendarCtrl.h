@@ -57,7 +57,7 @@ public:
 	void SetSnapMode(TCC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
 
 	void SetOptions(DWORD dwOption);
-	void SetOption(DWORD dwOption, BOOL bSet);
+	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
 	void SetGridLineColor(COLORREF crGrid);
