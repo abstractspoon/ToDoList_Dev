@@ -1961,11 +1961,16 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLOR
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
+
+	DWORD dwOrgTaskID(dwTaskID);
 	
 	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 		return FALSE;
 	
 	// else
+	if (bRef == -1)
+		bRef = (dwTaskID != dwOrgTaskID);
+
 	return GetTaskTextColors(pTDI, pTDS, crText, crBack, bRef, FALSE);
 }
 
@@ -2009,7 +2014,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 	}
 	else // all incomplete tasks
 	{
-		while (true)
+		do
 		{
 			// if it's a ref task just return the ref colour
 			if (bRef && HasColor(m_crReference))
@@ -2117,9 +2122,8 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 			{
 				crText = pTDI->color; 
 			}
-
-			break; // always
 		}
+		while (false); // break
 	}
 	ASSERT(HasColor(crText));
 	
