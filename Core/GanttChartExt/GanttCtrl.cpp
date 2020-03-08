@@ -648,7 +648,7 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		return TRUE;
 	}
 	
-	// Update certain attributes before resolving references
+	// Don't resolve references here
 	GANTTITEM* pGI = m_data.GetItem(dwTaskID, FALSE);
 
 	if (!pGI)
@@ -660,15 +660,14 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 	// Take a snapshot we can check changes against
 	GANTTITEM giOrg = *pGI;
 
-	// Update these attributes for all tasks
+	// Update colour for all tasks
 	pGI->color = pTasks->GetTaskTextColor(hTask);
-	pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
-	pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
-	pGI->dwOrgRefID = 0;
 
 	// Existing tasks should not change reference ID 
 	DWORD dwRefID = pTasks->GetTaskReferenceID(hTask);
-	ASSERT(pGI->dwRefID == dwRefID); 
+	ASSERT(pGI->dwRefID == dwRefID);
+
+	pGI->dwOrgRefID = 0;
 	
 	// Update rest of attributes if not a reference task
 	if (pGI->dwRefID == 0)
@@ -749,6 +748,10 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 					pGI->aDependIDs.Add(dwTaskID);
 			}
 		}
+
+		// Always update these
+		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
+		pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 	}
 
 	// detect update
@@ -1382,7 +1385,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 			DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 			GANTTITEM* pGI = NULL;
 
-			GET_GI_RET(dwTaskID, pGI, 0L);
+			GET_GI_RET(dwTaskID, pGI, CDRF_DODEFAULT);
 				
  			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 			CRect rItem(pTVCD->nmcd.rc);
