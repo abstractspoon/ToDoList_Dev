@@ -1134,66 +1134,77 @@ CString CTabbedToDoCtrl::GetTaskViewName() const
 
 LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 {
-	if (!m_bUpdatingExtensions)
+	if (m_bUpdatingExtensions)
+		return 0;
+
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
 	{
-		CDWordArray aTaskIDs;
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+	case FTCV_TASKLIST:
+		ASSERT(0);
+		return 0;
 
-		if (wParam == 0)
+	default:
+		break;
+	}
+
+	CDWordArray aTaskIDs;
+
+	if (wParam == 0)
+	{
+		aTaskIDs.Add(lParam);
+	}
+	else
+	{
+		LPDWORD pIDs = (LPDWORD)wParam;
+
+		for (int nID = 0; nID < (int)lParam; nID++)
+			aTaskIDs.Add(pIDs[nID]);
+	}
+
+	VIEWDATA* pVData = GetActiveViewData();
+	BOOL bHadSelectedTask = pVData->bHasSelectedTask;
+
+	if (aTaskIDs.GetSize() == 1)
+	{
+		DWORD dwTaskID = aTaskIDs[0];
+		pVData->bHasSelectedTask = (dwTaskID != 0);
+
+		if (dwTaskID)
 		{
-			aTaskIDs.Add(lParam);
-		}
-		else
-		{
-			LPDWORD pIDs = (LPDWORD)wParam;
-
-			for (int nID = 0; nID < (int)lParam; nID++)
-				aTaskIDs.Add(pIDs[nID]);
-		}
-		
-		VIEWDATA* pVData = GetActiveViewData();
-		BOOL bHadSelectedTask = pVData->bHasSelectedTask;
-
-		if (aTaskIDs.GetSize() == 1)
-		{
-			DWORD dwTaskID = aTaskIDs[0];
-			pVData->bHasSelectedTask = (dwTaskID != 0);
-
-			if (dwTaskID)
+			if (HasSingleSelectionChanged(dwTaskID))
 			{
-				if (HasSingleSelectionChanged(dwTaskID))
-				{
-					// Call base class directly so that we don't end
-					// up calling back into extension this came from
-					VERIFY(CToDoCtrl::SelectTask(dwTaskID, FALSE));	
-				}
-				else
-				{
-					// Update if the extension previously did NOT have a selection
-					if (!bHadSelectedTask)
-						UpdateControls();
-				}
+				// Call base class directly so that we don't end
+				// up calling back into extension this came from
+				VERIFY(CToDoCtrl::SelectTask(dwTaskID, FALSE));
 			}
 			else
 			{
-				// Update if the extension previously had a selection
-				if (bHadSelectedTask)
+				// Update if the extension previously did NOT have a selection
+				if (!bHadSelectedTask)
 					UpdateControls();
 			}
 		}
 		else
 		{
-			pVData->bHasSelectedTask = TRUE;
-
-			// Call base class directly so that we don't end
-			// up calling back into extension this came from
-			VERIFY(CToDoCtrl::SelectTasks(aTaskIDs, FALSE));
+			// Update if the extension previously had a selection
+			if (bHadSelectedTask)
+				UpdateControls();
 		}
+	}
+	else
+	{
+		pVData->bHasSelectedTask = TRUE;
 
-		return pVData->bHasSelectedTask;
+		// Call base class directly so that we don't end
+		// up calling back into extension this came from
+		VERIFY(CToDoCtrl::SelectTasks(aTaskIDs, FALSE));
 	}
 
-	// else
-	return 0L;
+	return pVData->bHasSelectedTask;
 }
 
 LRESULT CTabbedToDoCtrl::OnUIExtSortColumnChange(WPARAM wParam, LPARAM lParam)
@@ -2453,6 +2464,8 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 	// notify extension windows
 	if (HasAnyExtensionViews())
 	{
+		CAutoFlag af(m_bUpdatingExtensions, TRUE);
+
 		// we need to update in 2 ways:
 		// 1. Tell the extensions that application settings have changed
 		// 2. Refresh tasks if one or more calculated attributes has changed
