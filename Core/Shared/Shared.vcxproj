@@ -45,10 +45,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">.\Unicode_Release\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">.\Unicode_Release\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">.\Unicode_Debug\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">.\Unicode_Debug\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
     <ClCompile>
@@ -59,9 +59,9 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeaderOutputFile>.\Unicode_Release/Shared.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Unicode_Release/</AssemblerListingLocation>
-      <ObjectFileName>.\Unicode_Release/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Unicode_Release/</ProgramDataBaseFileName>
+      <AssemblerListingLocation>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</AssemblerListingLocation>
+      <ObjectFileName>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</ObjectFileName>
+      <ProgramDataBaseFileName>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </ClCompile>
@@ -70,7 +70,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\Unicode_Release\Shared.lib</OutputFile>
+      <OutputFile>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\Shared.lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Bscmake>
@@ -86,9 +86,9 @@
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeaderOutputFile>.\Unicode_Debug/Shared.pch</PrecompiledHeaderOutputFile>
-      <AssemblerListingLocation>.\Unicode_Debug/</AssemblerListingLocation>
-      <ObjectFileName>.\Unicode_Debug/</ObjectFileName>
-      <ProgramDataBaseFileName>.\Unicode_Debug/</ProgramDataBaseFileName>
+      <AssemblerListingLocation>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</AssemblerListingLocation>
+      <ObjectFileName>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
@@ -98,7 +98,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Lib>
-      <OutputFile>.\Unicode_Debug\Shared.lib</OutputFile>
+      <OutputFile>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\Shared.lib</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
     </Lib>
     <Bscmake>

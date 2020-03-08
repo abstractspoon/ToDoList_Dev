@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3rdParty", "3rdParty\3rdParty.vcxproj", "{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3rdParty", "..\..\Core\3rdParty\3rdParty.vcxproj", "{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "Shared\Shared.vcxproj", "{95605899-9C90-40D8-8774-D1DA1FCE7464}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "..\..\Core\Shared\Shared.vcxproj", "{95605899-9C90-40D8-8774-D1DA1FCE7464}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
