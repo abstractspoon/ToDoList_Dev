@@ -137,6 +137,7 @@ struct WORKLOADITEM
 	
 	WORKLOADITEM& operator=(const WORKLOADITEM& wi);
 	BOOL operator==(const WORKLOADITEM& wi) const;
+	BOOL operator!=(const WORKLOADITEM& wi) const;
 	
 	BOOL HasStartDate() const;
 	BOOL HasDueDate() const;

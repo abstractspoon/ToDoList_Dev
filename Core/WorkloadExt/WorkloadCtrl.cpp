@@ -666,89 +666,99 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		return TRUE;
 	}
 	
-	WORKLOADITEM* pWI = NULL;
-	GET_WI_RET(dwTaskID, pWI, FALSE);
+	// Don't resolve references here
+	WORKLOADITEM* pWI = m_data.GetItem(dwTaskID, FALSE);
 
-	// update taskID to refID 
-	if (pWI->dwOrgRefID)
+	if (!pWI)
 	{
-		dwTaskID = pWI->dwOrgRefID;
-		pWI->dwOrgRefID = 0;
+		ASSERT(0);
+		return FALSE;
 	}
 
-	// take a snapshot we can check changes against
-	// Note: No need to check meta-data because we're 
-	// the only one who can change it
-	WORKLOADITEM giOrg = *pWI;
+	// Take a snapshot we can check changes against
+	WORKLOADITEM wiOrg = *pWI;
 
-	// can't use a switch here because we also need to check for IUI_ALL
-	time64_t tDate = 0;
-	BOOL bAllocationChange = FALSE;
-	
-	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
-		pWI->sTitle = pTasks->GetTaskTitle(hTask);
-	
- 	if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
-	{
- 		GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
-		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
-
-		bAllocationChange = TRUE;
-	}
-	
-	if (pTasks->IsAttributeAvailable(TDCA_ICON))
-		pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
-
-	if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
-		pWI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
-		
-	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
-	{
-		if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
-			pWI->dtRange.m_dtStart = CDateHelper::GetDate(tDate);
-		else
-			CDateHelper::ClearDate(pWI->dtRange.m_dtStart);
-
-		bAllocationChange = TRUE;
-	}
-	
-	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
-	{
-		if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
-			pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
-		else
-			CDateHelper::ClearDate(pWI->dtRange.m_dtEnd);
-
-		bAllocationChange = TRUE;
-	}
-
-	if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
-	{
-		pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
-
-		bAllocationChange = TRUE;
-	}
-	
-	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
-		pWI->bDone = pTasks->IsTaskDone(hTask);
-
-	if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
-	{
-		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
-	}
-
-	// always update lock states
-	pWI->bLocked = pTasks->IsTaskLocked(hTask, true);
-
-	// always update colour because it can change for so many reasons
+	// Update colour for all tasks
 	pWI->color = pTasks->GetTaskTextColor(hTask);
 
-	// likewise 'Good as Done'
-	pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+	// Existing tasks should not change reference ID 
+	DWORD dwRefID = pTasks->GetTaskReferenceID(hTask);
+	ASSERT(pWI->dwRefID == dwRefID);
+
+	pWI->dwOrgRefID = 0;
+
+	// Update rest of attributes if not a reference task
+	BOOL bAllocationChange = FALSE;
+
+	if (pWI->dwRefID == 0)
+	{
+		// can't use a switch here because we also need to check for IUI_ALL
+		time64_t tDate = 0;
+	
+		if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
+			pWI->sTitle = pTasks->GetTaskTitle(hTask);
+	
+ 		if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
+		{
+ 			GetTaskAllocTo(pTasks, hTask, pWI->aAllocTo);
+			Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
+
+			bAllocationChange = TRUE;
+		}
+	
+		if (pTasks->IsAttributeAvailable(TDCA_ICON))
+			pWI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+
+		if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
+			pWI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
+		
+		if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
+		{
+			time64_t tDate = 0;
+	
+			if (pTasks->GetTaskStartDate64(hTask, pWI->bParent, tDate))
+				pWI->dtRange.m_dtStart = CDateHelper::GetDate(tDate);
+			else
+				CDateHelper::ClearDate(pWI->dtRange.m_dtStart);
+
+			bAllocationChange = TRUE;
+		}
+	
+		if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
+		{
+			time64_t tDate = 0;
+
+			if (pTasks->GetTaskDueDate64(hTask, pWI->bParent, tDate))
+				pWI->dtRange.m_dtEnd = CDateHelper::GetDate(tDate);
+			else
+				CDateHelper::ClearDate(pWI->dtRange.m_dtEnd);
+
+			bAllocationChange = TRUE;
+		}
+
+		if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
+		{
+			pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
+
+			bAllocationChange = TRUE;
+		}
+	
+		if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+			pWI->bDone = pTasks->IsTaskDone(hTask);
+
+		if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
+		{
+			LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
+			pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+		}
+
+		// Always update these
+		pWI->bLocked = pTasks->IsTaskLocked(hTask, true);
+		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+	}
 
 	// detect update
-	BOOL bChange = !(*pWI == giOrg);
+	BOOL bChange = (*pWI != wiOrg);
 		
 	// children
 	if (UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, TRUE))
@@ -948,16 +958,15 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	WORKLOADITEM* pWI = new WORKLOADITEM(dwTaskID);
 	m_data[dwTaskID] = pWI;
 	
+	pWI->dwTaskID = dwTaskID;
 	pWI->dwRefID = pTasks->GetTaskReferenceID(hTask);
-
-	// Except for position
 	pWI->nPosition = pTasks->GetTaskPosition(hTask);
+	pWI->color = pTasks->GetTaskTextColor(hTask);
 
 	// Only save data for non-references
 	if (pWI->dwRefID == 0)
 	{
 		pWI->sTitle = pTasks->GetTaskTitle(hTask);
-		pWI->color = pTasks->GetTaskTextColor(hTask);
 		pWI->bDone = pTasks->IsTaskDone(hTask);
 		pWI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 		pWI->bParent = pTasks->IsTaskParent(hTask);
@@ -1200,7 +1209,7 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 			DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 			WORKLOADITEM* pWI = NULL;
 
-			GET_WI_RET(dwTaskID, pWI, 0L);
+			GET_WI_RET(dwTaskID, pWI, CDRF_DODEFAULT);
 				
  			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 			CRect rItem(pTVCD->nmcd.rc);
@@ -1227,7 +1236,7 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 				WORKLOADITEM* pWI = NULL;
 
-				GET_WI_RET(dwTaskID, pWI, 0L);
+				GET_WI_RET(dwTaskID, pWI, CDRF_DODEFAULT);
 				
 				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 
@@ -2487,7 +2496,17 @@ void CWorkloadCtrl::DrawTotalsHeader(CDC* pDC)
 
 COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const
 {
-	COLORREF crTextBk = wi.GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	COLORREF crTextBk = CLR_NONE;
+
+	if (wi.dwOrgRefID)
+	{
+		const WORKLOADITEM* pWIRef = m_data.GetItem(wi.dwOrgRefID, FALSE);
+		crTextBk = pWIRef->GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	}
+	else
+	{
+		crTextBk = wi.GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	}
 
 	if (crTextBk == CLR_NONE)
 	{
@@ -2502,7 +2521,17 @@ COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelecte
 
 COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter) const
 {
-	COLORREF crText = wi.GetTextColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	COLORREF crText = CLR_NONE;
+
+	if (wi.dwOrgRefID)
+	{
+		const WORKLOADITEM* pWIRef = m_data.GetItem(wi.dwOrgRefID, FALSE);
+		crText = pWIRef->GetTextColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	}
+	else
+	{
+		crText = wi.GetTextColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	}
 	ASSERT(crText != CLR_NONE);
 
 	if (!m_bSavingToImage)

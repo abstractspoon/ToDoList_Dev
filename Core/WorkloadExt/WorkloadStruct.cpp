@@ -473,6 +473,11 @@ WORKLOADITEM& WORKLOADITEM::operator=(const WORKLOADITEM& wi)
 	return (*this);
 }
 
+WORKLOADITEM::~WORKLOADITEM()
+{
+	
+}
+
 BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi) const
 {
 	return ((sTitle == wi.sTitle) &&
@@ -494,9 +499,9 @@ BOOL WORKLOADITEM::operator==(const WORKLOADITEM& wi) const
 			mapAllocatedDays.MatchAll(wi.mapAllocatedDays));
 }
 
-WORKLOADITEM::~WORKLOADITEM()
+BOOL WORKLOADITEM::operator!=(const WORKLOADITEM& wi) const
 {
-	
+	return !(*this == wi);
 }
 
 int WORKLOADITEM::GetNames(const CStringArray& aAllNames, CStringArray& aNames) const
