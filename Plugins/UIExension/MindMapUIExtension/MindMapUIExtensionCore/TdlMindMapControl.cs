@@ -888,10 +888,11 @@ namespace MindMapUIExtension
 		{
 			if (m_TaskColorIsBkgnd)
 			{
-				var realItem = GetRealTaskItem(itemData as MindMapTaskItem);
+				var taskItem = (itemData as MindMapTaskItem);
+				var realItem = GetRealTaskItem(taskItem);
 
-				if (!realItem.TextColor.IsEmpty && !realItem.IsDone(true))
-					return realItem.TextColor;
+				if (!taskItem.TextColor.IsEmpty && !realItem.IsDone(true))
+					return taskItem.TextColor;
 			}
 
 			// all else
@@ -937,19 +938,19 @@ namespace MindMapUIExtension
 			// Text Colour
 			Color textColor = SystemColors.WindowText;
 
-			if (!realItem.TextColor.IsEmpty)
+			if (!taskItem.TextColor.IsEmpty)
 			{
-				if (m_TaskColorIsBkgnd && !isSelected && !taskItem.IsDone(true))
+				if (m_TaskColorIsBkgnd && !isSelected && !realItem.IsDone(true))
 				{
-					textColor = DrawingColor.GetBestTextColor(realItem.TextColor);
+					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
 				}
 				else if (isSelected)
 				{
-					textColor = DrawingColor.SetLuminance(realItem.TextColor, 0.3f);
+					textColor = DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
 				}
                 else
                 {
-                    textColor = realItem.TextColor;
+                    textColor = taskItem.TextColor;
                 }
             }
 
