@@ -1365,6 +1365,27 @@ BOOL CTreeListCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 	return TRUE;
 }
 
+BOOL CTreeListCtrl::GetTreeIconRect(HTREEITEM hti, CRect& rIcon) const
+{
+	if (m_tree.GetImageList(TVSIL_NORMAL) == NULL)
+		return FALSE;
+
+	CRect rItem;
+
+	if (!GetTreeItemRect(hti, 0, rItem))
+		return FALSE;
+
+	rIcon = rItem;
+
+	rIcon.right = (rIcon.left + IMAGE_SIZE);
+	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+
+	rIcon.OffsetRect(-(IMAGE_SIZE + 2), 0);
+	GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
+
+	return !rItem.IsRectEmpty();
+}
+
 void CTreeListCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem)
 {
 	if (m_themeHeader.AreControlsThemed())

@@ -1238,7 +1238,8 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, FALSE, bSelected);
 
 				// Draw icon
-				CRect rIcon(rItem);
+				CRect rIcon;
+				GetTreeIconRect(hti, rIcon);
 
 				if (pWI->bHasIcon || pWI->bParent)
 				{
@@ -1246,13 +1247,7 @@ LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					HIMAGELIST hilTask = GetTaskIcon(pWI->dwTaskID, iImageIndex);
 
 					if (hilTask && (iImageIndex != -1))
-					{
-						rIcon.left -= (IMAGE_SIZE + 2);
-						rIcon.bottom = (rIcon.top + IMAGE_SIZE);
-						GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
-
 						ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-					}
 				}
 				
 				// draw background

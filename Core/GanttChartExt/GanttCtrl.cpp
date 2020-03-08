@@ -1422,7 +1422,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 				// Draw icon
 				CRect rIcon;
-				VERIFY(GetTreeIconRect(rItem, rIcon));
+				GetTreeIconRect(hti, rIcon);
 
 				if (pGI->bHasIcon || pGI->bParent)
 				{
@@ -2799,19 +2799,6 @@ BOOL CGanttCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bTe
 		rItem.OffsetRect(-1, 0);
 
 	return TRUE;
-}
-
-BOOL CGanttCtrl::GetTreeIconRect(const CRect& rItem, CRect& rIcon) const
-{
-	rIcon = rItem;
-
-	rIcon.right = (rIcon.left + IMAGE_SIZE);
-	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
-
-	rIcon.OffsetRect(-(IMAGE_SIZE + 2), 0);
-	GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
-	
-	return !rItem.IsRectEmpty();
 }
 
 void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem, 

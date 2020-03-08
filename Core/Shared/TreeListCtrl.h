@@ -307,7 +307,8 @@ protected:
 	DWORD GetItemData(HTREEITEM htiFrom) const;
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
 	BOOL GetListColumnRect(int nCol, CRect& rect, BOOL bScrolled = TRUE) const;
-	
+	BOOL GetTreeIconRect(HTREEITEM hti, CRect& rIcon) const;
+
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
 	BOOL SetColor(COLORREF& color, COLORREF crNew);
