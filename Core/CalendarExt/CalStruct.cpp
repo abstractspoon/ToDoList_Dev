@@ -484,7 +484,7 @@ void CTaskCalItemArray::SortItems(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending)
 		s_nSortBy = nSortBy;
 		s_bSortAscending = bSortAscending;
 
-		Misc::SortArrayT(*this, CompareItems);
+		Misc::SortArrayT<TASKCALITEM*>(*this, CompareItems);
 
 		s_nSortBy = TDCA_NONE;
 		s_bSortAscending = -1;
