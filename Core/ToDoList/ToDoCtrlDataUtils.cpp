@@ -3915,12 +3915,12 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	}
 
 	// SPECIAL CASE:
-	// if task is a reference we use a bit of sleight of hand
-	// and write the 'true' task's title but nothing else
+	// if task is a reference we write the minimum necessary information
 	if (pTDI->dwTaskRefID)
 	{
 		tasks.SetTaskTitle(hTask, m_data.GetTaskTitle(pTDI->dwTaskRefID));
 		tasks.SetTaskReferenceID(hTask, pTDI->dwTaskRefID);
+		tasks.SetTaskTextColor(hTask, GetTaskTextColor(pTDI, pTDS));
 
 		return TRUE;
 	}
@@ -4027,7 +4027,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		tasks.SetTaskIsParent(hTask);
 
 	// For references, export the 'real' task's attributes
-	// all except for the reference task ID itself
+	// all except for the reference task ID itself and its text colour
 	if (pTDI->dwTaskRefID)
 	{
 		const TODOITEM* pTDIReal = NULL;
@@ -4040,7 +4040,8 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 			return FALSE;
 
 		tasks.SetTaskReferenceID(hTask, pTDI->dwTaskRefID);
-		
+		tasks.SetTaskTextColor(hTask, GetTaskTextColor(pTDI, pTDS));
+
 		return TRUE;
 	}
 	

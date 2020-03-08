@@ -1989,7 +1989,15 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 		return FALSE;
 
 	if (bRef == -1)
+	{
 		bRef = pTDI->IsReference();
+
+		if (bRef)
+		{
+			DWORD dwTaskID(pTDI->dwTaskRefID);
+			m_data.GetTrueTask(dwTaskID, pTDI, pTDS);
+		}
+	}
 
 	// all else
 	crBack = CLR_NONE;
