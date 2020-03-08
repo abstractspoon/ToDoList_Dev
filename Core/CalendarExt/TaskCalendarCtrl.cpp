@@ -629,9 +629,9 @@ void CTaskCalendarCtrl::SetWeekendColor(COLORREF crWeekend)
 	}
 }
 
-COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
+COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL /*bToday*/) const
 {
-	COLORREF crBkgnd = GetSysColor(COLOR_WINDOW);//CCalendarCtrlEx::GetCellBkgndColor(pCell, bSelected, bToday);
+	COLORREF crBkgnd = GetSysColor(COLOR_WINDOW); // Disable default alternate month colouring
 
 	if (CWeekend().IsWeekend(pCell->date))
 	{
