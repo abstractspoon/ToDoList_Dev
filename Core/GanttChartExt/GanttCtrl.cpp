@@ -587,13 +587,13 @@ GTLC_COLUMN CGanttCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 	{
 	case TDCA_TASKNAME:		return GTLCC_TITLE;		
 	case TDCA_DUEDATE:		return GTLCC_DUEDATE;		
-	case TDCA_STARTDATE:		return GTLCC_STARTDATE;	
+	case TDCA_STARTDATE:	return GTLCC_STARTDATE;	
 	case TDCA_ALLOCTO:		return GTLCC_ALLOCTO;		
 	case TDCA_PERCENT:		return GTLCC_PERCENT;		
-	case TDCA_ID:				return GTLCC_TASKID;		
+	case TDCA_ID:			return GTLCC_TASKID;		
 	case TDCA_DONEDATE:		return GTLCC_DONEDATE;
 	case TDCA_TAGS:			return GTLCC_TAGS;
-	case TDCA_DEPENDENCY:		return GTLCC_DEPENDENCY;
+	case TDCA_DEPENDENCY:	return GTLCC_DEPENDENCY;
 	}
 	
 	// all else 
@@ -648,102 +648,112 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		return TRUE;
 	}
 	
-	GANTTITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	// Update certain attributes before resolving references
+	GANTTITEM* pGI = m_data.GetItem(dwTaskID, FALSE);
 
-	// update taskID to refID 
-	if (pGI->dwOrgRefID)
+	if (!pGI)
 	{
-		dwTaskID = pGI->dwOrgRefID;
-		pGI->dwOrgRefID = 0;
+		ASSERT(0);
+		return FALSE;
 	}
 
-	// take a snapshot we can check changes against
+	// Take a snapshot we can check changes against
 	GANTTITEM giOrg = *pGI;
 
-	// can't use a switch here because we also need to check for IUI_ALL
-	time64_t tDate = 0;
-	
-	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
-		pGI->sTitle = pTasks->GetTaskTitle(hTask);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
-		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_ICON))
-		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+	// Update these attributes for all tasks
+	pGI->color = pTasks->GetTaskTextColor(hTask);
+	pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
+	pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+	pGI->dwOrgRefID = 0;
 
-	if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
-		pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
-		
-	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
-	{ 
-		// update min/max too
-		if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
-			pGI->SetStartDate(tDate, TRUE);
-		else
-			pGI->ClearStartDate(TRUE);
-	}
+	// Existing tasks should not change reference ID 
+	DWORD dwRefID = pTasks->GetTaskReferenceID(hTask);
+	ASSERT(pGI->dwRefID == dwRefID); 
 	
-	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
+	// Update rest of attributes if not a reference task
+	if (pGI->dwRefID == 0)
 	{
-		// update min/max too
-		if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
-			pGI->SetDueDate(tDate, TRUE);
-		else
-			pGI->ClearDueDate(TRUE);
-	}
+		// can't use a switch here because we also need to check for IUI_ALL
+		time64_t tDate = 0;
 	
-	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
-	{
-		if (pTasks->GetTaskDoneDate64(hTask, tDate))
-			pGI->SetDoneDate(tDate);
-		else
-			pGI->ClearDoneDate();
-	}
+		if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
+			pGI->sTitle = pTasks->GetTaskTitle(hTask);
 	
-	if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
-	{
-		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
-	}
+		if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
+			pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
+	
+		if (pTasks->IsAttributeAvailable(TDCA_ICON))
+			pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
-	if (pTasks->IsAttributeAvailable(TDCA_TAGS))
-	{
-		int nTag = pTasks->GetTaskTagCount(hTask);
-		pGI->aTags.RemoveAll();
+		if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
+			pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		
-		while (nTag--)
-			pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
-	}
+		if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
+		{ 
+			time64_t tDate = 0;
 	
-	if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
-	{
-		int nDepend = pTasks->GetTaskDependencyCount(hTask);
-		pGI->aDependIDs.RemoveAll();
-		
-		while (nDepend--)
+			// update min/max too
+			if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
+				pGI->SetStartDate(tDate, TRUE);
+			else
+				pGI->ClearStartDate(TRUE);
+		}
+	
+		if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 		{
-			// Local dependencies only
-			DWORD dwTaskID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+			time64_t tDate = 0;
 
-			if (dwTaskID)
-				pGI->aDependIDs.Add(dwTaskID);
+			// update min/max too
+			if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
+				pGI->SetDueDate(tDate, TRUE);
+			else
+				pGI->ClearDueDate(TRUE);
+		}
+	
+		if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+		{
+			time64_t tDate = 0;
+
+			if (pTasks->GetTaskDoneDate64(hTask, tDate))
+				pGI->SetDoneDate(tDate);
+			else
+				pGI->ClearDoneDate();
+		}
+	
+		if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
+		{
+			LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
+			pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+		}
+
+		if (pTasks->IsAttributeAvailable(TDCA_TAGS))
+		{
+			int nTag = pTasks->GetTaskTagCount(hTask);
+			pGI->aTags.RemoveAll();
+		
+			while (nTag--)
+				pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
+		}
+	
+		if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
+		{
+			int nDepend = pTasks->GetTaskDependencyCount(hTask);
+			pGI->aDependIDs.RemoveAll();
+		
+			while (nDepend--)
+			{
+				// Local dependencies only
+				DWORD dwTaskID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+
+				if (dwTaskID)
+					pGI->aDependIDs.Add(dwTaskID);
+			}
 		}
 	}
 
-	// always update lock states
-	pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
-
-	// always update colour because it can change for so many reasons
-	pGI->color = pTasks->GetTaskTextColor(hTask);
-
-	// likewise 'Good as Done'
-	pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
-
 	// detect update
-	BOOL bChange = !(*pGI == giOrg);
-		
+	BOOL bChange = (*pGI != giOrg);
+
 	// children
 	if (UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, TRUE))
 		bChange = TRUE;
@@ -916,12 +926,12 @@ void CGanttCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	pGI->dwTaskID = dwTaskID;
 	pGI->dwRefID = pTasks->GetTaskReferenceID(hTask);
 	pGI->nPosition = pTasks->GetTaskPosition(hTask);
+	pGI->color = pTasks->GetTaskTextColor(hTask);
 
 	// Only save data for non-references
 	if (pGI->dwRefID == 0)
 	{
 		pGI->sTitle = pTasks->GetTaskTitle(hTask);
-		pGI->color = pTasks->GetTaskTextColor(hTask);
 		pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 		pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
 		pGI->bParent = pTasks->IsTaskParent(hTask);
@@ -1400,7 +1410,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
 				GANTTITEM* pGI = NULL;
 
-				GET_GI_RET(dwTaskID, pGI, 0L);
+				GET_GI_RET(dwTaskID, pGI, CDRF_DODEFAULT);
 				
 				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 
@@ -3597,7 +3607,17 @@ BOOL CGanttCtrl::GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart
 
 COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOOL bAlternate) const
 {
-	COLORREF crTextBk = gi.GetTextBkColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+	COLORREF crTextBk = CLR_NONE;
+	
+	if (gi.dwOrgRefID)
+	{
+		const GANTTITEM* pGIRef = m_data.GetItem(gi.dwOrgRefID, FALSE);
+		crTextBk = pGIRef->GetTextBkColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+	}
+	else
+	{
+		crTextBk = gi.GetTextBkColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+	}
 
 	if (crTextBk == CLR_NONE)
 	{
@@ -3620,7 +3640,17 @@ COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOO
 
 COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter) const
 {
-	COLORREF crText = gi.GetTextColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+	COLORREF crText = CLR_NONE;
+	
+	if (gi.dwOrgRefID)
+	{
+		const GANTTITEM* pGIRef = m_data.GetItem(gi.dwOrgRefID, FALSE);
+		crText = pGIRef->GetTextColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+	}
+	else
+	{
+		crText = gi.GetTextColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+	}
 	ASSERT(crText != CLR_NONE);
 
 	if (!m_bSavingToImage)

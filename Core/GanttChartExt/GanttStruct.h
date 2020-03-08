@@ -82,6 +82,7 @@ struct GANTTITEM
 	
 	GANTTITEM& operator=(const GANTTITEM& gi);
 	BOOL operator==(const GANTTITEM& gi) const;
+	BOOL operator!=(const GANTTITEM& gi) const;
 	
 	CString sTitle;
 	GANTTDATERANGE dtRange, dtMinMaxRange;

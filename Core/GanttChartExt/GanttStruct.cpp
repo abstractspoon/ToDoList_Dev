@@ -259,6 +259,11 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 	return (*this);
 }
 
+GANTTITEM::~GANTTITEM()
+{
+	
+}
+
 BOOL GANTTITEM::operator==(const GANTTITEM& gi) const
 {
 	return ((sTitle == gi.sTitle) &&
@@ -280,9 +285,9 @@ BOOL GANTTITEM::operator==(const GANTTITEM& gi) const
 			Misc::MatchAll(aDependIDs, gi.aDependIDs));
 }
 
-GANTTITEM::~GANTTITEM()
+BOOL GANTTITEM::operator!=(const GANTTITEM& gi) const
 {
-	
+	return !(*this == gi);
 }
 
 void GANTTITEM::MinMaxDates(const GANTTITEM& giOther, BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue)
