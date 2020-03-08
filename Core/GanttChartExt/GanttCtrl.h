@@ -223,6 +223,7 @@ protected:
 	CString FormatListColumnHeaderText(GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear) const;
 
 	BOOL GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bText = FALSE) const;
+	BOOL GetTreeIconRect(const CRect& rItem, CRect& rIcon) const;
 	HFONT GetTreeItemFont(HTREEITEM hti, const GANTTITEM& gi, GTLC_COLUMN nColID);
 	BOOL GetListColumnDate(int nCol, int& nMonth, int& nYear) const;
 	BOOL GetListColumnDate(int nCol, COleDateTime& date, BOOL bEndOfMonth = FALSE) const;

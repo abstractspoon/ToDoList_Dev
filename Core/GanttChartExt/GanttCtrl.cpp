@@ -1421,7 +1421,8 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
 
 				// Draw icon
-				CRect rIcon(rItem);
+				CRect rIcon;
+				VERIFY(GetTreeIconRect(rItem, rIcon));
 
 				if (pGI->bHasIcon || pGI->bParent)
 				{
@@ -1429,13 +1430,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					HIMAGELIST hilTask = GetTaskIcon(pGI->dwTaskID, iImageIndex);
 
 					if (hilTask && (iImageIndex != -1))
-					{
-						rIcon.left -= (IMAGE_SIZE + 2);
-						rIcon.bottom = (rIcon.top + IMAGE_SIZE);
-						GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
-
 						ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-					}
 				}
 				
 				// draw background
@@ -2804,6 +2799,19 @@ BOOL CGanttCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bTe
 		rItem.OffsetRect(-1, 0);
 
 	return TRUE;
+}
+
+BOOL CGanttCtrl::GetTreeIconRect(const CRect& rItem, CRect& rIcon) const
+{
+	rIcon = rItem;
+
+	rIcon.right = (rIcon.left + IMAGE_SIZE);
+	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+
+	rIcon.OffsetRect(-(IMAGE_SIZE + 2), 0);
+	GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
+	
+	return !rItem.IsRectEmpty();
 }
 
 void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem, 
