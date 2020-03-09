@@ -18,8 +18,16 @@ static char THIS_FILE[]=__FILE__;
 HTREEITEM CHTIMap::GetItem(DWORD dwItemID) const
 {
 	HTREEITEM hti = NULL;
-	Lookup(dwItemID, hti);
+	
+	if (Lookup(dwItemID, hti))
+		ASSERT(hti);
+
 	return hti;
+}
+
+BOOL CHTIMap::HasItem(DWORD dwItemID) const
+{
+	return (GetItem(dwItemID) != NULL);
 }
 
 int CHTIMap::BuildMap(const CTreeCtrl& tree, BOOL bVisibleChildrenOnly)
