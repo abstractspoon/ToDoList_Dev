@@ -75,19 +75,19 @@ void CHTIMap::AddItem(const CTreeCtrl& tree, HTREEITEM hti, BOOL bVisibleChildre
 	}
 }
 
-void CHTIMap::RemoveItem(const CTreeCtrl& tree, HTREEITEM hti)
+BOOL CHTIMap::RemoveItem(const CTreeCtrl& tree, HTREEITEM hti)
 {
-	// update our own mapping
-	VERIFY(RemoveKey(tree.GetItemData(hti)));
-
-	// then our children
+	// Remove children first
 	HTREEITEM htiChild = tree.GetChildItem(hti);
 
 	while (htiChild)
 	{
-		RemoveItem(tree, htiChild);
+		RemoveItem(tree, htiChild); // RECURSIVE CALL
 		htiChild = tree.GetNextItem(htiChild, TVGN_NEXT);
 	}
+
+	// remove ourselves
+	return RemoveKey(tree.GetItemData(hti));
 }
 
 #ifdef _DEBUG

@@ -73,9 +73,9 @@ public:
 		Add(key);
 	}
 
-	void Remove(KEY key)
+	BOOL Remove(KEY key)
 	{
-		CMap<KEY, ARG_KEY, char, char&>::RemoveKey(key);
+		return CMap<KEY, ARG_KEY, char, char&>::RemoveKey(key);
 	}
 
 	void Copy(const CSetBase& other)

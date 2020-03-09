@@ -39,7 +39,7 @@ public:
 
 	int BuildMap(const CTreeCtrl& tree, BOOL bVisibleChildrenOnly = FALSE);
 	void AddItem(const CTreeCtrl& tree, HTREEITEM hti, BOOL bVisibleChildrenOnly = FALSE);
-	void RemoveItem(const CTreeCtrl& tree, HTREEITEM hti);
+	BOOL RemoveItem(const CTreeCtrl& tree, HTREEITEM hti);
 	
 #ifdef _DEBUG
 	void Trace(CTreeCtrl& tree) const;
