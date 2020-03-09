@@ -65,7 +65,7 @@ public:
 	inline const CTreeSelectionHelper& TSH() const { return m_tsh; }
 	
 	inline const CToDoCtrlFind& Find() const { return m_find; }
-	inline const CHTIMap& TreeItemMap() const { return m_mapHTItems; }
+	inline const CHTIMap& TreeItemMap() const { return m_mapTaskIDToHTI; }
 
 	inline const TODOITEM* GetSelectedTask() const { return m_find.GetTask(GetSelectedItem(), TRUE); }
 	inline const TODOITEM* GetTask(HTREEITEM hti, BOOL bTrue = TRUE) const { return m_find.GetTask(hti, bTrue); }
@@ -94,7 +94,6 @@ public:
 
 	BOOL SelectItem(HTREEITEM hti);
 	BOOL SelectAll();
-	BOOL RemoveOrphanTreeItemReferences(HTREEITEM hti = NULL);
 	BOOL InvalidateItem(HTREEITEM hti, BOOL bUpdate = FALSE);
 	BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE);
 	BOOL InvalidateSelection(BOOL bUpdate = FALSE);
@@ -104,12 +103,16 @@ public:
 	BOOL SelectDropTarget(HTREEITEM hti) { return m_tcTasks.SelectDropTarget(hti); }
 	void ResortSelectedTaskParents();
 
+	int GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend = FALSE) const;
+	BOOL TaskHasReferences(DWORD dwTaskID) const;
+	BOOL RemoveOrphanTreeItemReferences(HTREEITEM hti = NULL);
+
 	BOOL GetInsertLocation(TDC_INSERTWHERE nWhere, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const;
 	BOOL GetInsertLocation(TDC_MOVETASK nDirection, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const;
 	BOOL GetInsertLocation(TDC_MOVETASK nDirection, DWORD& dwDest, DWORD& dwDestAfter) const;
 	
 	HTREEITEM InsertItem(DWORD dwTaskID, HTREEITEM htiParent, HTREEITEM htiAfter);
-	BOOL DeleteItem(HTREEITEM hti);
+	BOOL DeleteItem(HTREEITEM hti, BOOL bDeleteReferencesToItem = TRUE);
 
 	BOOL MoveSelection(TDC_MOVETASK nDirection);
 	BOOL CanMoveSelection(TDC_MOVETASK nDirection) const;
@@ -162,7 +165,8 @@ protected:
 	CTreeSelectionHelper m_tsh;
 	CTreeCtrlHelper m_tch;
 	CTDCReminderHelper m_reminders;
-	CHTIMap m_mapHTItems;
+	CHTIMap m_mapTaskIDToHTI;
+	CDWordSet m_mapReferenceTaskIDs;
 
 	HTREEITEM m_htiLastHandledLBtnDown;
 	WORD m_wKeyPress;

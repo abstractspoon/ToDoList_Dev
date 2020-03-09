@@ -145,7 +145,7 @@ public:
 	void GetTrueTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL IsTaskReference(DWORD dwTaskID) const;
 	DWORD GetTaskReferenceID(DWORD dwTaskID) const;
-	BOOL IsTaskReferenced(DWORD dwTaskID) const;
+//	BOOL IsTaskReferenced(DWORD dwTaskID) const;
 	int GetReferencesToTask(DWORD dwTaskID, CDWordArray& aRefIDs) const;
 	BOOL IsReferenceToTask(DWORD dwTestID, DWORD dwTaskID) const;
 	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
@@ -258,8 +258,8 @@ protected:
 	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUndo);
 	BOOL AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent);
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
-	BOOL IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) const;
-	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwMatchID = 0);
+//	BOOL IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) const;
+	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwMatchID = 0);
 	
 	BOOL FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependsID, CDWordSet& mapVisited) const;
 	void FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate);
@@ -267,7 +267,7 @@ protected:
 	UINT SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDateTime& dtNewStart);
 	BOOL CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDependencyID, TDC_DATE nDate, COleDateTime& dtNewStart) const;
 	BOOL CalcNewTaskDependencyStartDate(DWORD dwTaskID, TDC_DATE nDate, COleDateTime& dtNewStart) const;
-	BOOL RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent, DWORD dwDependID);
+	BOOL RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwDependID);
 	TDC_SET RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate);
 	TDC_SET SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate, const COleDateTime& date, BOOL bRecalcTimeEstimate);
 	TDC_SET SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates, BOOL bIsSubtask);

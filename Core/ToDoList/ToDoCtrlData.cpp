@@ -94,6 +94,8 @@ CToDoCtrlData::CToDoCtrlData(const CTDCStyleMap& styles, const CTDCCustomAttribD
 
 CToDoCtrlData::~CToDoCtrlData()
 {
+	ASSERT(!m_bUndoRedoing);
+
 	DeleteAllTasks();
 }
 
@@ -136,7 +138,7 @@ int CToDoCtrlData::BuildDataModel(const CTaskFile& tasks)
 	// add top-level items
 	VERIFY(AddTaskToDataModel(tasks, NULL, &m_struct));
 
-	RemoveOrphanTaskReferences(&m_struct);
+	RemoveOrphanTaskReferences(&m_struct, FALSE); // no undo
 
 	return GetTaskCount();
 }
@@ -1038,10 +1040,11 @@ BOOL CToDoCtrlData::IsTaskReference(DWORD dwTaskID) const
 
 BOOL CToDoCtrlData::IsReferenceToTask(DWORD dwTestID, DWORD dwTaskID) const
 {
-	ASSERT(dwTestID && dwTaskID);
-
 	if (!dwTestID || !dwTaskID)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	return (GetTaskReferenceID(dwTestID) == dwTaskID);
 }
@@ -1094,17 +1097,21 @@ BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUn
 	m_struct.DeleteTask(dwTaskID);
 
 	// then update it's referees and dependents unless it was a reference itself
-	if (!bRef)
+	if (!bRef && !m_bUndoRedoing)
 	{
-		RemoveOrphanTaskReferences(&m_struct, dwTaskID);
-		RemoveOrphanTaskLocalDependencies(&m_struct, dwTaskID);
+		RemoveOrphanTaskReferences(&m_struct, bWithUndo, dwTaskID);
+		RemoveOrphanTaskLocalDependencies(&m_struct, bWithUndo, dwTaskID);
 	}
 	
 	return TRUE;
 }
 
-BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD dwMatchID)
+BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwMatchID)
 {
+	// Undo/redo takes care of this itself because it has
+	// a precise list of what to delete already
+	ASSERT(!m_bUndoRedoing);
+
 	if (!pTDSParent)
 	{
 		ASSERT(0);
@@ -1119,7 +1126,7 @@ BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD 
 		TODOSTRUCTURE* pTDSChild = pTDSParent->GetSubTask(nChild);
 		
 		// children's children first
-		if (RemoveOrphanTaskReferences(pTDSChild, dwMatchID))
+		if (RemoveOrphanTaskReferences(pTDSChild, bWithUndo, dwMatchID))
 			bRemoved = TRUE;
 		
 		// then child
@@ -1128,16 +1135,14 @@ BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD 
 		
 		if (pTDIChild && pTDIChild->IsReference())
 		{
-			// references
 			BOOL bDeleteRef = (dwMatchID && (pTDIChild->dwTaskRefID == dwMatchID));
-			BOOL bWithUndo = bDeleteRef;
 
 			if (!bDeleteRef)
 				bDeleteRef = (!dwMatchID && !HasTask(pTDIChild->dwTaskRefID)); // undo = false
-			
-			if (bDeleteRef)			
+
+			if (bDeleteRef)
 			{
-				DeleteTask(pTDSParent, nChild, bWithUndo);
+				VERIFY(DeleteTask(pTDSParent, nChild, bWithUndo));
 				bRemoved = TRUE;
 			}
 		}
@@ -1146,7 +1151,7 @@ BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, DWORD 
 	return bRemoved;
 }
 
-BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent, DWORD dwDependID)
+BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwDependID)
 {
 	ASSERT(pTDSParent && dwDependID);
 	
@@ -1161,7 +1166,7 @@ BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent,
 		TODOSTRUCTURE* pTDSChild = pTDSParent->GetSubTask(nChild);
 		
 		// children's children first
-		if (RemoveOrphanTaskLocalDependencies(pTDSChild, dwDependID))
+		if (RemoveOrphanTaskLocalDependencies(pTDSChild, bWithUndo, dwDependID))
 			bRemoved = TRUE;
 		
 		// then child itself
@@ -1172,7 +1177,7 @@ BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent,
 
 		if (pTDIChild->IsLocallyDependentOn(dwDependID))
 		{
-			AddUndoElement(TDCUEO_EDIT, dwTaskID);
+			VERIFY(!bWithUndo || AddUndoElement(TDCUEO_EDIT, dwTaskID));
 			VERIFY(pTDIChild->RemoveLocalDependency(dwDependID));
 
 			bRemoved = TRUE;
@@ -1507,7 +1512,7 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRI
 
 BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib)
 {
-	// Exclude references and undo operations
+	// Exclude references and undo/redo operations
 	if (m_bUndoRedoing || IsTaskReference(dwTaskID))
 		return TRUE; // not an error
 
@@ -3367,6 +3372,7 @@ void CToDoCtrlData::GetTrueTaskIDs(CDWordArray& aTaskIDs) const
 		aTaskIDs[nID] = GetTrueTaskID(aTaskIDs[nID]);
 }
 
+/*
 BOOL CToDoCtrlData::IsTaskReferenced(DWORD dwTaskID) const
 {
 	// sanity check
@@ -3401,6 +3407,7 @@ BOOL CToDoCtrlData::IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) 
 	// else
 	return FALSE;
 }
+*/
 
 int CToDoCtrlData::GetReferencesToTask(DWORD dwTaskID, CDWordArray& aRefIDs) const
 {

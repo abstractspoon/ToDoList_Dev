@@ -301,7 +301,7 @@ void CTDLTaskTreeCtrl::SetExpandedTasks(const CDWordArray& aExpanded)
 
 HTREEITEM CTDLTaskTreeCtrl::GetItem(DWORD dwTaskID) const
 {
-	return m_mapHTItems.GetItem(dwTaskID);
+	return m_mapTaskIDToHTI.GetItem(dwTaskID);
 }
 
 void CTDLTaskTreeCtrl::OnBeginRebuild()
@@ -311,7 +311,7 @@ void CTDLTaskTreeCtrl::OnBeginRebuild()
 	if (CWnd::IsWindowVisible())
 		CWnd::SendMessage(WM_SETREDRAW, FALSE);
 
-	m_mapHTItems.RemoveAll();
+	m_mapTaskIDToHTI.RemoveAll();
 }
 
 void CTDLTaskTreeCtrl::OnEndRebuild()
@@ -408,7 +408,7 @@ void CTDLTaskTreeCtrl::DeleteAll()
 		m_lcColumns.DeleteAllItems();
 		
 	m_tcTasks.DeleteAllItems();
-	m_mapHTItems.RemoveAll();
+	m_mapTaskIDToHTI.RemoveAll();
 
 	ASSERT(m_lcColumns.GetItemCount() == 0);
 }
@@ -1865,14 +1865,16 @@ HTREEITEM CTDLTaskTreeCtrl::MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, 
 	if (htiDestParent)
 		m_tcTasks.SetItemState(htiDestParent, TVIS_EXPANDED, TVIS_EXPANDED);
 	
-	// Remove the existing task and its children from the map
-	m_mapHTItems.RemoveItem(m_tcTasks, hti);
+	// Remove the existing task and its children from the master map
+	// Note: Reference task list remains unaffected because it just
+	// stores task IDs and these won't have changed
+	m_mapTaskIDToHTI.RemoveItem(m_tcTasks, hti);
 
 	// do the move
 	hti = TCH().MoveTree(hti, htiDestParent, htiDestPrevSibling, TRUE, TRUE);
 
 	// Add the 'new' task and its children to the map
-	m_mapHTItems.AddItem(m_tcTasks, hti);
+	m_mapTaskIDToHTI.AddItem(m_tcTasks, hti);
 
 	// return the new tree item
 	return hti;
@@ -2151,7 +2153,7 @@ BOOL CTDLTaskTreeCtrl::InvalidateSelection(BOOL bUpdate)
 
 		// if the selected item is a reference or a task with references
 		// then we invalidate the whole tree
-		if (m_data.IsTaskReference(dwTaskID) || m_data.IsTaskReferenced(dwTaskID))
+		if (m_data.IsTaskReference(dwTaskID) || TaskHasReferences(dwTaskID))
 		{
 			m_tcTasks.Invalidate();
 			bInvalidated = TRUE;
@@ -2173,7 +2175,7 @@ BOOL CTDLTaskTreeCtrl::InvalidateTask(DWORD dwTaskID, BOOL bUpdate)
 	if (dwTaskID == 0)
 		return TRUE; // nothing to do
 	
-	HTREEITEM hti = m_mapHTItems.GetItem(dwTaskID);
+	HTREEITEM hti = m_mapTaskIDToHTI.GetItem(dwTaskID);
 
 	if (hti)
 		return InvalidateItem(hti, bUpdate);
@@ -2440,16 +2442,95 @@ HTREEITEM CTDLTaskTreeCtrl::InsertItem(DWORD dwTaskID, HTREEITEM htiParent, HTRE
 										(htiParent == NULL), // bold top-level items
 										FALSE);
 
-	m_mapHTItems[dwTaskID] = htiNew;
+	m_mapTaskIDToHTI[dwTaskID] = htiNew;
+
+	// Keep track of references
+	DWORD dwRefID = m_data.GetTaskReferenceID(dwTaskID);
+
+	if (dwRefID)
+		m_mapReferenceTaskIDs.Add(dwTaskID);
 
 	return htiNew;
 }
 
-BOOL CTDLTaskTreeCtrl::DeleteItem(HTREEITEM hti) 
+BOOL CTDLTaskTreeCtrl::DeleteItem(HTREEITEM hti, BOOL bDeleteReferencesToItem)
 { 
-	m_mapHTItems.RemoveItem(m_tcTasks, hti);
+	// Remove task from reference list 
+	DWORD dwTaskID = GetTaskID(hti);
+	BOOL bRefTask = m_mapReferenceTaskIDs.Remove(dwTaskID);
 
-	return m_tcTasks.DeleteItem(hti); 
+	// Remove item and its children from the master list,
+	// including any contained references
+	m_mapTaskIDToHTI.RemoveItem(m_tcTasks, hti);
+	
+	// Remove any references no longer in the master list
+	POSITION pos = m_mapReferenceTaskIDs.GetStartPosition();
+
+	while (pos)
+	{
+		DWORD dwRefID = m_mapReferenceTaskIDs.GetNext(pos);
+		
+		if (!m_mapTaskIDToHTI.HasItem(dwRefID))
+			m_mapReferenceTaskIDs.Remove(dwRefID);
+	}
+
+	// Now delete outstanding references to hti
+	if (!bRefTask && bDeleteReferencesToItem)
+	{
+		CHTIList listRefs;
+		GetReferencesToTask(dwTaskID, listRefs);
+
+		POSITION pos = listRefs.GetHeadPosition();
+
+		while (pos)
+			DeleteItem(listRefs.GetNext(pos), TRUE); // RECURSIVE CALL
+	}
+
+	// Finally delete the tree item
+	return m_tcTasks.DeleteItem(hti);
+}
+
+int CTDLTaskTreeCtrl::GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend) const
+{
+	if (!bAppend)
+		listRefs.RemoveAll();
+
+	POSITION pos = m_mapReferenceTaskIDs.GetStartPosition();
+
+	while (pos)
+	{
+		DWORD dwRefID = m_mapReferenceTaskIDs.GetNext(pos);
+		
+		if (m_data.IsReferenceToTask(dwRefID, dwTaskID))
+		{
+			// Can't have references to references
+			ASSERT(!m_data.IsTaskReference(dwTaskID));
+
+			HTREEITEM htiRef = m_mapTaskIDToHTI.GetItem(dwRefID);
+
+			if (htiRef)
+				listRefs.AddTail(htiRef);
+			else
+				ASSERT(0); // orphan reference
+		}
+	}
+
+	return listRefs.GetCount();
+}
+
+BOOL CTDLTaskTreeCtrl::TaskHasReferences(DWORD dwTaskID) const
+{
+	POSITION pos = m_mapReferenceTaskIDs.GetStartPosition();
+
+	while (pos)
+	{
+		DWORD dwRefID = m_mapReferenceTaskIDs.GetNext(pos);
+		
+		if (m_data.IsReferenceToTask(dwRefID, dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CTDLTaskTreeCtrl::GetInsertLocation(TDC_MOVETASK nDirection, DWORD& dwDest, DWORD& dwDestAfter) const
@@ -2774,21 +2855,21 @@ void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 	if (mapAttribIDs.Has(TDCA_NEWTASK))
 	{
 		// Already handled in InsertTreeItem
-		ASSERT(m_mapHTItems.GetCount() == (int)m_tcTasks.GetCount());
+		ASSERT(m_mapTaskIDToHTI.GetCount() == (int)m_tcTasks.GetCount());
 	}
 
 	if (mapAttribIDs.Has(TDCA_UNDO) ||
 		mapAttribIDs.Has(TDCA_PASTE) ||
 		mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
 	{
-		ASSERT(m_mapHTItems.GetCount() == (int)m_tcTasks.GetCount());
+		ASSERT(m_mapTaskIDToHTI.GetCount() == (int)m_tcTasks.GetCount());
 		RefreshItemBoldState();
 	}
 
 	if (mapAttribIDs.Has(TDCA_DELETE) ||
 		mapAttribIDs.Has(TDCA_ARCHIVE))
 	{
-		ASSERT(m_mapHTItems.GetCount() >= (int)m_tcTasks.GetCount());
+		ASSERT(m_mapTaskIDToHTI.GetCount() >= (int)m_tcTasks.GetCount());
 	}
 	
 	if (bAllowResort && ModsNeedResort(mapAttribIDs))

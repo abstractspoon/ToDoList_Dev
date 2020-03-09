@@ -5005,12 +5005,16 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 			HTREEITEM hti = selection.GetNext(pos);
 			DWORD dwTaskID = m_taskTree.GetTaskID(hti);
 
+			// Delete the tree item first so there's no chance 
+			// of a tree item referencing a non-existent task
 			m_taskTree.DeleteItem(hti);
+
+			// Delete data object last
 			m_data.DeleteTask(dwTaskID, TRUE); // TRUE == with undo
 		}
 		
 		// Note: CToDoCtrlData ought to have already cleaned up the data
-		m_taskTree.RemoveOrphanTreeItemReferences();
+		VERIFY(!m_taskTree.RemoveOrphanTreeItemReferences());
 	}
 	m_taskTree.UpdateAll();
 
@@ -9211,9 +9215,7 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 					BOOL bRemoveTask = (pContext != NULL && !WantAddTask(pTDIChild, pTDSChild, pContext));
 
 					if (bRemoveTask)
-					{
 						m_taskTree.DeleteItem(htiChild);
-					}
 				}
 			}
 		}
@@ -11620,7 +11622,8 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 				if (m_timeTracking.IsTrackingTask(elm.dwTaskID, FALSE))
 					EndTimeTracking(FALSE, FALSE);
 
-				m_taskTree.DeleteItem(hti);
+				// Don't cleanup references because we handle that ourselves
+				m_taskTree.DeleteItem(hti, FALSE); 
 			}
 		}
 		else if (elm.nOp == TDCUEO_ADD)
