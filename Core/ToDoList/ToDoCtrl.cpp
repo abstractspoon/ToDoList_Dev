@@ -9187,23 +9187,57 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 	
 	PrepareTaskfileForTasks(tasks, filter);
 
+	// Add selected tasks in an display-ordered list, 
+	// removing duplicate subtasks if we will be adding them anyway
+	BOOL bRemoveDupeSubtasks = !filter.HasFlag(TDCGSTF_NOTSUBTASKS);
+
+	CHTIList selection;
+	TSH().CopySelection(selection, bRemoveDupeSubtasks, TRUE);
+
+	VERIFY(AddTasksToTaskFile(selection, filter, tasks, TRUE)); // Mark tasks as selected
+
+	// If required, add references for the selected tasks
+	// but not selected and not 'resolved'
+	BOOL bIncludeReferences = filter.HasFlag(TDCGSTF_INCLUDEREFERENCES);
+
+	if (bIncludeReferences)
+	{
+		CHTIList selectionRefs;
+		POSITION pos = selection.GetHeadPosition();
+
+		while (pos)
+		{
+			DWORD dwSelID = GetTrueTaskID(selection.GetNext(pos));
+			m_taskTree.GetReferencesToTask(dwSelID, selectionRefs, TRUE); // Append
+		}
+
+		if (selectionRefs.GetCount())
+		{
+			// We want just the references and nothing else
+			TDCGETTASKS filterRefs(filter);
+			filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
+
+			VERIFY(AddTasksToTaskFile(selectionRefs, filterRefs, tasks, FALSE)); // Don't mark tasks as selected
+		}
+	}
+
+	return (tasks.GetTaskCount());
+}
+
+int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, BOOL bSelect) const
+{
 	BOOL bWantSubtasks = !filter.HasFlag(TDCGSTF_NOTSUBTASKS);
-	BOOL bResolveReferences = filter.HasFlag(TDCGSTF_RESOLVEREFERENCES);
 	BOOL bWantAllParents = filter.HasFlag(TDCGSTF_ALLPARENTS);
 	BOOL bWantImmediateParent = filter.HasFlag(TDCGSTF_IMMEDIATEPARENT);
+	BOOL bResolveReferences = filter.HasFlag(TDCGSTF_RESOLVEREFERENCES);
 
-	// get selected tasks ordered, removing duplicate subtasks 
-	// if we will be processing subtasks anyway
-	CHTIList selection;
-	TSH().CopySelection(selection, bWantSubtasks, TRUE);
-	
-	// Keep track of the selected tasks added
+	// Keep track of the selected tasks added 
 	CDWordSet aSelTaskIDs;
-	POSITION pos = selection.GetHeadPosition();
+	POSITION pos = listHTI.GetHeadPosition();
 
 	while (pos)
 	{
-		HTREEITEM hti = selection.GetNext(pos);
+		HTREEITEM hti = listHTI.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
 		BOOL bHasParent = m_taskTree.ItemHasParent(hti);
 
@@ -9211,20 +9245,23 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 		if (bResolveReferences)
 		{
 			DWORD dwRefID = GetTrueTaskID(hti);
-			
+
 			if (dwRefID != dwTaskID)
 			{
 				dwTaskID = dwRefID;
 				hti = m_taskTree.GetItem(dwRefID); // true task
 			}
 		}
-		
+
 		// does the user want this task's parent(s) ?
 		if ((bWantAllParents || bWantImmediateParent) && bHasParent)
 		{
 			if (AddTreeItemAndParentToTaskFile(hti, tasks, filter, bWantAllParents, bWantSubtasks))
 			{
-				aSelTaskIDs.Add(dwTaskID);
+				ASSERT(dwTaskID);
+
+				if (bSelect)
+					aSelTaskIDs.Add(dwTaskID);
 			}
 		}
 		else
@@ -9241,27 +9278,26 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 
 			if (AddTreeItemToTaskFile(hti, dwTaskID, tasks, hParent, filter, bWantSubtasks, dwParentID))
 			{
-				aSelTaskIDs.Add(dwTaskID);
+				ASSERT(dwTaskID);
+
+				if (bSelect)
+					aSelTaskIDs.Add(dwTaskID);
 			}
 		}
 	}
 
 	// extra processing to identify the originally selected tasks
 	// in case the user wants to paste as references.
-	// Note: References are excluded if bResolveReferences is true
-	pos = aSelTaskIDs.GetStartPosition();
-
-	while (pos)
+	if (bSelect)
 	{
-		DWORD dwSelID = aSelTaskIDs.GetNext(pos);
-		ASSERT(dwSelID);
+		pos = aSelTaskIDs.GetStartPosition();
 
-		if (!bResolveReferences || !m_data.IsTaskReference(dwSelID))
+		while (pos)
 		{
-			HTASKITEM hSelTask = tasks.FindTask(dwSelID);
-			ASSERT(hSelTask);
+			DWORD dwSelID = aSelTaskIDs.GetNext(pos);
 
-			tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
+			if (!bResolveReferences || !m_data.IsTaskReference(dwSelID))
+				tasks.SelectTask(dwSelID);
 		}
 	}
 

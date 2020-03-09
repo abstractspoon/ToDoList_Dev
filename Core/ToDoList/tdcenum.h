@@ -452,6 +452,7 @@ enum // CToDoCtrl::GetSelectedTasks()
 	TDCGSTF_ALLPARENTS				= 0x0200,
 	TDCGSTF_NOTSUBTASKS				= 0x0400,
 	TDCGSTF_RESOLVEREFERENCES		= 0x0800,
+	TDCGSTF_INCLUDEREFERENCES		= 0x1000 | TDCGSTF_RESOLVEREFERENCES,
 };
  
 /////////////////////////////////////////////////////////////////////////////
