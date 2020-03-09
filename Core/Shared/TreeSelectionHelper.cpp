@@ -501,7 +501,7 @@ BOOL CTreeSelectionHelper::ItemsAreAllSiblings(const CHTIList& selection) const
 	return TRUE;
 }
 
-void CTreeSelectionHelper::Sort(CHTIList& selection, BOOL bAscending) const
+void CTreeSelectionHelper::SortSelection(CHTIList& selection, BOOL bAscending) const
 {
 	if (selection.GetCount() < 2)
 		return;
@@ -581,7 +581,7 @@ int CTreeSelectionHelper::CopySelection(CHTIList& selection, BOOL bRemoveChildDu
 		RemoveChildDuplicates(selection);
 
 	if (bOrdered)
-		Sort(selection, TRUE);
+		SortSelection(selection, TRUE);
 
 	return selection.GetCount();
 }

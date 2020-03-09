@@ -104,6 +104,7 @@ public:
 	BOOL HasItem(DWORD dwItemData) const;
 
 	int CopySelection(CHTIList& selection, BOOL bRemoveChildDupes = FALSE, BOOL bOrdered = FALSE) const;
+	void SortSelection(CHTIList& selection, BOOL bAscending) const;
 
 	BOOL ContainsAllItems() const;
 	BOOL InvalidateAll(BOOL bErase = TRUE);
@@ -175,7 +176,6 @@ protected:
 	void InvalidateItem(HTREEITEM hti);
 	BOOL HasSelectedParent(HTREEITEM hti, const CHTIList& selection) const;
 	void AddAll(HTREEITEM hti);
-	void Sort(CHTIList& selection, BOOL bAscending) const;
 
 	struct SORTITEM
 	{
