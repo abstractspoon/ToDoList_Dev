@@ -7338,55 +7338,6 @@ void CToDoCtrl::FixupParentCompletion(DWORD dwParentID)
 	VERIFY(m_data.FixupParentCompletion(dwParentID, !m_sCompletionStatus.IsEmpty()));
 }
 
-void CToDoCtrl::RemoveNonSelectedTasks(CTaskFile& tasks)
-{
-	RemoveNonSelectedTasks(tasks, tasks.GetFirstTask());
-}
-	
-void CToDoCtrl::RemoveNonSelectedTasks(CTaskFile& tasks, HTASKITEM hTask)
-{
-	if (hTask)
-	{
-		// siblings first
-		RemoveNonSelectedTasks(tasks, tasks.GetNextTask(hTask));
-
-		LPCTSTR szSelected = tasks.GetTaskMetaData(hTask, _T("selected"));
-
-		if (!szSelected || (szSelected[0] != '1'))
-		{
-			tasks.DeleteTask(hTask);
-			return;
-		}
-
-		// children
-		RemoveNonSelectedTasks(tasks, tasks.GetFirstTask(hTask));
-	}
-}
-
-int CToDoCtrl::GetSelectedTaskIDs(const CTaskFile& tasks, CDWordArray& aTaskIDs)
-{
-	return GetSelectedTaskIDs(tasks, tasks.GetFirstTask(), aTaskIDs);
-}
-
-int CToDoCtrl::GetSelectedTaskIDs(const CTaskFile& tasks, HTASKITEM hTask, CDWordArray& aTaskIDs)
-{
-	if (hTask)
-	{
-		LPCTSTR szSelected = tasks.GetTaskMetaData(hTask, _T("selected"));
-
-		if (szSelected && (szSelected[0] == '1'))
-			aTaskIDs.Add(tasks.GetTaskID(hTask));
-
-		// siblings
-		GetSelectedTaskIDs(tasks, tasks.GetNextTask(hTask), aTaskIDs);
-
-		// children
-		GetSelectedTaskIDs(tasks, tasks.GetFirstTask(hTask), aTaskIDs);
-	}
-
-	return aTaskIDs.GetSize();
-}
-
 void CToDoCtrl::PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID, BOOL bResetCreation) const
 {
 	if (nResetID == TDCR_NO || (tasks.GetTaskCount() == 0))
@@ -8248,7 +8199,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	if (bAsRef)
 	{
 		// remove tasks not originally selected
-		RemoveNonSelectedTasks(tasks);
+		tasks.RemoveNonSelectedTasks();
 		
 		// pre-process the tasks to add themselves
 		// as a reference, and then to clear the task ID
@@ -8342,11 +8293,11 @@ BOOL CToDoCtrl::PasteTasksToTree(const CTaskFile& tasks, HTREEITEM htiDestParent
 	m_taskTree.ExpandItem(htiDestParent);
 	
 	// restore selection
-	CDWordArray aTaskIDs;
+	CDWordArray aSelTaskIDs;
 
-	if (bSelectAll && GetSelectedTaskIDs(tasks, aTaskIDs))
+	if (bSelectAll && tasks.GetSelectedTaskIDs(aSelTaskIDs))
 	{
-		m_taskTree.SelectTasks(aTaskIDs);
+		m_taskTree.SelectTasks(aSelTaskIDs);
 	}
 	else if (dwSelID)
 	{

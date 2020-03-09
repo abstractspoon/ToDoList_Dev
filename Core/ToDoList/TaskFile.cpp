@@ -33,6 +33,7 @@ static char THIS_FILE[]=__FILE__;
 //////////////////////////////////////////////////////////////////////
 
 static const CString NULLSTRING;
+static const LPCTSTR METADATA_SELECTED = _T("__selected__");
 
 //////////////////////////////////////////////////////////////////////
 
@@ -998,6 +999,104 @@ BOOL CTaskFile::SetMetaData(const CMapStringToString& mapMetaData)
 int CTaskFile::GetMetaData(CMapStringToString& mapMetaData) const
 {
 	return GetMetaData(Root(), mapMetaData);
+}
+
+int CTaskFile::SetSelectedTaskIDs(const CDWordArray& aSelTaskIDs, BOOL bSelect)
+{
+	int nSel = aSelTaskIDs.GetSize(), nNumModified = 0;
+
+	while (nSel--)
+	{
+		if (SelectTask(aSelTaskIDs[nSel], bSelect))
+			nNumModified++;
+	}
+
+	return nNumModified;
+}
+
+BOOL CTaskFile::SelectTask(DWORD dwTaskID, BOOL bSelect)
+{
+	ASSERT(dwTaskID);
+
+	return SelectTask(FindTask(dwTaskID), bSelect);
+}
+
+BOOL CTaskFile::SelectTask(HTASKITEM hTask, BOOL bSelect)
+{
+	if (!hTask)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return (SetTaskMetaData(hTask, METADATA_SELECTED, (bSelect ? _T("1") : NULL)) ? TRUE : FALSE);
+}
+
+BOOL CTaskFile::IsTaskSelected(DWORD dwTaskID) const
+{
+	ASSERT(dwTaskID);
+
+	return IsTaskSelected(FindTask(dwTaskID));
+}
+
+BOOL CTaskFile::IsTaskSelected(HTASKITEM hTask) const
+{
+	if (!hTask)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	LPCTSTR szSelected = GetTaskMetaData(hTask, METADATA_SELECTED);
+
+	return (szSelected && (szSelected[0] == '1'));
+}
+
+int CTaskFile::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
+{
+	return GetSelectedTaskIDs(GetFirstTask(), aTaskIDs);
+}
+
+int CTaskFile::GetSelectedTaskIDs(HTASKITEM hTask, CDWordArray& aTaskIDs) const
+{
+	aTaskIDs.RemoveAll();
+
+	if (hTask)
+	{
+		if (IsTaskSelected(hTask))
+			aTaskIDs.Add(GetTaskID(hTask));
+
+		// siblings
+		GetSelectedTaskIDs(GetNextTask(hTask), aTaskIDs);
+
+		// children
+		GetSelectedTaskIDs(GetFirstTask(hTask), aTaskIDs);
+	}
+
+	return aTaskIDs.GetSize();
+}
+
+void CTaskFile::RemoveNonSelectedTasks()
+{
+	RemoveNonSelectedTasks(GetFirstTask());
+}
+
+void CTaskFile::RemoveNonSelectedTasks(HTASKITEM hTask)
+{
+	if (hTask)
+	{
+		// siblings first ie. before we might delete it
+		RemoveNonSelectedTasks(GetNextTask(hTask));
+
+		if (!IsTaskSelected(hTask))
+		{
+			DeleteTask(hTask); // will delete children
+			return;
+		}
+
+		// check children
+		RemoveNonSelectedTasks(GetFirstTask(hTask));
+	}
 }
 
 BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)

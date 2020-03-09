@@ -167,6 +167,10 @@ public:
 	BOOL SetReportDetails(LPCTSTR szTitle, const COleDateTime& date = 0.0);
 	void SetAvailableAttributes(const CTDCAttributeMap& mapAttrib);
 
+	int SetSelectedTaskIDs(const CDWordArray& aSelTaskIDs, BOOL bSelect = TRUE);
+	int GetSelectedTaskIDs(CDWordArray& aSelTaskIDs) const;
+	void RemoveNonSelectedTasks();
+
 	// Task-related methods -----------
 	COleDateTime GetTaskLastModifiedOle(HTASKITEM hTask) const;
 	COleDateTime GetTaskDoneDateOle(HTASKITEM hTask) const;
@@ -236,6 +240,11 @@ public:
 	BOOL DeleteTaskAttributes(HTASKITEM hTask); // deletes all but child tasks
 	BOOL GetTaskAttribute(HTASKITEM hTask, const CString& sAttrib, CString& sValue) const;
 	BOOL SetTaskIsParent(HTASKITEM hTask);
+
+	BOOL SelectTask(DWORD dwTaskID, BOOL bSelect = TRUE);
+	BOOL SelectTask(HTASKITEM hTask, BOOL bSelect = TRUE);
+	BOOL IsTaskSelected(HTASKITEM hTask) const;
+	BOOL IsTaskSelected(DWORD dwTaskID) const;
 
 	//////////////////////////////////////////////////////////////
 	// ITaskList17 implementation 
@@ -529,6 +538,8 @@ protected:
 	void RemoveTaskFromMap(const CXmlItem* pXITask) const;
 	CXmlItem* TaskFromHandle(HTASKITEM hTask) const;
 	void AddTaskIDs(HTASKITEM hTask, BOOL bIncParents, CDWordArray& aTaskIDs) const;
+	int GetSelectedTaskIDs(HTASKITEM hTask, CDWordArray& aSelTaskIDs) const;
+	void RemoveNonSelectedTasks(HTASKITEM hTask);
 
 	void UpgradeArrays(HTASKITEM hTask = NULL);
 	void CleanUp(HTASKITEM hTask = NULL);

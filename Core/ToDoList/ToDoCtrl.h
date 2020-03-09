@@ -922,11 +922,6 @@ protected:
 	static TDC_FILE SaveTaskfile(CTaskFile& tasks, const CString& sSavePath);
 	static TDC_FILE MapTaskfileError(int nFileErr);
 
-	static void RemoveNonSelectedTasks(CTaskFile& tasks);
-	static void RemoveNonSelectedTasks(CTaskFile& tasks, HTASKITEM hTask);
-	static int GetSelectedTaskIDs(const CTaskFile& tasks, CDWordArray& aTaskIDs);
-	static int GetSelectedTaskIDs(const CTaskFile& tasks, HTASKITEM hTask, CDWordArray& aTaskIDs);
-	
 	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib);
 	static BOOL CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMATTRIBUTEDEFINITION& attribDefTo);
 	static BOOL CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribDefFrom, TDC_ATTRIBUTE nToAttrib);

@@ -388,15 +388,7 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 	pos = TSH().GetFirstItemPos();
 	
 	while (pos)
-	{
-		DWORD dwSelID = TSH().GetNextItemData(pos);
-		ASSERT(dwSelID);
-
-		HTASKITEM hSelTask = tasks.FindTask(dwSelID);
-		ASSERT(hSelTask);
-
-		tasks.SetTaskMetaData(hSelTask, _T("selected"), _T("1"));
-	}
+		VERIFY(tasks.SelectTask(TSH().GetNextItemData(pos)));
 	
 	// and their titles (including child dupes)
 	CStringArray aTitles;
