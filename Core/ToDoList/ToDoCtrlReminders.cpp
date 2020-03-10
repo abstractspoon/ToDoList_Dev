@@ -749,15 +749,7 @@ void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTas
 	if (nRem != -1)
 	{
 		if (bGotoTask)
-		{
 			DoGotoTask(rem);
-			HideWindow();
-		}
-		// hide dialog if this is the last
-		else if (m_lcReminders.GetItemCount() == 1)
-		{
-			HideWindow();
-		}
 
 		DismissReminder(nRem);
 	}
