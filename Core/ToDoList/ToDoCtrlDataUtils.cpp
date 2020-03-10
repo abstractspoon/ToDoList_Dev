@@ -2306,8 +2306,8 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 	double dEstimate = 0.0;
 	dWeightedEstimate = 0.0;
 
-	BOOL bIsParent = pTDS->HasSubTasks();
-	if (!bIsParent || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+	// Parent time
+	if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 	{
 		dEstimate = pTDI->timeEstimate.GetTime(THU_HOURS);
 
@@ -2324,22 +2324,20 @@ double CTDCTaskCalculator::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOS
 		}
 	}
 
-	if (bIsParent) // children's time
+	// Subtask time
+	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+
+		ASSERT(pTDIChild && pTDSChild);
+
+		if (pTDIChild && pTDSChild)
 		{
-			const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
-			const TODOITEM* pTDIChild = m_data.GetTrueTask(pTDSChild);
+			double dChildWeightedEstimate = 0.0;
 
-			ASSERT(pTDIChild && pTDSChild);
-
-			if (pTDIChild && pTDSChild)
-			{
-				double dChildWeightedEstimate = 0.0;
-
-				dEstimate += GetTaskTimeEstimate(pTDIChild, pTDSChild, TDCU_HOURS, dChildWeightedEstimate);
-				dWeightedEstimate += dChildWeightedEstimate;
-			}
+			dEstimate += GetTaskTimeEstimate(pTDIChild, pTDSChild, TDCU_HOURS, dChildWeightedEstimate); // RECURSIVE CALL
+			dWeightedEstimate += dChildWeightedEstimate;
 		}
 	}
 
