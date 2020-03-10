@@ -1714,6 +1714,7 @@ BOOL CTDLTaskTreeCtrl::GetLabelEditRect(CRect& rLabel) const
 	return GetItemTitleRect(GetSelectedItem(), TDCTR_EDIT, rLabel);
 }
 
+/*
 BOOL CTDLTaskTreeCtrl::RemoveOrphanTreeItemReferences(HTREEITEM hti)
 {
 	BOOL bRemoved = FALSE;
@@ -1745,6 +1746,7 @@ BOOL CTDLTaskTreeCtrl::RemoveOrphanTreeItemReferences(HTREEITEM hti)
 	
 	return bRemoved;
 }
+*/
 
 BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 {

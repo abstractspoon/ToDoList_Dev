@@ -5014,7 +5014,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 		}
 		
 		// Note: CToDoCtrlData ought to have already cleaned up the data
-		VERIFY(!m_taskTree.RemoveOrphanTreeItemReferences());
+		//VERIFY(!m_taskTree.RemoveOrphanTreeItemReferences());
 	}
 	m_taskTree.UpdateAll();
 
