@@ -9194,19 +9194,20 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 	CHTIList selection;
 	TSH().CopySelection(selection, bRemoveDupeSubtasks, TRUE);
 
-	VERIFY(AddTasksToTaskFile(selection, filter, tasks, TRUE)); // Mark tasks as selected
+	CDWordSet mapSelTaskIDs;
+	VERIFY(AddTasksToTaskFile(selection, filter, tasks, &mapSelTaskIDs)); // Mark tasks as selected
 
 	// If required, add all references for the selected tasks
 	BOOL bAppendReferences = filter.HasFlag(TDCGSTF_APPENDREFERENCES);
 
-	if (bIncludeReferences)
+	if (bAppendReferences && m_taskTree.HasReferenceTasks())
 	{
 		CHTIList selectionRefs;
-		POSITION pos = selection.GetHeadPosition();
+		POSITION pos = mapSelTaskIDs.GetStartPosition();
 
 		while (pos)
 		{
-			DWORD dwSelID = GetTrueTaskID(selection.GetNext(pos));
+			DWORD dwSelID = mapSelTaskIDs.GetNext(pos);
 			m_taskTree.GetReferencesToTask(dwSelID, selectionRefs, TRUE); // Append
 		}
 
@@ -9216,22 +9217,23 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 			TDCGETTASKS filterRefs(filter);
 			filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
 
-			VERIFY(AddTasksToTaskFile(selectionRefs, filterRefs, tasks, FALSE)); // Don't mark tasks as selected
+			VERIFY(AddTasksToTaskFile(selectionRefs, filterRefs, tasks, NULL)); // Don't mark tasks as selected
 		}
 	}
 
 	return (tasks.GetTaskCount());
 }
 
-int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, BOOL bSelect) const
+int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const
 {
 	BOOL bWantSubtasks = !filter.HasFlag(TDCGSTF_NOTSUBTASKS);
 	BOOL bWantAllParents = filter.HasFlag(TDCGSTF_ALLPARENTS);
 	BOOL bWantImmediateParent = filter.HasFlag(TDCGSTF_IMMEDIATEPARENT);
 	BOOL bResolveReferences = filter.HasFlag(TDCGSTF_RESOLVEREFERENCES);
 
-	// Keep track of the selected tasks added 
-	CDWordSet aSelTaskIDs;
+	if (pSelTaskIDs)
+		pSelTaskIDs->RemoveAll();
+
 	POSITION pos = listHTI.GetHeadPosition();
 
 	while (pos)
@@ -9259,8 +9261,8 @@ int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& fi
 			{
 				ASSERT(dwTaskID);
 
-				if (bSelect)
-					aSelTaskIDs.Add(dwTaskID);
+				if (pSelTaskIDs)
+					pSelTaskIDs->Add(dwTaskID);
 			}
 		}
 		else
@@ -9279,24 +9281,24 @@ int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& fi
 			{
 				ASSERT(dwTaskID);
 
-				if (bSelect)
-					aSelTaskIDs.Add(dwTaskID);
+				if (pSelTaskIDs)
+					pSelTaskIDs->Add(dwTaskID);
 			}
 		}
 	}
 
 	// extra processing to identify the originally selected tasks
 	// in case the user wants to paste as references.
-	if (bSelect)
+	if (pSelTaskIDs)
 	{
-		pos = aSelTaskIDs.GetStartPosition();
+		pos = pSelTaskIDs->GetStartPosition();
 
 		while (pos)
 		{
-			DWORD dwSelID = aSelTaskIDs.GetNext(pos);
+			DWORD dwSelID = pSelTaskIDs->GetNext(pos);
+			ASSERT(!bResolveReferences || !m_data.IsTaskReference(dwSelID));
 
-			if (!bResolveReferences || !m_data.IsTaskReference(dwSelID))
-				tasks.SelectTask(dwSelID);
+			tasks.SelectTask(dwSelID);
 		}
 	}
 
