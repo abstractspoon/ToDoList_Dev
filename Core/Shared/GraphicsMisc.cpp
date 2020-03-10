@@ -65,6 +65,26 @@ BOOL ConvertBufferToPARGB32(HPAINTBUFFER hPaintBuffer, HDC hdc, HICON hicon, SIZ
 
 //////////////////////////////////////////////////////////////////////
 
+CSaveDC::CSaveDC(HDC hDC) : m_hDC(hDC), m_nSave(-1)
+{
+	if (m_hDC)
+		m_nSave = ::SaveDC(m_hDC);
+}
+
+CSaveDC::CSaveDC(CDC* pDC) : m_hDC(pDC ? pDC->m_hDC : NULL), m_nSave(-1)
+{
+	if (m_hDC)
+		m_nSave = ::SaveDC(m_hDC);
+}
+
+CSaveDC::~CSaveDC()
+{
+	if (m_nSave != -1)
+		::RestoreDC(m_hDC, m_nSave);
+}
+
+//////////////////////////////////////////////////////////////////////
+
 BOOL GraphicsMisc::DrawGradient(GM_GRADIENT nType, CDC* pDC, LPCRECT pRect, 
 								COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder)
 {

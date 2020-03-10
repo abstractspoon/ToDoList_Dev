@@ -29,7 +29,8 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int PADDING = 3;
-const int DEF_TASK_HEIGHT = (GraphicsMisc::ScaleByDPIFactor(16) + 3); // Effective height is 1 less
+const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+const int DEF_TASK_HEIGHT = (IMAGE_SIZE + 3); // Effective height is 1 less
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 
 /////////////////////////////////////////////////////////////////////////////
@@ -737,6 +738,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		if (!CalcTaskCellRect(nTask, pCell, rCellTrue, rTask))
 			continue;
 
+		CSaveDC sdc(pDC);
+
 		// draw selection
 		BOOL bSelTask = (!m_bSavingToImage && (dwTaskID == m_dwSelectedTaskID));
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
@@ -750,7 +753,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				if (!m_bDrawGridOverCells)
 				{
-					rTask.left--; // draw over gridline
+					// draw over gridline
+					rTask.left--; 
 					rClip.left--;
 				}
 
@@ -789,6 +793,10 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 						
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwFlags);
 		}
+
+		// Draw contents
+		rTask.DeflateRect(1, 1);
+		pDC->IntersectClipRect(rTask);
 		
 		// draw icon
 		if ((nTaskHeight >= DEF_TASK_HEIGHT) && pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
@@ -801,9 +809,9 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 				if (hilTask && (iImageIndex != -1))
 				{
-					ImageList_Draw(hilTask, iImageIndex, *pDC, (rTask.left + 1), (rTask.top + 1), ILD_TRANSPARENT);
+					ImageList_Draw(hilTask, iImageIndex, *pDC, rTask.left, rTask.top, ILD_TRANSPARENT);
 
-					rTask.left += (CEnImageList::GetImageSize(hilTask) + 2);
+					rTask.left += (CEnImageList::GetImageSize(hilTask) + 1);
 				}
 			}
 		}

@@ -466,8 +466,8 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 {
 	ASSERT(HasFlag(TCE_CLOSEBUTTON));
 
-	int nSaveDC = dc.SaveDC();
-	
+	CSaveDC sdc(dc);
+
 	// create font first time
 	if (m_fontClose.GetSafeHandle() == NULL)
 		GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6);
@@ -505,8 +505,6 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 	dc.SetTextAlign(TA_TOP | TA_LEFT);
 	dc.SetBkMode(TRANSPARENT);
 	dc.TextOut(rBtn.left + 1, rBtn.top + 1, STR_CLOSEBTN);
-	dc.RestoreDC(nSaveDC);
-
 }
 
 void CTabCtrlEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)

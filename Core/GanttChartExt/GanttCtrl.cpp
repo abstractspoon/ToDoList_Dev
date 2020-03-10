@@ -3222,7 +3222,7 @@ BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn
 	if (!GetListColumnDate(nCol, nMonth, nYear))
 		return FALSE;
 
-	int nSaveDC = pDC->SaveDC();
+	CSaveDC sdc(pDC);
 
 	double dMonthWidth = GetMonthWidth(rColumn.Width());
 	BOOL bToday = FALSE;
@@ -3284,8 +3284,6 @@ BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn
 		break;
 	}
 
-	pDC->RestoreDC(nSaveDC);
-
 	return TRUE;
 }
 
@@ -3303,7 +3301,8 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	if (!GetListColumnDate(nCol, nMonth, nYear))
 		return;
 
-	int nSaveDC = pDC->SaveDC();
+	CSaveDC sdc(pDC);
+
 	double dMonthWidth = GetMonthWidth(rItem.Width());
 	CFont* pOldFont = GraphicsMisc::PrepareDCFont(pDC, m_listHeader);
 	
@@ -3515,7 +3514,6 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	}
 
 	pDC->SelectObject(pOldFont); // not sure if this is necessary but play safe
-	pDC->RestoreDC(nSaveDC);
 }
 
 void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme, BOOL bEnsureVisible)

@@ -2384,8 +2384,8 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 	}
 	
 	// fill background with theme brush
-	int nDC = pDC->SaveDC();
-	
+	CSaveDC sdc(pDC);
+
 	if (m_brUIBack.GetSafeHandle())
 	{
 		CRect rect;
@@ -2399,8 +2399,6 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 
 	// draw comments splitter
 	DrawSplitter(pDC);
-	
-	pDC->RestoreDC(nDC);
 	
 	return TRUE;
 }

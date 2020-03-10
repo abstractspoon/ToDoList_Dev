@@ -93,6 +93,20 @@ DECLARE_HANDLE(DPI_AWARENESS_CONTEXT);
 
 //////////////////////////////////////////////////////////////////////
 
+class CSaveDC
+{
+public:
+	CSaveDC(HDC hDC);
+	CSaveDC(CDC* pDC);
+	~CSaveDC();
+
+protected:
+	HDC m_hDC;
+	int m_nSave;
+};
+
+//////////////////////////////////////////////////////////////////////
+
 namespace GraphicsMisc  
 {
 	BOOL DrawGradient(GM_GRADIENT nType, CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder = -1);
