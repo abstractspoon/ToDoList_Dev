@@ -9196,9 +9196,8 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 
 	VERIFY(AddTasksToTaskFile(selection, filter, tasks, TRUE)); // Mark tasks as selected
 
-	// If required, add references for the selected tasks
-	// but not selected and not 'resolved'
-	BOOL bIncludeReferences = filter.HasFlag(TDCGSTF_INCLUDEREFERENCES);
+	// If required, add all references for the selected tasks
+	BOOL bAppendReferences = filter.HasFlag(TDCGSTF_APPENDREFERENCES);
 
 	if (bIncludeReferences)
 	{

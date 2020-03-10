@@ -3482,7 +3482,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// Include references to selected tasks if a 'Reference-specific' colour is not set
 		if (mapAttribIDs.Has(TDCA_COLOR) && !m_taskTree.HasReferenceTaskColor())
-			dwFlags |= TDCGSTF_INCLUDEREFERENCES;
+			dwFlags |= TDCGSTF_APPENDREFERENCES;
 	}
 
 	// Get the actual tasks for the update
