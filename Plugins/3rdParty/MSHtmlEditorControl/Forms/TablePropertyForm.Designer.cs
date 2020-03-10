@@ -51,8 +51,8 @@ namespace MSDN.Html.Editor
 			this.numericBorderSize = new System.Windows.Forms.NumericUpDown();
 			this.checkBorderColor = new System.Windows.Forms.CheckBox();
 			this.checkBackColor = new System.Windows.Forms.CheckBox();
-			this.btnBorderColor = new MSDN.Html.Editor.Classes.ColorButton();
-			this.btnBackColor = new MSDN.Html.Editor.Classes.ColorButton();
+			this.btnBorderColor = new UIComponents.ColorButton();
+			this.btnBackColor = new UIComponents.ColorButton();
 			this.listTextAlignment = new System.Windows.Forms.ComboBox();
 			this.labelBorderAlign = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -446,8 +446,8 @@ namespace MSDN.Html.Editor
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.CheckBox checkBorderColor;
 		private System.Windows.Forms.CheckBox checkBackColor;
-		private Classes.ColorButton btnBorderColor;
-		private Classes.ColorButton btnBackColor;
+		private UIComponents.ColorButton btnBorderColor;
+		private UIComponents.ColorButton btnBackColor;
 		private System.Windows.Forms.ComboBox listTextAlignment;
 		private System.Windows.Forms.Label labelBorderAlign;
 		private System.Windows.Forms.Label labelBorderSize;

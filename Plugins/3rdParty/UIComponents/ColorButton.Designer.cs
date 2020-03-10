@@ -1,4 +1,4 @@
-﻿namespace MSDN.Html.Editor.Classes
+﻿namespace UIComponents
 {
 	partial class ColorButton
 	{

@@ -168,6 +168,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolStripEx", "3rdParty\Too
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandHandling", "3rdParty\CommandHandling\CommandHandling.csproj", "{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIComponents", "3rdParty\UIComponents\UIComponents.csproj", "{D2DD86F1-5957-463F-8673-49F045DCC8E9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -562,6 +564,22 @@ Global
 		{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8}.Release|Win32.Build.0 = Release|Any CPU
 		{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8}.Release|x86.ActiveCfg = Release|Any CPU
 		{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8}.Release|x86.Build.0 = Release|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Debug|Win32.Build.0 = Debug|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Debug|x86.Build.0 = Debug|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Release|Win32.ActiveCfg = Release|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Release|Win32.Build.0 = Release|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Release|x86.ActiveCfg = Release|Any CPU
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -606,5 +624,6 @@ Global
 		{106D75D9-0012-416E-8C25-85124406171D} = {8ED6C235-FB52-45C1-8E1A-B6540BDED274}
 		{8193B99D-4913-4574-BA3C-A7EF4E2B8627} = {8ED6C235-FB52-45C1-8E1A-B6540BDED274}
 		{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8} = {8ED6C235-FB52-45C1-8E1A-B6540BDED274}
+		{D2DD86F1-5957-463F-8673-49F045DCC8E9} = {8ED6C235-FB52-45C1-8E1A-B6540BDED274}
 	EndGlobalSection
 EndGlobal

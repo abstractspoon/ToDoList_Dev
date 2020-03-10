@@ -37,9 +37,9 @@
 			this.ok = new System.Windows.Forms.Button();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.checkBorderColor = new System.Windows.Forms.CheckBox();
-			this.btnBorderColor = new MSDN.Html.Editor.Classes.ColorButton();
+			this.btnBorderColor = new UIComponents.ColorButton();
 			this.checkBackColor = new System.Windows.Forms.CheckBox();
-			this.btnBackColor = new MSDN.Html.Editor.Classes.ColorButton();
+			this.btnBackColor = new UIComponents.ColorButton();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
 			// 
@@ -193,8 +193,8 @@
 		private System.Windows.Forms.Button ok;
 		private System.Windows.Forms.GroupBox groupBox1;
 		private System.Windows.Forms.CheckBox checkBackColor;
-		private Classes.ColorButton btnBackColor;
+		private UIComponents.ColorButton btnBackColor;
 		private System.Windows.Forms.CheckBox checkBorderColor;
-		private Classes.ColorButton btnBorderColor;
+		private UIComponents.ColorButton btnBorderColor;
 	}
 }

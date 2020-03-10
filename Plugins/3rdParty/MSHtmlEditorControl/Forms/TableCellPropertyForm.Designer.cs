@@ -30,10 +30,10 @@
 		{
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.checkBorderColor = new System.Windows.Forms.CheckBox();
-			this.btnBorderColor = new MSDN.Html.Editor.Classes.ColorButton();
+			this.btnBorderColor = new UIComponents.ColorButton();
 			this.checkWrapText = new System.Windows.Forms.CheckBox();
 			this.checkBackColor = new System.Windows.Forms.CheckBox();
-			this.btnBackColor = new MSDN.Html.Editor.Classes.ColorButton();
+			this.btnBackColor = new UIComponents.ColorButton();
 			this.numericRowSpan = new System.Windows.Forms.NumericUpDown();
 			this.numericColSpan = new System.Windows.Forms.NumericUpDown();
 			this.label6 = new System.Windows.Forms.Label();
@@ -267,9 +267,9 @@
 		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.Label label5;
 		private System.Windows.Forms.CheckBox checkBackColor;
-		private Classes.ColorButton btnBackColor;
+		private UIComponents.ColorButton btnBackColor;
 		private System.Windows.Forms.CheckBox checkWrapText;
 		private System.Windows.Forms.CheckBox checkBorderColor;
-		private Classes.ColorButton btnBorderColor;
+		private UIComponents.ColorButton btnBorderColor;
 	}
 }
