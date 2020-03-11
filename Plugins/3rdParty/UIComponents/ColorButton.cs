@@ -25,7 +25,7 @@ namespace UIComponents
 			{
 				Rectangle rColor = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
 				rColor.Inflate(-5, -5);
-				//rColor.Offset(0, -((rColor.Height + 1) % 2));
+				rColor.Offset(0, -((rColor.Height + 1) % 2)); // To match app
 
 				if (this.TextAlign != ContentAlignment.TopRight &&
 					this.TextAlign != ContentAlignment.MiddleRight &&
