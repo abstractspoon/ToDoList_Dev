@@ -175,6 +175,8 @@ namespace DayViewUIExtension
             m_DayView.SetUITheme(theme);
 			m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 			m_TBRenderer.SetUITheme(theme);
+            m_SelectedTaskDatesLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+            m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 
             BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 
