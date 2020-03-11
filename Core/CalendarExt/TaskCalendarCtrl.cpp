@@ -738,8 +738,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		if (!CalcTaskCellRect(nTask, pCell, rCellTrue, rTask))
 			continue;
 
-		CSaveDC sdc(pDC);
-
 		// draw selection
 		BOOL bSelTask = (!m_bSavingToImage && (dwTaskID == m_dwSelectedTaskID));
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
@@ -794,10 +792,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwFlags);
 		}
 
-		// Draw contents
-		rTask.DeflateRect(1, 1);
-		pDC->IntersectClipRect(rTask);
-		
 		// draw icon
 		if ((nTaskHeight >= DEF_TASK_HEIGHT) && pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
 		{
@@ -809,6 +803,11 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 				if (hilTask && (iImageIndex != -1))
 				{
+					rTask.DeflateRect(1, 1);
+
+					CSaveDC sdc(pDC);
+					pDC->IntersectClipRect(rTask);
+
 					ImageList_Draw(hilTask, iImageIndex, *pDC, rTask.left, rTask.top, ILD_TRANSPARENT);
 
 					rTask.left += (CEnImageList::GetImageSize(hilTask) + 1);
@@ -817,7 +816,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		}
 
 		// draw text if there is enough space
-		if (nTaskHeight >= MIN_TASK_HEIGHT)
+		if ((nTaskHeight >= MIN_TASK_HEIGHT) && !rTask.IsRectEmpty())
 		{
 			int nOffset = GetTaskTextOffset(dwTaskID);
 			
