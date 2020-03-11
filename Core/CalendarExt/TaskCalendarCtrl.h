@@ -24,6 +24,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct UITHEME;
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTaskCalendarCtrl : public CCalendarCtrlEx
 {
 // Construction
@@ -61,7 +65,7 @@ public:
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
 	void SetGridLineColor(COLORREF crGrid);
-	void SetWeekendColor(COLORREF crWeekend);
+	void SetUITheme(const UITHEME& theme);
 
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
@@ -164,7 +168,6 @@ protected:
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
-	BOOL HasWeekendColor() const { return (m_crWeekend != CLR_NONE); }
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;

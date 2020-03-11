@@ -32,8 +32,6 @@ public:
 	BOOL GetTreatOverdueAsDueToday() const { return m_bTreatOverdueAsDueToday; }
 	BOOL GetHideParentTasks() const { return m_bHideParentTasks; }
 
-	COLORREF GetWeekendColor() const;
-
 	BOOL GetDisplayAsContinuous() const { return m_bShowTasksContinuous; }
 	BOOL GetDisplayStart() const { return m_bShowStartDates; }
 	BOOL GetDisplayCalcStart() const { return (m_bShowStartDates && m_bShowCalcStartDates); }
@@ -68,7 +66,6 @@ protected:
 	BOOL	m_bAdjustTaskHeights;
 	BOOL	m_bShowDoneDates;
 	BOOL	m_bTreatOverdueAsDueToday;
-	BOOL	m_bSpecifyWeekendColor;
 	//}}AFX_DATA
 	int		m_nCalcMissingStartDates;
 	int		m_nCalcMissingDueDates;
@@ -80,7 +77,6 @@ protected:
 	CDWordArray m_aSelPalette;
 	TDC_ATTRIBUTE m_nHeatMapAttrib;
 	COLORREF m_crThemeBkgnd;
-	COLORREF m_crWeekend;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -95,12 +91,10 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CCalendarPreferencesPage)
-	afx_msg void OnEnable(BOOL bEnable);
 	afx_msg void OnShowTasksContinuous();
 	afx_msg void OnShowStartDates();
 	afx_msg void OnShowDueDates();
 	afx_msg void OnShowMiniCalendar();
-	afx_msg void OnWeekendColor();
 	//}}AFX_MSG
 	afx_msg void OnSelChangeHeatMapPalette();
 	DECLARE_MESSAGE_MAP()
@@ -119,8 +113,6 @@ public:
 	BOOL GetAdjustTaskHeights() const { return m_page.GetAdjustTaskHeights(); }
 	BOOL GetTreatOverdueAsDueToday() const { return m_page.GetTreatOverdueAsDueToday(); }
 	BOOL GetHideParentTasks() const { return m_page.GetHideParentTasks(); }
-
-	COLORREF GetWeekendColor() const { return m_page.GetWeekendColor(); }
 
 	BOOL GetDisplayAsContinuous() const { return m_page.GetDisplayAsContinuous(); }
 	BOOL GetDisplayStart() const { return m_page.GetDisplayStart(); }

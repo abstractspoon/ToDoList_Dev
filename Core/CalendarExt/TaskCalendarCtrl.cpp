@@ -16,6 +16,8 @@
 #include "..\Shared\enimagelist.h"
 #include "..\Shared\WorkingWeek.h"
 
+#include "..\Interfaces\UITheme.h"
+
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -36,11 +38,11 @@ const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 /////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl
 
-CTaskCalendarCtrl::CTaskCalendarCtrl() 
-	: 
-	m_nMaxDayTaskCount(0), 
+CTaskCalendarCtrl::CTaskCalendarCtrl()
+	:
+	m_nMaxDayTaskCount(0),
 	m_dwSelectedTaskID(0),
-	m_bDraggingStart(FALSE), 
+	m_bDraggingStart(FALSE),
 	m_bDraggingEnd(FALSE),
 	m_bDragging(FALSE),
 	m_ptDragOrigin(0),
@@ -53,7 +55,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_nTaskHeight(DEF_TASK_HEIGHT),
 	m_nSortBy(TDCA_NONE),
 	m_bSortAscending(-1),
-	m_crWeekend(CLR_NONE)
+	m_crWeekend(RGB(224, 224, 224))
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
@@ -619,11 +621,13 @@ void CTaskCalendarCtrl::SetGridLineColor(COLORREF crGrid)
 	}
 }
 
-void CTaskCalendarCtrl::SetWeekendColor(COLORREF crWeekend)
+void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 {
-	if (crWeekend != m_crWeekend)
+	if ((m_crWeekend != theme.crAppBackLight) ||
+		(m_crTheme != theme.crAppBackDark))
 	{
-		m_crWeekend = crWeekend;
+		m_crWeekend = theme.crAppBackLight;
+		m_crTheme = theme.crAppBackDark;
 
 		if (GetSafeHwnd())
 			Invalidate();
@@ -656,7 +660,7 @@ COLORREF CTaskCalendarCtrl::GetCellHeaderTextColor(const CCalendarCell* pCell, B
 
 	if (bSelected)
 	{
-		if (HasWeekendColor() && CWeekend().IsWeekend(pCell->date))
+		if (CWeekend().IsWeekend(pCell->date))
 			crText = GraphicsMisc::Darker(m_crTheme, 0.5, FALSE);
 		else
 			crText = GraphicsMisc::Darker(m_crTheme, 0.3, FALSE);
@@ -672,7 +676,7 @@ COLORREF CTaskCalendarCtrl::GetCellHeaderBkgndColor(const CCalendarCell* pCell, 
 {
 	COLORREF crHeader = CLR_NONE; // == same as background color
 
-	if (HasWeekendColor() && CWeekend().IsWeekend(pCell->date))
+	if (CWeekend().IsWeekend(pCell->date))
 	{
 		if (bToday)
 		{

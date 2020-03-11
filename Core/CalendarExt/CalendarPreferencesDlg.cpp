@@ -41,8 +41,6 @@ const COLORBREWER_PALETTETYPE HEATMAP_PALETTETYPE = CBPT_SEQUENTIAL;
 
 const LPCTSTR FIRSTTIME = _T("FirstTime");
 
-const COLORREF DEF_WEEKENDCOLOR = RGB(224, 224, 224);
-
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarPreferencesPage dialog
 
@@ -59,7 +57,6 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 	m_bAdjustTaskHeights = FALSE;
 	m_bShowDoneDates = FALSE;
 	m_bTreatOverdueAsDueToday = FALSE;
-	m_bSpecifyWeekendColor = FALSE;
 	//}}AFX_DATA_INIT
 	m_bHideParentTasks = TRUE;
 }
@@ -79,7 +76,6 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_DYNAMICTASKHEIGHT, m_bAdjustTaskHeights);
 	DDX_Check(pDX, IDC_SHOWDONEDATES, m_bShowDoneDates);
 	DDX_Check(pDX, IDC_SHOWOVERDUEASDUETODAY, m_bTreatOverdueAsDueToday);
-	DDX_Check(pDX, IDC_WEEKENDCOLOR, m_bSpecifyWeekendColor);
 	DDX_Check(pDX, IDC_HIDEPARENTTASKS, m_bHideParentTasks);
 	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_USECREATIONFORSTART, m_nCalcMissingStartDates);
@@ -90,7 +86,6 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_CBData(pDX, m_cbHeatMapAttribute, m_nHeatMapAttrib, TDCA_DONEDATE);
 	
 	m_cbHeatMapPalette.DDX(pDX, m_aSelPalette);
-	m_btWeekendColor.DDX(pDX, m_crWeekend);
 }
 
 
@@ -100,7 +95,6 @@ BEGIN_MESSAGE_MAP(CCalendarPreferencesPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SHOWSTARTDATES, OnShowStartDates)
 	ON_BN_CLICKED(IDC_SHOWDUEDATES, OnShowDueDates)
 	ON_BN_CLICKED(IDC_SHOWMINICALENDAR, OnShowMiniCalendar)
-	ON_BN_CLICKED(IDC_WEEKENDCOLOR, OnWeekendColor)
 	//}}AFX_MSG_MAP
 	ON_CBN_SELCHANGE(IDC_HEATMAPPALETTE, OnSelChangeHeatMapPalette)
 END_MESSAGE_MAP()
@@ -126,7 +120,6 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowDueDates);
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetSize());
-	GetDlgItem(IDC_SETWEEKENDCOLOR)->EnableWindow(m_bSpecifyWeekendColor);
 		
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -169,8 +162,6 @@ void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("AdjustTaskHeights"), m_bAdjustTaskHeights);
 	pPrefs->WriteProfileInt(szKey, _T("TreatOverdueAsDueToday"), m_bTreatOverdueAsDueToday);
 	pPrefs->WriteProfileInt(szKey, _T("HideParentTasks"), m_bHideParentTasks);
-	pPrefs->WriteProfileInt(szKey, _T("SpecifyWeekendColor"), m_bSpecifyWeekendColor);
-	pPrefs->WriteProfileInt(szKey, _T("WeekendColor"), (int)m_crWeekend);
 
 	pPrefs->WriteProfileInt(szKey, _T("ShowTasksContinuous"), m_bShowTasksContinuous);
 	pPrefs->WriteProfileInt(szKey, _T("ShowStartDates"), m_bShowStartDates);
@@ -194,8 +185,6 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bAdjustTaskHeights = pPrefs->GetProfileInt(szKey, _T("AdjustTaskHeights"), FALSE);
 	m_bTreatOverdueAsDueToday = pPrefs->GetProfileInt(szKey, _T("TreatOverdueAsDueToday"), FALSE);
 	m_bHideParentTasks = pPrefs->GetProfileInt(szKey, _T("HideParentTasks"), TRUE);
-	m_bSpecifyWeekendColor = pPrefs->GetProfileInt(szKey, _T("SpecifyWeekendColor"), TRUE);
-	m_crWeekend = (COLORREF)pPrefs->GetProfileInt(szKey, _T("WeekendColor"), DEF_WEEKENDCOLOR);
 
 	m_bShowTasksContinuous = pPrefs->GetProfileInt(szKey, _T("ShowTasksContinuous"), TRUE);
 	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), FALSE);
@@ -231,11 +220,6 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	}
 
 	m_nHeatMapAttrib = (TDC_ATTRIBUTE)pPrefs->GetProfileInt(szKey, _T("HeatMapAttribute"), TDCA_DONEDATE);
-}
-
-COLORREF CCalendarPreferencesPage::GetWeekendColor() const
-{
-	return m_bSpecifyWeekendColor ? m_crWeekend : CLR_NONE;
 }
 
 BOOL CCalendarPreferencesPage::GetEnableHeatMap(CDWordArray& aPalette, TDC_ATTRIBUTE& nAttrib) const
@@ -285,13 +269,6 @@ void CCalendarPreferencesPage::OnShowMiniCalendar()
 void CCalendarPreferencesPage::SetThemeBkgndColors(COLORREF crLight, COLORREF crDark) 
 { 
 	m_crThemeBkgnd = GraphicsMisc::Blend(crLight, crDark, 0.5); 
-}
-
-void CCalendarPreferencesPage::OnWeekendColor()
-{
-	UpdateData();
-
-	GetDlgItem(IDC_SETWEEKENDCOLOR)->EnableWindow(m_bSpecifyWeekendColor);
 }
 
 /////////////////////////////////////////////////////////////////////////////

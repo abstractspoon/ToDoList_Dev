@@ -306,8 +306,6 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	m_BigCalendar.SetOptions(dwOptions);
 	m_MiniCalendar.SetOptions(dwOptions);
 
-	m_BigCalendar.SetWeekendColor(m_dlgPrefs.GetWeekendColor());
-
 	CDWordArray aHeatMapPalette;
 	TDC_ATTRIBUTE nHeatMapAttrib = TDCA_NONE;
 
@@ -330,7 +328,7 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 
 		m_dlgPrefs.SetThemeBkgndColors(pTheme->crAppBackLight, pTheme->crAppBackDark);
 
-		m_BigCalendar.SetThemeColour(pTheme->crAppBackDark);
+		m_BigCalendar.SetUITheme(*pTheme);
 		m_MiniCalendar.SetHighlightToday(TRUE, pTheme->crAppLinesDark);
 		
 		// intentionally set background colours to be same as ours
