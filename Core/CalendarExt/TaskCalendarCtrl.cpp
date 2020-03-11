@@ -623,15 +623,11 @@ void CTaskCalendarCtrl::SetGridLineColor(COLORREF crGrid)
 
 void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 {
-	if ((m_crWeekend != theme.crAppBackLight) ||
-		(m_crTheme != theme.crAppBackDark))
-	{
-		m_crWeekend = theme.crAppBackLight;
-		m_crTheme = theme.crAppBackDark;
+	m_crWeekend = theme.crAppBackDark;
+	m_crTheme = theme.crAppBackDark;
 
-		if (GetSafeHwnd())
-			Invalidate();
-	}
+	if (GetSafeHwnd())
+		Invalidate();
 }
 
 COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL /*bToday*/) const
@@ -643,12 +639,12 @@ COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL b
 		crBkgnd = m_crWeekend;
 
 		if (bSelected)
-			crBkgnd = GraphicsMisc::Darker(crBkgnd, 0.05);
+			crBkgnd = GraphicsMisc::Darker(crBkgnd, 0.05, FALSE);
 
 	}
 	else if (bSelected)
 	{
-		crBkgnd = GraphicsMisc::Lighter(m_crTheme, 0.5);
+		crBkgnd = GraphicsMisc::Lighter(m_crTheme, 0.5, FALSE);
 	}
 
 	return crBkgnd;
