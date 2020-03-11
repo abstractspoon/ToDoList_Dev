@@ -105,6 +105,7 @@ CGanttCtrl::CGanttCtrl()
 	m_crToday(CLR_NONE),
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crNonWorkingHoursColor(RGB(224, 224, 224)),
+	m_crVertGrid(RGB(192, 192, 192)),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
 	m_nDragging(GTLCD_NONE), 
 	m_ptDragStart(0),
@@ -1424,7 +1425,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				BOOL bSelected = (nState != GMIS_NONE);
 
 				// draw horz gridline before selection
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
+				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected, TRUE);
 
 				// Draw icon
 				CRect rIcon;
@@ -1541,7 +1542,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 			
 			// draw horz gridline before selection
-			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE, FALSE);
 
 			// draw background
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -2435,6 +2436,11 @@ void CGanttCtrl::SetUITheme(const UITHEME& theme)
 
 	SetColor(m_crWeekend, theme.crAppBackDark);
 	SetColor(m_crNonWorkingHoursColor, theme.crAppBackDark);
+
+	m_crVertGrid = theme.crAppLinesDark;
+
+	if (m_crVertGrid == m_crWeekend)
+		m_crVertGrid = theme.crAppLinesLight;
 }
 
 void CGanttCtrl::SetDefaultColor(COLORREF crDefault)
@@ -2531,7 +2537,7 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 	if (rItem.Width() == 0)
 		return;
 
-	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected);
+	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected, TRUE);
 
 	GTLC_COLUMN nColID = GetTreeColumnID(nCol);
 	BOOL bTitleCol = (nColID == GTLCC_TITLE);
@@ -2727,7 +2733,7 @@ BOOL CGanttCtrl::IsVerticalDivider(DIV_TYPE nType)
 	return FALSE;
 }
 
-void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
+void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected, BOOL bTree)
 {
 	if (nType == DIV_NONE)
 		return;
@@ -2737,7 +2743,7 @@ void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, B
 	if (!HasGridlines() || (bVert && (rItem.right < 0)))
 		return;
 
-	COLORREF color = m_crGridLine;
+	COLORREF color = (((nType == DIV_HORZ) || bTree) ? m_crGridLine : m_crVertGrid);
 
 	switch (nType)
 	{
@@ -2863,7 +2869,7 @@ void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 	if (!bRollup)
 	{
 		DIV_TYPE nDiv = GetVerticalDivider(nMonth, nYear);
-		DrawItemDivider(pDC, rMonth, nDiv, bSelected);
+		DrawItemDivider(pDC, rMonth, nDiv, bSelected, FALSE);
 
 		if (!bToday)
 			bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
@@ -2902,7 +2908,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 			if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
 			{
 				rDay.right = rDay.left; // draw at start of day
-				DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
+				DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected, FALSE);
 			}
 		}
 
@@ -2987,7 +2993,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 					{
 						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
 
-						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected, FALSE);
 						
 						rHour.left = rHour.right;
 					}
@@ -2995,7 +3001,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 
 				// draw all but the last day divider
 				if (nDay < nNumDays)
-					DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected);
+					DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected, FALSE);
 			}
 
 			// next day

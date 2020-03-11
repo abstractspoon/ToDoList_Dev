@@ -120,7 +120,7 @@ protected:
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 
 	COLORREF m_crParent, m_crDefault;
-	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor;
+	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor, m_crVertGrid;
 	COleDateTime m_dtDragMin;
 	CPoint m_ptDragStart, m_ptLastDependPick;
 	DWORD m_dwOptions;
@@ -210,7 +210,7 @@ protected:
 
 	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
 
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
+	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected, BOOL bTree);
 	DIV_TYPE GetVerticalDivider(int nMonth, int nYear) const;
 
 	void ClearDependencyPickLine(CDC* pDC = NULL);
