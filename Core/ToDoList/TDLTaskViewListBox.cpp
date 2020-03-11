@@ -98,7 +98,7 @@ void CTDLTaskViewListBox::BuildList()
 
 		CIcon icon(GraphicsMisc::LoadIcon(IDI_LISTVIEW_STD));
 
-		int nImage = AddItemImage(icon);
+		int nImage = AddItemImage(icon, FALSE);
 		ASSERT(nImage == nItem);
 
 		// add rest of extensions
