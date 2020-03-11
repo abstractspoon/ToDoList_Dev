@@ -89,7 +89,8 @@ namespace DayViewUIExtension
         {
             get
             {
-                return InterpolateColors(this.HourSeperatorColor, m_theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight), 0.5f);
+                // Halfway between AppLinesDark and window colour
+                return InterpolateColors(this.HourSeperatorColor, SystemColors.Window, 0.5f);
             }
         }
 
@@ -97,7 +98,12 @@ namespace DayViewUIExtension
         {
             get
             {
-                return m_theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+                Color appLineColor = m_theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+
+                if (appLineColor == BackColor)
+                    appLineColor = m_theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
+
+                return appLineColor;
             }
         }
 
