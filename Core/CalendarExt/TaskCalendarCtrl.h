@@ -64,9 +64,7 @@ public:
 	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
-	void SetGridLineColor(COLORREF crGrid);
 	void SetUITheme(const UITHEME& theme);
-
 	BOOL ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 

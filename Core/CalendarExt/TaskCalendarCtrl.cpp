@@ -610,21 +610,15 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 	CCalendarCtrlEx::DrawCells(pDC);
 }
 
-void CTaskCalendarCtrl::SetGridLineColor(COLORREF crGrid)
-{
-	if (crGrid != m_crGrid)
-	{
-		m_crGrid = crGrid;
-
-		if (GetSafeHwnd())
-			Invalidate();
-	}
-}
-
 void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 {
 	m_crWeekend = theme.crAppBackDark;
 	m_crTheme = theme.crAppBackDark;
+
+	m_crGrid = theme.crAppLinesDark;
+
+	if (m_crGrid == m_crWeekend)
+		m_crGrid = theme.crAppLinesLight;
 
 	if (GetSafeHwnd())
 		Invalidate();

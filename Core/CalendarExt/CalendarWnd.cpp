@@ -242,15 +242,6 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	DWORD dwWeekends = pPrefs->GetProfileInt(_T("Preferences"), _T("Weekends"), (DHW_SATURDAY | DHW_SUNDAY));
 	CWeekend::Initialise(dwWeekends);
 
-	// get grid line color from app prefs
-	COLORREF crGrid = DEF_GRIDLINECOLOR;
-
-	if (pPrefs->GetProfileInt(_T("Preferences"), _T("SpecifyGridColor"), TRUE))
-		crGrid = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("GridLines"), DEF_GRIDLINECOLOR);
-
-	m_BigCalendar.SetGridLineColor(crGrid);
-	m_MiniCalendar.SetBorderColor(crGrid);
-
 	// calendar specific preferences
 	if (!bAppOnly)
 	{
