@@ -422,7 +422,7 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
-		m_ctrlGantt.SetSplitBarColor(m_theme.crAppBackDark);
+		m_ctrlGantt.SetUITheme(m_theme);
 		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
 	}
 }
@@ -1081,8 +1081,6 @@ void CGanttChartWnd::UpdateGanttCtrlPreferences()
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYPARENTROLLUPS, m_dlgPrefs.GetDisplayParentsAsRollups());
 
 	m_ctrlGantt.SetTodayColor(m_dlgPrefs.GetTodayColor());
-	m_ctrlGantt.SetWeekendColor(m_dlgPrefs.GetWeekendColor());
-	m_ctrlGantt.SetNonWorkingHoursColor(m_dlgPrefs.GetNonWorkingHoursColor());
 	m_ctrlGantt.SetDefaultColor(m_dlgPrefs.GetDefaultColor());
 	m_ctrlGantt.SetMilestoneTag(m_dlgPrefs.GetMilestoneTag());
 

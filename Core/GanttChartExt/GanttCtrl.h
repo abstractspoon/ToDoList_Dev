@@ -25,6 +25,8 @@
 
 class CThemed;
 
+struct UITHEME;
+
 /////////////////////////////////////////////////////////////////////////////
 
 class CGanttCtrl : public CTreeListCtrl  
@@ -78,8 +80,7 @@ public:
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) ? TRUE : FALSE); }
 
 	void SetTodayColor(COLORREF crToday);
-	void SetWeekendColor(COLORREF crWeekend);
-	void SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor);
+	void SetUITheme(const UITHEME& theme);
 	void SetDefaultColor(COLORREF crDefault);
 	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
 	void SetMilestoneTag(const CString& sTag);

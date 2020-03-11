@@ -31,8 +31,6 @@ public:
 	BOOL GetCalculateMissingStartDates() const { return m_bCalculateMissingStartDates; }
 	BOOL GetCalculateMissingDueDates() const { return m_bCalculateMissingDueDates; }
 	COLORREF GetTodayColor() const;
-	COLORREF GetWeekendColor() const;
-	COLORREF GetNonWorkingHoursColor() const;
 	COLORREF GetDefaultColor() const;
 	CString GetMilestoneTag() const;
 	BOOL GetDisplayProgressInBar() const { return m_bDisplayProgressInBar; }
@@ -49,8 +47,6 @@ protected:
 	BOOL	m_bDisplayTrailingAllocTo;
 	BOOL	m_bDisplayTrailingTaskTitle;
 	BOOL	m_bAutoScrollSelection;
-	BOOL	m_bSpecifyWeekendColor;
-	BOOL	m_bSpecifyNonWorkingHoursColor;
 	BOOL	m_bSpecifyTodayColor;
 	BOOL	m_bSpecifyDefaultColor;
 	BOOL	m_bAutoCalcParentDates;
@@ -64,9 +60,8 @@ protected:
 	BOOL	m_bDisplayParentsAsRollups;
 	//}}AFX_DATA
 
-	CColorButton m_btNonWorkingHoursColor, m_btWeekendColor, m_btTodayColor;
-	CColorButton m_btParentColor, m_btDefaultColor;
-	COLORREF m_crNonWorkingHoursColor, m_crWeekend, m_crToday, m_crParent, m_crDefault;
+	CColorButton m_btParentColor, m_btDefaultColor, m_btTodayColor;
+	COLORREF m_crToday, m_crParent, m_crDefault;
 	CGroupLineManager m_mgrGroupLines;
 	CCheckListBoxEx m_lbColumnVisibility;
 	CDWordArray m_aColumnVis;
@@ -84,12 +79,8 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CGanttPreferencesPage)
-	afx_msg void OnSetNonWorkingHoursColor();
-	afx_msg void OnSetWeekendcolor();
 	afx_msg void OnSetTodaycolor();
 	afx_msg void OnSetDefaultcolor();
-	afx_msg void OnNonWorkingHoursColor();
-	afx_msg void OnWeekendcolor();
 	afx_msg void OnTodaycolor();
 	afx_msg void OnDefaultcolor();
 	afx_msg void OnChangeParentColoring();
@@ -119,8 +110,6 @@ public:
 	BOOL GetCalculateMissingStartDates() const { return m_page.GetCalculateMissingStartDates(); }
 	BOOL GetCalculateMissingDueDates() const { return m_page.GetCalculateMissingDueDates(); }
 	COLORREF GetTodayColor() const { return m_page.GetTodayColor(); }
-	COLORREF GetWeekendColor() const { return m_page.GetWeekendColor(); }
-	COLORREF GetNonWorkingHoursColor() const { return m_page.GetNonWorkingHoursColor(); }
 	COLORREF GetDefaultColor() const { return m_page.GetDefaultColor(); }
 	CString GetMilestoneTag() const { return m_page.GetMilestoneTag(); }
 	BOOL GetDisplayProgressInBar() const { return m_page.GetDisplayProgressInBar(); }

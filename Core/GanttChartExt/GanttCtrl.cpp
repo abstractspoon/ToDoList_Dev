@@ -23,6 +23,8 @@
 
 #include "..\3rdparty\shellicons.h"
 
+#include "..\Interfaces\UITheme.h"
+
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()
 
@@ -101,7 +103,8 @@ CGanttCtrl::CGanttCtrl()
 	m_crDefault(CLR_NONE),
 	m_crParent(CLR_NONE),
 	m_crToday(CLR_NONE),
-	m_crWeekend(CLR_NONE),
+	m_crWeekend(RGB(224, 224, 224)),
+	m_crNonWorkingHoursColor(RGB(224, 224, 224)),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
 	m_nDragging(GTLCD_NONE), 
 	m_ptDragStart(0),
@@ -2426,14 +2429,12 @@ void CGanttCtrl::SetTodayColor(COLORREF crToday)
 	SetColor(m_crToday, crToday);
 }
 
-void CGanttCtrl::SetWeekendColor(COLORREF crWeekend)
+void CGanttCtrl::SetUITheme(const UITHEME& theme)
 {
-	SetColor(m_crWeekend, crWeekend);
-}
+	SetSplitBarColor(theme.crAppBackDark);
 
-void CGanttCtrl::SetNonWorkingHoursColor(COLORREF crNonWorkingHoursColor)
-{
-	SetColor(m_crNonWorkingHoursColor, crNonWorkingHoursColor);
+	SetColor(m_crWeekend, theme.crAppBackDark);
+	SetColor(m_crNonWorkingHoursColor, theme.crAppBackDark);
 }
 
 void CGanttCtrl::SetDefaultColor(COLORREF crDefault)
