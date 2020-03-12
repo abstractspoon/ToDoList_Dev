@@ -267,14 +267,17 @@ void CUIThemeFile::RecalcNonWorkingColors(UITHEME& theme)
 	// Ensure a minimum 'darkness' level
 	HLSX crNonWorking(theme.crAppBackDark);
 
-	if (crNonWorking.fLuminosity <= 0.6)
+	if (crNonWorking.fLuminosity <= 0.6f)
 		crNonWorking.fLuminosity = max(crNonWorking.fLuminosity, 0.6f);
 	else
 		crNonWorking.fLuminosity = (crNonWorking.fLuminosity + 0.6f) / 2;
 
+	// And mute a bit
+	crNonWorking.fSaturation = min(crNonWorking.fSaturation, 0.5f);
+
 	theme.crNonWorkingHours = crNonWorking;
 
-	// Make weekend a smidgin darker
+	// Make weekend a smidgen darker
 	theme.crWeekend = GraphicsMisc::Darker(crNonWorking, 0.1, FALSE);
 }
 
