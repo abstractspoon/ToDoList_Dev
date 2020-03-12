@@ -29,7 +29,7 @@ CTaskMiniCalendarCtrl::CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData)
 	: 
 	m_mapData(mapData), 
 	m_nHeatMapAttribute(TDCA_NONE),
-	m_crBorder(RGB(192, 192, 192))
+	m_crBorder(CLR_NONE)
 {
 }
 
