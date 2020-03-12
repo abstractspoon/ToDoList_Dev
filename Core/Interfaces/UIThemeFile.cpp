@@ -19,25 +19,6 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-
-CUIThemeFile::UITOOLBAR::UITOOLBAR(LPCTSTR szFile, COLORREF crTrans)
-	:
-	sToolbarImageFile(szFile), crToolbarTransparency(crTrans)
-{
-}
-
-BOOL CUIThemeFile::UITOOLBAR::operator== (const UITOOLBAR& uitb) const
-{
-	return ((crToolbarTransparency == uitb.crToolbarTransparency) && 
-			FileMisc::IsSamePath(sToolbarImageFile, uitb.sToolbarImageFile));
-}
-
-BOOL CUIThemeFile::UITOOLBAR::operator!= (const UITOOLBAR& uitb) const
-{
-	return !(*this == uitb);
-}
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -72,7 +53,6 @@ void CUIThemeFile::Trace() const
 	TRACECOLOR(crStatusBarDark);
 	TRACECOLOR(crStatusBarLight);
 	TRACECOLOR(crStatusBarText);
-	TRACECOLOR(crToolbarTransparency);
 	TRACECOLOR(crWeekend);
 	TRACECOLOR(crNonWorkingHours);
 }
@@ -85,25 +65,22 @@ void CUIThemeFile::TraceColor(LPCTSTR szColor, COLORREF color) const
 
 CUIThemeFile& CUIThemeFile::operator=(const CUIThemeFile& theme)
 {
-	nRenderStyle = theme.nRenderStyle;
+	nRenderStyle		= theme.nRenderStyle;
 	
-	crAppBackDark = theme.crAppBackDark;
-	crAppBackLight = theme.crAppBackLight;
-	crAppLinesDark = theme.crAppLinesDark;
-	crAppLinesLight = theme.crAppLinesLight;
-	crAppText = theme.crAppText;
-	crMenuBack = theme.crMenuBack;
-	crToolbarDark = theme.crToolbarDark;
-	crToolbarLight = theme.crToolbarLight;
-	crToolbarHot = theme.crToolbarHot;
-	crStatusBarDark = theme.crStatusBarDark;
-	crStatusBarLight = theme.crStatusBarLight;
-	crStatusBarText = theme.crStatusBarText;
-	crWeekend = theme.crWeekend;
-	crNonWorkingHours = theme.crNonWorkingHours;
-
-	// toolbars
-	Misc::CopyStrT<UITOOLBAR>(theme.m_mapToolbars, m_mapToolbars);
+	crAppBackDark		= theme.crAppBackDark;
+	crAppBackLight		= theme.crAppBackLight;
+	crAppLinesDark		= theme.crAppLinesDark;
+	crAppLinesLight		= theme.crAppLinesLight;
+	crAppText			= theme.crAppText;
+	crMenuBack			= theme.crMenuBack;
+	crToolbarDark		= theme.crToolbarDark;
+	crToolbarLight		= theme.crToolbarLight;
+	crToolbarHot		= theme.crToolbarHot;
+	crStatusBarDark		= theme.crStatusBarDark;
+	crStatusBarLight	= theme.crStatusBarLight;
+	crStatusBarText		= theme.crStatusBarText;
+	crWeekend			= theme.crWeekend;
+	crNonWorkingHours	= theme.crNonWorkingHours;
 
 	return *this;
 }
@@ -130,10 +107,6 @@ BOOL CUIThemeFile::operator== (const CUIThemeFile& theme) const
 		return FALSE;
 	}
 
-	// then toolbars
-	if (!Misc::MatchAllStrT<UITOOLBAR>(m_mapToolbars, theme.m_mapToolbars))
-		return FALSE;
-
 	// all good
 	return TRUE;
 }
@@ -158,7 +131,7 @@ BOOL CUIThemeFile::LoadThemeFile(LPCTSTR szThemeFile)
 	// else
 	Reset();
 
-	nRenderStyle = GetRenderStyle(pXITheme);
+	nRenderStyle		= GetRenderStyle(pXITheme);
 
 	crAppBackDark		= GetColor(pXITheme, _T("APPBACKDARK"),		COLOR_3DFACE);
 	crAppBackLight		= GetColor(pXITheme, _T("APPBACKLIGHT"),	COLOR_3DFACE);
@@ -168,69 +141,19 @@ BOOL CUIThemeFile::LoadThemeFile(LPCTSTR szThemeFile)
 	crMenuBack			= GetColor(pXITheme, _T("MENUBACK"),		COLOR_3DFACE);
 	crToolbarDark		= GetColor(pXITheme, _T("TOOLBARDARK"),		COLOR_3DFACE);
 	crToolbarLight		= GetColor(pXITheme, _T("TOOLBARLIGHT"),	COLOR_3DFACE);
+	crToolbarHot		= GetColor(pXITheme, _T("TOOLBARHOT"),		CLR_NONE);
 	crStatusBarDark		= GetColor(pXITheme, _T("STATUSBARDARK"),	COLOR_3DFACE);
 	crStatusBarLight	= GetColor(pXITheme, _T("STATUSBARLIGHT"),	COLOR_3DFACE);
 	crStatusBarText		= GetColor(pXITheme, _T("STATUSBARTEXT"),	COLOR_WINDOWTEXT);
 
-	RecalcNonWorkingColors(*this);
-
-	// toolbars
-	crToolbarHot		= GetColor(pXITheme, _T("TOOLBARHOT"),		-1); // -1 == CLR_NONE
-
 	if (crToolbarHot == CLR_NONE)
 		crToolbarHot = GraphicsMisc::Lighter(crToolbarLight, 0.05);
 
-	CString sFolder = FileMisc::GetFolderFromFilePath(szThemeFile);
-	const CXmlItem* pTBImage = pXITheme->GetItem(_T("TOOLBARIMAGES"));
-
-	if (pTBImage)
-	{
-		while (pTBImage)
-		{
-			CString sKey = pTBImage->GetItemValue(_T("KEY"));
-			CString sFile = pTBImage->GetItemValue(_T("FILE"));
-
-			if (!sKey.IsEmpty() && !sFile.IsEmpty())
-			{
-				COLORREF crTrans = GetColor(pTBImage, _T("TRANSPARENCY"));
-				UITOOLBAR uitb(FileMisc::MakeFullPath(sFile, sFolder), crTrans);
-
-				sKey.MakeUpper();
-				m_mapToolbars[sKey] = uitb;
-			}
-
-			pTBImage = pTBImage->GetSibling();
-		}
-	}
-	else // go looking for the images
-	{
-		// look in folder of same name as theme
-		CString sImageFolder(szThemeFile);
-		FileMisc::RemoveExtension(sImageFolder);
-
-		CStringArray aImages;
-		int nImage = FileMisc::FindFiles(sImageFolder, aImages, FALSE, _T("*.gif"));
-
-		while (nImage--)
-		{
-			CString sImageFile = aImages[nImage];
-			CString sKey = FileMisc::GetFileNameFromPath(sImageFile, FALSE);
-
-			sKey.MakeUpper();
-			m_mapToolbars[sKey] = UITOOLBAR(sImageFile, 255);
-		}
-	}
+	RecalcNonWorkingColors();
 
 	//Trace();
 
 	return TRUE;
-}
-
-void CUIThemeFile::Reset()
-{
-	Reset(*this);
-
-	m_mapToolbars.RemoveAll();
 }
 
 BOOL CUIThemeFile::IsSet() const
@@ -239,33 +162,30 @@ BOOL CUIThemeFile::IsSet() const
 	return (*this != CUIThemeFile());
 }
 
-void CUIThemeFile::Reset(UITHEME& theme)
+void CUIThemeFile::Reset()
 {
-	theme.nRenderStyle = UIRS_GRADIENT;
+	nRenderStyle		= UIRS_GRADIENT;
 
-	theme.crAppBackDark		= GetSysColor(COLOR_3DFACE);
-	theme.crAppBackLight	= GetSysColor(COLOR_3DFACE);
-	theme.crAppLinesDark	= GetSysColor(COLOR_3DSHADOW);
-	theme.crAppLinesLight	= GetSysColor(COLOR_3DHIGHLIGHT);
-	theme.crAppText			= GetSysColor(COLOR_WINDOWTEXT);
-	theme.crMenuBack		= GetSysColor(COLOR_3DFACE);
-	theme.crToolbarDark		= GetSysColor(COLOR_3DFACE);
-	theme.crToolbarLight	= GetSysColor(COLOR_3DFACE);
-	theme.crToolbarHot		= GetSysColor(COLOR_3DHIGHLIGHT);
-	theme.crStatusBarDark	= GetSysColor(COLOR_3DFACE);
-	theme.crStatusBarLight	= GetSysColor(COLOR_3DFACE);
-	theme.crStatusBarText	= GetSysColor(COLOR_WINDOWTEXT);
+	crAppBackDark		= GetSysColor(COLOR_3DFACE);
+	crAppBackLight		= GetSysColor(COLOR_3DFACE);
+	crAppLinesDark		= GetSysColor(COLOR_3DSHADOW);
+	crAppLinesLight		= GetSysColor(COLOR_3DHIGHLIGHT);
+	crAppText			= GetSysColor(COLOR_WINDOWTEXT);
+	crMenuBack			= GetSysColor(COLOR_3DFACE);
+	crToolbarDark		= GetSysColor(COLOR_3DFACE);
+	crToolbarLight		= GetSysColor(COLOR_3DFACE);
+	crToolbarHot		= GetSysColor(COLOR_3DHIGHLIGHT);
+	crStatusBarDark		= GetSysColor(COLOR_3DFACE);
+	crStatusBarLight	= GetSysColor(COLOR_3DFACE);
+	crStatusBarText		= GetSysColor(COLOR_WINDOWTEXT);
 
-	theme.szToolbarImage[0] = 0;
-	theme.crToolbarTransparency = CLR_NONE;
-
-	RecalcNonWorkingColors(theme);
+	RecalcNonWorkingColors();
 }
 
-void CUIThemeFile::RecalcNonWorkingColors(UITHEME& theme)
+void CUIThemeFile::RecalcNonWorkingColors()
 {
 	// Ensure a minimum 'darkness' level
-	HLSX crNonWorking(theme.crAppBackDark);
+	HLSX crNonWorking(crAppBackDark);
 
 	if (crNonWorking.fLuminosity <= 0.6f)
 		crNonWorking.fLuminosity = max(crNonWorking.fLuminosity, 0.6f);
@@ -275,10 +195,10 @@ void CUIThemeFile::RecalcNonWorkingColors(UITHEME& theme)
 	// And mute a bit
 	crNonWorking.fSaturation = min(crNonWorking.fSaturation, 0.5f);
 
-	theme.crNonWorkingHours = crNonWorking;
+	crNonWorkingHours = crNonWorking;
 
 	// Make weekend a smidgen darker
-	theme.crWeekend = GraphicsMisc::Darker(crNonWorking, 0.1, FALSE);
+	crWeekend = GraphicsMisc::Darker(crNonWorking, 0.1, FALSE);
 }
 
 COLORREF CUIThemeFile::GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID)
@@ -321,51 +241,3 @@ UI_RENDER_STYLE CUIThemeFile::GetRenderStyle(const CXmlItem* pXITheme)
 	return UIRS_GRADIENT;
 }
 
-CString CUIThemeFile::GetToolbarImageFile(LPCTSTR szKey, COLORREF& crTrans) const
-{
-	UITOOLBAR uitb;
-
-	CString sKey(szKey);
-	sKey.MakeUpper();
-
-	if (m_mapToolbars.Lookup(sKey, uitb))
-	{
-		crTrans = uitb.crToolbarTransparency;
-		return uitb.sToolbarImageFile;
-	}
-
-	return _T("");
-}
-
-CString CUIThemeFile::GetToolbarImageFile(LPCTSTR szKey) const
-{
-	COLORREF crTrans;
-	return GetToolbarImageFile(szKey, crTrans);
-}
-
-BOOL CUIThemeFile::HasToolbarImageFile(LPCTSTR szKey) const
-{
-	return FileMisc::FileExists(GetToolbarImageFile(szKey));
-}
-
-BOOL CUIThemeFile::SetToolbarImageFile(LPCTSTR szKey)
-{
-	UITOOLBAR uitb;
-	
-	CString sKey(szKey);
-	sKey.MakeUpper();
-
-	if (m_mapToolbars.Lookup(sKey, uitb))
-	{
-		lstrcpy(szToolbarImage, uitb.sToolbarImageFile);
-		crToolbarTransparency = uitb.crToolbarTransparency;
-
-		return TRUE;
-	}
-	
-	// else
-	szToolbarImage[0] = 0;
-	crToolbarTransparency = CLR_NONE;
-
-	return FALSE;
-}

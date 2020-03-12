@@ -29,37 +29,17 @@ public:
 	void Reset();
 	BOOL IsSet() const;
 
-	CString GetToolbarImageFile(LPCTSTR szKey) const;
-	CString GetToolbarImageFile(LPCTSTR szKey, COLORREF& crTrans) const;
-	BOOL SetToolbarImageFile(LPCTSTR szKey);
-	BOOL HasToolbarImageFile(LPCTSTR szKey) const;
-
 	BOOL HasGlass() const { return (nRenderStyle != UIRS_GRADIENT); }
 	BOOL HasGradient() const { return (nRenderStyle != UIRS_GLASS); }
-
-	static void Reset(UITHEME& theme);
-
-protected:
-	struct UITOOLBAR
-	{
-		UITOOLBAR(LPCTSTR szFile = NULL, COLORREF crTrans = CLR_NONE);
-
-		BOOL operator== (const UITOOLBAR& uitb) const;
-		BOOL operator!= (const UITOOLBAR& uitb) const;
-
-		CString sToolbarImageFile;
-		COLORREF crToolbarTransparency;
-	};
-	CMap<CString, LPCTSTR, UITOOLBAR, UITOOLBAR&> m_mapToolbars;
 
 protected:
 	void Trace() const;
 	void TraceColor(LPCTSTR szColor, COLORREF color) const;
+	void RecalcNonWorkingColors();
 
 protected:
 	static COLORREF GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID = -1);
 	static UI_RENDER_STYLE GetRenderStyle(const CXmlItem* pXITheme);
-	static void RecalcNonWorkingColors(UITHEME& theme);
 
 };
 

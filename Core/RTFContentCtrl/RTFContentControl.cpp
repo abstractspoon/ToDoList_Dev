@@ -317,12 +317,6 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
- 	if (FileMisc::FileExists(pTheme->szToolbarImage))
- 	{
- 		m_toolbar.DestroyWindow();
- 		m_toolbar.Create(this, pTheme->szToolbarImage, pTheme->crToolbarTransparency);
- 	}
-
 	m_toolbar.SetBackgroundColors(pTheme->crToolbarLight, pTheme->crToolbarDark, pTheme->nRenderStyle != UIRS_GLASS, pTheme->nRenderStyle != UIRS_GRADIENT);
 	m_toolbar.SetHotColor(pTheme->crToolbarHot);
 	m_ruler.SetBackgroundColor(pTheme->crToolbarLight);

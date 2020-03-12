@@ -255,16 +255,7 @@ BOOL CTDLCustomAttributeDlg::InitializeToolbar()
 	if (!m_toolbar.LoadToolBar(IDR_CUSTATTRIB_TOOLBAR))
 		return FALSE;
 
-	// toolbar images
-	if (m_theme.HasToolbarImageFile(_T("CUSTOM_ATTRIB")))
-	{
-		COLORREF crMask = CLR_NONE;
-		CString sImagePath = m_theme.GetToolbarImageFile(_T("CUSTOM_ATTRIB"), crMask);
-
-		VERIFY(m_toolbar.SetImage(sImagePath, crMask));
-	}
-	else 
-		m_toolbar.SetImage(IDB_CUSTATTRIB_TOOLBAR_STD, RGB(255, 0, 255));
+	m_toolbar.SetImage(IDB_CUSTATTRIB_TOOLBAR_STD, RGB(255, 0, 255));
 	
 	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 	

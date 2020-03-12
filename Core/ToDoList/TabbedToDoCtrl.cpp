@@ -307,13 +307,7 @@ void CTabbedToDoCtrl::SetUITheme(const CUIThemeFile& theme)
 		IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
 		
 		if (pExtWnd)
-		{
-			// prepare theme file
-			CUIThemeFile themeExt(theme);
-
-			themeExt.SetToolbarImageFile(pExtWnd->GetTypeID());
-			pExtWnd->SetUITheme(&themeExt);
-		}
+			pExtWnd->SetUITheme(&theme);
 	}
 }
 

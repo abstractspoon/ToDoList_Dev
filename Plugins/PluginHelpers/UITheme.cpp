@@ -79,21 +79,6 @@ System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color)
 	return ColorUtil::DrawingColor::GetColor(GetColor(color));
 }
 
-String^ UITheme::GetToolBarImagePath()
-{
-	return gcnew String(m_pTheme->szToolbarImage);
-}
-
-Windows::Media::Color UITheme::GetToolbarTransparencyMediaColor()
-{
-	return ColorUtil::MediaColor::GetColor(m_pTheme->crToolbarTransparency);
-}
-
-Drawing::Color UITheme::GetToolbarTransparencyDrawingColor()
-{
-	return ColorUtil::DrawingColor::GetColor(m_pTheme->crToolbarTransparency);
-}
-
 UInt32 UITheme::GetColor(AppColor color)
 {
 	switch (color)

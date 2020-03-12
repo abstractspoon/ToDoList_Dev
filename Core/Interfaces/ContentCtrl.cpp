@@ -102,13 +102,7 @@ BOOL CContentCtrl::Attach(IContentControl* pContentCtrl)
 void CContentCtrl::SetUITheme(const CUIThemeFile& theme)
 {
 	if (m_pContentCtrl)
-	{
-		// configure theme for this plugin
-		CUIThemeFile themePlugin(theme);
-		themePlugin.SetToolbarImageFile(GetTypeID());
-
-		m_pContentCtrl->SetUITheme(&themePlugin);
-	}
+		m_pContentCtrl->SetUITheme(&theme);
 }
 
 void CContentCtrl::SetContentFont(HFONT hFont)

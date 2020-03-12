@@ -1027,15 +1027,13 @@ void CToDoListWnd::PopulateMenuIconManager()
 	}
 
 	// Toolbar images
-	UINT nToolbarImageID = IDB_APP_TOOLBAR_STD;
 	CUIntArray aCmdIDs;
 	
-	// toolbar
+	// Main toolbar
 	aCmdIDs.Add(ID_LOAD_NORMAL);
 	aCmdIDs.Add(ID_SAVE_NORMAL);
 	aCmdIDs.Add(ID_SAVEALL);
 	
-	// new tasks
 	aCmdIDs.Add(GetNewTaskCmdID());
 	aCmdIDs.Add(GetNewSubtaskCmdID());
 	
@@ -1056,17 +1054,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_PREFERENCES);
 	aCmdIDs.Add(ID_HELP_WIKI);
 
-	if (m_theme.HasToolbarImageFile(_T("TODOLIST")))
-	{
-		COLORREF crMask = CLR_NONE;
-		CString sImagePath = m_theme.GetToolbarImageFile(_T("TODOLIST"), crMask);
-
-		VERIFY(m_mgrMenuIcons.AddImages(aCmdIDs, sImagePath, crMask));
-	}
-	else
-	{
-		m_mgrMenuIcons.AddImages(aCmdIDs, nToolbarImageID, MAGENTA);
-	}
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_TOOLBAR_STD, MAGENTA);
 
 	// extra
 	aCmdIDs.RemoveAll();
@@ -1079,17 +1067,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_VIEW_DECREMENTTASKVIEWFONTSIZE);
 	aCmdIDs.Add(ID_EXIT);
 
-	if (m_theme.HasToolbarImageFile(_T("TODOLIST_EXTRA")))
-	{
-		COLORREF crMask = CLR_NONE;
-		CString sImagePath = m_theme.GetToolbarImageFile(_T("TODOLIST_EXTRA"), crMask);
-
-		VERIFY(m_mgrMenuIcons.AddImages(aCmdIDs, sImagePath, crMask));
-	}
-	else
-	{
-		m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_EXTRA_STD, MAGENTA);
-	}
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_EXTRA_STD, MAGENTA);
 
 	// social images
 	aCmdIDs.RemoveAll();
@@ -1348,18 +1326,7 @@ BOOL CToDoListWnd::InitMainToolbar()
 		m_toolbarMain.SetHotColor(m_theme.crToolbarHot);
 	}
 	
-	// toolbar images
-	if (m_theme.HasToolbarImageFile(_T("TODOLIST")))
-	{
-		COLORREF crMask = CLR_NONE;
-		CString sImagePath = m_theme.GetToolbarImageFile(_T("TODOLIST"), crMask);
-
-		VERIFY(m_toolbarMain.SetImage(sImagePath, crMask));
-	}
-	else 
-	{
-		m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, MAGENTA);
-	}
+	m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, MAGENTA);
 	
 	// resize the toolbar in one row so that our subsequent calculations work
 	m_toolbarMain.Resize(1000, CPoint(0, 2)); 

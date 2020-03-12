@@ -54,10 +54,6 @@ namespace Abstractspoon
 				Windows::Media::Color GetAppMediaColor(AppColor color);
 				Drawing::Color GetAppDrawingColor(AppColor color);
 
-				String^ GetToolBarImagePath();
-				Windows::Media::Color GetToolbarTransparencyMediaColor();
-				Drawing::Color GetToolbarTransparencyDrawingColor();
-
 			private:
 				UITHEME* m_pTheme;
 

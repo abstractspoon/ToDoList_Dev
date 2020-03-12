@@ -57,7 +57,6 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(CWnd* pParent /*=NULL*/)
 	
 	//{{AFX_DATA_INIT(CTDLFindTasksDlg)
 	//}}AFX_DATA_INIT
-	CUIThemeFile::Reset(m_theme);
 }
 
 CTDLFindTasksDlg::~CTDLFindTasksDlg()
@@ -272,15 +271,7 @@ BOOL CTDLFindTasksDlg::InitializeToolbar()
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 	}
 
-	if (m_theme.HasToolbarImageFile(_T("FIND_TASKS")))
-	{
-		COLORREF crMask = CLR_NONE;
-		CString sImagePath = m_theme.GetToolbarImageFile(_T("FIND_TASKS"), crMask);
-
-		VERIFY(m_toolbar.SetImage(sImagePath, crMask));
-	}
-	else 
-		m_toolbar.SetImage(IDB_FIND_TOOLBAR_STD, RGB(255, 0, 255));
+	m_toolbar.SetImage(IDB_FIND_TOOLBAR_STD, RGB(255, 0, 255));
 	
 	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 	

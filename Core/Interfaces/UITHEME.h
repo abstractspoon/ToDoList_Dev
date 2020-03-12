@@ -19,9 +19,6 @@ enum UI_RENDER_STYLE
 struct UITHEME
 {
 	UI_RENDER_STYLE nRenderStyle;
-	
-	TCHAR    szToolbarImage[MAX_PATH];
-	COLORREF crToolbarTransparency;
 
 	COLORREF crAppBackDark;
 	COLORREF crAppBackLight;
