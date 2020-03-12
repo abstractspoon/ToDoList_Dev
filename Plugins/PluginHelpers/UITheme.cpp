@@ -54,12 +54,22 @@ UITheme::RenderStyle UITheme::GetRenderStyle()
 
 Windows::Media::Color UITheme::GetAppMediaColor(AppColor color)
 {
-	return ColorUtil::MediaColor::GetColor(GetColor(color));
+	return GetAppMediaColor(color, 255);
+}
+
+Windows::Media::Color UITheme::GetAppMediaColor(AppColor color, unsigned char opacity)
+{
+	return ColorUtil::MediaColor::GetColor(GetColor(color), opacity);
 }
 
 System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color)
 {
-	return ColorUtil::DrawingColor::GetColor(GetColor(color));
+	return GetAppDrawingColor(color, 255);
+}
+
+System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color, unsigned char opacity)
+{
+	return ColorUtil::DrawingColor::GetColor(GetColor(color), opacity);
 }
 
 UInt32 UITheme::GetColor(AppColor color)
@@ -78,6 +88,8 @@ UInt32 UITheme::GetColor(AppColor color)
 	case UITheme::AppColor::StatusBarDark:		return m_pTheme->crStatusBarDark;
 	case UITheme::AppColor::StatusBarLight:		return m_pTheme->crStatusBarLight;
 	case UITheme::AppColor::StatusBarText:		return m_pTheme->crStatusBarText;
+	case UITheme::AppColor::Weekends:			return m_pTheme->crWeekend;
+	case UITheme::AppColor::NonWorkingHours:	return m_pTheme->crNonWorkingHours;
 	}
 
 	return 0; // black

@@ -49,10 +49,15 @@ namespace Abstractspoon
 					StatusBarDark,
 					StatusBarLight,
 					StatusBarText,
+					Weekends,
+					NonWorkingHours,
 				};
 
 				Windows::Media::Color GetAppMediaColor(AppColor color);
+				Windows::Media::Color GetAppMediaColor(AppColor color, unsigned char opacity);
+
 				Drawing::Color GetAppDrawingColor(AppColor color);
+				Drawing::Color GetAppDrawingColor(AppColor color, unsigned char opacity);
 
 			private:
 				CUIThemeFile* m_pTheme;

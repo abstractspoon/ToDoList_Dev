@@ -18,6 +18,7 @@ namespace Abstractspoon
 				{
 				public:
 					static Windows::Media::Color GetColor(UInt32 rgbColor);
+					static Windows::Media::Color GetColor(UInt32 rgbColor, unsigned char opacity);
 					static Windows::Media::Color GetBestTextColor(Windows::Media::Color backColor);
 					
 					static Windows::Media::Color SetLuminance(Windows::Media::Color color, float luminance);
@@ -30,6 +31,7 @@ namespace Abstractspoon
 				{
 				public:
 					static Drawing::Color GetColor(UInt32 rgbColor);
+					static Drawing::Color GetColor(UInt32 rgbColor, unsigned char opacity);
 					static Drawing::Color GetBestTextColor(Drawing::Color backColor);
 
 					static Drawing::Color SetLuminance(Drawing::Color color, float luminance);

@@ -35,7 +35,12 @@ Windows::Media::Color ColorUtil::MediaColor::SetLuminance(Windows::Media::Color 
 
 Windows::Media::Color ColorUtil::MediaColor::GetColor(UInt32 rgbColor)
 {
-	return System::Windows::Media::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
+	return GetColor(rgbColor, 255);
+}
+
+Windows::Media::Color ColorUtil::MediaColor::GetColor(UInt32 rgbColor, unsigned char opacity)
+{
+	return System::Windows::Media::Color::FromArgb(opacity, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
 }
 
 Windows::Media::Color ColorUtil::MediaColor::GetBestTextColor(Windows::Media::Color backColor)
@@ -74,7 +79,12 @@ Drawing::Color ColorUtil::DrawingColor::SetLuminance(Drawing::Color color, float
 
 Drawing::Color ColorUtil::DrawingColor::GetColor(UInt32 rgbColor)
 {
-	return System::Drawing::Color::FromArgb(255, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
+	return GetColor(rgbColor, 255);
+}
+
+Drawing::Color ColorUtil::DrawingColor::GetColor(UInt32 rgbColor, unsigned char opacity)
+{
+	return System::Drawing::Color::FromArgb(opacity, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
 }
 
 Drawing::Color ColorUtil::DrawingColor::GetBestTextColor(Drawing::Color backColor)
