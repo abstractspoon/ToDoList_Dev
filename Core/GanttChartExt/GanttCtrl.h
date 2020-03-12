@@ -120,7 +120,7 @@ protected:
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 
 	COLORREF m_crParent, m_crDefault;
-	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor, m_crVertGrid;
+	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor;
 	COleDateTime m_dtDragMin;
 	CPoint m_ptDragStart, m_ptLastDependPick;
 	DWORD m_dwOptions;
@@ -203,6 +203,7 @@ protected:
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 
+	BOOL WantDrawWeekend(const COleDateTime& dtDay) const;
 	BOOL DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay);
 	BOOL DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, BOOL bSelected);
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
@@ -210,7 +211,7 @@ protected:
 
 	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
 
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected, BOOL bTree);
+	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected);
 	DIV_TYPE GetVerticalDivider(int nMonth, int nYear) const;
 
 	void ClearDependencyPickLine(CDC* pDC = NULL);

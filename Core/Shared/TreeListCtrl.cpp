@@ -1527,16 +1527,9 @@ void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BO
 	CRect rDiv(rItem);
 
 	if (bVert)
-	{
 		rDiv.left = (rDiv.right - 1);
-
-		if (bSelected)
-			rDiv.DeflateRect(0, 1);
-	}
 	else
-	{
 		rDiv.top = (rDiv.bottom - 1);
-	}
 
 	COLORREF crOld = pDC->GetBkColor();
 

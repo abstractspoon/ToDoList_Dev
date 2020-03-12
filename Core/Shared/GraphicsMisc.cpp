@@ -13,6 +13,7 @@
 
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\ShellIcons.h"
+#include "..\3rdparty\GdiPlus.h"
 
 #include <windef.h>
 #include <afxpriv.h>
@@ -1092,9 +1093,10 @@ int GraphicsMisc::DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UIN
 	return nResult;
 }
 
-void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder, int nCornerRadius, DWORD dwEdges)
+void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder, int nCornerRadius, DWORD dwEdges, BYTE cFillOpacity)
 {
 	ASSERT((crBorder != CLR_NONE) || (crFill != CLR_NONE));
+	ASSERT((cFillOpacity == 255) || (nCornerRadius == 0));
 
  	if (rect.IsRectEmpty())
 	{
@@ -1117,8 +1119,8 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 		if (dwEdges == 0)
 			crBorder = CLR_NONE;
 
-		// if both colours are set there's an optimisation we can do
-		if ((crFill != CLR_NONE) && (crBorder != CLR_NONE))
+		// if both colours are set and fully opaque there's an optimisation we can do
+		if ((crFill != CLR_NONE) && (crBorder != CLR_NONE) && (cFillOpacity == 255))
 		{
 			pDC->FillSolidRect(rect, crBorder);
 
@@ -1148,12 +1150,20 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 				if (!rFill.IsRectEmpty())
 					pDC->FillSolidRect(rFill, crFill);
 			}
+
+			return;
 		}
-		else if (crFill != CLR_NONE) // inside of rect
+
+		// else
+		if (crFill != CLR_NONE) // inside of rect
 		{
-			pDC->FillSolidRect(rect, crFill);
+			if (cFillOpacity != 255)
+				CGdiPlus::FillRect(CGdiPlusGraphics(*pDC), CGdiPlusBrush(crFill, cFillOpacity), rect);
+			else
+				pDC->FillSolidRect(rect, crFill);
 		}
-		else if (crBorder != CLR_NONE) // border
+
+		if (crBorder != CLR_NONE) // border
 		{
 			if (dwEdges & GMDR_TOP)
 				pDC->FillSolidRect(rect.left, rect.top, rect.Width(), 1, crBorder);
@@ -1322,6 +1332,7 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 
 	BOOL bHighContrast = Misc::IsHighContrastActive();
 	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
+	BOOL bTransparent = (!bHighContrast && (dwFlags & GMIB_TRANSPARENT));
 
 	// adjust drawing rect/flags accordingly
 	CRect rDraw(rItem), rClip(prClip);
@@ -1374,15 +1385,18 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 	{
 		CThemed th(hwnd, _T("Explorer::ListView"));
 		
-		// always fill background with white to get the exact selection colour
-		CRect rBkgnd;
+		// Fill background with white if not transparent
+		if (!bTransparent)
+		{
+			CRect rBkgnd;
 
-		if (prClip)
-			rBkgnd.IntersectRect(prClip, rDraw);
-		else
-			rBkgnd = rDraw;
+			if (prClip)
+				rBkgnd.IntersectRect(prClip, rDraw);
+			else
+				rBkgnd = rDraw;
 
-		pDC->FillSolidRect(rBkgnd, RGB(255, 255, 255));
+			pDC->FillSolidRect(rBkgnd, RGB(255, 255, 255));
+		}
 		
 		switch (nState)
 		{
@@ -1413,13 +1427,13 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 			// OS versions I'm am going to standardise on XP's
 			// Navy Blue colour as the 'original'
 			crBorder = RGB(50, 105, 200); 
-			crFill = RGB(175, 195, 240);
+			crFill = (bTransparent ? crBorder : (175, 195, 240));
 			break;
 			
 		case GMIS_SELECTEDNOTFOCUSED:
 		case GMIS_DROPHILITED:
 			crBorder = GetSysColor(COLOR_3DSHADOW);
-			crFill = GetSysColor(COLOR_3DFACE);
+			crFill = GetSysColor(bTransparent ? COLOR_3DSHADOW : COLOR_3DFACE);
 			break;
 			
 		default:
@@ -1427,9 +1441,9 @@ BOOL GraphicsMisc::DrawExplorerItemBkgnd(CDC* pDC, HWND hwnd, GM_ITEMSTATE nStat
 			return FALSE;
 		}
 		
-		DrawRect(pDC, rDraw, crFill, crBorder, 0, dwDRFlags);
+		DrawRect(pDC, rDraw, crFill, crBorder, 0, dwDRFlags, (bTransparent ? 128 : 255));
 	}
-	else
+	else // high contrast
 	{
 		switch (nState)
 		{

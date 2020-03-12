@@ -22,6 +22,7 @@
 #include "..\shared\WorkingWeek.h"
 
 #include "..\3rdparty\shellicons.h"
+#include "..\3rdparty\GdiPlus.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -105,7 +106,6 @@ CGanttCtrl::CGanttCtrl()
 	m_crToday(CLR_NONE),
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crNonWorkingHoursColor(RGB(224, 224, 224)),
-	m_crVertGrid(RGB(192, 192, 192)),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
 	m_nDragging(GTLCD_NONE), 
 	m_ptDragStart(0),
@@ -1425,7 +1425,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				BOOL bSelected = (nState != GMIS_NONE);
 
 				// draw horz gridline before selection
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected, TRUE);
+				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
 
 				// Draw icon
 				CRect rIcon;
@@ -1441,7 +1441,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				}
 				
 				// draw background
-				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected);
+				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, (bSelected && Misc::IsHighContrastActive()));
 				
 				// draw gantt item attribute columns
 				DrawTreeItem(pDC, hti, *pGI, bSelected, crBack);
@@ -1453,6 +1453,9 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					rIcon.bottom = rItem.bottom;
 					GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 				}
+
+				if (bSelected && !Misc::IsHighContrastActive())
+					DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, TRUE);
 			}			
 	
 			return CDRF_SKIPDEFAULT;
@@ -1487,7 +1490,7 @@ COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTT
 	}
 	else
 	{
-		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT);
+		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_TRANSPARENT);
 		GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
 	}
 
@@ -1542,16 +1545,20 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 			
 			// draw horz gridline before selection
-			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE, FALSE);
+			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
 
-			// draw background
+			// draw selection background in high contrast mode
 			GM_ITEMSTATE nState = GetItemState(nItem);
-			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT);
 
-			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, dwFlags);
+			if ((nState != GMIS_NONE) && Misc::IsHighContrastActive())
+				GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT));
 
 			// draw row
 			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
+
+			// draw selection background when not in high contrast mode
+			if ((nState != GMIS_NONE) && !Misc::IsHighContrastActive())
+				GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_TRANSPARENT));
 		}
 		return CDRF_SKIPDEFAULT;
 								
@@ -1563,7 +1570,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			if (BuildVisibleDependencyList(aDepends))
 			{
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
-				
+
 				CRect rClient;
 				m_list.GetClientRect(rClient);
 
@@ -2434,13 +2441,16 @@ void CGanttCtrl::SetUITheme(const UITHEME& theme)
 {
 	SetSplitBarColor(theme.crAppBackDark);
 
-	SetColor(m_crWeekend, theme.crAppBackDark);
-	SetColor(m_crNonWorkingHoursColor, theme.crAppBackDark);
+	// Ensure a minimum 'darkness' level
+	HLSX crWeekend(theme.crAppBackDark);
 
-	m_crVertGrid = theme.crAppLinesDark;
+	if (crWeekend.fLuminosity <= 0.6)
+		crWeekend.fLuminosity = max(crWeekend.fLuminosity, 0.6f);
+	else
+		crWeekend.fLuminosity = (crWeekend.fLuminosity + 0.6f) / 2;
 
-	if (m_crVertGrid == m_crWeekend)
-		m_crVertGrid = theme.crAppLinesLight;
+	SetColor(m_crWeekend, crWeekend);
+	SetColor(m_crNonWorkingHoursColor, crWeekend);
 }
 
 void CGanttCtrl::SetDefaultColor(COLORREF crDefault)
@@ -2537,7 +2547,7 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 	if (rItem.Width() == 0)
 		return;
 
-	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected, TRUE);
+	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected);
 
 	GTLC_COLUMN nColID = GetTreeColumnID(nCol);
 	BOOL bTitleCol = (nColID == GTLCC_TITLE);
@@ -2733,7 +2743,7 @@ BOOL CGanttCtrl::IsVerticalDivider(DIV_TYPE nType)
 	return FALSE;
 }
 
-void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected, BOOL bTree)
+void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
 {
 	if (nType == DIV_NONE)
 		return;
@@ -2743,7 +2753,7 @@ void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, B
 	if (!HasGridlines() || (bVert && (rItem.right < 0)))
 		return;
 
-	COLORREF color = (((nType == DIV_HORZ) || bTree) ? m_crGridLine : m_crVertGrid);
+	COLORREF color = m_crGridLine;
 
 	switch (nType)
 	{
@@ -2869,7 +2879,7 @@ void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 	if (!bRollup)
 	{
 		DIV_TYPE nDiv = GetVerticalDivider(nMonth, nYear);
-		DrawItemDivider(pDC, rMonth, nDiv, bSelected, FALSE);
+		DrawItemDivider(pDC, rMonth, nDiv, bSelected);
 
 		if (!bToday)
 			bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
@@ -2908,7 +2918,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 			if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
 			{
 				rDay.right = rDay.left; // draw at start of day
-				DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected, FALSE);
+				DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
 			}
 		}
 
@@ -2919,23 +2929,22 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
 }
 
-BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
+BOOL CGanttCtrl::WantDrawWeekend(const COleDateTime& dtDay) const
 {
 	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHoursColor);
 
-	if ((color != CLR_NONE) && CWeekend().IsWeekend(dtDay))
-	{
-		// don't overdraw gridlines
-		CRect rWeekend(rDay);
+	return ((color != CLR_NONE) && CWeekend().IsWeekend(dtDay));
+}
 
-		if (HasGridlines())
-			rWeekend.bottom--;
+BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
+{
+	if (!WantDrawWeekend(dtDay))
+		return FALSE;
 
-		pDC->FillSolidRect(rWeekend, color);
-		return TRUE;
-	}
+	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHoursColor);
+	CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(color, 128), rDay);
 
-	return FALSE;
+	return TRUE;
 }
 
 void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
@@ -2959,15 +2968,27 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 			// only draw visible days
 			if (rDay.right > 0)
 			{
-				BOOL bDrawNonWorkingHours = (!bSelected && (m_crNonWorkingHoursColor != CLR_NONE));
-
-				// fill weekends if not selected
-				if (!bSelected)
-					bDrawNonWorkingHours &= ~DrawWeekend(pDC, dtDay, rDay);
+				BOOL bDrawWeekend = WantDrawWeekend(dtDay);
+				BOOL bDrawNonWorkingHours = (!bDrawWeekend && (m_crNonWorkingHoursColor != CLR_NONE));
 
 				if (bDrawHours)
 				{
 					double dHourWidth = (rMonth.Width() / (nNumDays * 24.0));
+					
+					// draw all but the first and last hours dividers
+					CRect rHour(rDay);
+
+					if (m_crGridLine != CLR_NONE)
+						rHour.bottom--;
+
+					for (int nHour = 1; nHour < 24; nHour++)
+					{
+						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
+
+						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+						
+						rHour.left = rHour.right;
+					}
 
 					if (bDrawNonWorkingHours)
 					{
@@ -2982,26 +3003,14 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 						// Afternoon
 						DrawNonWorkingHours(pDC, rMonth, nDay, wd.GetEndOfDayInHours(), 24.0, dDayWidth, dHourWidth);
 					}
-					
-					// draw all but the first and last hours dividers
-					CRect rHour(rDay);
-
-					if (m_crGridLine != CLR_NONE)
-						rHour.bottom--;
-
-					for (int nHour = 1; nHour < 24; nHour++)
-					{
-						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
-
-						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected, FALSE);
-						
-						rHour.left = rHour.right;
-					}
 				}
 
 				// draw all but the last day divider
 				if (nDay < nNumDays)
-					DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected, FALSE);
+					DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected);
+				
+				if (bDrawWeekend)
+					DrawWeekend(pDC, dtDay, rDay);
 			}
 
 			// next day
@@ -3019,13 +3028,15 @@ void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, do
 	{
 		CRect rNonWorking(rMonth);
 
-		if (m_crGridLine != CLR_NONE)
-			rNonWorking.bottom--;
+// 		if (m_crGridLine != CLR_NONE)
+// 			rNonWorking.bottom--;
 
 		rNonWorking.left = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * dFromHour)));
 		rNonWorking.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * dToHour)));
 
-		pDC->FillSolidRect(rNonWorking, m_crNonWorkingHoursColor);
+		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crNonWorkingHoursColor, 128), rNonWorking);
+
+		//pDC->FillSolidRect(rNonWorking, m_crNonWorkingHoursColor);
 	}
 }
 
@@ -3660,7 +3671,7 @@ COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL 
 	{
 		if (bSelected)
 		{
-			crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
+			crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC | GMIB_TRANSPARENT);
 		}
 		else if (bLighter)
 		{
@@ -4306,20 +4317,11 @@ BOOL CGanttCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear,
 	if (!CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, dtToday, dtToday.m_dt + 1.0, rToday))
 		return FALSE;
 
-	// don't overdraw selection or gridlines
+	// don't overdraw selection
 	if (bSelected)
-	{
 		rToday.DeflateRect(0, 1);
-	}
-	else if (HasGridlines())
-	{
-		rToday.bottom--;
-	}
 
-	COLORREF crBorder = GetColor(m_crToday, 0.0, bSelected);
-	COLORREF crFill = GetColor(m_crToday, 0.5, bSelected);
-
-	GraphicsMisc::DrawRect(pDC, rToday, crFill, crBorder, 0, GMDR_LEFT | GMDR_RIGHT);
+	CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crToday, 128), rToday);
 
 	return TRUE;
 }

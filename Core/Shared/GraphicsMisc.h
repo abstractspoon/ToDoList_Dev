@@ -59,6 +59,7 @@ enum // DrawExplorerItemBackground
 	GMIB_CLIPRIGHT		= 0x04,
 	GMIB_CLIPLEFT		= 0x08,
 	GMIB_THEMECLASSIC	= 0x10,
+	GMIB_TRANSPARENT	= 0x20,
 };
 
 enum GM_OLECURSOR // OLE drag'n'drop cursors
@@ -217,7 +218,7 @@ namespace GraphicsMisc
 	void CalculateBoxColors(COLORREF crBase, BOOL bEnabled, COLORREF& crFill, COLORREF& crBorder);
 
 	void DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder = CLR_NONE, 
-					int nCornerRadius = 0, DWORD dwEdges = GMDR_ALL);
+					int nCornerRadius = 0, DWORD dwEdges = GMDR_ALL, BYTE cFillOpacity = 255);
 	BOOL FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwnd); // will update rItem
 	BOOL FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND hwnd);
 	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);
