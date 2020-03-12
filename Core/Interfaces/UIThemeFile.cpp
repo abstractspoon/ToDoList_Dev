@@ -185,17 +185,17 @@ void CUIThemeFile::Reset()
 void CUIThemeFile::RecalcNonWorkingColors()
 {
 	// Ensure a minimum 'darkness' level
-	HLSX crNonWorking(crAppBackDark);
+	HLSX hlsNonWorking(crAppBackDark);
 
-	if (crNonWorking.fLuminosity <= 0.6f)
-		crNonWorking.fLuminosity = 0.6f;
+	if (hlsNonWorking.fLuminosity <= 0.6f)
+		hlsNonWorking.fLuminosity = 0.6f;
 	else
-		crNonWorking.fLuminosity = (crNonWorking.fLuminosity + 0.6f) / 2;
+		hlsNonWorking.fLuminosity = (hlsNonWorking.fLuminosity + 0.6f) / 2;
 
-	crNonWorkingHours = crNonWorking;
+	crNonWorkingHours = hlsNonWorking;
 
 	// Make weekend a smidgen darker
-	crWeekend = GraphicsMisc::Darker(crNonWorking, 0.1, FALSE);
+	crWeekend = GraphicsMisc::Darker(hlsNonWorking, 0.1, FALSE);
 }
 
 COLORREF CUIThemeFile::GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID)
