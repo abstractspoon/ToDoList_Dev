@@ -59,6 +59,7 @@ protected:
 protected:
 	static COLORREF GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID = -1);
 	static UI_RENDER_STYLE GetRenderStyle(const CXmlItem* pXITheme);
+	static void RecalcNonWorkingColors(UITHEME& theme);
 
 };
 

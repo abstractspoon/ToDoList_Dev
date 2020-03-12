@@ -105,7 +105,7 @@ CGanttCtrl::CGanttCtrl()
 	m_crParent(CLR_NONE),
 	m_crToday(CLR_NONE),
 	m_crWeekend(RGB(224, 224, 224)),
-	m_crNonWorkingHoursColor(RGB(224, 224, 224)),
+	m_crNonWorkingHours(RGB(224, 224, 224)),
 	m_nParentColoring(GTLPC_DEFAULTCOLORING),
 	m_nDragging(GTLCD_NONE), 
 	m_ptDragStart(0),
@@ -2441,16 +2441,8 @@ void CGanttCtrl::SetUITheme(const UITHEME& theme)
 {
 	SetSplitBarColor(theme.crAppBackDark);
 
-	// Ensure a minimum 'darkness' level
-	HLSX crWeekend(theme.crAppBackDark);
-
-	if (crWeekend.fLuminosity <= 0.6)
-		crWeekend.fLuminosity = max(crWeekend.fLuminosity, 0.6f);
-	else
-		crWeekend.fLuminosity = (crWeekend.fLuminosity + 0.6f) / 2;
-
-	SetColor(m_crWeekend, crWeekend);
-	SetColor(m_crNonWorkingHoursColor, crWeekend);
+	SetColor(m_crWeekend, theme.crWeekend);
+	SetColor(m_crNonWorkingHours, theme.crNonWorkingHours);
 }
 
 void CGanttCtrl::SetDefaultColor(COLORREF crDefault)
@@ -2931,7 +2923,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 
 BOOL CGanttCtrl::WantDrawWeekend(const COleDateTime& dtDay) const
 {
-	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHoursColor);
+	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHours);
 
 	return ((color != CLR_NONE) && CWeekend().IsWeekend(dtDay));
 }
@@ -2941,7 +2933,7 @@ BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& r
 	if (!WantDrawWeekend(dtDay))
 		return FALSE;
 
-	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHoursColor);
+	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHours);
 	CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(color, 128), rDay);
 
 	return TRUE;
@@ -2969,7 +2961,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 			if (rDay.right > 0)
 			{
 				BOOL bDrawWeekend = WantDrawWeekend(dtDay);
-				BOOL bDrawNonWorkingHours = (!bDrawWeekend && (m_crNonWorkingHoursColor != CLR_NONE));
+				BOOL bDrawNonWorkingHours = (!bDrawWeekend && (m_crNonWorkingHours != CLR_NONE));
 
 				if (bDrawHours)
 				{
@@ -3028,15 +3020,10 @@ void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, do
 	{
 		CRect rNonWorking(rMonth);
 
-// 		if (m_crGridLine != CLR_NONE)
-// 			rNonWorking.bottom--;
-
 		rNonWorking.left = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * dFromHour)));
 		rNonWorking.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * dToHour)));
 
-		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crNonWorkingHoursColor, 128), rNonWorking);
-
-		//pDC->FillSolidRect(rNonWorking, m_crNonWorkingHoursColor);
+		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crNonWorkingHours, 128), rNonWorking);
 	}
 }
 

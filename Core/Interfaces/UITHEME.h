@@ -36,6 +36,9 @@ struct UITHEME
 	COLORREF crStatusBarText;
 	COLORREF crToolbarHot;
 
+	COLORREF crWeekend;
+	COLORREF crNonWorkingHours;
+
 	// NEW ITEMS HERE ONLY
 };
 

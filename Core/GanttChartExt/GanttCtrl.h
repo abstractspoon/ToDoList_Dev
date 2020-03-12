@@ -120,7 +120,7 @@ protected:
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 
 	COLORREF m_crParent, m_crDefault;
-	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHoursColor;
+	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHours;
 	COleDateTime m_dtDragMin;
 	CPoint m_ptDragStart, m_ptLastDependPick;
 	DWORD m_dwOptions;

@@ -10,6 +10,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
 
+#include "..\3rdParty\ColorDef.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -71,6 +73,8 @@ void CUIThemeFile::Trace() const
 	TRACECOLOR(crStatusBarLight);
 	TRACECOLOR(crStatusBarText);
 	TRACECOLOR(crToolbarTransparency);
+	TRACECOLOR(crWeekend);
+	TRACECOLOR(crNonWorkingHours);
 }
 
 void CUIThemeFile::TraceColor(LPCTSTR szColor, COLORREF color) const
@@ -95,6 +99,8 @@ CUIThemeFile& CUIThemeFile::operator=(const CUIThemeFile& theme)
 	crStatusBarDark = theme.crStatusBarDark;
 	crStatusBarLight = theme.crStatusBarLight;
 	crStatusBarText = theme.crStatusBarText;
+	crWeekend = theme.crWeekend;
+	crNonWorkingHours = theme.crNonWorkingHours;
 
 	// toolbars
 	Misc::CopyStrT<UITOOLBAR>(theme.m_mapToolbars, m_mapToolbars);
@@ -117,7 +123,9 @@ BOOL CUIThemeFile::operator== (const CUIThemeFile& theme) const
 		(crToolbarHot		!= theme.crToolbarHot) ||
 		(crStatusBarDark	!= theme.crStatusBarDark) ||
 		(crStatusBarLight	!= theme.crStatusBarLight) ||
-		(crStatusBarText	!= theme.crStatusBarText))
+		(crStatusBarText	!= theme.crStatusBarText) ||
+		(crWeekend			!= theme.crWeekend) ||
+		(crNonWorkingHours	!= theme.crNonWorkingHours))
 	{
 		return FALSE;
 	}
@@ -164,12 +172,14 @@ BOOL CUIThemeFile::LoadThemeFile(LPCTSTR szThemeFile)
 	crStatusBarLight	= GetColor(pXITheme, _T("STATUSBARLIGHT"),	COLOR_3DFACE);
 	crStatusBarText		= GetColor(pXITheme, _T("STATUSBARTEXT"),	COLOR_WINDOWTEXT);
 
+	RecalcNonWorkingColors(*this);
+
+	// toolbars
 	crToolbarHot		= GetColor(pXITheme, _T("TOOLBARHOT"),		-1); // -1 == CLR_NONE
 
 	if (crToolbarHot == CLR_NONE)
 		crToolbarHot = GraphicsMisc::Lighter(crToolbarLight, 0.05);
 
-	// toolbars
 	CString sFolder = FileMisc::GetFolderFromFilePath(szThemeFile);
 	const CXmlItem* pTBImage = pXITheme->GetItem(_T("TOOLBARIMAGES"));
 
@@ -248,6 +258,24 @@ void CUIThemeFile::Reset(UITHEME& theme)
 
 	theme.szToolbarImage[0] = 0;
 	theme.crToolbarTransparency = CLR_NONE;
+
+	RecalcNonWorkingColors(theme);
+}
+
+void CUIThemeFile::RecalcNonWorkingColors(UITHEME& theme)
+{
+	// Ensure a minimum 'darkness' level
+	HLSX crNonWorking(theme.crAppBackDark);
+
+	if (crNonWorking.fLuminosity <= 0.6)
+		crNonWorking.fLuminosity = max(crNonWorking.fLuminosity, 0.6f);
+	else
+		crNonWorking.fLuminosity = (crNonWorking.fLuminosity + 0.6f) / 2;
+
+	theme.crNonWorkingHours = crNonWorking;
+
+	// Make weekend a smidgin darker
+	theme.crWeekend = GraphicsMisc::Darker(crNonWorking, 0.1, FALSE);
 }
 
 COLORREF CUIThemeFile::GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID)
