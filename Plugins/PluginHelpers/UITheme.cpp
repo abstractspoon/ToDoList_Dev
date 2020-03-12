@@ -6,7 +6,7 @@
 #include "ColorUtil.h"
 #include "PluginHelpers.h"
 
-#include <Interfaces\UITheme.h>
+#include <Interfaces\UIThemeFile.h>
 
 #using "System.dll"
 
@@ -32,29 +32,12 @@ UITheme::UITheme(const UITHEME* pTheme) : m_pTheme(nullptr)
 
 void UITheme::InitTheme(const UITHEME* pTheme)
 {
-	m_pTheme = new UITHEME;
-	ZeroMemory(m_pTheme, sizeof(UITHEME));
+	delete m_pTheme;
 
 	if (pTheme)
-	{
-		*m_pTheme = *pTheme;
-	}
+		m_pTheme = new CUIThemeFile(*pTheme);
 	else
-	{
-		// From 'Core\Interfaces\UIThemeFile.cpp'
-		m_pTheme->crAppBackDark		= GetSysColor(COLOR_3DFACE);
-		m_pTheme->crAppBackLight	= GetSysColor(COLOR_3DFACE);
-		m_pTheme->crAppLinesDark	= GetSysColor(COLOR_3DSHADOW);
-		m_pTheme->crAppLinesLight	= GetSysColor(COLOR_3DHIGHLIGHT);
-		m_pTheme->crAppText			= GetSysColor(COLOR_WINDOWTEXT);
-		m_pTheme->crMenuBack		= GetSysColor(COLOR_3DFACE);
-		m_pTheme->crToolbarDark		= GetSysColor(COLOR_3DFACE);
-		m_pTheme->crToolbarLight	= GetSysColor(COLOR_3DFACE);
-		m_pTheme->crStatusBarDark	= GetSysColor(COLOR_3DFACE);
-		m_pTheme->crStatusBarLight	= GetSysColor(COLOR_3DFACE);
-		m_pTheme->crStatusBarText	= GetSysColor(COLOR_WINDOWTEXT);
-		m_pTheme->crToolbarHot		= -1; // CLR_NONE
-	}
+		m_pTheme = new CUIThemeFile();
 }
 
 UITheme::RenderStyle UITheme::GetRenderStyle()

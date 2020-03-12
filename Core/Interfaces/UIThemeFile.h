@@ -18,12 +18,13 @@ class CUIThemeFile : public UITHEME
 {
 public:
 	CUIThemeFile();
-	CUIThemeFile(const CUIThemeFile& theme);
+	CUIThemeFile(const UITHEME& theme);
 	virtual ~CUIThemeFile();
 
-	CUIThemeFile& operator= (const CUIThemeFile& theme);
-	BOOL operator== (const CUIThemeFile& theme) const;
-	BOOL operator!= (const CUIThemeFile& theme) const;
+	CUIThemeFile& operator= (const UITHEME& theme);
+
+	BOOL operator== (const UITHEME& theme) const;
+	BOOL operator!= (const UITHEME& theme) const;
 
 	BOOL LoadThemeFile(LPCTSTR szThemeFile);
 	void Reset();

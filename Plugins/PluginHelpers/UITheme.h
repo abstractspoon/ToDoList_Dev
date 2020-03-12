@@ -10,7 +10,7 @@ using namespace System;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct UITHEME;
+class CUIThemeFile;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -55,7 +55,7 @@ namespace Abstractspoon
 				Drawing::Color GetAppDrawingColor(AppColor color);
 
 			private:
-				UITHEME* m_pTheme;
+				CUIThemeFile* m_pTheme;
 
 				UInt32 GetColor(AppColor color);
 				void InitTheme(const UITHEME* pTheme);

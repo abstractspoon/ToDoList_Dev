@@ -27,7 +27,7 @@ CUIThemeFile::CUIThemeFile()
 	Reset();
 }
 
-CUIThemeFile::CUIThemeFile(const CUIThemeFile& theme)
+CUIThemeFile::CUIThemeFile(const UITHEME& theme)
 {
 	*this = theme;
 }
@@ -63,7 +63,7 @@ void CUIThemeFile::TraceColor(LPCTSTR szColor, COLORREF color) const
 		szColor, GetRValue(color), GetGValue(color), GetBValue(color));
 }
 
-CUIThemeFile& CUIThemeFile::operator=(const CUIThemeFile& theme)
+CUIThemeFile& CUIThemeFile::operator=(const UITHEME& theme)
 {
 	nRenderStyle		= theme.nRenderStyle;
 	
@@ -85,7 +85,7 @@ CUIThemeFile& CUIThemeFile::operator=(const CUIThemeFile& theme)
 	return *this;
 }
 
-BOOL CUIThemeFile::operator== (const CUIThemeFile& theme) const
+BOOL CUIThemeFile::operator== (const UITHEME& theme) const
 {
 	// test colors first
 	if ((nRenderStyle		!= theme.nRenderStyle) ||
@@ -111,7 +111,7 @@ BOOL CUIThemeFile::operator== (const CUIThemeFile& theme) const
 	return TRUE;
 }
 
-BOOL CUIThemeFile::operator!= (const CUIThemeFile& theme) const
+BOOL CUIThemeFile::operator!= (const UITHEME& theme) const
 {
 	return !(*this == theme);
 }
