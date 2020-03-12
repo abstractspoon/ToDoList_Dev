@@ -182,7 +182,7 @@ BEGIN
     CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185
 END
 
-IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 348, 327
+IDD_PREFERENCES_PAGE DIALOG DISCARDABLE  0, 0, 348, 308
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -217,25 +217,22 @@ BEGIN
     CONTROL         "Treat overdue tasks as being due 'Today'",
                     IDC_SHOWOVERDUEASDUETODAY,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,170,334,10
-    CONTROL         "'&Weekend' colour",IDC_WEEKENDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,185,167,10
-    PUSHBUTTON      "S&et...   ",IDC_SETWEEKENDCOLOR,178,184,52,13,BS_RIGHT
-    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,200,
+    GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,185,
                     334,62
     CONTROL         "The task's 'Creation' date",IDC_USECREATIONFORSTART,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,214,316,10
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,199,316,10
     CONTROL         "The task's 'Due' date",IDC_USEDUEFORSTART,"Button",
-                    BS_AUTORADIOBUTTON,16,229,316,10
+                    BS_AUTORADIOBUTTON,16,214,316,10
     CONTROL         "The earlier of the task's 'Due' date and 'Today'",
                     IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
-                    244,316,10
-    GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,268,
+                    229,316,10
+    GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,253,
                     334,46
     CONTROL         "The task's 'Start' date",IDC_USESTARTFORDUE,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,16,282,316,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,16,267,316,10
     CONTROL         "The later of the task's 'Start' date and 'Today'",
                     IDC_USESTARTORTODAYFORDUE,"Button",BS_AUTORADIOBUTTON,16,
-                    298,316,10
+                    283,316,10
 END
 
 
@@ -266,7 +263,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 341
         TOPMARGIN, 7
-        BOTTOMMARGIN, 320
+        BOTTOMMARGIN, 301
     END
 END
 #endif    // APSTUDIO_INVOKED

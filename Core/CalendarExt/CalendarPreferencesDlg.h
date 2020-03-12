@@ -71,7 +71,6 @@ protected:
 	int		m_nCalcMissingDueDates;
 	BOOL	m_bHideParentTasks;
 
-	CColorButton m_btWeekendColor;
 	CComboBox m_cbHeatMapAttribute;
 	CColorBrewerComboBox m_cbHeatMapPalette;
 	CDWordArray m_aSelPalette;

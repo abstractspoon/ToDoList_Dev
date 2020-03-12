@@ -66,7 +66,6 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	CPreferencesPageBase::DoDataExchange(pDX);
 
 	//{{AFX_DATA_MAP(CCalendarPreferencesPage)
-	DDX_Control(pDX, IDC_SETWEEKENDCOLOR, m_btWeekendColor);
 	DDX_Check(pDX, IDC_SHOWDUEDATES, m_bShowDueDates);
 	DDX_Check(pDX, IDC_SHOWMINICALENDAR, m_bShowMiniCalendar);
 	DDX_Check(pDX, IDC_SHOWSTARTDATES, m_bShowStartDates);
