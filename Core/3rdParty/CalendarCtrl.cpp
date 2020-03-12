@@ -14,6 +14,8 @@
 #include "stdafx.h"
 #include "CalendarCtrl.h"
 
+#include "..\3rdParty\GdiPlus.h"
+
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -464,24 +466,21 @@ CString CCalendarCtrl::GetMonthName(const COleDateTime& date, BOOL bShort) const
 void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
 							 BOOL bSelected, BOOL bToday, BOOL bShowMonth)
 {
-	CRect rBkgnd(rCell);
-	COLORREF crBkgnd = GetCellBkgndColor(pCell, bSelected, bToday);
-	COLORREF crHeader = GetCellHeaderBkgndColor(pCell, bSelected, bToday);
 
-	if (!m_bDrawGridOverCells)
-		rBkgnd.DeflateRect(1, 1, 0, 0);
-	
-	CRect rHeader(rBkgnd);
+	COLORREF crBkgnd = GetCellBkgndColor(pCell);
+
+	CRect rHeader(rCell);
 	rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
 
-	if (crHeader != CLR_NONE)
-	{
-		pDC->FillSolidRect(rHeader, crHeader);
-		rBkgnd.top = (rHeader.bottom);
-	}
+	// Overlay colours
+	if (bToday && (m_crTheme != CLR_NONE))
+		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crTheme, 128), rHeader);
 
 	if (crBkgnd != CLR_NONE)
-		pDC->FillSolidRect(rBkgnd, crBkgnd);
+		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(crBkgnd, 128), rCell);
+
+	if (bSelected && m_crTheme != CLR_NONE)
+		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crTheme, 64), rCell);
 	
 	if (pCell->bMark)
 	{
@@ -512,7 +511,7 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	
 	rHeader.DeflateRect(0, 1, 2, 0); // padding
 	
-	pDC->SetTextColor(GetCellHeaderTextColor(pCell, bSelected, bToday));
+	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rHeader, DT_RIGHT|DT_VCENTER);
 
@@ -523,23 +522,8 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
 }
 
-COLORREF CCalendarCtrl::GetCellHeaderTextColor(const CCalendarCell* /*pCell*/, BOOL bSelected, BOOL /*bToday*/) const
+COLORREF CCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell) const
 {
-	if (bSelected/* && !bToday*/)
-		return RGB(255,104,4);
-
-	// else
-	return RGB(0,0,0);
-}
-
-COLORREF CCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL /*bToday*/) const
-{
-	// Draw the selection
-	if (bSelected)
-	{
-		return GetFadedThemeColour(10);
-	}
-
 	// Out of range
 	if ((pCell->date >= m_BoundUp) ||
 		(pCell->date <= m_BoundDown))
@@ -552,14 +536,6 @@ COLORREF CCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSele
 	{
 		return CALENDAR_LIGHTGREY;
 	}
-
-	return CLR_NONE;
-}
-
-COLORREF CCalendarCtrl::GetCellHeaderBkgndColor(const CCalendarCell* pCell, BOOL /*bSelected*/, BOOL bToday) const
-{
-	if (bToday)
-		return m_crTheme;
 
 	return CLR_NONE;
 }

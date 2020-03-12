@@ -144,9 +144,7 @@ protected:
 	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell,
 									BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
-	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
-	virtual COLORREF GetCellHeaderBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
-	virtual COLORREF GetCellHeaderTextColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const;
+	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell) const;
 	
 	int RebuildCellTasks(CCalendarCell* pCell) const;
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;

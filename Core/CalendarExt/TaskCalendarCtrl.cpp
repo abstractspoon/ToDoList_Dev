@@ -59,7 +59,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
-	m_bDrawGridOverCells = FALSE;
+	m_bDrawGridOverCells = FALSE; // always
 }
 
 CTaskCalendarCtrl::~CTaskCalendarCtrl()
@@ -151,7 +151,6 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 		FixupSelection(bScrollToTask);
 
 		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
-		m_bDrawGridOverCells = !HasOption(TCCO_DISPLAYCONTINUOUS);
 	}
 }
 
@@ -623,74 +622,16 @@ void CTaskCalendarCtrl::SetGridLineColor(COLORREF crGrid)
 
 void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 {
-	m_crWeekend = theme.crAppBackDark;
-	m_crTheme = theme.crAppBackDark;
+	m_crWeekend = theme.crWeekend;
+	m_crTheme = ((m_crWeekend == CLR_NONE) ? theme.crAppBackDark : m_crWeekend);
 
 	if (GetSafeHwnd())
 		Invalidate();
 }
 
-COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL /*bToday*/) const
+COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell) const
 {
-	COLORREF crBkgnd = GetSysColor(COLOR_WINDOW); // Disable default alternate month colouring
-
-	if (CWeekend().IsWeekend(pCell->date))
-	{
-		crBkgnd = m_crWeekend;
-
-		if (bSelected)
-			crBkgnd = GraphicsMisc::Darker(crBkgnd, 0.05, FALSE);
-
-	}
-	else if (bSelected)
-	{
-		crBkgnd = GraphicsMisc::Lighter(m_crTheme, 0.5, FALSE);
-	}
-
-	return crBkgnd;
-}
-
-COLORREF CTaskCalendarCtrl::GetCellHeaderTextColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
-{
-	COLORREF crText = GetSysColor(COLOR_WINDOWTEXT); // default
-
-	if (bSelected)
-	{
-		if (CWeekend().IsWeekend(pCell->date))
-			crText = GraphicsMisc::Darker(m_crTheme, 0.5, FALSE);
-		else
-			crText = GraphicsMisc::Darker(m_crTheme, 0.3, FALSE);
-
-		if (bToday)
-			crText = GraphicsMisc::Darker(crText, 0.5, FALSE);
-	}
-
-	return crText;
-}
-
-COLORREF CTaskCalendarCtrl::GetCellHeaderBkgndColor(const CCalendarCell* pCell, BOOL bSelected, BOOL bToday) const
-{
-	COLORREF crHeader = CLR_NONE; // == same as background color
-
-	if (CWeekend().IsWeekend(pCell->date))
-	{
-		if (bToday)
-		{
-			crHeader = GraphicsMisc::Darker(m_crWeekend, 0.1, FALSE);
-
-			if (bSelected)
-				crHeader = GraphicsMisc::Darker(crHeader, 0.05, FALSE);
-		}
-	}
-	else if (bToday)
-	{
-		crHeader = m_crTheme;
-
-		if (bSelected)
-			crHeader = GraphicsMisc::Darker(crHeader, 0.02, FALSE);
-	}
-
-	return crHeader;
+	return (CWeekend().IsWeekend(pCell->date) ? m_crWeekend : CLR_NONE);
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
@@ -749,7 +690,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 			if (rTask.left <= rCellTrue.left)
 			{
-				if (!m_bDrawGridOverCells)
+				if (HasOption(TCCO_DISPLAYCONTINUOUS))
 				{
 					// draw over gridline
 					rTask.left--; 
@@ -767,7 +708,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 			GraphicsMisc::DrawExplorerItemBkgnd(pDC, *this, nState, rTask, dwSelFlags, rClip);
 		}
-		else // draw task
+		else // draw task border/background
 		{
 			DWORD dwFlags = GMDR_TOP;
 			
@@ -775,7 +716,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				dwFlags |= GMDR_LEFT;
 			}
-			else if (!m_bDrawGridOverCells)
+			else if (HasOption(TCCO_DISPLAYCONTINUOUS))
 			{
 				rTask.left--; // draw over gridline
 			}
