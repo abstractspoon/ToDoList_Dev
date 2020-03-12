@@ -100,8 +100,18 @@ protected:
 	TDC_ATTRIBUTE m_nSortBy;
 	CDWordSet m_mapRecurringTaskIDs;
 	COLORREF m_crWeekend; // Grid color handled by base class
+
+	struct CONTINUOUSDRAWINFO
+	{
+		CONTINUOUSDRAWINFO(DWORD dwID = 0) : dwTaskID(dwID), nIconOffset(0), nTextOffset(0), nVertPos(-1) {}
+
+		DWORD dwTaskID;
+		int nIconOffset;
+		int nTextOffset;
+		int nVertPos;
+	};
 	
-	mutable CMap<DWORD, DWORD, int, int> m_mapVertPosContinuous, m_mapTextOffset;
+	mutable CArray<CONTINUOUSDRAWINFO> m_aContinuousDrawInfo;
 	mutable int m_nMaxDayTaskCount;
 	mutable TCC_SNAPMODE m_nSnapMode;
 
@@ -155,7 +165,7 @@ protected:
 	BOOL GetTaskIndex(DWORD dwTaskID, const CCalendarCell* pCell) const;
 
 	BOOL IsValidTask(int nTask, const CCalendarCell* pCell) const;
-	int GetTaskTextOffset(DWORD dwTaskID) const;
+	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
 	BOOL IsTaskCalItemLocked(DWORD dwTaskID) const;
 	BOOL IsTaskCalItemDone(DWORD dwTaskID, BOOL bIncGoodAs) const;

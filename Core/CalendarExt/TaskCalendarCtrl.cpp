@@ -30,7 +30,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int PADDING = 3;
+const int TIP_PADDING = 3;
+const int TEXT_PADDING = 2;
 const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 const int DEF_TASK_HEIGHT = (IMAGE_SIZE + 3); // Effective height is 1 less
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
@@ -571,8 +572,7 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 
 	// rebuild build display
 	m_nMaxDayTaskCount = 0;
-	m_mapTextOffset.RemoveAll();
-	m_mapVertPosContinuous.RemoveAll();
+	m_aContinuousDrawInfo.RemoveAll();
 
 	if (m_mapData.GetCount())
 	{
@@ -733,59 +733,86 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwFlags);
 		}
 
-		// draw icon
+		// draw icon and text
+		CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
+
+		if (cdi.nTextOffset == -1) // text (and icon) have been drawn
+			return;
+
 		if ((nTaskHeight >= DEF_TASK_HEIGHT) && pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
 		{
 			// draw at the start only
-			if (GetTaskTextOffset(pTCI->GetTaskID()) == 0)
+			const int nReqWidth = (IMAGE_SIZE + 1);
+
+			if ((cdi.nIconOffset >= 0) && (cdi.nIconOffset < nReqWidth))
 			{
 				int iImageIndex = -1;
 				HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_CALENDAR_GETTASKICON, pTCI->GetTaskID(), (LPARAM)&iImageIndex);
 
 				if (hilTask && (iImageIndex != -1))
 				{
-					rTask.DeflateRect(1, 1);
+					CRect rIcon(rTask), rClip(rTask);
 
+					rClip.DeflateRect(1, 1);
+					rIcon.OffsetRect(-cdi.nIconOffset, 0);
+
+					if (HasOption(TCCO_DISPLAYCONTINUOUS))
+					{
+						if (cdi.nIconOffset != 0)
+							rClip.left--; // draw over gridline
+
+						if (rTask.right >= rCellTrue.right)
+							rClip.right++; // draw over gridline
+					}
+					
 					CSaveDC sdc(pDC);
-					pDC->IntersectClipRect(rTask);
+					pDC->IntersectClipRect(rClip);
 
-					ImageList_Draw(hilTask, iImageIndex, *pDC, rTask.left, rTask.top, ILD_TRANSPARENT);
+					ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left + 1, rIcon.top + 1, ILD_TRANSPARENT);
 
-					rTask.left += (CEnImageList::GetImageSize(hilTask) + 1);
+					if (rIcon.Width() < nReqWidth)
+					{
+						cdi.nIconOffset = rTask.Width();
+					}
+					else
+					{
+						cdi.nIconOffset = -1;
+						rTask.left = (rIcon.left + nReqWidth);
+					}
 				}
 			}
 		}
 
-		// draw text if there is enough space
-		if ((nTaskHeight >= MIN_TASK_HEIGHT) && !rTask.IsRectEmpty())
+		// draw text if there is enough space and either there 
+		// is no icon or it's been completely drawn
+		if ((nTaskHeight >= MIN_TASK_HEIGHT) && !rTask.IsRectEmpty() && (cdi.nIconOffset <= 0))
 		{
-			int nOffset = GetTaskTextOffset(dwTaskID);
-			
-			if (nOffset != -1)
-			{
-				if (nOffset == 0)
-					rTask.left += PADDING; // initial pos
-				
-				int nLeft = (rTask.left - nOffset);
-				int nTop = (rTask.top + 1);
-				
-				pDC->SelectObject(GetTaskFont(pTCI));
-				pDC->SetTextColor(crText);
+			int nLeft = rTask.left, nTop = (rTask.top + 2);
 
-				CString sTitle = pTCI->GetName();
-				pDC->ExtTextOut(nLeft, nTop, ETO_CLIPPED, rTask, sTitle, NULL);
-				
-				// update text pos
-				nOffset += rTask.Width();
-				
-				// if the offset now exceeds the text extent we can stop
-				int nExtent = pDC->GetTextExtent(sTitle).cx;
-				
-				if (nOffset >= nExtent)
-					nOffset = -1;
-				
-				m_mapTextOffset[dwTaskID] = nOffset;
+			if (cdi.nTextOffset == 0)
+			{
+				rTask.left += TEXT_PADDING; // initial pos
+				nLeft = rTask.left;
 			}
+			else
+			{
+				nLeft -= cdi.nTextOffset;
+			}
+
+			pDC->SelectObject(GetTaskFont(pTCI));
+			pDC->SetTextColor(crText);
+
+			CString sTitle = pTCI->GetName();
+			pDC->ExtTextOut(nLeft, nTop, ETO_CLIPPED, rTask, sTitle, NULL);
+
+			// update text pos
+			cdi.nTextOffset += rTask.Width();
+
+			// if the offset now exceeds the text extent we can stop
+			int nExtent = pDC->GetTextExtent(sTitle).cx;
+
+			if (cdi.nTextOffset >= nExtent)
+				cdi.nTextOffset = -1;
 						
 			if (rTask.bottom >= rCellTrue.bottom)
 				break;
@@ -1133,16 +1160,12 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell) const
 			const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 			ASSERT(pTCI);
 
-			dwTaskID = pTCI->GetTaskID();
-			int nPos;
-
-			if (!m_mapVertPosContinuous.Lookup(dwTaskID, nPos))
-			{
-				nPos = max(nMaxPos, nTask);
-				m_mapVertPosContinuous[dwTaskID] = nPos;
-			}
+			CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(pTCI->GetTaskID());
 			
-			nMaxPos = max(nMaxPos, nPos+1);
+			if (cdi.nVertPos == -1)
+				cdi.nVertPos = max(nMaxPos, nTask);
+			
+			nMaxPos = max(nMaxPos, (cdi.nVertPos + 1));
 		}
 
 		m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, nMaxPos);
@@ -1254,12 +1277,10 @@ int CTaskCalendarCtrl::GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendar
 	ASSERT(nTask >= 0);
 	ASSERT(pCell);
 
-	int nPos = -1;
+	int nPos = nTask;
 
 	if (HasOption(TCCO_DISPLAYCONTINUOUS))
-		m_mapVertPosContinuous.Lookup(dwTaskID, nPos);
-	else
-		nPos = nTask;
+		nPos = GetTaskContinuousDrawInfo(dwTaskID).nVertPos;
 
 	BOOL bVScrolled = (IsGridCellSelected(pCell) || HasOption(TCCO_DISPLAYCONTINUOUS));
 
@@ -1446,19 +1467,28 @@ BOOL CTaskCalendarCtrl::CalcTaskCellRect(int nTask, const CCalendarCell* pCell, 
 	return TRUE;
 }
 
-int CTaskCalendarCtrl::GetTaskTextOffset(DWORD dwTaskID) const
+CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawInfo(DWORD dwTaskID) const
 {
 	ASSERT(dwTaskID);
-	int nPos = 0;
 
-	// special case: Always return zero if NOT drawing continuous
 	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
-		return 0;
+	{
+		static CONTINUOUSDRAWINFO nullDrawInfo;
+		return nullDrawInfo;
+	}
 
-	if (!m_mapTextOffset.Lookup(dwTaskID, nPos))
-		m_mapTextOffset[dwTaskID] = nPos;
+	int nItem, nNumItem = m_aContinuousDrawInfo.GetSize();
 
-	return nPos;
+	for (nItem = 0; nItem < nNumItem; nItem++)
+	{
+		if (m_aContinuousDrawInfo[nItem].dwTaskID == dwTaskID)
+			break;
+	}
+
+	if (nItem == nNumItem)
+		nItem = m_aContinuousDrawInfo.Add(CONTINUOUSDRAWINFO(dwTaskID));
+
+	return m_aContinuousDrawInfo[nItem];
 }
 
 TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
@@ -2351,7 +2381,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	if (dwTaskID)
 	{
-		int nTextOffset = GetTaskTextOffset(dwTaskID);
+		int nTextOffset = GetTaskContinuousDrawInfo(dwTaskID).nTextOffset;
 
 		if ((nTextOffset > 0) || 
 			!HasOption(TCCO_DISPLAYCONTINUOUS) ||
@@ -2409,7 +2439,7 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 	CRect rTip(rLabel);
 	m_tooltip.AdjustRect(rTip, TRUE);
-	rTip.OffsetRect(PADDING, 0);
+	rTip.OffsetRect(TIP_PADDING, 0);
 
 	rTip.top = rLabel.top;
 	rTip.bottom = rLabel.bottom;
