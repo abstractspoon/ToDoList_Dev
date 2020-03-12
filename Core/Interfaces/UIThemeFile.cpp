@@ -188,12 +188,9 @@ void CUIThemeFile::RecalcNonWorkingColors()
 	HLSX crNonWorking(crAppBackDark);
 
 	if (crNonWorking.fLuminosity <= 0.6f)
-		crNonWorking.fLuminosity = max(crNonWorking.fLuminosity, 0.6f);
+		crNonWorking.fLuminosity = 0.6f;
 	else
 		crNonWorking.fLuminosity = (crNonWorking.fLuminosity + 0.6f) / 2;
-
-	// And mute a bit
-	crNonWorking.fSaturation = min(crNonWorking.fSaturation, 0.5f);
 
 	crNonWorkingHours = crNonWorking;
 
