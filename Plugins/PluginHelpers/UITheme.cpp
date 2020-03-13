@@ -6,6 +6,8 @@
 #include "ColorUtil.h"
 #include "PluginHelpers.h"
 
+#include <Shared\GraphicsMisc.h>
+
 #include <Interfaces\UIThemeFile.h>
 
 #using "System.dll"
@@ -104,6 +106,8 @@ UIThemeToolbarRenderer::UIThemeToolbarRenderer()
 	m_PressedFillColor = Drawing::Color::Transparent;
 	m_BkgndLightColor = Drawing::Color::Transparent;
 	m_BkgndDarkColor = Drawing::Color::Transparent;
+
+	m_Style = UITheme::RenderStyle::Gradient;
 }
 
 void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
@@ -114,6 +118,8 @@ void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 
 	m_HotBorderColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.3f, false);
 	m_PressedFillColor = ColorUtil::DrawingColor::AdjustLighting(m_HotFillColor, -0.15f, false);
+
+	m_Style = theme->GetRenderStyle();
 }
 
 bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
@@ -180,9 +186,28 @@ void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Re
 		!ColorUtil::DrawingColor::IsTransparent(m_BkgndDarkColor, false) &&
 		!ColorUtil::DrawingColor::Equals(m_BkgndLightColor, m_BkgndDarkColor))
 	{
-		auto gradientBrush = gcnew Drawing2D::LinearGradientBrush(*rowRect, m_BkgndLightColor, m_BkgndDarkColor, Drawing2D::LinearGradientMode::Vertical);
+		HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
+		CDC* pDC = CDC::FromHandle(hDC);
+		CRect rRow(rowRect->Left, rowRect->Top, rowRect->Right, rowRect->Bottom);
 
-		g->FillRectangle(gradientBrush, *rowRect);
+		switch (m_Style)
+		{
+		case UITheme::RenderStyle::Glass:
+			GraphicsMisc::DrawGlass(pDC, rRow, m_BkgndLightColor.ToArgb(), m_BkgndDarkColor.ToArgb(), FALSE, 0);
+			break;
+
+		case UITheme::RenderStyle::Gradient:
+			GraphicsMisc::DrawGradient(pDC, rRow, m_BkgndLightColor.ToArgb(), m_BkgndDarkColor.ToArgb(), FALSE, 0);
+			break;
+
+		case UITheme::RenderStyle::GlassWithGradient:
+			GraphicsMisc::DrawGlassWithGradient(pDC, rRow, m_BkgndLightColor.ToArgb(), m_BkgndDarkColor.ToArgb(), FALSE, 0);
+			break;
+		}
+
+// 		auto gradientBrush = gcnew Drawing2D::LinearGradientBrush(*rowRect, m_BkgndLightColor, m_BkgndDarkColor, Drawing2D::LinearGradientMode::Vertical);
+// 		g->FillRectangle(gradientBrush, *rowRect);
+		g->ReleaseHdc();
 	}
 
 	DrawRowDivider(g, rowRect, firstRow, lastRow);

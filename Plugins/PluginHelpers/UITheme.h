@@ -88,6 +88,8 @@ namespace Abstractspoon
 				Drawing::Color m_BkgndLightColor;
 				Drawing::Color m_BkgndDarkColor;
 
+				UITheme::RenderStyle m_Style;
+
 				bool ValidColours();
 				bool RenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e);
 			};
