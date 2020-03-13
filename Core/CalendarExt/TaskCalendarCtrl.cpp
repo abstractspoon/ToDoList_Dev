@@ -817,6 +817,9 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			pDC->SetTextColor(crText);
 
 			CString sTitle = pTCI->GetName();
+#ifdef _DEBUG
+			sTitle += Misc::Format(_T(" (%ld)"), dwTaskID);
+#endif
 			pDC->ExtTextOut(nLeft, nTop, ETO_CLIPPED, rTask, sTitle, NULL);
 
 			// update text pos
