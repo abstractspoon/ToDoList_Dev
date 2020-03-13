@@ -163,7 +163,7 @@ protected:
 	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell) const;
 
 	BOOL CalcTaskCellRect(int nTask, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const;
-	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell) const;
+	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const;
 	BOOL GetTaskIndex(DWORD dwTaskID, const CCalendarCell* pCell) const;
 
 	BOOL IsValidTask(int nTask, const CCalendarCell* pCell) const;

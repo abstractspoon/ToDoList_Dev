@@ -658,6 +658,11 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	if (!m_nMaxDayTaskCount)
 		return;
 	
+#ifdef _DEBUG
+	int nDay = pCell->date.GetDay();
+	int nMonth = pCell->date.GetMonth();
+#endif
+
 	const CTaskCalItemArray* pTasks = GetCellTasks(pCell);
 	ASSERT(pTasks);
 	
@@ -673,14 +678,14 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	if (bShowScroll)
 		rCellTrue.right -= GetSystemMetrics(SM_CXVSCROLL);
 	
-	BOOL bVScrolled = (bShowScroll || HasOption(TCCO_DISPLAYCONTINUOUS));
+	BOOL bContinuous = HasOption(TCCO_DISPLAYCONTINUOUS);
+	BOOL bVScrolled = (bShowScroll || bContinuous);
 	BOOL bFocused = CDialogHelper::IsChildOrSame(this, GetFocus());
 	BOOL bTextColorIsBkgnd = HasOption(TCCO_TASKTEXTCOLORISBKGND);
 	
 	int nTaskHeight = GetTaskHeight();
-	int nStart = (bVScrolled ? m_nCellVScrollPos : 0);
 	
-	for (int nTask = nStart; nTask < nNumTasks; nTask++)
+	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
 		const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 		ASSERT(pTCI);
@@ -704,7 +709,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 			if (rTask.left <= rCellTrue.left)
 			{
-				if (HasOption(TCCO_DISPLAYCONTINUOUS))
+				if (bContinuous)
 				{
 					// draw over gridline
 					rTask.left--; 
@@ -730,7 +735,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				dwFlags |= GMDR_LEFT;
 			}
-			else if (HasOption(TCCO_DISPLAYCONTINUOUS))
+			else if (bContinuous)
 			{
 				rTask.left--; // draw over gridline
 			}
@@ -770,7 +775,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 					rClip.DeflateRect(1, 1);
 					rIcon.OffsetRect(-cdi.nIconOffset, 0);
 
-					if (HasOption(TCCO_DISPLAYCONTINUOUS))
+					if (bContinuous)
 					{
 						if (cdi.nIconOffset != 0)
 							rClip.left--; // draw over gridline
@@ -882,38 +887,48 @@ void CTaskCalendarCtrl::DrawCellFocus(CDC* /*pDC*/, const CCalendarCell* /*pCell
 
 BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 {
-	CRect rCell;
+	// First determine if we need to show a vertical scrollbar
 	int nRow = -1, nCol = -1;
-	int nNumCellTasks = 0;
+	BOOL bShowScrollbar = (CDialogHelper::IsChildOrSame(this, GetFocus()) &&
+							GetLastSelectedGridCell(nRow, nCol));
 
-	BOOL bShowSB = (CDialogHelper::IsChildOrSame(this, GetFocus()) && 
-					GetLastSelectedGridCell(nRow, nCol));
-	BOOL bSuccess = TRUE;
+	CRect rCell;
+	int nNumItems = 0;
 
-	if (bShowSB)
+	if (bShowScrollbar)
 	{
-		bShowSB = GetCellRect(nRow, nCol, rCell, TRUE);
+		bShowScrollbar = GetCellRect(nRow, nCol, rCell, TRUE);
 
-		if (bShowSB)
+		if (bShowScrollbar)
 		{
 			const CCalendarCell* pCell = GetCell(nRow, nCol);
 			const CTaskCalItemArray* pTasks = GetCellTasks(pCell);
 
-			if (pTasks)
+			if (pTasks && pTasks->GetSize())
 			{
-				nNumCellTasks = pTasks->GetSize();
-				bShowSB = ((nNumCellTasks * GetTaskHeight()) > rCell.Height());
+				// Get the max task pos range
+				int nLastTask = (pTasks->GetSize() - 1);
+				const TASKCALITEM* pTCILast = pTasks->GetAt(nLastTask);
+
+				int nMaxPos = GetTaskVertPos(pTCILast->GetTaskID(), nLastTask, pCell, FALSE);
+
+				nNumItems = (nMaxPos + 1);
+				bShowScrollbar = ((nNumItems * GetTaskHeight()) > rCell.Height());
 			}
 			else
 			{
-				bShowSB = FALSE;
+				bShowScrollbar = FALSE;
 			}
 		}
 	}
 
-	if (!bShowSB)
+	// Then update the state of the scrollbar appropriately
+	BOOL bWasShowingScrollbar = IsCellScrollBarActive();
+	BOOL bSuccess = TRUE;
+
+	if (!bShowScrollbar)
 	{
-		if (m_sbCellVScroll.GetSafeHwnd())
+		if (bWasShowingScrollbar)
 		{
 			if (m_sbCellVScroll.IsWindowVisible())
 			{
@@ -922,11 +937,10 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 			}
 
 			m_sbCellVScroll.EnableWindow(FALSE);
+			m_nCellVScrollPos = 0;
 		}
-
-		m_nCellVScrollPos = 0;
 	}
-	else
+	else // showing scrollbar
 	{
 		rCell.left = (rCell.right - GetSystemMetrics(SM_CXVSCROLL));
 
@@ -935,21 +949,24 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 		else
 			m_sbCellVScroll.MoveWindow(rCell);
 
-		// update scrollbar info
-		SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
+		// update scrollbar info if previously hidden
+		if (bSuccess && !bWasShowingScrollbar)
+		{
+			SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
 
-		si.nMin = 0;
-		si.nMax = (nNumCellTasks - 1);
-		si.nPage = min ((rCell.Height() / GetTaskHeight()), nNumCellTasks);
-		
-		if ((m_nCellVScrollPos < 0) || (m_nCellVScrollPos > (nNumCellTasks - (int)si.nPage)))
-			m_nCellVScrollPos = 0;
+			si.nMin = 0;
+			si.nMax = (nNumItems - 1);
+			si.nPage = min((rCell.Height() / GetTaskHeight()), nNumItems);
 
-		si.nPos = m_nCellVScrollPos;
+			if ((m_nCellVScrollPos < 0) || (m_nCellVScrollPos > (nNumItems - (int)si.nPage)))
+				m_nCellVScrollPos = 0;
 
-		m_sbCellVScroll.EnableWindow(TRUE);
-		m_sbCellVScroll.SetScrollInfo(&si, m_sbCellVScroll.IsWindowVisible());
-		m_sbCellVScroll.ShowWindow(SW_SHOW);
+			si.nPos = m_nCellVScrollPos;
+
+			m_sbCellVScroll.EnableWindow(TRUE);
+			m_sbCellVScroll.SetScrollInfo(&si, m_sbCellVScroll.IsWindowVisible());
+			m_sbCellVScroll.ShowWindow(SW_SHOW);
+		}
 	}
 
 	return bSuccess;
@@ -1247,7 +1264,7 @@ DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) cons
 		DWORD dwTaskID = pTCI->GetTaskID();
 		ASSERT(dwTaskID);
 
-		int nTaskPos = GetTaskVertPos(dwTaskID, nTask, pCell);
+		int nTaskPos = GetTaskVertPos(dwTaskID, nTask, pCell, TRUE);
 		
 		if (nTaskPos == nPos)
 		{
@@ -1289,7 +1306,7 @@ BOOL CTaskCalendarCtrl::IsValidTask(int nTask, const CCalendarCell* pCell) const
 	return ((nTask >= 0) && (nTask < pTasks->GetSize()));
 }
 
-int CTaskCalendarCtrl::GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell) const
+int CTaskCalendarCtrl::GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const
 {
 	ASSERT(dwTaskID);
 	ASSERT(nTask >= 0);
@@ -1300,7 +1317,7 @@ int CTaskCalendarCtrl::GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendar
 	if (HasOption(TCCO_DISPLAYCONTINUOUS))
 		nPos = GetTaskContinuousDrawInfo(dwTaskID).nVertPos;
 
-	BOOL bVScrolled = (IsGridCellSelected(pCell) || HasOption(TCCO_DISPLAYCONTINUOUS));
+	BOOL bVScrolled = (bScrolled && (IsGridCellSelected(pCell) || HasOption(TCCO_DISPLAYCONTINUOUS)));
 
 	if (bVScrolled)
 		nPos -= m_nCellVScrollPos;
@@ -1445,9 +1462,16 @@ BOOL CTaskCalendarCtrl::CalcTaskCellRect(int nTask, const CCalendarCell* pCell, 
 		return FALSE;
 
 	// check vertical (pos) intersection next
-	int nPos = GetTaskVertPos(pTCI->GetTaskID(), nTask, pCell);
-	ASSERT(nPos >= 0 && nPos < m_nMaxDayTaskCount);
+	int nPos = GetTaskVertPos(pTCI->GetTaskID(), nTask, pCell, TRUE);
 
+	if (nPos < 0)
+	{
+		ASSERT(m_nCellVScrollPos > 0);
+		return FALSE;
+	}
+	ASSERT(nPos < m_nMaxDayTaskCount);
+
+	// Check bottom of task against cell boundary
 	int nTaskHeight = GetTaskHeight();
 
 	if ((nPos * nTaskHeight) >= rCell.bottom)
@@ -1688,6 +1712,7 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		SelectTask(dwSelID, FALSE, TRUE);
 
 		const CCalendarCell* pCell = GetCell(point);
+		ASSERT(pCell);
 
 		if (pCell)
 			SelectDate(pCell->date, FALSE);
@@ -1697,7 +1722,7 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	}
 
 	// else
-	CCalendarCtrlEx::OnLButtonDown(nFlags, point);
+	CCalendarCtrl::OnLButtonDown(nFlags, point);
 	UpdateWindow();
 }
 
