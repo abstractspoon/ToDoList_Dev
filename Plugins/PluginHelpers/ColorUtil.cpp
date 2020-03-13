@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "ColorUtil.h"
 
+#include <Shared\GraphicsMisc.h>
+
 #include <3rdParty\ColorDef.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -149,6 +151,11 @@ bool ColorUtil::DrawingColor::Equals(Drawing::Color color1, Drawing::Color color
 Drawing::Color ColorUtil::DrawingColor::Copy(Drawing::Color color)
 {
 	return Drawing::Color::FromArgb(color.ToArgb());
+}
+
+float ColorUtil::DrawingColor::CalculateColorCloseness(Drawing::Color color1, Drawing::Color color2)
+{
+	return (float)GraphicsMisc::CalculateColorCloseness(ToRgb(color1), ToRgb(color2));
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

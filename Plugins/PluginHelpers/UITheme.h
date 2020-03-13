@@ -59,11 +59,14 @@ namespace Abstractspoon
 				Drawing::Color GetAppDrawingColor(AppColor color);
 				Drawing::Color GetAppDrawingColor(AppColor color, unsigned char opacity);
 
+				static void DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style);
+
 			private:
 				CUIThemeFile* m_pTheme;
 
 				UInt32 GetColor(AppColor color);
 				void InitTheme(const UITHEME* pTheme);
+
 			};
 
 			// --------------------------------------------------------------

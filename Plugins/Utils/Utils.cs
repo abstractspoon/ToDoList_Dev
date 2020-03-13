@@ -308,7 +308,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			private LinkLabelEx m_buyBtn;
             private ToolTip m_buyBtnTooltip;
 			private int m_DollarPrice = 0;
-			private Color m_themeBkColor = SystemColors.ButtonFace;
+			private UITheme m_Theme;
 
 			// ---------------------------------------------
 
@@ -317,6 +317,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				m_TypeId = typeId;
 				m_Trans = trans;
 				m_DollarPrice = dollarPrice;
+				m_Theme = new UITheme();
 
 				if (m_DollarPrice < 0)
 					m_LicenseType = LicenseType.Free;
@@ -328,10 +329,10 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 			public void SetUITheme(UITheme theme)
 			{
-				m_themeBkColor = theme.GetAppDrawingColor(UITheme.AppColor.StatusBarDark);
+				m_Theme = theme;
 
 				RefreshColors();
-                FixupBorder();
+				FixupBorder();
 			}
 
 			private void InitializeComponent()
@@ -358,7 +359,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				}
 
 				RefreshColors();
-                FixupBorder();
+				FixupBorder();
 			}
 
 			private void OnBuyLicense(object sender, LinkLabelLinkClickedEventArgs e)
@@ -372,7 +373,29 @@ namespace Abstractspoon.Tdl.PluginHelpers
 				TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, ForeColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
 			}
 
-            public new int Height
+			protected override void OnPaintBackground(PaintEventArgs e)
+			{
+				switch (m_LicenseType)
+				{
+					case RhinoLicensing.LicenseType.Free:
+					case RhinoLicensing.LicenseType.Supporter:
+					case RhinoLicensing.LicenseType.Contributor:
+						UITheme.DrawHorizontalBar(e.Graphics, 
+													Bounds, 
+													m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarLight),
+													m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarDark), 
+													m_Theme.GetRenderStyle());
+						break;
+
+					default:
+					case RhinoLicensing.LicenseType.Paid:
+					case RhinoLicensing.LicenseType.Trial:
+						base.OnPaintBackground(e);
+						break;
+				}
+			}
+
+			public new int Height
             {
                 get
                 {
@@ -398,55 +421,46 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 							return m_Trans.Translate("Under Development");
 
-						//case RhinoLicensing.LicenseType.Paid:
-						//	return 0;
-
 						case RhinoLicensing.LicenseType.Supporter:
 							return m_Trans.Translate("Supporter License");
 
 						case RhinoLicensing.LicenseType.Contributor:
 							return m_Trans.Translate("Contributor License");
-					}
 
-					return String.Empty;
+						case RhinoLicensing.LicenseType.Paid:
+						default:
+							return String.Empty;
+					}
 				}
 			}
 
 			private void RefreshColors()
 			{
 				BackColor = SystemColors.ButtonFace;
-				ForeColor = Color.Black;
+				ForeColor = SystemColors.WindowText;
 
                 Color PressedColor = ForeColor;
 
 				switch (m_LicenseType)
 				{
 					case RhinoLicensing.LicenseType.Free:
-						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
-                        PressedColor = Color.DimGray;
+					case RhinoLicensing.LicenseType.Supporter:
+					case RhinoLicensing.LicenseType.Contributor:
+						PressedColor = Color.DimGray;
+						ForeColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarText);
 						break;
 
 					case RhinoLicensing.LicenseType.Paid:
 						break;
 
-					case RhinoLicensing.LicenseType.Supporter:
-						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
-                        PressedColor = Color.DimGray;
-						break;
-
-					case RhinoLicensing.LicenseType.Contributor:
-						BackColor = ColorUtil.DrawingColor.AdjustLighting(m_themeBkColor, -0.05f, false);
-                        PressedColor = Color.DimGray;
-						break;
-
-					default:
 					case RhinoLicensing.LicenseType.Trial:
+					default:
 						BackColor = Color.DarkRed;
                         PressedColor = Color.LightPink;
+						ForeColor = ColorUtil.DrawingColor.GetBestTextColor(BackColor);
 						break;
 				}
 
-				ForeColor = ColorUtil.DrawingColor.GetBestTextColor(BackColor);
 
 				if (m_buyBtn != null)
 				{
@@ -481,13 +495,20 @@ namespace Abstractspoon.Tdl.PluginHelpers
             {
                 if (VisualStyleRenderer.IsSupported)
                 {
-                    // Add border if (nearly) gray
-                    float saturation = m_themeBkColor.GetSaturation();
-                    
-                    if (saturation < 0.2f)
-                        BorderStyle = BorderStyle.FixedSingle;
-                    else
-                        BorderStyle = BorderStyle.None;
+					// Add border if (nearly) gray or the colour 
+					// is too close to the parent background colour
+					Color parentColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight); ;
+					Color bannerColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarLight);
+
+					if (bannerColor.GetSaturation() < 0.2f ||
+						(ColorUtil.DrawingColor.CalculateColorCloseness(bannerColor, parentColor) < 0.2f))
+					{
+						BorderStyle = BorderStyle.FixedSingle;
+					}
+					else
+					{
+						BorderStyle = BorderStyle.None;
+					}
                 }
                 else // Classic theme
                 {

@@ -97,6 +97,43 @@ UInt32 UITheme::GetColor(AppColor color)
 	return 0; // black
 }
 
+void UITheme::DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style)
+{
+	HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
+	CDC* pDC = CDC::FromHandle(hDC);
+
+	CRect rRow(rect->Left, rect->Top, rect->Right, rect->Bottom);
+
+	if (!ColorUtil::DrawingColor::IsTransparent(topColor, false) &&
+		!ColorUtil::DrawingColor::IsTransparent(botColor, false) &&
+		!ColorUtil::DrawingColor::Equals(topColor, botColor))
+	{
+		COLORREF crFrom = ColorUtil::DrawingColor::ToRgb(topColor);
+		COLORREF crTo = ColorUtil::DrawingColor::ToRgb(botColor);
+
+		switch (style)
+		{
+		case UITheme::RenderStyle::Glass:
+			GraphicsMisc::DrawGlass(pDC, rRow, crFrom, crTo, FALSE, 0);
+			break;
+
+		case UITheme::RenderStyle::Gradient:
+			GraphicsMisc::DrawGradient(pDC, rRow, crFrom, crTo, FALSE, 0);
+			break;
+
+		case UITheme::RenderStyle::GlassWithGradient:
+			GraphicsMisc::DrawGlassWithGradient(pDC, rRow, crFrom, crTo, FALSE, 0);
+			break;
+		}
+	}
+	else
+	{
+		pDC->FillSolidRect(rRow, ColorUtil::DrawingColor::ToRgb(topColor));
+	}
+
+	g->ReleaseHdc();
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 UIThemeToolbarRenderer::UIThemeToolbarRenderer()
@@ -182,35 +219,7 @@ bool UIThemeToolbarRenderer::ValidColours()
 
 void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
 {
-	if (!ColorUtil::DrawingColor::IsTransparent(m_BkgndLightColor, false) &&
-		!ColorUtil::DrawingColor::IsTransparent(m_BkgndDarkColor, false) &&
-		!ColorUtil::DrawingColor::Equals(m_BkgndLightColor, m_BkgndDarkColor))
-	{
-		HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
-		CDC* pDC = CDC::FromHandle(hDC);
-
-		CRect rRow(rowRect->Left, rowRect->Top, rowRect->Right, rowRect->Bottom);
-
-		COLORREF crFrom = ColorUtil::DrawingColor::ToRgb(m_BkgndLightColor);
-		COLORREF crTo = ColorUtil::DrawingColor::ToRgb(m_BkgndDarkColor);
-
-		switch (m_Style)
-		{
-		case UITheme::RenderStyle::Glass:
-			GraphicsMisc::DrawGlass(pDC, rRow, crFrom, crTo, FALSE, 0);
-			break;
-
-		case UITheme::RenderStyle::Gradient:
-			GraphicsMisc::DrawGradient(pDC, rRow, crFrom, crTo, FALSE, 0);
-			break;
-
-		case UITheme::RenderStyle::GlassWithGradient:
-			GraphicsMisc::DrawGlassWithGradient(pDC, rRow, crFrom, crTo, FALSE, 0);
-			break;
-		}
-
-		g->ReleaseHdc();
-	}
+	UITheme::DrawHorizontalBar(g, rowRect, m_BkgndLightColor, m_BkgndDarkColor, m_Style);
 
 	DrawRowDivider(g, rowRect, firstRow, lastRow);
 }

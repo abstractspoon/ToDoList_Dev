@@ -42,6 +42,7 @@ namespace Abstractspoon
 					static Drawing::Color AdjustLighting(Drawing::Color color, float amount, bool rgbMethod);
 
 					static float GetLuminance(Drawing::Color color);
+					static float CalculateColorCloseness(Drawing::Color color1, Drawing::Color color2);
 
 					static bool IsTransparent(Drawing::Color color, bool whiteIsTransparent);
 					static String^ ToHtml(Drawing::Color color, bool whiteIsTransparent);
