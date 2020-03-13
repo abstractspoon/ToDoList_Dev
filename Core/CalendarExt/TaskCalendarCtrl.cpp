@@ -893,6 +893,7 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 							GetLastSelectedGridCell(nRow, nCol));
 
 	CRect rCell;
+	const CCalendarCell* pCell = NULL;
 	int nNumItems = 0;
 
 	if (bShowScrollbar)
@@ -901,7 +902,8 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 
 		if (bShowScrollbar)
 		{
-			const CCalendarCell* pCell = GetCell(nRow, nCol);
+			pCell = GetCell(nRow, nCol);
+
 			const CTaskCalItemArray* pTasks = GetCellTasks(pCell);
 
 			if (pTasks && pTasks->GetSize())
@@ -942,15 +944,30 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 	}
 	else // showing scrollbar
 	{
-		rCell.left = (rCell.right - GetSystemMetrics(SM_CXVSCROLL));
+		ASSERT(pCell);
+		ASSERT(!rCell.IsRectEmpty());
+
+		const CCalendarCell* pOldCell = NULL;
+
+		CRect rNewPos(rCell);
+		rNewPos.left = (rNewPos.right - GetSystemMetrics(SM_CXVSCROLL));
 
 		if (!m_sbCellVScroll.GetSafeHwnd())
-			bSuccess = m_sbCellVScroll.Create(WS_CHILD | SBS_VERT, rCell, this, (UINT)IDC_STATIC);
+		{
+			bSuccess = m_sbCellVScroll.Create(WS_CHILD | SBS_VERT, rNewPos, this, (UINT)IDC_STATIC);
+		}
 		else
-			m_sbCellVScroll.MoveWindow(rCell);
+		{
+			CRect rOldPos = CDialogHelper::GetChildRect(&m_sbCellVScroll);
+			pOldCell = GetCell(rOldPos.CenterPoint());
 
+			ASSERT(pOldCell);
+
+			m_sbCellVScroll.MoveWindow(rNewPos);
+		}
+		
 		// update scrollbar info if previously hidden
-		if (bSuccess && !bWasShowingScrollbar)
+		if (bSuccess && (!bWasShowingScrollbar || (pCell != pOldCell)))
 		{
 			SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
 
