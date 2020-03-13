@@ -103,7 +103,9 @@ protected:
 
 	struct CONTINUOUSDRAWINFO
 	{
-		CONTINUOUSDRAWINFO(DWORD dwID = 0) : dwTaskID(dwID), nIconOffset(0), nTextOffset(0), nVertPos(-1) {}
+		CONTINUOUSDRAWINFO(DWORD dwID = 0);
+
+		void Reset();
 
 		DWORD dwTaskID;
 		int nIconOffset;

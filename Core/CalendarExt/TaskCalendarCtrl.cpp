@@ -37,6 +37,20 @@ const int DEF_TASK_HEIGHT = (IMAGE_SIZE + 3); // Effective height is 1 less
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 
 /////////////////////////////////////////////////////////////////////////////
+
+CTaskCalendarCtrl::CONTINUOUSDRAWINFO::CONTINUOUSDRAWINFO(DWORD dwID) : dwTaskID(dwID) 
+{ 
+	Reset();
+}
+
+void CTaskCalendarCtrl::CONTINUOUSDRAWINFO::Reset() 
+{ 
+	nIconOffset = 0;
+	nTextOffset = 0;
+	nVertPos = -1; 
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl
 
 CTaskCalendarCtrl::CTaskCalendarCtrl()
@@ -1474,6 +1488,8 @@ CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawI
 	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
 	{
 		static CONTINUOUSDRAWINFO nullDrawInfo;
+		nullDrawInfo.Reset();
+
 		return nullDrawInfo;
 	}
 
