@@ -61,7 +61,7 @@ Windows::Media::Color UITheme::GetAppMediaColor(AppColor color)
 
 Windows::Media::Color UITheme::GetAppMediaColor(AppColor color, unsigned char opacity)
 {
-	return ColorUtil::MediaColor::GetColor(GetColor(color), opacity);
+	return ColorUtil::MediaColor::ToColor(GetColor(color), opacity);
 }
 
 System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color)
@@ -71,7 +71,7 @@ System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color)
 
 System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color, unsigned char opacity)
 {
-	return ColorUtil::DrawingColor::GetColor(GetColor(color), opacity);
+	return ColorUtil::DrawingColor::ToColor(GetColor(color), opacity);
 }
 
 UInt32 UITheme::GetColor(AppColor color)
@@ -188,25 +188,27 @@ void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Re
 	{
 		HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
 		CDC* pDC = CDC::FromHandle(hDC);
+
 		CRect rRow(rowRect->Left, rowRect->Top, rowRect->Right, rowRect->Bottom);
+
+		COLORREF crFrom = ColorUtil::DrawingColor::ToRgb(m_BkgndLightColor);
+		COLORREF crTo = ColorUtil::DrawingColor::ToRgb(m_BkgndDarkColor);
 
 		switch (m_Style)
 		{
 		case UITheme::RenderStyle::Glass:
-			GraphicsMisc::DrawGlass(pDC, rRow, m_BkgndLightColor.ToArgb(), m_BkgndDarkColor.ToArgb(), FALSE, 0);
+			GraphicsMisc::DrawGlass(pDC, rRow, crFrom, crTo, FALSE, 0);
 			break;
 
 		case UITheme::RenderStyle::Gradient:
-			GraphicsMisc::DrawGradient(pDC, rRow, m_BkgndLightColor.ToArgb(), m_BkgndDarkColor.ToArgb(), FALSE, 0);
+			GraphicsMisc::DrawGradient(pDC, rRow, crFrom, crTo, FALSE, 0);
 			break;
 
 		case UITheme::RenderStyle::GlassWithGradient:
-			GraphicsMisc::DrawGlassWithGradient(pDC, rRow, m_BkgndLightColor.ToArgb(), m_BkgndDarkColor.ToArgb(), FALSE, 0);
+			GraphicsMisc::DrawGlassWithGradient(pDC, rRow, crFrom, crTo, FALSE, 0);
 			break;
 		}
 
-// 		auto gradientBrush = gcnew Drawing2D::LinearGradientBrush(*rowRect, m_BkgndLightColor, m_BkgndDarkColor, Drawing2D::LinearGradientMode::Vertical);
-// 		g->FillRectangle(gradientBrush, *rowRect);
 		g->ReleaseHdc();
 	}
 

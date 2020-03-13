@@ -370,7 +370,7 @@ System::Drawing::Color Task::GetTextDrawingColor()
 		return System::Drawing::Color::Empty;
 
 	// else
-	return ColorUtil::DrawingColor::GetColor(color);
+	return ColorUtil::DrawingColor::ToColor(color);
 }
 
 System::Windows::Media::Color Task::GetTextMediaColor()
@@ -380,7 +380,7 @@ System::Windows::Media::Color Task::GetTextMediaColor()
 	if (color == 0)
 		return System::Windows::Media::Color::FromArgb(0, 0, 0, 0);
 
-	return ColorUtil::MediaColor::GetColor(color);
+	return ColorUtil::MediaColor::ToColor(color);
 }
 
 System::Drawing::Color Task::GetPriorityDrawingColor()
@@ -390,7 +390,7 @@ System::Drawing::Color Task::GetPriorityDrawingColor()
 	if (color == 0)
 		return System::Drawing::Color::Empty;
 
-	return ColorUtil::DrawingColor::GetColor(color);
+	return ColorUtil::DrawingColor::ToColor(color);
 }
 
 System::Windows::Media::Color Task::GetPriorityMediaColor()
@@ -400,7 +400,7 @@ System::Windows::Media::Color Task::GetPriorityMediaColor()
 	if (color == 0)
 		return System::Windows::Media::Color::FromArgb(0, 0, 0, 0);
 
-	return ColorUtil::MediaColor::GetColor(color);
+	return ColorUtil::MediaColor::ToColor(color);
 }
 
 String^ Task::GetTextForeWebColor()

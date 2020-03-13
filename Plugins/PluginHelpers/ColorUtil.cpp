@@ -4,10 +4,7 @@
 #include "stdafx.h"
 #include "ColorUtil.h"
 
-#include <math.h>
-
-#include <Shlwapi.h>
-#pragma comment(lib, "shlwapi.lib")
+#include <3rdParty\ColorDef.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,7 +16,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 Windows::Media::Color ColorUtil::MediaColor::AdjustLighting(Windows::Media::Color color, float amount, bool rgbMethod)
 {
-	COLORREF rgbIn = RGB(color.R, color.G, color.B);
+	COLORREF rgbIn = ToRgb(color);
 	COLORREF rgbOut = (COLORREF)ColorUtil::AdjustLighting(rgbIn, amount, rgbMethod);
 
 	return Windows::Media::Color::FromArgb(color.A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
@@ -27,18 +24,23 @@ Windows::Media::Color ColorUtil::MediaColor::AdjustLighting(Windows::Media::Colo
 
 Windows::Media::Color ColorUtil::MediaColor::SetLuminance(Windows::Media::Color color, float luminance)
 {
-	COLORREF rgbIn = RGB(color.R, color.G, color.B);
+	COLORREF rgbIn = ToRgb(color);
 	COLORREF rgbOut = (COLORREF)ColorUtil::SetLuminance(rgbIn, luminance);
 
 	return Windows::Media::Color::FromArgb(color.A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
 }
 
-Windows::Media::Color ColorUtil::MediaColor::GetColor(UInt32 rgbColor)
+COLORREF ColorUtil::MediaColor::ToRgb(Windows::Media::Color color)
 {
-	return GetColor(rgbColor, 255);
+	return RGB(color.R, color.G, color.B);
 }
 
-Windows::Media::Color ColorUtil::MediaColor::GetColor(UInt32 rgbColor, unsigned char opacity)
+Windows::Media::Color ColorUtil::MediaColor::ToColor(COLORREF rgbColor)
+{
+	return ToColor(rgbColor, 255);
+}
+
+Windows::Media::Color ColorUtil::MediaColor::ToColor(COLORREF rgbColor, unsigned char opacity)
 {
 	return System::Windows::Media::Color::FromArgb(opacity, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
 }
@@ -63,7 +65,7 @@ float ColorUtil::MediaColor::GetLuminance(Windows::Media::Color color)
 
 Drawing::Color ColorUtil::DrawingColor::AdjustLighting(Drawing::Color color, float amount, bool rgbMethod)
 {
-	COLORREF rgbIn = RGB(color.R, color.G, color.B);
+	COLORREF rgbIn = ToRgb(color);
 	COLORREF rgbOut = ColorUtil::AdjustLighting(rgbIn, amount, rgbMethod);
 
 	return Drawing::Color::FromArgb(color.A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
@@ -71,20 +73,29 @@ Drawing::Color ColorUtil::DrawingColor::AdjustLighting(Drawing::Color color, flo
 
 Drawing::Color ColorUtil::DrawingColor::SetLuminance(Drawing::Color color, float luminance)
 {
-	COLORREF rgbIn = RGB(color.R, color.G, color.B);
+	COLORREF rgbIn = ToRgb(color);
 	COLORREF rgbOut = ColorUtil::SetLuminance(rgbIn, luminance);
 
 	return Drawing::Color::FromArgb(color.A, (int)GetRValue(rgbOut), (int)GetGValue(rgbOut), (int)GetBValue(rgbOut));
 }
 
-Drawing::Color ColorUtil::DrawingColor::GetColor(UInt32 rgbColor)
+COLORREF ColorUtil::DrawingColor::ToRgb(Drawing::Color color)
 {
-	return GetColor(rgbColor, 255);
+	return RGB(color.R, color.G, color.B);
 }
 
-Drawing::Color ColorUtil::DrawingColor::GetColor(UInt32 rgbColor, unsigned char opacity)
+Drawing::Color ColorUtil::DrawingColor::ToColor(COLORREF rgbColor)
 {
-	return System::Drawing::Color::FromArgb(opacity, (Byte)GetRValue(rgbColor), (Byte)GetGValue(rgbColor), (Byte)GetBValue(rgbColor));
+	return ToColor(rgbColor, 255);
+}
+
+Drawing::Color ColorUtil::DrawingColor::ToColor(COLORREF rgbColor, unsigned char opacity)
+{
+	int red = GetRValue(rgbColor);
+	int green = GetGValue(rgbColor);
+	int blue = GetBValue(rgbColor);
+	
+	return System::Drawing::Color::FromArgb(opacity, red, green, blue);
 }
 
 Drawing::Color ColorUtil::DrawingColor::GetBestTextColor(Drawing::Color backColor)
@@ -142,45 +153,20 @@ Drawing::Color ColorUtil::DrawingColor::Copy(Drawing::Color color)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-float ColorUtil::GetLuminance(UInt32 rgbColor)
+float ColorUtil::GetLuminance(COLORREF rgbColor)
 {
 	return (((GetBValue(rgbColor) * 0.1f) + (GetGValue(rgbColor) * 0.6f) + (GetRValue(rgbColor) * 0.3f)) / 255.0f);
 }
 
-UInt32 ColorUtil::SetLuminance(UInt32 rgbColor, float luminance)
+COLORREF ColorUtil::SetLuminance(COLORREF rgbColor, float luminance)
 {
-	luminance = max(0.0f, min(1.0f, luminance));
+	HLSX hls(rgbColor);
+	hls.fLuminosity = luminance;
 
-	WORD wHue = 0, wLuminance = 0, wSaturation = 0;
-	ColorRGBToHLS((COLORREF)rgbColor, &wHue, &wLuminance, &wSaturation);
-
-	return ColorHLSToRGB(wHue, (WORD)(luminance * 240), wSaturation);
+	return hls;
 }
 
-UInt32 ColorUtil::AdjustLighting(UInt32 rgbColor, float amount, bool rgbMethod)
+COLORREF ColorUtil::AdjustLighting(COLORREF rgbColor, float amount, bool rgbMethod)
 {
-	if (rgbMethod)
-	{
-		BYTE btRed = GetRValue(rgbColor);
-		BYTE btGreen = GetGValue(rgbColor);
-		BYTE btBlue = GetBValue(rgbColor);
-		
-		if (amount > 0.0) // Lighter
-		{
-			btRed = (BYTE)min(255, (btRed + ((255 - btRed) * amount)));
-			btGreen = (BYTE)min(255, (btGreen + ((255 - btGreen) * amount)));
-			btBlue = (BYTE)min(255, (btBlue + ((255 - btBlue) * amount)));
-		}
-		else // < 0.0 - Darker
-		{
-			btRed = (BYTE)max(0, (btRed + (btRed * amount)));
-			btGreen = (BYTE)max(0, (btGreen + (btGreen * amount)));
-			btBlue = (BYTE)max(0, (btBlue + (btBlue * amount)));
-		}
-
-		return RGB(btRed, btGreen, btBlue);
-	}
-
-	// else
-	return ColorUtil::SetLuminance(rgbColor, (ColorUtil::GetLuminance(rgbColor) + amount));
+	return RGBX::AdjustLighting(rgbColor, amount, rgbMethod);
 }

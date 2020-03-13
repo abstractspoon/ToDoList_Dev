@@ -17,8 +17,10 @@ namespace Abstractspoon
 				public ref class MediaColor
 				{
 				public:
-					static Windows::Media::Color GetColor(UInt32 rgbColor);
-					static Windows::Media::Color GetColor(UInt32 rgbColor, unsigned char opacity);
+					static COLORREF ToRgb(Windows::Media::Color color);
+
+					static Windows::Media::Color ToColor(COLORREF rgbColor);
+					static Windows::Media::Color ToColor(COLORREF rgbColor, unsigned char opacity);
 					static Windows::Media::Color GetBestTextColor(Windows::Media::Color backColor);
 					
 					static Windows::Media::Color SetLuminance(Windows::Media::Color color, float luminance);
@@ -30,8 +32,10 @@ namespace Abstractspoon
 				public ref class DrawingColor
 				{
 				public:
-					static Drawing::Color GetColor(UInt32 rgbColor);
-					static Drawing::Color GetColor(UInt32 rgbColor, unsigned char opacity);
+					static COLORREF ToRgb(Drawing::Color color);
+
+					static Drawing::Color ToColor(COLORREF rgbColor);
+					static Drawing::Color ToColor(COLORREF rgbColor, unsigned char opacity);
 					static Drawing::Color GetBestTextColor(Drawing::Color backColor);
 
 					static Drawing::Color SetLuminance(Drawing::Color color, float luminance);
@@ -46,9 +50,9 @@ namespace Abstractspoon
 					static Drawing::Color Copy(Drawing::Color color);
 				};
 
-				float GetLuminance(UInt32 rgbColor);
-				UInt32 SetLuminance(UInt32 rgbColor, float luminance);
-				UInt32 AdjustLighting(UInt32 rgbColor, float amount, bool rgbMethod);
+				float GetLuminance(COLORREF rgbColor);
+				COLORREF SetLuminance(COLORREF rgbColor, float luminance);
+				COLORREF AdjustLighting(COLORREF rgbColor, float amount, bool rgbMethod);
 			}
 		}
 	}
