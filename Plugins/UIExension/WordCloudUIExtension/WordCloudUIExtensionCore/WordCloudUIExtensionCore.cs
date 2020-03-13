@@ -404,8 +404,11 @@ namespace WordCloudUIExtension
             this.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 			m_SplitterColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 
-			m_AttributeLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
-			m_ColorsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			Color labelColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+
+			m_AttributeLabel.ForeColor = labelColor;
+			m_ColorsLabel.ForeColor = labelColor;
+			m_StylesLabel.ForeColor = labelColor;
 
 			RhinoLicensing.SetUITheme(this, theme);
 		}
