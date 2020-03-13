@@ -751,7 +751,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
 
 		if (cdi.nTextOffset == -1) // text (and icon) have been drawn
-			return;
+			continue;
 
 		if ((nTaskHeight >= DEF_TASK_HEIGHT) && pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
 		{
@@ -1177,7 +1177,8 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell) const
 			const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 			ASSERT(pTCI);
 
-			CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(pTCI->GetTaskID());
+			DWORD dwTaskID = pTCI->GetTaskID();
+			CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
 			
 			if (cdi.nVertPos == -1)
 				cdi.nVertPos = max(nMaxPos, nTask);
