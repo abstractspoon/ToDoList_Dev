@@ -1332,11 +1332,10 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 
 	BOOL bHighContrast = Misc::IsHighContrastActive();
 	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
-	BOOL bTransparent = (!bHighContrast && (dwFlags & GMIB_TRANSPARENT));
 
-	// adjust drawing rect/flags accordingly
+	// Adjust drawing rect/flags accordingly
 	CRect rDraw(rItem), rClip(prClip);
-	DWORD dwDRFlags = GMDR_ALL; // for classic theme
+	DWORD dwClassicBorders = GMDR_ALL;
 
 	if (dwFlags & (GMIB_EXTENDLEFT | GMIB_EXTENDRIGHT | GMIB_CLIPLEFT | GMIB_CLIPRIGHT))
 	{
@@ -1361,7 +1360,7 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			}
 			else // classic
 			{
-				dwDRFlags &= ~GMDR_LEFT;
+				dwClassicBorders &= ~GMDR_LEFT;
 			}
 		}
 		
@@ -1373,20 +1372,21 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			}
 			else // classic
 			{
-				dwDRFlags &= ~GMDR_RIGHT;
+				dwClassicBorders &= ~GMDR_RIGHT;
 			}
 		}
 
 		prClip = rClip;
 	}
 	
-	// draw the rect
+	// Do the draw
+	BOOL bPreDraw = (dwFlags & GMIB_PREDRAW), bPostDraw = (dwFlags & GMIB_POSTDRAW);
+	BOOL bSingleStageDraw = ((bPreDraw & bPostDraw) || (!bPreDraw && !bPostDraw));
+
 	if (bThemed)
 	{
-		CThemed th(hwnd, _T("Explorer::ListView"));
-		
-		// Fill background with white if not transparent
-		if (!bTransparent)
+		// Fill background with white if single stage draw
+		if (bSingleStageDraw)
 		{
 			CRect rBkgnd;
 
@@ -1398,67 +1398,79 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			pDC->FillSolidRect(rBkgnd, RGB(255, 255, 255));
 		}
 		
-		switch (nState)
+		if (bSingleStageDraw || bPostDraw)
 		{
-		case GMIS_SELECTED:
-			th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
-			// fall thru to overdraw again
+			CThemed th(hwnd, _T("Explorer::ListView"));
 
-		case GMIS_SELECTEDNOTFOCUSED:
-		case GMIS_DROPHILITED:
-			th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
-			break;
+			switch (nState)
+			{
+			case GMIS_SELECTED:
+				th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
+				// fall thru to overdraw again
+
+			case GMIS_SELECTEDNOTFOCUSED:
+			case GMIS_DROPHILITED:
+				th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
+				break;
 			
-		default:
-			ASSERT(0);
-			return FALSE;
+			default:
+				ASSERT(0);
+				return FALSE;
+			}
 		}
 	}
 	// Can be XP, Linux or Classic theme, or themes disabled for this app only
 	else if (!bHighContrast && (dwFlags & GMIB_THEMECLASSIC))
 	{
-		// draw a bordered box based on standard colours
-		COLORREF crBorder = CLR_NONE, crFill = CLR_NONE;
-		
-		switch (nState)
+		if (bSingleStageDraw || bPostDraw)
 		{
-		case GMIS_SELECTED:
-			// Because the 'Classic' selection colour varies between
-			// OS versions I'm am going to standardise on XP's
-			// Navy Blue colour as the 'original'
-			crBorder = RGB(50, 105, 200); 
-			crFill = (bTransparent ? crBorder : (175, 195, 240));
-			break;
+			// draw a bordered box based on standard colours
+			COLORREF crBorder = CLR_NONE, crFill = CLR_NONE;
+			BOOL bTransparent = bPostDraw;
+
+			switch (nState)
+			{
+			case GMIS_SELECTED:
+				// Because the 'Classic' selection colour varies between
+				// OS versions I'm am going to standardise on XP's
+				// Navy Blue colour as the 'original'
+				crBorder = RGB(50, 105, 200); 
+				crFill = (bTransparent ? crBorder : (175, 195, 240));
+				break;
 			
-		case GMIS_SELECTEDNOTFOCUSED:
-		case GMIS_DROPHILITED:
-			crBorder = GetSysColor(COLOR_3DSHADOW);
-			crFill = GetSysColor(bTransparent ? COLOR_3DSHADOW : COLOR_3DFACE);
-			break;
+			case GMIS_SELECTEDNOTFOCUSED:
+			case GMIS_DROPHILITED:
+				crBorder = GetSysColor(COLOR_3DSHADOW);
+				crFill = GetSysColor(bTransparent ? COLOR_3DSHADOW : COLOR_3DFACE);
+				break;
 			
-		default:
-			ASSERT(0);
-			return FALSE;
+			default:
+				ASSERT(0);
+				return FALSE;
+			}
+		
+			DrawRect(pDC, rDraw, crFill, crBorder, 0, dwClassicBorders, (bTransparent ? 128 : 255));
 		}
-		
-		DrawRect(pDC, rDraw, crFill, crBorder, 0, dwDRFlags, (bTransparent ? 128 : 255));
 	}
-	else // high contrast
+	else // high contrast or unthemed classic 
 	{
-		switch (nState)
+		if (bSingleStageDraw || bPreDraw)
 		{
-		case GMIS_SELECTED:
-			pDC->FillSolidRect(rDraw, GetSysColor(COLOR_HIGHLIGHT));
-			break;
+			switch (nState)
+			{
+			case GMIS_SELECTED:
+				pDC->FillSolidRect(rDraw, GetSysColor(COLOR_HIGHLIGHT));
+				break;
 			
-		case GMIS_SELECTEDNOTFOCUSED:
-		case GMIS_DROPHILITED:
-			pDC->FillSolidRect(rDraw, GetSysColor(COLOR_3DFACE));
-			break;
+			case GMIS_SELECTEDNOTFOCUSED:
+			case GMIS_DROPHILITED:
+				pDC->FillSolidRect(rDraw, GetSysColor(COLOR_3DFACE));
+				break;
 			
-		default:
-			ASSERT(0);
-			return FALSE;
+			default:
+				ASSERT(0);
+				return FALSE;
+			}
 		}
 	}
 

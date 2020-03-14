@@ -43,7 +43,7 @@ enum GM_GRADIENT
 	GMG_GLASSWITHGRADIENT,
 };
 
-enum GM_ITEMSTATE // DrawExplorerItemBackground
+enum GM_ITEMSTATE // DrawExplorerItemSelection
 {
 	GMIS_NONE,
 	GMIS_SELECTED,
@@ -51,15 +51,16 @@ enum GM_ITEMSTATE // DrawExplorerItemBackground
 	GMIS_DROPHILITED,
 };
 
-enum // DrawExplorerItemBackground
+enum // DrawExplorerItemSelection
 {
-	GMIB_NONE			= 0x00,
-	GMIB_EXTENDRIGHT	= 0x01,
-	GMIB_EXTENDLEFT		= 0x02,
-	GMIB_CLIPRIGHT		= 0x04,
-	GMIB_CLIPLEFT		= 0x08,
-	GMIB_THEMECLASSIC	= 0x10,
-	GMIB_TRANSPARENT	= 0x20,
+	GMIB_NONE			= 0x0000,
+	GMIB_EXTENDRIGHT	= 0x0001,
+	GMIB_EXTENDLEFT		= 0x0002,
+	GMIB_CLIPRIGHT		= 0x0004,
+	GMIB_CLIPLEFT		= 0x0008,
+	GMIB_THEMECLASSIC	= 0x0010,
+	GMIB_PREDRAW		= 0x0020,
+	GMIB_POSTDRAW		= 0x0040,
 };
 
 enum GM_OLECURSOR // OLE drag'n'drop cursors

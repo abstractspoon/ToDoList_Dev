@@ -1394,7 +1394,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
  			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 			CRect rItem(pTVCD->nmcd.rc);
 
-			COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rItem, FALSE);
+			COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rItem, FALSE, TRUE);
 				
 			// hide text because we will draw it later
 			pTVCD->clrTextBk = pTVCD->clrText = crBack;
@@ -1440,8 +1440,8 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 						ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 				}
 				
-				// draw background
-				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, (bSelected && Misc::IsHighContrastActive()));
+				// pre-draw background
+				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected, TRUE);
 				
 				// draw gantt item attribute columns
 				DrawTreeItem(pDC, hti, *pGI, bSelected, crBack);
@@ -1454,8 +1454,8 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 				}
 
-				if (bSelected && !Misc::IsHighContrastActive())
-					DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, TRUE);
+				// Post-draw background
+				DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected, FALSE);
 			}			
 	
 			return CDRF_SKIPDEFAULT;
@@ -1474,12 +1474,12 @@ HIMAGELIST CGanttCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 	return (HIMAGELIST)CWnd::GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
 }
 
-COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected)
+COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected, BOOL bPreDraw)
 {
 	BOOL bAlternate = (HasAltLineColor() && !IsTreeItemLineOdd(hti));
 	COLORREF crBack = GetTreeTextBkColor(gi, bSelected, bAlternate);
 
-	if (!bSelected)
+	if (bPreDraw)
 	{
 		// redraw item background else tooltips cause overwriting
 		CRect rBack(rItem);
@@ -1488,9 +1488,9 @@ COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTT
 
 		pDC->FillSolidRect(rBack, crBack);
 	}
-	else
+	else if (bSelected)
 	{
-		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_TRANSPARENT);
+		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_POSTDRAW);
 		GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
 	}
 
@@ -1547,18 +1547,15 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			// draw horz gridline before selection
 			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
 
-			// draw selection background in high contrast mode
+			// pre-draw selection
 			GM_ITEMSTATE nState = GetItemState(nItem);
-
-			if ((nState != GMIS_NONE) && Misc::IsHighContrastActive())
-				GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT));
+			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW));
 
 			// draw row
 			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
 
-			// draw selection background when not in high contrast mode
-			if ((nState != GMIS_NONE) && !Misc::IsHighContrastActive())
-				GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_TRANSPARENT));
+			// post-draw selection
+			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_POSTDRAW));
 		}
 		return CDRF_SKIPDEFAULT;
 								
@@ -3609,15 +3606,16 @@ BOOL CGanttCtrl::GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart
 COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOOL bAlternate) const
 {
 	COLORREF crTextBk = CLR_NONE;
+	BOOL bColorIsBkgnd = (!bSelected && HasOption(GTLCF_TASKTEXTCOLORISBKGND));
 	
 	if (gi.dwOrgRefID)
 	{
 		const GANTTITEM* pGIRef = m_data.GetItem(gi.dwOrgRefID, FALSE);
-		crTextBk = pGIRef->GetTextBkColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+		crTextBk = pGIRef->GetTextBkColor(bSelected, bColorIsBkgnd);
 	}
 	else
 	{
-		crTextBk = gi.GetTextBkColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+		crTextBk = gi.GetTextBkColor(bSelected, bColorIsBkgnd);
 	}
 
 	if (crTextBk == CLR_NONE)
@@ -3626,7 +3624,7 @@ COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOO
 		{
 			crTextBk = m_crAltLine;
 		}
-		else if ((m_crDefault != CLR_NONE) && HasOption(GTLCF_TASKTEXTCOLORISBKGND))
+		else if ((m_crDefault != CLR_NONE) && bColorIsBkgnd)
 		{
 			crTextBk = m_crDefault;
 		}
@@ -3642,15 +3640,16 @@ COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOO
 COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter) const
 {
 	COLORREF crText = CLR_NONE;
+	BOOL bColorIsBkgnd = (!bSelected && HasOption(GTLCF_TASKTEXTCOLORISBKGND));
 	
 	if (gi.dwOrgRefID)
 	{
 		const GANTTITEM* pGIRef = m_data.GetItem(gi.dwOrgRefID, FALSE);
-		crText = pGIRef->GetTextColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+		crText = pGIRef->GetTextColor(bSelected, bColorIsBkgnd);
 	}
 	else
 	{
-		crText = gi.GetTextColor(bSelected, HasOption(GTLCF_TASKTEXTCOLORISBKGND));
+		crText = gi.GetTextColor(bSelected, bColorIsBkgnd);
 	}
 	ASSERT(crText != CLR_NONE);
 
@@ -3658,7 +3657,7 @@ COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL 
 	{
 		if (bSelected)
 		{
-			crText = GraphicsMisc::GetExplorerItemTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC | GMIB_TRANSPARENT);
+			//crText = GraphicsMisc::Darker(crText, 0.5);
 		}
 		else if (bLighter)
 		{

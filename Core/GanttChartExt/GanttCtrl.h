@@ -174,7 +174,7 @@ protected:
 	// Local methods
 	void DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack = CLR_NONE);
-	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected);
+	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected, BOOL bPreDraw);
 	void DrawListHeaderItem(CDC* pDC, int nCol);
 	void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme, BOOL bEnsureVisible = FALSE);
 	
