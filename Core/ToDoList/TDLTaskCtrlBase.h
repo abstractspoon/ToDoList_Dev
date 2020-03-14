@@ -310,6 +310,9 @@ protected:
 	// pseudo-handlers
 	void OnHeaderClick(TDC_COLUMN nColID);
 	virtual int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
+	
+	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd);
+	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd);
 
 protected:
 	// base-class overrides
@@ -326,10 +329,6 @@ protected:
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
-
-	// Pseudo message handlers
-	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd);
-	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd);
 
 protected:
 	enum SELCHANGE_ACTION
