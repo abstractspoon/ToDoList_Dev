@@ -1519,6 +1519,20 @@ void CTreeListCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSp
 	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
+void CTreeListCtrl::DrawItemColumnDividers(CDC* pDC, HTREEITEM hti)
+{
+	int nNumCol = m_treeHeader.GetItemCount();
+
+	for (int nCol = 0; nCol < nNumCol; nCol++)
+	{
+		CRect rItem;
+		GetTreeItemRect(hti, nCol, rItem);
+
+		if (rItem.Width() > 0)
+			DrawItemDivider(pDC, rItem, TRUE);
+	}
+}
+
 void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, COLORREF crDiv) const
 {
 	if (!HasGridlines() || (bVert && (rItem.right < 0)))
