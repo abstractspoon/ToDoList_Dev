@@ -324,12 +324,12 @@ protected:
 	BOOL OnListHeaderBeginTracking(NMHEADER* pHDN);
 	BOOL OnPrimaryHeaderBeginTracking(NMHEADER* /*pHDN*/) { return FALSE; }
 
-	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd);
-	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd);
-
-
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
 	BOOL IsListItemSelected(HWND hwnd, int nItem) const;
+
+	// Pseudo message handlers
+	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd);
+	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd);
 
 protected:
 	enum SELCHANGE_ACTION
