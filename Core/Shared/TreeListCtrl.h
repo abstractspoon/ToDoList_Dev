@@ -271,7 +271,8 @@ protected:
 	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATETITLEWIDTHACTION /*nAction*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected, COLORREF crDiv = CLR_NONE) const;
+	void DrawItemColumnDividers(CDC* pDC, HTREEITEM hti);
+	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, COLORREF crDiv = CLR_NONE) const;
 
 	void RedrawList(BOOL bErase = FALSE);
 	void InvalidateList(int nFrom, int nTo, BOOL bErase = FALSE);

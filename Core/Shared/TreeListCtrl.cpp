@@ -1519,7 +1519,7 @@ void CTreeListCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSp
 	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
-void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, BOOL bSelected, COLORREF crDiv) const
+void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, COLORREF crDiv) const
 {
 	if (!HasGridlines() || (bVert && (rItem.right < 0)))
 		return;

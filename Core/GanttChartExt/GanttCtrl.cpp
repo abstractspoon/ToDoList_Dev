@@ -1425,7 +1425,7 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				BOOL bSelected = (nState != GMIS_NONE);
 
 				// draw horz gridline before selection
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ, bSelected);
+				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ);
 
 				// Draw icon
 				CRect rIcon;
@@ -1545,7 +1545,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 			
 			// draw horz gridline before selection
-			DrawItemDivider(pDC, rFullWidth, DIV_HORZ, FALSE);
+			DrawItemDivider(pDC, rFullWidth, DIV_HORZ);
 
 			// pre-draw selection
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -2732,7 +2732,7 @@ BOOL CGanttCtrl::IsVerticalDivider(DIV_TYPE nType)
 	return FALSE;
 }
 
-void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, BOOL bSelected)
+void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType)
 {
 	if (nType == DIV_NONE)
 		return;
@@ -2755,7 +2755,7 @@ void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType, B
 		break;
 	}
 
-	CTreeListCtrl::DrawItemDivider(pDC, rItem, bVert, bSelected, color);
+	CTreeListCtrl::DrawItemDivider(pDC, rItem, bVert, color);
 }
 
 CString CGanttCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
@@ -2868,7 +2868,7 @@ void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 	if (!bRollup)
 	{
 		DIV_TYPE nDiv = GetVerticalDivider(nMonth, nYear);
-		DrawItemDivider(pDC, rMonth, nDiv, bSelected);
+		DrawItemDivider(pDC, rMonth, nDiv);
 
 		if (!bToday)
 			bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
@@ -2907,7 +2907,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 			if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
 			{
 				rDay.right = rDay.left; // draw at start of day
-				DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT, bSelected);
+				DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT);
 			}
 		}
 
@@ -2974,7 +2974,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 					{
 						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
 
-						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT, bSelected);
+						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT);
 						
 						rHour.left = rHour.right;
 					}
@@ -2996,7 +2996,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 
 				// draw all but the last day divider
 				if (nDay < nNumDays)
-					DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT), bSelected);
+					DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT));
 				
 				if (bDrawWeekend)
 					DrawWeekend(pDC, dtDay, rDay);
