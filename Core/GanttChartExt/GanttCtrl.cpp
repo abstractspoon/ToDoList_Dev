@@ -1442,6 +1442,12 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				
 				// pre-draw background
 				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected, TRUE);
+
+				// Vertical dividers
+				DrawItemColumnDividers(pDC, hti);
+
+				// Post-draw background before drawing text
+				DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected, FALSE);
 				
 				// draw gantt item attribute columns
 				DrawTreeItem(pDC, hti, *pGI, bSelected, crBack);
@@ -1453,9 +1459,6 @@ LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 					rIcon.bottom = rItem.bottom;
 					GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 				}
-
-				// Post-draw background
-				DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected, FALSE);
 			}			
 	
 			return CDRF_SKIPDEFAULT;
@@ -2535,8 +2538,6 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 
 	if (rItem.Width() == 0)
 		return;
-
-	DrawItemDivider(pDC, rItem, DIV_VERT_LIGHT, bSelected);
 
 	GTLC_COLUMN nColID = GetTreeColumnID(nCol);
 	BOOL bTitleCol = (nColID == GTLCC_TITLE);
