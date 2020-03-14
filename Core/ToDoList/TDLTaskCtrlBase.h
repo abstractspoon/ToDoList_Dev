@@ -324,8 +324,8 @@ protected:
 	BOOL OnListHeaderBeginTracking(NMHEADER* pHDN);
 	BOOL OnPrimaryHeaderBeginTracking(NMHEADER* /*pHDN*/) { return FALSE; }
 
-	void OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd);
-	void OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd);
+	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd);
+	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd);
 
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);

@@ -2555,7 +2555,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	return CDRF_DODEFAULT;
 }
 
-void CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd)
+DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd)
 {
 	// Fill the item background with the 'unselected' colour.
 	// Although we fill fill the entire row, we are really only
@@ -2566,8 +2566,7 @@ void CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillR
 
 	if (HasStyle(TDCS_TASKCOLORISBACKGROUND))
 	{
-		if (!GetTaskTextColors(nmcd.lItemlParam, crText, crBkgnd))
-			return;
+		VERIFY(GetTaskTextColors(nmcd.lItemlParam, crText, crBkgnd));
 
 		if (crBkgnd != CLR_NONE)
 			crRowBack = crBkgnd;
@@ -2576,9 +2575,11 @@ void CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillR
 
 	if (bFillRow)
 		GraphicsMisc::FillItemRect(pDC, &nmcd.rc, crRowBack, Tasks());
+
+	return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 }
 
-void CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
+DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 {
 	// Check row is visible
 	CRect rClient, rRow(nmcd.rc);
@@ -2651,6 +2652,8 @@ void CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
 		}
 	}
+
+	return CDRF_SKIPDEFAULT; // always
 }
 
 void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS,

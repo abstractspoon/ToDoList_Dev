@@ -540,16 +540,10 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 		return CDRF_NOTIFYITEMDRAW;
 		
 	case CDDS_ITEMPREPAINT:
-		{
-			OnPrePaintTaskTitle(pTVCD->nmcd, TRUE, pTVCD->clrText, pTVCD->clrTextBk);
-		}
-		return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
+		return OnPrePaintTaskTitle(pTVCD->nmcd, TRUE, pTVCD->clrText, pTVCD->clrTextBk);
 		
 	case CDDS_ITEMPOSTPAINT:
-		{
- 			OnPostPaintTaskTitle(pTVCD->nmcd);
-		}
-		return CDRF_SKIPDEFAULT; // always
+		return OnPostPaintTaskTitle(pTVCD->nmcd);
 	}
 	
 	return CDRF_DODEFAULT;

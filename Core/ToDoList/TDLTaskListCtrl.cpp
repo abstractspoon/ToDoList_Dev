@@ -244,32 +244,37 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 		return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD);
 	}
 
+	DWORD dwRes = CDRF_DODEFAULT;
+
 	switch (pLVCD->nmcd.dwDrawStage)
 	{
 	case CDDS_PREPAINT:
-		return CDRF_NOTIFYITEMDRAW;
+		dwRes = CDRF_NOTIFYITEMDRAW;
+		break;
 								
 	case CDDS_ITEMPREPAINT:
 		{
 			BOOL bFillRow = !OsIsXP();
-			OnPrePaintTaskTitle(pLVCD->nmcd, bFillRow, pLVCD->clrText, pLVCD->clrTextBk);
+			dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, bFillRow, pLVCD->clrText, pLVCD->clrTextBk);
 
 			if (bFillRow)
  				ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
+
+			return dwRes;
 		}
-		return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
+		break;
 
 	case CDDS_ITEMPOSTPAINT:
 		{
-			OnPostPaintTaskTitle(pLVCD->nmcd);
+			dwRes = OnPostPaintTaskTitle(pLVCD->nmcd);
 			
 			// restore default back colour set in CDDS_ITEMPREPAINT
 			ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));
 		}
-		return CDRF_SKIPDEFAULT; // always
+		break;
 	}
 	
-	return CDRF_DODEFAULT;
+	return dwRes;
 }
 
 void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
