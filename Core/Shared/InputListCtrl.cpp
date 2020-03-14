@@ -609,7 +609,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				DWORD dwFlags = ((IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0) | (bHasBtn ? GMIB_CLIPRIGHT : 0));
 				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 
-				GraphicsMisc::DrawExplorerItemBkgnd(pDC, *this, nState, rBack, dwFlags, rBack);
+				GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rBack, dwFlags, rBack);
 			}
 			else
 			{

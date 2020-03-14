@@ -688,7 +688,7 @@ BOOL COrderedTreeCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				rItem.left += 2;
 				
 				GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-				GraphicsMisc::DrawExplorerItemBkgnd(pDC, GetSafeHwnd(), nState, rItem, dwFlags);
+				GraphicsMisc::DrawExplorerItemSelection(pDC, GetSafeHwnd(), nState, rItem, dwFlags);
 
 				// draw text
 				COLORREF crText = GraphicsMisc::GetExplorerItemTextColor(GetSysColor(COLOR_WINDOWTEXT), nState, dwFlags);

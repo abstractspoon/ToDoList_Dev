@@ -1491,7 +1491,7 @@ COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTT
 	else
 	{
 		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_TRANSPARENT);
-		GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
+		GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
 	}
 
 	return crBack;
@@ -1551,14 +1551,14 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GM_ITEMSTATE nState = GetItemState(nItem);
 
 			if ((nState != GMIS_NONE) && Misc::IsHighContrastActive())
-				GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT));
+				GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT));
 
 			// draw row
 			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
 
 			// draw selection background when not in high contrast mode
 			if ((nState != GMIS_NONE) && !Misc::IsHighContrastActive())
-				GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_TRANSPARENT));
+				GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_TRANSPARENT));
 		}
 		return CDRF_SKIPDEFAULT;
 								

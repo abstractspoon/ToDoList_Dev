@@ -2539,7 +2539,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					if (bSelected)
 					{
 						crText = GraphicsMisc::GetExplorerItemTextColor(crText, nState, GMIB_THEMECLASSIC);
-						GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_lcColumns, nState, rItem, dwFlags);
+						GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, rItem, dwFlags);
 					}
 
 					// draw row text
@@ -2591,7 +2591,7 @@ void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const
 		if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
 			dwFlags |= GMIB_CLIPRIGHT;
 		
-		GraphicsMisc::DrawExplorerItemBkgnd(pDC, Tasks(), nState, rLabel, dwFlags);
+		GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags);
 	}
 }
 

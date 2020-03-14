@@ -1305,7 +1305,7 @@ COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WO
 	else
 	{
 		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT);
-		GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
+		GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
 	}
 
 	return crBack;
@@ -1496,7 +1496,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			BOOL bSelected = (nState != GMIS_NONE);
 			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT);
 
-			GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_list, nState, rItem, dwFlags);
+			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, dwFlags);
 
 			// draw row
 			COLORREF crText = GetTreeTextColor(*pWI, bSelected, FALSE);

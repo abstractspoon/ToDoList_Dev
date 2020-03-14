@@ -237,7 +237,7 @@ void CTDLFindResultsListCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 					GetItemRect(nItem, rRow, LVIR_BOUNDS);
 
 				GM_ITEMSTATE nState = ((bFocused && bSelected) ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-				GraphicsMisc::DrawExplorerItemBkgnd(pDC, *this, nState, rRow, GMIB_THEMECLASSIC);
+				GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rRow, GMIB_THEMECLASSIC);
 			}
 			
 			// hide text because we will draw it in SUBITEMPREPAINT

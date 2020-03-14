@@ -453,7 +453,7 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 			if (pNCGDI->nColID == PSP_COMMANDIDCOLUMNID)
 				dwFlags |= GMIB_CLIPLEFT;
 
-			GraphicsMisc::DrawExplorerItemBkgnd(pNCGDI->pDC, m_tcCommands, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), rItem, dwFlags, &rItem);
+			GraphicsMisc::DrawExplorerItemSelection(pNCGDI->pDC, m_tcCommands, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), rItem, dwFlags, &rItem);
 		}
 		else if (bParentItem)
 		{
@@ -637,7 +637,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 					CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 					BOOL bFocused = (GetFocus() == &m_tcCommands);
 
-					GraphicsMisc::DrawExplorerItemBkgnd(pDC, m_tcCommands, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), pTVCD->nmcd.rc, GMIB_CLIPLEFT, &pTVCD->nmcd.rc);
+					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tcCommands, (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED), pTVCD->nmcd.rc, GMIB_CLIPLEFT, &pTVCD->nmcd.rc);
 				}
 				else
 				{
