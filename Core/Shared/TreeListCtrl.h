@@ -195,7 +195,8 @@ protected:
 
 	const int MIN_COL_WIDTH;
 	const int MIN_LABEL_WIDTH;
-	const int IMAGE_SIZE;
+
+	static int IMAGE_SIZE;
 
 protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
@@ -220,6 +221,7 @@ protected:
 
 protected:
 	// base class callbacks
+	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	void OnNotifySplitterChange(int nSplitPos);
 	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
@@ -250,6 +252,11 @@ protected:
 	virtual GM_ITEMSTATE GetItemState(int nItem) const;
 	virtual GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
 	
+	virtual COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected);
+	virtual void DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected);
+	virtual void DrawTreeItemIcon(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
+	virtual void PostDrawTreeItem(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel);
+
 	virtual void DrawListHeaderItem(CDC* /*pDC*/, int /*nCol*/) {}
 	virtual void DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem);
 	
@@ -271,8 +278,9 @@ protected:
 	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATETITLEWIDTHACTION /*nAction*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
-	void DrawItemColumnDividers(CDC* pDC, HTREEITEM hti);
+	void DrawTreeSubItemDividers(CDC* pDC, HTREEITEM hti);
 	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, COLORREF crDiv = CLR_NONE) const;
+	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, BOOL bSelected);
 
 	void RedrawList(BOOL bErase = FALSE);
 	void InvalidateList(int nFrom, int nTo, BOOL bErase = FALSE);
@@ -312,6 +320,7 @@ protected:
 
 	BOOL HasGridlines() const { return (m_crGridLine != CLR_NONE); }
 	BOOL HasAltLineColor() const { return (m_crAltLine != CLR_NONE); }
+	BOOL HasAltLineColor(HTREEITEM hti) const;
 	BOOL SetColor(COLORREF& color, COLORREF crNew);
 	COLORREF GetRowColor(int nItem) const;
 
@@ -325,6 +334,7 @@ protected:
 	static COLORREF GetColor(COLORREF crBase, double dLighter, BOOL bSelected);
 	static int Compare(const CString& sText1, const CString& sText2);
 	static BOOL WantTitleWidthUpdate(int nOldWidth, int nNewWidth, UPDATETITLEWIDTHACTION nAction);
+	static BOOL GetTreeIconRect(const CRect& rLabel, CRect& rIcon);
 
 };
 

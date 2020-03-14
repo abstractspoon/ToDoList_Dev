@@ -312,6 +312,10 @@ void CTreeListTreeCtrl::OnDestroy()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
+int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
+
+//////////////////////////////////////////////////////////////////////
+
 CTreeListCtrl::CTreeListCtrl(int nMinLabelWidth, int nMinColWidth)
 	:
 	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
@@ -326,8 +330,7 @@ CTreeListCtrl::CTreeListCtrl(int nMinLabelWidth, int nMinColWidth)
 	m_tree(m_treeHeader),
 
 	MIN_LABEL_WIDTH(GraphicsMisc::ScaleByDPIFactor(nMinLabelWidth)),
-	MIN_COL_WIDTH(GraphicsMisc::ScaleByDPIFactor(nMinColWidth)),
-	IMAGE_SIZE(GraphicsMisc::ScaleByDPIFactor(16))
+	MIN_COL_WIDTH(GraphicsMisc::ScaleByDPIFactor(nMinColWidth))
 {
 }
 
@@ -491,6 +494,8 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 	if (hti == NULL)
 		return FALSE;
 
+	CHoldHScroll hs(m_tree);
+
 	BOOL bWasVisible = IsTreeItemVisible(m_tree, hti);
 	BOOL bWasSelected = TCH().IsSelectedItem(hti);
 
@@ -574,6 +579,11 @@ BOOL CTreeListCtrl::IsTreeItemLineOdd(HTREEITEM hti) const
 	int nItem = GetListItem(hti);
 
 	return IsListItemLineOdd(nItem);
+}
+
+BOOL CTreeListCtrl::HasAltLineColor(HTREEITEM hti) const
+{
+	return (HasAltLineColor() && !IsTreeItemLineOdd(hti));
 }
 
 BOOL CTreeListCtrl::IsListItemLineOdd(int nItem) const
@@ -733,7 +743,7 @@ GM_ITEMSTATE CTreeListCtrl::GetItemState(HTREEITEM hti) const
 
 COLORREF CTreeListCtrl::GetRowColor(int nItem) const
 {
-	BOOL bAlternate = (!m_bSavingToImage && !IsListItemLineOdd(nItem) && HasAltLineColor());
+	BOOL bAlternate = (/*!m_bSavingToImage &&*/ !IsListItemLineOdd(nItem) && HasAltLineColor());
 	COLORREF crBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
 	return crBack;
@@ -1375,15 +1385,20 @@ BOOL CTreeListCtrl::GetTreeIconRect(HTREEITEM hti, CRect& rIcon) const
 	if (!GetTreeItemRect(hti, 0, rItem))
 		return FALSE;
 
-	rIcon = rItem;
+	return GetTreeIconRect(rItem, rIcon);
+}
+
+BOOL CTreeListCtrl::GetTreeIconRect(const CRect& rLabel, CRect& rIcon)
+{
+	rIcon = rLabel;
 
 	rIcon.right = (rIcon.left + IMAGE_SIZE);
 	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
 
 	rIcon.OffsetRect(-(IMAGE_SIZE + 2), 0);
-	GraphicsMisc::CentreRect(rIcon, rItem, FALSE, TRUE);
+	GraphicsMisc::CentreRect(rIcon, rLabel, FALSE, TRUE);
 
-	return !rItem.IsRectEmpty();
+	return !rIcon.IsRectEmpty();
 }
 
 void CTreeListCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem)
@@ -1519,7 +1534,127 @@ void CTreeListCtrl::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSp
 	GraphicsMisc::DrawSplitBar(pDC, rSplitter, crSplitBar);
 }
 
-void CTreeListCtrl::DrawItemColumnDividers(CDC* pDC, HTREEITEM hti)
+LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
+{
+	HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
+
+	switch (pTVCD->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		return CDRF_NOTIFYITEMDRAW;
+
+	case CDDS_ITEMPREPAINT:
+		{
+			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+			CRect rItem(pTVCD->nmcd.rc);
+
+			COLORREF crBack = DrawTreeItemBackground(pDC, hti, pTVCD->nmcd.lItemlParam, rItem, FALSE);
+
+			// hide text because we will draw it later
+			pTVCD->clrTextBk = pTVCD->clrText = crBack;
+
+			return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
+		}
+		break;
+
+	case CDDS_ITEMPOSTPAINT:
+		{
+			// check row is visible
+			CRect rItem;
+			GetTreeItemRect(hti, 0, rItem);
+
+			CRect rClient;
+			m_tree.GetClientRect(rClient);
+
+			if ((rItem.bottom > 0) && (rItem.top < rClient.bottom))
+			{
+				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+				DWORD dwItemData = pTVCD->nmcd.lItemlParam;
+
+				GM_ITEMSTATE nState = GetItemState(hti);
+				BOOL bSelected = (nState != GMIS_NONE);
+
+				// Draw icon
+				DrawTreeItemIcon(pDC, hti, dwItemData, rItem);
+
+				// draw horz gridline
+				DrawItemDivider(pDC, pTVCD->nmcd.rc, FALSE);
+
+				// pre-draw background
+				CRect rBack(rItem);
+				rBack.right = rClient.right;
+
+				if (HasColor(m_crGridLine))
+					rBack.bottom--;
+
+				COLORREF crBack = DrawTreeItemBackground(pDC, hti, dwItemData, rBack, bSelected);
+
+				// Vertical dividers before selection
+				DrawTreeSubItemDividers(pDC, hti);
+
+				// Post-draw selection before drawing text
+				if (!m_bSavingToImage)
+				{
+					DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_POSTDRAW | GMIB_CLIPRIGHT);
+					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
+				}
+
+				// draw tree item attribute columns
+				DrawTreeItemText(pDC, hti, dwItemData, bSelected);
+
+				// Draw shortcut icon for reference tasks
+				PostDrawTreeItem(pDC, hti, dwItemData, rBack);
+			}
+
+			return CDRF_SKIPDEFAULT;
+		}
+		break;
+	}
+
+	return CDRF_DODEFAULT;
+}
+
+COLORREF CTreeListCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected)
+{
+	// Derived class implements
+	return CLR_NONE;
+}
+
+void CTreeListCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected)
+{
+	// Derived class implements
+}
+
+void CTreeListCtrl::DrawTreeItemIcon(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel)
+{
+	// Derived class implements
+}
+
+void CTreeListCtrl::PostDrawTreeItem(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rLabel)
+{
+	// Derived class implements
+}
+
+void CTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, BOOL bSelected)
+{
+	int nNumCol = m_treeHeader.GetItemCount();
+
+	for (int nCol = 0; nCol < nNumCol; nCol++)
+	{
+		CRect rSubItem;
+		GetTreeItemRect(hti, nCol, rSubItem);
+
+		if (rSubItem.Width() > 0)
+		{
+			DrawItemDivider(pDC, rSubItem, TRUE);
+
+			if (rSubItem.Width() > MIN_COL_WIDTH)
+				DrawTreeSubItemText(pDC, hti, dwItemData, nCol, rSubItem, bSelected);
+		}
+	}
+}
+
+void CTreeListCtrl::DrawTreeSubItemDividers(CDC* pDC, HTREEITEM hti)
 {
 	int nNumCol = m_treeHeader.GetItemCount();
 

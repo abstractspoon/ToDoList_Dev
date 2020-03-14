@@ -1375,98 +1375,65 @@ void CGanttCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	CTreeListCtrl::ExpandItem(hti, bExpand, bAndChildren);
 }
 
-LRESULT CGanttCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
+COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected)
 {
-	HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
-	
-	switch (pTVCD->nmcd.dwDrawStage)
+	GANTTITEM* pGI = NULL;
+	GET_GI_RET(dwItemData, pGI, CLR_NONE);
+
+	BOOL bAlternate = HasAltLineColor(hti);
+	COLORREF crBack = GetTreeTextBkColor(*pGI, bSelected, bAlternate);
+
+	// redraw item background else tooltips cause overwriting
+	BOOL bDrawn = FALSE;
+
+	if (!m_bSavingToImage)
 	{
-	case CDDS_PREPAINT:
-		return CDRF_NOTIFYITEMDRAW;
-								
-	case CDDS_ITEMPREPAINT:
-		{
-			DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
-			GANTTITEM* pGI = NULL;
-
-			GET_GI_RET(dwTaskID, pGI, CDRF_DODEFAULT);
-				
- 			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-			CRect rItem(pTVCD->nmcd.rc);
-
-			COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rItem, FALSE, TRUE);
-				
-			// hide text because we will draw it later
-			pTVCD->clrTextBk = pTVCD->clrText = crBack;
-		
-			return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
-		}
-		break;
-								
-	case CDDS_ITEMPOSTPAINT:
-		{
-			// check row is visible
-			CRect rItem;
-			GetTreeItemRect(hti, GTLCC_TITLE, rItem);
-
-			CRect rClient;
-			m_tree.GetClientRect(rClient);
-			
-			if ((rItem.bottom > 0) && (rItem.top < rClient.bottom))
-			{
-				DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
-				GANTTITEM* pGI = NULL;
-
-				GET_GI_RET(dwTaskID, pGI, CDRF_DODEFAULT);
-				
-				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-
-				GM_ITEMSTATE nState = GetItemState(hti);
-				BOOL bSelected = (nState != GMIS_NONE);
-
-				// draw horz gridline before selection
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, DIV_HORZ);
-
-				// Draw icon
-				CRect rIcon;
-				GetTreeIconRect(hti, rIcon);
-
-				if (pGI->bHasIcon || pGI->bParent)
-				{
-					int iImageIndex = -1;
-					HIMAGELIST hilTask = GetTaskIcon(pGI->dwTaskID, iImageIndex);
-
-					if (hilTask && (iImageIndex != -1))
-						ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-				}
-				
-				// pre-draw background
-				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected, TRUE);
-
-				// Vertical dividers
-				DrawItemColumnDividers(pDC, hti);
-
-				// Post-draw background before drawing text
-				DrawTreeItemBackground(pDC, hti, *pGI, rItem, rClient, bSelected, FALSE);
-				
-				// draw gantt item attribute columns
-				DrawTreeItem(pDC, hti, *pGI, bSelected, crBack);
-
-				// Draw shortcut icon for reference tasks
-				if (pGI->dwOrgRefID)
-				{
-					// Don't want the shortcut icon centred vertically
-					rIcon.bottom = rItem.bottom;
-					GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
-				}
-			}			
-	
-			return CDRF_SKIPDEFAULT;
-		}
-		break;
+		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW);
+		bDrawn = GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
 	}
 
-	return CDRF_DODEFAULT;
+	if (!bDrawn)
+		pDC->FillSolidRect(rItem, crBack);
+
+	return crBack;
+}
+
+void CGanttCtrl::DrawTreeItemIcon(CDC* pDC, HTREEITEM /*hti*/, DWORD dwItemData, const CRect& rLabel)
+{
+	GANTTITEM* pGI = NULL;
+	GET_GI(dwItemData, pGI);
+
+	if (pGI->bHasIcon || pGI->bParent)
+	{
+		int iImageIndex = -1;
+		HIMAGELIST hilTask = GetTaskIcon(pGI->dwTaskID, iImageIndex);
+
+		if (hilTask && (iImageIndex != -1))
+		{
+			CRect rIcon;
+			GetTreeIconRect(rLabel, rIcon);
+
+			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+		}
+	}
+}
+
+void CGanttCtrl::PostDrawTreeItem(CDC* pDC, HTREEITEM /*hti*/, DWORD dwItemData, const CRect& rLabel)
+{
+	GANTTITEM* pGI = NULL;
+	GET_GI(dwItemData, pGI);
+
+	// Draw shortcut icon for reference tasks
+	if (pGI->dwOrgRefID)
+	{
+		CRect rIcon;
+		GetTreeIconRect(rLabel, rIcon);
+
+		// Don't want the shortcut icon centred vertically
+		rIcon.bottom = rLabel.bottom;
+
+		GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
+	}
 }
 
 HIMAGELIST CGanttCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
@@ -1475,34 +1442,6 @@ HIMAGELIST CGanttCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 		return NULL;
 
 	return (HIMAGELIST)CWnd::GetParent()->SendMessage(WM_GTLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
-}
-
-COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, const CRect& rItem, const CRect& rClient, BOOL bSelected, BOOL bPreDraw)
-{
-	BOOL bAlternate = (HasAltLineColor() && !IsTreeItemLineOdd(hti));
-	COLORREF crBack = GetTreeTextBkColor(gi, bSelected, bAlternate);
-
-	if (bPreDraw)
-	{
-		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW);
-		
-		if (!m_bSavingToImage || !GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags))
-		{
-			// redraw item background else tooltips cause overwriting
-			CRect rBack(rItem);
-			rBack.bottom--;
-			rBack.right = rClient.right;
-
-			pDC->FillSolidRect(rBack, crBack);
-		}
-	}
-	else if (bSelected && !m_bSavingToImage)
-	{
-		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_POSTDRAW);
-		GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
-	}
-
-	return crBack;
 }
 
 GM_ITEMSTATE CGanttCtrl::GetItemState(int nItem) const
@@ -2528,56 +2467,24 @@ CString CGanttCtrl::GetTreeItemColumnText(const GANTTITEM& gi, GTLC_COLUMN nCol)
 	return sItem;
 }
 
-void CGanttCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack)
+void CGanttCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected)
 {
-	int nNumCol = m_treeHeader.GetItemCount();
-
-	for (int nCol = 0; nCol < nNumCol; nCol++)
-		DrawTreeItemText(pDC, hti, nCol, gi, bSelected, crBack);
-}
-
-void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTTITEM& gi, BOOL bSelected, COLORREF crBack)
-{
-	CRect rItem;
-	GetTreeItemRect(hti, nCol, rItem);
-
-	if (rItem.Width() == 0)
-		return;
+	GANTTITEM* pGI = NULL;
+	GET_GI(dwItemData, pGI);
 
 	GTLC_COLUMN nColID = GetTreeColumnID(nCol);
-	BOOL bTitleCol = (nColID == GTLCC_TITLE);
-
-	// draw item background colour
-	if (!bSelected && (crBack != CLR_NONE))
-	{
-		CRect rBack(rItem);
-
-		if (bTitleCol)
-			GetTreeItemRect(hti, GTLCC_TITLE, rBack, TRUE); // label only
-		
-		// don't overwrite gridlines
-		if (m_crGridLine != CLR_NONE)
-			rBack.DeflateRect(0, 0, 1, 1);
-		
-		pDC->FillSolidRect(rBack, crBack);
-	}
-	
-	if (rItem.Width() <= MIN_COL_WIDTH)
-		return;
-
-	// draw text
-	CString sItem = GetTreeItemColumnText(gi, nColID);
+	CString sItem = GetTreeItemColumnText(*pGI, nColID);
 
 	if (!sItem.IsEmpty())
 	{
-		CRect rText(rItem);
+		CRect rText(rSubItem);
 
-		if (bTitleCol)
+		if (nColID == GTLCC_TITLE)
 			rText.DeflateRect(2, 2, 1, 0);
 		else
 			rText.DeflateRect(LV_COLPADDING, 2, LV_COLPADDING, 0);
 
-		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, gi, nColID));
+		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, *pGI, nColID));
 
 		// text color and alignment
 		BOOL bLighter = FALSE; 
@@ -2598,16 +2505,16 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 		case GTLCC_DONEDATE:
 			{
 				// draw non-selected calculated dates lighter
-				if (!bSelected && !gi.IsDone(TRUE))
+				if (!bSelected && !pGI->IsDone(TRUE))
 				{
-					bLighter = (gi.bParent && HasOption(GTLCF_CALCPARENTDATES));
+					bLighter = (pGI->bParent && HasOption(GTLCF_CALCPARENTDATES));
 
 					if (!bLighter)
 					{
 						if (nColID == GTLCC_STARTDATE)
-							bLighter = (!gi.HasStartDate() && HasOption(GTLCF_CALCMISSINGSTARTDATES));
+							bLighter = (!pGI->HasStartDate() && HasOption(GTLCF_CALCMISSINGSTARTDATES));
 						else
-							bLighter = (!gi.HasDueDate() && HasOption(GTLCF_CALCMISSINGDUEDATES));
+							bLighter = (!pGI->HasDueDate() && HasOption(GTLCF_CALCMISSINGDUEDATES));
 					}
 				}
 				
@@ -2623,7 +2530,7 @@ void CGanttCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const GANTT
 			break;
 		}
 
-		COLORREF crText = GetTreeTextColor(gi, bSelected, bLighter);
+		COLORREF crText = GetTreeTextColor(*pGI, bSelected, bLighter);
 		COLORREF crOldColor = pDC->SetTextColor(crText);
 		
 		pDC->SetBkMode(TRANSPARENT);
@@ -3626,7 +3533,7 @@ COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOO
 
 	if (crTextBk == CLR_NONE)
 	{
-		if (!m_bSavingToImage && bAlternate && HasAltLineColor())
+		if (bAlternate)
 		{
 			crTextBk = m_crAltLine;
 		}

@@ -1195,89 +1195,124 @@ void CWorkloadCtrl::ResyncTotalsPositions()
 	m_lcTotalsLabels.SetColumnWidth(0, rTreeTotals.Width());
 }
 
-LRESULT CWorkloadCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
+COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected)
 {
-	HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
-	
-	switch (pTVCD->nmcd.dwDrawStage)
+	WORKLOADITEM* pWI = NULL;
+	GET_WI_RET(dwItemData, pWI, CLR_NONE);
+
+	BOOL bAlternate = HasAltLineColor(hti);
+	COLORREF crBack = GetTreeTextBkColor(*pWI, bSelected, bAlternate);
+
+	// redraw item background else tooltips cause overwriting
+	BOOL bDrawn = FALSE;
+
+	if (!m_bSavingToImage)
 	{
-	case CDDS_PREPAINT:
-		return CDRF_NOTIFYITEMDRAW;
-								
-	case CDDS_ITEMPREPAINT:
-		{
-			DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
-			WORKLOADITEM* pWI = NULL;
-
-			GET_WI_RET(dwTaskID, pWI, CDRF_DODEFAULT);
-				
- 			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-			CRect rItem(pTVCD->nmcd.rc);
-
-			COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pWI, rItem, rItem, FALSE);
-				
-			// hide text because we will draw it later
-			pTVCD->clrTextBk = pTVCD->clrText = crBack;
-		
-		}
-		return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
-								
-	case CDDS_ITEMPOSTPAINT:
-		{
-			// check row is visible
-			CRect rItem;
-			GetTreeItemRect(hti, WLCC_TITLE, rItem);
-
-			CRect rClient;
-			m_tree.GetClientRect(rClient);
-			
-			if ((rItem.bottom > 0) && (rItem.top < rClient.bottom))
-			{
-				DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
-				WORKLOADITEM* pWI = NULL;
-
-				GET_WI_RET(dwTaskID, pWI, CDRF_DODEFAULT);
-				
-				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-
-				GM_ITEMSTATE nState = GetItemState(hti);
-				BOOL bSelected = (nState != GMIS_NONE);
-
-				// draw horz gridline before selection
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, FALSE, bSelected);
-
-				// Draw icon
-				CRect rIcon;
-				GetTreeIconRect(hti, rIcon);
-
-				if (pWI->bHasIcon || pWI->bParent)
-				{
-					int iImageIndex = -1;
-					HIMAGELIST hilTask = GetTaskIcon(pWI->dwTaskID, iImageIndex);
-
-					if (hilTask && (iImageIndex != -1))
-						ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-				}
-				
-				// draw background
-				COLORREF crBack = DrawTreeItemBackground(pDC, hti, *pWI, rItem, rClient, bSelected);
-				
-				// draw Workload item attribute columns
-				DrawTreeItem(pDC, hti, *pWI, bSelected, crBack);
-
-				// Draw shortcut icon for reference tasks
-				if (pWI->dwOrgRefID)
-				{
-					// Don't want the shortcut icon centred vertically
-					rIcon.bottom = rItem.bottom;
-					GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
-				}
-			}			
-		}
-		return CDRF_SKIPDEFAULT;
+		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW);
+		bDrawn = GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
 	}
 
-	return CDRF_DODEFAULT;
+	if (!bDrawn)
+		pDC->FillSolidRect(rItem, crBack);
+
+	return crBack;
+}
+
+void CWorkloadCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected)
+{
+	WORKLOADITEM* pWI = NULL;
+	GET_WI(dwItemData, pWI);
+
+	WLC_COLUMNID nColID = GetTreeColumnID(nCol);
+	CString sItem = GetTreeItemColumnText(*pWI, nColID);
+
+	if (!sItem.IsEmpty())
+	{
+		CRect rText(rSubItem);
+
+		if (nColID == WLCC_TITLE)
+			rText.DeflateRect(2, 2, 1, 0);
+		else
+			rText.DeflateRect(LV_COLPADDING, 2, LV_COLPADDING, 0);
+
+		// text color and alignment
+		BOOL bLighter = FALSE;
+		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tree));
+
+		switch (nColID)
+		{
+		case WLCC_TITLE:
+			nFlags |= DT_END_ELLIPSIS;
+			break;
+
+		case WLCC_TASKID:
+		case WLCC_DURATION:
+		case WLCC_TIMEEST:
+			nFlags |= DT_RIGHT;
+			break;
+
+		case WLCC_STARTDATE:
+		case WLCC_DUEDATE:
+			{
+				// Right-align if the column width can show the entire date
+				// else keep left align to ensure day and month remain visible
+				if (rText.Width() >= pDC->GetTextExtent(sItem).cx)
+					nFlags |= DT_RIGHT;
+			}
+			break;
+
+		case WLCC_PERCENT:
+			nFlags |= DT_CENTER;
+			break;
+		}
+
+		COLORREF crText = GetTreeTextColor(*pWI, bSelected, bLighter);
+		COLORREF crOldColor = pDC->SetTextColor(crText);
+		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, *pWI, nColID));
+
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->DrawText(sItem, rText, nFlags);
+		pDC->SetTextColor(crOldColor);
+		pDC->SelectObject(hFontOld);
+	}
+}
+
+void CWorkloadCtrl::DrawTreeItemIcon(CDC* pDC, HTREEITEM /*hti*/, DWORD dwItemData, const CRect& rLabel)
+{
+	WORKLOADITEM* pWI = NULL;
+	GET_WI(dwItemData, pWI);
+
+	if (pWI->bHasIcon || pWI->bParent)
+	{
+		int iImageIndex = -1;
+		HIMAGELIST hilTask = GetTaskIcon(pWI->dwTaskID, iImageIndex);
+
+		if (hilTask && (iImageIndex != -1))
+		{
+			CRect rIcon;
+			GetTreeIconRect(rLabel, rIcon);
+
+			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+		}
+	}
+}
+
+void CWorkloadCtrl::PostDrawTreeItem(CDC* pDC, HTREEITEM /*hti*/, DWORD dwItemData, const CRect& rLabel)
+{
+	WORKLOADITEM* pWI = NULL;
+	GET_WI(dwItemData, pWI);
+
+	// Draw shortcut icon for reference tasks
+	if (pWI->dwOrgRefID)
+	{
+		CRect rIcon;
+		GetTreeIconRect(rLabel, rIcon);
+
+		// Don't want the shortcut icon centred vertically
+		rIcon.bottom = rLabel.bottom;
+
+		GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
+	}
 }
 
 HIMAGELIST CWorkloadCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
@@ -1286,29 +1321,6 @@ HIMAGELIST CWorkloadCtrl::GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const
 		return NULL;
 
 	return (HIMAGELIST)CWnd::GetParent()->SendMessage(WM_WLC_GETTASKICON, dwTaskID, (LPARAM)&iImageIndex);
-}
-
-COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, const CRect& rItem, const CRect& rClient, BOOL bSelected)
-{
-	BOOL bAlternate = (HasAltLineColor() && !IsTreeItemLineOdd(hti));
-	COLORREF crBack = GetTreeTextBkColor(wi, bSelected, bAlternate);
-
-	if (!bSelected)
-	{
-		// redraw item background else tooltips cause overwriting
-		CRect rBack(rItem);
-		rBack.bottom--;
-		rBack.right = rClient.right;
-
-		pDC->FillSolidRect(rBack, crBack);
-	}
-	else
-	{
-		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT);
-		GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
-	}
-
-	return crBack;
 }
 
 GM_ITEMSTATE CWorkloadCtrl::GetItemState(int nItem) const
@@ -1420,10 +1432,10 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			case ID_TOTALTASKSPERPERSON:
 			case ID_PERCENTLOADPERPERSON:
 				{
-					pDC->FillSolidRect(rFullWidth, GetSysColor(COLOR_WINDOW)/*GetRowColor(nItem + 1)*/);
+					pDC->FillSolidRect(rFullWidth, GetSysColor(COLOR_WINDOW));
 					
 					if (m_bSavingToImage || ((nItem + 1) != ID_LASTTOTAL))
-						DrawItemDivider(pDC, rFullWidth, FALSE, FALSE);
+						DrawItemDivider(pDC, rFullWidth, FALSE);
 				}
 				break;
 				
@@ -1489,7 +1501,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			CRect rFullWidth(rItem);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 
-			DrawItemDivider(pDC, rFullWidth, FALSE, FALSE);
+			DrawItemDivider(pDC, rFullWidth, FALSE);
 			
 			// draw selection rect only as far as the last column
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -2177,99 +2189,6 @@ CString CWorkloadCtrl::FormatTimeSpan(double dDays, int nDecimals)
 	return CEnString(IDS_TIMESPAN_FORMAT, sValue);
 }
 
-void CWorkloadCtrl::DrawTreeItem(CDC* pDC, HTREEITEM hti, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack)
-{
-	int nNumCol = m_treeHeader.GetItemCount();
-
-	for (int nCol = 0; nCol < nNumCol; nCol++)
-		DrawTreeItemText(pDC, hti, nCol, wi, bSelected, crBack);
-}
-
-void CWorkloadCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, int nCol, const WORKLOADITEM& wi, BOOL bSelected, COLORREF crBack)
-{
-	CRect rItem;
-	GetTreeItemRect(hti, nCol, rItem);
-
-	if (rItem.Width() == 0)
-		return;
-
-	DrawItemDivider(pDC, rItem, TRUE, bSelected);
-
-	WLC_COLUMNID nColID = GetTreeColumnID(nCol);
-	BOOL bTitleCol = (nColID == WLCC_TITLE);
-
-	// draw item background colour
-	if (!bSelected && (crBack != CLR_NONE))
-	{
-		CRect rBack(rItem);
-
-		if (bTitleCol)
-			GetTreeItemRect(hti, WLCC_TITLE, rBack, TRUE); // label only
-		
-		// don't overwrite gridlines
-		if (m_crGridLine != CLR_NONE)
-			rBack.DeflateRect(0, 0, 1, 1);
-		
-		pDC->FillSolidRect(rBack, crBack);
-	}
-	
-	if (rItem.Width() <= MIN_COL_WIDTH)
-		return;
-
-	// draw text
-	CString sItem = GetTreeItemColumnText(wi, nColID);
-
-	if (!sItem.IsEmpty())
-	{
-		CRect rText(rItem);
-
-		if (bTitleCol)
-			rText.DeflateRect(2, 2, 1, 0);
-		else
-			rText.DeflateRect(LV_COLPADDING, 2, LV_COLPADDING, 0);
-
-		// text color and alignment
-		BOOL bLighter = FALSE; 
-		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tree));
-
-		switch (nColID)
-		{
-		case WLCC_TITLE:
-			nFlags |= DT_END_ELLIPSIS;
-			break;
-
-		case WLCC_TASKID:
-		case WLCC_DURATION:
-		case WLCC_TIMEEST:
-			nFlags |= DT_RIGHT;
-			break;
-			
-		case WLCC_STARTDATE:
-		case WLCC_DUEDATE:
-			{
-				// Right-align if the column width can show the entire date
-				// else keep left align to ensure day and month remain visible
-				if (rText.Width() >= pDC->GetTextExtent(sItem).cx)
-					nFlags |= DT_RIGHT;
-			}
-			break;
-			
-		case WLCC_PERCENT:
-			nFlags |= DT_CENTER;
-			break;
-		}
-
-		COLORREF crText = GetTreeTextColor(wi, bSelected, bLighter);
-		COLORREF crOldColor = pDC->SetTextColor(crText);
-		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, wi, nColID));
-		
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->DrawText(sItem, rText, nFlags);
-		pDC->SetTextColor(crOldColor);
-		pDC->SelectObject(hFontOld);
-	}
-}
-
 HFONT CWorkloadCtrl::GetTreeItemFont(HTREEITEM hti, const WORKLOADITEM& wi, WLC_COLUMNID nCol)
 {
 	BOOL bStrikThru = (HasOption(WLCF_STRIKETHRUDONETASKS) && wi.bDone);
@@ -2392,7 +2311,7 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 		CRect rColumn;
 		m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 		
-		DrawItemDivider(pDC, rColumn, TRUE, bSelected);
+		DrawItemDivider(pDC, rColumn, TRUE);
 
 		COLORREF crBack = CLR_NONE;
 		double dDays = CalcAllocationListItemColumnDays(wi, nItem, nCol, crBack);
@@ -2473,7 +2392,7 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rText, DT_CENTER);
 		}
 			
-		DrawItemDivider(pDC, rColumn, TRUE, FALSE);
+		DrawItemDivider(pDC, rColumn, TRUE);
 	}
 }
 
@@ -2510,7 +2429,7 @@ COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelecte
 
 	if (crTextBk == CLR_NONE)
 	{
-		if (!m_bSavingToImage && bAlternate && HasAltLineColor())
+		if (bAlternate)
 			crTextBk = m_crAltLine;
 		else
 			crTextBk = GetSysColor(COLOR_WINDOW);
@@ -3031,11 +2950,11 @@ BOOL CWorkloadCtrl::DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF
 
 			// Draw vertical divider between labels and totals
 			CRect rDivider(0, sizeBase.cy, (sizeLabels.cx + 1), (sizeBase.cy + sizeTotals.cy));
-			DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
+			DrawItemDivider(&dcImage, rDivider, TRUE);
 
 			// Draw vertical divider at end of totals
 			rDivider.right = sizeBase.cx;
-			DrawItemDivider(&dcImage, rDivider, TRUE, FALSE);
+			DrawItemDivider(&dcImage, rDivider, TRUE);
 
 			// Bar chart
 			dcParts.SelectObject(bmChart);
