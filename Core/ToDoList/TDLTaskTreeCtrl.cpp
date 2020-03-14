@@ -1520,18 +1520,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	{
 		switch (msg)
 		{
-#ifdef _DEBUG
-/*
-		case WM_PAINT:
-			{
-				DWORD dwTick = GetTickCount();
-				LRESULT lr = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
-				TRACE(_T("WM_PAINT(TaskTree - Attribute Columns) took %d ms)\n"), (GetTickCount() - dwTick));
-				return lr;
-			}
-			break;
-*/
-#endif
 		case WM_LBUTTONDOWN:
 			// Selecting or de-selecting a lot of items can be slow
 			// because OnListSelectionChange is called once for each.
@@ -1707,40 +1695,6 @@ BOOL CTDLTaskTreeCtrl::GetLabelEditRect(CRect& rLabel) const
 {
 	return GetItemTitleRect(GetSelectedItem(), TDCTR_EDIT, rLabel);
 }
-
-/*
-BOOL CTDLTaskTreeCtrl::RemoveOrphanTreeItemReferences(HTREEITEM hti)
-{
-	BOOL bRemoved = FALSE;
-	
-	// process children
-	HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
-	
-	while (htiChild)
-	{
-		// get next item in case htiChild gets cleaned up
-		HTREEITEM htiNext = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
-		
-		if (RemoveOrphanTreeItemReferences(htiChild)) // RECURSIVE call
-			bRemoved = TRUE;
-		
-		// then check child itself
-		// Note: CToDoCtrlData ought to have already cleaned up the data
-		DWORD dwTaskID = GetTaskID(htiChild);
-		
-		if (!m_data.HasTask(dwTaskID))
-		{
-			m_tcTasks.DeleteItem(htiChild);
-			bRemoved = TRUE;
-		}
-		
-		// next
-		htiChild = htiNext;
-	}
-	
-	return bRemoved;
-}
-*/
 
 BOOL CTDLTaskTreeCtrl::MoveSelection(TDC_MOVETASK nDirection)
 {

@@ -105,7 +105,6 @@ public:
 
 	int GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend = FALSE) const;
 	BOOL TaskHasReferences(DWORD dwTaskID) const;
-	//BOOL RemoveOrphanTreeItemReferences(HTREEITEM hti = NULL);
 	BOOL HasReferenceTasks() const { return (m_mapReferenceTaskIDs.GetCount() > 0); }
 
 	BOOL GetInsertLocation(TDC_INSERTWHERE nWhere, HTREEITEM& htiDest, HTREEITEM& htiDestAfter) const;
