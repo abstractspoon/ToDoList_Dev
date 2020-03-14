@@ -487,6 +487,7 @@ BOOL CTaskCalendarCtrl::SetVisibleWeeks(int nWeeks)
 		if (HasOption(TCCO_ADJUSTTASKHEIGHTS))
 			GraphicsMisc::VerifyDeleteObject(m_fontAltText);
 
+		UpdateCellScrollBarVisibility();
 		return TRUE;
 	}
 
@@ -930,14 +931,9 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 
 	if (!bShowScrollbar)
 	{
-		if (bWasShowingScrollbar)
+		if (m_sbCellVScroll.GetSafeHwnd())
 		{
-			if (m_sbCellVScroll.IsWindowVisible())
-			{
-				m_sbCellVScroll.ShowWindow(SW_HIDE);
-				Invalidate(FALSE);
-			}
-
+			m_sbCellVScroll.ShowWindow(SW_HIDE);
 			m_sbCellVScroll.EnableWindow(FALSE);
 			m_nCellVScrollPos = 0;
 		}
