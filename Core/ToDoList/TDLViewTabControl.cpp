@@ -309,7 +309,7 @@ BOOL CTDLViewTabControl::SetActiveView(FTC_VIEW nView, BOOL bNotify)
 	return DoTabChange(nOldTab, nNewTab, bNotify);
 }
 
-void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM, LPRECT prcView)
+void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM)
 {
 	CRect rTabs, rView;
 
@@ -331,9 +331,6 @@ void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM, LPRECT p
 				pView->MoveWindow(rView, FALSE);
 			}
 		}
-
-		if (prcView)
-			*prcView = rView;
 	}
 }
 

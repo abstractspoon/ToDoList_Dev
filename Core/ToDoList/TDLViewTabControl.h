@@ -30,7 +30,7 @@ public:
 	BOOL DetachView(HWND hWnd);
 	BOOL DetachView(FTC_VIEW nView);
 
-	void Resize(const CRect& rect, CDeferWndMove* pDWM = NULL, LPRECT prcView = NULL);
+	void Resize(const CRect& rect, CDeferWndMove* pDWM = NULL);
 
 	BOOL SetActiveView(CWnd* pWnd, BOOL bNotify = FALSE);
 	BOOL SetActiveView(FTC_VIEW nView, BOOL bNotify = FALSE);
