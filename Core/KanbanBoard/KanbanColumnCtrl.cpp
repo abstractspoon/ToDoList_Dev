@@ -472,7 +472,7 @@ void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, cons
 		BOOL bFocused = (bSelected && (::GetFocus() == GetSafeHwnd()));
 
 		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-		crText = GraphicsMisc::GetExplorerItemTextColor(crText, nState, GMIB_THEMECLASSIC);
+		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 
 		GraphicsMisc::DrawExplorerItemSelection(pDC, GetSafeHwnd(), nState, rItem, GMIB_THEMECLASSIC);
 	}

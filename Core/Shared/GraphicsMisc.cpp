@@ -1269,7 +1269,7 @@ BOOL GraphicsMisc::CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz, 
 	return TRUE;
 }
 
-COLORREF GraphicsMisc::GetExplorerItemTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags)
+COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITEMSTATE nState, DWORD dwFlags)
 {
 	if (nState != GMIS_NONE)
 	{
@@ -1286,15 +1286,9 @@ COLORREF GraphicsMisc::GetExplorerItemTextColor(COLORREF crBase, GM_ITEMSTATE nS
 				// darken the base color to have a luminance <= 30%
 				{
 					HLSX hlsText(crBase);
+					hlsText.fLuminosity = min(hlsText.fLuminosity, 0.3f);
 
-					if (hlsText.fLuminosity > 0.3f)
-					{
-						hlsText.fLuminosity = 0.3f;
-						return hlsText;
-					}
-					
-					// else
-					return crBase;
+					return hlsText;
 				}
 				break;
 

@@ -175,7 +175,7 @@ LRESULT COrderedTreeCtrl::OnGutterGetItemColors(WPARAM /*wParam*/, LPARAM lParam
 		if (!pColors->bTextSet)
 		{
 			GM_ITEMSTATE nState = (bHasFocus ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-			pColors->crText = GraphicsMisc::GetExplorerItemTextColor(pColors->crBack, nState, 0);
+			pColors->crText = GraphicsMisc::GetExplorerItemSelectionTextColor(pColors->crBack, nState, 0);
 			pColors->bTextSet = TRUE;
 		}
 	}
@@ -691,7 +691,7 @@ BOOL COrderedTreeCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				GraphicsMisc::DrawExplorerItemSelection(pDC, GetSafeHwnd(), nState, rItem, dwFlags);
 
 				// draw text
-				COLORREF crText = GraphicsMisc::GetExplorerItemTextColor(GetSysColor(COLOR_WINDOWTEXT), nState, dwFlags);
+				COLORREF crText = GraphicsMisc::GetExplorerItemSelectionTextColor(GetSysColor(COLOR_WINDOWTEXT), nState, dwFlags);
 
 				pDC->SetTextColor(crText);
 				pDC->SetBkMode(TRANSPARENT);

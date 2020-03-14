@@ -3657,7 +3657,7 @@ COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL 
 	{
 		if (bSelected)
 		{
-			//crText = GraphicsMisc::Darker(crText, 0.5);
+			crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 		}
 		else if (bLighter)
 		{

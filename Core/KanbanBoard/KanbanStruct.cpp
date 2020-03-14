@@ -524,7 +524,7 @@ COLORREF KANBANITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 		else if (!Misc::IsHighContrastActive())
 		{
 			if (bSelected)
-				return GraphicsMisc::GetExplorerItemTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+				return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
 
 			return color;
 		}

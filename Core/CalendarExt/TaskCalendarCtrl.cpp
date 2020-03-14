@@ -723,7 +723,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				dwSelFlags |= GMIB_CLIPRIGHT;
 
 			GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-			crText = GraphicsMisc::GetExplorerItemTextColor(crText, nState, GMIB_THEMECLASSIC);
+			crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 
 			GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rTask, dwSelFlags, rClip);
 		}

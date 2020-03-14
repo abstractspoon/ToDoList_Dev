@@ -654,7 +654,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
 				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 				
-				crText = GraphicsMisc::GetExplorerItemTextColor(crText, nState, dwFlags);
+				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
 			}
 
 			// adjust for button
