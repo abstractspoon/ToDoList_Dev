@@ -966,7 +966,8 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 			m_sbCellVScroll.MoveWindow(rNewPos);
 		}
 		
-		// update scrollbar info if previously hidden
+		// update scrollbar info if previously hidden or 
+		// moved to a different cell
 		if (bSuccess && (!bWasShowingScrollbar || (pCell != pOldCell)))
 		{
 			SCROLLINFO si = { sizeof(si), (SIF_PAGE | SIF_POS | SIF_RANGE) };
