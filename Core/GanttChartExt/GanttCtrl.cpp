@@ -1484,14 +1484,19 @@ COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, const GANTT
 
 	if (bPreDraw)
 	{
-		// redraw item background else tooltips cause overwriting
-		CRect rBack(rItem);
-		rBack.bottom--;
-		rBack.right = rClient.right;
+		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW);
+		
+		if (!m_bSavingToImage || !GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags))
+		{
+			// redraw item background else tooltips cause overwriting
+			CRect rBack(rItem);
+			rBack.bottom--;
+			rBack.right = rClient.right;
 
-		pDC->FillSolidRect(rBack, crBack);
+			pDC->FillSolidRect(rBack, crBack);
+		}
 	}
-	else if (bSelected)
+	else if (bSelected && !m_bSavingToImage)
 	{
 		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_POSTDRAW);
 		GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);

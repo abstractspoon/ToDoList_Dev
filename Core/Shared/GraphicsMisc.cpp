@@ -1283,8 +1283,8 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITE
 			case GMIS_SELECTED:
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
-				// darken the base color to have a luminance <= 30%
 				{
+					// darken the base color to have a luminance <= 30%
 					HLSX hlsText(crBase);
 					hlsText.fLuminosity = min(hlsText.fLuminosity, 0.3f);
 
@@ -1292,6 +1292,19 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITE
 				}
 				break;
 
+			default:
+				ASSERT(0);
+			}
+		}
+		else if (bHighContrast)
+		{
+			switch (nState)
+			{
+			case GMIS_SELECTED:
+			case GMIS_SELECTEDNOTFOCUSED:
+			case GMIS_DROPHILITED:
+				return GetSysColor(COLOR_HIGHLIGHTTEXT);
+				
 			default:
 				ASSERT(0);
 			}
@@ -1376,6 +1389,7 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 	// Do the draw
 	BOOL bPreDraw = (dwFlags & GMIB_PREDRAW), bPostDraw = (dwFlags & GMIB_POSTDRAW);
 	BOOL bSingleStageDraw = ((bPreDraw & bPostDraw) || (!bPreDraw && !bPostDraw));
+	BOOL bDrawn = FALSE;
 
 	if (bThemed)
 	{
@@ -1390,6 +1404,7 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 				rBkgnd = rDraw;
 
 			pDC->FillSolidRect(rBkgnd, RGB(255, 255, 255));
+			bDrawn = TRUE;
 		}
 		
 		if (bSingleStageDraw || bPostDraw)
@@ -1411,10 +1426,30 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 				ASSERT(0);
 				return FALSE;
 			}
+			bDrawn = TRUE;
+		}
+	}
+	else if (bHighContrast)
+	{
+		if (bSingleStageDraw || bPreDraw)
+		{
+			switch (nState)
+			{
+			case GMIS_SELECTED:
+			case GMIS_SELECTEDNOTFOCUSED:
+			case GMIS_DROPHILITED:
+				pDC->FillSolidRect(rDraw, GetSysColor(COLOR_HIGHLIGHT));
+				break;
+			
+			default:
+				ASSERT(0);
+				return FALSE;
+			}
+			bDrawn = TRUE;
 		}
 	}
 	// Can be XP, Linux or Classic theme, or themes disabled for this app only
-	else if (!bHighContrast && (dwFlags & GMIB_THEMECLASSIC))
+	else if (dwFlags & GMIB_THEMECLASSIC)
 	{
 		if (bSingleStageDraw || bPostDraw)
 		{
@@ -1425,17 +1460,15 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			switch (nState)
 			{
 			case GMIS_SELECTED:
-				// Because the 'Classic' selection colour varies between
-				// OS versions I'm am going to standardise on XP's
-				// Navy Blue colour as the 'original'
-				crBorder = RGB(50, 105, 200); 
-				crFill = (bTransparent ? crBorder : (175, 195, 240));
+				// Similar to windows 10 colours
+				crBorder = RGB(90, 180, 255); 
+				crFill = (bTransparent ? crBorder : (160, 215, 255));
 				break;
 			
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
 				crBorder = GetSysColor(COLOR_3DSHADOW);
-				crFill = GetSysColor(bTransparent ? COLOR_3DSHADOW : COLOR_3DFACE);
+				crFill = (bTransparent ? crBorder : RGB(192, 192, 192));
 				break;
 			
 			default:
@@ -1444,9 +1477,10 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			}
 		
 			DrawRect(pDC, rDraw, crFill, crBorder, 0, dwClassicBorders, (bTransparent ? 128 : 255));
+			bDrawn = TRUE;
 		}
 	}
-	else // high contrast or unthemed classic 
+	else // unthemed classic 
 	{
 		if (bSingleStageDraw || bPreDraw)
 		{
@@ -1465,10 +1499,11 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 				ASSERT(0);
 				return FALSE;
 			}
+			bDrawn = TRUE;
 		}
 	}
 
-	return TRUE;
+	return bDrawn;
 }
 
 BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback)

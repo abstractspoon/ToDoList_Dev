@@ -2139,15 +2139,11 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 	{
 		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, GMIS_SELECTED, GMIB_THEMECLASSIC);
 	}
-	else
+	else if (HasStyle(TDCS_TASKCOLORISBACKGROUND) &&
+			 !bSelected && !bDone && (crText != GetSysColor(COLOR_WINDOWTEXT)))
 	{
-		if (HasStyle(TDCS_TASKCOLORISBACKGROUND) && 
-			(crText != GetSysColor(COLOR_WINDOWTEXT)) &&
-			!m_calculator.IsTaskDone(pTDI, pTDS))
-		{
-			crBack = crText;
-			crText = GraphicsMisc::GetBestTextColor(crBack);
-		}
+		crBack = crText;
+		crText = GraphicsMisc::GetBestTextColor(crBack);
 	}
 
 	return TRUE;
@@ -2534,8 +2530,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					// draw horz gridline before selection
 					DrawGridlines(pDC, rFullWidth, FALSE, TRUE, FALSE);
 
-					// draw task background
-					// Note: using the non-full width item rect
+					// pre-draw selection using the non-full width item rect
 					if (bSelected)
 					{
 						crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
@@ -2548,6 +2543,9 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					DrawColumnsRowText(pDC, nItem, dwTaskID, pTDI, pTDS, crText, bSelected);
 
 					pDC->SelectObject(pOldFont);
+
+					// Post-draw selection
+					GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, rItem, dwFlags | GMIB_POSTDRAW);
 				}
 			}
 			return CDRF_SKIPDEFAULT;
@@ -2555,44 +2553,6 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	}
 	
 	return CDRF_DODEFAULT;
-}
-
-void CTDLTaskCtrlBase::DrawTasksRowBackground(CDC* pDC, const CRect& rRow, const CRect& rLabel, GM_ITEMSTATE nState, COLORREF crBack)
-{
-	ASSERT(!m_bSavingToImage || (nState == GMIS_NONE));
-
-	BOOL bSelected = ((nState != GMIS_NONE) && !m_bSavingToImage);
-
-	if (!bSelected)
-	{
-		ASSERT(HasColor(crBack));
-
-		CRect rBack(rLabel);
-		rBack.right = rRow.right; // else overwriting with comments produces artifacts
-
-		// if we have gridlines we don't fill the bottom line so 
-		// as to avoid overwriting gridlines previously drawn
-		if (HasColor(m_crGridLine))
-			rBack.bottom--;
-		
-		pDC->FillSolidRect(rBack, crBack);
-	}
-	
-	// draw horz gridline before selection
-	DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
-	
-	if (bSelected) // selection of some sort
-	{
-		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT);
-		
-		// if the columns are on the right then
-		// we don't want to draw the rounded end 
-		// on the right so it looks continuous with the columns
-		if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
-			dwFlags |= GMIB_CLIPRIGHT;
-		
-		GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags);
-	}
 }
 
 void CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd)
@@ -2646,9 +2606,27 @@ void CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 			CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
 
 			// draw label background only
-			CRect rBkgnd;
-			GetItemTitleRect(nmcd, TDCTR_BKGND, rBkgnd, pDC, pTDI->sTitle);
-			DrawTasksRowBackground(pDC, rRow, rBkgnd, nState, crBack);
+			CRect rLabel;
+			GetItemTitleRect(nmcd, TDCTR_BKGND, rLabel, pDC, pTDI->sTitle);
+
+			rLabel.right = rRow.right; // else overwriting with comments produces artifacts
+
+			// if the columns are on the right we clip the title selection
+			// so it looks continuous with the column selection
+			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_PREDRAW);
+
+			if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
+				dwFlags |= GMIB_CLIPRIGHT;
+
+			if (!m_bSavingToImage || !GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags | GMIB_PREDRAW))
+				pDC->FillSolidRect(rLabel, crBack);
+
+			// draw horz gridline before selection
+			DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
+
+			// Post-draw selection before text
+			if (!m_bSavingToImage)
+		 		GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags | GMIB_POSTDRAW);
 
 			// draw text
 			CRect rText;
@@ -2660,11 +2638,13 @@ void CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 			// draw shortcut for references
 			if (dwTaskID != dwTrueID)
 			{
+				CRect rIcon(rLabel);
+
 				// Draw over icon if icon column NOT visible
 				if (!IsColumnShowing(TDCC_ICON))
-					rBkgnd.left -= (ICON_SIZE + 2);
+					rIcon.left -= (ICON_SIZE + 2);
 				
-				GraphicsMisc::DrawShortcutOverlay(pDC, rBkgnd);
+				GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 			}
 
 			// render comment text
