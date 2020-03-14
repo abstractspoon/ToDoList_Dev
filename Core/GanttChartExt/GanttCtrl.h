@@ -81,7 +81,7 @@ public:
 
 	void SetTodayColor(COLORREF crToday);
 	void SetUITheme(const UITHEME& theme);
-	void SetDefaultColor(COLORREF crDefault);
+	void SetDefaultBarColor(COLORREF crDefault);
 	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
 	void SetMilestoneTag(const CString& sTag);
 	void SetReadOnly(bool bReadOnly);
@@ -119,7 +119,7 @@ protected:
 	IGanttDependencyEditor* m_pDependEdit;
 	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, int, int> m_mapMinMonthWidths;
 
-	COLORREF m_crParent, m_crDefault;
+	COLORREF m_crParent, m_crBarDefault;
 	COLORREF m_crToday, m_crWeekend, m_crNonWorkingHours;
 	COleDateTime m_dtDragMin;
 	CPoint m_ptDragStart, m_ptLastDependPick;
@@ -210,10 +210,13 @@ protected:
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
 							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd);
 
-	enum DIV_TYPE { DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ };
+	enum DIV_TYPE
+	{
+		DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ
+	};
 
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType);
-	DIV_TYPE GetVerticalDivider(int nMonth, int nYear) const;
+	void DrawListItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType);
+	DIV_TYPE GetListVerticalDivider(int nMonth, int nYear) const;
 
 	void ClearDependencyPickLine(CDC* pDC = NULL);
 	BOOL DrawDependencyPickLine(const CPoint& ptClient);

@@ -110,7 +110,7 @@ public:
 	BOOL GetCalculateMissingStartDates() const { return m_page.GetCalculateMissingStartDates(); }
 	BOOL GetCalculateMissingDueDates() const { return m_page.GetCalculateMissingDueDates(); }
 	COLORREF GetTodayColor() const { return m_page.GetTodayColor(); }
-	COLORREF GetDefaultColor() const { return m_page.GetDefaultColor(); }
+	COLORREF GetDefaultBarColor() const { return m_page.GetDefaultColor(); }
 	CString GetMilestoneTag() const { return m_page.GetMilestoneTag(); }
 	BOOL GetDisplayProgressInBar() const { return m_page.GetDisplayProgressInBar(); }
 	BOOL GetDecadesAreZeroBased() const { return m_page.GetDecadesAreZeroBased(); }

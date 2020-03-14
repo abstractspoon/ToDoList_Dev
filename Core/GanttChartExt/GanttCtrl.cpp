@@ -101,7 +101,7 @@ CGanttCtrl::CGanttCtrl()
 	m_nMonthWidth(DEF_MONTH_WIDTH),
 	m_nMonthDisplay(GTLC_DISPLAY_MONTHS_LONG),
 	m_dwOptions(GTLCF_AUTOSCROLLTOTASK | GTLCF_SHOWSPLITTERBAR),
-	m_crDefault(CLR_NONE),
+	m_crBarDefault(CLR_NONE),
 	m_crParent(CLR_NONE),
 	m_crToday(CLR_NONE),
 	m_crWeekend(RGB(224, 224, 224)),
@@ -1492,7 +1492,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 			
 			// draw horz gridline before selection
-			DrawItemDivider(pDC, rFullWidth, DIV_HORZ);
+			DrawListItemDivider(pDC, rFullWidth, DIV_HORZ);
 
 			// pre-draw selection
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -2389,9 +2389,9 @@ void CGanttCtrl::SetUITheme(const UITHEME& theme)
 	SetColor(m_crNonWorkingHours, theme.crNonWorkingHours);
 }
 
-void CGanttCtrl::SetDefaultColor(COLORREF crDefault)
+void CGanttCtrl::SetDefaultBarColor(COLORREF crDefault)
 {
-	SetColor(m_crDefault, crDefault);
+	SetColor(m_crBarDefault, crDefault);
 }
 
 void CGanttCtrl::SetMilestoneTag(const CString& sTag)
@@ -2540,7 +2540,7 @@ void CGanttCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, 
 	}
 }
 
-CGanttCtrl::DIV_TYPE CGanttCtrl::GetVerticalDivider(int nMonth, int nYear) const
+CGanttCtrl::DIV_TYPE CGanttCtrl::GetListVerticalDivider(int nMonth, int nYear) const
 {
 	switch (m_nMonthDisplay)
 	{
@@ -2645,7 +2645,7 @@ BOOL CGanttCtrl::IsVerticalDivider(DIV_TYPE nType)
 	return FALSE;
 }
 
-void CGanttCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType)
+void CGanttCtrl::DrawListItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType)
 {
 	if (nType == DIV_NONE)
 		return;
@@ -2780,8 +2780,8 @@ void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 {
 	if (!bRollup)
 	{
-		DIV_TYPE nDiv = GetVerticalDivider(nMonth, nYear);
-		DrawItemDivider(pDC, rMonth, nDiv);
+		DIV_TYPE nDiv = GetListVerticalDivider(nMonth, nYear);
+		DrawListItemDivider(pDC, rMonth, nDiv);
 
 		if (!bToday)
 			bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
@@ -2820,7 +2820,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 			if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
 			{
 				rDay.right = rDay.left; // draw at start of day
-				DrawItemDivider(pDC, rDay, DIV_VERT_LIGHT);
+				DrawListItemDivider(pDC, rDay, DIV_VERT_LIGHT);
 			}
 		}
 
@@ -2887,7 +2887,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 					{
 						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
 
-						DrawItemDivider(pDC, rHour, DIV_VERT_LIGHT);
+						DrawListItemDivider(pDC, rHour, DIV_VERT_LIGHT);
 						
 						rHour.left = rHour.right;
 					}
@@ -2909,7 +2909,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 
 				// draw all but the last day divider
 				if (nDay < nNumDays)
-					DrawItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT));
+					DrawListItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT));
 				
 				if (bDrawWeekend)
 					DrawWeekend(pDC, dtDay, rDay);
@@ -3537,9 +3537,9 @@ COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOO
 		{
 			crTextBk = m_crAltLine;
 		}
-		else if ((m_crDefault != CLR_NONE) && bColorIsBkgnd)
+		else if ((m_crBarDefault != CLR_NONE) && bColorIsBkgnd)
 		{
-			crTextBk = m_crDefault;
+			crTextBk = m_crBarDefault;
 		}
 		else
 		{
@@ -3589,10 +3589,10 @@ void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLO
 
 	if (crDefFill == CLR_NONE)
 	{
-		if ((m_crDefault != CLR_NONE) && 
+		if ((m_crBarDefault != CLR_NONE) && 
 			(!gi.bParent || m_nParentColoring == GTLPC_DEFAULTCOLORING))
 		{
-			crDefFill = m_crDefault;
+			crDefFill = m_crBarDefault;
 			crDefBorder = GraphicsMisc::Darker(crDefFill, 0.4);
 		}
 		else
