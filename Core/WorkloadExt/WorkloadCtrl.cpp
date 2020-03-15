@@ -1195,25 +1195,28 @@ void CWorkloadCtrl::ResyncTotalsPositions()
 	m_lcTotalsLabels.SetColumnWidth(0, rTreeTotals.Width());
 }
 
-COLORREF CWorkloadCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected)
+COLORREF CWorkloadCtrl::GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const
 {
 	WORKLOADITEM* pWI = NULL;
 	GET_WI_RET(dwItemData, pWI, CLR_NONE);
 
-	BOOL bAlternate = HasAltLineColor(hti);
-	COLORREF crBack = GetTreeTextBkColor(*pWI, bSelected, bAlternate);
+	COLORREF crBack = CLR_NONE;
 
-	// redraw item background else tooltips cause overwriting
-	BOOL bDrawn = FALSE;
-
-	if (!m_bSavingToImage && bSelected)
+	if (pWI->dwOrgRefID)
 	{
-		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW);
-		bDrawn = GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
+		const WORKLOADITEM* pWIRef = m_data.GetItem(pWI->dwOrgRefID, FALSE);
+		ASSERT(pWIRef);
+
+		if (pWIRef)
+			crBack = pWIRef->GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
+	}
+	else
+	{
+		crBack = pWI->GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
 	}
 
-	if (!bDrawn)
-		pDC->FillSolidRect(rItem, crBack);
+	if (crBack == CLR_NONE)
+		crBack = CTreeListCtrl::GetTreeItemBackColor(hti, dwItemData, bSelected);
 
 	return crBack;
 }
@@ -1503,18 +1506,15 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 			DrawItemDivider(pDC, rFullWidth, FALSE);
 			
-			// pre-draw selection
+			// Draw selection before text
 			GM_ITEMSTATE nState = GetItemState(nItem);
-			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW));
+			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
 			COLORREF crText = GetTreeTextColor(*pWI, (nState != GMIS_NONE), FALSE);
 			pDC->SetTextColor(crText);
 
 			DrawAllocationListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
-
-			// post-draw selection
-			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_POSTDRAW));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
@@ -2411,31 +2411,6 @@ void CWorkloadCtrl::DrawTotalsHeader(CDC* pDC)
 
 		DrawListHeaderRect(pDC, rColumn, m_listHeader.GetItemText(nCol));
 	}
-}
-
-COLORREF CWorkloadCtrl::GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bAlternate) const
-{
-	COLORREF crTextBk = CLR_NONE;
-
-	if (wi.dwOrgRefID)
-	{
-		const WORKLOADITEM* pWIRef = m_data.GetItem(wi.dwOrgRefID, FALSE);
-		crTextBk = pWIRef->GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
-	}
-	else
-	{
-		crTextBk = wi.GetTextBkColor(bSelected, HasOption(WLCF_TASKTEXTCOLORISBKGND));
-	}
-
-	if (crTextBk == CLR_NONE)
-	{
-		if (bAlternate)
-			crTextBk = m_crAltLine;
-		else
-			crTextBk = GetSysColor(COLOR_WINDOW);
-	}
-	
-	return crTextBk;
 }
 
 COLORREF CWorkloadCtrl::GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter) const

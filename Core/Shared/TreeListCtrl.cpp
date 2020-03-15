@@ -1546,9 +1546,8 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	case CDDS_ITEMPREPAINT:
 		{
 			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-			CRect rItem(pTVCD->nmcd.rc);
 
-			COLORREF crBack = DrawTreeItemBackground(pDC, hti, pTVCD->nmcd.lItemlParam, rItem, FALSE);
+			COLORREF crBack = DrawTreeItemBackground(pDC, hti, pTVCD->nmcd.lItemlParam, pTVCD->nmcd.rc, FALSE);
 
 			// hide text because we will draw it later
 			pTVCD->clrTextBk = pTVCD->clrText = crBack;
@@ -1577,33 +1576,28 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				// Draw icon
 				DrawTreeItemIcon(pDC, hti, dwItemData, rItem);
 
+				// pre-draw background
+				rItem.right = rClient.right;
+				COLORREF crBack = DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
+
 				// draw horz gridline
 				DrawItemDivider(pDC, pTVCD->nmcd.rc, FALSE);
 
-				// pre-draw background
-				CRect rBack(rItem);
-				rBack.right = rClient.right;
-
-				if (HasColor(m_crGridLine))
-					rBack.bottom--;
-
-				COLORREF crBack = DrawTreeItemBackground(pDC, hti, dwItemData, rBack, bSelected);
-
-				// Vertical dividers before selection
-				DrawTreeSubItemDividers(pDC, hti);
-
-				// Post-draw selection before drawing text
-				if (!m_bSavingToImage && bSelected)
+				// Draw selection before drawing text
+				if (!m_bSavingToImage)
 				{
-					DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_POSTDRAW | GMIB_CLIPRIGHT);
-					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
+					DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW | GMIB_POSTDRAW);
+					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, nState, rItem, dwFlags);
 				}
 
 				// draw tree item attribute columns
 				DrawTreeItemText(pDC, hti, dwItemData, bSelected);
 
-				// Any derived class final drawing
-				PostDrawTreeItem(pDC, hti, dwItemData, rBack);
+				// Any derived class final drawing excluding gridline
+				if (HasColor(m_crGridLine))
+					rItem.bottom--;
+
+				PostDrawTreeItem(pDC, hti, dwItemData, rItem);
 			}
 
 			return CDRF_SKIPDEFAULT;
@@ -1616,8 +1610,18 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 
 COLORREF CTreeListCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected)
 {
-	// Derived class implements
-	return CLR_NONE;
+	COLORREF crBack = GetTreeItemBackColor(hti, dwItemData, bSelected); // virtual
+
+	if (crBack == CLR_NONE)
+		crBack = CTreeListCtrl::GetTreeItemBackColor(hti, dwItemData, bSelected);
+
+	pDC->FillSolidRect(rItem, crBack);
+	return crBack;
+}
+
+COLORREF CTreeListCtrl::GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const
+{
+	return (HasAltLineColor(hti) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 }
 
 void CTreeListCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected)
@@ -1651,20 +1655,6 @@ void CTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, 
 			if (rSubItem.Width() > MIN_COL_WIDTH)
 				DrawTreeSubItemText(pDC, hti, dwItemData, nCol, rSubItem, bSelected);
 		}
-	}
-}
-
-void CTreeListCtrl::DrawTreeSubItemDividers(CDC* pDC, HTREEITEM hti)
-{
-	int nNumCol = m_treeHeader.GetItemCount();
-
-	for (int nCol = 0; nCol < nNumCol; nCol++)
-	{
-		CRect rItem;
-		GetTreeItemRect(hti, nCol, rItem);
-
-		if (rItem.Width() > 0)
-			DrawItemDivider(pDC, rItem, TRUE);
 	}
 }
 

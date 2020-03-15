@@ -2499,14 +2499,6 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					CRect rFullWidth(rItem);
 					GraphicsMisc::FillItemRect(pDC, rFullWidth, crRowBack, m_lcColumns);
 
-					// if the columns are to the right then
-					// we don't want to draw the rounded end 
-					// on the left so it looks continuous with the tasks
-					DWORD dwFlags = GMIB_THEMECLASSIC;
-
-					if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
-						dwFlags |= GMIB_CLIPLEFT;
-
 					// selection state
 					GM_ITEMSTATE nState = GetColumnItemState(nItem);
 					
@@ -2528,22 +2520,26 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					// draw horz gridline before selection
 					DrawGridlines(pDC, rFullWidth, FALSE, TRUE, FALSE);
 
-					// pre-draw selection using the non-full width item rect
+					// Draw selection using the non-full width item rect
 					if (bSelected)
 					{
+						DWORD dwFlags = GMIB_THEMECLASSIC;
+
+						// if the columns are on the right we clip the column selection
+						// on the left so it looks continuous with the title selection
+						if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
+							dwFlags |= GMIB_CLIPLEFT;
+
 						crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
-						GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, rItem, dwFlags | GMIB_PREDRAW);
+						GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, rItem, dwFlags | GMIB_PREDRAW | GMIB_POSTDRAW);
 					}
 
-					// draw row text
+					// draw row text and column dividers
 					CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS));
 					
 					DrawColumnsRowText(pDC, nItem, dwTaskID, pTDI, pTDS, crText, bSelected);
 
 					pDC->SelectObject(pOldFont);
-
-					// Post-draw selection
-					GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, rItem, dwFlags | GMIB_POSTDRAW);
 				}
 			}
 			return CDRF_SKIPDEFAULT;
@@ -2609,23 +2605,23 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 			GetItemTitleRect(nmcd, TDCTR_BKGND, rLabel, pDC, pTDI->sTitle);
 
 			rLabel.right = rRow.right; // else overwriting with comments produces artifacts
+			pDC->FillSolidRect(rLabel, crBack);
 
-			// if the columns are on the right we clip the title selection
-			// so it looks continuous with the column selection
-			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_PREDRAW);
-
-			if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
-				dwFlags |= GMIB_CLIPRIGHT;
-
-			if (!m_bSavingToImage || !GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags | GMIB_PREDRAW))
-				pDC->FillSolidRect(rLabel, crBack);
-
-			// draw horz gridline before selection
+			// draw horz gridline
 			DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 
-			// Post-draw selection before text
+			// Draw selection before text
 			if (!m_bSavingToImage)
-		 		GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags | GMIB_POSTDRAW);
+			{
+				DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_PREDRAW | GMIB_POSTDRAW);
+
+				// if the columns are on the right we clip the title selection
+				// so it looks continuous with the column selection
+				if (HasStyle(TDCS_RIGHTSIDECOLUMNS))
+					dwFlags |= GMIB_CLIPRIGHT;
+
+				GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags);
+			}
 
 			// draw text
 			CRect rText;

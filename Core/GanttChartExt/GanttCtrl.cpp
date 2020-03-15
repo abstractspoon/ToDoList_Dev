@@ -1375,25 +1375,34 @@ void CGanttCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 	CTreeListCtrl::ExpandItem(hti, bExpand, bAndChildren);
 }
 
-COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected)
+COLORREF CGanttCtrl::GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const
 {
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwItemData, pGI, CLR_NONE);
 
-	BOOL bAlternate = HasAltLineColor(hti);
-	COLORREF crBack = GetTreeTextBkColor(*pGI, bSelected, bAlternate);
+	COLORREF crBack = CLR_NONE;
+	BOOL bColorIsBkgnd = HasOption(GTLCF_TASKTEXTCOLORISBKGND);
 
-	// redraw item background else tooltips cause overwriting
-	BOOL bDrawn = FALSE;
-
-	if (!m_bSavingToImage && bSelected)
+	if (pGI->dwOrgRefID)
 	{
-		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW);
-		bDrawn = GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
+		const GANTTITEM* pGIRef = m_data.GetItem(pGI->dwOrgRefID, FALSE);
+		ASSERT(pGIRef);
+
+		if (pGIRef)
+			crBack = pGIRef->GetTextBkColor(bSelected, bColorIsBkgnd);
+	}
+	else
+	{
+		crBack = pGI->GetTextBkColor(bSelected, bColorIsBkgnd);
 	}
 
-	if (!bDrawn)
-		pDC->FillSolidRect(rItem, crBack);
+	if (crBack == CLR_NONE)
+	{
+		if ((m_crBarDefault != CLR_NONE) && bColorIsBkgnd)
+			crBack = m_crBarDefault;
+		else
+			crBack = CTreeListCtrl::GetTreeItemBackColor(hti, dwItemData, bSelected);
+	}
 
 	return crBack;
 }
@@ -1494,15 +1503,12 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			// draw horz gridline before selection
 			DrawListItemDivider(pDC, rFullWidth, DIV_HORZ);
 
-			// pre-draw selection
+			// Draw selection before text
 			GM_ITEMSTATE nState = GetItemState(nItem);
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW));
 
 			// draw row
 			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
-
-			// post-draw selection
-			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_POSTDRAW));
 		}
 		return CDRF_SKIPDEFAULT;
 								
@@ -3514,40 +3520,6 @@ BOOL CGanttCtrl::GetTaskStartEndDates(const GANTTITEM& gi, COleDateTime& dtStart
 								HasOption(GTLCF_CALCMISSINGDUEDATES),
 								dtStart,
 								dtDue);
-}
-
-COLORREF CGanttCtrl::GetTreeTextBkColor(const GANTTITEM& gi, BOOL bSelected, BOOL bAlternate) const
-{
-	COLORREF crTextBk = CLR_NONE;
-	BOOL bColorIsBkgnd = (!bSelected && HasOption(GTLCF_TASKTEXTCOLORISBKGND));
-	
-	if (gi.dwOrgRefID)
-	{
-		const GANTTITEM* pGIRef = m_data.GetItem(gi.dwOrgRefID, FALSE);
-		crTextBk = pGIRef->GetTextBkColor(bSelected, bColorIsBkgnd);
-	}
-	else
-	{
-		crTextBk = gi.GetTextBkColor(bSelected, bColorIsBkgnd);
-	}
-
-	if (crTextBk == CLR_NONE)
-	{
-		if (bAlternate)
-		{
-			crTextBk = m_crAltLine;
-		}
-		else if ((m_crBarDefault != CLR_NONE) && bColorIsBkgnd)
-		{
-			crTextBk = m_crBarDefault;
-		}
-		else
-		{
-			crTextBk = GetSysColor(COLOR_WINDOW);
-		}
-	}
-	
-	return crTextBk;
 }
 
 COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL bLighter) const
