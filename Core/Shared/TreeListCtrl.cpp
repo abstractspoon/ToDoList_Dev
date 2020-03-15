@@ -1596,6 +1596,11 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				if (!m_bSavingToImage)
 				{
 					DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_POSTDRAW | GMIB_CLIPRIGHT);
+
+					// draw over gridline above
+					if ((rItem.top > 0) && HasGridlines())
+						rItem.top--;
+
 					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
 				}
 

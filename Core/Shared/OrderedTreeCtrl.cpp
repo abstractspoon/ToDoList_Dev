@@ -670,7 +670,7 @@ BOOL COrderedTreeCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 			{
 				BOOL bFocused = (::GetFocus() == GetSafeHwnd());
 				BOOL bFullRow = (GetStyle() & TVS_FULLROWSELECT);
-				DWORD dwFlags = GMIB_EXTENDRIGHT;
+				DWORD dwFlags = GMIB_EXTENDRIGHT | GMIB_THEMECLASSIC;
 
 				if (bFullRow)
 					dwFlags |= GMIB_EXTENDLEFT;

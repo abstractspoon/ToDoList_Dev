@@ -1276,7 +1276,20 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITE
 		BOOL bHighContrast = Misc::IsHighContrastActive();
 		BOOL bThemed = (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
 		
-		if (!bHighContrast && (bThemed || (dwFlags & GMIB_THEMECLASSIC)))
+		if (bHighContrast)
+		{
+			switch (nState)
+			{
+			case GMIS_SELECTED:
+			case GMIS_SELECTEDNOTFOCUSED:
+			case GMIS_DROPHILITED:
+				return GetSysColor(COLOR_HIGHLIGHTTEXT);
+				
+			default:
+				ASSERT(0);
+			}
+		}
+		else if (bThemed || (dwFlags & GMIB_THEMECLASSIC))
 		{
 			switch (nState)
 			{
@@ -1292,19 +1305,6 @@ COLORREF GraphicsMisc::GetExplorerItemSelectionTextColor(COLORREF crBase, GM_ITE
 				}
 				break;
 
-			default:
-				ASSERT(0);
-			}
-		}
-		else if (bHighContrast)
-		{
-			switch (nState)
-			{
-			case GMIS_SELECTED:
-			case GMIS_SELECTEDNOTFOCUSED:
-			case GMIS_DROPHILITED:
-				return GetSysColor(COLOR_HIGHLIGHTTEXT);
-				
 			default:
 				ASSERT(0);
 			}
@@ -1391,22 +1391,22 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 	BOOL bSingleStageDraw = ((bPreDraw & bPostDraw) || (!bPreDraw && !bPostDraw));
 	BOOL bDrawn = FALSE;
 
+	// Fill background with white if single stage draw
+	if (bSingleStageDraw && !bHighContrast)
+	{
+		CRect rBkgnd;
+
+		if (prClip)
+			rBkgnd.IntersectRect(prClip, rDraw);
+		else
+			rBkgnd = rDraw;
+
+		pDC->FillSolidRect(rBkgnd, RGB(255, 255, 255));
+		bDrawn = TRUE;
+	}
+
 	if (bThemed)
 	{
-		// Fill background with white if single stage draw
-		if (bSingleStageDraw)
-		{
-			CRect rBkgnd;
-
-			if (prClip)
-				rBkgnd.IntersectRect(prClip, rDraw);
-			else
-				rBkgnd = rDraw;
-
-			pDC->FillSolidRect(rBkgnd, RGB(255, 255, 255));
-			bDrawn = TRUE;
-		}
-		
 		if (bSingleStageDraw || bPostDraw)
 		{
 			CThemed th(hwnd, _T("Explorer::ListView"));
@@ -1414,12 +1414,14 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			switch (nState)
 			{
 			case GMIS_SELECTED:
+				// Draw twice to intensify the colour
 				th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
-				// fall thru to overdraw again
+				th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
+				break;
 
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
-				th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
+				th.DrawBackground(pDC, LVP_LISTITEM, LIS_SELECTED, rDraw, prClip);
 				break;
 			
 			default:

@@ -1503,18 +1503,21 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 			DrawItemDivider(pDC, rFullWidth, FALSE);
 			
-			// draw selection rect only as far as the last column
+			// pre-draw selection
 			GM_ITEMSTATE nState = GetItemState(nItem);
-			BOOL bSelected = (nState != GMIS_NONE);
-			DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_CLIPLEFT);
-
-			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, dwFlags);
+			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW));
 
 			// draw row
-			COLORREF crText = GetTreeTextColor(*pWI, bSelected, FALSE);
+			COLORREF crText = GetTreeTextColor(*pWI, (nState != GMIS_NONE), FALSE);
 			pDC->SetTextColor(crText);
-			
-			DrawAllocationListItem(pDC, nItem, *pWI, bSelected);
+
+			DrawAllocationListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
+
+			// post-draw selection over gridline above
+			if ((rItem.top > 0) && HasGridlines())
+				rItem.top--;
+
+			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_POSTDRAW));
 		}
 		return CDRF_SKIPDEFAULT;
 	}
