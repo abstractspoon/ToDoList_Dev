@@ -1386,7 +1386,7 @@ COLORREF CGanttCtrl::DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwIte
 	// redraw item background else tooltips cause overwriting
 	BOOL bDrawn = FALSE;
 
-	if (!m_bSavingToImage)
+	if (!m_bSavingToImage && bSelected)
 	{
 		DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_CLIPRIGHT | GMIB_PREDRAW);
 		bDrawn = GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);

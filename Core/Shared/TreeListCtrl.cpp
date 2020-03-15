@@ -1593,7 +1593,7 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				DrawTreeSubItemDividers(pDC, hti);
 
 				// Post-draw selection before drawing text
-				if (!m_bSavingToImage)
+				if (!m_bSavingToImage && bSelected)
 				{
 					DWORD dwFlags = (GMIB_THEMECLASSIC | GMIB_EXTENDRIGHT | GMIB_POSTDRAW | GMIB_CLIPRIGHT);
 					GraphicsMisc::DrawExplorerItemSelection(pDC, m_tree, GetItemState(hti), rItem, dwFlags);
@@ -1602,7 +1602,7 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				// draw tree item attribute columns
 				DrawTreeItemText(pDC, hti, dwItemData, bSelected);
 
-				// Draw shortcut icon for reference tasks
+				// Any derived class final drawing
 				PostDrawTreeItem(pDC, hti, dwItemData, rBack);
 			}
 

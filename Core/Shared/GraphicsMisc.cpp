@@ -1338,7 +1338,9 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 		return FALSE;
 
 	BOOL bHighContrast = Misc::IsHighContrastActive();
-	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
+
+	int nOSVer = COSVersion();
+	BOOL bThemed = (!bHighContrast && CThemed::AreControlsThemed() && (nOSVer >= OSV_VISTA));
 
 	// Adjust drawing rect/flags accordingly
 	CRect rDraw(rItem), rClip(prClip);
@@ -1405,9 +1407,36 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 		bDrawn = TRUE;
 	}
 
-	if (bThemed)
+	if (bHighContrast)
 	{
-		if (bSingleStageDraw || bPostDraw)
+		if (bSingleStageDraw || bPreDraw)
+		{
+			switch (nState)
+			{
+			case GMIS_SELECTED:
+			case GMIS_SELECTEDNOTFOCUSED:
+			case GMIS_DROPHILITED:
+				pDC->FillSolidRect(rDraw, GetSysColor(COLOR_HIGHLIGHT));
+				break;
+
+			default:
+				ASSERT(0);
+				return FALSE;
+			}
+			bDrawn = TRUE;
+		}
+	}
+	else if (bThemed)
+	{
+		BOOL bWantDraw = bSingleStageDraw;
+
+		// Windows 7 selection is too opaque to draw over text so we draw it under
+		if (nOSVer < OSV_WIN8)
+			bWantDraw |= bPreDraw;
+		else
+			bWantDraw |= bPostDraw;
+
+		if (bWantDraw)
 		{
 			CThemed th(hwnd, _T("Explorer::ListView"));
 
@@ -1422,25 +1451,6 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
 				th.DrawBackground(pDC, LVP_LISTITEM, LIS_SELECTED, rDraw, prClip);
-				break;
-			
-			default:
-				ASSERT(0);
-				return FALSE;
-			}
-			bDrawn = TRUE;
-		}
-	}
-	else if (bHighContrast)
-	{
-		if (bSingleStageDraw || bPreDraw)
-		{
-			switch (nState)
-			{
-			case GMIS_SELECTED:
-			case GMIS_SELECTEDNOTFOCUSED:
-			case GMIS_DROPHILITED:
-				pDC->FillSolidRect(rDraw, GetSysColor(COLOR_HIGHLIGHT));
 				break;
 			
 			default:
