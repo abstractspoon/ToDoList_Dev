@@ -113,7 +113,7 @@ protected:
 		int nVertPos;
 	};
 	
-	mutable CArray<CONTINUOUSDRAWINFO> m_aContinuousDrawInfo;
+	mutable CArray<CONTINUOUSDRAWINFO, CONTINUOUSDRAWINFO&> m_aContinuousDrawInfo;
 	mutable int m_nMaxDayTaskCount;
 	mutable TCC_SNAPMODE m_nSnapMode;
 

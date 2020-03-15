@@ -1544,7 +1544,10 @@ CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawI
 	}
 
 	if (nItem == nNumItem)
-		nItem = m_aContinuousDrawInfo.Add(CONTINUOUSDRAWINFO(dwTaskID));
+	{
+		CONTINUOUSDRAWINFO cdi(dwTaskID);
+		nItem = m_aContinuousDrawInfo.Add(cdi);
+	}
 
 	return m_aContinuousDrawInfo[nItem];
 }
