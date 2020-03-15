@@ -114,15 +114,15 @@ void UITheme::DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, 
 		switch (style)
 		{
 		case UITheme::RenderStyle::Glass:
-			GraphicsMisc::DrawGlass(pDC, rRow, crFrom, crTo, FALSE, 0);
+			GraphicsMisc::DrawGlass(pDC, rRow, crFrom, crTo, FALSE);
 			break;
 
 		case UITheme::RenderStyle::Gradient:
-			GraphicsMisc::DrawGradient(pDC, rRow, crFrom, crTo, FALSE, 0);
+			GraphicsMisc::DrawGradient(pDC, rRow, crFrom, crTo, FALSE);
 			break;
 
 		case UITheme::RenderStyle::GlassWithGradient:
-			GraphicsMisc::DrawGlassWithGradient(pDC, rRow, crFrom, crTo, FALSE, 0);
+			GraphicsMisc::DrawGlassWithGradient(pDC, rRow, crFrom, crTo, FALSE);
 			break;
 		}
 	}
