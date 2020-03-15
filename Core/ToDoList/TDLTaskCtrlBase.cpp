@@ -849,8 +849,6 @@ void CTDLTaskCtrlBase::OnImageListChange()
 
 		if (IsVisible())
 			::InvalidateRect(Tasks(), NULL, FALSE);
-
-// 		PostResize(); // resync horizontal scrollbars
 	}
 }
 
