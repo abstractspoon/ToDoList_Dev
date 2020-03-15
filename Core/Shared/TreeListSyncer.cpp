@@ -198,14 +198,27 @@ BOOL CTreeListSyncer::Sync(HWND hwndLeft, HWND hwndRight, TLS_LINKAGE nLink, HWN
 	Resync(hwndLeft, hwndRight);
 	
 	// show scrollbars as required
-	BOOL bShowLeftVScroll = (IsHiding(TLSH_RIGHT) && bRightHadVScroll);
-
-	ShowVScrollBar(hwndLeft, bShowLeftVScroll);
-	ShowVScrollBar(hwndRight, bRightHadVScroll);
+	FixupLeftVScrollbar(hwndLeft, bRightHadVScroll, FALSE); // don't refresh size
+	ShowVScrollBar(hwndRight, bRightHadVScroll, FALSE); // don't refresh size
 
 	PostResize();
 
 	return TRUE;
+}
+
+void CTreeListSyncer::FixupLeftVScrollbar(BOOL bRightHadVScroll, BOOL bRefreshSize)
+{
+	FixupLeftVScrollbar(Left(), bRightHadVScroll, bRefreshSize);
+}
+
+void CTreeListSyncer::FixupLeftVScrollbar(HWND hwndLeft, BOOL bRightHadVScroll, BOOL bRefreshSize)
+{
+	if (bRightHadVScroll == -1)
+		bRightHadVScroll = HasVScrollBar(Right());
+
+	BOOL bShowLeftVScroll = (IsHiding(TLSH_RIGHT) && bRightHadVScroll);
+
+	ShowVScrollBar(hwndLeft, bShowLeftVScroll, bRefreshSize);
 }
 
 BOOL CTreeListSyncer::SwapSides()
@@ -273,12 +286,10 @@ BOOL CTreeListSyncer::SwapSides()
 	Resync(hwndLeft, hwndRight);
 	
 	// show scrollbars as required
-	BOOL bShowLeftVScroll = (IsHiding(TLSH_RIGHT) && bRightHadVScroll);
+	FixupLeftVScrollbar(hwndLeft, bRightHadVScroll, FALSE); // don't refresh size
+	ShowVScrollBar(hwndRight, bRightHadVScroll, FALSE); // don't refresh size
 
-	ShowVScrollBar(hwndLeft, bShowLeftVScroll);
-	ShowVScrollBar(hwndRight, bRightHadVScroll);
-
-	PostResize(TRUE);
+	PostResize(TRUE); // Force resize
 
 	return TRUE;
 }
@@ -2976,7 +2987,7 @@ void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
 	if (HasFlag(TLSF_BORDER))
 		::InvalidateRect(GetHwnd(), NULL, TRUE);
 
-	//ASSERT(CheckBottomAlignment());
+	FixupLeftVScrollbar(hwndLeft, -1, FALSE);
 }
 
 BOOL CTreeListSyncer::HasScrollBars(HWND hwnd, BOOL bHScroll, BOOL bVScroll)

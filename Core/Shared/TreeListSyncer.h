@@ -240,6 +240,8 @@ protected:
 	HTREEITEM GetTreeItem(HWND hwndTree, HWND hwndList, int nItem) const;
 	BOOL ShowVScrollBar(HWND hwnd, BOOL bShow = TRUE, BOOL bRefreshSize = TRUE);
 	BOOL HasVScrollBar() const;
+	void FixupLeftVScrollbar(BOOL bRightHadVScroll = -1, BOOL bRefreshSize = TRUE);
+	void FixupLeftVScrollbar(HWND hwndLeft, BOOL bRightHadVScroll, BOOL bRefreshSize);
 	BOOL HasFlag(DWORD dwFlag) const { return ((m_dwFlags & dwFlag) == dwFlag); }
 	void InitItemHeights();
 	void RecalcItemHeights();
