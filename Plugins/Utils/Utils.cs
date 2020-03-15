@@ -501,7 +501,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 					Color bannerColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarLight);
 
 					if (bannerColor.GetSaturation() < 0.2f ||
-						(ColorUtil.DrawingColor.CalculateColorCloseness(bannerColor, parentColor) < 0.2f))
+						(ColorUtil.DrawingColor.CalculateColorDifference(bannerColor, parentColor) < 0.2f))
 					{
 						BorderStyle = BorderStyle.FixedSingle;
 					}
