@@ -2542,10 +2542,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 					pDC->SelectObject(pOldFont);
 
-					// Post-draw selection over gridline above
-					if ((rItem.top > 0) && HasColor(m_crGridLine))
-						rItem.top--;
-					
+					// Post-draw selection
 					GraphicsMisc::DrawExplorerItemSelection(pDC, m_lcColumns, nState, rItem, dwFlags | GMIB_POSTDRAW);
 				}
 			}
@@ -2628,13 +2625,7 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 
 			// Post-draw selection before text
 			if (!m_bSavingToImage)
-			{
-				// draw over gridline above
-				if ((rLabel.top > 0) && HasColor(m_crGridLine)) 
-					rLabel.top--;
-
 		 		GraphicsMisc::DrawExplorerItemSelection(pDC, Tasks(), nState, rLabel, dwFlags | GMIB_POSTDRAW);
-			}
 
 			// draw text
 			CRect rText;

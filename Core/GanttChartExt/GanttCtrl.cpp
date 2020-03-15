@@ -1501,10 +1501,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			// draw row
 			DrawListItem(pDC, nItem, *pGI, (nState != GMIS_NONE));
 
-			// post-draw selection over gridline above
-			if ((rItem.top > 0) && HasGridlines())
-				rItem.top--;
-
+			// post-draw selection
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_POSTDRAW));
 		}
 		return CDRF_SKIPDEFAULT;
