@@ -65,6 +65,8 @@ public:
 	static COLORREF AdjustLighting(COLORREF color, double dFactor, bool bRGB);
 	static COLORREF HLS2RGB(const HLSX& hls, RGBX& rgb);
 	static void RGB2HLS(const RGBX& rgb, HLSX& hls);
+	static float CalcLuminanceDifference(COLORREF crFrom, COLORREF crTo);
+	static float CalcColorDifference(COLORREF crFrom, COLORREF crTo);
 
 protected:
 	static BYTE Hue2Triplet(float fT1, float fT2, float fHue);

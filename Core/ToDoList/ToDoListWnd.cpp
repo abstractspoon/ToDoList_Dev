@@ -2992,7 +2992,7 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 
 	if (m_toolbarCustom.GetSafeHwnd() && m_bShowingCustomToolbar)
 	{
-		nVPos = (CDialogHelper::GetChildRect(&m_toolbarCustom).bottom + 1);
+		nVPos = CDialogHelper::GetChildRect(&m_toolbarCustom).bottom;
 	}
 	else if (m_bShowingMainToolbar)
 	{
@@ -3001,8 +3001,12 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 
 	if (nVPos > 0)
 	{
-		GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), nVPos, m_theme.crAppLinesDark);
-		GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), (nVPos + 1), m_theme.crAppLinesLight);
+		// Draw a bevel if the luminance of the toolbar and app color are similar
+		if (RGBX::CalcLuminanceDifference(m_theme.crToolbarDark, m_theme.crAppBackLight) < 0.3f)
+		{
+			GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), ++nVPos, m_theme.crAppLinesDark);
+			GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), ++nVPos, m_theme.crAppLinesLight);
+		}
 	}	
 	
 	// filter-bar edges
@@ -3016,13 +3020,16 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 			pDC->FillSolidRect(rFilter, crBkgnd);
 	}
 
-	// bevel above the statusbar if themed
+	// bevel above the statusbar if themed because classic theme provides it's own bevel
 	if (m_bShowStatusBar && CThemed::IsAppThemed())
 	{
-		int nVPos = (CDialogHelper::GetChildRect(&m_statusBar).top - BEVEL);
+		if (RGBX::CalcLuminanceDifference(m_theme.crStatusBarLight, m_theme.crAppBackLight) < 0.3f)
+		{
+			int nVPos = (CDialogHelper::GetChildRect(&m_statusBar).top - BEVEL);
 
-		GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), nVPos, m_theme.crAppLinesDark);
-		GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), (nVPos + 1), m_theme.crAppLinesLight);
+			GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), nVPos++, m_theme.crAppLinesDark);
+			GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), nVPos, m_theme.crAppLinesLight);
+		}
 	}
 
 	// The CSysImageList class seems to not initialize properly unless the 
@@ -6052,7 +6059,7 @@ BOOL CToDoListWnd::CalcToDoCtrlRect(CRect& rect, int cx, int cy, BOOL bMaximized
 			return FALSE;
 	}
 	
-	CRect rTaskList(0, BEVEL, cx - BEVEL, cy);
+	CRect rTaskList(0, 0, cx - BEVEL, cy);
 	
 	// toolbar
 	if (m_bShowingMainToolbar) 
@@ -6076,6 +6083,10 @@ BOOL CToDoListWnd::CalcToDoCtrlRect(CRect& rect, int cx, int cy, BOOL bMaximized
 		if (bSeparateLine)
 			rTaskList.top += (m_toolbarCustom.GetHeight() + BEVEL);
 	}
+
+	// Bevel below toolbars
+	if (rTaskList.top > 0)
+		rTaskList.top += 1;
 	
 	// resize tabctrl
 	CDeferWndMove dwm(0); // dummy
@@ -6146,11 +6157,11 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	// resize in one go
 	CDlgUnits dlu(this);
 	CDeferWndMove dwm(6);
-	CRect rTaskList(0, BEVEL, cx - BEVEL, cy);
+	CRect rTaskList(0, 0, cx - BEVEL, cy);
 	
 	// toolbar
 	if (m_bShowingMainToolbar) // showing toolbar
-		rTaskList.top += m_toolbarMain.Resize(cx);
+		rTaskList.top += m_toolbarMain.Resize(cx, rTaskList.TopLeft());
 
 	// ensure m_cbQuickFind is positioned correctly
 	int nPos = m_toolbarMain.CommandToIndex(ID_EDIT_FINDTASKS) + 2;
@@ -6207,7 +6218,11 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			m_toolbarCustom.Resize(cx - nMainLen, CPoint(nMainLen, 0));
 		}
 	}
-	
+
+	// Bevel below toolbars
+	if (rTaskList.top > 0)
+		rTaskList.top += 1;
+
 	// resize tabctrl
 	CPoint ptOrg(0, rTaskList.top);
 	int nTabHeight = ReposTabBar(dwm, ptOrg, cx);

@@ -5,6 +5,8 @@
 #include "stdafx.h"
 #include "ColorDef.h"
 
+#include <math.h>
+
 ///////////////////////////////////////////////////////////////////////
 
 HLSX::HLSX() : fHue(0.0f), fLuminosity(0.0f), fSaturation(0.0f)
@@ -105,6 +107,27 @@ void RGBX::AdjustLighting(double dFactor, bool bRGB)
 		
 		*this = hls;
 	}
+}
+
+float RGBX::CalcColorDifference(COLORREF crFrom, COLORREF crTo)
+{
+	// Algorithm from https://www.compuphase.com/cmetric.htm
+	double dAverageRed = ((GetRValue(crFrom) + GetRValue(crTo)) / 2.0);
+
+	int nDiffRed = (GetRValue(crFrom) - GetRValue(crTo));
+	int nDiffGreen = (GetGValue(crFrom) - GetGValue(crTo));
+	int nDiffBlue = (GetBValue(crFrom) - GetBValue(crTo));
+
+	double dRedCalc = ((2 + (dAverageRed / 256)) * (nDiffRed * nDiffRed));
+	double dGreenCalc = (4 * (nDiffGreen * nDiffGreen));
+	double dBlueCalc = ((2 + ((255 - dAverageRed) / 256)) * (nDiffBlue * nDiffBlue));
+
+	return (float)(sqrt(dRedCalc + dGreenCalc + dBlueCalc) / 256);
+}
+
+float RGBX::CalcLuminanceDifference(COLORREF crFrom, COLORREF crTo)
+{
+	return fabs(HLSX(crFrom).fLuminosity - HLSX(crTo).fLuminosity);
 }
 
 COLORREF RGBX::Complement(COLORREF color, bool bRGB)

@@ -900,22 +900,6 @@ void GraphicsMisc::CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nN
 	}
 }
 
-double GraphicsMisc::CalculateColorCloseness(COLORREF crFrom, COLORREF crTo)
-{
-	// Algorithm from https://www.compuphase.com/cmetric.htm
-	double dAverageRed = ((GetRValue(crFrom) + GetRValue(crTo)) / 2.0);
-
-	int nDiffRed = (GetRValue(crFrom) - GetRValue(crTo));
-	int nDiffGreen = (GetGValue(crFrom) - GetGValue(crTo));
-	int nDiffBlue = (GetBValue(crFrom) - GetBValue(crTo));
-
-	double dRedCalc = ((2 + (dAverageRed / 256)) * (nDiffRed * nDiffRed));
-	double dGreenCalc = (4 * (nDiffGreen * nDiffGreen));
-	double dBlueCalc = ((2 + ((255 - dAverageRed) / 256)) * (nDiffBlue * nDiffBlue));
-
-	return sqrt(dRedCalc + dGreenCalc + dBlueCalc);
-}
-
 BOOL GraphicsMisc::ForceIconicRepresentation(HWND hWnd, BOOL bForce)
 {
 #ifndef DWMWA_FORCE_ICONIC_REPRESENTATION
