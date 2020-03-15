@@ -128,7 +128,9 @@ void CUrlRichEditCtrl::Initialise()
 		CStringArray aProtocols;
 
 		VERIFY(m_parser.GetProtocols(aProtocols));
-		VERIFY(CRichEditBaseCtrl::EnableAutoUrlDetection(aProtocols));
+
+		// This will fail below Windows 8 and we will parse ourselves
+		CRichEditBaseCtrl::EnableAutoUrlDetection(aProtocols);
 	}
 
 	m_ncBorder.Initialize(GetSafeHwnd());
