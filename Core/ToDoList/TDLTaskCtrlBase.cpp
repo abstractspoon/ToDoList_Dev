@@ -793,7 +793,7 @@ void CTDLTaskCtrlBase::OnUndoRedo(BOOL /*bUndo*/)
 	PostResync(m_lcColumns, FALSE);
 
 	// resync scrollbars
-	PostResize(); 
+	PostResize(TRUE); 
 }
 
 void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges)
@@ -818,7 +818,7 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
 	else
-		RefreshSize(); // resync horizontal scrollbars
+		PostResize(TRUE); // resync scrollbars
 }
 
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
@@ -895,7 +895,7 @@ void CTDLTaskCtrlBase::OnCustomAttributeChange()
 	if (m_bAutoFitSplitter)
 		AdjustSplitterToFitAttributeColumns();
 	else
-		RefreshSize(); // resync horizontal scrollbars
+		PostResize(TRUE); // resync horizontal scrollbars
 }
 
 BOOL CTDLTaskCtrlBase::IsColumnShowing(TDC_COLUMN nColID) const
@@ -1425,9 +1425,9 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 		SetSplitPos(nSplitPos);
 	}
 
-	RefreshSize();
-
 	m_sort.LoadState(prefs, sKey);
+
+	PostResize();
 }
 
 int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
