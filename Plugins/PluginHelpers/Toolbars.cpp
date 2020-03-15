@@ -138,6 +138,21 @@ void BaseToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e)
 	//int breakpoint = 0;
 }
 
+void BaseToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e)
+{
+	auto rect = e->Item->Bounds;
+
+	if (e->Vertical)
+	{
+		e->Graphics->DrawLine(SystemPens::ButtonShadow, (rect.Width/2), 2, (rect.Width/2), rect.Height-1);
+		e->Graphics->DrawLine(SystemPens::ButtonHighlight, (rect.Width/2) + 1, 2, (rect.Width/2) + 1, rect.Height-1);
+	}
+	else
+	{
+		int breakpoint = 0;
+	}
+}
+
 void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ e)
 {
 	ToolStripProfessionalRenderer::OnRenderToolStripBackground(e);
