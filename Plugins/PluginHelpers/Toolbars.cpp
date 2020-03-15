@@ -82,7 +82,7 @@ int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Objec
 
 BaseToolbarRenderer::BaseToolbarRenderer() 
 	: 
-	m_DrawRowDividers(true),
+	m_DrawRowSeparators(true),
 	m_DrawLeftBorder(false), 
 	m_DrawTopBorder(false), 
 	m_DrawRightBorder(false), 
@@ -91,9 +91,9 @@ BaseToolbarRenderer::BaseToolbarRenderer()
 
 }
 
-void BaseToolbarRenderer::EnableDrawRowDividers(bool enable)
+void BaseToolbarRenderer::EnableDrawRowSeparators(bool enable)
 {
-	m_DrawRowDividers = enable;
+	m_DrawRowSeparators = enable;
 }
 
 void BaseToolbarRenderer::EnableDrawBorders(ToolStrip^ toolbar, bool left, bool top, bool right, bool bottom)
@@ -140,11 +140,11 @@ void BaseToolbarRenderer::OnRenderToolStripBorder(ToolStripRenderEventArgs^ e)
 
 void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ e)
 {
-	ToolStripRenderer::OnRenderToolStripBackground(e);
+	ToolStripProfessionalRenderer::OnRenderToolStripBackground(e);
 
 	auto toolbar = e->ToolStrip;
 
-	if (m_DrawRowDividers)
+	if (m_DrawRowSeparators)
 	{
 		int numItems = toolbar->Items->Count;
 
@@ -216,10 +216,10 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 
 void BaseToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
 {
-	DrawRowDivider(g, rowRect, firstRow, lastRow);
+	DrawRowSeparator(g, rowRect, firstRow, lastRow);
 }
 
-void BaseToolbarRenderer::DrawRowDivider(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
+void BaseToolbarRenderer::DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
 {
 	// Draw highlight line at top if not first row
 	if (!firstRow)

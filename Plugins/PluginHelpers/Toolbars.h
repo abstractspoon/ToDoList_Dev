@@ -36,11 +36,11 @@ namespace Abstractspoon
 			public:
 				BaseToolbarRenderer();
 
-				void EnableDrawRowDividers(bool enable);
+				void EnableDrawRowSeparators(bool enable);
 				void EnableDrawBorders(Windows::Forms::ToolStrip^ toolbar, bool left, bool top, bool right, bool bottom);
 
 			private:
-				bool m_DrawRowDividers;
+				bool m_DrawRowSeparators;
 				bool m_DrawLeftBorder, m_DrawTopBorder, m_DrawRightBorder, m_DrawBottomBorder;
 
 			protected:
@@ -48,7 +48,7 @@ namespace Abstractspoon
 				virtual void OnRenderToolStripBorder(Windows::Forms::ToolStripRenderEventArgs^ e) override;
 
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
-				virtual void DrawRowDivider(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
+				virtual void DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
 			};
 		}
 	}

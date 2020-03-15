@@ -221,5 +221,5 @@ void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Re
 {
 	UITheme::DrawHorizontalBar(g, rowRect, m_BkgndLightColor, m_BkgndDarkColor, m_Style);
 
-	DrawRowDivider(g, rowRect, firstRow, lastRow);
+	DrawRowSeparator(g, rowRect, firstRow, lastRow);
 }
