@@ -513,7 +513,7 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ dc, Int32 x, Int32 
 
 		CRect rSel(x, y, (x + cx), (y + cy));
 
-		bRes = (FALSE != GraphicsMisc::DrawExplorerItemBkgnd(CDC::FromHandle(hDC), hWndRef, state, rSel, GMIB_THEMECLASSIC));
+		bRes = (FALSE != GraphicsMisc::DrawExplorerItemSelection(CDC::FromHandle(hDC), hWndRef, state, rSel, GMIB_THEMECLASSIC));
 
 		::RestoreDC(hDC, saveHdc);
 		dc->ReleaseHdc();
