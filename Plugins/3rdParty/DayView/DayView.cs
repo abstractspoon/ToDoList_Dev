@@ -1368,7 +1368,7 @@ namespace Calendar
 			AdjustScrollbar();
         }
 
-        private void DrawHourLabels(PaintEventArgs e, Rectangle rect)
+		protected void DrawHourLabels(PaintEventArgs e, Rectangle rect)
         {
             e.Graphics.SetClip(rect);
 
@@ -1397,7 +1397,7 @@ namespace Calendar
                 e.Graphics.DrawLine(m_Pen, rect.Left, rect.Y, rect.Width, rect.Y);
         }
 
-        private void DrawDayHeaders(PaintEventArgs e, Rectangle rect)
+		protected void DrawDayHeaders(PaintEventArgs e, Rectangle rect)
         {
             int dayWidth = rect.Width / daysToShow;
 
@@ -1421,7 +1421,7 @@ namespace Calendar
             }
         }
 
-        private Rectangle GetHourRangeRectangle(HourMin start, HourMin end, Rectangle baseRectangle)
+		protected Rectangle GetHourRangeRectangle(HourMin start, HourMin end, Rectangle baseRectangle)
         {
             var dateStart = new DateTime(1, 1, 1, start.Hour, start.Min, 0);
             var dateEnd = (end.Hour >= 24) ? new DateTime(1, 1, 2, 0, 0, 0) : new DateTime(1, 1, 1, end.Hour, end.Min, 0);
@@ -1429,7 +1429,7 @@ namespace Calendar
             return GetHourRangeRectangle(dateStart, dateEnd, baseRectangle);
         }
 
-        private Rectangle GetHourRangeRectangle(DateTime start, DateTime end, Rectangle baseRectangle)
+		protected Rectangle GetHourRangeRectangle(DateTime start, DateTime end, Rectangle baseRectangle)
         {
             Rectangle rect = baseRectangle;
 
@@ -1450,7 +1450,7 @@ namespace Calendar
             return rect;
         }
 
-        private void DrawWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect)
+        protected void DrawWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect)
         {
             Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
 
@@ -1463,7 +1463,71 @@ namespace Calendar
             renderer.DrawHourRange(e.Graphics, hoursRect, false, false);
         }
 
-        private void DrawDay(PaintEventArgs e, Rectangle rect, DateTime time)
+		protected void DrawDaySelection(PaintEventArgs e, Rectangle rect, DateTime time)
+		{
+			if ((selection == SelectionType.DateRange) && (time.Day == selectionStart.Day))
+			{
+				Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
+
+				if ((selectionRectangle.Height > 1) && (selectionRectangle.Top + 1 > this.HeaderHeight))
+				{
+					renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
+				}
+			}
+		}
+
+		protected void DrawDaySlotSeparators(PaintEventArgs e, Rectangle rect, DateTime time)
+		{
+			for (int hour = 0; hour < 24 * slotsPerHour; hour++)
+			{
+				int y = rect.Top + (hour * slotHeight) - vscroll.Value;
+
+				Color color1 = renderer.HourSeperatorColor;
+				Color color2 = renderer.HalfHourSeperatorColor;
+
+				using (Pen pen = new Pen(((hour % slotsPerHour) == 0 ? color1 : color2)))
+					e.Graphics.DrawLine(pen, rect.Left, y, rect.Right, y);
+
+				if (y > rect.Bottom)
+					break;
+			}
+		}
+
+		protected void DrawDayGripper(PaintEventArgs e, Rectangle rect)
+		{
+			renderer.DrawDayGripper(e.Graphics, rect, appointmentGripWidth);
+		}
+
+		protected void DrawDayAppointments(PaintEventArgs e, Rectangle rect, DateTime time)
+		{
+			AppointmentList appointments = (AppointmentList)cachedAppointments[time.Day];
+
+			if (appointments != null)
+			{
+				List<string> groups = new List<string>();
+
+				foreach (Appointment app in appointments)
+					if (!groups.Contains(app.Group))
+						groups.Add(app.Group);
+
+				Rectangle rect2 = rect;
+				rect2.X += (appointmentGripWidth + 2);
+
+				rect2.Width -= appointmentGripWidth;
+				rect2.Width = (rect2.Width / groups.Count) - 2;
+
+				groups.Sort();
+
+				foreach (string group in groups)
+				{
+					DrawAppointments(e, rect2, time, group);
+
+					rect2.X += rect2.Width;
+				}
+			}
+		}
+
+		virtual protected void DrawDay(PaintEventArgs e, Rectangle rect, DateTime time)
         {
             renderer.DrawDayBackground(e.Graphics, rect);
 
@@ -1473,61 +1537,17 @@ namespace Calendar
                 DrawWorkHours(e, lunchEnd, workEnd, rect);
             }
 
-            if ((selection == SelectionType.DateRange) && (time.Day == selectionStart.Day))
-            {
-                Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
+			e.Graphics.SetClip(rect);
 
-                if ((selectionRectangle.Height > 1) && (selectionRectangle.Top + 1 > this.HeaderHeight))
-                {
-                    renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
-                }
-            }
+			DrawDaySelection(e, rect, time);
 
-            e.Graphics.SetClip(rect);
+			DrawDaySlotSeparators(e, rect, time);
 
-            for (int hour = 0; hour < 24 * slotsPerHour; hour++)
-            {
-                int y = rect.Top + (hour * slotHeight) - vscroll.Value;
-
-                Color color1 = renderer.HourSeperatorColor;
-                Color color2 = renderer.HalfHourSeperatorColor;
-
-                using (Pen pen = new Pen(((hour % slotsPerHour) == 0 ? color1 : color2)))
-                    e.Graphics.DrawLine(pen, rect.Left, y, rect.Right, y);
-
-                if (y > rect.Bottom)
-                    break;
-            }
-
-            renderer.DrawDayGripper(e.Graphics, rect, appointmentGripWidth);
+            DrawDayGripper(e, rect);
 
             e.Graphics.ResetClip();
 
-            AppointmentList appointments = (AppointmentList)cachedAppointments[time.Day];
-
-            if (appointments != null)
-            {
-                List<string> groups = new List<string>();
-
-                foreach (Appointment app in appointments)
-                    if (!groups.Contains(app.Group))
-                        groups.Add(app.Group);
-
-                Rectangle rect2 = rect;
-                rect2.X += (appointmentGripWidth + 2);
-
-                rect2.Width -= appointmentGripWidth;
-                rect2.Width = (rect2.Width / groups.Count) - 2;
-
-                groups.Sort();
-
-                foreach (string group in groups)
-                {
-                    DrawAppointments(e, rect2, time, group);
-
-                    rect2.X += rect2.Width;
-                }
-            }
+			DrawDayAppointments(e, rect, time);
         }
 
         internal Dictionary<Appointment, AppointmentView> appointmentViews = new Dictionary<Appointment, AppointmentView>();
