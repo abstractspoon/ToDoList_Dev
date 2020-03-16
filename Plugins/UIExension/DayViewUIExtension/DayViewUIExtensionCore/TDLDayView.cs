@@ -638,8 +638,30 @@ namespace DayViewUIExtension
 		{
 			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
 
-			DrawDaySlotSeparators(e, rect, time);
-			
+			if (UIExtension.IsHighContrastActive())
+			{
+				// Draw selection first because it's opaque
+				DrawDaySelection(e, rect, time);
+
+				DrawDaySlotSeparators(e, rect, time);
+				DrawNonWorkHours(e, rect, time);
+				DrawDayAppointments(e, rect, time);
+			}
+			else
+			{
+				DrawDaySlotSeparators(e, rect, time);
+				DrawNonWorkHours(e, rect, time);
+				DrawDayAppointments(e, rect, time);
+
+				// Draw selection last because it's translucent
+				DrawDaySelection(e, rect, time);
+			}
+
+			DrawDayGripper(e, rect);
+		}
+
+		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime time)
+		{
 			if (WeekendDays.Contains(time.DayOfWeek))
 			{
 				using (var brush = new SolidBrush(m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128)))
@@ -651,12 +673,8 @@ namespace DayViewUIExtension
 				DrawNonWorkHours(e, LunchStart, LunchEnd, rect);
 				DrawNonWorkHours(e, WorkEnd, new HourMin(24, 0), rect);
 			}
-
-			DrawDayAppointments(e, rect, time);
-			DrawDaySelection(e, rect, time);
-			DrawDayGripper(e, rect);
 		}
-
+		
 		protected void DrawNonWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect)
 		{
 			Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);

@@ -12,6 +12,7 @@
 #include <Interfaces\ITasklist.h>
 
 #include <Shared\GraphicsMisc.h>
+#include <Shared\Misc.h>
 
 #include <ShellAPI.h>
 
@@ -508,7 +509,7 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ dc, Int32 x, Int32 
 		HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
 
 		GM_ITEMSTATE state = (focused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-		DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_POSTDRAW : 0));
+		DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
 
 		int saveHdc = ::SaveDC(hDC);
 		::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
@@ -609,4 +610,9 @@ bool UIExtension::SaveImageToFile(Bitmap^ image, String^ filepath)
 	}
 
 	return true;
+}
+
+bool UIExtension::IsHighContrastActive()
+{
+	return (Misc::IsHighContrastActive() != FALSE);
 }

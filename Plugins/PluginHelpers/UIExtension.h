@@ -89,6 +89,7 @@ namespace Abstractspoon
 				static Windows::Forms::Cursor^ HandCursor();
 
 				static bool SaveImageToFile(Drawing::Bitmap^ image, String^ filepath);
+				static bool IsHighContrastActive();
 
 				ref class ParentNotify
 				{
