@@ -99,7 +99,7 @@ BOOL CContentCtrl::Attach(IContentControl* pContentCtrl)
 	return FALSE;
 }
 
-void CContentCtrl::SetUITheme(const CUIThemeFile& theme)
+void CContentCtrl::SetUITheme(const UITHEME& theme)
 {
 	if (m_pContentCtrl)
 		m_pContentCtrl->SetUITheme(&theme);
