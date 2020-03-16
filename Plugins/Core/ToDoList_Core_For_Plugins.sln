@@ -1,9 +1,13 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "3rdParty", "..\..\Core\3rdParty\3rdParty.vcxproj", "{E15C17B8-C080-492F-BBB8-BF9E84A0EA31}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "..\..\Core\Shared\Shared.vcxproj", "{95605899-9C90-40D8-8774-D1DA1FCE7464}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Interfaces", "..\..\Core\Interfaces\Interfaces.vcxproj", "{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +33,14 @@ Global
 		{95605899-9C90-40D8-8774-D1DA1FCE7464}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{95605899-9C90-40D8-8774-D1DA1FCE7464}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{95605899-9C90-40D8-8774-D1DA1FCE7464}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Debug|Win32.Build.0 = Unicode Debug|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Release|Win32.ActiveCfg = Unicode Release|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Release|Win32.Build.0 = Unicode Release|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
