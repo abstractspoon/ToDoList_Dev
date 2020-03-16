@@ -640,7 +640,7 @@ namespace WordCloudUIExtension
 				// Selection rect just around text label
 				Rectangle labelRect = LabelTextRect(e.Bounds, true);
 
-				UIExtension.SelectionRect.Draw(Handle, e.Graphics, labelRect.X, labelRect.Y, labelRect.Width, labelRect.Height);
+				UIExtension.SelectionRect.Draw(Handle, e.Graphics, labelRect.X, labelRect.Y, labelRect.Width, labelRect.Height, false); // opaque
 			}
 
 			// Draw subitems

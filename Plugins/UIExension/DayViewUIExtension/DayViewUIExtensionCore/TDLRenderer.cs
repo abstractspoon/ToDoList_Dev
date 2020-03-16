@@ -15,7 +15,6 @@ namespace DayViewUIExtension
 {
     class TDLRenderer : Calendar.AbstractRenderer
     {
-		private UITheme m_theme;
 		private UIExtension.TaskIcon m_TaskIcons;
 		private IntPtr m_hWnd;
 		private Font m_BaseFont;
@@ -36,11 +35,7 @@ namespace DayViewUIExtension
 		public bool TaskColorIsBackground { get; set; }
         public bool StrikeThruDoneTasks { get; set; }
 
-		public UITheme Theme
-        {
-            set { m_theme = value; }
-        }
-
+		public UITheme Theme { get; set; }
 		public int TextPadding { get { return 2; } }
 
         protected override void Dispose(bool mainThread)
@@ -98,10 +93,10 @@ namespace DayViewUIExtension
         {
             get
             {
-                Color appLineColor = m_theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+                Color appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 
                 if (appLineColor == BackColor)
-                    appLineColor = m_theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
+                    appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
 
                 return appLineColor;
             }
@@ -119,7 +114,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return m_theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+				return Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
             }
         }
 
@@ -135,11 +130,25 @@ namespace DayViewUIExtension
         {
             get
             {
-                return m_theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+                return Theme.GetAppDrawingColor(UITheme.AppColor.AppText);
             }
         }
 
-        public override void DrawHourLabel(System.Drawing.Graphics g, System.Drawing.Rectangle rect, int hour, bool ampm)
+		public void DrawNonWorkingHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight)
+		{
+			if (g == null)
+				throw new ArgumentNullException("g");
+
+			using (SolidBrush brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128)))
+			{
+				g.FillRectangle(brush, rect);
+			}
+
+			if (drawBorder)
+				g.DrawRectangle(SystemPens.WindowFrame, rect);
+		}
+
+		public override void DrawHourLabel(System.Drawing.Graphics g, System.Drawing.Rectangle rect, int hour, bool ampm)
         {
             if (g == null)
                 throw new ArgumentNullException("g");
@@ -179,7 +188,7 @@ namespace DayViewUIExtension
 
             if (hour)
             {
-                using (Pen pen = new Pen(m_theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark)))
+                using (Pen pen = new Pen(Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark)))
                     g.DrawLine(pen, rect.Left, rect.Y, rect.Width, rect.Y);
             }
         }
@@ -268,9 +277,22 @@ namespace DayViewUIExtension
 
         public override void DrawDayBackground(System.Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
-            using (SolidBrush backBrush = new SolidBrush(m_theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark)))
-                g.FillRectangle(backBrush, rect);
+            //using (SolidBrush backBrush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark)))
+            //    g.FillRectangle(backBrush, rect);
         }
+
+		public override void DrawHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight)
+		{
+			if (hilight)
+			{
+				// Draw selection rect
+				UIExtension.SelectionRect.Draw(m_hWnd, g, rect.X, rect.Y, rect.Width, rect.Height, true); // transparent
+			}
+			else
+			{
+				base.DrawHourRange(g, rect, drawBorder, hilight);
+			}
+		}
 
 		public bool TaskHasIcon(CalendarItem taskItem)
 		{
@@ -329,7 +351,7 @@ namespace DayViewUIExtension
                     // Draw the background of the appointment
 					if (isSelected)
 					{
-                        UIExtension.SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height);
+                        UIExtension.SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height, false); // opaque
 					}
 					else
 					{

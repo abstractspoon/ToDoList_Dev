@@ -634,6 +634,42 @@ namespace DayViewUIExtension
             return time;
         }
 
+		protected override void DrawDay(PaintEventArgs e, Rectangle rect, DateTime time)
+		{
+			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
+
+			DrawDaySlotSeparators(e, rect, time);
+			
+			if (WeekendDays.Contains(time.DayOfWeek))
+			{
+				using (var brush = new SolidBrush(m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128)))
+					e.Graphics.FillRectangle(brush, rect);
+			}
+			else // draw non-working hours
+			{
+				DrawNonWorkHours(e, new HourMin(0, 0), WorkStart, rect);
+				DrawNonWorkHours(e, LunchStart, LunchEnd, rect);
+				DrawNonWorkHours(e, WorkEnd, new HourMin(24, 0), rect);
+			}
+
+			DrawDayAppointments(e, rect, time);
+			DrawDaySelection(e, rect, time);
+			DrawDayGripper(e, rect);
+		}
+
+		protected void DrawNonWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect)
+		{
+			Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
+
+			if (hoursRect.Y < this.HeaderHeight)
+			{
+				hoursRect.Height -= this.HeaderHeight - hoursRect.Y;
+				hoursRect.Y = this.HeaderHeight;
+			}
+
+			m_Renderer.DrawNonWorkingHourRange(e.Graphics, hoursRect, false, false);
+		}
+
 		protected override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isSelected, Rectangle gripRect)
 		{
 			// Our custom gripper bar

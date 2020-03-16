@@ -722,7 +722,7 @@ namespace Calendar
 
         #endregion
 
-        private int HeaderHeight
+        protected int HeaderHeight
         {
             get
             {
@@ -1469,10 +1469,11 @@ namespace Calendar
 			{
 				Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
 
-				if ((selectionRectangle.Height > 1) && (selectionRectangle.Top + 1 > this.HeaderHeight))
-				{
+				selectionRectangle.X += (appointmentGripWidth + 2);
+				selectionRectangle.Width -= (appointmentGripWidth + 3);
+
+				if (selectionRectangle.Height > 1)
 					renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
-				}
 			}
 		}
 
@@ -1537,16 +1538,9 @@ namespace Calendar
                 DrawWorkHours(e, lunchEnd, workEnd, rect);
             }
 
-			e.Graphics.SetClip(rect);
-
 			DrawDaySelection(e, rect, time);
-
 			DrawDaySlotSeparators(e, rect, time);
-
             DrawDayGripper(e, rect);
-
-            e.Graphics.ResetClip();
-
 			DrawDayAppointments(e, rect, time);
         }
 
@@ -1906,11 +1900,14 @@ namespace Calendar
                 if (day == (daysToShow - 1))
                     rectangle.Width = (rect.Right - rectangle.Left);
 
-                DrawDay(e, rectangle, time);
+				e.Graphics.SetClip(rectangle);
+
+				DrawDay(e, rectangle, time);
+
+				e.Graphics.ResetClip();
 
                 rectangle.X += dayWidth;
-
-                time = time.AddDays(1);
+				time = time.AddDays(1);
             }
         }
 

@@ -957,11 +957,11 @@ namespace MindMapUIExtension
 			switch (nodeState)
 			{
 				case NodeDrawState.Selected:
-                    UIExtension.SelectionRect.Draw(this.Handle, graphics, rect.X, rect.Y, rect.Width, rect.Height, this.Focused);
+                    UIExtension.SelectionRect.Draw(this.Handle, graphics, rect.X, rect.Y, rect.Width, rect.Height, this.Focused, false); // opaque
 					break;
 
 				case NodeDrawState.DropTarget:
-                    UIExtension.SelectionRect.Draw(this.Handle, graphics, rect.X, rect.Y, rect.Width, rect.Height, false);
+                    UIExtension.SelectionRect.Draw(this.Handle, graphics, rect.X, rect.Y, rect.Width, rect.Height, false, false); // opaque
 					break;
 
                 case NodeDrawState.None:
