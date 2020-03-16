@@ -13,7 +13,8 @@ class IContentControl;
 class ISpellCheck;
 class IPreferences;
 class CBinaryData;
-class CUIThemeFile;
+
+struct UITHEME;
 
 class CONTENTFORMAT : public CString
 {
@@ -71,7 +72,7 @@ public:
 	BOOL Undo();
 	BOOL Redo();
 
-	void SetUITheme(const CUIThemeFile& theme);
+	void SetUITheme(const UITHEME& theme);
 	void SetContentFont(HFONT hFont);
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
