@@ -3002,7 +3002,9 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	if (nVPos > 0)
 	{
 		// Draw a bevel if the luminance of the toolbar and app color are similar
-		if (RGBX::CalcLuminanceDifference(m_theme.crToolbarDark, m_theme.crAppBackLight) < 0.3f)
+		COLORREF crAppBack = (WantTasklistTabbarVisible() ? m_theme.crAppBackDark : m_theme.crAppBackLight);
+
+		if (RGBX::CalcLuminanceDifference(m_theme.crToolbarDark, crAppBack) < 0.3f)
 		{
 			GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), ++nVPos, m_theme.crAppLinesDark);
 			GraphicsMisc::DrawHorzLine(pDC, 0, rClient.Width(), ++nVPos, m_theme.crAppLinesLight);
@@ -6081,12 +6083,12 @@ BOOL CToDoListWnd::CalcToDoCtrlRect(CRect& rect, int cx, int cy, BOOL bMaximized
 		}
 
 		if (bSeparateLine)
-			rTaskList.top += (m_toolbarCustom.GetHeight() + BEVEL);
+			rTaskList.top += m_toolbarCustom.GetHeight();
 	}
 
 	// Bevel below toolbars
 	if (rTaskList.top > 0)
-		rTaskList.top += 1;
+		rTaskList.top += BEVEL;
 	
 	// resize tabctrl
 	CDeferWndMove dwm(0); // dummy
@@ -6205,7 +6207,7 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			if (m_toolbarMain.LastItemIsSeparator())
 				m_toolbarMain.DeleteLastItem();
 
-			rTaskList.top += (m_toolbarCustom.Resize(cx, CPoint(0, rTaskList.top)) + BEVEL);
+			rTaskList.top += m_toolbarCustom.Resize(cx, CPoint(0, rTaskList.top));
 		}
 		else
 		{
@@ -6221,7 +6223,7 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 
 	// Bevel below toolbars
 	if (rTaskList.top > 0)
-		rTaskList.top += 1;
+		rTaskList.top += BEVEL;
 
 	// resize tabctrl
 	CPoint ptOrg(0, rTaskList.top);
