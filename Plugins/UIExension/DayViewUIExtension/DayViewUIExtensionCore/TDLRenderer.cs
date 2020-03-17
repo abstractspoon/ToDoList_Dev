@@ -344,13 +344,16 @@ namespace DayViewUIExtension
 				CalendarItem taskItem = (appointment as CalendarItem);
 				bool longAppt = taskItem.IsLongAppt();
 
-				if (!longAppt && (taskItem.StartDate.TimeOfDay.TotalHours == 0.0))
+				if (!longAppt)
 				{
-					rect.Y++;
-					rect.Height--;
-				}
+					if (taskItem.StartDate.TimeOfDay.TotalHours == 0.0)
+					{
+						rect.Y++;
+						rect.Height--;
+					}
 
-				rect.Width--;
+					rect.Width--;
+				}
 
 				// Recalculate colours
 				Color textColor = taskItem.TaskTextColor;
@@ -385,6 +388,9 @@ namespace DayViewUIExtension
 					}
 					else
 					{
+						// Infamous GDI+ off-by-one bug
+						rect.Width--;
+
 						using (SolidBrush brush = new SolidBrush(fillColor))
 							g.FillRectangle(brush, rect);
 
