@@ -27,6 +27,7 @@
 #include "memdc.h"
 #include "FPSMiniCalendarCtrl.h"
 #include "FPSMiniCalendarListCtrl.h"
+#include "GdiPlus.h"
 
 #include <locale.h>
 
@@ -882,13 +883,19 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 				CString strText = CStr(dt.GetDay());
 
 				COLORREF cBackColor = CLR_NONE, cTextColor = CLR_NONE;
-				GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, cTextColor, cBackColor);
-				ASSERT(cTextColor != CLR_NONE);
+				BYTE cBkgndOpacity = 255;
+
+				GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, cTextColor, cBackColor, cBkgndOpacity);
+				ASSERT((cTextColor != CLR_NONE) && (cBkgndOpacity > 0));
+
+				CRect rCell(iX, iY, iX + m_iIndividualDayWidth+5, iY + m_iDaysHeight+2);
 
 				if (cBackColor != CLR_NONE)
 				{
-					dc.SetBkColor(cBackColor);
-					dc.FillSolidRect(iX-2, iY, m_iIndividualDayWidth+5, m_iDaysHeight+2, cBackColor);
+					if (cBkgndOpacity == 255)
+						dc.FillSolidRect(rCell, cBackColor);
+					else
+						CGdiPlus::FillRect(CGdiPlusGraphics(dc, gdix_SmoothingModeNone), CGdiPlusBrush(cBackColor, cBkgndOpacity), rCell);
 				}
 
 				if (bSpecial && bActiveMonth)
@@ -897,12 +904,12 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 					pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_DAYS].m_pFont);
 
 				dc.SetTextColor(cTextColor);
-				dc.DrawText(strText, CRect(iX, iY, iX+m_iIndividualDayWidth,iY+m_iDaysHeight), DEFTEXTFLAGS);
+				dc.DrawText(strText, rCell, DEFTEXTFLAGS);
 
 				if (m_bHighlightToday && IsToday(dt))
-					dc.Draw3dRect(iX-2, iY, m_iIndividualDayWidth+5, m_iDaysHeight+2, m_crTodayBorder, m_crTodayBorder);
+					dc.Draw3dRect(rCell, m_crTodayBorder, m_crTodayBorder);
 
-				SetHotSpot(iMonthRow, iMonthCol, iDayCounter, dt, CRect(iX,iY,iX+m_iIndividualDayWidth+5, iY+m_iDaysHeight+2));
+				SetHotSpot(iMonthRow, iMonthCol, iDayCounter, dt, rCell);
 			}
 
 			dt += 1;
@@ -938,10 +945,11 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 }
 
 void CFPSMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, 
-											 COLORREF& crText, COLORREF& crBkgnd) const
+											 COLORREF& crText, COLORREF& crBkgnd, BYTE& cBkgndOpacity) const
 {
 	crText = m_FontInfo[FMC_FONT_DAYS].m_crTextColor;
 	crBkgnd = m_FontInfo[FMC_FONT_DAYS].m_crBkColor;
+	cBkgndOpacity = 255;
 
 	if (bActiveMonth)
 	{

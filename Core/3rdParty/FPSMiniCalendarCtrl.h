@@ -332,7 +332,7 @@ protected:
 	void FireTodayButton();
 
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;
-	virtual void GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd) const;
+	virtual void GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd, BYTE& cBkgndOpacity) const;
 
 	// computed values of importance
 	BOOL							m_bFontsCreated;

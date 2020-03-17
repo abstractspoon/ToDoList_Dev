@@ -29,7 +29,8 @@ CTaskMiniCalendarCtrl::CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData)
 	: 
 	m_mapData(mapData), 
 	m_nHeatMapAttribute(TDCA_NONE),
-	m_crBorder(CLR_NONE)
+	m_crBorder(CLR_NONE),
+	m_crWeekend(CLR_NONE)
 {
 }
 
@@ -77,6 +78,17 @@ void CTaskMiniCalendarCtrl::SetBorderColor(COLORREF crBorder)
 	}
 }
 
+void CTaskMiniCalendarCtrl::SetWeekendColor(COLORREF crWeekend)
+{
+	if (crWeekend != m_crWeekend)
+	{
+		m_crWeekend = crWeekend;
+
+		if (GetSafeHwnd())
+			Invalidate(FALSE);
+	}
+}
+
 void CTaskMiniCalendarCtrl::OnUpdateTasks()
 {
 	RecalcSpecialDates();
@@ -117,17 +129,30 @@ BOOL CTaskMiniCalendarCtrl::IsSpecialDate(const COleDateTime& dt) const
 	return m_setSpecialDates.Has(CDateHelper::GetDateOnly(dt.m_dt));
 }
 
-void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd) const
+void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd, BYTE& cBkgndOpacity) const
 {
-	CMiniCalendarCtrl::GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, crText, crBkgnd);
+	CMiniCalendarCtrl::GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, crText, crBkgnd, cBkgndOpacity);
 
-	// Handle heat map
- 	if (!bSelected && bActiveMonth && m_mapHeatMap.HasHeat())
+	// Handle weekends and heat map
+	if (!bSelected)
 	{
-		crBkgnd = m_mapHeatMap.GetColor(dt);
+		if (bActiveMonth && m_mapHeatMap.HasHeat())
+		{
+			crBkgnd = m_mapHeatMap.GetColor(dt);
+			cBkgndOpacity = 255;
 
-		if (crBkgnd != CLR_NONE)
-			crText = GraphicsMisc::GetBestTextColor(crBkgnd);
+			if (crBkgnd != CLR_NONE)
+			{
+				crText = GraphicsMisc::GetBestTextColor(crBkgnd);
+				return;
+			}
+		}
+
+		if ((m_crWeekend != CLR_NONE) && CWeekend().IsWeekend(dt))
+		{
+			crBkgnd = m_crWeekend;
+			cBkgndOpacity = 128;
+		}
 	}
 }
 

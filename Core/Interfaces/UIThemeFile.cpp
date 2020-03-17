@@ -19,6 +19,10 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+static CUIThemeFile UNSET_THEME;
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -159,7 +163,7 @@ BOOL CUIThemeFile::LoadThemeFile(LPCTSTR szThemeFile)
 BOOL CUIThemeFile::IsSet() const
 {
 	// test against empty theme file
-	return (*this != CUIThemeFile());
+	return (*this != UNSET_THEME);
 }
 
 void CUIThemeFile::Reset()
@@ -185,17 +189,14 @@ void CUIThemeFile::Reset()
 void CUIThemeFile::RecalcNonWorkingColors()
 {
 	// Ensure a minimum 'darkness' level
-	HLSX hlsNonWorking(crAppBackDark);
+	HLSX hlsTemp(crAppBackDark);
 
-	if (hlsNonWorking.fLuminosity <= 0.6f)
-		hlsNonWorking.fLuminosity = 0.6f;
-	else
-		hlsNonWorking.fLuminosity = (hlsNonWorking.fLuminosity + 0.6f) / 2;
-
-	crNonWorkingHours = hlsNonWorking;
+	hlsTemp.fLuminosity = 0.9f;
+	crNonWorkingHours = hlsTemp;
 
 	// Make weekend a smidgen darker
-	crWeekend = GraphicsMisc::Darker(hlsNonWorking, 0.1, FALSE);
+	hlsTemp.fLuminosity = 0.8f;
+	crWeekend = hlsTemp;
 }
 
 COLORREF CUIThemeFile::GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID)

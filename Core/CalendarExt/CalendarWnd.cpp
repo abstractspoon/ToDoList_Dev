@@ -330,6 +330,7 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 
 		m_BigCalendar.SetUITheme(*pTheme);
 		m_MiniCalendar.SetHighlightToday(TRUE, pTheme->crAppLinesDark);
+		m_MiniCalendar.SetWeekendColor(pTheme->crWeekend);
 		
 		// intentionally set background colours to be same as ours
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
