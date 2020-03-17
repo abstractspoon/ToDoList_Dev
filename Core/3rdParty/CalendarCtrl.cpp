@@ -604,6 +604,9 @@ bool CCalendarCtrl::GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeade
 		int nHeight = (rc.Height()-m_nHeaderHeight)/GetVisibleWeeks();
 		int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
 
+		if ((nHeight <= 0) || (bOmitHeader && (nHeight <= m_nDayHeaderHeight)))
+			return false;
+
 		rect.left = nWidth*nCol;
 		rect.right = rect.left + nWidth;
 		rect.top = m_nHeaderHeight + nRow*nHeight;
