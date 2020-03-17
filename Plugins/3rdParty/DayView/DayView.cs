@@ -1700,6 +1700,7 @@ namespace Calendar
 
                                 appointmentViews[appointment] = view;
 
+								var orgClipRect = e.Graphics.ClipBounds;
                                 e.Graphics.SetClip(rect);
 
                                 if (this.DrawAllAppBorder)
@@ -1713,7 +1714,7 @@ namespace Calendar
 
                                 DrawAppointment(e.Graphics, apptRect, appointment, isSelected, gripRect);
 
-                                e.Graphics.ResetClip();
+                                e.Graphics.SetClip(orgClipRect);
 
                                 drawnItems.Add(appointment);
                             }

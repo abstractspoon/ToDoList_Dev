@@ -447,82 +447,79 @@ bool UIExtension::TaskIcon::Get(UInt32 dwTaskID)
 	return false;
 }
 
-bool UIExtension::TaskIcon::Draw(Graphics^ dc, Int32 x, Int32 y)
+bool UIExtension::TaskIcon::Draw(Graphics^ g, Int32 x, Int32 y)
 {
 	if ((m_hilTaskImages == NULL) || (m_iImage == -1))
 		return false;
 
 	// Must retrieve clip rect before getting HDC
-	Drawing::Rectangle rClip = Rectangle::Truncate(dc->ClipBounds);
-	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
+	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
+	HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
 
 	if (hDC == NULL)
 		return false;
 
-	int saveHdc = ::SaveDC(hDC);
+	int nSaveDC = ::SaveDC(hDC);
+
 	::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
 
 	bool bRes = (ImageList_Draw(m_hilTaskImages, m_iImage, hDC, x, y, ILD_TRANSPARENT) != FALSE);
 
-	::RestoreDC(hDC, saveHdc);
-	dc->ReleaseHdc();
+	::RestoreDC(hDC, nSaveDC);
+	g->ReleaseHdc();
+	g->SetClip(rClip); // restore clip rect
 
 	return bRes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool UIExtension::ShortcutOverlay::Draw(Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy)
+bool UIExtension::ShortcutOverlay::Draw(Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy)
 {
-	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
-	bool bRes = false;
+	HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
 
-	if (hDC != NULL)
-	{
-		bRes = (FALSE != GraphicsMisc::DrawShortcutOverlay(CDC::FromHandle(hDC), CRect(x, y, x + cx, y + cy)));
-		dc->ReleaseHdc();
-	}
+	if (hDC == NULL)
+		return false;
+
+	bool bRes = (FALSE != GraphicsMisc::DrawShortcutOverlay(CDC::FromHandle(hDC), CRect(x, y, x + cx, y + cy)));
+	g->ReleaseHdc();
 
 	return bRes;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool transparent)
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, bool transparent)
 {
 	HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
 	bool focused = (::GetFocus() == hWndRef);
 
-	return Draw(hwnd, dc, x, y, cx, cy, focused, transparent);
+	return Draw(hwnd, g, x, y, cx, cy, focused, transparent);
 }
 
-bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused, bool transparent)
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused, bool transparent)
 {
-	bool bRes = false;
-
 	// Must retrieve clip rect before getting HDC
-	Drawing::Rectangle rClip = Rectangle::Truncate(dc->ClipBounds);
-	HDC hDC = static_cast<HDC>(dc->GetHdc().ToPointer());
+	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
+	HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
 
-	if (hDC != NULL)
-	{
-		HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
+	if (hDC == NULL)
+		return false;
 
-		GM_ITEMSTATE state = (focused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-		DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
+	int nSaveDC = ::SaveDC(hDC);
 
-		int saveHdc = ::SaveDC(hDC);
-		::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
+	GM_ITEMSTATE state = (focused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+	DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
 
-		CRect rSel(x, y, (x + cx), (y + cy));
+	::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
 
-		bRes = (FALSE != GraphicsMisc::DrawExplorerItemSelection(CDC::FromHandle(hDC), hWndRef, state, rSel, flags));
+	CRect rSel(x, y, (x + cx), (y + cy));
 
-		::RestoreDC(hDC, saveHdc);
-		
-		dc->ReleaseHdc();
-		dc->SetClip(rClip);
-	}
+	bool bRes = (FALSE != GraphicsMisc::DrawExplorerItemSelection(CDC::FromHandle(hDC), Win32::GetHwnd(hwnd), state, rSel, flags));
+	
+	::RestoreDC(hDC, nSaveDC);
+	g->ReleaseHdc();
+	g->SetClip(rClip); // restore clip rect
 
 	return bRes;
 }
