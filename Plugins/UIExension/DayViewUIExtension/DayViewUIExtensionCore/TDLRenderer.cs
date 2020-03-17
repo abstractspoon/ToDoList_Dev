@@ -29,13 +29,15 @@ namespace DayViewUIExtension
 			ShowParentsAsFolder = false;
             TaskColorIsBackground = false;
             StrikeThruDoneTasks = true;
+            GridlineColor = Color.Gray;
         }
 
 		public bool ShowParentsAsFolder { get; set; }
 		public bool TaskColorIsBackground { get; set; }
         public bool StrikeThruDoneTasks { get; set; }
 
-		public UITheme Theme { get; set; }
+        public Color GridlineColor { get; set; }
+        public UITheme Theme { get; set; }
 		public int TextPadding { get { return 2; } }
 
         protected override void Dispose(bool mainThread)
@@ -84,8 +86,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                // Halfway between AppLinesDark and window colour
-                return InterpolateColors(this.HourSeperatorColor, SystemColors.Window, 0.5f);
+                return GridlineColor;
             }
         }
 
@@ -93,12 +94,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                Color appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
-
-                if (appLineColor == BackColor)
-                    appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
-
-                return appLineColor;
+                return DrawingColor.AdjustLighting(GridlineColor, -0.25f, false);
             }
         }
 

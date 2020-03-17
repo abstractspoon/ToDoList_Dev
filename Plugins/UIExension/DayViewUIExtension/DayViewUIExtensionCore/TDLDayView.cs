@@ -22,7 +22,7 @@ namespace DayViewUIExtension
         private Boolean m_HideTasksSpanningWeekends = false;
         private Boolean m_HideTasksSpanningDays = false;
 
-		private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
+        private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
         private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
 
@@ -30,6 +30,18 @@ namespace DayViewUIExtension
 		{
 			get { return DPIScaling.Scale(4); }
 		}
+
+        public Color GridlineColor
+        {
+            set
+            {
+                if (value != m_Renderer.GridlineColor)
+                {
+                    m_Renderer.GridlineColor = value;
+                    Invalidate();
+                }
+            }
+        }
 
 		// ----------------------------------------------------------------
 

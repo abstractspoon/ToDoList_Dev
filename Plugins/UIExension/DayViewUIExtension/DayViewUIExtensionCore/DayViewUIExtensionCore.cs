@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace DayViewUIExtension
 {
@@ -23,8 +24,9 @@ namespace DayViewUIExtension
 		// --------------------------------------------------------------------------------------
 
 		private const string FontName = "Tahoma";
+        private static Color DefGridColor = Color.FromArgb(192, 192, 192);
 
-		private bool m_SettingMonthYear = false;
+        private bool m_SettingMonthYear = false;
 		private bool m_SettingDayViewStartDate = false;
 		private bool m_AllowModifyTimeEstimate = false;
 
@@ -213,6 +215,13 @@ namespace DayViewUIExtension
 			m_WorkWeek.Load(prefs);
             m_DayView.WeekendDays = m_WorkWeek.WeekendDays();
 
+            int gridColor = -1;
+
+            if (prefs.GetProfileBool("Preferences", "SpecifyGridColor", true))
+                gridColor = prefs.GetProfileInt("Preferences\\Colors", "GridLines", -1);
+
+            m_DayView.GridlineColor = ((gridColor == -1) ? DefGridColor : DrawingColor.ToColor((UInt32)gridColor));
+            
             if (!appOnly)
             {
                 // private settings
