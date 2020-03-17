@@ -831,101 +831,105 @@ namespace Calendar
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
-            {
-                // Capture focus
-                this.Focus();
+			// Ignore all clicks on the day header
+			if (e.Y > dayHeadersHeight)
+			{
+				if (e.Button == MouseButtons.Left)
+				{
+					// Capture focus
+					this.Focus();
 
-                if (CurrentlyEditing)
-                {
-                    FinishEditing(false);
-                }
-
-                if (selectedAppointmentIsNew)
-                {
-                    RaiseNewAppointment();
-                }
-
-                ITool newTool = null;
-                Appointment appointment = GetAppointmentAt(e.X, e.Y);
-
-                if (appointment == null)
-                {
-					if (e.Y < HeaderHeight && e.Y > dayHeadersHeight)
+					if (CurrentlyEditing)
 					{
-						newTool = drawTool;
-						selection = SelectionType.None;
-
-						base.OnMouseDown(e);
-						return;
+						FinishEditing(false);
 					}
 
-					newTool = drawTool;
-                    selection = SelectionType.DateRange;
-                }
-                else
-                {
-                    newTool = selectionTool;
-                    selectedAppointment = appointment;
-                    selection = SelectionType.Appointment;
+					if (selectedAppointmentIsNew)
+					{
+						RaiseNewAppointment();
+					}
 
-                    Invalidate();
-                }
+					ITool newTool = null;
+					Appointment appointment = GetAppointmentAt(e.X, e.Y);
 
-                if (activeTool != null)
-                {
-                    activeTool.MouseDown(e);
-                }
+					if (appointment == null)
+					{
+						if (e.Y < HeaderHeight && e.Y > dayHeadersHeight)
+						{
+							newTool = drawTool;
+							selection = SelectionType.None;
 
-                if ((activeTool != newTool) && (newTool != null))
-                {
-                    newTool.Reset();
-                    newTool.MouseDown(e);
-                }
+							base.OnMouseDown(e);
+							return;
+						}
 
-                activeTool = newTool;
-            }
-            else if (e.Button == MouseButtons.Right)
-            {
-                // If we right-click outside the area of selection,
-                // select whatever is under the cursor
-                Appointment appointment = GetAppointmentAt(e.X, e.Y);
-                bool redraw = false;
+						newTool = drawTool;
+						selection = SelectionType.DateRange;
+					}
+					else
+					{
+						newTool = selectionTool;
+						selectedAppointment = appointment;
+						selection = SelectionType.Appointment;
 
-                if (appointment == null)
-                {
-                    if (selectedAppointment != null)
-                        redraw = true;
+						Invalidate();
+					}
 
-                    selectedAppointment = null;
-                    selection = SelectionType.Appointment;
-                    RaiseSelectionChanged(new AppointmentEventArgs(null));
+					if (activeTool != null)
+					{
+						activeTool.MouseDown(e);
+					}
 
-                    DateTime click = GetDateTimeAt(e.X, e.Y);
-                    selection = SelectionType.DateRange;
+					if ((activeTool != newTool) && (newTool != null))
+					{
+						newTool.Reset();
+						newTool.MouseDown(e);
+					}
 
-                    if ((click < SelectionStart) || (click > SelectionEnd))
-                    {
-                        SelectionStart = new DateTime(click.Year, click.Month, click.Day, click.Hour, 0, 0);
-                        SelectionEnd = SelectionStart.AddMinutes(60);
+					activeTool = newTool;
+				}
+				else if (e.Button == MouseButtons.Right)
+				{
+					// If we right-click outside the area of selection,
+					// select whatever is under the cursor
+					Appointment appointment = GetAppointmentAt(e.X, e.Y);
+					bool redraw = false;
 
-                        redraw = true;
-                    }
-                }
-				else if (appointment != selectedAppointment)
-                {
-                    selectedAppointment = appointment;
-                    selection = SelectionType.Appointment;
+					if (appointment == null)
+					{
+						if (selectedAppointment != null)
+							redraw = true;
 
-                    RaiseSelectionChanged(new AppointmentEventArgs(selectedAppointment));
-                    redraw = true;
-                }
+						selectedAppointment = null;
+						selection = SelectionType.Appointment;
+						RaiseSelectionChanged(new AppointmentEventArgs(null));
 
-                if (redraw)
-                {
-                    Refresh();
-                }
-            }
+						DateTime click = GetDateTimeAt(e.X, e.Y);
+						selection = SelectionType.DateRange;
+
+						if ((click < SelectionStart) || (click > SelectionEnd))
+						{
+							SelectionStart = new DateTime(click.Year, click.Month, click.Day, click.Hour, 0, 0);
+							SelectionEnd = SelectionStart.AddMinutes(60);
+
+							redraw = true;
+						}
+					}
+					else if (appointment != selectedAppointment)
+					{
+						selectedAppointment = appointment;
+						selection = SelectionType.Appointment;
+
+						RaiseSelectionChanged(new AppointmentEventArgs(selectedAppointment));
+						redraw = true;
+					}
+
+					if (redraw)
+					{
+						Refresh();
+					}
+				}
+			}
 
             base.OnMouseDown(e);
         }
