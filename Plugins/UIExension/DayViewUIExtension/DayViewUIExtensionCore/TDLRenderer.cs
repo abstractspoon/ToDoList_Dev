@@ -177,15 +177,49 @@ namespace DayViewUIExtension
 			}
         }
 
-        public override void DrawMinuteLine(Graphics g, Rectangle rect, bool hour)
+        public override void DrawMinuteLine(Graphics g, Rectangle rect, int minute)
         {
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            if (hour)
+            if ((minute % 30) == 0)
             {
-                using (Pen pen = new Pen(Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark)))
-                    g.DrawLine(pen, rect.Left, rect.Y, rect.Width, rect.Y);
+                using (Pen pen = new Pen(MinuteLineColor))
+                {
+                    if (minute == 0)
+                    {
+                        g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
+                    }
+                    else if (rect.Height > MinuteFont.Height)
+                    {
+                        // 30 min mark - halve line width
+                        rect.X += rect.Width / 2;
+                        rect.Width /= 2;
+
+                        g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
+
+                        // Draw label beneath
+                        using (SolidBrush brush = new SolidBrush(this.TextColor)) 
+                        {
+                            g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+                            g.DrawString("30", MinuteFont, brush, rect);
+                            g.TextRenderingHint = TextRenderingHint.SystemDefault;
+                        }
+                    }
+                }
+            }
+        }
+
+        private Color MinuteLineColor
+        {
+            get
+            {
+                Color appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+
+                if (appLineColor == BackColor)
+                    appLineColor = Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
+
+                return appLineColor;
             }
         }
 

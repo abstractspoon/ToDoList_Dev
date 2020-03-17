@@ -1380,14 +1380,18 @@ namespace Calendar
                 hourRectangle.X += hourLabelIndent;
                 hourRectangle.Width = hourLabelWidth;
 
-                renderer.DrawHourLabel(e.Graphics, hourRectangle, m_Hour, this.ampmdisplay);
+                var minuteRect = hourRectangle;
+                minuteRect.Height = slotHeight;
 
-                for (int slot = 0; slot < slotsPerHour; slot++)
+                int interval = (60 / slotsPerHour);
+
+                for (int minute = 0; minute < 60; minute += interval)
                 {
-                    bool hour = ((slot % slotsPerHour) == 0);
-                    renderer.DrawMinuteLine(e.Graphics, hourRectangle, hour);
-                    hourRectangle.Y += slotHeight;
+                    renderer.DrawMinuteLine(e.Graphics, minuteRect, minute);
+                    minuteRect.Y += slotHeight;
                 }
+
+                renderer.DrawHourLabel(e.Graphics, hourRectangle, m_Hour, this.ampmdisplay);
             }
 
             e.Graphics.ResetClip();
@@ -1882,9 +1886,14 @@ namespace Calendar
                     DrawAppointment(e.Graphics, appointmenRect, appointment, (appointment == selectedAppointment), gripRect);
                 }
 
+                // Draw a vertical line to close off the long appointments on the left
+                using (Pen m_Pen = new Pen(Color.DarkGray))
+                    e.Graphics.DrawLine(m_Pen, backRectangle.Left, backRectangle.Top, backRectangle.Left, rect.Bottom);
+
 				e.Graphics.SetClip(rect);
             }
-
+            
+            // Draw the day appointments
             DateTime time = startDate;
             Rectangle rectangle = rect;
             rectangle.Width = dayWidth;

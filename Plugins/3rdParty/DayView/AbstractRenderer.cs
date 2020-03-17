@@ -124,7 +124,7 @@ namespace Calendar
 
         public abstract void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
 
-        public abstract void DrawMinuteLine(Graphics g, Rectangle rect, bool hour);
+        public abstract void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
 
         public abstract void DrawDayHeader(Graphics g, Rectangle rect, DateTime date);
 
