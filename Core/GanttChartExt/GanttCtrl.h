@@ -262,6 +262,7 @@ protected:
 	BOOL GetListItemRect(int nItem, CRect& rItem) const;
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
+	BOOL GetVisibleDateRange(COleDateTimeRange& dtRange) const;
 
 	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
 	BOOL RestoreGanttItem(const GANTTITEM& giPrev);

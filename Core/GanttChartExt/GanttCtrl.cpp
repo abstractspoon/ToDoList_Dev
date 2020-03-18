@@ -5059,14 +5059,20 @@ void CGanttCtrl::ScrollToTask(DWORD dwTaskID)
 	GANTTITEM* pGI = NULL;
 	GET_GI(dwTaskID, pGI);
 	
+	// Don't scroll if any part of the task is already visible
+	COleDateTimeRange dtVis;
+	VERIFY(GetVisibleDateRange(dtVis));
+
 	COleDateTime dtStart, dtDue;
 	
 	if (GetTaskStartEndDates(*pGI, dtStart, dtDue))
 	{
-		ScrollTo(pGI->IsMilestone(m_sMilestoneTag) ? dtDue : dtStart);
+		if (!dtVis.HasIntersection(COleDateTimeRange(dtStart, dtDue)))
+			ScrollTo(pGI->IsMilestone(m_sMilestoneTag) ? dtDue : dtStart);
 	}
 	else if (pGI->HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)))
 	{
+		if (!dtVis.Contains(pGI->dtDone))
 		ScrollTo(pGI->dtDone);
 	}
 }
@@ -5100,6 +5106,25 @@ void CGanttCtrl::ScrollTo(const COleDateTime& date)
 		if (m_list.Scroll(CSize(nStartPos, 0)))
 			InvalidateAll(FALSE);
 	}
+}
+
+BOOL CGanttCtrl::GetVisibleDateRange(COleDateTimeRange& dtRange) const
+{
+	CRect rList;
+	m_list.GetClientRect(rList);
+
+	rList.OffsetRect(m_list.GetScrollPos(SB_HORZ), 0);
+
+	COleDateTime dtStart, dtEnd;
+
+	if (GetDateFromScrollPos(rList.left, dtStart) &&
+		GetDateFromScrollPos(rList.right - 1, dtEnd))
+	{
+		return dtRange.Set(dtStart, dtEnd, HasOption(GTLCF_DECADESAREZEROBASED));
+	}
+
+	// else
+	return FALSE;
 }
 
 BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)
