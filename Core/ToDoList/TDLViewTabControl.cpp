@@ -22,7 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLViewTabControl::CTDLViewTabControl(DWORD dwStyles) 
 : 
-	CTabCtrlEx(TCE_MBUTTONCLOSE | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT | TCE_POSTDRAW, e_tabBottom), 
+	CTabCtrlEx(TCE_MBUTTONCLOSE | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT, e_tabBottom), 
 	m_nSelTab(-1),
 	m_dwStyles(dwStyles),
 	m_bShowingTabs(TRUE)
@@ -48,6 +48,7 @@ BEGIN_MESSAGE_MAP(CTDLViewTabControl, CTabCtrlEx)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnSelChange)
 	ON_NOTIFY_REFLECT(TCN_CLOSETAB, OnCloseTab)
+	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -56,6 +57,7 @@ END_MESSAGE_MAP()
 BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData)
 {
 	ASSERT (hWnd == NULL || ::IsWindow(hWnd));
+	ASSERT(hIcon);
 
 	// window and enum must be unique
 	if ((hWnd && FindView(hWnd) != -1) || (FindView(nView) != -1))
@@ -67,9 +69,7 @@ BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, 
 
 	if (GetSafeHwnd())
 	{
-		// Pass '0' as image index to create space for custom drawing
-		VERIFY(InsertItem(TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE, nIndex, view.sViewLabel, (hIcon ? 0 : -1), (LPARAM)nView) >= 0);
-		
+		VERIFY(InsertItem(TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE, nIndex, view.sViewLabel, nIndex, (LPARAM)nView) >= 0);
 		UpdateTabItemWidths(); 
 	}
 
@@ -374,11 +374,10 @@ void CTDLViewTabControl::PreSubclassWindow()
 
 	ShowTabControl(m_bShowingTabs);
 
-	// Dummy image list to create space for custom drawn icons
 	int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
 
-	if (m_ilSpacer.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1))
-		SetImageList(&m_ilSpacer);
+	if (m_ilTabs.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1))
+		SetImageList(&m_ilTabs); // Populated on demand
 
 	// add tabs
 	int nNumView = m_aViews.GetSize();
@@ -386,7 +385,7 @@ void CTDLViewTabControl::PreSubclassWindow()
 	for (int nView = 0; nView < nNumView; nView++)
 	{
 		const TDCVIEW& view = m_aViews[nView];
-		InsertItem(TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE, nView, view.sViewLabel, 0, (LPARAM)view.nView);
+		InsertItem(TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE, nView, view.sViewLabel, nView, (LPARAM)view.nView);
 	}
 
 	if (nNumView)
@@ -676,40 +675,18 @@ BOOL CTDLViewTabControl::ShowViewTab(FTC_VIEW nView, BOOL bShow)
 	return (nTab > 0);
 }
 
-void CTDLViewTabControl::PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip)
+BOOL CTDLViewTabControl::OnEraseBkgnd(CDC* pDC)
 {
-	CTabCtrlEx::PostDrawTab(dc, nTab, bSelected, rClip);
+	int nNumViews = m_aViews.GetSize();
 
-	// Draw icon
-	FTC_VIEW nView = (FTC_VIEW)GetItemData(nTab);
-
-	int nItem = FindView(nView);
-
-	if (nItem != -1)
+	if (nNumViews && !m_ilTabs.GetImageCount())
 	{
-		const TDCVIEW& view = m_aViews[nItem];
-
-		if (view.hIcon)
+		for (int nView = 0; nView < nNumViews; nView++)
 		{
-			CRect rTab;
-			GetItemRect(nTab, rTab);
-
-			if (CRect().IntersectRect(rClip, rTab))
-			{
-				// Centre icon vertically in tab
-				const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
-
-				CRect rIcon(rTab);
-				rIcon.bottom = (rIcon.top + IMAGE_SIZE);
-
-				GraphicsMisc::CentreRect(rIcon, rTab, FALSE, TRUE);
-
-				::DrawIconEx(dc, rIcon.left + 4, rIcon.top, view.hIcon, IMAGE_SIZE, IMAGE_SIZE, 0, NULL, DI_NORMAL);
-			}
+			m_ilTabs.Add(m_aViews[nView].hIcon);
 		}
 	}
-	else
-	{
-		ASSERT(0);
-	}
+
+	return CTabCtrlEx::OnEraseBkgnd(pDC);
 }
+

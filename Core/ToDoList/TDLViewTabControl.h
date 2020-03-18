@@ -79,7 +79,6 @@ protected:
 	CArray<TDCVIEW, TDCVIEW&> m_aViews;
 	DWORD m_dwStyles;
 	int m_nSelTab;
-	CImageList m_ilSpacer;
 	BOOL m_bShowingTabs;
 
 // Overrides
@@ -99,6 +98,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCloseTab(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -118,7 +118,6 @@ protected:
 
 	// Virtual overrides
 	BOOL WantTabCloseButton(int nTab) const;
-	void PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip);
 };
 
 /////////////////////////////////////////////////////////////////////////////

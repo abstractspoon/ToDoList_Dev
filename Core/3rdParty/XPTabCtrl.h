@@ -45,6 +45,7 @@ enum ETabOrientation
 // CXPTabCtrl window
 class CXPTabCtrl : public CTabCtrl
 {
+protected:
 	ETabOrientation	m_eTabOrientation;	// current tab orientation
 	CImageList		m_ilTabs; 			// possible tab image list
 	BOOL			m_bTabExtended;		// Use extended Themes functionalities
