@@ -5060,7 +5060,7 @@ void CGanttCtrl::ScrollToTask(DWORD dwTaskID)
 	GET_GI(dwTaskID, pGI);
 	
 	// Don't scroll if any part of the task is already visible
-	COleDateTimeRange dtVis;
+	GANTTDATERANGE dtVis;
 	VERIFY(GetVisibleDateRange(dtVis));
 
 	COleDateTime dtStart, dtDue;
@@ -5073,7 +5073,7 @@ void CGanttCtrl::ScrollToTask(DWORD dwTaskID)
 	else if (pGI->HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)))
 	{
 		if (!dtVis.Contains(pGI->dtDone))
-		ScrollTo(pGI->dtDone);
+			ScrollTo(pGI->dtDone);
 	}
 }
 
@@ -5108,23 +5108,27 @@ void CGanttCtrl::ScrollTo(const COleDateTime& date)
 	}
 }
 
-BOOL CGanttCtrl::GetVisibleDateRange(COleDateTimeRange& dtRange) const
+BOOL CGanttCtrl::GetVisibleDateRange(GANTTDATERANGE& dtRange) const
 {
-	CRect rList;
-	m_list.GetClientRect(rList);
+	dtRange = ActiveDateRange();
 
-	rList.OffsetRect(m_list.GetScrollPos(SB_HORZ), 0);
-
-	COleDateTime dtStart, dtEnd;
-
-	if (GetDateFromScrollPos(rList.left, dtStart) &&
-		GetDateFromScrollPos(rList.right - 1, dtEnd))
+	if (m_list.GetStyle() & WS_HSCROLL)
 	{
-		return dtRange.Set(dtStart, dtEnd, HasOption(GTLCF_DECADESAREZEROBASED));
+		CRect rList;
+		m_list.GetClientRect(rList);
+
+		rList.OffsetRect(m_list.GetScrollPos(SB_HORZ), 0);
+
+		COleDateTime dtStart, dtEnd;
+
+		if (GetDateFromScrollPos(rList.left, dtStart) &&
+			GetDateFromScrollPos(rList.right - 1, dtEnd))
+		{
+			dtRange.Set(COleDateTimeRange(dtStart, dtEnd, FALSE));
+		}
 	}
 
-	// else
-	return FALSE;
+	return dtRange.IsValid();
 }
 
 BOOL CGanttCtrl::GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date)

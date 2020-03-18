@@ -854,6 +854,16 @@ BOOL GANTTDATERANGE::Contains(const GANTTDATERANGE& dtRange) const
 	return TRUE;
 }
 
+BOOL GANTTDATERANGE::Contains(const COleDateTime& date) const
+{
+	return COleDateTimeRange::Contains(date);
+}
+
+BOOL GANTTDATERANGE::HasIntersection(const COleDateTimeRange& dtRange) const
+{
+	return COleDateTimeRange::HasIntersection(dtRange);
+}
+
 BOOL GANTTDATERANGE::IntersectWith(const GANTTDATERANGE& dtRange)
 {
 	if (!COleDateTimeRange::IntersectWith(dtRange))

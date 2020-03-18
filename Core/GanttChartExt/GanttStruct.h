@@ -64,6 +64,9 @@ struct GANTTDATERANGE : protected COleDateTimeRange
 
 	BOOL Contains(const GANTTITEM& gi) const;
 	BOOL Contains(const GANTTDATERANGE& dtRange) const;
+	BOOL Contains(const COleDateTime& date) const;
+	BOOL HasIntersection(const COleDateTimeRange& dtRange) const;
+
 	BOOL IntersectWith(const GANTTDATERANGE& dtRange);
 
 	BOOL operator==(const GANTTDATERANGE& dtOther) const;
