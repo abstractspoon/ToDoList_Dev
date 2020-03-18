@@ -191,12 +191,12 @@ void CUIThemeFile::RecalcNonWorkingColors()
 	// Ensure a minimum 'darkness' level
 	HLSX hlsTemp(crAppBackDark);
 
-	hlsTemp.fLuminosity = 0.9f;
-	crNonWorkingHours = hlsTemp;
-
-	// Make weekend a smidgen darker
 	hlsTemp.fLuminosity = 0.8f;
 	crWeekend = hlsTemp;
+
+	// Make non-working hours a smidgen lighter
+	hlsTemp.fLuminosity = 0.825f;
+	crNonWorkingHours = hlsTemp;
 }
 
 COLORREF CUIThemeFile::GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID)
