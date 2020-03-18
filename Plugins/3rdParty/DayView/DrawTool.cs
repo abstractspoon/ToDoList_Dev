@@ -26,7 +26,7 @@ namespace Calendar
             {
                 if (m_SelectionStarted)
                 {
-                    DateTime time = m_DayView.GetDateTimeAt(e.X, e.Y);
+                    DateTime time = m_DayView.GetDateTimeAt(e.X, e.Y, false); // not a long appointment
 
                     if (time < m_SelectionStart.Item1)
                     {
@@ -36,7 +36,7 @@ namespace Calendar
                     else
                     {
 						m_DayView.SelectionStart = m_SelectionStart.Item1;
-						m_DayView.SelectionEnd = time.AddMinutes(60 / m_DayView.SlotsPerHour);
+						m_DayView.SelectionEnd = time/*.AddMinutes(60 / m_DayView.SlotsPerHour)*/;
 					}
 
 					m_DayView.Invalidate();

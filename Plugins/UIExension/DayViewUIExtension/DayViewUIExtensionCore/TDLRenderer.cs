@@ -384,6 +384,10 @@ namespace DayViewUIExtension
                     // Draw the background of the appointment
 					if (isSelected)
 					{
+						// Infamous GDI+ off-by-one bug
+						if (!longAppt)
+							rect.Height++;
+
                         UIExtension.SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height, false); // opaque
 					}
 					else

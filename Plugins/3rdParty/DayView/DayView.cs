@@ -1278,16 +1278,14 @@ namespace Calendar
         {
             double numSlots = (y - this.HeaderHeight + vscroll.Value) / (double)slotHeight;
 
-            // Clip at top and bottom
-            numSlots = Math.Max(0, Math.Min((24 * slotsPerHour), numSlots));
-
-            int minutes = (int)((60 * numSlots) / slotsPerHour);
-
-            int minsPerSlot = (60 / slotsPerHour);
-            int lastSlotMins = ((24 * 60) - minsPerSlot);
+			// Clip at top and bottom
+			int maxSlots = (24 * slotsPerHour);
+            numSlots = Math.Max(0, Math.Min(maxSlots, numSlots));
 
             // nearest slot
-            minutes = ((int)numSlots * minsPerSlot);
+            //int minutes = (int)((60 * numSlots) / slotsPerHour);
+            int minsPerSlot = (60 / slotsPerHour);
+            int minutes = ((int)numSlots * minsPerSlot);
 
             return new TimeSpan((minutes / 60), (minutes % 60), 0);
         }
@@ -1478,7 +1476,11 @@ namespace Calendar
 				Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
 
 				selectionRectangle.X += (appointmentGripWidth + 2);
-				selectionRectangle.Width -= (appointmentGripWidth + 3);
+				selectionRectangle.Width -= (appointmentGripWidth + 2);
+
+				// GDI+ off-by-one bug
+				selectionRectangle.Width--;
+				selectionRectangle.Height++;
 
 				if (selectionRectangle.Height > 1)
 					renderer.DrawHourRange(e.Graphics, selectionRectangle, false, true);
