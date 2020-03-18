@@ -2107,20 +2107,21 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 					AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
 					// do the zoom
-					ZoomIn(zDelta > 0);
-
-					// scroll to area of interest
-					if (dwScrollID)
+					if (ZoomIn(zDelta > 0) && (m_nMonthDisplay != nPrevDisplay))
 					{
-						ScrollToTask(dwScrollID);
-					}
-					else if (CDateHelper::IsDateSet(dtScroll))
-					{
-						ScrollTo(dtScroll);
-					}
+						// scroll to area of interest
+						if (dwScrollID)
+						{
+							ScrollToTask(dwScrollID);
+						}
+						else if (CDateHelper::IsDateSet(dtScroll))
+						{
+							ScrollTo(dtScroll);
+						}
 					
-					// notify parent
-					CWnd::GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
+						// notify parent
+						CWnd::GetParent()->SendMessage(WM_GTLC_NOTIFYZOOM, nPrevDisplay, m_nMonthDisplay);
+					}
 				}
 			}
 		}
