@@ -149,17 +149,22 @@ namespace Calendar
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            if (gripWidth > 2)
-            {
-                using (Brush brush = new SolidBrush(SystemColors.Window))
-                    g.FillRectangle(brush, rect.Left, rect.Top - 1, gripWidth, rect.Height);
-            }
+			if (gripWidth <= 0)
+				return;
 
-            if (gripWidth > 0)
-            {
-                using (Pen pen = new Pen(HourSeperatorColor))
-                    g.DrawRectangle(pen, rect.Left, rect.Top - 1, gripWidth, rect.Height);
-            }
+			using (Pen pen = new Pen(HourSeperatorColor))
+			{
+				if (gripWidth > 2)
+				{
+					using (Brush brush = new SolidBrush(SystemColors.Window))
+						g.FillRectangle(brush, rect.Left, rect.Top - 1, gripWidth, rect.Height);
+				}
+
+				if (gripWidth == 1)
+					g.DrawLine(pen, rect.Left, rect.Top - 1, rect.Left, rect.Bottom);
+				else 
+					g.DrawRectangle(pen, rect.Left, rect.Top - 1, gripWidth, rect.Height);
+			}
         }
 
         public abstract void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isSelected, Rectangle gripRect);

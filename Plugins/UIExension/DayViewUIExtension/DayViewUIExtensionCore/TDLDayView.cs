@@ -52,9 +52,9 @@ namespace DayViewUIExtension
             hourLabelWidth = DPIScaling.Scale(hourLabelWidth);
             hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
             dayHeadersHeight = DPIScaling.Scale(dayHeadersHeight);
-            appointmentGripWidth = DPIScaling.Scale(appointmentGripWidth);
             headerBorder = DPIScaling.Scale(headerBorder);
             longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
+			appointmentGripWidth = 1; // matches app
 
             m_Renderer = new TDLRenderer(Handle, taskIcons);
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();

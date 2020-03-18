@@ -1380,7 +1380,7 @@ namespace Calendar
 
                 hourRectangle.Y = rect.Y + (m_Hour * slotsPerHour * slotHeight) - vscroll.Value;
                 hourRectangle.X += hourLabelIndent;
-                hourRectangle.Width = hourLabelWidth;
+				hourRectangle.Width = hourLabelWidth - 1;
 
                 var minuteRect = hourRectangle;
                 minuteRect.Height = slotHeight;

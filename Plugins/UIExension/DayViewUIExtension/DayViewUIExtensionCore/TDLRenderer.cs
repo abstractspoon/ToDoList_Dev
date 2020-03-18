@@ -86,7 +86,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return GridlineColor;
+                return DrawingColor.AdjustLighting(GridlineColor, 0.2f, false);
             }
         }
 
@@ -94,7 +94,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return DrawingColor.AdjustLighting(GridlineColor, -0.25f, false);
+                return GridlineColor;
             }
         }
 
@@ -186,6 +186,8 @@ namespace DayViewUIExtension
             {
                 using (Pen pen = new Pen(MinuteLineColor))
                 {
+					g.SmoothingMode = SmoothingMode.None;
+
                     if (minute == 0)
                     {
                         g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
@@ -196,7 +198,7 @@ namespace DayViewUIExtension
                         rect.X += rect.Width / 2;
                         rect.Width /= 2;
 
-                        g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
+						g.DrawLine(pen, rect.Left, rect.Y, rect.Right, rect.Y);
 
                         // Draw label beneath
                         using (SolidBrush brush = new SolidBrush(this.TextColor)) 
