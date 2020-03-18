@@ -86,7 +86,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return DrawingColor.AdjustLighting(GridlineColor, 0.2f, false);
+                return GridlineColor;
             }
         }
 
@@ -94,7 +94,7 @@ namespace DayViewUIExtension
         {
             get
             {
-                return GridlineColor;
+                return DrawingColor.AdjustLighting(GridlineColor, -0.2f, false);
             }
         }
 

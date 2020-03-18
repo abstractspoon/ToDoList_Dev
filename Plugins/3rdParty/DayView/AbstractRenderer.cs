@@ -163,7 +163,7 @@ namespace Calendar
 				if (gripWidth == 1)
 					g.DrawLine(pen, rect.Left, rect.Top - 1, rect.Left, rect.Bottom);
 				else 
-					g.DrawRectangle(pen, rect.Left, rect.Top - 1, gripWidth, rect.Height);
+					g.DrawRectangle(pen, rect.Left, rect.Top - 1, gripWidth - 1, rect.Height);
 			}
         }
 

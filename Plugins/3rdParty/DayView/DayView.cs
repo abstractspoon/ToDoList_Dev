@@ -1522,10 +1522,11 @@ namespace Calendar
 						groups.Add(app.Group);
 
 				Rectangle rect2 = rect;
-				rect2.X += (appointmentGripWidth + 2);
 
-				rect2.Width -= appointmentGripWidth;
-				rect2.Width = (rect2.Width / groups.Count) - 2;
+				rect2.X += (appointmentGripWidth + 1); // 1 pixel padding
+				rect2.Width -= (appointmentGripWidth + 1);
+
+				rect2.Width = (rect2.Width / groups.Count);
 
 				groups.Sort();
 
