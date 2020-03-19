@@ -1425,38 +1425,6 @@ int CCalendarCtrl::GetSelectedItems(CDWordArray& dwaSelection) const
 	return dwaSelection.GetSize();
 }
 
-bool CCalendarCtrl::GetGridCellFromDate(const COleDateTime& date, int &nRow, int &nCol) const
-{
-	for(int i=0; i < GetVisibleWeeks() ; i++)
-	{
-		for(int u=0; u<CALENDAR_NUM_COLUMNS; u++)
-		{
-			const CCalendarCell* pCell = GetCell(i, u);
-
-			if (floor(pCell->date.m_dt) == floor(date.m_dt))
-			{
-				nRow = i;
-				nCol = u;
-
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
-
-CCalendarCell* CCalendarCtrl::GetCell(const COleDateTime& date)
-{
-	int nRow, nCol;
-
-	if (GetGridCellFromDate(date, nRow, nCol))
-		return GetCell(nRow, nCol);
-
-	// else
-	return NULL;
-}
-
 void CCalendarCtrl::AdjustSelection()
 {
 	int nSelCount = 0;

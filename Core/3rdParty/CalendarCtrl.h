@@ -94,7 +94,6 @@ public:
 	//}}AFX_VIRTUAL
 
 protected:	
-	CCalendarCell* GetCell(const COleDateTime& date);
 	CCalendarCell* GetCell(const CPoint& point);	
 	const CCalendarCell* GetCell(const CPoint& point) const;
 
@@ -112,7 +111,6 @@ protected:
 	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell) const;
 	
 	bool GetGridCellFromPoint(const CPoint& point, int &nRow, int &nCol) const;
-	bool GetGridCellFromDate(const COleDateTime& date, int &nRow, int &nCol) const;
 	bool GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeader = FALSE) const;
 	void NotifyParentDblClick();
 	void NotifyParentClick();
