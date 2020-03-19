@@ -239,7 +239,7 @@ protected:
 	int GetColumnWidth() const;
 	double GetMonthWidth(int nColWidth) const;
 	int GetRequiredListColumnCount() const;
-	int GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const;
+	int GetRequiredListColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay) const;
 	BOOL ZoomTo(GTLC_MONTH_DISPLAY nNewDisplay, int nNewMonthWidth);
 	void DeleteItem(HTREEITEM hti);
 	void RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE* pTasks, const CDWordSet& mapIDs);

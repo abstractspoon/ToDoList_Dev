@@ -81,9 +81,11 @@ protected:
 	CBrush m_brBack;
 	UITHEME m_theme;
 	
-	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
 	BOOL m_bReadOnly;
 	BOOL m_bInSelectTask;
+	BOOL m_bInSetMonthDisplay;
+
+	CMap<GTLC_MONTH_DISPLAY, GTLC_MONTH_DISPLAY, GTLC_SNAPMODE, GTLC_SNAPMODE> m_mapDisplaySnapModes;
 	GANTTDATERANGE m_dtPrevActiveRange;
 
 // Overrides
@@ -136,7 +138,7 @@ protected:
 	afx_msg LRESULT OnGanttGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttEditTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnGanttMoveTask(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnActiveDateRangeChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnSliderDateRangeChange(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo handlers

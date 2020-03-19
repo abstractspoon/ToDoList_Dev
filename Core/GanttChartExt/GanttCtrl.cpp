@@ -1290,12 +1290,12 @@ double CGanttCtrl::GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth)
 
 int CGanttCtrl::GetRequiredListColumnCount() const
 {
-	return GetRequiredListColumnCount(m_nMonthDisplay);
+	return GetRequiredListColumnCount(ActiveDateRange(), m_nMonthDisplay);
 }
 
-int CGanttCtrl::GetRequiredListColumnCount(GTLC_MONTH_DISPLAY nDisplay) const
+int CGanttCtrl::GetRequiredListColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay) const
 {
-	int nNumCols = GetRequiredColumnCount(ActiveDateRange(), nDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
+	int nNumCols = GetRequiredColumnCount(dtRange, nDisplay, HasOption(GTLCF_DECADESAREZEROBASED));
 	
 	// Add a buffer column to accommodate trailing text except
 	// where an active date range has been set else we'll always
@@ -4280,8 +4280,14 @@ BOOL CGanttCtrl::CanSetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth
 		return FALSE;
 	}
 
-	// ignore hidden dummy first column
-	int nNumReqColumns = GetRequiredListColumnCount(nDisplay);
+	// We're only interested in the actual data we need to display
+	// rather than the active range which may be much larger
+	GANTTDATERANGE dtActual(m_dtActiveRange);
+
+	if (!dtActual.IntersectWith(m_dtDataRange))
+		dtActual = m_dtDataRange;
+
+	int nNumReqColumns = GetRequiredListColumnCount(dtActual, nDisplay);
 	int nColWidth = GetColumnWidth(nDisplay, nMonthWidth);
 	int nTotalReqdWidth = (nNumReqColumns * nColWidth);
 	
@@ -4694,7 +4700,7 @@ void CGanttCtrl::BuildListColumns()
 	m_list.InsertColumn(0, &lvc);
 	
 	// add other columns
-	int nNumCols = GetRequiredListColumnCount(m_nMonthDisplay);
+	int nNumCols = GetRequiredListColumnCount();
 
 	for (int i = 1; i <= nNumCols; i++)
 	{
@@ -4721,7 +4727,7 @@ void CGanttCtrl::UpdateListColumns(int nWidth)
 		nWidth = GetColumnWidth();
 
 	int nNumCols = m_listHeader.GetItemCount(); // includes hidden first column
-	int nReqCols = (GetRequiredListColumnCount(m_nMonthDisplay) + 1);
+	int nReqCols = (GetRequiredListColumnCount() + 1);
 	int nDiffCols = (nReqCols - nNumCols);
 
 	if (nDiffCols > 0)

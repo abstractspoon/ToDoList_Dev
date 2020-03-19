@@ -60,6 +60,7 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_GANTTTREE_DIALOG, pParent), 
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
+	m_bInSetMonthDisplay(FALSE),
 #pragma warning(disable:4355)
 	m_dlgPrefs(this)
 #pragma warning(default:4355)
@@ -120,7 +121,7 @@ BEGIN_MESSAGE_MAP(CGanttChartWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_TLC_ITEMSELCHANGE, OnGanttNotifySelChanged)
 
 	ON_REGISTERED_MESSAGE(WM_GANTTDEPENDDLG_CLOSE, OnGanttDependencyDlgClose)
-	ON_REGISTERED_MESSAGE(RANGE_CHANGED, OnActiveDateRangeChange)
+	ON_REGISTERED_MESSAGE(RANGE_CHANGED, OnSliderDateRangeChange)
 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelchangeSnapMode)
 END_MESSAGE_MAP()
 
@@ -900,13 +901,14 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 
 	GTLC_MONTH_DISPLAY nPrevDisplay = m_ctrlGantt.GetMonthDisplay();
 
-	CHoldRedraw hr(*this);
-
-	m_ctrlGantt.ClearActiveDateRange();
-	m_sliderDateRange.ClearSelectedRange();
+	CHoldRedraw hr(*this, (NCR_PAINT | NCR_ERASEBKGND));
 
 	if (m_ctrlGantt.SetMonthDisplay(nDisplay))
 	{
+		// Ignore updates from slider for the duration
+		// because we're going to be fiddling
+		CAutoFlag af(m_bInSetMonthDisplay, TRUE);
+
 		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nDisplay);
 
 		BuildSnapCombo();
@@ -937,12 +939,17 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 						dtActive.Set(dtActive, nDisplay, m_dlgPrefs.GetDecadesAreZeroBased());
 					else
 						dtActive.Reset();
-				}
 
-				if (dtActive.IsValid())
-				{
-					m_ctrlGantt.SetActiveDateRange(dtActive);
-					m_sliderDateRange.SetSelectedRange(dtActive);
+					if (dtActive.IsValid())
+					{
+						m_ctrlGantt.SetActiveDateRange(dtActive);
+						m_sliderDateRange.SetSelectedRange(dtActive);
+					}
+					else
+					{
+						m_ctrlGantt.ClearActiveDateRange();
+						m_sliderDateRange.ClearSelectedRange();
+					}
 				}
 			}
 
@@ -952,8 +959,6 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		{
 			m_sliderDateRange.EnableWindow(FALSE);
 		}
-
-		m_ctrlGantt.Invalidate(FALSE); // because of the CHoldRedraw
 
 		return TRUE;
 	}
@@ -1479,17 +1484,22 @@ LRESULT CGanttChartWnd::OnGanttEditTaskIcon(WPARAM wp, LPARAM lp)
 	return GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKICON, wp, lp);
 }
 
-LRESULT CGanttChartWnd::OnActiveDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CGanttChartWnd::OnSliderDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	GANTTDATERANGE dtSel;
+	// Ignore slider updates whilst setting the month display because 
+	// we do all the fixing up 
+	if (!m_bInSetMonthDisplay)
+	{
+		GANTTDATERANGE dtSel;
 
-	if (m_sliderDateRange.GetSelectedRange(dtSel))
-		m_ctrlGantt.SetActiveDateRange(dtSel);
-	else
-		m_ctrlGantt.ClearActiveDateRange();
+		if (m_sliderDateRange.GetSelectedRange(dtSel))
+			m_ctrlGantt.SetActiveDateRange(dtSel);
+		else
+			m_ctrlGantt.ClearActiveDateRange();
 
-	BuildDisplayCombo();
-	UpdateActiveRangeLabel();
+		BuildDisplayCombo();
+		UpdateActiveRangeLabel();
+	}
 
 	return 0L;
 }
