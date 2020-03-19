@@ -787,6 +787,17 @@ bool CCalendarCtrl::IsGridCellSelected(int nRow, int nCol) const
 	return IsGridCellSelected(pCell);
 }
 
+bool CCalendarCtrl::SelectGridCell(int nRow, int nCol)
+{ 
+	if ((nRow < 0) || (nRow >= m_nVisibleWeeks) || (nCol < 0) || (nCol >= CALENDAR_NUM_COLUMNS))
+	{
+		ASSERT(0);
+		return false;
+	}
+
+	return (SelectDate(m_dayCells[nRow][nCol].date, FALSE) != FALSE);
+}
+
 void CCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
 	int nRow, nCol;

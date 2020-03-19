@@ -47,14 +47,12 @@ public:
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
-	void EnsureVisible(DWORD dwTaskID, BOOL bShowStart);
+	void EnsureVisible(DWORD dwTaskID);
 	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
 	DWORD GetSelectedTaskID() const;
-	BOOL SelectTask(DWORD dwTaskID, BOOL bScroll);
-	void ScrollToSelectedTask();
-	void ScrollToTask(DWORD dwTaskID);
+	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending);
 
 	TCC_SNAPMODE GetSnapMode() const;
@@ -158,7 +156,9 @@ protected:
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
 	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell) const;
 	
-	int RebuildCellTasks(CCalendarCell* pCell) const;
+	int RebuildCellTasks();
+	int RebuildCellTasks(CCalendarCell* pCell);
+
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
 	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell) const;
 

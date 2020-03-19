@@ -121,6 +121,7 @@ protected:
 	bool IsGridCellSelected(int nRow, int nCol) const;
 	bool GetLastSelectedGridCell(int &nRow, int &nCol) const;
 	void AdjustSelection();
+	bool SelectGridCell(int nRow, int nCol);
 
 	const CCalendarCell* GetCell(int nRow, int nCol) const;
 	CCalendarCell* GetCell(int nRow, int nCol);

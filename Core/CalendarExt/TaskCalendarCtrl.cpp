@@ -581,13 +581,9 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 	pDC->SelectObject(pOldFont);
 }
 
-void CTaskCalendarCtrl::DrawCells(CDC* pDC)
+int CTaskCalendarCtrl::RebuildCellTasks()
 {
-	UpdateCellScrollBarVisibility();
-
-	// rebuild build display
-	m_nMaxDayTaskCount = 0;
-	m_aContinuousDrawInfo.RemoveAll();
+	int nTotal = 0;
 
 	if (m_mapData.GetCount())
 	{
@@ -598,10 +594,23 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 				CCalendarCell* pCell = GetCell(i, u);
 				ASSERT(pCell);
 
-				RebuildCellTasks(pCell);
+				nTotal += RebuildCellTasks(pCell);
 			}
 		}
 	}
+
+	return nTotal;
+}
+
+void CTaskCalendarCtrl::DrawCells(CDC* pDC)
+{
+	UpdateCellScrollBarVisibility();
+
+	// rebuild build display
+	m_nMaxDayTaskCount = 0;
+	m_aContinuousDrawInfo.RemoveAll();
+
+	RebuildCellTasks();
 
 	// create alternate text font as required
 	int nSize = CalcRequiredTaskFontPointSize();
@@ -1120,7 +1129,7 @@ CTaskCalItemArray* CTaskCalendarCtrl::GetCellTasks(CCalendarCell* pCell) const
 	return static_cast<CTaskCalItemArray*>(pCell->pUserData);
 }
 
-int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell) const
+int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell)
 {
 	ASSERT(pCell);
 
@@ -1367,42 +1376,71 @@ double CTaskCalendarCtrl::CalcDateDragTolerance() const
 	return min(dDragTol, 1.0);
 }
 
-void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID, BOOL bShowStart)
+void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID)
 {
-	if (!bShowStart) // partial visibility ok
+	// is the task already visible to some degree?
+	int nRow, nCol;
+
+	RebuildCellTasks();
+
+	if (!GetGridCellFromTask(dwTaskID, nRow, nCol))
 	{
-		// is the task already visible to some degree
-		int nRow, nCol;
+		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
-		if (GetGridCellFromTask(dwTaskID, nRow, nCol))
- 			return;
-	}
-
-	// else make it visible
-	TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
-	ASSERT(pTCI);
-
-	if (!pTCI)
-		return;
-
-	COleDateTime dtMin = GetMinDate(), dtMax = GetMaxDate();
-
-	if (bShowStart)
-	{
-		if (pTCI->GetAnyStartDate() < dtMin || pTCI->GetAnyStartDate() > dtMax)
+		if (!pTCI)
 		{
-			// need to scroll
-			Goto(pTCI->GetAnyStartDate());
+			ASSERT(0);
+			return;
+		}
+
+		COleDateTime dtCellsMin = GetMinDate();
+		COleDateTime dtCellsMax = GetMaxDate();
+
+		COleDateTime dtStart = pTCI->GetAnyStartDate();
+		COleDateTime dtEnd = pTCI->GetAnyEndDate();
+
+		if (dtEnd < dtCellsMin)
+		{
+			Goto(dtEnd);
+		}
+		else if (dtStart > dtCellsMax)
+		{
+			Goto(dtStart);
+		}
+		else if (!HasOption(TCCO_DISPLAYCONTINUOUS))
+		{
+			BOOL bHasStart = (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet());
+			BOOL bHasCalcStart = (HasOption(TCCO_DISPLAYCALCSTART) && !pTCI->IsStartDateSet() && pTCI->HasAnyStartDate());
+
+			BOOL bHasEnd = (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet());
+			BOOL bHasCalcEnd = (HasOption(TCCO_DISPLAYCALCDUE) && !pTCI->IsEndDateSet() && pTCI->HasAnyEndDate());
+
+			if ((dtStart < dtCellsMin) && (bHasStart || bHasCalcStart))
+			{
+				Goto(dtStart);
+			}
+			else if ((dtEnd > dtCellsMax) && (bHasEnd || bHasCalcEnd))
+			{
+				Goto(dtEnd);
+			}
+		}
+		else
+		{
+			ASSERT(0);
+		}
+
+		RebuildCellTasks();
+
+		if (!GetGridCellFromTask(dwTaskID, nRow, nCol))
+		{
+			ASSERT(0);
+			return;
 		}
 	}
-	else // allow any visibility
-	{
-		if (pTCI->GetAnyEndDate() <= dtMin || pTCI->GetAnyStartDate() >= dtMax)
-		{
-			// need to scroll
-			Goto(pTCI->GetAnyStartDate());
-		}
-	}
+	
+	// Now ensure it is visible vertically
+	SelectGridCell(nRow, nCol);
+	UpdateCellScrollBarVisibility();
 }
 
 BOOL CTaskCalendarCtrl::GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const
@@ -1603,7 +1641,7 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bScroll)
 }
 
 // internal version
-BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bScroll, BOOL bNotify)
+BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify)
 {
 	if (!HasTask(dwTaskID))
 		return FALSE;
@@ -1615,8 +1653,8 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bScroll, BOOL bNotify)
 		if (bNotify)
 			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetSelectedTaskID());
 
-		if (bScroll)
-			ScrollToSelectedTask();
+		if (bEnsureVisible)
+			EnsureVisible(dwTaskID);
 
 		Invalidate(FALSE);
 		UpdateWindow();
@@ -1658,65 +1696,6 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 	}
 	
 	return m_dwSelectedTaskID;
-}
-
-void CTaskCalendarCtrl::ScrollToSelectedTask()
-{
-	DWORD dwSelTaskID = GetSelectedTaskID();
-
-	if (dwSelTaskID)
-		ScrollToTask(dwSelTaskID);
-}
-
-void CTaskCalendarCtrl::ScrollToTask(DWORD dwTaskID)
-{
-	if (!dwTaskID)
-	{
-		ASSERT(0);
-		return;
-	}
-
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
-
-	if (!pTCI)
-	{
-		ASSERT(0);
-		return;
-	}
-
-	COleDateTime dtCellsMin = GetMinDate();
-	COleDateTime dtCellsMax = GetMaxDate();
-
-	COleDateTime dtStart = pTCI->GetAnyStartDate();
-	COleDateTime dtEnd = pTCI->GetAnyEndDate();
-	
-	if (dtEnd < dtCellsMin)
-	{
-		Goto(dtEnd);
-	}
-	else if (dtStart > dtCellsMax)
-	{
-		Goto(dtStart);
-	}
-	else if (!HasOption(TCCO_DISPLAYCONTINUOUS))
-	{
-		BOOL bHasStart = (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet());
-		BOOL bHasCalcStart = (HasOption(TCCO_DISPLAYCALCSTART) && !pTCI->IsStartDateSet() && pTCI->HasAnyStartDate());
-
-		BOOL bHasEnd = (HasOption(TCCO_DISPLAYDUE) && pTCI->IsEndDateSet());
-		BOOL bHasCalcEnd = (HasOption(TCCO_DISPLAYCALCDUE) && !pTCI->IsEndDateSet() && pTCI->HasAnyEndDate());
-
-		if ((dtStart < dtCellsMin) && (bHasStart || bHasCalcStart))
-		{
-			Goto(dtStart);
-		}
-		else if ((dtEnd > dtCellsMax) && (bHasEnd || bHasCalcEnd))
-		{
-			Goto(dtEnd);
-		}
-	}
-
-	// else task is visible
 }
 
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
