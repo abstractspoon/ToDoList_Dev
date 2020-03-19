@@ -545,6 +545,18 @@ int CTaskCalItemArray::CompareItems(const void* pV1, const void* pV2)
 	return nCompare;
 }
 
+int CTaskCalItemArray::FindItem(DWORD dwTaskID) const
+{
+	int nItem = GetSize();
+
+	while (nItem--)
+	{
+		if (GetAt(nItem)->GetTaskID() == dwTaskID)
+			return nItem;
+	}
+
+	return -1;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
