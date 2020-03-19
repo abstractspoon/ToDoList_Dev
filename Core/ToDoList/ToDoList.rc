@@ -715,7 +715,7 @@ BEGIN
                     10
     COMBOBOX        IDC_PERCENTINCREMENT,18,387,79,122,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Sh&ow columns on the right of the task tree",
+    CONTROL         "Sh&ow attribute columns to the right of the task tree",
                     IDC_RIGHTSIDECOLUMNS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,405,378,10
     CONTROL         "Set fo&cus to tasklist whenever ToDoList is activated",
