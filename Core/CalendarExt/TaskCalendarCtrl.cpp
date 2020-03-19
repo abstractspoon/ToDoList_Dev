@@ -1564,21 +1564,21 @@ TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
 	return pTCI;
 }
 
-BOOL CTaskCalendarCtrl::IsTaskCalItemLocked(DWORD dwTaskID) const
+BOOL CTaskCalendarCtrl::IsTaskLocked(DWORD dwTaskID) const
 {
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
 	return (pTCI && pTCI->bLocked);
 }
 
-BOOL CTaskCalendarCtrl::IsTaskCalItemDone(DWORD dwTaskID, BOOL bIncGoodAs) const
+BOOL CTaskCalendarCtrl::IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAs) const
 {
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 	
 	return (pTCI && pTCI->IsDone(bIncGoodAs));
 }
 
-BOOL CTaskCalendarCtrl::TaskCalItemHasDependencies(DWORD dwTaskID) const
+BOOL CTaskCalendarCtrl::TaskHasDependencies(DWORD dwTaskID) const
 {
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 	
@@ -2164,14 +2164,14 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 	
 	if (dwTaskID)
 	{
-		if (IsTaskCalItemLocked(dwTaskID))
+		if (IsTaskLocked(dwTaskID))
 			return FALSE;
 
-		if (IsTaskCalItemDone(dwTaskID, FALSE))
+		if (IsTaskDone(dwTaskID, FALSE))
 			return FALSE;
 		
 		BOOL bCanDrag = !HasOption(TCCO_PREVENTDEPENDENTDRAGGING) ||
-						!TaskCalItemHasDependencies(dwTaskID);
+						!TaskHasDependencies(dwTaskID);
 			
 		switch (nHit)
 		{
@@ -2222,7 +2222,7 @@ BOOL CTaskCalendarCtrl::SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const
 	{
 		if (!CanDragTask(dwTaskID, nHit))
 		{
-			if (IsTaskCalItemLocked(dwTaskID))
+			if (IsTaskLocked(dwTaskID))
 				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 			// else

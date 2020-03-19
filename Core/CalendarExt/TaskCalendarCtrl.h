@@ -169,9 +169,9 @@ protected:
 	BOOL IsValidTask(int nTask, const CCalendarCell* pCell) const;
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
-	BOOL IsTaskCalItemLocked(DWORD dwTaskID) const;
-	BOOL IsTaskCalItemDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
-	BOOL TaskCalItemHasDependencies(DWORD dwTaskID) const;
+	BOOL IsTaskLocked(DWORD dwTaskID) const;
+	BOOL IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
+	BOOL TaskHasDependencies(DWORD dwTaskID) const;
 	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
 	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
 	int GetGridRowFromPoint(const CPoint& point) const;
