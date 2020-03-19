@@ -9193,32 +9193,37 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 	TSH().CopySelection(selection, bRemoveDupeSubtasks, TRUE);
 
 	CDWordSet mapSelTaskIDs;
-	VERIFY(AddTasksToTaskFile(selection, filter, tasks, &mapSelTaskIDs)); // Mark tasks as selected
 
-	// If required, add all references for the selected tasks
-	BOOL bAppendReferences = filter.HasFlag(TDCGSTF_APPENDREFERENCES);
-
-	if (bAppendReferences && m_taskTree.HasReferenceTasks())
+	// Note: this call can fail if, for instance, the filter is asking
+	// for incomplete tasks and the selected tasks have just been 
+	// marked completed
+	if (AddTasksToTaskFile(selection, filter, tasks, &mapSelTaskIDs)) // Mark tasks as selected
 	{
-		CHTIList selectionRefs;
-		POSITION pos = mapSelTaskIDs.GetStartPosition();
+		// If required, add all references for the selected tasks
+		BOOL bAppendReferences = filter.HasFlag(TDCGSTF_APPENDREFERENCES);
 
-		while (pos)
+		if (bAppendReferences && m_taskTree.HasReferenceTasks())
 		{
-			DWORD dwSelID = mapSelTaskIDs.GetNext(pos);
-			m_taskTree.GetReferencesToTask(dwSelID, selectionRefs, TRUE); // Append
-		}
+			CHTIList selectionRefs;
+			POSITION pos = mapSelTaskIDs.GetStartPosition();
 
-		if (selectionRefs.GetCount())
-		{
-			// We want just the references and nothing else
-			TDCGETTASKS filterRefs(filter);
-			filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
+			while (pos)
+			{
+				DWORD dwSelID = mapSelTaskIDs.GetNext(pos);
+				m_taskTree.GetReferencesToTask(dwSelID, selectionRefs, TRUE); // Append
+			}
 
-			VERIFY(AddTasksToTaskFile(selectionRefs, filterRefs, tasks, NULL)); // Don't mark tasks as selected
+			if (selectionRefs.GetCount())
+			{
+				// We want just the references and nothing else
+				TDCGETTASKS filterRefs(filter);
+				filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
+
+				VERIFY(AddTasksToTaskFile(selectionRefs, filterRefs, tasks, NULL)); // Don't mark tasks as selected
+			}
 		}
 	}
-
+	
 	return (tasks.GetTaskCount());
 }
 
