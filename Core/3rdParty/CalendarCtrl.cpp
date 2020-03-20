@@ -110,9 +110,14 @@ BOOL CCalendarCtrl::SetVisibleWeeks(int nWeeks)
 	if (nWeeks < 1 || nWeeks > CALENDAR_MAX_ROWS)
 		return FALSE;
 
-	m_nVisibleWeeks = nWeeks;
-	Invalidate();
+	if (nWeeks != m_nVisibleWeeks)
+	{
+		m_nVisibleWeeks = nWeeks;
 
+		Invalidate();
+		OnVisibleDateRangeChanged();
+	}
+	
 	return TRUE;
 }
 
