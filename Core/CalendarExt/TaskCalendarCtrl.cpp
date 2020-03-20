@@ -1009,7 +1009,8 @@ void CTaskCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	
 	if (GetGridCellFromPoint(pt, nRow, nCol) && 
 		IsGridCellSelected(nRow, nCol) &&
-		IsCellScrollBarActive())
+		IsCellScrollBarActive() &&
+		!Misc::IsKeyPressed(VK_CONTROL))
 	{
 		int nLine = (abs(zDelta) / 120);
 		UINT nDir = ((zDelta < 0) ? SB_LINEDOWN : SB_LINEUP);
