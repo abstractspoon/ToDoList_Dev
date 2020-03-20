@@ -230,7 +230,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 		}
 
 		// Returns the visible height of the banner
-		public static int CreateBanner(String typeId, Control parent, Translator trans, int dollarPrice)
+		public static int CreateBanner(String typeId, String uiName, Control parent, Translator trans, int dollarPrice)
 		{
 			if (parent == null)
 				return 0;
@@ -240,7 +240,7 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 			if (banner == null)
 			{
-				banner = new Banner(typeId, trans, dollarPrice);
+				banner = new Banner(typeId, uiName, trans, dollarPrice);
 
 				banner.Location = new Point(0, 0);
 				banner.Size = new Size(parent.ClientSize.Width, banner.Height);
@@ -302,19 +302,21 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
 			// ---------------------------------------------
 
-			private String m_TypeId;
+			private String m_TypeId, m_UiName;
 			private RhinoLicensing.LicenseType m_LicenseType;
 			private Translator m_Trans;
 			private LinkLabelEx m_buyBtn;
             private ToolTip m_buyBtnTooltip;
 			private int m_DollarPrice = 0;
 			private UITheme m_Theme;
-
+			private Color m_ThemedBorderColor; // we draw it
+			
 			// ---------------------------------------------
 
-			public Banner(String typeId, Translator trans, int dollarPrice)
+			public Banner(String typeId, String uiName, Translator trans, int dollarPrice)
 			{
 				m_TypeId = typeId;
+				m_UiName = trans.Translate(uiName);
 				m_Trans = trans;
 				m_DollarPrice = dollarPrice;
 				m_Theme = new UITheme();
@@ -380,11 +382,23 @@ namespace Abstractspoon.Tdl.PluginHelpers
 					case RhinoLicensing.LicenseType.Free:
 					case RhinoLicensing.LicenseType.Supporter:
 					case RhinoLicensing.LicenseType.Contributor:
-						UITheme.DrawHorizontalBar(e.Graphics, 
-													Bounds, 
-													m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarLight),
-													m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarDark), 
-													m_Theme.GetRenderStyle());
+						{
+							var drawRect = Bounds;
+
+							if (m_ThemedBorderColor != Color.Empty)
+							{
+								using (var brush = new SolidBrush(m_ThemedBorderColor))
+									e.Graphics.FillRectangle(brush, drawRect);
+
+								drawRect.Inflate(-1, -1);
+							}
+
+							UITheme.DrawHorizontalBar(e.Graphics,
+														drawRect,
+														m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarLight),
+														m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarDark),
+														m_Theme.GetRenderStyle());
+						}
 						break;
 
 					default:
@@ -410,27 +424,35 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			{
 				get
 				{
+					String license = String.Empty;
+
 					switch (m_LicenseType)
 					{
 						case RhinoLicensing.LicenseType.Free:
-							return m_Trans.Translate("Free License");
+							license = m_Trans.Translate("Free License");
+							break;
 
 						case RhinoLicensing.LicenseType.Trial:
 							if (m_DollarPrice > 0)
-								return m_Trans.Translate("Trial License");
-
-							return m_Trans.Translate("Under Development");
+								license = m_Trans.Translate("Trial License");
+							else
+								license = m_Trans.Translate("Under Development");
+							break;
 
 						case RhinoLicensing.LicenseType.Supporter:
-							return m_Trans.Translate("Supporter License");
+							license = m_Trans.Translate("Supporter License");
+							break;
 
 						case RhinoLicensing.LicenseType.Contributor:
-							return m_Trans.Translate("Contributor License");
+							license = m_Trans.Translate("Contributor License");
+							break;
 
 						case RhinoLicensing.LicenseType.Paid:
 						default:
 							return String.Empty;
 					}
+
+					return String.Format("{0} ({1})", license, m_UiName);
 				}
 			}
 
@@ -493,27 +515,38 @@ namespace Abstractspoon.Tdl.PluginHelpers
 
             private void FixupBorder()
             {
-                if (VisualStyleRenderer.IsSupported)
-                {
-					// Add border if (nearly) gray or the colour 
-					// is too close to the parent background colour
-					Color parentColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight); ;
-					Color bannerColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarLight);
+				if (!VisualStyleRenderer.IsSupported)
+				{
+					BorderStyle = BorderStyle.Fixed3D;
+					return;
+				}
 
-					if (bannerColor.GetSaturation() < 0.2f ||
-						(ColorUtil.DrawingColor.CalculateColorDifference(bannerColor, parentColor) < 0.2f))
-					{
-						BorderStyle = BorderStyle.FixedSingle;
-					}
+				// Disable built-in border
+				BorderStyle = BorderStyle.None;
+
+				// Add border if (nearly) gray or the colour 
+				// is too close to the parent background colour
+				Color borderColor = Color.Empty;
+
+				Color parentColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+				Color bannerColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.StatusBarLight);
+
+				bool wantThemedBorder = ((bannerColor.GetSaturation() < 0.2f) ||
+										(ColorUtil.DrawingColor.CalculateColorDifference(bannerColor, parentColor) < 0.2f));
+
+				if (wantThemedBorder)
+				{
+					if (ColorUtil.DrawingColor.GetLuminance(parentColor) > 0.5f)
+						borderColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 					else
-					{
-						BorderStyle = BorderStyle.None;
-					}
-                }
-                else // Classic theme
-                {
-                    BorderStyle = BorderStyle.Fixed3D;
-                }
+						borderColor = m_Theme.GetAppDrawingColor(UITheme.AppColor.AppLinesLight);
+				}
+
+				if (borderColor != m_ThemedBorderColor)
+				{ 
+					m_ThemedBorderColor = borderColor;
+					Invalidate();
+				}
             }
 		}
 	}
