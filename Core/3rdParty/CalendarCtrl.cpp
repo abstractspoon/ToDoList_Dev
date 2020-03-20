@@ -198,6 +198,8 @@ void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 
 			SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
 		}
+
+		OnVisibleDateRangeChanged(); // for derived classes
 	}
 
 	Invalidate(true);

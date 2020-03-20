@@ -149,6 +149,8 @@ protected:
 	afx_msg UINT OnGetDlgCode();
 	DECLARE_MESSAGE_MAP()
 
+	virtual void OnVisibleDateRangeChanged() {} // for derived classes
+
 protected:
 	CFont			m_DefaultFont;
 	CCalendarCell	m_dayCells[CALENDAR_MAX_ROWS][CALENDAR_NUM_COLUMNS];

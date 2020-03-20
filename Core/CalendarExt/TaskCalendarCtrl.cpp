@@ -298,6 +298,8 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	if (bChange)
 	{
 		RecalcDataRange();
+		RebuildCellTasks();
+
 		Invalidate(FALSE);
 	}
 
@@ -584,12 +586,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 {
 	UpdateCellScrollBarVisibility();
-
-	// rebuild build display
-	m_nMaxDayTaskCount = 0;
-	m_aContinuousDrawInfo.RemoveAll();
-
-	RebuildCellTasks();
+	RebuildCellTaskDrawInfo();
 
 	// create alternate text font as required
 	int nSize = CalcRequiredTaskFontPointSize();
@@ -860,15 +857,8 @@ void CTaskCalendarCtrl::OnSetFocus(CWnd* pFocus)
 	if (m_mapData.GetCount())
 	{
 		int nRow, nCol;
-		BOOL bTaskVisible = GetGridCellFromTask(m_dwSelectedTaskID, nRow, nCol);
 
-		if (!bTaskVisible)
-		{
-			RebuildCellTasks();
-			bTaskVisible = GetGridCellFromTask(m_dwSelectedTaskID, nRow, nCol);
-		}
-
-		if (bTaskVisible)
+		if (GetGridCellFromTask(m_dwSelectedTaskID, nRow, nCol))
 		{
 			const CCalendarCell* pCell = GetCell(nRow, nCol);
 			ASSERT(pCell);
@@ -1166,7 +1156,56 @@ int CTaskCalendarCtrl::RebuildCellTasks()
 		}
 	}
 
+	RebuildCellTaskDrawInfo();
+
 	return nTotal;
+}
+
+void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
+{
+	m_nMaxDayTaskCount = 0;
+	m_aContinuousDrawInfo.RemoveAll();
+
+	if (m_mapData.GetCount())
+	{
+		for(int i=0; i<CALENDAR_MAX_ROWS ; i++)
+		{
+			for(int u=0; u<CALENDAR_NUM_COLUMNS ; u++)
+			{
+				CTaskCalItemArray* pTasks = GetCellTasks(GetCell(i, u));
+				ASSERT(pTasks);
+
+				// now go thru the list and set the position of each item 
+				// if not already done
+				if (HasOption(TCCO_DISPLAYCONTINUOUS))
+				{
+					int nMaxPos = 0;
+
+					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
+					{
+						const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
+						ASSERT(pTCI);
+
+						DWORD dwTaskID = pTCI->GetTaskID();
+						CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
+
+						if (cdi.nVertPos == -1)
+							cdi.nVertPos = max(nMaxPos, nTask);
+
+						nMaxPos = max(nMaxPos, (cdi.nVertPos + 1));
+					}
+
+					m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, nMaxPos);
+				}
+				else
+				{
+					// else pos is just task index
+					m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, pTasks->GetSize());
+				}
+
+			}
+		}
+	}
 }
 
 int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell)
@@ -1246,34 +1285,6 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell)
 
 	pTasks->SortItems(m_nSortBy, m_bSortAscending);
 
-	// now go thru the list and set the position of each item 
-	// if not already done
-	if (HasOption(TCCO_DISPLAYCONTINUOUS))
-	{
-		int nMaxPos = 0;
-
-		for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
-		{
-			const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
-			ASSERT(pTCI);
-
-			DWORD dwTaskID = pTCI->GetTaskID();
-			CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
-			
-			if (cdi.nVertPos == -1)
-				cdi.nVertPos = max(nMaxPos, nTask);
-			
-			nMaxPos = max(nMaxPos, (cdi.nVertPos + 1));
-		}
-
-		m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, nMaxPos);
-	}
-	else
-	{
-		// else pos is just task index
-		m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, pTasks->GetSize());
-	}
-	
 	return pTasks->GetSize();
 }
 
@@ -1414,8 +1425,6 @@ void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID)
 	// is the task already visible to some degree?
 	int nRow, nCol;
 
-	RebuildCellTasks();
-
 	if (!GetGridCellFromTask(dwTaskID, nRow, nCol))
 	{
 		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
@@ -1462,8 +1471,6 @@ void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID)
 			//ASSERT(0);
 		}
 
-		RebuildCellTasks();
-
 		if (!GetGridCellFromTask(dwTaskID, nRow, nCol))
 		{
 			//ASSERT(0);
@@ -1481,6 +1488,11 @@ void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID)
 	TRACE(_T("CTaskCalendarCtrl::EnsureVisible(%ld, vpos = %d)\n"), dwTaskID, m_nCellVScrollPos);
 
 	UpdateCellScrollBarVisibility();
+}
+
+void CTaskCalendarCtrl::OnVisibleDateRangeChanged()
+{
+	RebuildCellTasks();
 }
 
 bool CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
@@ -1711,9 +1723,9 @@ BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID) const
 }
 
 // external version
-BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bScroll)
+BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible)
 {
-	SelectTask(dwTaskID, bScroll, FALSE);
+	SelectTask(dwTaskID, bEnsureVisible, FALSE);
 
 	return (GetSelectedTaskID() != 0);
 }

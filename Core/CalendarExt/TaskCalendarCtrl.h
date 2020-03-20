@@ -144,6 +144,8 @@ protected:
 #endif
 	DECLARE_MESSAGE_MAP()
 
+	virtual void OnVisibleDateRangeChanged();
+
 protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -156,9 +158,6 @@ protected:
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
 	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell) const;
 	
-	int RebuildCellTasks();
-	int RebuildCellTasks(CCalendarCell* pCell);
-
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
 	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell);
 
@@ -197,8 +196,7 @@ protected:
 	BOOL IsDragging() const;
 	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	double CalcDateDragTolerance() const;
-	BOOL SelectTask(DWORD dwTaskID, BOOL bScroll, BOOL bNotify);
-	void RecalcTaskDates();
+	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify);
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
@@ -212,6 +210,11 @@ protected:
 	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void DeleteData();
 	void RecalcDataRange();
+	void RecalcTaskDates();
+
+	int RebuildCellTasks();
+	int RebuildCellTasks(CCalendarCell* pCell);
+	void RebuildCellTaskDrawInfo();
 
 	// helpers
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
