@@ -160,11 +160,10 @@ protected:
 	int RebuildCellTasks(CCalendarCell* pCell);
 
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
-	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell) const;
+	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell);
 
 	BOOL CalcTaskCellRect(int nTask, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const;
 	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const;
-	BOOL GetTaskIndex(DWORD dwTaskID, const CCalendarCell* pCell) const;
 
 	BOOL IsValidTask(int nTask, const CCalendarCell* pCell) const;
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
@@ -172,12 +171,14 @@ protected:
 	BOOL IsTaskLocked(DWORD dwTaskID) const;
 	BOOL IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL TaskHasDependencies(DWORD dwTaskID) const;
-	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
-	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
-	int GetGridRowFromPoint(const CPoint& point) const;
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
+
+	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
+	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
+	BOOL GetGridCellFromDate(const COleDateTime& date, int &nRow, int &nCol) const;
+	int GetGridRowFromPoint(const CPoint& point) const;
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;
@@ -201,6 +202,7 @@ protected:
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
+	bool SelectGridCell(int nRow, int nCol);
 
 	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();

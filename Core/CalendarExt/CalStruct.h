@@ -85,6 +85,7 @@ class CTaskCalItemArray : public CArray<TASKCALITEM*, TASKCALITEM*&>
 {
 public:
 	void SortItems(TDC_ATTRIBUTE nSortBy, BOOL bSortAscending);
+	int FindItem(DWORD dwTaskID) const;
 
 protected:
 	static int CompareItems(const void* pV1, const void* pV2);
