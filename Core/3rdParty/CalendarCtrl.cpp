@@ -202,6 +202,7 @@ void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 			m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent-today).GetDays()/7;
 
 			SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
+			NotifyParentClick();
 		}
 
 		OnVisibleDateRangeChanged(); // for derived classes

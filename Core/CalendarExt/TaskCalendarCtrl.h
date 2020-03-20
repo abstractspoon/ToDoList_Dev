@@ -160,11 +160,12 @@ protected:
 	
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
 	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell);
+	const CTaskCalItemArray* GetCellTasks(int nRow, int Col) const;
+	CTaskCalItemArray* GetCellTasks(int nRow, int Col);
 
 	BOOL CalcTaskCellRect(int nTask, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const;
 	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const;
 
-	BOOL IsValidTask(int nTask, const CCalendarCell* pCell) const;
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
 	BOOL IsTaskLocked(DWORD dwTaskID) const;
@@ -201,6 +202,7 @@ protected:
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
 	bool SelectGridCell(int nRow, int nCol);
+	void EnsureSelectedTaskVisibleIfInSelectedCell();
 
 	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();
