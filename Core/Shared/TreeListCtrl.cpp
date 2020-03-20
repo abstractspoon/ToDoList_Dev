@@ -1581,7 +1581,7 @@ LRESULT CTreeListCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 				COLORREF crBack = DrawTreeItemBackground(pDC, hti, dwItemData, rItem, bSelected);
 
 				// draw horz gridline
-				DrawItemDivider(pDC, pTVCD->nmcd.rc, FALSE);
+				DrawHorzItemDivider(pDC, pTVCD->nmcd.rc);
 
 				// Draw selection before drawing text
 				if (!m_bSavingToImage)
@@ -1650,7 +1650,7 @@ void CTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, 
 
 		if (rSubItem.Width() > 0)
 		{
-			DrawItemDivider(pDC, rSubItem, TRUE);
+			DrawVertItemDivider(pDC, rSubItem, bSelected);
 
 			if (rSubItem.Width() > MIN_COL_WIDTH)
 				DrawTreeSubItemText(pDC, hti, dwItemData, nCol, rSubItem, bSelected);
@@ -1658,21 +1658,43 @@ void CTreeListCtrl::DrawTreeItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, 
 	}
 }
 
-void CTreeListCtrl::DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, COLORREF crDiv) const
+void CTreeListCtrl::DrawHorzItemDivider(CDC* pDC, const CRect& rItem) const
 {
-	if (!HasGridlines() || (bVert && (rItem.right < 0)))
+	if (!HasGridlines())
 		return;
 
 	CRect rDiv(rItem);
-
-	if (bVert)
-		rDiv.left = (rDiv.right - 1);
-	else
-		rDiv.top = (rDiv.bottom - 1);
+	rDiv.top = (rDiv.bottom - 1);
 
 	COLORREF crOld = pDC->GetBkColor();
 
-	pDC->FillSolidRect(rDiv, ((crDiv == CLR_NONE) ? m_crGridLine : crDiv));
+	pDC->FillSolidRect(rDiv, m_crGridLine);
+	pDC->SetBkColor(crOld);
+}
+
+void CTreeListCtrl::DrawVertItemDivider(CDC* pDC, const CRect& rItem, BOOL bSelected, COLORREF crDiv) const
+{
+	if (rItem.right < 0)
+		return;
+
+	CRect rDiv(rItem);
+	rDiv.left = (rDiv.right - 1);
+
+	COLORREF crOld = pDC->GetBkColor();
+
+	if (crDiv == CLR_NONE)
+		crDiv = m_crGridLine;
+
+	if (bSelected)
+	{
+		// Don't overdraw selection at top/bottom
+		rDiv.DeflateRect(0, 1);
+
+		// Make color a little darker
+		crDiv = GraphicsMisc::Darker(crDiv, 0.2);
+	}
+
+	pDC->FillSolidRect(rDiv, crDiv);
 	pDC->SetBkColor(crOld);
 }
 

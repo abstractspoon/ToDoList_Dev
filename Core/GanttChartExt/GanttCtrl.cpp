@@ -1501,7 +1501,7 @@ LRESULT CGanttCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 			
 			// draw horz gridline before selection
-			DrawListItemDivider(pDC, rFullWidth, DIV_HORZ);
+			DrawHorzItemDivider(pDC, rFullWidth);
 
 			// Draw selection before text
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -2547,7 +2547,7 @@ void CGanttCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, 
 	}
 }
 
-CGanttCtrl::DIV_TYPE CGanttCtrl::GetListVerticalDivider(int nMonth, int nYear) const
+CGanttCtrl::VERT_DIV CGanttCtrl::GetListVertDivider(int nMonth, int nYear) const
 {
 	switch (m_nMonthDisplay)
 	{
@@ -2556,13 +2556,13 @@ CGanttCtrl::DIV_TYPE CGanttCtrl::GetListVerticalDivider(int nMonth, int nYear) c
 			if (nMonth == 12)
 			{
 				if (nYear == (GetEndYear(m_nMonthDisplay)))
-					return DIV_VERT_DARK;
+					return DIV_DARK;
 
-				return DIV_VERT_MID;
+				return DIV_MID;
 			}
 			else if ((nMonth % 3) == 0)
 			{
-				return DIV_VERT_LIGHT;
+				return DIV_LIGHT;
 			}
 
 			return DIV_NONE;
@@ -2575,13 +2575,13 @@ CGanttCtrl::DIV_TYPE CGanttCtrl::GetListVerticalDivider(int nMonth, int nYear) c
 			if (nMonth == 12)
 			{
 				if (nYear == (GetEndYear(m_nMonthDisplay)))
-					return DIV_VERT_DARK;
+					return DIV_DARK;
 
-				return DIV_VERT_MID;
+				return DIV_MID;
 			}
 
 			// else
-			return DIV_VERT_LIGHT;
+			return DIV_LIGHT;
 		}
 		break;
 
@@ -2590,13 +2590,13 @@ CGanttCtrl::DIV_TYPE CGanttCtrl::GetListVerticalDivider(int nMonth, int nYear) c
 	case GTLC_DISPLAY_QUARTERS_LONG:
 		{
 			if (nMonth == 12)
-				return DIV_VERT_DARK;
+				return DIV_DARK;
 			
 			if ((nMonth % 3) == 0)
-				return DIV_VERT_MID;
+				return DIV_MID;
 
 			// else
-			return DIV_VERT_LIGHT;
+			return DIV_LIGHT;
 		}
 		break;
 
@@ -2605,13 +2605,13 @@ CGanttCtrl::DIV_TYPE CGanttCtrl::GetListVerticalDivider(int nMonth, int nYear) c
 	case GTLC_DISPLAY_MONTHS_LONG:
 		{
 			if (nMonth == 12)
-				return DIV_VERT_DARK;
+				return DIV_DARK;
 	
 			if (nMonth == 6)
-				return DIV_VERT_MID;
+				return DIV_MID;
 		
 			// else
-			return DIV_VERT_LIGHT;
+			return DIV_LIGHT;
 		}
 		break;
 
@@ -2623,28 +2623,28 @@ CGanttCtrl::DIV_TYPE CGanttCtrl::GetListVerticalDivider(int nMonth, int nYear) c
 	case GTLC_DISPLAY_DAYS_LONG:
 		{
 			if (nMonth == 12)
-				return DIV_VERT_DARK;
+				return DIV_DARK;
 			
 			// else
-			return DIV_VERT_MID;
+			return DIV_MID;
 		}
 		break;
 		
 	case GTLC_DISPLAY_HOURS:
-		return DIV_VERT_DARK;
+		return DIV_DARK;
 	}
 
 	ASSERT(0);
 	return DIV_NONE;
 }
 
-BOOL CGanttCtrl::IsVerticalDivider(DIV_TYPE nType)
+BOOL CGanttCtrl::IsVerticalDivider(VERT_DIV nType)
 {
 	switch (nType)
 	{
-	case DIV_VERT_LIGHT:
-	case DIV_VERT_MID:
-	case DIV_VERT_DARK:
+	case DIV_LIGHT:
+	case DIV_MID:
+	case DIV_DARK:
 		return TRUE;
 	}
 
@@ -2652,30 +2652,25 @@ BOOL CGanttCtrl::IsVerticalDivider(DIV_TYPE nType)
 	return FALSE;
 }
 
-void CGanttCtrl::DrawListItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType)
+void CGanttCtrl::DrawListItemVertDivider(CDC* pDC, const CRect& rItem, VERT_DIV nType, BOOL bSelected)
 {
-	if (nType == DIV_NONE)
-		return;
-
-	BOOL bVert = IsVerticalDivider(nType);
-
-	if (!HasGridlines() || (bVert && (rItem.right < 0)))
+	if ((nType == DIV_NONE) || !HasGridlines() || (rItem.right < 0))
 		return;
 
 	COLORREF color = m_crGridLine;
 
 	switch (nType)
 	{
-	case DIV_VERT_MID:
+	case DIV_MID:
 		color = GraphicsMisc::Darker(color, 0.25);
 		break;
-		
-	case DIV_VERT_DARK:
+
+	case DIV_DARK:
 		color = GraphicsMisc::Darker(color, 0.5);
 		break;
 	}
 
-	CTreeListCtrl::DrawItemDivider(pDC, rItem, bVert, color);
+	CTreeListCtrl::DrawVertItemDivider(pDC, rItem, bSelected, color);
 }
 
 CString CGanttCtrl::GetLongestVisibleAllocTo(HTREEITEM hti) const
@@ -2787,8 +2782,8 @@ void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 {
 	if (!bRollup)
 	{
-		DIV_TYPE nDiv = GetListVerticalDivider(nMonth, nYear);
-		DrawListItemDivider(pDC, rMonth, nDiv);
+		VERT_DIV nDiv = GetListVertDivider(nMonth, nYear);
+		DrawListItemVertDivider(pDC, rMonth, nDiv, bSelected);
 
 		if (!bToday)
 			bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
@@ -2827,7 +2822,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 			if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
 			{
 				rDay.right = rDay.left; // draw at start of day
-				DrawListItemDivider(pDC, rDay, DIV_VERT_LIGHT);
+				DrawListItemVertDivider(pDC, rDay, DIV_LIGHT, bSelected);
 			}
 		}
 
@@ -2894,7 +2889,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 					{
 						rHour.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * nHour)));
 
-						DrawListItemDivider(pDC, rHour, DIV_VERT_LIGHT);
+						DrawListItemVertDivider(pDC, rHour, DIV_LIGHT, bSelected);
 						
 						rHour.left = rHour.right;
 					}
@@ -2913,13 +2908,13 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 						DrawNonWorkingHours(pDC, rMonth, nDay, wd.GetEndOfDayInHours(), 24.0, dDayWidth, dHourWidth);
 					}
 				}
-
-				// draw all but the last day divider
-				if (nDay < nNumDays)
-					DrawListItemDivider(pDC, rDay, (bDrawHours ? DIV_VERT_MID : DIV_VERT_LIGHT));
 				
 				if (bDrawWeekend)
 					DrawWeekend(pDC, dtDay, rDay);
+
+				// draw all but the last day divider
+				if (nDay < nNumDays)
+					DrawListItemVertDivider(pDC, rDay, (bDrawHours ? DIV_MID : DIV_LIGHT), bSelected);
 			}
 
 			// next day

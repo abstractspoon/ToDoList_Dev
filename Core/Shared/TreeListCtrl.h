@@ -278,7 +278,8 @@ protected:
 	virtual BOOL UpdateListColumnWidths(CDC* /*pDC*/, UPDATETITLEWIDTHACTION /*nAction*/) { return FALSE; }
 
 	void DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar);
-	void DrawItemDivider(CDC* pDC, const CRect& rItem, BOOL bVert, COLORREF crDiv = CLR_NONE) const;
+	void DrawVertItemDivider(CDC* pDC, const CRect& rItem, BOOL bSelected, COLORREF crDiv = CLR_NONE) const;
+	void DrawHorzItemDivider(CDC* pDC, const CRect& rItem) const;
 	void DrawTreeItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, BOOL bSelected);
 	COLORREF DrawTreeItemBackground(CDC* pDC, HTREEITEM hti, DWORD dwItemData, const CRect& rItem, BOOL bSelected);
 

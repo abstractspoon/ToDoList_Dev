@@ -210,13 +210,13 @@ protected:
 	void DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
 							 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd);
 
-	enum DIV_TYPE
+	enum VERT_DIV
 	{
-		DIV_NONE = -1, DIV_VERT_LIGHT, DIV_VERT_MID, DIV_VERT_DARK, DIV_HORZ
+		DIV_NONE = -1, DIV_LIGHT, DIV_MID, DIV_DARK
 	};
 
-	void DrawListItemDivider(CDC* pDC, const CRect& rItem, DIV_TYPE nType);
-	DIV_TYPE GetListVerticalDivider(int nMonth, int nYear) const;
+	void DrawListItemVertDivider(CDC* pDC, const CRect& rItem, VERT_DIV nType, BOOL bSelected);
+	VERT_DIV GetListVertDivider(int nMonth, int nYear) const;
 
 	void ClearDependencyPickLine(CDC* pDC = NULL);
 	BOOL DrawDependencyPickLine(const CPoint& ptClient);
@@ -346,7 +346,7 @@ protected:
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
 	static double GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth);
 	static BOOL GetDateFromScrollPos(int nScrollPos, GTLC_MONTH_DISPLAY nDisplay, int nMonth, int nYear, const CRect& rColumn, COleDateTime& date);
-	static BOOL IsVerticalDivider(DIV_TYPE nType);
+	static BOOL IsVerticalDivider(VERT_DIV nType);
 	static BOOL IsDragging(GTLC_DRAG nDrag);
 	static BOOL IsDraggingEnds(GTLC_DRAG nDrag);
 

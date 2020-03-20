@@ -1438,7 +1438,7 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					pDC->FillSolidRect(rFullWidth, GetSysColor(COLOR_WINDOW));
 					
 					if (m_bSavingToImage || ((nItem + 1) != ID_LASTTOTAL))
-						DrawItemDivider(pDC, rFullWidth, FALSE);
+						DrawHorzItemDivider(pDC, rFullWidth);
 				}
 				break;
 				
@@ -1447,6 +1447,8 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			}
 			
 			// Draw content
+			BOOL bSelected = (GetItemState(nItem) != GMIS_NONE);
+
 			switch (nItem)
 			{
 			case ID_TOTALCOLUMNHEADER:
@@ -1454,15 +1456,15 @@ LRESULT CWorkloadCtrl::OnAllocationsTotalsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				break;
 
 			case ID_TOTALDAYSPERPERSON:
-				DrawTotalsListItem(pDC, nItem, m_mapTotalDays, 2);
+				DrawTotalsListItem(pDC, nItem, m_mapTotalDays, 2, bSelected);
 				break;
 				
 			case ID_TOTALTASKSPERPERSON:
-				DrawTotalsListItem(pDC, nItem, m_mapTotalTasks, 0);
+				DrawTotalsListItem(pDC, nItem, m_mapTotalTasks, 0, bSelected);
 				break;
 				
 			case ID_PERCENTLOADPERPERSON:
-				DrawTotalsListItem(pDC, nItem, m_mapPercentLoad, 1);
+				DrawTotalsListItem(pDC, nItem, m_mapPercentLoad, 1, bSelected);
 				break;
 
 			default:
@@ -1504,7 +1506,7 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			CRect rFullWidth(rItem);
 			GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_list);
 
-			DrawItemDivider(pDC, rFullWidth, FALSE);
+			DrawHorzItemDivider(pDC, rFullWidth);
 			
 			// Draw selection before text
 			GM_ITEMSTATE nState = GetItemState(nItem);
@@ -2311,7 +2313,7 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 		CRect rColumn;
 		m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn);
 		
-		DrawItemDivider(pDC, rColumn, TRUE);
+		DrawVertItemDivider(pDC, rColumn, bSelected);
 
 		COLORREF crBack = CLR_NONE;
 		double dDays = CalcAllocationListItemColumnDays(wi, nItem, nCol, crBack);
@@ -2345,7 +2347,7 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 	}
 }
 
-void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocationTotals& mapTotals, int nDecimals)
+void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocationTotals& mapTotals, int nDecimals, BOOL bSelected)
 {
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -2392,7 +2394,7 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rText, DT_CENTER);
 		}
 			
-		DrawItemDivider(pDC, rColumn, TRUE);
+		DrawVertItemDivider(pDC, rColumn, bSelected);
 	}
 }
 
@@ -2925,11 +2927,11 @@ BOOL CWorkloadCtrl::DoSaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF
 
 			// Draw vertical divider between labels and totals
 			CRect rDivider(0, sizeBase.cy, (sizeLabels.cx + 1), (sizeBase.cy + sizeTotals.cy));
-			DrawItemDivider(&dcImage, rDivider, TRUE);
+			DrawVertItemDivider(&dcImage, rDivider, FALSE);
 
 			// Draw vertical divider at end of totals
 			rDivider.right = sizeBase.cx;
-			DrawItemDivider(&dcImage, rDivider, TRUE);
+			DrawVertItemDivider(&dcImage, rDivider, FALSE);
 
 			// Bar chart
 			dcParts.SelectObject(bmChart);

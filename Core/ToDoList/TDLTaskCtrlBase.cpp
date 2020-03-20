@@ -2454,12 +2454,18 @@ void CTDLTaskCtrlBase::DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected
 		if (bVert)
 		{
 			CRect rGridline(rect);
+			COLORREF crGridline(m_crGridLine);
 
-			// don't overdraw selection
 			if (bSelected)
+			{
+				// Don't overdraw selection at top/bottom
 				rGridline.DeflateRect(0, 1);
 
-			GraphicsMisc::DrawVertLine(pDC, rGridline.top, rGridline.bottom, rect.right - 1, m_crGridLine);
+				// Make color a little darker
+				crGridline = GraphicsMisc::Darker(crGridline, 0.2);
+			}
+
+			GraphicsMisc::DrawVertLine(pDC, rGridline.top, rGridline.bottom, rect.right - 1, crGridline);
 		}
 	}
 }
