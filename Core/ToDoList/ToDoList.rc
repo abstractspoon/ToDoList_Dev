@@ -3136,7 +3136,7 @@ BEGIN
         END
         MENUITEM SEPARATOR
         MENUITEM "Paste as &Subtask of Selected Task", ID_EDIT_PASTESUB
-        MENUITEM "&Paste after Selected Task",  ID_EDIT_PASTEAFTER
+        MENUITEM "&Paste below Selected Task",  ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
         MENUITEM SEPARATOR
         MENUITEM "&Delete Selected Task",       ID_DELETETASK
@@ -3834,7 +3834,7 @@ BEGIN
 
         MENUITEM SEPARATOR
         MENUITEM "Paste as Subtask",            ID_EDIT_PASTESUB
-        MENUITEM "Paste after",                 ID_EDIT_PASTEAFTER
+        MENUITEM "Paste below",                 ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
         MENUITEM SEPARATOR
         MENUITEM "&Delete",                     ID_DELETETASK
