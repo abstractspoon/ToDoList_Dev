@@ -637,16 +637,7 @@ void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell) const
 {
 	if (HasColor(m_crWeekend) && CWeekend().IsWeekend(pCell->date))
-	{
-		// If this cell is also today and we have a today colour
-		// then return a grey colour so that it doesn't distort
-		// the today colour which will be overlaid
-		if (HasColor(m_crToday) && CDateHelper::IsToday(pCell->date))
-			return RGBX(m_crWeekend).Gray();
-
-		// else
 		return m_crWeekend;
-	}
 	
 	return CLR_NONE;
 }

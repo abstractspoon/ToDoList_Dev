@@ -15,6 +15,7 @@
 #include "CalendarCtrl.h"
 
 #include "..\3rdParty\GdiPlus.h"
+#include "..\3rdParty\ColorDef.h"
 
 #include <math.h>
 
@@ -476,23 +477,60 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 {
 
 	COLORREF crBkgnd = GetCellBkgndColor(pCell);
+	BOOL bBkgnd = (crBkgnd != CLR_NONE);
 
-	CRect rHeader(rCell);
+	CRect rHeader(rCell), rBody(rCell);
 	rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
+	rBody.top = rHeader.bottom;
 
 	COLORREF crSelection = GetSelectionColor();
 	COLORREF crToday = GetTodayColor();
 
-	// Overlay colours
-	if (crBkgnd != CLR_NONE)
-		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(crBkgnd, 128), rCell);
+	bSelected &= (crSelection != CLR_NONE);
+	bToday &= (crToday != CLR_NONE);
 
-	if (bToday && (crToday != CLR_NONE))
-		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(crToday, 128), rCell);
+	if (bSelected || bToday || bBkgnd)
+	{
+		CGdiPlusGraphics g(*pDC, gdix_SmoothingModeNone);
 
-	if (bSelected && (crSelection != CLR_NONE))
-		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(crSelection, 64), rCell);
-	
+		// Header
+		if (bToday)
+		{
+			// If this cell is also today and we have a today colour
+			// then return a grey colour so that it doesn't distort
+			// the today colour which will be overlaid
+			if (bBkgnd)
+				CGdiPlus::FillRect(g, CGdiPlusBrush(RGBX(crBkgnd).Gray(), 128), rHeader);
+			
+			CGdiPlus::FillRect(g, CGdiPlusBrush(crToday, 128), rHeader);
+		}
+		else
+		{
+			if (bBkgnd)
+				CGdiPlus::FillRect(g, CGdiPlusBrush(crBkgnd, 128), rHeader);
+
+			if (bSelected)
+				CGdiPlus::FillRect(g, CGdiPlusBrush(crSelection, 64), rHeader);
+		}
+
+		// Body
+		if (bToday && !bSelected)
+		{
+			if (bBkgnd)
+				CGdiPlus::FillRect(g, CGdiPlusBrush(RGBX(crBkgnd).Gray(), 128), rBody);
+			
+			CGdiPlus::FillRect(g, CGdiPlusBrush(crToday, 128), rBody);
+		}
+		else
+		{
+			if (bBkgnd)
+				CGdiPlus::FillRect(g, CGdiPlusBrush(crBkgnd, 128), rBody);
+
+			if (bSelected)
+				CGdiPlus::FillRect(g, CGdiPlusBrush(crSelection, 64), rBody);
+		}
+	}
+		
 	if (pCell->bMark)
 	{
 		CRect rcMark(rCell);
