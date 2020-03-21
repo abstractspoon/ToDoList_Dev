@@ -1593,7 +1593,7 @@ BOOL CDateHelper::IsToday(const COleDateTime& date)
 
 	double dToday(GetDate(DHD_TODAY));
 
-	return ((date.m_dt >= dToday) && (date.m_dt < (dToday + 1.0)));
+	return ((int)date.m_dt == (int)dToday);
 }
 
 BOOL CDateHelper::IsSameDay(const COleDateTime& date1, const COleDateTime& date2)
