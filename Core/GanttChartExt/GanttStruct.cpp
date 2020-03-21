@@ -389,7 +389,6 @@ BOOL GANTTITEM::HasColor() const
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
-
 COleDateTime GANTTITEM::GetDate(time64_t tDate, BOOL bEndOfDay)
 {
 	COleDateTime date = CDateHelper::GetDate(tDate);

@@ -30,7 +30,6 @@ public:
 	BOOL GetAutoCalcParentDates() const { return m_bAutoCalcParentDates; }
 	BOOL GetCalculateMissingStartDates() const { return m_bCalculateMissingStartDates; }
 	BOOL GetCalculateMissingDueDates() const { return m_bCalculateMissingDueDates; }
-	COLORREF GetTodayColor() const;
 	COLORREF GetDefaultColor() const;
 	CString GetMilestoneTag() const;
 	BOOL GetDisplayProgressInBar() const { return m_bDisplayProgressInBar; }
@@ -47,7 +46,6 @@ protected:
 	BOOL	m_bDisplayTrailingAllocTo;
 	BOOL	m_bDisplayTrailingTaskTitle;
 	BOOL	m_bAutoScrollSelection;
-	BOOL	m_bSpecifyTodayColor;
 	BOOL	m_bSpecifyDefaultColor;
 	BOOL	m_bAutoCalcParentDates;
 	BOOL	m_bCalculateMissingStartDates;
@@ -60,8 +58,8 @@ protected:
 	BOOL	m_bDisplayParentsAsRollups;
 	//}}AFX_DATA
 
-	CColorButton m_btParentColor, m_btDefaultColor, m_btTodayColor;
-	COLORREF m_crToday, m_crParent, m_crDefault;
+	CColorButton m_btParentColor, m_btDefaultColor;
+	COLORREF m_crParent, m_crDefault;
 	CGroupLineManager m_mgrGroupLines;
 	CCheckListBoxEx m_lbColumnVisibility;
 	CDWordArray m_aColumnVis;
@@ -79,9 +77,7 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CGanttPreferencesPage)
-	afx_msg void OnSetTodaycolor();
 	afx_msg void OnSetDefaultcolor();
-	afx_msg void OnTodaycolor();
 	afx_msg void OnDefaultcolor();
 	afx_msg void OnChangeParentColoring();
 	afx_msg void OnUseTagForMilestone();
@@ -109,7 +105,6 @@ public:
 	BOOL GetAutoCalcParentDates() const { return m_page.GetAutoCalcParentDates(); }
 	BOOL GetCalculateMissingStartDates() const { return m_page.GetCalculateMissingStartDates(); }
 	BOOL GetCalculateMissingDueDates() const { return m_page.GetCalculateMissingDueDates(); }
-	COLORREF GetTodayColor() const { return m_page.GetTodayColor(); }
 	COLORREF GetDefaultBarColor() const { return m_page.GetDefaultColor(); }
 	CString GetMilestoneTag() const { return m_page.GetMilestoneTag(); }
 	BOOL GetDisplayProgressInBar() const { return m_page.GetDisplayProgressInBar(); }

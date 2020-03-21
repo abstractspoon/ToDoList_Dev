@@ -1085,7 +1085,6 @@ void CGanttChartWnd::UpdateGanttCtrlPreferences()
 	m_ctrlGantt.SetOption(GTLCF_DECADESAREZEROBASED, m_dlgPrefs.GetDecadesAreZeroBased());
 	m_ctrlGantt.SetOption(GTLCF_DISPLAYPARENTROLLUPS, m_dlgPrefs.GetDisplayParentsAsRollups());
 
-	m_ctrlGantt.SetTodayColor(m_dlgPrefs.GetTodayColor());
 	m_ctrlGantt.SetDefaultBarColor(m_dlgPrefs.GetDefaultBarColor());
 	m_ctrlGantt.SetMilestoneTag(m_dlgPrefs.GetMilestoneTag());
 

@@ -79,7 +79,6 @@ public:
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) ? TRUE : FALSE); }
 
-	void SetTodayColor(COLORREF crToday);
 	void SetUITheme(const UITHEME& theme);
 	void SetDefaultBarColor(COLORREF crDefault);
 	void SetParentColoring(GTLC_PARENTCOLORING nOption, COLORREF color);
@@ -199,7 +198,7 @@ protected:
 	void DrawListItemDays(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
 							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday, BOOL bDrawHours);
 
-	void DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, double dFromHour, double dToHour, double dDayWidth, double dHourWidth);
+	void DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BOOL bToday, double dFromHour, double dToHour, double dDayWidth, double dHourWidth);
 	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 	void DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
 	void DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);

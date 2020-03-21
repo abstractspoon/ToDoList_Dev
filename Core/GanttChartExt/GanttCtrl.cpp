@@ -22,7 +22,6 @@
 #include "..\shared\WorkingWeek.h"
 
 #include "..\3rdparty\shellicons.h"
-#include "..\3rdparty\GdiPlus.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -1398,7 +1397,7 @@ COLORREF CGanttCtrl::GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL 
 
 	if (crBack == CLR_NONE)
 	{
-		if ((m_crBarDefault != CLR_NONE) && bColorIsBkgnd)
+		if (HasColor(m_crBarDefault) && bColorIsBkgnd)
 			crBack = m_crBarDefault;
 		else
 			crBack = CTreeListCtrl::GetTreeItemBackColor(hti, dwItemData, bSelected);
@@ -2383,15 +2382,11 @@ BOOL CGanttCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 	return CTreeListCtrl::OnListLButtonDblClk(nFlags, point);
 }
 
-void CGanttCtrl::SetTodayColor(COLORREF crToday)
-{
-	SetColor(m_crToday, crToday);
-}
-
 void CGanttCtrl::SetUITheme(const UITHEME& theme)
 {
 	SetSplitBarColor(theme.crAppBackDark);
 
+	SetColor(m_crToday, theme.crToday);
 	SetColor(m_crWeekend, theme.crWeekend);
 	SetColor(m_crNonWorkingHours, theme.crNonWorkingHours);
 }
@@ -2835,9 +2830,12 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 
 BOOL CGanttCtrl::WantDrawWeekend(const COleDateTime& dtDay) const
 {
-	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHours);
+	if (HasColor(m_crToday) && CDateHelper::IsToday(dtDay))
+		return FALSE;
 
-	return ((color != CLR_NONE) && CWeekend().IsWeekend(dtDay));
+	COLORREF color = (HasColor(m_crWeekend) ? m_crWeekend : m_crNonWorkingHours);
+
+	return (HasColor(color) && CWeekend().IsWeekend(dtDay));
 }
 
 BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& rDay)
@@ -2845,8 +2843,15 @@ BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& r
 	if (!WantDrawWeekend(dtDay))
 		return FALSE;
 
-	COLORREF color = ((m_crWeekend != CLR_NONE) ? m_crWeekend : m_crNonWorkingHours);
-	CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(color, 128), rDay);
+	// If dtDay is also 'today' and we have a today colour
+	// then render using a grey so that that it does overly
+	// affect the today colour which will be overlaid on top
+	COLORREF color = (HasColor(m_crWeekend) ? m_crWeekend : m_crNonWorkingHours);
+
+	if (HasColor(m_crToday) && CDateHelper::IsToday(dtDay))
+		color = RGBX(color).Gray();
+
+	GraphicsMisc::DrawRect(pDC, rDay, color, CLR_NONE, 0, GMDR_NONE, 128);
 
 	return TRUE;
 }
@@ -2873,7 +2878,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 			if (rDay.right > 0)
 			{
 				BOOL bDrawWeekend = WantDrawWeekend(dtDay);
-				BOOL bDrawNonWorkingHours = (!bDrawWeekend && (m_crNonWorkingHours != CLR_NONE));
+				BOOL bDrawNonWorkingHours = (!bDrawWeekend && HasColor(m_crNonWorkingHours));
 
 				if (bDrawHours)
 				{
@@ -2882,7 +2887,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 					// draw all but the first and last hours dividers
 					CRect rHour(rDay);
 
-					if (m_crGridLine != CLR_NONE)
+					if (HasColor(m_crGridLine))
 						rHour.bottom--;
 
 					for (int nHour = 1; nHour < 24; nHour++)
@@ -2897,15 +2902,16 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 					if (bDrawNonWorkingHours)
 					{
 						CWorkingDay wd;
+						BOOL bToday = CDateHelper::IsToday(dtDay);
 
 						// Morning
-						DrawNonWorkingHours(pDC, rMonth, nDay, 0.0, wd.GetStartOfDayInHours(), dDayWidth, dHourWidth);
+						DrawNonWorkingHours(pDC, rMonth, nDay, bToday, 0.0, wd.GetStartOfDayInHours(), dDayWidth, dHourWidth);
 
 						// Lunch
-						DrawNonWorkingHours(pDC, rMonth, nDay, wd.GetStartOfLunchInHours(), wd.GetEndOfLunchInHours(), dDayWidth, dHourWidth);
+						DrawNonWorkingHours(pDC, rMonth, nDay, bToday, wd.GetStartOfLunchInHours(), wd.GetEndOfLunchInHours(), dDayWidth, dHourWidth);
 
 						// Afternoon
-						DrawNonWorkingHours(pDC, rMonth, nDay, wd.GetEndOfDayInHours(), 24.0, dDayWidth, dHourWidth);
+						DrawNonWorkingHours(pDC, rMonth, nDay, bToday, wd.GetEndOfDayInHours(), 24.0, dDayWidth, dHourWidth);
 					}
 				}
 				
@@ -2926,8 +2932,11 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
 }
 
-void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, double dFromHour, double dToHour, double dDayWidth, double dHourWidth)
+void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BOOL bToday, 
+									 double dFromHour, double dToHour, double dDayWidth, double dHourWidth)
 {
+	ASSERT(HasColor(m_crNonWorkingHours));
+
 	if (dToHour > dFromHour)
 	{
 		CRect rNonWorking(rMonth);
@@ -2935,7 +2944,15 @@ void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, do
 		rNonWorking.left = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * dFromHour)));
 		rNonWorking.right = (rMonth.left + (int)((dDayWidth * (nDay - 1)) + (dHourWidth * dToHour)));
 
-		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crNonWorkingHours, 128), rNonWorking);
+		// If dtDay is also 'today' and we have a today colour
+		// then render using a grey so that that it does overly
+		// affect the today colour which will be overlaid on top
+		COLORREF color = m_crNonWorkingHours;
+
+		if (HasColor(m_crToday) && bToday)
+			color = RGBX(color).Gray();
+
+		GraphicsMisc::DrawRect(pDC, rNonWorking, color, CLR_NONE, 0, GMDR_NONE, 128);
 	}
 }
 
@@ -3532,7 +3549,7 @@ COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL 
 	{
 		crText = gi.GetTextColor(bSelected, bColorIsBkgnd);
 	}
-	ASSERT(crText != CLR_NONE);
+	ASSERT(HasColor(crText));
 
 	if (!m_bSavingToImage)
 	{
@@ -3557,8 +3574,7 @@ void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLO
 
 	if (crDefFill == CLR_NONE)
 	{
-		if ((m_crBarDefault != CLR_NONE) && 
-			(!gi.bParent || m_nParentColoring == GTLPC_DEFAULTCOLORING))
+		if (HasColor(m_crBarDefault) && (!gi.bParent || m_nParentColoring == GTLPC_DEFAULTCOLORING))
 		{
 			crDefFill = m_crBarDefault;
 			crDefBorder = GraphicsMisc::Darker(crDefFill, 0.4);
@@ -4188,7 +4204,7 @@ BOOL CGanttCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear,
 	if (bSelected)
 		rToday.DeflateRect(0, 1);
 
-	CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crToday, 128), rToday);
+	GraphicsMisc::DrawRect(pDC, rToday, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
 
 	return TRUE;
 }

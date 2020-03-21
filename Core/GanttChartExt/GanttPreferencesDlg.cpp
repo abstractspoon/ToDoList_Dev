@@ -19,7 +19,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const COLORREF DEF_TODAYCOLOR			= RGB(255, 0, 0);
 const COLORREF DEF_PARENTCOLOR			= RGB(0, 0, 0);
 const COLORREF DEF_DEFAULTCOLOR			= RGB(70, 135, 245);
 
@@ -32,7 +31,6 @@ CGanttPreferencesPage::CGanttPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	//{{AFX_DATA_INIT(CGanttPreferencesPage)
 	//}}AFX_DATA_INIT
 	m_crParent = DEF_PARENTCOLOR;
-	m_crToday = DEF_TODAYCOLOR;
 	m_crDefault = DEF_DEFAULTCOLOR;
 
 	m_aColumnVis.SetSize(NUM_TREECOLUMNS + 1);
@@ -46,7 +44,6 @@ void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_DISPLAYALLOCTO, m_bDisplayTrailingAllocTo);
 	DDX_Check(pDX, IDC_DISPLAYTASKTITLE, m_bDisplayTrailingTaskTitle);
 	DDX_Check(pDX, IDC_AUTOSCROLLSELECTION, m_bAutoScrollSelection);
-	DDX_Check(pDX, IDC_TODAYCOLOR, m_bSpecifyTodayColor);
 	DDX_Check(pDX, IDC_DEFAULTCOLOR, m_bSpecifyDefaultColor);
 	DDX_Check(pDX, IDC_CALCULATEPARENTDATES, m_bAutoCalcParentDates);
 	DDX_Check(pDX, IDC_CALCULATEMISSINGSTARTDATE, m_bCalculateMissingStartDates);
@@ -58,7 +55,6 @@ void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_DECADESAREONEBASED, m_bDecadesAreOneBased);
 	DDX_Check(pDX, IDC_DISPLAYPARENTSASROLLUPS, m_bDisplayParentsAsRollups);
 	//}}AFX_DATA_MAP
-	DDX_Control(pDX, IDC_SETTODAYCOLOR, m_btTodayColor);
 	DDX_Control(pDX, IDC_SETPARENTCOLOR, m_btParentColor);
 	DDX_Control(pDX, IDC_SETDEFAULTCOLOR, m_btDefaultColor);
 	DDX_Control(pDX, IDC_COLUMNVISIBILITY, m_lbColumnVisibility);
@@ -67,8 +63,6 @@ void CGanttPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CGanttPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CGanttPreferencesPage)
-	ON_BN_CLICKED(IDC_SETTODAYCOLOR, OnSetTodaycolor)
-	ON_BN_CLICKED(IDC_TODAYCOLOR, OnTodaycolor)
 	ON_BN_CLICKED(IDC_DEFAULTCOLOR, OnDefaultcolor)
 	ON_BN_CLICKED(IDC_SETDEFAULTCOLOR, OnSetDefaultcolor)
 	ON_BN_CLICKED(IDC_DEFAULTPARENTCOLORS, OnChangeParentColoring)
@@ -83,11 +77,6 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CGanttPreferencesPage message handlers
 
-COLORREF CGanttPreferencesPage::GetTodayColor() const 
-{ 
-	return m_bSpecifyTodayColor ? m_crToday : CLR_NONE; 
-}
-
 COLORREF CGanttPreferencesPage::GetDefaultColor() const 
 { 
 	return m_bSpecifyDefaultColor ? m_crDefault : CLR_NONE; 
@@ -99,22 +88,10 @@ void CGanttPreferencesPage::OnSetDefaultcolor()
 	Invalidate();
 }
 
-void CGanttPreferencesPage::OnSetTodaycolor() 
-{
-	m_crToday = m_btTodayColor.GetColor();
-	Invalidate();
-}
-
 void CGanttPreferencesPage::OnDefaultcolor() 
 {
 	UpdateData();
 	m_btDefaultColor.EnableWindow(m_bSpecifyDefaultColor);
-}
-
-void CGanttPreferencesPage::OnTodaycolor() 
-{
-	UpdateData();
-	m_btTodayColor.EnableWindow(m_bSpecifyTodayColor);
 }
 
 BOOL CGanttPreferencesPage::OnInitDialog() 
@@ -124,11 +101,9 @@ BOOL CGanttPreferencesPage::OnInitDialog()
 	m_mgrGroupLines.AddGroupLine(IDC_COLORSGROUP, *this);
 	m_mgrGroupLines.AddGroupLine(IDC_DATESGROUP, *this);
 
-	m_btTodayColor.EnableWindow(m_bSpecifyTodayColor);
 	m_btDefaultColor.EnableWindow(m_bSpecifyDefaultColor);
 	m_btParentColor.EnableWindow(m_nParentColoring == 2);
 
-	m_btTodayColor.SetColor(m_crToday);
 	m_btDefaultColor.SetColor(m_crDefault);
 	m_btParentColor.SetColor(m_crParent);
 
@@ -182,9 +157,7 @@ void CGanttPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileInt(szKey, _T("AutoCalcParentDates"), m_bAutoCalcParentDates);
 	pPrefs->WriteProfileInt(szKey, _T("CalculateMissingStartDates"), m_bCalculateMissingStartDates);
 	pPrefs->WriteProfileInt(szKey, _T("CalculateMissingDueDates"), m_bCalculateMissingDueDates);
-	pPrefs->WriteProfileInt(szKey, _T("SpecifyTodayColor"), m_bSpecifyTodayColor);
 	pPrefs->WriteProfileInt(szKey, _T("SpecifyDefaultColor"), m_bSpecifyDefaultColor);
-	pPrefs->WriteProfileInt(szKey, _T("TodayColor"), (int)m_crToday);
 	pPrefs->WriteProfileInt(szKey, _T("DefaultColor"), (int)m_crDefault);
 	pPrefs->WriteProfileInt(szKey, _T("ParentColoring"), m_nParentColoring);
 	pPrefs->WriteProfileInt(szKey, _T("ParentColor"), (int)m_crParent);
@@ -192,7 +165,6 @@ void CGanttPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey)
 	pPrefs->WriteProfileInt(szKey, _T("DecadesAreOneBased"), m_bDecadesAreOneBased);
 	pPrefs->WriteProfileInt(szKey, _T("DisplayParentsAsRollups"), m_bDisplayParentsAsRollups);
 
-	m_btTodayColor.SavePreferences(pPrefs);
 	m_btParentColor.SavePreferences(pPrefs);
 	m_btDefaultColor.SavePreferences(pPrefs);
 
@@ -218,9 +190,7 @@ void CGanttPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_bAutoCalcParentDates = pPrefs->GetProfileInt(szKey, _T("AutoCalcParentDates"), TRUE);
 	m_bCalculateMissingStartDates = pPrefs->GetProfileInt(szKey, _T("CalculateMissingStartDates"), TRUE);
 	m_bCalculateMissingDueDates = pPrefs->GetProfileInt(szKey, _T("CalculateMissingDueDates"), TRUE);
-	m_bSpecifyTodayColor = pPrefs->GetProfileInt(szKey, _T("SpecifyTodayColor"), TRUE);
 	m_bSpecifyDefaultColor = pPrefs->GetProfileInt(szKey, _T("SpecifyDefaultColor"), FALSE);
-	m_crToday = (COLORREF)pPrefs->GetProfileInt(szKey, _T("TodayColor"), DEF_TODAYCOLOR);
 	m_crDefault = (COLORREF)pPrefs->GetProfileInt(szKey, _T("DefaultColor"), DEF_DEFAULTCOLOR);
 	m_crParent = (COLORREF)pPrefs->GetProfileInt(szKey, _T("ParentColor"), DEF_PARENTCOLOR);
 	m_nParentColoring = pPrefs->GetProfileInt(szKey, _T("ParentColoring"), 0);
