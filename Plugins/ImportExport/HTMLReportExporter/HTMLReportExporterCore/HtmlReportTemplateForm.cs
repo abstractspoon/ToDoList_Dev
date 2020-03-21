@@ -151,7 +151,7 @@ namespace HTMLReportExporter
 
 		protected override void OnLoad(EventArgs e)
 		{
-			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, 0/*20*/);
+			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, "", this, m_Trans, 0/*20*/);
 
 			this.Height = (this.Height + m_BannerHeight);
 			this.Content.Location = new Point(0, m_BannerHeight);

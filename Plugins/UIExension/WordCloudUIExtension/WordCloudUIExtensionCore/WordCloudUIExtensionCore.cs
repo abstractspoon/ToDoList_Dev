@@ -39,7 +39,7 @@ namespace WordCloudUIExtension
 		private IntPtr m_HwndParent;
         private Task.Attribute m_Attrib;
 		private Translator m_Trans;
-		private String m_TypeId;
+		private String m_TypeId, m_UiName;
 
 		private bool m_Splitting;
 		private Color m_SplitterColor;
@@ -64,9 +64,10 @@ namespace WordCloudUIExtension
 
         // -------------------------------------------------------------
 
-		public WordCloudUIExtensionCore(String typeId, IntPtr hwndParent, Translator trans)
+		public WordCloudUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
 		{
 			m_TypeId = typeId;
+			m_UiName = uiName;
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
 			m_Attrib = Task.Attribute.Title;
@@ -518,7 +519,7 @@ namespace WordCloudUIExtension
 			this.BackColor = Color.White;
 			m_Items = new Dictionary<UInt32, CloudTaskItem>();
 
-			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, -1);
+			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, m_UiName, this, m_Trans, -1);
 
 			CreateWordCloud();
 			CreateTaskMatchesListView();

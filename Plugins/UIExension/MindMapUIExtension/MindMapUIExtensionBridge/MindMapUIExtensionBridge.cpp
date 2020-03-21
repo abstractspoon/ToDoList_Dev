@@ -111,8 +111,9 @@ BOOL CMindMapUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<String^> typeID = gcnew String(MINDMAP_GUID);
+	msclr::auto_gcroot<String^> uiName = gcnew String(MINDMAP_NAME);
 
-	m_wnd = gcnew MindMapUIExtension::MindMapUIExtensionCore(typeID.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew MindMapUIExtension::MindMapUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 

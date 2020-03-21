@@ -19,7 +19,7 @@ namespace MindMapUIExtension
         // ----------------------------------------------------------------------------
 
         private IntPtr m_HwndParent = IntPtr.Zero;
-        private String m_TypeId;
+        private String m_TypeId, m_UiName;
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
@@ -29,10 +29,11 @@ namespace MindMapUIExtension
 
         // ----------------------------------------------------------------------------
 
-        public MindMapUIExtensionCore(String typeId, IntPtr hwndParent, Translator trans)
+        public MindMapUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
         {
             m_TypeId = typeId;
-            m_HwndParent = hwndParent;
+			m_UiName = uiName;
+			m_HwndParent = hwndParent;
             m_Trans = trans;
 
             InitializeComponent();
@@ -220,7 +221,7 @@ namespace MindMapUIExtension
 
 			m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
 
-			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, -1);
+			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, m_UiName, this, m_Trans, -1);
 
 			m_MindMap.Location = new Point(0, bannerHeight);
 			m_MindMap.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);

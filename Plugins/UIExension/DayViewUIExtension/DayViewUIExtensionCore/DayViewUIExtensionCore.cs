@@ -18,7 +18,7 @@ namespace DayViewUIExtension
 		private TDLDayView m_DayView = null;
 		private Translator m_Trans = null;
 		private UIExtension.TaskIcon m_TaskIcons = null;
-		private String m_TypeId;
+		private String m_TypeId, m_UiName;
 		private WorkingWeek m_WorkWeek = null;
 
 		// --------------------------------------------------------------------------------------
@@ -45,11 +45,12 @@ namespace DayViewUIExtension
 
 		// --------------------------------------------------------------------------------------
 
-		public DayViewUIExtensionCore(String typeID, IntPtr hwndParent, Translator trans)
+		public DayViewUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
             m_TypeId = typeID;
+			m_UiName = uiName;
 
 			InitializeComponent();
 		}
@@ -313,7 +314,7 @@ namespace DayViewUIExtension
 			m_PrefsDlg = new DayViewPreferencesDlg(m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
 
-			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, this, m_Trans, -1);
+			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, m_UiName, this, m_Trans, -1);
 
 			CreateMonthYearCombos();
 			CreateToolbar();

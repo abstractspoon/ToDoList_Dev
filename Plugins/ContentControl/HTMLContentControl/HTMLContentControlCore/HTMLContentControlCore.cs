@@ -161,7 +161,7 @@ namespace HTMLContentControl
             this.Padding = new System.Windows.Forms.Padding(0);
             this.Font = m_ControlsFont;
 
-			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeID, this, m_Trans, 0/*5*/);
+			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeID, "", this, m_Trans, 0/*5*/);
 
 			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
 			m_HtmlEditControl.Name = "m_HtmlEditControl";

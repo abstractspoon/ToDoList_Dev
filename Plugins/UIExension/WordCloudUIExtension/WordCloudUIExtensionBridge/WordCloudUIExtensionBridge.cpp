@@ -106,8 +106,9 @@ BOOL CWordCloudUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<String^> typeID = gcnew String(WORDCLOUD_GUID);
+	msclr::auto_gcroot<String^> uiName = gcnew String(WORDCLOUD_NAME);
 
-	m_wnd = gcnew WordCloudUIExtension::WordCloudUIExtensionCore(typeID.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew WordCloudUIExtension::WordCloudUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 
