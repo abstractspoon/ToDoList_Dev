@@ -55,8 +55,6 @@ public:
 	void SetCalendar(CFPSMiniCalendarCtrl* pWnd);
 	void SetMiddleMonthYear(int iMonth, int iYear);
 	void SetItemsPerPage(int iValue);
-	void SetBackColor(COLORREF cColor) {m_cBackColor = cColor;}
-	void SetTextColor(COLORREF cColor) {m_cTextColor = cColor;}
 
 	void SetFontInfo(const CFPSMiniCalendarCtrlFontInfo& font);
 
@@ -70,7 +68,7 @@ public:
 	void ScrollDown(int iCount = 1);
 	void ScrollUp(int iCount = 1);
 	void AutoConfigure();
-	void ForwardMessage(MSG* pMSG);
+	void ForwardMessage(const MSG* pMSG);
 	virtual ~CFPSMiniCalendarListCtrl();
 
 	// Generated message map functions
@@ -91,8 +89,6 @@ protected:
 	int			m_iSelMonth;
 	int			m_iSelYear;
 
-	COLORREF	m_cBackColor;
-	COLORREF	m_cTextColor;
 	CFPSMiniCalendarCtrlFontInfo	m_FontInfo;
 	CFPSMiniCalendarCtrl*			m_pwndCalendar;
 

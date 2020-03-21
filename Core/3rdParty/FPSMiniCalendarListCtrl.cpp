@@ -43,11 +43,6 @@ CFPSMiniCalendarListCtrl::CFPSMiniCalendarListCtrl()
 	SetCalendar(NULL);
 	SetItemsPerPage(7);
 	SetMiddleMonthYear(COleDateTime::GetCurrentTime().GetMonth(), COleDateTime::GetCurrentTime().GetYear());
-	SetBackColor((COLORREF)::GetSysColor(COLOR_WINDOW));
-	SetTextColor((COLORREF)::GetSysColor(COLOR_BTNTEXT));
-
-	SetBackColor(RGB(255,255,255));
-	SetTextColor(RGB(0,0,0));
 
 	m_iSelMonth = COleDateTime::GetCurrentTime().GetMonth();
 	m_iSelYear = COleDateTime::GetCurrentTime().GetYear();
@@ -129,7 +124,7 @@ void CFPSMiniCalendarListCtrl::OnPaint()
 	int iPosX = 10;
 	
 	// fill background
-	memdc.FillSolidRect(0, 0, rectClient.Width(), rectClient.Height(), m_cBackColor);
+	memdc.FillSolidRect(0, 0, rectClient.Width(), rectClient.Height(), ::GetSysColor(COLOR_WINDOW));
 	memdc.SetBkMode(TRANSPARENT);
 
 	for (iItem = 0; iItem < m_iItemsPerPage; iItem++)
@@ -155,15 +150,12 @@ void CFPSMiniCalendarListCtrl::OnPaint()
 			m_iSelMonth = iMonth;
 			m_iSelYear = iYear;
 
-			memdc.SetTextColor(m_cBackColor);
-			memdc.SetBkColor(m_cTextColor);
-
-			memdc.FillSolidRect(0, iPosY, rectClient.Width(), szItem.cy, memdc.GetBkColor());
+			memdc.SetTextColor(::GetSysColor(COLOR_HIGHLIGHTTEXT));
+			memdc.FillSolidRect(0, iPosY, rectClient.Width(), szItem.cy, ::GetSysColor(COLOR_HIGHLIGHT));
 		}
 		else
 		{
-			memdc.SetTextColor(m_cTextColor);
-			memdc.SetBkColor(m_cBackColor);
+			memdc.SetTextColor(::GetSysColor(COLOR_WINDOWTEXT));
 		}
 
 		memdc.DrawText(strDisplayText, rectItem, DT_SINGLELINE | DT_LEFT | DT_TOP);
@@ -181,7 +173,7 @@ void CFPSMiniCalendarListCtrl::OnPaint()
 	memdc.SelectObject(pOldFont);
 }
 
-void CFPSMiniCalendarListCtrl::ForwardMessage(MSG *pMSG)
+void CFPSMiniCalendarListCtrl::ForwardMessage(const MSG *pMSG)
 {
 	if (pMSG->message == WM_MOUSEMOVE || pMSG->message == WM_TIMER)
 	{

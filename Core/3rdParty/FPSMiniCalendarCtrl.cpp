@@ -89,6 +89,7 @@ CFPSMiniCalendarCtrlFontInfo::CFPSMiniCalendarCtrlFontInfo(const CFPSMiniCalenda
 
 CFPSMiniCalendarCtrlFontInfo& CFPSMiniCalendarCtrlFontInfo::operator=(const CFPSMiniCalendarCtrlFontInfo& font)
 {
+	m_strFontName = font.m_strFontName;
 	m_iFontSize = font.m_iFontSize;
 	m_bBold = font.m_bBold;
 	m_bItalic = font.m_bItalic;
@@ -1227,13 +1228,6 @@ void CFPSMiniCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 			SetCapture();
 			m_bHeaderTracking = TRUE;
-
-// 			CString strMessage = _T("Header hit = ");
-// 			strMessage += GetMonthName(iMonth);
-// 			strMessage += " ";
-// 			strMessage += CStr(iYear);
-
-			//AfxMessageBox(strMessage);
 		}
 	}
 	else
@@ -1351,7 +1345,11 @@ void CFPSMiniCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 void CFPSMiniCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point) 
 {
-	if (m_bTracking)
+	if (m_bHeaderTracking)
+	{
+		m_pHeaderList->ForwardMessage(GetCurrentMessage());
+	}
+	else if (m_bTracking)
 	{
 		CFPSMiniCalendarCtrlFontHotSpot* pSpot = HitTest(point);
 
