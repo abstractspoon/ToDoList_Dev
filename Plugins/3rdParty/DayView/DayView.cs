@@ -561,6 +561,11 @@ namespace Calendar
                 return Set((int)hours, (int)Math.Round((hours - (int)hours) * 60));
             }
 
+			public int TotalMins
+			{
+				get { return ((Hour * 60) + Min); }
+			}
+
             public bool Set(int hour, int min)
             {
                 if ((hour < 0) || (hour > 24))
@@ -578,7 +583,16 @@ namespace Calendar
                 return true;
             }
 
-        };
+			public static bool operator <(HourMin lhs, HourMin rhs)
+			{
+				return (lhs.TotalMins < rhs.TotalMins);
+			}
+
+			public static bool operator >(HourMin lhs, HourMin rhs)
+			{
+				return (lhs.TotalMins > rhs.TotalMins);
+			}
+		};
 
         private HourMin workStart   = new HourMin(8, 30);  // 8.30 AM
         private HourMin workEnd     = new HourMin(18, 30); // 6.30 PM
@@ -1429,31 +1443,37 @@ namespace Calendar
 
 		protected Rectangle GetHourRangeRectangle(HourMin start, HourMin end, Rectangle baseRectangle)
         {
-            var dateStart = new DateTime(1, 1, 1, start.Hour, start.Min, 0);
-            var dateEnd = (end.Hour >= 24) ? new DateTime(1, 1, 2, 0, 0, 0) : new DateTime(1, 1, 1, end.Hour, end.Min, 0);
+			if (start < end)
+			{
+				var dateStart = new DateTime(1, 1, 1, start.Hour, start.Min, 0);
+				var dateEnd = (end.Hour >= 24) ? new DateTime(1, 1, 2, 0, 0, 0) : new DateTime(1, 1, 1, end.Hour, end.Min, 0);
 
-            return GetHourRangeRectangle(dateStart, dateEnd, baseRectangle);
-        }
+				return GetHourRangeRectangle(dateStart, dateEnd, baseRectangle);
+			}
+
+			return Rectangle.Empty;
+		}
 
 		protected Rectangle GetHourRangeRectangle(DateTime start, DateTime end, Rectangle baseRectangle)
         {
-            Rectangle rect = baseRectangle;
+			Rectangle rect = Rectangle.Empty;
 
-            int startY;
-            int endY;
+			if (start < end)
+			{
+				int startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / (60 / slotsPerHour));
 
-            startY = (start.Hour * slotHeight * slotsPerHour) + ((start.Minute * slotHeight) / (60 / slotsPerHour));
+				// Special case: end time is 'end of day'
+				if (end == start.Date.AddDays(1))
+					end = end.AddSeconds(-1);
 
-			// Special case: end time is 'end of day'
-			if (end == start.Date.AddDays(1))
-				end = end.AddSeconds(-1);
+				int endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / (60 / slotsPerHour));
 
-            endY = (end.Hour * slotHeight * slotsPerHour) + ((end.Minute * slotHeight) / (60 / slotsPerHour));
+				rect = baseRectangle;
+				rect.Y = startY - vscroll.Value + this.HeaderHeight;
+				rect.Height = System.Math.Max(1, endY - startY);
+			}
 
-            rect.Y = startY - vscroll.Value + this.HeaderHeight;
-            rect.Height = System.Math.Max(1, endY - startY);
-
-            return rect;
+			return rect;
         }
 
         protected void DrawWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect)

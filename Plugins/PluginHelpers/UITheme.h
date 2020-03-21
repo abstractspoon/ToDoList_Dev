@@ -51,6 +51,7 @@ namespace Abstractspoon
 					StatusBarText,
 					Weekends,
 					NonWorkingHours,
+					Today,
 				};
 
 				Windows::Media::Color GetAppMediaColor(AppColor color);
@@ -58,6 +59,8 @@ namespace Abstractspoon
 
 				Drawing::Color GetAppDrawingColor(AppColor color);
 				Drawing::Color GetAppDrawingColor(AppColor color, unsigned char opacity);
+
+				bool HasAppColor(AppColor color);
 
 				static void DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style);
 

@@ -130,20 +130,6 @@ namespace DayViewUIExtension
             }
         }
 
-		public void DrawNonWorkingHourRange(Graphics g, Rectangle rect, bool drawBorder, bool hilight)
-		{
-			if (g == null)
-				throw new ArgumentNullException("g");
-
-			using (SolidBrush brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128)))
-			{
-				g.FillRectangle(brush, rect);
-			}
-
-			if (drawBorder)
-				g.DrawRectangle(SystemPens.WindowFrame, rect);
-		}
-
 		public override void DrawHourLabel(System.Drawing.Graphics g, System.Drawing.Rectangle rect, int hour, bool ampm)
         {
             if (g == null)
@@ -239,10 +225,21 @@ namespace DayViewUIExtension
 
                 if (VisualStyleRenderer.IsSupported)
                 {
-                    var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
-                    renderer.DrawBackground(g, rHeader);
-                }
-                else
+					if (Theme.HasAppColor(UITheme.AppColor.Today) && (date.Date == DateTime.Now.Date))
+					{
+						var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
+						renderer.DrawBackground(g, rHeader);
+
+						using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
+							g.FillRectangle(brush, rHeader);
+					}
+					else
+					{
+						var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
+						renderer.DrawBackground(g, rHeader);
+					}
+				}
+				else
                 {
                     using (SolidBrush brush = new SolidBrush(SystemColors.ButtonHighlight))
                         g.FillRectangle(brush, rHeader);

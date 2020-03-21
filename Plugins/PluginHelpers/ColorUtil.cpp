@@ -86,6 +86,13 @@ COLORREF ColorUtil::DrawingColor::ToRgb(Drawing::Color color)
 	return RGB(color.R, color.G, color.B);
 }
 
+Drawing::Color ColorUtil::DrawingColor::ToGray(Drawing::Color color)
+{
+	COLORREF gray = RGBX(ToRgb(color)).Gray();
+
+	return ToColor(gray, color.A);
+}
+
 Drawing::Color ColorUtil::DrawingColor::ToColor(COLORREF rgbColor)
 {
 	return ToColor(rgbColor, 255);

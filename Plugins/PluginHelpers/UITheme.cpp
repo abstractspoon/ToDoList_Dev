@@ -92,9 +92,15 @@ UInt32 UITheme::GetColor(AppColor color)
 	case UITheme::AppColor::StatusBarText:		return m_pTheme->crStatusBarText;
 	case UITheme::AppColor::Weekends:			return m_pTheme->crWeekend;
 	case UITheme::AppColor::NonWorkingHours:	return m_pTheme->crNonWorkingHours;
+	case UITheme::AppColor::Today:				return m_pTheme->crToday;
 	}
 
 	return 0; // black
+}
+
+bool UITheme::HasAppColor(AppColor color)
+{
+	return (GetColor(color) != CLR_NONE);
 }
 
 void UITheme::DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style)

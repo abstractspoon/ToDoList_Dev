@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace DayViewUIExtension
 {
@@ -657,12 +658,14 @@ namespace DayViewUIExtension
 
 				DrawDaySlotSeparators(e, rect, time);
 				DrawNonWorkHours(e, rect, time);
+				DrawToday(e, rect, time);
 				DrawDayAppointments(e, rect, time);
 			}
 			else
 			{
 				DrawDaySlotSeparators(e, rect, time);
 				DrawNonWorkHours(e, rect, time);
+				DrawToday(e, rect, time);
 				DrawDayAppointments(e, rect, time);
 
 				// Draw selection last because it's translucent
@@ -672,32 +675,69 @@ namespace DayViewUIExtension
 			DrawDayGripper(e, rect);
 		}
 
+		private bool WantDrawToday(DateTime time)
+		{
+			if (!m_Renderer.Theme.HasAppColor(UITheme.AppColor.Today))
+				return false;
+			
+			return (time.Date == DateTime.Now.Date);
+		}
+
+		protected void DrawToday(PaintEventArgs e, Rectangle rect, DateTime time)
+		{
+			if (!WantDrawToday(time))
+				return;
+
+			using (var brush = new SolidBrush(m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
+				e.Graphics.FillRectangle(brush, rect);
+		}
+
 		protected void DrawNonWorkHours(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			if (WeekendDays.Contains(time.DayOfWeek))
+			if (m_Renderer.Theme.HasAppColor(UITheme.AppColor.Weekends) && WeekendDays.Contains(time.DayOfWeek))
 			{
-				using (var brush = new SolidBrush(m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128)))
+				var weekendColor = m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.Weekends, 128);
+
+				// If this is also 'today' then convert to gray so it doesn't 
+				// impose too much when the today colour is laid on top
+				if (WantDrawToday(time))
+					weekendColor = DrawingColor.ToGray(weekendColor);
+
+				using (var brush = new SolidBrush(weekendColor))
 					e.Graphics.FillRectangle(brush, rect);
 			}
-			else // draw non-working hours
+			else if (m_Renderer.Theme.HasAppColor(UITheme.AppColor.NonWorkingHours))
 			{
-				DrawNonWorkHours(e, new HourMin(0, 0), WorkStart, rect);
-				DrawNonWorkHours(e, LunchStart, LunchEnd, rect);
-				DrawNonWorkHours(e, WorkEnd, new HourMin(24, 0), rect);
+				var nonWorkColor = m_Renderer.Theme.GetAppDrawingColor(UITheme.AppColor.NonWorkingHours, 128);
+
+				// If this is also 'today' then convert to gray so it doesn't 
+				// impose too much when the today colour is laid on top
+				if (WantDrawToday(time))
+					nonWorkColor = DrawingColor.ToGray(nonWorkColor);
+
+				using (SolidBrush brush = new SolidBrush(nonWorkColor))
+				{
+					DrawNonWorkHours(e, new HourMin(0, 0), WorkStart, rect, brush);
+					DrawNonWorkHours(e, LunchStart, LunchEnd, rect, brush);
+					DrawNonWorkHours(e, WorkEnd, new HourMin(24, 0), rect, brush);
+				}
 			}
 		}
 		
-		protected void DrawNonWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect)
+		protected void DrawNonWorkHours(PaintEventArgs e, HourMin start, HourMin end, Rectangle rect, Brush brush)
 		{
-			Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
-
-			if (hoursRect.Y < this.HeaderHeight)
+			if (start < end)
 			{
-				hoursRect.Height -= this.HeaderHeight - hoursRect.Y;
-				hoursRect.Y = this.HeaderHeight;
-			}
+				Rectangle hoursRect = GetHourRangeRectangle(start, end, rect);
 
-			m_Renderer.DrawNonWorkingHourRange(e.Graphics, hoursRect, false, false);
+				if (hoursRect.Y < this.HeaderHeight)
+				{
+					hoursRect.Height -= this.HeaderHeight - hoursRect.Y;
+					hoursRect.Y = this.HeaderHeight;
+				}
+
+				e.Graphics.FillRectangle(brush, hoursRect);
+			}
 		}
 
 		protected override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isSelected, Rectangle gripRect)
