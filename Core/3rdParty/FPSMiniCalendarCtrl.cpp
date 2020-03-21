@@ -880,34 +880,17 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 				BOOL bSpecial = IsSpecialDate(dt);
 				BOOL bActiveMonth = (dt.GetMonth() == iMonth);
 
-				CString strText = CStr(dt.GetDay());
-
-				COLORREF cBackColor = CLR_NONE, cTextColor = CLR_NONE;
-				BYTE cBkgndOpacity = 255;
-
-				GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, cTextColor, cBackColor, cBkgndOpacity);
-				ASSERT((cTextColor != CLR_NONE) && (cBkgndOpacity > 0));
-
 				CRect rCell(iX, iY, iX + m_iIndividualDayWidth+5, iY + m_iDaysHeight+2);
-
-				if (cBackColor != CLR_NONE)
-				{
-					if (cBkgndOpacity == 255)
-						dc.FillSolidRect(rCell, cBackColor);
-					else
-						CGdiPlus::FillRect(CGdiPlusGraphics(dc, gdix_SmoothingModeNone), CGdiPlusBrush(cBackColor, cBkgndOpacity), rCell);
-				}
+				DrawCellBkgnd(dc, rCell, dt, bSelected, bSpecial, bActiveMonth);
 
 				if (bSpecial && bActiveMonth)
 					pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_SPECIALDAYS].m_pFont);
 				else
 					pOldFont = dc.SelectObject(m_FontInfo[FMC_FONT_DAYS].m_pFont);
 
+				COLORREF cTextColor = GetCellTextColor(dt, bSelected, bSpecial, bActiveMonth);
 				dc.SetTextColor(cTextColor);
-				dc.DrawText(strText, rCell, DEFTEXTFLAGS);
-
-				if (m_bHighlightToday && IsToday(dt))
-					dc.Draw3dRect(rCell, m_crTodayBorder, m_crTodayBorder);
+				dc.DrawText(CStr(dt.GetDay()), rCell, DEFTEXTFLAGS);
 
 				SetHotSpot(iMonthRow, iMonthCol, iDayCounter, dt, rCell);
 			}
@@ -941,46 +924,57 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 	SetCellPosition(iMonthRow, iMonthCol, CRect(iStartX, iStartY, iEndX, iY));
 
 	return iReturn;
-
 }
 
-void CFPSMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, 
-											 COLORREF& crText, COLORREF& crBkgnd, BYTE& cBkgndOpacity) const
+void CFPSMiniCalendarCtrl::DrawCellBkgnd(CDC& dc, const CRect& rCell, const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth)
 {
-	crText = m_FontInfo[FMC_FONT_DAYS].m_crTextColor;
-	crBkgnd = m_FontInfo[FMC_FONT_DAYS].m_crBkColor;
-	cBkgndOpacity = 255;
+	COLORREF crBkgnd = GetCellBkgndColor(dt, bSelected, bSpecial, bActiveMonth);
 
+	if (crBkgnd != CLR_NONE)
+		dc.FillSolidRect(rCell, crBkgnd);
+
+	if (m_bHighlightToday && IsToday(dt))
+		dc.Draw3dRect(rCell, m_crTodayBorder, m_crTodayBorder);
+}
+
+COLORREF CFPSMiniCalendarCtrl::GetCellBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
+{
 	if (bActiveMonth)
 	{
 		if (bSelected)
-		{
-			crText = ::GetSysColor(COLOR_HIGHLIGHTTEXT);
-			crBkgnd = ::GetSysColor(COLOR_HIGHLIGHT);
-		}
-		else if (bSpecial)
-		{
-			crText = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crTextColor;
-			crBkgnd = m_FontInfo[FMC_FONT_SPECIALDAYS].m_crBkColor;
-		}
+			return ::GetSysColor(COLOR_HIGHLIGHT);
+
+		if (bSpecial)
+			return m_FontInfo[FMC_FONT_SPECIALDAYS].m_crBkColor;
+	}
+
+	// else
+	return m_FontInfo[FMC_FONT_DAYS].m_crBkColor;
+}
+
+COLORREF CFPSMiniCalendarCtrl::GetCellTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
+{
+	if (bActiveMonth)
+	{
+		if (bSelected)
+			return ::GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+		if (bSpecial)
+			return m_FontInfo[FMC_FONT_SPECIALDAYS].m_crTextColor;
 	}
 	else
 	{
-		crText = m_cNonMonthDayColor;
+		return m_cNonMonthDayColor;
 	}
+
+	return m_FontInfo[FMC_FONT_DAYS].m_crTextColor;
 }
 
-BOOL CFPSMiniCalendarCtrl::IsToday(COleDateTime &dt)
+BOOL CFPSMiniCalendarCtrl::IsToday(const COleDateTime &dt) const
 {
-	BOOL bReturn = FALSE;
 	COleDateTime dtNow = COleDateTime::GetCurrentTime();
 
-	if (dt.GetMonth() == dtNow.GetMonth() &&
-		dt.GetYear() == dtNow.GetYear() &&
-		dt.GetDay() == dtNow.GetDay())
-		bReturn = TRUE;
-
-	return bReturn;
+	return ((int)dt.m_dt == (int)dtNow.m_dt);
 }
 
 int CFPSMiniCalendarCtrl::DrawTodayButton(CDC &dc, int iY)

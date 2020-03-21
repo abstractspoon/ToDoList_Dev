@@ -314,13 +314,16 @@ protected:
 	void SetHotSpot(int iMonthRow, int iMonthCol, int iDayCounter, COleDateTime& dt, RECT rect);
 	void ClearHotSpots();
 	int DrawTodayButton(CDC& dc, int iY);
-	BOOL IsToday(COleDateTime& dt);
+	BOOL IsToday(const COleDateTime& dt) const;
 	CString CStr(long lValue);
 	void CreateFontObjects();
+
 	virtual void Draw(CDC& dc, const CRect& rDraw);
 	virtual int DrawHeader(CDC& dc, int iY, int iLeftX, int iRow, int iCol, int iMonth, int iYear);
 	virtual int DrawDays(CDC& dc, int iY, int iLeftX, int iRow, int iCol, int iMonth, int iYear);
 	virtual int DrawDaysOfWeek(CDC& dc, int iY, int iLeftX, int iRow, int iCol);
+	virtual void DrawCellBkgnd(CDC& dc, const CRect& rCell, const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth);
+
 	virtual int ComputeTodayNoneHeight();
 	virtual CSize ComputeTotalSize();
 	virtual CSize ComputeSize();
@@ -332,7 +335,8 @@ protected:
 	void FireTodayButton();
 
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;
-	virtual void GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd, BYTE& cBkgndOpacity) const;
+	virtual COLORREF GetCellBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;
+	virtual COLORREF GetCellTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;
 
 	// computed values of importance
 	BOOL							m_bFontsCreated;

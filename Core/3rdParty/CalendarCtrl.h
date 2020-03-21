@@ -109,6 +109,8 @@ protected:
 	virtual CString GetDayOfWeekName(const COleDateTime& date, BOOL bShort = FALSE) const;
 	virtual CString GetMonthName(const COleDateTime& date, BOOL bShort = FALSE) const;
 	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell) const;
+	virtual COLORREF GetSelectionColor() const { return m_crTheme; }
+	virtual COLORREF GetTodayColor() const { return m_crTheme; }
 	
 	bool GetGridCellFromPoint(const CPoint& point, int &nRow, int &nCol) const;
 	bool GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeader = FALSE) const;

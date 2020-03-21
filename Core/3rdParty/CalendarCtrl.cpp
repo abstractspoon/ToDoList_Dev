@@ -480,15 +480,18 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	CRect rHeader(rCell);
 	rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
 
-	// Overlay colours
-	if (bToday && (m_crTheme != CLR_NONE))
-		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crTheme, 128), rHeader);
+	COLORREF crSelection = GetSelectionColor();
+	COLORREF crToday = GetTodayColor();
 
+	// Overlay colours
 	if (crBkgnd != CLR_NONE)
 		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(crBkgnd, 128), rCell);
 
-	if (bSelected && m_crTheme != CLR_NONE)
-		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(m_crTheme, 64), rCell);
+	if (bToday && (crToday != CLR_NONE))
+		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(crToday, 128), rCell);
+
+	if (bSelected && (crSelection != CLR_NONE))
+		CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(crSelection, 64), rCell);
 	
 	if (pCell->bMark)
 	{

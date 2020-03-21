@@ -18,6 +18,8 @@
 
 #include "..\Interfaces\UITheme.h"
 
+#include "..\3rdParty\colordef.h"
+
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -70,7 +72,9 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_nTaskHeight(DEF_TASK_HEIGHT),
 	m_nSortBy(TDCA_NONE),
 	m_bSortAscending(-1),
-	m_crWeekend(RGB(224, 224, 224))
+	m_crWeekend(RGB(224, 224, 224)),
+	m_crToday(255), 
+	m_crSelected(RGB(160, 215, 255))
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
@@ -624,7 +628,7 @@ void CTaskCalendarCtrl::SetGridLineColor(COLORREF crGrid)
 void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 {
 	m_crWeekend = theme.crWeekend;
-	m_crTheme = ((m_crWeekend == CLR_NONE) ? theme.crAppBackDark : m_crWeekend);
+	m_crToday = theme.crToday;
 
 	if (GetSafeHwnd())
 		Invalidate();
@@ -632,7 +636,19 @@ void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 
 COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell) const
 {
-	return (CWeekend().IsWeekend(pCell->date) ? m_crWeekend : CLR_NONE);
+	if (HasColor(m_crWeekend) && CWeekend().IsWeekend(pCell->date))
+	{
+		// If this cell is also today and we have a today colour
+		// then return a grey colour so that it doesn't distort
+		// the today colour which will be overlaid
+		if (HasColor(m_crToday) && CDateHelper::IsToday(pCell->date))
+			return RGBX(m_crWeekend).Gray();
+
+		// else
+		return m_crWeekend;
+	}
+	
+	return CLR_NONE;
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
@@ -1408,6 +1424,9 @@ double CTaskCalendarCtrl::CalcDateDragTolerance() const
 
 void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID)
 {
+	if (!HasTask(dwTaskID, TRUE)) // exclude hidden tasks
+		return;
+
 	// is the task already visible to some degree?
 	int nRow, nCol;
 
@@ -1720,13 +1739,29 @@ BOOL CTaskCalendarCtrl::TaskHasDependencies(DWORD dwTaskID) const
 	return (pTCI && pTCI->bHasDepends);
 }
 
-BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID) const
+BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 {
 	if (dwTaskID == 0)
 		return FALSE;
 
 	TASKCALITEM* pTCI = NULL;
-	return m_mapData.Lookup(dwTaskID, pTCI);
+	
+	if (!m_mapData.Lookup(dwTaskID, pTCI))
+		return FALSE;
+
+	if (bExcludeHidden)
+	{
+		if (!pTCI->IsValid())
+			return FALSE;
+
+		if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
+			return FALSE;
+
+		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
+			return FALSE;
+	}
+
+	return TRUE;
 }
 
 // external version

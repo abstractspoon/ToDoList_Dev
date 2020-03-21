@@ -12,6 +12,8 @@
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\enstring.h"
 
+#include "..\Interfaces\UITHEME.h"
+
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -32,6 +34,7 @@ CTaskMiniCalendarCtrl::CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData)
 	m_crBorder(CLR_NONE),
 	m_crWeekend(CLR_NONE)
 {
+	m_bHighlightToday = FALSE; // we handle it ourselves
 }
 
 CTaskMiniCalendarCtrl::~CTaskMiniCalendarCtrl()
@@ -78,11 +81,12 @@ void CTaskMiniCalendarCtrl::SetBorderColor(COLORREF crBorder)
 	}
 }
 
-void CTaskMiniCalendarCtrl::SetWeekendColor(COLORREF crWeekend)
+void CTaskMiniCalendarCtrl::SetUITheme(const UITHEME& theme)
 {
-	if (crWeekend != m_crWeekend)
+	if ((theme.crWeekend != m_crWeekend) || (theme.crToday != m_crToday))
 	{
-		m_crWeekend = crWeekend;
+		m_crWeekend = theme.crWeekend;
+		m_crToday = theme.crToday;
 
 		if (GetSafeHwnd())
 			Invalidate(FALSE);
@@ -129,31 +133,56 @@ BOOL CTaskMiniCalendarCtrl::IsSpecialDate(const COleDateTime& dt) const
 	return m_setSpecialDates.Has(CDateHelper::GetDateOnly(dt.m_dt));
 }
 
-void CTaskMiniCalendarCtrl::GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd, BYTE& cBkgndOpacity) const
+COLORREF CTaskMiniCalendarCtrl::GetCellBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL /*bSpecial*/, BOOL bActiveMonth) const
 {
-	CMiniCalendarCtrl::GetDateCellColors(dt, bSelected, bSpecial, bActiveMonth, crText, crBkgnd, cBkgndOpacity);
+	if (bSelected && Misc::IsHighContrastActive())
+		return GetSysColor(COLOR_HIGHLIGHT);
 
-	// Handle weekends and heat map
-	if (!bSelected)
+	if (!bActiveMonth)
+		return GetSysColor(COLOR_3DHIGHLIGHT);
+
+	if (m_mapHeatMap.HasHeat())
+		return m_mapHeatMap.GetColor(dt);
+
+	// Ignore base class totally
+	return CLR_NONE;
+}
+
+COLORREF CTaskMiniCalendarCtrl::GetCellTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const
+{
+	if (bSelected && Misc::IsHighContrastActive())
+		return GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+	if (bActiveMonth && m_mapHeatMap.HasHeat())
 	{
-		if (bActiveMonth && m_mapHeatMap.HasHeat())
-		{
-			crBkgnd = m_mapHeatMap.GetColor(dt);
-			cBkgndOpacity = 255;
+		COLORREF crBkgnd = m_mapHeatMap.GetColor(dt);
 
-			if (crBkgnd != CLR_NONE)
-			{
-				crText = GraphicsMisc::GetBestTextColor(crBkgnd);
-				return;
-			}
-		}
-
-		if ((m_crWeekend != CLR_NONE) && CWeekend().IsWeekend(dt))
-		{
-			crBkgnd = m_crWeekend;
-			cBkgndOpacity = 128;
-		}
+		if (crBkgnd != CLR_NONE)
+			return GraphicsMisc::GetBestTextColor(crBkgnd);
 	}
+
+	// We handle selection as an overlay so we always pass FALSE
+	return CMiniCalendarCtrl::GetCellTextColor(dt, FALSE, bSpecial, bActiveMonth);;
+}
+
+void CTaskMiniCalendarCtrl::DrawCellBkgnd(CDC& dc, const CRect& rCell, const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth)
+{
+	COLORREF crBack = GetCellBkgndColor(dt, bSelected, bSpecial, bActiveMonth);
+
+	if ((crBack == CLR_NONE) && (m_crWeekend != CLR_NONE) && CWeekend().IsWeekend(dt))
+		GraphicsMisc::DrawRect(&dc, rCell, m_crWeekend, CLR_NONE, 0, GMDR_NONE, 128);
+
+	if ((m_crToday != CLR_NONE) && IsToday(dt))
+	{
+		GraphicsMisc::DrawRect(&dc, rCell, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
+	}
+	else if (crBack != CLR_NONE)
+	{
+		dc.FillSolidRect(rCell, crBack);
+	}
+
+	if (bSelected && !Misc::IsHighContrastActive())
+		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rCell, GMIB_PREDRAW | GMIB_POSTDRAW | GMIB_THEMECLASSIC);
 }
 
 void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttrib)

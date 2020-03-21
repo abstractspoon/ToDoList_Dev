@@ -33,7 +33,7 @@ public:
 
 	void SetOptions(DWORD dwOptions);
 	void SetBorderColor(COLORREF crBorder);
-	void SetWeekendColor(COLORREF crWeekend);
+	void SetUITheme(const UITHEME& theme);
 
 	void OnUpdateTasks();
 	void FilterToolTipMessage(MSG* pMsg);
@@ -47,7 +47,7 @@ protected:
 	
 	TDC_ATTRIBUTE m_nHeatMapAttribute;
 	DWORD m_dwOptions;
-	COLORREF m_crBorder, m_crWeekend;
+	COLORREF m_crBorder, m_crWeekend, m_crToday;
 
 	// Generated message map functions
 protected:
@@ -65,8 +65,9 @@ protected:
 
 	// helpers
 	virtual BOOL IsSpecialDate(const COleDateTime& dt) const;
-	virtual void GetDateCellColors(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, 
-									BOOL bActiveMonth, COLORREF& crText, COLORREF& crBkgnd, BYTE& cBkgndOpacity) const;
+	virtual COLORREF GetCellBkgndColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;
+	virtual COLORREF GetCellTextColor(const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth) const;
+	virtual void DrawCellBkgnd(CDC& dc, const CRect& rCell, const COleDateTime& dt, BOOL bSelected, BOOL bSpecial, BOOL bActiveMonth);
 
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 

@@ -42,7 +42,6 @@ public:
 	BOOL CanSaveToImage() const;
 	
 	BOOL CancelDrag();
-	BOOL HasTask(DWORD dwTaskID) const;
 	DWORD HitTest(const CPoint& ptClient) const;
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
@@ -97,7 +96,7 @@ protected:
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
 	CDWordSet m_mapRecurringTaskIDs;
-	COLORREF m_crWeekend; // Grid color handled by base class
+	COLORREF m_crWeekend, m_crToday, m_crSelected; // Grid color handled by base class
 
 	struct CONTINUOUSDRAWINFO
 	{
@@ -157,6 +156,8 @@ protected:
 									BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
 	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell) const;
+	virtual COLORREF GetSelectionColor() const { return m_crSelected; }
+	virtual COLORREF GetTodayColor() const { return m_crToday; }
 	
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
 	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell);
@@ -174,6 +175,7 @@ protected:
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
+	BOOL HasTask(DWORD dwTaskID, BOOL bExcludeHidden = FALSE) const;
 
 	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
 	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
@@ -221,6 +223,7 @@ protected:
 	// helpers
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew);
+	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 
 };
 
