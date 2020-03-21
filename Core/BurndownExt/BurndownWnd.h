@@ -87,7 +87,7 @@ protected:
 	CRangeSliderCtrl m_sliderDateRange;
 	CBurndownGraphComboBox m_cbGraphs;
 	CBurndownTrendComboBox m_cbTrends;
-	CBurndownPreferencesDlg m_dlgPrefs;
+	//CBurndownPreferencesDlg m_dlgPrefs;
 	
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
@@ -120,7 +120,7 @@ protected:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnNcDestroy();
 	afx_msg void OnTrendsChanged();
-	afx_msg void OnPreferences();
+	//afx_msg void OnPreferences();
 
 	afx_msg LRESULT OnRebuildGraph(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnActiveDateRangeChange(WPARAM wp, LPARAM lp);
