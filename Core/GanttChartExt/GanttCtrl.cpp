@@ -2830,9 +2830,6 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 
 BOOL CGanttCtrl::WantDrawWeekend(const COleDateTime& dtDay) const
 {
-	if (HasColor(m_crToday) && CDateHelper::IsToday(dtDay))
-		return FALSE;
-
 	COLORREF color = (HasColor(m_crWeekend) ? m_crWeekend : m_crNonWorkingHours);
 
 	return (HasColor(color) && CWeekend().IsWeekend(dtDay));
