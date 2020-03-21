@@ -10,6 +10,7 @@
 #endif // _MSC_VER > 1000
 
 #include "..\interfaces\uitheme.h"
+
 #include <afxtempl.h>
 
 class CXmlItem;
@@ -36,10 +37,10 @@ public:
 protected:
 	void Trace() const;
 	void TraceColor(LPCTSTR szColor, COLORREF color) const;
-	void RecalcNonWorkingColors();
 
 protected:
-	static COLORREF GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID = -1);
+	static BOOL GetColor(const CXmlItem* pXITheme, LPCTSTR szName, COLORREF& color);
+	static COLORREF GetColor(COLORREF color, float fLuminosity);
 	static UI_RENDER_STYLE GetRenderStyle(const CXmlItem* pXITheme);
 
 };

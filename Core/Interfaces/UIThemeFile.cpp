@@ -59,6 +59,7 @@ void CUIThemeFile::Trace() const
 	TRACECOLOR(crStatusBarText);
 	TRACECOLOR(crWeekend);
 	TRACECOLOR(crNonWorkingHours);
+	TRACECOLOR(crToday);
 }
 
 void CUIThemeFile::TraceColor(LPCTSTR szColor, COLORREF color) const
@@ -85,6 +86,7 @@ CUIThemeFile& CUIThemeFile::operator=(const UITHEME& theme)
 	crStatusBarText		= theme.crStatusBarText;
 	crWeekend			= theme.crWeekend;
 	crNonWorkingHours	= theme.crNonWorkingHours;
+	crToday				= theme.crToday;
 
 	return *this;
 }
@@ -106,7 +108,8 @@ BOOL CUIThemeFile::operator== (const UITHEME& theme) const
 		(crStatusBarLight	!= theme.crStatusBarLight) ||
 		(crStatusBarText	!= theme.crStatusBarText) ||
 		(crWeekend			!= theme.crWeekend) ||
-		(crNonWorkingHours	!= theme.crNonWorkingHours))
+		(crNonWorkingHours	!= theme.crNonWorkingHours) ||
+		(crToday			!= theme.crToday))
 	{
 		return FALSE;
 	}
@@ -135,25 +138,31 @@ BOOL CUIThemeFile::LoadThemeFile(LPCTSTR szThemeFile)
 	// else
 	Reset();
 
-	nRenderStyle		= GetRenderStyle(pXITheme);
+	nRenderStyle = GetRenderStyle(pXITheme);
 
-	crAppBackDark		= GetColor(pXITheme, _T("APPBACKDARK"),		COLOR_3DFACE);
-	crAppBackLight		= GetColor(pXITheme, _T("APPBACKLIGHT"),	COLOR_3DFACE);
-	crAppLinesDark		= GetColor(pXITheme, _T("APPLINESDARK"),	COLOR_3DSHADOW);
-	crAppLinesLight		= GetColor(pXITheme, _T("APPLINESLIGHT"),	COLOR_3DHIGHLIGHT);
-	crAppText			= GetColor(pXITheme, _T("APPTEXT"),			COLOR_WINDOWTEXT);
-	crMenuBack			= GetColor(pXITheme, _T("MENUBACK"),		COLOR_3DFACE);
-	crToolbarDark		= GetColor(pXITheme, _T("TOOLBARDARK"),		COLOR_3DFACE);
-	crToolbarLight		= GetColor(pXITheme, _T("TOOLBARLIGHT"),	COLOR_3DFACE);
-	crToolbarHot		= GetColor(pXITheme, _T("TOOLBARHOT"),		CLR_NONE);
-	crStatusBarDark		= GetColor(pXITheme, _T("STATUSBARDARK"),	COLOR_3DFACE);
-	crStatusBarLight	= GetColor(pXITheme, _T("STATUSBARLIGHT"),	COLOR_3DFACE);
-	crStatusBarText		= GetColor(pXITheme, _T("STATUSBARTEXT"),	COLOR_WINDOWTEXT);
-
-	if (crToolbarHot == CLR_NONE)
+	// These colours fallback by retaining their default colours
+	GetColor(pXITheme, _T("APPBACKDARK"),		crAppBackDark);
+	GetColor(pXITheme, _T("APPBACKLIGHT"),		crAppBackLight);
+	GetColor(pXITheme, _T("APPLINESDARK"),		crAppLinesDark);
+	GetColor(pXITheme, _T("APPLINESLIGHT"),		crAppLinesLight);
+	GetColor(pXITheme, _T("APPTEXT"),			crAppText);
+	GetColor(pXITheme, _T("MENUBACK"),			crMenuBack);
+	GetColor(pXITheme, _T("TOOLBARDARK"),		crToolbarDark);
+	GetColor(pXITheme, _T("TOOLBARLIGHT"),		crToolbarLight);
+	GetColor(pXITheme, _T("STATUSBARDARK"),		crStatusBarDark);
+	GetColor(pXITheme, _T("STATUSBARLIGHT"),	crStatusBarLight);
+	GetColor(pXITheme, _T("STATUSBARTEXT"),		crStatusBarText);
+	GetColor(pXITheme, _T("TODAY"),				crToday);
+	
+	// Special fallbacks
+	if (!GetColor(pXITheme, _T("TOOLBARHOT"), crToolbarHot))
 		crToolbarHot = GraphicsMisc::Lighter(crToolbarLight, 0.05);
 
-	RecalcNonWorkingColors();
+	if (!GetColor(pXITheme, _T("WEEKEND"), crWeekend))
+		crWeekend = GetColor(crAppBackDark, 0.8f);
+
+	if (!GetColor(pXITheme, _T("NONWORKINGHOURS"), crNonWorkingHours))
+		crNonWorkingHours = GetColor(crAppBackDark, 0.85f);
 
 	//Trace();
 
@@ -183,23 +192,22 @@ void CUIThemeFile::Reset()
 	crStatusBarLight	= GetSysColor(COLOR_3DFACE);
 	crStatusBarText		= GetSysColor(COLOR_WINDOWTEXT);
 
-	RecalcNonWorkingColors();
+	crToday				= 255; // Red
+	crWeekend			= GetColor(crAppBackDark, 0.8f);
+	crNonWorkingHours	= GetColor(crAppBackDark, 0.85f); // smidgen lighter
 }
 
-void CUIThemeFile::RecalcNonWorkingColors()
+COLORREF CUIThemeFile::GetColor(COLORREF color, float fLuminosity)
 {
-	// Ensure a minimum 'darkness' level
-	HLSX hlsTemp(crAppBackDark);
+	ASSERT((fLuminosity > 0.0f) && (fLuminosity <= 1.0f));
 
-	hlsTemp.fLuminosity = 0.8f;
-	crWeekend = hlsTemp;
+	HLSX hls(color);
+	hls.fLuminosity = fLuminosity;
 
-	// Make non-working hours a smidgen lighter
-	hlsTemp.fLuminosity = 0.825f;
-	crNonWorkingHours = hlsTemp;
+	return hls;
 }
 
-COLORREF CUIThemeFile::GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nColorID)
+BOOL CUIThemeFile::GetColor(const CXmlItem* pXITheme, LPCTSTR szName, COLORREF& color)
 {
 	const CXmlItem* pXIColor = pXITheme->GetItem(_T("COLOR"));
 
@@ -207,22 +215,27 @@ COLORREF CUIThemeFile::GetColor(const CXmlItem* pXITheme, LPCTSTR szName, int nC
 	{
 		if (pXIColor->GetItemValue(_T("NAME")).CompareNoCase(szName) == 0)
 		{
-			BYTE bRed = (BYTE)pXIColor->GetItemValueI(_T("R"));
-			BYTE bGreen = (BYTE)pXIColor->GetItemValueI(_T("G"));
-			BYTE bBlue = (BYTE)pXIColor->GetItemValueI(_T("B"));
+			if (pXIColor->HasItem(_T("RGB")))
+			{
+				color = (COLORREF)pXIColor->GetItemValueI(_T("RGB"));
+			}
+			else
+			{
+				BYTE bRed = (BYTE)pXIColor->GetItemValueI(_T("R"));
+				BYTE bGreen = (BYTE)pXIColor->GetItemValueI(_T("G"));
+				BYTE bBlue = (BYTE)pXIColor->GetItemValueI(_T("B"));
 
-			return RGB(bRed, bGreen, bBlue);
+				color = RGB(bRed, bGreen, bBlue);
+			}
+
+			return TRUE;
 		}
 
 		pXIColor = pXIColor->GetSibling();
 	}
 
 	// not found
-	if (nColorID != -1)
-		return GetSysColor(nColorID);
-
-	// else
-	return CLR_NONE;
+	return FALSE;
 }
 
 UI_RENDER_STYLE CUIThemeFile::GetRenderStyle(const CXmlItem* pXITheme)

@@ -35,6 +35,7 @@ struct UITHEME
 
 	COLORREF crWeekend;
 	COLORREF crNonWorkingHours;
+	COLORREF crToday;
 
 	// NEW ITEMS HERE ONLY
 };
