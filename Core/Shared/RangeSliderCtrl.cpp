@@ -6,8 +6,7 @@
 
 #include "Themed.h"
 #include "Misc.h"
-
-#include "..\3rdParty\GdiPlus.h"
+#include "GraphicsMisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -262,13 +261,7 @@ void CRangeSliderCtrl::DrawButton(CDC& dc, BUTTON_ID nBtn, const CRect& rButton,
 
 					// Fade the colour using semi-transparency
 					if (!bPressed && (bTrackingEnds || !bHot))
-					{
-						CGdiPlusBrush brush(RGB(255, 255, 255), (bTrackingEnds ? 96 : 128));
-						CGdiPlusRectF rect(rTrack);
-						CGdiPlusGraphics graphics(dc, gdix_SmoothingModeNone);
-
-						CGdiPlus::FillRect(graphics, brush, rect);
-					}
+						GraphicsMisc::DrawRect(&dc, rTrack, RGB(255, 255, 255), CLR_NONE, 0, GMDR_NONE, (bTrackingEnds ? 96 : 128));
 				}
 
 				DrawTicks(dc, rTrack, m_Left, m_Right);
