@@ -6,7 +6,6 @@
 #define IDR_STATISTICS                  1000
 #define IDC_DISPLAY                     1015
 #define IDC_TRENDLINES                  1016
-#define IDC_SETTODAYCOLOR               1073
 #define IDS_BURNDOWN_TITLE              6001
 #define IDS_TIME_AXIS                   6002
 #define IDS_TASK_AXIS                   6003
@@ -23,7 +22,6 @@
 #define IDS_TOOLTIP_ATTRIBFREQUENCY     6010
 #define IDD_PREFERENCES_DIALOG          16002
 #define IDD_PREFERENCES_PAGE            16003
-#define IDC_TODAYCOLOR                  16005
 #define IDR_TOOLBAR                     16006
 #define IDC_PPHOST                      16019
 #define IDC_TB_PLACEHOLDER              16024

@@ -21,8 +21,6 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const COLORREF DEF_TODAY_COLOR	= RGB(255, 0, 0);
-
 const COLORREF COLOR_GREEN		= RGB(122, 204, 0);
 const COLORREF COLOR_RED		= RGB(204, 0, 0);
 const COLORREF COLOR_YELLOW		= RGB(204, 164, 0);
@@ -39,7 +37,6 @@ CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, 
 	m_chart(chart)
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesPage)
-	m_bEnableTodayColor = FALSE;
 	//}}AFX_DATA_INIT
 }
 
@@ -49,17 +46,12 @@ void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 	//{{AFX_DATA_MAP(CBurndownPreferencesPage)
 	DDX_Control(pDX, IDC_GRAPHCOLORS, m_lcGraphColors);
-	DDX_Control(pDX, IDC_SETTODAYCOLOR, m_btnTodayColor);
-	DDX_Check(pDX, IDC_TODAYCOLOR, m_bEnableTodayColor);
 	//}}AFX_DATA_MAP
-
-	m_btnTodayColor.DDX(pDX, m_crToday);
 }
 
 
 BEGIN_MESSAGE_MAP(CBurndownPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CBurndownPreferencesPage)
-	ON_BN_CLICKED(IDC_TODAYCOLOR, OnEnableTodayColor)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -69,8 +61,6 @@ END_MESSAGE_MAP()
 BOOL CBurndownPreferencesPage::OnInitDialog() 
 {
 	CPreferencesPageBase::OnInitDialog();
-
-	GetDlgItem(IDC_SETTODAYCOLOR)->EnableWindow(m_bEnableTodayColor);
 
 	VERIFY(m_lcGraphColors.Initialize(m_chart));
 
@@ -82,9 +72,6 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 
 void CBurndownPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	pPrefs->WriteProfileInt(szKey, _T("EnableTodayColor"), m_bEnableTodayColor);
-	pPrefs->WriteProfileInt(szKey, _T("TodayColor"), (int)m_crToday);
-
 	// Graph colours
 	const CGraphColorMap& mapColors = m_lcGraphColors.GetGraphColors();
 
@@ -102,9 +89,6 @@ void CBurndownPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 
 void CBurndownPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
-	m_bEnableTodayColor = pPrefs->GetProfileInt(szKey, _T("EnableTodayColor"), TRUE);
-	m_crToday = (COLORREF)pPrefs->GetProfileInt(szKey, _T("TodayColor"), DEF_TODAY_COLOR);
-
 	// Graph colours
 	CGraphColorMap mapColors;
 	m_chart.GetDefaultGraphColors(mapColors);
@@ -136,11 +120,6 @@ void CBurndownPreferencesPage::OnOK()
 	CPreferencesPageBase::OnOK();
 }
 
-void CBurndownPreferencesPage::OnEnableTodayColor() 
-{
-	UpdateData();
-	GetDlgItem(IDC_SETTODAYCOLOR)->EnableWindow(m_bEnableTodayColor);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesDlg dialog

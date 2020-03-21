@@ -288,6 +288,7 @@ void CBurndownWnd::SetUITheme(const UITHEME* pTheme)
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
+		m_chart.SetTodayColour(m_theme.crToday);
 	}
 }
 
@@ -632,6 +633,7 @@ HBRUSH CBurndownWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	{
 		pDC->SetTextColor(m_theme.crAppText);
 		pDC->SetBkMode(TRANSPARENT);
+
 		hbr = m_brBack;
 	}
 

@@ -35,7 +35,6 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
-	COLORREF GetTodayColor() { return (m_bEnableTodayColor ? m_crToday : CLR_NONE); }
 	const CGraphColorMap& GetGraphColors() const { return m_lcGraphColors.GetGraphColors(); }
 
 protected:
@@ -45,9 +44,6 @@ protected:
 	//}}AFX_DATA
 	CBurndownGraphColorListCtrl	m_lcGraphColors;
 	CColorButton m_btnTodayColor;
-
-	BOOL m_bEnableTodayColor;
-	COLORREF m_crToday;
 
 	const CBurndownChart& m_chart;
 
@@ -64,7 +60,6 @@ protected:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CBurndownPreferencesPage)
-	afx_msg void OnEnableTodayColor();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -78,9 +73,6 @@ class CBurndownPreferencesDlg : public CPreferencesDlgBase
 // Construction
 public:
 	CBurndownPreferencesDlg(const CBurndownChart& chart, CWnd* pParent);
-
-	COLORREF GetTodayColor() { return m_page.GetTodayColor(); }
-	const CGraphColorMap& GetGraphColors() const { return m_page.GetGraphColors(); }
 
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
