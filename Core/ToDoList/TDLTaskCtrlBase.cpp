@@ -2458,11 +2458,8 @@ void CTDLTaskCtrlBase::DrawGridlines(CDC* pDC, const CRect& rect, BOOL bSelected
 
 			if (bSelected)
 			{
-				// Don't overdraw selection at top/bottom
-				rGridline.DeflateRect(0, 1);
-
 				// Make color a little darker
-				crGridline = GraphicsMisc::Darker(crGridline, 0.2);
+				crGridline = GraphicsMisc::Darker(crGridline, 0.1);
 			}
 
 			GraphicsMisc::DrawVertLine(pDC, rGridline.top, rGridline.bottom, rect.right - 1, crGridline);

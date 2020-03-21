@@ -1687,11 +1687,8 @@ void CTreeListCtrl::DrawVertItemDivider(CDC* pDC, const CRect& rItem, BOOL bSele
 
 	if (bSelected)
 	{
-		// Don't overdraw selection at top/bottom
-		rDiv.DeflateRect(0, 1);
-
 		// Make color a little darker
-		crDiv = GraphicsMisc::Darker(crDiv, 0.2);
+		crDiv = GraphicsMisc::Darker(crDiv, 0.1);
 	}
 
 	pDC->FillSolidRect(rDiv, crDiv);
