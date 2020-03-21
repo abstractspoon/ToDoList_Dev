@@ -949,11 +949,6 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 		}
 		else
 		{
-			CRect rOldPos = CDialogHelper::GetChildRect(&m_sbCellVScroll);
-			pOldCell = GetCell(rOldPos.CenterPoint());
-
-			ASSERT(pOldCell);
-
 			m_sbCellVScroll.MoveWindow(rNewPos);
 		}
 		
