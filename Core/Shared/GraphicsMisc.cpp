@@ -63,6 +63,7 @@ BOOL Create32BitHBITMAP(HDC hdc, const SIZE *psize, void **ppvBits, HBITMAP* phB
 BOOL HasAlpha(ARGB *pargb, SIZE& sizImage, int cxRow);
 BOOL ConvertToPARGB32(HDC hdc, ARGB *pargb, HBITMAP hbmp, SIZE& sizImage, int cxRow);
 BOOL ConvertBufferToPARGB32(HPAINTBUFFER hPaintBuffer, HDC hdc, HICON hicon, SIZE& sizIcon);
+BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
 
 //////////////////////////////////////////////////////////////////////
 
@@ -1079,7 +1080,7 @@ int GraphicsMisc::DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UIN
 
 void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder, int nCornerRadius, DWORD dwEdges, BYTE cFillOpacity)
 {
-	ASSERT((crBorder != CLR_NONE) || (crFill != CLR_NONE));
+	ASSERT(HasColor(crBorder) || HasColor(crFill));
 	ASSERT((cFillOpacity == 255) || (nCornerRadius == 0));
 
  	if (rect.IsRectEmpty())
@@ -1087,11 +1088,11 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 		// draw a line
 		if (rect.Width() > 0)
 		{
-			DrawHorzLine(pDC, rect.left, rect.right, rect.top, ((crBorder != CLR_NONE) ? crBorder : crFill));
+			DrawHorzLine(pDC, rect.left, rect.right, rect.top, (HasColor(crBorder) ? crBorder : crFill));
 		}
 		else if (rect.Height() > 0)
 		{
-			DrawVertLine(pDC, rect.top, rect.bottom, rect.left, ((crBorder != CLR_NONE) ? crBorder : crFill));
+			DrawVertLine(pDC, rect.top, rect.bottom, rect.left, (HasColor(crBorder) ? crBorder : crFill));
 		}
 
  		return;
@@ -1104,7 +1105,7 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 			crBorder = CLR_NONE;
 
 		// if both colours are set and fully opaque there's an optimisation we can do
-		if ((crFill != CLR_NONE) && (crBorder != CLR_NONE) && (cFillOpacity == 255))
+		if (HasColor(crFill) && HasColor(crBorder) && (cFillOpacity == 255))
 		{
 			pDC->FillSolidRect(rect, crBorder);
 
@@ -1139,15 +1140,15 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 		}
 
 		// else
-		if (crFill != CLR_NONE) // inside of rect
+		if (HasColor(crFill)) // inside of rect
 		{
 			if (cFillOpacity != 255)
-				CGdiPlus::FillRect(CGdiPlusGraphics(*pDC), CGdiPlusBrush(crFill, cFillOpacity), rect);
+				CGdiPlus::FillRect(CGdiPlusGraphics(*pDC, gdix_SmoothingModeNone), CGdiPlusBrush(crFill, cFillOpacity), rect);
 			else
 				pDC->FillSolidRect(rect, crFill);
 		}
 
-		if (crBorder != CLR_NONE) // border
+		if (HasColor(crBorder)) // border
 		{
 			if (dwEdges & GMDR_TOP)
 				pDC->FillSolidRect(rect.left, rect.top, rect.Width(), 1, crBorder);
@@ -1168,7 +1169,7 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 		CBrush* pOldBrush = NULL, brFill;
 
 		// inside of rect
-		if (crFill != CLR_NONE)
+		if (HasColor(crFill))
 		{
 			brFill.CreateSolidBrush(crFill);
 			pOldBrush = pDC->SelectObject(&brFill);
@@ -1179,7 +1180,7 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 		}
 
 		// border
-		if (crBorder != CLR_NONE)
+		if (HasColor(crBorder))
 		{
 			penBorder.CreatePen(PS_SOLID, 1, crBorder);
 			pOldPen = pDC->SelectObject(&penBorder);
