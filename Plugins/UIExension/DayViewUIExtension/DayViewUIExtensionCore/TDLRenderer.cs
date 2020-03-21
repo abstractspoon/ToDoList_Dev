@@ -230,7 +230,7 @@ namespace DayViewUIExtension
 						var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
 						renderer.DrawBackground(g, rHeader);
 
-						using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 128)))
+						using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 64)))
 							g.FillRectangle(brush, rHeader);
 					}
 					else
