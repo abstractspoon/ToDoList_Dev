@@ -73,12 +73,12 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_nSortBy(TDCA_NONE),
 	m_bSortAscending(-1),
 	m_crWeekend(RGB(224, 224, 224)),
-	m_crToday(255), 
-	m_crSelected(RGB(160, 215, 255))
+	m_crToday(255) 
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
 	m_bDrawGridOverCells = FALSE; // always
+	m_crTheme = RGB(160, 215, 255);
 }
 
 CTaskCalendarCtrl::~CTaskCalendarCtrl()
@@ -634,12 +634,36 @@ void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 		Invalidate();
 }
 
-COLORREF CTaskCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell) const
+void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
 {
 	if (HasColor(m_crWeekend) && CWeekend().IsWeekend(pCell->date))
-		return m_crWeekend;
-	
-	return CLR_NONE;
+	{
+		// If dtDay is also 'today' and we have a today colour
+		// then render using a grey so that that it does overly
+		// affect the today colour which will be overlaid on top
+		COLORREF crWeekend = m_crWeekend;
+
+		if (bToday && HasColor(m_crToday))
+			crWeekend = RGBX(crWeekend).Gray();
+
+		GraphicsMisc::DrawRect(pDC, rCell, crWeekend, CLR_NONE, 0, GMDR_NONE, 128);
+	}
+
+	if (bToday && HasColor(m_crToday))
+		GraphicsMisc::DrawRect(pDC, rCell, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
+
+	if (bSelected && (m_crTheme != CLR_NONE))
+	{
+		CRect rSel(rCell);
+
+		if (rSel.left)
+			rSel.left++;;
+
+		GraphicsMisc::DrawRect(pDC, rSel, CLR_NONE, m_crTheme);
+
+		rSel.DeflateRect(1, 1);
+		GraphicsMisc::DrawRect(pDC, rSel, CLR_NONE, m_crTheme);
+	}
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
@@ -665,12 +689,16 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	if (!nNumTasks)
 		return;
 	
-	// adjust cell rect for scrollbar
-	CRect rCellTrue(rCell);
+	// Exclude scrollbar rect from drawing
 	BOOL bShowScroll = (IsCellScrollBarActive() && IsGridCellSelected(pCell));
-
+	
 	if (bShowScroll)
-		rCellTrue.right -= GetSystemMetrics(SM_CXVSCROLL);
+	{
+		CRect rScrollbar;
+		CalcScrollBarRect(rCell, rScrollbar);
+
+		pDC->ExcludeClipRect(rScrollbar);
+	}
 	
 	BOOL bContinuous = HasOption(TCCO_DISPLAYCONTINUOUS);
 	BOOL bVScrolled = (bShowScroll || bContinuous);
@@ -689,7 +717,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		
 		CRect rTask;
 		
-		if (!CalcTaskCellRect(nTask, pCell, rCellTrue, rTask))
+		if (!CalcTaskCellRect(nTask, pCell, rCell, rTask))
 			continue;
 
 		// draw selection
@@ -701,7 +729,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
  			DWORD dwSelFlags = GMIB_THEMECLASSIC;
  			CRect rClip(rCell);
 
-			if (rTask.left <= rCellTrue.left)
+			if (rTask.left <= rCell.left)
 			{
 				if (bContinuous)
 				{
@@ -713,7 +741,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				dwSelFlags |= GMIB_CLIPLEFT;
 			}
 
-			if (rTask.right >= rCellTrue.right)
+			if (rTask.right >= rCell.right)
 				dwSelFlags |= GMIB_CLIPRIGHT;
 
 			GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
@@ -725,7 +753,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		{
 			DWORD dwFlags = GMDR_TOP;
 			
-			if (rTask.left > rCellTrue.left)
+			if (rTask.left > rCell.left)
 			{
 				dwFlags |= GMDR_LEFT;
 			}
@@ -734,10 +762,10 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				rTask.left--; // draw over gridline
 			}
 			
-			if (rTask.right < rCellTrue.right)
+			if (rTask.right < rCell.right)
 				dwFlags |= GMDR_RIGHT;
 			
-			if (rTask.bottom < rCellTrue.bottom)
+			if (rTask.bottom < rCell.bottom)
 				dwFlags |= GMDR_BOTTOM;
 			
 			COLORREF crFill = pTCI->GetFillColor(bTextColorIsBkgnd);
@@ -774,7 +802,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 						if (cdi.nIconOffset != 0)
 							rClip.left--; // draw over gridline
 
-						if (rTask.right >= rCellTrue.right)
+						if (rTask.right >= rCell.right)
 							rClip.right++; // draw over gridline
 					}
 					
@@ -830,7 +858,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			if (cdi.nTextOffset >= nExtent)
 				cdi.nTextOffset = -1;
 						
-			if (rTask.bottom >= rCellTrue.bottom)
+			if (rTask.bottom >= rCell.bottom)
 				break;
 		}
 	}
@@ -940,8 +968,8 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 
 		const CCalendarCell* pOldCell = NULL;
 
-		CRect rNewPos(rCell);
-		rNewPos.left = (rNewPos.right - GetSystemMetrics(SM_CXVSCROLL));
+		CRect rNewPos;
+		CalcScrollBarRect(rCell, rNewPos);
 
 		if (!m_sbCellVScroll.GetSafeHwnd())
 		{
@@ -974,6 +1002,16 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 	}
 
 	return bSuccess;
+}
+
+void CTaskCalendarCtrl::CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const
+{
+	rScrollbar = rCell;
+
+	if (m_crTheme != CLR_NONE)
+		rScrollbar.DeflateRect(0, 0, 2, 2);
+
+	rScrollbar.left = (rScrollbar.right - GetSystemMetrics(SM_CXVSCROLL));
 }
 
 #if _MSC_VER >= 1400

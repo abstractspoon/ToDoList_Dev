@@ -436,6 +436,9 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 					bSelected = ((tmax >= tcur) && (tcur >= tmin));
 				}
 
+				// don't draw over gridline
+				rCell.top++;
+
 				int nSaveDC = pDC->SaveDC();
 				pDC->IntersectClipRect(rCell);
 
@@ -472,65 +475,46 @@ CString CCalendarCtrl::GetMonthName(const COleDateTime& date, BOOL bShort) const
 	return (bShort ? date.Format(_T("%B")) : date.Format(_T("%b")));
 }
 
+void CCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
+{
+	if ((m_bMonthIsOdd && !(pCell->date.GetMonth()%2)) || 
+		(!m_bMonthIsOdd && (pCell->date.GetMonth()%2)))
+	{
+		pDC->FillSolidRect(rCell, CALENDAR_LIGHTGREY);
+	}
+	
+	if (bToday)
+	{
+		CRect selRect(rCell);
+		selRect.bottom = selRect.top + m_nDayHeaderHeight - 1;
+
+		pDC->FillSolidRect(rCell, m_crTheme);
+	}
+	
+	// Draw the selection
+	if (bSelected)
+	{	
+		CRect selRect(rCell);
+
+		if (bToday)	
+			selRect.top += m_nDayHeaderHeight;
+
+		pDC->FillSolidRect(rCell, GetFadedThemeColour(40));
+	}
+	
+	// Out of range
+	if ((pCell->date >= m_BoundUp) || 
+		(pCell->date <= m_BoundDown))	
+	{
+		pDC->FillSolidRect(rCell, RGB(255,225,225));
+	}
+}
+
 void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
 							 BOOL bSelected, BOOL bToday, BOOL bShowMonth)
 {
+	DrawCellBkgnd(pDC, pCell, rCell, bSelected, bToday);
 
-	COLORREF crBkgnd = GetCellBkgndColor(pCell);
-	BOOL bBkgnd = (crBkgnd != CLR_NONE);
-
-	CRect rHeader(rCell), rBody(rCell);
-	rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
-	rBody.top = rHeader.bottom;
-
-	COLORREF crSelection = GetSelectionColor();
-	COLORREF crToday = GetTodayColor();
-
-	bSelected &= (crSelection != CLR_NONE);
-	bToday &= (crToday != CLR_NONE);
-
-	if (bSelected || bToday || bBkgnd)
-	{
-		CGdiPlusGraphics g(*pDC, gdix_SmoothingModeNone);
-
-		// Header
-		if (bToday)
-		{
-			// If this cell is also today and we have a today colour
-			// then return a grey colour so that it doesn't distort
-			// the today colour which will be overlaid
-			if (bBkgnd)
-				CGdiPlus::FillRect(g, CGdiPlusBrush(RGBX(crBkgnd).Gray(), 128), rHeader);
-			
-			CGdiPlus::FillRect(g, CGdiPlusBrush(crToday, 128), rHeader);
-		}
-		else
-		{
-			if (bBkgnd)
-				CGdiPlus::FillRect(g, CGdiPlusBrush(crBkgnd, 128), rHeader);
-
-			if (bSelected)
-				CGdiPlus::FillRect(g, CGdiPlusBrush(crSelection, 64), rHeader);
-		}
-
-		// Body
-		if (bToday && !bSelected)
-		{
-			if (bBkgnd)
-				CGdiPlus::FillRect(g, CGdiPlusBrush(RGBX(crBkgnd).Gray(), 128), rBody);
-			
-			CGdiPlus::FillRect(g, CGdiPlusBrush(crToday, 128), rBody);
-		}
-		else
-		{
-			if (bBkgnd)
-				CGdiPlus::FillRect(g, CGdiPlusBrush(crBkgnd, 128), rBody);
-
-			if (bSelected)
-				CGdiPlus::FillRect(g, CGdiPlusBrush(crSelection, 64), rBody);
-		}
-	}
-		
 	if (pCell->bMark)
 	{
 		CRect rcMark(rCell);
@@ -558,6 +542,8 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 		csDay.Format(_T("%d"), nDay);
 	}
 	
+	CRect rHeader(rCell), rBody(rCell);
+	rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
 	rHeader.DeflateRect(0, 1, 2, 0); // padding
 	
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
@@ -569,24 +555,6 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	rContent.DeflateRect(1,m_nDayHeaderHeight, 0, 0);		
 	
 	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
-}
-
-COLORREF CCalendarCtrl::GetCellBkgndColor(const CCalendarCell* pCell) const
-{
-	// Out of range
-	if ((pCell->date >= m_BoundUp) ||
-		(pCell->date <= m_BoundDown))
-	{
-		return RGB(255, 225, 225);
-	}
-
-	if ((m_bMonthIsOdd && !(pCell->date.GetMonth() % 2)) ||
-		(!m_bMonthIsOdd && (pCell->date.GetMonth() % 2)))
-	{
-		return CALENDAR_LIGHTGREY;
-	}
-
-	return CLR_NONE;
 }
 
 void CCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 

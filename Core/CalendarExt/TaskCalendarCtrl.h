@@ -96,7 +96,7 @@ protected:
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
 	CDWordSet m_mapRecurringTaskIDs;
-	COLORREF m_crWeekend, m_crToday, m_crSelected; // Grid color handled by base class
+	COLORREF m_crWeekend, m_crToday; // Grid color handled by base class
 
 	struct CONTINUOUSDRAWINFO
 	{
@@ -152,12 +152,9 @@ protected:
 	//}}AFX_VIRTUAL
 	virtual void DrawHeader(CDC* pDC);
 	virtual void DrawCells(CDC* pDC);
-	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell,
-									BOOL bSelected, BOOL bToday);
+	virtual void DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
+	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
-	virtual COLORREF GetCellBkgndColor(const CCalendarCell* pCell) const;
-	virtual COLORREF GetSelectionColor() const { return m_crSelected; }
-	virtual COLORREF GetTodayColor() const { return m_crToday; }
 	
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
 	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell);
@@ -187,6 +184,7 @@ protected:
 	int GetTaskHeight() const;
 	int CalcRequiredTaskFontPointSize() const;
 	CFont* GetTaskFont(const TASKCALITEM* pTCI);
+	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
 
 	DWORD HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;

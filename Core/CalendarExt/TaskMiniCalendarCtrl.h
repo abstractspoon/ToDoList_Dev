@@ -47,7 +47,7 @@ protected:
 	
 	TDC_ATTRIBUTE m_nHeatMapAttribute;
 	DWORD m_dwOptions;
-	COLORREF m_crBorder, m_crWeekend, m_crToday;
+	COLORREF m_crBorder, m_crWeekend, m_crToday, m_crSelected;
 
 	// Generated message map functions
 protected:

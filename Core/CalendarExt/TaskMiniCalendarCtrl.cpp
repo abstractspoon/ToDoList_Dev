@@ -14,6 +14,8 @@
 
 #include "..\Interfaces\UITHEME.h"
 
+#include "..\3rdParty\ColorDef.h"
+
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -32,7 +34,8 @@ CTaskMiniCalendarCtrl::CTaskMiniCalendarCtrl(const CTaskCalItemMap& mapData)
 	m_mapData(mapData), 
 	m_nHeatMapAttribute(TDCA_NONE),
 	m_crBorder(CLR_NONE),
-	m_crWeekend(CLR_NONE)
+	m_crWeekend(CLR_NONE),
+	m_crSelected(RGB(160, 215, 255))
 {
 	m_bHighlightToday = FALSE; // we handle it ourselves
 }
@@ -138,10 +141,7 @@ COLORREF CTaskMiniCalendarCtrl::GetCellBkgndColor(const COleDateTime& dt, BOOL b
 	if (bSelected && Misc::IsHighContrastActive())
 		return GetSysColor(COLOR_HIGHLIGHT);
 
-	if (!bActiveMonth)
-		return GetSysColor(COLOR_3DHIGHLIGHT);
-
-	if (m_mapHeatMap.HasHeat())
+	if (bActiveMonth && m_mapHeatMap.HasHeat())
 		return m_mapHeatMap.GetColor(dt);
 
 	// Ignore base class totally
@@ -169,20 +169,25 @@ void CTaskMiniCalendarCtrl::DrawCellBkgnd(CDC& dc, const CRect& rCell, const COl
 {
 	COLORREF crBack = GetCellBkgndColor(dt, bSelected, bSpecial, bActiveMonth);
 
-	if ((crBack == CLR_NONE) && (m_crWeekend != CLR_NONE) && CWeekend().IsWeekend(dt))
-		GraphicsMisc::DrawRect(&dc, rCell, m_crWeekend, CLR_NONE, 0, GMDR_NONE, 128);
-
-	if ((m_crToday != CLR_NONE) && IsToday(dt))
+	BOOL bBkgnd = (crBack != CLR_NONE);
+	BOOL bWeekend = (!bBkgnd && (m_crWeekend != CLR_NONE) && CWeekend().IsWeekend(dt));
+	BOOL bToday = ((m_crToday != CLR_NONE) && IsToday(dt));
+	
+	if (bToday)
 	{
 		GraphicsMisc::DrawRect(&dc, rCell, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
 	}
-	else if (crBack != CLR_NONE)
+	else if (bBkgnd)
 	{
 		dc.FillSolidRect(rCell, crBack);
 	}
+	else if (bWeekend)
+	{
+		GraphicsMisc::DrawRect(&dc, rCell, m_crWeekend, CLR_NONE, 0, GMDR_NONE, 128);
+	}
 
 	if (bSelected && !Misc::IsHighContrastActive())
-		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rCell, GMIB_PREDRAW | GMIB_POSTDRAW | GMIB_THEMECLASSIC);
+		GraphicsMisc::DrawRect(&dc, rCell, CLR_NONE, m_crSelected);
 }
 
 void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttrib)
