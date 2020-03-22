@@ -15,7 +15,7 @@ pause
 
 REM - Build core app in VC6
 cd %REPO%\Core
-REM "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" 
+"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" 
 
 REM - Copy ToDoList.pdb/.map to versioned symbols folder
 %REPO%\Core\ToDoList\Unicode_Release\ToDoList.exe -ver
