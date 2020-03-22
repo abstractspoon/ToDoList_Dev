@@ -127,7 +127,7 @@ float RGBX::CalcColorDifference(COLORREF crFrom, COLORREF crTo)
 
 float RGBX::CalcLuminanceDifference(COLORREF crFrom, COLORREF crTo)
 {
-	return fabs(HLSX(crFrom).fLuminosity - HLSX(crTo).fLuminosity);
+	return (float)fabs(HLSX(crFrom).fLuminosity - HLSX(crTo).fLuminosity);
 }
 
 COLORREF RGBX::Complement(COLORREF color, bool bRGB)
