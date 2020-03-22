@@ -168,7 +168,7 @@ THEMEAPI GetThemeBackgroundExtent(HTHEME hTheme, OPTIONAL HDC hdc,
     OUT RECT *pExtentRect);
 
 //-------------------------------------------------------------------------
-typedef enum THEMESIZE
+enum THEMESIZE
 {
     TS_MIN,             // minimum size
     TS_TRUE,            // size without stretching
@@ -536,7 +536,7 @@ THEMEAPI GetThemeIntList(HTHEME hTheme, int iPartId,
     int iStateId, int iPropId, OUT INTLIST *pIntList);
 
 //-----------------------------------------------------------------------
-typedef enum PROPERTYORIGIN
+enum PROPERTYORIGIN
 {
     PO_STATE,           // property was found in the state section
     PO_PART,            // property was found in the part section
