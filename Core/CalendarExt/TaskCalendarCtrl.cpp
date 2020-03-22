@@ -977,6 +977,15 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 		}
 		else
 		{
+			CRect rPrevPos = CDialogHelper::GetChildRect(&m_sbCellVScroll);
+			int nRow, nCol;
+
+			if (GetGridCellFromPoint(rPrevPos.CenterPoint(), nRow, nCol))
+			{
+				pOldCell = GetCell(nRow, nCol);
+				ASSERT(pOldCell);
+			}
+
 			m_sbCellVScroll.MoveWindow(rNewPos);
 		}
 		
@@ -990,9 +999,7 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 			si.nMax = (nNumItems - 1);
 			si.nPage = min((rCell.Height() / GetTaskHeight()), nNumItems);
 
-			if ((m_nCellVScrollPos < 0) || (m_nCellVScrollPos > (nNumItems - (int)si.nPage)))
-				m_nCellVScrollPos = 0;
-
+			m_nCellVScrollPos = min(m_nCellVScrollPos, (nNumItems - (int)si.nPage));
 			si.nPos = m_nCellVScrollPos;
 
 			m_sbCellVScroll.EnableWindow(TRUE);
@@ -1501,6 +1508,10 @@ void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID)
 		}
 
 		ASSERT(GetGridCellFromTask(dwTaskID, nRow, nCol));
+	}
+	else
+	{
+		SelectGridCell(nRow, nCol);
 	}
 	
 	// Now ensure it is visible vertically
@@ -2153,6 +2164,11 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 					}
 				}
 			}
+
+			// Rebuild the cell tasks because the task may have 
+			// moved cells
+			RebuildCellTasks();
+			EnsureVisible(m_dwSelectedTaskID);
 		}
 		else
 		{
