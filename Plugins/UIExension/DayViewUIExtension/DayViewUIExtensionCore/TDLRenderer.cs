@@ -315,7 +315,7 @@ namespace DayViewUIExtension
 			if (hilight)
 			{
 				// Draw selection rect
-				UIExtension.SelectionRect.Draw(m_hWnd, g, rect.X, rect.Y, rect.Width, rect.Height, true); // transparent
+				UIExtension.SelectionRect.Draw(m_hWnd, g, rect.X, rect.Y, rect.Width, rect.Height, false, true); // not focused, transparent
 			}
 			else
 			{
