@@ -355,7 +355,7 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 	for(i=0 ; i<CALENDAR_NUM_COLUMNS; i++)
 	{
 		CString csTitle(GetDayOfWeekName(m_dayCells[0][i].date, bShort));
-		CRect txtRect(i*nWidth, 0, (i+1)*nWidth, m_nHeaderHeight);
+		CRect txtRect(i*nWidth, 2, (i+1)*nWidth, m_nHeaderHeight);
 		pDC->DrawText(csTitle, txtRect, DT_CENTER|DT_VCENTER);
 	}
 	pDC->SelectObject(pOldFont);
@@ -436,9 +436,6 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 					bSelected = ((tmax >= tcur) && (tcur >= tmin));
 				}
 
-				// don't draw over gridline
-				rCell.top++;
-
 				int nSaveDC = pDC->SaveDC();
 				pDC->IntersectClipRect(rCell);
 
@@ -477,7 +474,18 @@ CString CCalendarCtrl::GetMonthName(const COleDateTime& date, BOOL bShort) const
 
 void CCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
 {
-	if ((m_bMonthIsOdd && !(pCell->date.GetMonth()%2)) || 
+	// don't draw over gridline
+	CRect rBack(rCell);
+
+	if ((m_crGrid != CLR_NONE) && !m_bDrawGridOverCells)
+	{
+		rBack.top++;
+
+		if (rBack.left > 0)
+			rBack.left++;
+	}
+
+	if ((m_bMonthIsOdd && !(pCell->date.GetMonth()%2)) ||
 		(!m_bMonthIsOdd && (pCell->date.GetMonth()%2)))
 	{
 		pDC->FillSolidRect(rCell, CALENDAR_LIGHTGREY);
@@ -542,17 +550,22 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 		csDay.Format(_T("%d"), nDay);
 	}
 	
-	CRect rHeader(rCell), rBody(rCell);
-	rHeader.bottom = rHeader.top + m_nDayHeaderHeight - 1;
-	rHeader.DeflateRect(0, 1, 2, 0); // padding
+	CRect rText(rCell);
+	rText.bottom = rText.top + m_nDayHeaderHeight;
+	rText.DeflateRect(0, 3, 3, 0); // padding
 	
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rHeader, DT_RIGHT|DT_VCENTER);
+	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rText, DT_RIGHT|DT_VCENTER);
 
-	// draw inside...
+	// Draw contents
 	CRect rContent(rCell);
-	rContent.DeflateRect(1,m_nDayHeaderHeight, 0, 0);		
+
+	// Don't overdraw grid
+	if (!m_bDrawGridOverCells && (m_crGrid != CLR_NONE) && (rContent.left > 0))
+		rContent.left++;
+
+	rContent.top += m_nDayHeaderHeight;		
 	
 	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
 }
