@@ -1596,12 +1596,9 @@ int CDateHelper::GetDaysInMonth(int nMonth, int nYear)
 
 BOOL CDateHelper::IsToday(const COleDateTime& date)
 {
-	if (!IsDateSet(date))
-		return FALSE;
+	int nToday = (int)COleDateTime::GetCurrentTime().m_dt;
 
-	double dToday(GetDate(DHD_TODAY));
-
-	return ((int)date.m_dt == (int)dToday);
+	return ((int)date.m_dt == nToday);
 }
 
 BOOL CDateHelper::IsSameDay(const COleDateTime& date1, const COleDateTime& date2)
