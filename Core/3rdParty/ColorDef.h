@@ -18,14 +18,18 @@
 struct HLSX
 {
 	HLSX();
-	HLSX(float hue, float lum, float sat);
+	HLSX(double hue, double lum, double sat, BOOL bWrapHue = FALSE);
 	HLSX(const COLORREF& color);
 	
 	operator COLORREF() const;
 
+	void Increment(double hue, double lum, double sat, BOOL bWrapHue = FALSE);
+	void Validate(BOOL bWrapHue);
+
 	float fHue; // (0-360)
 	float fLuminosity; // (0-1)
 	float fSaturation; // (0-1)
+
 };
 
 class RGBX
@@ -40,9 +44,9 @@ protected:
 
 public:
 	RGBX();
-	RGBX(BYTE red, BYTE green, BYTE blue);
+	RGBX(int red, int green, int blue);
 	RGBX(const RGBX& color);
-	RGBX(const COLORREF& color);
+	RGBX(COLORREF color);
 
 	inline RGBX& operator=(const RGBX& rgb) { btRed = rgb.btRed; btBlue = rgb.btBlue; btGreen = rgb.btGreen; btUnused = 0; return *this; }
 	inline RGBX& operator=(const HLSX& hls) { HLS2RGB(hls, *this); return *this; }
@@ -60,6 +64,12 @@ public:
 	
 	BOOL IsGray(int nTolerance = 0) const;
 	void AdjustLighting(double dFactor, bool bRGB);
+
+	void Increment(int red, int green, int blue);
+	void Set(int red, int green, int blue);
+
+	void Increment(double red, double green, double blue);
+	void Set(double red, double green, double blue);
 
 	static COLORREF Complement(COLORREF color, bool bRGB);
 	static COLORREF AdjustLighting(COLORREF color, double dFactor, bool bRGB);

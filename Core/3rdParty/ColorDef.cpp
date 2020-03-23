@@ -13,8 +13,13 @@ HLSX::HLSX() : fHue(0.0f), fLuminosity(0.0f), fSaturation(0.0f)
 {
 }
 
-HLSX::HLSX(float hue, float lum, float sat) : fHue(hue), fLuminosity(lum), fSaturation(sat)
+HLSX::HLSX(double hue, double lum, double sat, BOOL bWrapHue) 
+	: 
+	fHue((float)hue), 
+	fLuminosity((float)lum), 
+	fSaturation((float)sat)
 {
+	Validate(bWrapHue);
 }
 
 HLSX::HLSX(const COLORREF& color) 
@@ -28,14 +33,43 @@ HLSX::operator COLORREF() const
 	return RGBX::HLS2RGB(*this, color); 
 }
 
+void HLSX::Increment(double hue, double lum, double sat, BOOL bWrapHue)
+{
+	fHue += (float)hue;
+	fSaturation += (float)sat;
+	fLuminosity += (float)lum;
+
+	Validate(bWrapHue);
+}
+
+void HLSX::Validate(BOOL bWrapHue)
+{
+	if (bWrapHue)
+	{
+		while (fHue < 0.0f)
+			fHue += 360.0f;
+
+		while (fHue > 360.0f)
+			fHue -= 360.0f;
+	}
+	else
+	{
+		fHue = max(0, min(fHue, 360.0f));
+	}
+
+	fSaturation = max(0, min(fSaturation, 1.0f));
+	fLuminosity = max(0, min(fLuminosity, 1.0f));
+}
+
 ///////////////////////////////////////////////////////////////////////
 
 RGBX::RGBX() : btRed(0), btBlue(0), btGreen(0), btUnused(0)
 {
 }
 
-RGBX::RGBX(BYTE red, BYTE green, BYTE blue) : btRed(red), btBlue(blue), btGreen(green), btUnused(0)
+RGBX::RGBX(int red, int green, int blue) : btRed(0), btBlue(0), btGreen(0), btUnused(0)
 {
+	Set(red, green, blue);
 }
 
 RGBX::RGBX(const RGBX& color) 
@@ -43,7 +77,7 @@ RGBX::RGBX(const RGBX& color)
 	*this = color; 
 }
 
-RGBX::RGBX(const COLORREF& color) : btRed(GetRValue(color)), btBlue(GetBValue(color)), btGreen(GetGValue(color)), btUnused(0)
+RGBX::RGBX(COLORREF color) : btRed(GetRValue(color)), btBlue(GetBValue(color)), btGreen(GetGValue(color)), btUnused(0)
 {
 }
 
@@ -81,15 +115,15 @@ void RGBX::AdjustLighting(double dFactor, bool bRGB)
 	{
 		if (dFactor > 0.0) // Lighter
 		{
-			btRed = (BYTE)min(255, (btRed + ((255 - btRed) * dFactor)));
-			btGreen = (BYTE)min(255, (btGreen + ((255 - btGreen) * dFactor)));
-			btBlue = (BYTE)min(255, (btBlue + ((255 - btBlue) * dFactor)));
+			Increment(((255 - btRed) * dFactor),
+					  ((255 - btGreen) * dFactor),
+					  ((255 - btBlue) * dFactor));
 		}
 		else // < 0.0 - Darker
 		{
-			btRed = (BYTE)max(0, (btRed + (btRed * dFactor)));
-			btGreen = (BYTE)max(0, (btGreen + (btGreen * dFactor)));
-			btBlue = (BYTE)max(0, (btBlue + (btBlue * dFactor)));
+			Increment((btRed * dFactor),
+					  (btGreen * dFactor),
+					  (btBlue * dFactor));
 		}
 	}
 	else // HLS
@@ -98,15 +132,41 @@ void RGBX::AdjustLighting(double dFactor, bool bRGB)
 
 		if (dFactor > 0.0) // Lighter
 		{
-			hls.fLuminosity = (float)min(1.0, (hls.fLuminosity + ((1.0f - hls.fLuminosity) * dFactor)));
+			hls.Increment(0.0, 
+						  ((1.0 - hls.fLuminosity) * dFactor), 
+						  0.0);
 		}
 		else // < 0.0 - Darker
 		{
-			hls.fLuminosity = (float)max(0.0, (hls.fLuminosity + (hls.fLuminosity * dFactor)));
+			hls.Increment(0.0, 
+						  (hls.fLuminosity * dFactor), 
+						  0.0);
 		}
 		
 		*this = hls;
 	}
+}
+
+void RGBX::Increment(int red, int green, int blue)
+{
+	Set((btRed + red), (btGreen + green), (btBlue + blue));
+}
+
+void RGBX::Increment(double red, double green, double blue)
+{
+	Set((int)(btRed + red), (int)(btGreen + green), (int)(btBlue + blue));
+}
+
+void RGBX::Set(int red, int green, int blue)
+{
+	btRed = max(0, min(red, 255));
+	btGreen = max(0, min(green, 255));
+	btBlue = max(0, min(blue, 255));
+}
+
+void RGBX::Set(double red, double green, double blue)
+{
+	Set((int)red, (int)green, (int)blue);
 }
 
 float RGBX::CalcColorDifference(COLORREF crFrom, COLORREF crTo)
@@ -137,11 +197,7 @@ COLORREF RGBX::Complement(COLORREF color, bool bRGB)
 
 	// else
 	HLSX hls(color);
-
-	hls.fHue += 180.0f;
-
-	if (hls.fHue > 360.0f)
-		hls.fHue -= 360.0f;
+	hls.Increment(180.0f, 0, 0, TRUE); // wrap hue
 
 	return hls;
 }
