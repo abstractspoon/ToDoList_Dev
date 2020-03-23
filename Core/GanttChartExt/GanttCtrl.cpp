@@ -2722,7 +2722,7 @@ BOOL CGanttCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL bTe
 
 void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem, 
 											int nYear, int nNumYears, const GANTTITEM& gi,
-											BOOL bSelected, BOOL bRollup, BOOL& bToday)
+											BOOL bSelected, BOOL bRollup, BOOL& bDrawToday)
 {
 	double dYearWidth = (rItem.Width() / (double)nNumYears);
 	CRect rYear(rItem);
@@ -2734,7 +2734,7 @@ void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
 		else
 			rYear.right = (rItem.left + (int)(dYearWidth * (j + 1)));
 
-		DrawListItemYear(pDC, rYear, (nYear + j), gi, bSelected, bRollup, bToday);
+		DrawListItemYear(pDC, rYear, (nYear + j), gi, bSelected, bRollup, bDrawToday);
 
 		// next year
 		rYear.left = rYear.right; 
@@ -2743,15 +2743,15 @@ void CGanttCtrl::DrawListItemYears(CDC* pDC, const CRect& rItem,
 
 void CGanttCtrl::DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
 											const GANTTITEM& gi, BOOL bSelected, 
-											BOOL bRollup, BOOL& bToday)
+											BOOL bRollup, BOOL& bDrawToday)
 {
-	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, bSelected, bRollup, bToday);
+	DrawListItemMonths(pDC, rYear, 1, 12, nYear, gi, bSelected, bRollup, bDrawToday);
 }
 
 void CGanttCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem, 
 											int nMonth, int nNumMonths, int nYear, 
 											const GANTTITEM& gi, BOOL bSelected, 
-											BOOL bRollup, BOOL& bToday)
+											BOOL bRollup, BOOL& bDrawToday)
 {
 	double dMonthWidth = (rItem.Width() / (double)nNumMonths);
 	CRect rMonth(rItem);
@@ -2763,7 +2763,7 @@ void CGanttCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem,
 		else
 			rMonth.right = (rItem.left + (int)(dMonthWidth * (i + 1)));
 
-		DrawListItemMonth(pDC, rMonth, (nMonth + i), nYear, gi, bSelected, bRollup, bToday);
+		DrawListItemMonth(pDC, rMonth, (nMonth + i), nYear, gi, bSelected, bRollup, bDrawToday);
 
 		// next item
 		rMonth.left = rMonth.right; 
@@ -2773,15 +2773,15 @@ void CGanttCtrl::DrawListItemMonths(CDC* pDC, const CRect& rItem,
 void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, 
 											const GANTTITEM& gi, BOOL bSelected, 
-											BOOL bRollup, BOOL& bToday)
+											BOOL bRollup, BOOL& bDrawToday)
 {
 	if (!bRollup)
 	{
 		VERT_DIV nDiv = GetListVertDivider(nMonth, nYear);
 		DrawListItemVertDivider(pDC, rMonth, nDiv, bSelected);
 
-		if (!bToday)
-			bToday = DrawToday(pDC, rMonth, nMonth, nYear, bSelected);
+		if (bDrawToday && DrawToday(pDC, rMonth, nMonth, nYear, bSelected))
+			bDrawToday = FALSE; // done
 	}
 
 	DrawGanttBar(pDC, rMonth, nMonth, nYear, gi);
@@ -2791,7 +2791,7 @@ void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, 
 											const GANTTITEM& gi, BOOL bSelected, 
-											BOOL bRollup, BOOL& bToday)
+											BOOL bRollup, BOOL& bDrawToday)
 {
 	// draw vertical week dividers
 	int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -2825,7 +2825,7 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 		dtDay += 1;
 	}
 
-	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
+	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bDrawToday);
 }
 
 BOOL CGanttCtrl::WantDrawWeekend(const COleDateTime& dtDay) const
@@ -2856,7 +2856,7 @@ BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& r
 void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth, 
 											int nMonth, int nYear, const GANTTITEM& gi, 
 											BOOL bSelected, BOOL bRollup, 
-											BOOL& bToday, BOOL bDrawHours)
+											BOOL& bDrawToday, BOOL bDrawHours)
 {
 	// draw vertical day dividers
 	if (!bRollup)
@@ -2926,7 +2926,7 @@ void CGanttCtrl::DrawListItemDays(CDC* pDC, const CRect& rMonth,
 		}
 	}
 
-	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bToday);
+	DrawListItemMonth(pDC, rMonth, nMonth, nYear, gi, bSelected, bRollup, bDrawToday);
 }
 
 void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BOOL bToday, 
@@ -3156,7 +3156,7 @@ BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn
 	CSaveDC sdc(pDC);
 
 	double dMonthWidth = GetMonthWidth(rColumn.Width());
-	BOOL bToday = FALSE;
+	BOOL bDrawToday = HasColor(m_crToday);
 
 	// Use higher resolution where possible
 	GTLC_MONTH_DISPLAY nCalcDisplay = GetColumnDisplay((int)dMonthWidth);
@@ -3165,49 +3165,49 @@ BOOL CGanttCtrl::DrawListItemColumnRect(CDC* pDC, int nCol, const CRect& rColumn
 	switch (m_nMonthDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
-		DrawListItemYears(pDC, rColumn, nYear, 25, gi, bSelected, bRollup, bToday);
+		DrawListItemYears(pDC, rColumn, nYear, 25, gi, bSelected, bRollup, bDrawToday);
 		break;
 		
 	case GTLC_DISPLAY_DECADES:
-		DrawListItemYears(pDC, rColumn, nYear, 10, gi, bSelected, bRollup, bToday);
+		DrawListItemYears(pDC, rColumn, nYear, 10, gi, bSelected, bRollup, bDrawToday);
 		break;
 		
 	case GTLC_DISPLAY_YEARS:
-		DrawListItemYear(pDC, rColumn, nYear, gi, bSelected, bRollup, bToday);
+		DrawListItemYear(pDC, rColumn, nYear, gi, bSelected, bRollup, bDrawToday);
 		break;
 		
 	case GTLC_DISPLAY_QUARTERS_SHORT:
 	case GTLC_DISPLAY_QUARTERS_MID:
 	case GTLC_DISPLAY_QUARTERS_LONG:
-		DrawListItemMonths(pDC, rColumn, nMonth, 3, nYear, gi, bSelected, bRollup, bToday);
+		DrawListItemMonths(pDC, rColumn, nMonth, 3, nYear, gi, bSelected, bRollup, bDrawToday);
 		break;
 		
 	case GTLC_DISPLAY_MONTHS_SHORT:
 	case GTLC_DISPLAY_MONTHS_MID:
 	case GTLC_DISPLAY_MONTHS_LONG:
 		if (bUseHigherRes)
-			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday);
+			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bDrawToday);
 		else
-			DrawListItemMonth(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday);
+			DrawListItemMonth(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bDrawToday);
 		break;
 		
 	case GTLC_DISPLAY_WEEKS_SHORT:
 	case GTLC_DISPLAY_WEEKS_MID:
 	case GTLC_DISPLAY_WEEKS_LONG:
 		if (bUseHigherRes)
-			DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday, FALSE);
+			DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bDrawToday, FALSE);
 		else
-			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday);
+			DrawListItemWeeks(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bDrawToday);
 		break;
 
 	case GTLC_DISPLAY_DAYS_SHORT:
 	case GTLC_DISPLAY_DAYS_MID:
 	case GTLC_DISPLAY_DAYS_LONG:
-		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday, bUseHigherRes);
+		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bDrawToday, bUseHigherRes);
 		break;
 
 	case GTLC_DISPLAY_HOURS:
-		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bToday, TRUE);
+		DrawListItemDays(pDC, rColumn, nMonth, nYear, gi, bSelected, bRollup, bDrawToday, TRUE);
 		break;
 	
 	default:

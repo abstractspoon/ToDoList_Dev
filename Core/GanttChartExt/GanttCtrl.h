@@ -186,17 +186,17 @@ protected:
 	void DrawListItemRollup(CDC* pDC, HTREEITEM htiParent, int nCol, const CRect& rColumn, BOOL bSelected);
 
 	void DrawListItemYears(CDC* pDC, const CRect& rItem, int nYear, int nNumYears,
-							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bDrawToday);
 	void DrawListItemYear(CDC* pDC, const CRect& rYear, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bDrawToday);
 	void DrawListItemMonths(CDC* pDC, const CRect& rItem, int nMonth, int nNumMonths, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bDrawToday);
 	void DrawListItemMonth(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bDrawToday);
 	void DrawListItemWeeks(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bDrawToday);
 	void DrawListItemDays(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, 
-							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bToday, BOOL bDrawHours);
+							const GANTTITEM& gi, BOOL bSelected, BOOL bRollup, BOOL& bDrawToday, BOOL bDrawHours);
 
 	void DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BOOL bToday, double dFromHour, double dToHour, double dDayWidth, double dHourWidth);
 	void DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi);
