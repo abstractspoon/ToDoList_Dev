@@ -2841,8 +2841,8 @@ BOOL CGanttCtrl::DrawWeekend(CDC* pDC, const COleDateTime& dtDay, const CRect& r
 		return FALSE;
 
 	// If dtDay is also 'today' and we have a today colour
-	// then render using a grey so that that it does overly
-	// affect the today colour which will be overlaid on top
+	// then render using a grey so that it doesn't heavily
+	// impact the today colour which will be overlaid on top
 	COLORREF color = (HasColor(m_crWeekend) ? m_crWeekend : m_crNonWorkingHours);
 
 	if (HasColor(m_crToday) && CDateHelper::IsToday(dtDay))
@@ -3284,7 +3284,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 				// check if we need to draw
 				if (rYear.right >= rClip.left)
-					DrawListHeaderRect(pDC, rYear, Misc::Format(nYear + i), pThemed);
+					DrawListHeaderRect(pDC, rYear, Misc::Format(nYear + i), pThemed, FALSE);
 			}
 		}
 		break;
@@ -3298,7 +3298,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// draw month header
 			rMonth.bottom = rWeek.top;
-			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed);
+			DrawListHeaderRect(pDC, rMonth, m_listHeader.GetItemText(nCol), pThemed, FALSE);
 
 			// draw week elements
 			int nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -3313,7 +3313,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 			if ((nCol == 1) && (nDay != -1))
 			{
 				rWeek.right = (rWeek.left + (int)((nDay - 1) * dDayWidth));
-				DrawListHeaderRect(pDC, rWeek, _T(""), pThemed);
+				DrawListHeaderRect(pDC, rWeek, _T(""), pThemed, FALSE);
 			}
 
 			// calc number of first week
@@ -3371,7 +3371,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 				// check if we need to draw
 				if (rWeek.right >= rClip.left)
-					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), pThemed);
+					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), pThemed, FALSE);
 
 				// next week
 				nDay += 7;
@@ -3414,18 +3414,16 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 				if (rDay.right >= rClip.left)
 				{
 					CString sHeader;
+					COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
 
 					if (m_nMonthDisplay == GTLC_DISPLAY_HOURS)
 					{
-						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
 						sHeader = FormatDate(dtDay, DHFD_DOW);
 					}
 					else if (m_nMonthDisplay == GTLC_DISPLAY_DAYS_LONG)
 					{
-						COleDateTime dtDay(nYear, nMonth, nDay, 0, 0, 0);
 						OLE_DAYOFWEEK nDOW = CDateHelper::GetDayOfWeek(dtDay);
 
-						//sHeader = FormatDate(dtDay, DHFD_NOYEAR);
 						sHeader.Format(_T("%s/%d"), CDateHelper::GetDayOfWeekName(nDOW, TRUE), nDay);
 					}
 					else
@@ -3433,7 +3431,9 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 						sHeader.Format(_T("%d"), nDay);
 					}
 
-					DrawListHeaderRect(pDC, rDay, sHeader, pThemed);
+					LPCRECT prcToday = (CDateHelper::IsToday(dtDay) ? &rDay : NULL);
+
+					DrawListHeaderRect(pDC, rDay, sHeader, pThemed, FALSE, prcToday);
 				}
 			}
 		}
@@ -3447,7 +3447,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 	pDC->SelectObject(pOldFont); // not sure if this is necessary but play safe
 }
 
-void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme, BOOL bEnsureVisible)
+void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString& sItem, CThemed* pTheme, BOOL bEnsureLabelVisible, LPCRECT prcToday)
 {
 	if (!pTheme)
 	{
@@ -3457,6 +3457,9 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 	else
 	{
 		pTheme->DrawBackground(pDC, HP_HEADERITEM, HIS_NORMAL, rItem);
+
+		if (prcToday)
+			GraphicsMisc::DrawRect(pDC, prcToday, m_crToday, CLR_NONE, 0, GMDR_NONE, 64);
 	}
 	
 	// text
@@ -3467,7 +3470,7 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 		int nHorzHAlign = DT_CENTER;
 		CRect rDraw(rItem);
 
-		if (bEnsureVisible)
+		if (bEnsureLabelVisible)
 		{
 			int nHorzPos = m_list.GetScrollPos(SB_HORZ);
 
@@ -3483,32 +3486,6 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 			// Calc the default position of the text
 			int nTextWidth = pDC->GetTextExtent(sItem).cx;
 
-/*
-			CRect rText(0, 0, nTextWidth, rItem.Height());
-			GraphicsMisc::CentreRect(rText, rDraw, TRUE, FALSE);
-
-			// Use the list's client rect to get the available 
-			// header rect, excluding any vertical scrollbar
-			CRect rHeader;
-			m_list.GetClientRect(rHeader);
-
-			rHeader.top = rItem.top;
-			rHeader.bottom = rItem.bottom;
-
-			// If it's clipped then make it left-aligned or right-aligned
-			// depending on which end is clipped
-			if (rText.left < 0)
-			{
-				rDraw.left = HD_COLPADDING;
-				nHorzHAlign = DT_LEFT;
-			}
-			else if (rText.right > rHeader.right)
-			{
-				rDraw.right = (rHeader.right - HD_COLPADDING);
-				nHorzHAlign = DT_RIGHT;
-			}
-*/
-			
 			if (rDraw.Width() < nTextWidth)
 				return;
 
@@ -3638,20 +3615,18 @@ BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 	if (dtFrom > dtTo || dtTo < dtMonthStart || dtFrom > dtMonthEnd)
 		return FALSE;
 
+	rDate.left = rMonth.left;
+	rDate.right = rMonth.right;
+	rDate.top = rMonth.top;
+	rDate.bottom = rMonth.bottom;
+
 	double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
 
 	if (dtFrom > dtMonthStart)
-		rDate.left = (rMonth.left + (int)(((dtFrom.m_dt - dtMonthStart.m_dt) * dDayWidth)));
-	else
-		rDate.left = rMonth.left;
+		rDate.left = (rMonth.left + (int)((dtFrom.m_dt - dtMonthStart.m_dt) * dDayWidth));
 
 	if (dtTo < dtMonthEnd)
-		rDate.right = (rMonth.left + (int)(((dtTo.m_dt - dtMonthStart.m_dt) * dDayWidth)));
-	else
-		rDate.right = rMonth.right;
-
-	rDate.top = rMonth.top;
-	rDate.bottom = rMonth.bottom;
+		rDate.right = (rDate.left + (int)((dtTo.m_dt - dtFrom.m_dt) * dDayWidth));
 
 	return (rDate.right > 0);
 }
