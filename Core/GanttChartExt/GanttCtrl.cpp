@@ -3341,6 +3341,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 						nYear++;
 					}
 					
+					// Note: width of next month may be different to this month
 					if (m_listHeader.GetItemRect(nCol+1, rMonth))
 					{
 						nNumDays = CDateHelper::GetDaysInMonth(nMonth, nYear);
@@ -3431,7 +3432,11 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 						sHeader.Format(_T("%d"), nDay);
 					}
 
-					LPCRECT prcToday = (CDateHelper::IsToday(dtDay) ? &rDay : NULL);
+					// Check if we need to draw today
+					LPCRECT prcToday = NULL;
+					
+					if (bThemed && HasColor(m_crToday) && CDateHelper::IsToday(dtDay))
+						prcToday = rDay;
 
 					DrawListHeaderRect(pDC, rDay, sHeader, pThemed, FALSE, prcToday);
 				}
@@ -4161,7 +4166,7 @@ BOOL CGanttCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear,
 		return FALSE;
 
 	// draw 'today'
-	COleDateTime dtToday = CDateHelper::GetDateOnly(COleDateTime::GetCurrentTime());
+	COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
 	
 	// check for overlap
 	if (dtToday < dtMonthStart || dtToday > dtMonthEnd)
