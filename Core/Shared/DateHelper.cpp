@@ -1530,18 +1530,26 @@ CString CDateHelper::GetDayOfWeekName(OLE_DAYOFWEEK nWeekday, BOOL bShort)
 
 int CDateHelper::GetMaxDayOfWeekNameWidth(CDC* pDC, BOOL bShort)
 {
-	int nMaxWidth = 0;
+	CSize sizeMax = GetMaxDayOfWeekNameExtent(pDC, bShort);
+	
+	return sizeMax.cx;
+}
+
+CSize CDateHelper::GetMaxDayOfWeekNameExtent(CDC* pDC, BOOL bShort)
+{
+	CSize sizeMax(0, 0);
 		
 	// figure out the longest day in pixels
 	for (int nDOW = 0; nDOW < 7; nDOW++)
 	{
 		CString sDOW = GetDayOfWeekName(OLE_DAYSOFWEEK[nDOW], bShort);
-		int nWidth = pDC->GetTextExtent(sDOW).cx;
+		CSize sizeDOW = pDC->GetTextExtent(sDOW);
 
-		nMaxWidth = max(nMaxWidth, nWidth);
+		sizeMax.cx = max(sizeMax.cx, sizeDOW.cx);
+		sizeMax.cy = max(sizeMax.cy, sizeDOW.cy);
 	}
 	
-	return nMaxWidth;
+	return sizeMax;
 }
 
 void CDateHelper::GetDayOfWeekNames(BOOL bShort, CStringArray& aNames)

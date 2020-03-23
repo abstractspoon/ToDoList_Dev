@@ -545,7 +545,9 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 	int nWidth = (rc.Width() / CALENDAR_NUM_COLUMNS);
 	
 	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
-	BOOL bShort = (CDateHelper::GetMaxDayOfWeekNameWidth(pDC) > nWidth);
+	CSize sizeDOW = CDateHelper::GetMaxDayOfWeekNameExtent(pDC);
+	BOOL bShort = (sizeDOW.cx > nWidth);
+
 	CRect rCol(rc);
 	
 	for(int i = 0 ; i < CALENDAR_NUM_COLUMNS; i++)
@@ -578,9 +580,9 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 		
 		CString csTitle = CDateHelper::GetDayOfWeekName((OLE_DAYOFWEEK)nDOW, bShort);
 		CRect rText(rCol);
-		rText.DeflateRect(0, 2, 0, 0);
+		rText.DeflateRect(0, (m_nHeaderHeight - sizeDOW.cy) / 2, 0, 0);
 		
-		pDC->DrawText(csTitle, rText, DT_CENTER|DT_VCENTER);
+		pDC->DrawText(csTitle, rText, DT_CENTER|DT_TOP);
 		
 		// next column
 		rCol.left = rCol.right;
