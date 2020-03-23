@@ -460,10 +460,10 @@ bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
-	DWORD dwSelTask = m_BigCalendar.GetSelectedTaskID();
-	m_BigCalendar.EnsureVisible(dwSelTask);
+	m_BigCalendar.EnsureSelectionVisible();
 
 	CRect rLabel;
+	DWORD dwSelTask = m_BigCalendar.GetSelectedTaskID();
 
 	if (m_BigCalendar.GetTaskLabelRect(dwSelTask, rLabel))
 	{

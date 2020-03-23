@@ -46,7 +46,7 @@ public:
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
-	void EnsureVisible(DWORD dwTaskID);
+	BOOL EnsureSelectionVisible();
 	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;

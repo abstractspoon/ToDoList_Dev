@@ -654,7 +654,7 @@ void CTaskCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRe
 	}
 }
 
-void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
+void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL /*bSelected*/, BOOL bToday)
 {
 	if (HasColor(m_crWeekend) && CWeekend().IsWeekend(pCell->date))
 	{
@@ -1469,22 +1469,42 @@ double CTaskCalendarCtrl::CalcDateDragTolerance() const
 	return min(dDragTol, 1.0);
 }
 
-void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID)
+BOOL CTaskCalendarCtrl::EnsureSelectionVisible()
 {
-	if (!HasTask(dwTaskID, TRUE)) // exclude hidden tasks
-		return;
+	if (!HasTask(m_dwSelectedTaskID, TRUE)) // exclude hidden tasks
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
-	// is the task already visible to some degree?
+	// Does the selected cell already have this task?
 	int nRow, nCol;
 
-	if (!GetGridCellFromTask(dwTaskID, nRow, nCol))
+	if (GetLastSelectedGridCell(nRow, nCol))
 	{
-		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+		const CTaskCalItemArray* pTasks = GetCellTasks(nRow, nCol);
+		ASSERT(pTasks);
+
+		if (pTasks && (pTasks->FindItem(m_dwSelectedTaskID) != -1))
+		{ 
+			EnsureSelectedTaskVisibleIfInSelectedCell();
+			return TRUE;
+		}
+	}
+	
+	// else is the task already visible to some degree?
+	if (GetGridCellFromTask(m_dwSelectedTaskID, nRow, nCol))
+	{
+		VERIFY(SelectGridCell(nRow, nCol));
+	}
+	else // scroll selected task date into view
+	{
+		const TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
 
 		if (!pTCI)
 		{
 			ASSERT(0);
-			return;
+			return FALSE;
 		}
 
 		COleDateTime dtCellsMin = GetMinDate();
@@ -1523,15 +1543,12 @@ void CTaskCalendarCtrl::EnsureVisible(DWORD dwTaskID)
 			//ASSERT(0);
 		}
 
-		ASSERT(GetGridCellFromTask(dwTaskID, nRow, nCol));
-	}
-	else
-	{
-		SelectGridCell(nRow, nCol);
+		ASSERT(GetGridCellFromTask(m_dwSelectedTaskID, nRow, nCol));
 	}
 	
 	// Now ensure it is visible vertically
 	EnsureSelectedTaskVisibleIfInSelectedCell();
+	return TRUE;
 }
 
 void CTaskCalendarCtrl::OnVisibleDateRangeChanged()
@@ -1546,7 +1563,7 @@ void CTaskCalendarCtrl::EnsureSelectedTaskVisibleIfInSelectedCell()
 {
 	// If the currently selected cell contains the currently
 	// selected task then scroll it into view
-	if (m_mapData.GetCount())
+	if (m_mapData.GetCount() && m_dwSelectedTaskID)
 	{
 		int nRow, nCol;
 
@@ -1837,7 +1854,7 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNo
 			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetSelectedTaskID());
 
 		if (bEnsureVisible)
-			EnsureVisible(dwTaskID);
+			EnsureSelectionVisible();
 
 		Invalidate(FALSE);
 		UpdateWindow();
@@ -2184,7 +2201,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 			// Rebuild the cell tasks because the task may have 
 			// moved cells
 			RebuildCellTasks();
-			EnsureVisible(m_dwSelectedTaskID);
+			EnsureSelectionVisible();
 		}
 		else
 		{
