@@ -2198,9 +2198,14 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 				}
 			}
 
-			// Rebuild the cell tasks because the task may have 
-			// moved cells
+			// Rebuild the cell tasks because the task may have moved cells
 			RebuildCellTasks();
+
+			// Select the cell under the mouse because we know it must contain the dragged task
+			int nRow, nCol;
+			
+			if (GetGridCellFromPoint(ptCursor, nRow, nCol))
+				SelectGridCell(nRow, nCol);
 			EnsureSelectionVisible();
 		}
 		else
