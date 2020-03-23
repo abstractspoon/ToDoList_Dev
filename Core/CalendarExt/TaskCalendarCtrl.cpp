@@ -634,6 +634,24 @@ void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 		Invalidate();
 }
 
+void CTaskCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday, BOOL bShowMonth)
+{
+	CCalendarCtrlEx::DrawCell(pDC, pCell, rCell, bSelected, bToday, bShowMonth);
+
+	if (bSelected && (m_crTheme != CLR_NONE))
+	{
+		CRect rSel(rCell);
+
+		if (rSel.left)
+			rSel.left++;
+
+		GraphicsMisc::DrawRect(pDC, rSel, CLR_NONE, m_crTheme);
+
+		rSel.DeflateRect(1, 1);
+		GraphicsMisc::DrawRect(pDC, rSel, CLR_NONE, m_crTheme);
+	}
+}
+
 void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
 {
 	if (HasColor(m_crWeekend) && CWeekend().IsWeekend(pCell->date))
@@ -651,19 +669,6 @@ void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, cons
 
 	if (bToday && HasColor(m_crToday))
 		GraphicsMisc::DrawRect(pDC, rCell, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
-
-	if (bSelected && (m_crTheme != CLR_NONE))
-	{
-		CRect rSel(rCell);
-
-		if (rSel.left)
-			rSel.left++;;
-
-		GraphicsMisc::DrawRect(pDC, rSel, CLR_NONE, m_crTheme);
-
-		rSel.DeflateRect(1, 1);
-		GraphicsMisc::DrawRect(pDC, rSel, CLR_NONE, m_crTheme);
-	}
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
@@ -690,6 +695,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		return;
 	
 	// Exclude scrollbar rect from drawing
+	CRect rAvailCell(rCell);
 	BOOL bShowScroll = (IsCellScrollBarActive() && IsGridCellSelected(pCell));
 	
 	if (bShowScroll)
@@ -697,7 +703,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		CRect rScrollbar;
 		CalcScrollBarRect(rCell, rScrollbar);
 
-		pDC->ExcludeClipRect(rScrollbar);
+		rAvailCell.right = rScrollbar.left;
 	}
 	
 	BOOL bContinuous = HasOption(TCCO_DISPLAYCONTINUOUS);
@@ -717,7 +723,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		
 		CRect rTask;
 		
-		if (!CalcTaskCellRect(nTask, pCell, rCell, rTask))
+		if (!CalcTaskCellRect(nTask, pCell, rAvailCell, rTask))
 			continue;
 
 		// draw selection
@@ -727,9 +733,9 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		if (bSelTask)
 		{
  			DWORD dwSelFlags = GMIB_THEMECLASSIC;
- 			CRect rClip(rCell);
+ 			CRect rClip(rAvailCell);
 
-			if (rTask.left <= rCell.left)
+			if (rTask.left <= rAvailCell.left)
 			{
 				if (bContinuous)
 				{
@@ -741,7 +747,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				dwSelFlags |= GMIB_CLIPLEFT;
 			}
 
-			if (rTask.right >= rCell.right)
+			if (rTask.right >= rAvailCell.right)
 				dwSelFlags |= GMIB_CLIPRIGHT;
 
 			GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
@@ -753,7 +759,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		{
 			DWORD dwFlags = GMDR_TOP;
 			
-			if (rTask.left > rCell.left)
+			if (rTask.left > rAvailCell.left)
 			{
 				dwFlags |= GMDR_LEFT;
 			}
@@ -762,10 +768,10 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				rTask.left--; // draw over gridline
 			}
 			
-			if (rTask.right < rCell.right)
+			if (rTask.right < rAvailCell.right)
 				dwFlags |= GMDR_RIGHT;
 			
-			if (rTask.bottom < rCell.bottom)
+			if (rTask.bottom < rAvailCell.bottom)
 				dwFlags |= GMDR_BOTTOM;
 			
 			COLORREF crFill = pTCI->GetFillColor(bTextColorIsBkgnd);
@@ -802,7 +808,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 						if (cdi.nIconOffset != 0)
 							rClip.left--; // draw over gridline
 
-						if (rTask.right >= rCell.right)
+						if (rTask.right >= rAvailCell.right)
 							rClip.right++; // draw over gridline
 					}
 					
@@ -858,7 +864,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			if (cdi.nTextOffset >= nExtent)
 				cdi.nTextOffset = -1;
 						
-			if (rTask.bottom >= rCell.bottom)
+			if (rTask.bottom >= rAvailCell.bottom)
 				break;
 		}
 	}

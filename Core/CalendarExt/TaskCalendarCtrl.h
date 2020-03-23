@@ -152,6 +152,7 @@ protected:
 	//}}AFX_VIRTUAL
 	virtual void DrawHeader(CDC* pDC);
 	virtual void DrawCells(CDC* pDC);
+	virtual void DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday, BOOL bShowMonth);
 	virtual void DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
 	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
