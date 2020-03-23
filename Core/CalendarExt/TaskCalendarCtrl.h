@@ -179,6 +179,7 @@ protected:
 	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
 	BOOL GetGridCell(const COleDateTime& date, int &nRow, int &nCol) const;
 	int HitTestRow(const CPoint& point) const;
+	int HitTestColumn(const COleDateTime& date) const;
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;

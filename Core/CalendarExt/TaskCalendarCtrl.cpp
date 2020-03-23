@@ -548,6 +548,12 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 	CSize sizeDOW = CDateHelper::GetMaxDayOfWeekNameExtent(pDC);
 	BOOL bShort = (sizeDOW.cx > nWidth);
 
+	// Overlay with 'today' colour 
+	int nTodayCol = -1;
+
+	if (bThemed && (m_crToday != CLR_NONE))
+		nTodayCol = HitTestColumn(COleDateTime::GetCurrentTime());
+	
 	CRect rCol(rc);
 	
 	for(int i = 0 ; i < CALENDAR_NUM_COLUMNS; i++)
@@ -571,6 +577,9 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 		if (bThemed)
 		{
 			th.DrawBackground(pDC, HP_HEADERITEM, HIS_NORMAL, rCol);
+
+			if (i == nTodayCol)
+				GraphicsMisc::DrawRect(pDC, rCol, m_crToday, CLR_NONE, 0, GMDR_NONE, 64);
 		}
 		else
 		{
@@ -1977,6 +1986,18 @@ int CTaskCalendarCtrl::HitTestRow(const CPoint& point) const
 
 	// else
 	return -1;
+}
+
+int CTaskCalendarCtrl::HitTestColumn(const COleDateTime& date) const
+{
+	// Supports any date visible or not
+	int nOffset = ((int)(date.m_dt) - (int)GetMinDate().m_dt);
+	int nCol = (nOffset % 7);
+
+	if (nCol < 0)
+		nCol += 7;
+
+	return nCol;
 }
 
 BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
