@@ -57,6 +57,11 @@ const static int DEFAULT_DPI = 96;
 
 //////////////////////////////////////////////////////////////////////
 
+const static COLORREF WHITE = RGB(255, 255, 255);
+const static COLORREF BLACK = RGB(0, 0, 0);
+
+//////////////////////////////////////////////////////////////////////
+
 // private helpers
 void InitBitmapInfo(BITMAPINFO *pbmi, ULONG cbInfo, LONG cx, LONG cy, WORD bpp);
 BOOL Create32BitHBITMAP(HDC hdc, const SIZE *psize, void **ppvBits, HBITMAP* phBmp);
@@ -767,7 +772,7 @@ CFont* GraphicsMisc::PrepareDCFont(CDC* pDC, HWND hwndRef, CFont* pFont, int nSt
 COLORREF GraphicsMisc::GetBestTextColor(COLORREF crBack)
 {
 	// base text color on luminance
-	return (RGBX(crBack).Luminance() < 128) ? RGB(255, 255, 255) : 0;
+	return ((RGBX(crBack).Luminance() < 128) ? WHITE : BLACK);
 }
 
 COLORREF GraphicsMisc::Lighter(COLORREF color, double dAmount, BOOL bRGB)
@@ -859,44 +864,35 @@ void GraphicsMisc::CalculateColorGradient(COLORREF crFrom, COLORREF crTo, int nN
 		double greenRange = (GetGValue(crTo) - greenFrom);
 		double blueRange = (GetBValue(crTo) - blueLow);
 
-		for (int nColor = 1; nColor < (nNumColors - 1); nColor++)
-		{
-			double dRed = (redFrom + (redRange * nColor / (nNumColors - 1)));
-			double dGreen = (greenFrom + (greenRange * nColor / (nNumColors - 1)));
-			double dBlue = (blueLow + (blueRange * nColor / (nNumColors - 1)));
+		int nRange = (nNumColors - 1);
 
-			double dColor = dRed + (dGreen * 256) + (dBlue * 256 * 256);
-			COLORREF color = min(RGB(255, 255, 255), (COLORREF)(int)dColor);
+		for (int nColor = 1; nColor < nRange; nColor++)
+		{
+			RGBX color(crFrom);
+			double dFactor = (nColor / (double)nRange);
+
+			color.Increment((redRange * dFactor),
+							(greenRange * dFactor),
+							(blueRange * dFactor));
 
 			aColors[nColor] = color;
 		}
 	}
 	else // HLS Gradient
 	{
-		HLSX hlsLow, hlsHigh;
-		RGBX rgbLow(crFrom), rgbHigh(crTo);
-
-		// convert rgb limits to hls
-		RGBX::RGB2HLS(rgbLow, hlsLow);
-		RGBX::RGB2HLS(rgbHigh, hlsHigh);
+		HLSX hlsLow(crFrom), hlsHigh(crTo);
 
 		float fHueInc = ((hlsHigh.fHue - hlsLow.fHue) / (nNumColors - 1));
 		float fSatInc = ((hlsHigh.fSaturation - hlsLow.fSaturation) / (nNumColors - 1));
 		float fLumInc = ((hlsHigh.fLuminosity - hlsLow.fLuminosity) / (nNumColors - 1));
 
-		HLSX hlsColor = hlsLow;
+		HLSX hls = hlsLow;
 
 		for (int nColor = 1; nColor < (nNumColors - 1); nColor++)
 		{
-			hlsColor.fHue += fHueInc;
-			hlsColor.fSaturation += fSatInc;
-			hlsColor.fLuminosity += fLumInc;
+			hls.Increment(fHueInc, fLumInc, fSatInc);
 
-			RGBX rgbColor;
-			RGBX::HLS2RGB(hlsColor, rgbColor);
-
-			COLORREF color = min(RGB(255, 255, 255), (COLORREF)rgbColor);
-			aColors[nColor] = color;
+			aColors[nColor] = hls;
 		}
 	}
 }
@@ -1388,7 +1384,12 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 		else
 			rBkgnd = rDraw;
 
-		pDC->FillSolidRect(rBkgnd, RGB(255, 255, 255));
+		// Themed Windows 7 and Vista require a round-rect
+		if (bThemed && (nOSVer < OSV_WIN8))
+			GraphicsMisc::DrawRect(pDC, rBkgnd, WHITE, CLR_NONE, 1);
+		else
+			pDC->FillSolidRect(rBkgnd, WHITE);
+
 		bDrawn = TRUE;
 	}
 
