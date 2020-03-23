@@ -29,7 +29,7 @@ COPY /Y /B %REPO%\Core\ToDoList\Unicode_Release\ToDoList.pdb %REPO%\..\ToDoList_
 COPY /Y /B %REPO%\Core\ToDoList\Unicode_Release\ToDoList.map %REPO%\..\ToDoList_Symbols\%TDLVER%\
 
 SET MSBUILD="C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\MSBuild\15.0\Bin\MSBuild.exe"
-SET BUILDPARAMS=/t:Build /p:Configuration=Release /m /v:normal /noWarn:MSB3267;MSB3305;LNK4248;CS1762
+SET BUILDPARAMS=/t:Build /p:Configuration=Release /m /v:normal /noWarn:MSB3267;MSB3305;LNK4248;CS1762;LNK4221;MSB3026
 SET VCTargetsPath=C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\
 
 cd %REPO%\Plugins
