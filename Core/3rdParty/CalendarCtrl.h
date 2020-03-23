@@ -94,9 +94,6 @@ public:
 	//}}AFX_VIRTUAL
 
 protected:	
-	CCalendarCell* HitTestCell(const CPoint& point);
-	const CCalendarCell* HitTestCell(const CPoint& point) const;
-
 	virtual void DrawHeader(CDC* pDC);
 	virtual void DrawGrid(CDC* pDC);
 	virtual void DrawCells(CDC* pDC);
@@ -110,8 +107,7 @@ protected:
 	virtual CString GetDayOfWeekName(const COleDateTime& date, BOOL bShort = FALSE) const;
 	virtual CString GetMonthName(const COleDateTime& date, BOOL bShort = FALSE) const;
 	
-	bool HitTestCell(const CPoint& point, int &nRow, int &nCol) const;
-	bool GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeader = FALSE) const;
+	bool GetGridCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeader = FALSE) const;
 	void NotifyParentDblClick();
 	void NotifyParentClick();
 
@@ -123,6 +119,15 @@ protected:
 
 	const CCalendarCell* GetCell(int nRow, int nCol) const;
 	CCalendarCell* GetCell(int nRow, int nCol);
+	const CCalendarCell* HitTestGridCell(const CPoint& point) const;
+	CCalendarCell* HitTestGridCell(const CPoint& point);
+
+	BOOL GetGridCell(const COleDateTime& date, int &nRow, int &nCol) const;
+	int GetGridCellColumn(const COleDateTime& date) const;
+
+	bool HitTestGridCell(const CPoint& point, int &nRow, int &nCol) const;
+	int HitTestGridRow(const CPoint& point) const;
+
 	COLORREF GetFadedThemeColour(int percent) const;
 	int GetDayOfWeek(int nColumn) const;
 	COleDateTime GetMinDate(int nRow) const;

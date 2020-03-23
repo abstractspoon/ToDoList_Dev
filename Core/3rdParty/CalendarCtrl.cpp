@@ -304,6 +304,20 @@ CCalendarCell* CCalendarCtrl::GetCell(int nRow, int nCol)
 	return &(m_dayCells[nRow][nCol]);
 }
 
+BOOL CCalendarCtrl::GetGridCell(const COleDateTime& date, int &nRow, int &nCol) const
+{
+	int nMinDate = (int)m_dayCells[0][0].date.m_dt, nDate = (int)date.m_dt;
+	int nCell = (nDate - nMinDate);
+
+	if (nCell < 0 || (nCell >= (m_nVisibleWeeks * CALENDAR_NUM_COLUMNS)))
+		return false;
+
+	nRow = (nCell / m_nVisibleWeeks);
+	nCol = (nCell % CALENDAR_NUM_COLUMNS);
+
+	return true;
+}
+
 BOOL CCalendarCtrl::PtInHeader(const CPoint& ptScreen) const
 {
 	CPoint ptHeader(ptScreen);
@@ -400,7 +414,7 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 		{
 			CRect rCell;
 
-			if (GetCellRect(i, u, rCell))
+			if (GetGridCellRect(i, u, rCell))
 			{
 				const CCalendarCell* pCell = GetCell(i, u);
 
@@ -623,7 +637,7 @@ void CCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const 
 	}
 }
 
-bool CCalendarCtrl::GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeader) const
+bool CCalendarCtrl::GetGridCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeader) const
 {
 	if (nRow >=0 && nRow<GetVisibleWeeks() && 
 		nCol>=0 && nCol<CALENDAR_NUM_COLUMNS)
@@ -654,27 +668,27 @@ bool CCalendarCtrl::GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeade
 	return false;
 }
 
-CCalendarCell* CCalendarCtrl::HitTestCell(const CPoint& point)
+CCalendarCell* CCalendarCtrl::HitTestGridCell(const CPoint& point)
 {
 	int nRow, nCol;
 
-	if (HitTestCell(point, nRow, nCol))
+	if (HitTestGridCell(point, nRow, nCol))
 		return GetCell(nRow, nCol);
 
 	return NULL;
 }
 
-const CCalendarCell* CCalendarCtrl::HitTestCell(const CPoint& point) const
+const CCalendarCell* CCalendarCtrl::HitTestGridCell(const CPoint& point) const
 {
 	int nRow, nCol;
 	
-	if (HitTestCell(point, nRow, nCol))
+	if (HitTestGridCell(point, nRow, nCol))
 		return GetCell(nRow, nCol);
 	
 	return NULL;
 }
 
-bool CCalendarCtrl::HitTestCell(const CPoint& point, int &nRow, int &nCol) const
+bool CCalendarCtrl::HitTestGridCell(const CPoint& point, int &nRow, int &nCol) const
 {
 	if (point.y > m_nHeaderHeight) 
 	{
@@ -702,7 +716,30 @@ bool CCalendarCtrl::HitTestCell(const CPoint& point, int &nRow, int &nCol) const
 	return false;
 }
 
-COleDateTime CCalendarCtrl::GetMinDate() const 
+int CCalendarCtrl::HitTestGridRow(const CPoint& point) const
+{
+	int nRow, nCol;
+
+	if (HitTestGridCell(point, nRow, nCol))
+		return nRow;
+
+	// else
+	return -1;
+}
+
+int CCalendarCtrl::GetGridCellColumn(const COleDateTime& date) const
+{
+	// Supports any date visible or not
+	int nOffset = ((int)(date.m_dt) - (int)GetMinDate().m_dt);
+	int nCol = (nOffset % 7);
+
+	if (nCol < 0)
+		nCol += 7;
+
+	return nCol;
+}
+
+COleDateTime CCalendarCtrl::GetMinDate() const
 { 
 	return GetMinDate(0);
 }
@@ -832,7 +869,7 @@ void CCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	int nRow, nCol;
 
-	if (HitTestCell(point, nRow, nCol))
+	if (HitTestGridCell(point, nRow, nCol))
 	{
 		// select if not already
 		if (!IsGridCellSelected(nRow, nCol))
@@ -867,7 +904,7 @@ void CCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	int nRow, nCol;
 
-	if (HitTestCell(point, nRow, nCol) && !bCtrl)
+	if (HitTestGridCell(point, nRow, nCol) && !bCtrl)
 	{
 		if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
 			(m_dayCells[nRow][nCol].date > m_BoundDown))
@@ -902,7 +939,7 @@ void CCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 	int nRow, nCol;
 
-	if (HitTestCell(point, nRow, nCol))
+	if (HitTestGridCell(point, nRow, nCol))
 	{
 		if (bCtrl)
 		{
@@ -995,7 +1032,7 @@ void CCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		int nRow, nCol;
 
-		if (HitTestCell(point, nRow, nCol))
+		if (HitTestGridCell(point, nRow, nCol))
 		{
 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
 				(m_dayCells[nRow][nCol].date > m_BoundDown))	
@@ -1493,7 +1530,7 @@ void CCalendarCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	int nRow, nCol;
 
-	if (HitTestCell(point, nRow, nCol))
+	if (HitTestGridCell(point, nRow, nCol))
 	{
 		CCalendarCell* pCell = GetCell(nRow, nCol);
 		ASSERT(pCell);
