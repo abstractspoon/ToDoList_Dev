@@ -996,7 +996,7 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 			CRect rPrevPos = CDialogHelper::GetChildRect(&m_sbCellVScroll);
 			int nRow, nCol;
 
-			if (GetGridCellFromPoint(rPrevPos.CenterPoint(), nRow, nCol))
+			if (HitTestCell(rPrevPos.CenterPoint(), nRow, nCol))
 			{
 				pOldCell = GetCell(nRow, nCol);
 				ASSERT(pOldCell);
@@ -1050,7 +1050,7 @@ void CTaskCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	// pt is in screen coords
 	ScreenToClient(&pt);
 	
-	if (GetGridCellFromPoint(pt, nRow, nCol) && 
+	if (HitTestCell(pt, nRow, nCol) &&
 		IsGridCellSelected(nRow, nCol) &&
 		IsCellScrollBarActive() &&
 		!Misc::IsKeyPressed(VK_CONTROL))
@@ -1359,7 +1359,7 @@ DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) cons
 
 	int nRow, nCol;
 
-	if (!GetGridCellFromPoint(ptClient, nRow, nCol))
+	if (!HitTestCell(ptClient, nRow, nCol))
 		return 0;
 
 	const CCalendarCell* pCell = GetCell(nRow, nCol);
@@ -1493,7 +1493,7 @@ BOOL CTaskCalendarCtrl::EnsureSelectionVisible()
 	}
 	
 	// else is the task already visible to some degree?
-	if (GetGridCellFromTask(m_dwSelectedTaskID, nRow, nCol))
+	if (GetGridCell(m_dwSelectedTaskID, nRow, nCol))
 	{
 		VERIFY(SelectGridCell(nRow, nCol));
 	}
@@ -1543,7 +1543,7 @@ BOOL CTaskCalendarCtrl::EnsureSelectionVisible()
 			//ASSERT(0);
 		}
 
-		ASSERT(GetGridCellFromTask(m_dwSelectedTaskID, nRow, nCol));
+		ASSERT(GetGridCell(m_dwSelectedTaskID, nRow, nCol));
 	}
 	
 	// Now ensure it is visible vertically
@@ -1608,13 +1608,13 @@ bool CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
 	return true;
 }
 
-BOOL CTaskCalendarCtrl::GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const
+BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const
 {
 	int nUnused;
-	return GetGridCellFromTask(dwTaskID, nRow, nCol, nUnused);
+	return GetGridCell(dwTaskID, nRow, nCol, nUnused);
 }
 
-BOOL CTaskCalendarCtrl::GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const
+BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const
 {
 	nRow = nCol = nTask = -1;
 
@@ -1645,7 +1645,7 @@ BOOL CTaskCalendarCtrl::GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol
 	return false;
 }
 
-BOOL CTaskCalendarCtrl::GetGridCellFromDate(const COleDateTime& date, int &nRow, int &nCol) const
+BOOL CTaskCalendarCtrl::GetGridCell(const COleDateTime& date, int &nRow, int &nCol) const
 {
 	int nMinDate = (int)m_dayCells[0][0].date.m_dt, nDate = (int)date.m_dt;
 	int nCell = (nDate - nMinDate);
@@ -1664,7 +1664,7 @@ BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const
 	int nRow, nCol, nTask;
 
 	// start with visibility check
-	if (!GetGridCellFromTask(dwTaskID, nRow, nCol, nTask))
+	if (!GetGridCell(dwTaskID, nRow, nCol, nTask))
  		return FALSE;
 
 	const CCalendarCell* pCell = GetCell(nRow, nCol);
@@ -1907,7 +1907,7 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		SetFocus();
 		SelectTask(dwSelID, FALSE, TRUE);
 
-		const CCalendarCell* pCell = GetCell(point);
+		const CCalendarCell* pCell = HitTestCell(point);
 		ASSERT(pCell);
 
 		if (pCell)
@@ -1968,11 +1968,11 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	return TRUE;
 }
 
-int CTaskCalendarCtrl::GetGridRowFromPoint(const CPoint& point) const
+int CTaskCalendarCtrl::HitTestRow(const CPoint& point) const
 {
 	int nRow, nCol;
 
-	if (GetGridCellFromPoint(point, nRow, nCol))
+	if (HitTestCell(point, nRow, nCol))
 		return nRow;
 
 	// else
@@ -1989,7 +1989,7 @@ BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& d
 		return FALSE;
 	}
 
-	int nRow = GetGridRowFromPoint(ptDrag);
+	int nRow = HitTestRow(ptDrag);
 
 	if (nRow == -1)
 	{
@@ -2204,7 +2204,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 			// Select the cell under the mouse because we know it must contain the dragged task
 			int nRow, nCol;
 			
-			if (GetGridCellFromPoint(ptCursor, nRow, nCol))
+			if (HitTestCell(ptCursor, nRow, nCol))
 				SelectGridCell(nRow, nCol);
 			EnsureSelectionVisible();
 		}
@@ -2327,7 +2327,7 @@ BOOL CTaskCalendarCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& d
 {
 	int nRow, nCol;
 
-	if (GetGridCellFromPoint(ptCursor, nRow, nCol))
+	if (HitTestCell(ptCursor, nRow, nCol))
 	{
 		const CCalendarCell* pCell = GetCell(nRow, nCol);
 		ASSERT(pCell);

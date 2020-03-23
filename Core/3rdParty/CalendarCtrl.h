@@ -94,8 +94,8 @@ public:
 	//}}AFX_VIRTUAL
 
 protected:	
-	CCalendarCell* GetCell(const CPoint& point);	
-	const CCalendarCell* GetCell(const CPoint& point) const;
+	CCalendarCell* HitTestCell(const CPoint& point);
+	const CCalendarCell* HitTestCell(const CPoint& point) const;
 
 	virtual void DrawHeader(CDC* pDC);
 	virtual void DrawGrid(CDC* pDC);
@@ -110,7 +110,7 @@ protected:
 	virtual CString GetDayOfWeekName(const COleDateTime& date, BOOL bShort = FALSE) const;
 	virtual CString GetMonthName(const COleDateTime& date, BOOL bShort = FALSE) const;
 	
-	bool GetGridCellFromPoint(const CPoint& point, int &nRow, int &nCol) const;
+	bool HitTestCell(const CPoint& point, int &nRow, int &nCol) const;
 	bool GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeader = FALSE) const;
 	void NotifyParentDblClick();
 	void NotifyParentClick();

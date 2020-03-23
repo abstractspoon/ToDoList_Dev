@@ -175,10 +175,10 @@ protected:
 	BOOL EnableLabelTips(BOOL bEnable);
 	BOOL HasTask(DWORD dwTaskID, BOOL bExcludeHidden = FALSE) const;
 
-	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol) const;
-	BOOL GetGridCellFromTask(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
-	BOOL GetGridCellFromDate(const COleDateTime& date, int &nRow, int &nCol) const;
-	int GetGridRowFromPoint(const CPoint& point) const;
+	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const;
+	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
+	BOOL GetGridCell(const COleDateTime& date, int &nRow, int &nCol) const;
+	int HitTestRow(const CPoint& point) const;
 
 	BOOL UpdateCellScrollBarVisibility();
 	BOOL IsCellScrollBarActive() const;

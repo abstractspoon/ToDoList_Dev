@@ -654,27 +654,27 @@ bool CCalendarCtrl::GetCellRect(int nRow, int nCol, CRect& rect, BOOL bOmitHeade
 	return false;
 }
 
-CCalendarCell* CCalendarCtrl::GetCell(const CPoint& point)
+CCalendarCell* CCalendarCtrl::HitTestCell(const CPoint& point)
 {
 	int nRow, nCol;
 
-	if (GetGridCellFromPoint(point, nRow, nCol))
+	if (HitTestCell(point, nRow, nCol))
 		return GetCell(nRow, nCol);
 
 	return NULL;
 }
 
-const CCalendarCell* CCalendarCtrl::GetCell(const CPoint& point) const 
+const CCalendarCell* CCalendarCtrl::HitTestCell(const CPoint& point) const
 {
 	int nRow, nCol;
 	
-	if (GetGridCellFromPoint(point, nRow, nCol))
+	if (HitTestCell(point, nRow, nCol))
 		return GetCell(nRow, nCol);
 	
 	return NULL;
 }
 
-bool CCalendarCtrl::GetGridCellFromPoint(const CPoint& point, int &nRow, int &nCol) const
+bool CCalendarCtrl::HitTestCell(const CPoint& point, int &nRow, int &nCol) const
 {
 	if (point.y > m_nHeaderHeight) 
 	{
@@ -832,7 +832,7 @@ void CCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	int nRow, nCol;
 
-	if (GetGridCellFromPoint(point, nRow, nCol))
+	if (HitTestCell(point, nRow, nCol))
 	{
 		// select if not already
 		if (!IsGridCellSelected(nRow, nCol))
@@ -867,7 +867,7 @@ void CCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	int nRow, nCol;
 
-	if (GetGridCellFromPoint(point, nRow, nCol) && !bCtrl)
+	if (HitTestCell(point, nRow, nCol) && !bCtrl)
 	{
 		if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
 			(m_dayCells[nRow][nCol].date > m_BoundDown))
@@ -902,7 +902,7 @@ void CCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 	int nRow, nCol;
 
-	if (GetGridCellFromPoint(point, nRow, nCol))
+	if (HitTestCell(point, nRow, nCol))
 	{
 		if (bCtrl)
 		{
@@ -948,17 +948,10 @@ void CCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 			m_SingleSelection.RemoveAll();
 			m_bSelectionStarted = false;
 
-			int nRow, nCol;
-
-			if (GetGridCellFromPoint(point, nRow, nCol))
+			if ((m_dayCells[nRow][nCol].date < m_BoundUp) &&
+				(m_dayCells[nRow][nCol].date > m_BoundDown))
 			{
-				if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
-					(m_dayCells[nRow][nCol].date > m_BoundDown))	
-				{
-					m_SelectionRange[1] = DateToSeconds(GetCell(nRow, nCol)->date);
-				}
-				else
-					m_SelectionRange[1] = m_SelectionRange[0];
+				m_SelectionRange[1] = DateToSeconds(GetCell(nRow, nCol)->date);
 			}
 			else
 				m_SelectionRange[1] = m_SelectionRange[0];
@@ -1002,7 +995,7 @@ void CCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		int nRow, nCol;
 
-		if (GetGridCellFromPoint(point, nRow, nCol))
+		if (HitTestCell(point, nRow, nCol))
 		{
 			if ((m_dayCells[nRow][nCol].date < m_BoundUp) && 
 				(m_dayCells[nRow][nCol].date > m_BoundDown))	
@@ -1500,7 +1493,7 @@ void CCalendarCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	int nRow, nCol;
 
-	if (GetGridCellFromPoint(point, nRow, nCol))
+	if (HitTestCell(point, nRow, nCol))
 	{
 		CCalendarCell* pCell = GetCell(nRow, nCol);
 		ASSERT(pCell);
