@@ -668,7 +668,15 @@ void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, cons
 	}
 
 	if (bToday && HasColor(m_crToday))
-		GraphicsMisc::DrawRect(pDC, rCell, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
+	{
+		CRect rToday(rCell);
+
+		// Don't overdraw gridline
+		if (rToday.left > 0)
+			rToday.left++;
+
+		GraphicsMisc::DrawRect(pDC, rToday, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
+	}
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
