@@ -1634,7 +1634,7 @@ namespace Calendar
                                 Rectangle apptRect = rect;
                                 apptRect.Width = rect.Width / appointment.conflictCount;
 
-                                int lastX = 0;
+                                int lastX = 0, leftOverX = (rect.Width - (appointment.conflictCount * apptRect.Width));
                                 AppointmentView view;
 
                                 foreach (Appointment app in hourLayout.Appointments)
@@ -1643,16 +1643,18 @@ namespace Calendar
                                     {
                                         view = appointmentViews[app];
 
-                                        if (lastX < view.Rectangle.X)
-                                            lastX = view.Rectangle.X;
+                                        if (lastX < view.Rectangle.Right)
+                                            lastX = view.Rectangle.Right;
                                     }
                                 }
 
-                                if ((lastX + (apptRect.Width * 2)) > (rect.X + rect.Width))
+                                if ((lastX + apptRect.Width) > rect.Right)
                                     lastX = 0;
 
                                 if (lastX > 0)
-                                    apptRect.X = lastX + apptRect.Width;
+                                    apptRect.X = lastX;
+                                else
+                                    apptRect.Width += leftOverX;
 
                                 DateTime apptStart, apptEnd;
                                 GetAppointmentDrawTimes(appointment, out apptStart, out apptEnd);
