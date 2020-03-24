@@ -1543,7 +1543,7 @@ namespace Calendar
 
 				Rectangle rect2 = rect;
 
-				rect2.X += (appointmentGripWidth + 1); // 1 pixel padding
+				rect2.X += (appointmentGripWidth + 1); // 1 pixel spacer
 				rect2.Width -= (appointmentGripWidth + 1);
 
 				rect2.Width = (rect2.Width / groups.Count);
@@ -1632,12 +1632,10 @@ namespace Calendar
                             if (drawnItems.IndexOf(appointment) < 0)
                             {
                                 Rectangle apptRect = rect;
-                                int appointmentWidth;
-                                AppointmentView view;
-
-                                appointmentWidth = rect.Width / appointment.conflictCount;
+                                apptRect.Width = rect.Width / appointment.conflictCount;
 
                                 int lastX = 0;
+                                AppointmentView view;
 
                                 foreach (Appointment app in hourLayout.Appointments)
                                 {
@@ -1650,72 +1648,16 @@ namespace Calendar
                                     }
                                 }
 
-                                if ((lastX + (appointmentWidth * 2)) > (rect.X + rect.Width))
+                                if ((lastX + (apptRect.Width * 2)) > (rect.X + rect.Width))
                                     lastX = 0;
 
-                                apptRect.Width = appointmentWidth/* - 5*/;
-
                                 if (lastX > 0)
-                                    apptRect.X = lastX + appointmentWidth;
+                                    apptRect.X = lastX + apptRect.Width;
 
-                                DateTime appstart = appointment.StartDate;
-                                DateTime append = appointment.EndDate;
+                                DateTime apptStart, apptEnd;
+                                GetAppointmentDrawTimes(appointment, out apptStart, out apptEnd);
 
-                                // Draw the appts boxes depending on the height display mode                           
-
-                                // If small appts are to be drawn in half-hour blocks
-                                if (this.AppHeightMode == AppHeightDrawMode.FullHalfHourBlocksShort && appointment.EndDate.Subtract(appointment.StartDate).TotalMinutes < (60 / slotsPerHour))
-                                {
-                                    // Round the start/end time to the last/next halfhour
-                                    appstart = appointment.StartDate.AddMinutes(-appointment.StartDate.Minute);
-                                    append = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
-
-                                    // Make sure we've rounded it to the correct halfhour :)
-                                    if (appointment.StartDate.Minute >= (60 / slotsPerHour))
-                                        appstart = appstart.AddMinutes((60 / slotsPerHour));
-                                    if (appointment.EndDate.Minute > (60 / slotsPerHour))
-                                        append = append.AddMinutes((60 / slotsPerHour));
-                                }
-
-                                // This is basically the same as previous mode, but for all appts
-                                else if (this.AppHeightMode == AppHeightDrawMode.FullHalfHourBlocksAll)
-                                {
-                                    appstart = appointment.StartDate.AddMinutes(-appointment.StartDate.Minute);
-                                    if (appointment.EndDate.Minute != 0 && appointment.EndDate.Minute != (60 / slotsPerHour))
-                                        append = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
-                                    else
-                                        append = appointment.EndDate;
-
-                                    if (appointment.StartDate.Minute >= (60 / slotsPerHour))
-                                        appstart = appstart.AddMinutes((60 / slotsPerHour));
-                                    if (appointment.EndDate.Minute > (60 / slotsPerHour))
-                                        append = append.AddMinutes((60 / slotsPerHour));
-                                }
-
-                                // Based on previous code
-                                else if (this.AppHeightMode == AppHeightDrawMode.EndHalfHourBlocksShort && appointment.EndDate.Subtract(appointment.StartDate).TotalMinutes < (60 / slotsPerHour))
-                                {
-                                    // Round the end time to the next halfhour
-                                    append = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
-
-                                    // Make sure we've rounded it to the correct halfhour :)
-                                    if (appointment.EndDate.Minute > (60 / slotsPerHour))
-                                        append = append.AddMinutes((60 / slotsPerHour));
-                                }
-
-                                else if (this.AppHeightMode == AppHeightDrawMode.EndHalfHourBlocksAll)
-                                {
-                                    // Round the end time to the next halfhour
-                                    if (appointment.EndDate.Minute != 0 && appointment.EndDate.Minute != (60 / slotsPerHour))
-                                        append = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
-                                    else
-                                        append = appointment.EndDate;
-                                    // Make sure we've rounded it to the correct halfhour :)
-                                    if (appointment.EndDate.Minute > (60 / slotsPerHour))
-                                        append = append.AddMinutes((60 / slotsPerHour));
-                                }
-
-                                apptRect = GetHourRangeRectangle(appstart, append, apptRect);
+                                apptRect = GetHourRangeRectangle(apptStart, apptEnd, apptRect);
 
                                 view = new AppointmentView();
                                 view.Rectangle = apptRect;
@@ -1744,6 +1686,76 @@ namespace Calendar
                         }
                     }
                 }
+            }
+        }
+
+        private void GetAppointmentDrawTimes(Appointment appointment, out DateTime apptStart, out DateTime apptEnd)
+        {
+            apptStart = appointment.StartDate;
+            apptEnd = appointment.EndDate;
+
+            // Adjust depending on the height display mode 
+            switch (this.AppHeightMode)
+            {
+                case AppHeightDrawMode.FullHalfHourBlocksShort:
+                    if (appointment.EndDate.Subtract(appointment.StartDate).TotalMinutes < (60 / slotsPerHour))
+                    {
+                        // Round the start/end time to the last/next halfhour
+                        apptStart = appointment.StartDate.AddMinutes(-appointment.StartDate.Minute);
+                        apptEnd = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
+
+                        // Make sure we've rounded it to the correct halfhour :)
+                        if (appointment.StartDate.Minute >= (60 / slotsPerHour))
+                            apptStart = apptStart.AddMinutes((60 / slotsPerHour));
+
+                        if (appointment.EndDate.Minute > (60 / slotsPerHour))
+                            apptEnd = apptEnd.AddMinutes((60 / slotsPerHour));
+                    }
+                    break;
+
+                case AppHeightDrawMode.FullHalfHourBlocksAll:
+                    {
+                        apptStart = appointment.StartDate.AddMinutes(-appointment.StartDate.Minute);
+
+                        if (appointment.EndDate.Minute != 0 && appointment.EndDate.Minute != (60 / slotsPerHour))
+                            apptEnd = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
+                        else
+                            apptEnd = appointment.EndDate;
+
+                        if (appointment.StartDate.Minute >= (60 / slotsPerHour))
+                            apptStart = apptStart.AddMinutes((60 / slotsPerHour));
+
+                        if (appointment.EndDate.Minute > (60 / slotsPerHour))
+                            apptEnd = apptEnd.AddMinutes((60 / slotsPerHour));
+                    }
+                    break;
+
+                // Based on previous code
+                case AppHeightDrawMode.EndHalfHourBlocksShort:
+                    if (appointment.EndDate.Subtract(appointment.StartDate).TotalMinutes < (60 / slotsPerHour))
+                    {
+                        // Round the end time to the next halfhour
+                        apptEnd = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
+
+                        // Make sure we've rounded it to the correct halfhour :)
+                        if (appointment.EndDate.Minute > (60 / slotsPerHour))
+                            apptEnd = apptEnd.AddMinutes((60 / slotsPerHour));
+                    }
+                    break;
+
+                case AppHeightDrawMode.EndHalfHourBlocksAll:
+                    {
+                        // Round the end time to the next halfhour
+                        if (appointment.EndDate.Minute != 0 && appointment.EndDate.Minute != (60 / slotsPerHour))
+                            apptEnd = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
+                        else
+                            apptEnd = appointment.EndDate;
+
+                        // Make sure we've rounded it to the correct halfhour :)
+                        if (appointment.EndDate.Minute > (60 / slotsPerHour))
+                            apptEnd = apptEnd.AddMinutes((60 / slotsPerHour));
+                    }
+                    break;
             }
         }
 
