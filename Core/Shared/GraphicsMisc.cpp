@@ -1436,7 +1436,7 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 
 			case GMIS_SELECTEDNOTFOCUSED:
 			case GMIS_DROPHILITED:
-				th.DrawBackground(pDC, LVP_LISTITEM, LIS_SELECTED, rDraw, prClip);
+				th.DrawBackground(pDC, LVP_LISTITEM, LIS_MORESELECTED, rDraw, prClip);
 				break;
 			
 			default:
