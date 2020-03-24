@@ -24,7 +24,7 @@ IMPLEMENT_DYNAMIC(CStaticLink, CStatic)
 BEGIN_MESSAGE_MAP(CStaticLink, CStatic)
 	ON_WM_NCHITTEST()
 	ON_WM_CTLCOLOR_REFLECT()
-	ON_WM_LBUTTONUP()
+	ON_WM_LBUTTONDOWN()
 	ON_WM_SETCURSOR()
 	ON_WM_GETDLGCODE()
 	ON_WM_CHAR()
@@ -95,7 +95,7 @@ HBRUSH CStaticLink::CtlColor(CDC* pDC, UINT nCtlColor)
 /////////////////
 // Handle mouse click: navigate link
 //
-void CStaticLink::OnLButtonUp(UINT /*nFlags*/, CPoint /*point*/)
+void CStaticLink::OnLButtonDown(UINT /*nFlags*/, CPoint /*point*/)
 {
 	Navigate();
 }
