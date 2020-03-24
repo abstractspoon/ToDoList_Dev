@@ -11,6 +11,7 @@
 #include "..\Shared\richedithelper.h"
 #include "..\Shared\enstring.h"
 #include "..\Shared\localizer.h"
+#include "..\Shared\dialoghelper.h"
 
 #include "..\Interfaces\IPreferences.h"
 
@@ -35,7 +36,8 @@ CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 	m_pPrefs(NULL),
 	m_stURL(_T("http://wiki.services.openoffice.org/wiki/Dictionaries")),
 	m_bMadeChanges(FALSE),
-	m_ptTopLeft(-1, -1)
+	m_ptTopLeft(-1, -1),
+	m_cbDictionaries(FES_RELATIVEPATHS | FES_COMBOSTYLEBTN)
 {
 	InitDialog(NULL/*pSpellCheck*/, _T("")/*sText*/);
 
@@ -48,10 +50,9 @@ void CSpellCheckDlg::InitDialog(ISpellCheck* pSpellCheck, const CString& sText)
 	AfxEnableControlContainer();
 	CRichEditHelper::InitRichEdit();
 
-	AddRCControl(_T("LTEXT"), _T(""), _T("Ac&tive Dictionary:"), 0,0, 7,9,70,8, IDC_SCD_DICTLABEL);
-	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_TABSTOP, 0, 71, 8, 182,100, IDC_SCD_DICTIONARIES);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Bro&wse"),WS_TABSTOP, 0,256,7,50,14,IDC_SCD_BROWSE);
-	AddRCControl(_T("LTEXT"), _T(""), _T("Download More Dictionaries"), WS_TABSTOP | SS_RIGHT,0, 66,21,182,8,IDC_SCD_URL);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Ac&tive Dictionary:"), 0, 0, 8, 9, 70, 8, IDC_SCD_DICTLABEL);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_TABSTOP, 0, 80, 7, 226, 100, IDC_SCD_DICTIONARIES);
+	AddRCControl(_T("LTEXT"), _T(""), _T("Download More Dictionaries"), WS_TABSTOP | SS_RIGHT, 0, 80, 21, 226, 8, IDC_SCD_URL);
 	AddRCControl(_T("LTEXT"), _T(""), _T("C&hecking Text:"), 0,0, 7,30,149,8, IDC_SCD_CHECKINGLABEL);
 	AddRCControl(_T("CONTROL"), _T("RICHEDIT"), _T(""),ES_MULTILINE | ES_AUTOVSCROLL | ES_NOHIDESEL | ES_READONLY | WS_VSCROLL | WS_TABSTOP,0, 7,40,242,68,IDC_SCD_TEXT);
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("R&estart"),WS_TABSTOP, 0,256,40,50,14,IDC_SCD_RESTART);
@@ -99,12 +100,7 @@ void CSpellCheckDlg::DoDataExchange(CDataExchange* pDX)
 
 	if (pDX->m_bSaveAndValidate)
 	{
-		int nCurSel = m_cbDictionaries.GetCurSel();
-
-		if (nCurSel != CB_ERR)
-			m_cbDictionaries.GetLBText(nCurSel, m_sSelDictionary);
-		else
-			m_sSelDictionary.Empty();
+		m_sSelDictionary = CDialogHelper::GetSelectedItem(m_cbDictionaries);
 	}
 	else
 	{
@@ -130,7 +126,6 @@ BEGIN_MESSAGE_MAP(CSpellCheckDlg, CRuntimeDlg)
 	ON_BN_CLICKED(IDC_SCD_RESTART, OnRestart)
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
-	ON_BN_CLICKED(IDC_SCD_BROWSE, OnBrowse)
 	ON_CBN_SELCHANGE(IDC_SCD_DICTIONARIES, OnChangeDictionary)
 	ON_LBN_DBLCLK(IDC_SCD_SUGGESTIONS, OnDblClkSuggestions)
 END_MESSAGE_MAP()
@@ -234,28 +229,12 @@ void CSpellCheckDlg::SetSpellCheck(ISpellCheck* pSpellCheck)
 
 void CSpellCheckDlg::OnChangeDictionary()
 {
+	ASSERT(m_cbDictionaries.GetCount() > 0);
+	
 	UpdateData();
 
 	if (InitDictionary(m_sSelDictionary))
 		StartChecking(CH_CURRENT);
-}
-
-void CSpellCheckDlg::OnBrowse()
-{
-	UpdateData();
-
-	CString sFilter = GetItemText(DLG_SCD_DICTFILTER, _T("Dictionaries (*.dic)|*.dic||"));
-	CString sTitle = GetItemText(DLG_SCD_BROWSETITLE, _T("Select Dictionary"));
-
-	CFileOpenDialog dialog(sTitle, _T("dic"), m_sSelDictionary, OFN_PATHMUSTEXIST, sFilter);
-	
-	if (dialog.DoModal() == IDOK)
-	{
-		CString sDict = FileMisc::GetRelativePath(dialog.GetPathName(), FileMisc::GetAppFolder(), FALSE);
-
-		if (InitDictionary(sDict))
-			StartChecking(CH_CURRENT);
-	}
 }
 
 void CSpellCheckDlg::OnReplace() 
@@ -423,6 +402,9 @@ BOOL CSpellCheckDlg::OnInitDialog()
 	
 	if (IsInitialized() || InitDictionary(m_sSelDictionary))
 	{
+		// Clear active dictionary selection
+		::PostMessage(::GetDlgItem(m_cbDictionaries, 1001), EM_SETSEL, -1, 0);
+		
 		if (!StartChecking() && m_bEndOnNoErrors)
 		{
 			EndDialog(IDNOERRORS);

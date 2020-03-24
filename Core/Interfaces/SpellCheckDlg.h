@@ -10,6 +10,7 @@
 #include "..\Shared\runtimedlg.h"
 #include "..\Shared\richeditncborder.h"
 #include "..\Shared\RichEditBaseCtrl.h"
+#include "..\Shared\FileComboBox.h"
 
 #include "..\3rdparty\statlink.h"
 
@@ -82,7 +83,7 @@ protected:
 	CString	m_sSuggestion;
 	//}}AFX_DATA
 	CString m_sEnginePath;
-	CComboBox m_cbDictionaries;
+	CFileComboBox m_cbDictionaries;
 	CString m_sSelDictionary;
 	BOOL m_bEndOnNoErrors;
     CStaticLink m_stURL;
@@ -117,7 +118,6 @@ protected:
 	afx_msg void OnRestart();
 	afx_msg void OnDestroy();
 	//}}AFX_MSG
-	afx_msg void OnBrowse();
 	afx_msg void OnChangeDictionary();
 	afx_msg void OnDblClkSuggestions();
 	DECLARE_MESSAGE_MAP()
