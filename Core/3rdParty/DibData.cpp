@@ -2877,7 +2877,11 @@ void DumpDib(const LPBYTE pDib)
 		szRaw[0] = _T('\0');
 		for( n = 0; n < 32 && i < ddv.m_dwDibSize; ++n, ++i )
 		{
+#if _MSC_VER >= 1400
+			_stprintf_s(szByte, 32, _T(" %2.2X"), pDib[i]);
+#else
 			_stprintf(szByte, _T(" %2.2X"), pDib[i]);
+#endif
 			lstrcat(szRaw, szByte);
 		}
 		lstrcat(szRaw, _T("\n"));

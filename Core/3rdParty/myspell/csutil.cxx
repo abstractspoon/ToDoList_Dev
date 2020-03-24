@@ -47,6 +47,24 @@ char * mystrdup(const char * s)
   return d;
 }
 
+// safe copy
+void safestrcpy(char* dest, unsigned int destLen, const char* src)
+{
+#if _MSC_VER >= 1400
+	strcpy_s(dest, destLen, src);
+#else
+	strcpy(dest, src);
+#endif
+}
+
+void safestrncpy(char* dest, unsigned int destLen, const char* src, int count)
+{
+#if _MSC_VER >= 1400
+	strncpy_s(dest, destLen, src, count);
+#else
+	strncpy(dest, src);
+#endif
+}
 
 // remove cross-platform text line end characters
 void mychomp(char * s)

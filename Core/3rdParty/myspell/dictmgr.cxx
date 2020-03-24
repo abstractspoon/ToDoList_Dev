@@ -67,8 +67,14 @@ int  DictMgr::parse_file(const char * dictpath, const char * etype)
     dictentry * pdict = pdentry;
 
     // open the dictionary list file
-    FILE * dictlst;
-    dictlst = fopen(dictpath,"r");
+	FILE * dictlst = NULL;
+
+#if _MSC_VER >= 1400
+	fopen_s(&dictlst, dictpath, "r");
+#else
+	dictlst = fopen(dictpath, "r");
+#endif
+
     if (!dictlst) {
       return 1;
     }

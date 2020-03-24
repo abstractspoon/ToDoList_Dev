@@ -40,7 +40,11 @@ HICON ShellIcons::ExtractIcon(SHELLICON nIndex, bool bLarge)
 		DWORD dwSize = MAX_PATH * sizeof TCHAR;
 
 		TCHAR szIndex[6] = {0};
-		_stprintf (szIndex, _T("%d"), nIndex);
+#if _MSC_VER >= 1400
+		_stprintf_s(szIndex, 6, _T("%d"), nIndex);
+#else
+		_stprintf(szIndex, _T("%d"), nIndex);
+#endif
 
 		if (RegQueryValueEx (hkeyShellIcons, szIndex, NULL, NULL, (LPBYTE)szBuffer, &dwSize) == ERROR_SUCCESS)
 		{

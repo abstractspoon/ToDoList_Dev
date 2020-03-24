@@ -120,8 +120,14 @@ int  AffixMgr::parse_file(const char * affpath)
   char ft;
 
   // open the affix file
-  FILE * afflst;
-  afflst = fopen(affpath,"r");
+  FILE * afflst = NULL;
+
+#if _MSC_VER >= 1400
+  fopen_s(&afflst, affpath, "r");
+#else
+  afflst = fopen(affpath, "r");
+#endif
+
   if (!afflst) {
     fprintf(stderr,"Error - could not open affix description file %s\n",affpath);
     return 1;

@@ -6,6 +6,7 @@
 
 #include "mythes.hxx"
 
+extern void safestrncpy(char* dest, unsigned int destLen, const char* src, int count);
 
 
 MyThes::MyThes(const char* idxpath, const char * datpath)
@@ -40,9 +41,15 @@ MyThes::~MyThes()
 
 int MyThes::thInitialize(const char* idxpath, const char* datpath)
 {
-
     // open the index file
-    FILE * pifile = fopen(idxpath,"r");
+	FILE * pifile = NULL;
+
+#if _MSC_VER >= 1400
+	fopen_s(&pifile, idxpath, "r");
+#else
+	pifile = fopen(idxpath, "r");
+#endif
+
     if (!pifile) {
         pifile = NULL;
         return 0;
@@ -89,7 +96,12 @@ int MyThes::thInitialize(const char* idxpath, const char* datpath)
     pifile=NULL;
 
     /* next open the data file */
-    pdfile = fopen(datpath,"r");
+#if _MSC_VER >= 1400
+	fopen_s(&pdfile, datpath, "r");
+#else
+	pdfile = fopen(datpath, "r");
+#endif
+
     if (!pdfile) {
         pdfile = NULL;
         return 0;
@@ -228,9 +240,9 @@ int MyThes::Lookup(const char * pText, int len, mentry** pme)
         int k = strlen(pos);
         int m = strlen(pm->psyns[0]);
         if ((k+m) < (MAX_WD_LEN - 1)) {
-             strncpy(dfn,pos,k);
+             safestrncpy(dfn, MAX_WD_LEN,pos,k);
              *(dfn+k) = ' ';
-             strncpy((dfn+k+1),(pm->psyns[0]),m+1);
+             safestrncpy((dfn+k+1), MAX_WD_LEN - (k+1),(pm->psyns[0]),m+1);
              pm->defn = mystrdup(dfn);
 	} else {
 	     pm->defn = mystrdup(pm->psyns[0]);

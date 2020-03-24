@@ -10,6 +10,10 @@ void   mychomp(char * s);
 // duplicate string                          
 char * mystrdup(const char * s);
 
+// safe copy
+void safestrcpy(char* dest, unsigned int destLen, const char* src);
+void safestrncpy(char* dest, unsigned int destLen, const char* src, int count);
+
 // duplicate reverse of string                   
 char * myrevstrdup(const char * s);
 

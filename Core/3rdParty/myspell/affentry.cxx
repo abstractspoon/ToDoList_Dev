@@ -12,8 +12,9 @@
 
 //using namespace std;
 
-extern char * mystrdup(const char * s);
-extern char *  myrevstrdup(const char * s);
+extern char* mystrdup(const char * s);
+extern char* myrevstrdup(const char * s);
+extern void  safestrcpy(char* dest, unsigned int destLen, const char* src);
 
 PfxEntry::PfxEntry(AffixMgr* pmgr, affentry* dp)
 {
@@ -65,11 +66,11 @@ char * PfxEntry::add(const char * word, int len)
 	      /* we have a match so add prefix */
               int tlen = 0;
               if (appndl) {
-	          strcpy(tword,appnd);
+	          safestrcpy(tword, MAXWORDLEN+1,appnd);
                   tlen += appndl;
                } 
                char * pp = tword + tlen;
-               strcpy(pp, (word + stripl));
+               safestrcpy(pp, (MAXWORDLEN - tlen), (word + stripl));
                return mystrdup(tword);
 	    }
      }
@@ -101,8 +102,8 @@ struct hentry * PfxEntry::check(const char * word, int len)
 	    // generate new root word by removing prefix and adding
 	    // back any characters that would have been stripped
 
-	    if (stripl) strcpy (tmpword, strip);
-	    strcpy ((tmpword + stripl), (word + appndl));
+	    if (stripl) safestrcpy (tmpword, MAXWORDLEN, strip);
+	    safestrcpy ((tmpword + stripl), MAXWORDLEN - stripl, (word + appndl));
 
             // now make sure all of the conditions on characters
             // are met.  Please see the appendix at the end of
@@ -187,14 +188,14 @@ char * SfxEntry::add(const char * word, int len)
             }
             if (cond < 0) {
 	      /* we have a match so add suffix */
-              strcpy(tword,word);
+              safestrcpy(tword, MAXWORDLEN, word);
               int tlen = len;
               if (stripl) {
 		 tlen -= stripl;
               }
               char * pp = (tword + tlen);
               if (appndl) {
-	          strcpy(pp,appnd);
+	          safestrcpy(pp, MAXWORDLEN - tlen, appnd);
                   tlen += appndl;
 	      } else *pp = '\0';
                return mystrdup(tword);
@@ -235,10 +236,10 @@ struct hentry * SfxEntry::check(const char * word, int len, int optflags, AffEnt
 	    // back any characters that would have been stripped or
 	    // or null terminating the shorter string
 
-	    strcpy (tmpword, word);
+	    safestrcpy (tmpword, MAXWORDLEN, word);
 	    cp = (unsigned char *)(tmpword + tmpl);
 	    if (stripl) {
-		strcpy ((char *)cp, strip);
+		safestrcpy ((char *)cp, MAXWORDLEN - tmpl, strip);
 		tmpl += stripl;
 		cp = (unsigned char *)(tmpword + tmpl);
 	    } else *cp = '\0';

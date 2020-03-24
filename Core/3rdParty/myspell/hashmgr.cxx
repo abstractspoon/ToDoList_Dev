@@ -146,7 +146,14 @@ int HashMgr::load_tables(const char * tpath)
   char * ap;
 
   // raw dictionary - munched file
-  FILE * rawdict = fopen(tpath, "r");
+  FILE * rawdict = NULL;
+
+#if _MSC_VER >= 1400
+  fopen_s(&rawdict, tpath, "r");
+#else
+  rawdict = fopen(tpath, "r");
+#endif
+
   if (rawdict == NULL) return 1;
 
   // first read the first line of file to get hash table size */

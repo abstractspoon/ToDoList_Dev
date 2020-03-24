@@ -456,7 +456,11 @@ CString CRecordsetEx::GetSQLDataType(SWORD nSQLType)
 	}
 
 	// all else
+#if _MSC_VER >= 1400
+	_stprintf_s(szType, 10, _T("%d"), nSQLType);
+#else
 	_stprintf(szType, _T("%d"), nSQLType);
+#endif
 	return szType;
 }
 

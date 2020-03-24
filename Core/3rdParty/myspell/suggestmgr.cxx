@@ -10,8 +10,8 @@
 #pragma warning(disable:4514)
 #pragma warning(disable:4706)
 
-extern char * mystrdup(const char *);
-
+extern char* mystrdup(const char *);
+extern void  safestrcpy(char* dest, unsigned int destLen, const char* src);
 
 SuggestMgr::SuggestMgr(const char * tryme, int maxn, 
                        AffixMgr * aptr)
@@ -118,7 +118,7 @@ int SuggestMgr::map_related(const char * word, int i, char** wlst, int ns, const
   for (int j = 0; j < nummap; j++) {
     if (strchr(maptable[j].set,c) != 0) {
       in_map = 1;
-      char * newword = strdup(word);
+      char * newword = _strdup(word);
       for (int k = 0; k < maptable[j].len; k++) {
 	*(newword + i) = *(maptable[j].set + k);
 	ns = map_related(newword, (i+1), wlst, ns, maptable, nummap);
@@ -157,10 +157,10 @@ int SuggestMgr::replchars(char** wlst, const char * word, int ns)
       lenp = strlen(reptable[i].pattern);
       // search every occurence of the pattern in the word
       while ((r=strstr(r, reptable[i].pattern)) != NULL) {
-	  strcpy(candidate, word);
+	  safestrcpy(candidate, MAXSWL, word);
 	  if (r-word + lenr + strlen(r+lenp) >= MAXSWL) break;
-	  strcpy(candidate+(r-word),reptable[i].replacement);
-	  strcpy(candidate+(r-word)+lenr, r+lenp);
+	  safestrcpy(candidate+(r-word), MAXSWL-(r-word),reptable[i].replacement);
+	  safestrcpy(candidate+(r-word)+lenr, MAXSWL-(r-word+lenr), r+lenp);
           cwrd = 1;
           for (int k=0; k < ns; k++)
 	      if (strcmp(candidate,wlst[k]) == 0) cwrd = 0;
@@ -187,7 +187,7 @@ int SuggestMgr::badchar(char ** wlst, const char * word, int ns)
 
   int wl = strlen(word);
   int cwrd;
-  strcpy (candidate, word);
+  safestrcpy(candidate, MAXSWL, word);
 
   // swap out each char one by one and try all the tryme
   // chars in its place to see if that makes a good word
@@ -226,7 +226,7 @@ int SuggestMgr::extrachar(char** wlst, const char * word, int ns)
    if (wl < 2) return ns;
 
    // try omitting one char of word at a time
-   strcpy (candidate, word + 1);
+   safestrcpy (candidate, MAXSWL, word + 1);
    for (p = word, r = candidate;  *p != 0;  ) {
        cwrd = 1;
        for (int k=0; k < ns; k++)
@@ -256,7 +256,7 @@ int SuggestMgr::forgotchar(char ** wlst, const char * word, int ns)
    int wl = strlen(word);
 
    // try inserting a tryme character before every letter
-   strcpy(candidate + 1, word);
+   safestrcpy(candidate + 1, MAXSWL - 1, word);
    for (p = word, q = candidate;  *p != 0;  )  {
       for (int i = 0;  i < ctryl;  i++) {
 	 *q = ctry[i];
@@ -302,7 +302,7 @@ int SuggestMgr::twowords(char ** wlst, const char * word, int ns)
 
     int wl=strlen(word);
     if (wl < 3) return ns;
-    strcpy(candidate + 1, word);
+	safestrcpy(candidate + 1, MAXSWL-1, word);
 
     // split the string into two pieces after every char
     // if both pieces are good words make them a suggestion
@@ -336,7 +336,7 @@ int SuggestMgr::swapchar(char ** wlst, const char * word, int ns)
    int wl = strlen(word);
 
    // try swapping adjacent chars one by one
-   strcpy(candidate, word);
+   safestrcpy(candidate, MAXSWL, word);
    for (p = candidate;  p[1] != 0;  p++) {
       tmpc = *p;
       *p = p[1];
@@ -405,7 +405,7 @@ int SuggestMgr::ngsuggest(char** wlst, char * word, HashMgr* pHMgr)
   int thresh = 0;
   char * mw = NULL;
   for (int sp = 1; sp < 4; sp++) {
-     mw = strdup(word);
+     mw = _strdup(word);
      for (int k=sp; k < n; k+=4) *(mw + k) = '*';
      thresh = thresh + ngram(n, word, mw, NGRAM_ANY_MISMATCH);
      free(mw);
