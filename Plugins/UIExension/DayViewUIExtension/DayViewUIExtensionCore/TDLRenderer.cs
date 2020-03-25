@@ -94,6 +94,7 @@ namespace DayViewUIExtension
         {
             get
             {
+				// Slightly darker
                 return DrawingColor.AdjustLighting(GridlineColor, -0.2f, false);
             }
         }
@@ -216,50 +217,42 @@ namespace DayViewUIExtension
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            System.Drawing.Rectangle rHeader = rect;
-			rHeader.Width++;
+			// Header background
+			bool isToday = date.Date.Equals(DateTime.Now.Date);
 
-            if (date.Date.Equals(DateTime.Now.Date))
-            {
-                if (VisualStyleRenderer.IsSupported)
-                {
-					if (Theme.HasAppColor(UITheme.AppColor.Today))
-					{
-						var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
-						renderer.DrawBackground(g, rHeader);
+			Rectangle rHeader = rect;
+			rHeader.X++;
 
-						using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 64)))
-							g.FillRectangle(brush, rHeader);
-					}
-					else
-					{
-						var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Hot);
-						renderer.DrawBackground(g, rHeader);
-					}
+			if (VisualStyleRenderer.IsSupported)
+			{
+				bool hasTodayColor = Theme.HasAppColor(UITheme.AppColor.Today);
+				var headerState = VisualStyleElement.Header.Item.Normal;
+
+				if (isToday && !hasTodayColor)
+					headerState = VisualStyleElement.Header.Item.Hot;
+
+				var renderer = new VisualStyleRenderer(headerState);
+				renderer.DrawBackground(g, rHeader);
+
+				if (isToday && hasTodayColor)
+				{
+					rHeader.X--;
+
+					using (var brush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.Today, 64)))
+						g.FillRectangle(brush, rHeader);
 				}
-				else
-                {
-                    using (SolidBrush brush = new SolidBrush(SystemColors.ButtonHighlight))
-                        g.FillRectangle(brush, rHeader);
-                }
-            }
-            else
-            {
-                if (VisualStyleRenderer.IsSupported)
-                {
-                    var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
-                    renderer.DrawBackground(g, rHeader);
-                }
-                else
-                {
-                    using (SolidBrush brush = new SolidBrush(SystemColors.ButtonFace))
-                        g.FillRectangle(brush, rHeader);
-                }
+			}
+			else // classic theme
+			{
+				rHeader.Y++;
+
+				var headerBrush = (isToday ? SystemBrushes.ButtonHighlight : SystemBrushes.ButtonFace);
+                g.FillRectangle(headerBrush, rHeader);
+
+				ControlPaint.DrawBorder3D(g, rHeader, Border3DStyle.Raised);
             }
 
-            if (VisualStyleRenderer.IsSupported)
-				g.DrawLine(SystemPens.ButtonFace, new Point(rHeader.Left, rHeader.Bottom), new Point(rHeader.Left, rHeader.Top));
-
+			// Header text
 			using (StringFormat format = new StringFormat())
             {
                 format.Alignment = StringAlignment.Center;
