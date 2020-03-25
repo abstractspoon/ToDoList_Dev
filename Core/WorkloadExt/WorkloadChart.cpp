@@ -92,6 +92,16 @@ int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	return 0;
 }
 
+int CWorkloadChart::CalcYScaleFontSize(BOOL bTitle) const
+{
+	return (bTitle ? (m_nFontPixelSize + 8) : m_nFontPixelSize);
+}
+
+int CWorkloadChart::CalcXScaleFontSize(BOOL bTitle) const
+{
+	return CalcYScaleFontSize(bTitle);
+}
+
 void CWorkloadChart::RebuildChart()
 {
 	// build the graph

@@ -55,6 +55,8 @@ protected:
 	// virtual overrides
 	int HitTest(const CPoint& ptClient) const;
 	CString GetTooltip(int) const;
+	int CalcXScaleFontSize(BOOL bTitle) const;
+	int CalcYScaleFontSize(BOOL bTitle) const;
 
 };
 

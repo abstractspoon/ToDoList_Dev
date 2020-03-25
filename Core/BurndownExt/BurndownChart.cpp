@@ -122,6 +122,16 @@ CGraphBase* CBurndownChart::GetGraph(BURNDOWN_GRAPH nGraph) const
 	return pGraph;
 }
 
+int CBurndownChart::CalcYScaleFontSize(BOOL bTitle) const
+{
+	return (bTitle ? (m_nFontPixelSize + 8) : m_nFontPixelSize);
+}
+
+int CBurndownChart::CalcXScaleFontSize(BOOL bTitle) const
+{
+	return CalcYScaleFontSize(bTitle);
+}
+
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 {
 	if (!IsValidGraph(nGraph))
