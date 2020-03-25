@@ -122,6 +122,9 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	if (bPaintBkgnd)
 		PaintBkGnd(dc);
 
+	if (m_rectData.Height() <= 0)
+		return;
+
 	// Recreate pens, etc
 	if (!m_penGrid.GetSafeHandle())
 		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
@@ -604,6 +607,9 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 	if (!nTicks && m_strYText.IsEmpty())
 		return false;
+
+	if (m_rectData.Height() < nTicks)
+		return false;
 	
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
 	CRect rTitle(m_rectYAxis);
@@ -616,23 +622,26 @@ bool CHMXChart::DrawYScale(CDC & dc)
 		CFont* pFontOld = dc.SelectObject(&font);
 
 		// nY is the size of a division
-		double nY = (m_nYMax - m_nYMin)/nTicks, nTemp1, nTemp2;
+		double nY = (m_nYMax - m_nYMin)/nTicks;
 		int nFontSize = CalcYScaleFontSize(FALSE);
-		CString sBuffer;
 
 		// draw text
 		for(int f=0; f<=nTicks; f++) 
 		{
-			nTemp1 = m_rectYAxis.bottom + nFontSize/2 - (nY*(f)  ) * m_rectData.Height()/(m_nYMax-m_nYMin);
-			nTemp2 = m_rectYAxis.bottom + nFontSize/2 - (nY*(f+1)) * m_rectData.Height()/(m_nYMax-m_nYMin);
+			CString sTick = GetYTickText(f, (m_nYMin + nY*f));
 
-			CRect rTemp(m_rectYAxis.left, (int)nTemp2, m_rectYAxis.right - 4, (int)nTemp1);
-			sBuffer.Format(_T("%g"), m_nYMin + nY*f);
+			if (!sTick.IsEmpty())
+			{
+				int nTop = m_rectYAxis.bottom + nFontSize / 2 - (int)((nY*(f + 1)) * m_rectData.Height() / (m_nYMax - m_nYMin));
+				int nBot = m_rectYAxis.bottom + nFontSize / 2 - (int)((nY*(f)) * m_rectData.Height() / (m_nYMax - m_nYMin));
+				ASSERT(nBot > nTop);
 
-			dc.DrawText(sBuffer, &rTemp, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+				CRect rTick(m_rectYAxis.left, (int)nTop, m_rectYAxis.right - 4, (int)nBot);
+				dc.DrawText(sTick, &rTick, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
 
-			int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sBuffer).cx);
-			rTitle.right = min(rTitle.right, nLabelLeft);
+				int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sTick).cx);
+				rTitle.right = min(rTitle.right, nLabelLeft);
+			}
 		}
 
 		dc.SelectObject(pFontOld);
@@ -645,8 +654,27 @@ bool CHMXChart::DrawYScale(CDC & dc)
 
 		CFont* pFontOld = dc.SelectObject(&font);
 
-		dc.SetTextAlign(TA_CENTER | TA_BASELINE);
-		dc.TextOut(rTitle.CenterPoint().x, rTitle.CenterPoint().y, m_strYText);
+		// Only draw if there is enough space
+		int nTitleExtent = dc.GetTextExtent(m_strYText).cx;
+
+		if (nTitleExtent > rTitle.Height())
+		{
+			rTitle.top = m_rectArea.top + 5;
+			rTitle.bottom = m_rectUsable.bottom;
+
+			if (nTitleExtent < rTitle.Height())
+			{
+				// Must use CDC::TextOut for rotated fonts
+				dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
+				dc.TextOut(rTitle.CenterPoint().x, rTitle.top, m_strYText);
+			}
+		}
+		else
+		{
+			// Must use CDC::TextOut for rotated fonts
+			dc.SetTextAlign(TA_BASELINE | TA_CENTER);
+			dc.TextOut(rTitle.CenterPoint().x, rTitle.CenterPoint().y, m_strYText);
+		}
 
 		dc.SelectObject(pFontOld);
 	}
@@ -654,6 +682,14 @@ bool CHMXChart::DrawYScale(CDC & dc)
 	dc.SetBkMode(nBkModeOld);
 
 	return true;
+}
+
+CString CHMXChart::GetYTickText(int /*nTick*/, double dValue) const
+{
+	CString sBuffer;
+	sBuffer.Format(_T("%g"), dValue);
+
+	return sBuffer;
 }
 
 //
@@ -1075,10 +1111,10 @@ bool CHMXChart::CalcDatas()
 
 	m_rectYAxis.top    = m_rectGraph.top;
 	m_rectYAxis.left   = m_rectGraph.left;
-	m_rectYAxis.bottom = m_rectGraph.top  + m_rectGraph.Height() - nAxisSize;
+	m_rectYAxis.bottom = m_rectGraph.bottom - nAxisSize;
 	m_rectYAxis.right  = m_rectGraph.left + nAxisSize;
 
-	m_rectXAxis.top    = m_rectGraph.top  + m_rectGraph.Height() - nAxisSize;
+	m_rectXAxis.top    = m_rectGraph.bottom - nAxisSize;
 	m_rectXAxis.left   = m_rectGraph.left + nAxisSize;
 	m_rectXAxis.bottom = m_rectGraph.bottom;
 	m_rectXAxis.right  = m_rectGraph.right;

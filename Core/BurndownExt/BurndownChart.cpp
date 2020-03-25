@@ -36,6 +36,11 @@ static int SortProc(const void* pV1, const void* pV2)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+
+// Fixed number of Y ticks
+const int NUM_Y_TICKS = 10;
+
+////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart
 
 CBurndownChart::CBurndownChart(const CStatsItemArray& data)
@@ -63,6 +68,7 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	//FileMisc::EnableLogging(TRUE);
 
 	GetDefaultGraphColors(m_mapGraphColors);
+	EnableFixedLabelFontSize(); // don't scale down as available size decreases
 }
 
 CBurndownChart::~CBurndownChart()
@@ -120,16 +126,6 @@ CGraphBase* CBurndownChart::GetGraph(BURNDOWN_GRAPH nGraph) const
 	m_mapGraphs.Lookup(nGraph, pGraph);
 
 	return pGraph;
-}
-
-int CBurndownChart::CalcYScaleFontSize(BOOL bTitle) const
-{
-	return (bTitle ? (m_nFontPixelSize + 8) : m_nFontPixelSize);
-}
-
-int CBurndownChart::CalcXScaleFontSize(BOOL bTitle) const
-{
-	return CalcYScaleFontSize(bTitle);
 }
 
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
@@ -323,7 +319,7 @@ void CBurndownChart::PreSubclassWindow()
 	SetBkGnd(GetSysColor(COLOR_WINDOW));
 	SetXLabelsAreTicks(true);
 	SetXLabelAngle(45);
-	SetNumYTicks(10);
+	SetNumYTicks(NUM_Y_TICKS);
 
 	VERIFY(InitTooltip(TRUE));
 }

@@ -85,7 +85,7 @@ const double MIN_SUBINTERVAL_HEIGHT = GraphicsMisc::ScaleByDPIFactor(5);
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChartEx
 
-CHMXChartEx::CHMXChartEx() : m_nLastTooltipHit(-1)
+CHMXChartEx::CHMXChartEx() : m_nLastTooltipHit(-1), m_bFixedLabelFontSize(FALSE)
 {
 }
 
@@ -321,3 +321,68 @@ void CHMXChartEx::HideLastHighlightedPoint()
 		m_nLastTooltipHit = -1;
 	}
 }
+
+void CHMXChartEx::EnableFixedLabelFontSize(BOOL bFixed)
+{
+	if (bFixed != m_bFixedLabelFontSize)
+	{
+		m_bFixedLabelFontSize = bFixed;
+
+		if (GetSafeHwnd())
+		{
+			CalcDatas();
+			Invalidate();
+		}
+	}
+}
+
+int CHMXChartEx::CalcYScaleFontSize(BOOL bTitle) const
+{
+	if (m_bFixedLabelFontSize)
+		return (bTitle ? (m_nFontPixelSize + 8) : m_nFontPixelSize);
+
+	// else
+	return CHMXChart::CalcYScaleFontSize(bTitle);
+}
+
+int CHMXChartEx::CalcXScaleFontSize(BOOL bTitle) const
+{
+	if (m_bFixedLabelFontSize)
+		return CalcYScaleFontSize(bTitle);
+
+	// else
+	return CHMXChart::CalcXScaleFontSize(bTitle);
+}
+
+CString CHMXChartEx::GetYTickText(int nTick, double dValue) const
+{
+	// Because we don't scale the label font we may need to drop-out
+	// labels when they don't fit but only in a controlled way
+	const int SPACING[] = { 10, 5, 2, 1 };
+	const int NUM_SPACING = (sizeof(SPACING) / sizeof(SPACING[0]));
+
+	int iSpacing = NUM_SPACING;
+	int nSingleTickHeight = (m_rectData.Height() / GetNumYTicks());
+
+	while (iSpacing--)
+	{
+		if ((nSingleTickHeight * SPACING[iSpacing]) > m_nFontPixelSize)
+			break;
+	}
+
+	// Omit zero if there is still not enough space
+	if (iSpacing < 0)
+	{
+		if (dValue == 0)
+			return _T("");
+
+		iSpacing = 0; // widest spacing
+	}
+
+	if ((nTick % SPACING[iSpacing]) != 0)
+		return _T("");
+
+	// else
+	return CHMXChart::GetYTickText(nTick, dValue);
+}
+

@@ -62,8 +62,6 @@ protected:
 	CString GetTooltip(int nHit) const;
 	int HitTest(const CPoint& ptClient) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd);
-	int CalcXScaleFontSize(BOOL bTitle) const;
-	int CalcYScaleFontSize(BOOL bTitle) const;
 
 };
 

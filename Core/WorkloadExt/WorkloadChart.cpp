@@ -31,6 +31,7 @@ CWorkloadChart::CWorkloadChart(const CStringArray& aAllocTo, const CMapAllocatio
 	m_dUnderloadValue(0.0)
 {
 	SetDatasetLineColor(0, COLOR_BLUE);
+	EnableFixedLabelFontSize(); // don't scale down as available size decreases
 }
 
 CWorkloadChart::~CWorkloadChart()
@@ -90,16 +91,6 @@ int CWorkloadChart::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	VERIFY(InitTooltip(FALSE));
 
 	return 0;
-}
-
-int CWorkloadChart::CalcYScaleFontSize(BOOL bTitle) const
-{
-	return (bTitle ? (m_nFontPixelSize + 8) : m_nFontPixelSize);
-}
-
-int CWorkloadChart::CalcXScaleFontSize(BOOL bTitle) const
-{
-	return CalcYScaleFontSize(bTitle);
 }
 
 void CWorkloadChart::RebuildChart()

@@ -33,9 +33,11 @@ public:
 
 	BOOL Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID);
 	void FilterToolTipMessage(MSG* pMsg);
+	void EnableFixedLabelFontSize(BOOL bFixed = TRUE);
 
 protected:
 	CToolTipCtrlEx m_tooltip;
+	BOOL m_bFixedLabelFontSize;
 
 	mutable int m_nLastTooltipHit;
 
@@ -64,6 +66,9 @@ protected:
 
 	BOOL HighlightDataPoint(int nIndex);
 	void HideLastHighlightedPoint();
+	int CalcXScaleFontSize(BOOL bTitle) const;
+	int CalcYScaleFontSize(BOOL bTitle) const;
+	CString GetYTickText(int nTick, double dValue) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
