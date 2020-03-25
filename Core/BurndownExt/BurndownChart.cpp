@@ -313,7 +313,7 @@ void CBurndownChart::PreSubclassWindow()
 	SetBkGnd(GetSysColor(COLOR_WINDOW));
 	SetXLabelsAreTicks(true);
 	SetXLabelAngle(45);
-	SetYTicks(10);
+	SetNumYTicks(10);
 
 	VERIFY(InitTooltip(TRUE));
 }

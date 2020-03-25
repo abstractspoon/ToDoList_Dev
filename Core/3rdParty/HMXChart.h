@@ -92,8 +92,8 @@ public:
 	virtual bool		SetRoundY( double nRound );
 	virtual double		GetRoundY() const;
 
-	virtual bool		SetYTicks( int nTicks );
-	virtual int			GetYTicks() const;
+	virtual bool		SetNumYTicks( int nTicks );
+	virtual int			GetNumYTicks() const;
 
 	// main title functions
 	virtual	bool		SetTitle( CString strTitle );
@@ -174,11 +174,11 @@ protected:
 	CStringArray	m_strarrScaleXLabel;					// x labels
 	int				m_nXLabelStep;							// x label step
 	double			m_nRoundY;								// y scale rounding
-	int				m_nYTicks;								// y ticks
+	int				m_nNumYTicks;							// y ticks
 	int				m_nXMax;								// max x value
 	double			m_nYMax;								// max y value
 	double			m_nYMin;								// min y value
-	CHMXDataset		m_datasets[HMX_MAX_DATASET];				// datasets
+	CHMXDataset		m_datasets[HMX_MAX_DATASET];			// datasets
 	int				m_nCountDataset;						// dataset counter
 	CString			m_strTitle;								// main title
 	CString			m_strYText;								// Y text

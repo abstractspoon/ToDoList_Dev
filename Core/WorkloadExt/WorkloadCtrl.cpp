@@ -149,7 +149,7 @@ int CWorkloadCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_barChart.SetBkGnd(GetSysColor(COLOR_WINDOW));
 	m_barChart.SetXLabelsAreTicks(true);
 	m_barChart.SetXLabelAngle(45);
-	m_barChart.SetYTicks(10);
+	m_barChart.SetNumYTicks(10);
 	
 	BuildTaskTreeColumns();
 	BuildListColumns();

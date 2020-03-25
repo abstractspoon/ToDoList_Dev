@@ -60,7 +60,7 @@ protected:
 
 protected:
 	BOOL InitTooltip(BOOL bMultiline);
-	int GetYSubTicks(double dInterval) const;
+	int GetNumYSubTicks(double dInterval) const;
 
 	BOOL HighlightDataPoint(int nIndex);
 	void HideLastHighlightedPoint();

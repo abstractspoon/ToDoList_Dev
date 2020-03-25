@@ -112,7 +112,7 @@ BOOL CHMXChartEx::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 	return CHMXChart::Create(NULL, NULL, dwStyle, rect, pParentWnd, nID);
 }
 
-int CHMXChartEx::GetYSubTicks(double dInterval) const
+int CHMXChartEx::GetNumYSubTicks(double dInterval) const
 {
 	if (dInterval != (int)dInterval)
 	{
@@ -128,7 +128,7 @@ int CHMXChartEx::GetYSubTicks(double dInterval) const
 	const int NUM_SUBTICKS = (sizeof(SUB_TICKS) / sizeof(SUB_TICKS[0]));
 
 	int nSubTick = NUM_SUBTICKS;
-	int nNumTicks = GetYTicks();
+	int nNumTicks = GetNumYTicks();
 
 	while (nSubTick--)
 	{
@@ -173,14 +173,14 @@ BOOL CHMXChartEx::InitTooltip(BOOL bMultiline)
 bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 {
 	double dInterval = HMXUtils::CalcYAxisInterval(m_nYMax, 10);
-	int nNumSubTicks = GetYSubTicks(dInterval);
+	int nNumSubTicks = GetNumYSubTicks(dInterval);
 
 	if (nNumSubTicks > 1)
 	{
 		CPen penSubGrid(PS_SOLID, 1, GraphicsMisc::Lighter(GetGridColor(), 0.6));
 		CPen* pPenOld = dc.SelectObject(&penSubGrid);
 
-		int nTotalTicks = (GetYTicks() * nNumSubTicks);
+		int nTotalTicks = (GetNumYTicks() * nNumSubTicks);
 		double nY = ((m_nYMax - m_nYMin) / nTotalTicks);
 
 		for (int f = 0; f <= nTotalTicks; f++)

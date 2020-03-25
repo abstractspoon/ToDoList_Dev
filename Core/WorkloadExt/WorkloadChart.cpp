@@ -113,7 +113,7 @@ void CWorkloadChart::RebuildChart()
 		if (dMax > 100)
 			nNumTicks = (int)((dMax / 10) + 1);
 
-		SetYTicks(nNumTicks);
+		SetNumYTicks(nNumTicks);
 		SetDatasetMax(0, (nNumTicks * 10));
 	}
 

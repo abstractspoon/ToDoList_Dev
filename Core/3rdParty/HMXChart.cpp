@@ -34,7 +34,7 @@ CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontPixelSize(-1)
 	m_strTitle = _T("");
 	m_strXText = _T("");
 	m_strYText = _T("");
-	m_nYTicks = 0;
+	m_nNumYTicks = 0;
 	m_nRoundY = 10;
 	m_nXMax = 0;
 	m_nYMin = 0;
@@ -361,7 +361,7 @@ bool CHMXChart::DrawAxes(CDC &dc)
 //
 bool CHMXChart::DrawHorzGridLines(CDC & dc)
 {
-	int nTicks = GetYTicks();
+	int nTicks = GetNumYTicks();
 	
 	if(!nTicks)
 		return false;
@@ -600,7 +600,7 @@ bool CHMXChart::DrawXScale(CDC & dc)
 //
 bool CHMXChart::DrawYScale(CDC & dc)
 {
-	int nTicks = GetYTicks();
+	int nTicks = GetNumYTicks();
 
 	if (!nTicks && m_strYText.IsEmpty())
 		return false;
@@ -1171,7 +1171,7 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 			}
 		}
 
-		if (m_nYTicks > 0)
+		if (m_nNumYTicks > 0)
 		{
 			CFont font;
 			VERIFY(CreateYAxisFont(FALSE, font));
@@ -1655,11 +1655,11 @@ CString CHMXChart::GetTitle() const
 //
 //		true if ok, else false
 //
-bool CHMXChart::SetYTicks(int nTicks)
+bool CHMXChart::SetNumYTicks(int nTicks)
 {
-	m_nYTicks = nTicks;
-	m_nYTicks = min(m_nYTicks, 100);
-	m_nYTicks = max(m_nYTicks, 0);
+	m_nNumYTicks = nTicks;
+	m_nNumYTicks = min(m_nNumYTicks, 100);
+	m_nNumYTicks = max(m_nNumYTicks, 0);
 
 	return true;
 }
@@ -1675,9 +1675,9 @@ bool CHMXChart::SetYTicks(int nTicks)
 //
 //		nTicks
 //
-int CHMXChart::GetYTicks() const
+int CHMXChart::GetNumYTicks() const
 {
-	return m_nYTicks;
+	return m_nNumYTicks;
 }
 
 //
