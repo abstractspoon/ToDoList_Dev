@@ -335,7 +335,12 @@ namespace DayViewUIExtension
 				CalendarItem taskItem = (appointment as CalendarItem);
 				bool longAppt = taskItem.IsLongAppt();
 
-				if (!longAppt)
+				if (longAppt)
+				{
+					rect.X++;
+					gripRect.X++;
+				}
+				else
 				{
 					if (taskItem.StartDate.TimeOfDay.TotalHours == 0.0)
 					{
