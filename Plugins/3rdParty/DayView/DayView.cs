@@ -55,7 +55,7 @@ namespace Calendar
         protected int dayHeadersHeight = 19;
         protected int appointmentGripWidth = 5;
         protected int allDayEventsHeaderHeight = 0;
-        protected int headerBorder = 2;
+        protected int headerBorder = 0;
         protected int longAppointmentSpacing = 2;
         
         static protected int minSlotHeight = 5;
@@ -1346,6 +1346,14 @@ namespace Calendar
             // Calculate visible rectangle
             Rectangle rectangle = new Rectangle(0, 0, this.Width - vscroll.Width, this.Height);
 
+            Rectangle headerRectangle = rectangle;
+            headerRectangle.X += hourLabelWidth + hourLabelIndent;
+            headerRectangle.Width -= (hourLabelWidth + hourLabelIndent);
+            headerRectangle.Height = dayHeadersHeight;
+
+            if (e.ClipRectangle.IntersectsWith(headerRectangle))
+                DrawDayHeaders(e, headerRectangle);
+
             Rectangle daysRectangle = rectangle;
             daysRectangle.X += hourLabelWidth + hourLabelIndent;
             daysRectangle.Y += this.HeaderHeight;
@@ -1361,15 +1369,6 @@ namespace Calendar
             hourLabelRectangle.Y += this.HeaderHeight;
 
             DrawHourLabels(e, hourLabelRectangle);
-
-            Rectangle headerRectangle = rectangle;
-
-            headerRectangle.X += hourLabelWidth + hourLabelIndent;
-            headerRectangle.Width -= (hourLabelWidth + hourLabelIndent);
-            headerRectangle.Height = dayHeadersHeight;
-
-            if (e.ClipRectangle.IntersectsWith(headerRectangle))
-                DrawDayHeaders(e, headerRectangle);
 
             Rectangle scrollrect = rectangle;
 
@@ -1419,7 +1418,7 @@ namespace Calendar
 
 		protected void DrawDayHeaders(PaintEventArgs e, Rectangle rect)
         {
-            int dayWidth = rect.Width / daysToShow;
+            int dayWidth = (rect.Width / daysToShow);
 
             // one day header rectangle
             Rectangle dayHeaderRectangle = new Rectangle(rect.Left, rect.Top, dayWidth, rect.Height);

@@ -217,15 +217,13 @@ namespace DayViewUIExtension
                 throw new ArgumentNullException("g");
 
             System.Drawing.Rectangle rHeader = rect;
-            rHeader.Height += 2;
+			rHeader.Width++;
 
             if (date.Date.Equals(DateTime.Now.Date))
             {
-                rHeader.Width += 1;
-
                 if (VisualStyleRenderer.IsSupported)
                 {
-					if (Theme.HasAppColor(UITheme.AppColor.Today) && (date.Date == DateTime.Now.Date))
+					if (Theme.HasAppColor(UITheme.AppColor.Today))
 					{
 						var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
 						renderer.DrawBackground(g, rHeader);
@@ -247,8 +245,6 @@ namespace DayViewUIExtension
             }
             else
             {
-                rHeader.X += 1;
-
                 if (VisualStyleRenderer.IsSupported)
                 {
                     var renderer = new VisualStyleRenderer(VisualStyleElement.Header.Item.Normal);
@@ -261,7 +257,10 @@ namespace DayViewUIExtension
                 }
             }
 
-            using (StringFormat format = new StringFormat())
+            if (VisualStyleRenderer.IsSupported)
+				g.DrawLine(SystemPens.ButtonFace, new Point(rHeader.Left, rHeader.Bottom), new Point(rHeader.Left, rHeader.Top));
+
+			using (StringFormat format = new StringFormat())
             {
                 format.Alignment = StringAlignment.Center;
                 format.FormatFlags = StringFormatFlags.NoWrap;
