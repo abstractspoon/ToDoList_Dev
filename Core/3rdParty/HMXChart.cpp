@@ -490,17 +490,17 @@ int CHMXChart::CalcYScaleFontSize(BOOL bTitle) const
 	if (nSize == -1)
 		nSize = nDefSize;
 
-	if (!bTitle)
-	{
-		nSize = min(nSize, (m_rectYAxis.Height() / GetYTicks()));
-	}
-	else
+	if (bTitle)
 	{
 		nSize += min(8, nSize); // bit bigger
 
 		// also check length of scale text
 		if (!m_strYText.IsEmpty())
 			nSize = min(nSize, 2 * (m_rectYAxis.Height() / m_strYText.GetLength()));
+	}
+	else
+	{
+		nSize = min(nSize, (m_rectYAxis.Height() / GetNumYTicks()));
 	}
 
 	return nSize;
