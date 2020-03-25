@@ -53,7 +53,6 @@ namespace DayViewUIExtension
             hourLabelWidth = DPIScaling.Scale(hourLabelWidth);
             hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
             dayHeadersHeight = DPIScaling.Scale(dayHeadersHeight);
-            headerBorder = DPIScaling.Scale(headerBorder);
             longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
 			appointmentGripWidth = 1; // to match app styling
 

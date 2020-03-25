@@ -55,7 +55,6 @@ namespace Calendar
         protected int dayHeadersHeight = 19;
         protected int appointmentGripWidth = 5;
         protected int allDayEventsHeaderHeight = 0;
-        protected int headerBorder = 0;
         protected int longAppointmentSpacing = 2;
         
         static protected int minSlotHeight = 5;
@@ -740,7 +739,7 @@ namespace Calendar
         {
             get
             {
-                return dayHeadersHeight + allDayEventsHeaderHeight + headerBorder;
+                return dayHeadersHeight + allDayEventsHeaderHeight;
             }
         }
 
