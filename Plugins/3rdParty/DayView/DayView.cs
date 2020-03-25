@@ -624,7 +624,7 @@ namespace Calendar
             set { lunchEnd = value; Invalidate(); }
         }
 
-        private int slotsPerHour = 4;
+        private int slotsPerHour = 4; // 15 min/slot
 
         [System.ComponentModel.DefaultValue(4)]
         public int SlotsPerHour
@@ -648,12 +648,12 @@ namespace Calendar
 		{
 			switch (numSlots)
 			{
-				case 1: return true;
-				case 2: return true;
-				case 3: return true;
-				case 4: return true;
-				case 6: return true;
-				case 12: return true;
+				case 1: return true;	// 60 min/slot
+				case 2: return true; 	// 30 min/slot
+				case 3: return true; 	// 20 min/slot
+				case 4: return true; 	// 15 min/slot
+				case 6: return true; 	// 10 min/slot
+				case 12: return true;   //  5 min/slot
 			}
 
 			return false;
@@ -1610,19 +1610,20 @@ namespace Calendar
 
             if (appointments != null)
             {
-                HalfHourLayout[] layout = GetMaxParallelAppointments(appointments, this.slotsPerHour);
+                SlotLayout[] layout = GetMaxParallelAppointments(appointments, this.slotsPerHour);
 
                 List<Appointment> drawnItems = new List<Appointment>();
 
-                for (int halfHour = 0; halfHour < 24 * slotsPerHour; halfHour++)
+                for (int slot = 0; slot < (24 * slotsPerHour); slot++)
                 {
-                    HalfHourLayout hourLayout = layout[halfHour];
+                    SlotLayout hourLayout = layout[slot];
 
-                    if ((hourLayout != null) && (hourLayout.Count > 0))
+                    if ((hourLayout != null) && (hourLayout.ApptCount > 0))
                     {
-                        for (int appIndex = 0; appIndex < hourLayout.Count; appIndex++)
-                        {
-                            Appointment appointment = hourLayout.Appointments[appIndex];
+                        for (int apptIndex = 0; apptIndex < hourLayout.ApptCount; apptIndex++)
+						//foreach (var apoointment in hourLayout.Appointments)
+						{
+							Appointment appointment = hourLayout.Appointments[apptIndex];
 
                             if (appointment.Group != group)
                                 continue;
@@ -1630,9 +1631,9 @@ namespace Calendar
                             if (drawnItems.IndexOf(appointment) < 0)
                             {
                                 Rectangle apptRect = rect;
-                                apptRect.Width = rect.Width / appointment.conflictCount;
+                                apptRect.Width = rect.Width / appointment.coincidentCount;
 
-                                int lastX = 0, leftOverX = (rect.Width - (appointment.conflictCount * apptRect.Width));
+                                int lastX = 0, leftOverX = (rect.Width - (appointment.coincidentCount * apptRect.Width));
                                 AppointmentView view;
 
                                 foreach (Appointment app in hourLayout.Appointments)
@@ -1759,60 +1760,59 @@ namespace Calendar
             }
         }
 
-        private static HalfHourLayout[] GetMaxParallelAppointments(List<Appointment> appointments, int slotsPerHour)
+        private static SlotLayout[] GetMaxParallelAppointments(List<Appointment> appointments, int slotsPerHour)
         {
-            HalfHourLayout[] appLayouts = new HalfHourLayout[24 * 20];
+            SlotLayout[] appLayouts = new SlotLayout[24 * 20];
 
+			// Reset the count of coincident appointements for each appointment
             foreach (Appointment appointment in appointments)
             {
-                appointment.conflictCount = 1;
+                appointment.coincidentCount = 1;
             }
 
+			// Recalculate the coincident appointments
             foreach (Appointment appointment in appointments)
             {
-                int firstHalfHour = appointment.StartDate.Hour * slotsPerHour + (appointment.StartDate.Minute / (60 / slotsPerHour));
-                int lastHalfHour = appointment.EndDate.Hour * slotsPerHour + (appointment.EndDate.Minute / (60 / slotsPerHour));
+                int firstApptSlot = appointment.StartDate.Hour * slotsPerHour + (appointment.StartDate.Minute / (60 / slotsPerHour));
+                int lastApptSlot = appointment.EndDate.Hour * slotsPerHour + (appointment.EndDate.Minute / (60 / slotsPerHour));
 
                 // Added to allow small parts been displayed
-                if (lastHalfHour == firstHalfHour)
+                if (lastApptSlot == firstApptSlot)
                 {
-                    if (lastHalfHour < 24 * slotsPerHour)
-                        lastHalfHour++;
+                    if (lastApptSlot < 24 * slotsPerHour)
+                        lastApptSlot++;
                     else
-                        firstHalfHour--;
+                        firstApptSlot--;
                 }
 
-                for (int halfHour = firstHalfHour; halfHour < lastHalfHour; halfHour++)
+				// For each slot in the current appointment, find all other
+				// appointments that coincide at this slot position
+                for (int halfHour = firstApptSlot; halfHour < lastApptSlot; halfHour++)
                 {
-                    HalfHourLayout layout = appLayouts[halfHour];
+                    SlotLayout layout = appLayouts[halfHour];
 
                     if (layout == null)
                     {
-                        layout = new HalfHourLayout();
-                        layout.Appointments = new Appointment[20];
+                        layout = new SlotLayout();
                         appLayouts[halfHour] = layout;
                     }
 
-                    layout.Appointments[layout.Count] = appointment;
-
-                    layout.Count++;
-
-                    List<string> groups = new List<string>();
+                    layout.Appointments[layout.ApptCount++] = appointment;
 
                     foreach (Appointment app2 in layout.Appointments)
                     {
-                        if ((app2 != null) && (!groups.Contains(app2.Group)))
-                            groups.Add(app2.Group);
+                        if ((app2 != null) && (!layout.Groups.Contains(app2.Group)))
+							layout.Groups.Add(app2.Group);
                     }
 
-                    layout.Groups = groups;
-
-                    // update conflicts
+                    // update coinciding count
                     foreach (Appointment app2 in layout.Appointments)
                     {
                         if ((app2 != null) && (app2.Group == appointment.Group))
-                            if (app2.conflictCount < layout.Count)
-                                app2.conflictCount = layout.Count - (layout.Groups.Count - 1);
+						{
+                            if (app2.coincidentCount < layout.ApptCount)
+                                app2.coincidentCount = layout.ApptCount - (layout.Groups.Count - 1);
+						}
                     }
                 }
             }
@@ -1976,11 +1976,17 @@ namespace Calendar
             hscroll.Height = dayHeadersHeight;
         }
 
-        class HalfHourLayout
+        class SlotLayout
         {
-            public int Count;
-            public List<string> Groups;
-            public Appointment[] Appointments;
+			public SlotLayout(int maxAppts = 20)
+			{
+				Groups = new List<string>();
+				Appointments = new Appointment[maxAppts];
+			}
+
+            public int ApptCount;
+            public List<string> Groups { get; }
+            public Appointment[] Appointments { get; }
         }
 
         internal class AppointmentView
