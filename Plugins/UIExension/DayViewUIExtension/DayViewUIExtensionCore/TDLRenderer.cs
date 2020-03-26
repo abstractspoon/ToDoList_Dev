@@ -335,22 +335,6 @@ namespace DayViewUIExtension
 				CalendarItem taskItem = (appointment as CalendarItem);
 				bool longAppt = taskItem.IsLongAppt();
 
-				if (longAppt)
-				{
-					rect.X++;
-					gripRect.X++;
-				}
-				else
-				{
-					if (taskItem.StartDate.TimeOfDay.TotalHours == 0.0)
-					{
-						rect.Y++;
-						rect.Height--;
-					}
-
-					rect.Width--;
-				}
-
 				// Recalculate colours
 				Color textColor = taskItem.TaskTextColor;
 				Color borderColor = taskItem.TaskTextColor;
@@ -372,104 +356,108 @@ namespace DayViewUIExtension
 					}
 				}
 
+                // Draw the background of the appointment
+                g.SmoothingMode = SmoothingMode.None;
+
+                if (isSelected)
+                {
+                    if (longAppt)
+                        rect.Height++;
+                    else
+                        rect.Width++;
+
+                    UIExtension.SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height, false); // opaque
+                }
+                else
+                {
+                    using (SolidBrush brush = new SolidBrush(fillColor))
+                        g.FillRectangle(brush, rect);
+
+                    if (taskItem.DrawBorder)
+                    {
+                        if (!longAppt)
+                            rect.Height--; // drawing with pen adds 1 to height
+
+                        using (Pen pen = new Pen(borderColor, 1))
+                            g.DrawRectangle(pen, rect);
+                    }
+                }
+
+                // Draw appointment icon
+                bool hasIcon = false;
+                taskItem.IconRect = Rectangle.Empty;
+
+                if (TaskHasIcon(taskItem))
+                {
+                    Rectangle rectIcon;
+                    int imageSize = DPIScaling.Scale(16);
+
+                    if (taskItem.IsLongAppt())
+                    {
+                        int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
+                        rectIcon = new Rectangle((rect.Left + TextPadding), (yCentre - (imageSize / 2)), imageSize, imageSize);
+                    }
+                    else
+                    {
+                        rectIcon = new Rectangle(rect.Left + TextPadding, rect.Top + TextPadding, imageSize, imageSize);
+                    }
+
+                    if (g.IsVisible(rectIcon) && m_TaskIcons.Get(taskItem.Id))
+                    {
+                        if (longAppt)
+                        {
+                            rectIcon.X = (gripRect.Right + TextPadding);
+                        }
+                        else
+                        {
+                            gripRect.Y += (imageSize + TextPadding);
+                            gripRect.Height -= (imageSize + TextPadding);
+                        }
+
+                        var clipRgn = g.Clip;
+
+                        if (rect.Bottom < (rectIcon.Y + imageSize))
+                            g.Clip = new Region(RectangleF.Intersect(rect, g.ClipBounds));
+
+                        m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
+
+                        g.Clip = clipRgn;
+
+                        hasIcon = true;
+                        taskItem.IconRect = rectIcon;
+
+                        rect.Width -= (rectIcon.Right - rect.Left);
+                        rect.X = rectIcon.Right;
+                    }
+                }
+
+                // Draw gripper bar
+                if (gripRect.Width > 0)
+                {
+                    using (SolidBrush brush = new SolidBrush(barColor))
+                        g.FillRectangle(brush, gripRect);
+
+                    if (!longAppt)
+                        gripRect.Height--; // drawing with pen adds 1 to height
+
+                    // Draw gripper border
+                    using (Pen pen = new Pen(DrawingColor.AdjustLighting(barColor, -0.5f, true), 1))
+                        g.DrawRectangle(pen, gripRect);
+
+                    if (!hasIcon)
+                    {
+                        rect.X = gripRect.Right;
+                        rect.Width -= (gripRect.Width + (TextPadding * 2));
+                    }
+                }
+
+                // draw appointment text
                 using (StringFormat format = new StringFormat())
                 {
                     format.Alignment = StringAlignment.Near;
                     format.LineAlignment = (longAppt ? StringAlignment.Center : StringAlignment.Near);
 
-                    // Draw the background of the appointment
-					if (isSelected)
-					{
-						// Infamous GDI+ off-by-one bug
-						if (!longAppt)
-							rect.Height++;
-
-                        UIExtension.SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height, false); // opaque
-					}
-					else
-					{
-						// Infamous GDI+ off-by-one bug
-						rect.Width--;
-
-						using (SolidBrush brush = new SolidBrush(fillColor))
-							g.FillRectangle(brush, rect);
-
-						if (taskItem.DrawBorder)
-						{
-							using (Pen pen = new Pen(borderColor, 1))
-								g.DrawRectangle(pen, rect);
-						}
-					}
-
-					// Draw appointment icon
-					bool hasIcon = false;
-                    taskItem.IconRect = Rectangle.Empty;
-
-                    if (TaskHasIcon(taskItem))
-                    {
-						Rectangle rectIcon;
-                        int imageSize = DPIScaling.Scale(16);
-                        
-						if (taskItem.IsLongAppt())
-						{
-							int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
-                            rectIcon = new Rectangle((rect.Left + TextPadding), (yCentre - (imageSize / 2)), imageSize, imageSize);
-						}
-						else
-						{
-                            rectIcon = new Rectangle(rect.Left + TextPadding, rect.Top + TextPadding, imageSize, imageSize);
-						}
-
-                        if (g.IsVisible(rectIcon) && m_TaskIcons.Get(taskItem.Id))
-                        {
-							if (longAppt)
-							{
-								rectIcon.X = (gripRect.Right + TextPadding);
-							}
-							else
-							{
-                                gripRect.Y += (imageSize + TextPadding);
-                                gripRect.Height -= (imageSize + TextPadding);
-							}
-
-							var clipRgn = g.Clip;
-
-							if (rect.Bottom < (rectIcon.Y + imageSize))
-								g.Clip = new Region(RectangleF.Intersect(rect, g.ClipBounds));
-
-							m_TaskIcons.Draw(g, rectIcon.X, rectIcon.Y);
-
-							g.Clip = clipRgn;
-							
-                            hasIcon = true;
-                            taskItem.IconRect = rectIcon;
-
-							rect.Width -= (rectIcon.Right - rect.Left);
-							rect.X = rectIcon.Right;
-
-
-						}
-                    }
-
-                    // Draw gripper bar
-					if (gripRect.Width > 0)
-					{
-						using (SolidBrush brush = new SolidBrush(barColor))
-							g.FillRectangle(brush, gripRect);
-
-						// Draw gripper border
-						using (Pen pen = new Pen(DrawingColor.AdjustLighting(barColor, -0.5f, true), 1))
-							g.DrawRectangle(pen, gripRect);
-
-						if (!hasIcon)
-						{
-							rect.X = gripRect.Right;
-							rect.Width -= (gripRect.Width + (TextPadding * 2));
-						}
-					}
-
-					// draw appointment text
-					rect.Y += 3;
+                    rect.Y += 3;
 
 					if (longAppt)
 						rect.Height = m_BaseFont.Height;

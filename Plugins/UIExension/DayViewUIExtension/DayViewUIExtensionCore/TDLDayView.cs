@@ -746,21 +746,44 @@ namespace DayViewUIExtension
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
 
-			// If the start date precedes the start of the week then extend the
-			// draw rect to the left so the edge is clipped and likewise for the right.
-			if (appointment.StartDate < StartDate)
-			{
-                rect.X -= 4;
-                rect.Width += 4;
+            // If the start date precedes the start of the week then extend the
+            // draw rect to the left so the edge is clipped and likewise for the right.
+            CalendarItem taskItem = (appointment as CalendarItem);
+            bool longAppt = taskItem.IsLongAppt();
 
-				gripRect.X = rect.X;
-				gripRect.Width = 0;
-			}
+            if (longAppt)
+            {
+                if (appointment.StartDate < StartDate)
+                {
+                    rect.X -= 4;
+                    rect.Width += 4;
 
-			if (appointment.EndDate >= EndDate)
-			{
-				rect.Width += 5;
-			}
+                    gripRect.X = rect.X;
+                    gripRect.Width = 0;
+                }
+                else if (appointment.StartDate > StartDate)
+                {
+                    rect.X++;
+                    rect.Width--;
+
+                    gripRect.X++;
+                }
+
+                if (appointment.EndDate >= EndDate)
+                {
+                    rect.Width += 5;
+                }
+            }
+            else // day appointment
+            {
+                if (taskItem.StartDate.TimeOfDay.TotalHours == 0.0)
+                {
+                    rect.Y++;
+                    rect.Height--;
+                }
+
+                rect.Width -= 2;
+            }
 			
 			m_Renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
 		}
