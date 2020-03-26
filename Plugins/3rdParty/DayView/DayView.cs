@@ -4,6 +4,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Globalization;
+using System.Linq;
 
 namespace Calendar
 {
@@ -54,9 +55,13 @@ namespace Calendar
         protected int hourLabelIndent = 2;
         protected int dayHeadersHeight = 19;
         protected int appointmentGripWidth = 5;
+        protected int dayGripWidth = 5;
         protected int allDayEventsHeaderHeight = 0;
         protected int longAppointmentSpacing = 2;
-        
+        protected int appointmentSpacing = 1;
+        protected int groupSpacing = 1;
+        protected int daySpacing = 1;
+
         static protected int minSlotHeight = 5;
 
         public enum AppHeightDrawMode
@@ -1524,7 +1529,7 @@ namespace Calendar
 
 		protected void DrawDayGripper(PaintEventArgs e, Rectangle rect)
 		{
-			renderer.DrawDayGripper(e.Graphics, rect, appointmentGripWidth);
+			renderer.DrawDayGripper(e.Graphics, rect, dayGripWidth);
 		}
 
 		protected void DrawDayAppointments(PaintEventArgs e, Rectangle rect, DateTime time)
@@ -1539,20 +1544,26 @@ namespace Calendar
 					if (!groups.Contains(app.Group))
 						groups.Add(app.Group);
 
-				Rectangle rect2 = rect;
+				rect.X += (dayGripWidth + daySpacing);
+				rect.Width -= (dayGripWidth + daySpacing);
 
-				rect2.X += (appointmentGripWidth + 1); // 1 pixel spacer
-				rect2.Width -= (appointmentGripWidth + 1);
+                int numGroups = groups.Count;
+                int groupWidth = (rect.Width / numGroups);
+                int leftOverWidth = (rect.Width - (numGroups * groupWidth));
 
-				rect2.Width = (rect2.Width / groups.Count);
+				Rectangle dayRect = rect;
+				dayRect.Width = groupWidth - ((numGroups > 1) ? groupSpacing : 0);
 
 				groups.Sort();
 
-				foreach (string group in groups)
+				for (int group = 0; group < numGroups; group++)
 				{
-					DrawAppointments(e, rect2, time, group);
+                    // Add left-over width to last column
+                    if (group == (numGroups - 1))
+                        dayRect.Width += leftOverWidth;
 
-					rect2.X += rect2.Width;
+					DrawDayGroupAppointments(e, dayRect, time, groups[group]);
+					dayRect.X += groupWidth;
 				}
 			}
 		}
@@ -1600,81 +1611,50 @@ namespace Calendar
             return false;
         }
 
-        private void DrawAppointments(PaintEventArgs e, Rectangle rect, DateTime time, string group)
+        private void DrawDayGroupAppointments(PaintEventArgs e, Rectangle rect, DateTime time, string group)
         {
-            DateTime timeStart = time.Date;
-            DateTime timeEnd = timeStart.AddHours(24);
-            timeEnd = timeEnd.AddSeconds(-1);
-
             AppointmentList appointments = (AppointmentList)cachedAppointments[time.Day];
 
-            if (appointments != null)
+            if (appointments == null)
+                return;
+
+            var groupAppts = new AppointmentList(appointments.Where(appt => (appt.Group == group)));
+
+            if ((groupAppts == null) || (groupAppts.Count() == 0))
+                return;
+
+            int numLayers = RecalcAppointmentLayers(groupAppts);
+
+            if (numLayers == 0)
+                return;
+
+            int layerWidth = (rect.Width / numLayers);
+            int leftOverWidth = (rect.Width - (layerWidth * numLayers));
+
+            foreach (var appointment in groupAppts)
             {
-                SlotLayout[] layout = GetMaxParallelAppointments(appointments, this.slotsPerHour);
+                Rectangle apptRect = rect;
+                apptRect.X += (appointment.Layer * layerWidth);
+                apptRect.Width = (layerWidth - ((numLayers > 1) ? appointmentSpacing : 0));
 
-                // Draw top-down
-                List<Appointment> drawnItems = new List<Appointment>();
+                // Last column picks up the slack
+                if (appointment.Layer == (numLayers - 1))
+                    apptRect.Width += leftOverWidth;
 
-                for (int slot = 0; slot < (24 * slotsPerHour); slot++)
-                {
-                    SlotLayout hourLayout = layout[slot];
+                DateTime apptStart, apptEnd;
+                GetAppointmentDrawTimes(appointment, out apptStart, out apptEnd);
 
-                    if ((hourLayout != null) && (hourLayout.ApptCount > 0))
-                    {
-                        for (int apptIndex = 0; apptIndex < hourLayout.ApptCount; apptIndex++)
-						{
-							Appointment appointment = hourLayout.Appointments[apptIndex];
+                apptRect = GetHourRangeRectangle(apptStart, apptEnd, apptRect);
+                appointmentViews[appointment] = new AppointmentView(appointment, apptRect);
 
-                            if (appointment.Group != group)
-                                continue;
+                if (this.DrawAllAppBorder)
+                    appointment.DrawBorder = true;
 
-                            if (drawnItems.Contains(appointment))
-                                continue;
+                Rectangle gripRect = GetHourRangeRectangle(appointment.StartDate, appointment.EndDate, apptRect);
+                gripRect.Width = appointmentGripWidth;
 
-                            Rectangle apptRect = rect;
-                            apptRect.Width = rect.Width / appointment.coincidentCount;
-
-                            int lastX = 0, leftOverX = (rect.Width - (appointment.coincidentCount * apptRect.Width));
-                            AppointmentView view;
-
-                            foreach (Appointment app in hourLayout.Appointments)
-                            {
-                                if ((app != null) && (app.Group == appointment.Group) && (appointmentViews.ContainsKey(app)))
-                                {
-                                    view = appointmentViews[app];
-
-                                    if (lastX < view.Rectangle.Right)
-                                        lastX = view.Rectangle.Right;
-                                }
-                            }
-
-                            if ((lastX + apptRect.Width) > rect.Right)
-                                lastX = 0;
-
-                            if (lastX > 0)
-                                apptRect.X = lastX;
-                            else
-                                apptRect.Width += leftOverX;
-
-                            DateTime apptStart, apptEnd;
-                            GetAppointmentDrawTimes(appointment, out apptStart, out apptEnd);
-
-                            apptRect = GetHourRangeRectangle(apptStart, apptEnd, apptRect);
-                            appointmentViews[appointment] = new AppointmentView(appointment, apptRect);
-                            
-                            if (this.DrawAllAppBorder)
-                                appointment.DrawBorder = true;
-
-                            Rectangle gripRect = GetHourRangeRectangle(appointment.StartDate, appointment.EndDate, apptRect);
-                            gripRect.Width = appointmentGripWidth;
-
-                            bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
-                            DrawAppointment(e.Graphics, apptRect, appointment, isSelected, gripRect);
-
-                            drawnItems.Add(appointment);
-                        }
-                    }
-                }
+                bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
+                DrawAppointment(e.Graphics, apptRect, appointment, isSelected, gripRect);
             }
         }
 
@@ -1748,66 +1728,6 @@ namespace Calendar
             }
         }
 
-        private static SlotLayout[] GetMaxParallelAppointments(List<Appointment> appointments, int slotsPerHour)
-        {
-            SlotLayout[] appLayouts = new SlotLayout[24 * 20];
-
-			// Reset the count of coincident appointements for each appointment
-            foreach (Appointment appointment in appointments)
-            {
-                appointment.coincidentCount = 1;
-            }
-
-			// Recalculate the coincident appointments
-            foreach (Appointment appointment in appointments)
-            {
-                int firstApptSlot = appointment.StartDate.Hour * slotsPerHour + (appointment.StartDate.Minute / (60 / slotsPerHour));
-                int lastApptSlot = appointment.EndDate.Hour * slotsPerHour + (appointment.EndDate.Minute / (60 / slotsPerHour));
-
-                // Added to allow small parts been displayed
-                if (lastApptSlot == firstApptSlot)
-                {
-                    if (lastApptSlot < 24 * slotsPerHour)
-                        lastApptSlot++;
-                    else
-                        firstApptSlot--;
-                }
-
-				// For each slot in the current appointment, find all other
-				// appointments that coincide at this slot position
-                for (int slot = firstApptSlot; slot < lastApptSlot; slot++)
-                {
-                    SlotLayout layout = appLayouts[slot];
-
-                    if (layout == null)
-                    {
-                        layout = new SlotLayout();
-                        appLayouts[slot] = layout;
-                    }
-
-                    layout.Appointments[layout.ApptCount++] = appointment;
-
-                    foreach (Appointment app2 in layout.Appointments)
-                    {
-                        if ((app2 != null) && (!layout.Groups.Contains(app2.Group)))
-							layout.Groups.Add(app2.Group);
-                    }
-
-                    // update coinciding count
-                    foreach (Appointment app2 in layout.Appointments)
-                    {
-                        if ((app2 != null) && (app2.Group == appointment.Group))
-						{
-                            if (app2.coincidentCount < layout.ApptCount)
-                                app2.coincidentCount = layout.ApptCount - (layout.Groups.Count - 1);
-						}
-                    }
-                }
-            }
-
-            return appLayouts;
-        }
-
         private void DrawDays(PaintEventArgs e, Rectangle rect)
         {
             DrawLongAppointments(e.Graphics, rect);
@@ -1839,117 +1759,129 @@ namespace Calendar
             }
         }
 
-        private void DrawLongAppointments(Graphics g, Rectangle rect)
+        private int RecalcAppointmentLayers(AppointmentList appointments)
         {
-            AppointmentList longAppointments = (AppointmentList)cachedAppointments[-1];
-            AppointmentList drawnLongApps = new AppointmentList();
+            if ((appointments == null) || (appointments.Count == 0))
+                return 0;
 
-            int y = dayHeadersHeight;
-            bool intersect = false;
-
+            AppointmentList processed = new AppointmentList();
             List<int> layers = new List<int>();
 
-			int dayWidth = rect.Width / daysToShow;
-			longAppointmentViews.Clear();
-
-            if (longAppointments != null)
+            foreach (Appointment appointment in appointments)
             {
-                foreach (Appointment appointment in longAppointments)
+                appointment.Layer = 0;
+
+                if (processed.Count != 0)
                 {
-                    appointment.Layer = 0;
+                    bool intersect = false;
 
-                    if (drawnLongApps.Count != 0)
+                    foreach (Appointment appt in processed)
                     {
-                        foreach (Appointment app in drawnLongApps)
-                            if (!layers.Contains(app.Layer))
-                                layers.Add(app.Layer);
-
-                        foreach (int lay in layers)
-                        {
-                            foreach (Appointment app in drawnLongApps)
-                            {
-								if (app.Layer == lay)
-								{
-									if (appointment.StartDate >= app.EndDate || appointment.EndDate <= app.StartDate)
-									{
-										intersect = false;
-									}
-									else
-									{
-										intersect = true;
-										break;
-									}
-								}
-
-                                appointment.Layer = lay;
-                            }
-
-                            if (!intersect)
-                                break;
-                        }
-
-                        if (intersect)
-                            appointment.Layer = layers.Count;
+                        if (!layers.Contains(appt.Layer))
+                            layers.Add(appt.Layer);
                     }
 
-                    drawnLongApps.Add(appointment); // changed by Gimlei
+                    foreach (int lay in layers)
+                    {
+                        foreach (Appointment app in processed)
+                        {
+                            if (app.Layer == lay)
+                            {
+                                if (appointment.StartDate >= app.EndDate || appointment.EndDate <= app.StartDate)
+                                {
+                                    intersect = false;
+                                }
+                                else
+                                {
+                                    intersect = true;
+                                    break;
+                                }
+                            }
+
+                            appointment.Layer = lay;
+                        }
+
+                        if (!intersect)
+                            break;
+                    }
+
+                    if (intersect)
+                        appointment.Layer = layers.Count;
                 }
 
-                foreach (Appointment app in drawnLongApps)
-                    if (!layers.Contains(app.Layer))
-                        layers.Add(app.Layer);
-
-				allDayEventsHeaderHeight = ((layers.Count * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
-
-                Rectangle backRectangle = rect;
-                backRectangle.Y = y;
-                backRectangle.Height = allDayEventsHeaderHeight;
-
-                renderer.DrawAllDayBackground(g, backRectangle);
-				g.SetClip(backRectangle);
-
-				var endOfLastDay = EndDate.AddSeconds(-1);
-
-                foreach (Appointment appointment in longAppointments)
-                {
-                    Rectangle appointmenRect = rect;
-
-                    double startDay = (appointment.StartDate - startDate).TotalDays;
-                    int startPos = (rect.X + (int)(startDay * dayWidth));
-
-					if (startPos <= rect.Left)
-						startPos = (rect.Left + 2);
-
-					double endDay = (appointment.EndDate - startDate).TotalDays;
-                    int endPos = (rect.X + (int)(endDay * dayWidth));
-					
-					if ((endPos >= rect.Right) || (appointment.EndDate >= endOfLastDay))
-						endPos = (rect.Right - 1);
-
-                    appointmenRect.X = startPos;
-                    appointmenRect.Width = (endPos - startPos);
-
-					appointmenRect.Y = y + (appointment.Layer * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing; // changed by Gimlei
-                    appointmenRect.Height = longAppointmentHeight;
-
-                    longAppointmentViews[appointment] = new AppointmentView(appointment, appointmenRect);
-
-                    Rectangle gripRect = appointmenRect;
-                    gripRect.Width = appointmentGripWidth;
-
-                    bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
-                    DrawAppointment(g, appointmenRect, appointment, isSelected, gripRect);
-                }
-
-                // Draw a vertical line to close off the long appointments on the left
-                using (Pen m_Pen = new Pen(Color.DarkGray))
-                    g.DrawLine(m_Pen, backRectangle.Left, backRectangle.Top, backRectangle.Left, rect.Bottom);
-
-				g.SetClip(rect);
+                processed.Add(appointment);
             }
+
+            foreach (Appointment app in processed)
+                if (!layers.Contains(app.Layer))
+                    layers.Add(app.Layer);
+
+            return layers.Count;
         }
 
-		protected virtual void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isSelected, Rectangle gripRect)
+        private void DrawLongAppointments(Graphics g, Rectangle rect)
+        {
+            AppointmentList appointments = (AppointmentList)cachedAppointments[-1];
+
+            int numLayers = RecalcAppointmentLayers(appointments);
+
+            if (numLayers == 0)
+                return;
+
+            int dayWidth = rect.Width / daysToShow;
+            int y = dayHeadersHeight;
+            longAppointmentViews.Clear();
+
+            allDayEventsHeaderHeight = ((numLayers * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
+
+            Rectangle backRectangle = rect;
+            backRectangle.Y = y;
+            backRectangle.Height = allDayEventsHeaderHeight;
+
+            renderer.DrawAllDayBackground(g, backRectangle);
+            g.SetClip(backRectangle);
+
+            var endOfLastDay = EndDate.AddSeconds(-1);
+
+            foreach (Appointment appointment in appointments)
+            {
+                Rectangle appointmenRect = rect;
+
+                double startDay = (appointment.StartDate - startDate).TotalDays;
+                int startPos = (rect.X + (int)(startDay * dayWidth));
+
+                if (startPos <= rect.Left)
+                    startPos = (rect.Left + 2);
+
+                double endDay = (appointment.EndDate - startDate).TotalDays;
+                int endPos = (rect.X + (int)(endDay * dayWidth));
+
+                if ((endPos >= rect.Right) || (appointment.EndDate >= endOfLastDay))
+                    endPos = (rect.Right - 1);
+
+                appointmenRect.X = startPos;
+                appointmenRect.Width = (endPos - startPos);
+
+                appointmenRect.Y = y + (appointment.Layer * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing;
+                appointmenRect.Height = longAppointmentHeight;
+
+                longAppointmentViews[appointment] = new AppointmentView(appointment, appointmenRect);
+
+                Rectangle gripRect = appointmenRect;
+                gripRect.Width = appointmentGripWidth;
+
+                bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
+                DrawAppointment(g, appointmenRect, appointment, isSelected, gripRect);
+            }
+
+            // Draw a vertical line to close off the long appointments on the left
+            using (Pen m_Pen = new Pen(Color.DarkGray))
+                g.DrawLine(m_Pen, backRectangle.Left, backRectangle.Top, backRectangle.Left, rect.Bottom);
+
+            g.SetClip(rect);
+        }
+
+        protected virtual void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isSelected, Rectangle gripRect)
 		{
 			// Pass draw rect as the clip rect by default
 			renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
@@ -1992,6 +1924,8 @@ namespace Calendar
 
         class AppointmentList : List<Appointment>
         {
+            public AppointmentList() : base() { }
+            public AppointmentList(IEnumerable<Appointment> appts) : base(appts) { }
         }
 
         #endregion

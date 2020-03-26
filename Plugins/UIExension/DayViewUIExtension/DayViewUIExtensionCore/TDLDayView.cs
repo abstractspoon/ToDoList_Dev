@@ -54,7 +54,7 @@ namespace DayViewUIExtension
             hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
             dayHeadersHeight = DPIScaling.Scale(dayHeadersHeight);
             longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
-			appointmentGripWidth = 1; // to match app styling
+			dayGripWidth = 1; // to match app styling
 
             m_Renderer = new TDLRenderer(Handle, taskIcons);
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
@@ -782,7 +782,7 @@ namespace DayViewUIExtension
                     rect.Height--;
                 }
 
-                rect.Width -= 2;
+                rect.Width -= 1;
             }
 			
 			m_Renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);

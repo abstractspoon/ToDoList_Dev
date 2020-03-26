@@ -231,6 +231,5 @@ namespace Calendar
 			return (start.Date != end.Date);
 		}
 
-		internal int coincidentCount;
     }
 }
