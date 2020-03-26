@@ -1923,7 +1923,9 @@ namespace Calendar
                     Rectangle gripRect = appointmenRect;
                     gripRect.Width = appointmentGripWidth;
 
-                    DrawAppointment(e.Graphics, appointmenRect, appointment, (appointment == selectedAppointment), gripRect);
+                    bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
+
+                    DrawAppointment(e.Graphics, appointmenRect, appointment, isSelected, gripRect);
                 }
 
                 // Draw a vertical line to close off the long appointments on the left
