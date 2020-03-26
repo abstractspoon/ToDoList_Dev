@@ -1787,14 +1787,14 @@ namespace Calendar
 
 				// For each slot in the current appointment, find all other
 				// appointments that coincide at this slot position
-                for (int halfHour = firstApptSlot; halfHour < lastApptSlot; halfHour++)
+                for (int slot = firstApptSlot; slot < lastApptSlot; slot++)
                 {
-                    SlotLayout layout = appLayouts[halfHour];
+                    SlotLayout layout = appLayouts[slot];
 
                     if (layout == null)
                     {
                         layout = new SlotLayout();
-                        appLayouts[halfHour] = layout;
+                        appLayouts[slot] = layout;
                     }
 
                     layout.Appointments[layout.ApptCount++] = appointment;
