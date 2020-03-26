@@ -132,8 +132,8 @@ protected:
 	void HighlightWord(BOOL bHighlight = TRUE);
 	BOOL InitDictionary(const CString& sDict);
 	void UpdateButtonStates();
+	void UpdateOKCancelLabels();
 
-	void InitDialog(ISpellCheck* pSpellCheck, const CString& sText);
 	CString GetItemText(UINT nIDItem, const CString& sDefault = _T(""));
 
 	virtual CPoint GetInitialPos() const;

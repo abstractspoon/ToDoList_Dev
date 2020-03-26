@@ -39,17 +39,6 @@ CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 	m_ptTopLeft(-1, -1),
 	m_cbDictionaries(FES_RELATIVEPATHS | FES_COMBOSTYLEBTN)
 {
-	InitDialog(NULL/*pSpellCheck*/, _T("")/*sText*/);
-
-	if (!m_sSelDictionary.IsEmpty())
-		FileMisc::MakeRelativePath(m_sSelDictionary, FileMisc::GetAppFolder(), FALSE);
-}
-
-void CSpellCheckDlg::InitDialog(ISpellCheck* pSpellCheck, const CString& sText)
-{
-	AfxEnableControlContainer();
-	CRichEditHelper::InitRichEdit();
-
 	AddRCControl(_T("LTEXT"), _T(""), _T("Ac&tive Dictionary:"), 0, 0, 8, 9, 70, 8, IDC_SCD_DICTLABEL);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_TABSTOP, 0, 80, 7, 226, 100, IDC_SCD_DICTIONARIES);
 	AddRCControl(_T("LTEXT"), _T(""), _T("Download More Dictionaries"), WS_TABSTOP | SS_RIGHT, 0, 80, 21, 226, 8, IDC_SCD_URL);
@@ -64,19 +53,11 @@ void CSpellCheckDlg::InitDialog(ISpellCheck* pSpellCheck, const CString& sText)
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("&Next Word"),WS_TABSTOP, 0,256,144,50,14,IDC_SCD_NEXT);
 	AddRCControl(_T("CONTROL"), _T("static"), _T(""),SS_ETCHEDHORZ,0,7,182,299,1, (UINT)IDC_STATIC);
 
-	if (!pSpellCheck)
-	{
-		AddRCControl(_T("DEFPUSHBUTTON"), _T(""), BTN_OK, WS_TABSTOP, 0, 201,190,50,14,IDOK);
-		AddRCControl(_T("PUSHBUTTON"), _T(""), BTN_CANCEL, WS_TABSTOP, 0,256,190,50,14,IDCANCEL);
+	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), BTN_OK, WS_TABSTOP, 0, 201,190,50,14,IDOK);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), BTN_CANCEL, WS_TABSTOP, 0,256,190,50,14,IDCANCEL);
 
-		SetText(sText);
-	}
-	else
-	{
-		AddRCControl(_T("PUSHBUTTON"), _T(""), BTN_CLOSE, WS_TABSTOP, 0,256,190,50,14,IDCANCEL);
-
-		SetSpellCheck(pSpellCheck);
-	}
+	if (!m_sSelDictionary.IsEmpty())
+		FileMisc::MakeRelativePath(m_sSelDictionary, FileMisc::GetAppFolder(), FALSE);
 }
 
 CSpellCheckDlg::~CSpellCheckDlg()
@@ -221,6 +202,8 @@ void CSpellCheckDlg::SetSpellCheck(ISpellCheck* pSpellCheck)
 		m_reText.SetBackgroundColor(FALSE, GetSysColor(COLOR_3DFACE));
 		m_reText.SetWindowText(m_sText);
 		m_lbSuggestions.ResetContent();
+
+		UpdateOKCancelLabels();
 
 		UpdateData(FALSE);
 		StartChecking();
@@ -413,6 +396,7 @@ BOOL CSpellCheckDlg::OnInitDialog()
 	}
 
 	UpdateButtonStates();
+	UpdateOKCancelLabels();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -465,7 +449,22 @@ void CSpellCheckDlg::UpdateButtonStates()
 	GetDlgItem(IDC_SCD_REPLACE)->EnableWindow(bInit && !m_sMisspeltWord.IsEmpty());
 	GetDlgItem(IDC_SCD_NEXT)->EnableWindow(bInit);
 	GetDlgItem(IDC_SCD_RESTART)->EnableWindow(bInit);
-	GetDlgItem(IDOK)->EnableWindow(bInit);
+
+	GetDlgItem(IDOK)->EnableWindow(bInit && (m_pSpellCheck == &m_reSpellCheck));
+}
+
+void CSpellCheckDlg::UpdateOKCancelLabels()
+{
+	BOOL bInit = IsInitialized();
+	BOOL bShowOK = (bInit && (m_pSpellCheck == &m_reSpellCheck));
+
+	GetDlgItem(IDOK)->EnableWindow(bShowOK);
+	GetDlgItem(IDOK)->ShowWindow(bShowOK ? SW_SHOW : SW_HIDE);
+
+	CEnString sCancelText(bShowOK ? BTN_CANCEL : BTN_CLOSE);
+	sCancelText.Translate();
+
+	SetDlgItemText(IDCANCEL, sCancelText);
 }
 
 void CSpellCheckDlg::ProcessMisspeltWord(const CString& sWord)
