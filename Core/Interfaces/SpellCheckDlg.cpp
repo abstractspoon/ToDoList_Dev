@@ -62,6 +62,8 @@ CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 
 	if (!m_sSelDictionary.IsEmpty())
 		FileMisc::MakeRelativePath(m_sSelDictionary, FileMisc::GetAppFolder(), FALSE);
+
+	m_cbDictionaries.SetCurrentFolder(FileMisc::GetAppFolder());
 }
 
 CSpellCheckDlg::~CSpellCheckDlg()
