@@ -12,6 +12,7 @@
 #include "..\Shared\enstring.h"
 #include "..\Shared\localizer.h"
 #include "..\Shared\dialoghelper.h"
+#include "..\Shared\wclassdefines.h"
 
 #include "..\Interfaces\IPreferences.h"
 
@@ -39,11 +40,14 @@ CSpellCheckDlg::CSpellCheckDlg(CWnd* /*pParent*/) :
 	m_ptTopLeft(-1, -1),
 	m_cbDictionaries(FES_RELATIVEPATHS | FES_COMBOSTYLEBTN)
 {
+	AfxEnableControlContainer();
+	CRichEditHelper::InitRichEdit();
+
 	AddRCControl(_T("LTEXT"), _T(""), _T("Ac&tive Dictionary:"), 0, 0, 8, 9, 70, 8, IDC_SCD_DICTLABEL);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_TABSTOP, 0, 80, 7, 226, 100, IDC_SCD_DICTIONARIES);
 	AddRCControl(_T("LTEXT"), _T(""), _T("Download More Dictionaries"), WS_TABSTOP | SS_RIGHT, 0, 80, 21, 226, 8, IDC_SCD_URL);
 	AddRCControl(_T("LTEXT"), _T(""), _T("C&hecking Text:"), 0,0, 7,30,149,8, IDC_SCD_CHECKINGLABEL);
-	AddRCControl(_T("CONTROL"), _T("RICHEDIT"), _T(""),ES_MULTILINE | ES_AUTOVSCROLL | ES_NOHIDESEL | ES_READONLY | WS_VSCROLL | WS_TABSTOP,0, 7,40,242,68,IDC_SCD_TEXT);
+	AddRCControl(_T("CONTROL"), WC_RICHEDIT50, _T(""),ES_MULTILINE | ES_AUTOVSCROLL | ES_NOHIDESEL | ES_READONLY | WS_VSCROLL | WS_TABSTOP | WS_BORDER,0, 7,40,242,68,IDC_SCD_TEXT);
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("R&estart"),WS_TABSTOP, 0,256,40,50,14,IDC_SCD_RESTART);
 	AddRCControl(_T("LTEXT"), _T(""), _T("Replace:"),0, 0,7,112,30,8, IDC_SCD_REPLACELABEL);
 	AddRCControl(_T("LTEXT"), _T(""), _T("Static"),0, 0,44,112,205,8,IDC_SCD_MISSPELTWORD);
