@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "BurndownChart.h"
 #include "BurndownGraphs.h"
+#include "BurndownStatic.h"
 
 #include "..\shared\datehelper.h"
 #include "..\shared\holdredraw.h"
@@ -48,7 +49,7 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_data(data),
 	m_nActiveGraph(BCT_TIMESERIES_INCOMPLETETASKS),
 	m_calculator(data),
-	m_nTrendLine(BTL_NONE)
+	m_nOption(BGO_NONE)
 {
 	m_mapGraphs[BCT_TIMESERIES_INCOMPLETETASKS]		= new CIncompleteTasksGraph();
 	m_mapGraphs[BCT_TIMESERIES_REMAININGDAYS]		= new CRemainingDaysGraph();
@@ -94,11 +95,6 @@ END_MESSAGE_MAP()
 ////////////////////////////////////////////////////////////////////////////////
 // CBurndownChart message handlers
 
-BOOL CBurndownChart::IsValidGraph(BURNDOWN_GRAPH nGraph) const
-{
-	return (GetGraphType(nGraph) != BCT_UNKNOWNTYPE);
-}
-
 BURNDOWN_GRAPHTYPE CBurndownChart::GetActiveGraphType() const
 {
 	return GetGraphType(m_nActiveGraph);
@@ -112,20 +108,17 @@ CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPH nGraph) const
 	return pGraph->GetTitle();
 }
 
-BURNDOWN_GRAPHTYPE CBurndownChart::GetGraphType(BURNDOWN_GRAPH nGraph) const
-{
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(nGraph, BCT_UNKNOWNTYPE);
-
-	return pGraph->GetType();
-}
-
 CGraphBase* CBurndownChart::GetGraph(BURNDOWN_GRAPH nGraph) const
 {
 	CGraphBase* pGraph = NULL;
 	m_mapGraphs.Lookup(nGraph, pGraph);
 
 	return pGraph;
+}
+
+BOOL CBurndownChart::HasGraph(BURNDOWN_GRAPH nGraph) const
+{
+	return (GetGraph(nGraph) != NULL);
 }
 
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
@@ -152,11 +145,14 @@ int CBurndownChart::BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& 
 	CArray<SORTITEM, SORTITEM&> aSort;
 	SORTITEM st;
 
-	for (int nGraph = 0; nGraph < BCT_NUMGRAPHS; nGraph++)
+	for (int nItem = 0; nItem < BCT_NUMGRAPHS; nItem++)
 	{
-		if (GetGraphType((BURNDOWN_GRAPH)nGraph) == nType)
+		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)nItem;
+		ASSERT(IsValidGraph(nGraph));
+
+		if (HasGraph(nGraph) && (GetGraphType(nGraph) == nType))
 		{
-			st.nGraph = (BURNDOWN_GRAPH)nGraph;
+			st.nGraph = (BURNDOWN_GRAPH)nItem;
 			st.sLabel = GetGraphTitle(st.nGraph);
 
 			aSort.Add(st);
@@ -208,29 +204,23 @@ void CBurndownChart::GetDefaultGraphColors(CGraphColorMap& mapColors) const
 	}
 }
 
-void CBurndownChart::ShowTrendLine(BURNDOWN_TREND nTrend)
+void CBurndownChart::SetGraphOption(BURNDOWN_GRAPHOPTION nOption)
 {
-	if (nTrend != m_nTrendLine)
+	if (nOption != m_nOption)
 	{
-		m_nTrendLine = nTrend;
+		m_nOption = nOption;
 
-		UpdateGraphTrendLine();
+		UpdateGraphOption();
 	}
 }
 
-void CBurndownChart::UpdateGraphTrendLine()
+void CBurndownChart::UpdateGraphOption()
 {
-	if (GetActiveGraphType() == BCT_TIMESERIES)
-	{
-		CGraphBase* pGraph = NULL;
-		GET_GRAPH(m_nActiveGraph);
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH(m_nActiveGraph);
 
-		CTimeSeriesGraph* pTSGraph = dynamic_cast<CTimeSeriesGraph*>(pGraph);
-		ASSERT(pTSGraph);
-
-		/*VERIFY*/(pTSGraph->ShowTrendLine(m_nTrendLine, m_datasets));
+	if (pGraph->SetOption(m_nOption, m_datasets))
 		Invalidate();
-	}
 }
 
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
@@ -303,7 +293,7 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 		VERIFY(m_mapGraphColors.Lookup(m_nActiveGraph, aColors) && aColors.GetSize());
 
 		pGraph->BuildGraph(m_calculator, aColors, m_datasets);
-		UpdateGraphTrendLine();
+		UpdateGraphOption();
 	}
 
 	if (!m_data.IsEmpty())

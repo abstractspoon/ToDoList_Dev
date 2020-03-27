@@ -12,7 +12,7 @@
 #include "BurndownChart.h"
 #include "BurndownStruct.h"
 #include "BurndownGraphComboBox.h"
-#include "BurndownTrendComboBox.h"
+#include "BurndownOptionsComboBox.h"
 #include "BurndownPreferencesDlg.h"
 
 #include "..\Shared\mapex.h"
@@ -86,13 +86,13 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CRangeSliderCtrl m_sliderDateRange;
 	CBurndownGraphComboBox m_cbGraphs;
-	CBurndownTrendComboBox m_cbTrends;
+	CBurndownOptionsComboBox m_cbOptions;
 	//CBurndownPreferencesDlg m_dlgPrefs;
 	
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
-	BURNDOWN_GRAPH m_nGraphType;
-	BURNDOWN_TREND m_nTrendLine;
+	BURNDOWN_GRAPH m_nGraph;
+	BURNDOWN_GRAPHOPTION m_nGraphOption;
 
 protected:
 // Overrides
@@ -119,7 +119,7 @@ protected:
 	afx_msg void OnSelchangeDisplay();
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg void OnNcDestroy();
-	afx_msg void OnTrendsChanged();
+	afx_msg void OnOptionChanged();
 	//afx_msg void OnPreferences();
 
 	afx_msg LRESULT OnRebuildGraph(WPARAM wp, LPARAM lp);

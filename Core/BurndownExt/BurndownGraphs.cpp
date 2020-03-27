@@ -26,8 +26,9 @@ const int		TREND_LINE_THICKNESS = 2;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CGraphBase::CGraphBase()
+CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph) : m_nGraph(nGraph), m_nOption(BGO_NONE)
 {
+	ASSERT(IsValidGraph(m_nGraph));
 }
 
 CGraphBase::~CGraphBase()
@@ -48,9 +49,31 @@ void CGraphBase::SetDatasetColor(CHMXDataset& dataset, COLORREF crBase)
 	dataset.SetFillColor(GraphicsMisc::Lighter(crBase, 0.25, FALSE));
 }
 
+BURNDOWN_GRAPHTYPE CGraphBase::GetType() const
+{
+	return GetGraphType(m_nGraph);
+}
+
+BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
+{
+	return m_nOption;
+}
+
+BOOL CGraphBase::SetOption(BURNDOWN_GRAPHOPTION nOption)
+{
+	if (!IsValidOption(nOption, m_nGraph))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_nOption = nOption;
+	return TRUE;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
-CTimeSeriesGraph::CTimeSeriesGraph() : m_nTrend(BTL_NONE)
+CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph)
 {
 }
 
@@ -213,39 +236,40 @@ BURNDOWN_GRAPHSCALE CTimeSeriesGraph::CalculateRequiredScale(int nAvailWidth, in
 	return BCS_YEAR;
 }
 
-BOOL CTimeSeriesGraph::ShowTrendLine(BURNDOWN_TREND nTrend, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CTimeSeriesGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	if (CalculateTrendLines(datasets, nTrend))
-		m_nTrend = nTrend;
-	else
-		m_nTrend = BTL_NONE;
+	if (!CGraphBase::SetOption(nOption))
+		return FALSE;
 
-	return (m_nTrend == nTrend);
+	if (!CalculateTrendLines(datasets, nOption))
+		VERIFY(CGraphBase::SetOption(BGO_NONE));
+
+	return TRUE;;
 }
 
-BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_TREND nTrend, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest)
+BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest)
 {
 	BOOL bSuccess = FALSE;
 
-	switch (nTrend)
+	switch (nOption)
 	{
-	case BTL_NONE:
+	case BGO_NONE:
 		bSuccess = TRUE;
 		break;
 
-	case BTL_BEST_FIT:
+	case BGO_TREND_BESTFIT:
 		bSuccess = CalculateBestFitLine(datasetSrc, datasetDest);
 		break;
 
-	case BTL_7DAY_ROLLING_AVERAGE:
+	case BGO_TREND_7DAYAVERAGE:
 		bSuccess = CalculateMovingAverage(7, datasetSrc, datasetDest);
 		break;
 
-	case BTL_30DAY_ROLLING_AVERAGE:
+	case BGO_TREND_30DAYAVERAGE:
 		bSuccess = CalculateMovingAverage(30, datasetSrc, datasetDest);
 		break;
 
-	case BTL_90DAY_ROLLING_AVERAGE:
+	case BGO_TREND_90DAYAVERAGE:
 		bSuccess = CalculateMovingAverage(90, datasetSrc, datasetDest);
 		break;
 
@@ -254,7 +278,7 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_TREND nTrend, const CHMXDatas
 		break;
 	}
 
-	if ((nTrend == BTL_NONE) || !bSuccess)
+	if ((nOption == BGO_NONE) || !bSuccess)
 		datasetDest.Reset();
 
 	if (bSuccess)
@@ -268,6 +292,12 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_TREND nTrend, const CHMXDatas
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+CIncompleteTasksGraph::CIncompleteTasksGraph()
+	:
+	CTimeSeriesGraph(BCT_TIMESERIES_INCOMPLETETASKS)
+{
+}
 
 CString CIncompleteTasksGraph::GetTitle() const
 {
@@ -319,7 +349,7 @@ void CIncompleteTasksGraph::BuildGraph(const CStatsItemCalculator& calculator, c
 		}
 	}
 
-	CalculateTrendLines(datasets, m_nTrend);
+	CalculateTrendLines(datasets, GetOption());
 }
 
 CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -338,12 +368,18 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 	return sTooltip;
 }
 
-BOOL CIncompleteTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TREND nTrend) const
+BOOL CIncompleteTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const
 {
 	return CalculateTrendLine(nTrend, datasets[0], datasets[1]);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+
+CRemainingDaysGraph::CRemainingDaysGraph()
+	:
+	CTimeSeriesGraph(BCT_TIMESERIES_REMAININGDAYS)
+{
+}
 
 CString CRemainingDaysGraph::GetTitle() const
 {
@@ -421,13 +457,19 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 	return sTooltip;
 }
 
-BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TREND nTrend) const
+BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const
 {
 	// No need to calculate trend of remaining estimate because it's already a straight line
 	return CalculateTrendLine(nTrend, datasets[REMAINING_SPENT], datasets[REMAINING_SPENT + 1]);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+
+CStartedEndedTasksGraph::CStartedEndedTasksGraph()
+	:
+	CTimeSeriesGraph(BCT_TIMESERIES_STARTEDENDEDTASKS)
+{
+}
 
 CString CStartedEndedTasksGraph::GetTitle() const
 {
@@ -485,7 +527,7 @@ void CStartedEndedTasksGraph::BuildGraph(const CStatsItemCalculator& calculator,
 		}
 	}
 
-	CalculateTrendLines(datasets, m_nTrend);
+	CalculateTrendLines(datasets, GetOption());
 }
 
 CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -504,7 +546,7 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 	return sTooltip;
 }
 
-BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TREND nTrend) const
+BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const
 {
 	if (CalculateTrendLine(nTrend, datasets[STARTED_TASKS], datasets[STARTED_TASKS + 2]) &&
 		CalculateTrendLine(nTrend, datasets[ENDED_TASKS], datasets[ENDED_TASKS + 2]))
@@ -519,6 +561,12 @@ BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_D
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+CEstimatedSpentDaysGraph::CEstimatedSpentDaysGraph()
+	:
+	CTimeSeriesGraph(BCT_TIMESERIES_ESTIMATEDSPENTDAYS)
+{
+}
 
 CString CEstimatedSpentDaysGraph::GetTitle() const
 {
@@ -579,7 +627,7 @@ void CEstimatedSpentDaysGraph::BuildGraph(const CStatsItemCalculator& calculator
 		}
 	}
 
-	CalculateTrendLines(datasets, m_nTrend);
+	CalculateTrendLines(datasets, GetOption());
 }
 
 CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -598,7 +646,7 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 	return sTooltip;
 }
 
-BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TREND nTrend) const
+BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const
 {
 	if (CalculateTrendLine(nTrend, datasets[ESTIMATED_DAYS], datasets[ESTIMATED_DAYS + 2]) &&
 		CalculateTrendLine(nTrend, datasets[SPENT_DAYS], datasets[SPENT_DAYS + 2]))
@@ -613,6 +661,12 @@ BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+CEstimatedSpentCostGraph::CEstimatedSpentCostGraph()
+	:
+	CTimeSeriesGraph(BCT_TIMESERIES_ESTIMATEDSPENTCOST)
+{
+}
 
 CString CEstimatedSpentCostGraph::GetTitle() const
 {
@@ -673,7 +727,7 @@ void CEstimatedSpentCostGraph::BuildGraph(const CStatsItemCalculator& calculator
 		}
 	}
 
-	CalculateTrendLines(datasets, m_nTrend);
+	CalculateTrendLines(datasets, GetOption());
 }
 
 CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
@@ -692,7 +746,7 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 	return sTooltip;
 }
 
-BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_TREND nTrend) const
+BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const
 {
 	if (CalculateTrendLine(nTrend, datasets[ESTIMATED_COST], datasets[ESTIMATED_COST + 2]) &&
 		CalculateTrendLine(nTrend, datasets[SPENT_COST], datasets[SPENT_COST + 2]))
@@ -708,7 +762,7 @@ BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_
 
 /////////////////////////////////////////////////////////////////////////////
 
-CAttributeFrequencyGraph::CAttributeFrequencyGraph()
+CAttributeFrequencyGraph::CAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph)
 {
 
 }
@@ -778,7 +832,18 @@ CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calcu
 	return sTooltip;
 }
 
+BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset /*datasets*/[HMX_MAX_DATASET])
+{
+	return FALSE;
+}
+
 // ---------------------------------------------------------------------------
+
+CCategoryFrequencyGraph::CCategoryFrequencyGraph() 
+	: 
+	CAttributeFrequencyGraph(BCT_FREQUENCY_CATEGORY)
+{
+}
 
 CString CCategoryFrequencyGraph::GetTitle() const
 {
@@ -800,6 +865,12 @@ void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 
 // ---------------------------------------------------------------------------
 
+CStatusFrequencyGraph::CStatusFrequencyGraph()
+	:
+	CAttributeFrequencyGraph(BCT_FREQUENCY_STATUS)
+{
+}
+
 CString CStatusFrequencyGraph::GetTitle() const
 {
 	return CEnString(IDS_FREQUENCY_STATUS);
@@ -819,6 +890,12 @@ void CStatusFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, c
 }
 
 // ---------------------------------------------------------------------------
+
+CAllocatedToFrequencyGraph::CAllocatedToFrequencyGraph()
+	:
+	CAttributeFrequencyGraph(BCT_FREQUENCY_ALLOCTO)
+{
+}
 
 CString CAllocatedToFrequencyGraph::GetTitle() const
 {
@@ -840,6 +917,12 @@ void CAllocatedToFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculat
 
 // ---------------------------------------------------------------------------
 
+CAllocatedByFrequencyGraph::CAllocatedByFrequencyGraph()
+	:
+	CAttributeFrequencyGraph(BCT_FREQUENCY_ALLOCBY)
+{
+}
+
 CString CAllocatedByFrequencyGraph::GetTitle() const
 {
 	return CEnString(IDS_FREQUENCY_ALLOCBY);
@@ -859,6 +942,12 @@ void CAllocatedByFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculat
 }
 
 // ---------------------------------------------------------------------------
+
+CVersionFrequencyGraph::CVersionFrequencyGraph()
+	:
+	CAttributeFrequencyGraph(BCT_FREQUENCY_VERSION)
+{
+}
 
 CString CVersionFrequencyGraph::GetTitle() const
 {
@@ -880,6 +969,12 @@ void CVersionFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, 
 
 // ---------------------------------------------------------------------------
 
+CTagFrequencyGraph::CTagFrequencyGraph()
+	:
+	CAttributeFrequencyGraph(BCT_FREQUENCY_TAGS)
+{
+}
+
 CString CTagFrequencyGraph::GetTitle() const
 {
 	return CEnString(IDS_FREQUENCY_TAGS);
@@ -900,6 +995,12 @@ void CTagFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, cons
 
 // ---------------------------------------------------------------------------
 
+CPriorityFrequencyGraph::CPriorityFrequencyGraph()
+	:
+	CAttributeFrequencyGraph(BCT_FREQUENCY_PRIORITY)
+{
+}
+
 CString CPriorityFrequencyGraph::GetTitle() const
 {
 	return CEnString(IDS_FREQUENCY_PRIORITY);
@@ -919,6 +1020,12 @@ void CPriorityFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 }
 
 // ---------------------------------------------------------------------------
+
+CRiskFrequencyGraph::CRiskFrequencyGraph()
+	:
+	CAttributeFrequencyGraph(BCT_FREQUENCY_RISK)
+{
+}
 
 CString CRiskFrequencyGraph::GetTitle() const
 {

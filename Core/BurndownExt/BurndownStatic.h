@@ -13,24 +13,79 @@
 
 static const GRAPHTYPE GRAPHTYPES[] = 
 {
-	{ IDS_TIMESERIES, BCT_TIMESERIES },
-	{ IDS_FREQUENCYDIST, BCT_FREQUENCY  },
+	{ BCT_TIMESERIES, IDS_TIMESERIES },
+	{ BCT_FREQUENCY,  IDS_FREQUENCYDIST },
 };
 
 static const int NUM_GRAPHTYPES = (sizeof(GRAPHTYPES) / sizeof(GRAPHTYPES[0]));
 
 /////////////////////////////////////////////////////////////////////////////
 
-static const TRENDLINE TRENDS[] = 
+static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph)
 {
-	{ IDS_NONE,					BTL_NONE	},
-	{ IDS_TREND_BESTFIT,		BTL_BEST_FIT	},
-	{ IDS_TREND_7DAYAVERAGE,	BTL_7DAY_ROLLING_AVERAGE },
-	{ IDS_TREND_30DAYAVERAGE,	BTL_30DAY_ROLLING_AVERAGE },
-	{ IDS_TREND_90DAYAVERAGE,	BTL_90DAY_ROLLING_AVERAGE },
+	if (nGraph == BCT_UNKNOWNGRAPH)
+		return BCT_UNKNOWNTYPE;
+
+	for (int nType = 0; nType < (BCT_NUMTYPES - 1); nType++)
+	{
+		int nRangeStart = GRAPHTYPES[nType].nType;
+		int nRangeEnd = (GRAPHTYPES[nType + 1].nType - 1);
+
+		if ((nGraph >= nRangeStart) && (nGraph <= nRangeEnd))
+			return GRAPHTYPES[nType].nType;
+	}
+
+	ASSERT(0);
+	return BCT_UNKNOWNTYPE;
+}
+
+static BOOL IsValidGraph(BURNDOWN_GRAPH nGraph)
+{
+	return (GetGraphType(nGraph) != BCT_UNKNOWNTYPE);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+static const GRAPHOPTION GRAPHOPTIONS[] = 
+{
+	{ BGO_NONE,					BCT_UNKNOWNTYPE	},
+	{ BGO_TREND_BESTFIT,		BCT_TIMESERIES,	},
+	{ BGO_TREND_7DAYAVERAGE,	BCT_TIMESERIES, },
+	{ BGO_TREND_30DAYAVERAGE,	BCT_TIMESERIES, },
+	{ BGO_TREND_90DAYAVERAGE,	BCT_TIMESERIES, },
 };
 
-static const int NUM_TRENDS = sizeof(TRENDS) / sizeof(TRENDLINE);
+static const int NUM_OPTIONS = sizeof(GRAPHOPTIONS) / sizeof(GRAPHOPTION);
+
+static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPHOPTION nOption)
+{
+	int nOpt = NUM_OPTIONS;
+
+	while (nOpt--)
+	{
+		if (GRAPHOPTIONS[nOpt].nOption == nOption)
+			return GRAPHOPTIONS[nOpt].nType;
+	}
+
+	ASSERT(0);
+	return BCT_UNKNOWNTYPE;
+}
+
+static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPHTYPE nType)
+{
+	if (nOption == BGO_NONE)
+		return TRUE;
+
+	if (nType == BCT_UNKNOWNTYPE)
+		return FALSE;
+
+	return (GetGraphType(nOption) == nType);
+}
+
+static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph)
+{
+	return IsValidOption(nOption, GetGraphType(nGraph));
+}
 
 /////////////////////////////////////////////////////////////////////////////
 

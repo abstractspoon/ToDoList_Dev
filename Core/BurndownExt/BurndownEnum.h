@@ -11,6 +11,9 @@ enum BURNDOWN_GRAPHTYPE
 	BCT_TIMESERIES	= 0,
 	BCT_FREQUENCY	= 100,
 	// BCT_NEXT		= 200,
+
+	// Always the last
+	BCT_NUMTYPES
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -57,13 +60,14 @@ enum BURNDOWN_GRAPHSCALE
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum BURNDOWN_TREND
+enum BURNDOWN_GRAPHOPTION
 {
-	BTL_NONE = -1,
-	BTL_BEST_FIT,
-	BTL_7DAY_ROLLING_AVERAGE,
-	BTL_30DAY_ROLLING_AVERAGE,
-	BTL_90DAY_ROLLING_AVERAGE,
+	BGO_NONE = -1,
+	BGO_TREND_BESTFIT,
+	BGO_TREND_7DAYAVERAGE,
+	BGO_TREND_30DAYAVERAGE,
+	BGO_TREND_90DAYAVERAGE,
+	// new options here
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -5,7 +5,7 @@
 #define IDR_BURNDOWN                    1000
 #define IDR_STATISTICS                  1000
 #define IDC_DISPLAY                     1015
-#define IDC_TRENDLINES                  1016
+#define IDC_OPTIONS                     1016
 #define IDS_BURNDOWN_TITLE              6001
 #define IDS_TIME_AXIS                   6002
 #define IDS_TASK_AXIS                   6003

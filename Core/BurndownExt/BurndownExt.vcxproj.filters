@@ -39,13 +39,13 @@
     <ClCompile Include="BurndownGraphComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BurndownTrendComboBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BurndownPreferencesDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BurndownGraphColorListCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BurndownOptionsComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -108,13 +108,13 @@
     <ClInclude Include="BurndownGraphComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BurndownTrendComboBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BurndownPreferencesDlg.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BurndownGraphColorListCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BurndownOptionsComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

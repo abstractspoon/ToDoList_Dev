@@ -19,15 +19,14 @@ public:
 	virtual ~CBurndownChart();
 
 	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
-	BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph) const;
-	BOOL IsValidGraph(BURNDOWN_GRAPH nGraph) const;
+	//BOOL IsValidGraph(BURNDOWN_GRAPH nGraph) const;
 
 	BURNDOWN_GRAPHTYPE GetActiveGraphType() const;
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
 	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
 	void SetTodayColour(COLORREF color);
 	BOOL SaveToImage(CBitmap& bmImage);
-	void ShowTrendLine(BURNDOWN_TREND nTrend);
+	void SetGraphOption(BURNDOWN_GRAPHOPTION nOption);
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
 	int BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const;
@@ -44,7 +43,7 @@ protected:
 	COLORREF m_crToday;
 	CGraphColorMap m_mapGraphColors;
 
-	BURNDOWN_TREND m_nTrendLine;
+	BURNDOWN_GRAPHOPTION m_nOption;
 	BURNDOWN_GRAPH m_nActiveGraph;
 
 protected:
@@ -55,13 +54,14 @@ protected:
 
 protected:
 	void RebuildXScale();
-	void UpdateGraphTrendLine();
+	void UpdateGraphOption();
 	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
 	int HitTest(const CPoint& ptClient) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd);
+	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
 
 };
 

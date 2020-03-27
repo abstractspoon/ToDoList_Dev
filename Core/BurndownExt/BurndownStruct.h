@@ -40,14 +40,6 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct TRENDLINE
-{
-	UINT nLabelID;
-	BURNDOWN_TREND nTrend;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 struct FREQUENCYITEM
 {
 	CString sLabel;
@@ -58,7 +50,15 @@ struct FREQUENCYITEM
 
 struct GRAPHTYPE
 {
+	BURNDOWN_GRAPHTYPE nType;
 	UINT nLabelID;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct GRAPHOPTION
+{
+	BURNDOWN_GRAPHOPTION nOption;
 	BURNDOWN_GRAPHTYPE nType;
 };
 
