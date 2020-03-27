@@ -17,8 +17,8 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-#define GET_GRAPH(e) pGraph = GetGraph(e); if (pGraph == NULL) return
-#define GET_GRAPH_RET(e, ret) pGraph = GetGraph(e); if (pGraph == NULL) return ret
+#define GET_GRAPH(e) pGraph = m_mapGraphs.GetGraph(e); if (pGraph == NULL) return
+#define GET_GRAPH_RET(e, ret) pGraph = m_mapGraphs.GetGraph(e); if (pGraph == NULL) return ret
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -51,20 +51,6 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_calculator(data),
 	m_nOption(BGO_NONE)
 {
-	m_mapGraphs[BCT_TIMESERIES_INCOMPLETETASKS]		= new CIncompleteTasksGraph();
-	m_mapGraphs[BCT_TIMESERIES_REMAININGDAYS]		= new CRemainingDaysGraph();
-	m_mapGraphs[BCT_TIMESERIES_STARTEDENDEDTASKS]	= new CStartedEndedTasksGraph();
-	m_mapGraphs[BCT_TIMESERIES_ESTIMATEDSPENTDAYS]	= new CEstimatedSpentDaysGraph();
-	//m_mapGraphs[BCT_ESTIMATEDSPENTCOST]			= new CEstimatedSpentCostGraph();
-
-	m_mapGraphs[BCT_FREQUENCY_CATEGORY]				= new CCategoryFrequencyGraph();
-	m_mapGraphs[BCT_FREQUENCY_STATUS]				= new CStatusFrequencyGraph();
-	m_mapGraphs[BCT_FREQUENCY_ALLOCTO]				= new CAllocatedToFrequencyGraph();
-	m_mapGraphs[BCT_FREQUENCY_ALLOCBY]				= new CAllocatedByFrequencyGraph();
-	m_mapGraphs[BCT_FREQUENCY_VERSION]				= new CVersionFrequencyGraph();
-	m_mapGraphs[BCT_FREQUENCY_TAGS]					= new CTagFrequencyGraph();
-	m_mapGraphs[BCT_FREQUENCY_PRIORITY]				= new CPriorityFrequencyGraph();
-	m_mapGraphs[BCT_FREQUENCY_RISK]					= new CRiskFrequencyGraph();
 
 	//FileMisc::EnableLogging(TRUE);
 
@@ -74,16 +60,6 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 
 CBurndownChart::~CBurndownChart()
 {
-	POSITION pos = m_mapGraphs.GetStartPosition();
-
-	while (pos)
-	{
-		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph;
-
-		m_mapGraphs.GetNextAssoc(pos, nGraph, pGraph);
-		delete pGraph;
-	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,19 +82,6 @@ CString CBurndownChart::GetGraphTitle(BURNDOWN_GRAPH nGraph) const
 	GET_GRAPH_RET(nGraph, _T(""));
 
 	return pGraph->GetTitle();
-}
-
-CGraphBase* CBurndownChart::GetGraph(BURNDOWN_GRAPH nGraph) const
-{
-	CGraphBase* pGraph = NULL;
-	m_mapGraphs.Lookup(nGraph, pGraph);
-
-	return pGraph;
-}
-
-BOOL CBurndownChart::HasGraph(BURNDOWN_GRAPH nGraph) const
-{
-	return (GetGraph(nGraph) != NULL);
 }
 
 BOOL CBurndownChart::SetActiveGraph(BURNDOWN_GRAPH nGraph)
@@ -150,7 +113,7 @@ int CBurndownChart::BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& 
 		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)nItem;
 		ASSERT(IsValidGraph(nGraph));
 
-		if (HasGraph(nGraph) && (GetGraphType(nGraph) == nType))
+		if (m_mapGraphs.HasGraph(nGraph) && (GetGraphType(nGraph) == nType))
 		{
 			st.nGraph = (BURNDOWN_GRAPH)nItem;
 			st.sLabel = GetGraphTitle(st.nGraph);
@@ -193,9 +156,7 @@ void CBurndownChart::GetDefaultGraphColors(CGraphColorMap& mapColors) const
 	while (pos)
 	{
 		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph;
-
-		m_mapGraphs.GetNextAssoc(pos, nGraph, pGraph);
+		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
 
 		CColorArray aColors;
 		VERIFY(pGraph->GetDefaultColors(aColors));

@@ -2,6 +2,7 @@
 
 #include "BurndownStruct.h"
 #include "BurndownCalculator.h"
+#include "BurndownGraphs.h"
 
 #include "..\Shared\HMXChartEx.h"
 
@@ -26,22 +27,22 @@ public:
 	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
 	void SetTodayColour(COLORREF color);
 	BOOL SaveToImage(CBitmap& bmImage);
-	void SetGraphOption(BURNDOWN_GRAPHOPTION nOption);
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
 	int BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& aGraphs) const;
 
+	void SetGraphOption(BURNDOWN_GRAPHOPTION nOption);
 	void SetGraphColors(const CGraphColorMap& mapColors);
 	void GetDefaultGraphColors(CGraphColorMap& mapColors) const;
 
 protected:
 	const CStatsItemArray& m_data;
-	CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CGraphBase*, CGraphBase*&> m_mapGraphs;
+	CGraphsMap m_mapGraphs;
+	CGraphColorMap m_mapGraphColors;
 
 	COleDateTimeRange m_dtExtents;
 	CStatsItemCalculator m_calculator;
 	COLORREF m_crToday;
-	CGraphColorMap m_mapGraphColors;
 
 	BURNDOWN_GRAPHOPTION m_nOption;
 	BURNDOWN_GRAPH m_nActiveGraph;
@@ -55,13 +56,11 @@ protected:
 protected:
 	void RebuildXScale();
 	void UpdateGraphOption();
-	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
 	int HitTest(const CPoint& ptClient) const;
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd);
-	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
 
 };
 

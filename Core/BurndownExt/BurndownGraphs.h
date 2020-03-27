@@ -42,6 +42,21 @@ private:
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CGraphsMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CGraphBase*, CGraphBase*>
+{
+public:
+	CGraphsMap();
+	~CGraphsMap();
+
+	CGraphBase* GetNext(POSITION& pos) const;
+	CGraphBase* GetNext(POSITION& pos, BURNDOWN_GRAPH& nGraph) const;
+	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
+
+	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTimeSeriesGraph : public CGraphBase
 {
 public:

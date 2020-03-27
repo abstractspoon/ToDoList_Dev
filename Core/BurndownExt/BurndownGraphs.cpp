@@ -73,6 +73,66 @@ BOOL CGraphBase::SetOption(BURNDOWN_GRAPHOPTION nOption)
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
+CGraphsMap::CGraphsMap()
+{
+	SetAt(BCT_TIMESERIES_INCOMPLETETASKS,		new CIncompleteTasksGraph());
+	SetAt(BCT_TIMESERIES_REMAININGDAYS,			new CRemainingDaysGraph());
+	SetAt(BCT_TIMESERIES_STARTEDENDEDTASKS,		new CStartedEndedTasksGraph());
+	SetAt(BCT_TIMESERIES_ESTIMATEDSPENTDAYS,	new CEstimatedSpentDaysGraph());
+	//SetAt(BCT_ESTIMATEDSPENTCOST,				new CEstimatedSpentCostGraph());
+	
+	SetAt(BCT_FREQUENCY_CATEGORY,				new CCategoryFrequencyGraph());
+	SetAt(BCT_FREQUENCY_STATUS,					new CStatusFrequencyGraph());
+	SetAt(BCT_FREQUENCY_ALLOCTO,				new CAllocatedToFrequencyGraph());
+	SetAt(BCT_FREQUENCY_ALLOCBY,				new CAllocatedByFrequencyGraph());
+	SetAt(BCT_FREQUENCY_VERSION,				new CVersionFrequencyGraph());
+	SetAt(BCT_FREQUENCY_TAGS,					new CTagFrequencyGraph());
+	SetAt(BCT_FREQUENCY_PRIORITY,				new CPriorityFrequencyGraph());
+	SetAt(BCT_FREQUENCY_RISK,					new CRiskFrequencyGraph());
+}
+
+CGraphsMap::~CGraphsMap()
+{
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+		delete GetNext(pos);
+
+	RemoveAll();
+}
+
+CGraphBase* CGraphsMap::GetNext(POSITION& pos) const
+{
+	BURNDOWN_GRAPH nUnused;
+	
+	return GetNext(pos, nUnused);
+}
+
+CGraphBase* CGraphsMap::GetNext(POSITION& pos, BURNDOWN_GRAPH& nGraph) const
+{
+	CGraphBase* pGraph = NULL;
+	GetNextAssoc(pos, nGraph, pGraph);
+
+	return pGraph;
+}
+
+CGraphBase* CGraphsMap::GetGraph(BURNDOWN_GRAPH nGraph) const
+{
+	CGraphBase* pGraph = NULL;
+	
+	if (Lookup(nGraph, pGraph))
+		ASSERT(pGraph);
+
+	return pGraph;
+}
+
+BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
+{
+	return (GetGraph(nGraph) != NULL);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////
+
 CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph)
 {
 }
