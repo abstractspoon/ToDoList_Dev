@@ -306,11 +306,19 @@ CString CMSOutlookHelper::FormatItemAsUrl(OutlookAPI::_Item& obj, DWORD dwFlags)
 		
 		if (lpParent)
 		{
-			CString sFolder = MAPIFolder(lpParent).GetFolderPath();
-			CString sSubject = GetItemData(obj, OA_TITLE);
+			CString sSubject = GetItemData(obj, OA_TITLE), sFolder;
 
-			if (EscapeText(sSubject))
-				sPath.Format(_T("%s\\~%s"), sFolder, sSubject);
+			try
+			{
+				sFolder = MAPIFolder(lpParent).GetFolderPath(); // can throw exception
+
+				if (EscapeText(sSubject))
+					sPath.Format(_T("%s\\~%s"), sFolder, sSubject);
+			}
+			catch (...)
+			{
+				// We use the default ID
+			}
 		}
 	}
 
