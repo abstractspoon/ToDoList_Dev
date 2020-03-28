@@ -18,31 +18,37 @@ public:
 	virtual ~CGraphBase();
 	
 	virtual CString GetTitle() const = 0;
-	virtual void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
+	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const = 0;
-	virtual int GetDefaultColors(CColorArray& aColors) const = 0;
 	virtual BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
 
-	void SetDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET], const CColorArray& aColors) const;
-
 	BURNDOWN_GRAPHTYPE GetType() const;
+
+	const CColorArray& GetColors() const;
+	BOOL SetColors(const CColorArray& aColors);
+	BOOL SetColors(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
+	void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	COLORREF GetColor(int nColor) const;
+
+	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption);
 	BURNDOWN_GRAPHOPTION GetOption() const;
+	BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption) const;
 	
 protected:
 	CGraphBase(BURNDOWN_GRAPH nGraph);
-	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption);
-
+	
 	static void SetDatasetColor(CHMXDataset& dataset, COLORREF crBase);
 
 private:
 	BURNDOWN_GRAPH m_nGraph;
 	BURNDOWN_GRAPHOPTION m_nOption;
+	CColorArray m_aColors;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CGraphsMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CGraphBase*, CGraphBase*>
+class CGraphsMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CGraphBase*, CGraphBase*&>
 {
 public:
 	CGraphsMap();
@@ -53,6 +59,9 @@ public:
 	CGraphBase* GetGraph(BURNDOWN_GRAPH nGraph) const;
 
 	BOOL HasGraph(BURNDOWN_GRAPH nGraph) const;
+
+protected:
+	BOOL AddGraph(BURNDOWN_GRAPH nGraph, CGraphBase* pGraph);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -63,7 +72,7 @@ public:
 	virtual ~CTimeSeriesGraph();
 
 	virtual CString GetTitle() const = 0;
-	virtual void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
+	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
 
 	void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
@@ -72,7 +81,7 @@ public:
 protected:
 	CTimeSeriesGraph(BURNDOWN_GRAPH nGraph);
 
-	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const = 0;
+	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 
 	static BOOL CalculateTrendLine(BURNDOWN_GRAPHOPTION nTrend, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest);
 
@@ -91,12 +100,11 @@ public:
 	CIncompleteTasksGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	int GetDefaultColors(CColorArray& aColors) const;
 
 protected:
-	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const;
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -107,9 +115,8 @@ public:
 	CRemainingDaysGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	int GetDefaultColors(CColorArray& aColors) const;
 
 protected:
 	enum
@@ -119,7 +126,7 @@ protected:
 	};
 
 protected:
-	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const;
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -130,9 +137,8 @@ public:
 	CStartedEndedTasksGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	int GetDefaultColors(CColorArray& aColors) const;
 
 protected:
 	enum
@@ -142,7 +148,7 @@ protected:
 	};
 
 protected:
-	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const;
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -153,9 +159,8 @@ public:
 	CEstimatedSpentDaysGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	int GetDefaultColors(CColorArray& aColors) const;
 
 protected:
 	enum
@@ -165,7 +170,7 @@ protected:
 	};
 
 protected:
-	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const;
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -176,9 +181,8 @@ public:
 	CEstimatedSpentCostGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
-	int GetDefaultColors(CColorArray& aColors) const;
 
 protected:
 	enum
@@ -188,7 +192,7 @@ protected:
 	};
 
 protected:
-	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET], BURNDOWN_GRAPHOPTION nTrend) const;
+	BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -199,7 +203,7 @@ public:
 	virtual ~CAttributeFrequencyGraph();
 
 	virtual CString GetTitle() const = 0;
-	virtual void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
+	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
 	void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
@@ -223,9 +227,7 @@ public:
 	CCategoryFrequencyGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	int GetDefaultColors(CColorArray& aColors) const;
-
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -236,9 +238,7 @@ public:
 	CStatusFrequencyGraph();
 	
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	int GetDefaultColors(CColorArray& aColors) const;
-
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -249,9 +249,7 @@ public:
 	CAllocatedToFrequencyGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	int GetDefaultColors(CColorArray& aColors) const;
-
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -262,9 +260,7 @@ public:
 	CAllocatedByFrequencyGraph();
 	
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	int GetDefaultColors(CColorArray& aColors) const;
-
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -275,9 +271,7 @@ public:
 	CVersionFrequencyGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	int GetDefaultColors(CColorArray& aColors) const;
-
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -288,9 +282,7 @@ public:
 	CTagFrequencyGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	int GetDefaultColors(CColorArray& aColors) const;
-
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -301,9 +293,7 @@ public:
 	CPriorityFrequencyGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	int GetDefaultColors(CColorArray& aColors) const;
-
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------
@@ -314,9 +304,7 @@ public:
 	CRiskFrequencyGraph();
 
 	CString GetTitle() const;
-	void BuildGraph(const CStatsItemCalculator& calculator, const CColorArray& aColors, CHMXDataset datasets[HMX_MAX_DATASET]) const;
-	int GetDefaultColors(CColorArray& aColors) const;
-
+	void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 };
 
 // ---------------------------------------------------------------------------

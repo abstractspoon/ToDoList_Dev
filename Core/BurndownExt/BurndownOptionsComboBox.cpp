@@ -137,15 +137,10 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 
 BURNDOWN_GRAPHOPTION CBurndownOptionsComboBox::GetSelectedOption() const
 {
-	return (BURNDOWN_GRAPHOPTION)CDialogHelper::GetSelectedItemData(*this);
+	return (BURNDOWN_GRAPHOPTION)CDialogHelper::GetSelectedItemData(*this, BCT_UNKNOWNTYPE);
 }
 
 BOOL CBurndownOptionsComboBox::SetSelectedOption(BURNDOWN_GRAPHOPTION nOption)
 {
 	return (CDialogHelper::SelectItemByData(*this, nOption) != CB_ERR);
-}
-
-void CBurndownOptionsComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPHOPTION& nOption)
-{
-	CDialogHelper::DDX_CBData(pDX, *this, nOption, BGO_NONE);
 }

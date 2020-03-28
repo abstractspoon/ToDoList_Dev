@@ -38,6 +38,11 @@ CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, 
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesPage)
 	//}}AFX_DATA_INIT
+
+	CGraphColorMap mapColors;
+	m_chart.GetGraphColors(mapColors);
+
+	m_lcGraphColors.SetGraphColors(mapColors);
 }
 
 void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
@@ -70,56 +75,20 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CBurndownPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
+void CBurndownPreferencesPage::SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const
 {
-	// Graph colours
-	const CGraphColorMap& mapColors = m_lcGraphColors.GetGraphColors();
-
-	BURNDOWN_GRAPH nGraph;
-	CColorArray aColors;
-
-	POSITION pos = mapColors.GetStartPosition();
-
-	while (pos)
-	{
-		mapColors.GetNextAssoc(pos, nGraph, aColors);
-		pPrefs->WriteProfileString(szKey, Misc::MakeKey(_T("Graph%d"), nGraph), Misc::FormatArray(aColors, '|'));
-	}
+	// Do nothing for now
 }
 
-void CBurndownPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
+void CBurndownPreferencesPage::LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) 
 {
-	// Graph colours
-	CGraphColorMap mapColors;
-	m_chart.GetDefaultGraphColors(mapColors);
-
-	BURNDOWN_GRAPH nGraph;
-	CColorArray aColors;
-
-	POSITION pos = mapColors.GetStartPosition();
-
-	while (pos)
-	{
-		mapColors.GetNextAssoc(pos, nGraph, aColors);
-
-		CString sColors = pPrefs->GetProfileString(szKey, Misc::MakeKey(_T("Graph%d"), nGraph));
-
-		if (sColors.IsEmpty())
-			break;
-
-		Misc::Split(sColors, aColors, '|');
-		mapColors[nGraph] = aColors;
-	}
-
-	m_lcGraphColors.SetGraphColors(mapColors);
+	// Do nothing for now
 }
 
 void CBurndownPreferencesPage::OnOK()
 {
-
 	CPreferencesPageBase::OnOK();
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesDlg dialog

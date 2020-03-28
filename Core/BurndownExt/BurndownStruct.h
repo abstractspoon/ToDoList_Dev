@@ -22,7 +22,7 @@
 class CColorArray : public CDWordArray
 {
 public:
-	CColorArray& operator=(CColorArray& other);
+	CColorArray& operator=(const CColorArray& other);
 
 	int Set(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
 };

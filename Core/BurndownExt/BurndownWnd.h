@@ -92,7 +92,6 @@ protected:
 	DWORD m_dwUpdateGraphOnShow;
 	BOOL m_bUpdatingSlider;
 	BURNDOWN_GRAPH m_nGraph;
-	BURNDOWN_GRAPHOPTION m_nGraphOption;
 
 protected:
 // Overrides

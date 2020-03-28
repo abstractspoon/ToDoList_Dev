@@ -23,8 +23,6 @@ public:
 	BURNDOWN_GRAPHOPTION GetSelectedOption() const;
 	BOOL SetSelectedOption(BURNDOWN_GRAPHOPTION nOption);
 
-	void DDX(CDataExchange* pDX, BURNDOWN_GRAPHOPTION& nOption);
-
 protected:
 	BURNDOWN_GRAPHTYPE m_nGraphType;
 

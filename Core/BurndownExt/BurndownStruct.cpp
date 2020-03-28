@@ -14,7 +14,7 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CColorArray& CColorArray::operator=(CColorArray& other)
+CColorArray& CColorArray::operator=(const CColorArray& other)
 {
 	Copy(other);
 	return *this;
@@ -22,8 +22,12 @@ CColorArray& CColorArray::operator=(CColorArray& other)
 
 int CColorArray::Set(COLORREF color1, COLORREF color2, COLORREF color3)
 {
-	ASSERT(color1 != CLR_NONE);
-
+	if (color1 == CLR_NONE)
+	{
+		ASSERT(0);
+		return 0;
+	}
+	
 	RemoveAll();
 	Add(color1); // always
 

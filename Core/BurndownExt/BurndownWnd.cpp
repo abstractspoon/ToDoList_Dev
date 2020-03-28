@@ -62,7 +62,6 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	CDialog(IDD_STATISTICS_DLG, pParent),
 	m_nGraph(BCT_TIMESERIES_REMAININGDAYS),
 	m_dwUpdateGraphOnShow(0),
-	m_nGraphOption(BGO_NONE),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
 	m_chart(m_data),
 // #pragma warning(disable:4355)
@@ -93,7 +92,6 @@ void CBurndownWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_ACTIVEDATERANGE, m_sliderDateRange);
 
 	m_cbGraphs.DDX(pDX, m_nGraph);
-	m_cbOptions.DDX(pDX, m_nGraphOption);
 }
 
 
@@ -203,7 +201,6 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	//CString sKey(szKey);
 
 	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nGraph);
-	pPrefs->WriteProfileInt(szKey, _T("GraphOption"), m_nGraphOption);
 
 	// Active date range
 	pPrefs->DeleteProfileSection(_T("ActiveRange"));
@@ -222,7 +219,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 		pPrefs->DeleteProfileSection(_T("ActiveRange"));
 	}
 
-	//m_dlgPrefs.SavePreferences(pPrefs, szKey);
+	m_chart.SavePreferences(pPrefs, szKey);
 }
 
 void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
@@ -237,15 +234,11 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (!IsValidGraph(m_nGraph))
 			m_nGraph = BCT_TIMESERIES_INCOMPLETETASKS;
 
+		m_chart.LoadPreferences(pPrefs, szKey);
 		m_chart.SetActiveGraph(m_nGraph);
+
 		m_cbOptions.SetActiveGraph(m_nGraph);
-
-		m_nGraphOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, _T("GraphOption"), BGO_TREND_BESTFIT);
-
-		if (!IsValidOption(m_nGraphOption, m_nGraph))
-			m_nGraphOption = BGO_NONE;
-
-		m_chart.SetGraphOption(m_nGraphOption);
+		m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
 
 		// Active range
 		m_dtPrevActiveRange.Reset();
@@ -256,7 +249,6 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		if (dEnd > dStart)
 			VERIFY(m_dtPrevActiveRange.Set(dStart, dEnd));
 
-		//m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 		//m_chart.SetGraphColors(m_dlgPrefs.GetGraphColors());
 
 		UpdateData(FALSE);
@@ -710,7 +702,9 @@ void CBurndownWnd::OnSelchangeDisplay()
 	UpdateData();
 
 	m_chart.SetActiveGraph(m_nGraph);
+
 	m_cbOptions.SetActiveGraph(m_nGraph);
+	m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -845,7 +839,5 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 
 void CBurndownWnd::OnOptionChanged()
 {
-	UpdateData();
-
-	m_chart.SetGraphOption(m_nGraphOption);
+	m_chart.SetActiveGraphOption(m_cbOptions.GetSelectedOption());
 }

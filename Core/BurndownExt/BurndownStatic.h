@@ -73,11 +73,11 @@ static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPHOPTION nOption)
 
 static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPHTYPE nType)
 {
-	if (nOption == BGO_NONE)
-		return TRUE;
-
 	if (nType == BCT_UNKNOWNTYPE)
 		return FALSE;
+
+	if (nOption == BGO_NONE)
+		return TRUE;
 
 	return (GetGraphType(nOption) == nType);
 }
