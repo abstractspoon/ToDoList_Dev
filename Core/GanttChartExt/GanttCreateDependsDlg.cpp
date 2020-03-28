@@ -334,6 +334,7 @@ void CGanttCreateDependsDlg::UpdatePrompt()
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
 	CStringArray aStages;
+	const CString ENDL('\n'), TAB('\t');
 
 	switch (m_nMode)
 	{
@@ -344,7 +345,7 @@ void CGanttCreateDependsDlg::UpdatePrompt()
 		}
 		else
 		{
-			aStages.Add(CEnString(IDS_PICKINGFROMTASK) + CEnString(IDS_PICKED));
+			aStages.Add(CEnString(IDS_PICKINGFROMTASK) + TAB + CEnString(IDS_PICKED) + ENDL);
 			aStages.Add(CEnString(IDS_PICKINGTOTASKADD));
 		}
 		break;
@@ -356,7 +357,7 @@ void CGanttCreateDependsDlg::UpdatePrompt()
 		}
 		else
 		{
-			aStages.Add(CEnString(IDS_PICKINGFROMDEPEND_EDIT) + CEnString(IDS_PICKED));
+			aStages.Add(CEnString(IDS_PICKINGFROMDEPEND_EDIT) + TAB + CEnString(IDS_PICKED) + ENDL);
 			aStages.Add(CEnString(IDS_PICKINGTOTASKEDIT));
 		}
 		break;

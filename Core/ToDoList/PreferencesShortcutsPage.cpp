@@ -129,7 +129,6 @@ void CPreferencesShortcutsPage::OnFirstShow()
 
 		if (m_bShowCommandIDs)
 			m_tcCommands.RecalcGutterColumn(PSP_COMMANDIDCOLUMNID);
-			//AddCommandIDsToTree(TVI_ROOT, TRUE);
 
 		// add miscellaneous un-editable shortcuts
 		AddMiscShortcuts();
@@ -146,14 +145,12 @@ void CPreferencesShortcutsPage::OnFirstShow()
 
 HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos)
 {
-	// delete the debug menu in release build
-#ifndef _DEBUG
+	// Exclude the debug menu
 	if (pMenu->GetMenuItemID(nPos) == (UINT)-1)
 	{
 		if (pMenu->GetSubMenu(nPos)->GetMenuItemID(0) == ID_DEBUGENDSESSION)
 			return NULL;
 	}
-#endif
 
 	CString sItem;
 	pMenu->GetMenuString(nPos, sItem, MF_BYPOSITION);

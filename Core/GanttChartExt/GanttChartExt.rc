@@ -365,12 +365,12 @@ BEGIN
     ID_GANTT_DELETEDEPENDS  "\nDelete Dependency"
     IDS_PICKINGFROMDEPEND_EDIT "Pick a dependency 'arrow' to edit... "
     IDS_PICKINGFROMDEPEND_DELETE "Pick a dependency 'arrow' to delete..."
-    IDS_PICKINGTOTASKEDIT   "Pick the the 'bar' of new task on which the just picked task will be dependent..."
+    IDS_PICKINGTOTASKEDIT   "Pick the 'bar' of the new task on which the just picked task will be dependent..."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_PICKED              "Done!\n"
+    IDS_PICKED              "Done!"
     IDS_CREATEDEPEND_TITLE  "Create Task Dependency"
     IDS_EDITDEPEND_TITLE    "Edit Task Dependency"
     IDS_DELETEDEPEND_TITLE  "Delete Task Dependency"

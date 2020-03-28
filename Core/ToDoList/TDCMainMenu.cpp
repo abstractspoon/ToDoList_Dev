@@ -102,6 +102,7 @@ void CTDCMainMenu::LoadMenuCommon()
 	ASSERT(GetSafeHmenu());
 
 #ifndef _DEBUG
+	// Exclude the debug menu in release builds
 	DeleteMenu(AM_DEBUG, MF_BYPOSITION);
 #endif
 
