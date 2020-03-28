@@ -26,10 +26,14 @@ static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph)
 	if (nGraph == BCT_UNKNOWNGRAPH)
 		return BCT_UNKNOWNTYPE;
 
-	for (int nType = 0; nType < (BCT_NUMTYPES - 1); nType++)
+	for (int nType = 0; nType < NUM_GRAPHTYPES; nType++)
 	{
-		int nRangeStart = GRAPHTYPES[nType].nType;
-		int nRangeEnd = (GRAPHTYPES[nType + 1].nType - 1);
+		int nRangeStart = GRAPHTYPES[nType].nType, nRangeEnd;
+
+		if (nType == (NUM_GRAPHTYPES - 1))
+			nRangeEnd = BCT_NUMGRAPHS;
+		else
+			nRangeEnd = (GRAPHTYPES[nType + 1].nType - 1);
 
 		if ((nGraph >= nRangeStart) && (nGraph <= nRangeEnd))
 			return GRAPHTYPES[nType].nType;
