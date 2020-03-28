@@ -62,7 +62,7 @@ void safestrncpy(char* dest, unsigned int destLen, const char* src, int count)
 #if _MSC_VER >= 1400
 	strncpy_s(dest, destLen, src, count);
 #else
-	strncpy(dest, src);
+	strncpy(dest, src, count);
 #endif
 }
 

@@ -102,7 +102,9 @@ int CBurndownChart::BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& 
 	CArray<SORTITEM, SORTITEM&> aSort;
 	SORTITEM st;
 
-	for (int nItem = 0; nItem < BCT_NUMGRAPHS; nItem++)
+	int nItem;
+
+	for (nItem = 0; nItem < BCT_NUMGRAPHS; nItem++)
 	{
 		BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)nItem;
 		ASSERT(IsValidGraph(nGraph));
@@ -118,7 +120,7 @@ int CBurndownChart::BuildSortedGraphList(BURNDOWN_GRAPHTYPE nType, CGraphArray& 
 
 	Misc::SortArrayT<SORTITEM>(aSort, SortProc);
 
-	int nItem = aSort.GetSize();
+	nItem = aSort.GetSize();
 	aGraphs.SetSize(nItem);
 
 	while (nItem--)

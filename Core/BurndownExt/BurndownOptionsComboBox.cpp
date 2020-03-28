@@ -96,8 +96,9 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	// Build our own sorted array because we have leading numbers
 	CArray<SORTITEM, SORTITEM&> aOptions;
 	SORTITEM st;
+	int nItem;
 
-	for (int nItem = 0; nItem < NUM_COMBO; nItem++)
+	for (nItem = 0; nItem < NUM_COMBO; nItem++)
 	{
 		const COMBOOPTION& opt = COMBOOPTIONS[nItem];
 
@@ -115,7 +116,7 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	BURNDOWN_GRAPHOPTION nSelOpt = GetSelectedOption();
 	ResetContent();
 	
-	for (int nItem = 0; nItem < aOptions.GetSize(); nItem++)
+	for (nItem = 0; nItem < aOptions.GetSize(); nItem++)
 	{
 		const SORTITEM& st = aOptions[nItem];
 		CDialogHelper::AddString(*this, st.sLabel, st.nOption);

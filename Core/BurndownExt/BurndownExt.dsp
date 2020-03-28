@@ -136,15 +136,15 @@ SOURCE=.\BurndownGraphs.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\BurndownOptionsComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\BurndownPreferencesDlg.cpp
 # End Source File
 # Begin Source File
 
 SOURCE=.\BurndownStruct.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=.\BurndownTrendComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -190,15 +190,15 @@ SOURCE=.\BurndownGraphs.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\BurndownOptionsComboBox.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\BurndownPreferencesDlg.h
 # End Source File
 # Begin Source File
 
 SOURCE=.\BurndownStruct.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\BurndownTrendComboBox.h
 # End Source File
 # Begin Source File
 
