@@ -170,6 +170,7 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
 
 		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
+/*
 		CString sColors = pPrefs->GetProfileString(szKey, sGraphKey);
 
 		if (!sColors.IsEmpty()) // first time will fail
@@ -179,6 +180,7 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 
 			pGraph->SetColors(aColors);
 		}
+*/
 
 		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
 		pGraph->SetOption((BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, BGO_NONE));
