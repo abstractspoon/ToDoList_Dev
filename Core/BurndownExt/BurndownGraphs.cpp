@@ -949,10 +949,22 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 
 CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
+	int nNumColors = GetNumColors();
+
+	if (!nNumColors)
+	{
+		ASSERT(0);
+		return _T("");
+	}
+
 	CString sTooltip;
 	double dCount = 0.0;
-	
-	if (datasets[0].GetData(nHit, dCount))
+
+	// We use multiple datasets to give each data point its own colour
+	int nNumDatasets = min(nNumColors, HMX_MAX_DATASET);
+	int nDataset = (nHit % nNumDatasets);
+		
+	if (datasets[nDataset].GetData(nHit, dCount))
 	{
 		ASSERT(m_aAttribValues.GetSize() > nHit);
 		sTooltip.Format(CEnString(IDS_TOOLTIP_ATTRIBFREQUENCY), m_aAttribValues[nHit], (int)dCount);
