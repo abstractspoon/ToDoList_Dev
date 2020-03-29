@@ -1460,7 +1460,7 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 			case GMIS_SELECTED:
 				// Similar to windows 10 colours
 				crBorder = RGB(90, 180, 255); 
-				crFill = (bTransparent ? crBorder : (160, 215, 255));
+				crFill = (bTransparent ? crBorder : RGB(160, 215, 255));
 				break;
 			
 			case GMIS_SELECTEDNOTFOCUSED:
