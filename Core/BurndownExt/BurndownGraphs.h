@@ -30,6 +30,7 @@ public:
 	BOOL SetColors(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
 	void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 	COLORREF GetColor(int nColor) const;
+	int GetNumColors() const;
 
 	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption);
 	BURNDOWN_GRAPHOPTION GetOption() const;
@@ -215,7 +216,7 @@ protected:
 protected:
 	CAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph);
 
-	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, COLORREF crGraph, CHMXDataset& dataset) const;
+	void BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const;
 
 };
 

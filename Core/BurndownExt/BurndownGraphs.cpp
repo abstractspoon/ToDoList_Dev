@@ -135,11 +135,17 @@ BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
 
 COLORREF CGraphBase::GetColor(int nColor) const
 {
-	if (nColor < 0 || nColor >= m_aColors.GetSize())
+	int nNumColors = GetNumColors();
+
+	if ((nColor < 0) || (nNumColors == 0))
 	{
 		ASSERT(0);
 		return CLR_NONE;
 	}
+
+	// Rotate through colours
+	nColor = (nColor % nNumColors);
+	ASSERT(nColor < nNumColors);
 
 	return m_aColors[nColor];
 }
@@ -156,7 +162,7 @@ BOOL CGraphBase::SetOption(BURNDOWN_GRAPHOPTION nOption)
 	return TRUE;
 }
 
-int CGraphBase::SetColors(COLORREF color1, COLORREF color2, COLORREF color3)
+BOOL CGraphBase::SetColors(COLORREF color1, COLORREF color2, COLORREF color3)
 {
 	return (m_aColors.Set(color1, color2, color3) > 0);
 }
@@ -176,6 +182,11 @@ BOOL CGraphBase::SetColors(const CColorArray& aColors)
 const CColorArray& CGraphBase::GetColors() const
 {
 	return m_aColors;
+}
+
+int CGraphBase::GetNumColors() const
+{
+	return m_aColors.GetSize();
 }
 
 BOOL CGraphBase::IsValidOption(BURNDOWN_GRAPHOPTION nOption) const
@@ -872,28 +883,48 @@ void CAttributeFrequencyGraph::RebuildXScale(const CStatsItemCalculator& /*calcu
 	aLabels.Copy(m_aAttribValues);
 }
 
-void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, COLORREF crGraph, CHMXDataset& dataset) const
+void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
+	int nNumColors = GetNumColors();
+
+	if (!nNumColors)
+	{
+		ASSERT(0);
+		return;
+	}
+
 	// Save off attrib values for building horizontal labels
 	m_aAttribValues.RemoveAll();
 
 	int nNumAttrib = aFrequencies.GetSize();
-	int nMaxFreq = 0;
 
 	if (nNumAttrib)
 	{
-		SetDatasetColor(dataset, crGraph);
+		// Use a different dataset for as many colours as we
+		// have so that each data point has a different color
+		int nMaxFreq = 0;
+		int nNumDatasets = min(nNumColors, HMX_MAX_DATASET);
 
-		dataset.SetStyle(HMX_DATASET_STYLE_VBAR);
-		dataset.SetSize(5); // 50% of spacing
-		dataset.SetMin(0.0);
-		dataset.SetDatasetSize(nNumAttrib);
-
-		for (int nItem = 0; nItem < nNumAttrib; nItem++)
+		for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
 		{
-			const FREQUENCYITEM& fi = aFrequencies[nItem];
+			int nDataset = (nAttrib % nNumDatasets);
 
-			dataset.SetData(nItem, fi.nCount);
+			CHMXDataset& dataset = datasets[nDataset];
+
+			// Initialise each dataset once only
+			if (nAttrib < nNumDatasets)
+			{
+				SetDatasetColor(dataset, GetColor(nDataset));
+
+				dataset.SetStyle(HMX_DATASET_STYLE_VBAR);
+				dataset.SetSize(5); // 50% of spacing
+				dataset.SetMin(0.0);
+				dataset.ClearData();
+				dataset.SetDatasetSize(nNumAttrib);
+			}
+
+			const FREQUENCYITEM& fi = aFrequencies[nAttrib];
+			dataset.SetData(nAttrib, fi.nCount);
 
 			if (fi.sLabel.IsEmpty())
 				m_aAttribValues.Add(CEnString(IDS_NONE));
@@ -907,7 +938,11 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 		if (nMaxFreq)
 		{
 			double dMax = HMXUtils::CalcMaxYAxisValue(nMaxFreq, 10);
-			dataset.SetMax(dMax);
+
+			int nDataset = nNumDatasets;
+
+			while (nDataset--)
+				datasets[nDataset].SetMax(dMax);
 		}
 	}
 }
@@ -937,7 +972,7 @@ CCategoryFrequencyGraph::CCategoryFrequencyGraph()
 	: 
 	CAttributeFrequencyGraph(BCT_FREQUENCY_CATEGORY)
 {
-	SetColors(COLOR_BLUE);
+	SetColors(COLOR_BLUE, COLOR_RED, COLOR_YELLOW);
 }
 
 CString CCategoryFrequencyGraph::GetTitle() const
@@ -950,7 +985,7 @@ void CCategoryFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetCategoryFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, GetColor(0), datasets[0]);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
@@ -959,7 +994,7 @@ CStatusFrequencyGraph::CStatusFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_STATUS)
 {
-	SetColors(COLOR_GREEN);
+	SetColors(COLOR_GREEN, COLOR_ORANGE, COLOR_BLUE);
 }
 
 CString CStatusFrequencyGraph::GetTitle() const
@@ -972,7 +1007,7 @@ void CStatusFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, C
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetStatusFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, GetColor(0), datasets[0]);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
@@ -981,7 +1016,7 @@ CAllocatedToFrequencyGraph::CAllocatedToFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_ALLOCTO)
 {
-	SetColors(COLOR_PINK);
+	SetColors(COLOR_PINK, COLOR_YELLOW, COLOR_GREEN);
 }
 
 CString CAllocatedToFrequencyGraph::GetTitle() const
@@ -994,7 +1029,7 @@ void CAllocatedToFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculat
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetAllocatedToFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, GetColor(0), datasets[0]);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
@@ -1003,7 +1038,7 @@ CAllocatedByFrequencyGraph::CAllocatedByFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_ALLOCBY)
 {
-	SetColors(COLOR_RED);
+	SetColors(COLOR_RED, COLOR_GREEN, COLOR_YELLOW);
 }
 
 CString CAllocatedByFrequencyGraph::GetTitle() const
@@ -1016,7 +1051,7 @@ void CAllocatedByFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculat
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetAllocatedByFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, GetColor(0), datasets[0]);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
@@ -1025,7 +1060,7 @@ CVersionFrequencyGraph::CVersionFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_VERSION)
 {
-	SetColors(COLOR_YELLOW);
+	SetColors(COLOR_YELLOW, COLOR_PINK, COLOR_BLUE);
 }
 
 CString CVersionFrequencyGraph::GetTitle() const
@@ -1038,7 +1073,7 @@ void CVersionFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, 
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetVersionFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, GetColor(0), datasets[0]);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
@@ -1047,7 +1082,7 @@ CTagFrequencyGraph::CTagFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_TAGS)
 {
-	SetColors(COLOR_ORANGE);
+	SetColors(COLOR_ORANGE, COLOR_GREEN, COLOR_PINK);
 }
 
 CString CTagFrequencyGraph::GetTitle() const
@@ -1060,7 +1095,7 @@ void CTagFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHMX
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetTagFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, GetColor(0), datasets[0]);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
@@ -1069,7 +1104,7 @@ CPriorityFrequencyGraph::CPriorityFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_PRIORITY)
 {
-	SetColors(COLOR_BLUE);
+	SetColors(COLOR_BLUE, COLOR_ORANGE, COLOR_PINK);
 }
 
 CString CPriorityFrequencyGraph::GetTitle() const
@@ -1082,7 +1117,7 @@ void CPriorityFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator,
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetPriorityFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, GetColor(0), datasets[0]);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
 // ---------------------------------------------------------------------------
@@ -1091,7 +1126,7 @@ CRiskFrequencyGraph::CRiskFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_RISK)
 {
-	SetColors(COLOR_GREEN);
+	SetColors(COLOR_GREEN, COLOR_RED, COLOR_BLUE);
 }
 
 CString CRiskFrequencyGraph::GetTitle() const
@@ -1104,6 +1139,6 @@ void CRiskFrequencyGraph::BuildGraph(const CStatsItemCalculator& calculator, CHM
 	CArray<FREQUENCYITEM, FREQUENCYITEM&> aFrequencies;
 	calculator.GetRiskFrequencies(aFrequencies);
 
-	CAttributeFrequencyGraph::BuildGraph(aFrequencies, GetColor(0), datasets[0]);
+	CAttributeFrequencyGraph::BuildGraph(aFrequencies, datasets);
 }
 
