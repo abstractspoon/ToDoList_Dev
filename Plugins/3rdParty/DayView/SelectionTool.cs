@@ -179,14 +179,14 @@ namespace Calendar
                             {
                                 System.DateTime newStart = selection.StartDate.AddHours(hoursDiff);
 
-                                if (newStart < m_dayView.StartDate)
-                                {
-                                    newStart = m_dayView.StartDate;
-                                }
-                                else if ((newStart + apptLen) >= m_dayView.EndDate)
-                                {
-                                    newStart = (m_dayView.EndDate - apptLen);
-                                }
+//                                 if (newStart < m_dayView.StartDate)
+//                                 {
+//                                     newStart = m_dayView.StartDate;
+//                                 }
+//                                 else if ((newStart + apptLen) >= m_dayView.EndDate)
+//                                 {
+//                                     newStart = (m_dayView.EndDate - apptLen);
+//                                 }
 
                                 if (newStart != selection.StartDate)
                                 {
