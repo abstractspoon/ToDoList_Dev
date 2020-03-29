@@ -200,7 +200,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	
 	//CString sKey(szKey);
 
-	pPrefs->WriteProfileInt(szKey, _T("GraphType"), m_nGraph);
+	pPrefs->WriteProfileInt(szKey, _T("ActiveGraph"), m_nGraph);
 
 	// Active date range
 	pPrefs->DeleteProfileSection(_T("ActiveRange"));
@@ -229,7 +229,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	// burn down specific options
 	if (!bAppOnly)
 	{
-		m_nGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("GraphType"), BCT_TIMESERIES_INCOMPLETETASKS);
+		m_nGraph = (BURNDOWN_GRAPH)pPrefs->GetProfileInt(szKey, _T("ActiveGraph"), BCT_TIMESERIES_INCOMPLETETASKS);
 		
 		if (!IsValidGraph(m_nGraph))
 			m_nGraph = BCT_TIMESERIES_INCOMPLETETASKS;
