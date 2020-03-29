@@ -376,7 +376,7 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 {
 	CHMXChartEx::DoPaint(dc, bPaintBkgnd);
 
-	if ((m_crToday != CLR_NONE) && (GetGraphType(m_nActiveGraph) == BCT_TIMESERIES))
+	if ((m_rectData.Height() > 0) && (m_crToday != CLR_NONE) && (GetGraphType(m_nActiveGraph) == BCT_TIMESERIES))
 	{
 		CGraphBase* pGraph = NULL;
 		GET_GRAPH(m_nActiveGraph);
