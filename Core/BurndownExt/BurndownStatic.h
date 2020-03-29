@@ -52,14 +52,15 @@ static BOOL IsValidGraph(BURNDOWN_GRAPH nGraph)
 
 static const GRAPHOPTION GRAPHOPTIONS[] = 
 {
-	{ BGO_TREND_NONE,			BCT_TIMESERIES	},
-	{ BGO_TREND_BESTFIT,		BCT_TIMESERIES,	},
+	{ BGO_TREND_BESTFIT,		BCT_TIMESERIES,	}, // default
 	{ BGO_TREND_7DAYAVERAGE,	BCT_TIMESERIES, },
 	{ BGO_TREND_30DAYAVERAGE,	BCT_TIMESERIES, },
 	{ BGO_TREND_90DAYAVERAGE,	BCT_TIMESERIES, },
+	{ BGO_TREND_NONE,			BCT_TIMESERIES	},
 
-	{ BGO_FREQUENCY_BAR,		BCT_FREQUENCY, },
+	{ BGO_FREQUENCY_BAR,		BCT_FREQUENCY, }, // default
 	{ BGO_FREQUENCY_LINE,		BCT_FREQUENCY, },
+	{ BGO_FREQUENCY_PIE,		BCT_FREQUENCY, },
 };
 
 static const int NUM_OPTIONS = sizeof(GRAPHOPTIONS) / sizeof(GRAPHOPTION);
@@ -102,6 +103,11 @@ static BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPHTYPE nType)
 
 	ASSERT(0);
 	return BGO_INVALID;
+}
+
+static BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPH nGraph)
+{
+	return GetDefaultOption(GetGraphType(nGraph));
 }
 
 /////////////////////////////////////////////////////////////////////////////

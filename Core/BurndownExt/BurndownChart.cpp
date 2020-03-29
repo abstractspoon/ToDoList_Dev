@@ -183,7 +183,7 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 */
 
 		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, BGO_INVALID);
+		BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, GetDefaultOption(nGraph));
 
 		if (nOption != BGO_INVALID)
 			pGraph->SetOption(nOption);
