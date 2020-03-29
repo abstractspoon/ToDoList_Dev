@@ -913,7 +913,7 @@ namespace DayViewUIExtension
 
 			if ((taskItem != null) && !ReadOnly)
 			{
-				if (taskItem.IsLocked)
+				if (taskItem.Locked)
 					return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 				if (taskItem.IconRect.Contains(e.Location))
@@ -924,6 +924,7 @@ namespace DayViewUIExtension
 				if (!CanResizeTask(taskItem, mode))
 					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 
+				// Same as Calendar.SelectionTool
 				switch (mode)
 				{
 					case Calendar.SelectionTool.Mode.ResizeBottom:

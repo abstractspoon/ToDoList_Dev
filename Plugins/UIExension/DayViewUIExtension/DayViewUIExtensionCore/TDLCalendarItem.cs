@@ -70,7 +70,6 @@ namespace DayViewUIExtension
         public Boolean IsDone { get; set; }
         public Boolean IsGoodAsDone { get; set; }
         public Boolean IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
-        public Boolean IsLocked { get; set; }
 		public Boolean HasDependencies { get; set; }
 		public double TimeEstimate { get; set; }
         public Task.TimeUnits TimeEstUnits { get; set; }
@@ -188,7 +187,7 @@ namespace DayViewUIExtension
 				IsParent = task.IsParent();
 				TaskTextColor = task.GetTextDrawingColor();
 				DrawBorder = true;
-				IsLocked = task.IsLocked(true);
+				Locked = task.IsLocked(true);
 				HasDependencies = (task.GetDependency().Count > 0);
 
 				Task.TimeUnits units = Task.TimeUnits.Unknown;
@@ -255,7 +254,7 @@ namespace DayViewUIExtension
 					HasDependencies = (task.GetDependency().Count > 0);
 
 				TaskTextColor = task.GetTextDrawingColor();
-				IsLocked = task.IsLocked(true);
+				Locked = task.IsLocked(true);
 			}
 
 			UpdateOriginalDates();

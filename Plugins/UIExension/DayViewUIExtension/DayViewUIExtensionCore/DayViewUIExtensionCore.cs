@@ -607,7 +607,7 @@ namespace DayViewUIExtension
 
 			var taskItem = (appointment as CalendarItem);
 
-			if ((taskItem == null) || taskItem.IsLocked)
+			if ((taskItem == null) || taskItem.Locked)
 				return;
 
 			if (taskItem.IconRect.Contains(e.Location))

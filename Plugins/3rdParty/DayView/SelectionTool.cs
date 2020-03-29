@@ -284,13 +284,13 @@ namespace Calendar
 			if (m_mode != Mode.None)
 				return m_mode;
 
-            DayView.AppointmentView view = null;
-            Boolean gotview = false;
-
-            if (appointment == null)
+            if ((appointment == null) || appointment.Locked)
                 return Mode.None;
 
-            if (m_dayView.appointmentViews.ContainsKey(appointment))
+			DayView.AppointmentView view = null;
+			Boolean gotview = false;
+
+			if (m_dayView.appointmentViews.ContainsKey(appointment))
             {
                 view = m_dayView.appointmentViews[appointment];
                 gotview = true;
