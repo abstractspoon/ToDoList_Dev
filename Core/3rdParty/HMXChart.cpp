@@ -886,8 +886,8 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 					nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
 					nTemp1 = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
 					
-					rBar.top    = m_rectData.bottom - (int)(nTemp);
-					rBar.bottom = m_rectData.bottom - (int)(nTemp1);
+					rBar.top    = (int)(m_rectData.bottom - nTemp);
+					rBar.bottom = (int)(m_rectData.bottom - nTemp1);
 
 					// Ensure something is visible
 					if (rBar.Height() == 0)
@@ -899,8 +899,8 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 					nZeroLine = m_nYMax < 0 ? m_nYMax : 0;
 					nTemp1 = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
 					
-					rBar.top    = m_rectData.bottom - (int)(nTemp1);
-					rBar.bottom = m_rectData.bottom - (int)(nTemp);
+					rBar.top    = (int)(m_rectData.bottom - nTemp1);
+					rBar.bottom = (int)(m_rectData.bottom - nTemp);
 
 					// Ensure something is visible
 					if (rBar.Height() == 0)
