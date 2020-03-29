@@ -100,7 +100,10 @@ BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
 
 /////////////////////////////////////////////////////////////////////////////
 
-CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph) : m_nGraph(nGraph), m_nOption(BGO_NONE)
+CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption) 
+	: 
+	m_nGraph(nGraph), 
+	m_nOption(nOption)
 {
 	ASSERT(IsValidGraph(m_nGraph));
 }
@@ -121,6 +124,14 @@ void CGraphBase::SetDatasetColor(CHMXDataset& dataset, COLORREF crBase)
 {
 	dataset.SetLineColor(GraphicsMisc::Darker(crBase, 0.05, FALSE));
 	dataset.SetFillColor(GraphicsMisc::Lighter(crBase, 0.25, FALSE));
+}
+
+void CGraphBase::ClearData(CHMXDataset datasets[HMX_MAX_DATASET])
+{
+	int nDataset = HMX_MAX_DATASET;
+
+	while (nDataset--)
+		datasets[nDataset].ClearData();
 }
 
 BURNDOWN_GRAPHTYPE CGraphBase::GetType() const
@@ -194,9 +205,14 @@ BOOL CGraphBase::IsValidOption(BURNDOWN_GRAPHOPTION nOption) const
 	return ::IsValidOption(nOption, m_nGraph);
 }
 
+BOOL CGraphBase::HasOption(BURNDOWN_GRAPHOPTION nOption) const
+{
+	return (nOption == m_nOption);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 
-CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph)
+CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph, BGO_TREND_NONE)
 {
 }
 
@@ -359,13 +375,16 @@ BURNDOWN_GRAPHSCALE CTimeSeriesGraph::CalculateRequiredScale(int nAvailWidth, in
 	return BCS_YEAR;
 }
 
-BOOL CTimeSeriesGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CTimeSeriesGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
 {
+	if (HasOption(nOption))
+		return TRUE;
+
 	if (!CGraphBase::SetOption(nOption))
 		return FALSE;
 
 	if (!CalculateTrendLines(datasets))
-		VERIFY(CGraphBase::SetOption(BGO_NONE));
+		VERIFY(CGraphBase::SetOption(BGO_TREND_NONE));
 
 	return TRUE;;
 }
@@ -376,7 +395,7 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CH
 
 	switch (nOption)
 	{
-	case BGO_NONE:
+	case BGO_TREND_NONE:
 		bSuccess = TRUE;
 		break;
 
@@ -401,7 +420,7 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CH
 		break;
 	}
 
-	if ((nOption == BGO_NONE) || !bSuccess)
+	if ((nOption == BGO_TREND_NONE) || !bSuccess)
 		datasetDest.Reset();
 
 	if (bSuccess)
@@ -867,9 +886,10 @@ BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_
 
 /////////////////////////////////////////////////////////////////////////////
 
-CAttributeFrequencyGraph::CAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph)
+CAttributeFrequencyGraph::CAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph) 
+	: 
+	CGraphBase(nGraph, BGO_FREQUENCY_BAR)
 {
-
 }
 
 CAttributeFrequencyGraph::~CAttributeFrequencyGraph()
@@ -896,14 +916,22 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 	// Save off attrib values for building horizontal labels
 	m_aAttribValues.RemoveAll();
 
+	// Clear all datasets
+	ClearData(datasets);
+			
 	int nNumAttrib = aFrequencies.GetSize();
 
 	if (nNumAttrib)
 	{
 		// Use a different dataset for as many colours as we
 		// have so that each data point has a different color
+		BOOL bLineStyle = HasOption(BGO_FREQUENCY_LINE);
+		int nNumDatasets = (bLineStyle ? 1 : min(nNumColors, HMX_MAX_DATASET));
+		
+		HMX_DATASET_STYLE nStyle = (bLineStyle ? HMX_DATASET_STYLE_AREALINE : HMX_DATASET_STYLE_VBAR);
+		int nSize = (bLineStyle ? 1 : 5);
+		
 		int nMaxFreq = 0;
-		int nNumDatasets = min(nNumColors, HMX_MAX_DATASET);
 
 		for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
 		{
@@ -916,8 +944,8 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 			{
 				SetDatasetColor(dataset, GetColor(nDataset));
 
-				dataset.SetStyle(HMX_DATASET_STYLE_VBAR);
-				dataset.SetSize(5); // 50% of spacing
+				dataset.SetStyle(nStyle);
+				dataset.SetSize(nSize);
 				dataset.SetMin(0.0);
 				dataset.ClearData();
 				dataset.SetDatasetSize(nNumAttrib);
@@ -973,9 +1001,20 @@ CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calcu
 	return sTooltip;
 }
 
-BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION /*nOption*/, CHMXDataset /*datasets*/[HMX_MAX_DATASET])
+BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	return FALSE;
+	if (HasOption(nOption))
+		return TRUE;
+
+	BOOL bRebuild = (HasOption(BGO_FREQUENCY_LINE) || (nOption == BGO_FREQUENCY_LINE));
+	
+	if (!CGraphBase::SetOption(nOption))
+		return FALSE;
+
+	if (bRebuild)
+		BuildGraph(calculator, datasets);
+
+	return TRUE;
 }
 
 // ---------------------------------------------------------------------------

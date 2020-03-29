@@ -26,11 +26,14 @@ struct COMBOOPTION
 
 static const COMBOOPTION COMBOOPTIONS[] =
 {
-	{ IDS_NONE,					BGO_NONE	},
-	{ IDS_TREND_BESTFIT,		BGO_TREND_BESTFIT	},
+	{ IDS_TREND_NONE,			BGO_TREND_NONE }, // default
+	{ IDS_TREND_BESTFIT,		BGO_TREND_BESTFIT },
 	{ IDS_TREND_7DAYAVERAGE,	BGO_TREND_7DAYAVERAGE },
 	{ IDS_TREND_30DAYAVERAGE,	BGO_TREND_30DAYAVERAGE },
 	{ IDS_TREND_90DAYAVERAGE,	BGO_TREND_90DAYAVERAGE },
+
+	{ IDS_FREQUENCY_BAR,		BGO_FREQUENCY_BAR }, // default
+	{ IDS_FREQUENCY_LINE,		BGO_FREQUENCY_LINE },
 };
 
 static const int NUM_COMBO = sizeof(COMBOOPTIONS) / sizeof(COMBOOPTION);
@@ -129,7 +132,7 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 
 	// restore selection
 	if (!IsValidOption(nSelOpt, nGraph))
-		nSelOpt = BGO_NONE;
+		nSelOpt = GetDefaultOption(m_nGraphType);
 
 	SetSelectedOption(nSelOpt);
 

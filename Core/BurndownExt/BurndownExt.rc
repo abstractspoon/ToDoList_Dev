@@ -138,7 +138,7 @@ END
 IDD_STATISTICS_DLG DIALOGEX 0, 0, 477, 281
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Dis&play",IDC_STATIC,0,2,120,8
     COMBOBOX        IDC_DISPLAY,0,13,121,118,CBS_DROPDOWNLIST | 
@@ -261,7 +261,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_NONE                "<none>"
+    IDS_TREND_NONE          "<none>"
     IDS_FREQUENCYDIST       "Frequency Distributions"
     IDS_TIMESERIES          "Time Series"
     IDS_FREQUENCY_CATEGORY  "Category Frequency"
@@ -273,6 +273,8 @@ BEGIN
     IDS_FREQUENCY_PRIORITY  "Priority Frequency"
     IDS_FREQUENCY_RISK      "Risk Frequency"
     IDS_TREND_90DAYAVERAGE  "90 Day Rolling Average"
+    IDS_FREQUENCY_BAR       "Bar Style"
+    IDS_FREQUENCY_LINE      "Line Style"
 END
 
 STRINGTABLE DISCARDABLE 

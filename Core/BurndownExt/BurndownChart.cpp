@@ -146,7 +146,7 @@ BOOL CBurndownChart::SetActiveGraphColors(const CColorArray& aColors)
 BURNDOWN_GRAPHOPTION CBurndownChart::GetActiveGraphOption() const
 {
 	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, BGO_NONE);
+	GET_GRAPH_RET(m_nActiveGraph, BGO_INVALID);
 
 	return pGraph->GetOption();
 }
@@ -183,7 +183,10 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 */
 
 		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		pGraph->SetOption((BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, BGO_NONE));
+		BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, BGO_INVALID);
+
+		if (nOption != BGO_INVALID)
+			pGraph->SetOption(nOption);
 	}
 }
 
@@ -252,8 +255,11 @@ BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
 	if (!pGraph->IsValidOption(nOption))
 		return FALSE;
 
-	if ((nOption != pGraph->GetOption()) && (pGraph->SetOption(nOption, m_datasets)))
-		Invalidate();
+	if (!pGraph->HasOption(nOption))
+	{
+		if (pGraph->SetOption(nOption, m_calculator, m_datasets))
+			Invalidate();
+	}
 
 	return TRUE;
 }

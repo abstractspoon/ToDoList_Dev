@@ -203,6 +203,7 @@ bool CHMXChartEx::DrawHorzGridLines(CDC& dc)
 int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	// Don't remove and redraw the same point if it hasn't changed
+	CHMXChartEx* pThis = const_cast<CHMXChartEx*>(this);
 	int nHit = HitTest(point);
 
 	if (nHit != -1)
@@ -213,23 +214,17 @@ int CHMXChartEx::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		{
 			if (nHit != m_nLastTooltipHit)
 			{
-				const_cast<CHMXChartEx*>(this)->HideLastHighlightedPoint();
+				pThis->HideLastHighlightedPoint();
 
-				if (const_cast<CHMXChartEx*>(this)->HighlightDataPoint(nHit))
-				{
+				if (pThis->HighlightDataPoint(nHit))
 					m_nLastTooltipHit = nHit;
-				}
-				else
-				{
-					ASSERT(0);
-				}
 			}
 
 			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, (nHit + 1), m_rectData);
 		}
 	}
 
-	const_cast<CHMXChartEx*>(this)->HideLastHighlightedPoint();
+	pThis->HideLastHighlightedPoint();
 
 	return CHMXChart::OnToolHitTest(point, pTI);
 }

@@ -52,14 +52,19 @@ static BOOL IsValidGraph(BURNDOWN_GRAPH nGraph)
 
 static const GRAPHOPTION GRAPHOPTIONS[] = 
 {
-	{ BGO_NONE,					BCT_UNKNOWNTYPE	},
+	{ BGO_TREND_NONE,			BCT_TIMESERIES	},
 	{ BGO_TREND_BESTFIT,		BCT_TIMESERIES,	},
 	{ BGO_TREND_7DAYAVERAGE,	BCT_TIMESERIES, },
 	{ BGO_TREND_30DAYAVERAGE,	BCT_TIMESERIES, },
 	{ BGO_TREND_90DAYAVERAGE,	BCT_TIMESERIES, },
+
+	{ BGO_FREQUENCY_BAR,		BCT_FREQUENCY, },
+	{ BGO_FREQUENCY_LINE,		BCT_FREQUENCY, },
 };
 
 static const int NUM_OPTIONS = sizeof(GRAPHOPTIONS) / sizeof(GRAPHOPTION);
+
+// -------------------------------------------------------------------
 
 static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPHOPTION nOption)
 {
@@ -71,17 +76,13 @@ static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPHOPTION nOption)
 			return GRAPHOPTIONS[nOpt].nType;
 	}
 
-	ASSERT(0);
 	return BCT_UNKNOWNTYPE;
 }
 
 static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPHTYPE nType)
 {
-	if (nType == BCT_UNKNOWNTYPE)
+	if ((nType == BCT_UNKNOWNTYPE) || (nOption == BGO_INVALID))
 		return FALSE;
-
-	if (nOption == BGO_NONE)
-		return TRUE;
 
 	return (GetGraphType(nOption) == nType);
 }
@@ -89,6 +90,18 @@ static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPHTYPE nType
 static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph)
 {
 	return IsValidOption(nOption, GetGraphType(nGraph));
+}
+
+static BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPHTYPE nType)
+{
+	for (int nItem = 0; nItem < NUM_OPTIONS; nItem++)
+	{
+		if (nType == GRAPHOPTIONS[nItem].nType)
+			return GRAPHOPTIONS[nItem].nOption;
+	}
+
+	ASSERT(0);
+	return BGO_INVALID;
 }
 
 /////////////////////////////////////////////////////////////////////////////
