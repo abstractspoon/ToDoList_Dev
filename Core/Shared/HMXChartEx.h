@@ -51,6 +51,7 @@ protected:
 	virtual CString GetTooltip(int nHit) const;
 	virtual int HitTest(const CPoint& ptClient) const;
 	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd);
+	virtual BOOL HighlightDataPoint(int nIndex);
 
 	// Generated message map functions
 	//{{AFX_MSG(CHMXChartEx)
@@ -64,7 +65,6 @@ protected:
 	BOOL InitTooltip(BOOL bMultiline);
 	int GetNumYSubTicks(double dInterval) const;
 
-	BOOL HighlightDataPoint(int nIndex);
 	void HideLastHighlightedPoint();
 	int CalcXScaleFontSize(BOOL bTitle) const;
 	int CalcYScaleFontSize(BOOL bTitle) const;
