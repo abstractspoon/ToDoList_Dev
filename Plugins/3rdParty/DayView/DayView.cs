@@ -1897,19 +1897,6 @@ namespace Calendar
             hscroll.Height = dayHeadersHeight;
         }
 
-        class SlotLayout
-        {
-			public SlotLayout(int maxAppts = 20)
-			{
-				Groups = new List<string>();
-				Appointments = new Appointment[maxAppts];
-			}
-
-            public int ApptCount;
-            public List<string> Groups { get; }
-            public Appointment[] Appointments { get; }
-        }
-
         internal class AppointmentView
         {
             public AppointmentView(Appointment appt, Rectangle rect)
