@@ -33,9 +33,9 @@ static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPH nGraph)
 		if (nType == (NUM_GRAPHTYPES - 1))
 			nRangeEnd = BCT_NUMGRAPHS;
 		else
-			nRangeEnd = (GRAPHTYPES[nType + 1].nType - 1);
+			nRangeEnd = GRAPHTYPES[nType + 1].nType;
 
-		if ((nGraph >= nRangeStart) && (nGraph <= nRangeEnd))
+		if ((nGraph >= nRangeStart) && (nGraph < nRangeEnd))
 			return GRAPHTYPES[nType].nType;
 	}
 
