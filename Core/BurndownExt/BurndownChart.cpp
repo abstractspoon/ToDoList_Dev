@@ -195,7 +195,7 @@ void CBurndownChart::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
 
 		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-		pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
+		//pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
 
 		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
 		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOption());
