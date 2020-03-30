@@ -294,6 +294,7 @@ public:
 	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush = NULL);
 	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush = NULL);
 	static BOOL DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees, gdix_Brush* brush = NULL);
+	static BOOL DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees);
 
 	static BOOL FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_PointF* points, int count);
 	static BOOL FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect);
@@ -310,6 +311,7 @@ public:
 	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush = NULL);
 	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush = NULL);
 	static BOOL DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees, gdix_Brush* brush = NULL);
+	static BOOL DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees);
 	
 	static BOOL FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count);
 	static BOOL FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect);

@@ -281,7 +281,8 @@ BOOL CBurndownChart::HighlightDataPoint(int nIndex)
 	CGraphBase* pGraph = NULL;
 	GET_GRAPH_RET(m_nActiveGraph, FALSE);
 
-	if (pGraph->HasOption(BGO_FREQUENCY_PIE))
+	if (pGraph->HasOption(BGO_FREQUENCY_PIE) || 
+		pGraph->HasOption(BGO_FREQUENCY_DONUT))
 	{ 
 		// we handle it ourselves for now
 		// TODO
@@ -454,7 +455,9 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 
 bool CBurndownChart::DrawGrid(CDC& dc)
 {
-	if (GetActiveGraphOption() == BGO_FREQUENCY_PIE)
+	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
+
+	if (nOption == BGO_FREQUENCY_PIE || nOption == BGO_FREQUENCY_DONUT)
 		return false;
 
 	return CHMXChartEx::DrawGrid(dc);
@@ -462,7 +465,9 @@ bool CBurndownChart::DrawGrid(CDC& dc)
 
 bool CBurndownChart::DrawAxes(CDC &dc)
 {
-	if (GetActiveGraphOption() == BGO_FREQUENCY_PIE)
+	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
+
+	if (nOption == BGO_FREQUENCY_PIE || nOption == BGO_FREQUENCY_DONUT)
 		return false;
 
 	return CHMXChartEx::DrawAxes(dc);
@@ -470,7 +475,9 @@ bool CBurndownChart::DrawAxes(CDC &dc)
 
 bool CBurndownChart::DrawBaseline(CDC& dc)
 {
-	if (GetActiveGraphOption() == BGO_FREQUENCY_PIE)
+	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
+
+	if (nOption == BGO_FREQUENCY_PIE || nOption == BGO_FREQUENCY_DONUT)
 		return false;
 
 	return CHMXChartEx::DrawBaseline(dc);
@@ -487,7 +494,9 @@ bool CBurndownChart::DrawXScale(CDC& dc, BOOL bTitleOnly)
 
 bool CBurndownChart::DrawYScale(CDC& dc, BOOL bTitleOnly)
 {
-	if (GetActiveGraphOption() == BGO_FREQUENCY_PIE)
+	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
+
+	if (nOption == BGO_FREQUENCY_PIE || nOption == BGO_FREQUENCY_DONUT)
 		return false;
 
 	return CHMXChartEx::DrawYScale(dc, bTitleOnly);
@@ -495,27 +504,35 @@ bool CBurndownChart::DrawYScale(CDC& dc, BOOL bTitleOnly)
 
 bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 {
-	ASSERT(GetActiveGraphOption() != BGO_FREQUENCY_PIE);
+	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
+	ASSERT(nOption != BGO_FREQUENCY_PIE || nOption != BGO_FREQUENCY_DONUT);
 
 	return CHMXChartEx::DrawDataset(dc, nDatasetIndex, alpha);
 }
 
 bool CBurndownChart::DrawDatasets(CDC &dc)
 {
-	if (GetActiveGraphOption() == BGO_FREQUENCY_PIE)
-		return DrawPieChart(dc);
+	switch (GetActiveGraphOption())
+	{
+	case BGO_FREQUENCY_PIE:
+		return DrawPieChart(dc, FALSE);
+
+	case BGO_FREQUENCY_DONUT:
+		return DrawPieChart(dc, TRUE);
+	}
 
 	return CHMXChartEx::DrawDatasets(dc);
 }
 
-bool CBurndownChart::DrawPieChart(CDC &dc)
+bool CBurndownChart::DrawPieChart(CDC &dc, BOOL bDonut)
 {
 	CGraphBase* pGraph = NULL;
 	GET_GRAPH_RET(m_nActiveGraph, false);
 	
-	// Build an array of data items
-	ASSERT(pGraph->HasOption(BGO_FREQUENCY_PIE));
+	ASSERT(!bDonut || pGraph->HasOption(BGO_FREQUENCY_DONUT));
+	ASSERT(bDonut || pGraph->HasOption(BGO_FREQUENCY_PIE));
 
+	// Build an array of data items
 	CStringArray aLabels;
 	int nLabelStep = 1;
 
@@ -555,7 +572,10 @@ bool CBurndownChart::DrawPieChart(CDC &dc)
 	rPie.right = rPie.left + nSize;
 	rPie.top = rPie.bottom - nSize;
 
-	GraphicsMisc::CentreRect(rPie, m_rectData, TRUE, FALSE);
+	GraphicsMisc::CentreRect(rPie, m_rectData, TRUE, TRUE);
+
+	CRect rDonut(rPie);
+	rDonut.DeflateRect((nSize / 4), (nSize / 4));
 
 	for (int nData = 0; nData < nNumData; nData++)
 	{
@@ -568,9 +588,22 @@ bool CBurndownChart::DrawPieChart(CDC &dc)
 			CGdiPlusBrush brush(pi.color, 128);
 
 			CGdiPlus::DrawPie(graphics, pen, rPie, fStartAngle, fSweepAngle, brush);
+
+			if (bDonut)
+				CGdiPlus::DrawArc(graphics, pen, rDonut, fStartAngle, fSweepAngle);
+
 			fStartAngle += fSweepAngle;
 		}
 	}
+
+	if (bDonut)
+	{
+		rDonut.DeflateRect(1, 1);
+		CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(RGB(255, 255, 255)), rDonut);
+	}
+
+	// Draw the labels
+	// TODO
 	
 	return true;
 }

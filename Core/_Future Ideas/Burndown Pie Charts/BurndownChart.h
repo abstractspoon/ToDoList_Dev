@@ -59,8 +59,8 @@ protected:
 
 protected:
 	void RebuildXScale();
-	bool DrawPieChart(CDC &dc);
 	void RefreshGraphTitle();
+	bool DrawPieChart(CDC &dc, BOOL bDonut);
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;

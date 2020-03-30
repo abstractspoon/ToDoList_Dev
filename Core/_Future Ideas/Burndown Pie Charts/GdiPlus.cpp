@@ -252,6 +252,7 @@ typedef gdix_Status (STDAPICALLTYPE *PFNADDPATHRECTANGLE)(gdix_Path*,gdix_Real,g
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINES)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPIE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
+typedef gdix_Status (STDAPICALLTYPE *PFNDRAWARC)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINES)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPOLYGON)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWELLIPSE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
@@ -592,6 +593,13 @@ BOOL CGdiPlus::DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF*
 	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h, startDegrees, sweepDegrees) == gdix_Ok);
 }
 
+BOOL CGdiPlus::DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees)
+{
+	GETPROCADDRESS(PFNDRAWARC, "GdipDrawArc");
+
+	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h, startDegrees, sweepDegrees) == gdix_Ok);
+}
+
 BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_PointF* points, int count)
 {
 	GETPROCADDRESS(PFNFILLPOLYGON2, "GdipFillPolygon2");
@@ -656,6 +664,11 @@ BOOL CGdiPlus::DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect
 BOOL CGdiPlus::DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees, gdix_Brush* brush)
 {
 	return DrawPie(graphics, pen, CGdiPlusRectF(rect), startDegrees, sweepDegrees, brush);
+}
+
+BOOL CGdiPlus::DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees)
+{
+	return DrawArc(graphics, pen, CGdiPlusRectF(rect), startDegrees, sweepDegrees);
 }
 
 BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count)
