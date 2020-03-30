@@ -188,11 +188,13 @@ protected:
 class CGdiPlusPen
 {
 public:
+	CGdiPlusPen();
 	CGdiPlusPen(COLORREF color, int nWidth, gdix_PenStyle nStyle = gdix_PenStyleSolid);
 	virtual ~CGdiPlusPen();
 
 	operator gdix_Pen*() { return m_pen; }
 
+	BOOL Create(COLORREF color, int nWidth, gdix_PenStyle nStyle = gdix_PenStyleSolid);
 	BOOL IsValid() const { return (m_pen != NULL); }
 	BOOL SetStyle(gdix_PenStyle nStyle);
 
@@ -205,10 +207,13 @@ protected:
 class CGdiPlusBrush
 {
 public:
+	CGdiPlusBrush();
 	CGdiPlusBrush(COLORREF color, BYTE alpha = 255);
 	virtual ~CGdiPlusBrush();
 
 	operator gdix_Brush*() const { return m_brush; }
+
+	BOOL Create(COLORREF color, BYTE alpha = 255);
 	BOOL IsValid() const { return (m_brush != NULL); }
 
 protected:

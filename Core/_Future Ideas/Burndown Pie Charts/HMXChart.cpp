@@ -772,27 +772,21 @@ BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int
 	return TRUE;
 }
 
-gdix_PenStyle CHMXChart::GetPenStyle(HMX_DATASET_STYLE nLineStyle)
-{
-	switch (nLineStyle)
-	{
-	case HMX_DATASET_STYLE_LINE:		return gdix_PenStyleSolid;
-	case HMX_DATASET_STYLE_LINE_DASHED:	return gdix_PenStyleDash;
-	case HMX_DATASET_STYLE_LINE_DOTTED: return gdix_PenStyleDot;
-	}
-
-	// all else
-	ASSERT(0);
-	return gdix_PenStyleSolid;
-}
-
-bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
+bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
 
 	CHMXDataset& ds = m_datasets[nDatasetIndex];
 
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
+	return DrawDataset(dc, ds, CDWordArray(), fillOpacity);
+}
+
+bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& aColors, BYTE fillOpacity)
+{
 	if (ds.GetDatasetSize() == 0)
 		return false;
 
@@ -810,9 +804,18 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	while(nFirstSample == HMX_DATASET_VALUE_INVALID);
 	f--;
 
-	double nSample = nFirstSample;
+	// Get default colors
+	int nNumColors = aColors.GetSize();
+	
+	CGdiPlusPen defPen;
+	GetDefaultPen(ds, aColors, defPen);
 
-	switch (ds.GetStyle())
+	CGdiPlusBrush defBrush;
+	GetDefaultBrush(ds, aColors, fillOpacity, defBrush);
+
+	HMX_DATASET_STYLE nStyle = ds.GetStyle();
+
+	switch (nStyle)
 	{
 	case HMX_DATASET_STYLE_LINE:
 	case HMX_DATASET_STYLE_LINE_DASHED:
@@ -821,42 +824,51 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, FALSE);
 
-			if (nPoints < 2)
-				return false;
-
-			CGdiPlusGraphics graphics(dc);
-			CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize(), GetPenStyle(ds.GetStyle()));
-
-			VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData(), points.GetSize()));
-			
-			HMX_DATASET_MARKER nMarker = ds.GetMarker();
-
-			if (nMarker == HMX_DATASET_MARKER_NONE) 
-				break;
-
-			CGdiPlusBrush brush(ds.GetFillColor(), alpha);
-			int nSize = ds.GetSize()*2;
-
-			CArray<gdix_PointF, gdix_PointF&> ptMarker;
-
-			for (f=0; f<nPoints; f++) 
+			if (nPoints >= 2)
 			{
-				VERIFY(GetMarker(nMarker, points[f], nSize, ptMarker));
+				CGdiPlusGraphics graphics(dc);
+				VERIFY(CGdiPlus::DrawLines(graphics, defPen, points.GetData(), points.GetSize()));
+			
+				HMX_DATASET_MARKER nMarker = ds.GetMarker();
 
-				switch (nMarker) 
+				if (nMarker == HMX_DATASET_MARKER_NONE) 
+					break;
+
+				int nSize = ds.GetSize()*2;
+
+				CArray<gdix_PointF, gdix_PointF&> ptMarker;
+
+				for (f=0; f<nPoints; f++) 
 				{
-				case HMX_DATASET_MARKER_TRIANGLE:
-				case HMX_DATASET_MARKER_DIAMOND:
-					VERIFY(CGdiPlus::DrawPolygon(graphics, pen, ptMarker.GetData(), ptMarker.GetSize(), brush));
-					break;
+					VERIFY(GetMarker(nMarker, points[f], nSize, ptMarker));
 
-				case HMX_DATASET_MARKER_SQUARE:
-					VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
-					break;
+					CGdiPlusPen altPen;
+					CGdiPlusBrush altBrush;
 
-				case HMX_DATASET_MARKER_CIRCLE:
-					VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
-					break;
+					if (nNumColors > 1)
+					{
+						altPen.Create(aColors[f % nNumColors], 1);
+						altBrush.Create(aColors[f % nNumColors], fillOpacity);
+					}
+
+					gdix_Pen* itemPen = (altPen.IsValid() ? altPen : defPen);
+					gdix_Brush* itemBrush = (altBrush.IsValid() ? altBrush : defBrush);
+
+					switch (nMarker) 
+					{
+					case HMX_DATASET_MARKER_TRIANGLE:
+					case HMX_DATASET_MARKER_DIAMOND:
+						VERIFY(CGdiPlus::DrawPolygon(graphics, itemPen, ptMarker.GetData(), ptMarker.GetSize(), itemBrush));
+						break;
+
+					case HMX_DATASET_MARKER_SQUARE:
+						VERIFY(CGdiPlus::DrawRect(graphics, itemPen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), itemBrush));
+						break;
+
+					case HMX_DATASET_MARKER_CIRCLE:
+						VERIFY(CGdiPlus::DrawEllipse(graphics, itemPen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), itemBrush));
+						break;
+					}
 				}
 			}
 		}
@@ -866,12 +878,13 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 		{
 			CGdiPlusGraphics graphics(dc);
 			CGdiPlusPen pen(ds.GetLineColor(), 1);
-			CGdiPlusBrush brush(ds.GetFillColor(), alpha);
+			CGdiPlusBrush brush(ds.GetFillColor(), fillOpacity);
 
 			CRect rectTemp;
 
 			for(f=0; f<ds.GetDatasetSize(); f++) 
 			{
+				double nSample = nFirstSample;
 				ds.GetData(f, nSample);
 
 				if (nSample == HMX_DATASET_VALUE_INVALID)
@@ -884,7 +897,7 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 
 				CRect rBar;
 
-				if(nSample > 0.0) 
+				if (nSample > 0.0) 
 				{
 					//  bar is positive
 					nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
@@ -919,7 +932,19 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 				if (rBar.Width() <= 0)
 					rBar.right = (rBar.left + 1);
 
-				VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(rBar), brush));
+				CGdiPlusPen altPen;
+				CGdiPlusBrush altBrush;
+
+				if (nNumColors > 1)
+				{
+					altPen.Create(aColors[f % nNumColors], 1);
+					altBrush.Create(aColors[f % nNumColors], fillOpacity);
+				}
+
+				gdix_Pen* itemPen = (altPen.IsValid() ? altPen : defPen);
+				gdix_Brush* itemBrush = (altBrush.IsValid() ? altBrush : defBrush);
+
+				VERIFY(CGdiPlus::DrawRect(graphics, itemPen, CGdiPlusRectF(rBar), itemBrush));
 			}
 		}
 		break;
@@ -927,32 +952,178 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	case HMX_DATASET_STYLE_AREALINE:
 	case HMX_DATASET_STYLE_AREA:
 		{
-			BOOL bAreaLine = (ds.GetStyle() == HMX_DATASET_STYLE_AREALINE);
+			BOOL bAreaLine = (nStyle == HMX_DATASET_STYLE_AREALINE);
 
 			CGdiPlusGraphics graphics(dc);
-			CGdiPlusBrush brush(ds.GetFillColor(), alpha);
 			
 			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, TRUE);
 
 			if (nPoints > 4)
 			{
-				VERIFY(CGdiPlus::FillPolygon(graphics, brush, points.GetData(), nPoints));
+				VERIFY(CGdiPlus::FillPolygon(graphics, defBrush, points.GetData(), nPoints));
 
 				// draw line too?
 				if (bAreaLine)
 				{
-					CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
-				
 					// don't draw the first/last closure points
-					VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData() + 1, nPoints - 2));
+					VERIFY(CGdiPlus::DrawLines(graphics, defPen, points.GetData() + 1, nPoints - 2));
 				}
+			}
+		}
+		break;
+
+	case HMX_DATASET_STYLE_PIE:
+	case HMX_DATASET_STYLE_PIELINE:
+	case HMX_DATASET_STYLE_DONUT:
+	case HMX_DATASET_STYLE_DONUTLINE:
+		{
+			BOOL bAreaLine = ((nStyle == HMX_DATASET_STYLE_PIELINE) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
+			BOOL bDonut = ((nStyle == HMX_DATASET_STYLE_DONUT) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
+
+			int nNumData = ds.GetDatasetSize();
+			ASSERT(nNumData == m_strarrScaleXLabel.GetSize());
+
+			double dTotalData = 0.0;
+
+			for (int nData = 0; nData < nNumData; nData++)
+			{
+				double dValue;
+				VERIFY(ds.GetData(nData, dValue));
+
+				dTotalData += max(0.0, dValue);
+			}
+
+			CGdiPlusGraphics graphics(dc);
+
+			CRect rPie(m_rectData);
+
+			int nSize = min(rPie.Height(), rPie.Width());
+			rPie.right = rPie.left + nSize;
+			rPie.top = rPie.bottom - nSize;
+
+			// Centre the chart
+			CPoint ptOffset = (m_rectData.CenterPoint() - rPie.CenterPoint());
+			rPie.OffsetRect(ptOffset);
+
+			CRect rDonut(rPie);
+			rDonut.DeflateRect((nSize / 4), (nSize / 4));
+
+			// Draw the items
+			float fAngleFactor = (float)(360 / dTotalData), fStartAngle = 0.0f;
+
+			for (int nData = 0; nData < nNumData; nData++)
+			{
+				double dValue;
+				VERIFY(ds.GetData(nData, dValue));
+
+				if (dValue > 0.0)
+				{
+					float fSweepAngle = (float)(dValue * fAngleFactor);
+
+					CGdiPlusPen altPen;
+					CGdiPlusBrush altBrush;
+
+					if (nNumColors > 1)
+					{
+						if (bAreaLine)
+							altPen.Create(aColors[f % nNumColors], 1);
+
+						altBrush.Create(aColors[f % nNumColors], fillOpacity);
+					}
+
+					gdix_Pen* itemPen = (altPen.IsValid() ? altPen : defPen);
+					gdix_Brush* itemBrush = (altBrush.IsValid() ? altBrush : defBrush);
+					
+					if (bAreaLine)
+					{
+						CGdiPlus::DrawPie(graphics, itemPen, rPie, fStartAngle, fSweepAngle, itemBrush);
+
+						if (bDonut)
+							CGdiPlus::DrawArc(graphics, itemPen, rDonut, fStartAngle, fSweepAngle);
+					}
+					else
+					{
+						CGdiPlus::FillPie(graphics, itemBrush, rPie, fStartAngle, fSweepAngle);
+					}
+					
+					fStartAngle += fSweepAngle;
+				}
+			}
+
+			if (bDonut)
+			{
+				rDonut.DeflateRect(1, 1);
+				CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(RGB(255, 255, 255)), rDonut);
 			}
 		}
 		break;
 	}
 
 	return true;
+}
+
+BOOL CHMXChart::GetDefaultPen(const CHMXDataset& ds, const CDWordArray& aColors, CGdiPlusPen& pen)
+{
+	COLORREF color = CLR_NONE;
+
+	switch (aColors.GetSize())
+	{
+	case 0:	
+	default:
+		color = ds.GetLineColor(); 
+		break;
+
+	case 1:
+		color = aColors[0];
+		break;
+	}
+
+	ASSERT(color != CLR_NONE);
+
+	int nSize = 1;
+	gdix_PenStyle nStyle = gdix_PenStyleSolid;
+
+	switch (ds.GetStyle())
+	{
+	case HMX_DATASET_STYLE_LINE:
+		nSize = ds.GetSize();
+		nStyle = gdix_PenStyleSolid;
+		break;
+
+	case HMX_DATASET_STYLE_LINE_DASHED:	
+		nSize = ds.GetSize();
+		nStyle = gdix_PenStyleDash;
+		break;
+
+	case HMX_DATASET_STYLE_LINE_DOTTED:
+		nSize = ds.GetSize();
+		nStyle = gdix_PenStyleDot;
+		break;
+	}
+
+	return pen.Create(color, nSize, nStyle);
+}
+
+BOOL CHMXChart::GetDefaultBrush(const CHMXDataset& ds, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusBrush& brush)
+{
+	COLORREF color = CLR_NONE;
+
+	switch (aColors.GetSize())
+	{
+	case 0:
+	default:
+		color = ds.GetFillColor();
+		break;
+
+	case 1:
+		color = aColors[0];
+		break;
+	}
+
+	ASSERT(color != CLR_NONE);
+
+	return brush.Create(color, fillOpacity);
 }
 
 COLORREF CHMXChart::GetLineColor(int nDatasetIndex, double dValue) const

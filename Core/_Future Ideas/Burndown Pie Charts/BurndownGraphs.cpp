@@ -905,14 +905,6 @@ void CAttributeFrequencyGraph::RebuildXScale(const CStatsItemCalculator& /*calcu
 
 void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies, CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	int nNumColors = GetNumColors();
-
-	if (!nNumColors)
-	{
-		ASSERT(0);
-		return;
-	}
-
 	// Save off attrib values for building horizontal labels
 	m_aAttribValues.RemoveAll();
 
@@ -923,34 +915,15 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 
 	if (nNumAttrib)
 	{
-		// Use a different dataset for as many colours as we
-		// have so that each data point has a different color
-		BOOL bBarStyle = HasOption(BGO_FREQUENCY_BAR);
-		int nNumDatasets = (bBarStyle ? min(nNumColors, HMX_MAX_DATASET) : 1);
-		
-		HMX_DATASET_STYLE nStyle = (bBarStyle ? HMX_DATASET_STYLE_VBAR : HMX_DATASET_STYLE_AREALINE);
-		int nSize = (bBarStyle ? 5 : 1);
-		
 		int nMaxFreq = 0;
+		CHMXDataset& dataset = datasets[0];
+
+		dataset.SetMin(0.0);
+		dataset.ClearData();
+		dataset.SetDatasetSize(nNumAttrib);
 
 		for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
 		{
-			int nDataset = (nAttrib % nNumDatasets);
-
-			CHMXDataset& dataset = datasets[nDataset];
-
-			// Initialise each dataset once only
-			if (nAttrib < nNumDatasets)
-			{
-				SetDatasetColor(dataset, GetColor(nDataset));
-
-				dataset.SetStyle(nStyle);
-				dataset.SetSize(nSize);
-				dataset.SetMin(0.0);
-				dataset.ClearData();
-				dataset.SetDatasetSize(nNumAttrib);
-			}
-
 			const FREQUENCYITEM& fi = aFrequencies[nAttrib];
 			dataset.SetData(nAttrib, fi.nCount);
 
@@ -966,33 +939,19 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 		if (nMaxFreq)
 		{
 			double dMax = HMXUtils::CalcMaxYAxisValue(nMaxFreq, 10);
-
-			int nDataset = nNumDatasets;
-
-			while (nDataset--)
-				datasets[nDataset].SetMax(dMax);
+			datasets[0].SetMax(dMax);
 		}
+
+		UpdateGraphStyles(dataset);
 	}
 }
 
 CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
-	int nNumColors = GetNumColors();
-
-	if (!nNumColors)
-	{
-		ASSERT(0);
-		return _T("");
-	}
-
 	CString sTooltip;
 	double dCount = 0.0;
 
-	// We use multiple datasets to give each data point its own colour
-	int nNumDatasets = min(nNumColors, HMX_MAX_DATASET);
-	int nDataset = (nHit % nNumDatasets);
-		
-	if (datasets[nDataset].GetData(nHit, dCount))
+	if (datasets[0].GetData(nHit, dCount))
 	{
 		ASSERT(m_aAttribValues.GetSize() > nHit);
 		sTooltip.Format(CEnString(IDS_TOOLTIP_ATTRIBFREQUENCY), m_aAttribValues[nHit], (int)dCount);
@@ -1001,20 +960,48 @@ CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calcu
 	return sTooltip;
 }
 
-BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	if (HasOption(nOption))
 		return TRUE;
 
-	BOOL bRebuild = (HasOption(BGO_FREQUENCY_BAR) || (nOption == BGO_FREQUENCY_BAR));
-	
 	if (!CGraphBase::SetOption(nOption))
 		return FALSE;
 
-	if (bRebuild)
-		BuildGraph(calculator, datasets);
+	return UpdateGraphStyles(datasets[0]);
+}
+
+BOOL CAttributeFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
+{
+	switch (GetOption())
+	{
+	case BGO_FREQUENCY_BAR:
+		dataset.SetSize(5);
+		dataset.SetStyle(HMX_DATASET_STYLE_VBAR);
+		break;
+
+	case BGO_FREQUENCY_LINE:
+		dataset.SetSize(1);
+		dataset.SetStyle(HMX_DATASET_STYLE_AREALINE);
+		break;
+
+	case BGO_FREQUENCY_PIE:
+		dataset.SetSize(1);
+		dataset.SetStyle(HMX_DATASET_STYLE_PIELINE);
+		break;
+
+	case BGO_FREQUENCY_DONUT:
+		dataset.SetSize(1);
+		dataset.SetStyle(HMX_DATASET_STYLE_DONUTLINE);
+		break;
+
+	default:
+		ASSERT(0);
+		return FALSE;
+	}
 
 	return TRUE;
+
 }
 
 // ---------------------------------------------------------------------------

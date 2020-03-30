@@ -60,7 +60,6 @@ protected:
 protected:
 	void RebuildXScale();
 	void RefreshGraphTitle();
-	bool DrawPieChart(CDC &dc, BOOL bDonut);
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
@@ -74,7 +73,6 @@ protected:
 	bool DrawXScale(CDC& dc, BOOL bTitleOnly);
 	bool DrawYScale(CDC& dc, BOOL bTitleOnly);
 	bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);
-	bool DrawDatasets(CDC &dc);
 
 };
 

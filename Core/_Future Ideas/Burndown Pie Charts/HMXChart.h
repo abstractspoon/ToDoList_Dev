@@ -160,7 +160,7 @@ protected:
 	virtual bool DrawBaseline( CDC& dc );					
 	virtual bool DrawXScale( CDC& dc , BOOL bTitleOnly = FALSE);						
 	virtual bool DrawYScale( CDC& dc , BOOL bTitleOnly = FALSE);						
-	virtual bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);	
+	virtual bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity = 255);	
 	virtual bool DrawDatasets(CDC &dc);						
 	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 
@@ -216,6 +216,8 @@ protected:
 	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
 
+	bool DrawDataset(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity = 255);
+
 	inline BOOL IsValidDatasetIndex(int nDatasetIndex) const
 	{
 		return ((nDatasetIndex >= 0) && (nDatasetIndex < HMX_MAX_DATASET));
@@ -224,7 +226,8 @@ protected:
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth = -1) const;
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth = -1) const;
 
-	static gdix_PenStyle GetPenStyle(HMX_DATASET_STYLE nLineStyle);
+	static BOOL GetDefaultPen(const CHMXDataset& dataset, const CDWordArray& aColors, CGdiPlusPen& pen);
+	static BOOL GetDefaultBrush(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusBrush& brush);
 };
 
 /////////////////////////////////////////////////////////////////////////////

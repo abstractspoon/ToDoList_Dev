@@ -65,12 +65,27 @@ CGdiPlusGraphics::~CGdiPlusGraphics()
 
 //////////////////////////////////////////////////////////////////////
 
+CGdiPlusPen::CGdiPlusPen() : m_pen(NULL)
+{
+}
+
 CGdiPlusPen::CGdiPlusPen(COLORREF color, int nWidth, gdix_PenStyle nStyle) : m_pen(NULL)
 {
-	VERIFY(CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), (float)nWidth, &m_pen));
+	Create(color, nWidth, nStyle);
+}
+
+BOOL CGdiPlusPen::Create(COLORREF color, int nWidth, gdix_PenStyle nStyle)
+{
+	if (!CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), (float)nWidth, &m_pen))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	if (nStyle != gdix_PenStyleSolid)
 		VERIFY(SetStyle(nStyle));
+
+	return TRUE;
 }
 
 BOOL CGdiPlusPen::SetStyle(gdix_PenStyle nStyle)
@@ -80,19 +95,34 @@ BOOL CGdiPlusPen::SetStyle(gdix_PenStyle nStyle)
 
 CGdiPlusPen::~CGdiPlusPen()
 {
-	VERIFY(CGdiPlus::DeletePen(m_pen));
+	VERIFY(!m_pen || CGdiPlus::DeletePen(m_pen));
 }
 
 //////////////////////////////////////////////////////////////////////
 
+CGdiPlusBrush::CGdiPlusBrush() : m_brush(NULL)
+{
+}
+
 CGdiPlusBrush::CGdiPlusBrush(COLORREF color, BYTE alpha) : m_brush(NULL)
 {
-	VERIFY(CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color, alpha), &m_brush));
+	Create(color, alpha);
+}
+
+BOOL CGdiPlusBrush::Create(COLORREF color, BYTE alpha)
+{
+	if (!CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color, alpha), &m_brush))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 CGdiPlusBrush::~CGdiPlusBrush()
 {
-	VERIFY(CGdiPlus::DeleteBrush(m_brush));
+	VERIFY(!m_brush || CGdiPlus::DeleteBrush(m_brush));
 }
 
 //////////////////////////////////////////////////////////////////////
