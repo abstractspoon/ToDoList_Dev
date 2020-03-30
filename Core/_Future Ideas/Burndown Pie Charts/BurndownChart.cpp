@@ -267,7 +267,10 @@ BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
 	if (!pGraph->HasOption(nOption))
 	{
 		if (pGraph->SetOption(nOption, m_calculator, m_datasets))
+		{
+			RefreshGraphTitle();
 			Invalidate();
+		}
 	}
 
 	return TRUE;
@@ -350,8 +353,8 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CHoldRedraw hr(*this);
 	
 	ClearData();
-	SetYText(pGraph->GetTitle());
-
+	RefreshGraphTitle();
+	
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 
@@ -364,6 +367,25 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CalcDatas();
 
 	return TRUE;
+}
+
+void CBurndownChart::RefreshGraphTitle()
+{
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH(m_nActiveGraph);
+
+	switch (pGraph->GetOption())
+	{
+	case BGO_FREQUENCY_PIE:
+	case BGO_FREQUENCY_DONUT:
+		SetXText(pGraph->GetTitle());
+		break;
+
+	default:
+		// all else
+		SetYText(pGraph->GetTitle());
+		break;
+	}
 }
 
 void CBurndownChart::PreSubclassWindow()
@@ -454,20 +476,21 @@ bool CBurndownChart::DrawBaseline(CDC& dc)
 	return CHMXChartEx::DrawBaseline(dc);
 }
 
-bool CBurndownChart::DrawXScale(CDC& dc)
+bool CBurndownChart::DrawXScale(CDC& dc, BOOL bTitleOnly)
 {
-	if (GetActiveGraphOption() == BGO_FREQUENCY_PIE)
-		return false;
+	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
 
-	return CHMXChartEx::DrawXScale(dc);
+	bTitleOnly = (nOption == BGO_FREQUENCY_PIE || nOption == BGO_FREQUENCY_DONUT);
+
+	return CHMXChartEx::DrawXScale(dc, bTitleOnly);
 }
 
-bool CBurndownChart::DrawYScale(CDC& dc)
+bool CBurndownChart::DrawYScale(CDC& dc, BOOL bTitleOnly)
 {
 	if (GetActiveGraphOption() == BGO_FREQUENCY_PIE)
 		return false;
 
-	return CHMXChartEx::DrawYScale(dc);
+	return CHMXChartEx::DrawYScale(dc, bTitleOnly);
 }
 
 bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
@@ -490,6 +513,7 @@ bool CBurndownChart::DrawPieChart(CDC &dc)
 	CGraphBase* pGraph = NULL;
 	GET_GRAPH_RET(m_nActiveGraph, false);
 	
+	// Build an array of data items
 	ASSERT(pGraph->HasOption(BGO_FREQUENCY_PIE));
 
 	CStringArray aLabels;
@@ -503,24 +527,50 @@ bool CBurndownChart::DrawPieChart(CDC &dc)
 	CArray<PIEITEM, PIEITEM&> aPieItems;
 	aPieItems.SetSize(aLabels.GetSize());
 
-	for (int nDataset = 0; nDataset < HMX_MAX_DATASET; nDataset++)
+	int nNumData = m_datasets[0].GetDatasetSize();
+	ASSERT(nNumData == aLabels.GetSize());
+
+	double dTotalData = 0.0;
+
+	for (int nData = 0; nData < nNumData; nData++)
 	{
-		int nNumData = m_datasets[nDataset].GetDatasetSize();
-		PIEITEM pi;
+		PIEITEM& pi = aPieItems[nData];
 
-		for (int nData = 0; nData < nNumData; nData++)
-		{
-			if (m_datasets[nDataset].GetData(nData, pi.dValue))
-			{
-				pi.sLabel = aLabels[nData];
-				pi.color = pGraph->GetColor(nData);
+		VERIFY(m_datasets[0].GetData(nData, pi.dValue));
+		pi.dValue = max(0.0, pi.dValue);
 
-				aPieItems.Add(pi);
-			}
-		}
+		pi.sLabel = aLabels[nData];
+		pi.color = pGraph->GetColor(nData);
+
+		dTotalData += pi.dValue;
 	}
 
-	// TODO
+	// Draw the items
+	CGdiPlusGraphics graphics(dc);
+	float fAngleFactor = (float)(360 / dTotalData), fStartAngle = 0.0f;
+
+	CRect rPie(m_rectData);
+
+	int nSize = min(rPie.Height(), rPie.Width());
+	rPie.right = rPie.left + nSize;
+	rPie.top = rPie.bottom - nSize;
+
+	GraphicsMisc::CentreRect(rPie, m_rectData, TRUE, FALSE);
+
+	for (int nData = 0; nData < nNumData; nData++)
+	{
+		const PIEITEM& pi = aPieItems[nData];
+
+		if (pi.dValue > 0.0)
+		{
+			float fSweepAngle = (float)(pi.dValue * fAngleFactor);
+			CGdiPlusPen pen(pi.color, 1);
+			CGdiPlusBrush brush(pi.color, 128);
+
+			CGdiPlus::DrawPie(graphics, pen, rPie, fStartAngle, fSweepAngle, brush);
+			fStartAngle += fSweepAngle;
+		}
+	}
 	
 	return true;
 }

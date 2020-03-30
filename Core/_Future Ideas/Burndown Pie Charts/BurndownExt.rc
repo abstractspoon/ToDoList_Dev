@@ -276,6 +276,7 @@ BEGIN
     IDS_FREQUENCY_BAR       "Bar Style"
     IDS_FREQUENCY_PIE       "Pie Style"
     IDS_FREQUENCY_LINE      "Line Style"
+    IDS_FREQUENCY_DONUT     "Doughnut Style"
 END
 
 STRINGTABLE DISCARDABLE 

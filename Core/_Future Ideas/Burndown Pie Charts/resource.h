@@ -63,6 +63,7 @@
 #define IDS_FREQUENCY_BAR               57708
 #define IDS_FREQUENCY_PIE               57709
 #define IDS_FREQUENCY_LINE              57710
+#define IDS_FREQUENCY_DONUT             57711
 
 // Next default values for new objects
 // 
