@@ -1299,7 +1299,7 @@ bool CHMXChart::CalcDatas()
 	// let's calc everything
 	m_rectGraph = m_rectUsable;
 
-	if (!m_strTitle.IsEmpty()) 
+	if (!m_strTitle.IsEmpty() && HasRenderFlag(HMX_RENDER_TITLE)) 
 	{
 		m_rectTitle = m_rectUsable;
 
@@ -1376,10 +1376,15 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 	}
 	else
 	{
-		int nXAxisHeight = (m_strXText.IsEmpty() ? 0 : (m_nFontPixelSize * 2));
-		int nYAxisWidth = (m_strYText.IsEmpty() ? 0 : (m_nFontPixelSize * 2));
+		int nXAxisHeight = 0, nYAxisWidth = 0;
+		
+		if (!m_strXText.IsEmpty() && HasRenderFlag(HMX_RENDER_XAXISTITLE))
+			nXAxisHeight = (m_nFontPixelSize * 2);
 
-		if (m_strarrScaleXLabel.GetSize())
+		if (!m_strYText.IsEmpty() && HasRenderFlag(HMX_RENDER_YAXISTITLE))
+			nYAxisWidth = (m_nFontPixelSize * 2);
+
+		if (m_strarrScaleXLabel.GetSize() && HasRenderFlag(HMX_RENDER_XAXISSCALE))
 		{
 			CFont font;
 			VERIFY(CreateXAxisFont(FALSE, font));
@@ -1412,7 +1417,7 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 			}
 		}
 
-		if (m_nNumYTicks > 0)
+		if ((m_nNumYTicks > 0) && HasRenderFlag(HMX_RENDER_YAXISSCALE))
 		{
 			CFont font;
 			VERIFY(CreateYAxisFont(FALSE, font));

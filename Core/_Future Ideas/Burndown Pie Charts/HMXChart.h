@@ -59,6 +59,7 @@ public:
 	void SetFont(LPCTSTR szFaceName, int nPointSize = -1);
 	void SetRenderFlags(DWORD dwFlags, BOOL bRedraw = TRUE);
 	DWORD ModifyRenderFlags(DWORD dwRemove, DWORD dwAdd, BOOL bRedraw = TRUE);
+	BOOL HasRenderFlag(DWORD dwFlag) const { return ((m_dwRenderFlags & dwFlag) == dwFlag); }
 
 // Operations
 public:
