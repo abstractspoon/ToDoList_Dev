@@ -2295,7 +2295,7 @@ BOOL Misc::ModifyFlags(DWORD& dwFlags, DWORD dwRemove, DWORD dwAdd)
 {
 	DWORD dwOldFlags = dwFlags;
 	
-	// order is important
+	// Remove before adding
 	dwFlags &= ~dwRemove;
 	dwFlags |= dwAdd;
 	
