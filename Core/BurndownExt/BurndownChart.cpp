@@ -398,9 +398,7 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 			CPoint ptPos;
 
 			if (GetPointXY(0, nPos, ptPos))
-			{
 				GraphicsMisc::DrawVertLine(&dc, m_rectData.bottom, m_rectData.top, ptPos.x, m_crToday);
-			}
 		}
 	}
 }
