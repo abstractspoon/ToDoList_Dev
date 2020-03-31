@@ -1005,7 +1005,7 @@ bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& a
 			CArray<gdix_PointF, gdix_PointF&> points;
 			int nPoints = GetPoints(ds, points, TRUE);
 
-			if (nPoints > 4)
+			if (nPoints >= 4)
 			{
 				VERIFY(CGdiPlus::FillPolygon(graphics, defBrush, points.GetData(), nPoints));
 
@@ -1013,6 +1013,7 @@ bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& a
 				if (bAreaLine)
 				{
 					// don't draw the first/last closure points
+					// That's why we need at least 4 points.
 					VERIFY(CGdiPlus::DrawLines(graphics, defPen, points.GetData() + 1, nPoints - 2));
 				}
 			}
@@ -1184,56 +1185,96 @@ int CHMXChart::GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&
 		if(nSample != HMX_DATASET_VALUE_INVALID)
 			nPoints++;
 	}
-	// add two points, for first and last point 
+
+	// If we only have a single point then we need
+	// two extra points to forma triangle
+	BOOL bSinglePoint = (nPoints == 1);
+
+	if (bSinglePoint)
+		nPoints += 2;
+
+	// If in area mode then we need a further two
+	// points vertically beneath the existing first
+	// and last points to close off the area
 	if (bArea)
 		nPoints += 2;
 
 	points.SetSize(nPoints);
 	
 	double nBarWidth = (double)m_rectData.Width()/(double)m_nXMax;
+	gdix_Real fZeroLineY = 0.0f; // Saves us having to calculate it twice
 
-	// the first (area only)
+	// First points (area and/or single point)
 	g = 0;
-	if (bArea)
+	if (bArea || bSinglePoint)
 	{
-		int f=0;
-		do 
+		int f = 0;
+		do
 		{
 			ds.GetData(f, nSample);
 			f++;
-		} 
-		while(nSample == HMX_DATASET_VALUE_INVALID);
+		}
+		while (nSample == HMX_DATASET_VALUE_INVALID);
 
-		points[0].x = m_rectData.left + (float)(nBarWidth/2.0) + (int)(nBarWidth*(f-1.0));
+		// Calculate the zero line where we will close off the area vertically
 		double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
 		nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
-		double nTemp = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-		points[0].y = m_rectData.bottom - (float)nTemp;
 
+		fZeroLineY = (gdix_Real)((nZeroLine - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin));
+		points[0].y = (m_rectData.bottom - fZeroLineY);
+
+		// Calculate the x pos vertically beneath the first data point
+		points[0].x = (m_rectData.left + (float)(nBarWidth / 2.0) + (int)(nBarWidth*(f - 1.0)));
 		g++;
+
+		// If we only have a single point then offset this point
+		// to the left by a quarter of the nominal bar width
+		if (bSinglePoint)
+		{
+			points[0].x -= (gdix_Real)(nBarWidth / 4);
+
+			// If we are in also area we just copy this point
+			if (bArea)
+			{
+				points[1] = points[0];
+				g++;
+			}
+		}
 	}
 
-	for(int f=0; f<ds.GetDatasetSize(); f++) 
+	// The actual data points
+	for (int f = 0; f < ds.GetDatasetSize(); f++)
 	{
 		ds.GetData(f, nSample);
-		if(nSample == HMX_DATASET_VALUE_INVALID)
+		if (nSample == HMX_DATASET_VALUE_INVALID)
 			continue;
-		// nTemp will contains a parametrized data 
-		double nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-		points[g].x = m_rectData.left + (float)(nBarWidth/2.0) + (int)(nBarWidth*f);
-		points[g].y = m_rectData.bottom - (float) nTemp;
+
+		points[g].x = m_rectData.left + (float)(nBarWidth / 2.0) + (int)(nBarWidth*f);
+
+		double nTemp = (nSample - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+		points[g].y = m_rectData.bottom - (float)nTemp;
 
 		g++;
 	}
-	
-	// the last (area only)
-	if (bArea)
+
+	// Last points (area and/or single point)
+	if (bArea || bSinglePoint)
 	{
-		points[nPoints-1].x = points[g-1].x;
-		double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
-		nZeroLine = m_nYMax < 0 ? m_nYMax : nZeroLine;
-		double nTemp = (nZeroLine - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-		points[nPoints-1].y = m_rectData.bottom - (float) nTemp;
+		points[g].x = points[g - 1].x;
+		points[g].y = (m_rectData.bottom - fZeroLineY);
+
+		// If we only have a single point then we offset this point
+		// to the right by a quarter of the nominal bar width
+		if (bSinglePoint)
+		{
+			points[g].x += (gdix_Real)(nBarWidth / 4);
+
+			// If we are in also area we just copy this point
+			if (bArea)
+			{
+				points[g + 1] = points[g];
+			}
+		}
 	}
 
 	return points.GetSize();
