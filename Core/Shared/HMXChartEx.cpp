@@ -62,7 +62,7 @@ double HMXUtils::CalcYAxisInterval(double dDataMax, int nNumTicks)
 {
 	ASSERT(nNumTicks > 0);
 
-	const double INTERVALS[] = { 1, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
+	const double INTERVALS[] = { 1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 5000 };
 	const int NUM_INT = (sizeof(INTERVALS) / sizeof(INTERVALS[0]));
 
 	// Find the first tick increment that gives us a range
