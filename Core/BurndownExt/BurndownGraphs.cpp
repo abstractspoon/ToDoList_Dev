@@ -977,21 +977,31 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 
 CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calculator*/, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const
 {
-	int nNumColors = GetNumColors();
-
-	if (!nNumColors)
-	{
-		ASSERT(0);
-		return _T("");
-	}
-
 	CString sTooltip;
 	double dCount = 0.0;
+	int nDataset = 0;
 
-	// We use multiple datasets to give each data point its own colour
-	int nNumDatasets = min(nNumColors, HMX_MAX_DATASET);
-	int nDataset = (nHit % nNumDatasets);
-		
+	switch (GetOption())
+	{
+	case BGO_FREQUENCY_BAR:
+		// When in VBAR mode we use multiple datasets to give 
+		// each data point its own colour
+		{
+			int nNumColors = GetNumColors();
+
+			if (nNumColors)
+			{
+				int nNumDatasets = min(nNumColors, HMX_MAX_DATASET);
+				nDataset = (nHit % nNumDatasets);
+			}
+		}
+		break;
+
+	case BGO_FREQUENCY_LINE:
+		// Uses just the default dataset
+		break;
+	}
+			
 	if (datasets[nDataset].GetData(nHit, dCount))
 	{
 		ASSERT(m_aAttribValues.GetSize() > nHit);
