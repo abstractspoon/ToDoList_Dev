@@ -68,7 +68,8 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 // 	m_dlgPrefs(m_chart, this),
 // #pragma warning(default:4355)
 	m_bUpdatingSlider(FALSE),
-	m_sliderDateRange(TBS_BOTTOM)
+	m_sliderDateRange(TBS_BOTTOM),
+	m_bVisible(FALSE)
 {
 	//{{AFX_DATA_INIT(CBurndownWnd)
 	//}}AFX_DATA_INIT
@@ -660,7 +661,7 @@ void CBurndownWnd::OnSize(UINT nType, int cx, int cy)
 
 void CBurndownWnd::RebuildGraph(BOOL bSortData, BOOL bUpdateExtents, BOOL bCheckVisibility)
 {
-	if (bCheckVisibility && !m_chart.IsWindowVisible())
+	if (bCheckVisibility && !m_bVisible)
 	{
 		m_dwUpdateGraphOnShow = REBUILD_GRAPH;
 		m_dwUpdateGraphOnShow |= (bSortData ? RESORT_DATA : 0);
@@ -710,6 +711,8 @@ void CBurndownWnd::OnSelchangeDisplay()
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
 {
 	CDialog::OnShowWindow(bShow, nStatus);
+
+	m_bVisible = bShow;
 
 	if (bShow && m_dwUpdateGraphOnShow)
 	{
