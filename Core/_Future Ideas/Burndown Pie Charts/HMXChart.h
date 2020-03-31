@@ -226,8 +226,8 @@ protected:
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth = -1) const;
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth = -1) const;
 
-	static BOOL GetDefaultPen(const CHMXDataset& dataset, const CDWordArray& aColors, CGdiPlusPen& pen);
-	static BOOL GetDefaultBrush(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusBrush& brush);
+	static BOOL CreateDefaultDrawingTools(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
+	static BOOL CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 };
 
 /////////////////////////////////////////////////////////////////////////////
