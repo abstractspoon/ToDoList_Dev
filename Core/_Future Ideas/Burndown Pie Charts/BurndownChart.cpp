@@ -264,13 +264,10 @@ BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
 	if (!pGraph->IsValidOption(nOption))
 		return FALSE;
 
-	if (!pGraph->HasOption(nOption))
+	if (!pGraph->HasOption(nOption) && pGraph->SetOption(nOption, m_calculator, m_datasets))
 	{
-		if (pGraph->SetOption(nOption, m_calculator, m_datasets))
-		{
-			RefreshGraphTitle();
-			Invalidate();
-		}
+		RefreshRenderFlags(FALSE);
+		Invalidate();
 	}
 
 	return TRUE;
@@ -354,41 +351,51 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CHoldRedraw hr(*this);
 	
 	ClearData();
-	RefreshGraphTitle();
-	
+	RefreshRenderFlags(FALSE);
+
+	// Which one gets drawn is controlled by the render flags
+	SetXText(pGraph->GetTitle());
+	SetYText(pGraph->GetTitle());
+
 	{
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 
 		pGraph->BuildGraph(m_calculator, m_datasets);
+
 	}
 
 	if (!m_data.IsEmpty())
 		RebuildXScale();
-
+	
 	CalcDatas();
 
 	return TRUE;
 }
 
-void CBurndownChart::RefreshGraphTitle()
+void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 {
 	CGraphBase* pGraph = NULL;
 	GET_GRAPH(m_nActiveGraph);
+
+	DWORD dwFlags = ModifyRenderFlags(HMX_RENDER_TITLE, 0, FALSE); // Never draw title
 
 	switch (pGraph->GetOption())
 	{
 	case BGO_FREQUENCY_PIE:
 	case BGO_FREQUENCY_DONUT:
-		SetXText(pGraph->GetTitle());
-		SetYText(_T(""));
+		// Remove then add
+		dwFlags &= ~ (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
+		dwFlags |= HMX_RENDER_XAXISTITLE;
 		break;
 
 	default:
-		// all else
-		SetXText(_T(""));
-		SetYText(pGraph->GetTitle());
+		// Add then remove
+		dwFlags |= (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
+		dwFlags &= ~HMX_RENDER_XAXISTITLE;
 		break;
 	}
+
+	SetRenderFlags(dwFlags, bRedraw);
 }
 
 void CBurndownChart::PreSubclassWindow()
@@ -451,55 +458,6 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 				GraphicsMisc::DrawVertLine(&dc, m_rectData.bottom, m_rectData.top, ptPos.x, m_crToday);
 		}
 	}
-}
-
-bool CBurndownChart::DrawGrid(CDC& dc)
-{
-	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
-
-	if ((nOption == BGO_FREQUENCY_PIE) || (nOption == BGO_FREQUENCY_DONUT))
-		return false;
-
-	return CHMXChartEx::DrawGrid(dc);
-}
-
-bool CBurndownChart::DrawAxes(CDC &dc)
-{
-	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
-
-	if ((nOption == BGO_FREQUENCY_PIE) || (nOption == BGO_FREQUENCY_DONUT))
-		return false;
-
-	return CHMXChartEx::DrawAxes(dc);
-}
-
-bool CBurndownChart::DrawBaseline(CDC& dc)
-{
-	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
-
-	if ((nOption == BGO_FREQUENCY_PIE) || (nOption == BGO_FREQUENCY_DONUT))
-		return false;
-
-	return CHMXChartEx::DrawBaseline(dc);
-}
-
-bool CBurndownChart::DrawXScale(CDC& dc, BOOL bTitleOnly)
-{
-	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
-
-	bTitleOnly = ((nOption == BGO_FREQUENCY_PIE) || (nOption == BGO_FREQUENCY_DONUT));
-
-	return CHMXChartEx::DrawXScale(dc, bTitleOnly);
-}
-
-bool CBurndownChart::DrawYScale(CDC& dc, BOOL bTitleOnly)
-{
-	BURNDOWN_GRAPHOPTION nOption = GetActiveGraphOption();
-
-	if ((nOption == BGO_FREQUENCY_PIE) || (nOption == BGO_FREQUENCY_DONUT))
-		return false;
-
-	return CHMXChartEx::DrawYScale(dc, bTitleOnly);
 }
 
 bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)

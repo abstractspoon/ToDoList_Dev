@@ -16,30 +16,34 @@
 // HMXChart.h : header file
 //
 
+/////////////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 	#define HMX_MAX_DATASET	16
 #else
 	#define HMX_MAX_DATASET	64
 #endif	// _DEBUG
 
-/* Handle to a DIB */
-DECLARE_HANDLE(HDIB);
+/////////////////////////////////////////////////////////////////////////////
 
-/* DIB constants */
-#define PALVERSION   0x300
+enum 
+{
+	HMX_RENDER_TITLE		= 0x0001,
+	HMX_RENDER_XAXIS		= 0x0004,
+	HMX_RENDER_YAXIS		= 0x0008,
+	HMX_RENDER_XAXISTITLE	= 0x0010,
+	HMX_RENDER_YAXISTITLE	= 0x0020,
+	HMX_RENDER_XAXISSCALE	= 0x0040,
+	HMX_RENDER_YAXISSCALE	= 0x0080,
+	HMX_RENDER_HORZGRID		= 0x0100,
+	HMX_RENDER_VERTGRID		= 0x0200,
+	HMX_RENDER_BASELINE		= 0x0400,
+	HMX_RENDER_AXES			= HMX_RENDER_XAXIS | HMX_RENDER_YAXIS | HMX_RENDER_XAXISTITLE | HMX_RENDER_YAXISTITLE | HMX_RENDER_XAXISSCALE | HMX_RENDER_YAXISSCALE,
+	HMX_RENDER_GRID			= HMX_RENDER_HORZGRID | HMX_RENDER_VERTGRID,
 
-/* DIB Macros*/
-#define IS_WIN30_DIB(lpbi)  ((*(LPDWORD)(lpbi)) == sizeof(BITMAPINFOHEADER))
-#define RECTWIDTH(lpRect)     ((lpRect)->right - (lpRect)->left)
-#define RECTHEIGHT(lpRect)    ((lpRect)->bottom - (lpRect)->top)
+	HMX_RENDER_ALL			= 0xffff
+};
 
-// WIDTHBYTES performs DWORD-aligning of DIB scanlines.  The "bits"
-// parameter is the bit count for the scanline (biWidth * biBitCount),
-// and this macro returns the number of DWORD-aligned bytes needed
-// to hold those bits.
-#define WIDTHBYTES(bits)    (((bits) + 31) / 32 * 4)
-
-#define DIB_HEADER_MARKER   ((WORD) ('M' << 8) | 'B')
 
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart window
@@ -53,6 +57,8 @@ public:
 // Attributes
 public:
 	void SetFont(LPCTSTR szFaceName, int nPointSize = -1);
+	void SetRenderFlags(DWORD dwFlags, BOOL bRedraw = TRUE);
+	DWORD ModifyRenderFlags(DWORD dwRemove, DWORD dwAdd, BOOL bRedraw = TRUE);
 
 // Operations
 public:
@@ -140,11 +146,7 @@ public:
 	// useful global functions
 	virtual bool		CalcDatas();
 	virtual bool		Redraw();
-
-	virtual HANDLE      DDBToDIB( CBitmap& bitmap, DWORD dwCompression, CPalette* pPal );	// functions used to
-	virtual WORD WINAPI PaletteSize( LPSTR lpbi );											// save the chart in
-	virtual WORD WINAPI DIBNumColors(LPSTR lpbi);											// a BMP file or in
-	virtual BOOL WINAPI SaveDIB (HDIB hDib, CFile& file);									// the clipboard
+																							// the clipboard
 
 	virtual ~CHMXChart();
 
@@ -158,8 +160,8 @@ protected:
 	virtual bool DrawHorzGridLines( CDC &dc);					
 	virtual bool DrawVertGridLines( CDC &dc);					
 	virtual bool DrawBaseline( CDC& dc );					
-	virtual bool DrawXScale( CDC& dc , BOOL bTitleOnly = FALSE);						
-	virtual bool DrawYScale( CDC& dc , BOOL bTitleOnly = FALSE);						
+	virtual bool DrawXScale( CDC& dc);						
+	virtual bool DrawYScale( CDC& dc);						
 	virtual bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity = 255);	
 	virtual bool DrawDatasets(CDC &dc);						
 	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
@@ -195,6 +197,7 @@ protected:
 	COLORREF		m_clrGrid;	
 	bool			m_bXLabelsAreTicks;
 	int				m_nXLabelDegrees;
+	DWORD			m_dwRenderFlags;
 
 	CString			m_strFont;
 	int				m_nFontPixelSize;						// -1 -> dynamic sizing
@@ -228,6 +231,13 @@ protected:
 
 	static BOOL CreateDefaultDrawingTools(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	static BOOL CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
+	
+	DECLARE_HANDLE(HDIB);
+
+	HANDLE DDBToDIB( CBitmap& bitmap, DWORD dwCompression, CPalette* pPal );	
+	BOOL SaveDIB (HDIB hDib, CFile& file);									
+	WORD PaletteSize( LPSTR lpbi );											
+	WORD DIBNumColors(LPSTR lpbi);											
 };
 
 /////////////////////////////////////////////////////////////////////////////

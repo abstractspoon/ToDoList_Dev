@@ -18,6 +18,24 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+/* DIB constants */
+#define PALVERSION   0x300
+
+/* DIB Macros*/
+#define IS_WIN30_DIB(lpbi)  ((*(LPDWORD)(lpbi)) == sizeof(BITMAPINFOHEADER))
+#define RECTWIDTH(lpRect)     ((lpRect)->right - (lpRect)->left)
+#define RECTHEIGHT(lpRect)    ((lpRect)->bottom - (lpRect)->top)
+
+// WIDTHBYTES performs DWORD-aligning of DIB scanlines.  The "bits"
+// parameter is the bit count for the scanline (biWidth * biBitCount),
+// and this macro returns the number of DWORD-aligned bytes needed
+// to hold those bits.
+#define WIDTHBYTES(bits)    (((bits) + 31) / 32 * 4)
+
+#define DIB_HEADER_MARKER   ((WORD) ('M' << 8) | 'B')
+
+/////////////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -27,7 +45,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart
 
-CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontPixelSize(-1)
+CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontPixelSize(-1), m_dwRenderFlags(HMX_RENDER_ALL)
 {
 	// set defaul value
 	m_clrBkGnd = RGB(200, 255, 255);
@@ -88,14 +106,45 @@ void CHMXChart::SetFont(LPCTSTR szFaceName, int nPointSize)
 	}
 }
 
+void CHMXChart::SetRenderFlags(DWORD dwFlags, BOOL bRedraw)
+{
+	dwFlags &= HMX_RENDER_ALL;
+
+	if (dwFlags != m_dwRenderFlags)
+	{
+		m_dwRenderFlags = dwFlags;
+
+		if (GetSafeHwnd())
+		{
+			CalcDatas();
+
+			if (bRedraw)
+				Invalidate();
+		}
+	}
+}
+
+DWORD CHMXChart::ModifyRenderFlags(DWORD dwRemove, DWORD dwAdd, BOOL bRedraw)
+{
+	DWORD dwFlags = m_dwRenderFlags;
+
+	// Remove before adding
+	dwFlags &= ~dwRemove;
+	dwFlags |= dwAdd;
+	
+	SetRenderFlags(dwFlags, bRedraw);
+
+	return m_dwRenderFlags;
+}
+
 void CHMXChart::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
 
-	CDC             memDC;
+	CDC memDC;
 	memDC.CreateCompatibleDC(&dc);
 
-	CBitmap         bitmap;
+	CBitmap bitmap;
 	bitmap.CreateCompatibleBitmap(&dc, m_rectArea.Width(),m_rectArea.Height());
 
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
@@ -131,13 +180,19 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 
 	dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-	DrawGrid(dc);
-	DrawDatasets(dc);
-	DrawTitle(dc);
-	DrawBaseline(dc);
-	DrawAxes(dc);
-	DrawYScale(dc);
-	DrawXScale(dc);
+	if (m_dwRenderFlags & HMX_RENDER_GRID)
+		DrawGrid(dc);
+
+	DrawDatasets(dc); // always
+
+	if (m_dwRenderFlags & HMX_RENDER_TITLE)
+		DrawTitle(dc);
+
+	if (m_dwRenderFlags & HMX_RENDER_BASELINE)
+		DrawBaseline(dc);
+
+	if (m_dwRenderFlags & HMX_RENDER_AXES)
+		DrawAxes(dc);
 }
 
 BOOL CHMXChart::OnEraseBkgnd(CDC* /*pDC*/)
@@ -168,14 +223,7 @@ bool CHMXChart::CopyToClipboard()
 
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 
-	PaintBkGnd(memDC);
-	DrawGrid(memDC);
-	DrawDatasets(memDC);
-	DrawTitle(memDC);
-	DrawBaseline(memDC);
-	DrawAxes(memDC);
-	DrawYScale(memDC);
-	DrawXScale(memDC);
+	DoPaint(memDC, TRUE);
 
 	this->OpenClipboard() ;
 	EmptyClipboard() ;
@@ -212,14 +260,7 @@ bool CHMXChart::CopyToFile(CString sFile)
 	bitmap.CreateCompatibleBitmap(&dc, m_rectArea.Width(), m_rectArea.Height());	
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 	
-	PaintBkGnd(memDC);
-	DrawGrid(memDC);
-	DrawDatasets(memDC);
-	DrawTitle(memDC);
-	DrawBaseline(memDC);
-	DrawAxes(memDC);
-	DrawYScale(memDC);
-	DrawXScale(memDC);
+	DoPaint(memDC, TRUE);
 
 	// Create logical palette if device supports a palette
 	CPalette pal;
@@ -322,8 +363,11 @@ bool CHMXChart::DrawTitle(CDC & dc)
 //
 bool CHMXChart::DrawGrid(CDC & dc)
 {
-	DrawVertGridLines(dc);
-	DrawHorzGridLines(dc);
+	if (m_dwRenderFlags & HMX_RENDER_VERTGRID)
+		DrawVertGridLines(dc);
+
+	if (m_dwRenderFlags & HMX_RENDER_HORZGRID)
+		DrawHorzGridLines(dc);
 
 	return true;
 }
@@ -342,12 +386,26 @@ bool CHMXChart::DrawGrid(CDC & dc)
 bool CHMXChart::DrawAxes(CDC &dc)
 {
 	// draw Y
-	dc.MoveTo(m_rectYAxis.right, m_rectYAxis.bottom);
-	dc.LineTo(m_rectYAxis.right, m_rectYAxis.top   );
+	if (m_dwRenderFlags & HMX_RENDER_YAXIS)
+	{
+		dc.MoveTo(m_rectYAxis.right, m_rectYAxis.bottom);
+		dc.LineTo(m_rectYAxis.right, m_rectYAxis.top);
+	}
 	
+	if (m_dwRenderFlags & (HMX_RENDER_YAXISSCALE | HMX_RENDER_YAXISTITLE))
+		DrawYScale(dc);
+
+
 	// draw X
-	dc.MoveTo(m_rectXAxis.left , m_rectXAxis.top);
-	dc.LineTo(m_rectXAxis.right, m_rectXAxis.top);
+	if (m_dwRenderFlags & HMX_RENDER_YAXIS)
+	{
+		dc.MoveTo(m_rectXAxis.left, m_rectXAxis.top);
+		dc.LineTo(m_rectXAxis.right, m_rectXAxis.top);
+	}
+	
+	if (m_dwRenderFlags & (HMX_RENDER_XAXISSCALE | HMX_RENDER_XAXISTITLE))
+		DrawXScale(dc);
+
 	return true;
 }
 
@@ -525,11 +583,11 @@ int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 //
 //		true if ok, else false
 //
-bool CHMXChart::DrawXScale(CDC & dc, BOOL bTitleOnly)
+bool CHMXChart::DrawXScale(CDC & dc)
 {
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
 
-	if (!bTitleOnly)
+	if (m_dwRenderFlags & HMX_RENDER_XAXISSCALE)
 	{
 		int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
 
@@ -578,7 +636,7 @@ bool CHMXChart::DrawXScale(CDC & dc, BOOL bTitleOnly)
 
 	}
 
-	if (!m_strXText.IsEmpty()) 
+	if (!m_strXText.IsEmpty() && (m_dwRenderFlags & HMX_RENDER_XAXISTITLE))
 	{
 		CFont font;
 		VERIFY(CreateXAxisFont(TRUE, font));
@@ -605,12 +663,12 @@ bool CHMXChart::DrawXScale(CDC & dc, BOOL bTitleOnly)
 //
 //		true if ok, else false
 //
-bool CHMXChart::DrawYScale(CDC & dc, BOOL bTitleOnly)
+bool CHMXChart::DrawYScale(CDC & dc)
 {
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
 	CRect rTitle(m_rectYAxis);
 
-	if (!bTitleOnly)
+	if (m_dwRenderFlags & HMX_RENDER_YAXISSCALE)
 	{
 		int nTicks = GetNumYTicks();
 
@@ -651,7 +709,7 @@ bool CHMXChart::DrawYScale(CDC & dc, BOOL bTitleOnly)
 		}
 	}
 
-	if (!m_strYText.IsEmpty()) 
+	if (!m_strYText.IsEmpty() && (m_dwRenderFlags & HMX_RENDER_YAXISTITLE))
 	{
 		CFont font;
 		VERIFY(CreateYAxisFont(TRUE, font));
@@ -2235,7 +2293,7 @@ HANDLE CHMXChart::DDBToDIB(CBitmap& bitmap, DWORD dwCompression, CPalette* pPal)
  ************************************************************************/
 
 
-WORD WINAPI CHMXChart::PaletteSize(LPSTR lpbi)
+WORD CHMXChart::PaletteSize(LPSTR lpbi)
 {
    /* calculate the size required by the palette */
    if (IS_WIN30_DIB (lpbi))
@@ -2266,7 +2324,7 @@ WORD WINAPI CHMXChart::PaletteSize(LPSTR lpbi)
  ************************************************************************/
 
 
-WORD WINAPI CHMXChart::DIBNumColors(LPSTR lpbi)
+WORD CHMXChart::DIBNumColors(LPSTR lpbi)
 {
 	WORD wBitCount;  // DIB bit count
 
@@ -2328,7 +2386,7 @@ WORD WINAPI CHMXChart::DIBNumColors(LPSTR lpbi)
  *************************************************************************/
 
 
-BOOL WINAPI CHMXChart::SaveDIB(HDIB hDib, CFile& file)
+BOOL CHMXChart::SaveDIB(HDIB hDib, CFile& file)
 {
 	BITMAPFILEHEADER bmfHdr; // Header for Bitmap file
 	LPBITMAPINFOHEADER lpBI;   // Pointer to DIB info structure

@@ -59,7 +59,7 @@ protected:
 
 protected:
 	void RebuildXScale();
-	void RefreshGraphTitle();
+	void RefreshRenderFlags(BOOL bRedraw = TRUE);
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
@@ -67,11 +67,6 @@ protected:
 	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
 
 	BOOL HighlightDataPoint(int nIndex);
-	bool DrawGrid(CDC& dc);
-	bool DrawAxes(CDC &dc);
-	bool DrawBaseline(CDC& dc);
-	bool DrawXScale(CDC& dc, BOOL bTitleOnly);
-	bool DrawYScale(CDC& dc, BOOL bTitleOnly);
 	bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);
 
 };
