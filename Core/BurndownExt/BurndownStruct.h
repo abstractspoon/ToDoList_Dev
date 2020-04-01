@@ -25,6 +25,7 @@ public:
 	CColorArray& operator=(const CColorArray& other);
 
 	int Set(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
+	BOOL Has(COLORREF color) const;
 };
 
 class CGraphColorMap : public CMap<BURNDOWN_GRAPH, BURNDOWN_GRAPH, CColorArray, CColorArray&>

@@ -42,6 +42,11 @@ int CColorArray::Set(COLORREF color1, COLORREF color2, COLORREF color3)
 	return GetSize();
 }
 
+BOOL CColorArray::Has(COLORREF color) const
+{
+	return Misc::HasT(color, *this);
+}
+
 // --------------------------------------------------------------------------
 
 void CGraphColorMap::Copy(const CGraphColorMap& other)
