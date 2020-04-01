@@ -12,14 +12,43 @@
 #include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
 
-////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
-const COLORREF	COLOR_GREEN		= RGB(122, 204,   0); 
-const COLORREF	COLOR_RED		= RGB(204,   0,   0); 
-const COLORREF	COLOR_YELLOW	= RGB(204, 164,   0); 
-const COLORREF	COLOR_BLUE		= RGB(0,     0, 244); 
-const COLORREF	COLOR_PINK		= RGB(234,  28,  74); 
-const COLORREF	COLOR_ORANGE	= RGB(255,  91,  21);
+const COLORREF COLOR_RED = RGB(213, 0, 0);
+const COLORREF COLOR_REDVIOLET = RGB(197, 17, 98);
+const COLORREF COLOR_VIOLET = RGB(170, 0, 255);
+const COLORREF COLOR_BLUEVIOLET = RGB(98, 0, 234);
+const COLORREF COLOR_BLUE = RGB(41, 98, 255);
+const COLORREF COLOR_BLUEGREEN = RGB(0, 184, 212);
+const COLORREF COLOR_GREENBLUE = RGB(0, 191, 165);
+const COLORREF COLOR_GREEN = RGB(0, 200, 83);
+const COLORREF COLOR_GREENYELLOW = RGB(100, 221, 23);
+const COLORREF COLOR_YELLOWGREEN = RGB(174, 234, 0);
+const COLORREF COLOR_YELLOW = RGB(255, 214, 0);
+const COLORREF COLOR_YELLOWORANGE = RGB(255, 171, 0);
+const COLORREF COLOR_ORANGE = RGB(255, 109, 0);
+const COLORREF COLOR_REDORANGE = RGB(221, 44, 0);
+
+const COLORREF GRAPH_COLORS[] =
+{
+	COLOR_RED,
+	COLOR_REDVIOLET,
+	COLOR_VIOLET,
+	COLOR_BLUEVIOLET,
+	COLOR_BLUE,
+	COLOR_BLUEGREEN,
+	COLOR_GREENBLUE,
+	COLOR_GREEN,
+	COLOR_GREENYELLOW,
+	COLOR_YELLOWGREEN,
+	COLOR_YELLOW,
+	COLOR_YELLOWORANGE,
+	COLOR_ORANGE,
+	COLOR_REDORANGE,
+};
+const int NUM_GRAPH_COLORS = (sizeof(GRAPH_COLORS) / sizeof(GRAPH_COLORS[0]));
+
+/////////////////////////////////////////////////////////////////////////////////
 
 const int		GRAPH_LINE_THICKNESS = 1;
 const int		TREND_LINE_THICKNESS = 2;
@@ -173,7 +202,41 @@ BOOL CGraphBase::SetOption(BURNDOWN_GRAPHOPTION nOption)
 	return TRUE;
 }
 
-BOOL CGraphBase::SetColors(COLORREF color1, COLORREF color2, COLORREF color3)
+BOOL CGraphBase::InitColorPalette(int nNumColors, int nStartColor)
+{
+	if ((nNumColors <= 0) || (nNumColors > NUM_GRAPH_COLORS) || (nStartColor >= NUM_GRAPH_COLORS))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_aColors.RemoveAll();
+
+	int nOffset = 3; // Rotate through the colours
+	int nColorIndex = nStartColor;
+
+	for (int nColor = 0; nColor < nNumColors; nColor++)
+	{
+		COLORREF crNext = GRAPH_COLORS[nColorIndex];
+
+		if (m_aColors.Has(crNext))
+		{
+			nColorIndex++;
+			nColor--;
+		}
+		else
+		{
+			m_aColors.Add(crNext);
+
+			nColorIndex += nOffset;
+			nColorIndex %= NUM_GRAPH_COLORS;
+		}
+	}
+
+	return TRUE;
+}
+
+BOOL CGraphBase::InitColorPalette(COLORREF color1, COLORREF color2, COLORREF color3)
 {
 	return (m_aColors.Set(color1, color2, color3) > 0);
 }
@@ -439,7 +502,7 @@ CIncompleteTasksGraph::CIncompleteTasksGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_INCOMPLETETASKS)
 {
-	SetColors(COLOR_GREEN);
+	InitColorPalette(COLOR_GREEN);
 }
 
 CString CIncompleteTasksGraph::GetTitle() const
@@ -517,7 +580,7 @@ CRemainingDaysGraph::CRemainingDaysGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_REMAININGDAYS)
 {
-	SetColors(COLOR_BLUE, COLOR_YELLOW);
+	InitColorPalette(COLOR_BLUE, COLOR_YELLOW);
 }
 
 CString CRemainingDaysGraph::GetTitle() const
@@ -605,7 +668,7 @@ CStartedEndedTasksGraph::CStartedEndedTasksGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_STARTEDENDEDTASKS)
 {
-	SetColors(COLOR_RED, COLOR_GREEN);
+	InitColorPalette(COLOR_RED, COLOR_GREEN);
 }
 
 CString CStartedEndedTasksGraph::GetTitle() const
@@ -698,7 +761,7 @@ CEstimatedSpentDaysGraph::CEstimatedSpentDaysGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_ESTIMATEDSPENTDAYS)
 {
-	SetColors(COLOR_PINK, COLOR_GREEN);
+	InitColorPalette(COLOR_VIOLET, COLOR_GREEN);
 }
 
 CString CEstimatedSpentDaysGraph::GetTitle() const
@@ -794,7 +857,7 @@ CEstimatedSpentCostGraph::CEstimatedSpentCostGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_ESTIMATEDSPENTCOST)
 {
-	SetColors(COLOR_YELLOW, COLOR_PINK);
+	InitColorPalette(COLOR_YELLOW, COLOR_VIOLET);
 }
 
 CString CEstimatedSpentCostGraph::GetTitle() const
@@ -1010,7 +1073,7 @@ CCategoryFrequencyGraph::CCategoryFrequencyGraph()
 	: 
 	CAttributeFrequencyGraph(BCT_FREQUENCY_CATEGORY)
 {
-	SetColors(COLOR_BLUE, COLOR_RED, COLOR_YELLOW);
+	InitColorPalette(7, 1);
 }
 
 CString CCategoryFrequencyGraph::GetTitle() const
@@ -1032,7 +1095,7 @@ CStatusFrequencyGraph::CStatusFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_STATUS)
 {
-	SetColors(COLOR_GREEN, COLOR_ORANGE, COLOR_BLUE);
+	InitColorPalette(7, 3);
 }
 
 CString CStatusFrequencyGraph::GetTitle() const
@@ -1054,7 +1117,7 @@ CAllocatedToFrequencyGraph::CAllocatedToFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_ALLOCTO)
 {
-	SetColors(COLOR_PINK, COLOR_YELLOW, COLOR_GREEN);
+	InitColorPalette(7, 5);
 }
 
 CString CAllocatedToFrequencyGraph::GetTitle() const
@@ -1076,7 +1139,7 @@ CAllocatedByFrequencyGraph::CAllocatedByFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_ALLOCBY)
 {
-	SetColors(COLOR_RED, COLOR_GREEN, COLOR_YELLOW);
+	InitColorPalette(7, 7);
 }
 
 CString CAllocatedByFrequencyGraph::GetTitle() const
@@ -1098,7 +1161,7 @@ CVersionFrequencyGraph::CVersionFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_VERSION)
 {
-	SetColors(COLOR_YELLOW, COLOR_PINK, COLOR_BLUE);
+	InitColorPalette(7, 9);
 }
 
 CString CVersionFrequencyGraph::GetTitle() const
@@ -1120,7 +1183,7 @@ CTagFrequencyGraph::CTagFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_TAGS)
 {
-	SetColors(COLOR_ORANGE, COLOR_GREEN, COLOR_PINK);
+	InitColorPalette(7, 11);
 }
 
 CString CTagFrequencyGraph::GetTitle() const
@@ -1142,7 +1205,7 @@ CPriorityFrequencyGraph::CPriorityFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_PRIORITY)
 {
-	SetColors(COLOR_BLUE, COLOR_ORANGE, COLOR_PINK);
+	InitColorPalette(7, 13);
 }
 
 CString CPriorityFrequencyGraph::GetTitle() const
@@ -1164,7 +1227,7 @@ CRiskFrequencyGraph::CRiskFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_RISK)
 {
-	SetColors(COLOR_GREEN, COLOR_RED, COLOR_BLUE);
+	InitColorPalette(7, 2);
 }
 
 CString CRiskFrequencyGraph::GetTitle() const
