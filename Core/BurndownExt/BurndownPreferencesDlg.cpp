@@ -53,6 +53,7 @@ void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CBurndownPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CBurndownPreferencesPage)
 	//}}AFX_MSG_MAP
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -81,6 +82,22 @@ void CBurndownPreferencesPage::LoadPreferences(const IPreferences* /*pPrefs*/, L
 void CBurndownPreferencesPage::OnOK()
 {
 	CPreferencesPageBase::OnOK();
+}
+
+void CBurndownPreferencesPage::OnSize(UINT nType, int cx, int cy)
+{
+	CPreferencesPageBase::OnSize(nType, cx, cy);
+
+	if (m_lcGraphColors.GetSafeHwnd())
+	{
+		CPoint ptBorders = GetCtrlRect(this, IDC_COLORSLABEL).TopLeft();
+		CRect rColors = GetChildRect(&m_lcGraphColors);
+
+		rColors.right = cx - ptBorders.x;
+		rColors.bottom = cy - ptBorders.y;
+	
+		m_lcGraphColors.MoveWindow(rColors);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
