@@ -129,10 +129,6 @@ SOURCE=.\OdbcStorage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\OdbcStorage.def
-# End Source File
-# Begin Source File
-
 SOURCE=.\OdbcStorage.rc
 # End Source File
 # Begin Source File

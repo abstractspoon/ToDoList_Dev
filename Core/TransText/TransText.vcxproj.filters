@@ -35,9 +35,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="TransText.def">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="res\TransText.rc2">
       <Filter>Resource Files</Filter>
     </None>

@@ -87,7 +87,6 @@
     <Link>
       <OutputFile>.\Unicode_Release/OdbcStorage.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\OdbcStorage.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Unicode_Release/OdbcStorage.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -140,7 +139,6 @@ copy unicode_release\odbcstorage.dll ..\todolist\unicode_release /y
     <Link>
       <OutputFile>.\Unicode_Debug/OdbcStorage.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\OdbcStorage.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Unicode_Debug/OdbcStorage.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -206,7 +204,6 @@ copy unicode_debug\odbcstorage.dll ..\todolist\unicode_debug /y
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="OdbcStorage.def" />
     <None Include="res\icon1.ico" />
     <None Include="res\OdbcStorage.rc2" />
   </ItemGroup>

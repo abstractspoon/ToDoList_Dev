@@ -89,9 +89,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="KanbanBoard.def">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="res\KanbanBoard.rc2">
       <Filter>Source Files</Filter>
     </None>

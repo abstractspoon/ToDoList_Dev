@@ -110,10 +110,6 @@ SOURCE=.\KanbanBoard.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\KanbanBoard.def
-# End Source File
-# Begin Source File
-
 SOURCE=.\KanbanBoard.rc
 # End Source File
 # Begin Source File

@@ -44,9 +44,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="GanttChartExt.def">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="res\GanttChartExt.rc2">
       <Filter>Resource Files</Filter>
     </None>

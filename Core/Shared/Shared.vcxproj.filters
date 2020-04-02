@@ -292,9 +292,6 @@
     <ClCompile Include="StatusBarProgress.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StickiesAPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

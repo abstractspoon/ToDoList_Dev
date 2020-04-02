@@ -1,7 +1,0 @@
-; TransText.def : Declares the module parameters for the DLL.
-
-LIBRARY      "TransText"
-DESCRIPTION  'TransText Windows Dynamic Link Library'
-
-EXPORTS
-    ; Explicit exports can go here

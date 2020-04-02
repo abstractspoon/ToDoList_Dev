@@ -88,7 +88,6 @@
     <Link>
       <OutputFile>.\Unicode_Release/TransText.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\TransText.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Unicode_Release/TransText.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -145,7 +144,6 @@ copy unicode_release\transtext.dll ..\..\Plugins\release /y
     <Link>
       <OutputFile>.\Unicode_Debug/TransText.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\TransText.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Unicode_Debug/TransText.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -189,7 +187,6 @@ copy unicode_debug\transtext.pdb ..\..\Plugins\debug /y
     <ClCompile Include="TransWnd.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TransText.def" />
     <None Include="res\TransText.rc2" />
   </ItemGroup>
   <ItemGroup>

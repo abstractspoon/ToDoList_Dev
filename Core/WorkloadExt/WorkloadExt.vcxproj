@@ -99,7 +99,6 @@ copy unicode_debug\WorkloadExt.dll ..\todolist\unicode_debug /y</Command>
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Unicode_Debug\WorkloadExt.dll</OutputFile>
       <ImportLibrary>.\Unicode_Debug\WorkloadExt.lib</ImportLibrary>
-      <ModuleDefinitionFile>.\WorkloadExt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
@@ -145,7 +144,6 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Unicode_Release\WorkloadExt.dll</OutputFile>
       <ImportLibrary>.\Unicode_Release\WorkloadExt.lib</ImportLibrary>
-      <ModuleDefinitionFile>.\WorkloadExt.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -165,7 +163,6 @@ copy unicode_release\WorkloadExt.dll ..\todolist\unicode_release /y</Command>
     <ClCompile Include="WorkloadWnd.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="WorkloadExt.def" />
     <CustomBuild Include="res\help_button.ico" />
     <CustomBuild Include="res\toolbar.bmp" />
     <CustomBuild Include="res\toolbar_std.bmp" />

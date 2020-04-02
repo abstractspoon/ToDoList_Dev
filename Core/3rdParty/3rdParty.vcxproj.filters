@@ -94,9 +94,6 @@
     <ClCompile Include="StatusBarACT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="StdioFileEx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

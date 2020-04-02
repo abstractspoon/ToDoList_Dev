@@ -123,7 +123,6 @@
     <ClCompile Include="RichEditSpellCheck.cpp" />
     <ClCompile Include="SpellCheckDlg.cpp" />
     <ClCompile Include="SpellChecker.cpp" />
-    <ClCompile Include="StdAfx.cpp" />
     <ClCompile Include="TasklistStorageMgr.cpp" />
     <ClCompile Include="UIExtensionHelper.cpp" />
     <ClCompile Include="UIExtensionMgr.cpp" />

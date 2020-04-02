@@ -85,7 +85,6 @@
     <Link>
       <OutputFile>.\Unicode_Release/KanbanBoard.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\KanbanBoard.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Unicode_Release/KanbanBoard.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -138,7 +137,6 @@ copy unicode_release\KanbanBoard.dll ..\todolist\unicode_release /y
     <Link>
       <OutputFile>.\Unicode_Debug/KanbanBoard.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\KanbanBoard.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Unicode_Debug/KanbanBoard.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -197,7 +195,6 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="KanbanBoard.def" />
     <None Include="res\column_toolbar.bmp" />
     <None Include="res\column_toolbar_std.bmp" />
     <None Include="res\flag.bmp" />

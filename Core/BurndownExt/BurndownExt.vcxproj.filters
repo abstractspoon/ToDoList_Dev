@@ -21,9 +21,6 @@
     <ClCompile Include="BurndownWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BurndownChart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -48,11 +45,11 @@
     <ClCompile Include="BurndownOptionsComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StdAfx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BurndownExt.def">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="res\icon1.ico">
       <Filter>Resource Files</Filter>
     </None>

@@ -90,9 +90,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="WorkloadExt.def">
-      <Filter>Source Files</Filter>
-    </CustomBuild>
     <CustomBuild Include="res\help_button.ico">
       <Filter>Resource Files</Filter>
     </CustomBuild>

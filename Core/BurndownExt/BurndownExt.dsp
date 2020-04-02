@@ -116,10 +116,6 @@ SOURCE=.\BurndownExt.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\BurndownExt.def
-# End Source File
-# Begin Source File
-
 SOURCE=.\BurndownExt.rc
 # End Source File
 # Begin Source File

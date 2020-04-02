@@ -47,9 +47,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="OdbcStorage.def">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="res\icon1.ico">
       <Filter>Resource Files</Filter>
     </None>

@@ -129,10 +129,6 @@ SOURCE=.\WorkloadExt.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\WorkloadExt.def
-# End Source File
-# Begin Source File
-
 SOURCE=.\WorkloadExt.rc
 # End Source File
 # Begin Source File

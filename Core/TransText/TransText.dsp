@@ -116,10 +116,6 @@ SOURCE=.\TransText.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TransText.def
-# End Source File
-# Begin Source File
-
 SOURCE=.\TransText.rc
 # End Source File
 # Begin Source File

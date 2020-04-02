@@ -71,7 +71,7 @@
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>.\Unicode_Release/BurndownExt.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\Unicode_Release/</AssemblerListingLocation>
@@ -88,7 +88,6 @@
     <Link>
       <OutputFile>.\Unicode_Release/BurndownExt.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\BurndownExt.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Unicode_Release/BurndownExt.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -124,7 +123,7 @@ copy unicode_release\burndownExt.dll ..\todolist\unicode_release /y
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <PrecompiledHeaderFile>stdafx.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>.\Unicode_Debug/BurndownExt.pch</PrecompiledHeaderOutputFile>
       <AssemblerListingLocation>.\Unicode_Debug/</AssemblerListingLocation>
@@ -141,7 +140,6 @@ copy unicode_release\burndownExt.dll ..\todolist\unicode_release /y
     <Link>
       <OutputFile>.\Unicode_Debug/BurndownExt.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\BurndownExt.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Unicode_Debug/BurndownExt.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -179,15 +177,9 @@ copy unicode_debug\burndownext.dll ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
-    <ClCompile Include="StdAfx.cpp">
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
-      <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="StdAfx.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="BurndownExt.def" />
     <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
     <None Include="res\BurndownExt.rc2" />

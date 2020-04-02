@@ -108,10 +108,6 @@ SOURCE=.\GanttChartExt.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\GanttChartExt.def
-# End Source File
-# Begin Source File
-
 SOURCE=.\GanttChartExt.rc
 # End Source File
 # Begin Source File

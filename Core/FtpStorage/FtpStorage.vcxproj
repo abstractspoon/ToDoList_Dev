@@ -88,7 +88,6 @@
     <Link>
       <OutputFile>.\Unicode_Release/FtpStorage.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\FtpStorage.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Unicode_Release/FtpStorage.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -141,7 +140,6 @@ copy unicode_release\ftpstorage.dll ..\todolist\unicode_release /y
     <Link>
       <OutputFile>.\Unicode_Debug/FtpStorage.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\FtpStorage.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Unicode_Debug/FtpStorage.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -175,7 +173,6 @@ copy unicode_debug\ftpstorage.dll ..\todolist\unicode_debug /y
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="FtpStorage.def" />
     <None Include="res\ftpstora.ico" />
     <None Include="res\FtpStorage.rc2" />
   </ItemGroup>

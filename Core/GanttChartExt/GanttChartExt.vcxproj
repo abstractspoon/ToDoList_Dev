@@ -88,7 +88,6 @@
     <Link>
       <OutputFile>.\Unicode_Release/GanttChartExt.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\GanttChartExt.def</ModuleDefinitionFile>
       <ProgramDatabaseFile>.\Unicode_Release/GanttChartExt.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -141,7 +140,6 @@ copy unicode_release\GanttChartExt.dll ..\todolist\unicode_release /y
     <Link>
       <OutputFile>.\Unicode_Debug/GanttChartExt.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <ModuleDefinitionFile>.\GanttChartExt.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>.\Unicode_Debug/GanttChartExt.pdb</ProgramDatabaseFile>
       <SubSystem>Windows</SubSystem>
@@ -197,7 +195,6 @@ copy unicode_debug\GanttChartExt.dll ..\todolist\unicode_debug /y
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="GanttChartExt.def" />
     <None Include="res\GanttChartExt.rc2" />
     <None Include="res\help_button.ico" />
     <None Include="res\icon1.ico" />
