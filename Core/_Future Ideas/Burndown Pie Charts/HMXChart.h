@@ -220,7 +220,11 @@ protected:
 	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
 
-	bool DrawDataset(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity = 255);
+	bool DrawDataset(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltItemColors, BYTE fillOpacity = 255);
+	bool DrawLineGraph(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltMarkerColors, BYTE fillOpacity = 255);
+	bool DrawAreaGraph(CDC &dc, const CHMXDataset& dataset, BYTE fillOpacity = 255);
+	bool DrawBarChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltBarColors, BYTE fillOpacity = 255);
+	bool DrawPieChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltPieColors, BYTE fillOpacity = 255);
 
 	inline BOOL IsValidDatasetIndex(int nDatasetIndex) const
 	{
@@ -230,7 +234,7 @@ protected:
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, CPoint& point, double nBarWidth = -1) const;
 	BOOL GetPointXY(int nDatasetIndex, int nIndex, gdix_PointF& point, double nBarWidth = -1) const;
 
-	static BOOL CreateDefaultDrawingTools(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
+	static BOOL CreateDefaultItemDrawingTools(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	static BOOL CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	
 	DECLARE_HANDLE(HDIB);

@@ -175,7 +175,7 @@ BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
 
 COLORREF CGraphBase::GetColor(int nColor) const
 {
-	int nNumColors = GetNumColors();
+	int nNumColors = m_aColors.GetSize();
 
 	if ((nColor < 0) || (nNumColors == 0))
 	{
@@ -256,11 +256,6 @@ BOOL CGraphBase::SetColors(const CColorArray& aColors)
 const CColorArray& CGraphBase::GetColors() const
 {
 	return m_aColors;
-}
-
-int CGraphBase::GetNumColors() const
-{
-	return m_aColors.GetSize();
 }
 
 BOOL CGraphBase::IsValidOption(BURNDOWN_GRAPHOPTION nOption) const
@@ -1205,7 +1200,7 @@ CPriorityFrequencyGraph::CPriorityFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_PRIORITY)
 {
-	InitColorPalette(7, 13);
+	InitColorPalette(11, 13);
 }
 
 CString CPriorityFrequencyGraph::GetTitle() const
@@ -1227,7 +1222,7 @@ CRiskFrequencyGraph::CRiskFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_RISK)
 {
-	InitColorPalette(7, 2);
+	InitColorPalette(11, 2);
 }
 
 CString CRiskFrequencyGraph::GetTitle() const

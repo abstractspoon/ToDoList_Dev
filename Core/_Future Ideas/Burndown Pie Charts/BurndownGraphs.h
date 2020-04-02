@@ -44,7 +44,6 @@ protected:
 	BOOL InitColorPalette(int nNumColors, int nStartColor);
 	BOOL InitColorPalette(COLORREF color1, COLORREF color2 = CLR_NONE, COLORREF color3 = CLR_NONE);
 	COLORREF GetColor(int nColor) const;
-	int GetNumColors() const;
 
 private:
 	BURNDOWN_GRAPH m_nGraph;

@@ -843,272 +843,300 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity)
 	return DrawDataset(dc, ds, CDWordArray(), fillOpacity);
 }
 
-bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& aColors, BYTE fillOpacity)
+bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltItemColors, BYTE fillOpacity)
 {
-	if (ds.GetDatasetSize() == 0)
-		return false;
-
-	// let's calc the bar size
-	double dSpacing = (double)m_rectData.Width()/(double)m_nXMax;
-	double nFirstSample, nTemp, nTemp1, nZeroLine;
-
-	// get first sample, if dataset is empty continue to next dataset
-	int f=0;
-	do 
-	{
-		if(!ds.GetData(f++, nFirstSample))
-			return false;
-	} 
-	while(nFirstSample == HMX_DATASET_VALUE_INVALID);
-	f--;
-
-	// Get default colors
-	int nNumColors = aColors.GetSize();
-	
-	CGdiPlusPen defPen;
-	CGdiPlusBrush defBrush;
-	CreateDefaultDrawingTools(ds, aColors, fillOpacity, defPen, defBrush);
-
-	HMX_DATASET_STYLE nStyle = ds.GetStyle();
-
-	switch (nStyle)
+	switch (ds.GetStyle())
 	{
 	case HMX_DATASET_STYLE_LINE:
 	case HMX_DATASET_STYLE_LINE_DASHED:
 	case HMX_DATASET_STYLE_LINE_DOTTED:
-		{
-			CArray<gdix_PointF, gdix_PointF&> points;
-			int nPoints = GetPoints(ds, points, FALSE);
-
-			if (nPoints >= 2)
-			{
-				CGdiPlusGraphics graphics(dc);
-				VERIFY(CGdiPlus::DrawLines(graphics, defPen, points.GetData(), points.GetSize()));
-			
-				HMX_DATASET_MARKER nMarker = ds.GetMarker();
-
-				if (nMarker == HMX_DATASET_MARKER_NONE) 
-					break;
-
-				int nSize = ds.GetSize()*2;
-
-				CArray<gdix_PointF, gdix_PointF&> ptMarker;
-
-				for (f=0; f<nPoints; f++) 
-				{
-					VERIFY(GetMarker(nMarker, points[f], nSize, ptMarker));
-
-					CGdiPlusPen itemPen;
-					CGdiPlusBrush itemBrush;
-					CreateItemDrawingTools(f, aColors, fillOpacity, itemPen, itemBrush);
-
-					gdix_Pen* pen = (itemPen.IsValid() ? itemPen : defPen);
-					gdix_Brush* brush = (itemBrush.IsValid() ? itemBrush : defBrush);
-
-					switch (nMarker) 
-					{
-					case HMX_DATASET_MARKER_TRIANGLE:
-					case HMX_DATASET_MARKER_DIAMOND:
-						VERIFY(CGdiPlus::DrawPolygon(graphics, pen, ptMarker.GetData(), ptMarker.GetSize(), brush));
-						break;
-
-					case HMX_DATASET_MARKER_SQUARE:
-						VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
-						break;
-
-					case HMX_DATASET_MARKER_CIRCLE:
-						VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
-						break;
-					}
-				}
-			}
-		}
-		break;
-		
-	case HMX_DATASET_STYLE_VBAR:
-		{
-			CGdiPlusGraphics graphics(dc);
-			CGdiPlusPen pen(ds.GetLineColor(), 1);
-			CGdiPlusBrush brush(ds.GetFillColor(), fillOpacity);
-
-			CRect rectTemp;
-
-			for(f=0; f<ds.GetDatasetSize(); f++) 
-			{
-				double nSample = nFirstSample;
-				ds.GetData(f, nSample);
-
-				if (nSample == HMX_DATASET_VALUE_INVALID)
-					break;
-
-				if (nSample == 0.0)
-					continue;
-
-				nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-
-				CRect rBar;
-
-				if (nSample > 0.0) 
-				{
-					//  bar is positive
-					nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
-					nTemp1 = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-					
-					rBar.top    = (int)(m_rectData.bottom - nTemp);
-					rBar.bottom = (int)(m_rectData.bottom - nTemp1);
-
-					// Ensure something is visible
-					if (rBar.Height() == 0)
-						rBar.top--;
-				} 
-				else // if (nSample < 0.0)
-				{
-					// bar is negative
-					nZeroLine = m_nYMax < 0 ? m_nYMax : 0;
-					nTemp1 = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-					
-					rBar.top    = (int)(m_rectData.bottom - nTemp1);
-					rBar.bottom = (int)(m_rectData.bottom - nTemp);
-
-					// Ensure something is visible
-					if (rBar.Height() == 0)
-						rBar.bottom++;
-				}
-
-				int nBarPos = m_rectData.left + (int)(dSpacing*(f + 0.5));
-
-				rBar.left   = (nBarPos - (int)(dSpacing*(ds.GetSize()/2.0)/10.0));
-				rBar.right  = (nBarPos + (int)(dSpacing*(ds.GetSize()/2.0)/10.0));
-
-				if (rBar.Width() <= 0)
-					rBar.right = (rBar.left + 1);
-
-				CGdiPlusPen itemPen;
-				CGdiPlusBrush itemBrush;
-				CreateItemDrawingTools(f, aColors, fillOpacity, itemPen, itemBrush);
-
-				gdix_Pen* pen = (itemPen.IsValid() ? itemPen : defPen);
-				gdix_Brush* brush = (itemBrush.IsValid() ? itemBrush : defBrush);
-
-				VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(rBar), brush));
-			}
-		}
-		break;
+		return DrawLineGraph(dc, ds, aAltItemColors, fillOpacity);
 		
 	case HMX_DATASET_STYLE_AREALINE:
 	case HMX_DATASET_STYLE_AREA:
-		{
-			BOOL bAreaLine = (nStyle == HMX_DATASET_STYLE_AREALINE);
-
-			CGdiPlusGraphics graphics(dc);
-			
-			CArray<gdix_PointF, gdix_PointF&> points;
-			int nPoints = GetPoints(ds, points, TRUE);
-
-			if (nPoints >= 4)
-			{
-				VERIFY(CGdiPlus::FillPolygon(graphics, defBrush, points.GetData(), nPoints));
-
-				// draw line too?
-				if (bAreaLine)
-				{
-					// don't draw the first/last closure points
-					// That's why we need at least 4 points.
-					VERIFY(CGdiPlus::DrawLines(graphics, defPen, points.GetData() + 1, nPoints - 2));
-				}
-			}
-		}
-		break;
+		return DrawAreaGraph(dc, ds, fillOpacity);
+		
+	case HMX_DATASET_STYLE_VBAR:
+		return DrawBarChart(dc, ds, aAltItemColors, fillOpacity);
 
 	case HMX_DATASET_STYLE_PIE:
 	case HMX_DATASET_STYLE_PIELINE:
 	case HMX_DATASET_STYLE_DONUT:
 	case HMX_DATASET_STYLE_DONUTLINE:
-		{
-			BOOL bAreaLine = ((nStyle == HMX_DATASET_STYLE_PIELINE) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
-			BOOL bDonut = ((nStyle == HMX_DATASET_STYLE_DONUT) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
-
-			// Get the total aggregate value to be distributed
-			int nNumData = ds.GetDatasetSize();
-			ASSERT(nNumData == m_strarrScaleXLabel.GetSize());
-
-			double dTotalData = 0.0;
-
-			for (f = 0; f < nNumData; f++)
-			{
-				double dValue;
-				VERIFY(ds.GetData(f, dValue));
-
-				dTotalData += max(0.0, dValue);
-			}
-
-			// Make the chart as big as possible
-			CRect rPie(m_rectData);
-
-			int nSize = min(rPie.Height(), rPie.Width());
-			rPie.right = rPie.left + nSize;
-			rPie.top = rPie.bottom - nSize;
-
-			// Centre the chart
-			CPoint ptOffset = (m_rectData.CenterPoint() - rPie.CenterPoint());
-			rPie.OffsetRect(ptOffset);
-
-			CRect rDonut(rPie);
-			rDonut.DeflateRect((nSize / 4), (nSize / 4));
-
-			// Draw the items
-			CGdiPlusGraphics graphics(dc);
-			float fAngleFactor = (float)(360 / dTotalData), fStartAngle = 0.0f;
-
-			for (f = 0; f < nNumData; f++)
-			{
-				double dValue;
-				VERIFY(ds.GetData(f, dValue));
-
-				if (dValue > 0.0)
-				{
-					float fSweepAngle = (float)(dValue * fAngleFactor);
-
-					CGdiPlusPen itemPen;
-					CGdiPlusBrush itemBrush;
-					CreateItemDrawingTools(f, aColors, fillOpacity, itemPen, itemBrush);
-
-					gdix_Pen* pen = (itemPen.IsValid() ? itemPen : defPen);
-					gdix_Brush* brush = (itemBrush.IsValid() ? itemBrush : defBrush);
-
-					if (bAreaLine)
-					{
-						CGdiPlus::DrawPie(graphics, pen, rPie, fStartAngle, fSweepAngle, brush);
-
-						if (bDonut)
-							CGdiPlus::DrawArc(graphics, pen, rDonut, fStartAngle, fSweepAngle);
-					}
-					else
-					{
-						CGdiPlus::FillPie(graphics, brush, rPie, fStartAngle, fSweepAngle);
-					}
-					
-					fStartAngle += fSweepAngle;
-				}
-			}
-
-			if (bDonut)
-			{
-				rDonut.DeflateRect(1, 1);
-				CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(RGB(255, 255, 255)), rDonut);
-			}
-		}
-		break;
+		return DrawPieChart(dc, ds, aAltItemColors, fillOpacity);
 	}
 
 	return true;
 }
 
-BOOL CHMXChart::CreateDefaultDrawingTools(const CHMXDataset& ds, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush)
+bool CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltMarkerColors, BYTE fillOpacity)
+{
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
+	CArray<gdix_PointF, gdix_PointF&> points;
+	int nPoints = GetPoints(ds, points, FALSE);
+
+	if (nPoints < 2)
+		return false;
+
+	gdix_PenStyle nPenStyle = gdix_PenStyleSolid;
+
+	switch (ds.GetStyle())
+	{
+	case HMX_DATASET_STYLE_LINE_DASHED:	
+		nPenStyle = gdix_PenStyleDash;	
+		break;
+
+	case HMX_DATASET_STYLE_LINE_DOTTED:	
+		nPenStyle = gdix_PenStyleDot;	
+		break;
+	}
+
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen linePen(ds.GetLineColor(), ds.GetSize(), nPenStyle);
+
+	VERIFY(CGdiPlus::DrawLines(graphics, linePen, points.GetData(), points.GetSize()));
+
+	HMX_DATASET_MARKER nMarker = ds.GetMarker();
+
+	if (nMarker != HMX_DATASET_MARKER_NONE)
+	{
+		CGdiPlusPen defMarkerPen;
+		CGdiPlusBrush defMarkerBrush;
+		CreateDefaultItemDrawingTools(ds, aAltMarkerColors, fillOpacity, defMarkerPen, defMarkerBrush);
+
+		int nSize = ds.GetSize() * 2;
+
+		CArray<gdix_PointF, gdix_PointF&> ptMarker;
+
+		for (int f = 0; f < nPoints; f++)
+		{
+			VERIFY(GetMarker(nMarker, points[f], nSize, ptMarker));
+
+			CGdiPlusPen markerPen;
+			CGdiPlusBrush markerBrush;
+			CreateItemDrawingTools(f, aAltMarkerColors, fillOpacity, markerPen, markerBrush);
+
+			gdix_Pen* pen = (markerPen.IsValid() ? markerPen : defMarkerPen);
+			gdix_Brush* brush = (markerBrush.IsValid() ? markerBrush : defMarkerBrush);
+
+			switch (nMarker)
+			{
+			case HMX_DATASET_MARKER_TRIANGLE:
+			case HMX_DATASET_MARKER_DIAMOND:
+				VERIFY(CGdiPlus::DrawPolygon(graphics, pen, ptMarker.GetData(), ptMarker.GetSize(), brush));
+				break;
+
+			case HMX_DATASET_MARKER_SQUARE:
+				VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
+				break;
+
+			case HMX_DATASET_MARKER_CIRCLE:
+				VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool CHMXChart::DrawAreaGraph(CDC &dc, const CHMXDataset& ds, BYTE fillOpacity)
+{
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
+	CArray<gdix_PointF, gdix_PointF&> points;
+	int nPoints = GetPoints(ds, points, TRUE);
+
+	if (nPoints >= 4)
+	{
+		CGdiPlusGraphics graphics(dc);
+		CGdiPlusBrush brush(ds.GetFillColor(), fillOpacity);
+	
+		VERIFY(CGdiPlus::FillPolygon(graphics, brush, points.GetData(), nPoints));
+
+		// draw line too?
+		if ((ds.GetStyle() == HMX_DATASET_STYLE_AREALINE))
+		{
+			// don't draw the first/last closure points
+			// That's why we need at least 4 points.
+			CGdiPlusPen pen(ds.GetLineColor(), 1);
+
+			VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData() + 1, nPoints - 2));
+		}
+	}
+
+	return true;
+}
+
+bool CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltBarColors, BYTE fillOpacity)
+{
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen defBarPen;
+	CGdiPlusBrush defBarBrush;
+	CreateDefaultItemDrawingTools(ds, aAltBarColors, fillOpacity, defBarPen, defBarBrush);
+	
+	double dBarSpacing = (double)m_rectData.Width() / (double)m_nXMax;
+
+	for (int f = 0; f < ds.GetDatasetSize(); f++)
+	{
+		double nSample = 0.0;
+		ds.GetData(f, nSample);
+
+		if (nSample == HMX_DATASET_VALUE_INVALID)
+			break;
+
+		if (nSample == 0.0)
+			continue;
+
+		double nTemp = (nSample - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+		CRect rBar;
+
+		if (nSample > 0.0)
+		{
+			//  bar is positive
+			double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
+			double nTemp1 = (nZeroLine - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+
+			rBar.top = (int)(m_rectData.bottom - nTemp);
+			rBar.bottom = (int)(m_rectData.bottom - nTemp1);
+
+			// Ensure something is visible
+			if (rBar.Height() == 0)
+				rBar.top--;
+		}
+		else // if (nSample < 0.0)
+		{
+			// bar is negative
+			double nZeroLine = m_nYMax < 0 ? m_nYMax : 0;
+			double nTemp1 = (nZeroLine - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+
+			rBar.top = (int)(m_rectData.bottom - nTemp1);
+			rBar.bottom = (int)(m_rectData.bottom - nTemp);
+
+			// Ensure something is visible
+			if (rBar.Height() == 0)
+				rBar.bottom++;
+		}
+
+		int nBarPos = m_rectData.left + (int)(dBarSpacing*(f + 0.5));
+
+		rBar.left = (nBarPos - (int)(dBarSpacing*(ds.GetSize() / 2.0) / 10.0));
+		rBar.right = (nBarPos + (int)(dBarSpacing*(ds.GetSize() / 2.0) / 10.0));
+
+		if (rBar.Width() <= 0)
+			rBar.right = (rBar.left + 1);
+
+		CGdiPlusPen barPen;
+		CGdiPlusBrush barBrush;
+		CreateItemDrawingTools(f, aAltBarColors, fillOpacity, barPen, barBrush);
+
+		gdix_Pen* pen = (barPen.IsValid() ? barPen : defBarPen);
+		gdix_Brush* brush = (barBrush.IsValid() ? barBrush : defBarBrush);
+
+		VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(rBar), brush));
+	}
+
+	return true;
+}
+
+bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltPieColors, BYTE fillOpacity)
+{
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen defPiePen;
+	CGdiPlusBrush defPieBrush;
+	CreateDefaultItemDrawingTools(ds, aAltPieColors, fillOpacity, defPiePen, defPieBrush);
+
+	HMX_DATASET_STYLE nStyle = ds.GetStyle();
+
+	BOOL bAreaLine = ((nStyle == HMX_DATASET_STYLE_PIELINE) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
+	BOOL bDonut = ((nStyle == HMX_DATASET_STYLE_DONUT) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
+
+	// Get the total aggregate value to be distributed
+	int nNumData = ds.GetDatasetSize(), f;
+	ASSERT(nNumData == m_strarrScaleXLabel.GetSize());
+
+	double dTotalData = 0.0;
+
+	for (f = 0; f < nNumData; f++)
+	{
+		double dValue;
+		VERIFY(ds.GetData(f, dValue));
+
+		dTotalData += max(0.0, dValue);
+	}
+
+	// Make the chart as big as possible
+	CRect rPie(m_rectData);
+
+	int nSize = min(rPie.Height(), rPie.Width());
+	rPie.right = rPie.left + nSize;
+	rPie.top = rPie.bottom - nSize;
+
+	// Centre the chart
+	CPoint ptOffset = (m_rectData.CenterPoint() - rPie.CenterPoint());
+	rPie.OffsetRect(ptOffset);
+
+	CRect rDonut(rPie);
+	rDonut.DeflateRect((nSize / 4), (nSize / 4));
+
+	// Draw the items
+	float fAngleFactor = (float)(360 / dTotalData), fStartAngle = 0.0f;
+
+	for (f = 0; f < nNumData; f++)
+	{
+		double dValue;
+		VERIFY(ds.GetData(f, dValue));
+
+		if (dValue > 0.0)
+		{
+			float fSweepAngle = (float)(dValue * fAngleFactor);
+
+			CGdiPlusPen piePen;
+			CGdiPlusBrush pieBrush;
+			CreateItemDrawingTools(f, aAltPieColors, fillOpacity, piePen, pieBrush);
+
+			gdix_Pen* pen = (piePen.IsValid() ? piePen : defPiePen);
+			gdix_Brush* brush = (pieBrush.IsValid() ? pieBrush : defPieBrush);
+
+			if (bAreaLine)
+			{
+				CGdiPlus::DrawPie(graphics, pen, rPie, fStartAngle, fSweepAngle, brush);
+
+				if (bDonut)
+					CGdiPlus::DrawArc(graphics, pen, rDonut, fStartAngle, fSweepAngle);
+			}
+			else
+			{
+				CGdiPlus::FillPie(graphics, brush, rPie, fStartAngle, fSweepAngle);
+			}
+
+			fStartAngle += fSweepAngle;
+		}
+	}
+
+	if (bDonut)
+	{
+		rDonut.DeflateRect(1, 1);
+		CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(RGB(255, 255, 255)), rDonut);
+	}
+
+	return true;
+}
+
+BOOL CHMXChart::CreateDefaultItemDrawingTools(const CHMXDataset& ds, const CDWordArray& aAltItemColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush)
 {
 	COLORREF crPen = CLR_NONE, crBrush = CLR_NONE;
 
-	switch (aColors.GetSize())
+	switch (aAltItemColors.GetSize())
 	{
 	case 0:	
 		crPen = ds.GetLineColor(); 
@@ -1117,34 +1145,13 @@ BOOL CHMXChart::CreateDefaultDrawingTools(const CHMXDataset& ds, const CDWordArr
 
 	case 1:
 	default:
-		crPen = crBrush = aColors[0];
+		crPen = crBrush = aAltItemColors[0];
 		break;
 	}
 
-	ASSERT(crPen != CLR_NONE);
+	ASSERT((crPen != CLR_NONE) && (crBrush != CLR_NONE));
 
-	int nPenSize = 1;
-	gdix_PenStyle nPenStyle = gdix_PenStyleSolid;
-
-	switch (ds.GetStyle())
-	{
-	case HMX_DATASET_STYLE_LINE:
-		nPenSize = ds.GetSize();
-		nPenStyle = gdix_PenStyleSolid;
-		break;
-
-	case HMX_DATASET_STYLE_LINE_DASHED:	
-		nPenSize = ds.GetSize();
-		nPenStyle = gdix_PenStyleDash;
-		break;
-
-	case HMX_DATASET_STYLE_LINE_DOTTED:
-		nPenSize = ds.GetSize();
-		nPenStyle = gdix_PenStyleDot;
-		break;
-	}
-
-	return (pen.Create(crPen, nPenSize, nPenStyle) && brush.Create(crBrush, fillOpacity));
+	return (pen.Create(crPen) && brush.Create(crBrush, fillOpacity));
 }
 
 BOOL CHMXChart::CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush)

@@ -172,10 +172,29 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
 		CString sColors = pPrefs->GetProfileString(szKey, sGraphKey);
 
-		if (!sColors.IsEmpty()) // first time will fail
+		if (!sColors.IsEmpty()) // first time will fail 
 		{
 			CColorArray aColors;
 			Misc::Split(sColors, aColors, '|');
+
+			// If the number of colours has changed from the default then fix things up
+			int nDefNumColors = pGraph->GetColors().GetSize();
+			int nNewNumColors = aColors.GetSize();
+
+			if (nNewNumColors < nDefNumColors)
+			{
+				// Append existing colours
+				for (int nColor = nNewNumColors; nColor < nDefNumColors; nColor++)
+					aColors.Add(pGraph->GetColors()[nColor]);
+			}
+			else if (nNewNumColors > nDefNumColors)
+			{
+				// Remove new colours
+				int nColor = nDefNumColors;
+
+				while (nColor-- > nNewNumColors)
+					aColors.RemoveAt(nColor);
+			}
 
 			pGraph->SetColors(aColors);
 		}
