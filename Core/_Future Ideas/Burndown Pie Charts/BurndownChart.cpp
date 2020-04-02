@@ -170,7 +170,6 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
 
 		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-/*
 		CString sColors = pPrefs->GetProfileString(szKey, sGraphKey);
 
 		if (!sColors.IsEmpty()) // first time will fail
@@ -180,7 +179,6 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 
 			pGraph->SetColors(aColors);
 		}
-*/
 
 		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
 		BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, GetDefaultOption(nGraph));
@@ -200,7 +198,7 @@ void CBurndownChart::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
 
 		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
-		//pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
+		pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
 
 		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
 		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOption());
@@ -209,28 +207,37 @@ void CBurndownChart::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 
 void CBurndownChart::SetGraphColors(const CGraphColorMap& mapColors)
 {
-	POSITION pos = m_mapGraphs.GetStartPosition();
+	POSITION pos = mapColors.GetStartPosition();
 
 	while (pos)
 	{
 		BURNDOWN_GRAPH nGraph;
-		CGraphBase* pGraph = m_mapGraphs.GetNext(pos, nGraph);
-
 		CColorArray aColors;
-		VERIFY(mapColors.Lookup(nGraph, aColors) && aColors.GetSize());
+		
+		mapColors.GetNextAssoc(pos, nGraph, aColors);
+		ASSERT(aColors.GetSize());
 
-		pGraph->SetColors(aColors);
-
-		// Refresh active graph
-		if (nGraph == m_nActiveGraph)
+		if (aColors.GetSize())
 		{
-			pGraph->UpdateDatasetColors(m_datasets);
-			Invalidate();
+			CGraphBase* pGraph = m_mapGraphs.GetGraph(nGraph);
+			ASSERT(pGraph);
+
+			if (pGraph)
+			{
+				pGraph->SetColors(aColors);
+
+				// Refresh active graph
+				if (nGraph == m_nActiveGraph)
+				{
+					pGraph->UpdateDatasetColors(m_datasets);
+					Invalidate();
+				}
+			}
 		}
 	}
 }
 
-void CBurndownChart::GetGraphColors(CGraphColorMap& mapColors) const
+int CBurndownChart::GetGraphColors(CGraphColorMap& mapColors) const
 {
 	mapColors.RemoveAll();
 	POSITION pos = m_mapGraphs.GetStartPosition();
@@ -245,6 +252,8 @@ void CBurndownChart::GetGraphColors(CGraphColorMap& mapColors) const
 
 		mapColors[nGraph] = aColors;
 	}
+
+	return mapColors.GetCount();
 }
 
 BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
@@ -352,7 +361,6 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 		CScopedLogTimer log(_T("CBurndownChart::BuildGraph(%s)"), GetYText());
 
 		pGraph->BuildGraph(m_calculator, m_datasets);
-
 	}
 
 	if (!m_data.IsEmpty())

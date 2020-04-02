@@ -40,7 +40,7 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
 	void SetGraphColors(const CGraphColorMap& mapColors);
-	void GetGraphColors(CGraphColorMap& mapColors) const;
+	int GetGraphColors(CGraphColorMap& mapColors) const;
 
 protected:
 	const CStatsItemArray& m_data;
