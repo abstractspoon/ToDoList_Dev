@@ -1091,7 +1091,7 @@ int Misc::SplitByLength(const CString& sText, CStringArray& aLines, int nMaxLeng
 				do
 				{
 					// Find nearest word-break
-					CString sSubLine = Left(sText, nMaxLength, TRUE);
+					CString sSubLine = Left(sLine, nMaxLength, TRUE);
 
 					aSubLines.Add(sSubLine);
 					sLine = sLine.Mid(sSubLine.GetLength());

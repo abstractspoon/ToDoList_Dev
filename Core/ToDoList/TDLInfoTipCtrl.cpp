@@ -75,7 +75,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 
 	// 1. Normalise the labels by adding a tab 
 	// 2. Keep track of the widest label
-	// 3. Keep track of the longest value string exclusing comments
+	// 3. Keep track of the longest value string excluding comments
 	int nMaxLabelWidth = 0;
 	int nMaxValueLen = 0;
 
