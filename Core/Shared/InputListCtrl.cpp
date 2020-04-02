@@ -535,12 +535,12 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		int nCol = 0;
 
 		// draw state image if required
-		int nImageStyle, nImageWidth = 0, nState;
+		int nImageWidth = 0;
 		bRes = GetColumn(nCol, &lvc);
 
 		if (pStateList && bRes)
 		{
-			nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
+			int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
 			nImage = nState >> 12;
 			pStateList->Draw(pDC, nImage, CPoint(rText.left + 1, rText.top), ILD_TRANSPARENT); 
 
@@ -553,6 +553,8 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		// draw item image
 		if (pImageList && bRes)
 		{
+			int nImageStyle;
+
 			if (bSelected && (nCol == m_nCurCol/* && nItem == GetCurSel()*/))
 			{
 				if (bListFocused && !IsEditing())
@@ -561,7 +563,9 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					nImageStyle = ILD_TRANSPARENT;
 			}
 			else
+			{
 				nImageStyle = ILD_TRANSPARENT;
+			}
 
 			if (lvc.cx > nImageWidth + sizeImage.cx)
 				pImageList->Draw(pDC, nImage, CPoint(rText.left + 1 + nImageWidth, rText.top), nImageStyle); 
@@ -645,19 +649,9 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				sizeText = sText.FormatDC(pDC, nWidth, GetColumnFormat(nCol));
 			}
 
-			// draw text
+			// adjust text rect for button
 			CRect rText(rCell);
-			COLORREF crText = GetItemTextColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
-	
-			if (bSel && IsSelectionThemed(FALSE))
-			{
-				DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
-				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-				
-				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
-			}
 
-			// adjust for button
 			if (bHasBtn)
 			{
 				if (rButton.left <= rCell.left)
@@ -691,6 +685,16 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 			}
 			
 			// draw text
+			COLORREF crText = GetItemTextColor(nItem, nCol, (bSel && !IsEditing()), FALSE, bListFocused);
+	
+			if (bSel && IsSelectionThemed(FALSE))
+			{
+				DWORD dwFlags = (IsSelectionThemed(TRUE) ? GMIB_THEMECLASSIC : 0);
+				GM_ITEMSTATE nState = (bListFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+				
+				crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, dwFlags);
+			}
+
 			UINT nFlags = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(*this));
 
 			switch ((lvc.fmt & LVCFMT_JUSTIFYMASK))

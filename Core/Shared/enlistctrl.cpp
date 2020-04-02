@@ -1073,10 +1073,10 @@ void CEnListCtrl::ResizeStretchyColumns()
 			nColEnd = rClient.Width() - nColEnd;
 
 			// if its reasonably less than the client area adjust else do nothing
-			if (nColEnd < rClient.Width() - 20 || nNumCols == 1)
+			if ((nColEnd > 100) && (nColEnd < rClient.Width() - 20) || (nNumCols == 1))
 				SetColumnWidth(0, nColEnd - 2);
 
-			ShowScrollBar(SB_HORZ, FALSE);
+			ShowScrollBar(SB_HORZ, (nColEnd < 100));
 		}
 
 		// show header ctrl
