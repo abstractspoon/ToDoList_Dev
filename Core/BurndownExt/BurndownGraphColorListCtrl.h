@@ -26,15 +26,13 @@ public:
 	virtual ~CBurndownGraphColorListCtrl();
 
 	BOOL Initialize(const CBurndownChart& chart);
-
 	const CGraphColorMap& GetGraphColors() const { return m_mapColors; }
-	void SetGraphColors(const CGraphColorMap& mapColors);
 
 protected:
 	CGraphColorMap m_mapColors;
 
 protected:
-	virtual COLORREF GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);

@@ -38,11 +38,6 @@ CBurndownPreferencesPage::CBurndownPreferencesPage(const CBurndownChart& chart, 
 {
 	//{{AFX_DATA_INIT(CBurndownPreferencesPage)
 	//}}AFX_DATA_INIT
-
-	CGraphColorMap mapColors;
-	m_chart.GetGraphColors(mapColors);
-
-	m_lcGraphColors.SetGraphColors(mapColors);
 }
 
 void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
@@ -69,9 +64,7 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 
 	VERIFY(m_lcGraphColors.Initialize(m_chart));
 
-	m_lcGraphColors.SetFocus();
-	
-	return FALSE;  // return TRUE unless you set the focus to a control
+	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 

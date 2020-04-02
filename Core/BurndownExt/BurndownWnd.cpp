@@ -55,9 +55,9 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_dwUpdateGraphOnShow(0),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
 	m_chart(m_data),
-// #pragma warning(disable:4355)
-// 	m_dlgPrefs(m_chart, this),
-// #pragma warning(default:4355)
+#pragma warning(disable:4355)
+	m_dlgPrefs(m_chart, this),
+#pragma warning(default:4355)
 	m_bUpdatingSlider(FALSE),
 	m_sliderDateRange(TBS_BOTTOM),
 	m_bVisible(FALSE)
@@ -93,7 +93,7 @@ BEGIN_MESSAGE_MAP(CBurndownWnd, CDialog)
 	ON_WM_SIZE()
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_HELP, OnHelp)
-	//ON_COMMAND(ID_BURNDOWN_PREF, OnPreferences)
+	ON_COMMAND(ID_BURNDOWN_PREF, OnPreferences)
 	ON_WM_HELPINFO()
 	ON_CBN_SELENDOK(IDC_DISPLAY, OnSelchangeDisplay)
 	ON_CBN_SELENDOK(IDC_OPTIONS, OnOptionChanged)
@@ -126,16 +126,13 @@ BOOL CBurndownWnd::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 	return TRUE;
 }
 
-/*
 void CBurndownWnd::OnPreferences()
 {
 	if (m_dlgPrefs.DoModal() == IDOK)
 	{
-		m_chart.SetTodayColour(m_dlgPrefs.GetTodayColor());
 		m_chart.SetGraphColors(m_dlgPrefs.GetGraphColors());
 	}
 }
-*/
 
 BOOL CBurndownWnd::Create(DWORD dwStyle, const RECT &/*rect*/, CWnd* pParentWnd, UINT nID)
 {
@@ -240,8 +237,6 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 		if (dEnd > dStart)
 			VERIFY(m_dtPrevActiveRange.Set(dStart, dEnd));
-
-		//m_chart.SetGraphColors(m_dlgPrefs.GetGraphColors());
 
 		UpdateData(FALSE);
 	}

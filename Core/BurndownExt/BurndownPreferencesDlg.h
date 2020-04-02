@@ -77,6 +77,8 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const { m_page.SavePreferences(pPrefs, szKey); }
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
+	const CGraphColorMap& GetGraphColors() const { return m_page.GetGraphColors(); }
+
 protected:
 // Dialog Data
 	//{{AFX_DATA(CBurndownPreferencesDlg)

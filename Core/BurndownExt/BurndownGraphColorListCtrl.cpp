@@ -33,7 +33,8 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 {
 	ASSERT(GetStyle() & LVS_OWNERDRAWFIXED);
 	ASSERT((GetStyle() & (LVS_SORTASCENDING | LVS_SORTDESCENDING)) == 0);
-	ASSERT(m_mapColors.GetCount());
+
+	VERIFY(chart.GetGraphColors(m_mapColors));
 
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);
@@ -68,7 +69,7 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 			int nNumColors = m_mapColors.GetColorCount(nGraph);
 
 			while (GetColumnCount() <= nNumColors)
-				AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(60), ILCT_BROWSE);
+				AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(50), ILCT_BROWSE);
 
 			// Set selection to the currently active graph
 			if (chart.GetActiveGraph() == nGraph)
@@ -81,19 +82,11 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 
 	if (nSelRow != -1)
 	{
-		SetCurSel(nSelRow, 1);
-		ScrollCellIntoView(nSelRow, 1);
+		SetCurSel(nSelRow, 0);
+		ScrollCellIntoView(nSelRow, 0);
 	}
 	
 	return (GetItemCount() > 0);
-}
-
-void CBurndownGraphColorListCtrl::SetGraphColors(const CGraphColorMap& mapColors)
-{
-	m_mapColors.Copy(mapColors);
-
-	if (GetSafeHwnd())
-		Invalidate();
 }
 
 BOOL CBurndownGraphColorListCtrl::CanEditCell(int nRow, int nCol) const
@@ -111,14 +104,17 @@ BOOL CBurndownGraphColorListCtrl::CanEditCell(int nRow, int nCol) const
 	return (nCol <= m_mapColors.GetColorCount((BURNDOWN_GRAPH)dwItemData));
 }
 
-COLORREF CBurndownGraphColorListCtrl::GetItemTextColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
+COLORREF CBurndownGraphColorListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
 {
-	int dwItemData = GetItemData(nItem);
+	if (nCol == 0)
+	{
+		int dwItemData = GetItemData(nItem);
 
-	if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
-		return GetSysColor(COLOR_3DDKSHADOW);
+		if ((dwItemData == BCT_FREQUENCY) || (dwItemData == BCT_TIMESERIES))
+			return GetSysColor(COLOR_3DLIGHT);
+	}
 
-	return CInputListCtrl::GetItemTextColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
+	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
 void CBurndownGraphColorListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick*/)
