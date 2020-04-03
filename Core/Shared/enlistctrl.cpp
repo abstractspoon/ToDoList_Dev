@@ -1194,16 +1194,21 @@ BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
 		return FALSE;
 	}
 
-	SetMinItemHeight(nHeight, TRUE);
+	if (nHeight != m_nMinItemHeight)
+	{
+		m_nMinItemHeight = nHeight;
+
+		if (GetItemCount())
+		{
+			CRect rItem;
+			GetItemRect(0, rItem, LVIR_BOUNDS);
+
+			if (nHeight != rItem.Height())
+				RefreshItemHeight();
+		}
+	}
+
 	return TRUE;
-}
-
-void CEnListCtrl::SetMinItemHeight(int nHeight, BOOL bRefresh)
-{
-	m_nMinItemHeight = max(m_nMinItemHeight, nHeight);
-
-	//if (bRefresh)
-		RefreshItemHeight();
 }
 
 void CEnListCtrl::DeleteAllColumns()

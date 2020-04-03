@@ -1199,23 +1199,10 @@ int CInputListCtrl::AddCol(const CString& sColText, int nWidth, IL_COLUMNTYPE nC
 
 	nCol = InsertColumn(nCol, sColText, LVCFMT_LEFT, nWidth == -1 ? m_nAutoColWidth : nWidth);
 
-	SetItemText(0, nCol, sColText);
+	if (!sColText.IsEmpty())
+		SetItemText(0, nCol, sColText);
+
 	SetColumnType(nCol, nColType);
-
-	switch (nColType)
-	{
-	case ILCT_TEXT:
-		SetMinItemHeight(CDlgUnits(this, TRUE).ToPixelsY(10), FALSE); // default edit height
-		break;
-
-	case ILCT_CHECK:
-		SetMinItemHeight(GraphicsMisc::ScaleByDPIFactor(18), FALSE);
-		break;
-
-	default:
-		SetMinItemHeight(GetSystemMetrics(SM_CYVTHUMB), FALSE);
-		break;
-	}
 
 	if (m_nCurCol == -1)
 		m_nCurCol = nCol;
@@ -1483,7 +1470,7 @@ void CInputListCtrl::CreateControl(CWnd& ctrl, UINT nID, BOOL bSort)
 	CRect rWnd;
 	ctrl.GetClientRect(rWnd);
 
-	SetMinItemHeight(rWnd.Height(), FALSE);
+	SetMinItemHeight(rWnd.Height()/*, FALSE*/);
 }
 
 CPopupEditCtrl* CInputListCtrl::GetEditControl()
@@ -1788,7 +1775,37 @@ void CInputListCtrl::SetColumnType(int nCol, IL_COLUMNTYPE nType)
 	CColumnData2* pData = (CColumnData2*)CreateColumnData(nCol);
 
 	if (pData)
+	{
 		pData->nType = nType;
+	
+		// Recalc the minimum height
+		int nCol = GetColumnCount();
+		int nNewMinHeight = 0;
+
+		while (nCol--)
+		{
+			int nMinColHeight = 0;
+
+			switch (GetColumnType(nCol))
+			{
+			case ILCT_TEXT:
+				nMinColHeight = CDlgUnits(this, TRUE).ToPixelsY(10); // default edit height
+				break;
+
+			case ILCT_CHECK:
+				nMinColHeight = GraphicsMisc::ScaleByDPIFactor(18);
+				break;
+
+			default:
+				nMinColHeight = GetSystemMetrics(SM_CYVTHUMB);
+				break;
+			}
+
+			nNewMinHeight = max(nNewMinHeight, nMinColHeight);
+		}
+
+		SetMinItemHeight(nNewMinHeight);
+	}
 }
 
 IL_COLUMNTYPE CInputListCtrl::GetColumnType(int nCol) const

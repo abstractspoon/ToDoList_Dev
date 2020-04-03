@@ -169,7 +169,7 @@ protected:
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LPARAM* lResult);
 	DECLARE_MESSAGE_MAP()
 
-// helpers
+	// helpers
 	virtual void Copy() {} // derived class override provides logic
 	virtual void Delete() {} // derived class override provides logic
 	virtual void Cut() {} // derived class override provides logic
@@ -195,7 +195,6 @@ protected:
 	void RefreshItemHeight();
 	void ResizeStretchyColumns();
 	CString GetSortString(DWORD dwItemData) const;
-	void SetMinItemHeight(int nHeight, BOOL bRefresh);
 
 	void BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
 
