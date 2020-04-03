@@ -106,8 +106,11 @@ void CInputListCtrl::AllowDuplicates(BOOL bAllow, BOOL bNotify)
 void CInputListCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point) 
 {
 	// find out which column the user clicked on
-	int nItem = HitTest(point);
-	int nCol = GetColumnAtPoint(point);
+	LVHITTESTINFO lvHit = { 0 };
+	lvHit.pt = point;
+	
+	int nItem = SubItemHitTest(&lvHit);
+	int nCol = lvHit.iSubItem;
 
 	// DO NOT DO DEFAULT HANDLING 
 	// because it causes flicker in combination with our owner draw
@@ -148,8 +151,12 @@ void CInputListCtrl::OnLButtonDown(UINT /*nFlags*/, CPoint point)
 
 	BOOL bHadFocus = (GetFocus() == this);
 	BOOL bWasEditing = IsEditing();
-	int nItem = HitTest(point);
-	int nCol = GetColumnAtPoint(point);
+
+	LVHITTESTINFO lvHit = { 0 };
+	lvHit.pt = point;
+	
+	int nItem = SubItemHitTest(&lvHit);
+	int nCol = lvHit.iSubItem;
 	
 	SetFocus();
 

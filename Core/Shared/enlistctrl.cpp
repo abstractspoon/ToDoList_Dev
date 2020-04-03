@@ -743,35 +743,34 @@ BOOL CEnListCtrl::SetTooltipCtrlText(CString sText)
 
 void CEnListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
-	int nSel;
+	int nSel = HitTest(point);
 	BOOL bChangedEditLabels = FALSE;
 
 	// if the list is in report mode AND supports label editing then
 	// clicking anywhere on the item when its already selected will
 	// edit the label of column one which is not what we want. 
 	// so we selectively disable it
-	if ((nSel = HitTest(point)) != -1 && m_nCurView == LVS_REPORT)
+	if ((nSel != -1) && m_nCurView == LVS_REPORT)
 	{
 		if (GetStyle() & LVS_EDITLABELS)
 		{
-			int nCol0Start, nCol0End;
-			GetColumnExtents(0, nCol0Start, nCol0End);
+			CRect rItem;
+			GetSubItemRect(nSel, 0, LVIR_BOUNDS, rItem);
 
 			if (GetImageList(LVSIL_SMALL))
-				nCol0Start += 19;
+				rItem.left += 19;
 
 			if (GetImageList(LVSIL_STATE))
-				nCol0Start += 19;
+				rItem.left += 19;
 
-			if (point.x < nCol0Start || point.x > nCol0End)
+			if ((point.x < rItem.left) || (point.x > rItem.right))
 			{
 				ModifyStyle(LVS_EDITLABELS, 0);
 				bChangedEditLabels = TRUE;
 			}
 		}
 	}
-
-
+	
 	CListCtrl::OnLButtonDown(nFlags, point);
 
 	if (nSel != -1) // user clicked on an item
@@ -1288,13 +1287,7 @@ BOOL CEnListCtrl::IsItemSelected(int nItem) const
 
 void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 {
-	CRect rItem;
-	GetItemRect(nRow, rItem, LVIR_BOUNDS); // item rect in current view
-
-	int nColStart, nColEnd;
-	GetColumnExtents(nCol, nColStart, nColEnd); // relative positions of column in client coords
-
-	rCell.SetRect(nColStart, rItem.top, nColEnd, rItem.bottom);
+	GetSubItemRect(nRow, nCol, LVIR_BOUNDS, rCell);
 }
 
 void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
@@ -1318,57 +1311,6 @@ void CEnListCtrl::NotifySelChange()
 	GetParent()->SendMessage(WM_NOTIFY, (WPARAM)GetDlgCtrlID(), (LPARAM)&m_nmhdr);
 
 	m_bUserSelChange = FALSE;
-}
-
-int CEnListCtrl::GetColumnAtPoint(CPoint point) const
-{
-	int nCol, nNumCols;
-	CPoint ptItem;
-
-	// iterate thru columns until we reach the one which was clicked
-	nNumCols = GetColumnCount();
-
-	for (nCol = 0; nCol < nNumCols; nCol++)
-	{
-		int nColStart, nColEnd;
-		GetColumnExtents(nCol, nColStart, nColEnd);
-
-		if (point.x >= nColStart && point.x < nColEnd)
-			return nCol;
-	}
-
-	// not on a column
-	return -1;
-}
-
-void CEnListCtrl::GetColumnExtents(int nCol, int& nColStart, int& nColEnd) const
-{
-	int nColItem;
-	CPoint ptItem;
-
-	ASSERT (nCol >= 0 && nCol < GetColumnCount());
-	
-	if (nCol >= 0 && nCol < GetColumnCount())
-	{
-		// iterate thru columns until we reach the one we want
-		CRect rItem;
-
-		GetItemRect(0, rItem, LVIR_BOUNDS); // item rect in current view
-		nColEnd = nColStart = rItem.left/* - 2*/;
-
-		for (nColItem = 0; nColItem <= nCol; nColItem++)
-		{
-			// calc col end in client coordinates
-			nColStart = nColEnd;
-			nColEnd += GetColumnWidth(nColItem);
-		}
-
-		return;
-	}
-
-	// nCol invalid
-	nColStart = -1;
-	nColEnd = -1;
 }
 
 BOOL CEnListCtrl::OnColumnClick(NMHDR* pNMHDR, LPARAM* /*lParam*/)

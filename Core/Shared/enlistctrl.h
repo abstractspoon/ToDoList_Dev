@@ -186,8 +186,6 @@ protected:
 	int GetImageStyle(BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	int GetImageIndex(int nItem, int nSubItem) const;
 	void NotifySelChange();
-	int GetColumnAtPoint(CPoint point) const;
-	void GetColumnExtents(int nCol, int& nColStart, int& nColEnd) const;
 	void DeleteAllColumnData();
 	CColumnData* CreateColumnData(int nCol);
 	const CColumnData* GetColumnData(int nCol) const;
