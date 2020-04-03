@@ -502,7 +502,7 @@ CIncompleteTasksGraph::CIncompleteTasksGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_INCOMPLETETASKS)
 {
-	InitColorPalette(COLOR_GREEN);
+	InitColorPalette(COLOR_GREENYELLOW);
 }
 
 CString CIncompleteTasksGraph::GetTitle() const
@@ -1245,7 +1245,7 @@ CPriorityFrequencyGraph::CPriorityFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_PRIORITY)
 {
-	InitColorPalette(7, 13);
+	InitColorPalette(11, 13);
 }
 
 CString CPriorityFrequencyGraph::GetTitle() const
@@ -1267,7 +1267,7 @@ CRiskFrequencyGraph::CRiskFrequencyGraph()
 	:
 	CAttributeFrequencyGraph(BCT_FREQUENCY_RISK)
 {
-	InitColorPalette(7, 2);
+	InitColorPalette(11, 2);
 }
 
 CString CRiskFrequencyGraph::GetTitle() const
