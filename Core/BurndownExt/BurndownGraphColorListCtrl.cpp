@@ -38,9 +38,8 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 
 	AutoAdd(FALSE, FALSE);
 	ShowGrid(TRUE, TRUE);
-	SetFirstColumnStretchy(TRUE);
 
-	AddCol(_T("")); // Graph titles
+	AddCol(_T(""), GraphicsMisc::ScaleByDPIFactor(200)); // Graph titles
 	DisableColumnEditing(0, TRUE);
 
 	// Populate items
@@ -77,7 +76,6 @@ BOOL CBurndownGraphColorListCtrl::Initialize(const CBurndownChart& chart)
 		}
 	}
 
-	ResizeStretchyColumns();
 	RefreshItemHeight();
 
 	if (nSelRow != -1)

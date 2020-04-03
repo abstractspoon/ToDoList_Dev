@@ -1287,7 +1287,7 @@ BOOL CEnListCtrl::IsItemSelected(int nItem) const
 
 void CEnListCtrl::GetCellRect(int nRow, int nCol, CRect& rCell) const
 {
-	GetSubItemRect(nRow, nCol, LVIR_BOUNDS, rCell);
+	GetSubItemRect(nRow, nCol, LVIR_LABEL, rCell);
 }
 
 void CEnListCtrl::GetCellEditRect(int nRow, int nCol, CRect& rCell) const
