@@ -195,11 +195,8 @@ protected:
 	void RefreshItemHeight();
 	void ResizeStretchyColumns();
 	CString GetSortString(DWORD dwItemData) const;
-
 	void BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
-
 	BOOL IsSelectionThemed(BOOL bClassic) const;
-//	static BOOL IsSelectionThemed(BOOL bClassic) { return IsSelectionThemed(s_dwSelectionTheming, bClassic); }
 
 private:
 	void BuildSortMap(int nCol);
