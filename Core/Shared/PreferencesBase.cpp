@@ -518,6 +518,10 @@ BOOL CPreferencesDlgBase::OnInitDialog()
 	}
 	CenterWindow();
 
+	// Initialise the size gripper if we are resizable
+	if (GetStyle() & WS_THICKFRAME)
+		m_sizer.Initialize(this);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
 }

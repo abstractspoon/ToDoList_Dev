@@ -10,6 +10,7 @@
 #include "winhelpbutton.h"
 #include "icon.h"
 #include "Groupline.h"
+#include "SizeGrip.h"
 
 #include "..\Interfaces\IPreferences.h"
 
@@ -108,6 +109,7 @@ protected:
 	CScrollingPropertyPageHost m_ppHost;
 	CWinHelpButton m_btnHelp;
 	CIcon m_icon;
+	CSizeGrip m_sizer;
 
 	UINT m_nDlgTemplateID;
 	UINT m_nPPHostFrameCtrlID;

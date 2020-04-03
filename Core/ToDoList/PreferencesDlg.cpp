@@ -210,10 +210,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 	CAutoFlag af(m_bInitialisingDialog, TRUE);
 
 	CPreferencesDlgBase::OnInitDialog();
-
 	CPreferencesDlgCopyHookMgr::Initialize(*this);
-
-	m_sbGrip.Initialize(this);
 
 	m_mgrPrompts.SetEditPrompt(m_eSearchText, CEnString(IDS_SEARCHPREFS_PROMPT));
 	
@@ -682,7 +679,7 @@ void CPreferencesDlg::SetUITheme(const CUIThemeFile& theme)
 {
 	m_theme = theme;
 
-	m_sbGrip.SetBackgroundColor(theme.crAppBackLight);
+	m_sizer.SetBackgroundColor(theme.crAppBackLight);
 	m_stPageTitle.SetBkgndColors(theme.crStatusBarLight, theme.crStatusBarDark);
 	m_stPageTitle.SetBkgndStyle(theme.HasGlass(), theme.HasGradient());
 	

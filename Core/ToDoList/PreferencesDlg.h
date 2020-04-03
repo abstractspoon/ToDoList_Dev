@@ -326,7 +326,6 @@ protected:
 
 	CTreeCtrl m_tcPages;
 	CEnStatic m_stPageTitle; 
-	CSizeGrip m_sbGrip;
 	CEnEdit m_eSearchText;
 	CIcon m_iconSearch;
 	CWndPromptManager m_mgrPrompts;
