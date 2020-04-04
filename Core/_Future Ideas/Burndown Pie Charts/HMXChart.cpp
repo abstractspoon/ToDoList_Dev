@@ -1053,11 +1053,46 @@ bool CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 	return true;
 }
 
+int CHMXChart::CalcPieRect(CRect& rPie) const
+{
+	// Make the chart as big as possible
+	rPie = m_rectData;
+
+	// Allow for item label near the top
+	rPie.top += CalcYScaleFontSize(FALSE);
+	
+	// Only use half the width to allow for labels
+	int nSize = min(rPie.Height(), (rPie.Width() / 2));
+	nSize -= (nSize % 2); // make even size
+
+	rPie.right = rPie.left + nSize;
+	rPie.top = rPie.bottom - nSize;
+
+	// And centre it
+	CPoint ptOffset = (m_rectData.CenterPoint() - rPie.CenterPoint());
+	rPie.OffsetRect(ptOffset);
+
+	if ((rPie.right <= rPie.left) || (rPie.bottom <= rPie.top))
+		rPie.SetRectEmpty();
+
+	return rPie.Width();
+}
+
 bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltPieColors, BYTE fillOpacity)
 {
 	if (ds.GetDatasetSize() == 0)
 		return false;
 
+	CRect rPie;
+	int nSize = CalcPieRect(rPie);
+
+	if (!nSize)
+		return false;
+
+	CRect rDonut(rPie);
+	rDonut.DeflateRect((nSize / 4), (nSize / 4));
+	
+	// Create default drawing tools
 	CGdiPlusGraphics graphics(dc);
 	CGdiPlusPen defPiePen;
 	CGdiPlusBrush defPieBrush;
@@ -1076,25 +1111,6 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 
 		dTotalData += max(0.0, dValue);
 	}
-
-	// Make the chart as big as possible and centred
-	CRect rPie(m_rectData);
-
-	// Allow for item label near the top
-	rPie.top += CalcYScaleFontSize(FALSE);
-	
-	int nSize = min(rPie.Height(), rPie.Width());
-	nSize -= (nSize % 2); // make even size
-
-	rPie.right = rPie.left + nSize;
-	rPie.top = rPie.bottom - nSize;
-
-	// And centred
-	CPoint ptOffset = (m_rectData.CenterPoint() - rPie.CenterPoint());
-	rPie.OffsetRect(ptOffset);
-
-	CRect rDonut(rPie);
-	rDonut.DeflateRect((nSize / 4), (nSize / 4));
 
 	// Draw the items
 	CArray<PIELABEL, PIELABEL&> aLabels;
