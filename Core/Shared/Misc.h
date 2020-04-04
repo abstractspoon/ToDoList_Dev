@@ -247,7 +247,7 @@ namespace Misc
  	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim = TRUE);
 	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
 
-	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLength = -1);
+	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLength = -1);
 	CString Left(const CString& sText, int nLength, BOOL bNearestWord);
 
 	template <class T, class S> 

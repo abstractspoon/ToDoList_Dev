@@ -1121,8 +1121,15 @@ CString Misc::Left(const CString& sText, int nLength, BOOL bNearestWord)
 
 		int nFindPrev = FindNextOneOf(BACKWARD_DELIMS, sText, FALSE, nLength);
 
+		// Only accept the delimiter position if it falls
+		// within a nominal word length of the requested length
 		if (nFindPrev != -1)
-			nLength = (nFindPrev + 1); // include delimiter
+		{
+			const int WORD_LEN = 15;
+
+			if (nFindPrev >= (nLength - WORD_LEN))
+				nLength = (nFindPrev + 1); // include delimiter
+		}
 	}
 
 	return sText.Left(nLength);

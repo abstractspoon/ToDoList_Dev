@@ -105,6 +105,7 @@ public:
 	BOOL TaskHasDate(DWORD dwTaskID, TDC_DATE nDate) const;
 	COLORREF GetTaskColor(DWORD dwTaskID) const; // -1 on no item selected
 	CString GetTaskComments(DWORD dwTaskID) const;
+	int GetTaskCommentsLength(DWORD dwTaskID) const;
 	const CBinaryData& GetTaskCustomComments(DWORD dwTaskID, CONTENTFORMAT& cfComments) const;
 	int GetTaskPercent(DWORD dwTaskID, BOOL bCheckIfDone) const;
 	BOOL GetTaskTimeEstimate(DWORD dwTaskID, TDCTIMEPERIOD& timeEst) const;

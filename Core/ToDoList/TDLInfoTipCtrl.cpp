@@ -122,16 +122,20 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		TDCINFOTIPITEM& iti = aItems[nItem];
 
 		// Multi-line or long comments are special case
-		if (iti.nAttribID == TDCA_COMMENTS)
+		if ((iti.nAttribID == TDCA_COMMENTS) && !iti.sValue.IsEmpty())
 		{
 			const int MAX_LINELEN = max(75, (nMaxValueLen + 10));
 
+			// Note: we don't pre-add the ellipsis because we 
+			// we don't want it to affect the line splitting
+			BOOL bWantEllipsis = (iti.sValue.GetLength() < m_data.GetTaskCommentsLength(dwTaskID));
+
 			if (((iti.sValue.Find('\n') != -1) || (iti.sValue.GetLength() > MAX_LINELEN)))
 			{
-				CStringArray aComments;
+				CStringArray aCommentLines;
 
-				int nNumLines = Misc::SplitLines(iti.sValue, aComments, MAX_LINELEN);
-				nNumLines -= Misc::RemoveEmptyItems(aComments);
+				int nNumLines = Misc::SplitLines(iti.sValue, aCommentLines, MAX_LINELEN);
+				nNumLines -= Misc::RemoveEmptyItems(aCommentLines);
 
 				if (nNumLines > 1)
 				{
@@ -142,13 +146,19 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 						else
 							sTip += CString('\t', (nMaxLabelWidth / nTabWidth));
 
-						sTip += aComments[nLine];
+						sTip += aCommentLines[nLine];
+
+						if ((nLine == (nNumLines - 1)) && bWantEllipsis)
+							sTip += _T("...");
+
 						sTip += _T("\n");
 					}
 					continue;
 				}
 			}
 
+			if (bWantEllipsis)
+				iti.sValue += _T("...");
 		}
 
 		// all the rest

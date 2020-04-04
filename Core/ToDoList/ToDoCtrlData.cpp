@@ -467,6 +467,14 @@ CString CToDoCtrlData::GetTaskComments(DWORD dwTaskID) const
 	return pTDI->sComments;
 }
 
+int CToDoCtrlData::GetTaskCommentsLength(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, 0);
+	
+	return pTDI->sComments.GetLength();
+}
+
 const CBinaryData& CToDoCtrlData::GetTaskCustomComments(DWORD dwTaskID, CONTENTFORMAT& cfComments) const
 {
 	static CBinaryData content;

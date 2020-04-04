@@ -53,7 +53,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	CString FormatCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 	CString FormatDate(const COleDateTime& date) const;
 
 	int BuildSortedAttributeArray(DWORD dwTaskID, 
