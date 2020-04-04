@@ -226,6 +226,13 @@ protected:
 	bool DrawBarChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltBarColors, BYTE fillOpacity = 255);
 	bool DrawPieChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltPieColors, BYTE fillOpacity = 255);
 
+	struct PIELABEL
+	{
+		CString sLabel;
+		float fStartDegrees, fSweepDegrees;
+	};
+	void DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIELABEL, PIELABEL&>& aLabels);
+	
 	inline BOOL IsValidDatasetIndex(int nDatasetIndex) const
 	{
 		return ((nDatasetIndex >= 0) && (nDatasetIndex < HMX_MAX_DATASET));

@@ -9,6 +9,14 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
 #define HMX_AREA_MARGINS	80		// fraction of area
 #define HMX_AREA_TITLE		10		// fraction of area
 #define HMX_AREA_YAXIS		7		// percentage
@@ -36,11 +44,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+#define DEG2RAD(d) ((d) * 3.141592654f / 180)
 
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart
@@ -173,10 +177,6 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 
 	if (m_rectData.Height() <= 0)
 		return;
-
-	// Recreate pens, etc
-	if (!m_penGrid.GetSafeHandle())
-		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
 
 	dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
@@ -428,6 +428,10 @@ bool CHMXChart::DrawHorzGridLines(CDC & dc)
 		return false;
 
 	double nY = ((m_nYMax - m_nYMin)/(double)nTicks);
+
+	if (!m_penGrid.GetSafeHandle())
+		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
+
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	for(int f=0; f<=nTicks; f++) 
@@ -460,14 +464,18 @@ bool CHMXChart::DrawVertGridLines(CDC & dc)
 	if(!m_nXMax)
 		return false;
 
-	double nX = (double)m_rectData.Width()/(double)m_nXMax;
+	if (!m_penGrid.GetSafeHandle())
+		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
+
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
-	CPoint ptLine;
+	double nX = (double)m_rectData.Width()/(double)m_nXMax;
 
 	for(int f=0; f < nCount; f += m_nXLabelStep)
 	{
+		CPoint ptLine;
+
 		if (!m_strarrScaleXLabel[f].IsEmpty() && GetPointXY(0, f, ptLine))
 		{
 			dc.MoveTo(ptLine.x, m_rectData.top);
@@ -1055,11 +1063,6 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 	CGdiPlusBrush defPieBrush;
 	CreateDefaultItemDrawingTools(ds, aAltPieColors, fillOpacity, defPiePen, defPieBrush);
 
-	HMX_DATASET_STYLE nStyle = ds.GetStyle();
-
-	BOOL bAreaLine = ((nStyle == HMX_DATASET_STYLE_PIELINE) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
-	BOOL bDonut = ((nStyle == HMX_DATASET_STYLE_DONUT) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
-
 	// Get the total aggregate value to be distributed
 	int nNumData = ds.GetDatasetSize(), f;
 	ASSERT(nNumData == m_strarrScaleXLabel.GetSize());
@@ -1074,14 +1077,19 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 		dTotalData += max(0.0, dValue);
 	}
 
-	// Make the chart as big as possible
+	// Make the chart as big as possible and centred
 	CRect rPie(m_rectData);
 
+	// Allow for item label near the top
+	rPie.top += CalcYScaleFontSize(FALSE);
+	
 	int nSize = min(rPie.Height(), rPie.Width());
+	nSize -= (nSize % 2); // make even size
+
 	rPie.right = rPie.left + nSize;
 	rPie.top = rPie.bottom - nSize;
 
-	// Centre the chart
+	// And centred
 	CPoint ptOffset = (m_rectData.CenterPoint() - rPie.CenterPoint());
 	rPie.OffsetRect(ptOffset);
 
@@ -1089,7 +1097,16 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 	rDonut.DeflateRect((nSize / 4), (nSize / 4));
 
 	// Draw the items
-	float fAngleFactor = (float)(360 / dTotalData), fStartAngle = 0.0f;
+	CArray<PIELABEL, PIELABEL&> aLabels;
+	aLabels.SetSize(nNumData);
+
+	HMX_DATASET_STYLE nStyle = ds.GetStyle();
+
+	BOOL bAreaLine = ((nStyle == HMX_DATASET_STYLE_PIELINE) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
+	BOOL bDonut = ((nStyle == HMX_DATASET_STYLE_DONUT) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
+
+	float fAngleFactor = (float)(360 / dTotalData);
+	float fStartAngle = -90.0f; // 12 o'clock
 
 	for (f = 0; f < nNumData; f++)
 	{
@@ -1119,6 +1136,11 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 				CGdiPlus::FillPie(graphics, brush, rPie, fStartAngle, fSweepAngle);
 			}
 
+			// Keep track of label info
+			aLabels[f].sLabel = m_strarrScaleXLabel[f];
+			aLabels[f].fStartDegrees = fStartAngle;
+			aLabels[f].fSweepDegrees = fSweepAngle;
+
 			fStartAngle += fSweepAngle;
 		}
 	}
@@ -1129,8 +1151,89 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 		CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(RGB(255, 255, 255)), rDonut);
 	}
 
+	DrawPieLabels(dc, rPie, aLabels);
+
 	return true;
 }
+
+void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIELABEL, PIELABEL&>& aLabels)
+{
+	int nNumData = aLabels.GetSize();
+
+	if (!nNumData)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen labelPen(m_clrGrid);
+
+	CFont fontLabel;
+	VERIFY(CreateYAxisFont(FALSE, fontLabel));
+	CFont* pFontOld = dc.SelectObject(&fontLabel);
+
+	int nRadius = (rPie.Width() / 2), nLabelHeight = CalcYScaleFontSize(FALSE);
+	CPoint ptCentre(rPie.CenterPoint());
+
+	for (int f = 0; f < nNumData; f++)
+	{
+		const PIELABEL& pl = aLabels[f];
+
+		if (!pl.sLabel.IsEmpty())
+		{
+			float fAveAngle = DEG2RAD(pl.fStartDegrees + (pl.fSweepDegrees / 2));
+			CPoint ptLabel[3];
+
+			// Initial point on the circumference
+			ptLabel[0] = ptCentre;
+			ptLabel[0].x += (int)(cos(fAveAngle) * (nRadius + 2));
+			ptLabel[0].y += (int)(sin(fAveAngle) * (nRadius + 2));
+
+			// Next point a little further out
+			ptLabel[1] = ptLabel[0];
+			ptLabel[1].x += (int)(cos(fAveAngle) * 10);
+			ptLabel[1].y += (int)(sin(fAveAngle) * 10);
+
+			// Last point projected horizontally depending on 
+			// which side of the centre point we are
+			BOOL bRightSide = (ptLabel[0].x >= ptCentre.x);
+
+			ptLabel[2] = ptLabel[1];
+			ptLabel[2].x = ptCentre.x;
+			
+			if (bRightSide)
+				ptLabel[2].x += (nRadius * 3 / 2);
+			else
+				ptLabel[2].x -= (nRadius * 3 / 2);
+
+			CGdiPlus::DrawLines(graphics, labelPen, ptLabel, 3);
+
+			// Label text
+			int nDrawFlags = DT_VCENTER;
+			CRect rLabel(m_rectData);
+				
+			rLabel.top = (ptLabel[2].y - (nLabelHeight / 2));
+			rLabel.bottom = (rLabel.top + nLabelHeight);
+
+			if (bRightSide)
+			{
+				rLabel.left = ptLabel[2].x;
+				nDrawFlags |= DT_LEFT;
+			}
+			else
+			{
+				rLabel.right = ptLabel[2].x;
+				nDrawFlags |= DT_RIGHT;
+			}
+			
+			dc.DrawText(pl.sLabel, rLabel, nDrawFlags);
+		}
+	}
+
+	dc.SelectObject(pFontOld);
+}
+
 
 BOOL CHMXChart::CreateDefaultItemDrawingTools(const CHMXDataset& ds, const CDWordArray& aAltItemColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush)
 {
@@ -1357,21 +1460,33 @@ bool CHMXChart::CalcDatas()
 
 	// make axis width the same for horz and vert
 	int nAxisSize = 0;
+
+	if (m_dwRenderFlags & HMX_RENDER_AXES)
 	{
 		CClientDC dc(this);
 		nAxisSize = CalcAxisSize(m_rectGraph, dc);
 	}
 
-	m_rectYAxis.top    = m_rectGraph.top;
-	m_rectYAxis.left   = m_rectGraph.left;
-	m_rectYAxis.bottom = m_rectGraph.bottom - nAxisSize;
-	m_rectYAxis.right  = m_rectGraph.left + nAxisSize;
+	// Initialise to zero width/height
+	m_rectXAxis = m_rectGraph;
+	m_rectXAxis.top = m_rectXAxis.bottom;
 
-	m_rectXAxis.top    = m_rectGraph.bottom - nAxisSize;
-	m_rectXAxis.left   = m_rectGraph.left + nAxisSize;
-	m_rectXAxis.bottom = m_rectGraph.bottom;
-	m_rectXAxis.right  = m_rectGraph.right;
+	m_rectYAxis = m_rectGraph;
+	m_rectYAxis.right = m_rectYAxis.left;
 
+	if (m_dwRenderFlags & (HMX_RENDER_XAXIS | HMX_RENDER_XAXISTITLE | HMX_RENDER_XAXISSCALE))
+	{
+		m_rectXAxis.top = m_rectXAxis.bottom - nAxisSize;
+		m_rectYAxis.bottom = m_rectXAxis.top;
+	}
+
+	if (m_dwRenderFlags & (HMX_RENDER_YAXIS | HMX_RENDER_YAXISTITLE | HMX_RENDER_YAXISSCALE))
+	{
+		m_rectYAxis.right  = m_rectYAxis.left + nAxisSize;
+		m_rectXAxis.left = m_rectYAxis.right;
+	}
+
+	// Data rect is whatever is left
 	m_rectData.top     = m_rectGraph.top;
 	m_rectData.bottom  = m_rectXAxis.top;
 	m_rectData.left    = m_rectYAxis.right;
