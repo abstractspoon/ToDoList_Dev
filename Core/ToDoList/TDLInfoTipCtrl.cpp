@@ -122,30 +122,34 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		TDCINFOTIPITEM& iti = aItems[nItem];
 
 		// Multi-line or long comments are special case
-		const int COMMENTS_MINLINELEN = 75;
-		const int COMMENTS_MAXLINELEN = max(COMMENTS_MINLINELEN, (nMaxValueLen + 10));
-
-		if ((iti.nAttribID == TDCA_COMMENTS) && ((iti.sValue.Find('\n') != -1) || (iti.sValue.GetLength() > COMMENTS_MAXLINELEN)))
+		if (iti.nAttribID == TDCA_COMMENTS)
 		{
-			CStringArray aComments;
+			const int COMMENTS_MINLINELEN = 75;
+			const int COMMENTS_MAXLINELEN = max(COMMENTS_MINLINELEN, (nMaxValueLen + 10));
 
-			int nNumLines = Misc::SplitByLength(iti.sValue, aComments, COMMENTS_MAXLINELEN);
-			nNumLines -= Misc::RemoveEmptyItems(aComments);
-
-			if (nNumLines > 1)
+			if (((iti.sValue.Find('\n') != -1) || (iti.sValue.GetLength() > COMMENTS_MAXLINELEN)))
 			{
-				for (int nLine = 0; nLine < nNumLines; nLine++)
-				{
-					if (nLine == 0)
-						sTip += iti.sLabel;
-					else
-						sTip += CString('\t', (nMaxLabelWidth / nTabWidth));
+				CStringArray aComments;
 
-					sTip += aComments[nLine];
-					sTip += _T("\n");
+				int nNumLines = Misc::SplitByLength(iti.sValue, aComments, COMMENTS_MAXLINELEN);
+				nNumLines -= Misc::RemoveEmptyItems(aComments);
+
+				if (nNumLines > 1)
+				{
+					for (int nLine = 0; nLine < nNumLines; nLine++)
+					{
+						if (nLine == 0)
+							sTip += iti.sLabel;
+						else
+							sTip += CString('\t', (nMaxLabelWidth / nTabWidth));
+
+						sTip += aComments[nLine];
+						sTip += _T("\n");
+					}
+					continue;
 				}
-				continue;
 			}
+
 		}
 
 		// all the rest
@@ -178,12 +182,13 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	{
 		CString sComments = pTDI->sComments;
 
-		if (nMaxCommentsLen != 0)
+		if (nMaxCommentsLen > 0)
 		{
 			sComments = Misc::Left(pTDI->sComments, nMaxCommentsLen, TRUE);
 
-			if (sComments.GetLength() < pTDI->sComments.GetLength())
-				sComments += _T("...");
+			// Make 'nMaxCommentsLen' a hard limit
+			if (sComments.GetLength() > nMaxCommentsLen)
+				sComments = sComments.Left(nMaxCommentsLen);
 		}
 
 		aItems.Add(TDCINFOTIPITEM(TDCA_COMMENTS, IDS_TDLBC_COMMENTS, sComments));

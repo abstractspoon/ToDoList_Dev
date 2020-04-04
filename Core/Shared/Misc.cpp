@@ -1118,26 +1118,11 @@ CString Misc::Left(const CString& sText, int nLength, BOOL bNearestWord)
 	{
 		// Look forwards and backwards for word break
 		static CString BACKWARD_DELIMS(_T(")-\\/}]:;,. ?\"'\r\t")); // opening braces
-		static CString FORWARD_DELIMS(_T("(-\\/{[:;,. ?\"'\r\t")); // closing braces
 
-		int nNextLess = FindNextOneOf(BACKWARD_DELIMS, sText, FALSE, nLength);
-		int nNextMore = FindNextOneOf(FORWARD_DELIMS, sText, TRUE, nLength);
+		int nFindPrev = FindNextOneOf(BACKWARD_DELIMS, sText, FALSE, nLength);
 
-		if (nNextMore == -1)
-			nNextMore = sText.GetLength();
-
-		// Use the closest one
-		if ((nLength - nNextLess) < (nNextMore - nLength))
-		{
-			if (nNextLess > 0)
-				nLength = nNextLess;
-			else
-				nLength = nNextMore;
-		}
-		else
-		{
-			nLength = nNextMore;
-		}
+		if (nFindPrev != -1)
+			nLength = (nFindPrev + 1); // include delimiter
 	}
 
 	return sText.Left(nLength);
