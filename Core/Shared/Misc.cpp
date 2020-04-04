@@ -1145,21 +1145,21 @@ CString Misc::Left(const CString& sText, int nLength, BOOL bNearestWord)
 
 int Misc::FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos)
 {
-	int nFind = -1;
+	int nFind = -1, nSearchLen = sSearchIn.GetLength();
 
 	if (bForward)
 	{
 		nFind = ((nStartPos == -1) ? 0 : nStartPos);
 		
-		while ((nFind < sSearchIn.GetLength()) && (sSearchForOneOf.Find(sSearchIn[nFind]) == -1))
+		while ((nFind < nSearchLen) && (sSearchForOneOf.Find(sSearchIn[nFind]) == -1))
 			nFind++;
 
-		if (nFind >= sSearchIn.GetLength())
+		if (nFind >= nSearchLen)
 			nFind = -1;
 	}
 	else // backwards
 	{
-		nFind = ((nStartPos == -1) ? (sSearchIn.GetLength() - 1) : nStartPos);
+		nFind = ((nStartPos == -1) ? (nSearchLen - 1) : nStartPos);
 		
 		while ((nFind >= 0) && (sSearchForOneOf.Find(sSearchIn[nFind]) == -1))
 			nFind--;
