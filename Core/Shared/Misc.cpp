@@ -1065,17 +1065,17 @@ int Misc::Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep, BOOL
 	return aValues.GetSize();
 }
 
-int Misc::SplitByLength(const CString& sText, CStringArray& aLines, int nMaxLength)
+int Misc::SplitLines(const CString& sText, CStringArray& aLines, int nMaxLineLength)
 {
-	int nNumLines = Split(sText, aLines, '\n');
+	int nNumLines = Split(sText, aLines, '\n', TRUE, TRUE);
 
-	if ((nNumLines == 0) || (nMaxLength <= 0) && (nMaxLength != -1))
+	if ((nNumLines == 0) || (nMaxLineLength <= 0) && (nMaxLineLength != -1))
 	{
 		ASSERT(0);
 		return 0;
 	}
 
-	if (nMaxLength != -1)
+	if (nMaxLineLength != -1)
 	{
 		// Extra over processing
 		int nLine = nNumLines;
@@ -1084,19 +1084,19 @@ int Misc::SplitByLength(const CString& sText, CStringArray& aLines, int nMaxLeng
 		{
 			CString& sLine = aLines[nLine];
 
-			if (sLine.GetLength() > nMaxLength)
+			if (sLine.GetLength() > nMaxLineLength)
 			{
 				CStringArray aSubLines;
 
 				do
 				{
 					// Find nearest word-break
-					CString sSubLine = Left(sLine, nMaxLength, TRUE);
+					CString sSubLine = Left(sLine, nMaxLineLength, TRUE);
 
 					aSubLines.Add(sSubLine);
 					sLine = sLine.Mid(sSubLine.GetLength());
 				}
-				while (sLine.GetLength() > nMaxLength);
+				while (sLine.GetLength() > nMaxLineLength);
 				
 				// Add whatever's left over
 				if (!sLine.IsEmpty())

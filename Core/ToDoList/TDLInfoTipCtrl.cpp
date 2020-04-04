@@ -124,14 +124,13 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		// Multi-line or long comments are special case
 		if (iti.nAttribID == TDCA_COMMENTS)
 		{
-			const int COMMENTS_MINLINELEN = 75;
-			const int COMMENTS_MAXLINELEN = max(COMMENTS_MINLINELEN, (nMaxValueLen + 10));
+			const int MAX_LINELEN = max(75, (nMaxValueLen + 10));
 
-			if (((iti.sValue.Find('\n') != -1) || (iti.sValue.GetLength() > COMMENTS_MAXLINELEN)))
+			if (((iti.sValue.Find('\n') != -1) || (iti.sValue.GetLength() > MAX_LINELEN)))
 			{
 				CStringArray aComments;
 
-				int nNumLines = Misc::SplitByLength(iti.sValue, aComments, COMMENTS_MAXLINELEN);
+				int nNumLines = Misc::SplitLines(iti.sValue, aComments, MAX_LINELEN);
 				nNumLines -= Misc::RemoveEmptyItems(aComments);
 
 				if (nNumLines > 1)
