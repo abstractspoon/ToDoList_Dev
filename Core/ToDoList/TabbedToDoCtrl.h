@@ -61,6 +61,7 @@ class CTabbedToDoCtrl : public CToDoCtrl
 public:
 	CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, 
 					CTDLContentMgr& mgrContent, 
+					CShortcutManager& mgrShortcuts,
 					const CONTENTFORMAT& cfDefault,
 					const TDCCOLEDITFILTERVISIBILITY& visDefault);
 

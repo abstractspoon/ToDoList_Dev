@@ -1070,6 +1070,12 @@
     <None Include="..\TDLUpdate\res\TDLUpdate_wiz_header.bmp">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="res\datetime_toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\datetime_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">

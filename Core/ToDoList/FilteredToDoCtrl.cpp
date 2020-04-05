@@ -62,10 +62,13 @@ const UINT TEN_MINUTES = (ONE_MINUTE * 10);
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFilteredToDoCtrl::CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, CTDLContentMgr& mgrContent, 
-									 const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault) 
+CFilteredToDoCtrl::CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, 
+									 CTDLContentMgr& mgrContent, 
+									 CShortcutManager& mgrShortcuts,
+									 const CONTENTFORMAT& cfDefault, 
+									 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	:
-	CTabbedToDoCtrl(mgrUIExt, mgrContent, cfDefault, visDefault),
+	CTabbedToDoCtrl(mgrUIExt, mgrContent, mgrShortcuts, cfDefault, visDefault),
 	m_visColEditFilter(visDefault),
 	m_bIgnoreListRebuild(FALSE),
 	m_bIgnoreExtensionUpdate(FALSE)

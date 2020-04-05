@@ -8,6 +8,8 @@
 
 #include "..\ToDoList\ToDoCtrl.h"
 
+#include "..\Shared\ShortcutManager.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -18,6 +20,7 @@ static char THIS_FILE[]=__FILE__;
 
 // Stubs
 CTDLContentMgr mgrContent;
+CShortcutManager mgrShortcuts;
 CONTENTFORMAT cfDefault;
 TDCCOLEDITFILTERVISIBILITY visDefault;
 
@@ -28,7 +31,7 @@ TDCCOLEDITFILTERVISIBILITY visDefault;
 CToDoCtrlTaskLinkTest::CToDoCtrlTaskLinkTest(const CTestUtils& utils) 
 	: 
 	CTDLTestBase(utils),
-	m_tdc(mgrContent, cfDefault, visDefault)
+	m_tdc(mgrContent, mgrShortcuts, cfDefault, visDefault)
 {
 
 }

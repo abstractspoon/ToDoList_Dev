@@ -47,7 +47,7 @@ CPreferencesTaskDefPage::CPreferencesTaskDefPage(const CTDLContentMgr* pMgrConte
 	: 
 	CPreferencesPageBase(CPreferencesTaskDefPage::IDD),
 	m_pMgrContent(pMgrContent), 
-	m_ctrlComments(NULL, COMMENTS_COMBOLENDLU, pMgrContent),
+	m_ctrlComments(FALSE, FALSE, COMMENTS_COMBOLENDLU, pMgrContent, NULL),
 	m_cbDefReminder(TDLRPC_SHOWNONE | TDLRPC_SHOWZERO),
 	m_cbDefPriority(FALSE),
 	m_cbDefRisk(FALSE),

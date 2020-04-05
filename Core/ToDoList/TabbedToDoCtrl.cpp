@@ -82,10 +82,11 @@ CStringArray CTabbedToDoCtrl::s_aDefTaskViews;
 
 CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt, 
 								 CTDLContentMgr& mgrContent, 
+								 CShortcutManager& mgrShortcuts,
 								 const CONTENTFORMAT& cfDefault, 
 								 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	:
-	CToDoCtrl(mgrContent, cfDefault, visDefault), 
+	CToDoCtrl(mgrContent, mgrShortcuts, cfDefault, visDefault), 
 	m_bTreeNeedResort(FALSE),
 	m_bUpdatingExtensions(FALSE),
 	m_bRecreatingRecurringTasks(FALSE),

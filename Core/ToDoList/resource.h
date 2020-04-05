@@ -166,6 +166,8 @@
 #define IDD_TASKLISTSAVEAS_DIALOG       314
 #define IDI_TRAY_LIGHT                  316
 #define IDI_TRAY_TIMETRACK_LIGHT        317
+#define IDR_DATETIME_TOOLBAR            318
+#define IDB_DATETIME_TOOLBAR_STD        319
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -2339,7 +2341,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        319
+#define _APS_NEXT_RESOURCE_VALUE        320
 #define _APS_NEXT_COMMAND_VALUE         34664
 #define _APS_NEXT_CONTROL_VALUE         1541
 #define _APS_NEXT_SYMED_VALUE           108

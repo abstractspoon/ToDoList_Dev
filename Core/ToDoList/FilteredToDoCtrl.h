@@ -28,9 +28,10 @@ class CFilteredToDoCtrl : public CTabbedToDoCtrl
 {
 public:
 	CFilteredToDoCtrl(CUIExtensionMgr& mgrUIExt, 
-						CTDLContentMgr& mgrContent, 
-						const CONTENTFORMAT& cfDefault,
-						const TDCCOLEDITFILTERVISIBILITY& visDefault);
+					  CTDLContentMgr& mgrContent, 
+					  CShortcutManager& mgrShortcuts,
+					  const CONTENTFORMAT& cfDefault,
+					  const TDCCOLEDITFILTERVISIBILITY& visDefault);
 	
 	virtual ~CFilteredToDoCtrl();
 

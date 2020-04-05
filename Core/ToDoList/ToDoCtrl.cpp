@@ -170,7 +170,10 @@ UINT CToDoCtrl::WM_TDC_RECREATERECURRINGTASK		= (WM_APP + 3);
 
 //////////////////////////////////////////////////////////////////////////////
 
-CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault) 
+CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent, 
+					 const CShortcutManager& mgrShortcuts, 
+					 const CONTENTFORMAT& cfDefault, 
+					 const TDCCOLEDITFILTERVISIBILITY& visDefault) 
 	: 
 	m_bArchive(FALSE),
 	m_bDelayLoaded(FALSE),
@@ -182,7 +185,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_cbAllocBy(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
-	m_ctrlComments(TRUE, 85, &mgr),
+	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
 	m_cbFileRef(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
 	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
@@ -201,7 +204,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, 
 	m_eTaskName(PEC_AUTODESTROY),
 	m_hFontComments(NULL),
 	m_hFontTree(NULL),
-	m_mgrContent(mgr),
+	m_mgrContent(mgrContent),
 	m_nCommentsPos(TDCUIL_RIGHT),
 	m_nCommentsSize(DEFCOMMENTSIZE),
 	m_nCommentsState(CS_CLEAN),

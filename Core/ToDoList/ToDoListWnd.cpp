@@ -7730,6 +7730,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 	
 	CFilteredToDoCtrl* pTDC = new CFilteredToDoCtrl(m_mgrUIExtensions, 
 													m_mgrContent, 
+													m_mgrShortcuts,
 													m_tdiDefault.cfComments, 
 													vis);
 	// Give it a meaningful maximum size

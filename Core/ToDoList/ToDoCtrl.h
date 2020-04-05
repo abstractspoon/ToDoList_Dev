@@ -68,7 +68,11 @@ class CToDoCtrl : public CRuntimeDlg
 
 // Construction
 public:
-	CToDoCtrl(const CTDLContentMgr& mgr, const CONTENTFORMAT& cfDefault, const TDCCOLEDITFILTERVISIBILITY& visDefault);
+	CToDoCtrl(const CTDLContentMgr& mgrContent, 
+			  const CShortcutManager& mgrShortcuts, 
+			  const CONTENTFORMAT& cfDefault, 
+			  const TDCCOLEDITFILTERVISIBILITY& visDefault);
+
 	virtual ~CToDoCtrl();
 
 	BOOL Create(const CRect& rect, CWnd* pParentWnd, UINT nID, BOOL bVisible = TRUE, BOOL bEnabled = TRUE);

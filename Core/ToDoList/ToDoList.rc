@@ -2719,7 +2719,9 @@ IDB_TIMETRACK_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\timetrack_toolbar_std.bm
 IDB_UDTPREFS_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar_std.bmp"
 IDR_UDTPREFS_TOOLBAR    BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar.bmp"
 IDB_OUTLOOKTYPES        BITMAP  MOVEABLE PURE   "res\\outlooktypes.bmp"
+IDR_DATETIME_TOOLBAR    BITMAP  DISCARDABLE     "res\\datetime_toolbar.bmp"
 IDB_TDLUPDATE_WIZ_HEADER BITMAP  DISCARDABLE     "..\\TDLUpdate\\res\\TDLUpdate_wiz_header.bmp"
+IDB_DATETIME_TOOLBAR_STD BITMAP  DISCARDABLE     "res\\datetime_toolbar_std.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2820,6 +2822,13 @@ BEGIN
     SEPARATOR
     BUTTON      ID_UDTPREFS_MOVEUP
     BUTTON      ID_UDTPREFS_MOVEDOWN
+END
+
+IDR_DATETIME_TOOLBAR TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_EDIT_INSERTDATE
+    BUTTON      ID_EDIT_INSERTTIME
+    BUTTON      ID_EDIT_INSERTDATETIME
 END
 
 
@@ -4905,6 +4914,7 @@ BEGIN
     ID_SB_FILEPATH          "(untitled)"
     ID_SB_SPACER            "                     "
     ID_SB_FOCUS             "                     "
+    ID_EDIT_INSERTTIME      "\nInsert Time"
     IDS_FOCUS_FILTERBAR     "Filter"
     IDS_FOCUS_TASKS         "Tasks"
     IDS_UNNAMEDFILTER       "- unnamed -"
@@ -5102,6 +5112,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_HELP_WIKI            "\nOnline Help"
+    ID_EDIT_INSERTDATETIME  "\nInsert Date & Time"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5685,6 +5696,11 @@ BEGIN
     IDS_EXPORTDLG_EXPORT    "Export"
     IDS_EXPORTDLG_TASKSEL   "Task Selection"
     IDS_MSVCR100_MSG        "System File Required|ToDoList requires the 'Microsoft Visual C++ 2010 SP1 Redistributable Package' to be installed.\n\nClick 'OK' to visit the appropriate download page or 'Cancel' to quit."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_INSERTDATE      "\nInsert Date"
 END
 
 #endif    // English (Australia) resources

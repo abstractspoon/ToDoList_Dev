@@ -736,7 +736,7 @@ int CEnToolBar::RefreshRowHeights()
 	return nTotalHeight;
 }
 
-int CEnToolBar::Resize(int cx, CPoint ptTopLeft)
+int CEnToolBar::Resize(int cx, CPoint ptTopLeft, int nMaxHeight)
 {
 	int nEstHeight = EstimateHeightRequired(cx);
 	CRect rToolbar(ptTopLeft, CSize(cx, nEstHeight));
@@ -744,6 +744,9 @@ int CEnToolBar::Resize(int cx, CPoint ptTopLeft)
 	MoveWindow(rToolbar);
 	
 	int nRealHeight = RefreshRowHeights();
+
+	if (nMaxHeight != -1)
+		nRealHeight = min(nRealHeight, nMaxHeight);
 
 	if (nRealHeight != nEstHeight)
 	{

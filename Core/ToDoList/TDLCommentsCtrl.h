@@ -9,6 +9,8 @@
 #include "..\shared\runtimedlg.h"
 #include "..\Shared\binarydata.h"
 #include "..\shared\wndPrompt.h"
+#include "..\shared\entoolbar.h"
+#include "..\shared\toolbarhelper.h"
 
 #include "..\Interfaces\UIThemeFile.h"
 #include "..\Interfaces\contentctrl.h"
@@ -18,6 +20,7 @@
 // PreferencesTaskDefPage.h : header file
 
 class CTDLContentMgr;
+class CShortcutManager;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -26,7 +29,8 @@ class CTDLCommentsCtrl : public CRuntimeDlg
 	DECLARE_DYNAMIC(CTDLCommentsCtrl)
 
 public:
-	CTDLCommentsCtrl(BOOL bShowLabel, int nComboLenDLU, const CTDLContentMgr* pMgrContent = NULL);
+	CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComboLenDLU, 
+					 const CTDLContentMgr* pMgrContent = NULL, const CShortcutManager* pMgrShortcuts = NULL);
 	virtual ~CTDLCommentsCtrl();
 
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
@@ -59,19 +63,22 @@ public:
 
 protected:
 	const CTDLContentMgr* m_pMgrContent;
+	const CShortcutManager* m_pMgrShortcuts;
 
 	CContentTypeComboBox m_cbCommentsFmt;
 	CContentCtrl m_ctrlComments;
 	CUIThemeFile m_theme;
 	CBrush m_brBack;
 	HFONT m_hContentFont;
+	CEnToolBar m_toolbar;
 
+	CToolbarHelper m_tbHelper;
 	CWndPromptManager m_mgrPrompts;
 	CString m_sCommentsPrompt, m_sComboPrompt;
 
 	CString m_sPrefsFilePath;
 	BOOL m_bReadOnly;
-	BOOL m_bShowingLabel;
+	BOOL m_bShowLabel, m_bShowToolbar;
 
 	CONTENTFORMAT m_cfLastCustom;
 	CBinaryData m_LastCustomComments;

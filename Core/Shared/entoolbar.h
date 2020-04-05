@@ -35,7 +35,7 @@ public:
 	int GetButtonCount(BOOL bIgnoreSeparators = FALSE) const;
 	CSize GetButtonSize() const { return m_sizeButton; }
 	int GetHeight() const;
-	int Resize(int cx, CPoint ptTopLeft = CPoint(0, 0));
+	int Resize(int cx, CPoint ptTopLeft = CPoint(0, 0), int nMaxHeight = -1);
 	int GetMinReqLength() const; // single row
 
 	BOOL IsItemSeparator(int nPos) const;

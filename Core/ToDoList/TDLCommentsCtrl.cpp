@@ -32,17 +32,20 @@ enum
 
 IMPLEMENT_DYNAMIC(CTDLCommentsCtrl, CRuntimeDlg)
 
-CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, int nComboLenDLU, const CTDLContentMgr* pMgrContent)
+CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComboLenDLU, 
+								   const CTDLContentMgr* pMgrContent, const CShortcutManager* pMsgShortcuts)
 	:
 	m_pMgrContent(pMgrContent), 
+	m_pMgrShortcuts(pMsgShortcuts),
 	m_cbCommentsFmt(pMgrContent, IDI_NULL),
 	m_hContentFont(NULL),
 	m_bReadOnly(FALSE),
-	m_bShowingLabel(bShowLabel)
+	m_bShowLabel(bShowLabel),
+	m_bShowToolbar(bShowToolbar)
 {
 	int nComboOffsetDLU = 0;
 
-	if (m_bShowingLabel)
+	if (m_bShowLabel)
 	{
 		CString sLabel;
 		sLabel.LoadString(IDS_TDC_FIELD_COMMENTS);
@@ -108,6 +111,32 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 
 	if (!m_sComboPrompt.IsEmpty())
 		m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, m_sComboPrompt);
+
+	// Toolbar
+	if (m_bShowToolbar)
+	{
+		UINT nStyle = (WS_VISIBLE | WS_CHILD | CBRS_ALIGN_TOP | CBRS_TOOLTIPS);
+
+		if (m_toolbar.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), nStyle))
+		{
+			VERIFY(m_toolbar.LoadToolBar(IDR_DATETIME_TOOLBAR));
+
+			const COLORREF MAGENTA = RGB(255, 0, 255);
+			VERIFY(m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, MAGENTA));
+
+			m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
+			m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+			// Need care to ensure toolbar does not encroach on content window 
+			CRect rToolbar = GetChildRect(&m_cbCommentsFmt);
+			int nMaxHeight = (rToolbar.bottom + CDlgUnits(this).ToPixelsY(2));
+
+			m_toolbar.Resize(m_toolbar.GetMinReqLength(), CPoint((rToolbar.right + 10), 0), nMaxHeight);
+
+			if (m_pMgrShortcuts)
+				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
+		}
+	}
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -175,7 +204,7 @@ void CTDLCommentsCtrl::OnSize(UINT nType, int cx, int cy)
 
 	if (m_ctrlComments.GetSafeHwnd())
 	{
-		if (m_bShowingLabel)
+		if (m_bShowLabel)
 		{
 			// Use the combo to position its label
 			CRect rCombo = CDialogHelper::GetChildRect(&m_cbCommentsFmt);
@@ -198,7 +227,7 @@ HBRUSH CTDLCommentsCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	if (m_bShowingLabel && (nCtlColor == CTLCOLOR_STATIC))
+	if (m_bShowLabel && (nCtlColor == CTLCOLOR_STATIC))
 	{
 		pDC->SetTextColor(m_theme.crAppText);
 
@@ -219,7 +248,7 @@ BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 		ExcludeCtrl(this, IDC_COMBO, pDC);
 		ExcludeCtrl(this, IDC_CTRL, pDC);
 
-		if (m_bShowingLabel)
+		if (m_bShowLabel)
 			ExcludeCtrl(this, IDC_COMBOLABEL, pDC);
 
 		CRect rClient;
@@ -413,7 +442,7 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 
 	m_theme = theme;
 
-	if (m_bShowingLabel)
+	if (m_bShowLabel)
 	{
 		GraphicsMisc::VerifyDeleteObject(m_brBack);
 
@@ -422,6 +451,9 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 	}
 
 	m_ctrlComments.SetUITheme(m_theme);
+
+	m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
+	m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 	Invalidate();
 }

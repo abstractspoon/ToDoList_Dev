@@ -232,10 +232,11 @@ CFilteredToDoCtrl& CToDoCtrlMgr::GetFallbackToDoCtrl()
 	// Only instantiated if called
 	static CUIExtensionMgr extm;
 	static CTDLContentMgr cm;
+	static CShortcutManager sm;
 	static CONTENTFORMAT cf;
 	static TDCCOLEDITFILTERVISIBILITY vis;
 	
-	static CFilteredToDoCtrl tdcFallback(extm, cm, cf, vis);
+	static CFilteredToDoCtrl tdcFallback(extm, cm, sm, cf, vis);
 
 	return tdcFallback;
 }

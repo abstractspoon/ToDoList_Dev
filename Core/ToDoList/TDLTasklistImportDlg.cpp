@@ -25,10 +25,11 @@ static char THIS_FILE[] = __FILE__;
 
 static CUIExtensionMgr s_extm;
 static CTDLContentMgr s_cm;
+static CShortcutManager s_sm;
 static CONTENTFORMAT s_cf(_T("PLAIN_TEXT"));
 static TDCCOLEDITFILTERVISIBILITY s_vis;
 
-CTDLTasklistImportCtrl::CTDLTasklistImportCtrl() : CFilteredToDoCtrl(s_extm, s_cm, s_cf, s_vis)
+CTDLTasklistImportCtrl::CTDLTasklistImportCtrl() : CFilteredToDoCtrl(s_extm, s_cm, s_sm, s_cf, s_vis)
 {
 }
 
