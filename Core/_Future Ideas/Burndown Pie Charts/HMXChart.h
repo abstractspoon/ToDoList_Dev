@@ -217,7 +217,6 @@ protected:
 	int GetPoints(const CHMXDataset& ds, CArray<gdix_PointF, gdix_PointF&>& points, BOOL bArea) const;
 	BOOL GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int nSize, CArray<gdix_PointF, gdix_PointF&>& ptMarker) const;
 	int CalcAxisSize(const CRect& rAvail, CDC& dc) const;
-	int CalcPieRect(CRect& rPie) const;
 	BOOL CreateXAxisFont(BOOL bTitle, CFont& font) const;
 	BOOL CreateYAxisFont(BOOL bTitle, CFont& font) const;
 
@@ -227,12 +226,14 @@ protected:
 	bool DrawBarChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltBarColors, BYTE fillOpacity = 255);
 	bool DrawPieChart(CDC &dc, const CHMXDataset& dataset, const CDWordArray& aAltPieColors, BYTE fillOpacity = 255);
 
-	struct PIELABEL
+	struct PIESEGMENT
 	{
 		CString sLabel;
 		float fStartDegrees, fSweepDegrees;
 	};
-	void DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIELABEL, PIELABEL&>& aLabels);
+	int CalcPieSegments(const CHMXDataset& dataset, CArray<PIESEGMENT, PIESEGMENT&>& aSegments) const;
+	void DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIESEGMENT, PIESEGMENT&>& aSegments);
+	BOOL CalcPieRects(CRect& rPie, CRect& rDonut) const;
 	
 	inline BOOL IsValidDatasetIndex(int nDatasetIndex) const
 	{
@@ -244,6 +245,7 @@ protected:
 
 	static BOOL CreateDefaultItemDrawingTools(const CHMXDataset& dataset, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
 	static BOOL CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush);
+	static float NormaliseAngle(float fDegrees);
 	
 	DECLARE_HANDLE(HDIB);
 

@@ -1053,7 +1053,7 @@ bool CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 	return true;
 }
 
-int CHMXChart::CalcPieRect(CRect& rPie) const
+BOOL CHMXChart::CalcPieRects(CRect& rPie, CRect& rDonut) const
 {
 	// Make the chart as big as possible
 	rPie = m_rectData;
@@ -1073,66 +1073,49 @@ int CHMXChart::CalcPieRect(CRect& rPie) const
 	rPie.OffsetRect(ptOffset);
 
 	if ((rPie.right <= rPie.left) || (rPie.bottom <= rPie.top))
+	{
 		rPie.SetRectEmpty();
+		return FALSE;
+	}
 
-	return rPie.Width();
+	// else
+	rDonut = rPie;
+	rDonut.DeflateRect((nSize / 4), (nSize / 4));
+
+	return TRUE;
 }
 
 bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltPieColors, BYTE fillOpacity)
 {
-	if (ds.GetDatasetSize() == 0)
+	CArray<PIESEGMENT, PIESEGMENT&> aSegments;
+	int nNumSeg = CalcPieSegments(ds, aSegments);
+	
+	if (nNumSeg == 0)
 		return false;
 
-	CRect rPie;
-	int nSize = CalcPieRect(rPie);
-
-	if (!nSize)
+	CRect rPie, rDonut;
+	
+	if (!CalcPieRects(rPie, rDonut))
 		return false;
-
-	CRect rDonut(rPie);
-	rDonut.DeflateRect((nSize / 4), (nSize / 4));
 	
 	// Create default drawing tools
 	CGdiPlusGraphics graphics(dc);
 	CGdiPlusPen defPiePen;
 	CGdiPlusBrush defPieBrush;
-	CreateDefaultItemDrawingTools(ds, aAltPieColors, fillOpacity, defPiePen, defPieBrush);
-
-	// Get the total aggregate value to be distributed
-	int nNumData = ds.GetDatasetSize(), f;
-	ASSERT(nNumData == m_strarrScaleXLabel.GetSize());
-
-	double dTotalData = 0.0;
-
-	for (f = 0; f < nNumData; f++)
-	{
-		double dValue;
-		VERIFY(ds.GetData(f, dValue));
-
-		dTotalData += max(0.0, dValue);
-	}
+	VERIFY(CreateDefaultItemDrawingTools(ds, aAltPieColors, fillOpacity, defPiePen, defPieBrush));
 
 	// Draw the items
-	CArray<PIELABEL, PIELABEL&> aLabels;
-	aLabels.SetSize(nNumData);
-
 	HMX_DATASET_STYLE nStyle = ds.GetStyle();
 
 	BOOL bAreaLine = ((nStyle == HMX_DATASET_STYLE_PIELINE) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
 	BOOL bDonut = ((nStyle == HMX_DATASET_STYLE_DONUT) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
 
-	float fAngleFactor = (float)(360 / dTotalData);
-	float fStartAngle = -90.0f; // 12 o'clock
-
-	for (f = 0; f < nNumData; f++)
+	for (int f = 0; f < nNumSeg; f++)
 	{
-		double dValue;
-		VERIFY(ds.GetData(f, dValue));
+		const PIESEGMENT& seg = aSegments[f];
 
-		if (dValue > 0.0)
+		if (seg.fSweepDegrees > 0.0f)
 		{
-			float fSweepAngle = (float)(dValue * fAngleFactor);
-
 			CGdiPlusPen piePen;
 			CGdiPlusBrush pieBrush;
 			CreateItemDrawingTools(f, aAltPieColors, fillOpacity, piePen, pieBrush);
@@ -1142,22 +1125,15 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 
 			if (bAreaLine)
 			{
-				CGdiPlus::DrawPie(graphics, pen, rPie, fStartAngle, fSweepAngle, brush);
+				CGdiPlus::DrawPie(graphics, pen, rPie, seg.fStartDegrees, seg.fSweepDegrees, brush);
 
 				if (bDonut)
-					CGdiPlus::DrawArc(graphics, pen, rDonut, fStartAngle, fSweepAngle);
+					CGdiPlus::DrawArc(graphics, pen, rDonut, seg.fStartDegrees, seg.fSweepDegrees);
 			}
 			else
 			{
-				CGdiPlus::FillPie(graphics, brush, rPie, fStartAngle, fSweepAngle);
+				CGdiPlus::FillPie(graphics, brush, rPie, seg.fStartDegrees, seg.fSweepDegrees);
 			}
-
-			// Keep track of label info
-			aLabels[f].sLabel = m_strarrScaleXLabel[f];
-			aLabels[f].fStartDegrees = fStartAngle;
-			aLabels[f].fSweepDegrees = fSweepAngle;
-
-			fStartAngle += fSweepAngle;
 		}
 	}
 
@@ -1167,14 +1143,70 @@ bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& 
 		CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(RGB(255, 255, 255)), rDonut);
 	}
 
-	DrawPieLabels(dc, rPie, aLabels);
+	DrawPieLabels(dc, rPie, aSegments);
 
 	return true;
 }
 
-void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIELABEL, PIELABEL&>& aLabels)
+int CHMXChart::CalcPieSegments(const CHMXDataset& dataset, CArray<PIESEGMENT, PIESEGMENT&>& aSegments) const
 {
-	int nNumData = aLabels.GetSize();
+	// Get the total aggregate value to be distributed
+	int nNumData = dataset.GetDatasetSize(), f;
+
+	if (nNumData != m_strarrScaleXLabel.GetSize())
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	double dTotalData = 0.0;
+
+	for (f = 0; f < nNumData; f++)
+	{
+		double dValue;
+		VERIFY(dataset.GetData(f, dValue));
+
+		dTotalData += max(0.0, dValue);
+	}
+
+	float fAngleFactor = (float)(360 / dTotalData);
+	double dDataValue;
+	
+	PIESEGMENT seg;
+	seg.fStartDegrees = 270.0f; // 12 o'clock
+
+	for (f = 0; f < nNumData; f++)
+	{
+		seg.sLabel = m_strarrScaleXLabel[f];
+		
+		if (dataset.GetData(f, dDataValue) && (dDataValue > 0.0))
+			seg.fSweepDegrees = (float)(dDataValue * fAngleFactor);
+		else
+			seg.fSweepDegrees = 0.0f;
+
+		aSegments.Add(seg);
+
+		// Next segment
+		seg.fStartDegrees = NormaliseAngle(seg.fStartDegrees + seg.fSweepDegrees);
+	}
+
+	return nNumData;
+}
+
+float CHMXChart::NormaliseAngle(float fDegrees)
+{
+	while (fDegrees > 360.0f)
+		fDegrees -= 360.0f;
+
+	while (fDegrees < 0.0f)
+		fDegrees += 360.0f;
+
+	return fDegrees;
+}
+
+void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIESEGMENT, PIESEGMENT&>& aSegments)
+{
+	int nNumData = aSegments.GetSize();
 
 	if (!nNumData)
 	{
@@ -1194,11 +1226,11 @@ void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIELABEL,
 
 	for (int f = 0; f < nNumData; f++)
 	{
-		const PIELABEL& pl = aLabels[f];
+		const PIESEGMENT& seg = aSegments[f];
 
-		if (!pl.sLabel.IsEmpty())
+		if (!seg.sLabel.IsEmpty() && (seg.fSweepDegrees > 0.0f))
 		{
-			float fAveAngle = DEG2RAD(pl.fStartDegrees + (pl.fSweepDegrees / 2));
+			float fAveAngle = DEG2RAD(seg.fStartDegrees + (seg.fSweepDegrees / 2));
 			CPoint ptLabel[3];
 
 			// Initial point on the circumference
@@ -1243,7 +1275,7 @@ void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIELABEL,
 				nDrawFlags |= DT_RIGHT;
 			}
 			
-			dc.DrawText(pl.sLabel, rLabel, nDrawFlags);
+			dc.DrawText(seg.sLabel, rLabel, nDrawFlags);
 		}
 	}
 
