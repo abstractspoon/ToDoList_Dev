@@ -242,11 +242,6 @@ BOOL CTDLImportExportAttributeMappingListCtrl::IsEditing() const
 			m_cbAttributes.IsWindowVisible();
 }
 
-BOOL CTDLImportExportAttributeMappingListCtrl::CanEditSelectedCell() const 
-{
-	return CInputListCtrl::CanEditSelectedCell();
-}
-
 void CTDLImportExportAttributeMappingListCtrl::PrepareEdit(int nRow, int nCol)
 {
 	if (m_bImporting && nCol == IMPORT_COLUMNID)

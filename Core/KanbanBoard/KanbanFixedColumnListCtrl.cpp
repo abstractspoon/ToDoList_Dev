@@ -194,11 +194,6 @@ BOOL CKanbanFixedColumnListCtrl::IsEditing() const
 	return (CInputListCtrl::IsEditing() || m_cbValues.IsWindowVisible());
 }
 
-BOOL CKanbanFixedColumnListCtrl::CanEditSelectedCell() const 
-{
-	return CInputListCtrl::CanEditSelectedCell();
-}
-
 void CKanbanFixedColumnListCtrl::PrepareEdit(int nRow, int nCol)
 {
 	if (nCol == KFCL_VALUECOL)

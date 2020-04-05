@@ -54,7 +54,6 @@ protected:
 	virtual BOOL IsEditing() const;
 	virtual BOOL CanDeleteSelectedCell() const;
 	virtual BOOL DeleteSelectedCell();
-	virtual BOOL CanEditSelectedCell() const;
 	virtual void InitState();
 
 	void PrepareEdit(int nRow, int nCol);
