@@ -326,6 +326,7 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 
 	// Other tasklist attributes
 	ExtractAttribute(cmdInfo, SWITCH_COMMANDID, m_sCmdIDs);
+	ExtractAttribute(cmdInfo, SWITCH_TITLEPREFIX, m_sTitlePrefix);
 
 	// Task attributes
 	ExtractAttribute(cmdInfo, SWITCH_TASKTITLE, m_sTaskTitle);	
@@ -443,6 +444,7 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	lstrcpy(m_szFilePaths, startup.m_szFilePaths); 
 
 	m_sCmdIDs = startup.m_sCmdIDs;
+	m_sTitlePrefix = startup.m_sTitlePrefix;
 
 	m_sNewTaskTitle = startup.m_sNewTaskTitle; 
 	m_sTaskTitle = startup.m_sTaskTitle;
@@ -491,6 +493,7 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(_tcscmp(m_szFilePaths, startup.m_szFilePaths) == 0) &&
 
 		(m_sCmdIDs == startup.m_sCmdIDs) &&
+		(m_sTitlePrefix == startup.m_sTitlePrefix) &&
 
 		(m_sNewTaskTitle == startup.m_sNewTaskTitle) &&
 		(m_sTaskTitle == startup.m_sTaskTitle) &&

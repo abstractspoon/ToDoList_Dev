@@ -74,6 +74,7 @@ public:
 
 	int GetCommandIDs(CUIntArray& aCmdIDs) const;
 	BOOL HasCommandID() const { return !m_sCmdIDs.IsEmpty(); }
+	CString GetTitlePrefix() const { return m_sTitlePrefix.GetValue(); }
 
 	BOOL HasFilePath() const { return (lstrlen(m_szFilePaths) > 0); }
 	int GetFilePaths(CStringArray& aFiles) const;
@@ -125,6 +126,7 @@ protected:
 	DWORD m_dwSiblingID; // sibling task for new subtask
 
 	TDCSTARTUPATTRIB m_sCmdIDs;
+	TDCSTARTUPATTRIB m_sTitlePrefix;
 
 	TDCSTARTUPATTRIB m_sNewTaskTitle, m_sTaskTitle, m_sTaskComments;
 	TDCSTARTUPATTRIB m_sTaskVersion, m_sTaskExternalID, m_sTaskAllocBy, m_sTaskStatus;

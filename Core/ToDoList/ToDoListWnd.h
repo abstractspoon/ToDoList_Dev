@@ -139,8 +139,9 @@ protected:
 
 	CString m_sQuickFind;
 	CString m_sThemeFile;
-	CEnString m_sCurrentFocus;
 	CString m_sTaskViewImageExt;
+	CString m_sTitlePrefix;
+	CEnString m_sCurrentFocus;
 
 	BOOL m_bVisible;
 	BOOL m_bShowFilterBar;

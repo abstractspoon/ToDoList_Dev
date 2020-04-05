@@ -3730,7 +3730,7 @@ void CToDoListWnd::UpdateCaption()
 			sCaption.Format(_T("%s [%s] - %s"), sProjectName, m_sCurrentFocus, sCopyright);
 	}
 	
-	// prepend task pathname if tasklist not visible
+	// Prefix with task pathname if tasklist not visible
 	if (m_nMaxState == TDCMS_MAXCOMMENTS)
 	{
 		// quote the path to help it stand-out
@@ -3740,7 +3740,11 @@ void CToDoListWnd::UpdateCaption()
 		if (!sTaskPath.IsEmpty())
 			sCaption = (sTaskPath + " - " + sCaption);
 	}
-	
+
+	// Prefix with 'title prefix'
+	if (!m_sTitlePrefix.IsEmpty())
+		sCaption = (m_sTitlePrefix.Left(20) + " - " + sCaption);
+		
 	CLocalizer::IgnoreString(sCaption);
 	SetWindowText(sCaption);
 
@@ -5252,6 +5256,14 @@ BOOL CToDoListWnd::HasTaskFile(const CTDCStartupOptions& startup) const
 
 BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup)
 {
+	CString sPrefix = startup.GetTitlePrefix();
+
+	if (!bStartup && (sPrefix != m_sTitlePrefix))
+	{
+		m_sTitlePrefix = sPrefix;
+		UpdateCaption();
+	}
+
 	// 1. check if we can handle a task link
 	if (startup.HasFlag(TLD_TASKLINK))
 	{
