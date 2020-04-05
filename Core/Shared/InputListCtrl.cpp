@@ -1477,7 +1477,7 @@ void CInputListCtrl::CreateControl(CWnd& ctrl, UINT nID, BOOL bSort)
 	CRect rWnd;
 	ctrl.GetClientRect(rWnd);
 
-	SetMinItemHeight(rWnd.Height()/*, FALSE*/);
+	SetMinItemHeight(max(GetMinItemHeight(), rWnd.Height()));
 }
 
 CPopupEditCtrl* CInputListCtrl::GetEditControl()

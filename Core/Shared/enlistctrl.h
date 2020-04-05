@@ -67,6 +67,7 @@ public:
 	void EnableTooltipCtrl(BOOL bEnable);
 	BOOL SetTooltipCtrlText(CString sText);
 	BOOL SetMinItemHeight(int nHeight);
+	int GetMinItemHeight() const { return m_nMinItemHeight; }
 	void DeleteAllColumns();
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL IsReadOnly() const { return m_bReadOnly; }

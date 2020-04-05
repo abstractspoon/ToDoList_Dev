@@ -104,7 +104,23 @@ END_MESSAGE_MAP()
 
 void CTDLFindTaskExpressionListCtrl::PreSubclassWindow() 
 {
-	// create child controls
+	CInputListCtrl::PreSubclassWindow(); // we need combo to be created first
+
+	m_header.EnableTracking(FALSE);
+	ShowGrid(TRUE, TRUE);
+
+	AddCol(CEnString(IDS_FT_ATTRIB), 120);
+	AddCol(CEnString(IDS_FT_MATCHES), 160, ILCT_DROPLIST);
+	AddCol(CEnString(IDS_FT_VALUE), 130, ILCT_DROPLIST);
+	AddCol(CEnString(IDS_FT_ANDOR), 60, ILCT_DROPLIST);
+	SetView(LVS_REPORT);
+
+	AutoAdd(TRUE, FALSE);
+
+	BuildListCtrl();
+
+	// create child controls last because they will
+	// get used to update the minimum item height
 	CreateControl(m_cbAttributes, ATTRIB_ID);
 	CreateControl(m_cbOperators, OPERATOR_ID, FALSE);
 	CreateControl(m_cbAndOr, ANDOR_ID, FALSE);
@@ -116,32 +132,12 @@ void CTDLFindTaskExpressionListCtrl::PreSubclassWindow()
 	CreateControl(m_cbCustomIcons, CUSTOMICON_ID, FALSE);
 	CreateControl(m_cbRecurrence, RECURRENCE_ID, FALSE);
 
-	CInputListCtrl::PreSubclassWindow(); // we need combo to be created first
-
 	// build and/or combo too
 	int nItem = m_cbAndOr.AddString(CEnString(IDS_FP_AND));
 	m_cbAndOr.SetItemData(nItem, TRUE);
 				
 	nItem = m_cbAndOr.AddString(CEnString(IDS_FP_OR));
 	m_cbAndOr.SetItemData(nItem, FALSE);
-
-	// post message for our setup
-	m_header.EnableTracking(FALSE);
-	ShowGrid(TRUE, TRUE);
-
-	InsertColumn(ATTRIB_COL, CEnString(IDS_FT_ATTRIB), LVCFMT_LEFT, 120);
-	InsertColumn(OPERATOR_COL, CEnString(IDS_FT_MATCHES), LVCFMT_LEFT, 160);
-	InsertColumn(VALUE_COL, CEnString(IDS_FT_VALUE), LVCFMT_LEFT, 130);
-	InsertColumn(ANDOR_COL, CEnString(IDS_FT_ANDOR), LVCFMT_LEFT, 60);
-	SetView(LVS_REPORT);
-
-	AutoAdd(TRUE, FALSE);
-
-	BuildListCtrl();
-
-	SetColumnType(ATTRIB_COL, ILCT_DROPLIST);
-	SetColumnType(OPERATOR_COL, ILCT_DROPLIST);
-	SetColumnType(ANDOR_COL, ILCT_DROPLIST);
 
 	// Not sure why this doesn't work 'out of the box'
 	// but we need to set the style manually
@@ -531,11 +527,8 @@ BOOL CTDLFindTaskExpressionListCtrl::IsEditing() const
 			m_cbRecurrence.IsWindowVisible());
 }
 
-BOOL CTDLFindTaskExpressionListCtrl::CanEditSelectedCell() const
+BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 {
-	int nRow, nCol;
-	GetCurSel(nRow, nCol);
-
 	if (nRow < m_aSearchParams.GetSize())
 	{
 		const SEARCHPARAM& rule = m_aSearchParams[nRow];
@@ -560,7 +553,7 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditSelectedCell() const
 	}
 
 	// else
-	return CInputListCtrl::CanEditSelectedCell();
+	return CInputListCtrl::CanEditCell(nRow, nCol);
 }
 
 void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)

@@ -53,7 +53,7 @@ public:
 	void SetAutoColumnWidth(int nWidth);
 	void SetAutoRowPrompt(const CString& sPrompt);
 	void SetAutoColPrompt(const CString& sPrompt);
-	virtual BOOL CanEditSelectedCell() const;
+	BOOL CanEditSelectedCell() const;
 	void EditSelectedCell();
 	virtual BOOL CanDeleteSelectedCell() const;
 	virtual BOOL DeleteSelectedCell();

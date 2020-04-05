@@ -115,7 +115,7 @@ protected:
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual BOOL IsEditing() const;
 	virtual BOOL DeleteSelectedCell();
-	virtual BOOL CanEditSelectedCell() const;
+	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
 	virtual void OnCancelEdit();
 	virtual void InitState();
