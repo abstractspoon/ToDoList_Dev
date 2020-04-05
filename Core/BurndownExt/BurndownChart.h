@@ -59,11 +59,15 @@ protected:
 
 protected:
 	void RebuildXScale();
+	void RefreshRenderFlags(BOOL bRedraw = TRUE);
 
 	// virtual overrides
 	CString GetTooltip(int nHit) const;
 	int HitTest(const CPoint& ptClient) const;
-	void DoPaint(CDC& dc, BOOL bPaintBkgnd);
+	void DoPaint(CDC& dc, BOOL bPaintBkgnd = TRUE);
+
+	BOOL HighlightDataPoint(int nIndex);
+	bool DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha = 255);
 
 };
 

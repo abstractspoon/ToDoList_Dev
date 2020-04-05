@@ -49,7 +49,7 @@ protected:
 	virtual bool DrawHorzGridLines(CDC& dc);
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 	virtual CString GetTooltip(int nHit) const;
-	virtual int HitTest(const CPoint& ptClient) const;
+	virtual int HitTest(const CPoint& ptClient, int nDataset = 0) const;
 	virtual void DoPaint(CDC& dc, BOOL bPaintBkgnd);
 	virtual BOOL HighlightDataPoint(int nIndex);
 

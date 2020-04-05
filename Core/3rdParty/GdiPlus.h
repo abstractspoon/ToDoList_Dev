@@ -188,11 +188,13 @@ protected:
 class CGdiPlusPen
 {
 public:
-	CGdiPlusPen(COLORREF color, int nWidth, gdix_PenStyle nStyle = gdix_PenStyleSolid);
+	CGdiPlusPen();
+	CGdiPlusPen(COLORREF color, int nWidth = 1, gdix_PenStyle nStyle = gdix_PenStyleSolid);
 	virtual ~CGdiPlusPen();
 
 	operator gdix_Pen*() { return m_pen; }
 
+	BOOL Create(COLORREF color, int nWidth = 1, gdix_PenStyle nStyle = gdix_PenStyleSolid);
 	BOOL IsValid() const { return (m_pen != NULL); }
 	BOOL SetStyle(gdix_PenStyle nStyle);
 
@@ -205,10 +207,13 @@ protected:
 class CGdiPlusBrush
 {
 public:
+	CGdiPlusBrush();
 	CGdiPlusBrush(COLORREF color, BYTE alpha = 255);
 	virtual ~CGdiPlusBrush();
 
 	operator gdix_Brush*() const { return m_brush; }
+
+	BOOL Create(COLORREF color, BYTE alpha = 255);
 	BOOL IsValid() const { return (m_brush != NULL); }
 
 protected:
@@ -293,11 +298,14 @@ public:
 	static BOOL DrawPolygon(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count, gdix_Brush* brush = NULL);
 	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush = NULL);
 	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, gdix_Brush* brush = NULL);
+	static BOOL DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees, gdix_Brush* brush = NULL);
+	static BOOL DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees);
 
 	static BOOL FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_PointF* points, int count);
 	static BOOL FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect);
 	static BOOL FillRect(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect);
-	
+	static BOOL FillPie(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect, float startDegrees, float sweepDegrees);
+
 	static gdix_ARGB MakeARGB(COLORREF color, BYTE alpha = 255);
 	static BOOL SetSmoothingMode(gdix_Graphics* graphics, gdix_SmoothingMode mode);
 
@@ -307,10 +315,13 @@ public:
 	static BOOL DrawPolygon(CGdiPlusGraphics& graphics, CGdiPlusPen& pen, const POINT points[], int count, gdix_Brush* brush = NULL);
 	static BOOL DrawEllipse(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush = NULL);
 	static BOOL DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, gdix_Brush* brush = NULL);
+	static BOOL DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees, gdix_Brush* brush = NULL);
+	static BOOL DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees);
 	
 	static BOOL FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count);
 	static BOOL FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect);
 	static BOOL FillRect(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect);
+	static BOOL FillPie(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect, float startDegrees, float sweepDegrees);
 
 	static void GetPointFs(const POINT points[], int count, CArray<gdix_PointF, gdix_PointF&>& pointFs);
 

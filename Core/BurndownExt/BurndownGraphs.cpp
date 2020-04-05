@@ -175,7 +175,7 @@ BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
 
 COLORREF CGraphBase::GetColor(int nColor) const
 {
-	int nNumColors = GetNumColors();
+	int nNumColors = m_aColors.GetSize();
 
 	if ((nColor < 0) || (nNumColors == 0))
 	{
@@ -256,11 +256,6 @@ BOOL CGraphBase::SetColors(const CColorArray& aColors)
 const CColorArray& CGraphBase::GetColors() const
 {
 	return m_aColors;
-}
-
-int CGraphBase::GetNumColors() const
-{
-	return m_aColors.GetSize();
 }
 
 BOOL CGraphBase::IsValidOption(BURNDOWN_GRAPHOPTION nOption) const
@@ -502,7 +497,7 @@ CIncompleteTasksGraph::CIncompleteTasksGraph()
 	:
 	CTimeSeriesGraph(BCT_TIMESERIES_INCOMPLETETASKS)
 {
-	InitColorPalette(COLOR_GREENYELLOW);
+	InitColorPalette(COLOR_GREEN);
 }
 
 CString CIncompleteTasksGraph::GetTitle() const
@@ -978,37 +973,15 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 
 	if (nNumAttrib)
 	{
-		// For bar charts use a different dataset for as many colours as we
-		// have so that each data point has a different color
-		BOOL bBarStyle = HasOption(BGO_FREQUENCY_BAR);
-		int nNumDatasets = (bBarStyle ? min(GetNumColors(), HMX_MAX_DATASET) : 1);
-		
-		if (!nNumDatasets)
-		{
-			// Means no colours
-			ASSERT(0);
-			return;
-		}
-	
 		int nMaxFreq = 0;
+		CHMXDataset& dataset = datasets[0];
+
+		dataset.SetMin(0.0);
+		dataset.ClearData();
+		dataset.SetDatasetSize(nNumAttrib);
 
 		for (int nAttrib = 0; nAttrib < nNumAttrib; nAttrib++)
 		{
-			int nDataset = (nAttrib % nNumDatasets);
-
-			CHMXDataset& dataset = datasets[nDataset];
-
-			// Initialise each dataset once only
-			if (nAttrib < nNumDatasets)
-			{
-				dataset.SetMin(0.0);
-				dataset.ClearData();
-				dataset.SetDatasetSize(nNumAttrib);
-		
-				SetDatasetColor(dataset, GetColor(nDataset));
-				UpdateGraphStyles(dataset);
-			}
-
 			const FREQUENCYITEM& fi = aFrequencies[nAttrib];
 			dataset.SetData(nAttrib, fi.nCount);
 
@@ -1024,12 +997,10 @@ void CAttributeFrequencyGraph::BuildGraph(const CArray<FREQUENCYITEM, FREQUENCYI
 		if (nMaxFreq)
 		{
 			double dMax = HMXUtils::CalcMaxYAxisValue(nMaxFreq, 10);
-
-			int nDataset = nNumDatasets;
-
-			while (nDataset--)
-				datasets[nDataset].SetMax(dMax);
+			datasets[0].SetMax(dMax);
 		}
+
+		UpdateGraphStyles(dataset);
 	}
 }
 
@@ -1037,30 +1008,8 @@ CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calcu
 {
 	CString sTooltip;
 	double dCount = 0.0;
-	int nDataset = 0;
 
-	switch (GetOption())
-	{
-	case BGO_FREQUENCY_BAR:
-		// When in VBAR mode we use multiple datasets to give 
-		// each data point its own colour
-		{
-			int nNumColors = GetNumColors();
-
-			if (nNumColors)
-			{
-				int nNumDatasets = min(nNumColors, HMX_MAX_DATASET);
-				nDataset = (nHit % nNumDatasets);
-			}
-		}
-		break;
-
-	case BGO_FREQUENCY_LINE:
-		// Uses just the default dataset
-		break;
-	}
-			
-	if (datasets[nDataset].GetData(nHit, dCount))
+	if (datasets[0].GetData(nHit, dCount))
 	{
 		ASSERT(m_aAttribValues.GetSize() > nHit);
 		sTooltip.Format(CEnString(IDS_TOOLTIP_ATTRIBFREQUENCY), m_aAttribValues[nHit], (int)dCount);
@@ -1069,21 +1018,17 @@ CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calcu
 	return sTooltip;
 }
 
-BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
 {
 	if (HasOption(nOption))
 		return TRUE;
 
-	BOOL bRebuild = (HasOption(BGO_FREQUENCY_LINE) || (nOption == BGO_FREQUENCY_LINE));
-	
 	if (!CGraphBase::SetOption(nOption))
 		return FALSE;
 
-	if (bRebuild)
-		BuildGraph(calculator, datasets);
-
-	return TRUE;
+	return UpdateGraphStyles(datasets[0]);
 }
+
 BOOL CAttributeFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
 {
 	switch (GetOption())
@@ -1096,6 +1041,16 @@ BOOL CAttributeFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
 	case BGO_FREQUENCY_LINE:
 		dataset.SetSize(1);
 		dataset.SetStyle(HMX_DATASET_STYLE_AREALINE);
+		break;
+
+	case BGO_FREQUENCY_PIE:
+		dataset.SetSize(1);
+		dataset.SetStyle(HMX_DATASET_STYLE_PIELINE);
+		break;
+
+	case BGO_FREQUENCY_DONUT:
+		dataset.SetSize(1);
+		dataset.SetStyle(HMX_DATASET_STYLE_DONUTLINE);
 		break;
 
 	default:

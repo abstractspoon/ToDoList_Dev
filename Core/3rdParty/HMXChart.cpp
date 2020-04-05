@@ -9,6 +9,14 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+
 #define HMX_AREA_MARGINS	80		// fraction of area
 #define HMX_AREA_TITLE		10		// fraction of area
 #define HMX_AREA_YAXIS		7		// percentage
@@ -18,16 +26,30 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifdef _DEBUG
-#define new DEBUG_NEW
-#undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
-#endif
+/* DIB constants */
+#define PALVERSION   0x300
+
+/* DIB Macros*/
+#define IS_WIN30_DIB(lpbi)  ((*(LPDWORD)(lpbi)) == sizeof(BITMAPINFOHEADER))
+#define RECTWIDTH(lpRect)     ((lpRect)->right - (lpRect)->left)
+#define RECTHEIGHT(lpRect)    ((lpRect)->bottom - (lpRect)->top)
+
+// WIDTHBYTES performs DWORD-aligning of DIB scanlines.  The "bits"
+// parameter is the bit count for the scanline (biWidth * biBitCount),
+// and this macro returns the number of DWORD-aligned bytes needed
+// to hold those bits.
+#define WIDTHBYTES(bits)    (((bits) + 31) / 32 * 4)
+
+#define DIB_HEADER_MARKER   ((WORD) ('M' << 8) | 'B')
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define DEG2RAD(d) ((d) * 3.141592654f / 180)
 
 /////////////////////////////////////////////////////////////////////////////
 // CHMXChart
 
-CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontPixelSize(-1)
+CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontPixelSize(-1), m_dwRenderFlags(HMX_RENDER_ALL)
 {
 	// set defaul value
 	m_clrBkGnd = RGB(200, 255, 255);
@@ -88,14 +110,45 @@ void CHMXChart::SetFont(LPCTSTR szFaceName, int nPointSize)
 	}
 }
 
+void CHMXChart::SetRenderFlags(DWORD dwFlags, BOOL bRedraw)
+{
+	dwFlags &= HMX_RENDER_ALL;
+
+	if (dwFlags != m_dwRenderFlags)
+	{
+		m_dwRenderFlags = dwFlags;
+
+		if (GetSafeHwnd())
+		{
+			CalcDatas();
+
+			if (bRedraw)
+				Invalidate();
+		}
+	}
+}
+
+DWORD CHMXChart::ModifyRenderFlags(DWORD dwRemove, DWORD dwAdd, BOOL bRedraw)
+{
+	DWORD dwFlags = m_dwRenderFlags;
+
+	// Remove before adding
+	dwFlags &= ~dwRemove;
+	dwFlags |= dwAdd;
+	
+	SetRenderFlags(dwFlags, bRedraw);
+
+	return m_dwRenderFlags;
+}
+
 void CHMXChart::OnPaint() 
 {
 	CPaintDC dc(this); // device context for painting
 
-	CDC             memDC;
+	CDC memDC;
 	memDC.CreateCompatibleDC(&dc);
 
-	CBitmap         bitmap;
+	CBitmap bitmap;
 	bitmap.CreateCompatibleBitmap(&dc, m_rectArea.Width(),m_rectArea.Height());
 
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
@@ -125,19 +178,21 @@ void CHMXChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 	if (m_rectData.Height() <= 0)
 		return;
 
-	// Recreate pens, etc
-	if (!m_penGrid.GetSafeHandle())
-		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
-
 	dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-	DrawGrid(dc);
-	DrawDatasets(dc);
-	DrawTitle(dc);
-	DrawBaseline(dc);
-	DrawAxes(dc);
-	DrawYScale(dc);
-	DrawXScale(dc);
+	if (m_dwRenderFlags & HMX_RENDER_GRID)
+		DrawGrid(dc);
+
+	DrawDatasets(dc); // always
+
+	if (m_dwRenderFlags & HMX_RENDER_TITLE)
+		DrawTitle(dc);
+
+	if (m_dwRenderFlags & HMX_RENDER_BASELINE)
+		DrawBaseline(dc);
+
+	if (m_dwRenderFlags & HMX_RENDER_AXES)
+		DrawAxes(dc);
 }
 
 BOOL CHMXChart::OnEraseBkgnd(CDC* /*pDC*/)
@@ -168,14 +223,7 @@ bool CHMXChart::CopyToClipboard()
 
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 
-	PaintBkGnd(memDC);
-	DrawGrid(memDC);
-	DrawDatasets(memDC);
-	DrawTitle(memDC);
-	DrawBaseline(memDC);
-	DrawAxes(memDC);
-	DrawYScale(memDC);
-	DrawXScale(memDC);
+	DoPaint(memDC, TRUE);
 
 	this->OpenClipboard() ;
 	EmptyClipboard() ;
@@ -212,14 +260,7 @@ bool CHMXChart::CopyToFile(CString sFile)
 	bitmap.CreateCompatibleBitmap(&dc, m_rectArea.Width(), m_rectArea.Height());	
 	CBitmap* pOldBitmap = memDC.SelectObject(&bitmap);
 	
-	PaintBkGnd(memDC);
-	DrawGrid(memDC);
-	DrawDatasets(memDC);
-	DrawTitle(memDC);
-	DrawBaseline(memDC);
-	DrawAxes(memDC);
-	DrawYScale(memDC);
-	DrawXScale(memDC);
+	DoPaint(memDC, TRUE);
 
 	// Create logical palette if device supports a palette
 	CPalette pal;
@@ -322,8 +363,11 @@ bool CHMXChart::DrawTitle(CDC & dc)
 //
 bool CHMXChart::DrawGrid(CDC & dc)
 {
-	DrawVertGridLines(dc);
-	DrawHorzGridLines(dc);
+	if (m_dwRenderFlags & HMX_RENDER_VERTGRID)
+		DrawVertGridLines(dc);
+
+	if (m_dwRenderFlags & HMX_RENDER_HORZGRID)
+		DrawHorzGridLines(dc);
 
 	return true;
 }
@@ -342,12 +386,26 @@ bool CHMXChart::DrawGrid(CDC & dc)
 bool CHMXChart::DrawAxes(CDC &dc)
 {
 	// draw Y
-	dc.MoveTo(m_rectYAxis.right, m_rectYAxis.bottom);
-	dc.LineTo(m_rectYAxis.right, m_rectYAxis.top   );
+	if (m_dwRenderFlags & HMX_RENDER_YAXIS)
+	{
+		dc.MoveTo(m_rectYAxis.right, m_rectYAxis.bottom);
+		dc.LineTo(m_rectYAxis.right, m_rectYAxis.top);
+	}
 	
+	if (m_dwRenderFlags & (HMX_RENDER_YAXISSCALE | HMX_RENDER_YAXISTITLE))
+		DrawYScale(dc);
+
+
 	// draw X
-	dc.MoveTo(m_rectXAxis.left , m_rectXAxis.top);
-	dc.LineTo(m_rectXAxis.right, m_rectXAxis.top);
+	if (m_dwRenderFlags & HMX_RENDER_YAXIS)
+	{
+		dc.MoveTo(m_rectXAxis.left, m_rectXAxis.top);
+		dc.LineTo(m_rectXAxis.right, m_rectXAxis.top);
+	}
+	
+	if (m_dwRenderFlags & (HMX_RENDER_XAXISSCALE | HMX_RENDER_XAXISTITLE))
+		DrawXScale(dc);
+
 	return true;
 }
 
@@ -370,6 +428,10 @@ bool CHMXChart::DrawHorzGridLines(CDC & dc)
 		return false;
 
 	double nY = ((m_nYMax - m_nYMin)/(double)nTicks);
+
+	if (!m_penGrid.GetSafeHandle())
+		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
+
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	for(int f=0; f<=nTicks; f++) 
@@ -402,14 +464,18 @@ bool CHMXChart::DrawVertGridLines(CDC & dc)
 	if(!m_nXMax)
 		return false;
 
-	double nX = (double)m_rectData.Width()/(double)m_nXMax;
+	if (!m_penGrid.GetSafeHandle())
+		m_penGrid.CreatePen(PS_SOLID, 1, m_clrGrid);
+
 	CPen* pPenOld = dc.SelectObject(&m_penGrid);
 
 	int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
-	CPoint ptLine;
+	double nX = (double)m_rectData.Width()/(double)m_nXMax;
 
 	for(int f=0; f < nCount; f += m_nXLabelStep)
 	{
+		CPoint ptLine;
+
 		if (!m_strarrScaleXLabel[f].IsEmpty() && GetPointXY(0, f, ptLine))
 		{
 			dc.MoveTo(ptLine.x, m_rectData.top);
@@ -527,54 +593,58 @@ int CHMXChart::CalcXScaleFontSize(BOOL bTitle) const
 //
 bool CHMXChart::DrawXScale(CDC & dc)
 {
-	int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
-
-	if (!nCount && m_strXText.IsEmpty())
-		return false;
-	
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
-	
-	if (nCount)
+
+	if (m_dwRenderFlags & HMX_RENDER_XAXISSCALE)
 	{
-		CFont font;
-		VERIFY(CreateXAxisFont(FALSE, font));
-		CFont* pFontOld = dc.SelectObject(&font);
+		int nCount = min(m_strarrScaleXLabel.GetSize(), m_nXMax);
 
-		// dX is the size of a division
-		double dX = (double)m_rectData.Width()/m_nXMax;
-
-		for(int f=0; f<nCount; f=f+m_nXLabelStep) 
+		if (!nCount && m_strXText.IsEmpty())
+			return false;
+	
+		if (nCount)
 		{
-			const CString& sLabel = m_strarrScaleXLabel.GetAt(f);
+			CFont font;
+			VERIFY(CreateXAxisFont(FALSE, font));
+			CFont* pFontOld = dc.SelectObject(&font);
 
-			if (!sLabel.IsEmpty())
+			// dX is the size of a division
+			double dX = (double)m_rectData.Width()/m_nXMax;
+
+			for(int f=0; f<nCount; f=f+m_nXLabelStep) 
 			{
-				CRect rText(m_rectXAxis);
+				const CString& sLabel = m_strarrScaleXLabel.GetAt(f);
+
+				if (!sLabel.IsEmpty())
+				{
+					CRect rText(m_rectXAxis);
 			
-				rText.top += HMX_XSCALE_OFFSET;
-				rText.left += (int)(dX*(f+0.5)) + 4;
+					rText.top += HMX_XSCALE_OFFSET;
+					rText.left += (int)(dX*(f+0.5)) + 4;
 
-				if (m_nXLabelDegrees > 0)
-				{
-					dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
-					dc.TextOut(rText.left, rText.top, sLabel);
-				}
-				else
-				{
-					rText.right = rText.left + (int)(dX * m_nXLabelStep);
-
-					if (m_bXLabelsAreTicks)
-						dc.DrawText(sLabel, rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+					if (m_nXLabelDegrees > 0)
+					{
+						dc.SetTextAlign(TA_BASELINE | TA_RIGHT);
+						dc.TextOut(rText.left, rText.top, sLabel);
+					}
 					else
-						dc.DrawText(sLabel, rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+					{
+						rText.right = rText.left + (int)(dX * m_nXLabelStep);
+
+						if (m_bXLabelsAreTicks)
+							dc.DrawText(sLabel, rText, DT_LEFT | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+						else
+							dc.DrawText(sLabel, rText, DT_CENTER | DT_TOP | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
+					}
 				}
 			}
-		}
 	
-		dc.SelectObject(pFontOld);
+			dc.SelectObject(pFontOld);
+		}
+
 	}
 
-	if (!m_strXText.IsEmpty()) 
+	if (!m_strXText.IsEmpty() && (m_dwRenderFlags & HMX_RENDER_XAXISTITLE))
 	{
 		CFont font;
 		VERIFY(CreateXAxisFont(TRUE, font));
@@ -603,51 +673,51 @@ bool CHMXChart::DrawXScale(CDC & dc)
 //
 bool CHMXChart::DrawYScale(CDC & dc)
 {
-	int nTicks = GetNumYTicks();
-
-	if (!nTicks && m_strYText.IsEmpty())
-		return false;
-
-	if (m_rectData.Height() < nTicks)
-		return false;
-	
 	const int nBkModeOld = dc.SetBkMode(TRANSPARENT);
 	CRect rTitle(m_rectYAxis);
-	
-	if (nTicks)
+
+	if (m_dwRenderFlags & HMX_RENDER_YAXISSCALE)
 	{
-		CFont font;
-		VERIFY(CreateYAxisFont(FALSE, font));
+		int nTicks = GetNumYTicks();
 
-		CFont* pFontOld = dc.SelectObject(&font);
+		if (!nTicks && m_strYText.IsEmpty())
+			return false;
 
-		// nY is the size of a division
-		double nY = (m_nYMax - m_nYMin)/nTicks;
-		int nFontSize = CalcYScaleFontSize(FALSE);
-
-		// draw text
-		for(int f=0; f<=nTicks; f++) 
+		if (nTicks && (m_rectData.Height() >= nTicks))
 		{
-			CString sTick = GetYTickText(f, (m_nYMin + nY*f));
+			CFont font;
+			VERIFY(CreateYAxisFont(FALSE, font));
 
-			if (!sTick.IsEmpty())
+			CFont* pFontOld = dc.SelectObject(&font);
+
+			// nY is the size of a division
+			double nY = (m_nYMax - m_nYMin)/nTicks;
+			int nFontSize = CalcYScaleFontSize(FALSE);
+
+			// draw text
+			for(int f=0; f<=nTicks; f++) 
 			{
-				int nTop = m_rectYAxis.bottom + nFontSize / 2 - (int)((nY*(f + 1)) * m_rectData.Height() / (m_nYMax - m_nYMin));
-				int nBot = m_rectYAxis.bottom + nFontSize / 2 - (int)((nY*(f)) * m_rectData.Height() / (m_nYMax - m_nYMin));
-				ASSERT(nBot > nTop);
+				CString sTick = GetYTickText(f, (m_nYMin + nY*f));
 
-				CRect rTick(m_rectYAxis.left, (int)nTop, m_rectYAxis.right - 4, (int)nBot);
-				dc.DrawText(sTick, &rTick, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
+				if (!sTick.IsEmpty())
+				{
+					int nTop = m_rectYAxis.bottom + nFontSize / 2 - (int)((nY*(f + 1)) * m_rectData.Height() / (m_nYMax - m_nYMin));
+					int nBot = m_rectYAxis.bottom + nFontSize / 2 - (int)((nY*(f)) * m_rectData.Height() / (m_nYMax - m_nYMin));
+					ASSERT(nBot > nTop);
 
-				int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sTick).cx);
-				rTitle.right = min(rTitle.right, nLabelLeft);
+					CRect rTick(m_rectYAxis.left, (int)nTop, m_rectYAxis.right - 4, (int)nBot);
+					dc.DrawText(sTick, &rTick, DT_RIGHT | DT_BOTTOM | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS | DT_NOCLIP);
+
+					int nLabelLeft = (m_rectYAxis.right - 4 - dc.GetTextExtent(sTick).cx);
+					rTitle.right = min(rTitle.right, nLabelLeft);
+				}
 			}
-		}
 
-		dc.SelectObject(pFontOld);
+			dc.SelectObject(pFontOld);
+		}
 	}
 
-	if (!m_strYText.IsEmpty()) 
+	if (!m_strYText.IsEmpty() && (m_dwRenderFlags & HMX_RENDER_YAXISTITLE))
 	{
 		CFont font;
 		VERIFY(CreateYAxisFont(TRUE, font));
@@ -768,21 +838,7 @@ BOOL CHMXChart::GetMarker(HMX_DATASET_MARKER nMarker, const gdix_PointF& pt, int
 	return TRUE;
 }
 
-gdix_PenStyle CHMXChart::GetPenStyle(HMX_DATASET_STYLE nLineStyle)
-{
-	switch (nLineStyle)
-	{
-	case HMX_DATASET_STYLE_LINE:		return gdix_PenStyleSolid;
-	case HMX_DATASET_STYLE_LINE_DASHED:	return gdix_PenStyleDash;
-	case HMX_DATASET_STYLE_LINE_DOTTED: return gdix_PenStyleDot;
-	}
-
-	// all else
-	ASSERT(0);
-	return gdix_PenStyleSolid;
-}
-
-bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
+bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE fillOpacity)
 {
 	if (!IsValidDatasetIndex(nDatasetIndex))
 		return false;
@@ -792,164 +848,471 @@ bool CHMXChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
 	if (ds.GetDatasetSize() == 0)
 		return false;
 
-	// let's calc the bar size
-	double dSpacing = (double)m_rectData.Width()/(double)m_nXMax;
-	double nFirstSample, nTemp, nTemp1, nZeroLine;
+	return DrawDataset(dc, ds, CDWordArray(), fillOpacity);
+}
 
-	// get first sample, if dataset is empty continue to next dataset
-	int f=0;
-	do 
-	{
-		if(!ds.GetData(f++, nFirstSample))
-			return false;
-	} 
-	while(nFirstSample == HMX_DATASET_VALUE_INVALID);
-	f--;
-
-	double nSample = nFirstSample;
-
+bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltItemColors, BYTE fillOpacity)
+{
 	switch (ds.GetStyle())
 	{
 	case HMX_DATASET_STYLE_LINE:
 	case HMX_DATASET_STYLE_LINE_DASHED:
 	case HMX_DATASET_STYLE_LINE_DOTTED:
-		{
-			CArray<gdix_PointF, gdix_PointF&> points;
-			int nPoints = GetPoints(ds, points, FALSE);
-
-			if (nPoints < 2)
-				return false;
-
-			CGdiPlusGraphics graphics(dc);
-			CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize(), GetPenStyle(ds.GetStyle()));
-
-			VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData(), points.GetSize()));
-			
-			HMX_DATASET_MARKER nMarker = ds.GetMarker();
-
-			if (nMarker == HMX_DATASET_MARKER_NONE) 
-				break;
-
-			CGdiPlusBrush brush(ds.GetFillColor(), alpha);
-			int nSize = ds.GetSize()*2;
-
-			CArray<gdix_PointF, gdix_PointF&> ptMarker;
-
-			for (f=0; f<nPoints; f++) 
-			{
-				VERIFY(GetMarker(nMarker, points[f], nSize, ptMarker));
-
-				switch (nMarker) 
-				{
-				case HMX_DATASET_MARKER_TRIANGLE:
-				case HMX_DATASET_MARKER_DIAMOND:
-					VERIFY(CGdiPlus::DrawPolygon(graphics, pen, ptMarker.GetData(), ptMarker.GetSize(), brush));
-					break;
-
-				case HMX_DATASET_MARKER_SQUARE:
-					VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
-					break;
-
-				case HMX_DATASET_MARKER_CIRCLE:
-					VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
-					break;
-				}
-			}
-		}
-		break;
-		
-	case HMX_DATASET_STYLE_VBAR:
-		{
-			CGdiPlusGraphics graphics(dc);
-			CGdiPlusPen pen(ds.GetLineColor(), 1);
-			CGdiPlusBrush brush(ds.GetFillColor(), alpha);
-
-			CRect rectTemp;
-
-			for(f=0; f<ds.GetDatasetSize(); f++) 
-			{
-				ds.GetData(f, nSample);
-
-				if (nSample == HMX_DATASET_VALUE_INVALID)
-					break;
-
-				if (nSample == 0.0)
-					continue;
-
-				nTemp =  (nSample - m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-
-				CRect rBar;
-
-				if(nSample > 0.0) 
-				{
-					//  bar is positive
-					nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
-					nTemp1 = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-					
-					rBar.top    = (int)(m_rectData.bottom - nTemp);
-					rBar.bottom = (int)(m_rectData.bottom - nTemp1);
-
-					// Ensure something is visible
-					if (rBar.Height() == 0)
-						rBar.top--;
-				} 
-				else // if (nSample < 0.0)
-				{
-					// bar is negative
-					nZeroLine = m_nYMax < 0 ? m_nYMax : 0;
-					nTemp1 = (nZeroLine -m_nYMin) * m_rectData.Height()/(m_nYMax-m_nYMin);
-					
-					rBar.top    = (int)(m_rectData.bottom - nTemp1);
-					rBar.bottom = (int)(m_rectData.bottom - nTemp);
-
-					// Ensure something is visible
-					if (rBar.Height() == 0)
-						rBar.bottom++;
-				}
-
-				int nBarPos = m_rectData.left + (int)(dSpacing*(f + 0.5));
-
-				rBar.left   = (nBarPos - (int)(dSpacing*(ds.GetSize()/2.0)/10.0));
-				rBar.right  = (nBarPos + (int)(dSpacing*(ds.GetSize()/2.0)/10.0));
-
-				if (rBar.Width() <= 0)
-					rBar.right = (rBar.left + 1);
-
-				VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(rBar), brush));
-			}
-		}
-		break;
+		return DrawLineGraph(dc, ds, aAltItemColors, fillOpacity);
 		
 	case HMX_DATASET_STYLE_AREALINE:
 	case HMX_DATASET_STYLE_AREA:
-		{
-			BOOL bAreaLine = (ds.GetStyle() == HMX_DATASET_STYLE_AREALINE);
+		return DrawAreaGraph(dc, ds, fillOpacity);
+		
+	case HMX_DATASET_STYLE_VBAR:
+		return DrawBarChart(dc, ds, aAltItemColors, fillOpacity);
 
-			CGdiPlusGraphics graphics(dc);
-			CGdiPlusBrush brush(ds.GetFillColor(), alpha);
-			
-			CArray<gdix_PointF, gdix_PointF&> points;
-			int nPoints = GetPoints(ds, points, TRUE);
-
-			if (nPoints >= 4)
-			{
-				VERIFY(CGdiPlus::FillPolygon(graphics, brush, points.GetData(), nPoints));
-
-				// draw line too?
-				if (bAreaLine)
-				{
-					CGdiPlusPen pen(ds.GetLineColor(), ds.GetSize());
-				
-					// don't draw the first/last closure points
-					// That's why we need at least 4 points.
-					VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData() + 1, nPoints - 2));
-				}
-			}
-		}
-		break;
+	case HMX_DATASET_STYLE_PIE:
+	case HMX_DATASET_STYLE_PIELINE:
+	case HMX_DATASET_STYLE_DONUT:
+	case HMX_DATASET_STYLE_DONUTLINE:
+		return DrawPieChart(dc, ds, aAltItemColors, fillOpacity);
 	}
 
 	return true;
+}
+
+bool CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltMarkerColors, BYTE fillOpacity)
+{
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
+	CArray<gdix_PointF, gdix_PointF&> points;
+	int nPoints = GetPoints(ds, points, FALSE);
+
+	if (nPoints < 2)
+		return false;
+
+	gdix_PenStyle nPenStyle = gdix_PenStyleSolid;
+
+	switch (ds.GetStyle())
+	{
+	case HMX_DATASET_STYLE_LINE_DASHED:	
+		nPenStyle = gdix_PenStyleDash;	
+		break;
+
+	case HMX_DATASET_STYLE_LINE_DOTTED:	
+		nPenStyle = gdix_PenStyleDot;	
+		break;
+	}
+
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen linePen(ds.GetLineColor(), ds.GetSize(), nPenStyle);
+
+	VERIFY(CGdiPlus::DrawLines(graphics, linePen, points.GetData(), points.GetSize()));
+
+	HMX_DATASET_MARKER nMarker = ds.GetMarker();
+
+	if (nMarker != HMX_DATASET_MARKER_NONE)
+	{
+		CGdiPlusPen defMarkerPen;
+		CGdiPlusBrush defMarkerBrush;
+		CreateDefaultItemDrawingTools(ds, aAltMarkerColors, fillOpacity, defMarkerPen, defMarkerBrush);
+
+		int nSize = ds.GetSize() * 2;
+
+		CArray<gdix_PointF, gdix_PointF&> ptMarker;
+
+		for (int f = 0; f < nPoints; f++)
+		{
+			VERIFY(GetMarker(nMarker, points[f], nSize, ptMarker));
+
+			CGdiPlusPen markerPen;
+			CGdiPlusBrush markerBrush;
+			CreateItemDrawingTools(f, aAltMarkerColors, fillOpacity, markerPen, markerBrush);
+
+			gdix_Pen* pen = (markerPen.IsValid() ? markerPen : defMarkerPen);
+			gdix_Brush* brush = (markerBrush.IsValid() ? markerBrush : defMarkerBrush);
+
+			switch (nMarker)
+			{
+			case HMX_DATASET_MARKER_TRIANGLE:
+			case HMX_DATASET_MARKER_DIAMOND:
+				VERIFY(CGdiPlus::DrawPolygon(graphics, pen, ptMarker.GetData(), ptMarker.GetSize(), brush));
+				break;
+
+			case HMX_DATASET_MARKER_SQUARE:
+				VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
+				break;
+
+			case HMX_DATASET_MARKER_CIRCLE:
+				VERIFY(CGdiPlus::DrawEllipse(graphics, pen, CGdiPlusRectF(ptMarker[0], ptMarker[1]), brush));
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool CHMXChart::DrawAreaGraph(CDC &dc, const CHMXDataset& ds, BYTE fillOpacity)
+{
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
+	CArray<gdix_PointF, gdix_PointF&> points;
+	int nPoints = GetPoints(ds, points, TRUE);
+
+	if (nPoints >= 4)
+	{
+		CGdiPlusGraphics graphics(dc);
+		CGdiPlusBrush brush(ds.GetFillColor(), fillOpacity);
+	
+		VERIFY(CGdiPlus::FillPolygon(graphics, brush, points.GetData(), nPoints));
+
+		// draw line too?
+		if ((ds.GetStyle() == HMX_DATASET_STYLE_AREALINE))
+		{
+			// don't draw the first/last closure points
+			// That's why we need at least 4 points.
+			CGdiPlusPen pen(ds.GetLineColor(), 1);
+
+			VERIFY(CGdiPlus::DrawLines(graphics, pen, points.GetData() + 1, nPoints - 2));
+		}
+	}
+
+	return true;
+}
+
+bool CHMXChart::DrawBarChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltBarColors, BYTE fillOpacity)
+{
+	if (ds.GetDatasetSize() == 0)
+		return false;
+
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen defBarPen;
+	CGdiPlusBrush defBarBrush;
+	CreateDefaultItemDrawingTools(ds, aAltBarColors, fillOpacity, defBarPen, defBarBrush);
+	
+	double dBarSpacing = (double)m_rectData.Width() / (double)m_nXMax;
+
+	for (int f = 0; f < ds.GetDatasetSize(); f++)
+	{
+		double nSample = 0.0;
+		ds.GetData(f, nSample);
+
+		if (nSample == HMX_DATASET_VALUE_INVALID)
+			break;
+
+		if (nSample == 0.0)
+			continue;
+
+		double nTemp = (nSample - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+		CRect rBar;
+
+		if (nSample > 0.0)
+		{
+			//  bar is positive
+			double nZeroLine = m_nYMin > 0 ? m_nYMin : 0;
+			double nTemp1 = (nZeroLine - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+
+			rBar.top = (int)(m_rectData.bottom - nTemp);
+			rBar.bottom = (int)(m_rectData.bottom - nTemp1);
+
+			// Ensure something is visible
+			if (rBar.Height() == 0)
+				rBar.top--;
+		}
+		else // if (nSample < 0.0)
+		{
+			// bar is negative
+			double nZeroLine = m_nYMax < 0 ? m_nYMax : 0;
+			double nTemp1 = (nZeroLine - m_nYMin) * m_rectData.Height() / (m_nYMax - m_nYMin);
+
+			rBar.top = (int)(m_rectData.bottom - nTemp1);
+			rBar.bottom = (int)(m_rectData.bottom - nTemp);
+
+			// Ensure something is visible
+			if (rBar.Height() == 0)
+				rBar.bottom++;
+		}
+
+		int nBarPos = m_rectData.left + (int)(dBarSpacing*(f + 0.5));
+
+		rBar.left = (nBarPos - (int)(dBarSpacing*(ds.GetSize() / 2.0) / 10.0));
+		rBar.right = (nBarPos + (int)(dBarSpacing*(ds.GetSize() / 2.0) / 10.0));
+
+		if (rBar.Width() <= 0)
+			rBar.right = (rBar.left + 1);
+
+		CGdiPlusPen barPen;
+		CGdiPlusBrush barBrush;
+		CreateItemDrawingTools(f, aAltBarColors, fillOpacity, barPen, barBrush);
+
+		gdix_Pen* pen = (barPen.IsValid() ? barPen : defBarPen);
+		gdix_Brush* brush = (barBrush.IsValid() ? barBrush : defBarBrush);
+
+		VERIFY(CGdiPlus::DrawRect(graphics, pen, CGdiPlusRectF(rBar), brush));
+	}
+
+	return true;
+}
+
+BOOL CHMXChart::CalcPieRects(CRect& rPie, CRect& rDonut) const
+{
+	// Make the chart as big as possible
+	rPie = m_rectData;
+
+	// Allow for item label near the top
+	rPie.top += CalcYScaleFontSize(FALSE);
+	
+	// Only use half the width to allow for labels
+	int nSize = min(rPie.Height(), (rPie.Width() / 2));
+	nSize -= (nSize % 2); // make even size
+
+	rPie.right = rPie.left + nSize;
+	rPie.top = rPie.bottom - nSize;
+
+	// And centre it
+	CPoint ptOffset = (m_rectData.CenterPoint() - rPie.CenterPoint());
+	rPie.OffsetRect(ptOffset);
+
+	if ((rPie.right <= rPie.left) || (rPie.bottom <= rPie.top))
+	{
+		rPie.SetRectEmpty();
+		return FALSE;
+	}
+
+	// else
+	rDonut = rPie;
+	rDonut.DeflateRect((nSize / 4), (nSize / 4));
+
+	return TRUE;
+}
+
+bool CHMXChart::DrawPieChart(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltPieColors, BYTE fillOpacity)
+{
+	CArray<PIESEGMENT, PIESEGMENT&> aSegments;
+	int nNumSeg = CalcPieSegments(ds, aSegments);
+	
+	if (nNumSeg == 0)
+		return false;
+
+	CRect rPie, rDonut;
+	
+	if (!CalcPieRects(rPie, rDonut))
+		return false;
+	
+	// Create default drawing tools
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen defPiePen;
+	CGdiPlusBrush defPieBrush;
+	VERIFY(CreateDefaultItemDrawingTools(ds, aAltPieColors, fillOpacity, defPiePen, defPieBrush));
+
+	// Draw the items
+	HMX_DATASET_STYLE nStyle = ds.GetStyle();
+
+	BOOL bAreaLine = ((nStyle == HMX_DATASET_STYLE_PIELINE) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
+	BOOL bDonut = ((nStyle == HMX_DATASET_STYLE_DONUT) || (nStyle == HMX_DATASET_STYLE_DONUTLINE));
+
+	for (int f = 0; f < nNumSeg; f++)
+	{
+		const PIESEGMENT& seg = aSegments[f];
+
+		if (seg.fSweepDegrees > 0.0f)
+		{
+			CGdiPlusPen piePen;
+			CGdiPlusBrush pieBrush;
+			CreateItemDrawingTools(f, aAltPieColors, fillOpacity, piePen, pieBrush);
+
+			gdix_Pen* pen = (piePen.IsValid() ? piePen : defPiePen);
+			gdix_Brush* brush = (pieBrush.IsValid() ? pieBrush : defPieBrush);
+
+			if (bAreaLine)
+			{
+				CGdiPlus::DrawPie(graphics, pen, rPie, seg.fStartDegrees, seg.fSweepDegrees, brush);
+
+				if (bDonut)
+					CGdiPlus::DrawArc(graphics, pen, rDonut, seg.fStartDegrees, seg.fSweepDegrees);
+			}
+			else
+			{
+				CGdiPlus::FillPie(graphics, brush, rPie, seg.fStartDegrees, seg.fSweepDegrees);
+			}
+		}
+	}
+
+	if (bDonut)
+	{
+		rDonut.DeflateRect(1, 1);
+		CGdiPlus::FillEllipse(graphics, CGdiPlusBrush(RGB(255, 255, 255)), rDonut);
+	}
+
+	DrawPieLabels(dc, rPie, aSegments);
+
+	return true;
+}
+
+int CHMXChart::CalcPieSegments(const CHMXDataset& dataset, CArray<PIESEGMENT, PIESEGMENT&>& aSegments) const
+{
+	// Get the total aggregate value to be distributed
+	int nNumData = dataset.GetDatasetSize(), f;
+
+	if (nNumData != m_strarrScaleXLabel.GetSize())
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	double dTotalData = 0.0;
+
+	for (f = 0; f < nNumData; f++)
+	{
+		double dValue;
+		VERIFY(dataset.GetData(f, dValue));
+
+		dTotalData += max(0.0, dValue);
+	}
+
+	float fAngleFactor = (float)(360 / dTotalData);
+	double dDataValue;
+	
+	PIESEGMENT seg;
+	seg.fStartDegrees = 270.0f; // 12 o'clock
+
+	for (f = 0; f < nNumData; f++)
+	{
+		seg.sLabel = m_strarrScaleXLabel[f];
+		
+		if (dataset.GetData(f, dDataValue) && (dDataValue > 0.0))
+			seg.fSweepDegrees = (float)(dDataValue * fAngleFactor);
+		else
+			seg.fSweepDegrees = 0.0f;
+
+		aSegments.Add(seg);
+
+		// Next segment
+		seg.fStartDegrees = NormaliseAngle(seg.fStartDegrees + seg.fSweepDegrees);
+	}
+
+	return nNumData;
+}
+
+float CHMXChart::NormaliseAngle(float fDegrees)
+{
+	while (fDegrees > 360.0f)
+		fDegrees -= 360.0f;
+
+	while (fDegrees < 0.0f)
+		fDegrees += 360.0f;
+
+	return fDegrees;
+}
+
+void CHMXChart::DrawPieLabels(CDC& dc, const CRect& rPie, const CArray<PIESEGMENT, PIESEGMENT&>& aSegments)
+{
+	int nNumData = aSegments.GetSize();
+
+	if (!nNumData)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	CGdiPlusGraphics graphics(dc);
+	CGdiPlusPen labelPen(m_clrGrid);
+
+	CFont fontLabel;
+	VERIFY(CreateYAxisFont(FALSE, fontLabel));
+	CFont* pFontOld = dc.SelectObject(&fontLabel);
+
+	int nRadius = (rPie.Width() / 2), nLabelHeight = CalcYScaleFontSize(FALSE);
+	CPoint ptCentre(rPie.CenterPoint());
+
+	for (int f = 0; f < nNumData; f++)
+	{
+		const PIESEGMENT& seg = aSegments[f];
+
+		if (!seg.sLabel.IsEmpty() && (seg.fSweepDegrees > 0.0f))
+		{
+			float fAveAngle = DEG2RAD(seg.fStartDegrees + (seg.fSweepDegrees / 2));
+			CPoint ptLabel[3];
+
+			// Initial point on the circumference
+			ptLabel[0] = ptCentre;
+			ptLabel[0].x += (int)(cos(fAveAngle) * (nRadius + 2));
+			ptLabel[0].y += (int)(sin(fAveAngle) * (nRadius + 2));
+
+			// Next point a little further out
+			ptLabel[1] = ptLabel[0];
+			ptLabel[1].x += (int)(cos(fAveAngle) * 10);
+			ptLabel[1].y += (int)(sin(fAveAngle) * 10);
+
+			// Last point projected horizontally depending on 
+			// which side of the centre point we are
+			BOOL bRightSide = (ptLabel[0].x >= ptCentre.x);
+
+			ptLabel[2] = ptLabel[1];
+			ptLabel[2].x = ptCentre.x;
+			
+			if (bRightSide)
+				ptLabel[2].x += (nRadius * 3 / 2);
+			else
+				ptLabel[2].x -= (nRadius * 3 / 2);
+
+			CGdiPlus::DrawLines(graphics, labelPen, ptLabel, 3);
+
+			// Label text
+			int nDrawFlags = DT_VCENTER;
+			CRect rLabel(m_rectData);
+				
+			rLabel.top = (ptLabel[2].y - (nLabelHeight / 2));
+			rLabel.bottom = (rLabel.top + nLabelHeight);
+
+			if (bRightSide)
+			{
+				rLabel.left = ptLabel[2].x;
+				nDrawFlags |= DT_LEFT;
+			}
+			else
+			{
+				rLabel.right = ptLabel[2].x;
+				nDrawFlags |= DT_RIGHT;
+			}
+			
+			dc.DrawText(seg.sLabel, rLabel, nDrawFlags);
+		}
+	}
+
+	dc.SelectObject(pFontOld);
+}
+
+
+BOOL CHMXChart::CreateDefaultItemDrawingTools(const CHMXDataset& ds, const CDWordArray& aAltItemColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush)
+{
+	COLORREF crPen = CLR_NONE, crBrush = CLR_NONE;
+
+	switch (aAltItemColors.GetSize())
+	{
+	case 0:	
+		crPen = ds.GetLineColor(); 
+		crBrush = ds.GetFillColor();
+		break;
+
+	case 1:
+	default:
+		crPen = crBrush = aAltItemColors[0];
+		break;
+	}
+
+	ASSERT((crPen != CLR_NONE) && (crBrush != CLR_NONE));
+
+	return (pen.Create(crPen) && brush.Create(crBrush, fillOpacity));
+}
+
+BOOL CHMXChart::CreateItemDrawingTools(int nItem, const CDWordArray& aColors, BYTE fillOpacity, CGdiPlusPen& pen, CGdiPlusBrush& brush)
+{
+	if (aColors.GetSize() <= 1)
+		return FALSE;
+
+	COLORREF color = aColors[nItem % aColors.GetSize()];
+
+	return (pen.Create(color, 1) && brush.Create(color, fillOpacity));
 }
 
 COLORREF CHMXChart::GetLineColor(int nDatasetIndex, double dValue) const
@@ -1135,7 +1498,7 @@ bool CHMXChart::CalcDatas()
 	// let's calc everything
 	m_rectGraph = m_rectUsable;
 
-	if (!m_strTitle.IsEmpty()) 
+	if (!m_strTitle.IsEmpty() && HasRenderFlag(HMX_RENDER_TITLE)) 
 	{
 		m_rectTitle = m_rectUsable;
 
@@ -1145,21 +1508,33 @@ bool CHMXChart::CalcDatas()
 
 	// make axis width the same for horz and vert
 	int nAxisSize = 0;
+
+	if (m_dwRenderFlags & HMX_RENDER_AXES)
 	{
 		CClientDC dc(this);
 		nAxisSize = CalcAxisSize(m_rectGraph, dc);
 	}
 
-	m_rectYAxis.top    = m_rectGraph.top;
-	m_rectYAxis.left   = m_rectGraph.left;
-	m_rectYAxis.bottom = m_rectGraph.bottom - nAxisSize;
-	m_rectYAxis.right  = m_rectGraph.left + nAxisSize;
+	// Initialise to zero width/height
+	m_rectXAxis = m_rectGraph;
+	m_rectXAxis.top = m_rectXAxis.bottom;
 
-	m_rectXAxis.top    = m_rectGraph.bottom - nAxisSize;
-	m_rectXAxis.left   = m_rectGraph.left + nAxisSize;
-	m_rectXAxis.bottom = m_rectGraph.bottom;
-	m_rectXAxis.right  = m_rectGraph.right;
+	m_rectYAxis = m_rectGraph;
+	m_rectYAxis.right = m_rectYAxis.left;
 
+	if (m_dwRenderFlags & (HMX_RENDER_XAXIS | HMX_RENDER_XAXISTITLE | HMX_RENDER_XAXISSCALE))
+	{
+		m_rectXAxis.top = m_rectXAxis.bottom - nAxisSize;
+		m_rectYAxis.bottom = m_rectXAxis.top;
+	}
+
+	if (m_dwRenderFlags & (HMX_RENDER_YAXIS | HMX_RENDER_YAXISTITLE | HMX_RENDER_YAXISSCALE))
+	{
+		m_rectYAxis.right  = m_rectYAxis.left + nAxisSize;
+		m_rectXAxis.left = m_rectYAxis.right;
+	}
+
+	// Data rect is whatever is left
 	m_rectData.top     = m_rectGraph.top;
 	m_rectData.bottom  = m_rectXAxis.top;
 	m_rectData.left    = m_rectYAxis.right;
@@ -1212,10 +1587,15 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 	}
 	else
 	{
-		int nXAxisHeight = (m_strXText.IsEmpty() ? 0 : (m_nFontPixelSize * 2));
-		int nYAxisWidth = (m_strYText.IsEmpty() ? 0 : (m_nFontPixelSize * 2));
+		int nXAxisHeight = 0, nYAxisWidth = 0;
+		
+		if (!m_strXText.IsEmpty() && HasRenderFlag(HMX_RENDER_XAXISTITLE))
+			nXAxisHeight = (m_nFontPixelSize * 2);
 
-		if (m_strarrScaleXLabel.GetSize())
+		if (!m_strYText.IsEmpty() && HasRenderFlag(HMX_RENDER_YAXISTITLE))
+			nYAxisWidth = (m_nFontPixelSize * 2);
+
+		if (m_strarrScaleXLabel.GetSize() && HasRenderFlag(HMX_RENDER_XAXISSCALE))
 		{
 			CFont font;
 			VERIFY(CreateXAxisFont(FALSE, font));
@@ -1248,7 +1628,7 @@ int CHMXChart::CalcAxisSize(const CRect& rAvail, CDC& dc) const
 			}
 		}
 
-		if (m_nNumYTicks > 0)
+		if ((m_nNumYTicks > 0) && HasRenderFlag(HMX_RENDER_YAXISSCALE))
 		{
 			CFont font;
 			VERIFY(CreateYAxisFont(FALSE, font));
@@ -1699,8 +2079,15 @@ COLORREF CHMXChart::GetBkGnd() const
 //
 bool CHMXChart::SetTitle(CString strTitle)
 {
+	// If switching to/from an empty string we need to recalc data too
+	BOOL bRecalcData = (m_strTitle.IsEmpty() != strTitle.IsEmpty());
+
 	m_strTitle = strTitle;
-	Redraw();
+
+	if (bRecalcData)
+		CalcDatas();
+	else
+		Redraw();
 
 	return true;
 }
@@ -2122,7 +2509,7 @@ HANDLE CHMXChart::DDBToDIB(CBitmap& bitmap, DWORD dwCompression, CPalette* pPal)
  ************************************************************************/
 
 
-WORD WINAPI CHMXChart::PaletteSize(LPSTR lpbi)
+WORD CHMXChart::PaletteSize(LPSTR lpbi)
 {
    /* calculate the size required by the palette */
    if (IS_WIN30_DIB (lpbi))
@@ -2153,7 +2540,7 @@ WORD WINAPI CHMXChart::PaletteSize(LPSTR lpbi)
  ************************************************************************/
 
 
-WORD WINAPI CHMXChart::DIBNumColors(LPSTR lpbi)
+WORD CHMXChart::DIBNumColors(LPSTR lpbi)
 {
 	WORD wBitCount;  // DIB bit count
 
@@ -2215,7 +2602,7 @@ WORD WINAPI CHMXChart::DIBNumColors(LPSTR lpbi)
  *************************************************************************/
 
 
-BOOL WINAPI CHMXChart::SaveDIB(HDIB hDib, CFile& file)
+BOOL CHMXChart::SaveDIB(HDIB hDib, CFile& file)
 {
 	BITMAPFILEHEADER bmfHdr; // Header for Bitmap file
 	LPBITMAPINFOHEADER lpBI;   // Pointer to DIB info structure

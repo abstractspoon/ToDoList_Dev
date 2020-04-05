@@ -9,6 +9,8 @@
 #include "Themed.h"
 #include "OSVersion.h"
 
+#include <math.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -22,6 +24,10 @@ const CPoint  NULL_POINT(0, 0);
 
 const int HILITEBOXSIZE = GraphicsMisc::ScaleByDPIFactor(3);
 const int TOOLTIPOFFSET = GraphicsMisc::ScaleByDPIFactor(20);
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define RAD2DEG(d) ((d) * 180 / 3.141592654f)
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -234,18 +240,93 @@ CString CHMXChartEx::GetTooltip(int nHit) const
 	return EMPTY_STR;
 }
 
-int CHMXChartEx::HitTest(const CPoint& ptClient) const
+int CHMXChartEx::HitTest(const CPoint& ptClient, int nDataset) const
 {
 	if (!m_rectData.Width())
 		return -1;
 
-	if (!m_rectData.PtInRect(ptClient))
-		return -1;
+	HMX_DATASET_STYLE nStyle;
+	VERIFY(GetDatasetStyle(nDataset, nStyle));
 
-	int nNumData = m_datasets[0].GetDatasetSize();
-	int nXOffset = (ptClient.x - m_rectData.left);
+	switch (nStyle)
+	{
+	case HMX_DATASET_STYLE_DONUT:
+	case HMX_DATASET_STYLE_DONUTLINE:
+	case HMX_DATASET_STYLE_PIE:
+	case HMX_DATASET_STYLE_PIELINE:
+		{
+			CArray<PIESEGMENT, PIESEGMENT&> aSegments;
+			int nNumSeg = CalcPieSegments(m_datasets[nDataset], aSegments);
 
-	return ((nXOffset * nNumData) / m_rectData.Width());
+			if (nNumSeg == 0)
+				return false;
+			
+			CRect rPie, rDonut;
+			VERIFY(CalcPieRects(rPie, rDonut) > 0);
+
+			if (!rPie.PtInRect(ptClient))
+				return -1;
+
+			// Calculate the distance from the pie centre to the cursor
+			CPoint ptDiff = (ptClient - rPie.CenterPoint());
+			double dist = sqrt((double)(ptDiff.x * ptDiff.x) + (ptDiff.y * ptDiff.y));
+
+			if (dist > (rPie.Width() / 2))
+				return -1;
+
+			if (nStyle == HMX_DATASET_STYLE_DONUT || nStyle == HMX_DATASET_STYLE_DONUTLINE)
+			{
+				if (dist < (rPie.Width() / 4))
+					return -1;
+			}
+
+			// Determine which segment the cursor falls in
+			float fAngle = NormaliseAngle(RAD2DEG(atan2f((float)ptDiff.y, (float)ptDiff.x)));
+
+			for (int nSeg = 0; nSeg < nNumSeg; nSeg++)
+			{
+				const PIESEGMENT& seg = aSegments[nSeg];
+				
+				if (seg.fSweepDegrees > 0.0f)
+				{
+					float fFrom = seg.fStartDegrees;
+					float fTo = NormaliseAngle(seg.fStartDegrees + seg.fSweepDegrees);
+
+					if (fTo < fFrom) // Segment straddles the 0-360 mark
+					{
+						if (((fAngle >= fFrom) && (fAngle < 360.f)) ||
+							 ((fAngle >= 0.0f) && (fAngle < fTo)))
+						{
+							return nSeg;
+						}
+					}
+					else
+					{
+						if ((fAngle >= fFrom) && (fAngle < fTo))
+							return nSeg;
+					}
+				}
+			}
+			
+			ASSERT(0);
+		}
+		break;
+
+	default:
+		{
+			if (!m_rectData.PtInRect(ptClient))
+				return -1;
+
+			int nNumData = m_datasets[nDataset].GetDatasetSize();
+			int nXOffset = (ptClient.x - m_rectData.left);
+
+			return ((nXOffset * nNumData) / m_rectData.Width());
+		}
+		break;
+	}
+
+	ASSERT(0);
+	return -1;
 }
 
 void CHMXChartEx::OnMouseMove(UINT nFlags, CPoint point)

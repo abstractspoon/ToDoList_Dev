@@ -65,12 +65,27 @@ CGdiPlusGraphics::~CGdiPlusGraphics()
 
 //////////////////////////////////////////////////////////////////////
 
+CGdiPlusPen::CGdiPlusPen() : m_pen(NULL)
+{
+}
+
 CGdiPlusPen::CGdiPlusPen(COLORREF color, int nWidth, gdix_PenStyle nStyle) : m_pen(NULL)
 {
-	VERIFY(CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), (float)nWidth, &m_pen));
+	Create(color, nWidth, nStyle);
+}
+
+BOOL CGdiPlusPen::Create(COLORREF color, int nWidth, gdix_PenStyle nStyle)
+{
+	if (!CGdiPlus::CreatePen(CGdiPlus::MakeARGB(color), (float)nWidth, &m_pen))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	if (nStyle != gdix_PenStyleSolid)
 		VERIFY(SetStyle(nStyle));
+
+	return TRUE;
 }
 
 BOOL CGdiPlusPen::SetStyle(gdix_PenStyle nStyle)
@@ -80,19 +95,34 @@ BOOL CGdiPlusPen::SetStyle(gdix_PenStyle nStyle)
 
 CGdiPlusPen::~CGdiPlusPen()
 {
-	VERIFY(CGdiPlus::DeletePen(m_pen));
+	VERIFY(!m_pen || CGdiPlus::DeletePen(m_pen));
 }
 
 //////////////////////////////////////////////////////////////////////
 
+CGdiPlusBrush::CGdiPlusBrush() : m_brush(NULL)
+{
+}
+
 CGdiPlusBrush::CGdiPlusBrush(COLORREF color, BYTE alpha) : m_brush(NULL)
 {
-	VERIFY(CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color, alpha), &m_brush));
+	Create(color, alpha);
+}
+
+BOOL CGdiPlusBrush::Create(COLORREF color, BYTE alpha)
+{
+	if (!CGdiPlus::CreateBrush(CGdiPlus::MakeARGB(color, alpha), &m_brush))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 CGdiPlusBrush::~CGdiPlusBrush()
 {
-	VERIFY(CGdiPlus::DeleteBrush(m_brush));
+	VERIFY(!m_brush || CGdiPlus::DeleteBrush(m_brush));
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -252,6 +282,7 @@ typedef gdix_Status (STDAPICALLTYPE *PFNADDPATHRECTANGLE)(gdix_Path*,gdix_Real,g
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINES)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPIE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
+typedef gdix_Status (STDAPICALLTYPE *PFNDRAWARC)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWLINES)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWPOLYGON)(gdix_Graphics*,gdix_Pen*,const gdix_PointF*,INT);
 typedef gdix_Status (STDAPICALLTYPE *PFNDRAWELLIPSE)(gdix_Graphics*,gdix_Pen*,gdix_Real,gdix_Real,gdix_Real,gdix_Real);
@@ -579,6 +610,26 @@ BOOL CGdiPlus::DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF
 	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
 }
 
+BOOL CGdiPlus::DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees, gdix_Brush* brush)
+{
+	if (brush && !FillPie(graphics, brush, rect, startDegrees, sweepDegrees))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	GETPROCADDRESS(PFNDRAWPIE, "GdipDrawPie");
+	
+	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h, startDegrees, sweepDegrees) == gdix_Ok);
+}
+
+BOOL CGdiPlus::DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_RectF* rect, float startDegrees, float sweepDegrees)
+{
+	GETPROCADDRESS(PFNDRAWARC, "GdipDrawArc");
+
+	return (pFN(graphics, pen, rect->x, rect->y, rect->w, rect->h, startDegrees, sweepDegrees) == gdix_Ok);
+}
+
 BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_PointF* points, int count)
 {
 	GETPROCADDRESS(PFNFILLPOLYGON2, "GdipFillPolygon2");
@@ -598,6 +649,13 @@ BOOL CGdiPlus::FillRect(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_R
 	GETPROCADDRESS(PFNFILLRECTANGLE, "GdipFillRectangle");
 	
 	return (pFN(graphics, brush, rect->x, rect->y, rect->w, rect->h) == gdix_Ok);
+}
+
+BOOL CGdiPlus::FillPie(gdix_Graphics* graphics, gdix_Brush* brush, const gdix_RectF* rect, float startDegrees, float sweepDegrees)
+{
+	GETPROCADDRESS(PFNFILLPIE, "GdipFillPie");
+	
+	return (pFN(graphics, brush, rect->x, rect->y, rect->w, rect->h, startDegrees, sweepDegrees) == gdix_Ok);
 }
 
 // Win32 support -----------------------------------------------------------------------------------------
@@ -633,6 +691,16 @@ BOOL CGdiPlus::DrawRect(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect
 	return DrawRect(graphics, pen, CGdiPlusRectF(rect), brush);
 }
 
+BOOL CGdiPlus::DrawPie(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees, gdix_Brush* brush)
+{
+	return DrawPie(graphics, pen, CGdiPlusRectF(rect), startDegrees, sweepDegrees, brush);
+}
+
+BOOL CGdiPlus::DrawArc(gdix_Graphics* graphics, gdix_Pen* pen, const RECT& rect, float startDegrees, float sweepDegrees)
+{
+	return DrawArc(graphics, pen, CGdiPlusRectF(rect), startDegrees, sweepDegrees);
+}
+
 BOOL CGdiPlus::FillPolygon(gdix_Graphics* graphics, gdix_Brush* brush, const POINT points[], int count)
 {
 	CArray<gdix_PointF, gdix_PointF&> pointFs;
@@ -649,6 +717,11 @@ BOOL CGdiPlus::FillEllipse(gdix_Graphics* graphics, gdix_Brush* brush, const REC
 BOOL CGdiPlus::FillRect(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect)
 {
 	return FillRect(graphics, brush, CGdiPlusRectF(rect));
+}
+
+BOOL CGdiPlus::FillPie(gdix_Graphics* graphics, gdix_Brush* brush, const RECT& rect, float startDegrees, float sweepDegrees)
+{
+	return FillPie(graphics, brush, CGdiPlusRectF(rect), startDegrees, sweepDegrees);
 }
 
 void CGdiPlus::GetPointFs(const POINT points[], int count, CArray<gdix_PointF, gdix_PointF&>& pointFs)

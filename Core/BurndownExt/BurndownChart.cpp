@@ -172,10 +172,29 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 		CString sGraphKey = Misc::MakeKey(_T("GraphColors%d"), nGraph);
 		CString sColors = pPrefs->GetProfileString(szKey, sGraphKey);
 
-		if (!sColors.IsEmpty()) // first time will fail
+		if (!sColors.IsEmpty()) // first time will fail 
 		{
 			CColorArray aColors;
 			Misc::Split(sColors, aColors, '|');
+
+			// If the number of colours has changed from the default then fix things up
+			int nDefNumColors = pGraph->GetColors().GetSize();
+			int nNewNumColors = aColors.GetSize();
+
+			if (nNewNumColors < nDefNumColors)
+			{
+				// Append existing colours
+				for (int nColor = nNewNumColors; nColor < nDefNumColors; nColor++)
+					aColors.Add(pGraph->GetColors()[nColor]);
+			}
+			else if (nNewNumColors > nDefNumColors)
+			{
+				// Remove new colours
+				int nColor = nDefNumColors;
+
+				while (nColor-- > nNewNumColors)
+					aColors.RemoveAt(nColor);
+			}
 
 			pGraph->SetColors(aColors);
 		}
@@ -264,13 +283,30 @@ BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
 	if (!pGraph->IsValidOption(nOption))
 		return FALSE;
 
-	if (!pGraph->HasOption(nOption))
+	if (!pGraph->HasOption(nOption) && pGraph->SetOption(nOption, m_calculator, m_datasets))
 	{
-		if (pGraph->SetOption(nOption, m_calculator, m_datasets))
-			Invalidate();
+		RefreshRenderFlags(FALSE);
+		Invalidate();
 	}
 
 	return TRUE;
+}
+
+BOOL CBurndownChart::HighlightDataPoint(int nIndex)
+{
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(m_nActiveGraph, FALSE);
+
+	if (pGraph->HasOption(BGO_FREQUENCY_PIE) || 
+		pGraph->HasOption(BGO_FREQUENCY_DONUT))
+	{ 
+		// we handle it ourselves for now
+		// TODO
+
+		return FALSE;
+	}
+
+	return CHMXChartEx::HighlightDataPoint(nIndex);
 }
 
 BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
@@ -334,6 +370,10 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 	CHoldRedraw hr(*this);
 	
 	ClearData();
+	RefreshRenderFlags(FALSE);
+
+	// Which one gets drawn is controlled by the render flags
+	SetXText(pGraph->GetTitle());
 	SetYText(pGraph->GetTitle());
 
 	{
@@ -344,10 +384,36 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 
 	if (!m_data.IsEmpty())
 		RebuildXScale();
-
+	
 	CalcDatas();
 
 	return TRUE;
+}
+
+void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
+{
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH(m_nActiveGraph);
+
+	DWORD dwFlags = ModifyRenderFlags(HMX_RENDER_TITLE, 0, FALSE); // Never draw title
+
+	switch (pGraph->GetOption())
+	{
+	case BGO_FREQUENCY_PIE:
+	case BGO_FREQUENCY_DONUT:
+		// Remove then add
+		dwFlags &= ~ (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
+		dwFlags |= HMX_RENDER_XAXISTITLE;
+		break;
+
+	default:
+		// Add then remove
+		dwFlags |= (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
+		dwFlags &= ~HMX_RENDER_XAXISTITLE;
+		break;
+	}
+
+	SetRenderFlags(dwFlags, bRedraw);
 }
 
 void CBurndownChart::PreSubclassWindow()
@@ -411,3 +477,18 @@ void CBurndownChart::DoPaint(CDC& dc, BOOL bPaintBkgnd)
 		}
 	}
 }
+
+bool CBurndownChart::DrawDataset(CDC &dc, int nDatasetIndex, BYTE alpha)
+{
+	if (!IsValidDatasetIndex(nDatasetIndex))
+	{
+		ASSERT(0);
+		return false;
+	}
+
+	CGraphBase* pGraph = NULL;
+	GET_GRAPH_RET(m_nActiveGraph, false);
+
+	return CHMXChartEx::DrawDataset(dc, m_datasets[nDatasetIndex], pGraph->GetColors(), alpha);
+}
+
