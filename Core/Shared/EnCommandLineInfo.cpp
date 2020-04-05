@@ -18,18 +18,82 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CEnCommandLineInfo::CEnCommandLineInfo(const CString& sFileExts)
+CEnCommandLineInfo::CEnCommandLineInfo()
 {
 	m_nLastParameter = -1;	
-	
+}
+
+CEnCommandLineInfo::CEnCommandLineInfo(const CString& sFileExts)
+{
+	m_nLastParameter = -1;
+
 	if (!sFileExts.IsEmpty())
 		Misc::Split(sFileExts, m_aFileExt, ';');
+}
+
+CEnCommandLineInfo::CEnCommandLineInfo(const CEnCommandLineInfo& info)
+{
+	*this = info;
 }
 
 CEnCommandLineInfo::~CEnCommandLineInfo()
 {
 
 }
+
+CEnCommandLineInfo& CEnCommandLineInfo::operator=(const CEnCommandLineInfo& info)
+{
+	// base class
+	m_bShowSplash = info.m_bShowSplash;
+	m_bRunEmbedded = info.m_bRunEmbedded;
+	m_bRunAutomated = info.m_bRunAutomated;
+	m_nShellCommand = info.m_nShellCommand;
+
+	m_strFileName = info.m_strFileName;
+	m_strPrinterName = info.m_strPrinterName;
+	m_strDriverName = info.m_strDriverName;
+	m_strPortName = info.m_strPortName;
+
+#if _MSC_VER >= 1400
+	m_bRegisterPerUser = info.m_bRegisterPerUser;
+	m_strRestartIdentifier = info.m_strRestartIdentifier;
+#endif
+
+	// Our values
+	Misc::Copy(info.m_mapCommandLine, m_mapCommandLine);
+	m_aFileExt.Copy(info.m_aFileExt);
+
+	m_sCurFlag = info.m_sCurFlag;
+	m_nLastParameter = info.m_nLastParameter;
+
+	return *this;
+}
+
+void CEnCommandLineInfo::Reset()
+{
+	// base class
+	m_bShowSplash = FALSE;
+	m_bRunEmbedded = FALSE;
+	m_bRunAutomated = FALSE;
+	m_nShellCommand = CCommandLineInfo::FileNew;
+
+	m_strFileName.Empty();
+	m_strPrinterName.Empty();
+	m_strDriverName.Empty();
+	m_strPortName.Empty();
+
+#if _MSC_VER >= 1400
+	m_bRegisterPerUser = FALSE;
+	m_strRestartIdentifier.Empty();
+#endif
+
+	// Our values
+	m_mapCommandLine.RemoveAll();
+	m_aFileExt.RemoveAll();
+	m_sCurFlag.Empty();
+	m_nLastParameter = -1;
+}
+
 
 void CEnCommandLineInfo::ParseParam(LPCTSTR lpszParam, BOOL bFlag, BOOL /*bLast*/)
 {
@@ -170,11 +234,19 @@ CString CEnCommandLineInfo::GetOption(LPCTSTR szFlag) const
 	return sOption;
 }
 
+BOOL CEnCommandLineInfo::HasOption(TCHAR cFlag) const
+{
+	TCHAR szFlag[2] = { cFlag, 0};
+	CString sUnused;
+	
+	return GetOption(szFlag, sUnused);
+}
+
 BOOL CEnCommandLineInfo::HasOption(LPCTSTR szFlag) const
 {
-	CString sOption;
-	
-	return GetOption(szFlag, sOption);
+	CString sUnused;
+
+	return GetOption(szFlag, sUnused);
 }
 
 void CEnCommandLineInfo::DeleteOption(LPCTSTR szFlag)
@@ -210,30 +282,6 @@ int CEnCommandLineInfo::SetCommandLine(LPCTSTR szCmdLine, int nFirstArg)
 	}
 
 	return m_mapCommandLine.GetCount();
-}
-
-void CEnCommandLineInfo::Reset()
-{
-	m_mapCommandLine.RemoveAll();
-	m_aFileExt.RemoveAll();
-	m_sCurFlag.Empty();
-	m_nLastParameter = -1;
-
-	// base class
-	m_bShowSplash = FALSE;
-	m_bRunEmbedded = FALSE;
-	m_bRunAutomated = FALSE;
-	m_nShellCommand = CCommandLineInfo::FileNew;
-
-	m_strFileName.Empty();
-	m_strPrinterName.Empty();
-	m_strDriverName.Empty();
-	m_strPortName.Empty();
-
-#if _MSC_VER >= 1400
-	m_bRegisterPerUser = FALSE;
-	m_strRestartIdentifier.Empty();
-#endif
 }
 
 CString CEnCommandLineInfo::GetCommandLine(TCHAR cDelim) const

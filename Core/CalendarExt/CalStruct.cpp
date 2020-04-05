@@ -30,7 +30,8 @@ TASKCALITEM::TASKCALITEM()
 	dwTaskID(0),
 	bTopLevel(FALSE),
 	bLocked(FALSE),
-	bIsParent(FALSE)
+	bIsParent(FALSE),
+	bRecurring(FALSE)
 {
 
 }
@@ -42,7 +43,8 @@ TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwC
 	dwTaskID(0),
 	bTopLevel(FALSE),
 	bLocked(FALSE),
-	bIsParent(FALSE)
+	bIsParent(FALSE),
+	bRecurring(FALSE)
 {
 	UpdateTask(pTasks, hTask, dwCalcDates);
 
@@ -72,6 +74,7 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	dtEndCalc = tci.dtEndCalc;
 	bHasIcon = tci.bHasIcon;
 	bIsParent = tci.bIsParent;
+	bRecurring = tci.bRecurring;
 	
 	return (*this);
 }
@@ -90,7 +93,8 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 		(dtStartCalc == tci.dtStartCalc) &&
 		(dtEndCalc == tci.dtEndCalc) &&
 		(bHasIcon == tci.bHasIcon) &&
-		(bIsParent == tci.bIsParent));
+		(bIsParent == tci.bIsParent) &&
+		(bRecurring == tci.bRecurring));
 }
 
 void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates)
@@ -236,6 +240,9 @@ BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD
 
 	if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
 		bHasDepends = !Misc::IsEmpty(pTasks->GetTaskDependency(hTask, 0));
+
+	if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
+		bRecurring = pTasks->IsTaskRecurring(hTask);
 
 	UpdateTaskDates(pTasks, hTask, dwCalcDates);
 

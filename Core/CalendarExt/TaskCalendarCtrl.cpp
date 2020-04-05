@@ -398,8 +398,18 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		if (HasTask(dwTaskID)) 
 		{
 			TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+
 			bChange = pTCI->UpdateTask(pTasks, hTask, m_dwOptions);
 
+			// Update our list of recurring tasks
+			if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
+			{
+				if (pTCI->bRecurring)
+					m_mapRecurringTaskIDs.Add(dwTaskID);
+				else
+					m_mapRecurringTaskIDs.Remove(dwTaskID);
+			}
+			
 			// subtasks
 			HTASKITEM hSubtask = pTasks->GetFirstTask(hTask);
 
@@ -458,13 +468,17 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	if (pTasks->IsTaskReference(hTask))
 		return;
 
-	// sanity check
+	// Only interested in new tasks
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
 
 	if (!HasTask(dwTaskID))
 	{
 		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, m_dwOptions);
 		m_mapData[dwTaskID] = pTCI;
+
+		// Keep track of recurring tasks
+		if (pTCI->bRecurring)
+			m_mapRecurringTaskIDs.Add(dwTaskID);
 	}
 	
 	// process children
@@ -531,6 +545,7 @@ void CTaskCalendarCtrl::DeleteData()
 	}
 
 	m_mapData.RemoveAll();
+	m_mapRecurringTaskIDs.RemoveAll();
 }
 
 void CTaskCalendarCtrl::DrawHeader(CDC* pDC)

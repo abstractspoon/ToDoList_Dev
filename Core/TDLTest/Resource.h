@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// Microsoft Developer Studio generated include file.
 // Used by TDLTest.rc
 //
 #define IDR_MAINFRAME_STD               128
@@ -7,6 +7,11 @@
 #define IDI_DEPENDS_LINK                289
 #define IDI_NULL                        290
 #define IDI_ADD_LOGGED_TIME             308
+#define IDS_ONCEONLY                    58018
+#define IDS_DAILY                       58019
+#define IDS_WEEKLY                      58020
+#define IDS_MONTHLY                     58021
+#define IDS_YEARLY                      58022
 
 // Next default values for new objects
 // 

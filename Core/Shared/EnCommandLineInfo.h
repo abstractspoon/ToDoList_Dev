@@ -12,16 +12,20 @@
 class CEnCommandLineInfo : public CCommandLineInfo  
 {
 public:
-	CEnCommandLineInfo(const CString& szFileExts = _T(""));
+	CEnCommandLineInfo();
+	CEnCommandLineInfo(const CString& szFileExts);
+	CEnCommandLineInfo(const CEnCommandLineInfo& info);
 	virtual ~CEnCommandLineInfo();
 
-	void Reset();
+	CEnCommandLineInfo& operator=(const CEnCommandLineInfo& info);
 
+	BOOL HasOption(TCHAR cFlag) const;
 	BOOL HasOption(LPCTSTR szFlag) const; 
 	BOOL GetOptions(LPCTSTR szFlag, CStringArray& aParams) const; 
 	BOOL GetOption(LPCTSTR szFlag, CString& sParam) const; 
 	CString GetOption(LPCTSTR szFlag) const; 
 
+	void Reset();
 	void DeleteOption(LPCTSTR szFlag);
 
 	void SetOption(LPCTSTR szFlag); 

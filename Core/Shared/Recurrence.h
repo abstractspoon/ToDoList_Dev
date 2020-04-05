@@ -9,6 +9,12 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include <afxtempl.h>
+
+/////////////////////////////////////////////////////////////////////////////
+
+class COleDateTimeRange;
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum RECURRENCE_REGULARITY
@@ -61,6 +67,7 @@ struct CRecurrence
 	//													HIWORD = DOW (1-7)		
 
 	CRecurrence();
+	CRecurrence(const CRecurrence& tr);
 
 	BOOL operator==(const CRecurrence& tr) const;
 	BOOL operator!=(const CRecurrence& tr) const;
@@ -71,6 +78,9 @@ struct CRecurrence
 	BOOL CanRecur() const;
 	BOOL GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtNext);
 	BOOL FitDayToScheme(COleDateTime& dtRecur) const;
+	
+	BOOL CalcNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtNext) const;
+	int CalcNextOccurences(const COleDateTime& dtFrom, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const;
 
 	BOOL SetRegularity(RECURRENCE_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 	RECURRENCE_REGULARITY GetRegularity(DWORD& dwSpecific1, DWORD& dwSpecific2) const;

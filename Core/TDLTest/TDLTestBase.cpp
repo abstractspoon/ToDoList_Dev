@@ -24,7 +24,7 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTestUtils::CTestUtils()
+CTestUtils::CTestUtils(const CEnCommandLineInfo& info) : m_cmdInfo(info)
 {
 }
 
@@ -55,6 +55,11 @@ BOOL CTestUtils::Initialise(const CString& sOutputDir, const CString& sControlDi
 	m_sControlDir = sControlDir;
 	
 	return TRUE;
+}
+
+BOOL CTestUtils::HasCommandlineFlag(TCHAR cFlag) const
+{
+	return m_cmdInfo.HasOption(cFlag);
 }
 
 CString CTestUtils::GetOutputFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const
@@ -275,6 +280,13 @@ public:
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
+
+static CEnCommandLineInfo cmdInfoEmpty;
+
+// private constructor for self test
+CTDLTestBase::CTDLTestBase() : m_utils(cmdInfoEmpty)
+{
+}
 
 CTDLTestBase::CTDLTestBase(const CTestUtils& utils) : m_utils(utils) 
 {

@@ -651,6 +651,42 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 	return FALSE;
 }
 
+BOOL TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const
+{
+	ASSERT(!IsDone());
+
+	if (!CanRecur())
+		return FALSE;
+
+	if (!HasStart() || !HasDue())
+		return FALSE;
+
+	switch (trRecurrence.nRecalcFrom)
+	{
+	case TDIRO_DUEDATE:
+	case TDIRO_DONEDATE:
+		if (trRecurrence.CalcNextOccurences(dateDue, dtRange, aDates))
+		{
+			bDue = TRUE;
+			return TRUE;
+		}
+		break;
+
+	case TDIRO_STARTDATE:
+		if (trRecurrence.CalcNextOccurences(dateDue, dtRange, aDates))
+		{
+			bDue = FALSE;
+			return TRUE;
+		}
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	return FALSE;
+}
+
 BOOL TODOITEM::IsRecentlyModified() const
 {
 	return IsRecentlyModified(dateLastMod);

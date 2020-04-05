@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\shared\EnCommandlineInfo.h"
+
 //////////////////////////////////////////////////////////////////////
 
 class CTestUtils
@@ -16,10 +18,11 @@ class CTestUtils
 	friend class CTDLTestSelfTest;
 
 public:
-	CTestUtils();
+	CTestUtils(const CEnCommandLineInfo& info);
 	CTestUtils(const CTestUtils& utils);
 	
 	BOOL Initialise(const CString& sOutputDir, const CString& sControlDir);
+	BOOL HasCommandlineFlag(TCHAR cFlag) const;
 	
 	CString GetOutputFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const;
 	CString GetControlFilePath(const CString& sSubDir, const CString& sFilename, const CString& sExt) const;
@@ -39,6 +42,8 @@ public:
 protected:
 	CString m_sOutputDir;
 	CString m_sControlDir;
+
+	CEnCommandLineInfo m_cmdInfo;
 
 	static CString GetFilePath(const CString& sRoot, const CString& sSubDir, 
 								const CString& sFilename, const CString& sExt);
@@ -196,7 +201,7 @@ private:
 	CString m_sCurrentTest;
 
 private:
-	CTDLTestBase() {} // for self test
+	CTDLTestBase();
 
 	enum TEST_OP
 	{

@@ -9,6 +9,7 @@
 #include "..\todolist\tdcrecurrence.h"
 
 #include "..\shared\datehelper.h"
+#include "..\shared\misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -35,6 +36,7 @@ TESTRESULT CTDCRECURRENCETest::Run()
 	ClearTotals();
 
 	TestSetRegularity();
+	TestCalcNextOccurrencesPerformance();
 
 	return GetTotals();
 }
@@ -169,4 +171,107 @@ void CTDCRECURRENCETest::TestSetRegularity()
 	//  ---------------------------------------
 
 	EndTest();
+}
+
+void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
+{
+	if (!m_utils.HasCommandlineFlag('p'))
+	{
+		_tprintf(_T("Add '-p' to run CTDCRECURRENCETest::CalcNextOccurrencesPerformance\n"));
+		return;
+	}
+
+	BeginTest(_T("CTDCRECURRENCETest::CalcNextOccurrencesPerformance"));
+
+	const TDCRECURRENCE RECURRENCES[] = 
+	{
+		//	TDIR_DAY_EVERY_NDAYS 
+		TDCRECURRENCE(TDIR_DAY_EVERY_NDAYS, 2, 0),
+
+		//	TDIR_DAY_EVERY_WEEKDAY 
+		TDCRECURRENCE(TDIR_DAY_EVERY_WEEKDAY, 0, 0),
+
+		//	TDIR_DAY_EVERY_NWEEKDAYS 
+		TDCRECURRENCE(TDIR_DAY_EVERY_NWEEKDAYS, 2, 0),
+
+		//	TDIR_WEEK_SPECIFIC_DOWS_NWEEKS 
+		TDCRECURRENCE(TDIR_WEEK_SPECIFIC_DOWS_NWEEKS, 2, DHW_EVERYDAY),
+
+		//	TDIR_WEEK_EVERY_NWEEKS 
+		TDCRECURRENCE(TDIR_WEEK_EVERY_NWEEKS, 1, 0),
+
+		//	TDIR_MONTH_EVERY_NMONTHS 
+		TDCRECURRENCE(TDIR_MONTH_EVERY_NMONTHS, 1, 0),
+
+		//	TDIR_MONTH_SPECIFIC_DAY_NMONTHS 
+		TDCRECURRENCE(TDIR_MONTH_SPECIFIC_DAY_NMONTHS, 1, 1),
+		TDCRECURRENCE(TDIR_MONTH_SPECIFIC_DAY_NMONTHS, 1, 31),
+
+		//	TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS 
+		TDCRECURRENCE(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, 0, 1), // 1st weekday 
+		TDCRECURRENCE(TDIR_MONTH_FIRSTLASTWEEKDAY_NMONTHS, 1, 1), // Last weekday
+
+		//	TDIR_MONTH_SPECIFIC_DOW_NMONTHS 
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 1), // 1st Sunday
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(5, 7), 1), // Last Saturday
+
+		//	TDIR_YEAR_SPECIFIC_DAY_MONTH 
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 1),
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 11),
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DAY_MONTH, 5, 31),
+
+		//	TDIR_YEAR_EVERY_NYEARS 
+		TDCRECURRENCE(TDIR_YEAR_EVERY_NYEARS, 1, 0),
+
+		//  TDIR_YEAR_SPECIFIC_DOW_MONTH 
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(1, 1), 5), // 1st Sunday of May
+		TDCRECURRENCE(TDIR_YEAR_SPECIFIC_DOW_MONTH, MAKELONG(5, 7), 5), // Last Saturday of May
+	};
+	const int NUM_RECURRENCE = (sizeof(RECURRENCES) / sizeof(RECURRENCES[0]));
+
+	COleDateTime date(CDateHelper::GetDate(DHD_TODAY));
+	CArray<double, double&> aRecurrences;
+
+#ifdef _DEBUG
+	COleDateTimeRange range(DHD_ENDTHISYEAR, 1, DHU_YEARS);
+#else
+	COleDateTimeRange range(DHD_ENDNEXTYEAR, 4, DHU_YEARS);
+#endif
+
+	for (int nRecur = 0; nRecur < NUM_RECURRENCE; nRecur++)
+	{
+		// Run test
+		DWORD dwTickStart = GetTickCount();
+		const TDCRECURRENCE& tr = RECURRENCES[nRecur];
+
+		int nNumRecur = tr.CalcNextOccurences(date, range, aRecurrences);
+
+		DWORD dwDuration = (GetTickCount() - dwTickStart);
+
+		// Output results
+		if (nNumRecur == 0)
+		{
+			_tprintf(_T("Recurrence (%s) failed to produce any recurrences for the range: %s\n"), FormatRecurrenceRegularity(tr), range.Format());
+		}
+		else
+		{
+			_tprintf(_T("Recurrence (%s) took %ld ms to calculate %d recurrences for the range: %s\n"), FormatRecurrenceRegularity(tr), dwDuration, nNumRecur, range.Format());
+		}
+	}
+
+	EndTest();
+}
+
+CString CTDCRECURRENCETest::FormatRecurrenceRegularity(const TDCRECURRENCE& tr)
+{
+	DWORD dwSpecific1 = 0, dwSpecific2 = 0;
+	TDC_REGULARITY nRegularity = tr.GetRegularity(dwSpecific1, dwSpecific2);
+
+	CString sRegularity = TDCRECURRENCE::GetRegularityText(nRegularity, FALSE);
+
+	if (dwSpecific1 > 0xffff)
+		return Misc::Format(_T("%s, (%ld, %ld), %ld"), sRegularity, LOWORD(dwSpecific1), HIWORD(dwSpecific1), dwSpecific2);
+
+	// else
+	return Misc::Format(_T("%s, %ld, %ld"), sRegularity, dwSpecific1, dwSpecific2);
 }

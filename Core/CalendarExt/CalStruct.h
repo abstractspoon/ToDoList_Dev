@@ -62,7 +62,7 @@ public:
 public:
 	COLORREF color;
 	BOOL bGoodAsDone, bTopLevel;
-	BOOL bLocked, bHasDepends;
+	BOOL bLocked, bHasDepends, bRecurring;
 
 protected:
 	COleDateTime dtCreation, dtStart, dtDue, dtDone;

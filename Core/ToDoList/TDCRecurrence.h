@@ -44,6 +44,7 @@ struct TDCRECURRENCE : public CRecurrence
 	//													HIWORD = DOW (1-7)		
 
 	TDCRECURRENCE();
+	TDCRECURRENCE(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 
 	BOOL operator==(const TDCRECURRENCE& tr) const;
 	BOOL operator!=(const TDCRECURRENCE& tr) const;

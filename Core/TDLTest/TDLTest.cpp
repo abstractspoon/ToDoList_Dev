@@ -13,6 +13,8 @@
 #include "DateHelperTest.h"
 #include "TimeHelperTest.h"
 
+#include "..\shared\EnCommandLineInfo.h"
+
 using namespace std; // for console output
 
 #ifdef _DEBUG
@@ -45,13 +47,13 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 //	CTDLTestBase::SelfTest();
 
-	CCommandLineInfo rCmdInfo;
-	theApp.ParseCommandLine(rCmdInfo);
+	CEnCommandLineInfo cmdInfo;
+	theApp.ParseCommandLine(cmdInfo);
 
-	CString sOutputDir;// = rCmdInfo...;
-	CString sControlDir;// = rCmdInfo...;
+	CString sOutputDir;// = cmdInfo...;
+	CString sControlDir;// = cmdInfo...;
 
-	CTestUtils utils;
+	CTestUtils utils(cmdInfo);
 
 // 	if (!utils.Initialise(sOutputDir, sControlDir))
 // 	{

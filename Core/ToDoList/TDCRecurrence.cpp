@@ -31,6 +31,15 @@ TDCRECURRENCE::TDCRECURRENCE()
 {
 }
 
+TDCRECURRENCE::TDCRECURRENCE(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2)
+	: 
+	nRecalcFrom(TDIRO_DUEDATE), 
+	nReuse(TDIRO_REUSE),
+	bPreserveComments(TRUE)
+{
+	VERIFY(SetRegularity(nRegularity, dwSpecific1, dwSpecific2));
+}
+
 BOOL TDCRECURRENCE::operator==(const TDCRECURRENCE& tr) const
 {
 	return Matches(tr, TRUE);

@@ -71,6 +71,21 @@ IDI_TIME_TRACK          ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 IDI_NULL                ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 IDI_ADD_LOGGED_TIME     ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
 IDI_DEPENDS_LINK        ICON    DISCARDABLE     "..\\ToDoList\\res\\app_std.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ONCEONLY            "Once"
+    IDS_DAILY               "Daily"
+    IDS_WEEKLY              "Weekly"
+    IDS_MONTHLY             "Monthly"
+    IDS_YEARLY              "Yearly"
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 

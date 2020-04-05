@@ -273,30 +273,54 @@ struct IUIAPPCOMMANDDATA
 
 //////////////////////////////////////////////////////////////////////
 
+struct IUINEXTTASKOCCURRENCES
+{
+	// Range within which to retrieve occurrences
+	__int64 tRangeStart;
+	__int64 tRangeEnd;
+
+	// Ocurrences found within range
+	struct IUITASKOCCURRENCE
+	{
+		__int64 tStart;
+		__int64 tEnd;
+	};
+
+	static const int IUI_MAXOCCURRENCES = 256;
+
+	int nNumOccurrences;
+	IUITASKOCCURRENCE occurrences[IUI_MAXOCCURRENCES];
+};
+
+//////////////////////////////////////////////////////////////////////
+
 // if   wParam == 0,		lParam = Task ID
 // else wParam = LPDWORD,	lParam = ID count
-const UINT WM_IUI_SELECTTASK			= ::RegisterWindowMessageW(L"WM_IUI_SELECTTASK"); 
+const UINT WM_IUI_SELECTTASK				= ::RegisterWindowMessageW(L"WM_IUI_SELECTTASK"); 
 
 // wParam = Number of Mods, lParam = &IUITASKMOD[0]
-const UINT WM_IUI_MODIFYSELECTEDTASK	= ::RegisterWindowMessageW(L"WM_IUI_MODIFYSELECTEDTASK"); 
+const UINT WM_IUI_MODIFYSELECTEDTASK		= ::RegisterWindowMessageW(L"WM_IUI_MODIFYSELECTEDTASK"); 
 
 // wParam = 0, lParam = IUITASKMOVE*
-const UINT WM_IUI_MOVESELECTEDTASK		= ::RegisterWindowMessageW(L"WM_IUI_MOVESELECTEDTASK"); 
+const UINT WM_IUI_MOVESELECTEDTASK			= ::RegisterWindowMessageW(L"WM_IUI_MOVESELECTEDTASK"); 
 
 // wParam = lParam = 0
-const UINT WM_IUI_EDITSELECTEDTASKTITLE	= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKTITLE"); 
+const UINT WM_IUI_EDITSELECTEDTASKTITLE		= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKTITLE"); 
 
 // wParam = lParam = 0
-const UINT WM_IUI_EDITSELECTEDTASKICON	= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKICON"); 
+const UINT WM_IUI_EDITSELECTEDTASKICON		= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKICON"); 
 
 // wParam = sort ascending, lParam = Column ID
-const UINT WM_IUI_SORTCOLUMNCHANGE		= ::RegisterWindowMessageW(L"WM_IUI_SORTCOLUMNCHANGE"); 
+const UINT WM_IUI_SORTCOLUMNCHANGE			= ::RegisterWindowMessageW(L"WM_IUI_SORTCOLUMNCHANGE"); 
 
 // wParam = 0, lParam = identifying string (LPCTSTR)
-const UINT WM_IUI_DOHELP				= ::RegisterWindowMessageW(L"WM_IUI_DOHELP"); 
+const UINT WM_IUI_DOHELP					= ::RegisterWindowMessageW(L"WM_IUI_DOHELP"); 
 
 // WPARAM = Task ID, LPARAM = int* (imageIndex), return HIMAGELIST
-const UINT WM_IUI_GETTASKICON			= ::RegisterWindowMessageW(L"WM_IUI_GETTASKICON"); 
+const UINT WM_IUI_GETTASKICON				= ::RegisterWindowMessageW(L"WM_IUI_GETTASKICON"); 
+
+// WPARAM = Task ID, LPARAM = &IUITASKNEXTOCCURRENCES
+const UINT WM_IUI_GETNEXTTASKOCCURRENCES	= ::RegisterWindowMessageW(L"WM_IUI_GETTASKNEXTOCCURRENCES"); 
 
 //////////////////////////////////////////////////////////////////////
 

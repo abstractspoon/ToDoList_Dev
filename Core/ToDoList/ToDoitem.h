@@ -128,6 +128,7 @@ public:
 	CString GetFileRef(int nFile) const;
 
 	BOOL GetNextOccurence(COleDateTime& dtNext, BOOL& bDue);
+	BOOL CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const;
 	BOOL IsRecurring() const;
 	BOOL CanRecur() const;
 	BOOL RecurrenceMatches(const TODOITEM& tdi, BOOL bIncludeRemainingOccurrences) const;
