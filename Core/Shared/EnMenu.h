@@ -40,6 +40,7 @@ public:
 
 	int FindMenuItem(UINT nCmdID) const;
 	int FindMenuItem(HMENU hSubMenu) const;
+	int FindFirstMenuItem(UINT nCmdIDStart, UINT nCmdIDEnd) const;
 
 	int GetMenuString(UINT nIDItem,	CString& sItem, UINT nFlags) const;
 	CString GetMenuString(UINT nIDItem,	UINT nFlags) const;
@@ -58,6 +59,7 @@ public:
 	BOOL DeleteSubMenu(HMENU hSubMenu, BOOL bAutoCleanUp = FALSE);
 	BOOL DeleteMenu(UINT nPosition, UINT nFlags, BOOL bAutoCleanUp = FALSE); // equivalent to base class
 	BOOL DeleteMenuContents();
+	void RemoveDuplicateSeparators(int nStartPos = 0);
 
 	BOOL SortMenuStrings(UINT nCmdIDStart, UINT nCmdIDEnd);
 	BOOL TranslateDynamicMenuItems(UINT nCmdIDStart, UINT nCmdIDEnd, LPCTSTR szFormat);
@@ -73,6 +75,8 @@ public:
 	static int FindMenuItem(HMENU hMenu, UINT nCmdID, HMENU& hParentMenu);
 	static int FindMenuItem(HMENU hMenu, HMENU hSubMenu);
 	static int FindMenuItem(HMENU hMenu, HMENU hSubMenu, HMENU& hParentMenu);
+	static int FindFirstMenuItem(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd);
+	static int FindFirstMenuItem(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd, HMENU& hParentMenu);
 
 	static HMENU GetSubMenu(HMENU hMenu, UINT nCmdID);
 	static HMENU GetParentMenu(HMENU hMenu, HMENU hSubMenu);
@@ -85,6 +89,7 @@ public:
 	static BOOL DeleteSubMenu(HMENU hMenu, HMENU hSubMenu, BOOL bAutoCleanUp);
 	static BOOL DeleteMenu(HMENU hMenu, UINT nPosition, UINT nFlags, BOOL bAutoCleanUp);
 	static BOOL DeleteMenuContents(HMENU hMenu);
+	static void RemoveDuplicateSeparators(HMENU hMenu, int nStartPos = 0);
 
 	static CString GetMenuString(HMENU hMenu, UINT nIDItem,	UINT nFlags);
 	static BOOL SetMenuString(HMENU hMenu, UINT nIDItem, const CString& sItem, UINT nFlags);

@@ -48,6 +48,7 @@ public:
 	BOOL SetItemWidth(int nPos, int nWidth, CRect& rect);
 	BOOL SetItemWidth(int nPos, int nWidth);
 	int GetItemWidth(int nPos) const;
+	void RemoveDuplicateSeparators(int nStartPos = 0);
 
 	// Attributes
 protected:

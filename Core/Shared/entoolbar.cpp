@@ -562,6 +562,21 @@ BOOL CEnToolBar::LastItemIsSeparator() const
 	return IsItemSeparator(GetToolBarCtrl().GetButtonCount() - 1);
 }
 
+void CEnToolBar::RemoveDuplicateSeparators(int nStartPos)
+{
+	int nLastPos = GetToolBarCtrl().GetButtonCount();
+	int nPos = nStartPos;
+
+	while (nPos < nLastPos)
+	{
+		if (!IsItemSeparator(nPos) || !IsItemSeparator(nPos + 1))
+			break;
+
+		GetToolBarCtrl().DeleteButton(nPos);
+		nLastPos--;
+	}
+}
+
 BOOL CEnToolBar::SetItemWidth(int nPos, int nWidth, CRect& rect)
 {
 	TBBUTTONINFO tbi;

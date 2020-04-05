@@ -244,6 +244,11 @@ int CEnMenu::FindMenuItem(HMENU hSubMenu) const
 	return FindMenuItem(m_hMenu, hSubMenu);
 }
 
+int CEnMenu::FindFirstMenuItem(UINT nCmdIDStart, UINT nCmdIDEnd) const
+{
+	return FindFirstMenuItem(m_hMenu, nCmdIDStart, nCmdIDEnd);
+}
+
 BOOL CEnMenu::DeleteSubMenu(HMENU hSubMenu, BOOL bAutoCleanUp)
 {
 	return DeleteSubMenu(m_hMenu, hSubMenu, bAutoCleanUp);
@@ -345,6 +350,11 @@ BOOL CEnMenu::IsPopop(int nPos) const
 	return IsPopop(GetSafeHmenu(), nPos);
 }
 
+void CEnMenu::RemoveDuplicateSeparators(int nStartPos)
+{
+	RemoveDuplicateSeparators(GetSafeHmenu(), nStartPos);
+}
+
 // static helpers -------------------------------------------------------
 
 void CEnMenu::SetLocalizer(ITransText* pTT)
@@ -443,6 +453,62 @@ int CEnMenu::FindMenuItem(HMENU hMenu, DWORD dwItem, HMENU& hParentMenu, BOOL bI
 		else if (hSubMenu) // search recursively
 		{
 			int nSubPos = FindMenuItem(hSubMenu, dwItem, hParentMenu, bItemIsMenu);
+
+			if (nSubPos != -1)
+			{
+				ASSERT(hParentMenu != NULL);
+				return nSubPos;
+			}
+		}
+	}
+
+	// else
+	ASSERT(hParentMenu == NULL);
+	return -1;
+}
+
+int CEnMenu::FindFirstMenuItem(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd)
+{
+	HMENU hItemMenu = NULL;
+	int nPos = FindFirstMenuItem(hMenu, nCmdIDStart, nCmdIDEnd, hItemMenu);
+
+	if (hItemMenu == hMenu)
+		return nPos;
+
+	// else
+	return -1;
+}
+
+int CEnMenu::FindFirstMenuItem(HMENU hMenu, UINT nCmdIDStart, UINT nCmdIDEnd, HMENU& hParentMenu)
+{
+	hParentMenu = NULL;
+
+	// sanity checks
+	if (!hMenu || (nCmdIDStart == 0) || (nCmdIDEnd < nCmdIDStart))
+	{
+		ASSERT(0);
+		return -1;
+	}
+
+	// search recursively forward only
+	int nNumPos = ::GetMenuItemCount(hMenu);
+
+	for (int nPos = 0; nPos < nNumPos; nPos++)
+	{
+		UINT nMenuID = ::GetMenuItemID(hMenu, nPos);
+		HMENU hSubMenu = ::GetSubMenu(hMenu, nPos);
+
+		if (hSubMenu == NULL)
+		{
+			if (nMenuID >= nCmdIDStart && nMenuID <= nCmdIDEnd)
+			{
+				hParentMenu = hMenu;
+				return nPos;
+			}
+		}
+		else // search recursively
+		{
+			int nSubPos = FindFirstMenuItem(hSubMenu, nCmdIDStart, nCmdIDEnd, hParentMenu);
 
 			if (nSubPos != -1)
 			{
@@ -861,4 +927,19 @@ BOOL CEnMenu::IsSeparator(HMENU hMenu, int nPos)
 BOOL CEnMenu::IsPopop(HMENU hMenu, int nPos)
 {
 	return (::GetMenuItemID(hMenu, nPos) == (UINT)-1);
+}
+
+void CEnMenu::RemoveDuplicateSeparators(HMENU hMenu, int nStartPos)
+{
+	int nLastPos = ::GetMenuItemCount(hMenu);
+	int nPos = nStartPos;
+
+	while (nPos < nLastPos)
+	{
+		if (!IsSeparator(hMenu, nPos) || !IsSeparator(hMenu, (nPos + 1)))
+			break;
+
+		::DeleteMenu(hMenu, nPos, MF_BYPOSITION);
+		nLastPos--;
+	}
 }

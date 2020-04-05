@@ -50,23 +50,26 @@ struct USERTOOLARGS
 
 class CPreferencesDlg;
 class CEnToolBar;
+class CMenuIconMgr;
 
 //////////////////////////////////////////////////////////////////////
 
 typedef CArray<USERTOOL, USERTOOL&> CUserToolArray;
+typedef CArray<int, int&> CToolIndexArray;
 
 //////////////////////////////////////////////////////////////////////
 
 class CTDCToolsHelper  
 {
 public:
-	CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates, UINT nStart, int nSize = 16);
+	CTDCToolsHelper(BOOL bTDLEnabled, BOOL bISODates);
 	virtual ~CTDCToolsHelper();
 	
 	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
-	void AppendToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter);
-	void RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
+	void AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped);
+	void AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped);
+	int RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
 
 	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
 						const CTDCCustomAttribDefinitionArray& aCustAttribDefs, CString& sCmdline);
@@ -74,10 +77,9 @@ public:
 	static HICON GetToolIcon(const USERTOOL& tool);
 	static BOOL GetToolIcon(const USERTOOL& tool, CBitmap& bmp, COLORREF crBkgnd);
 	static CString GetToolPath(const USERTOOL& tool);
-	
+	static BOOL IsToolCmdID(UINT nCmdID);
+
 protected:
-	UINT m_nStartID;
-	int m_nSize;
 	BOOL m_bTDLEnabled, m_bISODates;
 	
 protected:
@@ -93,6 +95,9 @@ protected:
 	static BOOL ReplaceToolArgument(CTDCToolsCmdlineParser& tcp, const CString& sName, 
 									const CString& sValue, BOOL bWebTool);
 	static CString EscapeCharacters(const CString& sValue, BOOL bWebTool);
+
+	static int IndexArraySortProc(const void* pV1, const void* pV2);
+	static int BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped, BOOL bIncTrailingSeparator);
 };
 
 #endif // !defined(AFX_TOOLSHELPER_H__6BAD432D_0189_46A9_95ED_EF869CFC6CE1__INCLUDED_)

@@ -690,55 +690,8 @@ void CTDCMainMenu::PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, 
 	if (!pMenu)
 		return;
 
-	const UINT MENUSTARTID = ID_TOOLS_USERTOOL1;
-	const int MENUSTARTPOS = CEnMenu::FindMenuItem(*pMenu, ID_TOOLS_USERTOOL1);
-
-	// delete existing tool entries and their icons first
-	int nTool = MAX_NUM_TOOLS;
-
-	while (nTool--)
-	{
-		DeleteMenu(MENUSTARTID + nTool, MF_BYCOMMAND);
-		mgrMenuIcons.DeleteImage(MENUSTARTID + nTool);
-	}
-
-	// if we have any tools to add we do it here
 	CUserToolArray aTools;
 	prefs.GetUserTools(aTools);
 
-	// Remove invalid tools
-	nTool = aTools.GetSize();
-
-	while (nTool--)
-	{
-		if (aTools[nTool].sToolName.IsEmpty() || aTools[nTool].sToolPath.IsEmpty())
-			aTools.RemoveAt(nTool);
-	}
-
-	if (aTools.GetSize())
-	{
-		int nNumTools = min(aTools.GetSize(), MAX_NUM_TOOLS);
-
-		for (nTool = 0; nTool < nNumTools; nTool++)
-		{
-			const USERTOOL& tool = aTools[nTool];
-			CString sMenuItem;
-
-			if (nTool < 9)
-				sMenuItem.Format(_T("&%d %s"), nTool + 1, tool.sToolName);
-			else
-				sMenuItem = tool.sToolName;
-
-			pMenu->InsertMenu(MENUSTARTPOS + nTool, MF_BYPOSITION | MF_STRING,
-							  MENUSTARTID + nTool, sMenuItem);
-
-			// Icon manager will free the icon
-			mgrMenuIcons.SetImage(MENUSTARTID + nTool, CTDCToolsHelper::GetToolIcon(tool));
-		}
-	}
-	else // if nothing to add just re-add placeholder
-	{
-		pMenu->InsertMenu(MENUSTARTPOS, MF_BYPOSITION | MF_STRING | MF_GRAYED,
-						  MENUSTARTID, CEnString(IDS_USERDEFINEDTOOLS));
-	}
+	CTDCToolsHelper(FALSE, FALSE).AddToolsToMenu(aTools, *pMenu, mgrMenuIcons, TRUE/*prefs.GetWantToolsgrouping()*/);
 }

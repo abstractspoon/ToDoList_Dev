@@ -141,6 +141,24 @@ namespace Misc
 #endif
 	
 	int RemoveItems(const CStringArray& aItems, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
+
+	template <class T>
+	int RemoveItemsT(const CArray<T, T&>& aItems, CArray<T, T&>& aFrom)
+	{
+		int nRemoved = 0; // counter
+		int nItem = array.GetSize();
+
+		while (nItem--)
+		{
+			const T& item = GetItemT(array, nItem);
+
+			if (RemoveItemT(item, aFrom))
+				nRemoved++;
+		}
+
+		return nRemoved;
+	}
+
 	int RemoveEmptyItems(CStringArray& aFrom);
 	BOOL RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
@@ -336,6 +354,48 @@ namespace Misc
 		}
 
 		return mapDest.GetCount();
+	}
+
+	template <class S, class T>
+	int GetValuesT(const CMap<S, S, T, T&>& mapSrc, CArray<T, T&>& aDest)
+	{
+		aDest.SetSize();
+
+		if (mapSrc.GetCount())
+		{
+			POSITION pos = mapSrc.GetStartPosition();
+			S key;
+			T value;
+
+			while (pos)
+			{
+				mapSrc.GetNextAssoc(pos, key, value);
+				aDest.Add(value);
+			}
+		}
+
+		return aDest.GetSize();
+	}
+
+	template <class T>
+	int GetValuesStrT(const CMap<CString, LPCTSTR, T, T&>& mapSrc, CArray<T, T&>& aDest)
+	{
+		aDest.SetSize();
+
+		if (mapSrc.GetCount())
+		{
+			POSITION pos = mapSrc.GetStartPosition();
+			CString key;
+			T value;
+
+			while (pos)
+			{
+				mapSrc.GetNextAssoc(pos, key, value);
+				aDest.Add(value);
+			}
+		}
+
+		return aDest.GetSize();
 	}
 
 	template <class T> 
