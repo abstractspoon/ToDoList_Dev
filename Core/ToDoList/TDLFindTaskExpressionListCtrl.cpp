@@ -104,7 +104,7 @@ END_MESSAGE_MAP()
 
 void CTDLFindTaskExpressionListCtrl::PreSubclassWindow() 
 {
-	CInputListCtrl::PreSubclassWindow(); // we need combo to be created first
+	CInputListCtrl::PreSubclassWindow();
 
 	m_header.EnableTracking(FALSE);
 	ShowGrid(TRUE, TRUE);
