@@ -231,6 +231,19 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 	switch (dwDataType)
 	{
 	case TDCCA_DOUBLE:
+		return ((dwFeature == TDCCAF_ACCUMULATE) ||
+				(dwFeature == TDCCAF_MAXIMIZE) ||
+				(dwFeature == TDCCAF_MINIMIZE) ||
+				(dwFeature == TDCCAF_HIDEZERO) ||
+				(dwFeature == TDCCAF_ONEDECIMAL));
+
+	case TDCCA_FRACTION:
+		return ((dwFeature == TDCCAF_DISPLAYASPERCENT) ||
+				(dwFeature == TDCCAF_MAXIMIZE) ||
+				(dwFeature == TDCCAF_MINIMIZE) ||
+				(dwFeature == TDCCAF_HIDEZERO) ||
+				(dwFeature == TDCCAF_ONEDECIMAL));
+		
 	case TDCCA_INTEGER:
 	case TDCCA_TIMEPERIOD:
 		return ((dwFeature == TDCCAF_ACCUMULATE) ||
@@ -248,12 +261,6 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 	case TDCCA_BOOL:
 	case TDCCA_ICON:
 		break;
-
-	case TDCCA_FRACTION:
-		return ((dwFeature == TDCCAF_DISPLAYASPERCENT) ||
-				(dwFeature == TDCCAF_MAXIMIZE) ||
-				(dwFeature == TDCCAF_MINIMIZE) ||
-				(dwFeature == TDCCAF_HIDEZERO));
 
 	default:
 		ASSERT(0);
@@ -525,23 +532,37 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bIS
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
 {
+	int nDecimals = 0;
+	LPCTSTR szTrail = NULL;
+
 	switch (GetDataType())
 	{
 	case TDCCA_FRACTION:
 		if (HasFeature(TDCCAF_DISPLAYASPERCENT))
-			return Misc::Format((dValue * 100), 1, _T("%"));
-		// else fall thru
+		{
+			dValue *= 100;
+			szTrail = _T("%");
+			nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 0);
+		}
+		else
+		{
+			nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 2);
+		}
+		break;
 
 	case TDCCA_DOUBLE:
-		return Misc::Format(dValue, 2);
+		nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 2);
+		break;
 
 	case TDCCA_INTEGER:
-		return Misc::Format(dValue, 0);
+		break;
+
+	default:
+		ASSERT(0);
+		return _T("");
 	}
 
-	// All else
-	ASSERT(0);
-	return _T("");
+	return Misc::Format(dValue, nDecimals, szTrail);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

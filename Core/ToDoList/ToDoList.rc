@@ -5701,6 +5701,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INSERTDATE      "\nInsert Date"
+    IDS_CUSTOM_FEATURE_ONEDECIMAL "One decimal place"
 END
 
 #endif    // English (Australia) resources

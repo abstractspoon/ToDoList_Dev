@@ -1339,6 +1339,10 @@ SOURCE=.\res\custom_attrib_icons.ico
 # End Source File
 # Begin Source File
 
+SOURCE=.\res\datetime_toolbar_std.bmp
+# End Source File
+# Begin Source File
+
 SOURCE=.\res\depend_link.ico
 # End Source File
 # Begin Source File
