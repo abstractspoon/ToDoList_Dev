@@ -998,6 +998,7 @@ struct SEARCHPARAM
 			switch (GetAttribType())
 			{
 			case FT_BOOL:
+			case FT_DEPENDENCY:
 				return TRUE; // handled by operator
 
 			case FT_DATE:
@@ -1198,12 +1199,14 @@ struct SEARCHPARAM
 		case TDCA_EXTERNALID: 
 		case TDCA_TAGS: 
 		case TDCA_PATH: 
-		case TDCA_LASTMODBY: 
-		case TDCA_DEPENDENCY: 
+		case TDCA_LASTMODBY:
 			return FT_STRING;
 
 		case TDCA_ICON: 
 			return FT_ICON;
+
+		case TDCA_DEPENDENCY: 
+			return FT_DEPENDENCY;
 
 		case TDCA_PRIORITY:
 		case TDCA_COLOR:
@@ -1274,6 +1277,9 @@ struct SEARCHPARAM
 		case FOP_LESS_OR_EQUAL:
 		case FOP_LESS:
 			return (nType == FT_INTEGER || nType == FT_DOUBLE || nType == FT_TIMEPERIOD);
+
+		case FOP_IS_COMPLETE:
+			return (nType == FT_DEPENDENCY);
 
 		case FOP_SET:
 		case FOP_NOT_SET:
@@ -1383,6 +1389,7 @@ struct SEARCHPARAM
 		case FT_STRING:
 		case FT_DATERELATIVE:
 		case FT_ICON:
+		case FT_DEPENDENCY:
 			sValue = val;
 			break;
 			

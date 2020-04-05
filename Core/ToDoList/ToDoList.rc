@@ -5702,6 +5702,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_EDIT_INSERTDATE      "\nInsert Date"
     IDS_CUSTOM_FEATURE_ONEDECIMAL "One decimal place"
+    IDS_FP_IS_COMPLETE      "is completed (or not set)"
 END
 
 #endif    // English (Australia) resources

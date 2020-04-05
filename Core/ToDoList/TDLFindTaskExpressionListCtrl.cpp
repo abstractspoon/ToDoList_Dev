@@ -465,6 +465,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 
 			case FT_TIMEPERIOD:
 			case FT_BOOL:
+			case FT_DEPENDENCY:
 			case FT_NONE:
 				// Nothing or default edit control
 				break;
@@ -545,6 +546,7 @@ BOOL CTDLFindTaskExpressionListCtrl::CanEditSelectedCell() const
 			switch (rule.GetAttribType())
 			{
 			case FT_BOOL:
+			case FT_DEPENDENCY:
 				return FALSE;
 			}
 
@@ -807,6 +809,12 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 				AddOperatorToCombo(FOP_NOT_SET);
 				break;
 
+			case FT_DEPENDENCY:
+				AddOperatorToCombo(FOP_SET);
+				AddOperatorToCombo(FOP_NOT_SET);
+				AddOperatorToCombo(FOP_IS_COMPLETE);
+				break;
+				
 			case FT_RECURRENCE:
 				AddOperatorToCombo(FOP_SET);
 				AddOperatorToCombo(FOP_NOT_SET);
@@ -1015,6 +1023,7 @@ void CTDLFindTaskExpressionListCtrl::OnValueEditOK(NMHDR* pNMHDR, LRESULT* pResu
 	case FT_DATERELATIVE:
 	case FT_INTEGER:
 	case FT_DOUBLE:
+	case FT_DEPENDENCY:
 	case FT_TIMEPERIOD:
 		rule.SetValue(pDispInfo->item.pszText);
 		break;
@@ -1258,6 +1267,7 @@ void CTDLFindTaskExpressionListCtrl::UpdateValueColumnText(int nRow)
 			case FT_DATERELATIVE:
 			case FT_DOUBLE:
 			case FT_ICON:
+			case FT_DEPENDENCY:
 				sValue = rule.ValueAsString();
 				break;
 

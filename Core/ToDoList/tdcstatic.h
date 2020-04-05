@@ -292,7 +292,8 @@ static const TDCOPERATOR OPERATORS[] =
 	{ FOP_LESS_OR_EQUAL,	IDS_FP_LESS_OR_EQUAL },
 	{ FOP_LESS,				IDS_FP_LESS },
 	{ FOP_SET,				IDS_FP_SET },
-	{ FOP_NOT_SET,			IDS_FP_NOT_SET }
+	{ FOP_NOT_SET,			IDS_FP_NOT_SET },
+	{ FOP_IS_COMPLETE,		IDS_FP_IS_COMPLETE } // Dependency only
 };
 static const int OP_COUNT = sizeof(OPERATORS) / sizeof(TDCOPERATOR);
 

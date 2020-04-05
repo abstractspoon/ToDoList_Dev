@@ -590,6 +590,7 @@ enum FIND_OPERATOR
 	FOP_LESS,
 	FOP_SET,
 	FOP_NOT_SET,
+	FOP_IS_COMPLETE, // Applies only to TDCA_DEPENDENCY
 };
 
 enum FIND_ATTRIBTYPE
@@ -604,6 +605,7 @@ enum FIND_ATTRIBTYPE
 	FT_DATERELATIVE,
 	FT_ICON,
 	FT_RECURRENCE,
+	FT_DEPENDENCY
 };
  
 /////////////////////////////////////////////////////////////////////////////
