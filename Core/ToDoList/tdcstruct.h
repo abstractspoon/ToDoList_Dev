@@ -702,10 +702,40 @@ struct CTRLITEM
 	{
 		return !(*this == other);
 	}
-	
+
+	CWnd* GetCtrl(const CWnd* pParent) const
+	{
+		return pParent->GetDlgItem(nCtrlID);
+	}
+
+	CWnd* GetLabel(const CWnd* pParent) const
+	{
+		return pParent->GetDlgItem(nLabelID);
+	}
+
+	void DeleteCtrls(const CWnd* pParent)
+	{
+		DeleteCtrl(pParent, nCtrlID);
+		DeleteCtrl(pParent, nLabelID);
+	}
+
 	UINT nCtrlID;
 	UINT nLabelID;
 	TDC_ATTRIBUTE nAttrib;
+
+protected:
+	void DeleteCtrl(const CWnd* pParent, UINT& nCtrlID)
+	{
+		CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
+
+		if (pCtrl)
+		{
+			pCtrl->DestroyWindow();
+			delete pCtrl;
+		}
+
+		nCtrlID = 0;
+	}
 };
 
 struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
@@ -716,20 +746,62 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 	{
 		nCtrlID = nLabelID = nBuddyCtrlID = nBuddyLabelID = 0;
 		nAttrib = TDCA_NONE;
+		pBuddyClass = NULL;
 	}
 
 	BOOL operator==(const CUSTOMATTRIBCTRLITEM& other) const
 	{
-		return (CTRLITEM::operator==(other) && 
-				(nBuddyLabelID == other.nBuddyLabelID) && 
-				(nBuddyCtrlID == other.nBuddyCtrlID) &&
-				(sAttribID == other.sAttribID));
-	}
+		if (!CTRLITEM::operator==(other) || 
+			(nBuddyLabelID != other.nBuddyLabelID) ||
+			(nBuddyCtrlID != other.nBuddyCtrlID) ||
+			(sAttribID != other.sAttribID))
+		{
+			return FALSE;
+		}
 
-	
+		if (!(pBuddyClass && other.pBuddyClass))
+		{
+			return FALSE;
+		}
+
+		return (strcmp(pBuddyClass->m_lpszClassName, other.pBuddyClass->m_lpszClassName) == 0);
+	}
+		
 	BOOL operator!=(const CUSTOMATTRIBCTRLITEM& other) const
 	{
 		return !(*this == other);
+	}
+
+	void ShowBuddy(const CWnd* pParent, BOOL bShow = TRUE)
+	{
+		CWnd* pBuddy = GetBuddy(pParent);
+
+		if (!pBuddy)
+		{
+			pBuddyClass = NULL;
+			ASSERT(0);
+		}
+		else
+		{
+			pBuddy->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+			pBuddy->EnableWindow(bShow);
+
+			pBuddyClass = (bShow ? pBuddy->GetRuntimeClass() : NULL);
+
+			CWnd* pLabel = GetBuddyLabel(pParent);
+			ASSERT_VALID(pLabel);
+
+			if (pLabel)
+			{
+				pLabel->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+				pLabel->EnableWindow(bShow);
+			}
+		}
+	}
+
+	BOOL IsShowingBuddy() const
+	{
+		return (HasBuddy() && pBuddyClass);
 	}
 
 	BOOL HasBuddy() const
@@ -749,30 +821,34 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 		return TRUE;
 	}
 
+	CWnd* GetBuddy(const CWnd* pParent) const
+	{
+		return pParent->GetDlgItem(nBuddyCtrlID);
+	}
+
+	CWnd* GetBuddyLabel(const CWnd* pParent) const
+	{
+		return pParent->GetDlgItem(nBuddyLabelID);
+	}
+
 	void DeleteCtrls(const CWnd* pParent)
 	{
-		DeleteCtrl(pParent, nCtrlID);
-		DeleteCtrl(pParent, nLabelID);
-		DeleteCtrl(pParent, nBuddyCtrlID);
-		DeleteCtrl(pParent, nBuddyLabelID);
+		CTRLITEM::DeleteCtrls(pParent);
+
+		DeleteBuddy(pParent);
 	}
-	
+
 	CString sAttribID;
 	UINT nBuddyCtrlID;
 	UINT nBuddyLabelID;
 
 protected:
-	void DeleteCtrl(const CWnd* pParent, UINT& nCtrlID)
+	CRuntimeClass* pBuddyClass;
+
+	void DeleteBuddy(const CWnd* pParent)
 	{
-		CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
-
-		if (pCtrl)
-		{
-			pCtrl->DestroyWindow();
-			delete pCtrl;
-		}
-
-		nCtrlID = 0;
+		DeleteCtrl(pParent, nBuddyCtrlID);
+		DeleteCtrl(pParent, nBuddyLabelID);
 	}
 
 };
@@ -796,11 +872,16 @@ public:
 
 		while (nCtrl--)
 		{
-			if (GetAt(nCtrl).nCtrlID == nCtrlID)
+			const CUSTOMATTRIBCTRLITEM& ctrl = GetAt(nCtrl);
+
+			if ((ctrl.nCtrlID == nCtrlID) || (ctrl.nBuddyCtrlID == nCtrlID))
 				return nCtrl;
 
-			if (bIncludeLabels && (GetAt(nCtrl).nLabelID == nCtrlID))
-				return nCtrl;
+			if (bIncludeLabels)
+			{
+				if ((ctrl.nLabelID == nCtrlID) || (ctrl.nBuddyLabelID == nCtrlID))
+					return nCtrl;
+			}
 		}
 
 		// not found
@@ -814,6 +895,20 @@ public:
 		while (nCtrl--)
 		{
 			if (GetAt(nCtrl).nAttrib == nAttribID)
+				return nCtrl;
+		}
+
+		// not found
+		return -1;
+	}
+
+	int Find(const CString& sAttribID) const
+	{
+		int nCtrl = GetSize();
+
+		while (nCtrl--)
+		{
+			if (GetAt(nCtrl).sAttribID == sAttribID)
 				return nCtrl;
 		}
 

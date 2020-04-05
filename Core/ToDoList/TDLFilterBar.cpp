@@ -199,8 +199,8 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CBN_SELCHANGE(IDC_CATEGORYFILTERCOMBO, OnSelchangeFilter)
 
 	ON_CBN_SELENDOK(IDC_FILTERCOMBO, OnSelchangeFilter)
-	ON_CBN_SELENDOK(IDC_STARTFILTERCOMBO, OnSelchangeFilter)
-	ON_CBN_SELENDOK(IDC_DUEFILTERCOMBO, OnSelchangeFilter)
+	ON_CBN_SELENDOK(IDC_STARTFILTERCOMBO, OnSelchangeStartDateFilter)
+	ON_CBN_SELENDOK(IDC_DUEFILTERCOMBO, OnSelchangeDueDateFilter)
 	ON_CBN_SELENDOK(IDC_PRIORITYFILTERCOMBO, OnSelchangeFilter)
 	ON_CBN_SELENDOK(IDC_RISKFILTERCOMBO, OnSelchangeFilter)
 
@@ -214,11 +214,12 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 
 	ON_CBN_CLOSEUP(IDC_OPTIONFILTERCOMBO, OnCloseUpOptions)
 
-	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnSelchangeDateFilter)
-	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERSTARTDATE, OnSelchangeDateFilter)
+	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERDUEDATE, OnChangeDateFilter)
+	ON_NOTIFY(DTN_DATETIMECHANGE, IDC_USERSTARTDATE, OnChangeDateFilter)
 
 	ON_CONTROL_RANGE(CBN_SELCHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelchangeFilter)
 	ON_CONTROL_RANGE(CBN_SELENDCANCEL, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeSelcancelFilter)
+	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMFILTERFIELD, IDC_LAST_CUSTOMFILTERFIELD, OnCustomAttributeChangeDateFilter)
 
 	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
@@ -293,8 +294,15 @@ void CTDLFilterBar::OnSelchangeFilter()
 	// Only notify the parent if something actually changed
 	if ((m_filter != prevFilter) || (m_filter.IsAdvanced() && (sPrevAdvanced != m_sAdvancedFilter)))
 	{
-		GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+		NotifyParentFilterChange();
 	}
+}
+
+void CTDLFilterBar::NotifyParentFilterChange()
+{
+	GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+
+	RefreshUIBkgndBrush();
 }
 
 void CTDLFilterBar::OnSelcancelAllocToFilter()
@@ -370,33 +378,66 @@ void CTDLFilterBar::OnCloseUpOptions()
 	if (dwCurFlags != m_cbOptions.GetSelectedOptions())
 	{
 		UpdateData();
-		GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+		NotifyParentFilterChange();
 	}
 }
 
-void CTDLFilterBar::OnSelchangeDateFilter(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CTDLFilterBar::OnSelchangeDueDateFilter()
 {
+	OnSelchangeDateFilter(m_filter.nDueBy, m_cbDueFilter);
+}
+
+void CTDLFilterBar::OnSelchangeStartDateFilter()
+{
+	OnSelchangeDateFilter(m_filter.nStartBy, m_cbStartFilter);
+}
+
+void CTDLFilterBar::OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFilterDateComboBox& combo)
+{
+	FILTER_DATE nFilter = combo.GetSelectedFilter();
+
+	BOOL bWasShowingBuddy = ((nPrevFilter == FD_USER) || (nPrevFilter == FD_NEXTNDAYS));
+	BOOL bShowBuddy = ((nFilter == FD_USER) || (nFilter == FD_NEXTNDAYS));
+
 	UpdateData();
-	GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+
+	if ((bWasShowingBuddy && !bShowBuddy) || (!bWasShowingBuddy || bShowBuddy))
+		ReposControls();
+
+	NotifyParentFilterChange();
+}
+
+void CTDLFilterBar::OnChangeDateFilter(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{
+	NotifyParentFilterChange();
 
 	*pResult = 0;
 }
 
 LRESULT CTDLFilterBar::OnEEBtnClick(WPARAM wp, LPARAM /*lp*/)
 {
-	OnSelchangeFilter();
-	
-	switch (wp)
+	int nCtrl = m_aCustomControls.Find(wp);
+
+	if (nCtrl != -1)
 	{
-	case IDC_STARTNEXTNDAYS:
-		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
-		break;
-
-	case IDC_DUENEXTNDAYS:
-		m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
-		break;
+		OnCustomAttributeChangeFilter(m_aCustomControls[nCtrl]);
 	}
+	else
+	{
+		OnSelchangeFilter();
 
+		switch (wp)
+		{
+		case IDC_STARTNEXTNDAYS:
+			m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
+			break;
+
+		case IDC_DUENEXTNDAYS:
+			m_cbDueFilter.SetNextNDays(m_filter.nDueNextNDays);
+			break;
+		}
+	}
+	
 	return 0L;
 }
 
@@ -584,16 +625,17 @@ void CTDLFilterBar::UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRI
 		CTDCCustomAttribDefinitionArray aNewAttribDefs;
 		tdc.GetCustomAttributeDefs(aNewAttribDefs);
 
-		if (CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(m_aCustomAttribDefs, 
-																	aNewAttribDefs,
-																	m_aCustomControls))
+		if (CTDCCustomAttributeUIHelper::NeedRebuildFilterControls(m_aCustomAttribDefs,
+																   aNewAttribDefs,
+																   m_aCustomControls))
 		{
-			CTDCCustomAttributeUIHelper::RebuildFilterControls(aNewAttribDefs,
-															 tdc.GetTaskIconImageList(), 
-															 this, 
-															 IDC_OPTIONFILTERCOMBO, 
-															 m_bMultiSelection,
-															 m_aCustomControls);
+			CTDCCustomAttributeUIHelper::RebuildFilterControls(this,
+															   aNewAttribDefs,
+															   m_filter.mapCustomAttrib,
+															   tdc.GetTaskIconImageList(),
+															   IDC_OPTIONFILTERCOMBO,
+															   m_bMultiSelection,
+															   m_aCustomControls);
 		}
 
 		// Update data
@@ -872,7 +914,7 @@ int CTDLFilterBar::GetControls(CTDCControlArray& aControls) const
 		// Buddy Control
 		CTRLITEM buddy;
 
-		if (ctrl.GetBuddy(buddy))
+		if (ctrl.GetBuddy(buddy) && ctrl.IsShowingBuddy())
 			aControls.Add(buddy);
 	}
 
@@ -953,7 +995,7 @@ BOOL CTDLFilterBar::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 			
 		default:
 			if (CTDCCustomAttributeUIHelper::IsCustomFilterControl(nID))
-				sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(nID, this);
+				sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(this, nID);
 			break;
         }
 
@@ -1106,27 +1148,60 @@ void CTDLFilterBar::OnCustomAttributeSelchangeFilter(UINT nCtrlID)
 {
 	ASSERT(CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID));
 
-	CUSTOMATTRIBCTRLITEM ctrl;
+	int nCtrl = m_aCustomControls.Find(nCtrlID);
 
-	if (CTDCCustomAttributeUIHelper::GetControl(nCtrlID, m_aCustomControls, ctrl))
+	if (nCtrl != -1)
 	{
-		ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
-
-		TDCCADATA data, dataPrev;
-		m_filter.mapCustomAttrib.Lookup(ctrl.sAttribID, dataPrev);
-		
-		if (CTDCCustomAttributeUIHelper::GetControlData(this, ctrl, m_aCustomAttribDefs, data))
-			m_filter.mapCustomAttrib[ctrl.sAttribID] = data;
-		else
-			m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);
-
-		if (data != dataPrev)
-			GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+		// Common helper
+		OnCustomAttributeChangeFilter(m_aCustomControls[nCtrl]);
 	}
 	else
 	{
 		ASSERT(0);
 	}
+}
+
+void CTDLFilterBar::OnCustomAttributeChangeDateFilter(UINT nCtrlID, NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{
+	*pResult = 0;
+
+	int nCtrl = m_aCustomControls.Find(nCtrlID);
+
+	if (nCtrl != -1)
+	{
+		CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
+
+		ASSERT(nCtrlID == ctrl.nBuddyCtrlID);
+
+		// Common helper
+		OnCustomAttributeChangeFilter(ctrl);
+	}
+	else
+	{
+		ASSERT(0);
+	}
+}
+
+void CTDLFilterBar::OnCustomAttributeChangeFilter(CUSTOMATTRIBCTRLITEM& ctrl)
+{
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(ctrl.nAttrib));
+	ASSERT(CTDCCustomAttributeUIHelper::IsCustomFilterControl(ctrl.nCtrlID));
+
+	TDCCADATA data, dataPrev;
+	m_filter.mapCustomAttrib.Lookup(ctrl.sAttribID, dataPrev);
+
+	TDCCAUI_UPDATERESULT nRes = CTDCCustomAttributeUIHelper::GetControlData(this, ctrl, m_aCustomAttribDefs, dataPrev, data);
+
+	if (data.IsEmpty())
+		m_filter.mapCustomAttrib.RemoveKey(ctrl.sAttribID);
+	else
+		m_filter.mapCustomAttrib[ctrl.sAttribID] = data;
+	
+	if (data != dataPrev)
+		NotifyParentFilterChange();
+
+	if (nRes == TDCCAUIRES_REPOSCTRLS)
+		ReposControls();
 }
 
 void CTDLFilterBar::OnCustomAttributeSelcancelFilter(UINT nCtrlID)

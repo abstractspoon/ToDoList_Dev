@@ -24,6 +24,8 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	TDCCUSTOMATTRIBUTEDEFINITION& operator=(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 
 	BOOL operator==(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	BOOL operator!=(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	BOOL Matches(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bIncAutoListData = FALSE) const;
 
 	CString GetColumnTitle() const;
 	CString GetToolTip() const;

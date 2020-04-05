@@ -474,50 +474,13 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 		break;
 	}
 
-	// handle start date filters
-	COleDateTime dateStart;
+	// Date filters
+	CTDCSearchParamHelper::AppendDateFilter(filter.nStartBy, filter.dtUserStart, filter.nStartNextNDays, TDCA_STARTDATE, TDCA_STARTTIME, params.aRules);
+	CTDCSearchParamHelper::AppendDateFilter(filter.nDueBy, filter.dtUserDue, filter.nDueNextNDays, TDCA_DUEDATE, TDCA_DUETIME, params.aRules);
 
-	if (InitFilterDate(filter.nStartBy, filter.dtUserStart, filter.nStartNextNDays, dateStart))
-	{
-		// special case: FD_NOW
-		if (filter.nStartBy == FD_NOW)
-			params.aRules.Add(SEARCHPARAM(TDCA_STARTTIME, FOP_ON_OR_BEFORE, dateStart));
-		else
-			params.aRules.Add(SEARCHPARAM(TDCA_STARTDATE, FOP_ON_OR_BEFORE, dateStart));
-	}
-	else if (filter.nStartBy == FD_NONE)
-	{
-		params.aRules.Add(SEARCHPARAM(TDCA_STARTDATE, FOP_NOT_SET));
-	}
-
-	// handle due date filters
-	COleDateTime dateDue;
-
-	if (InitFilterDate(filter.nDueBy, filter.dtUserDue, filter.nDueNextNDays, dateDue))
-	{
-		// special case: FD_NOW
-		if (filter.nDueBy == FD_NOW)
-			params.aRules.Add(SEARCHPARAM(TDCA_DUETIME, FOP_ON_OR_BEFORE, dateDue));
-		else
-			params.aRules.Add(SEARCHPARAM(TDCA_DUEDATE, FOP_ON_OR_BEFORE, dateDue));
-
-		// this flag only applies to due filters
-		params.bIgnoreOverDue = filter.HasFlag(FO_HIDEOVERDUE);
-	}
-	else if (filter.nDueBy == FD_NONE)
-	{
-		params.aRules.Add(SEARCHPARAM(TDCA_DUEDATE, FOP_NOT_SET));
-	}
-
-	// handle other attributes
-	AddNonDateFilterQueryRules(filter, aCustomAttribDefs, params);
-}
-
-void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, SEARCHPARAMS& params)
-{
+	// Title text
 	BOOL bWantCustomAttrib = FALSE;
 
-	// title text
 	if (!filter.sTitle.IsEmpty())
 	{
 		switch (filter.nTitleOption)
@@ -538,19 +501,18 @@ void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, const CTDCC
 		}
 	}
 
-	// note: these are all 'AND' 
-	AppendArrayRule(filter.aCategories, TDCA_CATEGORY, params.aRules, filter.dwFlags, FO_ANYCATEGORY);
-	AppendArrayRule(filter.aAllocTo, TDCA_ALLOCTO, params.aRules, filter.dwFlags, FO_ANYALLOCTO);
-	AppendArrayRule(filter.aAllocBy, TDCA_ALLOCBY, params.aRules);
-	AppendArrayRule(filter.aStatus, TDCA_STATUS, params.aRules);
-	AppendArrayRule(filter.aVersions, TDCA_VERSION, params.aRules);
-	AppendArrayRule(filter.aTags, TDCA_TAGS, params.aRules);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aCategories, TDCA_CATEGORY, params.aRules, filter.dwFlags, FO_ANYCATEGORY);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aAllocTo, TDCA_ALLOCTO, params.aRules, filter.dwFlags, FO_ANYALLOCTO);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aAllocBy, TDCA_ALLOCBY, params.aRules);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aStatus, TDCA_STATUS, params.aRules);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aVersions, TDCA_VERSION, params.aRules);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aTags, TDCA_TAGS, params.aRules);
 
-	AppendPriorityRiskRule(filter.nPriority, TDCA_PRIORITY, params.aRules, FM_ANYPRIORITY, FM_NOPRIORITY);
-	AppendPriorityRiskRule(filter.nRisk, TDCA_RISK, params.aRules, FM_ANYRISK, FM_NORISK);
+	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nPriority, TDCA_PRIORITY, params.aRules, FM_ANYPRIORITY, FM_NOPRIORITY);
+	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nRisk, TDCA_RISK, params.aRules, FM_ANYRISK, FM_NORISK);
 
 	// Custom Attributes
-	bWantCustomAttrib = CTDCSearchParamHelper::AppendFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules);
+	bWantCustomAttrib |= CTDCSearchParamHelper::AppendCustomAttributeFilterRules(filter.mapCustomAttrib, aCustomAttribDefs, params.aRules);
 
 	// special case: no rules + ignore completed
 	if (params.bIgnoreDone && (params.aRules.GetSize() == 0))
@@ -558,120 +520,6 @@ void CTDCFilter::AddNonDateFilterQueryRules(const TDCFILTER& filter, const CTDCC
 
 	if (bWantCustomAttrib)
 		params.aAttribDefs.Copy(aCustomAttribDefs);
-}
-
-void CTDCFilter::AppendArrayRule(const CStringArray& aValues, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules, 
-								DWORD dwFlags, DWORD dwIncludeMask)
-{
-	if (aValues.GetSize())
-	{
-		CString sMatchBy = Misc::FormatArray(aValues);
-		int nRule = -1;
-
-		if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
-		{
-			nRule = aRules.Add(SEARCHPARAM(nAttrib, FOP_NOT_SET));
-		}
-		else if (dwFlags && dwIncludeMask)
-		{
-			if (dwFlags & dwIncludeMask)
-				nRule = aRules.Add(SEARCHPARAM(nAttrib, FOP_INCLUDES, sMatchBy));
-			else
-				nRule = aRules.Add(SEARCHPARAM(nAttrib, FOP_EQUALS, sMatchBy));
-		}
-		else // includes
-		{
-			nRule = aRules.Add(SEARCHPARAM(nAttrib, FOP_INCLUDES, sMatchBy));
-		}
-
-		// Always apply 'match whole word' because filter combos are read-only
-		if (nRule != -1)
-			aRules[nRule].SetMatchWholeWord(TRUE);
-	}
-}
-
-void CTDCFilter::AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules,
-										int nAnyValue, int nNoValue)
-{
-	ASSERT((nAttrib == TDCA_PRIORITY) || (nAttrib == TDCA_RISK));
-
-	if (nValue != nAnyValue)
-	{
-		if (nValue == nNoValue)
-		{
-			aRules.Add(SEARCHPARAM(nAttrib, FOP_NOT_SET));
-		}
-		else if (nValue != nAnyValue)
-		{
-			aRules.Add(SEARCHPARAM(nAttrib, FOP_GREATER_OR_EQUAL, nValue));
-		}
-	}
-}
-
-BOOL CTDCFilter::InitFilterDate(FILTER_DATE nDate, const COleDateTime& dateUser, int nNextNDays, COleDateTime& date) 
-{
-	switch (nDate)
-	{
-	case FD_TODAY:
-		date = CDateHelper::GetDate(DHD_TODAY);
-		break;
-
-	case FD_YESTERDAY:
-		date = CDateHelper::GetDate(DHD_YESTERDAY);
-		break;
-		
-	case FD_TOMORROW:
-		date = CDateHelper::GetDate(DHD_TOMORROW);
-		break;
-
-	case FD_ENDTHISWEEK:
-		date = CDateHelper::GetDate(DHD_ENDTHISWEEK);
-		break;
-
-	case FD_ENDNEXTWEEK: 
-		date = CDateHelper::GetDate(DHD_ENDNEXTWEEK);
-		break;
-
-	case FD_ENDTHISMONTH:
-		date = CDateHelper::GetDate(DHD_ENDTHISMONTH);
-		break;
-
-	case FD_ENDNEXTMONTH:
-		date = CDateHelper::GetDate(DHD_ENDNEXTMONTH);
-		break;
-
-	case FD_ENDTHISYEAR:
-		date = CDateHelper::GetDate(DHD_ENDTHISYEAR);
-		break;
-
-	case FD_ENDNEXTYEAR:
-		date = CDateHelper::GetDate(DHD_ENDNEXTYEAR);
-		break;
-
-	case FD_NEXTNDAYS:
-		date = (CDateHelper::GetDate(DHD_TODAY) + nNextNDays - 1); // -1 because filter is FOP_ON_OR_BEFORE
-		break;
-
-	case FD_NOW:
-		date = COleDateTime::GetCurrentTime();
-		break;
-
-	case FD_USER:
-		ASSERT(CDateHelper::IsDateSet(dateUser));
-
-		date = CDateHelper::GetDateOnly(dateUser);
-		break;
-
-	case FD_ANY:
-	case FD_NONE:
-		break;
-
-	default:
-		ASSERT(0);
-		break;
-	}
-
-	return CDateHelper::IsDateSet(date);
 }
 
 void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey) const

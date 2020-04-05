@@ -11299,12 +11299,12 @@ LRESULT CToDoListWnd::OnSelchangeFilter(WPARAM wp, LPARAM lp)
 	DWORD dwCustomFlags;
 
 	m_filterBar.GetFilter(filter, sCustom, dwCustomFlags);
-	OnChangeFilter(filter, sCustom, dwCustomFlags);
+	OnChangeFilter(filter, sCustom, dwCustomFlags, FALSE);
 
 	return 0L;
 }
 
-void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags)
+void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWORD dwCustomFlags, BOOL bUpdateFilterCtrls)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
@@ -11320,7 +11320,11 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 		tdc.SetFilter(filter);
 	}
 
-	RefreshFilterBarControls(TDCA_ALL);
+	if (bUpdateFilterCtrls)
+		RefreshFilterBarControls(TDCA_ALL);
+	else
+		CheckResizeFilterBar();
+
 	UpdateStatusbar();
 }
 
@@ -11347,7 +11351,7 @@ void CToDoListWnd::OnViewFilter()
 		DWORD dwCustomFlags = 0;
 		
 		dialog.GetFilter(filter, sCustom, dwCustomFlags);
-		OnChangeFilter(filter, sCustom, dwCustomFlags);
+		OnChangeFilter(filter, sCustom, dwCustomFlags, TRUE);
 	}
 }
 
@@ -11374,7 +11378,7 @@ void CToDoListWnd::OnViewRefreshfilter()
 	}
 	else
 	{
-		OnChangeFilter(filter, sCustom, dwCustomFlags);
+		OnChangeFilter(filter, sCustom, dwCustomFlags, FALSE);
 
 		if (Prefs().GetExpandTasksOnLoad())
 			tdc.ExpandTasks(TDCEC_ALL);

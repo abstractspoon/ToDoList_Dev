@@ -229,9 +229,9 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttri
 	return FT_NONE;
 }
 
-BOOL CTDCSearchParamHelper::AppendFilterRules(const CTDCCustomAttributeDataMap& mapData,
-												  const CTDCCustomAttribDefinitionArray& aAttribDefs,
-												  CSearchParamArray& aRules)
+BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAttributeDataMap& mapData,
+															const CTDCCustomAttribDefinitionArray& aAttribDefs,
+															CSearchParamArray& aRules)
 {
 	BOOL bRulesAdded = FALSE;
 	POSITION pos = mapData.GetStartPosition();
@@ -254,12 +254,16 @@ BOOL CTDCSearchParamHelper::AppendFilterRules(const CTDCCustomAttributeDataMap& 
 			case TDCCA_DOUBLE:
 			case TDCCA_FRACTION:
 			case TDCCA_FILELINK:
-			case TDCCA_DATE:
 			case TDCCA_TIMEPERIOD:
 			case TDCCA_ICON:
 			case TDCCA_BOOL:
 				// Not yet supported
 				ASSERT(0);
+				break;
+
+			case TDCCA_DATE:
+				if (AppendCustomAttributeDateFilter(data, attribDef, aRules))
+					bRulesAdded = TRUE;
 				break;
 			}
 		}
@@ -294,5 +298,214 @@ BOOL CTDCSearchParamHelper::AppendFilterRules(const CTDCCustomAttributeDataMap& 
 	}
 
 	return bRulesAdded;
+}
+
+BOOL CTDCSearchParamHelper::AppendDateFilter(FILTER_DATE nFilter, const COleDateTime& dateUser, int nNextNDays, 
+											 TDC_ATTRIBUTE nDateAttrib, TDC_ATTRIBUTE nTimeAttrib, CSearchParamArray& aRules)
+{
+	COleDateTime date;
+
+	if (InitFilterDate(nFilter, dateUser, nNextNDays, date))
+	{
+		// special case: FD_NOW
+		if (nFilter == FD_NOW)
+			aRules.Add(SEARCHPARAM(nTimeAttrib, FOP_ON_OR_BEFORE, date));
+		else
+			aRules.Add(SEARCHPARAM(nDateAttrib, FOP_ON_OR_BEFORE, date));
+	}
+	else if (nFilter == FD_NONE)
+	{
+		aRules.Add(SEARCHPARAM(nDateAttrib, FOP_NOT_SET));
+	}
+	else
+	{
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& data, TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules)
+{
+	COleDateTime date, dtUser(CDateHelper::NullDate());
+	int nNextNDays = 0;
+
+	FILTER_DATE nFilter = (FILTER_DATE)data.AsInteger();
+
+	SEARCHPARAM rule;
+	rule.SetCustomAttribute(attribDef.GetAttributeID(), attribDef.sUniqueID, FT_DATE);
+
+	switch (nFilter)
+	{
+	case FD_ANY:
+		return FALSE;
+
+	case FD_NONE:
+		rule.SetOperator(FOP_NOT_SET);
+		break;
+
+	case FD_USER:
+		{
+			CString sFilter(data.AsString()), sDate;
+
+			if (Misc::Split(sFilter, sDate, '|') && !sDate.IsEmpty())
+				dtUser = _ttof(sDate);
+		}
+		break;
+
+	case FD_NEXTNDAYS:
+		{
+			CString sFilter(data.AsString()), sNumDays;
+
+			if (Misc::Split(sFilter, sNumDays, '|') && !sNumDays.IsEmpty())
+				nNextNDays = _ttoi(sNumDays);
+		}
+		break;
+
+	case FD_TODAY:
+	case FD_TOMORROW:
+	case FD_ENDTHISWEEK:
+	case FD_ENDNEXTWEEK:
+	case FD_ENDTHISMONTH:
+	case FD_ENDNEXTMONTH:
+	case FD_ENDTHISYEAR:
+	case FD_ENDNEXTYEAR:
+	case FD_NOW:
+	case FD_YESTERDAY:
+		break;
+
+	default:
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (rule.OperatorIs(FOP_NONE))
+	{
+		if (!InitFilterDate(nFilter, dtUser, nNextNDays, date))
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		rule.SetOperator(FOP_ON_OR_BEFORE);
+		rule.SetValue(date);
+	}
+
+	aRules.Add(rule);
+	return TRUE;
+}
+
+BOOL CTDCSearchParamHelper::InitFilterDate(FILTER_DATE nDate, const COleDateTime& dateUser, int nNextNDays, COleDateTime& date)
+{
+	switch (nDate)
+	{
+	case FD_TODAY:
+		date = CDateHelper::GetDate(DHD_TODAY);
+		break;
+
+	case FD_YESTERDAY:
+		date = CDateHelper::GetDate(DHD_YESTERDAY);
+		break;
+
+	case FD_TOMORROW:
+		date = CDateHelper::GetDate(DHD_TOMORROW);
+		break;
+
+	case FD_ENDTHISWEEK:
+		date = CDateHelper::GetDate(DHD_ENDTHISWEEK);
+		break;
+
+	case FD_ENDNEXTWEEK:
+		date = CDateHelper::GetDate(DHD_ENDNEXTWEEK);
+		break;
+
+	case FD_ENDTHISMONTH:
+		date = CDateHelper::GetDate(DHD_ENDTHISMONTH);
+		break;
+
+	case FD_ENDNEXTMONTH:
+		date = CDateHelper::GetDate(DHD_ENDNEXTMONTH);
+		break;
+
+	case FD_ENDTHISYEAR:
+		date = CDateHelper::GetDate(DHD_ENDTHISYEAR);
+		break;
+
+	case FD_ENDNEXTYEAR:
+		date = CDateHelper::GetDate(DHD_ENDNEXTYEAR);
+		break;
+
+	case FD_NEXTNDAYS:
+		date = (CDateHelper::GetDate(DHD_TODAY) + nNextNDays - 1); // -1 because filter is FOP_ON_OR_BEFORE
+		break;
+
+	case FD_NOW:
+		date = COleDateTime::GetCurrentTime();
+		break;
+
+	case FD_USER:
+		ASSERT(CDateHelper::IsDateSet(dateUser));
+
+		date = CDateHelper::GetDateOnly(dateUser);
+		break;
+
+	case FD_ANY:
+	case FD_NONE:
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	return CDateHelper::IsDateSet(date);
+}
+
+void CTDCSearchParamHelper::AppendArrayRule(const CStringArray& aValues, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules,
+											DWORD dwFlags, DWORD dwIncludeMask)
+{
+	if (aValues.GetSize())
+	{
+		CString sMatchBy = Misc::FormatArray(aValues);
+		int nRule = -1;
+
+		if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
+		{
+			nRule = aRules.Add(SEARCHPARAM(nAttrib, FOP_NOT_SET));
+		}
+		else if (dwFlags && dwIncludeMask)
+		{
+			if (dwFlags & dwIncludeMask)
+				nRule = aRules.Add(SEARCHPARAM(nAttrib, FOP_INCLUDES, sMatchBy));
+			else
+				nRule = aRules.Add(SEARCHPARAM(nAttrib, FOP_EQUALS, sMatchBy));
+		}
+		else // includes
+		{
+			nRule = aRules.Add(SEARCHPARAM(nAttrib, FOP_INCLUDES, sMatchBy));
+		}
+
+		// Always apply 'match whole word' because filter combos are read-only
+		if (nRule != -1)
+			aRules[nRule].SetMatchWholeWord(TRUE);
+	}
+}
+
+void CTDCSearchParamHelper::AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules,
+													int nAnyValue, int nNoValue)
+{
+	ASSERT((nAttrib == TDCA_PRIORITY) || (nAttrib == TDCA_RISK));
+
+	if (nValue != nAnyValue)
+	{
+		if (nValue == nNoValue)
+		{
+			aRules.Add(SEARCHPARAM(nAttrib, FOP_NOT_SET));
+		}
+		else if (nValue != nAnyValue)
+		{
+			aRules.Add(SEARCHPARAM(nAttrib, FOP_GREATER_OR_EQUAL, nValue));
+		}
+	}
 }
 

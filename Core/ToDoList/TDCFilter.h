@@ -65,12 +65,6 @@ protected:
 	static void SaveAdvancedFilter(CPreferences& prefs, const CString& sKey, const TDCADVANCEDFILTER& filter);
 	
 	static void BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, SEARCHPARAMS& params);
-	static void AddNonDateFilterQueryRules(const TDCFILTER& filter, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, SEARCHPARAMS& params);
-	static BOOL InitFilterDate(FILTER_DATE nDate, const COleDateTime& dateUser, int nNextNDays, COleDateTime& dateDue);
-	static void AppendArrayRule(const CStringArray& aValues, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules, 
-								DWORD dwFlags = 0, DWORD dwMask = 0);
-	static void AppendPriorityRiskRule(int nValue, TDC_ATTRIBUTE nAttrib, CSearchParamArray& aRules,
-										int nAnyValue, int nNoValue);
 
 	static DWORD LoadFlags(const CPreferences& prefs, const CString& sKey);
 	static void SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sKey);

@@ -1190,7 +1190,7 @@ int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
 		// Buddy Control
 		CTRLITEM buddy;
 
-		if (ctrl.GetBuddy(buddy))
+		if (ctrl.GetBuddy(buddy) && ctrl.IsShowingBuddy())
 			aControls.Add(buddy);
 	}
 
@@ -1459,7 +1459,7 @@ void CToDoCtrl::ShowHideControls()
 		// Handle buddy control
 		CTRLITEM buddy;
 
-		if (ctrl.GetBuddy(buddy))
+		if (ctrl.GetBuddy(buddy) && ctrl.IsShowingBuddy())
 			ShowHideControl(buddy);
 	}
 
@@ -2307,7 +2307,7 @@ BOOL CToDoCtrl::SetSelectedTaskCustomAttributeData(const CString& sAttribID, con
 			if (!bCtrlEdited)
 				CTDCCustomAttributeUIHelper::UpdateControl(this, ctrl, m_aCustomAttribDefs, data);
 
-			if (ctrl.HasBuddy())
+			if (ctrl.IsShowingBuddy())
 				EnableDisableControls(GetSelectedItem());
 		}
 	}
@@ -5983,11 +5983,11 @@ void CToDoCtrl::LoadCustomAttributeDefinitions(const CTaskFile& tasks)
 void CToDoCtrl::RebuildCustomAttributeUI()
 {
 	// and add fields after the 'version' control
- 	CTDCCustomAttributeUIHelper::RebuildEditControls(m_aCustomAttribDefs, 
-												   m_ilTaskIcons, 
-												   this, 
-												   IDC_VERSION, 
-												   m_aCustomControls);
+	CTDCCustomAttributeUIHelper::RebuildEditControls(this,
+													 m_aCustomAttribDefs,
+													 m_ilTaskIcons,
+													 IDC_VERSION,
+													 m_aCustomControls);
 
 	CTDCCustomAttributeUIHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
 
@@ -12142,15 +12142,6 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
 		SetModified(nAttrib, aModTaskIDs);
 
-// 		CUSTOMATTRIBCTRLITEM ctrl;
-// 		
-// 		if (CTDCCustomAttributeUIHelper::GetControl(sToCustomAttribID, m_aCustomControls, ctrl))
-// 		{
-// 			CTDCCustomAttributeUIHelper::UpdateCustomAttributeControl(this, ctrl, m_aCustomAttribDefs, data);
-// 		
-// 			if (ctrl.HasBuddy())
-// 				EnableDisableControls(GetSelectedItem());
-// 		}
 		UpdateControls(FALSE);
 	}
 

@@ -53,19 +53,43 @@ TDCCUSTOMATTRIBUTEDEFINITION& TDCCUSTOMATTRIBUTEDEFINITION::operator=(const TDCC
 	return *this;
 }
 
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::Matches(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bIncAutoListData) const
+{
+	if ((dwAttribType != attribDef.dwAttribType) ||
+		(sUniqueID.CompareNoCase(attribDef.sUniqueID) != 0) ||
+		(sColumnTitle != attribDef.sColumnTitle) ||
+		(sLabel != attribDef.sLabel) ||
+		(nTextAlignment != attribDef.nTextAlignment) ||
+		(dwFeatures != attribDef.dwFeatures) ||
+		(nColID != attribDef.nColID) ||
+		(nAttribID != attribDef.nAttribID) ||
+		(bEnabled != attribDef.bEnabled))
+	{
+		return FALSE;
+	}
+
+	if (IsList())
+	{
+		if (!Misc::MatchAll(aDefaultListData, attribDef.aDefaultListData, TRUE, TRUE))
+			return FALSE;
+
+		if (bIncAutoListData && !Misc::MatchAll(aAutoListData, attribDef.aAutoListData, TRUE, TRUE))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::operator==(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
 {
-	// NOTE: we ignore auto data which is temporary
-	return ((dwAttribType == attribDef.dwAttribType) &&
-			(sUniqueID.CompareNoCase(attribDef.sUniqueID) == 0) &&
-			(sColumnTitle == attribDef.sColumnTitle) &&
-			(sLabel == attribDef.sLabel) &&
-			(nTextAlignment == attribDef.nTextAlignment) &&
-			(dwFeatures == attribDef.dwFeatures) &&
-			(nColID == attribDef.nColID) &&
-			(nAttribID == attribDef.nAttribID) &&
-			(bEnabled == attribDef.bEnabled) &&
-			Misc::MatchAll(aDefaultListData, attribDef.aDefaultListData, TRUE, TRUE));
+	// NOTE: we ignore temporary auto-list data
+	return Matches(attribDef, FALSE);
+}
+
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::operator!=(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
+{
+	// NOTE: we ignore temporary auto-list data
+	return !Matches(attribDef, FALSE);
 }
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::GetColumnTitle() const
@@ -190,7 +214,7 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 		return TRUE;
 
 	case TDCCAF_FILTER:
-		return IsList();
+		return (IsDataType(TDCCA_DATE) || IsList());
 
 	case TDCCAF_EXCLUDEBLANKITEM:
 		return (IsList() && !IsMultiList());

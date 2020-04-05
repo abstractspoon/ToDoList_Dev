@@ -372,7 +372,7 @@ BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResu
 
 		default:
 			if (CTDCCustomAttributeUIHelper::IsCustomFilterControl(nID))
-				sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(nID, this);
+				sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(this, nID);
 			break;
         }
 
