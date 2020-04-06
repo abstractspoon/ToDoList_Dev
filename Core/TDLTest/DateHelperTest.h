@@ -20,7 +20,8 @@ public:
 	TESTRESULT Run();
 
 protected:
-	void TestRelativeDateDecoding();
+	void TestDecodeRelativeDate();
+	void TestTruncateSeconds();
 };
 
 #endif // !defined(AFX_DATEHELPERTEST_H__6A11464D_D4DA_4ABA_8FDB_310C9A5252E5__INCLUDED_)

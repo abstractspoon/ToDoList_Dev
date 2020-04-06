@@ -32,12 +32,13 @@ TESTRESULT CDateHelperTest::Run()
 {
 	ClearTotals();
 
-	TestRelativeDateDecoding();
+	TestDecodeRelativeDate();
+	TestTruncateSeconds();
 
 	return GetTotals();
 }
 
-void CDateHelperTest::TestRelativeDateDecoding()
+void CDateHelperTest::TestDecodeRelativeDate()
 {
 	BeginTest(_T("CDateHelperTest::DecodeRelativeDate"));
 	
@@ -115,6 +116,30 @@ void CDateHelperTest::TestRelativeDateDecoding()
 		ExpectTrue(dh.OffsetDate(dtExpect, -4, DHU_YEARS));
 		ExpectEQ(date, dtExpect);
 	}
+	
+	// -----------------------------------------------------------------------
+	
+	EndTest();
+}
+void CDateHelperTest::TestTruncateSeconds()
+{
+	BeginTest(_T("CDateHelperTest::TruncateSeconds"));
+	
+	const COleDateTime dtPositive(45678.123456);
+	const COleDateTime dtNegative(-45678.123456);
+
+	const COleDateTime dtPositiveNoSeconds = CDateHelper::TruncateSeconds(dtPositive);
+	const COleDateTime dtNegativeNoSeconds = CDateHelper::TruncateSeconds(dtNegative);
+
+	ExpectEQ(dtPositive.GetYear(), dtPositiveNoSeconds.GetYear());
+	ExpectEQ(dtPositive.GetMonth(), dtPositiveNoSeconds.GetMonth());
+	ExpectEQ(dtPositive.GetDay(), dtPositiveNoSeconds.GetDay());
+	ExpectEQ(dtPositive.GetHour(), dtPositiveNoSeconds.GetHour());
+	ExpectEQ(dtPositive.GetMinute(), dtPositiveNoSeconds.GetMinute());
+	ExpectNE(dtPositive.GetSecond(), dtPositiveNoSeconds.GetSecond());
+
+	ExpectTrue(dtPositive.GetSecond() > 0);
+	ExpectTrue(dtPositiveNoSeconds.GetSecond() == 0);
 	
 	// -----------------------------------------------------------------------
 	

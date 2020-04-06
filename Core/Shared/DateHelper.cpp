@@ -1739,6 +1739,20 @@ COleDateTime CDateHelper::GetDateOnly(const COleDateTime& date)
 	return (double)((int)date.m_dt);
 }
 
+COleDateTime CDateHelper::TruncateSeconds(const COleDateTime& date)
+{
+	double dTime = GetTimeOnly(date).m_dt;
+	ASSERT(dTime >= 0.0); // always positive
+
+	if (dTime <= 0)
+		return date;
+
+	dTime = (int)(dTime * MINS_IN_DAY);
+	dTime /= MINS_IN_DAY;
+
+	return (GetDateOnly(date).m_dt + dTime);
+}
+
 void CDateHelper::SplitDate(const COleDateTime& date, double& dDateOnly, double& dTimeOnly)
 {
 	dDateOnly = GetDateOnly(date);

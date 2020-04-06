@@ -185,6 +185,7 @@ public:
 	static BOOL DateHasTime(const COleDateTime& date);
 	static COleDateTime GetTimeOnly(const COleDateTime& date);
 	static COleDateTime GetDateOnly(const COleDateTime& date);
+	static COleDateTime TruncateSeconds(const COleDateTime& date);
 
 	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
