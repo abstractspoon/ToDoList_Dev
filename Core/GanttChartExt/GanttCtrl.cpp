@@ -3608,7 +3608,7 @@ BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nMonth, int nYear,
 		return FALSE;
 	
 	COleDateTime dtMonthStart(nYear, nMonth, 1, 0, 0, 0);
-	COleDateTime dtMonthEnd(nYear, nMonth, nDaysInMonth, 23, 59, 59); // end of last day
+	COleDateTime dtMonthEnd = (dtMonthStart.m_dt + nDaysInMonth);
 
 	return CalcDateRect(rMonth, nDaysInMonth, dtMonthStart, dtMonthEnd, dtFrom, dtTo, rDate);
 }
@@ -3620,20 +3620,16 @@ BOOL CGanttCtrl::CalcDateRect(const CRect& rMonth, int nDaysInMonth,
 	if (dtFrom > dtTo || dtTo < dtMonthStart || dtFrom > dtMonthEnd)
 		return FALSE;
 
-	rDate.left = rMonth.left;
-	rDate.right = rMonth.right;
-	rDate.top = rMonth.top;
-	rDate.bottom = rMonth.bottom;
-
 	double dDayWidth = (rMonth.Width() / (double)nDaysInMonth);
+	rDate = rMonth;
 
 	if (dtFrom > dtMonthStart)
-		rDate.left = (rMonth.left + (int)((dtFrom.m_dt - dtMonthStart.m_dt) * dDayWidth));
+		rDate.left += (int)((dtFrom.m_dt - dtMonthStart.m_dt) * dDayWidth);
 
 	if (dtTo < dtMonthEnd)
-		rDate.right = (rDate.left + (int)((dtTo.m_dt - dtFrom.m_dt) * dDayWidth));
+		rDate.right = (rMonth.left + (int)((dtTo.m_dt - dtMonthStart.m_dt) * dDayWidth));
 
-	return (rDate.right > 0);
+	return ((rDate.right > 0) && (rDate.Width() > 0));
 }
 
 DWORD CGanttCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
@@ -3841,6 +3837,11 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 	
 	if (!GetTaskStartEndDates(gi, dtStart, dtDue))
 		return;
+
+	// Move due date to beginning of next day as necessary
+	// to avoid rounding errors
+	if (CDateHelper::IsEndOfDay(dtDue, FALSE))
+		dtDue = CDateHelper::GetStartOfNextDay(dtDue);
 
 	// check for visibility
 	CRect rBar(rMonth);
