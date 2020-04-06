@@ -253,6 +253,8 @@ paket-files/
 
 # JetBrains Rider
 .idea/
+
+# Misc
 *.sln.iml
 *.bak
 *.pdn
@@ -260,6 +262,5 @@ paket-files/
 *.vsscc
 *.ini
 *.zip
-*.bak
 *.vsscc
-*.bak
+*.resources
