@@ -342,7 +342,7 @@ DROPEFFECT CTaskListDropTarget::GetDropEffect(TLDT_HITTEST nHitTest, const TLDT_
 				if (FileMisc::HasExtension(sFilePath, _T(".TDL")) ||
 					FileMisc::HasExtension(sFilePath, _T(".XML")))
 				{
-					return DROPEFFECT_MOVE;
+					return DROPEFFECT_COPY;
 				}
 			}
 			break;

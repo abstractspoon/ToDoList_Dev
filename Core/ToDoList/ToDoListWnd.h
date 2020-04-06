@@ -364,6 +364,7 @@ protected:
 	afx_msg LRESULT OnExportThreadFinished(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyClickReminderCol(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDropFile(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCanDropFile(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnFileOpenFromUserStorage(UINT nCmdID);
 	afx_msg void OnFileSaveToUserStorage(UINT nCmdID);
 	afx_msg LRESULT OnFindApplyAsFilter(WPARAM wp, LPARAM lp);

@@ -80,6 +80,9 @@
     <Reference Include="PluginHelpers">
       <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
     </Reference>
+    <Reference Include="MSDN.HtmlEditorControl">
+      <HintPath>..\..\..\$(Configuration)\MSDN.HtmlEditorControl.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="HTMLContentControlCore.resx">
@@ -93,10 +96,6 @@
       <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
       <Name>CommandHandling</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
-      <Project>{5873DE0F-6853-4C8E-91A4-7A6861069A9A}</Project>
-      <Name>MSHTMLEditorControl</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\WebBrowserEx\WebBrowserEx.csproj">
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
       <Name>WebBrowserEx</Name>
@@ -107,7 +106,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>PublicSettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
