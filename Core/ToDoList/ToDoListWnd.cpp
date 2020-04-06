@@ -494,6 +494,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCN_DISMISSREMINDER, OnNotifyReminderModified)
 	ON_REGISTERED_MESSAGE(WM_TDCN_SNOOZEREMINDER, OnNotifyReminderModified)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropFile)
+	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropFile)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STARTTRACKING, OnTimeTrackerStartTracking)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STOPTRACKING, OnTimeTrackerStopTracking)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_RESETELAPSEDTIME, OnTimeTrackerResetElapsedTime)
@@ -10502,21 +10503,41 @@ LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM /*lp*/)
 
 LRESULT CToDoListWnd::OnDropFile(WPARAM wParam, LPARAM lParam)
 {
-	TLDT_DATA* pData = (TLDT_DATA*)wParam;
-	CWnd* pTarget = (CWnd*)lParam;
-
-	if (pTarget == this) // we're the target
+	// Sanity check
+	if (!OnCanDropFile(wParam, lParam))
 	{
-		CString sFile = pData->pFilePaths ? pData->pFilePaths->GetAt(0) : _T("");
-
-		if (FileMisc::HasExtension(sFile, _T("tdl")) || FileMisc::HasExtension(sFile, _T("xml"))) // tasklist
-		{
-			TDC_FILE nRes = OpenTaskList(sFile);
-			HandleLoadTasklistError(nRes, sFile);
-		}
+		ASSERT(0);
+		return 0L;
 	}
 
-	return 0L;
+	// else
+	TLDT_DATA* pData = (TLDT_DATA*)wParam;
+	CString sFile = pData->pFilePaths->GetAt(0);
+
+	TDC_FILE nRes = OpenTaskList(sFile);
+	HandleLoadTasklistError(nRes, sFile);
+
+	return (nRes == TDCF_SUCCESS);
+}
+
+LRESULT CToDoListWnd::OnCanDropFile(WPARAM wParam, LPARAM lParam)
+{
+	CWnd* pTarget = (CWnd*)lParam;
+
+	if (pTarget != this)
+		return FALSE;
+	
+	// One file at a time
+	TLDT_DATA* pData = (TLDT_DATA*)wParam;
+
+	if (!pData->pFilePaths || (pData->pFilePaths->GetSize() != 1))
+		return FALSE;
+
+	// Check it's a possible tasklist
+	CString sFile = pData->pFilePaths ? pData->pFilePaths->GetAt(0) : _T("");
+
+	return (FileMisc::HasExtension(sFile, _T("tdl")) || 
+			FileMisc::HasExtension(sFile, _T("xml")));
 }
 
 void CToDoListWnd::OnViewMovetasklistright() 
