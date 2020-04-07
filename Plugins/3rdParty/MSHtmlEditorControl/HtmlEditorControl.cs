@@ -4176,7 +4176,10 @@ namespace MSDN.Html.Editor
         /// </summary>
         private bool IsStringEqual(string tagText, string tagType)
         {
-            return (string.Compare(tagText, tagType, true) == 0)? true : false;
+            if ((tagText == null) || (tagType == null))
+                return false;
+
+            return (string.Compare(tagText, tagType, true) == 0);
 
         } //IsStringEqual
 
