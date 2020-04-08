@@ -5,6 +5,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -228,7 +229,11 @@ namespace MindMapUIExtension
 
 			m_MindMap.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             m_MindMap.Font = m_ControlsFont;
-            m_MindMap.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+
+            if (VisualStyleRenderer.IsSupported)
+                m_MindMap.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            else
+                m_MindMap.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
 
 			m_MindMap.SelectionChange += new SelectionChangeEventHandler(OnMindMapSelectionChange);
 			m_MindMap.DragDropChange += new DragDropChangeEventHandler(OnMindMapDragDrop);
