@@ -21,6 +21,7 @@ namespace Abstractspoon
 			public ref class FormsUtil
 			{
 			public:
+				static void SetFont(Windows::Forms::Form^ form, Drawing::Font^ font);
 				static void SetFont(Windows::Forms::Control^ ctrl, Drawing::Font^ font);
 				static void SetFont(Windows::Forms::Control::ControlCollection^ ctrls, Drawing::Font^ font);
 

@@ -15,6 +15,13 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+void FormsUtil::SetFont(Form^ form, Font^ font)
+{
+	form->Font = font;
+
+	SetFont(form->Controls, font);
+}
+
 void FormsUtil::SetFont(Control^ ctrl, Font^ font)
 {
 	ctrl->Font = font;

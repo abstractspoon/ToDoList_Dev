@@ -156,7 +156,7 @@ BOOL CUIThemeFile::LoadThemeFile(LPCTSTR szThemeFile)
 	
 	// Special fallbacks
 	if (!GetColor(pXITheme, _T("TOOLBARHOT"), crToolbarHot))
-		crToolbarHot = GraphicsMisc::Lighter(crToolbarLight, 0.05);
+		RecalcToolbarHotColor();
 
 	if (!GetColor(pXITheme, _T("WEEKEND"), crWeekend))
 		crWeekend = GetColor(crAppBackDark, 0.8f);
@@ -166,6 +166,18 @@ BOOL CUIThemeFile::LoadThemeFile(LPCTSTR szThemeFile)
 
 	//Trace();
 
+	return TRUE;
+}
+
+BOOL CUIThemeFile::RecalcToolbarHotColor()
+{
+	if (crToolbarLight == CLR_NONE)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	crToolbarHot = GraphicsMisc::Lighter(crToolbarLight, 0.05);
 	return TRUE;
 }
 

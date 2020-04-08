@@ -54,6 +54,16 @@ UITheme::RenderStyle UITheme::GetRenderStyle()
 	return UITheme::RenderStyle::Gradient;
 }
 
+void UITheme::SetRenderStyle(UITheme::RenderStyle style)
+{
+	switch (style)
+	{
+	case UITheme::RenderStyle::Gradient:			m_pTheme->nRenderStyle = UIRS_GRADIENT; break;
+	case UITheme::RenderStyle::Glass:				m_pTheme->nRenderStyle = UIRS_GLASS; break;
+	case UITheme::RenderStyle::GlassWithGradient:	m_pTheme->nRenderStyle = UIRS_GLASSWITHGRADIENT; break;
+	}
+}
+
 Windows::Media::Color UITheme::GetAppMediaColor(AppColor color)
 {
 	return GetAppMediaColor(color, 255);
@@ -64,6 +74,11 @@ Windows::Media::Color UITheme::GetAppMediaColor(AppColor color, unsigned char op
 	return ColorUtil::MediaColor::ToColor(GetColor(color), opacity);
 }
 
+void UITheme::SetAppMediaColor(AppColor color, Windows::Media::Color clr)
+{
+	SetColor(color, ColorUtil::MediaColor::ToRgb(clr));
+}
+
 System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color)
 {
 	return GetAppDrawingColor(color, 255);
@@ -72,6 +87,11 @@ System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color)
 System::Drawing::Color UITheme::GetAppDrawingColor(AppColor color, unsigned char opacity)
 {
 	return ColorUtil::DrawingColor::ToColor(GetColor(color), opacity);
+}
+
+void UITheme::SetAppDrawingColor(AppColor color, Drawing::Color clr)
+{
+	SetColor(color, ColorUtil::DrawingColor::ToRgb(clr));
 }
 
 UInt32 UITheme::GetColor(AppColor color)
@@ -96,6 +116,33 @@ UInt32 UITheme::GetColor(AppColor color)
 	}
 
 	return 0; // black
+}
+
+void UITheme::SetColor(AppColor color, UInt32 rgb)
+{
+	switch (color)
+	{
+	case UITheme::AppColor::AppBackDark:		m_pTheme->crAppBackDark		= rgb; break;
+	case UITheme::AppColor::AppBackLight:		m_pTheme->crAppBackLight	= rgb; break;
+	case UITheme::AppColor::AppLinesDark:		m_pTheme->crAppLinesDark	= rgb; break;
+	case UITheme::AppColor::AppLinesLight:		m_pTheme->crAppLinesLight	= rgb; break;
+	case UITheme::AppColor::AppText:			m_pTheme->crAppText			= rgb; break;
+	case UITheme::AppColor::MenuBack:			m_pTheme->crMenuBack		= rgb; break;
+	case UITheme::AppColor::ToolbarDark:		m_pTheme->crToolbarDark		= rgb; break;
+	case UITheme::AppColor::ToolbarLight:		m_pTheme->crToolbarLight	= rgb; break;
+	case UITheme::AppColor::ToolbarHot:			m_pTheme->crToolbarHot		= rgb; break;
+	case UITheme::AppColor::StatusBarDark:		m_pTheme->crStatusBarDark	= rgb; break;
+	case UITheme::AppColor::StatusBarLight:		m_pTheme->crStatusBarLight  = rgb; break;
+	case UITheme::AppColor::StatusBarText:		m_pTheme->crStatusBarText	= rgb; break;
+	case UITheme::AppColor::Weekends:			m_pTheme->crWeekend			= rgb; break;
+	case UITheme::AppColor::NonWorkingHours:	m_pTheme->crNonWorkingHours = rgb; break;
+	case UITheme::AppColor::Today:				m_pTheme->crToday			= rgb; break;
+	}
+}
+
+void UITheme::RecalcToolbarHotColor()
+{
+	m_pTheme->RecalcToolbarHotColor();
 }
 
 bool UITheme::HasAppColor(AppColor color)
@@ -139,6 +186,7 @@ void UITheme::DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, 
 
 	g->ReleaseHdc();
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 

@@ -34,6 +34,7 @@ namespace Abstractspoon
 				};
 
 				RenderStyle GetRenderStyle();
+				void SetRenderStyle(RenderStyle style);
 
 				enum class AppColor 
 				{ 
@@ -56,11 +57,14 @@ namespace Abstractspoon
 
 				Windows::Media::Color GetAppMediaColor(AppColor color);
 				Windows::Media::Color GetAppMediaColor(AppColor color, unsigned char opacity);
+				void SetAppMediaColor(AppColor color, Windows::Media::Color);
 
 				Drawing::Color GetAppDrawingColor(AppColor color);
 				Drawing::Color GetAppDrawingColor(AppColor color, unsigned char opacity);
+				void SetAppDrawingColor(AppColor color, Drawing::Color clr);
 
 				bool HasAppColor(AppColor color);
+				void RecalcToolbarHotColor();
 
 				static void DrawHorizontalBar(Drawing::Graphics^ g, Drawing::Rectangle^ rect, Drawing::Color topColor, Drawing::Color botColor, UITheme::RenderStyle style);
 
@@ -68,6 +72,7 @@ namespace Abstractspoon
 				CUIThemeFile* m_pTheme;
 
 				UInt32 GetColor(AppColor color);
+				void SetColor(AppColor color, UInt32 rgb);
 				void InitTheme(const UITHEME* pTheme);
 
 			};

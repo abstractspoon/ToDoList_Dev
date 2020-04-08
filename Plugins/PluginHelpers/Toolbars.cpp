@@ -183,7 +183,8 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 					{
 						auto itemRect = item->Bounds;
 
-						if (itemRect.Top > prevItemRect.Top)
+						// Look for an appreciable difference in height
+						if ((itemRect.Top - prevItemRect.Top) > (prevItemRect.Height / 2))
 						{
 							rowBottom = ((itemRect.Top + prevItemRect.Bottom) / 2);
 

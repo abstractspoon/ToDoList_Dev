@@ -28,6 +28,8 @@ public:
 	BOOL operator!= (const UITHEME& theme) const;
 
 	BOOL LoadThemeFile(LPCTSTR szThemeFile);
+	BOOL RecalcToolbarHotColor();
+
 	void Reset();
 	BOOL IsSet() const;
 
