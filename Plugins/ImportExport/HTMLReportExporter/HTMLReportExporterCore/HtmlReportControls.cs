@@ -239,6 +239,10 @@ namespace HTMLReportExporter
 			}
 
 			base.SetUITheme(new UITheme());
+
+            // Since we have no theme,  we set the toolbar's 
+            // back color to the same as its parent's back color
+            ToolBar.BackColor = ToolBar.Parent.BackColor;
 		}
 
 		virtual protected void InitialiseToolbarAttributeMenu()
