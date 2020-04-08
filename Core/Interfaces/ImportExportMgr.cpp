@@ -19,8 +19,8 @@ static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
-const LPCTSTR IMPORTER_KEY = _T("Importers");
-const LPCTSTR EXPORTER_KEY = _T("Exporters");
+const CString IMPORTER_KEY(_T("Importers"));
+const CString EXPORTER_KEY(_T("Exporters"));
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -347,7 +347,7 @@ IIMPORTEXPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskLi
 	CWaitCursor cursor;
 
 	ASSERT (m_aImporters[nByImporter] != NULL);
-	return m_aImporters[nByImporter]->Import(szSrcFile, pDestTasks, (bSilent != FALSE), pPrefs, IMPORTER_KEY);
+	return m_aImporters[nByImporter]->Import(szSrcFile, pDestTasks, (bSilent != FALSE), pPrefs, GetImporterPreferenceKey(nByImporter));
 }
 
 IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
@@ -357,7 +357,7 @@ IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks
 	if (nByExporter >= 0 && nByExporter < m_aExporters.GetSize())
 	{
 		ASSERT (m_aExporters[nByExporter] != NULL);
-		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, (bSilent != FALSE), pPrefs, EXPORTER_KEY);
+		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, (bSilent != FALSE), pPrefs, GetExporterPreferenceKey(nByExporter));
 	}
 
 	// else
@@ -371,11 +371,29 @@ IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSr
 	if (nByExporter >= 0 && nByExporter < m_aExporters.GetSize())
 	{
 		ASSERT (m_aExporters[nByExporter] != NULL);
-		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, (bSilent != FALSE), pPrefs, EXPORTER_KEY);
+		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, (bSilent != FALSE), pPrefs, GetExporterPreferenceKey(nByExporter));
 	}
 
 	// else
 	return IIER_BADFORMAT;
+}
+
+CString CImportExportMgr::GetExporterPreferenceKey(int nExporter) const
+{
+	if (nExporter >= 0 && nExporter < m_aExporters.GetSize())
+	{
+		ASSERT(m_aExporters[nExporter] != NULL);
+		return (EXPORTER_KEY + '\\' + m_aExporters[nExporter]->GetTypeID());
+	}
+}
+
+CString CImportExportMgr::GetImporterPreferenceKey(int nImporter) const
+{
+	if (nImporter >= 0 && nImporter < m_aImporters.GetSize())
+	{
+		ASSERT(m_aImporters[nImporter] != NULL);
+		return (IMPORTER_KEY + '\\' + m_aImporters[nImporter]->GetTypeID());
+	}
 }
 
 int CImportExportMgr::FindImporterByPath(LPCTSTR szFilePath) const

@@ -1199,6 +1199,13 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 			}
 		}
 	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("8.0")) < 0)
+	{
+		// Each importer and exporter now gets its own preference section
+		prefs.DeleteProfileSection(_T("Exporters"));
+		prefs.DeleteProfileSection(_T("Importers"));
+	}
 }
 
 int CToDoListApp::DoMessageBox(LPCTSTR lpszPrompt, UINT nType, UINT /*nIDPrompt*/) 
