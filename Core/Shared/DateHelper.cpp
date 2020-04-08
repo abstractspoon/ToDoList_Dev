@@ -28,6 +28,7 @@ const double ONE_MINUTE = (1.0 / (24 * 60));
 const float  ONE_SECOND	= (1.0f / (24 * 60 * 60)); // intentionally 'float' for less precision
 const double END_OF_DAY = (1.0 - ONE_SECOND);
 const double START_OF_DAY = ONE_SECOND;
+const double MINS_IN_DAY = (24 * 60);
 
 //////////////////////////////////////////////////////////////////////
 
