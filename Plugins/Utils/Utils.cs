@@ -452,6 +452,10 @@ namespace Abstractspoon.Tdl.PluginHelpers
 							return String.Empty;
 					}
 
+					if (string.IsNullOrEmpty(m_UiName))
+						return license;
+
+					// else
 					return String.Format("{0} ({1})", license, m_UiName);
 				}
 			}
