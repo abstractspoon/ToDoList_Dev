@@ -10,6 +10,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "..\shared\mapex.h"
+#include "..\shared\DateHelper.h"
 
 #include "..\Interfaces\ITaskList.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -81,6 +82,45 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct TASKCALFUTUREITEM : public TASKCALITEM
+{
+	// Just so we can override TASKCALITEM::dwTaskID
+	TASKCALFUTUREITEM(const TASKCALITEM& tciOrg, DWORD dwFutureID, const COleDateTimeRange& dtRange);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct TASKCALFUTUREDATES
+{
+	// Range within which to retrieve occurrences
+	COleDateTimeRange dtRange;
+
+	// Occurrences found within range
+	static const int MAXFUTUREITEMS = 256;
+
+	int nNumOccurrences;
+	COleDateTimeRange dtOccurrences[MAXFUTUREITEMS];
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTaskCalItemMap : public CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&>
+{
+public:
+	virtual ~CTaskCalItemMap();
+
+	void RemoveAll();
+	void RemoveKey(DWORD dwTaskID);
+
+	TASKCALITEM* GetTaskItem(DWORD dwTaskID) const;
+	TASKCALITEM* GetNextTask(POSITION& pos) const;
+
+	DWORD GetNextTaskID(POSITION& pos) const;
+	BOOL HasTask(DWORD dwTaskID) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTaskCalItemArray : public CArray<TASKCALITEM*, TASKCALITEM*&>
 {
 public:
@@ -94,7 +134,6 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-typedef CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&> CTaskCalItemMap;
 typedef CSet<double> CSpecialDateSet;
 
 /////////////////////////////////////////////////////////////////////////////

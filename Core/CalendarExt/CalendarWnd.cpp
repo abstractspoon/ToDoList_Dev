@@ -95,6 +95,7 @@ BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_VISIBLEWEEKCHANGE, OnBigCalendarNotifyVisibleWeekChange)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_PREFSHELP, OnBigCalendarPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_CALENDAR_GETTASKICON, OnBigCalendarGetTaskIcon)
+	ON_REGISTERED_MESSAGE(WM_CALENDAR_GETTASKFUTUREDATES, OnBigCalendarGetTaskFutureDates)
 	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
@@ -854,3 +855,54 @@ LRESULT CCalendarWnd::OnBigCalendarGetTaskIcon(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_GETTASKICON, wp, lp);
 }
+
+
+LRESULT CCalendarWnd::OnBigCalendarGetTaskFutureDates(WPARAM wp, LPARAM lp)
+{
+	if (!wp || !lp)
+	{
+		ASSERT(0);
+		return 0L;
+	}
+
+	TASKCALFUTUREDATES* pFutureDates = (TASKCALFUTUREDATES*)lp;
+	IUINEXTTASKOCCURRENCES iuiNext;
+
+	// Package up range
+	if (!CDateHelper::GetTimeT64(pFutureDates->dtRange.GetStart(), iuiNext.tRangeStart))
+	{
+		ASSERT(0);
+		return 0L;
+	}
+
+	if (!CDateHelper::GetTimeT64(pFutureDates->dtRange.GetEndInclusive(), iuiNext.tRangeEnd))
+	{
+		ASSERT(0);
+		return 0L;
+	}
+
+	if (!GetParent()->SendMessage(WM_IUI_GETNEXTTASKOCCURRENCES, wp, (LPARAM)&iuiNext) ||
+		!iuiNext.nNumOccurrences)
+	{
+		// No occurrences
+		return 0L;
+	}
+	 
+	// Unpack occurrences
+	int nNumSrc = iuiNext.nNumOccurrences, nNumDest = 0;
+
+	for (int nItem = 0; nItem < nNumSrc; nItem++)
+	{
+		COleDateTime dtStart = CDateHelper::GetDate(iuiNext.occurrences[nItem].tStart);
+		COleDateTime dtEnd = CDateHelper::GetDate(iuiNext.occurrences[nItem].tEnd);
+
+		if (pFutureDates->dtOccurrences[nNumDest].Set(dtStart, dtEnd, TRUE))
+			nNumDest++;
+	}
+
+	ASSERT(nNumDest);
+	pFutureDates->nNumOccurrences = nNumDest;
+	
+	return nNumDest;
+}
+

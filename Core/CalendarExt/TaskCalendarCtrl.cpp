@@ -15,6 +15,7 @@
 #include "..\Shared\autoflag.h"
 #include "..\Shared\enimagelist.h"
 #include "..\Shared\WorkingWeek.h"
+#include "..\Shared\ScopedTimer.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -331,7 +332,7 @@ void CTaskCalendarCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 	mapIDs.Add(pTasks->GetTaskID(hTask));
 	
 	// children
-	BuildTaskMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);
+	BuildTaskMap(pTasks, pTasks->GetFirstTask(hTask), mapIDs, TRUE);  // RECURSIVE CALL
 	
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -341,7 +342,7 @@ void CTaskCalendarCtrl::BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 		while (hSibling)
 		{
 			// FALSE == not siblings
-			BuildTaskMap(pTasks, hSibling, mapIDs, FALSE);
+			BuildTaskMap(pTasks, hSibling, mapIDs, FALSE);  // RECURSIVE CALL
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
@@ -354,20 +355,15 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 
 	// traverse the data looking for items that do not 
 	// exist in pTasks and delete them
-	POSITION pos = m_mapData.GetStartPosition();
-	DWORD dwTaskID = 0;
-	TASKCALITEM* pTCI = NULL;
 	BOOL bChange = FALSE;
+	POSITION pos = m_mapData.GetStartPosition();
 
 	while (pos)
 	{
-		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
-		ASSERT(pTCI);
-		ASSERT(pTCI->GetTaskID() == dwTaskID);
+		DWORD dwTaskID = m_mapData.GetNextTaskID(pos);
 
 		if (!mapIDs.Has(dwTaskID))
 		{
-			delete pTCI;
 			m_mapData.RemoveKey(dwTaskID);
 
 			// clear selection if necessary
@@ -390,11 +386,13 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 
 	BOOL bChange = FALSE;
 
-	// Not interested in references
+	DWORD dwTaskID = pTasks->GetTaskID(hTask);
+	m_dwMaximumTaskID = max(m_dwMaximumTaskID, dwTaskID);
+
+	// Not interested in references or their subtasks
+	// which can also only be references
 	if (!pTasks->IsTaskReference(hTask))
 	{
-		DWORD dwTaskID = pTasks->GetTaskID(hTask);
-
 		if (HasTask(dwTaskID)) 
 		{
 			TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
@@ -464,13 +462,14 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	if (hTask == NULL)
 		return;
 
+	DWORD dwTaskID = pTasks->GetTaskID(hTask);
+	m_dwMaximumTaskID = max(m_dwMaximumTaskID, dwTaskID);
+	
 	// Not interested in references
 	if (pTasks->IsTaskReference(hTask))
 		return;
 
 	// Only interested in new tasks
-	DWORD dwTaskID = pTasks->GetTaskID(hTask);
-
 	if (!HasTask(dwTaskID))
 	{
 		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, m_dwOptions);
@@ -534,18 +533,9 @@ int CTaskCalendarCtrl::CalcRequiredTaskFontPointSize() const
 
 void CTaskCalendarCtrl::DeleteData()
 {
-	POSITION pos = m_mapData.GetStartPosition();
-	DWORD dwTaskID = 0;
-	TASKCALITEM* pTCI = NULL;
-
-	while (pos)
-	{
-		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
-		delete pTCI;
-	}
-
 	m_mapData.RemoveAll();
 	m_mapRecurringTaskIDs.RemoveAll();
+	m_dwMaximumTaskID = 0;
 }
 
 void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
@@ -1218,25 +1208,79 @@ CTaskCalItemArray* CTaskCalendarCtrl::GetCellTasks(int nRow, int nCol)
 
 int CTaskCalendarCtrl::RebuildCellTasks()
 {
+	CScopedTraceTimer timing(_T("CTaskCalendarCtrl::RebuildCellTasks()"));
+
+	// Rebuild future occurrences first because these are
+	// needed for building the cell tasks
+	RebuildFutureOccurrences();
+	
+	// Now rebuild the cell tasks
 	int nTotal = 0;
 
-	if (m_mapData.GetCount())
+	for (int i = 0; i < CALENDAR_MAX_ROWS; i++)
 	{
-		for(int i=0; i<CALENDAR_MAX_ROWS ; i++)
+		for (int u = 0; u < CALENDAR_NUM_COLUMNS; u++)
 		{
-			for(int u=0; u<CALENDAR_NUM_COLUMNS ; u++)
-			{
-				CCalendarCell* pCell = GetCell(i, u);
-				ASSERT(pCell);
+			CCalendarCell* pCell = GetCell(i, u);
+			ASSERT(pCell);
 
-				nTotal += RebuildCellTasks(pCell);
-			}
+			nTotal += RebuildCellTasks(pCell);
 		}
 	}
 
+	// Finally rebuild the temporary cell draw info
 	RebuildCellTaskDrawInfo();
 
 	return nTotal;
+}
+
+void CTaskCalendarCtrl::RebuildFutureOccurrences()
+{
+	m_mapFutureOccurrences.RemoveAll();
+
+	if (m_mapRecurringTaskIDs.GetCount())
+	{
+		// Go through all the known recurring tasks to see if any 
+		// of them have future occurrences within the visible cells
+		TASKCALFUTUREDATES dtFuture;
+		VERIFY(dtFuture.dtRange.Set(GetMinDate(), GetMaxDate()));
+
+		POSITION pos = m_mapRecurringTaskIDs.GetStartPosition();
+		DWORD dwNextFutureTaskID = (((m_dwMaximumTaskID / 1000) + 1) * 1000);
+
+		while (pos)
+		{
+			DWORD dwTaskID = m_mapRecurringTaskIDs.GetNext(pos);
+			ASSERT(dwTaskID);
+
+			TASKCALITEM* pTCIReal = m_mapData.GetTaskItem(dwTaskID);
+
+			if (!pTCIReal)
+			{
+				ASSERT(0);
+				continue;
+			}
+
+			if (pTCIReal->IsDone(FALSE))
+				continue;
+
+			// This is the potentially expensive bit
+			if (!GetParent()->SendMessage(WM_CALENDAR_GETTASKFUTUREDATES, dwTaskID, (LPARAM)&dtFuture))
+				continue;
+
+			// Create new temporary tasks outside the range
+			// of real tasks with future dates and new IDs
+			int nItem = dtFuture.nNumOccurrences;
+
+			while (nItem--)
+			{
+				TASKCALITEM* pTCIFuture = new TASKCALFUTUREITEM(*pTCIReal, dwNextFutureTaskID, dtFuture.dtOccurrences[nItem]);
+				m_mapFutureOccurrences[dwNextFutureTaskID];
+
+				dwNextFutureTaskID++;
+			}
+		}
+	}
 }
 
 void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
@@ -1244,44 +1288,44 @@ void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 	m_nMaxDayTaskCount = 0;
 	m_aContinuousDrawInfo.RemoveAll();
 
-	if (m_mapData.GetCount())
+	if (m_mapData.GetCount() == 0)
+		return;
+
+	for (int i = 0; i < CALENDAR_MAX_ROWS; i++)
 	{
-		for(int i=0; i<CALENDAR_MAX_ROWS ; i++)
+		for (int u = 0; u < CALENDAR_NUM_COLUMNS; u++)
 		{
-			for(int u=0; u<CALENDAR_NUM_COLUMNS ; u++)
+			CTaskCalItemArray* pTasks = GetCellTasks(i, u);
+			ASSERT(pTasks);
+
+			if (pTasks)
 			{
-				CTaskCalItemArray* pTasks = GetCellTasks(i, u);
-				ASSERT(pTasks);
-
-				if (pTasks)
+				// now go thru the list and set the position of each item 
+				// if not already done
+				if (HasOption(TCCO_DISPLAYCONTINUOUS))
 				{
-					// now go thru the list and set the position of each item 
-					// if not already done
-					if (HasOption(TCCO_DISPLAYCONTINUOUS))
+					int nMaxPos = 0;
+
+					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
 					{
-						int nMaxPos = 0;
+						const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
+						ASSERT(pTCI);
 
-						for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
-						{
-							const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
-							ASSERT(pTCI);
+						DWORD dwTaskID = pTCI->GetTaskID();
+						CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
 
-							DWORD dwTaskID = pTCI->GetTaskID();
-							CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
+						if (cdi.nVertPos == -1)
+							cdi.nVertPos = max(nMaxPos, nTask);
 
-							if (cdi.nVertPos == -1)
-								cdi.nVertPos = max(nMaxPos, nTask);
-
-							nMaxPos = max(nMaxPos, (cdi.nVertPos + 1));
-						}
-
-						m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, nMaxPos);
+						nMaxPos = max(nMaxPos, (cdi.nVertPos + 1));
 					}
-					else
-					{
-						// else pos is just task index
-						m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, pTasks->GetSize());
-					}
+
+					m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, nMaxPos);
+				}
+				else
+				{
+					// else pos is just task index
+					m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, pTasks->GetSize());
 				}
 			}
 		}
@@ -1292,22 +1336,35 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell)
 {
 	ASSERT(pCell);
 
-#ifdef _DEBUG
-	int nDay = pCell->date.GetDay();
-	int nMonth = pCell->date.GetMonth();
-#endif
-
 	CTaskCalItemArray* pTasks = GetCellTasks(pCell);
 	pTasks->RemoveAll();
 
-	double dCellStart = pCell->date, dCellEnd = dCellStart + 1.0;
-	POSITION pos = m_mapData.GetStartPosition();
-	DWORD dwTaskID = 0;
-	TASKCALITEM* pTCI = NULL;
+	// 'Real' tasks
+	AddTasksToCell(m_mapData, pCell->date, pTasks);
+
+	// Future task occurrences
+	AddTasksToCell(m_mapFutureOccurrences, pCell->date, pTasks);
+
+	// Sort them in order of task start date
+	pTasks->SortItems(m_nSortBy, m_bSortAscending);
+
+	return pTasks->GetSize();
+}
+
+void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const COleDateTime& dtCell, CTaskCalItemArray* pTasks)
+{
+#ifdef _DEBUG
+	int nDay = dtCell.GetDay();
+	int nMonth = dtCell.GetMonth();
+#endif
+
+	double dCellStart = dtCell, dCellEnd = (dCellStart + 1.0);
+	POSITION pos = mapTasks.GetStartPosition();
 
 	while (pos)
 	{
-		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
+		TASKCALITEM* pTCI = mapTasks.GetNextTask(pos);
+		ASSERT(pTCI);
 
 		// ignore tasks with both start and end dates calculated
 		if (!pTCI->IsValid())
@@ -1320,7 +1377,6 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell)
 		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
 			continue;
 
-		// draw continuous either if the flag is set or the item is selected
 		if (HasOption(TCCO_DISPLAYCONTINUOUS))
 		{
 			if ((pTCI->GetAnyStartDate().m_dt < dCellEnd) && 
@@ -1362,10 +1418,6 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell)
 			}
 		}
 	}
-
-	pTasks->SortItems(m_nSortBy, m_bSortAscending);
-
-	return pTasks->GetSize();
 }
 
 DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient) const

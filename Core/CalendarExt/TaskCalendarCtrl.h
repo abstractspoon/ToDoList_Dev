@@ -75,6 +75,9 @@ public:
 
 protected:
 	CTaskCalItemMap m_mapData;
+	CTaskCalItemMap m_mapFutureOccurrences;
+	CDWordSet m_mapRecurringTaskIDs;
+	TASKCALITEM m_tciPreDrag;
 
 	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
 	BOOL m_bReadOnly;
@@ -87,7 +90,7 @@ protected:
 
 	DWORD m_dwSelectedTaskID;
 	DWORD m_dwOptions;
-	TASKCALITEM m_tciPreDrag;
+	DWORD m_dwMaximumTaskID;
 	CPoint m_ptDragOrigin;
 	int m_nCellVScrollPos;
 	CFont m_fontAltText;
@@ -95,7 +98,6 @@ protected:
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
-	CDWordSet m_mapRecurringTaskIDs;
 	COLORREF m_crWeekend, m_crToday; // Grid color handled by base class
 
 	struct CONTINUOUSDRAWINFO
@@ -216,6 +218,8 @@ protected:
 	int RebuildCellTasks();
 	int RebuildCellTasks(CCalendarCell* pCell);
 	void RebuildCellTaskDrawInfo();
+	void RebuildFutureOccurrences();
+	void AddTasksToCell(const CTaskCalItemMap& mapTasks, const COleDateTime& dtCell, CTaskCalItemArray* pTasks);
 
 	// helpers
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);

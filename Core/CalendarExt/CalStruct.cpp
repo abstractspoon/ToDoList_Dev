@@ -480,6 +480,93 @@ void TASKCALITEM::ReformatName()
 
 /////////////////////////////////////////////////////////////////////////////
 
+TASKCALFUTUREITEM::TASKCALFUTUREITEM(const TASKCALITEM& tciOrg, DWORD dwFutureID, const COleDateTimeRange& dtRange)
+	: TASKCALITEM(tciOrg)
+{
+	ASSERT(!tciOrg.IsDone(FALSE));
+
+	dwTaskID = dwFutureID;
+	dtStart = dtRange.GetStart();
+	dtDue = dtRange.GetEndInclusive();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+CTaskCalItemMap::~CTaskCalItemMap()
+{
+	RemoveAll();
+}
+
+void CTaskCalItemMap::RemoveAll()
+{
+	POSITION pos = GetStartPosition();
+	DWORD dwTaskID = 0;
+	TASKCALITEM* pTCI = NULL;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pTCI);
+		delete pTCI;
+	}
+
+	CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&>::RemoveAll();
+}
+
+void CTaskCalItemMap::RemoveKey(DWORD dwTaskID)
+{
+	delete GetTaskItem(dwTaskID);
+
+	CMap<DWORD, DWORD, TASKCALITEM*, TASKCALITEM*&>::RemoveKey(dwTaskID);
+
+}
+
+TASKCALITEM* CTaskCalItemMap::GetTaskItem(DWORD dwTaskID) const
+{
+	TASKCALITEM* pTCI = NULL;
+	VERIFY(!Lookup(dwTaskID, pTCI) || pTCI);
+
+	return pTCI;
+}
+
+TASKCALITEM* CTaskCalItemMap::GetNextTask(POSITION& pos) const
+{
+	if (!pos)
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	DWORD dwTaskID = 0;
+	TASKCALITEM* pTCI = NULL;
+
+	GetNextAssoc(pos, dwTaskID, pTCI);
+
+	return pTCI;
+}
+
+DWORD CTaskCalItemMap::GetNextTaskID(POSITION& pos) const
+{
+	if (!pos)
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	DWORD dwTaskID = 0;
+	TASKCALITEM* pTCI = NULL;
+
+	GetNextAssoc(pos, dwTaskID, pTCI);
+
+	return dwTaskID;
+}
+
+BOOL CTaskCalItemMap::HasTask(DWORD dwTaskID) const
+{
+	return (GetTaskItem(dwTaskID) != NULL);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 // Used temporarily by CompareItems
 static TDC_ATTRIBUTE s_nSortBy = TDCA_NONE;
 static BOOL s_bSortAscending = TRUE;

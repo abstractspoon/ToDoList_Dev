@@ -9,19 +9,22 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // WPARAM = Hit test, LPARAM = Task ID
-const UINT WM_CALENDAR_DATECHANGE	= ::RegisterWindowMessage(_T("WM_CALENDAR_DATECHANGE"));
+const UINT WM_CALENDAR_DATECHANGE			= ::RegisterWindowMessage(_T("WM_CALENDAR_DATECHANGE"));
 
 // WPARAM = 0, LPARAM = Task ID
-const UINT WM_CALENDAR_SELCHANGE	= ::RegisterWindowMessage(_T("WM_CALENDAR_SELCHANGE"));
+const UINT WM_CALENDAR_SELCHANGE			= ::RegisterWindowMessage(_T("WM_CALENDAR_SELCHANGE"));
 
 // WPARAM = Drag Mode, LPARAM = Task ID
-const UINT WM_CALENDAR_DRAGCHANGE	= ::RegisterWindowMessage(_T("WM_CALENDAR_DRAGCHANGE"));
+const UINT WM_CALENDAR_DRAGCHANGE			= ::RegisterWindowMessage(_T("WM_CALENDAR_DRAGCHANGE"));
 
 // WPARAM = , LPARAM = 
-const UINT WM_CALENDAR_PREFSHELP	= ::RegisterWindowMessage(_T("WM_CALENDAR_PREFSHELP"));
+const UINT WM_CALENDAR_PREFSHELP			= ::RegisterWindowMessage(_T("WM_CALENDAR_PREFSHELP"));
 
 // WPARAM = LPCTSTR (Task Icon), LPARAM = int* (imageIndex), return HIMAGELIST
-const UINT WM_CALENDAR_GETTASKICON	= ::RegisterWindowMessage(_T("WM_CALENDAR_GETTASKICON"));
+const UINT WM_CALENDAR_GETTASKICON			= ::RegisterWindowMessage(_T("WM_CALENDAR_GETTASKICON"));
+
+// WPARAM = Task ID, LPARAM = TASKCALFUTUREDATES*
+const UINT WM_CALENDAR_GETTASKFUTUREDATES	= ::RegisterWindowMessage(_T("WM_CALENDAR_GETTASKFUTUREDATES"));
 
 /////////////////////////////////////////////////////////////////////////////
 
