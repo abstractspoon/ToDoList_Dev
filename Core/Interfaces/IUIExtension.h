@@ -279,7 +279,7 @@ struct IUINEXTTASKOCCURRENCES
 	__int64 tRangeStart;
 	__int64 tRangeEnd;
 
-	// Ocurrences found within range
+	// Occurrences found within range
 	struct IUITASKOCCURRENCE
 	{
 		__int64 tStart;
