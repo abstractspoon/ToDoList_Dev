@@ -380,20 +380,28 @@ IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSr
 
 CString CImportExportMgr::GetExporterPreferenceKey(int nExporter) const
 {
+	CString sKey(EXPORTER_KEY);
+
 	if (nExporter >= 0 && nExporter < m_aExporters.GetSize())
 	{
 		ASSERT(m_aExporters[nExporter] != NULL);
-		return (EXPORTER_KEY + '\\' + m_aExporters[nExporter]->GetTypeID());
+		sKey += ('\\' + m_aExporters[nExporter]->GetTypeID());
 	}
+
+	return sKey;
 }
 
 CString CImportExportMgr::GetImporterPreferenceKey(int nImporter) const
 {
+	CString sKey(IMPORTER_KEY);
+
 	if (nImporter >= 0 && nImporter < m_aImporters.GetSize())
 	{
 		ASSERT(m_aImporters[nImporter] != NULL);
-		return (IMPORTER_KEY + '\\' + m_aImporters[nImporter]->GetTypeID());
+		sKey += ('\\' + m_aImporters[nImporter]->GetTypeID());
 	}
+
+	return sKey;
 }
 
 int CImportExportMgr::FindImporterByPath(LPCTSTR szFilePath) const
