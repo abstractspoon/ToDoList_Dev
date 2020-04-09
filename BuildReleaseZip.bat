@@ -79,6 +79,7 @@ REM Some .Net Plugins are obfuscated first
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WebBrowserEx.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\RichEditExtensions.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\CommandHandling.dll
 
 REM Copy latest Resources
 del %OUTDIR%\Resources\ /Q /S
