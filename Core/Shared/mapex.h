@@ -275,68 +275,70 @@ public:
 
 //////////////////////////////////////////////////////////////////////
 
-template <class VALUE>
-class CMapStringToContainer : protected CMap<CString, LPCTSTR, VALUE*, VALUE*&>
+template <class ARG, class ARG_KEY, class VALUE>
+class CContainerMap : protected CMap<ARG, ARG_KEY, VALUE*, VALUE*&>
 {
-public:
-	CMapStringToContainer()
+	// To be derived from only
+protected:
+	CContainerMap()
 	{
 	}
 
-	CMapStringToContainer(UINT hashSize)
+public:
+	CContainerMap(UINT hashSize)
 	{
 		if (hashSize)
 			InitHashTable(hashSize);
 	}
-	
-	virtual ~CMapStringToContainer()
+
+	virtual ~CContainerMap()
 	{
 		RemoveAll();
 	}
 
 	POSITION GetStartPosition() const
 	{
-		return CMap<CString, LPCTSTR, VALUE*, VALUE*&>::GetStartPosition();
+		return CMap<ARG, ARG_KEY, VALUE*, VALUE*&>::GetStartPosition();
 	}
 
-	void GetNextAssoc(POSITION& rNextPosition, CString& rKey, VALUE*& rValue) const
+	void GetNextAssoc(POSITION& rNextPosition, ARG& rKey, VALUE*& rValue) const
 	{
-		CMap<CString, LPCTSTR, VALUE*, VALUE*&>::GetNextAssoc(rNextPosition, rKey, rValue);
+		CMap<ARG, ARG_KEY, VALUE*, VALUE*&>::GetNextAssoc(rNextPosition, rKey, rValue);
 	}
-	
-	const VALUE* GetMapping(const CString& str) const
+
+	const VALUE* GetMapping(const ARG& rKey) const
 	{
-		return const_cast<CMapStringToContainer*>(this)->GetMapping(str);
+		return const_cast<CContainerMap*>(this)->GetMapping(rKey);
 	}
-	
-	BOOL HasMapping(const CString& str) const
+
+	BOOL HasMapping(const ARG& rKey) const
 	{
-		return (GetMapping(str) != NULL);
+		return (GetMapping(rKey) != NULL);
 	}
-	
-	VALUE* GetMapping(const CString& str)
+
+	VALUE* GetMapping(const ARG& rKey)
 	{
 		VALUE* pMapping = NULL;
-		
-		if (!Lookup(str, pMapping))
+
+		if (!Lookup(rKey, pMapping))
 			return NULL;
-		
+
 		ASSERT(pMapping);
 		return pMapping;
 	}
 
-	VALUE* GetAddMapping(const CString& str)
+	VALUE* GetAddMapping(const ARG& rKey)
 	{
 		VALUE* pMapping = NULL;
-		
-		if (Lookup(str, pMapping))
+
+		if (Lookup(rKey, pMapping))
 		{
 			ASSERT(pMapping);
 			return pMapping;
 		}
 
 		pMapping = new VALUE;
-		SetAt(str, pMapping);
+		SetAt(rKey, pMapping);
 
 		return pMapping;
 	}
@@ -348,53 +350,67 @@ public:
 
 	int GetCount() const
 	{
-		return CMap<CString, LPCTSTR, VALUE*, VALUE*&>::GetCount();
+		return CMap<ARG, ARG_KEY, VALUE*, VALUE*&>::GetCount();
 	}
 
 	void RemoveAll()
 	{
-		CString str;
+		ARG rKey;
 		VALUE* pMapping = NULL;
 
 		POSITION pos = GetStartPosition();
 
 		while (pos)
 		{
-			GetNextAssoc(pos, str, pMapping);
+			GetNextAssoc(pos, rKey, pMapping);
 
 			ASSERT(pMapping);
-			ASSERT(!str.IsEmpty());
+			ASSERT(!rKey.IsEmpty());
 
 			delete pMapping;
 		}
 
-		CMap<CString, LPCTSTR, VALUE*, VALUE*&>::RemoveAll();
+		CMap<ARG, ARG_KEY, VALUE*, VALUE*&>::RemoveAll();
 	}
-	
-	void RemoveKey(const CString& str)
+
+	void RemoveKey(const ARG& rKey)
 	{
 		VALUE* pMapping = NULL;
-		
-		if (Lookup(str, pMapping))
+
+		if (Lookup(rKey, pMapping))
 		{
 			ASSERT(pMapping);
 			delete pMapping;
 
-			CMap<CString, LPCTSTR, VALUE*, VALUE*&>::RemoveKey(str);
+			CMap<ARG, ARG_KEY, VALUE*, VALUE*&>::RemoveKey(rKey);
 		}
 	}
 
 	// overload new/delete because we've hidden the base class
 	void* operator new (size_t size)
 	{
-		return CMap<CString, LPCTSTR, VALUE*, VALUE*&>::operator new(size);
+		return CMap<ARG, ARG_KEY, VALUE*, VALUE*&>::operator new(size);
 	}
 
 	void operator delete (void *p)
 	{
-		CMap<CString, LPCTSTR, VALUE*, VALUE*&>::operator delete(p);
+		CMap<ARG, ARG_KEY, VALUE*, VALUE*&>::operator delete(p);
 	}
 
+};
+
+//////////////////////////////////////////////////////////////////////
+
+template <class VALUE>
+class CMapStringToContainer : public CContainerMap<CString, LPCTSTR, VALUE>
+{
+};
+
+//////////////////////////////////////////////////////////////////////
+
+template <class VALUE>
+class CMapDWordToContainer : public CContainerMap<DWORD, DWORD, VALUE>
+{
 };
 
 //////////////////////////////////////////////////////////////////////
