@@ -2254,7 +2254,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 			}
 
 			// Rebuild the cell tasks because the task may have moved cells
-			// but without rebiuilding future tasks because we do that at the 
+			// but without rebuilding future tasks because we do that at the 
 			// end of the drag only
 			RebuildCellTasks(FALSE);
 
