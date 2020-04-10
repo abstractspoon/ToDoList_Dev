@@ -1830,6 +1830,71 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	return TRUE;
 }
 
+BOOL CTDCTaskCalculator::HasCalculatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+{
+	POSITION pos = mapAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		if (IsCalculatedAttribute(mapAttribIDs.GetNext(pos), aAttribDefs))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+{
+	switch (nAttribID)
+	{
+	case TDCA_DONETIME:
+	case TDCA_DONEDATE:		
+		return m_data.HasStyle(TDCS_TREATSUBCOMPLETEDASDONE);
+
+	case TDCA_DUETIME:
+	case TDCA_DUEDATE:		
+		return (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || m_data.HasStyle(TDCS_USELATESTDUEDATE));
+
+	case TDCA_STARTTIME:
+	case TDCA_STARTDATE:	
+		return (m_data.HasStyle(TDCS_USEEARLIESTSTARTDATE) || m_data.HasStyle(TDCS_USELATESTSTARTDATE));
+
+	case TDCA_PRIORITY:		
+		return m_data.HasStyle(TDCS_USEHIGHESTPRIORITY);
+
+	case TDCA_RISK:			
+		return m_data.HasStyle(TDCS_USEHIGHESTRISK);
+
+	case TDCA_PERCENT:		
+		return m_data.HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION);
+
+	case TDCA_FLAG:			
+		return m_data.HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS);
+
+	case TDCA_COST:
+	case TDCA_LASTMODDATE:
+	case TDCA_RECENTMODIFIED:
+	case TDCA_LASTMODBY:
+	case TDCA_SUBTASKDONE:
+	case TDCA_TIMESPENT:
+	case TDCA_TIMEEST:		
+	case TDCA_CUSTOMATTRIB_ALL:
+		return TRUE;
+
+	default:
+		// check custom attributes
+		{
+			int nAttrib = aAttribDefs.Find(nAttribID);
+
+			if (nAttrib != -1)
+				return aAttribDefs[nAttrib].IsCalculated();
+		}
+	}
+
+	// all else
+	return FALSE;
+}
+
 BOOL CTDCTaskCalculator::IsTaskReference(DWORD dwTaskID) const
 {
 	return (m_data.GetTaskReferenceID(dwTaskID) != 0);
@@ -2012,7 +2077,7 @@ int CTDCTaskCalculator::GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUC
 		{
 			nPercent = 100;
 		}
-		else if(m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		else if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
 			nPercent = GetPercentFromTime(pTDI, pTDS);
 		}

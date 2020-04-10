@@ -2798,8 +2798,6 @@ void CTDLTaskTreeCtrl::RefreshItemBoldState(HTREEITEM hti, BOOL bAndChildren)
 
 void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
 {
-	// Note: Tree item map should already be up to date
-	// so we just assert on it
 	ASSERT (!mapAttribIDs.Has(TDCA_POSITION));
 
 	if (mapAttribIDs.Has(TDCA_NEWTASK))
@@ -2824,23 +2822,29 @@ void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 	
 	if (bAllowResort && ModsNeedResort(mapAttribIDs))
 	{
-		// if the mod was a task completion and the parent completed state 
-		// is based on this then we need to resort the entire tree 
-		// likewise for start dates and due dates
-		if ((mapAttribIDs.Has(TDCA_DONEDATE) && HasStyle(TDCS_TREATSUBCOMPLETEDASDONE)) ||
-			(mapAttribIDs.Has(TDCA_DUEDATE) && (HasStyle(TDCS_USEEARLIESTDUEDATE) || HasStyle(TDCS_USELATESTDUEDATE))) ||
-			(mapAttribIDs.Has(TDCA_STARTDATE) && (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE))))
+		// if parent state is not calculated from its subtask values
+		// can do an optimised sort of just the affected branches
+		if (!ModsRequireFullResort(mapAttribIDs))
 		{
-			// handled by base class
-		}
-		else // attributes that only have a local effect
-		{ 
 			ResortSelectedTaskParents();
 			bAllowResort = FALSE;
 		}
 	}
 
 	CTDLTaskCtrlBase::SetModified(mapAttribIDs, bAllowResort);
+}
+
+BOOL CTDLTaskTreeCtrl::ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const
+{
+	if (mapAttribIDs.Has(TDCA_ALL) ||
+		mapAttribIDs.Has(TDCA_UNDO) ||
+		mapAttribIDs.Has(TDCA_PASTE) ||
+		mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT))
+	{
+		return TRUE;
+	}
+	
+	return m_calculator.HasCalculatedAttribute(mapAttribIDs, m_aCustomAttribDefs);
 }
 
 BOOL CTDLTaskTreeCtrl::DoSaveToImage(CBitmap& bmImage, COLORREF crDivider)

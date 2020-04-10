@@ -233,6 +233,7 @@ protected:
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bAndParents, BOOL bUpdateList = TRUE);
+	BOOL ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const;
 
 	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
 	HTREEITEM MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
