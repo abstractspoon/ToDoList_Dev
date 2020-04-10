@@ -115,7 +115,12 @@ BOOL COleDateTimeRange::Set(const COleDateTimeRange& dtRange)
 
 BOOL COleDateTimeRange::Set(const COleDateTime& dtStart, const COleDateTime& dtEnd, BOOL bInclusive)
 {
-	if (!CDateHelper::IsDateSet(dtStart) || !CDateHelper::IsDateSet(dtEnd) || (dtEnd < dtStart))
+	if (!CDateHelper::IsDateSet(dtStart) || !CDateHelper::IsDateSet(dtEnd))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	else if (GetEndInclusive(dtEnd, bInclusive) < dtStart)
 	{
 		ASSERT(0);
 		return FALSE;

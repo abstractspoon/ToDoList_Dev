@@ -11,6 +11,8 @@
 #include "..\Shared\misc.h"
 #include "..\Shared\dialoghelper.h"
 
+#include "..\3rdParty\ColorDef.h"
+
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -481,13 +483,35 @@ void TASKCALITEM::ReformatName()
 /////////////////////////////////////////////////////////////////////////////
 
 TASKCALFUTUREITEM::TASKCALFUTUREITEM(const TASKCALITEM& tciOrg, DWORD dwFutureID, const COleDateTimeRange& dtRange)
-	: TASKCALITEM(tciOrg)
+	: 
+	TASKCALITEM(tciOrg), 
+	dwRealTaskID(0)
 {
 	ASSERT(!tciOrg.IsDone(FALSE));
+	ASSERT(dwFutureID && dtRange.IsValid());
 
+	dwRealTaskID = dwTaskID;
 	dwTaskID = dwFutureID;
 	dtStart = dtRange.GetStart();
 	dtDue = dtRange.GetEndInclusive();
+}
+
+COLORREF TASKCALFUTUREITEM::GetFillColor(BOOL /*bTextIsBack*/) const
+{
+	return CLR_NONE;
+}
+
+COLORREF TASKCALFUTUREITEM::GetBorderColor(BOOL /*bTextIsBack*/) const
+{
+	return GetTextColor(FALSE, FALSE);
+}
+
+COLORREF TASKCALFUTUREITEM::GetTextColor(BOOL /*bSelected*/, BOOL /*bTextIsBack*/) const
+{
+	HLSX crText(TASKCALITEM::GetTextColor(FALSE, FALSE));
+	crText.fLuminosity = min(crText.fLuminosity + 0.2f, 0.7f);
+
+	return crText;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -525,6 +549,7 @@ TASKCALITEM* CTaskCalItemMap::GetTaskItem(DWORD dwTaskID) const
 	TASKCALITEM* pTCI = NULL;
 	VERIFY(!Lookup(dwTaskID, pTCI) || pTCI);
 
+	ASSERT(!pTCI || (pTCI->GetTaskID() == dwTaskID));
 	return pTCI;
 }
 
@@ -563,6 +588,27 @@ DWORD CTaskCalItemMap::GetNextTaskID(POSITION& pos) const
 BOOL CTaskCalItemMap::HasTask(DWORD dwTaskID) const
 {
 	return (GetTaskItem(dwTaskID) != NULL);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+DWORD CTaskCalFutureItemMap::GetRealTaskID(DWORD dwTaskID) const
+{
+	const TASKCALITEM* pTCI = GetTaskItem(dwTaskID);
+
+	if (!pTCI)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	const TASKCALFUTUREITEM* pTCIFuture = dynamic_cast<const TASKCALFUTUREITEM*>(pTCI);
+
+	if (pTCIFuture)
+		return pTCIFuture->dwRealTaskID;
+
+	// else
+	return dwTaskID;
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -51,9 +51,9 @@ public:
 	COleDateTime GetDoneDate() const;
 	BOOL HasAnyEndDate() const;
 
-	COLORREF GetFillColor(BOOL bTextIsBack) const;
-	COLORREF GetBorderColor(BOOL bTextIsBack) const;
-	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
+	virtual COLORREF GetFillColor(BOOL bTextIsBack) const;
+	virtual COLORREF GetBorderColor(BOOL bTextIsBack) const;
+	virtual COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 	BOOL HasColor() const;
 
 	CString GetName(BOOL bFormatted = TRUE) const;
@@ -84,8 +84,13 @@ protected:
 
 struct TASKCALFUTUREITEM : public TASKCALITEM
 {
-	// Just so we can override TASKCALITEM::dwTaskID
 	TASKCALFUTUREITEM(const TASKCALITEM& tciOrg, DWORD dwFutureID, const COleDateTimeRange& dtRange);
+
+	COLORREF GetFillColor(BOOL bTextIsBack) const;
+	COLORREF GetBorderColor(BOOL bTextIsBack) const;
+	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
+
+	DWORD dwRealTaskID;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -117,6 +122,14 @@ public:
 
 	DWORD GetNextTaskID(POSITION& pos) const;
 	BOOL HasTask(DWORD dwTaskID) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTaskCalFutureItemMap : public CTaskCalItemMap
+{
+public:
+	DWORD GetRealTaskID(DWORD dwTaskID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

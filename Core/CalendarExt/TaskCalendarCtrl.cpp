@@ -290,7 +290,8 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		break;
 		
 	case IUI_EDIT:
-		bChange = UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
+		bChange = (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) ||
+					pTasks->IsAttributeAvailable(TDCA_RECURRENCE));
 		break;
 		
 	case IUI_DELETE:
@@ -393,7 +394,7 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	// which can also only be references
 	if (!pTasks->IsTaskReference(hTask))
 	{
-		if (HasTask(dwTaskID)) 
+		if (HasTask(dwTaskID, FALSE)) // don't exclude hidden tasks
 		{
 			TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
@@ -469,9 +470,9 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	if (pTasks->IsTaskReference(hTask))
 		return;
 
-	// Only interested in new tasks
-	if (!HasTask(dwTaskID))
+	if (!HasTask(dwTaskID, FALSE)) // don't exclude hidden tasks
 	{
+		// Only interested in new tasks
 		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, m_dwOptions);
 		m_mapData[dwTaskID] = pTCI;
 
@@ -507,7 +508,7 @@ BOOL CTaskCalendarCtrl::SetVisibleWeeks(int nWeeks)
 		if (HasOption(TCCO_ADJUSTTASKHEIGHTS))
 			GraphicsMisc::VerifyDeleteObject(m_fontAltText);
 
-		UpdateCellScrollBarVisibility();
+		UpdateCellScrollBarVisibility(TRUE); // scroll to selected task
 		return TRUE;
 	}
 
@@ -606,7 +607,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 
 void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 {
-	UpdateCellScrollBarVisibility();
+	UpdateCellScrollBarVisibility(FALSE);
 	RebuildCellTaskDrawInfo();
 
 	// create alternate text font as required
@@ -717,9 +718,14 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 	if (!nNumTasks)
 		return;
+
+	// Exclude selection border from drawing
+	CRect rAvailCell(rCell);
+
+	if (bSelected)
+		rAvailCell.DeflateRect(2, 0); // not top/bottom
 	
 	// Exclude scrollbar rect from drawing
-	CRect rAvailCell(rCell);
 	BOOL bShowScroll = (IsCellScrollBarActive() && IsGridCellSelected(pCell));
 	
 	if (bShowScroll)
@@ -751,7 +757,9 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			continue;
 
 		// draw selection
-		BOOL bSelTask = (!m_bSavingToImage && (dwTaskID == m_dwSelectedTaskID));
+		DWORD dwRealTaskID = GetRealTaskID(dwTaskID);
+		BOOL bSelTask = (!m_bSavingToImage && (dwRealTaskID == m_dwSelectedTaskID));
+
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
 
 		if (bSelTask)
@@ -774,7 +782,17 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			if (rTask.right >= rAvailCell.right)
 				dwSelFlags |= GMIB_CLIPRIGHT;
 
-			GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+			GM_ITEMSTATE nState = GMIS_SELECTED;
+			
+			if (!bFocused)
+			{
+				nState = GMIS_SELECTEDNOTFOCUSED;
+			}
+			else if (dwTaskID != dwRealTaskID)
+			{
+				nState = GMIS_DROPHILITED;
+			}
+
 			crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 
 			GraphicsMisc::DrawExplorerItemSelection(pDC, *this, nState, rTask, dwSelFlags, rClip);
@@ -919,9 +937,7 @@ void CTaskCalendarCtrl::OnSetFocus(CWnd* pFocus)
 {
 	CCalendarCtrlEx::OnSetFocus(pFocus);
 
-	// Attempt to scroll the selected task into view
-	EnsureSelectedTaskVisibleIfInSelectedCell();
-
+	UpdateCellScrollBarVisibility(TRUE); // scroll to selected task
 	Invalidate(FALSE);
 }
 
@@ -929,7 +945,7 @@ void CTaskCalendarCtrl::OnKillFocus(CWnd* pFocus)
 {
 	CCalendarCtrlEx::OnKillFocus(pFocus);
 
-	UpdateCellScrollBarVisibility();
+	UpdateCellScrollBarVisibility(FALSE); // don't scroll to selected task
 	Invalidate(FALSE);
 }
 
@@ -939,7 +955,7 @@ void CTaskCalendarCtrl::DrawCellFocus(CDC* /*pDC*/, const CCalendarCell* /*pCell
 	// CCalendarCtrlEx::DrawCellFocus(pDC, pCell, rCell);
 }
 
-BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
+BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 {
 	// First determine if we need to show a vertical scrollbar
 	int nRow = -1, nCol = -1;
@@ -970,6 +986,15 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility()
 
 				nNumItems = (nMaxPos + 1);
 				bShowScrollbar = ((nNumItems * GetTaskHeight()) > rCell.Height());
+
+				// And scroll selected task into view
+				if (bEnsureSelVisible && m_dwSelectedTaskID)
+				{
+					int nFind = pTasks->FindItem(m_dwSelectedTaskID);
+
+					if (nFind != -1)
+						m_nCellVScrollPos = GetTaskVertPos(m_dwSelectedTaskID, nFind, pCell, FALSE);
+				}
 			}
 			else
 			{
@@ -1138,7 +1163,7 @@ void CTaskCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBa
 		// Notify Parent
 		GetParent()->SendMessage(WM_VSCROLL, nPos, (LPARAM)GetSafeHwnd());
 
-		UpdateCellScrollBarVisibility();
+		UpdateCellScrollBarVisibility(TRUE);
 	}
 }
 
@@ -1206,13 +1231,14 @@ CTaskCalItemArray* CTaskCalendarCtrl::GetCellTasks(int nRow, int nCol)
 	return GetCellTasks(GetCell(nRow, nCol));
 }
 
-int CTaskCalendarCtrl::RebuildCellTasks()
+int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncFutureItems)
 {
 	CScopedTraceTimer timing(_T("CTaskCalendarCtrl::RebuildCellTasks()"));
 
 	// Rebuild future occurrences first because these are
 	// needed for building the cell tasks
-	RebuildFutureOccurrences();
+	if (bIncFutureItems)
+		RebuildFutureOccurrences();
 	
 	// Now rebuild the cell tasks
 	int nTotal = 0;
@@ -1253,7 +1279,7 @@ void CTaskCalendarCtrl::RebuildFutureOccurrences()
 			DWORD dwTaskID = m_mapRecurringTaskIDs.GetNext(pos);
 			ASSERT(dwTaskID);
 
-			TASKCALITEM* pTCIReal = m_mapData.GetTaskItem(dwTaskID);
+			TASKCALITEM* pTCIReal = GetTaskCalItem(dwTaskID, FALSE); // exclude future items
 
 			if (!pTCIReal)
 			{
@@ -1275,7 +1301,7 @@ void CTaskCalendarCtrl::RebuildFutureOccurrences()
 			while (nItem--)
 			{
 				TASKCALITEM* pTCIFuture = new TASKCALFUTUREITEM(*pTCIReal, dwNextFutureTaskID, dtFuture.dtOccurrences[nItem]);
-				m_mapFutureOccurrences[dwNextFutureTaskID];
+				m_mapFutureOccurrences[dwNextFutureTaskID] = pTCIFuture;
 
 				dwNextFutureTaskID++;
 			}
@@ -1470,7 +1496,7 @@ DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) cons
 		DWORD dwTaskID = pTCI->GetTaskID();
 		ASSERT(dwTaskID);
 
-		int nTaskPos = GetTaskVertPos(dwTaskID, nTask, pCell, TRUE);
+		int nTaskPos = GetTaskVertPos(dwTaskID, nTask, pCell, IsCellScrollBarActive());
 		
 		if (nTaskPos == nPos)
 		{
@@ -1563,7 +1589,7 @@ BOOL CTaskCalendarCtrl::EnsureSelectionVisible()
 
 		if (pTasks && (pTasks->FindItem(m_dwSelectedTaskID) != -1))
 		{ 
-			EnsureSelectedTaskVisibleIfInSelectedCell();
+			UpdateCellScrollBarVisibility(TRUE); // scroll to selected task
 			return TRUE;
 		}
 	}
@@ -1622,8 +1648,7 @@ BOOL CTaskCalendarCtrl::EnsureSelectionVisible()
 		ASSERT(GetGridCell(m_dwSelectedTaskID, nRow, nCol));
 	}
 	
-	// Now ensure it is visible vertically
-	EnsureSelectedTaskVisibleIfInSelectedCell();
+	UpdateCellScrollBarVisibility(TRUE); // scroll to selected task
 	return TRUE;
 }
 
@@ -1632,39 +1657,7 @@ void CTaskCalendarCtrl::OnVisibleDateRangeChanged()
 	if (RebuildCellTasks() == 0)
 		return;
 
-	EnsureSelectedTaskVisibleIfInSelectedCell();
-}
-
-void CTaskCalendarCtrl::EnsureSelectedTaskVisibleIfInSelectedCell()
-{
-	// If the currently selected cell contains the currently
-	// selected task then scroll it into view
-	if (m_mapData.GetCount() && m_dwSelectedTaskID)
-	{
-		int nRow, nCol;
-
-		if (GetLastSelectedGridCell(nRow, nCol))
-		{
-			const CCalendarCell* pCell = GetCell(nRow, nCol);
-			ASSERT(pCell);
-
-			if (pCell)
-			{
-				const CTaskCalItemArray* pTasks = GetCellTasks(pCell);
-				ASSERT(pTasks);
-
-				if (pTasks)
-				{
-					int nTask = pTasks->FindItem(m_dwSelectedTaskID);
-
-					if (nTask != -1)
-						m_nCellVScrollPos = GetTaskVertPos(m_dwSelectedTaskID, nTask, pCell, FALSE);
-				}
-			}
-		}
-
-		UpdateCellScrollBarVisibility();
-	}
+	UpdateCellScrollBarVisibility(TRUE);// scroll to selected task
 }
 
 bool CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
@@ -1760,7 +1753,7 @@ BOOL CTaskCalendarCtrl::CalcTaskCellRect(int nTask, const CCalendarCell* pCell, 
 		return FALSE;
 
 	// check vertical (pos) intersection next
-	int nPos = GetTaskVertPos(pTCI->GetTaskID(), nTask, pCell, TRUE);
+	int nPos = GetTaskVertPos(pTCI->GetTaskID(), nTask, pCell, IsCellScrollBarActive());
 
 	if (nPos < 0)
 	{
@@ -1836,15 +1829,17 @@ CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawI
 	return m_aContinuousDrawInfo[nItem];
 }
 
-TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
+TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID, BOOL bIncFutureItems) const
 {
 	ASSERT(dwTaskID);
-	TASKCALITEM* pTCI = NULL;
+	TASKCALITEM* pTCI = m_mapData.GetTaskItem(dwTaskID);
 
-	if (!m_mapData.Lookup(dwTaskID, pTCI))
-		return NULL;
+	if (!pTCI && bIncFutureItems && (dwTaskID > m_dwMaximumTaskID))
+	{
+		pTCI = m_mapFutureOccurrences.GetTaskItem(dwTaskID);
+		ASSERT(pTCI);
+	}
 
-	ASSERT(pTCI);
 	return pTCI;
 }
 
@@ -1905,7 +1900,7 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible)
 // internal version
 BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify)
 {
-	if (!HasTask(dwTaskID))
+	if (!HasTask(dwTaskID, FALSE)) // don't exclude hidden tasks
 		return FALSE;
 
 	if (dwTaskID != GetSelectedTaskID())
@@ -1967,7 +1962,7 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	if (dwSelID)
 	{
 		SetFocus();
-		SelectTask(dwSelID, FALSE, TRUE);
+		SelectTask(GetRealTaskID(dwSelID), FALSE, TRUE);
 
 		const CCalendarCell* pCell = HitTestGridCell(point);
 		ASSERT(pCell);
@@ -1982,6 +1977,15 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	// else
 	CCalendarCtrl::OnLButtonDown(nFlags, point);
 	UpdateWindow();
+}
+
+DWORD CTaskCalendarCtrl::GetRealTaskID(DWORD dwTaskID) const
+{
+	if (m_mapFutureOccurrences.HasTask(dwTaskID))
+		return m_mapFutureOccurrences.GetRealTaskID(dwTaskID);
+
+	// else
+	return dwTaskID;
 }
 
 BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
@@ -2250,13 +2254,16 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 			}
 
 			// Rebuild the cell tasks because the task may have moved cells
-			RebuildCellTasks();
+			// but without rebiuilding future tasks because we do that at the 
+			// end of the drag only
+			RebuildCellTasks(FALSE);
 
 			// Select the cell under the mouse because we know it must contain the dragged task
 			int nRow, nCol;
 			
 			if (HitTestGridCell(ptCursor, nRow, nCol))
 				SelectGridCell(nRow, nCol);
+
 			EnsureSelectionVisible();
 		}
 		else
@@ -2337,13 +2344,20 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 		// cleanup
 		m_bDraggingStart = m_bDraggingEnd = m_bDragging = FALSE;
 		ReleaseCapture();
-		Invalidate(FALSE);
 
 		// keep parent informed
 		if (!NotifyParentDateChange(nDragWhat))
+		{
 			*pTCI = m_tciPreDrag;
+		}
+		else if (m_mapRecurringTaskIDs.Has(m_dwSelectedTaskID))
+		{
+			RebuildCellTasks();
+		}
 
+		Invalidate(FALSE);
 		NotifyParentDragChange();
+
 		return TRUE;
 	}
 
@@ -2403,6 +2417,9 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 	
 	if (dwTaskID)
 	{
+		if (m_mapFutureOccurrences.HasTask(dwTaskID))
+			return FALSE;
+
 		if (IsTaskLocked(dwTaskID))
 			return FALSE;
 
@@ -2688,7 +2705,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			!HasOption(TCCO_DISPLAYCONTINUOUS) ||
 			(GetTaskHeight() < MIN_TASK_HEIGHT))
 		{
-			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include future items
 			ASSERT(pTCI);
 
 			CRect rLabel;
@@ -2723,7 +2740,7 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 
 	// Set the font first, bold for top level items
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include future items
 
 	if (!pTCI)
 	{

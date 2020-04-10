@@ -75,7 +75,7 @@ public:
 
 protected:
 	CTaskCalItemMap m_mapData;
-	CTaskCalItemMap m_mapFutureOccurrences;
+	CTaskCalFutureItemMap m_mapFutureOccurrences;
 	CDWordSet m_mapRecurringTaskIDs;
 	TASKCALITEM m_tciPreDrag;
 
@@ -168,19 +168,19 @@ protected:
 	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const;
 
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
-	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
+	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID, BOOL bIncFutureItems = FALSE) const;
 	BOOL IsTaskLocked(DWORD dwTaskID) const;
 	BOOL IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL TaskHasDependencies(DWORD dwTaskID) const;
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
-	BOOL HasTask(DWORD dwTaskID, BOOL bExcludeHidden = FALSE) const;
+	BOOL HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const;
 
 	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const;
 	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;
 
-	BOOL UpdateCellScrollBarVisibility();
+	BOOL UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible);
 	BOOL IsCellScrollBarActive() const;
 	int GetTaskHeight() const;
 	int CalcRequiredTaskFontPointSize() const;
@@ -188,6 +188,7 @@ protected:
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
 
 	DWORD HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) const;
+	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);
@@ -203,7 +204,6 @@ protected:
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
 	bool SelectGridCell(int nRow, int nCol);
-	void EnsureSelectedTaskVisibleIfInSelectedCell();
 
 	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();
@@ -215,7 +215,7 @@ protected:
 	void RecalcDataRange();
 	void RecalcTaskDates();
 
-	int RebuildCellTasks();
+	int RebuildCellTasks(BOOL bIncFutureItems = TRUE);
 	int RebuildCellTasks(CCalendarCell* pCell);
 	void RebuildCellTaskDrawInfo();
 	void RebuildFutureOccurrences();
