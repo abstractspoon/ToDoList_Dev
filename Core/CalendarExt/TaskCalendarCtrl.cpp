@@ -1294,8 +1294,7 @@ void CTaskCalendarCtrl::RebuildFutureOccurrences()
 			if (!GetParent()->SendMessage(WM_CALENDAR_GETTASKFUTUREDATES, dwTaskID, (LPARAM)&dtFuture))
 				continue;
 
-			// Create new temporary tasks outside the range
-			// of real tasks with future dates and new IDs
+			// Create new temporary tasks for these future items
 			int nItem = dtFuture.nNumOccurrences;
 
 			while (nItem--)
