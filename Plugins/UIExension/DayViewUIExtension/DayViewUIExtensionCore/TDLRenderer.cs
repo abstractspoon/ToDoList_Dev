@@ -363,8 +363,6 @@ namespace DayViewUIExtension
                 {
                     if (longAppt)
                         rect.Height++;
-                    else
-                        rect.Width++;
 
                     UIExtension.SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height, false); // opaque
                 }
@@ -375,8 +373,11 @@ namespace DayViewUIExtension
 
                     if (taskItem.DrawBorder)
                     {
-                        if (!longAppt)
-                            rect.Height--; // drawing with pen adds 1 to height
+						if (!longAppt)
+						{
+							rect.Height--; // drawing with pen adds 1 to height
+							rect.Width--;
+						}
 
                         using (Pen pen = new Pen(borderColor, 1))
                             g.DrawRectangle(pen, rect);
