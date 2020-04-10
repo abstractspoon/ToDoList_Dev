@@ -1498,8 +1498,8 @@ namespace Calendar
 			{
 				Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
 
-				selectionRectangle.X += (appointmentGripWidth + 1);
-				selectionRectangle.Width -= (appointmentGripWidth + 1);
+				selectionRectangle.X += (dayGripWidth + 1);
+				selectionRectangle.Width -= (dayGripWidth + 1);
 
 				// GDI+ off-by-one bug
 				selectionRectangle.Width--;
