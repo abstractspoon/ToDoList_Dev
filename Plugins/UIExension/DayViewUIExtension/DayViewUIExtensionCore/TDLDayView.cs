@@ -14,6 +14,7 @@ namespace DayViewUIExtension
     {
         private UInt32 m_SelectedTaskID = 0;
 		private UInt32 m_VisibleSelectedTaskID = 0;
+		private UInt32 m_MaxTaskID = 0;
 
 		private int m_UserMinSlotHeight = -1;
 
@@ -23,9 +24,11 @@ namespace DayViewUIExtension
         private Boolean m_HideTasksSpanningWeekends = false;
         private Boolean m_HideTasksSpanningDays = false;
 
-        private System.Collections.Generic.Dictionary<UInt32, CalendarItem> m_Items;
+        private Dictionary<UInt32, CalendarItem> m_Items;
+
         private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
+		private UIExtension.TaskRecurrences m_TaskRecurrences;
 
 		private int LabelTipBorder
 		{
@@ -48,7 +51,7 @@ namespace DayViewUIExtension
 
 		public Boolean ReadOnly { get; set; }
 
-        public TDLDayView(UIExtension.TaskIcon taskIcons, int minSlotHeight)
+        public TDLDayView(UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
         {
             hourLabelWidth = DPIScaling.Scale(hourLabelWidth);
             hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
@@ -60,8 +63,9 @@ namespace DayViewUIExtension
 			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 			m_UserMinSlotHeight = minSlotHeight;
             m_LabelTip = new LabelTip(this);
-
-            InitializeComponent();
+			m_TaskRecurrences = taskRecurrences;
+			
+			InitializeComponent();
             RefreshHScrollSize();
         }
 
@@ -518,7 +522,8 @@ namespace DayViewUIExtension
 				case UIExtension.UpdateType.All:
 					// Rebuild
 					m_Items.Clear();
-                    SelectedAppointment = null;
+					m_MaxTaskID = 0;
+					SelectedAppointment = null;
 					break;
 
 				case UIExtension.UpdateType.New:
@@ -545,6 +550,8 @@ namespace DayViewUIExtension
 
 			CalendarItem item;
 			UInt32 taskID = task.GetID();
+
+			m_MaxTaskID = Math.Max(m_MaxTaskID, taskID); // needed for future occurrences
 
 			if (m_Items.TryGetValue(taskID, out item))
 			{
@@ -796,11 +803,30 @@ namespace DayViewUIExtension
 		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end, bool sorted = false)
 		{
 			var appts = new System.Collections.Generic.List<Calendar.Appointment>();
+			UInt32 nextFutureId = (((m_MaxTaskID / 1000) + 1) * 1000);
 
-			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> item in m_Items)
+			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> pair in m_Items)
 			{
-				if (IsItemWithinRange(item.Value, start, end))
-					appts.Add(item.Value);
+				CalendarItem item = pair.Value;
+
+				if (IsItemWithinRange(item, start, end))
+					appts.Add(item);
+
+				if (item.IsRecurring)
+				{
+					// Add this task's future items for the current date range
+					var futureItems = m_TaskRecurrences.Get(item.Id, StartDate, EndDate);
+
+					if (futureItems != null)
+					{
+						foreach (var futureItem in futureItems)
+						{
+							var futureAppt = new CalendarFutureItem(item, nextFutureId, futureItem);
+
+							appts.Add(futureAppt);
+						}
+					}
+				}
 			}
 
 			if (sorted)

@@ -186,7 +186,7 @@ namespace Abstractspoon
 				String^ GetMetaDataValue(String^ sKey);
 
 				// TODO
-				Boolean GetRecurrence();
+				Boolean IsRecurring();
 
 				// SETTERS ----------------------------------------------------
 

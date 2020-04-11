@@ -700,10 +700,9 @@ double Task::GetTimeSpent(TimeUnits% cUnits, bool calculated)
 	return dTime;
 }
 
-Boolean Task::GetRecurrence()
+Boolean Task::IsRecurring()
 {
-	// TODO
-	return false;
+	return GETTASKVAL(IsTaskRecurring, false);
 }
 
 String^ Task::GetCustomAttributeValue(String^ sID, bool display)

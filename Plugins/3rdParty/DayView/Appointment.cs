@@ -16,31 +16,30 @@ namespace Calendar
             title = t;
         }
 
-        private UInt32 id;
+		protected Appointment(Appointment appt)
+		{
+			title = appt.title;
+			startDate = appt.startDate;
+			endDate = appt.endDate;
+			locked = appt.locked;
 
-        public UInt32 Id
-        {
-            get { return id; }
-            set { id = value; }
-        }
+			Id = appt.Id;
+			Layer = appt.Layer;
+			Group = appt.Group;
+			DrawBorder = appt.DrawBorder;
 
-        private int layer;
+			barColor = appt.barColor;
+			borderColor = appt.borderColor;
+			fillColor = appt.fillColor;
+			textColor = appt.textColor;
+		}
 
-        public int Layer
-        {
-            get { return layer; }
-            set { layer = value; }
-        }
+        public UInt32 Id { get; set; }
+        public int Layer { get; set; }
+        public string Group { get; set; }
+		public bool DrawBorder { get; set; }
 
-        private string group;
-
-        public string Group
-        {
-            get { return group; }
-            set { group = value; }
-        }
-
-        private DateTime startDate;
+		private DateTime startDate;
 
         public virtual DateTime StartDate
         {
@@ -54,11 +53,13 @@ namespace Calendar
                 OnStartDateChanged();
             }
         }
+
         protected virtual void OnStartDateChanged()
         {
-        }
+			// for derived classes
+		}
 
-        private DateTime endDate;
+		private DateTime endDate;
 
         public virtual DateTime EndDate
         {
@@ -72,11 +73,13 @@ namespace Calendar
                 OnEndDateChanged();
             }
         }
+
         protected virtual void OnEndDateChanged()
         {
-        }
+			// for derived classes
+		}
 
-        public virtual TimeSpan Length
+		public virtual TimeSpan Length
         {
             get { return (endDate - startDate); }
         }
@@ -99,9 +102,10 @@ namespace Calendar
 
         protected virtual void OnLockedChanged()
         {
-        }
+			// for derived classes
+		}
 
-        private Color barColor = Color.White;
+		private Color barColor = Color.White;
 
         public Color BarColor
         {
@@ -139,9 +143,10 @@ namespace Calendar
 
         protected virtual void OnColorChanged()
         {
-        }
+			// for derived classes
+		}
 
-        private Color textColor = Color.Black;
+		private Color textColor = Color.Black;
 
         public Color TextColor
         {
@@ -161,23 +166,8 @@ namespace Calendar
 
         protected virtual void OnTextColorChanged()
         {
-        }
-
-        private bool drawBorder = false;
-
-        public bool DrawBorder
-        {
-            get
-            {
-                return drawBorder;
-            }
-
-            set
-            {
-                drawBorder = value;
-            }
-        }
-       
+			// for derived classes
+		}
 
         private Color borderColor = Color.Blue;
 
@@ -199,9 +189,10 @@ namespace Calendar
 
         protected virtual void OnBorderColorChanged()
         {
-        }
+			// for derived classes
+		}
 
-        private string title = "";
+		private string title = "";
 
         [System.ComponentModel.DefaultValue("")]
         public string Title
@@ -219,9 +210,10 @@ namespace Calendar
 
         protected virtual void OnTitleChanged()
         {
-        }
+			// for derived classes
+		}
 
-        public virtual bool IsLongAppt()
+		public virtual bool IsLongAppt()
         {
             return IsLongAppt(startDate, endDate);
         }

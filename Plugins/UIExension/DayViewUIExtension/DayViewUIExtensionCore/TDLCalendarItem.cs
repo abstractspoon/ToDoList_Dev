@@ -25,6 +25,28 @@ namespace DayViewUIExtension
 
 		// --------------------
 
+		protected CalendarItem(CalendarItem item) : base(item)
+		{
+			AllocTo = item.AllocTo;
+			HasIcon = item.HasIcon;
+			IsParent = item.IsParent;
+			TaskTextColor = item.TaskTextColor;
+			HasDependencies = item.HasDependencies;
+			IsDone = item.IsDone;
+			IsGoodAsDone = item.IsGoodAsDone;
+			StartDate = item.StartDate;
+			EndDate = item.EndDate;
+			TimeEstimate = item.TimeEstimate;
+			TimeEstUnits = item.TimeEstUnits;
+			IsRecurring = item.IsRecurring;
+		}
+
+		// --------------------
+
+		public CalendarItem()
+		{
+		}
+
 		public Boolean HasTaskTextColor
 		{
 			get { return !m_TaskTextColor.IsEmpty; }
@@ -71,6 +93,7 @@ namespace DayViewUIExtension
         public Boolean IsGoodAsDone { get; set; }
         public Boolean IsDoneOrGoodAsDone { get { return IsDone || IsGoodAsDone; } }
 		public Boolean HasDependencies { get; set; }
+		public Boolean IsRecurring { get; set; }
 		public double TimeEstimate { get; set; }
         public Task.TimeUnits TimeEstUnits { get; set; }
 
@@ -189,6 +212,7 @@ namespace DayViewUIExtension
 				DrawBorder = true;
 				Locked = task.IsLocked(true);
 				HasDependencies = (task.GetDependency().Count > 0);
+				IsRecurring = task.IsRecurring();
 
 				Task.TimeUnits units = Task.TimeUnits.Unknown;
 				TimeEstimate = task.GetTimeEstimate(ref units, false);
@@ -250,6 +274,9 @@ namespace DayViewUIExtension
 				if (task.IsAttributeAvailable(Task.Attribute.Icon))
 					HasIcon = task.HasIcon();
 
+				if (task.IsAttributeAvailable(Task.Attribute.Recurrence))
+					IsRecurring = task.IsRecurring();
+
 				if (task.IsAttributeAvailable(Task.Attribute.Dependency))
 					HasDependencies = (task.GetDependency().Count > 0);
 
@@ -270,6 +297,25 @@ namespace DayViewUIExtension
 			// else
 			return date;
 		}
+	}
+
+	// ---------------------------------------------------------------
+
+	public class CalendarFutureItem : CalendarItem
+	{
+		private UInt32 m_RealTaskId;
+
+		public CalendarFutureItem(CalendarItem item, UInt32 futureId, Tuple<DateTime, DateTime> futureDates) : base(item)
+		{
+			m_RealTaskId = item.Id;
+			Id = futureId;
+			Locked = true; // always (for now)
+
+			StartDate = futureDates.Item1;
+			EndDate = futureDates.Item2;
+		}
+
+		public UInt32 RealTaskId { get { return m_RealTaskId; } }
 	}
 
 }

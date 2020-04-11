@@ -613,3 +613,45 @@ bool UIExtension::IsHighContrastActive()
 {
 	return (Misc::IsHighContrastActive() != FALSE);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+UIExtension::TaskRecurrences::TaskRecurrences(IntPtr hwndParent) : m_hwndParent(NULL)
+{
+	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
+}
+
+List<Tuple<DateTime, DateTime>^>^ UIExtension::TaskRecurrences::Get(UInt32 dwTaskID, DateTime^ rangeStart, DateTime^ rangeEnd)
+{
+	if (!IsWindow(m_hwndParent))
+		return nullptr;
+
+	IUINEXTTASKOCCURRENCES iuiNext = { 0 };
+
+	iuiNext.tRangeStart = static_cast<__int64>(Task::MapDate(rangeStart));
+	iuiNext.tRangeEnd = static_cast<__int64>(Task::MapDate(rangeEnd));
+
+	if (::SendMessage(m_hwndParent, WM_IUI_GETNEXTTASKOCCURRENCES, dwTaskID, (LPARAM)&iuiNext) == 0)
+		return nullptr;
+
+	if (iuiNext.nNumOccurrences == 0)
+		return nullptr;
+
+	auto dates = gcnew List<Tuple<DateTime, DateTime>^>();
+
+	for (int item = 0; item < iuiNext.nNumOccurrences; item++)
+	{
+		const auto& occur = iuiNext.occurrences[item];
+
+		if ((occur.tStart != 0) && (occur.tEnd >= occur.tStart))
+		{
+			DateTime startDate = Task::MapDate(occur.tStart);
+			DateTime endDate = Task::MapDate(occur.tEnd);
+
+			dates->Add(gcnew Tuple<DateTime, DateTime>(startDate, endDate));
+		}
+	}
+
+	return dates;
+}
+

@@ -17,7 +17,6 @@ namespace DayViewUIExtension
 		private IntPtr m_HwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView = null;
 		private Translator m_Trans = null;
-		private UIExtension.TaskIcon m_TaskIcons = null;
 		private String m_TypeId, m_UiName;
 		private WorkingWeek m_WorkWeek = null;
 
@@ -98,6 +97,7 @@ namespace DayViewUIExtension
 				case Task.Attribute.Icon:
                 case Task.Attribute.TimeEstimate:
 				case Task.Attribute.Dependency:
+				case Task.Attribute.Recurrence:
 					return true;
 			}
 
@@ -309,7 +309,6 @@ namespace DayViewUIExtension
 
 		private void InitializeComponent()
 		{
-			m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
 			m_ControlsFont = new Font(FontName, 8);
 			m_PrefsDlg = new DayViewPreferencesDlg(m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
@@ -327,7 +326,9 @@ namespace DayViewUIExtension
 
 		private void CreateDayView()
 		{
-			m_DayView = new TDLDayView(m_TaskIcons, DPIScaling.Scale(5));
+			m_DayView = new TDLDayView(new UIExtension.TaskIcon(m_HwndParent),
+										new UIExtension.TaskRecurrences(m_HwndParent),
+										DPIScaling.Scale(5));
 
 			m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(OnDayViewNewAppointment);
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);

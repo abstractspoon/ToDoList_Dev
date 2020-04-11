@@ -14,6 +14,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
+using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -30,6 +31,8 @@ namespace Abstractspoon
 			public ref class UIExtension
 			{
 			public: 
+				// -----------------------------------------------
+
 				enum class UpdateType
 				{
 					Unknown = -1,
@@ -41,6 +44,8 @@ namespace Abstractspoon
 					All = 0xffff
 				};
 
+				// -----------------------------------------------
+
 				enum class ExpandTask
 				{ 
 					ExpandAllTasks,
@@ -48,6 +53,8 @@ namespace Abstractspoon
 					ExpandSelectedTasks,
 					CollapseSelectedTasks,
 				};
+
+				// -----------------------------------------------
 
 				enum class GetTask
 				{ 
@@ -59,6 +66,8 @@ namespace Abstractspoon
 					GetPrevTopLevelTask,
 				};
 
+				// -----------------------------------------------
+
 				enum class SelectTask
 				{ 
 					SelectFirstTask,			
@@ -68,6 +77,8 @@ namespace Abstractspoon
 					SelectLastTask,				
 				};
 
+				// -----------------------------------------------
+
 				enum class HitResult
 				{
 					Nowhere,
@@ -76,11 +87,15 @@ namespace Abstractspoon
 					Task,
 				};
 
+				// -----------------------------------------------
+
 				enum class AppCursorType
 				{
 					LockedTask,
 					NoDrag,
 				};
+
+				// -----------------------------------------------
 
 				static UpdateType Map(IUI_UPDATETYPE type);
 				static IUI_HITTEST Map(HitResult test);
@@ -90,6 +105,8 @@ namespace Abstractspoon
 
 				static bool SaveImageToFile(Drawing::Bitmap^ image, String^ filepath);
 				static bool IsHighContrastActive();
+
+				// -----------------------------------------------
 
 				ref class ParentNotify
 				{
@@ -188,6 +205,8 @@ namespace Abstractspoon
 					bool DoNotify(const IUITASKMOVE* pMove);
 				};
 
+				// -----------------------------------------------
+
 				ref class TaskIcon
 				{
 				public:
@@ -202,11 +221,15 @@ namespace Abstractspoon
 					int m_iImage;
 				};
 
+				// -----------------------------------------------
+
 				ref class ShortcutOverlay
 				{
 				public:
 					static bool Draw(Drawing::Graphics^ dc, Int32 x, Int32 y, Int32 cx, Int32 cy);
 				};
+
+				// -----------------------------------------------
 
 				ref class SelectionRect
 				{
@@ -217,6 +240,21 @@ namespace Abstractspoon
 				private:
 					Windows::Forms::VisualStyles::VisualStyleRenderer^ m_visExplorerSelected;
 				};
+
+				// -----------------------------------------------
+
+				ref class TaskRecurrences
+				{
+				public:
+					TaskRecurrences(IntPtr hwndParent);
+
+					List<Tuple<DateTime, DateTime>^>^ Get(UInt32 dwTaskID, DateTime^ rangeStart, DateTime^ rangeEnd);
+
+				private:
+					HWND m_hwndParent;
+				};
+
+				// -----------------------------------------------
 			};
 
 			public interface class IUIExtension
