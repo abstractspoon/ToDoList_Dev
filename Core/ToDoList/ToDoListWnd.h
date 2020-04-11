@@ -485,6 +485,7 @@ protected:
 	afx_msg void OnToolsShowtasksDue(UINT nCmdID);
  	afx_msg void OnToolsRemovefromsourcecontrol();
 	afx_msg void OnToolsToggleCheckin();
+	afx_msg void OnToolsViewLogFile();
 	afx_msg void OnTrayIconClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTrayIconDblClk(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTrayIconRClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -540,6 +541,7 @@ protected:
 	afx_msg void OnUpdateToolsCheckout(CCmdUI* pCmdUI);
  	afx_msg void OnUpdateToolsRemovefromsourcecontrol(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateToolsToggleCheckin(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateToolsViewLogFile(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateUserTool(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewMovetasklistleft(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewMovetasklistright(CCmdUI* pCmdUI);

@@ -3548,6 +3548,7 @@ BEGIN
         MENUITEM "User Defined Tool 50",        ID_TOOLS_USERTOOL50, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "Enable Lo&gging",             ID_TOOLS_TOGGLE_LOGGING
+        MENUITEM "&View Log File",              ID_TOOLS_VIEWLOG
     END
     POPUP "&Window"
     BEGIN
@@ -5696,13 +5697,13 @@ BEGIN
     IDS_EXPORTDLG_EXPORT    "Export"
     IDS_EXPORTDLG_TASKSEL   "Task Selection"
     IDS_MSVCR100_MSG        "System File Required|ToDoList requires the 'Microsoft Visual C++ 2010 SP1 Redistributable Package' to be installed.\n\nClick 'OK' to visit the appropriate download page or 'Cancel' to quit."
+    IDS_CUSTOM_FEATURE_ONEDECIMAL "One decimal place"
+    IDS_FP_IS_COMPLETE      "is completed (or not set)"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INSERTDATE      "\nInsert Date"
-    IDS_CUSTOM_FEATURE_ONEDECIMAL "One decimal place"
-    IDS_FP_IS_COMPLETE      "is completed (or not set)"
 END
 
 #endif    // English (Australia) resources

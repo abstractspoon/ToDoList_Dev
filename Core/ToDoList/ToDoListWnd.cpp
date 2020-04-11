@@ -389,6 +389,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_TOOLS_SPELLCHECKTASKLIST, OnSpellcheckTasklist)
 	ON_COMMAND(ID_TOOLS_TOGGLECHECKIN, OnToolsToggleCheckin)
 	ON_COMMAND(ID_TOOLS_TRANSFORM, OnToolsTransformactivetasklist)
+	ON_COMMAND(ID_TOOLS_VIEWLOG, OnToolsViewLogFile)
 	ON_COMMAND(ID_TRAYICON_CLOSE, OnTrayiconClose)
 	ON_COMMAND(ID_TRAYICON_CREATETASK, OnTrayiconCreatetask)
 	ON_COMMAND(ID_TRAYICON_SHOW, OnTrayiconShow)
@@ -594,6 +595,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_SPELLCHECKTASKLIST, OnUpdateSpellcheckTasklist)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_TOGGLECHECKIN, OnUpdateToolsToggleCheckin)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_TRANSFORM, OnUpdateExport) // use same text as export
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_VIEWLOG, OnUpdateToolsViewLogFile)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CLEARFILTER, OnUpdateViewClearfilter)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_CYCLETASKVIEWS, OnUpdateViewCycleTaskViews)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_FILTER, OnUpdateViewFilter)
@@ -665,7 +667,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_DEBUG_CLEANDICTIONARIES, OnDebugCleanDictionaries)
 #endif
 
-END_MESSAGE_MAP()
+		END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd message handlers
@@ -13381,3 +13383,12 @@ BOOL CALLBACK CToDoListWnd::FindOtherInstance(HWND hWnd, LPARAM lParam)
 	return TRUE; // keep going to the end
 }
 
+void CToDoListWnd::OnToolsViewLogFile()
+{
+	FileMisc::Run(*this, FileMisc::GetLogFilePath());
+}
+
+void CToDoListWnd::OnUpdateToolsViewLogFile(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(FileMisc::FileExists(FileMisc::GetLogFilePath()));
+}
