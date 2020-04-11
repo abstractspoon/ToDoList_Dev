@@ -1,21 +1,29 @@
 ﻿using System;
 using System.IO;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using System.Web.UI;
-using System.Runtime.InteropServices;
-using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
 namespace HTMLReportExporter
 {
+	struct TemplateHistoryItem
+	{
+		public TemplateHistoryItem(String filePath)
+		{
+			FilePath = filePath;
+			FileName = Path.GetFileName(filePath);
+		}
+
+		public String FileName;
+		public String FilePath;
+
+		public override String ToString() { return FileName; }
+	}
+
 	public partial class HtmlReportTemplateForm : Form
 	{
 		private String m_TypeId = String.Empty;
@@ -25,7 +33,7 @@ namespace HTMLReportExporter
 		private Preferences m_Prefs = null;
 		private UIThemeToolbarRenderer m_TBRenderer = null;
 
-		private HtmlReportTemplate m_Template = null;
+        private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
 		private Timer m_ChangeTimer = null;
 		private String m_TemplateFilePath = "";
@@ -59,20 +67,14 @@ namespace HTMLReportExporter
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
 			m_CustomAttributes = new HtmlReportUtils.CustomAttributes();
-
 			m_EditedSinceLastSave = false;
-			m_TemplateFilePath = prefs.GetProfileString(key, "LastOpenTemplate", "");
 
-			if (!m_Template.Load(m_TemplateFilePath))
-				m_TemplateFilePath = String.Empty;
-			else
-				m_PrevTemplate.Copy(m_Template);
-
-			m_ChangeTimer = new Timer();
+            m_ChangeTimer = new Timer();
 			m_ChangeTimer.Tick += new EventHandler(OnChangeTimer);
 			m_ChangeTimer.Interval = 500;
 
 			InitializeComponent();
+            InitialiseControlsFont();
 			DoHighDPIFixups();
             SetTabsToolbarBackColor();
 
@@ -91,32 +93,104 @@ namespace HTMLReportExporter
 
 			this.htmlReportTasksControl.SetCustomAttributes(m_CustomAttributes);
 
-			HtmlEditorControlEx.SizeEditHtmlForm = new Size(prefs.GetProfileInt(key, "HtmlFormWidth", -1),
-															prefs.GetProfileInt(key, "HtmlFormHeight", -1));
-
-			var prevSize = new Size(prefs.GetProfileInt(key, "TemplateFormWidth", -1),
-									prefs.GetProfileInt(key, "TemplateFormHeight", -1));
+			var prevSize = LoadPreferences();
 
 			if ((prevSize.Width > 0) && (prevSize.Height > 0))
 				this.Size = prevSize;
 		}
 
-        private void SetTabsToolbarBackColor()
+        private void InitialiseControlsFont()
         {
-            if (VisualStyleRenderer.IsSupported)
+            var controlsFont = new Font("Tahoma", 8.25f);
+
+            FormsUtil.SetFont(this, controlsFont);
+
+            // Manual fixups
+            htmlReportHeaderControl.SetControlFont(controlsFont);
+            htmlReportTitleControl.SetControlFont(controlsFont);
+            htmlReportTasksControl.SetControlFont(controlsFont);
+            htmlReportFooterControl.SetControlFont(controlsFont);
+
+            toolStripFileHistory.Font = controlsFont;
+        }
+
+        private Size LoadPreferences()
+		{
+			// Last template
+			m_TemplateFilePath = m_Prefs.GetProfileString(m_PrefsKey, "LastOpenTemplate", "");
+
+			if (!m_Template.Load(m_TemplateFilePath))
+				m_TemplateFilePath = String.Empty;
+			else
+				m_PrevTemplate.Copy(m_Template);
+
+			// Template history
+			int numHistory = m_Prefs.GetProfileInt(m_PrefsKey, "TemplateHistoryCount", 0);
+
+			for (int nItem = 0; nItem < numHistory; nItem++)
+			{
+				string path = m_Prefs.GetProfileString(m_PrefsKey, string.Format("History{0}", nItem), "");
+
+				if (!string.IsNullOrEmpty(path) && (path != m_TemplateFilePath))
+					toolStripFileHistory.Items.Add(new TemplateHistoryItem(path));
+			}
+			AddFileToTopOfHistory(m_TemplateFilePath);
+
+			// Window sizes
+			HtmlEditorControlEx.SizeEditHtmlForm = new Size(m_Prefs.GetProfileInt(m_PrefsKey, "HtmlFormWidth", -1),
+															m_Prefs.GetProfileInt(m_PrefsKey, "HtmlFormHeight", -1));
+
+			var prevSize = new Size(m_Prefs.GetProfileInt(m_PrefsKey, "TemplateFormWidth", -1),
+									m_Prefs.GetProfileInt(m_PrefsKey, "TemplateFormHeight", -1));
+
+			return prevSize;
+		}
+
+		private void AddFileToTopOfHistory(string filePath)
+		{
+			if (string.IsNullOrEmpty(filePath))
+				return;
+
+			// Delete item if it already exists
+			filePath = Path.GetFullPath(filePath);
+
+			foreach (var item in toolStripFileHistory.Items)
+			{
+				string itemPath = ((TemplateHistoryItem)item).FilePath;
+
+				if (string.Compare(itemPath, filePath, true) == 0)
+                {
+                    toolStripFileHistory.Items.Remove(item);
+                    break;
+                }
+			}
+
+            // (re)Add to top of list
+			toolStripFileHistory.Items.Insert(0, new TemplateHistoryItem(filePath));
+
             {
-                this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
-                this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
-                this.htmlReportTasksControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
-                this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ControlLightLight;
+                toolStripFileHistory.SelectedIndexChanged -= new EventHandler(OnSelChangeTemplateHistoryCombo);
+                toolStripFileHistory.SelectedIndex = 0;
+                toolStripFileHistory.SelectedIndexChanged += new EventHandler(OnSelChangeTemplateHistoryCombo);
             }
-            else
-            {
-                this.htmlReportHeaderControl.ToolbarBackColor = System.Drawing.SystemColors.ButtonFace;
-                this.htmlReportTitleControl.ToolbarBackColor = System.Drawing.SystemColors.ButtonFace;
-                this.htmlReportTasksControl.ToolbarBackColor = System.Drawing.SystemColors.ButtonFace;
-                this.htmlReportFooterControl.ToolbarBackColor = System.Drawing.SystemColors.ButtonFace;
-            }
+
+            FormsUtil.RecalcDropWidth(toolStripFileHistory.ComboBox);
+		}
+
+		private void SetTabsToolbarBackColor()
+        {
+            // Since we have no theme, we set the toolbar's 
+            // back color to the back color of the tabs
+            var toolbarTheme = new UITheme();
+
+            toolbarTheme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, headerPage.BackColor);
+            toolbarTheme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, headerPage.BackColor);
+            toolbarTheme.RecalcToolbarHotColor();
+
+            this.htmlReportHeaderControl.SetUITheme(toolbarTheme);
+            this.htmlReportTitleControl.SetUITheme(toolbarTheme);
+            this.htmlReportTasksControl.SetUITheme(toolbarTheme);
+            this.htmlReportFooterControl.SetUITheme(toolbarTheme);
         }
 
 		private void DoHighDPIFixups()
@@ -201,6 +275,7 @@ namespace HTMLReportExporter
 			m_TBRenderer.EnableDrawRowSeparators(true);
 
 			this.Toolbar.Renderer = m_TBRenderer;
+            this.Toolbar.BackColor = BackColor;
 
 			if (DPIScaling.WantScaling())
 			{
@@ -223,7 +298,7 @@ namespace HTMLReportExporter
 
 			this.headerEnabledCheckbox.Checked = m_Template.Header.Enabled;
 			this.headerDividerCheckbox.Checked = m_Template.Header.WantDivider;
-			this.headerHeightCombobox.Text = m_Template.Header.PixelHeightText;
+			this.headerHeightCombobox.Text = m_Template.Header.HeightAsText;
 
 			// ----------
 
@@ -253,7 +328,7 @@ namespace HTMLReportExporter
 
 			this.footerEnabledCheckbox.Checked = m_Template.Footer.Enabled;
 			this.footerDividerCheckbox.Checked = m_Template.Footer.WantDivider;
-			this.footerHeightCombobox.Text = m_Template.Footer.PixelHeightText;
+			this.footerHeightCombobox.Text = m_Template.Footer.HeightAsText;
 
 			// Refresh enable states
 			// Note: 'Task' control always enabled
@@ -264,8 +339,24 @@ namespace HTMLReportExporter
 			RefreshPreview();
 		}
 
+        protected void OnSelChangeTemplateHistoryCombo(object obj, EventArgs args)
+        {
+            string path = ((TemplateHistoryItem)toolStripFileHistory.SelectedItem).FilePath;
 
-		private void UpdateToolbar()
+            if (m_Template.Load(path))
+            {
+                m_TemplateFilePath = path;
+                m_EditedSinceLastSave = false;
+
+                AddFileToTopOfHistory(m_TemplateFilePath);
+
+                UpdateCaption();
+                UpdateControls();
+            }
+
+        }
+
+        private void UpdateToolbar()
 		{
 			this.toolStripSaveReport.Enabled = m_EditedSinceLastSave;
 			this.toolStripBackColorClear.Enabled = m_Template.HasBackColor;
@@ -350,7 +441,7 @@ namespace HTMLReportExporter
 					m_Template.Header.Enabled = headerEnabledCheckbox.Checked;
 					m_Template.Header.WantDivider = headerDividerCheckbox.Checked;
 					m_Template.Header.BackColor = this.htmlReportHeaderControl.BackColor;
-					m_Template.Header.PixelHeightText = this.headerHeightCombobox.Text;
+					m_Template.Header.HeightAsText = this.headerHeightCombobox.Text;
 					break;
 
 				case PageType.Title:
@@ -375,7 +466,7 @@ namespace HTMLReportExporter
 					m_Template.Footer.Enabled = footerEnabledCheckbox.Checked;
 					m_Template.Footer.WantDivider = footerDividerCheckbox.Checked;
 					m_Template.Footer.BackColor = this.htmlReportFooterControl.BackColor;
-					m_Template.Footer.PixelHeightText = this.footerHeightCombobox.Text;
+					m_Template.Footer.HeightAsText = this.footerHeightCombobox.Text;
 					break;
 			}
 
@@ -409,8 +500,18 @@ namespace HTMLReportExporter
 					break;
 			}
 
-			// Always
+			// Last template
 			m_Prefs.WriteProfileString(m_PrefsKey, "LastOpenTemplate", m_TemplateFilePath);
+
+			// Template History
+			int numHistory = toolStripFileHistory.Items.Count;
+			m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateHistoryCount", numHistory);
+
+			for (int nItem = 0; nItem < numHistory; nItem++)
+			{
+				string path = ((TemplateHistoryItem)toolStripFileHistory.Items[nItem]).FilePath;
+				m_Prefs.WriteProfileString(m_PrefsKey, string.Format("History{0}", nItem), path);
+			}
 
 			// The size of the 'Edit Html' form
 			m_Prefs.WriteProfileInt(m_PrefsKey, "HtmlFormWidth", HtmlEditorControlEx.SizeEditHtmlForm.Width);
@@ -535,6 +636,8 @@ namespace HTMLReportExporter
 					m_TemplateFilePath = dlg.FileName;
 					m_EditedSinceLastSave = false;
 
+					AddFileToTopOfHistory(m_TemplateFilePath);
+
 					UpdateCaption();
 					UpdateControls();
 				}
@@ -602,7 +705,9 @@ namespace HTMLReportExporter
 					m_TemplateFilePath = dlg.FileName;
 					m_EditedSinceLastSave = false;
 
+					AddFileToTopOfHistory(m_TemplateFilePath);
 					UpdateCaption();
+
 					return true;
 				}
 			}

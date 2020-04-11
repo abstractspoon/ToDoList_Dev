@@ -80,7 +80,14 @@ namespace HTMLReportExporter
 			return ((xElm == null) ? defValue : (int)xElm);
 		}
 
-		protected bool ReadValue(XDocument doc, String element, bool defValue)
+        protected float ReadValue(XDocument doc, String element, float defValue)
+        {
+            var xElm = doc.Root.Element(XmlTag).Element(element);
+
+            return ((xElm == null) ? defValue : (float)xElm);
+        }
+
+        protected bool ReadValue(XDocument doc, String element, bool defValue)
 		{
 			var xElm = doc.Root.Element(XmlTag).Element(element);
 
@@ -93,36 +100,36 @@ namespace HTMLReportExporter
 
 	public class HeaderFooterTemplateItem : TemplateItem
 	{
-		private int DefPixelHeight = 0;
+		private float DefHeight = 0;
 
 		// ----------------------------------
 
 		public bool WantDivider { get; set; }
 		public Color BackColor { get; set; }
-		public int PixelHeight { get; set; }
+		public float Height { get; set; }
 
 		public bool HasBackColor
 		{
 			get { return !DrawingColor.IsTransparent(BackColor, false); } // white is opaque
 		}
 
-		public String PixelHeightText
+		public String HeightAsText
 		{
-			get { return PixelHeight.ToString(); }
+			get { return Height.ToString(".0######"); } // show at least one decimal
 			set
 			{
-				int height = 0;
+				float height = 0;
 
-				if (Int32.TryParse(value, out height) && (height > 0))
-					PixelHeight = height;
+				if (float.TryParse(value, out height) && (height > 0))
+					Height = height;
 			}
 		}
 
 		// ----------------------------------
 
-		public HeaderFooterTemplateItem(String xmlTag, int defPixelHeight) : base(xmlTag)
+		public HeaderFooterTemplateItem(String xmlTag, float defHeight) : base(xmlTag)
 		{
-			DefPixelHeight = defPixelHeight;
+			DefHeight = defHeight;
 
 			Clear();
 		}
@@ -146,7 +153,7 @@ namespace HTMLReportExporter
 
 			WantDivider = ReadValue(doc, "wantDivider", true);
 			BackColorHtml = ReadValue(doc, "backColor");
-			PixelHeight = ReadValue(doc, "pixelHeight", DefPixelHeight);
+			Height = ReadValue(doc, "height", DefHeight);
 		}
 
 		override public void Write(XDocument doc)
@@ -154,7 +161,7 @@ namespace HTMLReportExporter
 			base.Write(doc);
 
 			doc.Root.Element(XmlTag).Add(new XElement("wantDivider", WantDivider));
-			doc.Root.Element(XmlTag).Add(new XElement("pixelHeight", PixelHeight));
+			doc.Root.Element(XmlTag).Add(new XElement("height", Height));
 
 			if (HasBackColor)
 				doc.Root.Element(XmlTag).Add(new XElement("backColor", BackColorHtml));
@@ -166,14 +173,14 @@ namespace HTMLReportExporter
 
 			WantDivider = true;
 			BackColor = Color.White;
-			PixelHeight = DefPixelHeight;
+			Height = DefHeight;
 		}
 
 		public bool Equals(HeaderFooterTemplateItem other)
 		{
 			return (base.Equals(other) &&
 					(WantDivider == other.WantDivider) &&
-					(PixelHeight == other.PixelHeight) &&
+					(Height == other.Height) &&
 					DrawingColor.Equals(BackColor, other.BackColor));
 		}
 
@@ -183,7 +190,7 @@ namespace HTMLReportExporter
 				return false;
 
 			WantDivider = other.WantDivider;
-			PixelHeight = other.PixelHeight;
+			Height = other.Height;
 			BackColor = DrawingColor.Copy(other.BackColor);
 
 			return true;
@@ -195,8 +202,8 @@ namespace HTMLReportExporter
 
 	public class HeaderTemplate : HeaderFooterTemplateItem
 	{
-		public HeaderTemplate() : base("header", 100)
-		{
+		public HeaderTemplate() : base("header", 6.0f) // ems
+        {
 		}
 
 		public HeaderTemplate(HeaderTemplate header) : this()
@@ -210,8 +217,8 @@ namespace HTMLReportExporter
 
 	public class FooterTemplate : HeaderFooterTemplateItem
 	{
-		public FooterTemplate() : base("footer", 50)
-		{
+		public FooterTemplate() : base("footer", 3.0f) // ems
+        {
 		}
 
 		public FooterTemplate(FooterTemplate footer) : this()

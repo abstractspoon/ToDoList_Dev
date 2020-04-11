@@ -19,7 +19,7 @@ namespace HTMLReportExporter
 		private String m_BodyFontStyle = "";
 		private bool m_StrikeThruDone = true;
 
-		private const int ContentPadding = 40;
+		private const float ContentPadding = 4; // ems
 
 		// -------------------------------------------------------------
 
@@ -230,8 +230,8 @@ namespace HTMLReportExporter
 
 			html.RenderBeginTag(HtmlTextWriterTag.Tr);
 
-			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingLeft, String.Format("{0}px", ContentPadding));
-			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingRight, String.Format("{0}px", ContentPadding));
+			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingLeft, String.Format("{0}em", ContentPadding));
+			html.AddStyleAttribute(HtmlTextWriterStyle.PaddingRight, String.Format("{0}em", ContentPadding));
 			html.RenderBeginTag(HtmlTextWriterTag.Td);
 		}
 
@@ -248,7 +248,7 @@ namespace HTMLReportExporter
 			// For deriving only
 			protected HeaderFooterTemplateReporter(HeaderFooterTemplateItem item, Color defbackColor)
 				:
-				base(item.XmlTag, item.PixelHeight)
+				base(item.XmlTag, item.Height)
 			{
 				Copy(item);
 
@@ -294,7 +294,7 @@ namespace HTMLReportExporter
 
 			public bool WriteStyles(HtmlTextWriter html)
 			{
-				if (!Enabled || (PixelHeight <= 0))
+				if (!Enabled || (Height <= 0))
 					return false;
 
 				html.WriteLine(".page-header { position: fixed; top: 0; width: 100%; }");
@@ -307,15 +307,15 @@ namespace HTMLReportExporter
 				if (!String.IsNullOrEmpty(backColorHtml))
 					html.WriteLine(String.Format(".page-header {{ background: {0}; }}", backColorHtml));
 
-				html.WriteLine(String.Format(".page-header {{ height: {0}px; }}", PixelHeight));
-				html.WriteLine(String.Format(".page-header-space {{ height: {0}px; }}", PixelHeight + ContentPadding));
+				html.WriteLine(String.Format(".page-header {{ height: {0}em; }}", Height));
+				html.WriteLine(String.Format(".page-header-space {{ height: {0}em; }}", Height + ContentPadding));
 
 				return true;
 			}
 
 			public bool WriteBodyDiv(TaskList tasks, HtmlTextWriter html)
 			{
-				if (!Enabled || (PixelHeight <= 0))
+				if (!Enabled || (Height <= 0))
 					return false;
 
 				html.AddAttribute("class", "page-header");
@@ -331,7 +331,7 @@ namespace HTMLReportExporter
 
 			public bool WriteHeaderContent(HtmlTextWriter html)
 			{
-				if (!Enabled || (PixelHeight <= 0))
+				if (!Enabled || (Height <= 0))
 					return false;
 
 				html.RenderBeginTag(HtmlTextWriterTag.Thead);
@@ -362,7 +362,7 @@ namespace HTMLReportExporter
 
 			public bool WriteStyles(HtmlTextWriter html)
 			{
-				if (!Enabled || (PixelHeight <= 0))
+				if (!Enabled || (Height <= 0))
 					return false;
 
 				html.WriteLine(".page-footer { position: fixed;	bottom: 0; width: 100%; }");
@@ -375,15 +375,15 @@ namespace HTMLReportExporter
 				if (!String.IsNullOrEmpty(backColorHtml))
 					html.WriteLine(String.Format(".page-footer {{ background: {0}; }}", backColorHtml));
 
-				html.WriteLine(String.Format(".page-footer {{ height: {0}px; }}", PixelHeight));
-				html.WriteLine(String.Format(".page-footer-space {{ height: {0}px; }}", PixelHeight + ContentPadding));
+				html.WriteLine(String.Format(".page-footer {{ height: {0}em; }}", Height));
+				html.WriteLine(String.Format(".page-footer-space {{ height: {0}em; }}", Height + ContentPadding));
 
 				return true;
 			}
 
 			public bool WriteBodyDiv(TaskList tasks, HtmlTextWriter html)
 			{
-				if (!Enabled || (PixelHeight <= 0))
+				if (!Enabled || (Height <= 0))
 					return false;
 
 				html.AddAttribute("class", "page-footer");
@@ -399,7 +399,7 @@ namespace HTMLReportExporter
 
 			public bool WriteFooterContent(HtmlTextWriter html)
 			{
-				if (!Enabled || (PixelHeight <= 0))
+				if (!Enabled || (Height <= 0))
 					return false;
 
 				html.RenderBeginTag(HtmlTextWriterTag.Tfoot);

@@ -49,7 +49,7 @@
 			this.tabControl = new System.Windows.Forms.TabControl();
 			this.headerPage = new System.Windows.Forms.TabPage();
 			this.headerHeightCombobox = new System.Windows.Forms.ComboBox();
-			this.headerPixelLabel = new System.Windows.Forms.Label();
+			this.headerHeightUnitsLabel = new System.Windows.Forms.Label();
 			this.headerHeightLabel = new System.Windows.Forms.Label();
 			this.headerDividerCheckbox = new System.Windows.Forms.CheckBox();
 			this.headerEnabledCheckbox = new System.Windows.Forms.CheckBox();
@@ -59,7 +59,7 @@
 			this.taskPage = new System.Windows.Forms.TabPage();
 			this.footerPage = new System.Windows.Forms.TabPage();
 			this.footerHeightCombobox = new System.Windows.Forms.ComboBox();
-			this.footerPixelLabel = new System.Windows.Forms.Label();
+			this.footerHeightUnitsLabel = new System.Windows.Forms.Label();
 			this.footerHeightLabel = new System.Windows.Forms.Label();
 			this.footerDividerCheckbox = new System.Windows.Forms.CheckBox();
 			this.footerEnabledCheckbox = new System.Windows.Forms.CheckBox();
@@ -305,7 +305,7 @@
 			// headerPage
 			// 
 			this.headerPage.Controls.Add(this.headerHeightCombobox);
-			this.headerPage.Controls.Add(this.headerPixelLabel);
+			this.headerPage.Controls.Add(this.headerHeightUnitsLabel);
 			this.headerPage.Controls.Add(this.headerHeightLabel);
 			this.headerPage.Controls.Add(this.headerDividerCheckbox);
 			this.headerPage.Controls.Add(this.htmlReportHeaderControl);
@@ -323,30 +323,30 @@
 			this.headerHeightCombobox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.headerHeightCombobox.FormattingEnabled = true;
 			this.headerHeightCombobox.Items.AddRange(new object[] {
-            "10",
-            "20",
-            "30",
-            "40",
-            "50",
-            "60",
-            "70",
-            "80",
-            "90",
-            "100"});
+            "1.0",
+            "2.0",
+            "3.0",
+            "4.0",
+            "5.0",
+            "6.0",
+            "7.0",
+            "8.0",
+            "9.0",
+            "10.0"});
 			this.headerHeightCombobox.Location = new System.Drawing.Point(48, 382);
 			this.headerHeightCombobox.Name = "headerHeightCombobox";
 			this.headerHeightCombobox.Size = new System.Drawing.Size(52, 21);
 			this.headerHeightCombobox.TabIndex = 34;
-			// 
-			// headerPixelLabel
-			// 
-			this.headerPixelLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.headerPixelLabel.AutoSize = true;
-			this.headerPixelLabel.Location = new System.Drawing.Point(106, 385);
-			this.headerPixelLabel.Name = "headerPixelLabel";
-			this.headerPixelLabel.Size = new System.Drawing.Size(33, 13);
-			this.headerPixelLabel.TabIndex = 32;
-			this.headerPixelLabel.Text = "pixels";
+            // 
+            // headerHeightUnitsLabel
+            // 
+            this.headerHeightUnitsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.headerHeightUnitsLabel.AutoSize = true;
+			this.headerHeightUnitsLabel.Location = new System.Drawing.Point(106, 385);
+			this.headerHeightUnitsLabel.Name = "headerHeightUnitsLabel";
+			this.headerHeightUnitsLabel.Size = new System.Drawing.Size(33, 13);
+			this.headerHeightUnitsLabel.TabIndex = 32;
+			this.headerHeightUnitsLabel.Text = "lines";
 			// 
 			// headerHeightLabel
 			// 
@@ -433,7 +433,7 @@
 			// footerPage
 			// 
 			this.footerPage.Controls.Add(this.footerHeightCombobox);
-			this.footerPage.Controls.Add(this.footerPixelLabel);
+			this.footerPage.Controls.Add(this.footerHeightUnitsLabel);
 			this.footerPage.Controls.Add(this.footerHeightLabel);
 			this.footerPage.Controls.Add(this.footerDividerCheckbox);
 			this.footerPage.Controls.Add(this.footerEnabledCheckbox);
@@ -450,30 +450,30 @@
 			this.footerHeightCombobox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
 			this.footerHeightCombobox.FormattingEnabled = true;
 			this.footerHeightCombobox.Items.AddRange(new object[] {
-            "10",
-            "20",
-            "30",
-            "40",
-            "50",
-            "60",
-            "70",
-            "80",
-            "90",
-            "100"});
+            "1.0",
+            "2.0",
+            "3.0",
+            "4.0",
+            "5.0",
+            "6.0",
+            "7.0",
+            "8.0",
+            "9.0",
+            "10.0"});
 			this.footerHeightCombobox.Location = new System.Drawing.Point(48, 382);
 			this.footerHeightCombobox.Name = "footerHeightCombobox";
 			this.footerHeightCombobox.Size = new System.Drawing.Size(52, 21);
 			this.footerHeightCombobox.TabIndex = 31;
-			// 
-			// footerPixelLabel
-			// 
-			this.footerPixelLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			this.footerPixelLabel.AutoSize = true;
-			this.footerPixelLabel.Location = new System.Drawing.Point(106, 384);
-			this.footerPixelLabel.Name = "footerPixelLabel";
-			this.footerPixelLabel.Size = new System.Drawing.Size(33, 13);
-			this.footerPixelLabel.TabIndex = 30;
-			this.footerPixelLabel.Text = "pixels";
+            // 
+            // footerHeightUnitsLabel
+            // 
+            this.footerHeightUnitsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+			this.footerHeightUnitsLabel.AutoSize = true;
+			this.footerHeightUnitsLabel.Location = new System.Drawing.Point(106, 384);
+			this.footerHeightUnitsLabel.Name = "footerHeightUnitsLabel";
+			this.footerHeightUnitsLabel.Size = new System.Drawing.Size(33, 13);
+			this.footerHeightUnitsLabel.TabIndex = 30;
+			this.footerHeightUnitsLabel.Text = "lines";
 			// 
 			// footerHeightLabel
 			// 
@@ -723,7 +723,7 @@
 		private System.Windows.Forms.TabControl tabControl;
 		private System.Windows.Forms.TabPage headerPage;
 		private System.Windows.Forms.ComboBox headerHeightCombobox;
-		private System.Windows.Forms.Label headerPixelLabel;
+		private System.Windows.Forms.Label headerHeightUnitsLabel;
 		private System.Windows.Forms.Label headerHeightLabel;
 		private System.Windows.Forms.CheckBox headerDividerCheckbox;
 		private HtmlReportHeaderControl htmlReportHeaderControl;
@@ -737,7 +737,7 @@
 		private HtmlReportTaskFormatControl htmlReportTasksControl;
 		private System.Windows.Forms.TabPage footerPage;
 		private System.Windows.Forms.ComboBox footerHeightCombobox;
-		private System.Windows.Forms.Label footerPixelLabel;
+		private System.Windows.Forms.Label footerHeightUnitsLabel;
 		private System.Windows.Forms.Label footerHeightLabel;
 		private System.Windows.Forms.CheckBox footerDividerCheckbox;
 		private System.Windows.Forms.CheckBox footerEnabledCheckbox;
