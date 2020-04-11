@@ -89,15 +89,19 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 	// If no tools and 'first time' then create a toolbar to showcase the feature
 	if (!nBtnCount && pPrefs->GetProfileInt(_T("CustomToolbar"), _T("FirstTime"), TRUE))
 	{
-		aButtons.Add(TOOLBARBUTTON(ID_NEW,					_T("28")));
-		aButtons.Add(TOOLBARBUTTON(ID_PRINTPREVIEW,			_T("82")));
-		aButtons.Add(TOOLBARBUTTON(ID_SENDTASKS,			_T("39")));
-		aButtons.Add(TOOLBARBUTTON());						// separator
-		aButtons.Add(TOOLBARBUTTON(ID_EDIT_FLAGTASK,		_T("49")));
-		aButtons.Add(TOOLBARBUTTON(ID_EDIT_LOCKTASK,		_T("100")));
-		aButtons.Add(TOOLBARBUTTON());						// separator
-		aButtons.Add(TOOLBARBUTTON(ID_VIEW_CLEARFILTER,		_T("62")));
-		aButtons.Add(TOOLBARBUTTON(ID_VIEW_REFRESHFILTER,	_T("99")));
+		aButtons.Add(TOOLBARBUTTON(ID_NEW,						_T("28")));
+		aButtons.Add(TOOLBARBUTTON(ID_PRINTPREVIEW,				_T("82")));
+		aButtons.Add(TOOLBARBUTTON(ID_SENDTASKS,				_T("39")));
+		aButtons.Add(TOOLBARBUTTON());							// separator
+		aButtons.Add(TOOLBARBUTTON(ID_EDIT_FLAGTASK,			_T("49")));
+		aButtons.Add(TOOLBARBUTTON(ID_EDIT_LOCKTASK,			_T("100")));
+		aButtons.Add(TOOLBARBUTTON());							// separator
+		aButtons.Add(TOOLBARBUTTON(ID_VIEW_CLEARFILTER,			_T("62")));
+		aButtons.Add(TOOLBARBUTTON(ID_VIEW_REFRESHFILTER,		_T("99")));
+		aButtons.Add(TOOLBARBUTTON());							// separator
+		aButtons.Add(TOOLBARBUTTON(ID_HELP_DONATE,				_T("16")));
+		aButtons.Add(TOOLBARBUTTON());							// separator
+		aButtons.Add(TOOLBARBUTTON(ID_TOOLS_CHECKFORUPDATES,	_T("83")));
 	}
 	
 	m_ilcButtons.SetButtons(aButtons);
