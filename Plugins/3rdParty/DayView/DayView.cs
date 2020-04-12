@@ -473,11 +473,11 @@ namespace Calendar
 				{
 					if (appt.StartDate.Hour < startHour)
 					{
-						ScrollToHour(appt.StartDate.Hour + 1);
+						ScrollToHour(appt.StartDate.Hour);
 					}
 					else if (appt.EndDate.Hour > endHour)
 					{
-						ScrollToHour(appt.EndDate.Hour - endHour + 1);
+						ScrollToHour(appt.EndDate.Hour - endHour);
 					}
 				}
 			}

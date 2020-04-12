@@ -1286,44 +1286,19 @@ LRESULT CTabbedToDoCtrl::OnUIExtDoHelp(WPARAM /*wParam*/, LPARAM lParam)
 
 LRESULT CTabbedToDoCtrl::OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam)
 {
-	FTC_VIEW nView = GetTaskView();
-	
-	switch (nView)
+	// Note: Queries from extensions are processed even if
+	// an extension view is not active
+	ASSERT(wParam && lParam);
+
+	if (wParam && lParam)
 	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-	case FTCV_TASKLIST:
-	default:
-		//ASSERT(0);
-		break;
-		
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		if (wParam && lParam)
-		{
-			DWORD dwTaskID = wParam;
-			int* pImageIndex = (int*)lParam;
+		DWORD dwTaskID = wParam;
+		int* pImageIndex = (int*)lParam;
 
-			*pImageIndex = m_taskTree.GetTaskIconIndex(dwTaskID);
+		*pImageIndex = m_taskTree.GetTaskIconIndex(dwTaskID);
 
-			if (*pImageIndex != -1)
-				return (LRESULT)m_ilTaskIcons.GetSafeHandle();
-		}
-		break;
+		if (*pImageIndex != -1)
+			return (LRESULT)m_ilTaskIcons.GetSafeHandle();
 	}
 
 	return 0L;
@@ -1331,102 +1306,77 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam)
 
 LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lParam)
 {
-	FTC_VIEW nView = GetTaskView();
-	
-	switch (nView)
+	// Note: Queries from extensions are processed even if
+	// an extension view is not active
+	ASSERT(wParam && lParam);
+
+	if (wParam && lParam)
 	{
-	case FTCV_TASKTREE:
-	case FTCV_UNSET:
-	case FTCV_TASKLIST:
-	default:
-		//ASSERT(0);
-		break;
-		
-	case FTCV_UIEXTENSION1:
-	case FTCV_UIEXTENSION2:
-	case FTCV_UIEXTENSION3:
-	case FTCV_UIEXTENSION4:
-	case FTCV_UIEXTENSION5:
-	case FTCV_UIEXTENSION6:
-	case FTCV_UIEXTENSION7:
-	case FTCV_UIEXTENSION8:
-	case FTCV_UIEXTENSION9:
-	case FTCV_UIEXTENSION10:
-	case FTCV_UIEXTENSION11:
-	case FTCV_UIEXTENSION12:
-	case FTCV_UIEXTENSION13:
-	case FTCV_UIEXTENSION14:
-	case FTCV_UIEXTENSION15:
-	case FTCV_UIEXTENSION16:
-		if (wParam && lParam)
+		DWORD dwTaskID = wParam;
+		IUINEXTTASKOCCURRENCES* pOccurrences = (IUINEXTTASKOCCURRENCES*)lParam;
+
+		COleDateTimeRange dtRange;
+
+		if (!dtRange.Set(CDateHelper::GetDate(pOccurrences->tRangeStart),
+						 CDateHelper::GetDate(pOccurrences->tRangeEnd)))
 		{
-			DWORD dwTaskID = wParam;
-			IUINEXTTASKOCCURRENCES* pOccurrences = (IUINEXTTASKOCCURRENCES*)lParam;
-
-			COleDateTimeRange dtRange;
-			
-			if (!dtRange.Set(CDateHelper::GetDate(pOccurrences->tRangeStart), 
-							 CDateHelper::GetDate(pOccurrences->tRangeEnd)))
-			{
-				ASSERT(0);
-				return 0;
-			}
-
-			CArray<double, double&> aDates;
-			BOOL bDueDate = FALSE;
-
-			if (!m_data.CalcNextTaskOccurences(dwTaskID, dtRange, aDates, bDueDate))
-			{
-				return 0;
-			}
-
-			int nNumOccur = aDates.GetSize();
-			nNumOccur = min(nNumOccur, IUINEXTTASKOCCURRENCES::IUI_MAXOCCURRENCES);
-
-			COleDateTime dtCur = m_data.GetTaskDate(dwTaskID, (bDueDate ? TDCD_DUE : TDCD_START));
-
-			TDCRECURRENCE tr;
-			VERIFY(m_data.GetTaskRecurrence(dwTaskID, tr));
-
-			for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
-			{
-				const double dDate = aDates[nOccur];
-				int nOffset = (int)(dDate - dtCur.m_dt);
-
-				IUINEXTTASKOCCURRENCES::IUITASKOCCURRENCE& occur = pOccurrences->occurrences[nOccur];
-
-				if (bDueDate)
-				{
-					VERIFY(CDateHelper::GetTimeT64(dDate, occur.tEnd));
-					
-					COleDateTime dtNewStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
-					VERIFY(CDateHelper().OffsetDate(dtNewStart, nOffset, DHU_DAYS));
-
-					// Note: Don't fit start date to recurring scheme
-					VERIFY(CDateHelper::GetTimeT64(dtNewStart, occur.tStart));
-
-					ASSERT((occur.tStart <= occur.tEnd) || 
-							(CDateHelper::IsSameDay(dDate, dtNewStart) && !CDateHelper::DateHasTime(dDate)));
-				}
-				else // start date
-				{
-					VERIFY(CDateHelper::GetTimeT64(dDate, occur.tStart));
-
-					COleDateTime dtNewDue = m_data.GetTaskDate(dwTaskID, TDCD_DUE);
-					VERIFY(CDateHelper().OffsetDate(dtNewDue, nOffset, DHU_DAYS));
-
-					// Note: Don't fit due date to recurring scheme
-					VERIFY(CDateHelper::GetTimeT64(dtNewDue, occur.tEnd));
-
-					ASSERT((occur.tStart <= occur.tEnd) ||
-						(CDateHelper::IsSameDay(dDate, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
-				}
-			}
-			
-			pOccurrences->nNumOccurrences = nNumOccur;
-			return TRUE;
+			ASSERT(0);
+			return 0;
 		}
-		break;
+
+		CArray<double, double&> aDates;
+		BOOL bDueDate = FALSE;
+
+		if (!m_data.CalcNextTaskOccurences(dwTaskID, dtRange, aDates, bDueDate))
+		{
+			return 0;
+		}
+
+		int nNumOccur = aDates.GetSize();
+		nNumOccur = min(nNumOccur, IUINEXTTASKOCCURRENCES::IUI_MAXOCCURRENCES);
+
+		COleDateTime dtCur = m_data.GetTaskDate(dwTaskID, (bDueDate ? TDCD_DUE : TDCD_START));
+
+		TDCRECURRENCE tr;
+		VERIFY(m_data.GetTaskRecurrence(dwTaskID, tr));
+
+		for (int nOccur = 0; nOccur < nNumOccur; nOccur++)
+		{
+			const double dDate = aDates[nOccur];
+			int nOffset = (int)(dDate - dtCur.m_dt);
+
+			IUINEXTTASKOCCURRENCES::IUITASKOCCURRENCE& occur = pOccurrences->occurrences[nOccur];
+
+			if (bDueDate)
+			{
+				VERIFY(CDateHelper::GetTimeT64(dDate, occur.tEnd));
+
+				COleDateTime dtNewStart = m_data.GetTaskDate(dwTaskID, TDCD_START);
+				VERIFY(CDateHelper().OffsetDate(dtNewStart, nOffset, DHU_DAYS));
+
+				// Note: Don't fit start date to recurring scheme
+				VERIFY(CDateHelper::GetTimeT64(dtNewStart, occur.tStart));
+
+				ASSERT((occur.tStart <= occur.tEnd) ||
+					(CDateHelper::IsSameDay(dDate, dtNewStart) && !CDateHelper::DateHasTime(dDate)));
+			}
+			else // start date
+			{
+				VERIFY(CDateHelper::GetTimeT64(dDate, occur.tStart));
+
+				COleDateTime dtNewDue = m_data.GetTaskDate(dwTaskID, TDCD_DUE);
+				VERIFY(CDateHelper().OffsetDate(dtNewDue, nOffset, DHU_DAYS));
+
+				// Note: Don't fit due date to recurring scheme
+				VERIFY(CDateHelper::GetTimeT64(dtNewDue, occur.tEnd));
+
+				ASSERT((occur.tStart <= occur.tEnd) ||
+					(CDateHelper::IsSameDay(dDate, dtNewDue) && !CDateHelper::DateHasTime(dtNewDue)));
+			}
+		}
+
+		pOccurrences->nNumOccurrences = nNumOccur;
+		return TRUE;
 	}
 
 	return 0L;

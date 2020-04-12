@@ -601,7 +601,7 @@ namespace DayViewUIExtension
 			if (m_DayView.ReadOnly)
 				return;
 
-			Calendar.Appointment appointment = m_DayView.GetAppointmentAt(e.Location.X, e.Location.Y);
+			var appointment = m_DayView.GetRealAppointmentAt(e.Location.X, e.Location.Y);
 
 			if (appointment == null)
 				return;
@@ -656,10 +656,7 @@ namespace DayViewUIExtension
 			{
 				UpdatedSelectedTaskDatesText();
 
-				if (args.Appointment != null)
-					notify.NotifySelChange(args.Appointment.Id);
-				else
-					notify.NotifySelChange(0);
+				notify.NotifySelChange(m_DayView.GetSelectedTaskID());
 			}
 		}
 

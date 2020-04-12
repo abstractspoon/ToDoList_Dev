@@ -329,7 +329,15 @@ namespace DayViewUIExtension
 					(taskItem.HasIcon || (ShowParentsAsFolder && taskItem.IsParent)));
 		}
 
-        public override void DrawAppointment(System.Drawing.Graphics g, System.Drawing.Rectangle rect, Calendar.Appointment appointment, bool isSelected, System.Drawing.Rectangle gripRect)
+		private UInt32 GetRealTaskId(Calendar.Appointment appt)
+		{
+			if (appt is CalendarFutureItem)
+				return (appt as CalendarFutureItem).RealTaskId;
+
+			return appt.Id;
+		}
+
+		public override void DrawAppointment(System.Drawing.Graphics g, System.Drawing.Rectangle rect, Calendar.Appointment appointment, bool isSelected, System.Drawing.Rectangle gripRect)
         {
             if (appointment == null)
                 throw new ArgumentNullException("appointment");
@@ -340,26 +348,41 @@ namespace DayViewUIExtension
             if (rect.Width != 0 && rect.Height != 0)
             {
 				CalendarItem taskItem = (appointment as CalendarItem);
-				bool longAppt = taskItem.IsLongAppt();
+
+				UInt32 taskId = taskItem.Id;
+				UInt32 realTaskId = GetRealTaskId(taskItem);
+
+				bool isLongAppt = taskItem.IsLongAppt();
+				bool isFutureItem = (taskId != realTaskId);
 
 				// Recalculate colours
 				Color textColor = taskItem.TaskTextColor;
-				Color borderColor = taskItem.TaskTextColor;
-				Color fillColor = DrawingColor.SetLuminance(taskItem.TaskTextColor, 0.95f);
-				Color barColor = taskItem.TaskTextColor;
+				Color fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
+
+				if (isFutureItem)
+				{
+					fillColor = SystemColors.Window;
+
+					float textLum = DrawingColor.GetLuminance(textColor);
+					textColor = DrawingColor.SetLuminance(textColor, Math.Min(textLum + 0.2f, 0.7f));
+				}
+
+				Color borderColor = textColor;
+				Color barColor = textColor;
 
 				if (taskItem.HasTaskTextColor)
 				{
 					if (isSelected)
 					{
-						textColor = DrawingColor.SetLuminance(taskItem.TaskTextColor, 0.3f);
+						textColor = DrawingColor.SetLuminance(textColor, 0.3f);
 					}
-					else if (TaskColorIsBackground && !taskItem.IsDoneOrGoodAsDone)
+					else if (TaskColorIsBackground && !taskItem.IsDoneOrGoodAsDone && !isFutureItem)
 					{
-						textColor = DrawingColor.GetBestTextColor(taskItem.TaskTextColor);
-						borderColor = DrawingColor.AdjustLighting(taskItem.TaskTextColor, -0.5f, true);
-						barColor = taskItem.TaskTextColor;
-						fillColor = taskItem.TaskTextColor;
+						barColor = textColor;
+						fillColor = textColor;
+
+						borderColor = DrawingColor.AdjustLighting(textColor, -0.5f, true);
+						textColor = DrawingColor.GetBestTextColor(textColor);
 					}
 				}
 
@@ -368,10 +391,30 @@ namespace DayViewUIExtension
 
                 if (isSelected)
                 {
-                    if (longAppt)
+                    if (isLongAppt)
                         rect.Height++;
 
-                    UIExtension.SelectionRect.Draw(m_hWnd, g, rect.Left, rect.Top, rect.Width, rect.Height, false); // opaque
+					if (isFutureItem)
+					{
+						UIExtension.SelectionRect.Draw(m_hWnd,
+														g,
+														rect.Left,
+														rect.Top,
+														rect.Width,
+														rect.Height,
+														UIExtension.SelectionRect.Style.DropHighlighted,
+														false); // opaque
+					}
+					else
+					{
+						UIExtension.SelectionRect.Draw(m_hWnd,
+														g,
+														rect.Left,
+														rect.Top,
+														rect.Width,
+														rect.Height,
+														false); // opaque
+					}
                 }
                 else
                 {
@@ -380,7 +423,7 @@ namespace DayViewUIExtension
 
                     if (taskItem.DrawBorder)
                     {
-						if (!longAppt)
+						if (!isLongAppt)
 						{
 							rect.Height--; // drawing with pen adds 1 to height
 							rect.Width--;
@@ -400,7 +443,7 @@ namespace DayViewUIExtension
                     Rectangle rectIcon;
                     int imageSize = DPIScaling.Scale(16);
 
-                    if (taskItem.IsLongAppt())
+                    if (isLongAppt)
                     {
                         int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
                         rectIcon = new Rectangle((rect.Left + TextPadding), (yCentre - (imageSize / 2)), imageSize, imageSize);
@@ -410,9 +453,9 @@ namespace DayViewUIExtension
                         rectIcon = new Rectangle(rect.Left + TextPadding, rect.Top + TextPadding, imageSize, imageSize);
                     }
 
-                    if (g.IsVisible(rectIcon) && m_TaskIcons.Get(taskItem.Id))
+                    if (g.IsVisible(rectIcon) && m_TaskIcons.Get(realTaskId))
                     {
-                        if (longAppt)
+                        if (isLongAppt)
                         {
                             rectIcon.X = (gripRect.Right + TextPadding);
                         }
@@ -445,7 +488,7 @@ namespace DayViewUIExtension
                     using (SolidBrush brush = new SolidBrush(barColor))
                         g.FillRectangle(brush, gripRect);
 
-                    if (!longAppt)
+                    if (!isLongAppt)
                         gripRect.Height--; // drawing with pen adds 1 to height
 
                     // Draw gripper border
@@ -463,11 +506,11 @@ namespace DayViewUIExtension
                 using (StringFormat format = new StringFormat())
                 {
                     format.Alignment = StringAlignment.Near;
-                    format.LineAlignment = (longAppt ? StringAlignment.Center : StringAlignment.Near);
+                    format.LineAlignment = (isLongAppt ? StringAlignment.Center : StringAlignment.Near);
 
                     rect.Y += 3;
 
-					if (longAppt)
+					if (isLongAppt)
 						rect.Height = m_BaseFont.Height;
 					else
 						rect.Height -= 3;

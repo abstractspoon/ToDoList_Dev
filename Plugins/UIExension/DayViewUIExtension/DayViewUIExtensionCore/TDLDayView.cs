@@ -25,6 +25,7 @@ namespace DayViewUIExtension
         private Boolean m_HideTasksSpanningDays = false;
 
         private Dictionary<UInt32, CalendarItem> m_Items;
+        private Dictionary<UInt32, CalendarFutureItem> m_FutureItems;
 
         private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
@@ -64,6 +65,8 @@ namespace DayViewUIExtension
 			m_UserMinSlotHeight = minSlotHeight;
             m_LabelTip = new LabelTip(this);
 			m_TaskRecurrences = taskRecurrences;
+
+			m_FutureItems = new Dictionary<uint, CalendarFutureItem>();
 			
 			InitializeComponent();
             RefreshHScrollSize();
@@ -195,12 +198,19 @@ namespace DayViewUIExtension
             if (dwTaskID == 0)
                 return false;
 
+			CalendarFutureItem futureItem;
+
+			if (m_FutureItems.TryGetValue(m_SelectedTaskID, out futureItem))
+				return IsItemDisplayable(futureItem);
+			
+			// else
 			CalendarItem item;
 
-			if (!m_Items.TryGetValue(dwTaskID, out item))
-                return false;
+			if (m_Items.TryGetValue(dwTaskID, out item))
+	            return IsItemDisplayable(item);
 
-            return IsItemDisplayable(item);
+			// else
+			return false;
         }
 
         public Boolean HideParentTasks
@@ -277,8 +287,15 @@ namespace DayViewUIExtension
         {
             if (!IsTaskDisplayable(m_SelectedTaskID))
                 return 0;
-            
-            return m_SelectedTaskID;
+
+			// If a future item is selected, return the 'real' task Id
+			CalendarFutureItem futureItem;
+
+			if (m_FutureItems.TryGetValue(m_SelectedTaskID, out futureItem))
+				return futureItem.RealTaskId;
+
+			// else
+			return m_SelectedTaskID;
         }
 
 		public bool GetSelectedTaskDates(ref DateTime from, ref DateTime to)
@@ -409,8 +426,36 @@ namespace DayViewUIExtension
 			return 0;
 		}
 
-		public bool GetItemLabelRect(Calendar.Appointment appointment, ref Rectangle rect)
+		public Calendar.Appointment GetRealAppointmentAt(int x, int y)
 		{
+			return GetRealAppointment(GetAppointmentAt(x, y));
+		}
+
+		public Calendar.Appointment GetRealAppointment(Calendar.Appointment appt)
+		{
+			if (appt != null)
+			{
+				CalendarFutureItem futureItem;
+
+				if (m_FutureItems.TryGetValue(appt.Id, out futureItem))
+				{
+					CalendarItem taskItem;
+
+					if (m_Items.TryGetValue(futureItem.RealTaskId, out taskItem))
+						return taskItem;
+				}
+			}
+
+			return appt;
+		}
+
+		public bool GetSelectedItemLabelRect(ref Rectangle rect)
+		{
+			var appointment = GetRealAppointment(SelectedAppointment);
+
+			EnsureVisible(appointment, false);
+			Update(); // make sure draw rects are updated
+
 			if (GetAppointmentRect(appointment, ref rect))
 			{
 				CalendarItem item = (appointment as CalendarItem);
@@ -452,11 +497,6 @@ namespace DayViewUIExtension
 			}
 
 			return false;
-		}
-
-		public bool GetSelectedItemLabelRect(ref Rectangle rect)
-		{
-			return GetItemLabelRect(SelectedAppointment, ref rect);
 		}
 
 		public bool IsItemDisplayable(CalendarItem item)
@@ -746,8 +786,35 @@ namespace DayViewUIExtension
 			}
 		}
 
+		bool WantDrawAppointmentSelected(Calendar.Appointment appointment)
+		{
+			// When a real or future task item is selected we want
+			// all the other related tasks to also appear selected
+			if (m_SelectedTaskID == appointment.Id)
+				return true;
+
+			var selTaskID = GetSelectedTaskID();
+
+			if (selTaskID == appointment.Id)
+				return true;
+
+			// If the argument is a future item, check to see
+			// if its real task ID matches the selected task
+			var futureItem = (appointment as CalendarFutureItem);
+
+			if (futureItem != null)
+			{
+				if (selTaskID == futureItem.RealTaskId)
+					return true;
+			}
+
+			return false;
+		}
+
 		protected override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isSelected, Rectangle gripRect)
 		{
+			isSelected = WantDrawAppointmentSelected(appointment);
+			
 			// Our custom gripper bar
 			gripRect = rect;
 			gripRect.Inflate(-2, -2);
@@ -802,7 +869,10 @@ namespace DayViewUIExtension
 
 		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end, bool sorted = false)
 		{
-			var appts = new System.Collections.Generic.List<Calendar.Appointment>();
+			// Future items are always populated on demand
+			m_FutureItems = new Dictionary<uint, CalendarFutureItem>();
+
+			var appts = new List<Calendar.Appointment>();
 			UInt32 nextFutureId = (((m_MaxTaskID / 1000) + 1) * 1000);
 
 			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> pair in m_Items)
@@ -823,7 +893,10 @@ namespace DayViewUIExtension
 						{
 							var futureAppt = new CalendarFutureItem(item, nextFutureId, futureItem);
 
+							m_FutureItems[nextFutureId] = futureAppt;
 							appts.Add(futureAppt);
+
+							nextFutureId++;
 						}
 					}
 				}

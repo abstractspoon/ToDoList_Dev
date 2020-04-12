@@ -513,8 +513,8 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) c
 			{
 				date.m_dt += (bForwards ? 1.0 : -1.0);
 
-				// skip weekends
-				m_week.MakeWeekday(date, bForwards);
+				// skip weekends but don't truncate time
+				m_week.MakeWeekday(date, bForwards, FALSE);
 			}
 
 			break;
