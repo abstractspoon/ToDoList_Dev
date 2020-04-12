@@ -1729,7 +1729,21 @@ BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const
 	CRect rCell;
 	VERIFY(GetGridCellRect(nRow, nCol, rCell, TRUE));
 
-	return CalcTaskCellRect(nTask, pCell, rCell, rLabel);
+	if (!CalcTaskCellRect(nTask, pCell, rCell, rLabel))
+		return FALSE;
+
+	const TASKCALITEM* pTCI = m_mapData.GetTaskItem(GetRealTaskID(dwTaskID));
+	
+	if (!pTCI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (pTCI->HasIcon(HasOption(TCCO_SHOWPARENTTASKSASFOLDER)))
+		rLabel.left += (IMAGE_SIZE + TIP_PADDING);
+
+	return TRUE;
 }
 
 BOOL CTaskCalendarCtrl::CalcTaskCellRect(int nTask, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const
