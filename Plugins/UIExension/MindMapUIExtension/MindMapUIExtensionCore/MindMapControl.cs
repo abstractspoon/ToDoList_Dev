@@ -98,12 +98,12 @@ namespace MindMapUIExtension
             return value;
         }
 
-		private int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
-		private int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
-        private int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
-		private int LabelPadding { get { return ScaleByDPIFactor(2); } }
-        private int GraphPadding { get { return ScaleByDPIFactor(6); } }
-        private int DefaultExpansionButtonSize { get { return ScaleByDPIFactor(8); } }
+		protected int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
+		protected int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
+        protected int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
+		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
+        protected int GraphPadding { get { return ScaleByDPIFactor(6); } }
+        protected int DefaultExpansionButtonSize { get { return ScaleByDPIFactor(8); } }
 
 		private int ExpansionButtonSize 
         { 
