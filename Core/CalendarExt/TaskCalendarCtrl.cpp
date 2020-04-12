@@ -745,19 +745,21 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	
 	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
-		const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
-		ASSERT(pTCI);
-
-		DWORD dwTaskID = pTCI->GetTaskID();
-		ASSERT(dwTaskID);
-		
 		CRect rTask;
 		
 		if (!CalcTaskCellRect(nTask, pCell, rAvailCell, rTask))
 			continue;
 
-		// draw selection
+		const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
+		ASSERT(pTCI);
+
+		DWORD dwTaskID = pTCI->GetTaskID();
+		ASSERT(dwTaskID);
+
 		DWORD dwRealTaskID = GetRealTaskID(dwTaskID);
+		ASSERT(dwRealTaskID);
+		
+		// draw selection
 		BOOL bSelTask = (!m_bSavingToImage && (dwRealTaskID == m_dwSelectedTaskID));
 
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
@@ -836,7 +838,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			if ((cdi.nIconOffset >= 0) && (cdi.nIconOffset < nReqWidth))
 			{
 				int iImageIndex = -1;
-				HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_CALENDAR_GETTASKICON, pTCI->GetTaskID(), (LPARAM)&iImageIndex);
+				HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_CALENDAR_GETTASKICON, dwRealTaskID, (LPARAM)&iImageIndex);
 
 				if (hilTask && (iImageIndex != -1))
 				{
