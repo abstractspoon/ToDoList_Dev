@@ -552,7 +552,7 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 				aIndexArrays.Add(pIndices);
 			}
 						
-			Misc::SortArrayT(aIndexArrays, IndexArraySortProc);
+			Misc::SortArrayT<CToolIndexArray*>(aIndexArrays, IndexArraySortProc);
 
 			// Build final index array with separators between groups
 			aIndices.RemoveAll();

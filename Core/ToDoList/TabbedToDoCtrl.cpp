@@ -1333,7 +1333,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lPar
 		}
 
 		int nNumOccur = aDates.GetSize();
-		nNumOccur = min(nNumOccur, IUINEXTTASKOCCURRENCES::IUI_MAXOCCURRENCES);
+		nNumOccur = min(nNumOccur, IUI_MAXNEXTOCCURRENCES);
 
 		COleDateTime dtCur = m_data.GetTaskDate(dwTaskID, (bDueDate ? TDCD_DUE : TDCD_START));
 

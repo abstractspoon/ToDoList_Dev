@@ -47,6 +47,15 @@ struct DATETIMEPICKERINFO
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+#if _MSC_VER <= 1200
+	// Under VC6 this definition seems to be missing - causes link error
+	IMPLEMENT_DYNAMIC(CDateTimeCtrl, CWnd)
+#endif
+
+IMPLEMENT_DYNAMIC(CDateTimeCtrlEx, CDateTimeCtrl)
+
+/////////////////////////////////////////////////////////////////////////////
 // CDateTimeCtrlEx
 
 CDateTimeCtrlEx::CDateTimeCtrlEx(DWORD dwMonthCalStyle) 

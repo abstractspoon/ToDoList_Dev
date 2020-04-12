@@ -316,6 +316,10 @@ SOURCE=..\ToDoList\TDLDialog.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLFilterDateComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\tdliconcombobox.cpp
 # End Source File
 # Begin Source File

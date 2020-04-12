@@ -691,6 +691,14 @@ typedef CMap<TDC_COLUMN, TDC_COLUMN, const TDCCOLUMN*, const TDCCOLUMN*&> CTDCCo
 
 struct CTRLITEM
 {
+	CTRLITEM()	: nCtrlID(0), nLabelID(0), nAttrib(TDCA_NONE)
+	{
+	}
+	
+	CTRLITEM(UINT ctrlID, UINT labelID, TDC_ATTRIBUTE attribID)	: nCtrlID(ctrlID), nLabelID(labelID), nAttrib(attribID)
+	{
+	}
+
 	BOOL operator==(const CTRLITEM& other) const
 	{
 		return ((nCtrlID == other.nCtrlID) && 
@@ -742,10 +750,9 @@ struct CUSTOMATTRIBCTRLITEM : public CTRLITEM
 {
 	friend class CTDCCustomControlArray;
 
-	CUSTOMATTRIBCTRLITEM()
+	CUSTOMATTRIBCTRLITEM() : CTRLITEM(0, 0, nAttrib)
 	{
-		nCtrlID = nLabelID = nBuddyCtrlID = nBuddyLabelID = 0;
-		nAttrib = TDCA_NONE;
+		nBuddyCtrlID = nBuddyLabelID = 0;
 		pBuddyClass = NULL;
 	}
 

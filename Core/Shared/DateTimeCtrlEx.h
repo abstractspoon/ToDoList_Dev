@@ -20,6 +20,8 @@ struct DATETIMEPICKERINFO;
 
 class CDateTimeCtrlEx : public CDateTimeCtrl
 {
+	DECLARE_DYNAMIC(CDateTimeCtrlEx)
+
 // Construction
 public:
 	CDateTimeCtrlEx(DWORD dwMonthCalStyle = MCS_WEEKNUMBERS);

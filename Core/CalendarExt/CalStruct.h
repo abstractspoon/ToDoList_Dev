@@ -100,11 +100,8 @@ struct TASKCALFUTUREDATES
 	// Range within which to retrieve occurrences
 	COleDateTimeRange dtRange;
 
-	// Occurrences found within range
-	static const int MAXFUTUREITEMS = 256;
-
 	int nNumOccurrences;
-	COleDateTimeRange dtOccurrences[MAXFUTUREITEMS];
+	COleDateTimeRange dtOccurrences[IUI_MAXNEXTOCCURRENCES];
 };
 
 /////////////////////////////////////////////////////////////////////////////

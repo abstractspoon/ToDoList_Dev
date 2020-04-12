@@ -273,6 +273,8 @@ struct IUIAPPCOMMANDDATA
 
 //////////////////////////////////////////////////////////////////////
 
+const int IUI_MAXNEXTOCCURRENCES = 256;
+
 struct IUINEXTTASKOCCURRENCES
 {
 	// Range within which to retrieve occurrences
@@ -286,10 +288,8 @@ struct IUINEXTTASKOCCURRENCES
 		__int64 tEnd;
 	};
 
-	static const int IUI_MAXOCCURRENCES = 256;
-
 	int nNumOccurrences;
-	IUITASKOCCURRENCE occurrences[IUI_MAXOCCURRENCES];
+	IUITASKOCCURRENCE occurrences[IUI_MAXNEXTOCCURRENCES];
 };
 
 //////////////////////////////////////////////////////////////////////
