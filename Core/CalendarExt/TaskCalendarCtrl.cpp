@@ -1729,6 +1729,9 @@ BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const
 	CRect rCell;
 	VERIFY(GetGridCellRect(nRow, nCol, rCell, TRUE));
 
+	if (IsGridCellSelected(pCell))
+		rCell.DeflateRect(2, 0);
+
 	if (!CalcTaskCellRect(nTask, pCell, rCell, rLabel))
 		return FALSE;
 
