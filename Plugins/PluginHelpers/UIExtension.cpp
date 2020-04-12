@@ -493,11 +493,12 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 {
 	HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
 	bool focused = (::GetFocus() == hWndRef);
+	Style style = (focused ? Style::Selected : Style::SelectedNotFocused);
 
-	return Draw(hwnd, g, x, y, cx, cy, focused, transparent);
+	return Draw(hwnd, g, x, y, cx, cy, style, transparent);
 }
 
-bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, bool focused, bool transparent)
+bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, Style style, bool transparent)
 {
 	// Must retrieve clip rect before getting HDC
 	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
@@ -506,22 +507,40 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 	if (hDC == NULL)
 		return false;
 
+	GM_ITEMSTATE state = GMIS_SELECTED;
+	
+	switch (style)
+	{
+	case Style::Selected:
+		break;
+
+	case Style::SelectedNotFocused:
+		state = GMIS_SELECTEDNOTFOCUSED;
+		break;
+
+	case Style::DropHighlighted:
+		state = GMIS_DROPHILITED;
+		break;
+
+	default:
+		return false;
+	}
+		
 	int nSaveDC = ::SaveDC(hDC);
-
-	GM_ITEMSTATE state = (focused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-	DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
-
 	::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
 
-	CRect rSel(x, y, (x + cx), (y + cy));
+	DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
 
-	bool bRes = (FALSE != GraphicsMisc::DrawExplorerItemSelection(CDC::FromHandle(hDC), Win32::GetHwnd(hwnd), state, rSel, flags));
-	
+	BOOL bRes = GraphicsMisc::DrawExplorerItemSelection(CDC::FromHandle(hDC), 
+														Win32::GetHwnd(hwnd), 
+														state, 
+														CRect(x, y, (x + cx), (y + cy)), 
+														flags);
 	::RestoreDC(hDC, nSaveDC);
 	g->ReleaseHdc();
 	g->SetClip(rClip); // restore clip rect
 
-	return bRes;
+	return (bRes != FALSE);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

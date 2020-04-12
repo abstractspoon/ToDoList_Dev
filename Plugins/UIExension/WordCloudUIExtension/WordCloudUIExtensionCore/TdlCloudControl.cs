@@ -234,7 +234,15 @@ namespace WordCloudUIExtension
 		private void DrawSelected(LayoutItem layoutItem)
 		{
 			Rectangle rect = Rectangle.Inflate(Rectangle.Round(layoutItem.Rectangle), -1, -1);
-			UIExtension.SelectionRect.Draw(m_Ctrl.Handle, m_Graphics, rect.Left, rect.Top, rect.Width, rect.Height, m_Ctrl.Focused, false); // opaque
+
+			UIExtension.SelectionRect.Draw(m_Ctrl.Handle, 
+											m_Graphics, 
+											rect.Left, 
+											rect.Top, 
+											rect.Width, 
+											rect.Height, 
+											(m_Ctrl.Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused), 
+											false); // opaque
 
 			DrawEmphasizedText(layoutItem, true);
 		}
