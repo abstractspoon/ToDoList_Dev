@@ -169,7 +169,9 @@ float ColorUtil::DrawingColor::CalculateColorDifference(Drawing::Color color1, D
 
 float ColorUtil::GetLuminance(COLORREF rgbColor)
 {
-	return (((GetBValue(rgbColor) * 0.1f) + (GetGValue(rgbColor) * 0.6f) + (GetRValue(rgbColor) * 0.3f)) / 255.0f);
+	HLSX hls(rgbColor);
+	
+	return hls.fLuminosity;
 }
 
 COLORREF ColorUtil::SetLuminance(COLORREF rgbColor, float luminance)
