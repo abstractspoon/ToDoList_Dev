@@ -95,6 +95,65 @@ const DWORD NOTSET = 0xffffffff;
 DWORD CEnListCtrl::s_dwSelectionTheming = MAKELONG(TRUE, FALSE);
 
 /////////////////////////////////////////////////////////////////////////////
+
+BOOL CListCtrlItemGrouping::EnableGroupView(BOOL bEnable)
+{
+	return (m_list.SendMessage(LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
+}
+
+BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/)
+{
+	LVGROUP lvg = { 0 };
+
+	lvg.cbSize = sizeof(lvg);
+	lvg.iGroupId = nGroupID;
+	lvg.state = LVGS_NORMAL;//dwState;
+	lvg.mask = LVGF_GROUPID | LVGF_HEADER | LVGF_STATE | LVGF_ALIGN;
+	lvg.uAlign = LVGA_HEADER_LEFT;//dwAlign;
+
+								  // Header-title must be unicode (Convert if necessary)
+#ifdef UNICODE
+	lvg.pszHeader = (LPWSTR)(LPCTSTR)strHeader;
+	lvg.cchHeader = strHeader.GetLength();
+#else
+	CComBSTR header = strHeader;
+	lvg.pszHeader = header;
+	lvg.cchHeader = header.Length();
+#endif
+
+	return (S_OK == m_list.SendMessage(LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
+}
+
+int CListCtrlItemGrouping::GetItemGroupId(int nRow)
+{
+	LVGROUPITEM lvgi = { 0 };
+
+	lvgi.mask = LVIF_GROUPID;
+	lvgi.iItem = nRow;
+
+	VERIFY(m_list.SendMessage(LVM_GETITEM, 0, (LPARAM)&lvgi));
+
+	return lvgi.iGroupId;
+}
+
+BOOL CListCtrlItemGrouping::SetItemGroupId(int nRow, int nGroupID)
+{
+	LVGROUPITEM lvgi = { 0 };
+
+	lvgi.mask = LVIF_GROUPID;
+	lvgi.iItem = nRow;
+	lvgi.iSubItem = 0;
+	lvgi.iGroupId = nGroupID;
+
+	return (BOOL)m_list.SendMessage(LVM_SETITEM, 0, (LPARAM)&lvgi);
+}
+
+void CListCtrlItemGrouping::RemoveAllGroups()
+{
+	m_list.SendMessage(LVM_REMOVEALLGROUPS);
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // CEnListCtrl
 
 IMPLEMENT_DYNAMIC(CEnListCtrl, CListCtrl)
@@ -1559,59 +1618,3 @@ void CEnListCtrl::EnableAlternateRowColoring(BOOL bEnable)
 	}
 }
 
-BOOL CEnListCtrl::EnableGroupView(BOOL bEnable)
-{
-	return (SendMessage(LVM_ENABLEGROUPVIEW, (WPARAM)bEnable, 0) != -1);
-}
-
-BOOL CEnListCtrl::InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/)
-{
-	LVGROUP lvg = { 0 };
-
-	lvg.cbSize = sizeof(lvg);
-	lvg.iGroupId = nGroupID;
-	lvg.state = LVGS_NORMAL;//dwState;
-	lvg.mask = LVGF_GROUPID | LVGF_HEADER | LVGF_STATE | LVGF_ALIGN;
-	lvg.uAlign = LVGA_HEADER_LEFT;//dwAlign;
-	
-	// Header-title must be unicode (Convert if necessary)
-#ifdef UNICODE
-	lvg.pszHeader = (LPWSTR)(LPCTSTR)strHeader;
-	lvg.cchHeader = strHeader.GetLength();
-#else
-	CComBSTR header = strHeader;
-	lvg.pszHeader = header;
-	lvg.cchHeader = header.Length();
-#endif
-
-	return (S_OK == SendMessage(LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
-}
-
-int CEnListCtrl::GetItemGroupId(int nRow)
-{
-	LVGROUPITEM lvgi = { 0 };
-
-    lvgi.mask = LVIF_GROUPID;
-    lvgi.iItem = nRow;
-
-	VERIFY(GetItem((LVITEM*)&lvgi));
-
-    return lvgi.iGroupId;
-}
-
-BOOL CEnListCtrl::SetItemGroupId(int nRow, int nGroupID)
-{
-	LVGROUPITEM lvgi = { 0 };
-	
-	lvgi.mask = LVIF_GROUPID;
-	lvgi.iItem = nRow;
-	lvgi.iSubItem = 0;
-	lvgi.iGroupId = nGroupID;
-
-	return SetItem((LVITEM*)&lvgi);
-}
-
-void CEnListCtrl::RemoveAllGroups()
-{
-	SendMessage(LVM_REMOVEALLGROUPS);
-}

@@ -32,6 +32,24 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
+// helper class for manipulating item grouping
+class CListCtrlItemGrouping
+{
+public:
+	CListCtrlItemGrouping(CWnd& list) : m_list(list) {}
+
+	BOOL EnableGroupView(BOOL bEnable = TRUE);
+	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/);
+	int GetItemGroupId(int nRow);
+	BOOL SetItemGroupId(int nRow, int nGroupID);
+	void RemoveAllGroups();
+
+protected:
+	CWnd& m_list;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CEnListCtrl : public CListCtrl
 {
 	DECLARE_DYNAMIC(CEnListCtrl)
@@ -92,13 +110,6 @@ public:
 	int GetColumnFormat(int nCol) const;
 	BOOL SetColumnText(int nCol, LPCTSTR szText);
 
-	// group methods
-	BOOL EnableGroupView(BOOL bEnable = TRUE);
-	BOOL InsertGroupHeader(int nIndex, int nGroupID, const CString& strHeader/*, DWORD dwState = LVGS_NORMAL, DWORD dwAlign = LVGA_HEADER_LEFT*/);
-	int GetItemGroupId(int nRow);
-	BOOL SetItemGroupId(int nRow, int nGroupID);
-	void RemoveAllGroups();
-	
 	void OverrideSelectionTheming(BOOL bThemed, BOOL bClassic) { m_dwSelectionTheming = MAKELONG(bThemed, bClassic); }
 	static void EnableSelectionTheming(BOOL bThemed, BOOL bClassic) { s_dwSelectionTheming = MAKELONG(bThemed, bClassic); }
 

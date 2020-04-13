@@ -38,7 +38,11 @@ enum
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindResultsListCtrl
 
-CTDLFindResultsListCtrl::CTDLFindResultsListCtrl() : m_nCurGroupID(-1), m_bStrikeThruDone(FALSE) 
+CTDLFindResultsListCtrl::CTDLFindResultsListCtrl() 
+	: 
+	m_nCurGroupID(-1), 
+	m_lcGrouping(*this),
+	m_bStrikeThruDone(FALSE) 
 {
 }
 
@@ -384,7 +388,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	SetItemText(nIndex, COL_TASKPATH, sPath);
 
 	if (m_nCurGroupID != -1)
-		SetItemGroupId(nIndex, m_nCurGroupID);
+		m_lcGrouping.SetItemGroupId(nIndex, m_nCurGroupID);
 
 	UpdateWindow();
 		
@@ -398,9 +402,9 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 BOOL CTDLFindResultsListCtrl::AddHeaderRow(LPCTSTR szText)
 {
 	if (m_nCurGroupID == -1)
-		EnableGroupView();
+		m_lcGrouping.EnableGroupView();
 
-	return InsertGroupHeader(-1, ++m_nCurGroupID, szText);
+	return m_lcGrouping.InsertGroupHeader(-1, ++m_nCurGroupID, szText);
 }
 
 BOOL CTDLFindResultsListCtrl::OsIsXP()

@@ -47,6 +47,7 @@ protected:
 	int m_nCurGroupID;
 	BOOL m_bStrikeThruDone;
 	CFontCache m_fonts;
+	CListCtrlItemGrouping m_lcGrouping;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
