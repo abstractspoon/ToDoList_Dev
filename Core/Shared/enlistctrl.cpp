@@ -121,7 +121,7 @@ BOOL CListCtrlItemGrouping::InsertGroupHeader(int nIndex, int nGroupID, const CS
 	lvg.cchHeader = header.Length();
 #endif
 
-	return (S_OK == m_list.SendMessage(LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
+	return (-1 != m_list.SendMessage(LVM_INSERTGROUP, (WPARAM)nIndex, (LPARAM)&lvg));
 }
 
 int CListCtrlItemGrouping::GetItemGroupId(int nRow)
