@@ -122,7 +122,9 @@ BOOL CTDLTaskCtrlBase::TDSORTFLAGS::WantIncludeTime(TDC_COLUMN nColID) const
 
 CTDLTaskCtrlBase::TDSORTPARAMS::TDSORTPARAMS(const CTDLTaskCtrlBase& tcb) 
 	: 
-	base(tcb)
+	base(tcb),
+	pCols(NULL),
+	nNumCols(0)
 {
 }
 
@@ -1430,48 +1432,20 @@ void CTDLTaskCtrlBase::LoadState(const CPreferences& prefs, const CString& sKey)
 	PostResize();
 }
 
-int CALLBACK CTDLTaskCtrlBase::SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
-{
-	TDSORTPARAMS* pSS = (TDSORTPARAMS*)lParamSort;
-	ASSERT (pSS && pSS->sort.bMulti && pSS->sort.multi.IsSorting());
-
-	int nCompare = 0;
-	const TDSORTCOLUMN* pCols = pSS->sort.multi.Cols();
-	
-	for (int nCol = 0; ((nCol < 3) && (nCompare == 0)); nCol++)
-	{
-		if (!pCols[nCol].IsSorting())
-			break;
-
-		nCompare = CompareTasks(lParam1, lParam2, 
-								pSS->base, 
-								pCols[nCol], 
-								pSS->flags);
-	}
-
-	// finally, if the items are equal we sort by raw
-	// position so that the sort is stable
-	if (nCompare == 0)
-	{
-		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
-		static TDSORTFLAGS nullFlags;
-
-		nCompare = CompareTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
-	}
-	
-	return nCompare;
-}
-
 int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	TDSORTPARAMS* pSS = (TDSORTPARAMS*)lParamSort;
+	ASSERT (pSS->pCols && pSS->nNumCols);
 	
-	ASSERT (!pSS->sort.bMulti);
-	
-	int nCompare = CompareTasks(lParam1, lParam2, 
-								pSS->base, 
-								pSS->sort.single, 
-								pSS->flags);
+	int nCompare = 0;
+
+	for (int nCol = 0; ((nCol < pSS->nNumCols) && (nCompare == 0)); nCol++)
+	{
+		if (!pSS->pCols[nCol].IsSorting())
+			break;
+
+		nCompare = pSS->base.CompareTasks(lParam1, lParam2,	pSS->pCols[nCol], pSS->flags);
+	}
 	
 	// finally, if the items are equal we sort by raw
 	// position so that the sort is stable
@@ -1480,7 +1454,7 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 		static TDSORTCOLUMN nullCol(TDCC_NONE, FALSE);
 		static TDSORTFLAGS nullFlags;
 
-		nCompare = CompareTasks(lParam1, lParam2, pSS->base, nullCol, nullFlags);
+		nCompare = pSS->base.CompareTasks(lParam1, lParam2, nullCol, nullFlags);
 	}
 	
 	return nCompare;
@@ -1488,9 +1462,8 @@ int CALLBACK CTDLTaskCtrlBase::SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM l
 
 int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1, 
 									LPARAM lParam2, 
-									const CTDLTaskCtrlBase& base, 
 									const TDSORTCOLUMN& sort, 
-									const TDSORTFLAGS& flags)
+									const TDSORTFLAGS& flags) const
 {
 	ASSERT(sort.bAscending != -1);
 
@@ -1509,8 +1482,8 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 	{
 		COleDateTime dtRem1, dtRem2;
 
-		BOOL bHasReminder1 = base.GetTaskReminder(dwTaskID1, dtRem1);
-		BOOL bHasReminder2 = base.GetTaskReminder(dwTaskID2, dtRem2);
+		BOOL bHasReminder1 = GetTaskReminder(dwTaskID1, dtRem1);
+		BOOL bHasReminder2 = GetTaskReminder(dwTaskID2, dtRem2);
 
 		int nCompare = 0;
 
@@ -1534,19 +1507,19 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 		
 		// this can still fail
-		if (!base.m_aCustomAttribDefs.GetAttributeDef(sort.nBy, attribDef))
+		if (!m_aCustomAttribDefs.GetAttributeDef(sort.nBy, attribDef))
 			return 0;
 		
-		return base.m_comparer.CompareTasks(dwTaskID1, dwTaskID2, attribDef, sort.bAscending);
+		return m_comparer.CompareTasks(dwTaskID1, dwTaskID2, attribDef, sort.bAscending);
 	}
 	
 	// else default attribute
-	return base.m_comparer.CompareTasks(dwTaskID1, 
-										dwTaskID2, 
-										sort.nBy, 
-										sort.bAscending, 
-										flags.bSortDueTodayHigh,
-										flags.WantIncludeTime(sort.nBy));
+	return m_comparer.CompareTasks(dwTaskID1, 
+									dwTaskID2, 
+									sort.nBy, 
+									sort.bAscending, 
+									flags.bSortDueTodayHigh,
+									flags.WantIncludeTime(sort.nBy));
 }
 
 DWORD CTDLTaskCtrlBase::HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const
@@ -1831,8 +1804,7 @@ void CTDLTaskCtrlBase::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 			}
 			else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nBy))
 			{
-				// TODO
-				bAscending = FALSE;//(m_ctrlTreeList.Tree().GetGutterColumnSort(nBy) != NCGSORT_DOWN);
+				bAscending = FALSE;
 			}
 		}
 		// if there's been a mod since last sorting then its reasonable to assume
@@ -1861,7 +1833,23 @@ void CTDLTaskCtrlBase::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 
 PFNTLSCOMPARE CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 {
-	ss.sort = m_sort;
+	if (!m_sort.IsSorting())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (m_sort.bMulti)
+	{
+		ss.pCols = m_sort.multi.Cols();
+		ss.nNumCols = 3;
+	}
+	else
+	{
+		ss.pCols = &m_sort.single;
+		ss.nNumCols = 1;
+	}
+
 	ss.flags.bSortChildren = TRUE;
 	ss.flags.bSortDueTodayHigh = HasColor(m_crDueToday);
 	ss.flags.dwTimeTrackID = m_dwTimeTrackTaskID;
@@ -1870,7 +1858,7 @@ PFNTLSCOMPARE CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 	ss.flags.bIncDueTime = IsColumnShowing(TDCC_DUETIME);
 	ss.flags.bIncDoneTime = IsColumnShowing(TDCC_DONETIME);
 	
-	return (ss.sort.bMulti ? SortFuncMulti : SortFunc);
+	return &SortFunc;
 }
 
 void CTDLTaskCtrlBase::DoSort()

@@ -178,7 +178,7 @@ public:
 	BOOL GetTaskTextColors(DWORD dwTaskID, COLORREF& crText, COLORREF& crBack, BOOL bRef = -1) const;
 	int GetTaskIconIndex(DWORD dwTaskID) const;
 	int GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	
+
 	TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	TDC_COLUMN HitTestColumn(const CPoint& ptScreen) const;
 	DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
@@ -354,6 +354,7 @@ protected:
 	virtual BOOL GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const = 0;
 	virtual GM_ITEMSTATE GetItemTitleState(const NMCUSTOMDRAW& nmcd) const = 0;
 	virtual BOOL IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const = 0;
+	virtual LPCTSTR GetDebugName() const = 0;
 
 	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
 	BOOL IsAlternateColumnLine(int nItem) const;
@@ -418,9 +419,11 @@ protected:
 		TDSORTPARAMS(const CTDLTaskCtrlBase& tcb);
 		
 		const CTDLTaskCtrlBase& base;
-		TDSORT sort;
+		const TDSORTCOLUMN* pCols;
+		int nNumCols;
 		TDSORTFLAGS flags;
 	};
+
 	// ------------------------------------------------------------------
 
 	void ClearSortColumn();
@@ -430,9 +433,12 @@ protected:
 	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const;
 	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
 	BOOL AttribsMatchSort(const CTDCAttributeMap& attribIDs) const;
-	int GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const;
 
-	PFNTLSCOMPARE PrepareSort(TDSORTPARAMS& ss) const;
+	virtual PFNTLSCOMPARE PrepareSort(TDSORTPARAMS& ss) const;
+	virtual int CompareTasks(LPARAM lParam1,
+							 LPARAM lParam2,
+							 const TDSORTCOLUMN& sort,
+							 const TDSORTFLAGS& flags) const;
 	
 protected:
 	int CalcMaxDateColWidth(TDC_DATE nDate, CDC* pDC, BOOL bCustomWantsTime = FALSE) const;
@@ -441,6 +447,7 @@ protected:
 	int CalcSplitterPosToFitListColumns() const;
 	void UpdateAttributePaneVisibility();
 	void AdjustSplitterToFitAttributeColumns();
+	int GetColumnIndices(const CTDCColumnIDMap& aColIDs, CIntArray& aCols) const;
 
 	BOOL NeedDrawColumnSelection() { return (HasFocus() && (GetFocus() != &m_lcColumns)); }
 	void RepackageAndSendToParent(UINT msg, WPARAM wp, LPARAM lp);
@@ -490,17 +497,7 @@ protected:
 	static inline BOOL HasColor(COLORREF color) { return (color != CLR_NONE) ? TRUE : FALSE; }
 
 	static int CALLBACK SortFunc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
-	static int CALLBACK SortFuncMulti(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort); 
-	static int CompareTasks(LPARAM lParam1, 
-							LPARAM lParam2, 
-							const CTDLTaskCtrlBase& base, 
-							const TDSORTCOLUMN& sort, 
-							const TDSORTFLAGS& flags);
 	
-	// ----------------------------------------------------
-
-	virtual LPCTSTR GetDebugName() const = 0;
-
 };
 
 #endif // !defined(AFX_TDCTASKCTRLBASE_H__155791A3_22AC_4083_B933_F39E9EBDADEF__INCLUDED_)
