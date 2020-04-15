@@ -2607,7 +2607,9 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
 			CRect rLabel;
 			GetItemTitleRect(nmcd, TDCTR_BKGND, rLabel, pDC, pTDI->sTitle);
 
+			rRow.right = (rClient.right + GetSystemMetrics(SM_CXVSCROLL));
 			rLabel.right = rRow.right; // else overwriting with comments produces artifacts
+
 			pDC->FillSolidRect(rLabel, crBack);
 
 			// draw horz gridline
