@@ -2976,6 +2976,7 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 		AddTreeItemToList(NULL, pContext);
 
 		m_taskList.SetNextUniqueTaskID(m_dwNextUniqueID);
+		m_taskList.OnBuildComplete();
 
 		VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
 		ASSERT(pLVData);

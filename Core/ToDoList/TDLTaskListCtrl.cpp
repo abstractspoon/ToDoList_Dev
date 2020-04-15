@@ -86,7 +86,12 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
-	CTDLTaskCtrlBase(TRUE, ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs)
+	CTDLTaskCtrlBase(TRUE, ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs),
+#ifdef _DEBUG
+	m_nGroupBy(TDCC_ALLOCTO)
+#else
+	m_nGroupBy(TDCC_NONE)
+#endif
 {
 }
 
@@ -235,43 +240,90 @@ void CTDLTaskListCtrl::RemoveDeletedItems()
 LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
-	int nItem = (int)pLVCD->nmcd.dwItemSpec;
+	BOOL bColumns = (hwndList == m_lcColumns);
+
 	DWORD dwTaskID = pLVCD->nmcd.lItemlParam;
 
-	if (hwndList == m_lcColumns)
-	{
-		// columns handled by base class
-		return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD);
-	}
+	if (bColumns)
+		dwTaskID = GetTaskID((int)dwTaskID);
 
 	DWORD dwRes = CDRF_DODEFAULT;
 
-	switch (pLVCD->nmcd.dwDrawStage)
+	if (IsGroupHeaderTask(dwTaskID))
 	{
-	case CDDS_PREPAINT:
-		dwRes = CDRF_NOTIFYITEMDRAW;
-		break;
+		switch (pLVCD->nmcd.dwDrawStage)
+		{
+		case CDDS_PREPAINT:
+			dwRes = CDRF_NOTIFYITEMDRAW;
+			break;
+
+		case CDDS_ITEMPREPAINT:
+			{
+				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
+
+				CRect rRow(pLVCD->nmcd.rc);
+				rRow.right += GetSystemMetrics(SM_CXVSCROLL);
+
+				pDC->FillSolidRect(rRow, GetSysColor(COLOR_WINDOW));
+				DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
+
+				const COLORREF HEADER_COLOR = RGB(63, 118, 179);
+				GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, HEADER_COLOR);
+
+				if (hwndList == m_lcTasks)
+				{
+					rRow.left = 20; // Always ensure the text is visible
+
+					CEnString sHeader;
+					m_mapGroupHeaders.Lookup(dwTaskID, sHeader);
+
+					if (sHeader.IsEmpty())
+						sHeader.LoadString(IDS_TDC_NONE);
+
+					pDC->SetTextColor(HEADER_COLOR);
+					pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
+					pDC->SetBkMode(OPAQUE);
+					pDC->DrawText(sHeader, rRow, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+				}
+			}
+			dwRes = CDRF_SKIPDEFAULT;
+		}
+	}
+	else
+	{
+		if (hwndList == m_lcColumns)
+		{
+			// columns handled by base class
+			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD);
+		}
+
+		switch (pLVCD->nmcd.dwDrawStage)
+		{
+		case CDDS_PREPAINT:
+			dwRes = CDRF_NOTIFYITEMDRAW;
+			break;
 								
-	case CDDS_ITEMPREPAINT:
-		{
-			BOOL bFillRow = !OsIsXP();
-			dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, bFillRow, pLVCD->clrText, pLVCD->clrTextBk);
+		case CDDS_ITEMPREPAINT:
+			{
+				BOOL bFillRow = !OsIsXP();
+				dwRes = OnPrePaintTaskTitle(pLVCD->nmcd, bFillRow, pLVCD->clrText, pLVCD->clrTextBk);
 
-			if (bFillRow)
- 				ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
+				if (bFillRow)
+ 					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
 
-			return dwRes;
-		}
-		break;
+				return dwRes;
+			}
+			break;
 
-	case CDDS_ITEMPOSTPAINT:
-		{
-			dwRes = OnPostPaintTaskTitle(pLVCD->nmcd);
+		case CDDS_ITEMPOSTPAINT:
+			{
+				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd);
 			
-			// restore default back colour set in CDDS_ITEMPREPAINT
-			ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));
+				// restore default back colour set in CDDS_ITEMPREPAINT
+				ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));
+			}
+			break;
 		}
-		break;
 	}
 	
 	return dwRes;
@@ -323,6 +375,200 @@ int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 								LVIS_STATEIMAGEMASK,
 								I_IMAGECALLBACK, 
 								dwTaskID);
+}
+
+BOOL CTDLTaskListCtrl::GroupBy(TDC_COLUMN nGroupBy)
+{
+	if (nGroupBy == m_nGroupBy)
+		return TRUE;
+
+	switch (nGroupBy)
+	{
+	case TDCA_CATEGORY:
+	case TDCA_ALLOCTO:
+	case TDCA_TAGS:
+	case TDCA_ALLOCBY:
+	case TDCA_VERSION:
+	case TDCA_STATUS:
+		// acceptable
+		break;
+
+	default:
+		return FALSE;
+	}
+
+	m_nGroupBy = nGroupBy;
+
+	RebuildGroupHeaders();
+	Resort();
+
+	return TRUE;
+}
+
+void CTDLTaskListCtrl::OnBuildComplete()
+{
+	RebuildGroupHeaders();
+}
+
+void CTDLTaskListCtrl::RebuildGroupHeaders()
+{
+	EnableResync(FALSE);
+
+	// Take a copy of the current group headers
+	// to be deleted and then clear them
+	CDWordSet mapCurGroupIDs;
+
+	if (m_mapGroupHeaders.GetCount())
+	{
+		CString sUnused;
+		DWORD dwGroupID;
+		POSITION pos = m_mapGroupHeaders.GetStartPosition();
+
+		while (pos)
+		{
+			m_mapGroupHeaders.GetNextAssoc(pos, dwGroupID, sUnused);
+			mapCurGroupIDs.Add(dwGroupID);
+		}
+		m_mapGroupHeaders.RemoveAll();
+	}
+	
+	// Build new headers and delete the old as we go
+	CStringSet mapNewHeaders;
+	DWORD dwNewHeaderID = 0xffffffff;
+
+	int nTask = GetItemCount();
+
+	while (nTask--)
+	{
+		CString sGroupHeader;
+		DWORD dwTaskID = GetTaskID(nTask);
+
+		if (mapCurGroupIDs.Has(dwTaskID))
+		{
+			m_lcColumns.DeleteItem(nTask);
+			m_lcTasks.DeleteItem(nTask);
+
+			mapCurGroupIDs.RemoveKey(dwTaskID);
+		}
+		else if (m_nGroupBy != TDCC_NONE)
+		{
+			sGroupHeader = GetTaskGroupHeaderText(dwTaskID);
+
+			if (!mapNewHeaders.Has(sGroupHeader))
+			{
+				m_mapGroupHeaders[dwNewHeaderID] = sGroupHeader;
+				mapNewHeaders.Add(sGroupHeader);
+
+				int nTaskItem = m_lcTasks.InsertItem(GetItemCount(), sGroupHeader, -1);
+				m_lcTasks.SetItemData(nTaskItem, dwNewHeaderID);
+
+				int nColItem = m_lcColumns.InsertItem(GetItemCount(), sGroupHeader, -1);
+				m_lcColumns.SetItemData(nColItem, nTaskItem);
+
+				dwNewHeaderID--;
+			}
+		}
+	}
+
+	EnableResync(TRUE);
+}
+
+CString CTDLTaskListCtrl::GetTaskGroupHeaderText(DWORD dwTaskID) const
+{
+	CString sGroupHeader;
+
+	if (!m_mapGroupHeaders.Lookup(dwTaskID, sGroupHeader))
+	{
+		const TODOITEM* pTDI = GetTask(dwTaskID);
+		ASSERT(pTDI);
+
+		switch (m_nGroupBy)
+		{
+		case TDCC_CATEGORY: sGroupHeader = m_formatter.GetTaskCategories(pTDI);	break;
+		case TDCC_ALLOCTO:	sGroupHeader = m_formatter.GetTaskAllocTo(pTDI);	break;
+		case TDCC_TAGS:		sGroupHeader = m_formatter.GetTaskTags(pTDI);		break;
+
+		case TDCC_ALLOCBY:	sGroupHeader = pTDI->sAllocBy;	break;
+		case TDCC_VERSION:	sGroupHeader = pTDI->sVersion;	break;
+		case TDCC_STATUS:	sGroupHeader = pTDI->sStatus;	break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	return sGroupHeader;
+}
+
+PFNTLSCOMPARE CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
+{
+	PFNTLSCOMPARE pfnSort = CTDLTaskCtrlBase::PrepareSort(ss);
+
+	if (m_nGroupBy != TDCC_NONE)
+	{
+		m_aGroupSortCols[0].nBy = m_nGroupBy;
+		m_aGroupSortCols[0].bAscending = TRUE;
+
+		int nNumCols = 1;
+
+		// Copy over default sort columns unless they
+		// match the group column
+		for (int nCol = 0; nCol < ss.nNumCols; nCol++)
+		{
+			TDC_COLUMN nSortCol = ss.pCols[nCol].nBy;
+
+			if (nSortCol != m_nGroupBy)
+			{
+				m_aGroupSortCols[nNumCols] = ss.pCols[nCol];
+				nNumCols++;
+			}
+		}
+
+		ss.pCols = m_aGroupSortCols;
+		ss.nNumCols = nNumCols;
+	}
+
+	return pfnSort;
+}
+
+BOOL CTDLTaskListCtrl::IsGroupHeaderTask(DWORD dwTaskID) const
+{
+	return m_mapGroupHeaders.Lookup(dwTaskID, CString());
+}
+
+int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
+								   LPARAM lParam2,
+								   const TDSORTCOLUMN& sort,
+								   const TDSORTFLAGS& flags) const
+{
+	if (sort.nBy == m_nGroupBy)
+	{
+		ASSERT(m_nGroupBy != TDCC_NONE);
+
+		CString sTask1Text = GetTaskGroupHeaderText(lParam1);
+		CString sTask2Text = GetTaskGroupHeaderText(lParam2);
+
+		int nCompare = Misc::NaturalCompare(sTask1Text, sTask2Text);
+
+		// If the items matched then they are part of the 
+		// same group. And if either item is the group item
+		// then always sort that item higher
+		if (nCompare == 0)
+		{
+			if (IsGroupHeaderTask(lParam1))
+				return -1;
+
+			if (IsGroupHeaderTask(lParam2))
+				return 1;
+		}
+
+		// Note: Group is always sorted ascending
+		return nCompare;
+	}
+	
+	// all else
+	return CTDLTaskCtrlBase::CompareTasks(lParam1, lParam2, sort, flags);
 }
 
 LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
@@ -598,6 +844,26 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					return 0L; // eat it
 				}
 			}
+		}
+		break;
+
+	case LVM_HITTEST:
+	case LVM_SUBITEMHITTEST:
+		// Make group header tasks disappear 
+		if (m_nGroupBy != TDCC_NONE)
+		{
+			int nItem = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
+			DWORD dwTaskID = ((hRealWnd == m_lcTasks) ? GetTaskID(nItem) : GetColumnItemTaskID(nItem));
+
+			if (IsGroupHeaderTask(dwTaskID))
+			{
+				ASSERT(lp);
+				LPLVHITTESTINFO pLVHit = (LPLVHITTESTINFO)lp;
+
+				nItem = pLVHit->iItem = pLVHit->iSubItem = -1;
+			}
+
+			return nItem;
 		}
 		break;
 
@@ -1223,17 +1489,15 @@ int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 
 	if (m_lcTasks.GetSelectedCount())
 	{
-		aTaskIDs.SetSize(m_lcTasks.GetSelectedCount());
-	
-		int nCount = 0;
 		POSITION pos = m_lcTasks.GetFirstSelectedItemPosition();
 	
 		while (pos)
 		{
 			int nItem = m_lcTasks.GetNextSelectedItem(pos);
+			DWORD dwTaskID = m_lcTasks.GetItemData(nItem);
 		
-			aTaskIDs[nCount] = m_lcTasks.GetItemData(nItem);
-			nCount++;
+			if (!IsGroupHeaderTask(dwTaskID))
+				aTaskIDs.Add(dwTaskID);
 		}
 	
 		dwFocusedTaskID = GetFocusedListTaskID();

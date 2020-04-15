@@ -90,15 +90,23 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();
 	void RemoveDeletedItems();
+	BOOL GroupBy(TDC_COLUMN nGroupBy);
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
+	void OnBuildComplete();
 
 protected:
 	CListCtrl m_lcTasks;
 
+	TDC_COLUMN m_nGroupBy;
+	CMap<DWORD, DWORD, CString, CString&> m_mapGroupHeaders;
+	
+	mutable TDSORTCOLUMN m_aGroupSortCols[4];
+	
 protected:
 	// Virtual function overrides
-	
+	virtual PFNTLSCOMPARE PrepareSort(TDSORTPARAMS& ss) const;
+
 protected:
 	// Message map functions
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
@@ -114,6 +122,7 @@ protected:
 
 	BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
 	void OnNotifySplitterChange(int nSplitPos);
+	//int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 
 	// pure virtual overrides
 	void NotifyParentSelChange(SELCHANGE_ACTION nAction = SC_UNKNOWN);
@@ -146,7 +155,17 @@ protected:
 	BOOL GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
 	int CalcRequiredTitleColumnWidthForImage();
 	GM_ITEMSTATE GetListItemState(int nItem) const;
+
+	void RebuildGroupHeaders();
+	CString GetTaskGroupHeaderText(DWORD dwTaskID) const;
+	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
+
 	LPCTSTR GetDebugName() const { return _T("ListView"); }
+
+	virtual int CompareTasks(LPARAM lParam1,
+							 LPARAM lParam2,
+							 const TDSORTCOLUMN& sort,
+							 const TDSORTFLAGS& flags) const;
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 
