@@ -207,6 +207,7 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColID))
 			AddString(m_cbGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColID);
 	}
+	SelectItemByData(m_cbGroupBy, TDCC_NONE);
 
 	return FALSE;
 }
