@@ -91,6 +91,7 @@ public:
 	void DeleteAll();
 	void RemoveDeletedItems();
 	BOOL GroupBy(TDC_COLUMN nGroupBy);
+	BOOL CanGroupBy(TDC_COLUMN nGroupBy) const;
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBuildComplete();
@@ -105,7 +106,11 @@ protected:
 	
 protected:
 	// Virtual function overrides
-	virtual PFNTLSCOMPARE PrepareSort(TDSORTPARAMS& ss) const;
+	virtual BOOL PrepareSort(TDSORTPARAMS& ss) const;
+	virtual int CompareTasks(LPARAM lParam1,
+							 LPARAM lParam2,
+							 const TDSORTCOLUMN& sort,
+							 const TDSORTFLAGS& flags) const;
 
 protected:
 	// Message map functions
@@ -122,7 +127,6 @@ protected:
 
 	BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
 	void OnNotifySplitterChange(int nSplitPos);
-	//int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 
 	// pure virtual overrides
 	void NotifyParentSelChange(SELCHANGE_ACTION nAction = SC_UNKNOWN);
@@ -137,6 +141,7 @@ protected:
 	void DeselectAll();
 	DWORD GetHelpID() const;
 	BOOL DoSaveToImage(CBitmap& bmImage, COLORREF crDivider);
+	LPCTSTR GetDebugName() const { return _T("ListView"); }
 
 	BOOL GetItemTitleRect(const NMCUSTOMDRAW& nmcd, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
 	GM_ITEMSTATE GetItemTitleState(const NMCUSTOMDRAW& nmcd) const;
@@ -159,13 +164,6 @@ protected:
 	void RebuildGroupHeaders();
 	CString GetTaskGroupHeaderText(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
-
-	LPCTSTR GetDebugName() const { return _T("ListView"); }
-
-	virtual int CompareTasks(LPARAM lParam1,
-							 LPARAM lParam2,
-							 const TDSORTCOLUMN& sort,
-							 const TDSORTFLAGS& flags) const;
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 

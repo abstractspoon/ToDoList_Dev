@@ -115,10 +115,19 @@ CTabbedToDoCtrl::~CTabbedToDoCtrl()
 {
 }
 
+void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
+{
+	CToDoCtrl::DoDataExchange(pDX);
+
+	DDX_Control(pDX, IDC_FTC_TABCTRL, m_tabViews);
+	DDX_Control(pDX, IDC_GROUPBYATTRIB, m_cbGroupBy);
+}
+
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 //{{AFX_MSG_MAP(CTabbedToDoCtrl)
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
+	ON_CBN_SELCHANGE(IDC_GROUPBYATTRIB, OnGroupBySelChanged)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_FTC_TASKLISTLIST, OnListSelChanged)
 	ON_NOTIFY(NM_CLICK, IDC_FTC_TASKLISTLIST, OnListClick)
 	ON_NOTIFY(NM_RCLICK, IDC_FTC_TABCTRL, OnTabCtrlRClick)
@@ -156,13 +165,6 @@ void CTabbedToDoCtrl::SetDefaultTaskViews(const CStringArray& aTypeIDs)
 	s_aDefTaskViews.Copy(aTypeIDs);
 }
 
-void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
-{
-	CToDoCtrl::DoDataExchange(pDX);
-	
-	DDX_Control(pDX, IDC_FTC_TABCTRL, m_tabViews);
-}
-
 BOOL CTabbedToDoCtrl::OnInitDialog()
 {
 	CToDoCtrl::OnInitDialog();
@@ -185,16 +187,33 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 		m_tabViews.AttachView(m_taskTree.GetSafeHwnd(), FTCV_TASKTREE, CEnString(IDS_TASKTREE), icon, NULL);
 
 	if (icon.Load(IDI_LISTVIEW_STD))
-		m_tabViews.AttachView(m_taskList, FTCV_TASKLIST, CEnString(IDS_LISTVIEW), icon, NewViewData());
-
-	for (int nExt = 0; nExt < m_mgrUIExt.GetNumUIExtensions(); nExt++)
 	{
-		AddView(m_mgrUIExt.GetUIExtension(nExt));
+		int nVertOffset = (GetCtrlSize(IDC_GROUPBYATTRIB).cy + 4);
+		m_tabViews.AttachView(m_taskList, FTCV_TASKLIST, CEnString(IDS_LISTVIEW), icon, NewViewData(), nVertOffset);
 	}
 
+	// Add rest of plugins as tabbed views
+	for (int nExt = 0; nExt < m_mgrUIExt.GetNumUIExtensions(); nExt++)
+		AddView(m_mgrUIExt.GetUIExtension(nExt));
+	
+	// Initialise the previously visible tabs
 	SetVisibleExtensionViews(s_aDefTaskViews);
 
+	// Build the 'group by' combobox
+	AddString(m_cbGroupBy, IDS_TDC_NONE, TDCC_NONE);
+
+	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
+	{
+		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColID))
+			AddString(m_cbGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColID);
+	}
+
 	return FALSE;
+}
+
+void CTabbedToDoCtrl::OnGroupBySelChanged()
+{
+	m_taskList.GroupBy(GetSelectedItemData(m_cbGroupBy, TDCC_NONE));
 }
 
 BOOL CTabbedToDoCtrl::IsResortAllowed() const
@@ -849,6 +868,8 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 		}
 		break;
 	}
+
+	ShowListViewGroupByCtrls(nNewView == FTCV_TASKLIST);
 	
 	// If we are switching to/from a view with selection 
 	// from/to a view without selection then update controls
@@ -859,6 +880,15 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 	GetParent()->SendMessage(WM_TDCN_VIEWPOSTCHANGE, nOldView, nNewView);
 	
 	return 0L;
+}
+
+void CTabbedToDoCtrl::ShowListViewGroupByCtrls(BOOL bShow)
+{
+	GetDlgItem(IDC_GROUPBY)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_GROUPBYATTRIB)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+
+	GetDlgItem(IDC_GROUPBY)->EnableWindow(bShow);
+	GetDlgItem(IDC_GROUPBYATTRIB)->EnableWindow(bShow);
 }
 
 int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const
@@ -1950,8 +1980,15 @@ void CTabbedToDoCtrl::RebuildCustomAttributeUI()
 
 void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 {
-	// Tab control takes care of active view including tree
+	// Tab control takes care of active view including tree/list
 	m_tabViews.Resize(rPos, pDWM);
+
+	// Reposition 'group by' controls whether they are showing or not
+	CRect rCombo = GetCtrlRect(IDC_GROUPBYATTRIB);
+	int nYOffset = (rPos.top - rCombo.top);
+
+	pDWM->OffsetCtrl(this, IDC_GROUPBY, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_GROUPBYATTRIB, 0, nYOffset);
 }
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()
@@ -2003,11 +2040,6 @@ BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 		ExcludeChild(&m_tabViews, pDC);
 
 	return CToDoCtrl::OnEraseBkgnd(pDC);
-}
-
-void CTabbedToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
-{
-	CToDoCtrl::Resize(cx, cy, bSplitting);
 }
 
 void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)

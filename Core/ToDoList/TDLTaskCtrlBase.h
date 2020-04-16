@@ -434,7 +434,7 @@ protected:
 	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
 	BOOL AttribsMatchSort(const CTDCAttributeMap& attribIDs) const;
 
-	virtual PFNTLSCOMPARE PrepareSort(TDSORTPARAMS& ss) const;
+	virtual BOOL PrepareSort(TDSORTPARAMS& ss) const;
 	virtual int CompareTasks(LPARAM lParam1,
 							 LPARAM lParam2,
 							 const TDSORTCOLUMN& sort,

@@ -87,11 +87,7 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
 	CTDLTaskCtrlBase(TRUE, ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs),
-#ifdef _DEBUG
-	m_nGroupBy(TDCC_ALLOCTO)
-#else
 	m_nGroupBy(TDCC_NONE)
-#endif
 {
 }
 
@@ -379,30 +375,36 @@ int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 
 BOOL CTDLTaskListCtrl::GroupBy(TDC_COLUMN nGroupBy)
 {
+	if (!CanGroupBy(nGroupBy))
+		return FALSE;
+
 	if (nGroupBy == m_nGroupBy)
 		return TRUE;
-
-	switch (nGroupBy)
-	{
-	case TDCA_CATEGORY:
-	case TDCA_ALLOCTO:
-	case TDCA_TAGS:
-	case TDCA_ALLOCBY:
-	case TDCA_VERSION:
-	case TDCA_STATUS:
-		// acceptable
-		break;
-
-	default:
-		return FALSE;
-	}
 
 	m_nGroupBy = nGroupBy;
 
 	RebuildGroupHeaders();
-	Resort();
+	DoSort();
 
 	return TRUE;
+}
+
+BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy) const
+{
+	switch (nGroupBy)
+	{
+	case TDCC_CATEGORY:
+	case TDCC_ALLOCTO:
+	case TDCC_TAGS:
+	case TDCC_ALLOCBY:
+	case TDCC_VERSION:
+	case TDCC_STATUS:
+	case TDCC_NONE:
+		return TRUE;
+	}
+
+	// All else
+	return FALSE;
 }
 
 void CTDLTaskListCtrl::OnBuildComplete()
@@ -412,7 +414,7 @@ void CTDLTaskListCtrl::OnBuildComplete()
 
 void CTDLTaskListCtrl::RebuildGroupHeaders()
 {
-	EnableResync(FALSE);
+	CHoldRedraw hr(*this);
 
 	// Take a copy of the current group headers
 	// to be deleted and then clear them
@@ -444,9 +446,9 @@ void CTDLTaskListCtrl::RebuildGroupHeaders()
 		DWORD dwTaskID = GetTaskID(nTask);
 
 		if (mapCurGroupIDs.Has(dwTaskID))
-		{
-			m_lcColumns.DeleteItem(nTask);
-			m_lcTasks.DeleteItem(nTask);
+		{	
+			// Note: column item will be automatically removed
+			m_lcTasks.DeleteItem(nTask); 
 
 			mapCurGroupIDs.RemoveKey(dwTaskID);
 		}
@@ -458,19 +460,17 @@ void CTDLTaskListCtrl::RebuildGroupHeaders()
 			{
 				m_mapGroupHeaders[dwNewHeaderID] = sGroupHeader;
 				mapNewHeaders.Add(sGroupHeader);
-
+ 
+				// Note: column item will be automatically added
 				int nTaskItem = m_lcTasks.InsertItem(GetItemCount(), sGroupHeader, -1);
 				m_lcTasks.SetItemData(nTaskItem, dwNewHeaderID);
-
-				int nColItem = m_lcColumns.InsertItem(GetItemCount(), sGroupHeader, -1);
-				m_lcColumns.SetItemData(nColItem, nTaskItem);
 
 				dwNewHeaderID--;
 			}
 		}
 	}
 
-	EnableResync(TRUE);
+	PostResize();
 }
 
 CString CTDLTaskListCtrl::GetTaskGroupHeaderText(DWORD dwTaskID) const
@@ -501,9 +501,10 @@ CString CTDLTaskListCtrl::GetTaskGroupHeaderText(DWORD dwTaskID) const
 	return sGroupHeader;
 }
 
-PFNTLSCOMPARE CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
+BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 {
-	PFNTLSCOMPARE pfnSort = CTDLTaskCtrlBase::PrepareSort(ss);
+	if (IsSorting() && !CTDLTaskCtrlBase::PrepareSort(ss))
+		return FALSE;
 
 	if (m_nGroupBy != TDCC_NONE)
 	{
@@ -529,7 +530,7 @@ PFNTLSCOMPARE CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 		ss.nNumCols = nNumCols;
 	}
 
-	return pfnSort;
+	return TRUE;
 }
 
 BOOL CTDLTaskListCtrl::IsGroupHeaderTask(DWORD dwTaskID) const
@@ -542,10 +543,8 @@ int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 								   const TDSORTCOLUMN& sort,
 								   const TDSORTFLAGS& flags) const
 {
-	if (sort.nBy == m_nGroupBy)
+	if ((sort.nBy == m_nGroupBy) && (m_nGroupBy != TDCC_NONE))
 	{
-		ASSERT(m_nGroupBy != TDCC_NONE);
-
 		CString sTask1Text = GetTaskGroupHeaderText(lParam1);
 		CString sTask2Text = GetTaskGroupHeaderText(lParam2);
 

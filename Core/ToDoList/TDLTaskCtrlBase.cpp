@@ -1831,7 +1831,7 @@ void CTDLTaskCtrlBase::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 		DoSort();
 }
 
-PFNTLSCOMPARE CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
+BOOL CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 {
 	if (!m_sort.IsSorting())
 	{
@@ -1858,7 +1858,7 @@ PFNTLSCOMPARE CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 	ss.flags.bIncDueTime = IsColumnShowing(TDCC_DUETIME);
 	ss.flags.bIncDoneTime = IsColumnShowing(TDCC_DONETIME);
 	
-	return &SortFunc;
+	return TRUE;
 }
 
 void CTDLTaskCtrlBase::DoSort()
@@ -1868,7 +1868,9 @@ void CTDLTaskCtrlBase::DoSort()
 		CHoldListVScroll hold(m_lcColumns);
 
 		TDSORTPARAMS ss(*this);
-		CTreeListSyncer::Sort(PrepareSort(ss), (LPARAM)&ss);
+		VERIFY(PrepareSort(ss));
+
+		CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss);
 
 		ResyncSelection(m_lcColumns, Tasks(), FALSE);
 	}

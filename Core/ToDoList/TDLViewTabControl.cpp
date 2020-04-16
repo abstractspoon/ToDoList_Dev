@@ -25,7 +25,8 @@ CTDLViewTabControl::CTDLViewTabControl(DWORD dwStyles)
 	CTabCtrlEx(TCE_MBUTTONCLOSE | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT, e_tabBottom), 
 	m_nSelTab(-1),
 	m_dwStyles(dwStyles),
-	m_bShowingTabs(TRUE)
+	m_bShowingTabs(TRUE),
+	m_rOverall(0, 0, 0, 0)
 {
 }
 
@@ -54,7 +55,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDCViewTabControl message handlers
 
-BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData)
+BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData, int nVertOffset)
 {
 	ASSERT (hWnd == NULL || ::IsWindow(hWnd));
 	ASSERT(hIcon);
@@ -64,7 +65,7 @@ BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, 
 		return FALSE;
 
 	// prepare tab bar
-	TDCVIEW view(hWnd, nView, szLabel, hIcon, pData);
+	TDCVIEW view(hWnd, nView, szLabel, hIcon, pData, nVertOffset);
 	int nIndex = m_aViews.Add(view);
 
 	if (GetSafeHwnd())
@@ -102,15 +103,15 @@ BOOL CTDLViewTabControl::DetachView(FTC_VIEW nView)
 	return FALSE;
 }
 
-void CTDLViewTabControl::GetViewRect(TDCVIEW& view, CRect& rPos) const
+void CTDLViewTabControl::GetViewRect(const TDCVIEW& view, CRect& rView) const
 {
-	CWnd* pWndView = GetViewWnd(view);
+	CRect rUnused;
+	CalcTabViewRects(m_rOverall, rUnused, rView);
 
-	pWndView->GetWindowRect(rPos);
-	pWndView->GetParent()->ScreenToClient(rPos);
+	rView.top += view.nVertOffset;
 }
 
-CWnd* CTDLViewTabControl::GetViewWnd(TDCVIEW& view) const
+CWnd* CTDLViewTabControl::GetViewWnd(const TDCVIEW& view) const
 {
 	return CWnd::FromHandle(view.hwndView);
 }
@@ -131,15 +132,14 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 		return FALSE;
 
 	// make sure we have a valid HWND to switch to
-	HWND hwndNew = m_aViews[nIndex].hwndView, hwndOld = NULL;
+	const TDCVIEW& viewNew = m_aViews[nIndex];
+	HWND hwndNew = viewNew.hwndView, hwndOld = NULL;
 
 	if (!hwndNew || !::IsWindow(hwndNew))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
-
-	CRect rView(0, 0, 0, 0);
 
 	if (m_nSelTab == -1)
 	{
@@ -151,19 +151,15 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 			if (nOther != nIndex)
 				::ShowWindow(m_aViews[nOther].hwndView, SW_HIDE);
 		}
-
-		// and if the index > 0, grab the [0] view rect as the best hint
-		if (nIndex > 0)
-			GetViewRect(m_aViews[0], rView);
 	}
 	else // just hide the currently visible view
 	{
 		int nOldIndex = TabToIndex(m_nSelTab);
-		TDCVIEW& oldView = m_aViews[nOldIndex];
-		
-		GetViewRect(oldView, rView);
-		hwndOld = oldView.hwndView;
+		hwndOld = m_aViews[nOldIndex].hwndView;
 	}
+
+	CRect rView;
+	GetViewRect(viewNew, rView);
 
 	if (!rView.IsRectEmpty())
 		::MoveWindow(hwndNew, rView.left, rView.top, rView.Width(), rView.Height(), FALSE);
@@ -180,8 +176,6 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 	m_nSelTab = nTab;
 	SetCurSel(nTab);
 	UpdateTabItemWidths(FALSE);
-
-	// Make sure the spin control is always drawn
 
 	return TRUE;
 }
@@ -311,15 +305,21 @@ BOOL CTDLViewTabControl::SetActiveView(FTC_VIEW nView, BOOL bNotify)
 
 void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM)
 {
+	m_rOverall = rect;
+
 	CRect rTabs, rView;
 
 	if (CalcTabViewRects(rect, rTabs, rView))
 	{
-		CWnd* pView = GetActiveWnd();
+		int nActive = TabToIndex(m_nSelTab);
+
+		CWnd* pView = ((nActive == -1) ? NULL : CWnd::FromHandle(m_aViews[nActive].hwndView));
 		ASSERT(pView);
 
 		if (pView)
 		{
+			rView.top += m_aViews[nActive].nVertOffset;
+
 			if (pDWM)
 			{
 				pDWM->MoveWindow(this, rTabs);
@@ -332,6 +332,8 @@ void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM)
 			}
 		}
 	}
+
+
 }
 
 int CTDLViewTabControl::FindView(HWND hWnd) const
@@ -409,7 +411,7 @@ void CTDLViewTabControl::ShowTabControl(BOOL bShow)
 	}
 }
 
-BOOL CTDLViewTabControl::CalcTabViewRects(const CRect& rPos, CRect& rTabs, CRect& rView)
+BOOL CTDLViewTabControl::CalcTabViewRects(const CRect& rPos, CRect& rTabs, CRect& rView) const
 {
 	if (!GetSafeHwnd())
 		return FALSE;
@@ -419,7 +421,8 @@ BOOL CTDLViewTabControl::CalcTabViewRects(const CRect& rPos, CRect& rTabs, CRect
 	// We just don't adjust the view rect if we are invisible.
 	rTabs = rPos;
 	rTabs.bottom = rTabs.top;
-	AdjustRect(TRUE, rTabs);
+
+	const_cast<CTDLViewTabControl*>(this)->AdjustRect(TRUE, rTabs);
 
 	int nTabHeight = rTabs.Height();
 	rTabs = rView = rPos;

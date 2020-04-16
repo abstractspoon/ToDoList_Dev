@@ -2339,6 +2339,7 @@
 #define IDS_MSVCR100_MSG                58519
 #define IDS_CUSTOM_FEATURE_ONEDECIMAL   58520
 #define IDS_FP_IS_COMPLETE              58521
+#define IDS_TDC_GROUPBY                 58522
 
 // Next default values for new objects
 // 

@@ -507,7 +507,7 @@ void CTDLTaskTreeCtrl::ResortSelectedTaskParents()
 		TSH().GetUniqueParents(lstParents);
 		
 		TDSORTPARAMS ss(*this);
-		PFNTLSCOMPARE pfnSort = PrepareSort(ss);
+		VERIFY(PrepareSort(ss));
 
 		POSITION pos = lstParents.GetHeadPosition();
 		
@@ -515,7 +515,7 @@ void CTDLTaskTreeCtrl::ResortSelectedTaskParents()
 		{
 			HTREEITEM htiParent = lstParents.GetNext(pos);
 
-			CTreeListSyncer::Sort(pfnSort, (LPARAM)&ss, htiParent);
+			CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss, htiParent);
 		}
 		
 		ResyncSelection(m_lcColumns, Tasks(), FALSE);

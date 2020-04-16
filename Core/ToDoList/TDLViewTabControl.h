@@ -26,7 +26,7 @@ public:
 	CTDLViewTabControl(DWORD dwStyles = 0);
 
 public:
-	BOOL AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData = NULL);
+	BOOL AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData = NULL, int nVertOffset = 0);
 	BOOL DetachView(HWND hWnd);
 	BOOL DetachView(FTC_VIEW nView);
 
@@ -54,13 +54,14 @@ public:
 protected:
 	struct TDCVIEW
 	{
-		TDCVIEW(HWND hWnd = NULL, FTC_VIEW view = FTCV_UNSET, LPCTSTR szLabel = NULL, HICON icon = NULL, void* data = NULL) 
+		TDCVIEW(HWND hWnd = NULL, FTC_VIEW view = FTCV_UNSET, LPCTSTR szLabel = NULL, HICON icon = NULL, void* data = NULL, int vertOffset = 0) 
 			: 
 			hwndView(hWnd), 
 			nView(view), 
 			sViewLabel(szLabel), 
 			pData(data),
-			hIcon(NULL)
+			hIcon(NULL),
+			nVertOffset(vertOffset)
 		{
 			// add space for close button
 			sViewLabel += "   ";
@@ -74,12 +75,14 @@ protected:
 		CString sViewLabel;
 		HICON hIcon;
 		void* pData;
+		int nVertOffset;
 	};
 
 	CArray<TDCVIEW, TDCVIEW&> m_aViews;
 	DWORD m_dwStyles;
 	int m_nSelTab;
 	BOOL m_bShowingTabs;
+	CRect m_rOverall; // tabs plus views
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -105,12 +108,12 @@ protected:
 	int FindView(HWND hWnd) const;
 	int FindView(FTC_VIEW nView) const;
 	int FindTab(FTC_VIEW nView) const;
-	CWnd* GetViewWnd(TDCVIEW& view) const;
+	CWnd* GetViewWnd(const TDCVIEW& view) const;
 	FTC_VIEW GetView(int nIndex) const;
 	FTC_VIEW GetTabView(int nTab) const;
-	void GetViewRect(TDCVIEW& view, CRect& rPos) const;
+	void GetViewRect(const TDCVIEW& view, CRect& rView) const;
 	BOOL SwitchToTab(int nNewIndex);
-	BOOL CalcTabViewRects(const CRect& rPos, CRect& rTabs, CRect& rView);
+	BOOL CalcTabViewRects(const CRect& rPos, CRect& rTabs, CRect& rView) const;
 	BOOL DoTabChange(int nOldTab, int nNewTab, BOOL bNotify);
 
 	int IndexToTab(int nIndex) const;

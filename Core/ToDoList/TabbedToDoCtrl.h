@@ -162,8 +162,10 @@ protected:
 	CTDLTaskListCtrl m_taskList;
 	CTDLViewTabControl m_tabViews;
 	CTaskListDropTarget m_dtList;
-	CArray<IUIExtensionWindow*, IUIExtensionWindow*> m_aExtViews;
+	CComboBox m_cbGroupBy;
+
 	const CUIExtensionMgr& m_mgrUIExt;
+	CArray<IUIExtensionWindow*, IUIExtensionWindow*> m_aExtViews;
 
 	CTDCAttributeMap m_mapAttribsAffectedByPrefs;
 
@@ -198,6 +200,7 @@ protected:
 	afx_msg void OnListSelChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnGroupBySelChanged();
 
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
@@ -243,7 +246,6 @@ protected:
 	virtual void SaveTasksState(CPreferences& prefs, BOOL bRebuildTree = FALSE) const; 
 	virtual HTREEITEM LoadTasksState(const CPreferences& prefs, BOOL bRebuildTree = FALSE);
 
-	virtual void Resize(int cx = 0, int cy = 0, BOOL bSplitting = FALSE);
 	virtual BOOL IsResortAllowed() const;
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 	virtual void OnTaskIconsChanged();
@@ -339,6 +341,7 @@ protected:
 	BOOL GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nDirection, DWORD& dwDestParentID, DWORD& dwDestPrevSiblingID) const;
 	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const;
+	void ShowListViewGroupByCtrls(BOOL bShow);
 
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, DWORD dwFlags, CTaskFile& tasks) const;
