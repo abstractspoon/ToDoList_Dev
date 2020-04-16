@@ -399,6 +399,11 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy) const
 	case TDCC_ALLOCBY:
 	case TDCC_VERSION:
 	case TDCC_STATUS:
+	case TDCC_PRIORITY:
+	case TDCC_RISK:
+	case TDCC_RECURRENCE:
+		return TRUE;
+
 	case TDCC_NONE:
 		return TRUE;
 	}
@@ -484,13 +489,18 @@ CString CTDLTaskListCtrl::GetTaskGroupByText(DWORD dwTaskID) const
 
 		switch (m_nGroupBy)
 		{
-		case TDCC_CATEGORY: sGroupBy = m_formatter.GetTaskCategories(pTDI);	break;
-		case TDCC_ALLOCTO:	sGroupBy = m_formatter.GetTaskAllocTo(pTDI);	break;
-		case TDCC_TAGS:		sGroupBy = m_formatter.GetTaskTags(pTDI);		break;
+		case TDCC_CATEGORY:		sGroupBy = m_formatter.GetTaskCategories(pTDI);	break;
+		case TDCC_ALLOCTO:		sGroupBy = m_formatter.GetTaskAllocTo(pTDI);	break;
+		case TDCC_TAGS:			sGroupBy = m_formatter.GetTaskTags(pTDI);		break;
 
-		case TDCC_ALLOCBY:	sGroupBy = pTDI->sAllocBy;	break;
-		case TDCC_VERSION:	sGroupBy = pTDI->sVersion;	break;
-		case TDCC_STATUS:	sGroupBy = pTDI->sStatus;	break;
+		case TDCC_PRIORITY:		sGroupBy = m_formatter.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID));	break;
+		case TDCC_RISK:			sGroupBy = m_formatter.GetTaskRisk(pTDI, m_data.LocateTask(dwTaskID));		break;
+
+		case TDCC_ALLOCBY:		sGroupBy = pTDI->sAllocBy;	break;
+		case TDCC_VERSION:		sGroupBy = pTDI->sVersion;	break;
+		case TDCC_STATUS:		sGroupBy = pTDI->sStatus;	break;
+
+		case TDCC_RECURRENCE:	sGroupBy = pTDI->trRecurrence.GetRegularityText(FALSE); break;
 
 		default:
 			ASSERT(0);
@@ -515,6 +525,9 @@ CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
 		case TDCC_TAGS:
 		case TDCC_VERSION:
 		case TDCC_STATUS:
+		case TDCC_PRIORITY:
+		case TDCC_RISK:
+		case TDCC_RECURRENCE:
 			sGroupBy.LoadString(IDS_TDC_NONE);
 			break;
 
