@@ -91,6 +91,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt,
 	m_bUpdatingExtensions(FALSE),
 	m_bRecreatingRecurringTasks(FALSE),
 	m_nExtModifyingAttrib(TDCA_NONE),
+	m_nListViewGroupBy(TDCC_NONE),
 	m_mgrUIExt(mgrUIExt),
 	m_taskList(m_ilTaskIcons, m_data, TCF(), m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
 {
@@ -121,6 +122,8 @@ void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_FTC_TABCTRL, m_tabViews);
 	DDX_Control(pDX, IDC_GROUPBYATTRIB, m_cbGroupBy);
+
+	DDX_CBData(pDX, m_cbGroupBy, m_nListViewGroupBy, TDCC_NONE);
 }
 
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
@@ -233,7 +236,9 @@ void CTabbedToDoCtrl::BuildGroupByCombo()
 
 void CTabbedToDoCtrl::OnListGroupBySelChanged()
 {
-	m_taskList.GroupBy(GetSelectedItemData(m_cbGroupBy, TDCC_NONE));
+	UpdateData();
+
+	m_taskList.GroupBy(m_nListViewGroupBy);
 }
 
 BOOL CTabbedToDoCtrl::IsResortAllowed() const
@@ -430,6 +435,9 @@ void CTabbedToDoCtrl::LoadPrefs()
 	if (prefs.GetProfileInt(sKey, _T("ListViewVisible"), TRUE))
 		aTypeIDs.Add(LISTVIEW_TYPE);
 
+	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
+	m_taskList.GroupBy(m_nListViewGroupBy);
+
 	// remove hidden extensions from list of all extensions
 	// this ensures that new extensions always appear first time
 	int nExt = prefs.GetProfileInt(sKey, _T("HiddenExtensionCount"), -1);
@@ -478,6 +486,7 @@ void CTabbedToDoCtrl::SavePrefs()
 
 	// save listview visibility
 	prefs.WriteProfileInt(sKey, _T("ListViewVisible"), IsListViewTabShowing());
+	prefs.WriteProfileInt(sKey, _T("ListViewGroupBy"), m_nListViewGroupBy);
 
 	// save hidden extensions
 	CStringArray aVisTypeIDs, aTypeIDs;

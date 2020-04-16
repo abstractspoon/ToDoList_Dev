@@ -173,6 +173,7 @@ protected:
 	BOOL m_bRecreatingRecurringTasks;
 	BOOL m_bTreeNeedResort;
 	
+	TDC_COLUMN m_nListViewGroupBy;
 	TDC_ATTRIBUTE m_nExtModifyingAttrib;
 	CDWordArray m_aRecreatedRecurringTasks;
 
@@ -200,7 +201,7 @@ protected:
 	afx_msg void OnListSelChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnGroupBySelChanged();
+	afx_msg void OnListGroupBySelChanged();
 
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);

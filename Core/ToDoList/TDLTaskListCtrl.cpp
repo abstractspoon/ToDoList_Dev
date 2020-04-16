@@ -383,8 +383,13 @@ BOOL CTDLTaskListCtrl::GroupBy(TDC_COLUMN nGroupBy)
 
 	m_nGroupBy = nGroupBy;
 
-	RebuildGroupHeaders();
-	DoSort();
+	if (GetSafeHwnd())
+	{
+		RebuildGroupHeaders();
+
+		if ((nGroupBy != TDCA_NONE) || IsSorting())
+			DoSort();
+	}
 
 	return TRUE;
 }
