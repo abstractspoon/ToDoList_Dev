@@ -406,6 +406,21 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy) const
 
 	case TDCC_NONE:
 		return TRUE;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nGroupBy))
+		{
+			int nAttribDef = m_aCustomAttribDefs.Find(nGroupBy);
+			ASSERT(nAttribDef != -1);
+
+			if (nAttribDef != -1)
+			{
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttribDef];
+
+				return (attribDef.bEnabled && attribDef.IsDataType(TDCCA_STRING));
+			}
+		}
+		break;
 	}
 
 	// All else
@@ -503,7 +518,17 @@ CString CTDLTaskListCtrl::GetTaskGroupByText(DWORD dwTaskID) const
 		case TDCC_RECURRENCE:	sGroupBy = pTDI->trRecurrence.GetRegularityText(FALSE); break;
 
 		default:
-			ASSERT(0);
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
+			{
+				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+				int nAttribDef = m_aCustomAttribDefs.Find(m_nGroupBy);
+
+				sGroupBy = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, m_aCustomAttribDefs[nAttribDef]);
+			}
+			else
+			{
+				ASSERT(0);
+			}
 			break;
 		}
 	}
@@ -543,18 +568,31 @@ CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
 	}
 
 	// Prefix the text by the column name
-	CEnString sColName;
-	int nCol = NUM_COLUMNS;
+	return CEnString(_T("%s: %s"), GetGroupByColumnName(), sGroupBy);
+}
 
-	while (nCol-- && sColName.IsEmpty())
+CString CTDLTaskListCtrl::GetGroupByColumnName() const
+{
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 	{
-		if (COLUMNS[nCol].nColID == m_nGroupBy)
-			sColName.LoadString(COLUMNS[nCol].nIDLongName);
+		int nAttribDef = m_aCustomAttribDefs.Find(m_nGroupBy);
+
+		if (nAttribDef != -1)
+			return m_aCustomAttribDefs[nAttribDef].sLabel;
+	}
+	else
+	{
+		int nCol = NUM_COLUMNS;
+
+		while (nCol--)
+		{
+			if (COLUMNS[nCol].nColID == m_nGroupBy)
+				return CEnString(COLUMNS[nCol].nIDLongName);
+		}
 	}
 
-	ASSERT(!sColName.IsEmpty());
-
-	return CEnString(_T("%s: %s"), sColName, sGroupBy);
+	ASSERT(0);
+	return _T("");
 }
 
 BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const

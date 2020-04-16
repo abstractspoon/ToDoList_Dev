@@ -111,6 +111,7 @@ public:
 
 	int Find(const CString& sAttribID, int nIgnore = -1) const;
 	int Find(TDC_ATTRIBUTE nAttribID, int nIgnore = -1) const;
+	int Find(TDC_COLUMN nColID, int nIgnore = -1) const;
 
 	BOOL AnyHasFeature(DWORD dwFeature) const;
 	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const;

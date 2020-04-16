@@ -164,6 +164,7 @@ protected:
 	void RebuildGroupHeaders();
 	CString GetTaskGroupByText(DWORD dwTaskID) const;
 	CString FormatTaskGroupHeaderText(DWORD dwTaskID) const;
+	CString GetGroupByColumnName() const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);

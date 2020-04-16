@@ -262,6 +262,7 @@ protected:
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
+	void BuildGroupByCombo();
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree();

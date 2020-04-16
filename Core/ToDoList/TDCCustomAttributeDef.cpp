@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "tdccustomattributeDef.h"
 #include "tdccustomattribdata.h"
+#include "tdcmapping.h"
 
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
@@ -630,9 +631,21 @@ int CTDCCustomAttribDefinitionArray::Find(const CString& sAttribID, int nIgnore)
 	return -1;
 }
 
+int CTDCCustomAttribDefinitionArray::Find(TDC_COLUMN nColID, int nIgnore) const
+{
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID));
+
+	TDC_ATTRIBUTE nAttribID = TDC::MapColumnToAttribute(nColID);
+
+	if (nAttribID == TDCA_NONE)
+		return -1;
+
+	return Find(nAttribID, nIgnore);
+}
+
 int CTDCCustomAttribDefinitionArray::Find(TDC_ATTRIBUTE nAttribID, int nIgnore) const
 {
-	ASSERT(nAttribID != TDCA_NONE);
+	ASSERT(TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID));
 
 	int nAttrib = GetSize();
 

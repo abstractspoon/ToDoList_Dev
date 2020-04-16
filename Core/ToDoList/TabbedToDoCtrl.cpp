@@ -127,7 +127,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 //{{AFX_MSG_MAP(CTabbedToDoCtrl)
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
-	ON_CBN_SELCHANGE(IDC_GROUPBYATTRIB, OnGroupBySelChanged)
+	ON_CBN_SELCHANGE(IDC_GROUPBYATTRIB, OnListGroupBySelChanged)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_FTC_TASKLISTLIST, OnListSelChanged)
 	ON_NOTIFY(NM_CLICK, IDC_FTC_TASKLISTLIST, OnListClick)
 	ON_NOTIFY(NM_RCLICK, IDC_FTC_TABCTRL, OnTabCtrlRClick)
@@ -200,6 +200,15 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	SetVisibleExtensionViews(s_aDefTaskViews);
 
 	// Build the 'group by' combobox
+	BuildGroupByCombo();
+
+	return FALSE;
+}
+
+void CTabbedToDoCtrl::BuildGroupByCombo()
+{
+	m_cbGroupBy.ResetContent();
+
 	AddString(m_cbGroupBy, IDS_TDC_NONE, TDCC_NONE);
 
 	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
@@ -207,12 +216,22 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColID))
 			AddString(m_cbGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColID);
 	}
-	SelectItemByData(m_cbGroupBy, TDCC_NONE);
+	
+	for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
 
-	return FALSE;
+		if (m_taskList.CanGroupBy(attribDef.GetColumnID()))
+		{
+			CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
+			AddString(m_cbGroupBy, sAttrib, attribDef.GetColumnID());
+		}
+	}
+	
+	SelectItemByData(m_cbGroupBy, m_nListViewGroupBy);
 }
 
-void CTabbedToDoCtrl::OnGroupBySelChanged()
+void CTabbedToDoCtrl::OnListGroupBySelChanged()
 {
 	m_taskList.GroupBy(GetSelectedItemData(m_cbGroupBy, TDCC_NONE));
 }
@@ -3042,6 +3061,8 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 	{
 		UpdateControls();
 	}
+
+	BuildGroupByCombo();
 }
 
 void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
