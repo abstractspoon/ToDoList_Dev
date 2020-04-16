@@ -241,7 +241,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	DWORD dwTaskID = pLVCD->nmcd.lItemlParam;
 
 	if (bColumns)
-		dwTaskID = GetTaskID((int)dwTaskID);
+		dwTaskID = GetColumnItemTaskID((int)pLVCD->nmcd.dwItemSpec);
 
 	DWORD dwRes = CDRF_DODEFAULT;
 
@@ -258,28 +258,28 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
 				CRect rRow(pLVCD->nmcd.rc);
-				rRow.right += GetSystemMetrics(SM_CXVSCROLL);
 
-				pDC->FillSolidRect(rRow, GetSysColor(COLOR_WINDOW));
-				DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
-
-				const COLORREF HEADER_COLOR = RGB(63, 118, 179);
-				GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, HEADER_COLOR);
-
-				if (hwndList == m_lcTasks)
+				if (rRow.Width())
 				{
-					rRow.left = 20; // Always ensure the text is visible
+					rRow.right += GetSystemMetrics(SM_CXVSCROLL);
 
-					CEnString sHeader;
-					m_mapGroupHeaders.Lookup(dwTaskID, sHeader);
+					pDC->FillSolidRect(rRow, GetSysColor(COLOR_WINDOW));
+					DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 
-					if (sHeader.IsEmpty())
-						sHeader.LoadString(IDS_TDC_NONE);
+					const COLORREF HEADER_COLOR = RGB(63, 118, 179);
+					GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, HEADER_COLOR);
 
-					pDC->SetTextColor(HEADER_COLOR);
-					pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
-					pDC->SetBkMode(OPAQUE);
-					pDC->DrawText(sHeader, rRow, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+					if (hwndList == m_lcTasks)
+					{
+						rRow.left = 20; // Always ensure the text is visible
+
+						CString sHeader = FormatTaskGroupHeaderText(dwTaskID);
+
+						pDC->SetTextColor(HEADER_COLOR);
+						pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
+						pDC->SetBkMode(OPAQUE);
+						pDC->DrawText(sHeader, rRow, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
+					}
 				}
 			}
 			dwRes = CDRF_SKIPDEFAULT;
@@ -454,7 +454,7 @@ void CTDLTaskListCtrl::RebuildGroupHeaders()
 		}
 		else if (m_nGroupBy != TDCC_NONE)
 		{
-			sGroupHeader = GetTaskGroupHeaderText(dwTaskID);
+			sGroupHeader = GetTaskGroupByText(dwTaskID);
 
 			if (!mapNewHeaders.Has(sGroupHeader))
 			{
@@ -473,24 +473,24 @@ void CTDLTaskListCtrl::RebuildGroupHeaders()
 	PostResize();
 }
 
-CString CTDLTaskListCtrl::GetTaskGroupHeaderText(DWORD dwTaskID) const
+CString CTDLTaskListCtrl::GetTaskGroupByText(DWORD dwTaskID) const
 {
-	CString sGroupHeader;
+	CString sGroupBy;
 
-	if (!m_mapGroupHeaders.Lookup(dwTaskID, sGroupHeader))
+	if (!m_mapGroupHeaders.Lookup(dwTaskID, sGroupBy))
 	{
 		const TODOITEM* pTDI = GetTask(dwTaskID);
 		ASSERT(pTDI);
 
 		switch (m_nGroupBy)
 		{
-		case TDCC_CATEGORY: sGroupHeader = m_formatter.GetTaskCategories(pTDI);	break;
-		case TDCC_ALLOCTO:	sGroupHeader = m_formatter.GetTaskAllocTo(pTDI);	break;
-		case TDCC_TAGS:		sGroupHeader = m_formatter.GetTaskTags(pTDI);		break;
+		case TDCC_CATEGORY: sGroupBy = m_formatter.GetTaskCategories(pTDI);	break;
+		case TDCC_ALLOCTO:	sGroupBy = m_formatter.GetTaskAllocTo(pTDI);	break;
+		case TDCC_TAGS:		sGroupBy = m_formatter.GetTaskTags(pTDI);		break;
 
-		case TDCC_ALLOCBY:	sGroupHeader = pTDI->sAllocBy;	break;
-		case TDCC_VERSION:	sGroupHeader = pTDI->sVersion;	break;
-		case TDCC_STATUS:	sGroupHeader = pTDI->sStatus;	break;
+		case TDCC_ALLOCBY:	sGroupBy = pTDI->sAllocBy;	break;
+		case TDCC_VERSION:	sGroupBy = pTDI->sVersion;	break;
+		case TDCC_STATUS:	sGroupBy = pTDI->sStatus;	break;
 
 		default:
 			ASSERT(0);
@@ -498,7 +498,50 @@ CString CTDLTaskListCtrl::GetTaskGroupHeaderText(DWORD dwTaskID) const
 		}
 	}
 
-	return sGroupHeader;
+	return sGroupBy;
+}
+
+CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
+{
+	ASSERT(IsGroupHeaderTask(dwTaskID));
+
+	CEnString sGroupBy = GetTaskGroupByText(dwTaskID);
+
+	if (sGroupBy.IsEmpty())
+	{
+		switch (m_nGroupBy)
+		{
+		case TDCC_CATEGORY:
+		case TDCC_TAGS:
+		case TDCC_VERSION:
+		case TDCC_STATUS:
+			sGroupBy.LoadString(IDS_TDC_NONE);
+			break;
+
+		case TDCC_ALLOCTO:
+		case TDCC_ALLOCBY:
+			sGroupBy.LoadString(IDS_TDC_NOBODY);
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+	}
+
+	// Prefix the text by the column name
+	CEnString sColName;
+	int nCol = NUM_COLUMNS;
+
+	while (nCol-- && sColName.IsEmpty())
+	{
+		if (COLUMNS[nCol].nColID == m_nGroupBy)
+			sColName.LoadString(COLUMNS[nCol].nIDLongName);
+	}
+
+	ASSERT(!sColName.IsEmpty());
+
+	return CEnString(_T("%s: %s"), sColName, sGroupBy);
 }
 
 BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
@@ -545,8 +588,8 @@ int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 {
 	if ((sort.nBy == m_nGroupBy) && (m_nGroupBy != TDCC_NONE))
 	{
-		CString sTask1Text = GetTaskGroupHeaderText(lParam1);
-		CString sTask2Text = GetTaskGroupHeaderText(lParam2);
+		CString sTask1Text = GetTaskGroupByText(lParam1);
+		CString sTask2Text = GetTaskGroupByText(lParam2);
 
 		int nCompare = Misc::NaturalCompare(sTask1Text, sTask2Text);
 

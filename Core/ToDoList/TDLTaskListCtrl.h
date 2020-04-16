@@ -162,7 +162,8 @@ protected:
 	GM_ITEMSTATE GetListItemState(int nItem) const;
 
 	void RebuildGroupHeaders();
-	CString GetTaskGroupHeaderText(DWORD dwTaskID) const;
+	CString GetTaskGroupByText(DWORD dwTaskID) const;
+	CString FormatTaskGroupHeaderText(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
