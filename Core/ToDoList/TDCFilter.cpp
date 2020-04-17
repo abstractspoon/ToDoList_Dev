@@ -683,6 +683,7 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCF
 	filter.nDueBy = prefs.GetProfileEnum(sKey, _T("Due"), FD_ANY);
 
 	filter.sTitle = prefs.GetProfileString(sKey, _T("Title"));
+	filter.nTitleOption = prefs.GetProfileEnum(sKey, _T("TitleOption"), FT_FILTERONTITLEONLY);
 	filter.nPriority = prefs.GetProfileInt(sKey, _T("Priority"), FM_ANYPRIORITY);
 	filter.nRisk = prefs.GetProfileInt(sKey, _T("Risk"), FM_ANYRISK);
 	filter.nStartNextNDays = prefs.GetProfileInt(sKey, _T("StartNextNDays"), 7);
@@ -763,6 +764,7 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCF
 {
 	prefs.WriteProfileString(sKey, _T("Title"), filter.sTitle);
 
+	prefs.WriteProfileInt(sKey, _T("TitleOption"), filter.nTitleOption);
 	prefs.WriteProfileInt(sKey, _T("Show"), filter.nShow);
 	prefs.WriteProfileInt(sKey, _T("Start"), filter.nStartBy);
 	prefs.WriteProfileInt(sKey, _T("Due"), filter.nDueBy);
