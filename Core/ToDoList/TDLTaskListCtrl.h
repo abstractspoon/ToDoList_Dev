@@ -90,8 +90,10 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();
 	void RemoveDeletedItems();
+
 	BOOL GroupBy(TDC_COLUMN nGroupBy);
 	BOOL CanGroupBy(TDC_COLUMN nGroupBy) const;
+	UINT GetGroupCount() const;
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBuildComplete();
