@@ -373,6 +373,11 @@ int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 								dwTaskID);
 }
 
+UINT CTDLTaskListCtrl::GetGroupCount() const
+{
+	return ((m_nGroupBy != TDCC_NONE) ? m_mapGroupHeaders.GetCount() : 0);
+}
+
 BOOL CTDLTaskListCtrl::GroupBy(TDC_COLUMN nGroupBy)
 {
 	if (!CanGroupBy(nGroupBy))

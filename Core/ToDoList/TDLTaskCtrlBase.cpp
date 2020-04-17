@@ -6625,7 +6625,7 @@ BOOL CTDLTaskCtrlBase::SaveToImage(CBitmap& bmImage)
 
 BOOL CTDLTaskCtrlBase::CanSaveToImage() const
 {
-	return (GetTaskCount() > 0);
+	return (GetItemCount() > 0);
 }
 
 BOOL CTDLTaskCtrlBase::DoSaveToImage(CBitmap& bmImage, COLORREF crDivider)
