@@ -335,11 +335,45 @@ namespace Misc
 	CString GetNextKey(const CMapStringToString& map, POSITION& pos);
 	int GetKeys(const CMapStringToString& map, CStringArray& aKeys);
 
+	template <class S, class T>
+	BOOL HasKeyT(const CMap<S, S, T, T&>& map, const S& key)
+	{
+		// Avoid constructing empty T
+		if (map.GetCount() == 0)
+			return FALSE;
+
+		T unused;
+		return map.Lookup(key, unused);
+	}
+
+	template <class S, class T, class U>
+	int GetKeysT(const CMap<S, S, T, T&>& map, U& aKeys)
+	{
+		aKeys.RemoveAll();
+
+		// Avoid the cost of constructing empty S and T
+		if (map.GetCount())
+		{
+			POSITION pos = map.GetStartPosition();
+			S key;
+			T unused;
+
+			while (pos)
+			{
+				map.GetNextAssoc(pos, key, unused);
+				aKeys.Add(key);
+			}
+		}
+
+		return aKeys.GetSize();
+	}
+
 	template <class S, class T> 
 	int CopyT(const CMap<S, S, T, T&>& mapSrc, CMap<S, S, T, T&>& mapDest)
 	{
 		mapDest.RemoveAll();
 
+		// Avoid the cost of constructing empty S and T
 		if (mapSrc.GetCount())
 		{
 			POSITION pos = mapSrc.GetStartPosition();
@@ -356,8 +390,8 @@ namespace Misc
 		return mapDest.GetCount();
 	}
 
-	template <class S, class T>
-	int GetValuesT(const CMap<S, S, T, T&>& mapSrc, CArray<T, T&>& aDest)
+	template <class S, class T, class VALS>
+	int GetValuesT(const CMap<S, S, T, T&>& mapSrc, VALS& aDest)
 	{
 		aDest.SetSize();
 
@@ -377,8 +411,8 @@ namespace Misc
 		return aDest.GetSize();
 	}
 
-	template <class T>
-	int GetValuesStrT(const CMap<CString, LPCTSTR, T, T&>& mapSrc, CArray<T, T&>& aDest)
+	template <class T, class VALS>
+	int GetValuesStrT(const CMap<CString, LPCTSTR, T, T&>& mapSrc, VALS& aDest)
 	{
 		aDest.SetSize();
 

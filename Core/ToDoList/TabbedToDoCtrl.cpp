@@ -3014,9 +3014,10 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 	}
 
 	// cache current selection
+	BOOL bInList = InListView();
 	TDCSELECTIONCACHE cache;
 
-	if (InListView())
+	if (bInList)
 		CacheListSelection(cache);
 
 	// note: the call to m_taskList.RestoreSelection at the bottom fails if the 
@@ -3039,9 +3040,10 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 		ASSERT(pLVData);
 
 		pLVData->bNeedFullTaskUpdate = FALSE;
+		pLVData->bNeedResort = (m_nListViewGroupBy != TDCC_NONE);
 
 		// redo last sort
-		if ((GetTaskView() == FTCV_TASKLIST) && IsSorting())
+		if (bInList && IsSorting())
 		{
 			pLVData->bNeedResort = FALSE;
 			m_taskList.Resort();
@@ -3049,23 +3051,25 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 	}
 	
 	// restore selection
-	if (InListView())
+	if (bInList)
 	{
 		// Make sure something is selected
 		m_taskList.RestoreSelection(cache, TRUE);
 		OnListSelChanged();
 	}
-	
-	// don't update controls if only one item is selected and it did not
-	// change as a result of the filter and we haven't already done
-	// and update in OnListSelChanged() above
-	if (!InListView() &&
-		!((GetSelectedCount() == 1) && 
-		(cache.aSelTaskIDs.GetSize() == 1) &&
-		(GetTaskID(GetSelectedItem()) == cache.aSelTaskIDs[0])))
+	else
 	{
-		UpdateControls();
+		// don't update controls if only one item is selected and it did not
+		// change as a result of the filter and we haven't already done
+		// and update in OnListSelChanged() above
+		if (!((GetSelectedCount() == 1) && 
+			(cache.aSelTaskIDs.GetSize() == 1) &&
+			(GetTaskID(GetSelectedItem()) == cache.aSelTaskIDs[0])))
+		{
+			UpdateControls();
+		}
 	}
+	
 
 	BuildGroupByCombo();
 }

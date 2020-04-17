@@ -90,6 +90,7 @@ public:
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
 	void DeleteAll();
 	void RemoveDeletedItems();
+	void SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 
 	BOOL GroupBy(TDC_COLUMN nGroupBy);
 	BOOL CanGroupBy(TDC_COLUMN nGroupBy) const;
@@ -97,6 +98,8 @@ public:
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBuildComplete();
+	void Resort(BOOL bAllowToggle = FALSE);
+	BOOL ModsNeedResort(const CTDCAttributeMap& attribIDs) const;
 
 protected:
 	CListCtrl m_lcTasks;
@@ -168,6 +171,7 @@ protected:
 	CString FormatTaskGroupHeaderText(DWORD dwTaskID) const;
 	CString GetGroupByColumnName() const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
+	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 

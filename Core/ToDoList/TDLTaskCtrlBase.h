@@ -196,12 +196,13 @@ public:
 	void MultiSort(const TDSORTCOLUMNS& sort);
 	TDC_COLUMN GetSortBy() const { return m_sort.single.nBy; }
 	void GetSortBy(TDSORTCOLUMNS& sort) const;
-	void Resort(BOOL bAllowToggle = FALSE);
 	BOOL IsSorting() const;
 	BOOL IsMultiSorting() const;
 	BOOL IsSortingBy(TDC_COLUMN nBy) const;
 	const TDSORT& GetSort() const { return m_sort; }
-	BOOL ModsNeedResort(const CTDCAttributeMap& attribIDs) const;
+
+	virtual void Resort(BOOL bAllowToggle = FALSE);
+	virtual BOOL ModsNeedResort(const CTDCAttributeMap& attribIDs) const;
 
 	void SetModified(const CTDCAttributeMap& attribIDs, BOOL bAllowResort);
 	void SetAlternateLineColor(COLORREF crAltLine);

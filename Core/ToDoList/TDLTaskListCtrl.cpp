@@ -375,7 +375,7 @@ int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 
 UINT CTDLTaskListCtrl::GetGroupCount() const
 {
-	return ((m_nGroupBy != TDCC_NONE) ? m_mapGroupHeaders.GetCount() : 0);
+	return (IsGrouped() ? m_mapGroupHeaders.GetCount() : 0);
 }
 
 BOOL CTDLTaskListCtrl::GroupBy(TDC_COLUMN nGroupBy)
@@ -392,7 +392,7 @@ BOOL CTDLTaskListCtrl::GroupBy(TDC_COLUMN nGroupBy)
 	{
 		RebuildGroupHeaders();
 
-		if ((nGroupBy != TDCA_NONE) || IsSorting())
+		if (IsGrouped() || IsSorting())
 			DoSort();
 	}
 
@@ -446,24 +446,12 @@ void CTDLTaskListCtrl::RebuildGroupHeaders()
 {
 	CHoldRedraw hr(*this);
 
-	// Take a copy of the current group headers
-	// to be deleted and then clear them
+	// Snapshot the current group headers and clear
 	CDWordSet mapCurGroupIDs;
 
-	if (m_mapGroupHeaders.GetCount())
-	{
-		CString sUnused;
-		DWORD dwGroupID;
-		POSITION pos = m_mapGroupHeaders.GetStartPosition();
+	Misc::GetKeysT(m_mapGroupHeaders, mapCurGroupIDs);
+	m_mapGroupHeaders.RemoveAll();
 
-		while (pos)
-		{
-			m_mapGroupHeaders.GetNextAssoc(pos, dwGroupID, sUnused);
-			mapCurGroupIDs.Add(dwGroupID);
-		}
-		m_mapGroupHeaders.RemoveAll();
-	}
-	
 	// Build new headers and delete the old as we go
 	CStringSet mapNewHeaders;
 	DWORD dwNewHeaderID = 0xffffffff;
@@ -482,7 +470,7 @@ void CTDLTaskListCtrl::RebuildGroupHeaders()
 
 			mapCurGroupIDs.RemoveKey(dwTaskID);
 		}
-		else if (m_nGroupBy != TDCC_NONE)
+		else if (IsGrouped())
 		{
 			sGroupHeader = GetTaskGroupByText(dwTaskID);
 
@@ -500,7 +488,8 @@ void CTDLTaskListCtrl::RebuildGroupHeaders()
 		}
 	}
 
-	PostResize();
+	if (mapNewHeaders.GetCount() != mapCurGroupIDs.GetCount())
+		PostResize();
 }
 
 CString CTDLTaskListCtrl::GetTaskGroupByText(DWORD dwTaskID) const
@@ -605,12 +594,39 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 	return _T("");
 }
 
+void CTDLTaskListCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
+{
+	if (IsGrouped() && mapAttribIDs.Has(TDC::MapColumnToAttribute(m_nGroupBy)))
+		RebuildGroupHeaders();
+
+	CTDLTaskCtrlBase::SetModified(mapAttribIDs, bAllowResort);
+}
+
+void CTDLTaskListCtrl::Resort(BOOL bAllowToggle)
+{
+	if (IsGrouped() && !IsSorting())
+		DoSort();
+	else
+		CTDLTaskCtrlBase::Resort(bAllowToggle);
+}
+
+BOOL CTDLTaskListCtrl::ModsNeedResort(const CTDCAttributeMap& attribIDs) const
+{
+	// Note: we bypass the check of 'Resort On Mod' because
+	// we must resort if grouping is to work 
+	if (IsGrouped() && attribIDs.Has(TDC::MapColumnToAttribute(m_nGroupBy)))
+		return TRUE;
+
+	// else
+	return CTDLTaskCtrlBase::ModsNeedResort(attribIDs);
+}
+
 BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 {
 	if (IsSorting() && !CTDLTaskCtrlBase::PrepareSort(ss))
 		return FALSE;
 
-	if (m_nGroupBy != TDCC_NONE)
+	if (IsGrouped())
 	{
 		m_aGroupSortCols[0].nBy = m_nGroupBy;
 		m_aGroupSortCols[0].bAscending = TRUE;
@@ -647,7 +663,7 @@ int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 								   const TDSORTCOLUMN& sort,
 								   const TDSORTFLAGS& flags) const
 {
-	if ((sort.nBy == m_nGroupBy) && (m_nGroupBy != TDCC_NONE))
+	if (IsGrouped() && (sort.nBy == m_nGroupBy))
 	{
 		CString sTask1Text = GetTaskGroupByText(lParam1);
 		CString sTask2Text = GetTaskGroupByText(lParam2);
@@ -952,9 +968,9 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 	case LVM_HITTEST:
 	case LVM_SUBITEMHITTEST:
-		// Make group header tasks disappear 
-		if (m_nGroupBy != TDCC_NONE)
+		if (IsGrouped())
 		{
+			// Make group header tasks 'disappear' 
 			int nItem = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
 			DWORD dwTaskID = ((hRealWnd == m_lcTasks) ? GetTaskID(nItem) : GetColumnItemTaskID(nItem));
 
