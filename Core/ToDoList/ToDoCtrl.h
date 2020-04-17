@@ -378,7 +378,7 @@ public:
 	DWORD GetFileVersion() const { return m_nFileVersion == 0 ? 1 : m_nFileVersion; }
     TDC_FILEFMT CompareFileFormat() const; // older, same, newer
 	
-	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
+	inline UINT GetTaskCount() const { return m_taskTree.GetTaskCount(); }
 	inline int GetSelectedCount() const { return m_taskTree.GetSelectedCount(); }
 	inline BOOL HasSelection() const { return m_taskTree.HasSelection(); }
 	BOOL IsTaskLabelEditing() const;

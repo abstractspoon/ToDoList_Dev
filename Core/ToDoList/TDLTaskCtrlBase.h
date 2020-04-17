@@ -88,6 +88,7 @@ public:
 	void UpdateSelectedTaskPath();
 	
  	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_data.GetTrueTask(dwTaskID); }
+ 	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
 	inline BOOL HasSelection() const { return GetSelectedCount(); }
 
 	virtual int GetItemCount() const = 0;

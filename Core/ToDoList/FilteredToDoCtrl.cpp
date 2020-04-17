@@ -585,7 +585,7 @@ UINT CFilteredToDoCtrl::GetTaskCount(UINT* pVisible) const
 	if (pVisible)
 	{
 		if (InListView())
-			*pVisible = (m_taskList.GetItemCount() - m_taskList.GetGroupCount());
+			*pVisible = m_taskList.GetItemCount();
 		else
 			*pVisible = m_taskTree.GetItemCount();
 	}

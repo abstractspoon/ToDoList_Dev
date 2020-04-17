@@ -2636,7 +2636,7 @@ void CTDLTaskTreeCtrl::SaveState(CPreferences& prefs, const CString& sKey, BOOL 
 		CTDLTaskCtrlBase::SaveState(prefs, sKey);
 	
 	// ignore this if we have no tasks
-	if (GetItemCount() == 0)
+	if (GetTaskCount() == 0)
 		return;
 	
 	if (!sKey.IsEmpty())
