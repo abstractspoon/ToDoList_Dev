@@ -241,14 +241,10 @@ void CTabbedToDoCtrl::OnListGroupBySelChanged()
 	m_taskList.GroupBy(m_nListViewGroupBy);
 }
 
-BOOL CTabbedToDoCtrl::IsResortAllowed() const
-{
-	return InTreeView();
-}
-
 void CTabbedToDoCtrl::OnStylesUpdated(const CTDCStyleMap& styles)
 {
-	CToDoCtrl::OnStylesUpdated(styles);
+	// Bypass base class to only allow resort if in tree view
+	m_taskTree.OnStylesUpdated(styles, InTreeView());
 
 	// Only allow resort if in list view
 	m_taskList.OnStylesUpdated(styles, InListView());

@@ -351,8 +351,7 @@ public:
 	virtual BOOL IsSorting() const { return m_taskTree.IsSorting(); }
 	virtual BOOL IsMultiSorting() const { return m_taskTree.IsMultiSorting(); }
 	virtual BOOL IsSortingBy(TDC_COLUMN nBy) const { return m_taskTree.IsSortingBy(nBy); }
-	virtual void Resort(BOOL bAllowToggle = FALSE);
-	virtual BOOL IsResortAllowed() const { return TRUE; }
+	virtual void Resort(BOOL bAllowToggle = FALSE) { m_taskTree.Resort(bAllowToggle); }
 
 	// move functions
 	virtual BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
@@ -734,7 +733,7 @@ protected:
 	
 	virtual void Resize(int cx = 0, int cy = 0, BOOL bSplitting = FALSE);
 	virtual void UpdateTasklistVisibility();
-	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, IsResortAllowed()); }
+	virtual void OnStylesUpdated(const CTDCStyleMap& styles) { m_taskTree.OnStylesUpdated(styles, TRUE); }
 	virtual void OnTaskIconsChanged() { m_taskTree.OnImageListChange(); }
 	
 	virtual HTREEITEM GetUpdateControlsItem() const { return GetSelectedItem(); }

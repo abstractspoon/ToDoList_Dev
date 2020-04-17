@@ -5570,12 +5570,6 @@ BOOL CToDoCtrl::ModifyStyles(const CTDCStyleMap& modStyles)
 	return TRUE;
 }
 
-void CToDoCtrl::Resort(BOOL bAllowToggle)
-{
-	if (IsResortAllowed())
-		m_taskTree.Resort(bAllowToggle);
-}
-
 BOOL CToDoCtrl::HasStyle(TDC_STYLE nStyle) const 
 { 
 	// some special handling for dependent styles
