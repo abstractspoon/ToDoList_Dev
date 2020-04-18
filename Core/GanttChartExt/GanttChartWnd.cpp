@@ -547,7 +547,7 @@ void CGanttChartWnd::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate
 	}
 		
 	// Month Display may change for large date ranges
-	BuildDisplayCombo();
+	m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
 	UpdateActiveRangeLabel();
 }
 
@@ -790,8 +790,8 @@ BOOL CGanttChartWnd::OnInitDialog()
 	VERIFY(m_ctrlGantt.Create(this, rCtrl, IDC_GANTTCTRL));
 
 	BuildSnapCombo();
-	BuildDisplayCombo();
 	
+	m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
 
@@ -909,7 +909,7 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		// because we're going to be fiddling
 		CAutoFlag af(m_bInSetMonthDisplay, TRUE);
 
-		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nDisplay);
+		VERIFY(m_cbDisplayOptions.SelectDisplay(nDisplay));
 
 		BuildSnapCombo();
 		
@@ -970,12 +970,12 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 void CGanttChartWnd::OnSelchangeDisplay() 
 {
 	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlGantt.GetMonthDisplay();
-	GTLC_MONTH_DISPLAY nNewDisplay = CDialogHelper::GetSelectedItemData(m_cbDisplayOptions, GTLC_DISPLAY_NONE);
+	GTLC_MONTH_DISPLAY nNewDisplay = m_cbDisplayOptions.GetSelectedDisplay();
 
 	if (!SetMonthDisplay(nNewDisplay))
 	{
 		// restore previous selection
-		CDialogHelper::SelectItemByData(m_cbDisplayOptions, nCurDisplay);
+		VERIFY(m_cbDisplayOptions.SelectDisplay(nCurDisplay));
 	}
 }
 
@@ -996,10 +996,10 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 
 	// Update display combo selection
 	GTLC_MONTH_DISPLAY nDisplay = (GTLC_MONTH_DISPLAY)lp;
-	CDialogHelper::SelectItemByData(m_cbDisplayOptions, nDisplay);
 
 	// Rebuild snap combo
 	BuildSnapCombo();
+	VERIFY(m_cbDisplayOptions.SelectDisplay(nDisplay));
 
 	GTLC_SNAPMODE nSnap = GTLCSM_FREE;
 	VERIFY(m_mapDisplaySnapModes.Lookup(nDisplay, nSnap));
@@ -1243,50 +1243,6 @@ void CGanttChartWnd::BuildSnapCombo()
 	CDialogHelper::SelectItemByData(m_cbSnapModes, m_ctrlGantt.GetSnapMode());
 }
 
-void CGanttChartWnd::BuildDisplayCombo()
-{
-	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlGantt.GetMonthDisplay();
-	BOOL bOneBasedDecades = !m_dlgPrefs.GetDecadesAreZeroBased();
-
-	m_cbDisplayOptions.ResetContent();
-
-	for (int nMode = 0; nMode < NUM_DISPLAYMODES; nMode++)
-	{
-		const GTCDISPLAYMODE& mode = DISPLAYMODES[nMode];
-
-		if (!m_ctrlGantt.CanSetMonthDisplay(mode.nDisplay))
-		{
-			int nCurMode = GanttStatic::FindDisplay(nCurDisplay);
-
-			if (nMode < nCurMode)
-				nCurDisplay = mode.nDisplay;
-
-			break;
-		}
-
-		// else
-		CEnString sItemText(mode.nStringID);
-
-		// Handle one-based decades
-		if (bOneBasedDecades)
-		{
-			if (mode.nDisplay == GTLC_DISPLAY_DECADES)
-			{
-				sItemText.Replace(_T("2000-2009"), _T("2001-2010"));
-			}
-			else if (mode.nDisplay == GTLC_DISPLAY_QUARTERCENTURIES)
-			{
-				sItemText.Replace(_T("2000-2024"), _T("2001-2025"));
-			}
-		}
-
-		CDialogHelper::AddString(m_cbDisplayOptions, sItemText, mode.nDisplay);
-	}
-	
-	CDialogHelper::RefreshMaxDropWidth(m_cbDisplayOptions);
-	CDialogHelper::SelectItemByData(m_cbDisplayOptions, nCurDisplay);
-}
-
 void CGanttChartWnd::OnGanttGotoToday() 
 {
 	m_ctrlGantt.ScrollToToday();
@@ -1314,7 +1270,7 @@ void CGanttChartWnd::OnGanttPreferences()
 		
 		if (bDecadeChange)
 		{
-			BuildDisplayCombo();
+			m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
 			UpdateActiveRangeLabel();
 
 			GANTTDATERANGE dtRange;
@@ -1496,7 +1452,7 @@ LRESULT CGanttChartWnd::OnSliderDateRangeChange(WPARAM /*wp*/, LPARAM /*lp*/)
 		else
 			m_ctrlGantt.ClearActiveDateRange();
 
-		BuildDisplayCombo();
+		m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
 		UpdateActiveRangeLabel();
 	}
 

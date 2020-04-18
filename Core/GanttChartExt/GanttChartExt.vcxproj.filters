@@ -42,6 +42,9 @@
     <ClCompile Include="GanttCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="GanttDisplayComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\GanttChartExt.rc2">
@@ -103,6 +106,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="GanttCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GanttDisplayComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

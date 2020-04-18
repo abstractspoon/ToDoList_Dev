@@ -128,6 +128,10 @@ SOURCE=.\GanttDateRangeSlider.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GanttDisplayComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\GanttPreferencesDlg.cpp
 # End Source File
 # Begin Source File
@@ -166,6 +170,10 @@ SOURCE=.\GanttCtrl.h
 # Begin Source File
 
 SOURCE=.\GanttDateRangeSlider.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GanttDisplayComboBox.h
 # End Source File
 # Begin Source File
 

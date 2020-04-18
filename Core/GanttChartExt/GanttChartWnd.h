@@ -11,8 +11,8 @@
 #include "GanttPreferencesDlg.h"
 #include "GanttCreateDependsDlg.h"
 #include "GanttDateRangeSlider.h"
+#include "GanttDisplayComboBox.h"
 
-#include "..\Shared\tabbedcombobox.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\shared\Icon.h"
@@ -70,7 +70,7 @@ protected:
 	//}}AFX_DATA
 	CComboBox m_cbSnapModes;
 	CGanttCtrl m_ctrlGantt;
-	CTabbedComboBox	m_cbDisplayOptions;
+	CGanttDisplayComboBox m_cbDisplayOptions;
 	CGanttPreferencesDlg m_dlgPrefs;
 	CGanttCreateDependsDlg m_dlgDepends;
 	CEnToolBar m_toolbar;
@@ -151,7 +151,6 @@ protected:
 	void SendParentSelectionUpdate();
 	void UpdateActiveRangeLabel();
 	void BuildSnapCombo();
-	void BuildDisplayCombo();
 	BOOL SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay);
 	void LoadSnapModePreference(const IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay, GTLC_SNAPMODE nDefaultSnap);
 	void SaveSnapModePreference(IPreferences* pPrefs, LPCTSTR szSnapKey, GTLC_MONTH_DISPLAY nDisplay, LPCTSTR szDisplay) const;
