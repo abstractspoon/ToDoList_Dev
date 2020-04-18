@@ -73,6 +73,174 @@ namespace Misc
 	BOOL SameGuids(const GUID& guid1, const GUID& guid2);
 	CString NewGuid(GUID* pGuid = NULL);
 
+	CString FormatComputerNameAndUser(char cSeparator = ':');
+	CString GetComputerName();
+	CString GetUserName();
+	CString GetListSeparator();
+	CString GetDecimalSeparator();
+	CString GetDefCharset();
+	CString GetAM();
+	CString GetPM();
+	CString GetTimeSeparator();
+	CString GetTimeFormat(BOOL bIncSeconds = TRUE);
+	CString GetShortDateFormat(BOOL bIncDOW = FALSE);
+	CString GetDateSeparator();
+
+	BOOL MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = FALSE);
+	BOOL MatchAny(const CStringArray& array1, const CStringArray& array2, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
+	BOOL MatchAll(const CDWordArray& array1, const CDWordArray& array2, BOOL bOrderSensitive = FALSE);
+	BOOL MatchAny(const CDWordArray& array1, const CDWordArray& array2);
+	
+	int RemoveItems(const CStringArray& aItems, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
+	int RemoveEmptyItems(CStringArray& aFrom);
+	BOOL RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
+	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
+	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
+
+	CString GetLongestItem(const CStringArray& array);
+	int GetMaximumItemLength(const CStringArray& array);
+	int GetFormattedLength(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
+	int GetFormattedLength(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty = FALSE);
+
+	const CString& GetItem(const CStringArray& array, int nItem);
+
+	CString FormatArray(const CDWordArray& array, LPCTSTR szSep = NULL);
+	CString FormatArray(const CDWordArray& array, TCHAR cSep);
+	CString FormatArray(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
+	CString FormatArray(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty = FALSE);
+	CString FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDelim = _T(". "), int nStart = 1, BOOL bNumberBlankLines = FALSE);
+	int FormatArray(const CDWordArray& aSrc, LPCTSTR lpszFormat, CStringArray& aDest);
+
+	int Split(const CString& sText, CDWordArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE);
+	int Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE);
+	int Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
+ 	int Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
+ 	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim = TRUE);
+	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
+
+	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLength = -1);
+	CString Left(const CString& sText, int nLength, BOOL bNearestWord);
+
+	typedef int (*SORTPROC)(const void* pV1, const void* pV2);
+
+	void SortArray(CStringArray& array, SORTPROC pSortProc = NULL);
+	void SortArray(CDWordArray& array, SORTPROC pSortProc = NULL);
+
+	int Copy(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
+	int Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
+	BOOL MatchAll(const CMapStringToString& map1, const CMapStringToString& map2);
+	BOOL HasKey(const CMapStringToString& map, const CString& sKey);
+	CString GetNextKey(const CMapStringToString& map, POSITION& pos);
+	int GetKeys(const CMapStringToString& map, CStringArray& aKeys);
+
+	CString& MakeUpper(CString& sText);
+	CString& MakeLower(CString& sText);
+	CStringArray& MakeUpper(CStringArray& aText);
+	CStringArray& MakeLower(CStringArray& aText);
+	CString ToUpper(LPCTSTR szText);
+	CString ToLower(LPCTSTR szText);
+ 	TCHAR ToUpper(TCHAR cText);
+ 	TCHAR ToLower(TCHAR cText);
+	TCHAR ToggleCase(TCHAR cText);
+	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBelow = FALSE);
+	BOOL LCMapString(CString& sText, DWORD dwMapFlags);
+
+	void MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith);
+	void MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith);
+	CString GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith);
+	BOOL IsQuoted(LPCTSTR szText);
+
+	int LastIndex(const CString& sText);
+	int LastIndex(LPCTSTR szText);
+
+	TCHAR First(const CString& sText);
+	TCHAR Last(const CString& sText);
+	TCHAR First(LPCTSTR szText);
+	TCHAR Last(LPCTSTR szText);
+	TCHAR TrimFirst(CString& sText);
+	TCHAR TrimLast(CString& sText);
+	BOOL TrimFirstIf(TCHAR cTest, CString& sText);
+	BOOL TrimTrailingDecimalZeros(CString& sText);
+	BOOL TrimLastIf(TCHAR cTest, CString& sText);
+	CString& Trim(CString& sText, TCHAR cChar);
+	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
+	CString& TrimAlpha(CString& sText);
+	BOOL RemoveAt(CString& sText, int nPos);
+	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim = TRUE);
+	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim = TRUE);
+	BOOL IsEmpty(LPCTSTR szText);
+	BOOL IsEmpty(LPCSTR szText);
+	BOOL HasEmpty(const CStringArray& aItems);
+
+	int FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos = -1);
+	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
+	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, int iStart = 0);
+	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, BOOL bWholeWord = FALSE, int iStart = 0);
+	int Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
+	BOOL Contains(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
+
+	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CString& sSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
+	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CStringArray& aSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
+
+	int Round(double dValue);
+	double Round(double dValue, int nDecimals);
+	double Atof(const CString& sValue);
+	BOOL IsNumber(const CString& sValue);
+	BOOL IsSymbol(const CString& sValue);
+
+	CString FormatCost(double dCost, LPCTSTR szTrail = NULL);
+	CString Format(double dVal, int nDecPlaces = -1, LPCTSTR szTrail = NULL);
+	CString Format(int nVal, LPCTSTR szTrail = NULL);
+	CString Format(DWORD dwVal, LPCTSTR szTrail = NULL);
+	CString Format(LPCTSTR lpszFormat, ...);
+
+	const CString& GetLongest(const CString& str1, const CString& str2, BOOL bAsDouble = FALSE);
+
+	void Shuffle(LPTSTR szText);
+	CString Shuffle(const CString& str);
+	void Shuffle(CStringArray& aStr);
+
+	BOOL IsWorkStationLocked();
+	BOOL IsScreenSaverActive();
+	BOOL IsScreenReaderActive(BOOL bCheckForMSNarrator = TRUE);
+	BOOL IsMSNarratorActive();
+	LANGID GetUserDefaultUILanguage();
+	LANGID GetUserKeyboardLanguage();
+	BOOL IsMetricMeasurementSystem();
+	BOOL IsHighContrastActive();
+
+	BOOL ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason);
+	BOOL ShutdownBlockReasonDestroy(HWND hWnd);
+
+	void ProcessMsgLoop();
+	DWORD GetLastUserInputTick();
+	DWORD GetTicksSinceLastUserInput();
+
+	int ParseSearchString(LPCTSTR szSearch, CStringArray& aWords);
+	int FilterString(CString& sText, const CString& sFilter);
+
+	BOOL ModKeysArePressed(DWORD dwKeys); 
+	BOOL IsKeyPressed(DWORD dwVirtKey);
+	BOOL IsCursorKey(DWORD dwVirtKey, DWORD dwKeys = MKC_ANY);
+	BOOL IsCursorKeyPressed(DWORD dwKeys = MKC_ANY);
+	CString GetKeyName(WORD wVirtKey, BOOL bExtended = FALSE); 
+
+	BOOL HasFlag(DWORD dwFlags, DWORD dwFlag);
+	BOOL FlagHasChanged(DWORD dwFlag, DWORD dwOldFlags, DWORD dwNewFlags);
+	BOOL ModifyFlags(DWORD& dwFlags, DWORD dwRemove, DWORD dwAdd = 0);
+	BOOL SetFlag(DWORD& dwFlags, DWORD dwFlag, BOOL bSet = TRUE);
+
+	CString MakeKey(const CString& sFormat, int nKeyVal, LPCTSTR szParentKey = NULL);
+	CString MakeKey(const CString& sFormat, LPCTSTR szKeyVal, LPCTSTR szParentKey = NULL);
+
+#ifdef _DEBUG
+	void Trace(const CStringArray& array);
+#endif
+}
+
+// Template helpers
+namespace Misc  
+{
 	template <class T> 
 	BOOL MatchAllT(const T& array1, const T& array2, BOOL bOrderSensitive)
 	{
@@ -114,34 +282,6 @@ namespace Misc
 		return TRUE;
 	}
 
-	CString FormatComputerNameAndUser(char cSeparator = ':');
-	CString GetComputerName();
-	CString GetUserName();
-	CString GetListSeparator();
-	CString GetDecimalSeparator();
-	CString GetDefCharset();
-	CString GetAM();
-	CString GetPM();
-	CString GetTimeSeparator();
-	CString GetTimeFormat(BOOL bIncSeconds = TRUE);
-	CString GetShortDateFormat(BOOL bIncDOW = FALSE);
-	CString GetDateSeparator();
-
-	BOOL MatchAll(const CStringArray& array1, const CStringArray& array2, 
-					 BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = FALSE);
-	BOOL MatchAny(const CStringArray& array1, const CStringArray& array2, 
-					BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
-
-	BOOL MatchAll(const CDWordArray& array1, const CDWordArray& array2, 
-		BOOL bOrderSensitive = FALSE);
-	BOOL MatchAny(const CDWordArray& array1, const CDWordArray& array2);
-	
-#ifdef _DEBUG
-	void Trace(const CStringArray& array);
-#endif
-	
-	int RemoveItems(const CStringArray& aItems, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
-
 	template <class T>
 	int RemoveItemsT(const CArray<T, T&>& aItems, CArray<T, T&>& aFrom)
 	{
@@ -158,18 +298,6 @@ namespace Misc
 
 		return nRemoved;
 	}
-
-	int RemoveEmptyItems(CStringArray& aFrom);
-	BOOL RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
-	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
-	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
-
-	CString GetLongestItem(const CStringArray& array);
-	int GetMaximumItemLength(const CStringArray& array);
-	int GetFormattedLength(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
-	int GetFormattedLength(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty = FALSE);
-
-	const CString& GetItem(const CStringArray& array, int nItem);
 
 	template <class T> 
 	const T& GetItemT(const CArray<T, T&>& array, int nItem)
@@ -207,7 +335,6 @@ namespace Misc
 		return TRUE;
 	}
 	
-	/*
 	template <class T> 
 	T IncrementItemT(CArray<T, T&>& array, int nItem)
 	{
@@ -223,7 +350,6 @@ namespace Misc
 
 		return array[nItem];
 	}
-*/
 
 	template <class T> 
 	T IncrementItemStrT(CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
@@ -250,23 +376,6 @@ namespace Misc
 
 		return value;
 	}
-
-	CString FormatArray(const CDWordArray& array, LPCTSTR szSep = NULL);
-	CString FormatArray(const CDWordArray& array, TCHAR cSep);
-	CString FormatArray(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
-	CString FormatArray(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty = FALSE);
-	CString FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDelim = _T(". "), int nStart = 1, BOOL bNumberBlankLines = FALSE);
-	int FormatArray(const CDWordArray& aSrc, LPCTSTR lpszFormat, CStringArray& aDest);
-
-	int Split(const CString& sText, CDWordArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE);
-	int Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE);
-	int Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
- 	int Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
- 	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim = TRUE);
-	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
-
-	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLength = -1);
-	CString Left(const CString& sText, int nLength, BOOL bNearestWord);
 
 	template <class T, class S> 
 	int FindT(const S& toFind, const T& array)
@@ -317,23 +426,11 @@ namespace Misc
 		return TRUE;
 	}
 	
-	typedef int (*SORTPROC)(const void* pV1, const void* pV2);
-
-	void SortArray(CStringArray& array, SORTPROC pSortProc = NULL);
-	void SortArray(CDWordArray& array, SORTPROC pSortProc = NULL);
-
 	template <class T> 
 	void SortArrayT(CArray<T, T&>& array, SORTPROC pSortProc)
 	{
 		qsort(array.GetData(), array.GetSize(), sizeof(T), pSortProc);
 	}
-
-	int Copy(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
-	int Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
-	BOOL MatchAll(const CMapStringToString& map1, const CMapStringToString& map2);
-	BOOL HasKey(const CMapStringToString& map, const CString& sKey);
-	CString GetNextKey(const CMapStringToString& map, POSITION& pos);
-	int GetKeys(const CMapStringToString& map, CStringArray& aKeys);
 
 	template <class S, class T>
 	BOOL HasKeyT(const CMap<S, S, T, T&>& map, const S& key)
@@ -501,67 +598,6 @@ namespace Misc
 		return TRUE;
 	}
 
-	CString& MakeUpper(CString& sText);
-	CString& MakeLower(CString& sText);
-	CStringArray& MakeUpper(CStringArray& aText);
-	CStringArray& MakeLower(CStringArray& aText);
-	CString ToUpper(LPCTSTR szText);
-	CString ToLower(LPCTSTR szText);
- 	TCHAR ToUpper(TCHAR cText);
- 	TCHAR ToLower(TCHAR cText);
-	TCHAR ToggleCase(TCHAR cText);
-	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBelow = FALSE);
-	BOOL LCMapString(CString& sText, DWORD dwMapFlags);
-
-	void MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith);
-	void MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith);
-	CString GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith);
-	BOOL IsQuoted(LPCTSTR szText);
-
-	int LastIndex(const CString& sText);
-	int LastIndex(LPCTSTR szText);
-
-	TCHAR First(const CString& sText);
-	TCHAR Last(const CString& sText);
-	TCHAR First(LPCTSTR szText);
-	TCHAR Last(LPCTSTR szText);
-	TCHAR TrimFirst(CString& sText);
-	TCHAR TrimLast(CString& sText);
-	BOOL TrimFirstIf(TCHAR cTest, CString& sText);
-	BOOL TrimTrailingDecimalZeros(CString& sText);
-	BOOL TrimLastIf(TCHAR cTest, CString& sText);
-	CString& Trim(CString& sText, TCHAR cChar);
-	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
-	CString& TrimAlpha(CString& sText);
-	BOOL RemoveAt(CString& sText, int nPos);
-	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim = TRUE);
-	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim = TRUE);
-	BOOL IsEmpty(LPCTSTR szText);
-	BOOL IsEmpty(LPCSTR szText);
-	BOOL HasEmpty(const CStringArray& aItems);
-
-	int FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos = -1);
-	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
-	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, int iStart = 0);
-	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, BOOL bWholeWord = FALSE, int iStart = 0);
-	int Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
-	BOOL Contains(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
-
-	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CString& sSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
-	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CStringArray& aSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
-
-	int Round(double dValue);
-	double Round(double dValue, int nDecimals);
-	double Atof(const CString& sValue);
-	BOOL IsNumber(const CString& sValue);
-	BOOL IsSymbol(const CString& sValue);
-
-	CString FormatCost(double dCost, LPCTSTR szTrail = NULL);
-	CString Format(double dVal, int nDecPlaces = -1, LPCTSTR szTrail = NULL);
-	CString Format(int nVal, LPCTSTR szTrail = NULL);
-	CString Format(DWORD dwVal, LPCTSTR szTrail = NULL);
-	CString Format(LPCTSTR lpszFormat, ...);
-
 	template <class T>
 	int GetFormattedLength(T tVal, int nDecimals)
 	{
@@ -585,44 +621,6 @@ namespace Misc
 		return nNumDigits;
 	}
 
-	const CString& GetLongest(const CString& str1, const CString& str2, BOOL bAsDouble = FALSE);
-
-	void Shuffle(LPTSTR szText);
-	CString Shuffle(const CString& str);
-	void Shuffle(CStringArray& aStr);
-
-	BOOL IsWorkStationLocked();
-	BOOL IsScreenSaverActive();
-	BOOL IsScreenReaderActive(BOOL bCheckForMSNarrator = TRUE);
-	BOOL IsMSNarratorActive();
-	LANGID GetUserDefaultUILanguage();
-	LANGID GetUserKeyboardLanguage();
-	BOOL IsMetricMeasurementSystem();
-	BOOL IsHighContrastActive();
-
-	BOOL ShutdownBlockReasonCreate(HWND hWnd, LPCTSTR szReason);
-	BOOL ShutdownBlockReasonDestroy(HWND hWnd);
-
-	void ProcessMsgLoop();
-	DWORD GetLastUserInputTick();
-	DWORD GetTicksSinceLastUserInput();
-
-	int ParseSearchString(LPCTSTR szSearch, CStringArray& aWords);
-	int FilterString(CString& sText, const CString& sFilter);
-
-	BOOL ModKeysArePressed(DWORD dwKeys); 
-	BOOL IsKeyPressed(DWORD dwVirtKey);
-	BOOL IsCursorKey(DWORD dwVirtKey, DWORD dwKeys = MKC_ANY);
-	BOOL IsCursorKeyPressed(DWORD dwKeys = MKC_ANY);
-	CString GetKeyName(WORD wVirtKey, BOOL bExtended = FALSE); 
-
-	BOOL HasFlag(DWORD dwFlags, DWORD dwFlag);
-	BOOL FlagHasChanged(DWORD dwFlag, DWORD dwOldFlags, DWORD dwNewFlags);
-	BOOL ModifyFlags(DWORD& dwFlags, DWORD dwRemove, DWORD dwAdd = 0);
-	BOOL SetFlag(DWORD& dwFlags, DWORD dwFlag, BOOL bSet = TRUE);
-
-	CString MakeKey(const CString& sFormat, int nKeyVal, LPCTSTR szParentKey = NULL);
-	CString MakeKey(const CString& sFormat, LPCTSTR szKeyVal, LPCTSTR szParentKey = NULL);
-};
+}
 
 #endif // !defined(AFX_MISC_H__4B2FDA3E_63C5_4F52_A139_9512105C3AD4__INCLUDED_)
