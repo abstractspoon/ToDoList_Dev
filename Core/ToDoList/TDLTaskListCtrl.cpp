@@ -444,13 +444,11 @@ void CTDLTaskListCtrl::OnBuildComplete()
 
 BOOL CTDLTaskListCtrl::UpdateGroupHeaders()
 {
-	CIntArray aOldHeaderItems;
-	CStringSet mapNewHeaders;
-	CalcGroupHeaders(mapNewHeaders, aOldHeaderItems);
-
 	// Check for text changes
-	CStringSet mapOldHeaders;
-	Misc::GetValuesT(m_mapGroupHeaders, mapOldHeaders);
+	CIntArray aOldHeaderItems;
+	CStringSet mapNewHeaders, mapOldHeaders;
+
+	CalcGroupHeaders(mapNewHeaders, mapOldHeaders, aOldHeaderItems);
 
 	if (mapNewHeaders.MatchAll(mapOldHeaders))
 		return FALSE;
@@ -488,9 +486,10 @@ BOOL CTDLTaskListCtrl::UpdateGroupHeaders()
 	return TRUE;
 }
 
-int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CIntArray& aOldHeaderItems) const
+int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& mapOldHeaders, CIntArray& aOldHeaderItems) const
 {
 	mapNewHeaders.RemoveAll();
+	mapOldHeaders.RemoveAll();
 	aOldHeaderItems.RemoveAll();
 
 	if (IsGrouped())
@@ -502,9 +501,10 @@ int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CIntArray& aOl
 			CString sGroupHeader;
 			DWORD dwTaskID = GetTaskID(nTask);
 
-			if (IsGroupHeaderTask(dwTaskID))
+			if (m_mapGroupHeaders.Lookup(dwTaskID, sGroupHeader))
 			{
 				aOldHeaderItems.Add(nTask); // ascending order
+				mapOldHeaders.Add(sGroupHeader);
 			}
 			else
 			{

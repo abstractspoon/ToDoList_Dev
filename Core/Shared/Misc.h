@@ -489,48 +489,6 @@ namespace Misc
 		return mapDest.GetCount();
 	}
 
-	template <class S, class T, class VALS>
-	int GetValuesT(const CMap<S, S, T, T&>& mapSrc, VALS& aDest)
-	{
-		aDest.RemoveAll();
-
-		if (mapSrc.GetCount())
-		{
-			POSITION pos = mapSrc.GetStartPosition();
-			S key;
-			T value;
-
-			while (pos)
-			{
-				mapSrc.GetNextAssoc(pos, key, value);
-				aDest.Add(value);
-			}
-		}
-
-		return aDest.GetSize();
-	}
-
-	template <class T, class VALS>
-	int GetValuesStrT(const CMap<CString, LPCTSTR, T, T&>& mapSrc, VALS& aDest)
-	{
-		aDest.SetSize();
-
-		if (mapSrc.GetCount())
-		{
-			POSITION pos = mapSrc.GetStartPosition();
-			CString key;
-			T value;
-
-			while (pos)
-			{
-				mapSrc.GetNextAssoc(pos, key, value);
-				aDest.Add(value);
-			}
-		}
-
-		return aDest.GetSize();
-	}
-
 	template <class T> 
 	int CopyStrT(const CMap<CString, LPCTSTR, T, T&>& mapSrc, CMap<CString, LPCTSTR, T, T&>& mapDest)
 	{

@@ -41,8 +41,10 @@ enum
 CTDLFindResultsListCtrl::CTDLFindResultsListCtrl() 
 	: 
 	m_nCurGroupID(-1), 
-	m_lcGrouping(*this),
-	m_bStrikeThruDone(FALSE) 
+	m_bStrikeThruDone(FALSE), 
+#pragma warning (disable: 4355)
+	m_lcGrouping(*this)
+#pragma warning (default: 4355)
 {
 }
 
@@ -193,7 +195,7 @@ void CTDLFindResultsListCtrl::DeleteAllResults()
 	}
 
 	m_nCurGroupID = -1;
-	RemoveAllGroups();
+	m_lcGrouping.RemoveAllGroups();
 }
 
 BOOL CTDLFindResultsListCtrl::IsResultHot(const RECT& rResult) const

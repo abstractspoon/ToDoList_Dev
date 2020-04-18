@@ -173,7 +173,7 @@ protected:
 	CString GetGroupByColumnName() const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
-	int CalcGroupHeaders(CStringSet& mapNewHeaders, CIntArray& aOldHeaderItems) const;
+	int CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& mapOldHeaders, CIntArray& aOldHeaderItems) const;
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 
