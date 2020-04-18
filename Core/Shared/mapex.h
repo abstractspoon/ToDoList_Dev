@@ -242,6 +242,9 @@ public:
 
 	BOOL MatchAll(const CStringSet& other, BOOL bCaseSensitive = FALSE) const
 	{
+		if (GetCount() != other.GetCount())
+			return FALSE;
+
 		// Try case sensitive
 		BOOL bMatch = CSetBase<CString, LPCTSTR>::MatchAll(other);
 
