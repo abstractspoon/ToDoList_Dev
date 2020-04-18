@@ -393,7 +393,7 @@ namespace Misc
 	template <class S, class T, class VALS>
 	int GetValuesT(const CMap<S, S, T, T&>& mapSrc, VALS& aDest)
 	{
-		aDest.SetSize();
+		aDest.RemoveAll();
 
 		if (mapSrc.GetCount())
 		{

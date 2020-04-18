@@ -390,7 +390,7 @@ BOOL CTDLTaskListCtrl::GroupBy(TDC_COLUMN nGroupBy)
 
 	if (GetSafeHwnd())
 	{
-		RebuildGroupHeaders();
+		UpdateGroupHeaders();
 
 		if (IsGrouped() || IsSorting())
 			DoSort();
@@ -439,57 +439,84 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy) const
 
 void CTDLTaskListCtrl::OnBuildComplete()
 {
-	RebuildGroupHeaders();
+	UpdateGroupHeaders();
 }
 
-void CTDLTaskListCtrl::RebuildGroupHeaders()
+BOOL CTDLTaskListCtrl::UpdateGroupHeaders()
 {
+	CIntArray aOldHeaderItems;
+	CStringSet mapNewHeaders;
+	CalcGroupHeaders(mapNewHeaders, aOldHeaderItems);
+
+	// Check for text changes
+	CStringSet mapOldHeaders;
+	Misc::GetValuesT(m_mapGroupHeaders, mapOldHeaders);
+
+	if (mapNewHeaders.MatchAll(mapOldHeaders))
+		return FALSE;
+
+	// Update headers
 	CHoldRedraw hr(*this);
-
-	// Snapshot the current group headers and clear
-	CDWordSet mapCurGroupIDs;
-
-	Misc::GetKeysT(m_mapGroupHeaders, mapCurGroupIDs);
 	m_mapGroupHeaders.RemoveAll();
 
-	// Build new headers and delete the old as we go
-	CStringSet mapNewHeaders;
+	// Remove old headers
+	// Note: column items will be automatically removed
+	int nItem = aOldHeaderItems.GetSize();
+
+	while (nItem--)
+		m_lcTasks.DeleteItem(aOldHeaderItems[nItem]); 
+
+	// Add new headers
 	DWORD dwNewHeaderID = 0xffffffff;
+	POSITION pos = mapNewHeaders.GetStartPosition();
 
-	int nTask = GetItemCount();
-
-	while (nTask--)
+	while (pos)
 	{
-		CString sGroupHeader;
-		DWORD dwTaskID = GetTaskID(nTask);
+		CString sGroupHeader = mapNewHeaders.GetNext(pos);
+		m_mapGroupHeaders[dwNewHeaderID] = sGroupHeader;
 
-		if (mapCurGroupIDs.Has(dwTaskID))
-		{	
-			// Note: column item will be automatically removed
-			m_lcTasks.DeleteItem(nTask); 
+		// Note: column item will be automatically added
+		int nItem = m_lcTasks.InsertItem(GetItemCount(), sGroupHeader, -1);
+		m_lcTasks.SetItemData(nItem, dwNewHeaderID);
 
-			mapCurGroupIDs.RemoveKey(dwTaskID);
-		}
-		else if (IsGrouped())
+		dwNewHeaderID--;
+	}
+
+	if (mapNewHeaders.GetCount() != mapOldHeaders.GetCount())
+		PostResize();
+
+	return TRUE;
+}
+
+int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CIntArray& aOldHeaderItems) const
+{
+	mapNewHeaders.RemoveAll();
+	aOldHeaderItems.RemoveAll();
+
+	if (IsGrouped())
+	{
+		int nNumTasks = GetItemCount();
+
+		for (int nTask = 0; nTask < nNumTasks; nTask++)
 		{
-			sGroupHeader = GetTaskGroupByText(dwTaskID);
+			CString sGroupHeader;
+			DWORD dwTaskID = GetTaskID(nTask);
 
-			if (!mapNewHeaders.Has(sGroupHeader))
+			if (IsGroupHeaderTask(dwTaskID))
 			{
-				m_mapGroupHeaders[dwNewHeaderID] = sGroupHeader;
-				mapNewHeaders.Add(sGroupHeader);
- 
-				// Note: column item will be automatically added
-				int nTaskItem = m_lcTasks.InsertItem(GetItemCount(), sGroupHeader, -1);
-				m_lcTasks.SetItemData(nTaskItem, dwNewHeaderID);
+				aOldHeaderItems.Add(nTask); // ascending order
+			}
+			else
+			{
+				sGroupHeader = GetTaskGroupByText(dwTaskID);
 
-				dwNewHeaderID--;
+				if (!mapNewHeaders.Has(sGroupHeader))
+					mapNewHeaders.Add(sGroupHeader);
 			}
 		}
 	}
 
-	if (mapNewHeaders.GetCount() != mapCurGroupIDs.GetCount())
-		PostResize();
+	return mapNewHeaders.GetCount();
 }
 
 CString CTDLTaskListCtrl::GetTaskGroupByText(DWORD dwTaskID) const
@@ -597,7 +624,7 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 void CTDLTaskListCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
 {
 	if (IsGrouped() && mapAttribIDs.Has(TDC::MapColumnToAttribute(m_nGroupBy)))
-		RebuildGroupHeaders();
+		UpdateGroupHeaders();
 
 	CTDLTaskCtrlBase::SetModified(mapAttribIDs, bAllowResort);
 }

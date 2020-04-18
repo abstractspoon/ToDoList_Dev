@@ -103,9 +103,10 @@ public:
 
 protected:
 	CListCtrl m_lcTasks;
-
 	TDC_COLUMN m_nGroupBy;
-	CMap<DWORD, DWORD, CString, CString&> m_mapGroupHeaders;
+
+	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
+	CGroupHeaderMap m_mapGroupHeaders;
 	
 	mutable TDSORTCOLUMN m_aGroupSortCols[4];
 	
@@ -166,12 +167,13 @@ protected:
 	int CalcRequiredTitleColumnWidthForImage();
 	GM_ITEMSTATE GetListItemState(int nItem) const;
 
-	void RebuildGroupHeaders();
+	BOOL UpdateGroupHeaders();
 	CString GetTaskGroupByText(DWORD dwTaskID) const;
 	CString FormatTaskGroupHeaderText(DWORD dwTaskID) const;
 	CString GetGroupByColumnName() const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
+	int CalcGroupHeaders(CStringSet& mapNewHeaders, CIntArray& aOldHeaderItems) const;
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 
