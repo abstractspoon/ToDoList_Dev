@@ -335,6 +335,7 @@ namespace Misc
 		return TRUE;
 	}
 	
+/*
 	template <class T> 
 	T IncrementItemT(CArray<T, T&>& array, int nItem)
 	{
@@ -350,6 +351,7 @@ namespace Misc
 
 		return array[nItem];
 	}
+*/
 
 	template <class T> 
 	T IncrementItemStrT(CMap<CString, LPCTSTR, T, T&>& map, const CString& key)
