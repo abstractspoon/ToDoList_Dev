@@ -789,9 +789,9 @@ BOOL CGanttChartWnd::OnInitDialog()
 	CRect rCtrl = CDialogHelper::GetCtrlRect(this, IDC_GANTTCHART_FRAME);
 	VERIFY(m_ctrlGantt.Create(this, rCtrl, IDC_GANTTCTRL));
 
-	BuildSnapCombo();
-	
 	m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
+	m_cbSnapModes.UpdateSnapModes(m_ctrlGantt);
+
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
 
@@ -911,13 +911,12 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 
 		VERIFY(m_cbDisplayOptions.SelectDisplay(nDisplay));
 
-		BuildSnapCombo();
-		
+		// Update snap mode
 		GTLC_SNAPMODE nSnap = GTLCSM_FREE;
 		VERIFY(m_mapDisplaySnapModes.Lookup(nDisplay, nSnap));
 
 		m_ctrlGantt.SetSnapMode(nSnap);
-		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
+		m_cbSnapModes.UpdateSnapModes(m_ctrlGantt);
 
 		// Resync range slider
 		if (m_ctrlGantt.HasDateRange())
@@ -983,7 +982,7 @@ void CGanttChartWnd::OnSelchangeSnapMode()
 {
 	// save snap mode as we go
 	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlGantt.GetMonthDisplay();
-	GTLC_SNAPMODE nSnap = CDialogHelper::GetSelectedItemData(m_cbSnapModes, GTLCSM_NONE);
+	GTLC_SNAPMODE nSnap = m_cbSnapModes.GetSelectedMode();
 
 	m_mapDisplaySnapModes[nCurDisplay] = nSnap;
 	m_ctrlGantt.SetSnapMode(nSnap);
@@ -996,16 +995,14 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 
 	// Update display combo selection
 	GTLC_MONTH_DISPLAY nDisplay = (GTLC_MONTH_DISPLAY)lp;
-
-	// Rebuild snap combo
-	BuildSnapCombo();
 	VERIFY(m_cbDisplayOptions.SelectDisplay(nDisplay));
 
+	// Update snap mode
 	GTLC_SNAPMODE nSnap = GTLCSM_FREE;
 	VERIFY(m_mapDisplaySnapModes.Lookup(nDisplay, nSnap));
 
 	m_ctrlGantt.SetSnapMode(nSnap);
-	CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
+	m_cbSnapModes.UpdateSnapModes(m_ctrlGantt);
 
 	// Update slider active range
 	GANTTDATERANGE dtActive;
@@ -1172,75 +1169,9 @@ LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)
 	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
 
 	m_mapDisplaySnapModes[nDisplay] = nSnap;
-	CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
+	m_cbSnapModes.SelectMode(nSnap);
 
 	return 0L;
-}
-
-void CGanttChartWnd::BuildSnapCombo()
-{
-	m_cbSnapModes.ResetContent();
-
-	switch (m_ctrlGantt.GetMonthDisplay())
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFYEAR, GTLCSM_NEARESTHALFYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDECADE, GTLCSM_NEARESTDECADE);
-		break;
-		
-	case GTLC_DISPLAY_DECADES:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFYEAR, GTLCSM_NEARESTHALFYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
-		break;
-		
-	case GTLC_DISPLAY_YEARS:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFYEAR, GTLCSM_NEARESTHALFYEAR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTYEAR, GTLCSM_NEARESTYEAR);
-		break;
-		
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTQUARTER, GTLCSM_NEARESTQUARTER);
-		break;
-		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTMONTH, GTLCSM_NEARESTMONTH);
-		break;
-		
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, GTLCSM_NEARESTHALFDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTWEEK, GTLCSM_NEARESTWEEK);
-		break;
-		
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHOUR, GTLCSM_NEARESTHOUR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, GTLCSM_NEARESTHALFDAY);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTDAY, GTLCSM_NEARESTDAY);
-		break;
-
-	case GTLC_DISPLAY_HOURS:
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFHOUR, GTLCSM_NEARESTHALFHOUR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHOUR, GTLCSM_NEARESTHOUR);
-		CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, GTLCSM_NEARESTHALFDAY);
-		break;
-	}
-	// Add to all
-	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE, GTLCSM_FREE);
-
-	CDialogHelper::SelectItemByData(m_cbSnapModes, m_ctrlGantt.GetSnapMode());
 }
 
 void CGanttChartWnd::OnGanttGotoToday() 

@@ -136,6 +136,10 @@ SOURCE=.\GanttPreferencesDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\GanttSnapComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\GanttStatic.cpp
 # End Source File
 # Begin Source File
@@ -186,6 +190,10 @@ SOURCE=.\GanttMsg.h
 # Begin Source File
 
 SOURCE=.\GanttPreferencesDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\GanttSnapComboBox.h
 # End Source File
 # Begin Source File
 
