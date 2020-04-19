@@ -44,9 +44,9 @@ END_MESSAGE_MAP()
 void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 											COLORREF& crText, COLORREF& crBack) const
 {
-	BOOL bItemSelected = (nItemState & ODS_SELECTED);
 	BOOL bDisabled = !IsWindowEnabled();
 	BOOL bItemDisabled = (bDisabled || (nItemState & (ODS_GRAYED | ODS_DISABLED)));
+	BOOL bItemSelected = ((nItemState & ODS_SELECTED) && !bItemDisabled);
 
 	crBack = GetSysColor(bDisabled ? COLOR_3DFACE : (bItemSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
 	crText = GetSysColor(bItemDisabled ? COLOR_GRAYTEXT : (bItemSelected ? COLOR_HIGHLIGHTTEXT : COLOR_WINDOWTEXT));
@@ -119,6 +119,9 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 BOOL COwnerdrawComboBoxBase::WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const
 {
 	if (!CanDrawFocusRect((int)lpDrawItemStruct->itemID, lpDrawItemStruct->itemData))
+		return FALSE;
+	
+	if (lpDrawItemStruct->itemState & (ODS_DISABLED | ODS_GRAYED))
 		return FALSE;
 
 	if (lpDrawItemStruct->itemAction & ODA_FOCUS)
