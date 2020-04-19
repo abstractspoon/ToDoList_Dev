@@ -2807,12 +2807,10 @@ void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth,
 		rDay.left = rMonth.left + (int)(((nDay - 1) * dMonthWidth) / nNumDays);
 		rDay.right = rMonth.left + (int)((nDay * dMonthWidth) / nNumDays);
 
-		// draw divider if visible
+		// draw weekend/divider if visible
 		if ((rDay.right > 0) && !bRollup)
 		{
-			// fill weekends if not selected
-			if (!bSelected)
-				DrawWeekend(pDC, dtDay, rDay);
+			DrawWeekend(pDC, dtDay, rDay);
 
 			if ((dtDay.GetDayOfWeek() == nFirstDOW) && (nDay > 1))
 			{
