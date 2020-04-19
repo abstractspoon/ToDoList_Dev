@@ -1493,6 +1493,7 @@
 #define ID_EDIT_SETPERCENTTOTODAY       34662
 #define ID_DEBUGSHOWEMBEDDEDURL         34663
 #define ID_TOOLS_VIEWLOG                34664
+#define ID_DEBUGRESTARTAPP              34665
 #define ID_TOOLARG_USERVAR1             34670
 #define ID_TOOLARG_USERVAR2             34671
 #define ID_TOOLARG_USERVAR3             34672
@@ -2346,7 +2347,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        320
-#define _APS_NEXT_COMMAND_VALUE         34665
+#define _APS_NEXT_COMMAND_VALUE         34666
 #define _APS_NEXT_CONTROL_VALUE         1541
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

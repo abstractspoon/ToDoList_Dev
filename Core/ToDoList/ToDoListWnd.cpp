@@ -276,6 +276,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnUpdateTasklistCopySelectedTaskColumnValues)
 	ON_COMMAND(ID_EDIT_SETPERCENTTOTODAY, OnEditSetPercentToToday)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SETPERCENTTOTODAY, OnUpdateEditSetPercentToToday)
+	ON_COMMAND(ID_DEBUGRESTARTAPP, OnDebugRestartApp)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -13390,4 +13391,9 @@ void CToDoListWnd::OnToolsViewLogFile()
 void CToDoListWnd::OnUpdateToolsViewLogFile(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(FileMisc::FileExists(FileMisc::GetLogFilePath()));
+}
+
+void CToDoListWnd::OnDebugRestartApp() 
+{
+	DoExit(TRUE);	
 }
