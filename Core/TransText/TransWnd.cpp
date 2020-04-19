@@ -275,7 +275,7 @@ void CTransComboBox::Initialize()
 	pCombo->SelectString(-1, sCurSel);
 
 	// update combo drop width
-	CDialogHelper::RefreshMaxDropWidth(*pCombo, NULL, 20);
+	CDialogHelper::RefreshMaxDropWidth(*pCombo);
 
 	// send a selection change to update the window text
 	// This is a DODGY HACK to make CCheckComboBoxes work

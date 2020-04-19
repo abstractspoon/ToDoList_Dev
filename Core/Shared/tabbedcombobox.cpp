@@ -40,7 +40,18 @@ void CTabbedComboBox::DrawItemText(CDC& dc, const CRect& rect, int /*nItem*/, UI
 	// replace [\][t] with [\t]
 	CString sText(sItem);
 	sText.Replace(_T("\\t"), _T("\t"));
-			
-	dc.TabbedTextOut(rect.left, rect.top, sText, 1, (int*)&TABSTOPS, rect.left);
+
+	if (TABSTOPS < 0)
+	{
+		dc.DrawText(sText, (LPRECT)(LPCRECT)rect, DT_EXPANDTABS);
+	}
+	else if (TABSTOPS == 0)
+	{
+		dc.TabbedTextOut(rect.left, rect.top, sText, 0, NULL, rect.left);
+	}
+	else
+	{
+		dc.TabbedTextOut(rect.left, rect.top, sText, 1, (int*)&TABSTOPS, rect.left);
+	}
 }
 

@@ -16,7 +16,7 @@ class CTabbedComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTabbedComboBox(int nTabStops = 20);
+	CTabbedComboBox(int nTabStops = 0);
 
 // Attributes
 protected:

@@ -21,7 +21,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFilterComboBox
 
-CTDLFilterComboBox::CTDLFilterComboBox() : m_bShowDefaultFilters(TRUE)
+CTDLFilterComboBox::CTDLFilterComboBox() : CTabbedComboBox(20), m_bShowDefaultFilters(TRUE)
 {
 }
 

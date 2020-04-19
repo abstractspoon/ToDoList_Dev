@@ -691,6 +691,27 @@ int GraphicsMisc::GetTextWidth(CDC* pDC, const CString& sText)
 	return pDC->GetTextExtent(sText).cx;
 }
 
+int GraphicsMisc::GetTabbedTextWidth(CDC* pDC, const CString& sText, int nTabWidth)
+{
+	if (nTabWidth < 0)
+	{
+		CRect rItem(0, 0, 10000, 100);
+
+		if (pDC->DrawText(sText, rItem, DT_EXPANDTABS | DT_CALCRECT) > 0)
+			return rItem.Width();
+
+		// else
+		ASSERT(0);
+		return 0;
+	}
+	
+	if (nTabWidth == 0)
+		return pDC->GetTabbedTextExtent(sText, 0, NULL).cx;
+	
+	// else
+	return pDC->GetTabbedTextExtent(sText, 1, &nTabWidth).cx;
+}
+
 int GraphicsMisc::GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...)
 {
 	ASSERT(AfxIsValidString(lpszFormat));

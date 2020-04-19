@@ -971,7 +971,7 @@ void CGanttChartWnd::OnSelchangeDisplay()
 	GTLC_MONTH_DISPLAY nCurDisplay = m_ctrlGantt.GetMonthDisplay();
 	GTLC_MONTH_DISPLAY nNewDisplay = m_cbDisplayOptions.GetSelectedDisplay();
 
-	if (!SetMonthDisplay(nNewDisplay))
+	if ((nNewDisplay != nCurDisplay) && !SetMonthDisplay(nNewDisplay))
 	{
 		// restore previous selection
 		VERIFY(m_cbDisplayOptions.SelectDisplay(nCurDisplay));

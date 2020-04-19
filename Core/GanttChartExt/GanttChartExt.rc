@@ -418,6 +418,7 @@ BEGIN
     IDS_ATTRIB_DONEDATE     "Completion Date"
     IDS_COL_DONEDATE        "Completed"
     IDS_ACTIVEDATERANGE     "&Visible Date Range (%s)"
+    IDS_DISPLAYHINT         "(Reduce visible date range)"
 END
 
 #endif    // English (Australia) resources

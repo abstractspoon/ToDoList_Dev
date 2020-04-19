@@ -23,28 +23,38 @@ class CGanttDisplayComboBox : public CTabbedComboBox
 // Construction
 public:
 	CGanttDisplayComboBox();
+	virtual ~CGanttDisplayComboBox();
 
 	void UpdateDisplayOptions(const CGanttCtrl& ctrl);
 
 	BOOL SelectDisplay(GTLC_MONTH_DISPLAY nDisplay);
 	GTLC_MONTH_DISPLAY GetSelectedDisplay() const;
 
+protected:
+	GTLC_MONTH_DISPLAY m_nMinEnabledDisplay;    
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CGanttDisplayComboBox)
 	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~CGanttDisplayComboBox();
 
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CGanttDisplayComboBox)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
+	afx_msg BOOL OnSelChange();
+	afx_msg BOOL OnSelEndOK();
 
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
+	void FixupTabOffsets(const CStringArray& aItems, CStringArray& aOptions, CStringArray& aExamples) const;
+	BOOL IsEnabledDisplay(GTLC_MONTH_DISPLAY nDisplay) const;
+	GTLC_MONTH_DISPLAY GetSelectedDisplayRaw() const;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////

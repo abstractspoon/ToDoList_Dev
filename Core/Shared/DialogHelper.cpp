@@ -853,20 +853,14 @@ int CDialogHelper::CalcMaxTextWidth(CComboBox& combo, int nMinWidth, BOOL bDropp
 		pOldFont = pDC->SelectObject(combo.GetFont());
 	}
 	
-	CEnString sText;
-	int nMaxWidth = nMinWidth;
-	int nItem = combo.GetCount();
+	CString sText;
+	int nMaxWidth = nMinWidth, nItem = combo.GetCount();
 	
 	while (nItem--)
 	{
 		combo.GetLBText(nItem, sText);
 		
-		int nWidth = pDC->GetTextExtent(sText).cx;
-		
-		// handle tabs
-		if (nTabWidth > 0)
-			nWidth += sText.GetCharacterCount('\t', FALSE) * nTabWidth;
-		
+		int nWidth = GraphicsMisc::GetTabbedTextWidth(pDC, sText, nTabWidth);
 		nMaxWidth = max(nMaxWidth, nWidth);
 	}
 	
@@ -875,7 +869,7 @@ int CDialogHelper::CalcMaxTextWidth(CComboBox& combo, int nMinWidth, BOOL bDropp
 	{
 		combo.GetWindowText(sText);
 		
-		int nWidth = pDC->GetTextExtent(sText).cx;
+		int nWidth = GraphicsMisc::GetTabbedTextWidth(pDC, sText, nTabWidth);
 		nMaxWidth = max(nMaxWidth, nWidth);
 	}
 	else // dropped width needs some more space

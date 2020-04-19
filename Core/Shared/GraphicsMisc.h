@@ -172,6 +172,7 @@ namespace GraphicsMisc
 	int GetTextWidth(const CString& sText, HWND hWndRef, HFONT hFontRef = NULL);
 	int GetTextWidth(const CString& sText, CWnd& wndRef, CFont* pRefFont = NULL);
 	int GetTextWidth(CDC* pDC, const CString& sText);
+	int GetTabbedTextWidth(CDC* pDC, const CString& sText, int nTabWidth);
 	int GetFormattedTextWidth(CDC* pDC, LPCTSTR lpszFormat, ...);
 	float GetAverageCharWidth(CDC* pDC, CFont* pFont = NULL);
 	int GetAverageStringWidth(const CString& sText, CDC* pDC, CFont* pFont = NULL);

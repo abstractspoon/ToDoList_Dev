@@ -167,7 +167,7 @@ public:
 	// comboboxes
 	static int SetComboBoxItems(CComboBox& combo, const CStringArray& aItems);
 	static int GetComboBoxItems(const CComboBox& combo, CStringArray& aItems);
-	static int RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef = NULL, int nTabWidth = 0, int nExtra = 0);
+	static int RefreshMaxDropWidth(CComboBox& combo, CDC* pDCRef = NULL, int nTabWidth = -1, int nExtra = 0);
 	static int CalcMaxTextWidth(CComboBox& combo, int nMinWidth = 0, BOOL bDropped = FALSE, CDC* pDCRef = NULL, int nTabWidth = 0);
 	static int SelectItemByValue(CComboBox& combo, int nValue);
 	static DWORD GetSelectedItemData(const CComboBox& combo);
