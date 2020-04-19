@@ -397,7 +397,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_HELP                 "\nOnline Help"
     IDS_DISPLAYQUARTERCENTURIES "Quarter Centuries \t(eg. 2000-2024)"
-    IDS_DISPLAYDECADES      "Decades \t\t\t(eg, 2000-2009)"
+    IDS_DISPLAYDECADES      "Decades \t\t\t(eg. 2000-2009)"
     IDS_SNAP_NEARESTQUARTERCENTURY "Nearest Quarter-Century"
     IDS_SNAP_NEARESTDECADE  "Nearest Decade"
     IDS_SNAP_NEARESTHALFHOUR "Nearest Half-Hour"
