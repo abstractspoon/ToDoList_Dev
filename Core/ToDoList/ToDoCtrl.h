@@ -366,7 +366,8 @@ public:
 	virtual void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
 
 	// copy/paste functions
-	BOOL CanPasteText(); // into focused control
+	BOOL CanPasteText() const; // into focused control
+	BOOL CanPasteDateTime() const; // into focused control, excludes numeric fields
 	BOOL PasteText(const CString& sText); // into focused control
 	BOOL CutSelectedTask();
 	BOOL CopySelectedTask() const;

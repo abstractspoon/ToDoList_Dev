@@ -128,6 +128,7 @@ public:
 	BOOL GetAttributeDef(const CString& sUniqueID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 	BOOL GetAttributeDef(TDC_COLUMN nColID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 
+	DWORD GetAttributeDataType(TDC_ATTRIBUTE nAttribID) const;
 	DWORD GetAttributeDataType(const CString& sUniqueID) const;
 
 	BOOL IsColumnSortable(TDC_COLUMN nColID) const;

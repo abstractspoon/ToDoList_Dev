@@ -1220,3 +1220,9 @@ void CTDLFilterBar::OnCustomAttributeSelcancelFilter(UINT nCtrlID)
 		ASSERT(0);
 	}
 }
+
+BOOL CTDLFilterBar::CanPasteText() const
+{
+	return (::GetFocus() == m_eTitleFilter);
+}
+

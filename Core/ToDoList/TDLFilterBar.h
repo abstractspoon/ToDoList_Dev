@@ -63,6 +63,7 @@ public:
 	void EnableMultiSelection(BOOL bEnable);
 	void SetUITheme(const CUIThemeFile& theme);
 	COLORREF CalcUIBkgndColor() const;
+	BOOL CanPasteText() const; // into focused control
 
 protected:
 // Dialog Data

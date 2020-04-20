@@ -2679,12 +2679,38 @@ BOOL CToDoCtrl::SetSelectedTaskIcon(const CString& sIcon)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::CanPasteText()
+BOOL CToDoCtrl::CanPasteText() const
 {
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 	
 	return (CanEditSelectedTask(nAttribID) && 
 			((nAttribID == TDCA_COMMENTS) || CWinClasses::IsEditControl(::GetFocus())));
+}
+
+BOOL CToDoCtrl::CanPasteDateTime() const
+{
+	if (!CanPasteText())
+		return FALSE;
+
+	// Exclude some numeric fields
+	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
+
+	switch (GetFocusedControlAttribute())
+	{
+	case TDCA_COST:
+	case TDCA_TIMEEST:
+	case TDCA_TIMESPENT:
+	case TDCA_PERCENT:
+		return FALSE;
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			return (m_aCustomAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_STRING);
+		break;
+	}
+
+	// All else
+	return TRUE;
 }
 
 BOOL CToDoCtrl::PasteText(const CString& sText)
@@ -11716,7 +11742,13 @@ void CToDoCtrl::RedrawReminders()
 TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 {
 	HWND hFocus = ::GetFocus();
+
+	if (hFocus == NULL)
+		return TDCA_NONE;
+
 	UINT nCtrlID = ::GetDlgCtrlID(hFocus);
+	ASSERT(nCtrlID);
+
 	TDC_ATTRIBUTE nAttrib = MapCtrlIDToAttribute(nCtrlID);
 
 	// handle edit controls of combos and custom comments plugins
@@ -11725,6 +11757,10 @@ TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 		if (hFocus == m_eTaskName)
 		{
 			nAttrib = TDCA_TASKNAME;
+		}
+		else if (nCtrlID == IDC_PROJECTNAME)
+		{
+			nAttrib = TDCA_PROJECTNAME;
 		}
 		else if (IsChildOrSame(m_ctrlComments, hFocus))
 		{

@@ -12200,17 +12200,32 @@ void CToDoListWnd::DoInsertDateAndTime(BOOL bDate, BOOL bTime)
 
 void CToDoListWnd::OnUpdateEditInsertdatetime(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanPasteText());
+	pCmdUI->Enable(CanInsertDateAndTime());
 }
 
 void CToDoListWnd::OnUpdateEditInserttime(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanPasteText());
+	pCmdUI->Enable(CanInsertDateAndTime());
 }
 
 void CToDoListWnd::OnUpdateEditInsertdate(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanPasteText());
+	pCmdUI->Enable(CanInsertDateAndTime());
+}
+
+BOOL CToDoListWnd::CanInsertDateAndTime() const
+{
+	if ((m_nMaxState != TDCMS_MAXCOMMENTS) && GetToDoCtrl().CanPasteDateTime())
+		return TRUE;
+
+	// Check other controls outside of CToDoCtrl
+	if (m_bShowFilterBar && m_filterBar.CanPasteText())
+		return TRUE;
+
+	if (m_bShowingMainToolbar && CDialogHelper::IsChildOrSame(m_cbQuickFind, ::GetFocus()))
+		return TRUE;
+
+	return FALSE;
 }
 
 void CToDoListWnd::OnSysColorChange() 

@@ -800,6 +800,17 @@ BOOL CTDCCustomAttribDefinitionArray::GetAttributeDef(TDC_COLUMN nColID, TDCCUST
 	return FALSE;
 }
 
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nAttribID) const
+{
+	int nAttrib = Find(nAttribID);
+
+	if (nAttrib != -1)
+		return GetData()[nAttrib].GetDataType();
+
+	// all else
+	return TDCCA_STRING;
+}
+
 DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const CString& sUniqueID) const
 {
 	int nAttrib = Find(sUniqueID);

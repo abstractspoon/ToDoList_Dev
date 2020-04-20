@@ -750,6 +750,7 @@ protected:
 	BOOL DoDueTaskNotification(int nTDC, int nDueBy);
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);
 	void DoInsertDateAndTime(BOOL bDate, BOOL bTime);
+	BOOL CanInsertDateAndTime() const;
 	BOOL DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere);
 	TDC_FILE DoSaveWithBackupAndProgress(CFilteredToDoCtrl& tdc, int nIndex, CTaskFile& tasks, LPCTSTR szFilePath = NULL, BOOL bFlush = TRUE);
 	BOOL DoExit(BOOL bRestart = FALSE, BOOL bClosingWindows = FALSE);
