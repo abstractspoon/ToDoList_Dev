@@ -77,7 +77,7 @@ void CGanttDisplayComboBox::UpdateDisplayOptions(const CGanttCtrl& ctrl)
 	CStringArray aItems;
 	int nItem;
 
-	for (int nItem = 0; nItem < NUM_DISPLAYMODES; nItem++)
+	for (nItem = 0; nItem < NUM_DISPLAYMODES; nItem++)
 		aItems.Add(CEnString(DISPLAYMODES[nItem].nStringID));
 
 	CStringArray aOptions, aExamples;
