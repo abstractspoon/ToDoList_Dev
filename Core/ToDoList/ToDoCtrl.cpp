@@ -2683,8 +2683,17 @@ BOOL CToDoCtrl::CanPasteText() const
 {
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 	
-	return (CanEditSelectedTask(nAttribID) && 
-			((nAttribID == TDCA_COMMENTS) || CWinClasses::IsEditControl(::GetFocus())));
+	if (!CanEditSelectedTask(nAttribID))
+		return FALSE;
+
+	if (CWinClasses::IsEditControl(::GetFocus()))
+		return TRUE;
+
+	// Special case
+	if (nAttribID == TDCA_COMMENTS)
+		return m_ctrlComments.HasFocus();
+
+	return FALSE;
 }
 
 BOOL CToDoCtrl::CanPasteDateTime() const
