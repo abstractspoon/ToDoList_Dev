@@ -1664,7 +1664,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 
 			if (bChange)
 			{
-				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && SelectedTasksHaveDependents())
 					dwResults |= UIEXTMOD_DEPENDCHANGE;
 				else
 					dwResults |= UIEXTMOD_OFFSETDATES;
@@ -1740,7 +1740,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 
 			if (bChange)
 			{
-				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && SelectedTasksHaveDependents())
 					dwResults |= UIEXTMOD_DEPENDCHANGE;
 				else
 					dwResults |= UIEXTMOD_OFFSETDATES;
@@ -1916,7 +1916,10 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 			if (!GetExtensionWnd(GetTaskView(), pExtWnd, pVData))
 				return FALSE;
 
-			// update all tasks
+			// Mark all extensions needing an update
+			SetExtensionsNeedTaskUpdate(TRUE);
+
+			// update all tasks on the active view
 			CWaitCursor cursor;
 			CTaskFile tasks;
 
