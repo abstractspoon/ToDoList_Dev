@@ -13,7 +13,7 @@ namespace DayViewUIExtension
 {
 	public class CalendarItem : Calendar.Appointment
 	{
-		static DateTime NullDate = new DateTime();
+		static DateTime NullDate = DateTime.MinValue;
 
 		// --------------------
 
@@ -27,6 +27,9 @@ namespace DayViewUIExtension
 
 		protected CalendarItem(CalendarItem item) : base(item)
 		{
+            if (item == null)
+                return;
+
 			AllocTo = item.AllocTo;
 			HasIcon = item.HasIcon;
 			IsParent = item.IsParent;
@@ -34,11 +37,11 @@ namespace DayViewUIExtension
 			HasDependencies = item.HasDependencies;
 			IsDone = item.IsDone;
 			IsGoodAsDone = item.IsGoodAsDone;
-			StartDate = item.StartDate;
-			EndDate = item.EndDate;
 			TimeEstimate = item.TimeEstimate;
 			TimeEstUnits = item.TimeEstUnits;
 			IsRecurring = item.IsRecurring;
+
+            UpdateOriginalDates();
 		}
 
 		// --------------------
@@ -230,6 +233,34 @@ namespace DayViewUIExtension
 				if (task.IsAttributeAvailable(Task.Attribute.Title))
 					Title = task.GetTitle();
 
+				if (task.IsAttributeAvailable(Task.Attribute.TimeEstimate))
+				{
+					Task.TimeUnits units = Task.TimeUnits.Unknown;
+					TimeEstimate = task.GetTimeEstimate(ref units, false);
+					TimeEstUnits = units;
+				}
+
+				if (task.IsAttributeAvailable(Task.Attribute.AllocatedTo))
+					AllocTo = String.Join(", ", task.GetAllocatedTo());
+
+				if (task.IsAttributeAvailable(Task.Attribute.Icon))
+					HasIcon = task.HasIcon();
+
+				if (task.IsAttributeAvailable(Task.Attribute.Recurrence))
+					IsRecurring = task.IsRecurring();
+
+				if (task.IsAttributeAvailable(Task.Attribute.Dependency))
+					HasDependencies = (task.GetDependency().Count > 0);
+
+				TaskTextColor = task.GetTextDrawingColor();
+				Locked = task.IsLocked(true);
+
+                // Dates
+                bool hadValidDates = HasValidDates();
+
+				if (task.IsAttributeAvailable(Task.Attribute.StartDate))
+					StartDate = task.GetStartDate(false);
+
 				if (task.IsAttributeAvailable(Task.Attribute.DueDate))
 				{
 					m_PrevDueDate = task.GetDueDate(false); // always
@@ -258,33 +289,21 @@ namespace DayViewUIExtension
 					}
 				}
 
-				if (task.IsAttributeAvailable(Task.Attribute.TimeEstimate))
-				{
-					Task.TimeUnits units = Task.TimeUnits.Unknown;
-					TimeEstimate = task.GetTimeEstimate(ref units, false);
-					TimeEstUnits = units;
-				}
+                // Maintain Valid date range if it was before
+                if (hadValidDates && !HasValidDates())
+                {
+                    if (task.IsAttributeAvailable(Task.Attribute.StartDate) && (StartDate != NullDate))
+                    {
+                        EndDate = StartDate.AddDays(1.0);
+                    }
+                    else if (EndDate != NullDate)
+                    {
+                        StartDate = EndDate.AddDays(-1.0);
+                    }
+                }
+            }
 
-				if (task.IsAttributeAvailable(Task.Attribute.StartDate))
-					StartDate = task.GetStartDate(false);
-
-				if (task.IsAttributeAvailable(Task.Attribute.AllocatedTo))
-					AllocTo = String.Join(", ", task.GetAllocatedTo());
-
-				if (task.IsAttributeAvailable(Task.Attribute.Icon))
-					HasIcon = task.HasIcon();
-
-				if (task.IsAttributeAvailable(Task.Attribute.Recurrence))
-					IsRecurring = task.IsRecurring();
-
-				if (task.IsAttributeAvailable(Task.Attribute.Dependency))
-					HasDependencies = (task.GetDependency().Count > 0);
-
-				TaskTextColor = task.GetTextDrawingColor();
-				Locked = task.IsLocked(true);
-			}
-
-			UpdateOriginalDates();
+            UpdateOriginalDates();
 
 			return true;
 		}

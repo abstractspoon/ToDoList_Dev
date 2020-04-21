@@ -18,6 +18,9 @@ namespace Calendar
 
 		protected Appointment(Appointment appt)
 		{
+            if (appt == null)
+                return;
+
 			title = appt.title;
 			startDate = appt.startDate;
 			endDate = appt.endDate;

@@ -449,11 +449,11 @@ namespace Calendar
 			if (appt.StartDate == DateTime.MinValue)
 				return false;
 
+            if ((appt.StartDate < StartDate) || (appt.StartDate >= EndDate))
+			    StartDate = appt.StartDate;
+
 			if (!appt.IsLongAppt())
 			{
-                if ((appt.StartDate < StartDate) || (appt.StartDate >= EndDate))
-				    StartDate = appt.StartDate;
-
 				// Ensure at least part of the task is in view
 				int startHour = (vscroll.Value / (slotsPerHour * slotHeight));
 				int endHour = (startHour + (vscroll.LargeChange / (slotsPerHour * slotHeight)));
