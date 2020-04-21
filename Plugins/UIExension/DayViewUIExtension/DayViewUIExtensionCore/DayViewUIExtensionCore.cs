@@ -112,7 +112,7 @@ namespace DayViewUIExtension
 
 		private int ComboTop
 		{
-			get { return LabelTop; }
+			get { return (LabelTop + DPIScaling.Scale(2)); }
 		}
 
 		public bool WantSortUpdate(Task.Attribute attrib)
@@ -579,9 +579,9 @@ namespace DayViewUIExtension
         {
             base.OnSizeChanged(e);
 
-			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, m_YearCombo.Top);
-			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, m_YearCombo.Top - 2);
-			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, m_YearCombo.Top);
+			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, ComboTop);
+			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, LabelTop - 2);
+			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, LabelTop);
 			UpdatedSelectedTaskDatesPosition(); // called elsewhere also
 
 			Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
@@ -841,8 +841,8 @@ namespace DayViewUIExtension
         {
             get
             {
-                if (m_MonthCombo != null)
-                    return m_MonthCombo.Bounds.Bottom + new DlgUnits(m_HwndParent).ToPixelsY(4);
+                if (m_Toolbar != null)
+                    return m_Toolbar.Bounds.Bottom;
 
                 // else
                 return 0;
