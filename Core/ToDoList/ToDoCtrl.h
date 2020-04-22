@@ -395,6 +395,7 @@ public:
 	BOOL SelectedTasksHaveIcons() const { return m_taskTree.SelectionHasIcons(); }
 	BOOL SelectedTasksAreAllDone() const { return m_taskTree.SelectionAreAllDone(); }
 	BOOL SelectedTasksHaveDependencies() { return m_taskTree.SelectionHasDependencies(); }
+	BOOL SelectedTasksHaveDependents() { return m_taskTree.SelectionHasDependents(); }
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
 	void SelectTasksInHistory(BOOL bForward);
