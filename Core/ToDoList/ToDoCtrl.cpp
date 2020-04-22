@@ -179,6 +179,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_bDelayLoaded(FALSE),
 	m_bDeletingTasks(FALSE),
 	m_bDragDropSubtasksAtTop(TRUE),
+	m_bInSelectedTaskEdit(FALSE),
 	m_bModified(FALSE), 
 	m_bSplitting(FALSE),
 	m_calculator(m_data),
@@ -2735,6 +2736,25 @@ BOOL CToDoCtrl::PasteText(const CString& sText)
 	::SendMessage(hFocus, EM_REPLACESEL, TRUE, (LPARAM)(LPCTSTR)sText);
 	
 	return TRUE;
+}
+
+void CToDoCtrl::BeginSelectedTaskEdit()
+{
+	ASSERT(!m_bInSelectedTaskEdit);
+
+	m_bInSelectedTaskEdit = TRUE;
+
+	// Aggregate all mods in a single undo operation
+	VERIFY(m_data.BeginNewUndoAction(TDCUAT_EDIT));
+}
+
+void CToDoCtrl::EndSelectedTaskEdit()
+{
+	ASSERT(m_bInSelectedTaskEdit);
+
+	m_bInSelectedTaskEdit = FALSE;
+
+	VERIFY(m_data.EndCurrentUndoAction());
 }
 
 BOOL CToDoCtrl::SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments)

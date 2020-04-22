@@ -288,19 +288,6 @@ namespace DayViewUIExtension
 						EndDate = CheckGetEndOfDay(m_PrevDueDate);
 					}
 				}
-
-                // Maintain Valid date range if it was before
-                if (hadValidDates && !HasValidDates())
-                {
-                    if (task.IsAttributeAvailable(Task.Attribute.StartDate) && (StartDate != NullDate))
-                    {
-                        EndDate = StartDate.AddDays(1.0);
-                    }
-                    else if (EndDate != NullDate)
-                    {
-                        StartDate = EndDate.AddDays(-1.0);
-                    }
-                }
             }
 
             UpdateOriginalDates();

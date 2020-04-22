@@ -275,6 +275,7 @@ namespace Abstractspoon
 				Boolean IsCustomAttributeEnabled(int nIndex);
 
 				UInt32 GetTaskCount();
+				Boolean HasTask(UInt32 dwTaskID);
 				Task^ FindTask(UInt32 dwTaskID);
 
 				Task^ GetFirstTask();

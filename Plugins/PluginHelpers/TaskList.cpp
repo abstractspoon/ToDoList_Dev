@@ -139,6 +139,13 @@ UInt32 TaskList::GetTaskCount()
 	return GETVAL(GetTaskCount, 0);
 }
 
+Boolean TaskList::HasTask(UInt32 dwTaskID)
+{
+	HTASKITEM hTask = GETVAL_ARG(FindTask, dwTaskID, NULL);
+
+	return (hTask != NULL);
+}
+
 Task^ TaskList::FindTask(UInt32 dwTaskID)
 {
 	HTASKITEM hTask = GETVAL_ARG(FindTask, dwTaskID, NULL);

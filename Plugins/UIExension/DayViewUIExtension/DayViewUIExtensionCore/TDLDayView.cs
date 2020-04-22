@@ -539,7 +539,7 @@ namespace DayViewUIExtension
 
             if (HideTasksSpanningDays)
             {
-                if (item.IsLongAppt())
+                if (item.StartDate.Date != item.EndDate.Date)
                     return false;
             }
 
@@ -570,27 +570,15 @@ namespace DayViewUIExtension
 					break;
 			}
 
-            // Snapshot the selected item so that if its dates change we can scroll to it
-            DateTime prevStart = DateTime.MinValue, prevEnd = DateTime.MinValue;
-            bool hasPrevSelDates = GetSelectedTaskDates(ref prevStart, ref prevEnd);
-
             // Update the tasks
 			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid() && ProcessTaskUpdate(task, type))
 				task = task.GetNextTask();
 
-            // Scroll back to the selected item
-            if (hasPrevSelDates)
-            {
-                DateTime newStart = DateTime.MinValue, newEnd = DateTime.MinValue;
-
-                if (GetSelectedTaskDates(ref newStart, ref newEnd))
-                {
-                    if ((newStart != prevStart) && (newEnd > newStart))
-                        EnsureVisible(SelectedAppointment, true);
-                }
-            }
+			// Scroll to the selected item if it was modified and is 'visible'
+			if (tasks.HasTask(m_SelectedTaskID) && IsTaskDisplayable(m_SelectedTaskID))
+                EnsureVisible(SelectedAppointment, true);
 
 			SelectionStart = SelectionEnd;
 
