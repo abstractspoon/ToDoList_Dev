@@ -33,6 +33,13 @@ CTDCAttributeMap::~CTDCAttributeMap()
 
 BOOL CTDCAttributeMap::Add(TDC_ATTRIBUTE nAttrib)
 {
+	// Special cases
+	switch (nAttrib)
+	{
+	case TDCA_OFFSETTASK:
+		return (Add(TDCA_STARTDATE) && Add(TDCA_DUEDATE)); // RECURSIVE CALLS
+	}
+
 	if (!CanAdd(nAttrib))
 		return FALSE;
 
@@ -84,6 +91,8 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 	default:
 		if (IsTaskAttribute(nAttrib))
 		{
+			// Can only add a task attribute if we already
+			// contain a task attribute
 			TDC_ATTRIBUTE nExistAttrib = GetNext(pos);
 			bCanAdd = IsTaskAttribute(nExistAttrib);
 		}

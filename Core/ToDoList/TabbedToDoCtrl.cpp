@@ -1928,7 +1928,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 		}
 		else if (dwResults & UIEXTMOD_OFFSETDATES)
 		{
-			UpdateExtensionViewsSelection(TDCA_DUEDATE);
+			UpdateExtensionViewsSelection(TDCA_OFFSETTASK);
 		}
 		else if (dwResults & UIEXTMOD_INHERITATTRIB)
 		{
