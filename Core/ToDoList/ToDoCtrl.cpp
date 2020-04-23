@@ -2705,7 +2705,7 @@ BOOL CToDoCtrl::CanPasteDateTime() const
 	// Exclude some numeric fields
 	TDC_ATTRIBUTE nAttribID = GetFocusedControlAttribute();
 
-	switch (GetFocusedControlAttribute())
+	switch (nAttribID)
 	{
 	case TDCA_COST:
 	case TDCA_TIMEEST:
@@ -8568,6 +8568,13 @@ TDC_ATTRIBUTE CToDoCtrl::MapCtrlIDToAttribute(UINT nCtrlID) const
 			return ctrl.nAttrib;
 	}
 
+	// pick up any stragglers
+	switch (nCtrlID)
+	{
+	case IDC_PROJECTNAME:
+		return TDCA_PROJECTNAME;
+	}
+
 	// Not everything is an attribute field
 	return TDCA_NONE;
 }
@@ -11775,27 +11782,21 @@ TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 	if (hFocus == NULL)
 		return TDCA_NONE;
 
+	if (hFocus == m_eTaskName)
+		return TDCA_TASKNAME;
+
+	if (IsChildOrSame(m_ctrlComments, hFocus))
+		return TDCA_COMMENTS;
+
 	UINT nCtrlID = ::GetDlgCtrlID(hFocus);
 	ASSERT(nCtrlID);
 
 	TDC_ATTRIBUTE nAttrib = MapCtrlIDToAttribute(nCtrlID);
 
-	// handle edit controls of combos and custom comments plugins
 	if (nAttrib == TDCA_NONE)
 	{
-		if (hFocus == m_eTaskName)
-		{
-			nAttrib = TDCA_TASKNAME;
-		}
-		else if (nCtrlID == IDC_PROJECTNAME)
-		{
-			nAttrib = TDCA_PROJECTNAME;
-		}
-		else if (IsChildOrSame(m_ctrlComments, hFocus))
-		{
-			nAttrib = TDCA_COMMENTS;
-		}
-		else if (CWinClasses::IsEditControl(hFocus))
+		// handle edit controls of combos
+		if (CWinClasses::IsEditControl(hFocus))
 		{
 			hFocus = ::GetParent(hFocus);
 
