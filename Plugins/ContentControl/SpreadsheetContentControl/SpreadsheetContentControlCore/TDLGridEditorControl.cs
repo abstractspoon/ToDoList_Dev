@@ -9,6 +9,7 @@ using System.Windows.Forms;
 
 using unvell.ReoGrid.Editor;
 using Abstractspoon.Tdl.PluginHelpers;
+using Command.Handling;
 
 namespace SpreadsheetContentControl
 {
@@ -32,7 +33,23 @@ namespace SpreadsheetContentControl
 			this.FontBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.StatusBar.SizingGrip = false;
 
-			System.Windows.Forms.ToolStripProfessionalRenderer var;
+			//System.Windows.Forms.ToolStripProfessionalRenderer var;
+
+			// Hide unwanted menubar options
+			CommandHandling.HideCommand("scriptToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.HideCommand("toolsToolStripMenuItem", this.MenuBar.Items);
+
+			CommandHandling.HideCommand("printPreviewToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.HideCommand("printSettingsToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.HideCommand("printToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.HideCommand("exitToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.HideCommand("componentsToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.HideCommand("visibleToolStripMenuItem", this.MenuBar.Items);
+			//CommandHandling.HideCommand("", this.MenuBar.Items);
+
+			// Hide unwanted toolbar options
+			CommandHandling.HideCommand("printPreviewToolStripButton", this.ToolBar.Items);
+			//CommandHandling.HideCommand("", this.ToolBar.Items);
 
 		}
 

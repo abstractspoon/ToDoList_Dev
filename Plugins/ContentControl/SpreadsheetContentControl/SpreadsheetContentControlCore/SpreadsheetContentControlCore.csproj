@@ -66,6 +66,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\CommandHandling\CommandHandling.csproj">
+      <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
+      <Name>CommandHandling</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\ReoGridEditorControl\ReoGridEditorControl.csproj">
       <Project>{8307dffb-7e57-42b4-b402-601a80923f4e}</Project>
       <Name>ReoGridEditorControl</Name>

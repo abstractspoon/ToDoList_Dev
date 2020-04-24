@@ -1820,6 +1820,8 @@ namespace unvell.ReoGrid.Editor
 			// zoomToolStripDropDownButton
 			// 
 			this.zoomToolStripDropDownButton.AutoSize = false;
+			this.zoomToolStripDropDownButton.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.zoomToolStripDropDownButton.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.zoomToolStripDropDownButton.Items.AddRange(new object[] {
             "10%",
             "20%",
