@@ -54,7 +54,9 @@
     <Compile Include="..\..\..\Utils\Utils.cs">
       <Link>Utils.cs</Link>
     </Compile>
-    <Compile Include="SpreadsheetContentControlCore.cs" />
+    <Compile Include="SpreadsheetContentControlCore.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -63,6 +65,14 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\ReoGridEditorControl\ReoGridEditorControl.csproj">
+      <Project>{8307dffb-7e57-42b4-b402-601a80923f4e}</Project>
+      <Name>ReoGridEditorControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\ReoGrid\ReoGrid.csproj">
+      <Project>{8b62357a-abbc-4db0-8633-f1d6a6c1ea53}</Project>
+      <Name>ReoGrid</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>

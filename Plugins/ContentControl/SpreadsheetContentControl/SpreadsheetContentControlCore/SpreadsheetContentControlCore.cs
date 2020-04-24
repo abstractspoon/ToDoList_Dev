@@ -1,17 +1,20 @@
 ﻿
 using System;
 using System.Runtime.InteropServices;
-
+using System.Windows.Forms;
 using Abstractspoon.Tdl.PluginHelpers;
+using unvell.ReoGrid.Editor;
+
 
 // PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
 
 namespace SpreadsheetContentControl
 {
-    [System.ComponentModel.DesignerCategory("")]
+    //[System.ComponentModel.DesignerCategory("")]
     public class SpreadsheetContentControlCore : System.Windows.Forms.UserControl, IContentControlWnd
     {
         private IntPtr m_hwndParent;
+        private ReoGridEditorControl m_EditorControl;
 
         public SpreadsheetContentControlCore(IntPtr hwndParent)
         {
@@ -103,9 +106,21 @@ namespace SpreadsheetContentControl
             // 
             // SpreadsheetContentControlCore
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            //this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.ClientSize = new System.Drawing.Size(603, 716);
             this.Name = "SpreadsheetContentControlCore";
+
+            m_EditorControl = new ReoGridEditorControl();
+            m_EditorControl.Location = new System.Drawing.Point(0, 0);
+            m_EditorControl.ClientSize = this.ClientSize;
+            m_EditorControl.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+            m_EditorControl.BorderStyle = BorderStyle.FixedSingle;
+
+            this.Controls.Add(m_EditorControl);
+
+
+
+
             this.ResumeLayout(false);
             this.PerformLayout();
         }
@@ -122,6 +137,16 @@ namespace SpreadsheetContentControl
 			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
 
             notify.NotifyKillFocus();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+             // do nothing
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+             // do nothing
         }
 
     }
