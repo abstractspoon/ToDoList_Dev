@@ -174,7 +174,7 @@ int CSpreadsheetContentControlBridge::GetTextContent(LPWSTR szContent, int nLeng
 	String^ content = m_wnd->GetTextContent();
 	nLength = content->Length;
 
-	if (szContent != nullptr)
+	if (szContent && nLength)
 	{
 		MarshalledString msContent(content);
 		CopyMemory(szContent, msContent, (nLength * sizeof(WCHAR)));
@@ -190,21 +190,24 @@ bool CSpreadsheetContentControlBridge::SetTextContent(LPCWSTR szContent, bool bR
 	return m_wnd->SetTextContent(content.get(), bResetSelection);
 }
 
-bool CSpreadsheetContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
-{
-	// TODO
-	return false;
-}
-
 bool CSpreadsheetContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
 {
-	// TODO
-	return false;
+	msclr::auto_gcroot<String^> find = gcnew String(szFind);
+	msclr::auto_gcroot<String^> replace = gcnew String(szReplace);
+
+	return false;//(m_wnd->FindReplaceAll(find.get(), replace.get(), bWholeWord, bCaseSensitive) > 0);
+}
+
+bool CSpreadsheetContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
+{
+	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+
+	return false;//m_wnd->InsertTextContent(content.get(), bAtEnd);
 }
 
 void CSpreadsheetContentControlBridge::SetReadOnly(bool bReadOnly)
 {
-
+	m_wnd->SetReadOnly(bReadOnly);
 }
 
 void CSpreadsheetContentControlBridge::Enable(bool bEnable)
@@ -225,7 +228,7 @@ void CSpreadsheetContentControlBridge::Release()
 
 bool CSpreadsheetContentControlBridge::ProcessMessage(MSG* pMsg)
 {
-	return false;
+	return m_wnd->ProcessMessage((IntPtr)pMsg->hwnd, pMsg->message, pMsg->wParam, pMsg->lParam, pMsg->time, pMsg->pt.x, pMsg->pt.y);
 }
 
 ISpellCheck* CSpreadsheetContentControlBridge::GetSpellCheckInterface()
@@ -235,30 +238,38 @@ ISpellCheck* CSpreadsheetContentControlBridge::GetSpellCheckInterface()
 
 bool CSpreadsheetContentControlBridge::Undo()
 {
-	return false;
+	return m_wnd->Undo();
 }
 
 bool CSpreadsheetContentControlBridge::Redo()
 {
-	return false;
+	return m_wnd->Redo();
 }
 
 void CSpreadsheetContentControlBridge::SetUITheme(const UITHEME* pTheme)
 {
+	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
 
+	m_wnd->SetUITheme(theme.get());
 }
 
 void CSpreadsheetContentControlBridge::SetContentFont(HFONT hFont)
 {
-
+	//m_wnd->SetContentFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
 void CSpreadsheetContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
+	m_wnd->SavePreferences(prefs.get(), key.get());
 }
 
 void CSpreadsheetContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
+	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
+	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
+	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
 }

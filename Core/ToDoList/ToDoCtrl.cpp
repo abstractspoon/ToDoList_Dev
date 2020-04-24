@@ -11789,7 +11789,9 @@ TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 		return TDCA_COMMENTS;
 
 	UINT nCtrlID = ::GetDlgCtrlID(hFocus);
-	ASSERT(nCtrlID);
+
+	if (nCtrlID == 0)
+		return TDCA_NONE;
 
 	TDC_ATTRIBUTE nAttrib = MapCtrlIDToAttribute(nCtrlID);
 

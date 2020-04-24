@@ -213,7 +213,7 @@ void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 	m_Style = theme->GetRenderStyle();
 }
 
-bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
+bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e, bool overflow)
 {
 	auto item = e->Item;
 	bool checkedButton = (ISTYPE(item, ToolStripButton) && ASTYPE(item, ToolStripButton)->Checked);
@@ -224,6 +224,9 @@ bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs
 
 		rect->Width--;
 		rect->Height--;
+
+		if (overflow)
+			rect->Width -= 3; // to avoid rounded corners
 
 		if (item->Pressed || checkedButton)
 		{
@@ -248,20 +251,44 @@ bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs
 
 void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
-	if (!RenderButtonBackground(e))
+	if (!RenderButtonBackground(e, false))
 		BaseToolbarRenderer::OnRenderButtonBackground(e);
 }
 
 void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEventArgs^ e)
 {
-	if (!RenderButtonBackground(e))
+	if (!RenderButtonBackground(e, false))
 		BaseToolbarRenderer::OnRenderMenuItemBackground(e);
 }
 
 void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
-	if (!RenderButtonBackground(e))
+	if (!RenderButtonBackground(e, false))
 		BaseToolbarRenderer::OnRenderDropDownButtonBackground(e);
+}
+
+void UIThemeToolbarRenderer::OnRenderOverflowButtonBackground(ToolStripItemRenderEventArgs^ e)
+{
+	RenderButtonBackground(e, true);
+
+	Drawing::Rectangle rBtn(Point::Empty, e->Item->Size);
+	rBtn.Width -= 3;
+	rBtn.Y += (rBtn.Height / 4);
+
+	DrawDropArrow(e->Graphics, rBtn);
+}
+
+void UIThemeToolbarRenderer::OnRenderSplitButtonBackground(ToolStripItemRenderEventArgs^ e)
+{
+	RenderButtonBackground(e, false);
+
+	ToolStripSplitButton^ btn = ASTYPE(e->Item, ToolStripSplitButton);
+
+	if (btn != nullptr)
+	{
+		Drawing::Rectangle rBtn(Point::Empty, e->Item->Size);
+		DrawDropArrow(e->Graphics, btn->DropDownButtonBounds);
+	}
 }
 
 bool UIThemeToolbarRenderer::ValidColours()
@@ -276,4 +303,22 @@ void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Re
 	UITheme::DrawHorizontalBar(g, rowRect, m_BkgndLightColor, m_BkgndDarkColor, m_Style);
 
 	DrawRowSeparator(g, rowRect, firstRow, lastRow);
+}
+
+void UIThemeToolbarRenderer::DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect)
+{
+	// Draw the arrow glyph on the right side of the button
+	int dX = Math::Min(7, (btnRect->Width - 2));
+	int dY = ((dX / 2) + 1);
+
+	int arrowX = btnRect->Left + ((btnRect->Width - dX) / 2);
+	int arrowY = btnRect->Top + ((btnRect->Height / 2) - 1);
+
+	auto arrowBrush = (/*Enabled ?*/ SystemBrushes::ControlText/* : SystemBrushes.ButtonShadow*/);
+	cli::array<Drawing::Point>^ arrow = gcnew cli::array<Drawing::Point>(3)
+ 	{
+ 		Drawing::Point(arrowX, arrowY), Drawing::Point(arrowX + dX, arrowY), Drawing::Point(arrowX + (dX / 2), arrowY + dY)
+ 	};
+
+	g->FillPolygon(arrowBrush, arrow);
 }

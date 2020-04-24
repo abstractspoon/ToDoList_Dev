@@ -58,6 +58,7 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TDLGridEditorControl.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="SpreadsheetContentControlCore.resx">

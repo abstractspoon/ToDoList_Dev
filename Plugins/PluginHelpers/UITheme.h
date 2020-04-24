@@ -90,6 +90,9 @@ namespace Abstractspoon
 				virtual void OnRenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderMenuItemBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 				virtual void OnRenderDropDownButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
+				virtual void OnRenderOverflowButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
+				virtual void OnRenderSplitButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
+
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow) override;
 
 			private:
@@ -102,7 +105,8 @@ namespace Abstractspoon
 				UITheme::RenderStyle m_Style;
 
 				bool ValidColours();
-				bool RenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e);
+				bool RenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e, bool overflow);
+				void DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect);
 			};
 
 		}

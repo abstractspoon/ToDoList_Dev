@@ -3,7 +3,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Abstractspoon.Tdl.PluginHelpers;
-using unvell.ReoGrid.Editor;
 
 
 // PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
@@ -14,7 +13,7 @@ namespace SpreadsheetContentControl
     public class SpreadsheetContentControlCore : System.Windows.Forms.UserControl, IContentControlWnd
     {
         private IntPtr m_hwndParent;
-        private ReoGridEditorControl m_EditorControl;
+        private TDLGridEditorControl m_EditorControl;
 
         public SpreadsheetContentControlCore(IntPtr hwndParent)
         {
@@ -69,8 +68,7 @@ namespace SpreadsheetContentControl
 
         public void SetUITheme(UITheme theme)
         {
-            // TODO
-
+			m_EditorControl.SetUITheme(theme);
         }
 
         public void SetReadOnly(bool bReadOnly)
@@ -110,11 +108,11 @@ namespace SpreadsheetContentControl
             this.ClientSize = new System.Drawing.Size(603, 716);
             this.Name = "SpreadsheetContentControlCore";
 
-            m_EditorControl = new ReoGridEditorControl();
+            m_EditorControl = new TDLGridEditorControl();
             m_EditorControl.Location = new System.Drawing.Point(0, 0);
             m_EditorControl.ClientSize = this.ClientSize;
             m_EditorControl.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
-            m_EditorControl.BorderStyle = BorderStyle.FixedSingle;
+            //m_EditorControl.BorderStyle = BorderStyle.FixedSingle;
 
             this.Controls.Add(m_EditorControl);
 

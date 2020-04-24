@@ -187,8 +187,8 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 						if ((itemRect.Top - prevItemRect.Top) > (prevItemRect.Height / 2))
 						{
 							rowBottom = ((itemRect.Top + prevItemRect.Bottom) / 2);
-
-							auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, rowTop, toolbar->Width, (rowBottom - rowTop));
+							
+							auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, (rowTop - toolbar->Top), toolbar->Width, (rowBottom - rowTop));
 							DrawRowBackground(e->Graphics, rowRect, firstRow, false);
 							
 							prevItemRect = itemRect;
@@ -200,7 +200,7 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 			}
 
 			// Last row
-			auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, rowTop, toolbar->Width, (toolbar->Bottom - rowTop));
+			auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, (rowTop - toolbar->Top), toolbar->Width, (toolbar->Bottom - rowTop));
 			DrawRowBackground(e->Graphics, rowRect, firstRow, true);
 		}
 	}

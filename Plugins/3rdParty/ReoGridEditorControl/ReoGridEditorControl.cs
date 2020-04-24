@@ -61,10 +61,23 @@ namespace unvell.ReoGrid.Editor
 
 		private NamedRangeManageForm nameManagerForm = null;
 
+		// -------------------------------------------------------------
+
+		// Access to major UI elements for derived classes
+
+		protected MenuStrip			MenuBar { get { return menuStrip1; } }
+		protected ToolStrip			ToolBar { get { return toolStrip1; } }
+		protected ToolStrip			FontBar { get { return fontToolStrip; } }
+		protected StatusStrip		StatusBar { get { return statusStrip1; } }
+		protected FormulaBarControl FormulaBar { get { return formulaBar; } }
+
+		// -------------------------------------------------------------
+
 		public ReoGridControl GridCtrl
 		{
 			get { return grid; }
 		}
+
 		/// <summary>
 		/// Create instance of ReoGrid Editor.
 		/// </summary>
