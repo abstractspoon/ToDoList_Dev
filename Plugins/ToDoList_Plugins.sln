@@ -167,6 +167,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UIComponents", "3rdParty\UI
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MSHTMLEditorControl", "3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj", "{5873DE0F-6853-4C8E-91A4-7A6861069A9A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SpreadsheetContentControl", "SpreadsheetContentControl", "{D2C1142E-A3D2-47E5-B988-EFD785688A0B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetContentControlCore", "ContentControl\SpreadsheetContentControl\SpreadsheetContentControlCore\SpreadsheetContentControlCore.csproj", "{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpreadsheetContentControlBridge", "ContentControl\SpreadsheetContentControl\SpreadsheetContentControlBridge\SpreadsheetContentControlBridge.vcxproj", "{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36} = {699E2BDF-1266-4295-8AC0-E1C7E8D14B36}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -583,6 +595,36 @@ Global
 		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|Win32.Build.0 = Release|Any CPU
 		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|x86.ActiveCfg = Release|Any CPU
 		{5873DE0F-6853-4C8E-91A4-7A6861069A9A}.Release|x86.Build.0 = Release|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Debug|Win32.Build.0 = Debug|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Debug|x86.Build.0 = Debug|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Release|Any CPU.Build.0 = Release|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Release|Win32.ActiveCfg = Release|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Release|Win32.Build.0 = Release|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Release|x86.ActiveCfg = Release|Any CPU
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36}.Release|x86.Build.0 = Release|Any CPU
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Debug|Win32.Build.0 = Debug|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Debug|x86.ActiveCfg = Debug|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Debug|x86.Build.0 = Debug|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Release|Any CPU.ActiveCfg = Release|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Release|Win32.ActiveCfg = Release|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Release|Win32.Build.0 = Release|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Release|x86.ActiveCfg = Release|Win32
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -628,5 +670,8 @@ Global
 		{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8} = {8ED6C235-FB52-45C1-8E1A-B6540BDED274}
 		{D2DD86F1-5957-463F-8673-49F045DCC8E9} = {8ED6C235-FB52-45C1-8E1A-B6540BDED274}
 		{5873DE0F-6853-4C8E-91A4-7A6861069A9A} = {8ED6C235-FB52-45C1-8E1A-B6540BDED274}
+		{D2C1142E-A3D2-47E5-B988-EFD785688A0B} = {0F3DAD82-0CDD-456E-B5BA-3931F2A28FB1}
+		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36} = {D2C1142E-A3D2-47E5-B988-EFD785688A0B}
+		{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B} = {D2C1142E-A3D2-47E5-B988-EFD785688A0B}
 	EndGlobalSection
 EndGlobal
