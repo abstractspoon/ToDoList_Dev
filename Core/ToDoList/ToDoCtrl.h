@@ -563,6 +563,7 @@ protected:
 	BOOL m_bDragDropSubtasksAtTop;
 	BOOL m_bDelayLoaded;
 	BOOL m_bDeletingTasks;
+	BOOL m_bInSelectedTaskEdit;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
