@@ -38,26 +38,26 @@ namespace SpreadsheetContentControl
 
         public Byte[] GetContent()
         {
-            return new Byte[1];
+			return m_EditorControl.GetContent();
         }
 
-        public bool SetContent(Byte[] content, bool bResetSelection)
+        public bool SetContent(Byte[] content, bool resetSelection)
         {
-            return true;
-        }
+			return m_EditorControl.SetContent(content, resetSelection);
+		}
 
-        // text content if supported. return false if not supported
-        public String GetTextContent()
+		// text content if supported. return false if not supported
+		public String GetTextContent()
         {
-            return ""; //OutputText;
-        }
+			return m_EditorControl.GetTextContent();
+		}
 
-        public bool SetTextContent(String content, bool bResetSelection)
+		public bool SetTextContent(String content, bool resetSelection)
         {
-            return true;
-        }
+			return m_EditorControl.SetTextContent(content, resetSelection);
+		}
 
-        public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
             // TODO
             return false;

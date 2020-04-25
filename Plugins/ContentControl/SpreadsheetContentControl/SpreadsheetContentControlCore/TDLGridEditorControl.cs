@@ -41,6 +41,27 @@ namespace SpreadsheetContentControl
 
 		}
 
+		public Byte[] GetContent()
+		{
+			return new Byte[1];
+		}
+
+		public bool SetContent(Byte[] content, bool resetSelection)
+		{
+			return true;
+		}
+
+		// text content if supported. return false if not supported
+		public String GetTextContent()
+		{
+			return ""; //OutputText;
+		}
+
+		public bool SetTextContent(String content, bool resetSelection)
+		{
+			return true;
+		}
+
 		private bool IsLoading { get; set; }
 
 		protected override void OnLoad(EventArgs e)
