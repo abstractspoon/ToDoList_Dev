@@ -162,8 +162,8 @@ void BaseToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRe
 
 	if (e->Vertical)
 	{
-		e->Graphics->DrawLine(SystemPens::ButtonShadow, (rect.Width/2), 2, (rect.Width/2), rect.Height-1);
-		e->Graphics->DrawLine(SystemPens::ButtonHighlight, (rect.Width/2) + 1, 2, (rect.Width/2) + 1, rect.Height-1);
+		e->Graphics->DrawLine(GetSeperatorDarkPen(), (rect.Width/2), 2, (rect.Width/2), rect.Height-3);
+		e->Graphics->DrawLine(GetSeperatorLightPen(), (rect.Width/2) + 1, 2, (rect.Width/2) + 1, rect.Height-3);
 	}
 	else
 	{
@@ -225,26 +225,26 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 
 	if (m_DrawLeftBorder)
 	{
-// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
-// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
+// 		e->Graphics->DrawLine(GetSeperatorLightPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(GetSeperatorDarkPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
 	}
 
 	if (m_DrawTopBorder)
 	{
-// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
-// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top + 1, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top + 1);
+// 		e->Graphics->DrawLine(GetSeperatorLightPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(GetSeperatorDarkPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top + 1, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top + 1);
 	}
 
 	if (m_DrawRightBorder)
 	{
-// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
-// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
+// 		e->Graphics->DrawLine(GetSeperatorLightPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(GetSeperatorDarkPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
 	}
 
 	if (m_DrawBottomBorder)
 	{
-		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 3, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 3);
-		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 2, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 2);
+		e->Graphics->DrawLine(GetSeperatorLightPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 3, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 3);
+		e->Graphics->DrawLine(GetSeperatorDarkPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 2, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 2);
 	}
 }
 
@@ -257,11 +257,11 @@ void BaseToolbarRenderer::DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectan
 {
 	// Draw highlight line at top if not first row
 	if (!firstRow)
-		g->DrawLine(SystemPens::ButtonHighlight, rowRect->Left, rowRect->Top, rowRect->Right, rowRect->Top);
+		g->DrawLine(GetSeperatorLightPen(), rowRect->Left, rowRect->Top, rowRect->Right, rowRect->Top);
 	
 	// Draw shadow line at bottom if not last row
 	if (!lastRow)
-		g->DrawLine(SystemPens::ButtonShadow, rowRect->Left, rowRect->Bottom, rowRect->Right, rowRect->Bottom);
+		g->DrawLine(GetSeperatorDarkPen(), rowRect->Left, rowRect->Bottom, rowRect->Right, rowRect->Bottom);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

@@ -94,6 +94,8 @@ namespace Abstractspoon
 				virtual void OnRenderSplitButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e) override;
 
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow) override;
+				virtual Drawing::Pen^ GetSeperatorLightPen() override;
+				virtual Drawing::Pen^ GetSeperatorDarkPen() override;
 
 			private:
 				Drawing::Color m_HotFillColor;

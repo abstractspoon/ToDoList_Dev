@@ -61,6 +61,9 @@ namespace Abstractspoon
 
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
 				virtual void DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
+
+				virtual Drawing::Pen^ GetSeperatorLightPen() { return Drawing::SystemPens::ButtonHighlight; }
+				virtual Drawing::Pen^ GetSeperatorDarkPen() { return Drawing::SystemPens::ButtonShadow; }
 			};
 		}
 	}

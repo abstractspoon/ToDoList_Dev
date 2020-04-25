@@ -19,6 +19,7 @@ using namespace System::Windows::Forms;
 using namespace System::Drawing;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers::ColorUtil;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -345,3 +346,14 @@ void UIThemeToolbarRenderer::DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectan
 
 	g->FillPolygon(arrowBrush, arrow);
 }
+
+Drawing::Pen^ UIThemeToolbarRenderer::GetSeperatorLightPen()
+{
+	return gcnew Drawing::Pen(DrawingColor::AdjustLighting(m_BkgndLightColor, 0.4f, true));
+}
+
+Drawing::Pen^ UIThemeToolbarRenderer::GetSeperatorDarkPen()
+{
+	return gcnew Drawing::Pen(DrawingColor::AdjustLighting(m_BkgndLightColor, -0.4f, true));
+}
+
