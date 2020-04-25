@@ -123,6 +123,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="ColorUtil.h" />
+    <ClInclude Include="Compression.h" />
     <ClInclude Include="DateUtil.h" />
     <ClInclude Include="DPIScaling.h" />
     <ClInclude Include="DragDropUtil.h" />
@@ -146,6 +147,7 @@ copy $(SolutionDir)$(ConfigurationName)\Microsoft.VisualStudio.OLE.Interop.dll "
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ColorUtil.cpp" />
+    <ClCompile Include="Compression.cpp" />
     <ClCompile Include="DateUtil.cpp" />
     <ClCompile Include="DPIScaling.cpp" />
     <ClCompile Include="DragDropUtil.cpp" />

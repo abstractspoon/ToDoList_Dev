@@ -78,6 +78,9 @@
     <ClInclude Include="UrlParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Compression.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -138,6 +141,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="UrlParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Compression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
