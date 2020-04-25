@@ -22,6 +22,17 @@ namespace Abstractspoon
 				static void FixupButtonSizes(Windows::Forms::ToolStrip^ toolbar);
 				static void Sort(Windows::Forms::ToolStripItemCollection^ items);
 
+				enum class ItemState
+				{
+					Normal,
+					Disabled,
+					Pressed,
+					Checked,
+					Hot,
+				};
+
+				static ItemState GetItemState(Windows::Forms::ToolStripItem^ item);
+
 			protected:
 				ref class ToolStripItemComparer : Collections::IComparer
 				{

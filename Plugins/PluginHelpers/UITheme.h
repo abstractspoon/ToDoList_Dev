@@ -105,8 +105,10 @@ namespace Abstractspoon
 				UITheme::RenderStyle m_Style;
 
 				bool ValidColours();
-				bool RenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e, bool overflow);
-				void DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect);
+				bool RenderButtonBackground(Windows::Forms::ToolStripItemRenderEventArgs^ e);
+				void DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ arrowRect);
+				bool DrawButtonBackground(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect, Toolbars::ItemState state);
+
 			};
 
 		}

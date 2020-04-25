@@ -24,7 +24,7 @@ using System.ComponentModel;
 
 namespace unvell.UIControls
 {
-	public class ColorPickerToolStripItem : ToolStripItem
+	public class ColorPickerToolStripItem : ToolStripSplitButton
 	{
 		private ColorPickMode mode = ColorPickMode.Background;
 
@@ -44,24 +44,12 @@ namespace unvell.UIControls
 
 		private ColorPickerWindow dropPanel = new ColorPickerWindow();
 
-		private static readonly StringFormat sf = new StringFormat();
-
 		public ColorPickerToolStripItem()
 			: base()
 		{
-			Width = 39;
-
+			DropDown = dropPanel;
 			dropPanel.ColorPicked += new EventHandler(dropPanel_ColorPicked);
 			dropPanel.OwnerItem = this;
-
-			sf.Alignment = StringAlignment.Center;
-			sf.LineAlignment = StringAlignment.Center;
-			dropPanel.VisibleChanged += new EventHandler(dropPanel_VisibleChanged);
-		}
-
-		public override Size GetPreferredSize(Size constrainingSize)
-		{
-			return new Size(39, 23);
 		}
 
 		public bool CloseOnClick { get; set; }
@@ -90,70 +78,16 @@ namespace unvell.UIControls
 
 		public event EventHandler ColorPicked;
 
-		void dropPanel_VisibleChanged(object sender, EventArgs e)
-		{
-			if (!dropPanel.Visible)
-			{
-				isPressed = false;
-				Invalidate();
-			}
-		}
-
-		private bool isPressed = false;
-		
-		protected override void OnMouseDown(MouseEventArgs e)
-		{
-			isPressed = true;
-
-			Rectangle panelRect = Parent.RectangleToScreen(Bounds);
-			dropPanel.CurrentColor = CurrentColor;
-			dropPanel.Show(panelRect.X, panelRect.Y + panelRect.Height);
-
-			base.OnMouseDown(e);
-		}
-
 		protected override void OnPaint(PaintEventArgs e)
 		{
+			base.OnPaint(e);
+
 			Graphics g = e.Graphics;
 
-			Rectangle rect = new Rectangle(0, 0, Size.Width - 1, Size.Height - 1);
-
-			// background
-			Rectangle bgRect = rect;
-			bgRect.Offset(1, 1);
-			//g.FillRectangle(isPressed ? Brushes.Black : Brushes.White, bgRect);
-
-			// outter frame
-			g.DrawLine(SystemPens.ButtonShadow, rect.X + 1, rect.Y, rect.Right - 1, rect.Y);
-			g.DrawLine(SystemPens.ButtonShadow, rect.X + 1, rect.Bottom, rect.Right - 1, rect.Bottom);
-			g.DrawLine(SystemPens.ButtonShadow, rect.X, rect.Y + 1, rect.X, rect.Bottom - 1);
-			g.DrawLine(SystemPens.ButtonShadow, rect.Right, rect.Y + 1, rect.Right, rect.Bottom - 1);
-
-			// content
-			Rectangle bodyRect = rect;
-			bodyRect.Inflate(-1, -1);
-			bodyRect.Offset(1, 1);
-
-			// draw allow
-			if (isPressed) rect.Offset(1, 1);
-
-			//GraphicsToolkit.FillTriangle(g, 9, new Point(rect.Right - 9, rect.Top + 8));
-			try
-			{
-				g.FillPolygon(SystemBrushes.WindowText, new Point[] { 
-					new Point(rect.Right-12, rect.Top+9),
-					new Point(rect.Right-3, rect.Top+9),
-					new Point(rect.Right-8, rect.Top+14),
-				});
-
-				g.DrawLine(SystemPens.ControlDarkDark, rect.Right - 16, rect.Top + 3, rect.Right - 16, rect.Bottom - 4);
-				g.DrawLine(SystemPens.ControlLightLight, rect.Right - 15, rect.Top + 4, rect.Right - 15, rect.Bottom - 4);
-			}
-			catch { }
-
 			// draw color
-			Rectangle rectColor = new Rectangle(4, 4, 14, 14);
-			if (isPressed) rectColor.Offset(1, 1);
+			Rectangle rectColor = this.ButtonBounds;
+			rectColor.Inflate(-4, -5);
+
 			if (currentColor == null || currentColor.IsEmpty)
 			{
 				g.DrawRectangle(Pens.Black, rectColor);

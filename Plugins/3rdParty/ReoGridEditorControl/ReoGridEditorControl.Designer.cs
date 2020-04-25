@@ -570,7 +570,7 @@ namespace unvell.ReoGrid.Editor
 			this.borderColorPickToolStripItem.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.borderColorPickToolStripItem.Mode = unvell.UIControls.ColorPickMode.Outline;
 			this.borderColorPickToolStripItem.Name = "borderColorPickToolStripItem";
-			this.borderColorPickToolStripItem.Size = new System.Drawing.Size(40, 22);
+			this.borderColorPickToolStripItem.Size = new System.Drawing.Size(32, 22);
 			this.borderColorPickToolStripItem.SolidColor = System.Drawing.Color.Black;
 			this.borderColorPickToolStripItem.Text = "Border Color";
 			this.borderColorPickToolStripItem.ToolTipText = "Border Color";
@@ -1604,7 +1604,7 @@ namespace unvell.ReoGrid.Editor
             this.zoomToolStripDropDownButton});
 			this.fontToolStrip.Location = new System.Drawing.Point(0, 49);
 			this.fontToolStrip.Name = "fontToolStrip";
-			this.fontToolStrip.Size = new System.Drawing.Size(1002, 26);
+			this.fontToolStrip.Size = new System.Drawing.Size(1002, 25);
 			this.fontToolStrip.TabIndex = 3;
 			this.fontToolStrip.Text = "toolStrip2";
 			// 
@@ -1616,7 +1616,7 @@ namespace unvell.ReoGrid.Editor
 			this.fontToolStripComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.fontToolStripComboBox.IntegralHeight = false;
 			this.fontToolStripComboBox.Name = "fontToolStripComboBox";
-			this.fontToolStripComboBox.Size = new System.Drawing.Size(200, 26);
+			this.fontToolStripComboBox.Size = new System.Drawing.Size(200, 25);
 			this.fontToolStripComboBox.Text = "Segoe UI";
 			this.fontToolStripComboBox.ToolTipText = "Change font";
 			this.fontToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.fontToolStripComboBox_SelectedIndexChanged);
@@ -1637,7 +1637,7 @@ namespace unvell.ReoGrid.Editor
 			this.enlargeFontToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.font_larger;
 			this.enlargeFontToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.enlargeFontToolStripButton.Name = "enlargeFontToolStripButton";
-			this.enlargeFontToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.enlargeFontToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.enlargeFontToolStripButton.Text = "Make text larger";
 			this.enlargeFontToolStripButton.Click += new System.EventHandler(this.enlargeFontToolStripButton_Click);
 			// 
@@ -1647,7 +1647,7 @@ namespace unvell.ReoGrid.Editor
 			this.fontSmallerToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.font_smaller;
 			this.fontSmallerToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.fontSmallerToolStripButton.Name = "fontSmallerToolStripButton";
-			this.fontSmallerToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.fontSmallerToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.fontSmallerToolStripButton.Text = "Make text smaller";
 			this.fontSmallerToolStripButton.Click += new System.EventHandler(this.fontSmallerToolStripButton_Click);
 			// 
@@ -1659,7 +1659,7 @@ namespace unvell.ReoGrid.Editor
 			this.textColorPickToolStripItem.Margin = new System.Windows.Forms.Padding(3, 1, 0, 2);
 			this.textColorPickToolStripItem.Mode = unvell.UIControls.ColorPickMode.Font;
 			this.textColorPickToolStripItem.Name = "textColorPickToolStripItem";
-			this.textColorPickToolStripItem.Size = new System.Drawing.Size(40, 23);
+			this.textColorPickToolStripItem.Size = new System.Drawing.Size(32, 22);
 			this.textColorPickToolStripItem.SolidColor = System.Drawing.Color.Empty;
 			this.textColorPickToolStripItem.Text = "Text Color";
 			this.textColorPickToolStripItem.ToolTipText = "Text Color";
@@ -1673,7 +1673,7 @@ namespace unvell.ReoGrid.Editor
 			this.boldToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.boldToolStripButton.Margin = new System.Windows.Forms.Padding(2, 1, 0, 2);
 			this.boldToolStripButton.Name = "boldToolStripButton";
-			this.boldToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.boldToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.boldToolStripButton.Text = "Bold";
 			this.boldToolStripButton.Click += new System.EventHandler(this.boldToolStripButton_Click);
 			// 
@@ -1684,7 +1684,7 @@ namespace unvell.ReoGrid.Editor
 			this.italicToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.italic;
 			this.italicToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.italicToolStripButton.Name = "italicToolStripButton";
-			this.italicToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.italicToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.italicToolStripButton.Text = "Italic";
 			this.italicToolStripButton.Click += new System.EventHandler(this.italicToolStripButton_Click);
 			// 
@@ -1695,7 +1695,7 @@ namespace unvell.ReoGrid.Editor
 			this.underlineToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.underlinee;
 			this.underlineToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.underlineToolStripButton.Name = "underlineToolStripButton";
-			this.underlineToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.underlineToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.underlineToolStripButton.Text = "Underline";
 			this.underlineToolStripButton.Click += new System.EventHandler(this.underlineToolStripButton_Click);
 			// 
@@ -1706,14 +1706,14 @@ namespace unvell.ReoGrid.Editor
 			this.strikethroughToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.strikethrough;
 			this.strikethroughToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.strikethroughToolStripButton.Name = "strikethroughToolStripButton";
-			this.strikethroughToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.strikethroughToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.strikethroughToolStripButton.Text = "Strikethrough";
 			this.strikethroughToolStripButton.Click += new System.EventHandler(this.strikethroughToolStripButton_Click);
 			// 
 			// toolStripSeparator3
 			// 
 			this.toolStripSeparator3.Name = "toolStripSeparator3";
-			this.toolStripSeparator3.Size = new System.Drawing.Size(6, 26);
+			this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
 			// 
 			// textWrapToolStripButton
 			// 
@@ -1722,13 +1722,13 @@ namespace unvell.ReoGrid.Editor
 			this.textWrapToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.textwrap;
 			this.textWrapToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.textWrapToolStripButton.Name = "textWrapToolStripButton";
-			this.textWrapToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.textWrapToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.textWrapToolStripButton.Text = "Text Wrap";
 			// 
 			// toolStripSeparator13
 			// 
 			this.toolStripSeparator13.Name = "toolStripSeparator13";
-			this.toolStripSeparator13.Size = new System.Drawing.Size(6, 26);
+			this.toolStripSeparator13.Size = new System.Drawing.Size(6, 25);
 			// 
 			// textAlignLeftToolStripButton
 			// 
@@ -1737,7 +1737,7 @@ namespace unvell.ReoGrid.Editor
 			this.textAlignLeftToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.AlignTableCellMiddleLeftJustHS;
 			this.textAlignLeftToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.textAlignLeftToolStripButton.Name = "textAlignLeftToolStripButton";
-			this.textAlignLeftToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.textAlignLeftToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.textAlignLeftToolStripButton.Text = "Text Left Align";
 			this.textAlignLeftToolStripButton.Click += new System.EventHandler(this.textLeftToolStripButton_Click);
 			// 
@@ -1748,7 +1748,7 @@ namespace unvell.ReoGrid.Editor
 			this.textAlignCenterToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.AlignTableCellMiddleCenterHS;
 			this.textAlignCenterToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.textAlignCenterToolStripButton.Name = "textAlignCenterToolStripButton";
-			this.textAlignCenterToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.textAlignCenterToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.textAlignCenterToolStripButton.Text = "Text Center Align";
 			this.textAlignCenterToolStripButton.Click += new System.EventHandler(this.textCenterToolStripButton_Click);
 			// 
@@ -1759,7 +1759,7 @@ namespace unvell.ReoGrid.Editor
 			this.textAlignRightToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.AlignTableCellMiddleRightHS;
 			this.textAlignRightToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.textAlignRightToolStripButton.Name = "textAlignRightToolStripButton";
-			this.textAlignRightToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.textAlignRightToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.textAlignRightToolStripButton.Text = "Text Right Align";
 			this.textAlignRightToolStripButton.Click += new System.EventHandler(this.textRightToolStripButton_Click);
 			// 
@@ -1770,14 +1770,14 @@ namespace unvell.ReoGrid.Editor
 			this.distributedIndentToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.PageWidthHS;
 			this.distributedIndentToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.distributedIndentToolStripButton.Name = "distributedIndentToolStripButton";
-			this.distributedIndentToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.distributedIndentToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.distributedIndentToolStripButton.Text = "Text Distributed Indent";
 			this.distributedIndentToolStripButton.Click += new System.EventHandler(this.distributedIndentToolStripButton_Click);
 			// 
 			// toolStripSeparator7
 			// 
 			this.toolStripSeparator7.Name = "toolStripSeparator7";
-			this.toolStripSeparator7.Size = new System.Drawing.Size(6, 26);
+			this.toolStripSeparator7.Size = new System.Drawing.Size(6, 25);
 			// 
 			// textAlignTopToolStripButton
 			// 
@@ -1786,7 +1786,7 @@ namespace unvell.ReoGrid.Editor
 			this.textAlignTopToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.AlignLayoutTop;
 			this.textAlignTopToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.textAlignTopToolStripButton.Name = "textAlignTopToolStripButton";
-			this.textAlignTopToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.textAlignTopToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.textAlignTopToolStripButton.Text = "Text Top Align";
 			this.textAlignTopToolStripButton.Click += new System.EventHandler(this.textAlignTopToolStripButton_Click);
 			// 
@@ -1797,7 +1797,7 @@ namespace unvell.ReoGrid.Editor
 			this.textAlignMiddleToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.AlignLayoutMiddle;
 			this.textAlignMiddleToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.textAlignMiddleToolStripButton.Name = "textAlignMiddleToolStripButton";
-			this.textAlignMiddleToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.textAlignMiddleToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.textAlignMiddleToolStripButton.Text = "Text Middle Align";
 			this.textAlignMiddleToolStripButton.Click += new System.EventHandler(this.textAlignMiddleToolStripButton_Click);
 			// 
@@ -1808,14 +1808,14 @@ namespace unvell.ReoGrid.Editor
 			this.textAlignBottomToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.AlignLayoutBottom;
 			this.textAlignBottomToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.textAlignBottomToolStripButton.Name = "textAlignBottomToolStripButton";
-			this.textAlignBottomToolStripButton.Size = new System.Drawing.Size(23, 23);
+			this.textAlignBottomToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.textAlignBottomToolStripButton.Text = "Text Bottom Align";
 			this.textAlignBottomToolStripButton.Click += new System.EventHandler(this.textAlignBottomToolStripButton_Click);
 			// 
 			// toolStripSeparator12
 			// 
 			this.toolStripSeparator12.Name = "toolStripSeparator12";
-			this.toolStripSeparator12.Size = new System.Drawing.Size(6, 26);
+			this.toolStripSeparator12.Size = new System.Drawing.Size(6, 25);
 			// 
 			// zoomToolStripDropDownButton
 			// 
@@ -3129,7 +3129,7 @@ namespace unvell.ReoGrid.Editor
 			this.grid.ContextMenuStrip = this.cellContextMenuStrip;
 			this.grid.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.grid.LeadHeaderContextMenuStrip = this.leadHeaderContextMenuStrip;
-			this.grid.Location = new System.Drawing.Point(0, 103);
+			this.grid.Location = new System.Drawing.Point(0, 102);
 			this.grid.Name = "grid";
 			this.grid.RowHeaderContextMenuStrip = this.rowContextMenuStrip;
 			this.grid.Script = null;
@@ -3138,7 +3138,7 @@ namespace unvell.ReoGrid.Editor
 			this.grid.SheetTabVisible = true;
 			this.grid.SheetTabWidth = 400;
 			this.grid.ShowScrollEndSpacing = true;
-			this.grid.Size = new System.Drawing.Size(1002, 575);
+			this.grid.Size = new System.Drawing.Size(1002, 576);
 			this.grid.TabIndex = 0;
 			// 
 			// leadHeaderContextMenuStrip
@@ -3160,7 +3160,7 @@ namespace unvell.ReoGrid.Editor
 			this.formulaBar.Dock = System.Windows.Forms.DockStyle.Top;
 			this.formulaBar.FocusToGridAfterInputValue = true;
 			this.formulaBar.GridControl = this.grid;
-			this.formulaBar.Location = new System.Drawing.Point(0, 75);
+			this.formulaBar.Location = new System.Drawing.Point(0, 74);
 			this.formulaBar.Name = "formulaBar";
 			this.formulaBar.Padding = new System.Windows.Forms.Padding(0, 0, 0, 1);
 			this.formulaBar.Size = new System.Drawing.Size(1002, 28);

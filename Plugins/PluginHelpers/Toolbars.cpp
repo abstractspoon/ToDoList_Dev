@@ -78,6 +78,24 @@ int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Objec
 	return String::Compare(oItem1->Text, oItem2->Text, true);
 }
 
+Toolbars::ItemState Toolbars::GetItemState(ToolStripItem^ item)
+{
+	if (!item->Enabled)
+		return Toolbars::ItemState::Disabled;
+
+	if (item->Selected)
+		return Toolbars::ItemState::Hot;
+
+	if (item->Pressed)
+		return Toolbars::ItemState::Pressed;
+
+	if (ISTYPE(item, ToolStripButton) && ASTYPE(item, ToolStripButton)->Checked)
+		return Toolbars::ItemState::Checked;
+
+	// else
+	return Toolbars::ItemState::Normal;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 BaseToolbarRenderer::BaseToolbarRenderer() 

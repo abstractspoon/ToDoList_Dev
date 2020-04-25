@@ -57,7 +57,7 @@ namespace SpreadsheetContentControl
 		{
 			m_toolbarRenderer.SetUITheme(theme);
 
-			var BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			var BackColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
 
 			MenuBar.BackColor = BackColor;
 			ToolBar.BackColor = BackColor;
