@@ -76,12 +76,9 @@ namespace unvell.ReoGrid.Editor
 		protected ContextMenuStrip  HeaderContextMenu { get { return this.leadHeaderContextMenuStrip; } }
 		protected ContextMenuStrip  ColumnContextMenu { get { return this.columnContextMenuStrip; } }
 
-		// -------------------------------------------------------------
+		protected ReoGridControl	GridCtrl { get { return grid; }	}
 
-		public ReoGridControl GridCtrl
-		{
-			get { return grid; }
-		}
+		// -------------------------------------------------------------
 
 		/// <summary>
 		/// Create instance of ReoGrid Editor.

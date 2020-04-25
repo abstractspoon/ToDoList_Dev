@@ -22,6 +22,10 @@ namespace SpreadsheetContentControl
 
 		// --------------------------------------------
 
+		public event EventHandler ContentChanged;
+
+		// --------------------------------------------
+
 		public TDLGridEditorControl(Font font, Translator trans)
 		{
 			m_toolbarRenderer = new UIThemeToolbarRenderer();
@@ -30,10 +34,22 @@ namespace SpreadsheetContentControl
 
 			InitialiseFeatures();
 			InitialiseToolbars();
+			InitialiseChangeCallbacks();
 
 			//System.Windows.Forms.ToolStripProfessionalRenderer var;
 
 
+		}
+
+		private bool IsLoading { get; set; }
+
+		protected override void OnLoad(EventArgs e)
+		{
+			IsLoading = true;
+
+			base.OnLoad(e);
+
+			IsLoading = false;
 		}
 
 		private void InitialiseToolbars()
@@ -78,7 +94,7 @@ namespace SpreadsheetContentControl
 				this.HeaderContextMenu.ImageScalingSize = scalingSize;
 				this.ColumnContextMenu.ImageScalingSize = scalingSize;
 			}
-			
+
 			this.ToolBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.FontBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.StatusBar.SizingGrip = false;
@@ -114,6 +130,42 @@ namespace SpreadsheetContentControl
 			FontBar.BackColor = BackColor;
 			StatusBar.BackColor = BackColor;
 			FormulaBar.BackColor = BackColor;
+		}
+
+		private void InitialiseChangeCallbacks()
+		{
+			GridCtrl.ActionPerformed += (s, e) =>
+			{
+				NotifyParentContentChange();
+			};
+
+			GridCtrl.WorksheetCreated += (s, e) =>
+			{
+				NotifyParentContentChange();
+			};
+
+			GridCtrl.WorksheetInserted += (s, e) =>
+			{
+				NotifyParentContentChange();
+			};
+
+			GridCtrl.WorksheetRemoved += (s, e) =>
+			{
+				NotifyParentContentChange();
+			};
+
+			GridCtrl.WorksheetNameChanged += (s, e) =>
+			{
+				NotifyParentContentChange();
+			};
+		}
+
+		protected void NotifyParentContentChange()
+		{
+			if (/*!m_SettingContent &&*/ !IsLoading && (ContentChanged != null))
+			{
+				ContentChanged(this, new EventArgs());
+			}
 		}
 	}
 }

@@ -30,7 +30,7 @@ namespace SpreadsheetContentControl
 
 			InitializeComponent();
 
-//             inputTextBox.TextChanged += new System.EventHandler(OnInputTextChanged);
+			m_EditorControl.ContentChanged += new System.EventHandler(OnContentChanged);
 //             inputTextBox.LostFocus += new System.EventHandler(OnInputTextLostFocus);
         }
 
@@ -134,7 +134,7 @@ namespace SpreadsheetContentControl
             this.PerformLayout();
         }
 
-        private void OnInputTextChanged(object sender, EventArgs e)
+        private void OnContentChanged(object sender, EventArgs e)
         {
 			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
 
