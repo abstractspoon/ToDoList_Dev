@@ -35,7 +35,7 @@ const LPCWSTR SPREADSHEET_NAME = L"Spreadsheet";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CSpreadsheetContentBridge::CSpreadsheetContentBridge() : m_hIcon(NULL)
+CSpreadsheetContentBridge::CSpreadsheetContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
    HMODULE hMod = LoadLibrary(L"SpreadsheetContentControlBridge.dll"); // us
 
@@ -52,9 +52,10 @@ void CSpreadsheetContentBridge::Release()
 	delete this;
 }
 
-void CSpreadsheetContentBridge::SetLocalizer(ITransText* /*pTT*/)
+void CSpreadsheetContentBridge::SetLocalizer(ITransText* pTT)
 {
-	// TODO
+	if (m_pTT == nullptr)
+		m_pTT = pTT;
 }
 
 LPCWSTR CSpreadsheetContentBridge::GetTypeDescription() const
@@ -75,7 +76,7 @@ LPCWSTR CSpreadsheetContentBridge::GetTypeID() const
 IContentControl* CSpreadsheetContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned long nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CSpreadsheetContentControlBridge* pCtrl = new CSpreadsheetContentControlBridge();
+	CSpreadsheetContentControlBridge* pCtrl = new CSpreadsheetContentControlBridge(m_pTT);
 
 	if (!pCtrl->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -115,14 +116,17 @@ void CSpreadsheetContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CSpreadsheetContentControlBridge::CSpreadsheetContentControlBridge()
+CSpreadsheetContentControlBridge::CSpreadsheetContentControlBridge(ITransText* pTT) : m_pTT(pTT)
 {
 }
 
 BOOL CSpreadsheetContentControlBridge::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	m_wnd = gcnew SpreadsheetContentControl::SpreadsheetContentControlCore(static_cast<IntPtr>(hwndParent));
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<String^> typeID = gcnew String(SPREADSHEET_GUID);
+
+	m_wnd = gcnew SpreadsheetContentControl::SpreadsheetContentControlCore(typeID.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 

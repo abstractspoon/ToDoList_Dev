@@ -71,6 +71,11 @@ namespace unvell.ReoGrid.Editor
 		protected StatusStrip		StatusBar { get { return statusStrip1; } }
 		protected FormulaBarControl FormulaBar { get { return formulaBar; } }
 
+		protected ContextMenuStrip  RowContextMenu { get { return this.rowContextMenuStrip; } }
+		protected ContextMenuStrip  CellContextMenu { get { return this.cellContextMenuStrip; } }
+		protected ContextMenuStrip  HeaderContextMenu { get { return this.leadHeaderContextMenuStrip; } }
+		protected ContextMenuStrip  ColumnContextMenu { get { return this.columnContextMenuStrip; } }
+
 		// -------------------------------------------------------------
 
 		public ReoGridControl GridCtrl

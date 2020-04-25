@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Abstractspoon.Tdl.PluginHelpers;
@@ -9,23 +10,31 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace SpreadsheetContentControl
 {
-    //[System.ComponentModel.DesignerCategory("")]
+    [System.ComponentModel.DesignerCategory("")]
     public class SpreadsheetContentControlCore : System.Windows.Forms.UserControl, IContentControlWnd
     {
-        private IntPtr m_hwndParent;
+        private IntPtr m_HwndParent;
         private TDLGridEditorControl m_EditorControl;
+		private Font m_ControlsFont;
+		private Translator m_Trans;
+		private String m_TypeID;
 
-        public SpreadsheetContentControlCore(IntPtr hwndParent)
+		// --------------------------------------------------------------------
+
+		public SpreadsheetContentControlCore(String typeId, IntPtr hwndParent, Translator trans)
         {
-            m_hwndParent = hwndParent;
+			m_TypeID = typeId;
+			m_HwndParent = hwndParent;
+			m_Trans = trans;
+			m_ControlsFont = new Font("Tahoma", 8);
 
-            InitializeComponent();
+			InitializeComponent();
 
 //             inputTextBox.TextChanged += new System.EventHandler(OnInputTextChanged);
 //             inputTextBox.LostFocus += new System.EventHandler(OnInputTextLostFocus);
         }
 
-        // ITDLContentControl ------------------------------------------------------------------
+        // ITDLContentControl -------------------------------------------------
 
         public Byte[] GetContent()
         {
@@ -108,10 +117,12 @@ namespace SpreadsheetContentControl
             this.ClientSize = new System.Drawing.Size(603, 716);
             this.Name = "SpreadsheetContentControlCore";
 
-            m_EditorControl = new TDLGridEditorControl();
-            m_EditorControl.Location = new System.Drawing.Point(0, 0);
-            m_EditorControl.ClientSize = this.ClientSize;
-            m_EditorControl.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
+			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeID, "", this, m_Trans, 0/*5*/);
+
+			m_EditorControl = new TDLGridEditorControl(m_ControlsFont, m_Trans);
+			m_EditorControl.Location = new Point(0, bannerHeight);
+			m_EditorControl.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);
+			m_EditorControl.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             //m_EditorControl.BorderStyle = BorderStyle.FixedSingle;
 
             this.Controls.Add(m_EditorControl);
@@ -125,14 +136,14 @@ namespace SpreadsheetContentControl
 
         private void OnInputTextChanged(object sender, EventArgs e)
         {
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
 
             notify.NotifyChange();
         }
 
         private void OnInputTextLostFocus(object sender, EventArgs e)
         {
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_hwndParent);
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
 
             notify.NotifyKillFocus();
         }

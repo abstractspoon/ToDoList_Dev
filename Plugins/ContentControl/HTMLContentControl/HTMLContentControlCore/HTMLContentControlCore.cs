@@ -23,10 +23,6 @@ namespace HTMLContentControl
 
 		const int WM_ENABLE = 0x000A;
 
-		// --------------------------------------------------------------------------------------
-
-		private const string FontName = "Tahoma";
-
         // --------------------------------------------------------------------------------------
 
         public HTMLContentControlCore(String typeId, IntPtr hwndParent, Translator trans)
@@ -34,8 +30,9 @@ namespace HTMLContentControl
             m_TypeID = typeId;
             m_HwndParent = hwndParent;
             m_Trans = trans;
-            
-            InitializeComponent();
+			m_ControlsFont = new Font("Tahoma", 8);
+
+			InitializeComponent();
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
@@ -148,7 +145,6 @@ namespace HTMLContentControl
 
         private void InitializeComponent()
         {
-			m_ControlsFont = new Font(FontName, 8);
 
 			this.SuspendLayout();
             // 

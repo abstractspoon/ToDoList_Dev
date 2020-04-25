@@ -17,27 +17,75 @@ namespace SpreadsheetContentControl
 	public class TDLGridEditorControl : ReoGridEditorControl
 	{
 		private UIThemeToolbarRenderer m_toolbarRenderer;
+		private Font m_ControlsFont;
+		private Translator m_Trans;
 
 		// --------------------------------------------
 
-		public TDLGridEditorControl()
+		public TDLGridEditorControl(Font font, Translator trans)
 		{
 			m_toolbarRenderer = new UIThemeToolbarRenderer();
+			m_ControlsFont = font;
+			m_Trans = trans;
 
+			InitialiseFeatures();
+			InitialiseToolbars();
+
+			//System.Windows.Forms.ToolStripProfessionalRenderer var;
+
+
+		}
+
+		private void InitialiseToolbars()
+		{
 			this.MenuBar.Renderer = m_toolbarRenderer;
 			this.ToolBar.Renderer = m_toolbarRenderer;
 			this.FontBar.Renderer = m_toolbarRenderer;
 			this.StatusBar.Renderer = m_toolbarRenderer;
 
+			this.RowContextMenu.Renderer = m_toolbarRenderer;
+			this.CellContextMenu.Renderer = m_toolbarRenderer;
+			this.HeaderContextMenu.Renderer = m_toolbarRenderer;
+			this.ColumnContextMenu.Renderer = m_toolbarRenderer;
+
 			Toolbars.FixupButtonSizes(this.ToolBar);
 			Toolbars.FixupButtonSizes(this.FontBar);
 
+			if (m_ControlsFont != null)
+			{
+				this.MenuBar.Font = m_ControlsFont;
+				this.ToolBar.Font = m_ControlsFont;
+				this.FontBar.Font = m_ControlsFont;
+				this.StatusBar.Font = m_ControlsFont;
+
+				this.RowContextMenu.Font = m_ControlsFont;
+				this.CellContextMenu.Font = m_ControlsFont;
+				this.HeaderContextMenu.Font = m_ControlsFont;
+				this.ColumnContextMenu.Font = m_ControlsFont;
+			}
+
+			if (DPIScaling.WantScaling())
+			{
+				int imageSize = DPIScaling.Scale(16);
+				var scalingSize = new Size(imageSize, imageSize);
+
+				this.MenuBar.ImageScalingSize = scalingSize;
+				this.ToolBar.ImageScalingSize = scalingSize;
+				this.FontBar.ImageScalingSize = scalingSize;
+
+				this.RowContextMenu.ImageScalingSize = scalingSize;
+				this.CellContextMenu.ImageScalingSize = scalingSize;
+				this.HeaderContextMenu.ImageScalingSize = scalingSize;
+				this.ColumnContextMenu.ImageScalingSize = scalingSize;
+			}
+			
 			this.ToolBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.FontBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.StatusBar.SizingGrip = false;
+		}
 
-			//System.Windows.Forms.ToolStripProfessionalRenderer var;
-
+		private void InitialiseFeatures()
+		{
 			// Hide unwanted menubar options
 			CommandHandling.HideCommand("scriptToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.HideCommand("toolsToolStripMenuItem", this.MenuBar.Items);
@@ -53,7 +101,6 @@ namespace SpreadsheetContentControl
 			// Hide unwanted toolbar options
 			CommandHandling.HideCommand("printPreviewToolStripButton", this.ToolBar.Items);
 			//CommandHandling.HideCommand("", this.ToolBar.Items);
-
 		}
 
 		public void SetUITheme(UITheme theme)

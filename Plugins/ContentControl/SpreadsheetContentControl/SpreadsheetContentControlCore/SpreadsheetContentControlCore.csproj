@@ -54,9 +54,7 @@
     <Compile Include="..\..\..\Utils\Utils.cs">
       <Link>Utils.cs</Link>
     </Compile>
-    <Compile Include="SpreadsheetContentControlCore.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
+    <Compile Include="SpreadsheetContentControlCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TDLGridEditorControl.cs" />
   </ItemGroup>

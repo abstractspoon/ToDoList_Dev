@@ -36,6 +36,7 @@ public:
 
 protected:
    HICON m_hIcon;
+   ITransText* m_pTT;
 
 protected:
    ~CSpreadsheetContentBridge();
@@ -44,7 +45,7 @@ protected:
 class CSpreadsheetContentControlBridge : public IContentControl
 {
 public:
-	CSpreadsheetContentControlBridge();
+	CSpreadsheetContentControlBridge(ITransText* pTT);
 
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
       long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent);
@@ -81,6 +82,7 @@ public:
 
 protected:
    gcroot<SpreadsheetContentControlCore^> m_wnd;
+   ITransText* m_pTT;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()
