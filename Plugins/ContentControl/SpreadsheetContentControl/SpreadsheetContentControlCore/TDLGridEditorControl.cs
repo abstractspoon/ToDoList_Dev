@@ -29,6 +29,9 @@ namespace SpreadsheetContentControl
 			this.FontBar.Renderer = m_toolbarRenderer;
 			this.StatusBar.Renderer = m_toolbarRenderer;
 
+			Toolbars.FixupButtonSizes(this.ToolBar);
+			Toolbars.FixupButtonSizes(this.FontBar);
+
 			this.ToolBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.FontBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.StatusBar.SizingGrip = false;
