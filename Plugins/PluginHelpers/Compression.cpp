@@ -10,20 +10,18 @@ using namespace System::IO;
 using namespace System::IO::Compression; 
 using namespace System::Text;
 
-using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace Abstractspoon::Tdl;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // https://dotnet-snippets.de/snippet/strings-komprimieren-und-dekomprimieren/1058
 
-cli::array<Byte>^ StringCompression::Compress(String^ text)
+cli::array<Byte>^ PluginHelpers::Compression::Compress(cli::array<Byte>^ bytes)
 {
-	cli::array<Byte>^ buffer = Encoding::UTF8->GetBytes(text);
-
 	MemoryStream^ memoryStream = gcnew MemoryStream();
 
 	{
 		GZipStream^ gZipStream = gcnew GZipStream(memoryStream, CompressionMode::Compress, true);
-		gZipStream->Write(buffer, 0, buffer->Length);
+		gZipStream->Write(bytes, 0, bytes->Length);
 	}
 
 	cli::array<Byte>^ compressedData = gcnew cli::array<Byte>((int)memoryStream->Length);
@@ -34,12 +32,12 @@ cli::array<Byte>^ StringCompression::Compress(String^ text)
 	cli::array<Byte>^ gZipBuffer = gcnew cli::array<Byte>(compressedData->Length + 4);
 
 	Buffer::BlockCopy(compressedData, 0, gZipBuffer, 4, compressedData->Length);
-	Buffer::BlockCopy(BitConverter::GetBytes(buffer->Length), 0, gZipBuffer, 0, 4); // first dword is length
+	Buffer::BlockCopy(BitConverter::GetBytes(bytes->Length), 0, gZipBuffer, 0, 4); // first dword is length
 
 	return gZipBuffer;
 }
 
-String^ StringCompression::Decompress(cli::array<Byte>^ bytes)
+cli::array<Byte>^ PluginHelpers::Compression::Decompress(cli::array<Byte>^ bytes)
 {
 	MemoryStream^ memoryStream = gcnew MemoryStream();
 
@@ -54,6 +52,20 @@ String^ StringCompression::Decompress(cli::array<Byte>^ bytes)
 		GZipStream^ gZipStream = gcnew GZipStream(memoryStream, CompressionMode::Decompress);
 		gZipStream->Read(buffer, 0, buffer->Length);
 	}
+
+	return buffer;
+}
+
+cli::array<Byte>^ PluginHelpers::Compression::CompressString(String^ text)
+{
+	cli::array<Byte>^ buffer = Encoding::UTF8->GetBytes(text);
+
+	return Compress(buffer);
+}
+
+String^ PluginHelpers::Compression::DecompressString(cli::array<Byte>^ bytes)
+{
+	cli::array<Byte>^ buffer = Decompress(bytes);
 
 	return Encoding::UTF8->GetString(buffer);
 }

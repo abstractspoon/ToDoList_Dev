@@ -12,11 +12,14 @@ namespace Abstractspoon
 	{
 		namespace PluginHelpers
 		{
-			public ref class StringCompression
+			public ref class Compression
 			{
 			public:
-				static cli::array<Byte>^ Compress(String^ text);
-				static String^ Decompress(cli::array<Byte>^ bytes);
+				static cli::array<Byte>^ Compress(cli::array<Byte>^ bytes);
+				static cli::array<Byte>^ Decompress(cli::array<Byte>^ bytes);
+
+				static cli::array<Byte>^ CompressString(String^ text);
+				static String^ DecompressString(cli::array<Byte>^ bytes);
 			};
 		}
 	}
