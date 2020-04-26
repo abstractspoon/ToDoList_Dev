@@ -26,7 +26,7 @@ cli::array<Byte>^ PluginHelpers::Compression::Compress(cli::array<Byte>^ bytes)
 	}
 	catch (...)
 	{
-
+		return gcnew cli::array<Byte>(0);
 	}
 
 	memoryStream->Position = 0;
@@ -60,7 +60,7 @@ cli::array<Byte>^ PluginHelpers::Compression::Decompress(cli::array<Byte>^ bytes
 	}
 	catch (...)
 	{
-		
+		return gcnew cli::array<Byte>(0);
 	}
 
 	return buffer;
