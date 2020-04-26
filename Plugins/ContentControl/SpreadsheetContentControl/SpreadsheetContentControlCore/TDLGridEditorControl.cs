@@ -82,7 +82,15 @@ namespace SpreadsheetContentControl
 		// text content if supported. return false if not supported
 		public String GetTextContent()
 		{
-			return ""; //OutputText;
+			var worksheet = GridControl.CurrentWorksheet;
+			var contentRange = new RangePosition(0, 0, worksheet.MaxContentRow, worksheet.MaxContentCol);
+
+			var text = worksheet.StringifyRange(contentRange).Trim();
+
+			text = text.Replace("\t\t", ""); // leaves single tabs as spacers
+			text = text.Replace("\n", " ");
+
+			return text;
 		}
 
 		public bool SetTextContent(String content, bool resetSelection)
