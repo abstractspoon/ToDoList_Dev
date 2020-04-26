@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
@@ -119,7 +118,47 @@ namespace SpreadsheetContentControl
 
 		public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
 		{
-			return 0;// FindReplaceAll(findText, replaceText, matchWhole, matchCase, true);
+			var worksheet = GridControl.CurrentWorksheet;
+			var contentRange = new RangePosition(0, 0, worksheet.MaxContentRow, worksheet.MaxContentCol);
+
+			int numChanges = 0;
+
+			for (int row = contentRange.StartPos.Row; row <= contentRange.EndPos.Row; row++)
+			{
+				for (int col = contentRange.StartPos.Col; col <= contentRange.EndPos.Col; col++)
+				{
+					var cell = GridControl.CurrentWorksheet.GetCell(row, col);
+
+					if (cell == null)
+						continue;
+
+					// Only handle native text elements
+					var cellText = cell.GetData<String>();
+
+					if (cellText == null)
+						continue;
+
+					try
+					{
+						String resultText = "";
+
+						if (StringUtil.FindReplace(cellText, findText, replaceText, matchWhole, matchCase, ref resultText))
+						{
+							cell.Data = resultText;
+							numChanges++;
+						}
+					}
+					catch (Exception)
+					{
+
+					}
+				}
+			}
+
+			if (numChanges > 0)
+				NotifyParentContentChange();
+
+			return numChanges;
 		}
 
 		public void SetContentFont(String fontName, int pointSize)

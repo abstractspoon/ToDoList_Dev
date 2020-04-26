@@ -42,6 +42,15 @@ namespace Abstractspoon
 
 			// ----------------------------------------------------------------------------
 
+			public ref class StringUtil
+			{
+			public:
+				static bool FindReplace(String^ source, String^ findText, String^ replaceText,
+										bool matchWhole, bool matchCase, String^% result);
+			};
+
+			// ----------------------------------------------------------------------------
+
 			public ref class Log
 			{
 			private:
