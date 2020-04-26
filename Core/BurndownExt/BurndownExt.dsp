@@ -194,6 +194,10 @@ SOURCE=.\BurndownPreferencesDlg.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\BurndownStatic.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\BurndownStruct.h
 # End Source File
 # Begin Source File
