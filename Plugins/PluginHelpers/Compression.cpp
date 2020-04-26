@@ -19,20 +19,25 @@ cli::array<Byte>^ PluginHelpers::Compression::Compress(cli::array<Byte>^ bytes)
 {
 	MemoryStream^ memoryStream = gcnew MemoryStream();
 
+	try
 	{
-		GZipStream^ gZipStream = gcnew GZipStream(memoryStream, CompressionMode::Compress, true);
-		gZipStream->Write(bytes, 0, bytes->Length);
+		GZipStream gZipStream(memoryStream, CompressionMode::Compress, true);
+		gZipStream.Write(bytes, 0, bytes->Length);
+	}
+	catch (...)
+	{
+
 	}
 
+	memoryStream->Position = 0;
 	cli::array<Byte>^ compressedData = gcnew cli::array<Byte>((int)memoryStream->Length);
 
-	memoryStream->Position = 0;
 	memoryStream->Read(compressedData, 0, compressedData->Length);
 
 	cli::array<Byte>^ gZipBuffer = gcnew cli::array<Byte>(compressedData->Length + 4);
 
 	Buffer::BlockCopy(compressedData, 0, gZipBuffer, 4, compressedData->Length);
-	Buffer::BlockCopy(BitConverter::GetBytes(bytes->Length), 0, gZipBuffer, 0, 4); // first dword is length
+	Buffer::BlockCopy(BitConverter::GetBytes(bytes->Length), 0, gZipBuffer, 0, 4); // first DWORD is length
 
 	return gZipBuffer;
 }
@@ -41,16 +46,21 @@ cli::array<Byte>^ PluginHelpers::Compression::Decompress(cli::array<Byte>^ bytes
 {
 	MemoryStream^ memoryStream = gcnew MemoryStream();
 
-	int dataLength = BitConverter::ToInt32(bytes, 0); // first dword is length
+	int dataLength = BitConverter::ToInt32(bytes, 0); // first DWORD is length
 	memoryStream->Write(bytes, 4, bytes->Length - 4);
 
 	cli::array<Byte>^ buffer = gcnew cli::array<Byte>(dataLength);
 
 	memoryStream->Position = 0;
 
+	try
 	{
-		GZipStream^ gZipStream = gcnew GZipStream(memoryStream, CompressionMode::Decompress);
-		gZipStream->Read(buffer, 0, buffer->Length);
+		GZipStream gZipStream(memoryStream, CompressionMode::Decompress);
+		gZipStream.Read(buffer, 0, buffer->Length);
+	}
+	catch (...)
+	{
+		
 	}
 
 	return buffer;
