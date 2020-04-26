@@ -219,14 +219,14 @@ bool CSpreadsheetContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR sz
 	msclr::auto_gcroot<String^> find = gcnew String(szFind);
 	msclr::auto_gcroot<String^> replace = gcnew String(szReplace);
 
-	return false;//(m_wnd->FindReplaceAll(find.get(), replace.get(), bWholeWord, bCaseSensitive) > 0);
+	return (m_wnd->FindReplaceAll(find.get(), replace.get(), bWholeWord, bCaseSensitive) > 0);
 }
 
 bool CSpreadsheetContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 {
 	msclr::auto_gcroot<String^> content = gcnew String(szContent);
 
-	return false;//m_wnd->InsertTextContent(content.get(), bAtEnd);
+	return m_wnd->InsertTextContent(content.get(), bAtEnd);
 }
 
 void CSpreadsheetContentControlBridge::SetReadOnly(bool bReadOnly)
@@ -279,7 +279,7 @@ void CSpreadsheetContentControlBridge::SetUITheme(const UITHEME* pTheme)
 
 void CSpreadsheetContentControlBridge::SetContentFont(HFONT hFont)
 {
-	//m_wnd->SetContentFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
+	m_wnd->SetContentFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
 void CSpreadsheetContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const

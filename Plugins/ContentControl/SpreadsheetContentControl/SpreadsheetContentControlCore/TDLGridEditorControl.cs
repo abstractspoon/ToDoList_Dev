@@ -8,9 +8,14 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 
+using unvell.ReoGrid;
 using unvell.ReoGrid.Editor;
+
 using Abstractspoon.Tdl.PluginHelpers;
+
 using Command.Handling;
+
+///////////////////////////////////////////////////////////////////////////////
 
 namespace SpreadsheetContentControl
 {
@@ -83,6 +88,35 @@ namespace SpreadsheetContentControl
 		public bool SetTextContent(String content, bool resetSelection)
 		{
 			return false;
+		}
+
+		public bool InsertTextContent(String content, bool bAtEnd)
+		{
+			var selection = GridControl.CurrentWorksheet.SelectionRange;
+
+			if (selection == null)
+				return false;
+
+			for (int row = selection.StartPos.Row; row <= selection.EndPos.Row; row++)
+			{
+				for (int col = selection.StartPos.Col; col <= selection.EndPos.Col; col++)
+				{
+					GridControl.CurrentWorksheet.PasteFromString(new CellPosition(row, col), content);
+				}
+			}
+
+			NotifyParentContentChange();
+			return true;
+		}
+
+		public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
+		{
+			return 0;// FindReplaceAll(findText, replaceText, matchWhole, matchCase, true);
+		}
+
+		public void SetContentFont(String fontName, int pointSize)
+		{
+			//SetBodyFont(fontName, pointSize);
 		}
 
 		private bool IsLoading { get; set; }

@@ -57,6 +57,21 @@ namespace SpreadsheetContentControl
 			return m_EditorControl.SetTextContent(content, resetSelection);
 		}
 
+		public bool InsertTextContent(String content, bool bAtEnd)
+		{
+			return m_EditorControl.InsertTextContent(content, bAtEnd);
+		}
+
+		public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
+		{
+			return m_EditorControl.FindReplaceAll(findText, replaceText, matchWhole, matchCase/*, true*/);
+		}
+
+		public void SetContentFont(String fontName, int pointSize)
+		{
+			m_EditorControl.SetContentFont(fontName, pointSize);
+		}
+
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
             // TODO
