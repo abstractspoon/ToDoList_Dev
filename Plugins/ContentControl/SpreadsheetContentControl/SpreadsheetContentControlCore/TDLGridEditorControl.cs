@@ -78,13 +78,17 @@ namespace SpreadsheetContentControl
 			return false;
 		}
 
+		private RangePosition ContentRange()
+		{
+			var worksheet = GridControl.CurrentWorksheet;
+
+			return new RangePosition(0, 0, worksheet.MaxContentRow + 1, worksheet.MaxContentCol + 1);
+		}
+
 		// text content if supported. return false if not supported
 		public String GetTextContent()
 		{
-			var worksheet = GridControl.CurrentWorksheet;
-			var contentRange = new RangePosition(0, 0, worksheet.MaxContentRow, worksheet.MaxContentCol);
-
-			var text = worksheet.StringifyRange(contentRange).Trim();
+			var text = GridControl.CurrentWorksheet.StringifyRange(ContentRange()).Trim();
 
 			text = text.Replace("\t\t", ""); // leaves single tabs as spacers
 			text = text.Replace("\n", " ");
@@ -118,9 +122,7 @@ namespace SpreadsheetContentControl
 
 		public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
 		{
-			var worksheet = GridControl.CurrentWorksheet;
-			var contentRange = new RangePosition(0, 0, worksheet.MaxContentRow, worksheet.MaxContentCol);
-
+			var contentRange = ContentRange();
 			int numChanges = 0;
 
 			for (int row = contentRange.StartPos.Row; row <= contentRange.EndPos.Row; row++)
