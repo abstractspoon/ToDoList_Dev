@@ -82,6 +82,8 @@ public:
 
 protected:
    gcroot<SpreadsheetContentControlCore^> m_wnd;
+   mutable gcroot<cli::array<unsigned char>^> m_lastRequestedContent;
+
    ITransText* m_pTT;
 };
 

@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 using unvell.ReoGrid.Editor;
 using Abstractspoon.Tdl.PluginHelpers;
@@ -43,12 +44,34 @@ namespace SpreadsheetContentControl
 
 		public Byte[] GetContent()
 		{
+			try
+			{
+				var memStream = new MemoryStream();
+				GridControl.Save(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
+
+				return Compression.Compress(memStream.GetBuffer());
+			}
+			catch (Exception)
+			{
+			}
+
 			return new Byte[1];
 		}
 
 		public bool SetContent(Byte[] content, bool resetSelection)
 		{
-			return true;
+ 			try
+ 			{
+ 				var memStream = new MemoryStream(Compression.Decompress(content));
+ 				GridControl.Load(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
+ 
+ 				return true;
+ 			}
+ 			catch (Exception)
+ 			{
+ 			}
+
+			return false;
 		}
 
 		// text content if supported. return false if not supported
@@ -59,7 +82,7 @@ namespace SpreadsheetContentControl
 
 		public bool SetTextContent(String content, bool resetSelection)
 		{
-			return true;
+			return false;
 		}
 
 		private bool IsLoading { get; set; }

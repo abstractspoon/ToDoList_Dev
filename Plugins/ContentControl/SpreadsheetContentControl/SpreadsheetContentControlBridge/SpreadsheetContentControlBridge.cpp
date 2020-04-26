@@ -145,12 +145,32 @@ BOOL CSpreadsheetContentControlBridge::Create(UINT nCtrlID, DWORD nStyle,
 
 int CSpreadsheetContentControlBridge::GetContent(unsigned char* pContent) const
 {
-	cli::array<Byte>^ content = m_wnd->GetContent();
-	int nLength = content->Length;
-
-	if (pContent && nLength)
+	if (pContent == NULL)
 	{
-		pin_ptr<Byte> ptrContent = &content[content->GetLowerBound(0)];
+		// Caller is just requesting length but it's inefficient
+		// for us to request the full content just for its length
+		// so we cache it for the subsequent actual content request
+		cli::array<Byte>^ content = m_wnd->GetContent();
+		int nLength = content->Length;
+
+		m_lastRequestedContent = gcnew cli::array<unsigned char>(nLength);
+
+		if (nLength)
+			Array::Copy(content, 0, m_lastRequestedContent, 0, nLength);
+
+		return nLength;
+	}
+	else if (m_lastRequestedContent == nullptr)
+	{
+		return 0;
+	}
+
+	// else
+	int nLength = m_lastRequestedContent->Length;
+
+	if (nLength)
+	{
+		pin_ptr<Byte> ptrContent = &m_lastRequestedContent[m_lastRequestedContent->GetLowerBound(0)];
 		CopyMemory(pContent, ptrContent, nLength);
 	}
 
