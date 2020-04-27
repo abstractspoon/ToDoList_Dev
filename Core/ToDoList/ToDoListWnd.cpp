@@ -6418,11 +6418,11 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 				CString sHtmlOutput(_T("<!DOCTYPE html>\n"));
 
 				sHtmlOutput += _T("<html>\n<head>\n");
+				sHtmlOutput += _T("<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-16\">\n");
 				sHtmlOutput += _T("</head>\n<style>\n");
-
 				sHtmlOutput += _T("img { max-width: 100%; } \n");
-
 				sHtmlOutput += _T("</style>\n<body>\n");
+
 				CString sTitle = dlg.GetTitle(), sDate = CDateHelper::FormatDate(dlg.GetDate());
 
 				if (!sDate.IsEmpty() || !sTitle.IsEmpty())
@@ -7337,6 +7337,8 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 	if (sTDCFile.IsEmpty())
 	{
 		sTDCFile = CEnString(IDS_TDC_UNTITLEDFILE);
+		Misc::Trim(sTDCFile);
+
 		sTDCExt = GetDefaultFileExt(FALSE);
 	}
 
@@ -10200,6 +10202,7 @@ BOOL CToDoListWnd::LogIntermediateTaskList(CTaskFile& tasks, LPCTSTR szRefPath)
 CString CToDoListWnd::GetIntermediateTaskListPath(LPCTSTR szRefPath)
 {
 	CEnString sRefName(IDS_TDC_UNTITLEDFILE);
+	Misc::Trim(sRefName);
 
 	if (szRefPath && FileMisc::IsPath(szRefPath))
 		sRefName = FileMisc::RemoveExtension(FileMisc::GetFileNameFromPath(szRefPath));
@@ -13019,9 +13022,14 @@ void CToDoListWnd::OnViewSaveToImage()
 	CString sFilePath(tdc.GetFilePath());
 
 	if (sFilePath.IsEmpty())
+	{
 		sFilePath = CEnString(IDS_TDC_UNTITLEDFILE);
+		Misc::Trim(sFilePath);
+	}
 	else
+	{
 		FileMisc::RemoveExtension(sFilePath);
+	}
 
 	sFilePath += '.';
 	sFilePath += tdc.GetTaskViewName();

@@ -367,7 +367,10 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 		
 		// handle empty filename
 		if (sFName.IsEmpty())
+		{
 			sFName.LoadString(IDS_TDC_UNTITLEDFILE);
+			Misc::Trim(sFName);
+		}
 		
 		FileMisc::MakePath(m_sFilePath, NULL, m_sFolderPath, sFName);
 	}
