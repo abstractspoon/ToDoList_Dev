@@ -3795,21 +3795,14 @@ void CToDoListWnd::OnSaveas()
 	int nSel = GetSelToDoCtrl();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	if (!tdc.HasFilePath())
-	{
-		SaveTaskList(nSel);
-		return;
-	}
+	CString sCurFilePath = m_mgrToDoCtrls.GetFilePath(nSel), sNewFilePath(sCurFilePath);
+	CString sCurProjName = tdc.GetProjectName();
 	
-	CString sCurFilePath = m_mgrToDoCtrls.GetFilePath(nSel, FALSE);
-	CString sCurProjName = tdc.GetProjectName(), sNewProjName(sCurProjName);
-
-	CString sNewFilePath(sCurFilePath);
-	FileMisc::ReplaceExtension(sNewFilePath, GetDefaultFileExt(FALSE));
-	
-	if (!sCurProjName.IsEmpty())
+	// If the tasklist has already been saved and has a project name
+	// then we show a custom dialog allowing both to be modified
+	if (!sCurFilePath.IsEmpty() && !sCurProjName.IsEmpty())
 	{
-		CTDLTasklistSaveAsDlg dialog(sNewFilePath, 
+		CTDLTasklistSaveAsDlg dialog(sCurFilePath, 
 									 sCurProjName,
 									 GetFileFilter(FALSE),
 									 GetDefaultFileExt(FALSE));
@@ -3818,10 +3811,14 @@ void CToDoListWnd::OnSaveas()
 			return;
 
 		sNewFilePath = dialog.GetFilePath();
-		sNewProjName = dialog.GetProjectName();
+
+		tdc.SetProjectName(dialog.GetProjectName());
 	}
-	else
+	else // simple file dialog
 	{
+		sNewFilePath = m_mgrToDoCtrls.GetFilePath(nSel, FALSE);
+		FileMisc::ReplaceExtension(sNewFilePath, GetDefaultFileExt(FALSE));
+	
 		CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
 							   GetDefaultFileExt(FALSE),
 							   sNewFilePath,
@@ -3837,11 +3834,9 @@ void CToDoListWnd::OnSaveas()
 
 		sNewFilePath = dialog.GetPathName();
 	}
-
+	
 	if (!FileMisc::IsSamePath(sCurFilePath, sNewFilePath))
 	{
-		tdc.SetProjectName(sNewProjName);
-
  		if (SaveTaskList(nSel, sNewFilePath) == TDCF_SUCCESS)
 		{
 			m_mgrToDoCtrls.ClearStorageDetails(nSel);
@@ -3849,7 +3844,7 @@ void CToDoListWnd::OnSaveas()
 		}
 		else
 		{
-			tdc.SetProjectName(sCurProjName);
+			tdc.SetProjectName(sCurProjName); // revert change
 			UpdateStatusbar();
 		}
 	}
@@ -3857,9 +3852,7 @@ void CToDoListWnd::OnSaveas()
 
 void CToDoListWnd::OnUpdateSaveas(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-	pCmdUI->Enable(tdc.GetTaskCount() || tdc.IsModified());
+	pCmdUI->Enable(TRUE);
 }
 
 void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point) 
