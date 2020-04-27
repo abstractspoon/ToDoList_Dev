@@ -1728,7 +1728,7 @@ void CKanbanCtrl::RebuildColumnHeader()
 	}
 
 	// Add new columns
-	if (m_header.GetItemCount() < nNumVisColumns)
+	if (nNumVisColumns > m_header.GetItemCount())
 	{
 		// Give new columns the average width of old columns
 		int nNewColWidth = 1;
@@ -2908,12 +2908,17 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 				BOOL bChange = EndDragItem(pSrcCol, dwDragID, pDestCol, sDestAttribValue);
 
-				if (!WantShowColumn(pSrcCol) && UsingDynamicColumns())
+				// Remove the source column if it is now empty 
+				// and should not be shown
+				if (bChange && UsingDynamicColumns() && !WantShowColumn(pSrcCol))
 				{
+					m_pSelectedColumn = NULL;
+
 					int nCol = Misc::FindT(pSrcCol, m_aColumns);
 					ASSERT(nCol != -1);
 
 					m_aColumns.RemoveAt(nCol);
+					RebuildColumnHeader();
 				}
 
 				Resize();
