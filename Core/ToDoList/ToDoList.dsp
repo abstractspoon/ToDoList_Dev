@@ -88,8 +88,8 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 Msimg32.lib msimg32.lib Winmm.lib /nologo /subsystem:windows /pdb:"ToDoList.pdb" /map /machine:I386 /pdbtype:con /MAPINFO:LINES /MAPINFO:EXPORTS
 # SUBTRACT BASE LINK32 /pdb:none /debug
-# ADD LINK32 /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /map /debug /debugtype:both /machine:I386 /nodefaultlib:"libc" /pdbtype:con /MAPINFO:LINES /MAPINFO:EXPORTS
-# SUBTRACT LINK32 /pdb:none
+# ADD LINK32 /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /map /debug /debugtype:cv /machine:I386 /nodefaultlib:"libc" /MAPINFO:LINES /MAPINFO:EXPORTS
+# SUBTRACT LINK32 /pdb:none /pdbtype:<none>
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Release	copy unicode_release\ToDoList.exe ..\..\Plugins\release /y	unicode_release\TDLTest.exe
@@ -1580,12 +1580,12 @@ SOURCE=..\ToDoList_Core.sln
 # End Source File
 # End Target
 # End Project
-# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
-# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
-# 	2:16:DefaultSinkClass:CWebBrowserCtrl
-# End Section
 # Section ToDoList : {D30C1661-CDAF-11D0-8A3E-00C04FC9E26E}
 # 	2:5:Class:CWebBrowserCtrl
 # 	2:10:HeaderFile:webbrowserctrl.h
 # 	2:8:ImplFile:webbrowserctrl.cpp
+# End Section
+# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
+# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
+# 	2:16:DefaultSinkClass:CWebBrowserCtrl
 # End Section
