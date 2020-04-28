@@ -136,6 +136,8 @@ namespace unvell.Common
 
 					if (font != null)
 					{
+						g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+
 						g.DrawString(font.Name, font,
 							isSelected ? SystemBrushes.HighlightText : Brushes.Black, rect, sf);
 

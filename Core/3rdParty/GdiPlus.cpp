@@ -361,12 +361,18 @@ BOOL CGdiPlus::Initialize()
 
 void CGdiPlus::Free()
 {
+#if _MSC_VER <= 1200
+	// For reasons I don't understand trying to 
+	// access s_hGdiPlus under VC6 causes a crash due
+	// to a memory corruption (possibly of s_hGdiPlus)
+	// so for now we just let Windows do the cleanup
+#else
 	if (s_hGdiPlus && (s_hGdiPlus != HMODULE(-1)))
 	{
 		ASSERT(s_GdiToken);
 
 		PFNSHUTDOWN pFn = (PFNSHUTDOWN)GetProcAddress(s_hGdiPlus, "GdiplusShutdown");
-		
+
 		if (pFn)
 			pFn(s_GdiToken);
 
@@ -375,6 +381,7 @@ void CGdiPlus::Free()
 		s_hGdiPlus = HMODULE(-1);
 		s_GdiToken = NULL;
 	}
+#endif
 }
 
 //////////////////////////////////////////////////////////////////////

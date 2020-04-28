@@ -78,6 +78,24 @@ int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Objec
 	return String::Compare(oItem1->Text, oItem2->Text, true);
 }
 
+Toolbars::ItemState Toolbars::GetItemState(ToolStripItem^ item)
+{
+	if (!item->Enabled)
+		return Toolbars::ItemState::Disabled;
+
+	if (item->Pressed)
+		return Toolbars::ItemState::Pressed;
+
+	if (item->Selected)
+		return Toolbars::ItemState::Hot;
+
+	if (ISTYPE(item, ToolStripButton) && ASTYPE(item, ToolStripButton)->Checked)
+		return Toolbars::ItemState::Checked;
+
+	// else
+	return Toolbars::ItemState::Normal;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 BaseToolbarRenderer::BaseToolbarRenderer() 
@@ -144,8 +162,8 @@ void BaseToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRe
 
 	if (e->Vertical)
 	{
-		e->Graphics->DrawLine(SystemPens::ButtonShadow, (rect.Width/2), 2, (rect.Width/2), rect.Height-1);
-		e->Graphics->DrawLine(SystemPens::ButtonHighlight, (rect.Width/2) + 1, 2, (rect.Width/2) + 1, rect.Height-1);
+		e->Graphics->DrawLine(GetSeperatorDarkPen(), (rect.Width/2), 2, (rect.Width/2), rect.Height-3);
+		e->Graphics->DrawLine(GetSeperatorLightPen(), (rect.Width/2) + 1, 2, (rect.Width/2) + 1, rect.Height-3);
 	}
 	else
 	{
@@ -187,8 +205,8 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 						if ((itemRect.Top - prevItemRect.Top) > (prevItemRect.Height / 2))
 						{
 							rowBottom = ((itemRect.Top + prevItemRect.Bottom) / 2);
-
-							auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, rowTop, toolbar->Width, (rowBottom - rowTop));
+							
+							auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, (rowTop - toolbar->Top), toolbar->Width, (rowBottom - rowTop));
 							DrawRowBackground(e->Graphics, rowRect, firstRow, false);
 							
 							prevItemRect = itemRect;
@@ -200,33 +218,33 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 			}
 
 			// Last row
-			auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, rowTop, toolbar->Width, (toolbar->Bottom - rowTop));
+			auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, (rowTop - toolbar->Top), toolbar->Width, (toolbar->Bottom - rowTop));
 			DrawRowBackground(e->Graphics, rowRect, firstRow, true);
 		}
 	}
 
 	if (m_DrawLeftBorder)
 	{
-// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
-// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
+// 		e->Graphics->DrawLine(GetSeperatorLightPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(GetSeperatorDarkPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
 	}
 
 	if (m_DrawTopBorder)
 	{
-// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
-// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top + 1, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top + 1);
+// 		e->Graphics->DrawLine(GetSeperatorLightPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(GetSeperatorDarkPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top + 1, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top + 1);
 	}
 
 	if (m_DrawRightBorder)
 	{
-// 		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
-// 		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
+// 		e->Graphics->DrawLine(GetSeperatorLightPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Top, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Top);
+// 		e->Graphics->DrawLine(GetSeperatorDarkPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom);
 	}
 
 	if (m_DrawBottomBorder)
 	{
-		e->Graphics->DrawLine(SystemPens::ButtonHighlight, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 3, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 3);
-		e->Graphics->DrawLine(SystemPens::ButtonShadow, toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 2, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 2);
+		e->Graphics->DrawLine(GetSeperatorLightPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 3, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 3);
+		e->Graphics->DrawLine(GetSeperatorDarkPen(), toolbar->ClientRectangle.Left, toolbar->ClientRectangle.Bottom - 2, toolbar->ClientRectangle.Right, toolbar->ClientRectangle.Bottom - 2);
 	}
 }
 
@@ -239,11 +257,11 @@ void BaseToolbarRenderer::DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectan
 {
 	// Draw highlight line at top if not first row
 	if (!firstRow)
-		g->DrawLine(SystemPens::ButtonHighlight, rowRect->Left, rowRect->Top, rowRect->Right, rowRect->Top);
+		g->DrawLine(GetSeperatorLightPen(), rowRect->Left, rowRect->Top, rowRect->Right, rowRect->Top);
 	
 	// Draw shadow line at bottom if not last row
 	if (!lastRow)
-		g->DrawLine(SystemPens::ButtonShadow, rowRect->Left, rowRect->Bottom, rowRect->Right, rowRect->Bottom);
+		g->DrawLine(GetSeperatorDarkPen(), rowRect->Left, rowRect->Bottom, rowRect->Right, rowRect->Bottom);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

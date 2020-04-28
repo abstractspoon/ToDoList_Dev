@@ -22,6 +22,17 @@ namespace Abstractspoon
 				static void FixupButtonSizes(Windows::Forms::ToolStrip^ toolbar);
 				static void Sort(Windows::Forms::ToolStripItemCollection^ items);
 
+				enum class ItemState
+				{
+					Normal,
+					Disabled,
+					Pressed,
+					Checked,
+					Hot,
+				};
+
+				static ItemState GetItemState(Windows::Forms::ToolStripItem^ item);
+
 			protected:
 				ref class ToolStripItemComparer : Collections::IComparer
 				{
@@ -50,6 +61,9 @@ namespace Abstractspoon
 
 				virtual void DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
 				virtual void DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow);
+
+				virtual Drawing::Pen^ GetSeperatorLightPen() { return Drawing::SystemPens::ButtonHighlight; }
+				virtual Drawing::Pen^ GetSeperatorDarkPen() { return Drawing::SystemPens::ButtonShadow; }
 			};
 		}
 	}

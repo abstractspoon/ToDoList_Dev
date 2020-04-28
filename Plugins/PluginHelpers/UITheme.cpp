@@ -19,6 +19,7 @@ using namespace System::Windows::Forms;
 using namespace System::Drawing;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+using namespace Abstractspoon::Tdl::PluginHelpers::ColorUtil;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -215,35 +216,43 @@ void UIThemeToolbarRenderer::SetUITheme(UITheme^ theme)
 
 bool UIThemeToolbarRenderer::RenderButtonBackground(ToolStripItemRenderEventArgs^ e)
 {
-	auto item = e->Item;
-	bool checkedButton = (ISTYPE(item, ToolStripButton) && ASTYPE(item, ToolStripButton)->Checked);
+	Drawing::Rectangle rect(Point::Empty, e->Item->Size);
 
-	if (ValidColours() && (item->Selected || item->Pressed || checkedButton))
+	rect.Width--;
+	rect.Height--;
+
+	return DrawButtonBackground(e->Graphics, rect, Toolbars::GetItemState(e->Item));
+}
+
+bool UIThemeToolbarRenderer::DrawButtonBackground(Drawing::Graphics^ g, Drawing::Rectangle^ btnRect, Toolbars::ItemState state)
+{
+	if (!ValidColours())
+		return false;
+
+	Color fillColor = Color::Transparent;
+
+	switch (state)
 	{
-		System::Drawing::Rectangle^ rect = gcnew System::Drawing::Rectangle(Point::Empty, item->Size);
+	case Toolbars::ItemState::Hot:
+		fillColor = m_HotFillColor;
+		break;
 
-		rect->Width--;
-		rect->Height--;
+	case Toolbars::ItemState::Pressed:
+	case Toolbars::ItemState::Checked:
+		fillColor = m_PressedFillColor;
+		break;
 
-		if (item->Pressed || checkedButton)
-		{
-			Brush^ brush = gcnew SolidBrush(m_PressedFillColor);
-			e->Graphics->FillRectangle(brush, *rect);
-		}
-		else if (item->Selected)
-		{
-			Brush^ brush = gcnew SolidBrush(m_HotFillColor);
-			e->Graphics->FillRectangle(brush, *rect);
-		}
-
-		Pen^ pen = gcnew Pen(m_HotBorderColor);
-		e->Graphics->DrawRectangle(pen, *rect);
-
-		return true;
+		// else
+	case Toolbars::ItemState::Disabled:
+	case Toolbars::ItemState::Normal:
+	default:
+		return false;
 	}
 
-	// Use default renderer
-	return false;
+	g->FillRectangle(gcnew SolidBrush(fillColor), *btnRect);
+	g->DrawRectangle(gcnew Pen(m_HotBorderColor), *btnRect);
+
+	return true;
 }
 
 void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventArgs^ e)
@@ -264,6 +273,48 @@ void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRende
 		BaseToolbarRenderer::OnRenderDropDownButtonBackground(e);
 }
 
+void UIThemeToolbarRenderer::OnRenderOverflowButtonBackground(ToolStripItemRenderEventArgs^ e)
+{
+	Drawing::Rectangle rBtn(Point::Empty, e->Item->Size);
+
+	rBtn.Width -= 3; // to avoid rounded corners
+	DrawButtonBackground(e->Graphics, rBtn, Toolbars::GetItemState(e->Item));
+
+	rBtn.Y += (rBtn.Height / 4);
+	DrawDropArrow(e->Graphics, rBtn);
+}
+
+void UIThemeToolbarRenderer::OnRenderSplitButtonBackground(ToolStripItemRenderEventArgs^ e)
+{
+	ToolStripSplitButton^ btn = ASTYPE(e->Item, ToolStripSplitButton);
+
+	if ((btn != nullptr) && btn->Enabled)
+	{
+		if (RenderButtonBackground(e))
+		{
+			if (btn->DropDownButtonPressed)
+			{
+				DrawButtonBackground(e->Graphics, btn->DropDownButtonBounds, Toolbars::ItemState::Pressed);
+			}
+			else if (btn->ButtonPressed)
+			{
+				DrawButtonBackground(e->Graphics, btn->ButtonBounds, Toolbars::ItemState::Pressed);
+			}
+			else
+			{
+				e->Graphics->FillRectangle(gcnew SolidBrush(m_HotBorderColor), btn->SplitterBounds);
+			}
+		}
+
+		DrawDropArrow(e->Graphics, btn->DropDownButtonBounds);
+	}
+	else
+	{
+		// draw as regular button
+		RenderButtonBackground(e);
+	}
+}
+
 bool UIThemeToolbarRenderer::ValidColours()
 {
 	return (!ColorUtil::DrawingColor::IsTransparent(m_HotFillColor, false) &&
@@ -277,3 +328,32 @@ void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Re
 
 	DrawRowSeparator(g, rowRect, firstRow, lastRow);
 }
+
+void UIThemeToolbarRenderer::DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ arrowRect)
+{
+	// Draw the arrow glyph on the right side of the button
+	int dX = Math::Min(7, (arrowRect->Width - 2));
+	int dY = ((dX / 2) + 1);
+
+	int arrowX = arrowRect->Left + ((arrowRect->Width - dX) / 2);
+	int arrowY = arrowRect->Top + ((arrowRect->Height / 2) - 1);
+
+	auto arrowBrush = (/*Enabled ?*/ SystemBrushes::ControlText/* : SystemBrushes.ButtonShadow*/);
+	cli::array<Drawing::Point>^ arrow = gcnew cli::array<Drawing::Point>(3)
+ 	{
+ 		Drawing::Point(arrowX, arrowY), Drawing::Point(arrowX + dX, arrowY), Drawing::Point(arrowX + (dX / 2), arrowY + dY)
+ 	};
+
+	g->FillPolygon(arrowBrush, arrow);
+}
+
+Drawing::Pen^ UIThemeToolbarRenderer::GetSeperatorLightPen()
+{
+	return gcnew Drawing::Pen(DrawingColor::AdjustLighting(m_BkgndLightColor, 0.4f, true));
+}
+
+Drawing::Pen^ UIThemeToolbarRenderer::GetSeperatorDarkPen()
+{
+	return gcnew Drawing::Pen(DrawingColor::AdjustLighting(m_BkgndLightColor, -0.4f, true));
+}
+

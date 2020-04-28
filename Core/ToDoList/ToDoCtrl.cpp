@@ -7790,6 +7790,7 @@ CString CToDoCtrl::GetFriendlyProjectName(int nUntitledIndex) const
 		else
 		{
 			sProjectName = CEnString(IDS_TDC_UNTITLEDFILE);
+			Misc::Trim(sProjectName);
 
 			if (nUntitledIndex > 0)
 				sProjectName += Misc::Format(nUntitledIndex);
@@ -11789,7 +11790,9 @@ TDC_ATTRIBUTE CToDoCtrl::GetFocusedControlAttribute() const
 		return TDCA_COMMENTS;
 
 	UINT nCtrlID = ::GetDlgCtrlID(hFocus);
-	ASSERT(nCtrlID);
+
+	if (nCtrlID == 0)
+		return TDCA_NONE;
 
 	TDC_ATTRIBUTE nAttrib = MapCtrlIDToAttribute(nCtrlID);
 

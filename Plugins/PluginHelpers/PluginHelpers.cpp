@@ -7,6 +7,8 @@
 
 #include <Interfaces\IEnums.h>
 
+#include <Shared\Misc.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System::IO;
@@ -51,6 +53,21 @@ MarshalledString::~MarshalledString()
 MarshalledString::operator LPCWSTR() 
 { 
 	return m_wszGlobal; 
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+bool StringUtil::FindReplace(String^ source, String^ findText, String^ replaceText,
+							bool matchWhole, bool matchCase, String^% result)
+{
+	MarshalledString msSearchIn(source), msSearchFor(findText), msReplaceWith(replaceText);
+	CString sSearchIn(msSearchIn), sSearchFor(msSearchFor), sReplaceWith(msReplaceWith);
+
+	if (0 == Misc::Replace(sSearchFor, sReplaceWith, sSearchIn, (BOOL)matchCase, (BOOL)matchWhole))
+		return false;
+
+	result = gcnew String(sSearchIn);
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

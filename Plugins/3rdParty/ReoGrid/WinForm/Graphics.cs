@@ -813,7 +813,8 @@ namespace unvell.ReoGrid.WinForm
 
 			double s = 0, c = 0;
 
-			//if (sf == null) sf = new System.Drawing.StringFormat(System.Drawing.StringFormat.GenericTypographic);
+			if (sf == null)
+				sf = new System.Drawing.StringFormat(System.Drawing.StringFormat.GenericTypographic);
 
 			if (cell.Style.RotationAngle != 0)
 			{

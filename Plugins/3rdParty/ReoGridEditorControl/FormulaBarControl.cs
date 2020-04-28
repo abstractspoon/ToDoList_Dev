@@ -110,6 +110,20 @@ namespace unvell.ReoGrid.Editor
 
 		}
 
+		public new Color BackColor
+		{
+			get { return base.BackColor; }
+			set
+			{
+				base.BackColor = value;
+
+				this.leftPanel.BackColor = value;
+				this.panel1.BackColor = value;
+				this.panel2.BackColor = value;
+				this.pictureBox1.BackColor = value;
+			}
+		}
+
 		private bool dragging = false;
 
 		protected override void OnPaint(PaintEventArgs e)
