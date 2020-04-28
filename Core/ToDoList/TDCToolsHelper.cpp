@@ -335,6 +335,7 @@ CString CTDCToolsHelper::EscapeCharacters(const CString& sValue, BOOL bWebTool)
 
 int CTDCToolsHelper::RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter)
 {
+	ASSERT(toolbar.GetSafeHwnd());
 	int nRemoved = 0;
 	CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
 
@@ -368,6 +369,8 @@ int CTDCToolsHelper::RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter)
 
 void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped)
 {
+	ASSERT(toolbar.GetSafeHwnd());
+
 	// remove tools first
 	RemoveToolsFromToolbar(toolbar, nCmdAfter);
 	
