@@ -1844,6 +1844,8 @@ void CTreeListSyncer::HandleItemExpanded(HWND hwndTree, HTREEITEM hti, BOOL bExp
 
 	if (bParentExpanded)
 	{
+		RefreshSize();
+
 		// make sure the tree is redrawn first before resyncing the list
 		::InvalidateRect(hwndTree, NULL, FALSE);
 		::UpdateWindow(hwndTree);
