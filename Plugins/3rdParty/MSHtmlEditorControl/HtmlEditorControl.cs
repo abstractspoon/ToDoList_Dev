@@ -2503,26 +2503,42 @@ namespace MSDN.Html.Editor
             // prompt the user for the new href
             using (EnterImageForm dialog = new EnterImageForm())
             {
+                int imageWidth = ((image == null) ? -1 : image.width);
+
                 // set the dialog properties
                 dialog.ImageLink = imageHref;
                 dialog.ImageText = imageText;
                 dialog.ImageAlign = imageAlign;
-				dialog.ImageWidth = ((image == null) ? -1 : image.width);
+				dialog.ImageWidth = imageWidth;
 
                 PreShowDialog(dialog);
 
-                // based on the user interaction perform the neccessary action
+                // based on the user interaction perform the necessary action
                 // after one has a valid image href
                 if (dialog.ShowDialog() == DialogResult.OK)
                 {
 					PostShowDialog(dialog);
 
-					if (image == null)
-						return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign, dialog.ImageWidth);
+                    // Brand new image
+                    if (image == null)
+                        return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign, dialog.ImageWidth);
 
-					// else
-					ModifyImage(image, dialog.ImageText, dialog.ImageAlign, dialog.ImageWidth);
-				}
+                    // Modifying an existing image w/o changing the url
+                    if (dialog.ImageLink.Equals(imageHref, StringComparison.InvariantCultureIgnoreCase))
+                        return ModifyImage(image, dialog.ImageText, dialog.ImageAlign, dialog.ImageWidth);
+
+                    // Changing the Url requires replacing the whole image
+                    var domNode = (image as mshtmlDomNode);
+                    domNode.parentNode.removeChild(domNode);
+
+                    ClearSelection();
+
+                    if (InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign, dialog.ImageWidth))
+                        return true;
+
+                    // Then if the image insert fails we have to restore the old image
+                    InsertImage(imageHref, imageText, imageAlign, imageWidth);
+                }
 			}
 
 			return false;
@@ -2547,8 +2563,11 @@ namespace MSDN.Html.Editor
 			return true;
 		}
 
-		protected void ModifyImage(mshtmlImageElement image, string imageText, ImageAlignOption imageAlign, int imageWidth)
+		protected bool ModifyImage(mshtmlImageElement image, string imageText, ImageAlignOption imageAlign, int imageWidth)
 		{
+            if (image == null)
+                return false;
+
 			image.alt = (String.IsNullOrEmpty(imageText) ? image.href : imageText);
 
 			if (imageAlign != ImageAlignOption.Default)
@@ -2564,6 +2583,8 @@ namespace MSDN.Html.Editor
 				image.width = imageWidth;
 			else
 				(image as mshtmlElement).removeAttribute("width");
+
+            return true;
 		}
 
 		/// <summary>
