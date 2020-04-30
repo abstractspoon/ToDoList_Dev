@@ -10,10 +10,10 @@ namespace HTMLReportExporter
 
 	public struct TaskAttribute
 	{
-		public TaskAttribute(Task.Attribute id, String label, String basePlaceholder) : this()
+		public TaskAttribute(Task.Attribute id, String basePlaceholder) : this()
 		{
 			Id = id;
-			Label = label;
+			Label = TaskList.GetAttributeName(id);
 			BasePlaceholder = basePlaceholder;
 		}
 
@@ -33,37 +33,37 @@ namespace HTMLReportExporter
 
 		public static TaskAttribute[] Attributes =
 		{
-			new TaskAttribute(Task.Attribute.AllocatedBy,       "Allocated By",             "allocBy" ),
-			new TaskAttribute(Task.Attribute.AllocatedTo,       "Allocated To",             "allocTo" ),
-			new TaskAttribute(Task.Attribute.Category,          "Category",                 "cat" ),
-			new TaskAttribute(Task.Attribute.Cost,              "Cost",                     "cost" ),
-			new TaskAttribute(Task.Attribute.CreatedBy,         "Created By",               "createBy" ),
-			new TaskAttribute(Task.Attribute.CreationDate,      "Creation Date",            "createDate" ),
-			new TaskAttribute(Task.Attribute.Dependency,        "Dependency",               "depends" ),
-			new TaskAttribute(Task.Attribute.DoneDate,          "Completion Date",          "doneDate" ),
-			new TaskAttribute(Task.Attribute.DueDate,           "Due Date",                 "dueDate" ),
-			new TaskAttribute(Task.Attribute.ExternalId,        "External ID",              "extId" ),
-			new TaskAttribute(Task.Attribute.FileReference,     "File Link",                "filelink" ),
-			new TaskAttribute(Task.Attribute.Flag,              "Flag",                     "flag" ),
-			new TaskAttribute(Task.Attribute.HtmlComments,      "Comments",                 "comments" ),
-			new TaskAttribute(Task.Attribute.Id,                "Task ID",                  "id" ),
-			new TaskAttribute(Task.Attribute.LastModifiedBy,    "Last Modified By",         "modBy" ),
-			new TaskAttribute(Task.Attribute.LastModifiedDate,  "Last Modified Date",       "modDate" ),
-			new TaskAttribute(Task.Attribute.ParentId,          "Parent Task ID",           "pid" ),
-			new TaskAttribute(Task.Attribute.Path,              "Path",                     "path" ),
-			new TaskAttribute(Task.Attribute.Percent,           "Percent Done",             "percent" ),
-			new TaskAttribute(Task.Attribute.Position,          "Position",                 "pos" ),
-			new TaskAttribute(Task.Attribute.Priority,          "Priority",                 "priority" ),
-			new TaskAttribute(Task.Attribute.Recurrence,        "Recurrence",               "recurs" ),
-			new TaskAttribute(Task.Attribute.Risk,              "Risk",                     "risk" ),
-			new TaskAttribute(Task.Attribute.StartDate,         "Start Date",               "startDate" ),
-			new TaskAttribute(Task.Attribute.Status,            "Status",                   "status" ),
-			new TaskAttribute(Task.Attribute.SubtaskDone,       "Subtask Completion",       "subtaskDone" ),
-			new TaskAttribute(Task.Attribute.Tags,              "Tags",                     "tag" ),
-			new TaskAttribute(Task.Attribute.TimeEstimate,      "Time Estimate",            "est" ),
-			new TaskAttribute(Task.Attribute.TimeSpent,         "Time Spent",               "spent" ),
-			new TaskAttribute(Task.Attribute.Title,             "Title",                    "title" ),
-			new TaskAttribute(Task.Attribute.Version,           "Version",                  "ver" ),
+			new TaskAttribute(Task.Attribute.AllocatedBy,       "allocBy" ),
+			new TaskAttribute(Task.Attribute.AllocatedTo,       "allocTo" ),
+			new TaskAttribute(Task.Attribute.Category,          "cat" ),
+			new TaskAttribute(Task.Attribute.Cost,              "cost" ),
+			new TaskAttribute(Task.Attribute.CreatedBy,         "createBy" ),
+			new TaskAttribute(Task.Attribute.CreationDate,      "createDate" ),
+			new TaskAttribute(Task.Attribute.Dependency,        "depends" ),
+			new TaskAttribute(Task.Attribute.DoneDate,          "doneDate" ),
+			new TaskAttribute(Task.Attribute.DueDate,           "dueDate" ),
+			new TaskAttribute(Task.Attribute.ExternalId,        "extId" ),
+			new TaskAttribute(Task.Attribute.FileReference,     "filelink" ),
+			new TaskAttribute(Task.Attribute.Flag,              "flag" ),
+			new TaskAttribute(Task.Attribute.HtmlComments,      "comments" ),
+			new TaskAttribute(Task.Attribute.Id,                "id" ),
+			new TaskAttribute(Task.Attribute.LastModifiedBy,    "modBy" ),
+			new TaskAttribute(Task.Attribute.LastModifiedDate,  "modDate" ),
+			new TaskAttribute(Task.Attribute.ParentId,          "pid" ),
+			new TaskAttribute(Task.Attribute.Path,              "path" ),
+			new TaskAttribute(Task.Attribute.Percent,           "percent" ),
+			new TaskAttribute(Task.Attribute.Position,          "pos" ),
+			new TaskAttribute(Task.Attribute.Priority,          "priority" ),
+			new TaskAttribute(Task.Attribute.Recurrence,        "recurs" ),
+			new TaskAttribute(Task.Attribute.Risk,              "risk" ),
+			new TaskAttribute(Task.Attribute.StartDate,         "startDate" ),
+			new TaskAttribute(Task.Attribute.Status,            "status" ),
+			new TaskAttribute(Task.Attribute.SubtaskDone,       "subtaskDone" ),
+			new TaskAttribute(Task.Attribute.Tags,              "tag" ),
+			new TaskAttribute(Task.Attribute.TimeEstimate,      "est" ),
+			new TaskAttribute(Task.Attribute.TimeSpent,         "spent" ),
+			new TaskAttribute(Task.Attribute.Title,             "title" ),
+			new TaskAttribute(Task.Attribute.Version,           "ver" ),
 		};
 	}
 

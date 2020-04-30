@@ -284,7 +284,9 @@ namespace Abstractspoon
 				Boolean AddCustomAttribute(String^ sID, String^ sLabel, String^ sColumn);
 				Boolean SetMetaData(String^ sKey, String^ sValue);
 				Boolean ClearMetaData(String^ sKey);
-
+				
+				static String^ GetAttributeName(Task::Attribute attrib);
+				
 			private: // -------------------------------------------------------
 				ITASKLISTBASE* m_pTaskList;
 				const ITASKLISTBASE* m_pConstTaskList;

@@ -162,6 +162,54 @@ Task^ TaskList::GetFirstTask()
 	return gcnew Task(m_pTaskList, m_pTaskList->GetFirstTask(nullptr));
 }
 
+String^ TaskList::GetAttributeName(Task::Attribute attrib)
+{
+	switch (attrib)
+	{
+	case Task::Attribute::AllocatedBy:       return L"Allocated By";        
+	case Task::Attribute::AllocatedTo:       return L"Allocated To";        
+	case Task::Attribute::Category:			 return L"Category";            
+	case Task::Attribute::Color:			 return L"Colour";  
+	case Task::Attribute::Comments:          return L"Comments";  
+	case Task::Attribute::Cost:              return L"Cost";                
+	case Task::Attribute::CreatedBy:         return L"Created By";          
+	case Task::Attribute::CreationDate:      return L"Creation Date";       
+	case Task::Attribute::Dependency:        return L"Dependency";          
+	case Task::Attribute::DoneDate:          return L"Completion Date";     
+	case Task::Attribute::DueDate:           return L"Due Date";            
+	case Task::Attribute::ExternalId:        return L"External ID";         
+	case Task::Attribute::FileReference:     return L"File Link";           
+	case Task::Attribute::Flag:              return L"Flag";                
+	case Task::Attribute::HtmlComments:      return L"Comments";            
+	case Task::Attribute::Icon:              return L"Icon";  
+	case Task::Attribute::Id:                return L"Task ID";             
+	case Task::Attribute::LastModifiedBy:    return L"Last Modified By";    
+	case Task::Attribute::LastModifiedDate:  return L"Last Modified Date";  
+	case Task::Attribute::ParentId:          return L"Parent Task ID";      
+	case Task::Attribute::Path:              return L"Path";                
+	case Task::Attribute::Percent:           return L"Percent Done";        
+	case Task::Attribute::Position:          return L"Position";            
+	case Task::Attribute::Priority:          return L"Priority";            
+	case Task::Attribute::ProjectName:       return L"Project Name";  
+	case Task::Attribute::Recurrence:        return L"Recurrence";          
+	case Task::Attribute::Risk:              return L"Risk";                
+	case Task::Attribute::StartDate:         return L"Start Date";          
+	case Task::Attribute::Status:            return L"Status";              
+	case Task::Attribute::SubtaskDone:       return L"Subtask Completion";  
+	case Task::Attribute::Tags:              return L"Tags";                
+	case Task::Attribute::TimeEstimate:      return L"Time Estimate";       
+	case Task::Attribute::TimeSpent:         return L"Time Spent";          
+	case Task::Attribute::Title:             return L"Title";               
+	case Task::Attribute::Version:           return L"Version";             
+
+	case Task::Attribute::CustomAttribute:   break;
+	case Task::Attribute::OffsetTask:        break;
+	case Task::Attribute::MetaData:          break;
+	}
+
+	return L"";
+}
+
 // ---------------------------------------------------------
 
 #define GETTASKVAL(fn, errret) \
