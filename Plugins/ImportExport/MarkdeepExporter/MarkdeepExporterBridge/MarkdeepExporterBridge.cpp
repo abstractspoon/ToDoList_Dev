@@ -34,7 +34,7 @@ const LPCWSTR MARKDEEPEXPORTER_NAME = L"Markdeep";
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CMarkdeepExporterBridge::CMarkdeepExporterBridge() : m_hIcon(NULL)
+CMarkdeepExporterBridge::CMarkdeepExporterBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
 	HMODULE hMod = LoadLibrary(L"MarkdeepExporterBridge.dll"); // us
 
@@ -46,9 +46,10 @@ void CMarkdeepExporterBridge::Release()
 	delete this;
 }
 
-void CMarkdeepExporterBridge::SetLocalizer(ITransText* /*pTT*/)
+void CMarkdeepExporterBridge::SetLocalizer(ITransText* pTT)
 {
-	// TODO
+	if (m_pTT == nullptr)
+		m_pTT = pTT;
 }
 
 HICON CMarkdeepExporterBridge::GetIcon() const
@@ -89,10 +90,13 @@ IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFi
    }
 
 	// call into out sibling C# module to do the actual work
-	msclr::auto_gcroot<MarkdeepExporterCore^> expCore = gcnew MarkdeepExporterCore();
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
-	
+	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
+	msclr::auto_gcroot<String^> typeID = gcnew String(MARKDEEPEXPORTER_GUID);
+
+	msclr::auto_gcroot<MarkdeepExporterCore^> expCore = gcnew MarkdeepExporterCore(typeID.get(), trans.get());
+
 	// do the export
 	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
 		return IIER_SUCCESS;

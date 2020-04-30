@@ -12,12 +12,27 @@ namespace MarkdeepExporter
 {
     public class MarkdeepExporterCore
     {
-        public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
+		private Translator m_Trans;
+		private String m_TypeId;
+
+		private List<Tuple<String, Task.Attribute>> m_Attributes;
+
+		// --------------------------------------------------------------------------------------
+
+		public MarkdeepExporterCore(String typeId, Translator trans)
+		{
+			m_TypeId = typeId;
+			m_Trans = trans;
+		}
+
+		// ------------------------------------------------------------------------
+
+		public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
-            UInt32 taskCount = srcTasks.GetTaskCount();
+			if (!InitialiseAttributeList(srcTasks))
+				return false;
 
             BulletedMarkdownContainer mdTasks = new BulletedMarkdownContainer();
-
             Task task = srcTasks.GetFirstTask();
 
             while (task.IsValid())
@@ -73,14 +88,56 @@ namespace MarkdeepExporter
         {
             StringBuilder taskAttrib = new StringBuilder();
 
-            taskAttrib.Append("**`" + task.GetTitle() + "`**");
-            taskAttrib.Append("  ").AppendLine().Append("Priority: " + task.GetPriority(false).ToString());
-            taskAttrib.Append("  ").AppendLine().Append("Allocated to: " + task.FormatAllocatedTo(", "));
-            taskAttrib.Append(task.GetComments());
+            taskAttrib.AppendLine("**`" + task.GetTitle() + "`**");
+//             taskAttrib.Append("  ").AppendLine("Priority: " + task.GetPriority(false).ToString());
+//             taskAttrib.Append("  ").AppendLine("Allocated to: " + task.FormatAllocatedTo(", "));
+            taskAttrib.Append("  ").AppendLine(task.GetComments());
 
             return taskAttrib.AppendLine().ToString();
         }
-    }
+
+		private bool InitialiseAttributeList(TaskList tasks)
+		{
+			m_Attributes = new List<Tuple<String, Task.Attribute>>();
+
+			// Build a list of sorted attributes
+			// excluding certain attributes whose positions are fixed
+			foreach (Task.Attribute attrib in Enum.GetValues(typeof(Task.Attribute)))
+			{
+				switch (attrib)
+				{
+					case Task.Attribute.Title:
+						// Always first
+						break;
+
+					case Task.Attribute.Comments:
+						// Always last
+						break;
+
+					case Task.Attribute.HtmlComments:
+						// Always last
+						break;
+
+					default:
+						if (tasks.IsAttributeAvailable(attrib))
+						{
+							var attribName = TaskList.GetAttributeName(attrib);
+
+							if (!String.IsNullOrEmpty(attribName))
+								m_Attributes.Add(new Tuple<string, Task.Attribute>(m_Trans.Translate(attribName), attrib));
+						}
+						break;
+				}
+			}
+
+			if (m_Attributes.Count > 0)
+			{
+				
+			}
+
+			return (m_Attributes.Count > 0);
+		}
+	}
 
     public class BulletedMarkdownContainer : MarkdownContainer
     {

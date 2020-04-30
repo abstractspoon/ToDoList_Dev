@@ -27,6 +27,7 @@ public:
    IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey);
 
 protected:
+	ITransText* m_pTT;
 	HICON m_hIcon;
 };
 
