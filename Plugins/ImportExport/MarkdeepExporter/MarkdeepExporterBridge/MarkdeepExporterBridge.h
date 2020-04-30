@@ -8,10 +8,10 @@
 #include <Interfaces\IImportExport.h>
 
 // This class is exported from ExporterBridge.dll
-class CMarkdownImpExpBridge : public IExportTasklist
+class CMarkdeepExporterBridge : public IExportTasklist
 {
 public:
-	CMarkdownImpExpBridge();
+	CMarkdeepExporterBridge();
 
    void Release(); // releases the interface
 
@@ -25,6 +25,9 @@ public:
 
    IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey);
    IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey);
+
+protected:
+	HICON m_hIcon;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()
@@ -34,7 +37,7 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IExportTasklist* CreateExportInterface()
 {
-   return new CMarkdownImpExpBridge();
+   return new CMarkdeepExporterBridge();
 }
 
 DLL_DECLSPEC IImportTasklist* CreateImportInterface()

@@ -2,7 +2,8 @@
 //
 
 #include "stdafx.h"
-#include "MarkdownImpExpBridge.h"
+#include "resource.h"
+#include "MarkdeepExporterBridge.h"
 
 #include <unknwn.h>
 #include <tchar.h>
@@ -18,7 +19,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace MarkdownImpExp;
+using namespace MarkdeepExporter;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
@@ -26,57 +27,58 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-const LPCWSTR MARKDOWNEXPORTER_GUID = L"49A52D2D-7661-49AF-949A-E60066B300FC";
-const LPCWSTR MARKDOWNEXPORTER_NAME = L"Markdown";
+const LPCWSTR MARKDEEPEXPORTER_GUID = L"49A52D2D-7661-49AF-949A-E60066B300FC";
+const LPCWSTR MARKDEEPEXPORTER_NAME = L"Markdeep";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // This is the constructor of a class that has been exported.
 // see ExporterBridge.h for the class definition
-CMarkdownImpExpBridge::CMarkdownImpExpBridge()
+CMarkdeepExporterBridge::CMarkdeepExporterBridge() : m_hIcon(NULL)
 {
-	return;
+	HMODULE hMod = LoadLibrary(L"MarkdeepExporterBridge.dll"); // us
+
+	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_MARKDEEP));
 }
 
-void CMarkdownImpExpBridge::Release()
+void CMarkdeepExporterBridge::Release()
 {
 	delete this;
 }
 
-void CMarkdownImpExpBridge::SetLocalizer(ITransText* /*pTT*/)
+void CMarkdeepExporterBridge::SetLocalizer(ITransText* /*pTT*/)
 {
 	// TODO
 }
 
-HICON CMarkdownImpExpBridge::GetIcon() const
+HICON CMarkdeepExporterBridge::GetIcon() const
 {
-	// TODO
-	return NULL;
+	return m_hIcon;
 }
 
-LPCWSTR CMarkdownImpExpBridge::GetMenuText() const
+LPCWSTR CMarkdeepExporterBridge::GetMenuText() const
 {
-	return MARKDOWNEXPORTER_NAME;
+	return MARKDEEPEXPORTER_NAME;
 }
 
-LPCWSTR CMarkdownImpExpBridge::GetFileFilter() const
+LPCWSTR CMarkdeepExporterBridge::GetFileFilter() const
 {
-	return L"md";
+	return L"md.html";
 }
 
-LPCWSTR CMarkdownImpExpBridge::GetFileExtension() const
+LPCWSTR CMarkdeepExporterBridge::GetFileExtension() const
 {
-	return L"md";
+	return L"md.html";
 }
 
-LPCWSTR CMarkdownImpExpBridge::GetTypeID() const
+LPCWSTR CMarkdeepExporterBridge::GetTypeID() const
 {
-	return MARKDOWNEXPORTER_GUID;
+	return MARKDEEPEXPORTER_GUID;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-IIMPORTEXPORT_RESULT CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
    const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14);
 
@@ -87,7 +89,7 @@ IIMPORTEXPORT_RESULT CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile
    }
 
 	// call into out sibling C# module to do the actual work
-	msclr::auto_gcroot<MarkdownImpExpCore^> expCore = gcnew MarkdownImpExpCore();
+	msclr::auto_gcroot<MarkdeepExporterCore^> expCore = gcnew MarkdeepExporterCore();
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<TaskList^> srcTasks = gcnew TaskList(pSrcTaskFile);
 	
@@ -98,7 +100,7 @@ IIMPORTEXPORT_RESULT CMarkdownImpExpBridge::Export(const ITaskList* pSrcTaskFile
 	return IIER_OTHER;
 }
 
-IIMPORTEXPORT_RESULT CMarkdownImpExpBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 	return IIER_OTHER;

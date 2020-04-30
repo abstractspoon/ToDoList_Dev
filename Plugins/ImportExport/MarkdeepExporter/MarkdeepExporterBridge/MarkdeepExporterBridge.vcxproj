@@ -12,8 +12,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{4BD0C76E-2582-470F-9468-FDC94389159F}</ProjectGuid>
-    <RootNamespace>MarkdownImpExpBridge</RootNamespace>
-    <ProjectName>MarkdownImpExpBridge</ProjectName>
+    <RootNamespace>MarkdeepExporterBridge</RootNamespace>
+    <ProjectName>MarkdeepExporterBridge</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -94,7 +94,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
     </ClCompile>
-    <ClCompile Include="MarkdownImpExpBridge.cpp">
+    <ClCompile Include="MarkdeepExporterBridge.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</CompileAsManaged>
     </ClCompile>
@@ -103,13 +103,13 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MarkdownImpExpBridge.h" />
+    <ClInclude Include="MarkdeepExporterBridge.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MarkdownImpExpBridge.rc" />
+    <ResourceCompile Include="MarkdeepExporterBridge.rc" />
   </ItemGroup>
   <ItemGroup>
     <None Include="markdown.ico" />
@@ -118,7 +118,7 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MarkdownImpExpCore\MarkdownImpExpCore.csproj">
+    <ProjectReference Include="..\MarkdeepExporterCore\MarkdeepExporterCore.csproj">
       <Project>{fa1f07f6-7653-4fb8-8bec-91c5b381c0dd}</Project>
     </ProjectReference>
   </ItemGroup>

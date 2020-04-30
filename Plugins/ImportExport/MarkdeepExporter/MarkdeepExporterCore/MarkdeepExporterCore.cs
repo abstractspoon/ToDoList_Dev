@@ -8,9 +8,9 @@ using MarkdownLog;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace MarkdownImpExp
+namespace MarkdeepExporter
 {
-    public class MarkdownImpExpCore
+    public class MarkdeepExporterCore
     {
         public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {

@@ -21,7 +21,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MarkdownImpExpBridge.cpp">
+    <ClCompile Include="MarkdeepExporterBridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,7 +32,7 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MarkdownImpExpBridge.h">
+    <ClInclude Include="MarkdeepExporterBridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
@@ -40,7 +40,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="MarkdownImpExpBridge.rc">
+    <ResourceCompile Include="MarkdeepExporterBridge.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>
