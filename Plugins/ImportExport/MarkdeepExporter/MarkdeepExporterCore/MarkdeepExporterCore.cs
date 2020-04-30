@@ -27,8 +27,19 @@ namespace MarkdeepExporter
                 task = task.GetNextTask();
             }
 
-            Debug.Write(mdTasks.ToMarkdown());
-            System.IO.File.WriteAllText(sDestFilePath, mdTasks.ToMarkdown());
+            StringBuilder mdFile = new StringBuilder();
+
+            mdFile.AppendLine("<meta charset=\"utf-8\">");
+            mdFile.AppendLine(mdTasks.ToMarkdown());
+
+            mdFile.AppendLine("<!-- Markdeep: -->");
+            mdFile.AppendLine("<style class=\"fallback\">body{visibility:hidden;white-space:pre;font-family:monospace}</style>");
+            mdFile.AppendLine("<script src=\"markdeep.min.js\" charset=\"utf-8\"></script>");
+            mdFile.AppendLine("<script src=\"https://casual-effects.com/markdeep/latest/markdeep.min.js\" charset=\"utf-8\"></script>");
+            mdFile.AppendLine("<script>window.alreadyProcessedMarkdeep||(document.body.style.visibility=\"visible\")</script>");
+
+            Debug.Write(mdFile.ToString());
+            System.IO.File.WriteAllText(sDestFilePath, mdFile.ToString(), Encoding.UTF8);
 
             return true;
         }
@@ -36,16 +47,15 @@ namespace MarkdeepExporter
         protected bool ExportTask(Task task, BulletedMarkdownContainer mdParent, bool root)
         {
             // add ourselves
-            
             mdParent.Append(new RawMarkdown(FormatTaskAttributes(task, root)));
-
-            // then our subtasks in a container
-            BulletedMarkdownContainer mdSubtasks = new BulletedMarkdownContainer();
 
             Task subtask = task.GetFirstSubtask();
 
             if (subtask.IsValid())
             {
+                // then our subtasks in a container
+                BulletedMarkdownContainer mdSubtasks = new BulletedMarkdownContainer();
+
                 while (subtask.IsValid())
                 {
                     ExportTask(subtask, mdSubtasks, false);
@@ -66,6 +76,7 @@ namespace MarkdeepExporter
             taskAttrib.Append("**`" + task.GetTitle() + "`**");
             taskAttrib.Append("  ").AppendLine().Append("Priority: " + task.GetPriority(false).ToString());
             taskAttrib.Append("  ").AppendLine().Append("Allocated to: " + task.FormatAllocatedTo(", "));
+            taskAttrib.Append(task.GetComments());
 
             return taskAttrib.AppendLine().ToString();
         }
