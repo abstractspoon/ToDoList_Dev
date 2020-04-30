@@ -1857,7 +1857,7 @@ BOOL CToDoListWnd::HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist)
 		FileMisc::LogText(_T("Saving of the file '%s' failed with the error code: %d"), szTasklist, nErr);
 		///////////////////////////////////////////////////////////////////////
 
-		CMessageBox::AfxShow(IDS_SAVETASKLIST_TITLE, sMessage, MB_OK);
+		CMessageBox::AfxShow(IDS_SAVETASKLIST_TITLE, sMessage, MB_OK | MB_ICONEXCLAMATION);
 	}
 	
 	return FALSE; // not handled
@@ -9579,14 +9579,19 @@ void CToDoListWnd::OnToolsCheckout()
 			break;
 		}
 
-		// else handle error
+		// Handle error
 		CString sFilePath(m_mgrToDoCtrls.GetFilePath(nSel));
 
-		if ((nFileRes != TDCF_OTHER) || sCheckedOutTo.IsEmpty())
+		if (nFileRes != TDCF_SSC_CHECKEDOUTBYOTHER)
 		{
+			ASSERT(sCheckedOutTo.IsEmpty());
+
 			HandleSaveTasklistError(nFileRes, sFilePath);
 			break;
 		}
+
+		// Handle 'checked out to other' error
+		ASSERT(!sCheckedOutTo.IsEmpty());
 		
 		SYSTEMTIME stLastMod;
 		FileMisc::GetFileLastModified(sFilePath, stLastMod);

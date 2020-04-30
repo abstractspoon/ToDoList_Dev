@@ -4613,7 +4613,7 @@ BEGIN
     IDS_CONFIRMSAVE_TITLE   "Confirm Save"
     IDS_STATUSCHANGE_TITLE  "Status Change"
     IDS_TIMESTAMPCHANGE_TITLE "Timestamp Change"
-    IDS_CHECKOUT_TITLE      "Checkout Tasklist for Editing"
+    IDS_CHECKOUT_TITLE      "Check Out Tasklist for Editing"
 END
 
 STRINGTABLE DISCARDABLE 
