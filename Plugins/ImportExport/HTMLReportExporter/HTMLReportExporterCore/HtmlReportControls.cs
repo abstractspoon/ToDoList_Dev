@@ -83,6 +83,8 @@ namespace HTMLReportExporter
 			base.SetControlFont(font);
 
 			this.ToolBar.Font = m_ControlsFont;
+
+			Toolbars.FixupButtonSizes(this.ToolBar);
 		}
 
 		public new void SetTranslator(Translator trans)
