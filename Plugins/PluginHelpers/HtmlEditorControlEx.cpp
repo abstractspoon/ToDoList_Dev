@@ -52,14 +52,13 @@ void HtmlEditorControlEx::SetUITheme(UITheme^ theme)
 {
 	m_toolbarRenderer->SetUITheme(theme);
 
+	// This sets toolbar back colour too
 	BackColor = theme->GetAppDrawingColor(UITheme::AppColor::AppBackLight);
-	ToolBar->BackColor = BackColor;
 }
 
 void HtmlEditorControlEx::InitializeComponentEx()
 {
 	ToolBar->Renderer = m_toolbarRenderer;
-	ContextMenu->Renderer = m_toolbarRenderer;
 
 	if (m_ControlsFont != nullptr)
 	{

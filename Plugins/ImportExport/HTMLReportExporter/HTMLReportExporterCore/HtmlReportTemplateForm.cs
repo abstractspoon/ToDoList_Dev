@@ -74,9 +74,8 @@ namespace HTMLReportExporter
 			m_ChangeTimer.Interval = 500;
 
 			InitializeComponent();
-            InitialiseControlsFont();
+            InitialiseFontAndColors();
 			DoHighDPIFixups();
-            SetTabsToolbarBackColor();
 
 			// Build list custom attribute IDs for later use
 			if (tasks.HasCustomAttributes())
@@ -99,7 +98,7 @@ namespace HTMLReportExporter
 				this.Size = prevSize;
 		}
 
-        private void InitialiseControlsFont()
+        private void InitialiseFontAndColors()
         {
             var controlsFont = new Font("Tahoma", 8.25f);
 
@@ -112,6 +111,11 @@ namespace HTMLReportExporter
             htmlReportFooterControl.SetControlFont(controlsFont);
 
             toolStripFileHistory.Font = controlsFont;
+
+            this.htmlReportHeaderControl.BackColor = headerPage.BackColor;
+            this.htmlReportTitleControl.BackColor = headerPage.BackColor;
+            this.htmlReportTasksControl.BackColor = headerPage.BackColor;
+            this.htmlReportFooterControl.BackColor = headerPage.BackColor;
         }
 
         private Size LoadPreferences()
@@ -176,22 +180,6 @@ namespace HTMLReportExporter
 
             FormsUtil.RecalcDropWidth(toolStripFileHistory.ComboBox);
 		}
-
-		private void SetTabsToolbarBackColor()
-        {
-            // Since we have no theme, we set the toolbar's 
-            // back color to the back color of the tabs
-            var toolbarTheme = new UITheme();
-
-            toolbarTheme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, headerPage.BackColor);
-            toolbarTheme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, headerPage.BackColor);
-            toolbarTheme.RecalcToolbarHotColor();
-
-            this.htmlReportHeaderControl.SetUITheme(toolbarTheme);
-            this.htmlReportTitleControl.SetUITheme(toolbarTheme);
-            this.htmlReportTasksControl.SetUITheme(toolbarTheme);
-            this.htmlReportFooterControl.SetUITheme(toolbarTheme);
-        }
 
 		private void DoHighDPIFixups()
 		{
