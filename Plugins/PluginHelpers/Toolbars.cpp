@@ -70,6 +70,19 @@ void Toolbars::Sort(ToolStripItemCollection^ items)
 		items->Add(ASTYPE(oAList[i], ToolStripItem));
 }
 
+int Toolbars::GetSelectedItem(ToolStripItemCollection^ items)
+{
+	int numItems = items->Count;
+
+	for (int i = 0; i < numItems; i++)
+	{
+		if (items[i]->Selected)
+			return i;
+	}
+
+	return -1;
+}
+
 int Toolbars::ToolStripItemComparer::Compare(System::Object^ obj1, System::Object^ obj2)
 {
 	auto oItem1 = dynamic_cast<ToolStripItem^>(obj1);

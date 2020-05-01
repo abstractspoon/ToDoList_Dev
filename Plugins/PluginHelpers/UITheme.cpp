@@ -5,8 +5,11 @@
 #include "UITheme.h"
 #include "ColorUtil.h"
 #include "PluginHelpers.h"
+#include "UIExtension.h"
 
+#include <Shared\OSVersion.h>
 #include <Shared\GraphicsMisc.h>
+#include <Shared\Misc.h>
 
 #include <Interfaces\UIThemeFile.h>
 
@@ -263,8 +266,53 @@ void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventAr
 
 void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEventArgs^ e)
 {
-	if (!RenderButtonBackground(e))
+	if ((COSVersion() >= OSV_WIN10) && !Misc::IsHighContrastActive())
+	{
+		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
+		e->Graphics->FillRectangle(Drawing::SystemBrushes::Window, rect);
+
+		auto itemState = Toolbars::GetItemState(e->Item);
+		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
+
+		if ((itemState == Toolbars::ItemState::Hot) || (itemState == Toolbars::ItemState::Pressed))
+		{
+			// If we're a top-level item use themed selection
+			if (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip))
+			{
+				UIExtension::SelectionRect::Draw(e->ToolStrip->Handle, e->Graphics, rect.X + 1, rect.Y, rect.Width, rect.Height, true);
+			}
+			else
+			{
+				auto selColor = Drawing::Color::FromArgb(128, Drawing::SystemColors::MenuHighlight);
+
+				rect.Inflate(-2, 0);
+				e->Graphics->FillRectangle(gcnew Drawing::SolidBrush(selColor), rect);
+			}
+		}
+	}
+	else
+	{
 		BaseToolbarRenderer::OnRenderMenuItemBackground(e);
+	}
+}
+
+void UIThemeToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e)
+{
+	if (!e->Vertical && ISTYPE(e->Item->OwnerItem, ContextMenuStrip) && (COSVersion() >= OSV_WIN10) && !Misc::IsHighContrastActive())
+	{
+		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
+		e->Graphics->FillRectangle(Drawing::SystemBrushes::Window, rect);
+
+		rect.Y += (rect.Height / 2);
+		e->Graphics->DrawLine(GetSeperatorLightPen(), rect.Left, rect.Y, rect.Right, rect.Y);
+
+		rect.Y -= 1;
+		e->Graphics->DrawLine(GetSeperatorDarkPen(), rect.Left, rect.Y, rect.Right, rect.Y);
+	}
+	else
+	{
+		BaseToolbarRenderer::OnRenderSeparator(e);
+	}
 }
 
 void UIThemeToolbarRenderer::OnRenderDropDownButtonBackground(ToolStripItemRenderEventArgs^ e)

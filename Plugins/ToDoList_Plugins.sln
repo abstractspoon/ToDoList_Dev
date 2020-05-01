@@ -164,7 +164,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SpreadsheetContentControlCo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SpreadsheetContentControlBridge", "ContentControl\SpreadsheetContentControl\SpreadsheetContentControlBridge\SpreadsheetContentControlBridge.vcxproj", "{4F912AB4-E20C-4FF6-A52E-B6D913C34F6B}"
 	ProjectSection(ProjectDependencies) = postProject
+		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
 		{699E2BDF-1266-4295-8AC0-E1C7E8D14B36} = {699E2BDF-1266-4295-8AC0-E1C7E8D14B36}
+		{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8} = {3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8}
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReoGrid", "3rdParty\ReoGrid\ReoGrid.csproj", "{8B62357A-ABBC-4DB0-8633-F1D6A6C1EA53}"

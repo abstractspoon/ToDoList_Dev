@@ -181,8 +181,13 @@ namespace SpreadsheetContentControl
 
 		private void InitialiseToolbars()
 		{
-            // Note: menus keep default rendering for consistency with app
-			this.ToolBar.Renderer = m_toolbarRenderer;
+            this.MenuBar.Renderer = m_toolbarRenderer;
+            this.RowContextMenu.Renderer = m_toolbarRenderer;
+            this.CellContextMenu.Renderer = m_toolbarRenderer;
+            this.HeaderContextMenu.Renderer = m_toolbarRenderer;
+            this.ColumnContextMenu.Renderer = m_toolbarRenderer;
+
+            this.ToolBar.Renderer = m_toolbarRenderer;
 			this.FontBar.Renderer = m_toolbarRenderer;
 			this.StatusBar.Renderer = m_toolbarRenderer;
 
@@ -253,7 +258,7 @@ namespace SpreadsheetContentControl
 
 			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
 
-            MenuBar.BackColor = SystemColors.Menu;//BackColor;
+            MenuBar.BackColor = SystemColors.Menu;
             ToolBar.BackColor = backColor;
 			FontBar.BackColor = backColor;
 			StatusBar.BackColor = backColor;
