@@ -132,7 +132,7 @@ namespace HTMLContentControl
 			base.InitialiseFeatures(true);
 
 			// Don't need the Enable Edit because we implement Ctrl+Click
-			CommandHandling.HideCommand("toolstripEnableEditing", ToolBar.Items);
+			CommandHandling.RemoveCommand("toolstripEnableEditing", ToolBar.Items);
 		}
 
 		private void OnTextChangeTimer(object sender, EventArgs e)

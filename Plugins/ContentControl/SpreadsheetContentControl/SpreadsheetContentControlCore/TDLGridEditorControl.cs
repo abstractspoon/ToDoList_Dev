@@ -231,19 +231,19 @@ namespace SpreadsheetContentControl
 		private void InitialiseFeatures()
 		{
 			// Hide unwanted menubar options
-			CommandHandling.HideCommand("scriptToolStripMenuItem", this.MenuBar.Items);
-			CommandHandling.HideCommand("toolsToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("scriptToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("toolsToolStripMenuItem", this.MenuBar.Items);
 
-			CommandHandling.HideCommand("printPreviewToolStripMenuItem", this.MenuBar.Items);
-			CommandHandling.HideCommand("printSettingsToolStripMenuItem", this.MenuBar.Items);
-			CommandHandling.HideCommand("printToolStripMenuItem", this.MenuBar.Items);
-			CommandHandling.HideCommand("exitToolStripMenuItem", this.MenuBar.Items);
-			CommandHandling.HideCommand("componentsToolStripMenuItem", this.MenuBar.Items);
-			CommandHandling.HideCommand("visibleToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("printPreviewToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("printSettingsToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("printToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("exitToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("componentsToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("visibleToolStripMenuItem", this.MenuBar.Items);
 			//CommandHandling.HideCommand("", this.MenuBar.Items);
 
 			// Hide unwanted toolbar options
-			CommandHandling.HideCommand("printPreviewToolStripButton", this.ToolBar.Items);
+			CommandHandling.RemoveCommand("printPreviewToolStripButton", this.ToolBar.Items);
 			//CommandHandling.HideCommand("", this.ToolBar.Items);
 		}
 

@@ -9,65 +9,39 @@ namespace Command.Handling
 {
 	public class CommandHandling
 	{
-		public static bool HideCommand(String commandId, ToolStripItemCollection items)
+		public static bool RemoveCommand(String commandId, ToolStripItemCollection items)
 		{
-			ToolStripItem cmd = GetCommandItem(commandId, items);
+			ToolStripItem cmd = GetCommandItem(commandId, ref items);
 
 			if (cmd != null)
 			{
-				cmd.Visible = false;
-				cmd.Enabled = false;
-
 				// Prevent sequential visible separators
-				ToolStripItem nextVisCmd = null;
-				ToolStripItem prevVisCmd = null;
-
 				int iItem = items.IndexOf(cmd);
-
-				// Handle nested menus
-				// ie. cmd may not be an immediate child of items
-				if ((iItem == -1) && (cmd.OwnerItem is ToolStripMenuItem))
-				{
-					items = (cmd.OwnerItem as ToolStripMenuItem).DropDownItems;
-					iItem = items.IndexOf(cmd);
-				}
 
 				if (iItem != -1)
 				{
-					int iNext = iItem, iPrev = iItem;
+				    ToolStripItem nextCmd = null, prevCmd = null;
 
-					while (iPrev-- > 0)
+					if (iItem > 0)
+						prevCmd = items[iItem - 1];
+
+					if (iItem < (items.Count - 1))
+						nextCmd = items[iItem + 1];
+
+					if ((nextCmd is ToolStripSeparator) &&
+						((prevCmd == null) || (prevCmd is ToolStripSeparator)))
 					{
-						if (items[iPrev].Visible)
-						{
-							prevVisCmd = items[iPrev];
-							break;
-						}
+                        items.Remove(nextCmd);
+					}
+					else if ((prevCmd is ToolStripSeparator) && (nextCmd == null))
+					{
+                        items.Remove(prevCmd);
 					}
 
-					while (++iNext < items.Count)
-					{
-						if (items[iNext].Visible)
-						{
-							nextVisCmd = items[iNext];
-							break;
-						}
-					}
+                    items.Remove(cmd);
+                }
 
-					if ((nextVisCmd is ToolStripSeparator) &&
-						((prevVisCmd == null) || (prevVisCmd is ToolStripSeparator)))
-					{
-						nextVisCmd.Visible = false;
-						nextVisCmd.Enabled = false;
-					}
-					else if ((prevVisCmd is ToolStripSeparator) && (nextVisCmd == null))
-					{
-						prevVisCmd.Visible = false;
-						prevVisCmd.Enabled = false;
-					}
-				}
-
-				return true;
+                return true;
 			}
 
 			return false;
@@ -113,7 +87,7 @@ namespace Command.Handling
 
 		public static ToolStripMenuItem GetMenuItem(String commandId, ToolStripItemCollection items)
 		{
-			ToolStripItem cmd = GetCommandItem(commandId, items);
+			ToolStripItem cmd = GetCommandItem(commandId, ref items);
 
 			if (cmd != null)
 				return (cmd as ToolStripMenuItem);
@@ -138,7 +112,7 @@ namespace Command.Handling
 			}
 		}
 
-		public static ToolStripItem GetCommandItem(String commandId, ToolStripItemCollection items)
+		public static ToolStripItem GetCommandItem(String commandId, ref ToolStripItemCollection items)
 		{
 			foreach (ToolStripItem item in items)
 			{
@@ -150,11 +124,15 @@ namespace Command.Handling
 
 				if (menu != null)
 				{
-					var menuItem = GetCommandItem(commandId, menu.DropDownItems); // RECURSIVE CALL
+                    var menuItems = menu.DropDownItems;
+					var menuItem = GetCommandItem(commandId, ref menuItems); // RECURSIVE CALL
 
 					if (menuItem != null)
-						return menuItem;
-				}
+                    {
+                        items = menuItems;
+                        return menuItem;
+                    }
+                }
 			}
 
 			return null;

@@ -100,13 +100,13 @@ void HtmlEditorControlEx::InitialiseFeatures(bool hideDocumentCommands)
 {
 	if (hideDocumentCommands)
 	{
-		CommandHandling::HideCommand("contextDocument", ContextMenu->Items);
+		CommandHandling::RemoveCommand("contextDocument", ContextMenu->Items);
 
-		CommandHandling::HideCommand("toolstripDocumentNew", ToolBar->Items);
-		CommandHandling::HideCommand("toolstripDocumentOpen", ToolBar->Items);
-		CommandHandling::HideCommand("toolstripDocumentSave", ToolBar->Items);
-		CommandHandling::HideCommand("toolstripDocumentPrint", ToolBar->Items);
-		CommandHandling::HideCommand("toolstripDocumentHelp", ToolBar->Items);
+		CommandHandling::RemoveCommand("toolstripDocumentNew", ToolBar->Items);
+		CommandHandling::RemoveCommand("toolstripDocumentOpen", ToolBar->Items);
+		CommandHandling::RemoveCommand("toolstripDocumentSave", ToolBar->Items);
+		CommandHandling::RemoveCommand("toolstripDocumentPrint", ToolBar->Items);
+		CommandHandling::RemoveCommand("toolstripDocumentHelp", ToolBar->Items);
 		// 
 		// CommandHandling::SetMenuShortcut("contextFormatStrikeout", Keys::Control | Keys::Subtract, ContextMenu::Items);
 		// CommandHandling::SetMenuShortcut("contextFormatIncrease", Keys::Control | Keys::Decimal, ContextMenu::Items);
