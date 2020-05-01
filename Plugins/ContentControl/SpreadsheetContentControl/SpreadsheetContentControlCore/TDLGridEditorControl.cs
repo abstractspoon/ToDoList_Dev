@@ -181,20 +181,15 @@ namespace SpreadsheetContentControl
 
 		private void InitialiseToolbars()
 		{
-			this.MenuBar.Renderer = m_toolbarRenderer;
+            // Note: menus keep default rendering for consistency with app
 			this.ToolBar.Renderer = m_toolbarRenderer;
 			this.FontBar.Renderer = m_toolbarRenderer;
 			this.StatusBar.Renderer = m_toolbarRenderer;
 
-			this.RowContextMenu.Renderer = m_toolbarRenderer;
-			this.CellContextMenu.Renderer = m_toolbarRenderer;
-			this.HeaderContextMenu.Renderer = m_toolbarRenderer;
-			this.ColumnContextMenu.Renderer = m_toolbarRenderer;
-
 			Toolbars.FixupButtonSizes(this.ToolBar);
 			Toolbars.FixupButtonSizes(this.FontBar);
 
-			if (m_ControlsFont != null)
+            if (m_ControlsFont != null)
 			{
 				this.MenuBar.Font = m_ControlsFont;
 				this.ToolBar.Font = m_ControlsFont;
@@ -225,6 +220,12 @@ namespace SpreadsheetContentControl
 			this.ToolBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.FontBar.GripStyle = ToolStripGripStyle.Hidden;
 			this.StatusBar.SizingGrip = false;
+
+            // After all resizing has occurred, set menu bar height to 
+            // match toolbar and make its top-level items full height
+            this.MenuBar.AutoSize = false;
+            this.MenuBar.Height = this.ToolBar.Height;
+            this.MenuBar.Padding = new Padding(0);
 		}
 
 		private void InitialiseFeatures()
@@ -250,13 +251,13 @@ namespace SpreadsheetContentControl
 		{
 			m_toolbarRenderer.SetUITheme(theme);
 
-			var BackColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
+			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
 
-			MenuBar.BackColor = BackColor;
-			ToolBar.BackColor = BackColor;
-			FontBar.BackColor = BackColor;
-			StatusBar.BackColor = BackColor;
-			FormulaBar.BackColor = BackColor;
+            MenuBar.BackColor = SystemColors.Menu;//BackColor;
+            ToolBar.BackColor = backColor;
+			FontBar.BackColor = backColor;
+			StatusBar.BackColor = backColor;
+			FormulaBar.BackColor = backColor;
 		}
 
 		private void InitialiseChangeCallbacks()
