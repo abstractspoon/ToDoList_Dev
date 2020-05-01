@@ -269,7 +269,7 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 	if ((COSVersion() >= OSV_WIN10) && !Misc::IsHighContrastActive())
 	{
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-		e->Graphics->FillRectangle(Drawing::SystemBrushes::Window, rect);
+		e->Graphics->FillRectangle(Drawing::SystemBrushes::ButtonFace, rect);
 
 		auto itemState = Toolbars::GetItemState(e->Item);
 		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
@@ -298,16 +298,16 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 
 void UIThemeToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e)
 {
-	if (!e->Vertical && ISTYPE(e->Item->OwnerItem, ContextMenuStrip) && (COSVersion() >= OSV_WIN10) && !Misc::IsHighContrastActive())
+	if (!e->Vertical && ISTYPE(e->ToolStrip, ToolStripDropDownMenu) && (COSVersion() >= OSV_WIN10) && !Misc::IsHighContrastActive())
 	{
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-		e->Graphics->FillRectangle(Drawing::SystemBrushes::Window, rect);
+		e->Graphics->FillRectangle(Drawing::SystemBrushes::ButtonFace, rect);
 
 		rect.Y += (rect.Height / 2);
-		e->Graphics->DrawLine(GetSeperatorLightPen(), rect.Left, rect.Y, rect.Right, rect.Y);
+		e->Graphics->DrawLine(Drawing::SystemPens::ButtonHighlight, rect.Left, rect.Y, rect.Right, rect.Y);
 
 		rect.Y -= 1;
-		e->Graphics->DrawLine(GetSeperatorDarkPen(), rect.Left, rect.Y, rect.Right, rect.Y);
+		e->Graphics->DrawLine(Drawing::SystemPens::ButtonShadow, rect.Left, rect.Y, rect.Right, rect.Y);
 	}
 	else
 	{
