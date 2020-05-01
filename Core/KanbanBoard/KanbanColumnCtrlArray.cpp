@@ -653,10 +653,10 @@ void CKanbanColumnCtrlArray::Redraw(BOOL bErase, BOOL bUpdate)
 	}
 }
 
-void CKanbanColumnCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
+int CKanbanColumnCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 {
 	// Go thru each list removing deleted items
-	int nCol = GetSize();
+	int nCol = GetSize(), nNumDeleted = 0;
 
 	while (nCol--)
 	{
@@ -664,7 +664,9 @@ void CKanbanColumnCtrlArray::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 		ASSERT(pCol);
 
 		if (pCol)
-			pCol->RemoveDeletedTasks(mapCurIDs);
+			nNumDeleted += pCol->RemoveDeletedTasks(mapCurIDs);
 	}
+
+	return nNumDeleted;
 }
 

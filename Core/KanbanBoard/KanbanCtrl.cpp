@@ -325,6 +325,8 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 					if (pBacklog)
 						pBacklog->AddTask(*pKI, FALSE);
 				}
+
+				RebuildColumns(FALSE, FALSE);
 			}
 
 			// try to restore selection
@@ -1671,7 +1673,6 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate)
 	}
 
 	CHoldRedraw gr(*this, NCR_PAINT | NCR_ERASEBKGND);
-
 	DWORD dwSelTaskID = GetSelectedTaskID();
 	
 	CKanbanItemArrayMap mapKIArray;
@@ -2048,8 +2049,11 @@ void CKanbanCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	CDWordSet mapIDs;
 	BuildTaskIDMap(pTasks, pTasks->GetFirstTask(NULL), mapIDs, TRUE);
 
-	m_aColumns.RemoveDeletedTasks(mapIDs);
+	BOOL bRebuildColumns = m_aColumns.RemoveDeletedTasks(mapIDs);
 	m_data.RemoveDeletedItems(mapIDs);
+
+	if (bRebuildColumns)
+		RebuildColumns(FALSE, TRUE);
 }
 
 KANBANITEM* CKanbanCtrl::GetKanbanItem(DWORD dwTaskID) const

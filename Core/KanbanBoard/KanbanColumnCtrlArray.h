@@ -59,7 +59,7 @@ public:
 
 	void Exclude(CDC* pDC);
 	void Redraw(BOOL bErase, BOOL bUpdate = FALSE);
-	void RemoveDeletedTasks(const CDWordSet& mapCurIDs);
+	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
 	void RefreshItemLineHeights();
 	void SetFont(HFONT hFont);
 
