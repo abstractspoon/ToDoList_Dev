@@ -224,7 +224,7 @@ namespace SpreadsheetContentControl
             // After all resizing has occurred, set menu bar height to 
             // match toolbar and make its top-level items full height
             this.MenuBar.AutoSize = false;
-            this.MenuBar.Height = this.ToolBar.Height;
+            this.MenuBar.Height = (this.ToolBar.Height - DPIScaling.Scale(2));
             this.MenuBar.Padding = new Padding(0);
 		}
 
