@@ -520,7 +520,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				// Checkbox
 				DrawItemCheckbox(pDC, pKI, rItem);
 				
-				BOOL bSelected = (!m_bSavingToImage && m_bSelected && (GetItemState(hti, TVIS_SELECTED) == TVIS_SELECTED));
+				BOOL bSelected = (!m_bSavingToImage && TCH().IsSelectedItem(hti));
 				COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
 
 				// Background
