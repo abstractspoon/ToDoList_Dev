@@ -167,7 +167,7 @@ void BaseToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRe
 	}
 	else
 	{
-		int breakpoint = 0;
+		ToolStripProfessionalRenderer::OnRenderSeparator(e);
 	}
 }
 
