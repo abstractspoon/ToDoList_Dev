@@ -16,6 +16,7 @@ namespace MarkdeepExporter
 		private String m_TypeId;
 
 		private List<Tuple<String, Task.Attribute>> m_Attributes;
+		private bool m_WantComments, m_WantPosition;
 
 		// --------------------------------------------------------------------------------------
 
@@ -29,8 +30,7 @@ namespace MarkdeepExporter
 
 		public bool Export(TaskList srcTasks, string sDestFilePath, bool bSilent, Preferences prefs, string sKey)
         {
-			if (!InitialiseAttributeList(srcTasks))
-				return false;
+			InitialiseAttributeList(srcTasks);
 
             BulletedMarkdownContainer mdTasks = new BulletedMarkdownContainer();
             Task task = srcTasks.GetFirstTask();
@@ -88,20 +88,45 @@ namespace MarkdeepExporter
         {
             StringBuilder taskAttrib = new StringBuilder();
 
-            taskAttrib.AppendLine("**`" + task.GetTitle() + "`**");
-//             taskAttrib.Append("  ").AppendLine("Priority: " + task.GetPriority(false).ToString());
-//             taskAttrib.Append("  ").AppendLine("Allocated to: " + task.FormatAllocatedTo(", "));
-            taskAttrib.Append("  ").AppendLine(task.GetComments());
+			// Task title
+			taskAttrib.Append("**");
+
+			if (m_WantPosition)
+				taskAttrib.Append(task.GetPositionString()).Append(" ");
+
+			taskAttrib.Append(task.GetTitle())
+					  .Append("**")
+					  .AppendLine("<br>");
+
+			// Rest of attributes
+			foreach (var item in m_Attributes)
+			{
+				var attribValue = task.GetAttributeValue(item.Item2, true, true);
+
+				if (!String.IsNullOrWhiteSpace(attribValue))
+				{
+					taskAttrib.Append("  ")
+							  .Append(item.Item1)
+							  .Append(": ")
+							  .Append(attribValue)
+							  .AppendLine("<br>");
+				}
+			}
+
+			// Comments
+			if (m_WantComments)
+				taskAttrib.Append("<blockquote>").Append(task.GetComments()).Append("</blockquote>");
 
             return taskAttrib.AppendLine().ToString();
         }
 
-		private bool InitialiseAttributeList(TaskList tasks)
+		private void InitialiseAttributeList(TaskList tasks)
 		{
 			m_Attributes = new List<Tuple<String, Task.Attribute>>();
+			m_WantComments = m_WantPosition = false;
 
-			// Build a list of sorted attributes
-			// excluding certain attributes whose positions are fixed
+			// Construct basic list of attributes
+			// excluding those whose positions are fixed
 			foreach (Task.Attribute attrib in Enum.GetValues(typeof(Task.Attribute)))
 			{
 				switch (attrib)
@@ -111,35 +136,53 @@ namespace MarkdeepExporter
 						break;
 
 					case Task.Attribute.Comments:
-						// Always last
+						// Always last if present
+						m_WantComments = true;
 						break;
 
 					case Task.Attribute.HtmlComments:
-						// Always last
+						// Always last if present
+						m_WantComments = true;
+						break;
+
+					case Task.Attribute.Position:
+						// Precedes task title
+						m_WantPosition = true;
+						break;
+
+					case Task.Attribute.ProjectName:
+						// Not a task attribute
 						break;
 
 					default:
 						if (tasks.IsAttributeAvailable(attrib))
-						{
-							var attribName = TaskList.GetAttributeName(attrib);
-
-							if (!String.IsNullOrEmpty(attribName))
-								m_Attributes.Add(new Tuple<string, Task.Attribute>(m_Trans.Translate(attribName), attrib));
-						}
+							AddAttribute(attrib, m_Attributes, true);
 						break;
 				}
 			}
 
-			if (m_Attributes.Count > 0)
-			{
-				
-			}
+			// Sort alphabetically
+			if (m_Attributes.Count > 1)
+				m_Attributes.Sort((x, y) => x.Item1.CompareTo(y.Item1));
+		}
 
-			return (m_Attributes.Count > 0);
+		private void AddAttribute(Task.Attribute attrib, List<Tuple<String, Task.Attribute>> attribs, bool atEnd)
+		{
+			var attribName = TaskList.GetAttributeName(attrib);
+
+			if (!String.IsNullOrEmpty(attribName))
+			{
+				var item = new Tuple<string, Task.Attribute>(m_Trans.Translate(attribName), attrib);
+
+				if (atEnd)
+					attribs.Add(item);
+				else
+					attribs.Insert(0, item);
+			}
 		}
 	}
 
-    public class BulletedMarkdownContainer : MarkdownContainer
+	public class BulletedMarkdownContainer : MarkdownContainer
     {
         public override string ToMarkdown()
         {
@@ -161,7 +204,7 @@ namespace MarkdeepExporter
                 }
                 else
                 {
-                    string md = ("* " + element.ToMarkdown()).Indent(indent * 4);
+                    string md = ("* " + element.ToMarkdown()).Indent(indent);
 
                     mdRaw.Append(md);
                     mdRaw.AppendLine();
