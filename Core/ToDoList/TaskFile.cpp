@@ -3397,8 +3397,19 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 			{
 				DISPLAYSTRING = GetTaskAttribute(hTask, szAttrib);
 
-				if (DISPLAYSTRING == _T("-2"))
+				if (DISPLAYSTRING == _T("-2")) // None
 					DISPLAYSTRING.Empty();
+			}
+			return DISPLAYSTRING;
+
+		case TDCA_COST:
+			{
+				TDCCOST cost(GetTaskAttribute(hTask, szAttrib));
+
+				if (cost.dAmount == 0)
+					DISPLAYSTRING.Empty();
+				else
+					DISPLAYSTRING = cost.Format(2);
 			}
 			return DISPLAYSTRING;
 		}
