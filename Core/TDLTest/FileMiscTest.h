@@ -21,6 +21,8 @@ public:
 
 protected:
 	void TestGetVirtualStorePath();
+	void TestGetExtension();
+	void TestSplitPath();
 };
 
 #endif // !defined(AFX_FILEMISCTEST_H__96F4BFF1_37C7_4AB6_95D6_FEE032D025DA__INCLUDED_)
