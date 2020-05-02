@@ -358,7 +358,7 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 
 		FileMisc::MakePath(m_sMultiFilePath, sDrive, sFolder, CEnString(IDS_TDC_MULTIFILE));
 	}
-	ReplaceExtension(m_sMultiFilePath, m_sFormatTypeID);
+	EnsureExtension(m_sMultiFilePath, m_sFormatTypeID);
 
 	if ((m_sFilePath.IsEmpty() || PathIsRelative(m_sFilePath)) && !m_sFolderPath.IsEmpty())
 	{
@@ -374,7 +374,7 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 		
 		FileMisc::MakePath(m_sFilePath, NULL, m_sFolderPath, sFName);
 	}
-	ReplaceExtension(m_sFilePath, m_sFormatTypeID);
+	EnsureExtension(m_sFilePath, m_sFormatTypeID);
 
 	// prepare initial export path
 	if (m_bSingleTaskList || !m_bExportAllTasklists) 
@@ -483,7 +483,7 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 		if (m_bExportOneFile)
 		{
 			m_sExportPath = m_sMultiFilePath;
-			ReplaceExtension(m_sExportPath, m_sFormatTypeID);
+			EnsureExtension(m_sExportPath, m_sFormatTypeID);
 		}
 		else
 			m_sExportPath = m_sFolderPath;
@@ -491,7 +491,7 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 	else
 	{
 		m_sExportPath = m_sFilePath;
-		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
+		EnsureExtension(m_sExportPath, m_sFormatTypeID);
 	}
 
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
@@ -523,7 +523,7 @@ void CTDLExportToPage::OnSelchangeFormatoptions()
 					m_sExportPath = m_sOrgFilePath;
 			}
 
-			ReplaceExtension(m_sExportPath, m_sFormatTypeID);
+			EnsureExtension(m_sExportPath, m_sFormatTypeID);
 			UpdateData(FALSE);
 		}
 		else if (m_sExportPath.IsEmpty())
@@ -538,7 +538,7 @@ void CTDLExportToPage::OnSelchangeFormatoptions()
 	}
 }
 
-void CTDLExportToPage::ReplaceExtension(CString& sPathName, LPCTSTR szFormatTypeID)
+void CTDLExportToPage::EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID)
 {
 	if (!sPathName.IsEmpty())
 	{
@@ -559,7 +559,7 @@ void CTDLExportToPage::OnOK()
 
 	// make sure extension is right
 	if (!m_bExportAllTasklists || m_bExportOneFile)
-		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
+		EnsureExtension(m_sExportPath, m_sFormatTypeID);
 
 	CPreferences prefs;
 
@@ -609,7 +609,7 @@ void CTDLExportToPage::OnExportonefile()
 		m_sExportPath = m_sFilePath;
 
 	if (!m_bExportAllTasklists || m_bExportOneFile)
-		ReplaceExtension(m_sExportPath, m_sFormatTypeID);
+		EnsureExtension(m_sExportPath, m_sFormatTypeID);
 
 	UpdateData(FALSE);
 }

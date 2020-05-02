@@ -75,7 +75,7 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-	void ReplaceExtension(CString& sPathName, LPCTSTR szFormatTypeID);
+	void EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID);
 };
 
 /////////////////////////////////////////////////////////////////////////////
