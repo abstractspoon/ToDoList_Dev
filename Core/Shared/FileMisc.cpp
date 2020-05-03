@@ -220,10 +220,13 @@ BOOL FileMisc::IsPathTerminated(const CString& sPath)
 
 CString& FileMisc::ReplaceExtension(CString& sFilePath, LPCTSTR szExt)
 {
-	CString sDrive, sDir, sFile;
+	if (!Misc::HasSuffix(sFilePath, szExt))
+	{
+		CString sDrive, sDir, sFile;
 
-	SplitPath(sFilePath, &sDrive, &sDir, &sFile);
-	MakePath(sFilePath, sDrive, sDir, sFile, szExt);
+		SplitPath(sFilePath, &sDrive, &sDir, &sFile);
+		MakePath(sFilePath, sDrive, sDir, sFile, szExt);
+	}
 
 	return sFilePath;
 }

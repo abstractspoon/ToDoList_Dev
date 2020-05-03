@@ -500,7 +500,11 @@ void CTDLExportToPage::OnSelchangeTasklistoptions()
 
 void CTDLExportToPage::OnSelchangeFormatoptions() 
 {
+	CString sPrevTypeID = m_sFormatTypeID;
 	UpdateData();
+
+	if (m_sFormatTypeID == sPrevTypeID)
+		return;
 
 	// check exporter has a file extension
 	int nFormat = m_mgrImportExport.FindExporterByType(m_sFormatTypeID);
@@ -523,7 +527,7 @@ void CTDLExportToPage::OnSelchangeFormatoptions()
 					m_sExportPath = m_sOrgFilePath;
 			}
 
-			EnsureExtension(m_sExportPath, m_sFormatTypeID);
+			UpdateExtension(m_sExportPath, sPrevTypeID, m_sFormatTypeID);
 			UpdateData(FALSE);
 		}
 		else if (m_sExportPath.IsEmpty())
@@ -538,7 +542,7 @@ void CTDLExportToPage::OnSelchangeFormatoptions()
 	}
 }
 
-void CTDLExportToPage::EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID)
+void CTDLExportToPage::EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt) const
 {
 	if (!sPathName.IsEmpty())
 	{
@@ -549,7 +553,30 @@ void CTDLExportToPage::EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeI
 	
 		CString sExt = m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE);
 
-		FileMisc::ReplaceExtension(sPathName, sExt);
+		if (bRemovePrevExt)
+			FileMisc::ReplaceExtension(sPathName, sExt);
+		else
+			sPathName += sExt;
+	}
+}
+
+void CTDLExportToPage::UpdateExtension(CString& sPathName, LPCTSTR szFromTypeID, LPCTSTR szToTypeID) const
+{
+	if (!sPathName.IsEmpty())
+	{
+		// Try to remove the previous extension with
+		// support for multi-part extensions
+		BOOL bExtRemoved = FALSE;
+		int nFromFormat = m_mgrImportExport.FindExporterByType(szFromTypeID);
+
+		if (m_mgrImportExport.ExporterHasFileExtension(nFromFormat))
+		{
+			CString sExt = m_mgrImportExport.GetExporterFileExtension(nFromFormat, TRUE);
+			bExtRemoved = Misc::RemoveSuffix(sPathName, sExt);
+		}
+
+		// Add new extension
+		EnsureExtension(sPathName, szToTypeID, !bExtRemoved);
 	}
 }
 

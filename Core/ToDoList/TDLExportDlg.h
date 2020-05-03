@@ -75,7 +75,8 @@ protected:
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
-	void EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID);
+	void EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt = TRUE) const;
+	void UpdateExtension(CString& sPathName, LPCTSTR szFromTypeID, LPCTSTR szToTypeID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

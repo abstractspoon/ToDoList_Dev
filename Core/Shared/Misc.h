@@ -168,6 +168,8 @@ namespace Misc
 	BOOL RemoveAt(CString& sText, int nPos);
 	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE, BOOL bTrim = TRUE);
 	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE, BOOL bTrim = TRUE);
+	BOOL HasPrefix(LPCTSTR szText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE);
+	BOOL HasSuffix(LPCTSTR szText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE);
 	BOOL IsEmpty(LPCTSTR szText);
 	BOOL IsEmpty(LPCSTR szText);
 	BOOL HasEmpty(const CStringArray& aItems);
