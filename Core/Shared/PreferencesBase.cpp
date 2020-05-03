@@ -144,7 +144,7 @@ BOOL CPreferencesPageBase::UITextContainsOneOf(const CString& sUIText, const CSt
 	{
 		for (int nItem = 0; nItem < aSearch.GetSize(); nItem++)
 		{
-			if (Misc::Find(aSearch[nItem], sUIText, FALSE) != -1)
+			if (Misc::Find(aSearch[nItem], sUIText) != -1)
 				return TRUE;
 		}
 	}

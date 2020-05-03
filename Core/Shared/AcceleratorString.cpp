@@ -332,7 +332,7 @@ BOOL CAcceleratorString::EnsureUniqueAccelerators(CStringArray& aText)
 
 			// This means that every char in 'sText' appears in 'sAccelerators'
 			// or the string is in a non-latin language eg. Chinese
-			int nAccel = Misc::FindFirstOf(sText, sAccelerators, FALSE);
+			int nAccel = Misc::FindFirstOf(sText, sAccelerators);
 
 			if (nAccel == -1) // non-latin language
 				break;
@@ -346,13 +346,13 @@ BOOL CAcceleratorString::EnsureUniqueAccelerators(CStringArray& aText)
 			sAccelerators += cAccel;
 
 			// Set the corresponding string accelerator
-			nAccel = Misc::Find(cAccel, sText, FALSE);
+			nAccel = Misc::Find(cAccel, sText);
 			ASSERT(nAccel != -1);
 
 			cAccel = SetAcceleratorPos(sText, nAccel);
 
 #ifdef _DEBUG
-			if (Misc::Find(cAccel, sDupes, FALSE) != -1)
+			if (Misc::Find(cAccel, sDupes) != -1)
 			{
 				int breakpoint = 0;
 			}

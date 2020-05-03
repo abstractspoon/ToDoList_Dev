@@ -1177,7 +1177,7 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 				break;
 
 			// Only replace if at the start of the filepath
-			if (Misc::Find(szTasklists, sFile, FALSE) == 0)
+			if (Misc::Find(szTasklists, sFile) == 0)
 			{
 				Misc::Replace(szTasklists, szExamples, sFile, FALSE);
 				prefs.WriteProfileString(_T("MRU"), sKey, sFile);
@@ -1192,7 +1192,7 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 			CString sFile = prefs.GetProfileString(_T("Settings"), sKey);
 
 			// Only replace if at the start of the filepath
-			if (Misc::Find(szTasklists, sFile, FALSE) == 0)
+			if (Misc::Find(szTasklists, sFile) == 0)
 			{
 				Misc::Replace(szTasklists, szExamples, sFile, FALSE);
 				prefs.WriteProfileString(_T("Settings"), sKey, sFile);

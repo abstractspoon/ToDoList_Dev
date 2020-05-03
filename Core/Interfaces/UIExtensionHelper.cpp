@@ -115,7 +115,7 @@ BOOL CUIExtensionHelper::ProcessExtensionVisibilityMenuCmd(UINT nCmdID, const CU
 	if (nExt >= 0 && nExt < m_nMaxNumExtensions)
 	{
 		CString sTypeID = mgr.GetUIExtensionTypeID(nExt);
-		int nFind = Misc::Find(sTypeID, aTypeIDs, FALSE, FALSE);
+		int nFind = Misc::Find(sTypeID, aTypeIDs);
 		
 		// toggle visibility
 		if (nFind == -1)

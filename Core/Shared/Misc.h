@@ -173,9 +173,9 @@ namespace Misc
 	BOOL HasEmpty(const CStringArray& aItems);
 
 	int FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos = -1);
-	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive);
-	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, int iStart = 0);
-	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = TRUE, BOOL bWholeWord = FALSE, int iStart = 0);
+	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE);
+	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE, int iStart = 0);
+	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE, int iStart = 0);
 	int Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 	BOOL Contains(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 

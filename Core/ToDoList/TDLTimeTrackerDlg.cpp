@@ -1261,7 +1261,7 @@ BOOL CTDLTimeTrackerDlg::QuickFindNextTaskComboItem(int nFrom, int nTo, int nInc
 	{
 		CString sItem(GetItem(m_cbTasks, nItem));
 
-		if (Misc::Find(m_sQuickFind, sItem, FALSE, FALSE) != -1)
+		if (Misc::Find(m_sQuickFind, sItem) != -1)
 		{
 			nNext = nItem;
 			break;
