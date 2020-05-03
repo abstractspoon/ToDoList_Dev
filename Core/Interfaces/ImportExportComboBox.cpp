@@ -50,13 +50,10 @@ void CImportExportComboBox::SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts
 
 	if (bFileBased && !Misc::IsEmpty(szFileExts))
 	{
-		int nExt = Misc::Split(szFileExts, m_aFileExt, '|');
+		int nExt = Misc::Split(szFileExts, m_aFileExt, ';');
 
 		while (nExt--)
-		{
-			Misc::RemovePrefix(m_aFileExt[nExt], _T("*"));
-			Misc::RemovePrefix(m_aFileExt[nExt], _T("."));
-		}
+			m_aFileExt[nExt].TrimLeft().TrimLeft('*').TrimLeft('.');
 	}
 	else
 	{

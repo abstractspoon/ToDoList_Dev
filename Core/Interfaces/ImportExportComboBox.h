@@ -20,7 +20,7 @@ class CImportExportComboBox : public COwnerdrawComboBoxBase
 public:
 	CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE, LPCTSTR szFileExts = NULL);
 
-	void SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts = NULL); // File-extensions delimited by '|'
+	void SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts = NULL); // File-extensions delimited by ';'
 
 	CString GetSelectedTypeID() const;
 	int SetSelectedTypeID(LPCTSTR szTypeID);
