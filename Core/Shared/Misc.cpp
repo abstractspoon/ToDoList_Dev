@@ -746,7 +746,7 @@ int Misc::Replace(const CString& sSearchFor, const CString& sReplaceWith, CStrin
 	return nNumReplaced;
 }
 
-BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
+BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive, BOOL bTrim)
 {
 	if (IsEmpty(szPrefix))
 		return FALSE;
@@ -754,7 +754,7 @@ BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
 	CString sTemp(sText);
 	sTemp.TrimLeft();
 
-	int nPos = sTemp.Find(szPrefix);
+	int nPos = Find(szPrefix, sTemp, bCaseSensitive);
 
 	if (nPos == 0)
 	{
@@ -770,7 +770,7 @@ BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bTrim)
 	return FALSE;
 }
 
-BOOL Misc::RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bTrim)
+BOOL Misc::RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive, BOOL bTrim)
 {
 	if (IsEmpty(szSuffix))
 		return FALSE;
