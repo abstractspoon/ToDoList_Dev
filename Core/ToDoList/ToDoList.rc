@@ -614,7 +614,7 @@ BEGIN
     LTEXT           "Position co&mments:",IDC_STATIC,7,462,381,10
     COMBOBOX        IDC_COMMENTPOS,7,474,183,145,CBS_DROPDOWNLIST | 
                     WS_TABSTOP
-    CONTROL         "S&how comments even when tasklist is maximised",
+    CONTROL         "S&how comments even when task view is maximised",
                     IDC_SHOWCOMMENTSALWAYS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,492,381,10
     CONTROL         "&Update all tasklists when the comments field is resized",
