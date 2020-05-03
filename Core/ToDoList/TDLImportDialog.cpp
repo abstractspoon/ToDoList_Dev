@@ -53,7 +53,7 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 	: 
 	CTDLDialog(CTDLImportDialog::IDD, _T("Importing"), pParent),
 	m_mgrImportExport(mgr),
-	m_cbFormat(mgr, TRUE),
+	m_cbFormat(mgr, TRUE, FALSE),
 	m_nImportMode(TDCIM_ALL),
 	m_bReadonlyTasklist(bReadonlyTasklist),
 	m_sFromText(CClipboard().GetText())

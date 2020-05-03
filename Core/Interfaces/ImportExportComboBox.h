@@ -18,7 +18,7 @@ class CImportExportComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly = FALSE, LPCTSTR szFileExts = NULL);
+	CImportExportComboBox(const CImportExportMgr& mgrImpExp, BOOL bImport, BOOL bFileBasedOnly, LPCTSTR szFileExts = NULL);
 
 	void SetFileBasedOnly(BOOL bFileBased, LPCTSTR szFileExts = NULL); // File-extensions delimited by ';'
 
