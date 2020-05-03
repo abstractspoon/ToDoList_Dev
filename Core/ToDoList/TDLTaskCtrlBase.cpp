@@ -822,12 +822,12 @@ void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChange
 
 void CTDLTaskCtrlBase::UpdateAttributePaneVisibility()
 {
-	// we only need to find one visible column
+	// we only need to find one visible non-title column
 	BOOL bShow = FALSE;
-	int nItem = m_hdrColumns.GetItemCount();
+	int nNumCols = m_hdrColumns.GetItemCount();
 	
-	while (nItem-- && !bShow)
-		bShow = IsColumnShowing(GetColumnID(nItem));
+	for (int nCol = 1; ((nCol < nNumCols) && !bShow); nCol++)
+		bShow = IsColumnShowing(GetColumnID(nCol));
 	
 	if (bShow)
 		SetHidden(TLSH_NONE);
