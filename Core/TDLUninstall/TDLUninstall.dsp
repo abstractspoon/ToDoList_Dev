@@ -54,10 +54,11 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
-# ADD LINK32 /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /machine:I386
+# ADD LINK32 /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /OPT:REF
+# SUBTRACT LINK32 /pdb:none /map
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\TDLUninstall.exe ..\todolist\unicode_release /y
+PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\TDLUninstall.exe ..\todolist\unicode_release /y	copy unicode_release\TDLUninstall.pdb ..\todolist\unicode_release /y
 # End Special Build Tool
 
 !ELSEIF  "$(CFG)" == "TDLUninstall - Win32 Unicode Debug"

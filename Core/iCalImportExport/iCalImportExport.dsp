@@ -89,11 +89,11 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 /nologo /subsystem:windows /dll /machine:I386
-# SUBTRACT LINK32 /pdb:none
+# ADD LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /OPT:REF
+# SUBTRACT LINK32 /pdb:none /map
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\icalimportexport.dll ..\todolist\unicode_release /y
+PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\icalimportexport.dll ..\todolist\unicode_release /y	copy unicode_release\icalimportexport.pdb ..\todolist\unicode_release /y
 # End Special Build Tool
 
 !ENDIF 

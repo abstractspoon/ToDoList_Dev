@@ -71,7 +71,7 @@ PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_de
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Unicode_Release"
 # PROP Intermediate_Dir "Unicode_Release"
-# PROP Ignore_Export_Lib 0
+# PROP Ignore_Export_Lib 1
 # PROP Target_Dir ""
 F90=df.exe
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_WINDLL" /D "_AFXDLL" /D "_MBCS" /D "_USRDLL" /Yu"stdafx.h" /FD /c
@@ -85,7 +85,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 /nologo /subsystem:windows /dll /machine:I386
+# ADD LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /OPT:REF
+# SUBTRACT LINK32 /pdb:none /map
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_release	copy unicode_release\KanbanBoard.dll ..\todolist\unicode_release /y

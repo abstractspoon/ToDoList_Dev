@@ -86,10 +86,11 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /dll /machine:I386
-# ADD LINK32 /nologo /subsystem:windows /dll /machine:I386
+# ADD LINK32 /nologo /subsystem:windows /dll /debug /machine:I386 /OPT:REF
+# SUBTRACT LINK32 /pdb:none /map
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_Release	copy unicode_release\TransText.dll ..\todolist\unicode_release /y
+PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_Release	copy unicode_release\TransText.dll ..\todolist\unicode_release /y	copy unicode_release\TransText.pdb ..\todolist\unicode_release /y
 # End Special Build Tool
 
 !ENDIF 

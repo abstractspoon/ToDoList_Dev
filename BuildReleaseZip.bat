@@ -22,6 +22,18 @@ ECHO PATHOBFUSCAR=%PATHOBFUSCAR%
 if NOT EXIST %PATHOBFUSCAR% exit
 
 set OUTDIR=%REPO%\Core\ToDoList\Unicode_Release
+
+REM Save symbols to separate zip file
+%REPO%\Core\ToDoList\Unicode_Release\ToDoList.exe -ver
+SET /P TDLVER=< .\ver.txt
+DEL .\ver.txt
+
+MKDIR %REPO%\..\ToDoList_Symbols
+set OUTZIP=%REPO%\..\ToDoList_Symbols\%TDLVER%.zip
+
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\*.pdb
+
+REM - Zip up app and resources
 set OUTZIP=%OUTDIR%\todolist_exe_.zip
 
 ECHO OUTDIR=%OUTDIR%
