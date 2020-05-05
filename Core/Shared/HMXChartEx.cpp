@@ -259,13 +259,13 @@ int CHMXChartEx::HitTest(const CPoint& ptClient, int nDataset) const
 			int nNumSeg = CalcPieSegments(m_datasets[nDataset], aSegments);
 
 			if (nNumSeg == 0)
-				return false;
+				return -1;
 			
 			CRect rPie, rDonut;
 			VERIFY(CalcPieRects(rPie, rDonut) > 0);
 
 			if (!rPie.PtInRect(ptClient))
-				return -1;
+				return false;
 
 			// Calculate the distance from the pie centre to the cursor
 			CPoint ptDiff = (ptClient - rPie.CenterPoint());
@@ -292,7 +292,12 @@ int CHMXChartEx::HitTest(const CPoint& ptClient, int nDataset) const
 					float fFrom = seg.fStartDegrees;
 					float fTo = NormaliseAngle(seg.fStartDegrees + seg.fSweepDegrees);
 
-					if (fTo < fFrom) // Segment straddles the 0-360 mark
+					if (fFrom == fTo)
+					{
+						// segment is full 0-360
+						return nSeg;
+					}
+					else if (fTo < fFrom) // Segment straddles the 0-360 mark
 					{
 						if (((fAngle >= fFrom) && (fAngle < 360.f)) ||
 							 ((fAngle >= 0.0f) && (fAngle < fTo)))
@@ -318,6 +323,10 @@ int CHMXChartEx::HitTest(const CPoint& ptClient, int nDataset) const
 				return -1;
 
 			int nNumData = m_datasets[nDataset].GetDatasetSize();
+
+			if (nNumData == 0)
+				return -1;
+
 			int nXOffset = (ptClient.x - m_rectData.left);
 
 			return ((nXOffset * nNumData) / m_rectData.Width());

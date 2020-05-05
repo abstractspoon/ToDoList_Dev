@@ -3745,13 +3745,14 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, B
 	if (nItem == -1) // Collapsed 
 	{
 		// Use first visible parent as surrogate
-		HTREEITEM hti = GetTreeItem(dwTaskID);
-		ASSERT(hti);
+		HTREEITEM htiParent = m_tree.GetParentItem(GetTreeItem(dwTaskID));
+		ASSERT(htiParent);
 
-		while (!TCH().IsParentItemExpanded(hti))
-			hti = m_tree.GetParentItem(hti);
+		while (htiParent && !TCH().IsParentItemExpanded(htiParent))
+			htiParent = m_tree.GetParentItem(htiParent);
 
-		DWORD dwParentID = GetTaskID(hti);
+		DWORD dwParentID = GetTaskID(htiParent);
+		ASSERT(dwParentID);
 
 		nItem = GetListItem(dwParentID);
 		ASSERT(nItem != -1);

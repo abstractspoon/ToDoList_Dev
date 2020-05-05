@@ -318,15 +318,18 @@ BOOL CBurndownChart::SaveToImage(CBitmap& bmImage)
 
 void CBurndownChart::RebuildXScale()
 {
-	CGraphBase* pGraph = NULL;
-	GET_GRAPH(m_nActiveGraph);
-
 	ClearXScaleLabels();
 
-	int nLabelStep = 1;
-	pGraph->RebuildXScale(m_calculator, m_rectData.Width(), m_strarrScaleXLabel, nLabelStep);
+	if (!m_data.IsEmpty())
+	{
+		CGraphBase* pGraph = NULL;
+		GET_GRAPH(m_nActiveGraph);
 
-	SetXLabelStep(nLabelStep);
+		int nLabelStep = 1;
+		pGraph->RebuildXScale(m_calculator, m_rectData.Width(), m_strarrScaleXLabel, nLabelStep);
+
+		SetXLabelStep(nLabelStep);
+	}
 }
 
 void CBurndownChart::OnSize(UINT nType, int cx, int cy) 
@@ -365,9 +368,7 @@ BOOL CBurndownChart::RebuildGraph(const COleDateTimeRange& dtExtents)
 		pGraph->BuildGraph(m_calculator, m_datasets);
 	}
 
-	if (!m_data.IsEmpty())
-		RebuildXScale();
-	
+	RebuildXScale();
 	CalcDatas();
 
 	return TRUE;

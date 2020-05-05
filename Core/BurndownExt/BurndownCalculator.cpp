@@ -541,6 +541,9 @@ int CStatsItemCalculator::GetAllocatedByFrequencies(CArray<FREQUENCYITEM, FREQUE
 
 int CStatsItemCalculator::GetPriorityFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
 {
+	if (!m_data.GetSize())
+		return 0L;
+
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
 	GetAttribFrequencies(PRIORITY, mapFrequencies);
 
@@ -553,6 +556,9 @@ int CStatsItemCalculator::GetPriorityFrequencies(CArray<FREQUENCYITEM, FREQUENCY
 
 int CStatsItemCalculator::GetRiskFrequencies(CArray<FREQUENCYITEM, FREQUENCYITEM&>& aFrequencies) const
 {
+	if (!m_data.GetSize())
+		return 0L;
+
 	CMap<CString, LPCTSTR, int, int&> mapFrequencies;
 	GetAttribFrequencies(RISK, mapFrequencies);
 	
