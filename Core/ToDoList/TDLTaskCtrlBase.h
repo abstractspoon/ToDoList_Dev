@@ -452,7 +452,8 @@ protected:
 	BOOL NeedDrawColumnSelection() { return (HasFocus() && (GetFocus() != &m_lcColumns)); }
 	void RepackageAndSendToParent(UINT msg, WPARAM wp, LPARAM lp);
 	void NotifyParentOfColumnEditClick(TDC_COLUMN nColID, DWORD dwTaskID);
-	
+	void HandleTabKey(HWND hWnd);
+
 	void HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoint pt);
 	void ShowFileLink(LPCTSTR szFilePath) const;
 	BOOL HandleListLBtnDown(CListCtrl& lc, CPoint pt);

@@ -20,6 +20,7 @@ class CTDLTasklistImportCtrl : public CFilteredToDoCtrl
 {
 public:
 	CTDLTasklistImportCtrl();
+
 	void DeselectAll();
 	void ShowAllColumns();
 };
@@ -38,6 +39,7 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLTasklistImportDlg)
+	enum { IDD = IDD_TDLIMPORTEXPORT_DIALOG };
 	BOOL	m_bResetCreationDate;
 	CString	m_sFilePath;
 	BOOL	m_bImportSubtasks;
@@ -64,6 +66,7 @@ protected:
 	//{{AFX_MSG(CTDLTasklistImportDlg)
 	afx_msg void OnSelectall();
 	afx_msg void OnSelectnone();
+	afx_msg void OnExpandAll();
 	//}}AFX_MSG
 	afx_msg LRESULT OnTDCNotifySelectionChange(WPARAM, LPARAM);
 	DECLARE_MESSAGE_MAP()

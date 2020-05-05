@@ -114,6 +114,7 @@ protected:
 	afx_msg LRESULT OnSetWordWrap(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnNcDestroy();
+	afx_msg UINT OnGetDlgCode();
 
 	DECLARE_MESSAGE_MAP()
 

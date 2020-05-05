@@ -290,7 +290,7 @@ CLIPFORMAT CRulerRichEdit::GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFO
 
 UINT CRulerRichEdit::OnGetDlgCode() 
 {
-	return DLGC_WANTALLKEYS;
+	return (DLGC_WANTALLKEYS & ~DLGC_HASSETSEL);
 }
 
 void CRulerRichEdit::OnLButtonDblClk(UINT nFlags, CPoint point) 

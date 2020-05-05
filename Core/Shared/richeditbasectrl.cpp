@@ -1094,14 +1094,14 @@ CPoint CRichEditBaseCtrl::GetCaretPos() const
 	
 	CPoint ptCaret = CWnd::GetCaretPos();
 	ptCaret.y += GetLineHeight() / 2; // half line height
-	ptCaret.x += 4; // estaimate 1/2 char width
+	ptCaret.x += 4; // estimate 1/2 char width
 	
 	return ptCaret;
 }
 
 void CRichEditBaseCtrl::MoveCaretToEnd()
 {
-	SetCaretPos(GetWindowTextLength());
+	SetSel(-1, 0);
 }
 
 void CRichEditBaseCtrl::SetCaretPos(int nPos)

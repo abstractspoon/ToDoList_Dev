@@ -668,7 +668,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_DEBUG_CLEANDICTIONARIES, OnDebugCleanDictionaries)
 #endif
 
-		END_MESSAGE_MAP()
+END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListWnd message handlers
@@ -1087,6 +1087,8 @@ void CToDoListWnd::PopulateMenuIconManager()
 
 	// Custom toolbar
 	m_mgrMenuIcons.AddImages(m_toolbarCustom);
+
+	UpdateMenuIconMgrSourceControlStatus();
 }
 
 void CToDoListWnd::OnShowKeyboardshortcuts() 
@@ -8052,13 +8054,16 @@ void CToDoListWnd::OnTimerCheckReloadTasklists(int nCtrl, BOOL bForceCheckRemote
 
 void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 {
+	if (!m_mgrMenuIcons.HasImages())
+		return;
+
 	// figure out current state
-	BOOL bCurDisabled = m_mgrMenuIcons.HasImageID(ID_TOOLS_TOGGLECHECKIN);
-	BOOL bCurCheckedOut = (!bCurDisabled && m_mgrMenuIcons.HasImageID(ID_TOOLS_CHECKIN));
+	BOOL bWasDisabled = m_mgrMenuIcons.HasImageID(ID_TOOLS_TOGGLECHECKIN);
+	BOOL bWasCheckedOut = (!bWasDisabled && m_mgrMenuIcons.HasImageID(ID_TOOLS_CHECKIN));
 
 	// figure out new state
-	BOOL bNewDisabled = TRUE;
-	BOOL bNewCheckedOut = FALSE;
+	BOOL bIsDisabled = TRUE;
+	BOOL bIsCheckedOut = FALSE;
 
 	if (GetTDCCount())
 	{
@@ -8066,48 +8071,48 @@ void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 
 		if (tdc.IsSourceControlled())
 		{
-			bNewDisabled = FALSE;
-			bNewCheckedOut = tdc.IsCheckedOut();
+			bIsDisabled = FALSE;
+			bIsCheckedOut = tdc.IsCheckedOut();
 		}
 	}
 
-	if (bNewDisabled)
+	if (bIsDisabled)
 	{
-		if (bCurDisabled)
+		if (bWasDisabled)
 		{
 			return;
 		}
-		else if (bCurCheckedOut)
+		else if (bWasCheckedOut)
 		{
 			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_CHECKIN, ID_TOOLS_TOGGLECHECKIN);
 		}
-		else // checkedin
+		else // checked in
 		{
 			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_CHECKOUT, ID_TOOLS_TOGGLECHECKIN);
 		}
 	}
-	else if (bNewCheckedOut)
+	else if (bIsCheckedOut)
 	{
-		if (bCurDisabled)
+		if (bWasDisabled)
 		{
 			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_TOGGLECHECKIN, ID_TOOLS_CHECKIN);
 		}
-		else if (bCurCheckedOut)
+		else if (bWasCheckedOut)
 		{
 			return;
 		}
-		else // checkedin
+		else // checked in
 		{
 			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_CHECKOUT, ID_TOOLS_CHECKIN);
 		}
 	}
-	else // new == checkedin
+	else // new == checked in
 	{
-		if (bCurDisabled)
+		if (bWasDisabled)
 		{
 			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_TOGGLECHECKIN, ID_TOOLS_CHECKOUT);
 		}
-		else if (bCurCheckedOut)
+		else if (bWasCheckedOut)
 		{
 			m_mgrMenuIcons.ChangeImageID(ID_TOOLS_CHECKIN, ID_TOOLS_CHECKOUT);
 		}

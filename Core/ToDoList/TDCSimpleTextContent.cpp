@@ -66,8 +66,6 @@ IContentControl* CTDCSimpleTextContent::CreateCtrl(unsigned short nCtrlID, unsig
 													long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
 	CTDLSimpleTextContentCtrl* pComments = new CTDLSimpleTextContentCtrl;
-
-	nStyle |= ES_MULTILINE | ES_WANTRETURN | WS_VSCROLL;
 	CRect rect(nLeft, nTop, nLeft + nWidth, nTop + nHeight);
 
 	if (pComments->Create(nStyle, rect, CWnd::FromHandle(hwndParent), nCtrlID))
@@ -159,6 +157,7 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_WM_CREATE()
 	//}}AFX_MSG_MAP
 	ON_WM_HELPINFO()
+	ON_WM_GETDLGCODE()
 	ON_COMMAND_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnCommentsMenuCmd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_COMMENTS_CUT, ID_COMMENTS_LAST, OnUpdateCommentsMenuCmd)
 	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChangeText)
@@ -391,7 +390,7 @@ void CTDLSimpleTextContentCtrl::OnNcDestroy()
 
 BOOL CTDLSimpleTextContentCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID)
 {
-	dwStyle |= ES_AUTOHSCROLL | WS_HSCROLL | ES_NOHIDESEL; 
+	dwStyle |= ES_NOHIDESEL | WS_HSCROLL | WS_VSCROLL | ES_WANTRETURN | ES_MULTILINE | WS_TABSTOP;
 
  	return CUrlRichEditCtrl::Create(dwStyle, rect, pParentWnd, nID);
 }
@@ -843,4 +842,9 @@ CLIPFORMAT CTDLSimpleTextContentCtrl::GetAcceptableClipFormat(LPDATAOBJECT lpDat
 
 	// FALSE ensures we only get what we allow
 	return CRichEditBaseCtrl::GetAcceptableClipFormat(lpDataOb, format, CF_PREFERRED, NUM_PREF, FALSE);
+}
+
+UINT CTDLSimpleTextContentCtrl::OnGetDlgCode()
+{
+	return (DLGC_WANTALLKEYS & ~DLGC_HASSETSEL);
 }

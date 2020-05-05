@@ -9774,11 +9774,11 @@ CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 	if (IsChild(pCtrl))
 	{
 		// comments field
-		if (::IsChild(m_ctrlComments, *pCtrl))
+		if (IsChildOrSame(m_ctrlComments, *pCtrl))
 		{
 			sText.LoadString(IDS_COMMENTSTYPE);
 		}
-		else if (::IsChild(m_taskTree, *pCtrl))
+		else if (IsChildOrSame(m_taskTree, *pCtrl))
 		{
 			sText.LoadString(IDS_TASKTREE);
 		}

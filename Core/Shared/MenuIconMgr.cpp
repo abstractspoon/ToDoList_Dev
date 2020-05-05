@@ -495,7 +495,7 @@ void CMenuIconMgr::OnInitMenuPopup(CMenu* pMenu)
     mnfo.dwStyle = MNS_CHECKORBMP | MNS_AUTODISMISS;
 	::SetMenuInfo(pMenu->GetSafeHmenu(), &mnfo);
 	
-    MENUITEMINFO minfo;
+	MENUITEMINFO minfo = { 0 };
     minfo.cbSize = sizeof(minfo);
 
 	UINT nNumItems = (UINT)pMenu->GetMenuItemCount();
@@ -515,10 +515,15 @@ void CMenuIconMgr::OnInitMenuPopup(CMenu* pMenu)
 					minfo.hbmpItem = (HBITMAP)hImage;
 				else
 					minfo.hbmpItem = HBMMENU_CALLBACK;
-
-				minfo.fMask = MIIM_BITMAP;
-				::SetMenuItemInfo(pMenu->GetSafeHmenu(), pos, TRUE, &minfo);
 			}
+			else
+			{
+				// Clear any existing image
+				minfo.hbmpItem = NULL;
+			}
+
+			minfo.fMask = MIIM_BITMAP;
+			::SetMenuItemInfo(pMenu->GetSafeHmenu(), pos, TRUE, &minfo);
 		}
     }
 }

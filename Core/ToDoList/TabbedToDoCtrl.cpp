@@ -187,7 +187,7 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	CIcon icon;
 	
 	if (icon.Load(IDI_TASKTREE_STD))
-		m_tabViews.AttachView(m_taskTree.GetSafeHwnd(), FTCV_TASKTREE, CEnString(IDS_TASKTREE), icon, NULL);
+		m_tabViews.AttachView(m_taskTree, FTCV_TASKTREE, CEnString(IDS_TASKTREE), icon, NULL);
 
 	if (icon.Load(IDI_LISTVIEW_STD))
 	{
@@ -2674,6 +2674,13 @@ void CTabbedToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 {
 	FTC_VIEW nView = GetTaskView();
+	HWND hwndView = m_tabViews.GetViewHwnd(nView);
+
+	// Task view tab-bar just returns the active task view
+	if (CDialogHelper::IsChildOrSame(m_tabViews, pCtrl->GetSafeHwnd()))
+	{
+		return GetControlDescription(CWnd::FromHandle(hwndView)); // RECURSIVE CALL
+	}
 
 	switch (nView)
 	{
@@ -2702,15 +2709,8 @@ CString CTabbedToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		if (pCtrl)
-		{
-			HWND hwnd = m_tabViews.GetViewHwnd(nView);
-
-			if (CDialogHelper::IsChildOrSame(hwnd, pCtrl->GetSafeHwnd()))
-			{
-				return m_tabViews.GetViewName(nView);
-			}
-		}
+		if (CDialogHelper::IsChildOrSame(hwndView, pCtrl->GetSafeHwnd()))
+			return m_tabViews.GetViewName(nView);
 		break;
 
 	default:
