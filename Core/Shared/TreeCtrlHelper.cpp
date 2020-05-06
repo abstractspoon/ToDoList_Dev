@@ -236,15 +236,14 @@ void CTreeCtrlHelper::ExpandAll(BOOL bExpand)
 void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BOOL bParents)
 {
 	// special case: equiv to ExpandAll
-	if (hti == NULL && bChildren)
+	if ((hti == NULL) && bChildren)
 	{
 		ExpandAll(bExpand);
 		return;
 	}
-	else if (hti)
-	{
+
+	if (hti)
 		m_tree.Expand(hti, bExpand ? TVE_EXPAND : TVE_COLLAPSE);
-	}
 	
 	if (bChildren)
 	{
