@@ -6,6 +6,7 @@
 #include "resource.h"
 #include "TDCMainMenu.h"
 #include "FilteredToDoCtrl.h"
+#include "ToDoCtrlMgr.h"
 #include "PreferencesDlg.h"
 #include "TDLFilterBar.h"
 #include "TDLTasklistStorageMgr.h"
@@ -21,6 +22,8 @@
 
 #include "..\Interfaces\UIExtensionHelper.h"
 #include "..\Interfaces\UIExtensionMgr.h"
+
+#include <afxadv.h> // for CRecentFileList
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -86,7 +89,7 @@ BOOL CTDCMainMenu::LoadMenu()
 
 	LoadMenuCommon();
 
-	TranslateDynamicMenuItems(ID_FILE_MRU_FILE1, ID_FILE_MRU_FILE16, _T("Recent Tasklist %d"));
+	TranslateDynamicMenuItems(ID_FILE_MRU1, ID_FILE_MRU16, _T("Recent Tasklist %d"));
 	TranslateDynamicMenuItems(ID_WINDOW1, ID_WINDOW16, _T("Window %d"));
 	TranslateDynamicMenuItems(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, _T("User Defined Tool %d"));
 	TranslateDynamicMenuItems(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, _T("3rd Party Storage %d"));
@@ -95,6 +98,115 @@ BOOL CTDCMainMenu::LoadMenu()
 	TranslateDynamicMenuItems(ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16, _T("Task View %d"));
 
 	return TRUE;
+}
+
+BOOL CTDCMainMenu::IsInRange(UINT nItem, UINT nStart, UINT nEnd)
+{
+	return ((nItem >= nStart) && (nItem <= nEnd));
+}
+
+BOOL CTDCMainMenu::IsDynamicItem(UINT nMenuID)
+{
+#define CHECKINRANGE(id, start, end) if (IsInRange(id, start, end)) return TRUE
+
+	// Same as above
+	CHECKINRANGE(nMenuID, ID_FILE_MRU1, ID_FILE_MRU16);
+	CHECKINRANGE(nMenuID, ID_WINDOW1, ID_WINDOW16);
+	CHECKINRANGE(nMenuID, ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50);
+	CHECKINRANGE(nMenuID, ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16);
+	CHECKINRANGE(nMenuID, ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16);
+	CHECKINRANGE(nMenuID, ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16);
+	CHECKINRANGE(nMenuID, ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16);
+
+	// Extra
+	CHECKINRANGE(nMenuID, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24);
+
+	// else
+	return FALSE;
+}
+
+CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
+											const CRecentFileList& mru,
+											const CToDoCtrlMgr& mgrToDoCtrl,
+											const CPreferencesDlg& prefs,
+											const CTDLFilterBar& filterBar,
+											const CTDLTasklistStorageMgr& mgrStorage,
+											const CUIExtensionMgr& mgrUIExt) const
+{
+	CString sTipText;
+
+	if (IsInRange(nMenuID, ID_FILE_MRU1, ID_FILE_MRU16))
+	{
+		int nMRU = (nMenuID - ID_FILE_MRU1);
+
+		if (nMRU < mru.GetSize())
+			sTipText = mru.m_arrNames[nMRU];
+	}
+	else if (IsInRange(nMenuID, ID_WINDOW1, ID_WINDOW16))
+	{
+		int nTDC = (nMenuID - ID_WINDOW1);
+
+		if (nTDC < mgrToDoCtrl.GetCount())
+			sTipText = mgrToDoCtrl.GetFriendlyProjectName(nTDC);
+	}
+	else if (IsInRange(nMenuID, ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50))
+	{
+		USERTOOL tool;
+		int nTool = (nMenuID - ID_TOOLS_USERTOOL1);
+
+		if (prefs.GetUserTool(nTool, tool))
+			sTipText = tool.sToolName;
+	}
+	else if (IsInRange(nMenuID, ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16))
+	{
+		int nStorage = (nMenuID - ID_FILE_OPEN_USERSTORAGE1);
+
+		if (nStorage < mgrStorage.GetNumStorage())
+			sTipText = mgrStorage.GetStorageMenuText(nStorage);
+	}
+	else if (IsInRange(nMenuID, ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16))
+	{
+		int nStorage = (nMenuID - ID_FILE_SAVE_USERSTORAGE1);
+
+		if (nStorage < mgrStorage.GetNumStorage())
+			sTipText = mgrStorage.GetStorageMenuText(nStorage);
+	}
+	else if (IsInRange(nMenuID, ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16))
+	{
+		int nExt = (nMenuID - ID_SHOWVIEW_UIEXTENSION1);
+
+		if (nExt < mgrUIExt.GetNumUIExtensions())
+			sTipText = mgrUIExt.GetUIExtensionMenuText(nExt);
+	}
+	else if (IsInRange(nMenuID, ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16))
+	{
+		int nExt = (nMenuID - ID_ACTIVATEVIEW_UIEXTENSION1);
+
+		if (nExt < mgrUIExt.GetNumUIExtensions())
+			sTipText = mgrUIExt.GetUIExtensionMenuText(nExt);
+	}
+	else if (IsInRange(nMenuID, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24))
+	{
+		CStringArray aFilters;
+		int nFilter = (nMenuID - ID_VIEW_ACTIVATEFILTER1);
+
+		if (nFilter < filterBar.GetAllFilterNames(aFilters))
+			sTipText = aFilters[nFilter];
+	}
+	else
+	{
+		ASSERT(0);
+	}
+
+	// Fallback
+	if (sTipText.IsEmpty())
+		sTipText = GetMenuString(nMenuID, MF_BYCOMMAND);
+
+	// removed embedded tabs
+	if (!sTipText.IsEmpty())
+		sTipText.Replace('\t', ' ');
+
+	return sTipText;
 }
 
 void CTDCMainMenu::LoadMenuCommon()
@@ -170,6 +282,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 {
 	if (GetSubMenu(AM_FILE) == pPopupMenu)
 	{
+		PrepareFileMenu(pPopupMenu, prefs);
 		return TRUE;
 	}
 	else if (GetSubMenu(AM_EDIT) == pPopupMenu)
@@ -212,6 +325,13 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 	}
 
 	return FALSE;
+}
+
+void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
+										  const CFilteredToDoCtrl& tdc,
+										  const CPreferencesDlg& prefs) const
+{
+	PrepareEditMenu(pMenu, tdc, prefs);
 }
 
 void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
@@ -622,7 +742,7 @@ void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, const CTDLFilterBar& filterBar
 		for (int nFilter = 0; nFilter < nNumFilters; nFilter++)
 		{
 			sMenuItem.Format(_T("&%s"), aFilters[nFilter]);
-			sMenuItem.Replace('\t', ' ');
+			sMenuItem.Replace('\t', ' '); // removed embedded tabs
 
 			pMenu->InsertMenu(nFilter, nFlags, (ID_VIEW_ACTIVATEFILTER1 + nFilter), sMenuItem);
 		}

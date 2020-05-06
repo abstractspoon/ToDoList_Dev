@@ -1205,6 +1205,35 @@ void CToDoListApp::UpgradePreferences(CPreferences& prefs, LPCTSTR szPrevVer)
 		// Each importer and exporter now gets its own preference section
 		prefs.DeleteProfileSection(_T("Exporters"));
 		prefs.DeleteProfileSection(_T("Importers"));
+
+		// Replace MFC MRU command IDs with our own
+		int nBtnCount = prefs.GetProfileInt(_T("CustomToolbar"), _T("ButtonCount"), 0);
+
+		for (int nBtn = 1; nBtn <= nBtnCount; nBtn++)
+		{
+			CString sKey = Misc::MakeKey(_T("CustomToolbar\\Button%d"), nBtn);
+			int nMenuID = prefs.GetProfileInt(sKey, _T("MenuID"));
+
+			if (nMenuID >= ID_FILE_MRU_FILE1 && nMenuID <= ID_FILE_MRU_FILE16)
+			{
+				nMenuID = (ID_FILE_MRU1 + (nMenuID - ID_FILE_MRU_FILE1));
+				prefs.WriteProfileInt(sKey, _T("MenuID"), nMenuID);
+			}
+		}
+
+		int nItem = prefs.GetProfileInt(_T("KeyboardShortcuts"), _T("NumItems"), 0);
+
+		while (nItem--)
+		{
+			CString sKey = Misc::MakeKey(_T("KeyboardShortcuts\\Item%02d"), nItem);
+			int nMenuID = prefs.GetProfileInt(sKey, _T("CmdID"));
+
+			if (nMenuID >= ID_FILE_MRU_FILE1 && nMenuID <= ID_FILE_MRU_FILE16)
+			{
+				nMenuID = (ID_FILE_MRU1 + (nMenuID - ID_FILE_MRU_FILE1));
+				prefs.WriteProfileInt(sKey, _T("CmdID"), nMenuID);
+			}
+		}
 	}
 }
 

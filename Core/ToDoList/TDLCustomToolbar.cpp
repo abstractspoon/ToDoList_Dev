@@ -2,8 +2,9 @@
 //
 
 #include "stdafx.h"
-#include "todolist.h"
+#include "resource.h"
 #include "TDLCustomToolbar.h"
+#include "TDCMainMenu.h"
 
 #include "..\Shared\ShortcutManager.h"
 #include "..\Shared\EnMenu.h"
@@ -37,7 +38,7 @@ END_MESSAGE_MAP()
 // CTDLCustomToolbar message handlers
 
 BOOL CTDLCustomToolbar::SetButtons(const CToolbarButtonArray& aButtons, 
-								   const CMenu& mainMenu,
+								   const CTDCMainMenu& mainMenu,
 								   const CShortcutManager& mgrShortcuts)
 {
 	if (!GetSafeHwnd())
@@ -85,12 +86,13 @@ BOOL CTDLCustomToolbar::SetButtons(const CToolbarButtonArray& aButtons,
 	{
 		const TOOLBARBUTTON& tb = aButtons[nTip];
 		
-		if (tb.nMenuID > 0)
+		// Only handle static non-separator items
+		if (tb.nMenuID && !mainMenu.IsDynamicItem(tb.nMenuID))
 		{
 			HMENU hItemMenu = NULL;
 			int nPos = CEnMenu::FindMenuItem(mainMenu, tb.nMenuID, hItemMenu);
 			ASSERT((nPos != -1) && (hItemMenu != NULL));
-			
+
 			CString sTooltip = CEnMenu::GetMenuString(hItemMenu, nPos, MF_BYPOSITION);
 			m_tbHelper.SetTooltip(tb.nMenuID, sTooltip);
 		}

@@ -36,13 +36,13 @@ CEnRecentFileList::~CEnRecentFileList()
 
 void CEnRecentFileList::UpdateMenu(CCmdUI* pCmdUI)
 {
+	if (pCmdUI->m_pMenu == NULL)
+		return;
+
 	UINT nFirstID = pCmdUI->m_nID;
 
     if (m_arrNames[0].IsEmpty())
 	{
-		if (pCmdUI->m_pMenu == NULL)
-			return;
-		
 		// delete all but the first item
 		for (int iMRU = 1; iMRU < m_nSize; iMRU++)
 			pCmdUI->m_pMenu->DeleteMenu(nFirstID + iMRU, MF_BYCOMMAND);

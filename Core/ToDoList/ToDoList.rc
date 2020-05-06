@@ -2940,38 +2940,22 @@ BEGIN
         MENUITEM SEPARATOR
         POPUP "&Recent Tasklists"
         BEGIN
-            MENUITEM "Recent Tasklist 1",           ID_FILE_MRU_FILE1
-            , GRAYED
-            MENUITEM "Recent Tasklist 2",           ID_FILE_MRU_FILE2
-            , GRAYED
-            MENUITEM "Recent Tasklist 3",           ID_FILE_MRU_FILE3
-            , GRAYED
-            MENUITEM "Recent Tasklist 4",           ID_FILE_MRU_FILE4
-            , GRAYED
-            MENUITEM "Recent Tasklist 5",           ID_FILE_MRU_FILE5
-            , GRAYED
-            MENUITEM "Recent Tasklist 6",           ID_FILE_MRU_FILE6
-            , GRAYED
-            MENUITEM "Recent Tasklist 7",           ID_FILE_MRU_FILE7
-            , GRAYED
-            MENUITEM "Recent Tasklist 8",           ID_FILE_MRU_FILE8
-            , GRAYED
-            MENUITEM "Recent Tasklist 9",           ID_FILE_MRU_FILE9
-            , GRAYED
-            MENUITEM "Recent Tasklist 10",          ID_FILE_MRU_FILE10
-            , GRAYED
-            MENUITEM "Recent Tasklist 11",          ID_FILE_MRU_FILE11
-            , GRAYED
-            MENUITEM "Recent Tasklist 12",          ID_FILE_MRU_FILE12
-            , GRAYED
-            MENUITEM "Recent Tasklist 13",          ID_FILE_MRU_FILE13
-            , GRAYED
-            MENUITEM "Recent Tasklist 14",          ID_FILE_MRU_FILE14
-            , GRAYED
-            MENUITEM "Recent Tasklist 15",          ID_FILE_MRU_FILE15
-            , GRAYED
-            MENUITEM "Recent Tasklist 16",          ID_FILE_MRU_FILE16
-            , GRAYED
+            MENUITEM "Recent Tasklist 1",           ID_FILE_MRU1, GRAYED
+            MENUITEM "Recent Tasklist 2",           ID_FILE_MRU2, GRAYED
+            MENUITEM "Recent Tasklist 3",           ID_FILE_MRU3, GRAYED
+            MENUITEM "Recent Tasklist 4",           ID_FILE_MRU4, GRAYED
+            MENUITEM "Recent Tasklist 5",           ID_FILE_MRU5, GRAYED
+            MENUITEM "Recent Tasklist 6",           ID_FILE_MRU6, GRAYED
+            MENUITEM "Recent Tasklist 7",           ID_FILE_MRU7, GRAYED
+            MENUITEM "Recent Tasklist 8",           ID_FILE_MRU8, GRAYED
+            MENUITEM "Recent Tasklist 9",           ID_FILE_MRU9, GRAYED
+            MENUITEM "Recent Tasklist 10",          ID_FILE_MRU10, GRAYED
+            MENUITEM "Recent Tasklist 11",          ID_FILE_MRU11, GRAYED
+            MENUITEM "Recent Tasklist 12",          ID_FILE_MRU12, GRAYED
+            MENUITEM "Recent Tasklist 13",          ID_FILE_MRU13, GRAYED
+            MENUITEM "Recent Tasklist 14",          ID_FILE_MRU14, GRAYED
+            MENUITEM "Recent Tasklist 15",          ID_FILE_MRU15, GRAYED
+            MENUITEM "Recent Tasklist 16",          ID_FILE_MRU16, GRAYED
         END
         MENUITEM SEPARATOR
         MENUITEM "Email &Tasks...",             ID_SENDTASKS

@@ -417,7 +417,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_TOGGLETREEANDLIST, OnViewToggleTreeandList)
 	ON_COMMAND(ID_VIEW_MAINTOOLBAR, OnViewMainToolbar)
 	ON_COMMAND(ID_VIEW_CUSTOMTOOLBAR, OnViewCustomToolbar)
-	ON_COMMAND_EX_RANGE(ID_FILE_MRU_FILE1, ID_FILE_MRU_FILE16, OnOpenRecentFile)
+	ON_COMMAND_EX_RANGE(ID_FILE_MRU1, ID_FILE_MRU16, OnOpenRecentFile)
 	ON_COMMAND_RANGE(ID_EDIT_OPENFILEREF1, ID_EDIT_OPENFILEREF16, OnEditOpenfileref)
 	ON_COMMAND_RANGE(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, OnActivateTaskView)
 	ON_COMMAND_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnSetPriority)
@@ -561,7 +561,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateEditUndo)
 	ON_UPDATE_COMMAND_UI(ID_FILE_CHANGEPASSWORD, OnUpdateFileChangePassword)
 	ON_UPDATE_COMMAND_UI(ID_FILE_ENCRYPT, OnUpdateFileEncrypt)
-	ON_UPDATE_COMMAND_UI(ID_FILE_MRU_FILE1, OnUpdateRecentFileMenu)
+	ON_UPDATE_COMMAND_UI(ID_FILE_MRU1, OnUpdateRecentFileMenu)
 	ON_UPDATE_COMMAND_UI(ID_FILE_OPENARCHIVE, OnUpdateFileOpenarchive)
 	ON_UPDATE_COMMAND_UI(ID_FILE_RESETVERSION, OnUpdateFileResetversion)
 	ON_UPDATE_COMMAND_UI(ID_MAXCOMMENTS, OnUpdateMaximizeComments)
@@ -3966,7 +3966,7 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				switch (nMenuID)
 				{
 				case MM_TASKCONTEXT:
-					m_menubar.PrepareEditMenu(pPopup, tdc, Prefs());
+					m_menubar.PrepareTaskContextMenu(pPopup, tdc, Prefs());
 					break;
 				}
 				
@@ -4211,10 +4211,10 @@ void CToDoListWnd::OnUpdateRecentFileMenu(CCmdUI* pCmdUI)
 
 BOOL CToDoListWnd::OnOpenRecentFile(UINT nID)
 {
-	ASSERT(nID >= ID_FILE_MRU_FILE1);
-	ASSERT(nID < ID_FILE_MRU_FILE1 + (UINT)m_mruList.GetSize());
+	ASSERT(nID >= ID_FILE_MRU1);
+	ASSERT(nID < ID_FILE_MRU1 + (UINT)m_mruList.GetSize());
 	
-	int nIndex = nID - ID_FILE_MRU_FILE1;
+	int nIndex = nID - ID_FILE_MRU1;
 	
 	CString sTaskList = m_mruList[nIndex];
 	TDC_FILE nOpen = OpenTaskList(sTaskList);
@@ -7119,18 +7119,14 @@ void CToDoListWnd::OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult)
 	static CString sTipText;
 	sTipText.Empty();
 
-	if ((pNMHDR->idFrom >= ID_TOOLS_USERTOOL1) && (pNMHDR->idFrom <= ID_TOOLS_USERTOOL50))
-	{
-		USERTOOL tool;
-
-		if (Prefs().GetUserTool(pNMHDR->idFrom - ID_TOOLS_USERTOOL1, tool))
-			sTipText = tool.sToolName;
-	}
-	else if ((pNMHDR->idFrom >= 0) && (pNMHDR->idFrom < (UINT)m_mgrToDoCtrls.GetCount()))
-	{
-		// tab control popups
-		sTipText = m_mgrToDoCtrls.GetTabItemTooltip(pNMHDR->idFrom);
-	}
+	// Handle items having dynamic menu text
+	sTipText = m_menubar.GetDynamicItemTooltip(pNMHDR->idFrom,
+											   m_mruList,
+											   m_mgrToDoCtrls,
+											   Prefs(),
+											   m_filterBar,
+											   m_mgrStorage,
+											   m_mgrUIExtensions);
 
 	if (!sTipText.IsEmpty())
 	{

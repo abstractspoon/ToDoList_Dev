@@ -16,6 +16,7 @@
 
 class CShortcutManager;
 class CToolbarHelper;
+class CTDCMainMenu;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -55,7 +56,7 @@ public:
 // Operations
 public:
 	BOOL SetButtons(const CToolbarButtonArray& aButtons,
-					const CMenu& mainMenu, 
+					const CTDCMainMenu& mainMenu, 
 					const CShortcutManager& mgrShortcuts);
 
 protected:
