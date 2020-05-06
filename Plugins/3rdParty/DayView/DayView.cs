@@ -1764,57 +1764,47 @@ namespace Calendar
             if ((appointments == null) || (appointments.Count == 0))
                 return 0;
 
-            AppointmentList processed = new AppointmentList();
-            List<int> layers = new List<int>();
+            var processed = new AppointmentList();
+            var layers = new SortedSet<int>();
 
-            foreach (Appointment appointment in appointments)
+            foreach (var appt in appointments)
             {
-                appointment.Layer = 0;
+                appt.Layer = 0;
 
                 if (processed.Count != 0)
                 {
-                    bool intersect = false;
-
-                    foreach (Appointment appt in processed)
+					// Look through the previously processed 
+					// appointments, one layer at a time, for 
+					// any which intersect this appointment
+					foreach (int lay in layers)
                     {
-                        if (!layers.Contains(appt.Layer))
-                            layers.Add(appt.Layer);
-                    }
+						bool intersect = false;
 
-                    foreach (int lay in layers)
-                    {
-                        foreach (Appointment app in processed)
+						foreach (var processedAppt in processed)
                         {
-                            if (app.Layer == lay)
+                            if ((processedAppt.Layer == lay) && appt.IntersectsWith(processedAppt))
                             {
-                                if (appointment.StartDate >= app.EndDate || appointment.EndDate <= app.StartDate)
-                                {
-                                    intersect = false;
-                                }
-                                else
-                                {
-                                    intersect = true;
-                                    break;
-                                }
-                            }
+								// If we find an intersection we update the current
+								// appointment's layer and move on to the next layer
+								// looking for a further intersection
+								appt.Layer = (lay + 1);
+								intersect = true;
 
-                            appointment.Layer = lay;
+                                break;
+                            }
                         }
 
+						// If we looked through all the previously processed 
+						// appointments within this layer without finding
+						// an intersection then we can stop looking
                         if (!intersect)
                             break;
                     }
-
-                    if (intersect)
-                        appointment.Layer = layers.Count;
                 }
 
-                processed.Add(appointment);
-            }
-
-            foreach (Appointment app in processed)
-                if (!layers.Contains(app.Layer))
-                    layers.Add(app.Layer);
+                processed.Add(appt);
+				layers.Add(appt.Layer);
+			}
 
             return layers.Count;
         }

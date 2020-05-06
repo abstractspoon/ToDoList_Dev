@@ -221,6 +221,17 @@ namespace Calendar
             return IsLongAppt(startDate, endDate);
         }
 
+		public bool IntersectsWith(Appointment other)
+		{
+			if (StartDate >= other.EndDate)
+				return false;
+
+			if (EndDate <= other.StartDate)
+				return false;
+
+			return true;
+		}
+
 		static public bool IsLongAppt(DateTime start, DateTime end)
 		{
 			return (start.Date != end.Date);
