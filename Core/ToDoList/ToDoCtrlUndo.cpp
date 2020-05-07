@@ -241,10 +241,10 @@ BOOL CToDoCtrlUndo::IsValidElementOperation(TDC_UNDOELMOP nOp) const
 		
 	case TDCUAT_ADD:
 		return (nOp == TDCUEO_ADD || 
-				nOp == TDCUEO_EDIT ||
-				nOp == TDCUEO_DELETE);
+				nOp == TDCUEO_EDIT);
 
 	case TDCUAT_DELETE:
+	case TDCUAT_ARCHIVE:
 		return (nOp == TDCUEO_DELETE || 
 				nOp == TDCUEO_EDIT);
 
@@ -252,10 +252,6 @@ BOOL CToDoCtrlUndo::IsValidElementOperation(TDC_UNDOELMOP nOp) const
 	case TDCUAT_PASTE:
 		return (nOp == TDCUEO_ADD || 
 				nOp == TDCUEO_EDIT);
-
-	case TDCUAT_ARCHIVE:
-		return (nOp == TDCUEO_ADD || 
-				nOp == TDCUEO_DELETE);
 
 	case TDCUAT_MOVE:
 		return (nOp == TDCUEO_MOVE || 
@@ -265,7 +261,8 @@ BOOL CToDoCtrlUndo::IsValidElementOperation(TDC_UNDOELMOP nOp) const
 	}
 
 	// all else
-	return TRUE;
+	ASSERT(0);
+	return FALSE;
 }
 
 int CToDoCtrlUndo::GetLastUndoActionTaskIDs(CDWordArray& aIDs) const
