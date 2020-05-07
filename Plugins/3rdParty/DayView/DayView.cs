@@ -1632,22 +1632,29 @@ namespace Calendar
             groupAppts.SortByStartDate();
 
             var buckets = new List<AppointmentList>();
-            AppointmentList currentBucket = null;
 
-            DateTime maxBucketDate = DateTime.MinValue;
-
-            foreach (var appt in groupAppts)
+            if (numLayers == 1)
             {
-                if (appt.StartDate >= maxBucketDate)
+                buckets.Add(groupAppts);
+            }
+            else
+            {
+                AppointmentList currentBucket = null;
+                DateTime maxBucketDate = DateTime.MinValue;
+
+                foreach (var appt in groupAppts)
                 {
-                    currentBucket = new AppointmentList();
-                    buckets.Add(currentBucket);
+                    if (appt.StartDate >= maxBucketDate)
+                    {
+                        currentBucket = new AppointmentList();
+                        buckets.Add(currentBucket);
+                    }
+
+                    currentBucket.Add(appt);
+
+                    if (appt.EndDate > maxBucketDate)
+                        maxBucketDate = appt.EndDate;
                 }
-
-                currentBucket.Add(appt);
-
-                if (appt.EndDate > maxBucketDate)
-                    maxBucketDate = appt.EndDate;
             }
 
             // Draw each bucket's contents as an independent list
@@ -1933,7 +1940,9 @@ namespace Calendar
 
             public void SortByStartDate()
             {
-                Sort((x, y) => ((x.StartDate < y.StartDate) ? -1 : ((x.StartDate > y.StartDate) ? 1 : 0)));
+                // If two tasks sort the same, attempt to keep things stable 
+                // by retaining their existing layer order
+                Sort((x, y) => ((x.StartDate < y.StartDate) ? -1 : ((x.StartDate > y.StartDate) ? 1 : (x.Layer - y.Layer))));
             }
         }
 
