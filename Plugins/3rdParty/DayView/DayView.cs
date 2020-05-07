@@ -1628,33 +1628,60 @@ namespace Calendar
             if (numLayers == 0)
                 return;
 
-            int layerWidth = (rect.Width / numLayers);
-            int leftOverWidth = (rect.Width - (layerWidth * numLayers));
+            // Sort them into buckets of independent tasks
+            groupAppts.SortByStartDate();
 
-            foreach (var appointment in groupAppts)
+            var buckets = new List<AppointmentList>();
+            AppointmentList currentBucket = null;
+
+            DateTime maxBucketDate = DateTime.MinValue;
+
+            foreach (var appt in groupAppts)
             {
-                Rectangle apptRect = rect;
-                apptRect.X += (appointment.Layer * layerWidth);
-                apptRect.Width = (layerWidth - ((numLayers > 1) ? appointmentSpacing : 0));
+                if (appt.StartDate >= maxBucketDate)
+                {
+                    currentBucket = new AppointmentList();
+                    buckets.Add(currentBucket);
+                }
 
-                // Last column picks up the slack
-                if (appointment.Layer == (numLayers - 1))
-                    apptRect.Width += leftOverWidth;
+                currentBucket.Add(appt);
 
-                DateTime apptStart, apptEnd;
-                GetAppointmentDrawTimes(appointment, out apptStart, out apptEnd);
+                if (appt.EndDate > maxBucketDate)
+                    maxBucketDate = appt.EndDate;
+            }
 
-                apptRect = GetHourRangeRectangle(apptStart, apptEnd, apptRect);
-                appointmentViews[appointment] = new AppointmentView(appointment, apptRect);
+            // Draw each bucket's contents as an independent list
+            foreach (var bucket in buckets)
+            {
+                int numBucketLayers = Math.Min(numLayers, bucket.Count);
+                int layerWidth = (rect.Width / numBucketLayers);
+                int leftOverWidth = (rect.Width - (layerWidth * numBucketLayers));
 
-                if (this.DrawAllAppBorder)
-                    appointment.DrawBorder = true;
+                foreach (var appt in bucket)
+                {
+                    Rectangle apptRect = rect;
+                    apptRect.X += (appt.Layer * layerWidth);
+                    apptRect.Width = (layerWidth - ((numBucketLayers > 1) ? appointmentSpacing : 0));
 
-                Rectangle gripRect = GetHourRangeRectangle(appointment.StartDate, appointment.EndDate, apptRect);
-                gripRect.Width = appointmentGripWidth;
+                    // Last column picks up the slack
+                    if (appt.Layer == (numBucketLayers - 1))
+                        apptRect.Width += leftOverWidth;
 
-                bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
-                DrawAppointment(e.Graphics, apptRect, appointment, isSelected, gripRect);
+                    DateTime apptStart, apptEnd;
+                    GetAppointmentDrawTimes(appt, out apptStart, out apptEnd);
+
+                    apptRect = GetHourRangeRectangle(apptStart, apptEnd, apptRect);
+                    appointmentViews[appt] = new AppointmentView(appt, apptRect);
+
+                    if (this.DrawAllAppBorder)
+                        appt.DrawBorder = true;
+
+                    Rectangle gripRect = GetHourRangeRectangle(appt.StartDate, appt.EndDate, apptRect);
+                    gripRect.Width = appointmentGripWidth;
+
+                    bool isSelected = ((activeTool != drawTool) && (appt == selectedAppointment));
+                    DrawAppointment(e.Graphics, apptRect, appt, isSelected, gripRect);
+                }
             }
         }
 
@@ -1903,6 +1930,11 @@ namespace Calendar
         {
             public AppointmentList() : base() { }
             public AppointmentList(IEnumerable<Appointment> appts) : base(appts) { }
+
+            public void SortByStartDate()
+            {
+                Sort((x, y) => ((x.StartDate < y.StartDate) ? -1 : ((x.StartDate > y.StartDate) ? 1 : 0)));
+            }
         }
 
         #endregion
