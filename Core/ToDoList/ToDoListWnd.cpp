@@ -1712,20 +1712,27 @@ BOOL CToDoListWnd::PreTranslateMessage(MSG* pMsg)
 
 	BOOL bKeyPress = ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_SYSKEYDOWN));
 	
-	if (bKeyPress && IsWindowEnabled())
+	if (bKeyPress && IsWindowEnabled() && !IsDroppedComboBox(pMsg->hwnd))
 	{
-		// Control accelerators
-		if (ProcessDialogCtrlShortcut(pMsg))
+		if (HandleEscapeTabReturn(pMsg))
+		{
+			TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> HandleEscapeTabReturn)\n"));
 			return TRUE;
-
-		if (IsDroppedComboBox(pMsg->hwnd))
-			return FALSE;
+		}
 
 		if (ProcessShortcut(pMsg))
+		{
+			TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> ProcessShortcut)\n"));
 			return TRUE;
+		}
 
-		if (HandleEscapeTabReturn(pMsg))
+		if (ProcessDialogCtrlAccelerator(pMsg))
+		{
+			TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> ProcessDialogCtrlShortcut)\n"));
 			return TRUE;
+		}
+
+		TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> Default handling)\n"));
 	}
 	
 	return CFrameWnd::PreTranslateMessage(pMsg);

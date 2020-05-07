@@ -709,7 +709,7 @@ BOOL CDialogHelper::IsDroppedComboBox(HWND hCtrl)
 	return FALSE;
 }
 
-BOOL CDialogHelper::ProcessDialogCtrlShortcut(const MSG* pMsg)
+BOOL CDialogHelper::ProcessDialogCtrlAccelerator(const MSG* pMsg)
 {
 	// message id must be WM_KEYDOWN and alt key must be pressed
 	if (pMsg->message != WM_SYSKEYDOWN || pMsg->wParam == VK_MENU)

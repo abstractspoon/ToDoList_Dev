@@ -189,7 +189,7 @@ public:
 	static CString GetItem(const CListBox& list, int nItem);
 
 	// better dialog control shortcut handling
-	static BOOL ProcessDialogCtrlShortcut(const MSG* pMsg);
+	static BOOL ProcessDialogCtrlAccelerator(const MSG* pMsg);
 
 	static CRect OffsetCtrl(const CWnd* pParent, UINT nCtrlID, int dx, int dy); 
 	static CRect ResizeCtrl(const CWnd* pParent, UINT nCtrlID, int cx, int cy);
