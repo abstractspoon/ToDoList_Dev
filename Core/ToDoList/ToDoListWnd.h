@@ -681,6 +681,7 @@ protected:
 	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
 	void RefreshFilterBarAdvancedFilterNames();
+	void FixupCustomToolbarFilterMenuItemIDs();
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);

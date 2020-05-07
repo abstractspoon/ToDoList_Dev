@@ -8176,6 +8176,21 @@ void CToDoListWnd::RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID)
 	m_findDlg.SetAttributeListData(tldActive, tldAll, nAttribID);
 }
 
+void CToDoListWnd::FixupCustomToolbarFilterMenuItemIDs()
+{
+	// A side-effect of the current alphabetic sorting of advanced
+	// filters is that any custom toolbar buttons which reference 
+	// advanced filter menu items are at risk of being invalidated 
+	// by the insertion or deletion of a filter earlier in the sort
+	// order. As a consequence we need to fix up the affected custom
+	// toolbar menu command IDs and this is the best place to do it
+	// because the filter bar provides the best before/after view of
+	// the required filters (for now).
+	CStringArray aOldAllFilters, aNewAllFilters;
+
+	// TODO
+}
+
 void CToDoListWnd::RefreshFilterBarAdvancedFilterNames()
 {
 	CStringArray aFilters;
