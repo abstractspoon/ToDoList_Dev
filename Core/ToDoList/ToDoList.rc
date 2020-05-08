@@ -199,7 +199,7 @@ END
 
 IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 457
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
@@ -245,9 +245,9 @@ BEGIN
     CONTROL         "&Enable 'tdl://' as a url protocol",
                     IDC_ENABLETDLPROTOCOL,"Button",BS_AUTOCHECKBOX | BS_TOP | 
                     WS_TABSTOP,7,260,353,10
-    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD2,372,235,21,20,
+    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD2,372,235,22,20,
                     SS_RIGHTJUST | SS_REALSIZEIMAGE
-    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD,372,260,21,20,
+    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD,372,260,22,20,
                     SS_RIGHTJUST | SS_REALSIZEIMAGE,WS_EX_TRANSPARENT
     CONTROL         "En&able delayed loading of tasklists",
                     IDC_ENABLEDELAYEDLOADING,"Button",BS_AUTOCHECKBOX | 
@@ -574,8 +574,9 @@ BEGIN
                     IDC_SHOWDEFAULTTASKICONS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,145,381,10
     LTEXT           "Filtering",IDC_FILTERGROUP,7,165,381,8
-    CONTROL         "S&how default filters",IDC_SHOWDEFAULTFILTERS,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,180,387,10
+    CONTROL         "S&how default filters in 'Filter Bar'",
+                    IDC_SHOWDEFAULTFILTERS,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,180,387,10
     CONTROL         "&Allow multi selection in the filter droplists",
                     IDC_MULTISELFILTER,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     7,195,381,10
@@ -1508,7 +1509,7 @@ END
 IDD_TDLIMPORTEXPORT_DIALOG DIALOGEX 0, 0, 400, 289
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Import Tasks from Tasklist"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,289,268,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,344,268,50,14
@@ -3285,53 +3286,102 @@ BEGIN
         MENUITEM "&Refresh Filter",             ID_VIEW_REFRESHFILTER
         POPUP "&Activate Filter"
         BEGIN
-            MENUITEM "Filter 1",                    ID_VIEW_ACTIVATEFILTER1
+            MENUITEM "Default Filter 1",            ID_VIEW_ACTIVATEFILTER1
             , GRAYED
-            MENUITEM "Filter 2",                    ID_VIEW_ACTIVATEFILTER2
+            MENUITEM "Default Filter 2",            ID_VIEW_ACTIVATEFILTER2
             , GRAYED
-            MENUITEM "Filter 3",                    ID_VIEW_ACTIVATEFILTER3
+            MENUITEM "Default Filter 3",            ID_VIEW_ACTIVATEFILTER3
             , GRAYED
-            MENUITEM "Filter 4",                    ID_VIEW_ACTIVATEFILTER4
+            MENUITEM "Default Filter 4",            ID_VIEW_ACTIVATEFILTER4
             , GRAYED
-            MENUITEM "Filter 5",                    ID_VIEW_ACTIVATEFILTER5
+            MENUITEM "Default Filter 5",            ID_VIEW_ACTIVATEFILTER5
             , GRAYED
-            MENUITEM "Filter 6",                    ID_VIEW_ACTIVATEFILTER6
+            MENUITEM "Default Filter 6",            ID_VIEW_ACTIVATEFILTER6
             , GRAYED
-            MENUITEM "Filter 7",                    ID_VIEW_ACTIVATEFILTER7
+            MENUITEM "Default Filter 7",            ID_VIEW_ACTIVATEFILTER7
             , GRAYED
-            MENUITEM "Filter 8",                    ID_VIEW_ACTIVATEFILTER8
+            MENUITEM "Default Filter 8",            ID_VIEW_ACTIVATEFILTER8
             , GRAYED
-            MENUITEM "Filter 9",                    ID_VIEW_ACTIVATEFILTER9
+            MENUITEM "Default Filter 9",            ID_VIEW_ACTIVATEFILTER9
             , GRAYED
-            MENUITEM "Filter 10",                   ID_VIEW_ACTIVATEFILTER10
+            MENUITEM "Default Filter 10",           ID_VIEW_ACTIVATEFILTER10
             , GRAYED
-            MENUITEM "Filter 11",                   ID_VIEW_ACTIVATEFILTER11
+            MENUITEM "Default Filter 11",           ID_VIEW_ACTIVATEFILTER11
             , GRAYED
-            MENUITEM "Filter 12",                   ID_VIEW_ACTIVATEFILTER12
+            MENUITEM "Default Filter 12",           ID_VIEW_ACTIVATEFILTER12
             , GRAYED
-            MENUITEM "Filter 13",                   ID_VIEW_ACTIVATEFILTER13
+            MENUITEM "Default Filter 13",           ID_VIEW_ACTIVATEFILTER13
             , GRAYED
-            MENUITEM "Filter 14",                   ID_VIEW_ACTIVATEFILTER14
+            MENUITEM "Default Filter 14",           ID_VIEW_ACTIVATEFILTER14
             , GRAYED
-            MENUITEM "Filter 15",                   ID_VIEW_ACTIVATEFILTER15
+            MENUITEM "Default Filter 15",           ID_VIEW_ACTIVATEFILTER15
             , GRAYED
-            MENUITEM "Filter 16",                   ID_VIEW_ACTIVATEFILTER16
+            MENUITEM "Default Filter 16",           ID_VIEW_ACTIVATEFILTER16
             , GRAYED
-            MENUITEM "Filter 17",                   ID_VIEW_ACTIVATEFILTER17
+            MENUITEM "Default Filter 17",           ID_VIEW_ACTIVATEFILTER17
             , GRAYED
-            MENUITEM "Filter 18",                   ID_VIEW_ACTIVATEFILTER18
+            MENUITEM "Default Filter 18",           ID_VIEW_ACTIVATEFILTER18
             , GRAYED
-            MENUITEM "Filter 19",                   ID_VIEW_ACTIVATEFILTER19
+            MENUITEM "Default Filter 19",           ID_VIEW_ACTIVATEFILTER19
             , GRAYED
-            MENUITEM "Filter 20",                   ID_VIEW_ACTIVATEFILTER20
+            MENUITEM "Default Filter 20",           ID_VIEW_ACTIVATEFILTER20
             , GRAYED
-            MENUITEM "Filter 21",                   ID_VIEW_ACTIVATEFILTER21
+            MENUITEM "Default Filter 21",           ID_VIEW_ACTIVATEFILTER21
             , GRAYED
-            MENUITEM "Filter 22",                   ID_VIEW_ACTIVATEFILTER22
+            MENUITEM "Default Filter 22",           ID_VIEW_ACTIVATEFILTER22
             , GRAYED
-            MENUITEM "Filter 23",                   ID_ACTIVATEVIEW_UIEXTENSION5
+            MENUITEM "Default Filter 23",           ID_VIEW_ACTIVATEFILTER23
             , GRAYED
-            MENUITEM "Filter 24",                   ID_VIEW_ACTIVATEFILTER24
+            MENUITEM "Default Filter 24",           ID_VIEW_ACTIVATEFILTER24
+            , GRAYED
+            MENUITEM SEPARATOR
+            MENUITEM "Find Tasks Filter 1",         ID_VIEW_ACTIVATEADVANCEDFILTER1
+            , GRAYED
+            MENUITEM "Find Tasks Filter 2",         ID_VIEW_ACTIVATEADVANCEDFILTER2
+            , GRAYED
+            MENUITEM "Find Tasks Filter 3",         ID_VIEW_ACTIVATEADVANCEDFILTER3
+            , GRAYED
+            MENUITEM "Find Tasks Filter 4",         ID_VIEW_ACTIVATEADVANCEDFILTER4
+            , GRAYED
+            MENUITEM "Find Tasks Filter 5",         ID_VIEW_ACTIVATEADVANCEDFILTER5
+            , GRAYED
+            MENUITEM "Find Tasks Filter 6",         ID_VIEW_ACTIVATEADVANCEDFILTER6
+            , GRAYED
+            MENUITEM "Find Tasks Filter 7",         ID_VIEW_ACTIVATEADVANCEDFILTER7
+            , GRAYED
+            MENUITEM "Find Tasks Filter 8",         ID_VIEW_ACTIVATEADVANCEDFILTER8
+            , GRAYED
+            MENUITEM "Find Tasks Filter 9",         ID_VIEW_ACTIVATEADVANCEDFILTER9
+            , GRAYED
+            MENUITEM "Find Tasks Filter 10",        ID_VIEW_ACTIVATEADVANCEDFILTER10
+            , GRAYED
+            MENUITEM "Find Tasks Filter 11",        ID_VIEW_ACTIVATEADVANCEDFILTER11
+            , GRAYED
+            MENUITEM "Find Tasks Filter 12",        ID_VIEW_ACTIVATEADVANCEDFILTER12
+            , GRAYED
+            MENUITEM "Find Tasks Filter 13",        ID_VIEW_ACTIVATEADVANCEDFILTER13
+            , GRAYED
+            MENUITEM "Find Tasks Filter 14",        ID_VIEW_ACTIVATEADVANCEDFILTER14
+            , GRAYED
+            MENUITEM "Find Tasks Filter 15",        ID_VIEW_ACTIVATEADVANCEDFILTER15
+            , GRAYED
+            MENUITEM "Find Tasks Filter 16",        ID_VIEW_ACTIVATEADVANCEDFILTER16
+            , GRAYED
+            MENUITEM "Find Tasks Filter 17",        ID_VIEW_ACTIVATEADVANCEDFILTER17
+            , GRAYED
+            MENUITEM "Find Tasks Filter 18",        ID_VIEW_ACTIVATEADVANCEDFILTER18
+            , GRAYED
+            MENUITEM "Find Tasks Filter 19",        ID_VIEW_ACTIVATEADVANCEDFILTER19
+            , GRAYED
+            MENUITEM "Find Tasks Filter 20",        ID_VIEW_ACTIVATEADVANCEDFILTER20
+            , GRAYED
+            MENUITEM "Find Tasks Filter 21",        ID_VIEW_ACTIVATEADVANCEDFILTER21
+            , GRAYED
+            MENUITEM "Find Tasks Filter 22",        ID_VIEW_ACTIVATEADVANCEDFILTER22
+            , GRAYED
+            MENUITEM "Find Tasks Filter 23",        ID_VIEW_ACTIVATEADVANCEDFILTER23
+            , GRAYED
+            MENUITEM "Find Tasks Filter 24",        ID_VIEW_ACTIVATEADVANCEDFILTER24
             , GRAYED
         END
         MENUITEM SEPARATOR
@@ -4457,8 +4507,32 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_HELP                 "\nOnline Help"
+    IDS_CAD_TIMEPERIOD      "Time Period"
+    IDS_CUSTOM_FEATURE_FILTER "Filterable"
+    IDS_SETREMINDER         "Set &Reminder..."
+    IDS_MODIFYREMINDER      "&Modify Reminder..."
+    IDS_TDC_EDITPROMPT_MULTIPLEFORMATS "<multiple formats>"
+    IDS_TDC_EDITPROMPT_MULTIPLETASKS "<multiple tasks>"
+    IDS_TDC_COLUMN_LASTMODBY "Last Mod. By"
+    IDS_TDLBC_LASTMODBY     "Last Modified By"
+    IDS_OA_DURATION         "Duration"
+    IDS_OA_ENDDATE          "End Date"
+    IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
+    IDS_ADVANCEDFILTERPLACEHOLDER "Find Tasks Filters"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CMDLINE_TASKCUSTOMATTRIB 
+                            "-ca <attribute id> <attribute value>\tSets the value for the specified custom attribute ID for the currently selected task"
+    IDS_CMDLINE_TASKCOPYATTRIB 
+                            "-copy <attrib1> <attrib2>\tCopies the value for 'attrib1' to 'attrib2' for the currently selected task"
+    IDS_CMDLINE_HELP        "-h, -help, -?\tDisplays a message box showing all the available commandline options"
     IDS_PTP_NEWTOOL         "New Tool"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_PTP_TOOLNAME        "Tool Name"
     IDS_PTP_TOOLPATH        "File Path"
     IDS_PTP_ARGUMENTS       "Arguments"
@@ -4467,11 +4541,14 @@ BEGIN
     IDS_TDLBC_ALLOCTO       "Allocated To"
     IDS_TDLBC_ALLOCBY       "Allocated By"
     IDS_TDLBC_DONEDATE      "Completed Date"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    AFX_IDS_APP_TITLE       "ToDoList"
+    IDS_TDLBC_DUEDATE       "Due Date"
+    IDS_TDLBC_STARTDATE     "Start Date"
+    IDS_TDLBC_TIMEEST       "Time Estimate"
+    IDS_TDLBC_TIMESPENT     "Time Spent"
+    IDS_TDLBC_CATEGORY      "Category"
+    IDS_TDLBC_STATUS        "Status"
+    IDS_TDLBC_CREATEDATE    "Creation Date"
+    IDS_TDLBC_CREATEDBY     "Created By"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4487,14 +4564,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDLBC_DUEDATE       "Due Date"
-    IDS_TDLBC_STARTDATE     "Start Date"
-    IDS_TDLBC_TIMEEST       "Time Estimate"
-    IDS_TDLBC_TIMESPENT     "Time Spent"
-    IDS_TDLBC_CATEGORY      "Category"
-    IDS_TDLBC_STATUS        "Status"
-    IDS_TDLBC_CREATEDATE    "Creation Date"
-    IDS_TDLBC_CREATEDBY     "Created By"
     IDS_TDLBC_ID            "Task ID"
     IDS_TDLBC_POS           "Position"
     IDS_TDLBC_PERCENT       "Percent Complete"
@@ -4503,13 +4572,13 @@ BEGIN
     IDS_TDLBC_TRACKTIME     "Track Time"
     IDS_PSP_SHORTCUT        "Shortcut"
     IDS_PSP_MENUITEM        "Menu Item"
+    IDS_PSP_CURRENTLYASSIGNED "Currently assigned to:\n\n'%s'"
+    IDS_PTDP_COLOR          "Colour"
+    IDS_FTD_RESULTS         "&Results"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_PSP_CURRENTLYASSIGNED "Currently assigned to:\n\n'%s'"
-    IDS_PTDP_COLOR          "Colour"
-    IDS_FTD_RESULTS         "&Results"
     IDS_FTD_SOMERESULTS     "&Results (%d found):"
 END
 
@@ -4521,10 +4590,6 @@ BEGIN
     IDS_ED_FILEPATH         "File"
     IDS_PREF_GEN            "General"
     IDS_PREF_MULTIUSER      "Multiple Users"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_PREF_MULTIUSERSS    "Multiple Users>Source Control"
     IDS_PREF_UI             "User Interface>General"
     IDS_PREF_UITASK         "User Interface>Tasklist Attributes"
@@ -4533,6 +4598,10 @@ BEGIN
     IDS_PREF_TASKDEF        "Tasks>Defaults"
     IDS_PREF_EXPORT         "Importing/Exporting"
     IDS_PREF_TOOLS          "User Defined Tools"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_PREF_SHORTCUT       "Keyboard Shortcuts"
     IDS_PREF_UIVISIBILITY   "User Interface>Column/Attribute Visibility"
     IDS_PREF_TASKDEFINHERIT "Tasks>Defaults>Inheritable Attributes"
@@ -4541,10 +4610,6 @@ BEGIN
     IDS_OPENTASKLIST_TITLE  "Open Tasklist"
     IDS_INVALIDTASKLIST     "'%s' does not appear to be a valid tasklist."
     IDS_STATUSREADONLY      "Read-only"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_STATUSNEWERFORMAT   "Read-only: Newer format"
     IDS_STATUSCHECKEDOUT    "Checked out"
     IDS_STATUSCHECKEDIN     "Read-only: Checked in"
@@ -4553,6 +4618,10 @@ BEGIN
     IDS_PREF_TASKDEFLISTS   "Tasks>Defaults>Dynamic Droplists"
     IDS_OPENREADONLY        "Open Tasklist|The file '%s' is currently read-only \nand you will not be able to make any changes to it."
     IDS_PREF_TIMETRACK      "Tasks>Time Tracking"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_OPENNEWER           "Open Tasklist|The file '%s' has a more recent file format than your \ncurrent version of ToDoList and you will therefore not be able to make any \nchanges to it."
     IDS_DUETOMORROW         "The following tasks are due tomorrow"
     IDS_DUETHISWEEK         "The following tasks are due by the end of this week"
@@ -4561,10 +4630,6 @@ BEGIN
     IDS_DUENEXTMONTH        "The following tasks are due by the end of next month"
     IDS_DUETASKS_TITLE      "Due Tasks: %s"
     IDS_PREF_TASKDEFATTRIB  "Tasks>Defaults>Task Attributes"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_ABOUTHEADING        "A simple and effective way to keep on top of your daily tasks"
     IDS_PASTETOPLEVELTASK   "Paste at bottom of tasklist"
     IDS_CONFIRMRELOAD       "If you reload the tasklist you will lose your current \nchanges.\n\nAre you sure you want to continue?"
@@ -4572,6 +4637,10 @@ BEGIN
     IDS_SAVEBEFORECLOSE     "Would you like to save the changes to '%s' \nbefore closing?"
     IDS_TABSWITCHTOOLTIP    "Use '%s' to switch tasklists"
     IDS_PREF_TASKVIEWVISIBILITY "User Interface>General>Task View Visibility"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_READONLYTOWRITABLE  "The status of the file '%s' has changed \nfrom 'read-only' to 'writable'."
     IDS_WRITABLETOREADONLY  "The status of the file '%s' has changed \nfrom 'writable' to 'read-only'."
     IDS_TASKLISTSRELOADED   "The following tasklists have been reloaded:\n\n%s"
@@ -4580,36 +4649,6 @@ BEGIN
                             "The following tasklists have been checked out:\n\n%s"
     IDS_SETFILEREF_TITLE    "Select File to which Task Refers"
     IDS_CHECKEDOUTBYOTHER   "'%s' could not be checked out \nbecause it is currently checked out to '%s' (Last saved: %s)."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_RECENTFILES         "Recent Tasklists"
-    IDS_COPYRIGHT           "ToDoList (c) AbstractSpoon"
-    IDS_SAVETASKLIST_TITLE  "Save Tasklist"
-    IDS_SAVEREADONLY        "'%s' could not be saved because the file is read-only.\n\nPlease select another filename."
-    IDS_PREF_UISORTING      "User Interface>General>Sorting"
-    IDS_XMLFILEFILTER       "Tasklist (*.xml)|*.xml||"
-    IDS_PRINTFAILED_TITLE   "Tasklist could not be printed"
-    IDS_WANTRELOAD          "Would you like to reload it?"
-    IDS_CHECKOUTFAILED      "'%s' could not be checked out.\n\nPlease check that it has not been moved or deleted and that you have the required access rights."
-    IDS_INIFILEFILTER       "Preference Files (*.ini)|*.ini||"
-    IDS_CONFIRMRELOAD_TITLE "Confirm Reload"
-    IDS_CONFIRMSAVE_TITLE   "Confirm Save"
-    IDS_STATUSCHANGE_TITLE  "Status Change"
-    IDS_TIMESTAMPCHANGE_TITLE "Timestamp Change"
-    IDS_CHECKOUT_TITLE      "Check Out Tasklist for Editing"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_XSLFILEFILTER       "Stylesheet (*.xsl)|*.xsl||"
-    IDS_TRANSFORMFILEFILTER "Web Page (*.htm, *.html)|*.htm;*.html|Text File (*.txt)|*.txt|All Files (*.*)|*.*||"
-    IDS_ALLFILEFILTER       "All Files (*.*)|*.*||"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_SAVEBEFORECHECKIN   "Would you like to save your changes before checking in?"
     IDS_TASKLISTSAUTOCHECKEDIN 
                             "The following tasklists have been checked in:\n\n%s"
@@ -4619,15 +4658,45 @@ BEGIN
     IDS_NODUETOMORROW       "'%s' has no tasks due by tomorrow"
     IDS_NODUETHISWEEK       "'%s' has no tasks due by the end of this week"
     IDS_NODUENEXTWEEK       "'%s' has no tasks due by the end of next week"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_XSLFILEFILTER       "Stylesheet (*.xsl)|*.xsl||"
+    IDS_TRANSFORMFILEFILTER "Web Page (*.htm, *.html)|*.htm;*.html|Text File (*.txt)|*.txt|All Files (*.*)|*.*||"
+    IDS_ALLFILEFILTER       "All Files (*.*)|*.*||"
+    IDS_RECENTFILES         "Recent Tasklists"
+    IDS_COPYRIGHT           "ToDoList (c) AbstractSpoon"
+    IDS_SAVETASKLIST_TITLE  "Save Tasklist"
+    IDS_SAVEREADONLY        "'%s' could not be saved because the file is read-only.\n\nPlease select another filename."
+    IDS_PREF_UISORTING      "User Interface>General>Sorting"
+    IDS_XMLFILEFILTER       "Tasklist (*.xml)|*.xml||"
+    IDS_PRINTFAILED_TITLE   "Tasklist could not be printed"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_WANTRELOAD          "Would you like to reload it?"
+    IDS_CHECKOUTFAILED      "'%s' could not be checked out.\n\nPlease check that it has not been moved or deleted and that you have the required access rights."
+    IDS_INIFILEFILTER       "Preference Files (*.ini)|*.ini||"
+    IDS_CONFIRMRELOAD_TITLE "Confirm Reload"
+    IDS_CONFIRMSAVE_TITLE   "Confirm Save"
+    IDS_STATUSCHANGE_TITLE  "Status Change"
+    IDS_TIMESTAMPCHANGE_TITLE "Timestamp Change"
+    IDS_CHECKOUT_TITLE      "Check Out Tasklist for Editing"
+    IDS_CHECKIN_TITLE       "Checkin Tasklist"
+    IDS_TASK                "Task"
+    IDS_EARLIERVERRUNNING   "There is an earlier version of ToDoList already running.\n\nTo run the more recent version, you will need to close the earlier version first and then retry."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_NODUETHISMONTH      "'%s' has no tasks due by the end of this month"
     IDS_NODUENEXTMONTH      "'%s' has no tasks due by the end of next month"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_CHECKIN_TITLE       "Checkin Tasklist"
-    IDS_TASK                "Task"
-    IDS_EARLIERVERRUNNING   "There is an earlier version of ToDoList already running.\n\nTo run the more recent version, you will need to close the earlier version first and then retry."
     IDS_POSTEXPORTPREFS     "Your registry settings have been successfully exported.\n\nDo you want to start using these preferences immediately?"
     IDS_POSTIMPORTPREFS     "Your preferences have been successfully imported into the registry.\n\nDo you want to start using these settings immediately?"
     IDS_PREF_UITABBAR       "User Interface>General>Tab bar"
@@ -4636,10 +4705,6 @@ BEGIN
     IDS_TH_TESTTOOL         "Tool '%s' will be run using the following commandline arguments:\n\n%s\n\nDo you want to continue?"
     IDS_TH_TESTTOOL_TITLE   "Test Tool"
     IDS_SELECTTASKLIST_TITLE "Select Tasklist"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_USERDEFINEDTOOLS    "User Defined Tools"
     IDS_PTP_ICONPATH        "Icon Path"
     IDS_OPENACCESSDENIED    "'%s' could not be opened because access to the file was denied.\n\nPlease check that you have the required permissions and try again."
@@ -4647,21 +4712,25 @@ BEGIN
     IDS_PREF_UITASKCOLUMNS  "User Interface>Column Selection"
     IDS_BADMSXML            "ToDoList requires version 3 or later of the msxml component.\n\nTo update your version of this component, Google for 'msxml 3.0 download', \nand follow the relevant installation instructions. Then try again."
     IDS_SAVEACCESSDENIED    "'%s' could not be saved because access to the file was denied.\n\nPlease select another filename."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_UNKNOWNSAVEERROR2   "'%s' could not be saved due to an unexpected error (%d)."
     IDS_TDLBC_LASTMODDATE   "Last Modified Date"
     IDS_TDLBC_RISK          "Risk"
     IDS_TDLBC_EXTERNALID    "External ID"
     IDS_SAVENOSPACE         "'%s' could not be saved due to insufficient disk space.\n\nPlease select another filename."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_COMMANDLINEOPTIONS  "<filepath>\tOpens/selects the specified tasklist"
     IDS_PTDP_DUEDATE        "Due Date"
     IDS_PRINTDLG_PREVIEW_TITLE "Print Preview Tasks"
     IDS_PRINTDLG_PRINT_TITLE "Print Tasks"
     IDS_TDC_COLUMN_ID       "ID"
     IDS_TDC_COLUMN_PRIORITY "!"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_TDC_COLUMN_PERCENT  "%"
     IDS_TDC_COLUMN_TIMEEST  "Est."
     IDS_TDC_COLUMN_TIMESPENT "Spent"
@@ -4670,10 +4739,6 @@ BEGIN
     IDS_TDC_COLUMN_DONEDATE "Completed"
     IDS_TDC_COLUMN_ALLOCTO  "Alloc To"
     IDS_TDC_COLUMN_ALLOCBY  "Alloc By"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_TDC_COLUMN_STATUS   "Status"
     IDS_TDC_COLUMN_CATEGORY "Cat."
     IDS_TDC_COLUMN_TASK     "Title"
@@ -4681,6 +4746,10 @@ BEGIN
     IDS_TDC_COLUMN_CREATEDATE "Created"
     IDS_TDC_COLUMN_LASTMODDATE "Last Mod."
     IDS_TDC_COLUMN_EXTID    "Ext.ID"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_TDC_SCALE0          "Lowest"
     IDS_TDC_SCALE1          "Very Low"
     IDS_TDC_SCALE2          "Low"
@@ -4689,10 +4758,6 @@ BEGIN
     IDS_TDC_SCALE5          "Medium"
     IDS_TDC_SCALE6          "Medium"
     IDS_TDC_SCALE7          "Med-High"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_TDC_SCALE8          "High"
     IDS_TDC_SCALE9          "Very High"
     IDS_TDC_SCALE10         "Highest"
@@ -4701,6 +4766,10 @@ BEGIN
     IDS_TDC_FIELD_PERCENT   "% C&omplete"
     IDS_TDC_FIELD_TIMEEST   "T&ime Estimate"
     IDS_TDC_FIELD_TIMESPENT "T&ime Spent"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_TDC_FIELD_STARTDATE "St&art Date"
     IDS_TDC_FIELD_DUEDATE   "D&ue Date"
     IDS_TDC_FIELD_DONEDATE  "Com&pleted"
@@ -4709,10 +4778,6 @@ BEGIN
     IDS_TDC_FIELD_STATUS    "St&atus"
     IDS_TDC_FIELD_CATEGORY  "Cate&gory"
     IDS_TDC_FIELD_FILEREF   "File &Link"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_TDC_FIELD_COMMENTS  "C&omments"
     IDS_TDC_FIELD_PROJECT   "Pro&ject"
     IDS_TDC_FIELD_RISK      "Ris&k"
@@ -4727,6 +4792,10 @@ BEGIN
                             "\n\n(ATTENTION: This task has subtasks which will also be deleted)"
     IDS_TDC_CONFIRMDELETEMOREWARNSUBTASKS 
                             "\n\n(ATTENTION: One or more of these tasks has subtasks which will also be deleted)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_TDC_CONFIRMDELETEALL 
                             "Are you sure you want to delete all the tasks in this tasklist?"
     IDS_TDC_CONFIRMDELETE_TITLE "Confirm Delete"
@@ -4735,10 +4804,6 @@ BEGIN
                             "The tasklist '%s' has been modified \nsince you opened it or last saved your changes.\n\nIf you continue you will overwrite those changes.\n\nAre you sure you want to proceed?"
     IDS_TDC_CONFIRMOVERWRITE_TITLE "Confirm Overwrite"
     IDS_TDC_SPELLCHECK_TITLE "Spell Checking"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_TDC_NOTITLESPELLERRORS 
                             "The selected task's title had no spelling errors"
     IDS_TDC_NOCOMMENTSPELLERRORS 
@@ -4749,6 +4814,10 @@ BEGIN
     IDS_TDC_ZEROINVALIDTASKID_TITLE "Invalid Task ID"
     IDS_TDC_SEECOMMENTS     "[...]"
     IDS_TDC_STARTSTOPCLOCK  "Start/Stop Tracking"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_TDC_SELTASKHASINCOMPLETE 
                             "The selected task contains one or more uncompleted subtasks.\n\nWould you also like to set those subtasks to be completed?"
     IDS_TDC_TASKHASINCOMPLETE 
@@ -4760,22 +4829,37 @@ BEGIN
                             "The tasklist you are adding to is an archive. Are you sure this is your intention?"
     IDS_TDC_WARNDELETEFROMARCHIVE 
                             "The tasklist you are deleting from is an archive. Are you sure this is your intention?"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_TDC_EDITPROMPT_FILEREF 
                             "Can be a file, folder, website, email, or task link"
     IDS_TDC_EDITPROMPT_PROJECT "Type a descriptive name for your tasklist"
     IDS_TDC_TASKLISTPROMPT  "This tasklist contains no tasks"
-    IDS_TDC_FILTEREDTASKLISTPROMPT 
-                            "There are no tasks matching the selected filter"
-    IDS_TDC_FIELD_COST      "C&ost"
-    IDS_TDC_COLUMN_COST     "Cost"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_TDC_FILTEREDTASKLISTPROMPT 
+                            "There are no tasks matching the selected filter"
+    IDS_TDC_FIELD_COST      "C&ost"
+    IDS_TDC_COLUMN_COST     "Cost"
+    IDS_TDLBC_COST          "Cost"
+    IDS_SECS_ABBREV         "s"
+    IDS_HOURS_ABBREV        "H"
+    IDS_MINS_ABBREV         "m"
+    IDS_MONTHS_ABBREV       "M"
+    IDS_WEEKS_ABBREV        "W"
+    IDS_YEARS_ABBREV        "Y"
+    IDS_DAYS_ABBREV         "D"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_TDC_FIELD_DEPENDENCY "De&pendency"
+    IDS_TDLBC_DEPENDS       "Dependency"
+    IDS_TDC_DEPENDSLINK_TIP "View Dependency"
+    IDS_TDC_SELTASKHASDEPENDENCY 
+                            "The selected task is dependent on another task that must be completed first.\n\nWould you like to view the dependency?"
+    IDS_TDC_SELTASKSHAVEDEPENDENCIES 
+                            "One or more selected tasks are dependent on other tasks that must be completed first."
     IDS_NOENCRYPTIONDLL     "'%s' could not be opened because it is encrypted and you do not have the encryption component installed.\n\nPlease contact AbstractSpoon Software for more information."
     IDS_UNKNOWNENCRYPTION   "'%s' could not be opened because the method of encryption could not be determined."
     IDS_ENCRYPTEDFILE       "The tasklist '%s' has been encrypted.\n\nPlease enter the required password below."
@@ -4783,6 +4867,10 @@ BEGIN
     IDS_PD_TITLE            "Password Required"
     IDS_PD_PASSWORDLABEL    "Password:"
     IDS_PD_CONFIRMLABEL     "Confirm Password:"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_PD_CONFIRMFAILED    "The confirmation did not match the password.\n\nPlease try again."
     IDS_OK                  "OK"
     IDS_CANCEL              "Cancel"
@@ -4792,29 +4880,26 @@ BEGIN
     IDS_TDLBC_TITLE         "Title"
     IDS_ED_CONFIRMEXPORTPATHMULTI 
                             "Are you sure you want to export all open tasklists to '%s'?"
+    IDS_ED_CONFIRMEXPORTPATH_TITLE "Confirm Export Folder"
+    IDS_INVALIDPREFFILE     "The file '%s' could not be imported into the registry.\n\nPlease check that it is a valid preference file and try again."
+    IDS_TDLBC_COMMENTS      "Comments"
+    IDS_BADXML              "'%s' could not be opened because it contains \nmalformed XML that the MSXML component could not interpret."
+    IDS_TASKLISTNOTFOUND    "'%s' could not be found."
+    IDS_ED_CONFIRMEXPORTPATH 
+                            "Are you sure you want to export the active tasklist to '%s'?"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDLBC_COST          "Cost"
-    IDS_SECS_ABBREV         "s"
-    IDS_HOURS_ABBREV        "H"
-    IDS_MINS_ABBREV         "m"
-    IDS_MONTHS_ABBREV       "M"
-    IDS_WEEKS_ABBREV        "W"
-    IDS_YEARS_ABBREV        "Y"
-    IDS_DAYS_ABBREV         "D"
-    IDS_TDC_FIELD_DEPENDENCY "De&pendency"
-    IDS_TDLBC_DEPENDS       "Dependency"
-    IDS_TDC_DEPENDSLINK_TIP "View Dependency"
-    IDS_TDC_SELTASKHASDEPENDENCY 
-                            "The selected task is dependent on another task that must be completed first.\n\nWould you like to view the dependency?"
-    IDS_TDC_SELTASKSHAVEDEPENDENCIES 
-                            "One or more selected tasks are dependent on other tasks that must be completed first."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
+    IDS_TDLBC_DONETIME      "Completed Time"
+    IDS_TDLBC_STARTTIME     "Start Time"
+    IDS_FILTERVISIBILITY    "Filter Bar Visibility"
+    IDS_LOG_PATH            "Path"
+    IDS_TDC_COLUMN_SUBTASKDONE "Subtasks"
+    IDS_TDLBC_SUBTASKDONE   "Subtask Completion"
+    IDS_QUICKFIND_NOTFOUND  "The text '%s' was not found in any task or comment."
+    IDS_NO_WEBUPDATE_CONNECTION 
+                            "The updater was unable to detect an active Internet connection."
     IDS_LOG_PERIOD          "Period"
     IDS_LOGANALYSIS_ERRNOTASKS 
                             "Logged Time Analysis|There were no tasks found matching the specified time period.\n\nWould you like to try another time period?"
@@ -4826,6 +4911,10 @@ BEGIN
                             "Logged Time Analysis|Please check that neither the log file nor the report file are open in another application."
     IDS_SOURCECONTROLCHANGE_BALLOONTITLE "Source Control Changes"
     IDS_SELECTSTYLESHEET_TITLE "Select Stylesheet"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_UNINSTALLER_SMARTSCREENBLOCK 
                             "The uninstaller could not be run at this time.\n\nIf this was due to Windows SmartScreen, you may need to temporarily disable SmartScreen before trying again."
     IDS_UPDATER_SMARTSCREENBLOCK 
@@ -4836,21 +4925,30 @@ BEGIN
     IDS_USERTOOL_FOLDERPROMPT "Folder prompt"
     IDS_USERTOOL_TEXTPROMPT "Text prompt"
     IDS_BADNETWORK          "'%s' could not be opened because the network location is not currently accessible."
+    IDS_USERTOOL_DATEPROMPT "Date prompt"
+    IDS_USERTOOL_FILEPROMPT "File prompt"
+    IDS_FILTER_YESTERDAY    "By Yesterday"
+    IDS_TRACKREMINDERPAUSED " (paused)"
+    IDS_TIMETRACKREMINDER   "The following task has been tracked for %d minutes:\n\n%s: %s"
+    IDS_TIMETRACKREMINDER_BALLOONTITLE "Time Tracking Reminder"
+    IDS_START_TRACKING      "Start Tracking"
+    IDS_STOP_TRACKING       "Stop Tracking"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_ED_CONFIRMEXPORTPATH_TITLE "Confirm Export Folder"
-    IDS_INVALIDPREFFILE     "The file '%s' could not be imported into the registry.\n\nPlease check that it is a valid preference file and try again."
-    IDS_TDLBC_COMMENTS      "Comments"
-    IDS_BADXML              "'%s' could not be opened because it contains \nmalformed XML that the MSXML component could not interpret."
-    IDS_TASKLISTNOTFOUND    "'%s' could not be found."
-    IDS_ED_CONFIRMEXPORTPATH 
-                            "Are you sure you want to export the active tasklist to '%s'?"
     IDS_BADPLUGINVERSIONS   "One or more plugins that provide enhanced comments functionality are out of date.\n\nClick OK to continue, in which case you may not be able to edit a task's comments, \nor click Cancel to close ToDoList, to allow you to update the plugins before restarting."
     IDS_BADPLUGINTITLE      "Plugins Out of Date"
     IDS_LICENSE             "ToDoList is freeware licensed under an <a href=%s>Eclipse Public License 1.0</a>."
     IDS_NOWUW               "Before you can download updates you need to install the Web Update Wizard component (and then try again).\n\nWould you like to download the Web Update Wizard now?"
+    IDS_TDC_FIELD_RECURRENCE "Rec&urrence"
+    IDS_TDC_COLUMN_RECURRENCE "Recurs"
+    IDS_ONCEONLY            "Once"
+    IDS_DAILY               "Daily"
+    IDS_WEEKLY              "Weekly"
+    IDS_MONTHLY             "Monthly"
+    IDS_YEARLY              "Yearly"
+    IDS_TDLBC_RECURRENCE    "Recurrence"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4870,20 +4968,16 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDC_FIELD_RECURRENCE "Rec&urrence"
-    IDS_TDC_COLUMN_RECURRENCE "Recurs"
-    IDS_ONCEONLY            "Once"
-    IDS_DAILY               "Daily"
-    IDS_WEEKLY              "Weekly"
-    IDS_MONTHLY             "Monthly"
-    IDS_YEARLY              "Yearly"
-    IDS_TDLBC_RECURRENCE    "Recurrence"
     IDS_TDLBC_VERSION       "Version"
     IDS_TDC_COLUMN_VERSION  "Ver."
     IDS_TDC_FIELD_VERSION   "Ve&rsion"
     IDS_TDC_RECALCPROMPT    "Would you like to recalculate the task time in the new units?"
     IDS_TDC_RECALCTITLE     "Recalculate Time"
     IDS_INIHASNOTOOLS       "The selected preference file contains no tools.\n\nWould you like to try an alternative preference file?"
+    IDS_TDLFILEFILTER       "Tasklist (*.tdl, *.xml)|*.tdl;*.xml||"
+    IDS_OUTLOOK_FIELDNAME   "Outlook field..."
+    IDS_TDC_COLUMN_TAGS     "Tags"
+    IDS_TDLBC_TAGS          "Tags"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4909,40 +5003,53 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_MISCSHORTCUTS       "Reserved (not editable)"
+    IDS_TDLBC_PARENTID      "Parent Task ID"
+    IDS_TDC_COLUMN_PARENTID "PID"
+    IDS_CSV_COLUMNNAME      "Column Name from File..."
+    IDS_CSV_MAPSTOATTRIBUTE "...maps to Task Attribute"
+    IDS_CSV_ATTRIBUTE       "Task Attribute..."
+    IDS_CSV_MAPSTOCOLUMNNAME "...maps to Column Name in File"
+    IDS_TDLBC_COLOR         "Colour"
     IDS_TDLBC_PROJECTNAME   "Project Name"
     IDS_CSV_EXPORTDLG       "Export Tasks to CSV"
     IDS_CSV_IMPORTDLG       "Import Tasks from CSV"
     IDS_SB_FOCUS_TIP        "Currently focused field"
     IDS_SB_SELTIMEEST_TIP   "Aggregate time estimate for the selected tasks"
     IDS_SB_SELTIMESPENT_TIP "Aggregate time spent on the selected tasks"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_SB_SELCOST_TIP      "Aggregate cost for the selected tasks"
     IDS_SB_FILEVERSION_TIP  "Tasklist file version"
     IDS_SB_TASKCOUNT_TIP    "Filtered task count / Total task count"
     IDS_SB_FILEPATH_TIP     "Active tasklist"
     IDS_IMPORTFILE_CANTOPEN "'%s' could not be opened for importing.\n\nCheck that you have the necessary permissions and that the file is not open in another application."
     IDS_TDLBC_TASKPARENTIDS "Task ID / Parent ID"
+    IDS_RESTARTTOCHANGELANGUAGE 
+                            "Language Change|The user interface language will be changed next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
+    IDS_SAVINGPROGRESS      "Saving tasklists..."
+    IDS_LOADINGPROGRESS     "Loading tasklists..."
+    IDS_SAVENOTCHECKEDOUT   "'%s' must be checked out before it can be saved."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDLFILEFILTER       "Tasklist (*.tdl, *.xml)|*.tdl;*.xml||"
-    IDS_OUTLOOK_FIELDNAME   "Outlook field..."
-    IDS_TDC_COLUMN_TAGS     "Tags"
-    IDS_TDLBC_TAGS          "Tags"
     IDS_FILTER_ANYTAGS      "Any tag can match"
     IDS_TDC_FIELD_TAGS      "Ta&gs"
     IDS_STICKIESEXEFILTER   "Stickies|Stickies*.exe||"
     IDS_TDC_NONE            "<none>"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_TDC_ANY             "<any>"
     IDS_TDC_ANYONE          "<anyone>"
     IDS_TABTIP_READONLY     "Read-only"
     IDS_TABTIP_CHECKEDIN    "Checked in (read-only)"
     IDS_TABTIP_CHECKEDOUT   "Checked out"
     IDS_TABTIP_NOTLOADED    "Not Yet Loaded"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_PREF_TASKTIME       "Tasks>Time Periods"
     IDS_PREF_TASKCALCS      "Tasks>Attribute Calculations"
     IDS_PREF_FILELOAD       "File Actions>Loading"
@@ -4951,10 +5058,6 @@ BEGIN
     IDS_PREF_FILESAVE       "File Actions (more)>Saving"
     IDS_PREF_MULTIUSERFILE  "Multiple Users>File Checking"
     IDS_PREF_FILE           "File Actions"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     ID_SB_SELCOUNTONE       "1 task selected (%d)"
     IDS_OPENSHARINGVIOLATION 
                             "'%s' could not be opened because another user\n(or application) is currently accessing the file.\n\nPlease try again in a moment."
@@ -4966,6 +5069,10 @@ BEGIN
     IDS_RESERVEDSHORTCUT_TITLE "Reserved Keyboard Shortcut"
     IDS_TDC_FIELD_COLOUR    "Colo&ur"
     IDS_TASKLISTEXTENDEDSELECTION "Extended tasklist selection"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_PEP_RESETCHARSET    "Reset to Default"
     IDS_COMMENTSGOTOERRMSG  "The selected file could not be opened.\n\nPlease check that the file exists and that there is an application \nregistered for opening the selected file type."
     IDS_SAVEBADXML          "The tasklist '%s' contained specific characters that could not be saved. Typically these will be found in a task's comments having been copied and pasted from another application.\n\nYou will need to remove these characters before you can save your tasklist."
@@ -4973,6 +5080,14 @@ BEGIN
     IDS_PREF_FILESWITCH     "File Actions>Switching Tasklists"
     IDS_FP_EQUALS           "equals"
     IDS_FP_NOT_EQUALS       "does not equal"
+    IDS_FP_INCLUDES         "includes"
+    IDS_FP_NOT_INCLUDES     "does not include"
+    IDS_FP_GREATER          "is greater than (>)"
+    IDS_FP_LESS             "is less than (<)"
+    IDS_FP_BEFORE           "occurs before (<)"
+    IDS_FP_AFTER            "occurs after (>)"
+    IDS_FP_GREATER_OR_EQUAL "is greater than or equal to (>=)"
+    IDS_FP_LESS_OR_EQUAL    "is less than or equal to (<=)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4985,6 +5100,9 @@ BEGIN
     IDS_3RDPARTYSTORAGE     "3rd Party Storage"
     IDS_TASKVIEWIMAGEFILTER "Bitmap Images (*.bmp)|*.bmp|GIF Images (*.gif)|*.gif|JPEG Images (*.jpg, *.jpeg)|*.jpg;*.jpeg|PNG Images (*.png)|*.png|TIFF Images (*.tif)|*.tif||"
     IDS_FILTER_LOCKED       "Locked Tasks"
+    IDS_TDLBC_LOCK          "Lock"
+    IDS_UNLOCKED            "Unlocked"
+    IDS_LOCKED              "Locked"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4994,6 +5112,16 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_CMDLINE_TASKRISK    "-r <risk>\tSets the 'Risk' for the currently selected task"
+    IDS_CMDLINE_TASKTAGS    "-tg <tags>\tSets the 'Tags' for the currently selected task"
+    IDS_CMDLINE_TASKCOST    "-cs <cost>\tSets the 'Cost' for the currently selected task"
+    IDS_CMDLINE_TASKDEPENDENCY 
+                            "-dp <id>\tSets the 'Dependencies' for the currently selected task"
+    IDS_CMDLINE_TASKTIMEEST "-te <hrs>\tSets the 'Time Estimate' for the currently selected task"
+    IDS_CMDLINE_TASKTIMESPENT 
+                            "-ts <hrs>\tSets the 'Time Spent' for the currently selected task"
+    IDS_CMDLINE_TASKFILEREF "-fr <path>\tSets the 'File Link' for the currently selected task"
+    IDS_CMDLINE_TASKALLOCBY "-ab <alloc by>\tSets the 'Allocated By' for the currently selected task"
     IDS_CMDLINE_TASKALLOCTO "-at <alloc to>\tSets the 'Allocated To' for the currently selected task"
     IDS_CMDLINE_TASKSTARTDATE 
                             "-sd <date>\tSets the 'Start Date' for the currently selected task"
@@ -5007,12 +5135,14 @@ BEGIN
                             "-ct <time>\tSets the 'Completion Time' for the currently selected task"
     IDS_CMDLINE_TASKCREATEDATE 
                             "-md <date>\tSets the 'Creation Date' of the newly created task"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_CMDLINE_TASKCREATETIME 
                             "-mt <time>\tSets the 'Creation Time' of the newly created task"
     IDS_CMDLINE_TASKPERCENT "-pc <percentage>\tSets the 'Percentage Completion' for the currently selected task"
     IDS_CMDLINE_TASKVERSION "-tv <version>\tSets the 'Version' for the currently selected task"
-    ID_EDIT_UNDO            "\nUndo"
-    ID_EDIT_REDO            "\nRedo"
     IDS_CMDLINE_TASKTITLE   "-tt <title>\tSets the 'Title' for the currently selected task"
 END
 
@@ -5024,14 +5154,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_FP_INCLUDES         "includes"
-    IDS_FP_NOT_INCLUDES     "does not include"
-    IDS_FP_GREATER          "is greater than (>)"
-    IDS_FP_LESS             "is less than (<)"
-    IDS_FP_BEFORE           "occurs before (<)"
-    IDS_FP_AFTER            "occurs after (>)"
-    IDS_FP_GREATER_OR_EQUAL "is greater than or equal to (>=)"
-    IDS_FP_LESS_OR_EQUAL    "is less than or equal to (<=)"
     IDS_FP_ON_OR_BEFORE     "occurs on or before (<=)"
     IDS_FP_ON_OR_AFTER      "occurs on or after (>=)"
     IDS_FP_SET              "is set"
@@ -5041,6 +5163,15 @@ BEGIN
     IDS_FP_OR               "or"
     IDS_TDC_SELTASKHASCIRCULARDEPENDENCY 
                             "The selected task has circular dependencies that must be resolved before it can be completed."
+    IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES 
+                            "The tasks %s have circular dependencies that must be resolved before they can be completed."
+    IDS_TDC_FIELD_DUETIME   "Due T&ime"
+    IDS_TASKTREE            "Task Tree"
+    IDS_LISTVIEW            "List View"
+    IDS_FT_TASK             "Task"
+    IDS_FT_WHATMATCHED      "What Matched"
+    IDS_TDLBC_TITLEORCOMMENTS "Title or Comments"
+    IDS_TDLBC_ANYTEXTATTRIB "Any text field"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5058,15 +5189,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES 
-                            "The tasks %s have circular dependencies that must be resolved before they can be completed."
-    IDS_TDC_FIELD_DUETIME   "Due T&ime"
-    IDS_TASKTREE            "Task Tree"
-    IDS_LISTVIEW            "List View"
-    IDS_FT_TASK             "Task"
-    IDS_FT_WHATMATCHED      "What Matched"
-    IDS_TDLBC_TITLEORCOMMENTS "Title or Comments"
-    IDS_TDLBC_ANYTEXTATTRIB "Any text field"
     IDS_FT_ATTRIB           "Attribute"
     IDS_FT_MATCHES          "Matches"
     IDS_FT_VALUE            "Value"
@@ -5075,10 +5197,6 @@ BEGIN
     IDS_TDC_COLUMN_RECENTEDIT "*"
     IDS_TDLBC_REMAINING     "Remaining Time"
     IDS_SB_TASKCOUNT        "%d / %d tasks"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_SOUNDFILEFILTER     "Sounds (*.wav)|*.wav||"
     IDS_TE_MINS             "Minutes"
     IDS_TE_HOURS            "Hours"
@@ -5086,6 +5204,10 @@ BEGIN
     IDS_TE_WEEKS            "Weeks"
     IDS_TE_MONTHS           "Months"
     IDS_TE_YEARS            "Years"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_FILTER_ANYCATS      "Any category can match"
     IDS_FILTER_ANYPEOPLE    "Any person can match"
     IDS_FILTER_HIDEPARENTS  "Hide parent tasks (List View)"
@@ -5094,6 +5216,14 @@ BEGIN
     IDS_FILTER_HIDECOLLAPSED "Hide collapsed tasks (List View)"
     IDS_QUICKFIND           "Quick Find"
     IDS_IMPORTFILE_NOTASKS  "'%s' contained no tasks which could be imported."
+    IDS_FT_SAVESEARCHPROMPT "Save Search"
+    IDS_FILTER_ALL          "All Tasks"
+    IDS_FILTER_NOTDONE      "Incomplete Tasks"
+    IDS_FILTER_DONE         "Completed Tasks"
+    IDS_FILTER_TODAY        "By Today"
+    IDS_FILTER_TOMORROW     "By Tomorrow"
+    IDS_FILTER_ENDTHISWEEK  "By the End of This Week"
+    IDS_FILTER_ENDNEXTWEEK  "By the End of Next Week"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5104,14 +5234,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_FT_SAVESEARCHPROMPT "Save Search"
-    IDS_FILTER_ALL          "All Tasks"
-    IDS_FILTER_NOTDONE      "Incomplete Tasks"
-    IDS_FILTER_DONE         "Completed Tasks"
-    IDS_FILTER_TODAY        "By Today"
-    IDS_FILTER_TOMORROW     "By Tomorrow"
-    IDS_FILTER_ENDTHISWEEK  "By the End of This Week"
-    IDS_FILTER_ENDNEXTWEEK  "By the End of Next Week"
     IDS_FILTER_ENDTHISMONTH "By the End of This Month"
     IDS_FILTER_ENDNEXTMONTH "By the End of Next Month"
     IDS_FILTER_ENDTHISYEAR  "By the End of This Year"
@@ -5120,10 +5242,6 @@ BEGIN
     IDS_QUICKTASKFIND       "Quick Task Find"
     IDS_IMPORTFROMCB_NOTASKS 
                             "The clipboard text contained no tasks which could be imported."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_FILTER_FLAGGED      "Flagged Tasks"
     IDS_BEGINWHENREMINDERREST "begins in %s at %s"
     IDS_DUEWHENREMINDERREST "is due in %s at %s"
@@ -5133,9 +5251,21 @@ BEGIN
     IDS_UITHEMEFILEFILTER   "Theme Files (*.xml)|*.xml||"
     IDS_NEEDRESTARTTODOLISTLIGHTBOXCHANGE 
                             "You will need to restart ToDoList to see the change to the window fading"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_FILTER_ACTIVE       "Active Tasks"
     IDS_FILTER_NOTSTARTED   "Tasks Not Started"
     IDS_PTDP_VERSION        "Version"
+    IDS_SD_SERVERLABEL      "&Server"
+    IDS_SD_USERNAMELABEL    "&Username:"
+    IDS_SD_PASSWORDLABEL    "&Password:"
+    IDS_SCD_DICTLABEL       "Ac&tive Dictionary:"
+    IDS_SCD_BROWSE          "Bro&wse"
+    IDS_SCD_URL             "Download More Dictionaries"
+    IDS_SCD_CHECKINGLABEL   "C&hecking Text:"
+    IDS_SCD_RESTART         "R&estart"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5146,14 +5276,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_SD_SERVERLABEL      "&Server"
-    IDS_SD_USERNAMELABEL    "&Username:"
-    IDS_SD_PASSWORDLABEL    "&Password:"
-    IDS_SCD_DICTLABEL       "Ac&tive Dictionary:"
-    IDS_SCD_BROWSE          "Bro&wse"
-    IDS_SCD_URL             "Download More Dictionaries"
-    IDS_SCD_CHECKINGLABEL   "C&hecking Text:"
-    IDS_SCD_RESTART         "R&estart"
     IDS_SCD_REPLACELABEL    "Replace:"
     IDS_SCD_WITHLABEL       "&With:"
     IDS_SCD_REPLACE         "&Replace"
@@ -5161,10 +5283,6 @@ BEGIN
     IDS_SCD_TITLE           "Spell Checker"
     IDS_SCD_BROWSETITLE     "Select Dictionary"
     IDS_SCD_SETUPMSG        "Before you can spell check for the first time you need \nto specify the location of the Spell Checker."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_SCD_DICTFILTER      "Dictionaries (*.dic)|*.dic||"
     IDS_SCD_ENGINETITLE     "Locate Spell Check Engine"
     IDS_SCD_ENGINEFILTER    "SpellChecker Engines|*.dll||"
@@ -5173,6 +5291,10 @@ BEGIN
     IDS_TDLBC_ICON          "Icon"
     IDS_PREF_FILEMORE       "File Actions (more)"
     IDS_PREF_FILEBACKUP     "File Actions (more)>Backup"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_PLAYSOUNDBTNTIP     "Play"
     IDS_TDC_FIELD_DONETIME  "Completed T&ime"
     IDS_TDLBC_REMINDER      "Reminder"
@@ -5180,10 +5302,6 @@ BEGIN
     IDS_BROWSE              "Browse"
     IDS_VIEW                "View"
     IDS_OPTIONS             "Options"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_TDC_UPDATEFILTER_TIP "Update Filter"
     IDS_ADVANCEDFILTER      "Find Tasks Filter"
     IDS_LOGFILELOCKED       "The log file could not be updated.\n\nPlease ensure that the file is not already open for editing and \nthat you have the correct permissions and then try again."
@@ -5191,14 +5309,6 @@ BEGIN
     IDS_UNFLAGGED           "Unflagged"
     IDS_DUEWHENREMINDERNOW  "is due now (%s)"
     IDS_BEGINWHENREMINDERNOW "begins now (%s)"
-    IDS_MISCSHORTCUTS       "Reserved (not editable)"
-    IDS_TDLBC_PARENTID      "Parent Task ID"
-    IDS_TDC_COLUMN_PARENTID "PID"
-    IDS_CSV_COLUMNNAME      "Column Name from File..."
-    IDS_CSV_MAPSTOATTRIBUTE "...maps to Task Attribute"
-    IDS_CSV_ATTRIBUTE       "Task Attribute..."
-    IDS_CSV_MAPSTOCOLUMNNAME "...maps to Column Name in File"
-    IDS_TDLBC_COLOR         "Colour"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5208,20 +5318,11 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_RESTARTTOCHANGELANGUAGE 
-                            "Language Change|The user interface language will be changed next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
-    IDS_SAVINGPROGRESS      "Saving tasklists..."
-    IDS_LOADINGPROGRESS     "Loading tasklists..."
-    IDS_SAVENOTCHECKEDOUT   "'%s' must be checked out before it can be saved."
     IDS_TDLBC_PATH          "Path (list view only)"
     IDS_TDC_COLUMN_PATH     "Path"
     IDS_FILTER_SHOWALLSUB   "Show all subtasks"
     IDS_TASKLISTATTACHED    "<Tasklist Attached>"
     IDS_FILTER_SELECTED     "Selected Tasks"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_OA_BCC              "Bcc"
     IDS_OA_BILLINGINFO      "Billing Info"
     IDS_OA_BODY             "Body"
@@ -5230,6 +5331,10 @@ BEGIN
     IDS_OA_COMPANIES        "Companies"
     IDS_OA_CONVERSATIONTOPIC "Conversation Topic"
     IDS_OA_CREATIONTIME     "Creation Time"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_OA_ENTRYID          "Entry ID"
     IDS_OA_EXPIRYTIME       "Expiry Time"
     IDS_OA_FLAGREQUEST      "Flag Request"
@@ -5239,10 +5344,6 @@ BEGIN
                             "Language Change|Support for RTL user input will be changed next time you restart ToDoList.\n\nWould you like to restart ToDoList now?"
     IDS_OA_MILEAGE          "Mileage"
     IDS_OA_PERMISSION       "Permission"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_OA_RECEIVEDBYNAME   "Received By"
     IDS_OA_RECEIVEDTIME     "Received Time"
     IDS_OA_REMINDERTIME     "Reminder Time"
@@ -5251,6 +5352,10 @@ BEGIN
     IDS_OA_SENDERNAME       "Sender"
     IDS_OA_SENSITIVITY      "Sensitivity"
     IDS_OA_SENTON           "Sent Date"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_OA_SENTONBEHALFOFNAME "Sent On Behalf Of"
     IDS_OA_SUBJECT          "Subject"
     IDS_OA_TASKCOMPLETEDDATE "Completed Date"
@@ -5259,10 +5364,6 @@ BEGIN
     IDS_OA_TASKSUBJECT      "Subject"
     IDS_OA_TO               "To"
     IDS_OUTLOOK_CONFIDENTIAL "Confidential"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_PASTE_ERROR         "There was a problem accessing the dragged or copied files.\n\nPlease re-copy the files and perform the operation again."
     IDS_TDC_NOBODY          "<nobody>"
     IDS_CAD_COLATTRIBLABEL  "Attribute Label"
@@ -5271,6 +5372,10 @@ BEGIN
     IDS_CAD_COLLISTTYPE     "List Type"
     IDS_CAD_COLFEATURES     "Features"
     IDS_CAD_COLALIGNMENT    "Alignment"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_CAD_STRING          "Text"
     IDS_CAD_DATE            "Date"
     IDS_CAD_INT             "Number (integer eg. 13)"
@@ -5279,15 +5384,15 @@ BEGIN
     IDS_CAD_NOTLIST         "Not a list"
     IDS_CAD_AUTOLIST        "Dynamic data, single-selection"
     IDS_CAD_FIXEDLIST       "Fixed data, single-selection"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_CAD_AUTOMULTILIST   "Dynamic data, multi-selection"
     IDS_CAD_FIXEDMULTILIST  "Fixed data, multi-selection"
     IDS_YES                 "Yes"
     IDS_NO                  "No"
     IDS_CAD_NEWATTRIB       "New Attribute"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_CUSTOMCOLUMN        "%s (Custom)"
     IDS_TDC_MULTIFILE       "Merge"
     IDS_CONFIRM_EXPORT_OVERWRITE 
@@ -5295,10 +5400,6 @@ BEGIN
     IDS_MULTIPLEUNIQUEIDSEXIST 
                             "Two or more attributes shared the unique ID '%s'.\n\nYou will need to resolve this before closing the dialog."
     IDS_PPREVIEWPROGRESS    "Preparing print preview..."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_PRINTPROGRESS       "Printing tasklists..."
     IDS_IMPORTPROGRESS      "Importing tasklist..."
     IDS_EXPORTPROGRESS      "Exporting tasklists..."
@@ -5307,6 +5408,10 @@ BEGIN
     IDS_BROWSEFILE_TITLE    "Select File"
     IDS_READONLYCHANGE_BALLOONTITLE "Read-only Status Change"
     IDS_TIMESTAMPCHANGE_BALLOONTITLE "File Timestamp Change"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_BROWSEFOLDER_TITLE  "Select Folder"
     IDS_TDLBC_DEPENDENTS    "Dependents"
     IDS_EXPORTDONEDATE      "(completed: %s)"
@@ -5315,10 +5420,6 @@ BEGIN
                             "One of the custom attributes being imported has the same unique ID as an existing attribute.\nWould you still like to import this item?\n\nClick 'Yes' to import it with a new ID, or 'No' to skip it."
     IDS_SYMBOLS             "Insert Symbol"
     IDS_SHUTDOWNBLOCKREASON "ToDoList is saving its settings."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_SHUTDOWNBLOCKREASONSAVING 
                             "ToDoList is closing tasklists and saving its settings."
     IDS_CUSTOMRELDATECOLUMN "%s (Custom, Relative)"
@@ -5328,6 +5429,10 @@ BEGIN
     IDS_COMMENTSTYPE        "Comments"
     IDS_FILTER_NODATE       "<no date>"
     IDS_FILTER_ANYDATE      "<any date>"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_FILTER_NOW          "By Now"
     IDS_IMPORTPREFS_TITLE   "Select Preference File"
     IDS_EXPORTFILEAS_TITLE  "Export Tasklist As"
@@ -5336,6 +5441,14 @@ BEGIN
     IDS_CAD_LEFTALIGN       "Left"
     IDS_CAD_CENTREALIGN     "Centre"
     IDS_CAD_RIGHTALIGN      "Right"
+    IDS_INITIALISINGTABBEDVIEW "Initialising %s..."
+    IDS_UPDATINGTABBEDVIEW  "Updating %s..."
+    IDS_ERROROUTLOOKNOTINSTALLED 
+                            "Outlook must be installed before 'outlook:' links will work."
+    IDS_LOG_TASKID          "Task ID"
+    IDS_LOG_TASKTITLE       "Title"
+    IDS_LOG_USERID          "User ID"
+    IDS_LOG_ENDDATE         "End Date"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5349,14 +5462,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_INITIALISINGTABBEDVIEW "Initialising %s..."
-    IDS_UPDATINGTABBEDVIEW  "Updating %s..."
-    IDS_ERROROUTLOOKNOTINSTALLED 
-                            "Outlook must be installed before 'outlook:' links will work."
-    IDS_LOG_TASKID          "Task ID"
-    IDS_LOG_TASKTITLE       "Title"
-    IDS_LOG_USERID          "User ID"
-    IDS_LOG_ENDDATE         "End Date"
     IDS_LOG_ENDTIME         "End Time"
     IDS_LOG_STARTDATE       "Start Date"
     IDS_LOG_STARTTIME       "Start Time"
@@ -5364,10 +5469,6 @@ BEGIN
     IDS_STICKIES_TITLE      "ToDoList Reminder"
     IDS_FINDINCLUDE_PARENTS "Parent Tasks"
     IDS_FINDINCLUDE_FILTEREDOUT "Filtered-out tasks"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_FINDINCLUDE_DONE    "Completed tasks"
     IDS_CUSTOM_FEATURE_SORTABLE "Sortable"
     IDS_CUSTOM_FEATURE_ACCUMULATED "Accumulated"
@@ -5377,6 +5478,10 @@ BEGIN
     IDS_CSV_MUSTMAPTASKTITLE 
                             "You must include 'Title' in your column mapping."
     IDS_IMPORT_SOMEFAILED   "One or more tasks could not be imported successfully."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_ERRORINSTALLTDLPROTOCOL 
                             "ToDoList was unable to install the 'tdl://' protocol handler.\n\nYou may need to run ToDoList with administrator privileges to install the handler.\n\nOnce installed you can then revert to your original security settings."
     IDS_ERRORINSTALLTDLEXTENSION 
@@ -5389,10 +5494,6 @@ BEGIN
     IDS_DUEBYNOW_CONFIRMREFILTER 
                             "ToDoList has detected that some tasks have just become due.\n\nWould you like to refresh the current filter to make those tasks visible?"
     IDS_WIZ_INTRO_HEADER    "Welcome to ToDoList"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_WIZ_INTRO_SUBHEADER "This brief wizard will help you set up the application for the first time."
     IDS_CSV_CUSTOMATTRIB    "Custom Attribute"
     IDS_NOREFERENCETASKSINSELECTION 
@@ -5402,6 +5503,10 @@ BEGIN
     IDS_ANALYSETXT_FORMAT   "Plain Text (.txt)|Text Files (*.txt)|*.txt||"
     IDS_ANALYSECSV_FORMAT   "Spreadsheet (.csv)|Spreadsheets (*.csv)|*.csv||"
     IDS_ANALYSEHTM_FORMAT   "Web Page (.html)|Web Pages (*.html, *.htm)|*.html;*.htm||"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_ANALYSEXML_FORMAT   "XML (.xml)|XML Files (*.xml)|*.xml||"
     IDS_NO_WEBUPDATE_AVAIL  "There are no updates available at this time."
     IDS_CSV_CUSTOMLISTATTRIB "Custom Attribute (List)"
@@ -5411,10 +5516,6 @@ BEGIN
                             "The uninstaller could not be run at this time.\n\nPlease try again after your next reboot."
     IDS_UPDATER_RUNFAILURE  "The updater could not be run at this time.\n\nPlease try again after your next reboot."
     IDS_FILTER_USERDATE     "<specific date>"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_LOG_TYPE            "Type"
     IDS_LOG_TYPETRACKED     "Tracked"
     IDS_LOG_TYPEADJUSTED    "Adjusted"
@@ -5423,27 +5524,10 @@ BEGIN
     IDS_COLUMNVISIBILITY    "Column Visibility"
     IDS_ATTRIBVISIBILITY    "Edit Field Visibility"
     IDS_TDLBC_DUETIME       "Due Time"
-    IDS_TDLBC_DONETIME      "Completed Time"
-    IDS_TDLBC_STARTTIME     "Start Time"
-    IDS_FILTERVISIBILITY    "Filter Bar Visibility"
-    IDS_LOG_PATH            "Path"
-    IDS_TDC_COLUMN_SUBTASKDONE "Subtasks"
-    IDS_TDLBC_SUBTASKDONE   "Subtask Completion"
-    IDS_QUICKFIND_NOTFOUND  "The text '%s' was not found in any task or comment."
-    IDS_NO_WEBUPDATE_CONNECTION 
-                            "The updater was unable to detect an active Internet connection."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_USERTOOL_DATEPROMPT "Date prompt"
-    IDS_USERTOOL_FILEPROMPT "File prompt"
-    IDS_FILTER_YESTERDAY    "By Yesterday"
-    IDS_TRACKREMINDERPAUSED " (paused)"
-    IDS_TIMETRACKREMINDER   "The following task has been tracked for %d minutes:\n\n%s: %s"
-    IDS_TIMETRACKREMINDER_BALLOONTITLE "Time Tracking Reminder"
-    IDS_START_TRACKING      "Start Tracking"
-    IDS_STOP_TRACKING       "Stop Tracking"
     IDS_REMINDER_TASKCOL    "Task"
     IDS_REMINDER_TASKLISTCOL "Tasklist"
     IDS_REMINDER_WHENCOL    "Notification"
@@ -5451,6 +5535,18 @@ BEGIN
     IDS_TIMETRACKER_DELAYLOADED "%s (Delay loaded)"
     IDS_TH_TOOLVERSIONERROR_TITLE "Tool Version Error"
     IDS_TH_TOOLVERSIONERROR "The version of ToDoList specified in the tool (%d.%d) must be the same as the version of the running application (%d.%d)."
+    IDS_TH_RUNTOOLERROR_TITLE "Run Tool Error"
+    IDS_TH_RUNTOOLERROR     "The tool '%s' could not be run.\n\nPlease check you have the required access rights and try again."
+    IDS_TH_TOOLNOTFOUND     "The tool '%s' could not be found.\n\nPlease check that it has not been moved or deleted and try again."
+    IDS_CUSTOM_FEATURE_HIDEZERO "Hide zero values"
+    IDS_IMPORTFILE_SOMETASKSFAILED 
+                            "Some tasks could not be imported from '%s'."
+    IDS_IMPORTFROMCB_SOMETASKSFAILED 
+                            "Some tasks could not be imported from the clipboard text."
+    IDS_IMPORTFILE_BADFORMAT 
+                            "The file '%s' does not have a recognised format."
+    IDS_IMPORTFROMCB_BADFORMAT 
+                            "The clipboard text does not have a recognised format."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5468,18 +5564,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TH_RUNTOOLERROR_TITLE "Run Tool Error"
-    IDS_TH_RUNTOOLERROR     "The tool '%s' could not be run.\n\nPlease check you have the required access rights and try again."
-    IDS_TH_TOOLNOTFOUND     "The tool '%s' could not be found.\n\nPlease check that it has not been moved or deleted and try again."
-    IDS_CUSTOM_FEATURE_HIDEZERO "Hide zero values"
-    IDS_IMPORTFILE_SOMETASKSFAILED 
-                            "Some tasks could not be imported from '%s'."
-    IDS_IMPORTFROMCB_SOMETASKSFAILED 
-                            "Some tasks could not be imported from the clipboard text."
-    IDS_IMPORTFILE_BADFORMAT 
-                            "The file '%s' does not have a recognised format."
-    IDS_IMPORTFROMCB_BADFORMAT 
-                            "The clipboard text does not have a recognised format."
     IDS_ONLINEHELP          "Online Help"
     IDS_MULTIINSTANCENOFILEPATH 
                             "Unable to process Startup Options|When more than one instance of ToDoList is running you must specify a tasklist path as well."
@@ -5490,6 +5574,14 @@ BEGIN
     IDS_OA_DATECOMPLETED    "Completion Date"
     IDS_OA_DELEGATOR        "Delegator"
     IDS_OA_DUEDATE          "Due Date"
+    IDS_OA_OWNER            "Owner"
+    IDS_OA_PERCENTCOMPLETE  "% Complete"
+    IDS_OA_SCHEDULEPLUSPRIORITY "Schedule and Priority"
+    IDS_OA_STARTDATE        "Start Date"
+    IDS_OA_STATUS           "Status"
+    IDS_OA_TOTALWORK        "Total Work"
+    IDS_GEN_RELEASE         "Stable Release"
+    IDS_DEV_RELEASE         "Development Preview"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5505,14 +5597,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_OA_OWNER            "Owner"
-    IDS_OA_PERCENTCOMPLETE  "% Complete"
-    IDS_OA_SCHEDULEPLUSPRIORITY "Schedule and Priority"
-    IDS_OA_STARTDATE        "Start Date"
-    IDS_OA_STATUS           "Status"
-    IDS_OA_TOTALWORK        "Total Work"
-    IDS_GEN_RELEASE         "Stable Release"
-    IDS_DEV_RELEASE         "Development Preview"
     IDS_ALPHA_RELEASE       "Alpha Release"
     IDS_BETA_RELEASE        "Beta Release"
     IDS_RC_RELEASE          "Release Candidate"
@@ -5522,24 +5606,15 @@ BEGIN
     IDS_GOTOTASK_NOSUCHTASK "Task Not Found"
     IDS_CONFIRM_CLEANUPPREFS 
                             "Remove the following tasklist information from your ini file?"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_TDLBC_LOCK          "Lock"
-    IDS_UNLOCKED            "Unlocked"
-    IDS_LOCKED              "Locked"
-    IDS_CAD_TIMEPERIOD      "Time Period"
-    IDS_CUSTOM_FEATURE_FILTER "Filterable"
-    IDS_SETREMINDER         "Set &Reminder..."
-    IDS_MODIFYREMINDER      "&Modify Reminder..."
-    IDS_TDC_EDITPROMPT_MULTIPLEFORMATS "<multiple formats>"
-    IDS_TDC_EDITPROMPT_MULTIPLETASKS "<multiple tasks>"
-    IDS_TDC_COLUMN_LASTMODBY "Last Mod. By"
-    IDS_TDLBC_LASTMODBY     "Last Modified By"
-    IDS_OA_DURATION         "Duration"
-    IDS_OA_ENDDATE          "End Date"
-    IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
+    IDS_CLEANUPPREFS_NOTASLISTS 
+                            "There is currently no tasklist information which can be removed from your ini file."
+    IDS_EXPORT_SOMEFAILED   "One or more tasks could not be exported."
+    IDS_EXPORT_CANTSAVE     "The exported content could not be saved to '%s'"
+    IDS_TDC_ADDLOGGEDTIME   "Add Tracked Time"
+    IDS_STICKIES_LINK       "link"
+    IDS_REPLACEINTASKTITLES "Replace in Task Titles"
+    IDS_FINDINTASKTITLES    "Find in Task Titles"
+    IDS_SAVETOIMAGEPROGRESS "Saving task view image..."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5559,15 +5634,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_CLEANUPPREFS_NOTASLISTS 
-                            "There is currently no tasklist information which can be removed from your ini file."
-    IDS_EXPORT_SOMEFAILED   "One or more tasks could not be exported."
-    IDS_EXPORT_CANTSAVE     "The exported content could not be saved to '%s'"
-    IDS_TDC_ADDLOGGEDTIME   "Add Tracked Time"
-    IDS_STICKIES_LINK       "link"
-    IDS_REPLACEINTASKTITLES "Replace in Task Titles"
-    IDS_FINDINTASKTITLES    "Find in Task Titles"
-    IDS_SAVETOIMAGEPROGRESS "Saving task view image..."
     IDS_INIFILELOCKED       "ToDoList cannot start because your preferences file is locked by another application."
     IDS_QUERYFORCEDCHECKOUT "\n\nDo you want to forcibly checkout the tasklist?\n\nNote: Any unsaved data from '%s' will be lost!"
     IDS_PREF_TOOLBAR        "User Interface>Custom Toolbar"
@@ -5576,6 +5642,14 @@ BEGIN
     IDS_TASKREMINDERDLG_TITLE "Task Reminders (%d)"
     IDS_REMINDER_DATENOTSET "Task date not set"
     IDS_RESET_ELAPSED       "Reset Elapsed Time"
+    IDS_REMINDER_TASKPARENTCOL "Parent"
+    IDS_CUSTOM_FEATURE_INHERITANCE "Inheritable"
+    IDS_TDLBC_COMMENTSSIZE  "Comments Size"
+    IDS_TDC_COLUMN_COMMENTSSIZE "KB"
+    IDS_SAVETASKVIEWTOIMAGE_TITLE "Save Task View to Image"
+    IDS_TDLBC_CUSTOMATTRIBS "Custom Attributes"
+    IDS_HANDLERNOTINSTALLED "(handler not installed)"
+    IDS_CUSTOM_FEATURE_FILTERABLE "Filterable"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5589,15 +5663,15 @@ BEGIN
     IDS_CMDLINE_LOGGING     "-g\tEnables logging"
     IDS_CMDLINE_IMPORT      "-m <filepath>\tImports the specified file"
     IDS_CMDLINE_COMMANDID   "-cmd <id>\tSends the specified command to ToDoList's main window"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_CMDLINE_STARTEMPTY  "-e\tStarts ToDoList without reloading any previously open tasklists"
     IDS_CMDLINE_TASKLINK    "-l <task link>\tOpens the specified tasklist and selects the specified task"
     IDS_CMDLINE_SAVEUIVISINTASKLIST 
                             "-z\tStores attribute visibility settings within each tasklist"
     IDS_CMDLINE_NEWTASK     "-nt <title>\tCreates a new task in the active tasklist with the specified title"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_CMDLINE_SELECTTASKID 
                             "-tid <task id>\tSelects the specified task in the active tasklist"
     IDS_CMDLINE_PARENTID    "-pid <task id>\tSpecifies the parent task in which to create the new task"
@@ -5610,37 +5684,10 @@ BEGIN
     IDS_CMDLINE_TASKSTATUS  "-s <status>\tSets the 'Status' for the currently selected task"
     IDS_CMDLINE_TASKPRIORITY 
                             "-p <priority>\tSets the 'Priority' for the currently selected task"
-    IDS_CMDLINE_TASKRISK    "-r <risk>\tSets the 'Risk' for the currently selected task"
-    IDS_CMDLINE_TASKTAGS    "-tg <tags>\tSets the 'Tags' for the currently selected task"
-    IDS_CMDLINE_TASKCOST    "-cs <cost>\tSets the 'Cost' for the currently selected task"
-    IDS_CMDLINE_TASKDEPENDENCY 
-                            "-dp <id>\tSets the 'Dependencies' for the currently selected task"
-    IDS_CMDLINE_TASKTIMEEST "-te <hrs>\tSets the 'Time Estimate' for the currently selected task"
-    IDS_CMDLINE_TASKTIMESPENT 
-                            "-ts <hrs>\tSets the 'Time Spent' for the currently selected task"
-    IDS_CMDLINE_TASKFILEREF "-fr <path>\tSets the 'File Link' for the currently selected task"
-    IDS_CMDLINE_TASKALLOCBY "-ab <alloc by>\tSets the 'Allocated By' for the currently selected task"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_CMDLINE_TASKCUSTOMATTRIB 
-                            "-ca <attribute id> <attribute value>\tSets the value for the specified custom attribute ID for the currently selected task"
-    IDS_CMDLINE_TASKCOPYATTRIB 
-                            "-copy <attrib1> <attrib2>\tCopies the value for 'attrib1' to 'attrib2' for the currently selected task"
-    IDS_CMDLINE_HELP        "-h, -help, -?\tDisplays a message box showing all the available commandline options"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_REMINDER_TASKPARENTCOL "Parent"
-    IDS_CUSTOM_FEATURE_INHERITANCE "Inheritable"
-    IDS_TDLBC_COMMENTSSIZE  "Comments Size"
-    IDS_TDC_COLUMN_COMMENTSSIZE "KB"
-    IDS_SAVETASKVIEWTOIMAGE_TITLE "Save Task View to Image"
-    IDS_TDLBC_CUSTOMATTRIBS "Custom Attributes"
-    IDS_HANDLERNOTINSTALLED "(handler not installed)"
-    IDS_CUSTOM_FEATURE_FILTERABLE "Filterable"
     IDS_TABTIP_TIMETRACKING "Time Tracking"
     IDS_REPLACEINTASKCOMMENTS "Replace in Comments"
     IDS_FINDINTASKCOMMENTS  "Find in Comments"
@@ -5649,10 +5696,6 @@ BEGIN
     IDS_CAD_FRACTION        "Number (fraction eg. 2/3)"
     IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
     IDS_FILTERPLACEHOLDER   "Filters"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_ERROR_EXPORT_OVERWRITETASKLIST 
                             "Export Tasklist|You must select a filename that does not match the tasklist being exported."
     IDS_UPDATER_FILEMISSING "The updater is missing from the installation folder.\n\nWould you like to try downloading the update file manually?"
@@ -5663,6 +5706,10 @@ BEGIN
     IDS_HASREMINDER         "Reminder"
     IDS_NOREMINDER          "No Reminder"
     IDS_TDLBC_TASK          "Task"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_CUSTOM_FEATURE_NOBLANK "Exclude blank list item"
     IDS_CUSTOM_TIMEATTRIB   "Time (%s)"
     IDS_IMPORTFROMTEXT      "&Text:"
@@ -5671,10 +5718,6 @@ BEGIN
     IDS_IMPORTTOBELOWSELTASK "After selected task"
     IDS_IMPORTTOBOTTOMOFTASKLIST "Bottom of tasklist"
     IDS_IMPORTDIALOGTITLE_CLIPBOARD "Import Tasks from Windows Clipboard"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_IMPORTDIALOGTITLE_TEXT "Import Tasks from Text"
     IDS_IMPORTDIALOGTITLE_FILE "Import Tasks from File"
     IDS_EXPORTTITLE_MULTIPLEFILES "<multiple tasklists>"
@@ -5683,6 +5726,10 @@ BEGIN
     IDS_EXPORTDLG_EXPORT    "Export"
     IDS_EXPORTDLG_TASKSEL   "Task Selection"
     IDS_MSVCR100_MSG        "System File Required|ToDoList requires the 'Microsoft Visual C++ 2010 SP1 Redistributable Package' to be installed.\n\nClick 'OK' to visit the appropriate download page or 'Cancel' to quit."
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
     IDS_CUSTOM_FEATURE_ONEDECIMAL "One decimal place"
     IDS_FP_IS_COMPLETE      "is completed (or not set)"
     IDS_TDC_GROUPBY         "Group by"

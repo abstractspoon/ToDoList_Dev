@@ -74,7 +74,7 @@ public:
 	CString GetUITheme() const;
 	PUIP_MATCHTITLE GetTitleFilterOption() const { return m_nTitleFilterOption; }
 	BOOL GetShowDefaultTaskIcons() const { return m_bShowDefaultTaskIcons; }
-	BOOL GetShowDefaultFilters() const { return m_bShowDefaultFilters; }
+	BOOL GetShowDefaultFiltersInFilterBar() const { return m_bShowDefaultFilters; }
 	BOOL GetEnableColumnHeaderSorting() const { return m_bEnableColumnHeaderSorting; }
 	int GetDefaultTaskViews(CStringArray& aTypeIDs) const;
 	BOOL GetStackEditFieldsAndComments() const { return m_bStackEditFieldsAndComments; }

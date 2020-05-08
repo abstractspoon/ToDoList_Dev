@@ -230,7 +230,7 @@ public:
 	CString GetUITheme() const { return m_pageUI.GetUITheme(); }
 	FILTER_TITLE GetTitleFilterOption() const;
 	BOOL GetShowDefaultTaskIcons() const { return m_pageUI.GetShowDefaultTaskIcons(); }
-	BOOL GetShowDefaultFilters() const { return m_pageUI.GetShowDefaultFilters(); }
+	BOOL GetShowDefaultFiltersInFilterBar() const { return m_pageUI.GetShowDefaultFiltersInFilterBar(); }
 	BOOL GetEnableColumnHeaderSorting() const { return m_pageUI.GetEnableColumnHeaderSorting(); }
 	int GetDefaultTaskViews(CStringArray& aViews) const { return m_pageUI.GetDefaultTaskViews(aViews); }
 	BOOL GetStackEditFieldsAndComments() const { return m_pageUI.GetStackEditFieldsAndComments(); }

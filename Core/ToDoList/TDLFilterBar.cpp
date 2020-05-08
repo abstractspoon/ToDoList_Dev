@@ -506,14 +506,9 @@ void CTDLFilterBar::AddAdvancedFilters(const CStringArray& aFilters)
 	m_cbTaskFilter.AddAdvancedFilters(aFilters); 
 }
 
-int CTDLFilterBar::GetAdvancedFilterNames(CStringArray& aFilters) const
+const CStringArray& CTDLFilterBar::GetAdvancedFilterNames() const
 {
-	return m_cbTaskFilter.GetAdvancedFilters(aFilters); 
-}
-
-int CTDLFilterBar::GetAllFilterNames(CStringArray& aFilters) const
-{
-	return CDialogHelper::GetComboBoxItems(m_cbTaskFilter, aFilters);
+	return m_cbTaskFilter.GetAdvancedFilters(); 
 }
 
 void CTDLFilterBar::RemoveAdvancedFilters()

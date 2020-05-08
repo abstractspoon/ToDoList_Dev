@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "TDCMainMenu.h"
+#include "TDCStatic.h"
 #include "FilteredToDoCtrl.h"
 #include "ToDoCtrlMgr.h"
 #include "PreferencesDlg.h"
@@ -96,6 +97,8 @@ BOOL CTDCMainMenu::LoadMenu()
 	TranslateDynamicMenuItems(ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16, _T("3rd Party Storage %d"));
 	TranslateDynamicMenuItems(ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16, _T("Task View %d"));
 	TranslateDynamicMenuItems(ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16, _T("Task View %d"));
+	TranslateDynamicMenuItems(ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, _T("Default Filter %d"));
+	TranslateDynamicMenuItems(ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, _T("Find Tasks Filter %d"));
 
 	return TRUE;
 }
@@ -117,9 +120,8 @@ BOOL CTDCMainMenu::IsDynamicItem(UINT nMenuID)
 	CHECKINRANGE(nMenuID, ID_FILE_SAVE_USERSTORAGE1, ID_FILE_SAVE_USERSTORAGE16);
 	CHECKINRANGE(nMenuID, ID_SHOWVIEW_UIEXTENSION1, ID_SHOWVIEW_UIEXTENSION16);
 	CHECKINRANGE(nMenuID, ID_ACTIVATEVIEW_UIEXTENSION1, ID_ACTIVATEVIEW_UIEXTENSION16);
-
-	// Extra
 	CHECKINRANGE(nMenuID, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24);
+	CHECKINRANGE(nMenuID, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24);
 
 	// else
 	return FALSE;
@@ -129,7 +131,7 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 											const CRecentFileList& mru,
 											const CToDoCtrlMgr& mgrToDoCtrl,
 											const CPreferencesDlg& prefs,
-											const CTDLFilterBar& filterBar,
+											const CStringArray& aAdvancedFilters,
 											const CTDLTasklistStorageMgr& mgrStorage,
 											const CUIExtensionMgr& mgrUIExt) const
 {
@@ -190,8 +192,16 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 		CStringArray aFilters;
 		int nFilter = (nMenuID - ID_VIEW_ACTIVATEFILTER1);
 
-		if (nFilter < filterBar.GetAllFilterNames(aFilters))
-			sTipText = aFilters[nFilter];
+		if (nFilter < NUM_SHOWFILTER)
+			sTipText = CEnString(SHOW_FILTERS[nFilter][0]);
+	}
+	else if (IsInRange(nMenuID, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24))
+	{
+		CStringArray aCustomFilters;
+		int nFilter = (nMenuID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
+
+		if (nFilter < aAdvancedFilters.GetSize())
+			sTipText = aAdvancedFilters[nFilter];
 	}
 	else
 	{
@@ -275,7 +285,7 @@ void CTDCMainMenu::UpdateBackgroundColor()
 BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,  
 									   const CFilteredToDoCtrl& tdc, 
 									   const CPreferencesDlg& prefs,
-									   const CTDLFilterBar& filterBar, 
+									   const CStringArray& aAdvancedFilters, 
 									   const CTDLTasklistStorageMgr& mgrStorage,
 									   const CUIExtensionMgr& mgrUIExt,
 									   CMenuIconMgr& mgrMenuIcons)
@@ -311,7 +321,16 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 			return TRUE;
 
 		case ID_VIEW_ACTIVATEFILTER1:
-			AddFiltersToMenu(pPopupMenu, filterBar);
+			{
+				// Default Filters
+				CStringArray aFilters;
+				GetDefaultFilterNames(aFilters);
+				
+				AddFiltersToMenu(pPopupMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, aFilters, IDS_FILTERPLACEHOLDER);
+
+				// Advanced filters
+				AddFiltersToMenu(pPopupMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, aAdvancedFilters, IDS_ADVANCEDFILTERPLACEHOLDER);
+			}
 			return TRUE;
 
 		case ID_ACTIVATEVIEW_TASKTREE:
@@ -716,23 +735,28 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 	}
 }
 
-void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, const CTDLFilterBar& filterBar)
+int CTDCMainMenu::GetDefaultFilterNames(CStringArray& aFilters)
 {
-	ASSERT(pMenu);
+	aFilters.RemoveAll();
 
-	if (!pMenu)
-		return;
+	for (int nFilter = 0; nFilter < NUM_SHOWFILTER; nFilter++)
+		aFilters.Add(CEnString(SHOW_FILTERS[nFilter][0]));
 
-	const UINT MENUSTARTID = pMenu->GetMenuItemID(0);
+	return NUM_SHOWFILTER;
+}
 
-	// delete existing entries
-	int nFilter = 24;
+void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)
+{
+	// Get the first item insertion point
+	int nStartPos = CEnMenu::FindMenuItem(*pMenu, nStart);
+	ASSERT(nStartPos >= 0);
 
-	while (nFilter--)
-		pMenu->DeleteMenu(nFilter, MF_BYPOSITION);
+	// Delete existing items
+	for (UINT nMenuID = nStart; nMenuID <= nEnd; nMenuID++)
+		pMenu->DeleteMenu(nMenuID, MF_BYCOMMAND);
 
-	CStringArray aFilters;
-	int nNumFilters = min(filterBar.GetAllFilterNames(aFilters), 24);
+	// Re-add filters or placeholder if no filters
+	int nNumFilters = min(aFilters.GetSize(), 24);
 
 	if (nNumFilters)
 	{
@@ -744,16 +768,12 @@ void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, const CTDLFilterBar& filterBar
 			sMenuItem.Format(_T("&%s"), aFilters[nFilter]);
 			sMenuItem.Replace('\t', ' '); // removed embedded tabs
 
-			pMenu->InsertMenu(nFilter, nFlags, (ID_VIEW_ACTIVATEFILTER1 + nFilter), sMenuItem);
+			pMenu->InsertMenu((nStartPos + nFilter), nFlags, (nStart + nFilter), sMenuItem);
 		}
-
-		int nSelFilter = filterBar.GetSelectedFilter();
-		pMenu->CheckMenuRadioItem(0, nNumFilters, nSelFilter, MF_BYPOSITION);
-
 	}
-	else // if nothing to add just re-add placeholder
+	else // if nothing to add, just re-add placeholder
 	{
-		pMenu->InsertMenu(0, MF_BYPOSITION | MF_STRING | MF_GRAYED, MENUSTARTID, CEnString(IDS_FILTERPLACEHOLDER));
+		pMenu->InsertMenu(nStartPos, MF_BYPOSITION | MF_STRING | MF_GRAYED, nStart, CEnString(nPlaceholderStrID));
 	}
 }
 

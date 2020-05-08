@@ -43,7 +43,7 @@ public:
 	BOOL HandleInitMenuPopup(CMenu* pPopupMenu, 
 							 const CFilteredToDoCtrl& tdc, 
 							 const CPreferencesDlg& prefs,
-							 const CTDLFilterBar& filterBar,
+							 const CStringArray& aAdvancedFilters,
 							 const CTDLTasklistStorageMgr& mgrStorage,
 							 const CUIExtensionMgr& mgrUIExt,
 							 CMenuIconMgr& mgrMenuIcons); // not const
@@ -61,7 +61,7 @@ public:
 								  const CRecentFileList& mru,
 								  const CToDoCtrlMgr& mgrToDoCtrl,
 								  const CPreferencesDlg& prefs,
-								  const CTDLFilterBar& filterBar,
+								  const CStringArray& aAdvancedFilters,
 								  const CTDLTasklistStorageMgr& mgrStorage,
 								  const CUIExtensionMgr& mgrUIExt) const;
 
@@ -78,12 +78,13 @@ protected:
 	void PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs) const;
 	void PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, CMenuIconMgr& mgrMenuIcons);
 
-	void AddFiltersToMenu(CMenu* pMenu, const CTDLFilterBar& filterBar);
+	void AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID);
 	void AddUserStorageToMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons);
 	void AddTaskViewVisibilityToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt);
 	void AddTaskViewActivationToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt);
 
 	static BOOL IsInRange(UINT nItem, UINT nStart, UINT nEnd);
+	static int GetDefaultFilterNames(CStringArray& aFilters);
 };
 
 #endif // !defined(AFX_TDCMAINMENU_H__5AB11CC8_CCF5_4D52_ADC7_27FDC151F3FE__INCLUDED_)

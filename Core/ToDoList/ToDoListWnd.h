@@ -566,6 +566,7 @@ protected:
 	afx_msg void OnViewMainToolbar();
 	afx_msg void OnViewCustomToolbar();
 	afx_msg void OnViewActivateFilter(UINT nCmdID);
+	afx_msg void OnViewActivateAdvancedFilter(UINT nCmdID);
 	afx_msg void OnWindow(UINT nCmdID);
 #ifdef _DEBUG
 	afx_msg void OnDebugEndSession();

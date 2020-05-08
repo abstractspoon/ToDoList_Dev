@@ -46,8 +46,7 @@ public:
 	int GetSelectedFilter() const;
 
 	void AddAdvancedFilters(const CStringArray& aFilters);
-	int GetAdvancedFilterNames(CStringArray& aFilters) const;
-	int GetAllFilterNames(CStringArray& aFilters) const;
+	const CStringArray& GetAdvancedFilterNames() const;
 	void RemoveAdvancedFilters();
 	void ShowDefaultFilters(BOOL bShow);
 
