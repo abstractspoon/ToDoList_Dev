@@ -101,6 +101,8 @@ public:
 	static int GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO, MENUITEMINFO&>& aMenuItems);
 	static BOOL GetMenuItemInfo(HMENU hMenu, CArray<MENUITEMINFO, MENUITEMINFO&>& aMenuItems, CStringArray& aItemText);
 
+	static BOOL RebaseMenuID(UINT nFromCmdIDStart, UINT nFromCmdIDEnd, UINT nToCmdIDStart, UINT& nCmdID);
+
 protected:
 	static ITransText* s_pTT;
 
