@@ -7,11 +7,11 @@
 #define IDI_DEPENDS_LINK                289
 #define IDI_NULL                        290
 #define IDI_ADD_LOGGED_TIME             308
-#define IDS_ONCEONLY                    58018
-#define IDS_DAILY                       58019
-#define IDS_WEEKLY                      58020
-#define IDS_MONTHLY                     58021
-#define IDS_YEARLY                      58022
+#define IDS_ONCEONLY                    51018
+#define IDS_DAILY                       51019
+#define IDS_WEEKLY                      51020
+#define IDS_MONTHLY                     51021
+#define IDS_YEARLY                      51022
 
 // Next default values for new objects
 // 
