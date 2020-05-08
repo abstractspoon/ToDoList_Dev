@@ -248,6 +248,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 		else
 		{
 			FIND_ATTRIBTYPE nType = rule.GetAttribType();
+			TDC_ATTRIBUTE nAttribID = rule.GetAttribute();
 
 			switch (nType)
 			{
@@ -266,7 +267,7 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 				break;
 
 			default:
-				switch (rule.GetAttribute())
+				switch (nAttribID)
 				{
 				case TDCA_ALLOCTO:
 				case TDCA_ALLOCBY:
@@ -286,18 +287,16 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 					return &m_cbRecurrence;
 
 				default:
+					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 					{
 						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-						if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
+						if (m_aAttribDefs.GetAttributeDef(nAttribID, attribDef) && attribDef.IsList())
 						{
-							if (attribDef.IsList())
-							{
-								if (attribDef.GetDataType() == TDCCA_ICON)
-									return &m_cbCustomIcons;
-								else
-									return &m_cbListValues;
-							}
+							if (attribDef.GetDataType() == TDCCA_ICON)
+								return &m_cbCustomIcons;
+							else
+								return &m_cbListValues;
 						}
 					}
 					break;
@@ -439,6 +438,8 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 		}
 		else
 		{
+			TDC_ATTRIBUTE nAttribID = rule.GetAttribute();
+
 			switch (rule.GetAttribType())
 			{
 			case FT_DATE:
@@ -448,21 +449,20 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				return ILCT_POPUPMENU;
 
 			case FT_ICON:
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 				{
 					TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-					BOOL bList = FALSE;
 
-					if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
-						bList = attribDef.IsList();
-
-					return (bList ? ILCT_DROPLIST : ILCT_BROWSE);
+					if (m_aAttribDefs.GetAttributeDef(nAttribID, attribDef) && attribDef.IsList())
+						return ILCT_DROPLIST;
 				}
-				break;
+				return ILCT_BROWSE;
 
 			case FT_TIMEPERIOD:
 			case FT_BOOL:
 			case FT_DEPENDENCY:
 			case FT_NONE:
+			case FT_STRING:
 				// Nothing or default edit control
 				break;
 
@@ -470,35 +470,32 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				return ILCT_DROPLIST;
 
 			default:
+				switch (nAttribID)
 				{
-					TDC_ATTRIBUTE nAttrib = rule.GetAttribute();
+				case TDCA_ALLOCTO:
+				case TDCA_ALLOCBY:
+				case TDCA_STATUS:
+				case TDCA_CATEGORY:
+				case TDCA_VERSION:
+				case TDCA_TAGS:
+				case TDCA_PRIORITY:
+				case TDCA_RISK:
+					return ILCT_DROPLIST;
 
-					switch (nAttrib)
+				default:
+					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 					{
-					case TDCA_ALLOCTO:
-					case TDCA_ALLOCBY:
-					case TDCA_STATUS:
-					case TDCA_CATEGORY:
-					case TDCA_VERSION:
-					case TDCA_TAGS: 
-					case TDCA_PRIORITY:
-					case TDCA_RISK:
-						return ILCT_DROPLIST;
+						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-					default:
+						if (m_aAttribDefs.GetAttributeDef(nAttribID, attribDef))
 						{
-							TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-
-							if (m_aAttribDefs.GetAttributeDef(nAttrib, attribDef))
+							if (attribDef.IsList())
 							{
-								if (attribDef.IsList())
-								{
-									return ILCT_DROPLIST;
-								}
+								return ILCT_DROPLIST;
 							}
 						}
-						break;
 					}
+					break;
 				}
 			}
 		}
