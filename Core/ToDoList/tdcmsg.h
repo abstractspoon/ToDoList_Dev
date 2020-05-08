@@ -47,10 +47,10 @@ const UINT WM_FTD_FIND						= ::RegisterWindowMessage(_T("WM_FTD_FIND"));
 const UINT WM_FTD_SELECTRESULT				= ::RegisterWindowMessage(_T("WM_FTD_SELECTRESULT"));
 const UINT WM_FTD_SELECTALL					= ::RegisterWindowMessage(_T("WM_FTD_SELECTALL"));
 const UINT WM_FTD_CLOSE						= ::RegisterWindowMessage(_T("WM_FTD_CLOSE"));
-const UINT WM_FTD_APPLYASFILTER				= ::RegisterWindowMessage(_T("WM_FTD_APPLYASFILTER"));
-const UINT WM_FTD_ADDSEARCH					= ::RegisterWindowMessage(_T("WM_FTD_ADDSEARCH"));
-const UINT WM_FTD_SAVESEARCH				= ::RegisterWindowMessage(_T("WM_FTD_SAVESEARCH"));
-const UINT WM_FTD_DELETESEARCH				= ::RegisterWindowMessage(_T("WM_FTD_DELETESEARCH"));
+const UINT WM_FTD_APPLYASFILTER				= ::RegisterWindowMessage(_T("WM_FTD_APPLYASFILTER"));			// lParam = LPCTSTR
+const UINT WM_FTD_ADDSEARCH					= ::RegisterWindowMessage(_T("WM_FTD_ADDSEARCH"));				// lParam = LPCTSTR
+const UINT WM_FTD_SAVESEARCH				= ::RegisterWindowMessage(_T("WM_FTD_SAVESEARCH"));				// lParam = LPCTSTR
+const UINT WM_FTD_DELETESEARCH				= ::RegisterWindowMessage(_T("WM_FTD_DELETESEARCH"));			// lParam = LPCTSTR
 const UINT WM_FTD_GETLISTITEMS				= ::RegisterWindowMessage(_T("WM_FTD_GETLISTITEMS"));			// wParam = <TDC_ATTRIBUTE>, lParam = CStringArray*
 
 // CTDCTimeTrackerDlg
