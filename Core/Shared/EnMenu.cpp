@@ -196,8 +196,10 @@ BOOL CEnMenu::DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 BOOL CEnMenu::MeasureMDIButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
 {
-	lpMeasureItemStruct->itemHeight = 4;
-	lpMeasureItemStruct->itemWidth = 4;
+	int nSize = GraphicsMisc::ScaleByDPIFactor(4);
+
+	lpMeasureItemStruct->itemHeight = nSize;
+	lpMeasureItemStruct->itemWidth = nSize;
 
 	return TRUE;
 }
