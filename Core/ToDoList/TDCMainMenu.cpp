@@ -131,7 +131,7 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 											const CRecentFileList& mru,
 											const CToDoCtrlMgr& mgrToDoCtrl,
 											const CPreferencesDlg& prefs,
-											const CStringArray& aAdvancedFilters,
+											const CTDLFilterBar& filterBar,
 											const CTDLTasklistStorageMgr& mgrStorage,
 											const CUIExtensionMgr& mgrUIExt) const
 {
@@ -189,7 +189,6 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	}
 	else if (IsInRange(nMenuID, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24))
 	{
-		CStringArray aFilters;
 		int nFilter = (nMenuID - ID_VIEW_ACTIVATEFILTER1);
 
 		if (nFilter < NUM_SHOWFILTER)
@@ -197,11 +196,10 @@ CString CTDCMainMenu::GetDynamicItemTooltip(UINT nMenuID,
 	}
 	else if (IsInRange(nMenuID, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24))
 	{
-		CStringArray aCustomFilters;
 		int nFilter = (nMenuID - ID_VIEW_ACTIVATEADVANCEDFILTER1);
 
-		if (nFilter < aAdvancedFilters.GetSize())
-			sTipText = aAdvancedFilters[nFilter];
+		if (nFilter < filterBar.GetAdvancedFilterNames().GetSize())
+			sTipText = filterBar.GetAdvancedFilterNames().GetAt(nFilter);
 	}
 	else
 	{
@@ -285,7 +283,7 @@ void CTDCMainMenu::UpdateBackgroundColor()
 BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,  
 									   const CFilteredToDoCtrl& tdc, 
 									   const CPreferencesDlg& prefs,
-									   const CStringArray& aAdvancedFilters, 
+									   const CTDLFilterBar& filterBar,
 									   const CTDLTasklistStorageMgr& mgrStorage,
 									   const CUIExtensionMgr& mgrUIExt,
 									   CMenuIconMgr& mgrMenuIcons)
@@ -321,16 +319,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 			return TRUE;
 
 		case ID_VIEW_ACTIVATEFILTER1:
-			{
-				// Default Filters
-				CStringArray aFilters;
-				GetDefaultFilterNames(aFilters);
-				
-				AddFiltersToMenu(pPopupMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, aFilters, IDS_FILTERPLACEHOLDER);
-
-				// Advanced filters
-				AddFiltersToMenu(pPopupMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, aAdvancedFilters, IDS_ADVANCEDFILTERPLACEHOLDER);
-			}
+			AddFiltersToMenu(pPopupMenu, filterBar);
 			return TRUE;
 
 		case ID_ACTIVATEVIEW_TASKTREE:
@@ -735,14 +724,27 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 	}
 }
 
-int CTDCMainMenu::GetDefaultFilterNames(CStringArray& aFilters)
+void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, const CTDLFilterBar& filterBar)
 {
-	aFilters.RemoveAll();
+	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, CTDCFilter::GetDefaultFilterNames(), IDS_FILTERPLACEHOLDER);
+	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.GetAdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
 
-	for (int nFilter = 0; nFilter < NUM_SHOWFILTER; nFilter++)
-		aFilters.Add(CEnString(SHOW_FILTERS[nFilter][0]));
+	// Restore selection
+	int nSelFilter = filterBar.GetSelectedFilter();
 
-	return NUM_SHOWFILTER;
+	if (filterBar.GetFilter() == FS_ADVANCED)
+	{
+		CString sFilter;
+		VERIFY((filterBar.GetFilter(sFilter) == FS_ADVANCED) && !sFilter.IsEmpty());
+
+		int nFilter = Misc::Find(sFilter, filterBar.GetAdvancedFilterNames(), FALSE, TRUE);
+		ASSERT(nFilter != -1);
+
+		nSelFilter = (NUM_SHOWFILTER + 1 + nFilter); // +1 for separator
+	}
+
+	if (nSelFilter != -1)
+		pMenu->CheckMenuRadioItem(0, pMenu->GetMenuItemCount(), nSelFilter, MF_BYPOSITION);
 }
 
 void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)

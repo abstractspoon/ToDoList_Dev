@@ -508,7 +508,7 @@ void CTDLFilterBar::AddAdvancedFilters(const CStringArray& aFilters)
 
 const CStringArray& CTDLFilterBar::GetAdvancedFilterNames() const
 {
-	return m_cbTaskFilter.GetAdvancedFilters(); 
+	return m_cbTaskFilter.GetAdvancedFilterNames(); 
 }
 
 void CTDLFilterBar::RemoveAdvancedFilters()

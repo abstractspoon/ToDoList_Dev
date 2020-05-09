@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "TDCFilter.h"
+#include "TDCStatic.h"
 #include "TDCSearchParamHelper.h"
 
 #include "..\Interfaces\Preferences.h"
@@ -877,4 +878,31 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 	}
 
 	return bNeedRefilter;
+}
+
+const CStringArray& CTDCFilter::GetDefaultFilterNames()
+{
+	static CStringArray aFilters;
+
+	if (aFilters.GetSize() == 0)
+	{
+		for (int nFilter = 0; nFilter < NUM_SHOWFILTER; nFilter++)
+			aFilters.Add(CEnString(SHOW_FILTERS[nFilter][0]));
+	}
+
+	return aFilters;
+}
+
+CString CTDCFilter::GetDefaultFilterName(FILTER_SHOW nShow)
+{
+	int nFilter = NUM_SHOWFILTER;
+
+	while (nFilter--)
+	{
+		if (SHOW_FILTERS[nFilter][1] == (UINT)nShow)
+			return CEnString(SHOW_FILTERS[nFilter][0]);
+	}
+
+	ASSERT(0);
+	return _T("");
 }

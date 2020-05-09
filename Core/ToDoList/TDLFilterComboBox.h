@@ -27,7 +27,7 @@ public:
 	BOOL SelectAdvancedFilter(const CString& sAdvanced);
 	
 	void AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel = NULL);
-	const CStringArray& GetAdvancedFilters() const;
+	const CStringArray& GetAdvancedFilterNames() const;
 	void RemoveAdvancedFilters();
 	void ShowDefaultFilters(BOOL bShow);
 

@@ -192,7 +192,7 @@ void CTDLFilterComboBox::AddAdvancedFilters(const CStringArray& aFilters, LPCTST
 		RefillCombo(szAdvancedSel);
 }
 
-const CStringArray& CTDLFilterComboBox::GetAdvancedFilters() const
+const CStringArray& CTDLFilterComboBox::GetAdvancedFilterNames() const
 {
 	return m_aAdvancedFilterNames;
 }
