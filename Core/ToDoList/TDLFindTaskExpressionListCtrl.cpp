@@ -462,7 +462,6 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 			case FT_BOOL:
 			case FT_DEPENDENCY:
 			case FT_NONE:
-			case FT_STRING:
 				// Nothing or default edit control
 				break;
 
@@ -487,13 +486,9 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 					{
 						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-						if (m_aAttribDefs.GetAttributeDef(nAttribID, attribDef))
-						{
-							if (attribDef.IsList())
-							{
-								return ILCT_DROPLIST;
-							}
-						}
+						if (m_aAttribDefs.GetAttributeDef(nAttribID, attribDef) && attribDef.IsList())
+							return ILCT_DROPLIST;
+
 					}
 					break;
 				}
