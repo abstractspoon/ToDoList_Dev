@@ -28,6 +28,8 @@ static char THIS_FILE[] = __FILE__;
 #define PSP_SHORTCUTCOLUMNID	(OTC_POSCOLUMNID - 1)
 #define PSP_COMMANDIDCOLUMNID	(OTC_POSCOLUMNID - 2)
 
+const COLORREF SUBMENU_COLOR = RGB(192, 192, 192);
+
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage property page
 
@@ -185,7 +187,7 @@ HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMen
 				if (pSubMenu)
 				{
 					for (int nSubPos = 0; nSubPos < (int)pSubMenu->GetMenuItemCount(); nSubPos++)
-						AddMenuItem(hti, pSubMenu, nSubPos);
+						AddMenuItem(hti, pSubMenu, nSubPos); // RECURSIVE CALL
 				}
 			}
 			else if (!IsMiscCommandID(nCmdID)) // fixes a bug where misc ids were being saved
@@ -454,8 +456,7 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 		}
 		else if (bParentItem)
 		{
-			pNCGDI->pDC->FillSolidRect(rItem, ::GetSysColor(COLOR_3DHIGHLIGHT));
-			pNCGDI->pDC->FillSolidRect(rItem.right - 1, rItem.top, 1, rItem.Height(), m_tcCommands.GetGridlineColor());
+			pNCGDI->pDC->FillSolidRect(rItem, SUBMENU_COLOR);
 		}
 
 		// draw text
@@ -469,7 +470,6 @@ LRESULT CPreferencesShortcutsPage::OnGutterDrawItem(WPARAM /*wParam*/, LPARAM lP
 			case PSP_SHORTCUTCOLUMNID:
 				{
 					DWORD dwShortcut = 0;
-
 					m_mapID2Shortcut.Lookup(nCmdID, dwShortcut);
 
 					if (dwShortcut)
@@ -620,9 +620,9 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 				rItem.left = (rText.left - 2);
 				
 				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-				pDC->FillSolidRect(rItem, GetSysColor(COLOR_3DSHADOW));
+				pDC->FillSolidRect(rItem, SUBMENU_COLOR);
 				
-				pTVCD->clrTextBk = GetSysColor(COLOR_3DSHADOW);
+				pTVCD->clrTextBk = SUBMENU_COLOR;
 				pTVCD->clrText = 0;
 				
 				*pResult |= CDRF_NEWFONT;
