@@ -155,7 +155,7 @@ BOOL CEnMenu::IsThemed()
 	return CThemed().IsNonClientThemed();
 }
 
-BOOL CEnMenu::DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct)
+BOOL CEnMenu::DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const
 {
 	if (!IsThemed())
 		return FALSE;
@@ -194,7 +194,7 @@ BOOL CEnMenu::DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	return TRUE;
 }
 
-BOOL CEnMenu::MeasureMDIButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
+BOOL CEnMenu::MeasureMDIButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const
 {
 	int nSize = GraphicsMisc::ScaleByDPIFactor(4);
 

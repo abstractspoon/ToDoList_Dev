@@ -39,24 +39,22 @@ public:
 	void UpdateBackgroundColor();
 	void SetUITheme(const UITHEME& theme);
 
-	// pseudo-message handlers
 	BOOL HandleInitMenuPopup(CMenu* pPopupMenu, 
 							 const CFilteredToDoCtrl& tdc, 
 							 const CPreferencesDlg& prefs,
 							 const CTDLFilterBar& filterBar,
 							 const CTDLTasklistStorageMgr& mgrStorage,
 							 const CUIExtensionMgr& mgrUIExt,
-							 CMenuIconMgr& mgrMenuIcons); // not const
+							 CMenuIconMgr& mgrMenuIcons) const;
 
-	BOOL HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct);
-	BOOL HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
-	BOOL HandlePostTranslateMenu(HMENU hMenu);
+	BOOL HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const;
+	BOOL HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const;
+	BOOL HandlePostTranslateMenu(HMENU hMenu) const;
 
 	void PrepareTaskContextMenu(CMenu* pMenu, 
 								const CFilteredToDoCtrl& tdc, 
 								const CPreferencesDlg& prefs) const;
 
-	// Helpers
 	CString GetDynamicItemTooltip(UINT nMenuID,
 								  const CRecentFileList& mru,
 								  const CToDoCtrlMgr& mgrToDoCtrl,
@@ -73,17 +71,17 @@ protected:
 protected:
 	void LoadMenuCommon();
 
-	void PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs);
-	void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs) const;
-	void PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs) const;
-	void PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, CMenuIconMgr& mgrMenuIcons);
+	static void PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs);
+	static void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);
+	static void PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);
+	static void PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, CMenuIconMgr& mgrMenuIcons);
 
-	void AddFiltersToMenu(CMenu* pMenu, const CTDLFilterBar& filterBar);
-	void AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID);
-	void AddUserStorageToMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons);
-	void AddTaskViewVisibilityToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt);
-	void AddTaskViewActivationToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt);
+	static void PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar);
+	static void PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons);
+	static void PrepareTaskViewVisibilityMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt);
+	static void PrepareTaskViewActivationMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt);
 
+	static void AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID);
 	static BOOL IsInRange(UINT nItem, UINT nStart, UINT nEnd);
 };
 

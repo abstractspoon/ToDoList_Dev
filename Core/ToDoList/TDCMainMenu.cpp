@@ -286,7 +286,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 									   const CTDLFilterBar& filterBar,
 									   const CTDLTasklistStorageMgr& mgrStorage,
 									   const CUIExtensionMgr& mgrUIExt,
-									   CMenuIconMgr& mgrMenuIcons)
+									   CMenuIconMgr& mgrMenuIcons) const
 {
 	if (GetSubMenu(AM_FILE) == pPopupMenu)
 	{
@@ -315,19 +315,19 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 			// test for 'Open From.../Save To...'
 		case ID_FILE_OPEN_USERSTORAGE1:
 		case ID_FILE_SAVE_USERSTORAGE1:
-			AddUserStorageToMenu(pPopupMenu, mgrStorage, mgrMenuIcons);
+			PrepareUserStorageMenu(pPopupMenu, mgrStorage, mgrMenuIcons);
 			return TRUE;
 
 		case ID_VIEW_ACTIVATEFILTER1:
-			AddFiltersToMenu(pPopupMenu, filterBar);
+			PrepareFiltersActivationMenu(pPopupMenu, filterBar);
 			return TRUE;
 
 		case ID_ACTIVATEVIEW_TASKTREE:
-			AddTaskViewActivationToMenu(pPopupMenu, tdc, mgrUIExt);
+			PrepareTaskViewActivationMenu(pPopupMenu, tdc, mgrUIExt);
 			return TRUE;
 
 		case ID_SHOWVIEW_TASKTREE:
-			AddTaskViewVisibilityToMenu(pPopupMenu, tdc, mgrUIExt);
+			PrepareTaskViewVisibilityMenu(pPopupMenu, tdc, mgrUIExt);
 			return TRUE;
 		}
 	}
@@ -378,7 +378,7 @@ void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
 	}
 }
 
-void CTDCMainMenu::AddTaskViewVisibilityToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt)
+void CTDCMainMenu::PrepareTaskViewVisibilityMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt)
 {
 	CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
 	helper.AddAllExtensionsToMenu(pMenu, mgrUIExt);
@@ -393,7 +393,7 @@ void CTDCMainMenu::AddTaskViewVisibilityToMenu(CMenu* pMenu, const CFilteredToDo
 	helper.UpdateExtensionVisibilityState(pMenu, mgrUIExt, aTypeIDs);
 }
 
-void CTDCMainMenu::AddTaskViewActivationToMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt)
+void CTDCMainMenu::PrepareTaskViewActivationMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt)
 {
 	CStringArray aTypeIDs;
 	tdc.GetVisibleExtensionViews(aTypeIDs);
@@ -444,7 +444,7 @@ void CTDCMainMenu::AddTaskViewActivationToMenu(CMenu* pMenu, const CFilteredToDo
 	pMenu->CheckMenuRadioItem(0, ID_ACTIVATEVIEW_UIEXTENSION16, nMenuID, MF_BYCOMMAND);
 }
 
-BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu)
+BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu) const
 {
 	ASSERT(::IsMenu(hMenu));
 
@@ -459,7 +459,7 @@ BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu)
 	return FALSE;
 }
 
-BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
+BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct) const
 {
 	if ((nIDCtl == 0) && (lpDrawItemStruct->itemID == ID_CLOSE))
 	{
@@ -470,7 +470,7 @@ BOOL CTDCMainMenu::HandleDrawItem(int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct)
 	return FALSE;
 }
 
-BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct)
+BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct) const
 {
 	if (nIDCtl == 0 && lpMeasureItemStruct->itemID == ID_CLOSE)
 	{
@@ -481,7 +481,7 @@ BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureIt
 	return FALSE;
 }
 
-void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs) const
+void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs)
 {
 	ASSERT(pMenu);
 
@@ -619,7 +619,7 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		pMenu->DeleteMenu(nLastItem, MF_BYPOSITION);
 }
 
-void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs) const
+void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs)
 {
 	ASSERT(pMenu);
 
@@ -724,7 +724,7 @@ void CTDCMainMenu::PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 	}
 }
 
-void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, const CTDLFilterBar& filterBar)
+void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBar& filterBar)
 {
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEFILTER1, ID_VIEW_ACTIVATEFILTER24, CTDCFilter::GetDefaultFilterNames(), IDS_FILTERPLACEHOLDER);
 	AddFiltersToMenu(pMenu, ID_VIEW_ACTIVATEADVANCEDFILTER1, ID_VIEW_ACTIVATEADVANCEDFILTER24, filterBar.GetAdvancedFilterNames(), IDS_ADVANCEDFILTERPLACEHOLDER);
@@ -779,7 +779,7 @@ void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const 
 	}
 }
 
-void CTDCMainMenu::AddUserStorageToMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons)
+void CTDCMainMenu::PrepareUserStorageMenu(CMenu* pMenu, const CTDLTasklistStorageMgr& mgrStorage, CMenuIconMgr& mgrMenuIcons)
 {
 	ASSERT(pMenu);
 

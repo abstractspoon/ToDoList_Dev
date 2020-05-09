@@ -35,8 +35,8 @@ public:
 	BOOL DeleteMDIMenu(UINT nCmdID);
 
 	// for themed buttons only
-	BOOL DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct); 
-	BOOL MeasureMDIButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct); 
+	BOOL DrawMDIButton(LPDRAWITEMSTRUCT lpDrawItemStruct) const; 
+	BOOL MeasureMDIButton(LPMEASUREITEMSTRUCT lpMeasureItemStruct) const; 
 
 	int FindMenuItem(UINT nCmdID) const;
 	int FindMenuItem(HMENU hSubMenu) const;
