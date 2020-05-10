@@ -160,7 +160,7 @@ BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CToolbarButtonArray& aButto
 
 	BOOL bRemapped = FALSE;
 
-	for (int nBtn = 0; nBtn < nNumBtns; nBtn++)
+	for (nBtn = 0; nBtn < nNumBtns; nBtn++)
 	{
 		// Skip over existing separators
 		// but allow buttons to be given a menu ID of 0
