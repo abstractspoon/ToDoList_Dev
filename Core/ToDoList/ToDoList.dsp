@@ -58,6 +58,8 @@ LINK32=link.exe
 # ADD LINK32 /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /pdbtype:sept
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
+PreLink_Desc=Build lib for test exe
+PreLink_Cmds=lib.exe /out:"Unicode_Debug\ToDoList.lib" "Unicode_Debug\*.obj"
 PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Debug	copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y	copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y	unicode_debug\TDLTest.exe
 # End Special Build Tool
 
@@ -92,6 +94,8 @@ LINK32=link.exe
 # SUBTRACT LINK32 /pdb:none /map
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
+PreLink_Desc=Build lib for test exe
+PreLink_Cmds=lib.exe /out:"Unicode_Release\ToDoList.lib" "Unicode_Release\*.obj"
 PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Release	copy unicode_release\ToDoList.exe ..\..\Plugins\release /y	unicode_release\TDLTest.exe
 # End Special Build Tool
 
@@ -1580,12 +1584,12 @@ SOURCE=..\ToDoList_Core.sln
 # End Source File
 # End Target
 # End Project
+# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
+# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
+# 	2:16:DefaultSinkClass:CWebBrowserCtrl
+# End Section
 # Section ToDoList : {D30C1661-CDAF-11D0-8A3E-00C04FC9E26E}
 # 	2:5:Class:CWebBrowserCtrl
 # 	2:10:HeaderFile:webbrowserctrl.h
 # 	2:8:ImplFile:webbrowserctrl.cpp
-# End Section
-# Section ToDoList : {8856F961-340A-11D0-A96B-00C04FD705A2}
-# 	2:21:DefaultSinkHeaderFile:webbrowserctrl.h
-# 	2:16:DefaultSinkClass:CWebBrowserCtrl
 # End Section

@@ -49,7 +49,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib  ..\ToDoList\Unicode_Debug\ToDoList.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\ToDoList	mkdir ..\ToDoList\unicode_debug	copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
@@ -77,7 +77,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /OPT:REF
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ..\ToDoList\Unicode_Release\ToDoList.lib /nologo /subsystem:console /debug /machine:I386 /OPT:REF
 # SUBTRACT LINK32 /pdb:none /map
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
@@ -202,198 +202,6 @@ SOURCE=.\ToDoCtrlTaskLinkTest.h
 # Begin Source File
 
 SOURCE=..\ToDoList\res\app_std.ico
-# End Source File
-# End Group
-# Begin Group "ToDoList Source"
-
-# PROP Default_Filter "*.cpp"
-# Begin Source File
-
-SOURCE=..\Interfaces\ContentCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\ContentMgr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\ContentTypeCombobox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\Preferences.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\RichEditSpellCheck.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\SpellCheckDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TaskClipboard.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TaskFile.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TaskListDropTarget.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCCustomAttribData.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCCustomAttributeDef.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCDialogHelper.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCEnumContainers.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCFindReplace.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCImageList.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCMergeTasklist.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCOutlookImportHelper.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCRecurrence.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCSimpleTextContent.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCSourceControl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCTaskTimeLog.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCTimeTracking.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLAddLoggedTimeDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLCommentsCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLContentMgr.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLDialog.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLFilterDateComboBox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\tdliconcombobox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLImportOutlookObjectsDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLImportOutlookObjectSetupListCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLInfoTipCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLPriorityComboBox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLRecurringTaskEdit.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLReuseRecurringTaskDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLRiskComboBox.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLTaskCtrlBase.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLTaskIconDlg.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDLTaskTreeCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\ToDoCtrl.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\ToDoCtrlData.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\ToDoCtrlDataUtils.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\ToDoCtrlFind.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\ToDoCtrlUndo.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\ToDoitem.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\Interfaces\UIThemeFile.cpp
 # End Source File
 # End Group
 # Begin Source File
