@@ -79,7 +79,7 @@
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\ToDoList\Unicode_Release\ToDoList.lib</AdditionalDependencies>
       <OutputFile>.\Unicode_Release/TDLTest.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ProgramDatabaseFile>.\Unicode_Release/TDLTest.pdb</ProgramDatabaseFile>
@@ -127,7 +127,7 @@ copy unicode_release\TDLTest.exe ..\todolist\unicode_release /y
       <Culture>0x0c09</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\ToDoList\Unicode_Debug\ToDoList.lib</AdditionalDependencies>
       <OutputFile>.\Unicode_Debug/TDLTest.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -150,53 +150,6 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Interfaces\ContentCtrl.cpp" />
-    <ClCompile Include="..\Interfaces\ContentMgr.cpp" />
-    <ClCompile Include="..\Interfaces\ContentTypeCombobox.cpp" />
-    <ClCompile Include="..\Interfaces\Preferences.cpp" />
-    <ClCompile Include="..\Interfaces\RichEditSpellCheck.cpp" />
-    <ClCompile Include="..\Interfaces\SpellCheckDlg.cpp" />
-    <ClCompile Include="..\Interfaces\UIThemeFile.cpp" />
-    <ClCompile Include="..\ToDoList\TaskClipboard.cpp" />
-    <ClCompile Include="..\ToDoList\TaskFile.cpp" />
-    <ClCompile Include="..\ToDoList\TaskListDropTarget.cpp" />
-    <ClCompile Include="..\ToDoList\TDCCustomAttribData.cpp" />
-    <ClCompile Include="..\ToDoList\TDCCustomAttributeDef.cpp" />
-    <ClCompile Include="..\ToDoList\TDCCustomAttributeUIHelper.cpp" />
-    <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp" />
-    <ClCompile Include="..\ToDoList\TDCEnumContainers.cpp" />
-    <ClCompile Include="..\ToDoList\TDCFindReplace.cpp" />
-    <ClCompile Include="..\ToDoList\TDCImageList.cpp" />
-    <ClCompile Include="..\ToDoList\TDCMergeTasklist.cpp" />
-    <ClCompile Include="..\ToDoList\TDCOutlookImportHelper.cpp" />
-    <ClCompile Include="..\ToDoList\TDCRecurrence.cpp" />
-    <ClCompile Include="..\ToDoList\TDCSimpleTextContent.cpp" />
-    <ClCompile Include="..\ToDoList\TDCSourceControl.cpp" />
-    <ClCompile Include="..\ToDoList\TDCTaskTimeLog.cpp" />
-    <ClCompile Include="..\ToDoList\TDCTimeTracking.cpp" />
-    <ClCompile Include="..\ToDoList\TDLAddLoggedTimeDlg.cpp" />
-    <ClCompile Include="..\ToDoList\TDLCommentsCtrl.cpp" />
-    <ClCompile Include="..\ToDoList\TDLContentMgr.cpp" />
-    <ClCompile Include="..\ToDoList\TDLDialog.cpp" />
-    <ClCompile Include="..\ToDoList\TDLFilterDateComboBox.cpp" />
-    <ClCompile Include="..\ToDoList\tdliconcombobox.cpp" />
-    <ClCompile Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp" />
-    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectsDlg.cpp" />
-    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectSetupListCtrl.cpp" />
-    <ClCompile Include="..\ToDoList\TDLInfoTipCtrl.cpp" />
-    <ClCompile Include="..\ToDoList\TDLPriorityComboBox.cpp" />
-    <ClCompile Include="..\ToDoList\TDLRecurringTaskEdit.cpp" />
-    <ClCompile Include="..\ToDoList\TDLReuseRecurringTaskDlg.cpp" />
-    <ClCompile Include="..\ToDoList\TDLRiskComboBox.cpp" />
-    <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp" />
-    <ClCompile Include="..\ToDoList\TDLTaskIconDlg.cpp" />
-    <ClCompile Include="..\ToDoList\TDLTaskTreeCtrl.cpp" />
-    <ClCompile Include="..\ToDoList\ToDoCtrl.cpp" />
-    <ClCompile Include="..\ToDoList\ToDoCtrlData.cpp" />
-    <ClCompile Include="..\ToDoList\ToDoCtrlDataUtils.cpp" />
-    <ClCompile Include="..\ToDoList\ToDoCtrlFind.cpp" />
-    <ClCompile Include="..\ToDoList\ToDoCtrlUndo.cpp" />
-    <ClCompile Include="..\ToDoList\ToDoitem.cpp" />
     <ClCompile Include="DateHelperTest.cpp" />
     <ClCompile Include="FileMiscTest.cpp" />
     <ClCompile Include="ImportExportMgrTest.cpp">
@@ -253,6 +206,9 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
   <ItemGroup>
     <ProjectReference Include="..\3rdParty\3rdParty.vcxproj">
       <Project>{e15c17b8-c080-492f-bbb8-bf9e84a0ea31}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Interfaces\Interfaces.vcxproj">
+      <Project>{a234e4e0-47de-4d77-bdba-ee17c021c95d}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Shared\Shared.vcxproj">
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>

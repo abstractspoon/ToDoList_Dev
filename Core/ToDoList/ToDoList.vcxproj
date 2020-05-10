@@ -116,6 +116,14 @@ unicode_debug\TDLTest.exe
     <BuildLog>
       <Path>$(IntDir)$(MSBuildProjectName).log</Path>
     </BuildLog>
+    <PreLinkEvent>
+      <Command>@ECHO ON
+@ECHO "$(VCInstallDir)bin\lib.exe" /out:"$(OutDir)$(ProjectName).lib" "$(IntermediateOutputPath)*.obj"
+"$(VCInstallDir)bin\lib.exe" /out:"$(OutDir)$(ProjectName).lib" "$(IntermediateOutputPath)*.obj"</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Build lib for test exe</Message>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
     <Midl>
@@ -180,6 +188,14 @@ unicode_release\TDLTest.exe
     <BuildLog>
       <Path />
     </BuildLog>
+    <PreLinkEvent>
+      <Command>@ECHO ON
+@ECHO "$(VCInstallDir)bin\lib.exe" /out:"$(OutDir)$(ProjectName).lib" "$(IntermediateOutputPath)*.obj"
+"$(VCInstallDir)bin\lib.exe" /out:"$(OutDir)$(ProjectName).lib" "$(IntermediateOutputPath)*.obj"</Command>
+    </PreLinkEvent>
+    <PreLinkEvent>
+      <Message>Build lib for test exe</Message>
+    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="FilteredToDoCtrl.cpp">
