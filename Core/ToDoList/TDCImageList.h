@@ -43,6 +43,9 @@ protected:
 	COLORREF m_crTransparent;
 
 protected:
+	// Images must be loaded
+	BOOL Attach(HIMAGELIST hImageList) { return CEnImageList::Attach(hImageList); }
+
 	void MapImage(int nIndex, const CString& sName);
 	BOOL NeedLoadImages(const CString& sTaskList, COLORREF crTransparent,
 						BOOL bWantDefaultIcons, BOOL bWantToolbars) const;
