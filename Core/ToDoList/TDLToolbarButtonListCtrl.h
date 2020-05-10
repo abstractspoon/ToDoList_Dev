@@ -73,6 +73,7 @@ protected:
 
 	BOOL MoveButton(int nBtn, int nRows);
 	BOOL CanMoveButton(int nBtn, int nRows) const;
+	void PopulateList();
 
 };
 

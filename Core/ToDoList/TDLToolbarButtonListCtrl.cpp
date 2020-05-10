@@ -10,6 +10,7 @@
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\Localizer.h"
+#include "..\Shared\Misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -64,7 +65,13 @@ int CTDLToolbarButtonListCtrl::GetButtons(CToolbarButtonArray& aButtons) const
 
 void CTDLToolbarButtonListCtrl::SetButtons(const CToolbarButtonArray& aButtons)
 {
-	m_aButtons.Copy(aButtons);
+	if (!Misc::MatchAllT(aButtons, m_aButtons, TRUE))
+	{
+		m_aButtons.Copy(aButtons);
+
+		if (GetSafeHwnd())
+			PopulateList();
+	}
 }
 
 UINT CTDLToolbarButtonListCtrl::GetLastButtonID() const
@@ -103,7 +110,13 @@ void CTDLToolbarButtonListCtrl::InitState()
 
 	m_ilImages.LoadDefaultImages(TRUE);
 
-	// Build list
+	PopulateList();
+}
+
+void CTDLToolbarButtonListCtrl::PopulateList()
+{
+	DeleteAllItems(FALSE);
+
 	for (int nBtn = 0; nBtn < m_aButtons.GetSize(); nBtn++)
 	{
 		const TOOLBARBUTTON& tb = m_aButtons[nBtn];
@@ -185,7 +198,7 @@ void CTDLToolbarButtonListCtrl::OnMenuItemOK()
 {
 	HideControl(m_cbMenuItems);
 	
-	// update item text and keep data store synched
+	// update item text and keep data store synced
 	int nRow = GetCurSel();
 	
 	if (nRow != CB_ERR)
