@@ -49,6 +49,8 @@ public:
 	BOOL SetItemWidth(int nPos, int nWidth);
 	int GetItemWidth(int nPos) const;
 	void RemoveDuplicateSeparators(int nStartPos = 0);
+	int GetItemImage(int nPos) const;
+	BOOL SetItemImage(int nPos, int iImage);
 
 	// Attributes
 protected:

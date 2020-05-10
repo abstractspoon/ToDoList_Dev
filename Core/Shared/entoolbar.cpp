@@ -584,11 +584,33 @@ BOOL CEnToolBar::SetItemWidth(int nPos, int nWidth, CRect& rect)
 	tbi.cx = (WORD)nWidth;
 	tbi.dwMask = TBIF_SIZE;
 
-	if (!GetToolBarCtrl().SetButtonInfo(nPos, &tbi))
+	if (!GetToolBarCtrl().SetButtonInfo(GetItemID(nPos), &tbi))
 		return FALSE;
 
 	GetItemRect(nPos, &rect);
 	return TRUE;
+}
+
+int CEnToolBar::GetItemImage(int nPos) const
+{
+	TBBUTTONINFO tbi;
+	tbi.cbSize = sizeof(TBBUTTONINFO);
+	tbi.dwMask = TBIF_IMAGE;
+
+	if (!GetToolBarCtrl().GetButtonInfo(GetItemID(nPos), &tbi))
+		return -1;
+
+	return tbi.iImage;
+}
+
+BOOL CEnToolBar::SetItemImage(int nPos, int iImage)
+{
+	TBBUTTONINFO tbi;
+	tbi.cbSize = sizeof(TBBUTTONINFO);
+	tbi.dwMask = TBIF_IMAGE;
+	tbi.iImage = iImage;
+
+	return GetToolBarCtrl().SetButtonInfo(GetItemID(nPos), &tbi);
 }
 
 BOOL CEnToolBar::SetItemWidth(int nPos, int nWidth)
