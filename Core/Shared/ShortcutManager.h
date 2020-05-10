@@ -49,6 +49,7 @@ public:
 	BOOL AddShortcut(UINT nCmdID, DWORD dwShortcut); 
 	void DeleteShortcut(UINT nCmdID);
 
+
 	// SetShortcut never fails and will overwrite any existing shortcuts
 	void SetShortcut(UINT nCmdID, WORD wVirtKeyCode, WORD wModifiers = HOTKEYF_CONTROL); 
 	void SetShortcut(UINT nCmdID, DWORD dwShortcut); 
@@ -68,6 +69,7 @@ public:
 
 	int BuildMapping(UINT nMenuID, CStringArray& aMapping, char cDelim = '\t') const;
 	int BuildMapping(const CMenu& menu, CStringArray& aMapping, char cDelim = '\t') const;
+	int CopyShortcuts(CMap<UINT, UINT, DWORD, DWORD&>& mapShortcuts) const;
 
 protected:
 	CMap<DWORD, DWORD, UINT, UINT&> m_mapShortcut2ID; // for use in ProcessMsg

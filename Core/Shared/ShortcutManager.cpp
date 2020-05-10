@@ -471,6 +471,11 @@ int CShortcutManager::BuildMapping(const CMenu* pMenu, LPCTSTR szParentName,
 	return aMapping.GetSize();
 }
 
+int CShortcutManager::CopyShortcuts(CMap<UINT, UINT, DWORD, DWORD&>& mapShortcuts) const
+{
+	return Misc::CopyT(m_mapID2Shortcut, mapShortcuts);
+}
+
 UINT CShortcutManager::GetCommandID(DWORD dwShortcut) const
 {
 	UINT nCmdID = 0;
