@@ -88,17 +88,10 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 	for (int nTip = 0; nTip < aButtons.GetSize(); nTip++)
 	{
 		const TOOLBARBUTTON& tb = aButtons[nTip];
-		
-		// Only handle static non-separator items
-		if (tb.nMenuID && !mainMenu.IsDynamicItem(tb.nMenuID))
-		{
-			HMENU hItemMenu = NULL;
-			int nPos = CEnMenu::FindMenuItem(mainMenu, tb.nMenuID, hItemMenu);
-			ASSERT((nPos != -1) && (hItemMenu != NULL));
-
-			CString sTooltip = CEnMenu::GetMenuString(hItemMenu, nPos, MF_BYPOSITION);
+		CString sTooltip;
+				
+		if (GetItemTooltip(tb.nMenuID, mainMenu, sTooltip))
 			m_tbHelper.SetTooltip(tb.nMenuID, sTooltip);
-		}
 	}
 
 	RefreshDisabledImageList();
@@ -106,9 +99,139 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 	return TRUE;
 }
 
+BOOL CTDLCustomToolbar::GetItemTooltip(UINT nMenuID, const CTDCMainMenu& mainMenu, CString& sTooltip)
+{
+	// Only handle static non-separator items
+	if (nMenuID && !mainMenu.IsDynamicItem(nMenuID))
+	{
+		HMENU hItemMenu = NULL;
+		int nPos = CEnMenu::FindMenuItem(mainMenu, nMenuID, hItemMenu);
+
+		ASSERT((nPos != -1) && (hItemMenu != NULL));
+
+		sTooltip = CEnMenu::GetMenuString(hItemMenu, nPos, MF_BYPOSITION);
+	}
+	else
+	{
+		sTooltip.Empty();
+	}
+
+	return !sTooltip.IsEmpty();
+}
+
 void CTDLCustomToolbar::OnDestroy() 
 {
 	m_tbHelper.Release();
 
 	CEnToolBar::OnDestroy();
+}
+
+BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CToolbarButtonArray& aButtons,
+												const CTDCMainMenu& mainMenu)
+{
+	int nNumBtns = GetButtonCount();
+
+	if (!nNumBtns || (aButtons.GetSize() != nNumBtns))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Cache the old tooltips and remove them because
+	// we will be updating in-situ
+	int nBtn = nNumBtns;
+
+	CStringArray aOldTips;
+	aOldTips.SetSize(nNumBtns);
+
+	while (nBtn--)
+	{
+		UINT nOldCmdID = GetItemID(nBtn);
+
+		if (nOldCmdID != ID_SEPARATOR)
+		{
+			aOldTips[nBtn] = m_tbHelper.GetTooltip(nOldCmdID);
+			m_tbHelper.ClearTooltip(nOldCmdID);
+		}
+	}
+
+	CTDCImageList ilButtons;
+	VERIFY(ilButtons.LoadDefaultImages(TRUE));
+
+	BOOL bRemapped = FALSE;
+
+	for (int nBtn = 0; nBtn < nNumBtns; nBtn++)
+	{
+		// Skip over existing separators
+		// but allow buttons to be given a menu ID of 0
+		if (IsItemSeparator(nBtn))
+			continue;
+
+		const TOOLBARBUTTON& tbNew = aButtons[nBtn];
+
+		// Update commandl ID
+		UINT nOldCmdID = GetItemID(nBtn);
+		UINT nNewCmdID = tbNew.nMenuID;
+
+		if (nNewCmdID != nOldCmdID)
+		{
+			GetToolBarCtrl().SetCmdID(nBtn, nNewCmdID);
+			bRemapped = TRUE;
+		}
+
+		// Update Image
+		TBBUTTONINFO tbiOld = { sizeof(TBBUTTONINFO), TBIF_IMAGE, 0 };
+		VERIFY(GetToolBarCtrl().GetButtonInfo(nBtn, &tbiOld));
+
+		TBBUTTONINFO tbiNew = tbiOld;
+		tbiNew.iImage = ilButtons.GetImageIndex(tbNew.sImageID);
+
+		if (tbiNew.iImage != tbiOld.iImage)
+		{
+			VERIFY(GetToolBarCtrl().SetButtonInfo(nNewCmdID, &tbiNew));
+			bRemapped = TRUE;
+		}
+
+		// Update tooltip
+		CString sOldTip = aOldTips[nBtn], sNewTip;
+		GetItemTooltip(nNewCmdID, mainMenu, sNewTip);
+
+		// Always set the tip because we cleared them at the start
+		m_tbHelper.SetTooltip(nNewCmdID, sNewTip);
+
+		if (sNewTip != sOldTip)
+			bRemapped = TRUE;
+	}
+
+	return bRemapped;
+}
+
+BOOL CTDLCustomToolbar::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs,
+										 CToolbarButtonArray& aButtons)
+{
+	// Work through the buttons updating as we go
+	BOOL bRemapped = FALSE;
+	int nBtn = aButtons.GetSize();
+
+	while (nBtn--)
+	{
+		TOOLBARBUTTON& tb = aButtons[nBtn];
+
+		// Ignore separators
+		if (tb.nMenuID == 0)
+			continue;
+
+		UINT nNewMenuID;
+
+		if (!mapCmdIDs.Lookup(tb.nMenuID, nNewMenuID))
+			continue;
+
+		if (nNewMenuID != tb.nMenuID)
+		{
+			tb.nMenuID = nNewMenuID;
+			bRemapped = TRUE;
+		}
+	}
+
+	return bRemapped;
 }

@@ -682,7 +682,7 @@ protected:
 	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
 	void RefreshFilterBarAdvancedFilterNames();
-	void FixupCustomToolbarFilterMenuItemIDs();
+	void RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilters, const CStringArray& aNewFilters);
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);

@@ -8192,19 +8192,47 @@ void CToDoListWnd::RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID)
 	m_findDlg.SetAttributeListData(tldActive, tldAll, nAttribID);
 }
 
-void CToDoListWnd::FixupCustomToolbarFilterMenuItemIDs()
+void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilters, const CStringArray& aNewFilters)
 {
 	// A side-effect of the current alphabetic sorting of advanced
-	// filters is that any custom toolbar buttons which reference 
-	// advanced filter menu items are at risk of being invalidated 
-	// by the insertion or deletion of a filter earlier in the sort
-	// order. As a consequence we need to fix up the affected custom
-	// toolbar menu command IDs and this is the best place to do it
-	// because the filter bar provides the best before/after view of
-	// the required filters (for now).
-	CStringArray aOldAllFilters, aNewAllFilters;
+	// filters is that any custom toolbar buttons or keyboard shortcuts
+	// which reference advanced filter menu items are at risk of being 
+	// invalidated by the insertion or deletion of filters earlier in 
+	// the sort order
 
-	// TODO
+	// Create a mapping between the old and new cmd IDs
+	CMap<UINT, UINT, UINT, UINT&> mapMenuIDs;
+	int nNumOldFilters = aOldFilters.GetSize();
+
+	for (int nOldFilter = 0; nOldFilter < nNumOldFilters; nOldFilter++)
+	{
+		UINT nOldCmdID = (nOldFilter + ID_VIEW_ACTIVATEADVANCEDFILTER1);
+
+		// Find this filter's name in the new list
+		int nNewFilter = Misc::Find(aOldFilters[nOldFilter], aNewFilters, FALSE, TRUE);
+
+		if (nNewFilter == -1)
+			mapMenuIDs[nOldCmdID] = 0;
+		else
+			mapMenuIDs[nOldCmdID] = (nNewFilter + ID_VIEW_ACTIVATEADVANCEDFILTER1);
+	}
+
+	// Remap all the relevant components
+	DWORD dwRes = m_pPrefs->RemapMenuItemIDs(mapMenuIDs);
+
+	if (dwRes & PREFS_REMAPPEDTOOLBAR)
+	{
+		// Remove 'old' toolbar icons
+		m_mgrMenuIcons.RemoveImages(m_toolbarCustom);
+		
+		CToolbarButtonArray aTBButtons;
+		VERIFY(Prefs().GetCustomToolbarButtons(aTBButtons));
+
+		VERIFY(m_toolbarCustom.ModifyButtonAttributes(aTBButtons, m_menubar));
+
+		// re-add modified toolbar icons
+		m_mgrMenuIcons.AddImages(m_toolbarCustom);
+	}
 }
 
 void CToDoListWnd::RefreshFilterBarAdvancedFilterNames()
@@ -10517,9 +10545,38 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	return 0;
 }
 
-LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM lp)
 {
 	RefreshFilterBarAdvancedFilterNames();
+
+	// See FixupAdvancedFilterMenuItemIDs for more detail
+	ASSERT(lp);
+
+	CStringArray aPrevFilters;
+	aPrevFilters.Copy(m_filterBar.GetAdvancedFilterNames());
+
+	VERIFY(Misc::RemoveItem((LPCTSTR)lp, aPrevFilters));
+
+	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
+
+	return 0;
+}
+
+LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
+{
+	RefreshFilterBarAdvancedFilterNames();
+
+	// See FixupAdvancedFilterMenuItemIDs for more detail
+	ASSERT(lp);
+
+	CStringArray aPrevFilters;
+	aPrevFilters.Copy(m_filterBar.GetAdvancedFilterNames());
+
+	VERIFY(Misc::AddUniqueItem((LPCTSTR)lp, aPrevFilters));
+	Misc::SortArray(aPrevFilters);
+
+	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
+
 	return 0;
 }
 
@@ -10538,12 +10595,6 @@ LRESULT CToDoListWnd::OnFindSaveSearch(WPARAM /*wp*/, LPARAM lp)
 		GetToDoCtrl().SetAdvancedFilter(filter);
 	}
 
-	return 0;
-}
-
-LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	RefreshFilterBarAdvancedFilterNames();
 	return 0;
 }
 

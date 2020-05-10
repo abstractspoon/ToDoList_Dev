@@ -292,6 +292,8 @@ BOOL CPreferencesShortcutsPage::IsMiscCommandID(UINT nCmdID)
 
 void CPreferencesShortcutsPage::OnOK()
 {
+	CPreferencesPageBase::OnOK();
+
 	// copy all the changes to m_pShortcutMgr
 	// except for reserved shortcuts
 	POSITION pos = m_mapID2Shortcut.GetStartPosition();
@@ -833,3 +835,49 @@ void CPreferencesShortcutsPage::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
+BOOL CPreferencesShortcutsPage::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs)
+{
+	// CANNOT call this whilst preferences are showing because
+	// we want to avoid having also to fix-up the temporary mappings
+	if (GetSafeHwnd())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
+	// Take a copy of the current mapping because we 
+	// are going to be making in-situ changes
+	CMap<UINT, UINT, DWORD, DWORD&> mapOldShortcuts;
+
+	if (!m_pShortcutMgr->CopyShortcuts(mapOldShortcuts))
+	{
+		ASSERT(m_pShortcutMgr->IsEmpty());
+		return FALSE;
+	}
+	
+	// Work through the old mappings updating them to their new positions
+	POSITION pos = mapCmdIDs.GetStartPosition();
+	BOOL bRemapped = FALSE;
+
+	while (pos)
+	{
+		UINT nOldCmdID, nNewCmdID;
+		mapCmdIDs.GetNextAssoc(pos, nOldCmdID, nNewCmdID);
+
+		if (nNewCmdID != nOldCmdID)
+		{
+			// Always remove the old menu ID
+			m_pShortcutMgr->DeleteShortcut(nOldCmdID);
+
+			// Point the shortcut to the new menu ID if it hasn't been deleted
+			DWORD dwShortcut;
+
+			if (mapOldShortcuts.Lookup(nOldCmdID, dwShortcut) && dwShortcut)
+				m_pShortcutMgr->SetShortcut(nNewCmdID, dwShortcut);
+
+			bRemapped = TRUE;
+		}
+	}
+		
+	return bRemapped;
+}

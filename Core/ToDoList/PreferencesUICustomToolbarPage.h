@@ -29,6 +29,8 @@ public:
 	int GetToolbarButtons(CToolbarButtonArray& aButtons) const;
 	UINT GetLastCustomToolbarButtonID() const;
 
+	BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs);
+
 protected:
 
 // Dialog Data

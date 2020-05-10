@@ -56,6 +56,12 @@ enum
 	PREFPAGE_SHORTCUT 		// CPreferencesShortcutsPage
 };
 
+enum // RemapAdvancedFilterNames
+{
+	PREFS_REMAPPEDSHORTCUTS	= 0x01,
+	PREFS_REMAPPEDTOOLBAR	= 0x02,
+};
+
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlg dialog
 
@@ -76,6 +82,7 @@ public:
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetAutoListData(const TDCAUTOLISTDATA& autoListData);
 	void SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs);
+	DWORD RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapMenuIDs);
 
 	// CPreferencesGenPage
 	BOOL GetAlwaysOnTop() const { return m_pageGen.GetAlwaysOnTop(); }

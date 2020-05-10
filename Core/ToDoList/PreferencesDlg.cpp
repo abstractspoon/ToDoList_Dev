@@ -598,6 +598,29 @@ void CPreferencesDlg::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArr
 	m_aCustomAttribDefs.Copy(aAttribDefs);
 }
 
+DWORD CPreferencesDlg::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapMenuIDs)
+{
+	DWORD dwRes = 0;
+
+	if (m_pageUICustomToolbar.RemapMenuItemIDs(mapMenuIDs))
+	{
+		CPreferencesPageBase* pPage = &m_pageUICustomToolbar;
+		pPage->SavePreferences(m_prefs, PREFSKEY);
+
+		dwRes |= PREFS_REMAPPEDTOOLBAR;
+	}
+
+	if (m_pageShortcuts.RemapMenuItemIDs(mapMenuIDs))
+	{
+		CPreferencesPageBase* pPage = &m_pageShortcuts;
+		pPage->SavePreferences(m_prefs, PREFSKEY);
+
+		dwRes |= PREFS_REMAPPEDSHORTCUTS;
+	}
+
+	return dwRes;
+}
+
 LRESULT CPreferencesDlg::OnToolPageTestTool(WPARAM wp, LPARAM lp)
 {
 	// forward on to main app

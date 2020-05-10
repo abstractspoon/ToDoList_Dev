@@ -23,7 +23,8 @@ public:
 	CPreferencesShortcutsPage(CShortcutManager* pMgr);
 	~CPreferencesShortcutsPage();
 
-	UINT GetShortcutCmdID(DWORD dwShortcut) { return m_pShortcutMgr->GetCommandID(dwShortcut); }
+	UINT GetShortcutCmdID(DWORD dwShortcut) const { return m_pShortcutMgr->GetCommandID(dwShortcut); }
+	BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs);
 
 protected:
 // Dialog Data
