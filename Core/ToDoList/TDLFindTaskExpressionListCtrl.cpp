@@ -519,6 +519,11 @@ BOOL CTDLFindTaskExpressionListCtrl::IsEditing() const
 			m_cbRecurrence.IsWindowVisible());
 }
 
+void CTDLFindTaskExpressionListCtrl::CancelEdit()
+{
+	OnEditCancel(0, TRUE); // TRUE - escaped
+}
+
 BOOL CTDLFindTaskExpressionListCtrl::CanEditCell(int nRow, int nCol) const
 {
 	if (nRow < m_aSearchParams.GetSize())

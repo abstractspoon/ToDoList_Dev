@@ -1423,7 +1423,10 @@ void CTDLFindTasksDlg::OnOK()
 
 void CTDLFindTasksDlg::OnCancel() 
 { 
-	ShowWindow(SW_HIDE); 
+	if (m_lcFindSetup.IsEditing())
+		m_lcFindSetup.CancelEdit();
+	else
+		ShowWindow(SW_HIDE); 
 }
 
 void CTDLFindTasksDlg::OnMoveRuleUp() 

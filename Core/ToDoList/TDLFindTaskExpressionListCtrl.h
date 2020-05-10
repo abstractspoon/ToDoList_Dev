@@ -54,6 +54,9 @@ public:
 	void MoveSelectedRuleDown();
 	BOOL CanMoveSelectedRuleDown() const;
 
+	virtual BOOL IsEditing() const;
+	void CancelEdit();
+
 // Attributes
 protected:
 	CComboBox						m_cbOperators;
@@ -113,7 +116,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
-	virtual BOOL IsEditing() const;
 	virtual BOOL DeleteSelectedCell();
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual IL_COLUMNTYPE GetCellType(int nRow, int nCol) const;
@@ -123,7 +125,6 @@ protected:
 
 	void PrepareEdit(int nRow, int nCol);
 	void PrepareControl(CWnd& ctrl, int nRow, int nCol);
-	int GetValueType(int nRow) const;
 	void BuildListCtrl();
 	int InsertRule(int nRow, const SEARCHPARAM& sp);
 	int GetRuleCount() const { return m_aSearchParams.GetSize(); }
