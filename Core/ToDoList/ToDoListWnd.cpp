@@ -1402,7 +1402,7 @@ BOOL CToDoListWnd::InitCustomToolbar()
 		m_toolbarCustom.SetHotColor(m_theme.crToolbarHot);
 	}
 
-	if (!m_toolbarCustom.SetButtons(aTBButtons, m_menubar, m_mgrShortcuts))
+	if (!m_toolbarCustom.InitialiseButtons(aTBButtons, m_menubar, m_mgrShortcuts))
 	{
 		ASSERT(0);
 		m_toolbarCustom.DestroyWindow();

@@ -37,11 +37,14 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomToolbar message handlers
 
-BOOL CTDLCustomToolbar::SetButtons(const CToolbarButtonArray& aButtons, 
+BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons, 
 								   const CTDCMainMenu& mainMenu,
 								   const CShortcutManager& mgrShortcuts)
 {
-	if (!GetSafeHwnd())
+	if (!GetSafeHwnd() || 
+		GetButtonCount() || 
+		m_tbHelper.IsInitialized() ||
+		m_ilNormal.GetSafeHandle())
 	{
 		ASSERT(0);
 		return FALSE;

@@ -55,9 +55,9 @@ public:
 
 // Operations
 public:
-	BOOL SetButtons(const CToolbarButtonArray& aButtons,
-					const CTDCMainMenu& mainMenu, 
-					const CShortcutManager& mgrShortcuts);
+	BOOL InitialiseButtons(const CToolbarButtonArray& aButtons,
+						   const CTDCMainMenu& mainMenu,
+						   const CShortcutManager& mgrShortcuts);
 
 protected:
 	CToolbarHelper m_tbHelper;
