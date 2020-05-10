@@ -120,12 +120,36 @@ BOOL CToolbarHelper::SetTooltip(UINT nBtnCmdID, UINT nIDTip)
 
 BOOL CToolbarHelper::SetTooltip(UINT nBtnCmdID, LPCTSTR szTip)
 {
+	if (Misc::IsEmpty(szTip))
+		return ClearTooltip(nBtnCmdID);
+
 	THButton dm = { 0 };
 
 	if (m_mapTHButtons.Lookup(nBtnCmdID, dm))
-		return SetButton(nBtnCmdID, dm.nMenuID, dm.nSubMenu, dm.nDefCmdID, dm.cHotKey, szTip);
+		return SetButton(nBtnCmdID, dm.nMenuID, dm.nSubMenu, dm.nDefMenuID, dm.cHotKey, szTip);
 	else
 		return SetButton(nBtnCmdID, 0, 0, 0, 0, szTip);
+}
+
+BOOL CToolbarHelper::ClearTooltip(UINT nBtnCmdID)
+{
+	THButton dm = { 0 };
+
+	if (!m_mapTHButtons.Lookup(nBtnCmdID, dm))
+		return TRUE;
+
+	// else
+	return SetButton(nBtnCmdID, dm.nMenuID, dm.nSubMenu, dm.nDefMenuID, dm.cHotKey, _T(""));
+}
+
+CString CToolbarHelper::GetTooltip(UINT nBtnCmdID) const
+{
+	THButton dm = { 0 };
+
+	if (m_mapTHButtons.Lookup(nBtnCmdID, dm))
+		return dm.szTip;
+
+	return _T("");
 }
 
 BOOL CToolbarHelper::SetButton(UINT nBtnCmdID, UINT nMenuID, int nSubMenu, UINT nDefCmdID, TCHAR cHotkey, LPCTSTR szTip)
@@ -169,13 +193,13 @@ BOOL CToolbarHelper::ClearDropButton(UINT nBtnCmdID, BOOL bRedraw)
 	return TRUE;
 }
 
-BOOL CToolbarHelper::SetDefaultMenuID(UINT nBtnCmdID, UINT nDefCmdID)
+BOOL CToolbarHelper::SetDefaultMenuID(UINT nBtnCmdID, UINT nDefMenuID)
 {
 	THButton dm = { 0 };
 	
 	if (m_mapTHButtons.Lookup(nBtnCmdID, dm))
 	{
-		dm.nDefCmdID = nDefCmdID;
+		dm.nDefMenuID = nDefMenuID;
 		m_mapTHButtons[nBtnCmdID] = dm;
 
 		return TRUE;
@@ -200,7 +224,7 @@ BOOL CToolbarHelper::DisplayDropMenu(UINT nCmdID, BOOL bPressBtn)
 			if (pSubMenu)
 			{
 				PrepareMenuItems(pSubMenu, GetCWnd());
-				pSubMenu->SetDefaultItem(dm.nDefCmdID);
+				pSubMenu->SetDefaultItem(dm.nDefMenuID);
 				
 				CRect rItem;
 				int nIndex = m_pToolbar->CommandToIndex(nCmdID);
@@ -308,8 +332,8 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 
 							if (m_mapTHButtons.Lookup(nCmdID, dm))
 							{
-								if (dm.nDefCmdID)
-									nCmdID = dm.nDefCmdID;
+								if (dm.nDefMenuID)
+									nCmdID = dm.nDefMenuID;
 							}
 
 							CString sShortcut = m_pShortcutMgr->GetShortcutTextByCmd(nCmdID);
@@ -362,9 +386,9 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 				if (m_mapTHButtons.Lookup(nCmdID, dm))
 				{
 					// if we have an enabled default command then send it
-					if (dm.nDefCmdID && IsCmdEnabled(dm.nDefCmdID))
+					if (dm.nDefMenuID && IsCmdEnabled(dm.nDefMenuID))
 					{
-						wp = MAKEWPARAM(dm.nDefCmdID, HIWORD(wp));
+						wp = MAKEWPARAM(dm.nDefMenuID, HIWORD(wp));
 					}
 					else
 					{
@@ -541,9 +565,9 @@ CString CToolbarHelper::GetTip(UINT nID, BOOL bOverDropBtn) const
 		if (!bOverDropBtn)
 		{
 			// try the default item first
-			if (dm.nDefCmdID && IsCmdEnabled(dm.nDefCmdID))
+			if (dm.nDefMenuID && IsCmdEnabled(dm.nDefMenuID))
 			{
-				sTip = GetResourceTip(dm.nDefCmdID);
+				sTip = GetResourceTip(dm.nDefMenuID);
 
 				if (!sTip.IsEmpty())
 					return sTip;

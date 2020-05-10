@@ -32,9 +32,11 @@ public:
 
 	BOOL ClearDropButton(UINT nBtnCmdID, BOOL bRedraw = TRUE);
 	BOOL SetDropButton(UINT nBtnCmdID, UINT nMenuID, int nSubMenu, UINT nDefCmdID = 0, char cHotkey = 0);
-	BOOL SetDefaultMenuID(UINT nBtnCmdID, UINT nDefCmdID = 0);
+	BOOL SetDefaultMenuID(UINT nBtnCmdID, UINT nDefMenuID = 0);
+	BOOL ClearTooltip(UINT nBtnCmdID);
 	BOOL SetTooltip(UINT nBtnCmdID, LPCTSTR szTip);
 	BOOL SetTooltip(UINT nBtnCmdID, UINT nIDTip);
+	CString GetTooltip(UINT nBtnCmdID) const;
 
 	BOOL IsInitialized() { return IsHooked(); }
 
@@ -54,7 +56,7 @@ protected:
 	{
 		UINT nMenuID;
 		int nSubMenu;
-		UINT nDefCmdID;
+		UINT nDefMenuID;
 		TCHAR cHotKey;
 
 #define MAX_TIP_LEN 128
