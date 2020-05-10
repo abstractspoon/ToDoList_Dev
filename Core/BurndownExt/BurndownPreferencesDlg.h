@@ -43,7 +43,7 @@ protected:
 	enum { IDD = IDD_PREFERENCES_PAGE };
 	//}}AFX_DATA
 	CBurndownGraphColorListCtrl	m_lcGraphColors;
-	CColorButton m_btnTodayColor;
+	CColourButton m_btnTodayColor;
 
 	const CBurndownChart& m_chart;
 

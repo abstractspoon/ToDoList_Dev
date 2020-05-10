@@ -17,11 +17,11 @@ class IPreferences;
 /////////////////////////////////////////////////////////////////////////////
 // CColorButton window
 
-class CColorButton : public CCustomButton
+class CColourButton : public CCustomButton
 {
 // Construction
 public:
-	CColorButton(BOOL bRoundRect = FALSE);
+	CColourButton(BOOL bRoundRect = FALSE);
 
 	COLORREF GetColor() const { return m_color; }
 	void SetColor(COLORREF color);
@@ -49,7 +49,7 @@ protected:
 
 // Implementation
 public:
-	virtual ~CColorButton();
+	virtual ~CColourButton();
 
 	// Generated message map functions
 protected:

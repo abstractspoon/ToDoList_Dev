@@ -16,24 +16,24 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CEnColorDialog CColorButton::s_dlgColor(CLR_NONE, CC_FULLOPEN | CC_RGBINIT);
+CEnColorDialog CColourButton::s_dlgColor(CLR_NONE, CC_FULLOPEN | CC_RGBINIT);
 
 /////////////////////////////////////////////////////////////////////////////
 // CColorButton
 
-CColorButton::CColorButton(BOOL bRoundRect) 
+CColourButton::CColourButton(BOOL bRoundRect) 
 	: 
 	m_color(CLR_NONE), 
 	m_bRoundRect(bRoundRect)
 {
 }
 
-CColorButton::~CColorButton()
+CColourButton::~CColourButton()
 {
 }
 
 
-BEGIN_MESSAGE_MAP(CColorButton, CCustomButton)
+BEGIN_MESSAGE_MAP(CColourButton, CCustomButton)
 	//{{AFX_MSG_MAP(CColorButton)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
@@ -41,7 +41,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CColorButton message handlers
 
-void CColorButton::DDX(CDataExchange* pDX, COLORREF& value)
+void CColourButton::DDX(CDataExchange* pDX, COLORREF& value)
 {
 	if (pDX->m_bSaveAndValidate)
 		value = GetColor();
@@ -49,7 +49,7 @@ void CColorButton::DDX(CDataExchange* pDX, COLORREF& value)
 		SetColor(value);
 }
 
-void CColorButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
+void CColourButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 {
 	int nCornerRadius = m_bRoundRect ? (rExtra.Width() / 4) : 0;
 
@@ -59,7 +59,7 @@ void CColorButton::DoExtraPaint(CDC* pDC, const CRect& rExtra)
 	GraphicsMisc::DrawRect(pDC, rExtra, crFill, crBorder, nCornerRadius);
 }
 
-void CColorButton::SetColor(COLORREF color) 
+void CColourButton::SetColor(COLORREF color) 
 { 
 	m_color = color; 
 
@@ -67,7 +67,7 @@ void CColorButton::SetColor(COLORREF color)
 		Invalidate();
 }
 
-BOOL CColorButton::DoAction()
+BOOL CColourButton::DoAction()
 {
 	s_dlgColor.SetCurrentColor(m_color);
 
@@ -82,12 +82,12 @@ BOOL CColorButton::DoAction()
 	return FALSE; // always notify parent
 }
 
-void CColorButton::LoadPreferences(const IPreferences* pPrefs)
+void CColourButton::LoadPreferences(const IPreferences* pPrefs)
 {
 	s_dlgColor.LoadPreferences(pPrefs);
 }
 
-void CColorButton::SavePreferences(IPreferences* pPrefs)
+void CColourButton::SavePreferences(IPreferences* pPrefs)
 {
 	s_dlgColor.SavePreferences(pPrefs);
 }

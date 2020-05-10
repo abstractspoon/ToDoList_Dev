@@ -70,7 +70,7 @@ DECLARE_MESSAGE_MAP()
 
 private:
 
-	CFontComboBox	m_font;
+	CFontNameComboBox	m_font;
 	CSizeComboBox	m_size;
 	COLORREF		m_crText, m_crBack;
 

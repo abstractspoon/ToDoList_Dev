@@ -63,7 +63,7 @@ protected:
 	CTimeEdit	m_eTimeEst;
 	CTimeEdit	m_eTimeSpent;
 	CMaskEdit m_eCost;
-	CColorButton	m_btDefColor;
+	CColourButton	m_btDefColor;
 	CIconButton		m_btDefIcon;
 
 	CString	m_sDefCreatedBy;

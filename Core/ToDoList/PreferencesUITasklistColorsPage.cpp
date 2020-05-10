@@ -912,7 +912,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bSpecifyFlaggedColor = pPrefs->GetProfileInt(szKey, _T("FlaggedColor"), FALSE);
 	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(szKey, _T("ReferenceColor"), FALSE);
 
-	CColorButton::LoadPreferences(pPrefs);
+	CColourButton::LoadPreferences(pPrefs);
 
 	// colors
 	CString sColorKey(szKey);
@@ -1098,7 +1098,7 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(szKey, _T("FlaggedColor"), m_bSpecifyFlaggedColor);
 	pPrefs->WriteProfileInt(szKey, _T("ReferenceColor"), m_bSpecifyReferenceColor);
 
-	CColorButton::SavePreferences(pPrefs);
+	CColourButton::SavePreferences(pPrefs);
 
 	pPrefs->WriteProfileInt(sColorKey, _T("Gridlines"), m_crGridlines);
 	pPrefs->WriteProfileInt(sColorKey, _T("TaskDone"), m_crDone);

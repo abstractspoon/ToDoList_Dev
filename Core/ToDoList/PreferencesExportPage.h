@@ -45,7 +45,7 @@ protected:
 	int		m_nTextIndent;
 	int		m_nLineSpaces;
 	//}}AFX_DATA
-	CFontComboBox	m_cbFonts;
+	CFontNameComboBox	m_cbFonts;
 	BOOL	m_bPreviewExport;
 	BOOL	m_bExportVisibleOnly;
 	CString m_sHtmlFont;

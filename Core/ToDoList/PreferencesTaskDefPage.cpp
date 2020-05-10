@@ -220,7 +220,7 @@ void CPreferencesTaskDefPage::LoadPreferences(const IPreferences* pPrefs, LPCTST
 	m_nDefReminderLeadin = pPrefs->GetProfileInt(szKey, _T("DefaultReminderLeadin"), TDLRPC_NOREMINDER);
 	m_bReminderBeforeDue = pPrefs->GetProfileInt(szKey, _T("ReminderBeforeDue"), TRUE);
 	
-	CColorButton::LoadPreferences(pPrefs);
+	CColourButton::LoadPreferences(pPrefs);
 
 	// comments format
 	m_cfDefault = pPrefs->GetProfileString(szKey, _T("DefaultCommentsFormatID"));

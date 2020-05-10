@@ -58,7 +58,7 @@ protected:
 	BOOL	m_bDisplayParentsAsRollups;
 	//}}AFX_DATA
 
-	CColorButton m_btParentColor, m_btDefaultColor;
+	CColourButton m_btParentColor, m_btDefaultColor;
 	COLORREF m_crParent, m_crDefault;
 	CGroupLineManager m_mgrGroupLines;
 	CCheckListBoxEx m_lbColumnVisibility;

@@ -51,9 +51,9 @@ protected:
 	int		m_nUnderloadToPercent;
 	COLORREF m_crOverload, m_crUnderload, m_crOverlap;
 
-	CColorButton m_btnOverloadColor;
-	CColorButton m_btnUnderloadColor;
-	CColorButton m_btnOverlapColor;
+	CColourButton m_btnOverloadColor;
+	CColourButton m_btnUnderloadColor;
+	CColourButton m_btnOverlapColor;
 	CCheckListBoxEx m_lbColumnVisibility;
 	CDWordArray m_aColumnVis;
 

@@ -10,11 +10,11 @@
 /////////////////////////////////////////////////////////////////////////////
 // CFontComboBox window
 
-class CFontComboBox : public CComboBox
+class CFontNameComboBox : public CComboBox
 {
 // Construction
 public:
-	CFontComboBox();
+	CFontNameComboBox();
 
 // Attributes
 public:
@@ -36,7 +36,7 @@ public:
 
 // Implementation
 public:
-	virtual ~CFontComboBox();
+	virtual ~CFontNameComboBox();
 
 	// Generated message map functions
 protected:

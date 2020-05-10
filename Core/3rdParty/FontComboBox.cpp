@@ -35,7 +35,7 @@ static char THIS_FILE[] = __FILE__;
 // installed fonts
 BOOL CALLBACK EnumFontProc( LPLOGFONT lplf, LPTEXTMETRIC /*lptm*/, DWORD /*dwType*/, LPARAM lpData )	
 {	
-	CFontComboBox *caller = reinterpret_cast< CFontComboBox* > ( lpData );		
+	CFontNameComboBox *caller = reinterpret_cast< CFontNameComboBox* > ( lpData );		
 	caller->AddString( lplf->lfFaceName );
 
 	CClientDC dc( caller );
@@ -53,7 +53,7 @@ BOOL CALLBACK EnumFontProc( LPLOGFONT lplf, LPTEXTMETRIC /*lptm*/, DWORD /*dwTyp
 /////////////////////////////////////////////////////////////////////////////
 // CFontComboBox
 
-CFontComboBox::CFontComboBox()
+CFontNameComboBox::CFontNameComboBox()
 /* ============================================================
 	Function :		CFontComboBox::CFontComboBox
 	Description :	ctor
@@ -69,7 +69,7 @@ CFontComboBox::CFontComboBox()
 	m_maxWidth = 0;
 }
 
-CFontComboBox::~CFontComboBox()
+CFontNameComboBox::~CFontNameComboBox()
 /* ============================================================
 	Function :		CFontComboBox::~CFontComboBox
 	Description :	dtor
@@ -84,7 +84,7 @@ CFontComboBox::~CFontComboBox()
 {
 }
 
-BEGIN_MESSAGE_MAP(CFontComboBox, CComboBox)
+BEGIN_MESSAGE_MAP(CFontNameComboBox, CComboBox)
 	//{{AFX_MSG_MAP(CFontComboBox)
 	ON_CONTROL_REFLECT(CBN_DROPDOWN, OnDropdown)
 	//}}AFX_MSG_MAP
@@ -93,7 +93,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CFontComboBox message handlers
 
-void CFontComboBox::OnDropdown() 
+void CFontNameComboBox::OnDropdown() 
 /* ============================================================
 	Function :		CFontComboBox::OnDropdown
 	Description :	Sets the dropped down width of the combo 
@@ -117,7 +117,7 @@ void CFontComboBox::OnDropdown()
 /////////////////////////////////////////////////////////////////////////////
 // CFontComboBox implementation
 
-void CFontComboBox::FillCombo()
+void CFontNameComboBox::FillCombo()
 /* ============================================================
 	Function :		CFontComboBox::FillCombo
 	Description :	Fills the combo with the font names from 
@@ -136,7 +136,7 @@ void CFontComboBox::FillCombo()
 	::EnumFonts( dc, 0, ( FONTENUMPROC ) EnumFontProc, ( LPARAM ) this );
 }
 
-void CFontComboBox::SetMaxWidth( int maxWidth )
+void CFontNameComboBox::SetMaxWidth( int maxWidth )
 /* ============================================================
 	Function :		CFontComboBox::SetMaxWidth
 	Description :	Sets the "m_maxWidth" member.
@@ -158,7 +158,7 @@ void CFontComboBox::SetMaxWidth( int maxWidth )
 
 }
 
-int CFontComboBox::GetMaxWidth() const
+int CFontNameComboBox::GetMaxWidth() const
 /* ============================================================
 	Function :		CFontComboBox::GetMaxWidth
 	Description :	Returns the "m_maxWidth" member of the 
@@ -179,7 +179,7 @@ int CFontComboBox::GetMaxWidth() const
 
 }
 
-BOOL CFontComboBox::SelectFontName( const CString& font )
+BOOL CFontNameComboBox::SelectFontName( const CString& font )
 /* ============================================================
 	Function :		CFontComboBox::SelectFontName
 	Description :	Selects "font" in the list, if it 
@@ -203,7 +203,7 @@ BOOL CFontComboBox::SelectFontName( const CString& font )
 	return (nFind != -1);
 }
 
-void CFontComboBox::DDX(CDataExchange* pDX, CString& font)
+void CFontNameComboBox::DDX(CDataExchange* pDX, CString& font)
 {
 	if (pDX->m_bSaveAndValidate)
 	{
