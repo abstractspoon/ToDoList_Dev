@@ -166,7 +166,7 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 	ResizeDlg(FALSE);
 	EnableToolTips();
 
-	return FALSE;  // return TRUE unless you set the focus to a control
+	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
@@ -1352,16 +1352,17 @@ void CTDLFindTasksDlg::OnNewSearch()
 
 void CTDLFindTasksDlg::OnDeleteSearch() 
 {
-	CString sSearch = GetCurrentSearch();
+	CString sDeletedSearch = GetCurrentSearch();
 
-	if (!sSearch.IsEmpty())
+	if (!sDeletedSearch.IsEmpty())
 	{
-		int nSearch = m_cbSearches.FindStringExact(-1, sSearch);
+		// Remove deleted search
+		int nSearch = m_cbSearches.FindStringExact(-1, sDeletedSearch);
 		
 		if (nSearch != CB_ERR)
 			m_cbSearches.DeleteString(nSearch);
 
-		Misc::RemoveItem(sSearch, m_aSavedSearches);
+		Misc::RemoveItem(sDeletedSearch, m_aSavedSearches);
 		
 		m_lcFindSetup.ClearSearch();
 		
@@ -1371,13 +1372,14 @@ void CTDLFindTasksDlg::OnDeleteSearch()
 		
 		if (nSearch != CB_ERR)
 		{
-			m_cbSearches.GetLBText(nSearch, sSearch);
+			CString sNextSearch;
+			m_cbSearches.GetLBText(nSearch, sNextSearch);
 			
 			CSearchParamArray params;
 			
-			if (LoadSearch(sSearch))
+			if (LoadSearch(sNextSearch))
 			{
-				m_sActiveSearch = sSearch;
+				m_sActiveSearch = sNextSearch;
 			}
 			else
 			{
@@ -1392,7 +1394,7 @@ void CTDLFindTasksDlg::OnDeleteSearch()
 	m_toolbar.RefreshButtonStates();
 
 	// notify parent
-	GetParent()->SendMessage(WM_FTD_DELETESEARCH, 0, (LPARAM)(LPCTSTR)sSearch);
+	GetParent()->SendMessage(WM_FTD_DELETESEARCH, 0, (LPARAM)(LPCTSTR)sDeletedSearch);
 }
 
 void CTDLFindTasksDlg::OnEditchangeSearchlist() 
