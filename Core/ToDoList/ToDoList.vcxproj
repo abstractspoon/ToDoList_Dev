@@ -98,7 +98,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>.\Unicode_Debug/ToDoList.lib</AdditionalDependencies>
+      <AdditionalDependencies>.\Unicode_Debug/ToDoListLib.lib</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -171,7 +171,7 @@ unicode_debug\TDLTest.exe
       <TargetMachine>MachineX86</TargetMachine>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
-      <AdditionalDependencies>.\Unicode_Release/ToDoList.lib</AdditionalDependencies>
+      <AdditionalDependencies>.\Unicode_Release/ToDoListLib.lib</AdditionalDependencies>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
