@@ -42,10 +42,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
     <OutDir>.\Unicode_Debug\</OutDir>
     <IntDir>.\Unicode_Debug\</IntDir>
+    <TargetName>ToDoList</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
     <OutDir>.\Unicode_Release\</OutDir>
     <IntDir>.\Unicode_Release\</IntDir>
+    <TargetName>ToDoList</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
     <ClCompile>
