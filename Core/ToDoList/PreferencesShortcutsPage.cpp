@@ -844,40 +844,6 @@ BOOL CPreferencesShortcutsPage::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UI
 		ASSERT(0);
 		return FALSE;
 	}
-	
-	// Take a copy of the current mapping because we 
-	// are going to be making in-situ changes
-	CMap<UINT, UINT, DWORD, DWORD&> mapOldShortcuts;
-
-	if (!m_pShortcutMgr->CopyShortcuts(mapOldShortcuts))
-	{
-		ASSERT(m_pShortcutMgr->IsEmpty());
-		return FALSE;
-	}
-	
-	// Work through the old mappings updating them to their new positions
-	POSITION pos = mapCmdIDs.GetStartPosition();
-	BOOL bRemapped = FALSE;
-
-	while (pos)
-	{
-		UINT nOldCmdID, nNewCmdID;
-		mapCmdIDs.GetNextAssoc(pos, nOldCmdID, nNewCmdID);
-
-		if (nNewCmdID != nOldCmdID)
-		{
-			// Always remove the old menu ID
-			m_pShortcutMgr->DeleteShortcut(nOldCmdID);
-
-			// Point the shortcut to the new menu ID if it hasn't been deleted
-			DWORD dwShortcut;
-
-			if (mapOldShortcuts.Lookup(nOldCmdID, dwShortcut) && dwShortcut)
-				m_pShortcutMgr->SetShortcut(nNewCmdID, dwShortcut);
-
-			bRemapped = TRUE;
-		}
-	}
-		
-	return bRemapped;
+			
+	return m_pShortcutMgr->RemapMenuItemIDs(mapCmdIDs);
 }
