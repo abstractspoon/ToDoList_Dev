@@ -49,7 +49,6 @@ public:
 	BOOL AddShortcut(UINT nCmdID, DWORD dwShortcut); 
 	void DeleteShortcut(UINT nCmdID);
 
-
 	// SetShortcut never fails and will overwrite any existing shortcuts
 	void SetShortcut(UINT nCmdID, WORD wVirtKeyCode, WORD wModifiers = HOTKEYF_CONTROL); 
 	void SetShortcut(UINT nCmdID, DWORD dwShortcut); 
