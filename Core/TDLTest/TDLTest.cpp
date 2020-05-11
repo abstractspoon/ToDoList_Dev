@@ -69,20 +69,20 @@ int _tmain(int argc, TCHAR* argv[], TCHAR* envp[])
 
 void DoTests(const CTestUtils& utils)
 {
-	TESTRESULT resOverall;
+	TESTRESULT res;
 
 	// Keep sorted for easy scanning
-	resOverall += CDateHelperTest(utils).Run();
-	resOverall += CFileMiscTest(utils).Run();
-	resOverall += CImportExportMgrTest(utils).Run();
-	resOverall += CRemapMenuIDsTest(utils).Run();
-	resOverall += CTaskFileTest(utils).Run();
-	resOverall += CTDCRECURRENCETest(utils).Run();
-	resOverall += CTimeHelperTest(utils).Run();
-	resOverall += CToDoCtrlDataTest(utils).Run();
-	resOverall += CToDoCtrlTaskLinkTest(utils).Run();
+	res += CDateHelperTest(utils).Run();
+	res += CFileMiscTest(utils).Run();
+	res += CImportExportMgrTest(utils).Run();
+	res += CRemapMenuIDsTest(utils).Run();
+	res += CTaskFileTest(utils).Run();
+	res += CTDCRECURRENCETest(utils).Run();
+	res += CTimeHelperTest(utils).Run();
+	res += CToDoCtrlDataTest(utils).Run();
+	res += CToDoCtrlTaskLinkTest(utils).Run();
 
 	// More...
 
-	resOverall.ReportResults();
+	res.ReportResults();
 }

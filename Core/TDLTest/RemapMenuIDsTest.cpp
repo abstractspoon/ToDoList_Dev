@@ -36,7 +36,7 @@ TESTRESULT CRemapMenuIDsTest::Run()
 	ClearTotals();
 
 	TestTDLCustomToolbar();
-	TestPreferencesShortcutsPage();
+	TestShortcutsMgr();
 
 	return GetTotals();
 }
@@ -96,14 +96,12 @@ void CRemapMenuIDsTest::TestTDLCustomToolbar()
 		ExpectTrue(ID_VIEW_ACTIVATEFILTER5 == aButtons[4].nMenuID);
 	}
 
-	// TODO
-	
 	EndTest();
 }
 
-void CRemapMenuIDsTest::TestPreferencesShortcutsPage()
+void CRemapMenuIDsTest::TestShortcutsMgr()
 {
-	BeginTest(_T("CPreferencesShortcutsPage::RemapMenuItemIDs"));
+	BeginTest(_T("CShortcutManager::RemapMenuItemIDs"));
 
 	const DWORD SHORTCUT1 = 0x12345678;
 	const DWORD SHORTCUT2 = 0x23456789;
@@ -130,6 +128,15 @@ void CRemapMenuIDsTest::TestPreferencesShortcutsPage()
 		ExpectTrue(mgrShortcuts.GetShortcut(ID_VIEW_ACTIVATEFILTER3) == 0);
 	}
 	
+	EndTest();
+}
+
+void CRemapMenuIDsTest::TestTDCFilter()
+{
+	BeginTest(_T("CTDCFilter::BuildAdvancedFilterMenuItemMapping"));
+
+	// TODO
+
 	EndTest();
 }
 

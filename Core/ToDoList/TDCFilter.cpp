@@ -906,3 +906,26 @@ CString CTDCFilter::GetDefaultFilterName(FILTER_SHOW nShow)
 	ASSERT(0);
 	return _T("");
 }
+
+int CTDCFilter::BuildAdvancedFilterMenuItemMapping(const CStringArray& aFromNames, 
+													const CStringArray& aToNames, 
+													CMap<UINT, UINT, UINT, UINT&>& mapMenuIDs)
+{
+	mapMenuIDs.RemoveAll();
+
+	int nNumFrom = aFromNames.GetSize();
+
+	for (int nFrom = 0; nFrom < nNumFrom; nFrom++)
+	{
+		// Find this filter's name in the new list
+		int nTo = Misc::Find(aFromNames[nFrom], aToNames, FALSE, TRUE);
+
+		UINT nFromCmdID = (nFrom + ID_VIEW_ACTIVATEADVANCEDFILTER1);
+		UINT nToCmdID = ((nTo == -1) ? 0 : (nTo + ID_VIEW_ACTIVATEADVANCEDFILTER1));
+
+		if (nToCmdID != nFromCmdID)
+			mapMenuIDs[nFromCmdID] = nToCmdID;
+	}
+
+	return mapMenuIDs.GetCount();
+}

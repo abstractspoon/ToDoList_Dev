@@ -25,7 +25,8 @@ public:
 
 protected:
 	void TestTDLCustomToolbar();
-	void TestPreferencesShortcutsPage();
+	void TestShortcutsMgr();
+	void TestTDCFilter();
 
 	static void InitButtonArray(CToolbarButtonArray& aButtons, UINT nIDFrom, UINT nIDTo);
 };

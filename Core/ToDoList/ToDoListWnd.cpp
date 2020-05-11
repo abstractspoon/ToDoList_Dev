@@ -8199,28 +8199,12 @@ void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilter
 	// which reference advanced filter menu items are at risk of being 
 	// invalidated by the insertion or deletion of filters earlier in 
 	// the sort order
-
-	// Create a mapping between the old and new cmd IDs
 	CMap<UINT, UINT, UINT, UINT&> mapMenuIDs;
-	int nNumOldFilters = aOldFilters.GetSize();
 
-	for (int nOldFilter = 0; nOldFilter < nNumOldFilters; nOldFilter++)
-	{
-		UINT nOldCmdID = (nOldFilter + ID_VIEW_ACTIVATEADVANCEDFILTER1);
+	if (!CTDCFilter::BuildAdvancedFilterMenuItemMapping(aOldFilters, aNewFilters, mapMenuIDs))
+		return;
 
-		// Find this filter's name in the new list
-		int nNewFilter = Misc::Find(aOldFilters[nOldFilter], aNewFilters, FALSE, TRUE);
-
-		if (nNewFilter == -1)
-			mapMenuIDs[nOldCmdID] = 0;
-		else
-			mapMenuIDs[nOldCmdID] = (nNewFilter + ID_VIEW_ACTIVATEADVANCEDFILTER1);
-	}
-
-	// Remap all the relevant components
-	DWORD dwRes = m_pPrefs->RemapMenuItemIDs(mapMenuIDs);
-
-	if (dwRes & PREFS_REMAPPEDTOOLBAR)
+	if (m_pPrefs->RemapMenuItemIDs(mapMenuIDs) & PREFS_REMAPPEDTOOLBAR)
 	{
 		// Remove 'old' toolbar icons
 		m_mgrMenuIcons.RemoveImages(m_toolbarCustom);

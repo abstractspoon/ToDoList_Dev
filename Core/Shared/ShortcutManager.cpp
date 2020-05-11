@@ -487,20 +487,24 @@ BOOL CShortcutManager::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& map
 	POSITION pos = mapCmdIDs.GetStartPosition();
 	BOOL bRemapped = FALSE;
 
+	UINT nOldCmdID, nNewCmdID;
+	DWORD dwShortcut;
+
 	while (pos)
 	{
-		UINT nOldCmdID, nNewCmdID;
 		mapCmdIDs.GetNextAssoc(pos, nOldCmdID, nNewCmdID);
+
+		// Skip commands with no shortcut
+		if (!mapOldShortcuts.Lookup(nOldCmdID, dwShortcut))
+			continue;
 
 		if (nNewCmdID != nOldCmdID)
 		{
 			// Always remove the old menu ID
 			DeleteShortcut(nOldCmdID);
 
-			// Point the shortcut to the new menu ID if it hasn't been deleted
-			DWORD dwShortcut;
-
-			if (mapOldShortcuts.Lookup(nOldCmdID, dwShortcut) && dwShortcut)
+			// Point the shortcut to the new menu ID if it isn't a deletion
+			if (dwShortcut)
 				SetShortcut(nNewCmdID, dwShortcut);
 
 			bRemapped = TRUE;
