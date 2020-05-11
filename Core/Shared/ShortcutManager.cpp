@@ -539,6 +539,12 @@ void CShortcutManager::DeleteShortcut(UINT nCmdID)
 	}
 }
 
+void CShortcutManager::DeleteAllShortcuts()
+{
+	m_mapShortcut2ID.RemoveAll();
+	m_mapID2Shortcut.RemoveAll();
+}
+
 CString CShortcutManager::GetShortcutTextByCmd(UINT nCmdID) const 
 {
 	return GetShortcutText(GetShortcut(nCmdID));

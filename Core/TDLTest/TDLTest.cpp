@@ -4,14 +4,15 @@
 #include "stdafx.h"
 #include "TDLTest.h"
 
+#include "DateHelperTest.h"
+#include "FileMiscTest.h"
+#include "ImportExportMgrTest.h"
+#include "RemapMenuIDsTest.h"
+#include "TaskFileTest.h"
+#include "TDCRecurrenceTest.h"
+#include "TimeHelperTest.h"
 #include "ToDoCtrlDataTest.h"
 #include "ToDoCtrlTaskLinkTest.h"
-#include "TaskFileTest.h"
-#include "ImportExportMgrTest.h"
-#include "TDCRecurrenceTest.h"
-#include "FileMiscTest.h"
-#include "DateHelperTest.h"
-#include "TimeHelperTest.h"
 
 #include "..\shared\EnCommandLineInfo.h"
 
@@ -70,21 +71,16 @@ void DoTests(const CTestUtils& utils)
 {
 	TESTRESULT resOverall;
 
-	resOverall += CToDoCtrlDataTest(utils).Run();
-
-	resOverall += CToDoCtrlTaskLinkTest(utils).Run();
-
-	resOverall += CTaskFileTest(utils).Run();
-
-	resOverall += CImportExportMgrTest(utils).Run();
-
-	resOverall += CTDCRECURRENCETest(utils).Run();
-
-	resOverall += CFileMiscTest(utils).Run();
-	
+	// Keep sorted for easy scanning
 	resOverall += CDateHelperTest(utils).Run();
-
+	resOverall += CFileMiscTest(utils).Run();
+	resOverall += CImportExportMgrTest(utils).Run();
+	resOverall += CRemapMenuIDsTest(utils).Run();
+	resOverall += CTaskFileTest(utils).Run();
+	resOverall += CTDCRECURRENCETest(utils).Run();
 	resOverall += CTimeHelperTest(utils).Run();
+	resOverall += CToDoCtrlDataTest(utils).Run();
+	resOverall += CToDoCtrlTaskLinkTest(utils).Run();
 
 	// More...
 

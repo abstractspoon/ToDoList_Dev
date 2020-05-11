@@ -48,6 +48,7 @@ public:
 	BOOL AddShortcut(UINT nCmdID, WORD wVirtKeyCode, WORD wModifiers = HOTKEYF_CONTROL); 
 	BOOL AddShortcut(UINT nCmdID, DWORD dwShortcut); 
 	void DeleteShortcut(UINT nCmdID);
+	void DeleteAllShortcuts();
 	BOOL RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs);
 
 	// SetShortcut never fails and will overwrite any existing shortcuts

@@ -108,6 +108,10 @@ SOURCE=.\ImportExportMgrTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\RemapMenuIDsTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\StdAfx.cpp
 # ADD BASE CPP /Yc"stdafx.h"
 # ADD CPP /Yc"stdafx.h"
@@ -159,6 +163,10 @@ SOURCE=.\FileMiscTest.h
 # Begin Source File
 
 SOURCE=.\ImportExportMgrTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\RemapMenuIDsTest.h
 # End Source File
 # Begin Source File
 

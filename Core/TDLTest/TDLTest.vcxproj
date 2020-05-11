@@ -156,6 +156,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="RemapMenuIDsTest.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">Create</PrecompiledHeader>
@@ -193,6 +194,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="DateHelperTest.h" />
     <ClInclude Include="FileMiscTest.h" />
     <ClInclude Include="ImportExportMgrTest.h" />
+    <ClInclude Include="RemapMenuIDsTest.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="TaskFileTest.h" />
