@@ -15,6 +15,7 @@
     <SccLocalPath />
     <Keyword>MFCProj</Keyword>
     <ProjectGuid>{6B012C16-664F-37CC-BB2F-0BE146C03B12}</ProjectGuid>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'" Label="Configuration">
@@ -26,6 +27,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseOfMfc>Dynamic</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v100</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -39,15 +41,12 @@
     <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
-    <OutDir>.\Unicode_Debug\</OutDir>
-    <IntDir>.\Unicode_Debug\</IntDir>
-    <TargetName>ToDoListLib</TargetName>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
-    <OutDir>.\Unicode_Release\</OutDir>
-    <IntDir>.\Unicode_Release\</IntDir>
-    <TargetName>ToDoListLib</TargetName>
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">.\Unicode_Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">.\Unicode_Release\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">.\Unicode_Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">.\Unicode_Debug\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
     <ClCompile>
@@ -400,9 +399,6 @@
     <ClInclude Include="ToDoListWnd.h" />
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="ToDoListLib.vcxproj">
-      <FileType>Document</FileType>
-    </CustomBuild>
     <CustomBuild Include="ToDoListLib.vcxproj.filters">
       <FileType>Document</FileType>
     </CustomBuild>
