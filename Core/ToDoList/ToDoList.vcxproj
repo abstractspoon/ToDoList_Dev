@@ -117,14 +117,6 @@ unicode_debug\TDLTest.exe
     <BuildLog>
       <Path>$(IntDir)$(MSBuildProjectName).log</Path>
     </BuildLog>
-    <PreLinkEvent>
-      <Command>
-      </Command>
-    </PreLinkEvent>
-    <PreLinkEvent>
-      <Message>
-      </Message>
-    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
     <Midl>
@@ -188,14 +180,6 @@ unicode_release\TDLTest.exe
     <BuildLog>
       <Path />
     </BuildLog>
-    <PreLinkEvent>
-      <Command>
-      </Command>
-    </PreLinkEvent>
-    <PreLinkEvent>
-      <Message>
-      </Message>
-    </PreLinkEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="StdAfx.cpp">
