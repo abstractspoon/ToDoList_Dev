@@ -339,6 +339,8 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	ExtractAttribute(cmdInfo, SWITCH_TASKTAGS, m_sTaskTags);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKDEPENDENCY, m_sTaskDepends);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKFILEREF, m_sTaskFileRef);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKICON, m_sTaskIcon);
+
 	ExtractAttribute(cmdInfo, SWITCH_TASKPRIORITY, m_nTaskPriority);
 	ExtractAttribute(cmdInfo, SWITCH_TASKRISK, m_nTaskRisk);
 
@@ -378,10 +380,10 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	CStringArray aValues;
 
 	if (cmdInfo.GetOptions(SWITCH_TASKCUSTOMATTRIB, aValues) && (aValues.GetSize() == 2))
-		m_sCustomAttrib.SetValue(Misc::FormatArray(aValues, '|'));
+		m_sTaskCustomAttrib.SetValue(Misc::FormatArray(aValues, '|'));
 
 	// Copying task attributes
-	if (cmdInfo.GetOptions(SWITCH_TASKCOPYATTRIB, aValues) && (aValues.GetSize() == 2))
+	if (cmdInfo.GetOptions(SWITCH_COPYTASKATTRIB, aValues) && (aValues.GetSize() == 2))
 	{
 		m_sCopyFromTaskAttrib.SetValue(aValues[0]);
 		m_sCopyToTaskAttrib.SetValue(aValues[1]);
@@ -458,7 +460,8 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	m_sTaskStatus = startup.m_sTaskStatus; 
 	m_sTaskDepends = startup.m_sTaskDepends; 
 	m_sTaskFileRef = startup.m_sTaskFileRef; 
-	m_sCustomAttrib = startup.m_sCustomAttrib; 
+	m_sTaskCustomAttrib = startup.m_sTaskCustomAttrib; 
+	m_sTaskIcon = startup.m_sTaskIcon;
 
 	m_dtTaskCreateDate = startup.m_dtTaskCreateDate;
 	m_dtTaskStartDate = startup.m_dtTaskStartDate;
@@ -507,7 +510,8 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(m_sTaskStatus == startup.m_sTaskStatus) &&
 		(m_sTaskDepends == startup.m_sTaskDepends) &&
 		(m_sTaskFileRef == startup.m_sTaskFileRef) &&
-		(m_sCustomAttrib == startup.m_sCustomAttrib) &&
+		(m_sTaskCustomAttrib == startup.m_sTaskCustomAttrib) &&
+		(m_sTaskIcon == startup.m_sTaskIcon) &&
 
 		(m_dtTaskCreateDate == startup.m_dtTaskCreateDate) &&
 		(m_dtTaskStartDate == startup.m_dtTaskStartDate) &&
@@ -660,7 +664,8 @@ void CTDCStartupOptions::Reset()
 	m_sTaskTags.ClearValue(); 
 	m_sTaskFileRef.ClearValue();
 	m_sTaskDepends.ClearValue();
-	m_sCustomAttrib.ClearValue();
+	m_sTaskCustomAttrib.ClearValue();
+	m_sTaskIcon.ClearValue();
 
 	m_dtTaskCreateDate.ClearValue();
 	m_dtTaskStartDate.ClearValue();
@@ -734,11 +739,11 @@ BOOL CTDCStartupOptions::GetTaskRisk(int& nValue, BOOL& bOffset) const
 
 BOOL CTDCStartupOptions::GetTaskCustomAttribute(CString& sCustomID, CString& sValue) const
 {
-	if (!m_sCustomAttrib.IsEmpty())
+	if (!m_sTaskCustomAttrib.IsEmpty())
 	{
 		CStringArray aValues;
 		
-		if (Misc::Split(m_sCustomAttrib.GetValue(), aValues, '|') == 2)
+		if (Misc::Split(m_sTaskCustomAttrib.GetValue(), aValues, '|') == 2)
 		{
 			sCustomID = aValues[0];
 			sValue = aValues[1];

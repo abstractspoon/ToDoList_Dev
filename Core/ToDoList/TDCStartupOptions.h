@@ -89,6 +89,7 @@ public:
 	BOOL GetTaskStatus(CString& sValue) const { return m_sTaskStatus.GetValue(sValue); }
 	BOOL GetTaskFileRef(CString& sValue) const { return m_sTaskFileRef.GetValue(sValue); }
 	BOOL GetTaskDependency(CString& sValue) const { return m_sTaskDepends.GetValue(sValue); }
+	BOOL GetTaskIcon(CString& sValue) const { return m_sTaskIcon.GetValue(sValue); }
 
 	BOOL GetTaskStartDate(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dtTaskStartDate.GetDate(dValue, nUnits, bOffset); } 
 	BOOL GetTaskStartTime(double& dValue, TDC_UNITS& nUnits, BOOL& bOffset) const { return m_dTaskStartTime.GetTimeOfDay(dValue, nUnits, bOffset); } 
@@ -130,8 +131,8 @@ protected:
 
 	TDCSTARTUPATTRIB m_sNewTaskTitle, m_sTaskTitle, m_sTaskComments;
 	TDCSTARTUPATTRIB m_sTaskVersion, m_sTaskExternalID, m_sTaskAllocBy, m_sTaskStatus;
-	TDCSTARTUPATTRIB m_sTaskAllocTo, m_sTaskCategory, m_sTaskTags, m_sTaskDepends, m_sTaskFileRef;
-	TDCSTARTUPATTRIB m_sCustomAttrib;
+	TDCSTARTUPATTRIB m_sTaskAllocTo, m_sTaskCategory, m_sTaskTags, m_sTaskDepends;
+	TDCSTARTUPATTRIB m_sTaskCustomAttrib, m_sTaskIcon, m_sTaskFileRef;
 
 	TDCSTARTUPATTRIB m_nTaskPriority, m_nTaskRisk, m_nTaskPercentDone;
 	TDCSTARTUPATTRIB m_dtTaskCreateDate, m_dtTaskStartDate, m_dtTaskDueDate, m_dtTaskDoneDate;

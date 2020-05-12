@@ -5481,6 +5481,9 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		
 		if (startup.GetTaskStatus(sItem))
 			tdc.SetSelectedTaskStatus(sItem);
+
+		if (startup.GetTaskIcon(sItem))
+			tdc.SetSelectedTaskIcon(sItem);
 		
 		// Numeric items
 		BOOL bOffset = FALSE;
