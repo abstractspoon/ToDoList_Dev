@@ -41,6 +41,7 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 								   const CTDCMainMenu& mainMenu,
 								   const CShortcutManager& mgrShortcuts)
 {
+	// Must be created BUT NOT initialsed
 	if (!GetSafeHwnd() || 
 		GetButtonCount() || 
 		m_tbHelper.IsInitialized() ||
@@ -129,9 +130,14 @@ void CTDLCustomToolbar::OnDestroy()
 BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CToolbarButtonArray& aButtons,
 												const CTDCMainMenu& mainMenu)
 {
+	// Must be created AND initialised
 	int nNumBtns = GetButtonCount();
 
-	if (!nNumBtns || (aButtons.GetSize() != nNumBtns))
+	if (!GetSafeHwnd() ||
+		!nNumBtns || 
+		(aButtons.GetSize() != nNumBtns) ||
+		!m_tbHelper.IsInitialized() ||
+		!m_ilNormal.GetSafeHandle())
 	{
 		ASSERT(0);
 		return FALSE;

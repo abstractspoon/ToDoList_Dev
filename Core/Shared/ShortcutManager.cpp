@@ -473,40 +473,48 @@ int CShortcutManager::BuildMapping(const CMenu* pMenu, LPCTSTR szParentName,
 
 BOOL CShortcutManager::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapCmdIDs)
 {
-	// Take a copy of the current mapping because we 
-	// are going to be making in-situ changes
+	// Cache and clear the affected shortcuts so we can
+	// make in-situ changes which must be unique at all times
 	CMap<UINT, UINT, DWORD, DWORD&> mapOldShortcuts;
 
-	if (!Misc::CopyT<UINT, DWORD>(m_mapID2Shortcut, mapOldShortcuts))
-	{
-		ASSERT(IsEmpty());
-		return FALSE;
-	}
-
-	// Work through the old mappings updating them to their new positions
 	POSITION pos = mapCmdIDs.GetStartPosition();
-	BOOL bRemapped = FALSE;
-
 	UINT nOldCmdID, nNewCmdID;
 	DWORD dwShortcut;
+	BOOL bRemapped = FALSE;
 
 	while (pos)
 	{
 		mapCmdIDs.GetNextAssoc(pos, nOldCmdID, nNewCmdID);
 
-		// Skip commands with no shortcut
-		if (!mapOldShortcuts.Lookup(nOldCmdID, dwShortcut))
+		if (nNewCmdID == nOldCmdID)
 			continue;
+		
+		dwShortcut = GetShortcut(nOldCmdID);
 
-		if (nNewCmdID != nOldCmdID)
+		if (dwShortcut)
 		{
-			// Always remove the old menu ID
 			DeleteShortcut(nOldCmdID);
+			mapOldShortcuts[nOldCmdID] = dwShortcut;
 
-			// Point the shortcut to the new menu ID if it isn't a deletion
-			if (dwShortcut)
-				SetShortcut(nNewCmdID, dwShortcut);
+			bRemapped = TRUE;
+		}
+	}
 
+	// Do the remapping
+	pos = mapCmdIDs.GetStartPosition();
+
+	while (pos)
+	{
+		mapCmdIDs.GetNextAssoc(pos, nOldCmdID, nNewCmdID);
+
+		if (nNewCmdID == nOldCmdID)
+			continue;
+		
+		if (mapOldShortcuts.Lookup(nOldCmdID, dwShortcut))
+		{
+			ASSERT(dwShortcut);
+
+			SetShortcut(nNewCmdID, dwShortcut);
 			bRemapped = TRUE;
 		}
 	}
