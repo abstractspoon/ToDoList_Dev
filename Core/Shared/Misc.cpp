@@ -384,7 +384,7 @@ CString Misc::FormatArray(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmp
 	// All else
 	CString sSep(szSep), sText;
 
-	if (!szSep)
+	if (sSep.IsEmpty())
 		sSep = GetListSeparator() + ' ';
 
 	for (int nItem = 0; nItem < nCount; nItem++)
@@ -433,29 +433,17 @@ CString Misc::FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDel
 	return sList;
 }
 
-CString Misc::FormatArray(const CDWordArray& array, LPCTSTR szSep)
+CString Misc::FormatArray(const CDWordArray& aValues, LPCTSTR szSep)
 {
-	int nCount = array.GetSize();
+	int nValue = aValues.GetSize();
 
-	if (nCount == 0)
+	if (nValue == 0)
 		return _T("");
 
-	CString sSep(szSep);
+	CStringArray aItems;
+	FormatArray(aValues, _T("%ld"), aItems);
 
-	if (!szSep)
-		sSep = GetListSeparator() + ' ';
-
-	CString sText;
-
-	for (int nItem = 0; nItem < nCount; nItem++)
-	{
-		if (nItem > 0)
-			sText += sSep;
-
-		sText += Format(array[nItem]);
-	}
-
-	return sText;
+	return FormatArray(aItems, szSep);
 }
 
 int Misc::FormatArray(const CDWordArray& aSrc, LPCTSTR lpszFormat, CStringArray& aDest)
