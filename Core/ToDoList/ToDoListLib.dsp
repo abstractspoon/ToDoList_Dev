@@ -49,7 +49,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"Unicode_Debug\ToDoList.lib"
+# ADD LIB32 /nologo
 
 !ELSEIF  "$(CFG)" == "ToDoListLib - Win32 Unicode Release"
 
@@ -72,7 +72,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LIB32=link.exe -lib
 # ADD BASE LIB32 /nologo
-# ADD LIB32 /nologo /out:"Unicode_Release\ToDoList.lib"
+# ADD LIB32 /nologo
 
 !ENDIF 
 
