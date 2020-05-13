@@ -184,8 +184,10 @@ public:
 	static void MoveCombo(CComboBox& combo, const CRect& rNew, int nDropHeight = 200);
 
 	// listboxes
+	static int SetListBoxItems(CListBox& list, const CStringArray& aItems);
 	static int RefreshMaxColumnWidth(CListBox& list, CDC* pDCRef = NULL);
 	static int CalcMaxTextWidth(CListBox& list, int nMinWidth = 0, CDC* pDCRef = NULL);
+	static CString GetSelectedItem(const CListBox& list);
 	static CString GetItem(const CListBox& list, int nItem);
 
 	// better dialog control shortcut handling

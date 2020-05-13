@@ -894,8 +894,30 @@ int CDialogHelper::CalcMaxTextWidth(CComboBox& combo, int nMinWidth, BOOL bDropp
 	return nMaxWidth;
 }
 
+int CDialogHelper::SetListBoxItems(CListBox& list, const CStringArray& aItems)
+{
+	list.ResetContent();
+
+	for (int nItem = 0; nItem < aItems.GetSize(); nItem++)
+		list.AddString(aItems[nItem]);
+
+	if (aItems.GetSize())
+		RefreshMaxColumnWidth(list);
+
+	return list.GetCount();
+}
+
+CString CDialogHelper::GetSelectedItem(const CListBox& list)
+{
+	return GetItem(list, list.GetCurSel());
+}
+
 int CDialogHelper::RefreshMaxColumnWidth(CListBox& list, CDC* pDCRef)
 {
+	// must have multi column style
+	if ((list.GetStyle() & LBS_MULTICOLUMN) == 0)
+		return 0;
+	
 	int nWidth = CalcMaxTextWidth(list, 0, pDCRef);
 	
 	if (nWidth > 0)
@@ -925,10 +947,6 @@ CString CDialogHelper::GetItem(const CListBox& list, int nItem)
 
 int CDialogHelper::CalcMaxTextWidth(CListBox& list, int nMinWidth, CDC* pDCRef)
 {
-	// must have multi column style
-	if ((list.GetStyle() & LBS_MULTICOLUMN) == 0)
-		return 0;
-	
 	CDC* pDC = pDCRef;
 	CFont* pOldFont = NULL;
 	
