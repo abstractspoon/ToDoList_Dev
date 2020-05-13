@@ -291,8 +291,8 @@ unicode_release\TDLTest.exe
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="ToDoListLib.vcxproj">
-      <Project>{6b012c16-664f-37cc-bb2f-0be146c03b12}</Project>
+    <ProjectReference Include="..\ToDoListLib\ToDoListLib.vcxproj">
+      <Project>{940be78e-1486-7f9b-02b3-6f0113741a6a}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

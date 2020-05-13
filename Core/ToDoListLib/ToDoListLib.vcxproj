@@ -1,0 +1,409 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Unicode Debug|Win32">
+      <Configuration>Unicode Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Unicode Release|Win32">
+      <Configuration>Unicode Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <SccProjectName />
+    <SccLocalPath />
+    <Keyword>MFCProj</Keyword>
+    <ProjectGuid>{940BE78E-1486-7F9B-02B3-6F0113741A6A}</ProjectGuid>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseOfMfc>Dynamic</UseOfMfc>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
+    <OutDir>.\Unicode_Debug\</OutDir>
+    <IntDir>.\Unicode_Debug\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
+    <OutDir>.\Unicode_Release\</OutDir>
+    <IntDir>.\Unicode_Release\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <Optimization>Disabled</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <MinimalRebuild>true</MinimalRebuild>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\Unicode_Debug\</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>.\Unicode_Debug\ToDoListLib.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\Unicode_Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>.\Unicode_Debug\</ProgramDataBaseFileName>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0c09</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Unicode_Debug\ToDoListLib.bsc</OutputFile>
+    </Bscmake>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Unicode_Debug\ToDoListLib.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <StringPooling>true</StringPooling>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <Optimization>MaxSpeed</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\Unicode_Release\</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>.\Unicode_Release\ToDoListLib.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\Unicode_Release\</ObjectFileName>
+      <ProgramDataBaseFileName>.\Unicode_Release\</ProgramDataBaseFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <Culture>0x0c09</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Unicode_Release\ToDoListLib.bsc</OutputFile>
+    </Bscmake>
+    <Lib>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Unicode_Release\ToDoListLib.lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\ToDoList\FilteredToDoCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\MultiTaskFile.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesDlg.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesExportPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesFile2Page.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesFilePage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesGenPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesMultiUserPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesShortcutsPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesTaskCalcPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesTaskDef2Page.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesTaskDefPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesTaskPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesToolPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesUICustomToolbarPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesUIPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesUITasklistColorsPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesUITasklistPage.cpp" />
+    <ClCompile Include="..\ToDoList\PreferencesUIVisibilityPage.cpp" />
+    <ClCompile Include="..\ToDoList\TabbedToDoCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TaskClipboard.cpp" />
+    <ClCompile Include="..\ToDoList\TaskFile.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListCsvExporter.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListCsvImporter.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListDropTarget.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListExporterBase.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListHtmlExporter.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListOutlookImporter.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListTdlExporter.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListTdlImporter.cpp" />
+    <ClCompile Include="..\ToDoList\TaskListTxtExporter.cpp" />
+    <ClCompile Include="..\ToDoList\TaskSelectionDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDCAnonymizeTasklist.cpp" />
+    <ClCompile Include="..\ToDoList\TDCCustomAttribData.cpp" />
+    <ClCompile Include="..\ToDoList\TDCCustomAttributeDef.cpp" />
+    <ClCompile Include="..\ToDoList\TDCCustomAttributeUIHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCEnumContainers.cpp" />
+    <ClCompile Include="..\ToDoList\TDCFilter.cpp" />
+    <ClCompile Include="..\ToDoList\TDCFindReplace.cpp" />
+    <ClCompile Include="..\ToDoList\TDCImageList.cpp" />
+    <ClCompile Include="..\ToDoList\TDCImportExportMgr.cpp" />
+    <ClCompile Include="..\ToDoList\TDCMainMenu.cpp" />
+    <ClCompile Include="..\ToDoList\TDCMergeTasklist.cpp" />
+    <ClCompile Include="..\ToDoList\TDCOutlookImportHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCRecurrence.cpp" />
+    <ClCompile Include="..\ToDoList\tdcreminder.cpp" />
+    <ClCompile Include="..\ToDoList\TDCSearchParamHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCSimpleTextContent.cpp" />
+    <ClCompile Include="..\ToDoList\TDCSourceControl.cpp" />
+    <ClCompile Include="..\ToDoList\TDCStartupOptions.cpp" />
+    <ClCompile Include="..\ToDoList\TDCTaskTimeLog.cpp" />
+    <ClCompile Include="..\ToDoList\TDCTaskTimeLogAnalysis.cpp" />
+    <ClCompile Include="..\ToDoList\TDCTimeTracking.cpp" />
+    <ClCompile Include="..\ToDoList\TDCToDoCtrlPreferenceHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCToolsCmdlineParser.cpp" />
+    <ClCompile Include="..\ToDoList\TDCToolsHelper.cpp" />
+    <ClCompile Include="..\ToDoList\TDCWebUpdateScript.cpp" />
+    <ClCompile Include="..\ToDoList\TDLAboutDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLAddLoggedTimeDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLAnalyseLoggedTimeDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLAttribListBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLCleanupIniPreferencesDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLCmdlineOptionsDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLColumnAttribVisibilityListCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLColumnListBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLColumnSelectionDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLCommentsCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLContentMgr.cpp" />
+    <ClCompile Include="..\ToDoList\TDLCsvImportExportDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLCustomAttribFeatureComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLCustomAttributeDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLCustomToolbar.cpp" />
+    <ClCompile Include="..\ToDoList\TDLDialog.cpp" />
+    <ClCompile Include="..\ToDoList\TDLExportDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFileEncodingComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFilterBar.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFilterComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFilterDateComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFilterDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFilterOptionComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\tdlfindresultslistctrl.cpp" />
+    <ClCompile Include="..\ToDoList\tdlfindtaskattributecombobox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFindTaskExpressionListCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLFindTasksDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLGoToTaskDlg.cpp" />
+    <ClCompile Include="..\ToDoList\tdliconcombobox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLImportDialog.cpp" />
+    <ClCompile Include="..\ToDoList\TDLImportOutlookDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectsDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLImportOutlookObjectSetupListCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLInfoTipCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLKeyboardShortcutDisplayDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLLanguageComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLLanguageDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLMultiSortDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLOffsetDatesDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLOleMessageFilter.cpp" />
+    <ClCompile Include="..\ToDoList\TDLPrefMigrationDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLPrintDialog.cpp" />
+    <ClCompile Include="..\ToDoList\TDLPriorityComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLQuickFindComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLRecurringTaskEdit.cpp" />
+    <ClCompile Include="..\ToDoList\TDLRegularityComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLReminderPeriodComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLReuseRecurringTaskDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLRiskComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLSendTasksDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLSetReminderDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLShowReminderDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLStylesheetParamConfigDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskIconDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskListCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTasklistImportDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTasklistSaveAsDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTasklistStorageMgr.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskTreeCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskViewListBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLThemeComboBox.cpp" />
+    <ClCompile Include="..\ToDoList\TDLThreadedExporterWnd.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTimeTrackerDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLToolbarButtonListCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLToolsUserInputDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTransformDialog.cpp" />
+    <ClCompile Include="..\ToDoList\TDLViewTabControl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLWebUpdatePromptDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLWelcomeWizard.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrlData.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrlDataUtils.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrlFind.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrlMgr.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrlReminders.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoCtrlUndo.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoitem.cpp" />
+    <ClCompile Include="..\ToDoList\ToDoListWnd.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h" />
+    <ClInclude Include="..\ToDoList\MultiTaskFile.h" />
+    <ClInclude Include="..\ToDoList\PreferencesDlg.h" />
+    <ClInclude Include="..\ToDoList\PreferencesExportPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesFile2Page.h" />
+    <ClInclude Include="..\ToDoList\PreferencesFilePage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesGenPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesMultiUserPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesShortcutsPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesTaskCalcPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesTaskDef2Page.h" />
+    <ClInclude Include="..\ToDoList\PreferencesTaskDefPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesTaskPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesToolPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesUICustomToolbarPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesUIPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesUITasklistColorsPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesUITasklistPage.h" />
+    <ClInclude Include="..\ToDoList\PreferencesUIVisibilityPage.h" />
+    <ClInclude Include="..\ToDoList\TabbedToDoCtrl.h" />
+    <ClInclude Include="..\ToDoList\TaskClipboard.h" />
+    <ClInclude Include="..\ToDoList\TaskFile.h" />
+    <ClInclude Include="..\ToDoList\TaskListCsvExporter.h" />
+    <ClInclude Include="..\ToDoList\TaskListCsvImporter.h" />
+    <ClInclude Include="..\ToDoList\TaskListDropTarget.h" />
+    <ClInclude Include="..\ToDoList\TaskListExporterBase.h" />
+    <ClInclude Include="..\ToDoList\TaskListHtmlExporter.h" />
+    <ClInclude Include="..\ToDoList\TaskListOutlookImporter.h" />
+    <ClInclude Include="..\ToDoList\TaskListTdlExporter.h" />
+    <ClInclude Include="..\ToDoList\TaskListTdlImporter.h" />
+    <ClInclude Include="..\ToDoList\TaskListTxtExporter.h" />
+    <ClInclude Include="..\ToDoList\TaskSelectionDlg.h" />
+    <ClInclude Include="..\ToDoList\TDCAnonymizeTasklist.h" />
+    <ClInclude Include="..\ToDoList\tdccustomattribdata.h" />
+    <ClInclude Include="..\ToDoList\TDCCustomAttributeDef.h" />
+    <ClInclude Include="..\ToDoList\TDCCustomAttributeUIHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCDialogHelper.h" />
+    <ClInclude Include="..\ToDoList\tdcenum.h" />
+    <ClInclude Include="..\ToDoList\TDCEnumContainers.h" />
+    <ClInclude Include="..\ToDoList\TDCFilter.h" />
+    <ClInclude Include="..\ToDoList\TDCFindReplace.h" />
+    <ClInclude Include="..\ToDoList\TDCImageList.h" />
+    <ClInclude Include="..\ToDoList\TDCImportExportMgr.h" />
+    <ClInclude Include="..\ToDoList\TDCMainMenu.h" />
+    <ClInclude Include="..\ToDoList\tdcmapping.h" />
+    <ClInclude Include="..\ToDoList\TDCMergeTasklist.h" />
+    <ClInclude Include="..\ToDoList\tdcmsg.h" />
+    <ClInclude Include="..\ToDoList\TDCOutlookImportHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCRecurrence.h" />
+    <ClInclude Include="..\ToDoList\tdcreminder.h" />
+    <ClInclude Include="..\ToDoList\TDCSearchParamHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCSimpleTextContent.h" />
+    <ClInclude Include="..\ToDoList\tdcsort.h" />
+    <ClInclude Include="..\ToDoList\TDCSourceControl.h" />
+    <ClInclude Include="..\ToDoList\TDCStartupOptions.h" />
+    <ClInclude Include="..\ToDoList\tdcstatic.h" />
+    <ClInclude Include="..\ToDoList\tdcstruct.h" />
+    <ClInclude Include="..\ToDoList\tdcswitch.h" />
+    <ClInclude Include="..\ToDoList\TDCTaskTimeLog.h" />
+    <ClInclude Include="..\ToDoList\TDCTaskTimeLogAnalysis.h" />
+    <ClInclude Include="..\ToDoList\TDCTimeTracking.h" />
+    <ClInclude Include="..\ToDoList\TDCToDoCtrlPreferenceHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCToolsCmdlineParser.h" />
+    <ClInclude Include="..\ToDoList\TDCToolsHelper.h" />
+    <ClInclude Include="..\ToDoList\TDCWebUpdateScript.h" />
+    <ClInclude Include="..\ToDoList\TDLAboutDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLAddLoggedTimeDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLAnalyseLoggedTimeDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLAttribListBox.h" />
+    <ClInclude Include="..\ToDoList\TDLCleanupIniPreferencesDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLCmdlineOptionsDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLColumnAttribVisibilityListCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLColumnListBox.h" />
+    <ClInclude Include="..\ToDoList\TDLColumnSelectionDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLCommentsCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLContentMgr.h" />
+    <ClInclude Include="..\ToDoList\TDLCsvImportExportDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLCustomAttribFeatureComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLCustomAttributeDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLCustomToolbar.h" />
+    <ClInclude Include="..\ToDoList\TDLDialog.h" />
+    <ClInclude Include="..\ToDoList\TDLExportDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLFileEncodingComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLFilterBar.h" />
+    <ClInclude Include="..\ToDoList\TDLFilterComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLFilterDateComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLFilterDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLFilterOptionComboBox.h" />
+    <ClInclude Include="..\ToDoList\tdlfindresultslistctrl.h" />
+    <ClInclude Include="..\ToDoList\tdlfindtaskattributecombobox.h" />
+    <ClInclude Include="..\ToDoList\TDLFindTaskExpressionListCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLFindTasksDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLGoToTaskDlg.h" />
+    <ClInclude Include="..\ToDoList\tdliconcombobox.h" />
+    <ClInclude Include="..\ToDoList\TDLImpExpAttributeMappingListCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLImportDialog.h" />
+    <ClInclude Include="..\ToDoList\TDLImportOutlookDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLImportOutlookObjectsDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLImportOutlookObjectSetupListCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLInfoTipCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLKeyboardShortcutDisplayDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLLanguageComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLLanguageDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLMultiSortDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLOffsetDatesDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLOleMessageFilter.h" />
+    <ClInclude Include="..\ToDoList\TDLPrefMigrationDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLPrintDialog.h" />
+    <ClInclude Include="..\ToDoList\TDLPriorityComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLQuickFindComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLRecurringTaskEdit.h" />
+    <ClInclude Include="..\ToDoList\TDLRegularityComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLReminderPeriodComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLReuseRecurringTaskDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLRiskComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLSendTasksDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLSetReminderDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLShowReminderDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLStylesheetParamConfigDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskCtrlBase.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskIconDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskListCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLTasklistImportDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTasklistSaveAsDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTasklistStorageMgr.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskTreeCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskViewListBox.h" />
+    <ClInclude Include="..\ToDoList\TDLThemeComboBox.h" />
+    <ClInclude Include="..\ToDoList\TDLThreadedExporterWnd.h" />
+    <ClInclude Include="..\ToDoList\TDLTimeTrackerDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLToolbarButtonListCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLToolsUserInputDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTransformDialog.h" />
+    <ClInclude Include="..\ToDoList\TDLViewTabControl.h" />
+    <ClInclude Include="..\ToDoList\TDLWebUpdatePromptDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLWelcomeWizard.h" />
+    <ClInclude Include="..\ToDoList\tdstringres.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrl.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlData.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlDataDefines.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlDataUtils.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlFind.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlMgr.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlReminders.h" />
+    <ClInclude Include="..\ToDoList\ToDoCtrlUndo.h" />
+    <ClInclude Include="..\ToDoList\ToDoitem.h" />
+    <ClInclude Include="..\ToDoList\ToDoListWnd.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="ToDoListLib.vcxproj">
+      <FileType>Document</FileType>
+    </CustomBuild>
+    <CustomBuild Include="ToDoListLib.vcxproj.filters">
+      <FileType>Document</FileType>
+    </CustomBuild>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

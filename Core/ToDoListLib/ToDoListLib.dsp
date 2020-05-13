@@ -85,555 +85,555 @@ LIB32=link.exe -lib
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\FilteredToDoCtrl.cpp
+SOURCE=..\ToDoList\FilteredToDoCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\MultiTaskFile.cpp
+SOURCE=..\ToDoList\MultiTaskFile.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesDlg.cpp
+SOURCE=..\ToDoList\PreferencesDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesExportPage.cpp
+SOURCE=..\ToDoList\PreferencesExportPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesFile2Page.cpp
+SOURCE=..\ToDoList\PreferencesFile2Page.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesFilePage.cpp
+SOURCE=..\ToDoList\PreferencesFilePage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesGenPage.cpp
+SOURCE=..\ToDoList\PreferencesGenPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesMultiUserPage.cpp
+SOURCE=..\ToDoList\PreferencesMultiUserPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesShortcutsPage.cpp
+SOURCE=..\ToDoList\PreferencesShortcutsPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesTaskCalcPage.cpp
+SOURCE=..\ToDoList\PreferencesTaskCalcPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesTaskDef2Page.cpp
+SOURCE=..\ToDoList\PreferencesTaskDef2Page.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesTaskDefPage.cpp
+SOURCE=..\ToDoList\PreferencesTaskDefPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesTaskPage.cpp
+SOURCE=..\ToDoList\PreferencesTaskPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesToolPage.cpp
+SOURCE=..\ToDoList\PreferencesToolPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUICustomToolbarPage.cpp
+SOURCE=..\ToDoList\PreferencesUICustomToolbarPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUIPage.cpp
+SOURCE=..\ToDoList\PreferencesUIPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUITasklistColorsPage.cpp
+SOURCE=..\ToDoList\PreferencesUITasklistColorsPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUITasklistPage.cpp
+SOURCE=..\ToDoList\PreferencesUITasklistPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUIVisibilityPage.cpp
+SOURCE=..\ToDoList\PreferencesUIVisibilityPage.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TabbedToDoCtrl.cpp
+SOURCE=..\ToDoList\TabbedToDoCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskClipboard.cpp
+SOURCE=..\ToDoList\TaskClipboard.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskFile.cpp
+SOURCE=..\ToDoList\TaskFile.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListCsvExporter.cpp
+SOURCE=..\ToDoList\TaskListCsvExporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListCsvImporter.cpp
+SOURCE=..\ToDoList\TaskListCsvImporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListDropTarget.cpp
+SOURCE=..\ToDoList\TaskListDropTarget.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListExporterBase.cpp
+SOURCE=..\ToDoList\TaskListExporterBase.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListHtmlExporter.cpp
+SOURCE=..\ToDoList\TaskListHtmlExporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListOutlookImporter.cpp
+SOURCE=..\ToDoList\TaskListOutlookImporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListTdlExporter.cpp
+SOURCE=..\ToDoList\TaskListTdlExporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListTdlImporter.cpp
+SOURCE=..\ToDoList\TaskListTdlImporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListTxtExporter.cpp
+SOURCE=..\ToDoList\TaskListTxtExporter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskSelectionDlg.cpp
+SOURCE=..\ToDoList\TaskSelectionDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCAnonymizeTasklist.cpp
+SOURCE=..\ToDoList\TDCAnonymizeTasklist.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCCustomAttribData.cpp
+SOURCE=..\ToDoList\TDCCustomAttribData.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCCustomAttributeDef.cpp
+SOURCE=..\ToDoList\TDCCustomAttributeDef.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCCustomAttributeUIHelper.cpp
+SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCDialogHelper.cpp
+SOURCE=..\ToDoList\TDCDialogHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCEnumContainers.cpp
+SOURCE=..\ToDoList\TDCEnumContainers.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCFilter.cpp
+SOURCE=..\ToDoList\TDCFilter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCFindReplace.cpp
+SOURCE=..\ToDoList\TDCFindReplace.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCImageList.cpp
+SOURCE=..\ToDoList\TDCImageList.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCImportExportMgr.cpp
+SOURCE=..\ToDoList\TDCImportExportMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCMainMenu.cpp
+SOURCE=..\ToDoList\TDCMainMenu.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCMergeTasklist.cpp
+SOURCE=..\ToDoList\TDCMergeTasklist.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCOutlookImportHelper.cpp
+SOURCE=..\ToDoList\TDCOutlookImportHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TdcRecurrence.cpp
+SOURCE=..\ToDoList\TDCRecurrence.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcreminder.cpp
+SOURCE=..\ToDoList\tdcreminder.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCSearchParamHelper.cpp
+SOURCE=..\ToDoList\TDCSearchParamHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCSimpleTextContent.cpp
+SOURCE=..\ToDoList\TDCSimpleTextContent.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCSourceControl.cpp
+SOURCE=..\ToDoList\TDCSourceControl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCStartupOptions.cpp
+SOURCE=..\ToDoList\TDCStartupOptions.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCTaskTimeLog.cpp
+SOURCE=..\ToDoList\TDCTaskTimeLog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCTaskTimeLogAnalysis.cpp
+SOURCE=..\ToDoList\TDCTaskTimeLogAnalysis.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCTimeTracking.cpp
+SOURCE=..\ToDoList\TDCTimeTracking.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCToDoCtrlPreferenceHelper.cpp
+SOURCE=..\ToDoList\TDCToDoCtrlPreferenceHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCToolsCmdlineParser.cpp
+SOURCE=..\ToDoList\TDCToolsCmdlineParser.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCToolsHelper.cpp
+SOURCE=..\ToDoList\TDCToolsHelper.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCWebUpdateScript.cpp
+SOURCE=..\ToDoList\TDCWebUpdateScript.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLAboutDlg.cpp
+SOURCE=..\ToDoList\TDLAboutDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLAddLoggedTimeDlg.cpp
+SOURCE=..\ToDoList\TDLAddLoggedTimeDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLAnalyseLoggedTimeDlg.cpp
+SOURCE=..\ToDoList\TDLAnalyseLoggedTimeDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLAttribListBox.cpp
+SOURCE=..\ToDoList\TDLAttribListBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCleanupIniPreferencesDlg.cpp
+SOURCE=..\ToDoList\TDLCleanupIniPreferencesDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCmdlineOptionsDlg.cpp
+SOURCE=..\ToDoList\TDLCmdlineOptionsDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLColumnAttribVisibilityListCtrl.cpp
+SOURCE=..\ToDoList\TDLColumnAttribVisibilityListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLColumnListBox.cpp
+SOURCE=..\ToDoList\TDLColumnListBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLColumnSelectionDlg.cpp
+SOURCE=..\ToDoList\TDLColumnSelectionDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCommentsCtrl.cpp
+SOURCE=..\ToDoList\TDLCommentsCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLContentMgr.cpp
+SOURCE=..\ToDoList\TDLContentMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCsvImportExportDlg.cpp
+SOURCE=..\ToDoList\TDLCsvImportExportDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCustomAttribFeatureComboBox.cpp
+SOURCE=..\ToDoList\TDLCustomAttribFeatureComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCustomAttributeDlg.cpp
+SOURCE=..\ToDoList\TDLCustomAttributeDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCustomToolbar.cpp
+SOURCE=..\ToDoList\TDLCustomToolbar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLDialog.cpp
+SOURCE=..\ToDoList\TDLDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLExportDlg.cpp
+SOURCE=..\ToDoList\TDLExportDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFileEncodingComboBox.cpp
+SOURCE=..\ToDoList\TDLFileEncodingComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterBar.cpp
+SOURCE=..\ToDoList\TDLFilterBar.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterComboBox.cpp
+SOURCE=..\ToDoList\TDLFilterComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterDateComboBox.cpp
+SOURCE=..\ToDoList\TDLFilterDateComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterDlg.cpp
+SOURCE=..\ToDoList\TDLFilterDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterOptionComboBox.cpp
+SOURCE=..\ToDoList\TDLFilterOptionComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdlfindresultslistctrl.cpp
+SOURCE=..\ToDoList\tdlfindresultslistctrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdlfindtaskattributecombobox.cpp
+SOURCE=..\ToDoList\tdlfindtaskattributecombobox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFindTaskExpressionListCtrl.cpp
+SOURCE=..\ToDoList\TDLFindTaskExpressionListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFindTasksDlg.cpp
+SOURCE=..\ToDoList\TDLFindTasksDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLGoToTaskDlg.cpp
+SOURCE=..\ToDoList\TDLGoToTaskDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdliconcombobox.cpp
+SOURCE=..\ToDoList\tdliconcombobox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImpExpAttributeMappingListCtrl.cpp
+SOURCE=..\ToDoList\TDLImpExpAttributeMappingListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportDialog.cpp
+SOURCE=..\ToDoList\TDLImportDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportOutlookDlg.cpp
+SOURCE=..\ToDoList\TDLImportOutlookDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportOutlookObjectsDlg.cpp
+SOURCE=..\ToDoList\TDLImportOutlookObjectsDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportOutlookObjectSetupListCtrl.cpp
+SOURCE=..\ToDoList\TDLImportOutlookObjectSetupListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLInfoTipCtrl.cpp
+SOURCE=..\ToDoList\TDLInfoTipCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLKeyboardShortcutDisplayDlg.cpp
+SOURCE=..\ToDoList\TDLKeyboardShortcutDisplayDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLLanguageComboBox.cpp
+SOURCE=..\ToDoList\TDLLanguageComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLLanguageDlg.cpp
+SOURCE=..\ToDoList\TDLLanguageDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLMultiSortDlg.cpp
+SOURCE=..\ToDoList\TDLMultiSortDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLOffsetDatesDlg.cpp
+SOURCE=..\ToDoList\TDLOffsetDatesDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLOleMessageFilter.cpp
+SOURCE=..\ToDoList\TDLOleMessageFilter.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLPrefMigrationDlg.cpp
+SOURCE=..\ToDoList\TDLPrefMigrationDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLPrintDialog.cpp
+SOURCE=..\ToDoList\TDLPrintDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLPriorityComboBox.cpp
+SOURCE=..\ToDoList\TDLPriorityComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLQuickFindComboBox.cpp
+SOURCE=..\ToDoList\TDLQuickFindComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLRecurringTaskEdit.cpp
+SOURCE=..\ToDoList\TDLRecurringTaskEdit.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLRegularityComboBox.cpp
+SOURCE=..\ToDoList\TDLRegularityComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLReminderPeriodComboBox.cpp
+SOURCE=..\ToDoList\TDLReminderPeriodComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLReuseRecurringTaskDlg.cpp
+SOURCE=..\ToDoList\TDLReuseRecurringTaskDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLRiskComboBox.cpp
+SOURCE=..\ToDoList\TDLRiskComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLSendTasksDlg.cpp
+SOURCE=..\ToDoList\TDLSendTasksDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLSetReminderDlg.cpp
+SOURCE=..\ToDoList\TDLSetReminderDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLShowReminderDlg.cpp
+SOURCE=..\ToDoList\TDLShowReminderDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLStylesheetParamConfigDlg.cpp
+SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskCtrlBase.cpp
+SOURCE=..\ToDoList\TDLTaskCtrlBase.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskIconDlg.cpp
+SOURCE=..\ToDoList\TDLTaskIconDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskListCtrl.cpp
+SOURCE=..\ToDoList\TDLTaskListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTasklistImportDlg.cpp
+SOURCE=..\ToDoList\TDLTasklistImportDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTasklistSaveAsDlg.cpp
+SOURCE=..\ToDoList\TDLTasklistSaveAsDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTasklistStorageMgr.cpp
+SOURCE=..\ToDoList\TDLTasklistStorageMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskTreeCtrl.cpp
+SOURCE=..\ToDoList\TDLTaskTreeCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskViewListBox.cpp
+SOURCE=..\ToDoList\TDLTaskViewListBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLThemeComboBox.cpp
+SOURCE=..\ToDoList\TDLThemeComboBox.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLThreadedExporterWnd.cpp
+SOURCE=..\ToDoList\TDLThreadedExporterWnd.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTimeTrackerDlg.cpp
+SOURCE=..\ToDoList\TDLTimeTrackerDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLToolbarButtonListCtrl.cpp
+SOURCE=..\ToDoList\TDLToolbarButtonListCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLToolsUserInputDlg.cpp
+SOURCE=..\ToDoList\TDLToolsUserInputDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTransformDialog.cpp
+SOURCE=..\ToDoList\TDLTransformDialog.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLViewTabControl.cpp
+SOURCE=..\ToDoList\TDLViewTabControl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLWebUpdatePromptDlg.cpp
+SOURCE=..\ToDoList\TDLWebUpdatePromptDlg.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLWelcomeWizard.cpp
+SOURCE=..\ToDoList\TDLWelcomeWizard.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrl.cpp
+SOURCE=..\ToDoList\ToDoCtrl.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlData.cpp
+SOURCE=..\ToDoList\ToDoCtrlData.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlDataUtils.cpp
+SOURCE=..\ToDoList\ToDoCtrlDataUtils.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlFind.cpp
+SOURCE=..\ToDoList\ToDoCtrlFind.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlMgr.cpp
+SOURCE=..\ToDoList\ToDoCtrlMgr.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlReminders.cpp
+SOURCE=..\ToDoList\ToDoCtrlReminders.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlUndo.cpp
+SOURCE=..\ToDoList\ToDoCtrlUndo.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoitem.cpp
+SOURCE=..\ToDoList\ToDoitem.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoListWnd.cpp
+SOURCE=..\ToDoList\ToDoListWnd.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -641,595 +641,591 @@ SOURCE=.\ToDoListWnd.cpp
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=.\FilteredToDoCtrl.h
+SOURCE=..\ToDoList\FilteredToDoCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\MultiTaskFile.h
+SOURCE=..\ToDoList\MultiTaskFile.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesDlg.h
+SOURCE=..\ToDoList\PreferencesDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesExportPage.h
+SOURCE=..\ToDoList\PreferencesExportPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesFile2Page.h
+SOURCE=..\ToDoList\PreferencesFile2Page.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesFilePage.h
+SOURCE=..\ToDoList\PreferencesFilePage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesGenPage.h
+SOURCE=..\ToDoList\PreferencesGenPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesMultiUserPage.h
+SOURCE=..\ToDoList\PreferencesMultiUserPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesShortcutsPage.h
+SOURCE=..\ToDoList\PreferencesShortcutsPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesTaskCalcPage.h
+SOURCE=..\ToDoList\PreferencesTaskCalcPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesTaskDef2Page.h
+SOURCE=..\ToDoList\PreferencesTaskDef2Page.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesTaskDefPage.h
+SOURCE=..\ToDoList\PreferencesTaskDefPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesTaskPage.h
+SOURCE=..\ToDoList\PreferencesTaskPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesToolPage.h
+SOURCE=..\ToDoList\PreferencesToolPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUICustomToolbarPage.h
+SOURCE=..\ToDoList\PreferencesUICustomToolbarPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUIPage.h
+SOURCE=..\ToDoList\PreferencesUIPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUITasklistColorsPage.h
+SOURCE=..\ToDoList\PreferencesUITasklistColorsPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUITasklistPage.h
+SOURCE=..\ToDoList\PreferencesUITasklistPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\PreferencesUIVisibilityPage.h
+SOURCE=..\ToDoList\PreferencesUIVisibilityPage.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Resource.h
+SOURCE=..\ToDoList\TabbedToDoCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TabbedToDoCtrl.h
+SOURCE=..\ToDoList\TaskClipboard.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskClipboard.h
+SOURCE=..\ToDoList\TaskFile.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskFile.h
+SOURCE=..\ToDoList\TaskListCsvExporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListCsvExporter.h
+SOURCE=..\ToDoList\TaskListCsvImporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListCsvImporter.h
+SOURCE=..\ToDoList\TaskListDropTarget.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListDropTarget.h
+SOURCE=..\ToDoList\TaskListExporterBase.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListExporterBase.h
+SOURCE=..\ToDoList\TaskListHtmlExporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListHtmlExporter.h
+SOURCE=..\ToDoList\TaskListOutlookImporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListOutlookImporter.h
+SOURCE=..\ToDoList\TaskListTdlExporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListTdlExporter.h
+SOURCE=..\ToDoList\TaskListTdlImporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListTdlImporter.h
+SOURCE=..\ToDoList\TaskListTxtExporter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskListTxtExporter.h
+SOURCE=..\ToDoList\TaskSelectionDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TaskSelectionDlg.h
+SOURCE=..\ToDoList\TDCAnonymizeTasklist.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCAnonymizeTasklist.h
+SOURCE=..\ToDoList\tdccustomattribdata.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdccustomattribdata.h
+SOURCE=..\ToDoList\TDCCustomAttributeDef.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCCustomAttributeDef.h
+SOURCE=..\ToDoList\TDCCustomAttributeUIHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCCustomAttributeUIHelper.h
+SOURCE=..\ToDoList\TDCDialogHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCDialogHelper.h
+SOURCE=..\ToDoList\tdcenum.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcenum.h
+SOURCE=..\ToDoList\TDCEnumContainers.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCEnumContainers.h
+SOURCE=..\ToDoList\TDCFilter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCFilter.h
+SOURCE=..\ToDoList\TDCFindReplace.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCFindReplace.h
+SOURCE=..\ToDoList\TDCImageList.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCImageList.h
+SOURCE=..\ToDoList\TDCImportExportMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCImportExportMgr.h
+SOURCE=..\ToDoList\TDCMainMenu.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCMainMenu.h
+SOURCE=..\ToDoList\tdcmapping.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcmapping.h
+SOURCE=..\ToDoList\TDCMergeTasklist.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCMergeTasklist.h
+SOURCE=..\ToDoList\tdcmsg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcmsg.h
+SOURCE=..\ToDoList\TDCOutlookImportHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCOutlookImportHelper.h
+SOURCE=..\ToDoList\TDCRecurrence.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TdcRecurrence.h
+SOURCE=..\ToDoList\tdcreminder.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcreminder.h
+SOURCE=..\ToDoList\TDCSearchParamHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCSearchParamHelper.h
+SOURCE=..\ToDoList\TDCSimpleTextContent.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCSimpleTextContent.h
+SOURCE=..\ToDoList\tdcsort.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcsort.h
+SOURCE=..\ToDoList\TDCSourceControl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCSourceControl.h
+SOURCE=..\ToDoList\TDCStartupOptions.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCStartupOptions.h
+SOURCE=..\ToDoList\tdcstatic.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcstatic.h
+SOURCE=..\ToDoList\tdcstruct.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcstruct.h
+SOURCE=..\ToDoList\tdcswitch.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdcswitch.h
+SOURCE=..\ToDoList\TDCTaskTimeLog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCTaskTimeLog.h
+SOURCE=..\ToDoList\TDCTaskTimeLogAnalysis.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCTaskTimeLogAnalysis.h
+SOURCE=..\ToDoList\TDCTimeTracking.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCTimeTracking.h
+SOURCE=..\ToDoList\TDCToDoCtrlPreferenceHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCToDoCtrlPreferenceHelper.h
+SOURCE=..\ToDoList\TDCToolsCmdlineParser.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCToolsCmdlineParser.h
+SOURCE=..\ToDoList\TDCToolsHelper.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCToolsHelper.h
+SOURCE=..\ToDoList\TDCWebUpdateScript.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDCWebUpdateScript.h
+SOURCE=..\ToDoList\TDLAboutDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLAboutDlg.h
+SOURCE=..\ToDoList\TDLAddLoggedTimeDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLAddLoggedTimeDlg.h
+SOURCE=..\ToDoList\TDLAnalyseLoggedTimeDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLAnalyseLoggedTimeDlg.h
+SOURCE=..\ToDoList\TDLAttribListBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLAttribListBox.h
+SOURCE=..\ToDoList\TDLCleanupIniPreferencesDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCleanupIniPreferencesDlg.h
+SOURCE=..\ToDoList\TDLCmdlineOptionsDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCmdlineOptionsDlg.h
+SOURCE=..\ToDoList\TDLColumnAttribVisibilityListCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLColumnAttribVisibilityListCtrl.h
+SOURCE=..\ToDoList\TDLColumnListBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLColumnListBox.h
+SOURCE=..\ToDoList\TDLColumnSelectionDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLColumnSelectionDlg.h
+SOURCE=..\ToDoList\TDLCommentsCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCommentsCtrl.h
+SOURCE=..\ToDoList\TDLContentMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLContentMgr.h
+SOURCE=..\ToDoList\TDLCsvImportExportDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCsvImportExportDlg.h
+SOURCE=..\ToDoList\TDLCustomAttribFeatureComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCustomAttribFeatureComboBox.h
+SOURCE=..\ToDoList\TDLCustomAttributeDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCustomAttributeDlg.h
+SOURCE=..\ToDoList\TDLCustomToolbar.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLCustomToolbar.h
+SOURCE=..\ToDoList\TDLDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLDialog.h
+SOURCE=..\ToDoList\TDLExportDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLExportDlg.h
+SOURCE=..\ToDoList\TDLFileEncodingComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFileEncodingComboBox.h
+SOURCE=..\ToDoList\TDLFilterBar.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterBar.h
+SOURCE=..\ToDoList\TDLFilterComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterComboBox.h
+SOURCE=..\ToDoList\TDLFilterDateComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterDateComboBox.h
+SOURCE=..\ToDoList\TDLFilterDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterDlg.h
+SOURCE=..\ToDoList\TDLFilterOptionComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFilterOptionComboBox.h
+SOURCE=..\ToDoList\tdlfindresultslistctrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdlfindresultslistctrl.h
+SOURCE=..\ToDoList\tdlfindtaskattributecombobox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdlfindtaskattributecombobox.h
+SOURCE=..\ToDoList\TDLFindTaskExpressionListCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFindTaskExpressionListCtrl.h
+SOURCE=..\ToDoList\TDLFindTasksDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLFindTasksDlg.h
+SOURCE=..\ToDoList\TDLGoToTaskDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLGoToTaskDlg.h
+SOURCE=..\ToDoList\tdliconcombobox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdliconcombobox.h
+SOURCE=..\ToDoList\TDLImpExpAttributeMappingListCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImpExpAttributeMappingListCtrl.h
+SOURCE=..\ToDoList\TDLImportDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportDialog.h
+SOURCE=..\ToDoList\TDLImportOutlookDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportOutlookDlg.h
+SOURCE=..\ToDoList\TDLImportOutlookObjectsDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportOutlookObjectsDlg.h
+SOURCE=..\ToDoList\TDLImportOutlookObjectSetupListCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLImportOutlookObjectSetupListCtrl.h
+SOURCE=..\ToDoList\TDLInfoTipCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLInfoTipCtrl.h
+SOURCE=..\ToDoList\TDLKeyboardShortcutDisplayDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLKeyboardShortcutDisplayDlg.h
+SOURCE=..\ToDoList\TDLLanguageComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLLanguageComboBox.h
+SOURCE=..\ToDoList\TDLLanguageDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLLanguageDlg.h
+SOURCE=..\ToDoList\TDLMultiSortDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLMultiSortDlg.h
+SOURCE=..\ToDoList\TDLOffsetDatesDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLOffsetDatesDlg.h
+SOURCE=..\ToDoList\TDLOleMessageFilter.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLOleMessageFilter.h
+SOURCE=..\ToDoList\TDLPrefMigrationDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLPrefMigrationDlg.h
+SOURCE=..\ToDoList\TDLPrintDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLPrintDialog.h
+SOURCE=..\ToDoList\TDLPriorityComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLPriorityComboBox.h
+SOURCE=..\ToDoList\TDLQuickFindComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLQuickFindComboBox.h
+SOURCE=..\ToDoList\TDLRecurringTaskEdit.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLRecurringTaskEdit.h
+SOURCE=..\ToDoList\TDLRegularityComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLRegularityComboBox.h
+SOURCE=..\ToDoList\TDLReminderPeriodComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLReminderPeriodComboBox.h
+SOURCE=..\ToDoList\TDLReuseRecurringTaskDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLReuseRecurringTaskDlg.h
+SOURCE=..\ToDoList\TDLRiskComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLRiskComboBox.h
+SOURCE=..\ToDoList\TDLSendTasksDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLSendTasksDlg.h
+SOURCE=..\ToDoList\TDLSetReminderDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLSetReminderDlg.h
+SOURCE=..\ToDoList\TDLShowReminderDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLShowReminderDlg.h
+SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLStylesheetParamConfigDlg.h
+SOURCE=..\ToDoList\TDLTaskCtrlBase.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskCtrlBase.h
+SOURCE=..\ToDoList\TDLTaskIconDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskIconDlg.h
+SOURCE=..\ToDoList\TDLTaskListCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskListCtrl.h
+SOURCE=..\ToDoList\TDLTasklistImportDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTasklistImportDlg.h
+SOURCE=..\ToDoList\TDLTasklistSaveAsDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTasklistSaveAsDlg.h
+SOURCE=..\ToDoList\TDLTasklistStorageMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTasklistStorageMgr.h
+SOURCE=..\ToDoList\TDLTaskTreeCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskTreeCtrl.h
+SOURCE=..\ToDoList\TDLTaskViewListBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTaskViewListBox.h
+SOURCE=..\ToDoList\TDLThemeComboBox.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLThemeComboBox.h
+SOURCE=..\ToDoList\TDLThreadedExporterWnd.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLThreadedExporterWnd.h
+SOURCE=..\ToDoList\TDLTimeTrackerDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTimeTrackerDlg.h
+SOURCE=..\ToDoList\TDLToolbarButtonListCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLToolbarButtonListCtrl.h
+SOURCE=..\ToDoList\TDLToolsUserInputDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLToolsUserInputDlg.h
+SOURCE=..\ToDoList\TDLTransformDialog.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLTransformDialog.h
+SOURCE=..\ToDoList\TDLViewTabControl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLViewTabControl.h
+SOURCE=..\ToDoList\TDLWebUpdatePromptDlg.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLWebUpdatePromptDlg.h
+SOURCE=..\ToDoList\TDLWelcomeWizard.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\TDLWelcomeWizard.h
+SOURCE=..\ToDoList\tdstringres.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\tdstringres.h
+SOURCE=..\ToDoList\ToDoCtrl.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrl.h
+SOURCE=..\ToDoList\ToDoCtrlData.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlData.h
+SOURCE=..\ToDoList\ToDoCtrlDataDefines.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlDataDefines.h
+SOURCE=..\ToDoList\ToDoCtrlDataUtils.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlDataUtils.h
+SOURCE=..\ToDoList\ToDoCtrlFind.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlFind.h
+SOURCE=..\ToDoList\ToDoCtrlMgr.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlMgr.h
+SOURCE=..\ToDoList\ToDoCtrlReminders.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlReminders.h
+SOURCE=..\ToDoList\ToDoCtrlUndo.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoCtrlUndo.h
+SOURCE=..\ToDoList\ToDoitem.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\ToDoitem.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\ToDoListWnd.h
+SOURCE=..\ToDoList\ToDoListWnd.h
 # End Source File
 # End Group
 # Begin Source File

@@ -24,6 +24,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Shared", "Shared\Shared.vcxproj", "{95605899-9C90-40D8-8774-D1DA1FCE7464}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLTest", "TDLTest\TDLTest.vcxproj", "{9F8F45D4-C492-4653-8456-513D668DEF34}"
+	ProjectSection(ProjectDependencies) = postProject
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A} = {940BE78E-1486-7F9B-02B3-6F0113741A6A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLUninstall", "TDLUninstall\TDLUninstall.vcxproj", "{3BF70FA0-7245-4231-A0EF-7589E5805FFE}"
 EndProject
@@ -31,6 +34,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLUpdate", "TDLUpdate\TDLU
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoList", "ToDoList\ToDoList.vcxproj", "{255AD27A-87B1-4E26-A6A7-5E5AFB6BFAB5}"
 	ProjectSection(ProjectDependencies) = postProject
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A} = {940BE78E-1486-7F9B-02B3-6F0113741A6A}
 		{9F8F45D4-C492-4653-8456-513D668DEF34} = {9F8F45D4-C492-4653-8456-513D668DEF34}
 		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D} = {A234E4E0-47DE-4D77-BDBA-EE17C021C95D}
 	EndProjectSection
@@ -50,12 +54,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "WorkloadExt", "WorkloadExt\WorkloadExt.vcxproj", "{19F9E07E-7448-45EC-101E-8855E65841B1}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Interfaces", "Interfaces\Interfaces.vcxproj", "{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}"
-	ProjectSection(ProjectDependencies) = postProject
-		{95605899-9C90-40D8-8774-D1DA1FCE7464} = {95605899-9C90-40D8-8774-D1DA1FCE7464}
-		{E15C17B8-C080-492F-BBB8-BF9E84A0EA31} = {E15C17B8-C080-492F-BBB8-BF9E84A0EA31}
-	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoListLib", "ToDoList\ToDoListLib.vcxproj", "{6B012C16-664F-37CC-BB2F-0BE146C03B12}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoListLib", "ToDoListLib\ToDoListLib.vcxproj", "{940BE78E-1486-7F9B-02B3-6F0113741A6A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -155,10 +155,10 @@ Global
 		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{A234E4E0-47DE-4D77-BDBA-EE17C021C95D}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
-		{6B012C16-664F-37CC-BB2F-0BE146C03B12}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{6B012C16-664F-37CC-BB2F-0BE146C03B12}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{6B012C16-664F-37CC-BB2F-0BE146C03B12}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
-		{6B012C16-664F-37CC-BB2F-0BE146C03B12}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
+		{940BE78E-1486-7F9B-02B3-6F0113741A6A}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
