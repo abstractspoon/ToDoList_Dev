@@ -179,7 +179,7 @@ BOOL CMouseWheelMgr::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 
 //////////////////////////////////////////////////////////////////////
 
-CDisableMouseWheel::CDisableMouseWheel()
+CDisableMouseWheel::CDisableMouseWheel() : m_hwndIgnore(NULL)
 {
 }
 
@@ -187,9 +187,13 @@ CDisableMouseWheel::~CDisableMouseWheel()
 {
 }
 
-BOOL CDisableMouseWheel::Initialize()
+BOOL CDisableMouseWheel::Initialize(HWND hwndIgnore)
 {
-	return GetInstance().InitHooks(HM_MOUSE);
+	if (!GetInstance().InitHooks(HM_MOUSE))
+		return FALSE;
+
+	GetInstance().m_hwndIgnore = hwndIgnore;
+	return TRUE;
 }
 
 void CDisableMouseWheel::Release()
@@ -202,10 +206,13 @@ CDisableMouseWheel& CDisableMouseWheel::Instance()
 	return CHookMgr<CDisableMouseWheel>::GetInstance(); 
 }
 	
-BOOL CDisableMouseWheel::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& /*info*/)
+BOOL CDisableMouseWheel::OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info)
 {
 	if (uMouseMsg == WM_MOUSEWHEEL)
-		return TRUE; // prevents WM_MOUSEWHEEL ever reaching a window within the app
+	{
+		if (info.hwnd && (info.hwnd != m_hwndIgnore))
+			return TRUE; // prevents WM_MOUSEWHEEL ever reaching a window within the app
+	}
 		
 	return FALSE;
 }

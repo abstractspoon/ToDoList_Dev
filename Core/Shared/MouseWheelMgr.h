@@ -47,13 +47,16 @@ class CDisableMouseWheel : public CHookMgr<CDisableMouseWheel>
 	
 public:
 	virtual ~CDisableMouseWheel();
-	static BOOL Initialize();
+	static BOOL Initialize(HWND hwndIgnore = NULL);
 	static void Release();
 	
 protected:
 	CDisableMouseWheel();
 	static CDisableMouseWheel& Instance();
 	
+protected:
+	HWND m_hwndIgnore;
+
 protected:
 	virtual BOOL OnMouseEx(UINT uMouseMsg, const MOUSEHOOKSTRUCTEX& info);
 };
