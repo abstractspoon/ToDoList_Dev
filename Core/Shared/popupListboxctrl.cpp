@@ -6,7 +6,6 @@
 //_ Author: D.R.Godson
 //_ Modified By: 
 //_ 
-//_ Copyright (c) 1998 Brilliant Digital Entertainment Inc. 
 //_ 
 //_ **********************************************************
 
@@ -14,9 +13,14 @@
 //
 
 #include "stdafx.h"
-//#include "resource.h"
 #include "PopupListBoxCtrl.h"
 #include "PopupeditCtrl.h"
+#include "MouseWheelMgr.h"
+#include "DialogHelper.h"
+
+#include <afxpriv.h>
+
+/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -34,15 +38,6 @@ CPopupListBoxCtrl::CPopupListBoxCtrl()
 	m_pParent = NULL;
 	m_bAutoHide = TRUE;
 	m_bAutoTrack = TRUE;
-
-	// enter and cancel no longer work w/o accelerators
-/*
-	LPCTSTR lpszResourceName = MAKEINTRESOURCE(IDR_POPUPLISTCTRL);
-	HINSTANCE hInst = AfxFindResourceHandle(lpszResourceName, RT_ACCELERATOR);
-	m_hAccelerator = ::LoadAccelerators(hInst, lpszResourceName);
-
-	ASSERT (m_hAccelerator);
-*/
 }
 
 CPopupListBoxCtrl::~CPopupListBoxCtrl()
@@ -61,8 +56,7 @@ BEGIN_MESSAGE_MAP(CPopupListBoxCtrl, CListBox)
 	ON_WM_LBUTTONDOWN()
 	//}}AFX_MSG_MAP
 	ON_WM_MOUSEMOVE()
-//	ON_COMMAND(ID_POPUPLISTCTRL_ENTER, OnEnter)
-//	ON_COMMAND(ID_POPUPLISTCTRL_CANCEL, OnCancel)
+	ON_MESSAGE(WM_FLOATSTATUS, OnFloatStatus)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -104,7 +98,6 @@ BOOL CPopupListBoxCtrl::Create(CWnd* pParentWnd, UINT nID, BOOL bSort)
 
 	return CWnd::CreateEx(0, _T("LISTBOX"), NULL, dwStyle, 0, 0, 0, 0, pParentWnd->m_hWnd, (HMENU)NULL);
 }
-
 
 int CPopupListBoxCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
 {
@@ -170,14 +163,15 @@ void CPopupListBoxCtrl::Show(CRect rPos)
 	if (!rPos.IsRectNull())
 		MoveWindow(rPos);
 
+	// Prevent underlying window moving during edit
+	CDisableMouseWheel::Initialize(*this);
+
 	// show the listbox and enable
 	ShowWindow(SW_SHOW);
 	EnableWindow(TRUE);
 	SetFocus();
 
-	// do this to prevent all the title bars changing to inactive
-	// when the focus moves to us
-	AfxGetMainWnd()->SendMessage(WM_NCACTIVATE, (WPARAM)TRUE);
+	m_bEditEnded = FALSE;
 }
 
 void CPopupListBoxCtrl::Hide()
@@ -185,16 +179,22 @@ void CPopupListBoxCtrl::Hide()
 	// hide all and disable
 	ShowWindow(SW_HIDE);
 	EnableWindow(FALSE);
-	GetParent()->UpdateWindow();
 
-	// make sure the parent is properly reactivated
-	GetParent()->PostMessage(WM_ACTIVATE, MAKEWPARAM(WA_ACTIVE, FALSE), (LPARAM)m_hWnd);
+	// Allow mouse-wheel
+	CDisableMouseWheel::Release();
+}
+
+LRESULT CPopupListBoxCtrl::OnFloatStatus(WPARAM wParam, LPARAM lParam)
+{
+	// Prevent top-level parent losing activation when we gain focus
+	if (GetStyle() & WS_POPUP)
+		return 1L;
+
+	return 0L;
 }
 
 void CPopupListBoxCtrl::MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint)
 {
-	CRect rPos;
-
 	ValidateRect(x, y, nWidth, nHeight);
 
 	CListBox::MoveWindow(x, y, nWidth, nHeight, bRepaint);
@@ -217,42 +217,40 @@ void CPopupListBoxCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		Hide();
 }
 
-void CPopupListBoxCtrl::ValidateWidth(int& nWidth)
+void CPopupListBoxCtrl::ValidateSize(int& nWidth, int& nHeight)
 {
-	int nMinWidth = 0;
-	CClientDC dc(this);
-	CString sText;
-	int nNumItems;
-	CSize sizeText;
+	// Height
+	int nNumItems = GetCount();
+	BOOL bNeedsVScroll = FALSE;
 
-	// iterate thru list items to ensure that width >= max string
-	nNumItems = GetCount();
-	dc.SelectObject(GetFont());
-
-	while (nNumItems--)
+	if (nNumItems > 0)
 	{
-		GetText(nNumItems, sText);
-		sizeText = dc.GetTextExtent(sText);
-		nMinWidth = max(nMinWidth, sizeText.cx);
+		int nItemHeight = GetItemHeight(0);
+
+		// Must be a multiple of the item height
+		nHeight -= (nHeight % nItemHeight);
+
+		// Must be at least 3 items high
+		nHeight = max(nHeight, (3 * nItemHeight));
+		
+		// Can't be greater than max height
+		int nMaxHeight = (nNumItems * nItemHeight);
+
+		nHeight = min(nHeight, nMaxHeight);
+		bNeedsVScroll = (nHeight < nMaxHeight);
 	}
 
-	nWidth = max(nWidth, nMinWidth + 8);
-}
+	// Width
+	int nMinWidth = CDialogHelper::CalcMaxTextWidth(*this);
 
-void CPopupListBoxCtrl::ValidateHeight(int& nHeight)
-{
-	int nMaxHeight, nItemHeight;
-	int nNumItems;
+	nWidth = max(nWidth, nMinWidth);
 
-	nNumItems = GetCount();
-	nItemHeight = GetItemHeight(0);
+	if (bNeedsVScroll)
+		nWidth += GetSystemMetrics(SM_CXVSCROLL);
 
-	// if the list is empty then just adjust the height to be
-	// a multiple of the item height
-	nHeight = (nHeight / nItemHeight) * nItemHeight;
-	nMaxHeight = nNumItems ? nNumItems * nItemHeight : nHeight;
-
-	nHeight = min(nHeight, nMaxHeight) + 2;
+	// Padding
+	nHeight += 2;
+	nWidth += 8;
 }
 
 void CPopupListBoxCtrl::OnMouseMove(UINT nFlags, CPoint point)
@@ -296,33 +294,37 @@ CWnd* CPopupListBoxCtrl::GetParent()
 	return CListBox::GetParent();
 }
 
-void CPopupListBoxCtrl::ValidateRect(int& nX, int& nY, int& nWidth, int& nHeight)
+void CPopupListBoxCtrl::ValidateRect(CRect& rPos)
 {
-	CRect rScreen;
+	int nX = rPos.left, nY = rPos.top;
+	int nWidth = rPos.Width(), nHeight = rPos.Height();
 
-	// validate width and height
-	ValidateWidth(nWidth);
-	ValidateHeight(nHeight);
+	ValidateRect(nX, nY, nWidth, nHeight);
 
-	// adjust x and y to ensure fully within screen area
-	CWnd::GetDesktopWindow()->GetWindowRect(rScreen); 
-	
-	if (nX + nWidth > rScreen.Width())
-		nX = rScreen.Width() - nWidth;
-
-	if (nY + nHeight > rScreen.Height())
-		nY = rScreen.Height() - nHeight;
+	rPos.SetRect(nX, nY, nX + nWidth, nY + nHeight);
 }
 
-BOOL CPopupListBoxCtrl::PreTranslateMessage(MSG* pMsg) 
+void CPopupListBoxCtrl::ValidateRect(int& nX, int& nY, int& nWidth, int& nHeight)
 {
-	// handle accelerator keys
-	if (pMsg->message == WM_KEYDOWN || pMsg->message == WM_SYSKEYDOWN)
-	{
-		// try handling it ourself
-		if (m_hAccelerator && ::TranslateAccelerator(GetSafeHwnd(), m_hAccelerator, pMsg))
-			return TRUE;
-	}
+	// validate width and height
+	ValidateSize(nWidth, nHeight);
+
+	// adjust x and y to ensure fully within screen area
+	CRect rScreen, rPos(nX, nY, nX + nWidth, nY + nHeight);
 	
-	return CListBox::PreTranslateMessage(pMsg);
+	HMONITOR hMon = MonitorFromRect(rPos, MONITOR_DEFAULTTONULL);
+
+	if (hMon)
+	{
+		MONITORINFO mi = { sizeof(MONITORINFO), 0 };
+
+		if (GetMonitorInfo(hMon, &mi))
+		{
+			if (nX + nWidth > mi.rcMonitor.right)
+				nX = mi.rcMonitor.right - nWidth;
+
+			if (nY + nHeight > mi.rcMonitor.bottom)
+				nY = mi.rcMonitor.bottom - nHeight;
+		}
+	}
 }

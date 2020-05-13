@@ -87,6 +87,7 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_TASKLINK, OnCommentsTaskLink)
 	ON_REGISTERED_MESSAGE(WM_ICC_FAILEDLINK, OnCommentsFailedLink)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETLINKTOOLTIP, OnCommentsGetTooltip)
+	ON_REGISTERED_MESSAGE(WM_ICC_GETATTRIBUTELIST, OnCommentsGetAttributeList)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
 END_MESSAGE_MAP()
@@ -434,6 +435,12 @@ LRESULT CTDLCommentsCtrl::OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam)
 {
 	// Forward to parent
 	return GetParent()->SendMessage(WM_ICC_GETLINKTOOLTIP, wParam, lParam);
+}
+
+LRESULT CTDLCommentsCtrl::OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam)
+{
+	// Forward to parent
+	return GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, wParam, lParam);
 }
 
 void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)

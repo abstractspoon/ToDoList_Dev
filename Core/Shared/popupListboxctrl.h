@@ -30,6 +30,7 @@ class CPopupListBoxCtrl : public CListBox
 // Construction
 public:
 	CPopupListBoxCtrl();
+
 	void Reset() { m_bEditEnded = FALSE; }
 	void Show(CRect rPos = CRect(0, 0, 0, 0)); // screen coords
 	void Hide();
@@ -37,6 +38,7 @@ public:
 	void MoveWindow(int x, int y, int nWidth, int nHeight, BOOL bRepaint = TRUE); // screen coords
 	void MoveWindow(LPCRECT lpRect, BOOL bRepaint = TRUE); // screen coords
 	void AutoTrack(BOOL bEnable = TRUE) { m_bAutoTrack = bEnable; }
+	void ValidateRect(CRect& rPos);
 
 // Attributes
 protected:
@@ -45,7 +47,6 @@ protected:
 	CWnd* m_pParent;
 	BOOL m_bAutoHide;
 	BOOL m_bAutoTrack;
-	HACCEL m_hAccelerator;
 
 // Operations
 public:
@@ -55,7 +56,6 @@ public:
 	//{{AFX_VIRTUAL(CPopupListBoxCtrl)
 	public:
 	virtual BOOL Create(CWnd* pParentWnd, UINT nID, BOOL bSort = TRUE);
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	//}}AFX_VIRTUAL
 
 // Implementation
@@ -72,11 +72,13 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnEnter();
-	afx_msg void OnCancel();
+	afx_msg LRESULT OnFloatStatus(WPARAM wParam, LPARAM lParam);
 
-	void ValidateWidth(int& nWidth);
-	void ValidateHeight(int& nHeight);
+	// Pseudo message handlers
+	void OnEnter();
+	void OnCancel();
+
+	void ValidateSize(int& nWidth, int& nHeight);
 	void ValidateRect(int& nX, int& nY, int& nWidth, int& nHeight);
 	CWnd* GetParent();
 

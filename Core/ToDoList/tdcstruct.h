@@ -365,6 +365,22 @@ struct TDCAUTOLISTDATA
 			aVersion.RemoveAll();
 	}
 
+	CString Format(TDC_ATTRIBUTE nAttribID, TCHAR cSep = 0)
+	{
+		switch (nAttribID)
+		{
+		case TDCA_ALLOCBY:	return Misc::FormatArray(aAllocBy, cSep);
+		case TDCA_ALLOCTO:	return Misc::FormatArray(aAllocTo, cSep);
+		case TDCA_CATEGORY:	return Misc::FormatArray(aCategory, cSep);
+		case TDCA_STATUS:	return Misc::FormatArray(aStatus, cSep);
+		case TDCA_TAGS:		return Misc::FormatArray(aTags, cSep);
+		case TDCA_VERSION:	return Misc::FormatArray(aVersion, cSep);
+		}
+
+		ASSERT(0);
+		return _T("");
+	}
+
 	CStringArray aCategory, aStatus, aAllocTo, aAllocBy, aTags, aVersion;
 
 protected:

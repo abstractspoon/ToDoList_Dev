@@ -109,6 +109,7 @@ protected:
 	afx_msg LRESULT OnCommentsTaskLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam);
 
 protected:
 	void CalcCommentsCtrlRect(CRect& rCtrl, int cx = 0, int cy = 0) const;
@@ -117,6 +118,7 @@ protected:
 	CString GetPreferencesKey() const;
 	void SavePreferences() const;
 	void LoadPreferences(BOOL bAppOnly);
+
 
 };
 

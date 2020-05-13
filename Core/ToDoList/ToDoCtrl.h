@@ -679,6 +679,7 @@ protected:
 	afx_msg LRESULT OnCommentsKillFocus(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnApplyAddLoggedTime(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTaskIconDlgReloadIcons(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
