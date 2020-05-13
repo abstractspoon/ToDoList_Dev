@@ -822,12 +822,6 @@
     <ClInclude Include="XslFile.h" />
     <ClInclude Include="Zipper.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\3rdParty\3rdParty.vcxproj">
-      <Project>{e15c17b8-c080-492f-bbb8-bf9e84a0ea31}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
