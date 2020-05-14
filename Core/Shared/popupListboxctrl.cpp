@@ -51,8 +51,6 @@ BEGIN_MESSAGE_MAP(CPopupListBoxCtrl, CListBox)
 	ON_WM_CREATE()
 	ON_WM_KEYDOWN()
 	ON_WM_GETDLGCODE()
-	ON_WM_CTLCOLOR()
-	ON_WM_DESTROY()
 	ON_WM_LBUTTONDOWN()
 	//}}AFX_MSG_MAP
 	ON_WM_MOUSEMOVE()
@@ -104,6 +102,7 @@ int CPopupListBoxCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (CListBox::OnCreate(lpCreateStruct) == -1)
 		return -1;
 	
+	SetDlgCtrlID(m_nID);
 	SetFont(CFont::FromHandle((HFONT)::GetStockObject(ANSI_VAR_FONT)));
 	SetItemHeight(0, 16);
 
@@ -177,8 +176,11 @@ void CPopupListBoxCtrl::Show(CRect rPos)
 void CPopupListBoxCtrl::Hide()
 {
 	// hide all and disable
-	ShowWindow(SW_HIDE);
-	EnableWindow(FALSE);
+	if (GetSafeHwnd())
+	{
+		ShowWindow(SW_HIDE);
+		EnableWindow(FALSE);
+	}
 
 	// Allow mouse-wheel
 	CDisableMouseWheel::Release();
@@ -243,10 +245,10 @@ void CPopupListBoxCtrl::ValidateSize(int& nWidth, int& nHeight)
 	// Width
 	int nMinWidth = CDialogHelper::CalcMaxTextWidth(*this);
 
-	nWidth = max(nWidth, nMinWidth);
-
 	if (bNeedsVScroll)
-		nWidth += GetSystemMetrics(SM_CXVSCROLL);
+		nMinWidth += GetSystemMetrics(SM_CXVSCROLL);
+
+	nWidth = max(nWidth, nMinWidth);
 
 	// Padding
 	nHeight += 2;

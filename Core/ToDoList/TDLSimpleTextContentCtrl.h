@@ -9,7 +9,6 @@
 
 #include "..\shared\icon.h"
 #include "..\shared\urlricheditctrl.h"
-#include "..\shared\PopupListboxCtrl.h"
 
 #include "..\Interfaces\richeditspellcheck.h"
 #include "..\Interfaces\IContentControl.h"
@@ -56,7 +55,6 @@ protected:
 	BOOL m_bWordWrap;
 
 	CRichEditSpellCheck m_reSpellCheck;
-	CPopupListBoxCtrl m_lbDropList;
 
 	static BOOL s_bInlineSpellChecking;
 	static BOOL s_bPasteSourceUrls;
@@ -89,14 +87,12 @@ protected:
 	afx_msg void OnNcDestroy();
 	afx_msg UINT OnGetDlgCode();
 
-	afx_msg LRESULT OnDropListEndEdit(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnDropListCancelEdit(WPARAM wp, LPARAM lp);
-
 	DECLARE_MESSAGE_MAP()
 
 	virtual LRESULT SendNotifyCustomUrl(LPCTSTR szUrl) const;
 	virtual LRESULT SendNotifyFailedUrl(LPCTSTR szUrl) const;
 	virtual CLIPFORMAT GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format);
+	virtual void OnPopupListSelectItem(const CString& sSelItem);
 
 protected:
 	BOOL IsTDLClipboardEmpty() const;

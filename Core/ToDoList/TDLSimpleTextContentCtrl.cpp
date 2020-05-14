@@ -20,7 +20,6 @@
 #include "..\shared\localizer.h"
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\dialoghelper.h"
-#include "..\shared\popupeditctrl.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
@@ -92,8 +91,6 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
 	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
 	ON_WM_NCDESTROY()
-	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnDropListEndEdit)
-	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnDropListCancelEdit)
 
 END_MESSAGE_MAP()
 
@@ -265,47 +262,20 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 				break;
 
 			case '2':
-				if (bShift)
+				if (bShift) // '@'
 				{
-					CStringArray aListData, aTemp;
-
 					// Get both allocated by and allocated to
 					CString sAllocTo = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, TDCA_ALLOCTO, '\n');
-					int nNumItems = Misc::Split(sAllocTo, aListData, '\n');
-
 					CString sAllocBy = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, TDCA_ALLOCBY, '\n');
+
+					CStringArray aListData, aTemp;
+
+					Misc::Split(sAllocTo, aListData, '\n');
 					Misc::Split(sAllocBy, aTemp, '\n');
+					Misc::AddUniqueItems(aTemp, aListData);
 
-					nNumItems += Misc::AddUniqueItems(aTemp, aListData);
-
-					if (!nNumItems)
-						return false;
-
-					if (!m_lbDropList.GetSafeHwnd())
-					{
-						VERIFY(m_lbDropList.Create(this, IDC_DROPLIST));
-
-						m_lbDropList.SetFont(GetParent()->GetFont());
-					}
-
-					CDialogHelper::SetListBoxItems(m_lbDropList, aListData);
-
-					// Display the list above or below the line
-					CPoint ptCaret(GetCaretPos());
-					ClientToScreen(&ptCaret);
-
-					// Below first
-					ptCaret.y += (GetLineHeight() / 2);
-
-					CRect rList(ptCaret, CSize(0, 20));
-					m_lbDropList.ValidateRect(rList);
-
-					// if the vertical position has changed try above
-					if (rList.top != ptCaret.y)
-						rList.OffsetRect(0, (ptCaret.y - GetLineHeight() - rList.Height() - rList.top));
-
-					m_lbDropList.SetCurSel(0);
-					m_lbDropList.Show(rList);
+					if (aListData.GetSize())
+						ShowPopupListBoxAtCaret(aListData);
 				}
 				break;
 			}
@@ -315,36 +285,22 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 	return false;
 }
 
-LRESULT CTDLSimpleTextContentCtrl::OnDropListEndEdit(WPARAM wp, LPARAM lp)
+void CTDLSimpleTextContentCtrl::OnPopupListSelectItem(const CString& sSelItem)
 {
-	ASSERT(wp == IDC_DROPLIST);
-
-	CString sSelItem = CDialogHelper::GetSelectedItem(m_lbDropList);
-
 	if (!sSelItem.IsEmpty())
 	{
 		// replace the preceding '@' with this item
 		CHARRANGE crSel = { 0 };
+		
 		GetSel(crSel);
-
 		ASSERT(crSel.cpMin == crSel.cpMax);
 
 		crSel.cpMin--;
+		ASSERT(GetTextRange(crSel) == _T("@"));
 
 		SetSel(crSel);
 		ReplaceSel(sSelItem, TRUE);
 	}
-
-	SetFocus();
-
-	return 0L;
-}
-
-LRESULT CTDLSimpleTextContentCtrl::OnDropListCancelEdit(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	SetFocus();
-
-	return 0L;
 }
 
 void CTDLSimpleTextContentCtrl::FilterToolTipMessage(MSG* /*pMsg*/) 

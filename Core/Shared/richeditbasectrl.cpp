@@ -14,6 +14,7 @@
 #include "regkey.h"
 #include "osversion.h"
 #include "clipboard.h"
+#include "popupeditctrl.h"
 
 #include <atlconv.h>
 
@@ -26,6 +27,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const CRect DEFMARGINS					= CRect(8, 4, 8, 0);
+const CSize DEFPOPUPLISTSIZE			= CSize(GraphicsMisc::ScaleByDPIFactor(75), GraphicsMisc::ScaleByDPIFactor(200));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -91,7 +93,8 @@ CRichEditBaseCtrl::CRichEditBaseCtrl(BOOL bAutoRTL)
 	m_bEnableSelectOnFocus(FALSE),
 	m_bInOnFocus(FALSE), 
 	m_rMargins(DEFMARGINS),
-	m_bAutoRTL(bAutoRTL)
+	m_bAutoRTL(bAutoRTL),
+	m_pPopupListOwner(NULL)
 {
    m_callback.SetOwner(this);
 }
@@ -113,6 +116,8 @@ BEGIN_MESSAGE_MAP(CRichEditBaseCtrl, CRichEditCtrl)
 	ON_REGISTERED_MESSAGE(WM_FINDREPLACE, OnFindReplaceMsg)
 	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 	ON_REGISTERED_MESSAGE(WM_REBC_REENABLECHANGENOTIFY, OnReenableChangeNotifications)
+	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnDropListEndEdit)
+	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnDropListCancelEdit)
 
 	ON_MESSAGE(EM_SETSEL, OnEditSetSelection)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
@@ -1528,5 +1533,81 @@ LRESULT CRichEditBaseCtrl::OnReenableChangeNotifications(WPARAM /*wParam*/, LPAR
 	ASSERT((GetEventMask() & ENM_CHANGE) == 0);
 
 	SetEventMask(GetEventMask() | ENM_CHANGE);
+	return 0L;
+}
+
+BOOL CRichEditBaseCtrl::ShowPopupListBoxAtCaret(const CStringArray& aListItems, CWnd* pNotify, UINT nID)
+{
+	int nNumItems = aListItems.GetSize();
+
+	if (!nNumItems || (pNotify && (!pNotify->GetSafeHwnd() || !nID)) || m_lbPopupList.GetSafeHwnd())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (!m_lbPopupList.Create(this, nID))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_lbPopupList.SetFont(GetParent()->GetFont());
+
+	for (int nItem = 0; nItem < nNumItems; nItem++)
+		m_lbPopupList.AddString(aListItems[nItem]);
+
+	// Display the list above or below the line
+	CPoint ptCaret(GetCaretPos());
+	ClientToScreen(&ptCaret);
+
+	// Below first
+	ptCaret.y += (GetLineHeight() / 2);
+
+	CRect rList(ptCaret, DEFPOPUPLISTSIZE);
+	m_lbPopupList.ValidateRect(rList);
+
+	// if the vertical position has changed try above
+	if (rList.top != ptCaret.y)
+		rList.OffsetRect(0, (ptCaret.y - GetLineHeight() - rList.Height() - rList.top));
+
+	m_lbPopupList.SetCurSel(0);
+	m_lbPopupList.Show(rList);
+
+	m_pPopupListOwner = pNotify;
+
+	return TRUE;
+}
+
+LRESULT CRichEditBaseCtrl::OnDropListEndEdit(WPARAM wp, LPARAM lp)
+{
+	ASSERT(wp == m_lbPopupList.GetDlgCtrlID());
+	ASSERT(!m_pPopupListOwner || m_pPopupListOwner->GetSafeHwnd());
+
+	// Notify owner
+	CString sSelItem;
+	m_lbPopupList.GetText(m_lbPopupList.GetCurSel(), sSelItem);
+
+	if (m_pPopupListOwner)
+	{
+		m_pPopupListOwner->SendMessage(WM_REB_NOTIFYSELECTPOPUPLISTITEM, wp, (LPARAM)(LPCTSTR)sSelItem);
+	}
+	else
+	{
+		// Derived class
+		OnPopupListSelectItem(sSelItem);
+	}
+
+	// Cleanup
+	return OnDropListCancelEdit(wp, lp);
+}
+
+LRESULT CRichEditBaseCtrl::OnDropListCancelEdit(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	m_lbPopupList.DestroyWindow();
+	m_pPopupListOwner = NULL;
+
+	SetFocus();
+
 	return 0L;
 }

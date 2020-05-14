@@ -7,6 +7,8 @@
 
 #include "findreplace.h"
 #include "tooltipctrlex.h"
+#include "popuplistboxctrl.h"
+
 #include <richole.h>
 
 /////////////////////////////////////////////////////////////////////////////
@@ -100,6 +102,10 @@ enum REBC_URL
 	REBCU_ENABLEDRIVELETTERS = 0x10,
 	REBCU_DISABLEMIXEDLGC	 = 0x20,
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+const UINT WM_REB_NOTIFYSELECTPOPUPLISTITEM = ::RegisterWindowMessage(_T("WM_REB_NOTIFYSELECTPOPUPLISTITEM")); // wParam = DlgCtrlID, lParam = LPCTSTR
 
 /////////////////////////////////////////////////////////////////////////////
 // CRichEditBaseCtrl window
@@ -197,6 +203,8 @@ public:
 	BOOL EnableAutoUrlDetection(const CStringArray& aProtocols, DWORD dwFlags = REBCU_ENABLEURL);
 	BOOL IsAutoUrlDetectionEnabled() const;
 
+	BOOL ShowPopupListBoxAtCaret(const CStringArray& aListItems, CWnd* pNotify = NULL, UINT nID = 0xffff);
+
 	// Attributes
 protected:
 	BOOL m_bEnableSelectOnFocus;
@@ -205,7 +213,10 @@ protected:
 
 	CRect m_rMargins;
 	FIND_STATE m_findState;
+
 	CToolTipCtrlEx m_tooltip;
+	CPopupListBoxCtrl m_lbPopupList;
+	CWnd* m_pPopupListOwner;
 	
 	// Overrides
 	// ClassWizard generated virtual function overrides
@@ -277,21 +288,25 @@ protected:
 								BOOL bNext, BOOL bCase,	BOOL bWord);
 	virtual void OnReplaceAll(const CString& sFind, const CString& sReplace,
 								BOOL bCase, BOOL bWord);
+	virtual void OnPopupListSelectItem(const CString& /*sSelItem*/) {}
 	virtual void Initialise();
 	
 	//{{AFX_MSG(CRichEditBaseCtrl)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	//}}AFX_MSG
-	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnDestroy();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
-	afx_msg LRESULT OnEditSetSelection(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+
 	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSetText(WPARAM wParam, LPARAM lParam);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnEditSetSelection(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToolHitTest(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnReenableChangeNotifications(WPARAM wParam, LPARAM lParam);
-	
+	afx_msg LRESULT OnDropListEndEdit(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnDropListCancelEdit(WPARAM wp, LPARAM lp);
+
 	DECLARE_MESSAGE_MAP()
 		
 	void AdjustFindDialogPosition();

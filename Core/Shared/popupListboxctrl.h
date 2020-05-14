@@ -39,6 +39,7 @@ public:
 	void MoveWindow(LPCRECT lpRect, BOOL bRepaint = TRUE); // screen coords
 	void AutoTrack(BOOL bEnable = TRUE) { m_bAutoTrack = bEnable; }
 	void ValidateRect(CRect& rPos);
+	UINT GetDlgCtrlID() const { return m_nID; }
 
 // Attributes
 protected:
