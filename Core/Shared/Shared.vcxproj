@@ -762,6 +762,7 @@
     <ClInclude Include="Regkey.h" />
     <ClInclude Include="RemoteFile.h" />
     <ClInclude Include="RemoteFileDialog.h" />
+    <ClInclude Include="richeditbasectrl.h" />
     <ClInclude Include="RichEditHelper.h" />
     <ClInclude Include="RichEditNcBorder.h" />
     <ClInclude Include="RoundCorner.h" />
