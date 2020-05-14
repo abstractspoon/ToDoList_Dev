@@ -135,6 +135,7 @@ protected:
 	afx_msg LRESULT OnCustomUrl(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFailedUrl(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnPrefsHelp(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnSelectPopupListItem(WPARAM wp, LPARAM lp);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult);

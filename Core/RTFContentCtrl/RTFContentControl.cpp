@@ -136,6 +136,7 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_CUSTOMURL, OnCustomUrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_FAILEDURL, OnFailedUrl)
 	ON_REGISTERED_MESSAGE(WM_RTF_PREFSHELP, OnPrefsHelp)
+	ON_REGISTERED_MESSAGE(WM_REB_NOTIFYSELECTPOPUPLISTITEM, OnSelectPopupListItem)
 	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
@@ -148,6 +149,36 @@ void CRTFContentControl::OnNcDestroy()
 	
 	delete this;
 }
+
+LRESULT CRTFContentControl::OnSelectPopupListItem(WPARAM wp, LPARAM lp)
+{
+	if ((wp != 0xffff) || !lp)
+	{
+		ASSERT(0);
+	}
+	else
+	{
+		CString sSelItem((LPCTSTR)lp);
+
+		if (!sSelItem.IsEmpty())
+		{
+			// replace the preceding '@' with this item
+			CHARRANGE crSel = { 0 };
+
+			m_rtf.GetSel(crSel);
+			ASSERT(crSel.cpMin == crSel.cpMax);
+
+			crSel.cpMin--;
+			ASSERT(m_rtf.GetTextRange(crSel) == _T("@"));
+
+			m_rtf.SetSel(crSel);
+			m_rtf.ReplaceSel(sSelItem, TRUE);
+		}
+	}
+
+	return 0L;
+}
+
 
 LRESULT CRTFContentControl::OnPrefsHelp(WPARAM /*wp*/, LPARAM /*lp*/)
 {
@@ -586,25 +617,48 @@ bool CRTFContentControl::ProcessMessage(MSG* pMsg)
 					return true; // to prevent the richedit performing the redo
 				}
 			}
-			else if (bEnabled && (pMsg->wParam == VK_TAB))
+			else if (bEnabled)
 			{
-				CHARRANGE cr;
-				m_rtf.GetSel(cr);
-				
-				// if nothing is selected then just insert tabs
-				if (cr.cpMin == cr.cpMax)
+				switch (pMsg->wParam)
 				{
-					m_rtf.ReplaceSel(_T("\t"), TRUE);
-				}
-				else
+				case VK_TAB:
 				{
-					if (!bShift)
-						DoIndent();
+					CHARRANGE cr;
+					m_rtf.GetSel(cr);
+
+					// if nothing is selected then just insert tabs
+					if (cr.cpMin == cr.cpMax)
+					{
+						m_rtf.ReplaceSel(_T("\t"), TRUE);
+					}
 					else
-						DoOutdent();
+					{
+						if (!bShift)
+							DoIndent();
+						else
+							DoOutdent();
+					}
 				}
-				
 				return true;
+
+				case '2':
+					if (bShift) // '@'
+					{
+						// Get both allocated by and allocated to
+						CString sAllocTo = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, TDCA_ALLOCTO, '\n');
+						CString sAllocBy = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, TDCA_ALLOCBY, '\n');
+
+						CStringArray aListData, aTemp;
+
+						Misc::Split(sAllocTo, aListData, '\n');
+						Misc::Split(sAllocBy, aTemp, '\n');
+						Misc::AddUniqueItems(aTemp, aListData);
+
+						if (aListData.GetSize())
+							m_rtf.ShowPopupListBoxAtCaret(aListData, this);
+					}
+					break;
+				}
 			}
 		}
 		break;
