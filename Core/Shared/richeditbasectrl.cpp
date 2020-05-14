@@ -1552,7 +1552,10 @@ BOOL CRichEditBaseCtrl::ShowPopupListBoxAtCaret(const CStringArray& aListItems, 
 		return FALSE;
 	}
 
-	m_lbPopupList.SetFont(GetParent()->GetFont());
+	if (pNotify)
+		m_lbPopupList.SetFont(pNotify->GetParent()->GetFont());
+	else
+		m_lbPopupList.SetFont(GetParent()->GetFont());
 
 	for (int nItem = 0; nItem < nNumItems; nItem++)
 		m_lbPopupList.AddString(aListItems[nItem]);
@@ -1595,7 +1598,7 @@ LRESULT CRichEditBaseCtrl::OnDropListEndEdit(WPARAM wp, LPARAM lp)
 	else
 	{
 		// Derived class
-		OnPopupListSelectItem(sSelItem);
+		OnSelectPopupListItem(sSelItem);
 	}
 
 	// Cleanup

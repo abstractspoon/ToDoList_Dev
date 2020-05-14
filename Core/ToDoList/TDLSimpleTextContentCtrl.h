@@ -92,7 +92,7 @@ protected:
 	virtual LRESULT SendNotifyCustomUrl(LPCTSTR szUrl) const;
 	virtual LRESULT SendNotifyFailedUrl(LPCTSTR szUrl) const;
 	virtual CLIPFORMAT GetAcceptableClipFormat(LPDATAOBJECT lpDataOb, CLIPFORMAT format);
-	virtual void OnPopupListSelectItem(const CString& sSelItem);
+	virtual void OnSelectPopupListItem(const CString& sSelItem);
 
 protected:
 	BOOL IsTDLClipboardEmpty() const;

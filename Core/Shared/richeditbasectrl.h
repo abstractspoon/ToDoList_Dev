@@ -288,7 +288,7 @@ protected:
 								BOOL bNext, BOOL bCase,	BOOL bWord);
 	virtual void OnReplaceAll(const CString& sFind, const CString& sReplace,
 								BOOL bCase, BOOL bWord);
-	virtual void OnPopupListSelectItem(const CString& /*sSelItem*/) {}
+	virtual void OnSelectPopupListItem(const CString& /*sSelItem*/) {}
 	virtual void Initialise();
 	
 	//{{AFX_MSG(CRichEditBaseCtrl)

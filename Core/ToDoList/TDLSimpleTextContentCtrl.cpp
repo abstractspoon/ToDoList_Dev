@@ -285,7 +285,7 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 	return false;
 }
 
-void CTDLSimpleTextContentCtrl::OnPopupListSelectItem(const CString& sSelItem)
+void CTDLSimpleTextContentCtrl::OnSelectPopupListItem(const CString& sSelItem)
 {
 	if (!sSelItem.IsEmpty())
 	{
