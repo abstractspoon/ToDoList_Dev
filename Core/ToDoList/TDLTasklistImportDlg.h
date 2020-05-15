@@ -43,7 +43,7 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTasklistImportDlg dialog
 
-class CTDLTasklistImportDlg : public CDialog
+class CTDLTasklistImportDlg : public CTDLDialog
 {
 // Construction
 public:
@@ -77,6 +77,7 @@ protected:
 protected:
 	virtual BOOL OnInitDialog();
 	virtual void OnOK();
+	virtual void OnRepositionControls(int dx, int dy);
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLTasklistImportDlg)

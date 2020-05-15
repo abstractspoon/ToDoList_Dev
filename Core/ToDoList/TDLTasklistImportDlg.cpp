@@ -21,14 +21,16 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLTaskTreeImportCtrl::CTDLTaskTreeImportCtrl() 
 	: 
-	m_data(m_styles, m_aCustAttribDefs),
-	m_exporter(m_data, *this, m_mgrContent),
 	CTDLTaskTreeCtrl(m_ilIcons, 
 					m_data, 
 					m_styles, 
 					m_tld, 
 					m_visibleCols.GetVisibleColumns(), 
-					m_aCustAttribDefs)
+					m_aCustAttribDefs),
+	m_data(m_styles, m_aCustAttribDefs),
+#pragma warning (disable: 4355)
+	m_exporter(m_data, *this, m_mgrContent)
+#pragma warning (default: 4355)
 {
 	CPreferencesDlg prefs;
 
@@ -159,7 +161,7 @@ void CTDLTaskTreeImportCtrl::AddTreeItemToTasks(HTREEITEM hti, CTaskFile& tasks,
 
 CTDLTasklistImportDlg::CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(IDD_TDLIMPORTEXPORT_DIALOG, pParent), 
+	CTDLDialog(IDD_TDLIMPORTEXPORT_DIALOG, _T(""), pParent), 
 	m_eFilePath(FES_NOBROWSE), 
 	m_nLoadRes(TDCF_UNSET),
 	m_bFirstShow(TRUE)
@@ -174,7 +176,7 @@ CTDLTasklistImportDlg::CTDLTasklistImportDlg(const CString& sFilePath, CWnd* pPa
 
 void CTDLTasklistImportDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLTasklistImportDlg)
 	DDX_Check(pDX, IDC_RESETCREATIONDATE, m_bResetCreationDate);
 	DDX_Text(pDX, IDC_TDLFILEPATH, m_sFilePath);
@@ -184,7 +186,7 @@ void CTDLTasklistImportDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLTasklistImportDlg, CDialog)
+BEGIN_MESSAGE_MAP(CTDLTasklistImportDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLTasklistImportDlg)
 	ON_BN_CLICKED(IDC_SELECTALL, OnSelectall)
 	ON_BN_CLICKED(IDC_SELECTNONE, OnSelectnone)
@@ -198,7 +200,7 @@ END_MESSAGE_MAP()
 
 BOOL CTDLTasklistImportDlg::OnInitDialog() 
 {
-	CDialog::OnInitDialog();
+	CTDLDialog::OnInitDialog();
 	
 	// create task tree in the space of IDC_TODOCTRL
 	CRect rToDoCtrl = CDialogHelper::GetCtrlRect(this, IDC_TODOCTRL);
@@ -229,6 +231,24 @@ BOOL CTDLTasklistImportDlg::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeChild(&m_taskTree, pDC);
 
 	return CDialog::OnEraseBkgnd(pDC);
+}
+
+void CTDLTasklistImportDlg::OnRepositionControls(int dx, int dy)
+{
+	CDialogHelper::ResizeChild(&m_taskTree, dx, dy);
+	CDialogHelper::ResizeChild(&m_eFilePath, dx, 0);
+
+	CDialogHelper::OffsetCtrl(this, IDC_SELECTALL, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SELECTNONE, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_EXPANDALL, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_IMPORTSUBTASKS, 0, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_RESETCREATIONDATE, 0, dy);
+
+	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
+	CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, dx, 0);
+
+	CDialogHelper::OffsetCtrl(this, IDOK, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDCANCEL, dx, dy);
 }
 
 void CTDLTasklistImportDlg::OnSelectall() 
