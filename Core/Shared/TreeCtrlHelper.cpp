@@ -243,7 +243,12 @@ void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BO
 	}
 
 	if (hti)
-		m_tree.Expand(hti, bExpand ? TVE_EXPAND : TVE_COLLAPSE);
+	{
+		BOOL bIsExpanded = IsItemExpanded(hti);
+
+		if ((bIsExpanded && !bExpand) || (!bIsExpanded && bExpand))
+			m_tree.Expand(hti, bExpand ? TVE_EXPAND : TVE_COLLAPSE);
+	}
 	
 	if (bChildren)
 	{
@@ -263,11 +268,10 @@ void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BO
 	{
 		HTREEITEM htiParent = m_tree.GetParentItem(hti);
 		
-		while (htiParent)
-		{
-			m_tree.Expand(htiParent, TVE_EXPAND);
-			htiParent = m_tree.GetParentItem(htiParent);
-		}
+		// Don't expand this parent's children because
+		// they will already have been done
+		if (htiParent)
+			ExpandItem(htiParent, TRUE, FALSE, TRUE); // RECURSIVE call
 	}
 }
 
