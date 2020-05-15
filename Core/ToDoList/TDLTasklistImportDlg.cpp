@@ -58,12 +58,14 @@ CTDLTaskTreeImportCtrl::CTDLTaskTreeImportCtrl()
 	VERIFY(GraphicsMisc::CreateFont(m_font, sFaceName, nFontSize));
 }
 
-BOOL CTDLTaskTreeImportCtrl::BuildTree(const CString& sFilePath)
+TDC_FILE CTDLTaskTreeImportCtrl::LoadTasklist(const CString& sFilePath)
 {
+	ASSERT(GetSafeHwnd());
+
 	CTaskFile tasks;
 
 	if (!tasks.Load(sFilePath))
-		return FALSE;
+		return TDC::MapTaskfileError(tasks.GetLastFileError());
 
 	tasks.GetCustomAttributeDefs(m_aCustAttribDefs);
 
@@ -84,7 +86,7 @@ BOOL CTDLTaskTreeImportCtrl::BuildTree(const CString& sFilePath)
 
 	SetFont(m_font);
 	
-	return TRUE;
+	return TDCF_SUCCESS;
 }
 
 void CTDLTaskTreeImportCtrl::AddTasksToTree(const TODOSTRUCTURE* pTDSParent, HTREEITEM htiParent)
@@ -205,10 +207,13 @@ BOOL CTDLTasklistImportDlg::OnInitDialog()
 	// create task tree in the space of IDC_TODOCTRL
 	CRect rToDoCtrl = CDialogHelper::GetCtrlRect(this, IDC_TODOCTRL);
 
-	if (!m_taskTree.Create(this, rToDoCtrl, IDC_TODOCTRL + 1) || !m_taskTree.BuildTree(m_sFilePath))
-		EndDialog(IDOK);
+	if (m_taskTree.Create(this, rToDoCtrl, IDC_TODOCTRL + 1))
+		m_nLoadRes = m_taskTree.LoadTasklist(m_sFilePath);
 	else
-		m_nLoadRes = TDCF_SUCCESS;
+		m_nLoadRes = TDCF_OTHER;
+
+	if (m_nLoadRes != TDCF_SUCCESS)
+		EndDialog(IDOK);
 	
 	return FALSE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -226,6 +231,7 @@ BOOL CTDLTasklistImportDlg::OnEraseBkgnd(CDC* pDC)
 
 		m_taskTree.ExpandAll();
 		m_taskTree.SelectAll();
+		m_taskTree.SetFocus();
 	}
 	
 	CDialogHelper::ExcludeChild(&m_taskTree, pDC);
@@ -271,6 +277,8 @@ LRESULT CTDLTasklistImportDlg::OnTDCNotifySelectionChange(WPARAM, LPARAM)
 {
 	GetDlgItem(IDOK)->EnableWindow(m_taskTree.GetSelectedCount());
 	GetDlgItem(IDC_IMPORTSUBTASKS)->EnableWindow(m_taskTree.SelectionHasSubtasks());
+
+	m_taskTree.UpdateWindow();
 
 	return 0L;
 }

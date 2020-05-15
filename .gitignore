@@ -264,5 +264,6 @@ paket-files/
 *.zip
 *.vsscc
 *.resources
+*.vcxproj.user
 *.tlog
 *.lastbuildstate

@@ -21,7 +21,7 @@ class CTDLTaskTreeImportCtrl : public CTDLTaskTreeCtrl
 public:
 	CTDLTaskTreeImportCtrl();
 
-	BOOL BuildTree(const CString& sFilePath);
+	TDC_FILE LoadTasklist(const CString& sFilePath);
 	int GetSelectedTasks(CTaskFile& tasks, BOOL bWantAllSubtasks);
 
 protected:

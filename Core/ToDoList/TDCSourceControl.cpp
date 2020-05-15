@@ -185,7 +185,7 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 	else
 	{
 		if (nResult == TDCF_UNSET)
-			nResult = m_tdc.MapTaskfileError(tasks.GetLastFileError());
+			nResult = TDC::MapTaskfileError(tasks.GetLastFileError());
 
 		VERIFY(backup.RestoreBackup());
 	}

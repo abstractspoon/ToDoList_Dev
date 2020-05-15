@@ -5887,38 +5887,7 @@ TDC_FILE CToDoCtrl::SaveTaskfile(CTaskFile& tasks, const CString& sSavePath)
 	// Error
 	VERIFY(backup.RestoreBackup());
 	
-	return MapTaskfileError(tasks.GetLastFileError());
-}
-
-// static helper
-TDC_FILE CToDoCtrl::MapTaskfileError(int nFileErr)
-{
-	switch (nFileErr)
-	{
-	case XFL_CANCELLED:			return TDCF_CANCELLED;
-	case XFL_MISSINGROOT:		return TDCF_NOTTASKLIST;
-	case XFL_BADMSXML:			return TDCF_BADMSXML;
-	case XFL_NOENCRYPTIONDLL:	return TDCF_NOENCRYPTIONDLL;
-	case XFL_UNKNOWNENCRYPTION:	return TDCF_UNKNOWNENCRYPTION;
-		
-	default:
-		// if nFileErr is greater than zero then it represents GetLastError
-		// so we append this to TDCO_OTHER
-		if (nFileErr > 0)
-		{
-			switch (nFileErr)
-			{
-			case ERROR_ACCESS_DENIED:		return TDCF_NOTALLOWED;
-			case ERROR_SHARING_VIOLATION:	return TDCF_INUSE;
-			case ERROR_DISK_FULL:			return TDCF_NOSPACE;
-				
-			default: return (TDC_FILE)(TDCF_OTHER + nFileErr);
-			}
-		}
-	}
-	
-	// all else
-	return TDCF_OTHER;
+	return TDC::MapTaskfileError(tasks.GetLastFileError());
 }
 
 void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
@@ -6224,7 +6193,7 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 	}
 
 	// else do error handling
-	return MapTaskfileError(tasks.GetLastFileError());
+	return TDC::MapTaskfileError(tasks.GetLastFileError());
 }
 
 BOOL CToDoCtrl::DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue)
