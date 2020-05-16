@@ -268,24 +268,36 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 {
 	if ((COSVersion() >= OSV_WIN10) && !Misc::IsHighContrastActive())
 	{
+		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
+		bool isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
+
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
-		e->Graphics->FillRectangle(Drawing::SystemBrushes::ButtonFace, rect);
+
+		if (isMenuBar)
+			e->Graphics->FillRectangle(Drawing::Brushes::White, rect);
+		else
+			e->Graphics->FillRectangle(Drawing::SystemBrushes::ButtonFace, rect);
 
 		auto itemState = Toolbars::GetItemState(e->Item);
-		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
 
 		if ((itemState == Toolbars::ItemState::Hot) || (itemState == Toolbars::ItemState::Pressed))
 		{
-			// If we're a top-level item use themed selection
-			if (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip))
+			if (menuItem->Bounds.X > 0)
 			{
-				UIExtension::SelectionRect::Draw(e->ToolStrip->Handle, e->Graphics, rect.X + 1, rect.Y, rect.Width, rect.Height, true);
+				rect.X++;
+				rect.Width--;
+			}
+
+			if (isMenuBar) 
+			{
+				// If we're a top-level item use themed selection
+				UIExtension::SelectionRect::Draw(e->ToolStrip->Handle, e->Graphics, rect.X, rect.Y, rect.Width, rect.Height, true);
 			}
 			else
 			{
+				rect.Inflate(-1, 0);
 				auto selColor = Drawing::Color::FromArgb(128, Drawing::SystemColors::MenuHighlight);
 
-				rect.Inflate(-2, 0);
 				e->Graphics->FillRectangle(gcnew Drawing::SolidBrush(selColor), rect);
 			}
 		}

@@ -35,6 +35,7 @@ namespace Abstractspoon
 				static int GetSystemDPI();
 				static int GetMouseHoverRectSize();
 				static int GetMouseHoverDelay();
+				static int GetSystemMetric(int nMetric);
 
 				static String^ GetFaceName(HFONT hFont);
 				static int GetPointSize(HFONT hFont);

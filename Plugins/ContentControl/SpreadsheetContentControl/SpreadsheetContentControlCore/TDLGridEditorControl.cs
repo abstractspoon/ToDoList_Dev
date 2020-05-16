@@ -227,10 +227,10 @@ namespace SpreadsheetContentControl
 			this.StatusBar.SizingGrip = false;
 
             // After all resizing has occurred, set menu bar height to 
-            // match toolbar and make its top-level items full height
+            // match application and make its top-level items full height
             this.MenuBar.AutoSize = false;
-            this.MenuBar.Height = (this.ToolBar.Height - DPIScaling.Scale(2));
-            this.MenuBar.Padding = new Padding(0);
+            this.MenuBar.Height = Win32.GetSystemMetric(15); // SM_CYMENU
+			this.MenuBar.Padding = new Padding(0);
 		}
 
 		private void InitialiseFeatures()

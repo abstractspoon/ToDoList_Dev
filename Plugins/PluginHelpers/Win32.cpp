@@ -127,6 +127,11 @@ int Win32::GetMouseHoverDelay()
 	return 500;
 }
 
+int Win32::GetSystemMetric(int nMetric)
+{
+	return ::GetSystemMetrics(nMetric);
+}
+
 String^ Win32::GetFaceName(HFONT hFont)
 {
 	if (!hFont)
