@@ -41,9 +41,8 @@ namespace SpreadsheetContentControl
 			InitialiseToolbars();
 			InitialiseChangeCallbacks();
 
-			//System.Windows.Forms.ToolStripProfessionalRenderer var;
-
-
+			Worksheet.DefaultFontName = m_ControlsFont.Name;
+			Worksheet.DefaultFontSize = m_ControlsFont.SizeInPoints;
 		}
 
 		public Byte[] GetContent()
@@ -165,7 +164,8 @@ namespace SpreadsheetContentControl
 
 		public void SetContentFont(String fontName, int pointSize)
 		{
-			//SetBodyFont(fontName, pointSize);
+			Worksheet.DefaultFontName = fontName;
+			Worksheet.DefaultFontSize = pointSize;
 		}
 
 		private bool IsLoading { get; set; }

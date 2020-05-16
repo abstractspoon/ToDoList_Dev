@@ -131,6 +131,18 @@ namespace unvell.ReoGrid
 			HAlign = ReoGridHorAlign.General,
 			VAlign = ReoGridVerAlign.General,
 		};
+
+		public static String DefaultFontName
+		{
+			get { return DefaultStyle.FontName; }
+			set { DefaultStyle.FontName = value; }
+		}
+
+		public static float DefaultFontSize
+		{
+			get { return DefaultStyle.FontSize; }
+			set { DefaultStyle.FontSize = value; }
+		}
 		#endregion
 
 		#region Workbook Relation

@@ -103,7 +103,7 @@ namespace unvell.Common
             5f, 6f, 7f, 8f, 9f, 10f, 10.5f, 11f, 11.5f, 12f, 12.5f, 14f, 16f, 18f,
             20f, 22f, 24f, 26f, 28f, 30f, 32f, 34f, 38f, 46f, 58f, 64f, 78f, 92f};
 
-		private static readonly float FixedDrawFontSize = 14f;
+		private static readonly float FixedDrawFontSize = 10f;
 
 		public static void DrawFontItem(Graphics g, FontFamilyInfo fontFamily,
 			Rectangle rect, bool isSelected)
@@ -136,8 +136,6 @@ namespace unvell.Common
 
 					if (font != null)
 					{
-						g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
-
 						g.DrawString(font.Name, font,
 							isSelected ? SystemBrushes.HighlightText : Brushes.Black, rect, sf);
 
