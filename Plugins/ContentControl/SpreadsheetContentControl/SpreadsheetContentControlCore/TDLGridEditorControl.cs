@@ -198,8 +198,11 @@ namespace SpreadsheetContentControl
 			{
 				this.MenuBar.Font = m_ControlsFont;
 				this.ToolBar.Font = m_ControlsFont;
-				this.FontBar.Font = m_ControlsFont;
 				this.StatusBar.Font = m_ControlsFont;
+
+				this.FontBar.Font = m_ControlsFont;
+				this.FontBar.Items["fontToolStripComboBox"].Font = m_ControlsFont;
+				this.FontBar.Items["fontSizeToolStripComboBox"].Font = m_ControlsFont;
 
 				this.RowContextMenu.Font = m_ControlsFont;
 				this.CellContextMenu.Font = m_ControlsFont;
@@ -231,6 +234,7 @@ namespace SpreadsheetContentControl
             this.MenuBar.AutoSize = false;
             this.MenuBar.Height = Win32.GetSystemMetric(15); // SM_CYMENU
 			this.MenuBar.Padding = new Padding(0);
+
 		}
 
 		private void InitialiseFeatures()
