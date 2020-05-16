@@ -269,7 +269,8 @@ namespace SpreadsheetContentControl
 		{
 			GridCtrl.ActionPerformed += (s, e) =>
 			{
-				NotifyParentContentChange();
+				if (e.Action is unvell.Common.IUndoableAction)
+					NotifyParentContentChange();
 			};
 
 			GridCtrl.WorksheetCreated += (s, e) =>
