@@ -91,7 +91,7 @@ namespace unvell.ReoGrid
 	/// <summary>
 	/// ReoGrid Control Appearance Colors
 	/// </summary>
-	[Obsolete("use ControlAppearanceStyle instead")]
+	//[Obsolete("use ControlAppearanceStyle instead")]
 	public sealed class ReoGridControlStyle : ControlAppearanceStyle
 	{
 	}
@@ -167,7 +167,7 @@ namespace unvell.ReoGrid
 		/// <summary>
 		/// Construct empty control appearance
 		/// </summary>
-		[Obsolete("use ControlAppearanceStyle.CreateDefaultControlStyle() to create instance")]
+		//[Obsolete("use ControlAppearanceStyle.CreateDefaultControlStyle() to create instance")]
 		public ControlAppearanceStyle()
 		{
 			this.SelectionBorderWidth = 3f;

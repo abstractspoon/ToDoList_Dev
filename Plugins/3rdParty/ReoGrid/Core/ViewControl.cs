@@ -142,7 +142,7 @@ namespace unvell.ReoGrid
 		/// <summary>
 		/// Force to repaint the canvas region of control
 		/// </summary>
-		[Obsolete("use RequestInvalidate instead")]
+		//[Obsolete("use RequestInvalidate instead")]
 		public void InvalidateSheet()
 		{
 			this.RequestInvalidate();
