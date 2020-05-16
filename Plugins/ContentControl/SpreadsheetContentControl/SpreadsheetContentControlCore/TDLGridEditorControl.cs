@@ -199,8 +199,8 @@ namespace SpreadsheetContentControl
 				this.MenuBar.Font = m_ControlsFont;
 				this.ToolBar.Font = m_ControlsFont;
 				this.StatusBar.Font = m_ControlsFont;
-
 				this.FontBar.Font = m_ControlsFont;
+
 				this.FontBar.Items["fontToolStripComboBox"].Font = m_ControlsFont;
 				this.FontBar.Items["fontSizeToolStripComboBox"].Font = m_ControlsFont;
 
@@ -216,9 +216,13 @@ namespace SpreadsheetContentControl
 				var scalingSize = new Size(imageSize, imageSize);
 
 				this.MenuBar.ImageScalingSize = scalingSize;
-				this.ToolBar.ImageScalingSize = scalingSize;
 				this.FontBar.ImageScalingSize = scalingSize;
+				this.ToolBar.ImageScalingSize = scalingSize;
 
+				// Border colour drop-button is not DPI aware
+				this.ToolBar.Items["borderColorPickToolStripItem"].Width = this.ToolBar.Items["outlineSolidToolStripButton"].Width;
+				this.ToolBar.Items["borderColorPickToolStripItem"].Height = this.ToolBar.Items["outlineSolidToolStripButton"].Height;
+				
 				this.RowContextMenu.ImageScalingSize = scalingSize;
 				this.CellContextMenu.ImageScalingSize = scalingSize;
 				this.HeaderContextMenu.ImageScalingSize = scalingSize;
