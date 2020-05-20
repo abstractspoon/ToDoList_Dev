@@ -507,27 +507,24 @@ int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& ma
 	mapOldHeaders.RemoveAll();
 	aOldHeaderItems.RemoveAll();
 
-	if (IsGrouped())
+	int nNumTasks = GetItemCount();
+
+	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
-		int nNumTasks = GetItemCount();
+		CString sGroupHeader;
+		DWORD dwTaskID = GetTaskID(nTask);
 
-		for (int nTask = 0; nTask < nNumTasks; nTask++)
+		if (m_mapGroupHeaders.Lookup(dwTaskID, sGroupHeader))
 		{
-			CString sGroupHeader;
-			DWORD dwTaskID = GetTaskID(nTask);
+			aOldHeaderItems.Add(nTask); // ascending order
+			mapOldHeaders.Add(sGroupHeader);
+		}
+		else if (IsGrouped())
+		{
+			sGroupHeader = GetTaskGroupByText(dwTaskID);
 
-			if (m_mapGroupHeaders.Lookup(dwTaskID, sGroupHeader))
-			{
-				aOldHeaderItems.Add(nTask); // ascending order
-				mapOldHeaders.Add(sGroupHeader);
-			}
-			else
-			{
-				sGroupHeader = GetTaskGroupByText(dwTaskID);
-
-				if (!mapNewHeaders.Has(sGroupHeader))
-					mapNewHeaders.Add(sGroupHeader);
-			}
+			if (!mapNewHeaders.Has(sGroupHeader))
+				mapNewHeaders.Add(sGroupHeader);
 		}
 	}
 
