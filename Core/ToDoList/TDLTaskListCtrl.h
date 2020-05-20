@@ -139,7 +139,7 @@ protected:
 	BOOL CreateTasksWnd(CWnd* pParentWnd, const CRect& rect, BOOL bVisible);
 	BOOL BuildColumns();
 	void Release();
-	DWORD GetColumnItemTaskID(int nItem) const { return GetTaskID(nItem); }
+	DWORD GetColumnItemTaskID(int nItem) const;
 	DWORD HitTestTasksTask(const CPoint& ptScreen) const;
 	void SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn = TRUE);
 	HWND Tasks() const { return m_lcTasks; }

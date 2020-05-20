@@ -233,16 +233,22 @@ void CTDLTaskListCtrl::RemoveDeletedItems()
 		m_lcColumns.SetItemData(nItem, nItem);
 }
 
+DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
+{
+	if ((nItem == -1) || (nItem >= m_lcTasks.GetItemCount()))
+		return 0;
+
+	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
+}
+
 LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	BOOL bColumns = (hwndList == m_lcColumns);
 
-	DWORD dwTaskID = pLVCD->nmcd.lItemlParam;
+	// Column item data is index into m_lcTasks
+	DWORD dwTaskID = (bColumns ? GetTaskID((int)pLVCD->nmcd.dwItemSpec) : pLVCD->nmcd.lItemlParam);
 	DWORD dwRes = CDRF_DODEFAULT;
-
-	if (bColumns)
-		dwTaskID = GetColumnItemTaskID((int)pLVCD->nmcd.dwItemSpec);
 
 	if (IsGroupHeaderTask(dwTaskID))
 	{
@@ -1004,14 +1010,19 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		{
 			// Make group header tasks 'disappear' 
 			int nItem = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
-			DWORD dwTaskID = ((hRealWnd == m_lcTasks) ? GetTaskID(nItem) : GetColumnItemTaskID(nItem));
 
-			if (IsGroupHeaderTask(dwTaskID))
+			if (nItem != -1)
 			{
-				ASSERT(lp);
-				LPLVHITTESTINFO pLVHit = (LPLVHITTESTINFO)lp;
+				BOOL bTasks = (hRealWnd == m_lcTasks);
+				DWORD dwTaskID = (bTasks ? GetTaskID(nItem) : GetColumnItemTaskID(nItem));
 
-				nItem = pLVHit->iItem = pLVHit->iSubItem = -1;
+				if (IsGroupHeaderTask(dwTaskID))
+				{
+					ASSERT(lp);
+					LPLVHITTESTINFO pLVHit = (LPLVHITTESTINFO)lp;
+
+					nItem = pLVHit->iItem = pLVHit->iSubItem = -1;
+				}
 			}
 
 			return nItem;
@@ -1021,7 +1032,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	case WM_RBUTTONDOWN:
 		// Don't let the selection to be set to -1 when clicking below the last item
 		// BUT NOT ON Linux because it interferes with context menu handling
-		if ((hRealWnd == m_lcTasks) && (COSVersion() != OSV_LINUX))
+		if ((hRealWnd == m_lcTasks) && !OsIsLinux())
 		{
 			// let parent handle any focus changes first
 			m_lcTasks.SetFocus();
@@ -1323,7 +1334,7 @@ BOOL CTDLTaskListCtrl::HandleClientColumnClick(const CPoint& pt, BOOL bDblClk)
 		{
 			ASSERT(IsListItemSelected(m_lcTasks, nItem)); 
 
-			DWORD dwTaskID = GetColumnItemTaskID(nItem);
+			DWORD dwTaskID = GetTaskID(nItem);
 			TDC_COLUMN nClickCol = TDCC_NONE;
 
 			if (!bDblClk)
@@ -1560,9 +1571,7 @@ BOOL CTDLTaskListCtrl::EnsureSelectionVisible()
 {
 	if (GetSelectedCount())
 	{
-		OSVERSION nOSVer = COSVersion();
-		
-		if ((nOSVer == OSV_LINUX) || (nOSVer < OSV_VISTA))
+		if (OsIsLinux() || OsIsXP())
 		{
 			m_lcTasks.PostMessage(LVM_ENSUREVISIBLE, GetSelectedItem());
 		}
@@ -1608,7 +1617,9 @@ DWORD CTDLTaskListCtrl::GetTaskID(int nItem) const
 
 DWORD CTDLTaskListCtrl::GetSelectedTaskID() const 
 { 
-	return GetTaskID(GetSelectedItem()); 
+	DWORD dwTaskID = GetTaskID(GetSelectedItem()); 
+
+	return (IsGroupHeaderTask(dwTaskID) ? 0 : dwTaskID);
 }
 
 DWORD CTDLTaskListCtrl::GetTrueTaskID(int nItem) const 
@@ -1881,11 +1892,12 @@ DWORD CTDLTaskListCtrl::GetFocusedListTaskID() const
 	if (nItem == -1)
 		nItem = GetSelectedItem();
 
-	if (nItem != -1)
-		return m_lcTasks.GetItemData(nItem);
-	
-	// else
-	return 0;
+	DWORD dwTaskID = GetTaskID(nItem);
+
+	if (IsGroupHeaderTask(dwTaskID))
+		dwTaskID = 0;
+
+	return dwTaskID;
 }
 
 int CTDLTaskListCtrl::GetFocusedListItem() const
