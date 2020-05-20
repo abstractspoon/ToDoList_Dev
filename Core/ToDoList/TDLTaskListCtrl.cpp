@@ -241,7 +241,6 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	DWORD dwTaskID = pLVCD->nmcd.lItemlParam;
 	DWORD dwRes = CDRF_DODEFAULT;
 
-/*
 	if (bColumns)
 		dwTaskID = GetColumnItemTaskID((int)pLVCD->nmcd.dwItemSpec);
 
@@ -286,7 +285,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 		}
 	}
 	else
-*/	{
+	{
 		if (hwndList == m_lcColumns)
 		{
 			// columns handled by base class
@@ -316,7 +315,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
 
-				if (OsIsXP())
+				if (OsIsXP() || OsIsLinux())
 					m_lcTasks.GetItemRect((int)pLVCD->nmcd.dwItemSpec, rRow, LVIR_BOUNDS);
 
 				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd, rRow);

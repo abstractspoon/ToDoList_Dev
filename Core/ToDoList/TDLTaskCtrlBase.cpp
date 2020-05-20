@@ -2486,7 +2486,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 					CRect rItem(pLVCD->nmcd.rc);
 
-					if (OsIsXP())
+					if (OsIsXP() || OsIsLinux())
 						m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 
 					// this call will update rFullWidth to full client width
