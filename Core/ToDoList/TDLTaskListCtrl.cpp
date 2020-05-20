@@ -268,7 +268,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					const COLORREF HEADER_COLOR = RGB(63, 118, 179);
 					GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, HEADER_COLOR);
 
-					if (hwndList == m_lcTasks)
+					if (!bColumns)
 					{
 						rRow.left = 20; // Always ensure the text is visible
 
@@ -288,7 +288,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	}
 	else
 	{
-		if (hwndList == m_lcColumns)
+		if (bColumns)
 		{
 			// columns handled by base class
 			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD);
