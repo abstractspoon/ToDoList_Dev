@@ -280,8 +280,10 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 						pDC->DrawText(sHeader, rRow, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
 					}
 				}
+	
+				dwRes = CDRF_SKIPDEFAULT;
 			}
-			dwRes = CDRF_SKIPDEFAULT;
+			break;
 		}
 	}
 	else
@@ -305,8 +307,6 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 				if (bFillRow)
  					ListView_SetBkColor(m_lcTasks, pLVCD->clrTextBk);
-
-				return dwRes;
 			}
 			break;
 
