@@ -58,13 +58,17 @@ END_MESSAGE_MAP()
 BOOL CTDLViewTabControl::AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData, int nVertOffset)
 {
 	ASSERT (hWnd == NULL || ::IsWindow(hWnd));
-	ASSERT(hIcon);
 
 	// window and enum must be unique
 	if ((hWnd && FindView(hWnd) != -1) || (FindView(nView) != -1))
 		return FALSE;
 
 	// prepare tab bar
+	if (!hIcon)
+		hIcon = AfxGetApp()->LoadStandardIcon(IDI_WARNING);
+
+	ASSERT(hIcon);
+
 	TDCVIEW view(hWnd, nView, szLabel, hIcon, pData, nVertOffset);
 	int nIndex = m_aViews.Add(view);
 
