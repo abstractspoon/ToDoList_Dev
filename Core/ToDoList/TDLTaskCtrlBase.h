@@ -311,7 +311,7 @@ protected:
 	void OnHeaderClick(TDC_COLUMN nColID);
 	virtual int OnToolHitTest(CPoint point, TOOLINFO * pTI) const;
 	
-	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd);
+	DWORD OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rRow);
 	DWORD OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFillRow, COLORREF& crText, COLORREF& crBkgnd);
 
 protected:

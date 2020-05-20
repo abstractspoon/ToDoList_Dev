@@ -2483,8 +2483,11 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					BOOL bAlternate = IsAlternateColumnLine(nItem);
 					COLORREF crRowBack = (bAlternate ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 					
-					CRect rItem;
-					m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS);
+					// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
+					CRect rItem(pLVCD->nmcd.rc);
+
+					if (OsIsXP())
+						m_lcColumns.GetItemRect(nItem, rItem, LVIR_BOUNDS);
 
 					// this call will update rFullWidth to full client width
 					CRect rFullWidth(rItem);
@@ -2564,10 +2567,10 @@ DWORD CTDLTaskCtrlBase::OnPrePaintTaskTitle(const NMCUSTOMDRAW& nmcd, BOOL bFill
 	return (CDRF_NOTIFYPOSTPAINT | CDRF_NEWFONT); // always
 }
 
-DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd)
+DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRect& rect)
 {
 	// Check row is visible
-	CRect rClient, rRow(nmcd.rc);
+	CRect rClient, rRow(rect);
 	::GetClientRect(Tasks(), rClient);
 
 	if ((rRow.bottom > 0) && (rRow.top <= rClient.bottom))

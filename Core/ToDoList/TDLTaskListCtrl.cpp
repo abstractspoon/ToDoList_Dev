@@ -239,11 +239,11 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	BOOL bColumns = (hwndList == m_lcColumns);
 
 	DWORD dwTaskID = pLVCD->nmcd.lItemlParam;
+	DWORD dwRes = CDRF_DODEFAULT;
 
+/*
 	if (bColumns)
 		dwTaskID = GetColumnItemTaskID((int)pLVCD->nmcd.dwItemSpec);
-
-	DWORD dwRes = CDRF_DODEFAULT;
 
 	if (IsGroupHeaderTask(dwTaskID))
 	{
@@ -286,7 +286,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 		}
 	}
 	else
-	{
+*/	{
 		if (hwndList == m_lcColumns)
 		{
 			// columns handled by base class
@@ -313,7 +313,13 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 		case CDDS_ITEMPOSTPAINT:
 			{
-				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd);
+				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
+				CRect rRow(pLVCD->nmcd.rc);
+
+				if (OsIsXP())
+					m_lcTasks.GetItemRect((int)pLVCD->nmcd.dwItemSpec, rRow, LVIR_BOUNDS);
+
+				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd, rRow);
 			
 				// restore default back colour set in CDDS_ITEMPREPAINT
 				ListView_SetBkColor(m_lcTasks, GetSysColor(COLOR_WINDOW));
