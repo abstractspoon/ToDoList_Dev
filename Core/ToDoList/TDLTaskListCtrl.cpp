@@ -235,7 +235,7 @@ void CTDLTaskListCtrl::RemoveDeletedItems()
 
 DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 {
-	if ((nItem == -1) || (nItem >= m_lcTasks.GetItemCount()))
+	if ((nItem < 0) || (nItem >= m_lcTasks.GetItemCount()))
 		return 0;
 
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
@@ -262,7 +262,11 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			{
 				CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
+				// XP fails to initialise NMCUSTOMDRAW::rc so we have to do it ourselves
 				CRect rRow(pLVCD->nmcd.rc);
+
+				if (OsIsXP() || OsIsLinux())
+					ListView_GetItemRect(hwndList, pLVCD->nmcd.dwItemSpec, rRow, LVIR_BOUNDS);
 
 				if (rRow.Width())
 				{
@@ -1609,7 +1613,7 @@ BOOL CTDLTaskListCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const
 
 DWORD CTDLTaskListCtrl::GetTaskID(int nItem) const 
 { 
-	if ((nItem == -1) || (nItem >= m_lcTasks.GetItemCount()))
+	if ((nItem < 0) || (nItem >= m_lcTasks.GetItemCount()))
 		return 0;
 
 	return m_lcTasks.GetItemData(nItem); 
