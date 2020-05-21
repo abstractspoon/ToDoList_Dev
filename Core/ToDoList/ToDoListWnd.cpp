@@ -7127,16 +7127,24 @@ void CToDoListWnd::OnTimerCheckoutStatus(int nCtrl, BOOL bForceCheckRemote)
 void CToDoListWnd::OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	static CString sTipText;
-	sTipText.Empty();
 
-	// Handle items having dynamic menu text
-	sTipText = m_menubar.GetDynamicItemTooltip(pNMHDR->idFrom,
-											   m_mruList,
-											   m_mgrToDoCtrls,
-											   Prefs(),
-											   m_filterBar,
-											   m_mgrStorage,
-											   m_mgrUIExtensions);
+	UINT nCmdID = pNMHDR->idFrom;
+
+	if (pNMHDR->hwndFrom == m_tabCtrl.GetToolTips()->GetSafeHwnd())
+	{
+		sTipText = m_mgrToDoCtrls.GetTabItemTooltip((int)nCmdID);
+	}
+	else
+	{
+		// Handle items having dynamic menu text
+		sTipText = m_menubar.GetDynamicItemTooltip(pNMHDR->idFrom,
+												   m_mruList,
+												   m_mgrToDoCtrls,
+												   Prefs(),
+												   m_filterBar,
+												   m_mgrStorage,
+												   m_mgrUIExtensions);
+	}
 
 	if (!sTipText.IsEmpty())
 	{
