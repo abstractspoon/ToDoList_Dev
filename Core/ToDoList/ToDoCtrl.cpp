@@ -5160,8 +5160,9 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 	if (!GetLabelEditRect(rPos))
 		return FALSE;
 
-	// make sure it's at least 150 px long
-	rPos.right = max(rPos.right, rPos.left + 150);
+	// make sure it's at least 200 px long
+	int nMinLen = GraphicsMisc::ScaleByDPIFactor(200);
+	rPos.right = max(rPos.right, rPos.left + nMinLen);
 
 	// create edit if nec.
 	if (!m_eTaskName.GetSafeHwnd() && !m_eTaskName.Create(this, IDC_FTC_EDIT, WS_POPUP | WS_BORDER))
