@@ -2367,7 +2367,7 @@ void CTDLTaskCtrlBase::DrawCommentsText(CDC* pDC, const CRect& rRow, const CRect
 	}
 }
 
-CFont* CTDLTaskCtrlBase::GetTaskFont(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bColumns)
+CFont* CTDLTaskCtrlBase::PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bColumns)
 {
 	if (!m_fonts.GetHwnd() && !m_fonts.Initialise(Tasks()))
 		return NULL;
@@ -2375,11 +2375,10 @@ CFont* CTDLTaskCtrlBase::GetTaskFont(const TODOITEM* pTDI, const TODOSTRUCTURE* 
 	BOOL bStrikeThru = (HasStyle(TDCS_STRIKETHOUGHDONETASKS) && pTDI->IsDone());
 	BOOL bBold = (pTDS->ParentIsRoot() && !bColumns);
 
-	if (bBold || bStrikeThru)
-		return m_fonts.GetFont(bBold, FALSE, FALSE, bStrikeThru);
+	if (!bBold && !bStrikeThru)
+		return NULL;
 
-	// else
-	return NULL;
+	return pDC->SelectObject(m_fonts.GetFont(bBold, FALSE, FALSE, bStrikeThru));
 }
 
 BOOL CTDLTaskCtrlBase::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
@@ -2529,7 +2528,7 @@ LRESULT CTDLTaskCtrlBase::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					}
 
 					// draw row text and column dividers
-					CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS));
+					CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, TRUE);
 					
 					DrawColumnsRowText(pDC, nItem, dwTaskID, pTDI, pTDS, crText, bSelected);
 
@@ -2592,7 +2591,7 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				crBack = (IsAlternateTitleLine(nmcd) ? m_crAltLine : GetSysColor(COLOR_WINDOW));
 
 			// Set font before getting text length
-			CFont* pOldFont = pDC->SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
+			CFont* pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
 
 			// draw label background only
 			CRect rLabel;

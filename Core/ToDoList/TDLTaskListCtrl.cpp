@@ -1239,8 +1239,6 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		break;
 
 	case WM_TIMER:
-		// make sure the mouse is still over the item label because
-		// with LVS_EX_FULLROWSELECT turned on the whole 
 		if (wp == TIMER_EDITLABEL)
 		{
 			if (CTreeListSyncer::HasStyle(hRealWnd, LVS_EDITLABELS, FALSE))
@@ -1253,14 +1251,16 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				
 				if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 				{
+					// make sure the mouse is still over the item label because
+					// LVS_EX_FULLROWSELECT turned on the whole row
 					CClientDC dc(&m_lcTasks);
-					CFont* pOldFont = dc.SelectObject(GetTaskFont(pTDI, pTDS, FALSE));
+					CFont* pOldFont = PrepareDCFont(&dc, pTDI, pTDS, FALSE);
 					
 					CRect rLabel;
 					
 					if (GetItemTitleRect(nItem, TDCTR_TEXT, rLabel, &dc, pTDI->sTitle))
 					{
-						// Add a bit ie. 'near enough is good enough'
+						// Add a bit ie. 'near enough is close enough'
 						rLabel.right += 10;
 
 						CPoint pt(GetMessagePos());

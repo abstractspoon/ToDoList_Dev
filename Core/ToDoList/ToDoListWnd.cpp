@@ -895,15 +895,14 @@ BOOL CToDoListWnd::InitTabCtrl()
 	UINT nFlags = (WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | TCS_HOTTRACK | TCS_TABS | 
 					TCS_SINGLELINE | TCS_RIGHTJUSTIFY | TCS_TOOLTIPS);
 
+	if (Prefs().GetStackTabbarItems())
+		nFlags |= TCS_MULTILINE;
+
 	if (m_tabCtrl.Create(nFlags, CRect(0, 0, 10, 10), this, IDC_TABCONTROL))
 	{
 		m_tabCtrl.GetToolTips()->ModifyStyle(0, TTS_ALWAYSTIP);
 		CLocalizer::EnableTranslation(m_tabCtrl, FALSE);
 		
-		BOOL bStackTabbar = Prefs().GetStackTabbarItems();
-		
-		m_tabCtrl.ModifyStyle(bStackTabbar ? 0 : TCS_MULTILINE, bStackTabbar ? TCS_MULTILINE : 0);
-
 		// Delay image list creation to avoid resource leaks
 		return TRUE;
 	}
