@@ -244,10 +244,10 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
+	int nItem = (int)pLVCD->nmcd.dwItemSpec;
 	BOOL bColumns = (hwndList == m_lcColumns);
 
-	// Column item data is index into m_lcTasks
-	DWORD dwTaskID = (bColumns ? GetTaskID((int)pLVCD->nmcd.dwItemSpec) : pLVCD->nmcd.lItemlParam);
+	DWORD dwTaskID = (bColumns ? GetColumnItemTaskID(nItem) : pLVCD->nmcd.lItemlParam);
 	DWORD dwRes = CDRF_DODEFAULT;
 
 	if (IsGroupHeaderTask(dwTaskID))
@@ -266,7 +266,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				CRect rRow(pLVCD->nmcd.rc);
 
 				if (OsIsXP() || OsIsLinux())
-					ListView_GetItemRect(hwndList, pLVCD->nmcd.dwItemSpec, rRow, LVIR_BOUNDS);
+					ListView_GetItemRect(hwndList, nItem, rRow, LVIR_BOUNDS);
 
 				if (rRow.Width())
 				{
@@ -326,7 +326,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				CRect rRow(pLVCD->nmcd.rc);
 
 				if (OsIsXP() || OsIsLinux())
-					m_lcTasks.GetItemRect((int)pLVCD->nmcd.dwItemSpec, rRow, LVIR_BOUNDS);
+					m_lcTasks.GetItemRect(nItem, rRow, LVIR_BOUNDS);
 
 				dwRes = OnPostPaintTaskTitle(pLVCD->nmcd, rRow);
 			
