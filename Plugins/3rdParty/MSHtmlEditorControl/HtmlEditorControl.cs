@@ -406,6 +406,9 @@ namespace MSDN.Html.Editor
             // after load ensure document marked as editable
             this.ReadOnly = _readOnly;
             this.ScrollBars = _scrollBars;
+
+            if (body.style != null)
+                body.style.border = "none";
 		}
 
 		/// <summary>
