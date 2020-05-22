@@ -1077,8 +1077,8 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, D
 	if ((dwCompareFlags & DHC_COMPARETIME) == 0)
 	{
 		// Compare dates only
-		double dDateOnly1 = CDateHelper::GetDateOnly(date1).m_dt;
-		double dDateOnly2 = CDateHelper::GetDateOnly(date2).m_dt;
+		double dDateOnly1 = GetDateOnly(date1).m_dt;
+		double dDateOnly2 = GetDateOnly(date2).m_dt;
 
 		return ((dDateOnly1 < dDateOnly2) ? -1 : ((dDateOnly1 > dDateOnly2) ? 1 : 0));
 	}
@@ -1088,17 +1088,17 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, D
 
 	if (dwCompareFlags & DHC_NOTIMEISENDOFDAY)
 	{
-		if (!CDateHelper::DateHasTime(date1))
-			dDateTime1 = CDateHelper::GetEndOfDay(date1).m_dt;
+		if (!DateHasTime(date1))
+			dDateTime1 = GetEndOfDay(date1).m_dt;
 
-		if (!CDateHelper::DateHasTime(date2))
-			dDateTime2 = CDateHelper::GetEndOfDay(date2).m_dt;
+		if (!DateHasTime(date2))
+			dDateTime2 = GetEndOfDay(date2).m_dt;
 	}
 
 	if ((dwCompareFlags & DHC_COMPARESECONDS) == 0)
 	{
-		if (fabs(dDateTime1 - dDateTime2) < ONE_MINUTE)
-			return 0;
+		dDateTime1 = TruncateSeconds(dDateTime1).m_dt;
+		dDateTime2 = TruncateSeconds(dDateTime2).m_dt;
 	}
 
 	return ((dDateTime1 < dDateTime2) ? -1 : (dDateTime1 > dDateTime2) ? 1 : 0);
