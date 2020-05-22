@@ -767,12 +767,6 @@ BOOL CRuntimeDlg::PreTranslateMessage(MSG* pMsg)
 	return (bChild && !bTab) ? CWnd::PreTranslateMessage(pMsg) : CDialog::PreTranslateMessage(pMsg);
 }
 
-
-void CRuntimeDlg::ExcludeCtrls(CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bIgnoreCorners)
-{
-	CDialogHelper::ExcludeCtrls(this, pDC, nCtrlIDFrom, nCtrlIDTo, bIgnoreCorners);
-}
-
 void CRuntimeDlg::SetFont(CFont* pFont, BOOL bRedraw)
 {
 	SetFont(pFont ? (HFONT)pFont->GetSafeHandle() : NULL, bRedraw);

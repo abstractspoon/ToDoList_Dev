@@ -2384,7 +2384,7 @@ BOOL CToDoCtrl::OnEraseBkgnd(CDC* pDC)
 	// clip out all the child controls to reduce flicker
 	if (!(GetStyle() & WS_CLIPCHILDREN) && m_taskTree.GetSafeHwnd())
 	{
-		ExcludeCtrls(pDC, IDC_FIRST + 1, IDC_LAST - 1, TRUE);
+		ExcludeCtrls(this, pDC, IDC_FIRST + 1, IDC_LAST - 1);
 		ExcludeChild(&m_taskTree, pDC);
 	}
 	

@@ -218,10 +218,10 @@ public:
 	static void ShowCtrl(const CWnd* pParent, UINT nCtrlID, BOOL bShow = TRUE);
 	static void ShowCtrl(CWnd* pCtrl, BOOL bShow = TRUE);
 
-	static void ExcludeCtrls(const CWnd* pParent, CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo, BOOL bIgnoreCorners = FALSE);
-	static void ExcludeCtrls(const CWnd* pParent, CDC* pDC, BOOL bIgnoreCorners = FALSE);
-	static void ExcludeCtrl(const CWnd* pParent, UINT nCtrlID, CDC* pDC, BOOL bIgnoreCorners = FALSE);
-	static void ExcludeChild(const CWnd* pChild, CDC* pDC, BOOL bIgnoreCorners = FALSE);
+	static void ExcludeCtrls(const CWnd* pParent, CDC* pDC, UINT nCtrlIDFrom, UINT nCtrlIDTo);
+	static void ExcludeCtrls(const CWnd* pParent, CDC* pDC);
+	static void ExcludeCtrl(const CWnd* pParent, UINT nCtrlID, CDC* pDC);
+	static void ExcludeChild(const CWnd* pChild, CDC* pDC);
 
 	static void EnableAllCtrls(const CWnd* pParent, BOOL bEnable = TRUE);
 	static void InvalidateAllCtrls(const CWnd* pParent, BOOL bErase = TRUE);

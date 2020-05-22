@@ -54,6 +54,7 @@ static CTRLITEM FILTERCTRLS[] =
 	CTRLITEM(IDC_VERSIONFILTERCOMBO,	IDC_VERSIONFILTERLABEL,		TDCA_VERSION),
 	CTRLITEM(IDC_OPTIONFILTERCOMBO,		IDC_OPTIONFILTERLABEL,		TDCA_NONE),
 };
+
 const int NUMFILTERCTRLS = sizeof(FILTERCTRLS) / sizeof(CTRLITEM);
 
 #define WM_WANTCOMBOPROMPT (WM_APP+1)
@@ -1088,8 +1089,8 @@ void CTDLFilterBar::OnPaint()
 
 		while (nCtrl--)
 		{
-			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nLabelID, &dc, TRUE);
-			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nCtrlID, &dc, TRUE);
+			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nLabelID, &dc);
+			ExcludeCtrl(this, FILTERCTRLS[nCtrl].nCtrlID, &dc);
 		}
 
 		// Custom
@@ -1097,8 +1098,8 @@ void CTDLFilterBar::OnPaint()
 
 		while (nCtrl--)
 		{
-			ExcludeCtrl(this, m_aCustomControls[nCtrl].nLabelID, &dc, TRUE);
-			ExcludeCtrl(this, m_aCustomControls[nCtrl].nCtrlID, &dc, TRUE);
+			ExcludeCtrl(this, m_aCustomControls[nCtrl].nLabelID, &dc);
+			ExcludeCtrl(this, m_aCustomControls[nCtrl].nCtrlID, &dc);
 		}
 
 		CRect rect;
