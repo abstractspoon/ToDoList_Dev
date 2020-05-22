@@ -266,33 +266,48 @@ void CKanbanWnd::UpdatePriorityColors(const IPreferences* pPrefs)
 
 	if (pPrefs->GetProfileInt(_T("Preferences"), _T("ColorPriority")))
 	{
-		if (pPrefs->GetProfileInt(_T("Preferences"), _T("IndividualPriorityColors")))
+		const LPCTSTR COLORKEY = _T("Preferences\\Colors");
+
+		switch (pPrefs->GetProfileInt(_T("Preferences"), _T("PriorityColorOption"), 0))
 		{
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P0")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P1")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P2")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P3")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P4")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P5")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P6")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P7")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P8")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P9")));
-			aPriorityColors.Add(pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("P10")));
-		}
-		else
-		{
-			COLORREF crFrom = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("Low"));
-			COLORREF crTo = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("High"));
-			BOOL bRGB = !pPrefs->GetProfileInt(_T("Preferences"), _T("HLSColorGradient"));
-			
-			GraphicsMisc::CalculateColorGradient(crFrom, crTo, 11, aPriorityColors, bRGB);
+		case 0:	// Individual colours
+			if (pPrefs->GetProfileInt(COLORKEY, _T("P0"), -1) != -1)
+			{
+				for (int nColor = 0; nColor < 11; nColor++)
+				{
+					CString sKey = Misc::MakeKey(_T("P%d"), nColor);
+					aPriorityColors.Add(pPrefs->GetProfileInt(COLORKEY, sKey));
+				}
+			}
+			break;
+
+		case 1:	// Colour range
+			{
+				COLORREF crFrom = pPrefs->GetProfileInt(COLORKEY, _T("Low"));
+				COLORREF crTo = pPrefs->GetProfileInt(COLORKEY, _T("High"));
+				BOOL bRGB = !pPrefs->GetProfileInt(_T("Preferences"), _T("HLSColorGradient"));
+
+				GraphicsMisc::CalculateColorGradient(crFrom, crTo, 11, aPriorityColors, bRGB);
+			}
+			break;
+
+		case 2:	// Individual colours
+			if (pPrefs->GetProfileInt(COLORKEY, _T("S0"), -1) != -1)
+			{
+				for (int nColor = 0; nColor < 11; nColor++)
+				{
+					CString sKey = Misc::MakeKey(_T("S%d"), nColor);
+					aPriorityColors.Add(pPrefs->GetProfileInt(COLORKEY, sKey));
+				}
+			}
+			break;
 		}
 	}
 	else // grayscale
-	{
+	{ 
 		GraphicsMisc::CalculateColorGradient(RGB(240, 240, 240), 0, 11, aPriorityColors, TRUE);
 	}
+
 	m_ctrlKanban.SetPriorityColors(aPriorityColors);
 }
 
