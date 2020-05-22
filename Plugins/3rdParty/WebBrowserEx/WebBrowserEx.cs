@@ -68,24 +68,28 @@ namespace WebBrowserEx
 			// constructor
 			public WebBrowserSiteEx(WebBrowserEx host) : base(host)
 			{
-				_host = host;
+                // This code causes problems on XP
+                if (host.Version.Major >= 9)
+                {
+				    _host = host;
 
-				// get the CCW object for this
-				_unkOuter = Marshal.GetIUnknownForObject(this);
-				Marshal.AddRef(_unkOuter);
-				try
-				{
-					// aggregate the CCW object with the helper Inner object
-					_inner = new Inner(this);
-					_unkInnerAggregated = Marshal.CreateAggregatedObject(_unkOuter, _inner);
+				    // get the CCW object for this
+				    _unkOuter = Marshal.GetIUnknownForObject(this);
+				    Marshal.AddRef(_unkOuter);
+				    try
+				    {
+					    // aggregate the CCW object with the helper Inner object
+					    _inner = new Inner(this);
+					    _unkInnerAggregated = Marshal.CreateAggregatedObject(_unkOuter, _inner);
 
-					// obtain private WebBrowserSite COM interfaces
-					_baseIDocHostUIHandler = (NativeMethods.IDocHostUIHandler)Marshal.GetTypedObjectForIUnknown(_unkInnerAggregated, typeof(NativeMethods.IDocHostUIHandler));
-				}
-				finally
-				{
-					Marshal.Release(_unkOuter);
-				}
+					    // obtain private WebBrowserSite COM interfaces
+					    _baseIDocHostUIHandler = (NativeMethods.IDocHostUIHandler)Marshal.GetTypedObjectForIUnknown(_unkInnerAggregated, typeof(NativeMethods.IDocHostUIHandler));
+				    }
+				    finally
+				    {
+					    Marshal.Release(_unkOuter);
+				    }
+                }
 			}
 
 			~WebBrowserSiteEx()
@@ -183,92 +187,141 @@ namespace WebBrowserEx
 			#region IDocHostUIHandler
 			int NativeMethods.IDocHostUIHandler.ShowContextMenu(int dwID, ref NativeMethods.POINT pt, IntPtr pcmdtReserved, IntPtr pdispReserved)
 			{
-				return _baseIDocHostUIHandler.ShowContextMenu(dwID, ref pt, pcmdtReserved, pdispReserved);
-			}
+                if (_baseIDocHostUIHandler != null)
+				    return _baseIDocHostUIHandler.ShowContextMenu(dwID, ref pt, pcmdtReserved, pdispReserved);
 
-			int NativeMethods.IDocHostUIHandler.GetHostInfo(ref NativeMethods.DOCHOSTUIINFO info)
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.GetHostInfo(ref NativeMethods.DOCHOSTUIINFO info)
 			{
 				Debug.Print("IDocHostUIHandler.GetHostInfo");
-				return _baseIDocHostUIHandler.GetHostInfo(ref info);
-			}
 
-			int NativeMethods.IDocHostUIHandler.ShowUI(int dwID, IntPtr activeObject, IntPtr commandTarget, IntPtr frame, IntPtr doc)
+                if (_baseIDocHostUIHandler != null)
+				    return _baseIDocHostUIHandler.GetHostInfo(ref info);
+
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.ShowUI(int dwID, IntPtr activeObject, IntPtr commandTarget, IntPtr frame, IntPtr doc)
 			{
-				return _baseIDocHostUIHandler.ShowUI(dwID, activeObject, commandTarget, frame, doc);
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.ShowUI(dwID, activeObject, commandTarget, frame, doc);
 
-			int NativeMethods.IDocHostUIHandler.HideUI()
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.HideUI()
 			{
-				return _baseIDocHostUIHandler.HideUI();
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.HideUI();
 
-			int NativeMethods.IDocHostUIHandler.UpdateUI()
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.UpdateUI()
 			{
-				return _baseIDocHostUIHandler.UpdateUI();
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.UpdateUI();
 
-			int NativeMethods.IDocHostUIHandler.EnableModeless(bool fEnable)
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.EnableModeless(bool fEnable)
 			{
-				return _baseIDocHostUIHandler.EnableModeless(fEnable);
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.EnableModeless(fEnable);
 
-			int NativeMethods.IDocHostUIHandler.OnDocWindowActivate(bool fActivate)
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.OnDocWindowActivate(bool fActivate)
 			{
-				return _baseIDocHostUIHandler.OnDocWindowActivate(fActivate);
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.OnDocWindowActivate(fActivate);
 
-			int NativeMethods.IDocHostUIHandler.OnFrameWindowActivate(bool fActivate)
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.OnFrameWindowActivate(bool fActivate)
 			{
-				return _baseIDocHostUIHandler.OnFrameWindowActivate(fActivate);
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.OnFrameWindowActivate(fActivate);
 
-			int NativeMethods.IDocHostUIHandler.ResizeBorder(ref NativeMethods.COMRECT rect, IntPtr doc, bool fFrameWindow)
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.ResizeBorder(ref NativeMethods.COMRECT rect, IntPtr doc, bool fFrameWindow)
 			{
-				return _baseIDocHostUIHandler.ResizeBorder(ref rect, doc, fFrameWindow);
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.ResizeBorder(ref rect, doc, fFrameWindow);
 
-			int NativeMethods.IDocHostUIHandler.TranslateAccelerator(ref NativeMethods.MSG msg, ref Guid group, int nCmdID)
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.TranslateAccelerator(ref NativeMethods.MSG msg, ref Guid group, int nCmdID)
 			{
-				return _baseIDocHostUIHandler.TranslateAccelerator(ref msg, ref group, nCmdID);
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.TranslateAccelerator(ref msg, ref group, nCmdID);
 
-			int NativeMethods.IDocHostUIHandler.GetOptionKeyPath(string[] pbstrKey, int dw)
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.GetOptionKeyPath(string[] pbstrKey, int dw)
 			{
-				return _baseIDocHostUIHandler.GetOptionKeyPath(pbstrKey, dw);
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.GetOptionKeyPath(pbstrKey, dw);
 
-			int NativeMethods.IDocHostUIHandler.GetDropTarget(IntPtr pDropTarget, out IntPtr ppDropTarget)
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.GetDropTarget(IntPtr pDropTarget, out IntPtr ppDropTarget)
 			{
 				Debug.Print("IDocHostUIHandler.GetDropTarget");
 
-				var altTarget = _host.GetAlternativeDropTarget(pDropTarget);
+                if (_host != null)
+                {
+                    var altTarget = _host.GetAlternativeDropTarget(pDropTarget);
 
-				if (altTarget != IntPtr.Zero)
-				{
-					ppDropTarget = altTarget;
-					return NativeMethods.HRESULT.S_OK;
-				}
+                    if (altTarget != IntPtr.Zero)
+                    {
+                        ppDropTarget = altTarget;
+                        return NativeMethods.HRESULT.S_OK;
+                    }
+                }
 
-				ppDropTarget = IntPtr.Zero;
-				return NativeMethods.HRESULT.S_FALSE;
-			}
+                ppDropTarget = IntPtr.Zero;
+                return NativeMethods.HRESULT.S_FALSE;
+            }
 
-			int NativeMethods.IDocHostUIHandler.GetExternal(out object ppDispatch)
+            int NativeMethods.IDocHostUIHandler.GetExternal(out object ppDispatch)
 			{
-				return _baseIDocHostUIHandler.GetExternal(out ppDispatch);
-			}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.GetExternal(out ppDispatch);
 
-			int NativeMethods.IDocHostUIHandler.TranslateUrl(int dwTranslate, string strURLIn, out string pstrURLOut)
-			{
-				return _baseIDocHostUIHandler.TranslateUrl(dwTranslate, strURLIn, out pstrURLOut);
-			}
+                ppDispatch = IntPtr.Zero;
+                return NativeMethods.HRESULT.S_FALSE;
+            }
 
-			int NativeMethods.IDocHostUIHandler.FilterDataObject(IntPtr pDO, out IntPtr ppDORet)
+            int NativeMethods.IDocHostUIHandler.TranslateUrl(int dwTranslate, string strURLIn, out string pstrURLOut)
 			{
-				return _baseIDocHostUIHandler.FilterDataObject(pDO, out ppDORet);
-			}
-			#endregion
-		}
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.TranslateUrl(dwTranslate, strURLIn, out pstrURLOut);
+
+                pstrURLOut = string.Empty;
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+
+            int NativeMethods.IDocHostUIHandler.FilterDataObject(IntPtr pDO, out IntPtr ppDORet)
+			{
+                if (_baseIDocHostUIHandler != null)
+                    return _baseIDocHostUIHandler.FilterDataObject(pDO, out ppDORet);
+
+                ppDORet = IntPtr.Zero;
+                return NativeMethods.HRESULT.S_FALSE;
+            }
+            #endregion
+        }
 		#endregion
 	}
 
