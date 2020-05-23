@@ -39,7 +39,7 @@ CMDContentBridge::CMDContentBridge() : m_hIcon(NULL)
 {
    HMODULE hMod = LoadLibrary(L"MDContentControlBridge.dll"); // us
 
-   m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_MARKDOWN));
+   m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MARKDOWN), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 CMDContentBridge::~CMDContentBridge()

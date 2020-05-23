@@ -39,7 +39,7 @@ CSpreadsheetContentBridge::CSpreadsheetContentBridge() : m_hIcon(NULL), m_pTT(NU
 {
    HMODULE hMod = LoadLibrary(L"SpreadsheetContentControlBridge.dll"); // us
 
-   m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_SPREADSHEET));
+   m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_SPREADSHEET), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 CSpreadsheetContentBridge::~CSpreadsheetContentBridge()

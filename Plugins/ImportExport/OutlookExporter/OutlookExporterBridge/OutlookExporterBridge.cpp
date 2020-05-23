@@ -38,7 +38,7 @@ COutlookExporterBridge::COutlookExporterBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
 	HMODULE hMod = LoadLibrary(L"OutlookExporterBridge.dll"); // us
 
-	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_OUTLOOK));
+	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_OUTLOOK), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 void COutlookExporterBridge::Release()

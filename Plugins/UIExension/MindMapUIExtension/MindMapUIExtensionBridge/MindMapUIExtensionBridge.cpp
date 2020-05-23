@@ -40,7 +40,7 @@ CMindMapUIExtensionBridge::CMindMapUIExtensionBridge() : m_hIcon(NULL), m_pTT(nu
 {
 	HMODULE hMod = LoadLibrary(L"MindMapUIExtensionBridge.dll"); // us
 
-	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_MINDMAP));
+	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MINDMAP), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 void CMindMapUIExtensionBridge::Release()

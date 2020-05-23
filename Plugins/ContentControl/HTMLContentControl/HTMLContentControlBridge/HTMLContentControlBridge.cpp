@@ -39,7 +39,7 @@ CHTMLContentBridge::CHTMLContentBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
    HMODULE hMod = LoadLibrary(L"HTMLContentControlBridge.dll"); // us
 
-   m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_HTML));
+   m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_HTML), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 CHTMLContentBridge::~CHTMLContentBridge()

@@ -32,7 +32,7 @@ CSampleImpExpBridge::CSampleImpExpBridge()
 {
 // 	HMODULE hMod = LoadLibrary(L"SampleImpExpBridge.dll"); // us
 // 
-// 	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_ICON));
+//	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 void CSampleImpExpBridge::Release()

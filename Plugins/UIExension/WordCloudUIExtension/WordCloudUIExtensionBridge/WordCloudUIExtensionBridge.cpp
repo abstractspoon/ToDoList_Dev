@@ -40,7 +40,7 @@ CWordCloudUIExtensionBridge::CWordCloudUIExtensionBridge() : m_hIcon(NULL), m_pT
 {
 	HMODULE hMod = LoadLibrary(L"WordCloudUIExtensionBridge.dll"); // us
 
-	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_DAYVIEW));
+	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_DAYVIEW), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 void CWordCloudUIExtensionBridge::Release()

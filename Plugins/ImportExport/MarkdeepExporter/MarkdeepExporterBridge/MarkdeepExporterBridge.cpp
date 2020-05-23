@@ -38,7 +38,7 @@ CMarkdeepExporterBridge::CMarkdeepExporterBridge() : m_hIcon(NULL), m_pTT(NULL)
 {
 	HMODULE hMod = LoadLibrary(L"MarkdeepExporterBridge.dll"); // us
 
-	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_MARKDEEP));
+	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_MARKDEEP), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 void CMarkdeepExporterBridge::Release()

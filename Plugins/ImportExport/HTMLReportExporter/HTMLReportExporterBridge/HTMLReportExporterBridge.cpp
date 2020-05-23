@@ -38,7 +38,7 @@ CHTMLReportExporterBridge::CHTMLReportExporterBridge() : m_pTT(nullptr), m_hIcon
 {
 	HMODULE hMod = LoadLibrary(L"HTMLReportExporterBridge.dll"); // us
 
-	m_hIcon = ::LoadIcon(hMod, MAKEINTRESOURCE(IDI_HTMLREPORTER));
+	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_HTMLREPORTER), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
 void CHTMLReportExporterBridge::Release()
