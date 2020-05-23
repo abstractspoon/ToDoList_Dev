@@ -427,7 +427,7 @@ namespace DayViewUIExtension
 			btn4.Name = "Show7DayView";
 			btn4.ImageIndex = 3;
 			btn4.Click += new EventHandler(OnShow7DayView);
-			btn4.ToolTipText = m_Trans.Translate("7 day View");
+			btn4.ToolTipText = m_Trans.Translate("7 Day View");
 			m_Toolbar.Items.Add(btn4);
 
 			var sep2 = new ToolStripSeparator();

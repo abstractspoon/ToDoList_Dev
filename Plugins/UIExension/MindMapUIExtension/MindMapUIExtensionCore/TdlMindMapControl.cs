@@ -965,7 +965,6 @@ namespace MindMapUIExtension
 													rect.Y, 
 													rect.Width, 
 													rect.Height, 
-													(Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused),
 													false); // opaque
 					break;
 

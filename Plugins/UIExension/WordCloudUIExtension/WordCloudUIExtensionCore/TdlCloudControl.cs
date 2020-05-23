@@ -241,7 +241,6 @@ namespace WordCloudUIExtension
 											rect.Top, 
 											rect.Width, 
 											rect.Height, 
-											(m_Ctrl.Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused), 
 											false); // opaque
 
 			DrawEmphasizedText(layoutItem, true);
