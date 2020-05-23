@@ -16,7 +16,7 @@
 // Pseudo Attributes
 
 #define TDCA_PARENT			TDCA_POSITION
-#define TDCA_FIXEDCOLUMNS		0xffffffff
+#define TDCA_FIXEDCOLUMNS	((TDC_ATTRIBUTE)-2)
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -932,6 +932,7 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 			if (GetCurSel() < GetItemCount() - 1)
 			{
 				DeleteItem(GetCurSel());
+				RecalcHotButtonRects();
 			}
 			else
 			{
@@ -944,6 +945,8 @@ BOOL CInputListCtrl::DeleteSelectedCell()
 			if (m_nCurCol < GetColumnCount() - 1)
 			{
 				DeleteColumn(m_nCurCol);
+				RecalcHotButtonRects();
+
 				m_nCurCol = -1;
 			}
 			else

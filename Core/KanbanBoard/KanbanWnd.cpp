@@ -348,6 +348,14 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 
 		switch (m_nTrackedAttrib)
 		{
+		// backwards compatibility
+		case TDCA_NONE:
+			if (m_dlgPrefs.HasFixedColumns())
+				m_nTrackedAttrib = TDCA_FIXEDCOLUMNS;
+			else
+				m_nTrackedAttrib = TDCA_STATUS;
+			break;
+
 		case TDCA_FIXEDCOLUMNS:
 			if (!m_dlgPrefs.HasFixedColumns())
 				m_nTrackedAttrib = TDCA_STATUS;
