@@ -1494,7 +1494,7 @@ namespace Calendar
 
 		protected void DrawDaySelection(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			if ((selection == SelectionType.DateRange) && (time.Day == selectionStart.Day))
+			if (Focused && (selection == SelectionType.DateRange) && (time.Day == selectionStart.Day))
 			{
 				Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
 
