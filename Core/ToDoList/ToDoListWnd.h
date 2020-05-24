@@ -660,8 +660,8 @@ protected:
 	BOOL ValidateTaskLinkFilePath(CString& sPath) const;
 	BOOL WantCheckRemoteFiles(int nCtrl, int nInterval, int& nElapsed) const;
 	BOOL WantCheckReloadFiles(RELOAD_OPTION nOption) const;
-	BOOL WantOverwriteExportFiles(const CTDLExportDlg& dlg) const;
-	BOOL CanExportToFilePaths(const CStringArray& aExportPaths) const;
+	int GetExportFilePaths(const CTDLExportDlg& dlg, CStringArray& aExportPaths) const;
+	BOOL CanOverwriteExportFiles(const CStringArray& aExportPaths) const;
 	BOOL ExporterWantsHTMLComments(int nExporter) const;
 
 	BOOL HandleReservedShortcut(DWORD dwShortcut);

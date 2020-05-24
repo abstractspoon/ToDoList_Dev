@@ -162,6 +162,8 @@ namespace FileMisc
 	BOOL IsFileReadable(LPCTSTR szFilePath);
 	BOOL IsFolderWritable(LPCTSTR szFolder);
 	BOOL CanonicalizePath(CString& sFilePath);
+	int GetExistingFiles(const CStringArray& aFilePaths, CStringArray& aExistPaths);
+	int GetNonWritableFiles(const CStringArray& aExistPaths, CStringArray& aNonWritablePaths);
 
 	CString GetCwd();
 	void SetCwd(const CString& sCwd);

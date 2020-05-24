@@ -722,6 +722,33 @@ BOOL FileMisc::FileExists(LPCTSTR szFile)
 	return FALSE;
 }
 
+int FileMisc::GetExistingFiles(const CStringArray& aFilePaths, CStringArray& aExistPaths)
+{
+	aExistPaths.RemoveAll();
+	int nFile = aFilePaths.GetSize();
+
+	while (nFile--)
+	{
+		if (FileExists(aFilePaths[nFile]))
+			aExistPaths.InsertAt(0, aFilePaths[nFile]);
+	}
+
+	return aExistPaths.GetSize();
+}
+
+int FileMisc::GetNonWritableFiles(const CStringArray& aFilePaths, CStringArray& aNonWritablePaths)
+{
+	int nFile = GetExistingFiles(aFilePaths, aNonWritablePaths);
+
+	while (nFile--)
+	{
+		if (IsFileWritable(aNonWritablePaths[nFile]))
+			aNonWritablePaths.RemoveAt(nFile);
+	}
+	
+	return aNonWritablePaths.GetSize();
+}
+
 BOOL FileMisc::FolderFromFilePathExists(LPCTSTR szFilePath)
 {
 	return FolderExists(GetFolderFromFilePath(szFilePath));
