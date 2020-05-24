@@ -20,6 +20,9 @@ enum TDL_WEBUPDATE_PROGRESS
 	TDLWP_COPY,
 	TDLWP_CLEANUP,
 	TDLWP_COMPLETE,
+
+	// Last item
+	TDLWP_NUMSTATES
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -34,14 +37,22 @@ public:
 	CTDLWebUpdateProgressPage();   // standard constructor
 	
 	void AttachFont(HFONT hFont) { m_hFont = hFont; }
-	void SetProgress(const CStringArray& aProgress);
+	
+	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus);
+	TDL_WEBUPDATE_PROGRESS GetProgressStatus() const { return m_nStatus; }
+	BOOL IsDownloading() const { return (m_nStatus == TDLWP_DOWNLOAD); }
+	BOOL SetDownloadPercent(int nPercent);
 	
 protected:
+	TDL_WEBUPDATE_PROGRESS m_nStatus;
+	CListCtrl m_lcProgress;
+	CStringArray m_aProgressDescriptions;
+	CString m_sDone;
+	HFONT m_hFont;
+
 	// Dialog Data
 	//{{AFX_DATA(CTDLWebUpdatePromptDlg)
-	CString	m_sProgress;
 	//}}AFX_DATA
-	HFONT m_hFont;
 
 	// Overrides
 	// ClassWizard generated virtual function overrides
@@ -54,12 +65,12 @@ protected:
 	
 	// Implementation
 protected:
-	
 	// Generated message map functions
 	//{{AFX_MSG(CTDLWebUpdatePromptDlg)
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	//}}AFX_MSG
+	void OnProgressCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	DECLARE_MESSAGE_MAP()
+
 };
 
 
@@ -73,7 +84,7 @@ public:
 	CTDLWebUpdateProgressDlg(const CPoint& ptPos);
 
 	void SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus);
-	TDL_WEBUPDATE_PROGRESS GetProgressStatus() const { return m_nStatus; }
+	TDL_WEBUPDATE_PROGRESS GetProgressStatus() const;
 	
 	BOOL IsCancelled() const;
 
@@ -99,8 +110,6 @@ protected:
 	//{{AFX_DATA(CTDLWebUpdateProgressDlg)
 	//}}AFX_DATA
 	ULONG m_ulObjRefCount;
-	TDL_WEBUPDATE_PROGRESS m_nStatus;
-	CStringArray m_aProgress;
 	CTDLWebUpdateProgressPage m_page;
 	HFONT m_hFont;
 	BOOL m_bCancelled;
@@ -115,18 +124,14 @@ protected:
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLWebUpdateProgressDlg)
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	//}}AFX_MSG
 	afx_msg void OnClose();
 	afx_msg void OnCancel();
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void AddProgress(const CString& sProgress);
-	void AddProgress(UINT nIDProgress);
 };
 
 //{{AFX_INSERT_LOCATION}}
