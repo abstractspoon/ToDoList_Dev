@@ -202,6 +202,7 @@ unicode_release\TDLTest.exe
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="ToDoList.h" />
   </ItemGroup>
