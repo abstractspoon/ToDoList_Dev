@@ -33,36 +33,10 @@ namespace HTMLHelpExporter
 			return true;
 		}
 
-		private static bool FileIsWritable(string filePath)
-		{
-			try
-			{
-				using (var fs = new FileStream(filePath, FileMode.Open))
-				{
-					return fs.CanWrite;
-				}
-			}
-			catch (Exception e)
-			{
-				return false;
-			}
-		}
-
 		public bool Export(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
 			if (!InitConsts(tasks, destFilePath, silent, prefs, sKey))
 				return false;
-
-			// Output file must be writable
-			while (!FileIsWritable(destFilePath))
-			{
-				var message = String.Format("Please close any open instances of {0} and click OK to continue...", Path.GetFileName(destFilePath));
-
-				if (AppMessageBox.Show("Unable to Access File", message, MessageBoxButtons.OKCancel) == DialogResult.Cancel)
-					return false;
-
-				// else retest file
-			}
 
 			try
 			{
@@ -71,24 +45,25 @@ namespace HTMLHelpExporter
 				Directory.CreateDirectory(tempFolder);
 
 				String projPath = (tempFolder + '\\' + "proj.hhp");
-				String tocPath = (tempFolder + '\\' + "toc.hhc");
-				//String idxPath = (tempFolder + '\\' + "index.hhc");
-				String logPath = (tempFolder + '\\' + "err.log");
 
 				using (var proj = new System.IO.StreamWriter(projPath))
 				{
 					proj.WriteLine("[OPTIONS]");
 					proj.WriteLine("Compatibility=1.1 or later");
 					proj.WriteLine("Compiled file={0}", destFilePath);
-					proj.WriteLine("Contents file={0}", tocPath);
+					proj.WriteLine("Contents file=toc.hhc");
+					proj.WriteLine("Default topic=Task{0}.html", tasks.GetFirstTask().GetID());
+					proj.WriteLine("Display compile notes=No");
 					proj.WriteLine("Display compile progress=No");
-					proj.WriteLine("Error log file={0}", logPath);
-					//file.WriteLine("Index file={0}", idxPath);
+					proj.WriteLine("Error log file=err.log");
+					//file.WriteLine("Index file=index.hhk");
 					//file.WriteLine("Language=0xc09 English (Australia)");
 					proj.WriteLine("[INFOTYPES]");
 				}
 
 				// Create temporary Html Help Table of Contents and associated html files
+				String tocPath = (tempFolder + '\\' + "toc.hhc");
+
 				using (var toc = new System.IO.StreamWriter(tocPath))
 				{
 					// Header
@@ -125,13 +100,14 @@ namespace HTMLHelpExporter
 
 				// Run the Html Help Compiler
 				string hhcPath = "C:\\Program Files (x86)\\HTML Help Workshop\\hhc.exe";
-				var compiler = new Process();
 
-				compiler.StartInfo = new ProcessStartInfo(hhcPath, projPath);
+				var compiler = Process.Start(new ProcessStartInfo(hhcPath, ('\"' + projPath + '\"')));
 
-				if (compiler.Start())
+				if (compiler != null)
 				{
 					compiler.WaitForExit();
+					compiler.Close();
+
 					return true;
 				}
 			}
@@ -156,6 +132,7 @@ namespace HTMLHelpExporter
 				html.WriteLine("<HEAD>");
 				html.WriteLine("</HEAD>");
 				html.WriteLine("<BODY>");
+				html.WriteLine("<H1>{0}</H1>", task.GetTitle());
 
 				var comments = task.GetHtmlComments();
 
