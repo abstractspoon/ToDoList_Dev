@@ -227,8 +227,7 @@ BOOL CEnEdit::InitializeImageLists()
 				VERIFY(m_ilDisabledBtns.Add(iconDisabled) == eb.iImage);
 				ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
 
-				VERIFY(::DestroyIcon(eb.hIcon));
-				eb.hIcon = NULL;
+				// Note: We cleanup icons in the destructor
 			}
 		}
 	}

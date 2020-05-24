@@ -187,7 +187,6 @@ LRESULT CFileEdit::OnPaste(WPARAM /*wp*/, LPARAM /*lp*/)
 	return Default();
 }
 
-
 void CFileEdit::OnSetReadOnly(BOOL bReadOnly)
 {
 	EnableButton(FEBTN_BROWSE, !bReadOnly && IsWindowEnabled());
