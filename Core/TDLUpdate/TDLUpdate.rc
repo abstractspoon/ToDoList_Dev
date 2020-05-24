@@ -142,7 +142,9 @@ CAPTION "ToDoList Web Update (c) AbstractSpoon"
 FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Progress:",IDC_STATIC,0,0,275,8
-    EDITTEXT        IDC_PROGRESS,0,13,275,93,ES_MULTILINE | ES_READONLY
+    CONTROL         "List1",IDC_PROGRESS,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | 
+                    WS_DISABLED | WS_BORDER | WS_TABSTOP,0,12,275,94
 END
 
 
@@ -169,12 +171,12 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_WEBUPDATE_FAILURE   "There was a problem updating ToDoList at this time.\nOften this can be a problem with file and folder permissions.\n\nWould you like to view the update log file for possible clues?"
     IDS_WEBUPDATEPROGRESS_UNZIP "Unzipping update..."
-    IDS_WEBUPDATEPROGRESS_DOWNLOAD "Downloading latest update... %d%%"
+    IDS_WEBUPDATEPROGRESS_DOWNLOAD "Downloading latest update..."
     IDS_WEBUPDATEPROGRESS_COPY 
                             "Copying updated files to installation folder..."
     IDS_WEBUPDATEPROGRESS_BACKUP "Backing-up installation folder..."
     IDS_WEBUPDATEPROGRESS_CLEANUP "Removing backup files..."
-    IDS_WEBUPDATEDONE       "     Done!"
+    IDS_WEBUPDATEDONE       "Done!"
     IDS_WEBUPDATE_PROGRESSHEADER "Hi %s, ToDoList is being updated"
     IDS_WEBUPDATE_PROGRESS  "Please wait"
     IDS_WEBUPDATE_CANCEL    "The update was cancelled, and your previous installation has been restored.\n\nPlease wait while ToDoList is restarted..."

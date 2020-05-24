@@ -22,6 +22,10 @@ static char THIS_FILE[] = __FILE__;
 
 #define PSH_WIZARD97_EX 0x01000000
 
+#ifndef LVS_EX_DOUBLEBUFFER
+#	define LVS_EX_DOUBLEBUFFER  0x00010000
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef BINDSTATUS_ACCEPTRANGES
@@ -77,61 +81,28 @@ void CTDLWebUpdateProgressDlg::OnCancel()
 
 void CTDLWebUpdateProgressDlg::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus)
 {
-	m_nStatus = nStatus;
+	m_page.SetProgressStatus(nStatus);
 
 	// extra handling
-	switch (m_nStatus)
+	switch (nStatus)
 	{
-	case TDLWP_UNZIP:
-		AddProgress(IDS_WEBUPDATEPROGRESS_UNZIP);
-		break;
-
-	case TDLWP_BACKUP:
-		AddProgress(IDS_WEBUPDATEPROGRESS_BACKUP);
-		break;
-		
 	case TDLWP_COPY:
-		// can't cancel from here on
-		{
-			AddProgress(IDS_WEBUPDATEPROGRESS_COPY);
-
-			GetDlgItem(IDCANCEL)->EnableWindow(FALSE);
-		}
+		GetDlgItem(IDCANCEL)->EnableWindow(FALSE);
 		break;
 
-	case TDLWP_CLEANUP:
-		AddProgress(IDS_WEBUPDATEPROGRESS_CLEANUP);
-		break;
-		
 	case TDLWP_COMPLETE:
-		AddProgress(_T(""));
+		// Pause for a moment
+		Sleep(1000);
 		break;
 	}
-}
 
-void CTDLWebUpdateProgressDlg::AddProgress(UINT nIDProgress)
-{
-	AddProgress(CEnString(nIDProgress));
-}
-
-void CTDLWebUpdateProgressDlg::AddProgress(const CString& sProgress)
-{
-	// add 'Done' to last element
-	if (m_aProgress.GetSize())
-	{
-		int nLast = (m_aProgress.GetSize() - 1);
-		
-		m_aProgress[nLast] += ' ';
-		m_aProgress[nLast] += CEnString(IDS_WEBUPDATEDONE);
-	}
-	
-	if (!sProgress.IsEmpty())
-		m_aProgress.Add(sProgress);
-	
-	m_page.SetProgress(m_aProgress);
-	
 	// for some reason the 'Next' button keeps reappearing
 	GetDlgItem(ID_WIZNEXT)->ShowWindow(SW_HIDE);
+}
+
+TDL_WEBUPDATE_PROGRESS CTDLWebUpdateProgressDlg::GetProgressStatus() const
+{
+	return m_page.GetProgressStatus();
 }
 
 BOOL CTDLWebUpdateProgressDlg::OnInitDialog() 
@@ -164,9 +135,6 @@ BOOL CTDLWebUpdateProgressDlg::OnInitDialog()
 		rWindow.OffsetRect(m_ptInitialPos - rWindow.CenterPoint());
 		MoveWindow(rWindow);
 	}
-
-	// initialise progress
-	AddProgress(CEnString(IDS_WEBUPDATEPROGRESS_DOWNLOAD, 0));
 
 	m_bCancelled = FALSE;
 
@@ -314,26 +282,15 @@ STDMETHODIMP CTDLWebUpdateProgressDlg::OnProgress(ULONG ulProgress,
 	
 //	TRACE(_T("(%s), szStatusText: %ls\n"), plpszStatus[ulStatusCode - UF_BINDSTATUS_FIRST], szStatusText);
 
-	if (m_hWnd && (m_nStatus == TDLWP_DOWNLOAD))
+	if (m_hWnd && m_page.IsDownloading())
 	{
 		switch (ulStatusCode)
 		{
 		case BINDSTATUS_BEGINDOWNLOADDATA:
 		case BINDSTATUS_DOWNLOADINGDATA:
 		case BINDSTATUS_ENDDOWNLOADDATA:
-			{
-				CString sProgress;
-				sProgress.Format(CEnString(IDS_WEBUPDATEPROGRESS_DOWNLOAD), MulDiv(ulProgress, 100, ulProgressMax));
-
-				if ((m_aProgress.GetSize() == 0) || 
-					(m_aProgress[0] != sProgress))
-				{
-					m_aProgress.RemoveAll();
-					m_aProgress.Add(sProgress);
-
-					m_page.SetProgress(m_aProgress);
-				}
-			}
+			m_page.SetDownloadPercent((int)MulDiv(ulProgress, 100, ulProgressMax));
+			break;
 		}
 		
 		Misc::ProcessMsgLoop();
@@ -374,6 +331,17 @@ STDMETHODIMP CTDLWebUpdateProgressDlg::OnObjectAvailable(REFIID, IUnknown *)
 /////////////////////////////////////////////////////////////////////////////
 // CTDLWebUpdateProgressPage dialog
 
+const int PADDING = 10;
+
+enum // list columns
+{
+	ITEM_COL,
+	DESCRIPTION_COL,
+	STATUS_COL
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 IMPLEMENT_DYNCREATE(CTDLWebUpdateProgressPage, CPropertyPageEx)
 
 CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
@@ -385,6 +353,17 @@ CTDLWebUpdateProgressPage::CTDLWebUpdateProgressPage()
 	
 	m_strHeaderTitle.Format(CEnString(IDS_WEBUPDATE_PROGRESSHEADER), Misc::GetUserName());
 	m_strHeaderSubTitle = CEnString(IDS_WEBUPDATE_PROGRESS);
+
+	m_sDone = CEnString(IDS_WEBUPDATEDONE);
+
+	m_aProgressDescriptions.Add(CEnString(IDS_WEBUPDATEPROGRESS_DOWNLOAD));
+	m_aProgressDescriptions.Add(CEnString(IDS_WEBUPDATEPROGRESS_UNZIP));
+	m_aProgressDescriptions.Add(CEnString(IDS_WEBUPDATEPROGRESS_BACKUP));
+	m_aProgressDescriptions.Add(CEnString(IDS_WEBUPDATEPROGRESS_COPY));
+	m_aProgressDescriptions.Add(CEnString(IDS_WEBUPDATEPROGRESS_CLEANUP));
+	m_aProgressDescriptions.Add(_T("")); // completion doesn't display a string
+
+	ASSERT(m_aProgressDescriptions.GetSize() == TDLWP_NUMSTATES);
 }
 
 
@@ -392,15 +371,15 @@ void CTDLWebUpdateProgressPage::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPageEx::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLWebUpdateProgressPage)
-	DDX_Text(pDX, IDC_PROGRESS, m_sProgress);
+	DDX_Control(pDX, IDC_PROGRESS, m_lcProgress);
 	//}}AFX_DATA_MAP
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLWebUpdateProgressPage, CPropertyPageEx)
 //{{AFX_MSG_MAP(CTDLWebUpdateProgressPage)
-ON_WM_CTLCOLOR()
 //}}AFX_MSG_MAP
+	ON_NOTIFY(NM_CUSTOMDRAW, IDC_PROGRESS, OnProgressCustomDraw)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -408,22 +387,52 @@ END_MESSAGE_MAP()
 
 BOOL CTDLWebUpdateProgressPage::OnInitDialog() 
 {
+	CPropertyPageEx::OnInitDialog();
+
 	CDialogHelper::SetFont(this, m_hFont);
-	
-	return CPropertyPageEx::OnInitDialog();
-}
 
-HBRUSH CTDLWebUpdateProgressPage::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
-{
-	HBRUSH hBrush = CPropertyPageEx::OnCtlColor(pDC, pWnd, nCtlColor);
+	// Calculate longest column strings
+	CClientDC dc(&m_lcProgress);
+	HGDIOBJ hOldFont = dc.SelectObject(m_hFont);
 
-	if (pWnd->GetDlgCtrlID() == IDC_PROGRESS)
+	CString sMaxItem = _T("10."), sMaxDesc;
+
+	// progress descriptions
+	int nItem = m_aProgressDescriptions.GetSize(), nMaxDescLen = 0;
+
+	while (nItem--)
 	{
- 		pDC->SetBkMode(TRANSPARENT);
- 		hBrush = GetSysColorBrush(COLOR_WINDOW);
- 	}
+		int nItemLen = dc.GetTextExtent(m_aProgressDescriptions[nItem]).cx;
+
+		if (nItemLen > nMaxDescLen)
+		{
+			nMaxDescLen = nItemLen;
+			sMaxDesc = m_aProgressDescriptions[nItem];
+		}
+	}
+
+	// Progress status
+	CString sMaxStatus = _T("100%");
+
+	if (dc.GetTextExtent(sMaxStatus).cx < dc.GetTextExtent(m_sDone).cx)
+		sMaxStatus = m_sDone;
 	
-	return hBrush;
+	dc.SelectObject(hOldFont);
+
+	// Create progress columns
+	m_lcProgress.InsertColumn(ITEM_COL, sMaxItem);
+	m_lcProgress.InsertColumn(DESCRIPTION_COL, sMaxDesc);
+	m_lcProgress.InsertColumn(STATUS_COL, sMaxStatus);
+
+	// Use auto-sizing must come after creation of all columns
+	m_lcProgress.SetColumnWidth(ITEM_COL, LVSCW_AUTOSIZE_USEHEADER);
+	m_lcProgress.SetColumnWidth(DESCRIPTION_COL, LVSCW_AUTOSIZE_USEHEADER);
+	m_lcProgress.SetColumnWidth(STATUS_COL, LVSCW_AUTOSIZE_USEHEADER);
+
+	// Reduce flicker during % updates
+	ListView_SetExtendedListViewStyleEx(m_lcProgress, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
+
+	return TRUE;
 }
 
 BOOL CTDLWebUpdateProgressPage::OnSetActive() 
@@ -437,18 +446,63 @@ BOOL CTDLWebUpdateProgressPage::OnSetActive()
 	return TRUE;
 }
 
-void CTDLWebUpdateProgressPage::SetProgress(const CStringArray& aProgress)
+void CTDLWebUpdateProgressPage::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus)
 {
-	m_sProgress = Misc::FormatArrayAsNumberedList(aProgress, _T(".\t"));
+	ASSERT(nStatus < m_aProgressDescriptions.GetSize());
+
+	m_nStatus = nStatus;
+
+	// Finish off previous item
+	int nCurItem = (m_lcProgress.GetItemCount() - 1);
+
+	if (nCurItem >= 0)
+		m_lcProgress.SetItemText(nCurItem, STATUS_COL, m_sDone);
 	
-	// replace '\n' with '\r\n'
-	m_sProgress.Replace(_T("\n"), _T("\r\n"));
-	UpdateData(FALSE);
+	// Add new item
+	int nNewItem = m_lcProgress.InsertItem((nCurItem + 1), _T(""));
 
-	// set cursor to end of text
-	int nSel = m_sProgress.GetLength();
+	m_lcProgress.SetItemText(nNewItem, ITEM_COL, Misc::Format(_T("%d."), nNewItem + 1)); // one-based
+	m_lcProgress.SetItemText(nNewItem, DESCRIPTION_COL, m_aProgressDescriptions[nNewItem]);
 
-	GetDlgItem(IDC_PROGRESS)->SendMessage(EM_SETSEL, nSel, nSel);
-	GetDlgItem(IDC_PROGRESS)->Invalidate();
-	GetDlgItem(IDC_PROGRESS)->UpdateWindow();
+	if (nNewItem == 0)
+		m_lcProgress.SetItemText(nNewItem, STATUS_COL, _T("0%"));
+
+	m_lcProgress.UpdateWindow();
+}
+
+BOOL CTDLWebUpdateProgressPage::SetDownloadPercent(int nPercent)
+{
+	if (!IsDownloading() || (nPercent < 0) || (nPercent > 100))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	m_lcProgress.SetItemText(0, STATUS_COL, Misc::Format(_T("%d%%"), nPercent));
+	return TRUE;
+}
+
+void CTDLWebUpdateProgressPage::OnProgressCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = CDRF_DODEFAULT;
+
+	NMLVCUSTOMDRAW* pLVCD = (NMLVCUSTOMDRAW*)pNMHDR;
+
+	switch (pLVCD->nmcd.dwDrawStage)
+	{
+	case CDDS_PREPAINT:
+		{
+			CRect rClient;
+			m_lcProgress.GetClientRect(rClient);
+
+			::FillRect(pLVCD->nmcd.hdc, rClient, ::GetSysColorBrush(COLOR_WINDOW));
+		}
+		*pResult = CDRF_NOTIFYITEMDRAW;
+		break;
+
+	case CDDS_ITEMPREPAINT:
+		pLVCD->clrTextBk = GetSysColor(COLOR_WINDOW);
+		*pResult = CDRF_NEWFONT;
+		break;
+	}
 }

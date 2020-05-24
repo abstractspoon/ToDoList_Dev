@@ -70,7 +70,7 @@ protected:
 protected:
 	BOOL SetAppFolder(const CString& sAppFolder);
 	BOOL InitialiseTemporaries();
-	BOOL DoProgressDialog(const CString& sPrevCmdLine, BOOL bDownloadOnly = FALSE);
+	BOOL DoProgressDialog(const CString& sPrevCmdLine);
 	void CleanupTemporaries();
 	BOOL CheckUpdateCancelled();
 	TDL_WEBUPDATE_RESULT LogError(const CString& sAppFolder) const;
