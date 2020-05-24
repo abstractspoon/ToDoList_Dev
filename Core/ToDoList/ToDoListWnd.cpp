@@ -1086,7 +1086,8 @@ void CToDoListWnd::PopulateMenuIconManager()
 	m_mgrMenuIcons.AddImage(ID_TRAYICON_CLOSE, ID_EXIT);
 
 	// Custom toolbar
-	m_mgrMenuIcons.AddImages(m_toolbarCustom);
+	if (m_toolbarCustom.GetSafeHwnd())
+		m_mgrMenuIcons.AddImages(m_toolbarCustom);
 
 	UpdateMenuIconMgrSourceControlStatus();
 }

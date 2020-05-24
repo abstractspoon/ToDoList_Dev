@@ -291,7 +291,7 @@ void CKanbanWnd::UpdatePriorityColors(const IPreferences* pPrefs)
 			}
 			break;
 
-		case 2:	// Individual colours
+		case 2:	// Scheme colours
 			if (pPrefs->GetProfileInt(COLORKEY, _T("S0"), -1) != -1)
 			{
 				for (int nColor = 0; nColor < 11; nColor++)
