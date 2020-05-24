@@ -180,6 +180,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HtmlHelpExporter", "HtmlHelpExporter", "{EF1B4169-4595-4ADE-8BFE-9321DC76BD1E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HTMLHelpExporterBridge", "ImportExport\HTMLHelpExporter\HTMLHelpExporterBridge\HTMLHelpExporterBridge.vcxproj", "{9552E8F9-DEB5-464A-9312-83D21D44B0A4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1A4786FF-E0CA-4BFB-B902-B799A0B42448} = {1A4786FF-E0CA-4BFB-B902-B799A0B42448}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HTMLHelpExporterCore", "ImportExport\HTMLHelpExporter\HTMLHelpExporterCore\HTMLHelpExporterCore.csproj", "{1A4786FF-E0CA-4BFB-B902-B799A0B42448}"
 EndProject

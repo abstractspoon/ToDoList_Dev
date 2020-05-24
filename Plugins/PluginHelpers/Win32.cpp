@@ -6,7 +6,11 @@
 #include "CommCtrl.h"
 #include "PluginHelpers.h"
 
+#include <Shared\MessageBox.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
+
+using namespace Windows::Forms;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -209,6 +213,16 @@ void DlgUnits::ToPixels(int& x, int& y)
 		x = rect.right;
 		y = rect.bottom;
 	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+DialogResult AppMessageBox::Show(String^ instruction, String^ text, MessageBoxButtons buttons)
+{
+	MarshalledString msText(text), msInstruction(instruction);
+	CString sText(msText), sInstruction(instruction);
+
+	return (DialogResult)CMessageBox::AfxShow(sInstruction, sText, (UINT)buttons);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

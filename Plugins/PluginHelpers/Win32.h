@@ -62,6 +62,12 @@ namespace Abstractspoon
 			protected:
 				HWND m_hWnd;
 			};
+
+			public ref class AppMessageBox
+			{
+			public:
+				static Windows::Forms::DialogResult Show(String^ instruction, String^ text, Windows::Forms::MessageBoxButtons buttons);
+			};
 		}
 	}
 }
