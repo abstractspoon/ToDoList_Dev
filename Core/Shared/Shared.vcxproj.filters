@@ -262,9 +262,6 @@
     <ClCompile Include="RichEditNcBorder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RoundCorner.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Rtf2HtmlConverter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -763,9 +760,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RichEditNcBorder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RoundCorner.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Rtf2HtmlConverter.h">

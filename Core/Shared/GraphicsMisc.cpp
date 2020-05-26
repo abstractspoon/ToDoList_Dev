@@ -924,7 +924,7 @@ BOOL GraphicsMisc::ForceIconicRepresentation(HWND hWnd, BOOL bForce)
 # define DWMWA_FORCE_ICONIC_REPRESENTATION 7
 #endif
 	
-	return DwmSetWindowAttribute(hWnd, DWMWA_FORCE_ICONIC_REPRESENTATION, &bForce, sizeof(bForce));
+	return DwmSetWindowAttributeEx(hWnd, DWMWA_FORCE_ICONIC_REPRESENTATION, &bForce, sizeof(bForce));
 }
 
 BOOL GraphicsMisc::EnableAeroPeek(HWND hWnd, BOOL bEnable)
@@ -935,7 +935,7 @@ BOOL GraphicsMisc::EnableAeroPeek(HWND hWnd, BOOL bEnable)
 	
 	BOOL bDisallow = !bEnable;
 	
-	return DwmSetWindowAttribute(hWnd, DWMWA_DISALLOW_PEEK, &bDisallow, sizeof(bDisallow));
+	return DwmSetWindowAttributeEx(hWnd, DWMWA_DISALLOW_PEEK, &bDisallow, sizeof(bDisallow));
 }
 
 BOOL GraphicsMisc::GetExtendedFrameBounds(HWND hWnd, CRect& rBounds)
@@ -944,7 +944,7 @@ BOOL GraphicsMisc::GetExtendedFrameBounds(HWND hWnd, CRect& rBounds)
 # define DWMWA_EXTENDED_FRAME_BOUNDS 9
 #endif
 
-	return DwmGetWindowAttribute(hWnd, DWMWA_EXTENDED_FRAME_BOUNDS, &rBounds, sizeof(rBounds));
+	return DwmGetWindowAttributeEx(hWnd, DWMWA_EXTENDED_FRAME_BOUNDS, &rBounds, sizeof(rBounds));
 }
 
 BOOL GraphicsMisc::EnableFlip3D(HWND hWnd, BOOL bEnable)
@@ -958,10 +958,10 @@ BOOL GraphicsMisc::EnableFlip3D(HWND hWnd, BOOL bEnable)
 	
 	int nPolicy = bEnable ? DWMFLIP3D_DEFAULT : DWMFLIP3D_EXCLUDEBELOW;
 	
-	return DwmSetWindowAttribute(hWnd, DWMWA_FLIP3D_POLICY, &nPolicy, sizeof(nPolicy));
+	return DwmSetWindowAttributeEx(hWnd, DWMWA_FLIP3D_POLICY, &nPolicy, sizeof(nPolicy));
 }
 
-BOOL GraphicsMisc::DwmSetWindowAttribute(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize)
+BOOL GraphicsMisc::DwmSetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize)
 {
 	HMODULE hMod = ::LoadLibrary(_T("Dwmapi.dll"));
 	
@@ -980,7 +980,7 @@ BOOL GraphicsMisc::DwmSetWindowAttribute(HWND hWnd, DWORD dwAttrib, LPCVOID pDat
 	return FALSE;
 }
 
-BOOL GraphicsMisc::DwmGetWindowAttribute(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize)
+BOOL GraphicsMisc::DwmGetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize)
 {
 	HMODULE hMod = ::LoadLibrary(_T("Dwmapi.dll"));
 
@@ -1654,7 +1654,7 @@ CString GraphicsMisc::GetWebColor(COLORREF color)
 COLORREF GraphicsMisc::ParseWebColor(const CString& sHexColor)
 {
 	COLORREF color = CLR_NONE;
-	WORD wRed = 0, wBlue = 0, wGreen = 0;
+	UINT wRed = 0, wBlue = 0, wGreen = 0;
 
 #pragma warning(push)
 #pragma warning(disable:4996)
@@ -1662,12 +1662,12 @@ COLORREF GraphicsMisc::ParseWebColor(const CString& sHexColor)
 	switch (sHexColor.GetLength())
 	{
 	case 7:
-		if (_stscanf(sHexColor, _T("#%02X%02X%02X"), wRed, wGreen, wBlue) == 3)
+		if (_stscanf(sHexColor, _T("#%02X%02X%02X"), &wRed, &wGreen, &wBlue) == 3)
 			color = RGB(wRed, wGreen, wBlue);
 		break;
 
 	case 6:
-		if (_stscanf(sHexColor, _T("%02X%02X%02X"), wRed, wGreen, wBlue) == 3)
+		if (_stscanf(sHexColor, _T("%02X%02X%02X"), &wRed, &wGreen, &wBlue) == 3)
 			color = RGB(wRed, wGreen, wBlue);
 		break;
 	}
@@ -1988,7 +1988,7 @@ int GraphicsMisc::GetScreenBitDepth()
 
 BOOL GraphicsMisc::WantDPIScaling()
 {
-	typedef enum PROCESSDPIAWARENESS
+	enum PROCESSDPIAWARENESS
 	{
 		DPI_UNAWARE            = 0,
 		SYSTEM_DPI_AWARE       = 1,

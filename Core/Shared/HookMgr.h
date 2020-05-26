@@ -87,15 +87,6 @@ protected:
 
 		m_sClassFilter = szClassFilter;
 
-		// detect whether on 2000 or later
-		OSVERSIONINFO OS;
-
-		OS.dwOSVersionInfoSize=sizeof(OS);
-		::GetVersionEx(&OS);
-
-		m_b2000orLater = (OS.dwPlatformId == VER_PLATFORM_WIN32_NT &&
-			OS.dwMajorVersion >= 5);
-
 		return TRUE;
 	}
 
@@ -125,7 +116,6 @@ protected:
 	HHOOK m_hShellHook;
 	HHOOK m_hSysMsgFilterHook;
 	CString m_sClassFilter;
-	BOOL m_b2000orLater;
 
 protected:
 	static MGRTYPE& GetInstance()
@@ -134,7 +124,7 @@ protected:
 		return manager; 
 	}
 
-	CHookMgr() // cannot instanciate one of these directly
+	CHookMgr() // cannot instantiate one of these directly
 	{
 		m_hCallWndHook = NULL;
 		m_hCallWndRetHook = NULL;
@@ -146,7 +136,6 @@ protected:
 		m_hMsgFilterHook = NULL;
 		m_hShellHook = NULL;
 		m_hSysMsgFilterHook = NULL;
-		m_b2000orLater = FALSE;
 	}
 
 	// derived classes override whatever they need
@@ -301,37 +290,12 @@ protected:
 
 		if (nCode == HC_ACTION)
 		{
-			MOUSEHOOKSTRUCT* pInfo = (MOUSEHOOKSTRUCT*)lParam;
+			MOUSEHOOKSTRUCTEX* pInfo = (MOUSEHOOKSTRUCTEX*)lParam;
 
 			if (mgr.ClassMatches(pInfo->hwnd))
 			{
-#if _MSC_VER >= 1300
-				//fabio_2005	
-				MOUSEHOOKSTRUCTEX* pInfoEx = (MOUSEHOOKSTRUCTEX*)pInfo;
-
-				if (!mgr.m_b2000orLater)
-					pInfoEx->mouseData = 0;
-
-				if (mgr.OnMouseEx(wParam, *pInfoEx))
+				if (mgr.OnMouseEx(wParam, *pInfo))
 					return TRUE;
-#else
-				if (mgr.m_b2000orLater)
-				{
-					MOUSEHOOKSTRUCTEX* pInfoEx = (MOUSEHOOKSTRUCTEX*)pInfo;
-
-					if (mgr.OnMouseEx(wParam, *pInfoEx))
-						return TRUE;
-				}
-				else
-				{
-					MOUSEHOOKSTRUCTEX infoEx;
-					infoEx = *((MOUSEHOOKSTRUCTEX*)pInfo);
-					infoEx.mouseData = 0;
-
-					if (mgr.OnMouseEx(wParam, infoEx))
-						return TRUE;
-				}
-#endif
 			}
 		}
 

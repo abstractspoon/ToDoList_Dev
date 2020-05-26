@@ -236,8 +236,8 @@ namespace GraphicsMisc
 	BOOL ChangeWindowMessageFilter(UINT nMessage, BOOL bOn);
 	BOOL EnableNonClientDpiScaling(HWND hWnd);
 
-	BOOL DwmSetWindowAttribute(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize);
-	BOOL DwmGetWindowAttribute(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize);
+	BOOL DwmSetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, LPCVOID pData, DWORD dwDataSize);
+	BOOL DwmGetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize);
 	BOOL DwmIsCompositionEnabled();
 
 	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);

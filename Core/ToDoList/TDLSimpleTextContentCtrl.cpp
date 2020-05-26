@@ -726,7 +726,7 @@ BOOL CTDLSimpleTextContentCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT mess
 	// menu appears so we set the cursor back to the arrow
 	if (nHitTest == HTCAPTION)
 	{
-		SetCursor(AfxGetApp()->LoadStandardCursor(MAKEINTRESOURCE(IDC_ARROW)));
+		SetCursor(AfxGetApp()->LoadStandardCursor(IDC_ARROW));
 		return TRUE;
 	}
 	

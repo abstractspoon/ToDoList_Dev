@@ -24,7 +24,7 @@ static char THIS_FILE[]=__FILE__;
 
 #define ADDCUSTOMATTRIB(name, value)									\
 {																		\
-	pXIAttribs = pXIDestItem->AddItem(_T("attribute"));					\
+	CXmlItem* pXIAttribs = pXIDestItem->AddItem(_T("attribute"));		\
 	pXIAttribs->AddItem(_T("NAME"), name);								\
 	pXIAttribs->AddItem(_T("VALUE"), value);							\
 }
@@ -233,7 +233,6 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 	}
 	
 	// comments
-	CXmlItem* pXIAttribs = NULL; 
 	CString sComments = pSrcTaskFile->GetTaskComments(hTask);
 	
 	if (!sComments.IsEmpty())

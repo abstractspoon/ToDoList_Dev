@@ -598,7 +598,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	m_spinPercent.SetRange(0, 100);
 	m_spinPercent.SetBuddy(GetDlgItem(IDC_PERCENT));
 	
-	UDACCEL uda = { 0, m_nPercentIncrement };
+	UDACCEL uda = { 0, (UINT)m_nPercentIncrement };
 	m_spinPercent.SetAccel(1, &uda);
 	
 	// init dates
@@ -3916,7 +3916,7 @@ void CToDoCtrl::SetPercentDoneIncrement(int nAmount)
 
 	if (m_spinPercent.GetSafeHwnd())
 	{
-		UDACCEL uda = { 0, m_nPercentIncrement };
+		UDACCEL uda = { 0, (UINT)m_nPercentIncrement };
 		m_spinPercent.SetAccel(1, &uda);
 	}
 }

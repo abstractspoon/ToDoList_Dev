@@ -52,7 +52,7 @@ struct NCGDRAWITEM
 	CDC* pDC;
 	DWORD dwItem;
 	DWORD dwParentItem; // always zero unless control responds to WM_NCG_GETFIRSTCHILDITEM
-	int nColID;
+	UINT nColID;
 	const CRect* rItem;
 	int nLevel;			// always zero unless control responds to WM_NCG_GETFIRSTCHILDITEM
 	int nItemPos;
@@ -62,7 +62,7 @@ struct NCGDRAWITEM
 
 struct NCGRECALCCOLUMN
 {
-	int nColID;
+	UINT nColID;
 	CDC* pDC;
 	UINT nWidth; // fill in on return
 };
@@ -79,21 +79,21 @@ struct NCGITEMCLICK
 {
 	DWORD dwItem;
 	DWORD dwPrevItem; // set if this is a BUTTONUP msg
-	int nColID; // NCG_CLIENTCOLUMNID if client click
+	UINT nColID; // NCG_CLIENTCOLUMNID if client click
 	UINT nMsgID; // WM_...
 	POINT ptClick;
 };
 
 struct NCGHDRCLICK
 {
-	int nColID; 
+	UINT nColID; 
 	UINT nMsgID; // WM_...
 	BOOL bPressed; // notifyee can modify to indicate what the final state should be
 };
 
 struct NCGGETCURSOR
 {
-	int nColID;
+	UINT nColID;
 	DWORD dwItem;
 };
 

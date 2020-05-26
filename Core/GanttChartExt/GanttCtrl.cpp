@@ -692,8 +692,6 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		
 		if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 		{ 
-			time64_t tDate = 0;
-	
 			// update min/max too
 			if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
 				pGI->SetStartDate(tDate, TRUE);
@@ -703,8 +701,6 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 	
 		if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 		{
-			time64_t tDate = 0;
-
 			// update min/max too
 			if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
 				pGI->SetDueDate(tDate, TRUE);
@@ -714,8 +710,6 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 	
 		if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 		{
-			time64_t tDate = 0;
-
 			if (pTasks->GetTaskDoneDate64(hTask, tDate))
 				pGI->SetDoneDate(tDate);
 			else
@@ -745,10 +739,10 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 			while (nDepend--)
 			{
 				// Local dependencies only
-				DWORD dwTaskID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+				DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
 
-				if (dwTaskID)
-					pGI->aDependIDs.Add(dwTaskID);
+				if (dwDependID)
+					pGI->aDependIDs.Add(dwDependID);
 			}
 		}
 
@@ -969,10 +963,10 @@ void CGanttCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		
 		while (nDepend--)
 		{	
-			DWORD dwTaskID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+			DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
 
-			if (dwTaskID)
-				pGI->aDependIDs.Add(dwTaskID);
+			if (dwDependID)
+				pGI->aDependIDs.Add(dwDependID);
 		}
 	}
 	
@@ -3352,9 +3346,7 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					if (nWeek == 53)
 					{
 						ASSERT(nMonth == 1);
-
-						COleDateTime dtWeek(nYear, nMonth, nDay, 0, 0, 0);
-						nWeek = CDateHelper::GetWeekofYear(dtWeek);
+						nWeek = CDateHelper::GetWeekofYear(COleDateTime(nYear, nMonth, nDay, 0, 0, 0));
 					}
 
 					bDone = TRUE;
