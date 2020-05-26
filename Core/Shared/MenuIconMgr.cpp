@@ -23,7 +23,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CMenuIconMgr::CMenuIconMgr()
+CMenuIconMgr::CMenuIconMgr() : m_bVistaPlus(FALSE)
 {
 	// Vista and above assigns ARGB bitmaps to menu items
 	// and lets the menu do the drawing.
@@ -316,12 +316,7 @@ BOOL CMenuIconMgr::ChangeImageID(UINT nCmdID, UINT nNewCmdID)
 HICON CMenuIconMgr::LoadItemIcon(UINT nCmdID, BOOL bNormal) const
 {
 	HICON hIcon = NULL;
-	
 	ImageMap(bNormal).Lookup(nCmdID, hIcon);
-
-	// fallback for disabled icon
-	if ((hIcon == NULL) && !bNormal)
-		ImageMap(TRUE).Lookup(nCmdID, hIcon);
 
 	return hIcon;
 }
@@ -563,6 +558,7 @@ BOOL CMenuIconMgr::OnMeasureItem(int /*nIDCtl*/, LPMEASUREITEMSTRUCT lpmis)
     if (hIcon)
     {
 		CSize sIcon = GraphicsMisc::GetIconSize(hIcon);
+		ASSERT(sIcon.cx > 0);
 
         lpmis->itemWidth = sIcon.cx;
         lpmis->itemHeight = sIcon.cy;

@@ -1254,7 +1254,7 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					// make sure the mouse is still over the item label because
 					// LVS_EX_FULLROWSELECT turned on the whole row
 					CClientDC dc(&m_lcTasks);
-					CFont* pOldFont = PrepareDCFont(&dc, pTDI, pTDS, FALSE);
+					CFont* pOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
 					
 					CRect rLabel;
 					

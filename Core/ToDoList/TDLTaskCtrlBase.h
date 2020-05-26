@@ -369,7 +369,7 @@ protected:
 	time_t GetTaskReminder(DWORD dwTaskID) const;
 	TDC_COLUMN GetColumnID(int nCol) const; // zero is always 'tasks'
 	int GetColumnIndex(TDC_COLUMN nColID) const;
-	CFont* PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bColumns);
+	CFont* PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bTitleLabel);
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
