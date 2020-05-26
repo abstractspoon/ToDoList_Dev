@@ -18,6 +18,7 @@ namespace HTMLHelpExporter
 
 		private Translator m_Trans;
 		private String m_TypeId;
+        private String m_TempFolder;
 
 		// --------------------------------------------------------------------------------------
 
@@ -25,6 +26,7 @@ namespace HTMLHelpExporter
 		{
 			m_TypeId = typeId;
 			m_Trans = trans;
+			m_TempFolder = (Path.GetTempPath() + typeId);
 		}
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
@@ -41,10 +43,9 @@ namespace HTMLHelpExporter
 			try
 			{
 				// Build temporary Html Help Project file
-				String tempFolder = (Path.GetTempPath() + m_TypeId);
-				Directory.CreateDirectory(tempFolder);
+				Directory.CreateDirectory(m_TempFolder);
 
-				String projPath = (tempFolder + '\\' + "proj.hhp");
+				String projPath = (m_TempFolder + '\\' + "proj.hhp");
 
 				using (var proj = new System.IO.StreamWriter(projPath))
 				{
@@ -62,7 +63,7 @@ namespace HTMLHelpExporter
 				}
 
 				// Create temporary Html Help Table of Contents and associated html files
-				String tocPath = (tempFolder + '\\' + "toc.hhc");
+				String tocPath = (m_TempFolder + '\\' + "toc.hhc");
 
 				using (var toc = new System.IO.StreamWriter(tocPath))
 				{
@@ -84,7 +85,7 @@ namespace HTMLHelpExporter
 
 					while (task.IsValid())
 					{
-						if (!ExportTaskAndSubtasks(task, toc, tempFolder))
+						if (!ExportTaskAndSubtasks(task, toc))
 						{
 							// TODO
 						}
@@ -111,20 +112,20 @@ namespace HTMLHelpExporter
 					return true;
 				}
 			}
-			catch (Exception e)
+			catch (Exception /*e*/)
 			{
 			}
 
 			return false;
 		}
 
-		protected bool ExportTaskAndSubtasks(Task task, StreamWriter toc, String tempFolder)
+		protected bool ExportTaskAndSubtasks(Task task, StreamWriter toc)
 		{
 			// Create the Html page for this task
 			string htmlFileName = string.Format("Task{0}.html", task.GetID());
-			String htmlPath = (tempFolder + '\\' + htmlFileName);
+			String htmlPath = (m_TempFolder + '\\' + htmlFileName);
 
-			using (var html = new System.IO.StreamWriter(htmlPath))
+			using (var html = new System.IO.StreamWriter(htmlPath, false, Encoding.UTF8))
 			{
 				// Header
 				html.WriteLine("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">");
@@ -164,7 +165,7 @@ namespace HTMLHelpExporter
 
 				do
 				{
-					if (!ExportTaskAndSubtasks(subtask, toc, tempFolder)) // RECURSIVE CALL
+					if (!ExportTaskAndSubtasks(subtask, toc)) // RECURSIVE CALL
 					{
 						// TODO
 					}
