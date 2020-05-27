@@ -81,7 +81,7 @@ public:
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly);
 
 protected:
-   msclr::auto_gcroot<HTMLContentControlCore^> m_wnd;
+   gcroot<HTMLContentControlCore^> m_wnd;
    ITransText* m_pTT;
 };
 

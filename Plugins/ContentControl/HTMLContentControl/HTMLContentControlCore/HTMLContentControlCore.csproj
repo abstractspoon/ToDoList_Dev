@@ -81,9 +81,6 @@
     <Compile Include="TDLHtmlEditorControl.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="PluginHelpers">
-      <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
-    </Reference>
     <Reference Include="MSDN.HtmlEditorControl">
       <HintPath>..\..\..\$(Configuration)\MSDN.HtmlEditorControl.dll</HintPath>
     </Reference>
@@ -103,6 +100,10 @@
     <ProjectReference Include="..\..\..\3rdParty\WebBrowserEx\WebBrowserEx.csproj">
       <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
       <Name>WebBrowserEx</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
+      <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
+      <Name>PluginHelpers</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

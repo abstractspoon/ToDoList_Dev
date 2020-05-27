@@ -126,6 +126,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HTMLContentControlBridge", 
 	ProjectSection(ProjectDependencies) = postProject
 		{8A0B2029-7325-4527-9483-38DDC1F3B011} = {8A0B2029-7325-4527-9483-38DDC1F3B011}
 		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
+		{3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8} = {3733D8E0-4B87-42A6-9B9D-5E16BB15C8D8}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "HtmlReportExporter", "HtmlReportExporter", "{C20A74AF-A6C4-4E7A-AA8C-B946F18D6ACE}"
@@ -174,6 +175,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReoGridEditorControl", "3rdParty\ReoGridEditorControl\ReoGridEditorControl.csproj", "{8307DFFB-7E57-42B4-B402-601A80923F4E}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MarkdeepExporterBridge", "ImportExport\MarkdeepExporter\MarkdeepExporterBridge\MarkdeepExporterBridge.vcxproj", "{4BD0C76E-2582-470F-9468-FDC94389159F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8} = {85DB2CAF-CC78-4CA9-B948-EC2AC25F13E8}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkdeepExporterCore", "ImportExport\MarkdeepExporter\MarkdeepExporterCore\MarkdeepExporterCore.csproj", "{FA1F07F6-7653-4FB8-8BEC-91C5B381C0DD}"
 EndProject
