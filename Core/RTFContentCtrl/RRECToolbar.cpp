@@ -202,7 +202,7 @@ void CRRECToolBar::OnSelchangeSize()
 void CRRECToolBar::OnKillFocusCombo() 
 {
 	// send a kill foxus message to our parent
-	NMHDR nmhdr = { *this, GetDlgCtrlID(), NM_KILLFOCUS };
+	NMHDR nmhdr = { *this, (UINT)GetDlgCtrlID(), NM_KILLFOCUS };
 
 	GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&nmhdr);
 }

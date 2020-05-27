@@ -24,6 +24,10 @@
 #endif
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#define NO_WARN_MBCS_MFC_DEPRECATION // for VS2015
+
+#pragma warning(disable:4996) // deprecated functions
+#pragma warning(disable:4355) // using 'this' in constructor
 
 #include <afxwin.h>         // MFC core and standard components
 

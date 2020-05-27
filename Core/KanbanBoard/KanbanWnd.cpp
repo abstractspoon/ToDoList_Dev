@@ -46,9 +46,7 @@ CKanbanWnd::CKanbanWnd(CWnd* pParent /*=NULL*/)
 	m_nTrackedAttrib(TDCA_NONE),
 	m_ctrlKanban(),
 	m_dwSelTaskID(0),
-#pragma warning(disable:4355)
 	m_dlgPrefs(this)
-#pragma warning(default:4355)
 {
 	m_icon.Load(IDR_KANBAN);
 }

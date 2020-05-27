@@ -103,11 +103,7 @@ BOOL				CPreferences::s_bLocked = FALSE;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CPreferences::CPreferences() 
-	: 
-#pragma warning (disable: 4355)
-	m_iPrefs(*this)
-#pragma warning (default: 4355)
+CPreferences::CPreferences() : m_iPrefs(*this)
 {
 	// prevent anyone else changing the shared resources
 	// for the duration of this function

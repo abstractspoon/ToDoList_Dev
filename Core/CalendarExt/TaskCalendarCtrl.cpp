@@ -1035,11 +1035,11 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 		else
 		{
 			CRect rPrevPos = CDialogHelper::GetChildRect(&m_sbCellVScroll);
-			int nRow, nCol;
+			int nOldRow, nOldCol;
 
-			if (HitTestGridCell(rPrevPos.CenterPoint(), nRow, nCol))
+			if (HitTestGridCell(rPrevPos.CenterPoint(), nOldRow, nOldCol))
 			{
-				pOldCell = GetCell(nRow, nCol);
+				pOldCell = GetCell(nOldRow, nOldCol);
 				ASSERT(pOldCell);
 			}
 

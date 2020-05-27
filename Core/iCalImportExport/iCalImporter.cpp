@@ -463,9 +463,9 @@ BOOL CiCalImporter::ExtractDate(const CString& sValue, COleDateTime& date, BOOL 
 	if (!sTime.IsEmpty())
 	{
 #if _MSC_VER >= 1400
-		int nRes = _stscanf_s(sTime, _T("%2d%2d%2d"), &nHour, &nMin, &nSec);
+		nRes = _stscanf_s(sTime, _T("%2d%2d%2d"), &nHour, &nMin, &nSec);
 #else
-		int nRes = _stscanf(sTime, _T("%2d%2d%2d"), &nHour, &nMin, &nSec);
+		nRes = _stscanf(sTime, _T("%2d%2d%2d"), &nHour, &nMin, &nSec);
 #endif
 		ASSERT(nRes == 3);
 		
@@ -490,7 +490,7 @@ BOOL CiCalImporter::ExtractDate(const CString& sValue, COleDateTime& date, BOOL 
 		date = mktime(&t);
 
 #ifdef _DEBUG
-		CString sTime = CDateHelper::FormatDate(date, DHFD_TIME);
+		sTime = CDateHelper::FormatDate(date, DHFD_TIME);
 #endif
 	}
 

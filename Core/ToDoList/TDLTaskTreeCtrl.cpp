@@ -74,10 +74,8 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 	m_wKeyPress(0),
 	m_bMovingItem(FALSE),
 	m_bEditLabelTimerStarted(FALSE),
-#pragma warning (disable: 4355)
 	m_reminders(*this),
 	m_find(m_tch, data, m_reminders)
-#pragma warning (default: 4355)
 {
 }
 

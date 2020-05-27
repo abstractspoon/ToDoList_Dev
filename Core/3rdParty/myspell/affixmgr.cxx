@@ -1254,7 +1254,7 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af)
                 case 2: { 
                           np++;
                           nptr->strip = mystrdup(piece);
-                          nptr->stripl = strlen(nptr->strip);
+                          nptr->stripl = (short)strlen(nptr->strip);
                           if (strcmp(nptr->strip,"0") == 0) {
                               free(nptr->strip);
                               nptr->strip=mystrdup("");
@@ -1267,7 +1267,7 @@ int  AffixMgr::parse_affix(char * line, const char at, FILE * af)
                 case 3: { 
 		          np++;
                           nptr->appnd = mystrdup(piece);
-                          nptr->appndl = strlen(nptr->appnd);
+                          nptr->appndl = (short)strlen(nptr->appnd);
                           if (strcmp(nptr->appnd,"0") == 0) {
                               free(nptr->appnd);
                               nptr->appnd=mystrdup("");

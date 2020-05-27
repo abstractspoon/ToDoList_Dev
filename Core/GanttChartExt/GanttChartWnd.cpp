@@ -61,9 +61,7 @@ CGanttChartWnd::CGanttChartWnd(CWnd* pParent /*=NULL*/)
 	m_bReadOnly(FALSE),
 	m_bInSelectTask(FALSE),
 	m_bInSetMonthDisplay(FALSE),
-#pragma warning(disable:4355)
 	m_dlgPrefs(this)
-#pragma warning(default:4355)
 {
 	m_icon.Load(IDR_GANTTCHART);
 }

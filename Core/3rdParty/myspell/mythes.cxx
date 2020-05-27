@@ -225,14 +225,14 @@ int MyThes::Lookup(const char * pText, int len, mentry** pme)
         
         // fill in the synonym list
         d = p;
-        for (int j = 0; j < nf; j++) {
+        for (int k = 0; k < nf; k++) {
             np = mystr_indexOfChar(d,'|');
             if (np > 0) {
 	      *(d+np) = '\0';
-              pm->psyns[j] = mystrdup(d);
+              pm->psyns[k] = mystrdup(d);
               d = d + np + 1;
             } else {
-              pm->psyns[j] = mystrdup(d);
+              pm->psyns[k] = mystrdup(d);
 	    }            
         }
 
@@ -312,17 +312,17 @@ int MyThes::readLine(FILE * pf, char * buf, int nc)
 //  returns: -1 on not found
 //           index of wrd in the list[]
 
-int MyThes::binsearch(char * sw, char* list[], int nlst) 
+int MyThes::binsearch(char * sw, char* clist[], int nlst) 
 {
     int lp, up, mp, j, indx;
     lp = 0;
     up = nlst-1;
     indx = -1;
-    if (strcmp(sw,list[lp]) < 0) return -1;
-    if (strcmp(sw,list[up]) > 0) return -1;
+    if (strcmp(sw,clist[lp]) < 0) return -1;
+    if (strcmp(sw,clist[up]) > 0) return -1;
     while (indx < 0 ) {
         mp = (int)((lp+up) >> 1);
-        j = strcmp(sw,list[mp]);
+        j = strcmp(sw,clist[mp]);
         if ( j > 0) {
             lp = mp + 1;
         } else if (j < 0 ) {

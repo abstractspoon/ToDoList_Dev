@@ -55,9 +55,7 @@ CBurndownWnd::CBurndownWnd(CWnd* pParent /*=NULL*/)
 	m_dwUpdateGraphOnShow(0),
 	m_dtDataRange(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH),
 	m_chart(m_data),
-#pragma warning(disable:4355)
 	m_dlgPrefs(m_chart, this),
-#pragma warning(default:4355)
 	m_bUpdatingSlider(FALSE),
 	m_sliderDateRange(TBS_BOTTOM),
 	m_bVisible(FALSE)

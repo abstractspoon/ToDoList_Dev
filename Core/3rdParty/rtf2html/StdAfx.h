@@ -19,8 +19,10 @@
 #include <iostream.h>
 #include <iostream.h>
 
-// disable vector warnings
-#pragma warning(disable:4018)
+#define NO_WARN_MBCS_MFC_DEPRECATION // for VS2015
+
+#pragma warning(disable:4996) // deprecated functions
+#pragma warning(disable:4018) // vector warnings
 
 // TODO: reference additional headers your program requires here
 

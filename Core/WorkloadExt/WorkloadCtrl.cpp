@@ -693,8 +693,6 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 	if (pWI->dwRefID == 0)
 	{
 		// can't use a switch here because we also need to check for IUI_ALL
-		time64_t tDate = 0;
-	
 		if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 			pWI->sTitle = pTasks->GetTaskTitle(hTask);
 	

@@ -1982,9 +1982,9 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				CPoint ptCursor(GetMessagePos());
 	
 				m_list.ScreenToClient(&ptCursor);
-				int nHit = m_list.HitTest(ptCursor);
+				int nItem = m_list.HitTest(ptCursor);
 
-				if ((nHit != -1) && m_data.ItemIsLocked(GetTaskID(nHit), FALSE))
+				if ((nItem != -1) && m_data.ItemIsLocked(GetTaskID(nItem), FALSE))
 					return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 				if (!IsDependencyEditing())

@@ -100,12 +100,12 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 
 	// Build our own sorted array because we have leading numbers
 	CArray<SORTITEM, SORTITEM&> aOptions;
-	SORTITEM st;
 	int nItem;
 
 	for (nItem = 0; nItem < NUM_COMBO; nItem++)
 	{
 		const COMBOOPTION& opt = COMBOOPTIONS[nItem];
+		SORTITEM st;
 
 		if (IsValidOption(opt.nOption, nType))
 		{

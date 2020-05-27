@@ -56,10 +56,7 @@ CRTFContentControl::CRTFContentControl(CRtfHtmlConverter& rtfHtml)
 	CRulerRichEditCtrl(rtfHtml),
 	m_reSpellCheck(m_rtf),
 	m_mgrShortcuts(TRUE),
-
-#pragma warning(disable:4355)
 	m_dlgPrefs(this)
-#pragma warning(default:4355)
 {
 	// add custom protocol to comments field for linking to task IDs
 	m_rtf.AddProtocol(TDL_LINK, TRUE);

@@ -225,12 +225,10 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_exporter(m_data, m_taskTree, m_mgrContent),
 	m_formatter(m_data),
 	m_infoTip(m_data, m_aCustomAttribDefs),
-#pragma warning (disable: 4355)
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
 	m_matcher(m_data, m_reminders)
-#pragma warning (default: 4355)
 {
 	SetBordersDLU(0);
 	

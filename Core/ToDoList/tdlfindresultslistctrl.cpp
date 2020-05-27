@@ -42,9 +42,7 @@ CTDLFindResultsListCtrl::CTDLFindResultsListCtrl()
 	: 
 	m_nCurGroupID(-1), 
 	m_bStrikeThruDone(FALSE), 
-#pragma warning (disable: 4355)
 	m_lcGrouping(*this)
-#pragma warning (default: 4355)
 {
 }
 

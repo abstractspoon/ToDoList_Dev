@@ -251,11 +251,11 @@ void CTDCRECURRENCETest::TestCalcNextOccurrencesPerformance()
 		// Output results
 		if (nNumRecur == 0)
 		{
-			_tprintf(_T("Recurrence (%s) failed to produce any recurrences for the range: %s\n"), FormatRecurrenceRegularity(tr), range.Format());
+			_tprintf(_T("Recurrence (%s) failed to produce any recurrences for the range: %s\n"), (LPCTSTR)FormatRecurrenceRegularity(tr), (LPCTSTR)range.Format());
 		}
 		else
 		{
-			_tprintf(_T("Recurrence (%s) took %ld ms to calculate %d recurrences for the range: %s\n"), FormatRecurrenceRegularity(tr), dwDuration, nNumRecur, range.Format());
+			_tprintf(_T("Recurrence (%s) took %ld ms to calculate %d recurrences for the range: %s\n"), (LPCTSTR)FormatRecurrenceRegularity(tr), dwDuration, nNumRecur, (LPCTSTR)range.Format());
 		}
 	}
 

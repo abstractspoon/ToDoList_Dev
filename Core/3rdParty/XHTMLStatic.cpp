@@ -81,8 +81,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#pragma warning(disable : 4996)	// disable bogus deprecation warning
-
 #ifndef __noop
 #if _MSC_VER < 1300
 #define __noop ((void)0)

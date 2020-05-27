@@ -451,7 +451,7 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 
 BOOL CToDoListApp::SendStartupOptions(HWND hWnd, const CTDCStartupOptions& startup, TDL_COPYDATA nMsg)
 {
-	COPYDATASTRUCT cds = { nMsg, sizeof(startup), (void*)&startup };
+	COPYDATASTRUCT cds = { (DWORD)nMsg, sizeof(startup), (void*)&startup };
 
 	if (::IsWindow(hWnd))
 		return (::SendMessage(hWnd, WM_COPYDATA, NULL, (LPARAM)&cds) != 0);

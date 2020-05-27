@@ -748,9 +748,9 @@ struct CTRLITEM
 	TDC_ATTRIBUTE nAttrib;
 
 protected:
-	void DeleteCtrl(const CWnd* pParent, UINT& nCtrlID)
+	void DeleteCtrl(const CWnd* pParent, UINT& nID)
 	{
-		CWnd* pCtrl = pParent->GetDlgItem(nCtrlID);
+		CWnd* pCtrl = pParent->GetDlgItem(nID);
 
 		if (pCtrl)
 		{
@@ -758,7 +758,7 @@ protected:
 			delete pCtrl;
 		}
 
-		nCtrlID = 0;
+		nID = 0;
 	}
 };
 

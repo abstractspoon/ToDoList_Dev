@@ -23,6 +23,10 @@
 #endif
 
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
+#define NO_WARN_MBCS_MFC_DEPRECATION // for VS2015
+
+#pragma warning(disable:4996) // deprecated functions
+#pragma warning(disable:4505)
 
 #include <afxwin.h>         // MFC core and standard components
 
@@ -32,9 +36,6 @@
 
 #pragma warning(disable:4706)
 #include <multimon.h>
-
-#pragma warning(disable:4239)
-#pragma warning(disable:4505)
 
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>

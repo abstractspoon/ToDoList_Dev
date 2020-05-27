@@ -331,7 +331,7 @@ BOOL CTDLTestBase::EndTest()
 	m_resTest.ReportResults();
 	m_resTotal += m_resTest;
 	
-	_tprintf(_T("\nTest '%s' ended ----------\n"), m_sCurrentTest);
+	_tprintf(_T("\nTest '%s' ended ----------\n"), (LPCTSTR)m_sCurrentTest);
 	
 	m_sCurrentTest.Empty();
 

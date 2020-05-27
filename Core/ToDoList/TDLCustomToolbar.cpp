@@ -64,7 +64,7 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 	for (int nBtn = 0; nBtn < aButtons.GetSize(); nBtn++)
 	{
 		const TOOLBARBUTTON& tb = aButtons[nBtn];
-		TBBUTTON tbb = { -1, tb.nMenuID, 0, TBSTYLE_SEP, 0, 0, (UINT)-1 };
+		TBBUTTON tbb = { -1, (int)tb.nMenuID, 0, TBSTYLE_SEP, 0, 0, (UINT)-1 };
 		
 		if (tb.nMenuID > 0)
 		{

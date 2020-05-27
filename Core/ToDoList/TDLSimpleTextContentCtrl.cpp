@@ -61,9 +61,7 @@ CTDLSimpleTextContentCtrl::CTDLSimpleTextContentCtrl()
 	: 
 	CUrlRichEditCtrl(CTRLCLICKTOFOLLOW, IDS_CTRLCLICKTOFOLLOWLINK),
 	m_bWordWrap(TRUE),
-#pragma warning (disable: 4355)
 	m_reSpellCheck(*this)
-#pragma warning (default: 4355)
 {
 	// add custom protocol to comments field for linking to task IDs
 	AddProtocol(TDL_PROTOCOL, TRUE);

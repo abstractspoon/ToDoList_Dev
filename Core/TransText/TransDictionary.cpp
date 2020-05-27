@@ -866,7 +866,7 @@ TD_CLEANUP CTransDictionary::CleanupDictionary(const CTransDictionary& tdMaster,
 		
 		if (!HasDictItem(sItemMaster))
 		{
-			DICTITEM* pDI = new DICTITEM(*pDIMaster);
+			pDI = new DICTITEM(*pDIMaster);
 	
 			// remove text out from item before adding
 			pDI->ClearTextOut();

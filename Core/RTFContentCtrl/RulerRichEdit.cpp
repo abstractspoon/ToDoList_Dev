@@ -108,7 +108,7 @@ BOOL CFindReplaceDialogEx::OnKeyboard(UINT uVirtKey, UINT uFlags)
 
 	if (::IsChild(*this, hFocus) && Misc::IsKeyPressed(uVirtKey))
 	{
-		MSG msg = { hFocus, WM_KEYDOWN, uVirtKey, uFlags, 0, {0, 0} };
+		MSG msg = { hFocus, WM_KEYDOWN, uVirtKey, (LPARAM)uFlags, 0, {0, 0} };
 
 		if (::IsDialogMessage(*this, &msg))
 			return TRUE;

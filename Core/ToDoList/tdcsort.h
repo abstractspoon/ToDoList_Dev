@@ -133,9 +133,9 @@ struct TDSORTCOLUMNS
 		return cols[nCol].nBy;
 	}
 
-	BOOL SetSortBy(const TDSORTCOLUMNS& cols)
+	BOOL SetSortBy(const TDSORTCOLUMNS& sortCols)
 	{
-		*this = cols;
+		*this = sortCols;
 
 		return Validate();
 	}

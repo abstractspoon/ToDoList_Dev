@@ -28,9 +28,7 @@ CTDLTaskTreeImportCtrl::CTDLTaskTreeImportCtrl()
 					m_visibleCols.GetVisibleColumns(), 
 					m_aCustAttribDefs),
 	m_data(m_styles, m_aCustAttribDefs),
-#pragma warning (disable: 4355)
 	m_exporter(m_data, *this, m_mgrContent)
-#pragma warning (default: 4355)
 {
 	CPreferencesDlg prefs;
 

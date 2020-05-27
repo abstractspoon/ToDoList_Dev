@@ -50,8 +50,8 @@ CAboutDlg::CAboutDlg(UINT nAppIconID, AB_STYLE nStyle,
 
     // variable height items
     const UINT ITEMIDS[] = { IDC_APPNAME, IDC_APPDESCRIPTION, IDC_COPYRIGHT, IDC_LICENSE };
-    const UINT NUMLINES[] =  { max(nAppLines, 0), max(nDescLines, 0), max(nCopyrightLines, 0), max(nLicenseLines, 0) };
-    const UINT NUMITEMS = sizeof(ITEMIDS) / sizeof(UINT);
+	const int NUMLINES[] = { max(nAppLines, 0), max(nDescLines, 0), max(nCopyrightLines, 0), max(nLicenseLines, 0) };
+    const int NUMITEMS = sizeof(ITEMIDS) / sizeof(UINT);
 
     int nTop = 7;
 

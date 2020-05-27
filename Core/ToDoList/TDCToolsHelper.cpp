@@ -414,7 +414,7 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 			{
 				int nImage = pIL->Add(&bmp, 255);
 
-				TBBUTTON tbb = { nImage, (nTool + FIRST_TOOLID), 0, TBSTYLE_BUTTON, 0, 0, (UINT)-1 };
+				TBBUTTON tbb = { nImage, (nTool + (int)FIRST_TOOLID), 0, TBSTYLE_BUTTON, 0, 0, (UINT)-1 };
 
 				if (toolbar.GetToolBarCtrl().InsertButton(nStartPos + nAdded, &tbb))
 				{

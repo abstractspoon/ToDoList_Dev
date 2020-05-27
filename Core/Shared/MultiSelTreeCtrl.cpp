@@ -294,7 +294,7 @@ HTREEITEM CMultiSelTreeCtrl::GetPrevSelectedItem(HTREEITEM hItem)
 
 void CMultiSelTreeCtrl::NotifySelChange()
 {
-	NMHDR nmhdr = { m_hWnd, GetDlgCtrlID(), TVN_SELCHANGED };
+	NMHDR nmhdr = { m_hWnd, (UINT)GetDlgCtrlID(), TVN_SELCHANGED };
 
 	GetParent()->SendMessage(WM_NOTIFY, (WPARAM)GetDlgCtrlID(), (LPARAM)&nmhdr);
 }

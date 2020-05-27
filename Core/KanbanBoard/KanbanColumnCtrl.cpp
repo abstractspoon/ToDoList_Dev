@@ -102,9 +102,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_bDrawTaskParents(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
-#pragma warning (disable: 4355)
 	m_tch(*this)
-#pragma warning (default: 4355)
 {
 }
 
@@ -1262,7 +1260,7 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 		break;
 	}
 
-	TVSORTCB tvs = { NULL, SortProc, (DWORD)&ks };
+	TVSORTCB tvs = { NULL, SortProc, (LPARAM)&ks };
 
 	SortChildrenCB(&tvs);
 }

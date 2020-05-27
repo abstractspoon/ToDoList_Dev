@@ -365,7 +365,6 @@ int SuggestMgr::ngsuggest(char** wlst, char * word, HashMgr* pHMgr)
 {
 
   int i, j;
-  int lval;
   int sc;
   int lp;
 
@@ -427,54 +426,67 @@ int SuggestMgr::ngsuggest(char** wlst, char * word, HashMgr* pHMgr)
   lp = MAX_GUESS - 1;
 
   struct guessword * glst;
-  glst = (struct guessword *) calloc(MAX_WORDS,sizeof(struct guessword));
-  if (! glst) return 0;
+  glst = (struct guessword *) calloc(MAX_WORDS, sizeof(struct guessword));
+  if (!glst) return 0;
 
-  for (i = 0; i < MAX_ROOTS; i++) {
+  for (i = 0; i < MAX_ROOTS; i++)
+  {
 
-      if (roots[i]) {
-        struct hentry * rp = roots[i];
-	int nw = pAMgr->expand_rootword(glst, MAX_WORDS, rp->word, rp->wlen,
-                                        rp->astr, rp->alen);
-        for (int k = 0; k < nw; k++) {
-           sc = ngram(n, word, glst[k].word, NGRAM_ANY_MISMATCH);
-           if (sc > thresh) {
-              if (sc > gscore[lp]) {
-	         if (guess[lp]) free (guess[lp]);
-                 gscore[lp] = sc;
-                 guess[lp] = glst[k].word;
-                 lval = sc;
-                 for (j=0; j < MAX_GUESS; j++)
-	            if (gscore[j] < lval) {
-	               lp = j;
-                       lval = gscore[j];
-	            }
-	      } else {
-                 free (glst[k].word);  
-              }
-	   }            
-	}
-      }
+	  if (roots[i])
+	  {
+		  struct hentry * rp = roots[i];
+		  int nw = pAMgr->expand_rootword(glst, MAX_WORDS, rp->word, rp->wlen,
+										  rp->astr, rp->alen);
+		  for (int k = 0; k < nw; k++)
+		  {
+			  sc = ngram(n, word, glst[k].word, NGRAM_ANY_MISMATCH);
+			  if (sc > thresh)
+			  {
+				  if (sc > gscore[lp])
+				  {
+					  if (guess[lp]) free(guess[lp]);
+					  gscore[lp] = sc;
+					  guess[lp] = glst[k].word;
+					  int lval = sc;
+					  for (j = 0; j < MAX_GUESS; j++)
+						  if (gscore[j] < lval)
+						  {
+							  lp = j;
+							  lval = gscore[j];
+						  }
+				  }
+				  else
+				  {
+					  free(glst[k].word);
+				  }
+			  }
+		  }
+	  }
   }
   if (glst) free(glst);
 
   // now we are done generating guesses
   // sort in order of decreasing score and copy over
-  
+
   bubblesort(&guess[0], &gscore[0], MAX_GUESS);
   int ns = 0;
-  for (i=0; i < MAX_GUESS; i++) {
-    if (guess[i]) {
-      int unique = 1;
-      for (j=i+1; j < MAX_GUESS; j++)
-	if (guess[j]) 
-	    if (!strcmp(guess[i], guess[j])) unique = 0;
-      if (unique) {
-         wlst[ns++] = guess[i];
-      } else {
-	 free(guess[i]);
-      }
-    }
+  for (i = 0; i < MAX_GUESS; i++)
+  {
+	  if (guess[i])
+	  {
+		  int unique = 1;
+		  for (j = i + 1; j < MAX_GUESS; j++)
+			  if (guess[j])
+				  if (!strcmp(guess[i], guess[j])) unique = 0;
+		  if (unique)
+		  {
+			  wlst[ns++] = guess[i];
+		  }
+		  else
+		  {
+			  free(guess[i]);
+		  }
+	  }
   }
   return ns;
 }

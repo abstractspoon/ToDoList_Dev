@@ -54,9 +54,7 @@ IMPLEMENT_DYNAMIC(CTreeListTreeCtrl, CTreeCtrl)
 CTreeListTreeCtrl::CTreeListTreeCtrl(const CEnHeaderCtrl& header)
 	:
 	m_header(header),
-#pragma warning (disable: 4355)
 	m_tch(*this)
-#pragma warning (default: 4355)
 {
 }
 
