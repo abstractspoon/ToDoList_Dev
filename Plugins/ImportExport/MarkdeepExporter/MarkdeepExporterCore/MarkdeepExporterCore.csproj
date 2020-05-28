@@ -53,14 +53,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="PluginHelpers">
-      <HintPath>..\..\..\$(Configuration)\PluginHelpers.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\..\3rdParty\MarkdownLog\MarkdownLog.csproj">
       <Project>{f28c9fc0-8d67-459c-a177-2809cd1816f5}</Project>
       <Name>MarkdownLog</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
+      <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
+      <Name>PluginHelpers</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
