@@ -20,6 +20,8 @@
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
 #include "..\Shared\enimagelist.h"
+#include "..\Shared\osversion.h"
+#include "..\Shared\themed.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -195,8 +197,13 @@ void CKanbanColumnCtrl::RefreshBkgndColor()
 		crBack = m_columnDef.crBackground;
 
 	if (m_bDropTarget)
-		crBack = GraphicsMisc::Darker(crBack, 0.1);
-
+	{
+		if ((COSVersion() < OSV_VISTA) || !CThemed::IsAppThemed() || (m_columnDef.crBackground != CLR_NONE))
+			crBack = GraphicsMisc::Darker(crBack, 0.1);
+		else
+			crBack = RGB(215, 240, 255);
+	}
+	
 	TreeView_SetBkColor(*this, crBack);
 }
 
@@ -1275,6 +1282,11 @@ void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 
 void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
+	// Note: The complexity of this function arises out of the 
+	// indentation of subtasks, because we want clicking to the
+	// left of the task to neither initiate a drag operation
+	// nor a label edit. 
+	// My intuition tells me that it can be simplified...
 	HTREEITEM htiHit = NULL;
 	BOOL bHandled = HandleButtonClick(point, htiHit);
 
@@ -1300,6 +1312,25 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 			// Post message to let mouse-click time to complete
 			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd(), GetTaskID(htiHit));
 			bHandled = TRUE;
+		}
+		else if (bHandled)
+		{
+			// Handle item drag because we WON'T be calling base class
+			CPoint ptScreen(point);
+			ClientToScreen(&ptScreen);
+
+			if (::DragDetect(*this, ptScreen))
+			{
+				TRACE(_T("CKanbanColumnCtrl::OnLButtonDown(Faking drag start)\n"));
+
+				NMTREEVIEW nmtv = { *this, (UINT)GetDlgCtrlID(), TVN_BEGINDRAG, 0 };
+
+				nmtv.itemNew.hItem = htiHit;
+				nmtv.itemNew.lParam = GetTaskID(htiHit);
+				nmtv.ptDrag = point;
+
+				GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&nmtv);
+			}
 		}
 	}
 

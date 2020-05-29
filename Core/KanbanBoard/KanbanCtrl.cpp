@@ -112,7 +112,7 @@ CKanbanCtrl::~CKanbanCtrl()
 }
 
 BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
-	//{{AFX_MSG_MAP(CKanbanCtrlEx)
+	//{{AFX_MSG_MAP(CKanbanCtrl)
 	//}}AFX_MSG_MAP
 	ON_WM_SIZE()
 	ON_WM_ERASEBKGND()
@@ -2260,6 +2260,9 @@ void CKanbanCtrl::Resize(int cx, int cy)
 
 void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 {
+	if (rAvail.IsRectEmpty())
+		return;
+
 	CAutoFlag af(m_bResizingHeader, TRUE);
 
 	ASSERT(m_header.GetSafeHwnd());
@@ -2268,30 +2271,40 @@ void CKanbanCtrl::ResizeHeader(CDeferWndMove& dwm, CRect& rAvail)
 	ASSERT(nNumCols == GetVisibleColumnCount());
 
 	CRect rNewHeader(rAvail);
-	rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
+	rAvail.top = rNewHeader.bottom = (rNewHeader.top + HEADER_HEIGHT);
 
 	dwm.MoveWindow(&m_header, rNewHeader, TRUE);
 		
-	int nTotalColWidth = m_header.CalcTotalItemWidth();
+	// -1 to compensate for the +1 to hide the last divider
+	int nCurTotalWidth = (m_header.CalcTotalItemWidth() - 1);
+	int nNewTotalWidth = rAvail.Width();
+
+	BOOL bHasTrackedCols = m_header.HasTrackedItems();
 
 	for (int nCol = 0, nColStart = 0; nCol < nNumCols; nCol++)
 	{
-		if (nCol < (nNumCols - 1))
-		{
-			int nCurWidth = m_header.GetItemWidth(nCol);
-			int nNewWidth = MulDiv(nCurWidth, rNewHeader.Width(), nTotalColWidth);
+		// Preserve tracking
+		BOOL bTrackedCol = m_header.IsItemTracked(nCol);
 
-			m_header.SetItemWidth(nCol, nNewWidth);
-			nColStart += nNewWidth;
-		}
-		else // last column
+		// Default equal width
+		int nNewWidth = (nNewTotalWidth / nNumCols);
+
+		if (nCol == (nNumCols - 1)) 
 		{
-			int nNewWidth = (rNewHeader.Width() - nColStart);
-			m_header.SetItemWidth(nCol, nNewWidth + 1); // +1 hides the divider
+			// last column takes up any slack
+			nNewWidth = (rNewHeader.Width() - nColStart) + 1; // +1 hides the divider
 		}
+		else if (bHasTrackedCols)
+		{
+			// Preserve column proportions
+			nNewWidth = MulDiv(m_header.GetItemWidth(nCol), nNewTotalWidth, nCurTotalWidth);
+		}
+
+		m_header.SetItemWidth(nCol, nNewWidth);
+		m_header.SetItemTracked(nCol, bTrackedCol);
+
+		nColStart += nNewWidth;
 	}
-
-	rAvail.top = rNewHeader.bottom;
 }
 
 float CKanbanCtrl::GetAverageColumnCharWidth()
@@ -2841,34 +2854,21 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 		{
 			NMTREEVIEW* pNMTV = (NMTREEVIEW*)pNMHDR;
 			ASSERT(pNMTV->itemNew.hItem);
+			ASSERT(pNMTV->itemNew.lParam);
 		
 			CKanbanColumnCtrl* pCol = (CKanbanColumnCtrl*)CWnd::FromHandle(pNMHDR->hwndFrom);
+			ASSERT(pCol == m_pSelectedColumn);
 
 			if (!pCol->SelectionHasLockedTasks())
 			{
-				DWORD dwDragID = pNMTV->itemNew.lParam;
-
-				if (dwDragID)
-				{
-					// If the 'drag-from' list is not currently selected
-					// we select it and then reset the selection to the
-					// items we have just copied
-					if (pCol != m_pSelectedColumn)
-					{
-						VERIFY(pCol->SelectTask(dwDragID));
-						SelectColumn(pCol);
-
-					}
-
-					SetCapture();
-					TRACE(_T("CKanbanCtrlEx::OnBeginDragColItem(start drag)\n"));
-				}
+				SetCapture();
+				TRACE(_T("CKanbanCtrl::OnBeginDragColItem(start drag)\n"));
 			}
 		}
 		else
 		{
 			// Mouse button already released
-			TRACE(_T("CKanbanCtrlEx::OnBeginDragColItem(cancel drag)\n"));
+			TRACE(_T("CKanbanCtrl::OnBeginDragColItem(cancel drag)\n"));
 		}
 	}
 	
@@ -2889,11 +2889,11 @@ BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 {
-	TRACE(_T("CKanbanCtrlEx::OnLButtonUp()\n"));
+	TRACE(_T("CKanbanCtrl::OnLButtonUp()\n"));
 
 	if (IsDragging())
 	{
-		TRACE(_T("CKanbanCtrlEx::OnLButtonUp(end drag)\n"));
+		TRACE(_T("CKanbanCtrl::OnLButtonUp(end drag)\n"));
 
 		// get the list under the mouse
 		ClientToScreen(&point);

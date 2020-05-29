@@ -817,6 +817,19 @@ BOOL CEnHeaderCtrl::SetTrackedItems(const CIntArray& aTracked)
 	return TRUE;
 }
 
+BOOL CEnHeaderCtrl::HasTrackedItems() const
+{
+	int nItem = GetItemCount();
+
+	while (nItem--)
+	{
+		if (IsItemTracked(nItem))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 void CEnHeaderCtrl::ClearAllTracked()
 {
 	ModifyAllItemFlags(EHCF_TRACKED, FALSE);

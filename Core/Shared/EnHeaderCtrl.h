@@ -83,6 +83,7 @@ public:
 	BOOL SetItemWidths(const CIntArray& aWidths);
 	int GetTrackedItems(CIntArray& aTracked) const;
 	BOOL SetTrackedItems(const CIntArray& aTracked);
+	BOOL HasTrackedItems() const;
 
 	int CalcTotalItemWidth(int nIgnoreItem = -1) const;
 	int CalcAverageItemWidth(int nIgnoreItem = -1) const;

@@ -123,7 +123,7 @@ BOOL CFileIcons::GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, HIMAGELIST& h
 		{
 			if (FileMisc::FolderExists(szFilePath))
 			{
-				nIndex = GetFolderIndex(bLargeIcon);
+				VERIFY(GetFolderImage(bLargeIcon, hIL, nIndex));
 			}
 			else if (sExt.CompareNoCase(_T(".lnk")) == 0)
 			{
@@ -147,10 +147,10 @@ BOOL CFileIcons::GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, HIMAGELIST& h
 				VERIFY(GetImage(sExt, bLargeIcon, hIL, nIndex));
 			}
 
-			if ((nIndex == -1) && sFName.IsEmpty() || sExt.IsEmpty())
+			if ((nIndex == -1) && (sFName.IsEmpty() || sExt.IsEmpty()))
 			{
 				// else assume it's a folder unless it looks like a file
-				nIndex = GetFolderIndex(bLargeIcon);
+				VERIFY(GetFolderImage(bLargeIcon, hIL, nIndex));
 			}
 		}
 	}
