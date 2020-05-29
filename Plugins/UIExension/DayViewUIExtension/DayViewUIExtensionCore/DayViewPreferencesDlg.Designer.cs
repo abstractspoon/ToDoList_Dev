@@ -30,8 +30,8 @@
         {
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(DayViewPreferencesDlg));
 			this.panel1 = new System.Windows.Forms.Panel();
-			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.m_DisplayContinuous = new System.Windows.Forms.CheckBox();
+			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.m_HideParentTasks = new System.Windows.Forms.CheckBox();
 			this.m_HideTasksSpanningDays = new System.Windows.Forms.CheckBox();
 			this.m_HideTasksSpanningWeekends = new System.Windows.Forms.CheckBox();
@@ -63,8 +63,20 @@
 			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(501, 305);
+			this.panel1.Size = new System.Drawing.Size(501, 223);
 			this.panel1.TabIndex = 2;
+			// 
+			// m_DisplayContinuous
+			// 
+			this.m_DisplayContinuous.AutoSize = true;
+			this.m_DisplayContinuous.Checked = true;
+			this.m_DisplayContinuous.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_DisplayContinuous.Location = new System.Drawing.Point(13, 63);
+			this.m_DisplayContinuous.Name = "m_DisplayContinuous";
+			this.m_DisplayContinuous.Size = new System.Drawing.Size(330, 17);
+			this.m_DisplayContinuous.TabIndex = 4;
+			this.m_DisplayContinuous.Text = "&Display tasks as continuous between their \'Start\' and \'Due\' dates";
+			this.m_DisplayContinuous.UseVisualStyleBackColor = true;
 			// 
 			// groupBox1
 			// 
@@ -78,18 +90,6 @@
 			this.groupBox1.TabIndex = 5;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Task Visibility";
-			// 
-			// m_DisplayContinuous
-			// 
-			this.m_DisplayContinuous.AutoSize = true;
-			this.m_DisplayContinuous.Checked = true;
-			this.m_DisplayContinuous.CheckState = System.Windows.Forms.CheckState.Checked;
-			this.m_DisplayContinuous.Location = new System.Drawing.Point(13, 63);
-			this.m_DisplayContinuous.Name = "m_DisplayContinuous";
-			this.m_DisplayContinuous.Size = new System.Drawing.Size(330, 17);
-			this.m_DisplayContinuous.TabIndex = 4;
-			this.m_DisplayContinuous.Text = "&Display tasks as continuous between their \'Start\' and \'Due\' dates";
-			this.m_DisplayContinuous.UseVisualStyleBackColor = true;
 			// 
 			// m_HideParentTasks
 			// 
@@ -177,7 +177,7 @@
 			// 
 			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(435, 327);
+			this.BtnCancel.Location = new System.Drawing.Point(435, 245);
 			this.BtnCancel.Name = "BtnCancel";
 			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
 			this.BtnCancel.TabIndex = 1;
@@ -188,7 +188,7 @@
 			// 
 			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(353, 327);
+			this.BtnOK.Location = new System.Drawing.Point(353, 245);
 			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnOK.Name = "BtnOK";
 			this.BtnOK.Size = new System.Drawing.Size(75, 23);
@@ -201,7 +201,7 @@
 			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(520, 359);
+			this.ClientSize = new System.Drawing.Size(520, 277);
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.Controls.Add(this.panel1);
