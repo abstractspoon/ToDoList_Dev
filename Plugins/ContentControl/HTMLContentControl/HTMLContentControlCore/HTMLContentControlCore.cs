@@ -15,9 +15,11 @@ namespace HTMLContentControl
     {
         private IntPtr m_HwndParent;
         private Font m_ControlsFont;
-        private TDLHtmlEditorControl m_HtmlEditControl;
         private Translator m_Trans;
         private String m_TypeID;
+
+		private TDLHtmlEditorControl m_HtmlEditControl;
+		private HTMLPreferencesDlg m_PrefsDlg;
 
 		// --------------------------------------------------------------------------------------
 
@@ -31,6 +33,7 @@ namespace HTMLContentControl
             m_HwndParent = hwndParent;
             m_Trans = trans;
 			m_ControlsFont = new Font("Tahoma", 8);
+			m_PrefsDlg = new HTMLPreferencesDlg(trans, m_ControlsFont);
 
 			InitializeComponent();
 		}
@@ -171,8 +174,59 @@ namespace HTMLContentControl
 
 			this.Controls.Add(this.m_HtmlEditControl);
 
+			PrepareToolbar();
+
 			this.ResumeLayout(false);
             this.PerformLayout();
+		}
+
+		private void PrepareToolbar()
+		{
+			// Add preferences and help buttons to the toolbar
+			m_HtmlEditControl.ToolBar.Items.Add(new ToolStripSeparator());
+
+			var prefsBtn = new System.Windows.Forms.ToolStripButton();
+			m_HtmlEditControl.ToolBar.Items.Add(prefsBtn);
+
+			prefsBtn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			prefsBtn.Name = "toolstripShowPrefs";
+			prefsBtn.Tag = "ShowPrefs";
+			prefsBtn.ToolTipText = m_Trans.Translate("Preferences");
+			prefsBtn.Click += new System.EventHandler(OnShowPreferences);
+			prefsBtn.Size = m_HtmlEditControl.ToolBar.Items[0].Size;
+			prefsBtn.Image = Properties.Resources.prefs.ToBitmap();
+
+			m_HtmlEditControl.ToolBar.Items.Add(new ToolStripSeparator());
+
+			var helpBtn = new System.Windows.Forms.ToolStripButton();
+			m_HtmlEditControl.ToolBar.Items.Add(helpBtn);
+
+			helpBtn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			helpBtn.Name = "toolstripShowHelp";
+			helpBtn.Tag = "ShowHelp";
+			helpBtn.ToolTipText = m_Trans.Translate("Online Help");
+			helpBtn.Click += new System.EventHandler(OnShowHelp);
+			helpBtn.Size = prefsBtn.Size;
+			helpBtn.Image = Properties.Resources.help.ToBitmap();
+
+			Toolbars.FixupButtonSizes(m_HtmlEditControl.ToolBar);
+		}
+
+		private void OnShowPreferences(object sender, EventArgs e)
+		{
+			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
+
+			if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_HwndParent)) == DialogResult.OK)
+			{
+				//UpdateDayViewPreferences();
+			}
+		}
+
+		private void OnShowHelp(object sender, EventArgs e)
+		{
+			UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
+
+			notify.NotifyDoHelp(m_TypeID);
 		}
 
 		private void OnInputTextChanged(object sender, EventArgs e)

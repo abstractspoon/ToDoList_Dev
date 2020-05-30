@@ -62,9 +62,12 @@ namespace HTMLContentControl
 		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans) : base(font, trans)
         {
             m_TextChangeTimer = new Timer();
-
-            InitializeComponent();
+			
+			InitializeComponent();
         }
+
+		// Allow parent to add buttons
+		public new ToolStrip ToolBar { get { return base.ToolBar; } }
 
 		private void InitializeComponent()
         {
@@ -277,7 +280,7 @@ namespace HTMLContentControl
 
 		protected override void PreShowDialog(Form dialog)
         {
-            base.PreShowDialog(dialog, HTMLContentControlCore.html);
+            base.PreShowDialog(dialog, Properties.Resources.html);
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
