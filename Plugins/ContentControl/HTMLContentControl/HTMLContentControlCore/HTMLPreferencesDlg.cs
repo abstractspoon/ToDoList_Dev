@@ -17,7 +17,7 @@ namespace HTMLContentControl
 
 		// ------------------------------------------------------------------------
 
-        public HTMLPreferencesDlg(Translator trans, Font font)
+        public HTMLPreferencesDlg(Font font, Translator trans)
         {
 			m_Trans = trans;
 			
@@ -26,27 +26,68 @@ namespace HTMLContentControl
 			FormsUtil.SetFont(this, font);
 			m_Trans.Translate(this);
 
+			OnEnableWatermark(null, null);
 		}
 
 		public void SavePreferences(Preferences prefs, String key)
 		{
             string prefsKey = (key + "\\Preferences");
 
-            prefs.WriteProfileString(prefsKey, "WatermarkImage", watermarkImage.Text);
+            prefs.WriteProfileString(prefsKey, "WatermarkPath", watermarkImage.Text);
+			prefs.WriteProfileBool(prefsKey, "EnableWatermark", enableWatermark.Checked);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key)
         {
             string prefsKey = (key + "\\Preferences");
 
-            watermarkImage.Text = prefs.GetProfileString(prefsKey, "WatermarkImage", "");
+			enableWatermark.Checked = prefs.GetProfileBool(prefsKey, "EnableWatermark", false);
+			watermarkImage.Text = prefs.GetProfileString(prefsKey, "WatermarkPath", "");
 		}
 
-		public String WatermarkImagePath { get { return watermarkImage.Text; } }
+		public String WatermarkPath	{ get { return watermarkImage.Text; } }
+		public bool WatermarkEnabled { get { return enableWatermark.Checked; } }
+
+		public void SetWatermark(String path, bool enabled)
+		{
+			enableWatermark.Checked = enabled;
+
+			if (enabled || !String.IsNullOrWhiteSpace(path))
+				watermarkImage.Text = path;
+		}
+		
+		public String LastBrowsedImageFolder { get; set; }
 
 		private void OnBrowseWatermark(object sender, EventArgs e)
 		{
+			var dialog = new OpenFileDialog
+			{
+				InitialDirectory = LastBrowsedImageFolder,
+				Title = m_Trans.Translate("Select Watermark Image"),
 
+				AutoUpgradeEnabled = true,
+				CheckFileExists = true,
+				CheckPathExists = true,
+
+				Filter = MSDN.Html.Editor.EnterImageForm.ImageFilter,
+				FilterIndex = 0,
+				RestoreDirectory = true,
+
+				ShowReadOnly = false
+			};
+
+			if (dialog.ShowDialog() == DialogResult.OK)
+			{
+				watermarkImage.Text = new System.Uri(dialog.FileName).AbsoluteUri;
+
+				LastBrowsedImageFolder = System.IO.Path.GetDirectoryName(dialog.FileName);
+			}
+		}
+
+		private void OnEnableWatermark(object sender, EventArgs e)
+		{
+			watermarkImage.Enabled = enableWatermark.Checked;
+			btnBrowseWatermark.Enabled = enableWatermark.Checked;
 		}
 	}
 }

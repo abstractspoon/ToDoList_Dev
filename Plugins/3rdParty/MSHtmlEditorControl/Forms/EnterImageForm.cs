@@ -17,7 +17,7 @@ namespace MSDN.Html.Editor
 	/// </summary>
 	public partial class EnterImageForm : Form
 	{
-		private static string ImageFilter = "Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||";
+		public static string ImageFilter = "Image Files (*.png, *.bmp, *.ico, *.jpg, *.jpeg, *.tiff, *.gif)|*.png;*.bmp;*.ico;*.jpg;*.jpeg;*.tiff;*.gif||";
 
 
 		/// <summary>

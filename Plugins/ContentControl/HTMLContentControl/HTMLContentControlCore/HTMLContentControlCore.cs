@@ -3,6 +3,9 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -23,6 +26,11 @@ namespace HTMLContentControl
 
 		// --------------------------------------------------------------------------------------
 
+		// For implementing static watermark images
+		static HashSet<HTMLContentControlCore> s_CtrlList = new HashSet<HTMLContentControlCore>();
+
+		// --------------------------------------------------------------------------------------
+
 		const int WM_ENABLE = 0x000A;
 
         // --------------------------------------------------------------------------------------
@@ -33,7 +41,13 @@ namespace HTMLContentControl
             m_HwndParent = hwndParent;
             m_Trans = trans;
 			m_ControlsFont = new Font("Tahoma", 8);
-			m_PrefsDlg = new HTMLPreferencesDlg(trans, m_ControlsFont);
+			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
+			m_PrefsDlg = new HTMLPreferencesDlg(m_ControlsFont, m_Trans);
+
+			if (s_CtrlList.Count > 0)
+				UpdateWatermark(s_CtrlList.First().m_PrefsDlg);
+
+			s_CtrlList.Add(this);
 
 			InitializeComponent();
 		}
@@ -110,6 +124,8 @@ namespace HTMLContentControl
 
 			prefs.WriteProfileInt(key, "HtmlFormWidth", HtmlEditorControlEx.SizeEditHtmlForm.Width);
 			prefs.WriteProfileInt(key, "HtmlFormHeight", HtmlEditorControlEx.SizeEditHtmlForm.Height);
+
+			m_PrefsDlg.SavePreferences(prefs, key);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -122,10 +138,32 @@ namespace HTMLContentControl
 
 				HtmlEditorControlEx.SizeEditHtmlForm = new Size(prefs.GetProfileInt(key, "HtmlFormWidth", -1),
 																prefs.GetProfileInt(key, "HtmlFormHeight", -1));
+
+				m_PrefsDlg.LoadPreferences(prefs, key);
+
+				if (s_CtrlList.Count > 1)
+					UpdateWatermark(s_CtrlList.First().m_PrefsDlg);
+				else
+					UpdateControlPreferences();
 			}
 		}
 
 		// --------------------------------------------------------------------
+
+		private void UpdateControlPreferences()
+		{
+			if (m_PrefsDlg.WatermarkEnabled)
+				m_HtmlEditControl.BodyBackImage = m_PrefsDlg.WatermarkPath;
+			else
+				m_HtmlEditControl.BodyBackImage = "";
+		}
+
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			base.OnHandleDestroyed(e);
+
+			s_CtrlList.Remove(this);
+		}
 
 		protected override void OnGotFocus(EventArgs e)
         {
@@ -215,11 +253,33 @@ namespace HTMLContentControl
 		private void OnShowPreferences(object sender, EventArgs e)
 		{
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
+			m_PrefsDlg.LastBrowsedImageFolder = m_HtmlEditControl.LastBrowsedImageFolder;
+			m_PrefsDlg.SetWatermark(m_HtmlEditControl.BodyBackImage, !String.IsNullOrWhiteSpace(m_HtmlEditControl.BodyBackImage));
+
+			String curWatermark = m_PrefsDlg.WatermarkPath;
+			bool curEnabled = m_PrefsDlg.WatermarkEnabled;
 
 			if (m_PrefsDlg.ShowDialog(Control.FromHandle(m_HwndParent)) == DialogResult.OK)
 			{
-				//UpdateDayViewPreferences();
+				if ((m_PrefsDlg.WatermarkPath != curWatermark) ||
+					(m_PrefsDlg.WatermarkEnabled != curEnabled))
+				{
+					foreach (var ctrl in s_CtrlList)
+						ctrl.UpdateWatermark(m_PrefsDlg);
+				}
+				else
+				{
+					UpdateControlPreferences();
+				}
 			}
+		}
+
+		private void UpdateWatermark(HTMLPreferencesDlg prefs)
+		{
+			m_PrefsDlg.SetWatermark(prefs.WatermarkPath, prefs.WatermarkEnabled);
+			m_HtmlEditControl.LastBrowsedImageFolder = prefs.LastBrowsedImageFolder;
+
+			UpdateControlPreferences();
 		}
 
 		private void OnShowHelp(object sender, EventArgs e)
