@@ -19,7 +19,6 @@ enum { IMPORT_COLUMNNAME, IMPORT_COLUMNID };
 enum { EXPORT_COLUMNID, EXPORT_COLUMNNAME };
 
 enum { ATTRIB_ID = 5000 };
-const int COL_WIDTH = 200;
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCsvAttributeSetupListCtrl
@@ -43,6 +42,7 @@ BEGIN_MESSAGE_MAP(CTDLImportExportAttributeMappingListCtrl, CInputListCtrl)
 	ON_CBN_SELENDCANCEL(ATTRIB_ID, OnAttribEditCancel)
 	ON_CBN_SELENDOK(ATTRIB_ID, OnAttribEditOK)
 	ON_NOTIFY_REFLECT(LVN_ENDLABELEDIT, OnNameEditOK)
+	ON_WM_SIZE()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -111,8 +111,8 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 
 	if (m_bImporting)
 	{
-		InsertColumn(IMPORT_COLUMNNAME, CEnString(IDS_CSV_COLUMNNAME), LVCFMT_LEFT, COL_WIDTH);
-		InsertColumn(IMPORT_COLUMNID, CEnString(IDS_CSV_MAPSTOATTRIBUTE), LVCFMT_LEFT, COL_WIDTH);
+		InsertColumn(IMPORT_COLUMNNAME, CEnString(IDS_CSV_COLUMNNAME));
+		InsertColumn(IMPORT_COLUMNID, CEnString(IDS_CSV_MAPSTOATTRIBUTE));
 
 		SetColumnType(IMPORT_COLUMNNAME, ILCT_TEXT);
 		DisableColumnEditing(IMPORT_COLUMNNAME, TRUE);
@@ -120,8 +120,8 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	}
 	else // export
 	{
-		InsertColumn(EXPORT_COLUMNID, CEnString(IDS_CSV_ATTRIBUTE), LVCFMT_LEFT, COL_WIDTH);
-		InsertColumn(EXPORT_COLUMNNAME, CEnString(IDS_CSV_MAPSTOCOLUMNNAME), LVCFMT_LEFT, COL_WIDTH);
+		InsertColumn(EXPORT_COLUMNID, CEnString(IDS_CSV_ATTRIBUTE));
+		InsertColumn(EXPORT_COLUMNNAME, CEnString(IDS_CSV_MAPSTOCOLUMNNAME));
 
 		SetColumnType(EXPORT_COLUMNID, ILCT_TEXT);
 		DisableColumnEditing(EXPORT_COLUMNID, TRUE);
@@ -414,3 +414,11 @@ void CTDLImportExportAttributeMappingListCtrl::OnNameEditOK(NMHDR* /*pNMHDR*/, L
 	*pResult = 0;
 }
 
+void CTDLImportExportAttributeMappingListCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CInputListCtrl::OnSize(nType, cx, cy);
+
+	// Size the columns equally
+	SetColumnWidth(0, cx / 2);
+	SetColumnWidth(1, cx / 2);
+}
