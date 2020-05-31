@@ -349,9 +349,9 @@
   <ItemGroup>
     <None Include="Resources\Filter2HS.png" />
     <Content Include="favicon.ico" />
-    <Content Include="Resources\FilterAlphabetically_5567_32.bmp" />
     <None Include="Resources\LandscapeHH.bmp" />
     <None Include="Resources\PortraitHH.bmp" />
+    <Content Include="Resources\grid_select.cur" />
     <Content Include="Resources\textwrap.png" />
     <None Include="Resources\trash.cur" />
     <None Include="Resources\VSProject_script.bmp" />

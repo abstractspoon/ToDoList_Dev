@@ -119,12 +119,12 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\markdown.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\SpreadsheetContentControlCore\SpreadsheetContentControlCore.csproj">
       <Project>{699e2bdf-1266-4295-8ac0-e1c7e8d14b36}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Spreadsheet.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

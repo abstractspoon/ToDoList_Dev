@@ -45,8 +45,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="markdown.ico">
+    <Image Include="res\markdeep.ico">
       <Filter>Resource Files</Filter>
-    </None>
+    </Image>
   </ItemGroup>
 </Project>

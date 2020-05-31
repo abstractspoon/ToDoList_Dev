@@ -42,8 +42,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="WordCloud.ico" >
+    <Image Include="res\WordCloud.ico">
       <Filter>Resource Files</Filter>
-    </None>
+    </Image>
   </ItemGroup>
 </Project>

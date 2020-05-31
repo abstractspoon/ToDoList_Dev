@@ -112,15 +112,15 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ResourceCompile Include="MarkdeepExporterBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="markdown.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MarkdeepExporterCore\MarkdeepExporterCore.csproj">
       <Project>{fa1f07f6-7653-4fb8-8bec-91c5b381c0dd}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\markdeep.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

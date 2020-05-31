@@ -45,8 +45,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\markdown.ico">
+    <Image Include="res\Spreadsheet.ico">
       <Filter>Resource Files</Filter>
-    </None>
+    </Image>
   </ItemGroup>
 </Project>
