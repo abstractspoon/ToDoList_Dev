@@ -34,5 +34,6 @@ REM - Allow caller to cancel building Zip
 pause
 
 CALL %REPO%\BuildReleaseZip.bat
+CALL %REPO%\BuildCodeZip.bat
 
 popd
