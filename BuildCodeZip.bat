@@ -14,14 +14,12 @@ ECHO PATH7ZIP=%PATHPZIP%
 REM Options
 REM ZP - Zip Path
 REM ML - Make Lowercase
-REM OZ - Open Zip
 REM NM - No Message
 
 ECHO Zipping %REPO%\Core\ToDoList_Core.dsw
-%PATHPZIP% %REPO%\Core\ToDoList_Core.dsw /ZP %REPO%\ToDoList_Core_src_.zip /ML /OZ /NM
+%PATHPZIP% %REPO%\Core\ToDoList_Core.dsw /ZP %REPO%\ToDoList_Core_src_.zip /ML /NM
 
 ECHO Zipping %REPO%\Plugins\ToDoList_Plugins.sln
-%PATHPZIP% %REPO%\Plugins\ToDoList_Plugins.sln /ZP %REPO%\ToDoList_Plugins_src_.zip /ML /OZ /NM
+%PATHPZIP% %REPO%\Plugins\ToDoList_Plugins.sln /ZP %REPO%\ToDoList_Plugins_src_.zip /ML /NM
 
 popd
-pause

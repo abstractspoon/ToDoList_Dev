@@ -36,4 +36,8 @@ pause
 CALL %REPO%\BuildReleaseZip.bat
 CALL %REPO%\BuildCodeZip.bat
 
+REM - Open repo folder
+Explorer.exe "%REPO%"
+
 popd
+pause

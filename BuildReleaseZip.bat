@@ -109,8 +109,7 @@ del %OUTDIR%\Resources\Install.Linux.txt
 REM Zip Resources
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\ -x!.git*
 
-REM Open zip for inspection
-%OUTZIP%
+REM Move the zip file to the repo root
+move %OUTZIP% %REPO%\
 
 popd
-pause
