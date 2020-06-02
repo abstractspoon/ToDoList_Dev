@@ -50,63 +50,42 @@ static BOOL IsValidGraph(BURNDOWN_GRAPH nGraph)
 
 /////////////////////////////////////////////////////////////////////////////
 
-static const GRAPHOPTION GRAPHOPTIONS[] = 
+static BOOL IsValidOption(DWORD dwOption, BURNDOWN_GRAPHTYPE nType)
 {
-	{ BGO_TREND_BESTFIT,		BCT_TIMESERIES,	}, // default
-	{ BGO_TREND_7DAYAVERAGE,	BCT_TIMESERIES, },
-	{ BGO_TREND_30DAYAVERAGE,	BCT_TIMESERIES, },
-	{ BGO_TREND_90DAYAVERAGE,	BCT_TIMESERIES, },
-	{ BGO_TREND_NONE,			BCT_TIMESERIES	},
-
-	{ BGO_FREQUENCY_BAR,		BCT_FREQUENCY, }, // default
-	{ BGO_FREQUENCY_LINE,		BCT_FREQUENCY, },
-	{ BGO_FREQUENCY_PIE,		BCT_FREQUENCY, },
-	{ BGO_FREQUENCY_DONUT,		BCT_FREQUENCY, },
-};
-
-static const int NUM_OPTIONS = sizeof(GRAPHOPTIONS) / sizeof(GRAPHOPTION);
-
-// -------------------------------------------------------------------
-
-static BURNDOWN_GRAPHTYPE GetGraphType(BURNDOWN_GRAPHOPTION nOption)
-{
-	int nOpt = NUM_OPTIONS;
-
-	while (nOpt--)
-	{
-		if (GRAPHOPTIONS[nOpt].nOption == nOption)
-			return GRAPHOPTIONS[nOpt].nType;
-	}
-
-	return BCT_UNKNOWNTYPE;
-}
-
-static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPHTYPE nType)
-{
-	if ((nType == BCT_UNKNOWNTYPE) || (nOption == BGO_INVALID))
+	if (nType == BCT_UNKNOWNTYPE)
 		return FALSE;
 
-	return (GetGraphType(nOption) == nType);
-}
+	DWORD dwValidOptions = 0;
 
-static BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption, BURNDOWN_GRAPH nGraph)
-{
-	return IsValidOption(nOption, GetGraphType(nGraph));
-}
-
-static BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPHTYPE nType)
-{
-	for (int nItem = 0; nItem < NUM_OPTIONS; nItem++)
+	switch (nType)
 	{
-		if (nType == GRAPHOPTIONS[nItem].nType)
-			return GRAPHOPTIONS[nItem].nOption;
+	case BCT_TIMESERIES:
+		dwValidOptions = BGO_TIMESERIES_TREND_MASK;
+		break;
+
+	case BCT_FREQUENCY:
+		dwValidOptions = BGO_FREQUENCY_STYLE_MASK;
+		break;
+	}
+	ASSERT(dwValidOptions);
+
+	return ((dwOption & dwValidOptions) == dwOption);
+}
+
+static DWORD GetDefaultOption(BURNDOWN_GRAPHTYPE nType)
+{
+	switch (nType)
+	{
+	case BCT_TIMESERIES:	return BGO_TIMESERIES_TREND_BESTFIT;
+	case BCT_FREQUENCY:		return BGO_FREQUENCY_STYLE_BAR;
+		break;
 	}
 
 	ASSERT(0);
-	return BGO_INVALID;
+	return 0;
 }
 
-static BURNDOWN_GRAPHOPTION GetDefaultOption(BURNDOWN_GRAPH nGraph)
+static DWORD GetDefaultOption(BURNDOWN_GRAPH nGraph)
 {
 	return GetDefaultOption(GetGraphType(nGraph));
 }

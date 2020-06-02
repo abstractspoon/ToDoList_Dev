@@ -36,6 +36,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	const CGraphColorMap& GetGraphColors() const { return m_lcGraphColors.GetGraphColors(); }
+	DWORD GetGraphOptions(BURNDOWN_GRAPHTYPE nType) const;
 
 protected:
 // Dialog Data
@@ -80,6 +81,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
 	const CGraphColorMap& GetGraphColors() const { return m_page.GetGraphColors(); }
+	DWORD GetGraphOptions(BURNDOWN_GRAPHTYPE nType) const { return m_page.GetGraphOptions(nType); }
 
 protected:
 // Dialog Data

@@ -129,10 +129,10 @@ BOOL CGraphsMap::HasGraph(BURNDOWN_GRAPH nGraph) const
 
 /////////////////////////////////////////////////////////////////////////////
 
-CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption) 
+CGraphBase::CGraphBase(BURNDOWN_GRAPH nGraph, DWORD dwOptions) 
 	: 
 	m_nGraph(nGraph), 
-	m_nOption(nOption)
+	m_dwOptions(dwOptions)
 {
 	ASSERT(IsValidGraph(m_nGraph));
 }
@@ -168,9 +168,9 @@ BURNDOWN_GRAPHTYPE CGraphBase::GetType() const
 	return GetGraphType(m_nGraph);
 }
 
-BURNDOWN_GRAPHOPTION CGraphBase::GetOption() const
+DWORD CGraphBase::GetOptions() const
 {
-	return m_nOption;
+	return m_dwOptions;
 }
 
 COLORREF CGraphBase::GetColor(int nColor) const
@@ -190,15 +190,15 @@ COLORREF CGraphBase::GetColor(int nColor) const
 	return m_aColors[nColor];
 }
 
-BOOL CGraphBase::SetOption(BURNDOWN_GRAPHOPTION nOption)
+BOOL CGraphBase::SetOptions(DWORD dwOptions)
 {
-	if (!IsValidOption(nOption))
+	if (!IsValidOption(dwOptions))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	m_nOption = nOption;
+	m_dwOptions = dwOptions;
 	return TRUE;
 }
 
@@ -258,19 +258,19 @@ const CColorArray& CGraphBase::GetColors() const
 	return m_aColors;
 }
 
-BOOL CGraphBase::IsValidOption(BURNDOWN_GRAPHOPTION nOption) const
+BOOL CGraphBase::IsValidOption(DWORD dwOption) const
 {
-	return ::IsValidOption(nOption, m_nGraph);
+	return ::IsValidOption(dwOption, GetGraphType(m_nGraph));
 }
 
-BOOL CGraphBase::HasOption(BURNDOWN_GRAPHOPTION nOption) const
+BOOL CGraphBase::HasOptions(DWORD dwOptions) const
 {
-	return (nOption == m_nOption);
+	return (dwOptions == m_dwOptions);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph, BGO_TREND_NONE)
+CTimeSeriesGraph::CTimeSeriesGraph(BURNDOWN_GRAPH nGraph) : CGraphBase(nGraph, BGO_TIMESERIES_TREND_NONE)
 {
 }
 
@@ -433,43 +433,43 @@ BURNDOWN_GRAPHSCALE CTimeSeriesGraph::CalculateRequiredScale(int nAvailWidth, in
 	return BCS_YEAR;
 }
 
-BOOL CTimeSeriesGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CTimeSeriesGraph::SetOptions(DWORD dwOptions, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	if (HasOption(nOption))
+	if (HasOptions(dwOptions))
 		return TRUE;
 
-	if (!CGraphBase::SetOption(nOption))
+	if (!CGraphBase::SetOptions(dwOptions))
 		return FALSE;
 
 	if (!CalculateTrendLines(datasets))
-		VERIFY(CGraphBase::SetOption(BGO_TREND_NONE));
+		VERIFY(CGraphBase::SetOptions(BGO_TIMESERIES_TREND_NONE));
 
 	return TRUE;;
 }
 
-BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest)
+BOOL CTimeSeriesGraph::CalculateTrendLine(DWORD dwOption, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest)
 {
 	BOOL bSuccess = FALSE;
 
-	switch (nOption)
+	switch (dwOption)
 	{
-	case BGO_TREND_NONE:
+	case BGO_TIMESERIES_TREND_NONE:
 		bSuccess = TRUE;
 		break;
 
-	case BGO_TREND_BESTFIT:
+	case BGO_TIMESERIES_TREND_BESTFIT:
 		bSuccess = CalculateBestFitLine(datasetSrc, datasetDest);
 		break;
 
-	case BGO_TREND_7DAYAVERAGE:
+	case BGO_TIMESERIES_TREND_7DAYAVERAGE:
 		bSuccess = CalculateMovingAverage(7, datasetSrc, datasetDest);
 		break;
 
-	case BGO_TREND_30DAYAVERAGE:
+	case BGO_TIMESERIES_TREND_30DAYAVERAGE:
 		bSuccess = CalculateMovingAverage(30, datasetSrc, datasetDest);
 		break;
 
-	case BGO_TREND_90DAYAVERAGE:
+	case BGO_TIMESERIES_TREND_90DAYAVERAGE:
 		bSuccess = CalculateMovingAverage(90, datasetSrc, datasetDest);
 		break;
 
@@ -478,7 +478,7 @@ BOOL CTimeSeriesGraph::CalculateTrendLine(BURNDOWN_GRAPHOPTION nOption, const CH
 		break;
 	}
 
-	if ((nOption == BGO_TREND_NONE) || !bSuccess)
+	if ((dwOption == BGO_TIMESERIES_TREND_NONE) || !bSuccess)
 		datasetDest.Reset();
 
 	if (bSuccess)
@@ -566,7 +566,7 @@ CString CIncompleteTasksGraph::GetTooltip(const CStatsItemCalculator& calculator
 
 BOOL CIncompleteTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	return CalculateTrendLine(GetOption(), datasets[0], datasets[1]);
+	return CalculateTrendLine(GetOptions(), datasets[0], datasets[1]);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -654,7 +654,7 @@ CString CRemainingDaysGraph::GetTooltip(const CStatsItemCalculator& calculator, 
 BOOL CRemainingDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
 	// No need to calculate trend of remaining estimate because it's already a straight line
-	return CalculateTrendLine(GetOption(), datasets[REMAINING_SPENT], datasets[REMAINING_SPENT + 1]);
+	return CalculateTrendLine(GetOptions(), datasets[REMAINING_SPENT], datasets[REMAINING_SPENT + 1]);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
@@ -738,8 +738,8 @@ CString CStartedEndedTasksGraph::GetTooltip(const CStatsItemCalculator& calculat
 
 BOOL CStartedEndedTasksGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	if (CalculateTrendLine(GetOption(), datasets[STARTED_TASKS], datasets[STARTED_TASKS + 2]) &&
-		CalculateTrendLine(GetOption(), datasets[ENDED_TASKS], datasets[ENDED_TASKS + 2]))
+	if (CalculateTrendLine(GetOptions(), datasets[STARTED_TASKS], datasets[STARTED_TASKS + 2]) &&
+		CalculateTrendLine(GetOptions(), datasets[ENDED_TASKS], datasets[ENDED_TASKS + 2]))
 	{
 		return TRUE;
 	}
@@ -834,8 +834,8 @@ CString CEstimatedSpentDaysGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 BOOL CEstimatedSpentDaysGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	if (CalculateTrendLine(GetOption(), datasets[ESTIMATED_DAYS], datasets[ESTIMATED_DAYS + 2]) &&
-		CalculateTrendLine(GetOption(), datasets[SPENT_DAYS], datasets[SPENT_DAYS + 2]))
+	if (CalculateTrendLine(GetOptions(), datasets[ESTIMATED_DAYS], datasets[ESTIMATED_DAYS + 2]) &&
+		CalculateTrendLine(GetOptions(), datasets[SPENT_DAYS], datasets[SPENT_DAYS + 2]))
 	{
 		return TRUE;
 	}
@@ -930,8 +930,8 @@ CString CEstimatedSpentCostGraph::GetTooltip(const CStatsItemCalculator& calcula
 
 BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const
 {
-	if (CalculateTrendLine(GetOption(), datasets[ESTIMATED_COST], datasets[ESTIMATED_COST + 2]) &&
-		CalculateTrendLine(GetOption(), datasets[SPENT_COST], datasets[SPENT_COST + 2]))
+	if (CalculateTrendLine(GetOptions(), datasets[ESTIMATED_COST], datasets[ESTIMATED_COST + 2]) &&
+		CalculateTrendLine(GetOptions(), datasets[SPENT_COST], datasets[SPENT_COST + 2]))
 	{
 		return TRUE;
 	}
@@ -946,7 +946,7 @@ BOOL CEstimatedSpentCostGraph::CalculateTrendLines(CHMXDataset datasets[HMX_MAX_
 
 CAttributeFrequencyGraph::CAttributeFrequencyGraph(BURNDOWN_GRAPH nGraph) 
 	: 
-	CGraphBase(nGraph, BGO_FREQUENCY_BAR)
+	CGraphBase(nGraph, BGO_FREQUENCY_STYLE_BAR)
 {
 }
 
@@ -1018,12 +1018,12 @@ CString CAttributeFrequencyGraph::GetTooltip(const CStatsItemCalculator& /*calcu
 	return sTooltip;
 }
 
-BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
+BOOL CAttributeFrequencyGraph::SetOptions(DWORD dwOptions, const CStatsItemCalculator& /*calculator*/, CHMXDataset datasets[HMX_MAX_DATASET])
 {
-	if (HasOption(nOption))
+	if (HasOptions(dwOptions))
 		return TRUE;
 
-	if (!CGraphBase::SetOption(nOption))
+	if (!CGraphBase::SetOptions(dwOptions))
 		return FALSE;
 
 	return UpdateGraphStyles(datasets[0]);
@@ -1031,24 +1031,24 @@ BOOL CAttributeFrequencyGraph::SetOption(BURNDOWN_GRAPHOPTION nOption, const CSt
 
 BOOL CAttributeFrequencyGraph::UpdateGraphStyles(CHMXDataset& dataset) const
 {
-	switch (GetOption())
+	switch (GetOptions())
 	{
-	case BGO_FREQUENCY_BAR:
+	case BGO_FREQUENCY_STYLE_BAR:
 		dataset.SetSize(5);
 		dataset.SetStyle(HMX_DATASET_STYLE_VBAR);
 		break;
 
-	case BGO_FREQUENCY_LINE:
+	case BGO_FREQUENCY_STYLE_LINE:
 		dataset.SetSize(1);
 		dataset.SetStyle(HMX_DATASET_STYLE_AREALINE);
 		break;
 
-	case BGO_FREQUENCY_PIE:
+	case BGO_FREQUENCY_STYLE_PIE:
 		dataset.SetSize(1);
 		dataset.SetStyle(HMX_DATASET_STYLE_PIELINE);
 		break;
 
-	case BGO_FREQUENCY_DONUT:
+	case BGO_FREQUENCY_STYLE_DONUT:
 		dataset.SetSize(1);
 		dataset.SetStyle(HMX_DATASET_STYLE_DONUTLINE);
 		break;

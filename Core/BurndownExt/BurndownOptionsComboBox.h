@@ -20,8 +20,8 @@ public:
 	virtual ~CBurndownOptionsComboBox();
 
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
-	BURNDOWN_GRAPHOPTION GetSelectedOption() const;
-	BOOL SetSelectedOption(BURNDOWN_GRAPHOPTION nOption);
+	DWORD GetSelectedOption() const;
+	BOOL SetSelectedOption(DWORD nOption);
 
 protected:
 	BURNDOWN_GRAPHTYPE m_nGraphType;
@@ -39,6 +39,16 @@ protected:
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
+
+private:
+	struct SORTITEM
+	{
+		DWORD dwOption;
+		CString sLabel;
+	};
+
+	static int BuildSortedList(BURNDOWN_GRAPHTYPE nType, CArray<SORTITEM, SORTITEM&>& aOptions);
+	static int SortProc(const void* pV1, const void* pV2);
 };
 
 /////////////////////////////////////////////////////////////////////////////

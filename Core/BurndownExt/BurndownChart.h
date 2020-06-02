@@ -26,11 +26,11 @@ public:
 	BOOL RebuildGraph(const COleDateTimeRange& dtExtents);
 
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
-	BOOL SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption);
+	BOOL SetActiveGraphOptions(DWORD dwOptions);
 	BOOL SetActiveGraphColors(const CColorArray& aColors);
 
 	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
-	BURNDOWN_GRAPHOPTION GetActiveGraphOption() const;
+	DWORD GetActiveGraphOptions() const;
 	int GetActiveGraphColors(CColorArray& aColors) const;
 	
 	CString GetGraphTitle(BURNDOWN_GRAPH nGraph) const;
