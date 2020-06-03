@@ -16,6 +16,7 @@
 #include "..\Shared\tooltipctrlex.h"
 #include "..\Shared\mapex.h"
 #include "..\Shared\TreeCtrlHelper.h"
+#include "..\Shared\HotTracker.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -124,6 +125,9 @@ protected:
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder;
 	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
+
+	HTREEITEM m_htiHotTaskFlag;
+	CHotTracker m_hotTracker;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -143,14 +147,16 @@ protected:
 	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
+	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -176,6 +182,8 @@ protected:
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
 	BOOL HitTestIcon(HTREEITEM hti, CPoint point) const;
 	BOOL HitTestFlag(HTREEITEM hti, CPoint point) const;
+	void GetIconRect(HTREEITEM hti, CRect& rIcon) const;
+	void GetFlagRect(HTREEITEM hti, CRect& rFlag) const;
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);

@@ -703,6 +703,13 @@ BOOL CKanbanItemMap::IsLocked(DWORD dwTaskID) const
 	return (pKI && pKI->bLocked);
 }
 
+BOOL CKanbanItemMap::HasFlag(DWORD dwTaskID) const
+{
+	const KANBANITEM* pKI = GetItem(dwTaskID);
+
+	return (pKI && pKI->bFlag);
+}
+
 KANBANITEM* CKanbanItemMap::NewItem(DWORD dwTaskID, const CString& sTitle)
 {
 	ASSERT(!sTitle.IsEmpty());

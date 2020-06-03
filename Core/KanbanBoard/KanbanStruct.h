@@ -138,6 +138,7 @@ public:
 	BOOL RemoveKey(DWORD dwKey);
 	BOOL HasItem(DWORD dwTaskID) const;
 	BOOL IsLocked(DWORD dwTaskID) const;
+	BOOL HasFlag(DWORD dwTaskID) const;
 
 	CString GetItemTitle(DWORD dwTaskID) const;
 

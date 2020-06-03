@@ -104,6 +104,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_bDrawTaskParents(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
+	m_htiHotTaskFlag(NULL),
 	m_tch(*this)
 {
 }
@@ -123,10 +124,12 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_RBUTTONDOWN()
+	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_SETCURSOR()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -691,10 +694,19 @@ void CKanbanColumnCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rI
 			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 	}
 
-	rIcon.top += (IMAGE_SIZE/* + IMAGE_PADDING*/);
+	rIcon.top += IMAGE_SIZE;
 
-	if (m_bDrawTaskFlags && pKI->bFlag)
-		ImageList_Draw(m_ilFlags, 0, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+	if (m_bDrawTaskFlags)
+	{
+		if (pKI->bFlag)
+		{
+			ImageList_Draw(m_ilFlags, 0, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+		}
+		else if (m_htiHotTaskFlag && (GetTaskID(m_htiHotTaskFlag) == pKI->dwTaskID) && !Misc::IsKeyPressed(VK_LBUTTON))
+		{
+			ImageList_Draw(m_ilFlags, 1, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+		}
+	}
 
 	rItem.left = (rIcon.left + IMAGE_SIZE);
 }
@@ -1280,6 +1292,52 @@ void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 	CTreeCtrl::OnRButtonDown(nFlags, point);
 }
 
+void CKanbanColumnCtrl::OnMouseMove(UINT nFlags, CPoint point)
+{
+	CTreeCtrl::OnMouseMove(nFlags, point);
+
+	if (m_bDrawTaskFlags)
+	{
+		HTREEITEM hti = HitTest(point);
+
+		if (hti && (hti != m_htiHotTaskFlag) && !m_data.HasFlag(GetTaskID(hti)))
+		{
+			CRect rFlag;
+			GetFlagRect(hti, rFlag);
+
+			if (rFlag.PtInRect(point))
+			{
+				if (!m_hotTracker.IsInitialized())
+					m_hotTracker.Initialize(this, FALSE);
+
+				m_hotTracker.AddRect(rFlag);
+
+				m_htiHotTaskFlag = hti;
+				InvalidateRect(rFlag);
+			}
+		}
+	}
+}
+
+LRESULT CKanbanColumnCtrl::OnHotChange(WPARAM wp, LPARAM lp)
+{
+	ASSERT(m_bDrawTaskFlags);
+	ASSERT(m_htiHotTaskFlag);
+
+	if (lp == -1)
+	{
+		CRect rFlag;
+		GetFlagRect(m_htiHotTaskFlag, rFlag);
+
+		m_htiHotTaskFlag = NULL;
+		InvalidateRect(rFlag);
+
+		m_hotTracker.DeleteAllRects();
+	}
+
+	return 0L;
+}
+
 void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	// Note: The complexity of this function arises out of the 
@@ -1403,11 +1461,7 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 BOOL CKanbanColumnCtrl::HitTestIcon(HTREEITEM hti, CPoint point) const
 {
 	CRect rIcon;
-	GetItemLabelTextRect(hti, rIcon);
-
-	rIcon.right = (rIcon.left - IMAGE_PADDING);
-	rIcon.left = (rIcon.right - IMAGE_SIZE);
-	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+	GetIconRect(hti, rIcon);
 
 	return rIcon.PtInRect(point);
 }
@@ -1418,14 +1472,25 @@ BOOL CKanbanColumnCtrl::HitTestFlag(HTREEITEM hti, CPoint point) const
 		return FALSE;
 
 	CRect rFlag;
-	GetItemLabelTextRect(hti, rFlag);
-
-	rFlag.right = (rFlag.left - IMAGE_PADDING);
-	rFlag.left = (rFlag.right - IMAGE_SIZE);
-	rFlag.top += (IMAGE_SIZE + IMAGE_PADDING);
-	rFlag.bottom = (rFlag.top + IMAGE_SIZE);
+	GetFlagRect(hti, rFlag);
 
 	return rFlag.PtInRect(point);
+}
+
+void CKanbanColumnCtrl::GetIconRect(HTREEITEM hti, CRect& rIcon) const
+{
+	GetItemLabelTextRect(hti, rIcon);
+
+	rIcon.right = (rIcon.left - IMAGE_PADDING);
+	rIcon.left = (rIcon.right - IMAGE_SIZE);
+	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
+}
+
+void CKanbanColumnCtrl::GetFlagRect(HTREEITEM hti, CRect& rFlag) const
+{
+	GetIconRect(hti, rFlag);
+
+	rFlag.OffsetRect(0, IMAGE_SIZE);
 }
 
 BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
