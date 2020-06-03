@@ -100,12 +100,6 @@ void CBurndownPreferencesPage::OnSize(UINT nType, int cx, int cy)
 	}
 }
 
-DWORD CBurndownPreferencesPage::GetGraphOptions(BURNDOWN_GRAPHTYPE /*nType*/) const
-{
-	// Does nothing for now
-	return 0;
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // CBurndownPreferencesDlg dialog
 

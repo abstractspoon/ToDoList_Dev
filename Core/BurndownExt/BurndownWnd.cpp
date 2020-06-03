@@ -225,7 +225,7 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		m_chart.SetActiveGraph(m_nGraph);
 
 		m_cbOptions.SetActiveGraph(m_nGraph);
-		m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOptions());
+		m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
 
 		// Active range
 		m_dtPrevActiveRange.Reset();
@@ -689,7 +689,7 @@ void CBurndownWnd::OnSelchangeDisplay()
 	m_chart.SetActiveGraph(m_nGraph);
 
 	m_cbOptions.SetActiveGraph(m_nGraph);
-	m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOptions());
+	m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
 }
 
 void CBurndownWnd::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -826,8 +826,5 @@ void CBurndownWnd::UpdateActiveRangeLabel(const COleDateTimeRange& dtActiveRange
 
 void CBurndownWnd::OnOptionChanged()
 {
-	DWORD dwNewOptions = m_dlgPrefs.GetGraphOptions(GetGraphType(m_nGraph));
-	dwNewOptions |= m_cbOptions.GetSelectedOption();
-
-	m_chart.SetActiveGraphOptions(dwNewOptions);
+	m_chart.SetActiveGraphOption(m_cbOptions.GetSelectedOption());
 }

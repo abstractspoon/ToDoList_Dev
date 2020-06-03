@@ -21,27 +21,40 @@ static char THIS_FILE[] = __FILE__;
 struct COMBOOPTION
 {
 	UINT nLabelID;
-	DWORD dwOption;
+	BURNDOWN_GRAPHOPTION nOption;
 };
 
-static const COMBOOPTION TIMESERIESOPTIONS[] =
+static const COMBOOPTION COMBOOPTIONS[] =
 {
-	{ IDS_TREND_NONE,			BGO_TIMESERIES_TREND_NONE },
-	{ IDS_TREND_BESTFIT,		BGO_TIMESERIES_TREND_BESTFIT },
-	{ IDS_TREND_7DAYAVERAGE,	BGO_TIMESERIES_TREND_7DAYAVERAGE },
-	{ IDS_TREND_30DAYAVERAGE,	BGO_TIMESERIES_TREND_30DAYAVERAGE },
-	{ IDS_TREND_90DAYAVERAGE,	BGO_TIMESERIES_TREND_90DAYAVERAGE },
-};
-static const int NUM_TIMEOPTIONS = sizeof(TIMESERIESOPTIONS) / sizeof(COMBOOPTION);
+	{ IDS_TREND_NONE,			BGO_TREND_NONE },
+	{ IDS_TREND_BESTFIT,		BGO_TREND_BESTFIT },
+	{ IDS_TREND_7DAYAVERAGE,	BGO_TREND_7DAYAVERAGE },
+	{ IDS_TREND_30DAYAVERAGE,	BGO_TREND_30DAYAVERAGE },
+	{ IDS_TREND_90DAYAVERAGE,	BGO_TREND_90DAYAVERAGE },
 
-static const COMBOOPTION FREQUENCYOPTIONS[] =
-{
-	{ IDS_FREQUENCY_BAR,		BGO_FREQUENCY_STYLE_BAR },
-	{ IDS_FREQUENCY_LINE,		BGO_FREQUENCY_STYLE_LINE },
-	{ IDS_FREQUENCY_PIE,		BGO_FREQUENCY_STYLE_PIE },
-	{ IDS_FREQUENCY_DONUT,		BGO_FREQUENCY_STYLE_DONUT },
+	{ IDS_FREQUENCY_BAR,		BGO_FREQUENCY_BAR },
+	{ IDS_FREQUENCY_LINE,		BGO_FREQUENCY_LINE },
+	{ IDS_FREQUENCY_PIE,		BGO_FREQUENCY_PIE },
+	{ IDS_FREQUENCY_DONUT,		BGO_FREQUENCY_DONUT },
 };
-static const int NUM_FREQOPTIONS = sizeof(FREQUENCYOPTIONS) / sizeof(COMBOOPTION);
+
+static const int NUM_COMBO = sizeof(COMBOOPTIONS) / sizeof(COMBOOPTION);
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct SORTITEM
+{
+	BURNDOWN_GRAPHOPTION nOption;
+	CString sLabel;
+};
+
+static int SortProc(const void* pV1, const void* pV2)
+{
+	const SORTITEM* pSI1 = (const SORTITEM*)pV1;
+	const SORTITEM* pSI2 = (const SORTITEM*)pV2;
+
+	return Misc::NaturalCompare(pSI1->sLabel, pSI2->sLabel);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CCBurndownOptionsComboBox
@@ -87,16 +100,31 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 
 	// Build our own sorted array because we have leading numbers
 	CArray<SORTITEM, SORTITEM&> aOptions;
-	VERIFY(BuildSortedList(nType, aOptions));
+	int nItem;
+
+	for (nItem = 0; nItem < NUM_COMBO; nItem++)
+	{
+		const COMBOOPTION& opt = COMBOOPTIONS[nItem];
+		SORTITEM st;
+
+		if (IsValidOption(opt.nOption, nType))
+		{
+			st.nOption = opt.nOption;
+			st.sLabel = CEnString(COMBOOPTIONS[nItem].nLabelID);
+
+			aOptions.Add(st);
+		}
+	}
+	Misc::SortArrayT<SORTITEM>(aOptions, SortProc);
 
 	// Cache selection and rebuild combo
-	DWORD dwSelOpt = GetSelectedOption();
+	BURNDOWN_GRAPHOPTION nSelOpt = GetSelectedOption();
 	ResetContent();
 	
-	for (int nItem = 0; nItem < aOptions.GetSize(); nItem++)
+	for (nItem = 0; nItem < aOptions.GetSize(); nItem++)
 	{
 		const SORTITEM& st = aOptions[nItem];
-		CDialogHelper::AddString(*this, st.sLabel, st.dwOption);
+		CDialogHelper::AddString(*this, st.sLabel, st.nOption);
 	}
 
 	CDialogHelper::RefreshMaxDropWidth(*this);
@@ -105,82 +133,20 @@ BOOL CBurndownOptionsComboBox::SetActiveGraph(BURNDOWN_GRAPH nGraph)
 	m_nGraphType = nType;
 
 	// restore selection
-	if (!IsValidOption(dwSelOpt, nType))
-		dwSelOpt = GetDefaultOption(nType);
+	if (!IsValidOption(nSelOpt, nGraph))
+		nSelOpt = GetDefaultOption(m_nGraphType);
 
-	SetSelectedOption(dwSelOpt);
+	SetSelectedOption(nSelOpt);
 
 	return TRUE;
 }
 
-int CBurndownOptionsComboBox::BuildSortedList(BURNDOWN_GRAPHTYPE nType, CArray<SORTITEM, SORTITEM&>& aOptions)
+BURNDOWN_GRAPHOPTION CBurndownOptionsComboBox::GetSelectedOption() const
 {
-	aOptions.RemoveAll();
-
-	const COMBOOPTION* pOptions = NULL;
-	int nNumOpt = 0;
-
-	switch (nType)
-	{
-	case BCT_TIMESERIES:
-		pOptions = TIMESERIESOPTIONS;
-		nNumOpt = NUM_TIMEOPTIONS;
-		break;
-
-	case BCT_FREQUENCY:
-		pOptions = FREQUENCYOPTIONS;
-		nNumOpt = NUM_FREQOPTIONS;
-		break;
-
-	default:
-		return 0;
-	}
-
-	for (int nOpt = 0; nOpt < nNumOpt; nOpt++)
-	{
-		const COMBOOPTION& opt = pOptions[nOpt];
-		SORTITEM st;
-
-		st.dwOption = opt.dwOption;
-		st.sLabel = CEnString(opt.nLabelID);
-
-		aOptions.Add(st);
-	}
-	Misc::SortArrayT<SORTITEM>(aOptions, SortProc);
-
-	return aOptions.GetSize();
+	return (BURNDOWN_GRAPHOPTION)CDialogHelper::GetSelectedItemData(*this, BCT_UNKNOWNTYPE);
 }
 
-int CBurndownOptionsComboBox::SortProc(const void* pV1, const void* pV2)
+BOOL CBurndownOptionsComboBox::SetSelectedOption(BURNDOWN_GRAPHOPTION nOption)
 {
-	const SORTITEM* pSI1 = (const SORTITEM*)pV1;
-	const SORTITEM* pSI2 = (const SORTITEM*)pV2;
-
-	return Misc::NaturalCompare(pSI1->sLabel, pSI2->sLabel);
-}
-
-DWORD CBurndownOptionsComboBox::GetSelectedOption() const
-{
-	return (DWORD)CDialogHelper::GetSelectedItemData(*this, BCT_UNKNOWNTYPE);
-}
-
-BOOL CBurndownOptionsComboBox::SetSelectedOption(DWORD dwOption)
-{
-	ASSERT(IsValidOption(dwOption, m_nGraphType));
-
-	switch (m_nGraphType)
-	{
-	case BCT_TIMESERIES:
-		dwOption &= BGO_TIMESERIES_TREND_MASK;
-		break;
-
-	case BCT_FREQUENCY:
-		dwOption &= BGO_FREQUENCY_STYLE_MASK;
-		break;
-
-	default:
-		return 0;
-	}
-
-	return (CDialogHelper::SelectItemByData(*this, dwOption) != CB_ERR);
+	return (CDialogHelper::SelectItemByData(*this, nOption) != CB_ERR);
 }

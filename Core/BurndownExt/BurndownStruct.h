@@ -59,7 +59,7 @@ struct GRAPHTYPE
 
 struct GRAPHOPTION
 {
-	DWORD dwOption;
+	BURNDOWN_GRAPHOPTION nOption;
 	BURNDOWN_GRAPHTYPE nType;
 };
 

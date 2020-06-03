@@ -21,7 +21,7 @@ public:
 	virtual void BuildGraph(const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
 	virtual void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const = 0;
-	virtual BOOL SetOptions(DWORD dwOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
+	virtual BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]) = 0;
 
 	BURNDOWN_GRAPHTYPE GetType() const;
 
@@ -29,13 +29,13 @@ public:
 	BOOL SetColors(const CColorArray& aColors);
 	void UpdateDatasetColors(CHMXDataset datasets[HMX_MAX_DATASET]) const;
 
-	BOOL SetOptions(DWORD dwOptions);
-	DWORD GetOptions() const;
-	BOOL IsValidOption(DWORD dwOption) const;
-	BOOL HasOptions(DWORD dwOptions) const;
+	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption);
+	BURNDOWN_GRAPHOPTION GetOption() const;
+	BOOL IsValidOption(BURNDOWN_GRAPHOPTION nOption) const;
+	BOOL HasOption(BURNDOWN_GRAPHOPTION nOption) const;
 
-protected:
-	CGraphBase(BURNDOWN_GRAPH nGraph, DWORD dwOptions = 0);
+	protected:
+	CGraphBase(BURNDOWN_GRAPH nGraph, BURNDOWN_GRAPHOPTION nOption = BGO_INVALID);
 	
 	static void SetDatasetColor(CHMXDataset& dataset, COLORREF crBase);
 	static void ClearData(CHMXDataset datasets[HMX_MAX_DATASET]);
@@ -47,7 +47,7 @@ protected:
 
 private:
 	BURNDOWN_GRAPH m_nGraph;
-	DWORD m_dwOptions;
+	BURNDOWN_GRAPHOPTION m_nOption;
 	CColorArray m_aColors;
 };
 
@@ -81,14 +81,14 @@ public:
 	virtual CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const = 0;
 
 	void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
-	BOOL SetOptions(DWORD dwOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	CTimeSeriesGraph(BURNDOWN_GRAPH nGraph);
 
 	virtual BOOL CalculateTrendLines(CHMXDataset datasets[HMX_MAX_DATASET]) const = 0;
 
-	static BOOL CalculateTrendLine(DWORD nTrend, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest);
+	static BOOL CalculateTrendLine(BURNDOWN_GRAPHOPTION nTrend, const CHMXDataset& datasetSrc, CHMXDataset& datasetDest);
 
 private:
 	static BOOL CalculateBestFitLine(const CHMXDataset& datasetSrc, CHMXDataset& datasetDest);
@@ -212,7 +212,7 @@ public:
 
 	CString GetTooltip(const CStatsItemCalculator& calculator, const CHMXDataset datasets[HMX_MAX_DATASET], int nHit) const;
 	void RebuildXScale(const CStatsItemCalculator& calculator, int nAvailWidth, CStringArray& aLabels, int& nLabelStep) const;
-	BOOL SetOptions(DWORD dwOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
+	BOOL SetOption(BURNDOWN_GRAPHOPTION nOption, const CStatsItemCalculator& calculator, CHMXDataset datasets[HMX_MAX_DATASET]);
 
 protected:
 	mutable CStringArray m_aAttribValues;

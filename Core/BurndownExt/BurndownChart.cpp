@@ -143,12 +143,12 @@ BOOL CBurndownChart::SetActiveGraphColors(const CColorArray& aColors)
 	return TRUE;
 }
 
-DWORD CBurndownChart::GetActiveGraphOptions() const
+BURNDOWN_GRAPHOPTION CBurndownChart::GetActiveGraphOption() const
 {
 	CGraphBase* pGraph = NULL;
-	GET_GRAPH_RET(m_nActiveGraph, 0);
+	GET_GRAPH_RET(m_nActiveGraph, BGO_INVALID);
 
-	return pGraph->GetOptions();
+	return pGraph->GetOption();
 }
 
 int CBurndownChart::GetActiveGraphColors(CColorArray& aColors) const
@@ -183,9 +183,10 @@ void CBurndownChart::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey)
 		}
 
 		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		DWORD dwOptions = (DWORD)pPrefs->GetProfileInt(szKey, sGraphKey, GetDefaultOption(nGraph));
+		BURNDOWN_GRAPHOPTION nOption = (BURNDOWN_GRAPHOPTION)pPrefs->GetProfileInt(szKey, sGraphKey, GetDefaultOption(nGraph));
 
-		pGraph->SetOptions(dwOptions);
+		if (nOption != BGO_INVALID)
+			pGraph->SetOption(nOption);
 	}
 }
 
@@ -202,7 +203,7 @@ void CBurndownChart::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 		pPrefs->WriteProfileString(szKey, sGraphKey, Misc::FormatArray(pGraph->GetColors(), '|'));
 
 		sGraphKey = Misc::MakeKey(_T("GraphOption%d"), nGraph);
-		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOptions());
+		pPrefs->WriteProfileInt(szKey, sGraphKey, pGraph->GetOption());
 	}
 }
 
@@ -257,15 +258,15 @@ int CBurndownChart::GetGraphColors(CGraphColorMap& mapColors) const
 	return mapColors.GetCount();
 }
 
-BOOL CBurndownChart::SetActiveGraphOptions(DWORD dwOptions)
+BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
 {
 	CGraphBase* pGraph = NULL;
 	GET_GRAPH_RET(m_nActiveGraph, FALSE);
 
-	if (!pGraph->IsValidOption(dwOptions))
+	if (!pGraph->IsValidOption(nOption))
 		return FALSE;
 
-	if (pGraph->SetOptions(dwOptions, m_calculator, m_datasets))
+	if (!pGraph->HasOption(nOption) && pGraph->SetOption(nOption, m_calculator, m_datasets))
 	{
 		RefreshRenderFlags(FALSE);
 		Invalidate();
@@ -279,8 +280,8 @@ BOOL CBurndownChart::HighlightDataPoint(int nIndex)
 	CGraphBase* pGraph = NULL;
 	GET_GRAPH_RET(m_nActiveGraph, FALSE);
 
-	if (pGraph->HasOptions(BGO_FREQUENCY_STYLE_PIE) || 
-		pGraph->HasOptions(BGO_FREQUENCY_STYLE_DONUT))
+	if (pGraph->HasOption(BGO_FREQUENCY_PIE) || 
+		pGraph->HasOption(BGO_FREQUENCY_DONUT))
 	{ 
 		// we handle it ourselves for now
 		// TODO
@@ -380,10 +381,10 @@ void CBurndownChart::RefreshRenderFlags(BOOL bRedraw)
 
 	DWORD dwFlags = ModifyRenderFlags(HMX_RENDER_TITLE, 0, FALSE); // Never draw title
 
-	switch (pGraph->GetOptions())
+	switch (pGraph->GetOption())
 	{
-	case BGO_FREQUENCY_STYLE_PIE:
-	case BGO_FREQUENCY_STYLE_DONUT:
+	case BGO_FREQUENCY_PIE:
+	case BGO_FREQUENCY_DONUT:
 		// Remove then add
 		dwFlags &= ~ (HMX_RENDER_YAXISTITLE | HMX_RENDER_GRID | HMX_RENDER_AXES | HMX_RENDER_BASELINE);
 		dwFlags |= HMX_RENDER_XAXISTITLE;
