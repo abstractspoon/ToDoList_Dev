@@ -129,6 +129,7 @@ void CBurndownWnd::OnPreferences()
 	if (m_dlgPrefs.DoModal() == IDOK)
 	{
 		m_chart.SetGraphColors(m_dlgPrefs.GetGraphColors());
+		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
 	}
 }
 
@@ -207,6 +208,7 @@ void CBurndownWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	}
 
 	m_chart.SavePreferences(pPrefs, szKey);
+	m_dlgPrefs.SavePreferences(pPrefs, szKey);
 }
 
 void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
@@ -222,8 +224,11 @@ void CBurndownWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 			m_nGraph = BCT_TIMESERIES_INCOMPLETETASKS;
 
 		m_chart.LoadPreferences(pPrefs, szKey);
-		m_chart.SetActiveGraph(m_nGraph);
+		m_dlgPrefs.LoadPreferences(pPrefs, szKey);
 
+		m_chart.SetActiveGraph(m_nGraph);
+		m_chart.SetShowEmptyFrequencyValues(m_dlgPrefs.GetShowEmptyFrequencyValues());
+		
 		m_cbOptions.SetActiveGraph(m_nGraph);
 		m_cbOptions.SetSelectedOption(m_chart.GetActiveGraphOption());
 

@@ -21,7 +21,8 @@ static char THIS_FILE[] = __FILE__;
 CStatsItemCalculator::CStatsItemCalculator(const CStatsItemArray& data)
 	:
 	m_data(data),
-	m_nTotalWeekdays(0)
+	m_nTotalWeekdays(0),
+	m_bShowEmptyFrequencyValues(TRUE)
 {
 }
 
@@ -43,6 +44,19 @@ BOOL CStatsItemCalculator::SetDateRange(const COleDateTimeRange& dtExtents)
 	m_nTotalWeekdays = 0;
 
 	return TRUE;
+}
+
+BOOL CStatsItemCalculator::SetShowEmptyFrequencyValues(BOOL bShowEmpty) 
+{ 
+	if ((m_bShowEmptyFrequencyValues && !bShowEmpty) ||
+		(!m_bShowEmptyFrequencyValues && bShowEmpty))
+	{
+		m_bShowEmptyFrequencyValues = bShowEmpty;
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
 }
 
 int CStatsItemCalculator::GetTotalDays() const
@@ -489,7 +503,8 @@ int CStatsItemCalculator::GetAttribFrequencies(FREQUENCY_ATTRIB nAttrib, CMap<CS
 
 void CStatsItemCalculator::AppendFrequencyAttrib(const CString& sAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const
 {
-	mapFrequencies[sAttrib]++;
+	if (m_bShowEmptyFrequencyValues || !sAttrib.IsEmpty())
+		mapFrequencies[sAttrib]++;
 }
 
 void CStatsItemCalculator::AppendFrequencyAttribs(const CStringArray& aAttrib, CMap<CString, LPCTSTR, int, int&>& mapFrequencies) const

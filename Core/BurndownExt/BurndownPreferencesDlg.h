@@ -36,11 +36,13 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
 	const CGraphColorMap& GetGraphColors() const { return m_lcGraphColors.GetGraphColors(); }
+	BOOL GetShowEmptyFrequencyValues() const { return m_bShowEmptyFrequencyValues; }
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CBurndownPreferencesPage)
 	enum { IDD = IDD_PREFERENCES_PAGE };
+	BOOL	m_bShowEmptyFrequencyValues;
 	//}}AFX_DATA
 	CBurndownGraphColorListCtrl	m_lcGraphColors;
 	CColourButton m_btnTodayColor;
@@ -80,6 +82,7 @@ public:
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) { m_page.LoadPreferences(pPrefs, szKey); }
 
 	const CGraphColorMap& GetGraphColors() const { return m_page.GetGraphColors(); }
+	BOOL GetShowEmptyFrequencyValues() const { return m_page.GetShowEmptyFrequencyValues(); }
 
 protected:
 // Dialog Data

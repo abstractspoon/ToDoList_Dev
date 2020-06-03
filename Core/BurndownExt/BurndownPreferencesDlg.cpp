@@ -46,6 +46,7 @@ void CBurndownPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 	//{{AFX_DATA_MAP(CBurndownPreferencesPage)
 	DDX_Control(pDX, IDC_GRAPHCOLORS, m_lcGraphColors);
+	DDX_Check(pDX, IDC_SHOWEMPTYINFREQUENCYCHARTS, m_bShowEmptyFrequencyValues);
 	//}}AFX_DATA_MAP
 }
 
@@ -69,14 +70,20 @@ BOOL CBurndownPreferencesPage::OnInitDialog()
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
-void CBurndownPreferencesPage::SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const
+void CBurndownPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 {
-	// Do nothing for now
+	pPrefs->WriteProfileInt(szKey, _T("ShowEmptyFrequencyValues"), m_bShowEmptyFrequencyValues);
+
+	// Note: Burndown chart is responsible for saving colour
+	// preferences. We are just the UI for their editing.
 }
 
-void CBurndownPreferencesPage::LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) 
+void CBurndownPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey) 
 {
-	// Do nothing for now
+	m_bShowEmptyFrequencyValues = pPrefs->GetProfileInt(szKey, _T("ShowEmptyFrequencyValues"), TRUE);
+
+	// Note: Burndown chart is responsible for loading colour
+	// preferences. We are just the UI for their editing.
 }
 
 void CBurndownPreferencesPage::OnOK()

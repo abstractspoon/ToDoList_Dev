@@ -28,6 +28,7 @@ public:
 	BOOL SetActiveGraph(BURNDOWN_GRAPH nGraph);
 	BOOL SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption);
 	BOOL SetActiveGraphColors(const CColorArray& aColors);
+	void SetShowEmptyFrequencyValues(BOOL bShowEmpty);
 
 	BURNDOWN_GRAPH GetActiveGraph() const { return m_nActiveGraph; }
 	BURNDOWN_GRAPHOPTION GetActiveGraphOption() const;

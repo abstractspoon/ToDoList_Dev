@@ -275,6 +275,15 @@ BOOL CBurndownChart::SetActiveGraphOption(BURNDOWN_GRAPHOPTION nOption)
 	return TRUE;
 }
 
+void CBurndownChart::SetShowEmptyFrequencyValues(BOOL bShowEmpty)
+{
+	if (m_calculator.SetShowEmptyFrequencyValues(bShowEmpty) &&
+		(GetGraphType(m_nActiveGraph) == BCT_FREQUENCY))
+	{
+		RebuildGraph(m_dtExtents);
+	}
+}
+
 BOOL CBurndownChart::HighlightDataPoint(int nIndex)
 {
 	CGraphBase* pGraph = NULL;

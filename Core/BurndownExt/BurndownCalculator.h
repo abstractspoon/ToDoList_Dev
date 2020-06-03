@@ -27,6 +27,7 @@ public:
 	virtual ~CStatsItemCalculator();
 
 	BOOL SetDateRange(const COleDateTimeRange& dtExtents);
+	BOOL SetShowEmptyFrequencyValues(BOOL bShowEmpty);
 
 	double GetStartDate() const { return m_dStartExtents; }
 	double GetEndDate() const { return m_dEndExtents; }
@@ -70,6 +71,7 @@ protected:
 	const CStatsItemArray& m_data;
 
 	double m_dStartExtents, m_dEndExtents;
+	BOOL m_bShowEmptyFrequencyValues;
 
 	mutable int m_nTotalWeekdays;
 
