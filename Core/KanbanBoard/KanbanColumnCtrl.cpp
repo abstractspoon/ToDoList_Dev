@@ -104,7 +104,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_bDrawTaskParents(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
-	m_htiHotTaskFlag(NULL),
+	m_htiHot(NULL),
 	m_tch(*this)
 {
 }
@@ -129,7 +129,8 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_SETCURSOR()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-	ON_REGISTERED_MESSAGE(WM_HTHOTCHANGE, OnHotChange)
+	ON_MESSAGE(WM_MOUSEWHEEL, OnMouseWheel)
+	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -548,7 +549,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				// Icons don't affect attributes
 				CRect rAttributes(rItem);
 
-				DrawItemIcons(pDC, pKI, rItem);
+				DrawItemIcons(pDC, pKI, rItem, (hti == m_htiHot));
 				DrawItemTitle(pDC, pKI, rItem, crText);
 
 				rAttributes.top += CalcItemTitleTextHeight();
@@ -677,10 +678,13 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 	}
 }
 
-void CKanbanColumnCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
+void CKanbanColumnCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, BOOL bHot) const
 {
-	DWORD dwDrawn = 0;
-	CRect rIcon(rItem);
+	CSaveDC sdc(pDC);
+	CRect rClip(rItem), rIcon(rItem);
+
+	rClip.DeflateRect(1, 1);
+	pDC->IntersectClipRect(rClip);
 
 	rIcon.left += IMAGE_PADDING;
 	rIcon.top += IMAGE_PADDING;
@@ -702,7 +706,7 @@ void CKanbanColumnCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rI
 		{
 			ImageList_Draw(m_ilFlags, 0, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 		}
-		else if (m_htiHotTaskFlag && (GetTaskID(m_htiHotTaskFlag) == pKI->dwTaskID) && !Misc::IsKeyPressed(VK_LBUTTON))
+		else if (bHot)
 		{
 			ImageList_Draw(m_ilFlags, 1, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 		}
@@ -1296,46 +1300,58 @@ void CKanbanColumnCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CTreeCtrl::OnMouseMove(nFlags, point);
 
-	if (m_bDrawTaskFlags)
-	{
-		HTREEITEM hti = HitTest(point);
-
-		if (hti && (hti != m_htiHotTaskFlag) && !m_data.HasFlag(GetTaskID(hti)))
-		{
-			CRect rFlag;
-			GetFlagRect(hti, rFlag);
-
-			if (rFlag.PtInRect(point))
-			{
-				if (!m_hotTracker.IsInitialized())
-					m_hotTracker.Initialize(this, FALSE);
-
-				m_hotTracker.AddRect(rFlag);
-
-				m_htiHotTaskFlag = hti;
-				InvalidateRect(rFlag);
-			}
-		}
-	}
+	UpdateHotItem();
 }
 
-LRESULT CKanbanColumnCtrl::OnHotChange(WPARAM wp, LPARAM lp)
+LRESULT CKanbanColumnCtrl::OnMouseWheel(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	ASSERT(m_bDrawTaskFlags);
-	ASSERT(m_htiHotTaskFlag);
+	LRESULT lr = Default();
 
-	if (lp == -1)
+	UpdateHotItem();
+
+	return lr;
+}
+
+LRESULT CKanbanColumnCtrl::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	LRESULT lr = Default();
+
+	UpdateHotItem();
+	CDialogHelper::TrackMouseLeave(*this, FALSE);
+
+	return lr;
+}
+
+void CKanbanColumnCtrl::UpdateHotItem()
+{
+	if (!m_bDrawTaskFlags)
+		return;
+
+	CPoint point(GetMessagePos());
+	ScreenToClient(&point);
+
+	HTREEITEM htiHot = HitTest(point);
+
+	if (htiHot != m_htiHot)
 	{
 		CRect rFlag;
-		GetFlagRect(m_htiHotTaskFlag, rFlag);
 
-		m_htiHotTaskFlag = NULL;
-		InvalidateRect(rFlag);
+		if (m_htiHot)
+		{
+			GetFlagRect(m_htiHot, rFlag);
+			InvalidateRect(rFlag);
+		}
 
-		m_hotTracker.DeleteAllRects();
+		if (htiHot)
+		{
+			GetFlagRect(htiHot, rFlag);
+			InvalidateRect(rFlag);
+
+			CDialogHelper::TrackMouseLeave(*this, TRUE, FALSE);
+		}
+
+		m_htiHot = htiHot;
 	}
-
-	return 0L;
 }
 
 void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)

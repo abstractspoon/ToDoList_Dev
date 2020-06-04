@@ -16,7 +16,6 @@
 #include "..\Shared\tooltipctrlex.h"
 #include "..\Shared\mapex.h"
 #include "..\Shared\TreeCtrlHelper.h"
-#include "..\Shared\HotTracker.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -125,9 +124,7 @@ protected:
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder;
 	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
-
-	HTREEITEM m_htiHotTaskFlag;
-	CHotTracker m_hotTracker;
+	HTREEITEM m_htiHot;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -156,7 +153,8 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnMouseWheel(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnMouseLeave(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -185,10 +183,11 @@ protected:
 	void GetIconRect(HTREEITEM hti, CRect& rIcon) const;
 	void GetFlagRect(HTREEITEM hti, CRect& rFlag) const;
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
+	void UpdateHotItem();
 
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
-	void DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
+	void DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, BOOL bHot) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const;
 	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;
