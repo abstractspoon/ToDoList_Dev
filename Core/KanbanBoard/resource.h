@@ -50,6 +50,7 @@
 #define IDB_CHECKBOXES                  16013
 #define IDS_DISPLAY_FILEREF_SHORT       16013
 #define IDC_CALCULATEPARENTDATES        16014
+#define IDB_ICONS                       16014
 #define IDC_DEFAULTPARENTCOLORS         16015
 #define IDC_NOPARENTCOLOR               16016
 #define IDC_SPECIFYPARENTCOLOR          16017
@@ -171,7 +172,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        16013
+#define _APS_NEXT_RESOURCE_VALUE        16015
 #define _APS_NEXT_COMMAND_VALUE         32784
 #define _APS_NEXT_CONTROL_VALUE         16047
 #define _APS_NEXT_SYMED_VALUE           16000

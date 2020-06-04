@@ -67,11 +67,18 @@ enum // checkbox images
 	KLCC_MIXED, 
 };
 
+enum // Icon images
+{
+	FLAG_SET,
+	FLAG_HOVER,
+	PIN_SET,
+	PIN_HOVER,
+};
+
 /////////////////////////////////////////////////////////////////////////////
 
 const int MIN_LABEL_EDIT_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200);
 const int BAR_WIDTH				= GraphicsMisc::ScaleByDPIFactor(6);
-const int NUM_TITLELINES		= 2;
 const int LV_PADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int CHECKBOX_PADDING		= GraphicsMisc::ScaleByDPIFactor(1);
 const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
@@ -81,6 +88,7 @@ const int IMAGE_PADDING			= 2/*GraphicsMisc::ScaleByDPIFactor(2)*/;
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
 
 const CRect TEXT_BORDER			= CRect(2, 1, 3, 1);
+const COLORREF WHITE			= RGB(255, 255, 255);
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx
@@ -97,6 +105,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_bSelected(FALSE),
 	m_nItemTextHeight(-1),
 	m_nItemTextBorder(-1),
+	m_nNumTitleLines(2),
 	m_nAttribLabelVisiability(KBCAL_LONG),
 	m_bSavingToImage(FALSE),
 	m_bDropTarget(FALSE),
@@ -153,8 +162,8 @@ int CKanbanColumnCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS))
 		VERIFY(InitTooltip());
 
-	m_ilFlags.Create(IDB_FLAG, 16, 1, RGB(255, 0, 255));
-	CEnImageList::ScaleByDPIFactor(m_ilFlags);
+	m_ilIcons.Create(IDB_ICONS, 16, 1, RGB(255, 0, 255));
+	CEnImageList::ScaleByDPIFactor(m_ilIcons);
 
 	CFont* pFont = m_fonts.GetFont();
 	ASSERT(pFont);
@@ -264,7 +273,7 @@ void CKanbanColumnCtrl::RefreshItemLineHeights(HTREEITEM hti)
 
 	if (pKI)
 	{
-		int nNumLines = NUM_TITLELINES;
+		int nNumLines = m_nNumTitleLines;
 		nNumLines += GetItemDisplayAttributeCount(*pKI);
 
 		if (m_bDrawTaskParents)
@@ -353,7 +362,7 @@ void CKanbanColumnCtrl::SetSelected(BOOL bSelected)
 
 int CKanbanColumnCtrl::CalcItemTitleTextHeight() const
 {
-	return (NUM_TITLELINES * m_nItemTextHeight);
+	return (m_nNumTitleLines * m_nItemTextHeight);
 }
 
 HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
@@ -549,7 +558,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				// Icons don't affect attributes
 				CRect rAttributes(rItem);
 
-				DrawItemIcons(pDC, pKI, rItem, (hti == m_htiHot));
+				DrawItemImages(pDC, pKI, rItem, (hti == m_htiHot));
 				DrawItemTitle(pDC, pKI, rItem, crText);
 
 				rAttributes.top += CalcItemTitleTextHeight();
@@ -664,7 +673,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 			if (hilTask && (iImageIndex != -1))
 			{
-				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, 255, ILD_TRANSPARENT | ILD_BLEND50);
+				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, WHITE, ILD_TRANSPARENT | ILD_BLEND50);
 				rParent.left += (IMAGE_SIZE + IMAGE_PADDING);
 			}
 
@@ -678,7 +687,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 	}
 }
 
-void CKanbanColumnCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, BOOL bHot) const
+void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, BOOL bHot) const
 {
 	CSaveDC sdc(pDC);
 	CRect rClip(rItem), rIcon(rItem);
@@ -688,6 +697,7 @@ void CKanbanColumnCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rI
 
 	rIcon.left += IMAGE_PADDING;
 	rIcon.top += IMAGE_PADDING;
+	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
 
 	if (pKI->bHasIcon || pKI->bParent)
 	{
@@ -698,18 +708,29 @@ void CKanbanColumnCtrl::DrawItemIcons(CDC* pDC, const KANBANITEM* pKI, CRect& rI
 			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 	}
 
-	rIcon.top += IMAGE_SIZE;
+	rIcon.OffsetRect(0, IMAGE_SIZE);
 
 	if (m_bDrawTaskFlags)
 	{
 		if (pKI->bFlag)
 		{
-			ImageList_Draw(m_ilFlags, 0, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+			ImageList_Draw(m_ilIcons, FLAG_SET, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
 		}
 		else if (bHot)
 		{
-			ImageList_Draw(m_ilFlags, 1, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+			ImageList_DrawEx(m_ilIcons, FLAG_HOVER, *pDC, rIcon.left, rIcon.top, 0, 0, 0, WHITE, ILD_TRANSPARENT | ILD_BLEND25);
 		}
+
+		rIcon.OffsetRect(0, IMAGE_SIZE);
+	}
+
+	/*if (pKI->bPinned)
+	{
+		ImageList_Draw(m_ilIcons, PIN_SET, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+	}
+	else*/ if (bHot)
+	{
+		ImageList_DrawEx(m_ilIcons, PIN_HOVER, *pDC, rIcon.left, rIcon.top, 0, 0, 0, WHITE, ILD_TRANSPARENT | ILD_BLEND25);
 	}
 
 	rItem.left = (rIcon.left + IMAGE_SIZE);
@@ -1337,16 +1358,11 @@ void CKanbanColumnCtrl::UpdateHotItem()
 		CRect rFlag;
 
 		if (m_htiHot)
-		{
-			GetFlagRect(m_htiHot, rFlag);
-			InvalidateRect(rFlag);
-		}
+			TCH().InvalidateItem(m_htiHot);
 
 		if (htiHot)
 		{
-			GetFlagRect(htiHot, rFlag);
-			InvalidateRect(rFlag);
-
+			TCH().InvalidateItem(htiHot);
 			CDialogHelper::TrackMouseLeave(*this, TRUE, FALSE);
 		}
 
@@ -1372,13 +1388,22 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			nMsgID = WM_KLCN_TOGGLETASKDONE;
 		}
-		else if (HitTestIcon(htiHit, point))
+		else
 		{
-			nMsgID = WM_KLCN_EDITTASKICON;
-		}
-		else if (HitTestFlag(htiHit, point))
-		{
-			nMsgID = WM_KLCN_TOGGLETASKFLAG;
+			switch (HitTestImage(htiHit, point))
+			{
+			case KBI_ICON:	
+				nMsgID = WM_KLCN_EDITTASKICON;
+				break;
+
+			case KBI_FLAG:
+				nMsgID = WM_KLCN_TOGGLETASKFLAG;
+				break;
+
+			case KBI_PIN:
+				// TODO
+				break;
+			}
 		}
 
 		if (nMsgID)
@@ -1474,39 +1499,36 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 	return bHandled;
 }
 
-BOOL CKanbanColumnCtrl::HitTestIcon(HTREEITEM hti, CPoint point) const
+CKanbanColumnCtrl::KB_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, CPoint point) const
 {
-	CRect rIcon;
-	GetIconRect(hti, rIcon);
+	CRect rImage;
+	GetItemLabelTextRect(hti, rImage);
 
-	return rIcon.PtInRect(point);
-}
+	// Icon
+	rImage.right = (rImage.left - IMAGE_PADDING);
+	rImage.left = (rImage.right - IMAGE_SIZE);
+	rImage.bottom = (rImage.top + IMAGE_SIZE);
 
-BOOL CKanbanColumnCtrl::HitTestFlag(HTREEITEM hti, CPoint point) const
-{
-	if (!m_bDrawTaskFlags)
-		return FALSE;
+	if (rImage.PtInRect(point))
+		return KBI_ICON;
 
-	CRect rFlag;
-	GetFlagRect(hti, rFlag);
+	// Flag
+	if (m_bDrawTaskFlags)
+	{
+		rImage.OffsetRect(0, IMAGE_SIZE);
 
-	return rFlag.PtInRect(point);
-}
+		if (rImage.PtInRect(point))
+			return KBI_FLAG;
+	}
 
-void CKanbanColumnCtrl::GetIconRect(HTREEITEM hti, CRect& rIcon) const
-{
-	GetItemLabelTextRect(hti, rIcon);
+	// Pin
+	rImage.OffsetRect(0, IMAGE_SIZE);
 
-	rIcon.right = (rIcon.left - IMAGE_PADDING);
-	rIcon.left = (rIcon.right - IMAGE_SIZE);
-	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
-}
+	if (rImage.PtInRect(point))
+		return KBI_PIN;
 
-void CKanbanColumnCtrl::GetFlagRect(HTREEITEM hti, CRect& rFlag) const
-{
-	GetIconRect(hti, rFlag);
-
-	rFlag.OffsetRect(0, IMAGE_SIZE);
+	// all else
+	return KBI_NONE;
 }
 
 BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
@@ -1516,7 +1538,7 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	HTREEITEM hti = HitTest(point);
 
-	if (hti && (HitTestIcon(hti, point) || HitTestFlag(hti, point)))
+	if (hti && (HitTestImage(hti, point) != KBI_NONE))
 		return GraphicsMisc::SetHandCursor();
 
 	// else
@@ -1645,8 +1667,14 @@ void CKanbanColumnCtrl::RecalcItemLineHeight()
 		
 	if (m_bDrawTaskFlags && (m_aDisplayAttrib.GetSize() == 1))
 		nItemHeight = max(nItemHeight, (IMAGE_SIZE + IMAGE_PADDING));
-	
+
 	SetItemHeight(nItemHeight);
+
+	// Recalc the required number of title lines
+	int nNumIcons = (2 + (m_bDrawTaskFlags ? 1 : 0));
+	double dTotalIconHeight = (nNumIcons * IMAGE_SIZE);
+
+	m_nNumTitleLines = max(2, (int)ceil(dTotalIconHeight / m_nItemTextHeight));
 }
 
 BOOL CKanbanColumnCtrl::SelectItem(HTREEITEM hItem, BOOL bByMouse)

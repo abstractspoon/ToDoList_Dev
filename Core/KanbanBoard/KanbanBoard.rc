@@ -72,7 +72,7 @@ END
 IDD_KANBAN_DIALOG DIALOGEX 0, 0, 411, 189
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Attribute to 'track'",IDC_ATTRIBUTES_LABEL,0,2,114,8
     COMBOBOX        IDC_ATTRIBUTES,0,13,105,116,CBS_DROPDOWNLIST | CBS_SORT | 
@@ -123,7 +123,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDR_KANBAN              ICON    DISCARDABLE     "res\\icon1.ico"
+IDR_KANBAN              ICON    DISCARDABLE     "res\\kanban.ico"
 #endif    // English (U.K.) resources
 /////////////////////////////////////////////////////////////////////////////
 
@@ -155,7 +155,7 @@ END
 
 IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
 STYLE WS_CHILD
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
@@ -278,7 +278,7 @@ IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
 IDR_COLUMN_TOOLBAR      BITMAP  MOVEABLE PURE   "res\\column_toolbar.bmp"
 IDB_COLUMN_TOOLBAR_STD  BITMAP  MOVEABLE PURE   "res\\column_toolbar_std.bmp"
 IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
-IDB_FLAG                BITMAP  DISCARDABLE     "res\\flag.bmp"
+IDB_ICONS               BITMAP  DISCARDABLE     "res\\icons.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
