@@ -120,6 +120,7 @@ protected:
 	afx_msg LRESULT OnColumnToggleTaskDone(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColumnEditTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColumnToggleTaskFlag(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnToggleTaskPin(WPARAM wp, LPARAM lp);
 	afx_msg void OnColumnSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnColumnGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);

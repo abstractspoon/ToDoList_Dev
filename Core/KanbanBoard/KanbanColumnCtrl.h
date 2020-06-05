@@ -23,6 +23,7 @@ const UINT WM_KLCN_TOGGLETASKDONE	= (WM_APP+1); // WPARAM = HWND, LPARAM = Task 
 const UINT WM_KLCN_GETTASKICON		= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
 const UINT WM_KLCN_EDITTASKICON		= (WM_APP+3); // WPARAM = HWND, LPARAM = Task ID
 const UINT WM_KLCN_TOGGLETASKFLAG	= (WM_APP+4); // WPARAM = HWND, LPARAM = Task ID
+const UINT WM_KLCN_TOGGLETASKPIN	= (WM_APP+5); // WPARAM = HWND, LPARAM = Task ID
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -179,15 +180,8 @@ protected:
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
 
-	enum KB_IMAGETYPE
-	{
-		KBI_NONE = -1,
-		KBI_ICON,
-		KBI_FLAG,
-		KBI_PIN
-	};
-
-	KB_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
+	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
+	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL = NULL, int nIndex = -1) const;
 
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 	void UpdateHotItem();

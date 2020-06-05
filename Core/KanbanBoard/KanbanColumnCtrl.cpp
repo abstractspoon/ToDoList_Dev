@@ -705,35 +705,49 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 		HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKI->dwTaskID, (LPARAM)&iImageIndex);
 
 		if (hilTask && (iImageIndex != -1))
-			ImageList_Draw(hilTask, iImageIndex, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+			DrawItemImage(pDC, rIcon, KBCI_ICON, FALSE, hilTask, iImageIndex);
 	}
 
 	rIcon.OffsetRect(0, IMAGE_SIZE);
 
 	if (m_bDrawTaskFlags)
 	{
-		if (pKI->bFlag)
-		{
-			ImageList_Draw(m_ilIcons, FLAG_SET, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-		}
-		else if (bHot)
-		{
-			ImageList_DrawEx(m_ilIcons, FLAG_HOVER, *pDC, rIcon.left, rIcon.top, 0, 0, 0, WHITE, ILD_TRANSPARENT | ILD_BLEND25);
-		}
+		if (pKI->bFlagged || bHot)
+			DrawItemImage(pDC, rIcon, KBCI_FLAG, (bHot && !pKI->bFlagged));
 
 		rIcon.OffsetRect(0, IMAGE_SIZE);
 	}
 
-	/*if (pKI->bPinned)
-	{
-		ImageList_Draw(m_ilIcons, PIN_SET, *pDC, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-	}
-	else*/ if (bHot)
-	{
-		ImageList_DrawEx(m_ilIcons, PIN_HOVER, *pDC, rIcon.left, rIcon.top, 0, 0, 0, WHITE, ILD_TRANSPARENT | ILD_BLEND25);
-	}
+	if (pKI->bPinned || bHot)
+		DrawItemImage(pDC, rIcon, KBCI_PIN, (bHot && !pKI->bPinned));
 
 	rItem.left = (rIcon.left + IMAGE_SIZE);
+}
+
+void CKanbanColumnCtrl::DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL, int nIndex) const
+{
+	switch (nType)
+	{
+	case KBCI_ICON:
+		ASSERT(hIL && (nIndex != -1));
+		break;
+
+	case KBCI_FLAG:
+		hIL = m_ilIcons;
+		nIndex = (bHover ? FLAG_HOVER : FLAG_SET);
+		break;
+
+	case KBCI_PIN:
+		hIL = m_ilIcons;
+		nIndex = (bHover ? PIN_HOVER : PIN_SET);
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	ImageList_Draw(hIL, nIndex, *pDC, rImage.left, rImage.top, ILD_TRANSPARENT);
+
 }
 
 void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
@@ -1150,6 +1164,13 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 	
 	if (pKI1 && pKI2)
 	{
+		// Pinned tasks always at the top
+		if (pKI1->bPinned && !pKI2->bPinned)
+			return -1;
+
+		if (!pKI1->bPinned && pKI2->bPinned)
+			return 1;
+
 		if (pSort->bSubtasksBelowParent && (pKI1->dwParentID != pKI2->dwParentID))
 		{
 			// If one is the parent of another always sort below
@@ -1231,15 +1252,15 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			break;
 			
 		case TDCA_FLAG:
-			if (pKI1->bFlag && pKI2->bFlag)
+			if (pKI1->bFlagged && pKI2->bFlagged)
 			{
 				nCompare = 0;
 			}
-			else if (pKI1->bFlag)
+			else if (pKI1->bFlagged)
 			{
 				nCompare = -1;
 			}
-			else if (pKI2->bFlag)
+			else if (pKI2->bFlagged)
 			{
 				nCompare = 1;
 			}
@@ -1307,6 +1328,7 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	TVSORTCB tvs = { NULL, SortProc, (LPARAM)&ks };
 
 	SortChildrenCB(&tvs);
+	UpdateHotItem();
 }
 
 void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)
@@ -1345,9 +1367,6 @@ LRESULT CKanbanColumnCtrl::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
 
 void CKanbanColumnCtrl::UpdateHotItem()
 {
-	if (!m_bDrawTaskFlags)
-		return;
-
 	CPoint point(GetMessagePos());
 	ScreenToClient(&point);
 
@@ -1383,6 +1402,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	if (htiHit)
 	{
 		UINT nMsgID = 0;
+		DWORD dwTaskID = GetTaskID(htiHit);
 
 		if (HitTestCheckbox(htiHit, point))
 		{
@@ -1392,24 +1412,25 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			switch (HitTestImage(htiHit, point))
 			{
-			case KBI_ICON:	
+			case KBCI_ICON:	
 				nMsgID = WM_KLCN_EDITTASKICON;
 				break;
 
-			case KBI_FLAG:
+			case KBCI_FLAG:
 				nMsgID = WM_KLCN_TOGGLETASKFLAG;
 				break;
 
-			case KBI_PIN:
-				// TODO
+			case KBCI_PIN:
+				nMsgID = WM_KLCN_TOGGLETASKPIN;
+				TCH().InvalidateItem(htiHit);
 				break;
 			}
 		}
 
 		if (nMsgID)
 		{
-			// Post message to let mouse-click time to complete
-			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd(), GetTaskID(htiHit));
+			// Post message to give mouse-click time to complete
+			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd(), dwTaskID);
 			bHandled = TRUE;
 		}
 		else if (bHandled)
@@ -1425,7 +1446,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 				NMTREEVIEW nmtv = { *this, (UINT)GetDlgCtrlID(), TVN_BEGINDRAG, 0 };
 
 				nmtv.itemNew.hItem = htiHit;
-				nmtv.itemNew.lParam = GetTaskID(htiHit);
+				nmtv.itemNew.lParam = dwTaskID;
 				nmtv.ptDrag = point;
 
 				GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&nmtv);
@@ -1499,7 +1520,7 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 	return bHandled;
 }
 
-CKanbanColumnCtrl::KB_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, CPoint point) const
+KBC_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, CPoint point) const
 {
 	CRect rImage;
 	GetItemLabelTextRect(hti, rImage);
@@ -1510,7 +1531,7 @@ CKanbanColumnCtrl::KB_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, C
 	rImage.bottom = (rImage.top + IMAGE_SIZE);
 
 	if (rImage.PtInRect(point))
-		return KBI_ICON;
+		return KBCI_ICON;
 
 	// Flag
 	if (m_bDrawTaskFlags)
@@ -1518,17 +1539,17 @@ CKanbanColumnCtrl::KB_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, C
 		rImage.OffsetRect(0, IMAGE_SIZE);
 
 		if (rImage.PtInRect(point))
-			return KBI_FLAG;
+			return KBCI_FLAG;
 	}
 
 	// Pin
 	rImage.OffsetRect(0, IMAGE_SIZE);
 
 	if (rImage.PtInRect(point))
-		return KBI_PIN;
+		return KBCI_PIN;
 
 	// all else
-	return KBI_NONE;
+	return KBCI_NONE;
 }
 
 BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
@@ -1538,7 +1559,7 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	HTREEITEM hti = HitTest(point);
 
-	if (hti && (HitTestImage(hti, point) != KBI_NONE))
+	if (hti && (HitTestImage(hti, point) != KBCI_NONE))
 		return GraphicsMisc::SetHandCursor();
 
 	// else

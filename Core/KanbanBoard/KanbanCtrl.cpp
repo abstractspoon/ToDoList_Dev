@@ -131,6 +131,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_TOGGLETASKDONE, OnColumnToggleTaskDone)
 	ON_MESSAGE(WM_KLCN_TOGGLETASKFLAG, OnColumnToggleTaskFlag)
+	ON_MESSAGE(WM_KLCN_TOGGLETASKPIN, OnColumnToggleTaskPin)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
 	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
@@ -709,7 +710,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		pKI->dwParentID = dwParentID;
 		pKI->bLocked = pTasks->IsTaskLocked(hTask, true);
 		pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
-		pKI->bFlag = (pTasks->IsTaskFlagged(hTask, false) ? TRUE : FALSE);
+		pKI->bFlagged = (pTasks->IsTaskFlagged(hTask, false) ? TRUE : FALSE);
 		pKI->nPosition = pTasks->GetTaskPosition(hTask);
 
 		pKI->SetColor(pTasks->GetTaskTextColor(hTask));
@@ -841,7 +842,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 				pKI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_FLAG))
-				pKI->bFlag = (pTasks->IsTaskFlagged(hTask, true) ? TRUE : FALSE);
+				pKI->bFlagged = (pTasks->IsTaskFlagged(hTask, true) ? TRUE : FALSE);
 			
 			// Trackable attributes
 			CStringArray aValues;
@@ -3226,14 +3227,14 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM lp)
 
 	if (pKI)
 	{
-		LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKFLAG, dwTaskID, !pKI->bFlag);
+		LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKFLAG, dwTaskID, !pKI->bFlagged);
 
 		if (lr && m_data.HasItem(dwTaskID))
 		{
 			KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 			ASSERT(pKI);
 
-			pKI->bFlag = !pKI->bFlag;
+			pKI->bFlagged = !pKI->bFlagged;
 
 			if (m_pSelectedColumn)
 				m_pSelectedColumn->Invalidate();
@@ -3246,6 +3247,28 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM lp)
 
 	// else
 	ASSERT(0);
+	return 0L;
+}
+
+LRESULT CKanbanCtrl::OnColumnToggleTaskPin(WPARAM /*wp*/, LPARAM lp)
+{
+	ASSERT(!m_bReadOnly);
+	ASSERT(lp);
+
+	KANBANITEM* pKI = m_data.GetItem(lp);
+	ASSERT(pKI);
+
+	if (pKI)
+	{
+		pKI->bPinned = !pKI->bPinned;
+
+		// Resort the selected column
+		ASSERT(m_pSelectedColumn);
+
+		if (m_pSelectedColumn)
+			m_pSelectedColumn->Sort(m_nSortBy, m_bSortAscending);
+	}
+
 	return 0L;
 }
 
