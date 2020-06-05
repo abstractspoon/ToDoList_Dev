@@ -2475,7 +2475,7 @@ int Misc::GetKeys(const CMapStringToString& map, CStringArray& aKeys)
 
 //////////////////////////////////////////////////////////////
 
-void Misc::MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith)
+CString& Misc::MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith)
 {
 	if (!IsQuoted(sText))
 	{
@@ -2489,9 +2489,11 @@ void Misc::MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith)
 		// wrap with quotes
 		sText = DBL_QUOTE + sText + DBL_QUOTE;
 	}
+
+	return sText;
 }
 
-void Misc::MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith)
+CString& Misc::MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith)
 {
 	if (IsQuoted(sText))
 	{
@@ -2504,6 +2506,8 @@ void Misc::MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith)
 			sText.Replace(szEscapedQuote, DBL_QUOTE);
 		}
 	}
+
+	return sText;
 }
 
 CString Misc::GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith)

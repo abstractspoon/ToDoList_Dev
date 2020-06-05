@@ -22,13 +22,16 @@ public:
 	
 	// caller is responsible for clean up
 	static HICON ExtractIcon(LPCTSTR szFilePath, BOOL bLargeIcon = FALSE);
+	static HICON ExtractUnknownFileTypeIcon(BOOL bLargeIcon = FALSE);
 	static BOOL GetImage(LPCTSTR szFilePath, CBitmap& bmp, COLORREF crBkgnd, BOOL bLargeIcon = FALSE);
 
 	static int GetIndex(LPCTSTR szFilePath, BOOL bLargeIcon = FALSE);
 	static int GetFolderIndex(BOOL bLargeIcon = FALSE);
+	static int GetUnknownFileTypeIndex(BOOL bLargeIcon = FALSE);
 
-	static BOOL Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon = FALSE, UINT nStyle = ILD_TRANSPARENT);
+	static BOOL Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon = FALSE, UINT nStyle = ILD_TRANSPARENT, BOOL bFailIfUnknownType = FALSE);
 	static BOOL DrawFolder(CDC* pDC, POINT pt, BOOL bLargeIcon = FALSE, UINT nStyle = ILD_TRANSPARENT);
+
 	
 protected:
 	static BOOL Initialise(BOOL bReInit = FALSE);

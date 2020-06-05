@@ -6,6 +6,7 @@
 #include "FileRegister.h"
 #include "regkey.h"
 #include "Filemisc.h"
+#include "misc.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -187,41 +188,26 @@ BOOL CFileRegister::IsRegisteredAppInstalled(LPCTSTR szExt)
 	return FileMisc::FileExists(sRegAppPath);
 }
 
+HICON CFileRegister::GetRegisteredIcon(LPCTSTR szExt, BOOL bLargeIcon)
+{
+	CString sAppPath = GetRegisteredAppEntry(szExt, _T("DefaultIcon")), sIconIndex;
+
+	Misc::Split(sAppPath, sIconIndex, ',');
+	Misc::MakeUnquoted(sAppPath, FALSE);
+
+	HICON hIcon = NULL;
+
+	if (bLargeIcon)
+		VERIFY(ExtractIconEx(sAppPath, _ttoi(sIconIndex), &hIcon, NULL, 1));
+	else
+		VERIFY(ExtractIconEx(sAppPath, _ttoi(sIconIndex), NULL, &hIcon, 1));
+
+	return hIcon;
+}
+
 CString CFileRegister::GetRegisteredAppPath(LPCTSTR szExt, BOOL bFilenameOnly)
 {
-	CString sExt;
-	
-	if (FileMisc::IsPath(szExt))
-		sExt = FileMisc::GetExtension(szExt);
-	else
-		sExt = GetExtension(szExt);
-
-	ASSERT (sExt.IsEmpty() || (sExt[0] == '.'));
-
-	if (sExt.IsEmpty() || (sExt[0] != '.'))
-		return _T("");
-
-	CRegKey2 reg;
-	CString sEntry, sAppPath;
-
-	if (reg.Open(HKEY_CLASSES_ROOT, sExt, TRUE) == ERROR_SUCCESS)
-	{
-		reg.Read(_T(""), sEntry);
-
-		if (!sEntry.IsEmpty() && CRegKey2::KeyExists(HKEY_CLASSES_ROOT, sEntry))
-		{
-			reg.Close();
-
-			// app to open file
-			sEntry += _T("\\shell\\open\\command");
-			
-			if (reg.Open(HKEY_CLASSES_ROOT, sEntry, TRUE) == ERROR_SUCCESS)
-			{
-				reg.Read(_T(""), sAppPath);
-				sAppPath.TrimLeft();
-			}
-		}
-	}
+	CString sAppPath = GetRegisteredAppEntry(szExt, _T("shell\\open\\command"));
 
 	if (!sAppPath.IsEmpty())
 	{
@@ -247,6 +233,46 @@ CString CFileRegister::GetRegisteredAppPath(LPCTSTR szExt, BOOL bFilenameOnly)
 	}
 	
 	return sAppPath;
+}
+
+CString CFileRegister::GetRegisteredAppEntry(LPCTSTR szExt, LPCTSTR szRegKey)
+{
+	CString sExt;
+	
+	if (FileMisc::IsPath(szExt))
+		sExt = FileMisc::GetExtension(szExt);
+	else
+		sExt = GetExtension(szExt);
+
+	ASSERT (sExt.IsEmpty() || (sExt[0] == '.'));
+
+	if (sExt.IsEmpty() || (sExt[0] != '.'))
+		return _T("");
+
+	CRegKey2 reg;
+	CString sEntry, sAppEntry;
+
+	if (reg.Open(HKEY_CLASSES_ROOT, sExt, TRUE) == ERROR_SUCCESS)
+	{
+		reg.Read(_T(""), sEntry);
+
+		if (!sEntry.IsEmpty() && CRegKey2::KeyExists(HKEY_CLASSES_ROOT, sEntry))
+		{
+			reg.Close();
+
+			// app to open file
+			sEntry += '\\';
+			sEntry += szRegKey;
+			
+			if (reg.Open(HKEY_CLASSES_ROOT, sEntry, TRUE) == ERROR_SUCCESS)
+			{
+				reg.Read(_T(""), sAppEntry);
+				sAppEntry.TrimLeft();
+			}
+		}
+	}
+
+	return sAppEntry;
 }
 
 CString CFileRegister::GetExtension(LPCTSTR szExt)

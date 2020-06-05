@@ -20,6 +20,7 @@ public:
 
 	static BOOL IsRegisteredAppInstalled(LPCTSTR szExt);
 	static CString GetRegisteredAppPath(LPCTSTR szExt, BOOL bFilenameOnly = FALSE);
+	static HICON GetRegisteredIcon(LPCTSTR szExt, BOOL bLargeIcon = FALSE); // caller responsible for deleting
 	static BOOL IsRegisteredApp(LPCTSTR szExt, LPCTSTR szAppPath, BOOL bFilenameOnly = FALSE);
 
 protected:
@@ -28,6 +29,7 @@ protected:
 	CString m_sAppPath;
 
 	static CString GetExtension(LPCTSTR szExt);
+	static CString GetRegisteredAppEntry(LPCTSTR szExt, LPCTSTR szRegKey);
 };
 
 #endif // !defined(AFX_FILEREGISTER_H__67F5AB1F_4CE5_405C_A6F5_DE7B3802790A__INCLUDED_)

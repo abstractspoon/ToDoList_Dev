@@ -23,6 +23,10 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+static LPCTSTR UNKNOWNFILETYPE_EXTENSION = _T(".{E7CC2F59-37FD-42C9-B3B9-275C6F9B9DBA}");
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -31,12 +35,15 @@ int CFileIcons::GetImageSize(BOOL bLargeIcons)
 	return GraphicsMisc::ScaleByDPIFactor(bLargeIcons ? 32 : 16);
 }
 
-BOOL CFileIcons::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon, UINT nStyle)
+BOOL CFileIcons::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon, UINT nStyle, BOOL bFailIfUnknownType)
 {
 	HIMAGELIST hIL = NULL;
 	int nIndex = -1;
 	
 	if (!GetFileImage(szFilePath, bLargeIcon, hIL, nIndex))
+		return FALSE;
+
+	if (bFailIfUnknownType && (nIndex == GetUnknownFileTypeIndex(bLargeIcon)))
 		return FALSE;
 
 	return ImageList_Draw(hIL, nIndex, *pDC, pt.x, pt.y, nStyle);
@@ -71,7 +78,7 @@ BOOL CFileIcons::GetImage(LPCTSTR szFile, BOOL bLargeIcon, HIMAGELIST& hIL, int&
 
 	hIL = (HIMAGELIST)SHGetFileInfo(szFile, FILE_ATTRIBUTE_NORMAL, &sfi, sizeof(sfi), nFlags);
 	nIndex = sfi.iIcon;
-	
+
 	return (hIL && (nIndex != -1));
 }
 
@@ -189,6 +196,11 @@ HICON CFileIcons::ExtractIcon(LPCTSTR szFilePath, BOOL bLargeIcon)
 	return ImageList_GetIcon(hIL, nIndex, ILD_TRANSPARENT);
 }
 
+HICON CFileIcons::ExtractUnknownFileTypeIcon(BOOL bLargeIcon)
+{
+	return ExtractIcon(UNKNOWNFILETYPE_EXTENSION, bLargeIcon);
+}
+
 BOOL CFileIcons::GetImage(LPCTSTR szFilePath, CBitmap& bmp, COLORREF crBkgnd, BOOL bLargeIcon)
 {
 	HIMAGELIST hIL = NULL;
@@ -225,6 +237,24 @@ int CFileIcons::GetFolderIndex(BOOL bLargeIcon)
 		return nIndex;
 
 	return -1;
+}
+
+int CFileIcons::GetUnknownFileTypeIndex(BOOL bLargeIcon)
+{
+	static int nLargeIndex = -1, nSmallIndex = -1;
+
+	if (bLargeIcon)
+	{
+		if (nLargeIndex == -1)
+			nLargeIndex = GetIndex(UNKNOWNFILETYPE_EXTENSION, TRUE);
+	}
+	else
+	{
+		if (nSmallIndex == -1)
+			nSmallIndex = GetIndex(UNKNOWNFILETYPE_EXTENSION, FALSE);
+	}
+
+	return (bLargeIcon ? nLargeIndex : nSmallIndex);
 }
 
 HIMAGELIST CFileIcons::GetImageList(BOOL bLargeIcons) 

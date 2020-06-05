@@ -136,7 +136,6 @@ BOOL CIconCache::Draw(CDC* pDC, const CString& sName, POINT pt, UINT nStyle)
 		return m_ilImages.Draw(pDC, nImage, pt, nStyle);
 	}
 	
-	ASSERT(0);
 	return FALSE;
 }
 

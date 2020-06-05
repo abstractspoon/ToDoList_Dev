@@ -145,8 +145,8 @@ namespace Misc
 	int NaturalCompare(LPCTSTR szString1, LPCTSTR szString2, BOOL bSortEmptyBelow = FALSE);
 	BOOL LCMapString(CString& sText, DWORD dwMapFlags);
 
-	void MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith);
-	void MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith);
+	CString& MakeQuoted(CString& sText, TCHAR cEscapeEmbeddedQuotesWith);
+	CString& MakeUnquoted(CString& sText, TCHAR cUnescapeEmbeddedQuotesWith);
 	CString GetQuoted(LPCTSTR szText, TCHAR cEscapeEmbeddedQuotesWith);
 	BOOL IsQuoted(LPCTSTR szText);
 

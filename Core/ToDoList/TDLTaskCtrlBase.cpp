@@ -24,6 +24,7 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\FileIcons.h"
+#include "..\shared\FileRegister.h"
 
 #include "..\3rdparty\colordef.h"
 
@@ -3053,30 +3054,46 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 		if (TODOITEM::IsTaskLink(sFileRef, TRUE))
 		{
 			// draw our app icon 
-			if (m_imageIcons.HasIcon(APP_ICON) ||
-				m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE)))
-			{
-				m_imageIcons.Draw(pDC, APP_ICON, rIcon.TopLeft());
-			}
-		}
-		else
-		{
-			// get the associated image, failing if necessary
-			sFileRef.Remove('\"'); // remove double-quotes
-			FileMisc::MakeFullPath(sFileRef, m_sTasklistFolder);
+			if (!m_imageIcons.HasIcon(APP_ICON))
+				m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE));
 
-			if (m_imageIcons.HasIcon(sFileRef) ||
-				(CEnBitmap::IsSupportedImageFile(sFileRef) &&
-					FileMisc::PathExists(sFileRef) &&
-					m_imageIcons.Add(sFileRef, sFileRef)))
-			{
-				m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft());
-			}
-			else
-			{
-				CFileIcons::Draw(pDC, sFileRef, rIcon.TopLeft());
-			}
+			VERIFY(m_imageIcons.Draw(pDC, APP_ICON, rIcon.TopLeft()));
+			continue;
 		}
+
+		// else
+		FileMisc::MakeFullPath(Misc::MakeUnquoted(sFileRef, FALSE), m_sTasklistFolder);
+
+		// Render the associated image if possible
+		if (!m_imageIcons.HasIcon(sFileRef))
+		{
+			if (CEnBitmap::IsSupportedImageFile(sFileRef) && FileMisc::PathExists(sFileRef))
+				VERIFY(m_imageIcons.Add(sFileRef, sFileRef));
+		}
+
+		if (m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft()))
+			continue;
+
+		// else try default Windows image list, failing
+		// if Windows gives us the 'blank page' icon
+		if (CFileIcons::Draw(pDC, sFileRef, rIcon.TopLeft(), FALSE, ILD_TRANSPARENT, TRUE))
+			continue;
+
+		// else fall back on extracting the icon manually
+		CString sExt = FileMisc::GetExtension(sFileRef);
+
+		if (!m_imageIcons.HasIcon(sExt))
+		{
+			HICON hIcon = CFileRegister::GetRegisteredIcon(sExt);
+
+			// Make sure we don't ask twice during the same session
+			if (!hIcon)
+				hIcon = CFileIcons::ExtractUnknownFileTypeIcon();
+
+			VERIFY(m_imageIcons.Add(sExt, hIcon));
+		}
+
+		VERIFY(m_imageIcons.Draw(pDC, sExt, rIcon.TopLeft()));
 	}
 }
 
