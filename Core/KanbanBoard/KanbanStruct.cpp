@@ -759,6 +759,60 @@ DWORD CKanbanItemMap::GetNextKey(POSITION& pos)
 	return dwTaskID;
 }
 
+int CKanbanItemMap::GetPinnedItems(CDWordArray& aTaskIDs) const
+{
+	aTaskIDs.RemoveAll();
+
+	DWORD dwTaskID = 0;
+	KANBANITEM* pKI = NULL;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pKI);
+		ASSERT(pKI);
+
+		if (pKI->bPinned)
+			aTaskIDs.Add(dwTaskID);
+	}
+
+	return aTaskIDs.GetSize();
+}
+
+void CKanbanItemMap::SetPinnedItems(const CDWordArray& aTaskIDs, BOOL bReset)
+{
+	if (bReset)
+		ClearPinnedItems();
+
+	int nID = aTaskIDs.GetSize();
+
+	while (nID--)
+	{
+		// Note: task may not exist so we don't assert
+		KANBANITEM* pKI = GetItem(aTaskIDs[nID]);
+
+		if (pKI)
+			pKI->bPinned = TRUE;
+	}
+}
+
+void CKanbanItemMap::ClearPinnedItems()
+{
+	DWORD dwTaskID = 0;
+	KANBANITEM* pKI = NULL;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pKI);
+		ASSERT(pKI);
+
+		pKI->bPinned = FALSE;
+	}
+}
+
 int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const
 {
 	ASSERT(!Misc::IsEmpty(szAttribID));

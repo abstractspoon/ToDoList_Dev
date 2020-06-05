@@ -147,6 +147,10 @@ public:
 
 	void RemoveDeletedItems(const CDWordSet& mapCurIDs);
 	int BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const;
+
+	int GetPinnedItems(CDWordArray& aTaskIDs) const;
+	void SetPinnedItems(const CDWordArray& aTaskIDs, BOOL bReset = TRUE);
+	void ClearPinnedItems();
 		
 #ifdef _DEBUG
 	void TraceSummary(LPCTSTR szAttribID) const;
