@@ -57,6 +57,7 @@ const int SIZE_COMBO_WIDTH		= GraphicsMisc::ScaleByDPIFactor(48);
 const int COMBO_HEIGHT			= GraphicsMisc::ScaleByDPIFactor(256);
 const int COMBO_WIDTH			= GraphicsMisc::ScaleByDPIFactor(40);
 const int MIN_FONT_COMBO_WIDTH	= GraphicsMisc::ScaleByDPIFactor(60);
+const int IMAGE_WIDTH			= GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 // CRRECToolBar
@@ -446,8 +447,8 @@ LRESULT CRRECToolBar::OnButtonPostPaint(LPNMTBCUSTOMDRAW lpNMCustomDraw)
 			else
 				rColor.DeflateRect(2, 2);
 
-			rColor.top = rColor.bottom - 3;
-			rColor.right = rColor.left + m_sizeImage.cx;
+			rColor.top = rColor.bottom - GraphicsMisc::ScaleByDPIFactor(3);
+			rColor.right = rColor.left + IMAGE_WIDTH;
 
 			CDC* pDC = CDC::FromHandle(lpNMCustomDraw->nmcd.hdc);
 			COLORREF color = GetFontColor(nBtnID == ID_EDIT_TEXTCOLOR, TRUE);
