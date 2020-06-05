@@ -48,8 +48,7 @@ class CColourPopup : public CWnd
 public:
     CColourPopup();
     CColourPopup(CPoint p, COLORREF crColour, CWnd* pParentWnd, UINT nID = 0, 
-                 LPCTSTR szDefaultText = NULL, LPCTSTR szCustomText = NULL,
-				 BOOL bIgnoreFirstLBtnUp = FALSE);
+                 LPCTSTR szDefaultText = NULL, LPCTSTR szCustomText = NULL);
 	void Initialise();
 
 // Attributes
@@ -58,8 +57,7 @@ public:
 // Operations
 public:
     BOOL Create(CPoint p, COLORREF crColour, CWnd* pParentWnd, UINT nID = 0, 
-                LPCTSTR szDefaultText = NULL, LPCTSTR szCustomText = NULL,
-				BOOL bIgnoreFirstLBtnUp = FALSE);
+                LPCTSTR szDefaultText = NULL, LPCTSTR szCustomText = NULL);
 	void Cancel() { DestroyWindow(); }
 
 // Overrides
@@ -106,7 +104,6 @@ protected:
     CWnd*          m_pParent;
 	UINT		   m_nID;
 
-	BOOL		   m_bIgnoreFirstLBtnUp;
     BOOL           m_bChildWindowVisible;
 
     // Generated message map functions

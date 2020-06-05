@@ -420,7 +420,7 @@ void CRRECToolBar::OnColorDropDown(NMHDR* pNMHDR, LRESULT* pResult)
 			CEnString defaultText(STRING_DEFAULT), customText(STRING_CUSTOM);
 
 			new CColourPopupEx(CPoint(rButton.left, rButton.bottom), color, 
-							 this, nBtnID, defaultText, customText, TRUE);
+							 this, nBtnID, defaultText, customText);
 		}
 		break;
 	}

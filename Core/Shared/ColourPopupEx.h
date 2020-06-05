@@ -20,8 +20,7 @@ class CColourPopupEx : public CColourPopup, public CSubclasser
 public:
 	CColourPopupEx();
 	CColourPopupEx(CPoint p, COLORREF crColour, CWnd* pParentWnd, UINT nID = 0, 
-				LPCTSTR szDefaultText = NULL, LPCTSTR szCustomText = NULL,
-				BOOL bIgnoreFirstLBtnUp = FALSE);
+				LPCTSTR szDefaultText = NULL, LPCTSTR szCustomText = NULL);
 
 protected:
 	CSubclassWnd   m_scParent;

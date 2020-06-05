@@ -116,8 +116,7 @@ CColourPopup::CColourPopup()
 CColourPopup::CColourPopup(CPoint p, COLORREF crColour, CWnd* pParentWnd, 
 						   UINT nID /* = 0*/,
                            LPCTSTR szDefaultText /* = NULL */,
-                           LPCTSTR szCustomText  /* = NULL */,
-						   BOOL bIgnoreFirstLBtnUp/* = FALSE*/)
+                           LPCTSTR szCustomText  /* = NULL */)
 {
     Initialise();
 
@@ -126,7 +125,7 @@ CColourPopup::CColourPopup(CPoint p, COLORREF crColour, CWnd* pParentWnd,
     m_strDefaultText = (szDefaultText)? szDefaultText : _T("");
     m_strCustomText  = (szCustomText)?  szCustomText  : _T("");
 
-    Create(p, crColour, pParentWnd, nID, szDefaultText, szCustomText, bIgnoreFirstLBtnUp);
+    Create(p, crColour, pParentWnd, nID, szDefaultText, szCustomText);
 }
 
 void CColourPopup::Initialise()
@@ -144,8 +143,7 @@ void CColourPopup::Initialise()
     m_pParent           = NULL;
     m_crColour          = m_crInitialColour = RGB(0,0,0);
 
-	m_bIgnoreFirstLBtnUp = FALSE;
-    m_bChildWindowVisible = FALSE;
+	m_bChildWindowVisible = FALSE;
 
 	HDC	hdc = ::GetDC(NULL);
     m_nBoxSize          = ((18 * GetDeviceCaps(hdc, LOGPIXELSX)) / 96);
@@ -191,14 +189,12 @@ CColourPopup::~CColourPopup()
 BOOL CColourPopup::Create(CPoint p, COLORREF crColour, CWnd* pParentWnd,
 						  UINT nID /* = 0*/,
                           LPCTSTR szDefaultText /* = NULL */,
-                          LPCTSTR szCustomText  /* = NULL */,
-						  BOOL bIgnoreFirstLBtnUp/* = FALSE*/)
+                          LPCTSTR szCustomText  /* = NULL */)
 {
     ASSERT(pParentWnd && ::IsWindow(pParentWnd->GetSafeHwnd()));
 
     m_pParent  = pParentWnd;
     m_crColour = m_crInitialColour = crColour;
-	m_bIgnoreFirstLBtnUp = bIgnoreFirstLBtnUp;
 	m_nID = (nID != 0) ? nID : pParentWnd->GetDlgCtrlID();
 
     // Get the class name and create the window
@@ -505,12 +501,6 @@ void CColourPopup::OnMouseMove(UINT nFlags, CPoint point)
 void CColourPopup::OnLButtonUp(UINT nFlags, CPoint point) 
 {    
     CWnd::OnLButtonUp(nFlags, point);
-
-	if (m_bIgnoreFirstLBtnUp)
-	{
-		m_bIgnoreFirstLBtnUp = FALSE;
-		return;
-	}
 
     DWORD pos = GetMessagePos();
     point = CPoint(LOWORD(pos), HIWORD(pos));

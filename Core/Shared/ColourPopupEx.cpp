@@ -18,11 +18,11 @@ CColourPopupEx::CColourPopupEx()
 }
 
 CColourPopupEx::CColourPopupEx(CPoint p, COLORREF crColour, CWnd* pParentWnd, UINT nID, 
-	LPCTSTR szDefaultText, LPCTSTR szCustomText, BOOL bIgnoreFirstLBtnUp)
+	LPCTSTR szDefaultText, LPCTSTR szCustomText)
 	:
-	// Don't call parameterised base class constructor because it calls
-	// Create() and we're only partially constructed so our OnCreate()
-	// does not get called
+	// Don't call parameterised base class constructor because it doesn't 
+	// set m_pParent before calling Create() and we need it set so that
+	// we can hook the parent in OnCreate()
 	CColourPopup()
 {
 	// NOTE: CColorPopup() will have called Initialise()
@@ -32,7 +32,7 @@ CColourPopupEx::CColourPopupEx(CPoint p, COLORREF crColour, CWnd* pParentWnd, UI
 	m_strDefaultText = (szDefaultText)? szDefaultText : _T("");
 	m_strCustomText  = (szCustomText)?  szCustomText  : _T("");
 
-	Create(p, crColour, pParentWnd, nID, szDefaultText, szCustomText, bIgnoreFirstLBtnUp);
+	Create(p, crColour, pParentWnd, nID, szDefaultText, szCustomText);
 }
 
 CColourPopupEx::~CColourPopupEx()
