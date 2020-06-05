@@ -45,7 +45,6 @@
 #define IDD_KANBAN_DIALOG               16010
 #define IDC_CALCULATEMISSINGSTARTDATE   16012
 #define IDS_DISPLAY_FILEREF             16012
-#define IDB_FLAG                        16012
 #define IDC_CALCULATEMISSINGDUEDATE     16013
 #define IDB_CHECKBOXES                  16013
 #define IDS_DISPLAY_FILEREF_SHORT       16013
