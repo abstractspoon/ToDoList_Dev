@@ -2074,7 +2074,8 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 	{
 		CScopedLogTimer log(_T("FixupExampleTasklistsTaskDates"));
 
-		CString sExamples = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples")));
+		CString sExamples = FileMisc::GetAppResourceFolder(_T("Resources\\Examples"));
+		FileMisc::TerminatePath(sExamples);
 
 		CStringArray aExamples;
 		int nNumExamples = FileMisc::FindFiles(sExamples, aExamples, FALSE, _T("*.tdl"));

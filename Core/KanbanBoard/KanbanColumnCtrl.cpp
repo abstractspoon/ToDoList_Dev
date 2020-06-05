@@ -23,6 +23,8 @@
 #include "..\Shared\osversion.h"
 #include "..\Shared\themed.h"
 
+#include <math.h>
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE

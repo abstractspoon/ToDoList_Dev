@@ -146,30 +146,30 @@ int MyThes::thCleanup()
 
 int MyThes::Lookup(const char * pText, int len, mentry** pme)
 { 
-
+	
     *pme = NULL;
-
+	
     // handle the case of missing file or file related errors
     if (! pdfile) return 0;
-
+	
     long offset = 0;
-
+	
     /* copy search word and make sure null terminated */
     char * wrd = (char *) calloc(1,(len+1));
     memcpy(wrd,pText,len);
-  
+	
     /* find it in the list */
     int idx = binsearch(wrd,list,nw);
     free(wrd);  
     if (idx < 0) return 0;
-
+	
     // now seek to the offset
     offset = (long) offst[idx];
     int rc = fseek(pdfile,offset,SEEK_SET);
     if (rc) {
-       return 0;
+		return 0;
     }
-
+	
     // grab the count of the number of meanings
     // and allocate a list of meaning entries
     char * buf = NULL;
@@ -178,8 +178,8 @@ int MyThes::Lookup(const char * pText, int len, mentry** pme)
     readLine(pdfile, buf, (MAX_LN_LEN-1));
     int np = mystr_indexOfChar(buf,'|');
     if (np < 0) {
-         free(buf);
-         return 0;
+		free(buf);
+		return 0;
     }          
     int nmeanings = atoi(buf+np+1);
     *pme = (mentry*) malloc( nmeanings * sizeof(mentry) );
@@ -187,28 +187,28 @@ int MyThes::Lookup(const char * pText, int len, mentry** pme)
         free(buf);
         return 0;
     }
-
+	
     // now read in each meaning and parse it to get defn, count and synonym lists
     mentry* pm = *(pme);
     char dfn[MAX_WD_LEN];
-
+	
     for (int j = 0; j < nmeanings; j++) {
         readLine(pdfile, buf, (MAX_LN_LEN-1));
-
+		
         pm->count = 0;
         pm->psyns = NULL;
         pm->defn = NULL;
-
+		
         // store away the part of speech for later use
         char * p = buf;
         char * pos = NULL;
         np = mystr_indexOfChar(p,'|');
         if (np >= 0) {
-           *(buf+np) = '\0';
-	   pos = mystrdup(p);
-           p = p + np + 1;
-	} else {
-          pos = mystrdup("");
+			*(buf+np) = '\0';
+			pos = mystrdup(p);
+			p = p + np + 1;
+		} else {
+			pos = mystrdup("");
         }
         
         // count the number of fields in the remaining line
@@ -216,43 +216,43 @@ int MyThes::Lookup(const char * pText, int len, mentry** pme)
         char * d = p;
         np = mystr_indexOfChar(d,'|');        
         while ( np >= 0 ) {
-	  nf++;
-          d = d + np + 1;
-          np = mystr_indexOfChar(d,'|');          
-	}
-	pm->count = nf;
+			nf++;
+			d = d + np + 1;
+			np = mystr_indexOfChar(d,'|');          
+		}
+		pm->count = nf;
         pm->psyns = (char **) malloc(nf*sizeof(char*)); 
         
         // fill in the synonym list
         d = p;
-        for (int k = 0; k < nf; k++) {
+        for (int s = 0; s < nf; s++) {
             np = mystr_indexOfChar(d,'|');
             if (np > 0) {
-	      *(d+np) = '\0';
-              pm->psyns[k] = mystrdup(d);
-              d = d + np + 1;
+				*(d+np) = '\0';
+				pm->psyns[s] = mystrdup(d);
+				d = d + np + 1;
             } else {
-              pm->psyns[k] = mystrdup(d);
-	    }            
+				pm->psyns[s] = mystrdup(d);
+			}            
         }
-
+		
         // add pos to first synonym to create the definition
         int k = strlen(pos);
         int m = strlen(pm->psyns[0]);
         if ((k+m) < (MAX_WD_LEN - 1)) {
-             safestrncpy(dfn, MAX_WD_LEN,pos,k);
-             *(dfn+k) = ' ';
-             safestrncpy((dfn+k+1), MAX_WD_LEN - (k+1),(pm->psyns[0]),m+1);
-             pm->defn = mystrdup(dfn);
-	} else {
-	     pm->defn = mystrdup(pm->psyns[0]);
-	}
+			safestrncpy(dfn, MAX_WD_LEN,pos,k);
+			*(dfn+k) = ' ';
+			safestrncpy((dfn+k+1), MAX_WD_LEN - (k+1),(pm->psyns[0]),m+1);
+			pm->defn = mystrdup(dfn);
+		} else {
+			pm->defn = mystrdup(pm->psyns[0]);
+		}
         free(pos);
         pm++;
-
+		
     }
     free(buf);
-   
+	
     return nmeanings;
 } 
 
