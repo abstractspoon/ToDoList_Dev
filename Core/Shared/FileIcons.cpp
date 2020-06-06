@@ -10,6 +10,7 @@
 #include "misc.h"
 #include "graphicsmisc.h"
 #include "enbitmap.h"
+#include "fileregister.h"
 
 #include "..\3rdParty\ShellIcons.h"
 
@@ -24,6 +25,11 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+CIconCache CFileIcons::s_fallbackBig(32, 32);
+CIconCache CFileIcons::s_fallbackSmall(16, 16);
+
+//////////////////////////////////////////////////////////////////////
+
 static LPCTSTR UNKNOWNFILETYPE_EXTENSION = _T(".{E7CC2F59-37FD-42C9-B3B9-275C6F9B9DBA}");
 
 //////////////////////////////////////////////////////////////////////
@@ -35,7 +41,7 @@ int CFileIcons::GetImageSize(BOOL bLargeIcons)
 	return GraphicsMisc::ScaleByDPIFactor(bLargeIcons ? 32 : 16);
 }
 
-BOOL CFileIcons::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon, UINT nStyle, BOOL bFailIfUnknownType)
+BOOL CFileIcons::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon, UINT nStyle)
 {
 	HIMAGELIST hIL = NULL;
 	int nIndex = -1;
@@ -43,8 +49,28 @@ BOOL CFileIcons::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon, U
 	if (!GetFileImage(szFilePath, bLargeIcon, hIL, nIndex))
 		return FALSE;
 
-	if (bFailIfUnknownType && (nIndex == GetUnknownFileTypeIndex(bLargeIcon)))
-		return FALSE;
+	if (nIndex == GetUnknownFileTypeIndex(bLargeIcon))
+	{
+		// Sometimes the Windows shell returns an unknown
+		// file type even though there is a registered app
+		// so we fall back by quizzing the registry directly
+		CString sExt = FileMisc::GetExtension(szFilePath);
+
+		if (!FallbackCache(bLargeIcon).HasIcon(sExt))
+		{
+			HICON hIcon = CFileRegister::GetRegisteredIcon(sExt, bLargeIcon);
+
+			// Make sure we don't ask twice during the same session
+			if (!hIcon)
+				hIcon = ExtractUnknownFileTypeIcon();
+
+			VERIFY(FallbackCache(bLargeIcon).Add(sExt, hIcon));
+		}
+
+		// This should always work
+		VERIFY(FallbackCache(bLargeIcon).Draw(pDC, sExt, pt, nStyle));
+		return TRUE;
+	}
 
 	return ImageList_Draw(hIL, nIndex, *pDC, pt.x, pt.y, nStyle);
 }
@@ -294,6 +320,9 @@ BOOL CFileIcons::Initialise(BOOL bReInit)
 
 		if (pfnFileIconInit)
 			bInitialised = pfnFileIconInit(TRUE);
+
+		s_fallbackBig.Clear();
+		s_fallbackSmall.Clear();
 	}
 	
 	return bInitialised;

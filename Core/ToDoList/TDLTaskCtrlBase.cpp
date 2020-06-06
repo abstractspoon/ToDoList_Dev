@@ -3058,42 +3058,21 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 				m_imageIcons.Add(APP_ICON, GraphicsMisc::GetAppWindowIcon(FALSE));
 
 			VERIFY(m_imageIcons.Draw(pDC, APP_ICON, rIcon.TopLeft()));
-			continue;
 		}
-
-		// else
-		FileMisc::MakeFullPath(Misc::MakeUnquoted(sFileRef, FALSE), m_sTasklistFolder);
-
-		// Render the associated image if possible
-		if (!m_imageIcons.HasIcon(sFileRef))
+		else
 		{
-			if (CEnBitmap::IsSupportedImageFile(sFileRef) && FileMisc::PathExists(sFileRef))
-				VERIFY(m_imageIcons.Add(sFileRef, sFileRef));
+			FileMisc::MakeFullPath(Misc::MakeUnquoted(sFileRef, FALSE), m_sTasklistFolder);
+
+			// Render the associated image if possible
+			if (!m_imageIcons.HasIcon(sFileRef))
+			{
+				if (CEnBitmap::IsSupportedImageFile(sFileRef) && FileMisc::PathExists(sFileRef))
+					VERIFY(m_imageIcons.Add(sFileRef, sFileRef));
+			}
+
+			if (!m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft()))
+				CFileIcons::Draw(pDC, sFileRef, rIcon.TopLeft());
 		}
-
-		if (m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft()))
-			continue;
-
-		// else try default Windows image list, failing
-		// if Windows gives us the 'blank page' icon
-		if (CFileIcons::Draw(pDC, sFileRef, rIcon.TopLeft(), FALSE, ILD_TRANSPARENT, TRUE))
-			continue;
-
-		// else fall back on extracting the icon manually
-		CString sExt = FileMisc::GetExtension(sFileRef);
-
-		if (!m_imageIcons.HasIcon(sExt))
-		{
-			HICON hIcon = CFileRegister::GetRegisteredIcon(sExt);
-
-			// Make sure we don't ask twice during the same session
-			if (!hIcon)
-				hIcon = CFileIcons::ExtractUnknownFileTypeIcon();
-
-			VERIFY(m_imageIcons.Add(sExt, hIcon));
-		}
-
-		VERIFY(m_imageIcons.Draw(pDC, sExt, rIcon.TopLeft()));
 	}
 }
 
