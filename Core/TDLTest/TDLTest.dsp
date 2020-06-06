@@ -108,6 +108,10 @@ SOURCE=.\ImportExportMgrTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\PreferencesTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\RemapMenuIDsTest.cpp
 # End Source File
 # Begin Source File
@@ -163,6 +167,10 @@ SOURCE=.\FileMiscTest.h
 # Begin Source File
 
 SOURCE=.\ImportExportMgrTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\PreferencesTest.h
 # End Source File
 # Begin Source File
 
