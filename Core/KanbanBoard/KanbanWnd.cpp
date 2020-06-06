@@ -222,6 +222,7 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 
 	// Preferences
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
+	m_ctrlKanban.SavePreferences(pPrefs, szKey);
 }
 
 /*
@@ -326,7 +327,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	m_ctrlKanban.SetOptions(dwOptions);
 	
 	// Default attribute values
-	m_ctrlKanban.LoadDefaultAttributeListValues(pPrefs);
+	m_ctrlKanban.LoadPreferences(pPrefs, szKey, bAppOnly);
 
 	// Kanban specific options
 	if (!bAppOnly)

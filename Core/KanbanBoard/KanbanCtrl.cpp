@@ -676,6 +676,10 @@ BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
 
 BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 {
+	// Preserve pinned items
+	if (!m_aPrevPinnedTasks.GetSize())
+		m_data.GetPinnedItems(m_aPrevPinnedTasks);
+	
 	// Rebuild global attribute value lists
 	m_mapAttributeValues.RemoveAll();
 	m_aCustomAttribDefs.RemoveAll();
@@ -685,7 +689,13 @@ BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 	// Rebuild data
 	m_data.RemoveAll();
 
-	return AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE);
+	if (!AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE))
+		return FALSE;
+
+	m_data.SetPinnedItems(m_aPrevPinnedTasks, FALSE);
+	m_aPrevPinnedTasks.RemoveAll();
+
+	return TRUE;
 }
 
 BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings)
@@ -1229,6 +1239,30 @@ int CKanbanCtrl::GetAttributeValues(CKanbanAttributeValueMap& mapValues) const
 	return mapValues.GetCount();
 }
 
+void CKanbanCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly)
+{
+	LoadDefaultAttributeListValues(pPrefs);
+
+	if (!bAppOnly)
+	{
+		CString sPinned = pPrefs->GetProfileString(szKey, _T("PinnedTasks"));
+		Misc::Split(sPinned, m_aPrevPinnedTasks, ',');
+	}
+
+	if (m_nTrackAttribute != TDCA_NONE)
+		RebuildColumns(FALSE, FALSE);
+}
+
+void CKanbanCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
+{
+	CDWordArray aPinnedTasks;
+	
+	if (m_data.GetPinnedItems(aPinnedTasks))
+		pPrefs->WriteProfileString(szKey, _T("PinnedTasks"), Misc::FormatArray(aPinnedTasks, ','));
+	else
+		pPrefs->DeleteProfileEntry(szKey, _T("PinnedTasks"));
+}
+
 void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs)
 {
 	m_mapGlobalAttributeValues.RemoveAll();
@@ -1239,9 +1273,6 @@ void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs)
 	LoadDefaultAttributeListValues(pPrefs, _T("CATEGORY"),	_T("CategoryList"));
 	LoadDefaultAttributeListValues(pPrefs, _T("VERSION"),	_T("VersionList"));
 	LoadDefaultAttributeListValues(pPrefs, _T("TAGS"),		_T("TagList"));
-
-	if (m_nTrackAttribute != TDCA_NONE)
-		RebuildColumns(FALSE, FALSE);
 }
 
 void CKanbanCtrl::LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey)

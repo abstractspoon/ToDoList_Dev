@@ -72,7 +72,6 @@ public:
 
 	int GetTaskTrackedAttributeValues(DWORD dwTaskID, CStringArray& aValues) const;
 	int GetAttributeValues(TDC_ATTRIBUTE nAttrib, CStringArray& aValues) const;
-	void LoadDefaultAttributeListValues(const IPreferences* pPrefs);
 	BOOL TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID, const CKanbanColumnArray& aColumnDefs);
 	TDC_ATTRIBUTE GetTrackedAttribute() const { return m_nTrackAttribute; }
 	TDC_ATTRIBUTE GetTrackedAttribute(CString& sCustomAttrib) const;
@@ -82,6 +81,9 @@ public:
 
 	BOOL WantSortUpdate(TDC_ATTRIBUTE nAttribute) const;
 	BOOL WantEditUpdate(TDC_ATTRIBUTE nAttribute) const;
+
+	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly);
+	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
 protected:
 	BOOL m_bReadOnly;
@@ -96,6 +98,7 @@ protected:
 	TDC_ATTRIBUTE m_nTrackAttribute, m_nSortBy;
 	CString m_sTrackAttribID;
 	CDWordArray m_aPriorityColors;
+	CDWordArray m_aPrevPinnedTasks;
 	CFontCache m_fonts;
 
 	CKanbanColumnCtrl* m_pSelectedColumn;
@@ -190,6 +193,7 @@ protected:
 	BOOL IsTracking(const CString& sAttribID) const;
 	BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const;
 	BOOL UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const;
+	void LoadDefaultAttributeListValues(const IPreferences* pPrefs);
 
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	BOOL RebuildData(const ITASKLISTBASE* pTasks);
