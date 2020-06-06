@@ -2544,38 +2544,32 @@ struct TDCCOLEDITVISIBILITY
 	{
 		pPrefs->WriteProfileInt(szKey, _T("ShowAttributes"), nShowFields);
 
-		CString sKey;
-		
-		sKey.Format(_T("%s\\ColumnVisibility"), szKey);
-		mapVisibleColumns.Save(pPrefs, sKey, _T("Col%d"));
+		mapVisibleColumns.Save(pPrefs, Misc::MakeKey(_T("%s\\ColumnVisibility"), szKey));
 
 		if (nShowFields == TDLSA_ANY)
-		{
-			sKey.Format(_T("%s\\EditVisibility"), szKey);
-			mapVisibleEdits.Save(pPrefs, sKey, _T("Edit%d"));
-		}
+			mapVisibleEdits.Save(pPrefs, Misc::MakeKey(_T("%s\\EditVisibility"), szKey));
 	}
 
 	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey)
 	{
-		nShowFields = (TDL_SHOWATTRIB)pPrefs->GetProfileInt(szKey, _T("ShowAttributes"));
+		nShowFields = (TDL_SHOWATTRIB)pPrefs->GetProfileInt(szKey, _T("ShowAttributes"), TDLSA_ASCOLUMN);
 
 		// columns
-		CString sKey;
-		sKey.Format(_T("%s\\ColumnVisibility"), szKey);
+		CString sKey = Misc::MakeKey(_T("%s\\ColumnVisibility"), szKey);
 
-		int nCol = pPrefs->GetProfileInt(sKey, _T("Count"), -1);
-
-		if (nCol == -1)
+		if (!mapVisibleColumns.Load(pPrefs, sKey) && 
+			!mapVisibleColumns.LegacyLoad(pPrefs, sKey, _T("Col%d")))
+		{
 			return FALSE; // old version OR first time
+		}
 
 		// else
-		mapVisibleColumns.Load(pPrefs, sKey, _T("Col%d"));
-
 		if (nShowFields == TDLSA_ANY)
 		{
-			sKey.Format(_T("%s\\EditVisibility"), szKey);
-			mapVisibleEdits.Load(pPrefs, sKey, _T("Edit%d"));
+			sKey = Misc::MakeKey(_T("%s\\EditVisibility"), szKey);
+
+			if (!mapVisibleEdits.Load(pPrefs, sKey))
+				mapVisibleEdits.LegacyLoad(pPrefs, sKey, _T("Edit%d"));
 		}
 		else
 		{
@@ -2727,7 +2721,7 @@ protected:
 		
 		return mapAttrib.GetCount();
 	}
-	
+
 };
 
 struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
@@ -2888,11 +2882,7 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 		TDCCOLEDITVISIBILITY::Save(pPrefs, szKey);
 
 		if (nShowFields == TDLSA_ANY)
-		{
-			CString sKey;
-			sKey.Format(_T("%s\\FilterVisibility"), szKey);
-			mapVisibleFilters.Save(pPrefs, sKey, _T("Filter%d"));
-		}
+			mapVisibleFilters.Save(pPrefs, Misc::MakeKey(_T("%s\\FilterVisibility"), szKey));
 	}
 
 	BOOL Load(const IPreferences* pPrefs, LPCTSTR szKey)
@@ -2902,9 +2892,10 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 
 		if (nShowFields == TDLSA_ANY)
 		{
-			CString sKey;
-			sKey.Format(_T("%s\\FilterVisibility"), szKey);
-			mapVisibleFilters.Load(pPrefs, sKey, _T("Filter%d"));
+			CString sKey = Misc::MakeKey(_T("%s\\FilterVisibility"), szKey);
+
+			if (!mapVisibleFilters.Load(pPrefs, sKey))
+				mapVisibleFilters.LegacyLoad(pPrefs, sKey, _T("Filter%d"));
 		}
 		else
 		{

@@ -7,6 +7,7 @@
 #include "..\Shared\mapex.h"
 
 #include "..\Interfaces\IEnums.h"
+#include "..\Interfaces\Preferences.h"
 
 #include <afxtempl.h>
 
@@ -22,40 +23,54 @@ class CTDCBaseEnumSet : public CSet<T>
 public:
 	~CTDCBaseEnumSet() {}
 
-protected:
-	CTDCBaseEnumSet() {}
-
-public:
-	void Save(IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt) const
+	void Save(IPreferences* pPrefs, LPCTSTR szSection, BOOL bPreDeleteSection = TRUE) const
 	{
-		pPrefs->WriteProfileInt(szKey, _T("Count"), GetCount());
+		if (bPreDeleteSection)
+			pPrefs->DeleteProfileSection(szSection);
 
-		POSITION pos = GetStartPosition();
-		int nItem = 0;
+		CArray<T, T&> aEnums;
+		CopyTo(aEnums);
 
-		while (pos)
-		{
-			CString sValueKey = Misc::MakeKey(szValueKeyFmt, nItem++);
-			T t = GetNext(pos);
-
-			pPrefs->WriteProfileInt(szKey, sValueKey, t);
-		}
+		CString sItems = Misc::FormatArrayT(aEnums, _T("%d"), '|');
+		pPrefs->WriteProfileString(szSection, _T("Items"), sItems);
 	}
 
-	void Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt, T tNone) 
+	int Load(const IPreferences* pPrefs, LPCTSTR szSection) 
 	{
 		RemoveAll();
 
-		int nItem = pPrefs->GetProfileInt(szKey, _T("Count"));
+		CString sItems = pPrefs->GetProfileString(szSection, _T("Items"));
+
+		CDWordArray aEnums;
+		int nItem = Misc::Split(sItems, aEnums, '|');
+
+		while (nItem--)
+			Add((T)aEnums[nItem]);
+
+		return GetCount();
+	}
+
+	int LegacyLoad(const IPreferences* pPrefs, LPCTSTR szSection, LPCTSTR szValueKeyFmt)
+	{
+		RemoveAll();
+
+		int nItem = pPrefs->GetProfileInt(szSection, _T("Count"));
+		T tDef = GetDefaultValue();
 
 		while (nItem--)
 		{
 			CString sValueKey = Misc::MakeKey(szValueKeyFmt, nItem);
-			T t = (T)pPrefs->GetProfileInt(szKey, sValueKey, tNone);
-
-			Add(t);
+			Add((T)pPrefs->GetProfileInt(szSection, sValueKey, tDef));
 		}
+
+		return GetCount();
 	}
+
+protected:
+	CTDCBaseEnumSet() {}
+
+protected:
+	virtual T GetDefaultValue() = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -71,11 +86,11 @@ public:
 	BOOL Add(TDC_ATTRIBUTE nAttrib);
 	int Append(const CTDCAttributeMap& other);
 
-	void Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
-
 	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttrib);
 
 protected:
+	TDC_ATTRIBUTE GetDefaultValue() { return TDCA_NONE; }
+
 	BOOL CanAdd(TDC_ATTRIBUTE nAttrib) const;
 };
 
@@ -105,9 +120,11 @@ public:
 	CTDCColumnIDMap(const CTDCColumnIDMap& mapOther);
 	~CTDCColumnIDMap();
 
-	void Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt);
 	BOOL Has(TDC_COLUMN nColID) const;
 	TDC_COLUMN GetFirst() const;
+
+protected:
+	TDC_COLUMN GetDefaultValue() { return TDCC_NONE; }
 };
 
 //////////////////////////////////////////////////////////////////////

@@ -161,11 +161,6 @@ BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib);
 }
 
-void CTDCAttributeMap::Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
-{
-	CTDCBaseEnumSet<TDC_ATTRIBUTE>::Load(pPrefs, szKey, szValueKeyFmt, TDCA_NONE);
-}
-
 //////////////////////////////////////////////////////////////////////
 
 CTDCAttributeArray::CTDCAttributeArray()
@@ -221,12 +216,6 @@ CTDCColumnIDMap::CTDCColumnIDMap(const CTDCColumnIDMap& mapOther)
 
 CTDCColumnIDMap::~CTDCColumnIDMap()
 {
-}
-
-
-void CTDCColumnIDMap::Load(const IPreferences* pPrefs, LPCTSTR szKey, LPCTSTR szValueKeyFmt)
-{
-	CTDCBaseEnumSet<TDC_COLUMN>::Load(pPrefs, szKey, szValueKeyFmt, TDCC_NONE);
 }
 
 BOOL CTDCColumnIDMap::Has(TDC_COLUMN nColID) const

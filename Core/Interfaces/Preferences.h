@@ -87,14 +87,14 @@ public:
 	BOOL DeleteProfileEntry(LPCTSTR lpszSection, LPCTSTR lpszEntry);
 
 	int GetProfileArray(LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty = FALSE) const;
-	void WriteProfileArray(LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection = TRUE);
+	void WriteProfileArray(LPCTSTR lpszSection, const CStringArray& aItems, BOOL bPreDeleteSection = TRUE);
 	int GetProfileArray(LPCTSTR lpszSection, CDWordArray& aItems) const;
-	void WriteProfileArray(LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection = TRUE);
+	void WriteProfileArray(LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bPreDeleteSection = TRUE);
 	
 	static int GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CStringArray& aItems, BOOL bAllowEmpty = FALSE);
-	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection = TRUE);
+	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CStringArray& aItems, BOOL bPreDeleteSection = TRUE);
 	static int GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CDWordArray& aItems);
-	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection = TRUE);
+	static void WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bPreDeleteSection = TRUE);
 		
 	static CString KeyFromFile(LPCTSTR szFilePath, BOOL bFilenameOnly = TRUE);
 

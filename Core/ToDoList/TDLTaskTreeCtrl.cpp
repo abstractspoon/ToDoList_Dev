@@ -245,21 +245,16 @@ int CTDLTaskTreeCtrl::GetExpandedTasks(CDWordArray& aExpanded, HTREEITEM hti) co
 {
 	int nStart = 0;
 	
-	if (hti == NULL)
+	if (hti)
 	{
-		// guesstimate initial size
-		aExpanded.SetSize(0, m_tcTasks.GetCount() / 4);
-	}
-	else if (TCH().IsItemExpanded(hti) <= 0)
-	{
-		return 0; // nothing added
-	}
-	else // expanded
-	{
+		if (TCH().IsItemExpanded(hti) <= 0)
+			return 0; // nothing added
+
+		// else expanded
 		nStart = aExpanded.GetSize();
 		aExpanded.Add(GetTaskID(hti));
 	}
-	
+
 	// process children
 	HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
 	
@@ -2633,22 +2628,16 @@ void CTDLTaskTreeCtrl::SaveState(CPreferences& prefs, const CString& sKey, BOOL 
 	if (!bExpandedOnly)
 		CTDLTaskCtrlBase::SaveState(prefs, sKey);
 	
-	// ignore this if we have no tasks
+	// Don't overwrite previous state if we have no tasks
 	if (GetItemCount() == 0)
 		return;
 	
 	if (!sKey.IsEmpty())
 	{
-		CString sExpKey(sKey + _T("\\ExpandedItems"));
+		CDWordArray aExpanded;
+		GetExpandedTasks(aExpanded);
 
-		// remove previous expanded state
-		prefs.DeleteProfileSection(sExpKey);
-		
-		// save items themselves
-		int nCount = SaveTreeExpandedState(prefs, sExpKey, NULL, 0);
-		
-		// save expanded count
-		prefs.WriteProfileInt(sExpKey, _T("Count"), nCount);
+		prefs.WriteProfileArray(sKey + _T("\\ExpandedItems"), aExpanded);
 		
 		// and selected item
 		prefs.WriteProfileInt(sKey, _T("SelItem"), GetSelectedTaskID());
@@ -2660,49 +2649,14 @@ HTREEITEM CTDLTaskTreeCtrl::LoadState(const CPreferences& prefs, const CString& 
 	if (!bExpandedOnly)
 		CTDLTaskCtrlBase::LoadState(prefs, sKey);
 
-	CString sExpKey(sKey + _T("\\ExpandedItems"));
-	int nCount = prefs.GetProfileInt(sExpKey, _T("Count"), 0);
-	
 	CDWordArray aExpanded;
 	
-	for (int nItem = 0; nItem < nCount; nItem++)
-	{
-		CString sItem = Misc::MakeKey(_T("Item%d"), nItem);
-		DWORD dwTaskID = (DWORD)prefs.GetProfileInt(sExpKey, sItem, 0);
-		
-		aExpanded.Add(dwTaskID);
-	}
-	
-	SetExpandedTasks(aExpanded);
+	if (prefs.GetProfileArray(sKey + _T("\\ExpandedItems"), aExpanded))
+		SetExpandedTasks(aExpanded);
 	
 	// restore prev selected item
 	DWORD dwSel = prefs.GetProfileInt(sKey, _T("SelItem"), 0);
 	return GetItem(dwSel);
-}
-
-int CTDLTaskTreeCtrl::SaveTreeExpandedState(CPreferences& prefs, const CString& sKey, 
-									 HTREEITEM hti, int nStart) const
-{
-	HTREEITEM htiChild = m_tcTasks.GetChildItem(hti);
-	int nCount = nStart;
-	
-	while (htiChild)
-	{
-		if (TCH().IsItemExpanded(htiChild) > 0)
-		{
-			CString sItem = Misc::MakeKey(_T("Item%d"), nCount);
-			
-			prefs.WriteProfileInt(sKey, sItem, (int)GetTaskID(htiChild));
-			nCount++;
-			
-			// now its children
-			nCount += SaveTreeExpandedState(prefs, sKey, htiChild, nCount);
-		}
-		
-		htiChild = m_tcTasks.GetNextItem(htiChild, TVGN_NEXT);
-	}	
-	
-	return (nCount - nStart);
 }
 
 void CTDLTaskTreeCtrl::SetTasksImageList(HIMAGELIST hil, BOOL bState, BOOL bOn)

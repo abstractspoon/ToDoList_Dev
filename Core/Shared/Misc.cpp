@@ -403,13 +403,6 @@ CString Misc::FormatArray(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmp
 	return sText;
 }
 
-CString Misc::FormatArray(const CDWordArray& array, TCHAR cSep)
-{
-	TCHAR szSep[2] = { cSep, 0 };
-
-	return FormatArray(array, szSep);
-}
-
 CString Misc::FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDelim, int nStart, BOOL bNumberBlankLines)
 {
 	ASSERT(szDelim);
@@ -433,30 +426,14 @@ CString Misc::FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDel
 	return sList;
 }
 
-CString Misc::FormatArray(const CDWordArray& aValues, LPCTSTR szSep)
+CString Misc::FormatArray(const CDWordArray& aValues, TCHAR cSep)
 {
-	int nValue = aValues.GetSize();
-
-	if (nValue == 0)
-		return _T("");
-
-	CStringArray aItems;
-	FormatArray(aValues, _T("%ld"), aItems);
-
-	return FormatArray(aItems, szSep);
+	return FormatArrayT(aValues, _T("%ld"), cSep);
 }
 
-int Misc::FormatArray(const CDWordArray& aSrc, LPCTSTR lpszFormat, CStringArray& aDest)
+CString Misc::FormatArray(const CDWordArray& aValues, LPCTSTR szSep)
 {
-	ASSERT(AfxIsValidString(lpszFormat));
-
-	int nSrc = aSrc.GetSize();
-	aDest.SetSize(nSrc);
-
-	while (nSrc--)
-		aDest[nSrc] = Format(lpszFormat, aSrc[nSrc]);
-
-	return aDest.GetSize();
+	return FormatArrayT(aValues, _T("%ld"), szSep);
 }
 
 #ifdef _DEBUG

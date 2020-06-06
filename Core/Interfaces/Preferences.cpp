@@ -545,15 +545,15 @@ int CPreferences::GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSectio
 	return aItems.GetSize();
 }
 
-void CPreferences::WriteProfileArray(LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection)
+void CPreferences::WriteProfileArray(LPCTSTR lpszSection, const CStringArray& aItems, BOOL bPreDeleteSection)
 {
-	WriteProfileArray(&m_iPrefs, lpszSection, aItems, bDelSection);
+	WriteProfileArray(&m_iPrefs, lpszSection, aItems, bPreDeleteSection);
 }
 
-void CPreferences::WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CStringArray& aItems, BOOL bDelSection)
+void CPreferences::WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CStringArray& aItems, BOOL bPreDeleteSection)
 {
 	// pre-delete?
-	if (bDelSection)
+	if (bPreDeleteSection)
 		pPrefs->DeleteProfileSection(lpszSection);
 
 	int nCount = aItems.GetSize();
@@ -578,43 +578,53 @@ int CPreferences::GetProfileArray(LPCTSTR lpszSection, CDWordArray& aItems) cons
 int CPreferences::GetProfileArray(const IPreferences* pPrefs, LPCTSTR lpszSection, CDWordArray& aItems)
 {
 	aItems.RemoveAll();
-	int nCount = pPrefs->GetProfileInt(lpszSection, _T("ItemCount"), 0);
-	
-	// items
-	for (int nItem = 0; nItem < nCount; nItem++)
-	{
-		CString sItemKey, sItem;
 
-		sItemKey.Format(_T("Item%d"), nItem);
-		aItems.Add(pPrefs->GetProfileInt(lpszSection, sItemKey));
+	CString sItems = pPrefs->GetProfileString(lpszSection, _T("Items"));
+
+	if (!Misc::Split(sItems, aItems, '|'))
+	{
+		// backwards compatibility
+		int nCount = pPrefs->GetProfileInt(lpszSection, _T("ItemCount"), 0);
+	
+		// items
+		for (int nItem = 0; nItem < nCount; nItem++)
+		{
+			CString sItemKey, sItem;
+
+			sItemKey.Format(_T("Item%d"), nItem);
+			aItems.Add(pPrefs->GetProfileInt(lpszSection, sItemKey));
+		}
 	}
 	
 	return aItems.GetSize();
 }
 
-void CPreferences::WriteProfileArray(LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection)
+void CPreferences::WriteProfileArray(LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bPreDeleteSection)
 {
-	WriteProfileArray(&m_iPrefs, lpszSection, aItems, bDelSection);
+	WriteProfileArray(&m_iPrefs, lpszSection, aItems, bPreDeleteSection);
 }
 
-void CPreferences::WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bDelSection)
+void CPreferences::WriteProfileArray(IPreferences* pPrefs, LPCTSTR lpszSection, const CDWordArray& aItems, BOOL bPreDeleteSection)
 {
-	// pre-delete?
-	if (bDelSection)
-		pPrefs->DeleteProfileSection(lpszSection);
-
-	int nCount = aItems.GetSize();
-	
-	// items
-	for (int nItem = 0; nItem < nCount; nItem++)
+	if (bPreDeleteSection)
 	{
-		CString sItemKey;
-		sItemKey.Format(_T("Item%d"), nItem);
-		pPrefs->WriteProfileInt(lpszSection, sItemKey, (int)aItems[nItem]);
+		pPrefs->DeleteProfileSection(lpszSection);
 	}
-	
-	// item count
-	pPrefs->WriteProfileInt(lpszSection, _T("ItemCount"), nCount);
+	else
+	{
+		// Cleanup old format
+		int nItem = pPrefs->GetProfileInt(lpszSection, _T("ItemCount"), -1);
+
+		if (nItem >= 0)
+		{
+			while (nItem--)
+				pPrefs->DeleteProfileEntry(lpszSection, Misc::MakeKey(_T("Item%d"), nItem));
+
+			pPrefs->DeleteProfileEntry(lpszSection, _T("ItemCount"));
+		}
+	}
+
+	pPrefs->WriteProfileString(lpszSection, _T("Items"), Misc::FormatArray(aItems, '|'));
 }
 
 // THIS IS AN INTERNAL METHOD THAT ASSUMES CALLERS HAVE INITIALISED A LOCK ALREADY

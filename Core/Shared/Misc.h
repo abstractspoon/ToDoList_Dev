@@ -97,19 +97,18 @@ namespace Misc
 	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
 	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
 
-	CString GetLongestItem(const CStringArray& array);
-	int GetMaximumItemLength(const CStringArray& array);
-	int GetFormattedLength(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
-	int GetFormattedLength(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty = FALSE);
+	CString GetLongestItem(const CStringArray& aValues);
+	int GetMaximumItemLength(const CStringArray& aValues);
+	int GetFormattedLength(const CStringArray& aValues, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
+	int GetFormattedLength(const CStringArray& aValues, TCHAR cSep, BOOL bIncEmpty = FALSE);
 
-	const CString& GetItem(const CStringArray& array, int nItem);
+	const CString& GetItem(const CStringArray& aValues, int nItem);
 
-	CString FormatArray(const CDWordArray& array, LPCTSTR szSep = NULL);
-	CString FormatArray(const CDWordArray& array, TCHAR cSep);
-	CString FormatArray(const CStringArray& array, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
-	CString FormatArray(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty = FALSE);
-	CString FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDelim = _T(". "), int nStart = 1, BOOL bNumberBlankLines = FALSE);
-	int FormatArray(const CDWordArray& aSrc, LPCTSTR lpszFormat, CStringArray& aDest);
+	CString FormatArray(const CDWordArray& aValues, LPCTSTR szSep = NULL);
+	CString FormatArray(const CDWordArray& aValues, TCHAR cSep);
+	CString FormatArray(const CStringArray& aValues, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
+	CString FormatArray(const CStringArray& aValues, TCHAR cSep, BOOL bIncEmpty = FALSE);
+	CString FormatArrayAsNumberedList(const CStringArray& aValues, LPCTSTR szDelim = _T(". "), int nStart = 1, BOOL bNumberBlankLines = FALSE);
 
 	int Split(const CString& sText, CDWordArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE);
 	int Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE);
@@ -123,8 +122,8 @@ namespace Misc
 
 	typedef int (*SORTPROC)(const void* pV1, const void* pV2);
 
-	void SortArray(CStringArray& array, SORTPROC pSortProc = NULL);
-	void SortArray(CDWordArray& array, SORTPROC pSortProc = NULL);
+	void SortArray(CStringArray& aValues, SORTPROC pSortProc = NULL);
+	void SortArray(CDWordArray& aValues, SORTPROC pSortProc = NULL);
 
 	int Copy(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
 	int Append(const CMapStringToString& mapSrc, CMapStringToString& mapDest);
@@ -178,8 +177,8 @@ namespace Misc
 	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE);
 	int Find(TCHAR cSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE, int iStart = 0);
 	int Find(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE, int iStart = 0);
-	int Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
-	BOOL Contains(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
+	int Find(LPCTSTR szItem, const CStringArray& aValues, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
+	BOOL Contains(LPCTSTR szItem, const CStringArray& aValues, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 
 	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CString& sSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
 	int Replace(const CString& sSearchFor, const CString& sReplaceWith, CStringArray& aSearchIn, BOOL bCaseSensitive = FALSE, BOOL bWholeWord = FALSE);
@@ -236,7 +235,7 @@ namespace Misc
 	CString MakeKey(const CString& sFormat, LPCTSTR szKeyVal, LPCTSTR szParentKey = NULL);
 
 #ifdef _DEBUG
-	void Trace(const CStringArray& array);
+	void Trace(const CStringArray& aValues);
 #endif
 }
 
@@ -288,11 +287,11 @@ namespace Misc
 	int RemoveItemsT(const CArray<T, T&>& aItems, CArray<T, T&>& aFrom)
 	{
 		int nRemoved = 0; // counter
-		int nItem = array.GetSize();
+		int nItem = aValues.GetSize();
 
 		while (nItem--)
 		{
-			const T& item = GetItemT(array, nItem);
+			const T& item = GetItemT(aValues, nItem);
 
 			if (RemoveItemT(item, aFrom))
 				nRemoved++;
@@ -302,56 +301,56 @@ namespace Misc
 	}
 
 	template <class T> 
-	const T& GetItemT(const CArray<T, T&>& array, int nItem)
+	const T& GetItemT(const CArray<T, T&>& aValues, int nItem)
 	{
-		ASSERT(nItem >= 0 && nItem < array.GetSize());
+		ASSERT(nItem >= 0 && nItem < aValues.GetSize());
 		
-		if (nItem < 0 || nItem >= array.GetSize())
+		if (nItem < 0 || nItem >= aValues.GetSize())
 		{
 			static T dummy;
 			return dummy;
 		}
 		
-		return array.GetData()[nItem];
+		return aValues.GetData()[nItem];
 	}
 
 	template <class T, class S> 
-	BOOL AddUniqueItemT(S item, T& array)
+	BOOL AddUniqueItemT(S item, T& aValues)
 	{
-		if (FindT(item, array) != -1)
+		if (FindT(item, aValues) != -1)
 			return FALSE;
 
-		array.Add(item);
+		aValues.Add(item);
 		return TRUE;
 	}
 
 	template <class T, class S>
-	BOOL RemoveItemT(const S& item, T& array)
+	BOOL RemoveItemT(const S& item, T& aValues)
 	{
-		int nFind = FindT(item, array);
+		int nFind = FindT(item, aValues);
 
 		if (nFind == -1)
 			return FALSE;
 
-		array.RemoveAt(nFind);
+		aValues.RemoveAt(nFind);
 		return TRUE;
 	}
 	
 /*
 	template <class T> 
-	T IncrementItemT(CArray<T, T&>& array, int nItem)
+	T IncrementItemT(CArray<T, T&>& aValues, int nItem)
 	{
 		ASSERT(nItem >= 0);
 		
 		if (nItem < 0)
 			return;
 
-		if (nItem >= array.GetSize())
-			array.SetSize(nItem + 1);
+		if (nItem >= aValues.GetSize())
+			aValues.SetSize(nItem + 1);
 
-		array[nItem] += 1;
+		aValues[nItem] += 1;
 
-		return array[nItem];
+		return aValues[nItem];
 	}
 */
 
@@ -382,10 +381,10 @@ namespace Misc
 	}
 
 	template <class T, class S> 
-	int FindT(const S& toFind, const T& array)
+	int FindT(const S& toFind, const T& aValues)
 	{
-		int nItem = array.GetSize();
-		const S* pData = array.GetData();
+		int nItem = aValues.GetSize();
+		const S* pData = aValues.GetData();
 
 		while (nItem--)
 		{
@@ -398,42 +397,42 @@ namespace Misc
 	}
 	
 	template <class T, class S> 
-	int HasT(const S& toFind, const T& array)
+	int HasT(const S& toFind, const T& aValues)
 	{
-		return (FindT<T, S>(toFind, array) != -1);
+		return (FindT<T, S>(toFind, aValues) != -1);
 	}
 
 
 	template <class T> 
-	BOOL RemoveLastT(T& array)
+	BOOL RemoveLastT(T& aValues)
 	{
-		if (!array.GetSize())
+		if (!aValues.GetSize())
 		{
 			ASSERT(0);
 			return FALSE;
 		}
 
-		array.RemoveAt(array.GetSize() - 1);
+		aValues.RemoveAt(aValues.GetSize() - 1);
 		return TRUE;
 	}
 		
 	template <class T, class S> 
-	BOOL ReplaceLastT(T& array, const S& val)
+	BOOL ReplaceLastT(T& aValues, const S& val)
 	{
-		if (!array.GetSize())
+		if (!aValues.GetSize())
 		{
 			ASSERT(0);
 			return FALSE;
 		}
 		
-		array[array.GetSize() - 1] = val;
+		aValues[aValues.GetSize() - 1] = val;
 		return TRUE;
 	}
 	
 	template <class T> 
-	void SortArrayT(CArray<T, T&>& array, SORTPROC pSortProc)
+	void SortArrayT(CArray<T, T&>& aValues, SORTPROC pSortProc)
 	{
-		qsort(array.GetData(), array.GetSize(), sizeof(T), pSortProc);
+		qsort(aValues.GetData(), aValues.GetSize(), sizeof(T), pSortProc);
 	}
 
 	template <class S, class T>
@@ -582,6 +581,43 @@ namespace Misc
 
 		return nNumDigits;
 	}
+
+	template <class T>
+	int FormatArrayT(const T& aSrc, LPCTSTR lpszFormat, CStringArray& aDest)
+	{
+		ASSERT(AfxIsValidString(lpszFormat));
+
+		int nSrc = aSrc.GetSize();
+		aDest.SetSize(nSrc);
+
+		while (nSrc--)
+			aDest[nSrc] = Format(lpszFormat, aSrc[nSrc]);
+
+		return aDest.GetSize();
+	}
+
+	template <class T>
+	CString FormatArrayT(const T& aValues, LPCTSTR lpszFormat, LPCTSTR szSep = NULL)
+	{
+		int nValue = aValues.GetSize();
+
+		if (nValue == 0)
+			return _T("");
+
+		CStringArray aItems;
+		FormatArrayT(aValues, lpszFormat, aItems);
+
+		return FormatArray(aItems, szSep);
+	}
+
+	template <class T>
+	CString FormatArrayT(const T& aValues, LPCTSTR lpszFormat, TCHAR cSep)
+	{
+		TCHAR szSep[2] = { cSep, 0 };
+
+		return FormatArrayT(aValues, lpszFormat, szSep);
+	}
+
 
 }
 
