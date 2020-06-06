@@ -159,11 +159,6 @@ public:
 			Add(other.GetNext(pos));
 	}
 	
-	int CopyFrom(const CArray<KEY, KEY&>& other)
-	{
-		return CopyFrom(other.GetData(), other.GetSize());
-	}
-
 	template <class ARRAY>
 	int CopyFrom(const ARRAY& other)
 	{
@@ -187,11 +182,6 @@ public:
 		return GetCount();
 	}
 
-	int CopyTo(CArray<KEY, KEY&>& other) const
-	{
-		CopyTo(other);
-	}
-
 	template <class ARRAY>
 	int CopyTo(ARRAY& other) const
 	{
@@ -199,7 +189,10 @@ public:
 		POSITION pos = GetStartPosition();
 
 		while (pos)
-			other.Add(GetNext(pos));
+		{
+			KEY val = GetNext(pos);
+			other.Add(val);
+		}
 
 		return other.GetSize();
 	}
