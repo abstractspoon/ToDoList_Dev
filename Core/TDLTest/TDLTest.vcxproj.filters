@@ -37,6 +37,9 @@
     <ClCompile Include="RemapMenuIDsTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PreferencesTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImportExportMgrTest.h">
@@ -79,6 +82,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RemapMenuIDsTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreferencesTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

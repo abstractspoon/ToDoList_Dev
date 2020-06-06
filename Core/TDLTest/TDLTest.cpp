@@ -7,6 +7,7 @@
 #include "DateHelperTest.h"
 #include "FileMiscTest.h"
 #include "ImportExportMgrTest.h"
+#include "PreferencesTest.h"
 #include "RemapMenuIDsTest.h"
 #include "TaskFileTest.h"
 #include "TDCRecurrenceTest.h"
@@ -75,6 +76,7 @@ void DoTests(const CTestUtils& utils)
 	res += CDateHelperTest(utils).Run();
 	res += CFileMiscTest(utils).Run();
 	res += CImportExportMgrTest(utils).Run();
+	res += CPreferencesTest(utils).Run();
 	res += CRemapMenuIDsTest(utils).Run();
 	res += CTaskFileTest(utils).Run();
 	res += CTDCRECURRENCETest(utils).Run();
