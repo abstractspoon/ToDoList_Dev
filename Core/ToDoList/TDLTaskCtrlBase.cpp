@@ -24,7 +24,6 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\FileIcons.h"
-#include "..\shared\FileRegister.h"
 
 #include "..\3rdparty\colordef.h"
 
