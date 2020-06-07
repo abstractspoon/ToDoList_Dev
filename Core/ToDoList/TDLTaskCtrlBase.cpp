@@ -5274,7 +5274,7 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 		
 	case TDCC_ID:
 		{
-			DWORD dwRefID = m_find.GetLargestReferenceID(bVisibleTasksOnly);
+			DWORD dwRefID = (IsTreeList() ? m_find.GetLargestReferenceID(TRUE) : 0);
 			nColWidth = GraphicsMisc::GetTextWidth(pDC, m_formatter.GetID(m_dwNextUniqueTaskID - 1, dwRefID));
 		}
 		break; 
