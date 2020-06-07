@@ -183,7 +183,7 @@ BOOL CFileIcons::GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, HIMAGELIST& h
 				VERIFY(GetImage(sExt, bLargeIcon, hIL, nIndex));
 			}
 
-			if ((nIndex == -1) && (sFName.IsEmpty() || sExt.IsEmpty()))
+			if (((nIndex == -1) && sFName.IsEmpty()) || sExt.IsEmpty())
 			{
 				// else assume it's a folder unless it looks like a file
 				VERIFY(GetFolderImage(bLargeIcon, hIL, nIndex));
