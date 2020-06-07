@@ -40,7 +40,8 @@ struct INISECTION
 	CString sSection;
 	CIniEntryMap aEntries;
 };
-typedef CArray<INISECTION*, INISECTION*> CIniSectionArray;
+typedef CMap<CString, LPCTSTR, INISECTION*, INISECTION*&> CIniSectionMap;
+typedef CArray<INISECTION*, INISECTION*&> CIniSectionArray; // For sorting
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -99,7 +100,7 @@ public:
 	static CString KeyFromFile(LPCTSTR szFilePath, BOOL bFilenameOnly = TRUE);
 
 protected:
-	static CIniSectionArray s_aIni;
+	static CIniSectionMap s_mapSections;
 	static BOOL s_bDirty;
 	static BOOL s_bIni;
 	static CString s_sPrefsPath;
@@ -113,20 +114,22 @@ protected:
 protected:
 	// internal helpers that require pre-locking
 	static BOOL SaveInternal();
-	static void Release(CIniSectionArray& aSections);
+	static void Release(CIniSectionMap& mapSections);
+
+	static int GetSortedSections(CIniSectionArray& aSections);
+	static int SectionSortProc(const void* pV1, const void* pV2);
 
 	static CString GetIniString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszDefault);
 	static BOOL WriteIniString(LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue, BOOL bQuoted);
 	
 	static INISECTION* GetSection(LPCTSTR lpszSection, BOOL bCreateNotExist);
-	static int FindSection(LPCTSTR lpszSection, BOOL bIncSubSections = FALSE);
 	
 	static BOOL GetEntryValue(const INISECTION& section, LPCTSTR lpszEntry, CString& sValue);
 	static void SetEntryValue(INISECTION& section, LPCTSTR lpszEntry, LPCTSTR szValue, BOOL bQuoted);
 	static void SetEntryValue(INISECTION& section, const INIENTRY& ie);
 
-	static void Copy(const CIniSectionArray& aSrc, CIniSectionArray& aDest);
-	static BOOL Load(LPCTSTR szFilePath, CIniSectionArray& aSections);
+	static void Copy(const CIniSectionMap& mapSrc, CIniSectionMap& mapDest);
+	static BOOL Load(LPCTSTR szFilePath, CIniSectionMap& mapSections);
 
 private:
 	class CIPreferencesImpl : public IPreferences

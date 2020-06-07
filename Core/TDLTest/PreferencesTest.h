@@ -26,7 +26,8 @@ public:
 	TESTRESULT Run();
 
 protected:
-	void TestLookupPerformance();
+	void TestArrayPerformance();
+	void TestSectionPerformance();
 
 protected:
 	static void InitArray(CDWordArray& aItems, int nSize);

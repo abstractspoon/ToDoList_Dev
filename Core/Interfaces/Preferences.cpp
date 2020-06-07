@@ -77,7 +77,7 @@ static CString NULLSTR;
 
 //////////////////////////////////////////////////////////////////////
 
-CIniSectionArray	CPreferences::s_aIni;
+CIniSectionMap		CPreferences::s_mapSections;
 BOOL				CPreferences::s_bDirty = FALSE;
 BOOL				CPreferences::s_bIni = FALSE;
 CString				CPreferences::s_sPrefsPath;
@@ -123,13 +123,13 @@ CPreferences::CPreferences() : m_iPrefs(*this)
 			if (FileMisc::FileExists(sBackupPath))
 				FileMisc::MoveFile(sBackupPath, s_sPrefsPath, TRUE, TRUE);
 
-			CIniSectionArray aItems;
+			CIniSectionMap mapItems;
 
-			if (Load(s_sPrefsPath, aItems))
+			if (Load(s_sPrefsPath, mapItems))
 			{
-				Release(s_aIni);
-				Copy(aItems, s_aIni);
-				Release(aItems);
+				Release(s_mapSections);
+				Copy(mapItems, s_mapSections);
+				Release(mapItems);
 			}
 		}
 
@@ -165,7 +165,7 @@ void CPreferences::Release()
 			
 	if (s_bIni)
 	{
-		Release(s_aIni);
+		Release(s_mapSections);
 	}
 	else
 	{
@@ -174,17 +174,23 @@ void CPreferences::Release()
 	}
 }
 
-void CPreferences::Release(CIniSectionArray& aSections)
+void CPreferences::Release(CIniSectionMap& mapSections)
 {
 	ASSERT(s_nRef == 0);
 	ASSERT(s_bLocked);
 
-	int nSection = aSections.GetSize();
+	CString sUnused;
+	INISECTION* pSection;
 
-	while (nSection--)
-		delete aSections[nSection];
+	POSITION pos = mapSections.GetStartPosition();
 
-	aSections.RemoveAll();
+	while (pos)
+	{
+		mapSections.GetNextAssoc(pos, sUnused, pSection);
+		delete pSection;
+	}
+
+	mapSections.RemoveAll();
 }
 
 BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
@@ -207,15 +213,15 @@ BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
 		}
 
 		if (!bIni)
-			Release(s_aIni);
+			Release(s_mapSections);
 	}
 
 	// Must be able to load the 'new' prefs
 	if (bIni && FileMisc::FileExists(szPrefsPath))
 	{
-		CIniSectionArray aItems;
+		CIniSectionMap mapItems;
 
-		if (!Load(szPrefsPath, aItems))
+		if (!Load(szPrefsPath, mapItems))
 		{
 			ASSERT(0);
 			return FALSE;
@@ -223,8 +229,8 @@ BOOL CPreferences::Initialise(LPCTSTR szPrefsPath, BOOL bIni)
 		else
 		{
 			// Take a copy in case next time we can't load the file
-			Copy(aItems, s_aIni);
-			Release(aItems);
+			Copy(mapItems, s_mapSections);
+			Release(mapItems);
 		}
 	}
 
@@ -242,7 +248,7 @@ BOOL CPreferences::IsInitialised()
 
 BOOL CPreferences::IsEmpty()
 {
-	return (s_aIni.GetSize() == 0);
+	return (s_mapSections.GetCount() == 0);
 }
 
 CString CPreferences::GetPath(BOOL bFriendly)
@@ -291,10 +297,13 @@ BOOL CPreferences::SaveInternal()
 	// time the prefs file is open is as short as possible
 	CString sPrefsContents;
 	
-	for (int nSection = 0; nSection < s_aIni.GetSize(); nSection++)
+	CIniSectionArray aSections;
+	int nNumSection = GetSortedSections(aSections);
+
+	for (int nSection = 0; nSection < nNumSection; nSection++)
 	{
 		// write section line
-		INISECTION* pSection = s_aIni[nSection];
+		const INISECTION* pSection = aSections[nSection];
 		
 		CString sLine;
 		sLine.Format(_T("[%s]%s"), pSection->sSection, ENDL);
@@ -344,6 +353,40 @@ BOOL CPreferences::SaveInternal()
 	s_bDirty = FALSE;
 
 	return TRUE;
+}
+
+int CPreferences::GetSortedSections(CIniSectionArray& aSections)
+{
+	ASSERT(s_bLocked);
+	ASSERT(s_bIni);
+
+	if (!s_bLocked)
+		return 0;
+
+	aSections.RemoveAll();
+
+	CString sUnused;
+	INISECTION* pSection;
+	POSITION pos = s_mapSections.GetStartPosition();
+
+	while (pos)
+	{
+		s_mapSections.GetNextAssoc(pos, sUnused, pSection);
+		aSections.Add(pSection);
+	}
+
+	Misc::SortArrayT<INISECTION*>(aSections, SectionSortProc);
+	return aSections.GetSize();
+}
+
+int CPreferences::SectionSortProc(const void* pV1, const void* pV2)
+{
+	typedef INISECTION* PSECTION;
+
+	const PSECTION* pS1 = (PSECTION*)pV1;
+	const PSECTION* pS2 = (PSECTION*)pV2;
+
+	return Misc::NaturalCompare((*pS1)->sSection, (*pS2)->sSection);
 }
 
 UINT CPreferences::GetProfileInt(LPCTSTR lpszSection, LPCTSTR lpszEntry, int nDefault) const
@@ -635,12 +678,9 @@ BOOL CPreferences::GetEntryValue(const INISECTION& section, LPCTSTR lpszEntry, C
 	
 	if (s_bIni && s_bLocked)
 	{
-		CString sKey(lpszEntry);
-		sKey.MakeUpper();
-		
 		INIENTRY ie;
 		
-		if (section.aEntries.Lookup(sKey, ie))
+		if (section.aEntries.Lookup(Misc::ToUpper(lpszEntry), ie))
 		{
 			sValue = ie.sValue;
 			return TRUE;
@@ -665,8 +705,7 @@ void CPreferences::SetEntryValue(INISECTION& section, const INIENTRY& ie)
 	if (s_bIni && s_bLocked)
 	{
 		INIENTRY ieExist;
-		CString sKey(ie.sName);
-		sKey.MakeUpper();
+		CString sKey = Misc::ToUpper(ie.sName);
 
 		if (!section.aEntries.Lookup(sKey, ieExist) || !(ie == ieExist))
 		{
@@ -684,65 +723,25 @@ INISECTION* CPreferences::GetSection(LPCTSTR lpszSection, BOOL bCreateNotExist)
 
 	if (s_bIni && s_bLocked)
 	{
-		int nSection = FindSection(lpszSection);
+		CString sSectionKey = (Misc::ToUpper(lpszSection));
+		INISECTION* pSection = NULL;
 
-		if (nSection != -1)
-			return s_aIni[nSection];
-		
-		// add a new section
-		if (bCreateNotExist)
+		if (s_mapSections.Lookup(sSectionKey, pSection))
 		{
-			INISECTION* pSection = new INISECTION(lpszSection);
-			
-			s_aIni.Add(pSection);
-			return pSection;
+			ASSERT(pSection);
 		}
+		else if (bCreateNotExist)
+		{
+			// add a new section
+			pSection = new INISECTION(lpszSection);
+			s_mapSections[sSectionKey] = pSection;
+		}
+
+		return pSection;
 	}
 	
 	// else
 	return NULL;
-}
-
-// THIS IS AN INTERNAL METHOD THAT ASSUMES CALLERS HAVE INITIALISED A LOCK ALREADY
-int CPreferences::FindSection(LPCTSTR lpszSection, BOOL bIncSubSections)
-{
-	ASSERT(s_bIni);
-	ASSERT(s_bLocked);
-
-	if (s_bIni && s_bLocked)
-	{
-		int nLenSection = lstrlen(lpszSection);
-		int nSection = s_aIni.GetSize();
-		
-		while (nSection--)
-		{
-			const CString& sSection = s_aIni[nSection]->sSection;
-
-			if (sSection.GetLength() < nLenSection)
-			{
-				continue;
-			}
-			else if (sSection.GetLength() == nLenSection)
-			{
-				if (sSection.CompareNoCase(lpszSection) == 0)
-					return nSection;
-			}
-			else // sSection.GetLength() > nLenSection
-			{
-				if (bIncSubSections)
-				{
-					// look for parent section at head of subsection
-					CString sTest = sSection.Left(nLenSection);
-
-					if (sTest.CompareNoCase(lpszSection) == 0)
-						return nSection;
-				}
-			}
-		}
-	}
-
-	// not found
-	return -1;
 }
 
 BOOL CPreferences::DeleteProfileSection(LPCTSTR lpszSection, BOOL bIncSubSections)
@@ -756,26 +755,34 @@ BOOL CPreferences::DeleteProfileSection(LPCTSTR lpszSection, BOOL bIncSubSection
 		// for the duration of this function
 		LOCKPREFSRET(FALSE);
 		
-		int nSection = FindSection(lpszSection);
+		INISECTION* pSection = GetSection(lpszSection, FALSE);
 		 
-		if (nSection != -1)
+		if (pSection)
 		{
-			delete s_aIni[nSection];
-			s_aIni.RemoveAt(nSection);
-			s_bDirty = TRUE;
-			
+			CString sSectionKey = Misc::ToUpper(lpszSection);
+
+			s_mapSections.RemoveKey(sSectionKey);
+			delete pSection;
+
 			if (bIncSubSections)
 			{
-				nSection = FindSection(lpszSection, TRUE);
+				CString sSubSectionKey;
+				POSITION pos = s_mapSections.GetStartPosition();
 
-				while (nSection != -1)
+				while (pos)
 				{
-					delete s_aIni[nSection];
-					s_aIni.RemoveAt(nSection);
-					nSection = FindSection(lpszSection, TRUE);
-				} 
+					s_mapSections.GetNextAssoc(pos, sSubSectionKey, pSection);
+
+					// look for parent section at head of subsection
+					if (sSubSectionKey.Find(sSectionKey) == 0)
+					{
+						s_mapSections.RemoveKey(sSubSectionKey);
+						delete pSection;
+					}
+				}
 			}
 
+			s_bDirty = TRUE;
 			return TRUE;
 		}
 
@@ -806,12 +813,9 @@ BOOL CPreferences::DeleteProfileEntry(LPCTSTR lpszSection, LPCTSTR lpszEntry)
 
 		if (pSection)
 		{
-			CString sKey(lpszEntry);
-			sKey.MakeUpper();
+			pSection->aEntries.RemoveKey(Misc::ToUpper(lpszEntry));
 
-			pSection->aEntries.RemoveKey(sKey);
 			s_bDirty = TRUE;
-
 			return TRUE;
 		}
 
@@ -860,11 +864,19 @@ int CPreferences::GetProfileSectionNames(CStringArray& aSections)
 
 	if (s_bIni)
 	{
-		int nSection = s_aIni.GetSize();
-		aSections.SetSize(nSection);
-		
-		while (nSection--)
-			aSections[nSection] = s_aIni[nSection]->sSection;
+		aSections.RemoveAll();
+
+		CString sUnused;
+		INISECTION* pSection;
+		POSITION pos = s_mapSections.GetStartPosition();
+
+		while (pos)
+		{
+			s_mapSections.GetNextAssoc(pos, sUnused, pSection);
+			ASSERT(pSection);
+
+			aSections.Add(pSection->sSection);
+		}
 	}
 
 	return aSections.GetSize();
@@ -887,17 +899,24 @@ CString CPreferences::KeyFromFile(LPCTSTR szFilePath, BOOL bFileNameOnly)
 	return sKey;
 }
 
-void CPreferences::Copy(const CIniSectionArray& aSrc, CIniSectionArray& aDest)
+void CPreferences::Copy(const CIniSectionMap& mapSrc, CIniSectionMap& mapDest)
 {
-	ASSERT(aDest.GetSize() == 0);
+	ASSERT(mapDest.GetCount() == 0);
 
-	int nSection = aSrc.GetSize();
+	CString sSectionKey;
+	INISECTION* pSection;
+	POSITION pos = mapSrc.GetStartPosition();
 
-	while (nSection--)
-		aDest.Add(new INISECTION(*aSrc[nSection]));
+	while (pos)
+	{
+		mapSrc.GetNextAssoc(pos, sSectionKey, pSection);
+		mapDest[sSectionKey] = new INISECTION(*pSection);
+	}
+
+	ASSERT(mapDest.GetCount() == mapSrc.GetCount());
 }
 
-BOOL CPreferences::Load(LPCTSTR szFilePath, CIniSectionArray& aSections)
+BOOL CPreferences::Load(LPCTSTR szFilePath, CIniSectionMap& mapSections)
 {
 	// read the ini file
 	CStdioFileEx file;
@@ -919,13 +938,11 @@ BOOL CPreferences::Load(LPCTSTR szFilePath, CIniSectionArray& aSections)
 
 				// assume (for speed) that the section is already unique
 				pCurSection = new INISECTION(sLine);
-				aSections.Add(pCurSection);
-
-				ASSERT (pCurSection != NULL);
+				mapSections[Misc::ToUpper(pCurSection->sSection)] = pCurSection;
 			}
-			// else an entry
 			else if (pCurSection)
 			{
+				// else an entry
 				INIENTRY ie;
 
 				if (ie.Parse(sLine))

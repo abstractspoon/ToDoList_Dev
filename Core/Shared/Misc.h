@@ -284,7 +284,7 @@ namespace Misc
 	}
 
 	template <class T>
-	int RemoveItemsT(const CArray<T, T&>& aItems, CArray<T, T&>& aFrom)
+	int RemoveItemsT(const CArray<T, T&>& aValues, CArray<T, T&>& aFrom)
 	{
 		int nRemoved = 0; // counter
 		int nItem = aValues.GetSize();
@@ -591,7 +591,7 @@ namespace Misc
 		aDest.SetSize(nSrc);
 
 		while (nSrc--)
-			aDest[nSrc] = Format(lpszFormat, aSrc[nSrc]);
+			aDest[nSrc].Format(lpszFormat, aSrc[nSrc]);
 
 		return aDest.GetSize();
 	}

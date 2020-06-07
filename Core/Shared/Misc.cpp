@@ -364,21 +364,21 @@ CString Misc::GetListSeparator()
 	return sSep;
 }
 
-CString Misc::FormatArray(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty)
+CString Misc::FormatArray(const CStringArray& aValues, TCHAR cSep, BOOL bIncEmpty)
 {
 	TCHAR szSep[2] = { cSep, 0 };
 
-	return FormatArray(array, szSep, bIncEmpty);
+	return FormatArray(aValues, szSep, bIncEmpty);
 }
 
-CString Misc::FormatArray(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmpty)
+CString Misc::FormatArray(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncEmpty)
 {
-	int nCount = array.GetSize();
+	int nCount = aValues.GetSize();
 
 	switch (nCount)
 	{
 	case 0: return _T("");
-	case 1:	return array[0];
+	case 1:	return aValues[0];
 	}
 
 	// All else
@@ -387,32 +387,47 @@ CString Misc::FormatArray(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmp
 	if (sSep.IsEmpty())
 		sSep = GetListSeparator() + ' ';
 
-	for (int nItem = 0; nItem < nCount; nItem++)
-	{
-		const CString& sItem = GetItem(array, nItem);
+	// VC6 has very poor performance with big arrays
+	// So we do in-place copying to avoid concatenation
+	int nReqLen = GetFormattedLength(aValues, sSep, bIncEmpty);
 
-		if (bIncEmpty || !sItem.IsEmpty())
+	if (nReqLen > 0)
+	{
+		LPTSTR szBuffer = sText.GetBuffer(nReqLen);
+		
+		for (int nItem = 0; nItem < nCount; nItem++)
 		{
-			if (nItem > 0)
-				sText += sSep;
+			const CString& sItem = GetItem(aValues, nItem);
 			
-			sText += sItem;
+			if (bIncEmpty || !sItem.IsEmpty())
+			{
+				if (nItem > 0)
+				{
+					_tcscpy(szBuffer, sSep);
+					szBuffer += sSep.GetLength();
+				}
+				
+				_tcscpy(szBuffer, sItem);
+				szBuffer += sItem.GetLength();
+			}
 		}
+		
+		sText.ReleaseBuffer(nReqLen);
 	}
 
 	return sText;
 }
 
-CString Misc::FormatArrayAsNumberedList(const CStringArray& array, LPCTSTR szDelim, int nStart, BOOL bNumberBlankLines)
+CString Misc::FormatArrayAsNumberedList(const CStringArray& aValues, LPCTSTR szDelim, int nStart, BOOL bNumberBlankLines)
 {
 	ASSERT(szDelim);
 
-	int nCount = array.GetSize();
+	int nCount = aValues.GetSize();
 	CString sList, sItem, sNumbered;
 
 	for (int nItem = 0, nLine = nStart; nItem < nCount; nItem++)
 	{
-		sItem = GetItem(array, nItem);
+		sItem = GetItem(aValues, nItem);
 
 		if (bNumberBlankLines || !sItem.IsEmpty())
 		{
@@ -437,25 +452,25 @@ CString Misc::FormatArray(const CDWordArray& aValues, LPCTSTR szSep)
 }
 
 #ifdef _DEBUG
-void Misc::Trace(const CStringArray& array)
+void Misc::Trace(const CStringArray& aValues)
 {
-	int nCount = array.GetSize();
+	int nCount = aValues.GetSize();
 
 	for (int nItem = 0; nItem < nCount; nItem++)
-		TRACE(_T("%s, "), GetItem(array, nItem));
+		TRACE(_T("%s, "), GetItem(aValues, nItem));
 
 	TRACE(_T("\n"));
 }
 #endif
 
-CString Misc::GetLongestItem(const CStringArray& array)
+CString Misc::GetLongestItem(const CStringArray& aValues)
 {
 	CString sLongest;
-	int nItem = array.GetSize();
+	int nItem = aValues.GetSize();
 
 	while (nItem--)
 	{
-		const CString& sItem = GetItem(array, nItem);
+		const CString& sItem = GetItem(aValues, nItem);
 
 		if (sItem.GetLength() > sLongest.GetLength())
 			sLongest = sItem;
@@ -464,28 +479,28 @@ CString Misc::GetLongestItem(const CStringArray& array)
 	return sLongest;
 }
 
-int Misc::GetMaximumItemLength(const CStringArray& array)
+int Misc::GetMaximumItemLength(const CStringArray& aValues)
 {
 	int nLongest = 0;
-	int nItem = array.GetSize();
+	int nItem = aValues.GetSize();
 
 	while (nItem--)
 	{
-		const CString& sItem = GetItem(array, nItem);
+		const CString& sItem = GetItem(aValues, nItem);
 		nLongest = max(nLongest, sItem.GetLength());
 	}
 
 	return nLongest;
 }
 
-int Misc::GetFormattedLength(const CStringArray& array, LPCTSTR szSep, BOOL bIncEmpty)
+int Misc::GetFormattedLength(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncEmpty)
 {
-	int nCount = array.GetSize();
+	int nCount = aValues.GetSize();
 
 	switch (nCount)
 	{
 	case 0: return 0;
-	case 1:	return array[0].GetLength();
+	case 1:	return aValues[0].GetLength();
 	}
 
 	// All else
@@ -494,21 +509,25 @@ int Misc::GetFormattedLength(const CStringArray& array, LPCTSTR szSep, BOOL bInc
 
 	for (int nItem = 0; nItem < nCount; nItem++)
 	{
-		int nItemLen = GetItem(array, nItem).GetLength();
+		int nItemLen = GetItem(aValues, nItem).GetLength();
 		nTotalLen += nItemLen;
 
-		if ((bIncEmpty || nItemLen) && (nItem > 0))
+		if (bIncEmpty || nItemLen)
 			nTotalLen += nLenSep;
 	}
+
+	// Remove trailing separator
+	if (nTotalLen)
+		nTotalLen -= nLenSep;
 
 	return nTotalLen;
 }
 
-int Misc::GetFormattedLength(const CStringArray& array, TCHAR cSep, BOOL bIncEmpty)
+int Misc::GetFormattedLength(const CStringArray& aValues, TCHAR cSep, BOOL bIncEmpty)
 {
 	TCHAR szSep[2] = { cSep, 0 };
 
-	return GetFormattedLength(array, szSep, bIncEmpty);
+	return GetFormattedLength(aValues, szSep, bIncEmpty);
 }
 
 BOOL Misc::Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim)
@@ -1257,7 +1276,7 @@ BOOL Misc::MatchAny(const CDWordArray& array1, const CDWordArray& array2)
 	return FALSE;
 }
 
-int Misc::Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, BOOL bWholeWord)
+int Misc::Find(LPCTSTR szItem, const CStringArray& aValues, BOOL bCaseSensitive, BOOL bWholeWord)
 {
 	ASSERT (szItem);
 
@@ -1265,12 +1284,12 @@ int Misc::Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, B
 		return -1;
 
 	BOOL bItemIsEmpty = IsEmpty(szItem);
-	int nSize = array.GetSize();
+	int nSize = aValues.GetSize();
 
 	for (int nItem = 0; nItem < nSize; nItem++)
 	{
 		// look for matching item
-		const CString& sArrItem = GetItem(array, nItem);
+		const CString& sArrItem = GetItem(aValues, nItem);
 
 		// special case: empty item
 		if (bItemIsEmpty)
@@ -1300,22 +1319,22 @@ int Misc::Find(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, B
 	return -1;
 }
 
-BOOL Misc::Contains(LPCTSTR szItem, const CStringArray& array, BOOL bCaseSensitive, BOOL bWholeWord)
+BOOL Misc::Contains(LPCTSTR szItem, const CStringArray& aValues, BOOL bCaseSensitive, BOOL bWholeWord)
 {
-	return (Find(szItem, array, bCaseSensitive, bWholeWord) != -1);
+	return (Find(szItem, aValues, bCaseSensitive, bWholeWord) != -1);
 }
 
-const CString& Misc::GetItem(const CStringArray& array, int nItem)
+const CString& Misc::GetItem(const CStringArray& aValues, int nItem)
 {
-	ASSERT(nItem >= 0 && nItem < array.GetSize());
+	ASSERT(nItem >= 0 && nItem < aValues.GetSize());
 
-	if (nItem < 0 || nItem >= array.GetSize())
+	if (nItem < 0 || nItem >= aValues.GetSize())
 	{
 		static CString sDummy;
 		return sDummy;
 	}
 
-	return array.GetData()[nItem];
+	return aValues.GetData()[nItem];
 }
 
 int Misc::RemoveEmptyItems(CStringArray& aFrom)
@@ -1338,14 +1357,14 @@ int Misc::RemoveEmptyItems(CStringArray& aFrom)
 	return nRemoved;
 }
 
-int Misc::RemoveItems(const CStringArray& array, CStringArray& aFrom, BOOL bCaseSensitive)
+int Misc::RemoveItems(const CStringArray& aValues, CStringArray& aFrom, BOOL bCaseSensitive)
 {
 	int nRemoved = 0; // counter
-	int nItem = array.GetSize();
+	int nItem = aValues.GetSize();
 
 	while (nItem--)
 	{
-		const CString& sItem = GetItem(array, nItem);
+		const CString& sItem = GetItem(aValues, nItem);
 
 		if (RemoveItem(sItem, aFrom, bCaseSensitive))
 			nRemoved++;
@@ -1365,14 +1384,14 @@ BOOL Misc::RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive)
 	return TRUE;
 }
 
-int Misc::AddUniqueItems(const CStringArray& array, CStringArray& aTo, BOOL bCaseSensitive)
+int Misc::AddUniqueItems(const CStringArray& aValues, CStringArray& aTo, BOOL bCaseSensitive)
 {
 	int nAdded = 0; // counter
-	int nSize = array.GetSize();
+	int nSize = aValues.GetSize();
 	
 	for (int nItem = 0; nItem < nSize; nItem++)
 	{
-		const CString& sItem = GetItem(array, nItem);
+		const CString& sItem = GetItem(aValues, nItem);
 
 		if (AddUniqueItem(sItem, aTo, bCaseSensitive))
 			nAdded++;
@@ -1714,7 +1733,7 @@ BOOL Misc::IsSymbol(const CString& sValue)
 	return TRUE;
 }
 
-// From: http://www.geeksforgeeks.org/shuffle-a-given-array/
+// From: http://www.geeksforgeeks.org/shuffle-a-given-aValues/
 void Misc::Shuffle(LPTSTR szText)
 {
 	// Use a different seed value so that we don't get same
@@ -2346,9 +2365,9 @@ int StringSortProc(const void* v1, const void* v2)
 	return Misc::NaturalCompare(*pStr1, *pStr2);
 }
 
-void Misc::SortArray(CStringArray& array, SORTPROC pSortProc)
+void Misc::SortArray(CStringArray& aValues, SORTPROC pSortProc)
 {
-	qsort(array.GetData(), array.GetSize(), sizeof(CString*), pSortProc ? pSortProc : StringSortProc);
+	qsort(aValues.GetData(), aValues.GetSize(), sizeof(CString*), pSortProc ? pSortProc : StringSortProc);
 }
 
 //////////////////////////////////////////////////////////////
@@ -2369,9 +2388,9 @@ int DWordSortProc(const void* v1, const void* v2)
 	return 0;
 }
 
-void Misc::SortArray(CDWordArray& array, SORTPROC pSortProc)
+void Misc::SortArray(CDWordArray& aValues, SORTPROC pSortProc)
 {
-	qsort(array.GetData(), array.GetSize(), sizeof(DWORD*), pSortProc ? pSortProc : DWordSortProc);
+	qsort(aValues.GetData(), aValues.GetSize(), sizeof(DWORD*), pSortProc ? pSortProc : DWordSortProc);
 }
 
 //////////////////////////////////////////////////////////////
