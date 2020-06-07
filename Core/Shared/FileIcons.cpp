@@ -56,20 +56,23 @@ BOOL CFileIcons::Draw(CDC* pDC, LPCTSTR szFilePath, POINT pt, BOOL bLargeIcon, U
 		// so we fall back by quizzing the registry directly
 		CString sExt = FileMisc::GetExtension(szFilePath);
 
-		if (!FallbackCache(bLargeIcon).HasIcon(sExt))
+		if (!sExt.IsEmpty())
 		{
-			HICON hIcon = CFileRegister::GetRegisteredIcon(sExt, bLargeIcon);
+			if (!FallbackCache(bLargeIcon).HasIcon(sExt))
+			{
+				HICON hIcon = CFileRegister::GetRegisteredIcon(sExt, bLargeIcon);
 
-			// Make sure we don't ask twice during the same session
-			if (!hIcon)
-				hIcon = ExtractUnknownFileTypeIcon();
+				// Make sure we don't ask twice during the same session
+				if (!hIcon)
+					hIcon = ExtractUnknownFileTypeIcon();
 
-			VERIFY(FallbackCache(bLargeIcon).Add(sExt, hIcon));
+				VERIFY(FallbackCache(bLargeIcon).Add(sExt, hIcon));
+			}
+
+			// This should always work
+			VERIFY(FallbackCache(bLargeIcon).Draw(pDC, sExt, pt, nStyle));
+			return TRUE;
 		}
-
-		// This should always work
-		VERIFY(FallbackCache(bLargeIcon).Draw(pDC, sExt, pt, nStyle));
-		return TRUE;
 	}
 
 	return ImageList_Draw(hIL, nIndex, *pDC, pt.x, pt.y, nStyle);
