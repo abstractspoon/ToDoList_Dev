@@ -215,7 +215,7 @@ CString CTimeHelper::FormatClockTime(int nHour, int nMin, int nSec, BOOL bIncSec
 	return sTime;
 }
 
-double CTimeHelper::DecodeClockTime(LPCTSTR szTime)
+double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 {
 	CString sTime(szTime);
 	Misc::Trim(sTime);
@@ -239,9 +239,13 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime)
 	{
 		switch (aBits.GetSize())
 		{
-		case 3: dTime += (_ttof(aBits[2]) / 3600);	// seconds
+		case 3: 
+			if (bIncSeconds)
+				dTime += (_ttof(aBits[2]) / 3600);	// seconds
+			// fall thru
 		case 2: dTime += (_ttof(aBits[1]) / 60);	// minutes
-		case 1: dTime += (_ttof(aBits[0]));			// minutes
+			// fall thru
+		case 1: dTime += (_ttof(aBits[0]));			// hours
 		}
 	}
 	// test for military time

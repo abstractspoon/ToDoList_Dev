@@ -6,6 +6,7 @@
 #include "DateHelper.h"
 #include "TimeHelper.h"
 #include "WorkingWeek.h"
+#include "Misc.h"
 
 #include <math.h>
 
@@ -569,6 +570,9 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 		if (!m_Weekend.IsWeekend(dStart))
 			dHoursDuration += m_WorkDay.CalculateDurationInHours(m_WorkDay.GetStartOfDayInHours(), dToTime);
 	}
+
+	// round to the nearest second
+	dHoursDuration = (Misc::Round(dHoursDuration * 60 * 60) / 3600.0);
 
 	return dHoursDuration;
 }

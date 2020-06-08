@@ -172,6 +172,29 @@ void DDX_TextWithFormat(CDataExchange* pDX, int nIDC, LPCTSTR lpszFormat, UINT n
 	va_end(pData);
 }
 
+//////////////////////////////////////////////////////////////////////
+
+// Prevent UpdateDataEx() dispatching control notifications
+// Copied from CWnd::UpdateData()
+CDialogHelper::CLockNotify::CLockNotify(HWND hWnd) : m_hwndOldLockNotify(NULL)
+{
+	_AFX_THREAD_STATE* pThreadState = AfxGetThreadState();
+
+	m_hwndOldLockNotify = pThreadState->m_hLockoutNotifyWindow;
+	ASSERT(m_hwndOldLockNotify != hWnd);   // must not recurse
+
+	pThreadState->m_hLockoutNotifyWindow = hWnd;
+}
+
+CDialogHelper::CLockNotify::~CLockNotify()
+{
+	_AFX_THREAD_STATE* pThreadState = AfxGetThreadState();
+
+	pThreadState->m_hLockoutNotifyWindow = m_hwndOldLockNotify;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
 void CDialogHelper::TextFloatFormat(BOOL bSaveAndValidate, void* pData, double value, int nSizeGcvt, 
 									int nDecimals, LPTSTR szBuffer, int nBufSize)
 {
@@ -371,7 +394,7 @@ void CDialogHelper::DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, nIDC, value);
@@ -381,7 +404,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAn
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, short& value, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, nIDC, value);
@@ -391,7 +414,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, short& value, BOOL bSaveA
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, int& value, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	// this can be used for a variety of control types so we need
@@ -451,7 +474,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, int& value, BOOL bSaveAnd
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, UINT& value, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, nIDC, value);
@@ -461,7 +484,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, UINT& value, BOOL bSaveAn
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, long& value, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, nIDC, value);
@@ -471,7 +494,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, long& value, BOOL bSaveAn
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, DWORD& value, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, nIDC, value);
@@ -481,7 +504,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, DWORD& value, BOOL bSaveA
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, CString& value, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	// this can be used for a variety of control types so we need
@@ -511,7 +534,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, CString& value, BOOL bSav
 
 BOOL CDialogHelper::UpdateDataExact(CWnd* pWnd, int nIDC, CString& value, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	// this can be used for a variety of control types so we need
@@ -538,7 +561,7 @@ BOOL CDialogHelper::UpdateDataExact(CWnd* pWnd, int nIDC, CString& value, BOOL b
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, float& value, BOOL bSaveAndValidate, int nDecimals)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, nIDC, value, nDecimals);
@@ -548,7 +571,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, float& value, BOOL bSaveA
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, double& value, BOOL bSaveAndValidate, int nDecimals)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, nIDC, value, nDecimals);
@@ -558,7 +581,7 @@ BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, double& value, BOOL bSave
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, CWnd& ctrl, BOOL bSaveAndValidate)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Control(&dx, nIDC, ctrl);

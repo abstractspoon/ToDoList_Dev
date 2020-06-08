@@ -2463,22 +2463,16 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& 
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	TDCTIMEPERIOD orgEst = pTDI->timeEstimate;
-	TDCTIMEPERIOD newEst(bOffset ? pTDI->timeEstimate : timeEst);
+	TDCTIMEPERIOD newEst(timeEst);
 	
 	if (bOffset)
-		newEst.AddTime(timeEst);
+		newEst.AddTime(pTDI->timeEstimate);
 
 	TDC_SET nRes = EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->timeEstimate, newEst);
 
 	if ((nRes == SET_CHANGE) && HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 	{
-		// recalc due date but only if the duration 'really' changed
-		// and the task has either a due date or a start date
-		BOOL bTimeChange = ((orgEst.dAmount != newEst.dAmount) ||
-							((newEst.dAmount != 0.0) && (orgEst.nUnits != newEst.nUnits)));
-		
-		if (bTimeChange && (pTDI->HasStart() || pTDI->HasDue()))
+		if ((newEst.dAmount != 0) && (pTDI->HasStart() || pTDI->HasDue()))
 		{
 			// Make sure the task has a start date
 			CalcMissingStartDateFromDue(pTDI);

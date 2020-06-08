@@ -21,10 +21,6 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-
-const double ONE_MINUTE = (1.0 / (60 * 24));
-
-/////////////////////////////////////////////////////////////////////////////
 // CTimeComboBox
 
 CTimeComboBox::CTimeComboBox(DWORD dwStyle) 
@@ -135,13 +131,7 @@ void CTimeComboBox::DDX(CDataExchange* pDX, COleDateTime& dtTime)
 
 double CTimeComboBox::GetOleTime() const
 {
-	double dTime = (Get24HourTime() / 24.0);
-
-	// Round to nearest minute
-	if ((dTime > 0.0) && (dTime < 1.0))
-		dTime += (ONE_MINUTE / 2);
-
-	return dTime;
+	return (Get24HourTime() / 24.0);
 }
 
 BOOL CTimeComboBox::SetOleTime(double dTime)

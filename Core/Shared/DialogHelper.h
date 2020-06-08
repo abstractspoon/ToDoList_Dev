@@ -228,27 +228,20 @@ public:
 
 	static BOOL TrackMouseLeave(HWND hWnd, BOOL bEnable = TRUE, BOOL bIncludeNonClient = TRUE);
 	
-protected:
-	CDialogHelper() : m_bInUpdateEx(FALSE) {}
-
-	BOOL m_bInUpdateEx;
-
-protected:
 	// helpers for updating only a single item
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate = TRUE);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, short& value, BOOL bSaveAndValidate = TRUE);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, int& value, BOOL bSaveAndValidate = TRUE);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, UINT& value, BOOL bSaveAndValidate = TRUE);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, long& value, BOOL bSaveAndValidate = TRUE);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, DWORD& value, BOOL bSaveAndValidate = TRUE);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, CString& value, BOOL bSaveAndValidate = TRUE);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, float& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, double& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, CWnd& ctrl, BOOL bSaveAndValidate = TRUE);
-	BOOL InUpdateEx() { return m_bInUpdateEx; }
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate = TRUE);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, short& value, BOOL bSaveAndValidate = TRUE);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, int& value, BOOL bSaveAndValidate = TRUE);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, UINT& value, BOOL bSaveAndValidate = TRUE);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, long& value, BOOL bSaveAndValidate = TRUE);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, DWORD& value, BOOL bSaveAndValidate = TRUE);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, CString& value, BOOL bSaveAndValidate = TRUE);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, float& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, double& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, CWnd& ctrl, BOOL bSaveAndValidate = TRUE);
 
 	// for combo and listboxes only
-	BOOL UpdateDataExact(CWnd* pWnd, int nIDC, CString& value, BOOL bSaveAndValidate = TRUE);
+	static BOOL UpdateDataExact(CWnd* pWnd, int nIDC, CString& value, BOOL bSaveAndValidate = TRUE);
 
 	static CWnd* FindNextMatch(CWnd* pCurrent, UINT nShortcut);
 	static TCHAR EnsureUniqueAccelerator(CWnd* pCtrl, const CString& sExclude);
@@ -257,6 +250,17 @@ protected:
 
 protected: // very low-level helper
 	static void TextFloatFormat(BOOL bSaveAndValidate, void* pData, double value, int nSizeGcvt, int nDecimals, LPTSTR szBuffer, int nBufSize);
+
+protected: // Derived use only
+	class CLockNotify
+	{
+	public:
+		CLockNotify(HWND hWnd);
+		~CLockNotify();
+
+	protected:
+		HWND m_hwndOldLockNotify;
+	};
 
 };
 

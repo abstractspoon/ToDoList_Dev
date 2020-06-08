@@ -25,11 +25,9 @@ struct TDCTIMEPERIOD;
 class CTDCDialogHelper : public CDialogHelper
 {
 public:
-	CTDCDialogHelper() {}
-
 	// helpers for updating only a single item
-	BOOL UpdateDataEx(CWnd* pWnd, int nIDC, TDCCOST& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
-	BOOL UpdateDataEx(CWnd* pWnd, CTimeEdit& ctrl, TDCTIMEPERIOD& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
+	static BOOL UpdateDataEx(CWnd* pWnd, int nIDC, TDCCOST& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
+	static BOOL UpdateDataEx(CWnd* pWnd, CTimeEdit& ctrl, TDCTIMEPERIOD& value, BOOL bSaveAndValidate = TRUE, int nDecimals = -1);
 
 	static void DDX_Text(CDataExchange* pDX, int nIDC, TDCCOST& value, int nDecimals = -1);
 	static void DDX_Text(CDataExchange* pDX, int nIDC, int& value, CSpinButtonCtrl& spin, int nMin = 0, int nMax = 100);

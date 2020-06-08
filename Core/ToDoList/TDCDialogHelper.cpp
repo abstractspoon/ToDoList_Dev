@@ -101,7 +101,7 @@ void CTDCDialogHelper::DDX_Text(CDataExchange* pDX, int nIDC, int& value, CSpinB
 
 BOOL CTDCDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, TDCCOST& value, BOOL bSaveAndValidate, int nDecimals)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, nIDC, value, nDecimals);
@@ -111,7 +111,7 @@ BOOL CTDCDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, TDCCOST& value, BOOL b
 
 BOOL CTDCDialogHelper::UpdateDataEx(CWnd* pWnd, CTimeEdit& ctrl, TDCTIMEPERIOD& value, BOOL bSaveAndValidate, int nDecimals)
 {
-	CAutoFlag af(m_bInUpdateEx, TRUE);
+	CLockNotify lock(*pWnd);
 	CDataExchange dx(pWnd, bSaveAndValidate);
 
 	DDX_Text(&dx, ctrl, value, nDecimals);

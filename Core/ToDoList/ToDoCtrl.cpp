@@ -1954,19 +1954,20 @@ void CToDoCtrl::UpdateTasklistVisibility()
 
 void CToDoCtrl::SetCtrlDate(CDateTimeCtrl& ctrl, const COleDateTime& date, const COleDateTime& dateMin)
 {
+	// Note: clear time component because control will 
+	// preserve it otherwise
 	if (CDateHelper::IsDateSet(date))
 	{
-		ctrl.SetTime(date);
+		ctrl.SetTime(CDateHelper::GetDateOnly(date));
 	}
-	else
+	else 
 	{
-		COleDateTime dtToday = COleDateTime::GetCurrentTime();
-		
-		if (CDateHelper::IsDateSet(dateMin))
-			ctrl.SetTime(max(dateMin, dtToday));
-		else
-			ctrl.SetTime(dtToday);
-		
+		COleDateTime dtDate = COleDateTime::GetCurrentTime();
+		VERIFY(CDateHelper::Max(dtDate, dateMin));
+
+		ctrl.SetTime(CDateHelper::GetDateOnly(dtDate));
+
+		// Clear checkbox
 		ctrl.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	}
 }
@@ -2028,8 +2029,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 				UpdateControls(FALSE); // don't update comments
 			}
 
-			// enable done time field depending on whether the done date is valid or not
-			m_cbTimeDone.EnableWindow(CDateHelper::IsDateSet(date));
+			EnableTimeCtrl(m_cbTimeDone, date);
 		}
 		break;
 		
@@ -2043,9 +2043,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			m_dtcStart.GetTime(date);
 			
 			SetSelectedTaskDate(TDCD_STARTDATE, date, TRUE);
-
-			// enable start time field depending on whether the start date is valid or not
-			m_cbTimeStart.EnableWindow(CDateHelper::IsDateSet(date));
+			EnableTimeCtrl(m_cbTimeStart, date);
 		}
 		break;
 		
@@ -2059,9 +2057,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			m_dtcDue.GetTime(date);
 			
 			SetSelectedTaskDate(TDCD_DUEDATE, date, TRUE);
-
-			// enable due time field depending on whether the due date is valid or not
-			m_cbTimeDue.EnableWindow(CDateHelper::IsDateSet(date));
+			EnableTimeCtrl(m_cbTimeDue, date);
 		}
 		break;
 		
@@ -2178,6 +2174,21 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			else
 				ClearSelectedTaskCustomAttributeData(sAttribID, TRUE);
 		}
+	}
+}
+
+void CToDoCtrl::EnableTimeCtrl(CTimeComboBox& ctrl, const COleDateTime& date) const
+{
+	// enable time field if the date is valid
+	// else clear the time if it isn't
+	if (CDateHelper::IsDateSet(date))
+	{
+		ctrl.EnableWindow(TRUE);
+	}
+	else
+	{
+		ctrl.EnableWindow(FALSE);
+		ctrl.SetCurSel(CB_ERR);
 	}
 }
 
@@ -3101,9 +3112,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 			// no due date has been specified
 			if (bDateEdited && CDateHelper::IsDateSet(date))
 			{
-				COleDateTime dtDue = GetSelectedTaskDate(TDCD_DUE);
-
-				if (!CDateHelper::IsDateSet(dtDue))
+				if (!CDateHelper::IsDateSet(GetSelectedTaskDate(TDCD_DUE)))
 				{
 					SetCtrlDate(m_dtcDue, 0.0, date);
 				}
@@ -3122,7 +3131,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 			// no due date has been specified
 			if (bDateEdited && !CDateHelper::IsDateSet(date))
 			{
-				COleDateTime dtStart = GetSelectedTaskDate(TDCD_START);
+				COleDateTime dtStart = GetSelectedTaskDate(TDCD_STARTDATE);
 
 				SetCtrlDate(m_dtcDue, 0.0, dtStart);
 			}
@@ -3156,7 +3165,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 			TDCTIMEPERIOD time;
 
 			if (GetSelectedTaskTimeEstimate(time))
-				CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, time, FALSE, DECIMALS);
+				CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, time, FALSE, DECIMALS);
 		}
 	}
 	
@@ -3857,7 +3866,7 @@ BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
 		if (GetSelectedTaskCost(costSel) && (m_cost != costSel))
 		{
 			m_cost = costSel;
-			CTDCDialogHelper().UpdateDataEx(this, IDC_COST, m_cost, FALSE, DECIMALS);
+			CTDCDialogHelper::UpdateDataEx(this, IDC_COST, m_cost, FALSE, DECIMALS);
 		}
 
 		SetModified(TDCA_COST, aModTaskIDs);
@@ -3968,7 +3977,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 			// note: setting the time field changes m_timeEstimate.nUnits
 			// so we have to do them separately
 			m_timeEstimate = time;
-			CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
+			CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
 		}
 
 		// Recalc other attributes if only one item selected
@@ -4054,7 +4063,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 			// note: setting the time field changes m_timeSpent.nUnits
 			// so we have to do them separately
 			m_timeSpent = time;
-			CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
+			CTDCDialogHelper::UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
 		}
 		
 		// update % complete?
@@ -4114,7 +4123,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 			if (bRecalcTime)
 			{
 				VERIFY(GetSelectedTaskTimeEstimate(m_timeEstimate));
-				CTDCDialogHelper().UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
+				CTDCDialogHelper::UpdateDataEx(this, m_eTimeEstimate, m_timeEstimate, FALSE, DECIMALS);
 			}
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4182,7 +4191,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 			if (bRecalcTime)
 			{
 				VERIFY(GetSelectedTaskTimeSpent(m_timeSpent));
-				CTDCDialogHelper().UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
+				CTDCDialogHelper::UpdateDataEx(this, m_eTimeSpent, m_timeSpent, FALSE, DECIMALS);
 			}
 			// update % complete?
 			else if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
