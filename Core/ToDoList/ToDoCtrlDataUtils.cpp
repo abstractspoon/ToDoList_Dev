@@ -3961,13 +3961,18 @@ BOOL CTDCTaskExporter::ExportTask(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hP
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
+	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
 	return ExportTask(pTDI, pTDS, tasks, hParentTask, bIncDuplicateCompletedRecurringSubtasks);
+}
+
+BOOL CTDCTaskExporter::ExportTrueTask(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hParentTask, BOOL bIncDuplicateCompletedRecurringSubtasks) const
+{
+	return ExportTask(m_data.GetTrueTaskID(dwTaskID), tasks, hParentTask, bIncDuplicateCompletedRecurringSubtasks);
 }
 
 BOOL CTDCTaskExporter::ExportTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, CTaskFile& tasks, 

@@ -7484,6 +7484,15 @@ void CToDoCtrl::PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, BOOL bRe
 		}
 	}
 
+	// and it's reference ID
+	DWORD dwRefTaskID = tasks.GetTaskReferenceID(hTask);
+
+	if (mapID.Lookup(dwRefTaskID, dwNewID))
+	{
+		ASSERT (dwNewID); // sanity check
+		tasks.SetTaskReferenceID(hTask, dwNewID);
+	}
+
 	// dependencies first
 	CStringArray aDepends;
 	int nDepend = tasks.GetTaskDependencies(hTask, aDepends);
