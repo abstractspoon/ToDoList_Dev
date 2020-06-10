@@ -669,8 +669,13 @@ BOOL FileMisc::IsPath(LPCTSTR szPath)
 	sPath.TrimLeft();
 	sPath.TrimRight();
 	
-	return (!sPath.IsEmpty() && 
-			(sPath.Find(_T(":\\")) == 1) || (sPath.Find(_T("\\\\")) == 0));
+	if (sPath.IsEmpty())
+		return FALSE;
+
+	return ((sPath.Find(_T(":\\")) == 1) || 
+			(sPath.Find(_T("\\\\")) == 0) || 
+			(sPath.Find(_T(".\\")) == 0) || 
+			(sPath.Find(_T("..\\")) == 0));
 }
 
 BOOL FileMisc::PathExists(LPCTSTR szPath)
