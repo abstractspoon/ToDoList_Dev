@@ -1714,14 +1714,14 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		}
 		break;
 		
-	case TDCA_FILEREF:
+	case TDCA_FILELINK:
 		{
 			Misc::Split(mod.szValue, aValues, '\n');
 
 			if (dwTaskID)
-				bChange = (m_data.SetTaskFileRefs(dwTaskID, aValues, FALSE));
+				bChange = (m_data.SetTaskFileLinks(dwTaskID, aValues, FALSE));
 			else 
-				bChange = SetSelectedTaskFileRefs(aValues);
+				bChange = SetSelectedTaskFileLinks(aValues);
 		}
 		break;
 		
@@ -3438,7 +3438,7 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 		// TDCA_PERCENT:
 		// TDCA_TIMEEST:
 		// TDCA_TIMESPENT:
-		// TDCA_FILEREF:
+		// TDCA_FILELINK:
 		// TDCA_COMMENTS:
 		// TDCA_FLAG:
 		// TDCA_LOCK:
@@ -3693,7 +3693,7 @@ BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_STATUS:
 	case TDCA_CATEGORY:
 	case TDCA_TAGS:
-	case TDCA_FILEREF:
+	case TDCA_FILELINK:
 	case TDCA_COMMENTS:
 	case TDCA_FLAG:
 	case TDCA_ICON:

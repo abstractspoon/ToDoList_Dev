@@ -415,7 +415,7 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 		}
 		break;
 
-	case TDCC_FILEREF:
+	case TDCC_FILELINK:
 		{
 			int nIndex = HitTestFileLinkColumn(ptScreen);
 
@@ -951,7 +951,7 @@ BOOL CTDLTaskCtrlBase::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelected
 	case TDCC_ALLOCBY:
 	case TDCC_STATUS:
 	case TDCC_CATEGORY:
-	case TDCC_FILEREF:
+	case TDCC_FILELINK:
 	case TDCC_POSITION:
 	case TDCC_ID:
 	case TDCC_CREATIONDATE:
@@ -1571,7 +1571,7 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 		ASSERT(0);
 		return -1;
 	}
-	ASSERT(nColID == TDCC_FILEREF);
+	ASSERT(nColID == TDCC_FILELINK);
 
 	const TODOITEM* pTDI = m_data.GetTrueTask(dwTaskID);
 	
@@ -2992,7 +2992,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				DrawColumnImage(pDC, nColID, rSubItem);
 			break;
 			
-		case TDCC_FILEREF:
+		case TDCC_FILELINK:
 			DrawColumnFileLinks(pDC, pTDI->aFileLinks, rSubItem);
 			break;
 			
@@ -3048,9 +3048,9 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 			break; // out of bounds
 
 		// first check for a tdl://
-		CString sFileRef = aFileLinks[nFile];
+		CString sFileLink = aFileLinks[nFile];
 
-		if (TODOITEM::IsTaskLink(sFileRef, TRUE))
+		if (TODOITEM::IsTaskLink(sFileLink, TRUE))
 		{
 			// draw our app icon 
 			if (!m_imageIcons.HasIcon(APP_ICON))
@@ -3060,17 +3060,17 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 		}
 		else
 		{
-			FileMisc::MakeFullPath(Misc::MakeUnquoted(sFileRef, FALSE), m_sTasklistFolder);
+			FileMisc::MakeFullPath(Misc::MakeUnquoted(sFileLink, FALSE), m_sTasklistFolder);
 
 			// Render the associated image if possible
-			if (!m_imageIcons.HasIcon(sFileRef))
+			if (!m_imageIcons.HasIcon(sFileLink))
 			{
-				if (CEnBitmap::IsSupportedImageFile(sFileRef) && FileMisc::PathExists(sFileRef))
-					VERIFY(m_imageIcons.Add(sFileRef, sFileRef));
+				if (CEnBitmap::IsSupportedImageFile(sFileLink) && FileMisc::PathExists(sFileLink))
+					VERIFY(m_imageIcons.Add(sFileLink, sFileLink));
 			}
 
-			if (!m_imageIcons.Draw(pDC, sFileRef, rIcon.TopLeft()))
-				CFileIcons::Draw(pDC, sFileRef, rIcon.TopLeft());
+			if (!m_imageIcons.Draw(pDC, sFileLink, rIcon.TopLeft()))
+				CFileIcons::Draw(pDC, sFileLink, rIcon.TopLeft());
 		}
 	}
 }
@@ -3797,7 +3797,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 		}
 		break;
 
-	case TDCC_FILEREF:
+	case TDCC_FILELINK:
 		if (!bDrawing)
 			return Misc::FormatArray(pTDI->aFileLinks, '+');
 		break;
@@ -3929,7 +3929,7 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 						
 						if (ItemColumnSupportsClickHandling(pNMIA->iItem, nColID))
 						{
-							if (nColID == TDCC_FILEREF)
+							if (nColID == TDCC_FILELINK)
 								HandleFileLinkColumnClick(pNMIA->iItem, dwTaskID, pNMIA->ptAction);
 							else
 								NotifyParentOfColumnEditClick(nColID, dwTaskID);
@@ -4304,7 +4304,7 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 		
 	default: // > 1 file links
 		{
-			int nCol = GetColumnIndex(TDCC_FILEREF);
+			int nCol = GetColumnIndex(TDCC_FILELINK);
 			ASSERT(nCol != -1);
 			ASSERT(m_hdrColumns.IsItemVisible(nCol));
 			
@@ -4393,7 +4393,7 @@ BOOL CTDLTaskCtrlBase::HandleListLBtnDown(CListCtrl& lc, CPoint pt)
 					ItemColumnSupportsClickHandling(nHit, nColID))
 				{
 					// special case
-					if (nColID == TDCC_FILEREF)
+					if (nColID == TDCC_FILELINK)
 						HandleFileLinkColumnClick(nHit, dwTaskID, pt);
 					else
 						NotifyParentOfColumnEditClick(nColID, dwTaskID);
@@ -4468,7 +4468,7 @@ void CTDLTaskCtrlBase::OnTimer(UINT nIDEvent)
 
 void CTDLTaskCtrlBase::NotifyParentOfColumnEditClick(TDC_COLUMN nColID, DWORD dwTaskID)
 {
-	ASSERT(nColID != TDCC_FILEREF); // handled by HandleFileLinkColumnClick
+	ASSERT(nColID != TDCC_FILELINK); // handled by HandleFileLinkColumnClick
 
 	CWnd::GetParent()->SendMessage(WM_TDCN_COLUMNEDITCLICK, nColID, dwTaskID);
 }
@@ -4578,12 +4578,12 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	case TDCC_REMINDER:
 		return !m_calculator.IsTaskDone(dwTaskID);
 
-	case TDCC_FILEREF:
+	case TDCC_FILELINK:
 		if (pCursor)
 			return (HitTestFileLinkColumn(*pCursor) != -1);
 		
 		// else
-		return m_data.TaskHasFileRef(dwTaskID);
+		return m_data.TaskHasFileLink(dwTaskID);
 			
 	case TDCC_DEPENDENCY:
 		return m_data.IsTaskDependent(dwTaskID);
@@ -4679,7 +4679,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 		case TDCA_STARTTIME:
 		case TDCA_EXTERNALID:
 		case TDCA_RECURRENCE:
-		case TDCA_FILEREF:
+		case TDCA_FILELINK:
 		case TDCA_SUBTASKDONE:
 			AccumulateRecalcColumn(nColID, aColIDs);
 			break;
@@ -4987,7 +4987,7 @@ BOOL CTDLTaskCtrlBase::ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy
 	case TDCA_TIMESPENT:
 	case TDCA_DEPENDENCY:
 	case TDCA_COST:
-	case TDCA_FILEREF:
+	case TDCA_FILELINK:
 	case TDCA_POSITION:
 	case TDCA_POSITION_SAMEPARENT:
 	case TDCA_POSITION_DIFFERENTPARENT:
@@ -5363,7 +5363,7 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 		nColWidth = pDC->GetTextExtent("10").cx;
 		break; 
 		
-	case TDCC_FILEREF:
+	case TDCC_FILELINK:
 		{
 			int nMaxCount = m_find.GetLargestFileLinkCount(bVisibleTasksOnly);
 
@@ -6538,29 +6538,29 @@ int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CStringArray& aDepends) const
 	return GetSelectedTaskArray(TDCA_DEPENDENCY, aDepends);
 }
 
-CString CTDLTaskCtrlBase::GetSelectedTaskFileRef(int nFile) const
+CString CTDLTaskCtrlBase::GetSelectedTaskFileLink(int nFile) const
 {
 	if (GetSelectedCount() == 1)
-		return m_data.GetTaskFileRef(GetSelectedTaskID(), nFile);
+		return m_data.GetTaskFileLink(GetSelectedTaskID(), nFile);
 	
 	// else
 	return EMPTY_STR;
 }
 
-int CTDLTaskCtrlBase::GetSelectedTaskFileRefs(CStringArray& aFiles) const
+int CTDLTaskCtrlBase::GetSelectedTaskFileLinks(CStringArray& aFiles) const
 {
 	if (GetSelectedCount() == 1)
-		return m_data.GetTaskFileRefs(GetSelectedTaskID(), aFiles);
+		return m_data.GetTaskFileLinks(GetSelectedTaskID(), aFiles);
 	
 	// else
 	aFiles.RemoveAll();
 	return 0;
 }
 
-int CTDLTaskCtrlBase::GetSelectedTaskFileRefCount() const
+int CTDLTaskCtrlBase::GetSelectedTaskFileLinkCount() const
 {
 	if (GetSelectedCount() == 1)
-		return m_data.GetTaskFileRefCount(GetSelectedTaskID());
+		return m_data.GetTaskFileLinkCount(GetSelectedTaskID());
 	
 	// else
 	return 0;

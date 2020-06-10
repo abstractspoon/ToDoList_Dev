@@ -207,7 +207,7 @@ BOOL CTaskListCsvImporter::ImportTask(ITASKLISTBASE* pTasks, const CString& sLin
 	AddAttributeToTask(pTasks, hTask, TDCA_ALLOCBY, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_ALLOCTO, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_VERSION, aValues);
-	AddAttributeToTask(pTasks, hTask, TDCA_FILEREF, aValues);
+	AddAttributeToTask(pTasks, hTask, TDCA_FILELINK, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_DEPENDENCY, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_COMMENTS, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_PRIORITY, aValues);
@@ -449,7 +449,7 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		SETTASKATTRIBARRAY(AddTaskAllocatedTo);
 		break;
 		
-	case TDCA_FILEREF: 
+	case TDCA_FILELINK: 
 		SETTASKATTRIBARRAY(AddTaskFileLink);
 		break;
 		

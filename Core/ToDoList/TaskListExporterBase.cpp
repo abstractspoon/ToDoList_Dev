@@ -58,7 +58,7 @@ static TDC_ATTRIBUTE ATTRIB_ORDER[] =
 	TDCA_CUSTOMATTRIB,
 	TDCA_FLAG,		
 	TDCA_DEPENDENCY,
-	TDCA_FILEREF,	
+	TDCA_FILELINK,	
 	TDCA_SUBTASKDONE,	
 	TDCA_COMMENTS,	
 };
@@ -345,8 +345,8 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKEXTERNALID);
 		break;
 
-	case TDCA_FILEREF:
-		sItem = FormatFileReferenceList(pTasks, hTask, sAttribLabel);
+	case TDCA_FILELINK:
+		sItem = FormatFileLinksList(pTasks, hTask, sAttribLabel);
 		break;
 
 	case TDCA_FLAG:
@@ -553,9 +553,9 @@ CString CTaskListExporterBase::FormatDependencyList(const ITASKLISTBASE* pTasks,
 	FORMATATTRIBLIST(GetTaskDependencyCount, GetTaskDependency, TDCA_DEPENDENCY);
 }
 
-CString CTaskListExporterBase::FormatFileReferenceList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const
+CString CTaskListExporterBase::FormatFileLinksList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const
 {
-	FORMATATTRIBLIST(GetTaskFileLinkCount, GetTaskFileLink, TDCA_FILEREF);
+	FORMATATTRIBLIST(GetTaskFileLinkCount, GetTaskFileLink, TDCA_FILELINK);
 }
 
 CString CTaskListExporterBase::FormatCustomAttributes(const ITASKLISTBASE* pTasks, HTASKITEM hTask) const

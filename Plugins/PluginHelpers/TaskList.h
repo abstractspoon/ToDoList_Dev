@@ -62,7 +62,7 @@ namespace Abstractspoon
 					Percent,
 					TimeEstimate,
 					TimeSpent,
-					FileReference,
+					FileLink,
 					Comments,
 					Flag,
 					CreationDate,
@@ -144,13 +144,13 @@ namespace Abstractspoon
 				List<String^>^ GetCategory();
 				List<String^>^ GetTag();
 				List<String^>^ GetDependency();
-				List<String^>^ GetFileReference();
+				List<String^>^ GetFileLink();
 
 				String^ FormatAllocatedTo(String^ delimiter);
 				String^ FormatCategory(String^ delimiter);
 				String^ FormatTag(String^ delimiter);
 				String^ FormatDependency(String^ delimiter);
-				String^ FormatFileReference(String^ delimiter);
+				String^ FormatFileLink(String^ delimiter);
 
 				Byte GetPercentDone(bool calculated);
 				double GetCost(bool calculated);
@@ -206,7 +206,7 @@ namespace Abstractspoon
 				Boolean AddCategory(String^ sCategory);
 				Boolean AddTag(String^ sTag);
 				Boolean AddDependency(String^ sDependency);
-				Boolean AddFileReference(String^ sFileLink);
+				Boolean AddFileLink(String^ sFileLink);
 
 				Boolean SetColor(UInt32 color);
 				Boolean SetPriority(Byte nPriority);

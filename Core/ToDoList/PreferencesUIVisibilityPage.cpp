@@ -96,7 +96,7 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const IPreferences* pPrefs, L
 		mapColumns.Add(TDCC_ALLOCTO);
 		mapColumns.Add(TDCC_STATUS);
 		mapColumns.Add(TDCC_CATEGORY);
-		mapColumns.Add(TDCC_FILEREF);
+		mapColumns.Add(TDCC_FILELINK);
 		mapColumns.Add(TDCC_RECURRENCE);
 		mapColumns.Add(TDCC_REMINDER);
 		mapColumns.Add(TDCC_TAGS);

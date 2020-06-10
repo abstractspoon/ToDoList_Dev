@@ -71,7 +71,7 @@ private:
 	CString FormatAllocToList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
 	CString FormatTagList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
 	CString FormatDependencyList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
-	CString FormatFileReferenceList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
+	CString FormatFileLinksList(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sAttribLabel) const;
 
 	void BuildAttribList(const ITASKLISTBASE* pTasks);
 	BOOL WantAttribute(TDC_ATTRIBUTE attrib, const ITASKLISTBASE* pTasks, HTASKITEM hTask) const;

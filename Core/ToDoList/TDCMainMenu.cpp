@@ -567,9 +567,9 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_PERCENT, TDCA_PERCENT);
 			break;
 
-		case ID_EDIT_OPENFILEREF1:
-		case ID_EDIT_SETFILEREF:
-			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_FILEREF, TDCA_FILEREF);
+		case ID_EDIT_OPENFILELINK1:
+		case ID_EDIT_SETFILELINK:
+			bDelete = !tdc.IsColumnOrEditFieldShowing(TDCC_FILELINK, TDCA_FILELINK);
 			break;
 
 		case ID_EDIT_FLAGTASK:

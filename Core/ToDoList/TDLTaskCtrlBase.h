@@ -126,9 +126,9 @@ public:
 	int GetSelectedTaskDependencies(CStringArray& aDepends) const;
 	int GetSelectedTaskTags(CStringArray& aTags) const;
 	int GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const;
-	CString GetSelectedTaskFileRef(int nFile) const;
-	int GetSelectedTaskFileRefs(CStringArray& aFiles) const;
-	int GetSelectedTaskFileRefCount() const;
+	CString GetSelectedTaskFileLink(int nFile) const;
+	int GetSelectedTaskFileLinks(CStringArray& aFiles) const;
+	int GetSelectedTaskFileLinkCount() const;
 	CString GetSelectedTaskExtID() const;
 	int GetSelectedTaskPercent() const;
 	int GetSelectedTaskPriority() const;

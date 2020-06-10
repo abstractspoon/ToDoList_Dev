@@ -237,7 +237,7 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_VERSION, IDS_TDLBC_VERSION, pTDI->sVersion);
 
 	if (pTDI->aFileLinks.GetSize())
-		ADDINFOITEM(TDCA_FILEREF, IDS_TDLBC_FILEREF, pTDI->aFileLinks[0]);
+		ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, pTDI->aFileLinks[0]);
 
 	if (!pTDI->IsDone() || !m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
 	{

@@ -87,7 +87,7 @@ public:
 	BOOL GetTaskVersion(CString& sValue) const { return m_sTaskVersion.GetValue(sValue); }
 	BOOL GetTaskAllocBy(CString& sValue) const { return m_sTaskAllocBy.GetValue(sValue); }
 	BOOL GetTaskStatus(CString& sValue) const { return m_sTaskStatus.GetValue(sValue); }
-	BOOL GetTaskFileRef(CString& sValue) const { return m_sTaskFileRef.GetValue(sValue); }
+	BOOL GetTaskFileLink(CString& sValue) const { return m_sTaskFileLink.GetValue(sValue); }
 	BOOL GetTaskDependency(CString& sValue) const { return m_sTaskDepends.GetValue(sValue); }
 	BOOL GetTaskIcon(CString& sValue) const { return m_sTaskIcon.GetValue(sValue); }
 
@@ -111,7 +111,7 @@ public:
 	int GetTaskCategories(CStringArray& aCats, BOOL& bAppend) const { return m_sTaskCategory.GetValues(aCats, bAppend); }
 	int GetTaskAllocTo(CStringArray& aAllocTo, BOOL& bAppend) const { return m_sTaskAllocTo.GetValues(aAllocTo, bAppend); }
 	int GetTaskTags(CStringArray& aTags, BOOL& bAppend) const { return m_sTaskTags.GetValues(aTags, bAppend); }
-	int GetTaskFileRefs(CStringArray& aFiles, BOOL& bAppend) const { return m_sTaskFileRef.GetValues(aFiles, bAppend); }
+	int GetTaskFileLinks(CStringArray& aFiles, BOOL& bAppend) const { return m_sTaskFileLink.GetValues(aFiles, bAppend); }
 
 	BOOL GetTaskCustomAttribute(CString& sCustomID, CString& sValue) const;
 
@@ -132,7 +132,7 @@ protected:
 	TDCSTARTUPATTRIB m_sNewTaskTitle, m_sTaskTitle, m_sTaskComments;
 	TDCSTARTUPATTRIB m_sTaskVersion, m_sTaskExternalID, m_sTaskAllocBy, m_sTaskStatus;
 	TDCSTARTUPATTRIB m_sTaskAllocTo, m_sTaskCategory, m_sTaskTags, m_sTaskDepends;
-	TDCSTARTUPATTRIB m_sTaskCustomAttrib, m_sTaskIcon, m_sTaskFileRef;
+	TDCSTARTUPATTRIB m_sTaskCustomAttrib, m_sTaskIcon, m_sTaskFileLink;
 
 	TDCSTARTUPATTRIB m_nTaskPriority, m_nTaskRisk, m_nTaskPercentDone;
 	TDCSTARTUPATTRIB m_dtTaskCreateDate, m_dtTaskStartDate, m_dtTaskDueDate, m_dtTaskDoneDate;

@@ -187,7 +187,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_cbAllocTo(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbCategory(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_ctrlComments(TRUE, TRUE, 85, &mgrContent, &mgrShortcuts),
-	m_cbFileRef(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
+	m_cbFileLink(FES_COMBOSTYLEBTN | FES_GOBUTTON | FES_ALLOWURL | FES_RELATIVEPATHS | FES_DISPLAYSIMAGES),
 	m_cbStatus(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTags(ACBS_ALLOWDELETE | ACBS_AUTOCOMPLETE),
 	m_cbTimeDone(TCB_HALFHOURS | TCB_NOTIME | TCB_HOURSINDAY),
@@ -282,7 +282,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DUEDATE, m_dtcDue);
 	DDX_Control(pDX, IDC_DUETIME, m_cbTimeDue);
 	DDX_Control(pDX, IDC_EXTERNALID, m_eExternalID);
-	DDX_Control(pDX, IDC_FILEPATH, m_cbFileRef);
+	DDX_Control(pDX, IDC_FILEPATH, m_cbFileLink);
 	DDX_Control(pDX, IDC_PERCENT, m_ePercentDone);
 	DDX_Control(pDX, IDC_PERCENTSPIN, m_spinPercent);
 	DDX_Control(pDX, IDC_PRIORITY, m_cbPriority);
@@ -313,7 +313,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	m_cbPriority.DDX(pDX, m_nPriority);
 	m_cbRisk.DDX(pDX, m_nRisk);
 	m_eRecurrence.DDX(pDX, m_tRecurrence);
-	m_cbFileRef.DDX(pDX, m_aFileRefs);
+	m_cbFileLink.DDX(pDX, m_aFileLinks);
 	
 	CTDCCustomAttributeUIHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
 
@@ -401,14 +401,14 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_CBN_SELCHANGE(IDC_CATEGORY, OnSelChangeCategory)
 	ON_CBN_SELCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 	ON_CBN_SELCHANGE(IDC_DUETIME, OnSelChangeDueTime)
-	ON_CBN_SELCHANGE(IDC_FILEPATH, OnSelChangeFileRefPath)
+	ON_CBN_SELCHANGE(IDC_FILEPATH, OnSelChangeFileLinkPath)
 	ON_CBN_SELCHANGE(IDC_PRIORITY, OnChangePriority)
 	ON_CBN_SELCHANGE(IDC_RISK, OnChangeRisk)
 	ON_CBN_SELCHANGE(IDC_STARTTIME, OnSelChangeStartTime)
 	ON_CBN_SELCHANGE(IDC_STATUS, OnSelChangeStatus)
 	ON_CBN_SELCHANGE(IDC_TAGS, OnSelChangeTag)
 	ON_CBN_SELCHANGE(IDC_VERSION, OnSelChangeVersion)
-	ON_CBN_SELENDCANCEL(IDC_FILEPATH, OnCancelChangeFileRefPath)
+	ON_CBN_SELENDCANCEL(IDC_FILEPATH, OnCancelChangeFileLinkPath)
 	ON_CBN_SELENDCANCEL(IDC_ALLOCTO, OnSelCancelAllocTo)
 	ON_CBN_SELENDCANCEL(IDC_CATEGORY, OnSelCancelCategory)
 	ON_CBN_SELENDCANCEL(IDC_TAGS, OnSelCancelTag)
@@ -605,7 +605,7 @@ BOOL CToDoCtrl::OnInitDialog()
 	m_dtcDone.SendMessage(DTM_SETSYSTEMTIME, GDT_NONE, 0);
 	
 	m_dtTree.Register(&m_taskTree.Tree(), this);
-	m_dtFileRef.Register(&m_cbFileRef, this); 
+	m_dtFileLink.Register(&m_cbFileLink, this); 
 	
 	// custom font
 	if (m_hFontTree)
@@ -649,7 +649,7 @@ void CToDoCtrl::InitEditPrompts()
 {
 	// Specific
 	m_mgrPrompts.SetEditPrompt(IDC_PROJECTNAME, *this, IDS_TDC_EDITPROMPT_PROJECT);
-	m_mgrPrompts.SetComboPrompt(m_cbFileRef, IDS_TDC_EDITPROMPT_FILEREF);
+	m_mgrPrompts.SetComboPrompt(m_cbFileLink, IDS_TDC_EDITPROMPT_FILELINK);
 
 	// Generic
 	m_mgrPrompts.SetEditPrompt(m_eExternalID, IDS_TDC_NONE);
@@ -1198,10 +1198,10 @@ int CToDoCtrl::GetControls(CTDCControlArray& aControls, BOOL bVisible) const
 	}
 
 	// finally file link
-	CTRLITEM ctrlFileRef = CTRLITEMS[NUM_CTRLITEMS - 1];
+	CTRLITEM ctrlFileLink = CTRLITEMS[NUM_CTRLITEMS - 1];
 
-	if (IsCtrlShowing(ctrlFileRef))
-		aControls.Add(ctrlFileRef);
+	if (IsCtrlShowing(ctrlFileLink))
+		aControls.Add(ctrlFileLink);
 
 	return aControls.GetSize();
 }
@@ -1547,13 +1547,13 @@ void CToDoCtrl::EnableDisableControl(const CTRLITEM& ctrl, DWORD dwTaskID, BOOL 
 	case IDC_FILEPATH: // special case
 		if (!bEnable)
 		{
-			m_cbFileRef.SetReadOnly(FALSE);
-			m_cbFileRef.EnableWindow(FALSE);
+			m_cbFileLink.SetReadOnly(FALSE);
+			m_cbFileLink.EnableWindow(FALSE);
 		}
 		else
 		{
-			m_cbFileRef.EnableWindow(TRUE);
-			m_cbFileRef.SetReadOnly(bReadOnly);
+			m_cbFileLink.EnableWindow(TRUE);
+			m_cbFileLink.SetReadOnly(bReadOnly);
 		}
 		return;
 
@@ -1785,7 +1785,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_cbTags.SetChecked(aMatched, aMixed);
 
 		// special cases
-		GetSelectedTaskFileRefs(m_aFileRefs, FALSE); // relative paths
+		GetSelectedTaskFileLinks(m_aFileLinks, FALSE); // relative paths
 
 		CStringArray aDepends;
 		GetSelectedTaskDependencies(aDepends);
@@ -1862,7 +1862,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_cbCategory.CheckAll(CCBC_UNCHECKED);
 		m_cbTags.CheckAll(CCBC_UNCHECKED);
 
-		m_aFileRefs.RemoveAll();
+		m_aFileLinks.RemoveAll();
 
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
 		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
@@ -2154,11 +2154,11 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			SetSelectedTaskTimeSpent(m_timeSpent);
 		break;
 		
-	case TDCA_FILEREF:
-		if (!m_cbFileRef.GetDroppedState())
+	case TDCA_FILELINK:
+		if (!m_cbFileLink.GetDroppedState())
 		{
 			BOOL bAppend = (GetSelectedCount() > 1);
-			SetSelectedTaskFileRefs(m_aFileRefs, bAppend, TRUE);
+			SetSelectedTaskFileLinks(m_aFileLinks, bAppend, TRUE);
 		}
 		break;
 		
@@ -4447,34 +4447,34 @@ BOOL CToDoCtrl::SetSelectedTaskTags(const CStringArray& aTags, BOOL bAppend)
 	return SetSelectedTaskArray(TDCA_TAGS, aTags, bAppend, m_cbTags);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAppend)
+BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend)
 {
-	return SetSelectedTaskFileRefs(aFilePaths, bAppend, FALSE);
+	return SetSelectedTaskFileLinks(aFilePaths, bAppend, FALSE);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited)
+BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited)
 {
-	CStringArray aFileRefs;
+	CStringArray aFileLinks;
 
 	if (bAppend)
-		GetSelectedTaskFileRefs(aFileRefs); // full paths
+		GetSelectedTaskFileLinks(aFileLinks); // full paths
 
-	Misc::AddUniqueItems(aFilePaths, aFileRefs);
+	Misc::AddUniqueItems(aFilePaths, aFileLinks);
 
 	// convert to relative paths
-	MakeRelativePaths(aFileRefs);
+	MakeRelativePaths(aFileLinks);
 
 	CDWordArray aModTaskIDs;
 
-	if (SET_FAILED == SetSelectedTaskArray(TDCA_FILEREF, aFileRefs, bAppend, aModTaskIDs))
+	if (SET_FAILED == SetSelectedTaskArray(TDCA_FILELINK, aFileLinks, bAppend, aModTaskIDs))
 		return FALSE;
 	
 	if (aModTaskIDs.GetSize())
 	{
-		m_aFileRefs.Copy(aFileRefs);
+		m_aFileLinks.Copy(aFileLinks);
 
 		if (!bCtrlEdited)
-			m_cbFileRef.SetFileList(aFileRefs);
+			m_cbFileLink.SetFileList(aFileLinks);
 	}
 
 	return TRUE;
@@ -4615,15 +4615,15 @@ BOOL CToDoCtrl::GetSelectedTaskRecurrence(TDCRECURRENCE& tr) const
 	return TRUE;
 }
 
-int CToDoCtrl::GetSelectedTaskFileRefs(CStringArray& aFiles) const 
+int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles) const 
 {  
 	// external version always returns full paths
-	return GetSelectedTaskFileRefs(aFiles, TRUE);
+	return GetSelectedTaskFileLinks(aFiles, TRUE);
 }
 
-int CToDoCtrl::GetSelectedTaskFileRefs(CStringArray& aFiles, BOOL bFullPath) const 
+int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPath) const 
 { 
-	int nNumFiles = m_taskTree.GetSelectedTaskFileRefs(aFiles); 
+	int nNumFiles = m_taskTree.GetSelectedTaskFileLinks(aFiles); 
 
 	if (nNumFiles && bFullPath)
 		MakeFullPaths(aFiles);
@@ -4631,14 +4631,14 @@ int CToDoCtrl::GetSelectedTaskFileRefs(CStringArray& aFiles, BOOL bFullPath) con
 	return nNumFiles;
 }
 
-BOOL CToDoCtrl::GotoSelectedTaskFileRef(int nFile)
+BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 {
-	return GotoFile(GetSelectedTaskFileRef(nFile, TRUE)); // full path
+	return GotoFile(GetSelectedTaskFileLink(nFile, TRUE)); // full path
 }
 
-CString CToDoCtrl::GetSelectedTaskFileRef(int nFile, BOOL bFullPath) const 
+CString CToDoCtrl::GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const 
 { 
-	CString sFile = m_taskTree.GetSelectedTaskFileRef(nFile);
+	CString sFile = m_taskTree.GetSelectedTaskFileLink(nFile);
 
 	if (!sFile.IsEmpty() && bFullPath && !WebMisc::IsURL(sFile))
 	{
@@ -4649,10 +4649,10 @@ CString CToDoCtrl::GetSelectedTaskFileRef(int nFile, BOOL bFullPath) const
 	return sFile;
 }
 
-CString CToDoCtrl::GetSelectedTaskFileRef(int nFile) const
+CString CToDoCtrl::GetSelectedTaskFileLink(int nFile) const
 {
 	// external version always returns full paths
-	return GetSelectedTaskFileRef(nFile, TRUE);
+	return GetSelectedTaskFileLink(nFile, TRUE);
 }
 
 BOOL CToDoCtrl::CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere, BOOL bEditText, DWORD dwDependency)
@@ -7232,17 +7232,17 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						CDWordArray aTaskIDs;
 						int nTask = GetSelectedTaskIDs(aTaskIDs, TRUE);
 
-						CStringArray aFileRefs;
-						aFileRefs.SetSize(nTask);
+						CStringArray aFileLinks;
+						aFileLinks.SetSize(nTask);
 
 						while (nTask--)
-							aFileRefs[nTask] = TODOITEM::FormatTaskLink(aTaskIDs[nTask], TRUE); // as URL
+							aFileLinks[nTask] = TODOITEM::FormatTaskLink(aTaskIDs[nTask], TRUE); // as URL
 
 						CDWordArray aModTaskIDs;
 						aModTaskIDs.Add(dwTargetID);
 
-						m_data.SetTaskFileRefs(dwTargetID, aFileRefs, TRUE);
-						SetModified(TDCA_FILEREF, aModTaskIDs);
+						m_data.SetTaskFileLinks(dwTargetID, aFileLinks, TRUE);
+						SetModified(TDCA_FILELINK, aModTaskIDs);
 					}
 					break;
 
@@ -7515,25 +7515,25 @@ void CToDoCtrl::PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, BOOL bRe
 		tasks.SetTaskDependencies(hTask, aDepends);
 	
 	// file references
-	CStringArray aFileRefs;
-	int nFile = tasks.GetTaskFileLinks(hTask, aFileRefs);
+	CStringArray aFileLinks;
+	int nFile = tasks.GetTaskFileLinks(hTask, aFileLinks);
 
 	bChanged = FALSE;
 
 	while (nFile--)
 	{
-		CString sFileRef = aFileRefs[nFile];
+		CString sFileLink = aFileLinks[nFile];
 
-		if (PrepareTaskLinkForPaste(sFileRef, mapID))
+		if (PrepareTaskLinkForPaste(sFileLink, mapID))
 		{
-			aFileRefs[nFile] = sFileRef;
+			aFileLinks[nFile] = sFileLink;
 			bChanged = TRUE;
 		}
 	}
 
 	// update taskfile if any file link was changed
 	if (bChanged)
-		tasks.SetTaskFileLinks(hTask, aFileRefs);
+		tasks.SetTaskFileLinks(hTask, aFileLinks);
 
 	// children
 	PrepareTasksForPaste(tasks, tasks.GetFirstTask(hTask), bResetCreation, mapID, TRUE);
@@ -7805,7 +7805,7 @@ void CToDoCtrl::SetFilePath(const CString& sPath)
 	
 	CString sFolder(FileMisc::GetFolderFromFilePath(sPath));
 	m_taskTree.SetTasklistFolder(sFolder);
-	m_cbFileRef.SetCurrentFolder(sFolder);
+	m_cbFileLink.SetCurrentFolder(sFolder);
 }
 
 CString CToDoCtrl::GetStylesheetPath() const
@@ -7946,15 +7946,15 @@ void CToDoCtrl::OnSelChangeCategory()
 	UpdateTask(TDCA_CATEGORY);
 }
 
-void CToDoCtrl::OnSelChangeFileRefPath()
+void CToDoCtrl::OnSelChangeFileLinkPath()
 {
-	UpdateTask(TDCA_FILEREF);
+	UpdateTask(TDCA_FILELINK);
 }
 
-void CToDoCtrl::OnCancelChangeFileRefPath()
+void CToDoCtrl::OnCancelChangeFileLinkPath()
 {
 	// restore combo state
-	m_cbFileRef.SetFileList(m_aFileRefs);
+	m_cbFileLink.SetFileList(m_aFileLinks);
 }
 
 void CToDoCtrl::OnSelChangeTag()
@@ -8435,8 +8435,8 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		EditSelectedTaskIcon();
 		break;
 		
-	case TDCC_FILEREF:
-		GotoFile(m_data.GetTaskFileRef(dwTaskID, 0));
+	case TDCC_FILELINK:
+		GotoFile(m_data.GetTaskFileLink(dwTaskID, 0));
 		break;
 		
 	case TDCC_DEPENDENCY:
@@ -9730,10 +9730,10 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 	return FALSE;
 }
 
-void CToDoCtrl::OnGotoFileRef()
+void CToDoCtrl::OnGotoFileLink()
 {
-	if (m_aFileRefs.GetSize())
-		GotoFile(m_aFileRefs[0]);
+	if (m_aFileLinks.GetSize())
+		GotoFile(m_aFileLinks[0]);
 }
 
 void CToDoCtrl::SetFocusToTasks()
@@ -9839,7 +9839,7 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 		if (pData->HasFiles())
 		{
 			if (pData->dwTaskID && !pData->bImportTasks)
-				return CanEditSelectedTask(TDCA_FILEREF);
+				return CanEditSelectedTask(TDCA_FILELINK);
 
 			// Check with parent
 			TDCDROPIMPORT data(pData->dwTaskID, *pData->pFilePaths);
@@ -9857,9 +9857,9 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 		ASSERT(0);
 		return FALSE;
 	}
-	else if (pTarget == &m_cbFileRef)
+	else if (pTarget == &m_cbFileLink)
 	{
-		return CanEditSelectedTask(TDCA_FILEREF);
+		return CanEditSelectedTask(TDCA_FILELINK);
 	}
 
 	// else
@@ -9924,7 +9924,7 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 			}
 			else
 			{
-				SetSelectedTaskFileRefs(aFiles, TRUE, FALSE);
+				SetSelectedTaskFileLinks(aFiles, TRUE, FALSE);
 			}
 		}
 		else if (pData->HasText())
@@ -9951,10 +9951,10 @@ LRESULT CToDoCtrl::OnDropObject(WPARAM wParam, LPARAM lParam)
 		SetFocusToTasks();
 		PostMessage(WM_TDC_FIXUPPOSTDROPSELECTION, 0L, (LPARAM)pData->dwTaskID);
 	}
-	else if ((pTarget == &m_cbFileRef) && aFiles.GetSize())
+	else if ((pTarget == &m_cbFileLink) && aFiles.GetSize())
 	{
-		SetSelectedTaskFileRefs(aFiles, TRUE); // append);
-		m_cbFileRef.SetFocus();
+		SetSelectedTaskFileLinks(aFiles, TRUE); // append);
+		m_cbFileLink.SetFocus();
 	}
 
 	// else ignore
@@ -11863,7 +11863,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_CATEGORY:		return SetSelectedTaskCategories(CStringArray());
 	case TDCA_TAGS:			return SetSelectedTaskTags(CStringArray());
 	case TDCA_DEPENDENCY:	return SetSelectedTaskDependencies(CStringArray());
-	case TDCA_FILEREF:		return SetSelectedTaskFileRefs(CStringArray());
+	case TDCA_FILELINK:		return SetSelectedTaskFileLinks(CStringArray());
 		
 	case TDCA_ALLOCBY:		return SetSelectedTaskAllocBy(_T(""));
 	case TDCA_STATUS:		return SetSelectedTaskStatus(_T(""));
@@ -11994,7 +11994,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_DUEDATE:		
 	case TDCA_DUETIME:		
 	case TDCA_EXTERNALID:	
-	case TDCA_FILEREF:		
+	case TDCA_FILELINK:		
 	case TDCA_FLAG:			
 	case TDCA_ICON:		
 	case TDCA_METADATA:
@@ -12336,7 +12336,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	case TDCA_TASKNAME:	
 	case TDCA_COMMENTS:			
 	case TDCA_DEPENDENCY:		
-	case TDCA_FILEREF:			
+	case TDCA_FILELINK:			
 	case TDCA_ICON:				
 	case TDCA_LASTMODBY:
 		return attribDefFrom.IsDataType(TDCCA_STRING);
@@ -12391,7 +12391,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribD
 		case TDCA_CREATEDBY:	
 		case TDCA_COMMENTS:			
 		case TDCA_DEPENDENCY:		
-		case TDCA_FILEREF:			
+		case TDCA_FILELINK:			
 		case TDCA_ALLOCTO:			
 		case TDCA_CATEGORY:			
 		case TDCA_TAGS:				

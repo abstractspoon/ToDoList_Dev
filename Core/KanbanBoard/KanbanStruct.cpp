@@ -411,7 +411,7 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 			return dtLastMod.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case TDCA_FILEREF:		return sFileRef;
+	case TDCA_FILELINK:		return sFileLink;
 	case TDCA_ID:			return Misc::Format(dwTaskID);
 	case TDCA_PERCENT:		return Misc::Format(nPercent, _T("%"));
 	case TDCA_CREATEDBY:		return sCreatedBy;
@@ -455,7 +455,7 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_CREATIONDATE:	return CDateHelper::IsDateSet(dtCreate);
 	case TDCA_LASTMODDATE:	return CDateHelper::IsDateSet(dtLastMod);
 
-	case TDCA_FILEREF:		return !sFileRef.IsEmpty();
+	case TDCA_FILELINK:		return !sFileLink.IsEmpty();
 	case TDCA_CREATEDBY:	return !sCreatedBy.IsEmpty();
 	case TDCA_EXTERNALID:	return !sExternalID.IsEmpty();
 	case TDCA_RECURRENCE:	return !sRecurrence.IsEmpty();

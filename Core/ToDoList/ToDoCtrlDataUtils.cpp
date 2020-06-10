@@ -505,7 +505,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			bMatch = ValueMatches(pTDI->sIcon, rule, resTask, FALSE); // Ignore case
 			break;
 
-		case TDCA_FILEREF:
+		case TDCA_FILELINK:
 			bMatch = ArrayMatches(pTDI->aFileLinks, rule, resTask, FALSE); // Ignore case
 			break;
 
@@ -1435,7 +1435,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 								m_formatter.GetTaskTags(pTDI2), TRUE);
 			break;
 
-		case TDCC_FILEREF:
+		case TDCC_FILELINK:
 			nCompare = Compare(pTDI1->aFileLinks.GetSize(), pTDI2->aFileLinks.GetSize());
 			break;
 
@@ -4228,7 +4228,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		if (pTDI->aTags.GetSize() && filter.WantAttribute(TDCA_TAGS))
 			tasks.SetTaskTags(hTask, pTDI->aTags);
 
-		if (pTDI->aFileLinks.GetSize() && filter.WantAttribute(TDCA_FILEREF))
+		if (pTDI->aFileLinks.GetSize() && filter.WantAttribute(TDCA_FILELINK))
 			tasks.SetTaskFileLinks(hTask, pTDI->aFileLinks);
 
 		if (!pTDI->sCreatedBy.IsEmpty() && filter.WantAttribute(TDCA_CREATEDBY))

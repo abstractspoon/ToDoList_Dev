@@ -638,7 +638,7 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_DONEDATE:
 	case TDCA_DUEDATE:
 	case TDCA_EXTERNALID:
-	case TDCA_FILEREF:
+	case TDCA_FILELINK:
 	case TDCA_FLAG:
 	case TDCA_ICON:
 	case TDCA_LASTMODDATE:
@@ -992,13 +992,13 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
 		pKI->sRecurrence = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKRECURRENCE);
 
-	if (pTasks->IsAttributeAvailable(TDCA_FILEREF) && pTasks->GetTaskFileLinkCount(hTask))
+	if (pTasks->IsAttributeAvailable(TDCA_FILELINK) && pTasks->GetTaskFileLinkCount(hTask))
 	{
-		pKI->sFileRef = pTasks->GetTaskFileLink(hTask, 0);
+		pKI->sFileLink = pTasks->GetTaskFileLink(hTask, 0);
 
 		// Get the shortest meaningful bit because of space constraints
-		if (FileMisc::IsPath(pKI->sFileRef))
-			pKI->sFileRef = FileMisc::GetFileNameFromPath(pKI->sFileRef);
+		if (FileMisc::IsPath(pKI->sFileLink))
+			pKI->sFileLink = FileMisc::GetFileNameFromPath(pKI->sFileLink);
 	}
 }
 
@@ -2391,7 +2391,7 @@ BOOL CKanbanCtrl::CanFitAttributeLabels(int nAvailWidth, float fAveCharWidth, KB
 					// Exclude 'flag' because that is rendered as an icon
 					switch (nAttribID)
 					{
-					case TDCA_FILEREF:
+					case TDCA_FILELINK:
 					case TDCA_PARENT:
 					case TDCA_FLAG:
 						continue;

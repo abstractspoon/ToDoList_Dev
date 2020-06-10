@@ -128,7 +128,7 @@ BOOL CTDCAttributeMap::IsTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_DUEDATE:
 	case TDCA_DUETIME:
 	case TDCA_EXTERNALID:
-	case TDCA_FILEREF:
+	case TDCA_FILELINK:
 	case TDCA_FLAG:
 	case TDCA_HTMLCOMMENTS:
 	case TDCA_ICON:

@@ -324,18 +324,18 @@ bool CGPExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask,
 	// dependencies done afterwards
 
 	// file/weblink
-	CString sFileRef = pSrcTaskFile->GetTaskFileLinkPath(hTask);
-	sFileRef.TrimLeft();
+	CString sFileLink = pSrcTaskFile->GetTaskFileLinkPath(hTask);
+	sFileLink.TrimLeft();
 
-	if (!sFileRef.IsEmpty())
+	if (!sFileLink.IsEmpty())
 	{
 		// web or file link?
-		if (sFileRef.Find(_T(":\\")) == 1 || sFileRef.Find(_T("\\\\")) == 0)
-			sFileRef = _T("file://") + sFileRef;
+		if (sFileLink.Find(_T(":\\")) == 1 || sFileLink.Find(_T("\\\\")) == 0)
+			sFileLink = _T("file://") + sFileLink;
 
-		sFileRef.Replace(_T(" "), _T("%20"));
+		sFileLink.Replace(_T(" "), _T("%20"));
 
-		pXIDestItem->AddItem(_T("webLink"), sFileRef);
+		pXIDestItem->AddItem(_T("webLink"), sFileLink);
 	}
 
 	// comments

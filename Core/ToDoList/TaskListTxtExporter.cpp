@@ -108,7 +108,7 @@ CString CTaskListTxtExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 	switch (nAttrib)
 	{
 	case TDCA_COMMENTS:
-	case TDCA_FILEREF:
+	case TDCA_FILELINK:
 		{
 			// indent
 			for (int nTab = 0; nTab < nDepth; nTab++)

@@ -176,19 +176,19 @@ bool CGPImporter::ImportTask(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTas
 	pDestTaskFile->SetTaskPriority(hTask, (unsigned char)(nPriority * 3 + 2)); // 2, 5, 8
 
 	// file ref
-	CString sFileRef = pXISrcTask->GetItemValue(_T("webLink"));
-	sFileRef.TrimLeft();
+	CString sFileLink = pXISrcTask->GetItemValue(_T("webLink"));
+	sFileLink.TrimLeft();
 
-	if (!sFileRef.IsEmpty())
+	if (!sFileLink.IsEmpty())
 	{
 		// decode file paths
-		if (sFileRef.Find(_T("file://")) == 0)
+		if (sFileLink.Find(_T("file://")) == 0)
 		{
-			sFileRef = sFileRef.Mid(7);
-			sFileRef.Replace(_T("%20"), _T(""));
+			sFileLink = sFileLink.Mid(7);
+			sFileLink.Replace(_T("%20"), _T(""));
 		}
 
-		pDestTaskFile->SetTaskFileLinkPath(hTask, sFileRef);
+		pDestTaskFile->SetTaskFileLinkPath(hTask, sFileLink);
 	}
 
 	

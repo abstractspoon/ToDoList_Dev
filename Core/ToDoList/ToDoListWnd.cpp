@@ -336,7 +336,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_SELECTALL, OnEditSelectall)
 	ON_COMMAND(ID_EDIT_SELECTREFERENCETARGET, OnEditSelectReferenceTarget)
 	ON_COMMAND(ID_EDIT_SELECTTASKREFERENCES, OnEditSelectTaskReferences)
-	ON_COMMAND(ID_EDIT_SETFILEREF, OnEditAddFileLink)
+	ON_COMMAND(ID_EDIT_SETFILELINK, OnEditAddFileLink)
 	ON_COMMAND(ID_EDIT_SETREMINDER, OnEditSetReminder)
 	ON_COMMAND(ID_EDIT_SETTASKICON, OnEditSettaskicon)
 	ON_COMMAND(ID_EDIT_SPELLCHECKCOMMENTS, OnSpellcheckcomments)
@@ -418,7 +418,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_MAINTOOLBAR, OnViewMainToolbar)
 	ON_COMMAND(ID_VIEW_CUSTOMTOOLBAR, OnViewCustomToolbar)
 	ON_COMMAND_EX_RANGE(ID_FILE_MRU1, ID_FILE_MRU16, OnOpenRecentFile)
-	ON_COMMAND_RANGE(ID_EDIT_OPENFILEREF1, ID_EDIT_OPENFILEREF16, OnEditOpenfileref)
+	ON_COMMAND_RANGE(ID_EDIT_OPENFILELINK1, ID_EDIT_OPENFILELINK16, OnEditOpenFileLink)
 	ON_COMMAND_RANGE(ID_ACTIVATEVIEW_TASKTREE, ID_ACTIVATEVIEW_UIEXTENSION16, OnActivateTaskView)
 	ON_COMMAND_RANGE(ID_EDIT_SETPRIORITYNONE, ID_EDIT_SETPRIORITY10, OnSetPriority)
 	ON_COMMAND_RANGE(ID_FILE_OPEN_USERSTORAGE1, ID_FILE_OPEN_USERSTORAGE16, OnFileOpenFromUserStorage)
@@ -539,7 +539,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENCIES, OnUpdateMoveSelectTaskDependencies)
 	ON_UPDATE_COMMAND_UI(ID_MOVE_SELECTTASKDEPENDENTS, OnUpdateMoveSelectTaskDependents)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_OFFSETDATES, OnUpdateEditOffsetDates)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_OPENFILEREF1, OnUpdateEditOpenfileref)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_OPENFILELINK1, OnUpdateEditOpenFileLink)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEAFTER, OnUpdateEditPasteAfter)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTEASREF, OnUpdateEditPasteAsRef)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_PASTESUB, OnUpdateEditPasteSub)
@@ -551,7 +551,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SELECTALL, OnUpdateEditSelectall)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SELECTREFERENCETARGET, OnUpdateEditSelectReferenceTarget)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SELECTTASKREFERENCES, OnUpdateEditSelectTaskReferences)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_SETFILEREF, OnUpdateEditAddFileLink)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_SETFILELINK, OnUpdateEditAddFileLink)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SETREMINDER, OnUpdateEditSetReminder)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SETTASKICON, OnUpdateEditSettaskicon)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SPELLCHECKCOMMENTS, OnUpdateSpellcheckcomments)
@@ -938,7 +938,7 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_INCTASKPERCENTDONE,			VK_ADD,			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_INSERTDATETIME,				'D',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_LOCKTASK,					'K',			HOTKEYF_CONTROL);
-	m_mgrShortcuts.AddShortcut(ID_EDIT_OPENFILEREF1,				'G',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
+	m_mgrShortcuts.AddShortcut(ID_EDIT_OPENFILELINK1,				'G',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTEAFTER,					'V',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_PASTESUB,					'V',			HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_QUICKFIND,					'Q',			HOTKEYF_CONTROL);
@@ -5525,8 +5525,8 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		if (startup.GetTaskTags(aItems, bAppend) != -1)
 			tdc.SetSelectedTaskTags(aItems, bAppend);
 		
-		if (startup.GetTaskFileRefs(aItems, bAppend) != -1)
-			tdc.SetSelectedTaskFileRefs(aItems, bAppend);
+		if (startup.GetTaskFileLinks(aItems, bAppend) != -1)
+			tdc.SetSelectedTaskFileLinks(aItems, bAppend);
 		
 		// start date and time
 		TDC_UNITS nUnits;
@@ -9215,12 +9215,12 @@ void CToDoListWnd::OnUpdateSetPriority(CCmdUI* pCmdUI)
 void CToDoListWnd::OnEditAddFileLink() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nNumFiles = tdc.GetSelectedTaskFileRefCount();
+	int nNumFiles = tdc.GetSelectedTaskFileLinkCount();
 		
 	CPreferences prefs;
-	CFileOpenDialog dialog(IDS_SETFILEREF_TITLE, 
+	CFileOpenDialog dialog(IDS_SETFILELINK_TITLE, 
 							NULL, 
-							((nNumFiles == 1) ? tdc.GetSelectedTaskFileRef(0) : _T("")), 
+							((nNumFiles == 1) ? tdc.GetSelectedTaskFileLink(0) : _T("")), 
 							(EOFN_DEFAULTOPEN | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT), 
 							CEnString(IDS_ALLFILEFILTER));
 	
@@ -9229,7 +9229,7 @@ void CToDoListWnd::OnEditAddFileLink()
 		CStringArray aFiles;
 		
 		if (dialog.GetPathNames(aFiles))
-			tdc.SetSelectedTaskFileRefs(aFiles, TRUE); // append
+			tdc.SetSelectedTaskFileLinks(aFiles, TRUE); // append
 	}
 }
 
@@ -9237,60 +9237,60 @@ void CToDoListWnd::OnUpdateEditAddFileLink(CCmdUI* pCmdUI)
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_FILEREF) && (tdc.GetSelectedCount() == 1));
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_FILELINK) && (tdc.GetSelectedCount() == 1));
 }
 
-void CToDoListWnd::OnEditOpenfileref(UINT nCmdID) 
+void CToDoListWnd::OnEditOpenFileLink(UINT nCmdID) 
 {
-	int nFile = (nCmdID - ID_EDIT_OPENFILEREF1);
+	int nFile = (nCmdID - ID_EDIT_OPENFILELINK1);
 	ASSERT(nFile < 16);
 
 	if (nFile < 16)
-		GetToDoCtrl().GotoSelectedTaskFileRef(nFile);
+		GetToDoCtrl().GotoSelectedTaskFileLink(nFile);
 }
 
-void CToDoListWnd::OnUpdateEditOpenfileref(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateEditOpenFileLink(CCmdUI* pCmdUI) 
 {
 	// we do all the work from the first item
-	if (pCmdUI->m_pMenu && (pCmdUI->m_nID == ID_EDIT_OPENFILEREF1))
+	if (pCmdUI->m_pMenu && (pCmdUI->m_nID == ID_EDIT_OPENFILELINK1))
 	{
 		// remove all existing items
 		for (int nFile = 0; nFile < 16; nFile++)
 		{
-			if (pCmdUI->m_pMenu->DeleteMenu((ID_EDIT_OPENFILEREF1 + nFile), MF_BYCOMMAND))
+			if (pCmdUI->m_pMenu->DeleteMenu((ID_EDIT_OPENFILELINK1 + nFile), MF_BYCOMMAND))
 				pCmdUI->m_nIndexMax--;
 		}
 	
 		// re-add the selected task's file refs
-		CStringArray aFileRefs;
+		CStringArray aFileLinks;
 
-		if (GetToDoCtrl().GetSelectedTaskFileRefs(aFileRefs))
+		if (GetToDoCtrl().GetSelectedTaskFileLinks(aFileLinks))
 		{
 			// restrict file lengths to 250 pixels
 			CClientDC dc(this);
 
-			for (int nFile = 0; nFile < aFileRefs.GetSize(); nFile++)
+			for (int nFile = 0; nFile < aFileLinks.GetSize(); nFile++)
 			{
-				CEnString sFileRef(aFileRefs[nFile]);
-				ASSERT(!sFileRef.IsEmpty());
+				CEnString sFileLink(aFileLinks[nFile]);
+				ASSERT(!sFileLink.IsEmpty());
 
-				sFileRef.FormatDC(&dc, 250, ES_PATH);
+				sFileLink.FormatDC(&dc, 250, ES_PATH);
 
 				pCmdUI->m_pMenu->InsertMenu(pCmdUI->m_nIndex++, 
 											(MF_BYPOSITION | MF_STRING), 
-											(ID_EDIT_OPENFILEREF1 + nFile), 
-											sFileRef);
+											(ID_EDIT_OPENFILELINK1 + nFile), 
+											sFileLink);
 			}
 
 			pCmdUI->m_nIndex--;
-			pCmdUI->m_nIndexMax += aFileRefs.GetSize();
+			pCmdUI->m_nIndexMax += aFileLinks.GetSize();
 		}
 		else // restore the generic text and disable
 		{
 			pCmdUI->m_pMenu->InsertMenu(pCmdUI->m_nIndex, 
 										(MF_BYPOSITION | MF_STRING | MF_GRAYED), 
-										ID_EDIT_OPENFILEREF1, 
-										CEnString(IDS_EDIT_OPENFILEREF));
+										ID_EDIT_OPENFILELINK1, 
+										CEnString(IDS_EDIT_OPENFILELINK));
 		}
 	}
 }
@@ -9303,7 +9303,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 	args.sTaskTitle = tdc.GetSelectedTaskTitle();
 	args.sTaskExtID = tdc.GetSelectedTaskExtID();
 	args.sTaskComments = tdc.GetSelectedTaskComments();
-	args.sTaskFileLink = tdc.GetSelectedTaskFileRef(0);
+	args.sTaskFileLink = tdc.GetSelectedTaskFileLink(0);
 	args.sTaskAllocBy = tdc.GetSelectedTaskAllocBy();
 	args.sTaskPath = tdc.GetSelectedTaskPath(FALSE);
 	

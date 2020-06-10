@@ -154,7 +154,7 @@ public:
 	virtual bool SetTaskAllocatedBy(HTASKITEM hTask, LPCWSTR szAllocBy) = 0;
 	virtual bool SetTaskCategory(HTASKITEM hTask, LPCWSTR szCategory) = 0;
 	virtual bool SetTaskStatus(HTASKITEM hTask, LPCWSTR szStatus) = 0;
-	virtual bool SetTaskFileLinkPath(HTASKITEM hTask, LPCWSTR szFileRefpath) = 0;
+	virtual bool SetTaskFileLinkPath(HTASKITEM hTask, LPCWSTR szFileLink) = 0;
 
 	virtual bool SetTaskColor(HTASKITEM hTask, unsigned long nColor) = 0;
 
@@ -359,7 +359,7 @@ class ITaskList14 : public ITaskList13
 	// new methods
 public:
 	virtual int GetTaskFileLinkCount(HTASKITEM hTask) const = 0;
-	virtual bool AddTaskFileLink(HTASKITEM hTask, LPCWSTR szFileRef) = 0;
+	virtual bool AddTaskFileLink(HTASKITEM hTask, LPCWSTR szFileLink) = 0;
 	virtual LPCWSTR GetTaskFileLink(HTASKITEM hTask, int nIndex) const = 0;
 	virtual bool IsTaskGoodAsDone(HTASKITEM hTask) const = 0;
 	virtual LPCWSTR GetTaskCustomDateString(HTASKITEM hTask, LPCWSTR szID) const = 0;

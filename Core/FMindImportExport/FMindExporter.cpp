@@ -269,7 +269,7 @@ void CFMindExporter::ExportTask(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTa
 	ADDCUSTOMATTRIB(FM_CUSTOMTASKID, (int)pSrcTaskFile->GetTaskID(hTask))
 	ADDCUSTOMATTRIB(FM_CUSTOMALLOCBY, pSrcTaskFile->GetTaskAllocatedBy(hTask))
 	ADDCUSTOMATTRIB(FM_CUSTOMSTATUS, pSrcTaskFile->GetTaskStatus(hTask))
-	ADDCUSTOMATTRIB(FM_CUSTOMFILEREF, pSrcTaskFile->GetTaskFileLinkPath(hTask))
+	ADDCUSTOMATTRIB(FM_CUSTOMFILELINK, pSrcTaskFile->GetTaskFileLinkPath(hTask))
 	ADDCUSTOMATTRIB(FM_CUSTOMCOLOR, (int)pSrcTaskFile->GetTaskColor(hTask))
 	ADDCUSTOMATTRIB(FM_CUSTOMPRIORITY, pSrcTaskFile->GetTaskPriority(hTask, false))
 	ADDCUSTOMATTRIB(FM_CUSTOMRISK, pSrcTaskFile->GetTaskRisk(hTask, false))

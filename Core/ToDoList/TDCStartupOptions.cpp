@@ -338,7 +338,7 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	ExtractAttribute(cmdInfo, SWITCH_TASKVERSION, m_sTaskVersion);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKTAGS, m_sTaskTags);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKDEPENDENCY, m_sTaskDepends);	
-	ExtractAttribute(cmdInfo, SWITCH_TASKFILEREF, m_sTaskFileRef);	
+	ExtractAttribute(cmdInfo, SWITCH_TASKFILELINK, m_sTaskFileLink);	
 	ExtractAttribute(cmdInfo, SWITCH_TASKICON, m_sTaskIcon);
 
 	ExtractAttribute(cmdInfo, SWITCH_TASKPRIORITY, m_nTaskPriority);
@@ -459,7 +459,7 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	m_sTaskTags = startup.m_sTaskTags; 
 	m_sTaskStatus = startup.m_sTaskStatus; 
 	m_sTaskDepends = startup.m_sTaskDepends; 
-	m_sTaskFileRef = startup.m_sTaskFileRef; 
+	m_sTaskFileLink = startup.m_sTaskFileLink; 
 	m_sTaskCustomAttrib = startup.m_sTaskCustomAttrib; 
 	m_sTaskIcon = startup.m_sTaskIcon;
 
@@ -509,7 +509,7 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(m_sTaskTags == startup.m_sTaskTags) &&
 		(m_sTaskStatus == startup.m_sTaskStatus) &&
 		(m_sTaskDepends == startup.m_sTaskDepends) &&
-		(m_sTaskFileRef == startup.m_sTaskFileRef) &&
+		(m_sTaskFileLink == startup.m_sTaskFileLink) &&
 		(m_sTaskCustomAttrib == startup.m_sTaskCustomAttrib) &&
 		(m_sTaskIcon == startup.m_sTaskIcon) &&
 
@@ -662,7 +662,7 @@ void CTDCStartupOptions::Reset()
 	m_sTaskCategory.ClearValue();
 	m_sTaskStatus.ClearValue();
 	m_sTaskTags.ClearValue(); 
-	m_sTaskFileRef.ClearValue();
+	m_sTaskFileLink.ClearValue();
 	m_sTaskDepends.ClearValue();
 	m_sTaskCustomAttrib.ClearValue();
 	m_sTaskIcon.ClearValue();

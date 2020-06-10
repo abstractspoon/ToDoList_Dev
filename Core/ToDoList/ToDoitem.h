@@ -125,7 +125,7 @@ public:
 	CString GetAllocTo(int nAllocTo) const;
 	CString GetDependency(int Depends) const;
 	CString GetTag(int nTag) const;
-	CString GetFileRef(int nFile) const;
+	CString GetFileLink(int nFile) const;
 
 	BOOL GetNextOccurence(COleDateTime& dtNext, BOOL& bDue);
 	BOOL CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const;

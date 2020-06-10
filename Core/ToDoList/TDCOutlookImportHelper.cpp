@@ -198,13 +198,13 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 			tdi.sVersion = sData;
 			break;
 			
-		case TDCA_FILEREF: 
+		case TDCA_FILELINK: 
 			// special case:
 			if (oaType == OA_ENTRYID)
 			{
-				CString sFileRef;
-				sFileRef.Format(_T("outlook:%s"), sData);
-				sData = sFileRef;
+				CString sFileLink;
+				sFileLink.Format(_T("outlook:%s"), sData);
+				sData = sFileLink;
 			}
 			tdi.aFileLinks.Add(sData);
 			break;

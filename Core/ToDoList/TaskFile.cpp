@@ -1942,7 +1942,7 @@ BOOL CTaskFile::GetTaskAttributes(HTASKITEM hTask, TODOITEM& tdi, BOOL bOverwrit
 		GETATTRIB(TDL_TASKALLOCTO,				GetTaskAllocatedTo(hTask, tdi.aAllocTo));
 		GETATTRIB(TDL_TASKRECURRENCE,			GetTaskRecurrence(hTask, tdi.trRecurrence));
 		GETATTRIB(TDL_TASKDEPENDENCY,			GetTaskDependencies(hTask, tdi.aDependencies));
-		GETATTRIB(TDL_TASKFILEREFPATH,			GetTaskFileLinks(hTask, tdi.aFileLinks));
+		GETATTRIB(TDL_TASKFILELINKPATH,			GetTaskFileLinks(hTask, tdi.aFileLinks));
 
 		// Comments are special
 		if (bOverwrite)
@@ -2144,7 +2144,7 @@ BOOL CTaskFile::SetTaskTags(HTASKITEM hTask, const CStringArray& aTags)
 
 BOOL CTaskFile::SetTaskFileLinks(HTASKITEM hTask, const CStringArray& aFiles)
 {
-	return SetTaskArray(hTask, TDL_TASKFILEREFPATH, aFiles, FALSE);
+	return SetTaskArray(hTask, TDL_TASKFILELINKPATH, aFiles, FALSE);
 }
 
 BOOL CTaskFile::SetTaskDependencies(HTASKITEM hTask, const CStringArray& aDepends)
@@ -2290,9 +2290,9 @@ bool CTaskFile::AddTaskAllocatedTo(HTASKITEM hTask, LPCTSTR szAllocTo)
 	return AddTaskArrayItem(hTask, TDL_TASKALLOCTO, szAllocTo, FALSE);
 }
 
-bool CTaskFile::AddTaskFileLink(HTASKITEM hTask, LPCTSTR szFileRef)
+bool CTaskFile::AddTaskFileLink(HTASKITEM hTask, LPCTSTR szFileLink)
 {
-	return AddTaskArrayItem(hTask, TDL_TASKFILEREFPATH, szFileRef, FALSE);
+	return AddTaskArrayItem(hTask, TDL_TASKFILELINKPATH, szFileLink, FALSE);
 }
 
 bool CTaskFile::AddTaskCategory(HTASKITEM hTask, LPCTSTR szCategory)
@@ -2317,7 +2317,7 @@ int CTaskFile::GetTaskTags(HTASKITEM hTask, CStringArray& aTags) const
 
 int CTaskFile::GetTaskFileLinks(HTASKITEM hTask, CStringArray& aFiles) const
 {
-	return GetTaskArray(hTask, TDL_TASKFILEREFPATH, aFiles, FALSE);
+	return GetTaskArray(hTask, TDL_TASKFILELINKPATH, aFiles, FALSE);
 }
 
 int CTaskFile::GetTaskDependencies(HTASKITEM hTask, CStringArray& aDepends) const
@@ -2622,12 +2622,12 @@ LPCTSTR CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, int nIndex) const
 
 int CTaskFile::GetTaskFileLinkCount(HTASKITEM hTask) const
 {
-	return GetTaskArraySize(hTask, TDL_TASKFILEREFPATH);
+	return GetTaskArraySize(hTask, TDL_TASKFILELINKPATH);
 }
 
 LPCTSTR CTaskFile::GetTaskFileLink(HTASKITEM hTask, int nIndex) const
 {
-	return GetTaskArrayItem(hTask, TDL_TASKFILEREFPATH, nIndex);
+	return GetTaskArrayItem(hTask, TDL_TASKFILELINKPATH, nIndex);
 }
 
 bool CTaskFile::IsTaskGoodAsDone(HTASKITEM hTask) const
@@ -2660,7 +2660,7 @@ LPCTSTR CTaskFile::GetTaskStatus(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskFileLinkPath(HTASKITEM hTask) const
 {
-	return GetTaskString(hTask, TDL_TASKFILEREFPATH);
+	return GetTaskString(hTask, TDL_TASKFILELINKPATH);
 }
 
 LPCTSTR CTaskFile::GetTaskCreatedBy(HTASKITEM hTask) const
@@ -3308,7 +3308,7 @@ LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay
 	case TDCA_CUSTOMATTRIB:	return TDL_TASKCUSTOMATTRIBDATA;
 	case TDCA_DEPENDENCY:	return TDL_TASKDEPENDENCY;
 	case TDCA_EXTERNALID:	return TDL_TASKEXTERNALID;
-	case TDCA_FILEREF:		return TDL_TASKFILEREFPATH;
+	case TDCA_FILELINK:		return TDL_TASKFILELINKPATH;
 	case TDCA_FLAG:			return TDL_TASKFLAG;
 	case TDCA_HTMLCOMMENTS: return TDL_TASKHTMLCOMMENTS;
 	case TDCA_ICON:			return TDL_TASKICON;
@@ -3371,7 +3371,7 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 		case TDCA_ALLOCTO:
 		case TDCA_CATEGORY:
 		case TDCA_DEPENDENCY:
-		case TDCA_FILEREF:
+		case TDCA_FILELINK:
 		case TDCA_TAGS:
 			{
 				DISPLAYSTRING = FormatTaskArray(hTask, szAttrib);
@@ -3665,9 +3665,9 @@ bool CTaskFile::SetTaskLock(HTASKITEM hTask, bool bLocked)
 	return (SetTaskLock(hTask, bLocked, FALSE) != FALSE);
 }
 
-bool CTaskFile::SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileRefpath)
+bool CTaskFile::SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileLink)
 {
-	return SetTaskString(hTask, TDL_TASKFILEREFPATH, szFileRefpath);
+	return SetTaskString(hTask, TDL_TASKFILELINKPATH, szFileLink);
 }
 
 bool CTaskFile::SetTaskCreatedBy(HTASKITEM hTask, LPCTSTR szCreatedBy)

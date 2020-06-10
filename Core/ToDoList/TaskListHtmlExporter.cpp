@@ -451,14 +451,14 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		}
 		break;
 		
-	case TDCA_FILEREF:
+	case TDCA_FILELINK:
 		if (!sItem.IsEmpty())
 		{
 			// do it over creating a link for each file ref
-			CString sFileRefs;
-			int nNumFileRefs = pTasks->GetTaskFileLinkCount(hTask);
+			CString sFileLinks;
+			int nNumFiles = pTasks->GetTaskFileLinkCount(hTask);
 
-			for (int nFile = 0; nFile < nNumFileRefs; nFile++) 
+			for (int nFile = 0; nFile < nNumFiles; nFile++) 
 			{ 
 				CString sFilePath = pTasks->GetTaskFileLink(hTask, nFile), sFileName;
 
@@ -475,16 +475,16 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 						sFileName = sFilePath;
 				}
 
-				CString sFileRef;
-				sFileRef.Format(_T("<a href=\"%s\">%s</a>"), sFilePath, sFileName);
+				CString sFileLink;
+				sFileLink.Format(_T("<a href=\"%s\">%s</a>"), sFilePath, sFileName);
 
-				if (!sFileRefs.IsEmpty())
-					sFileRefs += ' ';
+				if (!sFileLinks.IsEmpty())
+					sFileLinks += ' ';
 
-				sFileRefs += sFileRef;
+				sFileLinks += sFileLink;
 			} 
 
-			sItem = FormatAttribute(nAttrib, sAttribLabel, sFileRefs, FALSE); // FALSE = Don't encode
+			sItem = FormatAttribute(nAttrib, sAttribLabel, sFileLinks, FALSE); // FALSE = Don't encode
 			bColor = FALSE;
 		}
 		break;

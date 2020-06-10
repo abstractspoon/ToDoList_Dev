@@ -571,7 +571,7 @@ CString TODOITEM::GetTag(int nTag) const
 	return EMPTY_STR;
 }
 
-CString TODOITEM::GetFileRef(int nFile) const
+CString TODOITEM::GetFileLink(int nFile) const
 {
 	if (nFile < aFileLinks.GetSize())
 		return aFileLinks[nFile];

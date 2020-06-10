@@ -9,7 +9,7 @@
 #endif // _MSC_VER > 1000
 
 const LPCTSTR FM_CUSTOMSTATUS			= _T("TaskStatus");
-const LPCTSTR FM_CUSTOMFILEREF			= _T("TaskFileReferencePath");
+const LPCTSTR FM_CUSTOMFILELINK			= _T("TaskFileReferencePath");
 const LPCTSTR FM_CUSTOMCOLOR			= _T("TaskColor");
 const LPCTSTR FM_CUSTOMPRIORITY			= _T("TaskPriority");
 const LPCTSTR FM_CUSTOMRISK				= _T("TaskRisk");

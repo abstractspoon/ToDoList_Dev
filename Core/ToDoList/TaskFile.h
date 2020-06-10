@@ -296,7 +296,7 @@ public:
 	//////////////////////////////////////////////////////////////
 	// ITaskList14 implementation 
 	int GetTaskFileLinkCount(HTASKITEM hTask) const;
-	bool AddTaskFileLink(HTASKITEM hTask, LPCTSTR szFileRef);
+	bool AddTaskFileLink(HTASKITEM hTask, LPCTSTR szFileLink);
 	LPCTSTR GetTaskFileLink(HTASKITEM hTask, int nIndex) const;
 	bool IsTaskGoodAsDone(HTASKITEM hTask) const;
 	LPCTSTR GetTaskCustomDateString(HTASKITEM hTask, LPCTSTR szID) const; // DEPRECATED
@@ -497,7 +497,7 @@ public:
 	bool SetTaskAllocatedBy(HTASKITEM hTask, LPCTSTR szAllocBy);
 	bool SetTaskCategory(HTASKITEM hTask, LPCTSTR szCategory);
 	bool SetTaskStatus(HTASKITEM hTask, LPCTSTR szStatus);
-	bool SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileRefpath);
+	bool SetTaskFileLinkPath(HTASKITEM hTask, LPCTSTR szFileLink);
 
 	bool SetTaskColor(HTASKITEM hTask, unsigned long nColor);
 	bool SetTaskPriority(HTASKITEM hTask, int nPriority);

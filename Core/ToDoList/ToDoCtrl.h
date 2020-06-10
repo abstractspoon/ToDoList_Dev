@@ -242,10 +242,10 @@ public:
 	int GetSelectedTaskCategories(CStringArray& aCats) const { return m_taskTree.GetSelectedTaskCategories(aCats); }
 	int GetSelectedTaskDependencies(CStringArray& aDepends) const { return m_taskTree.GetSelectedTaskDependencies(aDepends); }
 	int GetSelectedTaskTags(CStringArray& aTags) const { return m_taskTree.GetSelectedTaskTags(aTags); }
-	CString GetSelectedTaskFileRef(int nFile) const;
-	int GetSelectedTaskFileRefCount() const { return m_taskTree.GetSelectedTaskFileRefCount(); }
-	int GetSelectedTaskFileRefs(CStringArray& aFiles) const;
-	BOOL GotoSelectedTaskFileRef(int nFile);
+	CString GetSelectedTaskFileLink(int nFile) const;
+	int GetSelectedTaskFileLinkCount() const { return m_taskTree.GetSelectedTaskFileLinkCount(); }
+	int GetSelectedTaskFileLinks(CStringArray& aFiles) const;
+	BOOL GotoSelectedTaskFileLink(int nFile);
 	CString GetSelectedTaskExtID() const { return m_taskTree.GetSelectedTaskExtID(); }
 	int GetSelectedTaskPercent() const { return m_taskTree.GetSelectedTaskPercent(); }
 	int GetSelectedTaskPriority() const { return m_taskTree.GetSelectedTaskPriority(); }
@@ -296,7 +296,7 @@ public:
 	BOOL SetSelectedTaskCategories(const CStringArray& aCats, BOOL bAppend = FALSE);
 	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppend = FALSE);
 	BOOL SetSelectedTaskTags(const CStringArray& aTags, BOOL bAppend = FALSE);
-	BOOL SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAppend = FALSE);
+	BOOL SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend = FALSE);
 
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset = FALSE);
 	BOOL SetSelectedTaskPriority(int nPriority, BOOL bOffset = FALSE);
@@ -463,7 +463,7 @@ protected:
 	CTDLCommentsCtrl m_ctrlComments;
 	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	CEnEdit m_eExternalID, m_eDependency;
-	CFileComboBox m_cbFileRef;
+	CFileComboBox m_cbFileLink;
 	CMaskEdit m_ePercentDone, m_eCost;
 	CPopupEditCtrl m_eTaskName;
 	CSpinButtonCtrl m_spinPercent;
@@ -484,7 +484,7 @@ protected:
 
 	CTDCStyleMap m_styles;
 	CString m_sXmlHeader, m_sXslHeader;
-	CTaskListDropTarget m_dtTree, m_dtFileRef;
+	CTaskListDropTarget m_dtTree, m_dtFileLink;
 	CString m_sLastSavePath;
 	CString m_sAltPrefsKey;
 	int m_nCommentsSize;
@@ -525,7 +525,7 @@ protected:
 	CTDCFindReplace m_findReplace;
 	CTDCReminderHelper m_reminders;
 
-	CStringArray m_aFileRefs;
+	CStringArray m_aFileLinks;
 	CString m_sTextComments;
 	CString m_sAllocBy;
 	CString m_sStatus;
@@ -606,7 +606,7 @@ protected:
 	afx_msg void OnStartDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnDueDatechange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnCompletionDatechange(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnGotoFileRef();
+	afx_msg void OnGotoFileLink();
 
 	afx_msg void OnTreeSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnTreeClick(NMHDR* pNMHDR, LRESULT* pResult);
@@ -630,8 +630,8 @@ protected:
 	afx_msg void OnSelChangeStatus();
 	afx_msg void OnSelChangeVersion();
 	afx_msg void OnSelChangeCategory();
-	afx_msg void OnSelChangeFileRefPath();
-	afx_msg void OnCancelChangeFileRefPath();
+	afx_msg void OnSelChangeFileLinkPath();
+	afx_msg void OnCancelChangeFileLinkPath();
 	afx_msg void OnSelChangeTag();
 	afx_msg void OnSelCancelAllocTo();
 	afx_msg void OnSelCancelCategory();
@@ -784,11 +784,11 @@ protected:
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data, BOOL bCtrlEdited);
 	BOOL ClearSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bCtrlEdited);
-	int GetSelectedTaskFileRefs(CStringArray& aFiles, BOOL bFullPath) const;
-	CString GetSelectedTaskFileRef(int nFile, BOOL bFullPath) const;
+	int GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPath) const;
+	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
-	BOOL SetSelectedTaskFileRefs(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
+	BOOL SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
 	TDC_SET SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, CDWordSet& mapProcessed);
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);

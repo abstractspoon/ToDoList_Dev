@@ -426,7 +426,7 @@ protected:
 	afx_msg void OnEditCopyashtml();
 	afx_msg void OnEditCopyastext();
 	afx_msg void OnEditCut();
-	afx_msg void OnEditOpenfileref(UINT nCmdID);
+	afx_msg void OnEditOpenFileLink(UINT nCmdID);
 	afx_msg void OnEditPasteAfter();
 	afx_msg void OnEditPasteSub();
 	afx_msg void OnEditAddFileLink();
@@ -500,7 +500,7 @@ protected:
 	afx_msg void OnUpdateDeletetask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditCopy(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditCut(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateEditOpenfileref(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditOpenFileLink(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteAfter(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditPasteSub(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditAddFileLink(CCmdUI* pCmdUI);

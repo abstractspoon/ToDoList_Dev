@@ -131,10 +131,10 @@ namespace SampleUIExtension
                 value.Add(task.GetTimeSpent(ref units, false).ToString() + units);
             }
 
-            if (tasks.IsAttributeAvailable(Task.Attribute.FileReference))
+            if (tasks.IsAttributeAvailable(Task.Attribute.FileLink))
             {
-                attrib.Add("File Reference");
-                value.Add(task.FormatFileReference(", "));
+                attrib.Add("File Link");
+                value.Add(task.FormatFileLink(", "));
             }
 
             if (tasks.IsAttributeAvailable(Task.Attribute.Comments))
