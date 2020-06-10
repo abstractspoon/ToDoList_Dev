@@ -459,13 +459,16 @@ void CTDLWebUpdateProgressPage::SetProgressStatus(TDL_WEBUPDATE_PROGRESS nStatus
 		m_lcProgress.SetItemText(nCurItem, STATUS_COL, m_sDone);
 	
 	// Add new item
-	int nNewItem = m_lcProgress.InsertItem((nCurItem + 1), _T(""));
+	if (nStatus != TDLWP_COMPLETE)
+	{
+		int nNewItem = m_lcProgress.InsertItem((nCurItem + 1), _T(""));
 
-	m_lcProgress.SetItemText(nNewItem, ITEM_COL, Misc::Format(_T("%d."), nNewItem + 1)); // one-based
-	m_lcProgress.SetItemText(nNewItem, DESCRIPTION_COL, m_aProgressDescriptions[nNewItem]);
+		m_lcProgress.SetItemText(nNewItem, ITEM_COL, Misc::Format(_T("%d."), nNewItem + 1)); // one-based
+		m_lcProgress.SetItemText(nNewItem, DESCRIPTION_COL, m_aProgressDescriptions[nNewItem]);
 
-	if (nNewItem == 0)
-		m_lcProgress.SetItemText(nNewItem, STATUS_COL, _T("0%"));
+		if (nNewItem == 0)
+			m_lcProgress.SetItemText(nNewItem, STATUS_COL, _T("0%"));
+	}
 
 	m_lcProgress.UpdateWindow();
 }
