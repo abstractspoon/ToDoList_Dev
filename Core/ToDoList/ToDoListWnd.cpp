@@ -2239,7 +2239,7 @@ void CToDoListWnd::HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTaskList)
 		FileMisc::LogText(_T("Loading of the file '%s' failed with the error code: %d"), szTaskList, nErr);
 		///////////////////////////////////////////////////////////////////////
 
-		CMessageBox::AfxShow(IDS_OPENTASKLIST_TITLE, sMessage, MB_OK);
+		CMessageBox::AfxShow(IDS_OPENTASKLIST_TITLE, sMessage, MB_OK | MB_ICONWARNING);
 	}
 }
 
@@ -2363,32 +2363,10 @@ TDC_PREPAREPATH CToDoListWnd::PrepareFilePath(CString& sFilePath, TSM_TASKLISTIN
 	// if it starts with a colon then we need to find the removable drive it's stored on
 	else if (!sFilePath.IsEmpty())
 	{
-		if (sFilePath[0] == ':')
-		{
-			for (int nDrive = 4; nDrive <= 26; nDrive++) // from D: upwards
-			{
-				if (CDriveInfo::GetType(nDrive) == DRIVE_REMOVABLE)
-				{
-					CString sTryPath = CDriveInfo::GetLetter(nDrive) + sFilePath;
+		FileMisc::MakeFullPath(sFilePath, FileMisc::GetAppFolder());
 
-					if (FileMisc::FileExists(sTryPath))
-					{
-						sFilePath = sTryPath;
-						break; // finished
-					}
-				}
-			}
-		}
-		else
-		{
-			FileMisc::MakeFullPath(sFilePath, FileMisc::GetAppFolder()); // handle relative paths
-		}
-
-		// check for existence
-		if (FileMisc::FileExists(sFilePath))
-			nType = TDCPP_FILE;
-		else
-			sFilePath.Empty();
+		// Don't check for existence
+		nType = TDCPP_FILE;
 	}
 	
 	return nType;
@@ -2487,14 +2465,14 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 				{
 					TDC_FILE nResult = OpenTaskList(sLastFile, FALSE);
 
-					// if the last active tasklist was cancelled or its an 
-					// inaccessible network path then delay load it and mark the last active todoctrl as not found
+					// if the last active tasklist couldn't be loaded for any reason
+					// then delay load it and mark the last active todoctrl as not found
 					if (bActiveTDC && (nResult != TDCF_SUCCESS))
 					{
 						sOrgLastActiveFile = sLastActiveFile;
 						sLastActiveFile.Empty();
 
-						if ((nResult == TDCF_CANCELLED) && bCanDelayLoad)
+						if (bCanDelayLoad)
 							DelayOpenTaskList(sLastFile);
 					}
 				}
@@ -2517,7 +2495,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 					// ignore original active tasklist
 					if (tdc.GetFilePath() != sOrgLastActiveFile)
 					{
-						if (VerifyTaskListOpen(nTDC, FALSE))
+						if (VerifyTaskListOpen(nTDC, FALSE, FALSE))
 							sLastActiveFile = tdc.GetFilePath();
 					}
 				}
@@ -2526,8 +2504,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 			// if nothing suitable found then create an empty tasklist
 			if (sLastActiveFile.IsEmpty())
 			{
-				if (GetTDCCount() == 0)
-					CreateNewTaskList(FALSE);
+				CreateNewTaskList(FALSE);
 			}
 			else if (!SelectToDoCtrl(sLastActiveFile, FALSE))
 			{
@@ -4298,7 +4275,7 @@ TDC_FILE CToDoListWnd::DelayOpenTaskList(LPCTSTR szFilePath)
 		// and the user wants notification
 		int nNotifyDueBy = Prefs().GetNotifyDueByOnLoad();
 
-		if (nNotifyDueBy != PFP_DONTNOTIFY && CDateHelper::IsDateSet(dtEarliest.m_dt))
+		if ((nNotifyDueBy != PFP_DONTNOTIFY) && CDateHelper::IsDateSet(dtEarliest.m_dt))
 		{
 			// check the date against when the user wants notifying
 			DH_DATE nDate = DHD_TODAY;
@@ -4489,6 +4466,8 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 
 TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath, TSM_TASKLISTINFO* pInfo)
 {
+	ASSERT(!Misc::IsEmpty(szFilePath));
+
 	CString sFilePath(szFilePath);
 	CTaskFile tasks;
 
@@ -4510,7 +4489,9 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 					return TDCF_CANCELLED;
 			}
 			else
+			{
 				storageInfo = *pInfo;
+			}
 
 			// else
 			sFilePath = storageInfo.szLocalFileName;
@@ -4522,20 +4503,13 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 		break;
 		
 	case TDCPP_FILE:
-		if (sFilePath.IsEmpty()) // handle bad path
-		{
-			if (!Misc::IsEmpty(szFilePath))
-				return TDCF_NOTEXIST;
-
-			// else
-			sFilePath = pTDC->GetFilePath(); // ie. reload
-		}
+		if (!FileMisc::FileExists(sFilePath))
+			return TDCF_NOTEXIST;
 		break;
 		
 	case TDCPP_NONE:
-	default:
 		ASSERT(0);
-		break;
+		return TDCF_OTHER;
 	}
 	
 	ASSERT(FileMisc::FileExists(sFilePath));
@@ -8436,7 +8410,7 @@ int CToDoListWnd::GetSelToDoCtrl() const
 		return -1;
 }
 
-BOOL CToDoListWnd::VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks)
+BOOL CToDoListWnd::VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks, BOOL bNotifyError)
 {
 	if (!m_mgrToDoCtrls.IsLoaded(nIndex))
 	{
@@ -8450,7 +8424,9 @@ BOOL CToDoListWnd::VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks)
 			sFilePath = storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords());
 		}
 
-		if (OpenTaskList(&tdc, sFilePath, &storageInfo) == TDCF_SUCCESS)
+		TDC_FILE nRes = OpenTaskList(&tdc, sFilePath, &storageInfo);
+		
+		if (nRes == TDCF_SUCCESS)
 		{
 			// make sure hidden windows stay hidden
 			if (nIndex != GetSelToDoCtrl())
@@ -8469,7 +8445,12 @@ BOOL CToDoListWnd::VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks)
 
 			return TRUE;
 		}
+		else if (bNotifyError)
+		{
+			HandleLoadTasklistError(nRes, sFilePath);
+		}
 
+		// else
 		return FALSE;
 	}
 
@@ -8489,7 +8470,7 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 		// if the tasklist is not loaded and we verify its loading
 		// then we know that the password (if there is one) has been 
 		// verified and doesn't need checking again
-		if (!m_mgrToDoCtrls.IsLoaded(nIndex) )
+		if (!m_mgrToDoCtrls.IsLoaded(nIndex))
 		{
 			if (!VerifyTaskListOpen(nIndex, nNotifyDueTasksBy == -1))
 			{

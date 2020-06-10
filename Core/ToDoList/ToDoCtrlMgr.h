@@ -182,13 +182,11 @@ protected:
 protected:
 	TDCITEM& GetTDCItem(int nIndex);
 	const TDCITEM& GetTDCItem(int nIndex) const;
+	const CPreferencesDlg& Prefs() const;
 
 	// sort function
 	static int SortProc(const void* v1, const void* v2);
 	BOOL AreToDoCtrlsSorted() const;
-
-	BOOL PathTypeSupportsSourceControl(TDCM_PATHTYPE nType) const;
-	const CPreferencesDlg& Prefs() const;
 
 	int UpdateTabItemImage(int nIndex) const;
 	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nKeepBackups) const;

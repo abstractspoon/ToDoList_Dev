@@ -1509,7 +1509,7 @@ END
 IDD_TDLIMPORTEXPORT_DIALOG DIALOGEX 0, 0, 400, 289
 STYLE WS_MAXIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 CAPTION "Import Tasks from Tasklist"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,289,268,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,344,268,50,14
@@ -4518,6 +4518,7 @@ BEGIN
     IDS_OA_ENDDATE          "End Date"
     IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
     IDS_ADVANCEDFILTERPLACEHOLDER "Find Tasks Filters"
+    IDS_TABTIP_NOTFOUND     "File not found (%s)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4566,7 +4567,7 @@ BEGIN
     IDS_TDLBC_ID            "Task ID"
     IDS_TDLBC_POS           "Position"
     IDS_TDLBC_PERCENT       "Percent Complete"
-    IDS_TDLBC_FILELINK       "File Link"
+    IDS_TDLBC_FILELINK      "File Link"
     IDS_TDLBC_FLAG          "Flag"
     IDS_TDLBC_TRACKTIME     "Track Time"
     IDS_PSP_SHORTCUT        "Shortcut"
@@ -4646,7 +4647,7 @@ BEGIN
     IDS_MODIFIEDELSEWHERE   "The file '%s' has been modified outside of ToDoList."
     IDS_TASKLISTSAUTOCHECKEDOUT 
                             "The following tasklists have been checked out:\n\n%s"
-    IDS_SETFILELINK_TITLE    "Select File to Link to Task"
+    IDS_SETFILELINK_TITLE   "Select File to Link to Task"
     IDS_CHECKEDOUTBYOTHER   "'%s' could not be checked out \nbecause it is currently checked out to '%s' (Last saved: %s)."
     IDS_SAVEBEFORECHECKIN   "Would you like to save your changes before checking in?"
     IDS_TASKLISTSAUTOCHECKEDIN 
@@ -4776,7 +4777,7 @@ BEGIN
     IDS_TDC_FIELD_ALLOCBY   "A&llocated By"
     IDS_TDC_FIELD_STATUS    "St&atus"
     IDS_TDC_FIELD_CATEGORY  "Cate&gory"
-    IDS_TDC_FIELD_FILELINK   "File &Link"
+    IDS_TDC_FIELD_FILELINK  "File &Link"
     IDS_TDC_FIELD_COMMENTS  "C&omments"
     IDS_TDC_FIELD_PROJECT   "Pro&ject"
     IDS_TDC_FIELD_RISK      "Ris&k"
@@ -4918,7 +4919,7 @@ BEGIN
                             "The uninstaller could not be run at this time.\n\nIf this was due to Windows SmartScreen, you may need to temporarily disable SmartScreen before trying again."
     IDS_UPDATER_SMARTSCREENBLOCK 
                             "The updater could not be run at this time.\n\nIf this was due to Windows SmartScreen, you may need to temporarily disable SmartScreen before trying again."
-    IDS_EDIT_OPENFILELINK    "Open Task File Link"
+    IDS_EDIT_OPENFILELINK   "Open Task File Link"
     IDS_TE_WEEKDAYS         "Weekdays"
     IDS_WEEKDAYS_ABBREV     "d"
     IDS_USERTOOL_FOLDERPROMPT "Folder prompt"
@@ -5044,7 +5045,7 @@ BEGIN
     IDS_TABTIP_READONLY     "Read-only"
     IDS_TABTIP_CHECKEDIN    "Checked in (read-only)"
     IDS_TABTIP_CHECKEDOUT   "Checked out"
-    IDS_TABTIP_NOTLOADED    "Not Yet Loaded"
+    IDS_TABTIP_NOTLOADED    "Not yet loaded (%s)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5119,7 +5120,8 @@ BEGIN
     IDS_CMDLINE_TASKTIMEEST "-te <hrs>\tSets the 'Time Estimate' for the currently selected task"
     IDS_CMDLINE_TASKTIMESPENT 
                             "-ts <hrs>\tSets the 'Time Spent' for the currently selected task"
-    IDS_CMDLINE_TASKFILELINK "-fr <path>\tSets the 'File Link' for the currently selected task"
+    IDS_CMDLINE_TASKFILELINK 
+                            "-fr <path>\tSets the 'File Link' for the currently selected task"
     IDS_CMDLINE_TASKALLOCBY "-ab <alloc by>\tSets the 'Allocated By' for the currently selected task"
     IDS_CMDLINE_TASKALLOCTO "-at <alloc to>\tSets the 'Allocated To' for the currently selected task"
     IDS_CMDLINE_TASKSTARTDATE 
@@ -5689,7 +5691,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_TABTIP_TIMETRACKING "Time Tracking"
+    IDS_TABTIP_TIMETRACKING "Time-tracking"
     IDS_REPLACEINTASKCOMMENTS "Replace in Comments"
     IDS_FINDINTASKCOMMENTS  "Find in Comments"
     IDS_SEARCHPREFS_PROMPT  "Search Preferences"

@@ -6206,23 +6206,23 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 
 BOOL CToDoCtrl::DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue)
 {
-	ASSERT (m_bDelayLoaded || !HasFilePath());
-
-	m_bDelayLoaded = FALSE;
-	CTaskFile temp;
-	
-	if (temp.LoadHeader(sFilePath) && (temp.IsArchive() || temp.GetEarliestTaskDueDate(dtEarliestDue)))
+	// Can only delay load an unloaded tasklist
+	if (!HasFilePath())
 	{
-		m_bDelayLoaded = TRUE;
+		CTaskFile temp;
+	
+		if (temp.LoadHeader(sFilePath) && (temp.IsArchive() || temp.GetEarliestTaskDueDate(dtEarliestDue)))
+		{
+			SetProjectName(temp.GetProjectName());
+			temp.GetCustomAttributeDefs(m_aCustomAttribDefs);
+		}
 
-		// save off some of the header info
 		SetFilePath(sFilePath);
-		SetProjectName(temp.GetProjectName());
 		SetModified(FALSE);
 
-		temp.GetCustomAttributeDefs(m_aCustomAttribDefs);
+		m_bDelayLoaded = TRUE;
 	}
-
+	
 	return m_bDelayLoaded;
 }
 

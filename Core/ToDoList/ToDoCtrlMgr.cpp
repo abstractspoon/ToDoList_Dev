@@ -37,7 +37,8 @@ enum STATUS_IMAGE
 	IM_CHECKEDIN, 
 	IM_CHECKEDOUT, 
 	IM_NOTLOADED,
-	IM_TIMETRACKING
+	IM_TIMETRACKING,
+	IM_NOTFOUND
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1161,7 +1162,10 @@ int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 	
 	if (!tci.bLoaded)
 	{
-		nImage = IM_NOTLOADED;
+		if (!FileMisc::FileExists(tci.pTDC->GetFilePath()))
+			nImage = IM_NOTFOUND;
+		else
+			nImage = IM_NOTLOADED;
 	}
 	else if (tci.bLastStatusReadOnly > 0)
 	{
@@ -1229,11 +1233,19 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 		break;
 
 	case IM_NOTLOADED:	
-		sTooltip.LoadString(IDS_TABTIP_NOTLOADED);
+		sTooltip.Format(IDS_TABTIP_NOTLOADED, tci.pTDC->GetFilePath());
+		break;
+
+	case IM_NOTFOUND:
+		sTooltip.Format(IDS_TABTIP_NOTFOUND, tci.pTDC->GetFilePath());
 		break;
 		
 	case IM_TIMETRACKING:	
 		sTooltip.LoadString(IDS_TABTIP_TIMETRACKING);
+		break;
+
+	case IM_NONE:
+		sTooltip = tci.pTDC->GetFilePath();
 		break;
 	}
 

@@ -613,7 +613,7 @@ protected:
 	TDC_PREPAREPATH PrepareFilePath(CString& sFilePath, TSM_TASKLISTINFO* pInfo = NULL);
 
 	BOOL ReloadTaskList(int nIndex, BOOL bNotifyDueTasks = TRUE, BOOL bNotifyError = TRUE);
-	BOOL VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks);
+	BOOL VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks, BOOL bNotifyError = TRUE);
 	BOOL ImportFile(LPCTSTR szFilePath, BOOL bSilent);
 
 	void InitShortcutManager();
