@@ -152,10 +152,10 @@ namespace FileMisc
 
 	BOOL CreateFolder(LPCTSTR szFolder);
 	BOOL CreateFolderFromFilePath(LPCTSTR szFilePath);
-	BOOL FolderExists(LPCTSTR szFolder);
+	BOOL FolderExists(LPCTSTR szFolder, BOOL bEmptyIsCwd = TRUE);
 	BOOL FileExists(LPCTSTR szFile);
 	BOOL IsPath(LPCTSTR szPath);
-	BOOL PathExists(LPCTSTR szPath); // file or folder
+	BOOL PathExists(LPCTSTR szPath, BOOL bEmptyIsCwd = TRUE); // file or folder
 	BOOL FolderFromFilePathExists(LPCTSTR szFilePath);
 	BOOL PathHasWildcard(LPCTSTR szFilePath);
 	BOOL IsFileWritable(LPCTSTR szFilePath);

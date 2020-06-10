@@ -678,20 +678,20 @@ BOOL FileMisc::IsPath(LPCTSTR szPath)
 			(sPath.Find(_T("..\\")) == 0));
 }
 
-BOOL FileMisc::PathExists(LPCTSTR szPath)
+BOOL FileMisc::PathExists(LPCTSTR szPath, BOOL bEmptyIsCwd)
 {
 	// special case
-	if (Misc::IsEmpty(szPath)) // cwd
-		return TRUE;
+	if (Misc::IsEmpty(szPath))
+		return bEmptyIsCwd;
 
 	return (::GetFileAttributes(szPath) != 0xffffffff);
 }
 
-BOOL FileMisc::FolderExists(LPCTSTR szFolder)
+BOOL FileMisc::FolderExists(LPCTSTR szFolder, BOOL bEmptyIsCwd)
 {
 	// special case
-	if (Misc::IsEmpty(szFolder)) // cwd
-		return TRUE;
+	if (Misc::IsEmpty(szFolder))
+		return bEmptyIsCwd;
 
 	if (lstrlen(szFolder) > _MAX_PATH)
 		return FALSE;
