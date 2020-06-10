@@ -97,7 +97,7 @@ void COdbcHelper::MapAttributeValues(const ODBCSETUP& setup, const ODBCTASK& tas
 			// simple strings
 			case TDCA_TASKNAME:		Misc::AddUniqueItem(task.sTitle,		*pMapping); break;
 			case TDCA_STATUS:		Misc::AddUniqueItem(task.sStatus,		*pMapping); break;
-			case TDCA_FILEREF:		Misc::AddUniqueItem(task.sFileRef,		*pMapping); break;
+			case TDCA_FILELINK:		Misc::AddUniqueItem(task.sFileLink,		*pMapping); break;
 			case TDCA_COMMENTS:		Misc::AddUniqueItem(task.sComments,		*pMapping); break;
 			case TDCA_CREATEDBY:	Misc::AddUniqueItem(task.sCreatedBy,	*pMapping); break;
 			case TDCA_VERSION:		Misc::AddUniqueItem(task.sVersion,		*pMapping); break;
@@ -296,7 +296,7 @@ CString COdbcHelper::GetAttributeValueAsSQLString(const ODBCTASK& task, TDC_ATTR
 	// simple strings
 	case TDCA_TASKNAME:		GET_ATTRIB_STR(OT_TITLE,			task.sTitle);
 	case TDCA_STATUS:		GET_ATTRIB_STR(OT_STATUS,			task.sStatus);
-	case TDCA_FILEREF:		GET_ATTRIB_STR(OT_FILEREF,			task.sFileRef);
+	case TDCA_FILELINK:		GET_ATTRIB_STR(OT_FILELINK,			task.sFileLink);
 	case TDCA_COMMENTS:		GET_ATTRIB_STR(OT_COMMENTS,			task.sComments);
 	case TDCA_CREATEDBY:	GET_ATTRIB_STR(OT_CREATEDBY,		task.sCreatedBy);
 	case TDCA_VERSION:		GET_ATTRIB_STR(OT_VERSION,			task.sVersion);
@@ -391,7 +391,7 @@ CDBVariant* COdbcHelper::GetAttributeValue(const ODBCTASK& task, TDC_ATTRIBUTE n
 	// simple strings
 	case TDCA_TASKNAME:		GET_ATTRIB_VAR(OT_TITLE,		task.sTitle);
 	case TDCA_STATUS:		GET_ATTRIB_VAR(OT_STATUS,		task.sStatus);
-	case TDCA_FILEREF:		GET_ATTRIB_VAR(OT_FILEREF,		task.sFileRef);
+	case TDCA_FILELINK:		GET_ATTRIB_VAR(OT_FILELINK,		task.sFileLink);
 	case TDCA_COMMENTS:		GET_ATTRIB_VAR(OT_COMMENTS,		task.sComments);
 	case TDCA_CREATEDBY:	GET_ATTRIB_VAR(OT_CREATEDBY,	task.sCreatedBy);
 	case TDCA_VERSION:		GET_ATTRIB_VAR(OT_VERSION,		task.sVersion);

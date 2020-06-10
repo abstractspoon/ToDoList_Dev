@@ -54,7 +54,7 @@
 #define IDS_TA_ID                       9026
 #define IDS_TA_POS                      9027
 #define IDS_TA_PERCENT                  9028
-#define IDS_TA_FILEREF                  9029
+#define IDS_TA_FILELINK                  9029
 #define IDS_TA_FLAG                     9030
 #define IDS_TA_TRACKTIME                9031
 #define IDS_TA_MODIFYDATE               9032

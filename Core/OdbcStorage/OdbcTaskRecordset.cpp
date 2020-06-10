@@ -243,7 +243,7 @@ BOOL COdbcTaskReader::PopulateTask(ODBCTASK& task)
 		case TDCA_DONEDATE:		GetFieldValue(nField, attrib, task.tDone,			task, OT_DONEDATE);		break;
 		case TDCA_DUEDATE:		GetFieldValue(nField, attrib, task.tDue,			task, OT_DUEDATE);		break;
 		case TDCA_EXTERNALID:	GetFieldValue(nField, attrib, task.sExternalID,		task, OT_EXTERNALID);	break;
-		case TDCA_FILEREF:		GetFieldValue(nField, attrib, task.sFileRef,		task, OT_FILEREF);		break;
+		case TDCA_FILELINK:		GetFieldValue(nField, attrib, task.sFileLink,		task, OT_FILELINK);		break;
 		case TDCA_FLAG:			GetFieldValue(nField, attrib, task.bFlag,			task, OT_FLAG);			break;
 		case TDCA_ICON:			GetFieldValue(nField, attrib, task.sIcon,			task, OT_ICON);			break;
 		case TDCA_LASTMODDATE:	GetFieldValue(nField, attrib, task.tModified,		task, OT_LASTMOD);		break;

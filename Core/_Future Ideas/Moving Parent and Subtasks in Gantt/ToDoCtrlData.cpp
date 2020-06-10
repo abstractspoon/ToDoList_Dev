@@ -887,7 +887,7 @@ BOOL CToDoCtrlData::IsTaskLocked(DWORD dwTaskID) const
 	return pTDI->bLocked;
 }
 
-BOOL CToDoCtrlData::TaskHasFileRef(DWORD dwTaskID) const
+BOOL CToDoCtrlData::TaskHasFileLink(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, FALSE);
@@ -974,15 +974,15 @@ int CToDoCtrlData::GetTaskPercent(DWORD dwTaskID, BOOL bCheckIfDone) const
 	return pTDI->nPercentDone;
 }
 
-CString CToDoCtrlData::GetTaskFileRef(DWORD dwTaskID, int nFileRef) const
+CString CToDoCtrlData::GetTaskFileLink(DWORD dwTaskID, int nFileLink) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
 	
-	return pTDI->GetFileRef(nFileRef);
+	return pTDI->GetFileLink(nFileLink);
 }
 
-int CToDoCtrlData::GetTaskFileRefs(DWORD dwTaskID, CStringArray& aFiles) const
+int CToDoCtrlData::GetTaskFileLinks(DWORD dwTaskID, CStringArray& aFiles) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
@@ -991,7 +991,7 @@ int CToDoCtrlData::GetTaskFileRefs(DWORD dwTaskID, CStringArray& aFiles) const
 	return aFiles.GetSize();
 }
 
-int CToDoCtrlData::GetTaskFileRefCount(DWORD dwTaskID) const
+int CToDoCtrlData::GetTaskFileLinkCount(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
@@ -1238,7 +1238,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 									COPYATTRIB(customComments); 
 									COPYATTRIB(cfComments); break;
 			
-			case TDCA_FILEREF:		COPYATTRIBARR(aFileLinks); break;
+			case TDCA_FILELINK:		COPYATTRIBARR(aFileLinks); break;
 			case TDCA_ALLOCTO:		COPYATTRIBARR(aAllocTo); break;
 			case TDCA_CATEGORY:		COPYATTRIBARR(aCategories); break;
 			case TDCA_TAGS:			COPYATTRIBARR(aTags); break;
@@ -1351,8 +1351,8 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib,
 		nRes = SetTaskDependencies(dwTaskID, CStringArray());
 		break;
 
-	case TDCA_FILEREF:		
-		nRes = SetTaskFileRefs(dwTaskID, CStringArray());
+	case TDCA_FILELINK:		
+		nRes = SetTaskFileLinks(dwTaskID, CStringArray());
 		break;
 		
 	case TDCA_ALLOCBY:		
@@ -1690,7 +1690,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 			pTDIChild->timeEstimate = pTDIParent->timeEstimate;
 		break;
 
-	case TDCA_FILEREF:
+	case TDCA_FILELINK:
 		if (bIncludeBlank || pTDIParent->aFileLinks.GetSize())
 			pTDIChild->aFileLinks.Copy(pTDIParent->aFileLinks);
 		break;
@@ -2587,7 +2587,7 @@ TDC_SET CToDoCtrlData::SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const
 	case TDCA_TAGS:			return SetTaskTags(dwTaskID, aItems, bAppend);
 	case TDCA_ALLOCTO:		return SetTaskAllocTo(dwTaskID, aItems, bAppend);
 	case TDCA_DEPENDENCY:	return SetTaskDependencies(dwTaskID, aItems, bAppend);
-	case TDCA_FILEREF:		return SetTaskFileRefs(dwTaskID, aItems, bAppend);
+	case TDCA_FILELINK:		return SetTaskFileLinks(dwTaskID, aItems, bAppend);
 		break;
 	}
 
@@ -2604,7 +2604,7 @@ int CToDoCtrlData::GetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, CStringAr
 	case TDCA_TAGS:			return GetTaskTags(dwTaskID, aItems);
 	case TDCA_ALLOCTO:		return GetTaskAllocTo(dwTaskID, aItems);
 	case TDCA_DEPENDENCY:	return GetTaskDependencies(dwTaskID, aItems);
-	case TDCA_FILEREF:		return GetTaskFileRefs(dwTaskID, aItems);
+	case TDCA_FILELINK:		return GetTaskFileLinks(dwTaskID, aItems);
 		break;
 	}
 
@@ -2796,12 +2796,12 @@ TDC_SET CToDoCtrlData::EditTaskTimeAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC
 	return SET_CHANGE;
 }
 
-TDC_SET CToDoCtrlData::SetTaskFileRefs(DWORD dwTaskID, const CStringArray& aFileRefs, BOOL bAppend)
+TDC_SET CToDoCtrlData::SetTaskFileLinks(DWORD dwTaskID, const CStringArray& aFileLinks, BOOL bAppend)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 	
-	return EditTaskArrayAttribute(dwTaskID, pTDI, TDCA_FILEREF, pTDI->aFileLinks, aFileRefs, bAppend, TRUE);
+	return EditTaskArrayAttribute(dwTaskID, pTDI, TDCA_FILELINK, pTDI->aFileLinks, aFileLinks, bAppend, TRUE);
 }
 
 BOOL CToDoCtrlData::BeginNewUndoAction(TDC_UNDOACTIONTYPE nType)
@@ -3827,7 +3827,7 @@ BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib
 	case TDCA_ICON:			data.Set(GetTaskIcon(dwTaskID));			break;	
 	case TDCA_LOCK:			data.Set(IsTaskLocked(dwTaskID));			break;	
 
-	case TDCA_FILEREF:	
+	case TDCA_FILELINK:	
 	case TDCA_DEPENDENCY:
 	case TDCA_ALLOCTO:			
 	case TDCA_CATEGORY:			
@@ -3924,7 +3924,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 	case TDCA_FLAG:			return SetTaskFlag(dwTaskID, data.AsBool());
 	case TDCA_LOCK:			return SetTaskLock(dwTaskID, data.AsBool());
 
-	case TDCA_FILEREF:	
+	case TDCA_FILELINK:	
 	case TDCA_DEPENDENCY:
 	case TDCA_ALLOCTO:			
 	case TDCA_CATEGORY:			

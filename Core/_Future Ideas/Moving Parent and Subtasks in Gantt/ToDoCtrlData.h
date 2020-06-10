@@ -116,7 +116,7 @@ public:
 	CString GetTaskCreatedBy(DWORD dwTaskID) const;
 	CString GetTaskStatus(DWORD dwTaskID) const;
 	CString GetTaskDependency(DWORD dwTaskID, int nDepends) const;
-	CString GetTaskFileRef(DWORD dwTaskID, int nFileRef) const;
+	CString GetTaskFileLink(DWORD dwTaskID, int nFileLink) const;
 	CString GetTaskExtID(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
 
@@ -139,8 +139,8 @@ public:
 	int GetTaskCategories(DWORD dwTaskID, CStringArray& aCategories) const;
 	int GetTaskTags(DWORD dwTaskID, CStringArray& aTags) const;
 	int GetTaskDependencies(DWORD dwTaskID, CStringArray& aDepends) const;
-	int GetTaskFileRefs(DWORD dwTaskID, CStringArray& aFiles) const;
-	int GetTaskFileRefCount(DWORD dwTaskID) const;
+	int GetTaskFileLinks(DWORD dwTaskID, CStringArray& aFiles) const;
+	int GetTaskFileLinkCount(DWORD dwTaskID) const;
 	int GetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
 
 	DWORD GetTrueTaskID(DWORD dwTaskID) const;
@@ -166,7 +166,7 @@ public:
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasSubtasks(DWORD dwTaskID) const;
-	BOOL TaskHasFileRef(DWORD dwTaskID) const;
+	BOOL TaskHasFileLink(DWORD dwTaskID) const;
 
 	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const;
@@ -201,7 +201,7 @@ public:
 	TDC_SET SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend = FALSE);
 	TDC_SET SetTaskTags(DWORD dwTaskID, const CStringArray& aTags, BOOL bAppend = FALSE);
 	TDC_SET SetTaskDependencies(DWORD dwTaskID, const CStringArray& aDepends, BOOL bAppend = FALSE);
-	TDC_SET SetTaskFileRefs(DWORD dwTaskID, const CStringArray& aFileRefs, BOOL bAppend = FALSE);
+	TDC_SET SetTaskFileLinks(DWORD dwTaskID, const CStringArray& aFileLinks, BOOL bAppend = FALSE);
 	TDC_SET SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend = FALSE);
 
 	TDC_SET ClearTaskColor(DWORD dwTaskID) { SetTaskColor(dwTaskID, CLR_NONE); }

@@ -37,7 +37,7 @@ enum
 	OT_PERCENT		= 0x00000200,
 	OT_TIMEEST		= 0x00000400,
 	OT_TIMESPENT	= 0x00000800,
-	OT_FILEREF		= 0x00001000,
+	OT_FILELINK		= 0x00001000,
 	OT_COMMENTS		= 0x00002000,
 	OT_FLAG			= 0x00004000,
 	OT_CREATIONDATE = 0x00008000,
@@ -72,7 +72,7 @@ struct ODBCTASK
 
 	CString sTaskKey, sParentKey;
 
-	CString sAllocBy, sComments, sCreatedBy, sVersion, sExternalID, sFileRef, sIcon, sStatus, sTitle;
+	CString sAllocBy, sComments, sCreatedBy, sVersion, sExternalID, sFileLink, sIcon, sStatus, sTitle;
 	CStringArray aAllocTo, aCategories, aTags, aDepends;
 	time64_t tCreation, tStart, tDue, tDone, tModified;
 	double dCost, dTimeEst, dTimeSpent;
@@ -250,7 +250,7 @@ const ATTRIBNAME TASKATTRIB_NAMES[] =
 	{ TDCA_PERCENT,			IDS_TA_PERCENT },
 	{ TDCA_TIMEEST,			IDS_TA_TIMEEST },
 	{ TDCA_TIMESPENT,		IDS_TA_TIMESPENT },
-	{ TDCA_FILEREF,			IDS_TA_FILEREF },
+	{ TDCA_FILELINK,			IDS_TA_FILELINK },
 	{ TDCA_COMMENTS,		IDS_TA_COMMENTS },
 	{ TDCA_FLAG,			IDS_TA_FLAG },
 	{ TDCA_CREATIONDATE,	IDS_TA_CREATEDATE },
