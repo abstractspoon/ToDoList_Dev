@@ -77,12 +77,14 @@ END_MESSAGE_MAP()
 
 int CEnFileDialog::DoModal(IPreferences* pPrefs)
 {
-	// show the new Vista/Windows 7 file dialog
+	// show the new Vista/Windows 7 file dialog under VC6
+#if _MSC_VER < 1300
 	if (COSVersion() >= OSV_VISTA)
 	{
 		m_ofn.lpfnHook = NULL;
 		m_ofn.Flags &= ~OFN_ENABLEHOOK;
 	}
+#endif
 
 	// determine the best file filter for the specified file
 	// if not already specified
