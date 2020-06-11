@@ -402,6 +402,27 @@ CString CToDoCtrlMgr::FormatProjectNameWithFileName(int nIndex) const
 	return sName;
 }
 
+int CToDoCtrlMgr::GetNextMostSelectableToDoCtrl(int nIndex) const
+{
+	int nNextIndex = -1;
+
+	// Sort tasklists in preferred order of selection
+	CArray<TDCITEM, TDCITEM&> aTemp;
+
+	aTemp.Copy(m_aToDoCtrls);
+	aTemp.RemoveAt(nIndex);
+
+	if (aTemp.GetSize() > 0)
+	{
+		Misc::SortArrayT(aTemp, SelectabilitySortProc);
+
+		// First item is the one we want
+		nNextIndex = FindToDoCtrl(aTemp[0].pTDC);
+	}
+
+	ASSERT(nNextIndex != -1);
+	return nNextIndex;
+}
 
 void CToDoCtrlMgr::ClearFilePath(int nIndex)
 {
@@ -434,10 +455,15 @@ TDCM_PATHTYPE CToDoCtrlMgr::RefreshPathType(int nIndex)
 	return tdci.nPathType;
 }
 
+BOOL CToDoCtrlMgr::IsPristine() const
+{
+	return ((GetCount() == 1) && IsPristine(0));
+}
+
 BOOL CToDoCtrlMgr::IsPristine(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
-	
+
 	return (!HasFilePath(nIndex) && !IsModified(nIndex));
 }
 
@@ -446,6 +472,13 @@ BOOL CToDoCtrlMgr::IsLoaded(int nIndex) const
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	return GetTDCItem(nIndex).bLoaded;
+}
+
+BOOL CToDoCtrlMgr::FileExists(int nIndex) const
+{
+	CHECKVALIDINDEXRET(nIndex, FALSE);
+
+	return FileMisc::FileExists(GetTDCItem(nIndex).pTDC->GetFilePath());
 }
 
 BOOL CToDoCtrlMgr::IsModified(int nIndex) const
@@ -807,7 +840,6 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 
 		if (!sKey.IsEmpty())
 		{
-
 			if (tdci.crTab == CLR_NONE)
 				prefs.DeleteProfileEntry(sKey, _T("TabColor"));
 			else
@@ -826,20 +858,9 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 		else
 			nNewSel = nSel;
 
-		// and try to find an already loaded tasklist
+		// If it's not loaded just look for next most selectable
 		if (!IsLoaded(nNewSel))
-		{
-			nIndex = GetCount();
-
-			while (nIndex--)
-			{
-				if (IsLoaded(nIndex))
-				{
-					nNewSel = nIndex;
-					break;
-				}
-			}
-		}
+			nNewSel = GetNextMostSelectableToDoCtrl(nNewSel);
 
 		m_tabCtrl.SetCurSel(nNewSel);
 	}
@@ -1002,12 +1023,12 @@ int CToDoCtrlMgr::SortToDoCtrlsByName()
 {
 	int nSel = GetSelToDoCtrl();
 
-	if (!AreToDoCtrlsSorted())
+	if (!AreToDoCtrlsSortedByName())
 	{
 		// save off current selection 
 		CFilteredToDoCtrl* pTDC = &GetToDoCtrl(nSel);
 
-		qsort(m_aToDoCtrls.GetData(), m_aToDoCtrls.GetSize(), sizeof(TDCITEM), SortProc);
+		qsort(m_aToDoCtrls.GetData(), m_aToDoCtrls.GetSize(), sizeof(TDCITEM), NameSortProc);
 
 		nSel = -1;
 
@@ -1028,10 +1049,10 @@ int CToDoCtrlMgr::SortToDoCtrlsByName()
 	return nSel;
 }
 
-int CToDoCtrlMgr::SortProc(const void* v1, const void* v2)
+int CToDoCtrlMgr::NameSortProc(const void* v1, const void* v2)
 {
-	TDCITEM* pTDCI1 = (TDCITEM*)v1;
-	TDCITEM* pTDCI2 = (TDCITEM*)v2;
+	const TDCITEM* pTDCI1 = (TDCITEM*)v1;
+	const TDCITEM* pTDCI2 = (TDCITEM*)v2;
 
 	CString sName1 = pTDCI1->GetFriendlyProjectName();
 	CString sName2 = pTDCI2->GetFriendlyProjectName();
@@ -1039,7 +1060,52 @@ int CToDoCtrlMgr::SortProc(const void* v1, const void* v2)
 	return sName1.CompareNoCase(sName2);
 }
 
-BOOL CToDoCtrlMgr::AreToDoCtrlsSorted() const
+int CToDoCtrlMgr::SelectabilitySortProc(const void* v1, const void* v2)
+{
+	const TDCITEM* pTDCI1 = (TDCITEM*)v1;
+	const TDCITEM* pTDCI2 = (TDCITEM*)v2;
+
+	// Order of select-ability
+	//
+	// 1. Not previously saved
+	CString sPath1 = pTDCI1->pTDC->GetFilePath();
+	CString sPath2 = pTDCI2->pTDC->GetFilePath();
+
+	if (sPath1.IsEmpty())
+		return -1;
+
+	if (sPath2.IsEmpty())
+		return 1;
+
+	// 2a. Loaded (not encrypted)
+	// 2b. Loaded (encrypted)
+	if (pTDCI1->bLoaded && pTDCI1->bLoaded)
+	{
+		if (!pTDCI1->pTDC->IsEncrypted())
+			return -1;
+
+		if (!pTDCI2->pTDC->IsEncrypted())
+			return 1;
+	}
+
+	if (pTDCI1->bLoaded)
+		return -1;
+
+	if (pTDCI1->bLoaded)
+		return 1;
+
+	// 3. File exists
+	if (FileMisc::FileExists(pTDCI1->pTDC->GetFilePath()))
+		return -1;
+
+	if (FileMisc::FileExists(pTDCI2->pTDC->GetFilePath()))
+		return 1;
+	
+	// else
+	return 0;
+}
+
+BOOL CToDoCtrlMgr::AreToDoCtrlsSortedByName() const
 {
 	if (GetCount() <= 1)
 		return TRUE;

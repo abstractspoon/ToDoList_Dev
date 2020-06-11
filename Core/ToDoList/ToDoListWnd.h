@@ -717,6 +717,7 @@ protected:
 	BOOL VerifyToDoCtrlPassword() const;
 	BOOL VerifyToDoCtrlPassword(int nIndex) const;
 	BOOL SelectTask(CFilteredToDoCtrl& tdc, DWORD dwTaskID);
+	void CheckCloseTasklist(int nIndex);
 
 	// caller must flush todoctrls if required before calling these
 	BOOL CloseToDoCtrl(int nIndex);

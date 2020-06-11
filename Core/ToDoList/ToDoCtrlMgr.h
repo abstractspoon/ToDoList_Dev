@@ -44,6 +44,7 @@ public:
 	inline int GetSelToDoCtrl() const { return m_tabCtrl.GetCurSel(); }
 
 	void SetPrefs(const CPreferencesDlg* pPrefs);
+	BOOL IsPristine() const;
 
 	CFilteredToDoCtrl& GetToDoCtrl(int nIndex);
 	const CFilteredToDoCtrl& GetToDoCtrl(int nIndex) const;
@@ -52,6 +53,7 @@ public:
 	int AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo = NULL, BOOL bLoaded = TRUE);
 	BOOL IsPristine(int nIndex) const;
 	BOOL IsLoaded(int nIndex) const;
+	BOOL FileExists(int nIndex) const;
 	void SetLoaded(int nIndex, BOOL bLoaded = TRUE);
 	BOOL VerifyPassword(int nIndex) const;
 	BOOL AnyIsModified() const;
@@ -61,7 +63,7 @@ public:
 	int FindToDoCtrl(const CFilteredToDoCtrl* pTDC) const;
 	int FindToDoCtrl(LPCTSTR szFilePath) const;
 	int FindToDoCtrl(const TSM_TASKLISTINFO& info) const;
-
+	
 	CString GetFileName(int nIndex, BOOL bStrict = TRUE) const;
 	CString GetFilePath(int nIndex, BOOL bStrict = TRUE) const;
 	CString GetFolderPath(int nIndex) const;
@@ -72,6 +74,7 @@ public:
 	CString GetFriendlyProjectName(int nIndex) const;
 	CString GetDisplayPath(int nIndex) const;
 	CString FormatProjectNameWithFileName(int nIndex) const;
+	int GetNextMostSelectableToDoCtrl(int nIndex) const;
 
 	int GetFileNames(CStringArray& sFileNames, BOOL bStrict = TRUE) const;
 	int GetFilePaths(CStringArray& sFilePaths, BOOL bStrict = TRUE) const;
@@ -184,9 +187,10 @@ protected:
 	const TDCITEM& GetTDCItem(int nIndex) const;
 	const CPreferencesDlg& Prefs() const;
 
-	// sort function
-	static int SortProc(const void* v1, const void* v2);
-	BOOL AreToDoCtrlsSorted() const;
+	// sort functions
+	static int NameSortProc(const void* v1, const void* v2);
+	static int SelectabilitySortProc(const void* v1, const void* v2);
+	BOOL AreToDoCtrlsSortedByName() const;
 
 	int UpdateTabItemImage(int nIndex) const;
 	void BackupLogFiles(const CString& sTDLPath, const CString& sBackupFolder, int nKeepBackups) const;

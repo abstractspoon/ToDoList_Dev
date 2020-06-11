@@ -2501,14 +2501,15 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 				}
 			}
 
-			// if nothing suitable found then create an empty tasklist
-			if (sLastActiveFile.IsEmpty())
+			// if nothing suitable found then select the 'pristine' first tasklist
+			if (sLastActiveFile.IsEmpty() || !SelectToDoCtrl(sLastActiveFile, FALSE))
 			{
-				CreateNewTaskList(FALSE);
+				SelectToDoCtrl(0, FALSE);
 			}
-			else if (!SelectToDoCtrl(sLastActiveFile, FALSE))
+			else // delete the pristine list
 			{
-				SelectToDoCtrl(0, FALSE); // the first one
+				m_dlgTimeTracker.RemoveTasklist(&GetToDoCtrl(0));
+				m_mgrToDoCtrls.RemoveToDoCtrl(0, TRUE);
 			}
 
 			Resize();
@@ -7707,6 +7708,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 	CHoldRedraw hr(bWantHoldRedraw ? GetSafeHwnd() : NULL);
 	
 	// if the active tasklist is unsaved and unmodified then delete it
+/*
 	BOOL bFirstTDC = (GetTDCCount() == 0);
 
 	if (!bFirstTDC)
@@ -7733,6 +7735,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 			}
 		}
 	}
+*/
 	
 	// else
 	CPreferences prefs;
@@ -7787,7 +7790,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 		// rest of runtime preferences
 		UpdateToDoCtrlPreferences(pTDC);
 
-		if (bFirstTDC)
+		if (GetTDCCount() == 0)
 		{
 			// Extensions are 'lazy' loaded so this is the first chance
 			// to allow them to load global preferences
@@ -7876,18 +7879,8 @@ void CToDoListWnd::OnTabCtrlCloseTab(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	NMTABCTRLEX* pNMTCE = (NMTABCTRLEX*)pNMHDR;
 
-	// don't close the tab if only one is open and it is pristine
-	if ((GetTDCCount() == 1) && m_mgrToDoCtrls.IsPristine(0))
-		return;
-
-	// check valid tab
 	if (pNMTCE->iTab >= 0)
-	{
-		CloseToDoCtrl(pNMTCE->iTab);
-		
-		if (!GetTDCCount())
-			CreateNewTaskList(FALSE);
-	}
+		CheckCloseTasklist(pNMTCE->iTab);
 
 	*pResult = 0;
 }
@@ -8371,24 +8364,43 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 
 void CToDoListWnd::OnCloseTasklist() 
 {
-	int nSel = GetSelToDoCtrl();
-	CFilteredToDoCtrl& tdc = GetToDoCtrl(nSel);
+	CheckCloseTasklist(GetSelToDoCtrl());
+}
+
+void CToDoListWnd::CheckCloseTasklist(int nIndex)
+{
+	if (nIndex < 0 || nIndex >= GetTDCCount())
+	{
+		ASSERT(0);
+		return;
+	}
 
 	// make sure there are no edits pending
-	tdc.Flush(TRUE); 
+	GetToDoCtrl(nIndex).Flush(TRUE); 
 	
-	// check if its a pristine tasklist and the last tasklist and 
-	// if so only close it if the default comments type has changed
-	if (m_mgrToDoCtrls.IsPristine(nSel) && GetTDCCount() == 1)
+	// Don't close the tab if it's the only pristine tasklist
+	if (m_mgrToDoCtrls.IsPristine())
 		return;
-	
-	CloseToDoCtrl(nSel);
+
+	// Don't close the tab if it's pristine and there are
+	// no other selectable tasklists
+	if (m_mgrToDoCtrls.IsPristine(nIndex))
+	{
+		int nNextSel = m_mgrToDoCtrls.GetNextMostSelectableToDoCtrl(nIndex);
+		ASSERT(nNextSel != -1);
+
+		if (!m_mgrToDoCtrls.FileExists(nNextSel))
+			return;
+	}
+		
+	CloseToDoCtrl(nIndex);
 	
 	// if empty then create a new dummy item		
 	if (!GetTDCCount())
 		CreateNewTaskList(FALSE);
 	else
 		Resize();
+
 }
 
 BOOL CToDoListWnd::SelectToDoCtrl(LPCTSTR szFilePath, BOOL bCheckPassword, int nNotifyDueTasksBy)
