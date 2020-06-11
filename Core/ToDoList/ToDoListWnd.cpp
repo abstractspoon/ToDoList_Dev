@@ -7707,38 +7707,6 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 	BOOL bWantHoldRedraw = ((m_bVisible > 0) && !IsIconic());
 	CHoldRedraw hr(bWantHoldRedraw ? GetSafeHwnd() : NULL);
 	
-	// if the active tasklist is unsaved and unmodified then delete it
-/*
-	BOOL bFirstTDC = (GetTDCCount() == 0);
-
-	if (!bFirstTDC)
-	{
-		// make sure that we don't accidentally delete a just edited tasklist
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-		tdc.Flush(); 
-		
-		int nSel = GetSelToDoCtrl();
-		
-		if (m_mgrToDoCtrls.IsPristine(nSel))
-		{
-			m_dlgTimeTracker.RemoveTasklist(&tdc);
-			m_mgrToDoCtrls.RemoveToDoCtrl(nSel, TRUE); // TRUE -> Delete
-			
-			// make sure we reset the selection to a valid index
-			if (GetTDCCount())
-			{
-				// try leaving the selection as-is
-				if (nSel >= GetTDCCount())
-					nSel--; // try the preceding item
-				
-				SelectToDoCtrl(nSel, FALSE);
-			}
-		}
-	}
-*/
-	
-	// else
-	CPreferences prefs;
 	TDCCOLEDITFILTERVISIBILITY vis;
 
 	Prefs().GetDefaultColumnEditFilterVisibility(vis);
@@ -7749,6 +7717,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 													m_tdiDefault.cfComments, 
 													vis);
 	// Give it a meaningful maximum size
+	CPreferences prefs;
 	CRect rCtrl;
 	BOOL bMaximized = IsZoomed();
 
