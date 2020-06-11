@@ -6500,7 +6500,7 @@ void CToDoListWnd::OnUpdatePrint(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
 }
 
-int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo, BOOL bResizeDlg)
+int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 {
 	// add tdc first to ensure tab controls has some
 	// items before we query it for its size
@@ -6516,8 +6516,7 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo, 
 	pTDC->SetFocusToTasks();
 	
 	// make sure the tab control is correctly sized
-	if (bResizeDlg)
-		Resize();
+	Resize();
 
 	// if this is the only control then set or terminate the various status 
 	// check timers
