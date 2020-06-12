@@ -559,7 +559,7 @@ protected:
 	COleDateTime GetEarliestTaskStartDate(HTASKITEM hTask) const;
 	BOOL OffsetTaskDates(HTASKITEM hTask, int nNumDays);
 	BOOL DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, const CString& sKey = EMPTY_STR);
-	CString FormatDate(const COleDateTime& date, BOOL bCalculated) const;
+	CString FormatDate(const COleDateTime& date) const;
 
 	const CXmlItem* GetCustomAttribDefs(int nIndex = 0) const;
 	const CXmlItem* GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const;
@@ -569,7 +569,7 @@ protected:
 	BOOL SetTaskCustomAttributeData(CXmlItem* pXITask, const CString& sCustAttribID, const TDCCADATA& data);
 
 	bool SetTaskDate(HTASKITEM hTask, const CString& sDateItem, time_t tVal);
-	bool SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COleDateTime& tVal, const CString& sDateStringItem = EMPTY_STR, BOOL bCalculated = FALSE);
+	bool SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COleDateTime& tVal, const CString& sDateStringItem = EMPTY_STR);
 	bool SetTaskUChar(HTASKITEM hTask, const CString& sUCharItem, unsigned char cVal);
 	bool SetTaskULong(HTASKITEM hTask, const CString& sULongItem, unsigned long lVal);
 	bool SetTaskInt(HTASKITEM hTask, const CString& sIntItem, int iVal);

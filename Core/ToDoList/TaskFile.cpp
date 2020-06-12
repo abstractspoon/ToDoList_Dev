@@ -1642,7 +1642,7 @@ void CTaskFile::SetFilePath(LPCTSTR szFilePath)
 BOOL CTaskFile::SetLastModified(const COleDateTime& tLastMod)
 {
 	if (SetItemValue(TDL_LASTMOD, tLastMod))
-		return (NULL != SetItemValue(TDL_LASTMODSTRING, FormatDate(tLastMod, FALSE)));
+		return (NULL != SetItemValue(TDL_LASTMODSTRING, FormatDate(tLastMod)));
 
 	// else
 	return FALSE;
@@ -4033,12 +4033,12 @@ BOOL CTaskFile::SetTaskCalcTimeSpent(HTASKITEM hTask, double dTime, TDC_UNITS cU
 
 BOOL CTaskFile::SetTaskCalcDueDate(HTASKITEM hTask, const COleDateTime& date)
 {
-	return SetTaskDate(hTask, TDL_TASKCALCDUEDATE, date, TDL_TASKCALCDUEDATESTRING, TRUE);
+	return SetTaskDate(hTask, TDL_TASKCALCDUEDATE, date, TDL_TASKCALCDUEDATESTRING);
 }
 
 BOOL CTaskFile::SetTaskCalcStartDate(HTASKITEM hTask, const COleDateTime& date)
 {
-	return SetTaskDate(hTask, TDL_TASKCALCSTARTDATE, date, TDL_TASKCALCSTARTDATESTRING, TRUE);
+	return SetTaskDate(hTask, TDL_TASKCALCSTARTDATE, date, TDL_TASKCALCSTARTDATESTRING);
 }
 
 BOOL CTaskFile::SetTaskCalcCompletion(HTASKITEM hTask, int nPercent)
@@ -4199,11 +4199,11 @@ double CTaskFile::GetTaskTime(HTASKITEM hTask, const CString& sTimeItem) const
 
 ////////////////////////////////////////////////////////////////////
 
-CString CTaskFile::FormatDate(const COleDateTime& date, BOOL bCalculated) const
+CString CTaskFile::FormatDate(const COleDateTime& date) const
 {
 	DWORD dwFmt = (m_bISODates ? DHFD_ISO : 0);
 
-	if (!bCalculated && CDateHelper::DateHasTime(date))
+	if (CDateHelper::DateHasTime(date))
 		dwFmt |= DHFD_TIME | DHFD_NOSEC;
 
 	return CDateHelper::FormatDate(date, dwFmt);
@@ -4218,12 +4218,12 @@ BOOL CTaskFile::DeleteTaskAttribute(HTASKITEM hTask, const CString& sAttrib, con
 }
 
 bool CTaskFile::SetTaskDate(HTASKITEM hTask, const CString& sDateItem, const COleDateTime& date, 
-							const CString& sDateStringItem, BOOL bCalculated)
+							const CString& sDateStringItem)
 {
 	if (SetTaskDouble(hTask, sDateItem, date))
 	{
 		if (!sDateStringItem.IsEmpty())
-			return SetTaskString(hTask, sDateStringItem, FormatDate(date, bCalculated));
+			return SetTaskString(hTask, sDateStringItem, FormatDate(date));
 		
 		return true;
 	}
