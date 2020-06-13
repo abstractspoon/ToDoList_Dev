@@ -170,7 +170,7 @@ protected:
 		TDCM_PATHTYPE nPathType;
 		TDCM_DUESTATUS nDueStatus;
 		BOOL bNeedPrefUpdate;
-		int nUntitled; // creation index regardless of actual position
+		int nUntitledIndex; // creation index regardless of actual position
 		BOOL bLoaded;
 		COLORREF crTab;
 

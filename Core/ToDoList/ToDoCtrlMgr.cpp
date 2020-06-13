@@ -75,16 +75,13 @@ CToDoCtrlMgr::TDCITEM::TDCITEM()
 	nPathType = TDCM_UNDEF;
 	nDueStatus = TDCM_NONE;
 	bNeedPrefUpdate = TRUE;
-	nUntitled = -1;
+	nUntitledIndex = -1;
 	bLoaded = TRUE;
 	crTab = CLR_NONE;
 }
 
 CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_TASKLISTINFO* pInfo) 
 { 
-	static int nNextUntitledIndex = 0;
-	nUntitled = (!pCtrl->HasFilePath() ? nNextUntitledIndex++ : -1);
-
 	pTDC = pCtrl; 
 	bLoaded = loaded;
 	bModified = FALSE; 
@@ -93,6 +90,7 @@ CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_
 	bLastCheckoutSuccess = -1;
 	nDueStatus = TDCM_NONE;
 	bNeedPrefUpdate = TRUE;
+	nUntitledIndex = -1;
 	crTab = CLR_NONE;
 
 	if (pInfo && pInfo->HasInfo())
@@ -107,6 +105,13 @@ CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_
 		{
 			bLastStatusReadOnly = (CDriveInfo::IsReadonlyPath(sFilePath) > 0);
 			tLastMod = FileMisc::GetFileLastModified(sFilePath);
+		}
+		else if (!pTDC->IsPristine())
+		{
+			// Set a unique index for non-pristine, non-empty tasklists
+			static int nNextUntitledIndex = 1;
+
+			nUntitledIndex = nNextUntitledIndex++;
 		}
 
 		if (pCtrl->IsCheckedOut())
@@ -170,7 +175,7 @@ CString CToDoCtrlMgr::TDCITEM::GetFriendlyProjectName() const
 		return storageinfo.szDisplayName;
 
 	// else
-	return pTDC->GetFriendlyProjectName(nUntitled); 
+	return pTDC->GetFriendlyProjectName(nUntitledIndex); 
 }
 
 TDCM_PATHTYPE CToDoCtrlMgr::TDCITEM::TranslatePathType(int nDriveInfoType)
@@ -1224,30 +1229,34 @@ int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 	CHECKVALIDINDEXRET(nIndex, IM_NONE);
 
 	int nImage = IM_NONE;
-	const TDCITEM& tci = GetTDCItem(nIndex);
+	const TDCITEM& tdci = GetTDCItem(nIndex);
 	
-	if (!tci.bLoaded)
+	if (!tdci.HasFilePath())
 	{
-		if (!FileMisc::FileExists(tci.pTDC->GetFilePath()))
+		// IM_NONE
+	}
+	else if (!tdci.bLoaded)
+	{
+		if (!FileMisc::FileExists(tdci.pTDC->GetFilePath()))
 			nImage = IM_NOTFOUND;
 		else
 			nImage = IM_NOTLOADED;
 	}
-	else if (tci.bLastStatusReadOnly > 0)
+	else if (tdci.bLastStatusReadOnly > 0)
 	{
 		nImage = IM_READONLY;	
 	}
-	else if (tci.pTDC->CompareFileFormat() == TDCFF_NEWER)
+	else if (tdci.pTDC->CompareFileFormat() == TDCFF_NEWER)
 	{
 		nImage = IM_READONLY;	
 	}
-	else if (tci.pTDC->IsActivelyTimeTracking()) // takes priority
+	else if (tdci.pTDC->IsActivelyTimeTracking()) // takes priority
 	{
 		nImage = IM_TIMETRACKING;
 	}
-	else if ((tci.bLastStatusReadOnly == 0) && IsSourceControlled(nIndex))
+	else if ((tdci.bLastStatusReadOnly == 0) && IsSourceControlled(nIndex))
 	{
-		nImage = (tci.pTDC->IsCheckedOut() ? IM_CHECKEDOUT : IM_CHECKEDIN);	
+		nImage = (tdci.pTDC->IsCheckedOut() ? IM_CHECKEDOUT : IM_CHECKEDIN);	
 	}
 
 	// update tab array
@@ -1279,12 +1288,12 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 	CHECKVALIDINDEXRET(nIndex, _T(""));
 
 	CEnString sTooltip;
-	const TDCITEM& tci = GetTDCItem(nIndex);
+	const TDCITEM& tdci = GetTDCItem(nIndex);
 
 	switch (UpdateTabItemImage(nIndex))
 	{
 	case IM_READONLY:
-		if (tci.pTDC->CompareFileFormat() == TDCFF_NEWER)
+		if (tdci.pTDC->CompareFileFormat() == TDCFF_NEWER)
 			sTooltip.LoadString(IDS_STATUSNEWERFORMAT);
 		else
 			sTooltip.LoadString(IDS_STATUSREADONLY);
@@ -1299,11 +1308,11 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 		break;
 
 	case IM_NOTLOADED:	
-		sTooltip.Format(IDS_TABTIP_NOTLOADED, tci.pTDC->GetFilePath());
+		sTooltip.Format(IDS_TABTIP_NOTLOADED, tdci.pTDC->GetFilePath());
 		break;
 
 	case IM_NOTFOUND:
-		sTooltip.Format(IDS_TABTIP_NOTFOUND, tci.pTDC->GetFilePath());
+		sTooltip.Format(IDS_TABTIP_NOTFOUND, tdci.pTDC->GetFilePath());
 		break;
 		
 	case IM_TIMETRACKING:	
@@ -1311,7 +1320,7 @@ CString CToDoCtrlMgr::GetTabItemTooltip(int nIndex) const
 		break;
 
 	case IM_NONE:
-		sTooltip = tci.pTDC->GetFilePath();
+		sTooltip = tdci.pTDC->GetFilePath();
 		break;
 	}
 
