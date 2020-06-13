@@ -8461,14 +8461,12 @@ BOOL CToDoListWnd::VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks, BOOL
 	return FALSE;
 }
 
-BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDueTasksBy)
+BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDueTasksBy, BOOL bNotifyError)
 {
 	ASSERT (nIndex >= 0);
 	ASSERT (nIndex < GetTDCCount());
 	
 	// load and show the chosen item
-	// we don't need to do a 'open' due task notification if the caller
-	// has asked for a notification anyway
 	if (!m_bClosing)
 	{
 		// if the tasklist is not loaded and we verify its loading
@@ -8476,15 +8474,15 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 		// verified and doesn't need checking again
 		if (!m_mgrToDoCtrls.IsLoaded(nIndex))
 		{
-			if (!VerifyTaskListOpen(nIndex, nNotifyDueTasksBy == -1))
-			{
-				// TODO
+			// We only need to do a 'open' due task notification 
+			// if the caller has NOT otherwise requested a notification
+			// else we do it at the end
+			BOOL bWantNotifyDueTasks = (nNotifyDueTasksBy == -1);
+
+			if (!VerifyTaskListOpen(nIndex, bWantNotifyDueTasks, FALSE))
 				return FALSE;
-			}
-			else
-			{
-				bCheckPassword = FALSE;
-			}
+
+			bCheckPassword = FALSE;
 		}
 	}
 

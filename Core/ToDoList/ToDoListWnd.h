@@ -711,7 +711,7 @@ protected:
 	int AddToDoCtrl(CFilteredToDoCtrl* pCtrl, TSM_TASKLISTINFO* pInfo = NULL);
 	inline int GetTDCCount() const { return m_mgrToDoCtrls.GetCount(); }
 	BOOL SelectToDoCtrl(LPCTSTR szFilePath, BOOL bCheckPassword, int nNotifyDueTasksBy = -1);
-	BOOL SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDueTasksBy = -1);
+	BOOL SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDueTasksBy = -1, BOOL bNotifyError = TRUE);
 	int GetSelToDoCtrl() const;
 	BOOL CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser);
 	BOOL VerifyToDoCtrlPassword() const;
