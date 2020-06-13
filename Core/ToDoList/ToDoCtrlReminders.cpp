@@ -91,7 +91,7 @@ void CToDoCtrlReminders::AddToDoCtrl(const CFilteredToDoCtrl* pTDC)
 	LoadReminders(pTDC);
 }
 
-void CToDoCtrlReminders::CloseToDoCtrl(const CFilteredToDoCtrl* pTDC)
+void CToDoCtrlReminders::RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC)
 {
 	SaveAndRemoveReminders(pTDC);
 }

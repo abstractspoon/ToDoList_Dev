@@ -37,7 +37,7 @@ public:
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
 
 	void AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
-	void CloseToDoCtrl(const CFilteredToDoCtrl* pTDC);
+	void RemoveToDoCtrl(const CFilteredToDoCtrl* pTDC);
 	void SetReminder(const TDCREMINDER& rem, BOOL bCheckNow = FALSE);
 	BOOL ClearReminder(DWORD dwTaskID, const CFilteredToDoCtrl* pTDC);
 	BOOL TransferReminder(DWORD dwTaskID, DWORD dwNewTaskID, const CFilteredToDoCtrl* pTDC);
