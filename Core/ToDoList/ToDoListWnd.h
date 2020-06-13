@@ -106,10 +106,10 @@ protected:
 	CStatusBarACTEx	m_statusBar;
 	CStatusBarProgress m_sbProgress;
 	CTDLFilterBar m_filterBar;
-	CTDLFindTasksDlg m_findDlg;
+	CTDLFindTasksDlg m_dlgFindTasks;
 	CTabCtrlEx m_tabCtrl;
 	CTaskListDropTarget m_dropTarget;
-	CToDoCtrlReminders m_reminders;
+	CToDoCtrlReminders m_dlgReminders;
 	CToolbarHelper m_tbHelperMain;
 	CTrayIcon m_trayIcon;
 	CUIThemeFile m_theme;
