@@ -429,7 +429,7 @@ int CToDoCtrlMgr::GetNextMostSelectableToDoCtrl(int nIndex) const
 
 	if (aTemp.GetSize() > 0)
 	{
-		Misc::SortArrayT(aTemp, SelectabilitySortProc);
+		Misc::SortArrayT<TDCITEM>(aTemp, SelectabilitySortProc);
 
 		// First item is the one we want
 		nNextIndex = FindToDoCtrl(aTemp[0].pTDC);
