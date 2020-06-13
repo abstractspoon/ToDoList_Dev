@@ -80,10 +80,10 @@ CToDoCtrlMgr::TDCITEM::TDCITEM()
 	crTab = CLR_NONE;
 }
 
-CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_TASKLISTINFO* pInfo) 
+CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo) 
 { 
 	pTDC = pCtrl; 
-	bLoaded = loaded;
+	bLoaded = (pCtrl->HasFilePath() && !pTDC->IsDelayLoaded());
 	bModified = FALSE; 
 	bLastStatusReadOnly = -1;
 	tLastMod = 0;
@@ -493,16 +493,20 @@ BOOL CToDoCtrlMgr::IsModified(int nIndex) const
 	return GetToDoCtrl(nIndex).IsModified();
 }
 
-void CToDoCtrlMgr::SetLoaded(int nIndex, BOOL bLoaded)
+void CToDoCtrlMgr::SetLoaded(int nIndex)
 {
 	CHECKVALIDINDEX(nIndex);
 
 	TDCITEM& tdci = GetTDCItem(nIndex);
-
-	if (tdci.bLoaded != bLoaded)
+	
+	if (!tdci.bLoaded)
 	{
-		tdci.bLoaded = bLoaded;
+		ASSERT(!tdci.pTDC->IsDelayLoaded());
+
+		tdci.bLoaded = TRUE;
+
 		UpdateTabItemImage(nIndex);
+		UpdateTabItemText(nIndex);
 	}
 }
 
@@ -824,7 +828,7 @@ void CToDoCtrlMgr::CheckNotifyReadonly(int nIndex) const
 	}
 }
 
-int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
+int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 {
 	CHECKVALIDINDEXRET(nIndex, -1);
 
@@ -834,7 +838,7 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	TDCITEM& tdci = GetTDCItem(nIndex);
 
-	if (bDelete)
+	if (tdci.HasFilePath())
 	{
 		// checkin as our final task
 		if (tdci.bLoaded && tdc.IsCheckedOut() && Prefs().GetCheckinOnClose())
@@ -855,7 +859,7 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 	m_aToDoCtrls.RemoveAt(nIndex);
 	m_tabCtrl.DeleteItem(nIndex);
 
-	// set new selection as close to previous as possible *before* deleting the tasklist
+	// set new selection as close to previous as possible BEFORE deleting the tasklist
 	if (GetCount())
 	{
 		if (nIndex <= nSel)
@@ -870,39 +874,36 @@ int CToDoCtrlMgr::RemoveToDoCtrl(int nIndex, BOOL bDelete)
 		m_tabCtrl.SetCurSel(nNewSel);
 	}
 
-	if (bDelete) // else it's going to be re-added
+	// cleanup browser
+	CBrowserDlg* pBrowser = NULL;
+
+	if (m_mapBrowsers.Lookup(&tdc, pBrowser))
 	{
-		// cleanup browser
-		CBrowserDlg* pBrowser = NULL;
+		CPreferences prefs;
+		pBrowser->SavePosition(prefs, tdc.GetPreferencesKey(_T("DueTaskViewer")));
 
-		if (m_mapBrowsers.Lookup(&tdc, pBrowser))
-		{
-			CPreferences prefs;
-			pBrowser->SavePosition(prefs, tdc.GetPreferencesKey(_T("DueTaskViewer")));
-			
-			pBrowser->DestroyWindow();
-			delete pBrowser;
+		pBrowser->DestroyWindow();
+		delete pBrowser;
 
-			m_mapBrowsers.RemoveKey(&tdc);
+		m_mapBrowsers.RemoveKey(&tdc);
 
-			// delete any temp due task notification files
-			CString sTempFile;
-			sTempFile.Format(_T("ToDoList.due.%d"), nIndex);
-			
-			FileMisc::DeleteFile(FileMisc::GetTempFilePath(sTempFile, _T("html")), TRUE);
-			FileMisc::DeleteFile(FileMisc::GetTempFilePath(sTempFile, _T("txt")), TRUE);
-		}
+		// delete any temp due task notification files
+		CString sTempFile;
+		sTempFile.Format(_T("ToDoList.due.%d"), nIndex);
 
-		tdc.DestroyWindow();
-		delete &tdc;
+		FileMisc::DeleteFile(FileMisc::GetTempFilePath(sTempFile, _T("html")), TRUE);
+		FileMisc::DeleteFile(FileMisc::GetTempFilePath(sTempFile, _T("txt")), TRUE);
 	}
+
+	tdc.DestroyWindow();
+	delete &tdc;
 
 	return nNewSel;
 }
 
-int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo, BOOL bLoaded)
+int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pTDC, const TSM_TASKLISTINFO* pInfo)
 {
-	TDCITEM tdci(pCtrl, bLoaded, pInfo);
+	TDCITEM tdci(pTDC, pInfo);
 
 	// Restore tasklist tab colour if any
 	CString sKey = pCtrl->GetPreferencesKey();
@@ -943,13 +944,17 @@ void CToDoCtrlMgr::MoveToDoCtrl(int nIndex, int nNumPlaces)
 
 	// work out what the new selection should be
 	if (nIndex == nSel)
+	{
 		nNewSel = (nIndex + nNumPlaces);
-
+	}
 	else if (nIndex > nSel && (nIndex + nNumPlaces) <= nSel)
+	{
 		nNewSel++;
-
+	}
 	else if (nIndex < nSel && (nIndex + nNumPlaces) >= nSel)
+	{
 		nNewSel--;
+	}
 
 	// make copies of existing
 	TCITEM tci;
@@ -959,10 +964,11 @@ void CToDoCtrlMgr::MoveToDoCtrl(int nIndex, int nNumPlaces)
 	tci.cchTextMax = 127;
 		
 	m_tabCtrl.GetItem(nIndex, &tci);
-	TDCITEM tdci = GetTDCItem(nIndex);
+	TDCITEM tdci = GetTDCItem(nIndex); // copy
 
 	// remove and re-add
-	RemoveToDoCtrl(nIndex);
+	m_aToDoCtrls.RemoveAt(nIndex);
+	m_tabCtrl.DeleteItem(nIndex);
 
 	nIndex += nNumPlaces;
 

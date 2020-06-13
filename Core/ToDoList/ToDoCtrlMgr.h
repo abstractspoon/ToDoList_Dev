@@ -49,12 +49,11 @@ public:
 	CFilteredToDoCtrl& GetToDoCtrl(int nIndex);
 	const CFilteredToDoCtrl& GetToDoCtrl(int nIndex) const;
 
-	int RemoveToDoCtrl(int nIndex, BOOL bDelete = FALSE); // returns new selection
-	int AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo = NULL, BOOL bLoaded = TRUE);
 	BOOL IsPristine(int nIndex) const;
+	int DeleteToDoCtrl(int nIndex); // returns new selection
+	int AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo = NULL);
 	BOOL IsLoaded(int nIndex) const;
 	BOOL FileExists(int nIndex) const;
-	void SetLoaded(int nIndex, BOOL bLoaded = TRUE);
 	BOOL VerifyPassword(int nIndex) const;
 	BOOL AnyIsModified() const;
 	BOOL AnyIsSourceControlled() const;
@@ -148,7 +147,7 @@ protected:
 	{
 	public:
 		TDCITEM();
-		TDCITEM(CFilteredToDoCtrl* pCtrl, BOOL loaded, const TSM_TASKLISTINFO* pInfo = NULL);
+		TDCITEM(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo = NULL);
 		virtual ~TDCITEM();
 
 		TDCM_PATHTYPE GetPathType() const;

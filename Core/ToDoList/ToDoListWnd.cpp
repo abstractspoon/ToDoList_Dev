@@ -4310,7 +4310,7 @@ TDC_FILE CToDoListWnd::DelayOpenTaskList(LPCTSTR szFilePath)
 		return OpenTaskList(szFilePath, FALSE);
 	}
 	
-	int nCtrl = m_mgrToDoCtrls.AddToDoCtrl(pTDC, &storageInfo, FALSE); // FALSE == not yet loaded
+	int nCtrl = AddToDoCtrl(pTDC, &storageInfo);
 	
 	// Update time tracking widget
 	m_dlgTimeTracker.AddTasklist(pTDC);
@@ -4322,10 +4322,13 @@ TDC_FILE CToDoListWnd::DelayOpenTaskList(LPCTSTR szFilePath)
 		COleDateTime dtToday = COleDateTime::GetCurrentTime();
 
 		if (floor(dtEarliest) < floor(dtToday))
+		{
 			nStatus = TDCM_PAST;
-
+		}
 		else if (floor(dtEarliest) == floor(dtToday))
+		{
 			nStatus = TDCM_TODAY;
+		}
 
 		m_mgrToDoCtrls.SetDueItemStatus(nCtrl, nStatus);
 	}
@@ -5969,7 +5972,7 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 	CString sFilePath = tdc.GetFilePath();
 
 	// Remove the tasklist from the time tracker because
-	// OpenTasklist will correctly want to re-add it
+	// OpenTasklist will (correctly) want to re-add it
 	m_dlgTimeTracker.RemoveTasklist(&tdc);
 	
 	TDC_FILE nRes = OpenTaskList(&tdc, sFilePath);
@@ -6502,10 +6505,10 @@ void CToDoListWnd::OnUpdatePrint(CCmdUI* pCmdUI)
 
 int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 {
-	// add tdc first to ensure tab controls has some
+	// Add tdc first to ensure tab controls has some
 	// items before we query it for its size
 	int nSel = m_mgrToDoCtrls.AddToDoCtrl(pTDC, pInfo);
-	
+
 	// make sure size is right
 	CRect rTDC;
 	
@@ -8293,7 +8296,7 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 	
 	CWaitCursor cursor;
 
-	int nNewSel = m_mgrToDoCtrls.RemoveToDoCtrl(nIndex, TRUE);
+	int nNewSel = m_mgrToDoCtrls.DeleteToDoCtrl(nIndex);
 	
 	if (nNewSel != -1)
 	{
@@ -8598,7 +8601,7 @@ void CToDoListWnd::OnCloseall()
 	int nCtrl = GetTDCCount();
 	
 	while (nCtrl--)
-		m_mgrToDoCtrls.RemoveToDoCtrl(nCtrl, TRUE);
+		m_mgrToDoCtrls.DeleteToDoCtrl(nCtrl);
 
 	// if empty then create a new dummy item		
 	if (!GetTDCCount())
@@ -12432,7 +12435,7 @@ void CToDoListWnd::OnCloseallbutthis()
 			m_dlgFindTasks.DeleteResults(&tdc);
 			m_dlgTimeTracker.RemoveTasklist(&tdc);
 
-			m_mgrToDoCtrls.RemoveToDoCtrl(nCtrl, TRUE);
+			m_mgrToDoCtrls.DeleteToDoCtrl(nCtrl);
 		}
 	}
 
