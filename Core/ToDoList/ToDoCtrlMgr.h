@@ -54,6 +54,7 @@ public:
 	int AddToDoCtrl(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO* pInfo = NULL);
 	BOOL IsLoaded(int nIndex) const;
 	BOOL FileExists(int nIndex) const;
+	void SetLoaded(int nIndex);
 	BOOL VerifyPassword(int nIndex) const;
 	BOOL AnyIsModified() const;
 	BOOL AnyIsSourceControlled() const;
