@@ -114,6 +114,7 @@ public:
 	void Flush(BOOL bEndTimeTracking = FALSE); // called to end current editing actions
 	BOOL IsModified() const;
 	void SetModified(BOOL bMod = TRUE);
+	BOOL IsPristine() const;
 
 	CString GetFilePath() const { return m_sLastSavePath; }
 	BOOL HasFilePath() const { return !m_sLastSavePath.IsEmpty(); }

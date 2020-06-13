@@ -6794,6 +6794,11 @@ BOOL CToDoCtrl::IsModified() const
 	return (m_nCommentsState == CS_PENDING);
 }
 
+BOOL CToDoCtrl::IsPristine() const 
+{ 
+	return (!HasFilePath() && !IsModified());
+}
+
 void CToDoCtrl::SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs)
 {
 	CTDCAttributeMap mapAttribIDs;
