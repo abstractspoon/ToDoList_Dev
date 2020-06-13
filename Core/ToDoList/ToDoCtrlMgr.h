@@ -63,6 +63,7 @@ public:
 	int FindToDoCtrl(const CFilteredToDoCtrl* pTDC) const;
 	int FindToDoCtrl(LPCTSTR szFilePath) const;
 	int FindToDoCtrl(const TSM_TASKLISTINFO& info) const;
+	int FindPristineToDoCtrl() const;
 	
 	CString GetFileName(int nIndex, BOOL bStrict = TRUE) const;
 	CString GetFilePath(int nIndex, BOOL bStrict = TRUE) const;
@@ -153,12 +154,14 @@ protected:
 
 		TDCM_PATHTYPE GetPathType() const;
 		CString GetFriendlyProjectName() const;
+		BOOL IsSelectable() const;
+		BOOL HasFilePath() const;
 
 		BOOL UsesStorage() const;
 		void RefreshPathType();
 		void ClearStorageDetails();
 		void SetStorageDetails(const TSM_TASKLISTINFO& info);
-
+		
 		static TDCM_PATHTYPE TranslatePathType(int nDriveInfoType);
 	
 	public:

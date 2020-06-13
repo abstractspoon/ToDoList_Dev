@@ -125,6 +125,16 @@ CToDoCtrlMgr::TDCITEM::~TDCITEM()
 {
 }
 
+BOOL CToDoCtrlMgr::TDCITEM::IsSelectable() const
+{
+	return (!HasFilePath() || bLoaded || FileMisc::FileExists(pTDC->GetFilePath()));
+}
+
+BOOL CToDoCtrlMgr::TDCITEM::HasFilePath() const
+{
+	return pTDC->HasFilePath();
+}
+
 TDCM_PATHTYPE CToDoCtrlMgr::TDCITEM::GetPathType() const 
 { 
 	return nPathType; 
@@ -423,9 +433,14 @@ int CToDoCtrlMgr::GetNextMostSelectableToDoCtrl(int nIndex) const
 
 		// First item is the one we want
 		nNextIndex = FindToDoCtrl(aTemp[0].pTDC);
+
+		ASSERT(nNextIndex != -1);
+
+		// Check it's selectable
+		if (!GetTDCItem(nNextIndex).IsSelectable())
+			return -1;
 	}
 
-	ASSERT(nNextIndex != -1);
 	return nNextIndex;
 }
 
@@ -440,7 +455,7 @@ BOOL CToDoCtrlMgr::HasFilePath(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	return !GetFilePath(nIndex, TRUE).IsEmpty();
+	return GetTDCItem(nIndex).HasFilePath();
 }
 
 TDCM_PATHTYPE CToDoCtrlMgr::GetFilePathType(int nIndex) const
@@ -469,7 +484,7 @@ BOOL CToDoCtrlMgr::IsPristine(int nIndex) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	return (!HasFilePath(nIndex) && !IsModified(nIndex));
+	return GetTDCItem(nIndex).pTDC->IsPristine();
 }
 
 BOOL CToDoCtrlMgr::IsLoaded(int nIndex) const
@@ -868,8 +883,13 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 			nNewSel = nSel;
 
 		// If it's not loaded just look for next most selectable
-		if (!IsLoaded(nNewSel))
-			nNewSel = GetNextMostSelectableToDoCtrl(nNewSel);
+		if (HasFilePath(nNewSel) && !IsLoaded(nNewSel))
+		{
+			int nAltSel = GetNextMostSelectableToDoCtrl(nNewSel);
+
+			if (nAltSel != -1)
+				nNewSel = nAltSel;
+		}
 
 		m_tabCtrl.SetCurSel(nNewSel);
 	}
@@ -905,8 +925,15 @@ int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pTDC, const TSM_TASKLISTINFO* p
 {
 	TDCITEM tdci(pTDC, pInfo);
 
+	// Sanity check - Can only be one pristine tasklist
+	if (pTDC->IsPristine() && (FindPristineToDoCtrl() != -1))
+	{
+		ASSERT(0);
+		return -1;
+	}
+
 	// Restore tasklist tab colour if any
-	CString sKey = pCtrl->GetPreferencesKey();
+	CString sKey = pTDC->GetPreferencesKey();
 	
 	if (!sKey.IsEmpty())
 		tdci.crTab = (COLORREF)CPreferences().GetProfileInt(sKey, _T("TabColor"), CLR_NONE);
@@ -920,6 +947,7 @@ int CToDoCtrlMgr::AddToDoCtrl(CFilteredToDoCtrl* pTDC, const TSM_TASKLISTINFO* p
 
 	RefreshPathType(nSel);
 	RefreshLastCheckoutStatus(nSel);
+	CheckNotifyReadonly(nSel);
 
 	UpdateTabItemImage(nSel);
 	UpdateTabItemText(nSel);
@@ -1102,7 +1130,7 @@ int CToDoCtrlMgr::SelectabilitySortProc(const void* v1, const void* v2)
 	if (pTDCI1->bLoaded)
 		return -1;
 
-	if (pTDCI1->bLoaded)
+	if (pTDCI2->bLoaded)
 		return 1;
 
 	// 3. File exists
@@ -1424,6 +1452,20 @@ int CToDoCtrlMgr::FindToDoCtrl(const TSM_TASKLISTINFO& info) const
 			if (_tcscmp(ctrlInfo.szTasklistID, info.szTasklistID) == 0)
 				return nCtrl;
 		}
+	}
+
+	// not found
+	return -1;
+}
+
+int CToDoCtrlMgr::FindPristineToDoCtrl() const
+{
+	int nCtrl = GetCount();
+	
+	while (nCtrl--)
+	{
+		if (IsPristine(nCtrl))
+			return nCtrl;
 	}
 
 	// not found

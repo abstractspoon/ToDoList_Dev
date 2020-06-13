@@ -713,11 +713,12 @@ protected:
 	BOOL SelectToDoCtrl(LPCTSTR szFilePath, BOOL bCheckPassword, int nNotifyDueTasksBy = -1);
 	BOOL SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDueTasksBy = -1);
 	int GetSelToDoCtrl() const;
-	BOOL CreateNewTaskList(BOOL bAddDefTask);
+	BOOL CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser);
 	BOOL VerifyToDoCtrlPassword() const;
 	BOOL VerifyToDoCtrlPassword(int nIndex) const;
 	BOOL SelectTask(CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 	void CheckCloseTasklist(int nIndex);
+	void CheckRemovePristineTasklist();
 
 	// caller must flush todoctrls if required before calling these
 	BOOL CloseToDoCtrl(int nIndex);

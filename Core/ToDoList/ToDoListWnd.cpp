@@ -871,7 +871,7 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndSessionStatus.Initialize(*this);
 
 	// add a barebones tasklist while we're still hidden
-	if (!CreateNewTaskList(FALSE))
+	if (!CreateNewTaskList(FALSE, FALSE))
 		return -1;
 
 	// notify users about dodgy content plugins
@@ -2431,7 +2431,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 		ProcessStartupOptions(m_startupOptions, TRUE);
 
 		// don't reload previous if a tasklist was actually loaded
-		if (!m_mgrToDoCtrls.IsPristine(0))
+		if (!m_mgrToDoCtrls.IsPristine())
 			bReloadTasklists = FALSE;
 	}
 	
@@ -2502,24 +2502,18 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 			}
 
 			// if nothing suitable found then select the 'pristine' first tasklist
-			if (sLastActiveFile.IsEmpty() || !SelectToDoCtrl(sLastActiveFile, FALSE))
-			{
+			if (!SelectToDoCtrl(sLastActiveFile, FALSE))
 				SelectToDoCtrl(0, FALSE);
-			}
-			else // delete the pristine list
-			{
-				m_dlgTimeTracker.RemoveTasklist(&GetToDoCtrl(0));
-				m_mgrToDoCtrls.RemoveToDoCtrl(0, TRUE);
-			}
+			else
+				CheckRemovePristineTasklist();
 
 			Resize();
 		}
 	}
 
-	// if there's only one tasklist open and it's pristine then 
-	// it's the original one so add a sample task unless 
-	// 'empty' flag is set
-	if (GetTDCCount() == 1 && m_mgrToDoCtrls.IsPristine(0))
+	// if there's only one tasklist open and it's pristine then it's
+	// the original one so add a sample task unless 'empty' flag is set
+	if (m_mgrToDoCtrls.IsPristine())
 	{
 		if (!bStartupEmpty)
 		{
@@ -2874,19 +2868,17 @@ void CToDoListWnd::RestorePosition()
 
 void CToDoListWnd::OnNewTasklist() 
 {
-	CreateNewTaskList(FALSE);
+	CreateNewTaskList(FALSE, TRUE);
 	RefreshTabOrder();
 }
 
-BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask)
+BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser)
 {
 	CFilteredToDoCtrl* pNew = NewToDoCtrl();
 	
 	if (pNew)
 	{
 		m_dlgTimeTracker.AddTasklist(pNew);
-
-		VERIFY(AddToDoCtrl(pNew) != -1);
 
 		// insert a default task
 		if (bAddDefTask)
@@ -2899,7 +2891,18 @@ BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask)
 			pNew->DeleteAllTasks();
 		}
 		
-		pNew->SetModified(FALSE);
+		// We identify the user's explicitly created tasklists
+		// by marking them as modified so we don't delete them 
+		// when we are cleaning up
+		pNew->SetModified(bByUser);
+
+		VERIFY(AddToDoCtrl(pNew) != -1);
+
+		if (bByUser)
+			CheckRemovePristineTasklist();
+
+		Resize();
+		Invalidate();
 	}
 
 	return (pNew != NULL);
@@ -4437,9 +4440,6 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 	{
 		int nTDC = AddToDoCtrl(pTDC, &storageInfo);
 
-		// notify readonly
-		m_mgrToDoCtrls.CheckNotifyReadonly(nTDC);
-
 		// reload any reminders
 		m_dlgReminders.AddToDoCtrl(pTDC);
 		
@@ -4454,6 +4454,8 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 		// update search
 		if (userPrefs.GetRefreshFindOnLoad() && m_dlgFindTasks.GetSafeHwnd())
 			m_dlgFindTasks.RefreshSearch();
+
+		CheckRemovePristineTasklist();
 	}
 	else if (GetTDCCount() >= 1) // only delete if there's another ctrl existing
 	{
@@ -4464,6 +4466,9 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 	{
 		AddToDoCtrl(pTDC);
 	}
+
+	Resize();
+	Invalidate();
 	
 	return nOpen;
 }
@@ -6514,22 +6519,24 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 	
 	if (CalcToDoCtrlRect(rTDC))
 		pTDC->MoveWindow(rTDC);
-	
-	SelectToDoCtrl(nSel, FALSE);
-	pTDC->SetFocusToTasks();
-	
-	// make sure the tab control is correctly sized
-	Resize();
 
-	// if this is the only control then set or terminate the various status 
-	// check timers
-	if (GetTDCCount() == 1)
-		RestoreTimers();
+	if (!pTDC->IsDelayLoaded() && SelectToDoCtrl(nSel, FALSE))
+	{
+		pTDC->SetFocusToTasks();
 	
-	// make sure everything looks okay
-	Invalidate();
-	UpdateWindow();
-	
+		// if this is the only control then set or terminate the various status 
+		// check timers
+		if (GetTDCCount() == 1)
+			RestoreTimers();
+
+		Invalidate();
+		UpdateWindow();
+	}
+	else
+	{
+		pTDC->ShowWindow(SW_HIDE);
+	}
+
 	return nSel;
 }
 
@@ -8312,7 +8319,7 @@ BOOL CToDoListWnd::CloseToDoCtrl(int nIndex)
 
 		if (!SelectToDoCtrl(nNewSel, bCheckPassword))
 		{
-			CreateNewTaskList(FALSE);
+			CreateNewTaskList(FALSE, FALSE);
 			RefreshTabOrder();
 		}
 
@@ -8355,10 +8362,7 @@ void CToDoListWnd::CheckCloseTasklist(int nIndex)
 	// no other selectable tasklists
 	if (m_mgrToDoCtrls.IsPristine(nIndex))
 	{
-		int nNextSel = m_mgrToDoCtrls.GetNextMostSelectableToDoCtrl(nIndex);
-		ASSERT(nNextSel != -1);
-
-		if (!m_mgrToDoCtrls.FileExists(nNextSel))
+		if (m_mgrToDoCtrls.GetNextMostSelectableToDoCtrl(nIndex) == -1)
 			return;
 	}
 		
@@ -8366,10 +8370,31 @@ void CToDoListWnd::CheckCloseTasklist(int nIndex)
 	
 	// if empty then create a new dummy item		
 	if (!GetTDCCount())
-		CreateNewTaskList(FALSE);
+		CreateNewTaskList(FALSE, FALSE);
 	else
 		Resize();
+}
 
+void CToDoListWnd::CheckRemovePristineTasklist()
+{
+	ASSERT(GetTDCCount());
+
+	if (m_mgrToDoCtrls.IsPristine())
+		return;
+
+	int nIndex = m_mgrToDoCtrls.FindPristineToDoCtrl();
+
+	if ((nIndex == -1))
+		return;
+
+	// We can remove the pristine tasklist if there 
+	// is another tasklist that can be selected
+	int nNextSel = m_mgrToDoCtrls.GetNextMostSelectableToDoCtrl(nIndex);
+
+	if (nNextSel == -1)
+		return;
+
+	CloseToDoCtrl(nIndex);
 }
 
 BOOL CToDoListWnd::SelectToDoCtrl(LPCTSTR szFilePath, BOOL bCheckPassword, int nNotifyDueTasksBy)
@@ -8393,49 +8418,47 @@ int CToDoListWnd::GetSelToDoCtrl() const
 
 BOOL CToDoListWnd::VerifyTaskListOpen(int nIndex, BOOL bWantNotifyDueTasks, BOOL bNotifyError)
 {
-	if (!m_mgrToDoCtrls.IsLoaded(nIndex))
+	if (m_mgrToDoCtrls.IsLoaded(nIndex))
+		return TRUE;
+
+	if (!m_mgrToDoCtrls.HasFilePath(nIndex))
+		return TRUE;
+
+	// else
+	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
+	CString sFilePath = tdc.GetFilePath();
+
+	TSM_TASKLISTINFO storageInfo;
+
+	if (m_mgrToDoCtrls.GetStorageDetails(nIndex, storageInfo))
+		sFilePath = storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords());
+
+	TDC_FILE nRes = OpenTaskList(&tdc, sFilePath, &storageInfo);
+
+	if (nRes == TDCF_SUCCESS)
 	{
-		CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
-		CString sFilePath = tdc.GetFilePath();
+		// make sure hidden windows stay hidden
+		if (nIndex != GetSelToDoCtrl())
+			tdc.ShowWindow(SW_HIDE);
 
-		TSM_TASKLISTINFO storageInfo;
+		Resize();
 
-		if (m_mgrToDoCtrls.GetStorageDetails(nIndex, storageInfo))
-		{
-			sFilePath = storageInfo.EncodeInfo(Prefs().GetSaveStoragePasswords());
-		}
+		m_mgrToDoCtrls.CheckNotifyReadonly(nIndex);
+		m_mgrToDoCtrls.SetStorageDetails(nIndex, storageInfo);
+		m_mgrToDoCtrls.SetLoaded(nIndex);
 
-		TDC_FILE nRes = OpenTaskList(&tdc, sFilePath, &storageInfo);
-		
-		if (nRes == TDCF_SUCCESS)
-		{
-			// make sure hidden windows stay hidden
-			if (nIndex != GetSelToDoCtrl())
-				tdc.ShowWindow(SW_HIDE);
+		if (bWantNotifyDueTasks)
+			DoDueTaskNotification(nIndex, Prefs().GetNotifyDueByOnLoad());
 
-			// notify readonly
-			Resize();
-
-			m_mgrToDoCtrls.CheckNotifyReadonly(nIndex);
-			m_mgrToDoCtrls.SetStorageDetails(nIndex, storageInfo);
-			m_mgrToDoCtrls.SetLoaded(nIndex);
-			m_mgrToDoCtrls.UpdateTabItemText(nIndex);
-
-			if (bWantNotifyDueTasks)
-				DoDueTaskNotification(nIndex, Prefs().GetNotifyDueByOnLoad());
-
-			return TRUE;
-		}
-		else if (bNotifyError)
-		{
-			HandleLoadTasklistError(nRes, sFilePath);
-		}
-
-		// else
-		return FALSE;
+		return TRUE;
+	}
+	else if (bNotifyError)
+	{
+		HandleLoadTasklistError(nRes, sFilePath);
 	}
 
-	return TRUE;
+	// else
+	return FALSE;
 }
 
 BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDueTasksBy)
@@ -8605,7 +8628,7 @@ void CToDoListWnd::OnCloseall()
 
 	// if empty then create a new dummy item		
 	if (!GetTDCCount())
-		CreateNewTaskList(FALSE);
+		CreateNewTaskList(FALSE, FALSE);
 	else
 		Resize();
 
@@ -8969,7 +8992,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromText, const CString& sImportFrom,
 						}
 					}
 
-					VERIFY(CreateNewTaskList(FALSE));
+					VERIFY(CreateNewTaskList(FALSE, TRUE));
 				}
 
 				CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
