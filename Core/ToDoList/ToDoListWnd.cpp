@@ -2502,7 +2502,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 			}
 
 			// if nothing suitable found then select the 'pristine' first tasklist
-			if (!SelectToDoCtrl(sLastActiveFile, FALSE))
+			if (sLastActiveFile.IsEmpty() || !SelectToDoCtrl(sLastActiveFile, FALSE))
 				SelectToDoCtrl(0, FALSE);
 			else
 				CheckRemovePristineTasklist();
@@ -8479,7 +8479,7 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 			// else we do it at the end
 			BOOL bWantNotifyDueTasks = (nNotifyDueTasksBy == -1);
 
-			if (!VerifyTaskListOpen(nIndex, bWantNotifyDueTasks, FALSE))
+			if (!VerifyTaskListOpen(nIndex, bWantNotifyDueTasks, bNotifyError))
 				return FALSE;
 
 			bCheckPassword = FALSE;
