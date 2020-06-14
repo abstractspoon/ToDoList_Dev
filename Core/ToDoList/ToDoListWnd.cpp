@@ -12455,6 +12455,7 @@ void CToDoListWnd::OnCloseallbutthis()
 
 			m_dlgFindTasks.DeleteResults(&tdc);
 			m_dlgTimeTracker.RemoveTasklist(&tdc);
+			m_dlgReminders.RemoveToDoCtrl(&tdc);
 
 			m_mgrToDoCtrls.DeleteToDoCtrl(nCtrl);
 		}
