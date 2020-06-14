@@ -2375,7 +2375,7 @@ TDC_PREPAREPATH CToDoListWnd::PrepareFilePath(CString& sFilePath, TSM_TASKLISTIN
 LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	const CPreferencesDlg& userPrefs = Prefs();
-	
+
 	// late initialization
 	CMouseWheelMgr::Initialize();
 	CEditShortcutMgr::Initialize();
@@ -2443,7 +2443,9 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 		UpdateWindow();
 
 		// get the last active tasklist
-		CString sLastActiveFile = prefs.GetProfileString(SETTINGS_KEY, _T("LastActiveFile")), sOrgLastActiveFile;
+		CString sLastActiveFile = prefs.GetProfileString(SETTINGS_KEY, _T("LastActiveFile"));
+		CString sOrgLastActiveFile(sLastActiveFile);
+
 		BOOL bCanDelayLoad = userPrefs.GetEnableDelayedLoading();
 
 		for (int nTDC = 0; nTDC < nTDCCount; nTDC++)
@@ -2457,7 +2459,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 				// unless the tasklist has reminders
 				BOOL bActiveTDC = (sLastFile == sLastActiveFile);
 
-				if (!bActiveTDC && bCanDelayLoad && !m_dlgReminders.ToDoCtrlHasReminders(sLastFile))
+				if (bCanDelayLoad && !bActiveTDC && !m_dlgReminders.ToDoCtrlHasReminders(sLastFile))
 				{
 					DelayOpenTaskList(sLastFile);
 				}
@@ -2469,7 +2471,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 					// then delay load it and mark the last active todoctrl as not found
 					if (bActiveTDC && (nResult != TDCF_SUCCESS))
 					{
-						sOrgLastActiveFile = sLastActiveFile;
 						sLastActiveFile.Empty();
 
 						if (bCanDelayLoad)
@@ -2506,8 +2507,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 				SelectToDoCtrl(0, FALSE);
 			else
 				CheckRemovePristineTasklist();
-
-			Resize();
 		}
 	}
 
@@ -4263,7 +4262,7 @@ TDC_FILE CToDoListWnd::DelayOpenTaskList(LPCTSTR szFilePath)
 		return TDCF_SUCCESS;
 
 	// delay load the file, visible but disabled
-	CFilteredToDoCtrl* pTDC = NewToDoCtrl(TRUE, FALSE);
+	CFilteredToDoCtrl* pTDC = NewToDoCtrl(FALSE);
 
 	// if this is a 'special' temp file then assume TDL automatically
 	// named it when handling WM_ENDSESSION. 
@@ -6307,10 +6306,10 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 
 BOOL CToDoListWnd::WantTasklistTabbarVisible() const 
 { 
-	BOOL bWantTabbar = (GetTDCCount() > 1 || !Prefs().GetAutoHideTabbar()); 
-	bWantTabbar &= m_bShowTasklistBar;
+	if (!m_bShowTasklistBar)
+		return FALSE;
 
-	return bWantTabbar;
+	return ((GetTDCCount() > 1) || !Prefs().GetAutoHideTabbar()); 
 }
 
 int CToDoListWnd::ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly)
@@ -7711,7 +7710,7 @@ const CFilteredToDoCtrl& CToDoListWnd::GetToDoCtrl(int nIndex) const
 	return m_mgrToDoCtrls.GetToDoCtrl(nIndex);
 }
 
-CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
+CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bEnabled)
 {
 	BOOL bWantHoldRedraw = ((m_bVisible > 0) && !IsIconic());
 	CHoldRedraw hr(bWantHoldRedraw ? GetSafeHwnd() : NULL);
@@ -7754,7 +7753,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bVisible, BOOL bEnabled)
 	// and somewhere out in space
 	rCtrl.OffsetRect(-30000, -30000);
 	
-	if (pTDC && pTDC->Create(rCtrl, this, IDC_TODOLIST, bVisible, bEnabled))
+	if (pTDC && pTDC->Create(rCtrl, this, IDC_TODOLIST, FALSE, bEnabled))
 	{
 		// set font to our font
 		CDialogHelper::SetFont(pTDC, m_fontMain, FALSE);
