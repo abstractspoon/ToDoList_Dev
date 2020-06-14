@@ -2508,6 +2508,8 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 			else
 				CheckRemovePristineTasklist();
 		}
+
+		Resize();
 	}
 
 	// if there's only one tasklist open and it's pristine then it's
