@@ -1,0 +1,443 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "KanbanBoard DLL\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "KanbanBoard\0"
+            VALUE "LegalCopyright", "Copyright (C) 2015\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "KanbanBoard.DLL\0"
+            VALUE "ProductName", "KanbanBoard Dynamic Link Library\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_KANBAN_DIALOG DIALOGEX 0, 0, 411, 189
+STYLE WS_CHILD
+EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
+FONT 8, "Tahoma"
+BEGIN
+    LTEXT           "Attribute to 'track'",IDC_ATTRIBUTES_LABEL,0,2,114,8
+    COMBOBOX        IDC_ATTRIBUTES,0,13,105,116,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CUSTOMATTRIB,112,13,105,30,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Options",IDC_OPTIONS_LABEL,223,2,105,8
+    COMBOBOX        IDC_OPTIONS,223,13,105,116,CBS_DROPDOWNLIST | 
+                    CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,334,12,48,15
+    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",TCS_BUTTONS,0,27,411,
+                    14
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_KANBAN_DIALOG, DIALOG
+    BEGIN
+        TOPMARGIN, 2
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_KANBAN              ICON    DISCARDABLE     "res\\kanban.ico"
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (Australia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENA)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_PREFERENCES_DIALOG DIALOGEX 0, 0, 373, 223
+STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Kanban Preferences"
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,262,202,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,316,202,50,14
+    CONTROL         "",IDC_PPHOST,"Static",SS_GRAYFRAME,7,7,359,185,
+                    WS_EX_TRANSPARENT
+END
+
+IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
+STYLE WS_CHILD
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    CONTROL         "S&ort subtasks below their respective parent task",
+                    IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,7,330,10
+    CONTROL         "&Indent subtasks",IDC_INDENTSUBTASKS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,22,330,10
+    CONTROL         "S&how a task's colour as a vertical bar",
+                    IDC_SHOWTASKCOLORASBAR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,37,330,10
+    CONTROL         "Colour &bar by task priority",IDC_COLORBARBYPRIORITY,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,52,321,10
+    LISTBOX         IDC_DISPLAYATTRIBUTES,16,84,312,84,LBS_SORT | 
+                    LBS_OWNERDRAWFIXED | LBS_HASSTRINGS | 
+                    LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_HSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Columns",IDC_COLUMNGROUP,7,200,330,8
+    CONTROL         "Al&ways show 'Backlog' column",IDC_ALWAYSSHOWBACKLOG,
+                    "Button",BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,7,216,
+                    330,10
+    LTEXT           "Attribute to 'track'",IDC_FIXEDATTRIBLABEL,17,248,307,8
+    COMBOBOX        IDC_ATTRIBUTES,16,259,105,116,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_CUSTOMATTRIBID,127,259,105,116,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "List1",IDC_COLUMNDEFS,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
+                    LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP,16,278,313,94
+    CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,278,261,53,16
+    GROUPBOX        "Fixed column definitions: (optional)",IDC_STATIC,7,233,
+                    330,147,0,WS_EX_TRANSPARENT
+    GROUPBOX        "Display the following attributes for each task:",
+                    IDC_STATIC,7,69,330,124
+    CONTROL         "&Hide empty attribute values",IDC_HIDEEMPTYATTRIBS,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,16,175,313,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PREFERENCES_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 366
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 216
+    END
+
+    IDD_PREFERENCES_PAGE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 337
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 383
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_HELP_BUTTON         ICON    DISCARDABLE     "res\\help_button.ico"
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\KanbanBoard.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
+IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
+IDR_COLUMN_TOOLBAR      BITMAP  MOVEABLE PURE   "res\\column_toolbar.bmp"
+IDB_COLUMN_TOOLBAR_STD  BITMAP  MOVEABLE PURE   "res\\column_toolbar_std.bmp"
+IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
+IDB_ICONS               BITMAP  DISCARDABLE     "res\\icons.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Toolbar
+//
+
+IDR_TOOLBAR TOOLBAR DISCARDABLE  16, 15
+BEGIN
+    BUTTON      ID_PREFS
+    SEPARATOR
+    BUTTON      ID_HELP
+END
+
+IDR_COLUMN_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
+BEGIN
+    BUTTON      ID_MOVECOL_UP
+    BUTTON      ID_MOVECOL_DOWN
+    SEPARATOR
+    BUTTON      ID_POPULATECOLUMNS
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_PREFS                "\nKanban Preferences"
+    IDS_BACKLOG             "Backlog"
+    ID_HIDE_EMPTY_COLS      "\nHide Empty Columns"
+    ID_POPULATECOLUMNS      "\nPopulate Columns"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_MOVECOL_UP           "\nMove Column Up"
+    ID_MOVECOL_DOWN         "\nMove Column Down"
+    IDS_STATUSATTRIB        "Status"
+    IDS_CUSTOMATTRIB        "Custom Attribute"
+    IDS_COLUMNTITLE         "Column Title"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_ATTRIBVALUES        "Attribute Values"
+    IDS_MAXTASKCOUNT        "Maximum Tasks"
+    IDS_NEWCOLUMN           "<New Column>"
+    IDS_CATEGORYATTRIB      "Category"
+    IDS_ALLOCTOATTRIB       "Allocated To"
+    IDS_ALLOCBYATTRIB       "Allocated By"
+    IDS_PRIORITYATTRIB      "Priority"
+    IDS_RISKATTRIB          "Risk"
+    IDS_VERSIONATTRIB       "Version"
+    IDS_TAGSATTRIB          "Tags"
+    IDS_OPTIONS_SHOWPARENTS "Show parent tasks"
+    IDS_OPTIONS_SHOWEMPTYCOLS "Show empty columns"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_HELP                 "\nOnline Help"
+    IDS_DISPLAY_PRIORITY    "Priority"
+    IDS_DISPLAY_ALLOCTO     "Allocated To"
+    IDS_DISPLAY_ALLOCBY     "Allocated By"
+    IDS_DISPLAY_DONEDATE    "Completed Date"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DISPLAY_DUEDATE     "Due Date"
+    IDS_DISPLAY_STARTDATE   "Start Date"
+    IDS_DISPLAY_TIMEEST     "Time Estimate"
+    IDS_DISPLAY_TIMESPENT   "Time Spent"
+    IDS_DISPLAY_CATEGORY    "Category"
+    IDS_DISPLAY_STATUS      "Status"
+    IDS_DISPLAY_CREATEDATE  "Creation Date"
+    IDS_DISPLAY_CREATEDBY   "Created By"
+    IDS_DISPLAY_PRIORITY_SHORT "Priority"
+    IDS_DISPLAY_ALLOCTO_SHORT "Alloc.To"
+    IDS_DISPLAY_PERCENT     "Percent Done"
+    IDS_DISPLAY_ALLOCBY_SHORT "Alloc.By"
+    IDS_DISPLAY_FLAG        "Flag"
+    IDS_DISPLAY_TAGS        "Tags"
+    IDS_DISPLAY_VERSION     "Version"
+    IDS_DISPLAY_RISK        "Risk"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DISPLAY_LASTMOD     "Last Modified"
+    IDS_DISPLAY_COST        "Cost"
+    IDS_DISPLAY_EXTERNALID  "External ID"
+    IDS_DISPLAY_RECURRENCE  "Recurrence"
+    IDS_DISPLAY_PARENT      "Parent"
+    IDS_FIXEDCOLUMNS        "- Fixed Columns -"
+    IDS_DELETEALLROWS       "Do you want to delete the existing column definitions?"
+    IDS_BKGNDCOLOR          "Colour"
+    IDS_DISPLAY_TASKID      "ID"
+    IDS_DISPLAY_DONEDATE_SHORT "Compl."
+    IDS_DISPLAY_DUEDATE_SHORT "Due"
+    IDS_DISPLAY_STARTDATE_SHORT "Start"
+    IDS_DISPLAY_TIMEEST_SHORT "Est."
+    IDS_DISPLAY_TIMESPENT_SHORT "Spent"
+    IDS_DISPLAY_CATEGORY_SHORT "Cat."
+    IDS_DISPLAY_STATUS_SHORT "Status"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DISPLAY_FILELINK    "File Link"
+    IDS_DISPLAY_FILELINK_SHORT "File"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_DISPLAY_CREATEDATE_SHORT "Created"
+    IDS_DISPLAY_CREATEDBY_SHORT "Creator"
+    IDS_DISPLAY_PERCENT_SHORT "%"
+    IDS_DISPLAY_FLAG_SHORT  "Flag"
+    IDS_DISPLAY_TAGS_SHORT  "Tags"
+    IDS_DISPLAY_VERSION_SHORT "Ver."
+    IDS_DISPLAY_RISK_SHORT  "Risk"
+    IDS_DISPLAY_LASTMOD_SHORT "Mod."
+    IDS_DISPLAY_COST_SHORT  "Cost"
+    IDS_DISPLAY_EXTERNALID_SHORT "Ext.ID"
+    IDS_DISPLAY_RECURRENCE_SHORT "Recurs"
+    IDS_DISPLAY_PARENT_SHORT "Parent"
+    IDS_DISPLAY_TASKID_SHORT "ID"
+    IDS_OPTIONS_NONE        "<none>"
+END
+
+#endif    // English (Australia) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "res\KanbanBoard.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
