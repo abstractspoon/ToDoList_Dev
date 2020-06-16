@@ -72,19 +72,17 @@ END
 IDD_KANBAN_DIALOG DIALOGEX 0, 0, 411, 189
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT | WS_EX_APPWINDOW
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
-    LTEXT           "Attribute to 'track'",IDC_ATTRIBUTES_LABEL,0,2,114,8
+    LTEXT           "Attribute to 'track'",IDC_ATTRIBUTES_LABEL,0,2,110,8
     COMBOBOX        IDC_ATTRIBUTES,0,13,105,116,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CUSTOMATTRIB,112,13,105,30,CBS_DROPDOWNLIST | 
-                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Options",IDC_OPTIONS_LABEL,223,2,105,8
-    COMBOBOX        IDC_OPTIONS,223,13,105,116,CBS_DROPDOWNLIST | 
+    LTEXT           "&Options",IDC_OPTIONS_LABEL,112,2,105,8
+    COMBOBOX        IDC_OPTIONS,112,13,105,116,CBS_DROPDOWNLIST | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "",IDC_TB_PLACEHOLDER,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,334,12,48,15
+                    WS_VISIBLE,223,12,48,15
 END
 
 
@@ -155,7 +153,7 @@ END
 
 IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
@@ -177,8 +175,6 @@ BEGIN
                     330,10
     LTEXT           "Attribute to 'track'",IDC_FIXEDATTRIBLABEL,17,248,307,8
     COMBOBOX        IDC_ATTRIBUTES,16,259,105,116,CBS_DROPDOWNLIST | 
-                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_CUSTOMATTRIBID,127,259,105,116,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     CONTROL         "List1",IDC_COLUMNDEFS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | 
@@ -319,7 +315,7 @@ BEGIN
     ID_MOVECOL_UP           "\nMove Column Up"
     ID_MOVECOL_DOWN         "\nMove Column Down"
     IDS_STATUSATTRIB        "Status"
-    IDS_CUSTOMATTRIB        "Custom Attribute"
+    IDS_CUSTOMATTRIB        "%s (Custom)"
     IDS_COLUMNTITLE         "Column Title"
 END
 
@@ -390,7 +386,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_DISPLAY_FILELINK     "File Link"
+    IDS_DISPLAY_FILELINK    "File Link"
     IDS_DISPLAY_FILELINK_SHORT "File"
 END
 

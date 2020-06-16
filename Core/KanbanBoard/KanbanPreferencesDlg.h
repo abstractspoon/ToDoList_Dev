@@ -9,7 +9,6 @@
 
 #include "KanbanStruct.h"
 #include "KanbanAttributeComboBox.h"
-#include "KanbanCustomAttributeComboBox.h"
 #include "KanbanFixedColumnListCtrl.h"
 
 #include "..\shared\groupline.h"
@@ -61,7 +60,6 @@ protected:
 	CGroupLineManager m_mgrGroupLines;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CKanbanCustomAttributeComboBox m_cbCustomAttributes;
 	CCheckListBoxEx	m_lbDisplayAttrib;
 
 	BOOL	m_bShowTaskColorAsBar;

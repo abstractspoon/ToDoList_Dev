@@ -8,6 +8,8 @@
 //
 /////////////////////////////////////////////////////////////////////////////
 
+#include "KanbanStruct.h"
+
 #include "..\Interfaces\iuiextension.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -19,18 +21,20 @@ class CKanbanAttributeComboBox : public CComboBox
 public:
 	CKanbanAttributeComboBox();
 
-	TDC_ATTRIBUTE GetSelectedAttribute() const;
-	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib);
+	TDC_ATTRIBUTE GetSelectedAttribute(CString& sCustomAttribID) const;
+	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID);
 
-	void ShowCustomAttribute(BOOL bShow = TRUE);
+	void SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs);
 	void ShowFixedColumns(BOOL bShow = TRUE);
 
-	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value);
+	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CString& sCustomAttribID);
 
 // Attributes
 protected:
 	BOOL m_bShowCustomAttrib;
 	BOOL m_bShowFixedColumns;
+
+	CKanbanCustomAttributeDefinitionArray m_aCustAttribDefs;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

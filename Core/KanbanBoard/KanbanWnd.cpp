@@ -59,19 +59,16 @@ void CKanbanWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CKanbanWnd)
-	DDX_Control(pDX, IDC_OPTIONS, m_cbOptions);
-	DDX_Control(pDX, IDC_CUSTOMATTRIB, m_cbCustomAttributes);
 	//}}AFX_DATA_MAP
+	DDX_Control(pDX, IDC_OPTIONS, m_cbOptions);
 	DDX_Control(pDX, IDC_ATTRIBUTES, m_cbAttributes);
 
-	m_cbAttributes.DDX(pDX, m_nTrackedAttrib);
-	m_cbCustomAttributes.DDX(pDX, m_sTrackedCustomAttribID);
+	m_cbAttributes.DDX(pDX, m_nTrackedAttrib, m_sTrackedCustomAttribID);
 }
 
 BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	//{{AFX_MSG_MAP(CKanbanWnd)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeTrackedAttribute)
-	ON_CBN_SELCHANGE(IDC_CUSTOMATTRIB, OnSelchangeTrackedAttribute)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_WM_SETFOCUS()
@@ -372,7 +369,6 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 		m_cbAttributes.ShowFixedColumns(m_dlgPrefs.HasFixedColumns());
 		UpdateData(FALSE);
 
-		EnableDisableCtrls();
 		UpdateKanbanCtrlPreferences(FALSE);
 	}
 }
@@ -505,15 +501,8 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 		return;
 	}
 
-	const CKanbanCustomAttributeDefinitionArray& aCustDefs = m_ctrlKanban.GetCustomAttributeDefinitions();
-
-	if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
-	{
-		m_cbCustomAttributes.SetAttributeDefinitions(aCustDefs);
-		m_cbCustomAttributes.SetSelectedAttributeID(m_sTrackedCustomAttribID);
-	}
-
-	m_cbAttributes.ShowCustomAttribute(aCustDefs.GetSize());
+	m_cbAttributes.SetAttributeDefinitions(m_ctrlKanban.GetCustomAttributeDefinitions());
+	m_cbAttributes.SetSelectedAttribute(m_nTrackedAttrib, m_sTrackedCustomAttribID);
 
 	// Validate any change in selection
 	UpdateData(TRUE);
@@ -522,8 +511,6 @@ void CKanbanWnd::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	{
 		m_nTrackedAttrib = TDCA_STATUS;
 		UpdateData(FALSE);
-
-		EnableDisableCtrls();
 	}
 }
 
@@ -664,28 +651,6 @@ void CKanbanWnd::Resize(int cx, int cy)
 {
 	if (m_ctrlKanban.GetSafeHwnd())
 	{
-		// combos and toolbar
-		int nXOffset = 0;
-		CRect rOptions = GetChildRect(&m_cbOptions);
-
-		CRect rAttrib;
-
-		if (m_nTrackedAttrib == TDCA_CUSTOMATTRIB)
-			rAttrib = GetChildRect(&m_cbCustomAttributes);
-		else
-			rAttrib = GetChildRect(&m_cbAttributes);
-
-		nXOffset = (rAttrib.right + 10 - rOptions.left);
-
-		if (nXOffset != 0)
-		{
-			OffsetChild(&m_cbOptions, nXOffset, 0);
-			OffsetCtrl(this, IDC_OPTIONS_LABEL, nXOffset, 0);
-			
-			OffsetChild(&m_toolbar, nXOffset, 0);
-		}
-		
-		// main window
 		if ((cx == 0) && (cy == 0))
 		{
 			CRect rClient;
@@ -771,6 +736,7 @@ void CKanbanWnd::UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled)
 		else if ((m_nTrackedAttrib != TDCA_FIXEDCOLUMNS) && m_dlgPrefs.HasFixedColumns())
 		{
 			m_nTrackedAttrib = (TDC_ATTRIBUTE)TDCA_FIXEDCOLUMNS;
+			m_sTrackedCustomAttribID.Empty();
 			UpdateData(FALSE);
 		}
 	}
@@ -903,18 +869,9 @@ void CKanbanWnd::OnKanbanPreferences()
 	if (m_dlgPrefs.DoModal(m_ctrlKanban) == IDOK)
 	{
 		UpdateKanbanCtrlPreferences(bHadFixedColumns != m_dlgPrefs.HasFixedColumns());
-		Resize();
 
 		m_ctrlKanban.SetFocus();
 	}
-}
-
-void CKanbanWnd::EnableDisableCtrls()
-{
-	BOOL bCustom = (m_nTrackedAttrib == TDCA_CUSTOMATTRIB);
-	
-	m_cbCustomAttributes.ShowWindow(bCustom ? SW_SHOW : SW_HIDE);
-	m_cbCustomAttributes.EnableWindow(bCustom);
 }
 
 void CKanbanWnd::OnUpdateKanbanPreferences(CCmdUI* pCmdUI) 
@@ -939,9 +896,10 @@ void CKanbanWnd::OnSelchangeTrackedAttribute()
 
 void CKanbanWnd::ProcessTrackedAttributeChange() 
 {
+	TDC_ATTRIBUTE nTrackAttrib = m_nTrackedAttrib;
+	CString sCustomAttrib = m_sTrackedCustomAttribID;
+
 	CKanbanColumnArray aColDefs;
-	TDC_ATTRIBUTE nTrackAttrib;
-	CString sCustomAttrib;
 
 	if (m_nTrackedAttrib == TDCA_FIXEDCOLUMNS)
 	{
@@ -949,29 +907,7 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 
 		nTrackAttrib = m_dlgPrefs.GetFixedAttributeToTrack(sCustomAttrib);
 	}
-	else
-	{
-		// If the new type is 'custom' auto-select the first custom attribute
-		// else hide the custom attribute field
-		if ((m_nTrackedAttrib == TDCA_CUSTOMATTRIB) && m_sTrackedCustomAttribID.IsEmpty())
-		{
-			m_cbCustomAttributes.SetCurSel(0);
-			m_sTrackedCustomAttribID = m_cbCustomAttributes.GetSelectedAttributeID();
 
-			// Fallback
-			if (m_sTrackedCustomAttribID.IsEmpty())
-			{
-				m_nTrackedAttrib = TDCA_STATUS;
-				UpdateData(FALSE);
-			}
-		}
-			
-		nTrackAttrib = m_nTrackedAttrib;
-		sCustomAttrib = m_sTrackedCustomAttribID;
-	}
-
-	EnableDisableCtrls();
-	Resize();
 	RefreshKanbanCtrlDisplayAttributes();
 
 	// Track the new attribute

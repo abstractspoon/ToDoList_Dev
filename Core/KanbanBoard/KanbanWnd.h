@@ -71,7 +71,6 @@ protected:
 	CKanbanPreferencesDlg m_dlgPrefs;
 	CKanbanAttributeComboBox m_cbAttributes;
 	CKanbanOptionComboBox m_cbOptions;
-	CKanbanCustomAttributeComboBox m_cbCustomAttributes;
 
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
@@ -130,7 +129,6 @@ protected:
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateKanbanCtrlPreferences(BOOL bFixedColumnsToggled);
 	void SendParentSelectionUpdate();
-	void EnableDisableCtrls();
 	void UpdatePriorityColors(const IPreferences* pPrefs);
 	void ProcessTrackedAttributeChange();
 	void RefreshKanbanCtrlDisplayAttributes();

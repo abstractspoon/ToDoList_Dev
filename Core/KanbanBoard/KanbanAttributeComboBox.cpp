@@ -8,6 +8,7 @@
 
 #include "..\shared\dialoghelper.h"
 #include "..\shared\enstring.h"
+#include "..\shared\localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -46,7 +47,10 @@ void CKanbanAttributeComboBox::PreSubclassWindow()
 
 void CKanbanAttributeComboBox::BuildCombo()
 {
-	TDC_ATTRIBUTE nSel = GetSelectedAttribute();
+	// Cache selection
+	CString sSelCustID;
+	TDC_ATTRIBUTE nSelAttrib = GetSelectedAttribute(sSelCustID);
+
 	ResetContent();
 
 	CDialogHelper::AddString(*this, CEnString(IDS_STATUSATTRIB), TDCA_STATUS);
@@ -58,40 +62,31 @@ void CKanbanAttributeComboBox::BuildCombo()
 	CDialogHelper::AddString(*this, CEnString(IDS_VERSIONATTRIB), TDCA_VERSION);
 	CDialogHelper::AddString(*this, CEnString(IDS_TAGSATTRIB), TDCA_TAGS);
 
+	for (int nCust = 0; nCust < m_aCustAttribDefs.GetSize(); nCust++)
+	{
+		const KANBANCUSTOMATTRIBDEF& kcaDef = m_aCustAttribDefs.GetData()[nCust];
+
+		CEnString sCustAttrib;
+		sCustAttrib.Format(IDS_CUSTOMATTRIB, kcaDef.sAttribName);
+
+		CLocalizer::IgnoreString(sCustAttrib);
+		CDialogHelper::AddString(*this, sCustAttrib, (TDCA_CUSTOMATTRIB + nCust));
+	}
+
 	if (m_bShowFixedColumns)
 		CDialogHelper::AddString(*this, CEnString(IDS_FIXEDCOLUMNS), TDCA_FIXEDCOLUMNS);
 
-	if (m_bShowCustomAttrib)
-		CDialogHelper::AddString(*this, CEnString(IDS_CUSTOMATTRIB), TDCA_CUSTOMATTRIB);
-
-	SetSelectedAttribute(nSel);
+	// Restore selection
+	if (!SetSelectedAttribute(nSelAttrib, sSelCustID))
+		SetSelectedAttribute(TDCA_STATUS, _T(""));
 }
 
-TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute() const
-{
-	return CDialogHelper::GetSelectedItemData(*this, TDCA_STATUS);
-}
-
-BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib)
-{
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nAttrib));
-}
-
-void CKanbanAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value)
+void CKanbanAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& value, CString& sCustomAttribID)
 {
 	if (pDX->m_bSaveAndValidate)
-		value = GetSelectedAttribute();
+		value = GetSelectedAttribute(sCustomAttribID);
 	else
-		SetSelectedAttribute(value);
-}
-
-void CKanbanAttributeComboBox::ShowCustomAttribute(BOOL bShow)
-{
-	if (!m_bShowCustomAttrib != !bShow) // normalise
-	{
-		m_bShowCustomAttrib = bShow;
-		BuildCombo();
-	}
+		SetSelectedAttribute(value, sCustomAttribID);
 }
 
 void CKanbanAttributeComboBox::ShowFixedColumns(BOOL bShow)
@@ -99,6 +94,64 @@ void CKanbanAttributeComboBox::ShowFixedColumns(BOOL bShow)
 	if (!m_bShowFixedColumns != !bShow) // normalise
 	{
 		m_bShowFixedColumns = bShow;
-		BuildCombo();
+
+		if (GetSafeHwnd())
+			BuildCombo();
 	}
+}
+
+TDC_ATTRIBUTE CKanbanAttributeComboBox::GetSelectedAttribute(CString& sCustomAttribID) const
+{
+	TDC_ATTRIBUTE nSelAttrib = CDialogHelper::GetSelectedItemData(*this, TDCA_STATUS);
+
+	if ((nSelAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nSelAttrib <= TDCA_CUSTOMATTRIB_LAST))
+	{
+		int nCust = (nSelAttrib - TDCA_CUSTOMATTRIB_FIRST);
+		ASSERT( nCust < m_aCustAttribDefs.GetSize());
+
+		sCustomAttribID = m_aCustAttribDefs[nCust].sAttribID;
+		nSelAttrib = TDCA_CUSTOMATTRIB;
+	}
+	else
+	{	
+		sCustomAttribID.Empty();
+	}
+
+	return nSelAttrib;
+}
+
+BOOL CKanbanAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAttribID)
+{
+	BOOL bCustom = ((nAttrib >= TDCA_CUSTOMATTRIB_FIRST) && (nAttrib <= TDCA_CUSTOMATTRIB_LAST));
+
+	if ((bCustom && sCustomAttribID.IsEmpty()) || (!bCustom && !sCustomAttribID.IsEmpty()))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nSelItem = CB_ERR;
+
+	if (bCustom)
+	{
+		int nCust = m_aCustAttribDefs.FindDefinition(sCustomAttribID);
+
+		if (nCust == -1)
+			return FALSE;
+
+		nAttrib = (TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB + nCust);
+	}
+
+	return (CB_ERR != CDialogHelper::SelectItemByData(*this, nAttrib));
+}
+
+void CKanbanAttributeComboBox::SetAttributeDefinitions(const CKanbanCustomAttributeDefinitionArray& aAttribDefs)
+{
+	if (Misc::MatchAllT(m_aCustAttribDefs, aAttribDefs, FALSE))
+		return;
+
+	m_aCustAttribDefs.Copy(aAttribDefs);
+
+	if (GetSafeHwnd())
+		BuildCombo();
 }

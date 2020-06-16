@@ -47,19 +47,16 @@ void CKanbanPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_COLUMNDEFS, m_lcFixedColumnDefs);
 	DDX_Check(pDX, IDC_HIDEEMPTYATTRIBS, m_bHideEmptyAttributeValues);
 	//}}AFX_DATA_MAP
-	DDX_Control(pDX, IDC_CUSTOMATTRIBID, m_cbCustomAttributes);
 	DDX_Check(pDX, IDC_COLORBARBYPRIORITY, m_bColorBarByPriority);
 	DDX_Check(pDX, IDC_INDENTSUBTASKS, m_bIndentSubtasks);
 
-	m_cbAttributes.DDX(pDX, m_nFixedAttrib);
-	m_cbCustomAttributes.DDX(pDX, m_sFixedCustomAttribID);
+	m_cbAttributes.DDX(pDX, m_nFixedAttrib, m_sFixedCustomAttribID);
 }
 
 
 BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CKanbanPreferencesPage)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTES, OnSelchangeAttribute)
-	ON_CBN_SELCHANGE(IDC_CUSTOMATTRIBID, OnSelchangeCustomAttribute)
 	ON_COMMAND(ID_MOVECOL_DOWN, OnMoveFixedColDown)
 	ON_UPDATE_COMMAND_UI(ID_MOVECOL_DOWN, OnUpdateFixedMoveColDown)
 	ON_COMMAND(ID_MOVECOL_UP, OnMoveFixedColUp)
@@ -94,11 +91,8 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 	
 	m_mgrGroupLines.AddGroupLine(IDC_COLUMNGROUP, *this);
 	
-	m_cbAttributes.ShowCustomAttribute(m_aCustAttribDefs.GetSize());
-	m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib);
-
-	m_cbCustomAttributes.SetAttributeDefinitions(m_aCustAttribDefs);
-	m_cbCustomAttributes.SetSelectedAttributeID(m_sFixedCustomAttribID);
+	m_cbAttributes.SetAttributeDefinitions(m_aCustAttribDefs);
+	m_cbAttributes.SetSelectedAttribute(m_nFixedAttrib, m_sFixedCustomAttribID);
 
 	EnableDisableControls();
 
@@ -304,9 +298,6 @@ void CKanbanPreferencesPage::OnShowColorAsBar()
 
 void CKanbanPreferencesPage::EnableDisableControls()
 {
-	m_cbCustomAttributes.EnableWindow(m_nFixedAttrib == TDCA_CUSTOMATTRIB);
-	m_cbCustomAttributes.ShowWindow((m_nFixedAttrib == TDCA_CUSTOMATTRIB) ? SW_SHOW : SW_HIDE);
-	
 	GetDlgItem(IDC_COLORBARBYPRIORITY)->EnableWindow(m_bShowTaskColorAsBar);
 
 	if (m_toolbar.GetSafeHwnd())
@@ -316,16 +307,6 @@ void CKanbanPreferencesPage::EnableDisableControls()
 void CKanbanPreferencesPage::OnSelchangeAttribute() 
 {
 	UpdateData();
-
-	if (m_nFixedAttrib != TDCA_CUSTOMATTRIB)
-	{
-		m_sFixedCustomAttribID.Empty();
-		m_cbCustomAttributes.SetCurSel(CB_ERR);
-	}
-	else if (m_cbCustomAttributes.GetCurSel() == CB_ERR)
-	{
-		m_cbCustomAttributes.SetCurSel(0);
-	}
 
 	if ((m_lcFixedColumnDefs.GetItemCount() > 1) && 
 		(AfxMessageBox(CEnString(IDS_DELETEALLROWS), (MB_YESNO | MB_ICONQUESTION)) == IDYES))
@@ -434,7 +415,7 @@ void CKanbanPreferencesPage::OnItemchangedColumndefs(NMHDR* /*pNMHDR*/, LRESULT*
 void CKanbanPreferencesPage::SetCustomAttributes(const CKanbanCustomAttributeDefinitionArray& aCustAttribDefs)
 {
 	m_aCustAttribDefs.Copy(aCustAttribDefs);
-	m_cbCustomAttributes.SetAttributeDefinitions(aCustAttribDefs);
+	m_cbAttributes.SetAttributeDefinitions(aCustAttribDefs);
 }
 
 void CKanbanPreferencesPage::SetAttributeValues(const CKanbanAttributeValueMap& mapValues)

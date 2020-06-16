@@ -28,9 +28,6 @@
     <ClCompile Include="KanbanOptionComboBox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="KanbanCustomAttributeComboBox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="KanbanColumnCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,9 +73,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KanbanOptionComboBox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KanbanCustomAttributeComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KanbanColumnCtrl.h">
