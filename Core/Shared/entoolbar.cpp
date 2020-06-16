@@ -9,6 +9,7 @@
 #include "graphicsmisc.h"
 #include "themed.h"
 #include "icon.h"
+#include "misc.h"
 
 #include <afxpriv.h>
 
@@ -27,6 +28,11 @@ const UINT WM_REFRESHBUTTONSTATES = WM_APP+1;
 #ifndef TBCDRF_NOBACKGROUND
 #	define TBCDRF_NOBACKGROUND   0x00400000
 #endif
+
+#ifndef TBSTYLE_EX_MIXEDBUTTONS
+#	define TBSTYLE_EX_MIXEDBUTTONS  0x00000008
+#endif
+
 /////////////////////////////////////////////////////////////////////////////
 
 void AFXAPI AfxDeleteObject(HGDIOBJ* pObject);
@@ -58,6 +64,29 @@ END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CEnToolBar message handlers
+
+void CEnToolBar::SetExtendedStyle(DWORD dwExStyle)
+{
+	SendMessage(TB_SETEXTENDEDSTYLE, 0, dwExStyle);
+}
+
+DWORD CEnToolBar::GetExtendedStyle() const
+{
+	return ::SendMessage(m_hWnd, TB_GETEXTENDEDSTYLE, 0, 0);
+}
+
+BOOL CEnToolBar::EnableMixedButtons(BOOL bEnable)
+{
+	DWORD dwExStyle = GetExtendedStyle();
+	
+	if (Misc::SetFlag(dwExStyle, TBSTYLE_EX_MIXEDBUTTONS, bEnable))
+	{
+		SetExtendedStyle(dwExStyle);
+		dwExStyle = GetExtendedStyle();
+	}
+
+	return Misc::HasFlag(dwExStyle, TBSTYLE_EX_MIXEDBUTTONS);
+}
 
 BOOL CEnToolBar::LoadToolBar(LPCTSTR lpszResourceName, LPCTSTR szImagePath, COLORREF crMask)
 {

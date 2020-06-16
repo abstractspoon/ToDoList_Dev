@@ -10,9 +10,11 @@
 #include "EnImageList.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CEnToolBar window
 
 class CEnBitmapEx;
+
+/////////////////////////////////////////////////////////////////////////////
+// CEnToolBar window
 
 class CEnToolBar : public CToolBar
 {
@@ -51,6 +53,10 @@ public:
 	void RemoveDuplicateSeparators(int nStartPos = 0);
 	int GetItemImage(int nPos) const;
 	BOOL SetItemImage(int nPos, int iImage);
+
+	void SetExtendedStyle(DWORD dwExStyle);
+	DWORD GetExtendedStyle() const;
+	BOOL EnableMixedButtons(BOOL bEnable = TRUE);
 
 	// Attributes
 protected:
