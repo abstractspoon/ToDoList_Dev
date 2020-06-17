@@ -812,7 +812,7 @@ BEGIN
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,495,139,10
     PUSHBUTTON      "S&et...   ",IDC_SETSTARTTASKCOLOR,149,494,52,13,
                     BS_RIGHT
-    CONTROL         "'Started &Today' task colour",IDC_STARTTODAYTASKCOLOR,
+    CONTROL         "'Starts &Today' task colour",IDC_STARTTODAYTASKCOLOR,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,510,139,10
     PUSHBUTTON      "S&et...   ",IDC_SETSTARTTODAYTASKCOLOR,149,509,52,13,
                     BS_RIGHT

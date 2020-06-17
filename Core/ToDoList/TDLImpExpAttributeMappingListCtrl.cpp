@@ -127,10 +127,9 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 		DisableColumnEditing(EXPORT_COLUMNID, TRUE);
 		SetColumnType(EXPORT_COLUMNNAME, ILCT_TEXT);
 	}
-	SetView(LVS_REPORT);
-	ResizeStretchyColumns();
 
 	BuildListCtrl();
+	ResizeColumns();
 }
 
 void CTDLImportExportAttributeMappingListCtrl::InitState()
@@ -165,8 +164,6 @@ void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 			SetItemData(nItem, col.nTDCAttrib);
 		}
 	}
-
-	ResizeStretchyColumns();
 
 	if (GetItemCount())
 		SetCurSel(0);
@@ -418,7 +415,15 @@ void CTDLImportExportAttributeMappingListCtrl::OnSize(UINT nType, int cx, int cy
 {
 	CInputListCtrl::OnSize(nType, cx, cy);
 
+	ResizeColumns();
+}
+
+void CTDLImportExportAttributeMappingListCtrl::ResizeColumns()
+{
+	CRect rClient;
+	GetClientRect(rClient);
+
 	// Size the columns equally
-	SetColumnWidth(0, cx / 2);
-	SetColumnWidth(1, cx / 2);
+	SetColumnWidth(0, rClient.Width() / 2);
+	SetColumnWidth(1, rClient.Width() / 2);
 }

@@ -62,6 +62,7 @@ protected:
 	int FindRow(TDC_ATTRIBUTE nAttrib, int nIgnoreRow = -1) const;
 	int FindRow(const CString& sName, int nIgnoreRow = -1) const;
 	void TraceMapping() const;
+	void ResizeColumns();
 
 	static CString GetAttributeName(TDC_ATTRIBUTE nAttrib);
 };

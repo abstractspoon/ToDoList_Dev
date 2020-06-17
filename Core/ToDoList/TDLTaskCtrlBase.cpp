@@ -2021,27 +2021,27 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 			BOOL bDueToday = m_calculator.IsTaskDueToday(pTDI, pTDS);
 			BOOL bOverDue = m_calculator.IsTaskOverDue(pTDI, pTDS);
 
-			// overdue takes priority
-			if (HasColor(m_crDue) && bOverDue)
-			{
-				crText = m_crDue;
-				break;
-			}
-			else if (HasColor(m_crDueToday) && bDueToday)
+			// 'Due Today' takes precedence over 'Overdue'
+			if (bDueToday && HasColor(m_crDueToday))
 			{
 				crText = m_crDueToday;
 				break;
 			}
-
-			// started 'by now' takes priority
-			if (HasColor(m_crStarted) && m_calculator.IsTaskStarted(pTDI, pTDS))
+			else if (bOverDue && HasColor(m_crDue))
 			{
-				crText = m_crStarted;
+				crText = m_crDue;
 				break;
 			}
-			else if (HasColor(m_crStartedToday) && m_calculator.IsTaskStarted(pTDI, pTDS, TRUE))
+
+			// 'Starts Today' takes precedence over 'Started'
+			if (HasColor(m_crStartedToday) && m_calculator.IsTaskStarted(pTDI, pTDS, TRUE))
 			{
 				crText = m_crStartedToday;
+				break;
+			}
+			else if (HasColor(m_crStarted) && m_calculator.IsTaskStarted(pTDI, pTDS))
+			{
+				crText = m_crStarted;
 				break;
 			}
 
