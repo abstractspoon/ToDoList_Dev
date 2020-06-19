@@ -50,8 +50,8 @@ public:
 
 	void OnDisplayAttributeChanged();
 
-	void SortColumns();
-	void SortItems(TDC_ATTRIBUTE nBy, BOOL bAscending);
+	void Sort();
+	void Sort(TDC_ATTRIBUTE nBy, BOOL bAscending);
 
 	void SetSelectedColumn(const CKanbanColumnCtrl* pSelList);
 	void SetDropTarget(const CKanbanColumnCtrl* pTarget);

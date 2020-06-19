@@ -35,6 +35,9 @@ const UINT WM_KBC_EDITTASKICON		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKICO
 // WPARAM = Task ID, LPARAM = TRUE/FALSE 
 const UINT WM_KBC_EDITTASKFLAG		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKFLAG"));
 
+// WPARAM = Sort ascending, LPARAM = TDC_ATTRIBUTE
+const UINT WM_KBC_SORTCHANGE		= ::RegisterWindowMessageW(L"WM_KBC_SORTCHANGE");
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_KANBANMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

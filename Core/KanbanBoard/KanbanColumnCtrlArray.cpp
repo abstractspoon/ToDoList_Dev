@@ -288,7 +288,7 @@ void CKanbanColumnCtrlArray::Exclude(CDC* pDC)
 	}
 }
 
-void CKanbanColumnCtrlArray::SortItems(TDC_ATTRIBUTE nBy, BOOL bAscending)
+void CKanbanColumnCtrlArray::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
 	int nCol = GetSize();
 
@@ -301,7 +301,7 @@ void CKanbanColumnCtrlArray::SortItems(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	}
 }
 
-void CKanbanColumnCtrlArray::SortColumns()
+void CKanbanColumnCtrlArray::Sort()
 {
 	if (GetSize() > 1)
 		qsort(GetData(), GetSize(), sizeof(CKanbanColumnCtrl**), SortProc);

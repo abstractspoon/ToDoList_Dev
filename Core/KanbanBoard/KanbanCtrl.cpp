@@ -120,6 +120,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_MOUSEMOVE()
 	ON_WM_LBUTTONUP()
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_HEADER, OnHeaderCustomDraw)
+	ON_NOTIFY(HDN_ITEMCLICK, IDC_HEADER, OnHeaderClick)
 	ON_NOTIFY(HDN_DIVIDERDBLCLICK, IDC_HEADER, OnHeaderDividerDoubleClick)
 	ON_NOTIFY(HDN_ITEMCHANGING, IDC_HEADER, OnHeaderItemChanging)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_COLUMNCTRL, OnBeginDragColumnItem)
@@ -154,7 +155,7 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 
-	if (!m_header.Create(HDS_FULLDRAG | /*HDS_DRAGDROP |*/ WS_CHILD | WS_VISIBLE, 
+	if (!m_header.Create(HDS_FULLDRAG | HDS_BUTTONS | /*HDS_DRAGDROP |*/ WS_CHILD | WS_VISIBLE, 
 						 CRect(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50),
 						 this, IDC_HEADER))
 	{
@@ -1659,7 +1660,7 @@ void CKanbanCtrl::RebuildDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 	bNeedResize |= CheckAddBacklogColumn();
 	
 	// (Re)sort
-	m_aColumns.SortColumns();
+	m_aColumns.Sort();
 }
 
 void CKanbanCtrl::RebuildFixedColumns(const CKanbanItemArrayMap& mapKIArray)
@@ -2165,7 +2166,7 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 
 		if ((m_nSortBy != TDCA_NONE) && Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
 		{
-			m_aColumns.SortItems(m_nSortBy, m_bSortAscending);
+			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 		}
 	}
 }
@@ -2456,7 +2457,7 @@ void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 		// do the sort
  		CHoldRedraw hr(*this);
 
-		m_aColumns.SortItems(m_nSortBy, m_bSortAscending);
+		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 	}
 }
 
@@ -2807,6 +2808,28 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
 
 		Invalidate(TRUE);
 	}
+}
+
+void CKanbanCtrl::OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	*pResult = 0;
+
+	// If the sort column is not set then set it to 'title'
+	// else flip the sort direction
+	if (m_nSortBy == TDCA_NONE)
+	{
+		m_nSortBy = TDCA_TASKNAME;
+		m_bSortAscending = TRUE;
+	}
+	else
+	{
+		m_bSortAscending = !m_bSortAscending;
+	}
+
+	m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+	m_header.Invalidate(FALSE);
+
+	GetParent()->SendMessage(WM_KBC_SORTCHANGE, m_bSortAscending, m_nSortBy);
 }
 
 void CKanbanCtrl::OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
