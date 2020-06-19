@@ -220,13 +220,9 @@ namespace MindMapUIExtension
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-			m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
+            RhinoLicensing.CreateBanner(m_TypeId, m_UiName, this, m_Trans, -1);
 
-			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeId, m_UiName, this, m_Trans, -1);
-
-			m_MindMap.Location = new Point(0, bannerHeight);
-			m_MindMap.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);
-
+            m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
 			m_MindMap.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             m_MindMap.Font = m_ControlsFont;
 
@@ -288,6 +284,24 @@ namespace MindMapUIExtension
 									 e.targetParent.uniqueID,
 									 e.afterSibling.uniqueID);
 		}
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+
+            Rectangle mindmapRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+            int bannerHeight = RhinoLicensing.GetBannerHeight(this);
+
+            mindmapRect.Y = bannerHeight;
+            mindmapRect.Height -= bannerHeight;
+
+            m_MindMap.Location = mindmapRect.Location;
+            m_MindMap.Size = mindmapRect.Size;
+
+            Invalidate(true);
+        }
+
+
     }
 
 }

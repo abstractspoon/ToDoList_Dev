@@ -273,7 +273,21 @@ namespace Abstractspoon.Tdl.PluginHelpers
 			return null;
 		}
 
-		private class LinkLabelEx : LinkLabel
+        public static int GetBannerHeight(Control bannerParent)
+        {
+            if (bannerParent != null)
+            {
+                foreach (Control ctrl in bannerParent.Controls)
+                {
+                    if (ctrl is Banner)
+                        return ctrl.Height;
+                }
+            }
+
+            return 0;
+        }
+
+        private class LinkLabelEx : LinkLabel
 		{
 			private const int WM_SETCURSOR = 0x0020;
 
