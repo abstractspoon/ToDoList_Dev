@@ -157,8 +157,6 @@ protected:
 	void SaveColumnState(IPreferences* pPrefs, LPCTSTR szKey, const CIntArray& aStates) const;
 	int LoadColumnState(const IPreferences* pPrefs, LPCTSTR szKey, CIntArray& aStates) const;
 
-	static DWORD MapColumn(GTLC_COLUMN nColumn);
-	static GTLC_COLUMN MapColumn(DWORD dwColumn);
 	static void InitWorkingWeek(const IPreferences* pPrefs);
 };
 

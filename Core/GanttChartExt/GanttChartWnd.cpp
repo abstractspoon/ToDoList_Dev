@@ -574,7 +574,9 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 	case IUI_SORT:
 		if (pData)
 		{
-			m_ctrlGantt.Sort(MapColumn(pData->nSortBy), (pData->bSortAscending ? TRUE : FALSE));
+			GTLC_COLUMN nCol = CGanttCtrl::MapAttributeToColumn(pData->nSortBy);
+
+			m_ctrlGantt.Sort(nCol, (pData->bSortAscending ? TRUE : FALSE));
 			return true;
 		}
 		break;
@@ -584,13 +586,13 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		{
 			GANTTSORTCOLUMNS sort;
 
-			sort.cols[0].nBy = m_ctrlGantt.MapAttributeToColumn(pData->sort.nAttrib1);
+			sort.cols[0].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib1);
 			sort.cols[0].bAscending = (pData->sort.bAscending1 ? TRUE : FALSE);
 
-			sort.cols[1].nBy = m_ctrlGantt.MapAttributeToColumn(pData->sort.nAttrib2);
+			sort.cols[1].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib2);
 			sort.cols[1].bAscending = (pData->sort.bAscending2 ? TRUE : FALSE);
 
-			sort.cols[2].nBy = m_ctrlGantt.MapAttributeToColumn(pData->sort.nAttrib3);
+			sort.cols[2].nBy = CGanttCtrl::MapAttributeToColumn(pData->sort.nAttrib3);
 			sort.cols[2].bAscending = (pData->sort.bAscending3 ? TRUE : FALSE);
 			
 			m_ctrlGantt.Sort(sort);
@@ -745,16 +747,6 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 
 	// all else
 	return false;
-}
-
-GTLC_COLUMN CGanttChartWnd::MapColumn(DWORD dwColumn)
-{
-	return CGanttCtrl::MapAttributeToColumn((TDC_ATTRIBUTE)dwColumn);
-}
-
-DWORD CGanttChartWnd::MapColumn(GTLC_COLUMN nColumn)
-{
-	return (DWORD)CGanttCtrl::MapColumnToAttribute(nColumn);
 }
 
 void CGanttChartWnd::OnSize(UINT nType, int cx, int cy) 
