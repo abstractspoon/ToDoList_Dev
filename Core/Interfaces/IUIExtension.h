@@ -310,8 +310,8 @@ const UINT WM_IUI_EDITSELECTEDTASKTITLE		= ::RegisterWindowMessageW(L"WM_IUI_EDI
 // wParam = lParam = 0
 const UINT WM_IUI_EDITSELECTEDTASKICON		= ::RegisterWindowMessageW(L"WM_IUI_EDITSELECTEDTASKICON"); 
 
-// wParam = sort ascending, lParam = Column ID
-const UINT WM_IUI_SORTCOLUMNCHANGE			= ::RegisterWindowMessageW(L"WM_IUI_SORTCOLUMNCHANGE"); 
+// wParam = sort ascending, lParam = TDC_ATTRIBUTE
+const UINT WM_IUI_SORTCHANGE				= ::RegisterWindowMessageW(L"WM_IUI_SORTCHANGE"); 
 
 // wParam = 0, lParam = identifying string (LPCTSTR)
 const UINT WM_IUI_DOHELP					= ::RegisterWindowMessageW(L"WM_IUI_DOHELP"); 

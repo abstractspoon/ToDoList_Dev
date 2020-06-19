@@ -1041,7 +1041,9 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 LRESULT CGanttChartWnd::OnGanttNotifySortChange(WPARAM wp, LPARAM lp)
 {
 	// notify app
-	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, wp, MapColumn((GTLC_COLUMN)lp));
+	TDC_ATTRIBUTE nAttrib = CGanttCtrl::MapColumnToAttribute((GTLC_COLUMN)lp);
+
+	GetParent()->SendMessage(WM_IUI_SORTCHANGE, wp, nAttrib);
 
 	return 0L;
 }

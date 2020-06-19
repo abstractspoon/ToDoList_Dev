@@ -766,7 +766,7 @@ void CWorkloadWnd::SendParentSelectionUpdate()
 LRESULT CWorkloadWnd::OnWorkloadNotifySortChange(WPARAM wp, LPARAM lp)
 {
 	// notify app
-	GetParent()->SendMessage(WM_IUI_SORTCOLUMNCHANGE, wp, MapColumn((WLC_COLUMNID)lp));
+	GetParent()->SendMessage(WM_IUI_SORTCHANGE, wp, MapColumn((WLC_COLUMNID)lp));
 
 	return 0L;
 }
