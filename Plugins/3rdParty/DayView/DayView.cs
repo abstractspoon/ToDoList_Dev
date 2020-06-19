@@ -1430,12 +1430,9 @@ namespace Calendar
 
             for (int day = 0; day < daysToShow; day++)
             {
-                // Take up any leftover from rounding on day 0
-                if (day == 0)
-                {
-                    int day0Width = (rect.Width - ((daysToShow - 1) * dayWidth));
-                    dayHeaderRectangle.Width = day0Width;
-                }
+                // Take up any leftover from rounding on last day
+                if (day == (daysToShow - 1))
+                    dayHeaderRectangle.Width = (rect.Right - dayHeaderRectangle.X);
 
                 renderer.DrawDayHeader(e.Graphics, dayHeaderRectangle, headerDate);
 
