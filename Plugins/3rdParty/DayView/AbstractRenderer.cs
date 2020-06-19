@@ -122,7 +122,12 @@ namespace Calendar
             }
         }
 
-        public abstract void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
+		public virtual void SetColumnWidth(Graphics g, int colWidth)
+		{
+			// To allow derived classes to cache calculations
+		}
+		
+		public abstract void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
 
         public abstract void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
 

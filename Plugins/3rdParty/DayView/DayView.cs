@@ -1423,6 +1423,7 @@ namespace Calendar
 		protected void DrawDayHeaders(PaintEventArgs e, Rectangle rect)
         {
             int dayWidth = (rect.Width / daysToShow);
+			renderer.SetColumnWidth(e.Graphics, dayWidth);
 
             // one day header rectangle
             Rectangle dayHeaderRectangle = new Rectangle(rect.Left, rect.Top, dayWidth, rect.Height);
@@ -1430,7 +1431,7 @@ namespace Calendar
 
             for (int day = 0; day < daysToShow; day++)
             {
-                // Take up any leftover from rounding on last day
+                // Add any leftover from rounding to last day
                 if (day == (daysToShow - 1))
                     dayHeaderRectangle.Width = (rect.Right - dayHeaderRectangle.X);
 
