@@ -84,7 +84,6 @@ namespace Calendar
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 			SetStyle(ControlStyles.UserPaint, true);
 			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-            SetStyle(ControlStyles.ResizeRedraw, true);
             SetStyle(ControlStyles.Selectable, true);
 
             vscroll = new VScrollBar();
