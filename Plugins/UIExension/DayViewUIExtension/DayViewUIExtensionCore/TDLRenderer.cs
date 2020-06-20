@@ -84,8 +84,7 @@ namespace DayViewUIExtension
 			// Subtract the width of the widest numerical component
 			using (Font font = new Font("Tahoma", 9, FontStyle.Bold))
 			{
-				colWidth -= (int)g.MeasureString("31", font).Width;
-				colWidth -= 2;
+				colWidth -= TextRenderer.MeasureText(g, "31", font).Width;
 			}
 
 			// Calculate the longest long and short day-of-week names
@@ -96,14 +95,14 @@ namespace DayViewUIExtension
 				for (int dow = 0; dow < 6; dow++)
 				{
 					string dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetDayName((DayOfWeek)dow);
-					int nameWidth = (int)g.MeasureString(dayName, font).Width;
+					int nameWidth = TextRenderer.MeasureText(g, dayName, font).Width;
 
-					maxLong = Math.Max(maxLong, nameWidth + 1);
+					maxLong = Math.Max(maxLong, nameWidth);
 
 					dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName((DayOfWeek)dow);
-					nameWidth = (int)g.MeasureString(dayName, font).Width;
+					nameWidth = TextRenderer.MeasureText(g, dayName, font).Width;
 
-					maxShort = Math.Max(maxShort, nameWidth + 1);
+					maxShort = Math.Max(maxShort, nameWidth);
 				}
 
 				if (maxLong > colWidth)
