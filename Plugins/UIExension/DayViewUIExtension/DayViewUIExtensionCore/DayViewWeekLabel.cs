@@ -25,7 +25,7 @@ namespace DayViewUIExtension
 
 			set
 			{
-				if ((value == 1) || (value == 7) && (value != m_NumDays))
+				if (value != m_NumDays)
 				{
 					m_NumDays = value;
 					StartDate = m_StartDate;
