@@ -18,6 +18,7 @@ namespace DayViewUIExtension
 		private UIExtension.TaskIcon m_TaskIcons;
 		private IntPtr m_hWnd;
 		private Font m_BaseFont;
+		private int m_ColWidth = -1;
 
 		enum DOWNameStyle
 		{
@@ -72,6 +73,11 @@ namespace DayViewUIExtension
 
 		public override void SetColumnWidth(Graphics g, int colWidth)
 		{
+			if (m_ColWidth == colWidth)
+				return;
+
+			m_ColWidth = colWidth;
+
 			// Update the visibility of the day of week component
 			DOWStyle = DOWNameStyle.Long;
 
