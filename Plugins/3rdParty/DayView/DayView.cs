@@ -1011,13 +1011,13 @@ namespace Calendar
 
 				// If a long appointment is being resized and it now fits within a 
 				// single day, still treat it as a long task until the edit finishes
-				if (!longAppt && (appointment == selectedAppointment) && (activeTool != null))
-				{
-					Calendar.SelectionTool selTool = activeTool as Calendar.SelectionTool;
-
-					if (selTool != null)
-						longAppt = selTool.IsResizingLongAppt();
-				}
+// 				if (!longAppt && (appointment == selectedAppointment) && (activeTool != null))
+// 				{
+// 					Calendar.SelectionTool selTool = activeTool as Calendar.SelectionTool;
+// 
+// 					if (selTool != null)
+// 						longAppt = selTool.IsResizingLongAppt();
+// 				}
 				
 				if (!longAppt)
                 {

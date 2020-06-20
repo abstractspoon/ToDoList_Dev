@@ -8,23 +8,23 @@ using System.Diagnostics;
 
 namespace Calendar
 {
-    public class SelectionTool : ITool
-    {
-        private DayView m_dayView;
+	public class SelectionTool : ITool
+	{
+		private DayView m_dayView;
 
-        public DayView DayView
-        {
-            get
-            {
-                return m_dayView;
-            }
-            set
-            {
-                m_dayView = value;
-            }
-        }
+		public DayView DayView
+		{
+			get
+			{
+				return m_dayView;
+			}
+			set
+			{
+				m_dayView = value;
+			}
+		}
 
-        private Mode m_mode = Mode.None;
+		private Mode m_mode = Mode.None;
 
 		public Boolean IsResizing
 		{
@@ -36,286 +36,368 @@ namespace Calendar
 			get { return m_mode; }
 		}
 
-		public Boolean IsResizingLongAppt()
+		private DateTime m_startDate;
+		private TimeSpan m_length;
+		private TimeSpan m_delta;
+		private Point m_lastMouseMove;
+
+		public void Reset()
 		{
+			m_mode = Mode.None;
+			m_length = TimeSpan.Zero;
+			m_delta = TimeSpan.Zero;
+		}
+
+		public bool UpdateCursor(System.Windows.Forms.MouseEventArgs e)
+		{
+			m_dayView.Cursor = System.Windows.Forms.Cursors.Default;
+
+			if (!CanModifyAppointment(e, false))
+				return false;
+
+			Mode mode = GetMode(e.Location, m_dayView.SelectedAppointment);
+
+			switch (mode)
+			{
+			case Mode.ResizeBottom:
+			case Mode.ResizeTop:
+				m_dayView.Cursor = System.Windows.Forms.Cursors.SizeNS;
+				break;
+
+			case Mode.ResizeLeft:
+			case Mode.ResizeRight:
+				DayView.Cursor = System.Windows.Forms.Cursors.SizeWE;
+				break;
+
+			case Mode.Move:
+				m_dayView.Cursor = System.Windows.Forms.Cursors.Default;
+				break;
+
+			default:
+				return false;
+			}
+
+			return true;
+		}
+
+		private bool CanModifyAppointment(System.Windows.Forms.MouseEventArgs e, bool checkMouseDown)
+		{
+			if (e == null)
+				return false;
+
+			if (checkMouseDown && (e.Button != System.Windows.Forms.MouseButtons.Left))
+				return false;
+
+			Appointment selection = m_dayView.SelectedAppointment;
+
+			if ((selection == null) || selection.Locked || (m_mode == Mode.None))
+				return false;
+
+			return true;
+		}
+
+		public void MouseMove(System.Windows.Forms.MouseEventArgs e)
+		{
+			if (!UpdateCursor(e))
+				return;
+
+			bool resized = false;
+
 			switch (m_mode)
 			{
-				case Mode.ResizeLeft:
-				case Mode.ResizeRight:
-					return true;
+			case Mode.Move:
+				resized = MoveAppointment(e);
+				break;
 
-				case Mode.Move:
-					return m_dayView.SelectedAppointment.IsLongAppt();
+			case Mode.ResizeBottom:
+				resized = ResizeShortAppointment(e);
+				break;
+
+			case Mode.ResizeTop:
+				resized = ResizeShortAppointment(e);
+				break;
+
+			case Mode.ResizeLeft:
+				resized = ResizeLongAppointment(e);
+				break;
+
+			case Mode.ResizeRight:
+				resized = ResizeLongAppointment(e);
+				break;
+			}
+
+			m_lastMouseMove = e.Location;
+
+			if (resized)
+			{
+				m_dayView.Invalidate();
+				m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, false));
+			}
+		}
+
+		private bool MoveAppointment(System.Windows.Forms.MouseEventArgs e)
+		{
+			Debug.Assert(CanModifyAppointment(e, true));
+
+			Rectangle shortApptsRect = m_dayView.GetTrueRectangle();
+			Rectangle longApptsRect = m_dayView.GetFullDayApptsRectangle();
+
+			if (!shortApptsRect.Contains(e.Location) && !longApptsRect.Contains(e.Location))
+				return false;
+
+			Appointment selection = m_dayView.SelectedAppointment;
+
+			bool longAppt = selection.IsLongAppt();
+			bool ptInLongApptsRect = longApptsRect.Contains(e.Location);
+
+			bool shortAppt = !longAppt;
+			bool ptInShortApptsRect = !ptInLongApptsRect;
+
+			// Get date/time at mouse position
+			DateTime dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y, longAppt);
+
+			switch (m_mode)
+			{
+			case Mode.Move:
+				if (shortAppt && ptInShortApptsRect)
+				{
+					if (m_length == TimeSpan.Zero)
+					{
+						m_startDate = selection.StartDate;
+						m_length = selection.Length;
+					}
+					else
+					{
+						DateTime startDate = dateAtCursor.Add(m_delta);
+						DateTime endDate = startDate.Add(m_length);
+
+						if (startDate.Date < dateAtCursor.Date)
+						{
+							// User has dragged off the top
+							startDate = dateAtCursor.Date;
+							endDate = startDate.Add(m_length);
+						}
+						else if (endDate > dateAtCursor.Date.AddDays(1))
+						{
+							// User has dragged off the bottom
+							startDate = endDate.Date.Subtract(m_length);
+							endDate = (startDate + m_length);
+						}
+
+						// Handle horizontal drag
+						DateTime date = m_dayView.GetDateAt(e.X, false);
+						DateTime datePrev = m_dayView.GetDateAt(m_lastMouseMove.X, false);
+
+						if (date != datePrev)
+						{
+							startDate = date.Date.Add(startDate.TimeOfDay);
+							endDate = startDate.Add(m_length);
+						}
+
+						// Check for a change
+						if (startDate != selection.StartDate)
+						{
+							selection.StartDate = startDate;
+							selection.EndDate = endDate;
+
+							return true;
+						}
+					}
+				}
+				else if (longAppt && ptInLongApptsRect)
+				{
+					dateAtCursor = dateAtCursor.Add(m_delta);
+
+					int hoursDiff = dateAtCursor.Subtract(selection.StartDate).Hours;
+					TimeSpan apptLen = selection.Length;
+
+					if (hoursDiff != 0)
+					{
+						System.DateTime newStart = selection.StartDate.AddHours(hoursDiff);
+
+						if (newStart != selection.StartDate)
+						{
+							selection.StartDate = newStart;
+							selection.EndDate = (newStart + apptLen);
+
+							return true;
+						}
+					}
+				}
+				break;
 			}
 
 			// all else
 			return false;
 		}
 
-        private DateTime m_startDate;
-        private TimeSpan m_length;
-        private TimeSpan m_delta;
-        private Point m_lastMouseMove;
+		private bool ResizeLongAppointment(System.Windows.Forms.MouseEventArgs e)
+		{
+			Debug.Assert(CanModifyAppointment(e, true));
 
-        public void Reset()
-        {
-			m_mode = Mode.None;
-			m_length = TimeSpan.Zero;
-            m_delta = TimeSpan.Zero;
-        }
+			Appointment selection = m_dayView.SelectedAppointment;
 
-        public void UpdateCursor(System.Windows.Forms.MouseEventArgs e, Appointment appointment)
-        {
-            if (e == null)
-                throw new ArgumentNullException("e");
+			if (!selection.IsLongAppt())
+				return false;
 
-            m_dayView.Cursor = System.Windows.Forms.Cursors.Default;
+			// Note: we allow the cursor to move outside the long appt rect
+			// because the date/time calculation will still be valid
+			DateTime dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y, true);
 
-			if ((appointment != null) && !appointment.Locked)
+			switch (m_mode)
 			{
-				Mode mode = GetMode(e.Location, appointment);
-
-				switch (mode)
+			case Mode.ResizeLeft:
 				{
-					case Mode.ResizeBottom:
-					case Mode.ResizeTop:
-						m_dayView.Cursor = System.Windows.Forms.Cursors.SizeNS;
-						break;
+					// Prevent resizing shorter than one hour
+					if (dateAtCursor.Date < selection.EndDate.AddHours(-1))
+					{
+						selection.StartDate = dateAtCursor;
+						return true;
+					}
+				}
+				break;
 
-					case Mode.ResizeLeft:
-					case Mode.ResizeRight:
-						DayView.Cursor = System.Windows.Forms.Cursors.SizeWE;
-						break;
-
-					case Mode.Move:
-					default:
-						m_dayView.Cursor = System.Windows.Forms.Cursors.Default;
-						break;
-                }
-            }
-        }
-
-        public void MouseMove(System.Windows.Forms.MouseEventArgs e)
-        {
-            if (e == null)
-                throw new ArgumentNullException("e");
-
-            Appointment selection = m_dayView.SelectedAppointment;
-
-            UpdateCursor(e, selection);
-
-            if ((selection == null) || selection.Locked || (m_mode == Mode.None))
-                return;
-
-            Rectangle viewrect = m_dayView.GetTrueRectangle();
-            Rectangle fdrect = m_dayView.GetFullDayApptsRectangle();
-
-            if ((e.Button == System.Windows.Forms.MouseButtons.Left) &&
-                 (viewrect.Contains(e.Location) || fdrect.Contains(e.Location)))
-            {
-                // Get time at mouse position
-                bool longAppt = IsResizingLongAppt();
-                bool ptInLongAptRect = fdrect.Contains(e.Location);
-
-                DateTime dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y, longAppt);
-
-                switch (m_mode)
-                {
-                    case Mode.Move:
-                        if (!selection.IsLongAppt() && !ptInLongAptRect)
-                        {
-                            if (m_length == TimeSpan.Zero)
-                            {
-                                m_startDate = selection.StartDate;
-                                m_length = selection.Length;
-                            }
-                            else
-                            {
-                                DateTime startDate = dateAtCursor.Add(m_delta);
-                                DateTime endDate = startDate.Add(m_length);
-
-                                if (startDate.Date < dateAtCursor.Date)
-                                {
-                                    // User has dragged off the top
-                                    startDate = dateAtCursor.Date;
-                                    endDate = startDate.Add(m_length);
-                                }
-                                else if (endDate > dateAtCursor.Date.AddDays(1))
-                                {
-                                    // User has dragged off the bottom
-                                    startDate = endDate.Date.Subtract(m_length);
-                                    endDate = (startDate + m_length);
-                                }
-
-                                // Handle horizontal drag
-                                DateTime date = m_dayView.GetDateAt(e.X, false);
-                                DateTime datePrev = m_dayView.GetDateAt(m_lastMouseMove.X, false);
-
-                                if (date != datePrev)
-                                {
-                                    startDate = date.Date.Add(startDate.TimeOfDay);
-                                    endDate = startDate.Add(m_length);
-                                }
-
-                                // Check for a change
-                                if (startDate != selection.StartDate)
-                                {
-                                    selection.StartDate = startDate;
-                                    selection.EndDate = endDate;
-
-                                    m_dayView.Invalidate();
-                                    m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
-                                }
-                            }
-                        }
-                        else if (selection.IsLongAppt() && ptInLongAptRect)
-                        {
-                            dateAtCursor = dateAtCursor.Add(m_delta);
-
-                            int hoursDiff = dateAtCursor.Subtract(selection.StartDate).Hours;
-                            TimeSpan apptLen = selection.Length;
-
-                            if (hoursDiff != 0)
-                            {
-                                System.DateTime newStart = selection.StartDate.AddHours(hoursDiff);
-
-//                                 if (newStart < m_dayView.StartDate)
-//                                 {
-//                                     newStart = m_dayView.StartDate;
-//                                 }
-//                                 else if ((newStart + apptLen) >= m_dayView.EndDate)
-//                                 {
-//                                     newStart = (m_dayView.EndDate - apptLen);
-//                                 }
-
-                                if (newStart != selection.StartDate)
-                                {
-                                    selection.StartDate = newStart;
-                                    selection.EndDate = (newStart + apptLen);
-
-                                    m_dayView.Invalidate();
-                                    m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
-                                }
-                            }
-                        }
-                        break;
-
-                    case Mode.ResizeBottom:
-                        if (!ptInLongAptRect)
-                        {
-							// Note: the current algorithm tends to 'floor' the time
-							// which makes selecting all the way to midnight tricky.
-							// We solve it by adding half the slot height to the 
-							// mouse position
-							dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y + m_dayView.SlotHeight, longAppt);
-
-							if (dateAtCursor == dateAtCursor.Date)
-								dateAtCursor = dateAtCursor.AddDays(1).AddSeconds(-1);
-
-							if (dateAtCursor > selection.StartDate)
-							{
-								if (SameDay(selection.EndDate, dateAtCursor.Date))
-								{
-									selection.EndDate = dateAtCursor;
-
-									m_dayView.Invalidate();
-									m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
-								}
-							}
-						}
-                        break;
-
-                    case Mode.ResizeTop:
-                        if (!ptInLongAptRect && (dateAtCursor < selection.EndDate))
-                        {
-                            if (selection.StartDate.Day == dateAtCursor.Day)
-                            {
-                                selection.StartDate = dateAtCursor;
-                                m_dayView.Invalidate();
-                                m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
-                            }
-                        }
-                        break;
-
-                    case Mode.ResizeLeft:
-                        if (ptInLongAptRect && (dateAtCursor.Date < selection.EndDate.AddHours(-1)))
-                        {
-                            selection.StartDate = dateAtCursor;
-
-                            m_dayView.Invalidate();
-                            m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
-                        }
-                        break;
-
-                    case Mode.ResizeRight:
-                        if (ptInLongAptRect && (dateAtCursor >= selection.StartDate.AddHours(1)))
-                        {
-                            selection.EndDate = dateAtCursor;
-
-                            m_dayView.Invalidate();
-                            m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(selection, m_mode, false));
-                        }
-                        break;
-                }
-
-                m_lastMouseMove = e.Location;
+			case Mode.ResizeRight:
+				{
+					// Prevent resizing shorter than one hour
+					if (dateAtCursor >= selection.StartDate.AddHours(1))
+					{
+						selection.EndDate = dateAtCursor;
+						return true;
+					}
+				}
+				break;
 			}
-        }
 
-        static private bool SameDay(DateTime startDate, DateTime endDate)
-        {
-            if (endDate.Date == startDate.Date)
-                return true;
+			// all else
+			return false;
+		}
 
-            if (endDate == startDate.Date.AddDays(1)) // midnight
-                return true;
+		private bool ResizeShortAppointment(System.Windows.Forms.MouseEventArgs e)
+		{
+			Debug.Assert(CanModifyAppointment(e, true));
 
-            // all else
-            return false;
-        }
+			Appointment selection = m_dayView.SelectedAppointment;
 
-        public Mode GetMode(System.Drawing.Point mousePos)
-        {
-            return GetMode(mousePos, m_dayView.SelectedAppointment);
-        }
+			if (selection.IsLongAppt())
+				return false;
 
-        public Mode GetMode(System.Drawing.Point mousePos, Appointment appointment)
-        {
+			Rectangle shortApptsRect = m_dayView.GetTrueRectangle();
+
+			if (!shortApptsRect.Contains(e.Location))
+				return false;
+
+			switch (m_mode)
+			{
+			case Mode.ResizeBottom:
+				{
+					// Note: the current algorithm tends to 'floor' the time
+					// which makes selecting all the way to midnight tricky.
+					// We solve it by adding half the slot height to the 
+					// mouse position
+					DateTime dateAtCursor = m_dayView.GetDateTimeAt(e.X, (e.Y + m_dayView.SlotHeight), false);
+
+					if (dateAtCursor == dateAtCursor.Date)
+					{
+						dateAtCursor = dateAtCursor.AddDays(1).AddSeconds(-1);
+					}
+					// If the cursor drifts outside the day column treat the
+					// time component as still being valid
+					else if (!SameDay(selection.StartDate, dateAtCursor))
+					{
+						dateAtCursor = selection.StartDate.Date + dateAtCursor.TimeOfDay;
+					}
+
+					// Prevent resizing shorter than one slot
+					if (dateAtCursor > selection.StartDate)
+					{
+						if (SameDay(selection.EndDate, dateAtCursor))
+						{
+							selection.EndDate = dateAtCursor;
+							return true;
+						}
+					}
+				}
+				break;
+
+			case Mode.ResizeTop:
+				{
+					DateTime dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y, false);
+
+					// If the cursor drifts outside the day column treat the
+					// time component as still being valid
+					if (!SameDay(selection.StartDate, dateAtCursor))
+						dateAtCursor = selection.StartDate.Date + dateAtCursor.TimeOfDay;
+
+					// Prevent resizing shorter than one slot
+					// and prevent the appointment start moving to the previous day
+					if ((dateAtCursor < selection.EndDate) && SameDay(selection.StartDate, dateAtCursor))
+					{
+						selection.StartDate = dateAtCursor;
+						return true;
+					}
+				}
+				break;
+			}
+
+			// all else
+			return false;
+		}
+
+		static private bool SameDay(DateTime startDate, DateTime endDate)
+		{
+			if (endDate.Date == startDate.Date)
+				return true;
+
+			if (endDate == startDate.Date.AddDays(1)) // midnight
+				return true;
+
+			// all else
+			return false;
+		}
+
+		public Mode GetMode(System.Drawing.Point mousePos)
+		{
+			return GetMode(mousePos, m_dayView.SelectedAppointment);
+		}
+
+		public Mode GetMode(System.Drawing.Point mousePos, Appointment appointment)
+		{
 			if (m_mode != Mode.None)
 				return m_mode;
 
-            if ((appointment == null) || appointment.Locked)
-                return Mode.None;
+			if ((appointment == null) || appointment.Locked)
+				return Mode.None;
 
 			DayView.AppointmentView view = null;
 			Boolean gotview = false;
 
 			if (m_dayView.appointmentViews.ContainsKey(appointment))
-            {
-                view = m_dayView.appointmentViews[appointment];
-                gotview = true;
-            }
-            else if (m_dayView.longAppointmentViews.ContainsKey(appointment))
-            {
-                view = m_dayView.longAppointmentViews[appointment];
-                gotview = true;
-            }
+			{
+				view = m_dayView.appointmentViews[appointment];
+				gotview = true;
+			}
+			else if (m_dayView.longAppointmentViews.ContainsKey(appointment))
+			{
+				view = m_dayView.longAppointmentViews[appointment];
+				gotview = true;
+			}
 
-            if (gotview)
-            {
-                Rectangle topRect = view.Rectangle;
-                Rectangle bottomRect = view.Rectangle;
-                Rectangle leftRect = view.Rectangle;
-                Rectangle rightRect = view.Rectangle;
+			if (gotview)
+			{
+				Rectangle topRect = view.Rectangle;
+				Rectangle bottomRect = view.Rectangle;
+				Rectangle leftRect = view.Rectangle;
+				Rectangle rightRect = view.Rectangle;
 
-                bottomRect.Y = bottomRect.Bottom - 5;
-                bottomRect.Height = 5;
-                topRect.Height = 5;
-                leftRect.Width = 5;
-                rightRect.X += rightRect.Width - 5;
-                rightRect.Width = 5;
+				bottomRect.Y = bottomRect.Bottom - 5;
+				bottomRect.Height = 5;
+				topRect.Height = 5;
+				leftRect.Width = 5;
+				rightRect.X += rightRect.Width - 5;
+				rightRect.Width = 5;
 
-                if (m_dayView.GetFullDayApptsRectangle().Contains(mousePos))
+				if (m_dayView.GetFullDayApptsRectangle().Contains(mousePos))
 				{
 					if (rightRect.Contains(mousePos))
 					{
@@ -338,75 +420,75 @@ namespace Calendar
 					}
 				}
 
-                // all else
-                return Mode.Move;
-            }
+				// all else
+				return Mode.Move;
+			}
 
-            return Mode.None;
-        }
+			return Mode.None;
+		}
 
-        public void MouseUp(System.Windows.Forms.MouseEventArgs e)
-        {
-            if (e == null)
-                throw new ArgumentNullException("e");
+		public void MouseUp(System.Windows.Forms.MouseEventArgs e)
+		{
+			if (e == null)
+				throw new ArgumentNullException("e");
 
-            if (e.Button == System.Windows.Forms.MouseButtons.Left)
-            {
-                if (Complete != null)
-                    Complete(this, EventArgs.Empty);
-            }
+			if (e.Button == System.Windows.Forms.MouseButtons.Left)
+			{
+				if (Complete != null)
+					Complete(this, EventArgs.Empty);
+			}
 
 			m_dayView.Invalidate();
 			m_dayView.RaiseAppointmentMove(new MoveAppointmentEventArgs(m_dayView.SelectedAppointment, m_mode, true));
 
-            m_mode = Mode.None;
-            m_delta = TimeSpan.Zero;
-        }
+			m_mode = Mode.None;
+			m_delta = TimeSpan.Zero;
+		}
 
-        public void MouseDown(System.Windows.Forms.MouseEventArgs e)
-        {
-            if (m_dayView.SelectedAppointmentIsNew)
-            {
-                m_dayView.RaiseNewAppointment();
-            }
+		public void MouseDown(System.Windows.Forms.MouseEventArgs e)
+		{
+			if (m_dayView.SelectedAppointmentIsNew)
+			{
+				m_dayView.RaiseNewAppointment();
+			}
 			else
 			{
 				m_dayView.RaiseSelectionChanged(new AppointmentEventArgs(m_dayView.SelectedAppointment));
 			}
 
-            if (m_dayView.CurrentlyEditing)
-                m_dayView.FinishEditing(false);
+			if (m_dayView.CurrentlyEditing)
+				m_dayView.FinishEditing(false);
 
-            m_mode = GetMode(e.Location);
+			m_mode = GetMode(e.Location);
 
-            if (m_mode != Mode.None)
-            {
-                // Calculate delta time between selection and clicked point
-                if (m_dayView.SelectedAppointment != null)
-                {
-                    DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
-                    m_delta = m_dayView.SelectedAppointment.StartDate - downPos;
-                }
-                else
-                {
-                    m_delta = TimeSpan.Zero;
-                }
+			if (m_mode != Mode.None)
+			{
+				// Calculate delta time between selection and clicked point
+				if (m_dayView.SelectedAppointment != null)
+				{
+					DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
+					m_delta = m_dayView.SelectedAppointment.StartDate - downPos;
+				}
+				else
+				{
+					m_delta = TimeSpan.Zero;
+				}
 
-                m_length = TimeSpan.Zero;
-                m_lastMouseMove = e.Location;
-            }
-        }
+				m_length = TimeSpan.Zero;
+				m_lastMouseMove = e.Location;
+			}
+		}
 
-        public event EventHandler Complete;
+		public event EventHandler Complete;
 
-        public enum Mode
-        {
-            ResizeTop,
-            ResizeBottom,
-            ResizeLeft,
-            ResizeRight,
-            Move,
-            None
-        }
-    }
+		public enum Mode
+		{
+			ResizeTop,
+			ResizeBottom,
+			ResizeLeft,
+			ResizeRight,
+			Move,
+			None
+		}
+	}
 }
