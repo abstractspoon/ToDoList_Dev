@@ -308,62 +308,51 @@ namespace DayViewUIExtension
             }
 
 			// Header text
-			using (StringFormat format = new StringFormat())
-            {
-                format.Alignment = StringAlignment.Center;
-                format.FormatFlags = StringFormatFlags.NoWrap;
-                format.LineAlignment = StringAlignment.Center;
+			g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-				using (StringFormat formatdd = new StringFormat())
+			// Day of month
+			TextFormatFlags flags = TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
+
+			using (Font font = new Font("Tahoma", 9, FontStyle.Bold))
+			{
+				if (DOWStyle == DOWNameStyle.None)
+					flags |= TextFormatFlags.HorizontalCenter;
+
+				string dayNum = date.ToString(" d");
+				TextRenderer.DrawText(g, dayNum, font, rect, SystemColors.WindowText, flags);
+
+				if (DOWStyle == DOWNameStyle.Long)
 				{
-					formatdd.FormatFlags = StringFormatFlags.NoWrap;
-					formatdd.LineAlignment = StringAlignment.Center;
-					formatdd.Alignment = ((DOWStyle == DOWNameStyle.None) ? StringAlignment.Center : StringAlignment.Near);
+					int strWidth = TextRenderer.MeasureText(g, dayNum, font).Width;
 
-					g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-
-					// Day of month
-					using (Font fntDayDate = new Font("Tahoma", 9, FontStyle.Bold))
-					{
-						var dateNum = date.ToString(" d");
-						g.DrawString(dateNum, fntDayDate, SystemBrushes.WindowText, rect, formatdd);
-
-						if (DOWStyle == DOWNameStyle.Long)
-						{
-							int strWidth = (int)g.MeasureString(dateNum, fntDayDate).Width;
-
-							rect.Width -= strWidth;
-							rect.X += strWidth;
-						}
-					}
-				}
-
-				// Day of week
-				if (DOWStyle != DOWNameStyle.None)
-				{
-					TextFormatFlags flags = TextFormatFlags.VerticalCenter;
-					
-					if (DOWStyle == DOWNameStyle.Long)
-						flags |= TextFormatFlags.HorizontalCenter;
-					else
-						flags |= TextFormatFlags.Right;
-
-					using (Font fntDay = new Font("Tahoma", 8, FontStyle.Regular))
-					{
-						string dayName;
-
-						if (DOWStyle == DOWNameStyle.Long)
-							dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek);
-						else
-							dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek);
-
-						TextRenderer.DrawText(g, dayName, fntDay, rect, SystemColors.WindowText, flags);
-					}
+					rect.Width -= strWidth;
+					rect.X += strWidth;
 				}
 			}
-        }
 
-        public override void DrawDayBackground(System.Drawing.Graphics g, System.Drawing.Rectangle rect)
+			// Day of week
+			if (DOWStyle != DOWNameStyle.None)
+			{
+				if (DOWStyle == DOWNameStyle.Long)
+					flags |= TextFormatFlags.HorizontalCenter;
+				else
+					flags |= TextFormatFlags.Right;
+
+				using (Font font = new Font("Tahoma", 8, FontStyle.Regular))
+				{
+					string dayName;
+
+					if (DOWStyle == DOWNameStyle.Long)
+						dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetDayName(date.DayOfWeek);
+					else
+						dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName(date.DayOfWeek);
+
+					TextRenderer.DrawText(g, dayName, font, rect, SystemColors.WindowText, flags);
+				}
+			}
+		}
+
+		public override void DrawDayBackground(System.Drawing.Graphics g, System.Drawing.Rectangle rect)
         {
             //using (SolidBrush backBrush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark)))
             //    g.FillRectangle(backBrush, rect);
