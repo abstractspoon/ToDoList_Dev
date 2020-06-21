@@ -119,10 +119,10 @@ namespace Calendar
 
             tooltip = new ToolTip();
 
-            drawTool = new DrawTool();
+            drawTool = NewDrawTool();
             drawTool.DayView = this;
 
-            selectionTool = new SelectionTool();
+            selectionTool = NewSelectionTool();
             selectionTool.DayView = this;
             selectionTool.Complete += new EventHandler(selectionTool_Complete);
 
@@ -134,6 +134,16 @@ namespace Calendar
 		#endregion
 
 		#region Properties
+
+		virtual protected SelectionTool NewSelectionTool()
+		{
+			return new SelectionTool();
+		}
+
+		virtual protected DrawTool NewDrawTool()
+		{
+			return new DrawTool();
+		}
 
 		public Boolean IsResizingAppointment()
 		{

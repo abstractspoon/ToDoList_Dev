@@ -80,7 +80,7 @@ namespace Calendar
 			return true;
 		}
 
-		private bool CanModifyAppointment(System.Windows.Forms.MouseEventArgs e, bool checkMouseDown)
+		protected bool CanModifyAppointment(System.Windows.Forms.MouseEventArgs e, bool checkMouseDown)
 		{
 			if (e == null)
 				return false;
@@ -135,9 +135,12 @@ namespace Calendar
 			}
 		}
 
-		private bool MoveAppointment(System.Windows.Forms.MouseEventArgs e)
+		virtual protected bool MoveAppointment(System.Windows.Forms.MouseEventArgs e)
 		{
 			Debug.Assert(CanModifyAppointment(e, true));
+
+			if (m_mode != Mode.Move)
+				return false;
 
 			Rectangle shortApptsRect = m_dayView.GetTrueRectangle();
 			Rectangle longApptsRect = m_dayView.GetFullDayApptsRectangle();
@@ -156,82 +159,77 @@ namespace Calendar
 			// Get date/time at mouse position
 			DateTime dateAtCursor = m_dayView.GetDateTimeAt(e.X, e.Y, longAppt);
 
-			switch (m_mode)
+			if (shortAppt && ptInShortApptsRect)
 			{
-			case Mode.Move:
-				if (shortAppt && ptInShortApptsRect)
+				if (m_length == TimeSpan.Zero)
 				{
-					if (m_length == TimeSpan.Zero)
+					m_startDate = selection.StartDate;
+					m_length = selection.Length;
+				}
+				else
+				{
+					DateTime startDate = dateAtCursor.Add(m_delta);
+					DateTime endDate = startDate.Add(m_length);
+
+					if (startDate.Date < dateAtCursor.Date)
 					{
-						m_startDate = selection.StartDate;
-						m_length = selection.Length;
+						// User has dragged off the top
+						startDate = dateAtCursor.Date;
+						endDate = startDate.Add(m_length);
 					}
-					else
+					else if (endDate > dateAtCursor.Date.AddDays(1))
 					{
-						DateTime startDate = dateAtCursor.Add(m_delta);
-						DateTime endDate = startDate.Add(m_length);
+						// User has dragged off the bottom
+						startDate = endDate.Date.Subtract(m_length);
+						endDate = (startDate + m_length);
+					}
 
-						if (startDate.Date < dateAtCursor.Date)
-						{
-							// User has dragged off the top
-							startDate = dateAtCursor.Date;
-							endDate = startDate.Add(m_length);
-						}
-						else if (endDate > dateAtCursor.Date.AddDays(1))
-						{
-							// User has dragged off the bottom
-							startDate = endDate.Date.Subtract(m_length);
-							endDate = (startDate + m_length);
-						}
+					// Handle horizontal drag
+					DateTime date = m_dayView.GetDateAt(e.X, false);
+					DateTime datePrev = m_dayView.GetDateAt(m_lastMouseMove.X, false);
 
-						// Handle horizontal drag
-						DateTime date = m_dayView.GetDateAt(e.X, false);
-						DateTime datePrev = m_dayView.GetDateAt(m_lastMouseMove.X, false);
+					if (date != datePrev)
+					{
+						startDate = date.Date.Add(startDate.TimeOfDay);
+						endDate = startDate.Add(m_length);
+					}
 
-						if (date != datePrev)
-						{
-							startDate = date.Date.Add(startDate.TimeOfDay);
-							endDate = startDate.Add(m_length);
-						}
+					// Check for a change
+					if (startDate != selection.StartDate)
+					{
+						selection.StartDate = startDate;
+						selection.EndDate = endDate;
 
-						// Check for a change
-						if (startDate != selection.StartDate)
-						{
-							selection.StartDate = startDate;
-							selection.EndDate = endDate;
-
-							return true;
-						}
+						return true;
 					}
 				}
-				else if (longAppt && ptInLongApptsRect)
+			}
+			else if (longAppt && ptInLongApptsRect)
+			{
+				dateAtCursor = dateAtCursor.Add(m_delta);
+
+				int hoursDiff = dateAtCursor.Subtract(selection.StartDate).Hours;
+				TimeSpan apptLen = selection.Length;
+
+				if (hoursDiff != 0)
 				{
-					dateAtCursor = dateAtCursor.Add(m_delta);
+					System.DateTime newStart = selection.StartDate.AddHours(hoursDiff);
 
-					int hoursDiff = dateAtCursor.Subtract(selection.StartDate).Hours;
-					TimeSpan apptLen = selection.Length;
-
-					if (hoursDiff != 0)
+					if (newStart != selection.StartDate)
 					{
-						System.DateTime newStart = selection.StartDate.AddHours(hoursDiff);
+						selection.StartDate = newStart;
+						selection.EndDate = (newStart + apptLen);
 
-						if (newStart != selection.StartDate)
-						{
-							selection.StartDate = newStart;
-							selection.EndDate = (newStart + apptLen);
-
-							return true;
-						}
+						return true;
 					}
 				}
-				break;
 			}
 
 			// all else
 			return false;
 		}
 
-		private bool ResizeLongAppointment(System.Windows.Forms.MouseEventArgs e)
+		virtual protected bool ResizeLongAppointment(System.Windows.Forms.MouseEventArgs e)
 		{
 			Debug.Assert(CanModifyAppointment(e, true));
 
@@ -273,7 +271,7 @@ namespace Calendar
 			return false;
 		}
 
-		private bool ResizeShortAppointment(System.Windows.Forms.MouseEventArgs e)
+		virtual protected bool ResizeShortAppointment(System.Windows.Forms.MouseEventArgs e)
 		{
 			Debug.Assert(CanModifyAppointment(e, true));
 
@@ -344,7 +342,7 @@ namespace Calendar
 			return false;
 		}
 
-		static private bool SameDay(DateTime startDate, DateTime endDate)
+		static protected bool SameDay(DateTime startDate, DateTime endDate)
 		{
 			if (endDate.Date == startDate.Date)
 				return true;
