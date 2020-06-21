@@ -186,8 +186,19 @@ namespace DayViewUIExtension
 
 		public override bool IsLongAppt()
 		{
-			return (base.IsLongAppt() || (m_OrgStartDate.Date != m_OrgEndDate.Date) ||
-					((m_OrgStartDate.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(m_OrgEndDate)));
+			if (base.IsLongAppt())
+				return true;
+
+			// If we are in the middle of a drag use the pre-drag
+			// dates so that the 'long-ness' does not change mid-drag
+			if (IsLongAppt(m_OrgStartDate, m_OrgEndDate))
+				return true;
+
+			// Also check for 'end of day' if the start time is midnight
+			if ((m_OrgStartDate.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(m_OrgEndDate))
+				return true;
+
+			return false;
 		}
 
 		public bool HasValidDates()
