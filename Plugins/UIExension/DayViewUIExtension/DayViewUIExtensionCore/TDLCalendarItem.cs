@@ -295,7 +295,7 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		private DateTime CheckGetEndOfDay(DateTime date)
+		static protected DateTime CheckGetEndOfDay(DateTime date)
 		{
 			if (date == date.Date)
 				return date.AddDays(1).AddSeconds(-1);
@@ -318,7 +318,7 @@ namespace DayViewUIExtension
 			Locked = true; // always (for now)
 
 			StartDate = futureDates.Item1;
-			EndDate = futureDates.Item2;
+			EndDate = CheckGetEndOfDay(futureDates.Item2);
 		}
 
 		public UInt32 RealTaskId { get { return m_RealTaskId; } }
