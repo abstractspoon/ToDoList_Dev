@@ -54,7 +54,7 @@ namespace DayViewUIExtension
 
         public TDLDayView(UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
         {
-            hourLabelWidth = DPIScaling.Scale(hourLabelWidth);
+            minHourLabelWidth = DPIScaling.Scale(minHourLabelWidth);
             hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
             dayHeadersHeight = DPIScaling.Scale(dayHeadersHeight);
             longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
@@ -582,7 +582,7 @@ namespace DayViewUIExtension
 
 			SelectionStart = SelectionEnd;
 
-            AdjustScrollbar();
+            AdjustVScrollbar();
             Invalidate();
         }
 
@@ -1069,7 +1069,7 @@ namespace DayViewUIExtension
 					base.SlotsPerHour = value;
 
 					ValidateMinSlotHeight();
-					AdjustScrollbar();
+					AdjustVScrollbar();
 				}
 			}
 		}
@@ -1085,7 +1085,7 @@ namespace DayViewUIExtension
 					minSlotHeight = m_UserMinSlotHeight;
 
 					ValidateMinSlotHeight();
-					AdjustScrollbar();
+					AdjustVScrollbar();
 					Invalidate();
 				}
 			}

@@ -51,7 +51,7 @@ namespace Calendar
 
         #region Constants
 
-        protected int hourLabelWidth = 50;
+        protected int minHourLabelWidth = 50;
         protected int hourLabelIndent = 2;
         protected int dayHeadersHeight = 19;
         protected int appointmentGripWidth = 5;
@@ -90,7 +90,7 @@ namespace Calendar
             vscroll.Dock = DockStyle.Right;
             vscroll.Visible = allowScroll;
             vscroll.Scroll += new ScrollEventHandler(OnVScroll);
-            AdjustScrollbar();
+            AdjustVScrollbar();
 			vscroll.Value = 0;
 
             this.Controls.Add(vscroll);
@@ -98,7 +98,7 @@ namespace Calendar
             hscroll = new HScrollBar();
             hscroll.Visible = true;
             hscroll.Location = new System.Drawing.Point(0, 0);
-            hscroll.Width = hourLabelWidth;
+            hscroll.Width = HourLabelWidth;
             hscroll.Height = dayHeadersHeight;
             hscroll.Scroll += new ScrollEventHandler(OnHScroll);
             hscroll.Minimum = -1000; // ~-20 years
@@ -152,6 +152,19 @@ namespace Calendar
 			set { tooltip.SetToolTip(hscroll, value); }
 		}
 
+		private int HourLabelWidth
+		{
+			get
+			{
+				// We use the hour label width to absorb any
+				// leftover from dividing up the width into days
+				int daysWidth = (Width - vscroll.Width - minHourLabelWidth - hourLabelIndent);
+				int leftover = (daysWidth % DaysShowing);
+
+				return (minHourLabelWidth + leftover);
+			}
+		}
+
 		private AppHeightDrawMode appHeightMode = AppHeightDrawMode.TrueHeightAll;
 
         public AppHeightDrawMode AppHeightMode
@@ -177,7 +190,7 @@ namespace Calendar
 
         private void OnSlotHeightChanged()
         {
-            AdjustScrollbar();
+            AdjustVScrollbar();
             Invalidate();
         }
 
@@ -297,9 +310,10 @@ namespace Calendar
 
                     EnsureVisible(SelectedAppointment, true);
                     OnDaysToShowChanged();
-                    AdjustScrollbar();
-                }
-            }
+                    AdjustVScrollbar();
+					AdjustHScrollbar();
+				}
+			}
         }
 
         protected virtual void OnDaysToShowChanged()
@@ -796,18 +810,30 @@ namespace Calendar
 				return;
 			}
 
-			AdjustScrollbar();
+			AdjustVScrollbar();
             Invalidate();
 			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
         }
 
-        protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
+		protected override void OnSizeChanged(EventArgs e)
+		{
+			base.OnSizeChanged(e);
+
+			AdjustHScrollbar();
+		}
+
+		protected void AdjustHScrollbar()
+		{
+			hscroll.Width = HourLabelWidth + hourLabelIndent;
+		}
+
+		protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
         {
             base.SetBoundsCore(x, y, width, height, specified);
-            AdjustScrollbar();
+            AdjustVScrollbar();
         }
 
-        protected void AdjustScrollbar()
+        protected void AdjustVScrollbar()
         {
 			if (this.Height < this.HeaderHeight)
 				return;
@@ -1190,8 +1216,8 @@ namespace Calendar
             Rectangle truerect;
 
             truerect = this.ClientRectangle;
-            truerect.X += hourLabelWidth + hourLabelIndent;
-            truerect.Width -= vscroll.Width + hourLabelWidth + hourLabelIndent;
+            truerect.X += HourLabelWidth + hourLabelIndent;
+            truerect.Width -= vscroll.Width + HourLabelWidth + hourLabelIndent;
             truerect.Y += this.HeaderHeight;
             truerect.Height -= this.HeaderHeight;
 
@@ -1204,8 +1230,8 @@ namespace Calendar
             fulldayrect = this.ClientRectangle;
             fulldayrect.Height = this.HeaderHeight - dayHeadersHeight;
             fulldayrect.Y += dayHeadersHeight;
-            fulldayrect.Width -= (hourLabelWidth + hourLabelIndent + this.vscroll.Width);
-            fulldayrect.X += hourLabelWidth + hourLabelIndent;
+            fulldayrect.Width -= (HourLabelWidth + hourLabelIndent + this.vscroll.Width);
+            fulldayrect.X += HourLabelWidth + hourLabelIndent;
 
             return fulldayrect;
         }
@@ -1275,16 +1301,16 @@ namespace Calendar
         public virtual DateTime GetDateAt(int x, bool longAppt)
         {
             DateTime date = startDate.Date;
-            int dayWidth = (this.Width - (vscroll.Width + hourLabelWidth + hourLabelIndent)) / daysToShow;
+            int dayWidth = (this.Width - (vscroll.Width + HourLabelWidth + hourLabelIndent)) / daysToShow;
 
 			if (longAppt)
 			{
-				int hours = ((24 * (x - hourLabelWidth)) / dayWidth);
+				int hours = ((24 * (x - HourLabelWidth)) / dayWidth);
 				date = date.AddHours(hours);
 			}
 			else
 			{
-				date = date.AddDays((x - hourLabelWidth) / dayWidth).Date;
+				date = date.AddDays((x - HourLabelWidth) / dayWidth).Date;
 
 				if (date < startDate)
 					date = startDate;
@@ -1355,17 +1381,17 @@ namespace Calendar
             Rectangle rectangle = new Rectangle(0, 0, this.Width - vscroll.Width, this.Height);
 
             Rectangle headerRectangle = rectangle;
-            headerRectangle.X += hourLabelWidth + hourLabelIndent;
-            headerRectangle.Width -= (hourLabelWidth + hourLabelIndent);
+            headerRectangle.X += HourLabelWidth + hourLabelIndent;
+            headerRectangle.Width -= (HourLabelWidth + hourLabelIndent);
             headerRectangle.Height = dayHeadersHeight;
 
             if (e.ClipRectangle.IntersectsWith(headerRectangle))
                 DrawDayHeaders(e, headerRectangle);
 
             Rectangle daysRectangle = rectangle;
-            daysRectangle.X += hourLabelWidth + hourLabelIndent;
+            daysRectangle.X += HourLabelWidth + hourLabelIndent;
             daysRectangle.Y += this.HeaderHeight;
-            daysRectangle.Width -= (hourLabelWidth + hourLabelIndent);
+            daysRectangle.Width -= (HourLabelWidth + hourLabelIndent);
 
             if (e.ClipRectangle.IntersectsWith(daysRectangle))
             {
@@ -1378,17 +1404,19 @@ namespace Calendar
 
             DrawHourLabels(e, hourLabelRectangle);
 
-            Rectangle scrollrect = rectangle;
+			e.Graphics.ResetClip();
 
-            if (this.AllowScroll == false)
+			Rectangle scrollrect = rectangle;
+
+            if (!this.AllowScroll)
             {
-                scrollrect.X = headerRectangle.Width + hourLabelWidth + hourLabelIndent;
+                scrollrect.X = headerRectangle.Width + HourLabelWidth + hourLabelIndent;
                 scrollrect.Width = vscroll.Width;
                 using (SolidBrush backBrush = new SolidBrush(renderer.BackColor))
                     e.Graphics.FillRectangle(backBrush, scrollrect);
             }
 
-			AdjustScrollbar();
+			AdjustVScrollbar();
         }
 
 		protected void DrawHourLabels(PaintEventArgs e, Rectangle rect)
@@ -1401,7 +1429,7 @@ namespace Calendar
 
                 hourRectangle.Y = rect.Y + (m_Hour * slotsPerHour * slotHeight) - vscroll.Value;
                 hourRectangle.X += hourLabelIndent;
-				hourRectangle.Width = hourLabelWidth - 1;
+				hourRectangle.Width = HourLabelWidth - 1;
 
                 var minuteRect = hourRectangle;
                 minuteRect.Height = slotHeight;
@@ -1420,8 +1448,8 @@ namespace Calendar
             e.Graphics.ResetClip();
 
             // draw a line at the top for closure
-            using (Pen m_Pen = new Pen(Color.DarkGray))
-                e.Graphics.DrawLine(m_Pen, rect.Left, rect.Y, rect.Width, rect.Y);
+            using (Pen pen = new Pen(Color.DarkGray))
+                e.Graphics.DrawLine(pen, rect.Left, rect.Y, rect.Width, rect.Y);
         }
 
 		protected void DrawDayHeaders(PaintEventArgs e, Rectangle rect)
@@ -1435,10 +1463,6 @@ namespace Calendar
 
             for (int day = 0; day < daysToShow; day++)
             {
-                // Add any leftover from rounding to last day
-                if (day == (daysToShow - 1))
-                    dayHeaderRectangle.Width = (rect.Right - dayHeaderRectangle.X);
-
                 renderer.DrawDayHeader(e.Graphics, dayHeaderRectangle, headerDate);
 
                 dayHeaderRectangle.X += dayWidth;
@@ -1780,10 +1804,6 @@ namespace Calendar
 
             for (int day = 0; day < daysToShow; day++)
             {
-                // last day takes up any slack
-                if (day == (daysToShow - 1))
-                    rectangle.Width = (rect.Right - rectangle.Left);
-
 				e.Graphics.SetClip(rectangle);
 
 				DrawDay(e, rectangle, time);
@@ -1919,7 +1939,7 @@ namespace Calendar
 
         protected void RefreshHScrollSize()
         {
-            hscroll.Width = (hourLabelWidth + hourLabelIndent);
+            hscroll.Width = (HourLabelWidth + hourLabelIndent);
             hscroll.Height = dayHeadersHeight;
         }
 
