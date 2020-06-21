@@ -822,11 +822,6 @@ namespace Calendar
 			AdjustHScrollbar();
 		}
 
-		protected void AdjustHScrollbar()
-		{
-			hscroll.Width = HourLabelWidth + hourLabelIndent;
-		}
-
 		protected override void SetBoundsCore(int x, int y, int width, int height, BoundsSpecified specified)
         {
             base.SetBoundsCore(x, y, width, height, specified);
@@ -1404,9 +1399,7 @@ namespace Calendar
 
             DrawHourLabels(e, hourLabelRectangle);
 
-			e.Graphics.ResetClip();
-
-			Rectangle scrollrect = rectangle;
+            Rectangle scrollrect = rectangle;
 
             if (!this.AllowScroll)
             {
@@ -1932,18 +1925,18 @@ namespace Calendar
 			// Pass draw rect as the clip rect by default
 			renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
 		}
-		
-        #endregion
 
-        #region Internal Utility Classes
+		#endregion
 
-        protected void RefreshHScrollSize()
-        {
-            hscroll.Width = (HourLabelWidth + hourLabelIndent);
-            hscroll.Height = dayHeadersHeight;
-        }
+		#region Internal Utility Classes
 
-        internal class AppointmentView
+		protected void AdjustHScrollbar()
+		{
+			hscroll.Width = (HourLabelWidth + hourLabelIndent);
+			hscroll.Height = dayHeadersHeight;
+		}
+
+		internal class AppointmentView
         {
             public AppointmentView(Appointment appt, Rectangle rect)
             {

@@ -69,7 +69,6 @@ namespace DayViewUIExtension
 			m_FutureItems = new Dictionary<uint, CalendarFutureItem>();
 			
 			InitializeComponent();
-            RefreshHScrollSize();
         }
 
         // ILabelTipHandler implementation
