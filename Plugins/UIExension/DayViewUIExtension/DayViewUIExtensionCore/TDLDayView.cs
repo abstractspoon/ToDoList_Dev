@@ -319,7 +319,7 @@ namespace DayViewUIExtension
 		public void FixupSelection(bool scrollToTask, bool allowNotify)
         {
 			// Our base class clears the selected appointment whenever
-			// the week changes so we can't rely on 'SelectedAppointmentId'
+			// the week changes so we can't always rely on 'SelectedAppointmentId'
             UInt32 prevSelTaskID = m_VisibleSelectedTaskID;
             UInt32 selTaskID = GetSelectedTaskID();
 

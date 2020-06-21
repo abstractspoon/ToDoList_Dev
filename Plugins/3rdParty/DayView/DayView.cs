@@ -412,8 +412,9 @@ namespace Calendar
 				{
 					selectedAppointment = value;
 				}
-				else // Validate against visible items
+				else if (value != selectedAppointment)
 				{
+					// Validate against visible items
 					if (ResolveAppointments == null)
 						return;
 
@@ -790,6 +791,10 @@ namespace Calendar
             {
                 StartDate = StartDate.AddDays(-daysToShow);
             }
+			else
+			{
+				return;
+			}
 
 			AdjustScrollbar();
             Invalidate();
