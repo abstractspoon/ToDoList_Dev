@@ -888,7 +888,9 @@ namespace DayViewUIExtension
 				if (item.IsRecurring)
 				{
 					// Add this task's future items for the current date range
-					var futureItems = m_TaskRecurrences.Get(item.Id, StartDate, EndDate);
+					// Note: we deliberately double the range else we lose 
+					// future items which overlap the the current item
+					var futureItems = m_TaskRecurrences.Get(item.Id, StartDate, EndDate.AddDays(DaysShowing));
 
 					if (futureItems != null)
 					{
