@@ -296,7 +296,8 @@ namespace Calendar
             {
                 if ((value > 0) && (value <= 28) && (value != daysToShow))
                 {
-                    daysToShow = value; // must come first
+                    daysToShow = value; // must come before resetting start date
+					StartDate = startDate;
 
 					switch (daysToShow)
 					{
