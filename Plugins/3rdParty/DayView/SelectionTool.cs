@@ -36,10 +36,10 @@ namespace Calendar
 			get { return m_mode; }
 		}
 
-		private DateTime m_startDate;
-		private TimeSpan m_length;
-		private TimeSpan m_delta;
-		private Point m_lastMouseMove;
+		protected DateTime m_startDate;
+		protected TimeSpan m_length;
+		protected TimeSpan m_delta;
+		protected Point m_lastMouseMove;
 
 		public void Reset()
 		{

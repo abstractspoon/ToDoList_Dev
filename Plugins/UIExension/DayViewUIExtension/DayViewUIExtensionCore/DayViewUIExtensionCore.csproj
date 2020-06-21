@@ -74,6 +74,7 @@
     <Compile Include="TDLRenderer.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="TDLSelectionTool.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="DayViewPreferencesDlg.resx">

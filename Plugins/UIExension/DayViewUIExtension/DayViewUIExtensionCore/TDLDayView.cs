@@ -144,6 +144,11 @@ namespace DayViewUIExtension
             base.WndProc(ref m);
         }
 
+		protected override Calendar.SelectionTool NewSelectionTool()
+		{
+			return new TDLSelectionTool();
+		}
+
         protected void InitializeComponent()
         {
             Calendar.DrawTool drawTool = new Calendar.DrawTool();
