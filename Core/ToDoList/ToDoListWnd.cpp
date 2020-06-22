@@ -12292,7 +12292,7 @@ void CToDoListWnd::OnUpdateEditInsertdate(CCmdUI* pCmdUI)
 
 BOOL CToDoListWnd::CanInsertDateAndTime() const
 {
-	if ((m_nMaxState != TDCMS_MAXCOMMENTS) && GetToDoCtrl().CanPasteDateTime())
+	if (GetToDoCtrl().CanPasteDateTime())
 		return TRUE;
 
 	// Check other controls outside of CToDoCtrl
