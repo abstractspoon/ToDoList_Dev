@@ -25,7 +25,7 @@ namespace DayViewUIExtension
 
 			// Note: we need to duplicate some of the base checks
 			// because we don't know what failed
-			if (ResizingMode != Mode.Move)
+			if (EditMode != Mode.Move)
 				return false;
 
 			Rectangle shortApptsRect = DayView.GetTrueRectangle();
@@ -34,22 +34,56 @@ namespace DayViewUIExtension
 			if (!shortApptsRect.Contains(e.Location) && !longApptsRect.Contains(e.Location))
 				return false;
 
-			// Add transition zone to the rect we are leaving
+			//              _  _________________________________________
+			//                |   ____________                          |
+			//                |  |            |               ^         |
+			// longApptsRect  |  |   long     |      ---------|---------| -
+			//                |  |____________|      transition zone    | longZoneRect
+			//              _ |_________|_____________________|_________| _
+			//                | transition zone               |         | shortZoneRect
+			//                |---------|------               |         | -
+			//                |         V                   __|__       |
+			//                |                            |     |      |
+			//                |                            |     |      |
+			//                |                            |     |      |
+			// shortApptsRect |                            |short|      |
+			//                |                            |     |      |
+			//                |                            |     |      |
+			//                |                            |     |      |
+			//                |                            |_____|      |
+			//                |                                         |
+			//              _ |_________________________________________|
+
+			// Create transition zones for the rect we are entering
+			Rectangle shortZoneRect = shortApptsRect;
+			shortZoneRect.Height = DayView.LongAppointmentHeight; // arbitrary
+
+			Rectangle longZoneRect = shortZoneRect;
+			longZoneRect.Offset(0, -shortZoneRect.Height);
+
+
+
+
+
 			Calendar.Appointment selection = DayView.SelectedAppointment;
 
 			bool longAppt = selection.IsLongAppt();
-			bool ptInLongApptsRect = longApptsRect.Contains(e.Location);
-
 			bool shortAppt = !longAppt;
-			bool ptInShortApptsRect = !ptInLongApptsRect;
+
+			bool curPtInLongApptsRect = longApptsRect.Contains(e.Location);
+			bool prevPtInLongApptsRect = longApptsRect.Contains(prevMousePos);
+
+			bool curPtInShortApptsRect = shortApptsRect.Contains(e.Location);
+			bool prevPtInShortApptsRect = shortApptsRect.Contains(prevMousePos);
 
 			// Get date/time at mouse position
 			DateTime dateAtCursor = DayView.GetDateTimeAt(e.X, e.Y, longAppt);
 
-			if (shortAppt && ptInLongApptsRect)
+			if (shortAppt && prevPtInShortApptsRect && curPtInLongApptsRect)
 			{
+				// Short appointment dragged into long appointment rect
 			}
-			else if (longAppt && ptInShortApptsRect)
+			else if (longAppt && prevPtInLongApptsRect && curPtInShortApptsRect)
 			{
 			}
 

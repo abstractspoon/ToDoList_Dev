@@ -14,24 +14,18 @@ namespace Calendar
 
 		public DayView DayView
 		{
-			get
-			{
-				return m_dayView;
-			}
-			set
-			{
-				m_dayView = value;
-			}
+			get	{ return m_dayView;	}
+			set	{ m_dayView = value; }
 		}
 
 		private Mode m_mode = Mode.None;
 
-		public Boolean IsResizing
+		public Boolean IsEditing
 		{
 			get { return (m_mode != Mode.None); }
 		}
 
-		public Mode ResizingMode
+		public Mode EditMode
 		{
 			get { return m_mode; }
 		}
@@ -40,6 +34,12 @@ namespace Calendar
 		protected TimeSpan m_length;
 		protected TimeSpan m_delta;
 		protected Point m_lastMouseMove;
+		protected bool m_longAppointment;
+
+		public bool IsEditingLongAppt
+		{
+			get { return (IsEditing && m_longAppointment); }
+		}
 
 		public void Reset()
 		{
@@ -150,7 +150,7 @@ namespace Calendar
 
 			Appointment selection = m_dayView.SelectedAppointment;
 
-			bool longAppt = selection.IsLongAppt();
+			bool longAppt = IsEditingLongAppt;
 			bool ptInLongApptsRect = longApptsRect.Contains(e.Location);
 
 			bool shortAppt = !longAppt;
@@ -235,7 +235,7 @@ namespace Calendar
 
 			Appointment selection = m_dayView.SelectedAppointment;
 
-			if (!selection.IsLongAppt())
+			if (!IsEditingLongAppt)
 				return false;
 
 			// Note: we allow the cursor to move outside the long appt rect
@@ -277,7 +277,7 @@ namespace Calendar
 
 			Appointment selection = m_dayView.SelectedAppointment;
 
-			if (selection.IsLongAppt())
+			if (IsEditingLongAppt)
 				return false;
 
 			Rectangle shortApptsRect = m_dayView.GetTrueRectangle();
@@ -462,18 +462,12 @@ namespace Calendar
 			if (m_mode != Mode.None)
 			{
 				// Calculate delta time between selection and clicked point
-				if (m_dayView.SelectedAppointment != null)
-				{
-					DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
-					m_delta = m_dayView.SelectedAppointment.StartDate - downPos;
-				}
-				else
-				{
-					m_delta = TimeSpan.Zero;
-				}
+				DateTime downPos = m_dayView.GetDateTimeAt(e.X, e.Y);
+				m_delta = m_dayView.SelectedAppointment.StartDate - downPos;
 
 				m_length = TimeSpan.Zero;
 				m_lastMouseMove = e.Location;
+				m_longAppointment = m_dayView.SelectedAppointment.IsLongAppt();
 			}
 		}
 
