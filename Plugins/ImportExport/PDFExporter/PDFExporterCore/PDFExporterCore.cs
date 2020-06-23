@@ -144,6 +144,10 @@ both server and client paging of Kendo Grid.</p>
 			return true;
 		}
 
+		// --------------------------------------------------------------------
+		// Following code (c) Ly Nguyen - 2015
+		// https://www.codeproject.com/Tips/899658/Create-PDF-With-Bookmark-and-TOC-from-HTML-with-iT
+
 		private Chapter CreateChapterContent(string html)
 		{
 			// Declare a font to used for the bookmarks
