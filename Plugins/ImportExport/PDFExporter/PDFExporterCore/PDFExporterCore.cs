@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 using System.IO;
 using System.Diagnostics;
 using System.Windows.Forms;
-using System.Xml;
+using System.Net;
 
 using iTextSharp;
 using iTextSharp.text;
@@ -16,31 +16,60 @@ using iTextSharp.text.pdf;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
+/////////////////////////////////////////////////////////////////////////////////
+
+// Grateful thanks to Ly Nguyen for getting me started 
+// https://www.codeproject.com/Tips/899658/Create-PDF-With-Bookmark-and-TOC-from-HTML-with-iT
+
+// Grateful thanks to Mike Brind for showing how to create nested bookmarks
+https://www.mikesdotnetting.com/article/84/itextsharp-links-and-bookmarks
+
+/////////////////////////////////////////////////////////////////////////////////
+
 namespace PDFExporter
 {
 	[System.ComponentModel.DesignerCategory("")]
 	public class PDFExporterCore
 	{
-		private String TestContent = 
-@"<h2>Introduction</h2>
-<p>This article shows how to create a load more button to your Kendo Grid 
-without using default paging control. Technology includes ASP.NET MVC, 
-jQuery and Kendo Grid Controls. I also used SQL Server Database Northwind for this sample.</p>
-<br/>
+		private class TaskContent
+		{
+			public TaskContent(Task task, bool showPos)
+			{
+				if (showPos)
+					Title = String.Format("{0} {1}", task.GetPositionString(), task.GetTitle());
+				else
+					Title = task.GetTitle();
 
-<h2>Background</h2>
-<p>With Kendo Grid you can&nbsp;easily configure the grid to display data and perform sorting, 
-paging and grouping operations via its built-in settings. Now, I will show you how to add a 
-load more button without using paging control. This article will apply for 
-both server and client paging of Kendo Grid.</p>
-<br />
+				TitleColor = task.GetTextDrawingColor();
+				Html = task.GetHtmlComments();
 
-<h2>Setting up Environment</h2>
-<p>Please follow steps instruction 
-<a href=""http://docs.telerik.com/kendo-ui/aspnet-mvc/introduction"">here 
-</a>to setup environment.</p>
-";
+				if (String.IsNullOrWhiteSpace(Html))
+				{
+					Html = WebUtility.HtmlEncode(task.GetComments());
+					Html = Html.Replace("\n", "<br>");
+				}
 
+				var subtask = task.GetFirstSubtask();
+
+				if (subtask != null)
+				{
+					Subtasks = new List<TaskContent>();
+
+					while (subtask.IsValid())
+					{
+						Subtasks.Add(new TaskContent(subtask, showPos)); // RECURSIVE CALL
+						subtask = subtask.GetNextTask();
+					}
+				}
+			}
+
+			public String Title;
+			public String Html;
+
+			public System.Drawing.Color TitleColor = System.Drawing.Color.Black;
+			public List<TaskContent> Subtasks = null;
+		}
+	
 		// --------------------------------------------------------------------------------------
 
 		private Translator m_Trans;
@@ -69,8 +98,9 @@ both server and client paging of Kendo Grid.</p>
 
 			try
 			{
-				var pdfContent = GenerateHtmlToPDFDocument(TestContent);
-
+				var taskContent = BuildTaskContent(tasks);
+				var pdfContent = CreatePDFDocument(taskContent);
+			
 				File.WriteAllBytes(destFilePath, pdfContent);
 			}
 			catch (Exception /*e*/)
@@ -81,132 +111,32 @@ both server and client paging of Kendo Grid.</p>
 			return true;
 		}
 
-		protected bool ExportTaskAndSubtasks(Task task, StreamWriter toc)
+		private List<TaskContent> BuildTaskContent(TaskList tasks)
 		{
-			// Create the Html page for this task
-			string htmlFileName = string.Format("Task{0}.html", task.GetID());
-			String htmlPath = (m_TempFolder + '\\' + htmlFileName);
+			var content = new List<TaskContent>();
+			var task = tasks.GetFirstTask();
 
-			using (var html = new System.IO.StreamWriter(htmlPath, false, Encoding.UTF8))
+			while (task.IsValid())
 			{
-				// Header
-				html.WriteLine("<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\">");
-				html.WriteLine("<HTML>");
-				html.WriteLine("<HEAD>");
-				html.WriteLine("</HEAD>");
-				html.WriteLine("<BODY>");
-				html.WriteLine("<H1>{0}</H1>", task.GetTitle());
-
-				var comments = task.GetHtmlComments();
-
-				if (String.IsNullOrWhiteSpace(comments))
-				{
-					comments = task.GetComments();
-					comments = comments.Replace("\n", "<BR>");
-				}
-
-				html.WriteLine(comments);
-
-				// Footer
-				html.WriteLine("</BODY>");
-				html.WriteLine("</HTML>");
+				content.Add(new TaskContent(task, tasks.IsAttributeAvailable(Task.Attribute.Position)));
+				task = task.GetNextTask();
 			}
 
-			// Create the TOC entry for this task
-			toc.WriteLine("<LI><OBJECT type=\"text/sitemap\">");
-			toc.WriteLine("<param name=\"Name\" value=\"{0}\">", task.GetTitle());
-			toc.WriteLine("<param name=\"Local\" value=\"{0}\">", htmlFileName);
-			toc.WriteLine("</OBJECT>");
-
-			// Recursively process subtasks
-			var subtask = task.GetFirstSubtask();
-
-			if (subtask.IsValid())
-			{
-				toc.WriteLine("<UL>");
-
-				do
-				{
-					if (!ExportTaskAndSubtasks(subtask, toc)) // RECURSIVE CALL
-					{
-						// TODO
-					}
-
-					subtask = subtask.GetNextTask();
-				}
-				while (subtask.IsValid());
-
-				toc.WriteLine("</UL>");
-			}
-
-			//file.WriteLine("</LI>");
-
-			return true;
+			return content;
 		}
 
-		// --------------------------------------------------------------------
-		// Following code (c) Ly Nguyen - 2015
-		// https://www.codeproject.com/Tips/899658/Create-PDF-With-Bookmark-and-TOC-from-HTML-with-iT
-
-		private Chapter CreateChapterContent(string html)
-		{
-			// Declare a font to used for the bookmarks
-			iTextSharp.text.Font bookmarkFont = iTextSharp.text.FontFactory.GetFont
-			(iTextSharp.text.FontFactory.HELVETICA, 16, iTextSharp.text.Font.NORMAL, new Color(255, 153, 0));
-
-			Chapter chapter = new Chapter(new Paragraph(""), 0);
-			chapter.NumberDepth = 0;
-
-			// Create css for some tag
-			StyleSheet styles = new StyleSheet();
-
-			styles.LoadTagStyle("h2", HtmlTags.HORIZONTALALIGN, "center");
-			styles.LoadTagStyle("h2", HtmlTags.COLOR, "#F90");
-			styles.LoadTagStyle("pre", "size", "10pt");
-
-			// Split H2 Html Tag
-			string pattern = @"<\s*h2[^>]*>(.*?)<\s*/h2\s*>";
-			string[] result = Regex.Split(html, pattern);
-
-			// Create section title & content
-			int sectionIndex = 0;
-			foreach (var item in result)
-			{
-				if (string.IsNullOrEmpty(item)) continue;
-
-				if (sectionIndex % 2 == 0)
-				{
-					chapter.AddSection(20f, new Paragraph(item, bookmarkFont), 0);
-				}
-				else
-				{
-					foreach (IElement element in HTMLWorker.ParseToList(new StringReader(item), styles))
-					{
-						chapter.Add(element);
-					}
-				}
-
-				sectionIndex++;
-			}
-
-			chapter.BookmarkTitle = "Demo for Load More Button in Kendo UI Grid";
-			return chapter;
-		}
-
-		private byte[] GenerateHtmlToPDFDocument(string html)
+		private byte[] CreatePDFDocument(List<TaskContent> tasks)
 		{
 			MemoryStream workStream = new MemoryStream();
 			Document pdfDoc = new Document(PageSize.A4);
 			PdfWriter.GetInstance(pdfDoc, workStream).CloseStream = false;
 			HTMLWorker parser = new HTMLWorker(pdfDoc);
 
-			// Get chapter content
-			Chapter chapter = CreateChapterContent(html);
-
 			pdfDoc.Open();
 
-			// Add chapter content to PDF
-			pdfDoc.Add(chapter);
+			// Add chapter content
+			foreach (var task in tasks)
+				pdfDoc.Add(CreateSection(task, null));
 
 			pdfDoc.Close();
 
@@ -214,90 +144,57 @@ both server and client paging of Kendo Grid.</p>
 			workStream.Write(byteInfo, 0, byteInfo.Length);
 			workStream.Position = 0;
 
-			// Generate TOC for existing content
-			return GeneratePDFTOCContent(byteInfo, html);
-		}
-
-		public byte[] GeneratePDFTOCContent(byte[] content, string html)
-		{
-			var reader = new PdfReader(content);
-			StringBuilder sb = new StringBuilder();
-
-			// Title of PDF
-			sb.Append("<h2><strong style='text-align:center'>Demo for Load More Button in Kendo UI Grid</strong></h2><br>");
-
-			// Begin to create TOC
-			sb.Append("<table>");
-			sb.Append(string.Format("<tr><td width='80%'><strong>{0}</strong></td><td align='right' width='10%'><strong>{1}</strong></td></tr>", 
-									"Section", "Page"));
-			using (MemoryStream ms = new MemoryStream())
-			{
-				// XML document generated by iText 
-				SimpleBookmark.ExportToXML(SimpleBookmark.GetBookmark(reader), ms, "UTF-8", false);
-
-				// rewind to create xmlreader
-				ms.Position = 0;
-				using (XmlReader xr = XmlReader.Create(ms))
-				{
-					xr.MoveToContent();
-					string page = null;
-					string text = null;
-
-					string format = @"<tr><td width='80%'>{0}</td><td align='right' width='10%'>{1}</td></tr>";
-                    
-					// extract page number from 'Page' attribute 
-					Regex re = new Regex(@"^\d+");
-					while (xr.Read())
-					{
-						if ((xr.NodeType == XmlNodeType.Element) && (xr.Name == "Title") && xr.IsStartElement())
-						{
-							page = re.Match(xr.GetAttribute("Page")).Captures[0].Value;
-							xr.Read();
-
-							if (xr.NodeType == XmlNodeType.Text)
-							{
-								text = xr.Value.Trim();
-								int pageSection = int.Parse(page) + 1;
-								sb.Append(String.Format(format, text, pageSection.ToString()));
-							}
-						}
-					}
-				}
-			}
-
-			sb.Append("</table>");
-
-			MemoryStream workStream = new MemoryStream();
-			var document = new Document(reader.GetPageSizeWithRotation(1));
-			var writer = PdfWriter.GetInstance(document, workStream);
-			writer.CloseStream = false;
-
-			document.Open();
-			document.NewPage();
-
-			// Add TOC
-			StyleSheet styles = new StyleSheet();
-			styles.LoadTagStyle("h2", HtmlTags.HORIZONTALALIGN, "center");
-			styles.LoadTagStyle("h2", HtmlTags.COLOR, "#F90");
-
-			foreach (IElement element in HTMLWorker.ParseToList(new StringReader(sb.ToString()), styles))
-			{
-				document.Add(element);
-			}
-
-			// Append your chapter content again
-			Chapter chapter = CreateChapterContent(html);
-			document.Add(chapter);
-
-			document.Close();
-			writer.Close();
-
-			byte[] byteInfo = workStream.ToArray();
-			workStream.Write(byteInfo, 0, byteInfo.Length);
-			workStream.Position = 0;
-
 			return byteInfo;
 		}
+
+		private Paragraph CreateTitleElement(TaskContent task)
+		{
+			var font = FontFactory.GetFont(FontFactory.HELVETICA, 16, Font.NORMAL, new Color(task.TitleColor));
+
+			return new Paragraph(task.Title, font);
+		}
+
+		private Section CreateSection(TaskContent task, Section parent)
+		{
+			Section section = null;
+
+			if (parent == null)
+			{
+				section = new Chapter(CreateTitleElement(task), 0);
+			}
+			else
+			{
+				section = parent.AddSection(CreateTitleElement(task));
+				section.TriggerNewPage = true;
+			}
+
+			section.NumberDepth = 0;
+			section.BookmarkTitle = task.Title;
+			section.BookmarkOpen = true;
+
+			// Add spacer beneath title
+			section.Add(Chunk.NEWLINE);
+
+			// Create content
+			StyleSheet styles = new StyleSheet();
+
+// 			styles.LoadTagStyle("h2", HtmlTags.HORIZONTALALIGN, "center");
+// 			styles.LoadTagStyle("h2", HtmlTags.COLOR, "#F90");
+// 			styles.LoadTagStyle("pre", "size", "10pt");
+
+			foreach (IElement element in HTMLWorker.ParseToList(new StringReader(task.Html), styles))
+				section.Add(element);
+
+			// Add subtasks as nested Sections on new pages
+			if (task.Subtasks != null)
+			{
+				foreach (var subtask in task.Subtasks)
+					CreateSection(subtask, section);
+			}
+
+			return section;
+		}
+
 	}
 }
 
