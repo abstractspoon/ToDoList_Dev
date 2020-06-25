@@ -2034,7 +2034,7 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 
 	pExport->sStylesheet = userPrefs.GetSaveExportStylesheet();
 	BOOL bTransform = GetStylesheetPath(tdc, pExport->sStylesheet);
-	BOOL bHtmlComments = (bTransform || ExporterWantsHTMLComments(nExporter));
+	BOOL bHtmlComments = (bTransform || m_mgrImportExport.ExporterSupportsHtmlComments(nExporter));
 
 	if (bFiltered || bHtmlComments || !userPrefs.GetExportAllAttributes())
 	{
@@ -2069,13 +2069,6 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	}
 	
 	return pExport;
-}
-
-BOOL CToDoListWnd::ExporterWantsHTMLComments(int nExporter) const
-{
-	return (m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("htm")) ||
-			m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("html")) ||
-			m_mgrImportExport.ExporterHasFileExtension(nExporter, _T("chm")));
 }
 
 BOOL CToDoListWnd::WantTDLExtensionSupport(BOOL bForLoading) const
@@ -9880,7 +9873,7 @@ void CToDoListWnd::OnExport()
 	int nExporter = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 	ASSERT(nExporter != -1);
 
-	BOOL bHtmlComments = ExporterWantsHTMLComments(nExporter);
+	BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nExporter);
 	CString sExportPath = (bExportToClipboard ? TEMP_CLIPBOARD_FILEPATH : dialog.GetExportPath());
 	
 	// The only OR active tasklist -----------------------------------------------------
