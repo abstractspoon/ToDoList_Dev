@@ -27,13 +27,14 @@ public:
 	// interface implementation
 	void Release() { delete this; }
 	void SetLocalizer(ITransText* pTT);
+	bool SupportsHtmlComments() const { return false; }
+	HICON GetIcon() const { return m_icon; }
 
 	// caller must copy only
 	LPCTSTR GetMenuText() const;
 	LPCTSTR GetFileFilter() const;
 	LPCTSTR GetFileExtension() const;
 	LPCWSTR GetTypeID() const { return _T("BD28EDEE-0F1F-4AC9-B083-9A033E473181"); }
-	HICON GetIcon() const { return m_icon; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

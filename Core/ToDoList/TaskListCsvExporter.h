@@ -31,12 +31,13 @@ public:
 
     void Release() { delete this; }
 	void SetLocalizer(ITransText* /*pTT*/) {}
+	bool SupportsHtmlComments() const { return false; }
+	HICON GetIcon() const { return NULL; }
 
 	LPCTSTR GetMenuText() const { return _T("Spreadsheet"); }
 	LPCTSTR GetFileFilter() const { return _T("Spreadsheet Files (*.csv)|*.csv||"); }
 	LPCTSTR GetFileExtension() const { return _T("csv"); }
 	LPCTSTR GetTypeID() const { return CSVEXPORT_TYPEID; }
-	HICON GetIcon() const { return NULL; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
    	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

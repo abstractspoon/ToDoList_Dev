@@ -25,13 +25,14 @@ public:
 	// interface implementation
 	void Release() { delete this; }
 	void SetLocalizer(ITransText* pTT);
+	bool SupportsHtmlComments() const { return false; }
+	HICON GetIcon() const { return m_icon; }
 
 	// caller must copy only
 	LPCTSTR GetMenuText() const { return _T("iCalendar"); }
 	LPCTSTR GetFileFilter() const { return _T("iCalendar Files (*.ics)|*.ics||"); }
 	LPCTSTR GetFileExtension() const { return _T("ics"); }
 	LPCWSTR GetTypeID() const { return _T("5CDCA505_6C5C_4342_8F80_67368C7EE6A5"); }
-	HICON GetIcon() const { return m_icon; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

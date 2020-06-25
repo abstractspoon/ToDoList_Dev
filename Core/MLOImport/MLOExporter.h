@@ -29,13 +29,14 @@ public:
 	// interface implementation
 	void Release() { delete this; }
 	void SetLocalizer(ITransText* pTT);
+	bool SupportsHtmlComments() const { return false; }
+	HICON GetIcon() const { return m_icon; }
 
 	// caller must copy only
     LPCTSTR GetMenuText() const { return _T("My Life Organized"); }
 	LPCTSTR GetFileFilter() const { return _T("MLO Task Files (*.ml)|*.ml||"); }
 	LPCTSTR GetFileExtension() const { return _T("ml"); }
 	LPCWSTR GetTypeID() const { return _T("F588E6B1_3646_4994_99A2_4223FDDA1A31"); }
-	HICON GetIcon() const { return m_icon; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

@@ -17,6 +17,7 @@ public:
 
    void SetLocalizer(ITransText* pTT);
    HICON GetIcon() const;
+   bool SupportsHtmlComments() const { return true; }
 
    LPCWSTR GetMenuText() const;
    LPCWSTR GetFileFilter() const;

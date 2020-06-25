@@ -44,6 +44,7 @@ public:
 	CString GetExporterFileFilter(int nExporter) const;
 	CString GetExporterTypeID(int nExporter) const;
 	HICON GetExporterIcon(int nExporter) const;
+	BOOL ExporterSupportsHtmlComments(int nExporter) const;
 	
 	IIMPORTEXPORT_RESULT ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent, IPreferences* pPrefs) const;
 	IIMPORTEXPORT_RESULT ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const;

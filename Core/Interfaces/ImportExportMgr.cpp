@@ -337,6 +337,19 @@ HICON CImportExportMgr::GetExporterIcon(int nExporter) const
 	return NULL;
 }
 
+BOOL CImportExportMgr::ExporterSupportsHtmlComments(int nExporter) const
+{
+	Initialize(); // initialize on demand
+	
+	if (nExporter >= 0 && nExporter < m_aExporters.GetSize())
+	{
+		ASSERT (m_aExporters[nExporter] != NULL);
+		return (m_aExporters[nExporter]->SupportsHtmlComments() ? TRUE : FALSE);
+	}
+	
+	return FALSE;
+}
+
 IIMPORTEXPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent, IPreferences* pPrefs) const
 {
 	Initialize(); // initialize on demand

@@ -29,12 +29,13 @@ public:
 
     void Release() { delete this; }
 	void SetLocalizer(ITransText* /*pTT*/) {}
+	bool SupportsHtmlComments() const { return false; }
+	HICON GetIcon() const { return NULL; }
 
 	LPCTSTR GetMenuText() const { return _T("ToDoList"); }
 	LPCTSTR GetFileFilter() const { return _T("Tasklists (*.tdl)|*.tdl||"); }
 	LPCTSTR GetFileExtension() const { return _T("tdl"); }
 	LPCTSTR GetTypeID() const { return TDLEXPORT_TYPEID; }
-	HICON GetIcon() const { return NULL; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);

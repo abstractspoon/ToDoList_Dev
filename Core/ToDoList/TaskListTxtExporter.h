@@ -28,12 +28,13 @@ public:
 
     void Release() { delete this; }
 	void SetLocalizer(ITransText* /*pTT*/) {}
+	bool SupportsHtmlComments() const { return false; }
+	HICON GetIcon() const { return NULL; }
 
 	LPCTSTR GetMenuText() const { return _T("Plain Text"); }
 	LPCTSTR GetFileFilter() const { return _T("Text Files (*.txt)|*.txt||"); }
 	LPCTSTR GetFileExtension() const { return _T("txt"); }
 	LPCTSTR GetTypeID() const { return TXTEXPORT_TYPEID; }
-	HICON GetIcon() const { return NULL; }
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
    	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
