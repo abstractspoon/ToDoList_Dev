@@ -43,54 +43,12 @@ namespace PDFExporter
 	[System.ComponentModel.DesignerCategory("")]
 	public class PDFExporterCore
 	{
-/*
-		private class TaskContent
-		{
-			public TaskContent(Task task, bool showPos)
-			{
-				if (showPos)
-					Title = String.Format("{0} {1}", task.GetPositionString(), task.GetTitle());
-				else
-					Title = task.GetTitle();
-
-				TitleColor = task.GetTextDrawingColor();
-				Html = task.GetHtmlComments();
-
-				if (String.IsNullOrWhiteSpace(Html))
-				{
-					Html = WebUtility.HtmlEncode(task.GetComments());
-					Html = Html.Replace("\n", "<br>");
-				}
-
-				var subtask = task.GetFirstSubtask();
-
-				if (subtask != null)
-				{
-					Subtasks = new List<TaskContent>();
-
-					while (subtask.IsValid())
-					{
-						Subtasks.Add(new TaskContent(subtask, showPos)); // RECURSIVE CALL
-						subtask = subtask.GetNextTask();
-					}
-				}
-			}
-
-			public String Title;
-			public String Html;
-
-			public System.Drawing.Color TitleColor = System.Drawing.Color.Black;
-			public List<TaskContent> Subtasks = null;
-		}
-*/
 	
-		// --------------------------------------------------------------------------------------
-
 		private Translator m_Trans;
 		private String m_TypeId;
         private String m_TempFolder;
         private System.Collections.Generic.List<TaskAttribute> m_AvailAttributes = null;
-        private bool m_WantComments;
+        private bool m_WantComments = false, m_WantPosition = false;
 
 		// --------------------------------------------------------------------------------------
 
@@ -119,7 +77,31 @@ namespace PDFExporter
                     m_WantComments = true;
                     break;
 
-                default:
+                case Task.Attribute.Position:
+                    m_WantPosition = true;
+                    break;
+
+// 				case Task.Attribute.CustomAttribute:
+// 					// TODO
+// 					break;
+
+				case Task.Attribute.MetaData:
+					// Not a user attribute
+					break;
+
+ 				case Task.Attribute.ProjectName:
+					// Not a task attribute
+ 					break;
+
+				case Task.Attribute.Color:
+					// handled separately
+					break;
+
+				case Task.Attribute.Title:
+					// handled separately
+					break;
+
+				default:
                     m_AvailAttributes.Add(new TaskAttribute(attrib, TaskList.GetAttributeName(attrib)));
                     break;
                 }
@@ -137,8 +119,6 @@ namespace PDFExporter
 
 			try
 			{
-// 				var taskContent = BuildTaskContent(tasks);
-// 				var pdfContent = CreatePDFDocument(taskContent);
 				var pdfContent = CreatePDFDocument(tasks);
 			
 				File.WriteAllBytes(destFilePath, pdfContent);
@@ -151,45 +131,6 @@ namespace PDFExporter
 			return true;
 		}
 
-/*
-		private List<TaskContent> BuildTaskContent(TaskList tasks)
-		{
-			var content = new List<TaskContent>();
-			var task = tasks.GetFirstTask();
-
-			while (task.IsValid())
-			{
-				content.Add(new TaskContent(task, tasks.IsAttributeAvailable(Task.Attribute.Position)));
-				task = task.GetNextTask();
-			}
-
-			return content;
-		}
-*/
-
-/*
-		private byte[] CreatePDFDocument(List<TaskContent> tasks)
-		{
-			MemoryStream workStream = new MemoryStream();
-			Document pdfDoc = new Document(PageSize.A4);
-			PdfWriter.GetInstance(pdfDoc, workStream).CloseStream = false;
-			HTMLWorker parser = new HTMLWorker(pdfDoc);
-
-			pdfDoc.Open();
-
-			// Add chapter content
-			foreach (var task in tasks)
-				pdfDoc.Add(CreateSection(task, null));
-
-			pdfDoc.Close();
-
-			byte[] byteInfo = workStream.ToArray();
-			workStream.Write(byteInfo, 0, byteInfo.Length);
-			workStream.Position = 0;
-
-			return byteInfo;
-		}
-*/
 
 		private byte[] CreatePDFDocument(TaskList tasks)
 		{
@@ -206,7 +147,7 @@ namespace PDFExporter
 			while (task.IsValid())
             {
 				pdfDoc.Add(CreateSection(task, null));
-
+				task = task.GetNextTask();
             }
 
 			pdfDoc.Close();
@@ -218,23 +159,13 @@ namespace PDFExporter
 			return byteInfo;
 		}
 
-/*
-		private Paragraph CreateTitleElement(TaskContent task)
-		{
-			var font = FontFactory.GetFont(FontFactory.HELVETICA, 16, Font.NORMAL, new Color(task.TitleColor));
-
-			return new Paragraph(task.Title, font);
-		}
-*/
-
 		private String GetTitle(Task task)
 		{
-            var title = task.GetPositionString();
+			if (m_WantPosition)
+				return string.Format("{0} {1}", task.GetPositionString(), task.GetTitle());
 
-            if (!String.IsNullOrWhiteSpace(title))
-                title = title + ' ';
-
-            return (title + task.GetTitle());
+			// else
+            return task.GetTitle();
 		}
 
 		private Paragraph CreateTitleElement(Task task)
@@ -262,18 +193,27 @@ namespace PDFExporter
 			section.BookmarkTitle = GetTitle(task);
 			section.BookmarkOpen = true;
 
-			// Add spacer beneath title
-			section.Add(Chunk.NEWLINE);
-
 			// Create content
-            foreach (var attrib in m_AvailAttributes)
-            {
-                section.Add(String.Format("{0}: {1}", attrib.Name, task.GetAttributeValue(attrib.Attribute, true, true)));
-            }
+			if (m_AvailAttributes.Count > 0)
+			{
+				// Add spacer beneath title
+				section.Add(Chunk.NEWLINE);
+
+				foreach (var attrib in m_AvailAttributes)
+				{
+					var attribVal = task.GetAttributeValue(attrib.Attribute, true, true);
+
+					if (!string.IsNullOrWhiteSpace(attribVal))
+						section.Add(new Paragraph(String.Format("{0}: {1}", attrib.Name, attribVal)));
+				}
+			}
 
             // Comments is always last
             if (m_WantComments)
             {
+				// Add spacer before comments
+				section.Add(Chunk.NEWLINE);
+
                 string html = task.GetHtmlComments();
 
                 if (String.IsNullOrWhiteSpace(html))
@@ -306,48 +246,6 @@ namespace PDFExporter
 
             return section;
 		}
-/*
-		private Section CreateSection(TaskContent task, Section parent)
-		{
-			Section section = null;
-
-			if (parent == null)
-			{
-				section = new Chapter(CreateTitleElement(task), 0);
-			}
-			else
-			{
-				section = parent.AddSection(CreateTitleElement(task));
-				section.TriggerNewPage = true;
-			}
-
-			section.NumberDepth = 0;
-			section.BookmarkTitle = task.Title;
-			section.BookmarkOpen = true;
-
-			// Add spacer beneath title
-			section.Add(Chunk.NEWLINE);
-
-			// Create content
-			StyleSheet styles = new StyleSheet();
-
-// 			styles.LoadTagStyle("h2", HtmlTags.HORIZONTALALIGN, "center");
-// 			styles.LoadTagStyle("h2", HtmlTags.COLOR, "#F90");
-// 			styles.LoadTagStyle("pre", "size", "10pt");
-
-			foreach (IElement element in HTMLWorker.ParseToList(new StringReader(task.Html), styles))
-				section.Add(element);
-
-			// Add subtasks as nested Sections on new pages
-			if (task.Subtasks != null)
-			{
-				foreach (var subtask in task.Subtasks)
-					CreateSection(subtask, section);
-			}
-
-			return section;
-		}
-*/
 
 	}
 }

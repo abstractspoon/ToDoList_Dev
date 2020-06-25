@@ -1736,10 +1736,10 @@ void CTaskFile::SetAvailableAttributes(const CTDCAttributeMap& mapAttrib)
 bool CTaskFile::IsAttributeAvailable(TDC_ATTRIBUTE nAttrib) const
 {
 	if (!m_mapReadableAttrib.GetCount() || m_mapReadableAttrib.Has(TDCA_ALL))
-		return true;
+		return (nAttrib != TDCA_NONE);
 
 	if (m_mapReadableAttrib.Has(TDCA_NONE))
-		return false;
+		return (nAttrib == TDCA_NONE);
 
 	return (m_mapReadableAttrib.Has(nAttrib) != FALSE);
 }
@@ -3292,7 +3292,14 @@ bool CTaskFile::TaskHasAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool bC
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, false);
 
-	return (pXITask->ItemHasValue(szAttrib) != FALSE);
+	if (pXITask->ItemHasValue(szAttrib))
+		return true;
+
+	// Fallback in special case
+	if ((nAttrib == TDCA_PARENTID) && IsAttributeAvailable(TDCA_ID))
+		return (GetTaskParent(hTask) != NULL);
+
+	return false;
 }
 
 LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay)

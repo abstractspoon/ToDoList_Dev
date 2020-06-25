@@ -63,8 +63,14 @@ List<Task::Attribute>^ TaskList::GetAvailableAttributes()
 	{
 		auto attrib = Task::Attribute(enumVal);
 
-		if (attrib == Task::Attribute::Unknown)
+		switch (attrib)
+		{
+		case Task::Attribute::Unknown:
 			continue;
+
+		case Task::Attribute::OffsetTask:
+			continue;
+		}
 
 		if (IsAttributeAvailable(attrib))
 			attribs->Add(attrib);
@@ -303,13 +309,35 @@ Boolean Task::IsAttributeAvailable(Attribute attrib)
 
 String^ Task::GetAttributeValue(Task::Attribute attrib, bool calculated, bool display)
 {
-	TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
+	// special cases
+	switch (attrib)
+	{
+	case Task::Attribute::ReferenceId:
+		{
+			UInt32 refID = GetReferenceID();
 
-	if (m_pConstTaskList)
-		return gcnew String(m_pConstTaskList->GetTaskAttribute(m_hTask, nAttrib, calculated, display));
+			if (refID > 0)
+				return String::Format(L"{0}", refID);
+		}
+		break;
+
+	case Task::Attribute::CustomAttribute:
+	case Task::Attribute::OffsetTask:
+	case Task::Attribute::MetaData:
+		break;
+
+	default:
+		{
+			TDC_ATTRIBUTE nAttrib = MapAttribute(attrib);
+
+			if (m_pConstTaskList)
+				return gcnew String(m_pConstTaskList->GetTaskAttribute(m_hTask, nAttrib, calculated, display));
 	
-	if (m_pTaskList)
-		return gcnew String(m_pTaskList->GetTaskAttribute(m_hTask, nAttrib, calculated, display));
+			if (m_pTaskList)
+				return gcnew String(m_pTaskList->GetTaskAttribute(m_hTask, nAttrib, calculated, display));
+		}
+		break;
+	}
 
 	return gcnew String(L"");
 }
