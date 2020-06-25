@@ -47,6 +47,11 @@ public:
 	static void DDX_CBValue(CDataExchange* pDX, int nIDC, int& value, int fallbackValue);
 	static void DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value, int fallbackValue);
 
+	// Allows for out of order radio buttons
+	static void DDX_Radio(CDataExchange* pDX, const UINT* pIDC, int nNumIDC, int& value);
+	static void DDX_Radio(CDataExchange* pDX, const CUIntArray& aIDC, int& value);
+	static void DDX_Radio(CDataExchange* pDX, int nIDC, int& value);
+
 	template <class T>
 	static void DDX_CBData(CDataExchange* pDX, CComboBox& combo, T& value, T fallbackValue)
 	{

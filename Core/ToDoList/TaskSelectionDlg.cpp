@@ -89,7 +89,7 @@ void CTaskSelectionDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTaskSelectionDlg)
-	DDX_Radio(pDX, IDC_ALLATTRIB, m_nAttribOption);
+	DDX_Radio(pDX, IDC_ALLTASKS, m_nWhatTasks);
 	DDX_Check(pDX, IDC_INCLUDEPARENTTASK, m_bSelectedParentTask);
 	DDX_Control(pDX, IDC_CUSTOMATTRIBLIST, m_lbAttribList);
 	DDX_Check(pDX, IDC_INCLUDESUBTASKS, m_bSelectedSubtasks);
@@ -97,7 +97,14 @@ void CTaskSelectionDlg::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_INCLUDEDONE, m_bCompletedTasks);
 	DDX_Check(pDX, IDC_INCLUDENOTDONE, m_bIncompleteTasks);
-	DDX_Radio(pDX, IDC_ALLTASKS, m_nWhatTasks);
+
+	// Because our radio buttons are out of sequence
+	// we use a special technique
+	static UINT RADIO_BTNS[] = { IDC_ALLATTRIB, IDC_VISIBLEATTRIB, IDC_CUSTOMATTRIB, IDC_TITLECOMMENTS };
+	static int NUM_RADIO_BTNS = sizeof(RADIO_BTNS) / sizeof(RADIO_BTNS[0]);
+
+	CDialogHelper::DDX_Radio(pDX, RADIO_BTNS, NUM_RADIO_BTNS, m_nAttribOption);
+//	DDX_Radio(pDX, IDC_ALLATTRIB, m_nAttribOption);
 }
 
 
@@ -332,6 +339,11 @@ int CTaskSelectionDlg::GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttribute
 	{
 	case TSDA_ALL:
 		mapAttrib.Add(TDCA_ALL);
+		break;
+
+	case TSDA_TITLECOMMENTS:
+		mapAttrib.Add(TDCA_TASKNAME);
+		mapAttrib.Add(TDCA_COMMENTS);
 		break;
 
 	case TSDA_VISIBLE:

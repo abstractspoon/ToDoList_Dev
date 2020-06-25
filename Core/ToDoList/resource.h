@@ -819,6 +819,7 @@
 #define IDC_NEWPROJNAME                 1540
 #define IDC_NEWFILEPATH                 1541
 #define IDC_EXPANDALL                   1541
+#define IDC_TITLECOMMENTS               1542
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2391,7 +2392,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        320
 #define _APS_NEXT_COMMAND_VALUE         34742
-#define _APS_NEXT_CONTROL_VALUE         1542
+#define _APS_NEXT_CONTROL_VALUE         1543
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

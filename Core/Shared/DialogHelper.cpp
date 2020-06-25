@@ -390,6 +390,43 @@ void CDialogHelper::DDX_CBValue(CDataExchange* pDX, CComboBox& combo, int& value
 	}
 }
 
+void CDialogHelper::DDX_Radio(CDataExchange* pDX, const CUIntArray& aIDC, int& value)
+{
+	DDX_Radio(pDX, aIDC.GetData(), aIDC.GetSize(), value);
+}
+
+void CDialogHelper::DDX_Radio(CDataExchange* pDX, const UINT* pIDC, int nNumIDC, int& value)
+{
+	// Adapted from dlgdata.cpp
+	if (pDX->m_bSaveAndValidate)
+		value = -1;     // value if none found
+
+	for (int nIDC = 0; nIDC < nNumIDC; nIDC++)
+	{
+		HWND hWndCtrl = ::GetDlgItem(*pDX->m_pDlgWnd, pIDC[nIDC]);
+		ASSERT(hWndCtrl);
+
+		if (pDX->m_bSaveAndValidate)
+		{
+			if (SendMessage(hWndCtrl, BM_GETCHECK, 0, 0L) != 0)
+			{
+				ASSERT(value == -1);    // only set once
+				value = nIDC;
+			}
+		}
+		else
+		{
+			// select button
+			::SendMessage(hWndCtrl, BM_SETCHECK, (nIDC == value), 0L);
+		}
+	}
+}
+
+void CDialogHelper::DDX_Radio(CDataExchange* pDX, int nIDC, int& value)
+{
+	return ::DDX_Radio(pDX, nIDC, value);
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 BOOL CDialogHelper::UpdateDataEx(CWnd* pWnd, int nIDC, BYTE& value, BOOL bSaveAndValidate)
