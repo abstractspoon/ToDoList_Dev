@@ -22,7 +22,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 // https://www.codeproject.com/Tips/899658/Create-PDF-With-Bookmark-and-TOC-from-HTML-with-iT
 
 // Grateful thanks to Mike Brind for showing how to create nested bookmarks
-https://www.mikesdotnetting.com/article/84/itextsharp-links-and-bookmarks
+// https://www.mikesdotnetting.com/article/84/itextsharp-links-and-bookmarks
 
 /////////////////////////////////////////////////////////////////////////////////
 
