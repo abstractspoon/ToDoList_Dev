@@ -259,6 +259,7 @@ namespace Abstractspoon
 
 				bool IsValid();
 				bool IsAttributeAvailable(Task::Attribute attrib);
+				List<Task::Attribute>^ GetAvailableAttributes();
 
 				String^ GetReportTitle();
 				String^ GetReportDate();

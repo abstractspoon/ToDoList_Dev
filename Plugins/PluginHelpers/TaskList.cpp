@@ -54,6 +54,25 @@ bool TaskList::IsAttributeAvailable(Task::Attribute attrib)
 		(m_pTaskList ? m_pTaskList->IsAttributeAvailable(nAttrib) : false));
 }
 
+List<Task::Attribute>^ TaskList::GetAvailableAttributes()
+{
+	auto attribs = gcnew List<Task::Attribute>();
+	auto enumValues = System::Enum::GetValues(Task::Attribute::typeid);
+
+	for each (auto enumVal in enumValues)
+	{
+		auto attrib = Task::Attribute(enumVal);
+
+		if (attrib == Task::Attribute::Unknown)
+			continue;
+
+		if (IsAttributeAvailable(attrib))
+			attribs->Add(attrib);
+	}
+
+	return attribs;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 // GETTERS
 
