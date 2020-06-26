@@ -50,6 +50,9 @@ namespace PDFExporter
         private System.Collections.Generic.List<TaskAttribute> m_AvailAttributes = null;
         private bool m_WantComments = false, m_WantPosition = false;
 
+		private BaseFont m_BaseFont = null;
+		private StyleSheet m_ParseStyles = null;
+
 		// --------------------------------------------------------------------------------------
 
 		public PDFExporterCore(String typeId, Translator trans)
@@ -57,10 +60,20 @@ namespace PDFExporter
 			m_TypeId = typeId;
 			m_Trans = trans;
 			m_TempFolder = (Path.GetTempPath() + typeId);
+
+			m_BaseFont = BaseFont.CreateFont(@"c:\windows\fonts\SimHei.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+			m_ParseStyles = new StyleSheet();
+
+			// m_ParseStyles.LoadTagStyle("h2", HtmlTags.HORIZONTALALIGN, "center");
+			// m_ParseStyles.LoadTagStyle("h2", HtmlTags.COLOR, "#F90");
+			// m_ParseStyles.LoadTagStyle("pre", "size", "10pt");
 		}
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
+
+
+
             m_AvailAttributes = new List<TaskAttribute>();
 
             var attribs = tasks.GetAvailableAttributes();
@@ -102,7 +115,7 @@ namespace PDFExporter
 					break;
 
 				default:
-                    m_AvailAttributes.Add(new TaskAttribute(attrib, TaskList.GetAttributeName(attrib)));
+                    m_AvailAttributes.Add(new TaskAttribute(attrib, m_Trans.Translate(TaskList.GetAttributeName(attrib))));
                     break;
                 }
             }
@@ -170,9 +183,48 @@ namespace PDFExporter
 
 		private Paragraph CreateTitleElement(Task task)
 		{
-			var font = FontFactory.GetFont(FontFactory.HELVETICA, 16, Font.NORMAL, new Color(task.GetTextDrawingColor()));
+			var font = new Font(m_BaseFont, 16, Font.NORMAL, new Color(task.GetTextDrawingColor()));
 
 			return new Paragraph(GetTitle(task), font);
+		}
+
+		private void AddContent(string html, Section section)
+		{
+			foreach (IElement element in HTMLWorker.ParseToList(new StringReader(html), m_ParseStyles))
+			{
+				if (element.IsContent())
+				{
+					var para = new Paragraph();
+
+					foreach (var obj in element.Chunks)
+					{
+						var chunk = (obj as Chunk);
+
+						if (chunk != null)
+						{
+							var font = chunk.Font;
+
+							if (font == null)
+								font = new Font(m_BaseFont);
+							else
+								font = new Font(m_BaseFont, font.Size, font.Style, font.Color);
+
+							chunk.Font = font;
+							para.Add(chunk);
+						}
+						else
+						{
+							para.Add(obj);
+						}
+					}
+
+					section.Add(para);
+				}
+				else
+				{
+					section.Add(element);
+				}
+			}
 		}
 
 		private Section CreateSection(Task task, Section parent)
@@ -204,16 +256,13 @@ namespace PDFExporter
 					var attribVal = task.GetAttributeValue(attrib.Attribute, true, true);
 
 					if (!string.IsNullOrWhiteSpace(attribVal))
-						section.Add(new Paragraph(String.Format("{0}: {1}", attrib.Name, attribVal)));
+						AddContent(String.Format("{0}: {1}", attrib.Name, attribVal), section);
 				}
 			}
 
             // Comments is always last
             if (m_WantComments)
             {
-				// Add spacer before comments
-				section.Add(Chunk.NEWLINE);
-
                 string html = task.GetHtmlComments();
 
                 if (String.IsNullOrWhiteSpace(html))
@@ -224,15 +273,11 @@ namespace PDFExporter
 
                 if (!String.IsNullOrWhiteSpace(html))
                 {
-			        StyleSheet styles = new StyleSheet();
+					// Add spacer before comments
+					section.Add(Chunk.NEWLINE);
 
-        // 			styles.LoadTagStyle("h2", HtmlTags.HORIZONTALALIGN, "center");
-        // 			styles.LoadTagStyle("h2", HtmlTags.COLOR, "#F90");
-        // 			styles.LoadTagStyle("pre", "size", "10pt");
-
-                    foreach (IElement element in HTMLWorker.ParseToList(new StringReader(html), styles))
-                        section.Add(element);
-                }
+					AddContent(html, section);
+				}
             }
 
             // Add subtasks as nested Sections on new pages
