@@ -8,6 +8,8 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
+
 using Microsoft.Win32;
 
 namespace PDFExporter
@@ -89,20 +91,34 @@ namespace PDFExporter
 			}
 		}
 
+		// ------------------------------------------------------------------
+		[DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int RemoveFontResourceEx(string lpszFilename, int fl, IntPtr pdv);
+
+		private static int FR_PRIVATE = 16;
+		// ------------------------------------------------------------------
+
 		public static string GetFontFromFileName(string fileName)
 		{
+			var fontName = string.Empty;
 			var fc = new PrivateFontCollection();
+
 			try
 			{
 				fc.AddFontFile(fileName);
-
-				return fc.Families[0].Name;
+				fontName = fc.Families[0].Name;
 			}
 			catch (FileNotFoundException)
 			{
 			}
 
-			return string.Empty;
+			fc.Dispose();
+
+			// There is a bug in PrivateFontCollection::Dispose()
+			// which does not release the font file in GDI32.dll
+			RemoveFontResourceEx(fileName, FR_PRIVATE, IntPtr.Zero);
+
+			return fontName;
 		}
 
 		public static string GetFileNameFromFont(string fontName, bool bold = false, bool italic = false)
