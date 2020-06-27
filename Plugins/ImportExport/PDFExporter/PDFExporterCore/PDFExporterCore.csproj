@@ -105,7 +105,7 @@ mkdir "$(SolutionDir)..\Core\ToDoList"
 mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
-</PostBuildEvent>
+copy $(SolutionDir)3rdParty\iText\iTextSharp.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
