@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace PDFExporter
 {
-	public partial class PDFExporterPreferencesForm : Form
+	public partial class PDFExporterForm : Form
 	{
-		public PDFExporterPreferencesForm()
+		public PDFExporterForm()
 		{
 			InitializeComponent();
 		}

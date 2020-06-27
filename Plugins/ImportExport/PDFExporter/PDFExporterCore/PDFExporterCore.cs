@@ -71,7 +71,10 @@ namespace PDFExporter
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
+			var prefsDlg = new PDFExporterForm();
 
+			if (prefsDlg.ShowDialog() == DialogResult.Cancel)
+				return false;
 
 
             m_AvailAttributes = new List<TaskAttribute>();
