@@ -76,10 +76,9 @@ namespace PDFExporter
 			{
 				var fontName = GetFontFromFileName(fontFile);
 
-				if (!string.IsNullOrEmpty(fontName))
+				if (!string.IsNullOrEmpty(fontName) && !addedFonts.Contains(fontName))
 				{
 					var fontItem = new FontItem(fontName, fontFile);
-
 					comboFont.Items.Add(fontItem);
 
 					if (String.Compare(fontFile, selFontPath, true) == 0)
