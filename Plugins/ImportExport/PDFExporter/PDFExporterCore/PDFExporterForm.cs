@@ -116,6 +116,8 @@ namespace PDFExporter
 
 			// There is a bug in PrivateFontCollection::Dispose()
 			// which does not release the font file in GDI32.dll
+			// This results in duplicate font names for anyone 
+			// calling the Win32 function EnumFonts.
 			RemoveFontResourceEx(fileName, FR_PRIVATE, IntPtr.Zero);
 
 			return fontName;
