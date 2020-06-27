@@ -13,6 +13,7 @@ using iTextSharp.text;
 using iTextSharp.text.html;
 using iTextSharp.text.html.simpleparser;
 using iTextSharp.text.pdf;
+using MSDN.Html.Editor;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
@@ -50,8 +51,9 @@ namespace PDFExporter
         private System.Collections.Generic.List<TaskAttribute> m_AvailAttributes = null;
         private bool m_WantComments = false, m_WantPosition = false;
 
-		private BaseFont m_BaseFont = null;
-		private StyleSheet m_ParseStyles = null;
+		private BaseFont m_BaseFont;
+		private float m_BaseFontSize;
+		private StyleSheet m_ParseStyles;
 
 		// --------------------------------------------------------------------------------------
 
@@ -61,7 +63,8 @@ namespace PDFExporter
 			m_Trans = trans;
 			m_TempFolder = (Path.GetTempPath() + typeId);
 
-			m_BaseFont = BaseFont.CreateFont(@"c:\windows\fonts\SimHei.ttf", BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+			m_BaseFont = BaseFont.CreateFont();
+			m_BaseFontSize = 10f;
 			m_ParseStyles = new StyleSheet();
 
 			// m_ParseStyles.LoadTagStyle("h2", HtmlTags.HORIZONTALALIGN, "center");
@@ -71,13 +74,40 @@ namespace PDFExporter
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
-			var prefsDlg = new PDFExporterForm();
+			// Create base font
+			var installedFontFile = prefs.GetProfileString(sKey, "InstalledFontFile", "");
+			var otherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", "");
+			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
 
-			if (prefsDlg.ShowDialog() == DialogResult.Cancel)
+			int fontSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
+
+			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
+
+			var htmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
+			var defaultInstalledFontFile = PDFExporterForm.GetFileNameFromFont(htmlFont);
+
+			if (string.IsNullOrEmpty(installedFontFile))
+				installedFontFile = defaultInstalledFontFile;
+
+			var fontDlg = new PDFExporterForm(installedFontFile, otherFontFile, useOtherFont);
+
+			if (!silent && (fontDlg.ShowDialog() == DialogResult.Cancel))
 				return false;
 
+			// Clear the installed font setting if it's the same 
+			// as the default so changes to the default will be picked up
+			if (string.Compare(fontDlg.InstalledFontPath, defaultInstalledFontFile, true) == 0)
+				prefs.DeleteProfileEntry(sKey, "InstalledFontFile");
+			else
+				prefs.WriteProfileString(sKey, "InstalledFontFile", fontDlg.InstalledFontPath);
 
-            m_AvailAttributes = new List<TaskAttribute>();
+			prefs.WriteProfileString(sKey, "OtherFontFile", fontDlg.OtherFontPath);
+			prefs.WriteProfileBool(sKey, "UseOtherFont", fontDlg.UseOtherFont);
+
+			m_BaseFont = BaseFont.CreateFont(fontDlg.SelectedFontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+
+			// Build attribute list
+			m_AvailAttributes = new List<TaskAttribute>();
 
             var attribs = tasks.GetAvailableAttributes();
 
@@ -208,7 +238,7 @@ namespace PDFExporter
 							var font = chunk.Font;
 
 							if (font == null)
-								font = new Font(m_BaseFont);
+								font = new Font(m_BaseFont, m_BaseFontSize);
 							else
 								font = new Font(m_BaseFont, font.Size, font.Style, font.Color);
 

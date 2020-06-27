@@ -41,6 +41,9 @@ namespace Abstractspoon
 				double GetProfileDouble(String^ sSection, String^ sEntry, double dDefault);
 				bool WriteProfileDouble(String^ sSection, String^ sEntry, double dValue);
 
+				bool DeleteProfileEntry(String^ sSection, String^ sEntry);
+				bool DeleteProfileSection(String^ sSection);
+
 			private:
 				IPreferences* m_pPrefs;
 				const IPreferences* m_pConstPrefs;

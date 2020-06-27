@@ -78,3 +78,12 @@ bool Preferences::WriteProfileDouble(String^ sSection, String^ sEntry, double dV
    return SETPREF(WriteProfileDouble, dValue);
 }
 
+bool Preferences::DeleteProfileEntry(String^ sSection, String^ sEntry)
+{
+	return (m_pPrefs ? m_pPrefs->DeleteProfileEntry(MS(sSection), MS(sEntry)) : false);
+}
+
+bool Preferences::DeleteProfileSection(String^ sSection)
+{
+	return (m_pPrefs ? m_pPrefs->DeleteProfileSection(MS(sSection)) : false);
+}
