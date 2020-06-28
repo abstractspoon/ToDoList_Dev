@@ -132,18 +132,12 @@ namespace SpreadsheetContentControl
             this.ClientSize = new System.Drawing.Size(603, 716);
             this.Name = "SpreadsheetContentControlCore";
 
-			int bannerHeight = RhinoLicensing.CreateBanner(m_TypeID, "", this, m_Trans, 0/*5*/);
-
 			m_EditorControl = new TDLGridEditorControl(m_ControlsFont, m_Trans);
-			m_EditorControl.Location = new Point(0, bannerHeight);
-			m_EditorControl.Size = new Size(this.ClientSize.Width, this.ClientSize.Height - bannerHeight);
+			m_EditorControl.Bounds = this.ClientRectangle;
 			m_EditorControl.Anchor = System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right;
             //m_EditorControl.BorderStyle = BorderStyle.FixedSingle;
 
             this.Controls.Add(m_EditorControl);
-
-
-
 
             this.ResumeLayout(false);
             this.PerformLayout();

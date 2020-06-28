@@ -23,7 +23,7 @@ namespace UIComponents
 			base.OnPaint(pe);
 
 			{
-				Rectangle rColor = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+				Rectangle rColor = ClientRectangle;
 				rColor.Inflate(-5, -5);
 				rColor.Offset(0, -((rColor.Height + 1) % 2)); // To match app
 

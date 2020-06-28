@@ -118,8 +118,6 @@ namespace MindMapUIExtension
             color = DrawingColor.SetLuminance(color, 0.6f);
 
             m_MindMap.ConnectionColor = color;
-
-			RhinoLicensing.SetUITheme(this, theme);
         }
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -220,8 +218,6 @@ namespace MindMapUIExtension
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-            RhinoLicensing.CreateBanner(m_TypeId, m_UiName, this, m_Trans, -1);
-
             m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
 			m_MindMap.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             m_MindMap.Font = m_ControlsFont;
@@ -289,14 +285,7 @@ namespace MindMapUIExtension
         {
             base.OnSizeChanged(e);
 
-            Rectangle mindmapRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
-            int bannerHeight = RhinoLicensing.GetBannerHeight(this);
-
-            mindmapRect.Y = bannerHeight;
-            mindmapRect.Height -= bannerHeight;
-
-            m_MindMap.Location = mindmapRect.Location;
-            m_MindMap.Size = mindmapRect.Size;
+            m_MindMap.Bounds = ClientRectangle;
 
             Invalidate(true);
         }

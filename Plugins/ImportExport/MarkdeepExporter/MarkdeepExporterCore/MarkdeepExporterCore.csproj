@@ -46,9 +46,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\..\Utils\Utils.cs">
-      <Link>Utils.cs</Link>
-    </Compile>
     <Compile Include="MarkdeepExporterCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

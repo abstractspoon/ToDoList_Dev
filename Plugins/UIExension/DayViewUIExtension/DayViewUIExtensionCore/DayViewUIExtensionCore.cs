@@ -24,6 +24,8 @@ namespace DayViewUIExtension
 
 		private const string FontName = "Tahoma";
         private static Color DefGridColor = Color.FromArgb(192, 192, 192);
+        private static int LabelTop = DPIScaling.Scale(2);
+        private static int ComboTop = (LabelTop + DPIScaling.Scale(2));
 
         private bool m_SettingMonthYear = false;
 		private bool m_SettingDayViewStartDate = false;
@@ -38,9 +40,7 @@ namespace DayViewUIExtension
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 		private Label m_SelectedTaskDatesLabel;
-
 		private Font m_ControlsFont;
-		private int m_BannerHeight;
 
 		// --------------------------------------------------------------------------------------
 
@@ -103,16 +103,6 @@ namespace DayViewUIExtension
 
 			// all else
 			return false;
-		}
-
-		private int LabelTop
-		{
-			get { return (m_BannerHeight + DPIScaling.Scale(2)); }
-		}
-
-		private int ComboTop
-		{
-			get { return (LabelTop + DPIScaling.Scale(2)); }
 		}
 
 		public bool WantSortUpdate(Task.Attribute attrib)
@@ -182,8 +172,6 @@ namespace DayViewUIExtension
             m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
 
             BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-
-			RhinoLicensing.SetUITheme(this, theme);
 		}
 		
 		public void SetTaskFont(String faceName, int pointSize)
@@ -312,8 +300,6 @@ namespace DayViewUIExtension
 			m_ControlsFont = new Font(FontName, 8);
 			m_PrefsDlg = new DayViewPreferencesDlg(m_Trans, m_ControlsFont);
 			m_WorkWeek = new WorkingWeek();
-
-			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, m_UiName, this, m_Trans, -1);
 
 			CreateMonthYearCombos();
 			CreateToolbar();
@@ -587,7 +573,7 @@ namespace DayViewUIExtension
 		// Message handlers ------------------------------------------------------------------
 		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
         {
-            Rectangle Border = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+            Rectangle Border = ClientRectangle;
 			Border.Y = ControlTop;
 			Border.Height -= ControlTop;
 
@@ -608,16 +594,16 @@ namespace DayViewUIExtension
 			m_YearCombo.Location = new Point(m_MonthCombo.Right + 10, ComboTop);
 			m_Toolbar.Location = new Point(m_YearCombo.Right + 10, LabelTop - 2);
 			m_WeekLabel.Location = new Point(m_Toolbar.Right + 10, LabelTop);
+
 			UpdatedSelectedTaskDatesPosition(); // called elsewhere also
 
-			Rectangle dayViewRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			Rectangle dayViewRect = ClientRectangle;
 
 			dayViewRect.Y = ControlTop;
 			dayViewRect.Height -= ControlTop;
 			dayViewRect.Inflate(-1, -1);
 
-			m_DayView.Location = dayViewRect.Location;
-			m_DayView.Size = dayViewRect.Size;
+			m_DayView.Bounds = dayViewRect;
 
             Invalidate(true);
         }
@@ -875,8 +861,8 @@ namespace DayViewUIExtension
         {
             get
             {
-                if (m_Toolbar != null)
-                    return m_Toolbar.Bounds.Bottom;
+                if (m_MonthCombo != null)
+                    return m_MonthCombo.Bounds.Bottom + DPIScaling.Scale(4);
 
                 // else
                 return 0;

@@ -399,7 +399,7 @@ namespace MindMapUIExtension
             Bitmap srcImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
 
             // The current position in the output image for rendering the temporary image
-            Rectangle drawRect = Copy(srcRect);
+            Rectangle drawRect = srcRect;
             drawRect.Offset(-border, -border);
 
             // Note: If the last horz or vert page is empty because of an 
@@ -1559,11 +1559,6 @@ namespace MindMapUIExtension
             return new Point(((rect.Left + rect.Right) / 2), ((rect.Top + rect.Bottom) / 2));
         }
 
-		protected Rectangle Copy(Rectangle rect)
-		{
-			return new Rectangle(rect.Location, rect.Size);
-		}
-
 		private Point CalculateCentreToCentreOffset(Rectangle fromRect, Rectangle toRect)
 		{
 			Point fromCentre = CentrePoint(fromRect);
@@ -1700,7 +1695,7 @@ namespace MindMapUIExtension
 
         private Rectangle GetLogicalTreeNodePosition(Graphics graphics, TreeNode node)
         {
-            Rectangle itemBounds = Copy(node.Bounds);
+            Rectangle itemBounds = node.Bounds;
 
             // Always calculate the width of the text because the tree 
             // doesn't seem to return the same widths as the Graphics object
@@ -2187,7 +2182,7 @@ namespace MindMapUIExtension
 
 		private Rectangle GetItemDrawRect(Rectangle itemRect)
 		{
-			Rectangle drawPos = Copy(itemRect);
+			Rectangle drawPos = itemRect;
 
 			drawPos.Offset(m_DrawOffset);
             drawPos.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);

@@ -40,7 +40,6 @@ namespace HTMLReportExporter
 		private bool m_FirstPreview = true;
 		private bool m_EditedSinceLastSave = false;
 		private HtmlReportUtils.CustomAttributes m_CustomAttributes = null;
-		private int m_BannerHeight = 0;
 
 		const String PreviewPageName = "HtmlReporterPreview.html";
 
@@ -213,12 +212,6 @@ namespace HTMLReportExporter
 
 		protected override void OnLoad(EventArgs e)
 		{
-			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, "", this, m_Trans, 0/*20*/);
-
-			this.Height = (this.Height + m_BannerHeight);
-			this.Content.Location = new Point(0, m_BannerHeight);
-			this.Content.Height = (this.Content.Height - m_BannerHeight);
-
 			var defFontName = m_Prefs.GetProfileString("Preferences", "HTMLFont", "Verdana");
 			var defFontSize = m_Prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
 
@@ -509,7 +502,7 @@ namespace HTMLReportExporter
 			Size formSize = ((WindowState == FormWindowState.Maximized) ? RestoreBounds.Size : Size);
 
 			m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormWidth", formSize.Width);
-			m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormHeight", formSize.Height - m_BannerHeight);
+			m_Prefs.WriteProfileInt(m_PrefsKey, "TemplateFormHeight", formSize.Height);
 
 			return result;
 		}

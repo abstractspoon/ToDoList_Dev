@@ -136,7 +136,7 @@ namespace WordCloudUIExtension
 				
 				if (scheme != null)
 				{
-					Rectangle rect = new Rectangle(e.Bounds.Location, e.Bounds.Size);
+					Rectangle rect = e.Bounds;
 					rect.Inflate(-2, -2);
 					rect.Width = rect.Height;
 

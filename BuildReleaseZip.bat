@@ -15,12 +15,6 @@ ECHO PATH7ZIP=%PATH7ZIP%
 
 if NOT EXIST %PATH7ZIP% exit
 
-REM Obfuscar Location
-set PATHOBFUSCAR="D:\Tools\Obfuscar\Obfuscar.Console.exe"
-ECHO PATHOBFUSCAR=%PATHOBFUSCAR%
-
-if NOT EXIST %PATHOBFUSCAR% exit
-
 set OUTDIR=%REPO%\Core\ToDoList\Unicode_Release
 
 REM Save symbols to separate zip file
@@ -68,9 +62,6 @@ REM Handle dlls explicitly to maintain control over plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MLOImport.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MySpellCheck.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\WorkloadExt.dll
-
-REM Some .Net Plugins are obfuscated first
-%PATHOBFUSCAR% %REPO%\ObfuscatePlugins.xml
 
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\PluginHelpers.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\DayViewUIExtensionCore.dll

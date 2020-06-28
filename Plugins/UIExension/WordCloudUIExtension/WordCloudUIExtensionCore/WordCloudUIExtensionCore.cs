@@ -33,6 +33,9 @@ namespace WordCloudUIExtension
         private const string FontName = "Tahoma";
 
         private static int MinSplitWidth = DPIScaling.Scale(25 * 2);
+		private static int LabelTop = DPIScaling.Scale(2); 
+		private static int ComboTop = DPIScaling.Scale(20);
+        private static int LabelHeight = (ComboTop - LabelTop);
 
         // -------------------------------------------------------------
 
@@ -45,7 +48,6 @@ namespace WordCloudUIExtension
 		private Color m_SplitterColor;
 		private int m_InitialSplitPos;
 		private int m_SplitterWidth;
-		private int m_BannerHeight;
 
 		private Dictionary<UInt32, CloudTaskItem> m_Items;
 		private TdlCloudControl m_WordCloud;
@@ -83,20 +85,6 @@ namespace WordCloudUIExtension
 			InitializeComponent();
 		}
 
-		private int LabelTop
-		{
-			get { return (m_BannerHeight + DPIScaling.Scale(2)); }
-		}
-
-		private int ComboTop
-		{
-			get { return (m_BannerHeight + DPIScaling.Scale(20));; }
-		}
-
-		private int LabelHeight
-		{
-			get { return (ComboTop - LabelTop); }
-		}
 
 		// IUIExtension ------------------------------------------------------------------
 
@@ -410,8 +398,6 @@ namespace WordCloudUIExtension
 			m_AttributeLabel.ForeColor = labelColor;
 			m_ColorsLabel.ForeColor = labelColor;
 			m_StylesLabel.ForeColor = labelColor;
-
-			RhinoLicensing.SetUITheme(this, theme);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -518,8 +504,6 @@ namespace WordCloudUIExtension
 		{
 			this.BackColor = Color.White;
 			m_Items = new Dictionary<UInt32, CloudTaskItem>();
-
-			m_BannerHeight = RhinoLicensing.CreateBanner(m_TypeId, m_UiName, this, m_Trans, -1);
 
 			CreateWordCloud();
 			CreateTaskMatchesListView();
@@ -710,26 +694,24 @@ namespace WordCloudUIExtension
 			if (ClientRectangle.IsEmpty)
 				return;
 
-			Rectangle baseRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			Rectangle baseRect = ClientRectangle;
 
 			// Adjust for border
 			baseRect.Inflate(-1, -1);
 			baseRect.Y = (ControlTop + 1);
 			baseRect.Height -= (ControlTop + 1);
 
-			Rectangle wordCloudRect = new Rectangle(baseRect.Location, baseRect.Size);
-			Rectangle taskMatchesRect = new Rectangle(baseRect.Location, baseRect.Size);
+			Rectangle wordCloudRect = baseRect, matchListRect = baseRect;
 			Rectangle splitterRect = SplitterRect();
 
 			// Always make sure the splitter is visible
 			splitterRect.X = Math.Max(splitterRect.X, MinSplitWidth);
 			splitterRect.X = Math.Min(splitterRect.X, ClientRectangle.Right - MinSplitWidth);
 			
-			taskMatchesRect.X = splitterRect.Right;
-			taskMatchesRect.Width = (baseRect.Right - splitterRect.Right);
+			matchListRect.X = splitterRect.Right;
+			matchListRect.Width = (baseRect.Right - splitterRect.Right);
 
-			m_TaskMatchesList.Location = taskMatchesRect.Location;
-			m_TaskMatchesList.Size = taskMatchesRect.Size;
+			m_TaskMatchesList.Bounds = matchListRect;
 
 			wordCloudRect.Width = (splitterRect.Left - baseRect.Left);
 
@@ -992,7 +974,7 @@ namespace WordCloudUIExtension
 		protected Rectangle SplitterRect()
 		{
 			// Note: Splitter pos is measured from RHS
-			Rectangle splitterRect = new Rectangle(ClientRectangle.Location, ClientRectangle.Size);
+			Rectangle splitterRect = ClientRectangle;
 			splitterRect.Inflate(-1, 0);
 
 			// Initialise split pos first time only
@@ -1035,7 +1017,7 @@ namespace WordCloudUIExtension
             get 
             { 
                 if (m_AttributeCombo != null)
-                    return m_AttributeCombo.Bounds.Bottom + new DlgUnits(m_HwndParent).ToPixelsY(4); 
+                    return m_AttributeCombo.Bounds.Bottom + DPIScaling.Scale(4); 
 
                 // else
                 return 0;

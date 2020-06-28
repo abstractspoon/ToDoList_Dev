@@ -422,7 +422,7 @@ namespace WordCloudUIExtension
 
 		public Rectangle LabelTextRect(Rectangle labelRect, bool includeIdColumn = false)
 		{
-			Rectangle textRect = new Rectangle(labelRect.Location, labelRect.Size);
+			Rectangle textRect = labelRect;
 
 			textRect.X = 2;
 			textRect.X += CheckboxOffset;
@@ -655,7 +655,7 @@ namespace WordCloudUIExtension
 			stringFormat.LineAlignment = StringAlignment.Center;
 			stringFormat.FormatFlags = StringFormatFlags.NoWrap;
             
-			Rectangle itemRect = new Rectangle(e.Bounds.Location, e.Bounds.Size);
+			Rectangle itemRect = e.Bounds;
 
 			for (int colIndex = 0; colIndex < e.Item.SubItems.Count; colIndex++)
 			{
