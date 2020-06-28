@@ -447,8 +447,10 @@ namespace Calendar
 							selection = SelectionType.Appointment;
                             ActiveTool = selectionTool;
 
-							// Ensure at least part of the task is in view
-							EnsureVisible(appt, true);
+							// Ensure short appointments are at least partly visible
+							if (!appt.IsLongAppt())
+								EnsureVisible(appt, true);
+
 							break;
 						}
 					}
