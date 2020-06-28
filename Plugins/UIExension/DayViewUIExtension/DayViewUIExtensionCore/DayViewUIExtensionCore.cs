@@ -140,7 +140,7 @@ namespace DayViewUIExtension
 					Keys keyPress = (Keys)wParam;
 
 					if (keyPress == Keys.Escape)
-						return (m_DayView.CancelAppointmentResizing());
+						return m_DayView.CancelAppointmentResizing();
 				}
 				break;
 			}
