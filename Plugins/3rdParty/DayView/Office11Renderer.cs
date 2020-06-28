@@ -87,7 +87,7 @@ namespace Calendar
                 g.FillRectangle(m_Brush, rect);
         }
 
-        public override void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isSelected, Rectangle gripRect)
+        public override void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isLong, bool isSelected, Rectangle gripRect)
         {
             if (appointment == null)
                 throw new ArgumentNullException("appointment");

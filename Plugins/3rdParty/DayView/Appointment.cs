@@ -232,7 +232,7 @@ namespace Calendar
 			return true;
 		}
 
-		static public bool IsLongAppt(DateTime start, DateTime end)
+		public virtual bool IsLongAppt(DateTime start, DateTime end)
 		{
 			return (start.Date != end.Date);
 		}

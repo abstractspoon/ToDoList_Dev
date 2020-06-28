@@ -101,7 +101,7 @@ namespace DayViewUIExtension
 			toolRect = taskItem.TextRect;
 			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
 
-			if (appointment.IsLongAppt())
+			if (IsLongAppt(appointment))
 			{
 				// single line tooltips
 				if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) <= toolRect.Height)
@@ -465,7 +465,7 @@ namespace DayViewUIExtension
 				CalendarItem item = (appointment as CalendarItem);
 				bool hasIcon = m_Renderer.TaskHasIcon(item);
 
-				if (appointment.IsLongAppt())
+				if (IsLongAppt(appointment))
 				{
 					// Gripper
 					if (appointment.StartDate >= StartDate)
@@ -843,7 +843,7 @@ namespace DayViewUIExtension
             // If the start date precedes the start of the week then extend the
             // draw rect to the left so the edge is clipped and likewise for the right.
             CalendarItem taskItem = (appointment as CalendarItem);
-            bool longAppt = taskItem.IsLongAppt();
+            bool longAppt = IsLongAppt(appointment);
 
             if (longAppt)
             {
@@ -879,7 +879,7 @@ namespace DayViewUIExtension
                 rect.Width -= 1;
             }
 			
-			m_Renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
+			m_Renderer.DrawAppointment(g, rect, appointment, longAppt, isSelected, gripRect);
 		}
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)

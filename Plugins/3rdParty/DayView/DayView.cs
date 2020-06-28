@@ -464,7 +464,7 @@ namespace Calendar
             if ((appt.StartDate < StartDate) || (appt.StartDate >= EndDate))
 			    StartDate = appt.StartDate;
 
-			if (!appt.IsLongAppt())
+			if (IsLongAppt(appt))
 			{
 				// Ensure at least part of the task is in view
 				int startHour = (vscroll.Value / (slotsPerHour * slotHeight));
@@ -1028,30 +1028,8 @@ namespace Calendar
 
             foreach (Appointment appointment in args.Appointments)
             {
-                int key;
-                AppointmentList list;
-
-				bool longAppt = appointment.IsLongAppt();
-
-				// If a long appointment is being resized and it now fits within a 
-				// single day, still treat it as a long task until the edit finishes
-				if (!longAppt && 
-					(appointment == selectedAppointment) && 
-					(activeTool == selectionTool))
-				{
-					longAppt = selectionTool.IsEditingLongAppt;
-				}
-				
-				if (!longAppt)
-                {
-                    key = appointment.StartDate.Day;
-                }
-                else
-                {
-                    key = -1;
-                }
-
-                list = (AppointmentList)cachedAppointments[key];
+				int key = (IsLongAppt(appointment) ? -1 : appointment.StartDate.DayOfYear);
+                AppointmentList list = (AppointmentList)cachedAppointments[key];
 
                 if (list == null)
                 {
@@ -1063,7 +1041,20 @@ namespace Calendar
             }
         }
 
-        protected void RaiseSelectionChanged(Appointment appt)
+		protected bool IsLongAppt(Appointment appt)
+		{
+			if (appt == null)
+				return false;
+
+			if ((appt == selectedAppointment) && (activeTool == selectionTool) && selectionTool.IsEditing)
+			{
+				return selectionTool.IsEditingLongAppt;
+			}
+
+			return appt.IsLongAppt();
+		}
+
+		protected void RaiseSelectionChanged(Appointment appt)
         {
             RaiseSelectionChanged(new AppointmentEventArgs(appt));
         }
@@ -1510,7 +1501,7 @@ namespace Calendar
 
 		protected void DrawDaySelection(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			if (Focused && (selection == SelectionType.DateRange) && (time.Day == selectionStart.Day))
+			if (Focused && (selection == SelectionType.DateRange) && (time.Date == selectionStart.Date))
 			{
 				Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
 
@@ -1550,7 +1541,7 @@ namespace Calendar
 
 		protected void DrawDayAppointments(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			AppointmentList appointments = (AppointmentList)cachedAppointments[time.Day];
+			AppointmentList appointments = (AppointmentList)cachedAppointments[time.DayOfYear];
 
 			if (appointments != null)
 			{
@@ -1629,7 +1620,7 @@ namespace Calendar
 
         private void DrawDayGroupAppointments(PaintEventArgs e, Rectangle rect, DateTime time, string group)
         {
-            AppointmentList appointments = (AppointmentList)cachedAppointments[time.Day];
+            AppointmentList appointments = (AppointmentList)cachedAppointments[time.DayOfYear];
 
             if (appointments == null)
                 return;
@@ -1919,8 +1910,8 @@ namespace Calendar
 
         protected virtual void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isSelected, Rectangle gripRect)
 		{
-			// Pass draw rect as the clip rect by default
-			renderer.DrawAppointment(g, rect, appointment, isSelected, gripRect);
+
+			renderer.DrawAppointment(g, rect, appointment, IsLongAppt(appointment), isSelected, gripRect);
 		}
 
 		#endregion

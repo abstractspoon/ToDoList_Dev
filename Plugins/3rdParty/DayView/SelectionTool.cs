@@ -36,7 +36,7 @@ namespace Calendar
 		protected Point m_lastMouseMove;
 		protected bool m_longAppointment;
 
-		public bool IsEditingLongAppt
+		virtual public bool IsEditingLongAppt
 		{
 			get { return (IsEditing && m_longAppointment); }
 		}
@@ -96,10 +96,16 @@ namespace Calendar
 			return true;
 		}
 
-		public void MouseMove(System.Windows.Forms.MouseEventArgs e)
+		virtual public void MouseMove(System.Windows.Forms.MouseEventArgs e)
 		{
 			if (!UpdateCursor(e))
 				return;
+
+			if (IsEditing && (e.Button != System.Windows.Forms.MouseButtons.Left))
+			{
+				MouseUp(e);
+				return;
+			}
 
 			bool resized = false;
 
@@ -425,7 +431,7 @@ namespace Calendar
 			return Mode.None;
 		}
 
-		public void MouseUp(System.Windows.Forms.MouseEventArgs e)
+		public virtual void MouseUp(System.Windows.Forms.MouseEventArgs e)
 		{
 			if (e == null)
 				throw new ArgumentNullException("e");
@@ -443,7 +449,7 @@ namespace Calendar
 			m_delta = TimeSpan.Zero;
 		}
 
-		public void MouseDown(System.Windows.Forms.MouseEventArgs e)
+		public virtual void MouseDown(System.Windows.Forms.MouseEventArgs e)
 		{
 			if (m_dayView.SelectedAppointmentIsNew)
 			{

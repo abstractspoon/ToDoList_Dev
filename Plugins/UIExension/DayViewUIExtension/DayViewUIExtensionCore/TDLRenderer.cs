@@ -128,15 +128,15 @@ namespace DayViewUIExtension
             return BaseFont.Height;
         }
 
-        public override System.Drawing.Color HourColor
+        public override Color HourColor
         {
             get
             {
-                return System.Drawing.Color.FromArgb(230, 237, 247);
+                return Color.FromArgb(230, 237, 247);
             }
         }
 
-        public override System.Drawing.Color HalfHourSeperatorColor
+        public override Color HalfHourSeperatorColor
         {
             get
             {
@@ -144,7 +144,7 @@ namespace DayViewUIExtension
             }
         }
 
-        public override System.Drawing.Color HourSeperatorColor
+        public override Color HourSeperatorColor
         {
             get
             {
@@ -153,15 +153,15 @@ namespace DayViewUIExtension
             }
         }
 
-        public override System.Drawing.Color WorkingHourColor
+        public override Color WorkingHourColor
         {
             get
             {
-                return System.Drawing.Color.FromArgb(255, 255, 255);
+                return Color.FromArgb(255, 255, 255);
             }
         }
 
-        public override System.Drawing.Color BackColor
+        public override Color BackColor
         {
             get
             {
@@ -169,15 +169,15 @@ namespace DayViewUIExtension
             }
         }
 
-        public override System.Drawing.Color SelectionColor
+        public override Color SelectionColor
         {
             get
             {
-                return System.Drawing.Color.FromArgb(41, 76, 122);
+                return Color.FromArgb(41, 76, 122);
             }
         }
 
-        public System.Drawing.Color TextColor
+        public Color TextColor
         {
             get
             {
@@ -185,7 +185,7 @@ namespace DayViewUIExtension
             }
         }
 
-		public override void DrawHourLabel(System.Drawing.Graphics g, System.Drawing.Rectangle rect, int hour, bool ampm)
+		public override void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm)
         {
             if (g == null)
                 throw new ArgumentNullException("g");
@@ -266,7 +266,7 @@ namespace DayViewUIExtension
             }
         }
 
-        public override void DrawDayHeader(System.Drawing.Graphics g, System.Drawing.Rectangle rect, DateTime date)
+        public override void DrawDayHeader(Graphics g, Rectangle rect, DateTime date)
         {
             if (g == null)
                 throw new ArgumentNullException("g");
@@ -351,7 +351,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public override void DrawDayBackground(System.Drawing.Graphics g, System.Drawing.Rectangle rect)
+		public override void DrawDayBackground(Graphics g, Rectangle rect)
         {
             //using (SolidBrush backBrush = new SolidBrush(Theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark)))
             //    g.FillRectangle(backBrush, rect);
@@ -392,7 +392,7 @@ namespace DayViewUIExtension
 			return appt.Id;
 		}
 
-		public override void DrawAppointment(System.Drawing.Graphics g, System.Drawing.Rectangle rect, Calendar.Appointment appointment, bool isSelected, System.Drawing.Rectangle gripRect)
+		public override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isLong, bool isSelected, Rectangle gripRect)
         {
             if (appointment == null)
                 throw new ArgumentNullException("appointment");
@@ -407,7 +407,6 @@ namespace DayViewUIExtension
 				UInt32 taskId = taskItem.Id;
 				UInt32 realTaskId = GetRealTaskId(taskItem);
 
-				bool isLongAppt = taskItem.IsLongAppt();
 				bool isFutureItem = (taskId != realTaskId);
 
 				// Recalculate colours
@@ -446,7 +445,7 @@ namespace DayViewUIExtension
 
                 if (isSelected)
                 {
-                    if (isLongAppt)
+                    if (isLong)
                         rect.Height++;
 
 					if (isFutureItem)
@@ -478,7 +477,7 @@ namespace DayViewUIExtension
 
                     if (taskItem.DrawBorder)
                     {
-						if (!isLongAppt)
+						if (!isLong)
 						{
 							rect.Height--; // drawing with pen adds 1 to height
 							rect.Width--;
@@ -498,7 +497,7 @@ namespace DayViewUIExtension
                     Rectangle rectIcon;
                     int imageSize = DPIScaling.Scale(16);
 
-                    if (isLongAppt)
+                    if (isLong)
                     {
                         int yCentre = ((rect.Top + rect.Bottom + 1) / 2);
                         rectIcon = new Rectangle((rect.Left + TextPadding), (yCentre - (imageSize / 2)), imageSize, imageSize);
@@ -510,7 +509,7 @@ namespace DayViewUIExtension
 
                     if (g.IsVisible(rectIcon) && m_TaskIcons.Get(realTaskId))
                     {
-                        if (isLongAppt)
+                        if (isLong)
                         {
                             rectIcon.X = (gripRect.Right + TextPadding);
                         }
@@ -543,7 +542,7 @@ namespace DayViewUIExtension
                     using (SolidBrush brush = new SolidBrush(barColor))
                         g.FillRectangle(brush, gripRect);
 
-                    if (!isLongAppt)
+                    if (!isLong)
                         gripRect.Height--; // drawing with pen adds 1 to height
 
                     // Draw gripper border
@@ -561,11 +560,11 @@ namespace DayViewUIExtension
                 using (StringFormat format = new StringFormat())
                 {
                     format.Alignment = StringAlignment.Near;
-                    format.LineAlignment = (isLongAppt ? StringAlignment.Center : StringAlignment.Near);
+                    format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
 
                     rect.Y += 3;
 
-					if (isLongAppt)
+					if (isLong)
 						rect.Height = m_BaseFont.Height;
 					else
 						rect.Height -= 3;

@@ -129,6 +129,11 @@ namespace DayViewUIExtension
             }
         }
 
+		public bool LengthDiffersFromOriginal()
+		{
+			return ((Length - OriginalLength).TotalSeconds != 0.0);
+		}
+
         public double LengthAsTimeEstimate(WorkingWeek workWeek, bool original)
         {
 			if (!TimeEstimateIsMinsOrHours)
@@ -184,18 +189,13 @@ namespace DayViewUIExtension
 			get { return !IsLongAppt(); }
 		}
 
-		public override bool IsLongAppt()
+		public override bool IsLongAppt(DateTime start, DateTime end)
 		{
-			if (base.IsLongAppt())
-				return true;
-
-			// If we are in the middle of a drag use the pre-drag
-			// dates so that the 'long-ness' does not change mid-drag
-			if (IsLongAppt(m_OrgStartDate, m_OrgEndDate))
+			if (base.IsLongAppt(start, end))
 				return true;
 
 			// Also check for 'end of day' if the start time is midnight
-			if ((m_OrgStartDate.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(m_OrgEndDate))
+			if ((start.TimeOfDay == TimeSpan.Zero) && IsEndOfDay(end))
 				return true;
 
 			return false;

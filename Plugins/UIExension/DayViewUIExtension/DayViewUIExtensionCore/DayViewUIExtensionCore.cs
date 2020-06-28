@@ -745,93 +745,103 @@ namespace DayViewUIExtension
 			if (item == null)
 				return;
 
-			var notify = new UIExtension.ParentNotify(m_HwndParent);
+			ProcessTaskAppointmentChange(item, move.Mode);
+			UpdatedSelectedTaskDatesText();
+        }
 
-			switch (move.Mode)
+		private bool PrepareTaskNotify(CalendarItem item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
+		{
+			switch (mode)
 			{
-				case Calendar.SelectionTool.Mode.Move:
-					if (item.StartDateDiffersFromOriginal())
+			case Calendar.SelectionTool.Mode.Move:
+				if (item.LengthDiffersFromOriginal())
+				{
+					// Start date WITHOUT TIME ESTIMATE
+					PrepareTaskNotify(item, Calendar.SelectionTool.Mode.ResizeLeft, notify, false);
+
+					// End date WITHOUT TIME ESTIMATE
+					PrepareTaskNotify(item, Calendar.SelectionTool.Mode.ResizeRight, notify, false);
+
+					if (includeTimeEstimate && WantModifyTimeEstimate(item))
 					{
-						if (notify.NotifyMod(Task.Attribute.OffsetTask, item.StartDate))
-						{
-							item.UpdateOriginalDates();
-							m_DayView.FixupSelection(true, false);
-						}
-						else
-						{
-							item.RestoreOriginalDates();
-							m_DayView.Invalidate();
-						}
+						notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
 					}
-					break;
 
-				case Calendar.SelectionTool.Mode.ResizeLeft:
-				case Calendar.SelectionTool.Mode.ResizeTop:
-					if (item.StartDateDiffersFromOriginal())
+					return true;
+				}
+				else if (item.StartDateDiffersFromOriginal())
+				{
+					notify.AddMod(Task.Attribute.OffsetTask, item.StartDate);
+
+					return true;
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeLeft:
+			case Calendar.SelectionTool.Mode.ResizeTop:
+				if (item.StartDateDiffersFromOriginal())
+				{
+					notify.AddMod(Task.Attribute.StartDate, item.StartDate);
+
+					if (includeTimeEstimate && WantModifyTimeEstimate(item))
 					{
-                        notify.AddMod(Task.Attribute.StartDate, item.StartDate);
-
-                        // Update the Time estimate if it is zero or 
-                        // it used to match the previous date range
-                        bool modifyTimeEst = WantModifyTimeEstimate(item);
-
-                        if (modifyTimeEst)
-                            notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
-
-						if (notify.NotifyMod())
-						{
-							item.UpdateOriginalDates();
-
-							if (modifyTimeEst)
-                                item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
-						}
-						else
-						{
-							item.RestoreOriginalDates();
-							m_DayView.Invalidate();
-						}
+						notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
 					}
-					break;
 
-				case Calendar.SelectionTool.Mode.ResizeRight:
-				case Calendar.SelectionTool.Mode.ResizeBottom:
-					if (item.EndDateDiffersFromOriginal())
+					return true;
+				}
+				break;
+
+			case Calendar.SelectionTool.Mode.ResizeRight:
+			case Calendar.SelectionTool.Mode.ResizeBottom:
+				if (item.EndDateDiffersFromOriginal())
+				{
+					// Allow for end of day
+					var endDate = item.EndDate;
+
+					if (endDate == endDate.Date)
+						endDate = endDate.AddDays(-1);
+
+					if (item.IsDone)
+						notify.AddMod(Task.Attribute.DoneDate, endDate);
+					else
+						notify.AddMod(Task.Attribute.DueDate, endDate);
+
+					if (includeTimeEstimate && WantModifyTimeEstimate(item))
 					{
-						// Allow for end of day
-						var endDate = item.EndDate;
-
-						if (endDate == endDate.Date)
-							endDate = endDate.AddDays(-1);
-
-						if (item.IsDone)
-							notify.AddMod(Task.Attribute.DoneDate, endDate);
-						else
-							notify.AddMod(Task.Attribute.DueDate, endDate);
-
-						// Update the Time estimate if used to match the previous date range
-						bool modifyTimeEst = WantModifyTimeEstimate(item);
-
-                        if (modifyTimeEst)
-                            notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
-
-						if (notify.NotifyMod())
-						{
-							item.UpdateOriginalDates();
-
-							if (modifyTimeEst)
-                                item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
-						}
-						else
-						{
-							item.RestoreOriginalDates();
-							m_DayView.Invalidate();
-						}
+						notify.AddMod(Task.Attribute.TimeEstimate, item.LengthAsTimeEstimate(m_WorkWeek, false), item.TimeEstUnits);
 					}
-					break;
+
+					return true;
+				}
+				break;
 			}
 
-            UpdatedSelectedTaskDatesText();
-        }
+			return false;
+		}
+
+		private void ProcessTaskAppointmentChange(CalendarItem item, Calendar.SelectionTool.Mode mode)
+		{
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+			if (PrepareTaskNotify(item, mode, notify))
+			{
+				bool modifyTimeEst = WantModifyTimeEstimate(item);
+
+				if (notify.NotifyMod())
+				{
+					item.UpdateOriginalDates();
+
+					if (modifyTimeEst)
+						item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
+
+					return;
+				}
+			}
+
+			item.RestoreOriginalDates();
+			m_DayView.Invalidate();
+		}
 
         private bool WantModifyTimeEstimate(CalendarItem item)
         {
