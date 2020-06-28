@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -329,10 +330,15 @@ namespace DayViewUIExtension
 			m_DayView.MouseDown += new MouseEventHandler(OnDayViewMouseClick);
 
 			m_DayView.StartDate = DateTime.Now;
-			m_WeekLabel.StartDate = m_DayView.StartDate;
 			m_DayView.SetFont(FontName, 8);
+			m_WeekLabel.StartDate = m_DayView.StartDate;
 
-			Controls.Add(m_DayView);
+            if (VisualStyleRenderer.IsSupported)
+                m_DayView.BorderStyle = BorderStyle.FixedSingle;
+            else
+                m_DayView.BorderStyle = BorderStyle.Fixed3D;
+
+            Controls.Add(m_DayView);
 
 		}
 
@@ -343,7 +349,7 @@ namespace DayViewUIExtension
 			m_WeekLabel.Font = new Font(FontName, 14);
             m_WeekLabel.Location = new Point(m_Toolbar.Right, LabelTop);
             m_WeekLabel.Height = m_Toolbar.Height;
-			m_WeekLabel.TextAlign = ContentAlignment.TopLeft;
+			m_WeekLabel.TextAlign = System.Drawing.ContentAlignment.TopLeft;
 			m_WeekLabel.AutoSize = true;
 
 			Controls.Add(m_WeekLabel);
@@ -356,7 +362,7 @@ namespace DayViewUIExtension
 			m_SelectedTaskDatesLabel.Font = m_ControlsFont;
 			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Bottom);
 			m_SelectedTaskDatesLabel.Height = m_Toolbar.Height;
-			m_SelectedTaskDatesLabel.TextAlign = ContentAlignment.MiddleLeft;
+			m_SelectedTaskDatesLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			m_SelectedTaskDatesLabel.AutoSize = true;
 
 			Controls.Add(m_SelectedTaskDatesLabel);
@@ -571,15 +577,6 @@ namespace DayViewUIExtension
 		}
 
 		// Message handlers ------------------------------------------------------------------
-		protected override void OnPaint(System.Windows.Forms.PaintEventArgs e)
-        {
-            Rectangle Border = ClientRectangle;
-			Border.Y = ControlTop;
-			Border.Height -= ControlTop;
-
-            System.Windows.Forms.ControlPaint.DrawBorder(e.Graphics, Border, Color.DarkGray, System.Windows.Forms.ButtonBorderStyle.Solid);
-        }
-
         protected override void OnGotFocus(EventArgs e)
         {
             base.OnGotFocus(e);

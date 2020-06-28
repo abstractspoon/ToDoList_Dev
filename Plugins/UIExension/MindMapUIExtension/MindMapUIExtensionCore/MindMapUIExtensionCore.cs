@@ -13,7 +13,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 namespace MindMapUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	public class MindMapUIExtensionCore : System.Windows.Forms.Panel, IUIExtension
+	public class MindMapUIExtensionCore : Panel, IUIExtension
     {
         private const string FontName = "Tahoma";
 
@@ -223,9 +223,9 @@ namespace MindMapUIExtension
             m_MindMap.Font = m_ControlsFont;
 
             if (VisualStyleRenderer.IsSupported)
-                m_MindMap.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+                m_MindMap.BorderStyle = BorderStyle.FixedSingle;
             else
-                m_MindMap.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+                m_MindMap.BorderStyle = BorderStyle.Fixed3D;
 
 			m_MindMap.SelectionChange += new SelectionChangeEventHandler(OnMindMapSelectionChange);
 			m_MindMap.DragDropChange += new DragDropChangeEventHandler(OnMindMapDragDrop);
