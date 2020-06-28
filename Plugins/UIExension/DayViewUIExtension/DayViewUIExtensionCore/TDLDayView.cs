@@ -995,7 +995,20 @@ namespace DayViewUIExtension
 
 			return selTool.GetMode(mousePos, appointment);
 		}
-		
+
+		public new bool CancelAppointmentResizing()
+		{
+			if (base.CancelAppointmentResizing())
+			{
+				(SelectedAppointment as CalendarItem).RestoreOriginalDates();
+				Invalidate();
+
+				return true;
+			}
+
+			return false;
+		}
+
 		private bool CanResizeTask(CalendarItem taskItem, Calendar.SelectionTool.Mode mode)
 		{
 			switch (mode)

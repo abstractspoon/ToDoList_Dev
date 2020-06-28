@@ -131,6 +131,20 @@ namespace DayViewUIExtension
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
 		{
+			const int WM_KEYDOWN = 0x0100;
+
+			switch (message)
+			{
+			case WM_KEYDOWN:
+				{
+					Keys keyPress = (Keys)wParam;
+
+					if (keyPress == Keys.Escape)
+						return (m_DayView.CancelAppointmentResizing());
+				}
+				break;
+			}
+
 			return false;
 		}
 

@@ -150,10 +150,15 @@ namespace Calendar
 			return ((activeTool == selectionTool) && selectionTool.IsEditing);
 		}
 
-		public void CancelAppointmentResizing()
+		public bool CancelAppointmentResizing()
 		{
-			if (activeTool == selectionTool)
+			if (IsResizingAppointment())
+			{
 				selectionTool.Reset();
+				return true;
+			}
+
+			return false;
 		}
 
 		public String HScrollTooltipText
