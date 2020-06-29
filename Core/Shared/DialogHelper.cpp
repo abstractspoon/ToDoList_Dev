@@ -424,7 +424,7 @@ void CDialogHelper::DDX_Radio(CDataExchange* pDX, const UINT* pIDC, int nNumIDC,
 
 void CDialogHelper::DDX_Radio(CDataExchange* pDX, int nIDC, int& value)
 {
-	return ::DDX_Radio(pDX, nIDC, value);
+	::DDX_Radio(pDX, nIDC, value);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
