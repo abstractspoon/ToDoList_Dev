@@ -61,6 +61,15 @@ namespace DayViewUIExtension
 			Rectangle shortApptsRect = DayView.GetTrueRectangle();
 			Rectangle longApptsRect = DayView.GetFullDayApptsRectangle();
 
+            // Make sure the long appointments rect has a reasonable height
+            if (longApptsRect.Height < DayView.LongAppointmentHeight)
+            {
+                int adjustment = (DayView.LongAppointmentHeight - longApptsRect.Height);
+
+                longApptsRect.Y -= adjustment;
+                longApptsRect.Height += adjustment;
+            }
+
 			if (!shortApptsRect.Contains(e.Location) && !longApptsRect.Contains(e.Location))
 				return false;
 
@@ -99,19 +108,17 @@ namespace DayViewUIExtension
 				// Short appointment dragged into long appointment rect
 				m_Transitioned = !base.IsEditingLongAppt;
 
-				// If the appointment was originally a long appointment 
-				// we just restore the original dates and update to the 
-				// current mouse pos
+				// If the appointment was originally a long appointment we
+				// restore the original length else create a day-long task
+				DateTime dateAtCursor = DayView.GetDateTimeAt(e.X, e.Y, true);
+                selection.StartDate = dateAtCursor.Date;
+
 				if (base.IsEditingLongAppt)
 				{
-					selection.RestoreOriginalDates();
+                    selection.EndDate = selection.StartDate.Add(selection.OriginalLength);
 				}
 				else
 				{
-					// Create a day-long hour task at the start of the day
-					DateTime dateAtCursor = DayView.GetDateTimeAt(e.X, e.Y, true);
-
-					selection.StartDate = dateAtCursor.Date;
 					selection.EndDate = selection.StartDate.AddDays(1).AddSeconds(-1);
 				}
 
@@ -125,19 +132,17 @@ namespace DayViewUIExtension
 				// Long appointment dragged into short appointment rect
 				m_Transitioned = base.IsEditingLongAppt;
 
-				// If the appointment was originally a short appointment 
-				// we just restore the original dates and update to the 
-				// current mouse pos
-				if (!base.IsEditingLongAppt)
+                // If the appointment was originally a long appointment we
+                // restore the original length else create a 3-hour task
+                DateTime dateAtCursor = DayView.GetDateTimeAt(e.X, e.Y, false);
+                selection.StartDate = dateAtCursor.Date;
+
+                if (!base.IsEditingLongAppt)
 				{
-					selection.RestoreOriginalDates();
+                    selection.EndDate = selection.StartDate.Add(selection.OriginalLength);
 				}
 				else
 				{
-					// Create a three hour task at the start of the day 
-					DateTime dateAtCursor = DayView.GetDateTimeAt(e.X, e.Y, false);
-
-					selection.StartDate = dateAtCursor.Date;
 					selection.EndDate = selection.StartDate.AddHours(3);
 				}
 
