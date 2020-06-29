@@ -16,14 +16,15 @@
 #include "..\Shared\tooltipctrlex.h"
 #include "..\Shared\mapex.h"
 #include "..\Shared\TreeCtrlHelper.h"
+#include "..\Shared\TreeSelectionHelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_KLCN_TOGGLETASKDONE	= (WM_APP+1); // WPARAM = HWND, LPARAM = Task ID
+const UINT WM_KLCN_TOGGLETASKDONE	= (WM_APP+1); // WPARAM = HWND, LPARAM = 
 const UINT WM_KLCN_GETTASKICON		= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
-const UINT WM_KLCN_EDITTASKICON		= (WM_APP+3); // WPARAM = HWND, LPARAM = Task ID
-const UINT WM_KLCN_TOGGLETASKFLAG	= (WM_APP+4); // WPARAM = HWND, LPARAM = Task ID
-const UINT WM_KLCN_TOGGLETASKPIN	= (WM_APP+5); // WPARAM = HWND, LPARAM = Task ID
+const UINT WM_KLCN_EDITTASKICON		= (WM_APP+3); // WPARAM = HWND, LPARAM = 
+const UINT WM_KLCN_TOGGLETASKFLAG	= (WM_APP+4); // WPARAM = HWND, LPARAM = 
+const UINT WM_KLCN_TOGGLETASKPIN	= (WM_APP+5); // WPARAM = HWND, LPARAM = 
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -63,6 +64,7 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
 
+	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
 	HTREEITEM FindTask(DWORD dwTaskID) const;
 	HTREEITEM FindTask(const CPoint& ptScreen) const;
 	HTREEITEM FindTask(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart = NULL) const;
@@ -70,7 +72,8 @@ public:
 	DWORD GetTaskID(HTREEITEM hti) const { return GetItemData(hti); }
 
 	DWORD GetSelectedTaskID() const;
-	BOOL SelectTasks(const CDWordArray& aTaskIDs) { return FALSE; }
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
+	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectTask(DWORD dwTaskID);
 	void ScrollToSelection();
 
@@ -120,6 +123,7 @@ protected:
 	CImageList m_ilCheckboxes, m_ilIcons;
 	CToolTipCtrlEx m_tooltip;
 	CTreeCtrlHelper m_tch;
+	CTreeSelectionHelper m_tsh;
 
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay, m_dwOptions;

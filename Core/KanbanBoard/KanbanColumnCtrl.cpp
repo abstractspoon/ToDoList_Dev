@@ -33,16 +33,8 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef LVS_EX_DOUBLEBUFFER
-#	define LVS_EX_DOUBLEBUFFER  0x00010000
-#endif
-
 #ifndef TVS_EX_DOUBLEBUFFER
 #	define TVS_EX_DOUBLEBUFFER  0x0004
-#endif
-
-#ifndef LVS_EX_LABELTIP
-#	define LVS_EX_LABELTIP		0x00004000
 #endif
 
 #ifndef TTM_ADJUSTRECT
@@ -116,7 +108,8 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_dwDisplay(0),
 	m_dwOptions(0),
 	m_htiHot(NULL),
-	m_tch(*this)
+	m_tch(*this),
+	m_tsh(*this)
 {
 }
 
@@ -540,7 +533,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				// Checkbox
 				DrawItemCheckbox(pDC, pKI, rItem);
 				
-				BOOL bSelected = (!m_bSavingToImage && TCH().IsSelectedItem(hti));
+				BOOL bSelected = (!m_bSavingToImage && m_tsh.HasItem(hti));
 				COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
 
 				// Background
@@ -1051,6 +1044,55 @@ DWORD CKanbanColumnCtrl::GetSelectedTaskID() const
 	return (hti ? GetTaskID(hti) : 0);
 }
 
+int CKanbanColumnCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
+{
+	aTaskIDs.RemoveAll();
+
+	POSITION pos = m_tsh.GetFirstItemPos();
+
+	while (pos)
+		aTaskIDs.Add(m_tsh.GetNextItemData(pos));
+
+	return aTaskIDs.GetSize();
+}
+
+BOOL CKanbanColumnCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+{
+	// Build a corresponding list of tree items
+	// quitting as soon as we can't find one
+	CHTIList listHTI;
+	int nID = aTaskIDs.GetSize();
+
+	while (nID--)
+	{
+		HTREEITEM hti = FindTask(aTaskIDs[nID]);
+
+		if (!hti)
+			return FALSE;
+
+		listHTI.AddHead(hti);
+	}
+
+	m_tsh.RemoveAll(TRUE, FALSE);
+	m_tsh.SetItems(listHTI, TSHS_SELECT);
+	m_tsh.FixupTreeSelection();
+
+	return TRUE;
+}
+
+BOOL CKanbanColumnCtrl::HasTasks(const CDWordArray& aTaskIDs) const
+{
+	int nID = aTaskIDs.GetSize();
+
+	while (nID--)
+	{
+		if (!FindTask(aTaskIDs[nID]))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 void CKanbanColumnCtrl::ScrollToSelection()
 {
 	TCH().EnsureItemVisible(GetSelectedItem(), FALSE);
@@ -1431,7 +1473,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		if (nMsgID)
 		{
 			// Post message to give mouse-click time to complete
-			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd(), dwTaskID);
+			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd());
 			bHandled = TRUE;
 		}
 		else if (bHandled)

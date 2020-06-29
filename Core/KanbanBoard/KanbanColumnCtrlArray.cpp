@@ -66,7 +66,7 @@ int CKanbanColumnCtrlArray::Find(DWORD dwTaskID, HTREEITEM& hti) const
 
 		for (int nCol = 0; nCol < nNumCol; nCol++)
 		{
-			CKanbanColumnCtrl* pCol = GetAt(nCol);
+			const CKanbanColumnCtrl* pCol = GetAt(nCol);
 			ASSERT(pCol);
 
 			hti = pCol->FindTask(dwTaskID);
@@ -81,6 +81,26 @@ int CKanbanColumnCtrlArray::Find(DWORD dwTaskID, HTREEITEM& hti) const
 	return -1;
 }
 
+int CKanbanColumnCtrlArray::Find(const CDWordArray& aTaskIDs) const
+{
+	if (aTaskIDs.GetSize())
+	{
+		int nNumCol = GetSize();
+
+		for (int nCol = 0; nCol < nNumCol; nCol++)
+		{
+			const CKanbanColumnCtrl* pCol = GetAt(nCol);
+			ASSERT(pCol);
+
+			if (pCol->HasTasks(aTaskIDs))
+				return nCol;
+		}
+	}
+
+	// not found
+	return -1;
+}
+
 int CKanbanColumnCtrlArray::Find(const CString& sAttribValue) const
 {
 	CString sAttribValueID(Misc::ToUpper(sAttribValue));
@@ -88,7 +108,7 @@ int CKanbanColumnCtrlArray::Find(const CString& sAttribValue) const
 
 	for (int nCol = 0; nCol < nNumCol; nCol++)
 	{
-		CKanbanColumnCtrl* pCol = GetAt(nCol);
+		const CKanbanColumnCtrl* pCol = GetAt(nCol);
 		ASSERT(pCol);
 
 		if (pCol->GetAttributeValueID() == sAttribValueID)
@@ -107,7 +127,7 @@ int CKanbanColumnCtrlArray::Find(HWND hwnd) const
 
 	for (int nCol = 0; nCol < nNumCol; nCol++)
 	{
-		CKanbanColumnCtrl* pCol = GetAt(nCol);
+		const CKanbanColumnCtrl* pCol = GetAt(nCol);
 		ASSERT(pCol);
 
 		if (pCol->GetSafeHwnd() == hwnd)

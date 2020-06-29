@@ -26,6 +26,7 @@ public:
 	int Find(HWND hWnd) const;
 	int Find(const CString& sAttribValue) const;
 	int Find(const CKanbanColumnCtrl* pList) const;
+	int Find(const CDWordArray& aTaskIDs) const;
 
 	CKanbanColumnCtrl* Get(DWORD dwTaskID) const;
 	CKanbanColumnCtrl* Get(DWORD dwTaskID, HTREEITEM& hti) const;

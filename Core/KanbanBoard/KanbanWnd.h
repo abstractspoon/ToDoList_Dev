@@ -82,7 +82,7 @@ protected:
 	UITHEME m_theme;
 	CString	m_sTrackedCustomAttribID;
 	TDC_ATTRIBUTE m_nTrackedAttrib;
-	DWORD m_dwSelTaskID;
+	CDWordArray m_aSelTaskIDs;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -116,8 +116,8 @@ protected:
 
 	afx_msg LRESULT OnKanbanNotifySelectionChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnKanbanNotifyEditTaskDone(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnKanbanNotifyEditTaskFlag(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnKanbanNotifyToggleTaskDone(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnKanbanNotifyToggleTaskFlag(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyFlagChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskTitle(WPARAM wp, LPARAM lp);
@@ -133,6 +133,8 @@ protected:
 	void UpdatePriorityColors(const IPreferences* pPrefs);
 	void ProcessTrackedAttributeChange();
 	void RefreshKanbanCtrlDisplayAttributes();
+	int PrepareNotification(TDC_ATTRIBUTE nAttrib, CArray<IUITASKMOD, IUITASKMOD&>& aMods);
+	int PrepareNotification(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttrib, CArray<IUITASKMOD, IUITASKMOD&>& aMods);
 
 };
 

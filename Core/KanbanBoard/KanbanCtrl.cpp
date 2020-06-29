@@ -236,7 +236,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 	case VK_LEFT:
 		if (m_pSelectedColumn->GetSelectedItem())
 		{
-			int nSelCol = m_aColumns.Find(m_pSelectedColumn);
+			int nSelCol = GetSelColumnIndex();
 
 			for (int nCol = (nSelCol - 1); nCol >= 0; nCol--)
 			{
@@ -249,7 +249,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 	case VK_HOME:
 		if (m_pSelectedColumn->GetSelectedItem())
 		{
-			int nSelCol = m_aColumns.Find(m_pSelectedColumn);
+			int nSelCol = GetSelColumnIndex();
 
 			for (int nCol = 0; nCol < nSelCol; nCol++)
 			{
@@ -262,7 +262,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 	case VK_RIGHT:
 		if (m_pSelectedColumn->GetSelectedItem())
 		{
-			int nSelCol = m_aColumns.Find(m_pSelectedColumn);
+			int nSelCol = GetSelColumnIndex();
 			int nNumCol = m_aColumns.GetSize();
 
 			for (int nCol = (nSelCol + 1); nCol < nNumCol; nCol++)
@@ -276,7 +276,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 	case VK_END:
 		if (m_pSelectedColumn->GetSelectedItem())
 		{
-			int nSelCol = m_aColumns.Find(m_pSelectedColumn);
+			int nSelCol = GetSelColumnIndex();
 			int nNumCol = m_aColumns.GetSize();
 
 			for (int nCol = (nNumCol - 1); nCol > nSelCol; nCol--)
@@ -300,39 +300,51 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 			CStringArray aListValues;
 			VERIFY(m_pSelectedColumn->GetAttributeValues(aListValues));
 
-			DWORD dwTaskID = GetSelectedTaskID();
-			KANBANITEM* pKI = GetKanbanItem(dwTaskID);
-			ASSERT(pKI);
+			CDWordArray aTaskIDs;
+			int nID = GetSelectedTaskIDs(aTaskIDs);
 
-			if (pKI)
-				pKI->RemoveTrackedAttributeValues(m_sTrackAttribID, aListValues);
+			while (nID--)
+			{
+				KANBANITEM* pKI = GetKanbanItem(aTaskIDs[nID]);
+				ASSERT(pKI);
+
+				if (pKI)
+					pKI->RemoveTrackedAttributeValues(m_sTrackAttribID, aListValues);
+			}
 
 			// Notify parent of changes before altering the lists because we can't
 			// guarantee that all the modified tasks will be in the same list afterwards
-			NotifyParentAttibuteChange(dwTaskID);
+			NotifyParentAttibuteChange(aTaskIDs);
 
 			// Reset selected list before removing items to 
 			// to prevent unwanted selection notifications
 			CKanbanColumnCtrl* pCol = m_pSelectedColumn;
 			m_pSelectedColumn = NULL;
 
-			if (pKI)
+			nID = aTaskIDs.GetSize();
+
+			while (nID--)
 			{
-				VERIFY(pCol->DeleteTask(dwTaskID));
+				DWORD dwTaskID = aTaskIDs[nID];
+				KANBANITEM* pKI = GetKanbanItem(dwTaskID);
+				ASSERT(pKI);
 
-				if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
+				if (pKI)
 				{
-					CKanbanColumnCtrl* pBacklog = m_aColumns.GetBacklog();
+					VERIFY(pCol->DeleteTask(dwTaskID));
 
-					if (pBacklog)
-						pBacklog->AddTask(*pKI, FALSE);
+					if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
+					{
+						CKanbanColumnCtrl* pBacklog = m_aColumns.GetBacklog();
+
+						if (pBacklog)
+							pBacklog->AddTask(*pKI, FALSE);
+					}
 				}
-
-				RebuildColumns(FALSE, FALSE);
 			}
 
-			// try to restore selection
-			SelectTask(dwTaskID);
+			RebuildColumns(FALSE, FALSE, aTaskIDs);
+
 			return TRUE;
 		}
 		break;
@@ -342,6 +354,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 	return FALSE;
 }
 
+/*
 BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 {
 	CAutoFlag af(m_bSelectTasks, TRUE);
@@ -349,7 +362,7 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	// Check for 'no change'
 	DWORD dwSelID = GetSelectedTaskID();
 
-	int nPrevSel = m_aColumns.Find(m_pSelectedColumn), nNewSel = -1;
+	int nPrevSel = GetSelColumnIndex(), nNewSel = -1;
 
 	if (m_pSelectedColumn && m_pSelectedColumn->FindTask(dwTaskID))
 		nNewSel = nPrevSel;
@@ -371,7 +384,47 @@ BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
 	ScrollToSelectedTask();
 	return TRUE;
 }
+*/
 
+BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
+{
+	CAutoFlag af(m_bSelectTasks, TRUE);
+
+	// Check for 'no change'
+	CDWordArray aSelTaskIDs;
+	GetSelectedTaskIDs(aSelTaskIDs);
+
+	int nPrevSel = GetSelColumnIndex(), nNewSel = -1;
+
+	if (m_pSelectedColumn && m_pSelectedColumn->HasTasks(aTaskIDs))
+	{
+		nNewSel = nPrevSel;
+	}
+	else
+	{
+		nNewSel = m_aColumns.Find(aTaskIDs);
+
+		if (nNewSel == -1)
+			return FALSE;
+	}
+
+	if ((nPrevSel != nNewSel) || !Misc::MatchAll(aTaskIDs, aSelTaskIDs))
+	{
+		m_aColumns.SetSelectedColumn(NULL);
+
+		if ((nNewSel == -1) || !aTaskIDs.GetSize())
+			return FALSE;
+
+		// else
+		SelectColumn(m_aColumns[nNewSel], FALSE);
+		VERIFY(m_pSelectedColumn->SelectTasks(aTaskIDs));
+	}
+
+	ScrollToSelectedTask();
+	return TRUE;
+}
+
+/*
 DWORD CKanbanCtrl::GetSelectedTaskID() const
 {
 	const CKanbanColumnCtrl* pCol = GetSelColumn();
@@ -380,6 +433,19 @@ DWORD CKanbanCtrl::GetSelectedTaskID() const
 		return pCol->GetSelectedTaskID();
 
 	// else
+	return 0;
+}
+*/
+
+int CKanbanCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
+{
+	const CKanbanColumnCtrl* pCol = GetSelColumn();
+
+	if (pCol)
+		return pCol->GetSelectedTaskIDs(aTaskIDs);
+
+	// else
+	aTaskIDs.RemoveAll();
 	return 0;
 }
 
@@ -406,6 +472,11 @@ const CKanbanColumnCtrl* CKanbanCtrl::GetSelColumn() const
 
 	// else
 	return NULL;
+}
+
+int CKanbanCtrl::GetSelColumnIndex() const
+{
+	return m_aColumns.Find(m_pSelectedColumn);
 }
 
 BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
@@ -1705,9 +1776,22 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate)
 		return;
 	}
 
+	CDWordArray aTaskIDs;
+	GetSelectedTaskIDs(aTaskIDs);
+
+	RebuildColumns(bRebuildData, bTaskUpdate, aTaskIDs);
+}
+
+void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate, const CDWordArray& aSelTaskIDs)
+{
+	if (m_sTrackAttribID.IsEmpty())
+	{
+		ASSERT(m_nTrackAttribute == TDCA_NONE);
+		return;
+	}
+
 	CHoldRedraw gr(*this, NCR_PAINT | NCR_ERASEBKGND);
-	DWORD dwSelTaskID = GetSelectedTaskID();
-	
+
 	CKanbanItemArrayMap mapKIArray;
 	m_data.BuildTempItemMaps(m_sTrackAttribID, mapKIArray);
 
@@ -1734,7 +1818,7 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate)
 		
 	// We only need to restore selection if not doing a task update
 	// because the app takes care of that
-	if (!bTaskUpdate && dwSelTaskID && !SelectTask(dwSelTaskID))
+	if (!bTaskUpdate && aSelTaskIDs.GetSize() && !SelectTasks(aSelTaskIDs))
 	{
 		if (!m_pSelectedColumn || !Misc::HasT(m_pSelectedColumn, m_aColumns))
 		{
@@ -2636,19 +2720,19 @@ BOOL CKanbanCtrl::IsDragging() const
 	return (!m_bReadOnly && (::GetCapture() == *this));
 }
 
-BOOL CKanbanCtrl::NotifyParentAttibuteChange(DWORD dwTaskID)
+BOOL CKanbanCtrl::NotifyParentAttibuteChange(const CDWordArray& aTaskIDs)
 {
 	ASSERT(!m_bReadOnly);
-	ASSERT(dwTaskID);
+	ASSERT(aTaskIDs.GetSize());
 
-	return GetParent()->SendMessage(WM_KBC_VALUECHANGE, (WPARAM)GetSafeHwnd(), dwTaskID);
+	return GetParent()->SendMessage(WM_KBC_VALUECHANGE, (WPARAM)GetSafeHwnd(), (LPARAM)&aTaskIDs);
 }
 
 void CKanbanCtrl::NotifyParentSelectionChange()
 {
 	ASSERT(!m_bSelectTasks);
 
-	GetParent()->SendMessage(WM_KBC_SELECTIONCHANGE, GetSelectedTaskID(), 0);
+	GetParent()->SendMessage(WM_KBC_SELECTIONCHANGE);
 }
 
 // external version
@@ -2973,10 +3057,10 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 			
 			if (GetColumnAttributeValue(pDestCol, point, sDestAttribValue))
 			{
-				DWORD dwDragID = pSrcCol->GetSelectedTaskID();
-				ASSERT(dwDragID);
+				CDWordArray aTaskIDs;
+				VERIFY(pSrcCol->GetSelectedTaskIDs(aTaskIDs));
 
-				BOOL bChange = EndDragItem(pSrcCol, dwDragID, pDestCol, sDestAttribValue);
+				BOOL bChange = EndDragItems(pSrcCol, aTaskIDs, pDestCol, sDestAttribValue);
 
 				// Remove the source column if it is now empty 
 				// and should not be shown
@@ -3002,10 +3086,10 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 						pDestCol->Sort(m_nSortBy, m_bSortAscending);
 
 					SelectColumn(pDestCol, FALSE);
-					SelectTask(dwDragID); 
+					SelectTasks(aTaskIDs); 
 
 					NotifyParentSelectionChange();
-					NotifyParentAttibuteChange(dwDragID);
+					NotifyParentAttibuteChange(aTaskIDs);
 				}
 			}
 		}
@@ -3027,63 +3111,69 @@ BOOL CKanbanCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnC
 	return CKanbanColumnCtrl::CanDrag(pSrcCol, pDestCol);
 }
 
-BOOL CKanbanCtrl::EndDragItem(CKanbanColumnCtrl* pSrcCol, DWORD dwTaskID, 
+BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aTaskIDs, 
 								CKanbanColumnCtrl* pDestCol, const CString& sDestAttribValue)
 {
 	ASSERT(CanDrag(pSrcCol, pDestCol));
-	ASSERT(pSrcCol->FindTask(dwTaskID) != NULL);
+	ASSERT(pSrcCol->HasTasks(aTaskIDs));
 
-	KANBANITEM* pKI = GetKanbanItem(dwTaskID);
+	int nID = aTaskIDs.GetSize();
 
-	if (!pKI)
+	while (nID--)
 	{
-		ASSERT(0);
-		return FALSE;
-	}
+		DWORD dwTaskID = aTaskIDs[nID];
+		KANBANITEM* pKI = GetKanbanItem(dwTaskID);
 
-	BOOL bSrcIsBacklog = pSrcCol->IsBacklog();
-	BOOL bDestIsBacklog = pDestCol->IsBacklog();
-	BOOL bCopy = (!bSrcIsBacklog && 
-					Misc::ModKeysArePressed(MKS_CTRL) &&
-					IsTrackedAttributeMultiValue());
+		if (!pKI)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
 
-	// Remove from the source list(s) if moving
-	if (bSrcIsBacklog)
-	{
-		VERIFY(pSrcCol->DeleteTask(dwTaskID));
-	}
-	else if (!bCopy) // move
-	{
-		// Remove all values
-		pKI->RemoveAllTrackedAttributeValues(m_sTrackAttribID);
+		BOOL bSrcIsBacklog = pSrcCol->IsBacklog();
+		BOOL bDestIsBacklog = pDestCol->IsBacklog();
+		BOOL bCopy = (!bSrcIsBacklog && 
+						Misc::ModKeysArePressed(MKS_CTRL) &&
+						IsTrackedAttributeMultiValue());
 
-		// Remove from all src lists
-		m_aColumns.DeleteTaskFromOthers(dwTaskID, pDestCol);
-	}
-	else if (bDestIsBacklog) // and 'copy'
-	{
-		// Just remove the source list's value(s)
-		CStringArray aSrcValues;
-		int nVal = pSrcCol->GetAttributeValues(aSrcValues);
+		// Remove from the source list(s) if moving
+		if (bSrcIsBacklog)
+		{
+			VERIFY(pSrcCol->DeleteTask(dwTaskID));
+		}
+		else if (!bCopy) // move
+		{
+			// Remove all values
+			pKI->RemoveAllTrackedAttributeValues(m_sTrackAttribID);
 
-		while (nVal--)
-			pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcValues[nVal]);
+			// Remove from all src lists
+			m_aColumns.DeleteTaskFromOthers(dwTaskID, pDestCol);
+		}
+		else if (bDestIsBacklog) // and 'copy'
+		{
+			// Just remove the source list's value(s)
+			CStringArray aSrcValues;
+			int nVal = pSrcCol->GetAttributeValues(aSrcValues);
 
-		VERIFY(pSrcCol->DeleteTask(dwTaskID));
-	}
+			while (nVal--)
+				pKI->RemoveTrackedAttributeValue(m_sTrackAttribID, aSrcValues[nVal]);
 
-	// Append to the destination list
-	if (bDestIsBacklog)
-	{
-		if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
-			pDestCol->AddTask(*pKI, TRUE);
-	}
-	else
-	{
-		pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
+			VERIFY(pSrcCol->DeleteTask(dwTaskID));
+		}
 
-		if (pDestCol->FindTask(dwTaskID) == NULL)
-			pDestCol->AddTask(*pKI, TRUE);
+		// Append to the destination list
+		if (bDestIsBacklog)
+		{
+			if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
+				pDestCol->AddTask(*pKI, TRUE);
+		}
+		else
+		{
+			pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
+
+			if (pDestCol->FindTask(dwTaskID) == NULL)
+				pDestCol->AddTask(*pKI, TRUE);
+		}
 	}
 
 	return TRUE;
@@ -3235,38 +3325,53 @@ LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	ASSERT(!m_bReadOnly);
-	ASSERT(lp);
 
-	DWORD dwTaskID = lp;
-	KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+	CDWordArray aTaskIDs;
+	int nID = GetSelectedTaskIDs(aTaskIDs);
+	ASSERT(nID);
 
-	if (pKI)
+	// Cache completion state for later update
+	CDWordSet mapTaskDone;
+
+	while (nID--)
 	{
-		BOOL bSetDone = !pKI->IsDone(FALSE);
-		BOOL bMod = GetParent()->SendMessage(WM_KBC_EDITTASKDONE, dwTaskID, bSetDone);
+		if (IsTaskDone(aTaskIDs[nID]))
+			mapTaskDone.Add(aTaskIDs[nID]);
+	}
 
-		if (bMod)
+	LRESULT lr = GetParent()->SendMessage(WM_KBC_TOGGLETASKDONE);
+
+	if (lr)
+	{
+		// If the app hasn't already updated this for us we must do it ourselves
+		while (nID--)
 		{
-			// If the app hasn't already updated this for us we must do it ourselves
-			if (pKI->IsDone(FALSE) != bSetDone)
+			DWORD dwTaskID = aTaskIDs[nID];
+			KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+
+			if (pKI && !pKI->bLocked)
 			{
-				if (bSetDone)
-					pKI->dtDone = COleDateTime::GetCurrentTime();
-				else
+				BOOL bWasDone = mapTaskDone.Has(dwTaskID);
+				BOOL bIsDone = pKI->IsDone(FALSE);
+
+				if (bWasDone && bIsDone)
+				{
 					CDateHelper::ClearDate(pKI->dtDone);
-
-				pKI->bDone = bSetDone;
-				m_pSelectedColumn->Invalidate(FALSE);
+				}
+				else if (!bWasDone && !bIsDone)
+				{
+					pKI->dtDone = COleDateTime::GetCurrentTime();
+				}
 			}
-
-			if (m_data.HasItem(dwTaskID))
-				PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
 		}
 
-		return bMod;
+		if (m_pSelectedColumn)
+			m_pSelectedColumn->Invalidate();
+
+		return lr;
 	}
 
 	// else
@@ -3274,37 +3379,39 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CKanbanCtrl::OnColumnEditTaskIcon(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanCtrl::OnColumnEditTaskIcon(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	ASSERT(!m_bReadOnly);
-	ASSERT(lp);
 
-	return GetParent()->SendMessage(WM_KBC_EDITTASKICON, (WPARAM)lp);
+	return GetParent()->SendMessage(WM_KBC_EDITTASKICON);
 }
 
-LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	ASSERT(!m_bReadOnly);
-	ASSERT(lp);
 
-	DWORD dwTaskID = lp;
-	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+	CDWordArray aTaskIDs;
+	int nID = GetSelectedTaskIDs(aTaskIDs);
+	ASSERT(nID);
 
-	if (pKI)
+	LRESULT lr = GetParent()->SendMessage(WM_KBC_TOGGLETASKFLAG);
+
+	if (lr)
 	{
-		LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKFLAG, dwTaskID, !pKI->bFlagged);
-
-		if (lr && m_data.HasItem(dwTaskID))
+		while (nID--)
 		{
+			DWORD dwTaskID = aTaskIDs[nID];
 			KANBANITEM* pKI = m_data.GetItem(dwTaskID);
-			ASSERT(pKI);
 
-			pKI->bFlagged = !pKI->bFlagged;
+			if (pKI && !pKI->bLocked)
+			{
+				pKI->bFlagged = !pKI->bFlagged;
 
-			if (m_pSelectedColumn)
-				m_pSelectedColumn->Invalidate();
+				if (m_pSelectedColumn)
+					m_pSelectedColumn->Invalidate();
 
-			PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
+				//PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
+			}
 		}
 
 		return lr;
@@ -3318,28 +3425,32 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM lp)
 LRESULT CKanbanCtrl::OnColumnToggleTaskPin(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
-	ASSERT(lp);
 
-	KANBANITEM* pKI = m_data.GetItem(lp);
-	ASSERT(pKI);
+	CDWordArray aTaskIDs;
+	int nID = GetSelectedTaskIDs(aTaskIDs);
+	ASSERT(nID);
 
-	if (pKI)
+	while (nID--)
 	{
-		pKI->bPinned = !pKI->bPinned;
+		DWORD dwTaskID = aTaskIDs[nID];
+		KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 
-		// Resort the selected column
-		ASSERT(m_pSelectedColumn);
-
-		if (m_pSelectedColumn)
-			m_pSelectedColumn->Sort(m_nSortBy, m_bSortAscending);
+		if (pKI)
+			pKI->bPinned = !pKI->bPinned;
 	}
+
+	// Resort the selected column
+	ASSERT(m_pSelectedColumn);
+
+	if (m_pSelectedColumn)
+		m_pSelectedColumn->Sort(m_nSortBy, m_bSortAscending);
 
 	return 0L;
 }
 
 LRESULT CKanbanCtrl::OnSelectTask(WPARAM /*wp*/, LPARAM lp)
 {
-	return SelectTask(lp);
+	return 0L;//SelectTask(lp);
 }
 
 LRESULT CKanbanCtrl::OnColumnGetTaskIcon(WPARAM wp, LPARAM lp)

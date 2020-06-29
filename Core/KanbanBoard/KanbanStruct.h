@@ -138,7 +138,8 @@ public:
 	BOOL RemoveKey(DWORD dwKey);
 	BOOL HasItem(DWORD dwTaskID) const;
 	BOOL IsLocked(DWORD dwTaskID) const;
-	BOOL HasFlag(DWORD dwTaskID) const;
+	BOOL IsFlagged(DWORD dwTaskID) const;
+	BOOL IsDone(DWORD dwTaskID, BOOL bIncGoodAsDone = FALSE) const;
 
 	CString GetItemTitle(DWORD dwTaskID) const;
 

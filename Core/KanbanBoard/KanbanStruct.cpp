@@ -706,11 +706,18 @@ BOOL CKanbanItemMap::IsLocked(DWORD dwTaskID) const
 	return (pKI && pKI->bLocked);
 }
 
-BOOL CKanbanItemMap::HasFlag(DWORD dwTaskID) const
+BOOL CKanbanItemMap::IsFlagged(DWORD dwTaskID) const
 {
 	const KANBANITEM* pKI = GetItem(dwTaskID);
 
 	return (pKI && pKI->bFlagged);
+}
+
+BOOL CKanbanItemMap::IsDone(DWORD dwTaskID, BOOL bIncGoodAsDone) const
+{
+	const KANBANITEM* pKI = GetItem(dwTaskID);
+
+	return (pKI && pKI->IsDone(bIncGoodAsDone));
 }
 
 KANBANITEM* CKanbanItemMap::NewItem(DWORD dwTaskID, const CString& sTitle)

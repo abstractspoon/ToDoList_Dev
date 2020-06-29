@@ -41,13 +41,19 @@ public:
 	void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate);
 	bool PrepareNewTask(ITaskList* pTask) const;
 
-	DWORD GetSelectedTaskID() const;
-	BOOL SelectTask(DWORD dwTaskID);
+//	DWORD GetSelectedTaskID() const;
+//	BOOL SelectTask(DWORD dwTaskID);
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
+	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	DWORD HitTestTask(const CPoint& ptScreen) const;
 	void ScrollToSelectedTask();
+
+	BOOL IsTaskLocked(DWORD dwTaskID) const { return m_data.IsLocked(dwTaskID); }
+	BOOL IsTaskFlagged(DWORD dwTaskID) const { return m_data.IsFlagged(dwTaskID); }
+	BOOL IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAsDone = FALSE) const { return m_data.IsDone(dwTaskID, bIncGoodAsDone); }
 
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
@@ -144,6 +150,7 @@ protected:
 	void ResizeHeader(CDeferWndMove& dwm, CRect& rAvail);
 
 	void RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate);
+	void RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate, const CDWordArray& aSelTaskIDs);
 	void RebuildDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
 	void RebuildFixedColumns(const CKanbanItemArrayMap& mapKIArray);
 	int RemoveOldDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
@@ -167,6 +174,7 @@ protected:
 	const CKanbanColumnCtrl* GetSelColumn() const;
 	const CKanbanColumnCtrl* GetNextColumn(const CKanbanColumnCtrl* pCol, BOOL bNext, BOOL bExcludeEmpty) const;
 
+	int GetSelColumnIndex() const;
 	BOOL SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent = TRUE);
 	BOOL IsSelectedColumn(HWND hWnd) const;
 	void FixupSelectedColumn();
@@ -179,10 +187,10 @@ protected:
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }
 
 	BOOL IsDragging() const;
-	BOOL EndDragItem(CKanbanColumnCtrl* pSrcCol, DWORD dwTaskID, CKanbanColumnCtrl* pDestCol, const CString& sDestAttribValue);
+	BOOL EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aTaskIDs, CKanbanColumnCtrl* pDestCol, const CString& sDestAttribValue);
 	BOOL HandleKeyDown(WPARAM wp, LPARAM lp);
 	
-	BOOL NotifyParentAttibuteChange(DWORD dwTaskID);
+	BOOL NotifyParentAttibuteChange(const CDWordArray& aTaskIDs);
 	void NotifyParentSelectionChange();
 	BOOL GetColumnAttributeValue(const CKanbanColumnCtrl* pDestCol, const CPoint& ptScreen, CString& sValue) const;
 	BOOL UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CString& sNewValue);
