@@ -103,29 +103,17 @@ namespace DayViewUIExtension
 			bool curPtInShortApptsRect = shortApptsRect.Contains(e.Location);
 			bool prevPtInShortApptsRect = shortApptsRect.Contains(m_lastMouseMove);
 
-			if (shortAppt && prevPtInShortApptsRect && curPtInLongApptsRect)
+            TimeSpan length = TimeSpan.Zero;
+            DateTime dateAtCursor = DayView.GetDateTimeAt(e.X, e.Y, curPtInLongApptsRect);
+
+            if (shortAppt && prevPtInShortApptsRect && curPtInLongApptsRect)
 			{
 				// Short appointment dragged into long appointment rect
 				m_Transitioned = !base.IsEditingLongAppt;
 
 				// If the appointment was originally a long appointment we
 				// restore the original length else create a day-long task
-				DateTime dateAtCursor = DayView.GetDateTimeAt(e.X, e.Y, true);
-                selection.StartDate = dateAtCursor.Date;
-
-				if (base.IsEditingLongAppt)
-				{
-                    selection.EndDate = selection.StartDate.Add(selection.OriginalLength);
-				}
-				else
-				{
-					selection.EndDate = selection.StartDate.AddDays(1).AddSeconds(-1);
-				}
-
-				m_delta = TimeSpan.Zero;
-				m_length = selection.Length;
-
-				return true;
+                length = (m_Transitioned ? new TimeSpan(24, 0, 0) : selection.OriginalLength);
 			}
 			else if (longAppt && prevPtInLongApptsRect && curPtInShortApptsRect)
 			{
@@ -134,26 +122,22 @@ namespace DayViewUIExtension
 
                 // If the appointment was originally a long appointment we
                 // restore the original length else create a 3-hour task
-                DateTime dateAtCursor = DayView.GetDateTimeAt(e.X, e.Y, false);
-                selection.StartDate = dateAtCursor.Date;
-
-                if (!base.IsEditingLongAppt)
-				{
-                    selection.EndDate = selection.StartDate.Add(selection.OriginalLength);
-				}
-				else
-				{
-					selection.EndDate = selection.StartDate.AddHours(3);
-				}
-
-				m_delta = TimeSpan.Zero;
-				m_length = selection.Length;
-
-				return true;
+                length = (m_Transitioned ? new TimeSpan(3, 0, 0) : selection.OriginalLength);
 			}
 
-			// all else
-			return false;
+            if (length != TimeSpan.Zero)
+            {
+                selection.StartDate = dateAtCursor.AddHours(-length.TotalHours / 2);
+                selection.EndDate = selection.StartDate.Add(length);
+
+                m_delta = (selection.StartDate - dateAtCursor);
+                m_length = TimeSpan.Zero;
+
+                return true;
+            }
+
+            // all else
+            return false;
 		}
 
 	}

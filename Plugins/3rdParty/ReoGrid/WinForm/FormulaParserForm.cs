@@ -27,10 +27,8 @@ using unvell.ReoGrid.Formula;
 
 namespace FormulaParserTest
 {
-#if DEBUG
-	public
-#endif
-	partial class FormulaParserForm : Form
+    [System.ComponentModel.DesignerCategory("Form")]
+    partial class FormulaParserForm : Form
 	{
 		public IWorkbook Workbook { get; set; }
 
