@@ -435,14 +435,14 @@
     <Compile Include="Control\ISheetTabControl.cs" />
     <Compile Include="Views\Layer.cs" />
     <Compile Include="Views\CellsViewport.cs" />
-    <Compile Include="WinForm\Graphics.cs" />
-    <Compile Include="Views\NormalViewportController.cs" />
     <Compile Include="WinForm\FormulaParserForm.cs">
-      <SubType>Form</SubType>
+      <SubType>Code</SubType>
     </Compile>
     <Compile Include="WinForm\FormulaParserForm.designer.cs">
       <DependentUpon>FormulaParserForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinForm\Graphics.cs" />
+    <Compile Include="Views\NormalViewportController.cs" />
     <Compile Include="WinForm\Platform.cs" />
     <Compile Include="WinForm\RenameSheetDialog.cs">
       <SubType>Form</SubType>
