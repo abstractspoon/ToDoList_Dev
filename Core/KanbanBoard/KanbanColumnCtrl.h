@@ -64,7 +64,6 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
 
-	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
 	HTREEITEM FindTask(DWORD dwTaskID) const;
 	HTREEITEM FindTask(const CPoint& ptScreen) const;
 	HTREEITEM FindTask(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart = NULL) const;
@@ -76,6 +75,7 @@ public:
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	void ScrollToSelection();
+	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
@@ -83,6 +83,7 @@ public:
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);
 	BOOL SelectItem(HTREEITEM hItem, BOOL bByMouse);
+	HTREEITEM GetSelectedItem() const;
 
 	void SetDropTarget(BOOL bTarget);
 	void SetBackgroundColor(COLORREF color);

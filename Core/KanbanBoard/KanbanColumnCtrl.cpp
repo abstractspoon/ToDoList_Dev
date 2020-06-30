@@ -423,7 +423,7 @@ BOOL CKanbanColumnCtrl::IsItemSelected(HTREEITEM hti) const
 	if (m_bSavingToImage || !m_bSelected || !m_aSelTaskIDs.GetSize())
 		return FALSE;
 	
-	DWORD dwTaskID = GetItemData(hti);
+	DWORD dwTaskID = GetTaskID(hti);
 
 	return (Misc::FindT(dwTaskID, m_aSelTaskIDs) != -1);
 }
@@ -1118,7 +1118,7 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 {
 	m_aSelTaskIDs.RemoveAll();
 
-	if (FindTask(dwTaskID))
+	if (dwTaskID && FindTask(dwTaskID))
 		m_aSelTaskIDs.Add(dwTaskID);
 
 	Invalidate(FALSE);
@@ -1760,9 +1760,11 @@ void CKanbanColumnCtrl::RecalcItemLineHeight()
 
 BOOL CKanbanColumnCtrl::SelectItem(HTREEITEM hItem, BOOL bByMouse)
 {
-	if (!CTreeCtrl::SelectItem(hItem))
-		return FALSE;
+	DWORD dwTaskID = GetTaskID(hItem);
 
+	if (!dwTaskID || !SelectTask(dwTaskID))
+		return FALSE;
+	
 	// We must synthesize our own notification because the default
 	// one will be ignored because its action is TVC_UNKNOWN
 	NMTREEVIEW nmtv = { 0 };
@@ -1774,13 +1776,22 @@ BOOL CKanbanColumnCtrl::SelectItem(HTREEITEM hItem, BOOL bByMouse)
 	nmtv.itemNew.hItem = hItem;
 	nmtv.itemNew.state = TVIS_SELECTED;
 	nmtv.itemNew.mask = TVIF_STATE;
-	nmtv.itemNew.lParam = GetTaskID(hItem);
+	nmtv.itemNew.lParam = dwTaskID;
 
 	nmtv.action = (bByMouse ? TVC_BYMOUSE : TVC_BYKEYBOARD);
 
 	GetParent()->SendMessage(WM_NOTIFY, nmtv.hdr.idFrom, (LPARAM)&nmtv);
 
 	return TRUE;
+}
+
+HTREEITEM CKanbanColumnCtrl::GetSelectedItem() const
+{
+	if (m_bSelected && m_aSelTaskIDs.GetSize())
+		return FindTask(m_aSelTaskIDs[0]);
+
+	// else
+	return NULL;
 }
 
 BOOL CKanbanColumnCtrl::InitTooltip()
