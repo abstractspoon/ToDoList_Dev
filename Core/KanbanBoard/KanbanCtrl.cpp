@@ -338,7 +338,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 						CKanbanColumnCtrl* pBacklog = m_aColumns.GetBacklog();
 
 						if (pBacklog)
-							pBacklog->AddTask(*pKI, FALSE);
+							pBacklog->AddTask(*pKI/*, FALSE*/);
 					}
 				}
 			}
@@ -1554,7 +1554,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aNewValues[nVal]);
 				
 				if (pCurCol)
-					pCurCol->AddTask(*pKI, FALSE);
+					pCurCol->AddTask(*pKI/*, FALSE*/);
 				else
 					bChange = TRUE; // needs new list ctrl
 			}
@@ -2100,7 +2100,8 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 	if (!pCol || !pCol->GetSafeHwnd())
 		return FALSE;
 
-	DWORD dwSelID = pCol->GetSelectedTaskID();
+	CDWordArray aSelTaskIDs;
+	pCol->GetSelectedTaskIDs(aSelTaskIDs);
 
 	pCol->SetRedraw(FALSE);
 	pCol->DeleteAll();
@@ -2123,9 +2124,9 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 				
 				if (!pKI->bParent || bShowParents)
 				{
-					BOOL bSelected = (dwSelID == pKI->dwTaskID);
+					//BOOL bSelected = (Misc::FindT(pKI->dwTaskID, aSelTaskIDs) != -1);
 
-					VERIFY(pCol->AddTask(*pKI, bSelected) != NULL);
+					VERIFY(pCol->AddTask(*pKI/*, bSelected*/) != NULL);
 				}
 			}
 		}
@@ -3165,14 +3166,14 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 		if (bDestIsBacklog)
 		{
 			if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
-				pDestCol->AddTask(*pKI, TRUE);
+				pDestCol->AddTask(*pKI/*, TRUE*/);
 		}
 		else
 		{
 			pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
 
 			if (pDestCol->FindTask(dwTaskID) == NULL)
-				pDestCol->AddTask(*pKI, TRUE);
+				pDestCol->AddTask(*pKI/*, TRUE*/);
 		}
 	}
 
@@ -3347,6 +3348,8 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM /*lp*/)
 	if (lr)
 	{
 		// If the app hasn't already updated this for us we must do it ourselves
+		nID = aTaskIDs.GetSize();
+
 		while (nID--)
 		{
 			DWORD dwTaskID = aTaskIDs[nID];
@@ -3359,10 +3362,12 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM /*lp*/)
 
 				if (bWasDone && bIsDone)
 				{
+					pKI->bDone = FALSE;
 					CDateHelper::ClearDate(pKI->dtDone);
 				}
 				else if (!bWasDone && !bIsDone)
 				{
+					pKI->bDone = TRUE;
 					pKI->dtDone = COleDateTime::GetCurrentTime();
 				}
 			}

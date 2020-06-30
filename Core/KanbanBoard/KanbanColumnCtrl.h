@@ -54,7 +54,7 @@ public:
 	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
 	
 	BOOL Create(UINT nID, CWnd* pParentWnd);
-	HTREEITEM AddTask(const KANBANITEM& ki, BOOL bSelect);
+	HTREEITEM AddTask(const KANBANITEM& ki/*, BOOL bSelect*/);
 	BOOL DeleteTask(DWORD dwTaskID);
 	BOOL DeleteAll();
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
@@ -71,10 +71,10 @@ public:
 
 	DWORD GetTaskID(HTREEITEM hti) const { return GetItemData(hti); }
 
-	DWORD GetSelectedTaskID() const;
+	//DWORD GetSelectedTaskID() const;
+	BOOL SelectTask(DWORD dwTaskID);
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
-	BOOL SelectTask(DWORD dwTaskID);
 	void ScrollToSelection();
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
@@ -123,7 +123,7 @@ protected:
 	CImageList m_ilCheckboxes, m_ilIcons;
 	CToolTipCtrlEx m_tooltip;
 	CTreeCtrlHelper m_tch;
-	CTreeSelectionHelper m_tsh;
+	CDWordArray m_aSelTaskIDs;
 
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay, m_dwOptions;
@@ -155,6 +155,8 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
@@ -183,6 +185,7 @@ protected:
 	BOOL GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
+	BOOL IsItemSelected(HTREEITEM hti) const;
 
 	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
 	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL = NULL, int nIndex = -1) const;

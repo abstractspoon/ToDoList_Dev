@@ -108,8 +108,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_dwDisplay(0),
 	m_dwOptions(0),
 	m_htiHot(NULL),
-	m_tch(*this),
-	m_tsh(*this)
+	m_tch(*this)
 {
 }
 
@@ -131,6 +130,8 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_MOUSEMOVE()
 	ON_WM_SIZE()
 	ON_WM_SETCURSOR()
+	ON_WM_KILLFOCUS()
+	ON_WM_SETFOCUS()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_MOUSEWHEEL, OnMouseWheel)
@@ -180,6 +181,20 @@ int CKanbanColumnCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	RefreshBkgndColor();
 
 	return 0;
+}
+
+void CKanbanColumnCtrl::OnSetFocus(CWnd* pOldWnd)
+{
+	CTreeCtrl::OnSetFocus(pOldWnd);
+
+	Invalidate(FALSE);
+}
+
+void CKanbanColumnCtrl::OnKillFocus(CWnd* pNewWnd)
+{
+	CTreeCtrl::OnKillFocus(pNewWnd);
+
+	Invalidate(FALSE);
 }
 
 void CKanbanColumnCtrl::SetDropTarget(BOOL bTarget)
@@ -360,7 +375,7 @@ int CKanbanColumnCtrl::CalcItemTitleTextHeight() const
 	return (m_nNumTitleLines * m_nItemTextHeight);
 }
 
-HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
+HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki/*, BOOL bSelect*/)
 {
 	HTREEITEM hti = FindTask(ki.dwTaskID);
 
@@ -388,11 +403,11 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
 		RefreshItemLineHeights(hti);
 
 		// select item and make visible
-		if (bSelect)
-		{
-			SetItemState(hti, TVIS_SELECTED, TVIS_SELECTED);
-			EnsureVisible(hti);
-		}
+// 		if (bSelect)
+// 		{
+// 			SetItemState(hti, TVIS_SELECTED, TVIS_SELECTED);
+// 			EnsureVisible(hti);
+// 		}
 	}
 
 	return hti;
@@ -401,6 +416,16 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki, BOOL bSelect)
 CString CKanbanColumnCtrl::GetAttributeID() const 
 { 
 	return m_columnDef.sAttribID; 
+}
+
+BOOL CKanbanColumnCtrl::IsItemSelected(HTREEITEM hti) const
+{
+	if (m_bSavingToImage || !m_bSelected || !m_aSelTaskIDs.GetSize())
+		return FALSE;
+	
+	DWORD dwTaskID = GetItemData(hti);
+
+	return (Misc::FindT(dwTaskID, m_aSelTaskIDs) != -1);
 }
 
 BOOL CKanbanColumnCtrl::IsBacklog() const
@@ -533,7 +558,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				// Checkbox
 				DrawItemCheckbox(pDC, pKI, rItem);
 				
-				BOOL bSelected = (!m_bSavingToImage && m_tsh.HasItem(hti));
+				BOOL bSelected = IsItemSelected(hti);
 				COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
 
 				// Background
@@ -1037,47 +1062,33 @@ BOOL CKanbanColumnCtrl::GetLabelEditRect(LPRECT pEdit)
 	return FALSE;
 }
 
-DWORD CKanbanColumnCtrl::GetSelectedTaskID() const
-{
-	HTREEITEM hti = GetSelectedItem();
-
-	return (hti ? GetTaskID(hti) : 0);
-}
+// DWORD CKanbanColumnCtrl::GetSelectedTaskID() const
+// {
+// 	HTREEITEM hti = GetSelectedItem();
+// 
+// 	return (hti ? GetTaskID(hti) : 0);
+// }
 
 int CKanbanColumnCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
 {
-	aTaskIDs.RemoveAll();
-
-	POSITION pos = m_tsh.GetFirstItemPos();
-
-	while (pos)
-		aTaskIDs.Add(m_tsh.GetNextItemData(pos));
+	if (m_bSelected)
+		aTaskIDs.Copy(m_aSelTaskIDs);
+	else
+		aTaskIDs.RemoveAll();
 
 	return aTaskIDs.GetSize();
 }
 
 BOOL CKanbanColumnCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
-	// Build a corresponding list of tree items
-	// quitting as soon as we can't find one
-	CHTIList listHTI;
-	int nID = aTaskIDs.GetSize();
+	if (HasTasks(aTaskIDs))
+		m_aSelTaskIDs.Copy(aTaskIDs);
+	else
+		m_aSelTaskIDs.RemoveAll();
 
-	while (nID--)
-	{
-		HTREEITEM hti = FindTask(aTaskIDs[nID]);
+	Invalidate(FALSE);
 
-		if (!hti)
-			return FALSE;
-
-		listHTI.AddHead(hti);
-	}
-
-	m_tsh.RemoveAll(TRUE, FALSE);
-	m_tsh.SetItems(listHTI, TSHS_SELECT);
-	m_tsh.FixupTreeSelection();
-
-	return TRUE;
+	return m_aSelTaskIDs.GetSize();
 }
 
 BOOL CKanbanColumnCtrl::HasTasks(const CDWordArray& aTaskIDs) const
@@ -1105,7 +1116,14 @@ void CKanbanColumnCtrl::ClearSelection()
 
 BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 {
-	return CTreeCtrl::SelectItem(FindTask(dwTaskID));
+	m_aSelTaskIDs.RemoveAll();
+
+	if (FindTask(dwTaskID))
+		m_aSelTaskIDs.Add(dwTaskID);
+
+	Invalidate(FALSE);
+
+	return m_aSelTaskIDs.GetSize();
 }
 
 HTREEITEM CKanbanColumnCtrl::FindTask(DWORD dwTaskID) const
@@ -1114,7 +1132,6 @@ HTREEITEM CKanbanColumnCtrl::FindTask(DWORD dwTaskID) const
 	m_mapItems.Lookup(dwTaskID, hti);
 
 	return hti;
-	//return m_tch.FindItem(dwTaskID);
 }
 
 HTREEITEM CKanbanColumnCtrl::FindTask(const CPoint& ptScreen) const
