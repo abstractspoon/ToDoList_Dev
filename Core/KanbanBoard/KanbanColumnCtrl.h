@@ -152,6 +152,7 @@ protected:
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
@@ -187,6 +188,7 @@ protected:
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
 	BOOL IsItemSelected(HTREEITEM hti) const;
+	void NotifyParentSelectionChange(HTREEITEM hItem, BOOL bByMouse);
 
 	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
 	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL = NULL, int nIndex = -1) const;

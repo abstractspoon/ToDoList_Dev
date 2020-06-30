@@ -124,6 +124,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnCustomDraw)
 	ON_MESSAGE(WM_THEMECHANGED, OnThemeChanged)
+	ON_WM_LBUTTONUP()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_RBUTTONDOWN()
@@ -145,7 +146,7 @@ BOOL CKanbanColumnCtrl::Create(UINT nID, CWnd* pParentWnd)
 {
 	UINT nFlags = (WS_CHILD | WS_VISIBLE | LVS_REPORT | WS_TABSTOP |
 				   TVS_NONEVENHEIGHT | TVS_SHOWSELALWAYS | TVS_EDITLABELS | 
-				   TVS_FULLROWSELECT | TVS_NOTOOLTIPS | TVS_NOHSCROLL);
+				   /*TVS_FULLROWSELECT |*/ TVS_NOTOOLTIPS | TVS_NOHSCROLL);
 
 	return CTreeCtrl::Create(nFlags, CRect(0, 0, 0, 0), pParentWnd, nID);
 }
@@ -1551,6 +1552,24 @@ void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 		CTreeCtrl::OnLButtonDblClk(nFlags, point);
 }
 
+void CKanbanColumnCtrl::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	CTreeCtrl::OnLButtonUp(nFlags, point);
+
+	// we only receive this if a drag was NOT initiated because
+	// otherwise out parent would have received it, therefore
+	// we know it must have been a simple click
+
+	// If no modifier keys are active then we select just this task
+	if (Misc::ModKeysArePressed(0))
+	{
+		HTREEITEM htiHit = HitTest(point);
+
+		if (htiHit)
+			SelectItem(htiHit, TRUE);
+	}
+}
+
 BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 {
 	BOOL bHandled = FALSE;
@@ -1560,7 +1579,7 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 
 	if (!htiHit)
 	{
-		if (m_bSelected)
+		if (!m_bSelected)
 			SetFocus();
 
 		bHandled = TRUE;
@@ -1573,8 +1592,27 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 			bHandled = TRUE;
 		}
 
-		if (htiHit != GetSelectedItem())
-			SelectItem(htiHit, TRUE);
+		if (Misc::IsKeyPressed(VK_CONTROL))
+		{
+			DWORD dwTaskID = GetTaskID(htiHit);
+
+			if (Misc::FindT(dwTaskID, m_aSelTaskIDs) == -1)
+				m_aSelTaskIDs.Add(dwTaskID);
+			else
+				Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
+
+			NotifyParentSelectionChange(htiHit, TRUE);
+			Invalidate(FALSE);
+		}
+		else if (Misc::IsKeyPressed(VK_SHIFT))
+		{
+			// select all items between first item (anchor)
+			// and clicked item
+		}
+		else
+		{
+			// handled in OnLButtonUp
+		}
 	}
 
 	return bHandled;
@@ -1765,6 +1803,13 @@ BOOL CKanbanColumnCtrl::SelectItem(HTREEITEM hItem, BOOL bByMouse)
 	if (!dwTaskID || !SelectTask(dwTaskID))
 		return FALSE;
 	
+	NotifyParentSelectionChange(hItem, bByMouse);
+
+	return TRUE;
+}
+
+void CKanbanColumnCtrl::NotifyParentSelectionChange(HTREEITEM hItem, BOOL bByMouse)
+{
 	// We must synthesize our own notification because the default
 	// one will be ignored because its action is TVC_UNKNOWN
 	NMTREEVIEW nmtv = { 0 };
@@ -1776,13 +1821,12 @@ BOOL CKanbanColumnCtrl::SelectItem(HTREEITEM hItem, BOOL bByMouse)
 	nmtv.itemNew.hItem = hItem;
 	nmtv.itemNew.state = TVIS_SELECTED;
 	nmtv.itemNew.mask = TVIF_STATE;
-	nmtv.itemNew.lParam = dwTaskID;
+	nmtv.itemNew.lParam = GetTaskID(hItem);
 
 	nmtv.action = (bByMouse ? TVC_BYMOUSE : TVC_BYKEYBOARD);
 
 	GetParent()->SendMessage(WM_NOTIFY, nmtv.hdr.idFrom, (LPARAM)&nmtv);
 
-	return TRUE;
 }
 
 HTREEITEM CKanbanColumnCtrl::GetSelectedItem() const
