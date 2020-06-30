@@ -54,7 +54,7 @@ public:
 	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
 	
 	BOOL Create(UINT nID, CWnd* pParentWnd);
-	HTREEITEM AddTask(const KANBANITEM& ki/*, BOOL bSelect*/);
+	HTREEITEM AddTask(const KANBANITEM& ki);
 	BOOL DeleteTask(DWORD dwTaskID);
 	BOOL DeleteAll();
 	int RemoveDeletedTasks(const CDWordSet& mapCurIDs);
@@ -70,12 +70,15 @@ public:
 
 	DWORD GetTaskID(HTREEITEM hti) const { return GetItemData(hti); }
 
-	//DWORD GetSelectedTaskID() const;
 	BOOL SelectTask(DWORD dwTaskID);
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	void ScrollToSelection();
 	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
+	BOOL IsTaskSelected(DWORD dwTaskID) const;
+	int GetSelectedCount() const;
+	HTREEITEM GetFirstSelectedItem() const;
+	HTREEITEM GetLastSelectedItem() const;
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
@@ -83,7 +86,6 @@ public:
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);
 	BOOL SelectItem(HTREEITEM hItem, BOOL bByMouse);
-	HTREEITEM GetSelectedItem() const;
 
 	void SetDropTarget(BOOL bTarget);
 	void SetBackgroundColor(COLORREF color);
@@ -152,13 +154,12 @@ protected:
 	afx_msg void OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
@@ -168,10 +169,11 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	// Prevent parent calling these
-	void DeleteAllItems() {}
-	void InsertItem() {}
-	void DeleteItem() {}
+	// Prevent anyone calling these
+	void DeleteAllItems() { ASSERT(0); }
+	void InsertItem() { ASSERT(0); }
+	void DeleteItem() { ASSERT(0); }
+	HTREEITEM GetSelectedItem() const { ASSERT(0); return NULL; }
 	
 protected:
 	int CalcItemTitleTextHeight() const;
@@ -187,7 +189,6 @@ protected:
 	BOOL GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
-	BOOL IsItemSelected(HTREEITEM hti) const;
 	void NotifyParentSelectionChange(HTREEITEM hItem, BOOL bByMouse);
 
 	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
@@ -204,6 +205,8 @@ protected:
 	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
+	int BuildSortedSelection(CHTIList& lstHTI) const;
+	void SortSelection();
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);

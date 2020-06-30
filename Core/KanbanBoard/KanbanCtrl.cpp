@@ -190,7 +190,7 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentCol)
 {
 	// Find the closest task at the currently
 	// selected task's scrolled pos
-	HTREEITEM hti = m_pSelectedColumn->GetSelectedItem();
+	HTREEITEM hti = m_pSelectedColumn->GetFirstSelectedItem();
 
 	if (!hti)
 	{
@@ -231,10 +231,11 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentCol)
 
 BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 {
+	// We need to process these before they reach the focused column 
 	switch (wp)
 	{
 	case VK_LEFT:
-		if (m_pSelectedColumn->GetSelectedItem())
+		if (m_pSelectedColumn->GetFirstSelectedItem())
 		{
 			int nSelCol = GetSelColumnIndex();
 
@@ -247,7 +248,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 		break;
 
 	case VK_HOME:
-		if (m_pSelectedColumn->GetSelectedItem())
+		if (m_pSelectedColumn->GetFirstSelectedItem())
 		{
 			int nSelCol = GetSelColumnIndex();
 
@@ -260,7 +261,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 		break;
 
 	case VK_RIGHT:
-		if (m_pSelectedColumn->GetSelectedItem())
+		if (m_pSelectedColumn->GetFirstSelectedItem())
 		{
 			int nSelCol = GetSelColumnIndex();
 			int nNumCol = m_aColumns.GetSize();
@@ -274,7 +275,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 		break;
 
 	case VK_END:
-		if (m_pSelectedColumn->GetSelectedItem())
+		if (m_pSelectedColumn->GetFirstSelectedItem())
 		{
 			int nSelCol = GetSelColumnIndex();
 			int nNumCol = m_aColumns.GetSize();
@@ -338,7 +339,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 						CKanbanColumnCtrl* pBacklog = m_aColumns.GetBacklog();
 
 						if (pBacklog)
-							pBacklog->AddTask(*pKI/*, FALSE*/);
+							pBacklog->AddTask(*pKI);
 					}
 				}
 			}
@@ -353,38 +354,6 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 	// all else
 	return FALSE;
 }
-
-/*
-BOOL CKanbanCtrl::SelectTask(DWORD dwTaskID)
-{
-	CAutoFlag af(m_bSelectTasks, TRUE);
-
-	// Check for 'no change'
-	DWORD dwSelID = GetSelectedTaskID();
-
-	int nPrevSel = GetSelColumnIndex(), nNewSel = -1;
-
-	if (m_pSelectedColumn && m_pSelectedColumn->FindTask(dwTaskID))
-		nNewSel = nPrevSel;
-	else
-		nNewSel = m_aColumns.Find(dwTaskID);
-
-	if ((nPrevSel != nNewSel) || (dwTaskID != dwSelID))
-	{
-		m_aColumns.SetSelectedColumn(NULL);
-
-		if ((nNewSel == -1) || (dwTaskID == 0))
-			return FALSE;
-
-		// else
-		SelectColumn(m_aColumns[nNewSel], FALSE);
-		VERIFY(m_pSelectedColumn->SelectTask(dwTaskID));
-	}
-
-	ScrollToSelectedTask();
-	return TRUE;
-}
-*/
 
 BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
@@ -423,19 +392,6 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 	ScrollToSelectedTask();
 	return TRUE;
 }
-
-/*
-DWORD CKanbanCtrl::GetSelectedTaskID() const
-{
-	const CKanbanColumnCtrl* pCol = GetSelColumn();
-
-	if (pCol)
-		return pCol->GetSelectedTaskID();
-
-	// else
-	return 0;
-}
-*/
 
 int CKanbanCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
 {
@@ -498,14 +454,14 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		pCol = m_pSelectedColumn;
 
 		if (pCol)
-			htiStart = pCol->GetNextSiblingItem(pCol->GetSelectedItem());;
+			htiStart = pCol->GetNextSiblingItem(pCol->GetLastSelectedItem());
 		break;
 
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 		pCol = m_pSelectedColumn;
 
 		if (pCol)
-			htiStart = pCol->GetSelectedItem();
+			htiStart = pCol->GetFirstSelectedItem();
 		break;
 
 	case IUI_SELECTPREVTASK:
@@ -513,7 +469,7 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		bForwards = FALSE;
 
 		if (pCol)
-			htiStart = pCol->GetPrevSiblingItem(pCol->GetSelectedItem());
+			htiStart = pCol->GetPrevSiblingItem(pCol->GetFirstSelectedItem());
 		break;
 
 	case IUI_SELECTLASTTASK:
@@ -1554,7 +1510,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aNewValues[nVal]);
 				
 				if (pCurCol)
-					pCurCol->AddTask(*pKI/*, FALSE*/);
+					pCurCol->AddTask(*pKI);
 				else
 					bChange = TRUE; // needs new list ctrl
 			}
@@ -2123,11 +2079,7 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 				ASSERT(pKI);
 				
 				if (!pKI->bParent || bShowParents)
-				{
-					//BOOL bSelected = (Misc::FindT(pKI->dwTaskID, aSelTaskIDs) != -1);
-
-					VERIFY(pCol->AddTask(*pKI/*, bSelected*/) != NULL);
-				}
+					VERIFY(pCol->AddTask(*pKI) != NULL);
 			}
 		}
 	}
@@ -2553,9 +2505,14 @@ void CKanbanCtrl::SetReadOnly(bool bReadOnly)
 
 BOOL CKanbanCtrl::GetLabelEditRect(LPRECT pEdit)
 {
-	if (!m_pSelectedColumn || !m_pSelectedColumn->GetLabelEditRect(pEdit))
+	if (!m_pSelectedColumn)
 	{
 		ASSERT(0);
+		return FALSE;
+	}
+	else if (!m_pSelectedColumn->GetLabelEditRect(pEdit))
+	{
+		ASSERT(m_pSelectedColumn->GetSelectedCount() > 1);
 		return FALSE;
 	}
 
@@ -2770,9 +2727,7 @@ BOOL CKanbanCtrl::SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent)
 		if (pCol->GetCount() > 0)
 		{
 			m_aColumns.SetSelectedColumn(m_pSelectedColumn);
-
-			if (m_pSelectedColumn->GetSelectedItem())
-				m_pSelectedColumn->ScrollToSelection();
+			m_pSelectedColumn->ScrollToSelection();
 
 			if (bNotifyParent)
 				NotifyParentSelectionChange();
@@ -2997,7 +2952,7 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	ReleaseCapture();
 
-	if (!m_bReadOnly && !IsDragging())
+	if (!m_bReadOnly && !IsDragging() && Misc::ModKeysArePressed(0))
 	{
 		ASSERT(pNMHDR->idFrom == IDC_COLUMNCTRL);
 
@@ -3006,9 +2961,10 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 			NMTREEVIEW* pNMTV = (NMTREEVIEW*)pNMHDR;
 			ASSERT(pNMTV->itemNew.hItem);
 			ASSERT(pNMTV->itemNew.lParam);
-		
+
 			CKanbanColumnCtrl* pCol = (CKanbanColumnCtrl*)CWnd::FromHandle(pNMHDR->hwndFrom);
 			ASSERT(pCol == m_pSelectedColumn);
+			ASSERT(pCol->IsTaskSelected(pNMTV->itemNew.lParam));
 
 			if (!pCol->SelectionHasLockedTasks())
 			{
@@ -3166,14 +3122,14 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 		if (bDestIsBacklog)
 		{
 			if (!pKI->HasTrackedAttributeValues(m_sTrackAttribID))
-				pDestCol->AddTask(*pKI/*, TRUE*/);
+				pDestCol->AddTask(*pKI);
 		}
 		else
 		{
 			pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
 
 			if (pDestCol->FindTask(dwTaskID) == NULL)
-				pDestCol->AddTask(*pKI/*, TRUE*/);
+				pDestCol->AddTask(*pKI);
 		}
 	}
 
