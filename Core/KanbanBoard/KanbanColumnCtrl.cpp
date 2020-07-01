@@ -107,7 +107,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_bDrawTaskParents(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
-	m_htiHot(NULL),
+	m_dwHotItem(0),
 	m_tch(*this)
 {
 }
@@ -129,14 +129,11 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_RBUTTONDOWN()
 	ON_WM_KEYDOWN()
 	ON_WM_SYSKEYDOWN()
-	ON_WM_MOUSEMOVE()
 	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-	ON_MESSAGE(WM_MOUSEWHEEL, OnMouseWheel)
-	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -562,7 +559,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				// Icons don't affect attributes
 				CRect rAttributes(rItem);
 
-				DrawItemImages(pDC, pKI, rItem, (hti == m_htiHot));
+				DrawItemImages(pDC, pKI, rItem);
 				DrawItemTitle(pDC, pKI, rItem, crText);
 
 				rAttributes.top += CalcItemTitleTextHeight();
@@ -691,7 +688,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 	}
 }
 
-void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, BOOL bHot) const
+void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
 	CSaveDC sdc(pDC);
 	CRect rClip(rItem), rIcon(rItem);
@@ -712,7 +709,10 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 			DrawItemImage(pDC, rIcon, KBCI_ICON, FALSE, hilTask, iImageIndex);
 	}
 
+	// Always leave space for icon
 	rIcon.OffsetRect(0, IMAGE_SIZE);
+
+	BOOL bHot = (!m_bSavingToImage && (pKI->dwTaskID == m_dwHotItem));
 
 	if (m_bDrawTaskFlags)
 	{
@@ -1197,6 +1197,20 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 	return m_aSelTaskIDs.GetSize();
 }
 
+void CKanbanColumnCtrl::SetHotItem(DWORD dwTaskID)
+{
+	if (m_dwHotItem == dwTaskID)
+		return;
+
+	if (m_dwHotItem)
+		TCH().InvalidateItem(FindItem(m_dwHotItem));
+
+	if (dwTaskID)
+		TCH().InvalidateItem(FindItem(dwTaskID));
+
+	m_dwHotItem = dwTaskID;
+}
+
 HTREEITEM CKanbanColumnCtrl::FindItem(DWORD dwTaskID) const
 {
 	return m_mapHTItems.GetItem(dwTaskID);
@@ -1243,8 +1257,8 @@ BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 	{
 		m_mapHTItems.RemoveKey(dwTaskID);
 
-		if (hti == m_htiHot)
-			m_htiHot = NULL;
+		if (m_dwHotItem == dwTaskID)
+			m_dwHotItem = 0;
 
 		return TRUE;
 	}
@@ -1460,7 +1474,6 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	TVSORTCB tvs = { NULL, SortProc, (LPARAM)&ks };
 
 	SortChildrenCB(&tvs);
-	UpdateHotItem();
 }
 
 void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)
@@ -1469,56 +1482,6 @@ void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 	HandleButtonClick(point, htiUnused);
 	
 	CTreeCtrl::OnRButtonDown(nFlags, point);
-}
-
-void CKanbanColumnCtrl::OnMouseMove(UINT nFlags, CPoint point)
-{
-	CTreeCtrl::OnMouseMove(nFlags, point);
-
-	UpdateHotItem();
-}
-
-LRESULT CKanbanColumnCtrl::OnMouseWheel(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	LRESULT lr = Default();
-
-	UpdateHotItem();
-
-	return lr;
-}
-
-LRESULT CKanbanColumnCtrl::OnMouseLeave(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-	LRESULT lr = Default();
-
-	UpdateHotItem();
-	CDialogHelper::TrackMouseLeave(*this, FALSE);
-
-	return lr;
-}
-
-void CKanbanColumnCtrl::UpdateHotItem()
-{
-	CPoint point(GetMessagePos());
-	ScreenToClient(&point);
-
-	HTREEITEM htiHot = HitTest(point);
-
-	if (htiHot != m_htiHot)
-	{
-		CRect rFlag;
-
-		if (m_htiHot)
-			TCH().InvalidateItem(m_htiHot);
-
-		if (htiHot)
-		{
-			TCH().InvalidateItem(htiHot);
-			CDialogHelper::TrackMouseLeave(*this, TRUE, FALSE);
-		}
-
-		m_htiHot = htiHot;
-	}
 }
 
 void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)

@@ -478,10 +478,16 @@ CKanbanColumnCtrl* CKanbanColumnCtrlArray::HitTest(const CPoint& ptScreen, HTREE
 	return NULL;
 }
 
-
 DWORD CKanbanColumnCtrlArray::HitTestTask(const CPoint& ptScreen) const
 {
-	const CKanbanColumnCtrl* pCol = HitTest(ptScreen);
+	CKanbanColumnCtrl* pUnused = NULL;
+
+	return HitTestTask(ptScreen, pUnused);
+}
+
+DWORD CKanbanColumnCtrlArray::HitTestTask(const CPoint& ptScreen, CKanbanColumnCtrl*& pCol) const
+{
+	pCol = HitTest(ptScreen);
 
 	if (pCol)
 	{
@@ -493,6 +499,33 @@ DWORD CKanbanColumnCtrlArray::HitTestTask(const CPoint& ptScreen) const
 
 	// else
 	return 0;
+}
+
+void CKanbanColumnCtrlArray::FilterToolTipMessage(MSG* pMsg)
+{
+	CKanbanColumnCtrl* pCol = HitTest(pMsg->pt);
+
+	if (pCol)
+		pCol->FilterToolTipMessage(pMsg);
+}
+
+void CKanbanColumnCtrlArray::UpdateHotItem(const CPoint& ptScreen)
+{
+	CKanbanColumnCtrl* pHotCol = NULL;
+	DWORD dwHotItem = HitTestTask(ptScreen, pHotCol);
+
+	int nCol = GetSize();
+
+	while (nCol--)
+	{
+		CKanbanColumnCtrl* pCol = GetAt(nCol);
+		ASSERT(pCol);
+
+		if (pCol == pHotCol)
+			pCol->SetHotItem(dwHotItem);
+		else
+			pCol->SetHotItem(0);
+	}
 }
 
 void CKanbanColumnCtrlArray::SetSelectedColumn(const CKanbanColumnCtrl* pSelCol)

@@ -167,11 +167,8 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CKanbanCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
-	// Column tooltips
-	CKanbanColumnCtrl* pCol = m_aColumns.HitTest(pMsg->pt);
-
-	if (pCol)
-		pCol->FilterToolTipMessage(pMsg);
+	m_aColumns.FilterToolTipMessage(pMsg);
+	m_aColumns.UpdateHotItem(pMsg->pt);
 }
 
 bool CKanbanCtrl::ProcessMessage(MSG* pMsg) 
