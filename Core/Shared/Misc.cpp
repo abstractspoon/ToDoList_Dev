@@ -1747,7 +1747,7 @@ BOOL Misc::IsSymbol(const CString& sValue)
 	return TRUE;
 }
 
-// From: http://www.geeksforgeeks.org/shuffle-a-given-aValues/
+// From: http://www.geeksforgeeks.org/shuffle-a-given-array/
 void Misc::Shuffle(LPTSTR szText)
 {
 	// Use a different seed value so that we don't get same
