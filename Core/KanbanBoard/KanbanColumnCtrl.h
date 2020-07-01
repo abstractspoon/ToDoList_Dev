@@ -178,7 +178,7 @@ protected:
 	int CalcItemTitleTextHeight() const;
 	void RecalcItemLineHeight();
 	void RefreshBkgndColor();
-	BOOL HandleButtonClick(CPoint point, HTREEITEM& htiHit);
+	BOOL HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM& htiHit);
 	BOOL HandleExtendedSelection(HTREEITEM htiSelected);
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
 	BOOL InitTooltip();

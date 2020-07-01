@@ -1503,7 +1503,7 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)
 {
 	HTREEITEM htiUnused = NULL;
-	HandleButtonClick(point, htiUnused);
+	HandleButtonClick(point, FALSE, htiUnused);
 	
 	CTreeCtrl::OnRButtonDown(nFlags, point);
 }
@@ -1518,7 +1518,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	DWORD dwPrevOnlyTaskID = GetOnlySelectedTask(), dwHitTaskID = 0;
 
 	HTREEITEM htiHit = NULL;
-	BOOL bHandled = HandleButtonClick(point, htiHit);
+	BOOL bHandled = HandleButtonClick(point, TRUE, htiHit);
 
 	if (htiHit)
 	{
@@ -1596,7 +1596,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	HTREEITEM htiHit = NULL;
-	BOOL bHandled = HandleButtonClick(point, htiHit);
+	BOOL bHandled = HandleButtonClick(point, TRUE, htiHit);
 
 	if (htiHit)
 	{
@@ -1674,7 +1674,7 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 	return FALSE;
 }
 
-BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
+BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM& htiHit)
 {
 	BOOL bHandled = FALSE;
 
@@ -1712,8 +1712,9 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 				// an existing multiple selection which the 
 				// user intends either to drag or to edit
 				BOOL bSameTask = IsOnlySelectedTask(dwTaskID);
-				BOOL bWantEdit = (HitTestCheckbox(htiHit, point) || 
-									(HitTestImage(htiHit, point) != KBCI_NONE));
+				BOOL bWantEdit = (!bLeftBtn ||
+								  HitTestCheckbox(htiHit, point) || 
+								  (HitTestImage(htiHit, point) != KBCI_NONE));
 
 				if (!bSameTask && !bWantEdit && !::DragDetect(*this, point))
 				{
