@@ -2236,9 +2236,11 @@ BOOL CKanbanCtrl::OnEraseBkgnd(CDC* pDC)
 
 void CKanbanCtrl::OnSetFocus(CWnd* pOldWnd)
 {
-	CWnd::OnSetFocus(pOldWnd);
+	if (m_pSelectedColumn)
+		m_pSelectedColumn->SetFocus();
+	else
+		CWnd::OnSetFocus(pOldWnd);
 
-	FixupColumnFocus();
 	ScrollToSelectedTask();
 }
 
