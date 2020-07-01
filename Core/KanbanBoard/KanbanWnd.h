@@ -133,8 +133,6 @@ protected:
 	void UpdatePriorityColors(const IPreferences* pPrefs);
 	void ProcessTrackedAttributeChange();
 	void RefreshKanbanCtrlDisplayAttributes();
-	int PrepareNotification(TDC_ATTRIBUTE nAttrib, CArray<IUITASKMOD, IUITASKMOD&>& aMods);
-	int PrepareNotification(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttrib, CArray<IUITASKMOD, IUITASKMOD&>& aMods);
 
 };
 

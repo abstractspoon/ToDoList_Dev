@@ -52,10 +52,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const UINT WM_KCM_SELECTTASK = (WM_APP+10); // WPARAM , LPARAM = Task ID
-
-//////////////////////////////////////////////////////////////////////
-
 const UINT IDC_COLUMNCTRL	= 101;
 const UINT IDC_HEADER		= 102;
 
@@ -135,7 +131,6 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_KLCN_EDITTASKPIN, OnColumnEditTaskPin)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
-	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
 
 END_MESSAGE_MAP()
 
@@ -3413,11 +3408,6 @@ LRESULT CKanbanCtrl::OnColumnEditTaskPin(WPARAM /*wp*/, LPARAM lp)
 		m_pSelectedColumn->Sort(m_nSortBy, m_bSortAscending);
 
 	return 0L;
-}
-
-LRESULT CKanbanCtrl::OnSelectTask(WPARAM /*wp*/, LPARAM lp)
-{
-	return 0L;//SelectTask(lp);
 }
 
 LRESULT CKanbanCtrl::OnColumnGetTaskIcon(WPARAM wp, LPARAM lp)
