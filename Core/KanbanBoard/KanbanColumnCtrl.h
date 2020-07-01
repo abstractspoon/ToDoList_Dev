@@ -20,11 +20,12 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_KLCN_EDITTASKDONE	= (WM_APP+1); // WPARAM = HWND, LPARAM = TRUE/FALSE
-const UINT WM_KLCN_GETTASKICON	= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
-const UINT WM_KLCN_EDITTASKICON	= (WM_APP+3); // WPARAM = HWND, LPARAM = 
-const UINT WM_KLCN_EDITTASKFLAG	= (WM_APP+4); // WPARAM = HWND, LPARAM = TRUE/FALSE
-const UINT WM_KLCN_EDITTASKPIN	= (WM_APP+5); // WPARAM = HWND, LPARAM = TRUE/FALSE
+const UINT WM_KLCN_EDITTASKDONE		= (WM_APP+1); // WPARAM = HWND, LPARAM = TRUE/FALSE
+const UINT WM_KLCN_GETTASKICON		= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_KLCN_EDITTASKICON		= (WM_APP+3); // WPARAM = HWND, LPARAM = 
+const UINT WM_KLCN_EDITTASKFLAG		= (WM_APP+4); // WPARAM = HWND, LPARAM = TRUE/FALSE
+const UINT WM_KLCN_EDITTASKPIN		= (WM_APP+5); // WPARAM = HWND, LPARAM = TRUE/FALSE
+const UINT WM_KLCN_EDITTASKLABEL	= (WM_APP+6); // WPARAM = HWND, LPARAM = TaskID
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -71,6 +72,7 @@ public:
 	DWORD GetTaskID(HTREEITEM hti) const { return GetItemData(hti); }
 
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
+	DWORD GetOnlySelectedTask() const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	void ScrollToSelection();
 	BOOL HasTasks(const CDWordArray& aTaskIDs) const;

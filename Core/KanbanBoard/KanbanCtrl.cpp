@@ -121,7 +121,6 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_NOTIFY(HDN_ITEMCHANGING, IDC_HEADER, OnHeaderItemChanging)
 	ON_NOTIFY(TVN_BEGINDRAG, IDC_COLUMNCTRL, OnBeginDragColumnItem)
 	ON_NOTIFY(TVN_SELCHANGED, IDC_COLUMNCTRL, OnColumnItemSelChange)
-	ON_NOTIFY(TVN_BEGINLABELEDIT, IDC_COLUMNCTRL, OnColumnEditLabel)
 	ON_NOTIFY(NM_SETFOCUS, IDC_COLUMNCTRL, OnColumnSetFocus)
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
@@ -131,6 +130,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_KLCN_EDITTASKPIN, OnColumnEditTaskPin)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
+	ON_MESSAGE(WM_KLCN_EDITTASKLABEL, OnColumnEditLabel)
 
 END_MESSAGE_MAP()
 
@@ -2792,14 +2792,27 @@ void CKanbanCtrl::OnColumnItemSelChange(NMHDR* pNMHDR, LRESULT* pResult)
 #endif
 }
 
-void CKanbanCtrl::OnColumnEditLabel(NMHDR* pNMHDR, LRESULT* pResult)
+LRESULT CKanbanCtrl::OnColumnEditLabel(WPARAM wp, LPARAM lp)
 {
-	*pResult = TRUE; // cancel our edit
+	// Sanity checks
+	if (!m_pSelectedColumn)
+	{
+		ASSERT(0);
+	}
+	else if (m_pSelectedColumn->GetSafeHwnd() != (HWND)wp)
+	{
+		ASSERT(0);
+	}
+	else if (m_pSelectedColumn->GetOnlySelectedTask() != lp)
+	{
+		ASSERT(0);
+	}
+	else
+	{
+		GetParent()->SendMessage(WM_KBC_EDITTASKTITLE, lp);
+	}
 
-	NMTVDISPINFO* pNMTV = (NMTVDISPINFO*)pNMHDR;
-	ASSERT(pNMTV->item.lParam);
-
-	GetParent()->SendMessage(WM_KBC_EDITTASKTITLE, pNMTV->item.lParam);
+	return 0L;
 }
 
 void CKanbanCtrl::OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult)

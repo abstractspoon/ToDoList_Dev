@@ -142,7 +142,7 @@ END_MESSAGE_MAP()
 BOOL CKanbanColumnCtrl::Create(UINT nID, CWnd* pParentWnd)
 {
 	UINT nFlags = (WS_CHILD | WS_VISIBLE | LVS_REPORT | WS_TABSTOP |
-				   TVS_NONEVENHEIGHT | TVS_SHOWSELALWAYS | TVS_EDITLABELS | 
+				   TVS_NONEVENHEIGHT | TVS_SHOWSELALWAYS | 
 				   TVS_FULLROWSELECT | TVS_NOTOOLTIPS | TVS_NOHSCROLL);
 
 	return CTreeCtrl::Create(nFlags, CRect(0, 0, 0, 0), pParentWnd, nID);
@@ -488,7 +488,7 @@ void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, cons
 {
 	if (bSelected)
 	{
-		BOOL bFocused = (bSelected && (GetFocus() == this));
+		BOOL bFocused = (bSelected && (::GetFocus() == *this));
 
 		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
@@ -1138,13 +1138,13 @@ void CKanbanColumnCtrl::ScrollToSelection()
 {
 	ASSERT(m_bSelected);
 
-	if (m_aSelTaskIDs.GetSize())
+	if (GetSelectedCount())
 	{
 		CRect rClient;
 		GetClientRect(rClient);
 
 		// Check for any selected item being completely visible
-		int nID = m_aSelTaskIDs.GetSize();
+		int nID = GetSelectedCount();
 		HTREEITEM htiPartial = NULL;
 
 		while (nID--)
@@ -1210,16 +1210,15 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 
 BOOL CKanbanColumnCtrl::IsOnlySelectedTask(DWORD dwTaskID)
 {
-	if (!m_bSelected)
-		return FALSE;
+	return (dwTaskID && (dwTaskID == GetOnlySelectedTask()));
+}
 
-	if (!dwTaskID)
-		return FALSE;
+DWORD CKanbanColumnCtrl::GetOnlySelectedTask() const
+{
+	if (GetSelectedCount() != 1)
+		return 0;
 
-	if (m_aSelTaskIDs.GetSize() != 1)
-		return FALSE;
-	
-	return (m_aSelTaskIDs[0] == dwTaskID);
+	return m_aSelTaskIDs[0];
 }
 
 void CKanbanColumnCtrl::SetHotItem(DWORD dwTaskID)
@@ -1516,14 +1515,16 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	// left of the task to select the task BUT NOT begin a 
 	// drag operation or a label edit. 
 	// My intuition tells me that it can be simplified...
+	DWORD dwPrevOnlyTaskID = GetOnlySelectedTask(), dwHitTaskID = 0;
+
 	HTREEITEM htiHit = NULL;
 	BOOL bHandled = HandleButtonClick(point, htiHit);
 
 	if (htiHit)
 	{
-		DWORD dwTaskID = GetTaskID(htiHit);
+		dwHitTaskID = GetTaskID(htiHit);
 
-		const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+		const KANBANITEM* pKI = m_data.GetItem(dwHitTaskID);
 		ASSERT(pKI);
 
 		UINT nMsgID = 0;
@@ -1562,7 +1563,8 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		}
 		else if (bHandled)
 		{
-			// Handle item drag if the point is to the left of any indent
+			// Perform drag if the point is to the right of any indent
+			// because we won't be calling the base class handler
 			CRect rIndentedItem;
 			GetItemLabelTextRect(htiHit, rIndentedItem, FALSE);
 
@@ -1578,30 +1580,12 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 					NMTREEVIEW nmtv = { *this, (UINT)GetDlgCtrlID(), TVN_BEGINDRAG, 0 };
 
 					nmtv.itemNew.hItem = htiHit;
-					nmtv.itemNew.lParam = dwTaskID;
+					nmtv.itemNew.lParam = dwHitTaskID;
 					nmtv.ptDrag = point;
 
 					GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&nmtv);
 				}
 			}
-		}
-	}
-
-	// If not handled second click should cause label edit
-	if (!bHandled && htiHit)
-	{
-		// Adjust 'point' to compensate for the indent
-		CRect rTreeItem, rIndentedItem;
-
-		CTreeCtrl::GetItemRect(htiHit, rTreeItem, FALSE);
-		GetItemLabelTextRect(htiHit, rIndentedItem, FALSE);
-
-		if (rTreeItem.left != rIndentedItem.left)
-		{
-			point.x -= (rIndentedItem.left - rTreeItem.left);
-			DefWindowProc(WM_LBUTTONDOWN, nFlags, MAKELPARAM(point.x, point.y));
-		
-			bHandled = TRUE;
 		}
 	}
 	
@@ -1622,7 +1606,7 @@ void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 		if (point.x > rIndentedItem.left)
 		{
 			bHandled = TRUE;
-			EditLabel(htiHit);
+			GetParent()->PostMessage(WM_KLCN_EDITTASKLABEL, (WPARAM)GetSafeHwnd(), GetTaskID(htiHit));
 		}
 	}
 
@@ -1706,11 +1690,8 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 	}
 	else
 	{
-		if (!m_bSelected)
-		{
-			SetFocus();
-			bHandled = TRUE;
-		}
+		bHandled = !m_bSelected;
+		SetFocus();
 
 		if (HandleExtendedSelection(htiHit))
 		{

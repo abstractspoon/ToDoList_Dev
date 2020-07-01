@@ -122,14 +122,8 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnColumnItemSelChange(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnColumnEditLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg LRESULT OnColumnEditTaskDone(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnColumnEditTaskIcon(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnColumnEditTaskFlag(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnColumnEditTaskPin(WPARAM wp, LPARAM lp);
 	afx_msg void OnColumnSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg LRESULT OnColumnGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnSetFocus(CWnd* );
@@ -139,6 +133,13 @@ protected:
 	afx_msg void OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult);
+
+	afx_msg LRESULT OnColumnEditLabel(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnEditTaskDone(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnEditTaskIcon(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnEditTaskFlag(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnEditTaskPin(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnGetTaskIcon(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
