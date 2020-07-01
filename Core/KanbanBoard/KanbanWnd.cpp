@@ -81,8 +81,8 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_WM_ERASEBKGND()
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_REGISTERED_MESSAGE(WM_KBC_VALUECHANGE, OnKanbanNotifyValueChange)
-	ON_REGISTERED_MESSAGE(WM_KBC_TOGGLETASKDONE, OnKanbanNotifyToggleTaskDone)
-	ON_REGISTERED_MESSAGE(WM_KBC_TOGGLETASKFLAG, OnKanbanNotifyToggleTaskFlag)
+	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKDONE, OnKanbanNotifyEditTaskDone)
+	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKFLAG, OnKanbanNotifyEditTaskFlag)
 	ON_REGISTERED_MESSAGE(WM_KBC_SELECTIONCHANGE, OnKanbanNotifySelectionChange)
 	ON_REGISTERED_MESSAGE(WM_KBC_PREFSHELP, OnKanbanPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_KBC_GETTASKICON, OnKanbanNotifyGetTaskIcon)
@@ -775,8 +775,7 @@ void CKanbanWnd::RefreshKanbanCtrlDisplayAttributes()
 
 LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 {
-	ASSERT((HWND)wp == m_ctrlKanban.GetSafeHwnd());
-	ASSERT(lp);
+	ASSERT(wp && lp);
 	
 	CString sCustAttribID;
 	TDC_ATTRIBUTE nAttrib = TDCA_NONE;
@@ -791,8 +790,8 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 		sCustAttribID = m_sTrackedCustomAttribID;
 	}
 
-	const CDWordArray* pTaskIDs = (const CDWordArray*)lp;
-	int nNumMods = pTaskIDs->GetSize();
+	int nNumMods = (int)wp;
+	LPDWORD pTaskIDs = (LPDWORD)lp;
 
 	CArray<IUITASKMOD, IUITASKMOD&> aMods;
 	aMods.SetSize(nNumMods);
@@ -802,7 +801,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 		IUITASKMOD& mod = aMods[nMod];
 
 		mod.nAttrib = nAttrib;
-		mod.dwSelectedTaskID = pTaskIDs->GetAt(nMod);
+		mod.dwSelectedTaskID = pTaskIDs[nMod];
 
 		CStringArray aTaskValues;
 		m_ctrlKanban.GetTaskTrackedAttributeValues(mod.dwSelectedTaskID, aTaskValues);
@@ -853,70 +852,37 @@ LRESULT CKanbanWnd::OnKanbanNotifySelectionChange(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
-LRESULT CKanbanWnd::OnKanbanNotifyToggleTaskDone(WPARAM /*wp*/, LPARAM lp) 
+LRESULT CKanbanWnd::OnKanbanNotifyEditTaskDone(WPARAM /*wp*/, LPARAM lp) 
 {
+	// This is complicated by the fact that we don't
+	// want to change any existing completion dates
+	int nNumSel = m_aSelTaskIDs.GetSize();
+	
 	CArray<IUITASKMOD, IUITASKMOD&> aMods;
-	int nNumMods = PrepareNotification(TDCA_DONEDATE, aMods);
-
-	for (int nMod = 0; nMod < nNumMods; nMod++)
-	{
-		IUITASKMOD& mod = aMods[nMod];
-
-		if (m_ctrlKanban.IsTaskDone(mod.dwSelectedTaskID))
-			mod.tValue = T64Utils::T64_NULL;
-		else
-			VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
-	}
-
-	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMods, (LPARAM)aMods.GetData());
-}
-
-LRESULT CKanbanWnd::OnKanbanNotifyToggleTaskFlag(WPARAM /*wp*/, LPARAM lp) 
-{
-	CArray<IUITASKMOD, IUITASKMOD&> aMods;
-	int nNumMods = PrepareNotification(TDCA_FLAG, aMods);
-
-	for (int nMod = 0; nMod < nNumMods; nMod++)
-	{
-		IUITASKMOD& mod = aMods[nMod];
-		mod.bValue = !m_ctrlKanban.IsTaskFlagged(mod.dwSelectedTaskID);
-	}
-
-	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, nNumMods, (LPARAM)aMods.GetData());
-}
-
-int CKanbanWnd::PrepareNotification(TDC_ATTRIBUTE nAttrib, CArray<IUITASKMOD, IUITASKMOD&>& aMods)
-{
-	CDWordArray aTaskIDs;
-	m_ctrlKanban.GetSelectedTaskIDs(aTaskIDs);
-
-	return PrepareNotification(aTaskIDs, nAttrib, aMods);
-}
-
-int CKanbanWnd::PrepareNotification(const CDWordArray& aTaskIDs, TDC_ATTRIBUTE nAttrib, CArray<IUITASKMOD, IUITASKMOD&>& aMods)
-{
-	int nNumMods = aTaskIDs.GetSize();
-	aMods.SetSize(nNumMods);
-
-	for (int nMod = 0; nMod < nNumMods; nMod++)
-	{
-		IUITASKMOD& mod = aMods[nMod];
-
-		mod.nAttrib = TDCA_FLAG;
-		mod.dwSelectedTaskID = aTaskIDs[nMod];
-	}
-
-	return nNumMods;
-}
-
-LRESULT CKanbanWnd::OnKanbanNotifyFlagChange(WPARAM /*wp*/, LPARAM lp) 
-{
 	IUITASKMOD mod = { TDCA_DONEDATE, 0, 0 };
 
-	if (lp) // done/not done
-		VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
-	else
-		mod.tValue = T64Utils::T64_NULL;
+	for (int nSel = 0, nMod = 0; nSel < nNumSel; nSel++)
+	{
+		mod.dwSelectedTaskID = m_aSelTaskIDs[nSel];
+
+		if (lp && m_ctrlKanban.IsTaskDone(mod.dwSelectedTaskID))
+			continue;
+
+		if (lp) // done
+			VERIFY(CDateHelper::GetTimeT64(CDateHelper::GetDate(DHD_NOW), mod.tValue));
+		else
+			mod.tValue = T64Utils::T64_NULL;
+
+		aMods.Add(mod);
+	}
+
+	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, aMods.GetSize(), (LPARAM)aMods.GetData());
+}
+
+LRESULT CKanbanWnd::OnKanbanNotifyEditTaskFlag(WPARAM /*wp*/, LPARAM lp) 
+{
+	IUITASKMOD mod = { TDCA_FLAG, 0, 0 };
+	mod.bValue = (lp != FALSE);
 
 	return GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod);
 }

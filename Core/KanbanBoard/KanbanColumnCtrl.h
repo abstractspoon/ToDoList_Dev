@@ -20,11 +20,11 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_KLCN_TOGGLETASKDONE	= (WM_APP+1); // WPARAM = HWND, LPARAM = 
-const UINT WM_KLCN_GETTASKICON		= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
-const UINT WM_KLCN_EDITTASKICON		= (WM_APP+3); // WPARAM = HWND, LPARAM = 
-const UINT WM_KLCN_TOGGLETASKFLAG	= (WM_APP+4); // WPARAM = HWND, LPARAM = 
-const UINT WM_KLCN_TOGGLETASKPIN	= (WM_APP+5); // WPARAM = HWND, LPARAM = 
+const UINT WM_KLCN_EDITTASKDONE	= (WM_APP+1); // WPARAM = HWND, LPARAM = TRUE/FALSE
+const UINT WM_KLCN_GETTASKICON	= (WM_APP+2); // WPARAM = TaskID, LPARAM = int* (imageIndex), return HIMAGELIST
+const UINT WM_KLCN_EDITTASKICON	= (WM_APP+3); // WPARAM = HWND, LPARAM = 
+const UINT WM_KLCN_EDITTASKFLAG	= (WM_APP+4); // WPARAM = HWND, LPARAM = TRUE/FALSE
+const UINT WM_KLCN_EDITTASKPIN	= (WM_APP+5); // WPARAM = HWND, LPARAM = TRUE/FALSE
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window

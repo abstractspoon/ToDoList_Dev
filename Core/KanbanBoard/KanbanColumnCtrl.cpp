@@ -1533,12 +1533,18 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	if (htiHit)
 	{
-		UINT nMsgID = 0;
 		DWORD dwTaskID = GetTaskID(htiHit);
+
+		const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+		ASSERT(pKI);
+
+		UINT nMsgID = 0;
+		BOOL bSet = FALSE;
 
 		if (HitTestCheckbox(htiHit, point))
 		{
-			nMsgID = WM_KLCN_TOGGLETASKDONE;
+			nMsgID = WM_KLCN_EDITTASKDONE;
+			bSet = !pKI->bDone;
 		}
 		else
 		{
@@ -1549,12 +1555,13 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 				break;
 
 			case KBCI_FLAG:
-				nMsgID = WM_KLCN_TOGGLETASKFLAG;
+				nMsgID = WM_KLCN_EDITTASKFLAG;
+				bSet = !pKI->bFlagged;
 				break;
 
 			case KBCI_PIN:
-				nMsgID = WM_KLCN_TOGGLETASKPIN;
-				TCH().InvalidateItem(htiHit);
+				nMsgID = WM_KLCN_EDITTASKPIN;
+				bSet = !pKI->bPinned;
 				break;
 			}
 		}
@@ -1562,7 +1569,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		if (nMsgID)
 		{
 			// Post message to give mouse-click time to complete
-			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd());
+			GetParent()->PostMessage(nMsgID, 0, bSet);
 			bHandled = TRUE;
 		}
 		else if (bHandled)

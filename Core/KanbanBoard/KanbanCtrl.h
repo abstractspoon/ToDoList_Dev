@@ -126,10 +126,10 @@ protected:
 	afx_msg void OnColumnItemSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnColumnEditLabel(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg LRESULT OnColumnToggleTaskDone(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnEditTaskDone(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColumnEditTaskIcon(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnColumnToggleTaskFlag(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnColumnToggleTaskPin(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnEditTaskFlag(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnEditTaskPin(WPARAM wp, LPARAM lp);
 	afx_msg void OnColumnSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnColumnGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);

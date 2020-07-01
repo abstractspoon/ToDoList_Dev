@@ -130,9 +130,9 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
-	ON_MESSAGE(WM_KLCN_TOGGLETASKDONE, OnColumnToggleTaskDone)
-	ON_MESSAGE(WM_KLCN_TOGGLETASKFLAG, OnColumnToggleTaskFlag)
-	ON_MESSAGE(WM_KLCN_TOGGLETASKPIN, OnColumnToggleTaskPin)
+	ON_MESSAGE(WM_KLCN_EDITTASKDONE, OnColumnEditTaskDone)
+	ON_MESSAGE(WM_KLCN_EDITTASKFLAG, OnColumnEditTaskFlag)
+	ON_MESSAGE(WM_KLCN_EDITTASKPIN, OnColumnEditTaskPin)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
 	ON_MESSAGE(WM_KCM_SELECTTASK, OnSelectTask)
@@ -997,19 +997,39 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 		pKI->sCreatedBy = pTasks->GetTaskCreatedBy(hTask);
 	
 	if (pTasks->IsAttributeAvailable(TDCA_CREATIONDATE))
-		pKI->dtCreate = pTasks->GetTaskCreationDate(hTask);
+		pKI->dtCreate = pTasks->GetTaskCreationDate(hTask); // doesn't change
 	
-	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE) && pTasks->GetTaskDoneDate64(hTask, tDate))
-		pKI->dtDone = CDateHelper::GetDate(tDate);
+	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+	{
+		if (pTasks->GetTaskDoneDate64(hTask, tDate))
+			pKI->dtDone = CDateHelper::GetDate(tDate);
+		else
+			CDateHelper::ClearDate(pKI->dtDone);
+	}
 	
-	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE) && pTasks->GetTaskDueDate64(hTask, true, tDate))
-		pKI->dtDue = CDateHelper::GetDate(tDate);
+	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
+	{
+		if (pTasks->GetTaskDueDate64(hTask, true, tDate))
+			pKI->dtDue = CDateHelper::GetDate(tDate);
+		else
+			CDateHelper::ClearDate(pKI->dtDue);
+	}
 	
-	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE) && pTasks->GetTaskStartDate64(hTask, true, tDate))
-		pKI->dtStart = CDateHelper::GetDate(tDate);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_LASTMODDATE) && pTasks->GetTaskLastModified64(hTask, tDate))
-		pKI->dtLastMod = CDateHelper::GetDate(tDate);
+	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
+	{
+		if (pTasks->GetTaskStartDate64(hTask, true, tDate))
+			pKI->dtStart = CDateHelper::GetDate(tDate);
+		else
+			CDateHelper::ClearDate(pKI->dtStart);
+	}
+		
+	if (pTasks->IsAttributeAvailable(TDCA_LASTMODDATE))
+	{
+		if (pTasks->GetTaskLastModified64(hTask, tDate))
+			pKI->dtLastMod = CDateHelper::GetDate(tDate);
+		else
+			CDateHelper::ClearDate(pKI->dtLastMod);
+	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
 		pKI->nPercent = pTasks->GetTaskPercentDone(hTask, true);
@@ -1902,7 +1922,7 @@ void CKanbanCtrl::FixupColumnFocus()
 			CAutoFlag af(m_bSettingColumnFocus, TRUE);
 
 			m_pSelectedColumn->SetFocus();
-			m_pSelectedColumn->Invalidate(TRUE);
+			m_pSelectedColumn->Invalidate(FALSE);
 		}
 
 		if (pFocus)
@@ -2685,7 +2705,7 @@ BOOL CKanbanCtrl::NotifyParentAttibuteChange(const CDWordArray& aTaskIDs)
 	ASSERT(!m_bReadOnly);
 	ASSERT(aTaskIDs.GetSize());
 
-	return GetParent()->SendMessage(WM_KBC_VALUECHANGE, (WPARAM)GetSafeHwnd(), (LPARAM)&aTaskIDs);
+	return GetParent()->SendMessage(WM_KBC_VALUECHANGE, aTaskIDs.GetSize(), (LPARAM)aTaskIDs.GetData());
 }
 
 void CKanbanCtrl::NotifyParentSelectionChange()
@@ -3284,7 +3304,7 @@ LRESULT CKanbanCtrl::OnSetFont(WPARAM wp, LPARAM lp)
 	return 0L;
 }
 
-LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CKanbanCtrl::OnColumnEditTaskDone(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 
@@ -3292,22 +3312,12 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM /*lp*/)
 	int nID = GetSelectedTaskIDs(aTaskIDs);
 	ASSERT(nID);
 
-	// Cache completion state for later update
-	CDWordSet mapTaskDone;
-
-	while (nID--)
-	{
-		if (IsTaskDone(aTaskIDs[nID]))
-			mapTaskDone.Add(aTaskIDs[nID]);
-	}
-
-	LRESULT lr = GetParent()->SendMessage(WM_KBC_TOGGLETASKDONE);
+	LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKDONE, 0, lp);
 
 	if (lr)
 	{
-		// If the app hasn't already updated this for us we must do it ourselves
-		nID = aTaskIDs.GetSize();
-
+		// If the app hasn't updated the completion state
+		// we must do it ourselves
 		while (nID--)
 		{
 			DWORD dwTaskID = aTaskIDs[nID];
@@ -3315,24 +3325,24 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskDone(WPARAM /*wp*/, LPARAM /*lp*/)
 
 			if (pKI && !pKI->bLocked)
 			{
-				BOOL bWasDone = mapTaskDone.Has(dwTaskID);
-				BOOL bIsDone = pKI->IsDone(FALSE);
-
-				if (bWasDone && bIsDone)
-				{
-					pKI->bDone = FALSE;
-					CDateHelper::ClearDate(pKI->dtDone);
-				}
-				else if (!bWasDone && !bIsDone)
+				if (lp && !pKI->bDone)
 				{
 					pKI->bDone = TRUE;
 					pKI->dtDone = COleDateTime::GetCurrentTime();
 				}
+				else if (!lp && pKI->bDone)
+				{
+					pKI->bDone = FALSE;
+					CDateHelper::ClearDate(pKI->dtDone);
+				}
+
+				if (m_pSelectedColumn)
+					m_pSelectedColumn->RefreshItemLineHeights(dwTaskID);
 			}
 		}
 
 		if (m_pSelectedColumn)
-			m_pSelectedColumn->Invalidate();
+			m_pSelectedColumn->Invalidate(FALSE);
 
 		return lr;
 	}
@@ -3349,7 +3359,7 @@ LRESULT CKanbanCtrl::OnColumnEditTaskIcon(WPARAM /*wp*/, LPARAM /*lp*/)
 	return GetParent()->SendMessage(WM_KBC_EDITTASKICON);
 }
 
-LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CKanbanCtrl::OnColumnEditTaskFlag(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 
@@ -3357,25 +3367,22 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM /*lp*/)
 	int nID = GetSelectedTaskIDs(aTaskIDs);
 	ASSERT(nID);
 
-	LRESULT lr = GetParent()->SendMessage(WM_KBC_TOGGLETASKFLAG);
+	LRESULT lr = GetParent()->SendMessage(WM_KBC_EDITTASKFLAG, 0, lp);
 
 	if (lr)
 	{
+		// Update item flag states
 		while (nID--)
 		{
 			DWORD dwTaskID = aTaskIDs[nID];
 			KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 
 			if (pKI && !pKI->bLocked)
-			{
-				pKI->bFlagged = !pKI->bFlagged;
-
-				if (m_pSelectedColumn)
-					m_pSelectedColumn->Invalidate();
-
-				//PostMessage(WM_KCM_SELECTTASK, 0, dwTaskID);
-			}
+				pKI->bFlagged = lp;
 		}
+
+		if (m_pSelectedColumn)
+			m_pSelectedColumn->Invalidate(FALSE);
 
 		return lr;
 	}
@@ -3385,7 +3392,7 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskFlag(WPARAM /*wp*/, LPARAM /*lp*/)
 	return 0L;
 }
 
-LRESULT CKanbanCtrl::OnColumnToggleTaskPin(WPARAM /*wp*/, LPARAM lp)
+LRESULT CKanbanCtrl::OnColumnEditTaskPin(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(!m_bReadOnly);
 
@@ -3399,7 +3406,7 @@ LRESULT CKanbanCtrl::OnColumnToggleTaskPin(WPARAM /*wp*/, LPARAM lp)
 		KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 
 		if (pKI)
-			pKI->bPinned = !pKI->bPinned;
+			pKI->bPinned = lp;
 	}
 
 	// Resort the selected column

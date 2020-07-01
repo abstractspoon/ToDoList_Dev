@@ -11,7 +11,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = HWND, LPARAM = CDWordArray*
+// WPARAM = int, LPARAM = LPDWORD
 const UINT WM_KBC_VALUECHANGE		= ::RegisterWindowMessage(_T("WM_KBC_VALUECHANGE"));
 
 // WPARAM = , LPARAM = 
@@ -23,8 +23,8 @@ const UINT WM_KBC_PREFSHELP			= ::RegisterWindowMessage(_T("WM_KBC_PREFSHELP"));
 // WPARAM = Task ID, LPARAM = int* (imageIndex), return HIMAGELIST
 const UINT WM_KBC_GETTASKICON 		= ::RegisterWindowMessage(_T("WM_KBC_GETTASKICON"));
 
-// WPARAM = , LPARAM = 
-const UINT WM_KBC_TOGGLETASKDONE	= ::RegisterWindowMessage(_T("WM_KBC_TOGGLETASKDONE"));
+// WPARAM = , LPARAM = TRUE/FALSE
+const UINT WM_KBC_EDITTASKDONE		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKDONE"));
 
 // WPARAM = Task ID, LPARAM = 
 const UINT WM_KBC_EDITTASKTITLE		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKTITLE"));
@@ -32,8 +32,8 @@ const UINT WM_KBC_EDITTASKTITLE		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKTI
 // WPARAM = , LPARAM = 
 const UINT WM_KBC_EDITTASKICON		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKICON"));
 
-// WPARAM = , LPARAM =  
-const UINT WM_KBC_TOGGLETASKFLAG	= ::RegisterWindowMessage(_T("WM_KBC_TOGGLETASKFLAG"));
+// WPARAM = , LPARAM = TRUE/FALSE
+const UINT WM_KBC_EDITTASKFLAG		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKFLAG"));
 
 // WPARAM = Sort ascending, LPARAM = TDC_ATTRIBUTE
 const UINT WM_KBC_SORTCHANGE		= ::RegisterWindowMessageW(L"WM_KBC_SORTCHANGE");
