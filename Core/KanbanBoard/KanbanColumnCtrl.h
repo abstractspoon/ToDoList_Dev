@@ -121,7 +121,7 @@ protected:
 	const CKanbanAttributeArray& m_aDisplayAttrib;
 
 	// For quick lookup
-	CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&> m_mapItems;
+	CHTIMap m_mapHTItems;
 
 	CImageList m_ilCheckboxes, m_ilIcons;
 	CToolTipCtrlEx m_tooltip;
@@ -180,6 +180,7 @@ protected:
 	void RecalcItemLineHeight();
 	void RefreshBkgndColor();
 	BOOL HandleButtonClick(CPoint point, HTREEITEM& htiHit);
+	BOOL HandleExtendedSelection(HTREEITEM htiSelected);
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
 	BOOL InitTooltip();
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
@@ -206,7 +207,6 @@ protected:
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	int BuildSortedSelection(CHTIList& lstHTI) const;
-	void SortSelection();
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);

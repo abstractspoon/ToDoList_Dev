@@ -128,6 +128,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_RBUTTONDOWN()
 	ON_WM_KEYDOWN()
+	ON_WM_SYSKEYDOWN()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
@@ -401,7 +402,7 @@ HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 
 	if (hti)
 	{
-		m_mapItems[ki.dwTaskID] = hti;
+		m_mapHTItems.AddItem(*this, hti);
 		RefreshItemLineHeights(hti);
 	}
 
@@ -1102,23 +1103,6 @@ int CKanbanColumnCtrl::BuildSortedSelection(CHTIList& lstHTI) const
 	return lstHTI.GetCount();
 }
 
-void CKanbanColumnCtrl::SortSelection()
-{
-	if (m_aSelTaskIDs.GetSize() > 1)
-	{
-		CHTIList lstHTI;
-
-		if (BuildSortedSelection(lstHTI))
-		{
-			m_aSelTaskIDs.RemoveAll();
-			POSITION pos = lstHTI.GetHeadPosition();
-
-			while (pos)
-				m_aSelTaskIDs.Add(GetTaskID(lstHTI.GetNext(pos)));
-		}
-	}
-}
-
 BOOL CKanbanColumnCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
 	if (HasTasks(aTaskIDs))
@@ -1137,7 +1121,7 @@ BOOL CKanbanColumnCtrl::HasTasks(const CDWordArray& aTaskIDs) const
 
 	while (nID--)
 	{
-		if (!FindTask(aTaskIDs[nID]))
+		if (!m_mapHTItems.HasItem(aTaskIDs[nID]))
 			return FALSE;
 	}
 
@@ -1215,10 +1199,7 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 
 HTREEITEM CKanbanColumnCtrl::FindItem(DWORD dwTaskID) const
 {
-	HTREEITEM hti = NULL;
-	m_mapItems.Lookup(dwTaskID, hti);
-
-	return hti;
+	return m_mapHTItems.GetItem(dwTaskID);
 }
 
 HTREEITEM CKanbanColumnCtrl::FindItem(const CPoint& ptScreen) const
@@ -1260,7 +1241,7 @@ BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 
 	if (hti && CTreeCtrl::DeleteItem(hti))
 	{
-		m_mapItems.RemoveKey(dwTaskID);
+		m_mapHTItems.RemoveKey(dwTaskID);
 
 		if (hti == m_htiHot)
 			m_htiHot = NULL;
@@ -1273,7 +1254,7 @@ BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 
 BOOL CKanbanColumnCtrl::DeleteAll()
 {
-	m_mapItems.RemoveAll();
+	m_mapHTItems.RemoveAll();
 
 	return CTreeCtrl::DeleteAllItems();
 }
@@ -1292,14 +1273,14 @@ int CKanbanColumnCtrl::RemoveDeletedTasks(const CDWordSet& mapCurIDs)
 
 		if (!mapCurIDs.Has(dwTaskID) && CTreeCtrl::DeleteItem(hti))
 		{	
-			m_mapItems.RemoveKey(dwTaskID);
+			m_mapHTItems.RemoveKey(dwTaskID);
 			nNumDeleted++;
 		}
 
 		hti = htiNext;
 	}
 
-	ASSERT(m_mapItems.GetCount() == (int)GetCount());
+	ASSERT(m_mapHTItems.GetCount() == (int)GetCount());
 
 	return nNumDeleted;
 }
@@ -1642,6 +1623,66 @@ void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 		CTreeCtrl::OnLButtonDblClk(nFlags, point);
 }
 
+BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
+{
+	DWORD dwTaskID = GetTaskID(htiSelected);
+
+	if (Misc::IsKeyPressed(VK_SHIFT))
+	{
+		// select all items between first item (anchor) and clicked item
+		if (m_aSelTaskIDs.GetSize())
+		{
+			DWORD dwAnchorID = m_aSelTaskIDs[0];
+
+			HTREEITEM htiAnchor = FindItem(dwAnchorID);
+			ASSERT(htiAnchor);
+
+			CTreeSelectionHelper tsh(*this);
+			tsh.SetItems(htiAnchor, htiSelected, TSHS_SELECT, FALSE);
+
+			// If control is pressed we append these to the current
+			// selection else we overwrite the current selection
+			if (Misc::IsKeyPressed(VK_CONTROL))
+			{
+				CDWordArray aNewTaskIDs;
+				tsh.GetItemData(aNewTaskIDs);
+
+				Misc::AddUniqueItems(aNewTaskIDs, m_aSelTaskIDs);
+			}
+			else
+			{
+				tsh.GetItemData(m_aSelTaskIDs);
+			}
+
+			// Move the anchor to the head
+			Misc::RemoveItemT(dwAnchorID, m_aSelTaskIDs);
+			m_aSelTaskIDs.InsertAt(0, dwAnchorID);
+		}
+		else
+		{
+			SelectTask(dwTaskID);
+		}
+
+		return TRUE;
+	}
+	
+	if (Misc::IsKeyPressed(VK_CONTROL))
+	{
+		if (Misc::FindT(dwTaskID, m_aSelTaskIDs) == -1)
+		{
+			m_aSelTaskIDs.InsertAt(0, dwTaskID); // new anchor
+		}
+		else
+		{
+			Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
+		}
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 {
 	BOOL bHandled = FALSE;
@@ -1664,31 +1705,40 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 			bHandled = TRUE;
 		}
 
-		DWORD dwTaskID = GetTaskID(htiHit);
-
-		if (Misc::IsKeyPressed(VK_CONTROL))
+		if (HandleExtendedSelection(htiHit))
 		{
-			if (Misc::FindT(dwTaskID, m_aSelTaskIDs) == -1)
+			bHandled = TRUE;
+		}
+		else
+		{
+			DWORD dwTaskID = GetTaskID(htiHit);
+
+			if (!IsTaskSelected(dwTaskID))
 			{
-				m_aSelTaskIDs.Add(dwTaskID);
+				SelectTask(dwTaskID);
+				bHandled = TRUE;
 			}
 			else
 			{
-				Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
+				// We need to be careful here not to clear
+				// an existing multiple selection which the 
+				// user intends either to drag or to edit
+				BOOL bWantEdit = (HitTestCheckbox(htiHit, point) || 
+									(HitTestImage(htiHit, point) != KBCI_NONE));
+
+				if (!bWantEdit && !::DragDetect(*this, point))
+				{
+					SelectTask(dwTaskID);
+					bHandled = TRUE;
+				}
 			}
 		}
-		else if (Misc::IsKeyPressed(VK_SHIFT))
-		{
-			// select all items between first item (anchor)
-			// and clicked item
-		}
-		else if (!IsTaskSelected(dwTaskID) || !::DragDetect(*this, point))
-		{
-			SelectTask(dwTaskID);
-		}
 
-		NotifyParentSelectionChange(htiHit, TRUE);
-		Invalidate(FALSE);
+		if (bHandled)
+		{
+			NotifyParentSelectionChange(htiHit, TRUE);
+			Invalidate(FALSE);
+		}
 	}
 
 	return bHandled;
@@ -1696,29 +1746,42 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 
 void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	HTREEITEM hti = NULL;
+	HTREEITEM htiSel = NULL, htiNext = NULL;
 
 	switch (nChar)
 	{
 	case VK_UP:
-		hti = GetPrevVisibleItem(GetFirstSelectedItem());
+		htiSel = GetFirstSelectedItem();
+		htiNext = GetPrevVisibleItem(htiSel);
 		break;
 
 	case VK_DOWN:
-		hti = GetNextVisibleItem(GetLastSelectedItem());
+		htiSel = GetLastSelectedItem();
+		htiNext = GetNextVisibleItem(htiSel);
 		break;
 
 	case VK_PRIOR:
-		hti = TCH().GetPrevPageVisibleItem(GetFirstSelectedItem());
+		htiSel = GetFirstSelectedItem();
+		htiNext = TCH().GetPrevPageVisibleItem(htiSel);
 		break;
 
 	case VK_NEXT:
-		hti = TCH().GetNextPageVisibleItem(GetLastSelectedItem());
+		htiSel = GetLastSelectedItem();
+		htiNext = TCH().GetNextPageVisibleItem(htiSel);
 		break;
 	}
 
-	if (hti)
-		SelectItem(hti, FALSE);
+	if (!htiNext)
+		htiNext = htiSel;
+
+	if (htiNext)
+	{
+		if (HandleExtendedSelection(htiNext) || SelectItem(htiNext, FALSE))
+		{
+			NotifyParentSelectionChange(htiNext, FALSE);
+			Invalidate(FALSE);
+		}
+	}
 }
 
 KBC_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, CPoint point) const
