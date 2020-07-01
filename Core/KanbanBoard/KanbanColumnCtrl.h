@@ -70,7 +70,6 @@ public:
 
 	DWORD GetTaskID(HTREEITEM hti) const { return GetItemData(hti); }
 
-	BOOL SelectTask(DWORD dwTaskID);
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	void ScrollToSelection();
@@ -189,6 +188,8 @@ protected:
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
 	void NotifyParentSelectionChange(HTREEITEM hItem, BOOL bByMouse);
+	BOOL SelectTask(DWORD dwTaskID);
+	BOOL IsOnlySelectedTask(DWORD dwTaskID);
 
 	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
 	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL = NULL, int nIndex = -1) const;

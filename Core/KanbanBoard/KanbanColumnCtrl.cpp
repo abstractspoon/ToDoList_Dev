@@ -488,7 +488,7 @@ void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, cons
 {
 	if (bSelected)
 	{
-		BOOL bFocused = (bSelected && (::GetFocus() == GetSafeHwnd()));
+		BOOL bFocused = (bSelected && (GetFocus() == this));
 
 		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
@@ -1106,9 +1106,15 @@ int CKanbanColumnCtrl::BuildSortedSelection(CHTIList& lstHTI) const
 BOOL CKanbanColumnCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
 	if (HasTasks(aTaskIDs))
+	{
 		m_aSelTaskIDs.Copy(aTaskIDs);
+		CTreeCtrl::SelectItem(FindItem(m_aSelTaskIDs[0]));
+	}
 	else
+	{
 		m_aSelTaskIDs.RemoveAll();
+		CTreeCtrl::SelectItem(NULL);
+	}
 
 	Invalidate(FALSE);
 
@@ -1181,6 +1187,9 @@ void CKanbanColumnCtrl::ClearSelection()
 
 BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 {
+	if (IsOnlySelectedTask(dwTaskID))
+		return TRUE;
+
 	ClearSelection();
 
 	if (dwTaskID)
@@ -1190,11 +1199,27 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 		if (hti)
 		{
 			m_aSelTaskIDs.Add(dwTaskID);
+
+			CTreeCtrl::SelectItem(hti);
 			TCH().EnsureItemVisible(hti, FALSE);
 		}
 	}
 
 	return m_aSelTaskIDs.GetSize();
+}
+
+BOOL CKanbanColumnCtrl::IsOnlySelectedTask(DWORD dwTaskID)
+{
+	if (!m_bSelected)
+		return FALSE;
+
+	if (!dwTaskID)
+		return FALSE;
+
+	if (m_aSelTaskIDs.GetSize() != 1)
+		return FALSE;
+	
+	return (m_aSelTaskIDs[0] == dwTaskID);
 }
 
 void CKanbanColumnCtrl::SetHotItem(DWORD dwTaskID)
@@ -1532,26 +1557,32 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		if (nMsgID)
 		{
 			// Post message to give mouse-click time to complete
-			GetParent()->PostMessage(nMsgID, 0, bSet);
+			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd(), bSet);
 			bHandled = TRUE;
 		}
 		else if (bHandled)
 		{
-			// Handle item drag because we WON'T be calling base class
-			CPoint ptScreen(point);
-			ClientToScreen(&ptScreen);
+			// Handle item drag if the point is to the left of any indent
+			CRect rIndentedItem;
+			GetItemLabelTextRect(htiHit, rIndentedItem, FALSE);
 
-			if (::DragDetect(*this, ptScreen))
+			if (point.x > rIndentedItem.left)
 			{
-				TRACE(_T("CKanbanColumnCtrl::OnLButtonDown(Faking drag start)\n"));
+				CPoint ptScreen(point);
+				ClientToScreen(&ptScreen);
 
-				NMTREEVIEW nmtv = { *this, (UINT)GetDlgCtrlID(), TVN_BEGINDRAG, 0 };
+				if (::DragDetect(*this, ptScreen))
+				{
+					TRACE(_T("CKanbanColumnCtrl::OnLButtonDown(Faking drag start)\n"));
 
-				nmtv.itemNew.hItem = htiHit;
-				nmtv.itemNew.lParam = dwTaskID;
-				nmtv.ptDrag = point;
+					NMTREEVIEW nmtv = { *this, (UINT)GetDlgCtrlID(), TVN_BEGINDRAG, 0 };
 
-				GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&nmtv);
+					nmtv.itemNew.hItem = htiHit;
+					nmtv.itemNew.lParam = dwTaskID;
+					nmtv.ptDrag = point;
+
+					GetParent()->SendMessage(WM_NOTIFY, GetDlgCtrlID(), (LPARAM)&nmtv);
+				}
 			}
 		}
 	}
@@ -1585,8 +1616,14 @@ void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 
 	if (htiHit)
 	{
-		bHandled = TRUE;
-		EditLabel(htiHit);
+		CRect rIndentedItem;
+		GetItemLabelTextRect(htiHit, rIndentedItem, FALSE);
+
+		if (point.x > rIndentedItem.left)
+		{
+			bHandled = TRUE;
+			EditLabel(htiHit);
+		}
 	}
 
 	if (!bHandled)
@@ -1662,14 +1699,14 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 
 	if (!htiHit)
 	{
-		if (!m_bSelected)
+		if (m_bSelected)
 			SetFocus();
 
 		bHandled = TRUE;
 	}
 	else
 	{
-		if (m_bSelected)
+		if (!m_bSelected)
 		{
 			SetFocus();
 			bHandled = TRUE;
@@ -1693,10 +1730,11 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, HTREEITEM& htiHit)
 				// We need to be careful here not to clear
 				// an existing multiple selection which the 
 				// user intends either to drag or to edit
+				BOOL bSameTask = IsOnlySelectedTask(dwTaskID);
 				BOOL bWantEdit = (HitTestCheckbox(htiHit, point) || 
 									(HitTestImage(htiHit, point) != KBCI_NONE));
 
-				if (!bWantEdit && !::DragDetect(*this, point))
+				if (!bSameTask && !bWantEdit && !::DragDetect(*this, point))
 				{
 					SelectTask(dwTaskID);
 					bHandled = TRUE;
