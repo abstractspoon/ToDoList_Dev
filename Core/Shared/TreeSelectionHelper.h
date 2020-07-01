@@ -148,6 +148,7 @@ public:
  
 	int GetItemTitles(const CHTIList& selection, CStringArray& aTitles) const; 
 	int GetItemData(const CHTIList& selection, CDWordArray& aData) const;
+	int GetItemData(CDWordArray& aItemData) const;
 
 	BOOL HasUncheckedItems() const;
 

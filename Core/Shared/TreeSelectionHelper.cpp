@@ -898,6 +898,11 @@ int CTreeSelectionHelper::GetItemData(const CHTIList& selection, CDWordArray& aD
 	return aData.GetSize();
 }
 
+int CTreeSelectionHelper::GetItemData(CDWordArray& aItemData) const
+{
+	return GetItemData(m_lstSelection, aItemData);
+}
+
 BOOL CTreeSelectionHelper::HasUncheckedItems() const
 {
 	// look for first incomplete task

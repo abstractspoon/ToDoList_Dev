@@ -95,6 +95,7 @@ namespace Misc
 	int RemoveEmptyItems(CStringArray& aFrom);
 	BOOL RemoveItem(LPCTSTR szItem, CStringArray& aFrom, BOOL bCaseSensitive = FALSE);
 	int AddUniqueItems(const CStringArray& aItems, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
+	int AddUniqueItems(const CDWordArray& aItems, CDWordArray& aTo);
 	BOOL AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSensitive = FALSE);
 
 	CString GetLongestItem(const CStringArray& aValues);
