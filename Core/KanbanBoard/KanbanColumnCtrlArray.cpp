@@ -69,7 +69,7 @@ int CKanbanColumnCtrlArray::Find(DWORD dwTaskID, HTREEITEM& hti) const
 			const CKanbanColumnCtrl* pCol = GetAt(nCol);
 			ASSERT(pCol);
 
-			hti = pCol->FindTask(dwTaskID);
+			hti = pCol->FindItem(dwTaskID);
 			
 			if (hti)
 				return nCol;
@@ -485,7 +485,7 @@ DWORD CKanbanColumnCtrlArray::HitTestTask(const CPoint& ptScreen) const
 
 	if (pCol)
 	{
-		HTREEITEM hti = pCol->FindTask(ptScreen);
+		HTREEITEM hti = pCol->FindItem(ptScreen);
 
 		if (hti)
 			return pCol->GetTaskID(hti);

@@ -64,9 +64,9 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
 
-	HTREEITEM FindTask(DWORD dwTaskID) const;
-	HTREEITEM FindTask(const CPoint& ptScreen) const;
-	HTREEITEM FindTask(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart = NULL) const;
+	HTREEITEM FindItem(DWORD dwTaskID) const;
+	HTREEITEM FindItem(const CPoint& ptScreen) const;
+	HTREEITEM FindItem(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart = NULL) const;
 
 	DWORD GetTaskID(HTREEITEM hti) const { return GetItemData(hti); }
 

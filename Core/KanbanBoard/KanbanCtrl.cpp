@@ -492,7 +492,7 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		
 		do
 		{
-			hti = pCol->FindTask(select, bForwards, hti);
+			hti = pCol->FindItem(select, bForwards, hti);
 
 			if (hti)
 			{
@@ -2141,7 +2141,7 @@ CKanbanColumnCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL 
 	// First try selected list
 	if (m_pSelectedColumn)
 	{
-		hti = m_pSelectedColumn->FindTask(dwTaskID);
+		hti = m_pSelectedColumn->FindItem(dwTaskID);
 
 		if (hti)
 			return m_pSelectedColumn;
@@ -2157,7 +2157,7 @@ CKanbanColumnCtrl* CKanbanCtrl::LocateTask(DWORD dwTaskID, HTREEITEM& hti, BOOL 
 
 	do
 	{
-		hti = pCol->FindTask(dwTaskID);
+		hti = pCol->FindItem(dwTaskID);
 
 		if (hti)
 			return const_cast<CKanbanColumnCtrl*>(pCol);
@@ -3128,7 +3128,7 @@ BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aT
 		{
 			pKI->AddTrackedAttributeValue(m_sTrackAttribID, sDestAttribValue);
 
-			if (pDestCol->FindTask(dwTaskID) == NULL)
+			if (pDestCol->FindItem(dwTaskID) == NULL)
 				pDestCol->AddTask(*pKI);
 		}
 	}

@@ -380,7 +380,7 @@ int CKanbanColumnCtrl::CalcItemTitleTextHeight() const
 
 HTREEITEM CKanbanColumnCtrl::AddTask(const KANBANITEM& ki)
 {
-	HTREEITEM hti = FindTask(ki.dwTaskID);
+	HTREEITEM hti = FindItem(ki.dwTaskID);
 
 	if (hti)
 	{
@@ -1028,7 +1028,7 @@ BOOL CKanbanColumnCtrl::GetLabelEditRect(LPRECT pEdit)
 		return FALSE;
 	}
 
-	HTREEITEM hti = FindTask(m_aSelTaskIDs[0]);
+	HTREEITEM hti = FindItem(m_aSelTaskIDs[0]);
 	ASSERT(hti);
 
 	// scroll into view first
@@ -1093,7 +1093,7 @@ int CKanbanColumnCtrl::BuildSortedSelection(CHTIList& lstHTI) const
 	int nSel = m_aSelTaskIDs.GetSize();
 
 	while (nSel--)
-		lstHTI.AddTail(FindTask(m_aSelTaskIDs[nSel]));
+		lstHTI.AddTail(FindItem(m_aSelTaskIDs[nSel]));
 
 	CKanbanColumnCtrl& tree = const_cast<CKanbanColumnCtrl&>(*this);
 
@@ -1159,7 +1159,7 @@ void CKanbanColumnCtrl::ScrollToSelection()
 
 		while (nID--)
 		{
-			HTREEITEM hti = FindTask(m_aSelTaskIDs[nID]);
+			HTREEITEM hti = FindItem(m_aSelTaskIDs[nID]);
 			ASSERT(hti);
 
 			CRect rItem;
@@ -1179,7 +1179,7 @@ void CKanbanColumnCtrl::ScrollToSelection()
 		}
 
 		// else just scroll to the first
-		HTREEITEM hti = (htiPartial ? htiPartial : FindTask(m_aSelTaskIDs[0]));
+		HTREEITEM hti = (htiPartial ? htiPartial : FindItem(m_aSelTaskIDs[0]));
 		ASSERT(hti);
 
 		TCH().EnsureItemVisible(hti, FALSE);
@@ -1201,7 +1201,7 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 
 	if (dwTaskID)
 	{
-		HTREEITEM hti = FindTask(dwTaskID);
+		HTREEITEM hti = FindItem(dwTaskID);
 
 		if (hti)
 		{
@@ -1213,7 +1213,7 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 	return m_aSelTaskIDs.GetSize();
 }
 
-HTREEITEM CKanbanColumnCtrl::FindTask(DWORD dwTaskID) const
+HTREEITEM CKanbanColumnCtrl::FindItem(DWORD dwTaskID) const
 {
 	HTREEITEM hti = NULL;
 	m_mapItems.Lookup(dwTaskID, hti);
@@ -1221,7 +1221,7 @@ HTREEITEM CKanbanColumnCtrl::FindTask(DWORD dwTaskID) const
 	return hti;
 }
 
-HTREEITEM CKanbanColumnCtrl::FindTask(const CPoint& ptScreen) const
+HTREEITEM CKanbanColumnCtrl::FindItem(const CPoint& ptScreen) const
 {
 	CPoint ptClient(ptScreen);
 	ScreenToClient(&ptClient);
@@ -1229,7 +1229,7 @@ HTREEITEM CKanbanColumnCtrl::FindTask(const CPoint& ptScreen) const
 	return CTreeCtrl::HitTest(ptClient);
 }
 
-HTREEITEM CKanbanColumnCtrl::FindTask(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart) const
+HTREEITEM CKanbanColumnCtrl::FindItem(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart) const
 {
 	HTREEITEM htiNext = NULL;
 
@@ -1256,7 +1256,7 @@ HTREEITEM CKanbanColumnCtrl::FindTask(const IUISELECTTASK& select, BOOL bNext, H
 
 BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 {
-	HTREEITEM hti = FindTask(dwTaskID);
+	HTREEITEM hti = FindItem(dwTaskID);
 
 	if (hti && CTreeCtrl::DeleteItem(hti))
 	{
@@ -1985,7 +1985,7 @@ void CKanbanColumnCtrl::OnTooltipShow(NMHDR* pNMHDR, LRESULT* pResult)
 	DWORD dwTaskID = m_tooltip.GetLastHitToolInfo().uId;
 	ASSERT(dwTaskID);
 
-	HTREEITEM hti = FindTask(dwTaskID);
+	HTREEITEM hti = FindItem(dwTaskID);
 	ASSERT(hti);
 
 	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
