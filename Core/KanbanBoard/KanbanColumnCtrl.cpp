@@ -1106,15 +1106,9 @@ int CKanbanColumnCtrl::BuildSortedSelection(CHTIList& lstHTI) const
 BOOL CKanbanColumnCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
 	if (HasTasks(aTaskIDs))
-	{
 		m_aSelTaskIDs.Copy(aTaskIDs);
-		CTreeCtrl::SelectItem(FindItem(m_aSelTaskIDs[0]));
-	}
 	else
-	{
 		m_aSelTaskIDs.RemoveAll();
-		CTreeCtrl::SelectItem(NULL);
-	}
 
 	Invalidate(FALSE);
 
@@ -1199,8 +1193,6 @@ BOOL CKanbanColumnCtrl::SelectTask(DWORD dwTaskID)
 		if (hti)
 		{
 			m_aSelTaskIDs.Add(dwTaskID);
-
-			CTreeCtrl::SelectItem(hti);
 			TCH().EnsureItemVisible(hti, FALSE);
 		}
 	}
