@@ -525,9 +525,8 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	case CDDS_ITEMPREPAINT:
 		{
 			DWORD dwTaskID = pTVCD->nmcd.lItemlParam;
-			const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 			
-			if (pKI)
+			if (m_data.HasItem(dwTaskID))
 			{
 				HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
 				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
@@ -536,41 +535,57 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				GetItemRect(hti, rItem, NULL);
 				rItem.DeflateRect(1, 1);
 
-				// Checkbox
-				DrawItemCheckbox(pDC, pKI, rItem);
-				
-				BOOL bSelected = IsTaskSelected(dwTaskID);
-				COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
+				BOOL bHot = (!m_bSavingToImage && (dwTaskID == m_dwHotItem));
 
-				// Background
-				FillItemBackground(pDC, pKI, rItem, crText, bSelected);
-
-				// Parents
-				COLORREF crOtherText = crText;
-				
-				if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
-					crOtherText = GraphicsMisc::Lighter(crText, 0.3);
-
-				DrawItemParents(pDC, pKI, rItem, crOtherText);
-	
-				// Bar affects everything else
-				DrawItemBar(pDC, pKI, rItem);
-
-				// Icons don't affect attributes
-				CRect rAttributes(rItem);
-
-				DrawItemImages(pDC, pKI, rItem);
-				DrawItemTitle(pDC, pKI, rItem, crText);
-
-				rAttributes.top += CalcItemTitleTextHeight();
-				rAttributes.top += IMAGE_PADDING;
-
-				DrawItemAttributes(pDC, pKI, rAttributes, crOtherText);
+				DrawItem(pDC, dwTaskID, rItem, bHot);
 			}
 			
 			*pResult |= CDRF_SKIPDEFAULT;
 		}
 	}
+}
+
+void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem, BOOL bHot)
+{
+	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+
+	if (!pKI)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	// Checkbox
+	CRect rBody(rItem);
+	DrawItemCheckbox(pDC, pKI, rBody);
+
+	BOOL bSelected = IsTaskSelected(dwTaskID);
+	COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
+
+	// Background
+	FillItemBackground(pDC, pKI, rBody, crText, bSelected);
+
+	// Parents
+	COLORREF crOtherText = crText;
+
+	if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
+		crOtherText = GraphicsMisc::Lighter(crText, 0.3);
+
+	DrawItemParents(pDC, pKI, rBody, crOtherText);
+
+	// Bar affects everything else
+	DrawItemBar(pDC, pKI, rBody);
+
+	// Icons don't affect attributes
+	CRect rAttributes(rBody);
+
+	DrawItemImages(pDC, pKI, rBody, bHot);
+	DrawItemTitle(pDC, pKI, rBody, crText);
+
+	rAttributes.top += CalcItemTitleTextHeight();
+	rAttributes.top += IMAGE_PADDING;
+
+	DrawItemAttributes(pDC, pKI, rAttributes, crOtherText);
 }
 
 void CKanbanColumnCtrl::DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText)
@@ -688,7 +703,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 	}
 }
 
-void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
+void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, BOOL bHot) const
 {
 	CSaveDC sdc(pDC);
 	CRect rClip(rItem), rIcon(rItem);
@@ -711,8 +726,6 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 
 	// Always leave space for icon
 	rIcon.OffsetRect(0, IMAGE_SIZE);
-
-	BOOL bHot = (!m_bSavingToImage && (pKI->dwTaskID == m_dwHotItem));
 
 	if (m_bDrawTaskFlags)
 	{
@@ -1130,9 +1143,7 @@ BOOL CKanbanColumnCtrl::HasTasks(const CDWordArray& aTaskIDs) const
 
 void CKanbanColumnCtrl::ScrollToSelection()
 {
-	ASSERT(m_bSelected);
-
-	if (GetSelectedCount())
+	if (m_bSelected && GetSelectedCount())
 	{
 		CRect rClient;
 		GetClientRect(rClient);
