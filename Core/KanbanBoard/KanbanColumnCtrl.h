@@ -18,6 +18,8 @@
 #include "..\Shared\TreeCtrlHelper.h"
 #include "..\Shared\TreeSelectionHelper.h"
 
+#include "..\3rdParty\DragDrop.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 const UINT WM_KLCN_EDITTASKDONE		= (WM_APP+1); // WPARAM = HWND, LPARAM = TRUE/FALSE
@@ -30,7 +32,7 @@ const UINT WM_KLCN_EDITTASKLABEL	= (WM_APP+6); // WPARAM = HWND, LPARAM = TaskID
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
 
-class CKanbanColumnCtrl : public CTreeCtrl
+class CKanbanColumnCtrl : public CTreeCtrl, protected CDragDropData
 {
 	DECLARE_DYNAMIC(CKanbanColumnCtrl);
 
@@ -64,6 +66,7 @@ public:
 	
 	BOOL SaveToImage(CBitmap& bmImage, const CSize& reqSize);
 	CSize CalcRequiredSizeForImage() const;
+	BOOL CreateDragImage(CImageList& ilDrag, CSize& sizeImage);
 
 	HTREEITEM FindItem(DWORD dwTaskID) const;
 	HTREEITEM FindItem(const CPoint& ptScreen) const;
@@ -173,6 +176,12 @@ protected:
 	void InsertItem() { ASSERT(0); }
 	void DeleteItem() { ASSERT(0); }
 	HTREEITEM GetSelectedItem() const { ASSERT(0); return NULL; }
+
+protected:
+	// CDragDropData interface
+	CSize OnGetDragSize(CDC& dc);
+	void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
+	void* OnGetData() { return NULL; }
 	
 protected:
 	int CalcItemTitleTextHeight() const;
@@ -198,13 +207,13 @@ protected:
 
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
-	void DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem, BOOL bHot);
+	void DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem);
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
-	void DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, BOOL bHot) const;
+	void DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const;
-	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const;
+	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	int BuildSortedSelection(CHTIList& lstHTI) const;

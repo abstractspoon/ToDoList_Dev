@@ -80,6 +80,7 @@ const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int IMAGE_PADDING			= 2/*GraphicsMisc::ScaleByDPIFactor(2)*/;
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
+const int MAX_DRAG_IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(200);
 
 const CRect TEXT_BORDER			= CRect(2, 1, 3, 1);
 const COLORREF WHITE			= RGB(255, 255, 255);
@@ -484,11 +485,11 @@ int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nColWidth) const
 	return nAvailWidth;
 }
 
-void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText, BOOL bSelected) const
+void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText) const
 {
-	if (bSelected)
+	if (IsTaskSelected(pKI->dwTaskID))
 	{
-		BOOL bFocused = (bSelected && (::GetFocus() == *this));
+		BOOL bFocused = (::GetFocus() == *this);
 
 		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
 		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
@@ -535,9 +536,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 				GetItemRect(hti, rItem, NULL);
 				rItem.DeflateRect(1, 1);
 
-				BOOL bHot = (!m_bSavingToImage && (dwTaskID == m_dwHotItem));
-
-				DrawItem(pDC, dwTaskID, rItem, bHot);
+				DrawItem(pDC, dwTaskID, rItem);
 			}
 			
 			*pResult |= CDRF_SKIPDEFAULT;
@@ -545,7 +544,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 }
 
-void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem, BOOL bHot)
+void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
 {
 	const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 
@@ -563,7 +562,7 @@ void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem, B
 	COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
 
 	// Background
-	FillItemBackground(pDC, pKI, rBody, crText, bSelected);
+	FillItemBackground(pDC, pKI, rBody, crText);
 
 	// Parents
 	COLORREF crOtherText = crText;
@@ -579,7 +578,7 @@ void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem, B
 	// Icons don't affect attributes
 	CRect rAttributes(rBody);
 
-	DrawItemImages(pDC, pKI, rBody, bHot);
+	DrawItemImages(pDC, pKI, rBody);
 	DrawItemTitle(pDC, pKI, rBody, crText);
 
 	rAttributes.top += CalcItemTitleTextHeight();
@@ -703,7 +702,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 	}
 }
 
-void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, BOOL bHot) const
+void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
 	CSaveDC sdc(pDC);
 	CRect rClip(rItem), rIcon(rItem);
@@ -726,6 +725,8 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 
 	// Always leave space for icon
 	rIcon.OffsetRect(0, IMAGE_SIZE);
+
+	BOOL bHot = (!m_bSavingToImage && (pKI->dwTaskID == m_dwHotItem));
 
 	if (m_bDrawTaskFlags)
 	{
@@ -805,27 +806,24 @@ void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rIte
 
 void CKanbanColumnCtrl::DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem)
 {
-	if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
+	CRect rCheckbox(rItem);
+
+	if (GetItemCheckboxRect(rCheckbox))
 	{
-		CRect rCheckbox(rItem);
+		int iImage = KLCC_UNCHECKED;
 
-		if (GetItemCheckboxRect(rCheckbox))
+		if (pKI->IsDone(FALSE))
 		{
-			int iImage = KLCC_UNCHECKED;
-		
-			if (pKI->IsDone(FALSE))
-			{
-				iImage = KLCC_CHECKED;
-			}
-			else if (pKI->bSomeSubtaskDone)
-			{
-				iImage = KLCC_MIXED;
-			}
-
-			m_ilCheckboxes.Draw(pDC, iImage, rCheckbox.TopLeft(), ILD_TRANSPARENT);
-
-			rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
+			iImage = KLCC_CHECKED;
 		}
+		else if (pKI->bSomeSubtaskDone)
+		{
+			iImage = KLCC_MIXED;
+		}
+
+		m_ilCheckboxes.Draw(pDC, iImage, rCheckbox.TopLeft(), ILD_TRANSPARENT);
+
+		rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
 	}
 }
 
@@ -2085,3 +2083,76 @@ BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanC
 	return TRUE;
 }
 
+// ---------------------------------------------------------------
+// CDragDropData interface
+
+CSize CKanbanColumnCtrl::OnGetDragSize(CDC& dc)
+{
+	// Calculate the aggregate height with no gaps
+	CSize sizeTotal(0, 0);
+
+	if (m_aSelTaskIDs.GetSize())
+	{
+		HTREEITEM htiSel = FindItem(m_aSelTaskIDs[0]);
+		ASSERT(htiSel);
+
+		CRect rItem;
+		CTreeCtrl::GetItemRect(htiSel, rItem, FALSE);
+
+		sizeTotal.cx = rItem.Width();
+
+		if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
+			sizeTotal.cx -= CEnImageList::GetImageSize(m_ilCheckboxes);
+
+		int nItemHeight = TEXT_BORDER.Height() + CalcItemTitleTextHeight();
+
+		sizeTotal.cy = (nItemHeight * m_aSelTaskIDs.GetSize());
+	}
+
+	sizeTotal.cx = min(sizeTotal.cx, MAX_DRAG_IMAGE_SIZE);
+	sizeTotal.cy = min(sizeTotal.cy, MAX_DRAG_IMAGE_SIZE);
+
+	return sizeTotal;
+}
+
+void CKanbanColumnCtrl::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+{
+	// Draw item sequentially with no gaps
+	CHTIList lstSelection;
+	BuildSortedSelection(lstSelection);
+
+	crMask = 1;
+	dc.FillSolidRect(rc, crMask);
+
+	CRect rItem(rc);
+	rItem.bottom = (rItem.bottom / m_aSelTaskIDs.GetSize());
+
+	POSITION pos = lstSelection.GetHeadPosition();
+
+	while (pos)
+	{
+		int nSaveDC = dc.SaveDC();
+		DWORD dwTaskID = GetTaskID(lstSelection.GetNext(pos));
+		const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+
+		CRect rBody(rItem);
+		rBody.DeflateRect(1, 1);
+
+		dc.FillSolidRect(rBody, ::GetSysColor(COLOR_HIGHLIGHT));
+		DrawItemTitle(&dc, pKI, rBody, ::GetSysColor(COLOR_HIGHLIGHTTEXT));
+
+		rItem.OffsetRect(0, rItem.Height());
+		dc.RestoreDC(nSaveDC);
+	}
+}
+
+BOOL CKanbanColumnCtrl::CreateDragImage(CImageList& ilDrag, CSize& sizeImage)
+{
+	if (!m_bSelected)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return CDragDropData::CreateDragImage(this, ilDrag, sizeImage);
+}

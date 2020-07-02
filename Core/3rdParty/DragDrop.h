@@ -51,16 +51,17 @@ public:
 	CDragDropData() { }
 	virtual ~CDragDropData() { }
 
-	virtual CImageList* CreateDragImage(CWnd* pWnd, CRect& rc);
-
-	// derived classes must implement these:
-	virtual CSize OnGetDragSize(CDC& dc) = 0;
-	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
-	virtual void* OnGetData() = 0;
+	CImageList* CreateDragImage(CWnd* pWnd, CSize& sizeImage);
+	BOOL CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage);
 
 protected:
 	CBitmap			m_bitmap; // bitmap used for drawing
 
+protected:
+	// derived classes must implement these:
+	virtual CSize OnGetDragSize(CDC& dc) = 0;
+	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
+	virtual void* OnGetData() = 0;
 };
 
 //////////////////
@@ -68,13 +69,15 @@ protected:
 //
 class CDragDropText : public CDragDropData 
 {
-protected:
-	enum { MAXWIDTH=64 };
-	CString m_text;
 public:
     CDragDropText(LPCTSTR text) : m_text(text) { }
 	~CDragDropText() { }
 
+protected:
+	enum { MAXWIDTH=64 };
+	CString m_text;
+
+protected:
 	virtual CSize OnGetDragSize(CDC& dc);
 	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
 	virtual void* OnGetData() { return (void*)(LPCTSTR)m_text; }

@@ -124,6 +124,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_NOTIFY(NM_SETFOCUS, IDC_COLUMNCTRL, OnColumnSetFocus)
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
+	ON_WM_CAPTURECHANGED()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_EDITTASKDONE, OnColumnEditTaskDone)
 	ON_MESSAGE(WM_KLCN_EDITTASKFLAG, OnColumnEditTaskFlag)
@@ -2713,8 +2714,6 @@ BOOL CKanbanCtrl::CancelOperation()
 	if (IsDragging())
 	{
 		ReleaseCapture();
-		m_aColumns.SetDropTarget(NULL);
-
 		return TRUE;
 	}
 	
@@ -2995,8 +2994,23 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 
 			if (!pCol->SelectionHasLockedTasks())
 			{
-				SetCapture();
 				TRACE(_T("CKanbanCtrl::OnBeginDragColItem(start drag)\n"));
+
+				SetCapture();
+
+				CSize sizeImage;
+
+				if (pCol->CreateDragImage(m_ilDrag, sizeImage))
+				{
+					CPoint ptHotSpot((sizeImage.cx / 2), min(100, (sizeImage.cy / 2)));
+
+					m_ilDrag.BeginDrag(0, ptHotSpot);
+					m_ilDrag.DragEnter(NULL, ::GetMessagePos());
+				}
+				else
+				{
+					ASSERT(0);
+				}
 			}
 		}
 		else
@@ -3079,11 +3093,20 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		}
 
 		// always
-		m_aColumns.SetDropTarget(NULL);
 		ReleaseCapture();
 	}
 
 	CWnd::OnLButtonUp(nFlags, point);
+}
+
+void CKanbanCtrl::OnCaptureChanged(CWnd* pWnd)
+{
+	CWnd::OnCaptureChanged(pWnd);
+
+	m_aColumns.SetDropTarget(NULL);
+
+	m_ilDrag.EndDrag();
+	m_ilDrag.DeleteImageList();
 }
 
 BOOL CKanbanCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const
@@ -3207,6 +3230,7 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	{
 		// get the list and item under the mouse
 		ClientToScreen(&point);
+		m_ilDrag.DragMove(point);
 
 		const CKanbanColumnCtrl* pDestCol = m_aColumns.HitTest(point);
 		BOOL bValidDest = CanDrag(m_pSelectedColumn, pDestCol);

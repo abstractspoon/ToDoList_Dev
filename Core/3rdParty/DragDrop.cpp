@@ -306,9 +306,9 @@ BOOL CDragDropMgr::OnMouseMove(const MSG& msg)
 				SetState(bLButtonDown ? LDRAGGING : RDRAGGING);	// I am now dragging
 				OnMouseMove(msg);
 
-				CRect rc;
-				m_pDragImage = m_ddi.pData->CreateDragImage(pWnd, rc);
-				m_pDragImage->BeginDrag(0, rc.BottomRight());
+				CSize sizeImage;
+				m_pDragImage = m_ddi.pData->CreateDragImage(pWnd, sizeImage);
+				m_pDragImage->BeginDrag(0, CPoint(sizeImage.cx, sizeImage.cy));
 
 				pWnd->ClientToScreen(&pt);
 				m_pDragImage->DragEnter(NULL, pt);
@@ -437,10 +437,23 @@ void CDragDropMgr::SetState(UINT iState)
 // Create the drag image: create an image list and call virtual darw function
 // to draw the data into the image list. Will then use this during dragging.
 //
-CImageList* CDragDropData::CreateDragImage(CWnd* pWnd, CRect& rc)
+CImageList* CDragDropData::CreateDragImage(CWnd* pWnd, CSize& sizeImage)
 {
+	CImageList *pil = new CImageList();
+
+	if (!CreateDragImage(pWnd, *pil, sizeImage))
+	{
+		delete pil;
+		pil = NULL;
+	}
+    
+	return pil;
+}
+
+BOOL CDragDropData::CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage)
+{
+	il.DeleteImageList();
 	m_bitmap.DeleteObject();
-//	const COLORREF BGCOLOR = GetSysColor(COLOR_3DLIGHT);
 
 	// create memory dc compatible w/source window
 	CWindowDC dcWin(pWnd);
@@ -452,11 +465,11 @@ CImageList* CDragDropData::CreateDragImage(CWnd* pWnd, CRect& rc)
 	CFont* pOldFont = dcMem.SelectObject(pFont);
 
 	// get size of drag image
-	CSize sz = OnGetDragSize(dcMem); // call virtual fn to get size
-	rc = CRect(CPoint(0,0), sz);
+	sizeImage = OnGetDragSize(dcMem); // call virtual fn to get size
+	CRect rc(CPoint(0, 0), sizeImage);
 
 	// create image list: create bitmap and draw into it
-	m_bitmap.CreateCompatibleBitmap(&dcWin, sz.cx, sz.cy);
+	m_bitmap.CreateCompatibleBitmap(&dcWin, sizeImage.cx, sizeImage.cy);
 
 	CBitmap* pOldBitmap = dcMem.SelectObject(&m_bitmap);
 
@@ -466,17 +479,18 @@ CImageList* CDragDropData::CreateDragImage(CWnd* pWnd, CRect& rc)
 
 	COLORREF crMask;
 	OnDrawData(dcMem, rc, crMask); // call virtual fn to draw
-    
+
 	dcMem.SelectObject(pOldFont);
 	dcMem.SelectObject(pOldBitmap);
 
 	// create image list and add bitmap to it
-	CImageList *pil = new CImageList();
+	if (!il.Create(sizeImage.cx, sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1))
+		return FALSE;
 
-	pil->Create(sz.cx, sz.cy, ILC_COLOR32|ILC_MASK, 0, 1);
-	pil->Add(&m_bitmap, crMask);
-    
-	return pil;
+	if (il.Add(&m_bitmap, crMask) != 0)
+		return FALSE;
+
+	return TRUE;
 }
 
 //////////////////

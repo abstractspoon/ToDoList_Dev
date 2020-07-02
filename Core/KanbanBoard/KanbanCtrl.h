@@ -103,11 +103,12 @@ protected:
 	CString m_sTrackAttribID;
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPrevPinnedTasks;
-	CFontCache m_fonts;
 
 	CKanbanColumnCtrl* m_pSelectedColumn;
 	CKanbanColumnCtrlArray m_aColumns;
 	CEnHeaderCtrl m_header;
+	CFontCache m_fonts;
+	CImageList m_ilDrag;
 
 	CKanbanItemMap m_data;
 	CKanbanAttributeValueMap m_mapAttributeValues;
@@ -126,7 +127,8 @@ protected:
 	afx_msg void OnColumnSetFocus(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnSetFocus(CWnd* );
+	afx_msg void OnSetFocus(CWnd* pOldWnd);
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnHeaderCustomDraw(NMHDR* pNMHDR, LRESULT* pResult);
