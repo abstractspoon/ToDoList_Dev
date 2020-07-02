@@ -55,7 +55,7 @@ public:
 
 	// derived classes must implement these:
 	virtual CSize OnGetDragSize(CDC& dc) = 0;
-	virtual void  OnDrawData(CDC& dc, CRect& rc, COLORREF& crMask) = 0;
+	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
 	virtual void* OnGetData() = 0;
 
 protected:
@@ -76,7 +76,7 @@ public:
 	~CDragDropText() { }
 
 	virtual CSize OnGetDragSize(CDC& dc);
-	virtual void  OnDrawData(CDC& dc, CRect& rc, COLORREF& crMask);
+	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
 	virtual void* OnGetData() { return (void*)(LPCTSTR)m_text; }
 };
 

@@ -50,7 +50,7 @@ protected:
 		return rDrag.Size();
 	}
 	
-	virtual void OnDrawData(CDC& dc, CRect& rc, COLORREF& crMask)
+	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
 	{
 		crMask = 1;
 		dc.FillSolidRect(rc, crMask);

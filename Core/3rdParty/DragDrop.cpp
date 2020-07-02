@@ -496,10 +496,10 @@ CSize CDragDropText::OnGetDragSize(CDC& dc)
 //////////////////
 // Call MFC/Windows to draw text.
 //
-void CDragDropText::OnDrawData(CDC& dc, CRect& rc, COLORREF& crMask)
+void CDragDropText::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
 {
 	crMask = 1;
-	dc.DrawText(m_text, &rc, DT_LEFT|DT_END_ELLIPSIS);
+	dc.DrawText(m_text, (LPRECT)&rc, DT_LEFT|DT_END_ELLIPSIS);
 }
 
 void CDragDropMgr::CancelDrag()
