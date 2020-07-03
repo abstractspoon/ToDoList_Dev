@@ -80,7 +80,7 @@ const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
 const int IMAGE_PADDING			= 2/*GraphicsMisc::ScaleByDPIFactor(2)*/;
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
-const int MAX_DRAG_IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(200);
+const int MAX_DRAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(200);
 
 const CRect TEXT_BORDER			= CRect(2, 1, 3, 1);
 const COLORREF WHITE			= RGB(255, 255, 255);
@@ -1515,7 +1515,6 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	// indentation of subtasks, because we want clicking to the
 	// left of the task to select the task BUT NOT begin a 
 	// drag operation or a label edit. 
-	// My intuition tells me that it can be simplified...
 	DWORD dwPrevOnlyTaskID = GetOnlySelectedTask(), dwHitTaskID = 0;
 
 	HTREEITEM htiHit = NULL;
