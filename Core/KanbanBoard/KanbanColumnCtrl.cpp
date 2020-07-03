@@ -2104,7 +2104,7 @@ CSize CKanbanColumnCtrl::OnGetDragSize(CDC& dc)
 		if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
 			sizeTotal.cx -= CEnImageList::GetImageSize(m_ilCheckboxes);
 
-		int nItemHeight = TEXT_BORDER.Height() + CalcItemTitleTextHeight();
+		int nItemHeight = (TEXT_BORDER.Height() + (m_nNumTitleLines * (m_nItemTextBorder + m_nItemTextHeight)));
 
 		sizeTotal.cy = (nItemHeight * m_aSelTaskIDs.GetSize());
 	}
