@@ -168,6 +168,7 @@ enum IUI_APPCOMMAND
 	IUI_MOVETASK,					// IUIAPPCOMMANDDATA::move			[in]
 	IUI_GETNEXTTASK,				// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
 	IUI_GETPREVTASK,				// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
+	IUI_SELECTALL,
 
 	// new values here
 //  IUI_

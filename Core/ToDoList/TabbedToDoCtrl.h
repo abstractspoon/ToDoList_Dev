@@ -121,9 +121,11 @@ public:
 	BOOL GotoNextTopLevelTask(TDC_GOTO nDirection); 
 	BOOL CanGotoNextTopLevelTask(TDC_GOTO nDirection) const;
 	BOOL CanDoFindReplace(TDC_ATTRIBUTE nAttrib = TDCA_TASKNAME) const;
+	void SelectAll();
+	BOOL CanSelectAll() const;
 
-	virtual BOOL CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const;
-	virtual void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
+	BOOL CanExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand) const;
+	void ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand = TRUE);
 	
 	BOOL CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
 	BOOL CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly) const;
@@ -131,7 +133,6 @@ public:
 	void SetFocusToTasks();
 	BOOL TasksHaveFocus() const;
 
-	void SelectAll();
 	void SelectTasksInHistory(BOOL bForward);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;

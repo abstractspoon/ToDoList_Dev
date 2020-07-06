@@ -484,14 +484,20 @@ bool CKanbanWnd::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 	for (int nID = 0; nID < nTaskCount; nID++)
 		aTaskIDs[nID] = pdwTaskIDs[nID];
 
-	if (m_ctrlKanban.SelectTasks(aTaskIDs) != FALSE)
+	if (m_ctrlKanban.SelectTasks(aTaskIDs))
 	{
 		m_ctrlKanban.GetSelectedTaskIDs(m_aSelTaskIDs);
 		return true;
 	}
 
-	// else
-	m_aSelTaskIDs.RemoveAll();
+	// if only one task was being selected, cache it so that
+	// if the visibility options are the cause then we can
+	// restore the selection later if options change again
+	if (nTaskCount == 1)
+		m_aSelTaskIDs.Copy(aTaskIDs);
+	else
+		m_aSelTaskIDs.RemoveAll();
+
 	return false;
 }
 
@@ -601,6 +607,9 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		if (pData)
 			return (m_ctrlKanban.SelectTask(nCmd, pData->select) != FALSE);
 		break;
+
+	case IUI_SELECTALL:
+		return (m_ctrlKanban.SelectAllInSelectedColumn() != FALSE);
 	}
 
 	return false;
@@ -951,21 +960,40 @@ void CKanbanWnd::ProcessTrackedAttributeChange()
 
 void CKanbanWnd::OnSelchangeOptions() 
 {
-	BOOL bWasShowingParentTasks = m_ctrlKanban.HasOption(KBCF_SHOWPARENTTASKS);
-	BOOL bIsShowingParentTasks = m_cbOptions.HasSelectedOption(KBCF_SHOWPARENTTASKS);
+	DWORD dwCurOptions = m_ctrlKanban.GetOptions(), dwNewOptions = dwCurOptions;
 
-	DWORD dwOptions = m_ctrlKanban.GetOptions();
+	Misc::SetFlag(dwNewOptions, KBCF_SHOWEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_SHOWEMPTYCOLUMNS));
+	Misc::SetFlag(dwNewOptions, KBCF_SHOWPARENTTASKS, m_cbOptions.HasSelectedOption(KBCF_SHOWPARENTTASKS));
 
-	Misc::SetFlag(dwOptions, KBCF_SHOWEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_SHOWEMPTYCOLUMNS));
-	Misc::SetFlag(dwOptions, KBCF_SHOWPARENTTASKS, bIsShowingParentTasks);
-
-	m_ctrlKanban.SetOptions(dwOptions);
-
-	// Fixup selection if parents are being shown
-	if ((bWasShowingParentTasks || bIsShowingParentTasks) && m_aSelTaskIDs.GetSize())
+	if (dwNewOptions != dwCurOptions)
 	{
-		m_ctrlKanban.SelectTasks(m_aSelTaskIDs);
-		SendParentSelectionUpdate();
+		CDWordArray aSelTaskIDs;
+		aSelTaskIDs.Copy(m_aSelTaskIDs);
+
+		m_ctrlKanban.SetOptions(dwNewOptions);
+
+		if (!m_ctrlKanban.GetSelectedCount())
+		{
+			BOOL bWasShowingParents = Misc::HasFlag(dwCurOptions, KBCF_SHOWPARENTTASKS);
+			BOOL bIsShowingParents = Misc::HasFlag(dwNewOptions, KBCF_SHOWPARENTTASKS);
+
+			if (bWasShowingParents && !bIsShowingParents)
+			{
+				// If parent visibility was being turned off and now
+				// nothing is selected cache the old selection in case
+				// we can restore it if the visibility is restored
+				if (m_aSelTaskIDs.GetSize() == 0)
+					m_aSelTaskIDs.Copy(aSelTaskIDs);
+			}
+			else if (!bWasShowingParents && bIsShowingParents)
+			{
+				// If parent visibility is being turned on and nothing
+				// is selected but we have something cached then try
+				// to restore it
+				if (m_ctrlKanban.SelectTasks(m_aSelTaskIDs))
+					SendParentSelectionUpdate();
+			}
+		}
 	}
 }
 

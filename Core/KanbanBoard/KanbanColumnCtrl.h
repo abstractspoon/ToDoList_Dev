@@ -77,6 +77,7 @@ public:
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	DWORD GetOnlySelectedTask() const;
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
+	BOOL SelectAll();
 	void ScrollToSelection();
 	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
 	BOOL IsTaskSelected(DWORD dwTaskID) const;

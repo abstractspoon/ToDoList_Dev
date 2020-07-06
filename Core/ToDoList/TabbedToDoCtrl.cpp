@@ -2192,6 +2192,51 @@ BOOL CTabbedToDoCtrl::GetSelectionBoundingRect(CRect& rSelection) const
 	return (!rSelection.IsRectEmpty());
 }
 
+BOOL CTabbedToDoCtrl::CanSelectAll() const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		return CToDoCtrl::CanSelectAll();
+
+	case FTCV_TASKLIST:
+		return (m_taskList.GetTaskCount() > 0);
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd);
+			
+			if (pExtWnd)
+				return pExtWnd->CanDoAppCommand(IUI_SELECTALL);
+		}
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	return FALSE;
+}
+
 void CTabbedToDoCtrl::SelectAll()
 {
 	FTC_VIEW nView = GetTaskView();
@@ -2243,6 +2288,13 @@ void CTabbedToDoCtrl::SelectAll()
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		{
+			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
+			ASSERT(pExtWnd);
+
+			if (pExtWnd)
+				pExtWnd->DoAppCommand(IUI_SELECTALL);
+		}
 		break;
 
 	default:

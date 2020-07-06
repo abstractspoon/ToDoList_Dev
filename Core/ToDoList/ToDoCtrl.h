@@ -191,7 +191,6 @@ public:
 
 	BOOL SelectTask(DWORD dwTaskID) { return SelectTask(dwTaskID, TRUE); }
 	BOOL SelectTasks(const CDWordArray& aTaskIDs) { return SelectTasks(aTaskIDs, TRUE); }
-	void SelectAll();
 	BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect);
 	
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
@@ -357,9 +356,11 @@ public:
 	virtual BOOL IsSortingBy(TDC_COLUMN nBy) const { return m_taskTree.IsSortingBy(nBy); }
 	virtual void Resort(BOOL bAllowToggle = FALSE) { m_taskTree.Resort(bAllowToggle); }
 
-	// move functions
+	// selection functions
 	virtual BOOL MoveSelectedTask(TDC_MOVETASK nDirection);
 	virtual BOOL CanMoveSelectedTask(TDC_MOVETASK nDirection) const { return m_taskTree.CanMoveSelection(nDirection); }
+	virtual void SelectAll();
+	virtual BOOL CanSelectAll() const { return (GetTaskCount() > 0); }
 
 	virtual BOOL GotoNextTask(TDC_GOTO nDirection); 
 	virtual BOOL CanGotoNextTask(TDC_GOTO nDirection) const;

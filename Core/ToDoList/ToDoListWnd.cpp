@@ -2369,7 +2369,7 @@ TDC_PREPAREPATH CToDoListWnd::PrepareFilePath(CString& sFilePath, TSM_TASKLISTIN
 LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	const CPreferencesDlg& userPrefs = Prefs();
-
+	
 	// late initialization
 	CMouseWheelMgr::Initialize();
 	CEditShortcutMgr::Initialize();
@@ -12430,7 +12430,7 @@ void CToDoListWnd::OnEditSelectall()
 
 void CToDoListWnd::OnUpdateEditSelectall(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());	
+	pCmdUI->Enable(GetToDoCtrl().CanSelectAll());	
 }
 
 void CToDoListWnd::OnCloseallbutthis() 

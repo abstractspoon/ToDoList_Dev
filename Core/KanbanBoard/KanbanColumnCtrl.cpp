@@ -1126,8 +1126,30 @@ BOOL CKanbanColumnCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 	return m_aSelTaskIDs.GetSize();
 }
 
+BOOL CKanbanColumnCtrl::SelectAll()
+{
+	if (!GetCount())
+		return FALSE;
+
+	m_aSelTaskIDs.RemoveAll();
+
+	HTREEITEM hti = CTreeCtrl::GetChildItem(NULL);
+
+	while (hti)
+	{
+		m_aSelTaskIDs.Add(GetTaskID(hti));
+		hti = CTreeCtrl::GetNextItem(hti, TVGN_NEXT);
+	}
+	
+	Invalidate(FALSE);
+	return TRUE;
+}
+
 BOOL CKanbanColumnCtrl::HasTasks(const CDWordArray& aTaskIDs) const
 {
+	if (aTaskIDs.GetSize() == 0)
+		return FALSE;
+
 	int nID = aTaskIDs.GetSize();
 
 	while (nID--)
@@ -1294,6 +1316,7 @@ BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 BOOL CKanbanColumnCtrl::DeleteAll()
 {
 	m_mapHTItems.RemoveAll();
+	m_aSelTaskIDs.RemoveAll();
 
 	return CTreeCtrl::DeleteAllItems();
 }

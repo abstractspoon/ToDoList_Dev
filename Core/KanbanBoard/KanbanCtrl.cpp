@@ -231,7 +231,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM lp)
 		if (m_pSelectedColumn->GetFirstSelectedItem())
 		{
 			int nSelCol = GetSelColumnIndex();
-
+			
 			for (int nCol = (nSelCol - 1); nCol >= 0; nCol--)
 			{
 				if (SelectClosestAdjacentItemToSelection(nCol))
@@ -359,23 +359,19 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 	int nPrevSel = GetSelColumnIndex(), nNewSel = -1;
 
 	if (m_pSelectedColumn && m_pSelectedColumn->HasTasks(aTaskIDs))
-	{
 		nNewSel = nPrevSel;
-	}
 	else
-	{
 		nNewSel = m_aColumns.Find(aTaskIDs);
 
-		if (nNewSel == -1)
-			return FALSE;
-	}
-
-	if ((nPrevSel != nNewSel) || !Misc::MatchAll(aTaskIDs, aSelTaskIDs))
+	if ((nPrevSel != nNewSel) || !aTaskIDs.GetSize() || !Misc::MatchAll(aTaskIDs, aSelTaskIDs))
 	{
 		m_aColumns.SetSelectedColumn(NULL);
 
 		if ((nNewSel == -1) || !aTaskIDs.GetSize())
+		{
+			m_pSelectedColumn = NULL;
 			return FALSE;
+		}
 
 		// else
 		SelectColumn(m_aColumns[nNewSel], FALSE);
@@ -383,6 +379,26 @@ BOOL CKanbanCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 	}
 
 	ScrollToSelectedTask();
+	return TRUE;
+}
+
+int CKanbanCtrl::GetSelectedCount() const
+{
+	if (m_pSelectedColumn)
+		return m_pSelectedColumn->GetSelectedCount();
+
+	return 0;
+}
+
+BOOL CKanbanCtrl::SelectAllInSelectedColumn()
+{
+	if (!GetSelectedCount())
+		return FALSE;
+
+	if (!m_pSelectedColumn->SelectAll())
+		return FALSE;
+
+	NotifyParentSelectionChange();
 	return TRUE;
 }
 
@@ -403,7 +419,10 @@ CKanbanColumnCtrl* CKanbanCtrl::GetSelColumn()
 	ASSERT((m_pSelectedColumn == NULL) || Misc::HasT(m_pSelectedColumn, m_aColumns));
 
 	if (!m_pSelectedColumn && m_aColumns.GetSize())
+	{
 		m_pSelectedColumn = m_aColumns[0];
+		m_pSelectedColumn->SetSelected(TRUE);
+	}
 
 	return m_pSelectedColumn;
 }
@@ -1789,15 +1808,8 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate, const CDWo
 	// because the app takes care of that
 	if (!bTaskUpdate && aSelTaskIDs.GetSize() && !SelectTasks(aSelTaskIDs))
 	{
-		if (!m_pSelectedColumn || !Misc::HasT(m_pSelectedColumn, m_aColumns))
-		{
-			// Find the first list with some items
-			m_pSelectedColumn = m_aColumns.GetFirstNonEmpty();
-
-			// No list has items?
-			if (!m_pSelectedColumn)
-				m_pSelectedColumn = m_aColumns[0];
-		}
+		FixupSelectedColumn();
+ 		NotifyParentSelectionChange();
 	}
 }
 
@@ -1900,6 +1912,8 @@ void CKanbanCtrl::FixupSelectedColumn()
 		// No list has items?
 		if (!m_pSelectedColumn)
 			m_pSelectedColumn = m_aColumns[0];
+
+		m_pSelectedColumn->SetSelected(TRUE);
 	}
 
 	FixupColumnFocus();
@@ -2802,7 +2816,7 @@ LRESULT CKanbanCtrl::OnColumnEditLabel(WPARAM wp, LPARAM lp)
 	{
 		ASSERT(0);
 	}
-	else if (m_pSelectedColumn->GetOnlySelectedTask() != lp)
+	else if (m_pSelectedColumn->GetOnlySelectedTask() != (DWORD)lp)
 	{
 		ASSERT(0);
 	}
