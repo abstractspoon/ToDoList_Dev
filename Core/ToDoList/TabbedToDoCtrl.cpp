@@ -6071,8 +6071,8 @@ void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)
 	}
 	else
 	{
-		ASSERT(cache.aSelTaskIDs.GetSize() >= 1);
-		ASSERT(cache.dwFocusedTaskID == cache.aSelTaskIDs[0]);
+		ASSERT((cache.aSelTaskIDs.GetSize() > 1) || 
+				(cache.dwFocusedTaskID == cache.aSelTaskIDs[0]));
 
 		pVData->bHasSelectedTask = pExt->SelectTask(cache.dwFocusedTaskID);
 

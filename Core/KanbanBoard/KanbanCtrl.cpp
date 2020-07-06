@@ -151,7 +151,7 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 
-	if (!m_header.Create(HDS_FULLDRAG | HDS_BUTTONS | /*HDS_DRAGDROP |*/ WS_CHILD | WS_VISIBLE, 
+	if (!m_header.Create(HDS_FULLDRAG | HDS_BUTTONS | WS_CHILD | WS_VISIBLE, 
 						 CRect(lpCreateStruct->x, lpCreateStruct->y, lpCreateStruct->cx, 50),
 						 this, IDC_HEADER))
 	{
@@ -1805,9 +1805,40 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate, const CDWo
 	Resize();
 		
 	// We only need to restore selection if not doing a task update
-	// because the app takes care of that
-	if (!bTaskUpdate && aSelTaskIDs.GetSize() && !SelectTasks(aSelTaskIDs))
+	// because otherwise the app takes care of that
+	if (!bTaskUpdate && aSelTaskIDs.GetSize())
 	{
+		if (m_aColumns.Find(aSelTaskIDs) != -1)
+		{
+			VERIFY(SelectTasks(aSelTaskIDs));
+			return;
+		}
+
+		// If the selection can't be restored as-is probably
+		// because previously visible tasks are now hidden
+		// then we give the selected column the chance to do
+		// the best it can
+		if (m_pSelectedColumn)
+		{
+			ASSERT(m_aColumns.Find(m_pSelectedColumn) != -1);
+
+			CDWordArray aFoundIDs;
+			aFoundIDs.Copy(aSelTaskIDs);
+
+			int nID = aFoundIDs.GetSize();
+
+			while (nID--)
+			{
+				if (!m_pSelectedColumn->FindItem(aFoundIDs[nID]))
+					aFoundIDs.RemoveAt(nID);
+			}
+		
+			if (aFoundIDs.GetSize() > 0)
+				m_pSelectedColumn->SelectTasks(aFoundIDs);
+			else
+				m_pSelectedColumn = NULL;
+		}
+
 		FixupSelectedColumn();
  		NotifyParentSelectionChange();
 	}

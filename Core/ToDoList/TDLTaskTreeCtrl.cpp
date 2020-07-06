@@ -2249,14 +2249,10 @@ int CTDLTaskTreeCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 	{
 		// get selected tasks ordered with/out duplicate subtasks
 		CHTIList selection;
+
 		TSH().CopySelection(selection, bRemoveChildDupes, TRUE);
-
-		TDCGETTASKS filter(TDCGT_ALL, 0);
-		POSITION pos = selection.GetHeadPosition();
-	
-		while (pos)
-			aTaskIDs.Add(GetTaskID(selection.GetNext(pos)));
-
+		TSH().GetItemData(selection, aTaskIDs);
+		
 		// focused item
 		HTREEITEM htiFocus = m_tcTasks.GetSelectedItem();
 
