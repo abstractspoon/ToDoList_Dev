@@ -10,7 +10,7 @@ if NOT EXIST %REPO%\Plugins exit
 
 ECHO ON
 
-REM - Make sure caller has updated ToDoList version number
+REM - Make sure caller has updated ToDoList version number and retrieved latest translations
 pause
 
 REM - Build core app in VC6
