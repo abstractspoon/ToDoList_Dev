@@ -5979,7 +5979,8 @@ void CToDoCtrl::SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTAS
 	// just like we do with standard combos
 	CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
 
-	if (filter.mapAttribs.HasOnly(TDCA_ALL))
+	if (filter.mapAttribs.HasOnly(TDCA_ALL) ||
+		filter.mapAttribs.Has(TDCA_CUSTOMATTRIB_ALL))
 	{
 		tasks.SetCustomAttributeDefs(m_aCustomAttribDefs);
 	}
