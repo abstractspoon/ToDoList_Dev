@@ -1187,7 +1187,13 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 	// Don't process if expanding an item
 	if (!(nFlags & TVHT_ONITEMBUTTON) && hti && (hti != GetTreeSelItem(m_tree)))
 	{
+		CLockUpdates hr(m_tree);
 		SelectItem(hti);
+
+		// Make sure item is visible horizontally
+		if (!TCH().IsItemVisible(hti, TRUE, FALSE))
+			m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
+
 		return TRUE;
 	}
 
