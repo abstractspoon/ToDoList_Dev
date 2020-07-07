@@ -493,7 +493,7 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 		}
 
 		// horizontal scroll
-		if (bHorzVisible)
+		if (!bHorzVisible)
 		{
 			m_tree.GetItemRect(hti, rItem, TRUE);
 			CRect rOrg(rItem);
