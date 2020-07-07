@@ -1643,6 +1643,9 @@ char* Misc::WideToMultiByte(const WCHAR* szFrom, UINT nCodePage)
 
 char* Misc::WideToMultiByte(const WCHAR* szFrom, int& nLength, UINT nCodePage)
 {
+	if (!szFrom)
+		return NULL;
+
 	int clen = WideCharToMultiByte(nCodePage, 0, szFrom, nLength, NULL, 0, NULL, NULL);
 
 	// if clen == 0, some unknown codepage was probably used.
@@ -1670,6 +1673,9 @@ WCHAR* Misc::MultiByteToWide(const char* szFrom, UINT nCodePage)
 
 WCHAR* Misc::MultiByteToWide(const char* szFrom, int& nLength, UINT nCodepage)
 {
+	if (!szFrom)
+		return NULL;
+
 	// Use api convert routine
 	int wlen = MultiByteToWideChar(nCodepage, 0, szFrom, nLength, NULL, 0);
 
