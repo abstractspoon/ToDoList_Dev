@@ -11,10 +11,10 @@ class CSendFileTo
 {
 public:
 	static bool SendMail(HWND hWndParent, 
-						const LPCSTR strTo="", 
-						const LPCSTR strSubject="", 
-						const LPCSTR strBody="", 
-						const LPCSTR strAttachmentFileName="")
+						const LPCSTR strTo, 
+						const LPCSTR strSubject, 
+						const LPCSTR strBody=NULL, 
+						const LPCSTR strAttachmentFileName=NULL)
 	{
 		if (!hWndParent || !::IsWindow(hWndParent))
 			return false;
