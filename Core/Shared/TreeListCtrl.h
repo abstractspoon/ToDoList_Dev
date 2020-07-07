@@ -292,6 +292,7 @@ protected:
 	void SetDropHighlight(HTREEITEM hti, int nItem);
 	BOOL IsTreeItemLineOdd(HTREEITEM hti) const;
 	BOOL IsListItemLineOdd(int nItem) const;
+	BOOL CanScrollTree(int nScrollbar, BOOL bLeftUp) const;
 
 	void Resize(int cx = 0, int cy = 0);
 	void UpdateColumnWidths(UPDATETITLEWIDTHACTION nAction);
