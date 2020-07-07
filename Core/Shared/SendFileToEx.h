@@ -7,28 +7,41 @@ class CSendFileToEx
 {
 public:
 	static bool SendMail(HWND hWndParent, 
-						const CString& strTo=_T(""), 
-						const CString& strSubject=_T(""), 
-						const CString& strBody=_T(""), 
-						const CString& strAttachmentFileName=_T(""))
+						const CString& strTo, 
+						const CString& strSubject, 
+						const CString& strBody = _T(""), 
+						const CString& strAttachmentFileName = _T(""))
 	{
-		bool bResult = false;
+		LPSTR lpszName = NULL, lpszPathName = NULL, lpszSubject = NULL, lpszNoteText = NULL;
+		bool bCleanup = false;
+
+		// Passing the body as a NULL pointer is an undocumented
+		// way of indicating to the the mail client it should render
+		// any attachment in the body.
 
 #ifdef _UNICODE
-		LPSTR lpszName = Misc::WideToMultiByte(strTo);
-		LPSTR lpszPathName = Misc::WideToMultiByte(strAttachmentFileName);
-		LPSTR lpszSubject = Misc::WideToMultiByte(strSubject);
-		LPSTR lpszNoteText = Misc::WideToMultiByte(strBody);
+		lpszName = Misc::WideToMultiByte(strTo);
+		lpszSubject = Misc::WideToMultiByte(strSubject);
+		lpszNoteText = (strBody.IsEmpty() ? NULL : Misc::WideToMultiByte(strBody));
+		lpszPathName = Misc::WideToMultiByte(strAttachmentFileName);
 
-		bResult = CSendFileTo::SendMail(hWndParent, lpszName, lpszSubject, lpszNoteText, lpszPathName);
-
-		delete lpszName;
-		delete lpszPathName;
-		delete lpszSubject;
-		delete lpszNoteText;
+		bCleanup = true;
 #else
-		bResult = CSendFileTo::SendMail(hWndParent, strTo, strSubject, strBody, strAttachmentFileName);
+		lpszName = strTo;
+		lpszSubject = strSubject;
+		lpszNoteText = (strBody.IsEmpty() ? NULL : strBody);
+		lpszPathName = strAttachmentFileName;
 #endif		
+
+		bool bResult = CSendFileTo::SendMail(hWndParent, lpszName, lpszSubject, lpszNoteText, lpszPathName);
+
+		if (bCleanup)
+		{
+			delete lpszName;
+			delete lpszPathName;
+			delete lpszSubject;
+			delete lpszNoteText;
+		}
 
 		return bResult;
 	}

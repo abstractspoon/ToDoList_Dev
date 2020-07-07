@@ -2058,7 +2058,9 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 		if (bHtmlComments)
 		{
 			sImgFolder = pExport->sExportPath;
+		
 			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
+			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 		}
 
 		GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, pExport->tasks, sImgFolder); 
@@ -12471,16 +12473,28 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 
 	if (dialog.DoModal() == IDOK)
 	{
-		// get tasks
-		CTaskFile tasks;
-		GetTasks(tdc, FALSE, FALSE, dialog.GetTaskSelection(), tasks, NULL);
-
-		// Export them
 		int nFormat = m_mgrImportExport.FindExporterByType(dialog.GetFormatTypeID());
 		ASSERT(nFormat != -1);
 
-		CString sFilePath = FileMisc::GetTempFilePath(_T("tdl.email"), m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE));
+		CString sExt = Misc::ToLower(m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE));
+		CString sFilePath = FileMisc::GetTempFilePath(_T("tdl.email"), sExt);
 
+		BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nFormat);
+		CString sImgFolder;
+
+		if (bHtmlComments)
+		{
+			sImgFolder = sFilePath;
+	
+			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
+			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
+		}
+
+		// get tasks
+		CTaskFile tasks;
+		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
+
+		// Export them
 		if (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE) != IIER_SUCCESS)
 		{
 			// Display error message
@@ -12500,7 +12514,13 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 			break;
 			
 		case TDSA_BODYTEXT:
-			if (!FileMisc::LoadFile(sFilePath, sBody))
+			if ((sExt == _T(".html")) || (sExt == _T(".htm")))
+			{
+				sAttachment = sFilePath;
+				// empty body instructs email client to render the 
+				// attached file in the body
+			}
+			else if (!FileMisc::LoadFile(sFilePath, sBody))
 			{
 				// Display error message
 				// TODO
