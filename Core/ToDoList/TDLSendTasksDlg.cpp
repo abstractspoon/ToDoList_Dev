@@ -96,6 +96,6 @@ void CTDLSendTasksDlg::OnOK()
 
 	CPreferences prefs;
 	prefs.WriteProfileInt(m_sPrefsKey, _T("SendTasksAs"), m_nSendTasksAsOption);
-	prefs.WriteProfileString(m_sPrefsKey, _T("ExportTypeID"), m_sFormatTypeID);
+	prefs.WriteProfileString(m_sPrefsKey, _T("FormatTypeID"), m_sFormatTypeID);
 }
 
