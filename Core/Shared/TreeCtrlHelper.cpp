@@ -111,6 +111,33 @@ void CHTIMap::Trace(CTreeCtrl& tree) const
 }
 #endif
 
+/////////////////////////////////////////////////////////////////////////////
+
+CDisableTreeTips::CDisableTreeTips(CTreeCtrl& tree, BOOL bToolTips, BOOL bInfoTips)
+	: 
+	m_tree(tree), 
+	m_bToolTips(FALSE),
+	m_bInfoTips(FALSE)
+{
+	DWORD dwStyle = m_tree.GetStyle();
+
+	m_bToolTips = (bToolTips && !(dwStyle & TVS_NOTOOLTIPS));
+	m_bInfoTips = (bInfoTips && (dwStyle & TVS_INFOTIP));
+
+	m_tree.ModifyStyle((m_bInfoTips ? TVS_INFOTIP : 0), (m_bToolTips ? TVS_NOTOOLTIPS : 0));
+}
+
+CDisableTreeTips::~CDisableTreeTips()
+{
+	m_tree.ModifyStyle((m_bToolTips ? TVS_NOTOOLTIPS : 0), (m_bInfoTips ? TVS_INFOTIP : 0));
+
+	if (m_bToolTips)
+	{
+		m_tree.Invalidate(FALSE);
+		m_tree.UpdateWindow();
+	}
+}
+
 //////////////////////////////////////////////////////////////////////
 
 // helper for copying

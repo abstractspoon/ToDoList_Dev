@@ -45,8 +45,7 @@ class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer
 	friend class CTCBHoldResync;
 	
 protected: // base class only
-	CTDLTaskCtrlBase(BOOL bSyncSelection,
-					 const CTDCImageList& ilIcons,
+	CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
 					 const CToDoCtrlFind& find, 
 					 const CTDCStyleMap& styles,

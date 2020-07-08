@@ -86,7 +86,7 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
-	CTDLTaskCtrlBase(TRUE, ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs),
+	CTDLTaskCtrlBase(ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs),
 	m_nGroupBy(TDCC_NONE)
 {
 }

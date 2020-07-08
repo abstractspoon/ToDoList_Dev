@@ -24,11 +24,12 @@ enum TLS_HIDE
 
 enum
 {
-	TLSF_SYNCSELECTION	= 0x0001,
-	TLSF_SYNCFOCUS		= 0x0002,
-	TLSF_SYNCDATA		= 0x0004,
-	TLSF_SPLITTER		= 0x0008,
-	TLSF_BORDER			= 0x0010,
+	TLSF_SYNCSELECTION		= 0x0001,
+	TLSF_SYNCFOCUS			= 0x0002,
+	TLSF_SYNCDATA			= 0x0004,
+	TLSF_SPLITTER			= 0x0008,
+	TLSF_BORDER				= 0x0010,
+	TLSF_LOCKTREEHSCROLL	= 0x0020,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -75,12 +76,25 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CHoldHScroll
+{
+public:
+	CHoldHScroll(HWND hwnd, int nInitialPos = -1);
+	~CHoldHScroll();
+
+protected:
+	HWND m_hwnd;
+	int m_nOrgHScrollPos;
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTreeListSyncer : protected CSubclassWnd, protected CSubclasser 
 {
 	friend class CTLSHoldResync;
 
 public:
-	CTreeListSyncer(DWORD dwFlags = TLSF_SYNCSELECTION | TLSF_SYNCFOCUS);
+	CTreeListSyncer(DWORD dwFlags = TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_LOCKTREEHSCROLL);
 	virtual ~CTreeListSyncer();
 	
 	BOOL Sync(HWND hwndLeft, HWND hwndRight, TLS_LINKAGE nLink, HWND hwndMainHeader = NULL);
@@ -251,6 +265,7 @@ protected:
 	HWND PrimaryWnd() const;
 	int GetSelectedListItems(HWND hwndList, CIntArray& aItems);
 	BOOL ResyncListToTreeSelection(HWND hwndTree, const CList<HTREEITEM, HTREEITEM>& htItems, HTREEITEM htiFocused);
+	BOOL WantHoldHScroll(HWND hWnd) const;
 
 	void ExpandList(HWND hwndList, HWND hwndTree, HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HWND hwndList, HWND hwndTree, HTREEITEM hti);
@@ -307,6 +322,8 @@ private:
 	void BuildTreeListSortMap(HWND hwndTree, HWND hwndList, HTREEITEM hti, CSortMap& map, int& nIndex);
 	void SortTreeItem(HWND hwndTree, HTREEITEM hti, PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, BOOL bRecursive);
 	void BuildListListSortMap(HWND hwndPrimary, HWND hwndList, CSortMap& map);
+	void HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp);
+	void HandleVScroll(HWND hWnd, WPARAM wp, LPARAM lp);
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static BOOL ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam);

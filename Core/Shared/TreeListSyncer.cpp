@@ -43,6 +43,10 @@ const int LINUX_VOFFSET_FUDGE	= 2;
 #	define TreeView_SetExtendedStyle(hwnd, dw, mask) (DWORD)SNDMSG((hwnd), TVM_SETEXTENDEDSTYLE, mask, dw)
 #endif
 
+#ifndef GET_WHEEL_DELTA_WPARAM
+#	define GET_WHEEL_DELTA_WPARAM(wParam)  ((short)HIWORD(wParam))
+#endif 
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 CTLSHoldResync::CTLSHoldResync(CTreeListSyncer& tls) : m_tls(tls), m_bResyncHeld(FALSE)
@@ -82,6 +86,32 @@ CHoldListVScroll::~CHoldListVScroll()
 			
 			int nVOffset = ((m_nOrgVScrollPos - nPos) * rItem.Height());
 			ListView_Scroll(m_hwndList, 0, nVOffset);
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////
+
+CHoldHScroll::CHoldHScroll(HWND hwnd, int nInitialPos) : m_hwnd(hwnd)
+{
+	// it's acceptable to pass no HWND -> nothing happens
+	if (m_hwnd)
+	{
+		if (nInitialPos < 0)
+			m_nOrgHScrollPos = ::GetScrollPos(hwnd, SB_HORZ);
+		else
+			m_nOrgHScrollPos = nInitialPos;
+	}
+}
+
+CHoldHScroll::~CHoldHScroll()
+{
+	if (m_hwnd)
+	{
+		if (::GetScrollPos(m_hwnd, SB_HORZ) != m_nOrgHScrollPos)
+		{
+			::SendMessage(m_hwnd, WM_HSCROLL, MAKEWPARAM(SB_THUMBPOSITION, m_nOrgHScrollPos), 0L);
+			::UpdateWindow(m_hwnd);
 		}
 	}
 }
@@ -549,6 +579,8 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 
 	CAutoFlag af(m_bResyncing, TRUE);
 	BOOL bSynced = FALSE;
+
+	CHoldHScroll hs(WantHoldHScroll(hwnd) ? hwnd : NULL);
 
 	if (IsTree(hwnd) && IsList(hwndTo)) // sync Tree to list
 	{
@@ -2401,49 +2433,36 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		}
 		break;
 
+	case TVM_SELECTITEM:
+		if ((wp == TVGN_FIRSTVISIBLE) && WantHoldHScroll(hRealWnd))
+		{
+			CHoldHScroll hhs(hRealWnd);
+
+			return ScDefault(hRealWnd);
+		}
+		break;
+
 	case WM_VSCROLL:
+		HandleVScroll(hRealWnd, wp, lp);
+		return 0L;
+
 	case LVM_ENSUREVISIBLE:
 	case TVM_ENSUREVISIBLE:
 		// one view has been scrolled => resync other
 		{
+			HWND hwndOther = OtherWnd(hRealWnd);
+			CHoldHScroll hs(WantHoldHScroll(hwndOther) ? hwndOther : NULL);
+
 			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
-			if (ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd))
-			{
-				// TODO
-			}
+			ResyncScrollPos(hwndOther, hRealWnd);
 		}
 		break;
 		
 	case WM_MOUSEWHEEL:
-		if (IsRight(hRealWnd)) // right view has received mousewheel => resync left
-		{
-			lr = ScDefault(hRealWnd);
-			bDoneDefault = TRUE;
-			
-			if (ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd))
-			{
-				// TODO
-			}
-		}
-		else // left view has received mousewheel input => response varies
-		{
-			HWND hwndOther = OtherWnd(hRealWnd);
-			
-			// if the right view has a vertical scrollbar this takes priority,
-			// else if we do not have a horz scrollbar
-			if (HasVScrollBar(hwndOther))
-			{
-				return ::SendMessage(hwndOther, WM_MOUSEWHEEL, wp, lp);
-			}
-			else if (!HasHScrollBar(hRealWnd))
-			{
-				return ::SendMessage(hwndOther, WM_MOUSEWHEEL, wp, lp);
-			}
-			// else default behaviour
-		}
-		break;
+		HandleMouseWheel(hRealWnd, wp, lp);
+		return 0L;
 		
 	case WM_NCPAINT:
 		if (m_bTreeExpanding && IsLeft(hRealWnd) && IsTree(hRealWnd))
@@ -2593,6 +2612,64 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		lr = ScDefault(hRealWnd);
 	
 	return lr;
+}
+
+void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
+{
+	HWND hwndOther = OtherWnd(hWnd);
+
+	if (HasVScrollBar())
+	{
+		// We get the fewest UI artifacts when we pass this to 
+		// the tree and then resync the list
+		HWND hwndScroll = (IsTree(hWnd) ? hWnd : IsTree(hwndOther) ? hwndOther : hWnd);
+
+		int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
+		int nLine = (abs(zDelta / 120) * 3);
+
+		BOOL bDown = (zDelta < 0);
+
+		while (nLine--)
+			::SendMessage(hwndScroll, WM_VSCROLL, (bDown ? SB_LINEDOWN : SB_LINEUP), 0L);
+
+		return;
+	}
+
+	// else
+	ScDefault(hWnd);
+	ResyncScrollPos(hwndOther, hWnd);
+}
+
+void CTreeListSyncer::HandleVScroll(HWND hWnd, WPARAM wp, LPARAM lp)
+{
+	ASSERT(HasVScrollBar());
+
+	ScDefault(hWnd);
+
+	HWND hwndOther = OtherWnd(hWnd);
+
+	// Prevent the tree auto-scrolling horizontally by scrolling
+	// it manually
+	if (HasFlag(TLSF_LOCKTREEHSCROLL) && !IsTree(hWnd) && IsTree(hwndOther))
+	{
+		switch (LOWORD(wp))
+		{
+		case SB_THUMBPOSITION:
+		case SB_THUMBTRACK:
+			{
+				// TODO
+			}
+			return;
+		}
+	}
+
+	// else
+	ResyncScrollPos(hwndOther, hWnd);
+}
+
+BOOL CTreeListSyncer::WantHoldHScroll(HWND hWnd) const
+{
+	return (HasFlag(TLSF_LOCKTREEHSCROLL) && IsTree(hWnd));
 }
 
 LRESULT CTreeListSyncer::ScDefault(HWND hwnd)
