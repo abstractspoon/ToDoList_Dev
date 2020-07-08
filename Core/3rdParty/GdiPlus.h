@@ -148,7 +148,7 @@ enum gdix_PenStyle
 
 #if _MSC_VER < 1400
 #	ifndef ULONG_PTR
-		typedef unsigned __int64    ULONG_PTR;
+		typedef ULONG ULONG_PTR;
 #	endif
 #endif
 
