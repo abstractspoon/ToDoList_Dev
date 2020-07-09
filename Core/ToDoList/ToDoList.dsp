@@ -55,7 +55,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 Msimg32.lib msimg32.lib Winmm.lib /nologo /subsystem:windows /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /pdbtype:sept
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /pdbtype:sept
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
 PostBuild_Cmds=mkdir ..\..\Plugins	mkdir ..\..\Plugins\Debug	copy unicode_debug\ToDoList.exe ..\..\Plugins\debug /y	copy unicode_debug\ToDoList.pdb ..\..\Plugins\debug /y	unicode_debug\TDLTest.exe
@@ -88,7 +88,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 Msimg32.lib msimg32.lib Winmm.lib /nologo /subsystem:windows /pdb:"ToDoList.pdb" /map /machine:I386 /pdbtype:con /MAPINFO:LINES /MAPINFO:EXPORTS
 # SUBTRACT BASE LINK32 /pdb:none /debug
-# ADD LINK32 /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /MAPINFO:LINES /MAPINFO:EXPORTS /OPT:REF
+# ADD LINK32 ..\3rdParty\Detours\lib.x86\detours.lib /nologo /entry:"wWinMainCRTStartup" /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /MAPINFO:LINES /MAPINFO:EXPORTS /OPT:REF
 # SUBTRACT LINK32 /pdb:none /map /nodefaultlib
 # Begin Special Build Tool
 SOURCE="$(InputPath)"

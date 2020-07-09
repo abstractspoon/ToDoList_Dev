@@ -150,6 +150,8 @@ copy unicode_release\GanttChartExt.dll ..\todolist\unicode_release /y
       </DataExecutionPrevention>
       <ImportLibrary>.\Unicode_Debug/GanttChartExt.lib</ImportLibrary>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>

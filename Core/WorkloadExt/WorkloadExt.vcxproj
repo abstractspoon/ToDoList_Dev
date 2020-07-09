@@ -101,6 +101,8 @@ copy unicode_debug\WorkloadExt.dll ..\todolist\unicode_debug /y</Command>
       <SubSystem>Windows</SubSystem>
       <OutputFile>.\Unicode_Debug\WorkloadExt.dll</OutputFile>
       <ImportLibrary>.\Unicode_Debug\WorkloadExt.lib</ImportLibrary>
+      <AdditionalDependencies>..\3rdParty\Detours\lib.x86\detours.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
