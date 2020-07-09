@@ -2495,20 +2495,14 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		break;
 
 	case WM_VSCROLL:
-		HandleVScroll(hRealWnd, wp, lp);
-		return 0L;
-
 	case LVM_ENSUREVISIBLE:
 	case TVM_ENSUREVISIBLE:
 		// one view has been scrolled => resync other
 		{
-			HWND hwndOther = OtherWnd(hRealWnd);
-			CHoldHScroll hs(WantHoldHScroll(hwndOther) ? hwndOther : NULL);
-
 			lr = ScDefault(hRealWnd);
 			bDoneDefault = TRUE;
 			
-			ResyncScrollPos(hwndOther, hRealWnd);
+			ResyncScrollPos(OtherWnd(hRealWnd), hRealWnd);
 		}
 		break;
 		
@@ -2689,33 +2683,6 @@ void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 
 	// else
 	ScDefault(hWnd);
-	ResyncScrollPos(hwndOther, hWnd);
-}
-
-void CTreeListSyncer::HandleVScroll(HWND hWnd, WPARAM wp, LPARAM lp)
-{
-	ASSERT(HasVScrollBar());
-
-	ScDefault(hWnd);
-
-	HWND hwndOther = OtherWnd(hWnd);
-
-	// Prevent the tree auto-scrolling horizontally by scrolling
-	// it manually
-	if (HasFlag(TLSF_LOCKTREEHSCROLL) && !IsTree(hWnd) && IsTree(hwndOther))
-	{
-		switch (LOWORD(wp))
-		{
-		case SB_THUMBPOSITION:
-		case SB_THUMBTRACK:
-			{
-				// TODO
-			}
-			return;
-		}
-	}
-
-	// else
 	ResyncScrollPos(hwndOther, hWnd);
 }
 
