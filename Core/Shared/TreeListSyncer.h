@@ -85,6 +85,13 @@ public:
 protected:
 	HWND m_hwnd;
 	int m_nOrgHScrollPos;
+
+private:
+	static HWND s_hwndGlobal;
+
+private:
+	static int WINAPI MySetScrollPos(HWND hWnd, int nBar, int nPos, BOOL bRedraw);
+	static int WINAPI MyScrollWindowEx(HWND hWnd, int dx, int dy, const RECT *prcScroll, const RECT *prcClip, HRGN hrgnUpdate, LPRECT prcUpdate, UINT flags);
 };
 
 /////////////////////////////////////////////////////////////////////////////

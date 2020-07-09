@@ -11,6 +11,8 @@
 #include "..\shared\copywndcontents.h"
 #include "..\shared\enbitmap.h"
 
+#include "..\3rdParty\Detours\detours.h"
+
 //////////////////////////////////////////////////////////////////////////////////////////
 
 #define WM_RESYNC           (WM_USER+2)
@@ -92,28 +94,78 @@ CHoldListVScroll::~CHoldListVScroll()
 
 //////////////////////////////////////////////////////////////////////
 
+int(WINAPI * TrueSetScrollPos)(HWND hWnd, int nBar, int nPos, BOOL bRedraw) = SetScrollPos;
+int(WINAPI * TrueScrollWindowEx)(HWND hWnd, int dx, int dy, const RECT *prcScroll, const RECT *prcClip, HRGN hrgnUpdate, LPRECT prcUpdate, UINT flags) = ScrollWindowEx;
+
+HWND CHoldHScroll::s_hwndGlobal = NULL;
+
 CHoldHScroll::CHoldHScroll(HWND hwnd, int nInitialPos) : m_hwnd(hwnd)
 {
 	// it's acceptable to pass no HWND -> nothing happens
-	if (m_hwnd)
+	if (m_hwnd == NULL)
+		return;
+
+	// Can only have one active hold at a time
+	// Don't assert if the HWND is the same
+	if (s_hwndGlobal != NULL)
 	{
-		if (nInitialPos < 0)
-			m_nOrgHScrollPos = ::GetScrollPos(hwnd, SB_HORZ);
-		else
-			m_nOrgHScrollPos = nInitialPos;
+		ASSERT(0/*m_hwnd == s_hwndGlobal*/);
+
+		m_hwnd = NULL;
+		return;
 	}
+
+	s_hwndGlobal = m_hwnd;
+
+	if (nInitialPos < 0)
+		m_nOrgHScrollPos = ::GetScrollPos(hwnd, SB_HORZ);
+	else
+		m_nOrgHScrollPos = nInitialPos;
+
+	VERIFY(DetourTransactionBegin() == 0);
+	VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
+	VERIFY(DetourAttach(&(PVOID&)TrueSetScrollPos, MySetScrollPos) == 0);
+	VERIFY(DetourAttach(&(PVOID&)TrueScrollWindowEx, MyScrollWindowEx) == 0);
+	VERIFY(DetourTransactionCommit() == 0);
 }
 
 CHoldHScroll::~CHoldHScroll()
 {
 	if (m_hwnd)
 	{
-		if (::GetScrollPos(m_hwnd, SB_HORZ) != m_nOrgHScrollPos)
-		{
-			::SendMessage(m_hwnd, WM_HSCROLL, MAKEWPARAM(SB_THUMBPOSITION, m_nOrgHScrollPos), 0L);
-			::UpdateWindow(m_hwnd);
-		}
+		ASSERT(s_hwndGlobal);
+
+		VERIFY(DetourTransactionBegin() == 0);
+		VERIFY(DetourUpdateThread(GetCurrentThread()) == 0);
+		VERIFY(DetourDetach(&(PVOID&)TrueSetScrollPos, MySetScrollPos) == 0);
+		VERIFY(DetourDetach(&(PVOID&)TrueScrollWindowEx, MyScrollWindowEx) == 0);
+		VERIFY(DetourTransactionCommit() == 0);
+
+		s_hwndGlobal = NULL;
+
+		::SendMessage(m_hwnd, WM_HSCROLL, MAKEWPARAM(SB_THUMBPOSITION, m_nOrgHScrollPos), 0L);
+		::UpdateWindow(m_hwnd);
 	}
+}
+
+int WINAPI CHoldHScroll::MySetScrollPos(HWND hWnd, int nBar, int nPos, BOOL bRedraw)
+{
+	if (nBar == SB_HORZ)
+	{
+		return 0;
+	}
+
+	// else
+	return TrueSetScrollPos(hWnd, nBar, nPos, bRedraw);
+}
+
+int WINAPI CHoldHScroll::MyScrollWindowEx(HWND hWnd, int dx, int dy, const RECT *prcScroll, const RECT *prcClip, HRGN hrgnUpdate, LPRECT prcUpdate, UINT flags)
+{
+	int nResult = TrueScrollWindowEx(hWnd, 0/*dx*/, dy, prcScroll, prcClip, hrgnUpdate, prcUpdate, flags);
+
+	InvalidateRect(hWnd, NULL, FALSE);
+
+	return nResult;
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
