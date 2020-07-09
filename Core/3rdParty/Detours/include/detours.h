@@ -14,7 +14,39 @@
 #define DETOURS_VERSION     30001   // 3.00.01
 
 //////////////////////////////////////////////////////////////////////////////
-//
+// Basic example
+
+/*
+LRESULT (WINAPI * TrueSendMessageW)(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) = SendMessageW;
+
+__declspec(dllexport) LRESULT WINAPI MySendMessageW(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	// TODO
+    return TrueSendMessageW(hWnd, Msg, wParam, lParam);
+}
+
+BOOL WINAPI DllMain(HINSTANCE hinst, DWORD dwReason, LPVOID reserved)
+{
+    if (dwReason == DLL_PROCESS_ATTACH) 
+    {
+        DetourRestoreAfterWith();
+        DetourTransactionBegin();
+        DetourUpdateThread(GetCurrentThread());
+        DetourAttach(&(PVOID&)TrueSendMessageW, MySendMessageW);
+        DetourTransactionCommit();
+    }
+    else if (dwReason == DLL_PROCESS_DETACH)
+    {
+        DetourTransactionBegin();
+        DetourUpdateThread(GetCurrentThread());
+        DetourDetach(&(PVOID&)TrueSendMessageW, MySendMessageW);
+        DetourTransactionCommit();
+    }
+    return TRUE;
+}
+*/
+
+//////////////////////////////////////////////////////////////////////////////
 
 #undef DETOURS_X64
 #undef DETOURS_X86

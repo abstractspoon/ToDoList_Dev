@@ -496,7 +496,7 @@ PBYTE CDetourDis::CopyBytesJump(REFCOPYENTRY pEntry, PBYTE pbDst, PBYTE pbSrc)
     ASSERT(pbSrc[0] >= 0x70 && pbSrc[0] <= 0x7f);
 
     pbDst[0] = 0x0f;
-    pbDst[1] = 0x80 | (pbSrc[0] & 0xf);
+    pbDst[1] = (unsigned char)(0x80 | (pbSrc[0] & 0xf));
     pvDstAddr = &pbDst[2];
     nNewOffset = nOldOffset - ((pbDst - pbSrc) + 4);
     *(UNALIGNED LONG*&)pvDstAddr = (LONG)nNewOffset;
@@ -826,7 +826,7 @@ PBYTE CDetourDis::CopyVex3(REFCOPYENTRY, PBYTE pbDst, PBYTE pbSrc)
     // VFMADD132PS xmm0, xmm1, xmm2/m128
     //
 #endif
-    return CopyVexCommon(pbSrc[1] & 0x1F, pbDst + 3, pbSrc + 3);
+    return CopyVexCommon((unsigned char)(pbSrc[1] & 0x1F), pbDst + 3, pbSrc + 3);
 }
 
 PBYTE CDetourDis::CopyVex2(REFCOPYENTRY, PBYTE pbDst, PBYTE pbSrc)

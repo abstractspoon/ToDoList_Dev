@@ -32,6 +32,7 @@ class CToDoListApp : public CWinApp
 {
 public:
 	CToDoListApp();
+	~CToDoListApp();
 	
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -39,8 +39,6 @@
 #include "..\3rdparty\LimitSingleInstance.h"
 #include "..\3rdparty\gdiplus.h"
 
-#include "..\3rdparty\Detours\detours.h"
-
 #include "..\Interfaces\Preferences.h"
 
 #include "..\TDLUpdate\TDLWebUpdater.h" // for URIs
@@ -122,13 +120,10 @@ END_MESSAGE_MAP()
 CToDoListApp::CToDoListApp() : CWinApp()
 {
 	// Place all significant initialization in InitInstance
-/*
-	DetourRestoreAfterWith();
-	DetourTransactionBegin();
-	DetourUpdateThread(GetCurrentThread());
-	//DetourAttach(&(PVOID&)TrueSendMessageW, MySendMessageW);
-    DetourTransactionCommit();
-*/
+}
+
+CToDoListApp::~CToDoListApp()
+{
 }
 
 /////////////////////////////////////////////////////////////////////////////
