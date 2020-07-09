@@ -131,6 +131,14 @@ SOURCE=.\modules.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\strsafe.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\strsafe.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\uimports.cpp
 # End Source File
 # End Target

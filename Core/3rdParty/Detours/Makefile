@@ -7,7 +7,7 @@
 ##  Copyright (c) Microsoft Corporation.  All rights reserved.
 ##
 
-ROOT = ..
+ROOT = .
 !include "$(ROOT)\system.mak"
 
 !IF "$(DETOURS_SOURCE_BROWSING)" == ""
@@ -16,7 +16,7 @@ DETOURS_SOURCE_BROWSING = 0
 
 #######################/#######################################################
 ##
-CFLAGS=/W4 /Zi /MT /Gy /Gm- /Zl /Od
+CFLAGS=/W4 /Zi /MT /Gy /Gm- /Zl /Od /UNICODE /_UNICODE
 
 !IF $(DETOURS_SOURCE_BROWSING)==1
 CFLAGS=$(CFLAGS) /FR
@@ -40,6 +40,7 @@ OBJS = \
     $(OBJD)\disasm.obj      \
     $(OBJD)\image.obj       \
     $(OBJD)\creatwth.obj    \
+    $(OBJD)\strsafe.obj    \
     $(OBJD)\disolx86.obj    \
 #    $(OBJD)\disolx64.obj    \
 #    $(OBJD)\disolia64.obj   \
@@ -98,16 +99,17 @@ $(INCD)\detours.h : detours.h
 $(INCD)\detver.h : detver.h
     copy detver.h $@
 
-$(OBJD)\detours.obj : detours.cpp detours.h
-$(OBJD)\modules.obj : modules.cpp detours.h
-$(OBJD)\disasm.obj : disasm.cpp detours.h
-$(OBJD)\image.obj : image.cpp detours.h
-$(OBJD)\creatwth.obj : creatwth.cpp uimports.cpp detours.h
-$(OBJD)\disolx86.obj: disasm.cpp detours.h
-$(OBJD)\disolx64.obj: disasm.cpp detours.h
-$(OBJD)\disolia64.obj: disasm.cpp detours.h
-$(OBJD)\disolarm.obj: disasm.cpp detours.h
-$(OBJD)\disolarm64.obj: disasm.cpp detours.h
+$(OBJD)\detours.obj : detours.cpp detours.h makefile
+$(OBJD)\modules.obj : modules.cpp detours.h makefile
+$(OBJD)\disasm.obj : disasm.cpp detours.h makefile
+$(OBJD)\image.obj : image.cpp detours.h makefile
+$(OBJD)\strsafe.obj : strsafe.cpp strsafe.h makefile
+$(OBJD)\creatwth.obj : creatwth.cpp uimports.cpp detours.h makefile
+$(OBJD)\disolx86.obj: disasm.cpp detours.h makefile
+$(OBJD)\disolx64.obj: disasm.cpp detours.h makefile
+$(OBJD)\disolia64.obj: disasm.cpp detours.h makefile
+$(OBJD)\disolarm.obj: disasm.cpp detours.h makefile
+$(OBJD)\disolarm64.obj: disasm.cpp detours.h makefile
 
 test: all
     cd $(MAKEDIR)\..\samples\slept
