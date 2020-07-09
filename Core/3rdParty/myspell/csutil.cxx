@@ -53,6 +53,7 @@ void safestrcpy(char* dest, unsigned int destLen, const char* src)
 #if _MSC_VER >= 1400
 	strcpy_s(dest, destLen, src);
 #else
+	(destLen); // UNREFERENCED_PARAMETER
 	strcpy(dest, src);
 #endif
 }
@@ -62,6 +63,7 @@ void safestrncpy(char* dest, unsigned int destLen, const char* src, int count)
 #if _MSC_VER >= 1400
 	strncpy_s(dest, destLen, src, count);
 #else
+	(destLen); // UNREFERENCED_PARAMETER
 	strncpy(dest, src, count);
 #endif
 }

@@ -1771,7 +1771,8 @@ void CToDoListApp::OnDebugTaskDialogError()
 
 void CToDoListApp::OnDebugShowUpdateDlg() 
 {
-	CString sAppPath = (FileMisc::TerminatePath(FileMisc::GetAppFolder()) + _T("TDLUpdate.exe"));
+	CString sAppPath = FileMisc::GetAppFolder();
+	FileMisc::TerminatePath(sAppPath) += _T("TDLUpdate.exe");
 
 	// pass our app id to app 
 	CEnCommandLineInfo cmdLine;
