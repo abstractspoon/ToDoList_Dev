@@ -336,8 +336,6 @@ void CTDLViewTabControl::Resize(const CRect& rect, CDeferWndMove* pDWM)
 			}
 		}
 	}
-
-
 }
 
 int CTDLViewTabControl::FindView(HWND hWnd) const
@@ -670,7 +668,7 @@ BOOL CTDLViewTabControl::ShowViewTab(FTC_VIEW nView, BOOL bShow)
 	}
 	ASSERT(nInsert > 0);
 
-	nTab = InsertItem(TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE, nInsert, view.sViewLabel, (view.hIcon ? 0 : -1), (LPARAM)nView);
+	nTab = InsertItem(TCIF_TEXT | TCIF_PARAM | TCIF_IMAGE, nInsert, view.sViewLabel, (view.hIcon ? nItem : -1), (LPARAM)nView);
 	ASSERT(nTab > 0);
 
 	// fixup selection

@@ -388,7 +388,7 @@ void CTDCMainMenu::PrepareTaskViewVisibilityMenu(CMenu* pMenu, const CFilteredTo
 
 	// UI Extension visibility
 	CStringArray aTypeIDs;
-	tdc.GetVisibleExtensionViews(aTypeIDs);
+	tdc.GetVisibleTaskViews(aTypeIDs);
 
 	helper.UpdateExtensionVisibilityState(pMenu, mgrUIExt, aTypeIDs);
 }
@@ -396,7 +396,7 @@ void CTDCMainMenu::PrepareTaskViewVisibilityMenu(CMenu* pMenu, const CFilteredTo
 void CTDCMainMenu::PrepareTaskViewActivationMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CUIExtensionMgr& mgrUIExt)
 {
 	CStringArray aTypeIDs;
-	tdc.GetVisibleExtensionViews(aTypeIDs);
+	tdc.GetVisibleTaskViews(aTypeIDs);
 
 	CUIExtensionHelper helper(ID_ACTIVATEVIEW_UIEXTENSION1, 16);
 	helper.AddExtensionsToMenu(pMenu, mgrUIExt, aTypeIDs);

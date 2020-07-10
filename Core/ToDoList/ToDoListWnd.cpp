@@ -7257,12 +7257,12 @@ void CToDoListWnd::OnShowTaskView(UINT nCmdID)
 		{
 			CStringArray aTypeIDs;
 			
-			if (tdc.GetVisibleExtensionViews(aTypeIDs))
+			if (tdc.GetVisibleTaskViews(aTypeIDs))
 			{
 				CUIExtensionHelper helper(ID_SHOWVIEW_UIEXTENSION1, 16);
 
 				if (helper.ProcessExtensionVisibilityMenuCmd(nCmdID, m_mgrUIExtensions, aTypeIDs))
-					tdc.SetVisibleExtensionViews(aTypeIDs);
+					tdc.SetVisibleTaskViews(aTypeIDs);
 			}
 		}
 		break;

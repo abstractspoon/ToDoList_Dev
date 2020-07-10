@@ -84,8 +84,8 @@ public:
 	void ShowListViewTab(BOOL bVisible = TRUE);
 	BOOL IsListViewTabShowing() const;
 	void SaveAllTaskViewPreferences();
-	void SetVisibleExtensionViews(const CStringArray& aTypeIDs);
-	int GetVisibleExtensionViews(CStringArray& aTypeIDs) const;
+	void SetVisibleTaskViews(const CStringArray& aTypeIDs);
+	int GetVisibleTaskViews(CStringArray& aTypeIDs) const;
 
 	static void SetDefaultTaskViews(const CStringArray& aTypeIDs);
 	
