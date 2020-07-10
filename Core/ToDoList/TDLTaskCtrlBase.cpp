@@ -144,7 +144,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 								   const CTDCColumnIDMap& mapVisibleCols,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
-	CTreeListSyncer(TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER | TLSF_SYNCSELECTION | TLSF_LOCKTREEHSCROLL),
+	CTreeListSyncer(TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER | TLSF_SYNCSELECTION),
 	m_data(data),
 	m_find(find),
 	m_styles(styles),

@@ -2688,7 +2688,7 @@ void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 
 BOOL CTreeListSyncer::WantHoldHScroll(HWND hWnd) const
 {
-	return (HasFlag(TLSF_LOCKTREEHSCROLL) && IsTree(hWnd));
+	return (!HasFlag(TLSF_NOHOLDTREEHSCROLL) && IsTree(hWnd));
 }
 
 LRESULT CTreeListSyncer::ScDefault(HWND hwnd)

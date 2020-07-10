@@ -29,7 +29,7 @@ enum
 	TLSF_SYNCDATA			= 0x0004,
 	TLSF_SPLITTER			= 0x0008,
 	TLSF_BORDER				= 0x0010,
-	TLSF_LOCKTREEHSCROLL	= 0x0020,
+	TLSF_NOHOLDTREEHSCROLL	= 0x0020,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -101,7 +101,7 @@ class CTreeListSyncer : protected CSubclassWnd, protected CSubclasser
 	friend class CTLSHoldResync;
 
 public:
-	CTreeListSyncer(DWORD dwFlags = TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_LOCKTREEHSCROLL);
+	CTreeListSyncer(DWORD dwFlags = TLSF_SYNCSELECTION | TLSF_SYNCFOCUS);
 	virtual ~CTreeListSyncer();
 	
 	BOOL Sync(HWND hwndLeft, HWND hwndRight, TLS_LINKAGE nLink, HWND hwndMainHeader = NULL);
