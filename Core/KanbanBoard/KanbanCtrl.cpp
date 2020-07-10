@@ -3456,7 +3456,15 @@ LRESULT CKanbanCtrl::OnColumnEditTaskFlag(WPARAM /*wp*/, LPARAM lp)
 		}
 
 		if (m_pSelectedColumn)
+		{
+			if (m_nSortBy == TDCA_FLAG)
+			{
+				m_pSelectedColumn->Sort(TDCA_FLAG, m_bSortAscending);
+				ScrollToSelectedTask();
+			}
+
 			m_pSelectedColumn->Invalidate(FALSE);
+		}
 
 		return lr;
 	}

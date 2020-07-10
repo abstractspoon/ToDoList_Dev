@@ -1452,11 +1452,11 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			}
 			else if (pKI1->bFlagged)
 			{
-				nCompare = -1;
+				nCompare = 1;
 			}
 			else if (pKI2->bFlagged)
 			{
-				nCompare = 1;
+				nCompare = -1;
 			}
 			break;
 			
@@ -1485,11 +1485,17 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			nCompare = CTimeHelper().Compare(pKI1->dTimeSpent, MapUnitsToTHUnits(pKI1->nTimeSpentUnits), 
 											pKI2->dTimeSpent, MapUnitsToTHUnits(pKI2->nTimeSpentUnits));
 			break;
+	
+ 		case TDCA_NONE: // Synonymous with IUI_POSITION
+ 			ASSERT(pSort->bSubtasksBelowParent);
+			ASSERT(nCompare == 0);
+			// handled below
+			break;
+		}
 
-		case TDCA_NONE: // Synonymous with IUI_POSITION
-			ASSERT(pSort->bSubtasksBelowParent);
-
-			// Avoid reversal of sign below
+		if ((nCompare == 0) && (pKI1->dwParentID == pKI2->dwParentID))
+		{
+			// Sort by IUI_POSITION, avoiding reversal of sign below
 			return ((pKI1->nPosition > pKI2->nPosition) ? 1 : -1);
 		}
 	}
