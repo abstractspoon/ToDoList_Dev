@@ -204,6 +204,7 @@ protected:
 	static BOOL HasVScrollBar(HWND hwnd);
 	static BOOL HasHScrollBar(HWND hwnd);
 	static BOOL HasScrollBars(HWND hwnd, BOOL bHScroll, BOOL bVScroll);
+	static BOOL CanScroll(HWND hwnd, int nScrollbar, BOOL bLeftUp);
 	static DWORD GetTreeItemData(HWND hwnd, HTREEITEM hti);
 	static DWORD GetListItemData(HWND hwnd, int nItem);
 	static BOOL SetListItemData(HWND hwnd, int nItem, DWORD dwItemData);

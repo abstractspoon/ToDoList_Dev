@@ -2666,24 +2666,44 @@ void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 
 	if (HasVScrollBar())
 	{
-		// We get the fewest UI artifacts when we pass this to 
-		// the tree and then resync the list
-		HWND hwndScroll = (IsTree(hWnd) ? hWnd : IsTree(hwndOther) ? hwndOther : hWnd);
-
 		int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
+		BOOL bUp = (zDelta > 0);
+
 		int nLine = (abs(zDelta / 120) * 3);
+		WORD wKeys = LOWORD(wp);
 
-		BOOL bDown = (zDelta < 0);
+		if (nLine && !wKeys && CanScroll(hWnd, SB_VERT, bUp))
+		{
+			// We get the fewest UI artifacts when we pass this to 
+			// the tree and then resync the list
+			HWND hwndScroll = (IsTree(hWnd) ? hWnd : IsTree(hwndOther) ? hwndOther : hWnd);
+			
+			while (nLine--)
+				::SendMessage(hwndScroll, WM_VSCROLL, (bUp ? SB_LINEUP : SB_LINEDOWN), 0L);
+		}
 
-		while (nLine--)
-			::SendMessage(hwndScroll, WM_VSCROLL, (bDown ? SB_LINEDOWN : SB_LINEUP), 0L);
-
-		return;
+		return; // always
 	}
 
 	// else
 	ScDefault(hWnd);
 	ResyncScrollPos(hwndOther, hWnd);
+}
+
+BOOL CTreeListSyncer::CanScroll(HWND hWnd, int nScrollbar, BOOL bLeftUp)
+{
+	int nPos = ::GetScrollPos(hWnd, nScrollbar);
+
+	if (bLeftUp)
+		return (nPos > 0);
+
+	// right/down
+	SCROLLINFO si = { sizeof(si), SIF_RANGE | SIF_PAGE, 0 };
+
+	if (!::GetScrollInfo(hWnd, nScrollbar, &si))
+		return FALSE;
+
+	return (nPos <= (si.nMax - (int)si.nPage));
 }
 
 BOOL CTreeListSyncer::WantHoldHScroll(HWND hWnd) const
