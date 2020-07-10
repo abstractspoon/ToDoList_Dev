@@ -17,8 +17,8 @@ CFG=Detours - Win32 Debug
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "Detours - Win32 Release" (based on "Win32 (x86) External Target")
-!MESSAGE "Detours - Win32 Debug" (based on "Win32 (x86) External Target")
+!MESSAGE "Detours - Win32 Unicode Release" (based on "Win32 (x86) External Target")
+!MESSAGE "Detours - Win32 Unicode Debug" (based on "Win32 (x86) External Target")
 !MESSAGE 
 
 # Begin Project
@@ -26,7 +26,7 @@ CFG=Detours - Win32 Debug
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 
-!IF  "$(CFG)" == "Detours - Win32 Release"
+!IF  "$(CFG)" == "Detours - Win32 Unicode Release"
 
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "Release"
@@ -45,7 +45,7 @@ CFG=Detours - Win32 Debug
 # PROP Bsc_Name "Detours.bsc"
 # PROP Target_Dir ""
 
-!ELSEIF  "$(CFG)" == "Detours - Win32 Debug"
+!ELSEIF  "$(CFG)" == "Detours - Win32 Unicode Debug"
 
 # PROP BASE Use_Debug_Libraries 1
 # PROP BASE Output_Dir "Debug"
@@ -68,12 +68,12 @@ CFG=Detours - Win32 Debug
 
 # Begin Target
 
-# Name "Detours - Win32 Release"
-# Name "Detours - Win32 Debug"
+# Name "Detours - Win32 Unicode Release"
+# Name "Detours - Win32 Unicode Debug"
 
-!IF  "$(CFG)" == "Detours - Win32 Release"
+!IF  "$(CFG)" == "Detours - Win32 Unicode Release"
 
-!ELSEIF  "$(CFG)" == "Detours - Win32 Debug"
+!ELSEIF  "$(CFG)" == "Detours - Win32 Unicode Debug"
 
 !ENDIF 
 

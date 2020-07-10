@@ -17,6 +17,12 @@
 // Basic example
 
 /*
+Linker Inputs:
+..\3rdParty\Detours\lib.x86\detours.lib
+legacy_stdio_definitions.lib // VS2015 only
+
+#include "..\3rdparty\Detours\detours.h"
+  
 LRESULT (WINAPI * TrueSendMessageW)(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam) = SendMessageW;
 
 __declspec(dllexport) LRESULT WINAPI MySendMessageW(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)

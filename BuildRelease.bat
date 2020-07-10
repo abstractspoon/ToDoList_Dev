@@ -16,6 +16,9 @@ pause
 
 REM - Build core app in VC6
 cd %REPO%\Core
+
+"C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\3rdParty\Detours\Detours.dsw /MAKE
+
 "C:\Program Files (x86)\Microsoft Visual Studio\Common\MSDev98\Bin\msdev.exe" .\ToDoList_Core.dsw /MAKE "ALL - Win32 Unicode Release" 
 
 REM - Build plugins using MSBuild for reliability
