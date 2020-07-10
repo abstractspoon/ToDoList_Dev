@@ -164,7 +164,6 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_
 		{
 			{
 				CLockUpdates hr(m_tcTasks);
-				//CHoldHScroll hhs(m_tcTasks);
 
 				m_tcTasks.EnsureVisible(hti);
 			}
@@ -373,8 +372,6 @@ BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
 
 			if (!bAllExpanded)
 			{
-				//CHoldHScroll hhs(m_tcTasks, 0);
-			
 				// Expand the parents of all selected tasks
 				POSITION pos = TSH().GetFirstItemPos();
 			
@@ -463,10 +460,7 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 	}
 
 	if (htiSel)
-	{
-//		CHoldHScroll hhs(m_tcTasks);
 		m_tcTasks.EnsureVisible(htiSel);
-	}
 
 	RecalcUntrackedColumnWidths();
 }
@@ -774,7 +768,6 @@ BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	if (hti && !TCH().IsItemVisible(hti, FALSE))
 	{
 		CLockUpdates lr(m_tcTasks);
-		//CHoldHScroll hhs(m_tcTasks);
 
 		TCH().EnsureItemVisible(hti, FALSE);
 	}
@@ -1164,12 +1157,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				if (hti)
 					InvalidateItem(hti);
 			}
-// 			else if (wp == TVGN_FIRSTVISIBLE)
-// 			{
-// 				CHoldHScroll hhs(m_tcTasks);
-// 				
-// 				return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
-// 			}
 			break;
 			
 		case WM_KEYUP: // --------------------------------------------------------------------------
@@ -1491,7 +1478,6 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 		case WM_VSCROLL:
 			{
- 				//CHoldHScroll hhs(m_tcTasks);
  				CDisableTreeTips dtt(m_tcTasks, FALSE);
 				
 				return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
@@ -1755,10 +1741,7 @@ BOOL CTDLTaskTreeCtrl::MoveSelection(HTREEITEM htiDestParent, HTREEITEM htiDestP
 
 	// make sure first moved item is visible
 	if (bEnsureVisible)
-	{
-		//CHoldHScroll hhs(m_tcTasks);
-		TCH().EnsureItemVisible(htiFirst, FALSE, FALSE);
-	}
+		m_tcTasks.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)htiFirst);
 
 	// No need to notify parent of selection change
 	// because logically the selection hasn't changed
