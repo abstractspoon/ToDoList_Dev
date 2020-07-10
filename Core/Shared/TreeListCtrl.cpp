@@ -1093,23 +1093,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	// else tree or list
 	switch (msg)
 	{
-	case WM_MOUSEWHEEL:
-		{
-			int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
-			WORD wKeys = LOWORD(wp);
-
-			if ((zDelta == 0) || (wKeys != 0))
-				return TRUE; // eat
-
-			if (!CanScrollTree(SB_VERT, (zDelta > 0)))
-				return TRUE; // eat
-
-			CHoldHScroll hhs(m_tree);
-					
-			return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-		}
-		break;
-
 	case WM_KEYUP:
 		{
 			LRESULT lr = CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
@@ -1139,14 +1122,6 @@ LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			}
 			return lr;
 		}
-		
-	case WM_VSCROLL:
-		{
-			CHoldHScroll hhs(m_tree);
-			
-			return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
-		}
-		break;
 	}
 	
 	return CTreeListSyncer::ScWindowProc(hRealWnd, msg, wp, lp);
