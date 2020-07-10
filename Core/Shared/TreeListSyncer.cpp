@@ -150,7 +150,7 @@ CHoldHScroll::~CHoldHScroll()
 
 int WINAPI CHoldHScroll::MySetScrollPos(HWND hWnd, int nBar, int nPos, BOOL bRedraw)
 {
-	if (nBar == SB_HORZ)
+	if ((s_hwndGlobal == hWnd) && (nBar == SB_HORZ))
 	{
 		return 0;
 	}
@@ -161,11 +161,13 @@ int WINAPI CHoldHScroll::MySetScrollPos(HWND hWnd, int nBar, int nPos, BOOL bRed
 
 int WINAPI CHoldHScroll::MyScrollWindowEx(HWND hWnd, int dx, int dy, const RECT *prcScroll, const RECT *prcClip, HRGN hrgnUpdate, LPRECT prcUpdate, UINT flags)
 {
-	int nResult = TrueScrollWindowEx(hWnd, 0/*dx*/, dy, prcScroll, prcClip, hrgnUpdate, prcUpdate, flags);
+	if (s_hwndGlobal == hWnd)
+	{
+		dx = 0;
+		InvalidateRect(hWnd, NULL, FALSE);
+	}
 
-	InvalidateRect(hWnd, NULL, FALSE);
-
-	return nResult;
+	return TrueScrollWindowEx(hWnd, dx, dy, prcScroll, prcClip, hrgnUpdate, prcUpdate, flags);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////
