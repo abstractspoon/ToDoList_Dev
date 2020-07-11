@@ -8,6 +8,7 @@
 
 #include "..\shared\Localizer.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\holdredraw.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -146,6 +147,9 @@ void CTDLImportExportAttributeMappingListCtrl::InitState()
 
 void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 {
+	CLockUpdates hr(*this);
+	CWaitCursor cursor;
+
 	DeleteAllItems();
 
 	for (int nRow = 0; nRow < m_aMapping.GetSize(); nRow++)
