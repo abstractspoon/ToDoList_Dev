@@ -374,6 +374,7 @@ void CTDLImportDialog::OnOK()
 	prefs.WriteProfileString(m_sPrefsKey, _T("ImportFilePath"), m_sFromFilePath);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ImportToWhere"), m_nImportTo);
 	prefs.WriteProfileString(m_sPrefsKey, _T("ImporterTypeID"), m_sFormatTypeID);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("TasklistPos"), m_nActiveTasklistPos);
 
 	// retrieve input text
 	if (IsCurrentImporterFileBased())
