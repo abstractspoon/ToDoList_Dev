@@ -235,31 +235,41 @@ BOOL CTaskListCsvImporter::ImportTask(ITASKLISTBASE* pTasks, const CString& sLin
 
 BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& col, CString& sCustID, CString& sCustLabel)
 {
-	if (((col.nTDCAttrib == TDCA_CUSTOMATTRIB_FIRST) || (col.nTDCAttrib == TDCA_CUSTOMATTRIB_LAST)) && !col.sColumnName.IsEmpty())
-	{
-		sCustLabel = col.sColumnName;
-		
-		// extract custom ID in brackets
-		int nCustIDStart = col.sColumnName.Find('(');
-		
-		if (nCustIDStart > 0)
-		{
-			sCustLabel = col.sColumnName.Left(nCustIDStart++);
-			
-			int nCustIDEnd = col.sColumnName.Find(')', nCustIDStart);
-			
-			if (nCustIDEnd == -1)
-				return FALSE;
-			
-			sCustID = col.sColumnName.Mid(nCustIDStart, nCustIDEnd - nCustIDStart);
-		}
-		else // create custom ID
-		{
-			sCustID.Format(_T("_%s_ID_"), col.sColumnName);
-			sCustID.Replace(' ', '_');
-		}
+	if (col.sColumnName.IsEmpty())
+		return FALSE;
 
-		return (!sCustID.IsEmpty() && !sCustLabel.IsEmpty());
+	switch (col.nTDCAttrib)
+	{
+	case TDCA_NEW_CUSTOMATTRIBUTE:
+	case TDCA_NEW_CUSTOMATTRIBUTE_LIST:
+		{
+			sCustLabel = col.sColumnName;
+		
+			// extract custom ID in brackets
+			int nCustIDStart = col.sColumnName.Find('(');
+		
+			if (nCustIDStart > 0)
+			{
+				sCustLabel = col.sColumnName.Left(nCustIDStart++);
+			
+				int nCustIDEnd = col.sColumnName.Find(')', nCustIDStart);
+			
+				if (nCustIDEnd == -1)
+					return FALSE;
+			
+				sCustID = col.sColumnName.Mid(nCustIDStart, nCustIDEnd - nCustIDStart);
+			}
+			else // create custom ID
+			{
+				ASSERT(col.nTDCAttrib != TDCA_EXISTING_CUSTOMATTRIBUTE);
+
+				sCustID.Format(_T("_%s_ID_"), col.sColumnName);
+				sCustID.Replace(' ', '_');
+			}
+
+			return (!sCustID.IsEmpty() && !sCustLabel.IsEmpty());
+		}
+		break;
 	}
 
 	// else
@@ -277,10 +287,18 @@ void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) 
 
 		if (GetCustomAttribIDAndLabel(col, sCustID, sCustLabel))
 		{
-			// Note: TDCA_CUSTATTRIB_LAST maps to LIST types
-			ASSERT((col.nTDCAttrib == TDCA_CUSTOMATTRIB_FIRST) || (col.nTDCAttrib == TDCA_CUSTOMATTRIB_LAST));
+			switch (col.nTDCAttrib)
+			{
+			case TDCA_NEW_CUSTOMATTRIBUTE:
+				pTasks->AddCustomAttribute(sCustID, sCustLabel, NULL, false);
+				break;
+
+			case TDCA_NEW_CUSTOMATTRIBUTE_LIST:
+				pTasks->AddCustomAttribute(sCustID, sCustLabel, NULL, true);
+				break;
 
 			pTasks->AddCustomAttribute(sCustID, sCustLabel, NULL, (col.nTDCAttrib == TDCA_CUSTOMATTRIB_LAST));
+			}
 		}
 	}
 }

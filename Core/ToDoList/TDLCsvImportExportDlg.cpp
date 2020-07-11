@@ -31,31 +31,32 @@ CTDLCsvImportExportDlg::CTDLCsvImportExportDlg(const CString& sFilePath,
 	m_lcColumnSetup(TRUE), 
 	m_eFilePath(FES_NOBROWSE)
 {
-	VERIFY(DoInit(sFilePath, pPrefs, szKey, NULL));
+	VERIFY(DoInit(TRUE, sFilePath, pPrefs, szKey));
 }
 
 CTDLCsvImportExportDlg::CTDLCsvImportExportDlg(const CString& sFilePath, 
 											   const CTDCAttributeArray& aExportAttributes, 
-											   IPreferences* pPrefs, LPCTSTR szKey, CWnd* pParent /*=NULL*/)
+											   IPreferences* pPrefs, 
+											   LPCTSTR szKey, 
+											   CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_CSVIMPORTEXPORT_DIALOG, _T(""), pParent), 
 	m_lcColumnSetup(FALSE), 
 	m_eFilePath(FES_NOBROWSE)
 {
-	VERIFY(DoInit(sFilePath, pPrefs, szKey, &aExportAttributes));
+	m_aExportAttributes.Copy(aExportAttributes);
+	
+	VERIFY(DoInit(FALSE, sFilePath, pPrefs, szKey));
 }
 
-BOOL CTDLCsvImportExportDlg::DoInit(const CString& sFilePath, 
-									IPreferences* pPrefs, 
-									LPCTSTR szKey, 
-									const CTDCAttributeArray* pExportAttributes)
+BOOL CTDLCsvImportExportDlg::DoInit(BOOL bImport, const CString& sFilePath, IPreferences* pPrefs, LPCTSTR szKey)
 {
+	m_bImporting = bImport;
 	m_sFilePath = sFilePath; 
 	m_pPrefs = pPrefs;
 	m_sPrefsKey.Format(_T("%s\\CsvColumnMapping"), szKey);
 	m_sDelim = Misc::GetListSeparator();
 	m_bAlwaysExportTaskIDs = TRUE;
-	m_bImporting = (pExportAttributes ? FALSE : TRUE);
 
 	InitialiseDelimiter();
 	LoadMasterColumnMapping();
@@ -64,14 +65,9 @@ BOOL CTDLCsvImportExportDlg::DoInit(const CString& sFilePath,
 	CTDCAttributeMapping aMapping;
 
 	if (m_bImporting)
-	{
 		BuildImportColumnMapping(aMapping);
-	}
 	else
-	{
-		m_aExportAttributes.Copy(*pExportAttributes);
 		BuildExportColumnMapping(aMapping);
-	}
 
 	m_lcColumnSetup.SetColumnMapping(aMapping);
 
@@ -421,12 +417,16 @@ void CTDLCsvImportExportDlg::SaveMasterColumnMapping() const
 
 CString CTDLCsvImportExportDlg::GetMasterColumnName(TDC_ATTRIBUTE attrib) const
 {
+	ASSERT(!m_bImporting);
+
 	int nCol = FindMasterColumn(attrib);
 	return (nCol == -1) ? _T("") : m_aMasterColumnMapping[nCol].sColumnName;
 }
 
 TDC_ATTRIBUTE CTDLCsvImportExportDlg::GetMasterColumnAttribute(LPCTSTR szColumn) const
 {
+	ASSERT(m_bImporting);
+
 	int nCol = FindMasterColumn(szColumn);
 	return (nCol == -1) ? TDCA_NONE : m_aMasterColumnMapping[nCol].nTDCAttrib;
 }

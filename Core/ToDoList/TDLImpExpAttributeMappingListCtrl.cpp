@@ -101,11 +101,8 @@ void CTDLImportExportAttributeMappingListCtrl::PreSubclassWindow()
 	// add custom attribute placeholder if importing
 	if (m_bImporting)
 	{
-		int nItem = m_cbAttributes.AddString(CEnString(IDS_CSV_CUSTOMATTRIB)); 
-		m_cbAttributes.SetItemData(nItem, (DWORD)TDCA_CUSTOMATTRIB_FIRST); 
-
-		nItem = m_cbAttributes.AddString(CEnString(IDS_CSV_CUSTOMLISTATTRIB)); 
-		m_cbAttributes.SetItemData(nItem, (DWORD)TDCA_CUSTOMATTRIB_LAST); 
+		CDialogHelper::AddString(m_cbAttributes, CEnString(IDS_CSV_CUSTOMATTRIB), TDCA_NEW_CUSTOMATTRIBUTE);
+		CDialogHelper::AddString(m_cbAttributes, CEnString(IDS_CSV_CUSTOMLISTATTRIB), TDCA_NEW_CUSTOMATTRIBUTE_LIST);
 	}
 
 	m_header.EnableTracking(FALSE);

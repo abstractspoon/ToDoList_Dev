@@ -12,6 +12,11 @@
 #include "..\shared\InputListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+#define TDCA_NEW_CUSTOMATTRIBUTE		TDCA_CUSTOMATTRIB_FIRST
+#define TDCA_NEW_CUSTOMATTRIBUTE_LIST	TDCA_CUSTOMATTRIB_LAST
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLCsvAttributeSetupListCtrl window
 
 class CTDLImportExportAttributeMappingListCtrl : public CInputListCtrl

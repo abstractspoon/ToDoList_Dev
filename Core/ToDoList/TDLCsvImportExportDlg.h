@@ -28,12 +28,12 @@ public:
 							LPCTSTR szKey, 
 							CWnd* pParent = NULL);   
    
-	// export constructor
-	CTDLCsvImportExportDlg(const CString& sFilePath, 
-							const CTDCAttributeArray& aExportAttributes, 
-							IPreferences* pPrefs, 
-							LPCTSTR szKey, 
-							CWnd* pParent = NULL);
+   // export constructor
+	CTDLCsvImportExportDlg(const CString& sFilePath,
+						   const CTDCAttributeArray& aExportAttributes,
+						   IPreferences* pPrefs,
+						   LPCTSTR szKey,
+						   CWnd* pParent = NULL);
 
 	int GetColumnMapping(CTDCAttributeMapping& aMapping) const;
 	CString GetDelimiter() const;
@@ -42,13 +42,15 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLCsvImportExportDlg)
-	CString	m_sDelim;
-	CString	m_sFilePath;
-	BOOL	m_bAlwaysExportTaskIDs;
 	//}}AFX_DATA
 	CFileEdit	m_eFilePath;
 	CTDLImportExportAttributeMappingListCtrl m_lcColumnSetup;
+
+	CString	m_sDelim;
+	CString	m_sFilePath;
+	BOOL m_bAlwaysExportTaskIDs;
 	BOOL m_bImporting;
+
 	CTDCAttributeMapping m_aMasterColumnMapping;
 	CTDCAttributeArray m_aExportAttributes;
 
@@ -91,10 +93,9 @@ protected:
 	int LoadMasterColumnMapping();
 	void SaveMasterColumnMapping() const;
 
-	BOOL DoInit(const CString& sFilePath, IPreferences* pPrefs, 
-				LPCTSTR szKey, const CTDCAttributeArray* pExportAttributes);
-
+	BOOL DoInit(BOOL bImport, const CString& sFilePath, IPreferences* pPrefs, LPCTSTR szKey);
 	void InitialiseDelimiter();
+
 	static BOOL IsUsingExcel();
 	static CString GetFileDelimiter(const CString& sUIDelim);
 	static CString GetUIDelimiter(const CString& sFileDelim);

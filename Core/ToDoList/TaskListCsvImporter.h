@@ -58,7 +58,7 @@ protected:
 
 	static CString GetLine(const CStringArray& aLines, int& nLine);
 	static TDC_UNITS GetTimeUnits(const CStringArray& aValues, int nCol);
-	static BOOL GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& col, CString& sID, CString& sLabel);
+	static BOOL GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& col, CString& sCustID, CString& sCustLabel);
 
 };
 
