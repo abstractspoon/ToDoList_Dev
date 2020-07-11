@@ -173,6 +173,10 @@ void CTDLImportExportAttributeMappingListCtrl::BuildListCtrl()
 // static helper
 CString CTDLImportExportAttributeMappingListCtrl::GetAttributeName(TDC_ATTRIBUTE nAtt)
 {
+	// Special case:
+	if (nAtt == TDCA_EXISTING_CUSTOMATTRIBUTE)
+		return CEnString(IDS_CSV_EXISTCUSTOMATTRIB);
+	
 	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 	{
 		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];

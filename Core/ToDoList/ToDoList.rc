@@ -5500,7 +5500,7 @@ BEGIN
                             "ToDoList has detected that some tasks have just become due.\n\nWould you like to refresh the current filter to make those tasks visible?"
     IDS_WIZ_INTRO_HEADER    "Welcome to ToDoList"
     IDS_WIZ_INTRO_SUBHEADER "This brief wizard will help you set up the application for the first time."
-    IDS_CSV_CUSTOMATTRIB    "Custom Attribute"
+    IDS_CSV_CUSTOMATTRIB    "New Custom Attribute"
     IDS_NOREFERENCETASKSINSELECTION 
                             "The selected tasks include no task references."
     IDS_SELECTIONHASNOREFERENCETASKS "The selected tasks have no references."
@@ -5514,7 +5514,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_ANALYSEXML_FORMAT   "XML (.xml)|XML Files (*.xml)|*.xml||"
     IDS_NO_WEBUPDATE_AVAIL  "There are no updates available at this time."
-    IDS_CSV_CUSTOMLISTATTRIB "Custom Attribute (List)"
+    IDS_CSV_CUSTOMLISTATTRIB "New Custom Attribute (List)"
     IDS_WEBUPDATE_PROMPT    "\nWould you like to update to this version?"
     IDS_WEBUPDATE_PROMPTHEADER "Hi %s, version %s is now available."
     IDS_UNINSTALLER_RUNFAILURE 
@@ -5533,6 +5533,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_CSV_EXISTCUSTOMATTRIB "Existing Custom Attribute"
     IDS_REMINDER_TASKCOL    "Task"
     IDS_REMINDER_TASKLISTCOL "Tasklist"
     IDS_REMINDER_WHENCOL    "Notification"

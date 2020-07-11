@@ -23,11 +23,12 @@ class CTDLCsvImportExportDlg : public CTDLDialog
 // Construction
 public:
 	// import constructor
-	CTDLCsvImportExportDlg(const CString& sFilePath, 
-							IPreferences* pPrefs, 
-							LPCTSTR szKey, 
-							CWnd* pParent = NULL);   
-   
+	CTDLCsvImportExportDlg(const CString& sFilePath,
+						   const CMapStringToString& mapImportCustAttrib,
+						   IPreferences* pPrefs,
+						   LPCTSTR szKey,
+						   CWnd* pParent = NULL);
+
    // export constructor
 	CTDLCsvImportExportDlg(const CString& sFilePath,
 						   const CTDCAttributeArray& aExportAttributes,
@@ -53,6 +54,7 @@ protected:
 
 	CTDCAttributeMapping m_aMasterColumnMapping;
 	CTDCAttributeArray m_aExportAttributes;
+	CMapStringToString m_mapImportCustAttrib;
 
 	IPreferences* m_pPrefs;
 
@@ -89,6 +91,7 @@ protected:
 	int FindMasterColumn(LPCTSTR szColumn) const;
 	TDC_ATTRIBUTE GetMasterColumnAttribute(LPCTSTR szColumn) const;
 	void SetMasterColumnAttribute(LPCTSTR szColumn, TDC_ATTRIBUTE attrib);
+	CString FindCustomAttributeID(LPCTSTR szColumn) const;
 
 	int LoadMasterColumnMapping();
 	void SaveMasterColumnMapping() const;

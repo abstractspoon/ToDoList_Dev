@@ -40,9 +40,16 @@ CTaskListCsvImporter::~CTaskListCsvImporter()
 
 }
 
-bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTasks, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	CTDLCsvImportExportDlg dialog(szSrcFilePath, pPrefs, szKey);
+	// Build custom attribute mapping
+	int nAttrib = pTasks->GetCustomAttributeCount();
+
+	while (nAttrib--)
+		m_mapCustomAttributes[pTasks->GetCustomAttributeID(nAttrib)] = pTasks->GetCustomAttributeLabel(nAttrib);
+
+	// Show mapping dialog
+	CTDLCsvImportExportDlg dialog(szSrcFilePath, m_mapCustomAttributes, pPrefs, szKey);
 
 	if (!bSilent)
 	{
@@ -85,7 +92,7 @@ IIMPORTEXPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskLi
 		return IIER_BADINTERFACE;
 	}
 	
-	if (!InitConsts(szSrcFilePath, bSilent, pPrefs, szKey))
+	if (!InitConsts(szSrcFilePath, pTasks, bSilent, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	// Load csv
@@ -242,6 +249,7 @@ BOOL CTaskListCsvImporter::GetCustomAttribIDAndLabel(const TDCATTRIBUTEMAPPING& 
 	{
 	case TDCA_NEW_CUSTOMATTRIBUTE:
 	case TDCA_NEW_CUSTOMATTRIBUTE_LIST:
+	case TDCA_EXISTING_CUSTOMATTRIBUTE:
 		{
 			sCustLabel = col.sColumnName;
 		
@@ -297,7 +305,8 @@ void CTaskListCsvImporter::AddCustomAttributeDefinitions(ITASKLISTBASE* pTasks) 
 				pTasks->AddCustomAttribute(sCustID, sCustLabel, NULL, true);
 				break;
 
-			pTasks->AddCustomAttribute(sCustID, sCustLabel, NULL, (col.nTDCAttrib == TDCA_CUSTOMATTRIB_LAST));
+			case TDCA_EXISTING_CUSTOMATTRIBUTE:
+				break;
 			}
 		}
 	}

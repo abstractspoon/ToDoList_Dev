@@ -8945,11 +8945,16 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromText, const CString& sImportFrom,
 		}
 	}
 
-	// load/import tasks
+	// If the importing into an existing tasklist
+	// write its custom attributes to the tasklist
+	CTaskFile tasks;
+
+	if (nImportTo != TDIT_CREATENEWTASKLIST)
+		tasks.SetCustomAttributeDefs(GetToDoCtrl().GetCustomAttributeDefs());
+	
+	// do the import
 	DOPROGRESS(IDS_IMPORTPROGRESS);
 
-	// do the import
-	CTaskFile tasks;
 	IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter);
 	BOOL bSomeSuceeded = FALSE;
 

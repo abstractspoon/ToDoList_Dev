@@ -42,11 +42,12 @@ protected:
 	CString DELIM;
 
 	CTDCAttributeMapping m_aColumnMapping;
+	CMapStringToString m_mapCustomAttributes;
 
 protected:
 	BOOL ImportTask(ITASKLISTBASE* pTasks, const CString& sLine) const;
 
-	bool InitConsts(LPCTSTR szSrcFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	bool InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTasks, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 
 	void GetTaskAndParentIDs(const CStringArray& aValues, DWORD& dwTaskID, DWORD& dwParentID) const;
 	CString GetTaskTitle(const CStringArray& aValues) const;
