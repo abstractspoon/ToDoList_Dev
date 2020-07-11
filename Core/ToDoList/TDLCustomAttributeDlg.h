@@ -84,6 +84,7 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CTDLCustomAttributeDlg)
 	afx_msg void OnItemchangedAttriblist(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDoubleClickItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDatatype();
 	afx_msg void OnSelchangeAlignment();
 	afx_msg void OnSelchangeListtype();

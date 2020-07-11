@@ -164,6 +164,7 @@ void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLCustomAttributeDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLCustomAttributeDlg)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_ATTRIBUTELIST, OnItemchangedAttriblist)
+	ON_NOTIFY(NM_DBLCLK, IDC_ATTRIBUTELIST, OnDoubleClickItem)
 	ON_CBN_SELCHANGE(IDC_DATATYPE, OnSelchangeDatatype)
 	ON_CBN_SELCHANGE(IDC_ALIGNMENT, OnSelchangeAlignment)
 	ON_CBN_SELCHANGE(IDC_LISTTYPE, OnSelchangeListtype)
@@ -427,6 +428,17 @@ void CTDLCustomAttributeDlg::BuildListTypeCombo(DWORD dwDataType)
 
 	// restore selection
 	SelectItemByData(m_cbListType, m_dwListType);
+}
+
+void CTDLCustomAttributeDlg::OnDoubleClickItem(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	CPoint ptCursor(GetMessagePos());
+	m_lcAttributes.ScreenToClient(&ptCursor);
+
+	int nItem = m_lcAttributes.HitTest(ptCursor);
+
+	if (nItem != -1)
+		m_lcAttributes.EditLabel(nItem);
 }
 
 void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
@@ -748,6 +760,7 @@ void CTDLCustomAttributeDlg::OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT*
 	if (nSel >= 0)
 	{
 		CString sItem(pDispInfo->item.pszText);
+		Misc::Trim(sItem);
 		
 		if (bCancelled)
 		{
