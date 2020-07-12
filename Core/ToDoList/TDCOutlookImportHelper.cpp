@@ -21,7 +21,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMappingError, ITaskList* pTasks)
+int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, ITaskList* pTasks)
 {
 	// If the data contains files which are not from Outlook
 	// then quit before starting up outlook
@@ -58,22 +58,12 @@ int CTDCOutlookImportHelper::ImportTasks(const TLDT_DATA* pData, UINT nIDMapping
 	CTDLImportOutlookObjectsDlg dialog(*pItem);
 	CTDCAttributeMapping aMapping;
 	
-	while (TRUE)
-	{
-		if (dialog.DoModal() != IDOK)
-			return -1;
+	if (dialog.DoModal() != IDOK)
+		return -1;
 		
-		// valid mapping must include title
-		if (!dialog.GetColumnMapping(aMapping) || !aMapping.IsAttributeMapped(TDCA_TASKNAME))
-		{
-			AfxMessageBox(CEnString(nIDMappingError));
-			// try again
-		}
-		else
-		{
-			break; // all good
-		}
-	} 
+	// valid mapping must include title
+	VERIFY(dialog.GetColumnMapping(aMapping));
+	ASSERT(aMapping.IsAttributeMapped(TDCA_TASKNAME));
 	
 	// cleanup the temporary file object
 	delete pItem;

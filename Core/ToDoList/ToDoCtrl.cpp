@@ -9971,7 +9971,7 @@ int CToDoCtrl::CreateTasksFromOutlookObjects(const TLDT_DATA* pData)
 {
 	CTaskFile tasks;
 
-	int nRet = CTDCOutlookImportHelper::ImportTasks(pData, IDS_CSV_MUSTMAPTASKTITLE, &tasks);
+	int nRet = CTDCOutlookImportHelper::ImportTasks(pData, &tasks);
 
 	switch (nRet)
 	{

@@ -52,26 +52,28 @@ protected:
 	static CEnString CONFIDENTIAL;
 
 // Overrides
+protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLImportOutlookObjectsDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLImportOutlookObjectsDlg)
-	virtual BOOL OnInitDialog();
 	afx_msg void OnHideAttributes();
+	afx_msg void OnMappingChange();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
 	void BuildMasterMapping();
 	void SaveMasterMapping() const;
 	void UpdateMasterMapping();
+	void EnableDisableOK();
 
 	CString FormatFieldAndData(const OUTLOOK_FIELD& oaField) const;
 	void RemoveUnwantedAttributes(CTDCAttributeMapping& aMapping) const;

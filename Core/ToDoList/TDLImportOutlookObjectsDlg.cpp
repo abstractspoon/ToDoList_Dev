@@ -116,9 +116,11 @@ void CTDLImportOutlookObjectsDlg::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CTDLImportOutlookObjectsDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLImportOutlookObjectsDlg)
+	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_HIDEUNMAPPED, OnHideAttributes)
 	ON_BN_CLICKED(IDC_HIDECONFIDENTIAL, OnHideAttributes)
-	//}}AFX_MSG_MAP
+	ON_CONTROL(TDCN_IMPORTMAPPINGCHANGE, IDC_FIELDMAPPING, OnMappingChange)
+	ON_WM_CTLCOLOR()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -145,6 +147,8 @@ BOOL CTDLImportOutlookObjectsDlg::OnInitDialog()
 	RemoveUnwantedAttributes(aMapping);
 
 	m_lcFieldMapping.SetColumnMapping(aMapping);
+
+	EnableDisableOK();
 
 	// make sure we have the foreground focus because
 	// the Outlook security popup can steal it.
@@ -375,4 +379,30 @@ void CTDLImportOutlookObjectsDlg::OnHideAttributes()
 	RemoveUnwantedAttributes(aMapping);
 
 	m_lcFieldMapping.SetColumnMapping(aMapping);
+}
+
+void CTDLImportOutlookObjectsDlg::OnMappingChange()
+{
+	EnableDisableOK();
+}
+
+void CTDLImportOutlookObjectsDlg::EnableDisableOK()
+{
+	BOOL bEnable = m_lcFieldMapping.IsAttributeMapped(TDCA_TASKNAME);
+	
+	GetDlgItem(IDOK)->EnableWindow(bEnable);
+	GetDlgItem(IDC_IMPORT_MUSTMAPTITLE)->ShowWindow(bEnable ? SW_HIDE : SW_SHOW);
+}
+
+HBRUSH CTDLImportOutlookObjectsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	
+	if ((pWnd->GetDlgCtrlID() == IDC_IMPORT_MUSTMAPTITLE) && !Misc::IsHighContrastActive())
+	{
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(255);
+	}
+	
+	return hbr;
 }

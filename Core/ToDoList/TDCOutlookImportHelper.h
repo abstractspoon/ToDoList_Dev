@@ -29,7 +29,7 @@ class CTDCOutlookImportHelper
 {
 public:
 	static BOOL ImportTask(const CTDCAttributeMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, ITaskList* pTasks, BOOL bWantAttrib = TRUE);
-	static int ImportTasks(const TLDT_DATA* pData, UINT nIDMappingError, ITaskList* pTasks);
+	static int ImportTasks(const TLDT_DATA* pData, ITaskList* pTasks);
 
 protected:
 	static BOOL ImportTask(const CTDCAttributeMapping& aMapping, OutlookAPI::_Item* pItem, BOOL bWantConfidential, TODOITEM& tdi);
