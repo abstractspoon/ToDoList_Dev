@@ -820,6 +820,7 @@
 #define IDC_NEWFILEPATH                 1541
 #define IDC_EXPANDALL                   1541
 #define IDC_TITLECOMMENTS               1542
+#define IDC_IMPORT_MUSTMAPTITLE         1542
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2180,7 +2181,6 @@
 #define IDS_CUSTOM_FEATURE_MINIMUM      51355
 #define IDS_CUSTOM_FEATURE_MAXIMUM      51356
 #define IDS_FILTER_RECENTMOD            51357
-#define IDS_CSV_MUSTMAPTASKTITLE        51358
 #define IDS_IMPORT_SOMEFAILED           51359
 #define IDS_UNINSTALL_FAILURE           51360
 #define IDS_ERRORINSTALLTDLPROTOCOL     51360

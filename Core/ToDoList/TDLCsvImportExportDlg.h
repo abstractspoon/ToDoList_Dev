@@ -61,21 +61,23 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLCsvImportExportDlg)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+	virtual void OnOK();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLCsvImportExportDlg)
-	virtual BOOL OnInitDialog();
 	afx_msg void OnChangeCsvdelimiter();
 	afx_msg void OnExportTaskIds();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnImportMappingChange();
 	//}}AFX_MSG
+
 	DECLARE_MESSAGE_MAP()
-	virtual void OnOK();
 
 protected:
 	int BuildImportColumnMapping(CTDCAttributeMapping& aImportMapping) const;
@@ -98,6 +100,7 @@ protected:
 
 	BOOL DoInit(BOOL bImport, const CString& sFilePath, IPreferences* pPrefs, LPCTSTR szKey);
 	void InitialiseDelimiter();
+	void EnableDisableOK();
 
 	static BOOL IsUsingExcel();
 	static CString GetFileDelimiter(const CString& sUIDelim);

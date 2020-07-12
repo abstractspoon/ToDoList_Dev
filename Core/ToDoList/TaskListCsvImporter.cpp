@@ -51,31 +51,11 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTas
 	// Show mapping dialog
 	CTDLCsvImportExportDlg dialog(szSrcFilePath, m_mapCustomAttributes, pPrefs, szKey);
 
-	if (!bSilent)
-	{
-		while (true)
-		{
-			if (dialog.DoModal() != IDOK)
-				return false;
+	if (!bSilent && (dialog.DoModal() != IDOK))
+		return false;
 
-			// valid mapping must include title
-			if (!dialog.GetColumnMapping(m_aColumnMapping) ||
-				!m_aColumnMapping.IsAttributeMapped(TDCA_TASKNAME))
-			{
-				AfxMessageBox(CEnString(IDS_CSV_MUSTMAPTASKTITLE));
-				// try again
-			}
-			else
-			{
-				break; // all good
-			}
-		} 
-	}
-	else
-	{
-		VERIFY (dialog.GetColumnMapping(m_aColumnMapping));
-		ASSERT (m_aColumnMapping.IsAttributeMapped(TDCA_TASKNAME));
-	}
+	VERIFY (dialog.GetColumnMapping(m_aColumnMapping));
+	ASSERT (m_aColumnMapping.IsAttributeMapped(TDCA_TASKNAME));
 
 	DELIM = dialog.GetDelimiter();
 

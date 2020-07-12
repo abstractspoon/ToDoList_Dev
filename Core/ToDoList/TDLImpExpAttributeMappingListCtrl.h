@@ -18,6 +18,11 @@
 #define TDCA_EXISTING_CUSTOMATTRIBUTE	(TDC_ATTRIBUTE)(TDCA_CUSTOMATTRIB_FIRST + 1)
 
 /////////////////////////////////////////////////////////////////////////////
+
+const UINT TDCN_IMPORTMAPPINGCHANGE = CBN_SELENDOK;
+const UINT TDCN_EXPORTMAPPINGCHANGE = EN_CHANGE;
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLCsvAttributeSetupListCtrl window
 
 class CTDLImportExportAttributeMappingListCtrl : public CInputListCtrl
@@ -29,6 +34,8 @@ public:
 
 	void SetColumnMapping(const CTDCAttributeMapping& aMapping);
 	int GetColumnMapping(CTDCAttributeMapping& aMapping) const;
+
+	BOOL IsAttributeMapped(TDC_ATTRIBUTE nAttrib) const { return m_aMapping.IsAttributeMapped(nAttrib); }
 
 // attributes
 protected:

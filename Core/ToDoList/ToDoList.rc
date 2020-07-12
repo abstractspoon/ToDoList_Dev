@@ -1493,6 +1493,8 @@ BEGIN
                     IDC_EXPORTTASKIDS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
                     7,226,174,10
     CONTROL         "",IDC_DIVIDER,"Static",SS_ETCHEDHORZ,7,242,386,1
+    RTEXT           "You must include 'Title' in your column mapping",
+                    IDC_IMPORT_MUSTMAPTITLE,7,251,272,8,NOT WS_VISIBLE
 END
 
 IDD_LANGUAGE_DIALOG DIALOG DISCARDABLE  0, 0, 188, 62
@@ -5480,8 +5482,6 @@ BEGIN
     IDS_CUSTOM_FEATURE_MINIMUM "Minimum"
     IDS_CUSTOM_FEATURE_MAXIMUM "Maximum"
     IDS_FILTER_RECENTMOD    "Recently Modified"
-    IDS_CSV_MUSTMAPTASKTITLE 
-                            "You must include 'Title' in your column mapping."
     IDS_IMPORT_SOMEFAILED   "One or more tasks could not be imported successfully."
 END
 

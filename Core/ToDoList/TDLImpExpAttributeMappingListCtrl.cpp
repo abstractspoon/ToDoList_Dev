@@ -346,7 +346,6 @@ void CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK()
 				// clear field
 				SetItemText(nExist, IMPORT_COLUMNID, _T(""));
 				SetItemData(nExist, (DWORD)TDCA_NONE);
-
 			}
 		}
 
@@ -361,6 +360,8 @@ void CTDLImportExportAttributeMappingListCtrl::OnAttribEditOK()
 		ASSERT(nMap != -1);
 
 		m_aMapping[nMap].nTDCAttrib = nAttrib;
+
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), TDCN_IMPORTMAPPINGCHANGE), (LPARAM)GetSafeHwnd());
 	}
 }
 
@@ -412,6 +413,8 @@ void CTDLImportExportAttributeMappingListCtrl::OnNameEditOK(NMHDR* /*pNMHDR*/, L
 	ASSERT(nMap != -1);
 	
 	m_aMapping[nMap].sColumnName = sSel;
+
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), TDCN_EXPORTMAPPINGCHANGE), (LPARAM)GetSafeHwnd());
 
 	*pResult = 0;
 }

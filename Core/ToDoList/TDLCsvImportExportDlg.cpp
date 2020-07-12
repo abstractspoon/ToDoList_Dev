@@ -95,6 +95,8 @@ BEGIN_MESSAGE_MAP(CTDLCsvImportExportDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLCsvImportExportDlg)
 	ON_EN_CHANGE(IDC_CSVDELIMITER, OnChangeCsvdelimiter)
 	ON_BN_CLICKED(IDC_EXPORTTASKIDS, OnExportTaskIds)
+	ON_CONTROL(TDCN_IMPORTMAPPINGCHANGE, IDC_COLUMNSETUP, OnImportMappingChange)
+	ON_WM_CTLCOLOR()
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -124,6 +126,8 @@ BOOL CTDLCsvImportExportDlg::OnInitDialog()
 		rList.bottom = rDivider.bottom;
 
 		m_lcColumnSetup.MoveWindow(rList);
+
+		EnableDisableOK();
 	}
 	else
 	{
@@ -556,6 +560,19 @@ int CTDLCsvImportExportDlg::FindMasterColumn(LPCTSTR szColumn) const
 	return -1;
 }
 
+HBRUSH CTDLCsvImportExportDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = CTDLDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+
+	if ((pWnd->GetDlgCtrlID() == IDC_IMPORT_MUSTMAPTITLE) && !Misc::IsHighContrastActive())
+	{
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(255);
+	}
+
+	return hbr;
+}
+
 void CTDLCsvImportExportDlg::OnExportTaskIds() 
 {
 	ASSERT(!m_bImporting);
@@ -618,4 +635,17 @@ void CTDLCsvImportExportDlg::OnExportTaskIds()
 	}
 	
 	m_lcColumnSetup.SetColumnMapping(aMapping);
+}
+
+void CTDLCsvImportExportDlg::OnImportMappingChange()
+{
+	EnableDisableOK();
+}
+
+void CTDLCsvImportExportDlg::EnableDisableOK()
+{
+	BOOL bEnable = (!m_bImporting || m_lcColumnSetup.IsAttributeMapped(TDCA_TASKNAME));
+
+	GetDlgItem(IDOK)->EnableWindow(bEnable);
+	GetDlgItem(IDC_IMPORT_MUSTMAPTITLE)->ShowWindow(bEnable ? SW_HIDE : SW_SHOW);
 }
