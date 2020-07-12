@@ -29,10 +29,10 @@ CUIExtensionAppCmdData::CUIExtensionAppCmdData(LPCWSTR szImagePath)
 // IUI_TOGGLABLESORT
 CUIExtensionAppCmdData::CUIExtensionAppCmdData(TDC_ATTRIBUTE nSortCol, BOOL bAscending)
 {
-	ASSERT(bAscending != -1);
+	ASSERT((nSortCol == TDCA_NONE) || (bAscending != -1));
 
 	nSortBy = nSortCol;
-	bSortAscending = (bAscending != FALSE);
+	bSortAscending = ((bAscending == -1) ? true : (bAscending != FALSE));
 }
 
 // IUI_SELECTTASK

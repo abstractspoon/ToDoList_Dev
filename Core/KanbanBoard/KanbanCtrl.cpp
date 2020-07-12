@@ -2259,10 +2259,8 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 
 		m_aColumns.SetOptions(dwOptions & ~(KBCF_SHOWPARENTTASKS | KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
 
-		if ((m_nSortBy != TDCA_NONE) && Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
-		{
+		if (Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
 			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
-		}
 	}
 }
 
@@ -2544,15 +2542,12 @@ void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	if ((nBy != TDCA_NONE) && (nBy == m_nTrackAttribute))
 		nBy = TDCA_TASKNAME;
 	
-	m_nSortBy = nBy;
+	ASSERT((nBy == TDCA_NONE) || (bAscending != -1));
 
-	if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+	if ((m_nSortBy != nBy) || (nBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
 	{
-		ASSERT((m_nSortBy == TDCA_NONE) || (bAscending != -1));
+		m_nSortBy = nBy;
 		m_bSortAscending = bAscending;
-
-		// do the sort
- 		CHoldRedraw hr(*this);
 
 		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 	}

@@ -4766,13 +4766,20 @@ void CTabbedToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 
 				BOOL bSortAscending = pVData->sort.single.bAscending;
 
-				if (bSortAscending == -1)
+				if (nBy != TDCC_NONE)
 				{
-					bSortAscending = TRUE;
+					if (bSortAscending == -1)
+					{
+						bSortAscending = TRUE;
+					}
+					else if (bAllowToggle)
+					{
+						bSortAscending = !bSortAscending;
+					}
 				}
-				else if ((nBy != TDCC_NONE) && bAllowToggle && (bSortAscending != -1))
+				else
 				{
-					bSortAscending = !bSortAscending;
+					bSortAscending = -1; // reset
 				}
 				 				
 				CUIExtensionAppCmdData data(nAttrib, bSortAscending);

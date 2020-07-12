@@ -1446,17 +1446,13 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			break;
 			
 		case TDCA_FLAG:
-			if (pKI1->bFlagged && pKI2->bFlagged)
-			{
-				nCompare = 0;
-			}
-			else if (pKI1->bFlagged)
-			{
-				nCompare = 1;
-			}
-			else if (pKI2->bFlagged)
+			if (pKI1->bFlagged && !pKI2->bFlagged)
 			{
 				nCompare = -1;
+			}
+			else if (!pKI1->bFlagged && pKI2->bFlagged)
+			{
+				nCompare = 1;
 			}
 			break;
 			
@@ -1485,17 +1481,12 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			nCompare = CTimeHelper().Compare(pKI1->dTimeSpent, MapUnitsToTHUnits(pKI1->nTimeSpentUnits), 
 											pKI2->dTimeSpent, MapUnitsToTHUnits(pKI2->nTimeSpentUnits));
 			break;
-	
- 		case TDCA_NONE: // Synonymous with IUI_POSITION
- 			ASSERT(pSort->bSubtasksBelowParent);
-			ASSERT(nCompare == 0);
-			// handled below
-			break;
 		}
 
+		// In the absence of a result we sort by IUI_POSITION, but without 
+		// reversing the sign. This also handles sorting by 'TDCA_NONE'
 		if ((nCompare == 0) && (pKI1->dwParentID == pKI2->dwParentID))
 		{
-			// Sort by IUI_POSITION, avoiding reversal of sign below
 			return ((pKI1->nPosition > pKI2->nPosition) ? 1 : -1);
 		}
 	}
@@ -1505,6 +1496,10 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 
 void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
+	if (GetCount() < 2)
+		return;
+
+	CHoldRedraw hr(*this);
 	KANBANSORT ks(m_data);
 	
 	ks.nBy = nBy;
@@ -1528,6 +1523,7 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	TVSORTCB tvs = { NULL, SortProc, (LPARAM)&ks };
 
 	SortChildrenCB(&tvs);
+	ScrollToSelection();
 }
 
 void CKanbanColumnCtrl::OnRButtonDown(UINT nFlags, CPoint point)
