@@ -600,7 +600,7 @@ void CTDCCustomAttribDefinitionArray::RemoveAt(int nIndex, int nCount)
 
 BOOL CTDCCustomAttribDefinitionArray::MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const
 {
-	for (int nAttrib = 0; nAttrib < GetSize(); nAttrib++)
+	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
 
