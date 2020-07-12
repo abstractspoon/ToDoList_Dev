@@ -42,7 +42,6 @@ protected:
 	CString DELIM;
 
 	CTDCAttributeMapping m_aColumnMapping;
-	CMapStringToString m_mapCustomAttributes;
 
 protected:
 	BOOL ImportTask(ITASKLISTBASE* pTasks, const CString& sLine) const;

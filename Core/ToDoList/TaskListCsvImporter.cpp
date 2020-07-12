@@ -43,13 +43,14 @@ CTaskListCsvImporter::~CTaskListCsvImporter()
 bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTasks, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// Build custom attribute mapping
+	CMapStringToString mapCustAttrib;
 	int nAttrib = pTasks->GetCustomAttributeCount();
 
 	while (nAttrib--)
-		m_mapCustomAttributes[pTasks->GetCustomAttributeID(nAttrib)] = pTasks->GetCustomAttributeLabel(nAttrib);
+		mapCustAttrib[pTasks->GetCustomAttributeID(nAttrib)] = pTasks->GetCustomAttributeLabel(nAttrib);
 
 	// Show mapping dialog
-	CTDLCsvImportExportDlg dialog(szSrcFilePath, m_mapCustomAttributes, pPrefs, szKey);
+	CTDLCsvImportExportDlg dialog(szSrcFilePath, mapCustAttrib, pPrefs, szKey);
 
 	if (!bSilent && (dialog.DoModal() != IDOK))
 		return false;
