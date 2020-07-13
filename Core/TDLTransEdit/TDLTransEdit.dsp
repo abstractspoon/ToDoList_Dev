@@ -177,5 +177,13 @@ SOURCE=.\res\TDLTransEdit.rc2
 
 SOURCE=.\res\TDLTransEdit.exe.manifest
 # End Source File
+# Begin Source File
+
+SOURCE=.\TDLTransEdit.vcxproj
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLTransEdit.vcxproj.filters
+# End Source File
 # End Target
 # End Project
