@@ -961,7 +961,6 @@ HWND CTreeListSyncer::GetTree() const
 	if (IsTree(Right()))
 		return Right();
 
-	ASSERT(0);
 	return NULL;
 }
 
@@ -2664,32 +2663,52 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 
 void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 {
-	HWND hwndOther = OtherWnd(hWnd);
+	if (!HasVScrollBar())
+		return;
 
-	if (HasVScrollBar())
+	int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
+	BOOL bUp = (zDelta > 0);
+
+	int nNumClicks = abs(zDelta / 120);
+	WORD wKeys = LOWORD(wp);
+
+	if (!nNumClicks || wKeys || !CanScroll(hWnd, SB_VERT, bUp))
+		return;
+
+	HWND hwndTree = GetTree();
+
+	if (hwndTree)
 	{
-		int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
-		BOOL bUp = (zDelta > 0);
-
-		int nLine = (abs(zDelta / 120) * 3);
-		WORD wKeys = LOWORD(wp);
-
-		if (nLine && !wKeys && CanScroll(hWnd, SB_VERT, bUp))
+		while (nNumClicks--)
 		{
-			// We get the fewest UI artifacts when we pass this to 
-			// the tree and then resync the list
-			HWND hwndScroll = (IsTree(hWnd) ? hWnd : IsTree(hwndOther) ? hwndOther : hWnd);
-			
-			while (nLine--)
-				::SendMessage(hwndScroll, WM_VSCROLL, (bUp ? SB_LINEUP : SB_LINEDOWN), 0L);
+			HTREEITEM htiPrevFirstVis = TreeView_GetFirstVisible(hwndTree), htiFirstVis = htiPrevFirstVis;
+
+			// Scroll 3 rows per click
+			for (int nRow = 0; nRow < 3; nRow++)
+			{
+				if (bUp)
+					htiFirstVis = TreeView_GetPrevVisible(hwndTree, htiFirstVis);
+				else
+					htiFirstVis = TreeView_GetNextVisible(hwndTree, htiFirstVis);
+			}
+
+			TreeView_SelectSetFirstVisible(hwndTree, htiFirstVis);
+
+			// Stop if we didn't move
+			htiFirstVis = TreeView_GetFirstVisible(hwndTree);
+
+			if (htiFirstVis == htiPrevFirstVis)
+				break;
+
+			htiPrevFirstVis = htiFirstVis;
+			ResyncScrollPos(OtherWnd(hwndTree), hwndTree);
 		}
-
-		return; // always
 	}
-
-	// else
-	ScDefault(hWnd);
-	ResyncScrollPos(hwndOther, hWnd);
+	else // list
+	{
+		ScDefault(hWnd);
+		ResyncScrollPos(OtherWnd(hWnd), hWnd);
+	}
 }
 
 BOOL CTreeListSyncer::CanScroll(HWND hWnd, int nScrollbar, BOOL bLeftUp)
