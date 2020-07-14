@@ -478,6 +478,7 @@ void CTreeListSyncer::EnableResync(BOOL bEnable, HWND hwnd)
 	{
 		ForceNcCalcSize(hwnd);
 		PostResync(hwnd, TRUE);
+		PostResize();
 	}
 }
 
