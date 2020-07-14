@@ -1830,21 +1830,21 @@ void CTDLTaskCtrlBase::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 
 BOOL CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 {
-	if (!m_sort.IsSorting())
+	if (!m_sort.bMulti)
 	{
-		ASSERT(0);
-		return FALSE;
+		// Can be TDCC_NONE
+		ss.pCols = &m_sort.single;
+		ss.nNumCols = 1;
 	}
-
-	if (m_sort.bMulti)
+	else if (m_sort.multi.IsSorting())
 	{
 		ss.pCols = m_sort.multi.Cols();
 		ss.nNumCols = 3;
 	}
 	else
 	{
-		ss.pCols = &m_sort.single;
-		ss.nNumCols = 1;
+		ASSERT(0);
+		return FALSE;
 	}
 
 	ss.flags.bSortChildren = TRUE;
@@ -1861,19 +1861,20 @@ BOOL CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 void CTDLTaskCtrlBase::DoSort()
 {
 	// Scope the hold to have finished before resyncing
+	TDSORTPARAMS ss(*this);
+	
+	if (PrepareSort(ss));
 	{
-		CHoldListVScroll hold(m_lcColumns);
+		{
+			CHoldListVScroll hold(m_lcColumns);
+			CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss);
 
-		TDSORTPARAMS ss(*this);
-		VERIFY(PrepareSort(ss));
+			ResyncSelection(m_lcColumns, Tasks(), FALSE);
+		}
 
-		CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss);
-
-		ResyncSelection(m_lcColumns, Tasks(), FALSE);
+		ResyncScrollPos(Tasks(), m_lcColumns);
+		EnsureSelectionVisible();
 	}
-
-	ResyncScrollPos(Tasks(), m_lcColumns);
-	EnsureSelectionVisible();
 }
 
 void CTDLTaskCtrlBase::GetSortBy(TDSORTCOLUMNS& sort) const
