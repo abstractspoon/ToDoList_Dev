@@ -742,7 +742,7 @@ void CToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 			switch (nState)
 			{
 			case TDCMS_NORMAL:
-				m_taskTree.EnsureSelectionVisible();
+				m_taskTree.EnsureSelectionVisible(TRUE);
 				break;
 				
 			case TDCMS_MAXTASKLIST:
@@ -5146,7 +5146,7 @@ DWORD CToDoCtrl::GetNextNonSelectedTaskID() const
 
 BOOL CToDoCtrl::GetLabelEditRect(CRect& rScreen)
 {
-	if (m_taskTree.EnsureSelectionVisible())
+	if (m_taskTree.EnsureSelectionVisible(FALSE))
 		return m_taskTree.GetLabelEditRect(rScreen);
 
 	// else
@@ -6223,7 +6223,7 @@ BOOL CToDoCtrl::DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue)
 
 		m_bDelayLoaded = TRUE;
 	}
-	
+
 	return m_bDelayLoaded;
 }
 
@@ -6346,7 +6346,10 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 				htiSel = htiFirst;
 			
 			if (htiSel)
+			{
 				SelectItem(htiSel);
+				m_taskTree.EnsureSelectionVisible(FALSE);
+			}
 		}
 	}
 	else
@@ -9758,7 +9761,7 @@ void CToDoCtrl::SetFocusToTasks()
 	}
 
 	// ensure the selected tree item is visible
-	if (!m_taskTree.EnsureSelectionVisible())
+	if (!m_taskTree.EnsureSelectionVisible(TRUE))
 		SelectItem(m_taskTree.GetChildItem());
 }
 

@@ -918,3 +918,34 @@ BOOL CTreeSelectionHelper::HasUncheckedItems() const
 
 	return FALSE;
 }
+
+BOOL CTreeSelectionHelper::ParentItemsAreAllExpanded(BOOL bRecursive) const
+{
+	CTreeCtrlHelper tch(m_tree);
+	POSITION pos = GetFirstItemPos();
+
+	while (pos)
+	{
+		HTREEITEM htiSel = GetNextItem(pos);
+		
+		if (!tch.IsParentItemExpanded(htiSel, bRecursive))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+void CTreeSelectionHelper::ExpandAllParentItems(BOOL bRecursive)
+{
+	CTreeCtrlHelper tch(m_tree);
+	POSITION pos = GetFirstItemPos();
+
+	while (pos)
+	{
+		HTREEITEM hti = GetNextItem(pos);
+		HTREEITEM htiParent = m_tree.GetParentItem(hti);
+
+		if (htiParent)
+			tch.ExpandItem(htiParent, TRUE, FALSE, bRecursive);
+	}
+}

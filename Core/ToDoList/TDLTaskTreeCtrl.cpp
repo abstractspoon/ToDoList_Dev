@@ -160,15 +160,16 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_
 		
 		bSelected = TCH().SelectItem(hti);
 
-		if (!TCH().IsItemVisible(hti, FALSE, FALSE))
+		if (!TCH().IsItemVisible(hti, FALSE))
 		{
 			{
 				CLockUpdates hr(m_tcTasks);
+				CHoldHScroll hh(m_tcTasks);
 
 				m_tcTasks.EnsureVisible(hti);
 			}
 
-			if ((nBy == SC_BYMOUSE) && !TCH().IsItemVisible(hti, TRUE, FALSE))
+			if ((nBy == SC_BYMOUSE) && !TCH().IsItemVisible(hti))
 			{
 				// If the item is still not visible because of the horizontal
 				// hold (which is necessary to prevent the default behaviour)
@@ -339,7 +340,7 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 	PostResize();
 }
 
-BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
+BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible(BOOL bHorzPartialOK)
 {
 	if (!GetSelectedCount())
 		return FALSE;
@@ -347,7 +348,7 @@ BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
 	OSVERSION nOSVer = COSVersion();
 	HTREEITEM htiSel = GetTreeSelectedItem();
 	
-	if ((nOSVer == OSV_LINUX) || (nOSVer < OSV_VISTA))
+	if (OsIsLinux() || OsIsXP())
 	{
 		m_tcTasks.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)htiSel);
 	}
@@ -355,37 +356,17 @@ BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible()
 	{
 		// Check there's something to do because holding 
 		// the redraw/scroll has a cost
-		BOOL bAllExpanded = TRUE;
-		POSITION pos = TSH().GetFirstItemPos();
-		
-		while (pos && bAllExpanded)
-		{
-			HTREEITEM htiSel = TSH().GetNextItem(pos);
-			bAllExpanded = TCH().IsParentItemExpanded(htiSel, TRUE);
-		}
-		
-		BOOL bVisible = (bAllExpanded && TCH().IsItemVisible(htiSel, FALSE));
+		BOOL bAllExpanded = TSH().ParentItemsAreAllExpanded(TRUE);
+		BOOL bVisible = (bAllExpanded && TCH().IsItemVisible(htiSel, FALSE, bHorzPartialOK));
 		
 		if (!bVisible)
 		{
 			CHoldRedraw hr(*this);
 
 			if (!bAllExpanded)
-			{
-				// Expand the parents of all selected tasks
-				POSITION pos = TSH().GetFirstItemPos();
+				TSH().ExpandAllParentItems(TRUE);
 			
-				while (pos)
-				{
-					HTREEITEM htiSel = TSH().GetNextItem(pos);
-					HTREEITEM htiParent = m_tcTasks.GetParentItem(htiSel);
-				
-					if (htiParent)
-						TCH().ExpandItem(htiParent);
-				}
-			}
-			
-			TCH().EnsureItemVisible(htiSel, FALSE);
+			TCH().EnsureItemVisible(htiSel, FALSE, bHorzPartialOK);
 		}
 	}
 
@@ -531,7 +512,7 @@ void CTDLTaskTreeCtrl::ResortSelectedTaskParents()
 	}
 
 	ResyncScrollPos(Tasks(), m_lcColumns);
-	EnsureSelectionVisible();
+	EnsureSelectionVisible(TRUE);
 }
 
 LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD) 
@@ -1410,7 +1391,7 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					{
 						// save item handle so we don't re-handle in LButtonUp handler
 						m_htiLastHandledLBtnDown = htiHit;
-						bColClick = TRUE;
+						bColClick = !(nHitFlags & TVHT_ONITEMINDENT);
 					}
 				}
 				
@@ -1449,11 +1430,11 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 						int nSelCount = TSH().GetCount();
 						ASSERT (nSelCount);
 						
-						if (!m_bReadOnly &&
-							!SelectionHasLocked(FALSE, FALSE) && 
+						if (!m_bReadOnly && 
 							(nHitFlags & TVHT_ONITEMLABEL) && 
 							(nSelCount == 1) && 
-							(htiLastHandledLBtnDown == NULL))
+							(htiLastHandledLBtnDown == NULL) &&
+							!SelectionHasLocked(FALSE, FALSE))
 						{
 							BeginLabelEditTimer();
 						}
@@ -2203,7 +2184,7 @@ BOOL CTDLTaskTreeCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 				htiFirstVis = m_tcTasks.GetChildItem(NULL);
 
 			m_tcTasks.SelectSetFirstVisible(htiFirstVis);
-			EnsureSelectionVisible();
+			EnsureSelectionVisible(TRUE);
 
 			return TRUE;
 		}
@@ -2315,7 +2296,7 @@ BOOL CTDLTaskTreeCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 		UpdateSelectedTaskPath();
 		NotifyParentSelChange();
 		
-		EnsureSelectionVisible();
+		EnsureSelectionVisible(TRUE);
 		ExpandList();
 	}
 	

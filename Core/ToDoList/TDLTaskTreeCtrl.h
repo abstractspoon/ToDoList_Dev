@@ -83,7 +83,7 @@ public:
 	BOOL RestoreSelection(const TDCSELECTIONCACHE& cache);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue = FALSE);
 	BOOL MultiSelectTask(DWORD dwTaskID, BOOL bSelected);
-	BOOL EnsureSelectionVisible();
+	BOOL EnsureSelectionVisible(BOOL bHorzPartialOK);
 	BOOL SelectTasksInHistory(BOOL bForward);
 	BOOL CanSelectTasksInHistory(BOOL bForward) const;
 	BOOL SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked = FALSE) const;

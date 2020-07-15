@@ -152,6 +152,9 @@ public:
 
 	BOOL HasUncheckedItems() const;
 
+	BOOL ParentItemsAreAllExpanded(BOOL bRecursive) const;
+	void ExpandAllParentItems(BOOL bRecursive);
+
 protected:
 	CTreeCtrl& m_tree;
 	CHTIList m_lstSelection;

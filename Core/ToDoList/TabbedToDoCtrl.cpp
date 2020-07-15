@@ -745,7 +745,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				CToDoCtrl::Resort();
 			}
 			
-			m_taskTree.EnsureSelectionVisible();
+			m_taskTree.EnsureSelectionVisible(TRUE);
 		}
 		break;
 
@@ -873,7 +873,7 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 
 	case FTCV_TASKLIST:
 		SyncListSelectionToTree();
-		m_taskList.EnsureSelectionVisible();
+		m_taskList.EnsureSelectionVisible(FALSE);
 		break;
 		
 	case FTCV_UIEXTENSION1:
@@ -5649,7 +5649,7 @@ void CTabbedToDoCtrl::SetFocusToTasks()
 			m_taskList.SetFocus();
 		}
 			
-		m_taskList.EnsureSelectionVisible();
+		m_taskList.EnsureSelectionVisible(TRUE);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -6289,7 +6289,7 @@ BOOL CTabbedToDoCtrl::GetLabelEditRect(CRect& rScreen)
 		return CToDoCtrl::GetLabelEditRect(rScreen);
 
 	case FTCV_TASKLIST:
-		if (m_taskList.EnsureSelectionVisible())
+		if (m_taskList.EnsureSelectionVisible(FALSE))
 			return m_taskList.GetLabelEditRect(rScreen);
 		break;
 

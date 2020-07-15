@@ -492,16 +492,20 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 	if (hti == NULL)
 		return FALSE;
 
-	CHoldHScroll hs(m_tree);
-
 	BOOL bWasVisible = IsTreeItemVisible(m_tree, hti);
 	BOOL bWasSelected = TCH().IsSelectedItem(hti);
 
-	SelectTreeItem(hti, FALSE);
+	{
+		CHoldHScroll hs(m_tree);
+		CTLSHoldResync hr(*this);
+
+		SelectTreeItem(hti, FALSE);
+	}
 
 	if (!bWasVisible)
 		ExpandList();
 
+/*
 	if (CanResync())
 	{
 		// If the item is already selected then we won't get a
@@ -519,6 +523,7 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 		ASSERT(m_list.GetItemData(nSel) == (DWORD)hti);
 #endif
 	}
+*/
 
 	return TRUE;
 }
@@ -1195,7 +1200,7 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 		SelectItem(hti);
 
 		// Make sure item is visible horizontally
-		if (!TCH().IsItemVisible(hti, TRUE, FALSE))
+		if (!TCH().IsItemVisible(hti))
 			m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
 
 		return TRUE;

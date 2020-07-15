@@ -1568,7 +1568,7 @@ BOOL CTDLTaskListCtrl::SelectItem(int nItem)
 	return TRUE;
 }
 
-BOOL CTDLTaskListCtrl::EnsureSelectionVisible()
+BOOL CTDLTaskListCtrl::EnsureSelectionVisible(BOOL /*bHorzPartialOK*/)
 {
 	if (GetSelectedCount())
 	{
@@ -1741,7 +1741,7 @@ void CTDLTaskListCtrl::SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFoc
 		}
 	}
 
-	EnsureSelectionVisible();
+	EnsureSelectionVisible(TRUE);
 }
 
 int CTDLTaskListCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const

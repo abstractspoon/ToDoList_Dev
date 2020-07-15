@@ -173,7 +173,7 @@ struct TCHHCOPY
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-const int HVISIBLE = 20;
+const int HVISIBLE = GraphicsMisc::ScaleByDPIFactor(20);
 
 CTreeCtrlHelper::CTreeCtrlHelper(CTreeCtrl& tree) : m_tree(tree)
 {
@@ -523,6 +523,8 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 		if (!bHorzVisible)
 		{
 			m_tree.GetItemRect(hti, rItem, TRUE);
+			rItem.DeflateRect(HVISIBLE, 0);
+
 			CRect rOrg(rItem);
 
 			if (rItem.left < rClient.left || (bHorzPartialOK && rItem.right < rClient.left))
@@ -530,9 +532,11 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 				while (rClient.left > (bHorzPartialOK ? rItem.right : rItem.left))
 				{
 					m_tree.SendMessage(WM_HSCROLL, SB_LINELEFT);
-					m_tree.GetItemRect(hti, rItem, TRUE); // check again
 
 					// check for no change
+					m_tree.GetItemRect(hti, rItem, TRUE);
+					rItem.DeflateRect(HVISIBLE, 0);
+
 					if (rItem == rOrg)
 						break;
 
@@ -544,9 +548,11 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 				while (rClient.right < (bHorzPartialOK ? rItem.left : rItem.right))
 				{
 					m_tree.SendMessage(WM_HSCROLL, SB_LINERIGHT);
-					m_tree.GetItemRect(hti, rItem, TRUE); // check again
 
 					// check for no change
+					m_tree.GetItemRect(hti, rItem, TRUE);
+					rItem.DeflateRect(HVISIBLE, 0);
+
 					if (rItem == rOrg)
 						break;
 

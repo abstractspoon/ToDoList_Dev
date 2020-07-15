@@ -71,7 +71,7 @@ public:
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	int RestoreSelection(const TDCSELECTIONCACHE& cache, BOOL bEnsureSelection);
 	BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const;
-	BOOL EnsureSelectionVisible();
+	BOOL EnsureSelectionVisible(BOOL bPartialOK);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 
 	// list related
