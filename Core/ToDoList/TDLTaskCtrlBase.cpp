@@ -1863,7 +1863,7 @@ void CTDLTaskCtrlBase::DoSort()
 	// Scope the hold to have finished before resyncing
 	TDSORTPARAMS ss(*this);
 	
-	if (PrepareSort(ss));
+	if (PrepareSort(ss))
 	{
 		{
 			CHoldListVScroll hold(m_lcColumns);
@@ -1873,7 +1873,7 @@ void CTDLTaskCtrlBase::DoSort()
 		}
 
 		ResyncScrollPos(Tasks(), m_lcColumns);
-		EnsureSelectionVisible();
+		EnsureSelectionVisible(TRUE);
 	}
 }
 
