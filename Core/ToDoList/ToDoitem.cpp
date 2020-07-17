@@ -599,56 +599,71 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 {
 	ASSERT(IsDone());
 
-	if (!IsRecurring() || !IsDone())
+	if (!trRecurrence.CanRecur() || !IsDone())
 		return FALSE;
+
+	BOOL bHasDue = HasDue();
+	BOOL bHasStart = HasStart();
+	bDue = (bHasDue || !bHasStart);
 
 	switch (trRecurrence.nRecalcFrom)
 	{
 	case TDIRO_DUEDATE:
-		if (HasDue())
-		{
-			bDue = TRUE;
+		if (bHasDue)
 			return trRecurrence.GetNextOccurence(dateDue, dtNext);
-		}
 		break;
 
 	case TDIRO_STARTDATE:
-		if (HasStart())
-		{
-			bDue = FALSE;
+		if (bHasStart)
 			return trRecurrence.GetNextOccurence(dateStart, dtNext);
-		}
 		break;
-
-		// else fall thru
 	}
-	
-	// use completed date but with the current due/start time
-	if (trRecurrence.GetNextOccurence(dateDone, dtNext))
+
+	COleDateTime dtStartDue = (bDue ? dateDue : dateStart);
+	COleDateTime dtFrom = dateDone;
+
+	if (CDateHelper::IsSameDay(dateDone, dtStartDue) || (dateDone < dtStartDue))
 	{
-		// restore the due time to be whatever it was
-		dtNext = CDateHelper::GetDateOnly(dtNext);
-
-		if (HasDue())
-		{
-			bDue = TRUE;
-			dtNext += CDateHelper::GetTimeOnly(dateDue).m_dt;
-		}
-		else if (HasStart())
-		{
-			bDue = FALSE;
-			dtNext += CDateHelper::GetTimeOnly(dateStart).m_dt;
-		}
-		else
-		{
-			bDue = TRUE;
-		}
-		
-		return TRUE;
+		// If the completion date comes on or before before the 
+		// start/due date we use the start/due date to prevent 
+		// the base class implementation from selecting either
+		// the same date again or a date in the past.
+		dtFrom = dtStartDue;
 	}
-	
-	// else
-	return FALSE;
+	else // completed date comes after start/due date
+	{
+		ASSERT(dateDone > dtStartDue);
+
+		// Special case:
+		//
+		// 1. Weekly occurrence
+		// 2. > 1 week interval
+		// 3. Completion date not in the same week as due date
+		DWORD dwNumWeeks, dwNotUsed;
+		TDC_REGULARITY nReg = trRecurrence.GetRegularity(dwNumWeeks, dwNotUsed);
+
+		if ((nReg == TDIR_WEEK_SPECIFIC_DOWS_NWEEKS) && 
+			(dwNumWeeks > 1) &&
+			!CDateHelper::IsSameWeek(dtStartDue, dateDone))
+		{
+			// Move the date to the end of the week to prevent 
+			// the base class implementation from selecting the
+			// next available day in the current week
+			dtFrom = CDateHelper::GetEndOfWeek(dateDone);
+		}
+	}
+	ASSERT(CDateHelper::IsDateSet(dtFrom));
+
+	if (!trRecurrence.GetNextOccurence(dtFrom, dtNext))
+		return FALSE;
+
+	// Restore the previous due/start time
+	if (bHasDue || bHasStart)
+		dtNext = CDateHelper::MakeDate(dtNext, dtStartDue);
+	else
+		dtNext = CDateHelper::GetDateOnly(dtNext); // End of day
+
+	return TRUE;
 }
 
 BOOL TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const
