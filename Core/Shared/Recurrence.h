@@ -46,13 +46,13 @@ enum RECURRENCE_REGULARITY
 
 struct CRecurrence
 {
-	//  nRegularity										dwSpecific1				dwSpecific2
+	//  nRegularity										m_dwSpecific1			m_dwSpecific2
 
 	//	RECURS_DAY_EVERY_NDAYS							every 'n' days			--- (0)
 	//	RECURS_DAY_EVERY_WEEKDAY						--- (0)					--- (0)
 	//	RECURS_DAY_EVERY_NWEEKDAYS						every 'n' days			--- (0)
 
-	//	RECURS_WEEK_SPECIFIC_DOWS_NWEEKS				every 'n' weeks			weekdays (TDIW_...)
+	//	RECURS_WEEK_SPECIFIC_DOWS_NWEEKS				every 'n' weeks			weekdays (DHW_...)
 	//	RECURS_WEEK_EVERY_NWEEKS						every 'n' weeks			--- (0)
 
 	//	RECURS_MONTH_EVERY_NMONTHS						every 'n' months		--- (0)
@@ -76,11 +76,11 @@ struct CRecurrence
 
 	BOOL IsRecurring() const;
 	BOOL CanRecur() const;
-	BOOL GetNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtNext);
+	BOOL GetNextOccurence(const COleDateTime& dtPrev, COleDateTime& dtNext); // updates remaining occurrences
 	BOOL FitDayToScheme(COleDateTime& dtRecur) const;
 	
-	BOOL CalcNextOccurence(const COleDateTime& dtFrom, COleDateTime& dtNext) const;
-	int CalcNextOccurences(const COleDateTime& dtFrom, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const;
+	BOOL CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dtNext) const;
+	int CalcNextOccurences(const COleDateTime& dtPrev, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates) const;
 
 	BOOL SetRegularity(RECURRENCE_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 	RECURRENCE_REGULARITY GetRegularity(DWORD& dwSpecific1, DWORD& dwSpecific2) const;
