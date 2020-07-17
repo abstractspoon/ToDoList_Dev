@@ -62,8 +62,6 @@ struct TDCRECURRENCE : public CRecurrence
 	TDC_RECURREUSEOPTION nReuse;
 	BOOL bPreserveComments;
 
-protected:
-	static BOOL IsValidRegularity(TDC_REGULARITY nRegularity, DWORD dwSpecific1, DWORD dwSpecific2);
 };
 
 

@@ -128,19 +128,9 @@ CString TDCRECURRENCE::GetRegularityText(TDC_REGULARITY nRegularity, BOOL bIncOn
 
 BOOL TDCRECURRENCE::SetRegularity(TDC_REGULARITY nReg, DWORD dwSpec1, DWORD dwSpec2)
 {
-	if (!IsValidRegularity(nReg, dwSpec1, dwSpec2))
-		return FALSE;
-
 	RECURRENCE_REGULARITY nRegularity = TDC::MapTDCRegularityToRegularity(nReg);
 
 	return CRecurrence::SetRegularity(nRegularity, dwSpec1, dwSpec2);
-}
-
-BOOL TDCRECURRENCE::IsValidRegularity(TDC_REGULARITY nReg, DWORD dwSpec1, DWORD dwSpec2)
-{
-	RECURRENCE_REGULARITY nRegularity = TDC::MapTDCRegularityToRegularity(nReg);
-
-	return CRecurrence::IsValidRegularity(nRegularity, dwSpec1, dwSpec2);
 }
 
 TDC_REGULARITY TDCRECURRENCE::GetRegularity(DWORD& dwSpec1, DWORD& dwSpec2) const
