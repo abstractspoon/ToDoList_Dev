@@ -8470,7 +8470,7 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		
 	case TDCC_RECURRENCE:
 		ASSERT(CanEditSelectedTask(TDCA_RECURRENCE, dwTaskID));
-		m_eRecurrence.DoEdit();
+		m_eRecurrence.DoEdit(TRUE);
 		break;
 		
 	case TDCC_REMINDER:
