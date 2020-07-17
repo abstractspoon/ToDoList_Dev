@@ -1271,6 +1271,19 @@ BOOL CDateHelper::ValidateDay(COleDateTime& date, DWORD dwAvailDays)
 	return TRUE;
 }
 
+int CDateHelper::GetDayCount(DWORD dwDays)
+{
+	int nCount = 0;
+
+	for (int nDay = 0; nDay < 7; nDay++)
+	{
+		if (dwDays & DH_DAYSOFWEEK[nDay])
+			nCount++;
+	}
+
+	return nCount;
+}
+
 DH_DAYOFWEEK CDateHelper::Map(OLE_DAYOFWEEK nDOW)
 {
 	switch (nDOW)

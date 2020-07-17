@@ -187,8 +187,10 @@ public:
 	static COleDateTime GetDateOnly(const COleDateTime& date);
 	static COleDateTime TruncateSeconds(const COleDateTime& date);
 
+	// Uses DHW_... enum
 	static COleDateTime GetNextAvailableDay(const COleDateTime& date, DWORD dwAvailDays);
 	static BOOL ValidateDay(COleDateTime& date, DWORD dwAvailDays);
+	static int GetDayCount(DWORD dwDays);
 
 	static COleDateTime GetStartOfWeek(const COleDateTime& date);
 	static COleDateTime GetEndOfWeek(const COleDateTime& date);
