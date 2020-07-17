@@ -3005,36 +3005,18 @@ const TODOITEM* CTDCTaskCalculator::GetLastModifiedTask(const TODOITEM* pTDI, co
 
 double CTDCTaskCalculator::GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay)
 {
-	if (dDate2 == 0.0)
-		return dDate1;
+	COleDateTime dtMax(dDate1);
+	CDateHelper::Max(dtMax, dDate2, bNoTimeIsEndOfDay);
 
-	if (bNoTimeIsEndOfDay && (dDate1 != 0))
-	{
-		double dTemp1 = (CDateHelper::DateHasTime(dDate1) ? dDate1 : CDateHelper::GetEndOfDay(dDate1).m_dt);
-		double dTemp2 = (CDateHelper::DateHasTime(dDate2) ? dDate2 : CDateHelper::GetEndOfDay(dDate2).m_dt);
-
-		return (dTemp1 >= dTemp2) ? dDate1 : dDate2;
-	}
-
-	// else
-	return (dDate1 >= dDate2) ? dDate1 : dDate2;
+	return dtMax.m_dt;
 }
 
 double CTDCTaskCalculator::GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay)
 {
-	if (dDate2 == 0.0)
-		return dDate1;
+	COleDateTime dtMin(dDate1);
+	CDateHelper::Min(dtMin, dDate2, bNoTimeIsEndOfDay);
 
-	if (bNoTimeIsEndOfDay && (dDate1 != 0))
-	{
-		double dTemp1 = (CDateHelper::DateHasTime(dDate1) ? dDate1 : CDateHelper::GetEndOfDay(dDate1).m_dt);
-		double dTemp2 = (CDateHelper::DateHasTime(dDate2) ? dDate2 : CDateHelper::GetEndOfDay(dDate2).m_dt);
-
-		return (dTemp1 <= dTemp2) ? dDate1 : dDate2;
-	}
-
-	// else
-	return (dDate1 <= dDate2) ? dDate1 : dDate2;
+	return dtMin.m_dt;
 }
 
 int CTDCTaskCalculator::GetTaskHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue) const

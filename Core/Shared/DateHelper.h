@@ -220,8 +220,11 @@ public:
 	static COleDateTime GetNearestHour(const COleDateTime& date, BOOL bEnd);
 	static COleDateTime GetNearestHalfHour(const COleDateTime& date, BOOL bEnd);
 
+	static COleDateTime GetDate(const COleDateTime& date, BOOL bNoTimeIsEndOfDay);
 	static BOOL Min(COleDateTime& date, const COleDateTime& dtOther);
+	static BOOL Min(COleDateTime& date, const COleDateTime& dtOther, BOOL bNoTimeIsEndOfDay);
 	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther);
+	static BOOL Max(COleDateTime& date, const COleDateTime& dtOther, BOOL bNoTimeIsEndOfDay);
 
 	static DH_DAYOFWEEK Map(OLE_DAYOFWEEK nDOW);
 	static OLE_DAYOFWEEK Map(DH_DAYOFWEEK nDOW);

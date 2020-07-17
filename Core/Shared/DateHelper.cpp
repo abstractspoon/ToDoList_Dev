@@ -1023,13 +1023,27 @@ double CDateHelper::GetDate(DH_DATE nDate)
 	return GetDateOnly(date);
 }
 
+COleDateTime CDateHelper::GetDate(const COleDateTime& date, BOOL bNoTimeIsEndOfDay)
+{
+	if (!bNoTimeIsEndOfDay || DateHasTime(date))
+		return date;
+
+	return GetEndOfDay(date);
+}
+
 BOOL CDateHelper::Min(COleDateTime& date, const COleDateTime& dtOther)
+{
+	return Min(date, dtOther, FALSE);
+}
+
+BOOL CDateHelper::Min(COleDateTime& date, const COleDateTime& dtOther, BOOL bNoTimeIsEndOfDay)
 {
 	if (IsDateSet(date))
 	{
 		if (IsDateSet(dtOther))
 		{
-			date.m_dt = min(dtOther.m_dt, date.m_dt);
+			if (GetDate(dtOther, bNoTimeIsEndOfDay) < GetDate(date, bNoTimeIsEndOfDay))
+				date = dtOther;
 		}
 		// else no change
 	}
@@ -1043,11 +1057,17 @@ BOOL CDateHelper::Min(COleDateTime& date, const COleDateTime& dtOther)
 
 BOOL CDateHelper::Max(COleDateTime& date, const COleDateTime& dtOther)
 {
+	return Max(date, dtOther, FALSE);
+}
+
+BOOL CDateHelper::Max(COleDateTime& date, const COleDateTime& dtOther, BOOL bNoTimeIsEndOfDay)
+{
 	if (IsDateSet(date))
 	{
 		if (IsDateSet(dtOther))
 		{
-			date.m_dt = max(dtOther.m_dt, date.m_dt);
+			if (GetDate(dtOther, bNoTimeIsEndOfDay) > GetDate(date, bNoTimeIsEndOfDay))
+				date = dtOther;
 		}
 		// else no change
 	}
@@ -1084,16 +1104,8 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, D
 	}
 
 	// else include time
-	double dDateTime1(date1.m_dt), dDateTime2(date2.m_dt);
-
-	if (dwCompareFlags & DHC_NOTIMEISENDOFDAY)
-	{
-		if (!DateHasTime(date1))
-			dDateTime1 = GetEndOfDay(date1).m_dt;
-
-		if (!DateHasTime(date2))
-			dDateTime2 = GetEndOfDay(date2).m_dt;
-	}
+	double dDateTime1 = GetDate(date1, (dwCompareFlags & DHC_NOTIMEISENDOFDAY)).m_dt;
+	double dDateTime2 = GetDate(date2, (dwCompareFlags & DHC_NOTIMEISENDOFDAY)).m_dt;
 
 	if ((dwCompareFlags & DHC_COMPARESECONDS) == 0)
 	{

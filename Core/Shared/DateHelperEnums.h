@@ -64,6 +64,17 @@ enum DH_DAYOFWEEK // Days of week bit flags
 	DHW_EVERYDAY	= 0x7F
 };
 
+static DH_DAYOFWEEK DH_DAYSOFWEEK[7] =
+{
+	DHW_SUNDAY,
+	DHW_MONDAY,
+	DHW_TUESDAY,
+	DHW_WEDNESDAY,
+	DHW_THURSDAY,
+	DHW_FRIDAY,
+	DHW_SATURDAY,
+};
+
 enum OLE_DAYOFWEEK // OLE Days of week
 {
 	DHO_UNDEF	= -1,
