@@ -209,7 +209,7 @@ void CPreferencesFile2Page::LoadPreferences(const IPreferences* pPrefs, LPCTSTR 
 	m_bBackupOnSave = pPrefs->GetProfileInt(szKey, _T("BackupOnSave"), TRUE);
 	m_sBackupLocation = pPrefs->GetProfileString(szKey, _T("BackupLocation"), _T("backup"));
 	m_nKeepBackups = pPrefs->GetProfileInt(szKey, _T("KeepBackups"), 10);
-	m_nBackupFolderType = pPrefs->GetProfileInt(szKey, _T("BackupFolderType"), PFP_RELATIVETOAPP);
+	m_nBackupFolderType = pPrefs->GetProfileInt(szKey, _T("BackupFolderType"), PFP_RELATIVETOTASKLIST);
 	
 	// saving
 	m_nAutoSaveFrequency = pPrefs->GetProfileInt(szKey, _T("AutoSaveFrequency"), 1);

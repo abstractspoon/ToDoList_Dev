@@ -89,6 +89,8 @@ enum // GetSpecialFolder
 #define CSIDL_PROGRAM_FILESX86   0x002a         // x86 C:\Program Files on RISC
 #endif // CSIDL_PROGRAM_FILESX86
 
+#define CSIDL_PROGRAM_FILESX64   0x00ff			// Hack for 32-bit
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CFileBackup

@@ -827,7 +827,7 @@ BOOL FileMisc::IsFolderWritable(LPCTSTR szFolder)
 		return FALSE;
 
 	// Detect 'Program Files' explicitly for non-admin users
-	if (!IsAdminProcess() && IsPathInSpecialFolder(szFolder, CSIDL_PROGRAM_FILES))
+	if (!IsAdminProcess() && IsPathInProgramFiles(szFolder))
 		return FALSE;
 		
 	// based on generated GUID = {90F97F18-32EC-4B5A-82FF-7F76953EDE37}
@@ -2341,12 +2341,23 @@ int FileMisc::CompareContents(const CString& sPath1, const CString& sPath2)
 
 BOOL FileMisc::GetSpecialFolder(int nCSIDL, CString& sFolder, BOOL bAutoCreate)
 {
-	BOOL bRes = SHGetSpecialFolderPath(NULL, sFolder.GetBuffer(MAX_PATH), nCSIDL, bAutoCreate);
+	BOOL bRes = FALSE;
+	LPTSTR szFolder = sFolder.GetBuffer(MAX_PATH);
+
+	switch (nCSIDL)
+	{
+	case CSIDL_PROGRAM_FILESX64:
+		bRes = ExpandEnvironmentStrings(_T("%ProgramW6432%"), szFolder, MAX_PATH);
+		break;
+
+	default:
+		bRes = SHGetSpecialFolderPath(NULL, szFolder, nCSIDL, bAutoCreate);
+		break;
+	}
 	sFolder.ReleaseBuffer();
 
 	// ought not to fail
 	ASSERT(bRes);
-
 	return bRes;
 }
 
@@ -2392,8 +2403,13 @@ BOOL FileMisc::IsAppInProgramFiles()
 
 BOOL FileMisc::IsPathInProgramFiles(const CString& sPath)
 {
-	return (IsPathInSpecialFolder(sPath, CSIDL_PROGRAM_FILES) ||
-			IsPathInSpecialFolder(sPath, CSIDL_PROGRAM_FILESX86));
+	if (IsPathInSpecialFolder(sPath, CSIDL_PROGRAM_FILESX86))
+		return TRUE;
+
+	if (IsPathInSpecialFolder(sPath, CSIDL_PROGRAM_FILESX64))
+		return TRUE;
+
+	return FALSE;
 }
 
 BOOL FileMisc::GetVirtualStorePath(const CString& sPath, CString& sVirtualStorePath)
@@ -2401,7 +2417,7 @@ BOOL FileMisc::GetVirtualStorePath(const CString& sPath, CString& sVirtualStoreP
 	if (!Misc::Is64BitWindows())
 		return FALSE;
 
-	if (!IsPathInSpecialFolder(sPath, CSIDL_PROGRAM_FILESX86))
+	if (!IsPathInSpecialFolder(sPath, CSIDL_PROGRAM_FILES))
 		return FALSE;
 
 	// else
