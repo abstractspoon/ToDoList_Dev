@@ -1,0 +1,18 @@
+#!/bin/sh
+#
+# This script checks that the commit message
+# does not make a mistaken reference to its 
+# own repo typically when commiting merged fixes
+#
+# eg. 'Fix merged from ToDoList_Dev' or 
+#     'Fix merged from ToDoList_8.0' or 
+
+REPO=$(basename "$PWD") 
+
+if grep -i "$REPO" "$1"
+then
+   echo "Commit message contains repository name!"
+   exit 1
+fi
+
+
