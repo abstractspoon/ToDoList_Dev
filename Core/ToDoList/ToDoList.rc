@@ -4528,7 +4528,7 @@ BEGIN
     IDS_ADVANCEDFILTERPLACEHOLDER "Find Tasks Filters"
     IDS_TABTIP_NOTFOUND     "File not found (%s)"
     IDS_ANONYMIZE_FAIL      "The active tasklist could not be anonymized"
-    IDS_ANONYMIZE_SUCCESS   "The active tasklist was successfully anonymized.\n\nWould you like to load the anonymized tasklist?"
+    IDS_ANONYMIZE_SUCCESS   "The active tasklist was successfully anonymized.\n\nWould you like to load the anonymized version?"
 END
 
 STRINGTABLE DISCARDABLE 
