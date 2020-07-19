@@ -36,6 +36,7 @@
 #include "TDLGoToTaskDlg.h"
 #include "TDLCleanupIniPreferencesDlg.h"
 #include "TDLTasklistSaveAsDlg.h"
+#include "TDCAnonymizeTasklist.h"
 
 #include "..\shared\aboutdlg.h"
 #include "..\shared\holdredraw.h"
@@ -277,6 +278,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_SETPERCENTTOTODAY, OnEditSetPercentToToday)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SETPERCENTTOTODAY, OnUpdateEditSetPercentToToday)
 	ON_COMMAND(ID_DEBUGRESTARTAPP, OnDebugRestartApp)
+	ON_COMMAND(ID_TOOLS_ANONYMIZE_TASKLIST, OnToolsAnonymizeTasklist)
+	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANONYMIZE_TASKLIST, OnUpdateToolsAnonymizeTasklist)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -13512,4 +13515,24 @@ void CToDoListWnd::OnUpdateToolsViewLogFile(CCmdUI* pCmdUI)
 void CToDoListWnd::OnDebugRestartApp() 
 {
 	DoExit(TRUE);	
+}
+
+void CToDoListWnd::OnToolsAnonymizeTasklist() 
+{
+	CString sAnonFilePath;
+
+	if (CTDCAnonymizeTasklist::Anonymize(GetToDoCtrl().GetFilePath(), sAnonFilePath))
+	{
+		if (IDYES == CMessageBox::AfxShow(IDS_ANONYMIZE_SUCCESS, MB_YESNO))
+			OpenTaskList(sAnonFilePath, FALSE);
+	}
+	else
+	{
+		CMessageBox::AfxShow(IDS_ANONYMIZE_FAIL);
+	}
+}
+
+void CToDoListWnd::OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(GetToDoCtrl().HasFilePath());
 }

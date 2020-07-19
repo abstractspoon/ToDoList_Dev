@@ -892,7 +892,7 @@ END
 IDD_TASKSELECTION_DIALOG DIALOGEX 0, 0, 369, 172
 STYLE DS_NOIDLEMSG | DS_CONTROL | WS_CHILD | WS_VISIBLE
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     CONTROL         "&All tasks",IDC_ALLTASKS,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,7,12,98,10
@@ -3589,6 +3589,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Enable Lo&gging",             ID_TOOLS_TOGGLE_LOGGING
         MENUITEM "&View Log File",              ID_TOOLS_VIEWLOG
+        MENUITEM SEPARATOR
+        MENUITEM "Anon&ymise Tasklist",         ID_TOOLS_ANONYMIZE_TASKLIST
     END
     POPUP "&Window"
     BEGIN
@@ -4525,6 +4527,8 @@ BEGIN
     IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
     IDS_ADVANCEDFILTERPLACEHOLDER "Find Tasks Filters"
     IDS_TABTIP_NOTFOUND     "File not found (%s)"
+    IDS_ANONYMIZE_FAIL      "The active tasklist could not be anonymized"
+    IDS_ANONYMIZE_SUCCESS   "The active tasklist was successfully anonymized.\n\nWould you like to load the anonymized tasklist?"
 END
 
 STRINGTABLE DISCARDABLE 

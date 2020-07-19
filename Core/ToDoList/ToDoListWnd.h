@@ -202,6 +202,8 @@ protected:
 	afx_msg void OnEditSetPercentToToday();
 	afx_msg void OnUpdateEditSetPercentToToday(CCmdUI* pCmdUI);
 	afx_msg void OnDebugRestartApp();
+	afx_msg void OnToolsAnonymizeTasklist();
+	afx_msg void OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();

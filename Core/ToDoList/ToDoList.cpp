@@ -205,6 +205,9 @@ BOOL CToDoListApp::InitInstance()
 	if (!HasVS2010Redistributable())
 		return FALSE;
 
+	AfxOleInit(); // for initializing COM and handling drag and drop via explorer
+	AfxEnableControlContainer(); // embedding IE
+
 	// Set up icons that might be required during startup
 	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE) && m_iconGo.Load(IDI_FILEEDIT_GO))
 		CFileEdit::SetDefaultButtonImages(m_iconBrowse, m_iconGo);
@@ -239,9 +242,6 @@ BOOL CToDoListApp::InitInstance()
 		// and turn on logging to capture the first run
 		CToDoListWnd::EnableLogging();
 	}
-
-	AfxOleInit(); // for initializing COM and handling drag and drop via explorer
-	AfxEnableControlContainer(); // embedding IE
 
 	// before anything else make sure we've got MSXML3 installed
 	if (!CXmlDocumentWrapper::IsVersion3orGreater())
