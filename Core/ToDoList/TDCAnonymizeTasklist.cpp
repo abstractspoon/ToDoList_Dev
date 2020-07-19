@@ -178,6 +178,7 @@ void CTDCAnonymizeTasklist::AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask)
 		AnonymizeListItems(tdi.aAllocTo,	*m_mapSharedData.GetAddMapping(_T("ALLOCTO")));
 		AnonymizeListItems(tdi.aCategories,	*m_mapSharedData.GetAddMapping(_T("CATEGORY")));
 		AnonymizeListItems(tdi.aTags,		*m_mapSharedData.GetAddMapping(_T("TAGS")));
+		AnonymizeListItems(tdi.aFileLinks,	*m_mapSharedData.GetAddMapping(_T("FILELINK")));
 		
 		AnonymizeListItem(tdi.sAllocBy,		*m_mapSharedData.GetAddMapping(_T("ALLOCBY")));
 		AnonymizeListItem(tdi.sStatus,		*m_mapSharedData.GetAddMapping(_T("STATUS")));
@@ -189,6 +190,7 @@ void CTDCAnonymizeTasklist::AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask)
 		VERIFY(tasks.SetTaskAllocatedTo(hTask, tdi.aAllocTo));
 		VERIFY(tasks.SetTaskCategories(hTask, tdi.aCategories));
 		VERIFY(tasks.SetTaskTags(hTask, tdi.aTags));
+		VERIFY(tasks.SetTaskFileLinks(hTask, tdi.aFileLinks));
 		VERIFY(tasks.SetTaskAllocatedBy(hTask, tdi.sAllocBy));
 		VERIFY(tasks.SetTaskStatus(hTask, tdi.sStatus));
 		VERIFY(tasks.SetTaskVersion(hTask, tdi.sVersion));
