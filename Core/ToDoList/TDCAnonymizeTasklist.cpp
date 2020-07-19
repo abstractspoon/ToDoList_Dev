@@ -21,10 +21,6 @@ static char THIS_FILE[]=__FILE__;
 
 CTDCAnonymizeTasklist::CTDCAnonymizeTasklist()
 {
-	// Use a different seed value so that we don't get same
-	// result each time we run this program
-	srand((unsigned int)time(NULL));
-
 }
 
 BOOL CTDCAnonymizeTasklist::Anonymize(LPCTSTR szTaskfile)
@@ -50,10 +46,17 @@ BOOL CTDCAnonymizeTasklist::Anonymize(LPCTSTR szTaskfile, CString& sAnonFilePath
 
 BOOL CTDCAnonymizeTasklist::AnonymizeTasklist(CTaskFile& tasks)
 {
+	// Use a different seed value so that we don't get same
+	// result each time we run this method
+	srand((unsigned int)time(NULL));
+
 	if (!BuildContent(tasks))
 		return FALSE;
 
-	// Walk the tasks randomising their titles, comments and string attributes
+	AnonymizeCustomAttributeDefs(tasks);
+
+	// Walk the tasks randomising their titles, comments,
+	// string and custom attributes
 	AnonymizeTask(tasks, NULL);
 		
 	// Save to alternate filename
@@ -61,6 +64,43 @@ BOOL CTDCAnonymizeTasklist::AnonymizeTasklist(CTaskFile& tasks)
 	FileMisc::AddToFileName(sFilePath, _T(".rnd"));
 
 	return tasks.Save(sFilePath, SFEF_UTF16);
+}
+
+void CTDCAnonymizeTasklist::AnonymizeCustomAttributeDefs(CTaskFile& tasks)
+{
+	// We need attributes to persist because we need them
+	// when anonymising the tasks
+	int nDef = tasks.GetCustomAttributeDefs(m_aAttribDefs);
+
+	if (nDef)
+	{
+		// We keep a mapping of custom attribute IDs for when
+		// we need to anonymise the task custom attribute data
+		CMapStringToString* pMap = m_mapSharedData.GetAddMapping(_T("CUSTOMATTRIBID"));
+		ASSERT(pMap);
+
+		while (nDef--)
+		{
+			TDCCUSTOMATTRIBUTEDEFINITION& def = m_aAttribDefs[nDef];
+
+			CString sCustID = def.sUniqueID;
+			CString sRndID = AnonymizeText(sCustID);
+
+			pMap->SetAt(sCustID, sRndID); // for task lookups
+			def.sUniqueID = sRndID;
+
+			def.sLabel = AnonymizeText(def.sLabel);
+
+			if (def.sColumnTitle.GetLength() > 1)
+				def.sColumnTitle = AnonymizeText(def.sColumnTitle);
+
+			// Anonymise list content
+			if (def.IsDataType(TDCCA_STRING) && def.IsList())
+				AnonymizeListItems(def.aDefaultListData, *m_mapSharedData.GetAddMapping(sRndID));
+		}
+
+		tasks.SetCustomAttributeDefs(m_aAttribDefs);
+	}
 }
 
 CString CTDCAnonymizeTasklist::GetContent(const CTaskFile& tasks, HTASKITEM hTask) const
@@ -135,16 +175,16 @@ void CTDCAnonymizeTasklist::AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask)
 		if (!tdi.customComments.IsEmpty())
 			tasks.SetTaskCustomComments(hTask, CBinaryData(_T("__")), tdi.cfComments); // Too hard
 		
-		AnonymizeListItems(tdi.aAllocTo,	*m_mapListData.GetAddMapping(_T("ALLOCTO")));
-		AnonymizeListItems(tdi.aCategories,	*m_mapListData.GetAddMapping(_T("CATEGORY")));
-		AnonymizeListItems(tdi.aTags,		*m_mapListData.GetAddMapping(_T("TAGS")));
+		AnonymizeListItems(tdi.aAllocTo,	*m_mapSharedData.GetAddMapping(_T("ALLOCTO")));
+		AnonymizeListItems(tdi.aCategories,	*m_mapSharedData.GetAddMapping(_T("CATEGORY")));
+		AnonymizeListItems(tdi.aTags,		*m_mapSharedData.GetAddMapping(_T("TAGS")));
 		
-		AnonymizeListItem(tdi.sAllocBy,		*m_mapListData.GetAddMapping(_T("ALLOCBY")));
-		AnonymizeListItem(tdi.sStatus,		*m_mapListData.GetAddMapping(_T("STATUS")));
-		AnonymizeListItem(tdi.sVersion,		*m_mapListData.GetAddMapping(_T("VERSION")));
+		AnonymizeListItem(tdi.sAllocBy,		*m_mapSharedData.GetAddMapping(_T("ALLOCBY")));
+		AnonymizeListItem(tdi.sStatus,		*m_mapSharedData.GetAddMapping(_T("STATUS")));
+		AnonymizeListItem(tdi.sVersion,		*m_mapSharedData.GetAddMapping(_T("VERSION")));
 		
-		AnonymizeListItem(tdi.sExternalID,	*m_mapListData.GetAddMapping(_T("EXTERNALID")));
-		AnonymizeListItem(tdi.sCreatedBy,	*m_mapListData.GetAddMapping(_T("CREATEDBY")));
+		AnonymizeListItem(tdi.sExternalID,	*m_mapSharedData.GetAddMapping(_T("EXTERNALID")));
+		AnonymizeListItem(tdi.sCreatedBy,	*m_mapSharedData.GetAddMapping(_T("CREATEDBY")));
 		
 		VERIFY(tasks.SetTaskAllocatedTo(hTask, tdi.aAllocTo));
 		VERIFY(tasks.SetTaskCategories(hTask, tdi.aCategories));
@@ -154,6 +194,16 @@ void CTDCAnonymizeTasklist::AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask)
 		VERIFY(tasks.SetTaskVersion(hTask, tdi.sVersion));
 		VERIFY(tasks.SetTaskExternalID(hTask, tdi.sExternalID));
 		VERIFY(tasks.SetTaskCreatedBy(hTask, tdi.sCreatedBy));
+
+		if (tdi.HasCustomAttributeValues())
+		{
+			CTDCCustomAttributeDataMap mapRndData;
+			
+			AnonymizeCustomAttributeData(tdi.GetCustomAttributeValues(), mapRndData);
+			ASSERT(mapRndData.GetCount());
+
+			VERIFY(tasks.SetTaskCustomAttributeData(hTask, mapRndData));
+		}
 	}
 	
 	// Subtasks
@@ -164,6 +214,58 @@ void CTDCAnonymizeTasklist::AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask)
 		AnonymizeTask(tasks, hSubTask);
 		
 		hSubTask = tasks.GetNextTask(hSubTask);
+	}
+}
+
+void CTDCAnonymizeTasklist::AnonymizeCustomAttributeData(const CTDCCustomAttributeDataMap& mapCustomData,
+														CTDCCustomAttributeDataMap& mapRndData)
+{
+	CMapStringToString* pMapIDs = m_mapSharedData.GetAddMapping(_T("CUSTOMATTRIBID"));
+	POSITION pos = mapCustomData.GetStartPosition();
+
+	while (pos)
+	{
+		CString sCustID, sRndID;
+		TDCCADATA data;
+		mapCustomData.GetNextAssoc(pos, sCustID, data);
+
+		// Could possibly not be in the map
+		if (!pMapIDs->Lookup(sCustID, sRndID))
+		{
+			ASSERT(0);
+
+			sRndID = AnonymizeText(sCustID);
+			pMapIDs->SetAt(sCustID, sRndID);
+		}
+
+		int nDef = m_aAttribDefs.Find(sRndID);
+		ASSERT(nDef != -1);
+
+		if (nDef != -1)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& def = m_aAttribDefs[nDef];
+
+			// Anonymise list content
+			if (def.IsDataType(TDCCA_STRING) || def.IsDataType(TDCCA_FILELINK))
+			{
+				if (def.IsList())
+				{
+					CStringArray aListData;
+
+					if (data.AsArray(aListData))
+					{
+						AnonymizeListItems(aListData, *m_mapSharedData.GetAddMapping(sRndID));
+						data.Set(aListData);
+					}
+				}
+				else
+				{
+					data.Set(AnonymizeText(data.AsString()));
+				}
+			}
+		}
+
+		mapRndData[sRndID] = data;
 	}
 }
 

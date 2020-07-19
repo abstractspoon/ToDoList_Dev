@@ -141,6 +141,7 @@ public:
 	BOOL HasCustomAttributeValue(const CString& sAttribID) const;
 	BOOL GetCustomAttributeValue(const CString& sAttribID, TDCCADATA& data) const;
 	void SetCustomAttributeValue(const CString& sAttribID, const TDCCADATA& data);
+	BOOL HasCustomAttributeValues() const { return mapCustomData.GetCount(); }
 	const CTDCCustomAttributeDataMap& GetCustomAttributeValues() const { return mapCustomData; }
 	void SetCustomAttributeValues(const CTDCCustomAttributeDataMap& data) { mapCustomData.Copy(data); }
 

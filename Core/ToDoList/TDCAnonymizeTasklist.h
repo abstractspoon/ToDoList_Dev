@@ -12,6 +12,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "TaskFile.h"
+#include "TDCCustomAttributeDef.h"
 
 #include "..\Shared\mapex.h"
 
@@ -25,15 +26,19 @@ public:
 
 protected:
 	CString m_sContent;
-	CMapStringToStringMap m_mapListData;
+	CMapStringToStringMap m_mapSharedData;
+	CTDCCustomAttribDefinitionArray m_aAttribDefs;
 
 protected:
 	CTDCAnonymizeTasklist();
 
 	BOOL AnonymizeTasklist(CTaskFile& tasks);
+	void AnonymizeCustomAttributeDefs(CTaskFile& tasks);
 	void AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask);
 	void AnonymizeListItems(CStringArray& aItems, CMapStringToString& mapTLD);
 	void AnonymizeListItem(CString& sItem, CMapStringToString& mapTLD);
+	void AnonymizeCustomAttributeData(const CTDCCustomAttributeDataMap& mapCustomData,
+										CTDCCustomAttributeDataMap& mapRndData);
 	CString AnonymizeText(const CString& sItem);
 
 	BOOL BuildContent(const CTaskFile& tasks);
