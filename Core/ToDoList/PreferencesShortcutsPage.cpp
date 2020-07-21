@@ -7,6 +7,7 @@
 #include "todoctrl.h"
 #include "tdcstatic.h"
 #include "TDCMainMenu.h"
+#include "TDCFilter.h"
 
 #include "..\shared\winclasses.h"
 #include "..\shared\wclassdefines.h"
@@ -16,6 +17,7 @@
 #include "..\shared\misc.h"
 #include "..\shared\clipboard.h"
 #include "..\shared\themed.h"
+#include "..\shared\AcceleratorString.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -134,6 +136,7 @@ void CPreferencesShortcutsPage::OnFirstShow()
 
 		// add miscellaneous un-editable shortcuts
 		AddMiscShortcuts();
+		FixupDefaultFilterNames();
 
 		if (htiFirst)
 			m_tcCommands.EnsureVisible(htiFirst);
@@ -158,9 +161,7 @@ HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMen
 	pMenu->GetMenuString(nPos, sItem, MF_BYPOSITION);
 
 	// remove '&'
-	sItem.Replace(_T("&&"), _T("~~~"));
-	sItem.Replace(_T("&"), _T(""));
-	sItem.Replace(_T("~~~"), _T("&"));
+	CAcceleratorString::RemoveAccelerator(sItem);
 	
 	// remove everything after '\t'
 	int nTab = sItem.Find('\t');
@@ -244,6 +245,30 @@ void CPreferencesShortcutsPage::AddMiscShortcuts()
 	
 	// expand parent
 	m_tcCommands.Expand(htiParent, TVE_EXPAND);
+}
+
+void CPreferencesShortcutsPage::FixupDefaultFilterNames()
+{
+	// Replace default filters with their actual text
+	HTREEITEM hti = m_tcCommands.TCH().FindItem(ID_VIEW_ACTIVATEFILTER1);
+	ASSERT(hti);
+
+	const CStringArray& aFilters = CTDCFilter::GetDefaultFilterNames();
+	int nFilter;
+
+	for (nFilter = 0; nFilter < aFilters.GetSize(); nFilter++)
+	{
+		m_tcCommands.SetItemText(hti, aFilters[nFilter]);
+		hti = m_tcCommands.GetNextSiblingItem(hti);
+	}
+
+	// Delete all the rest
+	for (; nFilter < 24; nFilter++)
+	{
+		HTREEITEM htiNext = m_tcCommands.GetNextSiblingItem(hti);
+		m_tcCommands.DeleteItem(hti);
+		hti = htiNext;
+	}
 }
 
 void CPreferencesShortcutsPage::OnSelchangedShortcuts(NMHDR* pNMHDR, LRESULT* pResult) 

@@ -749,6 +749,8 @@ void CTDCMainMenu::PrepareFiltersActivationMenu(CMenu* pMenu, const CTDLFilterBa
 
 void CTDCMainMenu::AddFiltersToMenu(CMenu* pMenu, UINT nStart, UINT nEnd, const CStringArray& aFilters, UINT nPlaceholderStrID)
 {
+	ASSERT(aFilters.GetSize() || nPlaceholderStrID);
+
 	// Get the first item insertion point
 	int nStartPos = CEnMenu::FindMenuItem(*pMenu, nStart);
 	ASSERT(nStartPos >= 0);
