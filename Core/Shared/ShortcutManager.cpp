@@ -9,6 +9,7 @@
 #include "winclasses.h"
 #include "Misc.h"
 #include "enmenu.h"
+#include "AcceleratorString.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -453,11 +454,8 @@ int CShortcutManager::BuildMapping(const CMenu* pMenu, LPCTSTR szParentName,
 				CString sShortcut = GetShortcutText(dwShortcut), sItem;
 				sItem.Format(_T("%s%c%s"), sShortcut, cDelim, sItemText);
 
-				// remove single '&'
-				// rather painful way to do it to avoid replacing '&&'
-				sItem.Replace(_T("&&"), _T("~~"));
-				sItem.Remove('&');
-				sItem.Replace(_T("~~"), _T("&&"));
+				// remove '&'
+				CAcceleratorString::RemoveAccelerator(sItem);
 
 				aMapping.Add(sItem);
 			}

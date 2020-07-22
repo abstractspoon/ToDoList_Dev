@@ -78,7 +78,7 @@ protected:
 	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos);
 	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
 	void AddMiscShortcuts();
-	void FixupDefaultFilterNames();
+	void RemoveUnusedDefaultFilterItems();
 	BOOL CopyItem(HTREEITEM hti, CString& sOutput);
 
 	static BOOL IsMiscCommandID(UINT nCmdID);

@@ -8902,6 +8902,8 @@ void CToDoListWnd::OnImportTasklist()
 	
 	while (bShowDlg)
 	{
+		// Put the dialog instance inside the loop
+		// to make sure it's reinitialised properly
 		CTDLImportDialog dialog(m_mgrImportExport, GetToDoCtrl().IsReadOnly());
 
 		if (dialog.DoModal() == IDOK)

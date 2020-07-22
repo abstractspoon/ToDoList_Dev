@@ -78,7 +78,9 @@ BOOL CTDLKeyboardShortcutDisplayDlg::OnInitDialog()
 			m_lcShortcuts.SetItemText(nIndex, 1, sMenu);
 		}
 		else
+		{
 			m_lcShortcuts.InsertItem(nItem, _T(""));
+		}
 	}
 
 	m_lcShortcuts.SetColumnWidth(0, LVSCW_AUTOSIZE);
@@ -87,7 +89,6 @@ BOOL CTDLKeyboardShortcutDisplayDlg::OnInitDialog()
 	if (m_il.Create(1, 16, ILC_COLOR, 1, 1))
 		m_lcShortcuts.SetImageList(&m_il, LVSIL_SMALL);
 
-//	ListView_SetExtendedListViewStyleEx(m_lcShortcuts, LVS_EX_GRIDLINES, LVS_EX_GRIDLINES);
 	ListView_SetExtendedListViewStyleEx(m_lcShortcuts, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(m_lcShortcuts, LVS_EX_LABELTIP, LVS_EX_LABELTIP);
 	
