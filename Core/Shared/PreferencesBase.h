@@ -153,8 +153,6 @@ protected:
 	int GetActiveIndex() const { return m_ppHost.GetActiveIndex(); }
 	CPreferencesPageBase* GetActivePage() { return (CPreferencesPageBase*)m_ppHost.GetActivePage(); }
 	int FindPage(CPreferencesPageBase* pPage) { return m_ppHost.FindPage(pPage); }
-	
-	void ForwardMessage(UINT nMsg) { m_ppHost.ForwardMessage(nMsg); }
 };
 
 //{{AFX_INSERT_LOCATION}}

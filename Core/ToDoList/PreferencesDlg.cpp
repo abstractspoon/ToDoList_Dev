@@ -144,10 +144,10 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	CPreferencesDlgBase::AddPage(&m_pageTools);
 	CPreferencesDlgBase::AddPage(&m_pageShortcuts);
 
-	ForwardMessage(WM_PTP_TESTTOOL);
-	ForwardMessage(WM_PGP_CLEARMRU);
-	ForwardMessage(WM_PGP_EDITLANGFILE);
-	ForwardMessage(WM_PPB_CTRLCHANGE);
+	m_ppHost.ForwardMessage(WM_PTP_TESTTOOL);
+	m_ppHost.ForwardMessage(WM_PGP_CLEARMRU);
+	m_ppHost.ForwardMessage(WM_PGP_EDITLANGFILE);
+	m_ppHost.ForwardMessage(WM_PPB_CTRLCHANGE);
 	
 	LoadPreferences(m_prefs, PREFSKEY);
 }
