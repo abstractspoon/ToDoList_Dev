@@ -25,7 +25,7 @@ static char THIS_FILE[]=__FILE__;
 
 CTaskListTdlExporter::CTaskListTdlExporter()
 {
-
+	m_icon.Load(IDR_MAINFRAME_STD);
 }
 
 CTaskListTdlExporter::~CTaskListTdlExporter()

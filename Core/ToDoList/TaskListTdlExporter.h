@@ -12,6 +12,8 @@
 #include "tdcenum.h"
 #include "taskfile.h"
 
+#include "..\Shared\icon.h"
+
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IImportExport.h"
 
@@ -30,7 +32,7 @@ public:
     void Release() { delete this; }
 	void SetLocalizer(ITransText* /*pTT*/) {}
 	bool SupportsHtmlComments() const { return false; }
-	HICON GetIcon() const { return NULL; }
+	HICON GetIcon() const { return m_icon; }
 
 	LPCTSTR GetMenuText() const { return _T("ToDoList"); }
 	LPCTSTR GetFileFilter() const { return _T("Tasklists (*.tdl)|*.tdl||"); }
@@ -39,6 +41,9 @@ public:
 
 	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
 	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+
+protected:
+	CIcon m_icon;
 
 protected:
 	static void CreateReverseFileLinks(CTaskFile& tasks, HTASKITEM hTask, const CID2IDMap& mapIDs, const CString& sFileName, BOOL bAndSiblings);

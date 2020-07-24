@@ -327,13 +327,15 @@ BOOL CTDLWelcomePage3::OnSetActive()
 	return CPropertyPageEx::OnSetActive();
 }
 
-LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM wParam, LPARAM /*lParam*/)
+LRESULT CTDLWelcomePage3::OnGetFileIcon(WPARAM /*wParam*/, LPARAM lParam)
 {
-	ASSERT(wParam == IDC_SAMPLETASKLIST);
-	UNUSED(wParam);
+	if (FileMisc::HasExtension((LPCTSTR)lParam, _T("tdl")))
+	{
+		if (!m_iconTDL.IsValid())
+			m_iconTDL.Load(IDR_MAINFRAME_STD);
 
-	if (!m_icon.IsValid()) 
-		m_icon.Load(IDR_MAINFRAME_STD);
+		return (LRESULT)(HICON)m_iconTDL;
+	}
 
-	return (LRESULT)(HICON)m_icon;
+	return 0L;
 }

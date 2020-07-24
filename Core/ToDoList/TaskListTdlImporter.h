@@ -9,6 +9,8 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "..\Shared\icon.h"
+
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IImportExport.h"
 
@@ -31,9 +33,12 @@ public:
 	LPCTSTR GetFileFilter() const { return _T("Tasklists (*.tdl)|*.tdl||"); }
 	LPCTSTR GetFileExtension() const { return _T("tdl"); }
 	LPCTSTR GetTypeID() const { return TDLIMPORT_TYPEID; }
-	HICON GetIcon() const { return NULL; }
+	HICON GetIcon() const { return m_icon; }
 
 	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+
+protected:
+	CIcon m_icon;
 
 };
 

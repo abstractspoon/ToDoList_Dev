@@ -122,6 +122,9 @@ const COLORREF MAGENTA = RGB(255, 0, 255);
 const LPCTSTR SETTINGS_KEY	= _T("Settings");
 const LPCTSTR PREF_KEY		= _T("Preferences");
 const LPCTSTR ENDL			= _T("\n");
+const LPCTSTR TDL_EXT		= _T("tdl");
+
+static CEnString TDL_FILEFILTER;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -215,6 +218,8 @@ CToDoListWnd::CToDoListWnd()
 	m_nContextMenuID(0),
 	m_bFirstEraseBkgnd(TRUE)
 {
+	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
+	
 	// must do this before initializing any controls
 	SetupUIStrings();
 	
@@ -1928,10 +1933,10 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 
 					// use 'friendly' name as user for user
 					CFileSaveDialog dialog(IDS_SAVETASKLIST_TITLE, 
-											GetDefaultFileExt(FALSE), 
+											TDL_FILEFILTER, 
 											m_mgrToDoCtrls.GetFileName(nTDC, FALSE), 
 											EOFN_DEFAULTSAVE, 
-											GetFileFilter(FALSE), 
+											TDL_EXT, 
 											this);
 					
 					dialog.m_ofn.nFilterIndex = 1; // .tdl
@@ -2076,48 +2081,6 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	return pExport;
 }
 
-BOOL CToDoListWnd::WantTDLExtensionSupport(BOOL bForLoading) const
-{
-	if (bForLoading)
-		return TRUE; // always
-
-	// Save
-	if (Prefs().GetEnableTDLExtension())
-		return TRUE;
-
-	// else
-	if 	(CFileRegister::IsRegisteredApp(_T("tdl"), _T("TODOLIST.EXE"), TRUE))
-		return TRUE;
-
-	return FALSE;
-}
-
-LPCTSTR CToDoListWnd::GetFileFilter(BOOL bForLoading) const
-{
-	if (WantTDLExtensionSupport(bForLoading))
-	{
-		static CEnString TDLFILEFILTER(IDS_TDLFILEFILTER);
-		return TDLFILEFILTER;
-	}
-	
-	// else
-	static CEnString XMLFILEFILTER(IDS_XMLFILEFILTER);
-	return XMLFILEFILTER;
-}
-
-LPCTSTR CToDoListWnd::GetDefaultFileExt(BOOL bForLoading) const
-{
-	if (WantTDLExtensionSupport(bForLoading))
-	{
-		static LPCTSTR TDLEXT = _T("tdl");
-		return TDLEXT;
-	}
-
-	// else
-	static LPCTSTR XMLEXT = _T("xml");
-	return XMLEXT;
-}
-
 void CToDoListWnd::UpdateStatusbar()
 {
 	if (!m_sbProgress.IsActive() && GetTDCCount())
@@ -2145,10 +2108,10 @@ void CToDoListWnd::OnLoad()
 
 	CPreferences prefs;
 	CFileOpenDialog dialog(IDS_OPENTASKLIST_TITLE, 
-							GetDefaultFileExt(TRUE), 
+						   TDL_FILEFILTER, 
 							NULL, 
 							EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT,
-							GetFileFilter(TRUE), 
+							TDL_EXT, 
 							this);
 	
 	const UINT BUFSIZE = 1024 * 5;
@@ -3796,8 +3759,8 @@ void CToDoListWnd::OnSaveas()
 	{
 		CTDLTasklistSaveAsDlg dialog(sCurFilePath, 
 									 sCurProjName,
-									 GetFileFilter(FALSE),
-									 GetDefaultFileExt(FALSE));
+									 TDL_FILEFILTER,
+									 TDL_EXT);
 
 		if (IDOK != dialog.DoModal())
 			return;
@@ -3809,13 +3772,13 @@ void CToDoListWnd::OnSaveas()
 	else // simple file dialog
 	{
 		sNewFilePath = m_mgrToDoCtrls.GetFilePath(nSel, FALSE);
-		FileMisc::ReplaceExtension(sNewFilePath, GetDefaultFileExt(FALSE));
+		FileMisc::ReplaceExtension(sNewFilePath, TDL_EXT);
 	
 		CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
-							   GetDefaultFileExt(FALSE),
+							   TDL_EXT,
 							   sNewFilePath,
 							   EOFN_DEFAULTSAVE,
-							   GetFileFilter(FALSE),
+							   TDL_FILEFILTER,
 							   this);
 	
 		// always use .tdl for initializing the file dialog
@@ -6537,6 +6500,10 @@ int CToDoListWnd::AddToDoCtrl(CFilteredToDoCtrl* pTDC, TSM_TASKLISTINFO* pInfo)
 		pTDC->ShowWindow(SW_HIDE);
 	}
 
+	// Show the tab-bar as required
+	if (WantTasklistTabbarVisible() && !m_tabCtrl.IsWindowVisible())
+		Resize();
+
 	return nSel;
 }
 
@@ -7356,7 +7323,7 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 		sTDCFile = CEnString(IDS_TDC_UNTITLEDFILE);
 		Misc::Trim(sTDCFile);
 
-		sTDCExt = GetDefaultFileExt(FALSE);
+		sTDCExt = TDL_EXT;
 	}
 
 	CString sTempPath = FileMisc::GetTempFilePath(sTDCFile, sTDCExt);

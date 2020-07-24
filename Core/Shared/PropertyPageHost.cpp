@@ -419,10 +419,7 @@ LRESULT CPropertyPageHost::WindowProc(UINT message, WPARAM wParam, LPARAM lParam
 		while (nMsg--)
 		{
 			if (m_aForwardMsgs[nMsg] == message)
-			{
-				GetParent()->SendMessage(message, wParam, lParam);
-				return 0L;
-			}
+				return GetParent()->SendMessage(message, wParam, lParam);
 		}
 	}
 

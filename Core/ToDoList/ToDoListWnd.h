@@ -647,9 +647,6 @@ protected:
 	void SetTimer(UINT nTimerID, BOOL bOn);
 	void RefreshTabOrder();
 	void UpdateGlobalHotkey();
-	LPCTSTR GetFileFilter(BOOL bLoad) const;
-	LPCTSTR GetDefaultFileExt(BOOL bLoad) const;
-	BOOL WantTDLExtensionSupport(BOOL bLoad) const;
 	void UpdateCwd();
 	BOOL WantTasklistTabbarVisible() const;
 	void UpdateAeroFeatures();

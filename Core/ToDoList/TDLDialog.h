@@ -10,6 +10,7 @@
 #include "..\shared\winhelpbutton.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\SizeGrip.h"
+#include "..\shared\Icon.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLDialog dialog
@@ -23,6 +24,8 @@ protected:
 protected:
 	CWinHelpButton m_btnHelp;
 	CSizeGrip m_sbGrip;
+
+	static CIcon s_iconTDL;
 
 	CSize m_sizeOrg, m_sizePrev;
 	CString m_sPrefsKey;
@@ -42,6 +45,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
+	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 protected:

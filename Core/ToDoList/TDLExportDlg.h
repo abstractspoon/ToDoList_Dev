@@ -57,22 +57,23 @@ protected:
 	// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CExportDlg)
+	//}}AFX_VIRTUAL
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-														//}}AFX_VIRTUAL
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 
 	// Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CExportDlg)
-	virtual BOOL OnInitDialog();
 	afx_msg void OnSelchangeFormatoptions();
 	afx_msg void OnSelchangeTasklistoptions();
 	afx_msg void OnExportonefile();
 	afx_msg void OnChangeExportpath();
 	afx_msg void OnExportToClipboardOrPath();
 	//}}AFX_MSG
+	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 	void EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt = TRUE) const;

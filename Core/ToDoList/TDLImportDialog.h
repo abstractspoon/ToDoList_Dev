@@ -71,11 +71,11 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLImportDialog)
-	protected:
+protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
-
 	virtual void OnRepositionControls(int dx, int dy);
 
 // Implementation
@@ -84,7 +84,6 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CTDLImportDialog)
 	afx_msg void OnChangeImportFrom();
-	virtual BOOL OnInitDialog();
 	afx_msg void OnSelchangeFormatoptions();
 	afx_msg void OnChangeClipboardtext();
 	afx_msg void OnChangeFilepath();

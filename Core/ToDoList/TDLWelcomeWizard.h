@@ -45,17 +45,16 @@ protected:
 // Overrides
 	// ClassWizard generate virtual function overrides
 	//{{AFX_VIRTUAL(CWelcomePage1)
-	public:
+protected:
 	virtual BOOL OnSetActive();
-	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CWelcomePage1)
-	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -130,7 +129,7 @@ protected:
 	int		m_bViewSample;
 	//}}AFX_DATA
 	HFONT m_hFont;
-	CIcon m_icon;
+	CIcon m_iconTDL;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

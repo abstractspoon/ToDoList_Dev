@@ -5,6 +5,9 @@
 #include "resource.h"
 #include "TDLDialog.h"
 
+#include "..\shared\FileMisc.h"
+#include "..\shared\FileEdit.h"
+
 #include "..\Interfaces\Preferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -18,6 +21,9 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLDialog dialog
 
+CIcon CTDLDialog::s_iconTDL;
+
+/////////////////////////////////////////////////////////////////////////////
 
 CTDLDialog::CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey, CWnd* pParent)
 	: 
@@ -31,7 +37,6 @@ CTDLDialog::CTDLDialog(UINT nIDTemplate, LPCTSTR szPrefsKey, CWnd* pParent)
 	//}}AFX_DATA_INIT
 }
 
-
 void CTDLDialog::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
@@ -40,7 +45,6 @@ void CTDLDialog::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-
 BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
 	//{{AFX_MSG_MAP(CTDLDialog)
 	ON_WM_SIZE()
@@ -48,6 +52,7 @@ BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
 	ON_WM_HELPINFO()
 	ON_WM_GETMINMAXINFO()
 	ON_WM_DESTROY()
+	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -158,3 +163,15 @@ void CTDLDialog::OnGetMinMaxInfo(MINMAXINFO* lpMMI)
 	}
 }
 
+LRESULT CTDLDialog::OnGetFileIcon(WPARAM /*wParam*/, LPARAM lParam)
+{
+	if (FileMisc::HasExtension((LPCTSTR)lParam, _T("tdl")))
+	{
+		if (!s_iconTDL.IsValid())
+			s_iconTDL.Load(IDR_MAINFRAME_STD);
+
+		return (LRESULT)(HICON)s_iconTDL;
+	}
+
+	return 0L;
+}

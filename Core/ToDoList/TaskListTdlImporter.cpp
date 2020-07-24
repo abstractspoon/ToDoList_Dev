@@ -19,7 +19,7 @@ static char THIS_FILE[]=__FILE__;
 
 CTaskListTdlImporter::CTaskListTdlImporter()
 {
-
+	m_icon.Load(IDR_MAINFRAME_STD);
 }
 
 CTaskListTdlImporter::~CTaskListTdlImporter()
