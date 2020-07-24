@@ -2664,16 +2664,24 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 
 void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 {
-	if (!HasVScrollBar())
-		return;
-
 	int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
 	BOOL bUp = (zDelta > 0);
 
 	int nNumClicks = abs(zDelta / 120);
 	WORD wKeys = LOWORD(wp);
 
-	if (!nNumClicks || wKeys || !CanScroll(hWnd, SB_VERT, bUp))
+	if (!nNumClicks || wKeys)
+		return;
+
+	if (!HasVScrollBar())
+	{
+		if (HasHScrollBar(hWnd) && CanScroll(hWnd, SB_HORZ, bUp))
+			ScDefault(hWnd);
+
+		return;
+	}
+
+	if (!CanScroll(hWnd, SB_VERT, bUp))
 		return;
 
 	HWND hwndTree = GetTree();
