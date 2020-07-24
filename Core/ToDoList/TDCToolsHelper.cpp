@@ -385,26 +385,23 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 	CSize sizeBtn(toolbar.GetToolBarCtrl().GetButtonSize());
 	sizeBtn -= CSize(7, 7); // btn borders from BarTool.cpp
 
-	// start adding after the pref button
 	CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
+
+	// work out where to start adding
 	int nStartPos = toolbar.CommandToIndex(nCmdAfter) + 1;
-
-	// Make sure we start after a separator
-	if (!toolbar.IsItemSeparator(nStartPos))
-		toolbar.InsertSeparator(nStartPos);
-
-	nStartPos++;
-
-	int nAdded = 0, nBtnsAdded = 0;
-
-	for (int nItem = 0; nItem < nNumItems; nItem++)
+	
+	for (int nItem = 0, nAdded = 0; nItem < nNumItems; nItem++)
 	{
 		const int nTool = aIndices[nItem];
+		int nPos = (nStartPos + nAdded);
 
 		if (nTool == -1)
 		{
-			if (toolbar.InsertSeparator(nStartPos + nAdded))
-				nAdded++;
+			// Prevent duplicate separators
+			if (!toolbar.IsItemSeparator(nPos - 1) && toolbar.InsertSeparator(nPos))
+			{
+				nPos++;
+			}
 		}
 		else
 		{
@@ -416,10 +413,9 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 
 				TBBUTTON tbb = { nImage, (nTool + (int)FIRST_TOOLID), 0, TBSTYLE_BUTTON, 0, 0, (UINT)-1 };
 
-				if (toolbar.GetToolBarCtrl().InsertButton(nStartPos + nAdded, &tbb))
+				if (toolbar.GetToolBarCtrl().InsertButton(nPos, &tbb))
 				{
-					nAdded++;
-					nBtnsAdded++;
+					nPos++;
 				}
 				else
 				{
@@ -428,6 +424,8 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 			}
 		}
 	}
+
+	toolbar.RemoveDuplicateSeparators(nStartPos);
 }
 
 void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped)

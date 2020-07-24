@@ -684,6 +684,7 @@ BOOL CEnToolBar::InsertSeparator(int nPos)
 	}
 	else if ((nPos < 0) || (nPos > GetToolBarCtrl().GetButtonCount()))
 	{
+		ASSERT(0);
 		return FALSE;
 	}
 
