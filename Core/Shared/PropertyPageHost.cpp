@@ -18,17 +18,65 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
-// CPropertyPageHost
+// CForwardMsgPropertyPage
 
-IMPLEMENT_DYNAMIC(CCmdNotifyPropertyPage, CPropertyPage)
+IMPLEMENT_DYNAMIC(CForwardMsgPropertyPage, CPropertyPage)
 
-CCmdNotifyPropertyPage::CCmdNotifyPropertyPage(UINT nIDTemplate, UINT nIDCaption)
+CForwardMsgPropertyPage::CForwardMsgPropertyPage(UINT nIDTemplate, UINT nIDCaption)
 	: CPropertyPage(nIDTemplate, nIDCaption)
 {
 }
 
-CCmdNotifyPropertyPage::CCmdNotifyPropertyPage(LPCTSTR lpszTemplateName, UINT nIDCaption)
+CForwardMsgPropertyPage::CForwardMsgPropertyPage(LPCTSTR lpszTemplateName, UINT nIDCaption)
 	: CPropertyPage(lpszTemplateName, nIDCaption)
+{
+}
+
+CForwardMsgPropertyPage::~CForwardMsgPropertyPage()
+{
+}
+
+void CForwardMsgPropertyPage::ForwardMessage(UINT message)
+{
+	ASSERT(message);
+	ASSERT(!m_mapForwardMsgs.Has(message));
+
+	m_mapForwardMsgs.Add(message);
+}
+
+LRESULT CForwardMsgPropertyPage::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+{
+	// let page handle it first
+	LRESULT lRes = CWnd::WindowProc(message, wParam, lParam);
+
+	// then notify parent
+	if (m_mapForwardMsgs.Has(message) && VerifyMessageArguments(message, wParam, lParam))
+	{
+		lRes = GetParent()->SendMessage(message, wParam, lParam);
+	}
+
+	return lRes;
+}
+
+BOOL CForwardMsgPropertyPage::VerifyMessageArguments(UINT message, WPARAM wParam, LPARAM lParam) const
+{
+	return TRUE;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// CCmdNotifyPropertyPage
+
+IMPLEMENT_DYNAMIC(CCmdNotifyPropertyPage, CForwardMsgPropertyPage)
+
+CCmdNotifyPropertyPage::CCmdNotifyPropertyPage(UINT nIDTemplate, UINT nIDCaption)
+	: CForwardMsgPropertyPage(nIDTemplate, nIDCaption)
+{
+	ForwardMessage(WM_COMMAND);
+	ForwardMessage(WM_NOTIFY);
+}
+
+CCmdNotifyPropertyPage::CCmdNotifyPropertyPage(LPCTSTR lpszTemplateName, UINT nIDCaption)
+	: CForwardMsgPropertyPage(lpszTemplateName, nIDCaption)
 {
 }
 
@@ -36,18 +84,15 @@ CCmdNotifyPropertyPage::~CCmdNotifyPropertyPage()
 {
 }
 
-LRESULT CCmdNotifyPropertyPage::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
+BOOL CCmdNotifyPropertyPage::VerifyMessageArguments(UINT message, WPARAM wParam, LPARAM lParam) const
 {
-	// let page handle it first
-	LRESULT lRes = CWnd::WindowProc(message, wParam, lParam);
-
-	// then notify parent
-	if (((message == WM_COMMAND) && lParam) || (message == WM_NOTIFY)) 
+	switch (message)
 	{
-		GetParent()->SendMessage(message, wParam, lParam);
+	case WM_COMMAND:
+		return (lParam != 0); // DlgCtrlID
 	}
 
-	return lRes;
+	return CForwardMsgPropertyPage::VerifyMessageArguments(message, wParam, lParam);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -118,6 +163,14 @@ BOOL CPropertyPageHost::Create(LPRECT lpRect, CWnd* pParent, UINT uCtrlID)
 
 	// create the first page
 	return SetActivePage(0);
+}
+
+void CPropertyPageHost::ForwardMessage(UINT message)
+{
+	ASSERT(message);
+	ASSERT(!m_mapForwardMsgs.Has(message));
+
+	m_mapForwardMsgs.Add(message);
 }
 
 int CPropertyPageHost::GetActiveIndex() const
@@ -412,16 +465,8 @@ BOOL CPropertyPageHost::OnCommand(WPARAM wp, LPARAM lp)
 
 LRESULT CPropertyPageHost::WindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 {
-	if (m_aForwardMsgs.GetSize())// is a message for be forwarded
-	{
-		int nMsg = m_aForwardMsgs.GetSize();
-		
-		while (nMsg--)
-		{
-			if (m_aForwardMsgs[nMsg] == message)
-				return GetParent()->SendMessage(message, wParam, lParam);
-		}
-	}
+	if (m_mapForwardMsgs.Has(message))
+		return GetParent()->SendMessage(message, wParam, lParam);
 
 	return CWnd::WindowProc(message, wParam, lParam);
 }

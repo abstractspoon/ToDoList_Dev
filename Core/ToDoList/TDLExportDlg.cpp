@@ -57,6 +57,7 @@ CTDLExportDlg::CTDLExportDlg(LPCTSTR szTitle,
 	m_ppHost.AddPage(&m_pageTo, CEnString(IDS_EXPORTDLG_EXPORT));
 	m_ppHost.AddPage(&m_pageTaskSel, CEnString(IDS_EXPORTDLG_TASKSEL));
 
+	m_pageTo.ForwardMessage(WM_FE_GETFILEICON);
 	m_ppHost.ForwardMessage(WM_FE_GETFILEICON);
 }
 
@@ -431,7 +432,6 @@ BEGIN_MESSAGE_MAP(CTDLExportToPage, CCmdNotifyPropertyPage)
 	ON_BN_CLICKED(IDC_TOPATH, OnExportToClipboardOrPath)
 	ON_BN_CLICKED(IDC_TOCLIPBOARD, OnExportToClipboardOrPath)
 	//}}AFX_MSG_MAP
-	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -673,9 +673,4 @@ CString CTDLExportToPage::GetExportPath() const
 
 	// else
 	return _T("");
-}
-
-LRESULT CTDLExportToPage::OnGetFileIcon(WPARAM wParam, LPARAM lParam)
-{
-	return GetParent()->SendMessage(WM_FE_GETFILEICON, wParam, lParam);
 }

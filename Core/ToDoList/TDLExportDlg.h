@@ -73,7 +73,6 @@ protected:
 	afx_msg void OnChangeExportpath();
 	afx_msg void OnExportToClipboardOrPath();
 	//}}AFX_MSG
-	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
 
 	void EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt = TRUE) const;

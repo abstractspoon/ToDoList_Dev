@@ -220,7 +220,7 @@ public:
 	int CopyTo(CDWordArray& other) const { return CSet<DWORD>::CopyTo(other); }
 };
 
-class CUintSet : public CSet<UINT>
+class CUIntSet : public CSet<UINT>
 {
 public:
 	int CopyFrom(const CUIntArray& other) {	return CSet<UINT>::CopyFrom(other); }

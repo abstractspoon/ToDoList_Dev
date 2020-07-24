@@ -7,24 +7,36 @@
 // PropertyPageHost.h : header file
 //
 
+#include "mapex.h"
+
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct PAGEITEM
+class CForwardMsgPropertyPage : public CPropertyPage
 {
-	PAGEITEM(CPropertyPage* _pPage = NULL, LPCTSTR szTitle = NULL, DWORD dwData = 0) : 
-			pPage(_pPage), sTitle(szTitle), dwItemData(dwData) {}
+	DECLARE_DYNAMIC(CForwardMsgPropertyPage)
 
-	CPropertyPage* pPage;
-	CString sTitle;
-	DWORD dwItemData;
-	CSize sizeOrg;
+	// Construction
+public:
+	CForwardMsgPropertyPage(UINT nIDTemplate, UINT nIDCaption = 0);
+	CForwardMsgPropertyPage(LPCTSTR lpszTemplateName, UINT nIDCaption = 0);
+
+	virtual ~CForwardMsgPropertyPage();
+
+	void ForwardMessage(UINT message);
+
+protected:
+	CUIntSet m_mapForwardMsgs;
+
+protected:
+	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	virtual BOOL VerifyMessageArguments(UINT message, WPARAM wParam, LPARAM lParam) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CCmdNotifyPropertyPage : public CPropertyPage
+class CCmdNotifyPropertyPage : public CForwardMsgPropertyPage
 {
 	DECLARE_DYNAMIC(CCmdNotifyPropertyPage)
 
@@ -36,7 +48,7 @@ public:
 	virtual ~CCmdNotifyPropertyPage();
 
 protected:
-	virtual LRESULT WindowProc(UINT message, WPARAM wParam, LPARAM lParam);
+	BOOL VerifyMessageArguments(UINT message, WPARAM wParam, LPARAM lParam) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -82,12 +94,25 @@ public:
 	BOOL EnsurePageCreated(const CPropertyPage* pPage);
 	BOOL IsPageCreated(int nIndex) const;
 
-	void ForwardMessage(UINT nMsg) { m_aForwardMsgs.Add(nMsg); }
+	void ForwardMessage(UINT message);
 
 protected:
+	struct PAGEITEM
+	{
+		PAGEITEM(CPropertyPage* _pPage = NULL, LPCTSTR szTitle = NULL, DWORD dwData = 0) :
+			pPage(_pPage), sTitle(szTitle), dwItemData(dwData)
+		{
+		}
+
+		CPropertyPage* pPage;
+		CString sTitle;
+		DWORD dwItemData;
+		CSize sizeOrg;
+	};
+
 	CArray<PAGEITEM, PAGEITEM&> m_aPages;
 	int m_nSelIndex;
-	CUIntArray m_aForwardMsgs;
+	CUIntSet m_mapForwardMsgs;
 	BOOL m_bCmdNotifyParent;
 
 // Overrides
