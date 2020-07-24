@@ -984,6 +984,11 @@ BOOL CXmlFile::Load(const CString& sFilePath, const CString& sRootItemName, IXml
 
 BOOL CXmlFile::Save(const CString& sFilePath, SFE_FORMAT nFormat)
 {
+	///////////////////////////////////////////////////////////////////////
+	// PERMANENT LOGGING
+	CScopedLogTimer log(_T("CXmlFile::Save(%s)"), FileMisc::GetFileNameFromPath(sFilePath));
+	///////////////////////////////////////////////////////////////////////
+
 	if (sFilePath.IsEmpty())
 		return FALSE;
 	

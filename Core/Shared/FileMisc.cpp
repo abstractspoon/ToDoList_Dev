@@ -1067,6 +1067,7 @@ BOOL FileMisc::CopyFile(LPCTSTR szSrcPath, LPCTSTR szDestPath, BOOL bOverwrite, 
 	if (bNewer && (GetFileLastModified(szSrcPath) <= GetFileLastModified(szDestPath)))
 		return TRUE;
 
+	DWORD dwTick = GetTickCount();
 	BOOL bCopied = ::CopyFile(szSrcPath, szDestPath, TRUE);
 
 	if (!bCopied && FileExists(szDestPath))
@@ -1086,7 +1087,7 @@ BOOL FileMisc::CopyFile(LPCTSTR szSrcPath, LPCTSTR szDestPath, BOOL bOverwrite, 
 	}
 
 	if (bCopied)
-		LogText(_T("FileMisc::CopyFile(%s -> %s)"), szSrcPath, szDestPath);
+		LogText(_T("FileMisc::CopyFile(%s -> %s) took %ld ms"), szSrcPath, szDestPath, (GetTickCount() - dwTick));
 	else
 		LogText(_T("FileMisc::CopyFile(%s -> %s) FAILED! (%ld)"), szSrcPath, szDestPath, ::GetLastError());
 
@@ -1095,6 +1096,7 @@ BOOL FileMisc::CopyFile(LPCTSTR szSrcPath, LPCTSTR szDestPath, BOOL bOverwrite, 
 
 BOOL FileMisc::MoveFile(LPCTSTR szSrcPath, LPCTSTR szDestPath, BOOL bOverwrite, BOOL bHiddenReadOnly)
 {
+	DWORD dwTick = GetTickCount();
 	BOOL bMoved = ::MoveFile(szSrcPath, szDestPath);
 
 	if (!bMoved && bOverwrite && FileExists(szDestPath))
@@ -1107,7 +1109,7 @@ BOOL FileMisc::MoveFile(LPCTSTR szSrcPath, LPCTSTR szDestPath, BOOL bOverwrite, 
 	}
 	
 	if (bMoved)
-		LogText(_T("FileMisc::MoveFile(%s -> %s)"), szSrcPath, szDestPath);
+		LogText(_T("FileMisc::MoveFile(%s -> %s) took %ld ms"), szSrcPath, szDestPath, (GetTickCount() - dwTick));
 	else
 		LogText(_T("FileMisc::MoveFile(%s -> %s) FAILED! (%ld)"), szSrcPath, szDestPath, ::GetLastError());
 

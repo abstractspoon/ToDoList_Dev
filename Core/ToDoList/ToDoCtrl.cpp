@@ -5882,7 +5882,9 @@ TDC_FILE CToDoCtrl::SaveTaskfile(CTaskFile& tasks, const CString& sSavePath)
 {
 	// PERMANENT LOGGING //////////////////////////////////////////////
 	CScopedLogTimer log(_T("CToDoCtrl::SaveTaskfile(%s)"), FileMisc::GetFileNameFromPath(sSavePath));
+	log.LogStart();
 	///////////////////////////////////////////////////////////////////
+
 	CWaitCursor cursor;
 
 	// Always backup before overwriting
