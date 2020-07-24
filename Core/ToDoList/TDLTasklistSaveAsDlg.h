@@ -20,8 +20,8 @@ class CTDLTasklistSaveAsDlg : public CTDLDialog
 public:
 	CTDLTasklistSaveAsDlg(LPCTSTR szFilePath, 
 						  LPCTSTR szProjectName, 
-						  LPCTSTR szFileFilter,
 						  LPCTSTR szDefaultFileExt,
+						  LPCTSTR szFileFilter,
 						  CWnd* pParent = NULL);   // standard constructor
 
 	CString GetFilePath() const { return m_sFilePath; }

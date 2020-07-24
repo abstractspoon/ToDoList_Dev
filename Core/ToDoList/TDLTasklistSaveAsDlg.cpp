@@ -17,8 +17,9 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLTasklistSaveAsDlg::CTDLTasklistSaveAsDlg(LPCTSTR szFilePath,
 											 LPCTSTR szProjectName,
+											 LPCTSTR szDefaultFileExt,
 											 LPCTSTR szFileFilter,
-											 LPCTSTR szDefaultFileExt, CWnd* pParent /*=NULL*/)
+											 CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TASKLISTSAVEAS_DIALOG, _T("SaveAs"), pParent),
 	m_sFilePath(szFilePath),

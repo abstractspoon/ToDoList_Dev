@@ -123,6 +123,7 @@ const LPCTSTR SETTINGS_KEY	= _T("Settings");
 const LPCTSTR PREF_KEY		= _T("Preferences");
 const LPCTSTR ENDL			= _T("\n");
 const LPCTSTR TDL_EXT		= _T("tdl");
+const LPCTSTR XML_EXT		= _T("xml");
 
 static CEnString TDL_FILEFILTER;
 
@@ -1933,10 +1934,10 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 
 					// use 'friendly' name as user for user
 					CFileSaveDialog dialog(IDS_SAVETASKLIST_TITLE, 
-											TDL_FILEFILTER, 
+											TDL_EXT, 
 											m_mgrToDoCtrls.GetFileName(nTDC, FALSE), 
 											EOFN_DEFAULTSAVE, 
-											TDL_EXT, 
+											TDL_FILEFILTER, 
 											this);
 					
 					dialog.m_ofn.nFilterIndex = 1; // .tdl
@@ -2107,11 +2108,11 @@ void CToDoListWnd::OnLoad()
 	ASSERT(IsWindowVisible());
 
 	CPreferences prefs;
-	CFileOpenDialog dialog(IDS_OPENTASKLIST_TITLE, 
-						   TDL_FILEFILTER, 
-							NULL, 
+	CFileOpenDialog dialog(IDS_OPENTASKLIST_TITLE,
+							TDL_EXT,
+							NULL,
 							EOFN_DEFAULTOPEN | OFN_ALLOWMULTISELECT,
-							TDL_EXT, 
+							TDL_FILEFILTER,
 							this);
 	
 	const UINT BUFSIZE = 1024 * 5;
@@ -3759,8 +3760,8 @@ void CToDoListWnd::OnSaveas()
 	{
 		CTDLTasklistSaveAsDlg dialog(sCurFilePath, 
 									 sCurProjName,
-									 TDL_FILEFILTER,
-									 TDL_EXT);
+									 TDL_EXT,
+									 TDL_FILEFILTER);
 
 		if (IDOK != dialog.DoModal())
 			return;
