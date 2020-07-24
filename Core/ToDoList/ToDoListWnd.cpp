@@ -3772,7 +3772,12 @@ void CToDoListWnd::OnSaveas()
 	else // simple file dialog
 	{
 		sNewFilePath = m_mgrToDoCtrls.GetFilePath(nSel, FALSE);
-		FileMisc::ReplaceExtension(sNewFilePath, TDL_EXT);
+
+		// Preserve existing file extension
+		if (FileMisc::HasExtension(tdc.GetFilePath(), XML_EXT))
+			FileMisc::ReplaceExtension(sNewFilePath, XML_EXT);
+		else
+			FileMisc::ReplaceExtension(sNewFilePath, TDL_EXT);
 	
 		CFileSaveDialog dialog(IDS_SAVETASKLISTAS_TITLE,
 							   TDL_EXT,
