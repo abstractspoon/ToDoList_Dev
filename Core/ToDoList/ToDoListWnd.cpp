@@ -2363,7 +2363,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	RestoreVisibility();
 	
 	// load last open tasklists
-	CAutoFlag af(m_bReloading, TRUE);
 	CPreferences prefs;
 
 	// initialize Progress first time
@@ -2403,7 +2402,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	// load last files
 	if (bReloadTasklists)
 	{
-		UpdateWindow();
+		CAutoFlag af(m_bReloading, TRUE);
 
 		// get the last active tasklist
 		CString sLastActiveFile = prefs.GetProfileString(SETTINGS_KEY, _T("LastActiveFile"));
@@ -2471,9 +2470,10 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 			else
 				CheckRemovePristineTasklist();
 		}
-
-		Resize();
 	}
+
+	Resize();
+	UpdateWindow();
 
 	// if there's only one tasklist open and it's pristine then it's
 	// the original one so add a sample task unless 'empty' flag is set
@@ -6276,6 +6276,9 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 
 BOOL CToDoListWnd::WantTasklistTabbarVisible() const 
 { 
+	if (m_bReloading)
+		return FALSE;
+
 	if (!m_bShowTasklistBar)
 		return FALSE;
 
