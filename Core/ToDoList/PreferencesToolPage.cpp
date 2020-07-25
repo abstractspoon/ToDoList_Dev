@@ -464,9 +464,9 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 		if (sIconPath.IsEmpty())
 		{
 			CString sToolPath = m_lcTools.GetItemText(nTool, 1);
+			CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE);
 
-			if (CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE))
-				lvi.iImage = CFileIcons::GetIndex(sToolPath);	
+			lvi.iImage = CFileIcons::GetIndex(sToolPath);	
 		}
 		else
 		{
