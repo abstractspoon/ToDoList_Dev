@@ -22,6 +22,8 @@ static char THIS_FILE[]=__FILE__;
 
 static CUIThemeFile UNSET_THEME;
 
+const COLORREF DEF_TODAY_COLOR = RGB(255, 145, 0);
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -204,7 +206,7 @@ void CUIThemeFile::Reset()
 	crStatusBarLight	= GetSysColor(COLOR_3DFACE);
 	crStatusBarText		= GetSysColor(COLOR_WINDOWTEXT);
 
-	crToday				= 255; // Red
+	crToday				= DEF_TODAY_COLOR;
 	crWeekend			= GetColor(crAppBackDark, 0.8f);
 	crNonWorkingHours	= GetColor(crAppBackDark, 0.85f); // smidgen lighter
 }

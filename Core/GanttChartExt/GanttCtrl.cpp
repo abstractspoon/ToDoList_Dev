@@ -4173,7 +4173,8 @@ BOOL CGanttCtrl::DrawToday(CDC* pDC, const CRect& rMonth, int nMonth, int nYear,
 	if (bSelected)
 		rToday.DeflateRect(0, 1);
 
-	GraphicsMisc::DrawRect(pDC, rToday, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
+	BYTE cFillOpacity = (rToday.Width() > 1 ? 128 : 255);
+	GraphicsMisc::DrawRect(pDC, rToday, m_crToday, CLR_NONE, 0, GMDR_NONE, cFillOpacity);
 
 	return TRUE;
 }
