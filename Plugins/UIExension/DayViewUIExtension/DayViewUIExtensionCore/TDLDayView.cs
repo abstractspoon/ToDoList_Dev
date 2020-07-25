@@ -389,6 +389,9 @@ namespace DayViewUIExtension
 			{
 				foreach (var appt in appointments)
 				{
+					if (!IsItemWithinRange(appt as CalendarItem, StartDate, EndDate))
+						break;
+					
 					if (EnsureVisible(appt, false))
 						break;
 				}
@@ -925,7 +928,7 @@ namespace DayViewUIExtension
 			}
 
 			if (sorted)
-				appts.Sort((a, b) => (int)(a.StartDate.Ticks - b.StartDate.Ticks));
+				appts.Sort((a, b) => (int)(b.StartDate.Ticks - a.StartDate.Ticks));
 
 			return appts;
 		}
