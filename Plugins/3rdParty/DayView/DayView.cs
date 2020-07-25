@@ -460,6 +460,11 @@ namespace Calendar
 			}
         }
 
+		static float GetTime(int hours, int mins)
+		{
+			return (hours + (mins / 60.0f));
+		}
+
 		virtual public bool EnsureVisible(Appointment appt, bool partialOK)
 		{
 			if (appt == null)
@@ -473,30 +478,34 @@ namespace Calendar
 
 			if (!IsLongAppt(appt))
 			{
-				// Ensure at least part of the task is in view
-				int startHour = (vscroll.Value / (slotsPerHour * slotHeight));
-				int endHour = (startHour + (vscroll.LargeChange / (slotsPerHour * slotHeight)));
+				// Ensure at least one hour of the task is in view
+				float scrollStart = (vscroll.Value / (float)(slotsPerHour * slotHeight));
+				float scrollEnd = (scrollStart + (vscroll.LargeChange / (float)(slotsPerHour * slotHeight)));
+				float scrollDiff = (scrollEnd - scrollStart);
+
+				float apptStart = GetTime(appt.StartDate.Hour, appt.StartDate.Minute);
+				float apptEnd = GetTime(appt.EndDate.Hour, appt.EndDate.Minute);
 
 				if (partialOK)
 				{
-					if (appt.StartDate.Hour > endHour)
+					if (apptStart > (scrollEnd - 1))
 					{
-						ScrollToHour(appt.EndDate.Hour - 1);
+						ScrollToHour(apptStart - scrollDiff + 1);
 					}
-					else if (appt.EndDate.Hour < startHour)
+					else if (apptEnd < (scrollStart + 1))
 					{
-						ScrollToHour(appt.StartDate.Hour + 1);
+						ScrollToHour(apptEnd - 1);
 					}
 				}
 				else
 				{
-					if (appt.StartDate.Hour < startHour)
+					if (apptStart <= scrollStart)
 					{
-						ScrollToHour(appt.StartDate.Hour);
+						ScrollToHour(apptStart);
 					}
-					else if (appt.EndDate.Hour > endHour)
+					else if (apptEnd > scrollEnd)
 					{
-						ScrollToHour(appt.EndDate.Hour - endHour);
+						ScrollToHour(apptEnd - scrollDiff);
 					}
 				}
 			}
@@ -1159,12 +1168,13 @@ namespace Calendar
             this.vscroll.Value = this.vscroll.Minimum;
             this.Invalidate();
         }
-		public bool ScrollToHour(int hour) // 0-23
+
+		public bool ScrollToHour(float hour) // 0-23
 		{
-			if (hour < 0 || hour > 23)
+			if (hour < 0f || hour > 23f)
 				return false;
 
-			vscroll.Value = (hour * slotsPerHour * slotHeight);
+			vscroll.Value = (int)(hour * slotsPerHour * slotHeight);
 			Invalidate();
 
 			return true;
