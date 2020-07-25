@@ -458,6 +458,7 @@ namespace DayViewUIExtension
 
 		public bool GetSelectedItemLabelRect(ref Rectangle rect)
 		{
+			FixupSelection(true, false);
 			var appointment = GetRealAppointment(SelectedAppointment);
 
 			EnsureVisible(appointment, false);
