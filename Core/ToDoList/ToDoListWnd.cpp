@@ -107,7 +107,8 @@ const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MRU_MAX_ITEM_LEN = 128;
 
 const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
-const int QUICKFIND_VOFFSET = (GraphicsMisc::ScaleByDPIFactor(1)/* - 1*/);
+const int QUICKFIND_VOFFSET = GraphicsMisc::ScaleByDPIFactor(1);
+const int QUICKFIND_HOFFSET = -GraphicsMisc::ScaleByDPIFactor(2);
 
 #ifdef _DEBUG
 const UINT ONE_MINUTE = 10000;
@@ -6164,6 +6165,7 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 		
 		rNewPos.top += QUICKFIND_VOFFSET;
 		rNewPos.bottom = rNewPos.top + QUICKFIND_HEIGHT;
+		rNewPos.OffsetRect(QUICKFIND_HOFFSET, 0);
 		
 		m_cbQuickFind.MoveWindow(rNewPos);
 	}

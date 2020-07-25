@@ -608,13 +608,20 @@ void CEnToolBar::RemoveDuplicateSeparators(int nStartPos)
 
 BOOL CEnToolBar::SetItemWidth(int nPos, int nWidth, CRect& rect)
 {
-	TBBUTTONINFO tbi;
-	tbi.cbSize = sizeof(TBBUTTONINFO);
-	tbi.cx = (WORD)nWidth;
-	tbi.dwMask = TBIF_SIZE;
+	if (IsItemSeparator(nPos))
+	{
+		SetButtonInfo(nPos, ID_SEPARATOR, TBBS_SEPARATOR, nWidth);
+	}
+	else
+	{
+		TBBUTTONINFO tbi;
+		tbi.cbSize = sizeof(TBBUTTONINFO);
+		tbi.cx = (WORD)nWidth;
+		tbi.dwMask = TBIF_SIZE;
 
-	if (!GetToolBarCtrl().SetButtonInfo(GetItemID(nPos), &tbi))
-		return FALSE;
+		if (!GetToolBarCtrl().SetButtonInfo(GetItemID(nPos), &tbi))
+			return FALSE;
+	}
 
 	GetItemRect(nPos, &rect);
 	return TRUE;
