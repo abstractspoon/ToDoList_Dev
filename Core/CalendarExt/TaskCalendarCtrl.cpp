@@ -651,40 +651,13 @@ void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 		Invalidate();
 }
 
-void CTaskCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday, BOOL bShowMonth)
+void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
 {
-	CCalendarCtrlEx::DrawCell(pDC, pCell, rCell, bSelected, bToday, bShowMonth);
+	bToday &= HasColor(m_crToday);
 
-	if (bSelected && (m_crTheme != CLR_NONE))
-	{
-		CRect rSel(rCell);
+	BOOL bWeekend = (HasColor(m_crWeekend) && CWeekend().IsWeekend(pCell->date));
 
-		if (rSel.left)
-			rSel.left++;
-
-		GraphicsMisc::DrawRect(pDC, rSel, CLR_NONE, m_crTheme);
-
-		rSel.DeflateRect(1, 1);
-		GraphicsMisc::DrawRect(pDC, rSel, CLR_NONE, m_crTheme);
-	}
-}
-
-void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL /*bSelected*/, BOOL bToday)
-{
-	if (HasColor(m_crWeekend) && CWeekend().IsWeekend(pCell->date))
-	{
-		// If dtDay is also 'today' and we have a today colour
-		// then render using a grey so that that it does overly
-		// affect the today colour which will be overlaid on top
-		COLORREF crWeekend = m_crWeekend;
-
-		if (bToday && HasColor(m_crToday))
-			crWeekend = RGBX(crWeekend).Gray();
-
-		GraphicsMisc::DrawRect(pDC, rCell, crWeekend, CLR_NONE, 0, GMDR_NONE, 128);
-	}
-
-	if (bToday && HasColor(m_crToday))
+	if (bToday)
 	{
 		CRect rToday(rCell);
 
@@ -693,6 +666,15 @@ void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, cons
 			rToday.left++;
 
 		GraphicsMisc::DrawRect(pDC, rToday, m_crToday, CLR_NONE, 0, GMDR_NONE, 128);
+	}
+	else if (bWeekend)
+	{
+		GraphicsMisc::DrawRect(pDC, rCell, m_crWeekend, CLR_NONE, 0, GMDR_NONE, 128);
+	}
+
+	if (bSelected)
+	{
+		GraphicsMisc::DrawRect(pDC, rCell, m_crTheme, CLR_NONE, 0, GMDR_NONE, (bToday ? 48 : 128));
 	}
 }
 
@@ -719,13 +701,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	if (!nNumTasks)
 		return;
 
-	// Exclude selection border from drawing
-	CRect rAvailCell(rCell);
-
-	if (bSelected)
-		rAvailCell.DeflateRect(2, 0); // not top/bottom
-	
 	// Exclude scrollbar rect from drawing
+	CRect rAvailCell(rCell);
 	BOOL bShowScroll = (IsCellScrollBarActive() && IsGridCellSelected(pCell));
 	
 	if (bShowScroll)
