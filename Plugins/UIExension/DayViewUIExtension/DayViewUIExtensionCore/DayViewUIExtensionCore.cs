@@ -374,10 +374,11 @@ namespace DayViewUIExtension
 			m_SelectedTaskDatesLabel = new LinkLabel();
 
 			m_SelectedTaskDatesLabel.Font = m_ControlsFont;
-			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Bottom);
+			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Top);
 			m_SelectedTaskDatesLabel.Height = m_Toolbar.Height;
-			m_SelectedTaskDatesLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-			m_SelectedTaskDatesLabel.AutoSize = true;
+			m_SelectedTaskDatesLabel.Width = 1024;
+			m_SelectedTaskDatesLabel.TextAlign = System.Drawing.ContentAlignment.BottomLeft;
+			m_SelectedTaskDatesLabel.AutoSize = false;
 			m_SelectedTaskDatesLabel.ActiveLinkColor = m_SelectedTaskDatesLabel.LinkColor;
 			m_SelectedTaskDatesLabel.VisitedLinkColor = m_SelectedTaskDatesLabel.LinkColor;
 
