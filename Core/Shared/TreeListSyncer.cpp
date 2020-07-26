@@ -2692,14 +2692,17 @@ void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 		{
 			HTREEITEM htiPrevFirstVis = TreeView_GetFirstVisible(hwndTree), htiFirstVis = htiPrevFirstVis;
 
-			// Scroll 3 rows per click
+			// Scroll max 3 rows per click
 			for (int nRow = 0; nRow < 3; nRow++)
 			{
-				if (bUp)
-					htiFirstVis = TreeView_GetPrevVisible(hwndTree, htiFirstVis);
-				else
-					htiFirstVis = TreeView_GetNextVisible(hwndTree, htiFirstVis);
+				HTREEITEM hti = TreeView_GetNextItem(hwndTree, htiFirstVis, (bUp ? TVGN_PREVIOUSVISIBLE : TVGN_NEXTVISIBLE));
+
+				if (!hti)
+					break;
+
+				htiFirstVis = hti;
 			}
+			ASSERT(htiFirstVis);
 
 			TreeView_SelectSetFirstVisible(hwndTree, htiFirstVis);
 
