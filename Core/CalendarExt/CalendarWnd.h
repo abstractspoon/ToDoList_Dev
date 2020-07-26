@@ -83,7 +83,6 @@ protected:
 	UITHEME m_theme;
 	CIcon m_icon;
 	BOOL m_bReadOnly;
-	CString m_sSelectedTaskDates;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

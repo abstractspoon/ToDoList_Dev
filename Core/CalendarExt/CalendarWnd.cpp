@@ -67,7 +67,6 @@ void CCalendarWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_NUMWEEKS, m_cbNumWeeks);
 	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
 	DDX_Control(pDX, IDC_SELECTEDTASKDATES, m_stSelectedTaskDates);
-	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
 }
 
 BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
@@ -787,7 +786,7 @@ void CCalendarWnd::OnCancel()
 
 void CCalendarWnd::UpdateSelectedTaskDates()
 {
-	CString sDateRange;
+	CString sSelectedTaskDates;
 	COleDateTime dtStart, dtDue;
 	
 	if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
@@ -804,16 +803,13 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 		else
 			sDue = CDateHelper::FormatDate(dtDue);
 
+		CString sDateRange;
 		sDateRange.Format(_T("%s - %s"), sStart, sDue);
 
-		m_sSelectedTaskDates.Format(_T("%s: <a href=%s>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), _T(""), sDateRange);
-	}
-	else
-	{
-		m_sSelectedTaskDates.Empty();
+		sSelectedTaskDates.Format(_T("%s: <a href=%s>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), _T(""), sDateRange);
 	}
 
-	UpdateData(FALSE);
+	m_stSelectedTaskDates.SetWindowText(sSelectedTaskDates);
 }
 
 void CCalendarWnd::OnClickSelectedTaskDates()
