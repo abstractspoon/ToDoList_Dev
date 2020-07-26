@@ -40,7 +40,7 @@ namespace DayViewUIExtension
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
-		private Label m_SelectedTaskDatesLabel;
+		private LinkLabel m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
 
 		// --------------------------------------------------------------------------------------
@@ -371,15 +371,25 @@ namespace DayViewUIExtension
 
 		private void CreateSelectedTaskDatesLabel()
 		{
-			m_SelectedTaskDatesLabel = new Label();
+			m_SelectedTaskDatesLabel = new LinkLabel();
 
 			m_SelectedTaskDatesLabel.Font = m_ControlsFont;
 			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Bottom);
 			m_SelectedTaskDatesLabel.Height = m_Toolbar.Height;
 			m_SelectedTaskDatesLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			m_SelectedTaskDatesLabel.AutoSize = true;
+			m_SelectedTaskDatesLabel.ActiveLinkColor = m_SelectedTaskDatesLabel.LinkColor;
+			m_SelectedTaskDatesLabel.VisitedLinkColor = m_SelectedTaskDatesLabel.LinkColor;
 
+			m_SelectedTaskDatesLabel.LinkClicked += new LinkLabelLinkClickedEventHandler(OnClickSelectedTaskDatesLink);
+			
 			Controls.Add(m_SelectedTaskDatesLabel);
+		}
+
+		protected void OnClickSelectedTaskDatesLink(object sender, LinkLabelLinkClickedEventArgs e)
+		{
+			m_DayView.EnsureSelectionVisible(false);
+			m_DayView.Focus();
 		}
 
 		private void CreateToolbar()
@@ -691,11 +701,13 @@ namespace DayViewUIExtension
 				(from != DateTime.MinValue) &&
 				(to != DateTime.MinValue))
 			{
-				String toDate = to.ToString((from.DayOfYear == to.DayOfYear) ? "t" : "g");
+				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range"));
 
-				m_SelectedTaskDatesLabel.Text = String.Format("{0}: {1}-{2}",
-												m_Trans.Translate("Selected Task Date Range"),
-												from.ToString("g"), toDate);
+				String toDate = to.ToString((from.DayOfYear == to.DayOfYear) ? "t" : "g");
+				String dateRange = String.Format("{0} - {1}", from.ToString("g"), toDate);
+
+				m_SelectedTaskDatesLabel.Text = (label + dateRange);
+				m_SelectedTaskDatesLabel.LinkArea = new LinkArea(label.Length, dateRange.Length);
 			}
 			else
 			{

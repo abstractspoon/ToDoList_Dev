@@ -435,7 +435,9 @@
     <Compile Include="Control\ISheetTabControl.cs" />
     <Compile Include="Views\Layer.cs" />
     <Compile Include="Views\CellsViewport.cs" />
-    <Compile Include="WinForm\FormulaParserForm.cs" />
+    <Compile Include="WinForm\FormulaParserForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="WinForm\FormulaParserForm.designer.cs">
       <DependentUpon>FormulaParserForm.cs</DependentUpon>
     </Compile>

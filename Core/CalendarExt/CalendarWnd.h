@@ -16,6 +16,8 @@
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 
+#include "..\3rdParty\XHTMLStatic.h"
+
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
 
@@ -75,6 +77,7 @@ protected:
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
 	CComboBox m_cbSnapModes;
+	CXHTMLStatic m_stSelectedTaskDates;
 
 	CBrush m_brBack;
 	UITHEME m_theme;
@@ -110,6 +113,7 @@ protected:
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnNcDestroy();
+	afx_msg void OnClickSelectedTaskDates();
 
 	afx_msg void OnBigCalendarNotifyClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBigCalendarNotifyDblClk(NMHDR* pNMHDR, LRESULT* pResult);

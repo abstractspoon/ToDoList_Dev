@@ -49,6 +49,7 @@ IMPLEMENT_DYNAMIC(CCalendarWnd, CDialog)
 CCalendarWnd::CCalendarWnd()
 	:	
 	m_bReadOnly(FALSE),
+	m_stSelectedTaskDates(TRUE), // we handle the click
 	m_MiniCalendar(m_BigCalendar.Data()),
 	m_dlgPrefs(this)
 {
@@ -65,6 +66,7 @@ void CCalendarWnd::DoDataExchange(CDataExchange* pDX)
 
 	DDX_Control(pDX, IDC_NUMWEEKS, m_cbNumWeeks);
 	DDX_Control(pDX, IDC_SNAPMODES, m_cbSnapModes);
+	DDX_Control(pDX, IDC_SELECTEDTASKDATES, m_stSelectedTaskDates);
 	DDX_Text(pDX, IDC_SELECTEDTASKDATES, m_sSelectedTaskDates);
 }
 
@@ -81,6 +83,7 @@ BEGIN_MESSAGE_MAP(CCalendarWnd, CDialog)
 	ON_WM_HELPINFO()
 	ON_COMMAND(ID_CAL_GOTOTODAY, OnGototoday)
 	ON_COMMAND(ID_CAL_PREFS, OnPreferences)
+	ON_CONTROL(STN_CLICKED, IDC_SELECTEDTASKDATES, OnClickSelectedTaskDates)
 	ON_CBN_SELCHANGE(IDC_NUMWEEKS, OnSelChangeNumWeeks)
 	ON_CBN_SELCHANGE(IDC_SNAPMODES, OnSelChangeSnapMode)
 	ON_NOTIFY(NM_CLICK, IDC_MINI_CALENDAR, OnMiniCalendarNotifyClick)
@@ -333,6 +336,8 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 		// intentionally set background colours to be same as ours
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+		m_stSelectedTaskDates.SetBkColor(m_theme.crAppBackLight);
 	}
 }
 
@@ -782,6 +787,7 @@ void CCalendarWnd::OnCancel()
 
 void CCalendarWnd::UpdateSelectedTaskDates()
 {
+	CString sDateRange;
 	COleDateTime dtStart, dtDue;
 	
 	if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
@@ -798,7 +804,9 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 		else
 			sDue = CDateHelper::FormatDate(dtDue);
 
-		m_sSelectedTaskDates.Format(_T("%s - %s"), sStart, sDue);
+		sDateRange.Format(_T("%s - %s"), sStart, sDue);
+
+		m_sSelectedTaskDates.Format(_T("%s: <a href=%s>%s</a>"), CEnString(IDS_SELTASKDATES_LABEL), _T(""), sDateRange);
 	}
 	else
 	{
@@ -806,6 +814,11 @@ void CCalendarWnd::UpdateSelectedTaskDates()
 	}
 
 	UpdateData(FALSE);
+}
+
+void CCalendarWnd::OnClickSelectedTaskDates()
+{
+	m_BigCalendar.EnsureSelectionVisible();
 }
 
 LRESULT CCalendarWnd::OnBigCalendarNotifyDragChange(WPARAM wp, LPARAM /*lp*/)

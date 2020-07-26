@@ -36,7 +36,7 @@ class CXHTMLStatic : public CStatic
 {
 // Construction
 public:
-	CXHTMLStatic();
+	CXHTMLStatic(BOOL bParentHandlesClick = FALSE);
 	virtual ~CXHTMLStatic();
 	void ResetAll();			// formerly called Init()
 	void Reset();
@@ -154,6 +154,7 @@ protected:
 	BOOL			m_bGeneratedText;
 	BOOL			m_bInAnchor;
 	BOOL			m_bOnHyperlink;
+	BOOL			m_bParentHandlesClick;
 	int				m_nHorizontalRuleSize;
 	CPtrArray		m_AnchorRectPtrs;
 	CStringArray	m_AnchorUrls;
@@ -174,7 +175,7 @@ protected:
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	//}}AFX_MSG
-	afx_msg void OnClicked();
+	afx_msg BOOL OnClicked();
 	afx_msg LRESULT OnUpdateUIState(WPARAM wp, LPARAM lp);
 	LRESULT OnPrint(WPARAM wParam, LPARAM /*lParam*/);
 

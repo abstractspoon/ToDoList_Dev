@@ -54,6 +54,7 @@
 #define IDS_HEATMAP_NUMDONE             57673
 #define IDS_HEATMAP_NUMDUE              57674
 #define IDS_HEATMAP_NUMSTARTED          57675
+#define IDS_SELTASKDATES_LABEL          57676
 
 // Next default values for new objects
 // 

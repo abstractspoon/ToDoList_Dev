@@ -148,13 +148,15 @@ BEGIN_MESSAGE_MAP(CXHTMLStatic, CStatic)
 	ON_WM_MOUSEMOVE()
 	//}}AFX_MSG_MAP
 	ON_MESSAGE(WM_PRINT, OnPrint)
-    ON_CONTROL_REFLECT(STN_CLICKED, OnClicked)
+    ON_CONTROL_REFLECT_EX(STN_CLICKED, OnClicked)
 	ON_MESSAGE(WM_UPDATEUISTATE, OnUpdateUIState)
 END_MESSAGE_MAP()
 
 //=============================================================================
-CXHTMLStatic::CXHTMLStatic()
-//=============================================================================
+CXHTMLStatic::CXHTMLStatic(BOOL bParentHandlesClick)
+	: 
+	m_bParentHandlesClick(bParentHandlesClick)
+//============================================================================= 
 {
 	memset(&m_lf, 0, sizeof(m_lf));
 
@@ -874,6 +876,7 @@ void CXHTMLStatic::Draw(HDC hDC)
 				strAnchorText = strText.Mid(9, index-10);
 				strText = strText.Mid(index+1);
 				n = strText.GetLength();
+				crText = RGB(0, 0, 255);
 				m_bInAnchor = TRUE;
 				continue;
 			}
@@ -1359,9 +1362,12 @@ BOOL CXHTMLStatic::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 }
 
 //=============================================================================
-void CXHTMLStatic::OnClicked()
+BOOL CXHTMLStatic::OnClicked()
 //=============================================================================
 {
+	if (m_bParentHandlesClick)
+		return FALSE; // route to parent
+
 	CPoint point;
 	::GetCursorPos(&point);
 
@@ -1374,7 +1380,7 @@ void CXHTMLStatic::OnClicked()
 		int i = 0;
 		for (i = 0; i < n; i++)
 		{
-			CRect *pRect = (CRect *) m_AnchorRectPtrs[i];
+			CRect *pRect = (CRect *)m_AnchorRectPtrs[i];
 			CRect rect = *pRect;
 			ClientToScreen(&rect);
 
@@ -1388,6 +1394,8 @@ void CXHTMLStatic::OnClicked()
 		if (bOnHyperlink)
 			GotoURL(m_AnchorUrls[i], SW_SHOW);
 	}
+
+	return TRUE; // eat
 }
 
 //=============================================================================

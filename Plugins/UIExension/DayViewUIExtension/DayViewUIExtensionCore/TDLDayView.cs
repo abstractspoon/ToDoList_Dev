@@ -320,7 +320,7 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		public void FixupSelection(bool scrollToTask, bool allowNotify)
+		public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
         {
 			// Our base class clears the selected appointment whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
@@ -368,6 +368,8 @@ namespace DayViewUIExtension
 
 				RaiseSelectionChanged(item);
 			}
+
+			return SelectedAppointment;
 		}
 
 		public bool SelectTask(UInt32 dwTaskID)
@@ -795,6 +797,16 @@ namespace DayViewUIExtension
 
 				e.Graphics.FillRectangle(brush, hoursRect);
 			}
+		}
+
+		public bool EnsureSelectionVisible(bool partialOK)
+		{
+			var appt = FixupSelection(true, false);
+
+			if (appt == null)
+				return false;
+
+			return EnsureVisible(appt, partialOK);
 		}
 
 		public override bool EnsureVisible(Calendar.Appointment appt, bool partialOK)
