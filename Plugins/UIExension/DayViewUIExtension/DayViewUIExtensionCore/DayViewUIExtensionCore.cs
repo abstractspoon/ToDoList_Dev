@@ -523,6 +523,7 @@ namespace DayViewUIExtension
 			m_DayView.HScrollTooltipText = m_Trans.Translate(tooltip);
 
 			UpdateToolbarButtonStates();
+            UpdatedSelectedTaskDatesPosition();
 		}
 
 		private void UpdateToolbarButtonStates()
