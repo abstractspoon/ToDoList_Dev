@@ -1365,9 +1365,6 @@ BOOL CXHTMLStatic::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 BOOL CXHTMLStatic::OnClicked()
 //=============================================================================
 {
-	if (m_bParentHandlesClick)
-		return FALSE; // route to parent
-
 	CPoint point;
 	::GetCursorPos(&point);
 
@@ -1392,7 +1389,13 @@ BOOL CXHTMLStatic::OnClicked()
 		}
 
 		if (bOnHyperlink)
+		{
+			if (m_bParentHandlesClick)
+				return FALSE; // route to parent
+
+			// else
 			GotoURL(m_AnchorUrls[i], SW_SHOW);
+		}
 	}
 
 	return TRUE; // eat
