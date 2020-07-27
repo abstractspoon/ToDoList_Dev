@@ -1065,14 +1065,10 @@ BOOL CInputListCtrl::SetCellText(int nRow, int nCol, const CString& sText)
 
 BOOL CInputListCtrl::DeleteAllItems(BOOL bIncludeCols)
 {
-	CString sText;
-	BOOL bRes;
-	int nNumCols;
-
 	// delete all 
-	bRes = CEnListCtrl::DeleteAllItems();
+	m_hotTrack.DeleteAllRects();
 
-	nNumCols = GetColumnCount();
+	BOOL bRes = CEnListCtrl::DeleteAllItems();
 
 	// delete columns if necessary
 	if (bIncludeCols)
@@ -1084,7 +1080,7 @@ BOOL CInputListCtrl::DeleteAllItems(BOOL bIncludeCols)
 		return bRes;
 
 	// if auto adding re-add prompts as appropriate
-	nNumCols = GetColumnCount();
+	int nNumCols = GetColumnCount();
 
 	// rows
 	if (m_bAutoAddRows)
