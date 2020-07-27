@@ -44,25 +44,30 @@ namespace DayViewUIExtension
 				{
 					if (endDate.Month == m_StartDate.Month)
 					{
-						Text = m_StartDate.ToString("MMMM yyyy");
+						Text = m_StartDate.ToString("MMMM yyyy ");
 					}
 					else
 					{
-						Text = String.Format("{0} - {1}",
+						Text = String.Format("{0} - {1} ",
 											m_StartDate.ToString("MMMM"),
 											endDate.ToString("MMMM yyyy"));
 					}
 				}
 				else
 				{
-					Text = String.Format("{0} - {1}",
+					Text = String.Format("{0} - {1} ",
 										m_StartDate.ToString("MMMM yyyy"),
 										endDate.ToString("MMMM yyyy"),
 										m_StartDate.Year);
 				}
 
-                String weekNum = String.Format(m_Trans.Translate("(Week {0})"), DateUtil.WeekOfYear(m_StartDate));
-                Text = (Text + ' ' + weekNum);
+                int startWeek = DateUtil.WeekOfYear(m_StartDate);
+                int numWeeks = (NumDays / 7);
+
+                if (numWeeks <= 1)
+                    Text = (Text + String.Format(m_Trans.Translate("(Week {0})"), startWeek));
+                else
+                    Text = (Text + String.Format(m_Trans.Translate("(Weeks {0}-{1})"), startWeek, (startWeek + numWeeks - 1)));
 
 				Invalidate();
 			}
