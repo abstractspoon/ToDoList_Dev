@@ -203,7 +203,7 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 		return m_wnd->Expand(MindMapControl::ExpandNode::ExpandAll);
 
 	case IUI_EXPANDSELECTED:
-		return m_wnd->Expand(MindMapControl::ExpandNode::ExpandSelection);
+		return m_wnd->Expand(MindMapControl::ExpandNode::ExpandSelectionAll);
 
 	case IUI_SELECTTASK:
 		if (pData)
@@ -311,7 +311,7 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 		return m_wnd->CanExpand(MindMapControl::ExpandNode::ExpandAll);
 
 	case IUI_EXPANDSELECTED:
-		return m_wnd->CanExpand(MindMapControl::ExpandNode::ExpandSelection);
+		return m_wnd->CanExpand(MindMapControl::ExpandNode::ExpandSelectionAll);
 
 	case IUI_SELECTTASK:
 		return true;
