@@ -497,33 +497,17 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 
 	{
 		CHoldHScroll hs(m_tree);
-		CTLSHoldResync hr(*this);
+		CTLSHoldResync hr(*this); 
 
 		SelectTreeItem(hti, FALSE);
 	}
 
+	// Handle notifications ignored by CTLSHoldResync
 	if (!bWasVisible)
 		ExpandList();
 
-/*
-	if (CanResync())
-	{
-		// If the item is already selected then we won't get a
-		// notification with which to resync the list selection
-		if (bWasSelected)
-			ResyncSelection(m_list, m_tree, FALSE);
-
-#ifdef _DEBUG
-		POSITION pos = m_list.GetFirstSelectedItemPosition();
-		ASSERT(pos);
-
-		int nSel = m_list.GetNextSelectedItem(pos);
-		ASSERT(nSel != -1);
-
-		ASSERT(m_list.GetItemData(nSel) == (DWORD)hti);
-#endif
-	}
-*/
+	if (!bWasSelected)
+		CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)hti);
 
 	return TRUE;
 }
