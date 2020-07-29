@@ -2718,6 +2718,16 @@ void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 	}
 	else // list
 	{
+		// Always pass to the window with the scrollbar (right) and
+		// resync the other window (left) because otherwise the 
+		// default handling of the left pane can scroll horizontally
+		if (hWnd != Right())
+		{
+			::SendMessage(Right(), WM_MOUSEWHEEL, wp, lp);
+			return;
+		}
+
+		// else
 		ScDefault(hWnd);
 		ResyncScrollPos(OtherWnd(hWnd), hWnd);
 	}
