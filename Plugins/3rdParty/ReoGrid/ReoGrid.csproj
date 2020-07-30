@@ -247,10 +247,6 @@
     <Compile Include="Actions\WorksheetActionGroup.cs" />
     <Compile Include="Actions\WorksheetReusableAction.cs" />
     <Compile Include="Actions\WorksheetReusableActionGroup.cs" />
-    <Compile Include="Android\Graphics.cs" />
-    <Compile Include="Android\Renderer.cs" />
-    <Compile Include="Android\ReoGridView.cs" />
-    <Compile Include="Android\Platform.cs" />
     <Compile Include="Actions\BackupRangeInfo.cs" />
     <Compile Include="CellTypes\ButtonCell.cs" />
     <Compile Include="CellTypes\CellBody.cs" />
@@ -349,17 +345,12 @@
     <Compile Include="Interaction\CursorStyle.cs" />
     <Compile Include="Interaction\ToggleStatus.cs" />
     <Compile Include="Interaction\Visual.cs" />
-    <Compile Include="iOS\Graphics.cs" />
-    <Compile Include="iOS\Platform.cs" />
-    <Compile Include="iOS\Renderer.cs" />
-    <Compile Include="iOS\ReoGridView.cs" />
     <Compile Include="Print\GDIPrint.cs" />
     <Compile Include="Print\PDFPrint.cs" />
     <Compile Include="Print\PrintInterface.cs" />
     <Compile Include="Print\PrintSession.cs" />
     <Compile Include="Print\PrintSettings.cs" />
     <Compile Include="Print\PaperSize.cs" />
-    <Compile Include="Print\WPFPrinter.cs" />
     <Compile Include="Graphics\Color.cs" />
     <Compile Include="Graphics\Font.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -475,11 +466,6 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="WinForm\Designer\WorkbookEditor.cs" />
-    <Compile Include="WPF\FilterGUI.cs" />
-    <Compile Include="WPF\Platform.cs" />
-    <Compile Include="WPF\Renderer.cs" />
-    <Compile Include="WPF\SheetTabControl.cs" />
-    <Compile Include="WPF\Utility.cs" />
     <Compile Include="Zip\CRC32.cs" />
     <Compile Include="Zip\Deflate.cs" />
     <Compile Include="Zip\Events.cs" />
@@ -535,7 +521,6 @@
     <Compile Include="Rendering\BorderPainter.cs" />
     <Compile Include="Rendering\DrawingContext.cs" />
     <Compile Include="WinForm\Designer\IntegrateDesigner.cs" />
-    <Compile Include="WPF\WPFControl.cs" />
     <Compile Include="WinForm\WinFormControl.cs">
       <SubType>Component</SubType>
     </Compile>

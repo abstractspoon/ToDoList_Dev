@@ -25,13 +25,8 @@ using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.Main;
 using unvell.ReoGrid.Interaction;
 
-#if WINFORM
 using DataObject = System.Windows.Forms.DataObject;
 using Clipboard = System.Windows.Forms.Clipboard;
-#elif WPF
-using DataObject = System.Windows.DataObject;
-using Clipboard = System.Windows.Clipboard;
-#endif // WINFORM
 
 #if EX_SCRIPT
 using unvell.ReoScript;
@@ -218,7 +213,6 @@ namespace unvell.ReoGrid
 					// highlight current copy range
 					currentCopingRange = selectionRange;
 
-#if WINFORM || WPF
 					DataObject data = new DataObject();
 					data.SetData(ClipBoardDataFormatIdentify,
 						GetPartialGrid(currentCopingRange, PartialGridCopyFlag.All, ExPartialGridCopyFlag.None, true));
@@ -228,7 +222,6 @@ namespace unvell.ReoGrid
 
 					// set object data into clipboard
 					Clipboard.SetDataObject(data);
-#endif // WINFORM || WPF
 
 					if (AfterCopy != null)
 					{
@@ -293,7 +286,6 @@ namespace unvell.ReoGrid
 					PartialGrid partialGrid = null;
 					string clipboardText = null;
 
-#if WINFORM || WPF
 					DataObject data = Clipboard.GetDataObject() as DataObject;
 					if (data != null)
 					{
@@ -305,9 +297,6 @@ namespace unvell.ReoGrid
 						}
 					}
 
-#elif ANDROID
-
-#endif // WINFORM || WPF
 
 					if (partialGrid != null)
 					{
@@ -639,6 +628,3 @@ namespace unvell.ReoGrid
 	}
 }
 
-#if WINFORM || WPF
-
-#endif // WINFORM || WPF

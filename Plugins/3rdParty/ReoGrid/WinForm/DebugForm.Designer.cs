@@ -16,8 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
-
 namespace unvell.ReoGrid.WinForm
 {
 	partial class DebugForm
@@ -493,4 +491,3 @@ namespace unvell.ReoGrid.WinForm
 	}
 }
 
-#endif // WINFORM && DEBUG

@@ -19,14 +19,9 @@
 using System;
 using System.Linq;
 
-#if WINFORM
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
-using RGFloat = System.Double;
-using RGImage = System.Windows.Media.ImageSource;
-#endif // WINFORM
 
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Rendering;
@@ -115,40 +110,9 @@ namespace unvell.ReoGrid.CellTypes
 		/// <param name="state">Button state.</param>
 		protected virtual void DrawButton(CellDrawingContext dc)
 		{
-#if WINFORM
 			ControlPaint.DrawButton(dc.Graphics.PlatformGraphics, (System.Drawing.Rectangle)Bounds,
 				this.IsPressed ? ButtonState.Pushed :
 				(this.Cell.IsReadOnly ? ButtonState.Inactive : ButtonState.Normal));
-#elif WPF
-
-			var g = dc.Graphics;
-
-			//g.TranslateTransform(20f, 00f);
-
-			var r = this.Bounds;
-			g.DrawRectangle(r, SolidColor.Dark(StaticResources.SystemColor_ControlDark));
-
-			//var r2 = new Rectangle(r.X, r.Y, r.Width - 1, r.Height - 1);
-			var r3 = new Rectangle(r.X + 1, r.Y + 1, r.Width - 2, r.Height - 2);
-			g.FillRectangle(r3, StaticResources.SystemColor_Control);
-
-			if (this.IsPressed)
-			{
-				//	g.DrawRectangle(r, StaticResources.SystemColor_ControlDark);
-
-				//	r.X++; r.Y++; r.Width--; r.Height--;
-				//	g.DrawRectangle(r, SolidColor.Dark(StaticResources.SystemColor_ControlDark));
-				var r2 = new Rectangle(r.X + 1, r.Y + 1, r.Width - 2, r.Height - 2);
-				g.DrawRectangle(r2, SolidColor.Dark(StaticResources.SystemColor_ControlDark));
-			}
-			else
-			{
-				//var r2 = new Rectangle(r.X + 1, r.Y + 1, r.Width - 1, r.Height - 1);
-				//g.DrawRectangle(r2, StaticResources.SystemColor_ControlDark);
-			}
-
-
-#endif // WPF
 		}
 
 		#endregion Draw

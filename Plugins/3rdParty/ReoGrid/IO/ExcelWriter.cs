@@ -1159,11 +1159,7 @@ namespace unvell.ReoGrid.IO.OpenXML
 
 			Row row = null;
 
-			//#if WINFORM || WPF
-			//			const int colPageSize = unvell.ReoGrid.Data.JaggedTreeArray<ReoGridCell>.ColSize;
-			//#elif ANDROID || iOS
-			//			const int colPageSize = unvell.ReoGrid.Data.ReoGridCellArray.ColSize;
-			//#endif // ANDROID
+			//	const int colPageSize = unvell.ReoGrid.Data.JaggedTreeArray<ReoGridCell>.ColSize;
 
 			for (int r = 0; r <= maxRows; r++)
 			{
@@ -1786,13 +1782,7 @@ namespace unvell.ReoGrid.IO.OpenXML
 							//var stream = ctEntry.CreateStream();
 							{
 								var image = blip._imageObject.Image;
-#if WINFORM
 								image.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
-#elif WPF
-								var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
-								encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create((System.Windows.Media.Imaging.BitmapSource)image));
-								encoder.Save(stream);
-#endif // WPF
 							}
 
 							stream.Position = 0;

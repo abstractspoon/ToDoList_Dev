@@ -334,12 +334,9 @@ namespace unvell.ReoGrid
 			cell.InnerFormula = null;
 			cell.InnerData = null;
 			cell.InnerDisplay = null;
-
 			cell.FontDirty = false;
-
-#if WINFORM
 			cell.RenderFont = null;
-#endif // WINFORM
+
 			RequestInvalidate();
 		}
 		#endregion // DeleteCellFormula

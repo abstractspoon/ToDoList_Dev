@@ -23,13 +23,7 @@ using System.Text;
 using unvell.ReoGrid.Core;
 using unvell.ReoGrid.Graphics;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#elif iOS
-using RGFloat = System.Double;
-#endif // WPF
 
 namespace unvell.ReoGrid
 {

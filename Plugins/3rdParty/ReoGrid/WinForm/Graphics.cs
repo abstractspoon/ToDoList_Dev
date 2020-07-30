@@ -16,8 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -1009,4 +1007,3 @@ namespace unvell.ReoGrid.WinForm
 	#endregion // GDIRenderer
 }
 
-#endif // WINFORM

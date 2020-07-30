@@ -82,7 +82,6 @@ namespace unvell.ReoGrid.Chart
 			var clientRect = this.ClientBounds;
 
 
-#if WINFORM
 			var path = new System.Drawing.Drawing2D.GraphicsPath();
 
 			for (int r = 0; r < ds.SerialCount; r++)
@@ -124,46 +123,6 @@ namespace unvell.ReoGrid.Chart
 			}
 
 			path.Dispose();
-#elif WPF
-
-
-			for (int r = 0; r < ds.SerialCount; r++)
-			{
-				var style = axisChart.DataSerialStyles[r];
-
-				var seg = new System.Windows.Media.PathFigure();
-
-				seg.StartPoint = new System.Windows.Point(axisChart.PlotColumnPoints[0], axisChart.ZeroHeight);
-
-				for (int c = 0; c < ds.CategoryCount; c++)
-				{
-					var pt = axisChart.PlotDataPoints[r][c];
-
-					System.Windows.Point point;
-
-					if (pt.hasValue)
-					{
-						point = new System.Windows.Point(axisChart.PlotColumnPoints[c], axisChart.ZeroHeight - pt.value);
-					}
-					else
-					{
-						point = new System.Windows.Point(axisChart.PlotColumnPoints[c], axisChart.ZeroHeight);
-					}
-
-					seg.Segments.Add(new System.Windows.Media.LineSegment(point, true));
-				}
-
-				var endPoint = new System.Windows.Point(axisChart.PlotColumnPoints[ds.CategoryCount - 1], axisChart.ZeroHeight);
-				seg.Segments.Add(new System.Windows.Media.LineSegment(endPoint, true));
-
-				seg.IsClosed = true;
-
-				var path = new System.Windows.Media.PathGeometry();
-				path.Figures.Add(seg);
-				g.FillPath(style.LineColor, path);
-			}
-
-#endif // WPF
 		}
 
 	}

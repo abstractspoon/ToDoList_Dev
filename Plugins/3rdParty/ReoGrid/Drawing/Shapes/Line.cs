@@ -18,11 +18,7 @@
 
 #if DRAWING
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#endif // WPF
 
 using unvell.ReoGrid.Rendering;
 using unvell.ReoGrid.Graphics;

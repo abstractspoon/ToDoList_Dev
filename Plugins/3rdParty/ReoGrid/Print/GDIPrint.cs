@@ -18,8 +18,6 @@
 
 #if PRINT
 
-#if WINFORM
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -121,7 +119,5 @@ namespace unvell.ReoGrid.Print
 	
 	}
 }
-
-#endif // WINFORM
 
 #endif // PRINT

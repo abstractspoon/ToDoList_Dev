@@ -25,13 +25,8 @@ using unvell.ReoGrid.Data;
 using System.Diagnostics;
 #endif
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
 using RGIntDouble = System.Int32;
-#elif WPF || iOS
-using RGFloat = System.Double;
-using RGIntDouble = System.Double;
-#endif
 
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Rendering;
@@ -786,13 +781,8 @@ namespace unvell.ReoGrid.Views
 			//if (this.mainViewport.Width < 0) this.mainViewport.Width = 0;
 			//if (this.mainViewport.Height < 0) this.mainViewport.Height = 0;
 
-#if WINFORM || ANDROID
 			this.worksheet.controlAdapter.ScrollBarHorizontalLargeChange = this.scrollHorLarge = (int)Math.Round(this.view.Width);
 			this.worksheet.controlAdapter.ScrollBarVerticalLargeChange = this.scrollVerLarge = (int)Math.Round(this.view.Height);
-#elif WPF
-			this.worksheet.controlAdapter.ScrollBarHorizontalLargeChange = this.scrollHorLarge = this.view.Width;
-			this.worksheet.controlAdapter.ScrollBarVerticalLargeChange = this.scrollVerLarge = this.view.Height;
-#endif // WPF
 
 			this.UpdateVisibleRegion();
 			this.UpdateScrollBarSize();
@@ -884,22 +874,14 @@ namespace unvell.ReoGrid.Views
 
 			if ((dir & ScrollDirection.Horizontal) == ScrollDirection.Horizontal)
 			{
-#if WPF
-				if (scrollHorValue + x > scrollHorMax) x = scrollHorMax - scrollHorValue;
-#else // WINFORM
 				if (scrollHorValue + x > scrollHorMax - scrollHorLarge) x = scrollHorMax - scrollHorValue - scrollHorLarge;
-#endif // WINFORM
 
 				if (scrollHorValue + x < scrollHorMin) x = scrollHorMin - scrollHorValue;
 			}
 
 			if ((dir & ScrollDirection.Vertical) == ScrollDirection.Vertical)
 			{
-#if WPF
-				if (scrollVerValue + y > scrollVerMax) y = scrollVerMax - scrollVerValue;
-#else // WINFORM
 				if (scrollVerValue + y > scrollVerMax - scrollVerLarge) y = scrollVerMax - scrollVerValue - scrollVerLarge;
-#endif // WINFORM
 
 				if (scrollVerValue + y < scrollVerMin) y = scrollVerMin - scrollVerValue;
 			}
@@ -951,13 +933,8 @@ namespace unvell.ReoGrid.Views
 			scrollHorValue += x;
 			scrollVerValue += y;
 
-#if WINFORM || ANDROID
 			this.worksheet.controlAdapter.ScrollBarHorizontalValue = (int)Math.Round(scrollHorValue);
 			this.worksheet.controlAdapter.ScrollBarVerticalValue = (int)Math.Round(scrollVerValue);
-#elif WPF
-			this.worksheet.ControlAdapter.ScrollBarHorizontalValue = scrollHorValue;
-			this.worksheet.ControlAdapter.ScrollBarVerticalValue = scrollVerValue;
-#endif // WPF
 
 			if (x != 0 || y != 0)
 			{
@@ -1038,33 +1015,19 @@ namespace unvell.ReoGrid.Views
 			if (worksheet.cols.Count > 0)
 			{
 				width = worksheet.cols[worksheet.cols.Count - 1].Right + mainViewport.Width - mainViewport.Width / scale;
-#if WPF
-				width -= scrollHorLarge;
-#endif // WPF 
 			}
 
 			if (worksheet.rows.Count > 0)
 			{
 				height = worksheet.rows[worksheet.rows.Count - 1].Bottom + mainViewport.Height - mainViewport.Height / scale;
-#if WPF
-				height -= scrollVerLarge;
-#endif // WPF
 			}
 
 			int maxHorizontal = Math.Max(0, (int)(Math.Floor(width + this.mainViewport.Left))) + 1;
 			int maxVertical = Math.Max(0, (int)(Math.Floor(height + this.mainViewport.Top))) + 1;
 
-#if WINFORM || ANDROID
 			int offHor = maxHorizontal - this.scrollHorMax;
 			int offVer = maxVertical - this.scrollVerMax;
-#elif WPF
-			int offHor = (int)Math.Round(maxHorizontal - this.scrollHorMax);
-			int offVer = (int)Math.Round(maxVertical - this.scrollVerMax);
-#elif ANDROID || iOS
-			RGFloat offHor = maxHorizontal - this.scrollHorMax;
-			RGFloat offVer = maxVertical - this.scrollVerMax;
 
-#endif // WPF
 			if (offHor > 0) offHor = 0;
 			if (offVer > 0) offVer = 0;
 

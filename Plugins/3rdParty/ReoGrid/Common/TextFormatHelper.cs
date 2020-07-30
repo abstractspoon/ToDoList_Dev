@@ -248,25 +248,15 @@ namespace unvell.Common
 
 					return true;
 				}
-#if WINFORM || WPF || ANDROID
 				else
 				{
 					try
 					{
-#if WINFORM
 						color = System.Drawing.Color.FromName(data);
-#elif WPF
-						color = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(data);
-#elif ANDROID
-						var c = System.Drawing.Color.FromName(data);
-						color = new SolidColor(c.R, c.G, c.B);
-
-#endif // WPF
 						return true;
 					}
 					catch { }
 				}
-#endif // WINFORM || WPF
 			}
 
 			color = new SolidColor();
@@ -291,8 +281,6 @@ namespace unvell.Common
 			else
 				return new Point(0, 0); // todo
 		}
-
-#if WINFORM
 
 		public static FontStyles DecodeFontStyle(string fontStyleStr)
 		{
@@ -345,7 +333,6 @@ namespace unvell.Common
 					return System.Drawing.Drawing2D.LineCap.NoAnchor;
 			}
 		}
-#endif // WINFORM
 
 		public static readonly Regex pointArrayRegex = new Regex(@"(\d*\.?\d+)\s(\d*\.?\d+)");
 		public static List<Point> DecodePoints(string data)

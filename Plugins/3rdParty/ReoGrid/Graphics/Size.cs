@@ -21,13 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#elif iOS
-using RGFloat = System.Double;
-#endif // WPF
 
 namespace unvell.ReoGrid.Graphics
 {
@@ -119,7 +113,6 @@ namespace unvell.ReoGrid.Graphics
 		}
 
 		#region Platform Associated
-#if WINFORM
 		/// <summary>
 		/// Convert System.Drawing.Size to unvell.ReoGrid.Graphics.Size.
 		/// </summary>
@@ -156,18 +149,7 @@ namespace unvell.ReoGrid.Graphics
 		{
 			return new System.Drawing.SizeF(size.Width, size.Height);
 		}
-#endif // WINFORM
 
-#if WPF
-		public static implicit operator System.Windows.Size(Size size)
-		{
-			return new System.Windows.Size(size.Width, size.Height);
-		}
-		public static implicit operator Size(System.Windows.Size size)
-		{
-			return new Size(size.Width, size.Height);
-		}
-#endif // WPF
 		#endregion // Platform Associated
 	}
 }

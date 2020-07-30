@@ -16,8 +16,6 @@
  * 
  ****************************************************************************/
 
-#if DEBUG && WINFORM && FORMULA
-
 using System;
 using System.Text;
 using System.Windows.Forms;
@@ -366,4 +364,3 @@ namespace FormulaParserTest
 
 }
 
-#endif // DEBUG && WINFORM && FORMULA

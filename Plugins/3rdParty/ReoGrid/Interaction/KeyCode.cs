@@ -26,9 +26,8 @@ namespace unvell.ReoGrid.Interaction
 #pragma warning disable 1591
 
 	[Flags]
-#if WINFORM
 	[System.ComponentModel.TypeConverter(typeof(System.Windows.Forms.KeysConverter))]
-#endif
+
 	public enum KeyCode
 	{
 		// Summary:

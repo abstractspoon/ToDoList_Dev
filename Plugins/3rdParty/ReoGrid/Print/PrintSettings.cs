@@ -20,13 +20,9 @@
 
 using System;
 
-#if WINFORM
 using RGFloat = System.Single;
 using WFPaperSize = System.Drawing.Printing.PaperSize;
 using WFPageSettings = System.Drawing.Printing.PageSettings;
-#elif WPF
-using RGFloat = System.Double;
-#endif // WPF
 
 namespace unvell.ReoGrid.Print
 {
@@ -127,8 +123,6 @@ namespace unvell.ReoGrid.Print
 			};
 		}
 
-#if WINFORM
-
 		private WFPaperSize FindPaperSize(WFPageSettings wfps)
 		{
 			var coll = wfps.PrinterSettings.PaperSizes;
@@ -178,7 +172,6 @@ namespace unvell.ReoGrid.Print
 			this.Margins = wfps.Margins;
 			this.Landscape = wfps.Landscape;
 		}
-#endif // WINFORM
 
 	}
 

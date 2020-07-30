@@ -30,18 +30,12 @@ using unvell.ReoGrid.Formula;
 
 using unvell.ReoGrid.Utility;
 
-#if WINFORM || WPF
 //using CellArray = unvell.ReoGrid.Data.JaggedTreeArray<unvell.ReoGrid.ReoGridCell>;
 //using HBorderArray = unvell.ReoGrid.Data.JaggedTreeArray<unvell.ReoGrid.Core.ReoGridHBorder>;
 //using VBorderArray = unvell.ReoGrid.Data.JaggedTreeArray<unvell.ReoGrid.Core.ReoGridVBorder>;
 using CellArray = unvell.ReoGrid.Data.Index4DArray<unvell.ReoGrid.Cell>;
 using HBorderArray = unvell.ReoGrid.Data.Index4DArray<unvell.ReoGrid.Core.ReoGridHBorder>;
 using VBorderArray = unvell.ReoGrid.Data.Index4DArray<unvell.ReoGrid.Core.ReoGridVBorder>;
-#elif ANDROID || iOS
-using CellArray = unvell.ReoGrid.Data.ReoGridCellArray;
-using HBorderArray = unvell.ReoGrid.Data.ReoGridHBorderArray;
-using VBorderArray = unvell.ReoGrid.Data.ReoGridVBorderArray;
-#endif // ANDROID
 
 namespace unvell.ReoGrid
 {

@@ -21,28 +21,11 @@
 using System;
 using System.ComponentModel;
 
-#if WINFORM
 using RGFloat = System.Single;
 using RGPoint = System.Drawing.Point;
 using RGColor = System.Drawing.Color;
 using RGRect = System.Drawing.Rectangle;
 using RGIntDouble = System.Int32;
-#elif WPF
-using RGFloat = System.Double;
-using RGPoint = System.Windows.Point;
-using RGColor = System.Windows.Media.Color;
-using RGRect = System.Windows.Rect;
-using RGIntDouble = System.Double;
-#elif ANDROID
-using RGFloat = System.Single;
-using RGPoint = Android.Graphics.Point;
-using RGColor = Android.Graphics.Color;
-using RGRect = Android.Graphics.Rect;
-using RGIntDouble = System.Int32;
-#elif iOS
-using RGPoint = CoreGraphics.CGPoint;
-using RGIntDouble = System.Double;
-#endif
 
 using unvell.ReoGrid.Interaction;
 

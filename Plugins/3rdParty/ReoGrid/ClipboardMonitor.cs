@@ -16,8 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
-
 using System;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
@@ -121,4 +119,3 @@ namespace unvell.ReoGrid
 		}
 	}
 }
-#endif // WINFORM

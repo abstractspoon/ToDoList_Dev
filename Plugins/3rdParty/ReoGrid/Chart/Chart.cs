@@ -21,11 +21,7 @@
 using System;
 using System.Collections.Generic;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#endif // WPF
 
 using unvell.ReoGrid.Drawing;
 using unvell.ReoGrid.Graphics;

@@ -16,7 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
 #pragma warning disable 1591
 
 using System;
@@ -453,4 +452,3 @@ namespace unvell.ReoGrid.WinForm
 }
 
 #pragma warning restore 1591
-#endif // WINFORM

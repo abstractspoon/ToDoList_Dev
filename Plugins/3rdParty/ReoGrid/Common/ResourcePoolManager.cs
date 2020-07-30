@@ -17,8 +17,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM || WPF
- 
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,8 +25,6 @@ using System.Diagnostics;
 using WFFont = System.Drawing.Font;
 using WFFontStyle = System.Drawing.FontStyle;
 using WFGraphics = System.Drawing.Graphics;
-
-#if WINFORM
 
 using RGFloat = System.Single;
 
@@ -40,18 +36,6 @@ using RGSolidBrush = System.Drawing.SolidBrush;
 
 using HatchBrush = System.Drawing.Drawing2D.HatchBrush;
 using HatchStyle = System.Drawing.Drawing2D.HatchStyle;
-
-#elif WPF
-
-using RGFloat = System.Double;
-
-using RGPen = System.Windows.Media.Pen;
-using RGSolidBrush = System.Windows.Media.SolidColorBrush;
-using RGBrushes = System.Windows.Media.Brushes;
-using RGDashStyle = System.Windows.Media.DashStyle;
-using RGDashStyles = System.Windows.Media.DashStyles;
-
-#endif // WPF
 
 using unvell.ReoGrid.Graphics;
 
@@ -68,7 +52,6 @@ namespace unvell.Common
 		}
 
 #region Brush
-#if WINFORM || WPF
 		private Dictionary<SolidColor, RGSolidBrush> cachedBrushes = new Dictionary<SolidColor, RGSolidBrush>();
 
 		public RGSolidBrush GetBrush(SolidColor color)
@@ -96,9 +79,7 @@ namespace unvell.Common
 				}
 			}
 		}
-#endif // WINFORM || WPF
 
-#if WINFORM
 		private Dictionary<HatchStyleBrushInfo, HatchBrush> hatchBrushes = new Dictionary<HatchStyleBrushInfo, HatchBrush>();
 
 		public HatchBrush GetHatchBrush(HatchStyle style, SolidColor foreColor, SolidColor backColor)
@@ -170,7 +151,6 @@ namespace unvell.Common
 				return (short)style * (foreColor.ToArgb() + backgroundColor.ToArgb());
 			}
 		}
-#endif // WINFORM
 #endregion Brush
 
 #region Pen
@@ -191,11 +171,7 @@ namespace unvell.Common
 				if (!cachedPens.TryGetValue(color, out penlist))
 				{
 					penlist = cachedPens[color] = new List<RGPen>();
-#if WINFORM
 					penlist.Add(pen = new RGPen(color, weight));
-#elif WPF
-				penlist.Add(pen = new RGPen(new RGSolidBrush(color), weight));
-#endif // WPF
 
 					pen.DashStyle = style;
 
@@ -208,20 +184,12 @@ namespace unvell.Common
 				{
 					lock (penlist)
 					{
-#if WINFORM
 						pen = penlist.FirstOrDefault(p => p.Width == weight && p.DashStyle == style);
-#elif WPF
-						pen = penlist.FirstOrDefault(p => p.Thickness == weight && p.DashStyle == style);
-#endif // WPF
 					}
 
 					if (pen == null)
 					{
-#if WINFORM
 						penlist.Add(pen = new RGPen(color, weight));
-#elif WPF
-					penlist.Add(pen = new RGPen(new RGSolidBrush(color), weight));
-#endif // WPF
 						pen.DashStyle = style;
 
 						if ((cachedPens.Count % 10) == 0)
@@ -240,16 +208,8 @@ namespace unvell.Common
 
 		private Dictionary<string, List<WFFont>> fonts = new Dictionary<string, List<WFFont>>();
 
-#if WINFORM
 		public WFFont GetFont(string familyName, float emSize, WFFontStyle wfs)
 		{
-
-#elif WPF
-		public WFFont GetFont(string familyName, double emSizeD, WFFontStyle wfs)
-		{
-			float emSize = (float)emSizeD;
-#endif // WPF
-
 #if DEBUG
 			Stopwatch sw = Stopwatch.StartNew();
 #endif // DEBUG
@@ -375,56 +335,10 @@ namespace unvell.Common
 		{
 		}
 
-#if WPF
-
-		private Dictionary<string, System.Windows.Media.FontFamily> fontFamilies
-			= new Dictionary<string, System.Windows.Media.FontFamily>();
-
-		public System.Windows.Media.FontFamily GetFontFamily(string name)
-		{
-			System.Windows.Media.FontFamily ff = null;
-			this.fontFamilies.TryGetValue(name, out ff);
-			if (ff == null)
-			{
-				ff = new System.Windows.Media.FontFamily(name);
-				this.fontFamilies[name] = ff;
-			}
-			return ff;
-		}
-
-		private Dictionary<string, List<System.Windows.Media.Typeface>> typefaces 
-			= new Dictionary<string, List<System.Windows.Media.Typeface>>();
-
-		public System.Windows.Media.Typeface GetTypeface(string name)
-		{
-			return GetTypeface(name, System.Windows.FontWeights.Regular, System.Windows.FontStyles.Normal,
-				System.Windows.FontStretches.Normal);
-		}
-
-		public System.Windows.Media.Typeface GetTypeface(string name, System.Windows.FontWeight weight, 
-			System.Windows.FontStyle style, System.Windows.FontStretch stretch)
-		{
-			List<System.Windows.Media.Typeface> list;
-
-			if (!typefaces.TryGetValue(name, out list))
-			{
-				this.typefaces[name] = list = new List<System.Windows.Media.Typeface>();
-			}
-
-			var typeface = list.FirstOrDefault(t=>t.Weight == weight && t.Style == style);
-			if (typeface == null)
-			{
-				list.Add(typeface = new System.Windows.Media.Typeface(new System.Windows.Media.FontFamily(name), style, weight, stretch));
-			}
-
-			return typeface;
-		}
-#endif // WPF
-
 #endregion // Font
 
 #region Image
-#if WINFORM && IMAGE_POOL
+#if IMAGE_POOL
 		private Dictionary<Guid, ImageResource> images 
 			= new Dictionary<Guid, ImageResource>();
 		public ImageResource GetImageResource(Guid id)
@@ -515,27 +429,18 @@ namespace unvell.Common
 			int count = 
 				cachedPens.Count +
 
-#if WINFORM
 				hatchBrushes.Count + fonts.Values.Sum(f => f.Count) +
-#endif
-				/*images.Count +*/ cachedBrushes.Count
-#if WPF
-				+ typefaces.Sum(t=>t.Value.Count)
-#endif
-				;
+				/*images.Count +*/ cachedBrushes.Count;
 
 			// pens
 			foreach (var plist in cachedPens.Values)
 			{
-#if WINFORM
 				foreach (var p in plist) p.Dispose();
-#endif // WINFORM
 				plist.Clear();
 			}
 
 			cachedPens.Clear();
 
-#if WINFORM
 			// fonts
 			foreach (var fl in fonts.Values)
 			{
@@ -560,20 +465,12 @@ namespace unvell.Common
 			{
 				sb.Dispose();
 			}
-#elif WPF
-			foreach (var list in typefaces)
-			{
-				list.Value.Clear();
-			}
-#endif // WPF
 
 			cachedBrushes.Clear();
 
-#if WINFORM
 
 			//if (cachedGDIGraphics != null) cachedGDIGraphics.Dispose();
 			//if (bitmapForCachedGDIGraphics != null) bitmapForCachedGDIGraphics.Dispose();
-#endif // WINFORM
 
 			Logger.Log("resource pool", count + " objects released.");
 		}
@@ -585,4 +482,3 @@ namespace unvell.Common
 	}
 }
 
-#endif // WINFORM || WPF

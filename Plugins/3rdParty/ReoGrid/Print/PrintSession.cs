@@ -25,11 +25,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 #endif // DEBUG
 
-#if WINFORM
 using PlatformGraphics = System.Drawing.Graphics;
-#elif WPF
-using PlatformGraphics = System.Windows.Media.DrawingContext;
-#endif // WPF
 
 using unvell.ReoGrid.Views;
 using unvell.ReoGrid.Graphics;
@@ -142,9 +138,7 @@ namespace unvell.ReoGrid.Print
 
 			var currentPS = sheet.PrintSettings;
 
-#if WINFORM
 			this.currentGDIPageSettings = sheet.CreateGDIPageSettings();
-#endif // WINFORM
 
 		}
 		#endregion // NextWorksheet
@@ -228,9 +222,7 @@ namespace unvell.ReoGrid.Print
 
 			if (this.DrawingContext.Graphics == null)
 			{
-#if WINFORM
 				this.DrawingContext.Graphics = new unvell.ReoGrid.WinForm.GDIRenderer(pg);
-#endif // WINFORM
 			}
 			else
 			{

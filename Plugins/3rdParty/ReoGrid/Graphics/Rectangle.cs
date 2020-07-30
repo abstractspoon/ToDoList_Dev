@@ -18,11 +18,7 @@
 
 using System;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF || iOS
-using RGFloat = System.Double;
-#endif // WPF || iOS
 
 namespace unvell.ReoGrid.Graphics
 {
@@ -328,7 +324,6 @@ namespace unvell.ReoGrid.Graphics
 		}
 
 		#region Platform Associated
-#if WINFORM
 		/// <summary>
 		/// Convert System.Drawing.Rectangle to unvell.ReoGrid.Graphics.Rectangle.
 		/// </summary>
@@ -365,48 +360,7 @@ namespace unvell.ReoGrid.Graphics
 		{
 			return new System.Drawing.RectangleF(r.X, r.Y, r.Width, r.Height);
 		}
-#endif // WINFORM
 
-#if ANDROID
-		public static implicit operator Android.Graphics.RectF(Rectangle r)
-		{
-			return new Android.Graphics.RectF(r.Left, r.Top, r.Right, r.Bottom);
-		}
-		public static implicit operator Rectangle(Android.Graphics.RectF rect)
-		{
-			return new Rectangle(rect.Left, rect.Top, rect.Width(), rect.Height());
-		}
-		public static implicit operator Android.Graphics.Rect(Rectangle r)
-		{
-			return new Android.Graphics.Rect((int)r.Left, (int)r.Top, (int)r.Right, (int)r.Bottom);
-		}
-		public static implicit operator Rectangle(Android.Graphics.Rect rect)
-		{
-			return new Rectangle(rect.Left, rect.Top, rect.Width(), rect.Height());
-		}
-#endif // ANDROID
-
-#if WPF
-		public static implicit operator System.Windows.Rect(Rectangle r)
-		{
-			return new System.Windows.Rect(r.X, r.Y, r.Width, r.Height);
-		}
-		public static implicit operator Rectangle(System.Windows.Rect r)
-		{
-			return new Rectangle(r.X, r.Y, r.Width, r.Height);
-		}
-#endif // WPF
-
-#if iOS
-		public static implicit operator CoreGraphics.CGRect(Rectangle r)
-		{
-			return new CoreGraphics.CGRect(r.X, r.Y, r.Width, r.Height);
-		}
-		public static implicit operator Rectangle(CoreGraphics.CGRect r)
-		{
-			return new Rectangle(r.X, r.Y, r.Width, r.Height);
-		}
-#endif // iOS
 		#endregion // Platform Associated
 	}
 }

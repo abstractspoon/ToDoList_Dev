@@ -21,14 +21,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-#if WINFORM
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
-using RGFloat = System.Double;
-using RGImage = System.Windows.Media.ImageSource;
-#endif // WINFORM
 
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Graphics;
@@ -37,7 +32,6 @@ using unvell.ReoGrid.Interaction;
 
 namespace unvell.ReoGrid.CellTypes
 {
-#if WINFORM
 
 	/// <summary>
 	/// Represents an abstract base class for custom drop-down cell.
@@ -407,7 +401,6 @@ namespace unvell.ReoGrid.CellTypes
 		/// <summary>
 		/// Prepresents dropdown window for dropdown cells.
 		/// </summary>
-#if WINFORM
 		protected class DropdownWindow : ToolStripDropDown
 		{
 			private DropdownCell owner;
@@ -465,26 +458,9 @@ namespace unvell.ReoGrid.CellTypes
 				}
 			}
 		}
-#elif WPF
-		protected class DropdownWindow : System.Windows.Controls.Primitives.Popup
-		{
-			private DropdownCell owner;
-
-			public DropdownWindow(DropdownCell owner)
-			{
-				this.owner = owner;
-			}
-
-			public void Hide()
-			{
-				this.IsOpen = false;
-			}
-		}
-#endif // WPF
 
 		#endregion // Dropdown Window
 
 	}
 
-#endif // WINFORM
 }

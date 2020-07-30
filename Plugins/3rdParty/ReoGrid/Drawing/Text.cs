@@ -18,24 +18,15 @@
 
 #if DRAWING
 
-#if (WINFORM || WPF)
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
 using RGFont = System.Drawing.Font;
 using RGPen = System.Drawing.Pen;
 using RGBrush = System.Drawing.SolidBrush;
-#elif WPF
-using RGFloat = System.Double;
-using RGFont = System.Windows.Media.Typeface;
-using RGPen = System.Windows.Media.Pen;
-using RGBrush = System.Windows.Media.SolidColorBrush;
-#endif // WINFORM
 
 using unvell.Common;
 using unvell.ReoGrid.Graphics;
@@ -50,12 +41,10 @@ namespace unvell.ReoGrid.Drawing
 	/// </summary>
 	public sealed class RichText
 	{
-#if WINFORM
 		internal System.Drawing.StringFormat sf = new System.Drawing.StringFormat(System.Drawing.StringFormat.GenericTypographic)
 		{
 			FormatFlags = System.Drawing.StringFormatFlags.NoWrap | System.Drawing.StringFormatFlags.MeasureTrailingSpaces,
 		};
-#endif // WINFORM
 
 		private bool suspendUpdateText = false;
 
@@ -214,7 +203,6 @@ namespace unvell.ReoGrid.Drawing
 			this.Overflow = false;
 		}
 
-#if WINFORM
 		/// <summary>
 		/// Dispose rich text object and attached resources.
 		/// </summary>
@@ -222,7 +210,6 @@ namespace unvell.ReoGrid.Drawing
 		{
 			this.sf.Dispose();
 		}
-#endif // WINFORM
 
 		/// <summary>
 		/// Create an instance of rich format text with an specified initial display area size.
@@ -446,9 +433,8 @@ namespace unvell.ReoGrid.Drawing
 							{
 								lastColor = textColor;
 
-#if WINFORM || ANDROID
-								if (lastBrush != null) lastBrush.Dispose();
-#endif // WINFORM
+								if (lastBrush != null)
+									lastBrush.Dispose();
 								lastBrush = new RGBrush(lastColor);
 							}
 
@@ -462,11 +448,7 @@ namespace unvell.ReoGrid.Drawing
 
 						if ((r.FontStyles & FontStyles.Underline) == FontStyles.Underline)
 						{
-#if WINFORM
 							using (var underlinePen = new RGPen(lastBrush.Color))
-#elif WPF
-							var underlinePen = new RGPen(new RGBrush(lastBrush.Color), 1);
-#endif // WPF
 							{
 								RGFloat underlineY = l.Height + y + 1;
 								g.PlatformGraphics.DrawLine(underlinePen, new Point(b.leftTop.X + x, underlineY), new Point(b.rightTop.X + x, underlineY));
@@ -476,17 +458,7 @@ namespace unvell.ReoGrid.Drawing
 						var tx = b.leftTop.X + x;
 						var ty = b.leftTop.Y + y;
 
-#if WINFORM || ANDROID
 						g.PlatformGraphics.DrawString(b.Str, b.FontInfo.Font, lastBrush, tx, ty, this.sf);
-#elif WPF
-						var gr = new System.Windows.Media.GlyphRun(b.FontInfo.GlyphTypeface, 0, false, r.FontSize * 1.33d,
-							new ushort[] { b.GlyphIndex },
-							new System.Windows.Point(tx, ty),
-							new double[] { b.Width }, null, null, null, null,
-							null, null);
-
-						g.PlatformGraphics.DrawGlyphRun(lastBrush, gr);
-#endif // WPF
 					}
 				}
 
@@ -766,11 +738,7 @@ namespace unvell.ReoGrid.Drawing.Text
 						{
 							char c = r.Text[i];//.ToString();
 
-#if WINFORM || ANDROID
 							var b = new Box(r, c.ToString(), curFontInfo, r.TextSizes[i], r.FontInfo.LineHeight);
-#elif WPF
-							var b = new Box(r, c.ToString(), curFontInfo, r.GlyphIndexes[i], r.TextSizes[i]);
-#endif // WPF
 
 							rs.AddCachedBox(b);
 
@@ -1058,12 +1026,7 @@ namespace unvell.ReoGrid.Drawing.Text
 	{
 		private RichText rt;
 
-#if WINFORM || ANDROID
 		internal List<RGFloat> TextSizes { get; private set; }
-#elif WPF
-		internal List<double> TextSizes { get; private set; }
-		internal List<ushort> GlyphIndexes { get; private set; }
-#endif // WPF
 
 		#region Font Info
 		private BoxFontInfo fontInfo = null;
@@ -1086,7 +1049,6 @@ namespace unvell.ReoGrid.Drawing.Text
 						renderFontSize *= 0.6f;
 					}
 
-#if WINFORM
 					var font = new System.Drawing.Font(this.fontName, (float)renderFontSize,
 						(System.Drawing.FontStyle)(this.fontStyles & ~(FontStyles.Superscrit | FontStyles.Subscript | FontStyles.Underline)));
 
@@ -1099,24 +1061,6 @@ namespace unvell.ReoGrid.Drawing.Text
 
 					fontInfo.Ascent = font.Size * ascent / emHeight;
 					fontInfo.LineHeight = font.Size * lineSpacing / emHeight;
-
-#elif WPF
-					var typeface = new System.Windows.Media.Typeface(
-						new System.Windows.Media.FontFamily(this.fontName),
-						PlatformUtility.ToWPFFontStyle(this.fontStyles),
-						(this.fontStyles & FontStyles.Bold) == FontStyles.Bold ?
-						System.Windows.FontWeights.Bold : System.Windows.FontWeights.Normal,
-						System.Windows.FontStretches.Normal);
-
-					System.Windows.Media.GlyphTypeface glyphTypeface;
-					typeface.TryGetGlyphTypeface(out glyphTypeface);
-
-					this.fontInfo.Typeface = typeface;
-					this.fontInfo.GlyphTypeface = glyphTypeface;
-
-					fontInfo.Ascent = typeface.FontFamily.Baseline;
-					fontInfo.LineHeight = typeface.CapsHeight;
-#endif // WPF
 
 					//fontInfo.Height = font.Height;
 				}
@@ -1149,13 +1093,7 @@ namespace unvell.ReoGrid.Drawing.Text
 			this.FontStyles = fontStyles;
 			this.TextColor = textColor;
 			this.BackColor = backColor;
-
-#if WINFORM
 			this.TextSizes = new List<RGFloat>();
-#elif WPF
-			this.TextSizes = new List<double>();
-			this.GlyphIndexes = new List<ushort>();
-#endif // WPF
 		}
 
 		#region Text
@@ -1177,7 +1115,6 @@ namespace unvell.ReoGrid.Drawing.Text
 		{
 			this.text += text;
 
-#if WINFORM
 			//foreach (var c in text)
 			{
 				var g = ResourcePoolManager.CachedGDIGraphics;
@@ -1200,22 +1137,6 @@ namespace unvell.ReoGrid.Drawing.Text
 					//}
 				}
 			}
-#elif WPF
-			var glyphTypeface = this.FontInfo.GlyphTypeface;
-			var size = this.fontSize * 1.33d;
-
-			this.GlyphIndexes.Capacity = text.Length;
-
-			for (int n = 0; n < text.Length; n++)
-			{
-				ushort glyphIndex = glyphTypeface.CharacterToGlyphMap[text[n]];
-				GlyphIndexes.Add(glyphIndex);
-
-				double width = glyphTypeface.AdvanceWidths[glyphIndex] * size;
-				this.TextSizes.Add(width);
-			}
-
-#endif // WINFORM
 		}
 		#endregion // Text
 
@@ -1271,12 +1192,7 @@ namespace unvell.ReoGrid.Drawing.Text
 
 	internal class BoxFontInfo
 	{
-#if WINFORM
 		public System.Drawing.Font Font { get; set; }
-#elif WPF
-		public System.Windows.Media.Typeface Typeface { get; set; }
-		public System.Windows.Media.GlyphTypeface GlyphTypeface { get; set; }
-#endif // WPF
 
 		public RGFloat Ascent { get; set; }
 		//public RGFloat Height { get; set; }
@@ -1309,7 +1225,6 @@ namespace unvell.ReoGrid.Drawing.Text
 			this.Str = str;
 		}
 
-#if WINFORM
 		public Box(Run run, string str, BoxFontInfo fontInfo, RGFloat width, RGFloat height)
 			: this(run, str)
 		{
@@ -1317,18 +1232,6 @@ namespace unvell.ReoGrid.Drawing.Text
 			this.Width = width;
 			this.Height = height;
 		}
-#elif WPF
-
-		internal ushort GlyphIndex { get; private set; }
-
-		public Box(Run run, string str, BoxFontInfo fontInfo, ushort glyphIndex, double width)
-			: this(run, str)
-		{
-			this.FontInfo = fontInfo;
-			this.GlyphIndex = glyphIndex;
-			this.Width = width;
-		}
-#endif // WINFORM
 
 		public override string ToString()
 		{
@@ -1446,7 +1349,5 @@ namespace unvell.ReoGrid.Drawing.Text
 	}
 	#endregion // CJKHelper
 }
-
-#endif // (WINFORM || WPF)
 
 #endif // DRAWING

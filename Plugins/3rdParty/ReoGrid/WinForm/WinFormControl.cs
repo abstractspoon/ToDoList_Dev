@@ -16,8 +16,6 @@
  *
  ****************************************************************************/
 
-#if WINFORM
-
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -57,10 +55,8 @@ namespace unvell.ReoGrid
 	/// </summary>
 
 	//[DefaultProperty("Template")]
-//#if WINFORM
 //	[Designer(typeof(ReoGridControlDesigner))]
 //	[ToolboxItem(typeof(ReoGridControlToolboxItem))]
-//#endif // WINFORM
 
 	public partial class ReoGridControl : System.Windows.Forms.Control, IVisualWorkbook,
 		IRangePickableControl, IContextMenuControl, IPersistenceWorkbook, IActionControl, IWorkbook,
@@ -284,9 +280,9 @@ namespace unvell.ReoGrid
 
 			this.InitWorkbook(this.adapter);
 
-#if WINFORM && DEBUG
+#if DEBUG
 			Logger.RegisterWritter(WinForm.RGDebugLogWritter.Instance);
-#endif // WINFORM && DEBUG
+#endif // DEBUG
 
 			//this.sheetTab.VisibleChanged += canvasElements_VisibleChanged;
 			//this.hScrollBar.VisibleChanged += canvasElements_VisibleChanged;
@@ -1410,4 +1406,3 @@ namespace unvell.ReoGrid
 	}
 }
 
-#endif // WINFORM

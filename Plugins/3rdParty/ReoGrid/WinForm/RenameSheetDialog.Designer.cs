@@ -16,8 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
-
 namespace unvell.ReoGrid.WinForm
 {
 	partial class RenameSheetDialog
@@ -124,4 +122,3 @@ namespace unvell.ReoGrid.WinForm
 	}
 }
 
-#endif // WINFORM

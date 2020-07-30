@@ -21,18 +21,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-#if WINFORM
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
-using RGFloat = System.Double;
-using RGImage = System.Windows.Media.ImageSource;
-#endif // WINFORM
 
 namespace unvell.ReoGrid.CellTypes
 {
-#if WINFORM
 	/// <summary>
 	/// Representation of a typecial dropdown control on spreadsheet
 	/// </summary>
@@ -149,7 +143,6 @@ namespace unvell.ReoGrid.CellTypes
 			base.PushDown();
 		}
 
-#if WINFORM
 		private ListBox listBox;
 
 		void ListBox_KeyDown(object sender, KeyEventArgs e)
@@ -177,10 +170,6 @@ namespace unvell.ReoGrid.CellTypes
 
 			PullUp();
 		}
-#elif WPF
-		private System.Windows.Controls.ListBox listBox;
-
-#endif // WPF
 
 		#region Items Property
 		private DropdownItemsCollection itemsCollection;
@@ -406,5 +395,4 @@ namespace unvell.ReoGrid.CellTypes
 			return new DropdownListCell(this.candidates);
 		}
 	}
-#endif // WINFORM
 }

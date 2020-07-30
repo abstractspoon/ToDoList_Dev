@@ -16,8 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -438,4 +436,3 @@ namespace unvell.ReoGrid.Tests
 }
 #endif // DEBUG
 
-#endif // WINFORM

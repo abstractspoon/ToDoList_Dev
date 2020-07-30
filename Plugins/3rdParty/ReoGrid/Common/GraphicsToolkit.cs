@@ -20,34 +20,13 @@
 
 using System;
 
-#if WINFORM
 using RGPen = System.Drawing.Pen;
 using RGPens = System.Drawing.Pens;
 using RGBrushes = System.Drawing.Brushes;
 using PlatformGraphics = System.Drawing.Graphics;
 using WFRect = System.Drawing.Rectangle;
 
-#elif WPF
-using RGPen = System.Windows.Media.Pen;
-using RGBrushes = System.Windows.Media.Brushes;
-using PlatformGraphics = System.Windows.Media.DrawingContext;
-#elif ANDROID
-using PlatformGraphics = Android.Graphics.Canvas;
-using RGPen = Android.Graphics.Paint;
-
-#elif iOS
-using PlatformGraphics = CoreGraphics.CGContext;
-using RGPen = CoreGraphics.CGContext;
-
-#endif // WPF
-
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#elif iOS
-using RGFloat = System.Double;
-#endif // WINFORM
 
 using unvell.ReoGrid.Graphics;
 
@@ -135,16 +114,7 @@ namespace unvell.Common
 		public static void FillTriangle(PlatformGraphics g, RGFloat size, Point loc, TriangleDirection dir = TriangleDirection.Down)
 		{
 
-#if WINFORM
 			var p = System.Drawing.Pens.Black;
-#elif WPF
-			var p = new System.Windows.Media.Pen(RGBrushes.Black, 1);
-#elif ANDROID
-			var p = new RGPen();
-			p.Color = Android.Graphics.Color.Black;
-#elif iOS
-			var p = g;
-#endif // WPF
 
 			FillTriangle(g, size, loc, dir, p);
 		}
@@ -160,11 +130,7 @@ namespace unvell.Common
 					loc.X -= size / 2;
 					for (x = 0; x < size / 2; x++)
 					{
-#if WINFORM || WPF
 						g.DrawLine(p, new Point(loc.X + x, y), new Point(loc.X + size - x - 1, y));
-#elif ANDROID
-						g.DrawLine(loc.X + x, y, loc.X + size - x - 1, y, p);
-#endif
 						y--;
 					}
 					break;
@@ -174,11 +140,7 @@ namespace unvell.Common
 					y--;
 					for (x = 0; x < size / 2; x++)
 					{
-#if WINFORM || WPF
 						g.DrawLine(p, new Point(loc.X + x, y), new Point(loc.X + size - x, y));
-#elif ANDROID
-						g.DrawLine(loc.X + x, y, loc.X + size - x, y, p);
-#endif
 						y++;
 					}
 					break;
@@ -187,11 +149,7 @@ namespace unvell.Common
 					loc.Y -= size / 2;
 					for (y = 0; y < size / 2; y++)
 					{
-#if WINFORM || WPF
 						g.DrawLine(p, new Point(x, loc.Y + y), new Point(x, loc.Y + size - y - 1));
-#elif ANDROID
-						g.DrawLine(x, loc.Y + y, x, loc.Y + size - y - 1, p);
-#endif
 						x--;
 					}
 					break;
@@ -200,11 +158,7 @@ namespace unvell.Common
 					loc.Y -= size / 2;
 					for (y = 0; y < size / 2; y++)
 					{
-#if WINFORM || WPF
 						g.DrawLine(p, new Point(x, loc.Y + y), new Point(x, loc.Y + size - y - 1));
-#elif ANDROID
-						g.DrawLine(x, loc.Y + y, x, loc.Y + size - y - 1, p);
-#endif
 						x++;
 					}
 					break;
@@ -214,7 +168,6 @@ namespace unvell.Common
 
 #endregion
 
-#if WINFORM
 
 #region Toolkit
 		public static void Draw3DButton(System.Drawing.Graphics g, System.Drawing.Rectangle rect, bool isPressed)
@@ -245,7 +198,7 @@ namespace unvell.Common
 			});
 		}
 #endregion
-#endif // WINFORM
+
 		/*
 				public static bool ConvertWebColor(string code, out SolidColor c)
 				{

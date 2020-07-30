@@ -18,34 +18,13 @@
 
 using unvell.ReoGrid.Graphics;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
 using unvell.ReoGrid.Interaction;
 using System;
-#elif WPF
-using RGFloat = System.Double;
-#endif // WPF
 
-#if WINFORM
 using RGPen = System.Drawing.Pen;
 using RGBrush = System.Drawing.Brush;
 using RGFont = System.Drawing.Font;
-
-#elif WPF
-using RGPen = System.Windows.Media.Pen;
-using RGBrush = System.Windows.Media.Brush;
-using RGFont = System.Windows.Media.Typeface;
-
-#elif ANDROID
-using RGPen = Android.Graphics.Paint;
-using RGBrush = Android.Graphics.Paint;
-
-#elif iOS
-using RGFloat = System.Double;
-using RGPen = CoreGraphics.CGContext;
-using RGBrush = CoreGraphics.CGContext;
-
-#endif // ANDROID
 
 using unvell.ReoGrid.Drawing.Text;
 
@@ -65,10 +44,7 @@ namespace unvell.ReoGrid.Rendering
 	{
 	}
 
-	internal interface IRenderer : IGraphics
-#if WINFORM
-		, System.IDisposable
-#endif // WINFORM
+	internal interface IRenderer : IGraphics, System.IDisposable
 	{
 		void DrawRunningFocusRect(RGFloat x, RGFloat y, RGFloat w, RGFloat h, SolidColor color, int runningOffset);
 

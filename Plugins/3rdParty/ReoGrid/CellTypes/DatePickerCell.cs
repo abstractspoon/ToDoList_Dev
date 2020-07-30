@@ -21,18 +21,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-#if WINFORM
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
-using RGFloat = System.Double;
-using RGImage = System.Windows.Media.ImageSource;
-#endif // WINFORM
 
 namespace unvell.ReoGrid.CellTypes
 {
-#if WINFORM
 	/// <summary>
 	/// Represetns a date picker cell on worksheet.
 	/// </summary>
@@ -85,5 +79,4 @@ namespace unvell.ReoGrid.CellTypes
 			return new DatePickerCell();
 		}
 	}
-#endif // WINFORM
 }

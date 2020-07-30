@@ -24,10 +24,7 @@ using System.Collections.Generic;
 using System.IO;
 
 using unvell.Common;
-
-#if WINFORM || WPF
 using unvell.Common.Win32Lib;
-#endif // WINFORM || WPF
 
 using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.IO;
@@ -41,22 +38,11 @@ using unvell.ReoScript;
 using unvell.ReoGrid.Script;
 #endif // EX_SCRIPT
 
-#if WINFORM || WPF
 //using CellArray = unvell.ReoGrid.Data.JaggedTreeArray<unvell.ReoGrid.ReoGridCell>;
 using CellArray = unvell.ReoGrid.Data.Index4DArray<unvell.ReoGrid.Cell>;
-#elif ANDROID || iOS
-using CellArray = unvell.ReoGrid.Data.ReoGridCellArray;
-#endif // ANDROID
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF || iOS
-using RGFloat = System.Double;
-#endif // WINFORM & WPF
-
-#if WINFORM
 using RGKeys = System.Windows.Forms.Keys;
-#endif // WINFORM
 
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Interaction;
@@ -289,7 +275,6 @@ namespace unvell.ReoGrid
 
 		#region Draw
 
-#if WINFORM
 		/*
 		public System.Drawing.Bitmap DrawToBitmap()
 		{
@@ -339,11 +324,7 @@ namespace unvell.ReoGrid
 			using (System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(bitmap))
 			{
 
-#if WINFORM
 				var ig = new GDIGraphics(g);
-#elif WPF
-				var ig = new unvell.ReoGrid.Rendering.GDIAdapterGraphics(g);
-#endif
 
 				var memViewportController = new NormalViewportController(this);
 				memViewportController.Bounds = new RGRect(0, 0, width, height);
@@ -357,7 +338,6 @@ namespace unvell.ReoGrid
 			return bitmap;
 		}
 		 */
-#endif // WINFORM
 		#endregion Draw To Bitmap
 
 		#region Freeze
@@ -1534,7 +1514,6 @@ namespace unvell.ReoGrid
 			this.waitingEndDirection = false;
 
 
-#if WINFORM || WPF
 			if (Toolkit.IsKeyDown(Win32.VKey.VK_CONTROL))
 			{
 				if (this.HasSettings(WorksheetSettings.Behavior_MouseWheelToZoom))
@@ -1543,7 +1522,6 @@ namespace unvell.ReoGrid
 				}
 			}
 			else
-#endif // WINFORM || WPF
 			{
 				if (!this.selStart.IsEmpty)
 				{
@@ -1577,7 +1555,6 @@ namespace unvell.ReoGrid
 					{
 						var svc = this.viewportController as IScrollableViewportController;
 
-#if WINFORM || WPF
 						if (Toolkit.IsKeyDown(Win32.VKey.VK_SHIFT))
 						{
 							svc.ScrollViews(ScrollDirection.Horizontal, -delta, 0);
@@ -1586,9 +1563,6 @@ namespace unvell.ReoGrid
 						{
 							svc.ScrollViews(ScrollDirection.Vertical, 0, -delta);
 						}
-#else
-							svc.ScrollViews(ScrollDirection.Vertical, 0, -delta);
-#endif // WINFORM || WPF
 					}
 				}
 			}
@@ -2114,7 +2088,6 @@ namespace unvell.ReoGrid
 		#endregion // Internal Utilites
 
 		#region Pick Range & Style Brush
-#if WINFORM || WPF
 		internal Func<Worksheet, RangePosition, bool> whenRangePicked;
 
 		internal void PickRange(Func<Worksheet, RangePosition, bool> onPicked)
@@ -2171,7 +2144,6 @@ namespace unvell.ReoGrid
 				});
 			}
 		}
-#endif // WINFORM || WPF
 		#endregion // Pick Range & Style Brush
 
 		#region Error Notification

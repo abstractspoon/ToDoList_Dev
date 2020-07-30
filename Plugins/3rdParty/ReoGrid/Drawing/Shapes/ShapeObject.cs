@@ -20,11 +20,7 @@
 
 using System;
 
-#if WINFORM
 using RGFloat = System.Single;
-#else
-using RGFloat = System.Double;
-#endif // WINFORM
 
 using unvell.ReoGrid.Rendering;
 using unvell.ReoGrid.Graphics;

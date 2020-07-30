@@ -24,13 +24,7 @@ using System.Text;
 using System.Diagnostics;
 #endif // DEBUG
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#elif iOS
-using RGFloat = System.Double;
-#endif // WINFORM
 
 #if EX_SCRIPT
 using unvell.ReoScript;
@@ -290,22 +284,6 @@ namespace unvell.ReoGrid
 			{
 				cell.InnerDisplay = Convert.ToString(data);
 			}
-
-#if WPF
-			cell.formattedText = null;
-
-			//if (cell.FormattedText == null || cell.FormattedText.Text != cell.InnerDisplay)
-			//{
-			//	float fontSize = cell.InnerStyle.FontSize * this.scaleFactor * (96f / 72f);
-
-			//	cell.FormattedText = new System.Windows.Media.FormattedText(cell.InnerDisplay, 
-			//		System.Globalization.CultureInfo.CurrentCulture,
-			//		System.Windows.FlowDirection.LeftToRight,
-			//		ResourcePoolManager.Instance.GetTypeface(cell.InnerStyle.FontName),
-			//		fontSize,
-			//		ResourcePoolManager.Instance.GetBrush(cell.InnerStyle.TextColor));
-			//}
-#endif
 
 			AfterCellDataUpdate(cell, dirtyCellStack);
 		}
@@ -1333,10 +1311,7 @@ namespace unvell.ReoGrid.Utility
 			toCell.RenderHorAlign = fromCell.RenderHorAlign;
 			toCell.RenderColor = fromCell.RenderColor;
 			toCell.DistributedIndentSpacing = fromCell.DistributedIndentSpacing;
-
-#if WINFORM
 			toCell.RenderFont = fromCell.RenderFont;
-#endif // WINFORM
 
 			// data format
 			toCell.DataFormat = fromCell.DataFormat;

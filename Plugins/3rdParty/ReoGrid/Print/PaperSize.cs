@@ -26,13 +26,8 @@ using System.Text;
 using unvell.ReoGrid.Rendering;
 using unvell.ReoGrid.Utility;
 
-#if WINFORM
 using RGFloat = System.Single;
 using RGSizeF = System.Drawing.SizeF;
-#elif WPF
-using RGFloat = System.Double;
-using RGSizeF = System.Windows.Size;
-#endif // WPF
 
 namespace unvell.ReoGrid.Print
 {

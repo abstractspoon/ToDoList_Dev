@@ -21,18 +21,12 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-#if WINFORM
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
-using RGFloat = System.Double;
-using RGImage = System.Windows.Media.ImageSource;
-#endif // WINFORM
 
 namespace unvell.ReoGrid.CellTypes
 {
-#if WINFORM
 
 	/// <summary>
 	/// Represents dropdown list cell for entire column.
@@ -84,6 +78,5 @@ namespace unvell.ReoGrid.CellTypes
 			this.PullUp();
 		}
 	}
-#endif // WINFORM
 
 }

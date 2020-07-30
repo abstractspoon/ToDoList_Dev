@@ -16,8 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
-
 using System.Drawing;
 using WFFontStyle = System.Drawing.FontStyle;
 
@@ -158,4 +156,3 @@ namespace unvell.ReoGrid.Rendering
 	#endregion // StaticResources
 }
 
-#endif // WINFORM

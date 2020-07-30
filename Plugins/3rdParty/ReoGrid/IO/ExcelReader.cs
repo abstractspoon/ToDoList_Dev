@@ -24,11 +24,7 @@ using System.IO;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#endif // WPF
 
 using RGWorkbook = unvell.ReoGrid.IWorkbook;
 using RGWorksheet = unvell.ReoGrid.Worksheet;
@@ -1028,9 +1024,7 @@ namespace unvell.ReoGrid.IO.OpenXML
 			Debug.WriteLine(string.Format("Cell Formula : {0} ms.", swFormula.ElapsedMilliseconds));
 			Debug.WriteLine(string.Format("Drawing      : {0} ms.", swDrawing.ElapsedMilliseconds));
 
-#if WINFORM
 			rgSheet._Debug_Validate_All();
-#endif // WINFORM
 #endif // DEBUG
 
 		}
@@ -1888,8 +1882,6 @@ namespace unvell.ReoGrid.IO.OpenXML
 
 					if (stream != null)
 					{
-
-#if WINFORM
 						System.Drawing.Image image = null;
 
 						try
@@ -1915,26 +1907,6 @@ namespace unvell.ReoGrid.IO.OpenXML
 						{
 							return new ImageObject(image);
 						}
-
-#elif WPF
-						try
-						{
-							System.Windows.Media.Imaging.BitmapImage biImg = new System.Windows.Media.Imaging.BitmapImage();
-
-							biImg.BeginInit();
-							biImg.StreamSource = stream;
-							biImg.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-							biImg.EndInit();
-
-							//stream.Dispose();
-
-							System.Windows.Media.ImageSource image = biImg as System.Windows.Media.ImageSource;
-
-							return image == null ? null : new ImageObject(image);
-						}
-						catch { }
-
-#endif // WINFORM
 
 					}
 				}

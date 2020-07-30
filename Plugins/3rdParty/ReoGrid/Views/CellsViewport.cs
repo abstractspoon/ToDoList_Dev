@@ -27,17 +27,10 @@ using unvell.ReoScript;
 using unvell.ReoGrid.Script;
 #endif // EX_SCRIPT
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#else
-using RGFloat = System.Double;
-#endif // WINFORM
 
 using unvell.Common;
-
-#if WINFORM || WPF
 using unvell.Common.Win32Lib;
-#endif // WINFORM || WPF
 
 using unvell.ReoGrid.Core;
 using unvell.ReoGrid.Utility;
@@ -995,7 +988,6 @@ namespace unvell.ReoGrid.Views
 
 						SolidColor selectionBorderColor = controlStyle.Colors[ControlAppearanceColors.SelectionBorder];
 
-#if WINFORM
 						if (sheet.FocusPosStyle == FocusPosStyle.Default)
 						{
 							g.PushClip(g.PlatformGraphics.ClipBounds);
@@ -1007,9 +999,6 @@ namespace unvell.ReoGrid.Views
 						{
 							g.FillRectangle(scaledSelectionRect, selectionFillColor);
 						}
-#elif WPF
-						g.FillRectangle(scaledSelectionRect, selectionFillColor);
-#endif // WPF
 
 						if (selectionBorderColor.A > 0)
 						{
@@ -1787,7 +1776,6 @@ namespace unvell.ReoGrid.Views
 							sheet.lastChangedSelectionRange = sheet.selectionRange;
 							sheet.selEnd = pos;
 
-#if WINFORM || WPF
 							//if (sheet.controlAdapter.ControlInstance is IRangePickableControl)
 							//{
 							if (sheet.whenRangePicked != null)
@@ -1798,7 +1786,6 @@ namespace unvell.ReoGrid.Views
 								}
 							}
 							//}
-#endif // WINFORM || WPF
 
 							sheet.RaiseSelectionRangeChanged(new RangeEventArgs(sheet.selectionRange));
 

@@ -21,11 +21,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF || iOS
-using RGFloat = System.Double;
-#endif
 
 namespace unvell.ReoGrid.Graphics
 {
@@ -123,7 +119,6 @@ namespace unvell.ReoGrid.Graphics
 		}
 
 		#region Platform Associated
-#if WINFORM
 		/// <summary>
 		/// Convert System.Drawing.Point to unvell.ReoGrid.Graphics.Point.
 		/// </summary>
@@ -160,41 +155,6 @@ namespace unvell.ReoGrid.Graphics
 		{
 			return new System.Drawing.PointF(p.X, p.Y);
 		}
-#endif // WINFORM
-
-#if WPF
-		public static implicit operator System.Windows.Point(Point p)
-		{
-			return new System.Windows.Point(p.X, p.Y);
-		}
-		public static implicit operator Point(System.Windows.Point p)
-		{
-			return new Point(p.X, p.Y);
-		}
-#endif // WPF
-
-#if ANDROID
-		public static implicit operator Android.Graphics.PointF(Point p)
-		{
-			return new Android.Graphics.PointF(p.X, p.Y);
-		}
-		public static implicit operator Point(Android.Graphics.PointF p)
-		{
-			return new Point(p.X, p.Y);
-		}
-#endif // ANDROID
-
-#if iOS
-		public static implicit operator CoreGraphics.CGPoint(Point p)
-		{
-			return new CoreGraphics.CGPoint(p.X, p.Y);
-		}
-		public static implicit operator Point(CoreGraphics.CGPoint p)
-		{
-			return new Point(p.X, p.Y);
-		}
-#endif // WPF
-
 
 		#endregion // Platform Associated
 	}

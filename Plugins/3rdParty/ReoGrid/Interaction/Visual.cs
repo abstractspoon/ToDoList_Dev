@@ -20,11 +20,7 @@ using System.Collections.Generic;
 
 using unvell.ReoGrid.Graphics;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#else
-using RGFloat = System.Double;
-#endif // WINFORM
 
 namespace unvell.ReoGrid.Interaction
 {

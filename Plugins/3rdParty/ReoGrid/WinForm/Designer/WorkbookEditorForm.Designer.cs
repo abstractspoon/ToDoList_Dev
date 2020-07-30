@@ -1,4 +1,4 @@
-﻿#if WINFORM
+﻿
 
 namespace unvell.ReoGrid.WinForm.Designer
 {
@@ -106,4 +106,3 @@ namespace unvell.ReoGrid.WinForm.Designer
 	}
 }
 
-#endif

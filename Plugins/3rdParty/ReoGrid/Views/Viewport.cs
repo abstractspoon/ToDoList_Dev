@@ -19,19 +19,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
 using RGIntDouble = System.Int32;
-
-#elif WPF
-using RGFloat = System.Double;
-using RGIntDouble = System.Double;
-
-#elif iOS
-using RGFloat = System.Double;
-using RGIntDouble = System.Double;
-
-#endif
 
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Rendering;
@@ -453,13 +442,13 @@ namespace unvell.ReoGrid.Views
 				g.PopClip();
 			}
 			
-#if VP_DEBUG && WINFORM
+#if VP_DEBUG
 				dc.Graphics.PlatformGraphics.DrawString(string.Format("VR {0},{1}-{2},{3} VS X{4},Y{5}\nSD {6}", this.visibleRegion.startRow,
 					this.visibleRegion.startCol, this.visibleRegion.endRow, this.visibleRegion.endCol, this.ViewLeft, this.ViewTop,
 					this.ScrollableDirections.ToString()),
 					System.Drawing.SystemFonts.DialogFont, System.Drawing.Brushes.Blue, this.Left + 1, this.Top + 
 					((this is CellsViewport) ? 30 : this.Height / 2));
-#endif // VP_DEBUG && WINFORM
+#endif // VP_DEBUG
 
 #if DEBUG
 			sw.Stop();

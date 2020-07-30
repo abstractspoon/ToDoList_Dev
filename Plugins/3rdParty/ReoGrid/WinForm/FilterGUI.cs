@@ -16,7 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
 
 using System;
 
@@ -282,4 +281,3 @@ namespace unvell.ReoGrid.WinForm
 	}
 }
 
-#endif // WINFORM

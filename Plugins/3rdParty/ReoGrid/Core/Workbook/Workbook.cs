@@ -33,31 +33,16 @@ using unvell.ReoGrid.Interaction;
 using unvell.ReoGrid.Print;
 #endif // PRINT
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#elif iOS
-using RGFloat = System.Double;
 
-#endif // WPF
-
-#if WINFORM || WPF
 using ReoGridControl = unvell.ReoGrid.ReoGridControl;
-#elif ANDROID
-using ReoGridControl = unvell.ReoGrid.ReoGridView;
-
-#elif iOS
-using ReoGridControl = unvell.ReoGrid.ReoGridView;
-
-#endif // ANDROID
 
 namespace unvell.ReoGrid
 {
 	internal partial class Workbook : IWorkbook
-#if (WINFORM || WPF) && PRINT
+#if PRINT
 		, IPrintableContainer
-#endif // (WINFORM || WPF) && PRINT
+#endif // PRINT
 	{
 		internal List<Worksheet> worksheets = new List<Worksheet>();
 

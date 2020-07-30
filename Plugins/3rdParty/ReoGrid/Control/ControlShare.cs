@@ -29,40 +29,13 @@ using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Views;
 using unvell.ReoGrid.Interaction;
 
-#if WINFORM
 using RGFloat = System.Single;
 using RGPointF = System.Drawing.PointF;
 using IntOrDouble = System.Int32;
 //using ReoGridControl = unvell.ReoGrid.ReoGridControl;
 
-#elif WPF
-using RGFloat = System.Double;
-using RGPoint = System.Windows.Point;
-using RGPointF = System.Windows.Point;
-using IntOrDouble = System.Double;
-//using ReoGridControl = unvell.ReoGrid.ReoGridControl;
-
-#elif ANDROID
-using RGFloat = System.Single;
-using RGPoint = Android.Graphics.Point;
-using IntOrDouble = System.Int32;
-using ReoGridControl = unvell.ReoGrid.ReoGridView;
-
-#elif iOS
-using RGFloat = System.Double;
-using RGPointF = CoreGraphics.CGPoint;
-using IntOrDouble = System.Double;
-using ReoGridControl = unvell.ReoGrid.ReoGridView;
-
-#endif // WPF
-
-#if WINFORM
 using Cursor = System.Windows.Forms.Cursor;
 //using Cursors = System.Windows.Forms.Cursor;
-#elif WPF
-using Cursor = System.Windows.Input.Cursor;
-//using Cursors = System.Windows.Input.Cursors;
-#endif // WPF
 
 using unvell.ReoGrid.Main;
 using unvell.ReoGrid.Rendering;
@@ -70,18 +43,13 @@ using unvell.ReoGrid.Rendering;
 namespace unvell.ReoGrid
 {
 
-#if WINFORM || WPF
 	partial class ReoGridControl
-#elif ANDROID || iOS
-	partial class ReoGridView
-#endif // ANDROID || iOS
 	{
 		private IRenderer renderer;
 
 		#region Initialize
 		private void InitControl()
 		{
-#if WINFORM || WPF
 			// initialize cursors
 			// normal grid selector
 			this.builtInCellsSelectionCursor = LoadCursorFromResource(unvell.ReoGrid.Properties.Resources.grid_select);
@@ -97,7 +65,6 @@ namespace unvell.ReoGrid
 			this.builtInEntireSheetSelectCursor = this.builtInCellsSelectionCursor;
 
 			this.builtInCrossCursor = LoadCursorFromResource(unvell.ReoGrid.Properties.Resources.cross);
-#endif // WINFORM || WPF
 
 			this.controlStyle = ControlAppearanceStyle.CreateDefaultControlStyle();
 		}
@@ -649,12 +616,12 @@ namespace unvell.ReoGrid
 		/// <summary>
 		/// Event raised when background color of worksheet name is changed.
 		/// </summary>
-		public event EventHandler<WorksheetEventArgs> WorksheetNameBackColorChanged;
+		//public event EventHandler<WorksheetEventArgs> WorksheetNameBackColorChanged;
 
 		/// <summary>
 		/// Event raised when text color of worksheet name is changed.
 		/// </summary>
-		public event EventHandler<WorksheetEventArgs> WorksheetNameTextColorChanged;
+		//public event EventHandler<WorksheetEventArgs> WorksheetNameTextColorChanged;
 
 		#endregion // Worksheet Management
 
@@ -1167,7 +1134,6 @@ namespace unvell.ReoGrid
 		#endregion // Internal Exceptions
 
 		#region Cursors
-#if WINFORM || WPF
 		private Cursor builtInCellsSelectionCursor = null;
 		private Cursor builtInFullColSelectCursor = null;
 		private Cursor builtInFullRowSelectCursor = null;
@@ -1217,11 +1183,9 @@ namespace unvell.ReoGrid
 				return new Cursor(ms);
 			}
 		}
-#endif // WINFORM || WPF
 		#endregion Cursors
 
 		#region Pick Range
-#if WINFORM || WPF
 		/// <summary>
 		/// Start to pick a range from current worksheet.
 		/// </summary>
@@ -1265,7 +1229,6 @@ namespace unvell.ReoGrid
 			this.internalCurrentCursor = (this.customCellsSelectionCursor != null ?
 				this.customCellsSelectionCursor : this.builtInCellsSelectionCursor);
 		}
-#endif // WINFORM || WPF
 		#endregion // Pick Range
 
 		#region Appearance
@@ -1294,13 +1257,8 @@ namespace unvell.ReoGrid
 
 				this.adapter.Invalidate();
 
-#if WINFORM
 				sheetTab.BackColor = value[ControlAppearanceColors.SheetTabBackground];
 				this.BackColor = value[ControlAppearanceColors.GridBackground];
-#elif WPF
-				sheetTab.Background = new System.Windows.Media.SolidColorBrush(value[ControlAppearanceColors.SheetTabBackground]);
-#endif // WINFORM & WPF
-
 			}
 		}
 		#endregion // App
@@ -1351,18 +1309,12 @@ namespace unvell.ReoGrid
 		}
 		#endregion // Mouse
 
-#if WINFORM || WPF
-#if WINFORM
 		/// <summary>
 		/// Overrides mouse-leave event
 		/// </summary>
 		/// <param name="e">Argument of mouse-leave</param>
 		protected override void OnMouseLeave(EventArgs e)
 		{
-#elif WPF
-		protected override void OnMouseLeave(System.Windows.Input.MouseEventArgs e)
-		{
-#endif // WPF
 			base.OnMouseLeave(e);
 
 			if (this.currentWorksheet != null)
@@ -1371,7 +1323,6 @@ namespace unvell.ReoGrid
 				this.currentWorksheet.HoverPos = CellPosition.Empty;
 			}
 		}
-#endif // WINFORM || WPF
 
 #if PRINT
 		/// <summary>

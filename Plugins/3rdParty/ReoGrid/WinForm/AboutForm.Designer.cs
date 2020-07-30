@@ -16,8 +16,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
-
 namespace unvell.ReoGrid.WinForm
 {
 	partial class AboutForm
@@ -155,4 +153,3 @@ namespace unvell.ReoGrid.WinForm
 	}
 }
 
-#endif // WINFORM

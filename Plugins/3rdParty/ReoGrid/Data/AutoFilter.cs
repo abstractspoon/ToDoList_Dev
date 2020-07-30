@@ -19,13 +19,7 @@
 using System;
 using System.Collections.Generic;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#elif iOS
-using RGFloat = System.Double;
-#endif // WINFORM
 
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Rendering;
@@ -326,14 +320,10 @@ namespace unvell.ReoGrid.Data
 				return bounds;
 			}
 
-#if WINFORM
 			/// <summary>
 			/// Get or set the context menu strip of column filter.
 			/// </summary>
 			public System.Windows.Forms.ContextMenuStrip ContextMenuStrip { get; set; }
-#elif WPF
-
-#endif
 
 			internal List<string> selectedTextItems = new List<string>();
 
@@ -559,13 +549,7 @@ namespace unvell.ReoGrid.Data
 
 			if (this.columnFilterUIFlag == AutoColumnFilterUI.DropdownButtonAndPanel)
 			{
-#if WINFORM
 				unvell.ReoGrid.WinForm.ColumnFilterContextMenu.ShowFilterPanel(headerBody, (System.Drawing.Point)point);
-#elif WPF
-				var ctx = new System.Windows.Controls.ContextMenu();
-				ctx.Items.Add(new System.Windows.Controls.MenuItem() { Header = "Item" });
-				ctx.IsOpen = true;
-#endif // WPF
 				return true;
 			}
 
@@ -604,14 +588,10 @@ namespace unvell.ReoGrid.Data
 
 				if (body != null)
 				{
-#if WINFORM
 					if (body.ContextMenuStrip != null)
 					{
 						body.ContextMenuStrip.Dispose();
 					}
-#elif WPF
-						// todo
-#endif
 
 					header.Body = null;
 				}

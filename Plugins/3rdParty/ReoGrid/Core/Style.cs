@@ -19,19 +19,8 @@
 using System;
 using System.Diagnostics;
 
-#if WINFORM || ANDROID
 using RGIntDouble = System.Int32;
 using RGFloat = System.Single;
-
-#elif WPF
-using RGFloat = System.Double;
-using RGIntDouble = System.Double;
-
-#elif iOS
-using RGFloat = System.Double;
-using RGIntDouble = System.Double;
-
-#endif // WPF
 
 using unvell.Common;
 
@@ -415,12 +404,6 @@ namespace unvell.ReoGrid
 				{
 					UpdateCellTextBounds(cell);
 				}
-#if WPF
-				else if (style.Flag.Has(PlainStyleFlag.TextColor))
-				{
-					UpdateCellFont(cell, UpdateFontReason.TextColorChanged);
-				}
-#endif // WPF
 			}
 			//else
 			//{
@@ -675,12 +658,7 @@ namespace unvell.ReoGrid
 
 			if ((flags & (/*PlainStyleFlag.AlignAll  // may don't need this  |*/
 				PlainStyleFlag.TextWrap |
-#if WINFORM || WPF || iOS
-				PlainStyleFlag.FontAll
-#elif ANDROID
-				PlainStyleFlag.FontName | PlainStyleFlag.FontStyleAll
-#endif // ANDROID
-				)) > 0)
+				PlainStyleFlag.FontAll)) > 0)
 			{
 				cell.FontDirty = true;
 			}
@@ -929,38 +907,27 @@ namespace unvell.ReoGrid
 
 			RGFloat cellWidth = cellBounds.Width * scaleFactor;
 
-#if WINFORM
+			if (cell.InnerStyle.HAlign == ReoGridHorAlign.DistributedIndent)
+			{
+				size.Width--;
 
-				if (cell.InnerStyle.HAlign == ReoGridHorAlign.DistributedIndent)
+				if (drawMode == DrawMode.View)
 				{
-					size.Width--;
-
-					if (drawMode == DrawMode.View)
-					{
-						cell.DistributedIndentSpacing = ((cellWidth - size.Width - 3) / (cell.DisplayText.Length - 1)) - 1;
-						if (cell.DistributedIndentSpacing < 0) cell.DistributedIndentSpacing = 0;
-					}
-					else
-					{
-						cell.DistributedIndentSpacingPrint = ((cellWidth - size.Width - 3) / (cell.DisplayText.Length - 1)) - 1;
-						if (cell.DistributedIndentSpacingPrint < 0) cell.DistributedIndentSpacingPrint = 0;
-					}
-
-					cell.RenderHorAlign = ReoGridRenderHorAlign.Center;
-					if (size.Width < cellWidth - 1) size.Width = (float)(Math.Round(cellWidth - 1));
+					cell.DistributedIndentSpacing = ((cellWidth - size.Width - 3) / (cell.DisplayText.Length - 1)) - 1;
+					if (cell.DistributedIndentSpacing < 0) cell.DistributedIndentSpacing = 0;
+				}
+				else
+				{
+					cell.DistributedIndentSpacingPrint = ((cellWidth - size.Width - 3) / (cell.DisplayText.Length - 1)) - 1;
+					if (cell.DistributedIndentSpacingPrint < 0) cell.DistributedIndentSpacingPrint = 0;
 				}
 
-#elif WPF
-
-			if (cell.InnerStyle.TextWrapMode != TextWrapMode.NoWrap)
-			{
-				cell.formattedText.MaxTextWidth = cellWidth;
+				cell.RenderHorAlign = ReoGridRenderHorAlign.Center;
+				if (size.Width < cellWidth - 1) size.Width = (float)(Math.Round(cellWidth - 1));
 			}
 
-#endif // WPF
-
-			#region Update Text Size Cache
-			RGFloat x = 0;
+				#region Update Text Size Cache
+				RGFloat x = 0;
 			RGFloat y = 0;
 
 			float indent = cell.InnerStyle.Indent;

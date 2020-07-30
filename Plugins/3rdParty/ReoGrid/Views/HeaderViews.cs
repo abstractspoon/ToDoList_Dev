@@ -18,11 +18,7 @@
 
 using System;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF || iOS
-using RGFloat = System.Double;
-#endif
 
 using unvell.Common;
 
@@ -156,12 +152,8 @@ namespace unvell.ReoGrid.Views
 				{
 					Rectangle rect = new Rectangle(x, 0, width, bounds.Height);
 
-#if WINFORM || WPF
 					g.FillRectangleLinear(controlStyle.GetColHeadStartColor(false, isSelected, isSelected && isFullColSelected, false),
 						controlStyle.GetColHeadEndColor(false, isSelected, isSelected && isFullColSelected, false), 90f, rect);
-#elif ANDROID
-					g.FillRectangle(rect, controlStyle.GetRowHeadEndColor(false, isSelected, isSelected && isFullColSelected, false));
-#endif // ANDROID
 
 					g.DrawLine(splitterLinePen, x, 0, x, bounds.Height);
 

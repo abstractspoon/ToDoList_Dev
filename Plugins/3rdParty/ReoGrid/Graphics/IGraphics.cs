@@ -18,7 +18,6 @@
 
 #pragma warning disable 1591
 
-#if WINFORM
 using RGFloat = System.Single;
 
 using RGPen = System.Drawing.Pen;
@@ -29,39 +28,6 @@ using RGImage = System.Drawing.Image;
 
 using PlatformGraphics = System.Drawing.Graphics;
 using RGTransform = System.Drawing.Drawing2D.Matrix;
-
-#elif ANDROID
-using RGFloat = System.Single;
-using PlatformGraphics = Android.Graphics.Canvas;
-using RGPen = Android.Graphics.Paint;
-using RGBrush = Android.Graphics.Paint;
-using RGPath = Android.Graphics.Path;
-using RGImage = Android.Graphics.Picture;
-using RGTransform = Android.Graphics.Matrix;
-
-#elif WPF
-
-using RGFloat = System.Double;
-
-using RGPath = System.Windows.Media.Geometry;
-using RGImage = System.Windows.Media.ImageSource;
-
-using RGPen = System.Windows.Media.Pen;
-using RGBrush = System.Windows.Media.Brush;
-
-using PlatformGraphics = System.Windows.Media.DrawingContext;
-using RGTransform = System.Windows.Media.Matrix;
-
-#elif iOS
-using RGFloat = System.Double;
-using PlatformGraphics = CoreGraphics.CGContext;
-using RGPen = CoreGraphics.CGContext;
-using RGBrush = CoreGraphics.CGContext;
-using RGPath = CoreGraphics.CGPath;
-using RGImage = CoreGraphics.CGImage;
-using RGTransform = CoreGraphics.CGAffineTransform;
-
-#endif // WPF
 
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Drawing.Text;

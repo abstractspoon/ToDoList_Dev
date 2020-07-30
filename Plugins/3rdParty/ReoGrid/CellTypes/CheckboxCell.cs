@@ -21,14 +21,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-#if WINFORM
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
-using RGFloat = System.Double;
-using RGImage = System.Windows.Media.ImageSource;
-#endif // WINFORM
 
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Rendering;
@@ -166,44 +161,11 @@ namespace unvell.ReoGrid.CellTypes
 		/// <param name="dc">Platform independency graphics context.</param>
 		protected override void OnContentPaint(CellDrawingContext dc)
 		{
-#if WINFORM
 			System.Windows.Forms.ButtonState bs = ButtonState.Normal;
 			if (IsPressed) bs |= ButtonState.Pushed;
 			if (IsChecked) bs |= ButtonState.Checked;
 
 			ControlPaint.DrawCheckBox(dc.Graphics.PlatformGraphics, (System.Drawing.Rectangle)ContentBounds, bs);
-#elif WPF
-			var g = dc.Graphics;
-
-			if (this.IsPressed)
-			{
-				g.FillRectangle(this.ContentBounds, StaticResources.SystemColor_Control);
-			}
-
-			g.DrawRectangle(this.ContentBounds, StaticResources.SystemColor_ControlDark);
-
-			if (this.isChecked)
-			{
-				var x = this.ContentBounds.X;
-				var y = this.ContentBounds.Y;
-				var w = this.ContentBounds.Width;
-				var h = this.ContentBounds.Height;
-
-				var path = new System.Windows.Media.PathGeometry();
-				var figure = new System.Windows.Media.PathFigure(new System.Windows.Point(x + w * 0.167, y + h * 0.546),
-					new System.Windows.Media.LineSegment[] {
-					new System.Windows.Media.LineSegment(new System.Windows.Point(x + w * 0.444, y + h * 0.712), false),
-					new System.Windows.Media.LineSegment(new System.Windows.Point(x + w * 0.833, y + h * 0.157), false),
-					new System.Windows.Media.LineSegment(new System.Windows.Point(x + w * 0.944, y + h * 0.323), false),
-					new System.Windows.Media.LineSegment(new System.Windows.Point(x + w * 0.500, y + h * 0.934), false),
-					new System.Windows.Media.LineSegment(new System.Windows.Point(x + w * 0.080, y + h * 0.712), false),
-					}, true);
-
-				path.Figures.Add(figure);
-
-				g.FillPath(StaticResources.SystemColor_WindowText, path);
-			}
-#endif // WPF
 		}
 
 		#endregion // Paint

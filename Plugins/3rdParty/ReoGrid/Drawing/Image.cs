@@ -9,13 +9,7 @@ using System.Text;
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Rendering;
 
-#if WINFORM
 using RGImage = System.Drawing.Image;
-#elif WPF
-using RGImage = System.Windows.Media.ImageSource;
-#elif ANDROID
-using RGImage = Android.Graphics.Picture;
-#endif // WINFORM
 
 namespace unvell.ReoGrid.Drawing
 {

@@ -25,11 +25,7 @@ using System.Linq;
 using System.Diagnostics;
 #endif
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#endif // WPF
 
 using unvell.ReoGrid.Outline;
 using unvell.ReoGrid.Graphics;
@@ -387,11 +383,7 @@ namespace unvell.ReoGrid.Views
 
 							if (this.scaleFactor > 0.5f)
 							{
-#if WINFORM
 								p.Width = 2;
-#elif WPF
-								p.Thickness = 2;
-#endif
 							}
 
 							Rectangle bbRect = outline.ToggleButtonBounds;
@@ -416,11 +408,7 @@ namespace unvell.ReoGrid.Views
 							g.DrawLine(p, bbRect.Left + 3, crossY, bbRect.Right - 2, crossY);
 
 							// frame
-#if WINFORM
 							p.Width = 1;
-#elif WPF
-								p.Thickness = 1;
-#endif
 							g.DrawRectangle(p, bbRect.X, bbRect.Y, bbRect.Width, bbRect.Height);
 						}
 					}
@@ -535,11 +523,7 @@ namespace unvell.ReoGrid.Views
 
 							if (this.scaleFactor > 0.5f)
 							{
-#if WINFORM
 								p.Width = 2;
-#elif WPF
-								p.Thickness = 2;
-#endif
 							}
 
 							Rectangle bbRect = outline.ToggleButtonBounds;
@@ -566,11 +550,7 @@ namespace unvell.ReoGrid.Views
 							g.DrawLine(p, bbRect.Left + 3, crossY, bbRect.Right - 2, crossY);
 
 							// frame
-#if WINFORM
 							p.Width = 1;
-#elif WPF
-								p.Thickness = 1;
-#endif
 							g.DrawRectangle(p, bbRect.X, bbRect.Y, bbRect.Width, bbRect.Height);
 						}
 					}

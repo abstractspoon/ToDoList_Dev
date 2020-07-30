@@ -372,20 +372,11 @@ namespace unvell.ReoGrid.Graphics
 				var c2 = (SolidColor)obj;
 				return this.A == c2.A && this.R == c2.R && this.G == c2.G && this.B == c2.B;
 			}
-#if WINFORM || ANDROID
 			else if (obj is System.Drawing.Color)
 			{
 				var c2 = (System.Drawing.Color)obj;
 				return this.A == c2.A && this.R == c2.R && this.G == c2.G && this.B == c2.B;
 			}
-#endif // WINFORM
-#if WPF
-			else if (obj is System.Windows.Media.Color)
-			{
-				var c2 = (System.Windows.Media.Color)obj;
-				return this.A == c2.A && this.R == c2.R && this.G == c2.G && this.B == c2.B;;
-			}
-#endif // WPF
 			else
 				return false;
 		}
@@ -405,7 +396,6 @@ namespace unvell.ReoGrid.Graphics
 
 		#region WinForm
 
-#if WINFORM
 		public static implicit operator SolidColor(System.Drawing.Color color)
 		{
 			return SolidColor.FromArgb(color.A, color.R, color.G, color.B);
@@ -433,9 +423,7 @@ namespace unvell.ReoGrid.Graphics
 			return c1.A == 0 && c1.R == 0 && c1.G == 0 && c1.B == 0 && c2.IsEmpty
 				|| c1.A == c2.A && c1.R == c2.R && c1.G == c2.G && c1.B == c2.B;
 		}
-#endif // WINFORM
 
-#if WINFORM
 		/// <summary>
 		/// Compare two colors and check whether they are same
 		/// </summary>
@@ -457,66 +445,8 @@ namespace unvell.ReoGrid.Graphics
 		//	return (this.A == 0 && this.R == 0 && this.G == 0 && this.B == 0 && c2.IsEmpty)
 		//		|| (this.A == c2.A && this.R == c2.R && this.G == c2.G && this.B == c2.B);
 		//}
-#endif // WINFORM
 
 		#endregion // WinForm
-
-#if WPF
-		public static implicit operator SolidColor(System.Windows.Media.Color color)
-		{
-			return SolidColor.FromArgb(color.A, color.R, color.G, color.B);
-		}
-		public static implicit operator System.Windows.Media.Color(SolidColor color)
-		{
-			return System.Windows.Media.Color.FromArgb(color.A, color.R, color.G, color.B);
-		}
-#endif // WPF
-
-#if ANDROID
-		public static implicit operator SolidColor(Android.Graphics.Color color)
-		{
-			return SolidColor.FromArgb(color.A, color.R, color.G, color.B);
-		}
-		public static implicit operator Android.Graphics.Color(SolidColor color)
-		{
-			return new Android.Graphics.Color(color.R, color.G, color.B, color.A);
-		}
-#endif // ANDROID
-
-#if iOS
-		public static implicit operator SolidColor(UIKit.UIColor color)
-		{
-			nfloat r, g, b, a;
-			color.GetRGBA(out r, out g, out b, out a);
-
-			int rr, gg, bb, aa;
-
-			rr = (int)Math.Round(r * 255);
-			if (rr < 0) rr = 0; else if (rr > 255) rr = 255;
-			gg = (int)Math.Round(g * 255);
-			if (gg < 0) gg = 0; else if (gg > 255) gg = 255;
-			bb = (int)Math.Round(b * 255);
-			if (bb < 0) bb = 0; else if (bb > 255) bb = 255;
-			aa = (int)Math.Round(a * 255);
-			if (aa < 0) aa = 0; else if (aa > 255) aa = 255;
-
-			return SolidColor.FromArgb(aa, rr, gg, bb);
-		}
-		public static implicit operator UIKit.UIColor(SolidColor color)
-		{
-			return new UIKit.UIColor(color.R / 255.0f, color.G / 255.0f,
-				color.B / 255.0f, color.A / 255.0f);
-		}
-		public static implicit operator SolidColor(CoreGraphics.CGColor color)
-		{
-			return new UIKit.UIColor(color);
-		}
-		public static implicit operator CoreGraphics.CGColor(SolidColor color)
-		{
-			return new CoreGraphics.CGColor(color.R / 255.0f, color.G / 255.0f, 
-				color.B / 255.0f, color.A / 255.0f);
-		}
-#endif // ANDROID
 		#endregion // Platform Converters
 
 		#region Predefined Colors

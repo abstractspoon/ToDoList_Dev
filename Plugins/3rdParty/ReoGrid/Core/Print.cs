@@ -23,13 +23,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-#if WINFORM
 using RGFloat = System.Single;
-
-#elif WPF
-using RGFloat = System.Double;
-
-#endif // WPF
 
 using unvell.ReoGrid.Print;
 using unvell.ReoGrid.Data;

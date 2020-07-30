@@ -23,7 +23,6 @@ using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Graphics;
 
-#if WINFORM
 using RGFloat = System.Single;
 using RGIntDouble = System.Int32;
 
@@ -33,29 +32,6 @@ using RGSize = System.Drawing.Size;
 using RGSizeF = System.Drawing.SizeF;
 using RGRect = System.Drawing.Rectangle;
 using RGRectF = System.Drawing.RectangleF;
-
-#elif WPF
-using RGFloat = System.Double;
-using RGIntDouble = System.Double;
-
-using IStringFormat = System.Object;
-
-using RGPoint = System.Windows.Point;
-using RGPointF = System.Windows.Point;
-using RGRect = System.Windows.Rect;
-
-#elif ANDROID
-using RGFloat = System.Single;
-using RGIntDouble = System.Int32;
-using RGRect = Android.Graphics.Rect;
-using RGPoint = Android.Graphics.Point;
-using RGPointF = Android.Graphics.PointF;
-
-#elif iOS
-using RGFloat = System.Double;
-using RGIntDouble = System.Double;
-
-#endif
 
 using unvell.ReoGrid.Views;
 using unvell.ReoGrid.Rendering;
@@ -81,18 +57,10 @@ namespace unvell.ReoGrid.Main
 
 	internal interface IContextMenuControl
 	{
-
-#if WINFORM
 		System.Windows.Forms.ContextMenuStrip ContextMenuStrip { get; }
 		System.Windows.Forms.ContextMenuStrip RowHeaderContextMenuStrip { get; }
 		System.Windows.Forms.ContextMenuStrip ColumnHeaderContextMenuStrip { get; }
 		System.Windows.Forms.ContextMenuStrip LeadHeaderContextMenuStrip { get; }
-#elif WPF
-		System.Windows.Controls.ContextMenu CellsContextMenu { get; }
-		System.Windows.Controls.ContextMenu RowHeaderContextMenu { get; }
-		System.Windows.Controls.ContextMenu ColumnHeaderContextMenu { get; }
-		System.Windows.Controls.ContextMenu LeadHeaderContextMenu { get; }
-#endif
 	}
 
 #if EX_SCRIPT

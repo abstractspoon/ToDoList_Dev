@@ -21,11 +21,7 @@
 using System;
 using System.Collections.Generic;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#else
-using RGFloat = System.Double;
-#endif // WINFORM
 
 using unvell.ReoGrid.Graphics;
 using unvell.ReoGrid.Drawing.Shapes;

@@ -21,14 +21,9 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-#if WINFORM
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
-using RGFloat = System.Double;
-using RGImage = System.Windows.Media.ImageSource;
-#endif // WINFORM
 
 using unvell.Common;
 using unvell.ReoGrid.Events;
@@ -37,7 +32,6 @@ using unvell.ReoGrid.Rendering;
 
 namespace unvell.ReoGrid.CellTypes
 {
-#if WINFORM
 
 	#region NumberInputCell
 	internal class NumberInputCell : CellBody
@@ -302,6 +296,5 @@ namespace unvell.ReoGrid.CellTypes
 	}
 	#endregion // NumberInputCell
 
-#endif // WINFORM
 
 }

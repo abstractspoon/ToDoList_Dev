@@ -9,13 +9,7 @@ using unvell.ReoScript;
 using unvell.ReoGrid.Script;
 #endif // EX_SCRIPT;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#elif iOS
-using RGFloat = System.Double;
-#endif // WPF
 
 using unvell.ReoGrid.Core;
 using unvell.ReoGrid.Actions;
@@ -247,12 +241,8 @@ namespace unvell.ReoGrid
 			//width -= indentSize;
 			//}
 
-#if WINFORM
-			if (width < cell.TextBounds.Width) width = cell.TextBounds.Width;
-#elif WPF
-			// why + 6 ?
-			if (width < cell.TextBounds.Width) width = cell.TextBounds.Width + 6;
-#endif
+			if (width < cell.TextBounds.Width)
+				width = cell.TextBounds.Width;
 
 			width--;
 			//width = (width - 1);

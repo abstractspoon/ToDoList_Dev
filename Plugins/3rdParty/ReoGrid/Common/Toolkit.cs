@@ -16,9 +16,7 @@
  * 
  ****************************************************************************/
 
-#if WINFORM || WPF
 using unvell.Common.Win32Lib;
-#endif // WINFORM || WPF
 
 using System;
 using System.Security.Cryptography;
@@ -31,7 +29,6 @@ namespace unvell.Common
 	/// </summary>
 	public static class Toolkit
 	{
-#if WINFORM || WPF
 		/// <summary>
 		/// Check whether or not the specified key is pressed.
 		/// </summary>
@@ -41,7 +38,6 @@ namespace unvell.Common
 		{
 			return ((Win32.GetKeyState(vkey) >> 15) & 1) == 1;
 		}
-#endif // WINFORM || WPF
 
 		private static MD5 md5 = null;
 

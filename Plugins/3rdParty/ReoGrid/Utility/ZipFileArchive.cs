@@ -126,7 +126,6 @@ namespace unvell.ReoGrid.Utility
 		}
 	}
 
-#if WINFORM || WPF
 	/// <summary>
 	/// Original Document: http://www.codeproject.com/Articles/209731/Csharp-use-Zip-archives-without-external-libraries
 	/// </summary>
@@ -161,7 +160,6 @@ namespace unvell.ReoGrid.Utility
 			};
 		}
 	}
-#endif // WINFORM || WPF
 
 	internal class MZipArchiveFactory
 	{

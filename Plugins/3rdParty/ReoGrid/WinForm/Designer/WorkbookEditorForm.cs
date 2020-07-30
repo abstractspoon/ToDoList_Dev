@@ -1,5 +1,4 @@
-﻿#if WINFORM
-
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -26,4 +25,3 @@ namespace unvell.ReoGrid.WinForm.Designer
 	}
 }
 
-#endif

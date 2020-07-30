@@ -411,27 +411,23 @@ namespace unvell.ReoGrid
 				return;
 			}
 
-#if WINFORM || WPF
 			if (!Common.Toolkit.IsKeyDown(unvell.Common.Win32Lib.Win32.VKey.VK_SHIFT))
 			{
-#endif // WINFORM || WPF
-			var viewport = this.viewportController.View.GetViewByPoint(location) as IRangeSelectableView;
+				var viewport = this.viewportController.View.GetViewByPoint(location) as IRangeSelectableView;
 
-			if (viewport == null)
-			{
-				viewport = this.viewportController.FocusView as IRangeSelectableView;
-			}
+				if (viewport == null)
+				{
+					viewport = this.viewportController.FocusView as IRangeSelectableView;
+				}
 
-			if (viewport != null)
-			{
-				Point vp = viewport.PointToView(location);
+				if (viewport != null)
+				{
+					Point vp = viewport.PointToView(location);
 
-				var pos = CellsViewport.GetPosByPoint(viewport, vp);
-				this.selEnd = this.selStart = pos;
+					var pos = CellsViewport.GetPosByPoint(viewport, vp);
+					this.selEnd = this.selStart = pos;
+				}
 			}
-#if WINFORM || WPF
-			}
-#endif // WINFORM || WPF
 
 			this.SelectRangeEndByMouse(location);
 		}

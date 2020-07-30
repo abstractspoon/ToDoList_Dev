@@ -22,15 +22,10 @@ using unvell.ReoGrid.Core;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Graphics;
 
-#if WINFORM || WPF
 //using HBorderArray = unvell.ReoGrid.Data.JaggedTreeArray<unvell.ReoGrid.Core.ReoGridHBorder>;
 //using VBorderArray = unvell.ReoGrid.Data.JaggedTreeArray<unvell.ReoGrid.Core.ReoGridVBorder>;
 using HBorderArray = unvell.ReoGrid.Data.Index4DArray<unvell.ReoGrid.Core.ReoGridHBorder>;
 using VBorderArray = unvell.ReoGrid.Data.Index4DArray<unvell.ReoGrid.Core.ReoGridVBorder>;
-#elif ANDROID || iOS
-using HBorderArray = unvell.ReoGrid.Data.ReoGridHBorderArray;
-using VBorderArray = unvell.ReoGrid.Data.ReoGridVBorderArray;
-#endif // ANDROID
 
 namespace unvell.ReoGrid.Core
 {

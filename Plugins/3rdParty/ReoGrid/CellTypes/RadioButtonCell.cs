@@ -22,14 +22,9 @@ using System.Reflection;
 using System.Linq;
 using unvell.ReoGrid.Graphics;
 
-#if WINFORM
 using System.Windows.Forms;
 using RGFloat = System.Single;
 using RGImage = System.Drawing.Image;
-#else
-using RGFloat = System.Double;
-using RGImage = System.Windows.Media.ImageSource;
-#endif // WINFORM
 
 using unvell.ReoGrid.Rendering;
 
@@ -172,7 +167,6 @@ namespace unvell.ReoGrid.CellTypes
 		/// <param name="dc">Platform independency graphics context.</param>
 		protected override void OnContentPaint(CellDrawingContext dc)
 		{
-#if WINFORM
 			System.Windows.Forms.ButtonState state = ButtonState.Normal;
 
 			if (this.IsPressed) state |= ButtonState.Pushed;
@@ -181,30 +175,6 @@ namespace unvell.ReoGrid.CellTypes
 			ControlPaint.DrawRadioButton(dc.Graphics.PlatformGraphics,
 				(System.Drawing.Rectangle)this.ContentBounds, state);
 
-#elif WPF
-			var g = dc.Graphics;
-
-			var ox = this.ContentBounds.OriginX;
-			var oy = this.ContentBounds.OriginY;
-
-			var hw = this.ContentBounds.Width / 2;
-			var hh = this.ContentBounds.Height / 2;
-			var r = new Rectangle(ox - hw / 2, oy - hh / 2, hw, hh);
-			g.DrawEllipse(StaticResources.SystemColor_ControlDark, r);
-
-			if (this.IsPressed)
-			{
-				g.FillEllipse(StaticResources.SystemColor_Control, r);
-			}
-
-			if (this.isChecked)
-			{
-				var hhw = this.ContentBounds.Width / 4;
-				var hhh = this.ContentBounds.Height / 4;
-				r = new Rectangle(ox - hhw / 2, oy - hhh / 2, hhw, hhh);
-				g.FillEllipse(StaticResources.SystemColor_WindowText, r);
-			}
-#endif // WINFORM
 		}
 
 		/// <summary>

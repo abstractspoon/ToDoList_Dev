@@ -24,17 +24,12 @@
 // Disable XML comment document
 #pragma warning disable 1591
 
-#if WINFORM || WPF
-
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
-
-#if WINFORM
 using System.Windows.Forms;
-#endif // WINFORM
 
 namespace unvell.Common.Win32Lib
 {
@@ -1333,4 +1328,3 @@ namespace unvell.Common.Win32Lib
 
 }
 
-#endif // WINFORM || WPF

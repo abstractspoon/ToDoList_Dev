@@ -18,8 +18,6 @@
  * 
  ****************************************************************************/
 
-#if WINFORM
-
 using System;
 using System.Linq;
 using System.Windows.Forms;
@@ -905,4 +903,3 @@ namespace unvell.ReoGrid.WinForm
 	}
 }
 
-#endif // WINFORM

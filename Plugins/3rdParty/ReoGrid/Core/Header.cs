@@ -20,13 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
-#if WINFORM
 using RGFloat = System.Single;
 using RGIntDouble = System.Int32;
-#else
-using RGFloat = System.Double;
-using RGIntDouble = System.Double;
-#endif // WINFORM
 
 using unvell.ReoGrid.Core;
 using unvell.ReoGrid.Events;

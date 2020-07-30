@@ -206,13 +206,10 @@ namespace unvell.ReoGrid
 					{
 						formulaDirtyCells.Remove(cell);
 					}
-
 #endif // FORMULA
 
 					cell.FontDirty = false;
-#if WINFORM
 					cell.RenderFont = null;
-#endif // WINFORM
 				}
 
 				// TODO: auto adjust row height

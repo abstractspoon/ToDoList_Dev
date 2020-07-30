@@ -20,11 +20,7 @@
 
 using System;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#else
-using RGFloat = System.Double;
-#endif // WINFORM
 
 using unvell.ReoGrid.Rendering;
 using unvell.ReoGrid.Graphics;
@@ -48,13 +44,7 @@ namespace unvell.ReoGrid.Drawing.Shapes
 			}
 		}
 
-#if WINFORM
 		protected System.Drawing.Drawing2D.GraphicsPath Path = new System.Drawing.Drawing2D.GraphicsPath();
-#elif WPF
-		protected System.Windows.Media.PathGeometry Path = new System.Windows.Media.PathGeometry();
-#elif ANDROID
-		protected Android.Graphics.Path Path = new Android.Graphics.Path();
-#endif // WINFORM
 
 		protected abstract void UpdatePath();
 
@@ -111,7 +101,6 @@ namespace unvell.ReoGrid.Drawing.Shapes
 			RGFloat min = Math.Min(Width, Height);
 			RGFloat c = roundRate * min;
 
-#if WINFORM
 			Path.Reset();
 
 			if (c > 0)
@@ -126,21 +115,6 @@ namespace unvell.ReoGrid.Drawing.Shapes
 			{
 				Path.AddRectangle(new System.Drawing.RectangleF(0, 0, Width, Height));
 			}
-#elif WPF
-
-			Path.Clear();
-
-			if (c > 0)
-			{
-				Path.AddGeometry(new System.Windows.Media.RectangleGeometry(new System.Windows.Rect(0, 0, Width, Height))
-				{
-					RadiusX = c,
-					RadiusY = c
-				});
-			}
-
-#elif ANDROID
-#endif // WINFORM
 		}
 
 		protected override Rectangle TextBounds
@@ -207,7 +181,6 @@ namespace unvell.ReoGrid.Drawing.Shapes
 		{
 			var clientRect = this.ClientBounds;
 
-#if WINFORM
 			Path.Reset();
 
 			if (sweepAngle > 0 && clientRect.Width > 0 && clientRect.Height > 0)
@@ -216,23 +189,6 @@ namespace unvell.ReoGrid.Drawing.Shapes
 				Path.AddArc(0, 0, clientRect.Width, clientRect.Height, this.startAngle - 90, this.sweepAngle);
 				Path.CloseAllFigures();
 			}
-#elif WPF
-
-			Path.Clear();
-
-			if (this.sweepAngle > 0)
-			{
-				System.Windows.Media.PathFigure pf = new System.Windows.Media.PathFigure();
-			
-				pf.Segments.Add(new System.Windows.Media.LineSegment(this.OriginPoint, false));
-				pf.Segments.Add(new System.Windows.Media.ArcSegment(new System.Windows.Point(0, 0),
-					new System.Windows.Size(this.Width, this.Height), this.sweepAngle, true, System.Windows.Media.SweepDirection.Clockwise, false));
-
-				Path.Figures.Add(pf);
-			}
-
-#elif ANDROID
-#endif // WINFORM
 		}
 	}
 	#endregion // Pie

@@ -21,17 +21,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-#if WINFORM || ANDROID
 using RGFloat = System.Single;
-#elif WPF
-using RGFloat = System.Double;
-#elif iOS
-using RGFloat = System.Double;
-#endif // WPF
-
-#if WINFORM
 using RGKeys = System.Windows.Forms.Keys;
-#endif // WINFORM
 
 using unvell.Common;
 using unvell.ReoGrid.DataFormat;

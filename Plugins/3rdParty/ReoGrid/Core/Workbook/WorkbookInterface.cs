@@ -6,21 +6,14 @@ using System.Text;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.IO;
 
-#if WINFORM || WPF
 using ControlType = unvell.ReoGrid.ReoGridControl;
-#elif ANDROID
-using ControlType = unvell.ReoGrid.ReoGridView;
-#endif // ANDROID
 
 namespace unvell.ReoGrid
 {
 	/// <summary>
 	/// Represents an interface of workbook instance
 	/// </summary>
-	public interface IWorkbook
-#if WINFORM || WPF
-		: IDisposable
-#endif // WINFORM || WPF
+	public interface IWorkbook : IDisposable
 	{
 		#region Save & Load
 
@@ -237,12 +230,12 @@ namespace unvell.ReoGrid
 		/// <summary>
 		/// Event raised when background color of worksheet name is changed.
 		/// </summary>
-		event EventHandler<WorksheetEventArgs> WorksheetNameBackColorChanged;
+		//event EventHandler<WorksheetEventArgs> WorksheetNameBackColorChanged;
 
 		/// <summary>
 		/// Event raised when text color of worksheet name is changed.
 		/// </summary>
-		event EventHandler<WorksheetEventArgs> WorksheetNameTextColorChanged;
+		//event EventHandler<WorksheetEventArgs> WorksheetNameTextColorChanged;
 
 		#endregion // Worksheet Management
 

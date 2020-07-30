@@ -210,12 +210,5 @@ namespace unvell.ReoGrid
 			}
 			return true;
 		}
-
-#if WPF
-		internal static bool Empty(this System.Windows.Point p)
-		{
-			return p.X == 0 && p.Y == 0;
-		}
-#endif
 	}
 }

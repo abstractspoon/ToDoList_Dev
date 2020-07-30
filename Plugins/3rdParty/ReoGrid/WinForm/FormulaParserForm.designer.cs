@@ -16,7 +16,7 @@
  * 
  ****************************************************************************/
 
-#if DEBUG && WINFORM && FORMULA
+#if DEBUG && FORMULA
 
 namespace FormulaParserTest
 {
@@ -820,4 +820,4 @@ namespace FormulaParserTest
 	}
 }
 
-#endif // DEBUG && WINFORM && FORMULA
+#endif // DEBUG && FORMULA
