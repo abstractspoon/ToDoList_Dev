@@ -189,13 +189,18 @@ BOOL CTDCTaskMatcher::TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& query, SEA
 BOOL CTDCTaskMatcher::AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, 
 											const SEARCHPARAMS& query, SEARCHRESULT& result, BOOL bCheckDueToday) const
 {
-	// sanity check
-	if (!pTDI || !pTDS)
+	// sanity checks
+	if (!pTDI || !pTDS || !query.bWantAllSubtasks)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 	
+	// Need to turn off 'bWantAllSubtasks' or we will 
+	// recurse back into here on every iteration
+	SEARCHPARAMS queryNoSubtasks(query);
+	queryNoSubtasks.bWantAllSubtasks = FALSE;
+
 	TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
 
 	while (pTDSParent && !pTDSParent->IsRoot())
@@ -209,7 +214,7 @@ BOOL CTDCTaskMatcher::AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUC
 			return FALSE;
 		}
 
-		if (TaskMatches(pTDIParent, pTDSParent, query, result, bCheckDueToday))
+		if (TaskMatches(pTDIParent, pTDSParent, queryNoSubtasks, result, bCheckDueToday))
 			return TRUE;
 
 		pTDSParent = pTDSParent->GetParentTask();
