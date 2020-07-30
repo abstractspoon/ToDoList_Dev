@@ -188,6 +188,29 @@ void CTDLFindTasksDlg::BuildOptionCombo()
 		m_cbInclude.SetItemData(nIndex, FI_FILTEREDOUT);
 }
 
+BOOL CTDLFindTasksDlg::SetSearchFlags(LPCTSTR szName, DWORD dwFlags)
+{
+	// Update both the option combobox and the saved search
+	BOOL bIncludeDone = !Misc::HasFlag(dwFlags, FO_HIDEDONE);
+
+	if (GetSafeHwnd())
+	{
+		if (Misc::Find(szName, m_aSavedSearches, FALSE, TRUE) == -1)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		if (m_sActiveSearch.CompareNoCase(szName) == 0)
+			CheckIncludeOption(FI_COMPLETED, bIncludeDone);
+	}
+	
+	CString sKey = Misc::MakeKey(_T("FindTasks\\Searches\\%s"), szName);
+	CPreferences().WriteProfileInt(sKey, _T("IncludeDoneTasks"), bIncludeDone);
+
+	return TRUE;
+}
+
 BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 {
 	if (m_cbInclude.GetSafeHwnd())
@@ -1535,11 +1558,11 @@ BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC)
 
 void CTDLFindTasksDlg::OnApplyasfilter() 
 {
-	if (m_sActiveSearch.IsEmpty())
-	{
-		m_sActiveSearch = CEnString(IDS_UNNAMEDFILTER);
-		m_cbSearches.SetWindowText(m_sActiveSearch);
-	}
+	CString sSearch;
+	m_cbSearches.GetWindowText(sSearch);
+
+	if (sSearch.IsEmpty())
+		m_cbSearches.SetWindowText(CEnString(IDS_UNNAMEDFILTER));
 
 	OnSaveSearch();
 

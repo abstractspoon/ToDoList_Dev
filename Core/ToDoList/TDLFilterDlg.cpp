@@ -135,7 +135,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 		if (m_filter.IsAdvanced())
 			m_cbTaskFilter.SelectAdvancedFilter(m_sAdvancedFilter);
 		else
-			m_cbTaskFilter.SelectAdvancedFilter(m_filter.nShow);
+			m_cbTaskFilter.SelectFilter(m_filter.nShow);
 
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbDueFilter.SelectFilter(m_filter.nDueBy);

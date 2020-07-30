@@ -129,26 +129,19 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	// special handling
 	if (pDX->m_bSaveAndValidate)
 	{
-		// filter
-		m_filter.nShow = m_cbTaskFilter.GetSelectedFilter(m_sAdvancedFilter);
+		// Note: we only modify 'm_filter.nShow' in 'OnSelchangeFilter'
+		// Note: we only modify 'm_filter.dwFlags' in 'OnCloseUpOptions'
+
 		m_filter.nStartBy = m_cbStartFilter.GetSelectedFilter();
 		m_filter.nDueBy = m_cbDueFilter.GetSelectedFilter();
+		m_filter.nTitleOption = m_nTitleFilter;
 
-		// check combos
 		m_cbCategoryFilter.GetChecked(m_filter.aCategories);
 		m_cbAllocToFilter.GetChecked(m_filter.aAllocTo);
 		m_cbStatusFilter.GetChecked(m_filter.aStatus);
 		m_cbAllocByFilter.GetChecked(m_filter.aAllocBy);
 		m_cbVersionFilter.GetChecked(m_filter.aVersions);
 		m_cbTagFilter.GetChecked(m_filter.aTags);
-
-		// flags
-		if (m_filter.IsAdvanced())
-			m_mapCustomFlags[m_sAdvancedFilter] = m_cbOptions.GetSelectedOptions();
-		else
-			m_filter.dwFlags = m_cbOptions.GetSelectedOptions();
-
-		m_filter.nTitleOption = m_nTitleFilter;
 	}
 	else
 	{
@@ -156,7 +149,7 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 		if (m_filter.IsAdvanced())
 			m_cbTaskFilter.SelectAdvancedFilter(m_sAdvancedFilter);
 		else
-			m_cbTaskFilter.SelectAdvancedFilter(m_filter.nShow);
+			m_cbTaskFilter.SelectFilter(m_filter.nShow);
 		
 		m_cbStartFilter.SelectFilter(m_filter.nStartBy);
 		m_cbStartFilter.SetNextNDays(m_filter.nStartNextNDays);
@@ -282,18 +275,19 @@ void CTDLFilterBar::ClearCheckboxHistory()
 
 void CTDLFilterBar::OnSelchangeFilter() 
 {
-	CString sPrevAdvanced = m_sAdvancedFilter;
-	TDCFILTER prevFilter = m_filter;
-
-	UpdateData();
+	CString sAdvanced;
+	FILTER_SHOW nShow = m_cbTaskFilter.GetSelectedFilter(sAdvanced);
 
 	// Refresh the labels if switching from custom to not, or vice versa
-	if (prevFilter.IsAdvanced() != m_filter.IsAdvanced())
+	if (sAdvanced.IsEmpty() != m_sAdvancedFilter.IsEmpty())
 		Invalidate(FALSE);
 
 	// Only notify the parent if something actually changed
-	if ((m_filter != prevFilter) || (m_filter.IsAdvanced() && (sPrevAdvanced != m_sAdvancedFilter)))
+	if ((nShow != m_filter.nShow) || ((nShow == FS_ADVANCED) && (sAdvanced != m_sAdvancedFilter)))
 	{
+		m_filter.nShow = nShow;
+		m_sAdvancedFilter = sAdvanced;
+
 		NotifyParentFilterChange();
 	}
 }
@@ -367,17 +361,21 @@ void CTDLFilterBar::OnSelcancelVersionFilter()
 
 void CTDLFilterBar::OnCloseUpOptions()
 {
-	// only notify parent if there has been a change
-	DWORD dwCurFlags = 0;
+	DWORD dwPrevFlags = 0, dwNewFlags = m_cbOptions.GetSelectedOptions();
 
 	if (m_filter.IsAdvanced())
-		m_mapCustomFlags.Lookup(m_sAdvancedFilter, dwCurFlags);
+		m_mapCustomFlags.Lookup(m_sAdvancedFilter, dwPrevFlags);
 	else
-		dwCurFlags = m_filter.dwFlags;
+		dwPrevFlags = m_filter.dwFlags;
 
-	if (dwCurFlags != m_cbOptions.GetSelectedOptions())
+	// only notify parent if there has been a change
+	if (dwNewFlags != dwPrevFlags)
 	{
-		UpdateData();
+		if (m_filter.IsAdvanced())
+			m_mapCustomFlags[m_sAdvancedFilter] = dwNewFlags;
+		else
+			m_filter.dwFlags = dwNewFlags;
+
 		NotifyParentFilterChange();
 	}
 }
@@ -490,6 +488,24 @@ FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD&
 	}
 
 	return filter.nShow;
+}
+
+BOOL CTDLFilterBar::SetAdvancedFilterFlags(const CString& sCustom, DWORD dwFlags)
+{
+	if (!m_cbTaskFilter.HasAdvancedFilter(sCustom))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CString sActive;
+
+	if ((GetFilter(sActive) == FS_ADVANCED) && (sCustom == sActive))
+		m_cbOptions.SetSelectedOptions(dwFlags);
+
+	m_mapCustomFlags[sCustom] = dwFlags;
+
+	return TRUE;
 }
 
 FILTER_SHOW CTDLFilterBar::GetFilter(CString& sCustom) const

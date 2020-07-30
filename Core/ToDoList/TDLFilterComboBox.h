@@ -23,11 +23,12 @@ public:
 public:
 	FILTER_SHOW GetSelectedFilter() const;
 	FILTER_SHOW GetSelectedFilter(CString& sAdvanced) const;
-	BOOL SelectAdvancedFilter(FILTER_SHOW nFilter);
+	BOOL SelectFilter(FILTER_SHOW nFilter);
 	BOOL SelectAdvancedFilter(const CString& sAdvanced);
 	
 	void AddAdvancedFilters(const CStringArray& aFilters, LPCTSTR szAdvancedSel = NULL);
 	const CStringArray& GetAdvancedFilterNames() const;
+	BOOL HasAdvancedFilter(const CString& sAdvanced) const;
 	void RemoveAdvancedFilters();
 	void ShowDefaultFilters(BOOL bShow);
 

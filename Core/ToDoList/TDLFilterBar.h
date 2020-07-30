@@ -48,8 +48,9 @@ public:
 	void AddAdvancedFilters(const CStringArray& aFilters);
 	const CStringArray& GetAdvancedFilterNames() const;
 	void RemoveAdvancedFilters();
-	void ShowDefaultFilters(BOOL bShow);
+	BOOL SetAdvancedFilterFlags(const CString& sCustom, DWORD dwFlags);
 
+	void ShowDefaultFilters(BOOL bShow);
 	void RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 	void SetFilterLabelAlignment(BOOL bLeft);
 	void SetPriorityColors(const CDWordArray& aColors);
