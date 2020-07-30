@@ -187,7 +187,7 @@ void CTaskMiniCalendarCtrl::DrawCellBkgnd(CDC& dc, const CRect& rCell, const COl
 	}
 
 	if (bSelected && !Misc::IsHighContrastActive())
-		GraphicsMisc::DrawRect(&dc, rCell, m_crSelected, CLR_NONE, 0, GMDR_NONE, (bToday ? 80 : 160));
+		GraphicsMisc::DrawRect(&dc, rCell, m_crSelected, CLR_NONE, 0, GMDR_NONE, (BYTE)(bToday ? 80 : 160));
 }
 
 void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRIBUTE nAttrib)
