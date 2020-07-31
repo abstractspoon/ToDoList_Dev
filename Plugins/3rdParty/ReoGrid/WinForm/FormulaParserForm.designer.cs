@@ -16,12 +16,12 @@
  * 
  ****************************************************************************/
 
-#if DEBUG && FORMULA
-
 namespace FormulaParserTest
 {
 	partial class FormulaParserForm
 	{
+#if DEBUG
+
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
@@ -817,7 +817,9 @@ namespace FormulaParserTest
 		private System.Windows.Forms.Label label15;
 		private System.Windows.Forms.LinkLabel linkComfortable;
 		private System.Windows.Forms.LinkLabel linkCompact;
+
+ #endif // DEBUG
+
 	}
 }
 
-#endif // DEBUG && FORMULA

@@ -28,6 +28,7 @@ namespace FormulaParserTest
     [System.ComponentModel.DesignerCategory("Form")]
     partial class FormulaParserForm : Form
 	{
+#if DEBUG
 		public IWorkbook Workbook { get; set; }
 
 		public Cell Cell { get; set; }
@@ -352,6 +353,7 @@ namespace FormulaParserTest
 
 			//FormulaRefactor.Reuse(sheet, new ReoGridPos("B1"), new ReoGridRange("B2:D5"));
 		}
+#endif // DEBUG
 	}
 
 	static class FormatFormuleFlagExtension
