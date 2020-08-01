@@ -22,6 +22,7 @@ static char THIS_FILE[] = __FILE__;
 
 CTDLFilterDateComboBox::CTDLFilterDateComboBox(int nNextNDays) 
 	: 
+	CTabbedComboBox(20),
 	m_nNextNDays(nNextNDays),
 	m_bRebuildingCombo(FALSE)
 {
