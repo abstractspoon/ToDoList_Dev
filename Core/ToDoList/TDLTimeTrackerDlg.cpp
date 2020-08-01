@@ -515,7 +515,9 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 	CLocalizer::EnableTranslation(m_cbTasks, FALSE);
 	CLocalizer::EnableTranslation(m_cbTasklists, FALSE);
 
-	GetWindowText(m_sOrgTitle);
+	GetWindowText(m_sOrgCaption);
+
+	// Note: Titlebar tooltip is created on demand in OnEraseBkgnd
 	
 	if (m_ilBtns.Create(32, 32, (ILC_COLOR32 | ILC_MASK), 0, 0))
 	{
@@ -554,6 +556,11 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 
 BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 {
+	if (m_tipCaption.GetSafeHwnd() && m_tipCaption.WantMessage(pMsg->message))
+	{
+		m_tipCaption.FilterToolTipMessage(pMsg);
+	}
+
 	// we need to check for <return> in quick find
 	if ((pMsg->message == WM_KEYDOWN) && 
 		(::GetDlgCtrlID(pMsg->hwnd) == IDC_QUICKFIND) &&
@@ -587,6 +594,37 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 	
 	// else default handling
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+int CTDLTimeTrackerDlg::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	// Don't show a tip if it's just 'Timer Tracker'
+	if (m_sCaption != m_sOrgCaption)
+	{
+		// Since we override WM_NCHITTEST we first need to 
+		// limit our hit-test to the actual caption bar
+		CRect rWindow;
+		GetWindowRect(rWindow);
+		ScreenToClient(rWindow);
+
+		rWindow.bottom = 0; // top of client rect
+		
+		if (rWindow.PtInRect(point))
+		{
+			ClientToScreen(&point);
+
+			int nHit = ::SendMessage(*this, WM_NCHITTEST, 0, MAKELPARAM(point.x, point.y));
+
+			switch (nHit)
+			{
+			case HTCAPTION:
+			case HTSYSMENU:
+				return m_tipCaption.SetToolInfo(*pTI, this, m_sCaption, 1, rWindow, TTF_ALWAYSTIP | TTF_TRANSPARENT | TTF_NOTBUTTON);
+			}
+		}
+	}
+
+	return -1;
 }
 
 void CTDLTimeTrackerDlg::SetUITheme(const CUIThemeFile& theme)
@@ -1175,6 +1213,11 @@ void CTDLTimeTrackerDlg::OnSelchangeTask()
 
 BOOL CTDLTimeTrackerDlg::OnEraseBkgnd(CDC* pDC)
 {
+	if (!m_tipCaption.GetSafeHwnd() && m_tipCaption.Create(this))
+	{
+		m_tipCaption.ModifyStyleEx(0, WS_EX_TRANSPARENT);
+	}
+
 	if (!Misc::IsHighContrastActive())
 	{
 		CRect rClient;
@@ -1546,12 +1589,13 @@ void CTDLTimeTrackerDlg::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 		}
 		
 		MoveWindow(rWindow);
+		RefreshCaptionText();
 	}
 }
 
 void CTDLTimeTrackerDlg::RefreshCaptionText()
 {
-	CString sTaskTitle = GetSelectedTaskTitle(), sCaption;
+	CString sTaskTitle = GetSelectedTaskTitle(), sPrevCaption = m_sCaption;
 
 	if (m_bCollapsed && !m_sTaskTimes.IsEmpty())
 	{
@@ -1559,11 +1603,11 @@ void CTDLTimeTrackerDlg::RefreshCaptionText()
 
 		if (!m_sElapsedTime.IsEmpty())
 		{
-			sCaption.Format(_T("%s (%s) - %s"), m_sElapsedTime, m_sTaskTimes, sTaskTitle);
+			m_sCaption.Format(_T("%s (%s) - %s"), m_sElapsedTime, m_sTaskTimes, sTaskTitle);
 		}
 		else
 		{
-			sCaption.Format(_T("%s - %s"), m_sTaskTimes, sTaskTitle);
+			m_sCaption.Format(_T("%s - %s"), m_sTaskTimes, sTaskTitle);
 		}
 	}
 	else
@@ -1576,19 +1620,22 @@ void CTDLTimeTrackerDlg::RefreshCaptionText()
 
 		if (nRows < 3) // task combo hidden
 		{
-			sCaption.Format(_T("%s - %s"), sTaskTitle, m_sOrgTitle);
+			m_sCaption.Format(_T("%s - %s"), sTaskTitle, m_sOrgCaption);
 		}
 		else if ((nRows == 3) || ((nRows == 4) && (m_aTasklists.GetNumTasklists() == 1))) // tasklist combo hidden
 		{
-			sCaption.Format(_T("%s - %s"), GetSelectedTasklistName(), m_sOrgTitle);
+			m_sCaption.Format(_T("%s - %s"), GetSelectedTasklistName(), m_sOrgCaption);
 		}
 		else
 		{
-			sCaption = m_sOrgTitle;
+			m_sCaption = m_sOrgCaption;
 		}
 	}
 
-	SetWindowText(sCaption);
+	SetWindowText(m_sCaption);
+
+	if (m_tipCaption.GetSafeHwnd() && (sPrevCaption != m_sCaption))
+		m_tipCaption.Activate(FALSE);
 }
 
 void CTDLTimeTrackerDlg::OnToggleTopMost()

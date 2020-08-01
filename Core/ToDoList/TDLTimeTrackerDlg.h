@@ -15,6 +15,7 @@
 #include "..\shared\subclass.h"
 #include "..\shared\icon.h"
 #include "..\shared\enedit.h"
+#include "..\shared\TooltipCtrlex.h"
 
 #include "..\Interfaces\uithemefile.h"
 
@@ -150,13 +151,14 @@ protected:
 	CEnToolBar m_toolbar;
 	CEnEdit m_eElapsedTime;
 	CImageList m_ilBtns;
+	CToolTipCtrlEx m_tipCaption;
 	
 	CTDCTrackTasklistArray m_aTasklists;
 	CUIThemeFile m_theme;
 	CString m_sTaskTimes, m_sElapsedTime;
 	CString m_sQuickFind;
 	CToolbarHelper m_tbHelper;
-	CString m_sOrgTitle;
+	CString m_sCaption, m_sOrgCaption;
 	DWORD m_dwOptions;
 	CSize m_sizeMin, m_sizeMax, m_sizeLast;
 	
@@ -167,8 +169,8 @@ protected:
 	virtual void OnCancel() { ShowWindow(SW_HIDE); }
 	virtual void OnOK() { OnStartStopTracking(); }
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
-	DECLARE_MESSAGE_MAP()
 protected:
 	afx_msg void OnStartStopTracking();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
@@ -191,6 +193,8 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
+
+	DECLARE_MESSAGE_MAP()
 	
 protected:
 	DWORD GetTasklistTrackID(const CFilteredToDoCtrl* pTDC) const;
