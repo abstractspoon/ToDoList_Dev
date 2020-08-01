@@ -127,6 +127,7 @@ protected:
 	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnSelchangeFilter();
+	afx_msg void OnSelchangeFilterAttribute();
 	afx_msg void OnSelcancelAllocToFilter();
 	afx_msg void OnSelcancelAllocByFilter();
 	afx_msg void OnSelcancelCategoryFilter();
