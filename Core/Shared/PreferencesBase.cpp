@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "winclasses.h"
 #include "wclassdefines.h"
+#include "CtrlTextHighlighter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,9 +30,7 @@ CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID)
 	m_brBack(NULL), 
 	m_crback(CLR_NONE), 
 	m_bFirstShow(TRUE), 
-	m_nHelpID(nDlgTemplateID),
-	m_brHighlight(NULL),
-	m_crHighlight(CLR_NONE)
+	m_nHelpID(nDlgTemplateID)
 {
 }
 
@@ -88,77 +87,9 @@ CWnd* CPreferencesPageBase::GetDlgItem(UINT nID) const
 	return &wnd;
 }
 
-BOOL CPreferencesPageBase::UITextContains(LPCTSTR szSearch) const
+CWnd* CPreferencesPageBase::GetFirstHighlightedItem() const 
 {
-	ASSERT_VALID(this);
-	
-	if (Misc::IsEmpty(szSearch))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	CStringArray aText;
-	aText.Add(szSearch);
-
-	return UITextContainsOneOf(aText);
-}
-
-BOOL CPreferencesPageBase::UITextContainsOneOf(const CStringArray& aSearch) const
-{
-	if (aSearch.GetSize() == 0)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	return UITextContainsOneOf(this, aSearch);
-}
-
-// static
-BOOL CPreferencesPageBase::UITextContainsOneOf(const CWnd* pWnd, const CStringArray& aSearch)
-{
-	ASSERT(pWnd && pWnd->GetSafeHwnd());
-
-	if (UITextContainsOneOf(GetCtrlText(pWnd), aSearch))
-		return TRUE;
-
-	// Children
-	const CWnd* pChild = pWnd->GetWindow(GW_CHILD);
-
-	while (pChild)
-	{
-		if (UITextContainsOneOf(pChild, aSearch))
-			return TRUE;
-
-		pChild = pChild->GetNextWindow();
-	}
-
-	return FALSE;
-}
-
-// static
-BOOL CPreferencesPageBase::UITextContainsOneOf(const CString& sUIText, const CStringArray& aSearch)
-{
-	if (!sUIText.IsEmpty())
-	{
-		for (int nItem = 0; nItem < aSearch.GetSize(); nItem++)
-		{
-			if (Misc::Find(aSearch[nItem], sUIText) != -1)
-				return TRUE;
-		}
-	}
-
-	return FALSE;
-}
-
-CWnd* CPreferencesPageBase::GetFirstHighlightedItem() const
-{
-	if (m_aHighlightedCtrls.GetSize())
-		return CWnd::FromHandle(m_aHighlightedCtrls[0]);
-
-	// else 
-	return NULL;
+	return m_ctrlHighlighter.GetFirstHighlightedItem();
 }
 
 BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
@@ -174,85 +105,20 @@ BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 		CPropertyPage::OnEraseBkgnd(pDC);
 	}
 
-	if (m_brHighlight != NULL)
-	{
-		int nNumCtrl = m_aHighlightedCtrls.GetSize();
-		CRect rCtrl;
-
-		for (int nCtrl = 0; nCtrl < nNumCtrl; nCtrl++)
-		{
-			if (GetHighlightRect(m_aHighlightedCtrls[nCtrl], rCtrl))
-				pDC->FillSolidRect(rCtrl, m_crHighlight);
-		}
-	}
-
 	return TRUE;
 }
 
-BOOL CPreferencesPageBase::GetHighlightRect(HWND hwnd, CRect& rHighlight) const
+HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
-	if (!::IsWindowVisible(hwnd))
-		return FALSE;
+	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
 
-	ASSERT(Misc::HasT(hwnd, m_aHighlightedCtrls));
-
-	::GetWindowRect(hwnd, rHighlight);
-	ScreenToClient(rHighlight);
-
-	// Tweak the rect on a per-class basis
-	int nPadding = 0;
-	CString sClass = CWinClasses::GetClass(hwnd);
-
-	if (CWinClasses::IsClass(sClass, WC_STATIC))
+	if ((nCtlColor == CTLCOLOR_STATIC) && (m_brBack != NULL))
 	{
-		nPadding = STATIC_PADDING;
-	}
-	else if (CWinClasses::IsClass(sClass, WC_BUTTON))
-	{
-		DWORD dwStyle = ::GetWindowLong(hwnd, GWL_STYLE);
-		int nType = (dwStyle & 0xF);
-
-		switch (nType)
-		{
-			case BS_PUSHBUTTON:
-			case BS_DEFPUSHBUTTON:
-				nPadding = OTHER_PADDING;
-				break;
-
-			case BS_GROUPBOX:
-				return FALSE;
-		}
-	}
-	else if (CWinClasses::IsClass(sClass, WC_EDIT))
-	{
-		// Handled by OnCtlColor
-		return FALSE;
-	}
-	else if (CWinClasses::IsClass(sClass, WC_COMBOBOX))
-	{
-		DWORD dwStyle = ::GetWindowLong(hwnd, GWL_STYLE);
-		int nType = (dwStyle & 0xF);
-
-		switch (nType)
-		{
-			case CBS_SIMPLE:
-			case CBS_DROPDOWN:
-				// Handled by the embedded edit
-				return FALSE;
-
-			case CBS_DROPDOWNLIST:
-				nPadding = OTHER_PADDING;
-				break;
-		}
-	}
-	else
-	{
-		nPadding = OTHER_PADDING;
+		hbr = m_brBack;
+		pDC->SetBkMode(TRANSPARENT);
 	}
 
-	rHighlight.InflateRect(nPadding, nPadding);
-	
-	return TRUE;
+	return hbr;
 }
 
 void CPreferencesPageBase::OnShowWindow(BOOL bShow, UINT nStatus)
@@ -276,95 +142,14 @@ BOOL CPreferencesPageBase::AddGroupLine(UINT nIDStatic)
 	return m_mgrGroupLines.AddGroupLine(nIDStatic, GetSafeHwnd());
 }
 
-HBRUSH CPreferencesPageBase::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
-{
-	HBRUSH hbr = CPropertyPage::OnCtlColor(pDC, pWnd, nCtlColor);
-
-	switch (nCtlColor)
-	{
-		case CTLCOLOR_STATIC:
-			if (Misc::HasT(pWnd->GetSafeHwnd(), m_aHighlightedCtrls))
-			{
-				hbr = m_brHighlight;
-			}
-			else if (m_brBack != NULL)
-			{
-				hbr = m_brBack;
-			}
-			pDC->SetBkMode(TRANSPARENT);
-			break;
-
-		case CTLCOLOR_EDIT:
-		case CTLCOLOR_LISTBOX:
-			if (Misc::HasT(pWnd->GetSafeHwnd(), m_aHighlightedCtrls))
-			{
-				hbr = m_brHighlight;
-			}
-			break;
-	}
-
-	return hbr;
-}
-
 BOOL CPreferencesPageBase::HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight)
 {
-	if (aSearch.GetSize() == 0)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	ClearHighlights();
-
-	if (!FindMatchingCtrls(this, aSearch, m_aHighlightedCtrls))
-		return FALSE;
-
-	m_crHighlight = crHighlight;
-	m_brHighlight = ::CreateSolidBrush(crHighlight);
-
-	InvalidateAllCtrls(this);
-
-	return TRUE;
-}
-
-int CPreferencesPageBase::FindMatchingCtrls(const CWnd* pWnd, const CStringArray& aSearch, CArray<HWND, HWND&>& aMatching) const
-{
-	ASSERT(pWnd && pWnd->GetSafeHwnd());
-
-	// Ignore 'us'
-	if (pWnd != this)
-	{
-		CString sCtrlText = GetCtrlText(pWnd);
-
-		if (UITextContainsOneOf(sCtrlText, aSearch))
-		{
-			HWND hwnd = pWnd->GetSafeHwnd();
-			aMatching.Add(hwnd);
-		}
-	}
-
-	// Children
-	const CWnd* pChild = pWnd->GetWindow(GW_CHILD);
-
-	while (pChild)
-	{
-		FindMatchingCtrls(pChild, aSearch, aMatching);
-		pChild = pChild->GetNextWindow();
-	}
-
-	return aMatching.GetSize();
+	return m_ctrlHighlighter.HighlightUIText(this, aSearch, crHighlight, this);
 }
 
 void CPreferencesPageBase::ClearHighlights()
 {
-	if (m_aHighlightedCtrls.GetSize())
-	{
-		m_aHighlightedCtrls.RemoveAll();
-		GraphicsMisc::VerifyDeleteObject(m_brHighlight);
-		m_crHighlight = CLR_NONE;
-
-		InvalidateAllCtrls(this);
-	}
+	m_ctrlHighlighter.ClearHighlights();
 }
 
 void CPreferencesPageBase::OnControlChange(UINT nID)

@@ -157,6 +157,10 @@ SOURCE=.\CopyWndContents.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\CtrlTextHighlighter.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\custombutton.cpp
 # End Source File
 # Begin Source File
@@ -814,6 +818,10 @@ SOURCE=.\ComboListboxPositioner.h
 # Begin Source File
 
 SOURCE=.\CopyWndContents.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\CtrlTextHighlighter.h
 # End Source File
 # Begin Source File
 

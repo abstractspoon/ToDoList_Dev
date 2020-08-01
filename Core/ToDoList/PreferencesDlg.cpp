@@ -17,6 +17,7 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\HookMgr.h"
 #include "..\shared\holdredraw.h"
+#include "..\shared\CtrlTextHighlighter.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -396,7 +397,7 @@ BOOL CPreferencesDlg::AddPageToTree(CPreferencesPageBase* pPage, UINT nIDPath, U
 
 			while (nPath--)
 			{
-				if (CPreferencesPageBase::UITextContainsOneOf(aPath[nPath], m_aSearchTerms))
+				if (CCtrlTextHighlighter::TextContainsOneOf(aPath[nPath], m_aSearchTerms))
 					break;
 			}
 
@@ -716,8 +717,7 @@ void CPreferencesDlg::UpdatePageTitleTextColors()
 {
 	COLORREF crText = m_theme.crStatusBarText, crBack = CLR_NONE;
 
-	if (m_aSearchTerms.GetSize() &&
-		CPreferencesPageBase::UITextContainsOneOf(m_sPageTitle, m_aSearchTerms))
+	if (CCtrlTextHighlighter::TextContainsOneOf(m_sPageTitle, m_aSearchTerms))
 	{
 		crText = 0;
 		crBack = HILITE_COLOUR;
@@ -883,7 +883,7 @@ void CPreferencesDlg::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 			{
 				CString sPage = m_tcPages.GetItemText(hti);
 
-				if (CPreferencesPageBase::UITextContainsOneOf(sPage, m_aSearchTerms))
+				if (CCtrlTextHighlighter::TextContainsOneOf(sPage, m_aSearchTerms))
 				{
 					pTVCD->clrTextBk = HILITE_COLOUR;
 					*pResult = CDRF_NEWFONT;
