@@ -12,6 +12,7 @@
 #include "Groupline.h"
 #include "SizeGrip.h"
 #include "CtrlTextHighlighter.h"
+#include "WndPrompt.h"
 
 #include "..\Interfaces\IPreferences.h"
 
@@ -57,6 +58,7 @@ protected:
 
 	CCtrlTextHighlighter m_ctrlHighlighter;
 	CGroupLineManager m_mgrGroupLines;
+	CWndPromptManager m_mgrPrompts;
 
 protected:
 	virtual BOOL OnInitDialog();

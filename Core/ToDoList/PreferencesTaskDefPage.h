@@ -19,7 +19,6 @@
 #include "..\shared\preferencesbase.h"
 #include "..\shared\colorbutton.h"
 #include "..\shared\timeedit.h"
-#include "..\shared\wndPrompt.h"
 #include "..\shared\autocombobox.h"
 #include "..\shared\maskedit.h"
 #include "..\Shared\iconbutton.h"
@@ -82,7 +81,6 @@ protected:
 	BOOL	m_bUseCreationDateForDefStartDate;
 	BOOL	m_bUseCreationTimeForDefStartDate;
 	BOOL	m_bUseCreationDateForDefDueDate;
-	CWndPromptManager m_mgrPrompts;
 	CTDCImageList m_ilTaskIcons;
 	int m_nDefReminderLeadin;
 

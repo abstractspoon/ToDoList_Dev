@@ -19,7 +19,6 @@
 #include "..\shared\preferencesbase.h"
 #include "..\shared\colorbutton.h"
 #include "..\shared\timeedit.h"
-#include "..\shared\wndPrompt.h"
 #include "..\shared\autocombobox.h"
 #include "..\shared\maskedit.h"
 #include "..\Shared\checklistboxex.h"
@@ -66,7 +65,6 @@ protected:
 	CCheckListBoxEx	m_lbInheritAttrib;
 	BOOL	m_bInheritParentAttributes;
 	int		m_nSelAttribUse;
-	CWndPromptManager m_mgrPrompts;
 
 	struct ATTRIBPREF
 	{

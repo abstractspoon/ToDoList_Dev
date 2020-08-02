@@ -34,6 +34,7 @@ static char THIS_FILE[] = __FILE__;
 
 const COLORREF SUBMENU_COLOR	= RGB(192, 192, 192);
 const int TEXT_PADDING			= 3;
+const int SHORTCUTCOL_MINWIDTH	= 75;
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage property page
@@ -127,6 +128,8 @@ void CPreferencesShortcutsPage::BuildMenuTree()
 {
 	ASSERT(m_pShortcutMgr);
 
+	CHoldRedraw ht(*this);
+
 	m_tcCommands.SendMessage(WM_NULL);
 	m_tcCommands.SetRedraw(FALSE);
 	m_tcCommands.DeleteAllItems();
@@ -160,6 +163,9 @@ void CPreferencesShortcutsPage::BuildMenuTree()
 
 	if (htiFirst)
 		m_tcCommands.EnsureVisible(htiFirst);
+
+	if (m_tcCommands.GetCount() == 0)
+		m_mgrPrompts.SetPrompt(m_tcCommands, CEnString(IDS_PSP_NOMATCHES), TVM_GETCOUNT);
 }
 
 HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos)
@@ -616,7 +622,7 @@ LRESULT CPreferencesShortcutsPage::OnGutterRecalcColWidth(WPARAM /*wParam*/, LPA
 				if (nLongest)
 					nLongest += (2 * TEXT_PADDING);
 
-				pNCRC->nWidth = max(40, nLongest);
+				pNCRC->nWidth = max(SHORTCUTCOL_MINWIDTH, nLongest);
 				return TRUE; // we handled it
 			}
 			break;
