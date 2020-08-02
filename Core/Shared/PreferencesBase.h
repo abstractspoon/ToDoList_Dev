@@ -45,7 +45,7 @@ public:
 	CWnd* GetDlgItem(UINT nID) const;
 	UINT GetHelpID() const { return m_nHelpID; }
 
-	virtual BOOL HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight);
+	virtual int HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight);
 	virtual void ClearHighlights();
 	virtual CWnd* GetFirstHighlightedItem() const;
 

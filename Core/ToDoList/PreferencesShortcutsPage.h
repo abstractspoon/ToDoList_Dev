@@ -12,6 +12,7 @@
 #include "..\shared\hotkeyctrlex.h"
 #include "..\shared\preferencesbase.h"
 #include "..\shared\enstring.h"
+#include "..\shared\FontCache.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesShortcutsPage dialog
@@ -36,6 +37,8 @@ protected:
 	CEnString	m_sOtherCmdID;
 	BOOL	m_bShowCommandIDs;
 	//}}AFX_DATA
+
+	CFontCache m_fonts;
 
 	CShortcutManager* m_pShortcutMgr;
 	CMap<UINT, UINT, DWORD, DWORD&> m_mapID2Shortcut;
@@ -75,11 +78,17 @@ protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
+	virtual int HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight);
+	virtual void ClearHighlights();
+
 	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos);
 	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
 	void AddMiscShortcuts();
-	void RemoveUnusedDefaultFilterItems();
+	void RemoveUnusedDefaultFilterItems(CMenu& menu) const;
 	BOOL CopyItem(HTREEITEM hti, CString& sOutput);
+	void BuildMenuTree();
+	HTREEITEM InsertItem(const CString& sItem, UINT nCmdID, HTREEITEM htiParent);
+	BOOL WantKeepSubmenu(HTREEITEM hti) const;
 
 	static BOOL IsMiscCommandID(UINT nCmdID);
 

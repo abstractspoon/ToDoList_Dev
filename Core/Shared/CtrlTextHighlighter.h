@@ -10,6 +10,10 @@
 #include <afxtempl.h>
 
 /////////////////////////////////////////////////////////////////////////////
+
+typedef CArray<HWND, HWND&> CHWndArray;
+
+/////////////////////////////////////////////////////////////////////////////
 // CCtrlTextSearcher
 
 class CCtrlTextHighlighter : CSubclassWnd
@@ -18,14 +22,21 @@ public:
 	CCtrlTextHighlighter();
 	virtual ~CCtrlTextHighlighter();
 	
-	BOOL HighlightUIText(CWnd* pWnd, const CStringArray& aSearch, COLORREF crHighlight, const CWnd* pWndIgnore = NULL);
+	int HighlightUIText(CWnd* pWnd, const CStringArray& aSearch, COLORREF crHighlight, const CWnd* pWndIgnore = NULL);
 	void ClearHighlights();
-	CWnd* GetFirstHighlightedItem() const;
-	
+
+	const CStringArray& GetSearch() const { return m_aSearch; }
+
+	BOOL HasSearch() const { return m_aSearch.GetSize(); }
+	HWND GetFirstCtrl() const;
+	COLORREF GetColor() const { return m_crHighlight; }
+
+	BOOL TextContainsOneOf(const CString& sUIText) const;
 	static BOOL TextContainsOneOf(const CString& sUIText, const CStringArray& aSearch);
 
 protected:
-	CArray<HWND, HWND&> m_aHighlightedCtrls;
+	CStringArray m_aSearch;
+	CHWndArray m_aHighlightedCtrls;
 	HBRUSH m_brHighlight;
 	COLORREF m_crHighlight;
 
@@ -35,7 +46,7 @@ protected:
 	BOOL GetHighlightRect(HWND hwnd, CRect& rHighlight) const;
 	
 	// This searches 'pWnd', its children, grand-children, etc
-	static int FindMatchingCtrls(const CWnd* pWnd, const CStringArray& aSearch, CArray<HWND, HWND&>& aMatching, const CWnd* pWndIgnore = NULL);
+	static int FindMatchingCtrls(const CWnd* pWnd, const CStringArray& aSearch, CHWndArray& aMatching, const CWnd* pWndIgnore = NULL);
 
 	// This checks 'pWnd only'
 	static BOOL TextContainsOneOf(const CWnd* pWnd, const CStringArray& aSearch);

@@ -26,6 +26,7 @@ public:
 	COrderedTreeCtrl(DWORD dwGutterStyles = NCGS_SHOWHEADER);
 	virtual ~COrderedTreeCtrl();
 
+	void SetParentHandlesCustomDraw(BOOL bParentHandles = TRUE) { m_bParentHandlesCustomDraw = bParentHandles; }
 	BOOL AddGutterColumn(UINT nColID, LPCTSTR szTitle = NULL, UINT nWidth = 0, UINT nTextAlign = DT_LEFT);
 	BOOL InsertGutterColumn(int nPos, UINT nColID, LPCTSTR szTitle = NULL, UINT nWidth = 0, UINT nTextAlign = DT_LEFT);
 	void RemoveGutterColumn(UINT nColID);
@@ -76,6 +77,7 @@ protected:
 	CTreeCtrlHelper m_ht;
 	CMapUIntToString m_mapTooltips;
 	BOOL m_bExpandingAll;
+	BOOL m_bParentHandlesCustomDraw;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

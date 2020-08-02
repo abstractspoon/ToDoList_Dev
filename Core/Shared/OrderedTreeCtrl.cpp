@@ -619,86 +619,90 @@ BOOL COrderedTreeCtrl::OnItemexpanded(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 BOOL COrderedTreeCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	NMCUSTOMDRAW* pNMCD = (NMCUSTOMDRAW*)pNMHDR;
-	NMTVCUSTOMDRAW* pTVCD = (NMTVCUSTOMDRAW*)pNMCD;
-	
-	HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
-	
-	switch (pNMCD->dwDrawStage)
+	if (!m_bParentHandlesCustomDraw)
 	{
-	case CDDS_PREPAINT:
-		*pResult |= CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;	
-		break;
+		NMCUSTOMDRAW* pNMCD = (NMCUSTOMDRAW*)pNMHDR;
+		NMTVCUSTOMDRAW* pTVCD = (NMTVCUSTOMDRAW*)pNMCD;
 	
-	case CDDS_ITEMPREPAINT:
+		HTREEITEM hti = (HTREEITEM)pTVCD->nmcd.dwItemSpec;
+	
+		switch (pNMCD->dwDrawStage)
 		{
-			*pResult = CDRF_NOTIFYPOSTPAINT;
-
-			// do the odd lines
-			if ((m_crAltLines != CLR_NONE) && TCH().ItemLineIsOdd(hti))
+		case CDDS_PREPAINT:
+			*pResult |= CDRF_NOTIFYITEMDRAW | CDRF_NOTIFYPOSTPAINT;	
+			break;
+	
+		case CDDS_ITEMPREPAINT:
 			{
-				CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
-				GraphicsMisc::FillItemRect(pDC, &pTVCD->nmcd.rc, m_crAltLines, GetSafeHwnd());
-				
-				pTVCD->clrTextBk = pTVCD->clrText = m_crAltLines;
-				*pResult |= CDRF_NEWFONT;
-			}
+				*pResult = CDRF_NOTIFYPOSTPAINT;
 
-			// themed selection
-			BOOL bThemedSel = ((hti == GetSelectedItem()) && CThemed::AreControlsThemed());
+				// do the odd lines
+				if ((m_crAltLines != CLR_NONE) && TCH().ItemLineIsOdd(hti))
+				{
+					CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
+					GraphicsMisc::FillItemRect(pDC, &pTVCD->nmcd.rc, m_crAltLines, GetSafeHwnd());
+				
+					pTVCD->clrTextBk = pTVCD->clrText = m_crAltLines;
+					*pResult |= CDRF_NEWFONT;
+				}
+
+				// themed selection
+				BOOL bThemedSel = ((hti == GetSelectedItem()) && CThemed::AreControlsThemed());
 			
-			if (bThemedSel)
-			{
-				pTVCD->clrTextBk = pTVCD->clrText = GetSysColor(COLOR_WINDOW);
-				*pResult |= CDRF_NEWFONT;
+				if (bThemedSel)
+				{
+					pTVCD->clrTextBk = pTVCD->clrText = GetSysColor(COLOR_WINDOW);
+					*pResult |= CDRF_NEWFONT;
+				}
 			}
-		}
-		break;
+			break;
 
-	case CDDS_ITEMPOSTPAINT:
-		{
-			CDC* pDC = CDC::FromHandle(pNMCD->hdc);
-
-			// horz gridline
-			if (m_crGridlines != CLR_NONE)
-				pDC->FillSolidRect(pNMCD->rc.left, pNMCD->rc.bottom - 1, pNMCD->rc.right - pNMCD->rc.left, 1, m_crGridlines);
-
-			// draw selection background
-			BOOL bThemedSel = ((hti == GetSelectedItem()) && CThemed::AreControlsThemed());
-
-			if (bThemedSel)
+		case CDDS_ITEMPOSTPAINT:
 			{
-				BOOL bFocused = (::GetFocus() == GetSafeHwnd());
-				BOOL bFullRow = (GetStyle() & TVS_FULLROWSELECT);
-				DWORD dwFlags = GMIB_EXTENDRIGHT | GMIB_THEMECLASSIC;
+				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
 
-				if (bFullRow)
-					dwFlags |= GMIB_EXTENDLEFT;
-				
-				// if the columns are on the right then
-				// we don't want to draw the rounded end 
-				// on the right so it looks continuous with the columns
-				if (m_gutter.HasStyle(NCGS_RIGHTCOLUMNS))
-					dwFlags |= GMIB_CLIPRIGHT;
-				else
-					dwFlags |= GMIB_CLIPLEFT;
-				
-				CRect rItem;
-				GetItemRect(hti, rItem, TRUE);
-				rItem.left += 2;
-				
-				GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-				GraphicsMisc::DrawExplorerItemSelection(pDC, GetSafeHwnd(), nState, rItem, dwFlags);
+				// horz gridline
+				if (m_crGridlines != CLR_NONE)
+					pDC->FillSolidRect(pNMCD->rc.left, pNMCD->rc.bottom - 1, pNMCD->rc.right - pNMCD->rc.left, 1, m_crGridlines);
 
-				// draw text
-				COLORREF crText = GraphicsMisc::GetExplorerItemSelectionTextColor(GetSysColor(COLOR_WINDOWTEXT), nState, dwFlags);
+				// draw selection background
+				BOOL bThemedSel = ((hti == GetSelectedItem()) && CThemed::AreControlsThemed());
 
-				pDC->SetTextColor(crText);
-				pDC->SetBkMode(TRANSPARENT);
-				pDC->DrawText(GetItemText(hti), rItem, (DT_SINGLELINE | DT_LEFT | DT_VCENTER | DT_NOPREFIX));
+				if (bThemedSel)
+				{
+					BOOL bFocused = (::GetFocus() == GetSafeHwnd());
+					BOOL bFullRow = (GetStyle() & TVS_FULLROWSELECT);
+					DWORD dwFlags = GMIB_EXTENDRIGHT | GMIB_THEMECLASSIC;
+
+					if (bFullRow)
+						dwFlags |= GMIB_EXTENDLEFT;
 				
-				*pResult |= CDRF_SKIPDEFAULT;
+					// if the columns are on the right then
+					// we don't want to draw the rounded end 
+					// on the right so it looks continuous with the columns
+					if (m_gutter.HasStyle(NCGS_RIGHTCOLUMNS))
+						dwFlags |= GMIB_CLIPRIGHT;
+					else
+						dwFlags |= GMIB_CLIPLEFT;
+				
+					CRect rItem;
+					GetItemRect(hti, rItem, TRUE);
+					rItem.left += 2;
+				
+					GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
+					GraphicsMisc::DrawExplorerItemSelection(pDC, GetSafeHwnd(), nState, rItem, dwFlags);
+
+					// draw text
+					COLORREF crText = GraphicsMisc::GetExplorerItemSelectionTextColor(GetSysColor(COLOR_WINDOWTEXT), nState, dwFlags);
+
+					pDC->SetTextColor(crText);
+					pDC->SetBkMode(TRANSPARENT);
+					pDC->DrawText(GetItemText(hti), rItem, (DT_SINGLELINE | DT_LEFT | DT_VCENTER | DT_NOPREFIX));
+				
+					*pResult |= CDRF_SKIPDEFAULT;
+				}
 			}
+			break;
 		}
 	}
 	

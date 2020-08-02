@@ -33,7 +33,7 @@ CCtrlTextHighlighter::~CCtrlTextHighlighter()
 	GraphicsMisc::VerifyDeleteObject(m_brHighlight);
 }
 
-BOOL CCtrlTextHighlighter::HighlightUIText(CWnd* pWnd, const CStringArray& aSearch, COLORREF crHighlight, const CWnd* pWndIgnore)
+int CCtrlTextHighlighter::HighlightUIText(CWnd* pWnd, const CStringArray& aSearch, COLORREF crHighlight, const CWnd* pWndIgnore)
 {
 	// Sanity checks
 	if (!pWnd || !pWnd->GetSafeHwnd())
@@ -50,27 +50,33 @@ BOOL CCtrlTextHighlighter::HighlightUIText(CWnd* pWnd, const CStringArray& aSear
 
 	ClearHighlights();
 
-	if (!CCtrlTextHighlighter::FindMatchingCtrls(pWnd, aSearch, m_aHighlightedCtrls, pWndIgnore))
-		return FALSE;
-
-	VERIFY(HookWindow(*pWnd));
-
 	m_crHighlight = crHighlight;
-	m_brHighlight = ::CreateSolidBrush(crHighlight);
+	m_aSearch.Copy(aSearch);
 
-	CDialogHelper::InvalidateAllCtrls(GetCWnd());
-	Invalidate(TRUE);
+	if (CCtrlTextHighlighter::FindMatchingCtrls(pWnd, aSearch, m_aHighlightedCtrls, pWndIgnore))
+	{
+		VERIFY(HookWindow(*pWnd));
 
-	return TRUE;
+		m_brHighlight = ::CreateSolidBrush(crHighlight);
+
+		CDialogHelper::InvalidateAllCtrls(GetCWnd());
+		Invalidate(TRUE);
+	}
+	
+	return m_aHighlightedCtrls.GetSize();
 }
 
 void CCtrlTextHighlighter::ClearHighlights()
 {
+	m_aSearch.RemoveAll();
+	m_crHighlight = CLR_NONE;
+	
 	if (IsHooked())
 	{
 		m_aHighlightedCtrls.RemoveAll();
+
 		GraphicsMisc::VerifyDeleteObject(m_brHighlight);
-		m_crHighlight = CLR_NONE;
+		m_brHighlight = NULL;
 
 		CDialogHelper::InvalidateAllCtrls(GetCWnd());
 		Invalidate(TRUE);
@@ -79,11 +85,12 @@ void CCtrlTextHighlighter::ClearHighlights()
 	}
 }
 
-CWnd* CCtrlTextHighlighter::GetFirstHighlightedItem() const
+HWND CCtrlTextHighlighter::GetFirstCtrl() const
 {
-	if (IsHooked() && m_aHighlightedCtrls.GetSize())
+	if (m_aHighlightedCtrls.GetSize())
 	{
-		return CWnd::FromHandle(m_aHighlightedCtrls[0]);
+		ASSERT(IsHooked()); 
+		return m_aHighlightedCtrls[0];
 	}
 
 	// else 
@@ -157,6 +164,11 @@ BOOL CCtrlTextHighlighter::TextContainsOneOf(const CWnd* pWnd, const CStringArra
 	}
 
 	return FALSE;
+}
+
+BOOL CCtrlTextHighlighter::TextContainsOneOf(const CString& sUIText) const
+{
+	return TextContainsOneOf(sUIText, m_aSearch);
 }
 
 BOOL CCtrlTextHighlighter::TextContainsOneOf(const CString& sUIText, const CStringArray& aSearch)
@@ -243,7 +255,7 @@ BOOL CCtrlTextHighlighter::GetHighlightRect(HWND hwnd, CRect& rHighlight) const
 	return TRUE;
 }
 
-int CCtrlTextHighlighter::FindMatchingCtrls(const CWnd* pWnd, const CStringArray& aSearch, CArray<HWND, HWND&>& aMatching, const CWnd* pWndIgnore)
+int CCtrlTextHighlighter::FindMatchingCtrls(const CWnd* pWnd, const CStringArray& aSearch, CHWndArray& aMatching, const CWnd* pWndIgnore)
 {
 	ASSERT(pWnd && pWnd->GetSafeHwnd());
 

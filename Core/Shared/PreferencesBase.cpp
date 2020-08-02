@@ -87,11 +87,6 @@ CWnd* CPreferencesPageBase::GetDlgItem(UINT nID) const
 	return &wnd;
 }
 
-CWnd* CPreferencesPageBase::GetFirstHighlightedItem() const 
-{
-	return m_ctrlHighlighter.GetFirstHighlightedItem();
-}
-
 BOOL CPreferencesPageBase::OnEraseBkgnd(CDC* pDC)
 {
 	if (m_brBack != NULL)
@@ -142,7 +137,7 @@ BOOL CPreferencesPageBase::AddGroupLine(UINT nIDStatic)
 	return m_mgrGroupLines.AddGroupLine(nIDStatic, GetSafeHwnd());
 }
 
-BOOL CPreferencesPageBase::HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight)
+int CPreferencesPageBase::HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight)
 {
 	return m_ctrlHighlighter.HighlightUIText(this, aSearch, crHighlight, this);
 }
@@ -150,6 +145,17 @@ BOOL CPreferencesPageBase::HighlightUIText(const CStringArray& aSearch, COLORREF
 void CPreferencesPageBase::ClearHighlights()
 {
 	m_ctrlHighlighter.ClearHighlights();
+}
+
+CWnd* CPreferencesPageBase::GetFirstHighlightedItem() const
+{
+	HWND hwndCtrl = m_ctrlHighlighter.GetFirstCtrl();
+
+	if (hwndCtrl)
+		return CWnd::FromHandle(hwndCtrl);
+
+	// else 
+	return NULL;
 }
 
 void CPreferencesPageBase::OnControlChange(UINT nID)
