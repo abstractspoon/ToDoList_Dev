@@ -1072,7 +1072,13 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					// If multiple items are selected and no edit took place
 					// Clear the selection to just the hit item
 					if (!HandleClientColumnClick(lp, FALSE) && (GetSelectedCount() > 1))
-						bSelChange |= SelectItem(nHit);
+					{
+						if (SelectItem(nHit) && !bSelChange)
+						{
+							bSelChange = TRUE;
+							NotifyParentSelChange(SC_BYMOUSE);
+						}
+					}
 				
 					// Eat the msg to prevent a label edit if we changed the selection
 					// Or if the item was already selected but not focused, 
