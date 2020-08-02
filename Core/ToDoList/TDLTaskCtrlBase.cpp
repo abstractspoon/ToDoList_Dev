@@ -792,7 +792,7 @@ void CTDLTaskCtrlBase::OnUndoRedo(BOOL /*bUndo*/)
 	PostResync(m_lcColumns, FALSE);
 
 	// resync scrollbars
-	PostResize(TRUE); 
+//	PostResize(TRUE); 
 }
 
 void CTDLTaskCtrlBase::OnColumnVisibilityChange(const CTDCColumnIDMap& mapChanges)
@@ -1369,8 +1369,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	dc.SelectObject(pOldFont);
 
 	// Resync horizontal scrollbars
-	if (m_hdrColumns.CalcTotalItemWidth() != nPrevTotalWidth)
-		PostResize();
+	PostResize();
 }
 
 void CTDLTaskCtrlBase::SaveState(CPreferences& prefs, const CString& sKey) const

@@ -337,7 +337,7 @@ void CTDLTaskTreeCtrl::OnEndRebuild()
 
 	// Resync horizontal scrollbars because 
 	// RecalcUntrackedColumnWidths doesn't always do it
-	PostResize();
+//	PostResize();
 }
 
 BOOL CTDLTaskTreeCtrl::EnsureSelectionVisible(BOOL bHorzPartialOK)

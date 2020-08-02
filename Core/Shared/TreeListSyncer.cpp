@@ -465,10 +465,10 @@ void CTreeListSyncer::Unsync()
 	m_hwndPrimaryHeader = NULL;
 }
 
-void CTreeListSyncer::ForceNcCalcSize(HWND hwnd)
-{
-	::SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE); 
-}
+// void CTreeListSyncer::ForceNcCalcSize(HWND hwnd)
+// {
+// 	::SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+// }
 
 void CTreeListSyncer::EnableResync(BOOL bEnable, HWND hwnd) 
 { 
@@ -476,9 +476,10 @@ void CTreeListSyncer::EnableResync(BOOL bEnable, HWND hwnd)
 
 	if (bEnable && hwnd)
 	{
-		ForceNcCalcSize(hwnd);
+		::SetWindowPos(hwnd, NULL, 0, 0, 0, 0, SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+
 		PostResync(hwnd, TRUE);
-		PostResize();
+//		PostResize();
 	}
 }
 
@@ -2531,6 +2532,10 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			ShowVScrollBar(hRealWnd, FALSE, FALSE);
 			// then default behaviour
 		}
+
+		// Brute force attempt to fix occasional misalignment
+		// of horizontal scroll regions
+		PostResize();
 		break;
 		
 	case WM_SIZE: 
@@ -2578,6 +2583,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			// visibility is changing
 			if (bHScrollNow != bHScrollBefore || bVScrollNow != bVScrollBefore)
 			{
+				ASSERT(0); // Not sure this ever gets called
 				PostResize();
 			}
 		}

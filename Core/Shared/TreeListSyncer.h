@@ -223,7 +223,7 @@ protected:
 	static BOOL TreeItemHasState(HWND hwnd, HTREEITEM hti, UINT nStateMask);
 	static void SetTreeItemState(HWND hwnd, HTREEITEM hti, UINT nState, UINT nStateMask);
 	static BOOL ListItemHasState(HWND hwnd, int nItem, UINT nStateMask);
-	static void ForceNcCalcSize(HWND hwnd);
+//	static void ForceNcCalcSize(HWND hwnd);
 	static void InvalidateTreeItem(HWND hwnd, HTREEITEM hti);
 	static void InvalidateListItem(HWND hwnd, int nItem);
 	static int InsertListItem(HWND hwndList, int nInsertPos, DWORD dwItemData);
