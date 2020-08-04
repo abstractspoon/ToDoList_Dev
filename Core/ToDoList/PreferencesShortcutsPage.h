@@ -81,14 +81,16 @@ protected:
 	virtual int HighlightUIText(const CStringArray& aSearch, COLORREF crHighlight);
 	virtual void ClearHighlights();
 
-	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos);
+	HTREEITEM AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd);
 	int GetLongestShortcutText(HTREEITEM hti, CDC* pDC);
 	void AddMiscShortcuts();
 	void RemoveUnusedDefaultFilterItems(CMenu& menu) const;
 	BOOL CopyItem(HTREEITEM hti, CString& sOutput);
 	void BuildMenuTree();
-	HTREEITEM InsertItem(const CString& sItem, UINT nCmdID, HTREEITEM htiParent);
+	HTREEITEM InsertItem(const CString& sItem, UINT nCmdID, HTREEITEM htiParent, BOOL bForceAdd);
 	BOOL WantKeepSubmenu(HTREEITEM hti) const;
+	BOOL WantItem(const CString& sItem) const;
+	BOOL MatchesSearch(const CString& sItem) const;
 
 	static BOOL IsMiscCommandID(UINT nCmdID);
 

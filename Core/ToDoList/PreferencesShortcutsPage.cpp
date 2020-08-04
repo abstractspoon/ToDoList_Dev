@@ -145,7 +145,7 @@ void CPreferencesShortcutsPage::BuildMenuTree()
 
 		for (int nPos = 0; nPos < (int)menu.GetMenuItemCount(); nPos++)
 		{
-			HTREEITEM hti = AddMenuItem(TVI_ROOT, &menu, nPos);
+			HTREEITEM hti = AddMenuItem(TVI_ROOT, &menu, nPos, !m_ctrlHighlighter.HasSearch());
 
 			if (!htiFirst)
 				htiFirst = hti;
@@ -168,7 +168,7 @@ void CPreferencesShortcutsPage::BuildMenuTree()
 		m_mgrPrompts.SetPrompt(m_tcCommands, CEnString(IDS_PSP_NOMATCHES), TVM_GETCOUNT);
 }
 
-HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos)
+HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMenu* pMenu, int nPos, BOOL bForceAdd)
 {
 	UINT nCmdID = pMenu->GetMenuItemID(nPos);
 	BOOL bSubMenu = (nCmdID == ID_SUBMENU);
@@ -195,7 +195,10 @@ HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMen
 	if (sItem.IsEmpty())
 		return NULL;
 
-	HTREEITEM hti = InsertItem(sItem, nCmdID, htiParent);
+	if (!bForceAdd && (htiParent != TVI_ROOT))
+		bForceAdd = WantItem(m_tcCommands.GetItemText(htiParent));
+
+	HTREEITEM hti = InsertItem(sItem, nCmdID, htiParent, bForceAdd);
 
 	if (!hti)
 	{
@@ -210,7 +213,9 @@ HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMen
 		if (pSubMenu)
 		{
 			for (int nSubPos = 0; nSubPos < (int)pSubMenu->GetMenuItemCount(); nSubPos++)
-				AddMenuItem(hti, pSubMenu, nSubPos); // RECURSIVE CALL
+			{
+				AddMenuItem(hti, pSubMenu, nSubPos, bForceAdd); // RECURSIVE CALL
+			}
 		}
 
 		// remove the submenu if it contains no items
@@ -235,31 +240,36 @@ HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMen
 
 BOOL CPreferencesShortcutsPage::WantKeepSubmenu(HTREEITEM hti) const
 {
-	if (m_ctrlHighlighter.HasSearch() == 0)
-		return TRUE;
-	
 	if (m_tcCommands.ItemHasChildren(hti))
 		return TRUE;
 
-	return m_ctrlHighlighter.TextContainsOneOf(m_tcCommands.GetItemText(hti));
+	return WantItem(m_tcCommands.GetItemText(hti));
 }
 
-HTREEITEM CPreferencesShortcutsPage::InsertItem(const CString& sItem, UINT nCmdID, HTREEITEM htiParent)
+BOOL CPreferencesShortcutsPage::WantItem(const CString& sItem) const
+{
+	if (!m_ctrlHighlighter.HasSearch())
+		return TRUE;
+	
+	return m_ctrlHighlighter.TextContainsOneOf(sItem);
+}
+
+BOOL CPreferencesShortcutsPage::MatchesSearch(const CString& sItem) const
+{
+	if (!m_ctrlHighlighter.HasSearch())
+		return FALSE;
+	
+	return m_ctrlHighlighter.TextContainsOneOf(sItem);
+}
+
+HTREEITEM CPreferencesShortcutsPage::InsertItem(const CString& sItem, UINT nCmdID, HTREEITEM htiParent, BOOL bForceAdd)
 {
 	// Exclude leaf tasks not matching the search terms
 	// unless their parent matches the search
 	BOOL bSubMenu = (nCmdID == ID_SUBMENU);
 
-	if ((htiParent != TVI_ROOT) && m_ctrlHighlighter.HasSearch() && !bSubMenu)
-	{
-		CString sParentText = m_tcCommands.GetItemText(htiParent);
-
-		if (!m_ctrlHighlighter.TextContainsOneOf(sParentText) &&
-			!m_ctrlHighlighter.TextContainsOneOf(sItem))
-		{
-			return NULL;
-		}
-	}
+	if (!bSubMenu && !bForceAdd && !WantItem(sItem))
+		return NULL;
 	
 	HTREEITEM hti = m_tcCommands.InsertItem(sItem, htiParent);
 	ASSERT(hti);
@@ -282,7 +292,9 @@ void CPreferencesShortcutsPage::AddMiscShortcuts()
 
 	// Add parent placeholder
 	CEnString sSubMenuText(IDS_MISCSHORTCUTS);
-	HTREEITEM htiParent = InsertItem(sSubMenuText, ID_SUBMENU, TVI_ROOT);
+
+	BOOL bForceAdd = !m_ctrlHighlighter.HasSearch();
+	HTREEITEM htiParent = InsertItem(sSubMenuText, ID_SUBMENU, TVI_ROOT, bForceAdd);
 
 	// add children
 	for (int nItem = 0; nItem < NUM_MISCSHORTCUTS; nItem++)
@@ -295,7 +307,7 @@ void CPreferencesShortcutsPage::AddMiscShortcuts()
 			UINT nCmdID = MAKELONG(0, nItem + 1);
 			CEnString sMisc(MISC_SHORTCUTS[nItem].nIDShortcut);
 			
-			HTREEITEM hti = InsertItem(sMisc, nCmdID, htiParent);
+			HTREEITEM hti = InsertItem(sMisc, nCmdID, htiParent, bForceAdd);
 
 			if (hti && dwShortcut)
 			{
@@ -702,6 +714,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			CDC* pDC = CDC::FromHandle(pTVCD->nmcd.hdc);
 			HTREEITEM hti = (HTREEITEM)pNMCD->dwItemSpec;
 			UINT nCmdID = pNMCD->lItemlParam;
+			CString sItem = m_tcCommands.GetItemText(hti);
 
 			// horz gridline
 			pDC->FillSolidRect(pNMCD->rc.left, pNMCD->rc.bottom - 1, pNMCD->rc.right - pNMCD->rc.left, 1, m_tcCommands.GetGridlineColor());
@@ -738,7 +751,7 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			CRect rText;
 			m_tcCommands.GetItemRect(hti, rText, TRUE);
 
-			if (m_ctrlHighlighter.HasSearch() && m_ctrlHighlighter.TextContainsOneOf(m_tcCommands.GetItemText(hti)))
+			if (MatchesSearch(sItem))
 			{ 
 				// don't draw over gridline
 				rText.bottom--;
@@ -750,12 +763,10 @@ void CPreferencesShortcutsPage::OnTreeCustomDraw(NMHDR* pNMHDR, LRESULT* pResult
 			}
 
 			BOOL bBold = (m_tcCommands.GetItemState(hti, TVIS_BOLD) & TVIS_BOLD);
-
 			HGDIOBJ hOldFont = pDC->SelectObject(m_fonts.GetHFont(bBold, FALSE, FALSE, FALSE));
 
 			pDC->SetBkMode(TRANSPARENT);
-			pDC->DrawText(m_tcCommands.GetItemText(hti), rText, (DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX));
-
+			pDC->DrawText(sItem, rText, (DT_SINGLELINE | DT_CENTER | DT_VCENTER | DT_NOPREFIX));
 			pDC->SelectObject(hOldFont);
 
 			*pResult |= CDRF_SKIPDEFAULT;
