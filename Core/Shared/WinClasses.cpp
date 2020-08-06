@@ -275,6 +275,16 @@ BOOL CWinClasses::IsComboBox(LPCTSTR szClass)
 	return (IsClass(szClass, WC_COMBOBOX) || IsClass(szClass, WC_COMBOBOXEX));
 }
 
+BOOL CWinClasses::IsListBox(HWND hWnd)
+{
+	return IsListBox(GetClass(hWnd));
+}
+
+BOOL CWinClasses::IsListBox(LPCTSTR szClass)
+{
+	return (IsClass(szClass, WC_LISTBOX) || IsClass(szClass, WC_CHECKLISTBOX));
+}
+
 BOOL CWinClasses::IsDialog(HWND hWnd)
 {
 	return IsClass(hWnd, WC_DIALOGBOX);

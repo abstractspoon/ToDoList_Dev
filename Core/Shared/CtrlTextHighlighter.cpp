@@ -53,7 +53,7 @@ int CCtrlTextHighlighter::HighlightUIText(CWnd* pWnd, const CStringArray& aSearc
 	m_crHighlight = crHighlight;
 	m_aSearch.Copy(aSearch);
 
-	if (CCtrlTextHighlighter::FindMatchingCtrls(pWnd, aSearch, m_aHighlightedCtrls, pWndIgnore))
+	if (FindMatchingCtrls(pWnd, aSearch, m_aHighlightedCtrls, pWndIgnore))
 	{
 		VERIFY(HookWindow(*pWnd));
 
@@ -158,7 +158,21 @@ BOOL CCtrlTextHighlighter::TextContainsOneOf(const CWnd* pWnd, const CStringArra
 
 	if (aSearch.GetSize())
 	{
-		CString sCtrlText = CDialogHelper::GetCtrlText(pWnd);
+		CString sCtrlText;
+		
+		// We look inside combo boxes and list boxes
+		if (CWinClasses::IsComboBox(*pWnd))
+		{
+			// TODO
+		}
+		else if (CWinClasses::IsListBox(*pWnd))
+		{
+			// TODO
+		}
+		else
+		{
+			sCtrlText = CDialogHelper::GetCtrlText(pWnd);
+		}
 
 		return TextContainsOneOf(sCtrlText, aSearch);
 	}

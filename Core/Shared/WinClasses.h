@@ -45,6 +45,8 @@ public:
 	static BOOL IsRichEditControl(HWND hWnd);
 	static BOOL IsComboBox(LPCTSTR szClass);
 	static BOOL IsComboBox(HWND hWnd);
+	static BOOL IsListBox(LPCTSTR szClass);
+	static BOOL IsListBox(HWND hWnd);
 	static BOOL IsChild(HWND hWnd);
 	static int GetButtonType(HWND hWnd); // BS_*
 	
