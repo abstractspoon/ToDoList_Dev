@@ -139,14 +139,6 @@ LRESULT CCtrlTextHighlighter::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPA
 			}
 		}
 		break;
-
-	case WM_CTLCOLOREDIT:
-	case WM_CTLCOLORLISTBOX:
-		if (Misc::HasT((HWND)lp, m_aHighlightedCtrls))
-		{
-			lr = (LRESULT)m_brHighlight;
-		}
-		break;
 	}
 
 	return lr;
@@ -253,28 +245,6 @@ BOOL CCtrlTextHighlighter::GetHighlightRect(HWND hwnd, CRect& rHighlight) const
 				return FALSE;
 		}
 	}
-	else if (CWinClasses::IsClass(sClass, WC_EDIT))
-	{
-		// Handled by OnCtlColor
-		return FALSE;
-	}
-	else if (CWinClasses::IsClass(sClass, WC_COMBOBOX))
-	{
-		DWORD dwStyle = ::GetWindowLong(hwnd, GWL_STYLE);
-		int nType = (dwStyle & 0xF);
-
-		switch (nType)
-		{
-			case CBS_SIMPLE:
-			case CBS_DROPDOWN:
-				// Handled by the embedded edit
-				return FALSE;
-
-			case CBS_DROPDOWNLIST:
-				nPadding = OTHER_PADDING;
-				break;
-		}
-	}
 	else
 	{
 		nPadding = OTHER_PADDING;
@@ -300,7 +270,7 @@ int CCtrlTextHighlighter::FindMatchingCtrls(const CWnd* pWnd, const CStringArray
 
 	while (pChild)
 	{
-		FindMatchingCtrls(pChild, aSearch, aMatching);
+		FindMatchingCtrls(pChild, aSearch, aMatching); // RECURSIVE CALL
 		pChild = pChild->GetNextWindow();
 	}
 
