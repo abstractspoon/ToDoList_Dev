@@ -808,16 +808,24 @@ LRESULT CPreferencesDlg::OnUpdateSearch(WPARAM wParam, LPARAM lParam)
 	UNREFERENCED_PARAMETER(wParam);
 	UNREFERENCED_PARAMETER(lParam);
 
-	if (!m_ppHost.PagesAreAllCreated())
+	// Only act if something has changed
+	CString sSearchText = GetCtrlText(&m_eSearchText);
+	CStringArray aSearchText;
+
+	Misc::Split(sSearchText, aSearchText, ' ');
+
+	if (!Misc::MatchAll(aSearchText, m_aSearchTerms))
 	{
-		CHoldRedraw hr2(m_ppHost);
-		CHoldRedraw hr3(m_stPageTitle);
+		m_aSearchTerms.Copy(aSearchText);
 
-		CWaitCursor cursor;
-
-		// Forcibly create all pages and translate them
-		if (CLocalizer::IsInitialized())
+		if (!m_ppHost.PagesAreAllCreated())
 		{
+			CHoldRedraw hr(m_ppHost);
+			CHoldRedraw hr2(m_stPageTitle);
+
+			CWaitCursor cursor;
+
+			// Forcibly create all pages and translate them
 			int nPage = m_ppHost.GetPageCount();
 
 			while (nPage--)
@@ -831,28 +839,14 @@ LRESULT CPreferencesDlg::OnUpdateSearch(WPARAM wParam, LPARAM lParam)
 						return FALSE;
 
 					// Showing the page triggers translation
+					// as well as ensuring all content is ready
 					pPage->ShowWindow(SW_SHOWNOACTIVATE);
 					pPage->ShowWindow(SW_HIDE);
 				}
 			}
 		}
-		else
-		{
-			VERIFY(m_ppHost.CreateAllPages());
-		}
-	}
 
-	CHoldRedraw hr(m_tcPages);
-	
-	CString sSearchText = GetCtrlText(&m_eSearchText);
-	CStringArray aSearchText;
-
-	Misc::Split(sSearchText, aSearchText, ' ');
-
-	if (!Misc::MatchAll(aSearchText, m_aSearchTerms))
-	{
-		m_aSearchTerms.Copy(aSearchText);
-
+		CHoldRedraw hr(m_tcPages);
 		AddPagesToTree(TRUE);
 
 		if (!m_tcPages.GetCount())
