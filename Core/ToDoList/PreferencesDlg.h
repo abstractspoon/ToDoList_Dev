@@ -334,7 +334,7 @@ protected:
 	CTreeCtrl m_tcPages;
 	CEnStatic m_stPageTitle; 
 	CEnEdit m_eSearchText;
-	CIcon m_iconSearch;
+	CIcon m_iconSearch, m_iconReset;
 	CWndPromptManager m_mgrPrompts;
 
 	CStringArray m_aSearchTerms;
@@ -353,16 +353,16 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CPreferencesDlg)
-	public:
+protected:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CPreferencesDlg)
-	virtual BOOL OnInitDialog();
 	afx_msg void OnTreeSelChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnApply();
 	//}}AFX_MSG

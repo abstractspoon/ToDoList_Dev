@@ -826,7 +826,7 @@
 #define IDI_OUTLOOK                     2001
 #define IDC_REMOVEOUTLOOKTASKS          2002
 #define IDI_NOTE                        2002
-#define IDI_RESET_ELAPSED               2002
+#define IDI_RESET                       2002
 #define IDD_PRINT_STYLE_PAGE            2002
 #define IDC_CHOOSEFOLDER                2003
 #define IDI_TASK                        2003
@@ -2390,12 +2390,13 @@
 #define IDS_ANONYMIZE_FAIL              51581
 #define IDS_ANONYMIZE_SUCCESS           51582
 #define IDS_PSP_NOMATCHES               51583
+#define IDS_CLEARSEARCH_TIP             51584
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        320
+#define _APS_NEXT_RESOURCE_VALUE        321
 #define _APS_NEXT_COMMAND_VALUE         34743
 #define _APS_NEXT_CONTROL_VALUE         1543
 #define _APS_NEXT_SYMED_VALUE           108

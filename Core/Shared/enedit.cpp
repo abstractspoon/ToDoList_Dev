@@ -51,7 +51,8 @@ CEnEdit::CEnEdit(BOOL bComboStyle, LPCTSTR szMask, DWORD dwFlags) :
 					m_nButtonDown(-1),
 					m_bParentIsCombo(-1),
 					m_nBottomBorder(0),
-					m_nTopBorder(0)
+					m_nTopBorder(0),
+					m_nDefaultBtn(-1)
 {
 }
 
@@ -254,6 +255,11 @@ BOOL CEnEdit::DeleteButton(UINT nID)
 	return TRUE;
 }
 
+void CEnEdit::SetDefaultButton(UINT nID)
+{
+	m_nDefaultBtn = ButtonHitTest(nID);
+}
+
 void CEnEdit::DeleteAllButtons()
 {
 	FreeButtonResources();
@@ -297,9 +303,10 @@ BOOL CEnEdit::PreTranslateMessage(MSG* pMsg)
 	if ((pMsg->message == WM_KEYDOWN) && 
 		(pMsg->wParam == VK_RETURN) && 
 		IsWindowEnabled() && 
-		(GetButtonCount() == 1))
+		((GetButtonCount() == 1) || (m_nDefaultBtn != -1)))
 	{ 
-		const EDITBTN& btn = m_aButtons[0];
+		int nBtn = ((GetButtonCount() == 1) ? 0 : m_nDefaultBtn);
+		const EDITBTN& btn = m_aButtons[nBtn];
 		
 		if (btn.bEnabled)
 		{

@@ -108,6 +108,8 @@ const UINT IDC_TOPOFPAGE = (UINT)-1; // pseudo control ID
 const TCHAR PATHDELIM = '>';
 const LPCTSTR PREFSKEY = _T("Preferences");
 
+enum SEARCH_BTNS { BTN_UPDATE = 1, BTN_CLEAR };
+
 /////////////////////////////////////////////////////////////////////////////
 // CPreferencesDlg dialog
 
@@ -123,10 +125,13 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
 	m_iconSearch(IDI_SEARCH_PREFS, 16),
+	m_iconReset(IDI_RESET, 16),
 	m_bInitialisingDialog(FALSE),
 	m_bBuildingTree(FALSE)
 {
-	m_eSearchText.AddButton(1, m_iconSearch, CEnString(IDS_SEARCHPREFS_PROMPT));
+	m_eSearchText.AddButton(BTN_UPDATE, m_iconSearch, CEnString(IDS_SEARCHPREFS_PROMPT));
+	m_eSearchText.AddButton(BTN_CLEAR, m_iconReset, CEnString(IDS_CLEARSEARCH_TIP));
+	m_eSearchText.SetDefaultButton(BTN_UPDATE);
 
 	CPreferencesDlgBase::AddPage(&m_pageGen);
 	CPreferencesDlgBase::AddPage(&m_pageMultiUser);
@@ -803,16 +808,28 @@ FILTER_TITLE CPreferencesDlg::GetTitleFilterOption() const
 LRESULT CPreferencesDlg::OnUpdateSearch(WPARAM wParam, LPARAM lParam)
 {
 	ASSERT(wParam == IDC_SEARCH);
-	ASSERT(lParam == 1);
-
 	UNREFERENCED_PARAMETER(wParam);
-	UNREFERENCED_PARAMETER(lParam);
 
 	// Only act if something has changed
-	CString sSearchText = GetCtrlText(&m_eSearchText);
 	CStringArray aSearchText;
 
-	Misc::Split(sSearchText, aSearchText, ' ');
+	switch (lParam)
+	{
+	case BTN_UPDATE:
+		{
+			CString sSearchText = GetCtrlText(&m_eSearchText);
+			Misc::Split(sSearchText, aSearchText, ' ');
+		}
+		break;
+
+	case BTN_CLEAR:
+		m_eSearchText.SetWindowText(_T(""));
+		break;
+
+	default:
+		ASSERT(0);
+		return 0L;
+	}
 
 	if (!Misc::MatchAll(aSearchText, m_aSearchTerms))
 	{

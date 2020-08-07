@@ -59,6 +59,7 @@ public:
 	BOOL SetButtonCaption(UINT nID, LPCTSTR szCaption);
 	BOOL SetButtonWidth(UINT nID, int nWidth);
 	BOOL SetButtonWidthDLU(UINT nID, int nDLU);
+	void SetDefaultButton(UINT nID);
 
 	CRect GetButtonRect(UINT nID) const;
 	CString GetButtonTip(UINT nID) const;
@@ -95,6 +96,7 @@ protected:
 	int m_nTopBorder, m_nBottomBorder;
 	CEnImageList m_ilBtns, m_ilDisabledBtns;
 	CToolTipCtrlEx m_tooltip;
+	int m_nDefaultBtn;
 
 	BOOL m_bFirstShow;
 	BOOL m_nButtonDown;
