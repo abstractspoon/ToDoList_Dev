@@ -693,12 +693,7 @@ int CDialogHelper::GetComboBoxItems(const CComboBox& combo, CStringArray& aItems
 	aItems.SetSize(nItem);
 	
 	while (nItem--)
-	{
-		CString sText;
-		combo.GetLBText(nItem, sText);
-
-		aItems[nItem] = sText;
-	}
+		combo.GetLBText(nItem, aItems[nItem]);
 
 	return aItems.GetSize();
 }
@@ -966,6 +961,19 @@ int CDialogHelper::SetListBoxItems(CListBox& list, const CStringArray& aItems)
 		RefreshMaxColumnWidth(list);
 
 	return list.GetCount();
+}
+
+int CDialogHelper::GetListBoxItems(const CListBox& list, CStringArray& aItems)
+{
+	aItems.RemoveAll();
+
+	int nItem = list.GetCount();
+	aItems.SetSize(nItem);
+
+	while (nItem--)
+		list.GetText(nItem, aItems[nItem]);
+
+	return aItems.GetSize();
 }
 
 CString CDialogHelper::GetSelectedItem(const CListBox& list)

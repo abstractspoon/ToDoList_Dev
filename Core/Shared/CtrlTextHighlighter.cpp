@@ -158,23 +158,26 @@ BOOL CCtrlTextHighlighter::TextContainsOneOf(const CWnd* pWnd, const CStringArra
 
 	if (aSearch.GetSize())
 	{
-		CString sCtrlText;
-		
+		CStringArray aCtrlText;
+		CString sClass = CWinClasses::GetClass(*pWnd);
+
 		// We look inside combo boxes and list boxes
-		if (CWinClasses::IsComboBox(*pWnd))
+		if (CWinClasses::IsComboBox(sClass))
 		{
-			// TODO
+			const CComboBox* pCombo = (const CComboBox*)pWnd;
+			CDialogHelper::GetComboBoxItems(*pCombo, aCtrlText);
 		}
-		else if (CWinClasses::IsListBox(*pWnd))
+		else if (CWinClasses::IsListBox(sClass))
 		{
-			// TODO
+			const CListBox* pList = (const CListBox*)pWnd;
+			CDialogHelper::GetListBoxItems(*pList, aCtrlText);
 		}
 		else
 		{
-			sCtrlText = CDialogHelper::GetCtrlText(pWnd);
+			aCtrlText.Add(CDialogHelper::GetCtrlText(pWnd));
 		}
 
-		return TextContainsOneOf(sCtrlText, aSearch);
+		return TextContainsOneOf(aCtrlText, aSearch);
 	}
 
 	return FALSE;
@@ -194,6 +197,19 @@ BOOL CCtrlTextHighlighter::TextContainsOneOf(const CString& sUIText, const CStri
 			if (Misc::Find(aSearch[nItem], sUIText) != -1)
 				return TRUE;
 		}
+	}
+
+	return FALSE;
+}
+
+BOOL CCtrlTextHighlighter::TextContainsOneOf(const CStringArray& aUIText, const CStringArray& aSearch)
+{
+	int nCtrl = aUIText.GetSize();
+
+	while (nCtrl--)
+	{
+		if (TextContainsOneOf(aUIText[nCtrl], aSearch))
+			return TRUE;
 	}
 
 	return FALSE;
@@ -273,16 +289,10 @@ int CCtrlTextHighlighter::FindMatchingCtrls(const CWnd* pWnd, const CStringArray
 {
 	ASSERT(pWnd && pWnd->GetSafeHwnd());
 
-	// Ignore 'us'
-	if (pWnd != pWndIgnore)
+	if ((pWnd != pWndIgnore) && TextContainsOneOf(pWnd, aSearch))
 	{
-		CString sCtrlText = CDialogHelper::GetCtrlText(pWnd);
-
-		if (TextContainsOneOf(sCtrlText, aSearch))
-		{
-			HWND hwnd = pWnd->GetSafeHwnd();
-			aMatching.Add(hwnd);
-		}
+		HWND hwnd = pWnd->GetSafeHwnd();
+		aMatching.Add(hwnd);
 	}
 
 	// Children

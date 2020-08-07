@@ -33,6 +33,7 @@ public:
 
 	BOOL TextContainsOneOf(const CString& sUIText) const;
 	static BOOL TextContainsOneOf(const CString& sUIText, const CStringArray& aSearch);
+	static BOOL TextContainsOneOf(const CStringArray& aUIText, const CStringArray& aSearch);
 
 protected:
 	CStringArray m_aSearch;

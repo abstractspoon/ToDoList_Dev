@@ -190,6 +190,7 @@ public:
 
 	// listboxes
 	static int SetListBoxItems(CListBox& list, const CStringArray& aItems);
+	static int GetListBoxItems(const CListBox& list, CStringArray& aItems);
 	static int RefreshMaxColumnWidth(CListBox& list, CDC* pDCRef = NULL);
 	static int CalcMaxTextWidth(CListBox& list, int nMinWidth = 0, CDC* pDCRef = NULL);
 	static CString GetSelectedItem(const CListBox& list);
