@@ -4339,6 +4339,11 @@ void CTDLTaskCtrlBase::ShowFileLink(LPCTSTR szFilePath) const
 		if (CMSOutlookHelper::HandleUrl(*this, szFilePath))
 			return;
 	}
+	// Likewise for task links if the 'tdl://' handler is not installed
+	else if (TODOITEM::IsTaskLink(szFilePath, TRUE))
+	{
+		// forward to parent below
+	}
 	else if (FileMisc::Run(GetSafeHwnd(), szFilePath, NULL, SW_SHOWNORMAL, m_sTasklistFolder) >= SE_ERR_SUCCESS)
 	{
 		return;

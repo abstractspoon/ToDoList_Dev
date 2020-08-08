@@ -11435,11 +11435,15 @@ LRESULT CToDoCtrl::OnTDCDoTaskLink(WPARAM /*wParam*/, LPARAM lParam)
 LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
 {
 	// Handle relative file path links
-	LPCTSTR szLink = (LPCTSTR)lParam;
+	CString sLink((LPCTSTR)lParam);
 
-	if (!CMSOutlookHelper::IsOutlookUrl(szLink) && ::PathIsRelative(szLink))
+	if (TODOITEM::IsTaskLink(sLink, TRUE))
 	{
-		CString sLink = FileMisc::GetFullPath(szLink, m_taskTree.GetTasklistFolder());
+		return ShowTaskLink(sLink, TRUE);
+	}
+	else if (!CMSOutlookHelper::IsOutlookUrl(sLink) && ::PathIsRelative(sLink))
+	{
+		CString sLink = FileMisc::GetFullPath(sLink, m_taskTree.GetTasklistFolder());
 		
 		if (FileMisc::Run(*this, sLink) >= SE_ERR_SUCCESS)
 			return 0L;
