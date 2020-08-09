@@ -81,6 +81,32 @@ BOOL CTDCTimeTracking::IsTrackingTask(DWORD dwTaskID, BOOL bActive) const
 	return (GetTrackedTaskID(bActive) == dwTaskID);
 }
 
+BOOL CTDCTimeTracking::IsTrackingTaskOrSubtask(DWORD dwTaskID, BOOL bActive) const
+{
+	ASSERT(dwTaskID);
+
+	DWORD dwTrackedID = GetTrackedTaskID(bActive);
+
+	if (!dwTrackedID)
+		return FALSE;
+
+	if (dwTaskID == dwTrackedID)
+		return TRUE;
+
+	// Lookup the parent chain for this item
+	DWORD dwParentID = m_data.GetTaskParentID(dwTrackedID);
+
+	while (dwParentID)
+	{
+		if (dwParentID == dwTaskID)
+			return TRUE;
+
+		dwParentID = m_data.GetTaskParentID(dwParentID);
+	}
+
+	return FALSE;
+}
+
 BOOL CTDCTimeTracking::IsTrackingSelectedTask(BOOL bActive) const
 {
 	DWORD dwSelID = GetSelectedTaskID();

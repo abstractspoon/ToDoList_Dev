@@ -3706,7 +3706,7 @@ TDC_SET CToDoCtrl::SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bA
 {
 	TDC_SET nRes = m_data.SetTaskDone(dwTaskID, date, bAndSubtasks, bUpdateAllSubtaskDates);
 	
-	if ((nRes == SET_CHANGE) && m_timeTracking.IsTrackingTask(dwTaskID, FALSE))
+	if ((nRes == SET_CHANGE) && m_timeTracking.IsTrackingTaskOrSubtask(dwTaskID, FALSE))
 	{
 		ASSERT(CDateHelper::IsDateSet(date));
 

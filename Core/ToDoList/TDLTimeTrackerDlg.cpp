@@ -190,7 +190,7 @@ BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 		if (!bRemove)
 		{
 			bRemove = (Misc::HasFlag(dwToRemove, TTL_REMOVEDONE) && 
-						pTDC->IsTaskDone(ti.dwTaskID));
+						pTDC->IsTaskGoodAsDone(ti.dwTaskID));
 
 			// if (!bRemove)
 			// {

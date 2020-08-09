@@ -3427,15 +3427,29 @@ BOOL CToDoCtrlData::IsTaskDone(DWORD dwTaskID) const
 
 BOOL CToDoCtrlData::IsTaskTimeTrackable(DWORD dwTaskID) const
 {
-	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FALSE);
-	
-	// not trackable if complete
-	if (pTDI->IsDone())
+	// Not trackable if complete
+	if (IsTaskDone(dwTaskID))
 		return FALSE;
 
-	// not trackable if a container
-	return (HasStyle(TDCS_ALLOWPARENTTIMETRACKING) || !IsTaskParent(dwTaskID));
+	// Not trackable if task is parent
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDS(dwTaskID, pTDS, FALSE);
+	
+	if (pTDS->HasSubTasks() && !HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
+		return FALSE;
+
+	// Not trackable if any of its parents are complete
+	pTDS = pTDS->GetParentTask();
+
+	while (pTDS && !pTDS->IsRoot())
+	{
+		if (IsTaskDone(pTDS->GetTaskID()))
+			return FALSE;
+
+		pTDS = pTDS->GetParentTask();
+	}
+
+	return TRUE;
 }
 
 BOOL CToDoCtrlData::IsTaskParent(DWORD dwTaskID) const

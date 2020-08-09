@@ -32,6 +32,7 @@ public:
 	BOOL CanTrackTask(DWORD dwTaskID) const;
 	BOOL CanTrackSelectedTask() const;
 	BOOL IsTrackingTask(DWORD dwTaskID, BOOL bActive = TRUE) const;
+	BOOL IsTrackingTaskOrSubtask(DWORD dwTaskID, BOOL bActive = TRUE) const;
 	BOOL IsTrackingSelectedTask(BOOL bActive = TRUE) const;
 	BOOL IsTracking(BOOL bActive = TRUE) const;
 	BOOL EndTracking();
