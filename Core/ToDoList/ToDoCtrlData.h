@@ -147,7 +147,6 @@ public:
 	void GetTrueTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL IsTaskReference(DWORD dwTaskID) const;
 	DWORD GetTaskReferenceID(DWORD dwTaskID) const;
-//	BOOL IsTaskReferenced(DWORD dwTaskID) const;
 	int GetReferencesToTask(DWORD dwTaskID, CDWordArray& aRefIDs) const;
 	BOOL IsReferenceToTask(DWORD dwTestID, DWORD dwTaskID) const;
 	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
@@ -260,7 +259,6 @@ protected:
 	BOOL DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUndo);
 	BOOL AddTaskToDataModel(const CTaskFile& tasks, HTASKITEM hTask, TODOSTRUCTURE* pTDSParent);
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
-//	BOOL IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) const;
 	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwMatchID = 0);
 	
 	BOOL FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependsID, CDWordSet& mapVisited) const;

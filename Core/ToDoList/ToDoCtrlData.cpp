@@ -3382,43 +3382,6 @@ void CToDoCtrlData::GetTrueTaskIDs(CDWordArray& aTaskIDs) const
 		aTaskIDs[nID] = GetTrueTaskID(aTaskIDs[nID]);
 }
 
-/*
-BOOL CToDoCtrlData::IsTaskReferenced(DWORD dwTaskID) const
-{
-	// sanity check
-	ASSERT(dwTaskID);
-
-	// if it is already a reference then it cannot have refs itself
-	if (dwTaskID == 0 || IsTaskReference(dwTaskID))
-		return FALSE;
-
-	return IsTaskReferenced(dwTaskID, &m_struct);
-}
-
-BOOL CToDoCtrlData::IsTaskReferenced(DWORD dwTaskID, const TODOSTRUCTURE* pTDS) const
-{
-	// sanity check
-	ASSERT(dwTaskID && pTDS);
-
-	if (!dwTaskID || !pTDS)
-		return FALSE;
-	
-	// test this task
-	if (!pTDS->IsRoot() && (GetTaskReferenceID(pTDS->GetTaskID()) == dwTaskID))
-		return TRUE;
-
-	// then its children
-	for (int nChild = 0; nChild < pTDS->GetSubTaskCount(); nChild++)
-	{
-		if (IsTaskReferenced(dwTaskID, pTDS->GetSubTask(nChild)))
-			return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-*/
-
 int CToDoCtrlData::GetReferencesToTask(DWORD dwTaskID, CDWordArray& aRefIDs) const
 {
 	// sanity check
