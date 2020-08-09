@@ -5688,7 +5688,7 @@ BEGIN
     IDS_CMDLINE_SELECTTASKID 
                             "-tid <task id>\tSelects the specified task in the active tasklist"
     IDS_CMDLINE_PARENTID    "-pid <task id>\tSpecifies the parent task in which to create the new task"
-    IDS_CMDLINE_SIBLINGID   "-bid <task id>\tSpecifies the sibling task after which to create the new task"
+    IDS_CMDLINE_SIBLINGID   "-bid <task id>\tSpecifies the sibling task below which to create the new task"
     IDS_CMDLINE_TASKCOMMENTS 
                             "-cm <comments>\tAdds to the 'Comments' for the currently selected task"
     IDS_CMDLINE_TASKEXTID   "-xid <ext_id>\tSets the 'external ID' for the currently selected task"
