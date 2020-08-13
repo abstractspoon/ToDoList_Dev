@@ -82,7 +82,7 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 {
 	//{{AFX_DATA_INIT(CFilterBar)
 	//}}AFX_DATA_INIT
-	m_iconUpdateBtn.Load(IDI_UPDATE_FILTER);
+	m_iconUpdateBtn.Load(IDI_UPDATE_FILTER, 16, FALSE);
 
 	// add update button to 'title text' and 'next 'n' days'
 	m_eTitleFilter.AddButton(1, m_iconUpdateBtn, CEnString(IDS_TDC_UPDATEFILTER_TIP));

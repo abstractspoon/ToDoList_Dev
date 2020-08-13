@@ -20,8 +20,7 @@ static char THIS_FILE[] = __FILE__;
 CTDLLanguageDlg::CTDLLanguageDlg(CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLLanguageDlg::IDD, _T("Language"), pParent), 
-	m_cbLanguages(_T("*.csv")), 
-	m_icon(NULL)
+	m_cbLanguages(_T("*.csv"))
 {
 	//{{AFX_DATA_INIT(CTDLLanguageDlg)
 	//}}AFX_DATA_INIT

@@ -541,7 +541,7 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 
 	m_mgrPrompts.SetEditPrompt(IDC_QUICKFIND, *this, IDS_QUICKTASKFIND);
 
-	m_iconResetElapsed.Load(IDI_RESET);
+	m_iconResetElapsed.Load(IDI_RESET, 16, FALSE);
 	m_eElapsedTime.AddButton(ID_RESET_ELAPSED, m_iconResetElapsed, CEnString(IDS_RESET_ELAPSED), 15);
 		
 	m_iconDlg.Load(IDR_MAINFRAME_STD);

@@ -247,15 +247,15 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_eCost.SetMask(_T("@-.0123456789"), ME_LOCALIZEDECIMAL);
 	
 	// add 'clock' button to 'time spent'
-	m_iconTrackTime.Load(IDI_TIMETRACK);
+	m_iconTrackTime.Load(IDI_TIMETRACK, 16, FALSE);
 	m_eTimeSpent.InsertButton(1, ID_TIME_TRACK, m_iconTrackTime, CEnString(IDS_TDC_STARTSTOPCLOCK), 15);
 
 	// add 'Plus' button to 'time spent'
-	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME);
+	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
 	m_eTimeSpent.InsertButton(2, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
 
 	// add 'go to' button to dependency
-	m_iconLink.Load(IDI_DEPENDS_LINK);
+	m_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
 	m_eDependency.AddButton(ID_DEPENDS_LINK, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
 
 	// misc

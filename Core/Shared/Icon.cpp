@@ -3,13 +3,17 @@
 #include "GraphicsMisc.h"
 
 
+CIcon::CIcon() : m_hIcon(NULL)
+{
+}
+
 CIcon::CIcon(HICON hIcon) : m_hIcon(hIcon)
 {
 }
 
-CIcon::CIcon(UINT nIDIcon, int nSize) : m_hIcon(NULL)
+CIcon::CIcon(UINT nIDIcon, int nSize, BOOL bScaleByDPI) : m_hIcon(NULL)
 {
-	Load(nIDIcon, nSize);
+	Load(nIDIcon, nSize, bScaleByDPI);
 }
 
 CIcon::~CIcon()
@@ -37,8 +41,11 @@ BOOL CIcon::SetIcon(HICON hIcon, BOOL bDeletePrev)
 	return TRUE;
 }
 
-BOOL CIcon::Load(UINT nIDIcon, int nSize)
+BOOL CIcon::Load(UINT nIDIcon, int nSize, BOOL bScaleByDPI)
 {
+	if (bScaleByDPI)
+		nSize = GraphicsMisc::ScaleByDPIFactor(nSize);
+
 	return SetIcon(GraphicsMisc::LoadIcon(nIDIcon, nSize));
 }
 

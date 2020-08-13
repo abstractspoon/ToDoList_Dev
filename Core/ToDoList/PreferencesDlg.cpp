@@ -124,8 +124,8 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_pageUI(pMgrUIExt), 
 	m_pageTaskDef(pContentMgr), 
 	m_pageFile2(pExportMgr),
-	m_iconSearch(IDI_SEARCH_PREFS, 16),
-	m_iconReset(IDI_RESET, 16),
+	m_iconSearch(IDI_SEARCH_PREFS, 16, FALSE),
+	m_iconReset(IDI_RESET, 16, FALSE),
 	m_bInitialisingDialog(FALSE),
 	m_bBuildingTree(FALSE)
 {

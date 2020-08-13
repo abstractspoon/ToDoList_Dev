@@ -263,7 +263,7 @@ SOURCE=.\res\prefs_dlg_std.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\reset_elapsed.ico
+SOURCE=.\res\reset.ico
 # End Source File
 # Begin Source File
 

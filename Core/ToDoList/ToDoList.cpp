@@ -209,7 +209,7 @@ BOOL CToDoListApp::InitInstance()
 	AfxEnableControlContainer(); // embedding IE
 
 	// Set up icons that might be required during startup
-	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE) && m_iconGo.Load(IDI_FILEEDIT_GO))
+	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE, 16, FALSE) && m_iconGo.Load(IDI_FILEEDIT_GO, 16, FALSE))
 		CFileEdit::SetDefaultButtonImages(m_iconBrowse, m_iconGo);
 	
 	if (m_iconHelp.Load(IDI_HELPBUTTON))

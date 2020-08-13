@@ -10,11 +10,12 @@
 class CIcon
 {
 public:
-	CIcon(HICON hIcon = NULL);
-	CIcon(UINT nIDIcon, int nSize);
+	CIcon();
+	CIcon(HICON hIcon);
+	CIcon(UINT nIDIcon, int nSize = 16, BOOL bScaleByDPI = TRUE);
 	virtual ~CIcon();
 
-	BOOL Load(UINT nIDIcon, int nSize = 16);
+	BOOL Load(UINT nIDIcon, int nSize = 16, BOOL bScaleByDPI = TRUE);
 	void Destroy();
 
 	BOOL IsValid() const;
