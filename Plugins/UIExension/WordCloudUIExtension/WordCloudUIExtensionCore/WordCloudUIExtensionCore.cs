@@ -244,10 +244,12 @@ namespace WordCloudUIExtension
 			switch (getTask)
 			{
 				case UIExtension.GetTask.GetNextTask:
+				case UIExtension.GetTask.GetNextVisibleTask:
 					taskId = m_TaskMatchesList.GetNextSelectedMatchId();
 					break;
 
 				case UIExtension.GetTask.GetPrevTask:
+				case UIExtension.GetTask.GetPrevVisibleTask:
 					taskId = m_TaskMatchesList.GetPrevSelectedMatchId();
 					break;
 			}

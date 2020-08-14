@@ -56,6 +56,68 @@ IUI_HITTEST UIExtension::Map(UIExtension::HitResult test)
 	return IUI_NOWHERE;
 }
 
+bool UIExtension::Map(IUI_APPCOMMAND nCmd, UIExtension::GetTask% getTask)
+{
+	switch (nCmd)
+	{
+	case IUI_GETNEXTTASK:
+		getTask = UIExtension::GetTask::GetNextTask;
+		return true;
+
+	case IUI_GETPREVTASK:
+		getTask = UIExtension::GetTask::GetPrevTask;
+		return true;
+
+	case IUI_GETNEXTVISIBLETASK:
+		getTask = UIExtension::GetTask::GetNextVisibleTask;
+		return true;
+
+	case IUI_GETPREVVISIBLETASK:
+		getTask = UIExtension::GetTask::GetPrevVisibleTask;
+		return true;
+
+	case IUI_GETNEXTTOPLEVELTASK:
+		getTask = UIExtension::GetTask::GetNextTopLevelTask;
+		return true;
+
+	case IUI_GETPREVTOPLEVELTASK:
+		getTask = UIExtension::GetTask::GetPrevTopLevelTask;
+		return true;
+	}
+
+	// all else
+	return false;
+}
+
+bool UIExtension::Map(IUI_APPCOMMAND nCmd, UIExtension::SelectTask% selectTask)
+{
+	switch (nCmd)
+	{
+	case IUI_SELECTFIRSTTASK:
+		selectTask = UIExtension::SelectTask::SelectFirstTask;
+		return true;
+
+	case IUI_SELECTNEXTTASK:
+		selectTask = UIExtension::SelectTask::SelectNextTask;
+		return true;
+
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+		selectTask = UIExtension::SelectTask::SelectNextTaskInclCurrent;
+		return true;
+
+	case IUI_SELECTPREVTASK:
+		selectTask = UIExtension::SelectTask::SelectPrevTask;
+		return true;
+
+	case IUI_SELECTLASTTASK:
+		selectTask = UIExtension::SelectTask::SelectLastTask;
+		return true;
+	}
+
+	// all else
+	return false;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 UIExtension::ParentNotify::IUITaskMod::IUITaskMod(Task::Attribute attrib, DateTime value)

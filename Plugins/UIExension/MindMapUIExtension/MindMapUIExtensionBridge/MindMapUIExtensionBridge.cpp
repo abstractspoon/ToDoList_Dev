@@ -189,21 +189,46 @@ bool CMindMapUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->pt.y);
 }
 
+bool CMindMapUIExtensionBridgeWindow::Map(IUI_APPCOMMAND nCmd, MindMapControl::ExpandNode% expand)
+{
+	switch (nCmd)
+	{
+	case IUI_COLLAPSEALL:
+		expand = MindMapControl::ExpandNode::CollapseAll;
+		return true;
+
+	case IUI_COLLAPSESELECTED:
+		expand = MindMapControl::ExpandNode::CollapseSelection;
+		return true;
+
+	case IUI_EXPANDALL:
+		expand = MindMapControl::ExpandNode::ExpandAll;
+		return true;
+
+	case IUI_EXPANDSELECTED:
+		expand = MindMapControl::ExpandNode::ExpandSelectionAll;
+		return true;
+	}
+
+	// all else
+	return false;
+}
+
 bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)
 	{
 	case IUI_COLLAPSEALL:
-		return m_wnd->Expand(MindMapControl::ExpandNode::CollapseAll);
-
 	case IUI_COLLAPSESELECTED:
-		return m_wnd->Expand(MindMapControl::ExpandNode::CollapseSelection);
-
 	case IUI_EXPANDALL:
-		return m_wnd->Expand(MindMapControl::ExpandNode::ExpandAll);
-
 	case IUI_EXPANDSELECTED:
-		return m_wnd->Expand(MindMapControl::ExpandNode::ExpandSelectionAll);
+		{
+			MindMapControl::ExpandNode expand;
+
+			if (Map(nCmd, expand))
+				return m_wnd->Expand(expand);
+		}
+		break;
 
 	case IUI_SELECTTASK:
 		if (pData)
@@ -238,6 +263,15 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 		}
 		break;
 
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
+		if (pData)
+			return DoAppSelectCommand(nCmd, pData->select);
+		break;
+
 	case IUI_SAVETOIMAGE:
 		if (pData)
 		{
@@ -259,42 +293,27 @@ DWORD CMindMapUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dw
 {
 	UIExtension::GetTask getTask;
 
-	switch (nCmd)
-	{
-		case IUI_GETNEXTTASK:
-			getTask = UIExtension::GetTask::GetNextTask;
-			break;
-
-		case IUI_GETPREVTASK:
-			getTask = UIExtension::GetTask::GetPrevTask;
-			break;
-
-		case IUI_GETNEXTVISIBLETASK:
-			getTask = UIExtension::GetTask::GetNextVisibleTask;
-			break;
-
-		case IUI_GETPREVVISIBLETASK:
-			getTask = UIExtension::GetTask::GetPrevVisibleTask;
-			break;
-
-		case IUI_GETNEXTTOPLEVELTASK:
-			getTask = UIExtension::GetTask::GetNextTopLevelTask;
-			break;
-
-		case IUI_GETPREVTOPLEVELTASK:
-			getTask = UIExtension::GetTask::GetPrevTopLevelTask;
-			break;
-
-		default:
-			return 0;
-	}
+	if (!UIExtension::Map(nCmd, getTask))
+		return 0;
 
 	UInt32 taskID = dwFromTaskID;
 
-	if (m_wnd->GetTask(getTask, taskID))
-		return taskID;
+	if (!m_wnd->GetTask(getTask, taskID))
+		return 0;
 
-	return 0;
+	return taskID;
+}
+
+bool CMindMapUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
+{
+	UIExtension::SelectTask selectWhat;
+
+	if (!UIExtension::Map(nCmd, selectWhat))
+		return false;
+
+	String^ sWords = gcnew String(select.szWords);
+
+	return m_wnd->SelectTask(sWords, selectWhat, select.bCaseSensitive, select.bWholeWord, select.bFindReplace);
 }
 
 bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
@@ -302,18 +321,23 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 	switch (nCmd)
 	{
 	case IUI_COLLAPSEALL:
-		return m_wnd->CanExpand(MindMapControl::ExpandNode::CollapseAll);
-
 	case IUI_COLLAPSESELECTED:
-		return m_wnd->CanExpand(MindMapControl::ExpandNode::CollapseSelection);
-
 	case IUI_EXPANDALL:
-		return m_wnd->CanExpand(MindMapControl::ExpandNode::ExpandAll);
-
 	case IUI_EXPANDSELECTED:
-		return m_wnd->CanExpand(MindMapControl::ExpandNode::ExpandSelectionAll);
+		{
+			MindMapControl::ExpandNode expand;
+
+			if (Map(nCmd, expand))
+				return m_wnd->CanExpand(expand);
+		}
+		break;
 
 	case IUI_SELECTTASK:
+	case IUI_SELECTFIRSTTASK:
+	case IUI_SELECTNEXTTASK:
+	case IUI_SELECTNEXTTASKINCLCURRENT:
+	case IUI_SELECTPREVTASK:
+	case IUI_SELECTLASTTASK:
 		return true;
 
 	case IUI_SETFOCUS:
@@ -324,6 +348,8 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 			return m_wnd->CanMoveTask(pData->move.dwSelectedTaskID, pData->move.dwParentID, pData->move.dwAfterSiblingID);
 		break;
 
+	case IUI_GETNEXTTASK:
+	case IUI_GETPREVTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:

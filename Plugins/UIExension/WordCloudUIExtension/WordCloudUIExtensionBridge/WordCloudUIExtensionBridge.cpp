@@ -198,25 +198,15 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
-		if (pData)
-		{
-			UInt32 taskID = 0;
-
-			if (m_wnd->GetTask(UIExtension::GetTask::GetNextTask, taskID))
-			{
-				pData->dwTaskID = taskID;
-				return true;
-			}
-		}
-		break;
-
+	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
+	case IUI_GETPREVTOPLEVELTASK:
 		if (pData)
 		{
-			UInt32 taskID = 0;
+			UInt32 taskID = GetNextTask(nCmd, pData->dwTaskID);
 
-			if (m_wnd->GetTask(UIExtension::GetTask::GetPrevTask, taskID))
+			if (taskID != 0)
 			{
 				pData->dwTaskID = taskID;
 				return true;
@@ -251,13 +241,39 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 	return false;
 }
 
+DWORD CWordCloudUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
+{
+	UIExtension::GetTask getTask;
+
+	if (!UIExtension::Map(nCmd, getTask))
+		return 0;
+
+	UInt32 taskID = dwFromTaskID;
+
+	if (!m_wnd->GetTask(getTask, taskID))
+		return 0;
+
+	return taskID;
+}
+
 bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
 {
 	switch (nCmd)
 	{
-	case IUI_SELECTTASK:
+	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
+	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
+	case IUI_GETPREVTOPLEVELTASK:
+		if (pData)
+		{
+			UInt32 taskID = GetNextTask(nCmd, pData->dwTaskID);
+			return ((taskID != 0) && (taskID != pData->dwTaskID));
+		}
+		break;
+
+	case IUI_SELECTTASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
@@ -278,31 +294,8 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, 
 {
 	UIExtension::SelectTask selectWhat;
 
-	switch (nCmd)
-	{
-	case IUI_SELECTFIRSTTASK:
-		selectWhat = UIExtension::SelectTask::SelectFirstTask;
-		break;
-
-	case IUI_SELECTNEXTTASK:
-		selectWhat = UIExtension::SelectTask::SelectNextTask;
-		break;
-
-	case IUI_SELECTNEXTTASKINCLCURRENT:
-		selectWhat = UIExtension::SelectTask::SelectNextTaskInclCurrent;
-		break;
-
-	case IUI_SELECTPREVTASK:
-		selectWhat = UIExtension::SelectTask::SelectPrevTask;
-		break;
-
-	case IUI_SELECTLASTTASK:
-		selectWhat = UIExtension::SelectTask::SelectLastTask;
-		break;
-
-	default:
+	if (!UIExtension::Map(nCmd, selectWhat))
 		return false;
-	}
 
 	String^ sWords = gcnew String(select.szWords);
 

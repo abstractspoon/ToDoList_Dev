@@ -194,34 +194,18 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
-		if (pData)
-		{
-			UInt32 taskID = pData->dwTaskID;
-
-			if (m_wnd->GetTask(UIExtension::GetTask::GetNextTask, taskID))
-			{
-				if ((taskID != 0) && (taskID != pData->dwTaskID))
-				{
-					pData->dwTaskID = taskID;
-					return true;
-				}
-			}
-		}
-		break;
-
+	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVTASK:
 	case IUI_GETPREVVISIBLETASK:
+	case IUI_GETPREVTOPLEVELTASK:
 		if (pData)
 		{
-			UInt32 taskID = pData->dwTaskID;
+			UInt32 taskID = GetNextTask(nCmd, pData->dwTaskID);
 
-			if (m_wnd->GetTask(UIExtension::GetTask::GetPrevTask, taskID))
+			if ((taskID != 0) && (taskID != pData->dwTaskID))
 			{
-				if ((taskID != 0) && (taskID != pData->dwTaskID))
-				{
-					pData->dwTaskID = taskID;
-					return true;
-				}
+				pData->dwTaskID = taskID;
+				return true;
 			}
 		}
 		break;
@@ -248,56 +232,57 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 	switch (nCmd)
 	{
 	case IUI_SELECTTASK:
-		return true;
-
-	case IUI_SETFOCUS:
-		return !m_wnd->Focused;
-
-	case IUI_GETNEXTVISIBLETASK:
-	case IUI_GETPREVVISIBLETASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
-		return /*true*/false; // TODO
+		return true;
+
+	case IUI_SETFOCUS:
+		return !m_wnd->Focused;
+
+	case IUI_GETNEXTTASK:
+	case IUI_GETNEXTVISIBLETASK:
+	case IUI_GETNEXTTOPLEVELTASK:
+	case IUI_GETPREVTASK:
+	case IUI_GETPREVVISIBLETASK:
+	case IUI_GETPREVTOPLEVELTASK:
+		if (pData)
+		{
+			DWORD dwTaskID = GetNextTask(nCmd, pData->dwTaskID);
+			return ((dwTaskID != 0) && (dwTaskID != pData->dwTaskID));
+		}
+		break;
 	}
 
 	// all else
 	return false;
 }
 
+DWORD CDayViewUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
+{
+	UIExtension::GetTask getTask;
+
+	if (!UIExtension::Map(nCmd, getTask))
+		return 0;
+
+	UInt32 taskID = dwFromTaskID;
+
+	if (!m_wnd->GetTask(getTask, taskID))
+		return 0;
+
+	return taskID;
+}
+
 bool CDayViewUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
 	UIExtension::SelectTask selectWhat;
 
-	switch (nCmd)
-	{
-	case IUI_SELECTFIRSTTASK:
-		selectWhat = UIExtension::SelectTask::SelectFirstTask;
-		break;
-
-	case IUI_SELECTNEXTTASK:
-		selectWhat = UIExtension::SelectTask::SelectNextTask;
-		break;
-
-	case IUI_SELECTNEXTTASKINCLCURRENT:
-		selectWhat = UIExtension::SelectTask::SelectNextTaskInclCurrent;
-		break;
-
-	case IUI_SELECTPREVTASK:
-		selectWhat = UIExtension::SelectTask::SelectPrevTask;
-		break;
-
-	case IUI_SELECTLASTTASK:
-		selectWhat = UIExtension::SelectTask::SelectLastTask;
-		break;
-
-	default:
+	if (!UIExtension::Map(nCmd, selectWhat))
 		return false;
-	}
 
-	msclr::auto_gcroot<String^> sWords = gcnew String(select.szWords);
+	String^ sWords = gcnew String(select.szWords);
 
 	return m_wnd->SelectTask(sWords, selectWhat, select.bCaseSensitive, select.bWholeWord, select.bFindReplace);
 }

@@ -52,6 +52,11 @@ namespace MindMapUIExtension
             return false;
         }
 
+        public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+        {
+            return m_MindMap.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
+        }
+
         public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
 			m_MindMap.UpdateTasks(tasks, type);

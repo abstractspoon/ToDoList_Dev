@@ -99,6 +99,8 @@ namespace Abstractspoon
 
 				static UpdateType Map(IUI_UPDATETYPE type);
 				static IUI_HITTEST Map(HitResult test);
+				static bool Map(IUI_APPCOMMAND nCmd, GetTask% getTask);
+				static bool Map(IUI_APPCOMMAND nCmd, SelectTask% selectTask);
 
 				static Windows::Forms::Cursor^ AppCursor(AppCursorType cursor);
 				static Windows::Forms::Cursor^ HandCursor();

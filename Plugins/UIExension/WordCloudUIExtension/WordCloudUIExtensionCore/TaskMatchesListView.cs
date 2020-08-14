@@ -376,7 +376,7 @@ namespace WordCloudUIExtension
 
 		public UInt32 GetNextSelectedMatchId()
 		{
-			if (Items.Count > 1)
+			if ((SelectedItems.Count > 0) && (Items.Count > 1))
 			{
 				var nextIndex = (SelectedItems[0].Index + 1);
 
@@ -390,9 +390,9 @@ namespace WordCloudUIExtension
 
 		public UInt32 GetPrevSelectedMatchId()
 		{
-			if (Items.Count > 1)
-			{
-				var prevIndex = (SelectedItems[0].Index - 1);
+            if ((SelectedItems.Count > 0) && (Items.Count > 1))
+            {
+                var prevIndex = (SelectedItems[0].Index - 1);
 
 				if (prevIndex >= 0)
 					return (Items[prevIndex].Tag as CloudTaskItem).Id;

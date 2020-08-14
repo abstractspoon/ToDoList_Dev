@@ -82,6 +82,7 @@ protected:
 
 protected:
 	bool DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
+	DWORD GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const;
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()

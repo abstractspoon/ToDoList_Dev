@@ -320,7 +320,72 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
+        public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+        {
+            switch (getTask)
+            {
+            case UIExtension.GetTask.GetNextTask:
+                // TODO
+                break;
+
+            case UIExtension.GetTask.GetPrevTask:
+                // TODO
+                break;
+
+            case UIExtension.GetTask.GetNextVisibleTask:
+                // TODO
+                break;
+
+            case UIExtension.GetTask.GetNextTopLevelTask:
+                // TODO
+                break;
+
+            case UIExtension.GetTask.GetPrevVisibleTask:
+                // TODO
+                break;
+
+            case UIExtension.GetTask.GetPrevTopLevelTask:
+                // TODO
+                break;
+            }
+
+            // all else
+            return false;
+        }
+
+        public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+        {
+            if (text == String.Empty)
+                return false;
+
+            switch (selectTask)
+            {
+            case UIExtension.SelectTask.SelectFirstTask:
+                // TODO
+                break;
+
+            case UIExtension.SelectTask.SelectNextTask:
+                // TODO
+                break;
+
+            case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+                // TODO
+                break;
+
+            case UIExtension.SelectTask.SelectPrevTask:
+                // TODO
+                break;
+
+            case UIExtension.SelectTask.SelectLastTask:
+                // TODO
+                break;
+            }
+
+            // all else
+            return false;
+        }
+
+        public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
         {
 			// Our base class clears the selected appointment whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
