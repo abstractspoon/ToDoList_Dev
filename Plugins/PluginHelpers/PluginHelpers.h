@@ -3,6 +3,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
+using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -47,6 +48,8 @@ namespace Abstractspoon
 			public:
 				static bool FindReplace(String^ source, String^ findText, String^ replaceText,
 										bool matchWhole, bool matchCase, String^% result);
+
+				static bool Find(String^ source, String^ findText, bool matchWhole, bool matchCase);
 			};
 
 			// ----------------------------------------------------------------------------

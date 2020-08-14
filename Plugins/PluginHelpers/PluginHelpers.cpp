@@ -70,6 +70,14 @@ bool StringUtil::FindReplace(String^ source, String^ findText, String^ replaceTe
 	return true;
 }
 
+bool StringUtil::Find(String^ source, String^ findText, bool matchWhole, bool matchCase)
+{
+	MarshalledString msSearchIn(source), msSearchFor(findText);
+	CString sSearchIn(msSearchIn), sSearchFor(msSearchFor);
+
+	return (-1 != Misc::Find(sSearchFor, sSearchIn, (BOOL)matchCase, (BOOL)matchWhole));
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 void Log::LogText(String^ text)

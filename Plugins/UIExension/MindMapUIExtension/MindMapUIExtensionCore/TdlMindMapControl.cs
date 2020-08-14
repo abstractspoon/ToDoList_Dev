@@ -446,37 +446,62 @@ namespace MindMapUIExtension
 
         public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
         {
-            if (text == String.Empty)
+            if ((text == String.Empty) || IsEmpty())
                 return false;
 
-            switch (selectTask)
+			TreeNode node = null; // start node
+			bool forward = true;
+
+			switch (selectTask)
             {
             case UIExtension.SelectTask.SelectFirstTask:
-                // TODO
+				node = RootNode.Nodes[0];
                 break;
 
             case UIExtension.SelectTask.SelectNextTask:
-                // TODO
+				if (SelectedNode != null)
+					node = SelectedNode.NextNode;
                 break;
 
             case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-                // TODO
-                break;
+				if (SelectedNode != null)
+					node = SelectedNode;
+				break;
 
             case UIExtension.SelectTask.SelectPrevTask:
-                // TODO
-                break;
+				if (SelectedNode != null)
+				{
+					node = SelectedNode.PrevNode;
+
+					if (node == null)
+						node = LastNode;
+
+					forward = false;
+				}
+				break;
 
             case UIExtension.SelectTask.SelectLastTask:
-                // TODO
-                break;
+				node = LastNode;
+				forward = false;
+				break;
             }
+			
+			// Avoid recursion
+			while (node != null)
+			{ 
+				if (StringUtil.Find(node.Text, text, caseSensitive, wholeWord))
+				{
+					SelectedNode = node;
+					return true;
+				}
 
-            // all else
-            return false;
-        }
+				node = (forward ? node.NextNode : node.PrevNode);
+			}
 
-        public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
+			return false;
+		}
+
+		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
 		{
 			TreeNode node = FindNode(taskID);
 
