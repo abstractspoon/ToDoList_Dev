@@ -1297,19 +1297,6 @@ namespace MindMapUIExtension
 			}
 		}
 
-		protected TreeNode LastNode
-		{
-			get
-			{
-				if (IsEmpty())
-					return null;
-
-				TreeNode lastNode = RootNode.LastNode;
-
-				return ((lastNode == null) ? RootNode : lastNode);
-			}
-		}
-
 		protected TreeNode SelectedNode
 		{
 			get { return m_TreeView.SelectedNode; }

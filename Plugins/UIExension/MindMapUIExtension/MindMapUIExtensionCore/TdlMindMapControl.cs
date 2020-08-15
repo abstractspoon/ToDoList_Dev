@@ -620,6 +620,11 @@ namespace MindMapUIExtension
             return fontChange;
         }
 
+		protected TreeNode LastNode
+		{
+			get { return TreeCtrl.GetLastItem(RootNode); }
+		}
+
 		private MindMapTaskItem TaskItem(TreeNode node)
 		{
 			if (node == null)
