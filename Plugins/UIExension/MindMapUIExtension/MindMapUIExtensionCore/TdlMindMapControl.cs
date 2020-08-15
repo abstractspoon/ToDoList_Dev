@@ -459,25 +459,20 @@ namespace MindMapUIExtension
                 break;
 
             case UIExtension.SelectTask.SelectNextTask:
-				if (SelectedNode != null)
-					node = SelectedNode.NextNode;
+				node = TreeCtrl.GetNextItem(SelectedNode);
                 break;
 
             case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-				if (SelectedNode != null)
-					node = SelectedNode;
+				node = SelectedNode;
 				break;
 
             case UIExtension.SelectTask.SelectPrevTask:
-				if (SelectedNode != null)
-				{
-					node = SelectedNode.PrevNode;
+				node = TreeCtrl.GetPrevItem(SelectedNode);
 
-					if (node == null)
-						node = LastNode;
+				if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
+					node = LastNode;
 
-					forward = false;
-				}
+				forward = false;
 				break;
 
             case UIExtension.SelectTask.SelectLastTask:
@@ -495,7 +490,10 @@ namespace MindMapUIExtension
 					return true;
 				}
 
-				node = (forward ? node.NextNode : node.PrevNode);
+				if (forward)
+					node = TreeCtrl.GetNextItem(node);
+				else
+					node = TreeCtrl.GetPrevItem(node);
 			}
 
 			return false;
