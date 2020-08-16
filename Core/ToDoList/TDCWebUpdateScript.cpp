@@ -65,21 +65,31 @@ BOOL CTDCWebUpdateScript::CheckForUpdates(BOOL bPreRelease)
 {
 	// NEVER update stable-release with pre-release
 	CString sAppVer(FileMisc::GetAppVersion());
+	BOOL bAppIsPreRelease = IsPreRelease(sAppVer);
 
-	if (bPreRelease && !IsPreRelease(sAppVer))
+	if (bPreRelease && !bAppIsPreRelease)
 	{
 		return FALSE;
 	}
 
 	// else
 	if (!LoadScript(GetScriptUrl(bPreRelease)))
+	{
 		return FALSE;
+	}
 
 	CString sScriptExeVer, sScriptDisplayVer;
 	
 	if (!GetScriptExeVersion(sScriptExeVer))
 	{
 		FileMisc::LogText(_T("CTDCWebUpdateScript::LoadScript(unable to get exe version from script)"));
+		return FALSE;
+	}
+
+	// DON'T allow pre-release to change versions
+	// ie. must update to a stable release first
+	if (bAppIsPreRelease && bPreRelease && (FileMisc::CompareVersions(sAppVer, sScriptExeVer, 2) != 0))
+	{
 		return FALSE;
 	}
 		
