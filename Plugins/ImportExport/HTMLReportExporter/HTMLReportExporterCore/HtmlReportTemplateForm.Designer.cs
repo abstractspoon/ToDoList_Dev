@@ -661,6 +661,8 @@
 			this.toolStripFileHistory.MaxDropDownItems = 16;
 			this.toolStripFileHistory.Name = "toolStripFileHistory";
 			this.toolStripFileHistory.Size = new System.Drawing.Size(150, 22);
+			this.toolStripFileHistory.ToolTipText = "Saved Templates";
+
 			// 
 			// HtmlReportTemplateForm
 			// 
