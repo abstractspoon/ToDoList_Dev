@@ -53,6 +53,7 @@ BOOL CTDCAnonymizeTasklist::AnonymizeTasklist(CTaskFile& tasks)
 	if (!BuildContent(tasks))
 		return FALSE;
 
+	AnonymizeAutoListData(tasks);
 	AnonymizeCustomAttributeDefs(tasks);
 
 	// Walk the tasks randomising their titles, comments,
@@ -100,6 +101,23 @@ void CTDCAnonymizeTasklist::AnonymizeCustomAttributeDefs(CTaskFile& tasks)
 		}
 
 		tasks.SetCustomAttributeDefs(m_aAttribDefs);
+	}
+}
+
+void CTDCAnonymizeTasklist::AnonymizeAutoListData(CTaskFile& tasks)
+{
+	TDCAUTOLISTDATA tld;
+
+	if (tasks.GetAutoListData(tld))
+	{
+		AnonymizeListItems(tld.aAllocTo,	*m_mapSharedData.GetAddMapping(_T("ALLOCTO")));
+		AnonymizeListItems(tld.aCategory,	*m_mapSharedData.GetAddMapping(_T("CATEGORY")));
+		AnonymizeListItems(tld.aTags,		*m_mapSharedData.GetAddMapping(_T("TAGS")));
+		AnonymizeListItems(tld.aAllocBy,	*m_mapSharedData.GetAddMapping(_T("ALLOCBY")));
+		AnonymizeListItems(tld.aStatus,		*m_mapSharedData.GetAddMapping(_T("STATUS")));
+		AnonymizeListItems(tld.aVersion,	*m_mapSharedData.GetAddMapping(_T("VERSION")));
+
+		tasks.SetAutoListData(tld);
 	}
 }
 

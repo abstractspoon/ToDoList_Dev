@@ -33,6 +33,7 @@ protected:
 	CTDCAnonymizeTasklist();
 
 	BOOL AnonymizeTasklist(CTaskFile& tasks);
+	void AnonymizeAutoListData(CTaskFile& tasks);
 	void AnonymizeCustomAttributeDefs(CTaskFile& tasks);
 	void AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask);
 	void AnonymizeListItems(CStringArray& aItems, CMapStringToString& mapTLD);
