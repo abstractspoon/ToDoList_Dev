@@ -573,6 +573,9 @@ BEGIN
     CONTROL         "Show &default task icons in icon selection dialog",
                     IDC_SHOWDEFAULTTASKICONS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,145,381,10
+    CONTROL         "&Show close buttons on tabs",
+                    IDC_SHOWTASKLISTCLOSEBTNONTAB,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,160,381,10
     LTEXT           "Filtering",IDC_FILTERGROUP,7,180,381,8
     CONTROL         "S&how default filters in 'Filter Bar'",
                     IDC_SHOWDEFAULTFILTERS,"Button",BS_AUTOCHECKBOX | 
@@ -640,9 +643,6 @@ BEGIN
     CONTROL         "Right &align attribute labels",IDC_RIGHTALIGNLABELS,
                     "Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_DISABLED | 
                     WS_TABSTOP,363,10,25,17
-    CONTROL         "&Show close buttons on tabs",
-                    IDC_SHOWTASKLISTCLOSEBTNONTAB,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,160,381,10
 END
 
 IDD_PREFUITASKLIST_PAGE DIALOG DISCARDABLE  0, 0, 394, 495
