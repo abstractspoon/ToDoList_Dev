@@ -68,7 +68,7 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 
 	LoadMenuCommon();
 
-	if (!prefs.GetShowTasklistTabCloseButton())
+	if (!prefs.GetShowTabCloseButtons())
 		AddMDIButton(MEB_CLOSE, ID_CLOSE);
 
 #ifdef _DEBUG

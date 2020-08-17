@@ -107,6 +107,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt,
 
 	// tab is on by default
 	m_styles[TDCS_SHOWTREELISTBAR] = TRUE;
+	m_styles[TDCS_SHOWTASKVIEWTABCLOSEBUTTON] = TRUE;
 
 	// Will be enabled on first showing
 	m_taskList.EnableRecalcColumns(FALSE);
@@ -2459,6 +2460,13 @@ DWORD CTabbedToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	case TDCS_SHOWTREELISTBAR:
 		m_tabViews.ShowTabControl(bEnable);
 		dwResult |= TDCSS_WANTRESIZE;
+		break;
+
+	case TDCS_SHOWTASKVIEWTABCLOSEBUTTON:
+		if (bEnable)
+			m_tabViews.ModifyFlags(0, TCE_CLOSEBUTTON);
+		else
+			m_tabViews.ModifyFlags(TCE_CLOSEBUTTON, 0);
 		break;
 
 	case TDCS_READONLY:

@@ -225,7 +225,7 @@ public:
 	PUIP_NEWTASKPOS GetNewTaskPos() const { return m_pageUI.GetNewTaskPos(); }
 	PUIP_NEWTASKPOS GetNewSubtaskPos() const { return m_pageUI.GetNewSubtaskPos(); }
 	BOOL GetKeepTabsOrdered() const { return m_pageUI.GetKeepTabsOrdered(); }
-	BOOL GetShowTasklistTabCloseButton() const { return m_pageUI.GetShowTasklistTabCloseButton(); }
+	BOOL GetShowTabCloseButtons() const { return m_pageUI.GetShowTabCloseButtons(); }
 	BOOL GetSortDoneTasksAtBottom() const { return m_pageUI.GetSortDoneTasksAtBottom(); }
 	BOOL GetRTLComments() const { return m_pageUI.GetRTLComments(); }
 	PUIP_LOCATION GetCommentsPos() const { return m_pageUI.GetCommentsPos(); }

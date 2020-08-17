@@ -202,6 +202,7 @@ void CTDCToDoCtrlPreferenceHelper::PopulateStyles(const CPreferencesDlg& prefs, 
 	styles[TDCS_SHOWPATHINHEADER] = prefs.GetShowPathInHeader();
 	styles[TDCS_SHOWPERCENTASPROGRESSBAR] = prefs.GetShowPercentAsProgressbar();
 	styles[TDCS_SHOWREMINDERSASDATEANDTIME] = prefs.GetShowRemindersAsDateAndTime();
+	styles[TDCS_SHOWTASKVIEWTABCLOSEBUTTON] = prefs.GetShowTabCloseButtons();
 	styles[TDCS_SHOWWEEKDAYINDATES] = prefs.GetShowWeekdayInDates();
 	styles[TDCS_SORTDONETASKSATBOTTOM] = prefs.GetSortDoneTasksAtBottom();
 	styles[TDCS_STACKCOMMENTSABOVEEDITS] = prefs.GetStackCommentsAboveEditFields();

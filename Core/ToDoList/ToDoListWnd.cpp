@@ -2558,7 +2558,7 @@ void CToDoListWnd::LoadSettings()
 	// user preferences
 	const CPreferencesDlg& userPrefs = Prefs();
 	
-	if (userPrefs.GetShowTasklistTabCloseButton())
+	if (userPrefs.GetShowTabCloseButtons())
 		m_tabCtrl.ModifyFlags(0, TCE_CLOSEBUTTON);
 	else
 		m_tabCtrl.ModifyFlags(TCE_CLOSEBUTTON, 0);
@@ -4965,7 +4965,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		InitMenubar();
 		
 		// tab bar
-		if (newPrefs.GetShowTasklistTabCloseButton())
+		if (newPrefs.GetShowTabCloseButtons())
 			m_tabCtrl.ModifyFlags(0, TCE_CLOSEBUTTON);
 		else
 			m_tabCtrl.ModifyFlags(TCE_CLOSEBUTTON, 0);

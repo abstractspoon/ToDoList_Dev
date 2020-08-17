@@ -62,7 +62,7 @@ public:
 	PUIP_NEWTASKPOS GetNewTaskPos() const { return m_nNewTaskPos; }
 	PUIP_NEWTASKPOS GetNewSubtaskPos() const { return m_nNewSubtaskPos; }
 	BOOL GetKeepTabsOrdered() const { return m_bKeepTabsOrdered; }
-	BOOL GetShowTasklistTabCloseButton() const { return m_bShowTasklistTabCloseButton; }
+	BOOL GetShowTabCloseButtons() const { return m_bShowTabCloseButtons; }
 	BOOL GetSortDoneTasksAtBottom() const { return m_bSortDoneTasksAtBottom; }
 	BOOL GetRTLComments() const { return m_bRTLComments; }
 	PUIP_LOCATION GetCommentsPos() const { return m_nCommentsPos; }
@@ -95,7 +95,7 @@ protected:
 	BOOL	m_bStackTabbarItems;
 	BOOL	m_bFocusTreeOnEnter;
 	BOOL	m_bKeepTabsOrdered;
-	BOOL	m_bShowTasklistTabCloseButton;
+	BOOL	m_bShowTabCloseButtons;
 	BOOL	m_bRTLComments;
 	BOOL	m_bShowEditMenuAsColumns;
 	BOOL	m_bMultiSelFilters;

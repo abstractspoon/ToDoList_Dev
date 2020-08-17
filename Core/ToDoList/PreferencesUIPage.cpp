@@ -49,7 +49,7 @@ void CPreferencesUIPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_STACKTABBARITEMS, m_bStackTabbarItems);
 	DDX_Check(pDX, IDC_FOCUSTREEONENTER, m_bFocusTreeOnEnter);
 	DDX_Check(pDX, IDC_KEEPTABSORDERED, m_bKeepTabsOrdered);
-	DDX_Check(pDX, IDC_SHOWTASKLISTCLOSEBTN, m_bShowTasklistTabCloseButton);
+	DDX_Check(pDX, IDC_SHOWTASKLISTCLOSEBTN, m_bShowTabCloseButtons);
 	DDX_Check(pDX, IDC_SHOWEDITMENUASCOLUMNS, m_bShowEditMenuAsColumns);
 	DDX_Check(pDX, IDC_MULTISELFILTER, m_bMultiSelFilters);
 	DDX_Check(pDX, IDC_RESTORETASKLISTFILTERS, m_bRestoreTasklistFilters);
@@ -144,7 +144,7 @@ void CPreferencesUIPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szK
 	m_nNewTaskPos = (PUIP_NEWTASKPOS)pPrefs->GetProfileInt(szKey, _T("NewTaskPos"), PUIP_BELOW);
 	m_nNewSubtaskPos = (PUIP_NEWTASKPOS)pPrefs->GetProfileInt(szKey, _T("NewSubtaskPos"), PUIP_BOTTOM);
 	m_bKeepTabsOrdered = pPrefs->GetProfileInt(szKey, _T("KeepTabsOrdered"), FALSE);
-	m_bShowTasklistTabCloseButton = pPrefs->GetProfileInt(szKey, _T("ShowTasklistTabCloseButton"), TRUE);
+	m_bShowTabCloseButtons = pPrefs->GetProfileInt(szKey, _T("ShowTasklistTabCloseButton"), TRUE);
 	m_bSortDoneTasksAtBottom = pPrefs->GetProfileInt(szKey, _T("SortDoneTasksAtBottom"), TRUE);
 	m_bRTLComments = pPrefs->GetProfileInt(szKey, _T("RTLComments"), FALSE);
 	m_nCommentsPos = (PUIP_LOCATION)pPrefs->GetProfileInt(szKey, _T("VertComments"), PUIP_LOCATERIGHT);
@@ -197,7 +197,7 @@ void CPreferencesUIPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) co
 	pPrefs->WriteProfileInt(szKey, _T("NewTaskPos"), m_nNewTaskPos);
 	pPrefs->WriteProfileInt(szKey, _T("NewSubtaskPos"), m_nNewSubtaskPos);
 	pPrefs->WriteProfileInt(szKey, _T("KeepTabsOrdered"), m_bKeepTabsOrdered);
-	pPrefs->WriteProfileInt(szKey, _T("ShowTasklistTabCloseButton"), m_bShowTasklistTabCloseButton);
+	pPrefs->WriteProfileInt(szKey, _T("ShowTasklistTabCloseButton"), m_bShowTabCloseButtons);
 	pPrefs->WriteProfileInt(szKey, _T("SortDoneTasksAtBottom"), m_bSortDoneTasksAtBottom);
 	pPrefs->WriteProfileInt(szKey, _T("RTLComments"), m_bRTLComments);
 	pPrefs->WriteProfileInt(szKey, _T("VertComments"), m_nCommentsPos);
