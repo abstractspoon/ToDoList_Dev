@@ -20,11 +20,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDCViewTabControl
 
-CTDLViewTabControl::CTDLViewTabControl(DWORD dwStyles) 
+CTDLViewTabControl::CTDLViewTabControl() 
 : 
 	CTabCtrlEx(TCE_MBUTTONCLOSE | TCE_CLOSEBUTTON | TCE_BOLDSELTEXT, e_tabBottom), 
 	m_nSelTab(-1),
-	m_dwStyles(dwStyles),
 	m_bShowingTabs(TRUE),
 	m_rOverall(0, 0, 0, 0)
 {
@@ -564,16 +563,6 @@ BOOL CTDLViewTabControl::DoTabChange(int nOldTab, int nNewTab, BOOL bNotify)
 	return TRUE;
 }
 
-DWORD CTDLViewTabControl::ModifyStyles(DWORD dwStyle, BOOL bAdd)
-{
-	if (bAdd)
-		m_dwStyles |= dwStyle;
-	else
-		m_dwStyles &= dwStyle;
-
-	return m_dwStyles;
-}
-
 void CTDLViewTabControl::OnCloseTab(NMHDR* pNMHDR, LRESULT* pResult) 
 {
 	*pResult = 0;
@@ -682,6 +671,7 @@ BOOL CTDLViewTabControl::ShowViewTab(FTC_VIEW nView, BOOL bShow)
 
 BOOL CTDLViewTabControl::OnEraseBkgnd(CDC* pDC)
 {
+	// Delayed one-time imagelist initialisation
 	int nNumViews = m_aViews.GetSize();
 
 	if (nNumViews && !m_ilTabs.GetImageCount())

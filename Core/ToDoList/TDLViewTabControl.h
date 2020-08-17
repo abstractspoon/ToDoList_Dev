@@ -23,7 +23,7 @@ class CTDLViewTabControl : public CTabCtrlEx
 {
 // Construction
 public:
-	CTDLViewTabControl(DWORD dwStyles = 0);
+	CTDLViewTabControl();
 
 public:
 	BOOL AttachView(HWND hWnd, FTC_VIEW nView, LPCTSTR szLabel, HICON hIcon, void* pData = NULL, int nVertOffset = 0);
@@ -45,7 +45,6 @@ public:
 	void* GetActiveViewData() const;
 	void* GetViewData(FTC_VIEW nView) const;
 
-	DWORD ModifyStyles(DWORD dwStyle, BOOL bAdd = TRUE);
 	void ShowTabControl(BOOL bShow = TRUE);
 
 	BOOL ShowViewTab(FTC_VIEW nView, BOOL bShow = TRUE);
@@ -79,7 +78,6 @@ protected:
 	};
 
 	CArray<TDCVIEW, TDCVIEW&> m_aViews;
-	DWORD m_dwStyles;
 	int m_nSelTab;
 	BOOL m_bShowingTabs;
 	CRect m_rOverall; // tabs plus views
