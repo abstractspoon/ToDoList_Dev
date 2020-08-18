@@ -284,6 +284,7 @@
     <EmbeddedResource Include="LangRes\LangResource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LangResource.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="LangRes\LangResource.ru-RU.resx" />
     <EmbeddedResource Include="NamedRangeManageForm.resx">

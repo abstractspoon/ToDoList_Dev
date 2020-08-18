@@ -80,14 +80,14 @@ namespace SpreadsheetContentControl
 
         public bool Undo()
         {
-            // TODO
-            return false;
+			m_EditorControl.Undo();
+            return true;
         }
 
         public bool Redo()
         {
-            // TODO
-            return false;
+			m_EditorControl.Redo();
+			return true;
         }
 
         public void SetUITheme(UITheme theme)

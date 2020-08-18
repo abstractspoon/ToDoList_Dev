@@ -191,10 +191,10 @@ namespace unvell.ReoGrid.Editor
 
 			zoomToolStripDropDownButton.TextChanged += zoomToolStripDropDownButton_TextChanged;
 
-			undoToolStripButton.Click += Undo;
-			redoToolStripButton.Click += Redo;
-			undoToolStripMenuItem.Click += Undo;
-			redoToolStripMenuItem.Click += Redo;
+			undoToolStripButton.Click += OnUndo;
+			redoToolStripButton.Click += OnRedo;
+			undoToolStripMenuItem.Click += OnUndo;
+			redoToolStripMenuItem.Click += OnRedo;
 
 			mergeRangeToolStripMenuItem.Click += MergeSelectionRange;
 			cellMergeToolStripButton.Click += MergeSelectionRange;
@@ -1044,14 +1044,34 @@ namespace unvell.ReoGrid.Editor
 			UpdateMenuAndToolStrips();
 		}
 
-		private void Undo(object sender, EventArgs e)
+		public void Undo()
 		{
 			this.grid.Undo();
 		}
 
-		private void Redo(object sender, EventArgs e)
+		public void Redo()
 		{
 			this.grid.Redo();
+		}
+
+		public bool CanUndo()
+		{
+			return this.grid.CanUndo();
+		}
+
+		public bool CanRedo()
+		{
+			return this.grid.CanRedo();
+		}
+
+		private void OnUndo(object sender, EventArgs e)
+		{
+			Undo();
+		}
+
+		private void OnRedo(object sender, EventArgs e)
+		{
+			Redo();
 		}
 
 		void zoomToolStripDropDownButton_TextChanged(object sender, EventArgs e)
