@@ -27,22 +27,23 @@ ContentControlWnd::ParentNotify::ParentNotify(IntPtr hwndParent, IntPtr hwndFrom
 	m_hwndFrom = static_cast<HWND>(hwndFrom.ToPointer());
 }
 
-bool ContentControlWnd::ParentNotify::NotifyChange()
+bool ContentControlWnd::ParentNotify::NotifySimple(UINT nMsg)
 {
 	if (!IsWindow(m_hwndParent))
 		return false;
 
-	::SendMessage(m_hwndParent, WM_ICC_CONTENTCHANGE, 0, (LPARAM)GetFrom());
+	::SendMessage(m_hwndParent, nMsg, 0, (LPARAM)GetFrom());
 	return true;
+}
+
+bool ContentControlWnd::ParentNotify::NotifyChange()
+{
+	return NotifySimple(WM_ICC_CONTENTCHANGE);
 }
 
 bool ContentControlWnd::ParentNotify::NotifyKillFocus()
 {
-	if (!IsWindow(m_hwndParent))
-		return false;
-
-	::SendMessage(m_hwndParent, WM_ICC_KILLFOCUS, 0, (LPARAM)GetFrom());
-	return true;
+	return NotifySimple(WM_ICC_KILLFOCUS);
 }
 
 String^ ContentControlWnd::ParentNotify::NotifyWantLinkTooltip(String^ sLink)
@@ -106,11 +107,7 @@ String^ ContentControlWnd::ParentNotify::ValidateLink(String^ sLink)
 
 bool ContentControlWnd::ParentNotify::HasClipboard()
 {
-	if (!IsWindow(m_hwndParent))
-		return false;
-
-	::SendMessage(m_hwndParent, WM_ICC_HASCLIPBOARD, 0, (LPARAM)GetFrom());
-	return true;
+	return NotifySimple(WM_ICC_HASCLIPBOARD);
 }
 
 /*
@@ -135,11 +132,7 @@ bool ContentControlWnd::ParentNotify::DoHelp(String^ sHelpKey)
 
 bool ContentControlWnd::ParentNotify::NotifyWantSpellcheck()
 {
-	if (!IsWindow(m_hwndParent))
-		return false;
-
-	::SendMessage(m_hwndParent, WM_ICC_WANTSPELLCHECK, 0, (LPARAM)GetFrom());
-	return true;
+	return NotifySimple(WM_ICC_WANTSPELLCHECK);
 }
 
 HWND ContentControlWnd::ParentNotify::GetFrom()

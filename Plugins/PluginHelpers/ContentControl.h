@@ -41,6 +41,8 @@ namespace Abstractspoon
 				private:
 					HWND GetFrom();
 					String^ ValidateLink(String^ sLink);
+
+					bool NotifySimple(UINT nMsg);
 				};
 			};
 
