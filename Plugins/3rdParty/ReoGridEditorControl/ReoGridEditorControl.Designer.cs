@@ -1142,7 +1142,7 @@ namespace unvell.ReoGrid.Editor
 			this.backColorPickerToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
 			this.backColorPickerToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
 			this.backColorPickerToolStripButton.Name = "backColorPickerToolStripButton";
-			this.backColorPickerToolStripButton.Size = new System.Drawing.Size(40, 22);
+			this.backColorPickerToolStripButton.Size = new System.Drawing.Size(32, 22);
 			this.backColorPickerToolStripButton.SolidColor = System.Drawing.Color.Empty;
 			this.backColorPickerToolStripButton.Text = "Background Color";
 			this.backColorPickerToolStripButton.ToolTipText = "Background Color";
