@@ -25,6 +25,8 @@ namespace SpreadsheetContentControl
 		private Font m_ControlsFont;
 		private Translator m_Trans;
 
+		private Byte[] m_PrevContent;
+
 		// --------------------------------------------
 
 		public event EventHandler ContentChanged;
@@ -304,10 +306,40 @@ namespace SpreadsheetContentControl
 
 		protected void NotifyParentContentChange()
 		{
-			if (/*!m_SettingContent &&*/ !IsLoading && (ContentChanged != null))
+			if (IsLoading)
+				return;
+
+			ContentChanged?.Invoke(this, new EventArgs());
+		}
+
+		override public void Undo()
+		{
+			if (base.CanUndo())
 			{
-				ContentChanged(this, new EventArgs());
+				base.Undo();
 			}
+			else if (m_PrevContent != null)
+			{
+				SetContent(m_PrevContent, true);
+				m_PrevContent = null;
+			}
+		}
+
+		override public bool CanUndo()
+		{
+			if (base.CanUndo())
+				return true;
+
+			return (m_PrevContent != null);
+		}
+
+		override public bool CloseDocument()
+		{
+			// Snapshot the current state because closing the document
+			// also destroys the undo stack
+			m_PrevContent = GetContent();
+
+			return true; // handled
 		}
 	}
 }

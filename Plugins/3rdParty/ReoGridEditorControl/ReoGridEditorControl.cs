@@ -1044,22 +1044,22 @@ namespace unvell.ReoGrid.Editor
 			UpdateMenuAndToolStrips();
 		}
 
-		public void Undo()
+		virtual public void Undo()
 		{
 			this.grid.Undo();
 		}
 
-		public void Redo()
+		virtual public void Redo()
 		{
 			this.grid.Redo();
 		}
 
-		public bool CanUndo()
+		virtual public bool CanUndo()
 		{
 			return this.grid.CanUndo();
 		}
 
-		public bool CanRedo()
+		virtual public bool CanRedo()
 		{
 			return this.grid.CanRedo();
 		}
@@ -1417,16 +1417,10 @@ namespace unvell.ReoGrid.Editor
 						borderColorPickToolStripItem.SolidColor = Color.Black;
 					}
 
-					undoToolStripButton.Enabled =
-						undoToolStripMenuItem.Enabled =
-						this.grid.CanUndo();
+					undoToolStripButton.Enabled = undoToolStripMenuItem.Enabled = CanUndo();
+					redoToolStripButton.Enabled = redoToolStripMenuItem.Enabled = CanRedo();
 
-					redoToolStripButton.Enabled =
-						redoToolStripMenuItem.Enabled =
-						this.grid.CanRedo();
-
-					repeatLastActionToolStripMenuItem.Enabled =
-						this.grid.CanUndo() || this.grid.CanRedo();
+					repeatLastActionToolStripMenuItem.Enabled = (CanUndo() || CanRedo());
 
 					cutToolStripButton.Enabled =
 						cutToolStripMenuItem.Enabled =
@@ -1842,7 +1836,7 @@ namespace unvell.ReoGrid.Editor
 			loadToolStripButton.PerformClick();
 		}
 
-		public bool CloseDocument()
+		virtual public bool CloseDocument()
 		{
 			if (this.grid.IsWorkbookEmpty)
 			{
