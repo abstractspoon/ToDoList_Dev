@@ -423,7 +423,7 @@ void CFileEdit::OnBtnClick(UINT nID)
 					dwFlags = EOFN_DEFAULTOPEN;
 
 					// if file not exists revert to current folder
-					if (FileMisc::FileExists(sFilename))
+					if (!FileMisc::FileExists(sFilename))
 						sFilename.Empty();
 				}
 				else // open

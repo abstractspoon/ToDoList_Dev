@@ -133,16 +133,19 @@ int CEnFileDialog::DoModal(IPreferences* pPrefs)
 
 	// if a full pathname has been specified, split the file/folder 
 	CString sInitialFolder(m_ofn.lpstrInitialDir), sFilename;
+	BOOL bUseLastSavedFolder = TRUE;
 	
 	if (HasInitialFileName() && !::PathIsRelative(m_ofn.lpstrFile))
 	{
 		sFilename = FileMisc::GetFileNameFromPath(m_ofn.lpstrFile);
 		sInitialFolder = FileMisc::GetFolderFromFilePath(m_ofn.lpstrFile);
+
+		bUseLastSavedFolder = !FileMisc::FolderExists(sInitialFolder);
 	}
 
-	// Use last saved folder if present
-	if (!m_sTitle.IsEmpty())
+	if (bUseLastSavedFolder && !m_sTitle.IsEmpty())
 	{
+		// Use last saved folder if present
 		CString sLastFolder;
 		
 		if (pPrefs)
