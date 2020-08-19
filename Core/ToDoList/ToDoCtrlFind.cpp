@@ -234,7 +234,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, BOOL bVisibleOnly) con
 		return GetLongestValue(nColID, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
 
 	case TDCC_COST:
-		return GetLongestCost();
+		return GetLongestCost(NULL, NULL, NULL, bVisibleOnly);
 
 	case TDCC_ALLOCTO:
 	case TDCC_CATEGORY:
@@ -1155,24 +1155,22 @@ CString CToDoCtrlFind::WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const
 }
 */
 
-CString CToDoCtrlFind::GetLongestCost() const
+CString CToDoCtrlFind::GetLongestCost(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
 {
-	// Just process the top-level items
-	double biggest = 0.0;
-	HTREEITEM hti = m_tch.TreeCtrl().GetChildItem(NULL);
-
-	while (hti)
-	{
-		double cost = m_calculator.GetTaskCost(GetTaskID(hti));
-		biggest = max(biggest, cost);
-
-		hti = m_tch.TreeCtrl().GetNextItem(hti, TVGN_NEXT);
-	}
-
-	if ((biggest == 0) && m_data.HasStyle(TDCS_HIDEZEROTIMECOST))
+	if (!CheckGetTask(hti, pTDI, pTDS))
 		return EMPTY_STR;
 
-	return Misc::Format(biggest, 2);
+	CString sLongest;
+
+	if (hti && pTDI && pTDS)
+		sLongest = m_formatter.GetTaskCost(pTDI, pTDS);
+
+	if (WantSearchChildren(hti, bVisibleOnly))
+	{
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestCost(htiChild, NULL, NULL, bVisibleOnly));
+	}
+
+	return sLongest;
 }
 
 int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols, 
@@ -1182,11 +1180,6 @@ int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 {
 	if (mapLongest.Initialise(mapCols, aCustAttribDefs))
 	{
-		// Cost is special because we only have to process the 
-		// top-level tasks as they already aggregate their subtasks
-		if (mapLongest.HasColumn(TDCC_COST))
-			mapLongest.UpdateValue(TDCC_COST, GetLongestCost());
-
 		// Likewise for certain calculated custom attributes
 		CTDCCustomAttribDefinitionArray aRestAttribDefs(aCustAttribDefs);
 		int nCust = aCustAttribDefs.GetSize();
@@ -1268,6 +1261,9 @@ void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCus
 
 		if (mapLongest.HasColumn(TDCC_SUBTASKDONE))
 			mapLongest.UpdateValue(TDCC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
+
+		if (mapLongest.HasColumn(TDCC_COST))
+			mapLongest.UpdateValue(TDCC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
 
 		if (mapLongest.HasColumn(TDCC_TIMEEST))
 			mapLongest.UpdateValue(TDCC_TIMEEST, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));

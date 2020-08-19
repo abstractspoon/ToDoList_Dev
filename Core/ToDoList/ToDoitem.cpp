@@ -209,7 +209,7 @@ BOOL TDCCOST::Parse(LPCTSTR szCost)
 			bIsRate = TRUE;
 			szCost++;
 		}
-		else if ((cFirst >= '0') && (cFirst <= '9'))
+		else if (((cFirst >= '0') && (cFirst <= '9')) || (cFirst == '-'))
 		{
 			bIsRate = FALSE;
 		}
@@ -226,12 +226,6 @@ BOOL TDCCOST::Parse(LPCTSTR szCost)
 
 BOOL TDCCOST::SetCost(double dCost, BOOL bCostIsRate)
 {
-	if (dCost < 0)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
 	dAmount = dCost;
 	bIsRate = bCostIsRate;
 
