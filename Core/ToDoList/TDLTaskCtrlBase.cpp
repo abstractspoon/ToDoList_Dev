@@ -3919,20 +3919,22 @@ LRESULT CTDLTaskCtrlBase::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			case NM_CLICK:
 				if (hwnd == m_lcColumns)
 				{
-					const NMITEMACTIVATE* pNMIA = (NMITEMACTIVATE*)lp;
+					// Assigning an imagelist to the columns to control the item height, 
+					// and then hiding column 0 seems to confuse Windows and it incorrectly
+					// reports any click within the the first 16+ pixels as being column 0. 
+					// So we just do our own hit-testing.
+					NMITEMACTIVATE* pNMIA = (NMITEMACTIVATE*)lp;
+					DWORD dwTaskID = 0;
+					TDC_COLUMN nColID = TDCC_NONE;
 
-					if (pNMIA->iItem != -1)// valid items only
+					int nHit = HitTestColumnsItem(pNMIA->ptAction, TRUE, nColID, &dwTaskID);
+
+					if (ItemColumnSupportsClickHandling(nHit, nColID))
 					{
-						DWORD dwTaskID = GetColumnItemTaskID(pNMIA->iItem); // task ID
-						TDC_COLUMN nColID = GetColumnID(pNMIA->iSubItem);
-						
-						if (ItemColumnSupportsClickHandling(pNMIA->iItem, nColID))
-						{
-							if (nColID == TDCC_FILELINK)
-								HandleFileLinkColumnClick(pNMIA->iItem, dwTaskID, pNMIA->ptAction);
-							else
-								NotifyParentOfColumnEditClick(nColID, dwTaskID);
-						}
+						if (nColID == TDCC_FILELINK)
+							HandleFileLinkColumnClick(nHit, dwTaskID, pNMIA->ptAction);
+						else
+							NotifyParentOfColumnEditClick(nColID, dwTaskID);
 					}
 				}
 				break;
