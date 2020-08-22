@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "soundedit.h"
+#include "filemisc.h"
 
 #pragma warning(disable: 4201)
 #include <Mmsystem.h> 
@@ -67,4 +68,14 @@ void CSoundEdit::OnBtnClick(UINT nID)
 
 	// else
 	CFileEdit::OnBtnClick(nID);
+}
+
+CString CSoundEdit::GetWindowsSound(LPCTSTR szSoundFile)
+{
+	CString sSoundPath = FileMisc::GetWindowsFolder() + _T("\\media\\") + szSoundFile;
+
+	if (FileMisc::GetExtension(sSoundPath, FALSE).IsEmpty())
+		sSoundPath += _T(".wav");
+
+	return sSoundPath;
 }

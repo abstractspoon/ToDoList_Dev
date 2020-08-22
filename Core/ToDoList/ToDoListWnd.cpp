@@ -3105,20 +3105,14 @@ BOOL CToDoListWnd::CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertW
 
 void CToDoListWnd::CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID)
 {
-	UINT nReminderLeadin = 0;
-	BOOL bReminderBeforeDue = TRUE;
+	TDCREMINDER rem;
 
-	if (Prefs().GetDefaultReminder(nReminderLeadin, bReminderBeforeDue))
+	if (Prefs().GetDefaultReminder(rem))
 	{
 		ASSERT(tdc.HasTask(dwTaskID));
-
-		TDCREMINDER rem;
 		
 		rem.dwTaskID = dwTaskID;
 		rem.pTDC = &tdc;
-		rem.bRelative = TRUE;
-		rem.dRelativeDaysLeadIn = (nReminderLeadin / (24.0 * 60 * 60));
-		rem.nRelativeFromWhen = (bReminderBeforeDue ? TDCR_DUEDATE : TDCR_STARTDATE);
 		rem.bEnabled = TRUE;
 
 		m_dlgReminders.SetReminder(rem);

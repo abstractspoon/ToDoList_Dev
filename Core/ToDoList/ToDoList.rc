@@ -416,7 +416,7 @@ BEGIN
     LTEXT           "Duration:",IDC_STATIC,18,296,67,8
 END
 
-IDD_PREFTASKDEF_PAGE DIALOG DISCARDABLE  0, 0, 398, 432
+IDD_PREFTASKDEF_PAGE DIALOG DISCARDABLE  0, 0, 398, 450
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -464,9 +464,10 @@ BEGIN
                     WS_TABSTOP
     COMBOBOX        IDC_DEFREMINDERDATE,231,290,122,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Comments",IDC_STATIC,7,310,94,10
+    EDITTEXT        IDC_PLAYSOUND,103,306,249,13,ES_AUTOHSCROLL
+    LTEXT           "&Comments",IDC_STATIC,7,327,94,10
     CONTROL         "",IDC_COMMENTSCTRLFRAME,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE | WS_DISABLED,103,307,280,115
+                    WS_VISIBLE | WS_DISABLED,103,324,280,115
 END
 
 IDD_PREFTASKDEF2_PAGE DIALOG DISCARDABLE  0, 0, 398, 334
@@ -4540,6 +4541,7 @@ BEGIN
                             "-copy <attrib1> <attrib2>\tCopies the value for 'attrib1' to 'attrib2' for the currently selected task"
     IDS_CMDLINE_HELP        "-h, -help, -?\tDisplays a message box showing all the available commandline options"
     IDS_PTP_NEWTOOL         "New Tool"
+    IDS_NOSOUND             "<no sound>"
 END
 
 STRINGTABLE DISCARDABLE 

@@ -163,7 +163,7 @@ public:
 	
 	// CPreferencesTaskDefPage
 	void GetDefaultTaskAttributes(TODOITEM& tdiDefault) const;
-	BOOL GetDefaultReminder(UINT& nMinutes, BOOL& bBeforeDue) const { return m_pageTaskDef.GetReminder(nMinutes, bBeforeDue); }
+	BOOL GetDefaultReminder(TDCREMINDER& rem) const { return m_pageTaskDef.GetReminder(rem); }
 
 	// CPreferencesTaskDef2Page
 	int GetInheritParentAttributes(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const { return m_pageTaskDef2.GetInheritParentAttributes(mapAttribs, bUpdateAttrib); }

@@ -21,6 +21,8 @@ public:
 
 	static void SetDefaultFilter(LPCTSTR szFilter) { s_sFilter = szFilter; }
 	static void SetDefaultPlayButtonTip(LPCTSTR szTip) { s_sPlayBtnTip = szTip; }
+
+	static CString GetWindowsSound(LPCTSTR szSoundFile);
 	
 // Implementation
 protected:

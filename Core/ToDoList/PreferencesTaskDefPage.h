@@ -15,6 +15,7 @@
 #include "tdcenumcontainers.h"
 #include "tdlcommentsctrl.h"
 #include "todoitem.h"
+#include "tdcreminder.h"
 
 #include "..\shared\preferencesbase.h"
 #include "..\shared\colorbutton.h"
@@ -23,6 +24,7 @@
 #include "..\shared\maskedit.h"
 #include "..\Shared\iconbutton.h"
 #include "..\Shared\binarydata.h"
+#include "..\Shared\SoundEdit.h"
 
 #include "..\Interfaces\contentMgr.h"
 
@@ -48,7 +50,7 @@ public:
 	void SetDefaultCommentsFont(const CString& sFaceName, int nPointSize);
 
 	void GetTaskAttributes(TODOITEM& tdiDefault) const;
-	BOOL GetReminder(UINT& nMinutes, BOOL& bBeforeDue) const;
+	BOOL GetReminder(TDCREMINDER& rem) const;
 
 protected:
 // Dialog Data
@@ -64,6 +66,7 @@ protected:
 	CMaskEdit m_eCost;
 	CColourButton	m_btDefColor;
 	CIconButton		m_btDefIcon;
+	CSoundEdit	m_eReminderSound;
 
 	CString	m_sDefCreatedBy;
 	BOOL	m_bReminderBeforeDue;
@@ -77,12 +80,13 @@ protected:
 	CString	m_sDefTags;
 	CString	m_sDefCategory;
 	CString m_sDefIcon;
+	CString	m_sReminderSound;
 	COLORREF m_crDef;
 	BOOL	m_bUseCreationDateForDefStartDate;
 	BOOL	m_bUseCreationTimeForDefStartDate;
 	BOOL	m_bUseCreationDateForDefDueDate;
 	CTDCImageList m_ilTaskIcons;
-	int m_nDefReminderLeadin;
+	int m_nDefReminderLeadinMins;
 
 	const CContentMgr* m_pMgrContent;
 	CTDLCommentsCtrl m_ctrlComments;

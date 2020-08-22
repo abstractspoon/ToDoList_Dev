@@ -46,7 +46,7 @@ protected:
 	CEnStatic m_stTaskTitle;
 
 	int		m_bRelativeFromDueDate;
-	double  m_dRelativeLeadIn;
+	double  m_dRelativeLeadInHours;
 	CString	m_sSoundFile;
 	int		m_bRelative;
 	COleDateTime	m_dtAbsoluteDate;
