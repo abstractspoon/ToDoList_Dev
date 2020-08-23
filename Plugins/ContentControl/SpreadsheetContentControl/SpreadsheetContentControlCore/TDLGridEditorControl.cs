@@ -45,6 +45,16 @@ namespace SpreadsheetContentControl
 
 			Worksheet.DefaultFontName = m_ControlsFont.Name;
 			Worksheet.DefaultFontSize = m_ControlsFont.SizeInPoints;
+
+			m_Trans.Translate(MenuBar.Items);
+			m_Trans.Translate(ToolBar.Items);
+			m_Trans.Translate(FontBar.Items);
+//			m_Trans.Translate(FormulaBar.Items);
+//			m_Trans.Translate(StatusBar.Items);
+			m_Trans.Translate(RowContextMenu.Items);
+			m_Trans.Translate(CellContextMenu.Items);
+			m_Trans.Translate(HeaderContextMenu.Items);
+			m_Trans.Translate(ColumnContextMenu.Items);
 		}
 
 		public Byte[] GetContent()

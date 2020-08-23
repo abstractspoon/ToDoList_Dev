@@ -24,6 +24,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 using unvell.Common;
 
@@ -567,7 +568,17 @@ namespace unvell.ReoGrid.Editor
 			foreach (var cellType in CellTypesManager.CellTypes)
 			{
 				var name = cellType.Key;
-				if (name.EndsWith("Cell")) name = name.Substring(0, name.Length - 4);
+
+				if (name.EndsWith("Cell"))
+					name = name.Substring(0, name.Length - 4);
+
+				// Make 'nice' by inserting spaces at upper case letters
+				var r = new Regex(@"
+                (?<=[A-Z])(?=[A-Z][a-z]) |
+                 (?<=[^A-Z])(?=[A-Z]) |
+                 (?<=[A-Za-z])(?=[^A-Za-z])", RegexOptions.IgnorePatternWhitespace);
+
+				name = r.Replace(name, " ");
 
 				var menuItem = new ToolStripMenuItem(name)
 				{
