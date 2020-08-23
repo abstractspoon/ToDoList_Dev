@@ -665,19 +665,19 @@ namespace HTMLReportExporter
 
 			switch (level)
 			{
-				case 0:		label = m_Trans.Translate("'Leaf' tasks");				break;
-				case 1:		label = m_Trans.Translate("Top-level tasks");			break;
-				case 2:		label = m_Trans.Translate("First level of subtasks");	break;
-				case 3:		label = m_Trans.Translate("Second level of subtasks");	break;
-				case 4:		label = m_Trans.Translate("Third level of subtasks");	break;
-				case 5:		label = m_Trans.Translate("Fourth level of subtasks");	break;
-				case 6:		label = m_Trans.Translate("Fifth level of subtasks");	break;
-				case 7:		label = m_Trans.Translate("Sixth level of subtasks");	break;
-				case 8:		label = m_Trans.Translate("Seventh level of subtasks");	break;
-				case 9:		label = m_Trans.Translate("Eighth level of subtasks");	break;
-				case 10:	label = m_Trans.Translate("Ninth level of subtasks");	break;
+				case 0:		label = m_Trans.Translate("'Leaf' tasks");			break;
+				case 1:		label = m_Trans.Translate("Top-level tasks");		break;
+				case 2:		label = m_Trans.Translate("1st subtask level");		break;
+				case 3:		label = m_Trans.Translate("2nd subtask level");		break;
+				case 4:		label = m_Trans.Translate("3rd subtask level");		break;
+				case 5:		label = m_Trans.Translate("4th subtask level");		break;
+				case 6:		label = m_Trans.Translate("5th subtask level");		break;
+				case 7:		label = m_Trans.Translate("6th subtask level");		break;
+				case 8:		label = m_Trans.Translate("7th subtask level");		break;
+				case 9:		label = m_Trans.Translate("8th subtask level");		break;
+				case 10:	label = m_Trans.Translate("9th subtask level");		break;
 
-				case -1:	label = m_Trans.Translate("Unspecified Levels");		break;
+				case -1:	label = m_Trans.Translate("Unspecified Levels");	break;
 			}
 
 			return !String.IsNullOrEmpty(label);
@@ -727,6 +727,13 @@ namespace HTMLReportExporter
  				item.Click += new System.EventHandler(this.OnAttributeLevelMenuClick);
 
 			ToolBar.Items.Add(m_ToolStripAttributeLevelMenu);
+		}
+
+		public new void SetTranslator(Translator trans)
+		{
+			base.SetTranslator(trans);
+
+			m_Trans.Translate(m_ToolStripAttributeLevelMenu.DropDownItems);
 		}
 
 		protected void OnAttributeLevelMenuClick(object sender, EventArgs args)
