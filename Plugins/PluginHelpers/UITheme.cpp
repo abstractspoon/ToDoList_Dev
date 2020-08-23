@@ -409,11 +409,18 @@ void UIThemeToolbarRenderer::DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectan
 
 Drawing::Pen^ UIThemeToolbarRenderer::GetSeperatorLightPen()
 {
+	if (ColorUtil::DrawingColor::IsGray(m_BkgndLightColor))
+		return BaseToolbarRenderer::GetSeperatorLightPen();
+
+	// else
 	return gcnew Drawing::Pen(DrawingColor::AdjustLighting(m_BkgndLightColor, 0.4f, true));
 }
 
 Drawing::Pen^ UIThemeToolbarRenderer::GetSeperatorDarkPen()
 {
+	if (ColorUtil::DrawingColor::IsGray(m_BkgndLightColor))
+		return BaseToolbarRenderer::GetSeperatorDarkPen();
+
 	return gcnew Drawing::Pen(DrawingColor::AdjustLighting(m_BkgndLightColor, -0.4f, true));
 }
 

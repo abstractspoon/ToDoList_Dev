@@ -93,6 +93,11 @@ Drawing::Color ColorUtil::DrawingColor::ToGray(Drawing::Color color)
 	return ToColor(gray, color.A);
 }
 
+bool ColorUtil::DrawingColor::IsGray(Drawing::Color color)
+{
+	return ((color.R == color.G) && (color.R == color.B));
+}
+
 Drawing::Color ColorUtil::DrawingColor::ToColor(COLORREF rgbColor)
 {
 	return ToColor(rgbColor, 255);

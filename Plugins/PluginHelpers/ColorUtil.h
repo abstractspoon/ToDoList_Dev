@@ -39,6 +39,8 @@ namespace Abstractspoon
 					static Drawing::Color ToGray(Drawing::Color color);
 					static Drawing::Color GetBestTextColor(Drawing::Color backColor);
 
+					static bool IsGray(Drawing::Color color);
+
 					static Drawing::Color SetLuminance(Drawing::Color color, float luminance);
 					static Drawing::Color AdjustLighting(Drawing::Color color, float amount, bool rgbMethod);
 
