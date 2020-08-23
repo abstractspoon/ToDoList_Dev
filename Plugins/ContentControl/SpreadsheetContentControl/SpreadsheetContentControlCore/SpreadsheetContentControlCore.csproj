@@ -51,11 +51,20 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Resource.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resource.resx</DependentUpon>
+    </Compile>
     <Compile Include="SpreadsheetContentControlCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TDLGridEditorControl.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Resource.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="SpreadsheetContentControlCore.resx">
       <DependentUpon>SpreadsheetContentControlCore.cs</DependentUpon>
     </EmbeddedResource>
@@ -77,6 +86,9 @@
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
       <Name>PluginHelpers</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Spreadsheet.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

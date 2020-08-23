@@ -341,5 +341,28 @@ namespace SpreadsheetContentControl
 
 			return true; // handled
 		}
+
+		protected override DialogResult ShowDialog(Form dialog)
+		{
+			FormsUtil.SetFont(dialog, m_ControlsFont);
+
+			// Add icon for identification
+			dialog.Icon = SpreadsheetContentControl.Resource.Spreadsheet;
+			dialog.ShowIcon = true;
+
+			// Per dialog customisations
+// 			if (ISTYPE(dialog, ))
+// 			{
+// 			}
+// 			else // all others
+			{
+				m_Trans.Translate(dialog);
+			}
+
+			Win32.ActivateApp(Handle);
+
+			return base.ShowDialog(dialog);
+		}
+
 	}
 }

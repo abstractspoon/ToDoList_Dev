@@ -219,7 +219,7 @@ namespace unvell.ReoGrid.Editor
 				{
 					rowHeightForm.Value = worksheet.GetRowHeight(worksheet.SelectionRange.Row);
 
-					if (rowHeightForm.ShowDialog() == DialogResult.OK)
+					if (ShowDialog(rowHeightForm) == DialogResult.OK)
 					{
 						this.grid.DoAction(new SetRowsHeightAction(worksheet.SelectionRange.Row,
 							worksheet.SelectionRange.Rows, (ushort)rowHeightForm.Value));
@@ -235,7 +235,7 @@ namespace unvell.ReoGrid.Editor
 				{
 					colWidthForm.Value = worksheet.GetColumnWidth(worksheet.SelectionRange.Col);
 
-					if (colWidthForm.ShowDialog() == DialogResult.OK)
+					if (ShowDialog(colWidthForm) == DialogResult.OK)
 					{
 						this.grid.DoAction(new SetColumnsWidthAction(worksheet.SelectionRange.Col,
 							worksheet.SelectionRange.Cols, (ushort)colWidthForm.Value));
@@ -411,7 +411,7 @@ namespace unvell.ReoGrid.Editor
 						dnrf.Comment = namedRange.Comment;
 					}
 
-					if (dnrf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(dnrf) == System.Windows.Forms.DialogResult.OK)
 					{
 						var newName = dnrf.RangeName;
 
@@ -475,7 +475,7 @@ namespace unvell.ReoGrid.Editor
 					hf.DefaultCellBody = sampleHeader.DefaultCellBody;
 					hf.AutoFitToCell = sampleHeader.IsAutoWidth;
 
-					if (hf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(hf) == System.Windows.Forms.DialogResult.OK)
 					{
 						var newText = string.IsNullOrEmpty(hf.HeaderText) ? null : hf.HeaderText;
 
@@ -513,7 +513,7 @@ namespace unvell.ReoGrid.Editor
 					hpf.RowHeaderWidth = sheet.RowHeaderWidth;
 					hpf.AutoFitToCell = sampleHeader.IsAutoHeight;
 
-					if (hpf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+					if (ShowDialog(hpf) == System.Windows.Forms.DialogResult.OK)
 					{
 						var newText = string.IsNullOrEmpty(hpf.HeaderText) ? null : hpf.HeaderText;
 
@@ -656,7 +656,8 @@ namespace unvell.ReoGrid.Editor
 
 					Cursor = Cursors.Default;
 
-					runFuncForm.ShowDialog(this);
+//					runFuncForm.ShowDialog(this);
+					ShowDialog(runFuncForm);
 				}
 			};
 
@@ -813,6 +814,14 @@ namespace unvell.ReoGrid.Editor
 #endif
 				}
 			};
+		}
+
+		virtual protected DialogResult ShowDialog(Form dialog)
+		{
+			// define location and control style as system
+			dialog.StartPosition = FormStartPosition.CenterParent;
+
+			return dialog.ShowDialog();
 		}
 
 		void worksheet_SelectionModeChanged(object sender, EventArgs e)
@@ -2406,7 +2415,7 @@ namespace unvell.ReoGrid.Editor
 				rgf.Rows = worksheet.RowCount;
 				rgf.Cols = worksheet.ColumnCount;
 
-				if (rgf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				if (ShowDialog(rgf) == System.Windows.Forms.DialogResult.OK)
 				{
 					WorksheetActionGroup ag = new WorksheetActionGroup();
 
@@ -2708,7 +2717,8 @@ namespace unvell.ReoGrid.Editor
 		{
 			using (PropertyForm form = new PropertyForm(this.grid))
 			{
-				form.ShowDialog(this);
+//				form.ShowDialog(this);
+				ShowDialog(form);
 			}
 		}
 
@@ -2740,6 +2750,7 @@ namespace unvell.ReoGrid.Editor
 					ppd.Document = session.PrintDocument;
 					ppd.SetBounds(200, 200, 1024, 768);
 					ppd.PrintPreviewControl.Zoom = 1d;
+
 					ppd.ShowDialog(this);
 				}
 			}
@@ -2791,7 +2802,7 @@ namespace unvell.ReoGrid.Editor
 
 				psf.PrintSettings = (PrintSettings)sheet.PrintSettings.Clone();
 
-				if (psf.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				if (ShowDialog(psf) == System.Windows.Forms.DialogResult.OK)
 				{
 					sheet.PrintSettings = psf.PrintSettings;
 					sheet.AutoSplitPage();
@@ -2855,7 +2866,7 @@ namespace unvell.ReoGrid.Editor
 		#region Help
 		private void aboutToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			new AboutForm().ShowDialog(this);
+			ShowDialog(new AboutForm());
 		}
 		#endregion
 
