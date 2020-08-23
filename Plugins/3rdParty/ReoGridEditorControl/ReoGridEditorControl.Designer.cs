@@ -16,6 +16,7 @@
  * 
  ****************************************************************************/
 
+using IIControls;
 using unvell.UIControls;
 
 namespace unvell.ReoGrid.Editor
@@ -52,7 +53,7 @@ namespace unvell.ReoGrid.Editor
 			this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-			this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+			this.toolStrip1 = new IIControls.ToolStripEx();
 			this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.loadToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -188,7 +189,7 @@ namespace unvell.ReoGrid.Editor
 			this.changeCellsTypeToolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem6 = new System.Windows.Forms.ToolStripSeparator();
 			this.formatCellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.fontToolStrip = new System.Windows.Forms.ToolStrip();
+			this.fontToolStrip = new IIControls.ToolStripEx();
 			this.fontToolStripComboBox = new unvell.UIControls.FontToolStripDropDown();
 			this.fontSizeToolStripComboBox = new System.Windows.Forms.ToolStripComboBox();
 			this.enlargeFontToolStripButton = new System.Windows.Forms.ToolStripButton();

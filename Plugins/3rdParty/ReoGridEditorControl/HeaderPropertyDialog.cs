@@ -103,7 +103,7 @@ namespace unvell.ReoGrid.Editor
 			{
 				for (int i = 0; i < this.cmbCellBody.Items.Count; i++)
 				{
-					if (this.DefaultCellBody == this.cmbCellBody.Items[i])
+					if (this.DefaultCellBody == (Type)this.cmbCellBody.Items[i])
 					{
 						this.cmbCellBody.SelectedIndex = i;
 						break;

@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>unvell.ReoGrid.Editor</RootNamespace>
     <AssemblyName>unvell.ReoGridEditorControl</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <TargetFrameworkProfile>
@@ -483,6 +483,10 @@
     <ProjectReference Include="..\ReoGrid\ReoGrid.csproj">
       <Project>{8b62357a-abbc-4db0-8633-f1d6a6c1ea53}</Project>
       <Name>ReoGrid</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ToolStripEx\ToolStripEx.csproj">
+      <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
+      <Name>ToolStripEx</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
