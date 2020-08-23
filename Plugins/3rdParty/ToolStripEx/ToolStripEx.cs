@@ -13,91 +13,54 @@ namespace IIControls
         ToolStripItem mouseOverItem = null;
         Point mouseOverPoint;
         Timer timer;
-		bool isDPIScaled = false;
-
         public ToolTip Tooltip;
         public int ToolTipInterval = 4000;
         public string ToolTipText;
         public bool ToolTipShowUp;
 
-		public ToolStripEx() : base()
-		{
-			// This class only needs to operate in DPI scaled mode
-			// because Winforms calculates the tooltip position wrong.
-			// Also it can't handle ToolStripComboBox because the 
-			// mouse move notifications go to the combobox
-			using (var graphics = this.CreateGraphics())
-			{
-				isDPIScaled = (graphics.DpiX != 96);
-
-				if (isDPIScaled)
-				{
-					ShowItemToolTips = false;
-					timer = new Timer();
-					timer.Enabled = false;
-					timer.Interval = SystemInformation.MouseHoverTime;
-					timer.Tick += new EventHandler(timer_Tick);
-					Tooltip = new ToolTip();
-				}
-			}
-		}
-
-		protected override void OnMouseMove(MouseEventArgs mea)
+        protected override void OnMouseMove(MouseEventArgs mea)
         {
             base.OnMouseMove(mea);
+            ToolStripItem newMouseOverItem = this.GetItemAt(mea.Location);
+            if (mouseOverItem != newMouseOverItem ||
+                (Math.Abs(mouseOverPoint.X - mea.X) > SystemInformation.MouseHoverSize.Width || (Math.Abs(mouseOverPoint.Y - mea.Y) > SystemInformation.MouseHoverSize.Height)))
+            {
+                mouseOverItem = newMouseOverItem;
+                mouseOverPoint = mea.Location;
+                if (Tooltip != null)
+                    Tooltip.Hide(this);
+                timer.Stop();
+                timer.Start();
+            }
+        }
 
-			if (isDPIScaled)
-			{
-				ToolStripItem newMouseOverItem = this.GetItemAt(mea.Location);
+        protected override void OnMouseClick(MouseEventArgs e)
+        {
+            base.OnMouseClick(e);
+            ToolStripItem newMouseOverItem = this.GetItemAt(e.Location);
+            if (newMouseOverItem != null && Tooltip != null)
+            {
+                Tooltip.Hide(this);
+            }
+        }
 
-				if (mouseOverItem != newMouseOverItem ||
-					(Math.Abs(mouseOverPoint.X - mea.X) > SystemInformation.MouseHoverSize.Width || (Math.Abs(mouseOverPoint.Y - mea.Y) > SystemInformation.MouseHoverSize.Height)))
-				{
-					mouseOverItem = newMouseOverItem;
-					mouseOverPoint = mea.Location;
-					if (Tooltip != null)
-						Tooltip.Hide(this);
-					timer.Stop();
-					timer.Start();
-				}
-			}
-		}
-
-		protected override void OnMouseClick(MouseEventArgs e)
-		{
-			base.OnMouseClick(e);
-
-			if (isDPIScaled)
-			{
-				ToolStripItem newMouseOverItem = this.GetItemAt(e.Location);
-				if (newMouseOverItem != null && Tooltip != null)
-				{
-					Tooltip.Hide(this);
-				}
-			}
-		}
-
-		protected override void OnMouseUp(MouseEventArgs mea)
+        protected override void OnMouseUp(MouseEventArgs mea)
         {
             base.OnMouseUp(mea);
-            //ToolStripItem newMouseOverItem = this.GetItemAt(mea.Location);
+            ToolStripItem newMouseOverItem = this.GetItemAt(mea.Location);
         }
 
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
+            timer.Stop();
+            if (Tooltip != null)
+                Tooltip.Hide(this);
+            mouseOverPoint = new Point(-50, -50);
+            mouseOverItem = null;
+        }
 
-			if (isDPIScaled)
-			{
-				timer.Stop();
-				if (Tooltip != null)
-					Tooltip.Hide(this);
-				mouseOverPoint = new Point(-50, -50);
-				mouseOverItem = null;
-			}
-		}
-
-		void timer_Tick(object sender, EventArgs e)
+        void timer_Tick(object sender, EventArgs e)
         {
             timer.Stop();
             try
@@ -138,12 +101,22 @@ namespace IIControls
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-
-            if (disposing && isDPIScaled)
+            if (disposing)
             {
                 timer.Dispose();
                 Tooltip.Dispose();
             }
+        }
+
+        public ToolStripEx()
+            : base()
+        {
+            ShowItemToolTips = false;
+            timer = new Timer();
+            timer.Enabled = false;
+            timer.Interval = SystemInformation.MouseHoverTime;
+            timer.Tick += new EventHandler(timer_Tick);
+            Tooltip = new ToolTip();
         }
 
 		[StructLayout(LayoutKind.Sequential)]
