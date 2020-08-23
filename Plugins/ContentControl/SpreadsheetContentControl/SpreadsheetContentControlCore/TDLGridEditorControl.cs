@@ -255,11 +255,27 @@ namespace SpreadsheetContentControl
 			CommandHandling.RemoveCommand("exitToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("componentsToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("visibleToolStripMenuItem", this.MenuBar.Items);
-			//CommandHandling.HideCommand("", this.MenuBar.Items);
+
+			CommandHandling.RemoveCommand("newWindowToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("exportAsHtmlToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("editXMLToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("exportAsCSVToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("saveToolStripMenuItem", this.MenuBar.Items);
+
+			CommandHandling.RemoveCommand("focusCellStyleToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("selectionToolStripMenuItem", this.MenuBar.Items);
+
+			//CommandHandling.RemoveCommand("", this.MenuBar.Items);
 
 			// Hide unwanted toolbar options
 			CommandHandling.RemoveCommand("printPreviewToolStripButton", this.ToolBar.Items);
-			//CommandHandling.HideCommand("", this.ToolBar.Items);
+			CommandHandling.RemoveCommand("saveToolStripButton", this.ToolBar.Items);
+			CommandHandling.RemoveCommand("showDebugFormToolStripButton", this.ToolBar.Items);
+			CommandHandling.RemoveCommand("slashLeftSolidToolStripButton", this.ToolBar.Items);
+			CommandHandling.RemoveCommand("slashRightSolidToolStripButton", this.ToolBar.Items);
+
+			CommandHandling.RemoveCommand("zoomToolStripDropDownButton", this.FontBar.Items);
+			//CommandHandling.RemoveCommand("", this.ToolBar.Items);
 		}
 
 		public void SetUITheme(UITheme theme)
