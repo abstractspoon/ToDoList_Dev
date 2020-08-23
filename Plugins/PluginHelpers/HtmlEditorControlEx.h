@@ -50,8 +50,9 @@ namespace Abstractspoon
 				void InitializeComponentEx();
 				void InitialiseFeatures(bool hideDocumentCommands);
 
+				Windows::Forms::DialogResult ShowDialog(Windows::Forms::Form^ dialog, Drawing::Icon^ icon);
 				void PreShowDialog(Windows::Forms::Form^ dialog, Drawing::Icon^ icon);
-				virtual void PostShowDialog(Windows::Forms::Form^ dialog) override;
+				Windows::Forms::DialogResult PostShowDialog(Windows::Forms::Form^ dialog, Windows::Forms::DialogResult res);
 
 				void Translate();
 			};

@@ -278,9 +278,9 @@ namespace HTMLContentControl
 			return true;
 		}
 
-		protected override void PreShowDialog(Form dialog)
-        {
-            base.PreShowDialog(dialog, Properties.Resources.html);
+		protected override DialogResult ShowDialog(Form dialog)
+		{
+			return base.ShowDialog(dialog, Properties.Resources.html);
 		}
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)

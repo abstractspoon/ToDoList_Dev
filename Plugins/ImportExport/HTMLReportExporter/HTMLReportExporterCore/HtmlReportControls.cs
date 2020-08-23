@@ -356,14 +356,14 @@ namespace HTMLReportExporter
 			}
 		}
 
-		protected override void PreShowDialog(Form dialog)
+		protected override DialogResult ShowDialog(Form dialog)
 		{
-			base.PreShowDialog(dialog, HTMLReportExporter.Properties.Resources.HTMLReporter);
-
 			var htmlForm = (dialog as EditHtmlForm);
 
 			if (htmlForm != null)
 				htmlForm.AddSyntaxPattern(@"\$\(([^)]+)\)", Color.Black, Color.LightGray, FontStyle.Bold);
+
+			return ShowDialog(dialog, HTMLReportExporter.Properties.Resources.HTMLReporter);
 		}
 
 		public new bool Focused

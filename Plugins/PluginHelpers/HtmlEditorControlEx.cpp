@@ -124,10 +124,17 @@ void HtmlEditorControlEx::SetBodyFont(String^ fontName, int pointSize)
 	BodyFont = HtmlFontProperty(fontName, ems);
 }
 
+DialogResult HtmlEditorControlEx::ShowDialog(Form^ dialog, Icon^ icon)
+{
+	PreShowDialog(dialog, icon);
+
+	DialogResult res = HtmlEditorControl::ShowDialog(dialog);
+
+	return PostShowDialog(dialog, res);
+}
+
 void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 {
-	HtmlEditorControl::PreShowDialog(dialog);
-
 	FormsUtil::SetFont(dialog, m_ControlsFont);
 
 	// Add icon for identification
@@ -177,30 +184,35 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 	Win32::ActivateApp(Handle);
 }
 
-void HtmlEditorControlEx::PostShowDialog(Form^ dialog)
+DialogResult HtmlEditorControlEx::PostShowDialog(Form^ dialog, DialogResult res)
 {
-	// Per dialog customisations
-	if (ISTYPE(dialog, EnterHrefForm))
+	if (res == DialogResult::OK)
 	{
-		auto urlDialog = ASTYPE(dialog, EnterHrefForm);
+		// Per dialog customisations
+		if (ISTYPE(dialog, EnterHrefForm))
+		{
+			auto urlDialog = ASTYPE(dialog, EnterHrefForm);
 
-		LastBrowsedFileFolder = urlDialog->LastBrowsedFolder;
-	}
-	else if (ISTYPE(dialog, EnterImageForm))
-	{
-		auto imageDialog = ASTYPE(dialog, EnterImageForm);
+			LastBrowsedFileFolder = urlDialog->LastBrowsedFolder;
+		}
+		else if (ISTYPE(dialog, EnterImageForm))
+		{
+			auto imageDialog = ASTYPE(dialog, EnterImageForm);
 
-		LastBrowsedImageFolder = imageDialog->LastBrowsedFolder;
-	}
-	else if (ISTYPE(dialog, EditHtmlForm))
-	{
-		auto htmlDialog = ASTYPE(dialog, EditHtmlForm);
+			LastBrowsedImageFolder = imageDialog->LastBrowsedFolder;
+		}
+		else if (ISTYPE(dialog, EditHtmlForm))
+		{
+			auto htmlDialog = ASTYPE(dialog, EditHtmlForm);
 
-		// Save the unmaximised size
-		if (htmlDialog->WindowState == FormWindowState::Maximized)
-			m_SizeEditHtmlForm = htmlDialog->RestoreBounds.Size;
-		else
-			m_SizeEditHtmlForm = htmlDialog->Size;
+			// Save the unmaximised size
+			if (htmlDialog->WindowState == FormWindowState::Maximized)
+				m_SizeEditHtmlForm = htmlDialog->RestoreBounds.Size;
+			else
+				m_SizeEditHtmlForm = htmlDialog->Size;
+		}
 	}
+
+	return res;
 }
 

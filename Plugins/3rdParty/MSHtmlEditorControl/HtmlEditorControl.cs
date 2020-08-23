@@ -1925,10 +1925,9 @@ namespace MSDN.Html.Editor
                 dialog.HTML = this.InnerHtml;
                 dialog.ReadOnly = false;
                 dialog.SetCaption(HTML_TITLE_EDIT);
-                PreShowDialog(dialog);
-                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+
+                if (ShowDialog(dialog) == DialogResult.OK)
                 {
-					PostShowDialog(dialog);
                     this.InnerHtml = dialog.HTML;
                 }
             }
@@ -1946,9 +1945,8 @@ namespace MSDN.Html.Editor
                 dialog.HTML = this.DocumentHtml;
                 dialog.ReadOnly = true;
                 dialog.SetCaption(HTML_TITLE_VIEW);
-                PreShowDialog(dialog);
-                dialog.ShowDialog(/*this.ParentForm*/);
-				PostShowDialog(dialog);
+
+                ShowDialog(dialog);
 			}
 
 		} //HtmlContentsView
@@ -2514,14 +2512,10 @@ namespace MSDN.Html.Editor
                 dialog.ImageAlign = imageAlign;
 				dialog.ImageWidth = imageWidth;
 
-                PreShowDialog(dialog);
-
                 // based on the user interaction perform the necessary action
                 // after one has a valid image href
-                if (dialog.ShowDialog() == DialogResult.OK)
+                if (ShowDialog(dialog) == DialogResult.OK)
                 {
-					PostShowDialog(dialog);
-
                     // Brand new image
                     if (image == null)
                         return InsertImage(dialog.ImageLink, dialog.ImageText, dialog.ImageAlign, dialog.ImageWidth);
@@ -2671,16 +2665,12 @@ namespace MSDN.Html.Editor
 					dialog.HrefTarget = NavigateActionOption.SameWindow;
 				}
 
-				PreShowDialog(dialog);
-
-				DialogResult result = dialog.ShowDialog();
+				DialogResult result = ShowDialog(dialog);
 
 				// based on the user interaction perform the necessary action
 				// after one has a valid href
 				if (result != DialogResult.Cancel)
 				{
-					PostShowDialog(dialog);
-
 					if (result == DialogResult.Yes)
 					{
 						string newHrefText = dialog.HrefText;
@@ -2796,10 +2786,9 @@ namespace MSDN.Html.Editor
                 dialog.HTML = "";
                 dialog.ReadOnly = false;
                 dialog.SetCaption(PASTE_TITLE_HTML);
-                PreShowDialog(dialog);
-                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+
+                if (ShowDialog(dialog) == DialogResult.OK)
                 {
-					PostShowDialog(dialog);
 					this.SelectedHtml = dialog.HTML;
 				}
 			}
@@ -2818,10 +2807,9 @@ namespace MSDN.Html.Editor
                 dialog.HTML = "";
                 dialog.ReadOnly = false;
                 dialog.SetCaption(PASTE_TITLE_TEXT);
-                PreShowDialog(dialog);
-                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+
+                if (ShowDialog(dialog) == DialogResult.OK)
                 {
-					PostShowDialog(dialog);
                     this.SelectedText = dialog.HTML;
 				}
 			}
@@ -2986,11 +2974,10 @@ namespace MSDN.Html.Editor
         {
             using (FontAttributeForm dialog = new FontAttributeForm())
             {
-                PreShowDialog(dialog);
                 dialog.HtmlFont = GetFontAttributes();
-                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+
+                if (ShowDialog(dialog) == DialogResult.OK)
                 {
-					PostShowDialog(dialog);
                     HtmlFontProperty font = dialog.HtmlFont;
                     FormatFontAttributes(new HtmlFontProperty(font.Name, font.Size, font.Bold, font.Italic, font.Underline, font.Strikeout, font.Subscript, font.Superscript));
 				}
@@ -3246,9 +3233,7 @@ namespace MSDN.Html.Editor
                        new FindReplaceOneDelegate(this.FindReplaceOne),
                        new FindReplaceAllDelegate(this.FindReplaceAll) ))
             {
-                PreShowDialog(dialog);
-                DialogResult result = dialog.ShowDialog(/*this.ParentForm*/);
-				PostShowDialog(dialog);
+                ShowDialog(dialog);
 			}
 
 		} //FindReplacePrompt
@@ -3507,11 +3492,9 @@ namespace MSDN.Html.Editor
 			{
 				// set the dialog properties
 				dialog.RowProperties = new HtmlTableRowProperty(row);
-				PreShowDialog(dialog);
 
-				if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				if (ShowDialog(dialog) == DialogResult.OK)
 				{
-					PostShowDialog(dialog);
 					dialog.RowProperties.Get(ref row);
 				}
 			}
@@ -3530,11 +3513,9 @@ namespace MSDN.Html.Editor
 			{
 				// set the dialog properties
  				dialog.CellProperties = new HtmlTableCellProperty(cell);
-				PreShowDialog(dialog);
 
-				if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+				if (ShowDialog(dialog) == DialogResult.OK)
 				{
-					PostShowDialog(dialog);
 					dialog.CellProperties.Get(ref cell);
 				}
 			}
@@ -3619,12 +3600,9 @@ namespace MSDN.Html.Editor
             using (TablePropertyForm dialog = new TablePropertyForm(insert))
             {
                 dialog.TableProperties = GetTableProperties(table);
-                PreShowDialog(dialog);
 
-                if (dialog.ShowDialog(/*this.ParentForm*/) == DialogResult.OK)
+                if (ShowDialog(dialog) == DialogResult.OK)
                 {
-					PostShowDialog(dialog);
-
                     if (table == null)
 						TableInsert(dialog.TableProperties);
                     else
@@ -4161,23 +4139,13 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to ensure dialog resembles the user form characteristics
         /// </summary>
-        protected virtual void PreShowDialog(Form dialog)
+        protected virtual DialogResult ShowDialog(Form dialog)
         {
-            // set ambient control properties
-//             dialog.Font = this.ParentForm.Font;
-//             dialog.ForeColor = this.ParentForm.ForeColor;
-//             dialog.BackColor = this.ParentForm.BackColor;
-//             dialog.Cursor = this.ParentForm.Cursor;
-//             dialog.RightToLeft = this.ParentForm.RightToLeft;
-
             // define location and control style as system
             dialog.StartPosition = FormStartPosition.CenterParent;
 
-        } // PreShowDialog
-
-        protected virtual void PostShowDialog(Form dialog)
-        {
-        } // PostShowDialog
+			return dialog.ShowDialog();
+        } 
 
 		/// <summary>
 		/// Method to determine if a string url is valid
