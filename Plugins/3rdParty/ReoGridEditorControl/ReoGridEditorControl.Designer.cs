@@ -382,6 +382,7 @@ namespace unvell.ReoGrid.Editor
 			this.leadHeaderContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.resetAllPageBreaksToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
 			this.formulaBar = new unvell.ReoGrid.Editor.FormulaBarControl();
+			this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStrip1.SuspendLayout();
 			this.columnContextMenuStrip.SuspendLayout();
 			this.rowContextMenuStrip.SuspendLayout();
@@ -415,9 +416,10 @@ namespace unvell.ReoGrid.Editor
             this.saveToolStripButton,
             this.printPreviewToolStripButton,
             this.toolStripSeparator4,
-            this.copyToolStripButton,
             this.cutToolStripButton,
+            this.copyToolStripButton,
             this.pasteToolStripButton,
+            this.toolStripSeparator14,
             this.styleBrushToolStripButton,
             this.toolStripSeparator10,
             this.undoToolStripButton,
@@ -3169,6 +3171,11 @@ namespace unvell.ReoGrid.Editor
 			this.formulaBar.Size = new System.Drawing.Size(1002, 28);
 			this.formulaBar.TabIndex = 6;
 			// 
+			// toolStripSeparator14
+			// 
+			this.toolStripSeparator14.Name = "toolStripSeparator14";
+			this.toolStripSeparator14.Size = new System.Drawing.Size(6, 25);
+			// 
 			// ReoGridEditorControl
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -3533,6 +3540,7 @@ namespace unvell.ReoGrid.Editor
 		private System.Windows.Forms.ToolStripMenuItem simplifiedChinesezhCNToolStripMenuItem;
 		private ToolStripEx toolStrip1;
 		private ToolStripEx fontToolStrip;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
 	}
 }
 
