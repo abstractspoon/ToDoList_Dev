@@ -13,7 +13,7 @@ namespace IIControls
         ToolStripItem mouseOverItem = null;
         Point mouseOverPoint;
         Timer timer;
-        public ToolTip Tooltip;
+        public ToolTip Tooltips;
         public int ToolTipInterval = 4000;
         public string ToolTipText;
         public bool ToolTipShowUp;
@@ -27,8 +27,7 @@ namespace IIControls
             {
                 mouseOverItem = newMouseOverItem;
                 mouseOverPoint = mea.Location;
-                if (Tooltip != null)
-                    Tooltip.Hide(this);
+                Tooltips.Hide(this);
                 timer.Stop();
                 timer.Start();
             }
@@ -38,9 +37,9 @@ namespace IIControls
         {
             base.OnMouseClick(e);
             ToolStripItem newMouseOverItem = this.GetItemAt(e.Location);
-            if (newMouseOverItem != null && Tooltip != null)
+            if (newMouseOverItem != null)
             {
-                Tooltip.Hide(this);
+                Tooltips.Hide(this);
             }
         }
 
@@ -54,8 +53,7 @@ namespace IIControls
         {
             base.OnMouseLeave(e);
             timer.Stop();
-            if (Tooltip != null)
-                Tooltip.Hide(this);
+            Tooltips.Hide(this);
             mouseOverPoint = new Point(-50, -50);
             mouseOverItem = null;
         }
@@ -77,20 +75,16 @@ namespace IIControls
                 {
                     if (ToolTipText != null && ToolTipText.Length > 0)
                     {
-                        if (Tooltip == null)
-                            Tooltip = new ToolTip();
-                        Tooltip.Show(ToolTipText, this, currentMouseOverPoint, ToolTipInterval);
+                        Tooltips.Show(ToolTipText, this, currentMouseOverPoint, ToolTipInterval);
                     }
                 }
                 else if ((!(mouseOverItem is ToolStripDropDownButton) && !(mouseOverItem is ToolStripSplitButton)) ||
                     ((mouseOverItem is ToolStripDropDownButton) && !((ToolStripDropDownButton)mouseOverItem).DropDown.Visible) ||
                     (((mouseOverItem is ToolStripSplitButton) && !((ToolStripSplitButton)mouseOverItem).DropDown.Visible)))
                 {
-                    if (mouseOverItem.ToolTipText != null && mouseOverItem.ToolTipText.Length > 0 && Tooltip != null)
+                    if (mouseOverItem.ToolTipText != null && mouseOverItem.ToolTipText.Length > 0)
                     {
-                        if (Tooltip == null)
-                            Tooltip = new ToolTip();
-                        Tooltip.Show(mouseOverItem.ToolTipText, this, currentMouseOverPoint, ToolTipInterval);
+                        Tooltips.Show(mouseOverItem.ToolTipText, this, currentMouseOverPoint, ToolTipInterval);
                     }
                 }
             }
@@ -104,22 +98,46 @@ namespace IIControls
             if (disposing)
             {
                 timer.Dispose();
-                Tooltip.Dispose();
+                Tooltips.Dispose();
             }
         }
 
         public ToolStripEx()
             : base()
         {
+            Tooltips = new ToolTip();
             ShowItemToolTips = false;
+
+            ControlAdded += new ControlEventHandler(OnControlAdded);
+            
             timer = new Timer();
             timer.Enabled = false;
             timer.Interval = SystemInformation.MouseHoverTime;
             timer.Tick += new EventHandler(timer_Tick);
-            Tooltip = new ToolTip();
         }
 
-		[StructLayout(LayoutKind.Sequential)]
+        protected void OnControlAdded(object sender, ControlEventArgs e)
+        {
+            var item = FindControlItem(e.Control);
+
+            if (item != null)
+                Tooltips.SetToolTip(e.Control, item.ToolTipText);
+        }
+
+        ToolStripItem FindControlItem(Control control)
+        {
+            foreach (ToolStripItem item in Items)
+            {
+                var controlHost = (item as ToolStripControlHost);
+
+                if ((controlHost != null) && (controlHost.Control == control))
+                    return item;
+            }
+
+            return null;
+        }
+
+    [StructLayout(LayoutKind.Sequential)]
 		private struct ICONINFO
 		{
 			public bool fIcon;
