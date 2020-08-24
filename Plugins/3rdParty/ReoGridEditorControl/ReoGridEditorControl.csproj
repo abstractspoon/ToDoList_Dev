@@ -353,6 +353,7 @@
     <None Include="Resources\LandscapeHH.bmp" />
     <None Include="Resources\PortraitHH.bmp" />
     <Content Include="Resources\grid_select.cur" />
+    <Content Include="Resources\placeholder.png" />
     <Content Include="Resources\textwrap.png" />
     <None Include="Resources\trash.cur" />
     <None Include="Resources\VSProject_script.bmp" />
