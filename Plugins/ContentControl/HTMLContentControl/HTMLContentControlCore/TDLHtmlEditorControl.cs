@@ -59,7 +59,7 @@ namespace HTMLContentControl
 
 		// ---------------------------------------------------------------
 
-		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans) : base(font, trans)
+		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans) : base(font, trans, false)
         {
             m_TextChangeTimer = new Timer();
 			

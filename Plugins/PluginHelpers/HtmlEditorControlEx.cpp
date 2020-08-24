@@ -19,10 +19,12 @@ using namespace Command::Handling;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-HtmlEditorControlEx::HtmlEditorControlEx(Drawing::Font^ font, Translator^ trans)
+HtmlEditorControlEx::HtmlEditorControlEx(Drawing::Font^ font, Translator^ trans, bool fixupToolbarButtonSizes) 
+	: 
+	m_AutoFixupToolbarButtonsSize(fixupToolbarButtonSizes)
 {
 	m_ControlsFont = font;
-	m_toolbarRenderer = gcnew UIThemeToolbarRenderer();
+	m_ToolbarRenderer = gcnew UIThemeToolbarRenderer();
 
 	if (trans != nullptr)
 		m_Trans = trans;
@@ -50,7 +52,7 @@ void HtmlEditorControlEx::SetTranslator(Translator^ trans)
 
 void HtmlEditorControlEx::SetUITheme(UITheme^ theme)
 {
-	m_toolbarRenderer->SetUITheme(theme);
+	m_ToolbarRenderer->SetUITheme(theme);
 
 	// This sets toolbar back colour too
 	BackColor = theme->GetAppDrawingColor(UITheme::AppColor::AppBackLight);
@@ -58,8 +60,8 @@ void HtmlEditorControlEx::SetUITheme(UITheme^ theme)
 
 void HtmlEditorControlEx::InitializeComponentEx()
 {
-	ToolBar->Renderer = m_toolbarRenderer;
-	ContextMenu->Renderer = m_toolbarRenderer;
+	ToolBar->Renderer = m_ToolbarRenderer;
+	ContextMenu->Renderer = m_ToolbarRenderer;
 
 	if (m_ControlsFont != nullptr)
 	{
@@ -82,7 +84,8 @@ void HtmlEditorControlEx::OnLoad(System::EventArgs^ args)
 {
 	HtmlEditorControl::OnLoad(args);
 
-	Toolbars::FixupButtonSizes(ToolBar);
+	if (m_AutoFixupToolbarButtonsSize)
+		Toolbars::FixupButtonSizes(ToolBar);
 }
 
 void HtmlEditorControlEx::Translate()

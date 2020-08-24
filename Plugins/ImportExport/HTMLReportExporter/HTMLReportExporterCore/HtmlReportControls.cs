@@ -73,7 +73,7 @@ namespace HTMLReportExporter
 
 		// ---------------------------------------------------------------
 
-		protected HtmlReportControlBase() : base(null, null)
+		protected HtmlReportControlBase() : base(null, null, true)
 		{
 			InitializeComponentEx();
 		}

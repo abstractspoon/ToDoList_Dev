@@ -18,13 +18,14 @@ namespace Abstractspoon
 			public ref class HtmlEditorControlEx : MSDN::Html::Editor::HtmlEditorControl
 			{
 			public:
-				HtmlEditorControlEx(Drawing::Font^ controlFont, Translator^ trans);
+				HtmlEditorControlEx(Drawing::Font^ controlFont, Translator^ trans, bool fixupToolbarButtonSizes);
 
 				void SetUITheme(UITheme^ theme);
 				void SetBodyFont(String^ fontName, int pointSize);
 
 				property String^ LastBrowsedImageFolder;
 				property String^ LastBrowsedFileFolder;
+
 
 				static property Drawing::Size SizeEditHtmlForm
 				{
@@ -37,9 +38,10 @@ namespace Abstractspoon
 				void SetTranslator(Translator^ trans);
 
 			protected:
-				UIThemeToolbarRenderer^ m_toolbarRenderer;
+				UIThemeToolbarRenderer^ m_ToolbarRenderer;
 				Drawing::Font^ m_ControlsFont;
 				Translator^ m_Trans;
+				bool m_AutoFixupToolbarButtonsSize;
 
 				static Drawing::Size m_SizeEditHtmlForm = Drawing::Size(-1, -1);
 
