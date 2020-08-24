@@ -86,13 +86,13 @@ namespace unvell.UIControls
 
 			// draw color
 			Rectangle rectColor = this.ButtonBounds;
-			rectColor.Inflate(-4, -5);
+			rectColor.Inflate(-4, -4);
+			rectColor.Height = rectColor.Width;
 
 			if (currentColor == null || currentColor.IsEmpty)
 			{
 				g.DrawRectangle(Pens.Black, rectColor);
-				g.DrawLine(Pens.Black, rectColor.Left,
-					rectColor.Bottom, rectColor.Right, rectColor.Top);
+				g.DrawLine(Pens.Black, rectColor.Left, rectColor.Bottom, rectColor.Right, rectColor.Top);
 			}
 			else
 			{
@@ -113,25 +113,38 @@ namespace unvell.UIControls
 
 				switch (mode)
 				{
-					default:
-					case ColorPickMode.Background:
+				default:
+				case ColorPickMode.Background:
+					{
 						g.PixelOffsetMode = PixelOffsetMode.Half;
 						g.FillRectangle(b, rectColor);
 						g.PixelOffsetMode = PixelOffsetMode.Default;
-						break;
-					case ColorPickMode.Outline:
-						using (Pen p = new Pen(currentColor.CompliantSolidColor, 2))
-							g.DrawRectangle(p, rectColor);
-						break;
-					case ColorPickMode.Font:
+					}
+					break;
+
+				case ColorPickMode.Outline:
+					using (Pen p = new Pen(currentColor.CompliantSolidColor, 1))
+					{
+						g.DrawRectangle(p, rectColor);
+						rectColor.Inflate(-1, -1);
+						g.DrawRectangle(p, rectColor);
+					}
+					break;
+
+				case ColorPickMode.Font:
+					{
 						g.DrawString("A", Font, b, new Rectangle(rectColor.Left, rectColor.Top - 3,
 							rectColor.Width, rectColor.Height));
 						g.FillRectangle(b, new Rectangle(rectColor.Left, rectColor.Bottom - 3, rectColor.Width, 3));
-						break;
-					case ColorPickMode.FontBackground:
+					}
+					break;
+
+				case ColorPickMode.FontBackground:
+					{
 						g.FillRectangle(b, rectColor);
 						g.DrawString("A", Font, b, rectColor);
-						break;
+					}
+					break;
 				}
 
 				if (b != null)

@@ -230,11 +230,7 @@ namespace SpreadsheetContentControl
 				this.MenuBar.ImageScalingSize = scalingSize;
 				this.FontBar.ImageScalingSize = scalingSize;
 				this.ToolBar.ImageScalingSize = scalingSize;
-
-				// Border colour drop-button is not DPI aware
-				this.ToolBar.Items["borderColorPickToolStripItem"].Width = this.ToolBar.Items["outlineSolidToolStripButton"].Width;
-				this.ToolBar.Items["borderColorPickToolStripItem"].Height = this.ToolBar.Items["outlineSolidToolStripButton"].Height;
-				
+			
 				this.RowContextMenu.ImageScalingSize = scalingSize;
 				this.CellContextMenu.ImageScalingSize = scalingSize;
 				this.HeaderContextMenu.ImageScalingSize = scalingSize;
