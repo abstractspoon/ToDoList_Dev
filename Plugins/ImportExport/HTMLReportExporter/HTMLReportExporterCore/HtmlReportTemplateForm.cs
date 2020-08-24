@@ -31,7 +31,6 @@ namespace HTMLReportExporter
 		private Translator m_Trans = null;
 		private TaskList m_Tasklist = null;
 		private Preferences m_Prefs = null;
-		private UIThemeToolbarRenderer m_TBRenderer = null;
 
         private HtmlReportTemplate m_Template = null;
 		private HtmlReportTemplate m_PrevTemplate = null;
@@ -244,20 +243,21 @@ namespace HTMLReportExporter
 			UpdateCaption();
 			UpdateControls();
 
-			InitialiseToolbar();
+			InitialiseToolbars();
 
 			m_ChangeTimer.Start();
 		}
 
-		private void InitialiseToolbar()
+		private void InitialiseToolbars()
 		{
-			m_TBRenderer = new UIThemeToolbarRenderer();
-			m_TBRenderer.SetUITheme(new UITheme());
-			m_TBRenderer.EnableDrawRowSeparators(true);
+			// Main toolbar
+			var tbRenderer = new UIThemeToolbarRenderer();
+			tbRenderer.SetUITheme(new UITheme());
+			tbRenderer.EnableDrawRowSeparators(true);
 
-			this.Toolbar.Renderer = m_TBRenderer;
+			this.Toolbar.Renderer = tbRenderer;
             this.Toolbar.BackColor = BackColor;
-
+			
 			if (DPIScaling.WantScaling())
 			{
 				int imageSize = DPIScaling.Scale(16);
@@ -268,6 +268,17 @@ namespace HTMLReportExporter
 			Toolbars.FixupButtonSizes(this.Toolbar);
 
 			UpdateToolbar();
+
+			// Page toolbars
+			var theme = new UITheme();
+			theme.SetAppDrawingColor(UITheme.AppColor.AppBackLight, headerPage.BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, headerPage.BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, headerPage.BackColor);
+
+			this.htmlReportHeaderControl.SetUITheme(theme);
+			this.htmlReportTitleControl.SetUITheme(theme);
+			this.htmlReportTasksControl.SetUITheme(theme);
+			this.htmlReportFooterControl.SetUITheme(theme);
 		}
 
 		private void UpdateControls()
