@@ -1934,6 +1934,8 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
 				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
+
+			pVData->bNeedFullTaskUpdate = FALSE;
 		}
 		else if (dwResults & UIEXTMOD_OFFSETDATES)
 		{
