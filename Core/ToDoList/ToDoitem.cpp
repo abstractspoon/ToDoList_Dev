@@ -152,8 +152,7 @@ CString TDCTIMEPERIOD::Format(int nDecPlaces) const
 
 TDCCOST::TDCCOST(LPCTSTR szCost) : dAmount(0.0), bIsRate(FALSE)
 {
-	if (!Misc::IsEmpty(szCost))
-		Parse(szCost);
+	Parse(szCost);
 }
 
 TDCCOST::TDCCOST(double dCost, BOOL bCostIsRate) : dAmount(dCost), bIsRate(bCostIsRate)
