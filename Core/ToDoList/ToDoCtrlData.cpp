@@ -612,7 +612,7 @@ BOOL CToDoCtrlData::IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BO
 	GET_TDI(dwTaskID, pTDI, FALSE);
 	
 	if (bImmediateOnly)
-		return pTDI->IsLocallyDependentOn(dwOtherID);
+		return pTDI->HasLocalDependency(dwOtherID);
 
 	CDWordArray aDependIDs;
 	int nDepend = pTDI->GetLocalDependencies(aDependIDs);
@@ -1191,7 +1191,7 @@ BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent,
 		
 		GET_TDI(dwTaskID, pTDIChild, FALSE);
 
-		if (pTDIChild->IsLocallyDependentOn(dwDependID))
+		if (pTDIChild->HasLocalDependency(dwDependID))
 		{
 			VERIFY(!bWithUndo || AddUndoElement(TDCUEO_EDIT, dwTaskID));
 			VERIFY(pTDIChild->RemoveLocalDependency(dwDependID));

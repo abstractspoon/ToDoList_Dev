@@ -88,6 +88,19 @@ struct TDCCOST
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+class CTDCDependencyArray : public CStringArray
+{
+public:
+	BOOL RemoveLocalDependency(DWORD dwDependID);
+	BOOL HasLocalDependency(DWORD dwDependID) const;
+	int GetLocalDependencies(CDWordArray& aDependIDs) const;
+
+private:
+	int FindLocalDependency(DWORD dwDependID, int nSearchFrom = 0) const;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace TDCTASKLINK
 {
 	BOOL IsTaskLink(const CString& sLink, BOOL bURL);
@@ -161,9 +174,8 @@ public:
 
 	// only applies to dependencies within this tasklist
 	BOOL RemoveLocalDependency(DWORD dwDependID);
-	BOOL IsLocallyDependentOn(DWORD dwDependID) const;
+	BOOL HasLocalDependency(DWORD dwDependID) const;
 	int GetLocalDependencies(CDWordArray& aDependIDs) const;
-	DWORD GetFirstLocalDependency() const;
 
 	float GetCommentsSizeInKB() const;
 	
@@ -187,9 +199,10 @@ public:
 	
 	CStringArray aAllocTo;
 	CStringArray aCategories;
-	CStringArray aDependencies;
 	CStringArray aTags;
 	CStringArray aFileLinks;
+
+	CTDCDependencyArray aDependencies;
 	
 	COleDateTime dateStart;
 	COleDateTime dateDue;

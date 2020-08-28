@@ -251,6 +251,67 @@ BOOL TDCCOST::AddCost(const TDCCOST& cost)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+BOOL CTDCDependencyArray::RemoveLocalDependency(DWORD dwDependID)
+{
+	BOOL bRemoved = FALSE;
+
+	for (int nDepend = 0; nDepend < GetSize(); nDepend++)
+	{
+		int nFind = FindLocalDependency(dwDependID, nDepend);
+
+		if (nFind == -1)
+			break;
+
+		bRemoved = TRUE;
+		RemoveAt(nFind);
+
+		// continuing search from this point on
+		nDepend = nFind;
+	}
+
+	return bRemoved;
+}
+
+int CTDCDependencyArray::GetLocalDependencies(CDWordArray& aDependIDs) const
+{
+	aDependIDs.RemoveAll();
+
+	for (int nDepend = 0; nDepend < GetSize(); nDepend++)
+	{
+		DWORD dwDependID = (DWORD)_ttol(Misc::GetItem(*this, nDepend));
+
+		if (dwDependID > 0)
+			aDependIDs.Add(dwDependID);
+	}
+
+	return aDependIDs.GetSize();
+}
+
+BOOL CTDCDependencyArray::HasLocalDependency(DWORD dwDependID) const
+{
+	return (FindLocalDependency(dwDependID) != -1);
+}
+
+int CTDCDependencyArray::FindLocalDependency(DWORD dwDependID, int nSearchFrom) const
+{
+	ASSERT(dwDependID && (nSearchFrom >= 0));
+
+	if (dwDependID && (nSearchFrom >= 0))
+	{
+		int nNumDepend = GetSize();
+
+		for (int nDepend = nSearchFrom; nDepend < nNumDepend; nDepend++)
+		{
+			if (dwDependID == (DWORD)_ttol(Misc::GetItem(*this, nDepend)))
+				return nDepend;
+		}
+	}
+
+	return -1; // not found
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 BOOL TDCTASKLINK::IsTaskLink(const CString& sLink, BOOL bURL)
 {
 	if (bURL)
@@ -449,74 +510,17 @@ BOOL TODOITEM::operator!=(const TODOITEM& tdi)
 // only interested in dependencies within this tasklist
 BOOL TODOITEM::RemoveLocalDependency(DWORD dwDependID)
 {
-	BOOL bRemoved = FALSE;
-
-	for (int nDepend = 0; nDepend < aDependencies.GetSize(); nDepend++)
-	{
-		int nFind = FindLocalDependency(dwDependID, nDepend);
-
-		if (nFind == -1)
-			break;
-
-		bRemoved = TRUE;
-		aDependencies.RemoveAt(nFind);
-
-		nDepend = nFind;
-	}
-
-	return bRemoved;
+	return aDependencies.RemoveLocalDependency(dwDependID);
 }
 
 int TODOITEM::GetLocalDependencies(CDWordArray& aDependIDs) const
 {
-	aDependIDs.RemoveAll();
-
-	for (int nDepend = 0; nDepend < aDependencies.GetSize(); nDepend++)
-	{
-		DWORD dwDependID = (DWORD)_ttol(Misc::GetItem(aDependencies, nDepend));
-
-		if (dwDependID > 0)
-			aDependIDs.Add(dwDependID);
-	}
-
-	return aDependIDs.GetSize();
+	return aDependencies.GetLocalDependencies(aDependIDs);
 }
 
-DWORD TODOITEM::GetFirstLocalDependency() const
+BOOL TODOITEM::HasLocalDependency(DWORD dwDependID) const
 {
-	for (int nDepend = 0; nDepend < aDependencies.GetSize(); nDepend++)
-	{
-		DWORD dwDependID = (DWORD)_ttol(Misc::GetItem(aDependencies, nDepend));
-		
-		if (dwDependID > 0)
-			return dwDependID;
-	}
-	
-	// no local dependencies
-	return 0;
-}
-
-BOOL TODOITEM::IsLocallyDependentOn(DWORD dwDependID) const
-{
-	return (FindLocalDependency(dwDependID) != -1);
-}
-
-int TODOITEM::FindLocalDependency(DWORD dwDependID, int nSearchFrom) const
-{
-	ASSERT (dwDependID && (nSearchFrom >= 0));
-
-	if (dwDependID && (nSearchFrom >= 0))
-	{
-		int nNumDepend = aDependencies.GetSize();
-		
-		for (int nDepend = nSearchFrom; nDepend < nNumDepend; nDepend++)
-		{
-			if (dwDependID == (DWORD)_ttol(Misc::GetItem(aDependencies, nDepend)))
-				return nDepend;
-		}
-	}
-	
-	return -1; // not found
+	return aDependencies.HasLocalDependency(dwDependID);
 }
 
 BOOL TODOITEM::HasCreation() const 
