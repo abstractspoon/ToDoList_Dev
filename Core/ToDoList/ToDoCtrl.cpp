@@ -473,7 +473,7 @@ BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, 
 
 BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
 {
-	return TODOITEM::ParseTaskLink(sLink, bURL, sFolder, dwTaskID, sFile);
+	return TDCTASKLINK::Parse(sLink, bURL, sFolder, dwTaskID, sFile);
 }
 
 CString CToDoCtrl::FormatTaskLink(DWORD dwTaskID, BOOL bFull) const
@@ -484,7 +484,7 @@ CString CToDoCtrl::FormatTaskLink(DWORD dwTaskID, BOOL bFull) const
 		return _T("");
 	}
 
-	return TODOITEM::FormatTaskLink(dwTaskID, TRUE, (bFull ? m_sLastSavePath : _T("")));
+	return TDCTASKLINK::Format(dwTaskID, TRUE, (bFull ? m_sLastSavePath : _T("")));
 }
 
 CString CToDoCtrl::FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const
@@ -495,7 +495,7 @@ CString CToDoCtrl::FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const
 		return _T("");
 	}
 
-	return TODOITEM::FormatTaskLink(dwTaskID, FALSE, (bFull ? m_sLastSavePath : _T("")));
+	return TDCTASKLINK::Format(dwTaskID, FALSE, (bFull ? m_sLastSavePath : _T("")));
 }
 
 BOOL CToDoCtrl::IsReservedShortcut(DWORD dwShortcut)
@@ -7226,7 +7226,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						aDepends.SetSize(nTask);
 
 						while (nTask--)
-							aDepends[nTask] = TODOITEM::FormatTaskLink(aTaskIDs[nTask], FALSE); // not as URL
+							aDepends[nTask] = TDCTASKLINK::Format(aTaskIDs[nTask], FALSE); // not as URL
 
 						CDWordArray aModTaskIDs;
 						aModTaskIDs.Add(dwTargetID);
@@ -7247,7 +7247,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						aFileLinks.SetSize(nTask);
 
 						while (nTask--)
-							aFileLinks[nTask] = TODOITEM::FormatTaskLink(aTaskIDs[nTask], TRUE); // as URL
+							aFileLinks[nTask] = TDCTASKLINK::Format(aTaskIDs[nTask], TRUE); // as URL
 
 						CDWordArray aModTaskIDs;
 						aModTaskIDs.Add(dwTargetID);
@@ -7570,7 +7570,7 @@ BOOL CToDoCtrl::PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) 
 	DWORD dwTaskID;
 	CString sFile;
 
-	BOOL bURL = TODOITEM::IsTaskLink(sLink, TRUE);
+	BOOL bURL = TDCTASKLINK::IsTaskLink(sLink, TRUE);
 
 	VERIFY(ParseTaskLink(sLink, bURL, dwTaskID, sFile));
 	
@@ -7592,12 +7592,11 @@ BOOL CToDoCtrl::PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) 
 		}
 		
 		// update link
-		sLink = TODOITEM::FormatTaskLink(dwNewID, bURL, sFile);
+		sLink = TDCTASKLINK::Format(dwNewID, bURL, sFile);
 		return TRUE;
 	}
 
 	return FALSE;
-
 }
 
 BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg) 
@@ -11217,7 +11216,7 @@ LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
 	{
 		const CString& sUrl = (LPCTSTR)lParam;
 		
-		if (TODOITEM::IsTaskLink(sUrl, TRUE))
+		if (TDCTASKLINK::IsTaskLink(sUrl, TRUE))
 			return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
 	}
 	
@@ -11237,7 +11236,7 @@ BOOL CToDoCtrl::GotoFile(const CString& sFile, BOOL bShellExecute)
 	if (sFile.IsEmpty())
 		return FALSE;
 	
-	if (TODOITEM::IsTaskLink(sFile, TRUE))
+	if (TDCTASKLINK::IsTaskLink(sFile, TRUE))
 	{
 		ShowTaskLink(sFile, TRUE);
 		return TRUE;
@@ -11437,7 +11436,7 @@ LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
 	// Handle relative file path links
 	CString sLink((LPCTSTR)lParam);
 
-	if (TODOITEM::IsTaskLink(sLink, TRUE))
+	if (TDCTASKLINK::IsTaskLink(sLink, TRUE))
 	{
 		return ShowTaskLink(sLink, TRUE);
 	}

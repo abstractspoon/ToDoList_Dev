@@ -3049,7 +3049,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 		// first check for a tdl://
 		CString sFileLink = aFileLinks[nFile];
 
-		if (TODOITEM::IsTaskLink(sFileLink, TRUE))
+		if (TDCTASKLINK::IsTaskLink(sFileLink, TRUE))
 		{
 			// draw our app icon 
 			if (!m_imageIcons.HasIcon(APP_ICON))
@@ -4342,7 +4342,7 @@ void CTDLTaskCtrlBase::ShowFileLink(LPCTSTR szFilePath) const
 			return;
 	}
 	// Likewise for task links if the 'tdl://' handler is not installed
-	else if (TODOITEM::IsTaskLink(szFilePath, TRUE))
+	else if (TDCTASKLINK::IsTaskLink(szFilePath, TRUE))
 	{
 		// forward to parent below
 	}
@@ -5538,7 +5538,7 @@ BOOL CTDLTaskCtrlBase::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sI
 		CString sFile;
 		DWORD dwDependID;
 		
-		VERIFY(TODOITEM::ParseTaskLink(aDepends[nDepends], FALSE, m_sTasklistFolder, dwDependID, sFile));
+		VERIFY(TDCTASKLINK::Parse(aDepends[nDepends], FALSE, m_sTasklistFolder, dwDependID, sFile));
 		
 		// see if dependent is one of 'our' tasks
 		if (dwDependID && sFile.IsEmpty())

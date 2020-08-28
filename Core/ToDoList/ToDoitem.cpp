@@ -251,6 +251,81 @@ BOOL TDCCOST::AddCost(const TDCCOST& cost)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+BOOL TDCTASKLINK::IsTaskLink(const CString& sLink, BOOL bURL)
+{
+	if (bURL)
+		return (sLink.Find(TDL_PROTOCOL) == 0);
+
+	// else
+	return ((sLink.Find('?') != -1) || Misc::IsNumber(sLink));
+}
+
+BOOL TDCTASKLINK::Parse(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
+{
+	sFile = sLink;
+
+	// strip off protocol
+	if (!Misc::RemovePrefix(sFile, TDL_PROTOCOL) && bURL)
+		return FALSE;
+
+	dwTaskID = 0;
+	CString sTaskID;
+
+	if (Misc::Split(sFile, sTaskID, '?'))
+	{
+		dwTaskID = _ttoi(sTaskID);
+
+		// remove trailing back slash appended by Macro Express Pro
+		sFile.TrimRight('\\');
+		sFile.TrimRight('/');
+	}
+	else if (Misc::IsNumber(sFile))
+	{
+		dwTaskID = _ttoi(sFile);
+		sFile.Empty();
+	}
+
+	// sFile
+	sFile.Replace(_T("%20"), _T(" "));
+	sFile.Replace(_T("/"), _T("\\"));
+
+	// Make full path
+	if (!sFile.IsEmpty() && !sFolder.IsEmpty())
+		FileMisc::MakeFullPath(sFile, sFolder);
+
+	return (dwTaskID || !sFile.IsEmpty());
+}
+
+CString TDCTASKLINK::Format(DWORD dwTaskID, BOOL bURL, const CString& sFile)
+{
+	CString sLink;
+	BOOL bHasFile = !sFile.IsEmpty();
+
+	if (!bHasFile && (dwTaskID > 0))
+	{
+		sLink.Format(_T("%lu"), dwTaskID);
+	}
+	else if (bHasFile)
+	{
+		if (dwTaskID > 0)
+			sLink.Format(_T("%s?%lu"), sFile, dwTaskID);
+		else
+			sLink = sFile;
+	}
+
+	if (bURL && !sLink.IsEmpty())
+	{
+		sLink.Replace(_T(" "), _T("%20"));
+		sLink.Replace('\\', '/');
+
+		sLink = (_T("tdl://") + sLink);
+	}
+
+	return sLink;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
 	sTitle(szTitle), 
 	sComments(szComments),
@@ -775,79 +850,6 @@ COleDateTimeSpan TODOITEM::GetRemainingTime(const COleDateTime& date)
 		dtsRemaining += 1; // midnight on the day
 	
 	return dtsRemaining;
-}
-
-BOOL TODOITEM::IsTaskLink(const CString& sLink, BOOL bURL)
-{
-	if (bURL)
-		return (sLink.Find(TDL_PROTOCOL) == 0);
-
-	// else
-	return ((sLink.Find('?') != -1) || Misc::IsNumber(sLink));
-}
-
-BOOL TODOITEM::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
-{
-	sFile = sLink;
-
-	// strip off protocol
-	if (!Misc::RemovePrefix(sFile, TDL_PROTOCOL) && bURL)
-		return FALSE;
-
-	dwTaskID = 0;
-	CString sTaskID;
-
-	if (Misc::Split(sFile, sTaskID, '?'))
-	{
-		dwTaskID = _ttoi(sTaskID);
-
-		// remove trailing back slash appended by Macro Express Pro
-		sFile.TrimRight('\\');
-		sFile.TrimRight('/');
-	}
-	else if (Misc::IsNumber(sFile))
-	{
-		dwTaskID = _ttoi(sFile);
-		sFile.Empty();
-	}
-
-	// sFile
-	sFile.Replace(_T("%20"), _T(" "));
-	sFile.Replace(_T("/"), _T("\\"));
-
-	// Make full path
-	if (!sFile.IsEmpty() && !sFolder.IsEmpty())
-		FileMisc::MakeFullPath(sFile, sFolder);
-
-	return (dwTaskID || !sFile.IsEmpty());
-}
-
-CString TODOITEM::FormatTaskLink(DWORD dwTaskID, BOOL bURL, const CString& sFile)
-{
-	CString sLink;
-	BOOL bHasFile = !sFile.IsEmpty();
-	
-	if (!bHasFile && (dwTaskID > 0))
-	{
-		sLink.Format(_T("%lu"), dwTaskID);
-	}
-	else if (bHasFile)
-	{
-		if (dwTaskID > 0)
-			sLink.Format(_T("%s?%lu"), sFile, dwTaskID);
-		else
-			sLink = sFile;
-	}
-
-	if (bURL && !sLink.IsEmpty())
-	{
-		sLink.Replace(_T(" "), _T("%20"));
-		sLink.Replace('\\', '/');
-
-		sLink = (_T("tdl://") + sLink);
-	}
-
-	return sLink;
 }
 
 void TODOITEM::SetRecentlyModifiedPeriod(double dDays)
