@@ -6,6 +6,7 @@
 #include "TaskListtdlExporter.h"
 #include "TaskFile.h"
 #include "tdcstruct.h"
+#include "todoitem.h"
 
 #include "..\shared\filemisc.h"
 
@@ -149,22 +150,22 @@ void CTaskListTdlExporter::FixupInternalDependencies(CTaskFile& tasks, HTASKITEM
 	if (!hTask)
 		return;
 
-	CStringArray aDepends;
+	CTDCDependencyArray aDepends;
 	int nNumDepends = tasks.GetTaskDependencies(hTask, aDepends);
 
 	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
 	{
-		DWORD dwDependID = _ttoi(aDepends[nDepend]);
+		TDCDEPENDENCY& depend = aDepends[nDepend];
 
 		// only handle  simple numeric dependencies
-		if (dwDependID > 0)
+		if (depend.IsLocal())
 		{
 			DWORD dwNewID = 0;
 
-			VERIFY (mapIDs.Lookup(dwDependID, dwNewID));
+			VERIFY (mapIDs.Lookup(depend.dwTaskID, dwNewID));
 			ASSERT (dwNewID > 0);
 
-			aDepends[nDepend] = Misc::Format(dwNewID);
+			depend.dwTaskID = dwNewID;
 		}
 	}
 

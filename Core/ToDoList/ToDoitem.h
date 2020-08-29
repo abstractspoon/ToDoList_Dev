@@ -88,15 +88,65 @@ struct TDCCOST
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-class CTDCDependencyArray : public CStringArray
+struct TDCDEPENDENCY
+{
+	TDCDEPENDENCY(LPCTSTR szDepends);
+	TDCDEPENDENCY(DWORD dwDependsID = 0, const CString& sFile = _T(""));
+
+	TDCDEPENDENCY& operator=(const TDCDEPENDENCY& other);
+
+	BOOL operator==(const TDCDEPENDENCY& other) const;
+	BOOL operator!=(const TDCDEPENDENCY& other) const;
+
+	CString Format() const;
+	BOOL Parse(LPCTSTR szDepends, const CString& sFolder = _T(""));
+	BOOL IsLocal() const;
+	BOOL Matches(const TDCDEPENDENCY& depend, BOOL bPartialFileOK = FALSE) const;
+	BOOL IsValid() const;
+
+	static CString Format(DWORD dwTaskID, const CString& sFile = _T(""));
+
+	DWORD dwTaskID;
+	CString sTasklist;
+};
+
+class CTDCDependencyArray : public CArray<TDCDEPENDENCY, TDCDEPENDENCY&>
 {
 public:
+	CTDCDependencyArray();
+	CTDCDependencyArray(const CDWordArray& aDepends);
+	CTDCDependencyArray(const CStringArray& aDepends);
+
+	int Set(const CDWordArray& aDepends);
+	int Set(const CStringArray& aDepends);
+
+	BOOL Add(DWORD dwDependID, const CString& sFile = _T(""));
+	BOOL Add(const TDCDEPENDENCY& depend);
+	int Append(const CTDCDependencyArray& aDepends);
+	int Remove(const CTDCDependencyArray& aDepends);
+
 	BOOL RemoveLocalDependency(DWORD dwDependID);
+	BOOL ReplaceLocalDependency(DWORD dwOldID, DWORD dwNewID);
 	BOOL HasLocalDependency(DWORD dwDependID) const;
 	int GetLocalDependencies(CDWordArray& aDependIDs) const;
 
+	int GetDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
+	BOOL HasDependency(const TDCDEPENDENCY& depend) const;
+
+	int Format(CStringArray& aDepends) const;
+	CString Format(LPCTSTR szSep = NULL) const;
+	
+	BOOL MatchAll(const CTDCDependencyArray& other) const;
+
+	// Mfc42 versions return value not reference
+	const TDCDEPENDENCY& GetAt(int nIndex) const;
+	TDCDEPENDENCY& GetAt(int nIndex);
+	const TDCDEPENDENCY& operator[](int nIndex) const;
+	TDCDEPENDENCY& operator[](int nIndex);
+
 private:
-	int FindLocalDependency(DWORD dwDependID, int nSearchFrom = 0) const;
+	int FindLocalDependency(DWORD dwDependID) const;
+	int FindDependency(const TDCDEPENDENCY& depend) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -145,7 +195,6 @@ public:
 	
 	CString GetCategory(int nCat) const;
 	CString GetAllocTo(int nAllocTo) const;
-	CString GetDependency(int Depends) const;
 	CString GetTag(int nTag) const;
 	CString GetFileLink(int nFile) const;
 
@@ -174,6 +223,7 @@ public:
 
 	// only applies to dependencies within this tasklist
 	BOOL RemoveLocalDependency(DWORD dwDependID);
+	BOOL ReplaceLocalDependency(DWORD dwOldID, DWORD dwNewID);
 	BOOL HasLocalDependency(DWORD dwDependID) const;
 	int GetLocalDependencies(CDWordArray& aDependIDs) const;
 
@@ -237,8 +287,6 @@ protected:
 	CTDCMetaDataMap mapMetaData; 
 
 private:
-	int FindLocalDependency(DWORD dwDependID, int nSearchFrom = 0) const;
-	
 	static COleDateTime GetDefaultStartDueDate(const COleDateTime& dtCreation, const COleDateTime& dtStartDue);
 	
 	static COleDateTimeSpan dtsRecentModPeriod;

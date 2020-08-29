@@ -340,7 +340,7 @@ BOOL CTDCOutlookImportHelper::SetTaskAttributes(ITaskList* pTaskList, HTASKITEM 
 		pTasks->AddTaskCategory(hTask, tdi.aCategories[nItem]);
 	
 	for (nItem = 0; nItem < tdi.aDependencies.GetSize(); nItem++)
-		pTasks->AddTaskDependency(hTask, tdi.aDependencies[nItem]);
+		pTasks->AddTaskDependency(hTask, tdi.aDependencies[nItem].dwTaskID);
 	
 	for (nItem = 0; nItem < tdi.aTags.GetSize(); nItem++)
 		pTasks->AddTaskTag(hTask, tdi.aTags[nItem]);

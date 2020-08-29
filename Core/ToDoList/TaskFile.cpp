@@ -2147,9 +2147,12 @@ BOOL CTaskFile::SetTaskFileLinks(HTASKITEM hTask, const CStringArray& aFiles)
 	return SetTaskArray(hTask, TDL_TASKFILELINKPATH, aFiles, FALSE);
 }
 
-BOOL CTaskFile::SetTaskDependencies(HTASKITEM hTask, const CStringArray& aDepends)
+BOOL CTaskFile::SetTaskDependencies(HTASKITEM hTask, const CTDCDependencyArray& aDepends)
 {
-	return SetTaskArray(hTask, TDL_TASKDEPENDENCY, aDepends, FALSE);
+	CStringArray aStrDepends;
+	aDepends.Format(aStrDepends);
+
+	return SetTaskArray(hTask, TDL_TASKDEPENDENCY, aStrDepends, FALSE);
 }
 
 BOOL CTaskFile::SetTaskMetaData(HTASKITEM hTask, const CMapStringToString& mapMetaData)
@@ -2320,9 +2323,16 @@ int CTaskFile::GetTaskFileLinks(HTASKITEM hTask, CStringArray& aFiles) const
 	return GetTaskArray(hTask, TDL_TASKFILELINKPATH, aFiles, FALSE);
 }
 
-int CTaskFile::GetTaskDependencies(HTASKITEM hTask, CStringArray& aDepends) const
+int CTaskFile::GetTaskDependencies(HTASKITEM hTask, CTDCDependencyArray& aDepends) const
 {
-	return GetTaskArray(hTask, TDL_TASKDEPENDENCY, aDepends, FALSE);
+	CStringArray aItems;
+
+	if (GetTaskArray(hTask, TDL_TASKDEPENDENCY, aItems, FALSE))
+		return aDepends.Set(aItems);
+
+	// else
+	aDepends.RemoveAll();
+	return 0;
 }
 
 int CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, CStringArray& aAllocTo) const

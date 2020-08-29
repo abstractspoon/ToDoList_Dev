@@ -2075,11 +2075,13 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		
 	case TDCA_DEPENDENCY:
 		{
-			CStringArray aDepends;
+			CStringArray aItems;
+			Misc::Split(m_sDepends, aItems);
 
-			Misc::Split(m_sDepends, aDepends);
+			CTDCDependencyArray aDepends;
+			aDepends.Append(aItems);
+
 			SetSelectedTaskDependencies(aDepends);
-
 			m_eDependency.EnableButton(ID_DEPENDS_LINK, !m_sDepends.IsEmpty());
 		}
 		break;
@@ -4480,18 +4482,36 @@ BOOL CToDoCtrl::SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bA
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppend)
+BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend)
 {
 	return SetSelectedTaskDependencies(aDepends, bAppend, FALSE);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppend, BOOL bEdit)
+BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend, BOOL bEdit)
 {
+	if (!CanEditSelectedTask(TDCA_DEPENDENCY))
+		return SET_FAILED;
+
+	Flush();
+
+	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
 	CDWordArray aModTaskIDs;
-	
-	if (SET_FAILED == SetSelectedTaskArray(TDCA_DEPENDENCY, aDepends, bAppend, aModTaskIDs))
-		return FALSE;
-	
+	POSITION pos = TSH().GetFirstItemPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		
+		if (!HandleModResult(dwTaskID, m_data.SetTaskDependencies(dwTaskID, aDepends, bAppend), aModTaskIDs))
+			return SET_FAILED;
+	}
+
+	if (!aModTaskIDs.GetSize())
+		return SET_NOCHANGE;
+
+	SetModified(TDCA_DEPENDENCY, aModTaskIDs);
+
 	if (aModTaskIDs.GetSize())
 	{
 		// Start and due dates might also have changed
@@ -4506,7 +4526,7 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL b
 		// removed from the edit field. 
 		if (!bEdit)
 		{
-			m_sDepends = Misc::FormatArray(aDepends);
+			m_sDepends = aDepends.Format();
 			UpdateDataEx(this, IDC_DEPENDS, m_sDepends, FALSE);
 		}
 	}
@@ -4838,8 +4858,8 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		// Fixup dates for dependent tasks
 		if (dwDependency)
 		{
-			CStringArray aDepends;
-			aDepends.Add(Misc::Format(dwDependency));
+			CTDCDependencyArray aDepends;
+			aDepends.Add(dwDependency);
 
 			m_data.SetTaskDependencies(dwTaskID, aDepends, FALSE);
 		}	
@@ -7222,16 +7242,14 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						CDWordArray aTaskIDs;
 						int nTask = GetSelectedTaskIDs(aTaskIDs, TRUE);
 
-						CStringArray aDepends;
-						aDepends.SetSize(nTask);
+						CTDCDependencyArray aDepends;
+						aDepends.Append(aTaskIDs);
 
-						while (nTask--)
-							aDepends[nTask] = TDCTASKLINK::Format(aTaskIDs[nTask], FALSE); // not as URL
+						m_data.SetTaskDependencies(dwTargetID, aDepends, (nCmdID == ID_TDD_ADDTASKDEPENDENCY));
 
 						CDWordArray aModTaskIDs;
 						aModTaskIDs.Add(dwTargetID);
 
-						m_data.SetTaskDependencies(dwTargetID, aDepends, (nCmdID == ID_TDD_ADDTASKDEPENDENCY));
 						SetModified(TDCA_DEPENDENCY, aModTaskIDs);
 					}
 					break;
@@ -7505,20 +7523,17 @@ void CToDoCtrl::PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, BOOL bRe
 	}
 
 	// dependencies first
-	CStringArray aDepends;
+	CTDCDependencyArray aDepends;
 	int nDepend = tasks.GetTaskDependencies(hTask, aDepends);
 
 	BOOL bChanged = FALSE;
 
 	while (nDepend--)
 	{
-		CString sDepends = aDepends[nDepend];
+		TDCDEPENDENCY& depend = aDepends[nDepend];
 
-		if (PrepareTaskLinkForPaste(sDepends, mapID))
-		{
-			aDepends[nDepend] = sDepends;
+		if (PrepareTaskLinkForPaste(depend, mapID))
 			bChanged = TRUE;
-		}
 	}
 
 	// update taskfile if any dependency was changed
@@ -7598,6 +7613,34 @@ BOOL CToDoCtrl::PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) 
 
 	return FALSE;
 }
+
+BOOL CToDoCtrl::PrepareTaskLinkForPaste(TDCDEPENDENCY& depend, const CMapID2ID& mapID) const
+{
+	if (!depend.dwTaskID)
+		return FALSE;
+
+	// does the ID need changing
+	DWORD dwNewID = 0;
+
+	if (mapID.Lookup(depend.dwTaskID, dwNewID))
+	{
+		ASSERT(dwNewID); // sanity check
+
+		// make sure the file path matches us
+		if (!depend.IsLocal() && HasFilePath())
+		{
+			if (!FileMisc::IsSamePath(depend.sTasklist, m_sLastSavePath))
+				return FALSE;
+		}
+
+		// update link
+		depend.dwTaskID = dwNewID;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 
 BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg) 
 {
@@ -8493,23 +8536,15 @@ int CToDoCtrl::GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStrin
 	CDWordArray aTaskIDs;
 
 	int nID = GetSelectedTaskIDs(aTaskIDs, TRUE);
+	CDWordArray aTaskLocal;
+	CStringArray aTaskOther;
 
 	while (nID--)
 	{
-		CStringArray aDepends;
-		int nDepend = m_data.GetTaskDependencies(aTaskIDs[nID], aDepends);
-
-		while (nDepend--)
+		if (m_data.GetTaskDependencies(aTaskIDs[nID], aTaskLocal, aTaskOther))
 		{
-			if (!aDepends[nDepend].IsEmpty())
-			{
-				DWORD dwDependID = _ttoi(aDepends[nDepend]);
-
-				if (dwDependID)
-					aLocal.Add(dwDependID);
-				else
-					aOther.Add(aDepends[nDepend]);
-			}
+			aLocal.Add(aTaskLocal);
+			aOther.Add(aTaskOther);
 		}
 	}
 
@@ -10420,7 +10455,7 @@ void CToDoCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 			// NOTE: we need to set the splitter before we 
 			// call CalcRequiredControlsRect since it
-			// depends on the splitter width to determine its
+			// depend on the splitter width to determine its
 			// available width/height.
 			// BUT if the drag fails we must remember to restore
 			// the previous split pos
@@ -11876,7 +11911,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_ALLOCTO:		return SetSelectedTaskAllocTo(CStringArray());
 	case TDCA_CATEGORY:		return SetSelectedTaskCategories(CStringArray());
 	case TDCA_TAGS:			return SetSelectedTaskTags(CStringArray());
-	case TDCA_DEPENDENCY:	return SetSelectedTaskDependencies(CStringArray());
+	case TDCA_DEPENDENCY:	return SetSelectedTaskDependencies(CTDCDependencyArray());
 	case TDCA_FILELINK:		return SetSelectedTaskFileLinks(CStringArray());
 		
 	case TDCA_ALLOCBY:		return SetSelectedTaskAllocBy(_T(""));

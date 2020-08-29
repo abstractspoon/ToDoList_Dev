@@ -534,7 +534,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			}
 			else
 			{
-				bMatch = ArrayMatches(pTDI->aDependencies, rule, result, FALSE); // Ignore case
+				CStringArray aItems;
+				pTDI->aDependencies.Format(aItems);
+
+				bMatch = ArrayMatches(aItems, rule, result, FALSE); // case insensitive
 			}
 			break;
 

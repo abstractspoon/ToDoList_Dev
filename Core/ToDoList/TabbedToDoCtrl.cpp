@@ -1730,13 +1730,18 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		{
 			Misc::Split(mod.szValue, aValues, '\n');
 
-			if (dwTaskID)
-				bChange = (m_data.SetTaskDependencies(dwTaskID, aValues, FALSE));
-			else 
-				bChange = SetSelectedTaskDependencies(aValues);
-	
-			if (bChange)
-				dwResults |= UIEXTMOD_DEPENDCHANGE;
+			CTDCDependencyArray aDepends(aValues);
+
+			if (aDepends.GetSize())
+			{
+				if (dwTaskID)
+					bChange = (m_data.SetTaskDependencies(dwTaskID, aDepends, FALSE));
+				else
+					bChange = SetSelectedTaskDependencies(aDepends);
+
+				if (bChange)
+					dwResults |= UIEXTMOD_DEPENDCHANGE;
+			}
 		}
 		break;
 		

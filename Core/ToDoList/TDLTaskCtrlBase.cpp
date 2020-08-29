@@ -366,17 +366,16 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 				if (nDepend > 0)
 					sTooltip += '\n';
 
-				const CString& sDepends = Misc::GetItem(pTDI->aDependencies, nDepend);
-				DWORD dwDependID = (DWORD)_ttol(sDepends);
+				const TDCDEPENDENCY& depend = Misc::GetItemT(pTDI->aDependencies, nDepend);
 				
-				sTooltip += sDepends; // always
+				sTooltip += depend.Format(); // always
 
 				// If local, append task name
-				if ((dwDependID != 0) && m_data.HasTask(dwDependID))
+				if (depend.IsLocal() && m_data.HasTask(depend.dwTaskID))
 				{
 					sTooltip += ' ';
 					sTooltip += '(';
-					sTooltip += m_data.GetTaskTitle(dwDependID);
+					sTooltip += m_data.GetTaskTitle(depend.dwTaskID);
 					sTooltip += ')';
 				}
 			}			
@@ -3782,7 +3781,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 
 	case TDCC_DEPENDENCY:
 		if (!bDrawing)
-			return Misc::FormatArray(pTDI->aDependencies, '+');
+			return pTDI->aDependencies.Format(_T("+"));
 		break;
 
 	case TDCC_REMINDER:
@@ -5530,32 +5529,29 @@ BOOL CTDLTaskCtrlBase::SelectionHasDependencies() const
 
 BOOL CTDLTaskCtrlBase::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const
 {
-	CStringArray aDepends;
+	CTDCDependencyArray aDepends;
 	int nNumDepends = m_data.GetTaskDependencies(dwTaskID, aDepends);
 	
-	for (int nDepends = 0; nDepends < nNumDepends; nDepends++)
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
 	{
-		CString sFile;
-		DWORD dwDependID;
-		
-		VERIFY(TDCTASKLINK::Parse(aDepends[nDepends], FALSE, m_sTasklistFolder, dwDependID, sFile));
+		const TDCDEPENDENCY& depend = aDepends[nDepend];
 		
 		// see if dependent is one of 'our' tasks
-		if (dwDependID && sFile.IsEmpty())
+		if (depend.IsLocal())
 		{
-			if (m_data.HasTask(dwDependID) && !m_data.IsTaskDone(dwDependID))
+			if (m_data.HasTask(depend.dwTaskID) && !m_data.IsTaskDone(depend.dwTaskID))
 			{
-				sIncomplete = aDepends[nDepends];
+				sIncomplete = depend.Format();
 				return TRUE;
 			}
 		}
-		else if (!sFile.IsEmpty()) // pass to parent if we can't handle
+		else if (!depend.sTasklist.IsEmpty()) // pass to parent if we can't handle
 		{
-			BOOL bDependentIsDone = CWnd::GetParent()->SendMessage(WM_TDCM_ISTASKDONE, dwDependID, (LPARAM)(LPCTSTR)sFile);
+			BOOL bDependentIsDone = CWnd::GetParent()->SendMessage(WM_TDCM_ISTASKDONE, depend.dwTaskID, (LPARAM)(LPCTSTR)depend.sTasklist);
 			
 			if (!bDependentIsDone)
 			{
-				sIncomplete = aDepends[nDepends];
+				sIncomplete = depend.Format();
 				return TRUE;
 			}
 		}

@@ -573,7 +573,7 @@ int CToDoCtrlData::GetTaskTags(DWORD dwTaskID, CStringArray& aTags) const
 	return aTags.GetSize();
 }
 
-int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CStringArray& aDependencies) const
+int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CTDCDependencyArray& aDependencies) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
@@ -582,15 +582,20 @@ int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CStringArray& aDependenci
 	return aDependencies.GetSize();
 }
 
-CString CToDoCtrlData::GetTaskDependency(DWORD dwTaskID, int nDepends) const
+int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CStringArray& aDepends) const
 {
 	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, EMPTY_STR);
-	
-	if (nDepends < pTDI->aDependencies.GetSize())
-		return pTDI->aDependencies[nDepends];
+	GET_TDI(dwTaskID, pTDI, 0);
 
-	return EMPTY_STR;
+	return pTDI->aDependencies.Format(aDepends);
+}
+
+int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, 0);
+
+	return pTDI->aDependencies.GetDependencies(aLocalDepends, aOtherDepends);
 }
 
 BOOL CToDoCtrlData::IsTaskDependent(DWORD dwTaskID) const
@@ -677,9 +682,7 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 		return FALSE;
 
 	// Search the entire tasklist for tasks having 'dwTaskID'
-	// in their list of dependencies
-	CString sTaskID = Misc::Format(dwTaskID);
-
+	// in their list of local dependencies
 	const TODOITEM* pTDI = NULL;
 	POSITION pos = GetFirstTaskPosition();
 		
@@ -688,7 +691,7 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 		DWORD dwDependsID = GetNextTask(pos, pTDI);
 		ASSERT (dwDependsID && pTDI);
 
-		if (pTDI && (dwDependsID != dwTaskID) && Misc::Contains(sTaskID, pTDI->aDependencies, FALSE, TRUE))
+		if (pTDI && (dwDependsID != dwTaskID) && pTDI->HasLocalDependency(dwTaskID))
 			return TRUE;
 	}	
 
@@ -742,9 +745,6 @@ void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTask
 	
 	if (GetTaskLocalDependents(dwPrevTaskID, aDependents))
 	{
-		CString sPrevTaskID = Misc::Format(dwPrevTaskID);
-		CString sTaskID = Misc::Format(dwTaskID);
-
 		int nTask = aDependents.GetSize();
 
 		while (nTask--)
@@ -752,15 +752,11 @@ void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTask
 			DWORD dwDependentID = aDependents[nTask];
 			CStringArray aDepends;
 	
-			// delete existing dependency
-			if (GetTaskDependencies(dwDependentID, aDepends))
-				Misc::RemoveItem(sPrevTaskID, aDepends);
+			TODOITEM* pTDIDepends = GetTask(dwDependentID, TRUE);
+			ASSERT(pTDIDepends);
 
-			// add new dependency
-			aDepends.Add(sTaskID);
-
-			// update dependencies
-			SetTaskDependencies(dwDependentID, aDepends, FALSE);
+			if (pTDIDepends)
+				VERIFY(pTDIDepends->ReplaceLocalDependency(dwPrevTaskID, dwTaskID));
 		}
 	}
 }
@@ -1258,7 +1254,14 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 			case TDCA_ALLOCTO:		COPYATTRIBARR(aAllocTo); break;
 			case TDCA_CATEGORY:		COPYATTRIBARR(aCategories); break;
 			case TDCA_TAGS:			COPYATTRIBARR(aTags); break;
-			case TDCA_DEPENDENCY:	COPYATTRIBARR(aDependencies); break;
+
+			case TDCA_DEPENDENCY:
+				if (!pToTDI->aDependencies.MatchAll(pFromTDI->aDependencies)) 
+				{ 
+					pToTDI->aDependencies.Copy(pFromTDI->aDependencies); 
+					nRes = SET_CHANGE; 
+				}
+				break;
 
 			default:
 				ASSERT(0);
@@ -1364,7 +1367,7 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib,
 		break;
 
 	case TDCA_DEPENDENCY:	
-		nRes = SetTaskDependencies(dwTaskID, CStringArray());
+		nRes = SetTaskDependencies(dwTaskID, CTDCDependencyArray());
 		break;
 
 	case TDCA_FILELINK:		
@@ -2593,10 +2596,11 @@ TDC_SET CToDoCtrlData::SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const
 	{
 	case TDCA_CATEGORY:		return SetTaskCategories(dwTaskID, aItems, bAppend);
 	case TDCA_TAGS:			return SetTaskTags(dwTaskID, aItems, bAppend);
-	case TDCA_ALLOCTO:		return SetTaskAllocTo(dwTaskID, aItems, bAppend);
 	case TDCA_DEPENDENCY:	return SetTaskDependencies(dwTaskID, aItems, bAppend);
+	case TDCA_ALLOCTO:		return SetTaskAllocTo(dwTaskID, aItems, bAppend);
 	case TDCA_FILELINK:		return SetTaskFileLinks(dwTaskID, aItems, bAppend);
 		break;
+
 	}
 
 	// all else
@@ -2669,38 +2673,43 @@ TDC_SET CToDoCtrlData::SetTaskTags(DWORD dwTaskID, const CStringArray& aTags, BO
 	return EditTaskArrayAttribute(dwTaskID, pTDI, TDCA_TAGS, pTDI->aTags, aTags, bAppend);
 }
 
-TDC_SET CToDoCtrlData::SetTaskDependencies(DWORD dwTaskID, const CStringArray& aDepends, BOOL bAppend)
+TDC_SET CToDoCtrlData::SetTaskDependencies(DWORD dwTaskID, const CTDCDependencyArray& aDepends, BOOL bAppend)
 {
-	// weed out 'unknown' tasks, dependencies on self and parent tasks
+	// weed out 'unknown' tasks, dependencies on self and own parent tasks
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDS(dwTaskID, pTDS, SET_FAILED);
 
-	CStringArray aWeeded;
+	CTDCDependencyArray aWeeded;
 	aWeeded.Copy(aDepends);
 
-	int nDepends = aWeeded.GetSize();
+	TDC_SET nRes = SET_NOCHANGE;
+	int nDepend = aDepends.GetSize();
 
-	while (nDepends--)
+	while (nDepend--)
 	{
-		DWORD dwDepends = _ttol(aWeeded[nDepends]);
+		const TDCDEPENDENCY& depend = aWeeded[nDepend];
 
-		if (dwDepends)
+		if (!depend.dwTaskID)
 		{
-			if (!HasTask(dwDepends)) // check for existence
+			aWeeded.RemoveAt(nDepend);
+		}
+		else if (depend.IsLocal())
+		{
+			if (!HasTask(depend.dwTaskID)) // check for existence
 			{
-				aWeeded.RemoveAt(nDepends);
+				aWeeded.RemoveAt(nDepend);
 			}
-			else if (dwDepends == dwTaskID || IsReferenceToTask(dwDepends, dwTaskID))
+			else if ((depend.dwTaskID == dwTaskID) || IsReferenceToTask(depend.dwTaskID, dwTaskID))
 			{
-				aWeeded.RemoveAt(nDepends);
+				aWeeded.RemoveAt(nDepend);
 			}
 			else // check for parent
 			{
 				while (pTDS)
 				{
-					if (dwDepends == pTDS->GetParentTaskID())
+					if (depend.dwTaskID == pTDS->GetParentTaskID())
 					{
-						aWeeded.RemoveAt(nDepends);
+						aWeeded.RemoveAt(nDepend);
 						break;
 					}
 
@@ -2711,28 +2720,40 @@ TDC_SET CToDoCtrlData::SetTaskDependencies(DWORD dwTaskID, const CStringArray& a
 		}
 	}
 
+	if (aWeeded.GetSize() == 0)
+		return SET_NOCHANGE;
+
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	TDC_SET nRes = EditTaskArrayAttribute(dwTaskID, pTDI, TDCA_DEPENDENCY, pTDI->aDependencies, aWeeded, bAppend);
+	// test for actual change
+	if (pTDI->aDependencies.MatchAll(aWeeded))
 
-	if (nRes == SET_CHANGE)
+	// save undo data
+	SaveEditUndo(dwTaskID, pTDI, TDCA_DEPENDENCY);
+
+	// make the change
+	if (bAppend)
+		VERIFY(pTDI->aDependencies.Append(aWeeded));
+	else
+		pTDI->aDependencies.Copy(aWeeded);
+
+	pTDI->SetModified();
+
+	// make sure our start date matches our dependents due date
+	if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 	{
-		// make sure our start date matches our dependents due date
-		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
-		{
-			UINT nAdjusted = UpdateTaskLocalDependencyDates(dwTaskID, TDCD_DUE);
+		UINT nAdjusted = UpdateTaskLocalDependencyDates(dwTaskID, TDCD_DUE);
 
-			if (nAdjusted == ADJUSTED_NONE)
-				nAdjusted = UpdateTaskLocalDependencyDates(dwTaskID, TDCD_DONE);
+		if (nAdjusted == ADJUSTED_NONE)
+			nAdjusted = UpdateTaskLocalDependencyDates(dwTaskID, TDCD_DONE);
 
-			// and then fix up our dependents
-			if (Misc::HasFlag(nAdjusted, ADJUSTED_DUE))
-				FixupTaskLocalDependentsDates(dwTaskID, TDCD_DUE);
-		}
+		// and then fix up our dependents
+		if (Misc::HasFlag(nAdjusted, ADJUSTED_DUE))
+			FixupTaskLocalDependentsDates(dwTaskID, TDCD_DUE);
 	}
 
-	return nRes;
+	return SET_CHANGE;
 }
 
 TDC_SET CToDoCtrlData::SetTaskExternalID(DWORD dwTaskID, const CString& sID)

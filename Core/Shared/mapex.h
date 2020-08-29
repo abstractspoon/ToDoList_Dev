@@ -67,6 +67,34 @@ public:
 		SetAt(key, val);
 	}
 
+	template <class ARRAY>
+	int Add(const ARRAY& other)
+	{
+		return Add(other.GetData(), other.GetSize());
+	}
+
+	int Add(const KEY* pOther, int nNumOther)
+	{
+		if (!pOther || !nNumOther)
+		{
+			ASSERT(0);
+			return 0;
+		}
+
+		int nItem = nNumOther, nAdded = 0;
+
+		while (nItem--)
+		{
+			if (!Has(pOther[nItem]))
+			{
+				Add(pOther[nItem]);
+				nAdded++;
+			}
+		}
+		
+		return nAdded;
+	}
+
 	void Set(KEY key)
 	{
 		RemoveAll();

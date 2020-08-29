@@ -114,7 +114,6 @@ public:
 	CString GetTaskAllocBy(DWORD dwTaskID) const;
 	CString GetTaskCreatedBy(DWORD dwTaskID) const;
 	CString GetTaskStatus(DWORD dwTaskID) const;
-	CString GetTaskDependency(DWORD dwTaskID, int nDepends) const;
 	CString GetTaskFileLink(DWORD dwTaskID, int nFileLink) const;
 	CString GetTaskExtID(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
@@ -138,11 +137,10 @@ public:
 	int GetTaskAllocTo(DWORD dwTaskID, CStringArray& aAllocTo) const;
 	int GetTaskCategories(DWORD dwTaskID, CStringArray& aCategories) const;
 	int GetTaskTags(DWORD dwTaskID, CStringArray& aTags) const;
-	int GetTaskDependencies(DWORD dwTaskID, CStringArray& aDepends) const;
 	int GetTaskFileLinks(DWORD dwTaskID, CStringArray& aFiles) const;
 	int GetTaskFileLinkCount(DWORD dwTaskID) const;
 	int GetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
-
+	
 	DWORD GetTrueTaskID(DWORD dwTaskID) const;
 	void GetTrueTaskIDs(CDWordArray& aTaskIDs) const;
 	BOOL IsTaskReference(DWORD dwTaskID) const;
@@ -152,6 +150,9 @@ public:
 	BOOL IsTaskTimeTrackable(DWORD dwTaskID) const;
 	BOOL IsTaskParent(DWORD dwTaskID) const;
 
+	int GetTaskDependencies(DWORD dwTaskID, CTDCDependencyArray& aDepends) const;
+	int GetTaskDependencies(DWORD dwTaskID, CStringArray& aDepends) const;
+	int GetTaskDependencies(DWORD dwTaskID, CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 	BOOL TaskHasDependencies(DWORD dwTaskID) const;
 	BOOL TaskHasDependents(DWORD dwTaskID) const;
 	int GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents) const;
@@ -200,7 +201,7 @@ public:
 	TDC_SET SetTaskAllocTo(DWORD dwTaskID, const CStringArray& aAllocTo, BOOL bAppend = FALSE);
 	TDC_SET SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend = FALSE);
 	TDC_SET SetTaskTags(DWORD dwTaskID, const CStringArray& aTags, BOOL bAppend = FALSE);
-	TDC_SET SetTaskDependencies(DWORD dwTaskID, const CStringArray& aDepends, BOOL bAppend = FALSE);
+	TDC_SET SetTaskDependencies(DWORD dwTaskID, const CTDCDependencyArray& aDepends, BOOL bAppend = FALSE);
 	TDC_SET SetTaskFileLinks(DWORD dwTaskID, const CStringArray& aFileLinks, BOOL bAppend = FALSE);
 	TDC_SET SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, BOOL bAppend = FALSE);
 

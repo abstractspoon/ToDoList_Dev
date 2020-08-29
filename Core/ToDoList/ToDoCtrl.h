@@ -294,7 +294,7 @@ public:
 
 	BOOL SetSelectedTaskAllocTo(const CStringArray& aAllocTo, BOOL bAppend = FALSE);
 	BOOL SetSelectedTaskCategories(const CStringArray& aCats, BOOL bAppend = FALSE);
-	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppend = FALSE);
+	BOOL SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppend = FALSE);
 	BOOL SetSelectedTaskTags(const CStringArray& aTags, BOOL bAppend = FALSE);
 	BOOL SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend = FALSE);
 
@@ -780,7 +780,7 @@ protected:
 
 	// internal versions so we can tell how we've been called
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
-	BOOL SetSelectedTaskDependencies(const CStringArray& aDepends, BOOL bAppends, BOOL bEdit);
+	BOOL SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppends, BOOL bEdit);
 	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
 	int CheckWantSubtasksCompleted();
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
@@ -886,6 +886,7 @@ protected:
 								CMapID2ID& mapID, TDC_RESETIDS nResetID, BOOL bAndSiblings) const;
 	void PrepareTasksForPaste(CTaskFile& tasks, HTASKITEM hTask, BOOL bResetCreation, const CMapID2ID& mapID, BOOL bAndSiblings) const;
 	BOOL PrepareTaskLinkForPaste(CString& sLink, const CMapID2ID& mapID) const;
+	BOOL PrepareTaskLinkForPaste(TDCDEPENDENCY& depends, const CMapID2ID& mapID) const;
 	void PrepareTaskIDsForPasteAsRef(CTaskFile& tasks) const;
 	void RemoveArchivedTasks(const CTaskFile& tasks, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);
 	BOOL RemoveArchivedTask(const CTaskFile& tasks, HTASKITEM hTask, TDC_ARCHIVE nRemove, BOOL bRemoveFlagged);

@@ -802,6 +802,10 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 			case FT_DEPENDENCY:
 				AddOperatorToCombo(FOP_SET);
 				AddOperatorToCombo(FOP_NOT_SET);
+				AddOperatorToCombo(FOP_EQUALS);
+				AddOperatorToCombo(FOP_NOT_EQUALS);
+				AddOperatorToCombo(FOP_INCLUDES);
+				AddOperatorToCombo(FOP_NOT_INCLUDES);
 				AddOperatorToCombo(FOP_IS_COMPLETE);
 				break;
 				

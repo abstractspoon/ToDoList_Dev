@@ -23,6 +23,7 @@
 class CBinaryData;
 class CTDCCustomAttribDefinitionArray;
 class CTDCCustomAttributeDataMap;
+class CTDCDependencyArray;
 
 struct TODOITEM;
 struct TDCRECURRENCE; 
@@ -223,8 +224,8 @@ public:
 	BOOL SetTaskMetaData(HTASKITEM hTask, const CMapStringToString& mapMetaData);
 	int GetTaskMetaData(HTASKITEM hTask, CMapStringToString& mapMetaData) const;
 
-	BOOL SetTaskDependencies(HTASKITEM hTask, const CStringArray& aDepends);
-	int  GetTaskDependencies(HTASKITEM hTask, CStringArray& aDepends) const;
+	BOOL SetTaskDependencies(HTASKITEM hTask, const CTDCDependencyArray& aDepends);
+	int  GetTaskDependencies(HTASKITEM hTask, CTDCDependencyArray& aDepends) const;
 
 	BOOL SetTaskAllocatedTo(HTASKITEM hTask, const CStringArray& aAllocTo);
 	int  GetTaskAllocatedTo(HTASKITEM hTask, CStringArray& aAllocTo) const;

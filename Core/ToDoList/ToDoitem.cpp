@@ -251,25 +251,114 @@ BOOL TDCCOST::AddCost(const TDCCOST& cost)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-BOOL CTDCDependencyArray::RemoveLocalDependency(DWORD dwDependID)
+TDCDEPENDENCY::TDCDEPENDENCY(LPCTSTR szDepends) : dwTaskID(0)
 {
-	BOOL bRemoved = FALSE;
+	Parse(szDepends, EMPTY_STR);
+}
 
-	for (int nDepend = 0; nDepend < GetSize(); nDepend++)
+TDCDEPENDENCY::TDCDEPENDENCY(DWORD dwDependsID, const CString& sFile)
+	:
+	dwTaskID(dwDependsID),
+	sTasklist(sFile)
+{
+}
+
+TDCDEPENDENCY& TDCDEPENDENCY::operator=(const TDCDEPENDENCY& other)
+{
+	dwTaskID = other.dwTaskID;
+	sTasklist = other.sTasklist;
+
+	return *this;
+}
+
+BOOL TDCDEPENDENCY::operator==(const TDCDEPENDENCY& other) const
+{
+	return ((dwTaskID == other.dwTaskID) &&
+			(sTasklist.CompareNoCase(other.sTasklist) == 0));
+}
+
+BOOL TDCDEPENDENCY::operator!=(const TDCDEPENDENCY& other) const
+{
+	return !(*this == other);
+}
+
+CString TDCDEPENDENCY::Format() const
+{
+	return TDCTASKLINK::Format(dwTaskID, FALSE, sTasklist);
+}
+
+BOOL TDCDEPENDENCY::Parse(LPCTSTR szDepends, const CString& sFolder)
+{
+	return TDCTASKLINK::Parse(szDepends, FALSE, sFolder, dwTaskID, sTasklist);
+}
+
+BOOL TDCDEPENDENCY::IsLocal() const
+{
+	return (dwTaskID && sTasklist.IsEmpty());
+}
+
+CString TDCDEPENDENCY::Format(DWORD dwTaskID, const CString& sFile)
+{
+	return TDCTASKLINK::Format(dwTaskID, FALSE, sFile);
+}
+
+BOOL TDCDEPENDENCY::IsValid() const
+{
+	// Validate the dependency
+	if (dwTaskID == 0)
 	{
-		int nFind = FindLocalDependency(dwDependID, nDepend);
-
-		if (nFind == -1)
-			break;
-
-		bRemoved = TRUE;
-		RemoveAt(nFind);
-
-		// continuing search from this point on
-		nDepend = nFind;
+		return FALSE;
 	}
 
-	return bRemoved;
+	if (!sTasklist.IsEmpty())
+	{
+		return (FileMisc::HasExtension(sTasklist, _T("xml")) ||
+				FileMisc::HasExtension(sTasklist, _T("tdl")));
+	}
+
+	return TRUE;
+}
+
+// --------------------------------------------
+
+CTDCDependencyArray::CTDCDependencyArray()
+{
+}
+
+CTDCDependencyArray::CTDCDependencyArray(const CDWordArray& aDepends)
+{
+	Set(aDepends);
+}
+
+CTDCDependencyArray::CTDCDependencyArray(const CStringArray& aDepends)
+{
+	Set(aDepends);
+}
+
+BOOL CTDCDependencyArray::RemoveLocalDependency(DWORD dwDependID)
+{
+	int nFind = FindLocalDependency(dwDependID);
+
+	if (nFind == -1)
+		return FALSE;
+
+	RemoveAt(nFind);
+
+	// There can be only one
+	ASSERT(FindLocalDependency(dwDependID) == -1);
+
+	return TRUE;
+}
+
+BOOL CTDCDependencyArray::ReplaceLocalDependency(DWORD dwOldID, DWORD dwNewID)
+{
+	int nFind = FindLocalDependency(dwOldID);
+
+	if (nFind == -1)
+		return FALSE;
+
+	GetAt(nFind).dwTaskID = dwNewID;
+	return TRUE;
 }
 
 int CTDCDependencyArray::GetLocalDependencies(CDWordArray& aDependIDs) const
@@ -278,13 +367,34 @@ int CTDCDependencyArray::GetLocalDependencies(CDWordArray& aDependIDs) const
 
 	for (int nDepend = 0; nDepend < GetSize(); nDepend++)
 	{
-		DWORD dwDependID = (DWORD)_ttol(Misc::GetItem(*this, nDepend));
+		const TDCDEPENDENCY& depend = GetAt(nDepend);
 
-		if (dwDependID > 0)
-			aDependIDs.Add(dwDependID);
+		if (depend.IsLocal())
+			aDependIDs.Add(depend.dwTaskID);
 	}
 
 	return aDependIDs.GetSize();
+}
+
+int CTDCDependencyArray::GetDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const
+{
+	aLocalDepends.RemoveAll();
+	aOtherDepends.RemoveAll();
+
+	for (int nDepend = 0; nDepend < GetSize(); nDepend++)
+	{
+		const TDCDEPENDENCY& depend = GetAt(nDepend);
+
+		if (depend.dwTaskID)
+		{
+			if (depend.IsLocal())
+				aLocalDepends.Add(depend.dwTaskID);
+			else
+				aOtherDepends.Add(depend.Format());
+		}
+	}
+
+	return (aLocalDepends.GetSize() + aOtherDepends.GetSize());
 }
 
 BOOL CTDCDependencyArray::HasLocalDependency(DWORD dwDependID) const
@@ -292,22 +402,189 @@ BOOL CTDCDependencyArray::HasLocalDependency(DWORD dwDependID) const
 	return (FindLocalDependency(dwDependID) != -1);
 }
 
-int CTDCDependencyArray::FindLocalDependency(DWORD dwDependID, int nSearchFrom) const
+BOOL CTDCDependencyArray::HasDependency(const TDCDEPENDENCY& depend) const
 {
-	ASSERT(dwDependID && (nSearchFrom >= 0));
+	return (FindDependency(depend) != -1);
+}
 
-	if (dwDependID && (nSearchFrom >= 0))
+int CTDCDependencyArray::FindLocalDependency(DWORD dwDependID) const
+{
+	ASSERT(dwDependID);
+
+	int nDepend = GetSize();
+
+	while (nDepend--)
 	{
-		int nNumDepend = GetSize();
+		const TDCDEPENDENCY& depend = GetAt(nDepend);
 
-		for (int nDepend = nSearchFrom; nDepend < nNumDepend; nDepend++)
-		{
-			if (dwDependID == (DWORD)_ttol(Misc::GetItem(*this, nDepend)))
-				return nDepend;
-		}
+		if (depend.IsLocal() && (dwDependID == depend.dwTaskID))
+			return nDepend;
 	}
 
 	return -1; // not found
+}
+
+int CTDCDependencyArray::FindDependency(const TDCDEPENDENCY& other) const
+{
+	ASSERT(other.IsValid());
+
+	int nDepend = GetSize();
+	BOOL bOtherLocal = other.IsLocal();
+
+	while (nDepend--)
+	{
+		const TDCDEPENDENCY& depend = GetAt(nDepend);
+		BOOL bLocal = depend.IsLocal();
+
+		if (bLocal && bOtherLocal)
+		{
+			if (depend.dwTaskID == other.dwTaskID)
+				return nDepend;
+		}
+		else if (!bLocal && !bOtherLocal)
+		{
+			if (FileMisc::IsSamePath(depend.sTasklist, other.sTasklist))
+				return nDepend;
+
+			// TODO 
+			// check for partial match?
+		}
+	}
+
+	// not found
+	return -1;
+}
+
+CString CTDCDependencyArray::Format(LPCTSTR szSep) const
+{
+	CStringArray aDepends;
+
+	if (!Format(aDepends))
+		return EMPTY_STR;
+		
+	return Misc::FormatArray(aDepends, szSep);
+}
+
+int CTDCDependencyArray::Format(CStringArray& aDepends) const
+{
+	int nNumDepends = GetSize();
+	aDepends.SetSize(nNumDepends);
+
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+		aDepends[nDepend] = GetAt(nDepend).Format();
+
+	return nNumDepends;
+}
+
+BOOL CTDCDependencyArray::MatchAll(const CTDCDependencyArray& other) const
+{
+	return Misc::MatchAllT(*this, other, FALSE); // not order sensitive
+}
+
+const TDCDEPENDENCY& CTDCDependencyArray::GetAt(int nIndex) const
+{
+	ASSERT(nIndex >= 0 && nIndex < m_nSize);
+
+	return GetData()[nIndex];
+}
+
+TDCDEPENDENCY& CTDCDependencyArray::GetAt(int nIndex)
+{
+	ASSERT(nIndex >= 0 && nIndex < m_nSize);
+
+	return GetData()[nIndex];
+}
+
+const TDCDEPENDENCY& CTDCDependencyArray::operator[](int nIndex) const
+{
+	return GetAt(nIndex);
+}
+
+TDCDEPENDENCY& CTDCDependencyArray::operator[](int nIndex)
+{
+	return GetAt(nIndex);
+}
+
+int CTDCDependencyArray::Set(const CDWordArray& aDepends)
+{
+	RemoveAll();
+
+	int nNumDepends = aDepends.GetSize();
+
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+	{
+		Add(TDCDEPENDENCY(aDepends[nDepend]));
+	}
+
+	return GetSize();
+}
+
+int CTDCDependencyArray::Set(const CStringArray& aDepends)
+{
+	RemoveAll();
+
+	int nNumDepends = aDepends.GetSize();
+	TDCDEPENDENCY depend;
+
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+	{
+		if (depend.Parse(aDepends[nDepend]))
+			Add(depend);
+	}
+
+	return GetSize();
+}
+
+BOOL CTDCDependencyArray::Add(DWORD dwDependID, const CString& sFile)
+{
+	return Add(TDCDEPENDENCY(dwDependID, sFile));
+}
+
+BOOL CTDCDependencyArray::Add(const TDCDEPENDENCY& depend)
+{
+	if (!depend.IsValid())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (FindDependency(depend) != -1)
+		return FALSE;
+
+	return (CArray<TDCDEPENDENCY, TDCDEPENDENCY&>::Add(TDCDEPENDENCY(depend)) >= 0);
+}
+
+int CTDCDependencyArray::Append(const CTDCDependencyArray& aDepends)
+{
+	int nNumDepends = aDepends.GetSize(), nAdded = 0;
+	TDCDEPENDENCY depend;
+
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+	{
+		if (Add(aDepends[nDepend]))
+			nAdded++;
+	}
+
+	return nAdded;
+}
+
+int CTDCDependencyArray::Remove(const CTDCDependencyArray& aDepends)
+{
+	int nNumDepends = aDepends.GetSize(), nRemoved = 0;
+	TDCDEPENDENCY depend;
+
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+	{
+		int nFind = FindDependency(aDepends[nDepend]);
+
+		if (nFind != -1)
+		{
+			RemoveAt(nFind);
+			nRemoved++;
+		}
+	}
+
+	return nRemoved;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -496,7 +773,7 @@ BOOL TODOITEM::operator==(const TODOITEM& tdi)
 			Misc::MatchAll(aCategories, tdi.aCategories) &&
 			Misc::MatchAll(aTags, tdi.aTags) &&
 			Misc::MatchAll(aAllocTo, tdi.aAllocTo) &&
-			Misc::MatchAll(aDependencies, tdi.aDependencies) &&
+			Misc::MatchAllT(aDependencies, tdi.aDependencies, FALSE) &&
 			Misc::MatchAll(aFileLinks, tdi.aFileLinks) &&
 			Misc::MatchAll(tdi.mapMetaData, mapMetaData) &&
 			mapCustomData.MatchAll(tdi.mapCustomData));
@@ -511,6 +788,11 @@ BOOL TODOITEM::operator!=(const TODOITEM& tdi)
 BOOL TODOITEM::RemoveLocalDependency(DWORD dwDependID)
 {
 	return aDependencies.RemoveLocalDependency(dwDependID);
+}
+
+BOOL TODOITEM::ReplaceLocalDependency(DWORD dwOldID, DWORD dwNewID)
+{
+	return aDependencies.ReplaceLocalDependency(dwOldID, dwNewID);
 }
 
 int TODOITEM::GetLocalDependencies(CDWordArray& aDependIDs) const
@@ -620,15 +902,6 @@ CString TODOITEM::GetAllocTo(int nAllocTo) const
 {
 	if (nAllocTo < aAllocTo.GetSize())
 		return aAllocTo[nAllocTo];
-	
-	// else
-	return EMPTY_STR;
-}
-
-CString TODOITEM::GetDependency(int nDepends) const
-{
-	if (nDepends < aDependencies.GetSize())
-		return aDependencies[nDepends];
 	
 	// else
 	return EMPTY_STR;
