@@ -507,7 +507,18 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 		ExpandList();
 
 	if (!bWasSelected)
-		CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)hti);
+	{
+		NMTREEVIEW nmtv = { *this, (UINT)CWnd::GetDlgCtrlID(), TVN_SELCHANGED, 0 };
+
+		nmtv.itemNew.hItem = hti;
+		nmtv.itemNew.lParam = GetItemData(hti);
+		nmtv.action = TVC_BYMOUSE;
+
+		nmtv.ptDrag = CPoint(GetMessagePos());
+		CWnd::ScreenToClient(&nmtv.ptDrag);
+
+		OnTreeSelectionChange(&nmtv);
+	}
 
 	return TRUE;
 }
