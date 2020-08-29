@@ -3678,22 +3678,19 @@ int CGanttCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray&
 
 	if (pGIFrom)
 	{
-		if (pGIFrom->aDependIDs.GetSize())
+		int nDepend = pGIFrom->aDependIDs.GetSize();
+
+		while (nDepend--)
 		{
-			int nDepend = pGIFrom->aDependIDs.GetSize();
+			DWORD dwToTaskID = pGIFrom->aDependIDs[nDepend];
 
-			while (nDepend--)
-			{
-				DWORD dwToTaskID = pGIFrom->aDependIDs[nDepend];
+			if (!m_data.HasItem(dwToTaskID))
+				continue;
 
-				if (!m_data.HasItem(dwToTaskID))
-					continue;
+			GANTTDEPENDENCY depend;
 
-				GANTTDEPENDENCY depend;
-
-				if (BuildDependency(dwFromTaskID, dwToTaskID, depend))
-					aDepends.Add(depend);
-			}
+			if (BuildDependency(dwFromTaskID, dwToTaskID, depend))
+				aDepends.Add(depend);
 		}
 
 		if (pGIFrom->bParent && HasOption(GTLCF_DISPLAYPARENTROLLUPS) && !TCH().IsItemExpanded(htiFrom))
