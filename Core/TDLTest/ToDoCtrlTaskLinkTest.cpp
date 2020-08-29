@@ -162,6 +162,11 @@ void CToDoCtrlTaskLinkTest::TestParseTaskLink()
 	ExpectEQ(dwTaskID, 0UL);
 	ExpectEQ(sFilePath, _T("C:\\Users\\Daniel Godson\\AppData\\Local\\A Tasklist.tdl"));
 
+	// Non-numeric taskID is NOT okay
+	ExpectFalse(m_tdc.ParseTaskLink(_T("tdl://C:/Users/Daniel%20Godson/AppData/Local/A%20Tasklist.tdl?20B"), TRUE, dwTaskID, sFilePath));
+	ExpectEQ(dwTaskID, 0UL);
+	ExpectEmpty(sFilePath);
+
 	// Missing tdl:// is NOT okay
 	ExpectFalse(m_tdc.ParseTaskLink(_T(""), TRUE, dwTaskID, sFilePath));
 	ExpectFalse(m_tdc.ParseTaskLink(_T("10"), TRUE, dwTaskID, sFilePath));

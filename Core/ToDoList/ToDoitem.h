@@ -99,6 +99,7 @@ struct TDCDEPENDENCY
 	BOOL operator!=(const TDCDEPENDENCY& other) const;
 
 	CString Format(const CString& sFolder = _T("")) const;
+	CString GetFullPath(const CString& sFolder) const;
 
 	BOOL Parse(LPCTSTR szDepends);
 	BOOL IsLocal() const;

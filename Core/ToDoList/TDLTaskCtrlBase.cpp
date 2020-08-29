@@ -6533,19 +6533,36 @@ int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CStringArray& aDepends) const
 	return GetSelectedTaskArray(TDCA_DEPENDENCY, aDepends);
 }
 
-CString CTDLTaskCtrlBase::GetSelectedTaskFileLink(int nFile) const
+CString CTDLTaskCtrlBase::GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const
 {
 	if (GetSelectedCount() == 1)
-		return m_data.GetTaskFileLink(GetSelectedTaskID(), nFile);
+	{
+		CString sFile = m_data.GetTaskFileLink(GetSelectedTaskID(), nFile);
+
+		if (bFullPath)
+			FileMisc::MakeFullPath(sFile, m_sTasklistFolder);
+
+		return sFile;
+	}
 	
 	// else
 	return EMPTY_STR;
 }
 
-int CTDLTaskCtrlBase::GetSelectedTaskFileLinks(CStringArray& aFiles) const
+int CTDLTaskCtrlBase::GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPaths) const
 {
 	if (GetSelectedCount() == 1)
-		return m_data.GetTaskFileLinks(GetSelectedTaskID(), aFiles);
+	{
+		int nNumFiles = m_data.GetTaskFileLinks(GetSelectedTaskID(), aFiles);
+
+		if (bFullPaths)
+		{
+			for (int nFile = 0; nFile < nNumFiles; nFile++)
+				FileMisc::MakeFullPath(aFiles[nFile], m_sTasklistFolder);
+		}
+
+		return nNumFiles;
+	}
 	
 	// else
 	aFiles.RemoveAll();

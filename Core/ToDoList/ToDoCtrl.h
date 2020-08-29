@@ -868,6 +868,7 @@ protected:
 	BOOL ShowTaskLink(const CString& sLink, BOOL bURL);
 	void MakeRelativePaths(CStringArray& aFilePaths) const;
 	void MakeFullPaths(CStringArray& aFilePaths) const;
+	CString GetFullPath(const CString& sFile) const;
 	CString GetLastSaveFolder() const;
 	BOOL CheckRestoreBackupFile(const CString& sFilePath);
 

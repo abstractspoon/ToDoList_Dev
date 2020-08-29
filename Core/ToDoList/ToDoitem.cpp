@@ -291,6 +291,14 @@ CString TDCDEPENDENCY::Format(const CString& sFolder) const
 	return Format(dwTaskID, sTasklist, sFolder);
 }
 
+CString TDCDEPENDENCY::GetFullPath(const CString& sFolder) const
+{
+	if (sTasklist.IsEmpty())
+		return sTasklist;
+
+	return FileMisc::GetFullPath(sTasklist, sFolder);
+}
+
 BOOL TDCDEPENDENCY::Parse(LPCTSTR szDepends)
 {
 	DWORD dwDependsID = 0;
@@ -315,7 +323,11 @@ BOOL TDCDEPENDENCY::IsLocal() const
 
 CString TDCDEPENDENCY::Format(DWORD dwTaskID, const CString& sFile, const CString& sFolder)
 {
-	return TDCTASKLINK::Format(dwTaskID, FALSE, FileMisc::GetFullPath(sFile, sFolder));
+	if (!sFile.IsEmpty())
+		return TDCTASKLINK::Format(dwTaskID, FALSE, FileMisc::GetFullPath(sFile, sFolder));
+
+	// else
+	return TDCTASKLINK::Format(dwTaskID, FALSE);
 }
 
 BOOL TDCDEPENDENCY::IsValid() const
@@ -637,12 +649,24 @@ BOOL TDCTASKLINK::Parse(const CString& sLink, BOOL bURL, const CString& sFolder,
 
 	if (Misc::Split(sFile, sTaskID, '?'))
 	{
-		int nTaskID = _ttoi(sTaskID);
+		if (!sTaskID.IsEmpty())
+		{
+			if (!Misc::IsNumber(sTaskID))
+			{
+				sFile.Empty();
+				return FALSE;
+			}
 
-		if (nTaskID <= 0)
-			return FALSE;
+			int nTaskID = _ttoi(sTaskID);
 
-		dwTaskID = nTaskID;
+			if (nTaskID <= 0)
+			{
+				sFile.Empty();
+				return FALSE;
+			}
+
+			dwTaskID = nTaskID;
+		}
 
 		// remove trailing back slash appended by Macro Express Pro
 		sFile.TrimRight('\\');
@@ -650,13 +674,13 @@ BOOL TDCTASKLINK::Parse(const CString& sLink, BOOL bURL, const CString& sFolder,
 	}
 	else if (Misc::IsNumber(sFile))
 	{
-		int nTaskID = _ttoi(sTaskID);
+		int nTaskID = _ttoi(sFile);
+		sFile.Empty();
 
 		if (nTaskID <= 0)
 			return FALSE;
 
 		dwTaskID = nTaskID;
-		sFile.Empty();
 	}
 
 	// sFile

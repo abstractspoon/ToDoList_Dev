@@ -468,7 +468,7 @@ END_MESSAGE_MAP()
 
 BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, DWORD& dwTaskID, CString& sFile) const
 {
-	return ParseTaskLink(sLink, bURL, FileMisc::GetFolderFromFilePath(m_sLastSavePath), dwTaskID, sFile);
+	return ParseTaskLink(sLink, bURL, GetLastSaveFolder(), dwTaskID, sFile);
 }
 
 BOOL CToDoCtrl::ParseTaskLink(const CString& sLink, BOOL bURL, const CString& sFolder, DWORD& dwTaskID, CString& sFile)
@@ -4643,12 +4643,7 @@ int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles) const
 
 int CToDoCtrl::GetSelectedTaskFileLinks(CStringArray& aFiles, BOOL bFullPath) const 
 { 
-	int nNumFiles = m_taskTree.GetSelectedTaskFileLinks(aFiles); 
-
-	if (nNumFiles && bFullPath)
-		MakeFullPaths(aFiles);
-
-	return nNumFiles;
+	return m_taskTree.GetSelectedTaskFileLinks(aFiles, bFullPath); 
 }
 
 BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
@@ -4658,15 +4653,7 @@ BOOL CToDoCtrl::GotoSelectedTaskFileLink(int nFile)
 
 CString CToDoCtrl::GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const 
 { 
-	CString sFile = m_taskTree.GetSelectedTaskFileLink(nFile);
-
-	if (!sFile.IsEmpty() && bFullPath && !WebMisc::IsURL(sFile))
-	{
-		CString sParentFolder = GetLastSaveFolder();
-		FileMisc::MakeFullPath(sFile, sParentFolder); 
-	}
-
-	return sFile;
+	return m_taskTree.GetSelectedTaskFileLink(nFile, bFullPath);
 }
 
 CString CToDoCtrl::GetSelectedTaskFileLink(int nFile) const
@@ -7629,7 +7616,9 @@ BOOL CToDoCtrl::PrepareTaskLinkForPaste(TDCDEPENDENCY& depend, const CMapID2ID& 
 		// make sure the file path matches us
 		if (!depend.IsLocal() && HasFilePath())
 		{
-			if (!FileMisc::IsSamePath(depend.sTasklist, m_sLastSavePath))
+			CString sDependPath = depend.GetFullPath(GetLastSaveFolder());
+
+			if (!FileMisc::IsSamePath(sDependPath, m_sLastSavePath))
 				return FALSE;
 		}
 
@@ -7640,7 +7629,6 @@ BOOL CToDoCtrl::PrepareTaskLinkForPaste(TDCDEPENDENCY& depend, const CMapID2ID& 
 
 	return FALSE;
 }
-
 
 BOOL CToDoCtrl::PreTranslateMessage(MSG* pMsg) 
 {
@@ -7876,13 +7864,8 @@ CString CToDoCtrl::GetStylesheetPath() const
 			{
 				CString sFile(aLinks[nLink]);
 
-				if (FileMisc::GetExtension(Misc::ToUpper(sFile)) == _T(".XSL"))
-				{
-					if (HasFilePath())
-						FileMisc::MakeFullPath(sFile, FileMisc::GetFolderFromFilePath(m_sLastSavePath));
-
-					return sFile;
-				}
+				if (FileMisc::HasExtension(sFile, _T("xsl")))
+					return GetFullPath(sFile);
 			}
 		}
 	}
@@ -9861,11 +9844,17 @@ void CToDoCtrl::MakeFullPaths(CStringArray& aFilePaths) const
 	
 	for (int nFile = 0; nFile < aFilePaths.GetSize(); nFile++)
 	{
-		CString& sFilePath = aFilePaths[nFile];
-
-		if (!WebMisc::IsURL(sFilePath))
-			FileMisc::MakeFullPath(sFilePath, sParentFolder);
+		if (!WebMisc::IsURL(aFilePaths[nFile]))
+			FileMisc::MakeFullPath(aFilePaths[nFile], sParentFolder);
 	}
+}
+
+CString CToDoCtrl::GetFullPath(const CString& sFilePath) const
+{
+	if (WebMisc::IsURL(sFilePath))
+		return sFilePath;
+
+	return FileMisc::GetFullPath(sFilePath, GetLastSaveFolder());
 }
 
 LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
@@ -11477,7 +11466,7 @@ LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
 	}
 	else if (!CMSOutlookHelper::IsOutlookUrl(sLink) && ::PathIsRelative(sLink))
 	{
-		CString sLink = FileMisc::GetFullPath(sLink, m_taskTree.GetTasklistFolder());
+		CString sLink = GetFullPath(sLink);
 		
 		if (FileMisc::Run(*this, sLink) >= SE_ERR_SUCCESS)
 			return 0L;
