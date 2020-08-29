@@ -270,7 +270,7 @@ private:
 	{
 		if (!bSuccess)
 		{
-			CString sOp, sOutput;
+			CString sOp;
 
 			switch (nOp)
 			{
@@ -284,10 +284,8 @@ private:
 
 			ASSERT(!sOp.IsEmpty());
 
-// 			if (bSuccess)
-// 				sOutput.Format(_T("  Test [%2d] succeeded:          \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
-// 			else
-				sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
+			CString sOutput;
+			sOutput.Format(_T("  Test [%2d] failed:    Expected \"%s\" %s \"%s\""), m_nCurTest, szFmt1, sOp, szFmt2);
 
 			if (!Misc::IsEmpty(szTrail))
 			{
