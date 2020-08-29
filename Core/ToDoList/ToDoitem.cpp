@@ -253,18 +253,22 @@ BOOL TDCCOST::AddCost(const TDCCOST& cost)
 
 TDCDEPENDENCY::TDCDEPENDENCY(LPCTSTR szDepends) : dwTaskID(0)
 {
-	Parse(szDepends, EMPTY_STR);
+	Parse(szDepends);
 }
 
-TDCDEPENDENCY::TDCDEPENDENCY(DWORD dwDependsID, const CString& sFile)
-	:
-	dwTaskID(dwDependsID),
-	sTasklist(sFile)
+TDCDEPENDENCY::TDCDEPENDENCY(DWORD dwDependsID, const CString& sFile) :	dwTaskID(0)
 {
+	if (IsValid(dwDependsID, sFile))
+	{
+		dwTaskID = dwDependsID;
+		sTasklist = sFile;
+	}
 }
 
 TDCDEPENDENCY& TDCDEPENDENCY::operator=(const TDCDEPENDENCY& other)
 {
+	ASSERT(other.IsValid());
+
 	dwTaskID = other.dwTaskID;
 	sTasklist = other.sTasklist;
 
@@ -282,14 +286,26 @@ BOOL TDCDEPENDENCY::operator!=(const TDCDEPENDENCY& other) const
 	return !(*this == other);
 }
 
-CString TDCDEPENDENCY::Format() const
+CString TDCDEPENDENCY::Format(const CString& sFolder) const
 {
-	return TDCTASKLINK::Format(dwTaskID, FALSE, sTasklist);
+	return Format(dwTaskID, sTasklist, sFolder);
 }
 
-BOOL TDCDEPENDENCY::Parse(LPCTSTR szDepends, const CString& sFolder)
+BOOL TDCDEPENDENCY::Parse(LPCTSTR szDepends)
 {
-	return TDCTASKLINK::Parse(szDepends, FALSE, sFolder, dwTaskID, sTasklist);
+	DWORD dwDependsID = 0;
+	CString sFile;
+
+	if (!TDCTASKLINK::Parse(szDepends, FALSE, EMPTY_STR, dwDependsID, sFile))
+		return FALSE;
+
+	if (!IsValid(dwDependsID, sFile))
+		return FALSE;
+
+	dwTaskID = dwDependsID;
+	sTasklist = sFile;
+
+	return TRUE;
 }
 
 BOOL TDCDEPENDENCY::IsLocal() const
@@ -297,23 +313,27 @@ BOOL TDCDEPENDENCY::IsLocal() const
 	return (dwTaskID && sTasklist.IsEmpty());
 }
 
-CString TDCDEPENDENCY::Format(DWORD dwTaskID, const CString& sFile)
+CString TDCDEPENDENCY::Format(DWORD dwTaskID, const CString& sFile, const CString& sFolder)
 {
-	return TDCTASKLINK::Format(dwTaskID, FALSE, sFile);
+	return TDCTASKLINK::Format(dwTaskID, FALSE, FileMisc::GetFullPath(sFile, sFolder));
 }
 
 BOOL TDCDEPENDENCY::IsValid() const
 {
-	// Validate the dependency
+	return IsValid(dwTaskID, sTasklist);
+}
+
+BOOL TDCDEPENDENCY::IsValid(DWORD dwTaskID, const CString& sFile)
+{
 	if (dwTaskID == 0)
 	{
 		return FALSE;
 	}
 
-	if (!sTasklist.IsEmpty())
+	if (!sFile.IsEmpty())
 	{
-		return (FileMisc::HasExtension(sTasklist, _T("xml")) ||
-				FileMisc::HasExtension(sTasklist, _T("tdl")));
+		return (FileMisc::HasExtension(sFile, _T("xml")) ||
+				FileMisc::HasExtension(sFile, _T("tdl")));
 	}
 
 	return TRUE;
@@ -399,11 +419,17 @@ int CTDCDependencyArray::GetDependencies(CDWordArray& aLocalDepends, CStringArra
 
 BOOL CTDCDependencyArray::HasLocalDependency(DWORD dwDependID) const
 {
+	if (dwDependID == 0)
+		return FALSE;
+
 	return (FindLocalDependency(dwDependID) != -1);
 }
 
 BOOL CTDCDependencyArray::HasDependency(const TDCDEPENDENCY& depend) const
 {
+	if (!depend.IsValid())
+		return FALSE;
+
 	return (FindDependency(depend) != -1);
 }
 
@@ -455,23 +481,23 @@ int CTDCDependencyArray::FindDependency(const TDCDEPENDENCY& other) const
 	return -1;
 }
 
-CString CTDCDependencyArray::Format(LPCTSTR szSep) const
+CString CTDCDependencyArray::Format(LPCTSTR szSep, const CString& sFolder) const
 {
 	CStringArray aDepends;
 
-	if (!Format(aDepends))
+	if (!Format(aDepends, sFolder))
 		return EMPTY_STR;
 		
 	return Misc::FormatArray(aDepends, szSep);
 }
 
-int CTDCDependencyArray::Format(CStringArray& aDepends) const
+int CTDCDependencyArray::Format(CStringArray& aDepends, const CString& sFolder) const
 {
 	int nNumDepends = GetSize();
 	aDepends.SetSize(nNumDepends);
 
 	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
-		aDepends[nDepend] = GetAt(nDepend).Format();
+		aDepends[nDepend] = GetAt(nDepend).Format(sFolder);
 
 	return nNumDepends;
 }
@@ -537,16 +563,16 @@ int CTDCDependencyArray::Set(const CStringArray& aDepends)
 
 BOOL CTDCDependencyArray::Add(DWORD dwDependID, const CString& sFile)
 {
+	if (!dwDependID)
+		return FALSE;
+
 	return Add(TDCDEPENDENCY(dwDependID, sFile));
 }
 
 BOOL CTDCDependencyArray::Add(const TDCDEPENDENCY& depend)
 {
 	if (!depend.IsValid())
-	{
-		ASSERT(0);
 		return FALSE;
-	}
 
 	if (FindDependency(depend) != -1)
 		return FALSE;
@@ -611,7 +637,12 @@ BOOL TDCTASKLINK::Parse(const CString& sLink, BOOL bURL, const CString& sFolder,
 
 	if (Misc::Split(sFile, sTaskID, '?'))
 	{
-		dwTaskID = _ttoi(sTaskID);
+		int nTaskID = _ttoi(sTaskID);
+
+		if (nTaskID <= 0)
+			return FALSE;
+
+		dwTaskID = nTaskID;
 
 		// remove trailing back slash appended by Macro Express Pro
 		sFile.TrimRight('\\');
@@ -619,7 +650,12 @@ BOOL TDCTASKLINK::Parse(const CString& sLink, BOOL bURL, const CString& sFolder,
 	}
 	else if (Misc::IsNumber(sFile))
 	{
-		dwTaskID = _ttoi(sFile);
+		int nTaskID = _ttoi(sTaskID);
+
+		if (nTaskID <= 0)
+			return FALSE;
+
+		dwTaskID = nTaskID;
 		sFile.Empty();
 	}
 

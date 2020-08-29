@@ -98,13 +98,15 @@ struct TDCDEPENDENCY
 	BOOL operator==(const TDCDEPENDENCY& other) const;
 	BOOL operator!=(const TDCDEPENDENCY& other) const;
 
-	CString Format() const;
-	BOOL Parse(LPCTSTR szDepends, const CString& sFolder = _T(""));
+	CString Format(const CString& sFolder = _T("")) const;
+
+	BOOL Parse(LPCTSTR szDepends);
 	BOOL IsLocal() const;
-	BOOL Matches(const TDCDEPENDENCY& depend, BOOL bPartialFileOK = FALSE) const;
+//	BOOL Matches(const TDCDEPENDENCY& depend, BOOL bPartialFileOK = FALSE) const;
 	BOOL IsValid() const;
 
-	static CString Format(DWORD dwTaskID, const CString& sFile = _T(""));
+	static CString Format(DWORD dwTaskID, const CString& sFile = _T(""), const CString& sFolder = _T(""));
+	static BOOL IsValid(DWORD dwTaskID, const CString& sFile = _T(""));
 
 	DWORD dwTaskID;
 	CString sTasklist;
@@ -133,8 +135,8 @@ public:
 	int GetDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 	BOOL HasDependency(const TDCDEPENDENCY& depend) const;
 
-	int Format(CStringArray& aDepends) const;
-	CString Format(LPCTSTR szSep = NULL) const;
+	int Format(CStringArray& aDepends, const CString& sFolder = _T("")) const;
+	CString Format(LPCTSTR szSep = NULL, const CString& sFolder = _T("")) const;
 	
 	BOOL MatchAll(const CTDCDependencyArray& other) const;
 
