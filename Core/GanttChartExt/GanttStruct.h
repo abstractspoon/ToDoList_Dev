@@ -94,7 +94,7 @@ struct GANTTITEM
 	CString sAllocTo;
 	BOOL bParent;
 	DWORD dwTaskID, dwRefID, dwOrgRefID;
-	CDWordArray aDependIDs;
+	CStringArray aDepends;
 	CStringArray aTags;
 	int nPercent;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
