@@ -178,25 +178,26 @@ BOOL CToDoListApp::HandleSimpleQueries(const CEnCommandLineInfo& cmdInfo)
 
 BOOL CToDoListApp::HasVS2010Redistributable()
 {
-	CString sVs2010Runtime;
-	VERIFY(FileMisc::GetSpecialFilePath(CSIDL_SYSTEM, MSVCR100_DLL, sVs2010Runtime));
-
-	if (::LoadLibraryEx(sVs2010Runtime, NULL, LOAD_IGNORE_CODE_AUTHZ_LEVEL) == NULL)
+	const CString REGUNINSTALL = _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\");
+	const LPCTSTR VCREDISTGUID[3] = 
 	{
-		CToDoListWnd::EnableLogging();
+		_T("{196bb40d-1578-3d01-b289-befc77a11a1e}"),
+		_T("{f0c3e5d1-1ade-321e-8167-68ef0de699a5}"),
+		_T("{1d5e3c0f-eda1-e123-1876-86fed06e995a}"),
+	};
 
-		FileMisc::LogText(_T("LoadLibrary(%s) failed"), sVs2010Runtime);
-		FileMisc::LogTextRaw(Misc::FormatGetLastError());
-		
-		if (AfxMessageBox(CEnString(IDS_MSVCR100_MSG), MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
-			FileMisc::Run(::GetDesktopWindow(), MSVCR100_URL);
-
-		// Always quit
-		return FALSE;
+	for (int nKey = 0; nKey < 3; nKey++)
+	{
+		if (CRegKey2::KeyExists(HKEY_LOCAL_MACHINE, REGUNINSTALL + VCREDISTGUID[nKey]))
+			return TRUE;
 	}
 
-	// All good
-	return TRUE;
+	// not found
+	if (AfxMessageBox(CEnString(IDS_MSVCR100_MSG), MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
+		FileMisc::Run(::GetDesktopWindow(), MSVCR100_URL);
+
+	// Always quit
+	return FALSE;
 }
 
 BOOL CToDoListApp::InitInstance()
@@ -204,9 +205,6 @@ BOOL CToDoListApp::InitInstance()
 	// .NET plugins require VS2010 redistributable to be installed
 	if (!HasVS2010Redistributable())
 		return FALSE;
-
-	AfxOleInit(); // for initializing COM and handling drag and drop via explorer
-	AfxEnableControlContainer(); // embedding IE
 
 	// Set up icons that might be required during startup
 	if (m_iconBrowse.Load(IDI_FILEEDIT_BROWSE, 16, FALSE) && m_iconGo.Load(IDI_FILEEDIT_GO, 16, FALSE))
@@ -242,6 +240,9 @@ BOOL CToDoListApp::InitInstance()
 		// and turn on logging to capture the first run
 		CToDoListWnd::EnableLogging();
 	}
+
+	AfxOleInit(); // for initializing COM and handling drag and drop via explorer
+	AfxEnableControlContainer(); // embedding IE
 
 	// before anything else make sure we've got MSXML3 installed
 	if (!CXmlDocumentWrapper::IsVersion3orGreater())
