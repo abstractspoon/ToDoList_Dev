@@ -126,6 +126,10 @@ SOURCE=.\TaskFileTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDCDEPENDENCYTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDCRECURRENCETest.cpp
 # End Source File
 # Begin Source File
@@ -187,6 +191,10 @@ SOURCE=.\StdAfx.h
 # Begin Source File
 
 SOURCE=.\TaskFileTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDCDEPENDENCYTest.h
 # End Source File
 # Begin Source File
 
