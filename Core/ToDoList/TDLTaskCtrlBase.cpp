@@ -366,7 +366,7 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 				if (nDepend > 0)
 					sTooltip += '\n';
 
-				const TDCDEPENDENCY& depend = Misc::GetItemT(pTDI->aDependencies, nDepend);
+				const TDCDEPENDENCY& depend = pTDI->aDependencies[nDepend];
 				
 				sTooltip += depend.Format(); // always
 
