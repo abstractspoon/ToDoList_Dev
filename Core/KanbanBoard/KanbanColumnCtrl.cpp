@@ -9,7 +9,6 @@
 
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\enstring.h"
-#include "..\shared\enbitmap.h"
 #include "..\shared\misc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\datehelper.h"
@@ -17,8 +16,6 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\copywndcontents.h"
 #include "..\shared\holdredraw.h"
-#include "..\shared\winclasses.h"
-#include "..\shared\wclassdefines.h"
 #include "..\Shared\enimagelist.h"
 #include "..\Shared\osversion.h"
 #include "..\Shared\themed.h"
@@ -133,6 +130,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
+	ON_WM_MOUSEWHEEL()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
@@ -194,6 +192,58 @@ void CKanbanColumnCtrl::OnKillFocus(CWnd* pNewWnd)
 	CTreeCtrl::OnKillFocus(pNewWnd);
 
 	Invalidate(FALSE);
+}
+
+#if _MSC_VER >= 1400
+afx_msg BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+#else
+afx_msg void CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
+#endif
+{
+	// Two bugs in Windows 7
+	if ((COSVersion() < OSV_WIN8) && (GetStyle() & WS_VSCROLL))
+	{
+		CRect rClient, rItem;
+		GetClientRect(rClient);
+
+		HTREEITEM htiLast = GetLastVisibleItem();
+		CTreeCtrl::GetItemRect(htiLast, rItem, FALSE);
+
+		BOOL bAtBottom = (rItem.bottom < rClient.bottom);
+
+		// 1. Mouse-wheeling past the bottom of the tree causes
+		//    considerable flickering
+		if (bAtBottom)
+		{
+			// 2. Sometimes this also breaks mouse-wheeling up
+			//    until the scrollbar is manually adjusted
+			BOOL bScrollUp = (zDelta > 0);
+
+			if (bScrollUp)
+			{
+				HTREEITEM hti = GetFirstVisibleItem();
+
+				// Shift up 2 ITEMS to get past the 'problem zone'
+				HTREEITEM htiPrev = GetPrevVisibleItem(hti);
+
+				if (htiPrev)
+				{
+					hti = htiPrev;
+					htiPrev = GetPrevVisibleItem(hti);
+					
+					SelectSetFirstVisible(htiPrev ? htiPrev : hti);
+				}
+			}
+
+			return TRUE;
+		}
+	}
+
+#if _MSC_VER >= 1400
+	return CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
+#else
+	CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
+#endif
 }
 
 void CKanbanColumnCtrl::SetDropTarget(BOOL bTarget)

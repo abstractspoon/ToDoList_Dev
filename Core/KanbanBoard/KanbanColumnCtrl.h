@@ -168,6 +168,11 @@ protected:
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg LRESULT OnThemeChanged(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+#if _MSC_VER >= 1400
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+#else
+	afx_msg void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
+#endif
 
 	DECLARE_MESSAGE_MAP()
 
