@@ -902,7 +902,7 @@ BOOL Misc::TrimFirstIf(TCHAR cTest, CString& sText)
 {
 	if (cTest && (First(sText) == cTest))
 	{
-		sText.TrimLeft(cTest);
+		TrimFirst(sText);
 		return TRUE;
 	}
 
@@ -914,7 +914,7 @@ BOOL Misc::TrimLastIf(TCHAR cTest, CString& sText)
 {
 	if (cTest && (Last(sText) == cTest))
 	{
-		sText.TrimRight(cTest);
+		TrimLast(sText);
 		return TRUE;
 	}
 
