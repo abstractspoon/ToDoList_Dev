@@ -206,7 +206,7 @@ afx_msg void CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint p
 		CRect rClient, rItem;
 		GetClientRect(rClient);
 
-		HTREEITEM htiLast = GetLastVisibleItem();
+		HTREEITEM htiLast = TCH().GetLastVisibleItem();
 		CTreeCtrl::GetItemRect(htiLast, rItem, FALSE);
 
 		BOOL bAtBottom = (rItem.bottom < rClient.bottom);
@@ -235,7 +235,11 @@ afx_msg void CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint p
 				}
 			}
 
+#if _MSC_VER >= 1400
 			return TRUE;
+#else
+			return;
+#endif
 		}
 	}
 
