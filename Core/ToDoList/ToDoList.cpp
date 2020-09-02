@@ -78,9 +78,6 @@ LPCTSTR FORUM_URL			= _T("https://www.abstractspoon.com/phpBB/");
 LPCTSTR LICENSE_URL			= _T("https://www.abstractspoon.com/wiki/doku.php?id=free-open-source-software"); 
 LPCTSTR DONATE_URL			= _T("https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=abstractspoon2%40optusnet%2ecom%2eau&item_name=Software"); 
 
-LPCTSTR MSVCR100_DLL		= _T("MSVCR100.dll"); 
-LPCTSTR MSVCR100_URL		= _T("https://www.microsoft.com/en-hk/download/details.aspx?id=8328"); 
-
 /////////////////////////////////////////////////////////////////////////////
 // CToDoListApp
 
@@ -176,36 +173,36 @@ BOOL CToDoListApp::HandleSimpleQueries(const CEnCommandLineInfo& cmdInfo)
 	return FALSE;
 }
 
-BOOL CToDoListApp::HasVS2010Redistributable()
+BOOL CToDoListApp::HasVSRedistributable()
 {
-	const CString REGUNINSTALL = _T("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\");
-	const LPCTSTR VCREDISTGUID[] = 
+	// Only reliable way to see if the C# plugins will load
+	// is to try to load the PluginHelpers.dll since it has
+	// dependencies on MSVCRT, MFC and .Net
+	// Don't test on Linux
+	if (COSVersion() >= OSV_XP)
 	{
-		_T("{196bb40d-1578-3d01-b289-befc77a11a1e}"),
-		_T("{f0c3e5d1-1ade-321e-8167-68ef0de699a5}"),
-		_T("{1d5e3c0f-eda1-e123-1876-86fed06e995a}"),
-		_T("{5d9ed403-94de-3ba0-b1d6-71f4bda412e6}"),
-	};
-	const int NUM_GUID = sizeof(VCREDISTGUID) / sizeof(VCREDISTGUID[0]);
+		const CString PLUGINHELPERS = FileMisc::GetAppFolder(_T("PluginHelpers.dll"));
 
-	for (int nKey = 0; nKey < NUM_GUID; nKey++)
-	{
-		if (CRegKey2::KeyExists(HKEY_LOCAL_MACHINE, REGUNINSTALL + VCREDISTGUID[nKey]))
-			return TRUE;
+		if (FileMisc::FileExists(PLUGINHELPERS) && !LoadLibrary(PLUGINHELPERS))
+		{
+			LPCTSTR MSVCREDIST_URL = _T("https://www.microsoft.com/en-au/download/details.aspx?id=48145"); 
+			
+			if (AfxMessageBox(CEnString(IDS_MSVCREDIST_MSG, 2015), MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
+				FileMisc::Run(::GetDesktopWindow(), MSVCREDIST_URL);
+
+			// Always quit
+			return FALSE;
+		}
 	}
 
-	// not found
-	if (AfxMessageBox(CEnString(IDS_MSVCR100_MSG), MB_OKCANCEL | MB_ICONEXCLAMATION) == IDOK)
-		FileMisc::Run(::GetDesktopWindow(), MSVCR100_URL);
-
-	// Always quit
-	return FALSE;
+	// All good
+	return TRUE;
 }
 
 BOOL CToDoListApp::InitInstance()
 {
 	// .NET plugins require VS2010 redistributable to be installed
-	if (!HasVS2010Redistributable())
+	if (!HasVSRedistributable())
 		return FALSE;
 
 	// Set up icons that might be required during startup

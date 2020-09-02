@@ -2359,7 +2359,7 @@
 #define IDS_PRINTDLG_TASKSEL            51516
 #define IDS_EXPORTDLG_EXPORT            51517
 #define IDS_EXPORTDLG_TASKSEL           51518
-#define IDS_MSVCR100_MSG                51519
+#define IDS_MSVCREDIST_MSG              51519
 #define IDS_CUSTOM_FEATURE_ONEDECIMAL   51520
 #define IDS_FP_IS_COMPLETE              51521
 #define IDS_TDC_GROUPBY                 51522
