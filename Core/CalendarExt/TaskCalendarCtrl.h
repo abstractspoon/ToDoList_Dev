@@ -135,14 +135,10 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pFocus);
 	afx_msg void OnKillFocus(CWnd* pFocus);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 
-#if _MSC_VER >= 1400
-	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-#else
-	afx_msg void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-#endif
 	DECLARE_MESSAGE_MAP()
 
 	virtual void OnVisibleDateRangeChanged();

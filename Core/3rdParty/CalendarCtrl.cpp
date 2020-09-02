@@ -1093,11 +1093,7 @@ void CCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 }
 
-#if _MSC_VER >= 1400
 BOOL CCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#else
-void CCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#endif
 {	
 	int nInc = ((zDelta < 0) ? 1 : -1);
 
@@ -1134,11 +1130,7 @@ void CCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		}
 	}
 	
-#if _MSC_VER >= 1400
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
-#else
-	CWnd::OnMouseWheel(nFlags, zDelta, pt);
-#endif
 }
 
 time_t CCalendarCtrl::DateToSeconds(const COleDateTime& date)

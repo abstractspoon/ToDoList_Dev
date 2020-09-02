@@ -1470,19 +1470,11 @@ void CFPSMiniCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point)
 	CWnd::OnMouseMove(nFlags, point);
 }
 
-#if _MSC_VER >= 1400
 BOOL CFPSMiniCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#else
-void CFPSMiniCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#endif
 {	
 	ScrollMonth((zDelta < 0) ? 1 : -1);
 
-#if _MSC_VER >= 1400
 	return CWnd::OnMouseWheel(nFlags, zDelta, pt);
-#else
-	CWnd::OnMouseWheel(nFlags, zDelta, pt);
-#endif
 }
 
 void CFPSMiniCalendarCtrl::ScrollMonth(int nNumMonths)

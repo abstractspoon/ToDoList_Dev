@@ -174,11 +174,7 @@ void CScrollingPropertyPageHost::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* 
 	}
 }
 
-#if _MSC_VER >= 1400
 BOOL CScrollingPropertyPageHost::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#else
-void CScrollingPropertyPageHost::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#endif
 {
 	// convert mouse wheel to equivalent WM_VSCROLL provided the 
 	// scrollbar is visible
@@ -191,11 +187,7 @@ void CScrollingPropertyPageHost::OnMouseWheel(UINT nFlags, short zDelta, CPoint 
 			SendMessage(WM_VSCROLL, nSBCode, (LPARAM)m_scroll.GetSafeHwnd());
 	}
 
-#if _MSC_VER >= 1400
 	return CPropertyPageHost::OnMouseWheel(nFlags, zDelta, pt);
-#else
-	CPropertyPageHost::OnMouseWheel(nFlags, zDelta, pt);
-#endif
 }
 
 void CScrollingPropertyPageHost::OnSize(UINT nType, int cx, int cy)

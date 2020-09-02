@@ -1252,21 +1252,15 @@ void CInputListCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 	RecalcHotButtonRects();
 }
 
-#if _MSC_VER >= 1400
 BOOL CInputListCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#else
-void CInputListCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#endif
 {
 	OnCancelEdit();
 
-	LRESULT lr = Default();
+	BOOL bRes = CEnListCtrl::OnMouseWheel(nFlags, zDelta, pt);
 
 	RecalcHotButtonRects();
 	
-#if _MSC_VER >= 1400
-	return lr;
-#endif
+	return bRes;
 }
 
 void CInputListCtrl::OnSize(UINT nType, int cx, int cy)

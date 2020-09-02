@@ -142,11 +142,7 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-#if _MSC_VER >= 1400
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-#else
-	afx_msg void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-#endif
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);

@@ -194,11 +194,7 @@ void CKanbanColumnCtrl::OnKillFocus(CWnd* pNewWnd)
 	Invalidate(FALSE);
 }
 
-#if _MSC_VER >= 1400
-afx_msg BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#else
-afx_msg void CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#endif
+BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
 	// Two bugs in Windows 7
 	if ((COSVersion() < OSV_WIN8) && (GetStyle() & WS_VSCROLL))
@@ -235,19 +231,11 @@ afx_msg void CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint p
 				}
 			}
 
-#if _MSC_VER >= 1400
 			return TRUE;
-#else
-			return;
-#endif
 		}
 	}
 
-#if _MSC_VER >= 1400
 	return CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
-#else
-	CTreeCtrl::OnMouseWheel(nFlags, zDelta, pt);
-#endif
 }
 
 void CKanbanColumnCtrl::SetDropTarget(BOOL bTarget)

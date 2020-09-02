@@ -135,15 +135,11 @@ protected:
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg LRESULT OnEditEnd(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnEditCancel(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnHotChange(WPARAM wp, LPARAM lp);
 
-#if _MSC_VER >= 1400
-	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-#else
-	afx_msg void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-#endif
 	DECLARE_MESSAGE_MAP()
 		
 	virtual BOOL CanEditCell(int nRow, int nCol) const;

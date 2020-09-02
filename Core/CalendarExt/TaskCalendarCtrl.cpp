@@ -1055,11 +1055,7 @@ void CTaskCalendarCtrl::CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar)
 	rScrollbar.left = (rScrollbar.right - GetSystemMetrics(SM_CXVSCROLL));
 }
 
-#if _MSC_VER >= 1400
 BOOL CTaskCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#else
-void CTaskCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
-#endif
 {
 	// if the mouse is over the cell with the scrollbar
 	// then pass to the scrollbar instead
@@ -1079,18 +1075,10 @@ void CTaskCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 		while (nLine--)
 			SendMessage(WM_VSCROLL, nDir, (LPARAM)m_sbCellVScroll.GetSafeHwnd());
 
-#if _MSC_VER >= 1400
 		return TRUE; // eat
-#else
-		return; // eat
-#endif
 	}
 
-#if _MSC_VER >= 1400
-		return CCalendarCtrlEx::OnMouseWheel(nFlags, zDelta, pt);
-#else
-		CCalendarCtrlEx::OnMouseWheel(nFlags, zDelta, pt);
-#endif
+	return CCalendarCtrlEx::OnMouseWheel(nFlags, zDelta, pt);
 }
 
 void CTaskCalendarCtrl::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)

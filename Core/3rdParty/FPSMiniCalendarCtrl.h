@@ -259,11 +259,8 @@ protected:
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	//}}AFX_MSG
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-#if _MSC_VER >= 1400
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-#else
-	afx_msg void OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
-#endif
+
 	DECLARE_MESSAGE_MAP()
 
 	int								m_iCurrentMonth;
