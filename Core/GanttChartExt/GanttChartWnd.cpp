@@ -1277,7 +1277,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 	
 	if (m_dlgDepends.IsPickingCompleted())
 	{
-		// make sure the 'from' task is reselected
+		// make sure the from task is selected
 		DWORD dwFromTaskID = m_dlgDepends.GetFromTask();
 
 		if (m_ctrlGantt.GetSelectedTaskID() != dwFromTaskID)
@@ -1288,30 +1288,31 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 			SendParentSelectionUpdate();
 		}
 
-		CStringArray aDepends;
+		CDWordArray aDepends;
 		m_ctrlGantt.GetSelectedTaskDependencies(aDepends);
 		
 		switch (wp)
 		{
 		case GCDDM_ADD:
-			aDepends.Add(Misc::Format(m_dlgDepends.GetToTask()));
+			aDepends.Add(m_dlgDepends.GetToTask());
 			break;
 			
 		case GCDDM_EDIT:
-			aDepends.Add(Misc::Format(m_dlgDepends.GetToTask()));
+			aDepends.Add(m_dlgDepends.GetToTask());
 			 //fall thru to delete prev dependency
 			
 		case GCDDM_DELETE:
 			{
 				DWORD dwPrevToTask;
 				VERIFY(m_dlgDepends.GetFromDependency(dwPrevToTask));
-				VERIFY(Misc::RemoveItem(Misc::Format(dwPrevToTask), aDepends, TRUE));
+				VERIFY(Misc::RemoveItemT(dwPrevToTask, aDepends));
 			}
 			break;
 			
 		default:
 			ASSERT(0);
 			return 0L;
+			
 		}
 
 		// notify parent

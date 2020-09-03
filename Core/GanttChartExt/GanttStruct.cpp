@@ -254,7 +254,7 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 	bSomeSubtaskDone = gi.bSomeSubtaskDone;
 	
 	aTags.Copy(gi.aTags);
-	aDepends.Copy(gi.aDepends);
+	aDependIDs.Copy(gi.aDependIDs);
 	
 	return (*this);
 }
@@ -282,7 +282,7 @@ BOOL GANTTITEM::operator==(const GANTTITEM& gi) const
 			(bHasIcon == gi.bHasIcon) &&
 			(bSomeSubtaskDone == gi.bSomeSubtaskDone) &&
 			Misc::MatchAll(aTags, gi.aTags) &&
-			Misc::MatchAll(aDepends, gi.aDepends));
+			Misc::MatchAll(aDependIDs, gi.aDependIDs));
 }
 
 BOOL GANTTITEM::operator!=(const GANTTITEM& gi) const
@@ -547,7 +547,7 @@ BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
 {
 	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
 
-	return (pGI && pGI->aDepends.GetSize());
+	return (pGI && pGI->aDependIDs.GetSize());
 }
 
 void CGanttItemMap::RemoveAll()
@@ -644,24 +644,22 @@ BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
 
 BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const
 {
-	int nDepend = gi.aDepends.GetSize();
+	int nDepend = gi.aDependIDs.GetSize();
 
 	while (nDepend--)
 	{
-		DWORD dwDependID = _ttoi(gi.aDepends[nDepend]);
+		DWORD dwDependID = gi.aDependIDs[nDepend];
+		ASSERT(dwDependID);
 
-		if (dwDependID)
-		{
-			if (dwDependID == dwOtherID)
-				return TRUE;
+		if (dwDependID == dwOtherID)
+			return TRUE;
 
-			// else check dependents of dwDependID
-			const GANTTITEM* pGIDepends = GetItem(dwDependID, FALSE);
-			ASSERT(pGIDepends);
+		// else check dependents of dwDependID
+		const GANTTITEM* pGIDepends = GetItem(dwDependID, FALSE);
+		ASSERT(pGIDepends);
 
-			if (pGIDepends && IsItemDependentOn(*pGIDepends, dwOtherID)) // RECURSIVE CALL
-				return TRUE;
-		}
+		if (pGIDepends && IsItemDependentOn(*pGIDepends, dwOtherID)) // RECURSIVE CALL
+			return TRUE;
 	}
 	
 	// all else
@@ -673,13 +671,14 @@ COleDateTime CGanttItemMap::CalcMaxDependencyDate(const GANTTITEM& gi) const
 	COleDateTime dtMax;
 	CDateHelper::ClearDate(dtMax);
 
-	int nDepend = gi.aDepends.GetSize();
+	int nDepend = gi.aDependIDs.GetSize();
 
 	while (nDepend--)
 	{
-		DWORD dwDependID = _ttoi(gi.aDepends[nDepend]);
+		DWORD dwDependID = gi.aDependIDs[nDepend];
+		ASSERT(dwDependID);
 
-		if (dwDependID && HasItem(dwDependID))
+		if (HasItem(dwDependID))
 		{
 			const GANTTITEM* pGIDepends = GetItem(dwDependID, FALSE);
 			ASSERT(pGIDepends);

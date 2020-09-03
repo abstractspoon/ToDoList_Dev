@@ -163,25 +163,25 @@ DWORD CGanttCtrl::GetSelectedTaskID() const
 	return GetSelectedItemData();
 }
 
-BOOL CGanttCtrl::GetSelectedTaskDependencies(CStringArray& aDepends) const
+BOOL CGanttCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	const GANTTITEM* pGI = NULL;
 	
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
-	aDepends.Copy(pGI->aDepends);
+	aDepends.Copy(pGI->aDependIDs);
 	return TRUE;
 }
 
-BOOL CGanttCtrl::SetSelectedTaskDependencies(const CStringArray& aDepends)
+BOOL CGanttCtrl::SetSelectedTaskDependencies(const CDWordArray& aDepends)
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	GANTTITEM* pGI = NULL;
 	
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 
-	pGI->aDepends.Copy(aDepends);
+	pGI->aDependIDs.Copy(aDepends);
 	RedrawList();
 	
 	return TRUE;
@@ -734,10 +734,16 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
 		{
 			int nDepend = pTasks->GetTaskDependencyCount(hTask);
-			pGI->aDepends.RemoveAll();
+			pGI->aDependIDs.RemoveAll();
 		
 			while (nDepend--)
-				pGI->aDepends.Add(pTasks->GetTaskDependency(hTask, nDepend));
+			{
+				// Local dependencies only
+				DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+
+				if (dwDependID)
+					pGI->aDependIDs.Add(dwDependID);
+			}
 		}
 
 		// Always update these
@@ -952,10 +958,16 @@ void CGanttCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		while (nTag--)
 			pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
 
+		// Local dependencies only
 		int nDepend = pTasks->GetTaskDependencyCount(hTask);
 		
 		while (nDepend--)
-			pGI->aDepends.Add(pTasks->GetTaskDependency(hTask, nDepend));
+		{	
+			DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+
+			if (dwDependID)
+				pGI->aDependIDs.Add(dwDependID);
+		}
 	}
 	
 	// add item to tree
@@ -3666,19 +3678,19 @@ int CGanttCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray&
 
 	if (pGIFrom)
 	{
-		int nDepend = pGIFrom->aDepends.GetSize();
+		int nDepend = pGIFrom->aDependIDs.GetSize();
 
 		while (nDepend--)
 		{
-			DWORD dwToTaskID = _ttoi(pGIFrom->aDepends[nDepend]);
+			DWORD dwToTaskID = pGIFrom->aDependIDs[nDepend];
 
-			if (dwToTaskID && m_data.HasItem(dwToTaskID))
-			{
-				GANTTDEPENDENCY depend;
+			if (!m_data.HasItem(dwToTaskID))
+				continue;
 
-				if (BuildDependency(dwFromTaskID, dwToTaskID, depend))
-					aDepends.Add(depend);
-			}
+			GANTTDEPENDENCY depend;
+
+			if (BuildDependency(dwFromTaskID, dwToTaskID, depend))
+				aDepends.Add(depend);
 		}
 
 		if (pGIFrom->bParent && HasOption(GTLCF_DISPLAYPARENTROLLUPS) && !TCH().IsItemExpanded(htiFrom))
