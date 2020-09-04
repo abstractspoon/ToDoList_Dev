@@ -7230,7 +7230,7 @@ LRESULT CToDoCtrl::OnTreeDragDrop(WPARAM /*wParam*/, LPARAM lParam)
 						int nTask = GetSelectedTaskIDs(aTaskIDs, TRUE);
 
 						CTDCDependencyArray aDepends;
-						aDepends.Append(aTaskIDs);
+						aDepends.Set(aTaskIDs);
 
 						m_data.SetTaskDependencies(dwTargetID, aDepends, (nCmdID == ID_TDD_ADDTASKDEPENDENCY));
 

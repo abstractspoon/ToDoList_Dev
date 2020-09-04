@@ -357,16 +357,6 @@ CTDCDependencyArray::CTDCDependencyArray()
 {
 }
 
-CTDCDependencyArray::CTDCDependencyArray(const CDWordArray& aDepends)
-{
-	Set(aDepends);
-}
-
-CTDCDependencyArray::CTDCDependencyArray(const CStringArray& aDepends)
-{
-	Set(aDepends);
-}
-
 BOOL CTDCDependencyArray::RemoveLocalDependency(DWORD dwDependID)
 {
 	int nFind = FindLocalDependency(dwDependID);

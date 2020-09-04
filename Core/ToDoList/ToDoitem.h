@@ -117,8 +117,6 @@ class CTDCDependencyArray : public CArray<TDCDEPENDENCY, TDCDEPENDENCY&>
 {
 public:
 	CTDCDependencyArray();
-	CTDCDependencyArray(const CDWordArray& aDepends);
-	CTDCDependencyArray(const CStringArray& aDepends);
 
 	int Set(const CDWordArray& aDepends);
 	int Set(const CStringArray& aDepends);

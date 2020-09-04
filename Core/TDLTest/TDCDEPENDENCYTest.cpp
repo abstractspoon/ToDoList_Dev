@@ -249,7 +249,8 @@ void CTDCDEPENDENCYTest::TestTDCDependencyArray()
 		aTaskIDs.Add(7); // duplicate
 		aTaskIDs.Add(0); // invalid
 		
-		CTDCDependencyArray aDepends(aTaskIDs);
+		CTDCDependencyArray aDepends;
+		aDepends.Set(aTaskIDs);
 
 		ExpectEQ(aDepends.GetSize(), 2);
 		ExpectEQ(aDepends[0].dwTaskID, 7UL);
@@ -293,7 +294,8 @@ void CTDCDEPENDENCYTest::TestTDCDependencyArray()
 		aStrDepends.Add(TDLFULLPATH + _T("?0")); // invalid
 		aStrDepends.Add(TDLFULLPATH); // invalid
 
-		CTDCDependencyArray aDepends(aStrDepends);
+		CTDCDependencyArray aDepends;
+		aDepends.Set(aStrDepends);
 
 		ExpectEQ(aDepends.GetSize(), 2);
 		ExpectEQ(aDepends[0].dwTaskID, 11UL);

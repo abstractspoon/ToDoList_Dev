@@ -201,7 +201,7 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 			
 		case TDCA_DEPENDENCY: 
 			Misc::Split(sData, aData);
-			tdi.aDependencies.Append(aData);
+			tdi.aDependencies.Set(aData);
 			break;
 			
 		case TDCA_COMMENTS:

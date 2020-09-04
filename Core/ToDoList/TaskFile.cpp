@@ -460,7 +460,11 @@ void CTaskFile::UpgradeArrays(HTASKITEM hTask)
 		if (LegacyGetTaskArray(hTask, TDL_TASKNUMDEPENDENCY_DEP, TDL_TASKDEPENDENCY, aItems) > 1)
 		{
 			LegacyDeleteTaskArray(hTask, TDL_TASKNUMDEPENDENCY_DEP, TDL_TASKDEPENDENCY);
-			SetTaskDependencies(hTask, aItems);
+
+			CTDCDependencyArray aDepends;
+			aDepends.Set(aItems);
+
+			SetTaskDependencies(hTask, aDepends);
 		}
 	}
 
