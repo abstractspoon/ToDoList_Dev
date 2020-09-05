@@ -296,7 +296,6 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_TIMESPENT, m_eTimeSpent);
 	DDX_Control(pDX, IDC_VERSION, m_cbVersion);
 
-	DDX_Text(pDX, IDC_DEPENDS, m_sDepends);
 	DDX_Text(pDX, IDC_EXTERNALID, m_sExternalID);
 	DDX_Text(pDX, IDC_PROJECTNAME, m_sProjectName);
 	DDX_ColourPicker(pDX, IDC_COLOUR, m_crColour);
@@ -314,6 +313,7 @@ void CToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	m_cbRisk.DDX(pDX, m_nRisk);
 	m_eRecurrence.DDX(pDX, m_tRecurrence);
 	m_cbFileLink.DDX(pDX, m_aFileLinks);
+	m_eDependency.DDX(pDX, m_aDepends);
 	
 	CTDCCustomAttributeUIHelper::DDX(pDX, m_aCustomControls, m_aCustomAttribDefs, m_mapCustomCtrlData);
 
@@ -1786,10 +1786,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		// special cases
 		GetSelectedTaskFileLinks(m_aFileLinks, FALSE); // relative paths
-
-		CStringArray aDepends;
-		GetSelectedTaskDependencies(aDepends);
-		m_sDepends = Misc::FormatArray(aDepends);
+		GetSelectedTaskDependencies(m_aDepends);
 
 		if (bEditTime)
 		{
@@ -1819,7 +1816,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_eTimeSpent.EnableButton(ID_ADD_TIME, (bCanTimeTrack && !bIsTrackingTask));
 
 		// dependency link button
-		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && !m_sDepends.IsEmpty());
+		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && m_aDepends.GetSize());
 
 		// percent done
 		if (IsSelectedTaskDone())
@@ -1855,7 +1852,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_sAllocBy.Empty();
 		m_sStatus.Empty();
 		m_sExternalID.Empty();
-		m_sDepends.Empty();
 		m_sVersion.Empty();
 
 		m_cbAllocTo.CheckAll(CCBC_UNCHECKED);
@@ -1863,6 +1859,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		m_cbTags.CheckAll(CCBC_UNCHECKED);
 
 		m_aFileLinks.RemoveAll();
+		m_aDepends.RemoveAll();
 
 		m_eTimeSpent.EnableButton(ID_TIME_TRACK, FALSE);
 		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
@@ -2075,14 +2072,8 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		
 	case TDCA_DEPENDENCY:
 		{
-			CStringArray aItems;
-			Misc::Split(m_sDepends, aItems);
-
-			CTDCDependencyArray aDepends;
-			aDepends.Append(aItems);
-
-			SetSelectedTaskDependencies(aDepends);
-			m_eDependency.EnableButton(ID_DEPENDS_LINK, !m_sDepends.IsEmpty());
+			SetSelectedTaskDependencies(m_aDepends, FALSE, TRUE);
+			m_eDependency.EnableButton(ID_DEPENDS_LINK, !m_aDepends.IsEmpty());
 		}
 		break;
 		
@@ -4526,8 +4517,8 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends,
 		// removed from the edit field. 
 		if (!bEdit)
 		{
-			m_sDepends = aDepends.Format();
-			UpdateDataEx(this, IDC_DEPENDS, m_sDepends, FALSE);
+			m_aDepends.Copy(aDepends);
+			m_eDependency.SetDependencies(m_aDepends);
 		}
 	}
 
@@ -11010,7 +11001,8 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case IDC_DEPENDS:
-		GotoSelectedTaskDependency();
+		if (lParam == ID_DEPENDS_LINK)
+			GotoSelectedTaskDependency();
 		break;
 	}
 	
@@ -11117,11 +11109,11 @@ BOOL CToDoCtrl::GotoSelectedTaskLocalDependents()
 
 BOOL CToDoCtrl::GotoSelectedTaskDependency()
 {
-	CStringArray aDepends;
+	CTDCDependencyArray aDepends;
 	GetSelectedTaskDependencies(aDepends);
 	
 	if (aDepends.GetSize())
-		return ShowTaskLink(aDepends[0], FALSE);
+		return ShowTaskLink(aDepends[0].Format(), FALSE);
 
 	// else
 	return FALSE;
@@ -12356,7 +12348,6 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nT
 			return TRUE;
 		}
 		break;
-
 	}
 
 	return FALSE;
@@ -12373,7 +12364,6 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	case TDCA_STATUS:			
 	case TDCA_TASKNAME:	
 	case TDCA_COMMENTS:			
-	case TDCA_DEPENDENCY:		
 	case TDCA_FILELINK:			
 	case TDCA_ICON:				
 	case TDCA_LASTMODBY:

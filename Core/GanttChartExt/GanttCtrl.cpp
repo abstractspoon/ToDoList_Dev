@@ -174,17 +174,52 @@ BOOL CGanttCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
 	return TRUE;
 }
 
-BOOL CGanttCtrl::SetSelectedTaskDependencies(const CDWordArray& aDepends)
+BOOL CGanttCtrl::AddSelectedTaskDependency(DWORD dwDependID)
 {
+	// sanity check
+	if (!m_data.HasItem(dwDependID))
+		return FALSE;
+
 	DWORD dwTaskID = GetSelectedTaskID();
 	GANTTITEM* pGI = NULL;
 	
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 
-	pGI->aDependIDs.Copy(aDepends);
-	RedrawList();
-	
+	return Misc::AddUniqueItemT(dwDependID, pGI->aDependIDs);
+}
+
+BOOL CGanttCtrl::EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID)
+{
+	// sanity check
+	if (!m_data.HasItem(dwToDependID))
+		return FALSE;
+
+	DWORD dwTaskID = GetSelectedTaskID();
+	GANTTITEM* pGI = NULL;
+
+	GET_GI_RET(dwTaskID, pGI, FALSE);
+
+	// Target task must not already be a dependency
+	if (Misc::FindT(dwToDependID, pGI->aDependIDs) != -1)
+		return FALSE;
+
+	int nFind = Misc::FindT(dwFromDependID, pGI->aDependIDs);
+
+	if (nFind == -1)
+		return FALSE;
+
+	pGI->aDependIDs[nFind] = dwToDependID;
 	return TRUE;
+}
+
+BOOL CGanttCtrl::DeleteSelectedTaskDependency(DWORD dwDependID)
+{
+	DWORD dwTaskID = GetSelectedTaskID();
+	GANTTITEM* pGI = NULL;
+
+	GET_GI_RET(dwTaskID, pGI, FALSE);
+
+	return Misc::RemoveItemT(dwDependID, pGI->aDependIDs);
 }
 
 BOOL CGanttCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const

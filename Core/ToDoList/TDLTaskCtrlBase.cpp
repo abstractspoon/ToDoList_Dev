@@ -6528,9 +6528,35 @@ int CTDLTaskCtrlBase::GetSelectedTaskTags(CStringArray& aMatched, CStringArray& 
 	return GetSelectedTaskArray(TDCA_TAGS, aMatched, aMixed);
 }
 
-int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CStringArray& aDepends) const
+int CTDLTaskCtrlBase::GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const
 {
-	return GetSelectedTaskArray(TDCA_DEPENDENCY, aDepends);
+	POSITION pos = GetFirstSelectedTaskPos();
+	DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+	if (dwTaskID)
+	{
+		m_data.GetTaskDependencies(dwTaskID, aDepends);
+
+		// Rest of selected tasks
+		while (pos)
+		{
+			dwTaskID = GetNextSelectedTaskID(pos);
+			CTDCDependencyArray aTaskDepends;
+
+			if ((m_data.GetTaskDependencies(dwTaskID, aTaskDepends) != aDepends.GetSize()) ||
+				!aDepends.MatchAll(aTaskDepends))
+			{
+				aDepends.RemoveAll();
+				break;
+			}
+		}
+	}
+	else
+	{
+		aDepends.RemoveAll();
+	}
+
+	return aDepends.GetSize();
 }
 
 CString CTDLTaskCtrlBase::GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const

@@ -1727,21 +1727,43 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		break;
 		
 	case TDCA_DEPENDENCY: 
+		if (GetSelectedCount() != 1)
 		{
-			Misc::Split(mod.szValue, aValues, '\n');
+			ASSERT(0);
+		}
+		else
+		{
+			CTDCDependencyArray aDepends;
+			
+			if (dwTaskID)
+				m_data.GetTaskDependencies(dwTaskID, aDepends);
+			else
+				GetSelectedTaskDependencies(aDepends);
 
-			CTDCDependencyArray aDepends(aValues);
-
-			if (aDepends.GetSize())
+			if (mod.dwDependID && !mod.dwPrevDependID)
 			{
-				if (dwTaskID)
-					bChange = (m_data.SetTaskDependencies(dwTaskID, aDepends, FALSE));
-				else
-					bChange = SetSelectedTaskDependencies(aDepends);
-
-				if (bChange)
-					dwResults |= UIEXTMOD_DEPENDCHANGE;
+				VERIFY(aDepends.Add(mod.dwDependID));
 			}
+			else if (!mod.dwDependID && mod.dwPrevDependID)
+			{
+				VERIFY(aDepends.RemoveLocalDependency(mod.dwPrevDependID));
+			}
+			else if (mod.dwDependID && mod.dwPrevDependID)
+			{
+				VERIFY(aDepends.ReplaceLocalDependency(mod.dwPrevDependID, mod.dwDependID));
+			}
+			else
+			{
+				ASSERT(0);
+			}
+
+			if (dwTaskID)
+				bChange = (SET_CHANGE == m_data.SetTaskDependencies(dwTaskID, aDepends));
+			else
+				bChange = SetSelectedTaskDependencies(aDepends);
+
+			if (bChange)
+				dwResults |= UIEXTMOD_DEPENDCHANGE;
 		}
 		break;
 		

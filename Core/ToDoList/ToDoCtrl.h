@@ -16,6 +16,7 @@
 #include "tdlprioritycombobox.h"
 #include "tdlriskcombobox.h"
 #include "tdlrecurringtaskedit.h"
+#include "tdltaskdependencyedit.h"
 #include "tdcimagelist.h"
 #include "tdltasktreectrl.h"
 #include "tdlcommentsctrl.h"
@@ -240,7 +241,7 @@ public:
 	CString GetSelectedTaskAllocBy() const { return m_taskTree.GetSelectedTaskAllocBy(); }
 	CString GetSelectedTaskStatus() const { return m_taskTree.GetSelectedTaskStatus(); }
 	int GetSelectedTaskCategories(CStringArray& aCats) const { return m_taskTree.GetSelectedTaskCategories(aCats); }
-	int GetSelectedTaskDependencies(CStringArray& aDepends) const { return m_taskTree.GetSelectedTaskDependencies(aDepends); }
+	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const { return m_taskTree.GetSelectedTaskDependencies(aDepends); }
 	int GetSelectedTaskTags(CStringArray& aTags) const { return m_taskTree.GetSelectedTaskTags(aTags); }
 	CString GetSelectedTaskFileLink(int nFile) const;
 	int GetSelectedTaskFileLinkCount() const { return m_taskTree.GetSelectedTaskFileLinkCount(); }
@@ -464,7 +465,8 @@ protected:
 	CColourPickerEx m_cpColour;
 	CTDLCommentsCtrl m_ctrlComments;
 	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
-	CEnEdit m_eExternalID, m_eDependency;
+	CEnEdit m_eExternalID;
+	CTDLTaskDependencyEdit m_eDependency;
 	CFileComboBox m_cbFileLink;
 	CMaskEdit m_ePercentDone, m_eCost;
 	CPopupEditCtrl m_eTaskName;
@@ -532,7 +534,7 @@ protected:
 	CString m_sAllocBy;
 	CString m_sStatus;
 	CString m_sProjectName;
-	CString m_sExternalID, m_sDepends;
+	CString m_sExternalID;
 	CString m_sOccurrence;
 	CString m_sVersion;
 	CBinaryData m_customComments;
@@ -540,6 +542,7 @@ protected:
 	int m_nPriority;
 	int m_nRisk;
 	int m_nPercentDone;
+	CTDCDependencyArray m_aDepends;
 	
 	TDCCOST m_cost;
 	TDCTIMEPERIOD m_timeEstimate, m_timeSpent;

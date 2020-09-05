@@ -53,7 +53,9 @@ public:
 	BOOL MoveSelectedTask(const IUITASKMOVE& move);
 
 	BOOL GetSelectedTaskDependencies(CDWordArray& aDepends) const;
-	BOOL SetSelectedTaskDependencies(const CDWordArray& aDepends);
+	BOOL AddSelectedTaskDependency(DWORD dwDependID);
+	BOOL EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID);
+	BOOL DeleteSelectedTaskDependency(DWORD dwDependID);
 
 	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
 	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);

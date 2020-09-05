@@ -5467,7 +5467,12 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			tdc.SetSelectedTaskCategories(aItems, bAppend);
 		
 		if (startup.GetTaskDependencies(aItems, bAppend) != -1)
-			tdc.SetSelectedTaskDependencies(aItems, bAppend);
+		{
+			CTDCDependencyArray aDepends;
+
+			if (aDepends.Set(aItems))
+				tdc.SetSelectedTaskDependencies(aDepends, bAppend);
+		}
 		
 		if (startup.GetTaskTags(aItems, bAppend) != -1)
 			tdc.SetSelectedTaskTags(aItems, bAppend);
@@ -11294,7 +11299,7 @@ void CToDoListWnd::OnEditGotoDependency()
 
 void CToDoListWnd::OnUpdateEditGotoDependency(CCmdUI* pCmdUI) 
 {
-	CStringArray aDepends;
+	CTDCDependencyArray aDepends;
 
 	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskDependencies(aDepends) > 0);	
 }

@@ -122,7 +122,7 @@ public:
 	CString GetSelectedTaskStatus() const;
 	int GetSelectedTaskCategories(CStringArray& aCats) const;
 	int GetSelectedTaskCategories(CStringArray& aMatched, CStringArray& aMixed) const;
-	int GetSelectedTaskDependencies(CStringArray& aDepends) const;
+	int GetSelectedTaskDependencies(CTDCDependencyArray& aDepends) const;
 	int GetSelectedTaskTags(CStringArray& aTags) const;
 	int GetSelectedTaskTags(CStringArray& aMatched, CStringArray& aMixed) const;
 	CString GetSelectedTaskFileLink(int nFile, BOOL bFullPath) const;

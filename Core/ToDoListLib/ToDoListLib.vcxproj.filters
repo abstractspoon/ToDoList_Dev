@@ -428,6 +428,9 @@
     <ClCompile Include="..\ToDoList\TDLSimpleTextContentCtrl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLTaskDependencyEdit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -872,6 +875,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLSimpleTextContentCtrl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLTaskDependencyEdit.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

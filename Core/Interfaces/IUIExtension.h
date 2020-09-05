@@ -203,6 +203,7 @@ struct IUITASKMOD
 		__int64 tValue;
 		bool bValue;
 		COLORREF crValue;
+		DWORD dwDependID;
 	};
 
 	// Extra info
@@ -210,6 +211,7 @@ struct IUITASKMOD
 	{
 		TDC_UNITS nTimeUnits;	// TDCA_TIMEEST, TDCA_TIMESPENT, TDCA_CUSTOMATTRIB
 		bool bCostIsRate;		// TDCA_COST
+		DWORD dwPrevDependID;	// TDCA_DEPENDENCY
 	};
 };
 

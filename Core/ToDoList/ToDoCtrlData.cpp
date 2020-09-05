@@ -2596,11 +2596,9 @@ TDC_SET CToDoCtrlData::SetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const
 	{
 	case TDCA_CATEGORY:		return SetTaskCategories(dwTaskID, aItems, bAppend);
 	case TDCA_TAGS:			return SetTaskTags(dwTaskID, aItems, bAppend);
-	case TDCA_DEPENDENCY:	return SetTaskDependencies(dwTaskID, aItems, bAppend);
 	case TDCA_ALLOCTO:		return SetTaskAllocTo(dwTaskID, aItems, bAppend);
 	case TDCA_FILELINK:		return SetTaskFileLinks(dwTaskID, aItems, bAppend);
 		break;
-
 	}
 
 	// all else
@@ -2615,7 +2613,6 @@ int CToDoCtrlData::GetTaskArray(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, CStringAr
 	case TDCA_CATEGORY:		return GetTaskCategories(dwTaskID, aItems);
 	case TDCA_TAGS:			return GetTaskTags(dwTaskID, aItems);
 	case TDCA_ALLOCTO:		return GetTaskAllocTo(dwTaskID, aItems);
-	case TDCA_DEPENDENCY:	return GetTaskDependencies(dwTaskID, aItems);
 	case TDCA_FILELINK:		return GetTaskFileLinks(dwTaskID, aItems);
 		break;
 	}
@@ -2720,15 +2717,22 @@ TDC_SET CToDoCtrlData::SetTaskDependencies(DWORD dwTaskID, const CTDCDependencyA
 		}
 	}
 
-	if (aWeeded.GetSize() == 0)
-		return SET_NOCHANGE;
-
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
 	// test for actual change
-	if (pTDI->aDependencies.MatchAll(aWeeded))
+	if (bAppend)
+	{
+		aWeeded.Remove(pTDI->aDependencies);
 
+		if (aWeeded.GetSize() == 0)
+			return SET_NOCHANGE;
+	}
+	else if (pTDI->aDependencies.MatchAll(aWeeded))
+	{
+		return SET_NOCHANGE;
+	}
+	
 	// save undo data
 	SaveEditUndo(dwTaskID, pTDI, TDCA_DEPENDENCY);
 
@@ -3836,7 +3840,6 @@ BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib
 	case TDCA_LOCK:			data.Set(IsTaskLocked(dwTaskID));			break;	
 
 	case TDCA_FILELINK:	
-	case TDCA_DEPENDENCY:
 	case TDCA_ALLOCTO:			
 	case TDCA_CATEGORY:			
 	case TDCA_TAGS:	
@@ -3889,6 +3892,10 @@ BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib
 
 			data.Set(cost);
 		}
+		break;
+
+	case TDCA_DEPENDENCY:
+		ASSERT(0);
 		break;
 	}
 

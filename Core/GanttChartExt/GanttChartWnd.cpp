@@ -1277,7 +1277,82 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 	
 	if (m_dlgDepends.IsPickingCompleted())
 	{
-		// make sure the from task is selected
+		// make sure the 'from' task is reselected
+		DWORD dwFromTaskID = m_dlgDepends.GetFromTask();
+
+		if (m_ctrlGantt.GetSelectedTaskID() != dwFromTaskID)
+		{
+			SelectTask(dwFromTaskID);
+
+			// explicitly update parent because SelectTask will not
+			SendParentSelectionUpdate();
+		}
+
+		// notify parent
+		IUITASKMOD mod = { TDCA_DEPENDENCY, 0 };
+
+		switch (wp)
+		{
+		case GCDDM_ADD:
+			mod.dwDependID = m_dlgDepends.GetToTask();
+			mod.dwPrevDependID = 0;
+			break;
+			
+		case GCDDM_EDIT:
+			mod.dwDependID = m_dlgDepends.GetToTask();
+			VERIFY(m_dlgDepends.GetFromDependency(mod.dwPrevDependID));
+			break;
+			
+		case GCDDM_DELETE:
+			mod.dwDependID = 0;
+			VERIFY(m_dlgDepends.GetFromDependency(mod.dwPrevDependID));
+			break;
+			
+		default:
+			ASSERT(0);
+			return 0L;
+		}
+
+		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
+		{
+			// update gantt ctrl
+			switch (wp)
+			{
+			case GCDDM_ADD:
+				VERIFY(m_ctrlGantt.AddSelectedTaskDependency(mod.dwDependID));
+				break;
+
+			case GCDDM_EDIT:
+				VERIFY(m_ctrlGantt.EditSelectedTaskDependency(mod.dwPrevDependID, mod.dwDependID));
+				break;
+
+			case GCDDM_DELETE:
+				VERIFY(m_ctrlGantt.DeleteSelectedTaskDependency(mod.dwPrevDependID));
+				break;
+
+			default:
+				ASSERT(0);
+				return 0L;
+			}
+		}
+	}
+
+	m_toolbar.RefreshButtonStates(FALSE);
+	m_ctrlGantt.OnEndDepedencyEdit();
+	m_ctrlGantt.SetFocus();
+
+	return 0L;
+}
+
+/*
+LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
+{
+	UNREFERENCED_PARAMETER(lp);
+	ASSERT(((HWND)lp) == m_dlgDepends);
+	
+	if (m_dlgDepends.IsPickingCompleted())
+	{
+		// make sure the 'from' task is reselected
 		DWORD dwFromTaskID = m_dlgDepends.GetFromTask();
 
 		if (m_ctrlGantt.GetSelectedTaskID() != dwFromTaskID)
@@ -1312,7 +1387,6 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 		default:
 			ASSERT(0);
 			return 0L;
-			
 		}
 
 		// notify parent
@@ -1333,7 +1407,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 	m_ctrlGantt.SetFocus();
 
 	return 0L;
-}
+*/
 
 LRESULT CGanttChartWnd::OnGanttNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 
 {
