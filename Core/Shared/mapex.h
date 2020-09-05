@@ -70,6 +70,9 @@ public:
 	template <class ARRAY>
 	int Add(const ARRAY& other)
 	{
+		if (other.GetSize() == 0)
+			return 0;
+
 		return Add(other.GetData(), other.GetSize());
 	}
 
