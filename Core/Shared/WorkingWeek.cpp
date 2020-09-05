@@ -161,7 +161,14 @@ COleDateTime CWorkingDay::GetStartOfDay(const COleDateTime& date) const
 
 COleDateTime CWorkingDay::GetEndOfDay(const COleDateTime& date) const
 {
-	return CDateHelper::MakeDate(date, (GetEndOfDayInHours() / 24));
+	double dEndHours = GetEndOfDayInHours();
+	ASSERT(dEndHours > 0.0 && dEndHours <= 24.0);
+
+	if (dEndHours >= 24.0)
+		return CDateHelper::GetStartOfNextDay(date);
+
+	// else
+	return CDateHelper::MakeDate(date, (dEndHours / 24));
 }
 
 COleDateTime CWorkingDay::GetStartOfLunch(const COleDateTime& date) const

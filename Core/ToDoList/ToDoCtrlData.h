@@ -266,8 +266,8 @@ protected:
 	void FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate);
 	UINT UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDate);
 	UINT SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDateTime& dtNewStart);
-	BOOL CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDependencyID, TDC_DATE nDate, COleDateTime& dtNewStart) const;
-	BOOL CalcNewTaskDependencyStartDate(DWORD dwTaskID, TDC_DATE nDate, COleDateTime& dtNewStart) const;
+	BOOL CalcTaskDependencyStartDate(DWORD dwTaskID, const TDCDEPENDENCY& depend, TDC_DATE nDate, COleDateTime& dtNewStart) const;
+	BOOL CalcTaskDependencyStartDate(DWORD dwTaskID, TDC_DATE nDate, COleDateTime& dtNewStart) const;
 	BOOL RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwDependID);
 	TDC_SET RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate);
 	TDC_SET SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDate, const COleDateTime& date, BOOL bRecalcTimeEstimate);

@@ -699,13 +699,13 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 	return FALSE;
 }
 
-// only interested in dependents within the same task list
 int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents) const
 {
 	aDependents.RemoveAll();
 
 	if (dwTaskID)
 	{
+		// Find all tasks dependent on 'dwTaskID' within the same task list
 		const TODOITEM* pTDI = NULL;
 		POSITION pos = GetFirstTaskPosition();
 		
@@ -3485,7 +3485,7 @@ BOOL CToDoCtrlData::IsTaskParent(DWORD dwTaskID) const
 	return pTDS->HasSubTasks();
 }
 
-BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDependencyID, 
+BOOL CToDoCtrlData::CalcTaskDependencyStartDate(DWORD dwTaskID, const TDCDEPENDENCY& depend, 
 												   TDC_DATE nDate, COleDateTime& dtNewStart) const
 {
 	CDateHelper::ClearDate(dtNewStart);
@@ -3498,6 +3498,8 @@ BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDepen
 		return FALSE;
 
 	const TODOITEM* pTDIDepends = NULL;
+	DWORD dwDependencyID = depend.dwTaskID;
+
 	GET_TDI(dwDependencyID, pTDIDepends, FALSE);
 
 	switch (nDate)
@@ -3537,16 +3539,23 @@ BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, DWORD dwDepen
 	case TDCD_STARTDATE:
 	case TDCD_STARTTIME:
 		// start is not affected by changes to dependency start dates
-		dtNewStart = pTDI->dateStart;
-		break;
+ 		break;
 
 	default:
 		ASSERT(0);
-		return FALSE;
+		break;
 	}
 	
 	if (CDateHelper::IsDateSet(dtNewStart))
 	{
+		// Add lead-in time
+		if (depend.nDaysLeadIn)
+		{
+			DH_UNITS nDHUnits = (pTDI->timeEstimate.nUnits == TDCU_WEEKDAYS) ? DHU_WEEKDAYS : DHU_DAYS;
+
+			VERIFY(CDateHelper().OffsetDate(dtNewStart, depend.nDaysLeadIn, nDHUnits));
+		}
+
 		if (pTDI->timeEstimate.nUnits == TDCU_WEEKDAYS)
 			CWorkingWeek().MakeWeekday(dtNewStart);
 
@@ -3595,21 +3604,27 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 	return nAdjusted;
 }
 
-BOOL CToDoCtrlData::CalcNewTaskDependencyStartDate(DWORD dwTaskID, TDC_DATE nDate, COleDateTime& dtNewStart) const
+BOOL CToDoCtrlData::CalcTaskDependencyStartDate(DWORD dwTaskID, TDC_DATE nDate, COleDateTime& dtNewStart) const
 {
-	CDateHelper::ClearDate(dtNewStart);
+	TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, FALSE);
 
 	// calculate the latest start date possible for this task's dependencies
-	CDWordArray aDepends;
+	CDateHelper::ClearDate(dtNewStart);
 
-	int nDepend = GetTaskLocalDependencies(dwTaskID, aDepends);
+	int nDepend = pTDI->aDependencies.GetSize();
 
 	while (nDepend--)
 	{
-		COleDateTime dtStart;
+		const TDCDEPENDENCY& depend = pTDI->aDependencies[nDepend];
 
-		if (CalcNewTaskDependencyStartDate(dwTaskID, aDepends[nDepend], nDate, dtStart))
-			VERIFY(CDateHelper::Max(dtNewStart, dtStart));
+		if (depend.IsLocal())
+		{
+			COleDateTime dtStart;
+
+			if (CalcTaskDependencyStartDate(dwTaskID, depend, nDate, dtStart))
+				VERIFY(CDateHelper::Max(dtNewStart, dtStart));
+		}
 	}
 
 	return CDateHelper::IsDateSet(dtNewStart);
@@ -3620,7 +3635,7 @@ UINT CToDoCtrlData::UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDat
 	// calculate the latest start date possible for this task's dependencies
 	COleDateTime dtNewStart;
 
-	if (CalcNewTaskDependencyStartDate(dwTaskID, nDate, dtNewStart))
+	if (CalcTaskDependencyStartDate(dwTaskID, nDate, dtNewStart))
 		return SetNewTaskDependencyStartDate(dwTaskID, dtNewStart);
 
 	return ADJUSTED_NONE;
