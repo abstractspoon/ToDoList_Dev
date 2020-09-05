@@ -2153,10 +2153,28 @@ BOOL CTaskFile::SetTaskFileLinks(HTASKITEM hTask, const CStringArray& aFiles)
 
 BOOL CTaskFile::SetTaskDependencies(HTASKITEM hTask, const CTDCDependencyArray& aDepends)
 {
-	CStringArray aStrDepends;
-	aDepends.Format(aStrDepends);
+	CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, FALSE);
 
-	return SetTaskArray(hTask, TDL_TASKDEPENDENCY, aStrDepends, FALSE);
+	// delete any existing items
+	DeleteTaskArray(hTask, TDL_TASKDEPENDENCY);
+
+	// then add these
+	int nCount = aDepends.GetSize();
+
+	for (int nDepend = 0; nDepend < nCount; nDepend++)
+	{
+		const TDCDEPENDENCY& depend = aDepends[nDepend];
+
+		// No need to check for duplicates because CTDCDependencyArray handles that
+		CXmlItem* pXIDepend = pXITask->AddItem(TDL_TASKDEPENDENCY, depend.Format(), XIT_ELEMENT);
+
+		// Attributes
+		if (depend.nDaysLeadIn)
+			pXIDepend->AddItem(TDL_TASKDEPENDENCYLEADIN, depend.nDaysLeadIn, XIT_ATTRIB);
+	}
+
+	return TRUE;
 }
 
 BOOL CTaskFile::SetTaskMetaData(HTASKITEM hTask, const CMapStringToString& mapMetaData)
@@ -2329,14 +2347,28 @@ int CTaskFile::GetTaskFileLinks(HTASKITEM hTask, CStringArray& aFiles) const
 
 int CTaskFile::GetTaskDependencies(HTASKITEM hTask, CTDCDependencyArray& aDepends) const
 {
-	CStringArray aItems;
-
-	if (GetTaskArray(hTask, TDL_TASKDEPENDENCY, aItems, FALSE))
-		return aDepends.Set(aItems);
-
-	// else
 	aDepends.RemoveAll();
-	return 0;
+
+	const CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, 0);
+
+	// first item
+	const CXmlItem* pXIDepend = pXITask->GetItem(TDL_TASKDEPENDENCY);
+	TDCDEPENDENCY depend;
+
+	while (pXIDepend)
+	{
+		if (depend.Parse(pXIDepend->GetValue()))
+		{
+			depend.nDaysLeadIn = pXIDepend->GetItemValueI(TDL_TASKDEPENDENCYLEADIN);
+			
+			aDepends.Add(depend);
+		}
+
+		pXIDepend = pXIDepend->GetSibling();
+	}
+
+	return aDepends.GetSize();
 }
 
 int CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, CStringArray& aAllocTo) const

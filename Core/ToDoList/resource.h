@@ -145,6 +145,7 @@
 #define IDI_TRAY_TIMETRACK_LIGHT        317
 #define IDR_DATETIME_TOOLBAR            318
 #define IDB_DATETIME_TOOLBAR_STD        319
+#define IDD_TASKDEPENDENCY_DIALOG       321
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -822,6 +823,7 @@
 #define IDC_EXPANDALL                   1541
 #define IDC_TITLECOMMENTS               1542
 #define IDC_IMPORT_MUSTMAPTITLE         1542
+#define IDC_DEPENDENCIES                1543
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2393,14 +2395,16 @@
 #define IDS_PSP_NOMATCHES               51583
 #define IDS_CLEARSEARCH_TIP             51584
 #define IDS_TABTIP_NOTFOUND             51585
+#define IDS_NEWDEPENDENCY_PROMPT        51586
+#define IDS_DEPENDSLEADIN_COL           51587
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        321
+#define _APS_NEXT_RESOURCE_VALUE        322
 #define _APS_NEXT_COMMAND_VALUE         34743
-#define _APS_NEXT_CONTROL_VALUE         1543
+#define _APS_NEXT_CONTROL_VALUE         1544
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

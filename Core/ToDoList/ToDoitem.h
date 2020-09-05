@@ -103,7 +103,6 @@ struct TDCDEPENDENCY
 
 	BOOL Parse(LPCTSTR szDepends);
 	BOOL IsLocal() const;
-//	BOOL Matches(const TDCDEPENDENCY& depend, BOOL bPartialFileOK = FALSE) const;
 	BOOL IsValid() const;
 
 	static CString Format(DWORD dwTaskID, const CString& sFile = _T(""), const CString& sFolder = _T(""));
@@ -111,6 +110,7 @@ struct TDCDEPENDENCY
 
 	DWORD dwTaskID;
 	CString sTasklist;
+	int nDaysLeadIn;
 };
 
 class CTDCDependencyArray : public CArray<TDCDEPENDENCY, TDCDEPENDENCY&>
@@ -123,6 +123,7 @@ public:
 
 	BOOL Add(DWORD dwDependID, const CString& sFile = _T(""));
 	BOOL Add(const TDCDEPENDENCY& depend);
+	BOOL Remove(const TDCDEPENDENCY& depend);
 	int Append(const CTDCDependencyArray& aDepends);
 	int Remove(const CTDCDependencyArray& aDepends);
 
@@ -137,7 +138,7 @@ public:
 	int Format(CStringArray& aDepends, const CString& sFolder = _T("")) const;
 	CString Format(LPCTSTR szSep = NULL, const CString& sFolder = _T("")) const;
 	
-	BOOL MatchAll(const CTDCDependencyArray& other) const;
+	BOOL MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes = TRUE) const;
 
 	// Mfc42 versions return value not reference
 	const TDCDEPENDENCY& GetAt(int nIndex) const;

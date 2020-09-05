@@ -2129,6 +2129,18 @@ BEGIN
                     WS_VSCROLL | WS_TABSTOP
 END
 
+IDD_TASKDEPENDENCY_DIALOG DIALOG DISCARDABLE  0, 0, 262, 160
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Task Dependencies"
+FONT 8, "Tahoma"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,149,139,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,205,139,50,14
+    CONTROL         "List1",IDC_DEPENDENCIES,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,7,7,248,124
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4454,6 +4466,14 @@ BEGIN
     BEGIN
         RIGHTMARGIN, 366
     END
+
+    IDD_TASKDEPENDENCY_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 255
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 153
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -4527,10 +4547,18 @@ BEGIN
     IDS_OA_ENDDATE          "End Date"
     IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
     IDS_ADVANCEDFILTERPLACEHOLDER "Find Tasks Filters"
-    IDS_TABTIP_NOTFOUND     "File not found (%s)"
+    IDS_NOSOUND             "<no sound>"
     IDS_ANONYMIZE_FAIL      "The active tasklist could not be anonymized"
     IDS_ANONYMIZE_SUCCESS   "The active tasklist was successfully anonymized.\n\nWould you like to load the anonymized version?"
     IDS_PSP_NOMATCHES       "No matching menu items found"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CLEARSEARCH_TIP     "Clear Search"
+    IDS_TABTIP_NOTFOUND     "File not found (%s)"
+    IDS_NEWDEPENDENCY_PROMPT "<new dependency>"
+    IDS_DEPENDSLEADIN_COL   "Lead In (Days)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -4541,7 +4569,6 @@ BEGIN
                             "-copy <attrib1> <attrib2>\tCopies the value for 'attrib1' to 'attrib2' for the currently selected task"
     IDS_CMDLINE_HELP        "-h, -help, -?\tDisplays a message box showing all the available commandline options"
     IDS_PTP_NEWTOOL         "New Tool"
-    IDS_NOSOUND             "<no sound>"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5753,11 +5780,6 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INSERTDATE      "\nInsert Date"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_CLEARSEARCH_TIP     "Clear Search"
 END
 
 #endif    // English (Australia) resources

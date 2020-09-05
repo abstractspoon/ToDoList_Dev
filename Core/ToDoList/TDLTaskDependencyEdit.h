@@ -13,6 +13,7 @@
 #include "TDLDialog.h"
 
 #include "..\shared\enedit.h"
+#include "..\shared\inputlistctrl.h"
 
 //////////////////////////////////////////////////////////////////////
 
@@ -29,8 +30,10 @@ public:
 
 protected:
 	CTDCDependencyArray m_aDepends;
+	BOOL m_bNotifyingParent;
 
 protected:
+	virtual void OnBtnClick(UINT nID);
 	virtual void PreSubclassWindow();
 
 // Implementation
@@ -44,7 +47,59 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	int Parse(CTDCDependencyArray& aDepends) const;
+	BOOL DoEdit();
 };
 
 #endif 
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLTaskDependencyOptionDlg dialog
+
+class CTDLTaskDependencyListCtrl : public CInputListCtrl
+{
+public:
+	CTDLTaskDependencyListCtrl();
+
+	void SetDependencies(const CTDCDependencyArray& aDepends);
+	int GetDependencies(CTDCDependencyArray& aDepends) const;
+
+// Implementation
+protected:
+	virtual BOOL CanEditCell(int nRow, int nCol) const;
+	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+};
+
+// ----------------------------------------------
+
+class CTDLTaskDependencyEditDlg : public CTDLDialog
+{
+// Construction
+public:
+	CTDLTaskDependencyEditDlg(const CTDCDependencyArray& aDepends, CWnd* pParent = NULL);   // standard constructor
+
+	int GetDependencies(CTDCDependencyArray& aDepends) const;
+
+protected:
+// Dialog Data
+	//{{AFX_DATA(CTDLTaskDependencyOptionDlg)
+	//}}AFX_DATA
+	CTDLTaskDependencyListCtrl m_lcDependencies;
+	CTDCDependencyArray m_aDepends;
+	
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CTDLTaskDependencyOptionDlg)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual void OnOK();
+	//}}AFX_VIRTUAL
+	virtual BOOL OnInitDialog();
+
+// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(CTDLTaskDependencyOptionDlg)
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
 

@@ -251,12 +251,18 @@ BOOL TDCCOST::AddCost(const TDCCOST& cost)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-TDCDEPENDENCY::TDCDEPENDENCY(LPCTSTR szDepends) : dwTaskID(0)
+TDCDEPENDENCY::TDCDEPENDENCY(LPCTSTR szDepends) 
+	: 
+	dwTaskID(0), 
+	nDaysLeadIn(0)
 {
 	Parse(szDepends);
 }
 
-TDCDEPENDENCY::TDCDEPENDENCY(DWORD dwDependsID, const CString& sFile) :	dwTaskID(0)
+TDCDEPENDENCY::TDCDEPENDENCY(DWORD dwDependsID, const CString& sFile) 
+	:	
+	dwTaskID(0), 
+	nDaysLeadIn(0)
 {
 	if (IsValid(dwDependsID, sFile))
 	{
@@ -271,6 +277,7 @@ TDCDEPENDENCY& TDCDEPENDENCY::operator=(const TDCDEPENDENCY& other)
 
 	dwTaskID = other.dwTaskID;
 	sTasklist = other.sTasklist;
+	nDaysLeadIn = other.nDaysLeadIn;
 
 	return *this;
 }
@@ -278,6 +285,7 @@ TDCDEPENDENCY& TDCDEPENDENCY::operator=(const TDCDEPENDENCY& other)
 BOOL TDCDEPENDENCY::operator==(const TDCDEPENDENCY& other) const
 {
 	return ((dwTaskID == other.dwTaskID) &&
+			(nDaysLeadIn == other.nDaysLeadIn) &&
 			(sTasklist.CompareNoCase(other.sTasklist) == 0));
 }
 
@@ -312,6 +320,7 @@ BOOL TDCDEPENDENCY::Parse(LPCTSTR szDepends)
 
 	dwTaskID = dwDependsID;
 	sTasklist = sFile;
+	nDaysLeadIn = 0;
 
 	return TRUE;
 }
@@ -473,9 +482,6 @@ int CTDCDependencyArray::FindDependency(const TDCDEPENDENCY& other) const
 		{
 			if (FileMisc::IsSamePath(depend.sTasklist, other.sTasklist))
 				return nDepend;
-
-			// TODO 
-			// check for partial match?
 		}
 	}
 
@@ -504,9 +510,23 @@ int CTDCDependencyArray::Format(CStringArray& aDepends, const CString& sFolder) 
 	return nNumDepends;
 }
 
-BOOL CTDCDependencyArray::MatchAll(const CTDCDependencyArray& other) const
+BOOL CTDCDependencyArray::MatchAll(const CTDCDependencyArray& other, BOOL bIncludeAttributes) const
 {
-	return Misc::MatchAllT(*this, other, FALSE); // not order sensitive
+	if (bIncludeAttributes)
+		return Misc::MatchAllT(*this, other, FALSE); // not order sensitive
+
+	int nDepend = GetSize();
+
+	if (nDepend != other.GetSize())
+		return FALSE;
+
+	while (nDepend--)
+	{
+		if (!other.HasDependency(GetAt(nDepend)))
+			return FALSE;
+	}
+
+	return TRUE;
 }
 
 const TDCDEPENDENCY& CTDCDependencyArray::GetAt(int nIndex) const
@@ -576,10 +596,24 @@ BOOL CTDCDependencyArray::Add(const TDCDEPENDENCY& depend)
 	if (!depend.IsValid())
 		return FALSE;
 
-	if (FindDependency(depend) != -1)
+	if (HasDependency(depend))
 		return FALSE;
 
 	return (CArray<TDCDEPENDENCY, TDCDEPENDENCY&>::Add(TDCDEPENDENCY(depend)) >= 0);
+}
+
+BOOL CTDCDependencyArray::Remove(const TDCDEPENDENCY& depend)
+{
+	if (!depend.IsValid())
+		return FALSE;
+
+	int nFind = FindDependency(depend);
+	
+	if (nFind == -1)
+		return FALSE;
+
+	RemoveAt(nFind);
+	return TRUE;
 }
 
 int CTDCDependencyArray::Append(const CTDCDependencyArray& aDepends)
