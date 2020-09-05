@@ -1256,7 +1256,7 @@ BOOL CEnListCtrl::SetMinItemHeight(int nHeight)
 	{
 		m_nMinItemHeight = nHeight;
 
-		if (GetItemCount())
+		if (GetSafeHwnd() && GetItemCount())
 		{
 			CRect rItem;
 			GetItemRect(0, rItem, LVIR_BOUNDS);
