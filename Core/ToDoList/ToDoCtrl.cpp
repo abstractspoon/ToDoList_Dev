@@ -2073,7 +2073,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	case TDCA_DEPENDENCY:
 		{
 			SetSelectedTaskDependencies(m_aDepends, FALSE, TRUE);
-			m_eDependency.EnableButton(ID_DEPENDS_LINK, !m_aDepends.IsEmpty());
+			m_eDependency.EnableButton(ID_DEPENDS_LINK, m_aDepends.GetSize());
 		}
 		break;
 		
