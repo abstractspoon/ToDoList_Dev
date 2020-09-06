@@ -6,11 +6,9 @@
 #include "TDLTaskDependencyEdit.h"
 #include "resource.h"
 
-#include "..\shared\dialoghelper.h"
 #include "..\shared\autoflag.h"
 #include "..\Shared\enstring.h"
-#include "..\Shared\localizer.h"
-#include "..\Shared\winclasses.h"
+#include "..\Shared\graphicsmisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -173,7 +171,6 @@ void CTDLTaskDependencyEdit::DDX(CDataExchange* pDX, CTDCDependencyArray& aValue
 
 CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl()
 {
-	SetMinItemHeight(18);
 }
 
 void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDepends)

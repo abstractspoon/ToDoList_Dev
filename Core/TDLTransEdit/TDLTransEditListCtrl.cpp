@@ -49,7 +49,6 @@ void CTDLTransEditListCtrl::Initialise()
 	DisableColumnEditing(2, TRUE);
 
 	ShowGrid(TRUE, TRUE);
-	SetMinItemHeight(18);
 	EnableSorting(TRUE);
 	SetSortColumn(0);
 	SetSortAscending(TRUE);
