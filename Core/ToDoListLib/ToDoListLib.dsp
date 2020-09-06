@@ -541,6 +541,10 @@ SOURCE=..\ToDoList\TDLTaskCtrlBase.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLTaskDependencyEdit.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLTaskIconDlg.cpp
 # End Source File
 # Begin Source File
@@ -1126,6 +1130,10 @@ SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLTaskCtrlBase.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskDependencyEdit.h
 # End Source File
 # Begin Source File
 
