@@ -201,7 +201,7 @@ BOOL CToDoListApp::HasVSRedistributable()
 
 BOOL CToDoListApp::InitInstance()
 {
-	// .NET plugins require VS2010 redistributable to be installed
+	// .NET plugins require VS redistributable to be installed
 	if (!HasVSRedistributable())
 		return FALSE;
 
