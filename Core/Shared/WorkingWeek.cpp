@@ -206,40 +206,34 @@ double CWorkingDay::CalculateDurationInHours(double fromHour, double toHour) con
 // NOTE: Caller's responsibility to check for weekends
 void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 {
-#ifdef _DEBUG
-	COleDateTime dtOrg(date);
-	double dOrgHours(dHours);
-#endif
-
-	do // easy to break out of
+	if (dHours > 0)
 	{
-		if (dHours > 0)
+		if (date < GetStartOfDay(date))
+			date = GetStartOfDay(date);
+
+		// Hours before lunch
+		double dStartHour = GetTimeOfDayInHours(date);
+		double dHoursBeforeLunch = (GetStartOfLunchInHours() - dStartHour);
+
+		if (dHoursBeforeLunch > 0)
 		{
-			if (date < GetStartOfDay(date))
-				date = GetStartOfDay(date);
-
-			// Hours before lunch
-			double dStartHour = GetTimeOfDayInHours(date);
-			double dHoursBeforeLunch = (GetStartOfLunchInHours() - dStartHour);
-
-			if (dHoursBeforeLunch > 0)
+			if (dHours <= dHoursBeforeLunch)
 			{
-				if (dHours <= dHoursBeforeLunch)
-				{
-					date.m_dt += (dHours / 24.0);
-					dHours = 0.0;
-
-					break; // done
-				}
-
-				// else
-				date = GetEndOfLunch(date);
+				date.m_dt += (dHours / 24.0);
+				dHours = 0.0; // done
+			}
+			else
+			{
+				date.m_dt += (dHoursBeforeLunch / 24.0);
 				dHours -= dHoursBeforeLunch;
 
 				dStartHour = GetEndOfLunchInHours();
 			}
+		}
 
-			// Hours after lunch
+		// Hours after lunch
+		if (dHours > 0.0)
+		{
 			double dHoursAfterLunch = (GetEndOfDayInHours() - dStartHour);
 
 			if (dHoursAfterLunch > 0)
@@ -247,44 +241,52 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 				if (dHours <= dHoursAfterLunch)
 				{
 					date.m_dt += (dHours / 24.0);
-					dHours = 0.0;
-
-					break; // done
+					dHours = 0.0; // done
 				}
-
-				// else
-				date = GetEndOfDay(date);
-				dHours -= dHoursAfterLunch;
+				else
+				{
+					date.m_dt += (dHoursAfterLunch / 24.0);
+					dHours -= dHoursAfterLunch;
+				}
 			}
 		}
-		else if (dHours < 0)
+	}
+	else if (dHours < 0)
+	{
+		if (date > GetEndOfDay(date))
+			date = GetEndOfDay(date);
+
+		double dStartHour = GetTimeOfDayInHours(date);
+
+		// Special case: 
+		// We're at the start of the day -> end of previous day
+		if (dStartHour == GetStartOfDayInHours())
 		{
-			if (date > GetEndOfDay(date))
-				date = GetEndOfDay(date);
+			dStartHour = GetEndOfDayInHours();
+		}
 
-			double dStartHour = GetTimeOfDayInHours(date);
+		// Hours after lunch
+		double dHoursAfterLunch = (dStartHour - GetEndOfLunchInHours());
 
-			// Hours after lunch
-			double dHoursAfterLunch = (dStartHour - GetEndOfLunchInHours());
-
-			if (dHoursAfterLunch > 0)
+		if (dHoursAfterLunch > 0)
+		{
+			if (fabs(dHours) <= dHoursAfterLunch)
 			{
-				if (fabs(dHours) <= dHoursAfterLunch)
-				{
-					date.m_dt += (dHours / 24.0);
-					dHours = 0.0;
-
-					break; // done
-				}
-
-				// else
-				date = GetStartOfLunch(date);
-				dHours -= dHoursAfterLunch;
+				date.m_dt += (dHours / 24.0);
+				dHours = 0.0; // done
+			}
+			else
+			{
+				date.m_dt -= (dHoursAfterLunch / 24.0);
+				dHours += dHoursAfterLunch;
 
 				dStartHour = GetStartOfLunchInHours();
 			}
+		}
 
-			// Hours before lunch
+		// Hours before lunch
+		if (dHours < 0.0)
+		{
 			double dHoursBeforeLunch = (dStartHour - GetStartOfDayInHours());
 
 			if (dHoursBeforeLunch > 0)
@@ -292,25 +294,16 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 				if (fabs(dHours) <= dHoursBeforeLunch)
 				{
 					date.m_dt += (dHours / 24.0);
-					dHours = 0.0;
-
-					break; // done
+					dHours = 0.0; // done
 				}
-
-				// else
-				date = GetStartOfDay(date);
-				dHours -= dHoursBeforeLunch;
+				else
+				{
+					date.m_dt -= (dHoursBeforeLunch / 24.0);
+					dHours += dHoursBeforeLunch;
+				}
 			}
 		}
 	} 
-	while (false);
-
-#ifdef _DEBUG
-	ASSERT(CDateHelper::IsSameDay(date, dtOrg));
-
-	double dCheckHours = CalculateDurationInHours(GetTimeOfDayInHours(dtOrg), GetTimeOfDayInHours(date));
-	ASSERT(fabs(dCheckHours - (dOrgHours - dHours)) < 0.001);
-#endif
 }
 
 double CWorkingDay::GetTimeOfDayInHours(const COleDateTime& date)
