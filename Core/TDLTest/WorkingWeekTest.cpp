@@ -70,8 +70,12 @@ TESTRESULT CWorkingDayTest::Run()
 
 void CWorkingDayTest::TestAddDurationInHours()
 {
-	// Add hours to positive date
+	BeginTest(_T("CWorkingDayTest::AddDurationInHours"));
+
+	// -----------------------------------------------------------------------
+
 	{
+		// Add hours to positive date
 		CWorkingDay day(24);
 		COleDateTime date(44000.0);
 
@@ -87,15 +91,17 @@ void CWorkingDayTest::TestAddDurationInHours()
 		ExpectEQ(date.m_dt, 44002.0);
 		ExpectEQ(dHours, 36.0);
 
-		dHours = 6.0;
+		dHours = 3.0;
 		day.AddDurationInHours(date, dHours);
 
-		ExpectEQ(date.m_dt, 44002.25);
+		ExpectEQ(date.m_dt, 44002.125);
 		ExpectEQ(dHours, 0.0);
 	}
 
-	// Subtract hours from positive date
+	// -----------------------------------------------------------------------
+
 	{
+		// Subtract hours from positive date 
 		CWorkingDay day(24);
 		COleDateTime date(44000.0);
 
@@ -118,8 +124,10 @@ void CWorkingDayTest::TestAddDurationInHours()
 		ExpectEQ(dHours, 0.0);
 	}
 
-	// Add hours to negative date
+	// -----------------------------------------------------------------------
+
 	{
+		// Add hours to negative date 
 		CWorkingDay day(24);
 		COleDateTime date(-44000.0);
 
@@ -135,19 +143,21 @@ void CWorkingDayTest::TestAddDurationInHours()
 		ExpectEQ(date.m_dt, -43998.0);
 		ExpectEQ(dHours, 36.0);
 
-		dHours = 6.0;
+		dHours = 3.0;
 		day.AddDurationInHours(date, dHours);
 
-		ExpectEQ(date.m_dt, -43997.75);
+		ExpectEQ(date.m_dt, -43998.125);
 		ExpectEQ(dHours, 0.0);
 	}
 
-	// Subtract hours from negative date
+	// -----------------------------------------------------------------------
+
 	{
+		// Subtract hours from negative date 
 		CWorkingDay day(24);
 		COleDateTime date(-44000.0);
 
-		double dHours = -24;
+ 		double dHours = -24;
 		day.AddDurationInHours(date, dHours);
 
 		ExpectEQ(date.m_dt, -44001.0);
@@ -165,5 +175,9 @@ void CWorkingDayTest::TestAddDurationInHours()
 		ExpectEQ(date.m_dt, -44003.625);
 		ExpectEQ(dHours, 0.0);
 	}
+
+	// -----------------------------------------------------------------------
+
+	EndTest();
 }
 
