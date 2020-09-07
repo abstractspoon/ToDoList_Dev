@@ -211,12 +211,12 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 	// eg. -44000.5 is a later date than -44000.0 
 	// We get around this by shifting the date forward until it is
 	// positive and then shifting it back at the end
-	int nDaysOffset = 0;
+	int nTempDaysOffset = 0;
 
 	if (date.m_dt < 0)
 	{
-		nDaysOffset = (int)fabs(2 * date.m_dt);
-		date.m_dt += nDaysOffset;
+		nTempDaysOffset = (int)fabs(2 * date.m_dt);
+		date.m_dt += nTempDaysOffset;
 	}
 
 	if (dHours > 0)
@@ -318,12 +318,12 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 		}
 	} 
 
-	if (nDaysOffset)
+	if (nTempDaysOffset)
 	{
 		COleDateTime dtTime = CDateHelper::GetTimeOnly(date);
 		COleDateTime dtDate = CDateHelper::GetDateOnly(date);
 
-		date.m_dt = (dtDate.m_dt - nDaysOffset);
+		date.m_dt = (dtDate.m_dt - nTempDaysOffset);
 		date.m_dt -= dtTime.m_dt; // counter-intuitive but correct
 	}
 }
