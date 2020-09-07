@@ -34,7 +34,11 @@ TESTRESULT CDateHelperTest::Run()
 
 	TestDecodeRelativeDate();
 	TestTruncateSeconds();
-
+	TestGetDateOnly();
+	TestGetTimeOnly();
+	TestMakeDate();
+	TestCompare();
+	
 	return GetTotals();
 }
 
@@ -141,6 +145,107 @@ void CDateHelperTest::TestTruncateSeconds()
 	ExpectTrue(dtPositive.GetSecond() > 0);
 	ExpectTrue(dtPositiveNoSeconds.GetSecond() == 0);
 	
+	// -----------------------------------------------------------------------
+	
+	EndTest();
+}
+
+void CDateHelperTest::TestGetDateOnly()
+{
+	BeginTest(_T("CDateHelperTest::GetDateOnly"));
+
+	ExpectEQ(CDateHelper::GetDateOnly(44000.125).m_dt, 44000.0);
+	ExpectEQ(CDateHelper::GetDateOnly(44000.0).m_dt, 44000.0);
+	ExpectEQ(CDateHelper::GetDateOnly(-44000.125).m_dt, -44000.0);
+	ExpectEQ(CDateHelper::GetDateOnly(-44000.0).m_dt, -44000.0);
+
+	// -----------------------------------------------------------------------
+	
+	EndTest();
+}
+
+void CDateHelperTest::TestGetTimeOnly()
+{
+	BeginTest(_T("CDateHelperTest::GetTimeOnly"));
+
+	// Note: time component is always positive
+	ExpectEQ(CDateHelper::GetTimeOnly(44000.125).m_dt, 0.125);
+	ExpectEQ(CDateHelper::GetTimeOnly(44000.0).m_dt, 0.0);
+	ExpectEQ(CDateHelper::GetTimeOnly(-44000.125).m_dt, 0.125);
+	ExpectEQ(CDateHelper::GetTimeOnly(-44000.0).m_dt, 0.0);
+
+	// -----------------------------------------------------------------------
+	
+	EndTest();
+}
+
+void CDateHelperTest::TestMakeDate()
+{
+	BeginTest(_T("CDateHelperTest::MakeDate"));
+
+	{
+		COleDateTime dt1(44000.125), dt2(34000.375);
+		
+		ExpectEQ(CDateHelper::MakeDate(dt1, dt2).m_dt, 44000.375);
+		ExpectEQ(CDateHelper::MakeDate(dt2, dt1).m_dt, 34000.125);
+	}
+
+	{
+		COleDateTime dt1(44000.125), dt2(-34000.375);
+
+		ExpectEQ(CDateHelper::MakeDate(dt1, dt2).m_dt, 44000.375);
+		ExpectEQ(CDateHelper::MakeDate(dt2, dt1).m_dt, -34000.125);
+	}
+
+	{
+		COleDateTime dt1(-44000.125), dt2(-34000.375);
+
+		ExpectEQ(CDateHelper::MakeDate(dt1, dt2).m_dt, -44000.375);
+		ExpectEQ(CDateHelper::MakeDate(dt2, dt1).m_dt, -34000.125);
+	}
+
+	// -----------------------------------------------------------------------
+	
+	EndTest();
+}
+
+void CDateHelperTest::TestCompare()
+{
+	BeginTest(_T("CDateHelperTest::Compare"));
+
+	{
+		COleDateTime dt1(44000.125), dt2(44000.25);
+		
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, 0) == 0);
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_COMPARETIME) < 0);
+	}
+
+	{
+		COleDateTime dt1(44000.125), dt2(44000.0);
+		
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, 0) == 0);
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_COMPARETIME) > 0);
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY) < 0);
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_NOTIMEISENDOFDAY) == 0);
+	}
+
+	{
+		// Note: time is treated positive
+		COleDateTime dt1(-44000.125), dt2(-44000.25);
+		
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, 0) == 0);
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_COMPARETIME) < 0);
+	}
+
+	{
+		COleDateTime dt1(-44000.125), dt2(-44000.0);
+
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, 0) == 0);
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_COMPARETIME) > 0);
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_COMPARETIME | DHC_NOTIMEISENDOFDAY) < 0);
+		ExpectTrue(CDateHelper::Compare(dt1, dt2, DHC_NOTIMEISENDOFDAY) == 0);
+	}
+
 	// -----------------------------------------------------------------------
 	
 	EndTest();

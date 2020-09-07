@@ -1094,23 +1094,27 @@ int CDateHelper::Compare(const COleDateTime& date1, const COleDateTime& date2, D
 		return 0;
 	}
 
-	if ((dwCompareFlags & DHC_COMPARETIME) == 0)
-	{
-		// Compare dates only
-		double dDateOnly1 = GetDateOnly(date1).m_dt;
-		double dDateOnly2 = GetDateOnly(date2).m_dt;
-
-		return ((dDateOnly1 < dDateOnly2) ? -1 : ((dDateOnly1 > dDateOnly2) ? 1 : 0));
-	}
-
-	// else include time
 	double dDateTime1 = GetDate(date1, (dwCompareFlags & DHC_NOTIMEISENDOFDAY)).m_dt;
 	double dDateTime2 = GetDate(date2, (dwCompareFlags & DHC_NOTIMEISENDOFDAY)).m_dt;
 
-	if ((dwCompareFlags & DHC_COMPARESECONDS) == 0)
+	if ((dwCompareFlags & DHC_COMPARETIME) == 0)
+	{
+		// Compare dates only
+		dDateTime1 = GetDateOnly(dDateTime1).m_dt;
+		dDateTime2 = GetDateOnly(dDateTime2).m_dt;
+	}
+	else if ((dwCompareFlags & DHC_COMPARESECONDS) == 0)
 	{
 		dDateTime1 = TruncateSeconds(dDateTime1).m_dt;
 		dDateTime2 = TruncateSeconds(dDateTime2).m_dt;
+	}
+
+	// Negative dates need care because time component is still positive
+	// eg. -44000.125 < -44000.25
+	if ((dDateTime1 < 0.0) && IsSameDay(date1, date2))
+	{
+		dDateTime1 = GetTimeOnly(dDateTime1).m_dt;
+		dDateTime2 = GetTimeOnly(dDateTime2).m_dt;
 	}
 
 	return ((dDateTime1 < dDateTime2) ? -1 : (dDateTime1 > dDateTime2) ? 1 : 0);
@@ -1781,7 +1785,7 @@ COleDateTime CDateHelper::TruncateSeconds(const COleDateTime& date)
 	dTime = (int)(dTime * MINS_IN_DAY);
 	dTime /= MINS_IN_DAY;
 
-	return (GetDateOnly(date).m_dt + dTime);
+	return MakeDate(date, dTime);
 }
 
 void CDateHelper::SplitDate(const COleDateTime& date, double& dDateOnly, double& dTimeOnly)
@@ -1957,7 +1961,7 @@ COleDateTime CDateHelper::GetEndOfDay(const COleDateTime& date)
 {
 	ASSERT(IsDateSet(date));
 
-	return (GetDateOnly(date).m_dt + END_OF_DAY);
+	return MakeDate(date, END_OF_DAY);
 }
 
 COleDateTime CDateHelper::GetStartOfNextDay(const COleDateTime& date)

@@ -22,6 +22,10 @@ public:
 protected:
 	void TestDecodeRelativeDate();
 	void TestTruncateSeconds();
+	void TestGetDateOnly();
+	void TestGetTimeOnly();
+	void TestMakeDate();
+	void TestCompare();
 };
 
 #endif // !defined(AFX_DATEHELPERTEST_H__6A11464D_D4DA_4ABA_8FDB_310C9A5252E5__INCLUDED_)
