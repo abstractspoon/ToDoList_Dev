@@ -522,11 +522,19 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) c
 		// else fall thru
 
 	case DHU_DAYS:
-		date += (double)nAmount;
+		{
+			// Handle negative dates whilst preserving time of day
+			double dDateOnly = GetDateOnly(date).m_dt;
+			date = MakeDate((dDateOnly + nAmount), date);
+		}
 		break;
 
 	case DHU_WEEKS:
-		date += nAmount * 7.0;
+		{
+			// Handle negative dates whilst preserving time of day
+			double dDateOnly = GetDateOnly(date).m_dt;
+			date = MakeDate((dDateOnly + (nAmount * 7)), date);
+		}
 		break;
 
 	case DHU_MONTHS:

@@ -218,11 +218,7 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 	if (date.m_dt < 0)
 	{
 		nTempDaysOffset = (int)fabs(2 * date.m_dt);
-
-		double dDateOnly = CDateHelper::GetDateOnly(date).m_dt;
-		dDateOnly += nTempDaysOffset;
-
-		date = CDateHelper::MakeDate(dDateOnly, date);
+		CDateHelper().OffsetDate(date, nTempDaysOffset, DHU_DAYS);
 	}
 
 	if (dHours > 0)
@@ -334,12 +330,7 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 	} 
 
 	if (nTempDaysOffset)
-	{
-		double dDateOnly = CDateHelper::GetDateOnly(date).m_dt;
-		dDateOnly -= nTempDaysOffset;
-
-		date = CDateHelper::MakeDate(dDateOnly, date);
-	}
+		CDateHelper().OffsetDate(date, -nTempDaysOffset, DHU_DAYS);
 }
 
 double CWorkingDay::GetTimeOfDayInHours(const COleDateTime& date)
