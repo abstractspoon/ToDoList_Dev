@@ -206,6 +206,8 @@ double CWorkingDay::CalculateDurationInHours(double fromHour, double toHour) con
 // NOTE: Caller's responsibility to check for weekends
 void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 {
+	ASSERT(dHours != 0.0);
+
 	// The arithmetic for negative dates is much complicated because
 	// the time component is always positive
 	// eg. -44000.5 is a later date than -44000.0 
@@ -216,7 +218,11 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 	if (date.m_dt < 0)
 	{
 		nTempDaysOffset = (int)fabs(2 * date.m_dt);
-		date.m_dt += nTempDaysOffset;
+
+		double dDateOnly = CDateHelper::GetDateOnly(date).m_dt;
+		dDateOnly += nTempDaysOffset;
+
+		date = CDateHelper::MakeDate(dDateOnly, date);
 	}
 
 	if (dHours > 0)
@@ -226,7 +232,7 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 
 		// Hours before lunch
 		double dStartHour = GetTimeOfDayInHours(date);
-		double dHoursBeforeLunch = (GetStartOfLunchInHours() - dStartHour);
+		double dHoursBeforeLunch = (m_dStartOfLunchInHours - dStartHour);
 
 		if (dHoursBeforeLunch > 0)
 		{
@@ -240,7 +246,7 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 				date.m_dt += (dHoursBeforeLunch / 24.0);
 				dHours -= dHoursBeforeLunch;
 
-				dStartHour = GetEndOfLunchInHours();
+				dStartHour = m_dEndOfLunchInHours;
 			}
 		}
 
@@ -251,6 +257,9 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 
 			if (dHoursAfterLunch > 0)
 			{
+				if (date < GetEndOfLunch(date))
+					date = GetDateAtTimeInHours(date, m_dEndOfLunchInHours);
+
 				if (dHours <= dHoursAfterLunch)
 				{
 					date.m_dt += (dHours / 24.0);
@@ -267,19 +276,22 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 	else if (dHours < 0)
 	{
 		if (date > GetEndOfDay(date))
+		{
 			date = GetEndOfDay(date);
-
+		}
+		
 		double dStartHour = GetTimeOfDayInHours(date);
 
 		// Special case: 
 		// We're at the start of the day -> end of previous day
-		if (dStartHour == GetStartOfDayInHours())
+		if (dStartHour <= m_dStartOfDayInHours)
 		{
-			dStartHour = GetEndOfDayInHours();
+			date = GetEndOfDay(date.m_dt - 1.0);
+ 			dStartHour = GetEndOfDayInHours();
 		}
-
+		
 		// Hours after lunch
-		double dHoursAfterLunch = (dStartHour - GetEndOfLunchInHours());
+		double dHoursAfterLunch = (dStartHour - m_dEndOfLunchInHours);
 
 		if (dHoursAfterLunch > 0)
 		{
@@ -293,17 +305,20 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 				date.m_dt -= (dHoursAfterLunch / 24.0);
 				dHours += dHoursAfterLunch;
 
-				dStartHour = GetStartOfLunchInHours();
+				dStartHour = m_dStartOfLunchInHours;
 			}
 		}
 
 		// Hours before lunch
 		if (dHours < 0.0)
 		{
-			double dHoursBeforeLunch = (dStartHour - GetStartOfDayInHours());
+			double dHoursBeforeLunch = (dStartHour - m_dStartOfDayInHours);
 
 			if (dHoursBeforeLunch > 0)
 			{
+				if (dStartHour >= m_dStartOfLunchInHours)
+					date = GetDateAtTimeInHours(date, m_dStartOfLunchInHours);
+
 				if (fabs(dHours) <= dHoursBeforeLunch)
 				{
 					date.m_dt += (dHours / 24.0);
@@ -320,17 +335,23 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 
 	if (nTempDaysOffset)
 	{
-		COleDateTime dtTime = CDateHelper::GetTimeOnly(date);
-		COleDateTime dtDate = CDateHelper::GetDateOnly(date);
+		double dDateOnly = CDateHelper::GetDateOnly(date).m_dt;
+		dDateOnly -= nTempDaysOffset;
 
-		date.m_dt = (dtDate.m_dt - nTempDaysOffset);
-		date.m_dt -= dtTime.m_dt; // counter-intuitive but correct
+		date = CDateHelper::MakeDate(dDateOnly, date);
 	}
 }
 
 double CWorkingDay::GetTimeOfDayInHours(const COleDateTime& date)
 {
 	return (CDateHelper::GetTimeOnly(date).m_dt * 24);
+}
+
+COleDateTime CWorkingDay::GetDateAtTimeInHours(const COleDateTime& date, double dHourOfDay)
+{
+	ASSERT((dHourOfDay >= 0.0) && (dHourOfDay <= 24.0));
+
+	return CDateHelper::MakeDate(date, (dHourOfDay / 24));
 }
 
 double CWorkingDay::GetLengthInHours(bool includingLunch) const
@@ -670,6 +691,7 @@ COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHour
 	MakeWeekday(dtFrom, (dHours > 0.0), TRUE); // truncates time if it was a weekend
 
 	COleDateTime dtTo(dtFrom);
+	const double DAYINHOURS = m_WorkDay.GetLengthInHours(false);
 
 	if (dHours > 0)
 	{
@@ -693,12 +715,12 @@ COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHour
 			// Subsequent whole days
 			ASSERT(dtTo == m_WorkDay.GetStartOfDay(dtTo));
 
-			while (dHours > m_WorkDay.GetLengthInHours(false))
+			while (dHours > DAYINHOURS)
 			{
 				dtTo.m_dt++;
 
 				if (!m_Weekend.IsWeekend(dtTo))
-					dHours -= m_WorkDay.GetLengthInHours(false);
+					dHours -= DAYINHOURS;
 			}
 
 			ASSERT(dtTo == m_WorkDay.GetStartOfDay(dtTo));
@@ -732,12 +754,12 @@ COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHour
 			MakeWeekday(dtTo, FALSE, FALSE);
 
 			// Subsequent whole days
-			while (fabs(dHours) > m_WorkDay.GetLengthInHours(false))
+			while (fabs(dHours) > DAYINHOURS)
 			{
 				dtTo.m_dt--;
 
 				if (!m_Weekend.IsWeekend(dtTo))
-					dHours += m_WorkDay.GetLengthInHours(false);
+					dHours += DAYINHOURS;
 			}
 
 			// Whatever is left

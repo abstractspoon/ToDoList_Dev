@@ -73,6 +73,7 @@ public:
 	BOOL IsStartOfDay(const COleDateTime& date) const;
 	
 	static double GetTimeOfDayInHours(const COleDateTime& date);
+	static COleDateTime GetDateAtTimeInHours(const COleDateTime& date, double dHourOfDay);
 	
 protected:
 	double m_dStartOfDayInHours;

@@ -63,6 +63,52 @@ void CWorkingWeekTest::TestAddDuration()
 
 	// -----------------------------------------------------------------------
 
+	{
+		CWorkingWeek week(0,		// no weekend (hard to test)
+						  8,		// 8 hour day
+						  9,		// 9 am - 6pm
+						  12, 13);	// 12-1pm lunch
+
+		COleDateTime date(44000.0);
+
+		ExpectEQ(week.AddDurationInMinutes(date, 30), CWorkingDay::GetDateAtTimeInHours(44000.0, 9.5));
+		ExpectEQ(week.AddDurationInMinutes(date, -30), CWorkingDay::GetDateAtTimeInHours(43999.0, 17.5));
+
+		ExpectEQ(week.AddDurationInHours(date, 9), CWorkingDay::GetDateAtTimeInHours(44001.0, 10));
+		ExpectEQ(week.AddDurationInHours(date, -9), CWorkingDay::GetDateAtTimeInHours(43998.0, 17));
+
+		ExpectEQ(week.AddDurationInDays(date, 9).m_dt, 44008.75);   // end of 9th day
+		ExpectEQ(week.AddDurationInDays(date, -9).m_dt, 43991.375); // start of 9th previous day
+
+		ExpectEQ(week.AddDurationInWeeks(date, 2).m_dt, 44013.75);  // end of 14th day
+		ExpectEQ(week.AddDurationInWeeks(date, -2).m_dt, 43986.375);// start of 14th previous day
+	}
+
+	// -----------------------------------------------------------------------
+
+	{
+		CWorkingWeek week(0,		// no weekend (hard to test)
+						  8,		// 8 hour day
+						  9,		// 9 am - 6pm
+						  12, 13);	// 12-1pm lunch
+
+		COleDateTime date(-44000.0);
+
+		ExpectEQ(week.AddDurationInMinutes(date, 30).m_dt, CWorkingDay::GetDateAtTimeInHours(-44000.0, 9.5));
+		ExpectEQ(week.AddDurationInMinutes(date, -30).m_dt, CWorkingDay::GetDateAtTimeInHours(-44001.0, 17.5));
+
+		ExpectEQ(week.AddDurationInHours(date, 9).m_dt, CWorkingDay::GetDateAtTimeInHours(-43999.0, 10));
+		ExpectEQ(week.AddDurationInHours(date, -9).m_dt, CWorkingDay::GetDateAtTimeInHours(-44002.0, 17));
+
+		ExpectEQ(week.AddDurationInDays(date, 9).m_dt, -43991.75);   // end of 9th day
+		ExpectEQ(week.AddDurationInDays(date, -9).m_dt, -44008.375); // start of 9th previous day
+
+		ExpectEQ(week.AddDurationInWeeks(date, 2).m_dt, -43986.75);  // end of 14th day
+		ExpectEQ(week.AddDurationInWeeks(date, -2).m_dt, -44013.375);// start of 14th previous day
+	}
+
+	// -----------------------------------------------------------------------
+
 	EndTest();
 }
 
@@ -127,6 +173,32 @@ void CWorkingDayTest::TestAddDurationInHours()
 
 		ExpectEQ(date.m_dt, 44002.125);
 		ExpectEQ(dHours, 0.0);
+	}
+
+	{
+		// Add hours to positive date
+		CWorkingDay day(8,			// 8 hour day
+						9,			// 9 am - 6pm
+						12, 13);	// 12-1pm lunch
+		COleDateTime date(44000.0);
+
+		double dHours = 3.0;
+		day.AddDurationInHours(date, dHours);
+
+		ExpectEQ(date.m_dt, 44000.5);
+		ExpectEQ(dHours, 0.0);
+
+		dHours = 3.0;
+		day.AddDurationInHours(date, dHours);
+
+		ExpectEQ(date, CWorkingDay::GetDateAtTimeInHours(44000.0, 16));
+		ExpectEQ(dHours, 0.0);
+
+		dHours = 60.0;
+		day.AddDurationInHours(date, dHours);
+
+		ExpectEQ(date.m_dt, 44000.75); // end of day
+		ExpectEQ(dHours, 58.0, 1e-9);
 	}
 
 	// -----------------------------------------------------------------------
