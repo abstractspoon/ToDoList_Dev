@@ -40,11 +40,42 @@ TESTRESULT CWorkingWeekTest::Run()
 
 void CWorkingWeekTest::TestAddDuration()
 {
+	BeginTest(_T("CWorkingWeekTest::AddDuration"));
+
+	// -----------------------------------------------------------------------
+
+	{
+		CTwentyFourSevenWeek week;
+		COleDateTime date(44000.125);
+
+		ExpectEQ(week.AddDurationInMinutes(date, 30).m_dt, 44000.125 + (30.0 / (60 * 24)));
+		ExpectEQ(week.AddDurationInMinutes(date, -30).m_dt, 44000.125 - (30.0 / (60 * 24)));
+
+		ExpectEQ(week.AddDurationInHours(date, 9).m_dt, 44000.5);
+		ExpectEQ(week.AddDurationInHours(date, -9).m_dt, 43999.75);
+
+		ExpectEQ(week.AddDurationInDays(date, 9).m_dt, 44009.125);
+		ExpectEQ(week.AddDurationInDays(date, -9).m_dt, 43991.125);
+
+		ExpectEQ(week.AddDurationInWeeks(date, 2).m_dt, 44014.125);
+		ExpectEQ(week.AddDurationInWeeks(date, -2).m_dt, 43986.125);
+	}
+
+	// -----------------------------------------------------------------------
+
+	EndTest();
 }
 
 void CWorkingWeekTest::TestCalculateDuration()
 {
+	BeginTest(_T("CWorkingWeekTest::CalculateDuration"));
 
+	// -----------------------------------------------------------------------
+
+
+	// -----------------------------------------------------------------------
+
+	EndTest();
 }
 
 //////////////////////////////////////////////////////////////////////

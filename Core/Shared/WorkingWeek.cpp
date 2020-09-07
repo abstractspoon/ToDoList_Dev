@@ -682,7 +682,10 @@ COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHour
 				break;
 
 			// Move to start of next day
-			dtTo = m_WorkDay.GetStartOfDay(dtTo.m_dt + 1.0);
+			if (m_WorkDay.GetEndOfDayInHours() < 24)
+				dtTo.m_dt++;
+
+			dtTo = m_WorkDay.GetStartOfDay(dtTo);
 
 			// Jump over weekends leaving time of day as-is
 			MakeWeekday(dtTo, TRUE, FALSE);
@@ -706,6 +709,11 @@ COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHour
 			ASSERT(dHours == 0.0);
 		}
 		while (false);
+
+#ifdef _DEBUG
+		double dCheckHours = CalculateDurationInHours(dtOrgFrom, dtTo);
+		ASSERT(fabs(dCheckHours - (dOrgHours - dHours)) < 0.001);
+#endif
 	}
 	else // if (dHours < 0)
 	{
@@ -724,8 +732,6 @@ COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHour
 			MakeWeekday(dtTo, FALSE, FALSE);
 
 			// Subsequent whole days
-			ASSERT(dtTo == m_WorkDay.GetEndOfDay(dtTo));
-
 			while (fabs(dHours) > m_WorkDay.GetLengthInHours(false))
 			{
 				dtTo.m_dt--;
@@ -734,20 +740,18 @@ COleDateTime CWorkingWeek::AddDurationInHours(COleDateTime& dtFrom, double dHour
 					dHours += m_WorkDay.GetLengthInHours(false);
 			}
 
-			ASSERT(dtTo == m_WorkDay.GetEndOfDay(dtTo));
-
 			// Whatever is left
 			m_WorkDay.AddDurationInHours(dtTo, dHours);
 
 			ASSERT(dHours == 0.0);
 		}
 		while (false);
-	}
 
 #ifdef _DEBUG
-	double dCheckHours = CalculateDurationInHours(dtOrgFrom, dtTo);
-	ASSERT(fabs(dCheckHours - (dOrgHours - dHours)) < 0.001);
+		double dCheckHours = -CalculateDurationInHours(dtTo, dtOrgFrom);
+		ASSERT(fabs(dCheckHours - (dOrgHours - dHours)) < 0.001);
 #endif
+	}
 
 	return dtTo;
 }
