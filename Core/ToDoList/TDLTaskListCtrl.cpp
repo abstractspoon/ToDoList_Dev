@@ -662,7 +662,7 @@ BOOL CTDLTaskListCtrl::ModsNeedResort(const CTDCAttributeMap& attribIDs) const
 
 BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 {
-	if (IsSorting() && !CTDLTaskCtrlBase::PrepareSort(ss))
+	if (!CTDLTaskCtrlBase::PrepareSort(ss))
 		return FALSE;
 
 	if (IsGrouped())
@@ -688,7 +688,7 @@ BOOL CTDLTaskListCtrl::PrepareSort(TDSORTPARAMS& ss) const
 		ss.pCols = m_aGroupSortCols;
 		ss.nNumCols = nNumCols;
 	}
-
+	
 	return TRUE;
 }
 

@@ -2655,7 +2655,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		// if this is a click in the area where the vertical
 		// scroll would normally be we convert it to a client
 		// mouse msg
-		if (IsLeft(hRealWnd) && (wp == HTVSCROLL))
+		if (!IsHiding(TLSH_RIGHT) && IsLeft(hRealWnd) && (wp == HTVSCROLL))
 		{
 			VERIFY(ConvertNonClientToClientMouseMsg(hRealWnd, msg, wp, lp));
 
@@ -2994,6 +2994,11 @@ void CTreeListSyncer::Resize(const CRect& rLeft, const CRect& rRight)
 {
 	HWND hwndLeft(Left()), hwndRight(Right());
 	CRect rLeftActual(rLeft), rRightActual(rRight);
+	
+	// Make sure 'right' has some width else its vert scrollbar 
+	// is not managed properly by windows
+	if (rRightActual.right <= rRightActual.left)
+		rRightActual.right = (rRightActual.left + 1);
 	
 	// Adjust top of primary window to take account of its or the others header
 	CRect rLeftHeader, rRightHeader;
