@@ -69,7 +69,7 @@ void CTDLFilterOptionComboBox::Initialize(DWORD dwFlags, DWORD dwOptions)
 	}
 }
 
-void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter, FTC_VIEW /*nView*/, BOOL bWantHideParents)
+void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter)
 {
 	// translation done via CEnString
 	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
@@ -94,12 +94,7 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter, FTC_VIEW /*nV
 			break;
 
 		case FO_SHOWALLSUB:
-		case FO_HIDECOLLAPSED:
 			bAddFlag = TRUE;
-			break;
-
-		case FO_HIDEPARENTS:
-			bAddFlag = !bWantHideParents;
 			break;
 
 		case FO_HIDEOVERDUE:

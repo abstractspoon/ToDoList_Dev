@@ -92,7 +92,6 @@ protected:
 
 	TDCFILTER m_filter;
 	FILTER_TITLE m_nTitleFilter;
-	FTC_VIEW m_nView;
 	CBrush m_brUIBack;
 	COLORREF m_crUIBack;
 	CUIThemeFile m_theme;
@@ -100,7 +99,6 @@ protected:
 	CWndPromptManager m_mgrPrompts;
 	CIcon m_iconUpdateBtn;
 
-	BOOL m_bWantHideParents;
 	BOOL m_bMultiSelection;
 
 protected:

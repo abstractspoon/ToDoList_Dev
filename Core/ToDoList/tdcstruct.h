@@ -1837,11 +1837,10 @@ struct TDCFILTER
 		return !FiltersMatch(*this, filter);
 	}
 	
-	BOOL IsSet(DWORD dwIgnore = 0) const
+	BOOL IsSet() const
 	{
-		TDCFILTER filterEmpty;
-
-		return !FiltersMatch(*this, filterEmpty, dwIgnore);
+		// Compare to empty filter
+		return !FiltersMatch(*this, TDCFILTER());
 	}
 
 	BOOL IsAdvanced() const { return (nShow == FS_ADVANCED); }
@@ -1917,8 +1916,6 @@ struct TDCFILTER
 			case FO_ANYCATEGORY:
 			case FO_ANYALLOCTO:
 			case FO_ANYTAG:
-			case FO_HIDEPARENTS:
-			case FO_HIDECOLLAPSED:
 			case FO_SHOWALLSUB:
 				break; // always allowed
 
@@ -1963,12 +1960,12 @@ struct TDCFILTER
 		nShow = nInit;
 	}
 
-	BOOL Matches(const TDCFILTER& filter, DWORD dwIgnore = 0) const
+	BOOL Matches(const TDCFILTER& filter) const
 	{
-		return FiltersMatch(*this, filter, dwIgnore);
+		return FiltersMatch(*this, filter);
 	}
 
-	static BOOL FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2, DWORD dwIgnore = 0)
+	static BOOL FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2)
 	{
 		// simple exclusion test first
 		if ((filter1.nShow != filter2.nShow) ||
@@ -1977,6 +1974,7 @@ struct TDCFILTER
 			(filter1.nPriority != filter2.nPriority) ||
 			(filter1.nRisk != filter2.nRisk) ||
 			(filter1.sTitle != filter2.sTitle) ||
+			(filter1.dwFlags != filter2.dwFlags) ||
 			((filter1.nTitleOption != filter2.nTitleOption) && !filter1.sTitle.IsEmpty()))
 		{
 			return FALSE;
@@ -2007,37 +2005,6 @@ struct TDCFILTER
 		if (filter1.nStartBy == FD_NEXTNDAYS) // == filter2.nStartBy
 		{
 			if (filter1.nStartNextNDays != filter2.nStartNextNDays)
-				return FALSE;
-		}
-
-		// options
-		if ((dwIgnore & FO_HIDEPARENTS) == 0)
-		{
-			if (filter1.HasFlag(FO_HIDEPARENTS) != filter2.HasFlag(FO_HIDEPARENTS))
-				return FALSE;
-		}
-
-		if ((dwIgnore & FO_HIDEDONE) == 0)
-		{
-			if (filter1.HasFlag(FO_HIDEDONE) != filter2.HasFlag(FO_HIDEDONE))
-				return FALSE;
-		}
-
-		if ((dwIgnore & FO_HIDEOVERDUE) == 0)
-		{
-			if (filter1.HasFlag(FO_HIDEOVERDUE) != filter2.HasFlag(FO_HIDEOVERDUE))
-				return FALSE;
-		}
-
-		if ((dwIgnore & FO_HIDECOLLAPSED) == 0)
-		{
-			if (filter1.HasFlag(FO_HIDECOLLAPSED) != filter2.HasFlag(FO_HIDECOLLAPSED))
-				return FALSE;
-		}
-
-		if ((dwIgnore & FO_SHOWALLSUB) == 0)
-		{
-			if (filter1.HasFlag(FO_SHOWALLSUB) != filter2.HasFlag(FO_SHOWALLSUB))
 				return FALSE;
 		}
 

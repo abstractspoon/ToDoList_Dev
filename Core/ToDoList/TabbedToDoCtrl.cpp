@@ -92,6 +92,7 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt,
 	m_bRecreatingRecurringTasks(FALSE),
 	m_nExtModifyingAttrib(TDCA_NONE),
 	m_nListViewGroupBy(TDCC_NONE),
+	m_dwListOptions(0),
 	m_mgrUIExt(mgrUIExt),
 	m_taskList(m_ilTaskIcons, m_data, TCF(), m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
 {
@@ -122,19 +123,39 @@ void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	CToDoCtrl::DoDataExchange(pDX);
 
 	DDX_Control(pDX, IDC_FTC_TABCTRL, m_tabViews);
-	DDX_Control(pDX, IDC_GROUPBYATTRIB, m_cbGroupBy);
+	DDX_Control(pDX, IDC_LISTVIEWGROUPBYATTRIB, m_cbListGroupBy);
+	DDX_Control(pDX, IDC_LISTVIEWOPTIONS, m_cbListOptions);
 
-	DDX_CBData(pDX, m_cbGroupBy, m_nListViewGroupBy, TDCC_NONE);
+	DDX_CBData(pDX, m_cbListGroupBy, m_nListViewGroupBy, TDCC_NONE);
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		m_dwListOptions = 0;
+
+		if (m_cbListOptions.GetCheckByData(LVO_HIDEPARENTS) == CCBC_CHECKED)
+			m_dwListOptions |= LVO_HIDEPARENTS;
+
+		if (m_cbListOptions.GetCheckByData(LVO_HIDECOLLAPSED) == CCBC_CHECKED)
+			m_dwListOptions |= LVO_HIDECOLLAPSED;
+	}
+	else
+	{
+		m_cbListOptions.SetCheckByData(LVO_HIDEPARENTS, ((m_dwListOptions & LVO_HIDEPARENTS) ? CCBC_CHECKED : CCBC_UNCHECKED));
+		m_cbListOptions.SetCheckByData(LVO_HIDECOLLAPSED, ((m_dwListOptions & LVO_HIDECOLLAPSED) ? CCBC_CHECKED : CCBC_UNCHECKED));
+	}
 }
 
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 //{{AFX_MSG_MAP(CTabbedToDoCtrl)
 	ON_WM_DESTROY()
 	//}}AFX_MSG_MAP
-	ON_CBN_SELCHANGE(IDC_GROUPBYATTRIB, OnListGroupBySelChanged)
+	ON_CBN_SELCHANGE(IDC_LISTVIEWGROUPBYATTRIB, OnListGroupBySelChanged)
+	ON_CBN_SELCHANGE(IDC_LISTVIEWOPTIONS, OnListOptionsCheckChanged)
+
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_FTC_TASKLISTLIST, OnListSelChanged)
 	ON_NOTIFY(NM_CLICK, IDC_FTC_TASKLISTLIST, OnListClick)
 	ON_NOTIFY(NM_RCLICK, IDC_FTC_TABCTRL, OnTabCtrlRClick)
+	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREELIST, OnTreeExpandItem)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPOSTCHANGE, OnPostTabViewChange)
@@ -192,7 +213,7 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	if (icon.Load(IDI_LISTVIEW_STD))
 	{
-		int nVertOffset = (GetCtrlSize(IDC_GROUPBYATTRIB).cy + 4);
+		int nVertOffset = (GetCtrlSize(IDC_LISTVIEWGROUPBYATTRIB).cy + 4);
 		m_tabViews.AttachView(m_taskList, FTCV_TASKLIST, CEnString(IDS_LISTVIEW), icon, NewViewData(), nVertOffset);
 	}
 
@@ -203,22 +224,23 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	// Initialise the previously visible tabs
 	SetVisibleTaskViews(s_aDefTaskViews);
 
-	// Build the 'group by' combobox
-	BuildGroupByCombo();
+	// Build the list-specific comboboxes
+	BuildListGroupByCombo();
+	BuildListOptionsCombo();
 
 	return FALSE;
 }
 
-void CTabbedToDoCtrl::BuildGroupByCombo()
+void CTabbedToDoCtrl::BuildListGroupByCombo()
 {
-	m_cbGroupBy.ResetContent();
+	m_cbListGroupBy.ResetContent();
 
-	AddString(m_cbGroupBy, IDS_TDC_NONE, TDCC_NONE);
+	AddString(m_cbListGroupBy, IDS_TDC_NONE, TDCC_NONE);
 
 	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
 	{
 		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColID))
-			AddString(m_cbGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColID);
+			AddString(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColID);
 	}
 	
 	for (int nAttrib = 0; nAttrib < m_aCustomAttribDefs.GetSize(); nAttrib++)
@@ -228,11 +250,19 @@ void CTabbedToDoCtrl::BuildGroupByCombo()
 		if (m_taskList.CanGroupBy(attribDef.GetColumnID()))
 		{
 			CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
-			AddString(m_cbGroupBy, sAttrib, attribDef.GetColumnID());
+			AddString(m_cbListGroupBy, sAttrib, attribDef.GetColumnID());
 		}
 	}
 	
-	SelectItemByData(m_cbGroupBy, m_nListViewGroupBy);
+	SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy);
+}
+
+void CTabbedToDoCtrl::BuildListOptionsCombo()
+{
+	ASSERT(m_cbListOptions.GetCount() == 0);
+
+	CDialogHelper::AddString(m_cbListOptions, IDS_FILTER_HIDEPARENTS, LVO_HIDEPARENTS);
+	CDialogHelper::AddString(m_cbListOptions, IDS_FILTER_HIDECOLLAPSED, LVO_HIDECOLLAPSED);
 }
 
 void CTabbedToDoCtrl::OnListGroupBySelChanged()
@@ -240,6 +270,30 @@ void CTabbedToDoCtrl::OnListGroupBySelChanged()
 	UpdateData();
 
 	m_taskList.GroupBy(m_nListViewGroupBy);
+}
+
+void CTabbedToDoCtrl::OnListOptionsCheckChanged()
+{
+	ASSERT(InListView());
+	DWORD dwPrevOptions = m_dwListOptions;
+
+	UpdateData();
+
+	if (m_dwListOptions != dwPrevOptions)
+	{
+		RebuildList();
+	}
+}
+
+void CTabbedToDoCtrl::OnTreeExpandItem(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
+{
+	if (m_dwListOptions & LVO_HIDECOLLAPSED)
+	{
+		if (InListView())
+			RebuildList();
+		else
+			SetViewNeedsTaskUpdate(FTCV_TASKLIST);
+	}
 }
 
 void CTabbedToDoCtrl::OnStylesUpdated(const CTDCStyleMap& styles)
@@ -440,9 +494,6 @@ void CTabbedToDoCtrl::LoadPrefs()
 	if (prefs.GetProfileInt(sKey, _T("ListViewVisible"), TRUE))
 		aTypeIDs.Add(LISTVIEW_TYPE);
 
-	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
-	m_taskList.GroupBy(m_nListViewGroupBy);
-
 	// remove hidden extensions from list of all extensions
 	// this ensures that new extensions always appear first time
 	int nExt = prefs.GetProfileInt(sKey, _T("HiddenExtensionCount"), -1);
@@ -463,6 +514,14 @@ void CTabbedToDoCtrl::LoadPrefs()
 	{
 		SetVisibleTaskViews(s_aDefTaskViews);
 	}
+
+	// Lisview options
+	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
+	m_taskList.GroupBy(m_nListViewGroupBy);
+
+	m_dwListOptions = 0;
+	Misc::SetFlag(m_dwListOptions, LVO_HIDEPARENTS, prefs.GetProfileInt(sKey, _T("ListViewHideParents"), FALSE));
+	Misc::SetFlag(m_dwListOptions, LVO_HIDECOLLAPSED, prefs.GetProfileInt(sKey, _T("ListViewHideCollapsed"), FALSE));
 
 	// Last active view
 	FTC_VIEW nCurView = GetTaskView();
@@ -489,9 +548,11 @@ void CTabbedToDoCtrl::SavePrefs()
 	if (GetTaskView() != FTCV_UNSET)
 		prefs.WriteProfileInt(sKey, _T("View"), GetTaskView());
 
-	// save listview visibility
+	// save listview state
 	prefs.WriteProfileInt(sKey, _T("ListViewVisible"), IsListViewTabShowing());
 	prefs.WriteProfileInt(sKey, _T("ListViewGroupBy"), m_nListViewGroupBy);
+	prefs.WriteProfileInt(sKey, _T("ListViewHideParents"), Misc::HasFlag(m_dwListOptions, LVO_HIDEPARENTS));
+	prefs.WriteProfileInt(sKey, _T("ListViewHideCollapsed"), Misc::HasFlag(m_dwListOptions, LVO_HIDECOLLAPSED));
 
 	// save hidden extensions
 	CStringArray aVisTypeIDs, aTypeIDs;
@@ -757,7 +818,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 
 			if (pLVData->bNeedFullTaskUpdate)
 			{
-				RebuildList(NULL);
+				RebuildList();
 			}
 			else if (pLVData->bNeedResort)
 			{
@@ -903,7 +964,7 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 		break;
 	}
 
-	ShowListViewGroupByCtrls(nNewView == FTCV_TASKLIST);
+	ShowListViewSpecificCtrls(nNewView == FTCV_TASKLIST);
 	
 	// If we are switching to/from a view with selection 
 	// from/to a view without selection then update controls
@@ -916,13 +977,19 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 	return 0L;
 }
 
-void CTabbedToDoCtrl::ShowListViewGroupByCtrls(BOOL bShow)
+void CTabbedToDoCtrl::ShowListViewSpecificCtrls(BOOL bShow)
 {
-	GetDlgItem(IDC_GROUPBY)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
-	GetDlgItem(IDC_GROUPBYATTRIB)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_LISTVIEWGROUPBYLABEL)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_LISTVIEWGROUPBYATTRIB)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
 
-	GetDlgItem(IDC_GROUPBY)->EnableWindow(bShow);
-	GetDlgItem(IDC_GROUPBYATTRIB)->EnableWindow(bShow);
+	GetDlgItem(IDC_LISTVIEWGROUPBYLABEL)->EnableWindow(bShow);
+	GetDlgItem(IDC_LISTVIEWGROUPBYATTRIB)->EnableWindow(bShow);
+
+	GetDlgItem(IDC_LISTVIEWOPTIONSLABEL)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+	GetDlgItem(IDC_LISTVIEWOPTIONS)->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+
+	GetDlgItem(IDC_LISTVIEWOPTIONSLABEL)->EnableWindow(bShow);
+	GetDlgItem(IDC_LISTVIEWOPTIONS)->EnableWindow(bShow);
 }
 
 int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const
@@ -2049,12 +2116,14 @@ void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 	// Tab control takes care of active view including tree/list
 	m_tabViews.Resize(rPos, pDWM);
 
-	// Reposition 'group by' controls whether they are showing or not
-	CRect rCombo = GetCtrlRect(IDC_GROUPBYATTRIB);
+	// Reposition list-specific controls whether they are showing or not
+	CRect rCombo = GetCtrlRect(IDC_LISTVIEWGROUPBYATTRIB);
 	int nYOffset = (rPos.top - rCombo.top);
 
-	pDWM->OffsetCtrl(this, IDC_GROUPBY, 0, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_GROUPBYATTRIB, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS, 0, nYOffset);
 }
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()
@@ -2101,9 +2170,16 @@ void CTabbedToDoCtrl::UpdateTasklistVisibility()
 
 BOOL CTabbedToDoCtrl::OnEraseBkgnd(CDC* pDC)
 {
-	// clip out tab ctrl
+	// clip out ctrls
 	if (m_tabViews.GetSafeHwnd())
+	{
 		ExcludeChild(&m_tabViews, pDC);
+		ExcludeChild(&m_cbListGroupBy, pDC);
+		ExcludeChild(&m_cbListOptions, pDC);
+
+		ExcludeCtrl(this, IDC_LISTVIEWGROUPBYLABEL, pDC);
+		ExcludeCtrl(this, IDC_LISTVIEWOPTIONSLABEL, pDC);
+	}
 
 	return CToDoCtrl::OnEraseBkgnd(pDC);
 }
@@ -3105,9 +3181,39 @@ BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	return bCanCreate;
 }
 
-void CTabbedToDoCtrl::RebuildList(const void* pContext)
+void CTabbedToDoCtrl::RebuildList()
 {
-	if (!m_data.GetTaskCount())
+	// Since the tree will have already got the items we want 
+	// we can optimize the rebuild if either:
+	//
+	// 1. the list is sorted OR
+	// 2. the tree is unsorted OR
+	//
+	// otherwise we need the data in it's unsorted state and the 
+	// tree doesn't have it
+	CDWordArray aTaskIDs;
+	BOOL bCheckVisibility = TRUE;
+
+	if (m_taskList.IsSorting() || !m_taskTree.IsSorting())
+	{
+		BOOL bWantParents = !Misc::HasFlag(m_dwListOptions, LVO_HIDEPARENTS);
+		BOOL bWantCollapsed = !Misc::HasFlag(m_dwListOptions, LVO_HIDECOLLAPSED);
+
+		TCH().GetItemData(aTaskIDs, bWantParents, bWantCollapsed);
+
+		bCheckVisibility = FALSE;
+	}
+	else
+	{
+		m_data.GetTaskIDs(aTaskIDs);
+	}
+
+	SetListItems(aTaskIDs, bCheckVisibility);
+}
+
+void CTabbedToDoCtrl::SetListItems(const CDWordArray& aTaskIDs, BOOL bCheckVisibility)
+{
+	if (aTaskIDs.GetSize() == 0)
 	{
 		m_taskList.DeleteAll(); 
 		return;
@@ -3127,11 +3233,20 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 		CHoldRedraw hr2(m_taskList);
 		CWaitCursor cursor;
 
-		// remove all existing items
 		m_taskList.DeleteAll();
 		
-		// rebuild the list from the tree
-		AddTreeItemToList(NULL, pContext);
+		for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+		{
+			DWORD dwTaskID = aTaskIDs[nID];
+
+			if (!bCheckVisibility || WantAddTaskToList(dwTaskID))
+			{
+				if (m_taskList.InsertItem(dwTaskID) == -1)
+				{
+					ASSERT(m_data.IsTaskReference(dwTaskID));
+				}
+			}	
+		}
 
 		m_taskList.SetNextUniqueTaskID(m_dwNextUniqueID);
 		m_taskList.OnBuildComplete();
@@ -3170,28 +3285,27 @@ void CTabbedToDoCtrl::RebuildList(const void* pContext)
 		}
 	}
 	
-
-	BuildGroupByCombo();
+	BuildListGroupByCombo();
 }
 
-void CTabbedToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
+BOOL CTabbedToDoCtrl::WantAddTaskToList(DWORD dwTaskID) const
 {
-	// add task
-	if (hti)
-	{
-		// if the add fails then it's a task reference
-		if (m_taskList.InsertItem(GetTaskID(hti)) == -1)
-			return; 
-	}
+	ASSERT(dwTaskID);
 
-	// children
-	HTREEITEM htiChild = m_taskTree.GetChildItem(hti);
+	HTREEITEM hti = m_taskTree.GetItem(dwTaskID);
+	ASSERT(hti);
 
-	while (htiChild)
-	{
-		AddTreeItemToList(htiChild, pContext);
-		htiChild = m_taskTree.GetNextItem(htiChild);
-	}
+	BOOL bHideParents = ((m_dwListOptions & LVO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS));
+
+	if (bHideParents && m_data.IsTaskParent(GetTaskID(hti)))
+		return FALSE;
+
+	BOOL bHideCollapsed = (m_dwListOptions & LVO_HIDECOLLAPSED);
+
+	if (bHideCollapsed && !TCH().IsParentItemExpanded(hti, TRUE))
+		return FALSE;
+
+	return TRUE;
 }
 
 void CTabbedToDoCtrl::SetExtensionsReadOnly(BOOL bReadOnly)
@@ -3217,10 +3331,7 @@ void CTabbedToDoCtrl::SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore
 			continue;
 
 		// else
-		VIEWDATA* pVData = GetViewData(nView);
-		
-		if (pVData)
-			pVData->bNeedFullTaskUpdate = bUpdate;
+		SetViewNeedsTaskUpdate(nView, bUpdate);
 	}
 }
 
@@ -3387,7 +3498,7 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 			TDCSELECTIONCACHE cache;
 			CacheTreeSelection(cache);
 
-			RebuildList(NULL);
+			RebuildList();
 			m_taskList.RestoreSelection(cache, TRUE);
 		}
 		else
@@ -5617,6 +5728,16 @@ BOOL CTabbedToDoCtrl::ViewSupportsNewTask(FTC_VIEW nView) const
 	return FALSE;
 }
 
+void CTabbedToDoCtrl::SetViewNeedsTaskUpdate(FTC_VIEW nView, BOOL bUpdate)
+{
+	VIEWDATA* pVData = GetViewData(nView);
+
+	if (pVData)
+		pVData->bNeedFullTaskUpdate = bUpdate;
+	else
+		ASSERT(0);
+}
+
 BOOL CTabbedToDoCtrl::ViewHasTaskSelection(FTC_VIEW nView) const
 {
 	switch (nView)
@@ -6038,7 +6159,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree()
 		m_taskList.SelectAll();
 		bUpdateCtrls = (m_taskList.GetItemCount() != m_taskTree.GetItemCount());
 	}
-	else
+	else if (m_taskList.GetItemCount())
 	{
 		// save current states
 		TDCSELECTIONCACHE cacheList, cacheTree;
@@ -6419,12 +6540,7 @@ HTREEITEM CTabbedToDoCtrl::LoadTasksState(const CPreferences& prefs, BOOL bRebui
 		m_taskList.RecalcUntrackedColumnWidths();
 		
 		if (m_taskList.IsSorting())
-		{
-			VIEWDATA* pVData = GetViewData(FTCV_TASKLIST);
-			ASSERT(pVData);
-			
-			pVData->bNeedResort = TRUE;
-		}
+			GetViewData(FTCV_TASKLIST)->bNeedResort = TRUE;
 	}
 
 	// base class

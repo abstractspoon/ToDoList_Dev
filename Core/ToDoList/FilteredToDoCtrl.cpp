@@ -85,8 +85,6 @@ BEGIN_MESSAGE_MAP(CFilteredToDoCtrl, CTabbedToDoCtrl)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
-	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPRECHANGE, OnPreTabViewChange)
-	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREELIST, OnTreeExpandItem)
 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnEditChangeDueTime)
 END_MESSAGE_MAP()
 
@@ -150,20 +148,20 @@ BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 
 		// always refresh the tree filter because all other
 		// views depend on it
-		if (IsFilterSet(FTCV_TASKTREE))
+		if (HasAnyFilter())
 			RefreshTreeFilter(); // always
 
 		// handle other views
 		switch (nView)
 		{
 		case FTCV_TASKLIST:
-			if (IsFilterSet(nView))
+			if (HasAnyFilter())
 			{
-				RefreshListFilter();
+				RebuildList();
 			}
 			else if (!GetPreferencesKey().IsEmpty()) // first time
 			{
-				GetViewData2(nView)->bNeedRefilter = TRUE;
+				SetViewNeedsTaskUpdate(nView);
 			}
 			break;
 
@@ -187,12 +185,12 @@ BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 			// will already have initialized the active view if it is an
 			// extension so we only need to update if the tree actually
 			// has a filter
-			if (IsFilterSet(FTCV_TASKTREE))
+			if (HasAnyFilter())
 				RefreshExtensionFilter(nView);
 			break;
 		}
 	}
-	else if (IsFilterSet(nView))
+	else if (HasAnyFilter())
 	{
 		RefreshFilter();
 	}
@@ -245,98 +243,16 @@ void CFilteredToDoCtrl::OnEditChangeDueTime()
 	CDWordArray aSelTaskIDs;
 	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
-	BOOL bNeedsRefilter = ModNeedsRefilter(TDCA_DUEDATE, FTCV_TASKTREE, aSelTaskIDs);
+	BOOL bNeedFullTaskUpdate = ModNeedsRefilter(TDCA_DUEDATE, FTCV_TASKTREE, aSelTaskIDs);
 	
-	if (bNeedsRefilter)
+	if (bNeedFullTaskUpdate)
 		m_styles[TDCS_REFILTERONMODIFY] = FALSE;
 	
 	CTabbedToDoCtrl::OnSelChangeDueTime();
 	
-	if (bNeedsRefilter)
+	if (bNeedFullTaskUpdate)
 		m_styles[TDCS_REFILTERONMODIFY] = TRUE;
 }
-
-void CFilteredToDoCtrl::OnTreeExpandItem(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
-{
-	if (m_filter.HasFilterFlag(FO_HIDECOLLAPSED))
-	{
-		if (InListView())
-			RefreshListFilter();
-		else
-			GetViewData2(FTCV_TASKLIST)->bNeedRefilter = TRUE;
-	}
-}
-
-LRESULT CFilteredToDoCtrl::OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView) 
-{
-	if (nNewView != FTCV_TASKTREE)
-	{
-		VIEWDATA2* pData = GetViewData2((FTC_VIEW)nNewView);
-		BOOL bFiltered = FALSE;
-
-		// take a note of what task is currently singly selected
-		// so that we can prevent unnecessary calls to UpdateControls
-		DWORD dwSelTaskID = GetSingleSelectedTaskID();
-
-		switch (nNewView)
-		{
-		case FTCV_TASKLIST:
-			// update filter as required
-			if (pData->bNeedRefilter)
-			{
-				bFiltered = TRUE;
-				RefreshListFilter();
-			}
-			break;
-
-		case FTCV_UIEXTENSION1:
-		case FTCV_UIEXTENSION2:
-		case FTCV_UIEXTENSION3:
-		case FTCV_UIEXTENSION4:
-		case FTCV_UIEXTENSION5:
-		case FTCV_UIEXTENSION6:
-		case FTCV_UIEXTENSION7:
-		case FTCV_UIEXTENSION8:
-		case FTCV_UIEXTENSION9:
-		case FTCV_UIEXTENSION10:
-		case FTCV_UIEXTENSION11:
-		case FTCV_UIEXTENSION12:
-		case FTCV_UIEXTENSION13:
-		case FTCV_UIEXTENSION14:
-		case FTCV_UIEXTENSION15:
-		case FTCV_UIEXTENSION16:
-			// update filter as required
-			if (pData && pData->bNeedRefilter)
-			{
-				// initialise progress depending on whether extension
-				// window is already created
-				UINT nProgressMsg = 0;
-
-				if (GetExtensionWnd((FTC_VIEW)nNewView) == NULL)
-					nProgressMsg = IDS_INITIALISINGTABBEDVIEW;
-
-				BeginExtensionProgress(pData, nProgressMsg);
-				RefreshExtensionFilter((FTC_VIEW)nNewView);
-
-				bFiltered = TRUE;
-			}
-			break;
-		}
-
-		if (bFiltered)
-			pData->bNeedFullTaskUpdate = FALSE;
-		
-		// update controls only if the selection has changed and 
-		// we didn't refilter (RefreshFilter will already have called UpdateControls)
-		BOOL bSelChange = HasSingleSelectionChanged(dwSelTaskID);
-		
-		if (bSelChange && !bFiltered)
-			UpdateControls();
-	}
-
-	return CTabbedToDoCtrl::OnPreTabViewChange(nOldView, nNewView);
-}
-
 
 BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 {
@@ -406,15 +322,8 @@ BOOL CFilteredToDoCtrl::ArchiveDoneTasks(TDC_ARCHIVE nFlags, BOOL bRemoveFlagged
 {
 	if (CTabbedToDoCtrl::ArchiveDoneTasks(nFlags, bRemoveFlagged))
 	{
-		if (InListView())
-		{
-			if (IsFilterSet(FTCV_TASKLIST))
-				RefreshListFilter();
-		}
-		else if (IsFilterSet(FTCV_TASKTREE))
-		{
-			RefreshTreeFilter();
-		}
+		if (HasAnyFilter())
+			RefreshFilter();
 
 		return TRUE;
 	}
@@ -427,15 +336,8 @@ BOOL CFilteredToDoCtrl::ArchiveSelectedTasks(BOOL bRemove)
 {
 	if (CTabbedToDoCtrl::ArchiveSelectedTasks(bRemove))
 	{
-		if (InListView())
-		{
-			if (IsFilterSet(FTCV_TASKLIST))
-				RefreshListFilter();
-		}
-		else if (IsFilterSet(FTCV_TASKTREE))
-		{
-			RefreshTreeFilter();
-		}
+		if (HasAnyFilter())
+			RefreshFilter();
 
 		return TRUE;
 	}
@@ -446,7 +348,7 @@ BOOL CFilteredToDoCtrl::ArchiveSelectedTasks(BOOL bRemove)
 
 int CFilteredToDoCtrl::GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) const
 {
-	if (bSelectedOnly || !IsFilterSet(FTCV_TASKTREE))
+	if (bSelectedOnly || !HasAnyFilter())
 		return CTabbedToDoCtrl::GetArchivableTasks(tasks, bSelectedOnly);
 
 	// else process the entire data hierarchy
@@ -460,10 +362,12 @@ BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
 	// note: if the tasks does not exist in the tree then this is not a bug
 	// if a filter is set
 	HTREEITEM hti = m_taskTree.GetItem(dwTaskID);
-	ASSERT(hti || IsFilterSet(FTCV_TASKTREE));
 	
-	if (!hti && !IsFilterSet(FTCV_TASKTREE))
+	if (!hti && !HasAnyFilter())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 	
 	if (hti)
 		m_taskTree.DeleteItem(hti);
@@ -492,30 +396,19 @@ void CFilteredToDoCtrl::SetFilter(const TDCFILTER& filter)
 		m_filter.SetFilter(filter);
 
 		// mark everything needing refilter
-		GetViewData2(FTCV_TASKTREE)->bNeedRefilter = TRUE;
-		SetListNeedRefilter(TRUE);
-		SetExtensionsNeedRefilter(TRUE);
+		SetViewNeedsTaskUpdate(FTCV_TASKTREE);
+		SetViewNeedsTaskUpdate(FTCV_TASKLIST);
+		
+		SetExtensionsNeedTaskUpdate();
 	}
 	else
 	{
-		BOOL bTreeNeedsFilter = !FilterMatches(filter, FTCV_TASKTREE);
-		BOOL bListNeedRefilter = !FilterMatches(filter, FTCV_TASKLIST); 
+		BOOL bNeedFullTaskUpdate = !FilterMatches(filter);
 
 		m_filter.SetFilter(filter);
 
-		if (bTreeNeedsFilter)
-		{
-			// this will mark all other views as needing refiltering
-			// and refilter them if they are active
+		if (bNeedFullTaskUpdate)
 			RefreshFilter();
-		}
-		else if (bListNeedRefilter)
-		{
-			if (nView == FTCV_TASKLIST)
-				RefreshListFilter();
-			else
-				SetListNeedRefilter(TRUE);
-		}
 	}
 
 	ResetNowFilterTimer();
@@ -539,45 +432,6 @@ void CFilteredToDoCtrl::ToggleFilter()
 		RefreshFilter();
 
 	ResetNowFilterTimer();
-}
-
-BOOL CFilteredToDoCtrl::FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2, FTC_VIEW nView) const
-{
-	if (nView == FTCV_UNSET)
-		return FALSE;
-
-	DWORD dwIgnore = 0;
-
-	if (nView == FTCV_TASKTREE)
-		dwIgnore = (FO_HIDECOLLAPSED | FO_HIDEPARENTS);
-
-	return TDCFILTER::FiltersMatch(filter1, filter2, dwIgnore);
-}
-
-BOOL CFilteredToDoCtrl::FilterMatches(const TDCFILTER& filter, FTC_VIEW nView) const
-{
-	if (nView == FTCV_UNSET)
-		return FALSE;
-
-	DWORD dwIgnore = 0;
-
-	if (nView == FTCV_TASKTREE)
-		dwIgnore = (FO_HIDECOLLAPSED | FO_HIDEPARENTS);
-
-	return m_filter.FilterMatches(filter, NULL, 0L, dwIgnore);
-}
-
-BOOL CFilteredToDoCtrl::IsFilterSet(FTC_VIEW nView) const
-{
-	if (nView == FTCV_UNSET)
-		return FALSE;
-
-	DWORD dwIgnore = 0;
-
-	if (nView == FTCV_TASKTREE)
-		dwIgnore = (FO_HIDECOLLAPSED | FO_HIDEPARENTS);
-
-	return m_filter.HasAnyFilter(dwIgnore);
 }
 
 UINT CFilteredToDoCtrl::GetTaskCount(UINT* pVisible) const
@@ -628,9 +482,10 @@ BOOL CFilteredToDoCtrl::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 		if (m_bDelayLoaded)
 		{
 			// mark everything needing refilter
-			GetViewData2(FTCV_TASKTREE)->bNeedRefilter = TRUE;
-			SetListNeedRefilter(TRUE);
-			SetExtensionsNeedRefilter(TRUE);
+			SetViewNeedsTaskUpdate(FTCV_TASKTREE);
+			SetViewNeedsTaskUpdate(FTCV_TASKLIST);
+
+			SetExtensionsNeedTaskUpdate();
 		}
 		else
 		{
@@ -644,9 +499,9 @@ BOOL CFilteredToDoCtrl::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags, DWORD dwIgnoreFlags) const
+BOOL CFilteredToDoCtrl::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags) const
 {
-	return m_filter.FilterMatches(filter, szCustom, dwCustomFlags, dwIgnoreFlags);
+	return m_filter.FilterMatches(filter, szCustom, dwCustomFlags);
 }
 
 void CFilteredToDoCtrl::RefreshFilter() 
@@ -661,15 +516,13 @@ void CFilteredToDoCtrl::RefreshFilter()
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		// mark all other views as needing refiltering
-		SetListNeedRefilter(TRUE);
-		SetExtensionsNeedRefilter(TRUE);
+		SetViewNeedsTaskUpdate(FTCV_TASKLIST);
+		SetExtensionsNeedTaskUpdate();
 		break;
 
 	case FTCV_TASKLIST:
-		// mark extensions as needing refiltering
-		RefreshListFilter();
-		SetExtensionsNeedRefilter(TRUE);
+		RebuildList();
+		SetExtensionsNeedTaskUpdate();
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -688,33 +541,11 @@ void CFilteredToDoCtrl::RefreshFilter()
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		SetExtensionsNeedRefilter(TRUE);
-		SetListNeedRefilter(TRUE);
+		SetViewNeedsTaskUpdate(FTCV_TASKLIST);
+		SetExtensionsNeedTaskUpdate(TRUE);
 		RefreshExtensionFilter(nView, TRUE);
 		SyncExtensionSelectionToTree(nView);
 		break;
-	}
-}
-
-void CFilteredToDoCtrl::SetListNeedRefilter(BOOL bRefilter)
-{
-	GetViewData2(FTCV_TASKLIST)->bNeedRefilter = bRefilter;
-}
-
-void CFilteredToDoCtrl::SetExtensionsNeedRefilter(BOOL bRefilter, FTC_VIEW nIgnore)
-{
-	for (int nExt = 0; nExt < m_aExtViews.GetSize(); nExt++)
-	{
-		FTC_VIEW nView = (FTC_VIEW)(FTCV_UIEXTENSION1 + nExt);
-
-		if (nView == nIgnore)
-			continue;
-
-		// else
-		VIEWDATA2* pData = GetViewData2(nView);
-
-		if (pData)
-			pData->bNeedRefilter = bRefilter;
 	}
 }
 
@@ -745,7 +576,7 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 	}
 	
 	// modify the tree prompt depending on whether there is a filter set
-	if (IsFilterSet(FTCV_TASKTREE))
+	if (HasAnyFilter())
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
 	else
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
@@ -768,9 +599,9 @@ HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
 	return CTabbedToDoCtrl::RebuildTree(pContext);
 }
 
-BOOL CFilteredToDoCtrl::WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const
+BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const
 {
-	BOOL bWantTask = CTabbedToDoCtrl::WantAddTask(pTDI, pTDS, pContext);
+	BOOL bWantTask = CTabbedToDoCtrl::WantAddTaskToTree(pTDI, pTDS, pContext);
 
 #ifdef _DEBUG
 	DWORD dwTaskID = pTDS->GetTaskID();
@@ -898,15 +729,14 @@ void CFilteredToDoCtrl::RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgres
 
 	if (pExtWnd)
 	{
-		VIEWDATA2* pData = GetViewData2(nView);
+		VIEWDATA* pData = GetViewData(nView);
 		ASSERT(pData);
 
 		if (bShowProgress)
 			BeginExtensionProgress(pData, IDS_UPDATINGTABBEDVIEW);
 		
-		// clear all update flags
+		// clear all update flag
 		pData->bNeedFullTaskUpdate = FALSE;
-		pData->bNeedRefilter = FALSE;
 
 		// update view with filtered tasks
 		CTaskFile tasks;
@@ -920,160 +750,45 @@ void CFilteredToDoCtrl::RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgres
 }
 
 // base class override
-void CFilteredToDoCtrl::RebuildList(const void* pContext)
+void CFilteredToDoCtrl::RebuildList()
 {
-	// This should only be called virtually from base-class
-	ASSERT(pContext == NULL);
-	UNREFERENCED_PARAMETER(pContext);
-
-	if (!m_bIgnoreListRebuild)
-		RefreshListFilter();
-}
-
-void CFilteredToDoCtrl::RefreshListFilter() 
-{
-	GetViewData2(FTCV_TASKLIST)->bNeedRefilter = FALSE;
-
-	// build a find query that matches the filter
-	SEARCHPARAMS filter;
-	m_filter.BuildFilterQuery(filter, m_aCustomAttribDefs);
-
-	// rebuild the list
-	RebuildList(filter);
-
-	// modify the list prompt depending on whether there is a filter set
-	if (IsFilterSet(FTCV_TASKLIST))
-		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
-	else
-		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
-}
-
-void CFilteredToDoCtrl::RebuildList(const SEARCHPARAMS& filter)
-{
-	// since the tree will have already got the items we want 
-	// we can optimize the rebuild under certain circumstances
-	// which are: 
-	// 1. the list is sorted OR
-	// 2. the tree is unsorted OR
-	// 3. we only want the selected items 
-	// otherwise we need the data in it's unsorted state and the 
-	// tree doesn't have it
-	if (filter.HasAttribute(TDCA_SELECTION) ||
-		m_taskList.IsSorting() || 
-		!m_taskTree.IsSorting())
+	if (m_bIgnoreListRebuild)
 	{
-		// rebuild the list from the tree
-		CTabbedToDoCtrl::RebuildList(&filter);
-	}
-	else // rebuild from scratch
-	{
-		// cache current selection
-		TDCSELECTIONCACHE cache;
-		CacheListSelection(cache);
-
-		// grab the selected items for the filtering
-		m_aSelectedTaskIDsForFiltering.Copy(cache.aSelTaskIDs);
-
-		// remove all existing items
-		m_taskList.DeleteAll();
-
-		// do the find
-		CResultArray aResults;
-		m_matcher.FindTasks(filter, aResults, HasDueTodayColor());
-
-		// add tasks to list
-		for (int nRes = 0; nRes < aResults.GetSize(); nRes++)
-		{
-			const SEARCHRESULT& res = aResults[nRes];
-
-			// some more filtering required
-			if (HasStyle(TDCS_ALWAYSHIDELISTPARENTS) || m_filter.HasFilterFlag(FO_HIDEPARENTS))
-			{
-				if (m_data.TaskHasSubtasks(res.dwTaskID))
-					continue;
-			}
-			else if (m_filter.HasFilterFlag(FO_HIDECOLLAPSED))
-			{
-				HTREEITEM hti = m_taskTree.GetItem(res.dwTaskID);
-				ASSERT(hti);			
-
-				if (m_taskTree.ItemHasChildren(hti) && !TCH().IsItemExpanded(hti))
-					continue;
-			}
-
-			m_taskList.InsertItem(res.dwTaskID);
-		}
-
-		m_taskList.RestoreSelection(cache, TRUE);
-
-		Resort();
-	}
-}
-
-void CFilteredToDoCtrl::AddTreeItemToList(HTREEITEM hti, const void* pContext)
-{
-	if (pContext == NULL)
-	{
-		CTabbedToDoCtrl::AddTreeItemToList(hti, NULL);
 		return;
 	}
 
-	// else it's a filter
-	const SEARCHPARAMS* pFilter = static_cast<const SEARCHPARAMS*>(pContext);
-
-	if (hti)
+	if (m_taskList.IsSorting() || !m_taskTree.IsSorting() || !HasAnyFilter())
 	{
-		BOOL bAdd = TRUE;
-		DWORD dwTaskID = GetTaskID(hti);
+		// See comment in CTabbedToDoCtrl::RebuildList()
+		CTabbedToDoCtrl::RebuildList();
+	}
+	else
+	{
+		SetViewNeedsTaskUpdate(FTCV_TASKLIST, FALSE);
 
-		// check if parent items are to be ignored
-		if ((m_filter.HasFilterFlag(FO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS)))
+		if (m_filter.GetFilter() == FS_SELECTED)
 		{
-			// quick test first
-			if (m_taskTree.ItemHasChildren(hti))
-			{
-				bAdd = FALSE;
-			}
-			else // item might have children currently filtered out
-			{
-				bAdd = !m_data.TaskHasSubtasks(dwTaskID);
-			}
+			SetListItems(m_aSelectedTaskIDsForFiltering);
 		}
-		// else check if it's a parent item that's only present because
-		// it has matching subtasks
-		else if (m_taskTree.ItemHasChildren(hti) && !pFilter->HasAttribute(TDCA_SELECTION))
+		else
 		{
-			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-			const TODOITEM* pTDI = GetTask(dwTaskID); 
+			SEARCHPARAMS filter;
+			m_filter.BuildFilterQuery(filter, m_aCustomAttribDefs);
 
-			if (pTDI)
-			{
-				SEARCHRESULT result;
+			CResultArray aResults;
+			m_matcher.FindTasks(filter, aResults, HasDueTodayColor());
 
-				// ie. check that parent actually matches
-				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+			CDWordArray aTaskIDs;
+			CTDCTaskMatcher::Convert(aResults, aTaskIDs);
 
-				if (pTDS)
-					bAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, result, FALSE);
-			}
+			SetListItems(aTaskIDs);
 		}
-
-		if (bAdd)
-			m_taskList.InsertItem(dwTaskID);
 	}
 
-	// always check the children unless collapsed tasks ignored
-	if (!m_filter.HasFilterFlag(FO_HIDECOLLAPSED) || !hti || TCH().IsItemExpanded(hti))
-	{
-		HTREEITEM htiChild = m_taskTree.GetChildItem(hti);
-
-		while (htiChild)
-		{
-			// check
-			AddTreeItemToList(htiChild, pContext);
-			htiChild = m_taskTree.GetNextItem(htiChild);
-		}
-	}
+	if (HasAnyFilter())
+		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
+	else
+		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 }
 
 BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStyleMap& styles)
@@ -1081,12 +796,12 @@ BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStyleMap& styles)
 	if (CTabbedToDoCtrl::ModifyStyles(styles))
 	{
 		// do we need to re-filter?
-		if (HasAnyFilter() && GetViewData2(FTCV_TASKLIST)->bNeedRefilter)
+		if (HasAnyFilter() && GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate)
 		{
 			RefreshTreeFilter(); // always
 
 			if (InListView())
-				RefreshListFilter();
+				RebuildList();
 		}
 
 		return TRUE;
@@ -1103,7 +818,7 @@ DWORD CFilteredToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
 	case TDCS_DONEHAVELOWESTPRIORITY:
 	case TDCS_ALWAYSHIDELISTPARENTS:
 	case TDCS_TREATSUBCOMPLETEDASDONE:
-		GetViewData2(FTCV_TASKLIST)->bNeedRefilter = TRUE;
+		SetViewNeedsTaskUpdate(FTCV_TASKLIST);
 		break;
 	}
 
@@ -1131,7 +846,7 @@ BOOL CFilteredToDoCtrl::SplitSelectedTask(int nNumSubtasks)
    if (CTabbedToDoCtrl::SplitSelectedTask(nNumSubtasks))
    {
       if (InListView())
-         RefreshListFilter();
+         RebuildList();
  
       return TRUE;
    }
@@ -1143,8 +858,8 @@ BOOL CFilteredToDoCtrl::CreateNewTask(LPCTSTR szText, TDC_INSERTWHERE nWhere, BO
 {
 	if (CTabbedToDoCtrl::CreateNewTask(szText, nWhere, bEditText, dwDependency))
 	{
-		SetListNeedRefilter(!InListView());
-		SetExtensionsNeedRefilter(TRUE, GetTaskView());
+		SetViewNeedsTaskUpdate(FTCV_TASKLIST, !InListView());
+		SetExtensionsNeedTaskUpdate(TRUE, GetTaskView());
 
 		return TRUE;
 	}
@@ -1178,11 +893,11 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 		// we are undoing a delete because the undone item will not yet be in the list.
 		if (InListView() || mapAttribIDs.Has(TDCA_UNDO))
 		{
-			RefreshListFilter();
+			RebuildList();
 		}
 		else
 		{
-			GetViewData2(FTCV_TASKLIST)->bNeedRefilter = TRUE;
+			SetViewNeedsTaskUpdate(FTCV_TASKLIST);
 		}
 	}
 
@@ -1246,9 +961,9 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
-	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nModType, m_aCustomAttribDefs);
+	BOOL bNeedFullTaskUpdate = m_filter.ModNeedsRefilter(nModType, m_aCustomAttribDefs);
 
-	if (!bNeedRefilter)
+	if (!bNeedFullTaskUpdate)
 	{
 		// handle attributes common to both filter types
 		switch (nModType)
@@ -1274,7 +989,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 		case TDCA_POSITION_SAMEPARENT:
 		case TDCA_POSITION_DIFFERENTPARENT:
 			// Task was moved
-			return (nView == FTCV_TASKLIST && !IsSorting());
+			return ((nView == FTCV_TASKLIST) && !IsSorting());
 
 		case TDCA_SELECTION:
 			// never need to refilter
@@ -1311,32 +1026,22 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 		BOOL bMatchesFilter = m_matcher.TaskMatches(dwModTaskID, params, result, FALSE);
 		BOOL bTreeHasItem = (m_taskTree.GetItem(dwModTaskID) != NULL);
 
-		bNeedRefilter = ((bMatchesFilter && !bTreeHasItem) || (!bMatchesFilter && bTreeHasItem));
+		bNeedFullTaskUpdate = ((bMatchesFilter && !bTreeHasItem) || (!bMatchesFilter && bTreeHasItem));
 		
 		// extra handling for 'Find Tasks' filters 
-		if (bNeedRefilter && HasAdvancedFilter())
+		if (bNeedFullTaskUpdate && HasAdvancedFilter())
 		{
 			// don't refilter on Time Spent if time tracking
-			bNeedRefilter = !(nModType == TDCA_TIMESPENT && IsActivelyTimeTracking());
+			bNeedFullTaskUpdate = !(nModType == TDCA_TIMESPENT && IsActivelyTimeTracking());
 		}
 	}
 
-	return bNeedRefilter;
+	return bNeedFullTaskUpdate;
 }
 
 void CFilteredToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 {
 	CTabbedToDoCtrl::Sort(nBy, bAllowToggle);
-}
-
-VIEWDATA2* CFilteredToDoCtrl::GetViewData2(FTC_VIEW nView) const
-{
-	return (VIEWDATA2*)CTabbedToDoCtrl::GetViewData(nView);
-}
-
-VIEWDATA2* CFilteredToDoCtrl::GetActiveViewData2() const
-{
-	return GetViewData2(GetTaskView());
 }
 
 void CFilteredToDoCtrl::OnTimerMidnight()
@@ -1520,7 +1225,7 @@ BOOL CFilteredToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap
 	}
 
 	// Special case: No filter is set -> All tasks (v much faster)
-	if (!IsFilterSet(FTCV_TASKTREE))
+	if (!HasAnyFilter())
 	{
 		PrepareTaskfileForTasks(tasks, TDCGT_ALL);
 

@@ -60,10 +60,8 @@ protected:
 	TDCFILTER m_filter;
 	FILTER_TITLE m_nTitleFilter;
 	TDCAUTOLISTDATA m_tldListData;
-	FTC_VIEW m_nView;
 	CString m_sAdvancedFilter;
 	DWORD m_dwCustomFlags;
-	BOOL m_bWantHideParents;
 	CStringArray m_aAdvancedFilterNames;
 	CWndPromptManager m_mgrPrompts;
 

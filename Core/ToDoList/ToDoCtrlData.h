@@ -54,6 +54,7 @@ public:
 	int BuildDataModel(const CTaskFile& tasks);
 	
 	inline int GetTaskCount() const { return m_items.GetCount(); }
+	inline int GetTaskIDs(CDWordArray& aTaskIDs) const { return m_struct.GetTaskIDs(aTaskIDs); }
 	
 	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID = 0) const;
 	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef = NULL) const;

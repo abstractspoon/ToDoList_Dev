@@ -164,7 +164,8 @@ protected:
 	CTDLTaskListCtrl m_taskList;
 	CTDLViewTabControl m_tabViews;
 	CTaskListDropTarget m_dtList;
-	CComboBox m_cbGroupBy;
+	CComboBox m_cbListGroupBy;
+	CCheckComboBox m_cbListOptions;
 
 	const CUIExtensionMgr& m_mgrUIExt;
 	CArray<IUIExtensionWindow*, IUIExtensionWindow*> m_aExtViews;
@@ -174,6 +175,7 @@ protected:
 	BOOL m_bUpdatingExtensions;
 	BOOL m_bRecreatingRecurringTasks;
 	BOOL m_bTreeNeedResort;
+	DWORD m_dwListOptions;
 	
 	TDC_COLUMN m_nListViewGroupBy;
 	TDC_ATTRIBUTE m_nExtModifyingAttrib;
@@ -202,8 +204,10 @@ protected:
 	afx_msg void OnTabCtrlRClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListSelChanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTreeExpandItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnListGroupBySelChanged();
+	afx_msg void OnListOptionsCheckChanged();
 
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
@@ -253,6 +257,9 @@ protected:
 	virtual void OnTaskIconsChanged();
 	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 
+	virtual void RebuildList();
+	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
+
 	void UpdateSelectedTaskPath();
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
 	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
@@ -264,7 +271,9 @@ protected:
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
-	void BuildGroupByCombo();
+	void BuildListGroupByCombo();
+	void BuildListOptionsCombo();
+	void SetListItems(const CDWordArray& aTaskIDs) { SetListItems(aTaskIDs, TRUE); }
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree();
@@ -278,10 +287,6 @@ protected:
 	
 	BOOL AddView(IUIExtension* pExtension);
 	BOOL RemoveView(IUIExtension* pExtension);
-
-	virtual void RebuildList(const void* pContext);
-	virtual void AddTreeItemToList(HTREEITEM hti, const void* pContext);
-	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
 
 	HTREEITEM GetTreeItem(int nItem) const;
 	int GetListItem(HTREEITEM hti) const;
@@ -307,6 +312,7 @@ protected:
 	BOOL ViewSupportsTaskSelection(FTC_VIEW nView) const;
 	BOOL ViewSupportsNewTask(FTC_VIEW nView) const;
 	BOOL ViewHasTaskSelection(FTC_VIEW nView) const;
+	void SetViewNeedsTaskUpdate(FTC_VIEW nView, BOOL bUpdate = TRUE);
 
 	void UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs);
 	BOOL ExtensionDoAppCommand(FTC_VIEW nView, IUI_APPCOMMAND nCmd);
@@ -328,8 +334,8 @@ protected:
 	void EndExtensionProgress();
 	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType);
 	void SetExtensionsReadOnly(BOOL bReadOnly);
-	void SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
-	void SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetExtensionsNeedTaskUpdate(BOOL bUpdate = TRUE, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetExtensionsNeedFontUpdate(BOOL bUpdate = TRUE, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetListViewNeedFontUpdate(BOOL bUpdate);
 	DWORD ProcessUIExtensionMod(const IUITASKMOD& mod);
 	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttribIDs) const;
@@ -342,19 +348,19 @@ protected:
 	void RefreshExtensionViewSort(FTC_VIEW nView);
 	BOOL ExtensionCanSortBy(FTC_VIEW nView, TDC_ATTRIBUTE nBy) const;
 	BOOL GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nDirection, DWORD& dwDestParentID, DWORD& dwDestPrevSiblingID) const;
-	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const;
-	void ShowListViewGroupByCtrls(BOOL bShow);
-
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, DWORD dwFlags, CTaskFile& tasks) const;
+	
 	int GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	BOOL CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID) const;
+	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 
 	BOOL AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
 	BOOL AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const;
 	void AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttribIDs) const;
+	void ShowListViewSpecificCtrls(BOOL bShow);
 
 	virtual VIEWDATA* NewViewData() { return new VIEWDATA(); }
 
@@ -362,6 +368,10 @@ protected:
 	static int PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData);
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
+
+private:
+	void SetListItems(const CDWordArray& aTaskIDs, BOOL bCheckVisibility);
+	BOOL WantAddTaskToList(DWORD dwTaskID) const;
 };
 
 #endif // !defined(AFX_TABBEDTODOCTRL_H__356A6EB9_C7EC_4395_8716_623AFF4A269B__INCLUDED_)

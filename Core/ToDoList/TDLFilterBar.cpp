@@ -73,7 +73,6 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	m_cbTagFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbPriorityFilter(TRUE),
 	m_cbRiskFilter(TRUE),
-	m_nView(FTCV_UNSET),
 	m_crUIBack(CLR_NONE),
 	m_eStartNextNDays(TRUE, _T("-0123456789")),
 	m_eDueNextNDays(TRUE, _T("-0123456789")),
@@ -170,12 +169,12 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 			DWORD dwFlags = TDCFILTER().dwFlags; // default
 			m_mapCustomFlags.Lookup(m_sAdvancedFilter, dwFlags);
 
-			DWORD dwOptions = (FO_HIDEPARENTS | FO_HIDEOVERDUE | FO_HIDEDONE | FO_HIDECOLLAPSED | FO_SHOWALLSUB);
+			DWORD dwOptions = (FO_HIDEOVERDUE | FO_HIDEDONE | FO_SHOWALLSUB);
 			m_cbOptions.Initialize(dwOptions, dwFlags);
 		}
 		else
 		{
-			m_cbOptions.Initialize(m_filter, m_nView, m_bWantHideParents);
+			m_cbOptions.Initialize(m_filter);
 		}
 	}
 }
@@ -557,9 +556,6 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 	{
 		CHoldRedraw hr(GetSafeHwnd(), NCR_PAINT | NCR_ERASEBKGND);
 
-		m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
-		m_nView = tdc.GetTaskView();
-	
 		// column visibility
 		SetVisibleFilters(tdc.GetVisibleFilterFields(), FALSE);
 

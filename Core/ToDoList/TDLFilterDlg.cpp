@@ -42,7 +42,6 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	m_cbRiskFilter(TRUE),
 	m_eStartNextNDays(TRUE, _T("-0123456789")),
 	m_eDueNextNDays(TRUE, _T("-0123456789")),
-	m_nView(FTCV_UNSET),
 	m_nTitleFilter(nTitleFilter)
 {
 	// main filter
@@ -70,9 +69,6 @@ CTDLFilterDlg::CTDLFilterDlg(FILTER_TITLE nTitleFilter,
 	tdc.GetAutoListData(m_tldListData, TDCA_ALL);
 
 	m_cbPriorityFilter.SetColors(aPriorityColors);
-	m_nView = tdc.GetTaskView();
-
-	m_bWantHideParents = tdc.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
 }
 
 
@@ -151,11 +147,11 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 		// options states set in OnInitDialog
 		if (m_sAdvancedFilter.IsEmpty())
 		{
-			m_cbOptions.Initialize(m_filter, m_nView, m_bWantHideParents);
+			m_cbOptions.Initialize(m_filter);
 		}
 		else
 		{
-			DWORD dwOptions = (FO_HIDEPARENTS | FO_HIDEOVERDUE | FO_HIDEDONE | FO_HIDECOLLAPSED | FO_SHOWALLSUB);
+			DWORD dwOptions = (FO_HIDEOVERDUE | FO_HIDEDONE | FO_SHOWALLSUB);
 			m_cbOptions.Initialize(dwOptions, m_dwCustomFlags);
 		}
 	}
@@ -288,7 +284,7 @@ void CTDLFilterDlg::OnSelchangeFiltercombo()
 	UpdateData();
 	EnableDisableControls();
 
-	m_cbOptions.Initialize(m_filter, m_nView);
+	m_cbOptions.Initialize(m_filter);
 }
 
 void CTDLFilterDlg::OnSelchangeFilter() 

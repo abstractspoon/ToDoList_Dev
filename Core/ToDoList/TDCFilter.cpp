@@ -52,18 +52,18 @@ BOOL CTDCFilter::operator==(const CTDCFilter& filter) const
 	return FALSE;
 }
 
-BOOL CTDCFilter::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags, DWORD dwIgnoreFlags) const
+BOOL CTDCFilter::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags) const
 {
 	BOOL bCustom = HasAdvancedFilter();
 	BOOL bOtherCustom = (szCustom && *szCustom);
 
 	if (bCustom && bOtherCustom)
 	{
-		return m_advFilter.Matches(szCustom, dwCustomFlags, dwIgnoreFlags);
+		return m_advFilter.Matches(szCustom, dwCustomFlags);
 	}
 	else if (!bCustom && !bOtherCustom)
 	{
-		return m_filter.Matches(filter, dwIgnoreFlags);
+		return m_filter.Matches(filter);
 	}
 
 	// One is custom but not the other
@@ -120,12 +120,12 @@ FILTER_SHOW CTDCFilter::GetFilter() const
 	return FS_ALL;
 }
 
-BOOL CTDCFilter::HasAnyFilter(DWORD dwIgnoreFlags) const
+BOOL CTDCFilter::HasAnyFilter() const
 {
 	switch (m_nState)
 	{
 	case TDCFS_FILTER:
-		return m_filter.IsSet(dwIgnoreFlags);
+		return m_filter.IsSet();
 
 	case TDCFS_ADVANCED:
 		return (m_advFilter.params.GetRuleCount() != 0);
@@ -734,29 +734,12 @@ DWORD CTDCFilter::LoadFlags(const CPreferences& prefs, const CString& sKey)
 {
 	DWORD dwFlags = 0;
 
-	if (prefs.GetProfileInt(sKey, _T("AnyCategory"), TRUE))
-		dwFlags |= FO_ANYCATEGORY;
-
-	if (prefs.GetProfileInt(sKey, _T("AnyAllocTo"), TRUE))
-		dwFlags |= FO_ANYALLOCTO;
-
-	if (prefs.GetProfileInt(sKey, _T("AnyTag"), TRUE))
-		dwFlags |= FO_ANYTAG;
-
-	if (prefs.GetProfileInt(sKey, _T("HideParents"), FALSE))
-		dwFlags |= FO_HIDEPARENTS;
-
-	if (prefs.GetProfileInt(sKey, _T("HideOverDue"), FALSE))
-		dwFlags |= FO_HIDEOVERDUE;
-
-	if (prefs.GetProfileInt(sKey, _T("HideDone"), FALSE))
-		dwFlags |= FO_HIDEDONE;
-
-	if (prefs.GetProfileInt(sKey, _T("HideCollapsed"), FALSE))
-		dwFlags |= FO_HIDECOLLAPSED;
-
-	if (prefs.GetProfileInt(sKey, _T("ShowAllSubtasks"), FALSE))
-		dwFlags |= FO_SHOWALLSUB;
+	Misc::SetFlag(dwFlags, FO_ANYCATEGORY,	prefs.GetProfileInt(sKey, _T("AnyCategory"), TRUE));
+	Misc::SetFlag(dwFlags, FO_ANYALLOCTO,	prefs.GetProfileInt(sKey, _T("AnyAllocTo"), TRUE));
+	Misc::SetFlag(dwFlags, FO_ANYTAG,		prefs.GetProfileInt(sKey, _T("AnyTag"), TRUE));
+	Misc::SetFlag(dwFlags, FO_HIDEOVERDUE,	prefs.GetProfileInt(sKey, _T("HideOverDue"), FALSE));
+	Misc::SetFlag(dwFlags, FO_HIDEDONE,		prefs.GetProfileInt(sKey, _T("HideDone"), FALSE));
+	Misc::SetFlag(dwFlags, FO_SHOWALLSUB,	prefs.GetProfileInt(sKey, _T("ShowAllSubtasks"), FALSE));
 
 	return dwFlags;
 }
@@ -817,14 +800,12 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCF
 
 void CTDCFilter::SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sKey)
 {
-	prefs.WriteProfileInt(sKey, _T("AnyAllocTo"), Misc::HasFlag(dwFlags, FO_ANYALLOCTO));
-	prefs.WriteProfileInt(sKey, _T("AnyCategory"), Misc::HasFlag(dwFlags, FO_ANYCATEGORY));
-	prefs.WriteProfileInt(sKey, _T("AnyTag"), Misc::HasFlag(dwFlags, FO_ANYTAG));
-	prefs.WriteProfileInt(sKey, _T("HideParents"), Misc::HasFlag(dwFlags, FO_HIDEPARENTS));
-	prefs.WriteProfileInt(sKey, _T("HideOverDue"), Misc::HasFlag(dwFlags, FO_HIDEOVERDUE));
-	prefs.WriteProfileInt(sKey, _T("HideDone"), Misc::HasFlag(dwFlags, FO_HIDEDONE));
-	prefs.WriteProfileInt(sKey, _T("HideCollapsed"), Misc::HasFlag(dwFlags, FO_HIDECOLLAPSED));
-	prefs.WriteProfileInt(sKey, _T("ShowAllSubtasks"), Misc::HasFlag(dwFlags, FO_SHOWALLSUB));
+	prefs.WriteProfileInt(sKey, _T("AnyAllocTo"),		Misc::HasFlag(dwFlags, FO_ANYALLOCTO));
+	prefs.WriteProfileInt(sKey, _T("AnyCategory"),		Misc::HasFlag(dwFlags, FO_ANYCATEGORY));
+	prefs.WriteProfileInt(sKey, _T("AnyTag"),			Misc::HasFlag(dwFlags, FO_ANYTAG));
+	prefs.WriteProfileInt(sKey, _T("HideOverDue"),		Misc::HasFlag(dwFlags, FO_HIDEOVERDUE));
+	prefs.WriteProfileInt(sKey, _T("HideDone"),			Misc::HasFlag(dwFlags, FO_HIDEDONE));
+	prefs.WriteProfileInt(sKey, _T("ShowAllSubtasks"),	Misc::HasFlag(dwFlags, FO_SHOWALLSUB));
 }
 
 BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const 

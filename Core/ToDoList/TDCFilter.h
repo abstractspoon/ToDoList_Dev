@@ -18,11 +18,11 @@ public:
 
 	BOOL SetFilter(const TDCFILTER& filter);
 	BOOL SetAdvancedFilter(const TDCADVANCEDFILTER& filter);
-	BOOL FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom = NULL, DWORD dwCustomFlags = 0, DWORD dwIgnoreFlags = 0) const;
+	BOOL FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom = NULL, DWORD dwCustomFlags = 0) const;
 	BOOL ClearFilter();
 	BOOL ToggleFilter();
 
-	BOOL HasAnyFilter(DWORD dwIgnoreFlags = 0) const;
+	BOOL HasAnyFilter() const;
 	BOOL HasAdvancedFilter() const;
 	BOOL HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttrib) const;
 	BOOL HasFilterAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs) const;

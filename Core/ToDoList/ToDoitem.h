@@ -399,6 +399,8 @@ public:
 
 	BOOL DeleteTask(DWORD dwID);
 	void DeleteAll();
+
+	int GetTaskIDs(CDWordArray& aTaskIDs) const;
 	
 protected:
 	CMap<DWORD, DWORD, TODOSTRUCTURE*, TODOSTRUCTURE*&> m_mapStructure;
@@ -411,6 +413,8 @@ protected:
 	const CToDoCtrlDataStructure& operator=(const CToDoCtrlDataStructure& tds); 
 	
 	BOOL InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDSParent, int nPos);
+	
+	static void AddTaskIDs(TODOSTRUCTURE* pTDS, CDWordArray& aTaskIDs);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////

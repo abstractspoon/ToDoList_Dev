@@ -1859,4 +1859,29 @@ void CToDoCtrlDataStructure::RemoveFromMap(const TODOSTRUCTURE* pTDS)
 	}
 }
 
+int CToDoCtrlDataStructure::GetTaskIDs(CDWordArray& aTaskIDs) const
+{
+	aTaskIDs.RemoveAll();
+
+	// Add top-level tasks
+	for (int nSubTask = 0; nSubTask < m_aSubTasks.GetSize(); nSubTask++)
+	{
+		AddTaskIDs(m_aSubTasks[nSubTask], aTaskIDs);
+	}
+
+	return aTaskIDs.GetSize();
+}
+
+void CToDoCtrlDataStructure::AddTaskIDs(TODOSTRUCTURE* pTDS, CDWordArray& aTaskIDs)
+{
+	ASSERT(pTDS->GetTaskID());
+
+	aTaskIDs.Add(pTDS->GetTaskID());
+
+	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+	{
+		AddTaskIDs(pTDS->GetSubTask(nSubTask), aTaskIDs);
+	}
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////

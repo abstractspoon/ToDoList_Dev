@@ -9219,7 +9219,7 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 		BOOL bAddTask = TRUE;
 
 		if (!bHasChildren && pContext)
-			bAddTask = WantAddTask(pTDIChild, pTDSChild, pContext);
+			bAddTask = WantAddTaskToTree(pTDIChild, pTDSChild, pContext);
 
 		if (bAddTask)
 		{
@@ -9238,7 +9238,7 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 				// if no subtasks got added to the tree then we may need to remove the parent too
 				if (!m_taskTree.ItemHasChildren(htiChild))
 				{
-					BOOL bRemoveTask = (pContext != NULL && !WantAddTask(pTDIChild, pTDSChild, pContext));
+					BOOL bRemoveTask = (pContext != NULL && !WantAddTaskToTree(pTDIChild, pTDSChild, pContext));
 
 					if (bRemoveTask)
 						m_taskTree.DeleteItem(htiChild);
@@ -9250,7 +9250,7 @@ BOOL CToDoCtrl::BuildTreeItem(HTREEITEM htiParent, const TODOSTRUCTURE* pTDS, co
 	return TRUE;
 }
 
-BOOL CToDoCtrl::WantAddTask(const TODOITEM* /*pTDI*/, const TODOSTRUCTURE* /*pTDS*/, const void* /*pContext*/) const
+BOOL CToDoCtrl::WantAddTaskToTree(const TODOITEM* /*pTDI*/, const TODOSTRUCTURE* /*pTDS*/, const void* /*pContext*/) const
 {
 	return TRUE;
 }

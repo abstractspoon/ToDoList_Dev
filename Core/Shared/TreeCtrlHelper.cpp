@@ -1346,3 +1346,33 @@ HTREEITEM CTreeCtrlHelper::CopyTree(HTREEITEM hDest, HTREEITEM hSrc, TCH_WHERE n
 	return CopyTree(hDest, &htcSrc, nWhere, bUsesTextCallback, bUsesImageCallback);
 }
 
+int CTreeCtrlHelper::GetItemData(CDWordArray& aItemData, BOOL bIncParents, BOOL bIncCollapsedChildren) const
+{
+	aItemData.RemoveAll();
+
+	AddItemData(TVI_ROOT, aItemData, bIncParents, bIncCollapsedChildren);
+
+	return aItemData.GetSize();
+}
+
+void CTreeCtrlHelper::AddItemData(HTREEITEM hti, CDWordArray& aItemData, BOOL bIncParents, BOOL bIncCollapsedChildren) const
+{
+	ASSERT(hti);
+
+	if ((hti != TVI_ROOT) && (bIncParents || !m_tree.ItemHasChildren(hti)))
+		aItemData.Add(m_tree.GetItemData(hti));
+
+	if (bIncCollapsedChildren || (IsItemExpanded(hti) > 0))
+	{
+		HTREEITEM htiChild = m_tree.GetChildItem(hti);
+
+		while (htiChild)
+		{
+			AddItemData(htiChild, aItemData, bIncParents, bIncCollapsedChildren);
+
+			htiChild = m_tree.GetNextSiblingItem(htiChild);
+		}
+	}
+}
+
+

@@ -14,16 +14,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct VIEWDATA2 : public VIEWDATA
-{
-	VIEWDATA2() : bNeedRefilter(TRUE) {}
-	virtual ~VIEWDATA2() {}
-
-	BOOL bNeedRefilter;
-};
-
-/////////////////////////////////////////////////////////////////////////////
-
 class CFilteredToDoCtrl : public CTabbedToDoCtrl  
 {
 public:
@@ -62,7 +52,7 @@ public:
 
 	FILTER_SHOW GetFilter(TDCFILTER& filter) const;
 	void SetFilter(const TDCFILTER& filter);
-	BOOL FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom = NULL, DWORD dwCustomFlags = 0, DWORD dwIgnoreFlags = 0) const;
+	BOOL FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom = NULL, DWORD dwCustomFlags = 0) const;
 
 	BOOL HasAdvancedFilter() const;
 	BOOL SetAdvancedFilter(const TDCADVANCEDFILTER& filter);
@@ -107,9 +97,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT nIDEvent);
 	//}}AFX_MSG
-	afx_msg void OnTreeExpandItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnEditChangeDueTime();
-	afx_msg LRESULT OnPreTabViewChange(WPARAM nOldView, LPARAM nNewView);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -129,33 +117,20 @@ protected:
 	virtual BOOL CopySelectedTasks() const;
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const;
+	virtual void RebuildList();
 
 	void SaveSettings() const;
 	void LoadSettings();
 
-	void RefreshListFilter();
 	void RefreshTreeFilter();
 	void RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgress = FALSE);
-	BOOL IsFilterSet(FTC_VIEW nView) const;
-	BOOL FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2, FTC_VIEW nView) const;
-	BOOL FilterMatches(const TDCFILTER& filter, FTC_VIEW nView) const;
-	void SetExtensionsNeedRefilter(BOOL bRefilter, FTC_VIEW nIgnore = FTCV_UNSET);
-	void SetListNeedRefilter(BOOL bRefilter);
 
 	void ResetNowFilterTimer();
 	BOOL FindNewNowFilterTasks(const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& params, const CHTIMap& htiMap) const;
 
-	VIEWDATA2* GetActiveViewData2() const;
-	VIEWDATA2* GetViewData2(FTC_VIEW nView) const;
-	virtual VIEWDATA* NewViewData() { return new VIEWDATA2(); }
-
 	HTREEITEM RebuildTree(const void* pContext = NULL);
-	BOOL WantAddTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const; 
-
-	void RebuildList(const void* pContext); 
-	void RebuildList(const SEARCHPARAMS& filter);
-
-	virtual void AddTreeItemToList(HTREEITEM hti, const void* pContext);
+	BOOL WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const; 
+	
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 

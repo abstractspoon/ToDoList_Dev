@@ -1065,10 +1065,13 @@ LRESULT CTDLTaskTreeCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 							SelectItem(pNMTV->itemNew.hItem, TRUE, SC_BYMOUSE);
 						}
 					}
+
+					UpdateAll();
+					RecalcUntrackedColumnWidths();
+
+					RepackageAndSendToParent(msg, wp, lp);
 				}
 
-				UpdateAll();
-				RecalcUntrackedColumnWidths();
 				break;
 			}
 		}

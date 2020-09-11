@@ -5251,10 +5251,10 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_FILTER_ANYCATS      "Any category can match"
     IDS_FILTER_ANYPEOPLE    "Any person can match"
-    IDS_FILTER_HIDEPARENTS  "Hide parent tasks (List View)"
+    IDS_FILTER_HIDEPARENTS  "Hide parent tasks"
     IDS_FILTER_HIDEOVERDUE  "Hide overdue tasks"
     IDS_FILTER_HIDEDONE     "Hide completed tasks"
-    IDS_FILTER_HIDECOLLAPSED "Hide collapsed tasks (List View)"
+    IDS_FILTER_HIDECOLLAPSED "Hide collapsed tasks"
     IDS_QUICKFIND           "Quick Find"
     IDS_IMPORTFILE_NOTASKS  "'%s' contained no tasks which could be imported."
     IDS_FT_SAVESEARCHPROMPT "Save Search"

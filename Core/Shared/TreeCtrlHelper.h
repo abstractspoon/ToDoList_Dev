@@ -112,6 +112,7 @@ public:
 	BOOL ItemHasParent(HTREEITEM hti, HTREEITEM htiParent) const;
 	BOOL IsAnyItemExpanded() const;
 	BOOL IsAnyItemCollapsed() const;
+	int GetItemData(CDWordArray& aItemData, BOOL bIncParents = TRUE, BOOL bInCollapsedChildren = TRUE) const;
 
 	BOOL IsItemFullyVisible(HTREEITEM hti) const;
 	BOOL IsItemVisible(HTREEITEM hti, BOOL bVertPartialOK = TRUE, BOOL bHorzPartialOK = TRUE) const;
@@ -194,6 +195,7 @@ protected:
 
 protected:
 	void AddVisibleItemToIndex(HTREEITEM hti) const;
+	void AddItemData(HTREEITEM hti, CDWordArray& aItemData, BOOL bIncParents, BOOL bInCollapsedChildren) const;
 
 	TCH_WHERE GetMoveTarget(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, HTREEITEM& htiTarget) const;
 	HTREEITEM CopyTree(HTREEITEM hDest, HTREEITEM hSrc, TCH_WHERE nWhere, BOOL bUsesTextCallback = FALSE, BOOL bUsesImageCallback = FALSE);
