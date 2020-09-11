@@ -1296,13 +1296,23 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 		switch (nSortBy)
 		{
 		case TDCC_POSITION:
-			nCompare = Compare(m_formatter.GetTaskPosition(pTDS1), 
-								m_formatter.GetTaskPosition(pTDS2));
+			if (pTDS1->HasSameParent(pTDS2))
+			{
+				nCompare = (pTDS1->GetPosition() - pTDS2->GetPosition());
+			}
+			else
+			{
+				nCompare = Compare(m_formatter.GetTaskPosition(pTDS1),
+								   m_formatter.GetTaskPosition(pTDS2));
+			}
 			break;
 
 		case TDCC_PATH:
-			nCompare = Compare(m_formatter.GetTaskPath(pTDI1, pTDS1), 
-								m_formatter.GetTaskPath(pTDI2, pTDS2));
+			if (!pTDS1->HasSameParent(pTDS2))
+			{
+				nCompare = Compare(m_formatter.GetTaskPath(pTDI1, pTDS1), 
+									m_formatter.GetTaskPath(pTDI2, pTDS2));
+			}
 			break;
 
 		case TDCC_CLIENT:
