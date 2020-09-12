@@ -223,6 +223,7 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	// Options
 	pPrefs->WriteProfileInt(sKey, _T("HideParents"), m_ctrlKanban.HasOption(KBCF_HIDEPARENTTASKS));
 	pPrefs->WriteProfileInt(sKey, _T("HideEmptyColumns"), m_ctrlKanban.HasOption(KBCF_HIDEEMPTYCOLUMNS));
+	pPrefs->WriteProfileInt(sKey, _T("HideSubtasks"), m_ctrlKanban.HasOption(KBCF_HIDESUBTASKS));
 
 	// Preferences
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
@@ -351,6 +352,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 
 		Misc::SetFlag(dwComboOptions, KBCF_HIDEPARENTTASKS, bHideParents);
 		Misc::SetFlag(dwComboOptions, KBCF_HIDEEMPTYCOLUMNS, bHideEmptyCols);
+		Misc::SetFlag(dwComboOptions, KBCF_HIDESUBTASKS, pPrefs->GetProfileInt(szKey, _T("HideSubtasks"), FALSE));
 		
 		m_cbOptions.SetSelectedOptions(dwComboOptions);
 		OnSelchangeOptions();
@@ -977,6 +979,7 @@ void CKanbanWnd::OnSelchangeOptions()
 
 	Misc::SetFlag(dwNewOptions, KBCF_HIDEEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_HIDEEMPTYCOLUMNS));
 	Misc::SetFlag(dwNewOptions, KBCF_HIDEPARENTTASKS, m_cbOptions.HasSelectedOption(KBCF_HIDEPARENTTASKS));
+	Misc::SetFlag(dwNewOptions, KBCF_HIDESUBTASKS, m_cbOptions.HasSelectedOption(KBCF_HIDESUBTASKS));
 
 	if (dwNewOptions != dwCurOptions)
 	{
@@ -990,17 +993,22 @@ void CKanbanWnd::OnSelchangeOptions()
 			BOOL bWasShowingParents = !Misc::HasFlag(dwCurOptions, KBCF_HIDEPARENTTASKS);
 			BOOL bIsShowingParents = !Misc::HasFlag(dwNewOptions, KBCF_HIDEPARENTTASKS);
 
-			if (bWasShowingParents && !bIsShowingParents)
+			BOOL bWasShowingSubtasks = !Misc::HasFlag(dwCurOptions, KBCF_HIDESUBTASKS);
+			BOOL bIsShowingSubtasks = !Misc::HasFlag(dwNewOptions, KBCF_HIDESUBTASKS);
+
+			if ((bWasShowingParents && !bIsShowingParents) ||
+				(bWasShowingSubtasks && !bIsShowingSubtasks))
 			{
-				// If parent visibility was being turned off and now
+				// If task visibility was being turned off and now
 				// nothing is selected cache the old selection in case
 				// we can restore it if the visibility is restored
 				if (m_aSelTaskIDs.GetSize() == 0)
 					m_aSelTaskIDs.Copy(aSelTaskIDs);
 			}
-			else if (!bWasShowingParents && bIsShowingParents)
+			else if ((!bWasShowingParents && bIsShowingParents) ||
+					 (!bWasShowingSubtasks && bIsShowingSubtasks))
 			{
-				// If parent visibility is being turned on and nothing
+				// If task visibility is being turned on and nothing
 				// is selected but we have something cached then try
 				// to restore it
 				if (m_ctrlKanban.SelectTasks(m_aSelTaskIDs))

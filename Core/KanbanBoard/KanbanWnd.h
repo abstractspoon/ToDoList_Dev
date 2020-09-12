@@ -120,7 +120,6 @@ protected:
 	afx_msg LRESULT OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskDone(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskFlag(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnKanbanNotifyFlagChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyGetTaskIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskTitle(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnKanbanNotifyEditTaskIcon(WPARAM wp, LPARAM lp);

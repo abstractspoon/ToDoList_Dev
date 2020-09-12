@@ -1490,7 +1490,9 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues)
 {
 	// Check if we need to update listctrls or not
-	if (!IsTracking(sAttribID) || (pKI->bParent && HasOption(KBCF_HIDEPARENTTASKS)))
+	if (!IsTracking(sAttribID) || 
+		(pKI->bParent && HasOption(KBCF_HIDEPARENTTASKS)) ||
+		(pKI->dwParentID && HasOption(KBCF_HIDESUBTASKS)))
 	{
 		pKI->SetTrackedAttributeValues(sAttribID, aNewValues);
 		return FALSE; // no effect on list items
@@ -1901,21 +1903,23 @@ void CKanbanCtrl::RebuildColumnHeader()
 
 void CKanbanCtrl::RebuildColumnsData(const CKanbanItemArrayMap& mapKIArray)
 {
-	BOOL bShowParents = !HasOption(KBCF_HIDEPARENTTASKS);
 	int nCol = m_aColumns.GetSize();
 	
+	BOOL bHideParents = HasOption(KBCF_HIDEPARENTTASKS);
+	BOOL bHideSubtasks = HasOption(KBCF_HIDESUBTASKS);
+
 	while (nCol--)
 	{
 		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
 		ASSERT(pCol);
 		
-		RebuildColumnContents(pCol, mapKIArray, bShowParents);
+		RebuildColumnContents(pCol, mapKIArray, bHideParents, bHideSubtasks);
 		
 		// The list can still end up empty if parent tasks are 
 		// omitted in Dynamic columns so we recheck and delete if required
 		if (UsingDynamicColumns())
 		{
-			if (!bShowParents && !WantShowColumn(pCol))
+			if ((bHideParents | bHideSubtasks) && !WantShowColumn(pCol))
 			{
 				DeleteColumn(nCol);
 			}
@@ -2107,7 +2111,8 @@ CKanbanColumnCtrl* CKanbanCtrl::AddNewColumn(const KANBANCOLUMN& colDef)
 	return pCol;
 }
 
-BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, BOOL bShowParents)
+BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanItemArrayMap& mapKIArray, 
+										BOOL bHideParents, BOOL bHideSubtasks)
 {
 	ASSERT(pCol && pCol->GetSafeHwnd());
 
@@ -2136,8 +2141,13 @@ BOOL CKanbanCtrl::RebuildColumnContents(CKanbanColumnCtrl* pCol, const CKanbanIt
 				const KANBANITEM* pKI = pKIArr->GetAt(nKI);
 				ASSERT(pKI);
 				
-				if (!pKI->bParent || bShowParents)
-					VERIFY(pCol->AddTask(*pKI) != NULL);
+				if (pKI->bParent && bHideParents)
+					continue;
+				
+				if (pKI->dwParentID && bHideSubtasks)
+					continue;
+
+				VERIFY(pCol->AddTask(*pKI) != NULL);
 			}
 		}
 	}
@@ -2248,7 +2258,7 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 		DWORD dwPrevOptions = m_dwOptions;
 		m_dwOptions = dwOptions;
 
-		if (Misc::FlagHasChanged(KBCF_HIDEPARENTTASKS, m_dwOptions, dwPrevOptions))
+		if (Misc::FlagHasChanged(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS, m_dwOptions, dwPrevOptions))
 		{
 			RebuildColumns(TRUE, FALSE);
 		}
@@ -2257,7 +2267,8 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 			RebuildColumns(FALSE, FALSE);
 		}
 
-		m_aColumns.SetOptions(dwOptions & ~(KBCF_HIDEPARENTTASKS | KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
+		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG);
+		m_aColumns.SetOptions(dwOptions);
 
 		if (Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
 			m_aColumns.Sort(m_nSortBy, m_bSortAscending);

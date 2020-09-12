@@ -166,6 +166,7 @@
 #define IDS_DISPLAY_PARENT_SHORT        57723
 #define IDS_DISPLAY_TASKID_SHORT        57724
 #define IDS_OPTIONS_NONE                57725
+#define IDS_OPTIONS_HIDESUBTASKS        57726
 
 // Next default values for new objects
 // 
