@@ -89,7 +89,6 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKTITLE, OnKanbanNotifyEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKICON, OnKanbanNotifyEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_KBC_SORTCHANGE, OnKanbanNotifySortChange)
-	ON_NOTIFY_EX_RANGE(TTN_NEEDTEXT, 0, 0xFFFF, OnToolTipNotify)
 	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
@@ -170,9 +169,6 @@ BOOL CKanbanWnd::OnInitDialog()
 
 	m_ctrlKanban.Create(WS_CHILD | WS_VISIBLE | WS_TABSTOP, CRect(0, 0, 0, 0), this, 101);
 	m_ctrlKanban.SetFocus();
-
-	if (m_tooltips.Create(this, (WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP)))
-		m_tooltips.AddTool(&m_cbOptions);
 
 	m_mgrPrompts.SetComboPrompt(m_cbOptions, CEnString(IDS_OPTIONS_NONE));
 	
@@ -428,11 +424,8 @@ void CKanbanWnd::FilterToolTipMessage(MSG* pMsg)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
-	// Our tooltips
-	m_tooltips.RelayEvent(pMsg);
-
-	// CKanbanCtrl tooltips
 	m_ctrlKanban.FilterToolTipMessage(pMsg);
+	m_cbOptions.FilterToolTipMessage(pMsg);
 }
 
 bool CKanbanWnd::PrepareNewTask(ITaskList* pTask) const
@@ -1016,37 +1009,4 @@ void CKanbanWnd::OnSelchangeOptions()
 			}
 		}
 	}
-}
-
-BOOL CKanbanWnd::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResult*/)
-{
-    // Get the tooltip structure.
-    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
-	
-    UINT nID = pNMHDR->idFrom;
-	
-    // Check once again that the idFrom holds handle itself.
-    if (pTTT->uFlags & TTF_IDISHWND)
-        nID = ::GetDlgCtrlID((HWND)nID);
-	
-	static CString sTooltip;
-	sTooltip.Empty();
-	
-	switch( nID )
-	{
-	case IDC_OPTIONS:
-		sTooltip = m_cbOptions.GetTooltip();
-		break;
-	}
-	
-	if (!sTooltip.IsEmpty())
-	{
-		// Set the multiline tooltip text
-		::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
-		pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
-		return TRUE;
-	}
-	
-    // Not handled.
-    return FALSE;
 }

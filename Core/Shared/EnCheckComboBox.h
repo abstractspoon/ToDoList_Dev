@@ -33,8 +33,6 @@ public:
 	BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	int SetCheck(int nIndex, CCB_CHECKSTATE nCheck = CCBC_CHECKED); 
 
-	CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
-
 protected:
 	BOOL m_bMultiSel;
 	CEnString m_sNone, m_sAny;
@@ -68,6 +66,7 @@ protected:
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const;
+	virtual CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
 
 	void FixupEmptyStringsAtStart();
 	int CalcNumRequiredEmptyStrings() const;

@@ -254,6 +254,8 @@ void CTabbedToDoCtrl::BuildListOptionsCombo()
 	CDialogHelper::AddString(m_cbListOptions, IDS_FILTER_HIDECOLLAPSED, LVO_HIDECOLLAPSED);
 
 	m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
+
+	m_cbListOptions.EnableTooltip();
 }
 
 void CTabbedToDoCtrl::OnListGroupBySelChanged()
@@ -6839,3 +6841,4 @@ BOOL CTabbedToDoCtrl::CanSaveTaskViewToImage() const
 	
 	return FALSE;
 }
+

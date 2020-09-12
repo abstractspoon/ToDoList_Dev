@@ -98,7 +98,6 @@ protected:
 	CString m_sAdvancedFilter;
 	CWndPromptManager m_mgrPrompts;
 	CIcon m_iconUpdateBtn;
-
 	BOOL m_bMultiSelection;
 
 protected:
@@ -113,6 +112,7 @@ protected:
 	virtual void OnOK() { /* do nothing */ }
 	virtual void OnCancel() { /* do nothing */ }
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
@@ -120,7 +120,6 @@ protected:
 	// Generated message map functions
 	//{{AFX_MSG(CFilterBar)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	virtual BOOL OnInitDialog();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	//}}AFX_MSG
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);

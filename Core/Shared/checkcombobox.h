@@ -10,6 +10,7 @@
 
 #include "autocombobox.h"
 #include "subclass.h"
+#include "tooltipctrlex.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -51,8 +52,9 @@ public:
 	virtual BOOL SetChecked(const CStringArray& aItems);
 	virtual BOOL SetChecked(const CStringArray& aChecked, const CStringArray& aMixed);
 	
+	void EnableTooltip(BOOL bEnable = TRUE);
 	CString GetTooltip() const;
-	virtual CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
+	void FilterToolTipMessage(MSG* pMsg);
 
 	virtual int AddUniqueItem(const CString& sItem); // returns index or CB_ERR
     virtual int SelectString(int nStartAfter, LPCTSTR lpszString);
@@ -63,6 +65,7 @@ protected:
 	BOOL m_bChecking;
 	int m_nClickedItem;
 	CStringArray m_aMixedItems;
+	CToolTipCtrlEx m_tooltip;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -98,6 +101,7 @@ protected:
 	virtual LRESULT OnEditboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 	virtual void OnCheckChange(int /*nIndex*/) {}
 	
+	virtual CString FormatCheckedItems(LPCTSTR szSep = NULL) const;
 	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 								DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	
 	virtual BOOL DrawCheckBox(CDC& dc, const CRect& rect, int nItem, UINT nItemState, DWORD dwItemData, BOOL bDisabled) const;
@@ -108,6 +112,9 @@ protected:
 	virtual CString GetSelectedItemText() const;
 	virtual BOOL HasIcon() const { return TRUE; }
 	virtual int UpdateEditAutoComplete(const CString& sText, int nCaretPos);
+
+	BOOL PreTranslateMessage(MSG* pMsg);
+	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 protected:
 	void RecalcText(BOOL bUpdate = TRUE, BOOL bNotify = TRUE);

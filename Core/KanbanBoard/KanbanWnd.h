@@ -75,7 +75,6 @@ protected:
 
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CToolTipCtrl m_tooltips;
 
 	BOOL m_bReadOnly;
 	CIcon m_icon;
@@ -112,7 +111,6 @@ protected:
 	afx_msg void OnUpdateKanbanPreferences(CCmdUI* pCmdUI);
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg BOOL OnToolTipNotify(UINT id, NMHDR* pNMHDR, LRESULT* pResult );	
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg void OnNcDestroy();
 

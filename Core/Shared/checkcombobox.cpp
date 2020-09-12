@@ -759,6 +759,24 @@ int CCheckComboBox::GetCheckedCount(CCB_CHECKSTATE nCheck) const
 	return nCount;
 }
 
+void CCheckComboBox::EnableTooltip(BOOL bEnable)
+{
+	if (bEnable)
+	{
+		if (!m_tooltip.GetSafeHwnd())
+		{
+			VERIFY(m_tooltip.Create(this, (WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP)));
+
+			// Set the multiline tooltip text
+			m_tooltip.SendMessage(TTM_SETMAXTIPWIDTH, 0, 300);
+		}
+	}
+	else if (m_tooltip.GetSafeHwnd())
+	{
+		m_tooltip.DestroyToolTipCtrl();
+	}
+}
+
 CString CCheckComboBox::GetTooltip() const
 {
 	if (!m_bTextFits)
@@ -969,4 +987,25 @@ DWORD CCheckComboBox::GetCheckedItemData() const
 	}
 
 	return dwChecked;
+}
+
+BOOL CCheckComboBox::PreTranslateMessage(MSG* pMsg)
+{
+	FilterToolTipMessage(pMsg);
+
+	return CAutoComboBox::PreTranslateMessage(pMsg);
+}
+
+void CCheckComboBox::FilterToolTipMessage(MSG* pMsg)
+{
+	if (m_tooltip.GetSafeHwnd())
+		m_tooltip.FilterToolTipMessage(pMsg);
+}
+
+int CCheckComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
+{
+	if (m_bTextFits)
+		return -1;
+
+	return m_tooltip.SetToolInfo(*pTI, this, GetTooltip(), 1);
 }

@@ -83,6 +83,7 @@ void CTDLCustomAttribFeatureComboBox::BuildCombo(const TDCCUSTOMATTRIBUTEDEFINIT
 	}
 
 	SetCheckedByItemData(attribDef.dwFeatures);
+	EnableTooltip();
 }
 
 DWORD CTDLCustomAttribFeatureComboBox::GetSelectedFeatures() const

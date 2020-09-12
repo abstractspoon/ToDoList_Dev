@@ -164,7 +164,6 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
     m_toolbar.RefreshButtonStates();
 	
 	ResizeDlg(FALSE);
-	EnableToolTips();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -172,20 +171,11 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 void CTDLFindTasksDlg::BuildOptionCombo()
 {
-	int nIndex = m_cbInclude.AddString(CEnString(IDS_FINDINCLUDE_DONE));
-	
-	if (nIndex != CB_ERR)
-		m_cbInclude.SetItemData(nIndex, FI_COMPLETED);
+	CDialogHelper::AddString(m_cbInclude, IDS_FINDINCLUDE_DONE, FI_COMPLETED);
+	CDialogHelper::AddString(m_cbInclude, IDS_FINDINCLUDE_PARENTS, FI_PARENT);
+	CDialogHelper::AddString(m_cbInclude, IDS_FINDINCLUDE_FILTEREDOUT, FI_FILTEREDOUT);
 
-	nIndex = m_cbInclude.AddString(CEnString(IDS_FINDINCLUDE_PARENTS));
-	
-	if (nIndex != CB_ERR)
-		m_cbInclude.SetItemData(nIndex, FI_PARENT);
-
-	nIndex = m_cbInclude.AddString(CEnString(IDS_FINDINCLUDE_FILTEREDOUT));
-	
-	if (nIndex != CB_ERR)
-		m_cbInclude.SetItemData(nIndex, FI_FILTEREDOUT);
+	m_cbInclude.EnableTooltip();
 }
 
 BOOL CTDLFindTasksDlg::SetSearchFlags(LPCTSTR szName, DWORD dwFlags)
@@ -1472,39 +1462,6 @@ void CTDLFindTasksDlg::OnMoveRuleDown()
 void CTDLFindTasksDlg::OnUpdateMoveRuleDown(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(m_lcFindSetup.CanMoveSelectedRuleDown());
-}
-
-BOOL CTDLFindTasksDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResult*/)
-{
-    // Get the tooltip structure.
-    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
-
-    UINT nID = pNMHDR->idFrom;
-
-    // Check once again that the idFrom holds handle itself.
-    if (pTTT->uFlags & TTF_IDISHWND)
-        nID = ::GetDlgCtrlID((HWND)nID);
-
-	static CString sTooltip;
-	sTooltip.Empty();
-
-	switch( nID )
-	{
-	case IDC_INCLUDE:
-		sTooltip = m_cbInclude.GetTooltip();
-		break;
-	}
-	
-	if (!sTooltip.IsEmpty())
-	{
-		// Set the multiline tooltip text
-		::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
-		pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
-		return TRUE;
-	}
-
-    // Not handled.
-    return FALSE;
 }
 
 HBRUSH CTDLFindTasksDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
