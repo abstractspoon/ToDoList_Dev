@@ -305,7 +305,7 @@ void CTDLFilterBar::OnSelchangeFilterAttribute()
 	
 	// Only notify the parent if something actually changed
 	if (m_filter != prevFilter)
-		GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+		NotifyParentFilterChange();
 }
 
 void CTDLFilterBar::OnSelcancelAllocToFilter()
