@@ -1490,7 +1490,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& sAttribID, const CStringArray& aNewValues)
 {
 	// Check if we need to update listctrls or not
-	if (!IsTracking(sAttribID) || (pKI->bParent && !HasOption(KBCF_SHOWPARENTTASKS)))
+	if (!IsTracking(sAttribID) || (pKI->bParent && HasOption(KBCF_HIDEPARENTTASKS)))
 	{
 		pKI->SetTrackedAttributeValues(sAttribID, aNewValues);
 		return FALSE; // no effect on list items
@@ -1562,7 +1562,7 @@ BOOL CKanbanCtrl::IsTracking(const CString& sAttribID) const
 
 BOOL CKanbanCtrl::WantShowColumn(LPCTSTR szValue, const CKanbanItemArrayMap& mapKIArray) const
 {
-	if (HasOption(KBCF_SHOWEMPTYCOLUMNS))
+	if (!HasOption(KBCF_HIDEEMPTYCOLUMNS))
 		return TRUE;
 
 	if (HasOption(KBCF_ALWAYSSHOWBACKLOG) && Misc::IsEmpty(szValue))
@@ -1576,7 +1576,7 @@ BOOL CKanbanCtrl::WantShowColumn(LPCTSTR szValue, const CKanbanItemArrayMap& map
 
 BOOL CKanbanCtrl::WantShowColumn(const CKanbanColumnCtrl* pCol) const
 {
-	if (HasOption(KBCF_SHOWEMPTYCOLUMNS))
+	if (!HasOption(KBCF_HIDEEMPTYCOLUMNS))
 		return TRUE;
 
 	if (HasOption(KBCF_ALWAYSSHOWBACKLOG) && pCol->IsBacklog())
@@ -1696,7 +1696,7 @@ int CKanbanCtrl::AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 			}
 		}
 
-		ASSERT(!HasOption(KBCF_SHOWEMPTYCOLUMNS) || 
+		ASSERT(HasOption(KBCF_HIDEEMPTYCOLUMNS) || 
 				(m_nTrackAttribute == TDCA_CUSTOMATTRIB) ||
 				(m_aColumns.GetSize() == pGlobals->GetCount()));
 	}
@@ -1901,7 +1901,7 @@ void CKanbanCtrl::RebuildColumnHeader()
 
 void CKanbanCtrl::RebuildColumnsData(const CKanbanItemArrayMap& mapKIArray)
 {
-	BOOL bShowParents = HasOption(KBCF_SHOWPARENTTASKS);
+	BOOL bShowParents = !HasOption(KBCF_HIDEPARENTTASKS);
 	int nCol = m_aColumns.GetSize();
 	
 	while (nCol--)
@@ -2248,16 +2248,16 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 		DWORD dwPrevOptions = m_dwOptions;
 		m_dwOptions = dwOptions;
 
-		if (Misc::FlagHasChanged(KBCF_SHOWPARENTTASKS, m_dwOptions, dwPrevOptions))
+		if (Misc::FlagHasChanged(KBCF_HIDEPARENTTASKS, m_dwOptions, dwPrevOptions))
 		{
 			RebuildColumns(TRUE, FALSE);
 		}
-		else if (Misc::FlagHasChanged(KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwPrevOptions))
+		else if (Misc::FlagHasChanged(KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwPrevOptions))
 		{
 			RebuildColumns(FALSE, FALSE);
 		}
 
-		m_aColumns.SetOptions(dwOptions & ~(KBCF_SHOWPARENTTASKS | KBCF_SHOWEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
+		m_aColumns.SetOptions(dwOptions & ~(KBCF_HIDEPARENTTASKS | KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG));
 
 		if (Misc::FlagHasChanged(KBCF_SORTSUBTASTASKSBELOWPARENTS, m_dwOptions, dwPrevOptions))
 			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
@@ -2302,7 +2302,7 @@ void CKanbanCtrl::OnSetFocus(CWnd* pOldWnd)
 
 int CKanbanCtrl::GetVisibleColumnCount() const
 {
-	if (UsingDynamicColumns() || HasOption(KBCF_SHOWEMPTYCOLUMNS))
+	if (UsingDynamicColumns() || !HasOption(KBCF_HIDEEMPTYCOLUMNS))
 		return m_aColumns.GetSize();
 
 	// Fixed columns

@@ -114,8 +114,8 @@
 #define IDS_RISKATTRIB                  34247
 #define IDS_VERSIONATTRIB               34248
 #define IDS_TAGSATTRIB                  34249
-#define IDS_OPTIONS_SHOWPARENTS         34250
-#define IDS_OPTIONS_SHOWEMPTYCOLS       34251
+#define IDS_OPTIONS_HIDEPARENTS         34250
+#define IDS_OPTIONS_HIDEEMPTYCOLS       34251
 #define IDS_DISPLAY_PRIORITY            57676
 #define IDS_DISPLAY_ALLOCTO             57677
 #define IDS_DISPLAY_ALLOCBY             57678

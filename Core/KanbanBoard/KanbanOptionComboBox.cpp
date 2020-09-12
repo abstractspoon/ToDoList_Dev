@@ -59,8 +59,8 @@ void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 		// translation done via CEnString
 		CLocalizer::EnableTranslation(*this, FALSE);
 
-		CDialogHelper::AddString(*this, IDS_OPTIONS_SHOWPARENTS, KBCF_SHOWPARENTTASKS);
-		CDialogHelper::AddString(*this, IDS_OPTIONS_SHOWEMPTYCOLS, KBCF_SHOWEMPTYCOLUMNS);
+		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDEPARENTS, KBCF_HIDEPARENTTASKS);
+		CDialogHelper::AddString(*this, IDS_OPTIONS_HIDEEMPTYCOLS, KBCF_HIDEEMPTYCOLUMNS);
 	}
 
 	if (dwOptions != m_dwOptions)

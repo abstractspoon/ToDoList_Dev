@@ -221,8 +221,8 @@ void CKanbanWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 		pPrefs->DeleteProfileEntry(sKey, _T("CustomAttrib"));
 
 	// Options
-	pPrefs->WriteProfileInt(sKey, _T("ShowParents"), m_ctrlKanban.HasOption(KBCF_SHOWPARENTTASKS));
-	pPrefs->WriteProfileInt(sKey, _T("ShowEmptyColumns"), m_ctrlKanban.HasOption(KBCF_SHOWEMPTYCOLUMNS));
+	pPrefs->WriteProfileInt(sKey, _T("HideParents"), m_ctrlKanban.HasOption(KBCF_HIDEPARENTTASKS));
+	pPrefs->WriteProfileInt(sKey, _T("HideEmptyColumns"), m_ctrlKanban.HasOption(KBCF_HIDEEMPTYCOLUMNS));
 
 	// Preferences
 	m_dlgPrefs.SavePreferences(pPrefs, sKey);
@@ -336,10 +336,21 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	// Kanban specific options
 	if (!bAppOnly)
 	{
+		// Backwards compatibility
+		BOOL bHideParents = pPrefs->GetProfileInt(szKey, _T("HideParents"), -1);
+
+		if (bHideParents == -1)
+			bHideParents = !pPrefs->GetProfileInt(szKey, _T("ShowParents"), TRUE);
+
+		BOOL bHideEmptyCols = pPrefs->GetProfileInt(szKey, _T("HideEmptyColumns"), -1);
+
+		if (bHideEmptyCols == -1)
+			bHideEmptyCols = !pPrefs->GetProfileInt(szKey, _T("ShowEmptyColumns"), TRUE);
+
 		DWORD dwComboOptions = 0;
 
-		Misc::SetFlag(dwComboOptions, KBCF_SHOWPARENTTASKS, pPrefs->GetProfileInt(szKey, _T("ShowParents"), TRUE));
-		Misc::SetFlag(dwComboOptions, KBCF_SHOWEMPTYCOLUMNS, pPrefs->GetProfileInt(szKey, _T("ShowEmptyColumns"), TRUE));
+		Misc::SetFlag(dwComboOptions, KBCF_HIDEPARENTTASKS, bHideParents);
+		Misc::SetFlag(dwComboOptions, KBCF_HIDEEMPTYCOLUMNS, bHideEmptyCols);
 		
 		m_cbOptions.SetSelectedOptions(dwComboOptions);
 		OnSelchangeOptions();
@@ -964,8 +975,8 @@ void CKanbanWnd::OnSelchangeOptions()
 {
 	DWORD dwCurOptions = m_ctrlKanban.GetOptions(), dwNewOptions = dwCurOptions;
 
-	Misc::SetFlag(dwNewOptions, KBCF_SHOWEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_SHOWEMPTYCOLUMNS));
-	Misc::SetFlag(dwNewOptions, KBCF_SHOWPARENTTASKS, m_cbOptions.HasSelectedOption(KBCF_SHOWPARENTTASKS));
+	Misc::SetFlag(dwNewOptions, KBCF_HIDEEMPTYCOLUMNS, m_cbOptions.HasSelectedOption(KBCF_HIDEEMPTYCOLUMNS));
+	Misc::SetFlag(dwNewOptions, KBCF_HIDEPARENTTASKS, m_cbOptions.HasSelectedOption(KBCF_HIDEPARENTTASKS));
 
 	if (dwNewOptions != dwCurOptions)
 	{
@@ -976,8 +987,8 @@ void CKanbanWnd::OnSelchangeOptions()
 
 		if (!m_ctrlKanban.GetSelectedCount())
 		{
-			BOOL bWasShowingParents = Misc::HasFlag(dwCurOptions, KBCF_SHOWPARENTTASKS);
-			BOOL bIsShowingParents = Misc::HasFlag(dwNewOptions, KBCF_SHOWPARENTTASKS);
+			BOOL bWasShowingParents = !Misc::HasFlag(dwCurOptions, KBCF_HIDEPARENTTASKS);
+			BOOL bIsShowingParents = !Misc::HasFlag(dwNewOptions, KBCF_HIDEPARENTTASKS);
 
 			if (bWasShowingParents && !bIsShowingParents)
 			{
