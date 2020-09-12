@@ -79,42 +79,15 @@ void CTDLCustomAttribFeatureComboBox::BuildCombo(const TDCCUSTOMATTRIBUTEDEFINIT
 		const TDCFEATURE& feature = FEATURES[nFeature];
 
 		if (attribDef.SupportsFeature(feature.dwFeature))
-		{
-			int nIndex = AddString(CEnString(feature.nStringID));
-
-			if (nIndex != CB_ERR)
-			{
-				BOOL bChecked = attribDef.HasFeature(feature.dwFeature);
-				SetCheck(nIndex, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
-				SetItemData(nIndex, feature.dwFeature);
-			}
-		}
+			CDialogHelper::AddString(*this, feature.nStringID, feature.dwFeature);
 	}
+
+	SetCheckedByItemData(attribDef.dwFeatures);
 }
 
 DWORD CTDLCustomAttribFeatureComboBox::GetSelectedFeatures() const
 {
-	DWORD dwFeatures = 0;
-	int nFeature = GetCount();
-
-	while (nFeature--)
-	{
-		if (GetCheck(nFeature))
-			dwFeatures |= GetItemData(nFeature);
-	}
-
-	return dwFeatures;
-}
-
-CString CTDLCustomAttribFeatureComboBox::FormatSelectedFeatures() const
-{
-	CStringArray aFeatures;
-
-	if (GetChecked(aFeatures))
-		return Misc::FormatArray(aFeatures);
-
-	// else
-	return _T("");
+	return GetCheckedItemData();
 }
 
 CString CTDLCustomAttribFeatureComboBox::FormatFeatureList(DWORD dwFeatures)

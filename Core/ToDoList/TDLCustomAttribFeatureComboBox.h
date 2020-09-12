@@ -21,7 +21,6 @@ public:
 
 	BOOL SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 	DWORD GetSelectedFeatures() const;
-	CString FormatSelectedFeatures() const;
 
 	static CString FormatFeatureList(DWORD dwFeatures);
 
