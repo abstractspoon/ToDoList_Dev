@@ -9,6 +9,7 @@
 #include "..\shared\misc.h"
 #include "..\Shared\enstring.h"
 #include "..\Shared\localizer.h"
+#include "..\Shared\dialoghelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -45,28 +46,15 @@ void CTDLFilterOptionComboBox::Initialize(DWORD dwFlags, DWORD dwOptions)
 	ResetContent();
 	m_dwOptions = (DWORD)-1;
 
-	CEnString sFlag;
-
 	for (int nItem = 0; nItem < NUM_FILTEROPT; nItem++)
 	{
 		UINT nFlag = FILTER_OPTIONS[nItem][1];
 
 		if (Misc::HasFlag(dwFlags, nFlag))
-		{
-			sFlag.LoadString(FILTER_OPTIONS[nItem][0]);
-			
-			int nIndex = AddString(sFlag);
-			
-			if (nIndex != CB_ERR)
-			{
-				SetItemData(nIndex, nFlag);
-
-				// is the item checked?
-				BOOL bChecked = Misc::HasFlag(dwOptions, nFlag);
-				SetCheck(nIndex, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
-			}
-		}
+			CDialogHelper::AddString(*this, FILTER_OPTIONS[nItem][0], nFlag);
 	}
+
+	SetCheckedByItemData(dwOptions);
 }
 
 void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter)
@@ -120,14 +108,7 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter)
 		}	
 
 		if (bAddFlag)
-		{
-			sFlag.LoadString(FILTER_OPTIONS[nItem][0]);
-			
-			int nIndex = AddString(sFlag);
-			
-			if (nIndex != CB_ERR)
-				SetItemData(nIndex, nFlag);
-		}
+			CDialogHelper::AddString(*this, FILTER_OPTIONS[nItem][0], nFlag);
 	}
 
 	// set states
@@ -136,35 +117,18 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter)
 
 void CTDLFilterOptionComboBox::OnCheckChange(int /*nIndex*/)
 {
-	// update m_dwOptions
-	m_dwOptions = 0;
-
-	for (int nItem = 0; nItem < GetCount(); nItem++)
-	{
-		// aggregate checked items
-		if (GetCheck(nItem))
-			m_dwOptions |= GetItemData(nItem);
-	}
+	m_dwOptions = GetCheckedItemData();
 }
 
 void CTDLFilterOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 {
 	ASSERT(GetSafeHwnd());
 
-	if (dwOptions == m_dwOptions)
-		return;
-
-	for (int nItem = 0; nItem < GetCount(); nItem++)
+	if (dwOptions != m_dwOptions)
 	{
-		// get flag for item
-		UINT nFlag = GetItemData(nItem);
-
-		// set state
-		BOOL bChecked = Misc::HasFlag(dwOptions, nFlag);
-		SetCheck(nItem, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
+		m_dwOptions = dwOptions;
+		SetCheckedByItemData(dwOptions);
 	}
-
-	m_dwOptions = dwOptions;
 }
 
 DWORD CTDLFilterOptionComboBox::GetSelectedOptions() const 

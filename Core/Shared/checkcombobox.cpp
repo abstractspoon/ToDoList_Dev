@@ -255,7 +255,7 @@ int CCheckComboBox::SelectString(int nStartAfter, LPCTSTR lpszString)
    return CAutoComboBox::SelectString(nStartAfter, lpszString);
 }
 
-int CCheckComboBox::SetCheckByData(DWORD dwItemData, CCB_CHECKSTATE nCheck)
+int CCheckComboBox::SetCheckByItemData(DWORD dwItemData, CCB_CHECKSTATE nCheck)
 {
 	int nIndex = CDialogHelper::FindItemByData(*this, dwItemData);
 
@@ -926,4 +926,47 @@ int CCheckComboBox::UpdateEditAutoComplete(const CString& sText, int nCaretPos)
 	}
 
 	return nMatch;
+}
+
+int CCheckComboBox::SetCheckedByItemData(DWORD dwFlags)
+{
+	ASSERT(GetSafeHwnd());
+
+	int nNumChecked = 0;
+
+	for (int nItem = 0; nItem < GetCount(); nItem++)
+	{
+		// get flag for item
+		UINT nFlag = GetItemData(nItem);
+
+		// set state
+		BOOL bChecked = Misc::HasFlag(dwFlags, nFlag);
+
+		if (bChecked)
+		{
+			SetCheck(nItem, CCBC_CHECKED);
+			nNumChecked++;
+		}
+		else
+		{
+			SetCheck(nItem, CCBC_UNCHECKED);
+		}
+	}
+
+	ASSERT(nNumChecked || !dwFlags); // sanity check
+
+	return nNumChecked;
+}
+
+DWORD CCheckComboBox::GetCheckedItemData() const
+{
+	DWORD dwChecked = 0;
+
+	for (int nItem = 0; nItem < GetCount(); nItem++)
+	{
+		if (GetCheck(nItem) == CCBC_CHECKED)
+			dwChecked |= GetItemData(nItem);
+	}
+
+	return dwChecked;
 }

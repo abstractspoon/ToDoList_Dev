@@ -150,18 +150,18 @@ void CTDLCustomAttribFeatureComboBox::OnCheckChange(int nIndex)
 		switch (dwFeature)
 		{
 		case TDCCAF_ACCUMULATE:
-			SetCheckByData(TDCCAF_MAXIMIZE, CCBC_UNCHECKED);
-			SetCheckByData(TDCCAF_MINIMIZE, CCBC_UNCHECKED);
+			SetCheckByItemData(TDCCAF_MAXIMIZE, CCBC_UNCHECKED);
+			SetCheckByItemData(TDCCAF_MINIMIZE, CCBC_UNCHECKED);
 			break;
 
 		case TDCCAF_MAXIMIZE:
-			SetCheckByData(TDCCAF_ACCUMULATE, CCBC_UNCHECKED);
-			SetCheckByData(TDCCAF_MINIMIZE, CCBC_UNCHECKED);
+			SetCheckByItemData(TDCCAF_ACCUMULATE, CCBC_UNCHECKED);
+			SetCheckByItemData(TDCCAF_MINIMIZE, CCBC_UNCHECKED);
 			break;
 
 		case TDCCAF_MINIMIZE:
-			SetCheckByData(TDCCAF_MAXIMIZE, CCBC_UNCHECKED);
-			SetCheckByData(TDCCAF_ACCUMULATE, CCBC_UNCHECKED);
+			SetCheckByItemData(TDCCAF_MAXIMIZE, CCBC_UNCHECKED);
+			SetCheckByItemData(TDCCAF_ACCUMULATE, CCBC_UNCHECKED);
 			break;
 
 		default:

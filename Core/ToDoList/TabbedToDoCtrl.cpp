@@ -129,20 +129,9 @@ void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_CBData(pDX, m_cbListGroupBy, m_nListViewGroupBy, TDCC_NONE);
 
 	if (pDX->m_bSaveAndValidate)
-	{
-		m_dwListOptions = 0;
-
-		if (m_cbListOptions.GetCheckByData(LVO_HIDEPARENTS) == CCBC_CHECKED)
-			m_dwListOptions |= LVO_HIDEPARENTS;
-
-		if (m_cbListOptions.GetCheckByData(LVO_HIDECOLLAPSED) == CCBC_CHECKED)
-			m_dwListOptions |= LVO_HIDECOLLAPSED;
-	}
+		m_dwListOptions = m_cbListOptions.GetCheckedItemData();
 	else
-	{
-		m_cbListOptions.SetCheckByData(LVO_HIDEPARENTS, ((m_dwListOptions & LVO_HIDEPARENTS) ? CCBC_CHECKED : CCBC_UNCHECKED));
-		m_cbListOptions.SetCheckByData(LVO_HIDECOLLAPSED, ((m_dwListOptions & LVO_HIDECOLLAPSED) ? CCBC_CHECKED : CCBC_UNCHECKED));
-	}
+		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 }
 
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)

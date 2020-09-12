@@ -9,6 +9,7 @@
 #include "..\shared\misc.h"
 #include "..\Shared\enstring.h"
 #include "..\Shared\localizer.h"
+#include "..\Shared\dialoghelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -45,15 +46,7 @@ BOOL CKanbanOptionComboBox::Initialise(DWORD dwOptions)
 
 void CKanbanOptionComboBox::OnCheckChange(int /*nIndex*/)
 {
-	// update m_dwOptions
-	m_dwOptions = 0;
-
-	for (int nItem = 0; nItem < GetCount(); nItem++)
-	{
-		// aggregate checked items
-		if (GetCheck(nItem))
-			m_dwOptions |= GetItemData(nItem);
-	}
+	m_dwOptions = GetCheckedItemData();
 }
 
 void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
@@ -66,25 +59,13 @@ void CKanbanOptionComboBox::SetSelectedOptions(DWORD dwOptions)
 		// translation done via CEnString
 		CLocalizer::EnableTranslation(*this, FALSE);
 
-		int nItem = AddString(CEnString(IDS_OPTIONS_SHOWPARENTS));
-		SetItemData(nItem, KBCF_SHOWPARENTTASKS);
-
-		nItem = AddString(CEnString(IDS_OPTIONS_SHOWEMPTYCOLS));
-		SetItemData(nItem, KBCF_SHOWEMPTYCOLUMNS);
+		CDialogHelper::AddString(*this, IDS_OPTIONS_SHOWPARENTS, KBCF_SHOWPARENTTASKS);
+		CDialogHelper::AddString(*this, IDS_OPTIONS_SHOWEMPTYCOLS, KBCF_SHOWEMPTYCOLUMNS);
 	}
 
 	if (dwOptions != m_dwOptions)
 	{
-		for (int nItem = 0; nItem < GetCount(); nItem++)
-		{
-			// get flag for item
-			UINT nFlag = GetItemData(nItem);
-
-			// set state
-			BOOL bChecked = Misc::HasFlag(dwOptions, nFlag);
-			SetCheck(nItem, (bChecked ? CCBC_CHECKED : CCBC_UNCHECKED));
-		}
-
+		SetCheckedByItemData(dwOptions);
 		m_dwOptions = dwOptions;
 	}
 }
@@ -96,7 +77,10 @@ DWORD CKanbanOptionComboBox::GetSelectedOptions() const
 
 BOOL CKanbanOptionComboBox::HasSelectedOption(DWORD dwOption) const
 {
-	return (dwOption && ((m_dwOptions & dwOption) == dwOption)) ? TRUE : FALSE;
+	if (!dwOption)
+		return FALSE;
+	
+	return Misc::HasFlag(m_dwOptions, dwOption);
 }
 
 void CKanbanOptionComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
