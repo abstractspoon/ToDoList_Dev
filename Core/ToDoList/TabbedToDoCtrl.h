@@ -76,6 +76,7 @@ public:
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+	BOOL SplitSelectedTask(int nNumSubtasks);
 
 	void SetTaskView(FTC_VIEW nView);
 	void SetNextTaskView();

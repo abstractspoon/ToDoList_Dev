@@ -243,7 +243,7 @@ void CFilteredToDoCtrl::OnEditChangeDueTime()
 	CDWordArray aSelTaskIDs;
 	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
-	BOOL bNeedFullTaskUpdate = ModNeedsRefilter(TDCA_DUEDATE, FTCV_TASKTREE, aSelTaskIDs);
+	BOOL bNeedFullTaskUpdate = ModNeedsRefilter(TDCA_DUEDATE/*, FTCV_TASKTREE*/, aSelTaskIDs);
 	
 	if (bNeedFullTaskUpdate)
 		m_styles[TDCS_REFILTERONMODIFY] = FALSE;
@@ -553,10 +553,6 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 {
 	if (m_data.GetTaskCount())
 	{
-		// save and reset current focus to work around a bug
-// 		CSaveFocus sf;
-// 		SetFocusToTasks();
-		
 		// grab the selected items for the filtering
 		m_taskTree.GetSelectedTaskIDs(m_aSelectedTaskIDsForFiltering, FALSE);
 		
@@ -580,6 +576,15 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
 	else
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
+}
+
+void CFilteredToDoCtrl::RebuildList()
+{
+	if (m_bIgnoreListRebuild)
+		return;
+
+	// else
+	CTabbedToDoCtrl::RebuildList();
 }
 
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
@@ -799,19 +804,6 @@ void CFilteredToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 	}
 }
 
-BOOL CFilteredToDoCtrl::SplitSelectedTask(int nNumSubtasks)
-{
-   if (CTabbedToDoCtrl::SplitSelectedTask(nNumSubtasks))
-   {
-      if (InListView())
-         RebuildList();
- 
-      return TRUE;
-   }
- 
-   return FALSE;
-}
-
 BOOL CFilteredToDoCtrl::CreateNewTask(LPCTSTR szText, TDC_INSERTWHERE nWhere, BOOL bEditText, DWORD dwDependency)
 {
 	if (CTabbedToDoCtrl::CreateNewTask(szText, nWhere, bEditText, dwDependency))
@@ -835,32 +827,18 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 {
 	BOOL bTreeRefiltered = FALSE, bListRefiltered = FALSE;
 
-	if (ModsNeedRefilter(mapAttribIDs, FTCV_TASKTREE, aModTaskIDs))
+	if (ModsNeedRefilter(mapAttribIDs, aModTaskIDs))
 	{
 		// This will also refresh the list view if it is active
 		RefreshFilter();
 
-		// Note: This will also have refreshed the list filter if active
-		bListRefiltered = (GetTaskView() == FTCV_TASKLIST);
+		// Note: This will also have refreshed the active view
 		bTreeRefiltered = TRUE;
-	}
-	else if (ModsNeedRefilter(mapAttribIDs, FTCV_TASKLIST, aModTaskIDs))
-	{
-		// if undoing then we must also refresh the list filter because
-		// otherwise ResyncListSelection will fail in the case where
-		// we are undoing a delete because the undone item will not yet be in the list.
-		if (InListView() || mapAttribIDs.Has(TDCA_UNDO))
-		{
-			RebuildList();
-		}
-		else
-		{
-			SetViewNeedsTaskUpdate(FTCV_TASKLIST);
-		}
+		bListRefiltered = InListView();
 	}
 
-	// This may cause the list to be re-filtered again so if it's already done
-	// we set a flag and ignore it
+	// This may cause either the list or one of the extensions to be rebuilt
+	// we set flags and ignore it
 	CAutoFlag af(m_bIgnoreListRebuild, bListRefiltered);
 	CAutoFlag af2(m_bIgnoreExtensionUpdate, bTreeRefiltered);
 
@@ -892,7 +870,7 @@ void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	}
 }
 
-BOOL CFilteredToDoCtrl::ModsNeedRefilter(const CTDCAttributeMap& mapAttribIDs, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const
+BOOL CFilteredToDoCtrl::ModsNeedRefilter(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs) const
 {
 	if (!m_filter.HasAnyFilter())
 		return FALSE;
@@ -901,14 +879,14 @@ BOOL CFilteredToDoCtrl::ModsNeedRefilter(const CTDCAttributeMap& mapAttribIDs, F
 
 	while (pos)
 	{
-		if (ModNeedsRefilter(mapAttribIDs.GetNext(pos), nView, aModTaskIDs))
+		if (ModNeedsRefilter(mapAttribIDs.GetNext(pos), aModTaskIDs))
 			return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const
+BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArray& aModTaskIDs) const
 {
 	// sanity checks
 	if ((nModType == TDCA_NONE) || !HasStyle(TDCS_REFILTERONMODIFY))
@@ -923,35 +901,25 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 
 	if (!bNeedFullTaskUpdate)
 	{
-		// handle attributes common to both filter types
+		// 'Other' attributes
 		switch (nModType)
 		{
-		case TDCA_NEWTASK:
-			// if we refilter in the middle of adding a task it messes
-			// up the tree items so we handle it in CreateNewTask
-			return FALSE;
-			
+		case TDCA_NEWTASK: // handled in CreateNewTask
 		case TDCA_DELETE:
-			// this is handled in CTabbedToDoCtrl::SetModified
+		case TDCA_POSITION:
+		case TDCA_POSITION_SAMEPARENT:
+		case TDCA_POSITION_DIFFERENTPARENT:
+		case TDCA_SELECTION: 
 			return FALSE;
 			
 		case TDCA_UNDO:
 		case TDCA_PASTE:
 		case TDCA_MERGE:
-			// CTabbedToDoCtrl::SetModified() will force a refilter
-			// of the list automatically in response to an undo/paste
-			// so we don't need to handle it ourselves
-			return (nView != FTCV_TASKLIST);
-			
-		case TDCA_POSITION:
-		case TDCA_POSITION_SAMEPARENT:
-		case TDCA_POSITION_DIFFERENTPARENT:
-			// Task was moved
-			return ((nView == FTCV_TASKLIST) && !IsSorting());
+			return TRUE;
 
-		case TDCA_SELECTION:
-			// never need to refilter
-			return FALSE;
+		default:
+			ASSERT(0);
+			break;
 		}
 	}
 	else if (aModTaskIDs.GetSize() == 1)
@@ -975,7 +943,6 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView,
 
 		// Finally, if this was a simple task edit we can just test to 
 		// see if the modified task still matches the filter.
-		// Note: This check handles both 'advanced' and 'normal' filters
 		SEARCHPARAMS params;
 		SEARCHRESULT result;
 

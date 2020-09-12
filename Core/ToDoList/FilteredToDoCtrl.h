@@ -63,7 +63,6 @@ public:
 	int GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 
-	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL ModifyStyles(const CTDCStyleMap& styles);
 	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle = TRUE);
 	void SetModified(BOOL bMod = TRUE) { CTabbedToDoCtrl::SetModified(bMod); }
@@ -106,8 +105,8 @@ protected:
 	void OnTimerMidnight();
 
 protected:
-	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const;
-	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nModType, FTC_VIEW nView, const CDWordArray& aModTaskIDs) const;
+	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs) const;
+	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArray& aModTaskIDs) const;
 
 	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bEnable);
@@ -117,6 +116,7 @@ protected:
 	virtual BOOL CopySelectedTasks() const;
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const;
+	virtual void RebuildList();
 
 	void SaveSettings() const;
 	void LoadSettings();

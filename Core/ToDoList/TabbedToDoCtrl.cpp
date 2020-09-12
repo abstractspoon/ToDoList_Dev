@@ -1549,6 +1549,17 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 	return TRUE;
 }
 
+BOOL CTabbedToDoCtrl::SplitSelectedTask(int nNumSubtasks)
+{
+	if (!CToDoCtrl::SplitSelectedTask(nNumSubtasks))
+		return FALSE;
+
+	if (InListView())
+		RebuildList();
+
+	return TRUE;
+}
+
 DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
@@ -3459,6 +3470,12 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 		{
 			pVData->bNeedFullTaskUpdate = TRUE;
 		}
+	}
+	else if (mapAttribIDs.Has(TDCA_POSITION_DIFFERENTPARENT) && (m_dwListOptions != 0))
+	{
+		ASSERT (!bInListView);
+
+		pVData->bNeedFullTaskUpdate = TRUE;
 	}
 	else // TDCA_MERGE and all other attributes
 	{
