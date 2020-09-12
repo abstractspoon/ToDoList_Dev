@@ -117,7 +117,6 @@ protected:
 	virtual BOOL CopySelectedTasks() const;
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttrib, CTaskFile& tasks) const;
-	virtual void RebuildList();
 
 	void SaveSettings() const;
 	void LoadSettings();

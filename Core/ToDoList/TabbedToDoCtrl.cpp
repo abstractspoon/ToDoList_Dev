@@ -822,8 +822,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 			}
 			else if (pLVData->bNeedResort)
 			{
-				pLVData->bNeedResort = FALSE;
-				m_taskList.Resort();
+				ResortList();
 			}
 
 			if (pLVData->bNeedFontUpdate)
@@ -3183,36 +3182,15 @@ BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 
 void CTabbedToDoCtrl::RebuildList()
 {
-	// Since the tree will have already got the items we want 
-	// we can optimize the rebuild if either:
-	//
-	// 1. the list is sorted OR
-	// 2. the tree is unsorted OR
-	//
-	// otherwise we need the data in it's unsorted state and the 
-	// tree doesn't have it
+	GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = FALSE;
+
 	CDWordArray aTaskIDs;
-	BOOL bCheckVisibility = TRUE;
 
-	if (m_taskList.IsSorting() || !m_taskTree.IsSorting())
-	{
-		BOOL bWantParents = !Misc::HasFlag(m_dwListOptions, LVO_HIDEPARENTS);
-		BOOL bWantCollapsed = !Misc::HasFlag(m_dwListOptions, LVO_HIDECOLLAPSED);
+	BOOL bWantParents = !Misc::HasFlag(m_dwListOptions, LVO_HIDEPARENTS);
+	BOOL bWantCollapsed = !Misc::HasFlag(m_dwListOptions, LVO_HIDECOLLAPSED);
 
-		TCH().GetItemData(aTaskIDs, bWantParents, bWantCollapsed);
+	TCH().GetItemData(aTaskIDs, bWantParents, bWantCollapsed);
 
-		bCheckVisibility = FALSE;
-	}
-	else
-	{
-		m_data.GetTaskIDs(aTaskIDs);
-	}
-
-	SetListItems(aTaskIDs, bCheckVisibility);
-}
-
-void CTabbedToDoCtrl::SetListItems(const CDWordArray& aTaskIDs, BOOL bCheckVisibility)
-{
 	if (aTaskIDs.GetSize() == 0)
 	{
 		m_taskList.DeleteAll(); 
@@ -3239,30 +3217,16 @@ void CTabbedToDoCtrl::SetListItems(const CDWordArray& aTaskIDs, BOOL bCheckVisib
 		{
 			DWORD dwTaskID = aTaskIDs[nID];
 
-			if (!bCheckVisibility || WantAddTaskToList(dwTaskID))
+			if (m_taskList.InsertItem(dwTaskID) == -1)
 			{
-				if (m_taskList.InsertItem(dwTaskID) == -1)
-				{
-					ASSERT(m_data.IsTaskReference(dwTaskID));
-				}
+				ASSERT(m_data.IsTaskReference(dwTaskID));
 			}	
 		}
 
 		m_taskList.SetNextUniqueTaskID(m_dwNextUniqueID);
 		m_taskList.OnBuildComplete();
 
-		VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
-		ASSERT(pLVData);
-
-		pLVData->bNeedFullTaskUpdate = FALSE;
-		pLVData->bNeedResort = (m_nListViewGroupBy != TDCC_NONE);
-
-		// redo last sort
-		if (bInList && IsSorting())
-		{
-			pLVData->bNeedResort = FALSE;
-			m_taskList.Resort();
-		}
+		ResortList();
 	}
 	
 	// restore selection
@@ -3288,24 +3252,14 @@ void CTabbedToDoCtrl::SetListItems(const CDWordArray& aTaskIDs, BOOL bCheckVisib
 	BuildListGroupByCombo();
 }
 
-BOOL CTabbedToDoCtrl::WantAddTaskToList(DWORD dwTaskID) const
+void CTabbedToDoCtrl::ResortList(BOOL bAllowToggle)
 {
-	ASSERT(dwTaskID);
+	if (m_taskList.IsSorting())
+		m_taskList.Resort(bAllowToggle);
+	else
+		m_taskList.Unsort();
 
-	HTREEITEM hti = m_taskTree.GetItem(dwTaskID);
-	ASSERT(hti);
-
-	BOOL bHideParents = ((m_dwListOptions & LVO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS));
-
-	if (bHideParents && m_data.IsTaskParent(GetTaskID(hti)))
-		return FALSE;
-
-	BOOL bHideCollapsed = (m_dwListOptions & LVO_HIDECOLLAPSED);
-
-	if (bHideCollapsed && !TCH().IsParentItemExpanded(hti, TRUE))
-		return FALSE;
-
-	return TRUE;
+	GetViewData(FTCV_TASKLIST)->bNeedResort = FALSE;
 }
 
 void CTabbedToDoCtrl::SetExtensionsReadOnly(BOOL bReadOnly)
@@ -4669,7 +4623,7 @@ void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 		break;
 		
 	case FTCV_TASKLIST:
-		m_taskList.Resort(bAllowToggle);
+		ResortList(bAllowToggle);
 		break;
 		
 	case FTCV_UIEXTENSION1:

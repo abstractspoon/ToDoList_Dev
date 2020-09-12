@@ -273,7 +273,7 @@ protected:
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 	void BuildListGroupByCombo();
 	void BuildListOptionsCombo();
-	void SetListItems(const CDWordArray& aTaskIDs) { SetListItems(aTaskIDs, TRUE); }
+	void ResortList(BOOL bAllowToggle = FALSE);
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree();
@@ -369,9 +369,6 @@ protected:
 	static IUI_APPCOMMAND MapGetNextToCommand(TTC_NEXTTASK nNext);
 	static TTC_NEXTTASK MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel);
 
-private:
-	void SetListItems(const CDWordArray& aTaskIDs, BOOL bCheckVisibility);
-	BOOL WantAddTaskToList(DWORD dwTaskID) const;
 };
 
 #endif // !defined(AFX_TABBEDTODOCTRL_H__356A6EB9_C7EC_4395_8716_623AFF4A269B__INCLUDED_)

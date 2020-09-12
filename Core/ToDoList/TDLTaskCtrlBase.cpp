@@ -1778,11 +1778,23 @@ BOOL CTDLTaskCtrlBase::IsMultiSorting() const
 	return (m_sort.bMulti && m_sort.multi.IsSorting());
 }
 
+void CTDLTaskCtrlBase::Unsort()
+{
+	Sort(TDCC_NONE, FALSE, FALSE);
+}
+
 void CTDLTaskCtrlBase::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 {
-	// special case
-	if (nBy == TDCC_NONE && !m_sort.IsSorting())
-		return; // nothing to do
+	Sort(nBy, bAllowToggle, TRUE);
+}
+
+void CTDLTaskCtrlBase::Sort(TDC_COLUMN nBy, BOOL bAllowToggle, BOOL bCheckSortable)
+{
+	if (bCheckSortable)
+	{
+		if ((nBy == TDCC_NONE) && !m_sort.IsSorting())
+			return; // nothing to do
+	}
 
 	BOOL bAscending = m_sort.single.bAscending;
 

@@ -749,48 +749,6 @@ void CFilteredToDoCtrl::RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgres
 	}
 }
 
-// base class override
-void CFilteredToDoCtrl::RebuildList()
-{
-	if (m_bIgnoreListRebuild)
-	{
-		return;
-	}
-
-	if (m_taskList.IsSorting() || !m_taskTree.IsSorting() || !HasAnyFilter())
-	{
-		// See comment in CTabbedToDoCtrl::RebuildList()
-		CTabbedToDoCtrl::RebuildList();
-	}
-	else
-	{
-		SetViewNeedsTaskUpdate(FTCV_TASKLIST, FALSE);
-
-		if (m_filter.GetFilter() == FS_SELECTED)
-		{
-			SetListItems(m_aSelectedTaskIDsForFiltering);
-		}
-		else
-		{
-			SEARCHPARAMS filter;
-			m_filter.BuildFilterQuery(filter, m_aCustomAttribDefs);
-
-			CResultArray aResults;
-			m_matcher.FindTasks(filter, aResults, HasDueTodayColor());
-
-			CDWordArray aTaskIDs;
-			CTDCTaskMatcher::Convert(aResults, aTaskIDs);
-
-			SetListItems(aTaskIDs);
-		}
-	}
-
-	if (HasAnyFilter())
-		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
-	else
-		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
-}
-
 BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStyleMap& styles)
 {
 	if (CTabbedToDoCtrl::ModifyStyles(styles))

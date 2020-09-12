@@ -191,6 +191,7 @@ public:
 	
 	// sort functions
 	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle = TRUE); // calling twice with the same param will toggle ascending attrib
+	void Unsort();
 	BOOL CanSortBy(TDC_COLUMN nBy) const { return IsColumnShowing(nBy); }
 	void MultiSort(const TDSORTCOLUMNS& sort);
 	TDC_COLUMN GetSortBy() const { return m_sort.single.nBy; }
@@ -432,6 +433,7 @@ protected:
 	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const;
 	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
 	BOOL AttribsMatchSort(const CTDCAttributeMap& attribIDs) const;
+	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle, BOOL bCheckSortable);
 
 	virtual BOOL PrepareSort(TDSORTPARAMS& ss) const;
 	virtual int CompareTasks(LPARAM lParam1,
