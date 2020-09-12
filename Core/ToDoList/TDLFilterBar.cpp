@@ -955,6 +955,7 @@ BOOL CTDLFilterBar::OnInitDialog()
 	
 	m_eTitleFilter.ModifyStyle(0, ES_WANTRETURN, 0);
 	m_mgrPrompts.SetEditPrompt(m_eTitleFilter, CEnString(IDS_TDC_ANY));
+	m_mgrPrompts.SetComboPrompt(m_cbOptions, CEnString(IDS_TDC_NONE));
 	
 	SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 	EnableToolTips();

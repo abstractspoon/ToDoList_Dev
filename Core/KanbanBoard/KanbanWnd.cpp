@@ -173,6 +173,8 @@ BOOL CKanbanWnd::OnInitDialog()
 
 	if (m_tooltips.Create(this, (WS_POPUP | TTS_NOPREFIX | TTS_ALWAYSTIP)))
 		m_tooltips.AddTool(&m_cbOptions);
+
+	m_mgrPrompts.SetComboPrompt(m_cbOptions, CEnString(IDS_OPTIONS_NONE));
 	
 	ModifyStyleEx(0, WS_EX_CONTROLPARENT, 0);
 	Resize();

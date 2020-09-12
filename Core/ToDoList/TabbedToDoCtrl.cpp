@@ -252,6 +252,8 @@ void CTabbedToDoCtrl::BuildListOptionsCombo()
 
 	CDialogHelper::AddString(m_cbListOptions, IDS_FILTER_HIDEPARENTS, LVO_HIDEPARENTS);
 	CDialogHelper::AddString(m_cbListOptions, IDS_FILTER_HIDECOLLAPSED, LVO_HIDECOLLAPSED);
+
+	m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
 }
 
 void CTabbedToDoCtrl::OnListGroupBySelChanged()

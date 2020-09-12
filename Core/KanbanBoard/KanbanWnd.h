@@ -16,6 +16,7 @@
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\checkcombobox.h"
+#include "..\Shared\WndPrompt.h"
 
 #include "..\Interfaces\uitheme.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -83,6 +84,7 @@ protected:
 	CString	m_sTrackedCustomAttribID;
 	TDC_ATTRIBUTE m_nTrackedAttrib;
 	CDWordArray m_aSelTaskIDs;
+	CWndPromptManager m_mgrPrompts;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

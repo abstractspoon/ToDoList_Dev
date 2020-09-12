@@ -135,14 +135,3 @@ DWORD CTDLFilterOptionComboBox::GetSelectedOptions() const
 {
 	return m_dwOptions;
 }
-
-void CTDLFilterOptionComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-	DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
-{
-	CString sItemText(sItem);
-
-	if (sItemText.IsEmpty() && m_sText.IsEmpty())
-		sItemText = CEnString(IDS_TDC_NONE);
-
-	CCheckComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItemText, bList, crText);
-}

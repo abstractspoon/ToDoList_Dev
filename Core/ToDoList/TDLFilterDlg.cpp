@@ -219,6 +219,7 @@ BOOL CTDLFilterDlg::OnInitDialog()
 	m_cbTagFilter.SetStrings(m_tldListData.aTags);
 
 	// title
+	m_mgrPrompts.SetComboPrompt(m_cbOptions, CEnString(IDS_TDC_NONE));
 	m_mgrPrompts.SetEditPrompt(IDC_TITLEFILTERTEXT, *this, CEnString(IDS_TDC_ANY));
 	SetDlgItemText(IDC_TITLEFILTERLABEL, m_filter.GetTitleFilterLabel());
 
