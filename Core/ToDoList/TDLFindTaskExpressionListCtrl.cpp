@@ -562,7 +562,7 @@ void CTDLFindTaskExpressionListCtrl::PrepareEdit(int nRow, int /*nCol*/)
 	switch (rule.GetAttribType())
 	{
 	case FT_STRING:
-		m_editBox.SetMask(_T(""));
+		m_editBox.ClearMask();
 		break;
 		
 	case FT_INTEGER:

@@ -609,19 +609,19 @@ void CTDLCustomAttributeDlg::UpdateListDataMask()
 	case TDCCA_ICON:
 	case TDCCA_FILELINK:
 	case TDCCA_TIMEPERIOD:
-		m_eListData.SetMask(_T("")); // clear mask
+		m_eListData.ClearMask();
 		break;
 
 	case TDCCA_INTEGER:
-		m_eListData.SetMask(_T("0123456789"));
+		m_eListData.SetMask(_T("-0123456789"));
 		break;
 
 	case TDCCA_FRACTION:
-		m_eListData.SetMask(_T("0123456789/"));
+		m_eListData.SetMask(_T("-0123456789/"));
 		break;
 			
 	case TDCCA_DOUBLE:
-		m_eListData.SetMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
+		m_eListData.SetMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
 		break;
 
 	default:

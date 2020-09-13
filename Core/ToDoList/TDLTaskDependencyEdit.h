@@ -67,6 +67,7 @@ public:
 protected:
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
+	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 };
 
 // ----------------------------------------------

@@ -138,14 +138,14 @@ void CTDLGoToTaskDlg::EnableDisableControls()
 	else if (GetFocus() == &m_eTaskTitle)
 	{
 		m_eTaskID.SetReadOnly(TRUE);
-		m_eTaskID.SetMask(_T(""), ME_EXCLUDE); // clear mask
+		m_eTaskID.ClearMask();
 
 		m_eTaskTitle.SetReadOnly(FALSE);
 	}
 	else
 	{
 		m_eTaskID.SetReadOnly(TRUE);
-		m_eTaskID.SetMask(_T(""), ME_EXCLUDE); // clear mask
+		m_eTaskID.ClearMask();
 
 		m_eTaskTitle.SetReadOnly(TRUE);
 	}

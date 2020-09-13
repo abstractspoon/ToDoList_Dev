@@ -20,12 +20,6 @@ static char THIS_FILE[]=__FILE__;
 
 const int REBTN_EDIT = 1;
 
-enum 
-{
-	DEPEND_COL,
-	LEADIN_COL,
-};
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -169,6 +163,12 @@ void CTDLTaskDependencyEdit::DDX(CDataExchange* pDX, CTDCDependencyArray& aValue
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskDependencyOptionDlg dialog
 
+enum
+{
+	DEPEND_COL,
+	LEADIN_COL,
+};
+
 CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl()
 {
 }
@@ -246,7 +246,24 @@ COLORREF CTDLTaskDependencyListCtrl::GetItemBackColor(int nItem, int nCol, BOOL 
 	return CInputListCtrl::GetItemBackColor(nItem, nCol, bSelected, bDropHighlighted, bWndFocus);
 }
 
-// -----------------------------------------------------
+void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
+{
+	ASSERT(&ctrl == &m_editBox);
+	UNREFERENCED_PARAMETER(ctrl);
+
+	switch (nCol)
+	{
+	case DEPEND_COL:
+		m_editBox.ClearMask();
+		break;
+
+	case LEADIN_COL:
+		m_editBox.SetMask(_T("-0123456789"));
+		break;
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
 
 CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CTDCDependencyArray& aDepends, CWnd* pParent /*=NULL*/)
 	: 

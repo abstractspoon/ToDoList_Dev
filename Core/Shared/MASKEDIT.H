@@ -16,6 +16,8 @@ enum
 	ME_LOCALIZEDECIMAL	= 0x02,
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
 class CMaskEdit : public CEdit
 {
 	DECLARE_DYNAMIC(CMaskEdit)
@@ -25,6 +27,7 @@ public:
 	CMaskEdit(LPCTSTR szMask = NULL, DWORD dwFlags = 0);
 
 	void SetMask(LPCTSTR szMask, DWORD dwFlags = 0);
+	void ClearMask() { SetMask(NULL, 0); }
 	BOOL IsMasked() const { return !m_sMask.IsEmpty(); }
 	CString& Validate(CString& sText, TCHAR cReplace = 0) const;
 
