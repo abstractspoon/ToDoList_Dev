@@ -146,7 +146,6 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_NOTIFY(NM_RCLICK, IDC_FTC_TABCTRL, OnTabCtrlRClick)
 	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREELIST, OnTreeExpandItem)
 
-	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPOSTCHANGE, OnPostTabViewChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPRECHANGE, OnPreTabViewChange)
 
@@ -4430,14 +4429,6 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	}
 	
 	*pResult = 0;
-}
-
-LRESULT CTabbedToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
-{
-// 	if (InListView())
-// 		SyncTreeSelectionToList();
-
-	return CToDoCtrl::OnTDCColumnEditClick(wParam, lParam);
 }
 
 void CTabbedToDoCtrl::OnListSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
