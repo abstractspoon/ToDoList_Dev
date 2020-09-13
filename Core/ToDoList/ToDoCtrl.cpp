@@ -8467,23 +8467,7 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		break;
 		
 	case TDCC_DEPENDENCY:
-		{
-			CDWordArray aLocalDepends;
-			CStringArray aOtherDepends;
-
-			if (GetAllSelectedTaskDependencies(aLocalDepends, aOtherDepends))
-			{
-				if (aLocalDepends.GetSize() == 0)
-				{
-					if (aOtherDepends.GetSize() > 0)
-						ShowTaskLink(aOtherDepends[0], FALSE);
-				}
-				else
-				{
-					SelectTasks(aLocalDepends, TRUE);
-				}
-			}
-		}
+		GotoSelectedTaskDependency();
 		break;
 		
 	case TDCC_RECURRENCE:
@@ -11109,11 +11093,21 @@ BOOL CToDoCtrl::GotoSelectedTaskLocalDependents()
 
 BOOL CToDoCtrl::GotoSelectedTaskDependency()
 {
-	CTDCDependencyArray aDepends;
-	GetSelectedTaskDependencies(aDepends);
-	
-	if (aDepends.GetSize())
-		return ShowTaskLink(aDepends[0].Format(), FALSE);
+	CDWordArray aLocalDepends;
+	CStringArray aOtherDepends;
+
+	if (GetAllSelectedTaskDependencies(aLocalDepends, aOtherDepends))
+	{
+		if (aLocalDepends.GetSize() == 0)
+		{
+			if (aOtherDepends.GetSize() > 0)
+				return ShowTaskLink(aOtherDepends[0], FALSE);
+		}
+		else
+		{
+			return SelectTasks(aLocalDepends, TRUE);
+		}
+	}
 
 	// else
 	return FALSE;
