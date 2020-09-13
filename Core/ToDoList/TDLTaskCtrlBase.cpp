@@ -2999,7 +2999,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			
 		case TDCC_DEPENDENCY:
 			if (pTDI->aDependencies.GetSize())
-				DrawColumnImage(pDC, nColID, rSubItem);
+				DrawColumnImage(pDC, nColID, rSubItem, (pTDI->aDependencies.GetSize() > 1));
 			break;
 			
 		case TDCC_FILELINK:
