@@ -2880,7 +2880,7 @@ void CToDoListWnd::OnUpdateDeletetask(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnUpdateEditTasktext(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	int nSelCount = tdc.GetSelectedCount();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_TASKNAME) && (nSelCount == 1));	
@@ -2893,7 +2893,7 @@ void CToDoListWnd::OnUpdateTaskcolor(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnUpdateEditTaskdone(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	int nSelCount = tdc.GetSelectedCount();
 	
 	if (nSelCount == 1)
@@ -2904,14 +2904,14 @@ void CToDoListWnd::OnUpdateEditTaskdone(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnUpdateDeletealltasks(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(!tdc.IsReadOnly() && tdc.GetTaskCount() && !tdc.HasLockedTasks());	
 }
 
 void CToDoListWnd::OnUpdateSave(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(GetTDCCount() && tdc.IsModified() && !tdc.IsReadOnly());	
 }
@@ -3038,7 +3038,7 @@ void CToDoListWnd::OnSortBy(UINT nCmdID)
 
 void CToDoListWnd::OnUpdateSortBy(CCmdUI* pCmdUI)
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	TDC_COLUMN nSortBy = TDC::MapSortIDToColumn(pCmdUI->m_nID);
 
 	switch (pCmdUI->m_nID)
@@ -3121,7 +3121,7 @@ void CToDoListWnd::CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWOR
 
 void CToDoListWnd::OnUpdateSort(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	pCmdUI->Enable(tdc.IsSorting() && tdc.GetTaskCount());	
 }
@@ -3155,7 +3155,7 @@ void CToDoListWnd::OnEditCleartaskcolor()
 
 void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_COLOR) && 
 					(Prefs().GetTextColorOption() == COLOROPT_DEFAULT) &&
@@ -3387,7 +3387,7 @@ void CToDoListWnd::OnEditTimeTrackTask()
 
 void CToDoListWnd::OnUpdateEditTimeTrackTask(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanTimeTrackSelectedTask());
 	pCmdUI->SetCheck(tdc.IsSelectedTaskBeingTimeTracked() ? 1 : 0);
@@ -3664,7 +3664,7 @@ void CToDoListWnd::UpdateCaption()
 	int nSel = GetSelToDoCtrl();
 	
 	CString sProjectName = m_mgrToDoCtrls.UpdateTabItemText(nSel);
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	CString sCaption, sCopyright(MAKEINTRESOURCE(IDS_COPYRIGHT));
 	CString sStatus = m_mgrToDoCtrls.GetTabItemTooltip(nSel);
@@ -3717,7 +3717,7 @@ void CToDoListWnd::UpdateTooltip()
     sTooltip.Replace(_T(" - "), ENDL);
 
     // prefix with selected task as first line
-    CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
     DWORD dwSelID = tdc.GetSelectedTaskID();
 
     if (dwSelID)
@@ -4057,7 +4057,7 @@ void CToDoListWnd::OnDebugShowSetupDlg()
 void CToDoListWnd::OnDebugShowReminderDlg() 
 {
 	TDCREMINDER rem;
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	rem.dwTaskID = tdc.GetSelectedTaskID();
 	rem.pTDC = &tdc;
@@ -7578,7 +7578,7 @@ void CToDoListWnd::OnArchiveCompletedtasks()
 
 void CToDoListWnd::OnUpdateArchiveCompletedtasks(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(!tdc.IsReadOnly() && !tdc.IsArchive());
 }
@@ -7603,7 +7603,7 @@ void CToDoListWnd::OnArchiveSelectedTasks()
 
 void CToDoListWnd::OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(!tdc.IsReadOnly() && !tdc.IsArchive() && !tdc.IsArchive());
 }
@@ -9167,7 +9167,7 @@ void CToDoListWnd::OnSetPriority(UINT nCmdID)
 
 void CToDoListWnd::OnUpdateSetPriority(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_PRIORITY));
 	
@@ -9202,7 +9202,7 @@ void CToDoListWnd::OnEditAddFileLink()
 
 void CToDoListWnd::OnUpdateEditAddFileLink(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_FILELINK) && (tdc.GetSelectedCount() == 1));
 }
@@ -10764,7 +10764,7 @@ void CToDoListWnd::OnFileEncrypt()
 
 void CToDoListWnd::OnUpdateFileEncrypt(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEncrypt() && !tdc.IsReadOnly());
 	pCmdUI->SetCheck(tdc.IsEncrypted() ? 1 : 0);
@@ -11271,7 +11271,7 @@ void CToDoListWnd::OnEditFlagtask()
 
 void CToDoListWnd::OnUpdateEditFlagtask(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_FLAG));	
 	pCmdUI->SetCheck(tdc.IsSelectedTaskFlagged() ? 1 : 0);
@@ -11286,7 +11286,7 @@ void CToDoListWnd::OnEditLocktask()
 
 void CToDoListWnd::OnUpdateEditLocktask(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_LOCK));	
 	pCmdUI->SetCheck(tdc.IsSelectedTaskLocked() ? 1 : 0);
@@ -11311,7 +11311,7 @@ void CToDoListWnd::OnEditRecurrence()
 
 void CToDoListWnd::OnUpdateEditRecurrence(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_RECURRENCE) && !tdc.IsSelectedTaskDone());	
 }
@@ -11366,7 +11366,7 @@ void CToDoListWnd::OnViewClearfilter()
 
 void CToDoListWnd::OnUpdateViewClearfilter(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.HasAnyFilter() || tdc.CanToggleFilter());
 }
@@ -12345,7 +12345,7 @@ void CToDoListWnd::OnUpdateSBSelectionCount(CCmdUI* /*pCmdUI*/)
 {
 	if (GetTDCCount())
 	{
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
+		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 		// keep track of previous information to avoid unnecessary processing
 		static TDCSTATUSBARINFO sbiPrev;
@@ -12407,7 +12407,7 @@ void CToDoListWnd::OnUpdateSBTaskCount(CCmdUI* /*pCmdUI*/)
 {
 	if (GetTDCCount())
 	{
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
+		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 		UINT nVisibleTasks;
 		UINT nTotalTasks = tdc.GetTaskCount(&nVisibleTasks);
@@ -12770,7 +12770,7 @@ void CToDoListWnd::OnEditSetReminder()
 
 void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	BOOL bEnable = (tdc.GetSelectedCount() > 0) && !tdc.SelectedTasksAreAllDone();
 	pCmdUI->Enable(bEnable);
@@ -12806,7 +12806,7 @@ void CToDoListWnd::OnEditClearReminder()
 
 void CToDoListWnd::OnUpdateEditClearReminder(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	// check at least one selected item has a reminder
 	CDWordArray aTaskIDs;
@@ -12823,7 +12823,7 @@ void CToDoListWnd::OnEditCleartaskicon()
 
 void CToDoListWnd::OnUpdateEditCleartaskicon(CCmdUI* pCmdUI) 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_ICON) && tdc.SelectedTasksHaveIcons());	
 }
