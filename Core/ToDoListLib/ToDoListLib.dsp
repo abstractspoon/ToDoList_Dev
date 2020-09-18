@@ -585,6 +585,10 @@ SOURCE=..\ToDoList\TDLTimeTrackerDlg.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLTimeTrackerDlgData.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLToolbarButtonListCtrl.cpp
 # End Source File
 # Begin Source File
@@ -1174,6 +1178,10 @@ SOURCE=..\ToDoList\TDLThreadedExporterWnd.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLTimeTrackerDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTimeTrackerDlgData.h
 # End Source File
 # Begin Source File
 

@@ -234,6 +234,7 @@
     <ClCompile Include="..\ToDoList\TDLThemeComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLThreadedExporterWnd.cpp" />
     <ClCompile Include="..\ToDoList\TDLTimeTrackerDlg.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTimeTrackerDlgData.cpp" />
     <ClCompile Include="..\ToDoList\TDLToolbarButtonListCtrl.cpp" />
     <ClCompile Include="..\ToDoList\TDLToolsUserInputDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLTransformDialog.cpp" />
@@ -383,6 +384,7 @@
     <ClInclude Include="..\ToDoList\TDLThemeComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLThreadedExporterWnd.h" />
     <ClInclude Include="..\ToDoList\TDLTimeTrackerDlg.h" />
+    <ClInclude Include="..\ToDoList\TDLTimeTrackerDlgData.h" />
     <ClInclude Include="..\ToDoList\TDLToolbarButtonListCtrl.h" />
     <ClInclude Include="..\ToDoList\TDLToolsUserInputDlg.h" />
     <ClInclude Include="..\ToDoList\TDLTransformDialog.h" />

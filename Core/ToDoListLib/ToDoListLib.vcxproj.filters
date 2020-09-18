@@ -431,6 +431,9 @@
     <ClCompile Include="..\ToDoList\TDLTaskDependencyEdit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLTimeTrackerDlgData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -878,6 +881,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLTaskDependencyEdit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLTimeTrackerDlgData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
