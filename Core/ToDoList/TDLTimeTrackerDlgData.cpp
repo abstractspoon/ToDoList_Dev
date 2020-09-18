@@ -53,6 +53,22 @@ CString TRACKITEM::FormatTaskTitle(BOOL bWantPath) const
 
 /////////////////////////////////////////////////////////////////////////
 
+
+void CTrackItemArray::BuildTaskMap(CMapTaskIndex& mapTasks) const
+{
+	mapTasks.RemoveAll();
+
+	int nTask = GetSize();
+
+	while (nTask--)
+	{
+		const TRACKITEM& ti = GetData()[nTask];
+		mapTasks[ti.dwTaskID] = nTask;
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////
+
 TRACKTASKLIST::TRACKTASKLIST() 
 	: 
 	pTDC(NULL), 
@@ -150,8 +166,12 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 
 BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks)
 {
+	ASSERT(pTasks);
+
 	CMapTaskIndex mapTasks;
-	BuildTaskMap(mapTasks);
+
+	if (pTasks)
+		pTasks->BuildTaskMap(mapTasks);
 
 	return UpdateTasks(tasks, NULL, _T(""), mapTasks);
 }
@@ -183,22 +203,6 @@ BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 	}
 
 	return (pTasks->GetSize() != nNumTask);
-}
-
-void TRACKTASKLIST::BuildTaskMap(CMapTaskIndex& mapTasks) const
-{
-	mapTasks.RemoveAll();
-
-	if (pTasks)
-	{
-		int nTask = pTasks->GetSize();
-
-		while (nTask--)
-		{
-			const TRACKITEM& ti = pTasks->GetData()[nTask];
-			mapTasks[ti.dwTaskID] = nTask;
-		}
-	}
 }
 
 BOOL TRACKTASKLIST::IsTracking(DWORD dwTaskID) const

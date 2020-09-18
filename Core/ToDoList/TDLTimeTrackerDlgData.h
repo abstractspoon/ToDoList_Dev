@@ -23,7 +23,17 @@ struct TRACKITEM
 	DWORD dwTaskID;
 	BOOL bParent;
 };
-typedef CArray<TRACKITEM, TRACKITEM&> CTrackItemArray;
+
+/////////////////////////////////////////////////////////////////////////
+
+typedef CMap<DWORD, DWORD, int, int> CMapTaskIndex;
+
+class CTrackItemArray : public CArray<TRACKITEM, TRACKITEM&>
+{
+public:
+	void BuildTaskMap(CMapTaskIndex& mapTasks) const;
+
+};
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -50,8 +60,6 @@ struct TRACKTASKLIST
 	CTrackItemArray* pTasks;
 
 protected:
-	typedef CMap<DWORD, DWORD, int, int> CMapTaskIndex;
-	void BuildTaskMap(CMapTaskIndex& mapTasks) const;
 	BOOL UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const CString& sParentPath, const CMapTaskIndex& mapTasks);
 };
 
