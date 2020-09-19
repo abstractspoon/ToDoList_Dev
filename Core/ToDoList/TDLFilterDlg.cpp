@@ -76,7 +76,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CTDLDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLFilterDlg)
-	DDX_Control(pDX, IDC_FILTEROPTIONS, m_cbOptions);
+	DDX_Control(pDX, IDC_OPTIONFILTERCOMBO, m_cbOptions);
 	DDX_Control(pDX, IDC_CATEGORYFILTERCOMBO, m_cbCategoryFilter);
 	DDX_Control(pDX, IDC_STATUSFILTERCOMBO, m_cbStatusFilter);
 	DDX_Control(pDX, IDC_PRIORITYFILTERCOMBO, m_cbPriorityFilter);

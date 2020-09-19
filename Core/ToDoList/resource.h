@@ -425,7 +425,6 @@
 #define IDC_DAYSINONEWEEK               1106
 #define IDC_STATUSLIST                  1106
 #define IDC_BYUNITS                     1106
-#define IDC_FILTEROPTIONS               1106
 #define IDC_SORTBY2                     1106
 #define IDC_STARTTASKCOLOR              1106
 #define IDC_SNOOZEALL                   1106
@@ -802,8 +801,8 @@
 #define IDC_TDLPROTOCOLHANDLER          1522
 #define IDC_MODIFYSHORTCUTS             1522
 #define IDC_GROUPBY                     1522
-#define IDC_GROUPBYATTRIB               1523
 #define IDC_LISTVIEWGROUPBYLABEL        1522
+#define IDC_GROUPBYATTRIB               1523
 #define IDC_LISTVIEWGROUPBYATTRIB       1523
 #define IDC_LISTVIEWOPTIONSLABEL        1524
 #define IDC_LISTVIEWOPTIONS             1525
