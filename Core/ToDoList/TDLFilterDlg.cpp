@@ -322,66 +322,59 @@ void CTDLFilterDlg::OnSelchangeDueNextNDays()
 
 BOOL CTDLFilterDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
-    // Get the tooltip structure.
-    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
+	TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 
-    // Actually the idFrom holds Control's handle.
-    UINT CtrlHandle = pNMHDR->idFrom;
+	UINT nCtrlID = CToolTipCtrlEx::GetCtrlID(pTTT);
 
-    // Check once again that the idFrom holds handle itself.
-    if (pTTT->uFlags & TTF_IDISHWND)
-    {
-		static CString sTooltip;
-		sTooltip.Empty();
+	static CString sTooltip;
 
-        // Get the control's ID.
-        UINT nID = ::GetDlgCtrlID( HWND( CtrlHandle ));
+	switch (nCtrlID)
+	{
+	case IDC_CATEGORYFILTERCOMBO:
+		sTooltip = m_cbCategoryFilter.GetTooltip();
+		break;
 
-        switch (nID)
-        {
-        case IDC_CATEGORYFILTERCOMBO:
-			sTooltip = m_cbCategoryFilter.GetTooltip();
-            break;
+	case IDC_ALLOCTOFILTERCOMBO:
+		sTooltip = m_cbAllocToFilter.GetTooltip();
+		break;
 
-        case IDC_ALLOCTOFILTERCOMBO:
-			sTooltip = m_cbAllocToFilter.GetTooltip();
-            break;
+	case IDC_STATUSFILTERCOMBO:
+		sTooltip = m_cbStatusFilter.GetTooltip();
+		break;
 
-        case IDC_STATUSFILTERCOMBO:
-			sTooltip = m_cbStatusFilter.GetTooltip();
-            break;
+	case IDC_ALLOCBYFILTERCOMBO:
+		sTooltip = m_cbAllocByFilter.GetTooltip();
+		break;
 
-        case IDC_ALLOCBYFILTERCOMBO:
-			sTooltip = m_cbAllocByFilter.GetTooltip();
-            break;
+	case IDC_VERSIONFILTERCOMBO:
+		sTooltip = m_cbVersionFilter.GetTooltip();
+		break;
 
-        case IDC_VERSIONFILTERCOMBO:
-			sTooltip = m_cbVersionFilter.GetTooltip();
-            break;
+	case IDC_TAGFILTERCOMBO:
+		sTooltip = m_cbTagFilter.GetTooltip();
+		break;
 
-        case IDC_TAGFILTERCOMBO:
-			sTooltip = m_cbTagFilter.GetTooltip();
-            break;
+	case IDC_OPTIONFILTERCOMBO:
+		sTooltip = m_cbOptions.GetTooltip();
+		break;
 
-        case IDC_OPTIONFILTERCOMBO:
-			sTooltip = m_cbOptions.GetTooltip();
-            break;
+	default:
+		if (!CTDCCustomAttributeUIHelper::IsCustomFilterControl(nCtrlID))
+			return FALSE;
 
-		default:
-			if (CTDCCustomAttributeUIHelper::IsCustomFilterControl(nID))
-				sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(this, nID);
-			break;
-        }
+		sTooltip = CTDCCustomAttributeUIHelper::GetFilterControlTooltip(this, nCtrlID);
+		break;
+	}
 
-		if (!sTooltip.IsEmpty())
-		{
-			// Set the tooltip text.
-			::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
-			pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
-	        return TRUE;
-		}
-    }
+	if (!sTooltip.IsEmpty())
+	{
+		// disable translation of the tip
+		CLocalizer::EnableTranslation(pNMHDR->hwndFrom, FALSE);
 
-    // Not handled.
-    return FALSE;
+		// Set the tooltip text.
+		::SendMessage(pNMHDR->hwndFrom, TTM_SETMAXTIPWIDTH, 0, 300);
+		pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
+	}
+
+	return TRUE; // handled
 }

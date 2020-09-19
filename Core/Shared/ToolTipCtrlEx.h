@@ -22,7 +22,7 @@ public:
 	virtual ~CToolTipCtrlEx();
 
 	void RelayEvent(LPMSG lpMsg);
-	void FilterToolTipMessage(MSG* pMsg);
+	void FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage = FALSE);
 	BOOL AdjustRect(LPRECT lprc, BOOL bLarger /*= TRUE*/) const;
 	void Activate(BOOL bActivate);
 	void EnableTracking(BOOL bTracking = TRUE, int nXOffset = 0, int nYOffset = 0);
@@ -36,6 +36,8 @@ public:
 
 	static int SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, LPCRECT pBounds = NULL, UINT nFlags = TTF_TRANSPARENT | TTF_NOTBUTTON);
 	static int SetToolInfo(TOOLINFO& ti, HWND hWnd, const CString sTooltip, int nID, LPCRECT pBounds = NULL, UINT nFlags = TTF_TRANSPARENT | TTF_NOTBUTTON);
+
+	static UINT GetCtrlID(const TOOLTIPTEXT* pTTT);
 
 protected:
 	BOOL m_bUsingRelayEvent;
@@ -51,7 +53,7 @@ protected:
 
 protected:
 	static void InitToolInfo(TOOLINFO& ti, BOOL bInitSize);
-	static int DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti);
+	static int DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti, BOOL bSendHitTestMessage);
 	static BOOL IsTopParentActive(CWnd* pOwner);
 	static HWND GetParentOwner(HWND hWnd);
 };

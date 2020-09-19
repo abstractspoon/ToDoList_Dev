@@ -99,7 +99,7 @@ void CToolTipCtrlEx::RelayEvent(LPMSG lpMsg)
 	CToolTipCtrl::RelayEvent(lpMsg);
 }
 
-void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
+void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 {
 	ASSERT(GetSafeHwnd());
 	ASSERT((m_bUsingRelayEvent == -1) || (m_bUsingRelayEvent == FALSE));
@@ -146,7 +146,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg)
 		TOOLINFO tiHit;
 		InitToolInfo(tiHit, TRUE);
 
-		int nHit = DoToolHitTest(pOwner, point, tiHit);
+		int nHit = DoToolHitTest(pOwner, point, tiHit, bSendHitTestMessage);
 
 		if (m_nLastHit != nHit)
 		{
@@ -251,11 +251,11 @@ BOOL CToolTipCtrlEx::IsKeypress(UINT nMsgID)
 			(nMsgID >= WM_SYSKEYFIRST && nMsgID <= WM_SYSKEYLAST));
 }
 
-int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti)
+int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti, BOOL bSendHitTestMessage)
 {
 	ASSERT(pOwner);
 
-	if (CWnd::FromHandlePermanent(*pOwner) != NULL)
+	if (!bSendHitTestMessage && CWnd::FromHandlePermanent(*pOwner) != NULL)
 		return pOwner->OnToolHitTest(point, &ti);
 
 	// Send message
@@ -286,6 +286,22 @@ void CToolTipCtrlEx::OnTimer(UINT_PTR nIDEvent)
 	}
 
 	CToolTipCtrl::OnTimer(nIDEvent);
+}
+
+UINT CToolTipCtrlEx::GetCtrlID(const TOOLTIPTEXT* pTTT)
+{
+	if (!pTTT)
+	{
+		ASSERT(0);
+		return 0;
+	}
+
+	UINT nCtrlID = pTTT->hdr.idFrom;
+
+	if (pTTT->uFlags & TTF_IDISHWND)
+		nCtrlID = ::GetDlgCtrlID((HWND)nCtrlID);
+
+	return nCtrlID;
 }
 
 int CToolTipCtrlEx::SetToolInfo(TOOLINFO& ti, const CWnd* pWnd, const CString sTooltip, int nID, LPCRECT pBounds, UINT nFlags)

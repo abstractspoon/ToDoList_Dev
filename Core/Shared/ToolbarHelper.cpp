@@ -276,7 +276,7 @@ LRESULT CToolbarHelper::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 					TOOLTIPTEXT* pTTT = (TOOLTIPTEXT*)pNMHDR;
 
 					// only handle this if it's not already been done
-					if (pTTT->lpszText && *(pTTT->lpszText))
+					if (!Misc::IsEmpty(pTTT->lpszText))
 						break;
 
 					UINT nID = pNMHDR->idFrom;

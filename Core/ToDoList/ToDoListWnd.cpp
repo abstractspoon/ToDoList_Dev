@@ -7100,7 +7100,7 @@ void CToDoListWnd::OnNeedTooltipText(NMHDR* pNMHDR, LRESULT* pResult)
 	else
 	{
 		// Handle items having dynamic menu text
-		sTipText = m_menubar.GetDynamicItemTooltip(pNMHDR->idFrom,
+		sTipText = m_menubar.GetDynamicItemTooltip(nCmdID,
 												   m_mruList,
 												   m_mgrToDoCtrls,
 												   Prefs(),

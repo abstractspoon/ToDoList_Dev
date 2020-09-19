@@ -79,6 +79,7 @@ BEGIN_MESSAGE_MAP(CTDLTimeTrackerDlg, CDialog)
 	ON_COMMAND(ID_TIMETRACK_HELP, OnHelp)
 	ON_WM_HELPINFO()
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
+	ON_REGISTERED_MESSAGE(WM_TTC_TOOLHITTEST, OnToolHitTest)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////
@@ -212,7 +213,7 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 {
 	if (m_tipCaption.GetSafeHwnd() && m_tipCaption.WantMessage(pMsg->message))
 	{
-		m_tipCaption.FilterToolTipMessage(pMsg);
+		m_tipCaption.FilterToolTipMessage(pMsg, TRUE);
 	}
 
 	// we need to check for <return> in quick find
@@ -248,37 +249,6 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 	
 	// else default handling
 	return CDialog::PreTranslateMessage(pMsg);
-}
-
-int CTDLTimeTrackerDlg::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
-{
-	// Don't show a tip if it's just 'Timer Tracker'
-	if (m_sCaption != m_sOrgCaption)
-	{
-		// Since we override WM_NCHITTEST we first need to 
-		// limit our hit-test to the actual caption bar
-		CRect rWindow;
-		GetWindowRect(rWindow);
-		ScreenToClient(rWindow);
-
-		rWindow.bottom = 0; // top of client rect
-		
-		if (rWindow.PtInRect(point))
-		{
-			ClientToScreen(&point);
-
-			int nHit = ::SendMessage(*this, WM_NCHITTEST, 0, MAKELPARAM(point.x, point.y));
-
-			switch (nHit)
-			{
-			case HTCAPTION:
-			case HTSYSMENU:
-				return m_tipCaption.SetToolInfo(*pTI, this, m_sCaption, 1, rWindow, TTF_ALWAYSTIP | TTF_TRANSPARENT | TTF_NOTBUTTON);
-			}
-		}
-	}
-
-	return -1;
 }
 
 void CTDLTimeTrackerDlg::SetUITheme(const CUIThemeFile& theme)
@@ -968,18 +938,49 @@ BOOL CTDLTimeTrackerDlg::QuickFindNextTaskComboItem(int nFrom, int nTo, int nInc
 	return (nNext != CB_ERR);
 }
 
+LRESULT CTDLTimeTrackerDlg::OnToolHitTest(WPARAM wp, LPARAM lp)
+{
+	ASSERT(wp && lp);
+
+	// Don't show a tip if it's just 'Timer Tracker'
+	if (m_sCaption != m_sOrgCaption)
+	{
+		CPoint point(wp);
+		TOOLINFO* pTI = (TOOLINFO*)lp;
+
+		// Since we override WM_NCHITTEST we first need to 
+		// limit our hit-test to the actual caption bar
+		CRect rWindow;
+		GetWindowRect(rWindow);
+		ScreenToClient(rWindow);
+
+		rWindow.bottom = 0; // top of client rect
+		
+		if (rWindow.PtInRect(point))
+		{
+			ClientToScreen(&point);
+
+			int nHit = ::SendMessage(*this, WM_NCHITTEST, 0, MAKELPARAM(point.x, point.y));
+
+			switch (nHit)
+			{
+			case HTCAPTION:
+			case HTSYSMENU:
+				return m_tipCaption.SetToolInfo(*pTI, this, m_sCaption, 1, rWindow, TTF_ALWAYSTIP | TTF_TRANSPARENT | TTF_NOTBUTTON);
+			}
+		}
+	}
+
+	return -1;
+}
+
 BOOL CTDLTimeTrackerDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
-    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT *)pNMHDR;
+    TOOLTIPTEXT *pTTT = (TOOLTIPTEXT*)pNMHDR;
 	
-    UINT nCtrlID = pNMHDR->idFrom;
-	
-    if (pTTT->uFlags & TTF_IDISHWND)
-		nCtrlID = ::GetDlgCtrlID((HWND)nCtrlID);
-
 	static CString sTooltip;
 		
-    switch (nCtrlID)
+	switch (CToolTipCtrlEx::GetCtrlID(pTTT))
 	{
 	case IDC_TASKLISTS:
 		sTooltip = GetSelectedItem(m_cbTasklists);
@@ -990,8 +991,7 @@ BOOL CTDLTimeTrackerDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*
 		break;
 
 	default:
-		sTooltip.Empty();
-		break;
+		return FALSE;
 	}
 	
 	if (!sTooltip.IsEmpty())
@@ -999,8 +999,8 @@ BOOL CTDLTimeTrackerDlg::OnToolTipNotify(UINT /*id*/, NMHDR* pNMHDR, LRESULT* /*
 		Misc::Trim(sTooltip);
 		pTTT->lpszText = (LPTSTR)(LPCTSTR)sTooltip;
 	}
-
-	return TRUE;
+	
+	return TRUE; // handled
 }
 
 void CTDLTimeTrackerDlg::OnShowWindow(BOOL bShow, UINT nStatus)

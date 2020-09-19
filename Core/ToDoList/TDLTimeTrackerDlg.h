@@ -93,7 +93,6 @@ protected:
 	virtual void OnCancel() { ShowWindow(SW_HIDE); }
 	virtual void OnOK() { OnStartStopTracking(); }
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 protected:
 	afx_msg void OnStartStopTracking();
@@ -117,6 +116,7 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnToolHitTest(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 	
