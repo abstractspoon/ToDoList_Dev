@@ -8691,8 +8691,13 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	EndTimeTracking(TRUE, bNotify);
 
 	// Select the task if this is a requirement
-	if (HasStyle(TDCS_TRACKSELECTEDTASKONLY) && !m_taskTree.IsTaskSelected(dwTaskID, TRUE))
+	BOOL bTaskIsSelected = m_taskTree.IsTaskSelected(dwTaskID, TRUE);
+
+	if (!bTaskIsSelected && HasStyle(TDCS_TRACKSELECTEDTASKONLY))
+	{
+		bTaskIsSelected = TRUE;
 		VERIFY(SelectTask(dwTaskID));
+	}
 
 	VERIFY(m_timeTracking.BeginTracking(dwTaskID));
 
@@ -8703,11 +8708,15 @@ BOOL CToDoCtrl::BeginTimeTracking(DWORD dwTaskID, BOOL bNotify)
 	m_taskTree.SetTimeTrackTaskID(dwTaskID);
 
 	// Update Time spent control
-	m_eTimeSpent.CheckButton(ID_TIME_TRACK, TRUE);
-	m_eTimeSpent.EnableButton(ID_TIME_TRACK, TRUE);
-	m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
+	if (bTaskIsSelected)
+	{
+		m_eTimeSpent.CheckButton(ID_TIME_TRACK, TRUE);
+		m_eTimeSpent.EnableButton(ID_TIME_TRACK, TRUE);
+		m_eTimeSpent.EnableButton(ID_ADD_TIME, FALSE);
 
-	SetCtrlState(m_eTimeSpent, RTCS_READONLY);
+		SetCtrlState(m_eTimeSpent, RTCS_READONLY);
+	}
+
 	SetTimer(TIMER_TRACK, TIMETRACKPERIOD, NULL);
 
 	// notify parent
