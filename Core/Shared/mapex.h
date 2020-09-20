@@ -193,6 +193,9 @@ public:
 	template <class ARRAY>
 	int CopyFrom(const ARRAY& other)
 	{
+		if (other.GetSize() == 0)
+			return 0;
+
 		return CopyFrom(other.GetData(), other.GetSize());
 	}
 
