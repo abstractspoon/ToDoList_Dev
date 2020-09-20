@@ -120,15 +120,15 @@ public:
 	template <class T, class S>
 	static int FindItemByData(const S& ctrl, T itemData)
 	{
-		int nItem = ctrl.GetCount();
+		int nNumItem = ctrl.GetCount();
 
-		while (nItem--)
+		for (int nItem = 0; nItem < nNumItem; nItem++)
 		{
 			if (ctrl.GetItemData(nItem) == (DWORD)itemData)
-				break;
+				return nItem;
 		}
 
-		return nItem;
+		return -1;
 	}
 
 	template <class T, class S>
@@ -167,6 +167,23 @@ public:
 	static int AddString(S& ctrl, UINT nIDItem, T itemData)
 	{
 		return AddString(ctrl, CEnString(nIDItem), itemData);
+	}
+
+	template <class T, class S>
+	static int InsertString(S& ctrl, int nPos, LPCTSTR szItem, T itemData)
+	{
+		int nIndex = ctrl.InsertString(nPos, szItem);
+
+		if (nIndex != -1)
+			ctrl.SetItemData(nIndex, itemData);
+
+		return nIndex;
+	}
+
+	template <class T, class S>
+	static int InsertString(S& ctrl, int nPos, UINT nIDItem, T itemData)
+	{
+		return InsertString(ctrl, nPos, CEnString(nIDItem), itemData);
 	}
 	
 	// comboboxes
