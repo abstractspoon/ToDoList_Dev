@@ -28,6 +28,7 @@ static char THIS_FILE[] = __FILE__;
 
 CBurndownGraphComboBox::CBurndownGraphComboBox()
 {
+	m_bHasHeadings = TRUE; // base class
 }
 
 CBurndownGraphComboBox::~CBurndownGraphComboBox()
@@ -39,8 +40,6 @@ BEGIN_MESSAGE_MAP(CBurndownGraphComboBox, COwnerdrawComboBoxBase)
 	//{{AFX_MSG_MAP(CBurndownGraphComboBox)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
-	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
-	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -92,8 +91,8 @@ void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
 	if (pDX->m_bSaveAndValidate)
 	{
 		int nSel = GetCurSel();
-
-		if ((nSel == -1) || ItemIsContainer(nSel))
+	
+		if ((nSel == -1) || COwnerdrawComboBoxBase::ItemIsHeading(nSel))
 		{
 			ASSERT(0);
 			nGraph = BCT_UNKNOWNGRAPH;
@@ -107,146 +106,14 @@ void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
 	{
 		int nFind = CDialogHelper::FindItemByData(*this, nGraph);
 
-		if (ItemIsContainer(nFind))
+		if (ItemIsHeading(nFind, nGraph))
 			ASSERT(0);
 		else
 			SetCurSel(nFind);
 	}
 }
 
-void CBurndownGraphComboBox::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
-											COLORREF& crText, COLORREF& crBack) const
-{
-	COwnerdrawComboBoxBase::GetItemColors(nItem, nItemState, dwItemData, crText, crBack);
-
-	if (ItemDataIsContainer(dwItemData))
-	{
-		crBack = GetSysColor(COLOR_3DLIGHT);
-		crText = GetSysColor(COLOR_WINDOWTEXT);
-	}
-}
-
-void CBurndownGraphComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-											DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
-{
-	// If it's an actual graph rather than a container then indent the item
-	CRect rItem(rect);
-
-	if (bList && !ItemDataIsContainer(dwItemData))
-	{
-		rItem.left += rItem.Height();
-	}
-
-	COwnerdrawComboBoxBase::DrawItemText(dc, rItem, nItem, nItemState, dwItemData, sItem, bList, crText);
-}
-
-BOOL CBurndownGraphComboBox::CanDrawFocusRect(int /*nItem*/, DWORD dwItemData) const
-{
-	return !ItemDataIsContainer(dwItemData);
-}
-
-BOOL CBurndownGraphComboBox::OnSelEndOK()
-{
-	// Prevent focus moving to a container item
-	int nSel = GetCurSel();
-
-	if (ItemIsContainer(nSel))
-		SetCurSel(nSel + 1);
-
-	return FALSE;// continue routing
-}
-
-void CBurndownGraphComboBox::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
-{
-
-
-	// Step over container items
-	int nNewSel = CB_ERR;
-
-	switch (nChar)
-	{
-	case VK_UP:
-		nNewSel = (GetCurSel() - 1);
-		nNewSel = max(0, nNewSel);
-		break;
-
-	case VK_PRIOR:
-		nNewSel = (GetCurSel() - (GetMinVisible() - 1));
-		nNewSel = max(0, nNewSel);
-		break;
-
-	case VK_DOWN:
-		nNewSel = (GetCurSel() + 1);
-		nNewSel = min((GetCount() - 1), nNewSel);
-		break;
-
-	case VK_NEXT:
-		nNewSel = (GetCurSel() + (GetMinVisible() - 1));
-		nNewSel = min((GetCount() - 1), nNewSel);
-		break;
-
-	case VK_HOME:
-		nNewSel = 0;
-		break;
-
-	case VK_END:
-		nNewSel = (GetCount() - 1);
-		break;
-	}
-
-	if ((nNewSel == CB_ERR) || !ItemIsContainer(nNewSel))
-	{
-		COwnerdrawComboBoxBase::OnKeyDown(nChar, nRepCnt, nFlags);
-		return;
-	}
-
-	int nCurSel = GetCurSel();
-
-	if (nNewSel > nCurSel)
-	{
-		// Step over container item unless it's the last
-		if ((nNewSel + 1) < GetCount())
-			nNewSel++;
-		else
-			nNewSel--; // move back one place
-	}
-	else 
-	{
-		// Step over container item unless it's the first
-		if ((nNewSel - 1) > 0)
-			nNewSel--;
-		else
-			nNewSel++; // move forward one place
-	}
-
-	if (nNewSel != nCurSel)
-	{
-		SetCurSel(nNewSel);
-
-		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
-		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
-	}
-}
-
-int CBurndownGraphComboBox::GetMinVisible() const
-{
-	int nMinVis = ::SendMessage(m_hWnd, CB_GETMINVISIBLE, 0, 0);
-
-	if (nMinVis == 0)
-		return 30;
-
-	return nMinVis;
-}
-
-BOOL CBurndownGraphComboBox::ItemIsContainer(int nItem) const
-{
-	if ((nItem < 0) || (nItem > (GetCount() - 1)))
-		return FALSE;
-
-	return ItemDataIsContainer(GetItemData(nItem));
-}
-
-BOOL CBurndownGraphComboBox::ItemDataIsContainer(DWORD dwItemData)
+BOOL CBurndownGraphComboBox::ItemIsHeading(int /*nItem*/, DWORD dwItemData) const
 {
 	switch (dwItemData)
 	{
@@ -257,3 +124,4 @@ BOOL CBurndownGraphComboBox::ItemDataIsContainer(DWORD dwItemData)
 	
 	return FALSE;
 }
+

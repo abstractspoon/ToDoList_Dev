@@ -39,22 +39,11 @@ protected:
 	//{{AFX_MSG(CBurndownGraphComboBox)
 		// NOTE - the ClassWizard will add and remove member functions here.
 	//}}AFX_MSG
-	afx_msg BOOL OnSelEndOK();
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
-					   COLORREF& crText, COLORREF& crBack) const;
-	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
-					  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
-	BOOL CanDrawFocusRect(int nItem, DWORD dwItemData) const;
-
-	BOOL ItemIsContainer(int nItem) const;
-	int GetMinVisible() const;
-	
-	static BOOL ItemDataIsContainer(DWORD dwItemData);
+	BOOL ItemIsHeading(int nItem, DWORD dwItemData) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

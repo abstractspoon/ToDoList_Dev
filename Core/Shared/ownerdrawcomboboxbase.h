@@ -16,7 +16,7 @@ class COwnerdrawComboBoxBase : public CComboBox
 
 // Construction
 public:
-	COwnerdrawComboBoxBase();
+	COwnerdrawComboBoxBase(int nDefMinVisible = 30);
 
 	void RefreshDropWidth();
 
@@ -24,8 +24,10 @@ public:
     int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;
 
 // Attributes
-private:
+protected:
 	int m_nMaxTextWidth;
+	int m_nDefMinVisible;
+	BOOL m_bHasHeadings;
 
 // Operations
 public:
@@ -51,6 +53,8 @@ protected:
 	//}}AFX_MSG
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
+	afx_msg BOOL OnSelEndOK();
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -64,11 +68,14 @@ protected:
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual BOOL CanDrawFocusRect(int /*nItem*/, DWORD /*dwItemData*/) const { return TRUE; }
+	virtual BOOL CanDrawFocusRect(int nItem, DWORD dwItemData) const { return !ItemIsHeading(nItem, dwItemData); }
+	virtual BOOL ItemIsHeading(int /*nItem*/, DWORD /*dwItemData*/) const { return FALSE; }
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;
 	void RefreshDropWidth(BOOL bRecalc);
+	int GetMinVisible() const;
+	BOOL ItemIsHeading(int nItem) const;
 
 	BOOL WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const;
 

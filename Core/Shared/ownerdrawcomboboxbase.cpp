@@ -18,10 +18,14 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase
 
-COwnerdrawComboBoxBase::COwnerdrawComboBoxBase() 
+COwnerdrawComboBoxBase::COwnerdrawComboBoxBase(int nDefMinVisible) 
 	: 
-	m_nMaxTextWidth(-1)
+	m_nMaxTextWidth(-1),
+	m_nDefMinVisible(nDefMinVisible),
+	m_bHasHeadings(FALSE)
 {
+	if (m_nDefMinVisible <= 0)
+		m_nDefMinVisible = 30;
 }
 
 COwnerdrawComboBoxBase::~COwnerdrawComboBoxBase()
@@ -36,6 +40,8 @@ BEGIN_MESSAGE_MAP(COwnerdrawComboBoxBase, CComboBox)
 	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_CONTROL_REFLECT_EX(CBN_SELENDOK, OnSelEndOK)
+	ON_WM_KEYDOWN()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -54,6 +60,12 @@ void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwI
 	// Special case
 	if (IsType(CBS_SIMPLE) && bDisabled)
 		crBack = GetSysColor(COLOR_WINDOW);
+
+	if (ItemIsHeading(nItem, dwItemData))
+	{
+		crBack = GetSysColor(COLOR_3DLIGHT);
+		crText = GetSysColor(COLOR_WINDOWTEXT);
+	}
 }
 
 void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) 
@@ -63,8 +75,18 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (!dc.Attach(lpDrawItemStruct->hDC))
 		return;
 
+	// Determine whether this is a list item
+	HWND hwndDC = ::WindowFromDC(lpDrawItemStruct->hDC);
+	BOOL bListItem = FALSE;
+	
+	if (hwndDC)
+		bListItem = CWinClasses::IsClass(hwndDC, WC_COMBOLBOX);
+	else
+		bListItem = (dc.GetWindowOrg().y == -1);
+
 	int nDC = dc.SaveDC(), nItem = (int)lpDrawItemStruct->itemID;
 
+	// Draw item background
 	COLORREF crText, crBack;
 	GetItemColors(nItem, lpDrawItemStruct->itemState, lpDrawItemStruct->itemData, crText, crBack);
 
@@ -73,6 +95,11 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	// draw the item
 	rItem.DeflateRect(2, 1);
+
+	if (bListItem && m_bHasHeadings && !ItemIsHeading(nItem, lpDrawItemStruct->itemData))
+	{
+		rItem.left += rItem.Height();
+	}
 
 	CString sText;
 
@@ -86,15 +113,6 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	{
 		GetWindowText(sText);
 	}
-
-	// Determine whether this is a list item
-	HWND hwndDC = ::WindowFromDC(lpDrawItemStruct->hDC);
-	BOOL bListItem = FALSE;
-	
-	if (hwndDC)
-		bListItem = CWinClasses::IsClass(hwndDC, WC_COMBOLBOX);
-	else
-		bListItem = (dc.GetWindowOrg().y == -1);
 
 	//TRACE(_T("COwnerdrawComboBoxBase::DrawItem(%s, hwnd=%s, list = %d)\n"), sText, CWinClasses::GetClass(hwndDC), bListItem);
 
@@ -254,7 +272,6 @@ void COwnerdrawComboBoxBase::RefreshDropWidth(BOOL bRecalc)
 		nWidth = min(nWidth, nMaxWidth);
 	
 	SetDroppedWidth(nWidth + GetExtraListboxWidth());
-
 }
 
 BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const
@@ -333,3 +350,99 @@ int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, const CString& sIte
 	return nFind;
 }
 
+int COwnerdrawComboBoxBase::GetMinVisible() const
+{
+	int nMinVis = ::SendMessage(m_hWnd, CB_GETMINVISIBLE, 0, 0);
+
+	if (nMinVis == 0)
+		return m_nDefMinVisible;
+
+	return nMinVis;
+}
+
+BOOL COwnerdrawComboBoxBase::OnSelEndOK()
+{
+	// Prevent focus moving to a container item
+	int nSel = GetCurSel();
+
+	if (ItemIsHeading(nSel))
+		SetCurSel(nSel + 1);
+
+	return FALSE;// continue routing
+}
+
+void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	// Step over container items
+	int nCurSel = GetCurSel(), nNewSel = CB_ERR;
+
+	switch (nChar)
+	{
+	case VK_UP:
+		nNewSel = (nCurSel - 1);
+		nNewSel = max(0, nNewSel);
+		break;
+
+	case VK_PRIOR:
+		nNewSel = (nCurSel - (GetMinVisible() - 1));
+		nNewSel = max(0, nNewSel);
+		break;
+
+	case VK_DOWN:
+		nNewSel = (nCurSel + 1);
+		nNewSel = min((GetCount() - 1), nNewSel);
+		break;
+
+	case VK_NEXT:
+		nNewSel = (nCurSel + (GetMinVisible() - 1));
+		nNewSel = min((GetCount() - 1), nNewSel);
+		break;
+
+	case VK_HOME:
+		nNewSel = 0;
+		break;
+
+	case VK_END:
+		nNewSel = (GetCount() - 1);
+		break;
+	}
+
+	if ((nNewSel == CB_ERR) || !ItemIsHeading(nNewSel))
+	{
+		CComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
+		return;
+	}
+
+	if (nNewSel > nCurSel)
+	{
+		// Step over container item unless it's the last
+		if ((nNewSel + 1) < GetCount())
+			nNewSel++;
+		else
+			nNewSel--; // move back one place
+	}
+	else
+	{
+		// Step over container item unless it's the first
+		if ((nNewSel - 1) > 0)
+			nNewSel--;
+		else
+			nNewSel++; // move forward one place
+	}
+
+	if (nNewSel != nCurSel)
+	{
+		SetCurSel(nNewSel);
+
+		int nMsgID = (GetDroppedState() ? CBN_SELCHANGE : CBN_SELENDOK);
+		GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), nMsgID), (LPARAM)GetSafeHwnd());
+	}
+}
+
+BOOL COwnerdrawComboBoxBase::ItemIsHeading(int nItem) const
+{
+	if (nItem < 0 || nItem >= GetCount())
+		return FALSE;
+
+	return ItemIsHeading(nItem, GetItemData(nItem));
+}
