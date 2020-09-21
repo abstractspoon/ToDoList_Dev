@@ -338,23 +338,21 @@ namespace HTMLContentControl
 			if (Uri.IsWellFormedUriString(href, UriKind.Absolute))
 				return true;
 
-			return IsOutlookLink(href);
-		}
+            var parser = new UrlParser();
 
-		private static bool IsOutlookLink(string href)
-		{
-			return href.ToLower().StartsWith("outlook://");
+            return (parser.GetUrlCount(href) == 1);
 		}
 
 		private void OnDocumentMouseOver(object sender, HtmlElementEventArgs e)
 		{
-			var element = e.ToElement;
+            var element = e.ToElement;
+            String href = GetElementUrl(element);
 
-			if ((element != null) && (element.TagName.Equals("A", StringComparison.InvariantCultureIgnoreCase)))
-			{
-				String href = element.GetAttribute("href"), tooltip = href;
+			if (!String.IsNullOrEmpty(href))
+            {
+                var tooltip = href;
 
-				if (NeedLinkTooltip != null)
+                if (NeedLinkTooltip != null)
 				{
 					var args = new NeedLinkTooltipEventArgs(href);
 					NeedLinkTooltip(this, args);
@@ -420,24 +418,40 @@ namespace HTMLContentControl
 				SelectElement(m_CurrentHRef);
 		}
 
-		private void OnDocumentMouseUp(object sender, HtmlElementEventArgs e)
+        private String GetElementUrl(HtmlElement element)
+        {
+            if (element != null)
+            {
+                String url = element.GetAttribute("href");
+
+                if (String.IsNullOrWhiteSpace(url))
+                    url = element.InnerHtml;
+
+                if (IsValidHref(url))
+                    return url;
+            }
+
+            // else
+            return "";
+        }
+
+        private void OnDocumentMouseUp(object sender, HtmlElementEventArgs e)
 		{
 			if (m_CurrentHRef != null)
 			{
 				var element = m_CurrentHRef; // for selecting after
+                m_CurrentHRef = null;
 
-				String url = m_CurrentHRef.GetAttribute("href");
-				m_CurrentHRef = null;
+                String url = GetElementUrl(element);
 
-				if (!String.IsNullOrWhiteSpace(url))
+				if (!String.IsNullOrEmpty(url))
 				{
 					// Verify that the mouse hasn't moved
 					var mouseElm = this.WebBrowser.Document.GetElementFromPoint(e.ClientMousePosition);
+                    
+                    String checkUrl = GetElementUrl(mouseElm);
 
-					if (mouseElm == null)
-						return;
-
-					if (!url.Equals(mouseElm.GetAttribute("href")))
+                    if (!checkUrl.Equals(url))
 						return;
 
 					if (HtmlNavigation != null)

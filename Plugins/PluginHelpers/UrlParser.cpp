@@ -32,7 +32,6 @@ UrlParser::~UrlParser()
 	delete m_parser;
 }
 
-
 List<UrlItem^>^ UrlParser::ParseText(String^ sText)
 {
 	CUrlArray aUrls;
@@ -57,5 +56,12 @@ bool UrlParser::IsFileProtocol(String^ sUrl)
 {
 	return (m_parser->IsFileProtocol(MS(sUrl)) != FALSE);
 }
+
+int UrlParser::GetUrlCount(String^ sText)
+{
+	CUrlArray aUrls;
+	return m_parser->ParseText(MS(sText), aUrls);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
