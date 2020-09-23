@@ -11,6 +11,7 @@
 #include "..\shared\dlgunits.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\localizer.h"
+#include "..\shared\mapex.h"
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -155,7 +156,7 @@ BOOL CTDLTimeTrackerDlg::Recreate()
 	if (!SelectTaskList(pTDC))
 		return FALSE;
 	
-	if (CB_ERR == SelectItemByData(m_cbTasks, dwTaskID))
+	if (!m_cbTasks.SelectTask(dwTaskID))
 		return FALSE;
 	
 	// restore position
@@ -231,7 +232,7 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 				int nSel = m_cbTasks.GetCurSel();
 				int nFrom = (bForward ? (nSel + 1) : (nSel - 1));
 				
-				int nNext = QuickFindNextTaskComboItem(nFrom, bForward);
+				int nNext = m_cbTasks.FindNextItem(m_sQuickFind, nFrom, bForward);
 				
 				if ((nNext != CB_ERR) && (nNext != nSel))
 				{
@@ -274,7 +275,7 @@ DWORD CTDLTimeTrackerDlg::GetTasklistTrackID(const CFilteredToDoCtrl* pTDC) cons
 	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 	ASSERT(pTTL);
 	
-	return (pTTL ? pTTL->dwTrackedTaskID : 0);
+	return (pTTL ? pTTL->GetTrackedTaskID() : 0);
 }
 
 int CTDLTimeTrackerDlg::GetTasklistCBIndex(const CFilteredToDoCtrl* pTDC) const
@@ -438,11 +439,6 @@ BOOL CTDLTimeTrackerDlg::IsSelectedTasklist(const CFilteredToDoCtrl* pTDC) const
 	return (pTDC && (pTDC == GetSelectedTasklist()));
 }
 
-DWORD CTDLTimeTrackerDlg::GetSelectedTaskID() const
-{
-	return GetSelectedItemData(m_cbTasks);
-}
-
 BOOL CTDLTimeTrackerDlg::RebuildTasklistCombo()
 {
 	int nTasklist = m_aTasklists.GetNumTasklists();
@@ -477,40 +473,13 @@ BOOL CTDLTimeTrackerDlg::RebuildTasklistCombo()
 
 void CTDLTimeTrackerDlg::RebuildTaskCombo()
 {
-	DWORD dwSelID = GetSelectedTaskID();
-	
-	m_cbTasks.ResetContent();
-
-	if (m_aTasklists.GetNumTasklists() == 0)
-		return;
-
 	const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
 	ASSERT(pTDC);
 
-	const CTrackItemArray* pTasks = m_aTasklists.GetTasks(pTDC);
+	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
+	ASSERT(pTTL);
 
-	if (pTasks)
-	{
-		CHoldRedraw hr(m_cbTasks);
-	
-		BOOL bWantParents = HasOption(TTDO_ALLOWPARENTTRACKING);
-		BOOL bWantPath = HasOption(TTDO_SHOWTASKPATH);
-
-		int nTask = pTasks->GetSize();
-	
-		while (nTask--)
-		{
-			const TRACKITEM& ti = pTasks->GetData()[nTask];
-		
-			if (!bWantParents && ti.bParent)
-				continue;
-
-			VERIFY(AddString(m_cbTasks, ti.FormatTaskTitle(bWantPath), ti.dwTaskID) != CB_ERR);
-		}
-	
-		RefreshMaxDropWidth(m_cbTasks);
-		SelectItemByData(m_cbTasks, dwSelID);
-	}
+	m_cbTasks.Rebuild(pTTL, m_dwOptions);
 }
 
 BOOL CTDLTimeTrackerDlg::RemoveTasklist(const CFilteredToDoCtrl* pTDC)
@@ -555,7 +524,7 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 {
 	ASSERT(m_pWndNotify && GetSafeHwnd());
 	ASSERT(pTDC);
-	
+
 	// Update data struct first
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 
@@ -566,13 +535,20 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 	}
 
 	BOOL bWasTracking = pTTL->IsTracking();
+	DWORD dwWasTrackingTaskID = (bWasTracking ? pTTL->GetTrackedTaskID() : 0);
 
-	VERIFY(m_aTasklists.UpdateTracking(pTTL));
-	ASSERT((bWasTracking && !pTTL->IsTracking()) || (!bWasTracking && pTTL->IsTracking()));
+	VERIFY(pTTL->UpdateTracking());
+
+	BOOL bIsTracking = pTTL->IsTracking();
+	DWORD dwIsTrackingTaskID = (bIsTracking ? pTTL->GetTrackedTaskID() : 0);
+
+	ASSERT((bWasTracking && !bIsTracking) ||
+			(!bWasTracking && bIsTracking) ||
+			(bWasTracking && bIsTracking && (dwIsTrackingTaskID != dwWasTrackingTaskID)));
 
 	// If we've just started tracking, switch to that tasklist
 	// and show the dialog if required
-	if (pTTL->IsTracking() && !bWasTracking)
+	if (bIsTracking && !bWasTracking)
 	{
 		SelectTaskList(pTDC);
 
@@ -587,15 +563,11 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 		UpdatePlayButton();
 		UpdateTaskTime(pTDC);
 	}
-	
+
+	m_cbTasks.UpdateRecentlyTrackedTasks(pTTL);
 	RefreshCaptionText();
-
+	
 	return TRUE;
-}
-
-BOOL CTDLTimeTrackerDlg::IsSelectedTask(DWORD dwTaskID) const
-{
-	return (dwTaskID && (dwTaskID == GetSelectedTaskID()));
 }
 
 BOOL CTDLTimeTrackerDlg::IsTrackingSelectedTasklistAndTask() const
@@ -710,7 +682,7 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 {
 	ASSERT(m_cbTasklists.GetCurSel() != CB_ERR);
 	
-	const TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(GetSelectedTasklist());
+	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(GetSelectedTasklist());
 
 	if (!pTTL)
 	{
@@ -720,7 +692,7 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
-	if (pTTL->dwTrackedTaskID == dwSelTaskID)
+	if (pTTL->IsTracking(dwSelTaskID))
 	{
 		// notify parent to STOP tracking
 		SendNotifyMessage(WM_TDLTTN_STOPTRACKING, pTTL->pTDC, 0);
@@ -732,6 +704,8 @@ void CTDLTimeTrackerDlg::OnStartStopTracking()
 	}
 
 	UpdateTracking(pTTL->pTDC);
+	m_cbTasks.UpdateRecentlyTrackedTasks(pTTL);
+
 	RefreshCaptionText();
 
 	// redraw text colour
@@ -798,7 +772,9 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
 	ASSERT(pTDC);
 
-	if (pTDC->IsDelayLoaded())
+	BOOL bTasklistChange = (pTDC != m_cbTasks.GetToDoCtrl());
+	
+	if (bTasklistChange && pTDC->IsDelayLoaded())
 	{
 		int nSel = m_cbTasklists.GetCurSel();
 
@@ -818,10 +794,10 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	}
 	
 	// Build task combo and select the tracked task if any
-	RebuildTaskCombo();
-	
-	DWORD dwTaskID = (pTTL->dwTrackedTaskID ? pTTL->dwTrackedTaskID : pTDC->GetSelectedTaskID());
-	SelectItemByData(m_cbTasks, dwTaskID);
+	if (bTasklistChange)
+		m_cbTasks.Rebuild(pTTL, m_dwOptions);
+	else
+		m_cbTasks.SelectTask(pTTL);
 	
 	UpdatePlayButton();
 	UpdateTaskTime(pTDC);
@@ -870,7 +846,7 @@ void CTDLTimeTrackerDlg::OnChangeQuickFind()
 	if (pTDC)
 	{
 		int nSel = m_cbTasks.GetCurSel();
-		int nNext = QuickFindNextTaskComboItem(nSel, TRUE);
+		int nNext = m_cbTasks.FindNextItem(m_sQuickFind, nSel, TRUE);
 		
 		if ((nNext != CB_ERR) && (nNext != nSel))
 		{
@@ -880,62 +856,6 @@ void CTDLTimeTrackerDlg::OnChangeQuickFind()
 			UpdateTaskTime(pTDC);
 		}
 	}
-}
-
-int CTDLTimeTrackerDlg::QuickFindNextTaskComboItem(int nFrom, BOOL bForward) const
-{
-	int nNumItems = m_cbTasks.GetCount(), nNext = CB_ERR;
-
-	if (bForward)
-	{
-		if ((nFrom < 0) || (nFrom >= nNumItems))
-			nFrom = 0;
-
-		// From nFrom to end of combo
-		if (QuickFindNextTaskComboItem(nFrom, (nNumItems - 1), 1, nNext))
-			return nNext;
-
-		// From start of combo to nFrom
-		if (QuickFindNextTaskComboItem(0, (nFrom - 1), 1, nNext))
-			return nNext;
-	}
-	else // backwards
-	{
-		if ((nFrom < 0) || (nFrom >= nNumItems))
-			nFrom = (nNumItems - 1);
-
-		// From nFrom to start of combo
-		if (QuickFindNextTaskComboItem(nFrom, 0, -1, nNext))
-			return nNext;
-
-		// From end of combo to nFrom
-		if (QuickFindNextTaskComboItem((nNumItems - 1), (nFrom + 1), -1, nNext))
-			return nNext;
-	}
-
-	// else
-	return CB_ERR;
-}
-
-BOOL CTDLTimeTrackerDlg::QuickFindNextTaskComboItem(int nFrom, int nTo, int nIncrement, int& nNext) const
-{
-	ASSERT(((nIncrement == 1) && (nTo >= nFrom)) || ((nIncrement == -1) && (nTo <= nFrom)));
-
-	nNext = CB_ERR;
-	nTo += nIncrement; // so the != will work to stop the loop
-
-	for (int nItem = nFrom; nItem != nTo; nItem += nIncrement)
-	{
-		CString sItem(GetItem(m_cbTasks, nItem));
-
-		if (Misc::Find(m_sQuickFind, sItem) != -1)
-		{
-			nNext = nItem;
-			break;
-		}
-	}
-
-	return (nNext != CB_ERR);
 }
 
 LRESULT CTDLTimeTrackerDlg::OnToolHitTest(WPARAM wp, LPARAM lp)

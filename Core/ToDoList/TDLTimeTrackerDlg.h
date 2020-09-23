@@ -4,7 +4,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 #include "taskfile.h"
-#include "TDLTimeTrackerDlgData.h"
+#include "TDLTimeTrackerTaskComboBox.h"
 
 #include "..\shared\DialogHelper.h"
 #include "..\shared\iconbutton.h"
@@ -16,16 +16,6 @@
 #include "..\shared\TooltipCtrlex.h"
 
 #include "..\Interfaces\uithemefile.h"
-
-/////////////////////////////////////////////////////////////////////////
-
-enum
-{
-	TTDO_FORMATTIMESASHMS		= 0X01,
-	TTDO_SHOWONBEGINTRACKING	= 0X02,
-	TTDO_ALLOWPARENTTRACKING	= 0X04,
-	TTDO_SHOWTASKPATH = 0X08,
-};
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -54,7 +44,7 @@ public:
 
 	BOOL SelectTaskList(const CFilteredToDoCtrl* pTDC);
 	const CFilteredToDoCtrl* GetSelectedTasklist() const;
-	DWORD GetSelectedTaskID() const;
+	DWORD GetSelectedTaskID() const { return m_cbTasks.GetSelectedTaskID(); }
 	BOOL IsAlwaysOnTop() const { return m_bAlwaysOnTop; }
 		
 protected:
@@ -66,7 +56,7 @@ protected:
 	BOOL m_bCentreOnShow;
 
 	CComboBox m_cbTasklists;
-	CComboBox m_cbTasks;
+	CTDLTimeTrackerTaskComboBox m_cbTasks;
 	CWnd* m_pWndNotify;
 	CIconButton m_btnStart;
 	CWndPromptManager m_mgrPrompts;
@@ -135,9 +125,6 @@ protected:
 	BOOL IsTrackingSelectedTasklistAndTask() const;
 	CString GetSelectedTaskTitle() const;
 	CString GetSelectedTasklistName() const;
-	BOOL IsSelectedTask(DWORD dwTaskID) const;
-	int QuickFindNextTaskComboItem(int nFrom, BOOL bForward) const;
-	BOOL QuickFindNextTaskComboItem(int nFrom, int nTo, int nIncrement, int& nNext) const;
 	void LoadSettings();
 	void SaveSettings() const;
 	void SetAlwaysOnTop(BOOL bTopMost);

@@ -10,6 +10,16 @@ typedef void* HTASKITEM;
 
 /////////////////////////////////////////////////////////////////////////
 
+enum
+{
+	TTDO_FORMATTIMESASHMS = 0X01,
+	TTDO_SHOWONBEGINTRACKING = 0X02,
+	TTDO_ALLOWPARENTTRACKING = 0X04,
+	TTDO_SHOWTASKPATH = 0X08,
+};
+
+/////////////////////////////////////////////////////////////////////////
+
 struct TRACKITEM
 {
 	TRACKITEM();
@@ -53,11 +63,16 @@ struct TRACKTASKLIST
 	BOOL RemoveTasks(DWORD dwToRemove);
 
 	BOOL IsTracking(DWORD dwTaskID = 0) const;
+	DWORD GetTrackedTaskID() const { return dwTrackedTaskID; }
+	BOOL UpdateTracking();
 
 	const CFilteredToDoCtrl* pTDC;
+	CTrackItemArray aTasks;
+	CDWordArray aRecentlyTrackedIDs;
+
+protected:
 	DWORD dwTrackedTaskID;
 	BOOL bTrackingPaused;
-	CTrackItemArray* pTasks;
 
 protected:
 	BOOL UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const CString& sParentPath, const CMapTaskIndex& mapTasks);
@@ -74,7 +89,6 @@ public:
 	BOOL IsEmpty() const { return !GetNumTasklists(); }
 	int GetNumTasklists() const;
 	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
-	BOOL UpdateTracking(TRACKTASKLIST* pTTL);
 
 	int AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
 	BOOL DeleteTasklist(const CFilteredToDoCtrl* pTDC);

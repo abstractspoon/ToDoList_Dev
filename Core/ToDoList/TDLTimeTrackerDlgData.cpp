@@ -53,7 +53,6 @@ CString TRACKITEM::FormatTaskTitle(BOOL bWantPath) const
 
 /////////////////////////////////////////////////////////////////////////
 
-
 void CTrackItemArray::BuildTaskMap(CMapTaskIndex& mapTasks) const
 {
 	mapTasks.RemoveAll();
@@ -73,31 +72,25 @@ TRACKTASKLIST::TRACKTASKLIST()
 	: 
 	pTDC(NULL), 
 	dwTrackedTaskID(0), 
-	bTrackingPaused(FALSE),
-	pTasks(new CTrackItemArray) 
+	bTrackingPaused(FALSE)
 {
 }
 	
 TRACKTASKLIST::~TRACKTASKLIST()
 {
-	delete pTasks;
 }
 
 int TRACKTASKLIST::SetTasks(const CTaskFile& tasks)
 {
-	ASSERT(pTasks);
-	pTasks->RemoveAll();
+	aTasks.RemoveAll();
 
-	CMapTaskIndex mapTasks; // empty
-	UpdateTasks(tasks, NULL, _T(""), mapTasks);
+	UpdateTasks(tasks);
 
-	return pTasks->GetSize();
+	return aTasks.GetSize();
 }
 	
 BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const CString& sParentPath, const CMapTaskIndex& mapTasks)
 {
-	ASSERT(pTasks);
-
 	BOOL bChange = FALSE;
 	BOOL bDone = FALSE;
 	BOOL bReference = FALSE;
@@ -125,7 +118,7 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 			if (mapTasks.Lookup(dwTaskID, nExist))
 			{
 				ASSERT(nExist != -1);
-				TRACKITEM& tiExist = pTasks->GetAt(nExist);
+				TRACKITEM& tiExist = aTasks[nExist];
 
 				if (tiExist != ti)
 				{
@@ -135,7 +128,7 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 			}
 			else // new
 			{
-				pTasks->Add(ti);
+				aTasks.Add(ti);
 				bChange = TRUE;
 			}
 
@@ -156,7 +149,7 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 	
 		while (hSubtask)
 		{
-			bChange |= UpdateTasks(tasks, hSubtask, sTaskPath, mapTasks);
+			bChange |= UpdateTasks(tasks, hSubtask, sTaskPath, mapTasks); // RECURSIVE CALL
 			hSubtask = tasks.GetNextTask(hSubtask);
 		}
 	}
@@ -166,23 +159,19 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const C
 
 BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks)
 {
-	ASSERT(pTasks);
-
 	CMapTaskIndex mapTasks;
-
-	if (pTasks)
-		pTasks->BuildTaskMap(mapTasks);
+	aTasks.BuildTaskMap(mapTasks);
 
 	return UpdateTasks(tasks, NULL, _T(""), mapTasks);
 }
 
 BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 {
-	int nNumTask = pTasks->GetSize(), nTask = nNumTask;
+	int nNumTask = aTasks.GetSize(), nTask = nNumTask;
 
 	while (nTask--)
 	{
-		const TRACKITEM& ti = pTasks->GetData()[nTask];
+		const TRACKITEM& ti = Misc::GetItemT(aTasks, nTask);
 
 		BOOL bRemove = (Misc::HasFlag(dwToRemove, TTL_REMOVEDELETED) && 
 						!pTDC->HasTask(ti.dwTaskID));
@@ -199,10 +188,10 @@ BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 		}
 
 		if (bRemove)
-			pTasks->RemoveAt(nTask);
+			aTasks.RemoveAt(nTask);
 	}
 
-	return (pTasks->GetSize() != nNumTask);
+	return (aTasks.GetSize() != nNumTask);
 }
 
 BOOL TRACKTASKLIST::IsTracking(DWORD dwTaskID) const
@@ -214,6 +203,30 @@ BOOL TRACKTASKLIST::IsTracking(DWORD dwTaskID) const
 		return FALSE;
 
 	return !bTrackingPaused;
+}
+
+
+BOOL TRACKTASKLIST::UpdateTracking()
+{
+	if (!pTDC)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	dwTrackedTaskID = pTDC->GetTimeTrackTaskID(FALSE);
+	bTrackingPaused = (dwTrackedTaskID && (pTDC->GetTimeTrackTaskID(TRUE) != dwTrackedTaskID));
+
+	if (dwTrackedTaskID)
+	{
+		Misc::RemoveItemT(dwTrackedTaskID, aRecentlyTrackedIDs);
+		aRecentlyTrackedIDs.InsertAt(0, dwTrackedTaskID);
+
+		while (aRecentlyTrackedIDs.GetSize() > 10)
+			Misc::RemoveLastT(aRecentlyTrackedIDs);
+	}
+
+	return TRUE;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -280,24 +293,15 @@ void CTDCTrackTasklistArray::DeleteAllTasklists()
 
 BOOL CTDCTrackTasklistArray::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 {
-	return UpdateTracking(GetTasklist(pTDC));
-}
+	TRACKTASKLIST* pTTL = GetTasklist(pTDC);
 
-BOOL CTDCTrackTasklistArray::UpdateTracking(TRACKTASKLIST* pTTL)
-{
 	if (!pTTL)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
-	// else
-	DWORD dwTrackedTaskID = pTTL->pTDC->GetTimeTrackTaskID(FALSE);
-
-	pTTL->dwTrackedTaskID = dwTrackedTaskID;
-	pTTL->bTrackingPaused = (dwTrackedTaskID && (pTTL->pTDC->GetTimeTrackTaskID(TRUE) != dwTrackedTaskID));
-
-	return TRUE;
+	return pTTL->UpdateTracking();
 }
 
 int CTDCTrackTasklistArray::FindTasklist(const CFilteredToDoCtrl* pTDC) const
@@ -344,13 +348,13 @@ const CTrackItemArray* CTDCTrackTasklistArray::GetTasks(const CFilteredToDoCtrl*
 {
 	const TRACKTASKLIST* pTTL = GetTasklist(pTDC);
 
-	return (pTTL ? pTTL->pTasks : NULL);
+	return (pTTL ? &(pTTL->aTasks) : NULL);
 }
 
 CTrackItemArray* CTDCTrackTasklistArray::GetTasks(const CFilteredToDoCtrl* pTDC)
 {
 	TRACKTASKLIST* pTTL = GetTasklist(pTDC);
 	
-	return (pTTL ? pTTL->pTasks : NULL);
+	return (pTTL ? &(pTTL->aTasks) : NULL);
 }
 

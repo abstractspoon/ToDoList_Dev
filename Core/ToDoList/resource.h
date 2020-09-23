@@ -2400,6 +2400,8 @@
 #define IDS_TABTIP_NOTFOUND             51585
 #define IDS_NEWDEPENDENCY_PROMPT        51586
 #define IDS_DEPENDSLEADIN_COL           51587
+#define IDS_TIMETRACKER_RECENTITEMS     51588
+#define IDS_TIMETRACKER_RESTOFITEMS     51589
 
 // Next default values for new objects
 // 

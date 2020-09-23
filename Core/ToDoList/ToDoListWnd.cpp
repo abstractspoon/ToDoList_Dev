@@ -3436,7 +3436,9 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 				if (bExclusive)
 					tdc.EndTimeTracking(FALSE);
 
-				m_dlgTimeTracker.UpdateTracking(&tdc);
+				if (&tdc == m_dlgTimeTracker.GetSelectedTasklist())
+					m_dlgTimeTracker.UpdateTracking(&tdc);
+
 				m_mgrToDoCtrls.RefreshTimeTracking(nCtrl);
 			}
 		}
