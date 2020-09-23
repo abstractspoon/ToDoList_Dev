@@ -110,6 +110,8 @@ BOOL Gui::DoAnimation()
 
 void Gui::MinToTray(const HWND hWnd) 
 {
+	ASSERT(IsWindowVisible(hWnd));
+
 	if (DoAnimation() && ::IsWindowVisible(hWnd)) 
 	{
 		RECT rcFrom = { 0 }, rcTo = { 0 };
@@ -125,6 +127,8 @@ void Gui::MinToTray(const HWND hWnd)
 
 void Gui::RestoreFromTray(const HWND hWnd, BOOL bForceMax) 
 {
+	ASSERT(!IsWindowVisible(hWnd));
+
 	if (DoAnimation()) 
 	{
 		RECT rcFrom = { 0 }, rcTo = { 0 };
@@ -137,7 +141,7 @@ void Gui::RestoreFromTray(const HWND hWnd, BOOL bForceMax)
 	
 	BOOL bZoomed = (IsZoomed(hWnd) || bForceMax);
 
-	::ShowWindow(hWnd, bZoomed ? SW_SHOWMAXIMIZED : SW_RESTORE);
+	::ShowWindow(hWnd, bZoomed ? SW_SHOWMAXIMIZED : SW_SHOW);
 	::SetActiveWindow(hWnd);
 	::SetForegroundWindow(hWnd);
 }

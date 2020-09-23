@@ -2777,8 +2777,9 @@ void CToDoListWnd::RestoreVisibility()
 
 void CToDoListWnd::RestorePosition()
 {
-	CPreferences prefs;
+	m_bStartHidden = FALSE;
 
+	CPreferences prefs;
 	CRect rect;
 	
 	rect.left = prefs.GetProfileInt(_T("Pos"), _T("Left"), -1);
