@@ -43,8 +43,8 @@ public:
 	CString m_sOutputTasklist;
 
 protected:
-	BOOL PostProcessHtml(CString& sHtml) const;
-	BOOL FixupLinks(CString& sHtml) const;
+	BOOL PostProcessHtml(const CString& sTextComments, CString& sHtml) const;
+	BOOL FixupLinks(const CString& sTextComments, CString& sHtml) const;
 	BOOL FixupColors(CString& sHtml) const;
 	BOOL FixupLists(CString& sHtml) const;
 

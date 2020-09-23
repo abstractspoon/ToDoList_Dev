@@ -91,7 +91,7 @@ BOOL WebMisc::Encode(CString& sUrlOrFragment, DWORD dwFlags)
 	DWORD dwLen = (sUrlOrFragment.GetLength() * 4);
 	CString sEncoded;
 
-	HRESULT hr = ::UrlEscape(sUrlOrFragment, sEncoded.GetBuffer(dwLen + 1), &dwLen, 0);
+	HRESULT hr = ::UrlEscape(sUrlOrFragment, sEncoded.GetBuffer(dwLen + 1), &dwLen, dwFlags);
 	sEncoded.ReleaseBuffer(dwLen);
 
 	if (hr == S_OK)

@@ -218,6 +218,19 @@ BOOL CUrlParser::ProtocolWantsNotification(int nProtocol) const
 	return m_aProtocols[nProtocol].bWantNotify;
 }
 
+int CUrlParser::ParseText(LPCTSTR szText, CStringArray& aUrls) const
+{
+	CUrlArray aParsedUrls;
+	int nNumUrl = ParseText(szText, aParsedUrls);
+
+	aUrls.SetSize(nNumUrl);
+
+	for (int nUrl = 0; nUrl < nNumUrl; nUrl++)
+		aUrls[nUrl] = aParsedUrls[nUrl].sUrl;
+
+	return nNumUrl;
+}
+
 int CUrlParser::ParseText(LPCTSTR szText, CUrlArray& aUrls) const
 {
 	aUrls.RemoveAll();

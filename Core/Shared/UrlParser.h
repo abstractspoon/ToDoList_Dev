@@ -45,6 +45,7 @@ public:
 
 	int AddProtocol(LPCTSTR szProtocol, BOOL bWantNotify = TRUE);
 	int ParseText(LPCTSTR szText, CUrlArray& aUrls) const;
+	int ParseText(LPCTSTR szText, CStringArray& aUrls) const;
 	int MatchProtocol(LPCTSTR szText) const;
 	int GetProtocols(CStringArray& aProtocols) const;
 

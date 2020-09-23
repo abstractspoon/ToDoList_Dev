@@ -221,7 +221,7 @@ void CConvertRTFToHTMLDlg::OnOK()
 					HTASKITEM hTask = tasksOut.FindTask(dwTaskID);
 					ASSERT(hTask);
 
-					PostProcessHtml(sHtml);
+					PostProcessHtml(pTDI->sComments, sHtml);
 
 					tasksOut.SetTaskCustomComments(hTask, CBinaryData(sHtml), HTML_GUID);
 				}
@@ -256,13 +256,13 @@ void CConvertRTFToHTMLDlg::OnOK()
 	CDialogEx::OnOK();
 }
 
-BOOL CConvertRTFToHTMLDlg::PostProcessHtml(CString& sHtml) const
+BOOL CConvertRTFToHTMLDlg::PostProcessHtml(const CString& sTextComments, CString& sHtml) const
 {
 	FileMisc::SaveFile(FileMisc::GetTempFilePath(L"before", L"html"), sHtml, SFEF_UTF16);
 
 	BOOL bChanged = FALSE;
 
-	bChanged |= FixupLinks(sHtml);
+	bChanged |= FixupLinks(sTextComments, sHtml);
 	bChanged |= FixupColors(sHtml);
 	bChanged |= FixupLists(sHtml);
 
@@ -271,9 +271,9 @@ BOOL CConvertRTFToHTMLDlg::PostProcessHtml(CString& sHtml) const
 	return bChanged;
 }
 
-BOOL CConvertRTFToHTMLDlg::FixupLinks(CString& sHtml) const
+BOOL CConvertRTFToHTMLDlg::FixupLinks(const CString& sTextComments, CString& sHtml) const
 {
-	BOOL bChanged = FALSE;
+	BOOL bChanged = FALSE, bHtmlLinksFound = FALSE;
 
 	if (m_bUseMSWordForConversion)
 	{
@@ -322,45 +322,59 @@ BOOL CConvertRTFToHTMLDlg::FixupLinks(CString& sHtml) const
 		// that links should be the same as the links text, so if the link text
 		// has no protocol we give it one
 		CStringArray aLinks, aLinksText;
-
 		int nLink = WebMisc::ExtractHtmlLinks(sHtml, aLinks, aLinksText);
 
-		while (nLink--)
+		if (nLink)
 		{
-			const CString& sLinkText = aLinksText[nLink];
+			bHtmlLinksFound = TRUE;
 
-			if (WebMisc::IsURL(sLinkText) && (sLinkText.Find(':') == -1))
+			while (nLink--)
 			{
-				const CString& sLink = aLinks[nLink];
-				CString sFilePath;
+				const CString& sLinkText = aLinksText[nLink];
 
-				if (WebMisc::DecodeFileURI(sLink, sFilePath) && FileMisc::IsTempFilePath(sFilePath))
+				if (WebMisc::IsURL(sLinkText) && (sLinkText.Find(':') == -1))
 				{
-					VERIFY(sHtml.Replace(sLink, (L"https://" + sLinkText)) == 1);
+					const CString& sLink = aLinks[nLink];
+					CString sFilePath;
 
-					bChanged = TRUE;
+					if (WebMisc::DecodeFileURI(sLink, sFilePath) && FileMisc::IsTempFilePath(sFilePath))
+					{
+						VERIFY(sHtml.Replace(sLink, (L"https://" + sLinkText)) == 1);
+
+						bChanged = TRUE;
+					}
 				}
 			}
 		}
 	}
-	else
+
+	if (!bHtmlLinksFound)
 	{
-		CUrlArray aUrls;
-		int nUrl = m_parser.ParseText(sHtml, aUrls);
+		CStringArray aLinks;
+		int nLink = m_parser.ParseText(sTextComments, aLinks);
 
-		while (nUrl--)
+		if (nLink)
 		{
-			const URLITEM& url = aUrls[nUrl];
+			// remove duplicates because CString::Replace will
+			// replace duplicates
+			CStringSet mapUrls;
+			mapUrls.CopyFrom(aLinks);
 
-			CString sHref;
-			sHref.Format(L"<A HREF='%s'>%s</A>", url.sUrl, url.sUrl);
+			POSITION pos = mapUrls.GetStartPosition();
 
-			sHtml = sHtml.Left(url.cr.cpMin) + sHref + sHtml.Mid(url.cr.cpMax);
+			while (pos)
+			{
+				CString sHref, sUrl = mapUrls.GetNext(pos);
+				sHref.Format(L"<A HREF='%s'>%s</A>", sUrl, sUrl);
 
-			bChanged = TRUE;
+				TXT2XML(sUrl); // to match Word
+
+				VERIFY(sHtml.Replace(sUrl, sHref) > 0);
+
+				bChanged = TRUE;
+			}
 		}
 	}
-
 	
 	return bChanged;
 }
