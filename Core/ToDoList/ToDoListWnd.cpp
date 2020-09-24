@@ -811,12 +811,7 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 	m_bVisible = startup.HasFlag(TLD_FORCEVISIBLE) ? 1 : -1;
 	m_bSaveUIVisInTaskList = startup.HasFlag(TLD_SAVEUIVISINTASKLIST);
 	m_bAllowForcedCheckOut = startup.HasFlag(TLD_ALLOWFORCEDCHECKOUT);
-
-#ifdef _DEBUG
-	m_bPasswordPrompting = FALSE;
-#else
 	m_bPasswordPrompting = startup.HasFlag(TLD_PASSWORDPROMPTING);
-#endif
 
 	if (startup.HasFlag(TLD_LOGGING))
 		EnableLogging();
@@ -7741,6 +7736,7 @@ CFilteredToDoCtrl* CToDoListWnd::NewToDoCtrl(BOOL bEnabled)
 		
 		// set global styles once only allowing the taskfile 
 		// itself to override from this point on
+		InitGlobalStyles(*pTDC);
 
 		// Set initial theme before it becomes visible
 		pTDC->SetUITheme(m_theme);
