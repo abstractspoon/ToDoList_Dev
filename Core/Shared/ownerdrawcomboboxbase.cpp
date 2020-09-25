@@ -16,6 +16,13 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+
+#ifndef CB_GETMINVISIBLE
+#	define CBM_FIRST         0x1700
+#	define CB_GETMINVISIBLE  (CBM_FIRST + 2)
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase
 
 COwnerdrawComboBoxBase::COwnerdrawComboBoxBase(int nDefMinVisible) 

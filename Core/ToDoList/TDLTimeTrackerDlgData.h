@@ -1,6 +1,8 @@
 #pragma once
 #include "afxwin.h"
 
+#include <AFXTEMPL.H>
+
 /////////////////////////////////////////////////////////////////////////
 
 class CFilteredToDoCtrl;

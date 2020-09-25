@@ -171,7 +171,7 @@ BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
 
 	while (nTask--)
 	{
-		const TRACKITEM& ti = Misc::GetItemT(aTasks, nTask);
+		const TRACKITEM& ti = Misc::GetItemT<TRACKITEM>(aTasks, nTask);
 
 		BOOL bRemove = (Misc::HasFlag(dwToRemove, TTL_REMOVEDELETED) && 
 						!pTDC->HasTask(ti.dwTaskID));

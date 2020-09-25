@@ -133,7 +133,7 @@ int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL, DWORD dwOpti
 
 	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
-		const TRACKITEM& ti = Misc::GetItemT(pTTL->aTasks, nTask);
+		const TRACKITEM& ti = Misc::GetItemT<TRACKITEM>(pTTL->aTasks, nTask);
 
 		if (!bWantParents && ti.bParent)
 			continue;
@@ -242,7 +242,7 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 
 			if (nNumAdded)
 			{
-				Misc::SortArrayT(aComboItemsToDelete, SortProc);
+				Misc::SortArrayT<int>(aComboItemsToDelete, SortProc);
 				int nItem = aComboItemsToDelete.GetSize();
 
 				while (nItem--)
