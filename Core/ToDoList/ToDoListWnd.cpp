@@ -2358,13 +2358,11 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	
 	RestoreVisibility();
 	
-	// load last open tasklists
-	CPreferences prefs;
-
 	// initialize Progress first time
 	m_sbProgress.BeginProgress(m_statusBar, CEnString(IDS_STARTUPPROGRESS));
 
 	// open cmdline tasklist
+	CPreferences prefs;
 	int nTDCCount = prefs.GetProfileInt(SETTINGS_KEY, _T("NumLastFiles"), 0);
 
 	if (!m_startupOptions.HasFilePath() || nTDCCount)
