@@ -40,6 +40,7 @@ REM Zip C++ Binaries
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\TDLUpdate.exe
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\TDLUninstall.exe
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\TDLTransEdit.exe
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\ConvertRTFToHTML.exe
 
 REM Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest

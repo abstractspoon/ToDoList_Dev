@@ -9,7 +9,7 @@
 #include "..\shared\urlricheditctrl.h"
 
 // CConvertRTFToHTMLDlg dialog
-class CConvertRTFToHTMLDlg : public CDialogEx
+class CConvertRTFToHTMLDlg : public CDialog
 {
 // Construction
 public:

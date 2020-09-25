@@ -57,6 +57,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Interfaces", "Interfaces\In
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoListLib", "ToDoListLib\ToDoListLib.vcxproj", "{940BE78E-1486-7F9B-02B3-6F0113741A6A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConvertRTFToHTML", "ConvertRTFToHTML\ConvertRTFToHTML.vcxproj", "{4A39B7E7-1695-4376-B9FE-615777318C5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Unicode Debug|Win32 = Unicode Debug|Win32

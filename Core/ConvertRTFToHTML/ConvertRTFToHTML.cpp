@@ -14,7 +14,7 @@
 // CConvertRTFToHTMLApp
 
 BEGIN_MESSAGE_MAP(CConvertRTFToHTMLApp, CWinApp)
-	ON_COMMAND(ID_HELP, &CWinApp::OnHelp)
+	ON_COMMAND(ID_HELP, OnHelp)
 END_MESSAGE_MAP()
 
 
@@ -53,13 +53,6 @@ BOOL CConvertRTFToHTMLApp::InitInstance()
 
 	AfxEnableControlContainer();
 
-	// Create the shell manager, in case the dialog contains
-	// any shell tree view or shell list view controls.
-	CShellManager *pShellManager = new CShellManager;
-
-	// Activate "Windows Native" visual manager for enabling themes in MFC controls
-	CMFCVisualManager::SetDefaultManager(RUNTIME_CLASS(CMFCVisualManagerWindows));
-
 	// Standard initialization
 	// If you are not using these features and wish to reduce the size
 	// of your final executable, you should remove from the following
@@ -71,7 +64,7 @@ BOOL CConvertRTFToHTMLApp::InitInstance()
 
 	CConvertRTFToHTMLDlg dlg;
 	m_pMainWnd = &dlg;
-	INT_PTR nResponse = dlg.DoModal();
+	int nResponse = dlg.DoModal();
 	if (nResponse == IDOK)
 	{
 		// TODO: Place code here to handle when the dialog is
@@ -84,19 +77,7 @@ BOOL CConvertRTFToHTMLApp::InitInstance()
 	}
 	else if (nResponse == -1)
 	{
-		TRACE(traceAppMsg, 0, "Warning: dialog creation failed, so application is terminating unexpectedly.\n");
-		TRACE(traceAppMsg, 0, "Warning: if you are using MFC controls on the dialog, you cannot #define _AFX_NO_MFC_CONTROLS_IN_DIALOGS.\n");
 	}
-
-	// Delete the shell manager created above.
-	if (pShellManager != NULL)
-	{
-		delete pShellManager;
-	}
-
-#ifndef _AFXDLL
-	ControlBarCleanUp();
-#endif
 
 	// Since the dialog has been closed, return FALSE so that we exit the
 	//  application, rather than start the application's message pump.

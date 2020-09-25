@@ -5,7 +5,6 @@
 #include "stdafx.h"
 #include "ConvertRTFToHTML.h"
 #include "ConvertRTFToHTMLDlg.h"
-#include "afxdialogex.h"
 
 #include "..\ToDoList\TaskFile.h"
 #include "..\ToDoList\ToDoCtrlData.h"
@@ -34,7 +33,7 @@ static const LPCTSTR RTF_TYPEID = L"849CF988-79FE-418A-A40D-01FE3AFCAB2C";
 
 
 CConvertRTFToHTMLDlg::CConvertRTFToHTMLDlg(CWnd* pParent /*=NULL*/)
-	: CDialogEx(IDD_CONVERTRTFTOHTML_DIALOG, pParent)
+	: CDialog(IDD_CONVERTRTFTOHTML_DIALOG, pParent)
 	, m_eInputTasklist(FES_COMBOSTYLEBTN, FILTER_TASKLISTS)
 	, m_eOutputTasklist(FES_COMBOSTYLEBTN | FES_SAVEAS, FILTER_TASKLISTS)
 	, m_sCurrentTask(_T(""))
@@ -56,7 +55,7 @@ CConvertRTFToHTMLDlg::CConvertRTFToHTMLDlg(CWnd* pParent /*=NULL*/)
 
 void CConvertRTFToHTMLDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialogEx::DoDataExchange(pDX);
+	CDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_INPUTTASKLIST, m_eInputTasklist);
 	DDX_Control(pDX, IDC_OUTPUTTASKLIST, m_eOutputTasklist);
 	DDX_Text(pDX, IDC_INPUTTASKLIST, m_sInputTasklist);
@@ -66,7 +65,7 @@ void CConvertRTFToHTMLDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_OPENAFTER, m_bOpenConvertedTasklist);
 }
 
-BEGIN_MESSAGE_MAP(CConvertRTFToHTMLDlg, CDialogEx)
+BEGIN_MESSAGE_MAP(CConvertRTFToHTMLDlg, CDialog)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 END_MESSAGE_MAP()
@@ -76,7 +75,7 @@ END_MESSAGE_MAP()
 
 BOOL CConvertRTFToHTMLDlg::OnInitDialog()
 {
-	CDialogEx::OnInitDialog();
+	CDialog::OnInitDialog();
 
 	// Set the icon for this dialog.  The framework does this automatically
 	//  when the application's main window is not a dialog
@@ -115,7 +114,7 @@ void CConvertRTFToHTMLDlg::OnPaint()
 	}
 	else
 	{
-		CDialogEx::OnPaint();
+		CDialog::OnPaint();
 	}
 }
 
@@ -253,7 +252,7 @@ void CConvertRTFToHTMLDlg::OnOK()
 #endif
 	}
 
-	CDialogEx::OnOK();
+	CDialog::OnOK();
 }
 
 BOOL CConvertRTFToHTMLDlg::PostProcessHtml(const CString& sTextComments, CString& sHtml) const
