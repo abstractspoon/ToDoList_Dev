@@ -420,15 +420,15 @@ namespace HTMLContentControl
 
         private String GetElementUrl(HtmlElement element)
         {
-            if (element != null)
-            {
-                String url = element.GetAttribute("href");
+			while (element != null)
+			{
+				String url = element.GetAttribute("href");
 
-                if (String.IsNullOrWhiteSpace(url))
-                    url = element.InnerHtml;
+				if (!String.IsNullOrWhiteSpace(url))
+					return url;
 
-                if (IsValidHref(url))
-                    return url;
+				// else work our way up
+				element = element.Parent;
             }
 
             // else
