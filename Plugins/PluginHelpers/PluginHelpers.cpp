@@ -42,17 +42,19 @@ static ModuleInitialiser* _init = new ModuleInitialiser();
 
 MarshalledString::MarshalledString(String^ str) : m_wszGlobal(NULL)
 {
-	m_wszGlobal = (LPCWSTR)Marshal::StringToHGlobalUni(str).ToPointer();
+	if (str != nullptr)
+		m_wszGlobal = (LPCWSTR)Marshal::StringToHGlobalUni(str).ToPointer();
 }
 
 MarshalledString::~MarshalledString()
 {
-	Marshal::FreeHGlobal((IntPtr)(void*)m_wszGlobal);
+	if (m_wszGlobal != NULL)
+		Marshal::FreeHGlobal((IntPtr)(void*)m_wszGlobal);
 }
 
 MarshalledString::operator LPCWSTR() 
 { 
-	return m_wszGlobal; 
+	return m_wszGlobal ? m_wszGlobal : L""; 
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
