@@ -663,13 +663,13 @@ BOOL CToDoCtrlMgr::ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL 
 	return TRUE;
 }
 
-BOOL CToDoCtrlMgr::VerifyPassword(int nIndex) const
+BOOL CToDoCtrlMgr::VerifyPassword(int nIndex, BOOL bForce) const
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 
-	if (!tdc.WantPasswordReprompting())
+	if (!bForce && !tdc.WantPasswordReprompting())
 		return TRUE;
 
 	// else

@@ -10735,8 +10735,10 @@ void CToDoListWnd::OnFileEncrypt()
 
 		// if the tasklist is already encrypted then verify password
 		// before allowing change
-		if (!bWasEncrypted || VerifyToDoCtrlPassword())
-			tdc.EnableEncryption(!tdc.IsEncrypted());
+		if (!bWasEncrypted || m_mgrToDoCtrls.VerifyPassword(GetSelToDoCtrl(), TRUE))
+		{
+			tdc.EnableEncryption(!bWasEncrypted);
+		}
 
 		// make sure we disable encryption on the archive too
 		if (bWasEncrypted)
