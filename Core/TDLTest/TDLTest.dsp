@@ -156,6 +156,10 @@ SOURCE=.\ToDoCtrlDataTest.cpp
 
 SOURCE=.\ToDoCtrlTaskLinkTest.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\WorkingWeekTest.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -219,6 +223,10 @@ SOURCE=.\ToDoCtrlDataTest.h
 # Begin Source File
 
 SOURCE=.\ToDoCtrlTaskLinkTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\WorkingWeekTest.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
