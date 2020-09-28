@@ -2735,7 +2735,12 @@ bool CTaskFile::IsTaskFlagged(HTASKITEM hTask, bool bCalc) const
 LPCTSTR CTaskFile::GetFileName(bool bFullPath) const
 {
 	if (bFullPath)
-		return CXmlFile::GetFilePath();
+	{
+		static CString sFilePath;
+		sFilePath = CXmlFile::GetFilePath();
+
+		return sFilePath;
+	}
 
 	// else
 	return GetAttribute(TDL_FILENAME);
