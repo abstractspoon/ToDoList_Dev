@@ -40,8 +40,8 @@ pause
 CALL %REPO%\BuildReleaseZip.bat
 CALL %REPO%\BuildCodeZip.bat
 
-REM - Open repo folder
-Explorer.exe "%REPO%"
+REM - Open ToDoList_Prev
+Explorer.exe "%REPO%\..\ToDoList_Prev\8.1"
 
 popd
 pause
