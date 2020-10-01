@@ -63,5 +63,25 @@ int UrlParser::GetUrlCount(String^ sText)
 	return m_parser->ParseText(MS(sText), aUrls);
 }
 
+int UrlParser::MatchProtocol(String^ sUrl)
+{
+	return m_parser->MatchProtocol(MS(sUrl));
+}
+
+bool UrlParser::ProtocolWantsNotification(int nProtocol)
+{
+	return m_parser->ProtocolWantsNotification(nProtocol);
+}
+
+String^ UrlParser::GetUrlAsFile(String^ sUrl)
+{
+	if (!IsFileProtocol(sUrl))
+		return nullptr;
+
+	MarshalledString msUrl(sUrl);
+	CString url(msUrl);
+
+	return gcnew String(m_parser->GetUrlAsFile(url));
+}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

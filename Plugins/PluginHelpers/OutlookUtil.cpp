@@ -4,6 +4,9 @@
 #include "OutlookUtil.h"
 #include "DragDropUtil.h"
 #include "PluginHelpers.h"
+#include "Win32.h"
+
+#include <Shared\MSOutlookHelper.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -38,5 +41,15 @@ bool OutlookUtil::IsOutlookItem(Microsoft::VisualStudio::OLE::Interop::IDataObje
 String^ OutlookUtil::FormatItemAsUrl(String^ id)
 {
 	return String::Format(L"outlook:{0}", id);
+}
+
+bool OutlookUtil::HandleUrl(String^ url, IntPtr hwnd)
+{
+	return (CMSOutlookHelper::HandleUrl(Win32::GetHwnd(hwnd), MS(url)) != FALSE);
+}
+
+bool OutlookUtil::IsOutlookUrl(String^ url)
+{
+	return (CMSOutlookHelper::IsOutlookUrl(MS(url)) != FALSE);
 }
 

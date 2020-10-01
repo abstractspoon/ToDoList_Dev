@@ -300,12 +300,7 @@ namespace HTMLContentControl
 		private void OnNavigateLink(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
 		{
 			// Pass everything back to our parent for consistent handling
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
-
-			if (e.Url.ToLower().StartsWith("tdl://"))
-				notify.NotifyTaskLink(e.Url);
-			else
-				notify.NotifyFailedLink(e.Url);
+			ContentControlWnd.GoToLink(e.Url.ToLower(), m_HwndParent, Handle);
 
 			e.Cancel = true; // always
 		}

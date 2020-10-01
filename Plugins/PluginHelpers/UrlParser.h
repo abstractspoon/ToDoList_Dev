@@ -35,7 +35,10 @@ namespace Abstractspoon
 				List<UrlItem^>^ ParseText(String^ sText);
 				bool IsFileProtocol(String^ sUrl);
 				int GetUrlCount(String^ sText);
-
+				int MatchProtocol(String^ sUrl);
+				bool ProtocolWantsNotification(int nProtocol);
+				String^ GetUrlAsFile(String^ sUrl);
+				
 			protected:
 				CUrlParser* m_parser;
 			};

@@ -44,6 +44,8 @@ namespace Abstractspoon
 
 					bool NotifySimple(UINT nMsg);
 				};
+
+				static bool GoToLink(String^ sLink, IntPtr hwndParent, IntPtr hwndFrom);
 			};
 
 			public interface class IContentControlWnd

@@ -16,6 +16,8 @@ namespace Abstractspoon
 			{
 			public:
 				static bool IsOutlookItem(Microsoft::VisualStudio::OLE::Interop::IDataObject^ obj);
+				static bool HandleUrl(String^ url, IntPtr hwnd);
+				static bool IsOutlookUrl(String^ url);
 
  				static String^ FormatItemAsUrl(String^ id);
 			};

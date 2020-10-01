@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "pluginhelpers.h"
 #include "ContentControl.h"
+#include "UrlParser.h"
+#include "OutlookUtil.h"
 
 #include <Interfaces\UITheme.h>
 #include <Interfaces\IContentControl.h>
@@ -11,6 +13,7 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System;
+using namespace System::Diagnostics;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -142,4 +145,41 @@ HWND ContentControlWnd::ParentNotify::GetFrom()
 	return (m_hwndFrom ? m_hwndFrom : m_hwndParent);
 }
 
+bool ContentControlWnd::GoToLink(String^ sLink, IntPtr hwndParent, IntPtr hwndFrom)
+{
+	ParentNotify notify(hwndParent, hwndFrom);
+	UrlParser parser;
 
+	int nProtocol = parser.MatchProtocol(sLink);
+
+	// If it's an unknown protocol OR our parent wants to handle it
+	// just forward it on
+	if ((nProtocol == -1) || parser.ProtocolWantsNotification(nProtocol))
+	{
+		notify.NotifyFailedLink(sLink);
+		return true;
+	}
+
+	// Handle Outlook manually because under Windows 10 ShellExecute 
+	// will succeed even if Outlook is not installed
+	if (OutlookUtil::IsOutlookUrl(sLink))
+	{
+		if (OutlookUtil::HandleUrl(sLink, hwndParent))
+			return true;
+	}
+	else
+	{
+		if (parser.IsFileProtocol(sLink))
+			sLink = parser.GetUrlAsFile(sLink);
+
+		auto psi = gcnew ProcessStartInfo(sLink);
+		psi->UseShellExecute = true;
+
+		if (Process::Start(psi) != nullptr)
+			return true;
+	}
+
+	// All else forward to parent as failures
+	notify.NotifyFailedLink(sLink);
+	return false;
+}
