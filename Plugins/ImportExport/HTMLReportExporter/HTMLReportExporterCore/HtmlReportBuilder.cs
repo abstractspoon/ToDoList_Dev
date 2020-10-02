@@ -190,11 +190,11 @@ namespace HTMLReportExporter
 
 			if (Title.ContainsTaskAttributes(m_Tasklist))
 			{
+				// Each top-level task gets a new page
 				Task task = m_Tasklist.GetFirstTask();
 
 				while (task.IsValid())
 				{
-					// Create a new row (page) for each top-level task
 					BeginContentRow(html, true);
 					
 					Title.WriteTitleContent(m_Tasklist, task, html);
@@ -592,16 +592,13 @@ namespace HTMLReportExporter
 				// subtasks of this task
 				Task subtask = task.GetFirstSubtask();
 
-				while (subtask.IsValid())
+				if (subtask.IsValid())
 				{
 					WriteTask(subtask, 
 							  layout, 
 							  2,
-							  true,		// export siblings
+							  true,	  // export siblings
 							  html);
-
-					// next subtask
-					subtask = subtask.GetNextTask();
 				}
 
 				return PostWriteContent(tasks, layout, html);
@@ -664,7 +661,11 @@ namespace HTMLReportExporter
 				if (layout.Style != Layout.StyleType.Table)
 					html.WriteLine(layout.StartHtml);
 
-				WriteTask(task.GetFirstSubtask(), layout, depth + 1, true, html); // and siblings
+				WriteTask(task.GetFirstSubtask(), 
+                          layout, 
+                          depth + 1, 
+                          true,         // export siblings
+                          html); 
 
 				if (layout.Style != Layout.StyleType.Table)
 					html.WriteLine(layout.EndHtml);
@@ -676,7 +677,11 @@ namespace HTMLReportExporter
 
 					while (task.IsValid())
 					{
-						WriteTask(task, layout, depth, false, html); // not siblings
+						WriteTask(task, 
+                                  layout, 
+                                  depth, 
+                                  false,  // DO NOT export siblings
+                                  html);
 
 						task = task.GetNextTask();
 					}
