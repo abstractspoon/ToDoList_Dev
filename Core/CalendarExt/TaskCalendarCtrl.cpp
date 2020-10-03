@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include "resource.h"
 #include "TaskCalendarCtrl.h"
 #include "CalMsg.h"
 
@@ -38,6 +39,7 @@ const int TEXT_PADDING = 2;
 const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 const int DEF_TASK_HEIGHT = (IMAGE_SIZE + 3); // Effective height is 1 less
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
+const int OVERFLOWBTN_TIPID = INT_MAX;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -889,6 +891,20 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				break;
 		}
 	}
+	
+	// Show an overflow button if not showing the scrollbar
+	if (!bShowScroll)
+	{
+		int nNumItems = CalcEffectiveCellContentItemCount(pCell);
+
+		if ((nNumItems * nTaskHeight) > rCell.Height())
+		{
+			CRect rOverflow;
+			CalcOverflowBtnRect(rCell, rOverflow);
+
+			CThemed::DrawFrameControl(this, pDC, rOverflow, DFC_SCROLL, DFCS_SCROLLDOWN, rCell);
+		}
+	}
 }
 
 CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
@@ -934,50 +950,54 @@ void CTaskCalendarCtrl::DrawCellFocus(CDC* /*pDC*/, const CCalendarCell* /*pCell
 	// CCalendarCtrlEx::DrawCellFocus(pDC, pCell, rCell);
 }
 
+int CTaskCalendarCtrl::CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const
+{
+	const CTaskCalItemArray* pTasks = GetCellTasks(pCell);
+	int nNumItems = 0;
+
+	if (pTasks && pTasks->GetSize())
+	{
+		// Get the max task pos range
+		int nLastTask = (pTasks->GetSize() - 1);
+		const TASKCALITEM* pTCILast = pTasks->GetAt(nLastTask);
+
+		int nMaxPos = GetTaskVertPos(pTCILast->GetTaskID(), nLastTask, pCell, FALSE);
+
+		nNumItems = (nMaxPos + 1);
+	}
+
+	return nNumItems;
+}
+
 BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 {
 	// First determine if we need to show a vertical scrollbar
-	int nRow = -1, nCol = -1;
-	BOOL bShowScrollbar = (CDialogHelper::IsChildOrSame(this, GetFocus()) &&
-							GetLastSelectedGridCell(nRow, nCol));
-
 	CRect rCell;
 	const CCalendarCell* pCell = NULL;
-	int nNumItems = 0;
+	int  nRow = -1, nCol = -1, nNumItems = 0;
+	BOOL bShowScrollbar = FALSE;
 
-	if (bShowScrollbar)
+	if (CDialogHelper::IsChildOrSame(this, GetFocus()) && 
+		GetLastSelectedGridCell(nRow, nCol) &&
+		GetGridCellRect(nRow, nCol, rCell, TRUE))
 	{
-		bShowScrollbar = GetGridCellRect(nRow, nCol, rCell, TRUE);
+		pCell = GetCell(nRow, nCol);
+		ASSERT(pCell);
 
-		if (bShowScrollbar)
+		nNumItems = CalcEffectiveCellContentItemCount(pCell);
+		bShowScrollbar = ((nNumItems * GetTaskHeight()) > rCell.Height());
+
+		// And scroll selected task into view
+		if (bEnsureSelVisible && m_dwSelectedTaskID)
 		{
-			pCell = GetCell(nRow, nCol);
-
 			const CTaskCalItemArray* pTasks = GetCellTasks(pCell);
 
-			if (pTasks && pTasks->GetSize())
+			if (pTasks)
 			{
-				// Get the max task pos range
-				int nLastTask = (pTasks->GetSize() - 1);
-				const TASKCALITEM* pTCILast = pTasks->GetAt(nLastTask);
+				int nFind = pTasks->FindItem(m_dwSelectedTaskID);
 
-				int nMaxPos = GetTaskVertPos(pTCILast->GetTaskID(), nLastTask, pCell, FALSE);
-
-				nNumItems = (nMaxPos + 1);
-				bShowScrollbar = ((nNumItems * GetTaskHeight()) > rCell.Height());
-
-				// And scroll selected task into view
-				if (bEnsureSelVisible && m_dwSelectedTaskID)
-				{
-					int nFind = pTasks->FindItem(m_dwSelectedTaskID);
-
-					if (nFind != -1)
-						m_nCellVScrollPos = GetTaskVertPos(m_dwSelectedTaskID, nFind, pCell, FALSE);
-				}
-			}
-			else
-			{
-				bShowScrollbar = FALSE;
+				if (nFind != -1)
+					m_nCellVScrollPos = GetTaskVertPos(m_dwSelectedTaskID, nFind, pCell, FALSE);
 			}
 		}
 	}
@@ -1042,17 +1062,21 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 		}
 	}
 
+	ASSERT(bSuccess);
 	return bSuccess;
 }
 
 void CTaskCalendarCtrl::CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const
 {
 	rScrollbar = rCell;
+	rScrollbar.left = (rCell.right - GetSystemMetrics(SM_CXVSCROLL));
+}
 
-	if (m_crTheme != CLR_NONE)
-		rScrollbar.DeflateRect(0, 0, 2, 2);
-
-	rScrollbar.left = (rScrollbar.right - GetSystemMetrics(SM_CXVSCROLL));
+void CTaskCalendarCtrl::CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const
+{
+	rOverflowBtn = rCell;
+	rOverflowBtn.left = (rCell.right - GetSystemMetrics(SM_CXVSCROLL));
+	rOverflowBtn.top = (rCell.bottom - GetSystemMetrics(SM_CYVSCROLL));
 }
 
 BOOL CTaskCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
@@ -1492,6 +1516,42 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit) 
 
 	// nothing hit
 	return 0;
+}
+
+BOOL CTaskCalendarCtrl::HitTestCellOverflowBtn(const CPoint& ptClient) const
+{
+	CRect rBtn;
+	return HitTestCellOverflowBtn(ptClient, rBtn);
+}
+
+BOOL CTaskCalendarCtrl::HitTestCellOverflowBtn(const CPoint& ptClient, CRect& rBtn) const
+{
+	int nRow, nCol;
+
+	if (!HitTestGridCell(ptClient, nRow, nCol))
+		return FALSE;
+
+	const CCalendarCell* pCell = GetCell(nRow, nCol);
+	ASSERT(pCell);
+
+	if (IsGridCellSelected(pCell))
+		return FALSE;
+
+	CRect rCell;
+	VERIFY(GetGridCellRect(nRow, nCol, rCell, TRUE)); // without header
+
+	int nNumCellItems = CalcEffectiveCellContentItemCount(pCell);
+
+	if ((nNumCellItems * GetTaskHeight()) <= rCell.Height())
+		return FALSE;
+
+	CalcOverflowBtnRect(rCell, rBtn);
+
+	if (rBtn.PtInRect(ptClient))
+		return TRUE;
+
+	rBtn.SetRectEmpty();
+	return FALSE;
 }
 
 int CTaskCalendarCtrl::GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const
@@ -2677,6 +2737,13 @@ void CTaskCalendarCtrl::FilterToolTipMessage(MSG* pMsg)
 
 int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
+	CRect rOverflowBtn;
+
+	if (HitTestCellOverflowBtn(point, rOverflowBtn))
+	{
+		return CToolTipCtrlEx::SetToolInfo(*pTI, this, CEnString(IDS_OVERFLOWBTN_TIP), OVERFLOWBTN_TIPID, rOverflowBtn);
+	}
+
 	// perform a hit-test
 	DWORD dwTaskID = HitTestTask(point);
 
@@ -2721,7 +2788,12 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 		ASSERT(0);
 		return;
 	}
-
+	else if (dwTaskID == OVERFLOWBTN_TIPID)
+	{
+		m_tooltip.SetFont(m_fonts.GetFont());
+		return;
+	}
+	
 	// Set the font first, bold for top level items
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include future items
 

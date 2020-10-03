@@ -55,6 +55,7 @@
 #define IDS_HEATMAP_NUMDUE              57674
 #define IDS_HEATMAP_NUMSTARTED          57675
 #define IDS_SELTASKDATES_LABEL          57676
+#define IDS_OVERFLOWBTN_TIP             57677
 
 // Next default values for new objects
 // 

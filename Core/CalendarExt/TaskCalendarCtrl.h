@@ -181,8 +181,12 @@ protected:
 	int CalcRequiredTaskFontPointSize() const;
 	CFont* GetTaskFont(const TASKCALITEM* pTCI);
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
+	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
+	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
 
 	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit) const;
+	BOOL HitTestCellOverflowBtn(const CPoint& ptClient) const;
+	BOOL HitTestCellOverflowBtn(const CPoint& ptClient, CRect& rBtn) const;
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	BOOL StartDragging(const CPoint& ptCursor);
