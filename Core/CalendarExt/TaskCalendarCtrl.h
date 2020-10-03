@@ -42,7 +42,7 @@ public:
 	BOOL CanSaveToImage() const;
 	
 	BOOL CancelDrag();
-	DWORD HitTest(const CPoint& ptClient) const;
+	DWORD HitTestTask(const CPoint& ptClient) const;
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
@@ -182,7 +182,7 @@ protected:
 	CFont* GetTaskFont(const TASKCALITEM* pTCI);
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
 
-	DWORD HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) const;
+	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit) const;
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	BOOL StartDragging(const CPoint& ptCursor);

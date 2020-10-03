@@ -1412,13 +1412,13 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
-DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient) const
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
-	return HitTest(ptClient, nHit);
+	return HitTestTask(ptClient, nHit);
 }
 
-DWORD CTaskCalendarCtrl::HitTest(const CPoint& ptClient, TCC_HITTEST& nHit) const
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit) const
 {
 	nHit = TCCHT_NOWHERE;
 
@@ -1940,7 +1940,7 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	DWORD dwSelID = HitTest(point);
+	DWORD dwSelID = HitTestTask(point);
 	
 	if (dwSelID)
 	{
@@ -1976,7 +1976,7 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	ASSERT(!m_bReadOnly);
 
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
-	DWORD dwTaskID = HitTest(ptCursor, nHit);
+	DWORD dwTaskID = HitTestTask(ptCursor, nHit);
 	
 	BOOL bCanDrag = CanDragTask(dwTaskID, nHit);
 
@@ -2445,7 +2445,7 @@ BOOL CTaskCalendarCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 		ScreenToClient(&ptCursor);
 
 		TCC_HITTEST nHit = TCCHT_NOWHERE;
-		DWORD dwHitID = HitTest(ptCursor, nHit);
+		DWORD dwHitID = HitTestTask(ptCursor, nHit);
 
 		if (SetTaskCursor(dwHitID, nHit))
 			return TRUE;
@@ -2623,7 +2623,7 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 
 void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	DWORD dwTaskID = HitTest(point);
+	DWORD dwTaskID = HitTestTask(point);
 	SelectTask(dwTaskID, FALSE, TRUE);
 	
 	CCalendarCtrlEx::OnRButtonDown(nFlags, point);
@@ -2678,7 +2678,7 @@ void CTaskCalendarCtrl::FilterToolTipMessage(MSG* pMsg)
 int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
 	// perform a hit-test
-	DWORD dwTaskID = HitTest(point);
+	DWORD dwTaskID = HitTestTask(point);
 
 	if (dwTaskID)
 	{

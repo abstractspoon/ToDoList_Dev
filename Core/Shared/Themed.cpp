@@ -766,7 +766,16 @@ BOOL CThemed::GetThemeClassPartState(int nType, int nState, CString& sThClass, i
 				nThPart = SBP_SIZEBOX;
 				nThState = (nState & DFCS_SCROLLLEFT) ? SZB_LEFTALIGN : SZB_RIGHTALIGN;
 			}
-			// else
+			else if (nState & DFCS_SCROLLDOWN)
+			{
+				sThClass = "SCROLLBAR";
+				nThPart = SBP_LOWERTRACKVERT;
+				nThState = SCRBS_NORMAL;
+			}
+			else
+			{
+				ASSERT(0);
+			}
 		}
 		break;
 	}

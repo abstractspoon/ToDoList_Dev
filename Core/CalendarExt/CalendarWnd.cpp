@@ -497,7 +497,7 @@ IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen) const
 	CPoint ptBigCal(ptScreen);
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	if (m_BigCalendar.HitTest(ptBigCal))
+	if (m_BigCalendar.HitTestTask(ptBigCal))
 		return IUI_TASK;
 
 	// else try rest of big cal
@@ -514,7 +514,7 @@ DWORD CCalendarWnd::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
 	CPoint ptBigCal(ptScreen);
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	return m_BigCalendar.HitTest(ptBigCal);
+	return m_BigCalendar.HitTestTask(ptBigCal);
 }
 
 bool CCalendarWnd::SelectTask(DWORD dwTaskID)
@@ -702,7 +702,7 @@ void CCalendarWnd::OnBigCalendarNotifyDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult
 	CPoint ptBigCal(GetMessagePos());
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	DWORD dwTaskID = m_BigCalendar.HitTest(ptBigCal);
+	DWORD dwTaskID = m_BigCalendar.HitTestTask(ptBigCal);
 
 	if (dwTaskID)
 		GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, dwTaskID);
