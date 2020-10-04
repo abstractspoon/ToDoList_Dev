@@ -55,7 +55,7 @@ public:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CPopupListBoxCtrl)
-	public:
+public:
 	virtual BOOL Create(CWnd* pParentWnd, UINT nID, BOOL bSort = TRUE);
 	//}}AFX_VIRTUAL
 

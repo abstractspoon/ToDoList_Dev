@@ -166,9 +166,11 @@ void CPopupListBoxCtrl::Show(CRect rPos)
 	CDisableMouseWheel::Initialize(*this);
 
 	// show the listbox and enable
-	ShowWindow(SW_SHOW);
+	ShowWindow(m_bAutoHide ? SW_SHOW : SW_SHOWNOACTIVATE);
 	EnableWindow(TRUE);
-	SetFocus();
+
+	if (m_bAutoHide)
+		SetFocus();
 
 	m_bEditEnded = FALSE;
 }
