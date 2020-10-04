@@ -6,6 +6,7 @@
 #include "PluginHelpers.h"
 
 #include <Shared\UrlParser.h>
+#include <Shared\WebMisc.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,6 +19,14 @@ UrlItem::UrlItem(int nStart, int nEnd, String^ sUrl)
 	StartPos = nStart;
 	EndPos = nEnd;
 	Url = sUrl;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+HtmlLink::HtmlLink(String^ sUrl, String^ sText)
+{
+	Url = sUrl;
+	Text = sText;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -38,14 +47,34 @@ List<UrlItem^>^ UrlParser::ParseText(String^ sText)
 	int nNumUrls = m_parser->ParseText(MS(sText), aUrls);
 
 	// Always returns a list
-	System::Collections::Generic::List<UrlItem^>^ items = gcnew System::Collections::Generic::List<UrlItem^>();
+	List<UrlItem^>^ items = gcnew List<UrlItem^>();
 
 	for (int nUrl = 0; nUrl < nNumUrls; nUrl++)
 	{
 		UrlItem^ item = gcnew UrlItem(aUrls[nUrl].cr.cpMin, 
 									  aUrls[nUrl].cr.cpMax, 
 									  gcnew String(aUrls[nUrl].sUrl));
+		items->Add(item);
+	}
 
+	return items;
+}
+
+List<HtmlLink^>^ UrlParser::ExtractHtmlLinks(String^ sHtml)
+{
+	CStringArray aUrls, aText;
+
+	MarshalledString msHtml(sHtml);
+	CString html(msHtml);
+
+	int nNumUrls = WebMisc::ExtractHtmlLinks(html, aUrls, aText);
+
+	// Always returns a list
+	List<HtmlLink^>^ items = gcnew List<HtmlLink^>();
+
+	for (int nUrl = 0; nUrl < nNumUrls; nUrl++)
+	{
+		HtmlLink^ item = gcnew HtmlLink(gcnew String(aUrls[nUrl]), gcnew String(aText[nUrl]));
 		items->Add(item);
 	}
 
@@ -70,7 +99,7 @@ int UrlParser::MatchProtocol(String^ sUrl)
 
 bool UrlParser::ProtocolWantsNotification(int nProtocol)
 {
-	return m_parser->ProtocolWantsNotification(nProtocol);
+	return (m_parser->ProtocolWantsNotification(nProtocol) != FALSE);
 }
 
 String^ UrlParser::GetUrlAsFile(String^ sUrl)

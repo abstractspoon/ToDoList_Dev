@@ -425,7 +425,28 @@ namespace HTMLContentControl
 				String url = element.GetAttribute("href");
 
 				if (!String.IsNullOrWhiteSpace(url))
+				{
+					// if the user created a relative file link without 
+					// specifying "file:///" by editing the html directly 
+					// then Winforms will add "about:" to the front of it 
+					// which we need to replace with "file:///"
+					if (url.IndexOf("about:") == 0)
+					{
+						var parser = new UrlParser();
+						var htmlLinks = parser.ExtractHtmlLinks(element.OuterHtml);
+
+						if ((htmlLinks != null) && (htmlLinks.Count == 1))
+						{
+							if (htmlLinks[0].Url.IndexOf("about:") == -1)
+							{
+								url = String.Format("file:///{0}", htmlLinks[0].Url.TrimStart('/'));
+								element.SetAttribute("href", url);
+							}
+						}
+					}
+
 					return url;
+				}
 
 				// else work our way up
 				element = element.Parent;

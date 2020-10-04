@@ -6423,7 +6423,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
 			// save intermediate tasklist to file as required
-			LogIntermediateTaskList(tasks, tdc.GetFilePath());
+			LogIntermediateTaskList(tasks);
 
 			// export
 			return tasks.TransformToFile(sStylesheet, sFilePath);
@@ -6441,7 +6441,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
 			// save intermediate tasklist to file as required
-			LogIntermediateTaskList(tasks, tdc.GetFilePath());
+			LogIntermediateTaskList(tasks);
 
 			// export
 			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, FALSE) == IIER_SUCCESS);
@@ -6460,7 +6460,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
 			// save intermediate tasklist to file as required
-			LogIntermediateTaskList(tasks, tdc.GetFilePath());
+			LogIntermediateTaskList(tasks);
 
 			// export
 			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML) == IIER_SUCCESS);
@@ -9886,7 +9886,7 @@ void CToDoListWnd::OnExport()
 		tasks.SetReportDetails(dialog.GetExportTitle(), dialog.GetExportDate());
 		
 		// save intermediate tasklist to file as required
-		LogIntermediateTaskList(tasks, tdcSel.GetFilePath());
+		LogIntermediateTaskList(tasks);
 
 		// Do the export
 		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nExporter, FALSE);
@@ -9926,7 +9926,7 @@ void CToDoListWnd::OnExport()
 				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
 
 				// save intermediate tasklist to file as required
-				LogIntermediateTaskList(tasks, tdc.GetFilePath());
+				LogIntermediateTaskList(tasks);
 			}
 			
 			tdc.UnlockWindowUpdate();
@@ -10009,7 +10009,7 @@ void CToDoListWnd::OnExport()
 				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
 
 				// save intermediate tasklist to file as required
-				LogIntermediateTaskList(tasks, tdc.GetFilePath());
+				LogIntermediateTaskList(tasks);
 
 				// Do the export
 				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nExporter, FALSE);
@@ -10214,7 +10214,7 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC), dialog.GetDate());
 	
 	// save intermediate tasklist to file as required
-	LogIntermediateTaskList(tasks, tdc.GetFilePath());
+	LogIntermediateTaskList(tasks);
 	
 	if (tasks.TransformToFile(sStylesheet, sOutputPath))
 	{
@@ -10224,13 +10224,22 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 	}
 }
 
-BOOL CToDoListWnd::LogIntermediateTaskList(CTaskFile& tasks, LPCTSTR szRefPath)
+BOOL CToDoListWnd::LogIntermediateTaskList(CTaskFile& tasks)
 {
-	if (FileMisc::IsLoggingEnabled())
-		return tasks.Save(GetIntermediateTaskListPath(szRefPath), SFEF_UTF16);
+	BOOL bSuccess = TRUE;
 
-	// else
-	return TRUE;
+	if (FileMisc::IsLoggingEnabled())
+	{
+		// Cache path so it can be restored
+		CString sOrgPath = tasks.GetFileName(true);
+
+		bSuccess = tasks.Save(GetIntermediateTaskListPath(sOrgPath), SFEF_UTF16);
+
+		// Restore original path
+		tasks.SetFilePath(sOrgPath);
+	}
+
+	return bSuccess;
 }
 
 CString CToDoListWnd::GetIntermediateTaskListPath(LPCTSTR szRefPath)

@@ -780,7 +780,7 @@ protected:
 	static void SetupUIStrings();
 	static CString GetEndSessionFilePath();
 	static BOOL IsEndSessionFilePath(const CString& sFilePath);
-	static BOOL LogIntermediateTaskList(CTaskFile& tasks, LPCTSTR szRefPath);
+	static BOOL LogIntermediateTaskList(CTaskFile& tasks);
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
 	static void ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);

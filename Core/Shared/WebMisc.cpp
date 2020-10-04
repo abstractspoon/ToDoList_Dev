@@ -126,13 +126,15 @@ int WebMisc::ExtractNextHtmlLink(const CString& sHtml, int nFrom, CString& sLink
 	const CString LINK_START(_T("href=\"")), LINK_END(_T("\""));
 	const CString TEXT_START(_T(">")), TEXT_END(_T("</a>"));
 
-	int nStart = sHtml.Find(LINK_START, nFrom), nEnd = -1;
+	const CString sHtmlLower = Misc::ToLower(sHtml);
+
+	int nStart = sHtmlLower.Find(LINK_START, nFrom), nEnd = -1;
 
 	if (nStart == -1)
 		return -1;
 
 	nStart += LINK_START.GetLength();
-	nEnd = sHtml.Find(LINK_END, nStart);
+	nEnd = sHtmlLower.Find(LINK_END, nStart);
 
 	if (nEnd == -1)
 		return -1;
@@ -140,12 +142,12 @@ int WebMisc::ExtractNextHtmlLink(const CString& sHtml, int nFrom, CString& sLink
 	sLink = sHtml.Mid(nStart, (nEnd - nStart));
 
 	// get text
-	nStart = sHtml.Find(TEXT_START, nEnd + 1);
+	nStart = sHtmlLower.Find(TEXT_START, nEnd + 1);
 
 	if (nStart != -1)
 	{
 		nStart += TEXT_START.GetLength();
-		nEnd = sHtml.Find(TEXT_END, nStart);
+		nEnd = sHtmlLower.Find(TEXT_END, nStart);
 
 		if (nEnd == -1)
 			return -1;

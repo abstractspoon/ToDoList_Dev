@@ -437,6 +437,8 @@ struct TDCEXPORTTASKLIST
 
 	BOOL IsValid() const
 	{
+		// Note: sTDCPath can be empty
+
 		if (!::IsWindow(hWndNotify))
 			return FALSE;
 
@@ -450,9 +452,6 @@ struct TDCEXPORTTASKLIST
 			return FALSE;
 
 		if (sExportPath.IsEmpty())
-			return FALSE;
-
-		if (sTDCPath.IsEmpty())
 			return FALSE;
 
 		if (nPurpose == TDCTEP_NONE)

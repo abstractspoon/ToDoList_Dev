@@ -174,49 +174,60 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 	TEWEXPORTWRAP* pExportWrap = (TEWEXPORTWRAP*)pParam;
 
 	TDCEXPORTTASKLIST* pExport = pExportWrap->pExport;
-	BOOL bSuccess = FALSE;
+	BOOL bSuccess = TRUE;
 
+	// Validation
 	if (!pExport || !pExport->IsValid())
 	{
 		bSuccess = FALSE;
 		FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Bad inputs) failed\n"));
 	}
-	else if (!pExport->sSaveIntermediatePath.IsEmpty() && 
-			!pExport->tasks.Save(pExport->sSaveIntermediatePath, SFEF_UTF16))
+	else if (!pExport->sSaveIntermediatePath.IsEmpty())
 	{
-		bSuccess = FALSE;
-		FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Intermediate save) failed\n"));
-	}
-	else if (FileMisc::FileExists(pExport->sStylesheet)) // bTransform
-	{
-		bSuccess = pExport->tasks.TransformToFile(pExport->sStylesheet, pExport->sExportPath);
+		if (!pExport->tasks.Save(pExport->sSaveIntermediatePath, SFEF_UTF16))
+		{
+			bSuccess = FALSE;
+			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Intermediate save) failed\n"));
+		}
 
-		if (!bSuccess)
-			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Transform) failed\n"));
+		// Restore original tasklist path
+		pExport->tasks.SetFilePath(pExport->sTDCPath);
 	}
-	else if (pExport->nPurpose == TDCTEP_DUETASKNOTIFY)
-	{
-		// For due task notifications we don't want space added for notes
-		// so we use a proxy which handles this
-		CPreferences prefs;
-		CTEWPreferencesWrap prefsWrap(prefs);
 
-		bSuccess = (IIER_SUCCESS == pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, 
-																		pExport->sExportPath, 
-																		pExport->nExporter, 
-																		TRUE, 
-																		&prefsWrap));
-		if (!bSuccess)
-			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Due tasks) failed"));
-	}
-	else
+	// The actual export
+	if (bSuccess)
 	{
-		bSuccess = (IIER_SUCCESS == pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, 
-																		pExport->sExportPath, 
-																		pExport->nExporter, 
-																		TRUE));
-		if (!bSuccess)
-			FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Export) failed"));
+		if (FileMisc::FileExists(pExport->sStylesheet)) // bTransform
+		{
+			bSuccess = pExport->tasks.TransformToFile(pExport->sStylesheet, pExport->sExportPath);
+
+			if (!bSuccess)
+				FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Transform) failed\n"));
+		}
+		else if (pExport->nPurpose == TDCTEP_DUETASKNOTIFY)
+		{
+			// For due task notifications we don't want space added for notes
+			// so we use a proxy which handles this
+			CPreferences prefs;
+			CTEWPreferencesWrap prefsWrap(prefs);
+
+			bSuccess = (IIER_SUCCESS == pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, 
+																			pExport->sExportPath, 
+																			pExport->nExporter, 
+																			TRUE, 
+																			&prefsWrap));
+			if (!bSuccess)
+				FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Due tasks) failed"));
+		}
+		else
+		{
+			bSuccess = (IIER_SUCCESS == pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, 
+																			pExport->sExportPath, 
+																			pExport->nExporter, 
+																			TRUE));
+			if (!bSuccess)
+				FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Export) failed"));
+		}
 	}
 
 	// notify ourselves
