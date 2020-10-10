@@ -1135,64 +1135,71 @@ void CToDoListWnd::OnShowKeyboardshortcuts()
 
 LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 {
-	if (m_statusBar.GetSafeHwnd() && IsWindowEnabled() && GetTDCCount() && wp)
+	if (IsWindowEnabled() && GetTDCCount() && wp)
 	{
-		m_sCurrentFocus.Empty();
+		// Store latest 'good' focus for restoration
+		// whenever we reactivate the application
+		m_hwndLastFocus = (HWND)wp;
 
-		// grab the previous window in the z-order and if its
-		// static text then use that as the focus hint
-		CWnd* pFocus = CWnd::FromHandle((HWND)wp);
+		if (m_statusBar.GetSafeHwnd())
+		{
+			m_sCurrentFocus.Empty();
 
-#ifdef _DEBUG
-// 		if (pFocus)
-// 		{
-// 			CString sFocus;
-// 			pFocus->GetWindowText(sFocus);
-// 			TRACE(_T("OnFocusChange(%s = %s)\n"), CWinClasses::GetClassEx(*pFocus), sFocus.Left(100));
-// 		}
-// 		else
-// 		{
-// 			TRACE(_T("OnFocusChange(NULL)\n"));
-// 		}
-#endif
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+			// grab the previous window in the z-order and if its
+			// static text then use that as the focus hint
+			CWnd* pFocus = CWnd::FromHandle(m_hwndLastFocus);
 
-		if (CDialogHelper::IsChildOrSame(tdc.GetSafeHwnd(), (HWND)wp))
-		{
-			m_sCurrentFocus.LoadString(IDS_FOCUS_TASKS);
-			m_sCurrentFocus += ": ";
-			m_sCurrentFocus += tdc.GetControlDescription(pFocus);
-		}
-		else if (m_cbQuickFind.GetSafeHwnd() && (pFocus == m_cbQuickFind.GetWindow(GW_CHILD)))
-		{
-			m_sCurrentFocus.LoadString(IDS_QUICKFIND);
-		}
-		else
-		{
-			if (m_dlgFindTasks.GetSafeHwnd() && m_dlgFindTasks.IsChild(pFocus))
+	#ifdef _DEBUG
+	// 		if (pFocus)
+	// 		{
+	// 			CString sFocus;
+	// 			pFocus->GetWindowText(sFocus);
+	// 			TRACE(_T("OnFocusChange(%s = %s)\n"), CWinClasses::GetClassEx(*pFocus), sFocus.Left(100));
+	// 		}
+	// 		else
+	// 		{
+	// 			TRACE(_T("OnFocusChange(NULL)\n"));
+	// 		}
+	#endif
+			const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+			if (CDialogHelper::IsChildOrSame(tdc.GetSafeHwnd(), (HWND)wp))
 			{
-				m_sCurrentFocus.LoadString(IDS_FINDTASKS);
-			}
-			else if (m_filterBar.GetSafeHwnd() && m_filterBar.IsChild(pFocus))
-			{
-				m_sCurrentFocus.LoadString(IDS_FOCUS_FILTERBAR);
-			}
-			
-			if (!m_sCurrentFocus.IsEmpty())
+				m_sCurrentFocus.LoadString(IDS_FOCUS_TASKS);
 				m_sCurrentFocus += ": ";
+				m_sCurrentFocus += tdc.GetControlDescription(pFocus);
+			}
+			else if (m_cbQuickFind.GetSafeHwnd() && (pFocus == m_cbQuickFind.GetWindow(GW_CHILD)))
+			{
+				m_sCurrentFocus.LoadString(IDS_QUICKFIND);
+			}
+			else
+			{
+				if (m_dlgFindTasks.GetSafeHwnd() && m_dlgFindTasks.IsChild(pFocus))
+				{
+					m_sCurrentFocus.LoadString(IDS_FINDTASKS);
+				}
+				else if (m_filterBar.GetSafeHwnd() && m_filterBar.IsChild(pFocus))
+				{
+					m_sCurrentFocus.LoadString(IDS_FOCUS_FILTERBAR);
+				}
 			
-			m_sCurrentFocus += GetCtrlLabel(pFocus);
-		}		
+				if (!m_sCurrentFocus.IsEmpty())
+					m_sCurrentFocus += ": ";
+			
+				m_sCurrentFocus += GetCtrlLabel(pFocus);
+			}		
 
-		// limit length of string
-		if (m_sCurrentFocus.GetLength() > 22)
-			m_sCurrentFocus = m_sCurrentFocus.Left(20) + _T("...");
+			// limit length of string
+			if (m_sCurrentFocus.GetLength() > 22)
+				m_sCurrentFocus = m_sCurrentFocus.Left(20) + _T("...");
 
-		m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_FOCUS), m_sCurrentFocus);
+			m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_FOCUS), m_sCurrentFocus);
 		
-		// if the status bar is hidden then add text to title bar
-		if (!m_bShowStatusBar)
-			UpdateCaption();
+			// if the status bar is hidden then add text to title bar
+			if (!m_bShowStatusBar)
+				UpdateCaption();
+		}
 	}
 
 	return 0L;
@@ -1739,7 +1746,7 @@ BOOL CToDoListWnd::PreTranslateMessage(MSG* pMsg)
 			return TRUE;
 		}
 
-		TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> Default handling)\n"));
+		//TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> Default handling)\n"));
 	}
 	
 	return CFrameWnd::PreTranslateMessage(pMsg);
@@ -4026,11 +4033,11 @@ void CToDoListWnd::Show(BOOL bAllowToggle)
 		MinimizeToTray();
 	}
 
-	// refresh all tasklists if we are visible
 	if (m_bVisible && !IsIconic())
+	{
+		// refresh all tasklists if we are visible
 		OnTimerCheckReloadTasklists(-1, TRUE);
-
-	GetToDoCtrl().SetFocusToTasks();
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -11089,11 +11096,7 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 
 	if (!bActive)
 	{
-		// save focus to restore when we next get activated
-		HWND hFocus = ::GetFocus();
-
-		if (hFocus)
-			m_hwndLastFocus = hFocus;
+ 		//TRACE(_T("OnActivateApp(FALSE, focus = %s)\n"), CWinClasses::GetClassEx(m_hwndLastFocus));
 
 		// save tasklists if required
 		if (Prefs().GetAutoSaveOnSwitchApp())

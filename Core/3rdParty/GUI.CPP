@@ -195,10 +195,10 @@ BOOL Gui::HasFocus(const HWND hWnd, BOOL bInclChildren)
 		HWND hFocus = GetFocus();
 
 #ifdef _DEBUG
-		TCHAR szWindowText[128];
-		::GetWindowText(hFocus, szWindowText, 127);
-		
-		TRACE(_T("HasFocus(hFocus = '%s')\n"), szWindowText);
+// 		TCHAR szWindowText[128];
+// 		::GetWindowText(hFocus, szWindowText, 127);
+// 		
+// 		TRACE(_T("HasFocus(hFocus = '%s')\n"), szWindowText);
 #endif
 
 		if (IsChild(hWnd, hFocus))
