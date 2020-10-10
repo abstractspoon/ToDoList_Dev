@@ -126,8 +126,6 @@ public:
 	CTDCTaskFormatter(const CToDoCtrlData& data);
 	
 	CString GetCommentSize(float fSize) const;
-	CString GetPriority(int nPriority) const;
-	CString GetRisk(int nRisk) const;
 	CString GetID(DWORD dwTaskID, DWORD dwRefID = 0) const;
 
 	CString GetTaskAllocTo(DWORD dwTaskID) const;

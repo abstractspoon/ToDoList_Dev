@@ -3540,35 +3540,16 @@ CString CTDCTaskFormatter::GetTaskStatus(const TODOITEM* pTDI, const TODOSTRUCTU
 	return pTDI->sStatus;
 }
 
-CString CTDCTaskFormatter::GetPriority(int nPriority) const
-{
-	if (!m_data.HasStyle(TDCS_HIDEPRIORITYNUMBER) && (nPriority != FM_NOPRIORITY))
-		return Misc::Format(nPriority);
-
-	// else
-	return EMPTY_STR;
-}
-
-CString CTDCTaskFormatter::GetRisk(int nRisk) const
-{
-	if (nRisk != FM_NOPRIORITY)
-		return Misc::Format(nRisk);
-
-	// else
-	return EMPTY_STR;
-}
-
 CString CTDCTaskFormatter::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	ASSERT(pTDI && pTDS);
 
 	if (pTDI && pTDS)
 	{
-		if (!m_data.HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || !m_calculator.IsTaskDone(pTDI, pTDS))
-		{
-			int nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
-			return GetPriority(nPriority);
-		}
+		int nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+
+		if (nPriority != FM_NOPRIORITY)
+			return Misc::Format(nPriority);
 	}
 
 	// else
@@ -3581,13 +3562,10 @@ CString CTDCTaskFormatter::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE
 
 	if (pTDI && pTDS)
 	{
-		if (m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !m_calculator.IsTaskDone(pTDI, pTDS))
-		{
-			int nRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+		int nRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
 
-			if (nRisk != FM_NORISK)
-				return Misc::Format(nRisk);
-		}
+		if (nRisk != FM_NOPRIORITY)
+			return Misc::Format(nRisk);
 	}
 
 	// else
