@@ -127,11 +127,7 @@ void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_LISTVIEWOPTIONS, m_cbListOptions);
 
 	DDX_CBData(pDX, m_cbListGroupBy, m_nListViewGroupBy, TDCC_NONE);
-
-	if (pDX->m_bSaveAndValidate)
-		m_dwListOptions = m_cbListOptions.GetCheckedItemData();
-	else
-		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
+	DDX_CheckItemData(pDX, m_cbListOptions, m_dwListOptions);
 }
 
 BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
@@ -214,7 +210,7 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	// Build the list-specific comboboxes
 	BuildListGroupByCombo();
-	BuildListOptionsCombo();
+	m_cbListOptions.BuildCombo();
 
 	return FALSE;
 }
@@ -245,23 +241,25 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 	SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy);
 }
 
-void CTabbedToDoCtrl::BuildListOptionsCombo()
-{
-	ASSERT(m_cbListOptions.GetCount() == 0);
-
-	CDialogHelper::AddString(m_cbListOptions, IDS_FILTER_HIDEPARENTS, LVO_HIDEPARENTS);
-	CDialogHelper::AddString(m_cbListOptions, IDS_FILTER_HIDECOLLAPSED, LVO_HIDECOLLAPSED);
-
-	m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
-
-	m_cbListOptions.EnableTooltip();
-}
-
 void CTabbedToDoCtrl::OnListGroupBySelChanged()
 {
+	TDC_COLUMN nPrevGroupBy = m_nListViewGroupBy;
 	UpdateData();
 
-	m_taskList.GroupBy(m_nListViewGroupBy);
+	if (m_nListViewGroupBy != nPrevGroupBy)
+	{
+
+		if (HasListOption(LVO_HIDENOGROUPVALUE))
+		{
+			// We need to rebuild the list because the <none>
+			// group will be different for each attribute
+			RebuildList(TRUE, m_nListViewGroupBy);
+		}
+		else
+		{
+			m_taskList.SetGroupBy(m_nListViewGroupBy);
+		}
+	}
 }
 
 void CTabbedToDoCtrl::OnListOptionsCheckChanged()
@@ -271,7 +269,18 @@ void CTabbedToDoCtrl::OnListOptionsCheckChanged()
 
 	UpdateData();
 
-	if (m_dwListOptions != dwPrevOptions)
+	DWORD dwNewOptions = m_dwListOptions;
+
+	if (Misc::FlagHasChanged(LVO_SORTGROUPSASCENDING, dwPrevOptions, dwNewOptions))
+	{
+		m_taskList.SetSortGroupsAscending(HasListOption(LVO_SORTGROUPSASCENDING));
+
+		// Remove sort option to simplify build option test
+		Misc::SetFlag(dwPrevOptions, LVO_SORTGROUPSASCENDING, FALSE);
+		Misc::SetFlag(dwNewOptions, LVO_SORTGROUPSASCENDING, FALSE);
+	}
+
+	if (dwNewOptions != dwPrevOptions)
 	{
 		RebuildList();
 	}
@@ -279,7 +288,7 @@ void CTabbedToDoCtrl::OnListOptionsCheckChanged()
 
 void CTabbedToDoCtrl::OnTreeExpandItem(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
-	if (m_dwListOptions & LVO_HIDECOLLAPSED)
+	if (HasListOption(LVO_HIDECOLLAPSED))
 	{
 		if (InListView())
 			RebuildList();
@@ -509,11 +518,9 @@ void CTabbedToDoCtrl::LoadPrefs()
 
 	// Lisview options
 	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
-	m_taskList.GroupBy(m_nListViewGroupBy);
+	m_taskList.SetGroupBy(m_nListViewGroupBy);
 
-	m_dwListOptions = 0;
-	Misc::SetFlag(m_dwListOptions, LVO_HIDEPARENTS, prefs.GetProfileInt(sKey, _T("ListViewHideParents"), FALSE));
-	Misc::SetFlag(m_dwListOptions, LVO_HIDECOLLAPSED, prefs.GetProfileInt(sKey, _T("ListViewHideCollapsed"), FALSE));
+	m_dwListOptions = m_cbListOptions.LoadOptions(prefs, sKey);
 
 	// Last active view
 	FTC_VIEW nCurView = GetTaskView();
@@ -543,8 +550,8 @@ void CTabbedToDoCtrl::SavePrefs()
 	// save listview state
 	prefs.WriteProfileInt(sKey, _T("ListViewVisible"), IsListViewTabShowing());
 	prefs.WriteProfileInt(sKey, _T("ListViewGroupBy"), m_nListViewGroupBy);
-	prefs.WriteProfileInt(sKey, _T("ListViewHideParents"), Misc::HasFlag(m_dwListOptions, LVO_HIDEPARENTS));
-	prefs.WriteProfileInt(sKey, _T("ListViewHideCollapsed"), Misc::HasFlag(m_dwListOptions, LVO_HIDECOLLAPSED));
+	
+	m_cbListOptions.SaveOptions(m_dwListOptions, prefs, sKey);
 
 	// save hidden extensions
 	CStringArray aVisTypeIDs, aTypeIDs;
@@ -3183,14 +3190,14 @@ BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	return bCanCreate;
 }
 
-void CTabbedToDoCtrl::RebuildList()
+void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy)
 {
 	GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = FALSE;
 
 	CDWordArray aTaskIDs;
 
-	BOOL bWantParents = !Misc::HasFlag(m_dwListOptions, LVO_HIDEPARENTS);
-	BOOL bWantCollapsed = !Misc::HasFlag(m_dwListOptions, LVO_HIDECOLLAPSED);
+	BOOL bWantParents = !HasListOption(LVO_HIDEPARENTS);
+	BOOL bWantCollapsed = !HasListOption(LVO_HIDECOLLAPSED);
 
 	TCH().GetItemData(aTaskIDs, bWantParents, bWantCollapsed);
 
@@ -3214,11 +3221,23 @@ void CTabbedToDoCtrl::RebuildList()
 		CHoldRedraw hr2(m_taskList);
 		CWaitCursor cursor;
 
+		// Delete all the items before changing the group
+		// so there's nothing actually for the list to do
 		m_taskList.DeleteAll();
+
+		if (bChangeGroup)
+			m_taskList.SetGroupBy(m_nListViewGroupBy);
+
+		BOOL bHideNoneGroup = ((m_nListViewGroupBy != TDCC_NONE) && HasListOption(LVO_HIDENOGROUPVALUE));
 		
 		for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 		{
 			DWORD dwTaskID = aTaskIDs[nID];
+
+			if (bHideNoneGroup && !m_taskList.TaskHasGroupValue(dwTaskID))
+			{
+				continue;
+			}
 
 			if (m_taskList.InsertItem(dwTaskID) == -1)
 			{

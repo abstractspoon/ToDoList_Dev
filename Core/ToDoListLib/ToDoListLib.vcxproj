@@ -226,6 +226,7 @@
     <ClCompile Include="..\ToDoList\TDLTaskDependencyEdit.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskIconDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskListCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLTaskListCtrlOptionsComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLTasklistImportDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLTasklistSaveAsDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLTasklistStorageMgr.cpp" />
@@ -377,6 +378,7 @@
     <ClInclude Include="..\ToDoList\TDLTaskDependencyEdit.h" />
     <ClInclude Include="..\ToDoList\TDLTaskIconDlg.h" />
     <ClInclude Include="..\ToDoList\TDLTaskListCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLTaskListCtrlOptionsComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLTasklistImportDlg.h" />
     <ClInclude Include="..\ToDoList\TDLTasklistSaveAsDlg.h" />
     <ClInclude Include="..\ToDoList\TDLTasklistStorageMgr.h" />
@@ -416,4 +418,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="\_code\ToDoList_Dev\Core\TDLTest\TDLTest.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

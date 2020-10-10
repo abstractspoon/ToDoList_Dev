@@ -87,7 +87,8 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
 	CTDLTaskCtrlBase(ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs),
-	m_nGroupBy(TDCC_NONE)
+	m_nGroupBy(TDCC_NONE),
+	m_bSortGroupsAscending(TRUE)
 {
 }
 
@@ -393,7 +394,7 @@ UINT CTDLTaskListCtrl::GetGroupCount() const
 	return (IsGrouped() ? m_mapGroupHeaders.GetCount() : 0);
 }
 
-BOOL CTDLTaskListCtrl::GroupBy(TDC_COLUMN nGroupBy)
+BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy)
 {
 	if (!CanGroupBy(nGroupBy))
 		return FALSE;
@@ -450,6 +451,18 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy) const
 
 	// All else
 	return FALSE;
+}
+
+void CTDLTaskListCtrl::SetSortGroupsAscending(BOOL bAscending)
+{
+	if ((m_bSortGroupsAscending && !bAscending) ||
+		(!m_bSortGroupsAscending && bAscending))
+	{
+		m_bSortGroupsAscending = bAscending;
+
+		if ((GetGroupCount() > 1) && GetSafeHwnd())
+			Resort(FALSE);
+	}
 }
 
 void CTDLTaskListCtrl::OnBuildComplete()
@@ -521,7 +534,7 @@ int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& ma
 		}
 		else if (IsGrouped())
 		{
-			sGroupHeader = GetTaskGroupByText(dwTaskID);
+			sGroupHeader = GetTaskGroupValue(dwTaskID);
 
 			if (!mapNewHeaders.Has(sGroupHeader))
 				mapNewHeaders.Add(sGroupHeader);
@@ -531,8 +544,55 @@ int CTDLTaskListCtrl::CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& ma
 	return mapNewHeaders.GetCount();
 }
 
-CString CTDLTaskListCtrl::GetTaskGroupByText(DWORD dwTaskID) const
+BOOL CTDLTaskListCtrl::TaskHasGroupValue(DWORD dwTaskID) const
 {
+	ASSERT(IsGrouped());
+
+	CString sGroupBy;
+
+	if (m_mapGroupHeaders.Lookup(dwTaskID, sGroupBy))
+		return FALSE;
+
+	const TODOITEM* pTDI = GetTask(dwTaskID);
+	ASSERT(pTDI);
+
+	switch (m_nGroupBy)
+	{
+	case TDCC_CATEGORY:		return pTDI->aCategories.GetSize();
+	case TDCC_ALLOCTO:		return pTDI->aAllocTo.GetSize();
+	case TDCC_TAGS:			return pTDI->aTags.GetSize();
+
+	case TDCC_PRIORITY:		return (m_calculator.GetTaskHighestPriority(pTDI, m_data.LocateTask(dwTaskID)) != FM_NOPRIORITY);
+	case TDCC_RISK:			return (m_calculator.GetTaskHighestRisk(pTDI, m_data.LocateTask(dwTaskID)) != FM_NORISK);
+
+	case TDCC_ALLOCBY:		return !pTDI->sAllocBy.IsEmpty();
+	case TDCC_VERSION:		return !pTDI->sVersion.IsEmpty();
+	case TDCC_STATUS:		return !pTDI->sStatus.IsEmpty();	
+
+	case TDCC_RECURRENCE:	return pTDI->trRecurrence.IsRecurring();
+
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
+		{
+			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+			int nAttribDef = m_aCustomAttribDefs.Find(m_nGroupBy);
+
+			return !m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, m_aCustomAttribDefs[nAttribDef]).IsEmpty();
+		}
+		else
+		{
+			ASSERT(0);
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
+CString CTDLTaskListCtrl::GetTaskGroupValue(DWORD dwTaskID) const
+{
+	ASSERT(IsGrouped());
+
 	CString sGroupBy;
 
 	if (!m_mapGroupHeaders.Lookup(dwTaskID, sGroupBy))
@@ -578,7 +638,7 @@ CString CTDLTaskListCtrl::FormatTaskGroupHeaderText(DWORD dwTaskID) const
 {
 	ASSERT(IsGroupHeaderTask(dwTaskID));
 
-	CEnString sGroupBy = GetTaskGroupByText(dwTaskID);
+	CEnString sGroupBy = GetTaskGroupValue(dwTaskID);
 
 	if (sGroupBy.IsEmpty())
 	{
@@ -704,8 +764,8 @@ int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 {
 	if (IsGrouped() && (sort.nBy == m_nGroupBy))
 	{
-		CString sTask1Text = GetTaskGroupByText(lParam1);
-		CString sTask2Text = GetTaskGroupByText(lParam2);
+		CString sTask1Text = GetTaskGroupValue(lParam1);
+		CString sTask2Text = GetTaskGroupValue(lParam2);
 
 		int nCompare = Misc::NaturalCompare(sTask1Text, sTask2Text);
 
@@ -716,13 +776,12 @@ int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 		{
 			if (IsGroupHeaderTask(lParam1))
 				return -1;
-
+			
 			if (IsGroupHeaderTask(lParam2))
 				return 1;
 		}
 
-		// Note: Group is always sorted ascending
-		return nCompare;
+		return (m_bSortGroupsAscending ? nCompare : -nCompare);
 	}
 	
 	// all else

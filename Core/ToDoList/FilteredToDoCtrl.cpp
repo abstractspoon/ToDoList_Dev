@@ -578,13 +578,13 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 }
 
-void CFilteredToDoCtrl::RebuildList()
+void CFilteredToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy)
 {
 	if (m_bIgnoreListRebuild)
 		return;
 
 	// else
-	CTabbedToDoCtrl::RebuildList();
+	CTabbedToDoCtrl::RebuildList(bChangeGroup, nNewGroupBy);
 }
 
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)

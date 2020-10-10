@@ -36,6 +36,15 @@ public:
 	};
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
+void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems)
+{
+	if (pDX->m_bSaveAndValidate)
+		dwItems = combo.GetCheckedItemData();
+	else
+		combo.SetCheckedByItemData(dwItems);
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CCheckComboBox

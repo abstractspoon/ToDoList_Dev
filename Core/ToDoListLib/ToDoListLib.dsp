@@ -553,6 +553,10 @@ SOURCE=..\ToDoList\TDLTaskListCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLTaskListCtrlOptionsComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLTasklistImportDlg.cpp
 # End Source File
 # Begin Source File
@@ -1150,6 +1154,10 @@ SOURCE=..\ToDoList\TDLTaskIconDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLTaskListCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskListCtrlOptionsComboBox.h
 # End Source File
 # Begin Source File
 

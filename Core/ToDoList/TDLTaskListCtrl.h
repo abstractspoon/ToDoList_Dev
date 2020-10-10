@@ -92,9 +92,11 @@ public:
 	void RemoveDeletedItems();
 	void SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 
-	BOOL GroupBy(TDC_COLUMN nGroupBy);
+	BOOL SetGroupBy(TDC_COLUMN nGroupBy);
 	BOOL CanGroupBy(TDC_COLUMN nGroupBy) const;
 	UINT GetGroupCount() const;
+	void SetSortGroupsAscending(BOOL bAscending = TRUE);
+	BOOL TaskHasGroupValue(DWORD dwTaskID) const;
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBuildComplete();
@@ -104,6 +106,7 @@ public:
 protected:
 	CListCtrl m_lcTasks;
 	TDC_COLUMN m_nGroupBy;
+	BOOL m_bSortGroupsAscending;
 
 	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
 	CGroupHeaderMap m_mapGroupHeaders;
@@ -168,7 +171,7 @@ protected:
 	GM_ITEMSTATE GetListItemState(int nItem) const;
 
 	BOOL UpdateGroupHeaders();
-	CString GetTaskGroupByText(DWORD dwTaskID) const;
+	CString GetTaskGroupValue(DWORD dwTaskID) const;
 	CString FormatTaskGroupHeaderText(DWORD dwTaskID) const;
 	CString GetGroupByColumnName() const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;

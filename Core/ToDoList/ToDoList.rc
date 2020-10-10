@@ -1861,7 +1861,7 @@ IDD_TIMETRACK_DIALOG DIALOGEX 0, 0, 134, 111
 STYLE WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
 EXSTYLE WS_EX_STATICEDGE
 CAPTION "Time Tracker"
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     COMBOBOX        IDC_TASKLISTS,4,28,126,128,CBS_DROPDOWNLIST | CBS_SORT | 
                     WS_VSCROLL | WS_TABSTOP
@@ -4549,8 +4549,8 @@ BEGIN
     IDS_TDC_EDITPROMPT_UNKNOWNFORMAT "<unknown format>"
     IDS_ADVANCEDFILTERPLACEHOLDER "Find Tasks Filters"
     IDS_NOSOUND             "<no sound>"
-    IDS_ANONYMIZE_FAIL      "The active tasklist could not be anonymized"
-    IDS_ANONYMIZE_SUCCESS   "The active tasklist was successfully anonymized.\n\nWould you like to load the anonymized version?"
+    IDS_ANONYMIZE_FAIL      "The active tasklist could not be anonymised"
+    IDS_ANONYMIZE_SUCCESS   "The active tasklist was successfully anonymised.\n\nWould you like to load the anonymised version?"
     IDS_PSP_NOMATCHES       "No matching menu items found"
 END
 
@@ -4562,6 +4562,8 @@ BEGIN
     IDS_DEPENDSLEADIN_COL   "Lead In (Days)"
     IDS_TIMETRACKER_RECENTITEMS "Recently Tracked"
     IDS_TIMETRACKER_RESTOFITEMS "Rest of Tasks"
+    IDS_LISTVIEW_SORTGROUPSASCENDING "Sort groups ascending"
+    IDS_LISTVIEW_HIDENOGROUPVALUE "Hide <none> group"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5254,10 +5256,10 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_FILTER_ANYCATS      "Any category can match"
     IDS_FILTER_ANYPEOPLE    "Any person can match"
-    IDS_FILTER_HIDEPARENTS  "Hide parent tasks"
+    IDS_LISTVIEW_HIDEPARENTS "Hide parent tasks"
     IDS_FILTER_HIDEOVERDUE  "Hide overdue tasks"
     IDS_FILTER_HIDEDONE     "Hide completed tasks"
-    IDS_FILTER_HIDECOLLAPSED "Hide collapsed tasks"
+    IDS_LISTVIEW_HIDECOLLAPSED "Hide collapsed tasks"
     IDS_QUICKFIND           "Quick Find"
     IDS_IMPORTFILE_NOTASKS  "'%s' contained no tasks which could be imported."
     IDS_FT_SAVESEARCHPROMPT "Save Search"

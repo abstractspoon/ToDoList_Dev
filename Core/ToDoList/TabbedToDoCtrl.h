@@ -12,6 +12,7 @@
 #include "ToDoCtrl.h"
 #include "tdltasklistctrl.h"
 #include "tdlviewTabcontrol.h"
+#include "tdltasklistctrloptionscombobox.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\subclass.h"
@@ -166,7 +167,7 @@ protected:
 	CTDLViewTabControl m_tabViews;
 	CTaskListDropTarget m_dtList;
 	CComboBox m_cbListGroupBy;
-	CCheckComboBox m_cbListOptions;
+	CTDLTaskListCtrlOptionsComboBox m_cbListOptions;
 
 	const CUIExtensionMgr& m_mgrUIExt;
 	CArray<IUIExtensionWindow*, IUIExtensionWindow*> m_aExtViews;
@@ -257,7 +258,7 @@ protected:
 	virtual void OnTaskIconsChanged();
 	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 
-	virtual void RebuildList();
+	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE);
 	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
 
 	void UpdateSelectedTaskPath();
@@ -272,8 +273,8 @@ protected:
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 	void BuildListGroupByCombo();
-	void BuildListOptionsCombo();
 	void ResortList(BOOL bAllowToggle = FALSE);
+	BOOL HasListOption(DWORD dwOption) const { return ((m_dwListOptions & dwOption) == dwOption); }
 
 	void SyncActiveViewSelectionToTree();
 	void SyncListSelectionToTree();

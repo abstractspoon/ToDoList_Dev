@@ -26,6 +26,12 @@ enum CCB_CHECKSTATE
 };
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CCheckComboBox;
+
+void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems);
+
+/////////////////////////////////////////////////////////////////////////////
 // CCheckComboBox window
 
 class CCheckComboBox : public CAutoComboBox
