@@ -2019,12 +2019,18 @@ namespace MSDN.Html.Editor
 					InsertLinkPrompt(text, text);
 					return;
 				}
-				else if (Path.IsPathRooted(text))
+				else
 				{
-					var fileUrl = new System.Uri(text).AbsoluteUri;
+					// Unquote path in case it was produced by Windows Explorer
+					text = text.Trim('"');
 
-					InsertLinkPrompt(fileUrl, text);
-					return;
+					if (Path.IsPathRooted(text))
+					{
+						var fileUrl = new System.Uri(text).AbsoluteUri;
+
+						InsertLinkPrompt(fileUrl, text);
+						return;
+					}
 				}
 			}
 			else if (Clipboard.ContainsFileDropList())

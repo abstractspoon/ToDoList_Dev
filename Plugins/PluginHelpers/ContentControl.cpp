@@ -6,9 +6,12 @@
 #include "ContentControl.h"
 #include "UrlParser.h"
 #include "OutlookUtil.h"
+#include "Win32.h"
 
 #include <Interfaces\UITheme.h>
 #include <Interfaces\IContentControl.h>
+
+#include <Shared\FileMisc.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -172,10 +175,7 @@ bool ContentControlWnd::GoToLink(String^ sLink, IntPtr hwndParent, IntPtr hwndFr
 		if (parser.IsFileProtocol(sLink))
 			sLink = parser.GetUrlAsFile(sLink);
 
-		auto psi = gcnew ProcessStartInfo(sLink);
-		psi->UseShellExecute = true;
-
-		if (Process::Start(psi) != nullptr)
+		if (FileMisc::Run(Win32::GetHwnd(hwndParent), MS(sLink)) >= SE_ERR_SUCCESS)
 			return true;
 	}
 
