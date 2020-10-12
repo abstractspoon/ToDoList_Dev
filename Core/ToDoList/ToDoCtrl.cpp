@@ -9864,6 +9864,15 @@ LRESULT CToDoCtrl::OnCanDropObject(WPARAM wParam, LPARAM lParam)
 			return GetParent()->SendMessage(WM_TDCM_CANIMPORTFROMDROP, (WPARAM)GetSafeHwnd(), (LPARAM)&data);
 		}
 
+		if (pData->pOutlookSelection || CMSOutlookHelper::IsOutlookObject(pData->pObject))
+		{
+			if (pData->dwTaskID && !pData->bImportTasks)
+				return CanEditSelectedTask(TDCA_FILELINK);
+
+			// else 
+			return CanEditSelectedTask(TDCA_NEWTASK);
+		}
+
 		if (pData->HasText())
 		{
 			// Check with parent
