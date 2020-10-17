@@ -31,7 +31,8 @@ protected:
 	virtual BOOL InitInstance();
 	//}}AFX_VIRTUAL
 
-	static void DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, BOOL bPreRelease, const CPoint& ptPos);
+	static void DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, const CPoint& ptPos,
+						 BOOL bPreRelease, BOOL bRestartElevated);
 
 // Implementation
 

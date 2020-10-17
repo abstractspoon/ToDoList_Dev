@@ -265,14 +265,21 @@ BOOL CToDoListApp::InitInstance()
 	
 	if (pTDL && pTDL->Create(startup))
 	{
-		// If we have just been upgraded we will have admin
-		// privileges which will stop single-instance and 
-		// Windows drag'n'drop from working because Windows 
-		// will prevent non-elevated apps from talking to us.
 		if (startup.HasFlag(TLD_UPGRADED))
 		{
-			GraphicsMisc::ChangeWindowMessageFilter(WM_COPYDATA, TRUE);
-			GraphicsMisc::ChangeWindowMessageFilter(WM_DROPFILES, TRUE);
+			// The updater always tries to restart us with the same
+			// privileges as we had before but this could fail.
+			// In such a case we now have admin privileges where before
+			// we didn't and this will stop single-instance and 
+			// Windows drag'n'drop from working because Windows 
+			// will prevent non-elevated apps from talking to us.
+			// So we detect this and tell Windows to override its
+			// default behaviour.
+			if (!cmdInfo.HasOption(SWITCH_RESTARTELEVATED) && FileMisc::IsAdminProcess())
+			{
+				GraphicsMisc::ChangeWindowMessageFilter(WM_COPYDATA, TRUE);
+				GraphicsMisc::ChangeWindowMessageFilter(WM_DROPFILES, TRUE);
+			}
 		}
 
 		m_pMainWnd = pTDL;
@@ -1521,6 +1528,10 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	// and whether this is a pre-prelease
 	if (bPreRelease)
 		params.SetOption(SWITCH_PRERELEASE);
+
+	// And whether we want to be restarted with admin rights
+	if (FileMisc::IsAdminProcess())
+		params.SetOption(SWITCH_RESTARTELEVATED);
 
 	return RunHelperApp(sAppPath, params, nIDGenErrorMsg, nIDSmartScreenErrorMsg, szVerb);
 }

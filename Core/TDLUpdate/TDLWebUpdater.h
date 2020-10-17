@@ -53,7 +53,8 @@ public:
 	CTDLWebUpdater(const CPoint& ptPos, BOOL bPreRelease);
 	virtual ~CTDLWebUpdater();
 
-	TDL_WEBUPDATE_RESULT DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, BOOL bDownloadOnly = FALSE);
+	TDL_WEBUPDATE_RESULT DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, 
+								  BOOL bRestartElevated, BOOL bDownloadOnly = FALSE);
 
 protected:
 	CString m_sAppFolder;
@@ -70,7 +71,7 @@ protected:
 protected:
 	BOOL SetAppFolder(const CString& sAppFolder);
 	BOOL InitialiseTemporaries();
-	BOOL DoProgressDialog(const CString& sPrevCmdLine);
+	BOOL DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestartElevated);
 	void CleanupTemporaries();
 	BOOL CheckUpdateCancelled();
 	TDL_WEBUPDATE_RESULT LogError(const CString& sAppFolder) const;

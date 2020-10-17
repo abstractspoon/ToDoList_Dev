@@ -3650,6 +3650,9 @@ BEGIN
     BEGIN
         MENUITEM "&End Session",                ID_DEBUGENDSESSION
         MENUITEM "Restart Application",         ID_DEBUGRESTARTAPP
+        MENUITEM "Restart Application from Explorer", 
+                                                ID_DEBUGRESTARTAPPFROMEXPLORER
+
         MENUITEM SEPARATOR
         MENUITEM "Update &Translation",         ID_DEBUG_UPDATETRANSLATION
         MENUITEM "&Clean Dictionaries",         ID_DEBUG_CLEANDICTIONARIES

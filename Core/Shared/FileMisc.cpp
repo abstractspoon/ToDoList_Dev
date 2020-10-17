@@ -14,6 +14,8 @@
 #include <sys/stat.h>
 #include <io.h>
 #include <afxole.h>
+#include <atlbase.h>
+#include <comdef.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1520,6 +1522,150 @@ BOOL FileMisc::ExpandPathEnvironmentVariables(CString& sFilePath)
 	return FALSE;
 }
 
+namespace
+{
+	// Private helpers for RunFromExplorer
+#define IID_PPV_ARGSEX(ppType) __uuidof(**(ppType)), reinterpret_cast<void**>(ppType)
+	
+#if _MSC_VER <= 1200
+
+#define SWC_DESKTOP 8
+#define SHELLFINDWINDOW spShellWindows->FindWindow
+	
+	MIDL_INTERFACE("A4C6892C-3BA9-11d2-9DEA-00C04FB16162")
+	IShellDispatch2Ex : public IShellDispatch
+	{
+	public:
+		virtual HRESULT STDMETHODCALLTYPE IsRestricted(
+			BSTR Group,
+			BSTR Restriction,
+			long *plRestrictValue) = 0;
+		
+		virtual HRESULT STDMETHODCALLTYPE ShellExecute(
+			BSTR File,
+			VARIANT vArgs,
+			VARIANT vDir,
+			VARIANT vOperation,
+			VARIANT vShow) = 0;
+			
+		virtual HRESULT STDMETHODCALLTYPE FindPrinter(
+			BSTR name,
+			BSTR location,
+			BSTR model) = 0;
+			
+		virtual HRESULT STDMETHODCALLTYPE GetSystemInformation(
+			BSTR name,
+			VARIANT *pv) = 0;
+			
+		virtual HRESULT STDMETHODCALLTYPE ServiceStart(
+			BSTR ServiceName,
+			VARIANT Persistent,
+			VARIANT *pSuccess) = 0;
+			
+		virtual HRESULT STDMETHODCALLTYPE ServiceStop(
+			BSTR ServiceName,
+			VARIANT Persistent,
+			VARIANT *pSuccess) = 0;
+			
+		virtual HRESULT STDMETHODCALLTYPE IsServiceRunning(
+			BSTR ServiceName,
+			VARIANT *pRunning) = 0;
+			
+		virtual HRESULT STDMETHODCALLTYPE CanStartStopService(
+			BSTR ServiceName,
+			VARIANT *pCanStartStop) = 0;
+			
+		virtual HRESULT STDMETHODCALLTYPE ShowBrowserBar(
+			BSTR bstrClsid,
+			VARIANT bShow,
+			VARIANT *pSuccess) = 0;
+	};
+
+#else
+
+	typedef IShellDispatch2 IShellDispatch2Ex;
+#define SHELLFINDWINDOW spShellWindows->FindWindowSW
+
+#endif
+
+	BOOL FindDesktopFolderView(REFIID riid, void **ppv)
+	{
+		CComPtr<IShellWindows> spShellWindows;
+		HRESULT hr = spShellWindows.CoCreateInstance(CLSID_ShellWindows);
+
+		if (FAILED(hr)) 
+			return FALSE;
+
+		CComVariant vtLoc(CSIDL_DESKTOP);
+		CComVariant vtEmpty;
+		long lhwnd;
+		CComPtr<IDispatch> spdisp;
+
+		hr = SHELLFINDWINDOW(&vtLoc, &vtEmpty, SWC_DESKTOP, &lhwnd, SWFO_NEEDDISPATCH, &spdisp);
+
+		if (FAILED(hr))
+			return FALSE;
+
+		CComPtr<IShellBrowser> spBrowser;
+		hr = CComQIPtr<IServiceProvider>(spdisp)->QueryService(SID_STopLevelBrowser, IID_PPV_ARGSEX(&spBrowser));
+
+		if (FAILED(hr))
+			return FALSE;
+
+		CComPtr<IShellView> spView;
+		hr = spBrowser->QueryActiveShellView(&spView);
+
+		if (FAILED(hr))
+			return FALSE;
+
+		hr = spView->QueryInterface(riid, ppv);
+
+		return SUCCEEDED(hr);
+	}
+
+	BOOL GetDesktopAutomationObject(REFIID riid, void **ppv)
+	{
+		CComPtr<IShellView> spsv;
+		HRESULT hr = FindDesktopFolderView(IID_PPV_ARGSEX(&spsv));
+
+		if (FAILED(hr))
+			return FALSE;
+
+		CComPtr<IDispatch> spdispView;
+		hr = spsv->GetItemObject(SVGIO_BACKGROUND, IID_PPV_ARGSEX(&spdispView));
+
+		if (FAILED(hr))
+			return FALSE;
+
+		hr = spdispView->QueryInterface(riid, ppv);
+
+		return SUCCEEDED(hr);
+	}
+}
+
+BOOL FileMisc::RunFromExplorer(LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, LPCTSTR lpDirectory, LPCTSTR lpVerb)
+{
+	CComPtr<IShellFolderViewDual> spFolderView;
+
+	if (!GetDesktopAutomationObject(IID_PPV_ARGSEX(&spFolderView)))
+		return FALSE;
+
+	CComPtr<IDispatch> spdispShell;
+	HRESULT hr = spFolderView->get_Application(&spdispShell);
+
+	if (FAILED(hr))
+		return FALSE;
+
+	hr = CComQIPtr<IShellDispatch2Ex>(spdispShell)->ShellExecute(
+		CComBSTR(lpFile),
+		CComVariant(lpParams ? lpParams : L""),
+		CComVariant(lpDirectory ? lpDirectory : L""),
+		CComVariant(lpVerb ? lpVerb : L""),
+		CComVariant(nShowCmd));
+
+	return SUCCEEDED(hr);
+}
+
 DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, LPCTSTR lpDirectory, LPCTSTR lpVerb)
 {
 	CString sFile(lpFile), sParams(lpParams);
@@ -1566,7 +1712,7 @@ DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, L
 		si.dwFlags = STARTF_USESHOWWINDOW;
 
 		// Start the child process.
-		if (CreateProcess( NULL,			// No module name (use command line).
+		if (CreateProcess(NULL,				// No module name (use command line).
 							(LPTSTR)lpFile,	// Command line.
 							NULL,			// Process handle not inheritable.
 							NULL,			// Thread handle not inheritable.
@@ -1586,8 +1732,8 @@ DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, L
 		}
 
 		// Close process and thread handles.
-		CloseHandle( pi.hProcess );
-		CloseHandle( pi.hThread );
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
 	}
 	return dwRes;
 }

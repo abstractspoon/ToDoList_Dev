@@ -34,30 +34,31 @@ CTDLWebUpdater::~CTDLWebUpdater()
 
 }
 
-TDL_WEBUPDATE_RESULT CTDLWebUpdater::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, BOOL bDownloadOnly)
+TDL_WEBUPDATE_RESULT CTDLWebUpdater::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, 
+											  BOOL bRestartElevated, BOOL bDownloadOnly)
 {
 	if (WebMisc::IsOnline())
 	{
 		// reset result
 		m_nResUpdate = TDLWUR_SUCCESS;
 		
-#ifndef _DEBUG
-		UNREFERENCED_PARAMETER(bDownloadOnly);
-#else
+#ifdef _DEBUG
 		if (bDownloadOnly)
 		{
 			m_sDownloadFile = FileMisc::GetTempFilePath();
 			m_sAppFolder = FileMisc::GetTempFolder();
 
 			InitialiseTemporaries();
-			DoProgressDialog(_T("")/*, bDownloadOnly*/);
+			DoProgressDialog(_T(""), FALSE);
 			
 			return TDLWUR_SUCCESS;
 		}
+#else
+		UNREFERENCED_PARAMETER(bDownloadOnly);
 #endif
 		if (SetAppFolder(sAppFolder) && InitialiseTemporaries())
 		{
-			if (!DoProgressDialog(sPrevCmdLine))
+			if (!DoProgressDialog(sPrevCmdLine, bRestartElevated))
 				RestoreBackup(m_dlgProgress.GetProgressStatus());
 			
 			m_dlgProgress.DestroyWindow();
@@ -304,7 +305,7 @@ TDL_WEBUPDATE_RESULT CTDLWebUpdater::LogError(const CString& sAppFolder) const
 	return m_nResUpdate;
 }
 
-BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine)
+BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine, BOOL bRestartElevated)
 {
 	// sanity checks
 	ASSERT(m_nResUpdate == TDLWUR_SUCCESS);
@@ -451,10 +452,16 @@ BOOL CTDLWebUpdater::DoProgressDialog(const CString& sPrevCmdLine)
 	CString sParams(sPrevCmdLine);
 	sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_UPGRADED);
 
-	if (FileMisc::Run(NULL, m_sAppPath, sParams) < SE_ERR_SUCCESS)
+	if (bRestartElevated)
+		sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTARTELEVATED);
+	
+	if (bRestartElevated || !FileMisc::RunFromExplorer(m_sAppPath, sParams))
 	{
-		m_nResUpdate = TDLWUR_ERR_RUNUPDATE;
-		return FALSE;
+		if (FileMisc::Run(NULL, m_sAppPath, sParams) < SE_ERR_SUCCESS)
+		{
+			m_nResUpdate = TDLWUR_ERR_RUNUPDATE;
+			return FALSE;
+		}
 	}
 	
 	FileMisc::LogText(_T("The updated application '%s' was successfully restarted."), m_sAppPath);

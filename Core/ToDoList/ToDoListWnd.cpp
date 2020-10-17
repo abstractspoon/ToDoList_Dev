@@ -284,7 +284,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_TASKLIST_COPYSELTASKSCOLUMNVALUES, OnUpdateTasklistCopySelectedTaskColumnValues)
 	ON_COMMAND(ID_EDIT_SETPERCENTTOTODAY, OnEditSetPercentToToday)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SETPERCENTTOTODAY, OnUpdateEditSetPercentToToday)
-	ON_COMMAND(ID_DEBUGRESTARTAPP, OnDebugRestartApp)
 	ON_COMMAND(ID_TOOLS_ANONYMIZE_TASKLIST, OnToolsAnonymizeTasklist)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANONYMIZE_TASKLIST, OnUpdateToolsAnonymizeTasklist)
 	//}}AFX_MSG_MAP
@@ -677,6 +676,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_DEBUGSHOWREMINDERDLG, OnDebugShowReminderDlg)
 	ON_COMMAND(ID_DEBUG_UPDATETRANSLATION, OnDebugUpdateTranslation)
 	ON_COMMAND(ID_DEBUG_CLEANDICTIONARIES, OnDebugCleanDictionaries)
+	ON_COMMAND(ID_DEBUGRESTARTAPP, OnDebugRestartApp)
+	ON_COMMAND(ID_DEBUGRESTARTAPPFROMEXPLORER, OnDebugRestartAppFromExplorer)
+	ON_UPDATE_COMMAND_UI(ID_DEBUGRESTARTAPPFROMEXPLORER, OnUpdateDebugRestartAppFromExplorer)
 #endif
 
 END_MESSAGE_MAP()
@@ -4150,6 +4152,29 @@ void CToDoListWnd::OnDebugCleanDictionaries()
 	CString sMasterDict = (sTransFolder + _T("\\YourLanguage.csv"));
 	
 	VERIFY(CLocalizer::CleanupDictionary(sMasterDict, sDictPath));
+}
+
+void CToDoListWnd::OnDebugRestartApp()
+{
+	DoExit(TRUE);
+}
+
+void CToDoListWnd::OnDebugRestartAppFromExplorer()
+{
+	DoExit(FALSE); // don't restart
+
+	CString sParams = AfxGetApp()->m_lpCmdLine;
+	sParams += CEnCommandLineInfo::FormatSwitch(SWITCH_RESTART, Misc::Format(::GetCurrentProcessId()));
+
+	if (!FileMisc::RunFromExplorer(FileMisc::GetModuleFilePath(), sParams))
+	{
+		AfxMessageBox(_T("Failed to restart app from Explorer"));
+	}
+}
+
+void CToDoListWnd::OnUpdateDebugRestartAppFromExplorer(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(FileMisc::IsAdminProcess());
 }
 
 #endif // DEBUG FUNCTIONS
@@ -13508,11 +13533,6 @@ void CToDoListWnd::OnToolsViewLogFile()
 void CToDoListWnd::OnUpdateToolsViewLogFile(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(FileMisc::FileExists(FileMisc::GetLogFilePath()));
-}
-
-void CToDoListWnd::OnDebugRestartApp() 
-{
-	DoExit(TRUE);	
 }
 
 void CToDoListWnd::OnToolsAnonymizeTasklist() 

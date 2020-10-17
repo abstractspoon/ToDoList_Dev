@@ -69,6 +69,7 @@ BOOL CTDLUpdateApp::InitInstance()
 		// position for more than one screen
 		CPoint ptPos(_ttol(cmdInfo.GetOption(SWITCH_POSITION)));
 		BOOL bPreRelease = cmdInfo.HasOption(SWITCH_PRERELEASE);
+		BOOL bRestartElevated = cmdInfo.HasOption(SWITCH_RESTARTELEVATED);
 
 #ifdef _DEBUG
 		// check if TDL just wants to see the ui
@@ -106,7 +107,7 @@ BOOL CTDLUpdateApp::InitInstance()
 			CString sPrevCmdLine = Base64Coder::Decode(cmdInfo.GetOption(SWITCH_CMDLINE));
 			
 			// do the update
-			DoUpdate(sAppFolder, sPrevCmdLine, bPreRelease, ptPos);
+			DoUpdate(sAppFolder, sPrevCmdLine, ptPos, bPreRelease, bRestartElevated);
 			
 			CLocalizer::Release();
 		}
@@ -153,7 +154,8 @@ BOOL CTDLUpdateApp::InitInstance()
 	return FALSE;
 }
 
-void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, BOOL bPreRelease, const CPoint& ptPos)
+void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdLine, const CPoint& ptPos, 
+							 BOOL bPreRelease, BOOL bRestartElevated)
 {
 	// sanity checks
 	ASSERT (!sAppFolder.IsEmpty() && FileMisc::FolderExists(sAppFolder));
@@ -163,7 +165,7 @@ void CTDLUpdateApp::DoUpdate(const CString& sAppFolder, const CString& sPrevCmdL
 	FileMisc::LogAppModuleState(FBM_SORTBY_FILENAME);
 
 	CTDLWebUpdater wu(ptPos, bPreRelease);
-	TDL_WEBUPDATE_RESULT nRes = wu.DoUpdate(sAppFolder, sPrevCmdLine);
+	TDL_WEBUPDATE_RESULT nRes = wu.DoUpdate(sAppFolder, sPrevCmdLine, bRestartElevated);
 	
 	// always copy update log to app folder
 	CString sLogPath = FileMisc::GetLogFilePath();

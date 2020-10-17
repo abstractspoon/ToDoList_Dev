@@ -320,6 +320,8 @@ namespace FileMisc
 	void LogAppModuleState(FB_MODULE_SORT nSort = FBM_UNSORTED);
 
 	DWORD Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams = NULL, int nShowCmd = SW_SHOWNORMAL, LPCTSTR lpDirectory = NULL, LPCTSTR lpVerb = NULL);
+	BOOL  RunFromExplorer(LPCTSTR lpFile, LPCTSTR lpParams = NULL, int nShowCmd = SW_SHOWNORMAL, LPCTSTR lpDirectory = NULL, LPCTSTR lpVerb = NULL);
+
 	BOOL SelectFileInExplorer(LPCTSTR szFilePath);
 	BOOL AppendLineToFile(LPCTSTR szPathname, const CString& sLine, SFE_FORMAT nFormat);
 	BOOL ExpandPathEnvironmentVariables(CString& sFilePath);

@@ -201,7 +201,6 @@ protected:
 	afx_msg void OnUpdateTasklistCopySelectedTaskColumnValues(CCmdUI* pCmdUI);
 	afx_msg void OnEditSetPercentToToday();
 	afx_msg void OnUpdateEditSetPercentToToday(CCmdUI* pCmdUI);
-	afx_msg void OnDebugRestartApp();
 	afx_msg void OnToolsAnonymizeTasklist();
 	afx_msg void OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI);
 	//}}AFX_MSG
@@ -576,6 +575,9 @@ protected:
 	afx_msg void OnDebugShowReminderDlg();
 	afx_msg void OnDebugUpdateTranslation();
 	afx_msg void OnDebugCleanDictionaries();
+	afx_msg void OnDebugRestartApp();
+	afx_msg void OnDebugRestartAppFromExplorer();
+	afx_msg void OnUpdateDebugRestartAppFromExplorer(CCmdUI* pCmdUI);
 #endif
 	DECLARE_MESSAGE_MAP()
 		
