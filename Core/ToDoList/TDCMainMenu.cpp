@@ -76,6 +76,15 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 
 	// don't translate the debug menu
 	CLocalizer::EnableTranslation(::GetSubMenu(GetSafeHmenu(), AM_DEBUG), FALSE);
+
+	// 'Run from Explorer' not supported below Vista
+	if (COSVersion() < OSV_VISTA)
+	{
+		CMenu* pSubMenu = GetSubMenu(AM_DEBUG);
+		ASSERT(pSubMenu);
+
+		pSubMenu->DeleteMenu(ID_DEBUGRESTARTAPPFROMEXPLORER, MF_BYPOSITION);
+	}
 #endif
 
 	UpdateBackgroundColor();

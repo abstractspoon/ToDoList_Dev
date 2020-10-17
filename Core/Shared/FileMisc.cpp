@@ -1645,6 +1645,9 @@ namespace
 
 BOOL FileMisc::RunFromExplorer(LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, LPCTSTR lpDirectory, LPCTSTR lpVerb)
 {
+	if (COSVersion() < OSV_VISTA)
+		return FALSE;
+
 	CComPtr<IShellFolderViewDual> spFolderView;
 
 	if (!GetDesktopAutomationObject(IID_PPV_ARGSEX(&spFolderView)))
