@@ -671,14 +671,14 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
  	ON_UPDATE_COMMAND_UI(ID_TOOLS_REMOVEFROMSOURCECONTROL, OnUpdateToolsRemovefromsourcecontrol)
 	
 #ifdef _DEBUG
-	ON_COMMAND(ID_DEBUGENDSESSION, OnDebugEndSession)
-	ON_COMMAND(ID_DEBUGSHOWSETUPDLG, OnDebugShowSetupDlg)
-	ON_COMMAND(ID_DEBUGSHOWREMINDERDLG, OnDebugShowReminderDlg)
+	ON_COMMAND(ID_DEBUG_ENDSESSION, OnDebugEndSession)
+	ON_COMMAND(ID_DEBUG_SHOWSETUPDLG, OnDebugShowSetupDlg)
+	ON_COMMAND(ID_DEBUG_SHOWREMINDERDLG, OnDebugShowReminderDlg)
 	ON_COMMAND(ID_DEBUG_UPDATETRANSLATION, OnDebugUpdateTranslation)
 	ON_COMMAND(ID_DEBUG_CLEANDICTIONARIES, OnDebugCleanDictionaries)
-	ON_COMMAND(ID_DEBUGRESTARTAPP, OnDebugRestartApp)
-	ON_COMMAND(ID_DEBUGRESTARTAPPFROMEXPLORER, OnDebugRestartAppFromExplorer)
-	ON_UPDATE_COMMAND_UI(ID_DEBUGRESTARTAPPFROMEXPLORER, OnUpdateDebugRestartAppFromExplorer)
+	ON_COMMAND(ID_DEBUG_RESTARTAPP, OnDebugRestartApp)
+	ON_COMMAND(ID_DEBUG_RESTARTAPPFROMEXPLORER, OnDebugRestartAppFromExplorer)
+	ON_UPDATE_COMMAND_UI(ID_DEBUG_RESTARTAPPFROMEXPLORER, OnUpdateDebugRestartAppFromExplorer)
 #endif
 
 END_MESSAGE_MAP()
@@ -4105,14 +4105,16 @@ void CToDoListWnd::OnDebugUpdateTranslation()
 		CLocalizer::IgnoreString(IDS_ABOUTCONTRIBUTION);
 		
 		// disable translation of debug menu
-		CLocalizer::EnableTranslation(ID_DEBUGENDSESSION, FALSE);
-		CLocalizer::EnableTranslation(ID_DEBUGSHOWSCRIPTDLG, FALSE);
-		CLocalizer::EnableTranslation(ID_DEBUGSHOWSETUPDLG, FALSE);
-		CLocalizer::EnableTranslation(ID_DEBUGSHOWUPDATEDLG, FALSE);
-		CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_INFO, FALSE);
-		CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_WARNING, FALSE);
-		CLocalizer::EnableTranslation(ID_DEBUGTASKDIALOG_ERROR, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_ENDSESSION, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_SHOWSCRIPTDLG, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_SHOWSETUPDLG, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_SHOWUPDATEDLG, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_TASKDIALOG_INFO, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_TASKDIALOG_WARNING, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_TASKDIALOG_ERROR, FALSE);
 		CLocalizer::EnableTranslation(ID_DEBUG_UPDATETRANSLATION, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_RESTARTAPPFROMEXPLORER, FALSE);
+		CLocalizer::EnableTranslation(ID_DEBUG_RESTARTAPPFROMEXPLORER, FALSE);
 		
 		CLocalizer::ForceTranslateAllUIElements(IDS_FIRSTSTRING, IDS_LASTSTRING);
 		

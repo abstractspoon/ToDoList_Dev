@@ -176,7 +176,7 @@ HTREEITEM CPreferencesShortcutsPage::AddMenuItem(HTREEITEM htiParent, const CMen
 	// Exclude the debug menu
 	if (bSubMenu)
 	{
-		if (pMenu->GetSubMenu(nPos)->GetMenuItemID(0) == ID_DEBUGENDSESSION)
+		if (pMenu->GetSubMenu(nPos)->GetMenuItemID(0) == ID_DEBUG_ENDSESSION)
 			return NULL;
 	}
 

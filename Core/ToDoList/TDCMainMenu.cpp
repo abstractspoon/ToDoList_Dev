@@ -83,7 +83,7 @@ BOOL CTDCMainMenu::LoadMenu(const CPreferencesDlg& prefs)
 		CMenu* pSubMenu = GetSubMenu(AM_DEBUG);
 		ASSERT(pSubMenu);
 
-		pSubMenu->DeleteMenu(ID_DEBUGRESTARTAPPFROMEXPLORER, MF_BYPOSITION);
+		pSubMenu->DeleteMenu(ID_DEBUG_RESTARTAPPFROMEXPLORER, MF_BYCOMMAND);
 	}
 #endif
 

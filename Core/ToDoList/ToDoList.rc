@@ -3648,37 +3648,37 @@ BEGIN
     END
     POPUP "Debug"
     BEGIN
-        MENUITEM "&End Session",                ID_DEBUGENDSESSION
-        MENUITEM "Restart Application",         ID_DEBUGRESTARTAPP
+        MENUITEM "&End Session",                ID_DEBUG_ENDSESSION
+        MENUITEM "Restart Application",         ID_DEBUG_RESTARTAPP
         MENUITEM "Restart Application from Explorer", 
-                                                ID_DEBUGRESTARTAPPFROMEXPLORER
+                                                ID_DEBUG_RESTARTAPPFROMEXPLORER
 
         MENUITEM SEPARATOR
         MENUITEM "Update &Translation",         ID_DEBUG_UPDATETRANSLATION
         MENUITEM "&Clean Dictionaries",         ID_DEBUG_CLEANDICTIONARIES
         MENUITEM SEPARATOR
-        MENUITEM "Show Language Dialog",        ID_DEBUGSHOWLANGDLG
-        MENUITEM "Show Setup &Wizard...",       ID_DEBUGSHOWSETUPDLG
-        MENUITEM "Show &Script Dialog...",      ID_DEBUGSHOWSCRIPTDLG
-        MENUITEM "Show &Updater Dialog...",     ID_DEBUGSHOWUPDATEDLG
-        MENUITEM "Show Reminder Dialog...",     ID_DEBUGSHOWREMINDERDLG
+        MENUITEM "Show Language Dialog",        ID_DEBUG_SHOWLANGDLG
+        MENUITEM "Show Setup &Wizard...",       ID_DEBUG_SHOWSETUPDLG
+        MENUITEM "Show &Script Dialog...",      ID_DEBUG_SHOWSCRIPTDLG
+        MENUITEM "Show &Updater Dialog...",     ID_DEBUG_SHOWUPDATEDLG
+        MENUITEM "Show Reminder Dialog...",     ID_DEBUG_SHOWREMINDERDLG
         MENUITEM SEPARATOR
         POPUP "&Test Download Link"
         BEGIN
-            MENUITEM "&Stable Release",             ID_DEBUGTESTSTABLEDOWNLOAD
+            MENUITEM "&Stable Release",             ID_DEBUG_TESTSTABLEDOWNLOAD
 
-            MENUITEM "&Pre Release",                ID_DEBUGTESTPREDOWNLOAD
+            MENUITEM "&Pre Release",                ID_DEBUG_TESTPREDOWNLOAD
         END
         MENUITEM SEPARATOR
         POPUP "Task &Dialog"
         BEGIN
-            MENUITEM "I&nfo",                       ID_DEBUGTASKDIALOG_INFO
-            MENUITEM "&Warning",                    ID_DEBUGTASKDIALOG_WARNING
+            MENUITEM "I&nfo",                       ID_DEBUG_TASKDIALOG_INFO
+            MENUITEM "&Warning",                    ID_DEBUG_TASKDIALOG_WARNING
 
-            MENUITEM "&Error",                      ID_DEBUGTASKDIALOG_ERROR
+            MENUITEM "&Error",                      ID_DEBUG_TASKDIALOG_ERROR
         END
         MENUITEM SEPARATOR
-        MENUITEM "Show File URL in IE",         ID_DEBUGSHOWEMBEDDEDURL
+        MENUITEM "Show File URL in IE",         ID_DEBUG_SHOWEMBEDDEDURL
     END
 END
 
