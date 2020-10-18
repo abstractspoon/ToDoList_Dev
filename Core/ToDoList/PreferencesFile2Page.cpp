@@ -415,7 +415,7 @@ void CPreferencesFile2Page::OnOtherexport()
 
 CString CPreferencesFile2Page::GetSaveExportStylesheet() const 
 { 
-	if (m_bUseStylesheetForSaveExport && !m_sSaveExportStylesheet.IsEmpty())
+	if (!m_bOtherExport && m_bUseStylesheetForSaveExport && !m_sSaveExportStylesheet.IsEmpty())
 		return FileMisc::GetFullPath(m_sSaveExportStylesheet, FileMisc::GetAppResourceFolder() + _T("\\Stylesheets")); 
 
 	// else
