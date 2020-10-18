@@ -773,21 +773,6 @@ BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStyleMap& styles)
 	return FALSE;
 }
 
-DWORD CFilteredToDoCtrl::SetStyle(TDC_STYLE nStyle, BOOL bEnable)
-{
-	switch (nStyle)
-	{
-	case TDCS_DUEHAVEHIGHESTPRIORITY:
-	case TDCS_DONEHAVELOWESTPRIORITY:
-	case TDCS_ALWAYSHIDELISTPARENTS:
-	case TDCS_TREATSUBCOMPLETEDASDONE:
-		SetViewNeedsTaskUpdate(FTCV_TASKLIST);
-		break;
-	}
-
-	return CTabbedToDoCtrl::SetStyle(nStyle, bEnable);
-}
-
 void CFilteredToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 {
 	// See if we need to refilter

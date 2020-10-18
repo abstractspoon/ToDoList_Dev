@@ -24,9 +24,13 @@ public:
 	virtual ~CTDLTaskListCtrlOptionsComboBox();
 	
 	void BuildCombo();
+	void RemoveOptions(DWORD dwOptions);
 
 	static DWORD LoadOptions(const IPreferences* pPrefs, LPCTSTR szKey);
 	static void SaveOptions(DWORD dwOptions, IPreferences* pPrefs, LPCTSTR szKey);
+
+protected:
+	DWORD m_dwRemovedOptions;
 
 protected:
 // Overrides
@@ -45,6 +49,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	void AddOption(DWORD dwOption, UINT nOptionStrID);
 };
 
 /////////////////////////////////////////////////////////////////////////////

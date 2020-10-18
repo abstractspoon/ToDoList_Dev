@@ -109,8 +109,6 @@ protected:
 	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArray& aModTaskIDs) const;
 
 	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
-	virtual DWORD SetStyle(TDC_STYLE nStyle, BOOL bEnable);
-
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
 	virtual BOOL RemoveArchivedTask(DWORD dwTaskID);
 	virtual BOOL CopySelectedTasks() const;

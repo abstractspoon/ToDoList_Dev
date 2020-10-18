@@ -20,6 +20,8 @@ static char THIS_FILE[] = __FILE__;
 // CTDLTaskListOptionsComboBox
 
 CTDLTaskListCtrlOptionsComboBox::CTDLTaskListCtrlOptionsComboBox()
+	:
+	m_dwRemovedOptions(0)
 {
 }
 
@@ -59,12 +61,34 @@ void CTDLTaskListCtrlOptionsComboBox::BuildCombo()
 	// once only
 	if (!GetCount())
 	{
-		CDialogHelper::AddString(*this, IDS_LISTVIEW_HIDEPARENTS,			LVO_HIDEPARENTS);
-		CDialogHelper::AddString(*this, IDS_LISTVIEW_HIDECOLLAPSED,			LVO_HIDECOLLAPSED);
-		CDialogHelper::AddString(*this, IDS_LISTVIEW_HIDENOGROUPVALUE,		LVO_HIDENOGROUPVALUE);
-		CDialogHelper::AddString(*this, IDS_LISTVIEW_SORTGROUPSASCENDING,	LVO_SORTGROUPSASCENDING);
+		AddOption(LVO_HIDEPARENTS,			IDS_LISTVIEW_HIDEPARENTS);
+		AddOption(LVO_HIDECOLLAPSED,		IDS_LISTVIEW_HIDECOLLAPSED);
+		AddOption(LVO_HIDENOGROUPVALUE,		IDS_LISTVIEW_HIDENOGROUPVALUE);
+		AddOption(LVO_SORTGROUPSASCENDING,	IDS_LISTVIEW_SORTGROUPSASCENDING);
 
 		EnableTooltip();
+	}
+}
+
+void CTDLTaskListCtrlOptionsComboBox::AddOption(DWORD dwOption, UINT nOptionStrID)
+{
+	if (!Misc::HasFlag(m_dwRemovedOptions, dwOption))
+	{
+		CDialogHelper::AddString(*this, nOptionStrID, dwOption);
+	}
+}
+
+void CTDLTaskListCtrlOptionsComboBox::RemoveOptions(DWORD dwOptions)
+{
+	if (dwOptions != m_dwRemovedOptions)
+	{
+		m_dwRemovedOptions = dwOptions;
+		
+		if (GetSafeHwnd())
+		{
+			ResetContent();
+			BuildCombo();
+		}
 	}
 }
 

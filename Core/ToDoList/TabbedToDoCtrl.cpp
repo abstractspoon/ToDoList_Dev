@@ -280,6 +280,13 @@ void CTabbedToDoCtrl::OnListOptionsCheckChanged()
 		Misc::SetFlag(dwNewOptions, LVO_SORTGROUPSASCENDING, FALSE);
 	}
 
+	// Ignore LVO_HIDEPARENTS if TDCS_ALWAYSHIDELISTPARENTS is enabled
+	if (HasStyle(TDCS_ALWAYSHIDELISTPARENTS))
+	{
+		Misc::SetFlag(dwPrevOptions, LVO_HIDEPARENTS, FALSE);
+		Misc::SetFlag(dwNewOptions, LVO_HIDEPARENTS, FALSE);
+	}
+
 	if (dwNewOptions != dwPrevOptions)
 	{
 		RebuildList();
@@ -302,8 +309,30 @@ void CTabbedToDoCtrl::OnStylesUpdated(const CTDCStyleMap& styles)
 	// Bypass base class to only allow resort if in tree view
 	m_taskTree.OnStylesUpdated(styles, InTreeView());
 
-	// Only allow resort if in list view
-	m_taskList.OnStylesUpdated(styles, InListView());
+	// ListView
+	BOOL bListNeedsUpdate = styles.HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
+
+	if (bListNeedsUpdate)
+	{
+		BOOL bAlwaysHideListParents = HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
+		m_cbListOptions.RemoveOptions(bAlwaysHideListParents ? LVO_HIDEPARENTS : 0);
+
+		// No need to update list if we're turning this style on
+		// AND LVO_HIDEPARENTS is already enabled
+		if (bAlwaysHideListParents && HasListOption(LVO_HIDEPARENTS))
+			bListNeedsUpdate = FALSE;
+	}
+
+	// Only allow resort if in ListView AND NOT rebuilding
+	m_taskList.OnStylesUpdated(styles, InListView() && !bListNeedsUpdate);
+
+	if (bListNeedsUpdate)
+	{
+		if (InListView())
+			RebuildList();
+		else
+			SetViewNeedsTaskUpdate(FTCV_TASKLIST);
+	}
 }
 
 void CTabbedToDoCtrl::OnTaskIconsChanged()
@@ -3196,7 +3225,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy)
 
 	CDWordArray aTaskIDs;
 
-	BOOL bWantParents = !HasListOption(LVO_HIDEPARENTS);
+	BOOL bWantParents = !(HasListOption(LVO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS));
 	BOOL bWantCollapsed = !HasListOption(LVO_HIDECOLLAPSED);
 
 	TCH().GetItemData(aTaskIDs, bWantParents, bWantCollapsed);
