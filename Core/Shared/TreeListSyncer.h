@@ -330,7 +330,7 @@ private:
 	void BuildTreeListSortMap(HWND hwndTree, HWND hwndList, HTREEITEM hti, CSortMap& map, int& nIndex);
 	void SortTreeItem(HWND hwndTree, HTREEITEM hti, PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, BOOL bRecursive);
 	void BuildListListSortMap(HWND hwndPrimary, HWND hwndList, CSortMap& map);
-	void HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp);
+	BOOL HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp);
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static BOOL ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam);

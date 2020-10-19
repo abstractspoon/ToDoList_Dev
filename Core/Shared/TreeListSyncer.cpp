@@ -493,6 +493,10 @@ BOOL CTreeListSyncer::ResyncScrollPos(HWND hwnd, HWND hwndTo)
 	if (!CanResync())
 		return FALSE;
 
+	// Don't resync if the window is hidden
+	if (IsHiding(hwnd))
+		return FALSE;
+
 	CAutoFlag af(m_bResyncing, TRUE);
 	BOOL bSynced = FALSE;
 
@@ -2512,8 +2516,9 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		break;
 		
 	case WM_MOUSEWHEEL:
-		HandleMouseWheel(hRealWnd, wp, lp);
-		return 0L;
+		if (HandleMouseWheel(hRealWnd, wp, lp))
+			return 0L; // eat
+		break;
 		
 	case WM_NCPAINT:
 		if (m_bTreeExpanding && IsLeft(hRealWnd) && IsTree(hRealWnd))
@@ -2670,7 +2675,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	return lr;
 }
 
-void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
+BOOL CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 {
 	int zDelta = GET_WHEEL_DELTA_WPARAM(wp);
 	BOOL bUp = (zDelta > 0);
@@ -2679,29 +2684,55 @@ void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 	WORD wKeys = LOWORD(wp);
 
 	if (!nNumClicks || wKeys)
-		return;
+		return FALSE; // we handled it
 
 	if (!HasVScrollBar())
 	{
 		if (HasHScrollBar(hWnd) && CanScroll(hWnd, SB_HORZ, bUp))
 			ScDefault(hWnd);
 
-		return;
+		return TRUE; // we handled it
+	}
+	else if (!CanScroll(hWnd, SB_VERT, bUp))
+	{
+		return TRUE; // we handled it
 	}
 
-	if (!CanScroll(hWnd, SB_VERT, bUp))
-		return;
+	// Let windows handle this if the non-primary window
+	// is hidden because there's no syncing to do
+	HWND hwndOther = OtherWnd(PrimaryWnd());
+
+	if (IsHiding(hwndOther))
+		return FALSE;
 
 	HWND hwndTree = GetTree();
 
 	if (hwndTree)
 	{
+		// There's a very strange bug (probably caused somehow 
+		// by the following method) where during a long, smooth
+		// scroll, the scroll direction suddenly reverses.
+		// My investigations thus far reveal that when the 
+		// direction changes the zDelta value is NOT a multiple
+		// of 120, so for now I'm going to try ignoring such
+		// values and hope it doesn't break anything else
+		if ((zDelta % 120) != 0)
+			return TRUE; // we handled it
+		
+		// Increase the number of rows scrolled per click 
+		// for higher numbers of clicks which is what Windows
+		// also appears to do
+		const int MAX_CLICKS = 50;
+		int nTotalRows = (nNumClicks * 3);
+
+		int nNumRowsPerClick = max(8, (nTotalRows / MAX_CLICKS));
+		nNumClicks = ((nTotalRows / nNumRowsPerClick) + 1);
+
 		while (nNumClicks--)
 		{
 			HTREEITEM htiPrevFirstVis = TreeView_GetFirstVisible(hwndTree), htiFirstVis = htiPrevFirstVis;
 
-			// Scroll max 3 rows per click
-			for (int nRow = 0; nRow < 3; nRow++)
+			for (int nRow = 0; nRow < nNumRowsPerClick; nRow++)
 			{
 				HTREEITEM hti = TreeView_GetNextItem(hwndTree, htiFirstVis, (bUp ? TVGN_PREVIOUSVISIBLE : TVGN_NEXTVISIBLE));
 
@@ -2732,13 +2763,15 @@ void CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 		if (hWnd != Right())
 		{
 			::SendMessage(Right(), WM_MOUSEWHEEL, wp, lp);
-			return;
+			return TRUE; // we handled it
 		}
 
 		// else
 		ScDefault(hWnd);
 		ResyncScrollPos(OtherWnd(hWnd), hWnd);
 	}
+
+	return TRUE; // we handled it
 }
 
 BOOL CTreeListSyncer::CanScroll(HWND hWnd, int nScrollbar, BOOL bLeftUp)
