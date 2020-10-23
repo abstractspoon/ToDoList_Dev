@@ -543,6 +543,13 @@ BOOL CGanttItemMap::ItemIsReference(DWORD dwTaskID) const
 	return (pGI && pGI->dwOrgRefID);
 }
 
+BOOL CGanttItemMap::ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
+
+	return (pGI && pGI->IsDone(bIncGoodAs));
+}
+
 BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
 {
 	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);

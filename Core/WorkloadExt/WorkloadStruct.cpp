@@ -689,6 +689,13 @@ BOOL CWorkloadItemMap::ItemIsReference(DWORD dwTaskID) const
 	return (pWI && pWI->dwOrgRefID);
 }
 
+BOOL CWorkloadItemMap::ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const
+{
+	const WORKLOADITEM* pWI = GetItem(dwTaskID, TRUE);
+
+	return (pWI && pWI->IsDone(bIncGoodAs));
+}
+
 BOOL CWorkloadItemMap::RemoveItem(DWORD dwTaskID)
 {
 	WORKLOADITEM* pWI = NULL;

@@ -1995,23 +1995,9 @@ BOOL CWorkloadCtrl::OnTreeCheckChange(HTREEITEM hti)
 	if (!m_bReadOnly)
 	{
 		DWORD dwTaskID = GetTaskID(hti);
-		WORKLOADITEM* pWI = GetWorkloadItem(dwTaskID);
-		ASSERT(pWI);
-
-		if (pWI)
-		{
-			BOOL bSetDone = !pWI->IsDone(FALSE);
-
-			if (CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), bSetDone))
-			{
-				// If the app hasn't already updated this for us we must do it ourselves
-				if (pWI->IsDone(FALSE) != bSetDone)
-				{
-					pWI->bDone = bSetDone;
-					m_tree.Invalidate(FALSE);
-				}
-			}
-		}
+		BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
+	
+		CWnd::GetParent()->SendMessage(WM_WLCN_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
 	}
 
 	return TRUE; // always

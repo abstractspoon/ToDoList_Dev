@@ -2251,27 +2251,9 @@ BOOL CGanttCtrl::OnTreeCheckChange(HTREEITEM hti)
 		return FALSE;
 
 	DWORD dwTaskID = GetTaskID(hti);
-	GANTTITEM* pGI = GetGanttItem(dwTaskID);
-	ASSERT(pGI);
+	BOOL bSetDone = !m_data.ItemIsDone(dwTaskID, FALSE);
 
-	if (pGI)
-	{
-		BOOL bSetDone = !pGI->IsDone(FALSE);
-
-		if (CWnd::GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)m_tree.GetSafeHwnd(), bSetDone))
-		{
-			// If the app hasn't already updated this for us we must do it ourselves
-			if (pGI->IsDone(FALSE) != bSetDone)
-			{
-				if (bSetDone)
-					pGI->dtDone = COleDateTime::GetCurrentTime();
-				else
-					CDateHelper::ClearDate(pGI->dtDone);
-
-				m_tree.Invalidate(FALSE);
-			}
-		}
-	}
+	CWnd::GetParent()->SendMessage(WM_GTLC_COMPLETIONCHANGE, (WPARAM)(HWND)m_tree, bSetDone);
 
 	return TRUE; // always
 }

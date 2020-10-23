@@ -183,8 +183,10 @@ public:
 	BOOL HasItem(DWORD dwKey) const;
 	WORKLOADITEM* GetItem(DWORD dwKey, BOOL bResolveReferences) const;
 	WORKLOADITEM* GetNextItem(POSITION& pos) const;
+
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;
+	BOOL ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 
 	void CalculateTotals(const COleDateTimeRange& dtPeriod,
 						CMapAllocationTotals& mapTotalDays, 

@@ -1919,7 +1919,7 @@ void CKanbanCtrl::RebuildColumnsData(const CKanbanItemArrayMap& mapKIArray)
 		// omitted in Dynamic columns so we recheck and delete if required
 		if (UsingDynamicColumns())
 		{
-			if ((bHideParents | bHideSubtasks) && !WantShowColumn(pCol))
+			if ((bHideParents || bHideSubtasks) && !WantShowColumn(pCol))
 			{
 				DeleteColumn(nCol);
 			}
@@ -3396,30 +3396,7 @@ LRESULT CKanbanCtrl::OnColumnEditTaskDone(WPARAM /*wp*/, LPARAM lp)
 
 	if (lr)
 	{
-		// If the app hasn't updated the completion state
-		// we must do it ourselves
-		while (nID--)
-		{
-			DWORD dwTaskID = aTaskIDs[nID];
-			KANBANITEM* pKI = m_data.GetItem(dwTaskID);
-
-			if (pKI && !pKI->bLocked)
-			{
-				if (lp && !pKI->bDone)
-				{
-					pKI->bDone = TRUE;
-					pKI->dtDone = COleDateTime::GetCurrentTime();
-				}
-				else if (!lp && pKI->bDone)
-				{
-					pKI->bDone = FALSE;
-					CDateHelper::ClearDate(pKI->dtDone);
-				}
-
-				if (m_pSelectedColumn)
-					m_pSelectedColumn->RefreshItemLineHeights(dwTaskID);
-			}
-		}
+		ASSERT(m_pSelectedColumn);
 
 		if (m_pSelectedColumn)
 			m_pSelectedColumn->Invalidate(FALSE);

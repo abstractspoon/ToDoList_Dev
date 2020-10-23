@@ -1214,21 +1214,7 @@ namespace MindMapUIExtension
                 if (HitTestCheckbox(node, e.Location))
                 {
 					if (EditTaskDone != null)
-					{
-						bool setDone = !taskItem.IsDone(false);
-
-						if (EditTaskDone(this, taskItem.ID, setDone))
-						{
-							// If the app hasn't already updated this for us we must do it ourselves
-							if (taskItem.IsDone(false) != setDone)
-							{
-								taskItem.SetDone(setDone);
-
-								RefreshItemFont(node, false);
-								RedrawNode(node);
-							}
-						}
-					}
+						EditTaskDone(this, taskItem.ID, !taskItem.IsDone(false));
 				}
                 else if (HitTestIcon(node, e.Location))
                 {
