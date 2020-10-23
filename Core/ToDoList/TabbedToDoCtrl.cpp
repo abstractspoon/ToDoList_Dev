@@ -1162,9 +1162,18 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 
 	// Globals
 	if (mapAttrib.IsEmpty())
+	{
 		AddGlobalsToTaskFile(tasks, TDCA_ALL);
+	}
+	else if (mapAttrib.Has(TDCA_NEWTASK))
+	{
+		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK));
+		AddGlobalsToTaskFile(tasks, TDCA_ALL);
+	}
 	else
+	{
 		AddGlobalsToTaskFile(tasks, mapAttrib);
+	}
 
 	return tasks.GetTaskCount();
 }
@@ -4041,8 +4050,9 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 		// if this update has come about as a consequence
 		// of this extension window modifying the specified
 		// attribute, then we assume that it won't want the update
-		// We exclude toggling completion because that can end
-		// up also completing children
+		// We exclude task completion because that can end
+		// up also completing children and in the case of reusable
+		// recurring tasks it can result in uncompleted tasks
 		if (m_nExtModifyingAttrib != TDCA_DONEDATE)
 		{
 			if (AttributeMatchesExtensionMod(nAttrib))
