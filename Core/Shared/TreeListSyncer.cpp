@@ -2723,16 +2723,21 @@ BOOL CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
 		// for higher numbers of clicks which is what Windows
 		// also appears to do
 		const int MAX_CLICKS = 50;
-		int nTotalRows = (nNumClicks * 3);
+		const int MAX_ROWS_PER_CLICK = 8;
 
-		int nNumRowsPerClick = max(8, (nTotalRows / MAX_CLICKS));
-		nNumClicks = ((nTotalRows / nNumRowsPerClick) + 1);
+		int nRowsPerClick = 3, nTotalRows = (nNumClicks * nRowsPerClick);
+
+		while ((nNumClicks > MAX_CLICKS) && (nRowsPerClick < MAX_ROWS_PER_CLICK))
+		{
+			nRowsPerClick++;
+			nNumClicks = ((nTotalRows / nRowsPerClick) + 1);
+		}
 
 		while (nNumClicks--)
 		{
 			HTREEITEM htiPrevFirstVis = TreeView_GetFirstVisible(hwndTree), htiFirstVis = htiPrevFirstVis;
 
-			for (int nRow = 0; nRow < nNumRowsPerClick; nRow++)
+			for (int nRow = 0; nRow < nRowsPerClick; nRow++)
 			{
 				HTREEITEM hti = TreeView_GetNextItem(hwndTree, htiFirstVis, (bUp ? TVGN_PREVIOUSVISIBLE : TVGN_NEXTVISIBLE));
 
