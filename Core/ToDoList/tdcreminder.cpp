@@ -93,7 +93,7 @@ CString TDCREMINDER::FormatWhenString() const
 {
 	ASSERT(pTDC);
 
-	CString sWhen;
+	CEnString sWhen;
 
 	if (pTDC && bRelative)
 	{
