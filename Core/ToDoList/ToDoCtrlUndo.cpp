@@ -188,6 +188,8 @@ BOOL CToDoCtrlUndo::ExtendLastAction(TDC_UNDOACTIONTYPE nType)
 	}
 
 	m_nActiveAction = nType;
+	LastUndoAction().nType = nType;
+
 	return TRUE;
 }
 
