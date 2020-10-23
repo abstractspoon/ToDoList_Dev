@@ -86,8 +86,7 @@ namespace MSDN.Html.Editor
         /// </summary>
         private void LoadFonts()
         {
-            // suspend drawing
-            this.listFontName.SuspendLayout();
+			this.listFontName.BeginUpdate();
 
             // load the installed fonts and iterate through the collections
             InstalledFontCollection fonts = new InstalledFontCollection();
@@ -100,10 +99,8 @@ namespace MSDN.Html.Editor
                 }
             }
 
-            // define the selected item and resume drawing
             this.listFontName.SelectedIndex = 0;
-            this.listFontName.ResumeLayout();
-
+            this.listFontName.EndUpdate();
         } //LoadFonts
 
 
