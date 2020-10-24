@@ -754,23 +754,22 @@ void CFilteredToDoCtrl::RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgres
 	}
 }
 
-BOOL CFilteredToDoCtrl::ModifyStyles(const CTDCStyleMap& styles)
+void CFilteredToDoCtrl::OnStylesUpdated(const CTDCStyleMap& styles)
 {
-	if (CTabbedToDoCtrl::ModifyStyles(styles))
+	// If we're going to refilter anyway we ignore our
+	// base class's possible update of the listview in
+	// response to TDCS_ALWAYSHIDELISTPARENTS changing
+	BOOL bNeedRefilter = StyleChangesNeedRefilter(styles);
+
 	{
-		// do we need to re-filter?
-		if (HasAnyFilter() && GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate)
-		{
-			RefreshTreeFilter(); // always
+		ASSERT(!m_bIgnoreListRebuild);
+		CAutoFlag af(m_bIgnoreListRebuild, bNeedRefilter);
 
-			if (InListView())
-				RebuildList();
-		}
-
-		return TRUE;
+		CTabbedToDoCtrl::OnStylesUpdated(styles);
 	}
-
-	return FALSE;
+	
+	if (bNeedRefilter)
+		RefreshFilter();
 }
 
 void CFilteredToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
@@ -943,6 +942,92 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArra
 	}
 
 	return bNeedRefilter;
+}
+
+BOOL CFilteredToDoCtrl::StyleChangesNeedRefilter(const CTDCStyleMap& styles) const
+{
+	// sanity check
+	if (!HasAnyFilter())
+		return FALSE;
+
+	CTDCAttributeMap mapAttribAffected;
+	POSITION pos = styles.GetStartPosition();
+
+	while (pos)
+	{
+		switch (styles.GetNext(pos))
+		{
+		case TDCS_NODUEDATEISDUETODAYORSTART:
+		case TDCS_USEEARLIESTDUEDATE:
+		case TDCS_USELATESTDUEDATE:
+			mapAttribAffected.Add(TDCA_DUEDATE);
+			break;
+
+		case TDCS_USEEARLIESTSTARTDATE:
+		case TDCS_USELATESTSTARTDATE:
+			mapAttribAffected.Add(TDCA_STARTDATE);
+			break;
+
+		case TDCS_CALCREMAININGTIMEBYDUEDATE:
+		case TDCS_CALCREMAININGTIMEBYSPENT:
+		case TDCS_CALCREMAININGTIMEBYPERCENT:
+			// Not supported
+			break;
+
+		case TDCS_DUEHAVEHIGHESTPRIORITY:
+		case TDCS_DONEHAVELOWESTPRIORITY:
+		case TDCS_USEHIGHESTPRIORITY:
+		case TDCS_INCLUDEDONEINPRIORITYCALC:
+			mapAttribAffected.Add(TDCA_PRIORITY);
+			break;
+
+		case TDCS_DONEHAVELOWESTRISK:
+		case TDCS_USEHIGHESTRISK:
+		case TDCS_INCLUDEDONEINRISKCALC:
+			mapAttribAffected.Add(TDCA_RISK);
+			break;
+
+		case TDCS_TREATSUBCOMPLETEDASDONE:
+			{
+				mapAttribAffected.Add(TDCA_DONEDATE);
+
+				if (styles.HasStyle(TDCS_DONEHAVELOWESTPRIORITY) || 
+					styles.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC))
+				{
+					mapAttribAffected.Add(TDCA_PRIORITY);
+				}
+
+				if (styles.HasStyle(TDCS_DONEHAVELOWESTRISK) ||
+					styles.HasStyle(TDCS_INCLUDEDONEINRISKCALC))
+				{
+					mapAttribAffected.Add(TDCA_PRIORITY);
+				}
+
+				if (styles.HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
+				{
+					mapAttribAffected.Add(TDCA_PERCENT);
+				}
+			}
+			break;
+
+		case TDCS_USEPERCENTDONEINTIMEEST:
+			mapAttribAffected.Add(TDCA_TIMEEST);
+			break;
+
+		case TDCS_INCLUDEDONEINAVERAGECALC:
+		case TDCS_WEIGHTPERCENTCALCBYNUMSUB:
+		case TDCS_AVERAGEPERCENTSUBCOMPLETION:
+		case TDCS_AUTOCALCPERCENTDONE:
+			mapAttribAffected.Add(TDCA_PERCENT);
+			break;
+
+		case TDCS_HIDESTARTDUEFORDONETASKS:
+			//mapAttribAffected.Add(TDCA_);
+			break;
+		}
+	}
+	
+	return ModsNeedRefilter(mapAttribAffected, CDWordArray());
 }
 
 void CFilteredToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)

@@ -314,17 +314,19 @@ void CTabbedToDoCtrl::OnStylesUpdated(const CTDCStyleMap& styles)
 
 	if (bListNeedsUpdate)
 	{
-		BOOL bAlwaysHideListParents = HasStyle(TDCS_ALWAYSHIDELISTPARENTS);
-		m_cbListOptions.RemoveOptions(bAlwaysHideListParents ? LVO_HIDEPARENTS : 0);
+		// Remove or restore 'List View' combo option 
+		if (HasStyle(TDCS_ALWAYSHIDELISTPARENTS))
+			m_cbListOptions.RemoveOptions(LVO_HIDEPARENTS);
+		else
+			m_cbListOptions.RemoveOptions(0);
 
-		// No need to update list if we're turning this style on
-		// AND LVO_HIDEPARENTS is already enabled
-		if (bAlwaysHideListParents && HasListOption(LVO_HIDEPARENTS))
+		// This style change has NO effect if LVO_HIDEPARENTS is enabled
+		if (HasListOption(LVO_HIDEPARENTS))
 			bListNeedsUpdate = FALSE;
 	}
 
 	// Only allow resort if in ListView AND NOT rebuilding
-	m_taskList.OnStylesUpdated(styles, InListView() && !bListNeedsUpdate);
+	m_taskList.OnStylesUpdated(styles, (InListView() && !bListNeedsUpdate));
 
 	if (bListNeedsUpdate)
 	{

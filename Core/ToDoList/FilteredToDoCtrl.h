@@ -63,7 +63,6 @@ public:
 	int GetFilteredTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 
-	BOOL ModifyStyles(const CTDCStyleMap& styles);
 	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle = TRUE);
 	void SetModified(BOOL bMod = TRUE) { CTabbedToDoCtrl::SetModified(bMod); }
 	void SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
@@ -106,8 +105,8 @@ protected:
 
 protected:
 	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs) const;
-	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArray& aModTaskIDs) const;
 	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs) const;
+	BOOL StyleChangesNeedRefilter(const CTDCStyleMap& styles) const;
 
 	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual BOOL LoadTasks(const CTaskFile& tasks);
@@ -118,6 +117,7 @@ protected:
 	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE);
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
+	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 
 	void SaveSettings() const;
 	void LoadSettings();
