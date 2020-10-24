@@ -233,6 +233,21 @@ public:
 
 		return CMap<TDC_STYLE, TDC_STYLE, BOOL, BOOL&>::operator[](nStyle);
 	}
+
+	TDC_STYLE GetNext(POSITION& pos) const
+	{
+		if (pos == NULL)
+		{
+			ASSERT(0);
+			return TDCS_LAST;
+		}
+
+		TDC_STYLE nStyle;
+		BOOL bUnused;
+		GetNextAssoc(pos, nStyle, bUnused);
+
+		return nStyle;
+	}
 	
 protected:
 	BOOL IsValidStyle(TDC_STYLE nStyle) const
