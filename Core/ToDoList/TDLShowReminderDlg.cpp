@@ -188,17 +188,13 @@ BOOL CTDLShowReminderDlg::AddListReminder(const TDCREMINDER& rem)
 
 	if (bNewReminder)
 	{
-		CString sTask(rem.GetTaskTitle()), sParent(rem.GetParentTitle());
-		sTask.Replace(_T("&"), _T("&&"));
-		sParent.Replace(_T("&"), _T("&&"));
-		
-		nItem = m_lcReminders.InsertItem(0, sTask);
+		nItem = m_lcReminders.InsertItem(0, rem.GetTaskTitle());
 		ASSERT(nItem != -1);
 
 		if (nItem == -1)
 			return FALSE;
 
-		m_lcReminders.SetItemText(nItem, TASKPARENT_COL, sParent);
+		m_lcReminders.SetItemText(nItem, TASKPARENT_COL, rem.GetParentTitle());
 		m_lcReminders.SetItemText(nItem, TASKLIST_COL, rem.GetTaskListName());
 		m_lcReminders.SetItemData(nItem, m_dwNextReminderID);
 
@@ -335,9 +331,14 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 			DoSnoozeReminder(aRem[nRem]);
 	}
 
+	if (m_lcReminders.GetItemCount())
+	{
+		m_lcReminders.SetFocus();
+		m_lcReminders.SetItemState(0, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
+	}
+
 	UpdateControls();
 }
-
 
 void CTDLShowReminderDlg::OnSnoozeAll() 
 {
