@@ -107,6 +107,7 @@ protected:
 protected:
 	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs) const;
 	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArray& aModTaskIDs) const;
+	BOOL ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs) const;
 
 	virtual void SetModified(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	virtual BOOL LoadTasks(const CTaskFile& tasks);

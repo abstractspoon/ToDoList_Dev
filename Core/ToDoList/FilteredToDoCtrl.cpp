@@ -871,10 +871,10 @@ BOOL CFilteredToDoCtrl::ModsNeedRefilter(const CTDCAttributeMap& mapAttribIDs, c
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArray& aModTaskIDs) const
+BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nAttrib, const CDWordArray& aModTaskIDs) const
 {
 	// sanity checks
-	if ((nModType == TDCA_NONE) || !HasStyle(TDCS_REFILTERONMODIFY))
+	if ((nAttrib == TDCA_NONE) || !HasStyle(TDCS_REFILTERONMODIFY))
 		return FALSE;
 
 	if (!m_filter.HasAnyFilter())
@@ -882,12 +882,12 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArr
 
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
-	BOOL bNeedFullTaskUpdate = m_filter.ModNeedsRefilter(nModType, m_aCustomAttribDefs);
+	BOOL bNeedRefilter = m_filter.ModNeedsRefilter(nAttrib, m_aCustomAttribDefs);
 
-	if (!bNeedFullTaskUpdate)
+	if (!bNeedRefilter)
 	{
 		// 'Other' attributes
-		switch (nModType)
+		switch (nAttrib)
 		{
 		case TDCA_NEWTASK: // handled in CreateNewTask
 		case TDCA_DELETE:
@@ -901,10 +901,6 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArr
 		case TDCA_PASTE:
 		case TDCA_MERGE:
 			return TRUE;
-
-		default:
-			ASSERT(0);
-			break;
 		}
 	}
 	else if (aModTaskIDs.GetSize() == 1)
@@ -919,7 +915,7 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArr
 			if (m_taskTree.GetItem(dwModTaskID) == NULL)
 			{
 				ASSERT(HasTask(dwModTaskID));
-				ASSERT(nModType == TDCA_TIMESPENT);
+				ASSERT(nAttrib == TDCA_TIMESPENT);
 
 				return FALSE;
 			}
@@ -936,17 +932,17 @@ BOOL CFilteredToDoCtrl::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CDWordArr
 		BOOL bMatchesFilter = m_matcher.TaskMatches(dwModTaskID, params, result, FALSE);
 		BOOL bTreeHasItem = (m_taskTree.GetItem(dwModTaskID) != NULL);
 
-		bNeedFullTaskUpdate = ((bMatchesFilter && !bTreeHasItem) || (!bMatchesFilter && bTreeHasItem));
+		bNeedRefilter = ((bMatchesFilter && !bTreeHasItem) || (!bMatchesFilter && bTreeHasItem));
 		
 		// extra handling for 'Find Tasks' filters 
-		if (bNeedFullTaskUpdate && HasAdvancedFilter())
+		if (bNeedRefilter && HasAdvancedFilter())
 		{
 			// don't refilter on Time Spent if time tracking
-			bNeedFullTaskUpdate = !(nModType == TDCA_TIMESPENT && IsActivelyTimeTracking());
+			bNeedRefilter = !(nAttrib == TDCA_TIMESPENT && IsActivelyTimeTracking());
 		}
 	}
 
-	return bNeedFullTaskUpdate;
+	return bNeedRefilter;
 }
 
 void CFilteredToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
