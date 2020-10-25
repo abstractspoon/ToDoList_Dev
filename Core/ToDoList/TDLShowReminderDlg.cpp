@@ -323,7 +323,8 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 
 	CTDCReminderArray aRem;
 
-	if ((bAll && GetVisibleReminders(aRem)) || (!bAll && GetSelectedReminders(aRem)))
+	if ((bAll && GetVisibleReminders(aRem)) || 
+		(!bAll && GetSelectedReminders(aRem)))
 	{
 		CAutoFlag af(m_bChangingReminders, TRUE);
 
@@ -331,13 +332,17 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 			DoSnoozeReminder(aRem[nRem]);
 	}
 
+	UpdateControls();
+	RestoreFocusToList();
+}
+
+void CTDLShowReminderDlg::RestoreFocusToList()
+{
 	if (m_lcReminders.GetItemCount())
 	{
 		m_lcReminders.SetFocus();
 		m_lcReminders.SetItemState(0, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
 	}
-
-	UpdateControls();
 }
 
 void CTDLShowReminderDlg::OnSnoozeAll() 
@@ -440,12 +445,12 @@ void CTDLShowReminderDlg::OnDismissAndGototask()
 	ASSERT(m_lcReminders.GetSelectedCount() == 1);
 
 	TDCREMINDER rem;
-	int nSel = GetSelectedReminder(rem);
 
-	if (nSel != -1)
+	if (GetSelectedReminder(rem) != -1)
 		DoDismissReminder(rem, TRUE);	
 
 	UpdateControls();
+	RestoreFocusToList();
 }
 
 void CTDLShowReminderDlg::OnDismiss() 
@@ -463,6 +468,7 @@ void CTDLShowReminderDlg::OnDismiss()
 	}
 
 	UpdateControls();
+	RestoreFocusToList();
 }
 
 void CTDLShowReminderDlg::OnOK()

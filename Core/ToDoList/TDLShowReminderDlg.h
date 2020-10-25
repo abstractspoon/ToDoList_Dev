@@ -108,6 +108,7 @@ protected:
 	void UpdateTitleText();
 	void UpdateColumnWidths();
 	void SnoozeReminders(BOOL bAll);
+	void RestoreFocusToList();
 };
 
 //{{AFX_INSERT_LOCATION}}
