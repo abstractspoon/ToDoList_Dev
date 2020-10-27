@@ -460,10 +460,10 @@ namespace HTMLContentControl
 		{
 			if (m_CurrentHRef != null)
 			{
-				var element = m_CurrentHRef; // for selecting after
+				var href = m_CurrentHRef; // for selecting after
                 m_CurrentHRef = null;
 
-                String url = GetElementUrl(element);
+                String url = GetElementUrl(href);
 
 				if (!String.IsNullOrEmpty(url))
 				{
@@ -475,15 +475,14 @@ namespace HTMLContentControl
                     if (!checkUrl.Equals(url))
 						return;
 
-					if (HtmlNavigation != null)
-					{
-						HtmlNavigation(this, new MSDN.Html.Editor.HtmlNavigationEventArgs(url));
-					}
-				}
+					// Must select the element before passing on the 
+					// URL in case the URL navigation causes the content 
+					// to be pulled out from under us (ie. a task link)
+					if (IsEditable && e.CtrlKeyPressed)
+						SelectElement(href);
 
-				// See above
-				if (IsEditable && e.CtrlKeyPressed)
-					SelectElement(element);
+					HtmlNavigation?.Invoke(this, new MSDN.Html.Editor.HtmlNavigationEventArgs(url));
+				}
 			}
 		}
 
