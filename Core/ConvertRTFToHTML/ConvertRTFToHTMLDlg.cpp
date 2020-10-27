@@ -181,6 +181,9 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 		if (pTDI->cfComments.CompareNoCase(RTF_TYPEID) == 0)
 		{
+			HTASKITEM hTask = tasksOut.FindTask(dwTaskID);
+			ASSERT(hTask);
+
 			CBinaryData content(pTDI->customComments);
 			const unsigned char* pContent = content.Get();
 			int nLength = content.GetLength();
@@ -209,22 +212,23 @@ void CConvertRTFToHTMLDlg::OnOK()
 				}
 			}
 
+			CString sHtml;
+
 			if (nLength)
 			{
 				rtfHtml.SetAllowUseOfMSWord(m_bUseMSWordForConversion);
 
-				CString sHtml;
-
 				if (rtfHtml.ConvertRtfToHtml((const char*)pContent, tasksOut.GetHtmlCharSet(), sHtml, sImageFolder))
 				{
-					HTASKITEM hTask = tasksOut.FindTask(dwTaskID);
-					ASSERT(hTask);
-
 					PostProcessHtml(pTDI->sComments, sHtml);
-
-					tasksOut.SetTaskCustomComments(hTask, CBinaryData(sHtml), HTML_GUID);
+				}
+				else
+				{
+					sHtml.Empty();
 				}
 			}
+
+			tasksOut.SetTaskCustomComments(hTask, CBinaryData(sHtml), HTML_GUID);
 
 			// cleanup
 			delete [] pDecompressed;
