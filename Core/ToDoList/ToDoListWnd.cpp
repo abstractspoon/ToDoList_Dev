@@ -7196,9 +7196,11 @@ void CToDoListWnd::OnUserTool(UINT nCmdID)
 				if (!startup.HasFilePath() || HasTaskFile(startup))
 				{
 					VERIFY(ProcessStartupOptions(startup, FALSE));
-					return;
 				}
 			}
+
+			// else user cancelled
+			return;
 		}
 
 		// All else

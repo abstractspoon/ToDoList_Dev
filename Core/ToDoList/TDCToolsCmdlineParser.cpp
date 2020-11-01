@@ -387,7 +387,7 @@ void CTDCToolsCmdlineParser::ParseCmdLine()
 							{
 								CString sUnused;
 								
-								if (Misc::Split(sAttribSwitch, sUnused, '$'))
+								if (Misc::Split(sAttribSwitch, sUnused, ' '))
 									cla.sRelatedSwitch = Misc::Trim(sAttribSwitch);
 							}
 						}
