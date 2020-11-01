@@ -341,6 +341,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 			
 		case TDCA_CREATIONDATE:
+			// ignore time
 			bMatch = ValueMatches(pTDI->dateCreated, rule, resTask, FALSE, TDCD_CREATE);
 			break;
 			
@@ -401,12 +402,14 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			}
 			else
 			{
-				bMatch = ValueMatches(pTDI->dateDone, rule, resTask, TRUE, TDCD_DONE);
+				// ignore time
+				bMatch = ValueMatches(pTDI->dateDone, rule, resTask, FALSE, TDCD_DONE);
 			}
 			break;
 			
 		case TDCA_LASTMODDATE:
-			bMatch = ValueMatches(m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), rule, resTask, TRUE, TDCD_LASTMOD);
+			// ignore time
+			bMatch = ValueMatches(m_calculator.GetTaskLastModifiedDate(pTDI, pTDS), rule, resTask, FALSE, TDCD_LASTMOD);
 			break;
 			
 		case TDCA_LASTMODBY:
