@@ -682,11 +682,31 @@ BOOL CEnMenu::EnsureUniqueAccelerators(HMENU hMenu)
 	ASSERT(::IsMenu(hMenu));
 
 	CStringArray aItems;
+	int nNumItems = GetMenuStrings(hMenu, aItems), nItem;
 
-	if (GetMenuStrings(hMenu, aItems))
+	if (nNumItems)
 	{
+		// Split off the keyboard shortcuts
+		CStringArray aShortcuts;
+		aShortcuts.SetSize(nNumItems);
+
+		for (nItem = 0; nItem < nNumItems; nItem++)
+			Misc::Split(aItems[nItem], aShortcuts[nItem], '\t');
+		
+		// Fixup the accelerators
 		CAcceleratorString::EnsureUniqueAccelerators(aItems);
 
+		// Restore the shortcuts
+		for (nItem = 0; nItem < nNumItems; nItem++)
+		{
+			if (!aShortcuts[nItem].IsEmpty())
+			{
+				aItems[nItem] += '\t';
+				aItems[nItem] += aShortcuts[nItem];
+			}
+		}
+
+		// update the menu
 		return SetMenuStrings(hMenu, aItems);
 	}
 

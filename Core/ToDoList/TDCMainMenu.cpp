@@ -461,7 +461,7 @@ BOOL CTDCMainMenu::HandlePostTranslateMenu(HMENU hMenu) const
 
 	if (pSortMenu && (hMenu == pSortMenu->GetSafeHmenu()))
 	{
-		CEnMenu::SortMenuStrings(hMenu, ID_SORTBY_ALLCOLUMNS_FIRST, ID_SORTBY_ALLCOLUMNS_LAST);
+		CEnMenu::SortMenuStrings(hMenu, ID_SORTBY_DEFAULTCOLUMNS_FIRST, ID_SORTBY_CUSTOMCOLUMN_LAST);
 		return TRUE;
 	}
 
