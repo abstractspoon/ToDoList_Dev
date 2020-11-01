@@ -51,18 +51,18 @@ public:
 	BOOL GetWantFilteredTasks() const { return m_nWhatTasks == TSDT_FILTERED; }
 	BOOL GetWantSelectedTasks() const { return m_nWhatTasks == TSDT_SELECTED; }
 
-	BOOL GetWantSelectedSubtasks() const { return GetWantSelectedTasks() && m_bSelectedSubtasks; }
-	BOOL GetWantSelectedParentTask() const { return GetWantSelectedTasks() && m_bSelectedParentTask; }
-	BOOL GetWantCompletedTasks() const { return m_bCompletedTasks; }
-	BOOL GetWantIncompleteTasks() const { return m_bIncompleteTasks; }
+	BOOL GetWantSelectedSubtasks() const;
+	BOOL GetWantSelectedParentTask() const;
+	BOOL GetWantCompletedTasksOnly() const;
+	BOOL GetWantIncompleteTasksOnly() const;
 
 	TSD_ATTRIB GetAttributeOption() const { return (TSD_ATTRIB)m_nAttribOption; }
 	int GetSelectedAttributes(const CToDoCtrl& tdc, CTDCAttributeMap& mapAttrib) const;
 	BOOL GetWantCommentsWithVisible() const { return m_bIncludeComments; }
 
 	void SetWantWhatTasks(TSD_TASKS nWhat);
-	void SetWantCompletedTasks(BOOL bWant = TRUE);
-	void SetWantInCompleteTasks(BOOL bWant = TRUE);
+//	void SetWantCompletedTasks(BOOL bWant = TRUE);
+//	void SetWantInCompleteTasks(BOOL bWant = TRUE);
 
 protected:
 // Dialog Data

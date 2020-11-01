@@ -10142,33 +10142,37 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
 							const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
 {
-	TDC_GETTASKS nFilter = TDCGT_ALL;
-	
-	// build filter
-	if (taskSel.GetWantCompletedTasks() && !taskSel.GetWantIncompleteTasks())
-	{
-		nFilter = TDCGT_DONE;
-	}
-	else if (!taskSel.GetWantCompletedTasks() && taskSel.GetWantIncompleteTasks())
-	{
-		nFilter = TDCGT_NOTDONE;
-	}
-		
-	TDCGETTASKS filter(nFilter);
+	TDCGETTASKS filter(TDCGT_ALL);
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
-	
+
 	TSD_TASKS nWhatTasks = taskSel.GetWantWhatTasks();
 
-	if (nWhatTasks == TSDT_SELECTED)
+	switch (nWhatTasks)
 	{
+	case TSDT_SELECTED:
 		if (!taskSel.GetWantSelectedSubtasks())
+		{
 			filter.dwFlags |= TDCGSTF_NOTSUBTASKS;
+		}
 
 		if (taskSel.GetWantSelectedParentTask())
+		{
 			filter.dwFlags |= TDCGSTF_IMMEDIATEPARENT;
-	}
+		}
+		break;
 
-	// get the tasks
+	default:
+		if (taskSel.GetWantCompletedTasksOnly())
+		{
+			filter.nFilter = TDCGT_DONE;
+		}
+		else if (taskSel.GetWantIncompleteTasksOnly())
+		{
+			filter.nFilter = TDCGT_NOTDONE;
+		}
+		break;
+	}
+	
 	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, tasks, szHtmlImageDir);
 }
 
@@ -12526,8 +12530,10 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		}
 
 		// get tasks
+		const CTaskSelectionDlg& taskSel = dialog.GetTaskSelection();
+
 		CTaskFile tasks;
-		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
+		GetTasks(tdc, bHtmlComments, FALSE, taskSel, tasks, sImgFolder);
 
 		// Export them
 		if (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE) != IIER_SUCCESS)
@@ -12571,7 +12577,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		CString sTo = Misc::FormatArray(aTo, _T(";"));
 
 		// prefix with task name if necessary
-		if (dialog.GetTaskSelection().GetWantSelectedTasks() && tdc.GetSelectedCount() == 1)
+		if (taskSel.GetWantSelectedTasks() && (tdc.GetSelectedCount() == 1))
 		{
 			sSubject = tdc.GetSelectedTaskTitle() + _T(" - ") + sSubject;
 		}

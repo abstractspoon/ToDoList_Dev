@@ -298,30 +298,6 @@ void CTaskSelectionDlg::SetWantWhatTasks(TSD_TASKS nWhat)
 	}
 }
 
-void CTaskSelectionDlg::SetWantCompletedTasks(BOOL bWant)
-{
-	// prevent the user unchecking both tick boxes
-	if (!bWant && !m_bIncompleteTasks)
-		m_bIncompleteTasks = TRUE;
-	
-	m_bCompletedTasks = bWant;
-
-	if (GetSafeHwnd())
-		UpdateData(FALSE);
-}
-
-void CTaskSelectionDlg::SetWantInCompleteTasks(BOOL bWant)
-{
-	// prevent the user unchecking both tick boxes
-	if (!bWant && !m_bCompletedTasks)
-		m_bCompletedTasks = TRUE;
-	
-	m_bIncompleteTasks = bWant;
-
-	if (GetSafeHwnd())
-		UpdateData(FALSE);
-}
-
 void CTaskSelectionDlg::OnChangeAttribOption() 
 {
 	UpdateData();
@@ -374,4 +350,24 @@ void CTaskSelectionDlg::OnEnable(BOOL bEnable)
 
 	if (bEnable)
 		UpdateEnableStates();
+}
+
+BOOL CTaskSelectionDlg::GetWantSelectedSubtasks() const
+{
+	return (GetWantSelectedTasks() && m_bSelectedSubtasks);
+}
+
+BOOL CTaskSelectionDlg::GetWantSelectedParentTask() const
+{
+	return (GetWantSelectedTasks() && m_bSelectedParentTask);
+}
+
+BOOL CTaskSelectionDlg::GetWantCompletedTasksOnly() const
+{
+	return (!GetWantSelectedTasks() && m_bCompletedTasks && !m_bIncompleteTasks);
+}
+
+BOOL CTaskSelectionDlg::GetWantIncompleteTasksOnly() const
+{
+	return (!GetWantSelectedTasks() && !m_bCompletedTasks && m_bIncompleteTasks);
 }
