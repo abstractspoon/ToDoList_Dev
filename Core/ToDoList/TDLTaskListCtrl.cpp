@@ -1375,10 +1375,6 @@ BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 	if (IsBoundSelecting())
 		return FALSE;
 
-	// Or more than 2 tasks are selected
-	if (m_lcColumns.GetSelectedCount() > 2)
-		return FALSE;
-
 	NotifyParentSelChange();
 	return TRUE;
 }
