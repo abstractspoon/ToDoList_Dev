@@ -111,8 +111,7 @@ const COLORREF MAGENTA	= RGB(255, 0, 255);
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT  DAYINSECS		= 24 * 60 * 60;
-const int	DECIMALS = 4;
+const int DECIMALS = 4;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -11096,15 +11095,15 @@ void CToDoCtrl::OnTimer(UINT nIDEvent)
 		{
 			// check if we've just passed midnight, in which case some tasks
 			// may have just become due
-			static time_t tPrev = time(NULL); // once only
-			time_t tNow = time(NULL);
+			static double dPrev = CDateHelper::GetDate(DHD_TODAY); // once only
+			double dNow = CDateHelper::GetDate(DHD_TODAY);
 
-			if ((tNow / DAYINSECS) > (tPrev / DAYINSECS))
+			if (dNow > dPrev)
 			{
-				OnTimerMidnight();
+				OnTimerMidnight();  
 			}
 
-			tPrev = tNow;
+			dPrev = dNow;
 		}
 		break;
 	}
