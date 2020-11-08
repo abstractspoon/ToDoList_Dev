@@ -173,11 +173,11 @@ void CColourPicker::DoColourPopup()
         pParent->SendMessage(CPN_DROPDOWN, (LPARAM)GetColour(), (WPARAM) GetDlgCtrlID());
 }
 
-CColourPopup* CColourPicker::NewColourPopup(CPoint pt) const 
+CColourPopup* CColourPicker::NewColourPopup(CPoint pt) 
 { 
 	return new CColourPopup(pt,					// Point to display popup
 							GetColour(),		// Selected colour
-							const_cast<CColourPicker*>(this),				// parent
+							this,				// parent
 							0,					// nID
 							m_strDefaultText,   // "Default" text area
 							m_strCustomText); 

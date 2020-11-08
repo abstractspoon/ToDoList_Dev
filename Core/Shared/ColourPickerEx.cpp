@@ -113,11 +113,11 @@ void CColourPickerEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		pDC->DrawFocusRect(rect);
 }
 
-CColourPopup* CColourPickerEx::NewColourPopup(CPoint pt) const 
+CColourPopup* CColourPickerEx::NewColourPopup(CPoint pt) 
 { 
 	return new CColourPopupEx(pt,					// Point to display popup
 								GetColour(),		// Selected colour
-								const_cast<CColourPickerEx*>(this),				// parent
+								this,				// parent
 								0,					// nID
 								m_strDefaultText,   // "Default" text area
 								m_strCustomText); 

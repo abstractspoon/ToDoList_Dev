@@ -112,7 +112,7 @@ protected:
     DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual CColourPopup* NewColourPopup(CPoint pt) const;
+	virtual CColourPopup* NewColourPopup(CPoint pt);
 };
 
 /////////////////////////////////////////////////////////////////////////////

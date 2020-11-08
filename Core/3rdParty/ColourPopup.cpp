@@ -502,10 +502,7 @@ void CColourPopup::OnLButtonUp(UINT nFlags, CPoint point)
 {    
     CWnd::OnLButtonUp(nFlags, point);
 
-    DWORD pos = GetMessagePos();
-    point = CPoint(LOWORD(pos), HIWORD(pos));
-
-    if (m_WindowRect.PtInRect(point))
+    if (m_WindowRect.PtInRect(CPoint(GetMessagePos())))
         EndSelection(CPN_SELENDOK);
     else
         EndSelection(CPN_SELENDCANCEL);
