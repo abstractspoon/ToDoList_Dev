@@ -6940,64 +6940,8 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 	}
 
 	// Finally check for colour change
-	if (ModsCauseColorChange(mapAttribIDs) && !mapAttribIDs.Has(TDCA_ALL))
+	if (m_taskTree.ModsCauseTaskTextColorChange(mapAttribIDs) && !mapAttribIDs.Has(TDCA_ALL))
 		mapAttribIDs.Add(TDCA_COLOR);
-}
-
-BOOL CToDoCtrl::ModCausesColorChange(TDC_ATTRIBUTE nModType) const
-{
-	switch (nModType)
-	{
-	case TDCA_ALL:
-		return TRUE;
-
-	case TDCA_COLOR:
-		return !HasStyle(TDCS_COLORTEXTBYPRIORITY) &&
-				!HasStyle(TDCS_COLORTEXTBYATTRIBUTE) &&
-				!HasStyle(TDCS_COLORTEXTBYNONE);
-
-	case TDCA_CATEGORY:
-	case TDCA_ALLOCBY:
-	case TDCA_ALLOCTO:
-	case TDCA_STATUS:
-	case TDCA_VERSION:
-	case TDCA_EXTERNALID:
-	case TDCA_TAGS:
-		return (HasStyle(TDCS_COLORTEXTBYATTRIBUTE) && (m_taskTree.GetColorByAttribute() == nModType));
-
-	case TDCA_DONEDATE:
-		return (m_taskTree.GetCompletedTaskColor() != CLR_NONE);
-
-	case TDCA_DUEDATE:
-		{
-			COLORREF crDue, crDueToday;
-			m_taskTree.GetDueTaskColors(crDue, crDueToday);
-
-			return ((crDue != CLR_NONE) || (crDueToday != CLR_NONE));
-		}
-
-	case TDCA_PRIORITY:
-		return HasStyle(TDCS_COLORTEXTBYPRIORITY);
-	}
-
-	// all else
-	return FALSE;
-}
-
-BOOL CToDoCtrl::ModsCauseColorChange(const CTDCAttributeMap& mapAttrib) const
-{
-	POSITION pos = mapAttrib.GetStartPosition();
-
-	while (pos)
-	{
-		TDC_ATTRIBUTE nAttrib = mapAttrib.GetNext(pos);
-
-		if (ModCausesColorChange(nAttrib))
-			return TRUE;
-	}
-
-	// else
-	return FALSE;
 }
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)

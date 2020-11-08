@@ -6361,6 +6361,60 @@ void CTabbedToDoCtrl::OnListSelChanged()
 	}
 }
 
+void CTabbedToDoCtrl::OnTimerMidnight()
+{
+	CToDoCtrl::OnTimerMidnight();
+
+	// Check whether extensions need a color update
+	if (!HasAnyExtensionViews())
+		return;
+
+	if (!m_taskTree.ModCausesTaskTextColorChange(TDCA_STARTDATE) &&
+		!m_taskTree.ModCausesTaskTextColorChange(TDCA_DUEDATE))
+	{
+		return;
+	}
+
+	CAutoFlag af(m_bUpdatingExtensions, TRUE);
+
+	int nExt = m_aExtViews.GetSize();
+	FTC_VIEW nCurView = GetTaskView();
+
+	while (nExt--)
+	{
+		if (!ExtensionViewWantsChange(nExt, TDCA_COLOR))
+			continue;
+
+		FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+
+		IUIExtensionWindow* pExtWnd = NULL;
+		VIEWDATA* pVData = NULL;
+
+		if (!GetExtensionWnd(nExtView, pExtWnd, pVData))
+			continue;
+
+		if (nExtView == nCurView)
+		{
+			BeginExtensionProgress(pVData);
+
+			CTaskFile tasks;
+			CWaitCursor cursor;
+
+			if (GetAllTasksForExtensionViewUpdate(TDCA_COLOR, tasks))
+			{
+				pVData->bNeedFullTaskUpdate = FALSE;
+				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
+			}
+
+			EndExtensionProgress();
+		}
+		else
+		{
+			pVData->bNeedFullTaskUpdate = TRUE;
+		}
+	}
+}
+
 HTREEITEM CTabbedToDoCtrl::GetTreeItem(int nItem) const
 {
 	if (nItem < 0 || nItem >= m_taskList.GetItemCount())

@@ -923,8 +923,6 @@ protected:
 	int CreateTasksFromOutlookObjects(const TLDT_DATA* pData);
 
 	void SetModified(TDC_ATTRIBUTE nAttribID, const CDWordArray& aModTaskIDs = CDWordArray());
-	BOOL ModCausesColorChange(TDC_ATTRIBUTE nModType) const;
-	BOOL ModsCauseColorChange(const CTDCAttributeMap& attribIDs) const;
 	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const;
 	
 	TDC_ATTRIBUTE GetFocusedControlAttribute() const;

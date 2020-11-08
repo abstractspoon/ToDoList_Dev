@@ -193,6 +193,7 @@ protected:
 	//}}AFX_VIRTUAL
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
+	virtual void OnTimerMidnight();
 
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
