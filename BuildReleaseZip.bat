@@ -74,10 +74,13 @@ REM Handle dlls explicitly to maintain control over plugins
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLReportExporterBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HTMLReportExporterCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MindMapUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MindMapUIExtensionCore.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\PDFExporterBridge.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\PDFExporterCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\PluginHelpers.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\RichEditExtensions.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\SpreadsheetContentControlBridge.dll
