@@ -2838,6 +2838,8 @@ void CToDoListWnd::OnNewTasklist()
 {
 	CreateNewTaskList(FALSE, TRUE);
 	RefreshTabOrder();
+
+	GetToDoCtrl().SetFocusToProjectName();
 }
 
 BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser)

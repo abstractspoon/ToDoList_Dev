@@ -429,6 +429,7 @@ public:
 	void RedrawReminders();
 	void SetLayoutPositions(TDC_UILOCATION nControlsPos, TDC_UILOCATION nCommentsPos, BOOL bResize);
 	void SetCompletionStatus(const CString& sStatus);
+	void SetFocusToProjectName();
 
 	CString FormatTaskLink(DWORD dwTaskID, BOOL bFull) const;
 	CString FormatTaskDependency(DWORD dwTaskID, BOOL bFull) const;

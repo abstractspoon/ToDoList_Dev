@@ -9714,10 +9714,19 @@ void CToDoCtrl::SetFocusToTasks()
 void CToDoCtrl::SetFocusToComments()
 {
 	// ignore if comments are not visible
-	if (!::IsWindowVisible(m_ctrlComments))
+	if (m_nMaxState == TDCMS_MAXTASKLIST)
 		return;
 
 	m_ctrlComments.SetFocus();
+}
+
+void CToDoCtrl::SetFocusToProjectName()
+{
+	// ignore if comments is maximised
+	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+		return;
+
+	GetDlgItem(IDC_PROJECTNAME)->SetFocus();
 }
 
 CString CToDoCtrl::GetControlDescription(const CWnd* pCtrl) const
