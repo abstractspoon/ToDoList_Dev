@@ -801,11 +801,7 @@
 #define IDC_TDLPROTOCOLHANDLER          1522
 #define IDC_MODIFYSHORTCUTS             1522
 #define IDC_GROUPBY                     1522
-#define IDC_LISTVIEWGROUPBYLABEL        1522
 #define IDC_GROUPBYATTRIB               1523
-#define IDC_LISTVIEWGROUPBYATTRIB       1523
-#define IDC_LISTVIEWOPTIONSLABEL        1524
-#define IDC_LISTVIEWOPTIONS             1525
 #define IDC_HASLUNCHBREAK               1526
 #define IDC_STARTOFLUNCH                1527
 #define IDC_ENDOFLUNCH                  1528

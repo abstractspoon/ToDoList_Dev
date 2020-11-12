@@ -257,7 +257,7 @@ namespace TDC
 		case TDCA_STARTTIME:		return IDC_STARTTIME;
 		case TDCA_STATUS:			return IDC_STATUS;
 		case TDCA_TAGS:				return IDC_TAGS;
-		case TDCA_TASKNAME:			return IDC_TASKTREELIST;
+		case TDCA_TASKNAME:			return IDC_TASKTREECTRL;
 		case TDCA_TIMEEST:			return IDC_TIMEEST;
 		case TDCA_TIMESPENT:		return IDC_TIMESPENT;
 		case TDCA_VERSION:			return IDC_VERSION;
@@ -309,7 +309,7 @@ namespace TDC
 		case IDC_STARTTIME:		return TDCA_STARTTIME;		
 		case IDC_STATUS:		return TDCA_STATUS;			
 		case IDC_TAGS:			return TDCA_TAGS;				
-		case IDC_TASKTREELIST:	return TDCA_TASKNAME;			
+		case IDC_TASKTREECTRL:	return TDCA_TASKNAME;			
 		case IDC_TIMEEST:		return TDCA_TIMEEST;			
 		case IDC_TIMESPENT:		return TDCA_TIMESPENT;		
 		case IDC_VERSION:		return TDCA_VERSION;			

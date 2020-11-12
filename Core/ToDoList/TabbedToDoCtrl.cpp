@@ -97,9 +97,9 @@ CTabbedToDoCtrl::CTabbedToDoCtrl(CUIExtensionMgr& mgrUIExt,
 	m_taskList(m_ilTaskIcons, m_data, TCF(), m_styles, m_tldAll, m_visColEdit.GetVisibleColumns(), m_aCustomAttribDefs)
 {
 	// add extra controls to implement list-view
-	for (int nCtrl = 0; nCtrl < NUM_FTDCCTRLS; nCtrl++)
+	for (int nCtrl = 0; nCtrl < NUM_TTDCCTRLS; nCtrl++)
 	{
-		const TDCCONTROL& ctrl = FTDCCONTROLS[nCtrl];
+		const TDCCONTROL& ctrl = TTDCCONTROLS[nCtrl];
 
 		AddRCControl(_T("CONTROL"), ctrl.szClass, CString((LPCTSTR)ctrl.nIDCaption), 
 					ctrl.dwStyle, ctrl.dwExStyle,
@@ -122,7 +122,7 @@ void CTabbedToDoCtrl::DoDataExchange(CDataExchange* pDX)
 {
 	CToDoCtrl::DoDataExchange(pDX);
 
-	DDX_Control(pDX, IDC_FTC_TABCTRL, m_tabViews);
+	DDX_Control(pDX, IDC_TASKLISTTABCTRL, m_tabViews);
 	DDX_Control(pDX, IDC_LISTVIEWGROUPBYATTRIB, m_cbListGroupBy);
 	DDX_Control(pDX, IDC_LISTVIEWOPTIONS, m_cbListOptions);
 
@@ -137,10 +137,10 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_CBN_SELCHANGE(IDC_LISTVIEWGROUPBYATTRIB, OnListGroupBySelChanged)
 	ON_CBN_SELCHANGE(IDC_LISTVIEWOPTIONS, OnListOptionsCheckChanged)
 
-	ON_NOTIFY(LVN_ITEMCHANGED, IDC_FTC_TASKLISTLIST, OnListSelChanged)
-	ON_NOTIFY(NM_CLICK, IDC_FTC_TASKLISTLIST, OnListClick)
-	ON_NOTIFY(NM_RCLICK, IDC_FTC_TABCTRL, OnTabCtrlRClick)
-	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREELIST, OnTreeExpandItem)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_TASKLISTCTRL, OnListSelChanged)
+	ON_NOTIFY(NM_CLICK, IDC_TASKLISTCTRL, OnListClick)
+	ON_NOTIFY(NM_RCLICK, IDC_TASKLISTTABCTRL, OnTabCtrlRClick)
+	ON_NOTIFY(TVN_ITEMEXPANDED, IDC_TASKTREECTRL, OnTreeExpandItem)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPOSTCHANGE, OnPostTabViewChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPRECHANGE, OnPreTabViewChange)
@@ -182,7 +182,7 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 	CRect rCtrl;
 	VERIFY(GraphicsMisc::GetPrimaryMonitorScreenSpace(rCtrl));
 
-	VERIFY(m_taskList.Create(this, rCtrl, IDC_FTC_TASKLISTLIST, FALSE)); // !visible
+	VERIFY(m_taskList.Create(this, rCtrl, IDC_TASKLISTCTRL, FALSE)); // !visible
 	
 	// list initialisation
 	m_dtList.Register(&m_taskList.List(), this);
@@ -248,7 +248,6 @@ void CTabbedToDoCtrl::OnListGroupBySelChanged()
 
 	if (m_nListViewGroupBy != nPrevGroupBy)
 	{
-
 		if (HasListOption(LVO_HIDENOGROUPVALUE))
 		{
 			// We need to rebuild the list because the <none>
@@ -721,7 +720,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	
 	// Create the extension window
 	int nExtension = (nView - FTCV_FIRSTUIEXTENSION);
-	UINT nCtrlID = (IDC_FTC_EXTENSIONWINDOW1 + nExtension);
+	UINT nCtrlID = (IDC_EXTENSIONWINDOW1 + nExtension);
 
 	try
 	{
