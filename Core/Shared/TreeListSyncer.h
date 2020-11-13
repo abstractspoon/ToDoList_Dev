@@ -246,7 +246,8 @@ protected:
 	inline HWND OtherWnd(HWND hwnd) const { ASSERT(IsLeft(hwnd) || IsRight(hwnd)); return (IsLeft(hwnd) ? Right() : Left()); }
 	inline BOOL IsLeft(HWND hwnd) const { return ((hwnd == Left()) ? TRUE : FALSE); }
 	inline BOOL IsRight(HWND hwnd) const { return ((hwnd == Right()) ? TRUE : FALSE); }
-	inline BOOL IsPrimaryHeader(HWND hwnd) const {	return (m_hwndPrimaryHeader == hwnd); }
+	inline BOOL IsPrimaryHeader(HWND hwnd) const { return (m_hwndPrimaryHeader == hwnd); }
+	inline BOOL IsHeaderTracking() const { return (m_hwndTrackedHeader != NULL); }
 		
 	void Resize(const CRect& rLeft, const CRect& rRight);
 	void RefreshSize();

@@ -2299,7 +2299,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			case HDN_BEGINTRACK:
 				if (IsList(hRealWnd) && (pNMHDR->hwndFrom == ListView_GetHeader(hRealWnd)))
 				{
-					ASSERT(m_hwndTrackedHeader == NULL);
+					ASSERT(!IsHeaderTracking());
 
 					if (!OnListHeaderBeginTracking((NMHEADER*)pNMHDR))
 						return 1L;
@@ -2311,7 +2311,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			case HDN_ENDTRACK:
 				if (IsList(hRealWnd) && (pNMHDR->hwndFrom == ListView_GetHeader(hRealWnd)))
 				{
-					ASSERT(m_hwndTrackedHeader);
+					ASSERT(IsHeaderTracking());
 					m_hwndTrackedHeader = NULL;
 
 					OnListHeaderEndTracking((NMHEADER*)pNMHDR);
@@ -2476,7 +2476,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			::SendMessage(hwndList, WM_SETFONT, wp, lp);
 
 			// and primary header
-			if (m_hwndPrimaryHeader)
+			if (m_hwndPrimaryHeader != NULL)
 				::SendMessage(m_hwndPrimaryHeader, WM_SETFONT, wp, lp);
 			
 			RecalcItemHeights();
@@ -2530,7 +2530,7 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 	case WM_NCCALCSIZE: 
 		if (hRealWnd == m_hwndIgnoreNcCalcSize)
 		{
-			ASSERT(m_hwndTrackedHeader && (hRealWnd == ::GetParent(m_hwndTrackedHeader)));
+			ASSERT(IsHeaderTracking() && (hRealWnd == ::GetParent(m_hwndTrackedHeader)));
 			return 0L; // eat it
 		}
 		
@@ -2542,7 +2542,10 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 
 		// Brute force attempt to fix occasional misalignment
 		// of horizontal scroll regions
-		PostResize();
+		if (IsTree(hRealWnd) && !IsHeaderTracking())
+		{
+			PostResize();
+		}
 		break;
 		
 	case WM_SIZE: 
