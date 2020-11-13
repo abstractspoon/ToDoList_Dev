@@ -2623,16 +2623,13 @@ void CToDoListWnd::EnableTDLExtension(BOOL bEnable, BOOL bStartup)
 		return;
 
 	CFileRegister filereg(_T("tdl"), _T("tdl_Tasklist"));
+	BOOL bExistingReg = filereg.IsRegisteredApp(_T("tdl"), FileMisc::GetAppFilePath(), TRUE);
 
 	if (bEnable)
 	{
-		CString sAppPath(FileMisc::GetAppFilePath());
-
 		// If we are a pre-release version then don't overwrite
 		// an existing registration unless it's also pre-release
 		BOOL bPreRelease = CTDCWebUpdateScript::IsPreRelease(FileMisc::GetAppVersion());
-		BOOL bExistingReg = filereg.IsRegisteredApp(_T("tdl"), sAppPath, TRUE);
-
 		if (bPreRelease && bExistingReg)
 		{
 			CString sRegPath = filereg.GetRegisteredAppPath(_T("tdl"));
@@ -2645,10 +2642,11 @@ void CToDoListWnd::EnableTDLExtension(BOOL bEnable, BOOL bStartup)
 		if (!filereg.RegisterFileType(_T("Tasklist"), 0))
 		{
 			ProcessProtocolRegistrationFailure(bStartup, bExistingReg, 
-				IDS_ERRORINSTALLTDLEXTENSION, _T("NotifiedTDLExtensionError"));
+											   IDS_ERRORINSTALLTDLEXTENSION, 
+											   _T("NotifiedTDLExtensionError"));
 		}
 	}
-	else
+	else if (bExistingReg)
 	{
 		if (!filereg.UnRegisterFileType())
 		{

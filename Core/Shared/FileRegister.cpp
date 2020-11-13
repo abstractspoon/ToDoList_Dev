@@ -173,6 +173,11 @@ BOOL CFileRegister::UnRegisterFileType() const
 	return bSuccess;
 }
 
+BOOL CFileRegister::IsRegisteredApp(LPCTSTR szAppPath, BOOL bFilenameOnly) const
+{
+	return IsRegisteredApp(m_sExt, szAppPath, bFilenameOnly);
+}
+
 // statics
 BOOL CFileRegister::IsRegisteredApp(LPCTSTR szExt, LPCTSTR szAppPath, BOOL bFilenameOnly)
 {

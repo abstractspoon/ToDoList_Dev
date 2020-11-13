@@ -17,6 +17,7 @@ public:
 
 	BOOL RegisterFileType(LPCTSTR szFileDesc, int nIcon, BOOL bAllowShellOpen = TRUE, LPCTSTR szParams = NULL, BOOL bAskUser = TRUE) const;
 	BOOL UnRegisterFileType() const;
+	BOOL IsRegisteredApp(LPCTSTR szAppPath, BOOL bFilenameOnly = FALSE) const;
 
 	static BOOL IsRegisteredAppInstalled(LPCTSTR szExt);
 	static CString GetRegisteredAppPath(LPCTSTR szExt, BOOL bFilenameOnly = FALSE);
