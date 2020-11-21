@@ -384,6 +384,8 @@ namespace MSDN.Html.Editor
             this.contextDocumentWordwrap.Checked = true;
 			this.toolstripEnableEditing.Checked = !ReadOnly;
 
+			this.toolstripEditor.RemapSysColors();
+
 			m_ToolbarRedrawTimer = new System.Windows.Forms.Timer();
 			m_ToolbarRedrawTimer.Interval = 100;
 			m_ToolbarRedrawTimer.Tick += delegate
@@ -1038,14 +1040,7 @@ namespace MSDN.Html.Editor
             {
                 _readOnly = value;
 
-                // define the document editable property
-                body.contentEditable = IsEditable.ToString();
-
-				// define the menu bar state
 				UpdateEnabledState();
-				
-				// define whether the IE cntext menu should be shown
-				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = !IsEditable;
 			}
 
         } //ReadOnly
@@ -1060,17 +1055,17 @@ namespace MSDN.Html.Editor
             {
 				_editEnabled = value;
 
-                // define the document editable property
-                body.contentEditable = IsEditable.ToString();
-				
-				// define the menu bar state
 				UpdateEnabledState();
-				
-				// define whether the IE cntext menu should be shown
-				this.editorWebBrowser.IsWebBrowserContextMenuEnabled = !IsEditable;
             }
 
         } //ReadOnly
+
+		override protected void OnEnabledChanged(EventArgs e)
+		{
+			base.OnEnabledChanged(e);
+
+			UpdateEnabledState();
+		}
 
 		protected bool IsEditable
 		{
@@ -2019,16 +2014,16 @@ namespace MSDN.Html.Editor
 					InsertLinkPrompt(text, text);
 					return;
 				}
-				else
+				else // see if it looks like a file path
 				{
 					// Unquote path in case it was produced by Windows Explorer
-					text = text.Trim('"');
+					var path = text.Trim('"');
 
-					if (Path.IsPathRooted(text))
+					if (path.StartsWith("\\\\") || (path.IndexOf(":\\") == 1))
 					{
-						var fileUrl = new System.Uri(text).AbsoluteUri;
+						var fileUrl = new System.Uri(path).AbsoluteUri;
 
-						InsertLinkPrompt(fileUrl, text);
+						InsertLinkPrompt(fileUrl, path);
 						return;
 					}
 				}
@@ -2201,54 +2196,55 @@ namespace MSDN.Html.Editor
 
         } //FormatSelectionChange
 
-		override protected void OnEnabledChanged(EventArgs e)
-		{
-			base.OnEnabledChanged(e);
-
-			UpdateEnabledState();
-		}
-
 		protected void UpdateEnabledState()
 		{
+			var editable = IsEditable;
+
+			// define the document editable property
+			body.contentEditable = editable.ToString();
+
+			// define whether the IE context menu should be shown
+			this.editorWebBrowser.IsWebBrowserContextMenuEnabled = !editable;
+
 			if (ToolbarVisible)
 			{
-				this.toolstripTextCut.Enabled = IsEditable;
-				this.toolstripTextCopy.Enabled = IsEditable;
-				this.toolstripTextPaste.Enabled = IsEditable;
-				this.toolstripEditUndo.Enabled = IsEditable;
-				this.toolstripEditRedo.Enabled = IsEditable;
-				this.toolstripFormatBold.Enabled = IsEditable;
-				this.toolstripFormatUnderline.Enabled = IsEditable;
-				this.toolstripFormatItalic.Enabled = IsEditable;
-				this.toolstripFontDialog.Enabled = IsEditable;
-				this.toolstripFontNormal.Enabled = IsEditable;
-				this.toolstripTextColor.Enabled = IsEditable;
-				this.toolstripFontIncrease.Enabled = IsEditable;
-				this.toolstripFontDecrease.Enabled = IsEditable;
-				this.toolstripJustifyLeft.Enabled = IsEditable;
-				this.toolstripJustifyCenter.Enabled = IsEditable;
-				this.toolstripJustifyRight.Enabled = IsEditable;
-				this.toolstripFontIndent.Enabled = IsEditable;
-				this.toolstripFontOutdent.Enabled = IsEditable;
-				this.toolstripListOrdered.Enabled = IsEditable;
-				this.toolstripListUnordered.Enabled = IsEditable;
-				this.toolstripInsertLine.Enabled = IsEditable;
-				this.toolstripInsertTable.Enabled = IsEditable;
-				this.toolstripInsertImage.Enabled = IsEditable;
-				this.toolstripInsertLink.Enabled = IsEditable;
-				this.toolstripFindReplace.Enabled = IsEditable;
+				this.toolstripTextCut.Enabled = editable;
+				this.toolstripTextCopy.Enabled = editable;
+				this.toolstripTextPaste.Enabled = editable;
+				this.toolstripEditUndo.Enabled = editable;
+				this.toolstripEditRedo.Enabled = editable;
+				this.toolstripFormatBold.Enabled = editable;
+				this.toolstripFormatUnderline.Enabled = editable;
+				this.toolstripFormatItalic.Enabled = editable;
+				this.toolstripFontDialog.Enabled = editable;
+				this.toolstripFontNormal.Enabled = editable;
+				this.toolstripTextColor.Enabled = editable;
+				this.toolstripFontIncrease.Enabled = editable;
+				this.toolstripFontDecrease.Enabled = editable;
+				this.toolstripJustifyLeft.Enabled = editable;
+				this.toolstripJustifyCenter.Enabled = editable;
+				this.toolstripJustifyRight.Enabled = editable;
+				this.toolstripFontIndent.Enabled = editable;
+				this.toolstripFontOutdent.Enabled = editable;
+				this.toolstripListOrdered.Enabled = editable;
+				this.toolstripListUnordered.Enabled = editable;
+				this.toolstripInsertLine.Enabled = editable;
+				this.toolstripInsertTable.Enabled = editable;
+				this.toolstripInsertImage.Enabled = editable;
+				this.toolstripInsertLink.Enabled = editable;
+				this.toolstripFindReplace.Enabled = editable;
 
 				this.toolstripEnableEditing.Enabled = !_readOnly;
-				this.toolstripEnableEditing.Checked = IsEditable;
+				this.toolstripEnableEditing.Checked = editable;
 
-				this.toolstripDocumentEditHTML.Enabled = IsEditable;
+				this.toolstripDocumentEditHTML.Enabled = editable;
 				this.toolstripDocumentPrint.Enabled = true; // always
 
 				if (!m_ToolbarRedrawTimer.Enabled)
 					m_ToolbarRedrawTimer.Enabled = true;
 			}
 
-			this.WebBrowser.Document.BackColor = (IsEditable ? SystemColors.Window : SystemColors.ControlLight);
+			this.WebBrowser.Document.BackColor = (editable ? SystemColors.Window : SystemColors.ControlLight);
 		}
 
 		/// <summary>

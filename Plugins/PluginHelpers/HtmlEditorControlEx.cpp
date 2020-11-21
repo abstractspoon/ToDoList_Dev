@@ -24,7 +24,9 @@ HtmlEditorControlEx::HtmlEditorControlEx(Drawing::Font^ font, Translator^ trans,
 	m_AutoFixupToolbarButtonsSize(fixupToolbarButtonSizes)
 {
 	m_ControlsFont = font;
-	m_ToolbarRenderer = gcnew UIThemeToolbarRenderer();
+
+	m_toolbarRenderer = gcnew UIThemeToolbarRenderer();
+	m_toolbarRenderer->SetUITheme(gcnew UITheme());
 
 	if (trans != nullptr)
 		m_Trans = trans;

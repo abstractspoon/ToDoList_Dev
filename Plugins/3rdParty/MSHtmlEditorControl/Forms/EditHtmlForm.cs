@@ -129,7 +129,7 @@ namespace MSDN.Html.Editor
 
 		public void AddSyntaxPattern(string pattern, Color textColor, FontStyle style = FontStyle.Regular)
 		{
-			AddSyntaxPattern(pattern, RegexOptions.None, textColor, Color.Transparent, style);
+			AddSyntaxPattern(pattern, RegexOptions.None, textColor, SystemColors.Window, style);
 		}
 
 		public void AddSyntaxPattern(string pattern, Color textColor, Color backColor, FontStyle style = FontStyle.Regular)
@@ -139,7 +139,7 @@ namespace MSDN.Html.Editor
 
 		public void AddSyntaxPattern(string pattern, RegexOptions options, Color textColor, FontStyle style = FontStyle.Regular)
 		{
-			AddSyntaxPattern(pattern, options, textColor, Color.Transparent, style);
+			AddSyntaxPattern(pattern, options, textColor, SystemColors.Window, style);
 		}
 
 		public void AddSyntaxPattern(string pattern, RegexOptions options, Color textColor, Color backColor, FontStyle style = FontStyle.Regular)

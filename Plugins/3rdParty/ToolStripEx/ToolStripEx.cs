@@ -13,12 +13,69 @@ namespace IIControls
         ToolStripItem mouseOverItem = null;
         Point mouseOverPoint;
         Timer timer;
+
         public ToolTip Tooltips;
         public int ToolTipInterval = 4000;
         public string ToolTipText;
         public bool ToolTipShowUp;
 
-        protected override void OnMouseMove(MouseEventArgs mea)
+		public void RemapSysColors()
+		{
+			foreach (ToolStripItem item in Items)
+			{
+				if (item.Image != null)
+				{
+					Bitmap image = (item.Image as Bitmap);
+
+					if (image != null)
+					{
+						for (int i = 0; i < image.Width; i++)
+						{
+							for (int j = 0; j < image.Height; j++)
+							{
+								Color color = image.GetPixel(i, j);
+
+								if (MapColor(ref color))
+									image.SetPixel(i, j, color);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		protected bool MapColor(ref Color color)
+		{
+			Color Black		= Color.FromArgb(0x00, 0x00, 0x00); // -> COLOR_BTNTEXT        
+			Color DarkGray	= Color.FromArgb(0x80, 0x80, 0x80); // -> COLOR_BTNSHADOW      
+			Color LightGray = Color.FromArgb(0xC0, 0xC0, 0xC0);	// -> COLOR_BTNFACE        
+			Color White		= Color.FromArgb(0xFF, 0xFF, 0xFF);	// -> COLOR_BTNHIGHLIGHT   
+
+			if (color == Black)
+			{
+				color = SystemColors.ControlText;
+			}
+			else if (color == DarkGray)
+			{
+				color = SystemColors.ControlDark;
+			}
+			else if (color == LightGray)
+			{
+				color = SystemColors.Control;
+			}
+			else if (color == White)
+			{
+				color = SystemColors.ControlLight;
+			}
+			else
+			{
+				return false;
+			}
+
+			return true;
+		}
+
+		protected override void OnMouseMove(MouseEventArgs mea)
         {
             base.OnMouseMove(mea);
             ToolStripItem newMouseOverItem = this.GetItemAt(mea.Location);
