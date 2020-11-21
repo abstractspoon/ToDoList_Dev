@@ -945,10 +945,10 @@ void CWorkloadWnd::OnUpdateWorkloadEditAllocations(CCmdUI* pCmdUI)
 
 BOOL CWorkloadWnd::CanEditSelectedTaskAllocations(DWORD dwTaskID) const
 {
-	if (m_bReadOnly || !m_ctrlWorkload.GetSafeHwnd() || !dwTaskID)
+	if (m_bReadOnly || !m_ctrlWorkload.GetSafeHwnd())
 		return FALSE;
-
-	if (dwTaskID != m_ctrlWorkload.GetSelectedTaskID())
+	
+	if (dwTaskID && (dwTaskID != m_ctrlWorkload.GetSelectedTaskID()))
 	{
 		ASSERT(0);
 		return FALSE;

@@ -1240,6 +1240,9 @@ void CWorkloadCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemDat
 		BOOL bLighter = FALSE;
 		UINT nFlags = (DT_LEFT | DT_VCENTER | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_tree));
 
+		// Must set font before calling GetTextExtent
+		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, *pWI, nColID));
+
 		switch (nColID)
 		{
 		case WLCC_TITLE:
@@ -1269,7 +1272,6 @@ void CWorkloadCtrl::DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemDat
 
 		COLORREF crText = GetTreeTextColor(*pWI, bSelected, bLighter);
 		COLORREF crOldColor = pDC->SetTextColor(crText);
-		HGDIOBJ hFontOld = pDC->SelectObject(GetTreeItemFont(hti, *pWI, nColID));
 
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(sItem, rText, nFlags);
