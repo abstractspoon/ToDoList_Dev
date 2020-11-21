@@ -379,7 +379,7 @@ void CGanttCtrl::RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI)
 	}
 }
 
-BOOL CGanttCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
+BOOL CGanttCtrl::UpdateWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
 {
 	switch (nUpdate)
 	{
@@ -505,7 +505,7 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	}
 	InitItemHeights();
 
-	if (EditWantsResort(pTasks, nUpdate))
+	if (UpdateWantsResort(pTasks, nUpdate))
 	{
 		ASSERT(m_sort.IsSorting());
 
@@ -711,8 +711,6 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 	if (pGI->dwRefID == 0)
 	{
 		// can't use a switch here because we also need to check for IUI_ALL
-		time64_t tDate = 0;
-	
 		if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
 			pGI->sTitle = pTasks->GetTaskTitle(hTask);
 	
@@ -727,6 +725,8 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		
 		if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 		{ 
+			time64_t tDate = 0;
+	
 			// update min/max too
 			if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
 				pGI->SetStartDate(tDate, TRUE);
@@ -736,6 +736,8 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 	
 		if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 		{
+			time64_t tDate = 0;
+
 			// update min/max too
 			if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
 				pGI->SetDueDate(tDate, TRUE);
@@ -745,6 +747,8 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 	
 		if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
 		{
+			time64_t tDate = 0;
+
 			if (pTasks->GetTaskDoneDate64(hTask, tDate))
 				pGI->SetDoneDate(tDate);
 			else

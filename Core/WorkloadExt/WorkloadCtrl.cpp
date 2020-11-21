@@ -320,7 +320,7 @@ BOOL CWorkloadCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 	return CTreeListCtrl::MoveItem(itemMove);
 }
 
-BOOL CWorkloadCtrl::EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
+BOOL CWorkloadCtrl::UpdateWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
 {
 	switch (nUpdate)
 	{
@@ -455,7 +455,7 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		return;
 	}
 		
-	if (EditWantsResort(pTasks, nUpdate))
+	if (UpdateWantsResort(pTasks, nUpdate))
 	{
 		ASSERT(m_sort.IsSorting());
 

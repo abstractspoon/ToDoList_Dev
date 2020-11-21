@@ -212,6 +212,7 @@ protected:
 	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks);
 	BOOL UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribute);
 	BOOL UpdateGlobalAttributeValues(LPCTSTR szAttribID, const CStringArray& aValues);
+	BOOL UpdateWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const;
 
 	BOOL WantShowColumn(LPCTSTR szAttribID, const CKanbanItemArrayMap& mapKIArray) const;
 	BOOL WantShowColumn(const CKanbanColumnCtrl* pCol) const;

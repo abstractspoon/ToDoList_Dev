@@ -185,19 +185,17 @@ protected:
 	void RefreshCalculatedAllocations();
 	void UpdateAllocationCalculations(WORKLOADITEM& wi) const;
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
+	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
 
 	double GetAllocationListItemColumnDays(const WORKLOADITEM& wi, int nCol, COLORREF& crBack) const;
 	double CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, int nItem, int nCol, COLORREF& crBack) const;
 	double CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, HTREEITEM hti, int nCol, COLORREF& crBack) const;
-
- 	COLORREF GetTreeTextColor(const WORKLOADITEM& wi, BOOL bSelected, BOOL bLighter = FALSE) const;
-	COLORREF GetTreeTextBkColor(const WORKLOADITEM& wi, BOOL bSelected) const;
-
+	
 	void RebuildTree(const ITASKLISTBASE* pTasks);
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 
-	BOOL EditWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const;
+	BOOL UpdateWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const;
 	void Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOADSORTCOLUMN& col) const;
 	void FixupListSortColumn(LPCTSTR szAllocTo = NULL);
