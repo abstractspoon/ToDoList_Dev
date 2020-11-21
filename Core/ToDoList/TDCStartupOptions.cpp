@@ -241,7 +241,7 @@ CTDCStartupOptions::CTDCStartupOptions(const CString& sCmdInfo, int nFirstArg)
 {
 	Reset();
 
-	CEnCommandLineInfo cmdInfo;
+	CEnCommandLineInfo cmdInfo(_T(".tdl;.xml"));
 
 	if (cmdInfo.SetCommandLine(sCmdInfo, nFirstArg) || !cmdInfo.m_strFileName.IsEmpty())
 		SetCmdInfo(cmdInfo);

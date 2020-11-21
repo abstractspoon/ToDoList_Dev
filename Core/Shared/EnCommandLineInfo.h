@@ -25,7 +25,7 @@ public:
 	BOOL GetOption(LPCTSTR szFlag, CString& sParam) const; 
 	CString GetOption(LPCTSTR szFlag) const; 
 
-	void Reset();
+	void Reset(BOOL bIncFileExts = FALSE);
 	void DeleteOption(LPCTSTR szFlag);
 
 	void SetOption(LPCTSTR szFlag); 

@@ -69,7 +69,7 @@ CEnCommandLineInfo& CEnCommandLineInfo::operator=(const CEnCommandLineInfo& info
 	return *this;
 }
 
-void CEnCommandLineInfo::Reset()
+void CEnCommandLineInfo::Reset(BOOL bIncFileExts)
 {
 	// base class
 	m_bShowSplash = FALSE;
@@ -89,9 +89,11 @@ void CEnCommandLineInfo::Reset()
 
 	// Our values
 	m_mapCommandLine.RemoveAll();
-	m_aFileExt.RemoveAll();
 	m_sCurFlag.Empty();
 	m_nLastParameter = -1;
+
+	if (bIncFileExts)
+		m_aFileExt.RemoveAll();
 }
 
 
