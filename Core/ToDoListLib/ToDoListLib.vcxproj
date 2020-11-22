@@ -158,6 +158,7 @@
     <ClCompile Include="..\ToDoList\tdcreminder.cpp" />
     <ClCompile Include="..\ToDoList\TDCSearchParamHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCSimpleTextContent.cpp" />
+    <ClCompile Include="..\ToDoList\tdcsort.cpp" />
     <ClCompile Include="..\ToDoList\TDCSourceControl.cpp" />
     <ClCompile Include="..\ToDoList\TDCStartupOptions.cpp" />
     <ClCompile Include="..\ToDoList\TDCTaskTimeLog.cpp" />

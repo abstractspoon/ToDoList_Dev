@@ -430,8 +430,6 @@ protected:
 	void SetSortColumn(TDC_COLUMN nColID, TDC_SORTDIR nSortDir);
 	TDC_COLUMN GetSortColumn(TDC_SORTDIR& nSortDir) const;
 	void DoSort();
-	BOOL ModNeedsResort(TDC_ATTRIBUTE nModType, TDC_COLUMN nSortBy) const;
-	BOOL AttribMatchesSort(TDC_ATTRIBUTE nAttrib) const;
 	BOOL AttribsMatchSort(const CTDCAttributeMap& attribIDs) const;
 	void Sort(TDC_COLUMN nBy, BOOL bAllowToggle, BOOL bCheckSortable);
 

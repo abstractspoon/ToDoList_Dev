@@ -1904,6 +1904,7 @@ BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 
 	default:
 		// check custom attributes
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
 			int nAttrib = aAttribDefs.Find(nAttribID);
 
