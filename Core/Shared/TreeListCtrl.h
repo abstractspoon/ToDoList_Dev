@@ -176,6 +176,8 @@ public:
 	BOOL SaveToImage(CBitmap& bmImage, COLORREF crDivider = CLR_NONE);
 	BOOL SaveToImage(CBitmap& bmImage, int nFrom, int nTo, COLORREF crDivider = CLR_NONE);
 
+	void Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort);
+
 protected:
 	CTreeListTreeCtrl m_tree;
 	CListCtrl m_list;

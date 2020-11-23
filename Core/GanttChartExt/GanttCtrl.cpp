@@ -379,44 +379,6 @@ void CGanttCtrl::RecalcParentDates(HTREEITEM htiParent, GANTTITEM*& pGI)
 	}
 }
 
-BOOL CGanttCtrl::UpdateWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
-{
-	switch (nUpdate)
-	{
-	case IUI_ALL:
-		// Note: Tasks should arrive 'unsorted' so we only need to
-		// resort if an attribute is set
-		return m_sort.IsSorting();
-
-	case IUI_NEW:
-		// Don't sort new tasks because it's confusing
-		return FALSE;
-
-	case IUI_EDIT:
-		if (m_sort.IsSorting())
-		{
-			if (!m_sort.bMultiSort)
-				return pTasks->IsAttributeAvailable(MapColumnToAttribute(m_sort.single.nBy));
-
-			// else
-			for (int nCol = 0; nCol < 3; nCol++)
-			{
-				if (pTasks->IsAttributeAvailable(MapColumnToAttribute(m_sort.multi.cols[nCol].nBy)))
-					return TRUE;
-			}
-		}
-		break;
-
-	case IUI_DELETE:
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return FALSE;
-}
-
 void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	// we must have been initialized already
@@ -503,19 +465,8 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	default:
 		ASSERT(0);
 	}
+
 	InitItemHeights();
-
-	if (UpdateWantsResort(pTasks, nUpdate))
-	{
-		ASSERT(m_sort.IsSorting());
-
-		CHoldRedraw hr(m_tree);
-
-		if (m_sort.bMultiSort)
-			CTreeListCtrl::Sort(MultiSortProc, (DWORD)this);
-		else
-			CTreeListCtrl::Sort(SortProc, (DWORD)this);
-	}
 }
 
 void CGanttCtrl::PreFixVScrollSyncBug()

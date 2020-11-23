@@ -581,41 +581,6 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	default:
 		ASSERT(0);
 	}
-
-	if (UpdateWantsResort(pTasks, nUpdate))
-	{
-		ASSERT(m_nSortBy != TDCA_NONE);
-
-		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
-	}
-}
-
-BOOL CKanbanCtrl::UpdateWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
-{
-	switch (nUpdate)
-	{
-	case IUI_ALL:
-		// Note: Tasks should arrive 'unsorted' so we only need to
-		// resort if an attribute is set
-		return (m_nSortBy != TDCA_NONE);
-
-	case IUI_NEW:
-		// Don't sort new tasks because it's confusing
-		return FALSE;
-
-	case IUI_EDIT:
-		if (m_nSortBy != TDCA_NONE)
-			return pTasks->IsAttributeAvailable(m_nSortBy);
-		break;
-
-	case IUI_DELETE:
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return FALSE;
 }
 
 BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const

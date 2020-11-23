@@ -763,8 +763,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	pExtWnd->LoadPreferences(prefs, sKey, false);
 
 	// sort state
-	if (pVData->sort.LoadState(prefs, sKey))
-		RefreshExtensionViewSort(nView);
+	pVData->bNeedResort = pVData->sort.LoadState(prefs, sKey);
 		
 	// and update tab control with our new HWND
 	m_tabViews.SetViewHwnd((FTC_VIEW)nView, hWnd);
@@ -943,6 +942,9 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 				pExtWnd->SetTaskFont(m_taskTree.GetFont());
 				pVData->bNeedFontUpdate = FALSE;
 			}
+
+			if (pVData->bNeedResort)
+				RefreshExtensionViewSort(nNewView);
 		}
 		break;
 	}
@@ -4194,9 +4196,30 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
-		// resorting handled by the extension itself
-		m_bTreeNeedResort |= bTreeNeedsResort;
-		pLVData->bNeedResort |= bListNeedsResort;
+		{
+			m_bTreeNeedResort |= bTreeNeedsResort;
+			pLVData->bNeedResort |= bListNeedsResort;
+
+			// resort active extension and mark other extensions 
+			// as needing resorting as required
+			int nExt = m_aExtViews.GetSize();
+
+			while (nExt--)
+			{
+				FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+
+				VIEWDATA* pVData = GetViewData(nExtView);
+				ASSERT(pVData);
+
+				if (pVData && pVData->sort.Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs))
+				{
+					if (nExtView == nView)
+						Resort(FALSE);
+					else
+						pVData->bNeedResort = TRUE;
+				}
+			}
+		}
 		break;
 
 	default:

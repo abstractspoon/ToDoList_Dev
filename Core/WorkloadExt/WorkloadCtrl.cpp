@@ -320,44 +320,6 @@ BOOL CWorkloadCtrl::MoveSelectedTask(const IUITASKMOVE& move)
 	return CTreeListCtrl::MoveItem(itemMove);
 }
 
-BOOL CWorkloadCtrl::UpdateWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const
-{
-	switch (nUpdate)
-	{
-	case IUI_ALL:
-		// Note: Tasks should arrive 'unsorted' so we only need to
-		// resort if an attribute is set
-		return m_sort.IsSorting();
-
-	case IUI_NEW:
-		// Don't sort new tasks because it's confusing
-		return FALSE;
-
-	case IUI_EDIT:
-		if (m_sort.IsSorting())
-		{
-			if (!m_sort.bMultiSort)
-				return pTasks->IsAttributeAvailable(MapColumnToAttribute(m_sort.single.nBy));
-
-			// else
-			for (int nCol = 0; nCol < 3; nCol++)
-			{
-				if (pTasks->IsAttributeAvailable(MapColumnToAttribute(m_sort.multi.cols[nCol].nBy)))
-					return TRUE;
-			}
-		}
-		break;
-
-	case IUI_DELETE:
-		break;
-
-	default:
-		ASSERT(0);
-	}
-
-	return FALSE;
-}
-
 void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 {
 	// we must have been initialized already
@@ -453,18 +415,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 	default:
 		ASSERT(0);
 		return;
-	}
-		
-	if (UpdateWantsResort(pTasks, nUpdate))
-	{
-		ASSERT(m_sort.IsSorting());
-
-		CHoldRedraw hr(m_tree);
-
-		if (m_sort.bMultiSort)
-			CTreeListCtrl::Sort(MultiSortProc, (DWORD)this);
-		else
-			CTreeListCtrl::Sort(SortProc, (DWORD)this);
 	}
 }
 
@@ -562,26 +512,6 @@ BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	
 	// all else 
 	return (nAttrib == IUI_ALL);
-}
-
-BOOL CWorkloadCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib)
-{
-	switch (nAttrib)
-	{
-	case TDCA_ALLOCTO:
-	case TDCA_DUEDATE:
-	case TDCA_ID:
-	case TDCA_PERCENT:
-	case TDCA_STARTDATE:
-	case TDCA_TASKNAME:
-		return (MapAttributeToColumn(nAttrib) != WLCC_NONE);
-
-	case TDCA_NONE:
-		return TRUE;
-	}
-	
-	// all else 
-	return FALSE;
 }
 
 TDC_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)

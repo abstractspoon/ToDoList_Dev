@@ -2330,3 +2330,19 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 	ASSERT(0);
 	return FALSE;
 }
+
+void CTreeListCtrl::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort)
+{
+	// Scope the hold to have finished before resyncing
+	{
+		CHoldListVScroll hold(m_list);
+		CLockUpdates lock(m_list);
+
+		CTreeListSyncer::Sort(pfnCompare, lParamSort);
+
+		ResyncSelection(m_list, m_tree, FALSE);
+	}
+
+	ResyncScrollPos(m_tree, m_list);
+	m_tree.TCH().EnsureItemVisible(GetSelectedItem());
+}

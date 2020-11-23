@@ -77,7 +77,6 @@ public:
 	void EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORREF crUnderload);
 
 	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttrib);
-	static BOOL WantSortUpdate(TDC_ATTRIBUTE nAttrib);
 	static TDC_ATTRIBUTE MapColumnToAttribute(WLC_COLUMNID nCol);
 	static WLC_COLUMNID MapAttributeToColumn(TDC_ATTRIBUTE nAttrib);
 
@@ -195,7 +194,6 @@ protected:
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 
-	BOOL UpdateWantsResort(const ITASKLISTBASE* pTasks, IUI_UPDATETYPE nUpdate) const;
 	void Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOADSORTCOLUMN& col) const;
 	void FixupListSortColumn(LPCTSTR szAllocTo = NULL);

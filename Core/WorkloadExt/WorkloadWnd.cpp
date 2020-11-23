@@ -617,7 +617,7 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 
 	case IUI_SORT:
 		if (pData)
-			return (CWorkloadCtrl::WantSortUpdate(pData->nSortBy) != FALSE);
+			return (CWorkloadCtrl::MapAttributeToColumn(pData->nSortBy) != WLCC_NONE);
 		break;
 
 	case IUI_MULTISORT:
