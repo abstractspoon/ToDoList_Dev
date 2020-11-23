@@ -1038,7 +1038,7 @@ BOOL GANTTSORTCOLUMN::operator!=(const GANTTSORTCOLUMN& other) const
 	return !(*this == other);
 }
 
-BOOL GANTTSORTCOLUMN::Sort(GTLC_COLUMN nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
+BOOL GANTTSORTCOLUMN::Set(GTLC_COLUMN nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
 {
 	if (!bAllowToggle && Matches(nSortBy, bSortAscending))
 		return FALSE;
@@ -1088,7 +1088,7 @@ GANTTSORTCOLUMNS::GANTTSORTCOLUMNS()
 
 }
 
-BOOL GANTTSORTCOLUMNS::Sort(const GANTTSORTCOLUMNS& sort)
+BOOL GANTTSORTCOLUMNS::Set(const GANTTSORTCOLUMNS& sort)
 {
 	if (*this == sort)
 		return FALSE;
@@ -1159,21 +1159,21 @@ BOOL GANTTSORT::IsMultiSortingBy(GTLC_COLUMN nColID) const
 	return FALSE;
 }
 
-BOOL GANTTSORT::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
+BOOL GANTTSORT::Set(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending)
 {
 	if (bMultiSort)
 	{
 		bMultiSort = FALSE;
-		return single.Sort(nBy, FALSE, bAscending);
+		return single.Set(nBy, FALSE, bAscending);
 	}
 
-	return single.Sort(nBy, bAllowToggle, bAscending);
+	return single.Set(nBy, bAllowToggle, bAscending);
 }
 
-BOOL GANTTSORT::Sort(const GANTTSORTCOLUMNS& sort)
+BOOL GANTTSORT::Set(const GANTTSORTCOLUMNS& sort)
 {
 	bMultiSort = TRUE;
-	return multi.Sort(sort);
+	return multi.Set(sort);
 }
 
 /////////////////////////////////////////////////////////////////////////////

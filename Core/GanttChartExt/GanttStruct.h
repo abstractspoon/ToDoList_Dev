@@ -200,7 +200,7 @@ struct GANTTSORTCOLUMN
 {
 	GANTTSORTCOLUMN();
 
-	BOOL Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL Set(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
 	BOOL Matches(GTLC_COLUMN nBy, BOOL bAscending) const;
 
 	BOOL operator==(const GANTTSORTCOLUMN& other) const;
@@ -216,7 +216,7 @@ struct GANTTSORTCOLUMNS
 {
 	GANTTSORTCOLUMNS();
 
-	BOOL Sort(const GANTTSORTCOLUMNS& sort);
+	BOOL Set(const GANTTSORTCOLUMNS& sort);
 
 	BOOL operator==(const GANTTSORTCOLUMNS& other) const;
 	BOOL operator!=(const GANTTSORTCOLUMNS& other) const;
@@ -234,8 +234,8 @@ struct GANTTSORT
 	BOOL IsSortingBy(GTLC_COLUMN nColID) const;
 	BOOL IsSingleSortingBy(GTLC_COLUMN nColID) const;
 	BOOL IsMultiSortingBy(GTLC_COLUMN nColID) const;
-	BOOL Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
-	BOOL Sort(const GANTTSORTCOLUMNS& sort);
+	BOOL Set(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending);
+	BOOL Set(const GANTTSORTCOLUMNS& sort);
 
 	GANTTSORTCOLUMN single;
 	GANTTSORTCOLUMNS multi;

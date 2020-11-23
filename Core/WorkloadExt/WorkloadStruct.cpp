@@ -899,7 +899,7 @@ BOOL WORKLOADSORTCOLUMN::operator!=(const WORKLOADSORTCOLUMN& other) const
 	return !(*this == other);
 }
 
-BOOL WORKLOADSORTCOLUMN::Sort(WLC_COLUMNID nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
+BOOL WORKLOADSORTCOLUMN::Set(WLC_COLUMNID nSortBy, BOOL bAllowToggle, BOOL bSortAscending)
 {
 	if (!bAllowToggle && Matches(nSortBy, bSortAscending))
 		return FALSE;
@@ -949,7 +949,7 @@ WORKLOADSORTCOLUMNS::WORKLOADSORTCOLUMNS()
 
 }
 
-BOOL WORKLOADSORTCOLUMNS::Sort(const WORKLOADSORTCOLUMNS& sort)
+BOOL WORKLOADSORTCOLUMNS::Set(const WORKLOADSORTCOLUMNS& sort)
 {
 	if (*this == sort)
 		return FALSE;
@@ -1020,21 +1020,21 @@ BOOL WORKLOADSORT::IsMultiSortingBy(WLC_COLUMNID nColID) const
 	return FALSE;
 }
 
-BOOL WORKLOADSORT::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending)
+BOOL WORKLOADSORT::Set(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending)
 {
 	if (bMultiSort)
 	{
 		bMultiSort = FALSE;
-		return single.Sort(nBy, FALSE, bAscending);
+		return single.Set(nBy, FALSE, bAscending);
 	}
 
-	return single.Sort(nBy, bAllowToggle, bAscending);
+	return single.Set(nBy, bAllowToggle, bAscending);
 }
 
-BOOL WORKLOADSORT::Sort(const WORKLOADSORTCOLUMNS& sort)
+BOOL WORKLOADSORT::Set(const WORKLOADSORTCOLUMNS& sort)
 {
 	bMultiSort = TRUE;
-	return multi.Sort(sort);
+	return multi.Set(sort);
 }
 
 /////////////////////////////////////////////////////////////////////////////

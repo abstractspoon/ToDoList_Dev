@@ -1643,7 +1643,7 @@ void CWorkloadCtrl::Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, B
 {
 	ASSERT((nBy != WLCC_ALLOCTO) || !m_sSortByAllocTo.IsEmpty());
 
-	m_sort.Sort(nBy, bAllowToggle, bAscending);
+	m_sort.Set(nBy, bAllowToggle, bAscending);
 
 	// do the sort
 	CHoldRedraw hr(m_tree);
@@ -1663,7 +1663,7 @@ void CWorkloadCtrl::Sort(const WORKLOADSORTCOLUMNS& multi)
 {
 	FixupListSortColumn();
 
-	m_sort.Sort(multi);
+	m_sort.Set(multi);
 
 	// do the sort
 	CHoldRedraw hr(m_tree);

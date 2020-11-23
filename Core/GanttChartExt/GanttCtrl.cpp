@@ -1658,7 +1658,7 @@ void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL 
 	// clear pick line first
 	ClearDependencyPickLine();
 
-	m_sort.Sort(nBy, bAllowToggle, bAscending);
+	m_sort.Set(nBy, bAllowToggle, bAscending);
 
 	// do the sort
 	CHoldRedraw hr(m_tree);
@@ -1676,7 +1676,7 @@ void CGanttCtrl::Sort(const GANTTSORTCOLUMNS multi)
 	// clear pick line first
 	ClearDependencyPickLine();
 
-	m_sort.Sort(multi);
+	m_sort.Set(multi);
 
 	// do the sort
 	CHoldRedraw hr(m_tree);
