@@ -3478,7 +3478,6 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 		return;
 
 	m_taskList.SetModified(mapAttribIDs, (bInListView && bAllowResort));
-	pVData->bNeedResort = (!bAllowResort || !bInListView);
 
 	if (mapAttribIDs.Has(TDCA_DELETE))
 	{
@@ -4170,13 +4169,25 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		m_bTreeNeedResort = !bAllowResort;
-		pLVData->bNeedResort |= bListNeedsResort;
+		{
+			if (bAllowResort)
+				m_bTreeNeedResort = FALSE;
+			else
+				m_bTreeNeedResort |= bTreeNeedsResort;
+
+			pLVData->bNeedResort |= bListNeedsResort;
+		}
 		break;
 
 	case FTCV_TASKLIST:
-		m_bTreeNeedResort |= bTreeNeedsResort;
-		pLVData->bNeedResort = !bAllowResort;
+		{
+			m_bTreeNeedResort |= bTreeNeedsResort;
+
+			if (bAllowResort)
+				pLVData->bNeedResort = FALSE;
+			else
+				pLVData->bNeedResort |= bListNeedsResort;
+		}
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -4212,7 +4223,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 
 				if (pVData && pVData->sort.Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs))
 				{
-					if (nExtView == nView)
+					if ((nExtView == nView) && HasStyle(TDCS_RESORTONMODIFY))
 						Resort(FALSE);
 					else
 						pVData->bNeedResort = TRUE;
@@ -4724,6 +4735,11 @@ void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 	case FTCV_UIEXTENSION14:
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
+		if (IsMultiSorting() || !bAllowToggle)
+		{
+			RefreshExtensionViewSort(nView);
+		}
+		else
 		{
 			VIEWDATA* pVData = GetViewData(nView);
 			ASSERT(pVData);
