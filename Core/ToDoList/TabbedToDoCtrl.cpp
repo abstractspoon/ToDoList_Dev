@@ -624,7 +624,7 @@ void CTabbedToDoCtrl::SaveAllTaskViewPreferences()
 			pExtWnd->SavePreferences(prefs, sKey);
 
 			// Save sort state
-			FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+			FTC_VIEW nExtView = GetExtensionView(nExt);
 
 			const VIEWDATA* pVData = GetViewData(nExtView);
 			ASSERT(pVData);
@@ -2807,7 +2807,7 @@ void CTabbedToDoCtrl::NotifyEndPreferencesUpdate()
 
 		while (nExt--)
 		{
-			FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+			FTC_VIEW nExtView = GetExtensionView(nExt);
 			
 			IUIExtensionWindow* pExtWnd = NULL;
 			VIEWDATA* pVData = NULL;
@@ -3587,7 +3587,7 @@ int CTabbedToDoCtrl::GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapA
 	
 	while (nExt--)
 	{
-		FTC_VIEW nView = (FTC_VIEW)(nExt + FTCV_FIRSTUIEXTENSION);
+		FTC_VIEW nView = GetExtensionView(nExt);
 		VIEWDATA* pVData = GetViewData(nView);
 
 		if (pVData)
@@ -3690,7 +3690,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsProjectName()
 
 		while (nExt--)
 		{
-			FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+			FTC_VIEW nExtView = GetExtensionView(nExt);
 			VIEWDATA* pVData = GetViewData(nExtView);
 			ASSERT(pVData);
 
@@ -3854,7 +3854,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	
 	while (nExt--)
 	{
-		FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+		FTC_VIEW nExtView = GetExtensionView(nExt);
 		VIEWDATA* pVData = GetViewData(nExtView);
 		ASSERT(pVData);
 		
@@ -4033,7 +4033,7 @@ int CTabbedToDoCtrl::GetExtensionViewWantedChanges(int nExt, const CTDCAttribute
 BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) const
 {
 	FTC_VIEW nCurView = GetTaskView();
-	FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+	FTC_VIEW nExtView = GetExtensionView(nExt);
 
 	const VIEWDATA* pVData = GetViewData(nExtView);
 
@@ -4099,7 +4099,7 @@ BOOL CTabbedToDoCtrl::AllExtensionViewsNeedFullUpdate() const
 	
 	while (nExt--)
 	{
-		FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+		FTC_VIEW nExtView = GetExtensionView(nExt);
 		const VIEWDATA* pVData = GetViewData(nExtView);
 
 		if (pVData && !pVData->bNeedFullTaskUpdate)
@@ -4216,7 +4216,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 
 			while (nExt--)
 			{
-				FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+				FTC_VIEW nExtView = GetExtensionView(nExt);
 
 				VIEWDATA* pVData = GetViewData(nExtView);
 				ASSERT(pVData);
@@ -6422,7 +6422,7 @@ void CTabbedToDoCtrl::OnTimerMidnight()
 		if (!ExtensionViewWantsChange(nExt, TDCA_COLOR))
 			continue;
 
-		FTC_VIEW nExtView = (FTC_VIEW)(FTCV_FIRSTUIEXTENSION + nExt);
+		FTC_VIEW nExtView = GetExtensionView(nExt);
 
 		IUIExtensionWindow* pExtWnd = NULL;
 		VIEWDATA* pVData = NULL;

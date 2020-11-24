@@ -353,6 +353,7 @@ protected:
 	BOOL AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const;
 	virtual BOOL GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, CTaskFile& tasks) const;
 	BOOL GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeMap& mapAttribIDs, DWORD dwFlags, CTaskFile& tasks) const;
+	FTC_VIEW GetExtensionView(int nExt) const { return (FTC_VIEW)(nExt + FTCV_FIRSTUIEXTENSION); }
 	
 	int GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
 	int GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASKS& filter) const;
