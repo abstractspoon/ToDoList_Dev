@@ -1186,7 +1186,6 @@ void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTa
 	ASSERT(!tasks.GetFilePath().IsEmpty() || m_sLastSavePath.IsEmpty());
 
 	CAutoFlag af(m_bUpdatingExtensions, TRUE);
-	CTDCAttributeArray aAttrib;
 	
 	pExtWnd->UpdateTasks(&tasks, nType);
 }
