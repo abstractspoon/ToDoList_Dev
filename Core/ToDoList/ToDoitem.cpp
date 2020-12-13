@@ -1053,14 +1053,25 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 
 	if (CDateHelper::IsSameDay(dateDone, dtStartDue) || (dateDone < dtStartDue))
 	{
-		// If the completion date comes on or before before the 
-		// start/due date we use the start/due date to prevent 
-		// the base class implementation from selecting either
-		// the same date again or a date in the past.
-		dtFrom = dtStartDue;
+		// If the completion date comes on/before before the 
+		// start/due date it's possible that the next start/due 
+		// date can be on/before the previous start/due date,
+		// which seems an unlikely expectation for the user.
+		// So we check it first, and if it is on/before we use
+		// the start/due date as our reference date instead.
+		COleDateTime dtTemp;
+
+		if (!trRecurrence.GetNextOccurence(dtFrom, dtTemp))
+			return FALSE;
+
+		if (CDateHelper::IsSameDay(dtTemp, dtStartDue) || (dtTemp < dtStartDue))
+		{
+			dtFrom = dtStartDue;
+		}
 	}
-	else // completed date comes after start/due date
+	else 
 	{
+		// completed date comes after start/due date
 		ASSERT(dateDone > dtStartDue);
 
 		// Special case:
