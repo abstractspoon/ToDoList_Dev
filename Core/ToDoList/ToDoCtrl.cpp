@@ -6033,34 +6033,49 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 	
 	if (FileMisc::FileExists(sBackupPath))
 	{
+		/////////////////////////////////////////////////////////////
+		// Permanent logging
 		FileMisc::LogText(_T("Backup file found: %s"), sBackupPath);
+		/////////////////////////////////////////////////////////////
 
 		double dBackupSize = FileMisc::GetFileSize(sBackupPath);
-		
+
 		// Check for valid backup
 		if (dBackupSize > 0.0)
 		{
+			/////////////////////////////////////////////////////////////
+			// Permanent logging
 			FileMisc::LogText(_T("  Backup file has non-zero length"));
+			/////////////////////////////////////////////////////////////
 
 			double dSize = FileMisc::GetFileSize(sFilePath);
-		
+
 			if (dSize == 0.0) // definitely a bad save -> copy over backup
 			{
+				/////////////////////////////////////////////////////////////
+				// Permanent logging
 				FileMisc::LogText(_T("    Taskfile '%s' has zero length, replacing with backup"));
+				/////////////////////////////////////////////////////////////
 
 				FileMisc::DeleteFile(sFilePath, TRUE);
 				FileMisc::MoveFile(sBackupPath, sFilePath);
 			}
 			else
 			{
+				/////////////////////////////////////////////////////////////
+				// Permanent logging
 				FileMisc::LogText(_T("    Taskfile has non-zero length"));
+				/////////////////////////////////////////////////////////////
 
 				time64_t tMod = FileMisc::GetFileLastModified(sFilePath);
 				time64_t tBackupMod = FileMisc::GetFileLastModified(sBackupPath);
 
 				if (tMod >= tBackupMod) // file is newer than backup
 				{
+					/////////////////////////////////////////////////////////////
+					// Permanent logging
 					FileMisc::LogText(_T("      Taskfile is newer than backup, deleting backup"));
+					/////////////////////////////////////////////////////////////
 
 					FileMisc::DeleteFile(sBackupPath, TRUE);
 				}
@@ -6068,25 +6083,31 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 				{
 					CEnString sMessage(IDS_BACKUPFILEFOUND, sFilePath);
 					int nRet = AfxMessageBox(sMessage, MB_YESNOCANCEL);
-			
+
 					switch (nRet)
 					{
 					case IDYES:
+						/////////////////////////////////////////////////////////////
+						// Permanent logging
 						FileMisc::LogText(_T("      User confirmed to replace taskfile with backup"));
+						/////////////////////////////////////////////////////////////
 
 						FileMisc::DeleteFile(sFilePath, TRUE);
 						FileMisc::MoveFile(sBackupPath, sFilePath, TRUE, TRUE);
 						break;
-				
+
 					case IDNO: // keep the backup just in case
 						{
+							/////////////////////////////////////////////////////////////
+							// Permanent logging
 							FileMisc::LogText(_T("      User confirmed to keep taskfile, renaming backup"));
+							/////////////////////////////////////////////////////////////
 
 							CString sRename = CFileBackup::BuildBackupPath(sBackupPath);
 							FileMisc::MoveFile(sBackupPath, sRename, TRUE, TRUE);
 						}
 						break;
-				
+
 					case IDCANCEL:
 						return FALSE; // do nothing
 					}
@@ -6095,7 +6116,10 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 		}
 		else
 		{
+			/////////////////////////////////////////////////////////////
+			// Permanent logging
 			FileMisc::LogText(_T("  Backup file has zero length, deleting backup"));
+			/////////////////////////////////////////////////////////////
 
 			FileMisc::DeleteFile(sBackupPath, TRUE);
 		}
@@ -11109,6 +11133,11 @@ void CToDoCtrl::OnTimer(UINT nIDEvent)
 
 			if (dNow > dPrev)
 			{
+				/////////////////////////////////////////////////////////////
+				// Permanent logging
+				FileMisc::LogText(_T("OnTimerMidnight(%s)"), CDateHelper::FormatCurrentDate());
+				/////////////////////////////////////////////////////////////
+
 				OnTimerMidnight();  
 			}
 
