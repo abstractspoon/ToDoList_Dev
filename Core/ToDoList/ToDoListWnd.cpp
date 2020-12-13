@@ -1135,21 +1135,37 @@ void CToDoListWnd::OnShowKeyboardshortcuts()
 	}
 }
 
+void CToDoListWnd::SaveCurrentFocus(HWND hwndFocus)
+{
+	if (!hwndFocus)
+		hwndFocus = ::GetFocus();
+
+	if (hwndFocus != *this)
+		m_hwndLastFocus = hwndFocus;
+}
+
+void CToDoListWnd::PostAppRestoreFocus(HWND hwndFocus)
+{
+	if (!hwndFocus)
+		hwndFocus = m_hwndLastFocus;
+
+	if (hwndFocus && (hwndFocus != *this))
+		PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)hwndFocus);
+}
+
 LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 {
 	if (IsWindowEnabled() && GetTDCCount() && wp)
 	{
 		// Store latest 'good' focus for restoration
 		// whenever we reactivate the application
-		m_hwndLastFocus = (HWND)wp;
+		SaveCurrentFocus((HWND)wp);
 
 		if (m_statusBar.GetSafeHwnd())
 		{
 			m_sCurrentFocus.Empty();
 
-			// grab the previous window in the z-order and if its
-			// static text then use that as the focus hint
-			CWnd* pFocus = CWnd::FromHandle(m_hwndLastFocus);
+			CWnd* pFocus = CWnd::FromHandle((HWND)wp);
 
 	#ifdef _DEBUG
 	// 		if (pFocus)
@@ -9400,7 +9416,7 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 	case SC_MINIMIZE:
 		// we don't minimize if we're going to be hiding to the system tray
 		{
-			m_hwndLastFocus = ::GetFocus();
+			SaveCurrentFocus();
 
 			if (Prefs().HasSysTrayOptions(STO_ONMINIMIZE, STO_ONMINCLOSE))
 			{
@@ -9432,9 +9448,7 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 			CFrameWnd::OnSysCommand(nID, lParam);
 			
 			Resize();
-
-			if (m_hwndLastFocus)
-				PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)m_hwndLastFocus);
+			PostAppRestoreFocus();
 
 			if (bWasMinimised)
 				OnTimerCheckReloadTasklists(-1, TRUE);
@@ -11161,14 +11175,9 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 		}
 		
 		if (GetTDCCount() && (!m_hwndLastFocus || Prefs().GetAutoFocusTasklist()))
-		{
-			PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)GetToDoCtrl().GetSafeHwnd());
-		}
-		else if (m_hwndLastFocus)
-		{
-			// delay the restoration of focus else it gets lost
-			PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)m_hwndLastFocus);
-		}
+			PostAppRestoreFocus(GetToDoCtrl());
+		else
+			PostAppRestoreFocus();
 
 		UpdateCwd();
 	}
@@ -11178,7 +11187,12 @@ LRESULT CToDoListWnd::OnAppRestoreFocus(WPARAM /*wp*/, LPARAM lp)
 {
 	HWND hWnd = (HWND)lp;
 	
-	if (GetTDCCount() && (hWnd == GetToDoCtrl().GetSafeHwnd()))
+	if (!hWnd || (hWnd == *this))
+	{
+		// We should have prevented this
+		ASSERT(0);
+	}
+	else if (GetTDCCount() && (hWnd == GetToDoCtrl().GetSafeHwnd()))
 	{
 		GetToDoCtrl().SetFocusToTasks();
 	}
@@ -11216,10 +11230,7 @@ void CToDoListWnd::OnEnable(BOOL bEnable)
 	if (!bEnable)
 	{
 		// save current focus because modal window is being shown
-		HWND hFocus = ::GetFocus();
-
-		if (hFocus)
-			m_hwndLastFocus = hFocus;
+		SaveCurrentFocus();
 
 		// Save and hide time tracker if it is top-most
 		if (m_dlgTimeTracker.GetSafeHwnd())
@@ -11250,8 +11261,7 @@ void CToDoListWnd::OnEnable(BOOL bEnable)
 		}
 
 		// then restore it when we are enabled
-		if (m_hwndLastFocus)
-			PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)m_hwndLastFocus);
+		PostAppRestoreFocus();
 	}
 }
 
