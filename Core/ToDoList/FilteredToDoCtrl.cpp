@@ -1245,10 +1245,7 @@ void CFilteredToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITFILTERVISIBILIT
 
 void CFilteredToDoCtrl::GetColumnFieldVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 {
-	CTabbedToDoCtrl::GetColumnFieldVisibility(vis);
-
-	if (vis.GetShowFields() == TDLSA_ANY)
-		vis.SetVisibleFilterFields(m_visColEditFilter.GetVisibleFilterFields());
+	vis = m_visColEditFilter;
 }
 
 const CTDCColumnIDMap& CFilteredToDoCtrl::GetVisibleColumns() const
