@@ -1900,6 +1900,14 @@ int CDateHelper::GetWeekofYear(const COleDateTime& date)
 		int nJan1DOW = dtJan1.GetDayOfWeek();
 
 		nWeek = (((nDayOfYear + nJan1DOW - 1) / 7) + 1);
+
+		if (nWeek == 53)
+		{
+			// Since week 53 could be week 1 of the next year
+			// we check the week number a week later
+			if (GetWeekofYear(date.m_dt + 7) == 2)
+				nWeek = 1;
+		}
 	}
 	ASSERT((nWeek >= 1) && (nWeek <= 53));
 

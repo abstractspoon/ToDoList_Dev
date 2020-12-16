@@ -3283,7 +3283,6 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 			// calc number of first week
 			COleDateTime dtWeek(nYear, nMonth, nDay, 0, 0, 0);
-			int nWeek = CDateHelper::GetWeekofYear(dtWeek);
 			BOOL bDone = FALSE;
 
 			while (!bDone)
@@ -3298,13 +3297,8 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 					
 					// plus some of next month
 					nDay += (6 - nNumDays);
-					nMonth++;
-					
-					if (nMonth > 12)
-					{
-						nMonth = 1;
-						nYear++;
-					}
+
+					CDateHelper::IncrementMonth(nMonth, nYear);
 					
 					// Note: width of next month may be different to this month
 					if (m_listHeader.GetItemRect(nCol+1, rMonth))
@@ -3313,13 +3307,6 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 						dDayWidth = (rMonth.Width() / (double)nNumDays);
 
 						rWeek.right += (int)(nDay * dDayWidth);
-					}
-
-					// if this is week 53, check that its not really week 1 of the next year
-					if (nWeek == 53)
-					{
-						ASSERT(nMonth == 1);
-						nWeek = CDateHelper::GetWeekofYear(COleDateTime(nYear, nMonth, nDay, 0, 0, 0));
 					}
 
 					bDone = TRUE;
@@ -3335,11 +3322,14 @@ void CGanttCtrl::DrawListHeaderItem(CDC* pDC, int nCol)
 
 				// check if we need to draw
 				if (rWeek.right >= rClip.left)
+				{
+					int nWeek = CDateHelper::GetWeekofYear(dtWeek);
 					DrawListHeaderRect(pDC, rWeek, Misc::Format(nWeek), pThemed, FALSE);
+				}
 
 				// next week
 				nDay += 7;
-				nWeek++;
+				dtWeek.m_dt += 7;
 
 				// are we done?
 				bDone = (bDone || nDay > nNumDays);

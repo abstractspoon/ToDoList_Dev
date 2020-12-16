@@ -274,6 +274,7 @@ BEGIN_MESSAGE_MAP(CFPSMiniCalendarCtrl, CWnd)
 	//}}AFX_MSG_MAP
 	ON_WM_SIZE()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_CAPTURECHANGED()
 END_MESSAGE_MAP()
 
 
@@ -1264,12 +1265,19 @@ void CFPSMiniCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	CWnd::OnLButtonDown(nFlags, point);
 }
 
+void CFPSMiniCalendarCtrl::OnCaptureChanged(CWnd* pWnd)
+{
+	CWnd::OnCaptureChanged(pWnd);
+
+	m_bTracking = FALSE;
+	m_bHeaderTracking = FALSE;
+}
+
 void CFPSMiniCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point) 
 {
 	if (m_bTracking)
 	{
 		ReleaseCapture();
-		m_bTracking = FALSE;
 		RedrawWindow();
 		FireNotifyClick();
 	}
@@ -1335,7 +1343,6 @@ void CFPSMiniCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 			KillTimer(m_iHeaderTimerID);
 		m_iHeaderTimerID = 0;
 
-		m_bHeaderTracking = FALSE;
 		ReleaseCapture();
 		RedrawWindow();
 	}
