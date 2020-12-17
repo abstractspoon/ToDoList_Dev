@@ -5156,11 +5156,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_TOOLS_CHECKFORUPDATES "\nCheck for Updates"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_CMDLINE_TASKRISK    "-r <risk>\tSets the 'Risk' for the currently selected task"
     IDS_CMDLINE_TASKTAGS    "-tg <tags>\tSets the 'Tags' for the currently selected task"
     IDS_CMDLINE_TASKCOST    "-cs <cost>\tSets the 'Cost' for the currently selected task"
@@ -5359,11 +5354,6 @@ BEGIN
     IDS_UNFLAGGED           "Unflagged"
     IDS_DUEWHENREMINDERNOW  "is due now (%s)"
     IDS_BEGINWHENREMINDERNOW "begins now (%s)"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_HELP_DONATE          "\nDonate"
 END
 
 STRINGTABLE DISCARDABLE 

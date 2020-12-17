@@ -322,7 +322,9 @@ BOOL CTDLToolbarButtonListCtrl::DeleteSelectedButton()
 		int nRow = GetCurSel();
 		
 		m_aButtons.RemoveAt(nRow);
-		DeleteItem(nRow);
+
+		m_nCurCol = 0;
+		CInputListCtrl::DeleteSelectedCell();
 
 		SetCurSel(nRow);
 
