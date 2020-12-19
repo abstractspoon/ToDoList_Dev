@@ -300,7 +300,7 @@ namespace HTMLContentControl
 		private void OnNavigateLink(object sender, MSDN.Html.Editor.HtmlNavigationEventArgs e)
 		{
 			// Pass everything back to our parent for consistent handling
-			ContentControlWnd.GoToLink(e.Url.ToLower(), m_HwndParent, Handle);
+			ContentControlWnd.GoToLink(e.Url, m_HwndParent, Handle);
 
 			e.Cancel = true; // always
 		}
