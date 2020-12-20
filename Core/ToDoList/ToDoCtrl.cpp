@@ -11132,14 +11132,7 @@ void CToDoCtrl::OnTimer(UINT nIDEvent)
 			double dNow = CDateHelper::GetDate(DHD_TODAY);
 
 			if (dNow > dPrev)
-			{
-				/////////////////////////////////////////////////////////////
-				// Permanent logging
-				FileMisc::LogText(_T("OnTimerMidnight(%s)"), CDateHelper::FormatCurrentDate());
-				/////////////////////////////////////////////////////////////
-
 				OnTimerMidnight();  
-			}
 
 			dPrev = dNow;
 		}
@@ -11152,6 +11145,8 @@ void CToDoCtrl::OnTimer(UINT nIDEvent)
 
 void CToDoCtrl::OnTimerMidnight()
 {
+	FileMisc::LogText(_T("CToDoCtrl::OnTimerMidnight"));
+
 	Invalidate();
 }
 

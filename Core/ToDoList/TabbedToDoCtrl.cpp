@@ -6400,8 +6400,6 @@ void CTabbedToDoCtrl::OnListSelChanged()
 
 void CTabbedToDoCtrl::OnTimerMidnight()
 {
-	CToDoCtrl::OnTimerMidnight();
-
 	// Check whether extensions need a color update
 	if (!HasAnyExtensionViews())
 		return;
@@ -6450,6 +6448,8 @@ void CTabbedToDoCtrl::OnTimerMidnight()
 			pVData->bNeedFullTaskUpdate = TRUE;
 		}
 	}
+
+	CToDoCtrl::OnTimerMidnight();
 }
 
 HTREEITEM CTabbedToDoCtrl::GetTreeItem(int nItem) const

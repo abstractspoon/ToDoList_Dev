@@ -30,16 +30,28 @@ CString COSVersion::FormatOSVersion()
 {
 	CString sVersion;
 
-	if (GetOSVersion() == OSV_LINUX)
+	switch (GetOSVersion())
 	{
+	case OSV_LINUX:
 		sVersion = _T("Linux (Wine)");
-	}
-	else
-	{
-		OSVERSIONINFO vinfo = { sizeof(OSVERSIONINFO) };
-		
-		if (GetVersionEx(&vinfo))
-			sVersion.Format(_T("%lu.%lu"), vinfo.dwMajorVersion, vinfo.dwMinorVersion);
+		break;
+
+	case OSV_WIN81:
+		sVersion = _T("6.3");
+		break;
+
+	case OSV_WIN10:
+		sVersion = _T("10");
+		break;
+
+	default:
+		{
+			OSVERSIONINFO vinfo = { sizeof(OSVERSIONINFO) };
+
+			if (GetVersionEx(&vinfo))
+				sVersion.Format(_T("%lu.%lu"), vinfo.dwMajorVersion, vinfo.dwMinorVersion);
+		}
+		break;
 	}
 	
 	return sVersion;
