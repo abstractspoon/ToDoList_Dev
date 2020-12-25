@@ -37,7 +37,7 @@ class CPreferencesPageBase : public CPropertyPage, protected CDialogHelper
 	// Construction
 public:
 	CPreferencesPageBase(UINT nDlgTemplateID);
-	~CPreferencesPageBase();
+	virtual ~CPreferencesPageBase();
 	
 	virtual void LoadPreferences(const IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) = 0;
 	virtual void SavePreferences(IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/) const = 0;
@@ -89,7 +89,6 @@ public:
 						UINT nDialogIconID,
 						UINT nHelpBtnIconID,
 						CWnd* pParent);
-
 	virtual ~CPreferencesDlgBase();
 	
 	int DoModal(IPreferences* prefs = NULL, LPCTSTR szKey = NULL, int nInitPage = -1);
