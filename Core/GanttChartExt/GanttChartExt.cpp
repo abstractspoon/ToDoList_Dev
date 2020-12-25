@@ -6,7 +6,6 @@
 #include "GanttChartWnd.h"
 #include "resource.h"
 
-#include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 
 #include "..\3rdParty\GdiPlus.h"

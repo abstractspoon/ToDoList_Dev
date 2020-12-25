@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "resource.h"
 #include "GanttPreferencesDlg.h"
 #include "GanttMsg.h"
 #include "Ganttstatic.h"
@@ -32,6 +31,7 @@ CGanttPreferencesPage::CGanttPreferencesPage(CWnd* /*pParent*/ /*=NULL*/)
 	//}}AFX_DATA_INIT
 	m_crParent = DEF_PARENTCOLOR;
 	m_crDefault = DEF_DEFAULTCOLOR;
+	m_nParentColoring = 0;
 
 	m_aColumnVis.SetSize(NUM_TREECOLUMNS + 1);
 }

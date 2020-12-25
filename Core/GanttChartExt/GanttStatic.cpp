@@ -5,8 +5,6 @@
 #include "stdafx.h"
 #include "ganttstatic.h"
 
-#include "..\Shared\EnString.h"
-
 /////////////////////////////////////////////////////////////////////////////
 
 int GanttStatic::FindDisplay(GTLC_MONTH_DISPLAY nDisplay)

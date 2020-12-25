@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "resource.h"
+//#include "resource.h"
 #include "GanttCtrl.h"
 #include "GanttMsg.h"
 #include "GanttStatic.h"
@@ -12,16 +12,16 @@
 #include "..\shared\DateHelper.h"
 #include "..\shared\holdredraw.h"
 #include "..\shared\graphicsMisc.h"
-#include "..\shared\autoflag.h"
+//#include "..\shared\autoflag.h"
 #include "..\shared\misc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\localizer.h"
 #include "..\shared\themed.h"
 #include "..\shared\enbitmap.h"
-#include "..\shared\copywndcontents.h"
+//#include "..\shared\copywndcontents.h"
 #include "..\shared\WorkingWeek.h"
 
-#include "..\3rdparty\shellicons.h"
+//#include "..\3rdparty\shellicons.h"
 
 #include "..\Interfaces\UITheme.h"
 
@@ -111,7 +111,8 @@ CGanttCtrl::CGanttCtrl()
 	m_ptLastDependPick(0),
 	m_pDependEdit(NULL),
 	m_dwMaxTaskID(0),
-	m_bReadOnly(FALSE)
+	m_bReadOnly(FALSE),
+	m_nSnapMode(GTLCSM_FREE)
 {
 
 }
@@ -1547,6 +1548,7 @@ LRESULT CGanttCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 			// only need handle drawing for double row height
 			if (m_listHeader.GetRowCount() > 1)
 				return CDRF_NOTIFYITEMDRAW;
+			break;
 							
 		case CDDS_ITEMPREPAINT:
 			// only need handle drawing for double row height
@@ -1622,7 +1624,7 @@ void CGanttCtrl::Sort(GTLC_COLUMN nBy, BOOL bAllowToggle, BOOL bAscending, BOOL 
 		CWnd::GetParent()->PostMessage(WM_GTLC_NOTIFYSORT, m_sort.single.bAscending, m_sort.single.nBy);
 }
 
-void CGanttCtrl::Sort(const GANTTSORTCOLUMNS multi)
+void CGanttCtrl::Sort(const GANTTSORTCOLUMNS& multi)
 {
 	// clear pick line first
 	ClearDependencyPickLine();
@@ -4850,7 +4852,7 @@ void CGanttCtrl::CalcMinMonthWidths()
 	dcClient.SelectObject(pOldFont);
 }
 
-GTLC_MONTH_DISPLAY CGanttCtrl::GetColumnDisplay(int nMonthWidth)
+GTLC_MONTH_DISPLAY CGanttCtrl::GetColumnDisplay(int nMonthWidth) const
 {
 	int nMinWidth = 0;
 

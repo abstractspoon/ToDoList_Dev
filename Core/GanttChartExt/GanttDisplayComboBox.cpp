@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "resource.h"
 #include "GanttDisplayComboBox.h"
 #include "GanttCtrl.h"
 #include "GanttStatic.h"
@@ -154,7 +153,7 @@ void CGanttDisplayComboBox::FixupTabOffsets(const CStringArray& aItems, CStringA
 	int nMaxLabelWidth = 0;
 	CRect rOption(0, 0, 10000, 100);
 
-	int nOption = aOptions.GetSize(), nWidestOption;
+	int nOption = aOptions.GetSize();
 
 	while (nOption--)
 	{
@@ -163,11 +162,7 @@ void CGanttDisplayComboBox::FixupTabOffsets(const CStringArray& aItems, CStringA
 		int nWidth = rOption.Width();
 		aOptionWidths[nOption] = nWidth;
 
-		if (nMaxLabelWidth < nWidth)
-		{
-			nMaxLabelWidth = nWidth;
-			nWidestOption = nOption;
-		}
+		nMaxLabelWidth = max(nMaxLabelWidth, nWidth);
 	}
 
 	// Now add tabs to each option until they all have the same length 

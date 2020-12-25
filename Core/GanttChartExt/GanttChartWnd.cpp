@@ -2,19 +2,15 @@
 //
 
 #include "stdafx.h"
-#include "resource.h"
 #include "GanttChartExt.h"
 #include "GanttChartWnd.h"
 #include "GanttStatic.h"
 #include "GanttMsg.h"
 
-#include "..\shared\misc.h"
-#include "..\shared\filemisc.h"
 #include "..\shared\themed.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\datehelper.h"
-#include "..\shared\timehelper.h"
 #include "..\shared\localizer.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
@@ -22,7 +18,6 @@
 #include "..\shared\WorkingWeek.h"
 
 #include "..\3rdparty\T64Utils.h"
-#include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
 
 #include "..\Interfaces\ipreferences.h"
@@ -651,8 +646,6 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			return (m_ctrlGantt.SelectTask(nCmd, pData->select) != FALSE);
 		break;
 
-		return true;
-
 	case IUI_MOVETASK:
 		if (pData)
 		{
@@ -661,7 +654,6 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			return (m_ctrlGantt.MoveSelectedTask(pData->move) != FALSE);
 		}
 		break;
-
 	}
 
 	return false;

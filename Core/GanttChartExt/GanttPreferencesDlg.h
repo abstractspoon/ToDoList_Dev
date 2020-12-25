@@ -12,8 +12,6 @@
 #include "..\Shared\preferencesbase.h"
 #include "..\Shared\checklistboxex.h"
 
-#include "..\Interfaces\ipreferences.h"
-
 /////////////////////////////////////////////////////////////////////////////
 // CGanttPreferencesPage dialog
 

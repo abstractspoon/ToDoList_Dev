@@ -64,7 +64,7 @@ public:
 	BOOL ZoomBy(int nAmount);
 
 	void Sort(GTLC_COLUMN nBy, BOOL bAscending);
-	void Sort(const GANTTSORTCOLUMNS multi);
+	void Sort(const GANTTSORTCOLUMNS& multi);
 	GTLC_COLUMN GetSortColumn() const { return m_sort.single.nBy; }
 	BOOL GetSortAscending() const { return m_sort.single.bAscending; }
 
@@ -236,7 +236,7 @@ protected:
 	void CalcMinMonthWidths();
 	int GetMinMonthWidth(GTLC_MONTH_DISPLAY nDisplay) const;
 	void BuildTreeColumns();
-	GTLC_MONTH_DISPLAY GetColumnDisplay(int nColWidth);
+	GTLC_MONTH_DISPLAY GetColumnDisplay(int nColWidth) const;
 	int GetColumnWidth() const;
 	double GetMonthWidth(int nColWidth) const;
 	int GetRequiredListColumnCount() const;

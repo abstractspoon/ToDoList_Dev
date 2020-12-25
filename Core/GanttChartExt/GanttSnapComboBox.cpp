@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include "resource.h"
 #include "GanttSnapComboBox.h"
 #include "GanttCtrl.h"
 #include "GanttStatic.h"

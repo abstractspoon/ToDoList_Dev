@@ -226,7 +226,8 @@ GANTTITEM::GANTTITEM()
 	bGoodAsDone(FALSE),
 	nPosition(-1),
 	bLocked(FALSE),
-	bSomeSubtaskDone(FALSE)
+	bSomeSubtaskDone(FALSE),
+	nPercent(0)
 {
 }
 

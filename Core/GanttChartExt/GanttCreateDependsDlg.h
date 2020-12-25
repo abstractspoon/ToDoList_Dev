@@ -27,6 +27,7 @@ class CGanttCreateDependsDlg : public CDialog, public IGanttDependencyEditor
 // Construction
 public:
 	CGanttCreateDependsDlg(CWnd* pParent = NULL);   // standard constructor
+	virtual ~CGanttCreateDependsDlg() {}
 
 	BOOL Create(GCDD_MODE nMode, CWnd* pOwner);
 	GCDD_MODE GetMode() const;
