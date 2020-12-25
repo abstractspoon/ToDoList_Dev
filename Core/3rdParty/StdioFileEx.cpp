@@ -97,6 +97,8 @@ CStdioFileEx::CStdioFileEx()
 	m_nFileCodePage(-1), 
 	m_nFormat(SFEF_UNKNOWN)
 {
+	ZeroMemory(m_arrMultibyteDefaultBuffer, SFE_DEFAULT_BUFFER_SIZE * sizeof(char));
+	ZeroMemory(m_arrUnicodeDefaultBuffer, SFE_DEFAULT_BUFFER_SIZE * sizeof(wchar_t));
 }
 
 CStdioFileEx::CStdioFileEx(LPCWSTR lpszFileName,UINT nOpenFlags)
@@ -107,6 +109,8 @@ CStdioFileEx::CStdioFileEx(LPCWSTR lpszFileName,UINT nOpenFlags)
 	m_nFileCodePage(-1), 
 	m_nFormat(SFEF_UNKNOWN)
 {
+	ZeroMemory(m_arrMultibyteDefaultBuffer, SFE_DEFAULT_BUFFER_SIZE * sizeof(char));
+	ZeroMemory(m_arrUnicodeDefaultBuffer, SFE_DEFAULT_BUFFER_SIZE * sizeof(wchar_t));
 }
 
 BOOL CStdioFileEx::Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nFormat, UINT nCodePage, CFileException* pError /*=NULL*/)
@@ -620,7 +624,7 @@ int CStdioFileEx::GetRequiredUnicodeLengthFromMultiByteString(IN LPCSTR szMultiB
 //					"delete"s when reading or writing large files.
 // Exceptions:	None.
 //
-int CStdioFileEx::GetNewUnicodeStringFromMultiByteString(IN LPCSTR szMultiByteString,IN OUT CTemplateSmartPtrArray<wchar_t>& spUnicodeString, IN const int nDefaultBufferSize/*=0*/,IN UINT nCodePage /*=CP_ACP OPTIONAL*/)
+int CStdioFileEx::GetNewUnicodeStringFromMultiByteString(IN LPCSTR szMultiByteString,IN OUT CTemplateSmartPtrArray<wchar_t>& spUnicodeString, IN int nDefaultBufferSize/*=0*/,IN UINT nCodePage /*=CP_ACP OPTIONAL*/)
 {
 	int nActualBufferSize = nDefaultBufferSize;
 
@@ -661,7 +665,7 @@ int CStdioFileEx::GetNewUnicodeStringFromMultiByteString(IN LPCSTR szMultiByteSt
 // Exceptions:	None.
 //
 int CStdioFileEx::GetMultiByteStringFromUnicodeString(IN const wchar_t * szUnicodeString, OUT char* szMultiByteString, 
-																			IN const int nMultiByteBufferSize, IN UINT nCodePage/*=CP_ACP OPTIONAL*/,
+																			IN int nMultiByteBufferSize, IN UINT nCodePage/*=CP_ACP OPTIONAL*/,
 																			IN char cFillerChar/*=sDEFAULT_UNICODE_FILLER_CHAR OPTIONAL*/)
 {
 	BOOL			bUsedDefChar	= FALSE;
@@ -792,7 +796,7 @@ int CStdioFileEx::GetRequiredMultiByteLengthForUnicodeString(IN const wchar_t * 
 //					"delete"s when reading or writing large files.
 // Exceptions:	None.
 //
-int CStdioFileEx::GetNewMultiByteStringFromUnicodeString(IN const wchar_t * szUnicodeString,IN OUT CTemplateSmartPtrArray<char>& spMultiByteString, IN const int nDefaultBufferSize/*=0*/,
+int CStdioFileEx::GetNewMultiByteStringFromUnicodeString(IN const wchar_t * szUnicodeString,IN OUT CTemplateSmartPtrArray<char>& spMultiByteString, IN int nDefaultBufferSize/*=0*/,
 																			IN UINT nCodePage /*=CP_ACP OPTIONAL*/, IN char cFillerChar/*=sDEFAULT_UNICODE_FILLER_CHAR OPTIONAL*/)
 {
 	int nActualBufferSize = nDefaultBufferSize;

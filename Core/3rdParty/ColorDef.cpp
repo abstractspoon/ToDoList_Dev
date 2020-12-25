@@ -210,14 +210,14 @@ COLORREF RGBX::HLS2RGB(const HLSX& hls, RGBX& rgb)
 	}
 	else
 	{
-		float fT1, fT2;
+		float fT2;
 		
 		if (hls.fLuminosity < 0.5f)
 			fT2 = hls.fLuminosity * (1.0f + hls.fSaturation);
 		else
 			fT2= (hls.fLuminosity + hls.fSaturation) - (hls.fLuminosity * hls.fSaturation);
 		
-		fT1 = 2 * hls.fLuminosity - fT2;
+		float fT1 = 2 * hls.fLuminosity - fT2;
 		
 		rgb.btRed = Hue2Triplet(fT1, fT2, hls.fHue + 120.0f);
 		rgb.btGreen = Hue2Triplet(fT1, fT2, hls.fHue);

@@ -61,7 +61,7 @@ public:
 
 // implementation helpers
 protected:
-	virtual void Reset();
+	void Reset();
 	BOOL GetTranslationId(LPVOID lpData, UINT unBlockSize, WORD wLangId, DWORD &dwId, BOOL bPrimaryEnough = FALSE);
 
 // attributes

@@ -23,7 +23,7 @@ public:
 			m_bOwnObject = true;
 			InitBuffer(nArrayLength);
 		}	
-	CTemplateSmartPtrArray(TYPE* pBuffer, IN const bool bOwned=true)
+	CTemplateSmartPtrArray(TYPE* pBuffer, IN bool bOwned=true)
 		{
 			m_pBuffer = NULL;
 			Assign(pBuffer, bOwned);
@@ -36,7 +36,7 @@ public:
 				delete [] m_pBuffer;
 			}
 		}
-	void		InitBuffer(IN const int nArrayLength)
+	void		InitBuffer(IN int nArrayLength)
 		{
 			m_pBuffer = new TYPE[nArrayLength];
 		}

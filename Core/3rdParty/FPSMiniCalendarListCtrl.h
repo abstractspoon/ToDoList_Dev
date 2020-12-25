@@ -49,8 +49,8 @@ public:
 
 // Operations
 public:
-	int GetSelMonth() {return m_iSelMonth;}
-	int GetSelYear() {return m_iSelYear;}
+	int GetSelMonth() const {return m_iSelMonth;}
+	int GetSelYear() const {return m_iSelYear;}
 
 	void SetCalendar(CFPSMiniCalendarCtrl* pWnd);
 	void SetMiddleMonthYear(int iMonth, int iYear);

@@ -34,7 +34,7 @@ public:
 class CHyperlink : public CString {
 public:
 	CHyperlink(LPCTSTR lpLink = NULL) : CString(lpLink) { }
-	~CHyperlink() { }
+	virtual ~CHyperlink() { }
 	const CHyperlink& operator=(LPCTSTR lpsz) {
 		CString::operator=(lpsz);
 		return *this;
@@ -59,7 +59,7 @@ public:
 class CStaticLink : public CStatic {
 public:
 	CStaticLink(LPCTSTR lpLink = NULL, BOOL bDeleteOnDestroy=FALSE);
-	~CStaticLink() { }
+	virtual ~CStaticLink() { }
 
 	BOOL Navigate(); // navigate the link (like clicking)
 

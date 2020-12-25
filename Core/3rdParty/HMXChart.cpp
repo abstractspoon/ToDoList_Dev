@@ -65,6 +65,7 @@ CHMXChart::CHMXChart() : m_strFont(_T("Arial")), m_nFontPixelSize(-1), m_dwRende
 	m_clrGrid = GetSysColor(COLOR_3DSHADOW);
 	m_bXLabelsAreTicks = false;
 	m_nXLabelDegrees = 0;
+	m_nCountDataset = 0;
 }
 
 CHMXChart::~CHMXChart()
@@ -331,9 +332,9 @@ bool CHMXChart::DrawTitle(CDC & dc)
 	if(m_strTitle.IsEmpty())
 		return false;
 
-	CFont font, *pFontOld;
 	int nFontSize = CalcTitleFontSize();
 
+	CFont font;
 	font.CreateFont(nFontSize, 0, 0, 0, FW_NORMAL,
 					 FALSE, FALSE, FALSE, ANSI_CHARSET,
 					 OUT_TT_PRECIS, CLIP_TT_ALWAYS, PROOF_QUALITY,
@@ -341,7 +342,7 @@ bool CHMXChart::DrawTitle(CDC & dc)
 
 	
 	COLORREF clrBkOld = dc.SetBkColor(m_clrBkGnd);
-	pFontOld = dc.SelectObject(&font);
+	CFont* pFontOld = dc.SelectObject(&font);
 	dc.DrawText(m_strTitle, m_rectTitle, DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS);
 
 	dc.SetBkColor(clrBkOld);
@@ -874,7 +875,8 @@ bool CHMXChart::DrawDataset(CDC &dc, const CHMXDataset& ds, const CDWordArray& a
 		return DrawPieChart(dc, ds, aAltItemColors, fillOpacity);
 	}
 
-	return true;
+	ASSERT(0);
+	return false;
 }
 
 bool CHMXChart::DrawLineGraph(CDC &dc, const CHMXDataset& ds, const CDWordArray& aAltMarkerColors, BYTE fillOpacity)

@@ -469,9 +469,13 @@ void CColourPopup::OnMouseMove(UINT nFlags, CPoint point)
 
     // First check we aren't in text box
     if (m_strCustomText.GetLength() && m_CustomTextRect.PtInRect(point))
-        nNewSelection = CUSTOM_BOX_VALUE;
+	{
+		nNewSelection = CUSTOM_BOX_VALUE;
+	}
     else if (m_strDefaultText.GetLength() && m_DefaultTextRect.PtInRect(point))
-        nNewSelection = DEFAULT_BOX_VALUE;
+	{
+		nNewSelection = DEFAULT_BOX_VALUE;
+	}
     else
     {
         // Take into account text box

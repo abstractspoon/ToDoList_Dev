@@ -276,10 +276,10 @@ class CDibDataVars
 {
 	CDibDataVars::CDibDataVars() {}	// No default constructor
 public:
-	CDibDataVars(const LPBITMAPINFOHEADER pInfo);
+	CDibDataVars(const BITMAPINFOHEADER* pInfo);
 	~CDibDataVars() {}
 
-	void SetDataVars(const LPBITMAPINFOHEADER pInfo);
+	void SetDataVars(const BITMAPINFOHEADER* pInfo);
 
 	DWORD m_dwCompression;		//!< Compression type
 	WORD  m_wBpp;				//!< Number of bits-per-pixel
@@ -306,8 +306,10 @@ public:
 \par Remarks:
   Constructs a CDibDataVars object.
 */
-CDibDataVars::CDibDataVars(const LPBITMAPINFOHEADER pInfo)
-{ SetDataVars(pInfo); }
+CDibDataVars::CDibDataVars(const BITMAPINFOHEADER* pInfo)
+{ 
+	SetDataVars(pInfo); 
+}
 
 // CDibDataVars::SetDataVars(const LPBITMAPINFOHEADER pInfo)
 /**
@@ -325,7 +327,7 @@ CDibDataVars::CDibDataVars(const LPBITMAPINFOHEADER pInfo)
 \par
   There is no error checking for this utility class/function.
 */
-void CDibDataVars::SetDataVars(const LPBITMAPINFOHEADER pInfo)
+void CDibDataVars::SetDataVars(const BITMAPINFOHEADER* pInfo)
 {
 	m_dwCompression = pInfo->biCompression;
 	m_wBpp          = WORD(pInfo->biPlanes * pInfo->biBitCount);
@@ -2195,11 +2197,11 @@ GetConvertedDIB(WORD wBitsPerPixel, BOOL bOptimize/* = FALSE*/)
 				if( i == uColors )
 				{
 					uColors = 256;
-					for( UINT i = 0; i < uColors; ++i )
+					for( UINT j = 0; j < uColors; ++j )
 					{
-						rgbqOp[i].rgbRed   =
-						rgbqOp[i].rgbGreen =
-						rgbqOp[i].rgbBlue  = (BYTE)i;
+						rgbqOp[j].rgbRed   =
+						rgbqOp[j].rgbGreen =
+						rgbqOp[j].rgbBlue  = (BYTE)j;
 					}
 				}
 			}

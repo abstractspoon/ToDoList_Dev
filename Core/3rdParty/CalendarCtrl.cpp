@@ -14,9 +14,6 @@
 #include "stdafx.h"
 #include "CalendarCtrl.h"
 
-#include "..\3rdParty\GdiPlus.h"
-#include "..\3rdParty\ColorDef.h"
-
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////////////

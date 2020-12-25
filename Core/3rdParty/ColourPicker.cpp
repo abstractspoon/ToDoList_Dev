@@ -32,7 +32,6 @@
 #include "stdafx.h"
 #include "ColourPopup.h"
 #include "ColourPicker.h"
-#include "colordef.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

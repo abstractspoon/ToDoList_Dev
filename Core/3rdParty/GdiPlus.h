@@ -176,7 +176,7 @@ public:
 	CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing = gdix_SmoothingModeMedium);
 	virtual ~CGdiPlusGraphics();
 
-	operator gdix_Graphics*() { return m_graphics; }
+	operator gdix_Graphics*() const { return m_graphics; }
 	BOOL IsValid() const { return (m_graphics != NULL); }
 
 protected:
@@ -192,7 +192,7 @@ public:
 	CGdiPlusPen(COLORREF color, int nWidth = 1, gdix_PenStyle nStyle = gdix_PenStyleSolid);
 	virtual ~CGdiPlusPen();
 
-	operator gdix_Pen*() { return m_pen; }
+	operator gdix_Pen*() const { return m_pen; }
 
 	BOOL Create(COLORREF color, int nWidth = 1, gdix_PenStyle nStyle = gdix_PenStyleSolid);
 	BOOL IsValid() const { return (m_pen != NULL); }
@@ -230,8 +230,8 @@ public:
 	CGdiPlusBitmap(HBITMAP hbitmap);
 	virtual ~CGdiPlusBitmap();
 
-	operator gdix_Bitmap*() { return m_bitmap; }
-	gdix_Image* AsImage() { return (gdix_Image*)m_bitmap; }
+	operator gdix_Bitmap*() const { return m_bitmap; }
+	gdix_Image* AsImage() const { return (gdix_Image*)m_bitmap; }
 
 	BOOL IsValid() const { return (m_bitmap != NULL); }
 	BOOL SaveAsFile(const WCHAR* filename);

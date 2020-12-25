@@ -32,8 +32,8 @@ public:
 	virtual ~Base64Coder();
 
 public:
-	virtual void		Encode(const PBYTE, DWORD dwLen);
-	virtual void		Decode(const PBYTE, DWORD dwLen);
+	virtual void		Encode(const BYTE* pBuffer, DWORD dwLen);
+	virtual void		Decode(const BYTE* pBuffer, DWORD dwLen);
 
 	static CString		Encode(const CString& sMessage);
 	static CString		Decode(const CString& sMessage);
@@ -45,8 +45,8 @@ public:
 
 	virtual void		AllocEncode(DWORD);
 	virtual void		AllocDecode(DWORD);
-	virtual void		SetEncodeBuffer(const PBYTE pBuffer, DWORD nBufLen);
-	virtual void		SetDecodeBuffer(const PBYTE pBuffer, DWORD nBufLen);
+	virtual void		SetEncodeBuffer(const BYTE* pBuffer, DWORD nBufLen);
+	virtual void		SetDecodeBuffer(const BYTE* pBuffer, DWORD nBufLen);
 
 protected:
 	virtual void		_EncodeToBuffer(const TempBucket &Decode, PBYTE pBuffer);

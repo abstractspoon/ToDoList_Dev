@@ -17,6 +17,7 @@ class CLockableHeaderCtrl : public CHeaderCtrl
 {
 public:
 	CLockableHeaderCtrl() { }
+	virtual ~CLockableHeaderCtrl() { }
 
 	void LockColumn(int nColumn, BOOL bLock = TRUE);
 	BOOL IsColumnLocked(int nColumn);

@@ -89,7 +89,7 @@ class CFPSMiniCalendarCtrlFontInfo
 public:
 	CFPSMiniCalendarCtrlFontInfo();
 	CFPSMiniCalendarCtrlFontInfo(const CFPSMiniCalendarCtrlFontInfo& font);
-	~CFPSMiniCalendarCtrlFontInfo();
+	virtual ~CFPSMiniCalendarCtrlFontInfo();
 
 	CFPSMiniCalendarCtrlFontInfo& operator=(const CFPSMiniCalendarCtrlFontInfo& font);
 	virtual void CreateFont(CDC* pDC);
@@ -165,14 +165,14 @@ public:
 	void SetDateSel(COleDateTime dtBegin, COleDateTime dtEnd);
 
 	void SetRowsAndColumns(int iRows, int iCols);
-	int GetRows() {return m_iRows;}
-	int GetCols() {return m_iCols;}
+	int GetRows() const {return m_iRows;}
+	int GetCols() const {return m_iCols;}
 
 	void SetShowNonMonthDays(BOOL bValue) {m_bShowNonMonthDays = bValue;}
 	BOOL GetShowNonMonthDays() {return m_bShowNonMonthDays;}
 
 	void SetDefaultMinFontSize(int iValue);
-	int GetDefaultMinFontSize() {return m_iDefaultMinFontSize;}
+	int GetDefaultMinFontSize() const {return m_iDefaultMinFontSize;}
 
 	void SetDefaultFont(LPCTSTR lpszValue);
 	CString GetDefaultFont() {return m_strDefaultFontName;}
@@ -184,7 +184,7 @@ public:
 	CString GetDayOfWeekName(int iDayOfWeek);
 
 	void SetFirstDayOfWeek(int iDayOfWeek);
-	int GetFirstDayOfWeek();
+	int GetFirstDayOfWeek() const;
 
 	void SetCurrentMonthAndYear(int iMonth, int iYear);
 	int GetCurrentMonth() const {return m_iCurrentMonth;}
@@ -208,7 +208,7 @@ public:
 	BOOL GetShowNoneButton() {return m_bShowNoneButton;}
 
 	void SetNonMonthDayColor(COLORREF cColor) {m_cNonMonthDayColor = cColor;}
-	COLORREF GetNonMonthDayColor(COLORREF cColor) {m_cNonMonthDayColor = cColor;}
+	COLORREF GetNonMonthDayColor() const {return m_cNonMonthDayColor;}
 
 	void SetShow3DBorder(BOOL bValue) {m_bShow3dBorder = bValue;}
 	BOOL GetShow3DBorder() {return m_bShow3dBorder;}
@@ -220,7 +220,7 @@ public:
 	BOOL GetUseAutoSettings() {return m_bUseAutoSettings;}
 
 	void SetMaxSelDays(int iValue) {m_iMaxSelDays = iValue;}
-	int GetMaxSelDays() {return m_iMaxSelDays;}
+	int GetMaxSelDays() const {return m_iMaxSelDays;}
 
 	void SetSpecialDaysCallback(funcSPECIALDATE pValue, DWORD dwUserData);
 	funcSPECIALDATE GetSpecialDaysCallback() {return m_pfuncCallback;}

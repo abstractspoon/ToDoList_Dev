@@ -101,7 +101,7 @@ void Base64Coder::AllocDecode(DWORD nSize)
 	m_nDDataLen = 0;
 }
 
-void Base64Coder::SetEncodeBuffer(const PBYTE pBuffer, DWORD nBufLen)
+void Base64Coder::SetEncodeBuffer(const BYTE* pBuffer, DWORD nBufLen)
 {
 	DWORD	i = 0;
 
@@ -118,14 +118,14 @@ void Base64Coder::SetEncodeBuffer(const PBYTE pBuffer, DWORD nBufLen)
 	}
 }
 
-void Base64Coder::SetDecodeBuffer(const PBYTE pBuffer, DWORD nBufLen)
+void Base64Coder::SetDecodeBuffer(const BYTE* pBuffer, DWORD nBufLen)
 {
 	AllocDecode(nBufLen);
 	::CopyMemory(m_pDBuffer, pBuffer, nBufLen);
 	m_nDDataLen = nBufLen;
 }
 
-void Base64Coder::Encode(const PBYTE pBuffer, DWORD nBufLen)
+void Base64Coder::Encode(const BYTE* pBuffer, DWORD nBufLen)
 {
 	SetDecodeBuffer(pBuffer, nBufLen);
 	AllocEncode(nBufLen * 2);
@@ -162,7 +162,7 @@ CString Base64Coder::Encode(const CString& sMessage)
 	return b64.EncodedMessage();
 }
 
-void Base64Coder::Decode(const PBYTE pBuffer, DWORD dwBufLen)
+void Base64Coder::Decode(const BYTE* pBuffer, DWORD dwBufLen)
 {
 	if(!Base64Coder::m_Init)
 		_Init();

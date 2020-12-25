@@ -27,7 +27,6 @@
 #include "memdc.h"
 #include "FPSMiniCalendarCtrl.h"
 #include "FPSMiniCalendarListCtrl.h"
-#include "GdiPlus.h"
 
 #include <locale.h>
 
@@ -47,7 +46,7 @@ const int WEEKNUMBERPADDING = 8;
 /////////////////////////////////////////////////////////////////////////////
 // CFPSMiniCalendarCtrl
 
-CFPSMiniCalendarCtrlCell::CFPSMiniCalendarCtrlCell()
+CFPSMiniCalendarCtrlCell::CFPSMiniCalendarCtrlCell() : m_iRow(-1), m_iCol(-1)
 {
 	m_parHotSpots = new CFPSMiniCalendarCtrlFontHotSpot[42];
 
@@ -839,7 +838,7 @@ int CFPSMiniCalendarCtrl::DrawDays(CDC &dc, int iY, int iLeftX, int iMonthRow, i
 	int iStartY = iY;
 	int iStartX = 0;
 	int iEndX = 0;
-	int iX = 0;
+//	int iX = 0;
 	COleDateTime dtStart;
 	COleDateTime dt;
 	int iDayCounter = 0;
@@ -1952,7 +1951,7 @@ void CFPSMiniCalendarCtrl::SetFirstDayOfWeek(int iDayOfWeek)
 	}
 }
 
-int CFPSMiniCalendarCtrl::GetFirstDayOfWeek()
+int CFPSMiniCalendarCtrl::GetFirstDayOfWeek() const
 {
 	return m_iFirstDayOfWeek;
 }

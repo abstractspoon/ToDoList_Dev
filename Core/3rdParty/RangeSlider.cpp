@@ -81,7 +81,7 @@ void CRangeSlider::Create(DWORD dwStyle, const RECT &rect, CWnd *pParentWnd, UIN
 
 
 // Register the window class, so you can use this class as a custom control.
-BOOL CRangeSlider::RegisterWindowClass(void) 
+BOOL CRangeSlider::RegisterWindowClass() 
 {
 	WNDCLASS wndcls;
 	HINSTANCE hInst = AfxGetInstanceHandle();
@@ -748,7 +748,7 @@ void CRangeSlider::SetRange(double left, double right)
 	Invalidate();
 }
 
-void CRangeSlider::NormalizeVisualMinMax(void) 
+void CRangeSlider::NormalizeVisualMinMax() 
 {
 	// Exchange if reversed.
 	if (m_VisualMax < m_VisualMin) 
@@ -782,7 +782,7 @@ double CRangeSlider::NormalizeByStep(double value) const
 	return value;
 }
 
-void CRangeSlider::Normalize(void) 
+void CRangeSlider::Normalize() 
 {
 	double prevLeft = m_Left;
 	double prevRight = m_Right;

@@ -78,6 +78,7 @@ class CStdioFileEx: public CStdioFile
 public:
 	CStdioFileEx();
 	CStdioFileEx(LPCWSTR lpszFileName, UINT nOpenFlags);
+	virtual ~CStdioFileEx() {}
 
 	virtual BOOL			Open(LPCWSTR lpszFileName, UINT nOpenFlags, SFE_FORMAT nFormat = SFEF_AUTODETECT, UINT nCodePage = CP_ACP, CFileException* pError = NULL);
 
@@ -191,7 +192,7 @@ private:
 	//
 	static int		GetNewUnicodeStringFromMultiByteString(IN LPCSTR szMultiByteString, 
 															IN OUT CTemplateSmartPtrArray<wchar_t>& spUnicodeString, 
-															IN const int nDefaultBufferSize,
+															IN int nDefaultBufferSize,
 															IN UINT nCodePage);
 
 	// --------------------------------------------------------------------------------------------
@@ -214,7 +215,7 @@ private:
 	//
 	static int			GetMultiByteStringFromUnicodeString(IN const wchar_t * szUnicodeString, 
 															OUT char* szMultiByteString,
-															IN const int nMultiByteBufferSize,
+															IN int nMultiByteBufferSize,
 															IN UINT nCodePage,
 															IN char cFillerChar);
 
@@ -268,7 +269,7 @@ private:
 	//
 	static int			GetNewMultiByteStringFromUnicodeString(IN const wchar_t * szUnicodeString,
 																IN OUT CTemplateSmartPtrArray<char>& spMultiByteString, 
-																IN const int nDefaultBufferSize,
+																IN int nDefaultBufferSize,
 																IN UINT nCodePage,
 																IN char cFillerChar);
 };

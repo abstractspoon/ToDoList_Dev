@@ -108,7 +108,7 @@ BOOL Gui::DoAnimation()
 #define IDANI_CAPTION 3
 #endif  // !IDANI_CAPTION
 
-void Gui::MinToTray(const HWND hWnd) 
+void Gui::MinToTray(HWND hWnd) 
 {
 	ASSERT(IsWindowVisible(hWnd));
 
@@ -125,7 +125,7 @@ void Gui::MinToTray(const HWND hWnd)
 	::ShowWindow(hWnd, SW_HIDE);
 }
 
-void Gui::RestoreFromTray(const HWND hWnd, BOOL bForceMax) 
+void Gui::RestoreFromTray(HWND hWnd, BOOL bForceMax) 
 {
 	ASSERT(!IsWindowVisible(hWnd));
 
@@ -146,7 +146,7 @@ void Gui::RestoreFromTray(const HWND hWnd, BOOL bForceMax)
 	::SetForegroundWindow(hWnd);
 }
 
-BOOL Gui::IsObscured(const HWND hWnd)
+BOOL Gui::IsObscured(HWND hWnd)
 {
 	// look up the z-order for any overlapping windows
 	RECT rWnd;
@@ -185,7 +185,7 @@ BOOL Gui::IsObscured(const HWND hWnd)
 	return FALSE;
 }
 
-BOOL Gui::HasFocus(const HWND hWnd, BOOL bInclChildren)
+BOOL Gui::HasFocus(HWND hWnd, BOOL bInclChildren)
 {
 	if (GetFocus() == hWnd)
 		return TRUE;
