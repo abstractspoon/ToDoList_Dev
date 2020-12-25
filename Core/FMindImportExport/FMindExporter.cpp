@@ -8,7 +8,6 @@
 #include "FMdefines.h"
 
 #include "..\shared\xmlfileex.h"
-#include "..\shared\datehelper.h"
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
 
