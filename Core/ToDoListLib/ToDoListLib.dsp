@@ -281,6 +281,10 @@ SOURCE=..\ToDoList\TDCSimpleTextContent.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\tdcsort.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCSourceControl.cpp
 # End Source File
 # Begin Source File
