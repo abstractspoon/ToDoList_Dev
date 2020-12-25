@@ -5,10 +5,8 @@
 #include "TaskCalendarCtrl.h"
 
 #include "..\Shared\GraphicsMisc.h"
-#include "..\Shared\themed.h"
 #include "..\Shared\DateHelper.h"
 #include "..\Shared\TimeHelper.h"
-#include "..\Shared\misc.h"
 #include "..\Shared\dialoghelper.h"
 
 #include "..\3rdParty\ColorDef.h"

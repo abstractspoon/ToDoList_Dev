@@ -6,7 +6,6 @@
 #include "calendarext.h"
 #include "calendarwnd.h"
 
-#include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 
 #include "..\3rdParty\GdiPlus.h"

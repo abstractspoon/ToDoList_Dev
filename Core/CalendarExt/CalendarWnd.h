@@ -7,12 +7,11 @@
 // CalendarWnd.h : header file
 //
 
+#include "CalendarExt.h"
 #include "TaskCalendarCtrl.h"
 #include "TaskMiniCalendarCtrl.h"
 #include "calendarpreferencesdlg.h"
 
-#include "..\Shared\menubutton.h"
-#include "..\Shared\enstring.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 

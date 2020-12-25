@@ -7,10 +7,8 @@
 // GanttPreferencesDlg.h : header file
 //
 
-#include "..\shared\groupline.h"
 #include "..\shared\preferencesbase.h"
 #include "..\Shared\ColorBrewerComboBox.h"
-#include "..\Shared\ColorButton.h"
 
 #include "..\Interfaces\IUIExtension.h"
 

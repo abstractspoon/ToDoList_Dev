@@ -9,7 +9,7 @@
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
-#include "..\Shared\EnString.h"
+//#include "..\Shared\EnString.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -59,6 +59,8 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 	m_bTreatOverdueAsDueToday = FALSE;
 	//}}AFX_DATA_INIT
 	m_bHideParentTasks = TRUE;
+	m_nCalcMissingStartDates = CALCSTART_ASCREATION;
+	m_nCalcMissingDueDates = CALCDUE_ASLATESTSTARTANDTODAY;
 }
 
 void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)

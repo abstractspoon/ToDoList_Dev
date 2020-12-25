@@ -3,23 +3,17 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "CalendarExt.h"
 #include "CalendarWnd.h"
 #include "CalMsg.h"
 
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\DateHelper.h"
-#include "..\Shared\TimeHelper.h"
-#include "..\Shared\FileMisc.h"
 #include "..\Shared\themed.h"
 #include "..\Shared\dlgunits.h"
-#include "..\shared\misc.h"
-#include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\localizer.h"
 #include "..\shared\WorkingWeek.h"
 
-#include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
 
 #include "..\Interfaces\UITheme.h"

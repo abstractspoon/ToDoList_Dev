@@ -3,18 +3,15 @@
 
 #include "stdafx.h"
 #include "TaskMiniCalendarCtrl.h"
-#include "CalMsg.h"
+#include "CalEnum.h"
 #include "resource.h"
 
 #include "..\Shared\GraphicsMisc.h"
 #include "..\Shared\DateHelper.h"
 #include "..\Shared\misc.h"
-#include "..\Shared\dialoghelper.h"
 #include "..\Shared\enstring.h"
 
 #include "..\Interfaces\UITHEME.h"
-
-#include "..\3rdParty\ColorDef.h"
 
 #include <math.h>
 

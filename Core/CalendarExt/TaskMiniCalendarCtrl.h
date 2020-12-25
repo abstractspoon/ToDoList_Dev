@@ -10,7 +10,6 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "CalStruct.h"
-#include "CalEnum.h"
 
 #include "..\shared\tooltipctrlex.h"
 #include "..\shared\MiniCalendarCtrl.h"

@@ -25,6 +25,7 @@ public:
 	TASKCALITEM();
 	TASKCALITEM(const TASKCALITEM& tci);
 	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates);
+	virtual ~TASKCALITEM() {}
 
 	TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci);
 	BOOL TASKCALITEM::operator==(const TASKCALITEM& tci);
