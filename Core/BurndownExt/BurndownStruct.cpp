@@ -4,7 +4,8 @@
 #include "stdafx.h"
 #include "BurndownStruct.h"
 
-#include "..\shared\datehelper.h"
+#include "..\Shared\mapex.h"
+#include "..\shared\timehelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -115,7 +116,8 @@ STATSITEM::STATSITEM(DWORD dwID)
 	dTimeEst(0.0), 
 	nTimeEstUnits(TDCU_DAYS),
 	dTimeSpent(0.0),
-	nTimeSpentUnits(TDCU_DAYS)
+	nTimeSpentUnits(TDCU_DAYS),
+	dCost(0.0)
 {
 	CDateHelper::ClearDate(dtStart);
 	CDateHelper::ClearDate(dtDone);

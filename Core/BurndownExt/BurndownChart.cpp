@@ -2,16 +2,13 @@
 //
 
 #include "stdafx.h"
-#include "resource.h"
 #include "BurndownChart.h"
 #include "BurndownGraphs.h"
 #include "BurndownStatic.h"
 
 #include "..\shared\datehelper.h"
 #include "..\shared\holdredraw.h"
-#include "..\shared\enstring.h"
 #include "..\shared\graphicsmisc.h"
-#include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\ScopedTimer.h"
 

@@ -8,7 +8,6 @@
 #include "BurndownStatic.h"
 
 #include "..\Shared\DialogHelper.h"
-#include "..\Shared\Misc.h"
 #include "..\Shared\Localizer.h"
 
 #ifdef _DEBUG

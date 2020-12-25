@@ -8,8 +8,6 @@
 #include "BurndownStatic.h"
 
 #include "..\shared\dialoghelper.h"
-#include "..\shared\enstring.h"
-#include "..\shared\misc.h"
 
 #include "..\Interfaces\ipreferences.h"
 

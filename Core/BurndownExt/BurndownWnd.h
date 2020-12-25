@@ -9,13 +9,13 @@
 
 #include <afxtempl.h>
 
+#include "BurndownExt.h"
 #include "BurndownChart.h"
 #include "BurndownStruct.h"
 #include "BurndownGraphComboBox.h"
 #include "BurndownOptionsComboBox.h"
 #include "BurndownPreferencesDlg.h"
 
-#include "..\Shared\mapex.h"
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
 #include "..\Shared\RangeSliderCtrl.h"

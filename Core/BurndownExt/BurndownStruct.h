@@ -7,8 +7,6 @@
 
 #include "BurndownEnum.h"
 
-#include "..\Shared\mapex.h"
-#include "..\shared\timehelper.h"
 #include "..\shared\datehelper.h"
 
 #include "..\Interfaces\ITasklist.h"

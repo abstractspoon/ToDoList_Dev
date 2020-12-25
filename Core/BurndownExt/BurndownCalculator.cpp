@@ -22,7 +22,9 @@ CStatsItemCalculator::CStatsItemCalculator(const CStatsItemArray& data)
 	:
 	m_data(data),
 	m_nTotalWeekdays(0),
-	m_bShowEmptyFrequencyValues(TRUE)
+	m_bShowEmptyFrequencyValues(TRUE),
+	m_dStartExtents(0.0),
+	m_dEndExtents(0.0)
 {
 }
 

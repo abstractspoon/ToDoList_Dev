@@ -3,13 +3,10 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "BurndownExt.h"
 #include "BurndownWnd.h"
 #include "BurndownStatic.h"
 
-#include "..\shared\mapex.h"
 #include "..\shared\misc.h"
-#include "..\shared\filemisc.h"
 #include "..\shared\themed.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
@@ -17,9 +14,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\WorkingWeek.h"
 #include "..\shared\AutoFlag.h"
-#include "..\Shared\Localizer.h"
 
-#include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
 
 #include "..\Interfaces\ipreferences.h"
