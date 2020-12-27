@@ -18,6 +18,41 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CTDLHtmlStyleStatic : public CStatic
+{
+public:
+	void SetStyle(TDLPD_STYLE nFormat);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+class CTDLHtmlStyleComboBox : public CComboBox
+{
+	// Construction
+public:
+	void DDX(CDataExchange* pDX, TDLPD_STYLE& value);
+
+protected:
+	// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CTDLLanguageComboBox)
+	virtual void PreSubclassWindow();
+	//}}AFX_VIRTUAL
+
+	// Generated message map functions
+protected:
+	//{{AFX_MSG(CTDLLanguageComboBox)
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	//}}AFX_MSG
+
+	DECLARE_MESSAGE_MAP()
+
+protected:
+	void BuildCombo();
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTDLPrintStylePage : public CPropertyPage
 {
 // Construction
@@ -36,19 +71,21 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLPrintStylePage)
 	enum { IDD = IDD_PRINT_STYLE_PAGE };
-	CStatic	m_stSimpleIcon;
-	CComboBox	m_cbSimpleOptions;
 	//}}AFX_DATA
 
-	const CTDCImportExportMgr& m_mgrImpExp;
+	CTDLHtmlStyleStatic m_stSimpleIcon;
+	CTDLHtmlStyleComboBox m_cbSimpleOptions;
 	CImportExportComboBox m_cbOtherExporters;
 	CFileEdit m_eStylesheet;
+
 	CString	m_sStylesheet;
 	int m_nStyleOption;
 	BOOL m_bSupportsExportToImage;
 	CString m_sPrefsKey;
 	CString m_sOtherExporterTypeID;
 	TDLPD_STYLE m_nSimpleStyle;
+
+	const CTDCImportExportMgr& m_mgrImpExp;
 
 // Overrides
 	// ClassWizard generate virtual function overrides

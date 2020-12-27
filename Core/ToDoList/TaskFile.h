@@ -139,6 +139,7 @@ public:
 	BOOL SetLastModified(const COleDateTime& tLastMod);
 	COleDateTime GetLastModifiedOle() const;
 
+	void SetHtmlExportStyle(TDLPD_STYLE nStyle);
 	void SetHtmlImageFolder(LPCTSTR szImgFolder) { m_sHtmlImgFolder = szImgFolder; }
 	CString GetHtmlImageFolder() { return m_sHtmlImgFolder; }
 

@@ -1698,6 +1698,11 @@ BOOL CTaskFile::SetNextUniqueID(DWORD dwNextID)
 	return bResult;
 }
 
+void CTaskFile::SetHtmlExportStyle(TDLPD_STYLE nStyle)
+{
+	SetMetaData(TDL_EXPORTSTYLE, Misc::Format(nStyle));
+}
+
 BOOL CTaskFile::SetReportDetails(LPCTSTR szTitle, const COleDateTime& date)
 {
 	BOOL bRes = TRUE;

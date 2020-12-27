@@ -71,7 +71,6 @@ void CTDLExportDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_CBString(pDX, IDC_EXPORTTITLE, m_sExportTitle);
 	DDX_Check(pDX, IDC_EXPORTDATE, m_bExportDate);
 	//}}AFX_DATA_MAP
-
 }
 
 BEGIN_MESSAGE_MAP(CTDLExportDlg, CTDLDialog)
@@ -315,7 +314,8 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 	m_sFolderPath(szFolderPath), m_sOrgFolderPath(szFolderPath),
 	m_sPrefsKey(szPrefsKey),
 	m_eExportPath(FES_COMBOSTYLEBTN | FES_SAVEAS | FES_NOPROMPTOVERWRITE), // parent handles prompting
-	m_cbFormat(mgr, FALSE, FALSE)
+	m_cbFormat(mgr, FALSE, FALSE),
+	m_nHtmlStyle(TDLPDS_WRAP)
 {
 	//{{AFX_DATA_INIT(CExportDlg)
 	//}}AFX_DATA_INIT
@@ -395,8 +395,9 @@ CTDLExportToPage::CTDLExportToPage(const CTDCImportExportMgr& mgr,
 		m_sExportPath = m_sFolderPath;
 		m_sPathLabel.LoadString(IDS_ED_FOLDER);
 	}
-}
 
+	m_nHtmlStyle = prefs.GetProfileEnum(m_sPrefsKey, _T("HtmlStyle"), TDLPDS_WRAP);
+}
 
 void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 {
@@ -412,14 +413,13 @@ void CTDLExportToPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_TOPATH, m_sPathLabel);
 	//}}AFX_DATA_MAP
 
-	if (pDX->m_bSaveAndValidate)
-	{
-		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
-	}
-	else
-	{
-		m_cbFormat.SetSelectedTypeID(m_sFormatTypeID);
-	}
+	DDX_Control(pDX, IDC_HTMLOPTIONS_ICON, m_stHtmlOptionIcon);
+	DDX_Control(pDX, IDC_HTMLOPTIONS, m_cbHtmlOptions);
+
+	m_cbFormat.DDX(pDX, m_sFormatTypeID);
+	m_cbHtmlOptions.DDX(pDX, m_nHtmlStyle);
+
+	m_stHtmlOptionIcon.SetStyle(m_nHtmlStyle);
 }
 
 
@@ -432,6 +432,7 @@ BEGIN_MESSAGE_MAP(CTDLExportToPage, CCmdNotifyPropertyPage)
 	ON_BN_CLICKED(IDC_TOPATH, OnExportToClipboardOrPath)
 	ON_BN_CLICKED(IDC_TOCLIPBOARD, OnExportToClipboardOrPath)
 	//}}AFX_MSG_MAP
+	ON_CBN_SELCHANGE(IDC_HTMLOPTIONS, OnSelChangeHtmlOption)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -452,8 +453,15 @@ BOOL CTDLExportToPage::OnInitDialog()
 	GetDlgItem(IDC_EXPORTONEFILE)->EnableWindow(!m_bSingleTaskList && m_bExportAllTasklists && !m_bExportToClipboard);
 	GetDlgItem(IDC_EXPORTPATH)->EnableWindow(m_mgrImportExport.ExporterHasFileExtension(nFormat) && !m_bExportToClipboard);
 
+	UpdateHtmlOptionsVisibility();
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CTDLExportToPage::OnSelChangeHtmlOption()
+{
+	UpdateData();
 }
 
 void CTDLExportToPage::OnSelchangeTasklistoptions() 
@@ -543,6 +551,16 @@ void CTDLExportToPage::OnSelchangeFormatoptions()
 		m_eExportPath.SetWindowText(_T(""));
 		m_eExportPath.EnableWindow(FALSE);
 	}
+
+	UpdateHtmlOptionsVisibility();
+}
+
+void CTDLExportToPage::UpdateHtmlOptionsVisibility()
+{
+	BOOL bShowHtmlFormat = m_mgrImportExport.IsFormat(m_sFormatTypeID, TDCET_HTML);
+
+	m_cbHtmlOptions.ShowWindow(bShowHtmlFormat ? SW_SHOW : SW_HIDE);
+	m_stHtmlOptionIcon.ShowWindow(bShowHtmlFormat ? SW_SHOW : SW_HIDE);
 }
 
 void CTDLExportToPage::EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt) const
@@ -596,6 +614,7 @@ void CTDLExportToPage::OnOK()
 	prefs.WriteProfileString(m_sPrefsKey, _T("ExporterTypeID"), m_sFormatTypeID);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportOneFile"), m_bExportOneFile);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("ExportToClipboard"), m_bExportToClipboard);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("HtmlStyle"), m_nHtmlStyle);
 
 	if (!m_bSingleTaskList)
 	{

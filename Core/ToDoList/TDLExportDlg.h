@@ -8,13 +8,13 @@
 //
 
 #include "TaskSelectionDlg.h"
-#include "TDLDialog.h"
+#include "TDLPrintDialog.h"
+#include "TDCImportExportMgr.h"
 
 #include "..\shared\fileedit.h"
 #include "..\shared\historycombobox.h"
 #include "..\shared\tabbedpropertypagehost.h"
 
-#include "..\Interfaces\importexportmgr.h"
 #include "..\Interfaces\ImportExportComboBox.h"
 
 class CTDLExportToPage : public CCmdNotifyPropertyPage
@@ -29,6 +29,8 @@ public:
 
 	CString GetFormatTypeID() const { return m_sFormatTypeID; }
 	CString GetExportPath() const; // can be folder or file
+	TDLPD_STYLE GetHtmlStyle() const { return m_nHtmlStyle; }
+
 	BOOL GetExportAllTasklists() const { return (!m_bSingleTaskList && m_bExportAllTasklists); }
 	BOOL GetExportOneFile() const { return (m_bSingleTaskList || m_bExportOneFile || m_bExportToClipboard || !m_bExportAllTasklists); }
 	BOOL GetExportToClipboard() const { return m_bExportToClipboard; }
@@ -38,8 +40,11 @@ protected:
 	//{{AFX_DATA(CExportDlg)
 	enum { IDD = IDD_EXPORT_TO_PAGE };
 
+	CTDLHtmlStyleStatic m_stHtmlOptionIcon;
+	CTDLHtmlStyleComboBox m_cbHtmlOptions;
 	CImportExportComboBox m_cbFormat;
 	CFileEdit	m_eExportPath;
+
 	BOOL		m_bExportAllTasklists;
 	BOOL		m_bExportOneFile;
 	BOOL		m_bExportToClipboard;
@@ -51,8 +56,9 @@ protected:
 	CString m_sFolderPath, m_sFilePath, m_sOrgFilePath, m_sOrgFolderPath, m_sMultiFilePath;
 	CString m_sFormatTypeID;
 	CString m_sPrefsKey;
+	TDLPD_STYLE m_nHtmlStyle;
 
-	const CImportExportMgr& m_mgrImportExport;
+	const CTDCImportExportMgr& m_mgrImportExport;
 
 	// Overrides
 	// ClassWizard generated virtual function overrides
@@ -73,10 +79,12 @@ protected:
 	afx_msg void OnChangeExportpath();
 	afx_msg void OnExportToClipboardOrPath();
 	//}}AFX_MSG
+	afx_msg void OnSelChangeHtmlOption();
 	DECLARE_MESSAGE_MAP()
 
 	void EnsureExtension(CString& sPathName, LPCTSTR szFormatTypeID, BOOL bRemovePrevExt = TRUE) const;
 	void UpdateExtension(CString& sPathName, LPCTSTR szFromTypeID, LPCTSTR szToTypeID) const;
+	void UpdateHtmlOptionsVisibility();
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -144,6 +152,7 @@ public:
 
 	CString GetFormatTypeID() const { return m_pageTo.GetFormatTypeID(); }
 	CString GetExportPath() const { return m_pageTo.GetExportPath(); }
+	TDLPD_STYLE GetHtmlStyle() const { return m_pageTo.GetHtmlStyle(); }
 	BOOL GetExportAllTasklists() const { return m_pageTo.GetExportAllTasklists(); }
 	BOOL GetExportOneFile() const { return m_pageTo.GetExportOneFile(); }
 	BOOL GetExportToClipboard() const { return m_pageTo.GetExportToClipboard(); }

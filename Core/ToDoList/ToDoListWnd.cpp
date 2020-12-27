@@ -6506,8 +6506,8 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			CTaskFile tasks;
 			GetTasks(tdc, TRUE, FALSE, dlg.GetTaskSelection(), tasks, NULL);
 
-			tasks.SetMetaData(TDL_EXPORTSTYLE, Misc::Format(nStyle));
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
+			tasks.SetHtmlExportStyle(nStyle);
 
 			// save intermediate tasklist to file as required
 			LogIntermediateTaskList(tasks);
@@ -9934,6 +9934,7 @@ void CToDoListWnd::OnExport()
 
 		// add report details
 		tasks.SetReportDetails(dialog.GetExportTitle(), dialog.GetExportDate());
+		tasks.SetHtmlExportStyle(dialog.GetHtmlStyle());
 		
 		// save intermediate tasklist to file as required
 		LogIntermediateTaskList(tasks);
@@ -9974,6 +9975,7 @@ void CToDoListWnd::OnExport()
 				
 				// add report details
 				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
+				tasks.SetHtmlExportStyle(dialog.GetHtmlStyle());
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks);
@@ -10057,6 +10059,7 @@ void CToDoListWnd::OnExport()
 				
 				// add report details
 				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
+				tasks.SetHtmlExportStyle(dialog.GetHtmlStyle());
 
 				// save intermediate tasklist to file as required
 				LogIntermediateTaskList(tasks);

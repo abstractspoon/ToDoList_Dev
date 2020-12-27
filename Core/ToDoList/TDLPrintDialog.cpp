@@ -24,6 +24,67 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+BEGIN_MESSAGE_MAP(CTDLHtmlStyleComboBox, CComboBox)
+	ON_WM_CREATE()
+END_MESSAGE_MAP()
+
+void CTDLHtmlStyleComboBox::PreSubclassWindow()
+{
+	CComboBox::PreSubclassWindow();
+
+	BuildCombo();
+}
+
+int CTDLHtmlStyleComboBox::OnCreate(LPCREATESTRUCT lpCreateStruct)
+{
+	if (CComboBox::OnCreate(lpCreateStruct) == -1)
+		return -1;
+
+	BuildCombo();
+
+	return 0;
+}
+
+void CTDLHtmlStyleComboBox::BuildCombo()
+{
+	if (GetCount() == 0)
+	{
+		CDialogHelper::AddString(*this, _T("Wrapped"), TDLPDS_WRAP);
+		CDialogHelper::AddString(*this, _T("Paragraph"), TDLPDS_PARA);
+		CDialogHelper::AddString(*this, _T("Table"), TDLPDS_TABLE);
+	}
+}
+
+void CTDLHtmlStyleComboBox::DDX(CDataExchange* pDX, TDLPD_STYLE& value)
+{
+	CDialogHelper::DDX_CBData(pDX, *this, value, TDLPDS_WRAP);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+void CTDLHtmlStyleStatic::SetStyle(TDLPD_STYLE nFormat)
+{
+	switch (nFormat)
+	{
+	case TDLPDS_WRAP:
+		SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_WRAP));
+		break;
+
+	case TDLPDS_PARA:
+		SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_PARA));
+		break;
+
+	case TDLPDS_TABLE:
+		SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_TABLE));
+		break;
+
+	default:
+		ASSERT(0);
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 enum
 {
 	OPT_STYLESHEET = 0,
@@ -34,7 +95,6 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLPrintDialog dialog
-
 
 CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, 
 								   BOOL bPreview, 
@@ -167,15 +227,16 @@ void CTDLPrintStylePage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_STYLE_STYLESHEET, m_nStyleOption);
 
 	m_cbOtherExporters.DDX(pDX, m_sOtherExporterTypeID);
+	m_cbSimpleOptions.DDX(pDX, m_nSimpleStyle);
 
-	CDialogHelper::DDX_CBData(pDX, m_cbSimpleOptions, m_nSimpleStyle, TDLPDS_WRAP);
+	m_stSimpleIcon.SetStyle(m_nSimpleStyle);
 }
 
 
 BEGIN_MESSAGE_MAP(CTDLPrintStylePage, CPropertyPage)
 	//{{AFX_MSG_MAP(CTDLPrintStylePage)
-	ON_CBN_SELCHANGE(IDC_SIMPLEPAGE_OPTIONS, OnSelchangeSimplePageOption)
 	//}}AFX_MSG_MAP
+	ON_CBN_SELCHANGE(IDC_SIMPLEPAGE_OPTIONS, OnSelchangeSimplePageOption)
 	ON_EN_CHANGE(IDC_STYLESHEET, OnChangeStylesheet)
 	ON_BN_CLICKED(IDC_STYLE_IMAGE, OnChangeStyle)
 	ON_BN_CLICKED(IDC_STYLE_STYLESHEET, OnChangeStyle)
@@ -222,11 +283,7 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 		m_cbOtherExporters.SetCurSel(0);
 		m_sOtherExporterTypeID = m_cbOtherExporters.GetSelectedTypeID();
 	}
-
-	CDialogHelper::AddString(m_cbSimpleOptions, _T("Wrapped"), TDLPDS_WRAP);
-	CDialogHelper::AddString(m_cbSimpleOptions, _T("Paragraph"), TDLPDS_PARA);
-	CDialogHelper::AddString(m_cbSimpleOptions, _T("Table"), TDLPDS_TABLE);
-
+	
 	TDLPD_STYLE nExportStyle = CPreferences().GetProfileEnum(m_sPrefsKey, _T("ExportStyle"), TDLPDS_WRAP);
 
 	switch (nExportStyle)
@@ -256,9 +313,6 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 
 	UpdateData(FALSE);
 	EnableDisableControls();
-
-	CDialogHelper::SelectItemByData(m_cbSimpleOptions, m_nSimpleStyle);
-	OnSelchangeSimplePageOption();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 				  // EXCEPTION: OCX Property Pages should return FALSE
@@ -421,21 +475,7 @@ void CTDLPrintStylePage::OnConfigureStylesheet()
 
 void CTDLPrintStylePage::OnSelchangeSimplePageOption()
 {
-	// Update the associated icon
-	switch (CDialogHelper::GetSelectedItemData(m_cbSimpleOptions, TDLPDS_WRAP))
-	{
-	case TDLPDS_WRAP:
-		m_stSimpleIcon.SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_WRAP));
-		break;
-
-	case TDLPDS_PARA:
-		m_stSimpleIcon.SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_PARA));
-		break;
-
-	case TDLPDS_TABLE:
-		m_stSimpleIcon.SetIcon(AfxGetApp()->LoadIcon(IDI_STYLE_TABLE));
-		break;
-	}
+	UpdateData();
 }
 
 /////////////////////////////////////////////////////////////////////////////
