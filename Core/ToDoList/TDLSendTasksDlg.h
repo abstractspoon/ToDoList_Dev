@@ -8,10 +8,10 @@
 //
 
 #include "TaskSelectionDlg.h"
-#include "TDLDialog.h"
+#include "TDLPrintDialog.h"
+#include "TDCImportExportMgr.h"
 
 #include "..\Interfaces\ImportExportComboBox.h"
-#include "..\Interfaces\importexportmgr.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -32,36 +32,49 @@ public:
 					const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);   // standard constructor
 
 	TD_SENDAS GetSendAs() const { return (TD_SENDAS)m_nSendTasksAsOption; }
-	CString GetFormatTypeID() { return m_sFormatTypeID; }
+	CString GetFormatTypeID() const { return m_sFormatTypeID; }
+	TDLPD_STYLE GetHtmlStyle() const { return m_nHtmlStyle; } 
 
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
 
 protected:
-    CTaskSelectionDlg m_dlgTaskSel;
 // Dialog Data
 	//{{AFX_DATA(CTDLSendTasksDlg)
 	enum { IDD = IDD_SENDTASKS_DIALOG };
-	int		m_nSendTasksAsOption;
-	CString		m_sFormatTypeID;
 	//}}AFX_DATA
-	CImportExportComboBox m_cbFormat;
 
+	TDLPD_STYLE m_nHtmlStyle;
+	int	m_nSendTasksAsOption;
+	CString	m_sFormatTypeID;
+
+	CImportExportComboBox m_cbFormat;
+	CTaskSelectionDlg m_dlgTaskSel;
+	CTDLHtmlStyleStatic m_stHtmlOptionIcon;
+	CTDLHtmlStyleComboBox m_cbHtmlOptions;
+
+	const CTDCImportExportMgr& m_mgrImportExport;
+
+protected:
 // Overrides
 	virtual void OnOK();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLSendTasksDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-
 	// Generated message map functions
 	//{{AFX_MSG(CTDLSendTasksDlg)
-	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
+	afx_msg void OnSelChangeFormat();
+	afx_msg void OnSelChangeHtmlStyle();
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	void UpdateHtmlOptionsVisibility();
+
 };
 
 //{{AFX_INSERT_LOCATION}}

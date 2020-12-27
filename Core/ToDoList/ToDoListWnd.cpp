@@ -12548,6 +12548,8 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		CTaskFile tasks;
 		GetTasks(tdc, bHtmlComments, FALSE, taskSel, tasks, sImgFolder);
 
+		tasks.SetHtmlExportStyle(dialog.GetHtmlStyle());
+
 		// Export them
 		if (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE) != IIER_SUCCESS)
 		{
