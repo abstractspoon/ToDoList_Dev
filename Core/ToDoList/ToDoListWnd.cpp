@@ -5690,7 +5690,7 @@ BOOL CToDoListWnd::ImportFile(LPCTSTR szFilePath, BOOL bSilent)
 
 	CTaskFile tasks;
 
-	if (m_mgrImportExport.ImportTaskList(szFilePath, &tasks, nImporter, bSilent) != IIER_SUCCESS)
+	if (m_mgrImportExport.ImportTaskList(szFilePath, tasks, nImporter, bSilent) != IIER_SUCCESS)
 		return FALSE;
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
@@ -8986,7 +8986,7 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromText, const CString& sImportFrom,
 	// do the import
 	DOPROGRESS(IDS_IMPORTPROGRESS);
 
-	IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ImportTaskList(sImportPath, &tasks, nImporter);
+	IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ImportTaskList(sImportPath, tasks, nImporter, FALSE);
 	BOOL bSomeSuceeded = FALSE;
 
 	if (tasks.GetTaskCount())
@@ -9987,7 +9987,7 @@ void CToDoListWnd::OnExport()
 		Resize();
 
 		// Do the export
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(&taskFiles, sExportPath, nExporter, FALSE);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(taskFiles, sExportPath, nExporter, FALSE);
 
 		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	}

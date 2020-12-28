@@ -4,14 +4,12 @@
 
 #include "stdafx.h"
 #include "ImportExportMgr.h"
+#include "ITaskList.h"
 
 #include "..\shared\filemisc.h"
 #include "..\shared\localizer.h"
 #include "..\shared\misc.h"
 #include "..\shared\osversion.h"
-
-#include "..\Interfaces\ITaskList.h"
-#include "..\Interfaces\IImportExport.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
