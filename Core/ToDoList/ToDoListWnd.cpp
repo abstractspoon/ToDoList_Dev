@@ -6494,7 +6494,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks);
 
 			// export
-			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, 0) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, IIEF_PRINTING) == IIER_SUCCESS);
 		}
 		break;
 
@@ -6513,7 +6513,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks);
 
 			// export
-			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML, IIEF_PRINTING) == IIER_SUCCESS);
 		}
 		break;
 	}
