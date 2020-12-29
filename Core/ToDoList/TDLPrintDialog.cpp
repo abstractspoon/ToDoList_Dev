@@ -306,7 +306,7 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 			m_nStyleOption = OPT_SIMPLE;
 		break;
 
-	case TDLPDS_OTHEREXPORTER:
+	case TDLPDS_OTHERHTMLEXPORTER:
 		m_nStyleOption = OPT_OTHEREXPORTER;
 		break;
 	}
@@ -399,7 +399,7 @@ TDLPD_STYLE CTDLPrintStylePage::GetExportStyle() const
 
 		case OPT_OTHEREXPORTER:
 			if (GetOtherExporterTypeID(sUnused))
-				return TDLPDS_OTHEREXPORTER;
+				return TDLPDS_OTHERHTMLEXPORTER;
 			else
 				ASSERT(0);
 			break;

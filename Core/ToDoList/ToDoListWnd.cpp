@@ -6480,7 +6480,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		}
 		break;
 
-	case TDLPDS_OTHEREXPORTER:
+	case TDLPDS_OTHERHTMLEXPORTER:
 		{
 			CString sExporterTypeID;
 			VERIFY(dlg.GetOtherExporterTypeID(sExporterTypeID));

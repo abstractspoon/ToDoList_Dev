@@ -82,7 +82,7 @@ enum TDLPD_STYLE
 	TDLPDS_TABLE,
 	TDLPDS_PARA,
 	TDLPDS_IMAGE,
-	TDLPDS_OTHEREXPORTER,
+	TDLPDS_OTHERHTMLEXPORTER,
 };
 
 /////////////////////////////////////////////////////////////////////////////
