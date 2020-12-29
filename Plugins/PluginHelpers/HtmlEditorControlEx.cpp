@@ -25,8 +25,8 @@ HtmlEditorControlEx::HtmlEditorControlEx(Drawing::Font^ font, Translator^ trans,
 {
 	m_ControlsFont = font;
 
-	m_toolbarRenderer = gcnew UIThemeToolbarRenderer();
-	m_toolbarRenderer->SetUITheme(gcnew UITheme());
+	m_ToolbarRenderer = gcnew UIThemeToolbarRenderer();
+	m_ToolbarRenderer->SetUITheme(gcnew UITheme());
 
 	if (trans != nullptr)
 		m_Trans = trans;
