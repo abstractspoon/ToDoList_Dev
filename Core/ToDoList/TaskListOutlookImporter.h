@@ -38,7 +38,7 @@ public:
 	LPCTSTR GetTypeID() const { return OUTLOOKIMPORT_TYPEID; }
 	HICON GetIcon() const { return m_icon; }
 	
-	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 	
 protected:
 	CIcon m_icon;

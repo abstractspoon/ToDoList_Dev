@@ -128,7 +128,7 @@ void CiCalImporter::SetLocalizer(ITransText* /*pTT*/)
 
 #define CHECK_STATE(cur_state, new_state) {	if (nState == cur_state	nState = new_state;	else nState = ICIS_ERROR; }
 
-IIMPORTEXPORT_RESULT CiCalImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CiCalImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 

@@ -348,7 +348,7 @@ BOOL CImportExportMgr::ExporterSupportsHtmlComments(int nExporter) const
 	return FALSE;
 }
 
-IIMPORTEXPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, BOOL bSilent, IPreferences* pPrefs) const
+IIMPORTEXPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskList* pDestTasks, int nByImporter, DWORD dwFlags, IPreferences* pPrefs) const
 {
 	Initialize(); // initialize on demand
 
@@ -358,31 +358,31 @@ IIMPORTEXPORT_RESULT CImportExportMgr::ImportTaskList(LPCTSTR szSrcFile, ITaskLi
 	CWaitCursor cursor;
 
 	ASSERT (m_aImporters[nByImporter] != NULL);
-	return m_aImporters[nByImporter]->Import(szSrcFile, pDestTasks, (bSilent != FALSE), pPrefs, GetImporterPreferenceKey(nByImporter));
+	return m_aImporters[nByImporter]->Import(szSrcFile, pDestTasks, dwFlags, pPrefs, GetImporterPreferenceKey(nByImporter));
 }
 
-IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
+IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskList(const ITaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, DWORD dwFlags, IPreferences* pPrefs) const
 {
 	Initialize(); // initialize on demand
 
 	if (nByExporter >= 0 && nByExporter < m_aExporters.GetSize())
 	{
 		ASSERT (m_aExporters[nByExporter] != NULL);
-		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, (bSilent != FALSE), pPrefs, GetExporterPreferenceKey(nByExporter));
+		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, dwFlags, pPrefs, GetExporterPreferenceKey(nByExporter));
 	}
 
 	// else
 	return IIER_OTHER;
 }
 
-IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, BOOL bSilent, IPreferences* pPrefs) const
+IIMPORTEXPORT_RESULT CImportExportMgr::ExportTaskLists(const IMultiTaskList* pSrcTasks, LPCTSTR szDestFile, int nByExporter, DWORD dwFlags, IPreferences* pPrefs) const
 {
 	Initialize(); // initialize on demand
 
 	if (nByExporter >= 0 && nByExporter < m_aExporters.GetSize())
 	{
 		ASSERT (m_aExporters[nByExporter] != NULL);
-		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, (bSilent != FALSE), pPrefs, GetExporterPreferenceKey(nByExporter));
+		return m_aExporters[nByExporter]->Export(pSrcTasks, szDestFile, dwFlags, pPrefs, GetExporterPreferenceKey(nByExporter));
 	}
 
 	// else

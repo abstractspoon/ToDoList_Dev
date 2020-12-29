@@ -6494,7 +6494,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks);
 
 			// export
-			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, FALSE) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, 0) == IIER_SUCCESS);
 		}
 		break;
 
@@ -9940,7 +9940,7 @@ void CToDoListWnd::OnExport()
 		LogIntermediateTaskList(tasks);
 
 		// Do the export
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nExporter, FALSE);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nExporter, 0);
 
 		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	} 
@@ -9987,7 +9987,7 @@ void CToDoListWnd::OnExport()
 		Resize();
 
 		// Do the export
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(taskFiles, sExportPath, nExporter, FALSE);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskLists(taskFiles, sExportPath, nExporter, 0);
 
 		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	}
@@ -10065,7 +10065,7 @@ void CToDoListWnd::OnExport()
 				LogIntermediateTaskList(tasks);
 
 				// Do the export
-				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nExporter, FALSE);
+				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nExporter, 0);
 
 				// Show error messages but that's all
 				HandleExportTasklistResult(nRes, _T(""), FALSE, FALSE);
@@ -12551,7 +12551,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		tasks.SetHtmlExportStyle(dialog.GetHtmlStyle());
 
 		// Export them
-		if (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, FALSE) != IIER_SUCCESS)
+		if (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, 0) != IIER_SUCCESS)
 		{
 			// Display error message
 			// TODO

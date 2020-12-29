@@ -41,7 +41,7 @@ namespace HTMLReportExporter
 			return m_Template.HasContents();
 		}
 
-		public bool Export(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
+		public bool Export(TaskList tasks, string destFilePath, bool silent, bool printing, Preferences prefs, string sKey)
 		{
 			if (!InitConsts(tasks, destFilePath, silent, prefs, sKey))
 				return false;

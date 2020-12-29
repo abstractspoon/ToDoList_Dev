@@ -36,8 +36,8 @@ public:
 	LPCTSTR GetFileExtension() const;
 	LPCWSTR GetTypeID() const { return _T("BD28EDEE-0F1F-4AC9-B083-9A033E473181"); }
 
-	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
-	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CIcon m_icon;
@@ -54,7 +54,7 @@ protected:
 	void SetupDisplay(CXmlItem* pDestPrj);
 	void SetupCalendar(CXmlItem* pDestPrj);
 	void ExportDependencies(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, CXmlItem* pDestPrj, BOOL bAndSiblings);
-	bool InitConsts(const ITASKLISTBASE* pTaskFile, bool bSilent, const IPreferences* pPrefs, LPCTSTR szKey);
+	bool InitConsts(const ITASKLISTBASE* pTaskFile, DWORD dwFlags, const IPreferences* pPrefs, LPCTSTR szKey);
 
 	static void GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTask, time64_t& tEarliestStart, time64_t& tLatestDue, time64_t& tLatestDone);
 	static int GetGPTaskID(DWORD dwTDLTaskID);

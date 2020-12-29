@@ -57,7 +57,7 @@ LPCTSTR CGPImporter::GetFileExtension() const
 	return GP_FILEEXT;
 }
 
-IIMPORTEXPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -69,7 +69,7 @@ IIMPORTEXPORT_RESULT CGPImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDest
 		return IIER_BADINTERFACE;
 	}
 
-	if (!InitConsts(bSilent, pPrefs, szKey))
+	if (!InitConsts(dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 	
 	CXmlFile fileSrc;
@@ -364,7 +364,7 @@ void CGPImporter::BuildResourceMap(const CXmlItem* pXISrcPrj)
 	}
 }
 
-bool CGPImporter::InitConsts(bool /*bSilent*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
+bool CGPImporter::InitConsts(DWORD /*dwFlags*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	CString sPrefKey;
 	sPrefKey.Format(_T("FileStates\\Introduction.tdl\\UIExtensions\\%s"), GANTTVIEW_ID);

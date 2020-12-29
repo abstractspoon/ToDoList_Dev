@@ -35,7 +35,7 @@ void CPlainTextImporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-bool CPlainTextImporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CPlainTextImporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -44,6 +44,8 @@ bool CPlainTextImporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR 
 
 	WANTPROJECT = pPrefs->GetProfileInt(szKey, _T("IncludeProject"), FALSE);
 	INDENT = pPrefs->GetProfileString(szKey, _T("Indent"), _T("  "));
+
+	BOOL bSilent = ((dwFlags & IIEF_SILENT) != 0);
 
 	if (!bSilent)
 	{
@@ -62,7 +64,7 @@ bool CPlainTextImporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR 
 	return true;
 }
 
-IIMPORTEXPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	ITaskList8* pTasks = GetITLInterface<ITaskList8>(pDestTaskFile, IID_TASKLIST8);
 	
@@ -72,7 +74,7 @@ IIMPORTEXPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList
 		return IIER_BADINTERFACE;
 	}
 	
-	if (!InitConsts(bSilent, pPrefs, szKey))
+	if (!InitConsts(dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	CStdioFileEx file;

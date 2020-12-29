@@ -34,7 +34,7 @@ public:
 	LPCWSTR GetTypeID() const { return _T("48AE3CCE_E042_432D_B5DB_D7E310CF99CE"); }
 	HICON GetIcon() const { return m_icon; }
 
-	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CIcon m_icon;

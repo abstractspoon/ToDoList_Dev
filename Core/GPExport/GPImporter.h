@@ -35,7 +35,7 @@ public:
 	LPCWSTR GetTypeID() const { return _T("7B3A9934_69F0_46D5_88B4_C84D715772FC"); }
 	HICON GetIcon() const { return m_icon; }
 
-	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CIcon m_icon;
@@ -49,7 +49,7 @@ protected:
 	void BuildResourceMap(const CXmlItem* pXISrcPrj);
 	void FixupDependencies(const CXmlItem* pXISrcTask, ITASKLISTBASE* pDestTaskFile, BOOL bAndSiblings);
 	void FixupResourceAllocations(const CXmlItem* pXISrcPrj, ITASKLISTBASE* pDestTaskFile);
-	bool InitConsts(bool bSilent, const IPreferences* pPrefs, LPCTSTR szKey);
+	bool InitConsts(DWORD dwFlags, const IPreferences* pPrefs, LPCTSTR szKey);
 	void InitWeekends(const CXmlItem* pXISrcPrj);
 
 	static DWORD GetTDLTaskID(int nGPTaskID);

@@ -79,7 +79,7 @@ LPCWSTR CMarkdeepExporterBridge::GetTypeID() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
    const ITaskList14* pTasks14 = GetITLInterface<ITaskList14>(pSrcTaskFile, IID_TASKLIST14);
 
@@ -98,13 +98,15 @@ IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const ITaskList* pSrcTaskFi
 	msclr::auto_gcroot<MarkdeepExporterCore^> expCore = gcnew MarkdeepExporterCore(typeID.get(), trans.get());
 
 	// do the export
+	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
+
 	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
 		return IIER_SUCCESS;
 
 	return IIER_OTHER;
 }
 
-IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CMarkdeepExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 	return IIER_OTHER;

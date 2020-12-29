@@ -37,18 +37,18 @@ CTaskListCsvExporter::~CTaskListCsvExporter()
 	
 }
 
-IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_bFirstHeader = TRUE;
 
-	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, bSilent, pPrefs, szKey);
+	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
-IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListCsvExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	m_bFirstHeader = TRUE;
 
-	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, bSilent, pPrefs, szKey);
+	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
 IIMPORTEXPORT_RESULT CTaskListCsvExporter::ExportOutput(LPCTSTR szDestFilePath, const CString& sOutput) const
@@ -75,10 +75,10 @@ CString CTaskListCsvExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM 
 	return sTask;
 }
 
-bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// base consts
-	if (!CTaskListExporterBase::InitConsts(pTasks, szDestFilePath, bSilent, pPrefs, szKey))
+	if (!CTaskListExporterBase::InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
 		return false;
 
 	ISODATES = pPrefs->GetProfileInt(_T("Preferences"), _T("DisplayDatesInISO"), FALSE);
@@ -92,8 +92,13 @@ bool CTaskListCsvExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDes
 
 	CTDLCsvImportExportDlg dialog(szDestFilePath, ARRATTRIBUTES, pPrefs, szKey);
 	
-	if (!bSilent && dialog.DoModal() != IDOK)
-		return false;
+	BOOL bSilent = ((dwFlags & IIEF_SILENT) != 0);
+
+	if (!bSilent)
+	{
+		if (dialog.DoModal() != IDOK)
+			return false;
+	}
 	
 	VERIFY(dialog.GetColumnMapping(m_aColumnMapping));
 	DELIM = dialog.GetDelimiter();

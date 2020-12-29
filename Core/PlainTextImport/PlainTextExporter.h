@@ -30,15 +30,15 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("txt"); }
 	LPCWSTR GetTypeID() const { return _T("69016DB3_5424_49DF_A877_962E83BC6E6B"); }
 
-	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
-	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CString INDENT;
 	BOOL WANTPROJECT;
 
 protected:
-	bool InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	bool InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 	void ExportTask(const ITaskList* pSrcTaskFile, HTASKITEM hTask, 
 					CStdioFile& fileOut, int nDepth, BOOL bAndSiblings);
 };

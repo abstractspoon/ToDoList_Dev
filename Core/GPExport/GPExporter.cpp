@@ -61,7 +61,7 @@ LPCTSTR CGPExporter::GetFileExtension() const
 	return GP_FILEEXT;
 }
 
-IIMPORTEXPORT_RESULT CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -73,7 +73,7 @@ IIMPORTEXPORT_RESULT CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR 
 		return IIER_BADINTERFACE;
 	}
 
-	if (!InitConsts(pTasks, bSilent, pPrefs, szKey))
+	if (!InitConsts(pTasks, dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	CXmlFile fileDest(_T("project"));
@@ -105,7 +105,7 @@ IIMPORTEXPORT_RESULT CGPExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR 
 	return IIER_SUCCESS;
 }
 
-IIMPORTEXPORT_RESULT CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -117,7 +117,7 @@ IIMPORTEXPORT_RESULT CGPExporter::Export(const IMultiTaskList* pSrcTaskFile, LPC
 		return IIER_BADINTERFACE;
 	}
 
-	if (!InitConsts(pTasks, bSilent, pPrefs, szKey))
+	if (!InitConsts(pTasks, dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	CXmlFile fileDest(_T("project"));
@@ -598,7 +598,7 @@ void CGPExporter::GetTaskDates(const ITASKLISTBASE* pSrcTaskFile, HTASKITEM hTas
 	}
 }
 
-bool CGPExporter::InitConsts(const ITASKLISTBASE* pTaskFile, bool /*bSilent*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
+bool CGPExporter::InitConsts(const ITASKLISTBASE* pTaskFile, DWORD /*dwFlags*/, const IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	MILESTONETAG = CEnString(_T("MileStone")); // default
 

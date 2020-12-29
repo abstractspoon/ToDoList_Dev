@@ -26,7 +26,7 @@ public:
 	LPCWSTR GetTypeID() const { return _T("36A40C31-D9DD-4235-9720-5F16FA66C677"); }
 	HICON GetIcon() const { return NULL; }
 	
-	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CString INDENT;
@@ -34,7 +34,7 @@ protected:
 	BOOL WANTPROJECT;
 
 protected:
-	bool InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	bool InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 	int GetDepth(const CString& sLine); // returns the indent
 	BOOL GetTitleComments(const CString& sLine, CString& sTitle, CString& sComments);
 };

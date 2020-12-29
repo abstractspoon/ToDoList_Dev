@@ -162,6 +162,14 @@ enum IIMPORTEXPORT_RESULT
 
 //////////////////////////////////////////////////////////////////////
 
+enum // IIMPORTEXPORT_FLAGS
+{
+	IIEF_SILENT			= 0x0001,
+	IIEF_PRINTING		= 0X0002, // Export only
+};
+
+//////////////////////////////////////////////////////////////////////
+
 class IImportTasklist
 {
 public:
@@ -175,7 +183,7 @@ public:
 	virtual LPCWSTR GetFileExtension() const = 0;
 	virtual LPCWSTR GetTypeID() const = 0;
 
-	virtual IIMPORTEXPORT_RESULT Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual IIMPORTEXPORT_RESULT Import(LPCWSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -194,8 +202,8 @@ public:
 	virtual LPCWSTR GetFileExtension() const = 0;
 	virtual LPCWSTR GetTypeID() const = 0;
 
-	virtual IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
-	virtual IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey) = 0;
+	virtual IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////

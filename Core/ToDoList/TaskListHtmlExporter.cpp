@@ -73,11 +73,11 @@ IIMPORTEXPORT_RESULT CTaskListHtmlExporter::ExportOutput(LPCTSTR szDestFilePath,
 	return CTaskListExporterBase::ExportOutput(szDestFilePath, sHtmlOutput);
 }
 
-bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, bool bSilent, 
+bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDestFilePath, DWORD dwFlags, 
 									   IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// base consts
-	if (!CTaskListExporterBase::InitConsts(pTasks, szDestFilePath, bSilent, pPrefs, szKey))
+	if (!CTaskListExporterBase::InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
 		return false;
 
 	// then ours
@@ -181,14 +181,14 @@ TDLPD_STYLE CTaskListHtmlExporter::ValidateExportStyle(int nStyle)
 	return TDLPDS_WRAP;
 }
 
-IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, bSilent, pPrefs, szKey);
+	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
-IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, bSilent, pPrefs, szKey);
+	return CTaskListExporterBase::Export(pSrcTaskFile, szDestFilePath, dwFlags, pPrefs, szKey);
 }
 
 CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks) const

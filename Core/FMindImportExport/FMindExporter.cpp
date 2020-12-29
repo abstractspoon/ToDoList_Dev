@@ -59,7 +59,7 @@ void CFMindExporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
@@ -95,7 +95,7 @@ IIMPORTEXPORT_RESULT CFMindExporter::Export(const ITaskList* pSrcTaskFile, LPCTS
 	return IIER_SUCCESS;
 }
 
-IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CFMindExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	CXmlFile fileDest(_T("map"));
 	fileDest.SetItemValue(_T("version"), _T("0.9.0"));

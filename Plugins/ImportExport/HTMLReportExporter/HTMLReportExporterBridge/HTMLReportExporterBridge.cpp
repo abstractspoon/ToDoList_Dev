@@ -79,7 +79,7 @@ LPCWSTR CHTMLReportExporterBridge::GetTypeID() const
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-IIMPORTEXPORT_RESULT CHTMLReportExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CHTMLReportExporterBridge::Export(const ITaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// call into out sibling C# module to do the actual work
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
@@ -90,13 +90,16 @@ IIMPORTEXPORT_RESULT CHTMLReportExporterBridge::Export(const ITaskList* pSrcTask
 	msclr::auto_gcroot<HTMLReportExporterCore^> expCore = gcnew HTMLReportExporterCore(typeID.get(), trans.get());
 	
 	// do the export
-	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, prefs.get(), gcnew String(szKey)))
+	bool bSilent = ((dwFlags & IIEF_SILENT) != 0);
+	bool bPrinting = ((dwFlags & IIEF_PRINTING) != 0);
+
+	if (expCore->Export(srcTasks.get(), gcnew String(szDestFilePath), bSilent, bPrinting, prefs.get(), gcnew String(szKey)))
 		return IIER_SUCCESS;
 
 	return IIER_OTHER;
 }
 
-IIMPORTEXPORT_RESULT CHTMLReportExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCWSTR szKey)
+IIMPORTEXPORT_RESULT CHTMLReportExporterBridge::Export(const IMultiTaskList* pSrcTaskFile, LPCWSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 	return IIER_OTHER;

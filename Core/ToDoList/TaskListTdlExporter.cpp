@@ -34,10 +34,10 @@ CTaskListTdlExporter::~CTaskListTdlExporter()
 
 }
 
-IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	if (pSrcTaskFile->GetTaskListCount() == 1)
-		return Export(pSrcTaskFile->GetTaskList(0), szDestFilePath, bSilent, pPrefs, szKey);
+		return Export(pSrcTaskFile->GetTaskList(0), szDestFilePath, dwFlags, pPrefs, szKey);
 
 	// create a single tasklist out of the many
 	CTaskFile tasks;
@@ -103,7 +103,7 @@ IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTask
 	return IIER_SUCCESS;
 }
 
-IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool /*bSilent*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD /*dwFlags*/, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	CTaskFile tasks(pSrcTaskFile);
 

@@ -40,7 +40,7 @@ CTaskListCsvImporter::~CTaskListCsvImporter()
 
 }
 
-bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTasks, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTasks, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	// Build custom attribute mapping
 	CMapStringToString mapCustAttrib;
@@ -52,8 +52,13 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTas
 	// Show mapping dialog
 	CTDLCsvImportExportDlg dialog(szSrcFilePath, mapCustAttrib, pPrefs, szKey);
 
-	if (!bSilent && (dialog.DoModal() != IDOK))
-		return false;
+	BOOL bSilent = ((dwFlags & IIEF_SILENT) != 0);
+
+	if (!bSilent)
+	{
+		if (dialog.DoModal() != IDOK)
+			return false;
+	}
 
 	VERIFY (dialog.GetColumnMapping(m_aColumnMapping));
 	ASSERT (m_aColumnMapping.IsAttributeMapped(TDCA_TASKNAME));
@@ -63,7 +68,7 @@ bool CTaskListCsvImporter::InitConsts(LPCTSTR szSrcFilePath, ITASKLISTBASE* pTas
 	return true;
 }
 
-IIMPORTEXPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pDestTaskFile, IID_TASKLISTBASE);
 
@@ -73,7 +78,7 @@ IIMPORTEXPORT_RESULT CTaskListCsvImporter::Import(LPCTSTR szSrcFilePath, ITaskLi
 		return IIER_BADINTERFACE;
 	}
 	
-	if (!InitConsts(szSrcFilePath, pTasks, bSilent, pPrefs, szKey))
+	if (!InitConsts(szSrcFilePath, pTasks, dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	// Load csv

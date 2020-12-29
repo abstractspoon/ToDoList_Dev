@@ -27,7 +27,7 @@ CTaskListTdlImporter::~CTaskListTdlImporter()
 
 }
 
-IIMPORTEXPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, bool bSilent, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
+IIMPORTEXPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskList* pDestTaskFile, DWORD dwFlags, IPreferences* /*pPrefs*/, LPCTSTR /*szKey*/)
 {
 	if (pDestTaskFile == NULL)
 	{
@@ -35,6 +35,8 @@ IIMPORTEXPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskLi
 		return IIER_BADINTERFACE;
 	}
 	
+	BOOL bSilent = ((dwFlags & IIEF_SILENT) != 0);
+
 	if (!bSilent)
 	{
 		CTDLTasklistImportDlg dialog(szSrcFilePath);
@@ -46,7 +48,7 @@ IIMPORTEXPORT_RESULT CTaskListTdlImporter::Import(LPCTSTR szSrcFilePath, ITaskLi
 		return dialog.GetSelectedTasks(pDestTaskFile);
 	}
 
-	// else 
+	// else all tasks
 	CTaskFile tasks;
 
 	if (!tasks.Load(szSrcFilePath))

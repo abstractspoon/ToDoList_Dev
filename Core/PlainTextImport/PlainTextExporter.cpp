@@ -40,7 +40,7 @@ void CPlainTextExporter::SetLocalizer(ITransText* /*pTT*/)
 	//CLocalizer::Initialize(pTT);
 }
 
-bool CPlainTextExporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CPlainTextExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -61,6 +61,8 @@ bool CPlainTextExporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR 
 			INDENT = '\t';
 	}
 
+	BOOL bSilent = ((dwFlags & IIEF_SILENT) != 0);
+
 	if (!bSilent)
 	{
 		COptionsDlg dlg(FALSE, WANTPROJECT, INDENT);
@@ -78,9 +80,9 @@ bool CPlainTextExporter::InitConsts(bool bSilent, IPreferences* pPrefs, LPCTSTR 
 	return true;
 }
 
-IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	if (!InitConsts(bSilent, pPrefs, szKey))
+	if (!InitConsts(dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	CStdioFileEx fileOut;
@@ -111,9 +113,9 @@ IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const ITaskList* pSrcTaskFile, L
 	return IIER_SUCCESS;
 }
 
-IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CPlainTextExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	if (!InitConsts(bSilent, pPrefs, szKey))
+	if (!InitConsts(dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	CStdioFileEx fileOut;

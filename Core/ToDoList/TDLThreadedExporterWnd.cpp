@@ -214,7 +214,7 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 			bSuccess = (IIER_SUCCESS == pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, 
 																			pExport->sExportPath, 
 																			pExport->nExporter, 
-																			TRUE, 
+																			IIEF_SILENT, 
 																			&prefsWrap));
 			if (!bSuccess)
 				FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Due tasks) failed"));
@@ -224,7 +224,7 @@ UINT CTDLThreadedExporterWnd::ExportThreadProc(LPVOID pParam)
 			bSuccess = (IIER_SUCCESS == pExport->pImpExpMgr->ExportTaskList(&pExport->tasks, 
 																			pExport->sExportPath, 
 																			pExport->nExporter, 
-																			TRUE));
+																			IIEF_SILENT));
 			if (!bSuccess)
 				FileMisc::LogTextRaw(_T("CTDLThreadedExporterWnd::ExportThreadProc(Export) failed"));
 		}

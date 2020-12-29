@@ -34,8 +34,8 @@ public:
 	LPCTSTR GetFileExtension() const { return _T("ics"); }
 	LPCWSTR GetTypeID() const { return _T("5CDCA505_6C5C_4342_8F80_67368C7EE6A5"); }
 
-	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
-	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
+	IIMPORTEXPORT_RESULT Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 
 protected:
 	CIcon m_icon;
@@ -44,7 +44,7 @@ protected:
 protected:
 	int ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID, 
 					CStdioFile& fileOut, BOOL bAndSiblings);
-	bool InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey);
+	bool InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey);
 
 	BOOL GetTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, COleDateTime& dtStart, COleDateTime& dtEnd, COleDateTime& dtDue) const;
 

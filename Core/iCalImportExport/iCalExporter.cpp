@@ -49,7 +49,7 @@ void CiCalExporter::WriteHeader(CStdioFileEx& fileOut)
 	WriteString(fileOut, _T("VERSION:2.0"));
 }
 
-IIMPORTEXPORT_RESULT CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
 
@@ -59,7 +59,7 @@ IIMPORTEXPORT_RESULT CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTST
 		return IIER_BADINTERFACE;
 	}
 
-	if (!InitConsts(bSilent, pPrefs, szKey))
+	if (!InitConsts(dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	CStdioFileEx fileOut;
@@ -82,9 +82,9 @@ IIMPORTEXPORT_RESULT CiCalExporter::Export(const ITaskList* pSrcTaskFile, LPCTST
 	return IIER_SUCCESS;
 }
 
-IIMPORTEXPORT_RESULT CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, bool bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+IIMPORTEXPORT_RESULT CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
-	if (!InitConsts(bSilent, pPrefs, szKey))
+	if (!InitConsts(dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 	
 	CStdioFileEx fileOut;
@@ -121,7 +121,7 @@ IIMPORTEXPORT_RESULT CiCalExporter::Export(const IMultiTaskList* pSrcTaskFile, L
 	return IIER_SUCCESS;
 }
 
-bool CiCalExporter::InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey)
+bool CiCalExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 
@@ -131,6 +131,8 @@ bool CiCalExporter::InitConsts(BOOL bSilent, IPreferences* pPrefs, LPCTSTR szKey
 	sKey += _T("\\iCalExporter");
 
 	EXPORTASTODO = pPrefs->GetProfileInt(szKey, _T("ExportAsTodos"), FALSE);
+
+	BOOL bSilent = ((dwFlags & IIEF_SILENT) != 0);
 
 	if (!bSilent)
 	{

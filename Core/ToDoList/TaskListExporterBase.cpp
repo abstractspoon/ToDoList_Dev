@@ -99,7 +99,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath,
 	return IIER_SUCCESS;
 }
 
-bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, bool /*bSilent*/, 
+bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, DWORD /*dwFlags*/, 
 									   IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
@@ -110,7 +110,7 @@ bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*sz
 	return true;
 }
 
-IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, 
+IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, 
 								   IPreferences* pPrefs, LPCTSTR szKey)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile->GetTaskList(0), IID_TASKLISTBASE);
@@ -124,7 +124,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTas
 	// else
 	MULTIFILE = TRUE;
 
-	if (!InitConsts(pTasks, szDestFilePath, (bSilent != FALSE), pPrefs, szKey))
+	if (!InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
 	{
 		ASSERT(0);
 		return IIER_CANCELLED;
@@ -157,7 +157,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const IMultiTaskList* pSrcTas
 	return ExportOutput(szDestFilePath, sOutput);
 }
 
-IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, BOOL bSilent, 
+IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, 
 								   IPreferences* pPrefs, LPCTSTR szKey)
 {
 	const ITASKLISTBASE* pTasks = GetITLInterface<ITASKLISTBASE>(pSrcTaskFile, IID_TASKLISTBASE);
@@ -169,7 +169,7 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::Export(const ITaskList* pSrcTaskFile
 		return IIER_BADINTERFACE;
 	}
 
-	if (!InitConsts(pTasks, szDestFilePath, (bSilent != FALSE), pPrefs, szKey))
+	if (!InitConsts(pTasks, szDestFilePath, dwFlags, pPrefs, szKey))
 		return IIER_CANCELLED;
 
 	// add title block
