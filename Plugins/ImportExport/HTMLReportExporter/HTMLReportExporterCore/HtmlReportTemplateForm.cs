@@ -559,25 +559,12 @@ namespace HTMLReportExporter
 
 		private String BuildPreviewPage()
 		{
-			try
-			{
-				String previewPath = Path.Combine(Path.GetTempPath(), PreviewPageName);
+			String previewPath = Path.Combine(Path.GetTempPath(), PreviewPageName);
 
-				using (var file = new StreamWriter(previewPath))
-				{
-					using (var html = new HtmlTextWriter(file))
-					{
-						var report = new HtmlReportBuilder(m_Trans, m_Tasklist, m_Prefs, m_Template, true);
+			var report = new HtmlReportBuilder(m_Trans, m_Tasklist, m_Prefs, m_Template, true);
 
-						report.BuildReport(html);
-					}
-				}
-
+			if (report.BuildReport(previewPath))
 				return previewPath;
-			}
-			catch (Exception /*e*/)
-			{
-			}
 
 			return String.Empty;
 		}

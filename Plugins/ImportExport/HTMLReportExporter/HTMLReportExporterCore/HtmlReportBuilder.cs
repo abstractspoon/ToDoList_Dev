@@ -55,18 +55,24 @@ namespace HTMLReportExporter
 			Tasks = new TaskTemplateReporter(trans, template.Task, baseIndent, preview);
 		}
 
-		public bool BuildReport(HtmlTextWriter html)
+		public bool BuildReport(string filePath)
 		{
 			try
 			{
-				html.Write(DocType);
-				html.WriteLine();
-				html.RenderBeginTag(HtmlTextWriterTag.Html);
+				using (var file = new System.IO.StreamWriter(filePath))
+				{
+					using (var html = new HtmlTextWriter(file))
+					{
+						html.Write(DocType);
+						html.WriteLine();
+						html.RenderBeginTag(HtmlTextWriterTag.Html);
 
-				WriteHead(html);
-				WriteBody(html);
+						WriteHead(html);
+						WriteBody(html);
 
-				html.RenderEndTag(); // Html
+						html.RenderEndTag(); // Html
+					}
+				}
 			}
 			catch
 			{

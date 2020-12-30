@@ -46,23 +46,9 @@ namespace HTMLReportExporter
 			if (!InitConsts(tasks, destFilePath, silent, prefs, sKey))
 				return false;
 
-			try
-			{
-				using (var file = new System.IO.StreamWriter(destFilePath))
-				{
-					using (var html = new HtmlTextWriter(file))
-					{
-						var report = new HtmlReportBuilder(m_Trans, tasks, prefs, m_Template, false);
+			var report = new HtmlReportBuilder(m_Trans, tasks, prefs, m_Template, false);
 
-						return report.BuildReport(html);
-					}
-				}
-			}
-			catch (Exception /*e*/)
-			{
-			}
-
-			return false;
+			return report.BuildReport(destFilePath);
 		}
 	}
 }
