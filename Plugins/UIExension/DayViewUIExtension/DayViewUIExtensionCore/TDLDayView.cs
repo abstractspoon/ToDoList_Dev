@@ -775,7 +775,7 @@ namespace DayViewUIExtension
 		{
 			e.Graphics.FillRectangle(SystemBrushes.Window, rect);
 
-			if (UIExtension.IsHighContrastActive())
+			if (SystemInformation.HighContrast)
 			{
 				// Draw selection first because it's opaque
 				DrawDaySelection(e, rect, time);

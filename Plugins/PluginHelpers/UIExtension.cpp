@@ -690,11 +690,6 @@ bool UIExtension::SaveImageToFile(Bitmap^ image, String^ filepath)
 	return true;
 }
 
-bool UIExtension::IsHighContrastActive()
-{
-	return (Misc::IsHighContrastActive() != FALSE);
-}
-
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 UIExtension::TaskRecurrences::TaskRecurrences(IntPtr hwndParent) : m_hwndParent(NULL)
