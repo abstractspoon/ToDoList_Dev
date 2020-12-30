@@ -35,6 +35,13 @@ enum TDC_IMPORT_TASKLIST
 	TDCIT_OUTLOOK,
 };
 
+enum // Extended export flags
+{
+	TDCEF_HTMLWRAP	= 0x00010000,
+	TDCEF_HTMLTABLE	= 0X00020000,
+	TDCEF_HTMLPARA	= 0X00040000,
+};
+
 /////////////////////////////////////////////////////////////////////
 
 class CTDCImportExportMgr : public CImportExportMgr  

@@ -14,6 +14,7 @@
 #include "tdcenumcontainers.h"
 #include "tdcswitch.h"
 #include "tdcsort.h"
+#include "tdcimportexportmgr.h"
 
 #include "..\Interfaces\IEnums.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -819,7 +820,18 @@ namespace TDC
 		return TDCF_OTHER;
 	}
 	
+	static DWORD MapPrintToExportStyle(TDLPD_STYLE nStyle)
+	{
+		switch (nStyle)
+		{
+		case TDLPDS_WRAP:	return TDCEF_HTMLWRAP;	
+		case TDLPDS_TABLE:	return TDCEF_HTMLTABLE;	
+		case TDLPDS_PARA:	return TDCEF_HTMLPARA;	
+		}
 
+		// else
+		return 0;
+	}
 }
 
 #endif // AFX_TDCMAP_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

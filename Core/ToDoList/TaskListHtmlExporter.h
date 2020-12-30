@@ -12,6 +12,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "TaskListExporterBase.h"
+#include "TDCImportExportMgr.h"
 
 #include "..\Interfaces\Itasklist.h"
 #include "..\Interfaces\IImportExport.h"
@@ -46,7 +47,7 @@ protected:
 	CString CHARSET, INDENT;
 	CString DEFAULTFONT, HTMLNOTES, TASKLISTLINK;
 	BOOL STRIKETHRUDONE;
-	TDLPD_STYLE EXPORTSTYLE;
+	int EXPORTSTYLE;
 	int COMMENTSPERCENTWIDTH;
 	mutable BOOL ROOT;
 
@@ -71,8 +72,12 @@ protected:
 	// non-virtual internal helper
 	CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sAttribLabel, const CString& sValue, BOOL bEncodeVal) const;
 
+	BOOL IsTableStyle() const		{ return (EXPORTSTYLE == TDCEF_HTMLTABLE); }
+	BOOL IsParagraphStyle() const	{ return (EXPORTSTYLE == TDCEF_HTMLPARA); }
+	BOOL IsWrappedStyle() const		{ return (EXPORTSTYLE == TDCEF_HTMLWRAP); }
+
 	static CString FormatTableCell(const CString& sValue);
-	static TDLPD_STYLE ValidateExportStyle(int nStyle);
+	static int GetExportStyle(DWORD dwFlags);
 };
 
 #endif // !defined(AFX_TASKFILEHTMLEXPORTER_H__E4FD92AB_2BF2_40E3_9C8E_5018A72AEA89__INCLUDED_)

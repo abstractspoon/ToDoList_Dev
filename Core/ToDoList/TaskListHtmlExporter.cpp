@@ -39,13 +39,13 @@ static LPCTSTR SPACE = _T("&nbsp;");
 CTaskListHtmlExporter::CTaskListHtmlExporter() 
 	: 
 	STRIKETHRUDONE(TRUE), 
-	EXPORTSTYLE(TDLPDS_WRAP),
+	EXPORTSTYLE(TDCEF_HTMLWRAP),
 	ROOT(TRUE), 
 	COMMENTSPERCENTWIDTH(30)
 {
 	// override base class ENDL
 	ENDL = "\n";
-	LISTSEPARATOR = (Misc::GetListSeparator() + ' '); // allows wrapping
+	LISTSEPARATOR = (Misc::GetListSeparator() + ' '); // add space to allow wrapping
 }
 
 CTaskListHtmlExporter::~CTaskListHtmlExporter()
@@ -105,7 +105,7 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 	}
 	
 	STRIKETHRUDONE = pPrefs->GetProfileInt(szKey, _T("StrikethroughDone"), TRUE);
-	EXPORTSTYLE = ValidateExportStyle(_ttoi(pTasks->GetMetaData(TDL_EXPORTSTYLE)));
+	EXPORTSTYLE = GetExportStyle(dwFlags);
 
 	if (pPrefs->GetProfileInt(szKey, _T("EnableTDLProtocol"), FALSE))
 	{
@@ -162,23 +162,20 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 			break;
 		}
 	}
-
-
+	
 	return true;
 }
 
-TDLPD_STYLE CTaskListHtmlExporter::ValidateExportStyle(int nStyle)
+int CTaskListHtmlExporter::GetExportStyle(DWORD dwFlags)
 {
-	switch (nStyle)
-	{
-	case TDLPDS_WRAP:
-	case TDLPDS_TABLE:
-	case TDLPDS_PARA:
-		return (TDLPD_STYLE)nStyle;
-	}
+	if (dwFlags & TDCEF_HTMLPARA)
+		return TDCEF_HTMLPARA;
+
+	if (dwFlags & TDCEF_HTMLTABLE)
+		return TDCEF_HTMLTABLE;
 
 	// all else
-	return TDLPDS_WRAP;
+	return TDCEF_HTMLWRAP;
 }
 
 IIMPORTEXPORT_RESULT CTaskListHtmlExporter::Export(const ITaskList* pSrcTaskFile, LPCTSTR szDestFilePath, DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKey)
@@ -215,7 +212,7 @@ CString CTaskListHtmlExporter::FormatTitle(const ITASKLISTBASE* pTasks) const
 
 	sTitleBlock += _T("<p/>");
 	
-	if (EXPORTSTYLE == TDLPDS_TABLE)
+	if (IsTableStyle())
 	{
 		sTitleBlock += _T("<table border=\"1\">\n");
 	}
@@ -227,7 +224,7 @@ CString CTaskListHtmlExporter::FormatHeader(const ITASKLISTBASE* pTasks) const
 {
 	CString sHeader = CTaskListExporterBase::FormatHeader(pTasks);
 
-	if ((EXPORTSTYLE == TDLPDS_TABLE) && !sHeader.IsEmpty())
+	if (IsTableStyle() && !sHeader.IsEmpty())
 	{
 		sHeader = _T("<thead><tr>") + sHeader + _T("</tr></thead>");
 	}
@@ -239,7 +236,7 @@ CString CTaskListHtmlExporter::FormatHeaderItem(TDC_ATTRIBUTE nAttrib, const CSt
 {
 	CString sItem;
 
-	if (EXPORTSTYLE == TDLPDS_TABLE)
+	if (IsTableStyle())
 	{
 		if (nAttrib == TDCA_COMMENTS)
 			sItem.Format(_T("<th width=\"%d%%\">%s</th>"), COMMENTSPERCENTWIDTH, sAttribLabel);
@@ -257,11 +254,13 @@ CString CTaskListHtmlExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 
 	CString sTask = CTaskListExporterBase::ExportTask(pTasks, hTask, nDepth);
 
-	switch (EXPORTSTYLE)
+	if (IsTableStyle())
 	{
-	case TDLPDS_WRAP:
-	case TDLPDS_PARA:
-		// figure out indent
+		sTask = _T("<tr>") + sTask + _T("</tr>");
+	}
+	else // Paragraph and Wrapped
+	{
+		// indent
 		if (pTasks->IsAttributeAvailable(TDCA_POSITION))
 		{
 			if (nDepth > 1)
@@ -277,24 +276,16 @@ CString CTaskListHtmlExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM
 			if (!ROOT)
 				sTask = _T("<li>") + sTask;
 			
-			// handle subtasks
-			if (pTasks->GetFirstTask(hTask)) // at least one sub-task
+			// subtasks
+			if (pTasks->GetFirstTask(hTask))
 				sTask += _T("<ul>");
 		}
 
 		// wrapped tasks without subtasks
-		if ((EXPORTSTYLE == TDLPDS_WRAP) && !pTasks->GetFirstTask(hTask))
+		if (IsWrappedStyle() && !pTasks->GetFirstTask(hTask))
 			sTask += _T("<br>");
 
 		sTask += _T("<br>");
-		break;
-		
-	case TDLPDS_TABLE:
-		sTask = _T("<tr>") + sTask + _T("</tr>");
-		break;
-
-	default:
-		ASSERT(0);
 	}
 
 	return sTask;
@@ -304,24 +295,23 @@ CString CTaskListHtmlExporter::ExportSubtasks(const ITASKLISTBASE* pTasks, HTASK
 {
 	CString sSubtasks = CTaskListExporterBase::ExportSubtasks(pTasks, hTask, nDepth);
 
-	if (!sSubtasks.IsEmpty()) // at least one sub-task
+	if (IsTableStyle())
 	{
-		if (EXPORTSTYLE != TDLPDS_TABLE)
+		if (nDepth == 0) // root
+		{
+			ASSERT(hTask == NULL);
+
+			sSubtasks += _T("</table>\n");
+		}
+	}
+	else // Paragraph and Wrapped
+	{ 
+		if (!sSubtasks.IsEmpty())
 		{
 			if (pTasks->IsAttributeAvailable(TDCA_POSITION))
 				sSubtasks += _T("</blockquote>");
 			else
 				sSubtasks += _T("</ul>");
-		}
-	}
-
-	if (nDepth == 0) // root
-	{
-		ASSERT(hTask == NULL);
-
-		if (EXPORTSTYLE == TDLPDS_TABLE)
-		{
-			sSubtasks += _T("</table>\n");
 		}
 	}
 
@@ -344,7 +334,7 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 		TXT2XML(sAttribVal);
 
 	// Must process empty values in table format
-	if (!sAttribVal.IsEmpty() || (EXPORTSTYLE == TDLPDS_TABLE))
+	if (IsTableStyle() || !sAttribVal.IsEmpty())
 	{
 		switch (nAttrib)
 		{
@@ -360,50 +350,45 @@ CString CTaskListHtmlExporter::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CStr
 				else
 					sFmtAttrib += sAttribVal;
 
-				if (EXPORTSTYLE == TDLPDS_PARA)
+				if (IsParagraphStyle())
 					sFmtAttrib += _T("<br>");
 			}
 			break;
 
 		// all else
 		default:
+			if (IsWrappedStyle())
 			{
-				switch (EXPORTSTYLE)
+				if (nAttrib == TDCA_COMMENTS)
 				{
-				case TDLPDS_WRAP:
-					if (nAttrib == TDCA_COMMENTS)
-					{
-						sFmtAttrib = ENDL + sAttribVal;
-					}
-					else
-					{
-						if (sAttribLabel.IsEmpty())
-							sFmtAttrib.Format(_T(" | %s"), sAttribVal);
-						else
-							sFmtAttrib.Format(_T(" | %s: %s"), sAttribLabel, sAttribVal);
-					}				
-					break;
-					
-				case TDLPDS_TABLE:
-					// special case: custom attrib
-					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
-						sFmtAttrib = FormatTableCell(sAttribVal);
-					else
-						sFmtAttrib = sAttribVal;
-					break;
-					
-				case TDLPDS_PARA:
+					sFmtAttrib = ENDL + sAttribVal;
+				}
+				else
+				{
 					if (sAttribLabel.IsEmpty())
-						sFmtAttrib = sAttribVal;
+						sFmtAttrib.Format(_T(" | %s"), sAttribVal);
 					else
-						sFmtAttrib.Format(_T("%s: %s"), sAttribLabel, sAttribVal);
-
-					if (nAttrib != TDCA_COMMENTS)
-						sFmtAttrib += _T("<br>");
-					break;
+						sFmtAttrib.Format(_T(" | %s: %s"), sAttribLabel, sAttribVal);
 				}
 			}
-			break;
+			else if (IsParagraphStyle())
+			{
+				if (sAttribLabel.IsEmpty())
+					sFmtAttrib = sAttribVal;
+				else
+					sFmtAttrib.Format(_T("%s: %s"), sAttribLabel, sAttribVal);
+
+				if (nAttrib != TDCA_COMMENTS)
+					sFmtAttrib += _T("<br>");
+			}
+			else // Wrapped
+			{
+				// special case: custom attrib
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+					sFmtAttrib = FormatTableCell(sAttribVal);
+				else
+					sFmtAttrib = sAttribVal;
+			}
 		}
 	}
 
@@ -426,18 +411,18 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	switch (nAttrib)
 	{
 	case TDCA_POSITION:
-		// Indent subtasks in table view only
-		if (EXPORTSTYLE == TDLPDS_TABLE)
+		if (IsTableStyle())
 		{
+			// Indent subtasks in table view only
 			while (--nDepth)
 				sItem = (INDENT + sItem);
 		}
 		break;
 
 	case TDCA_TASKNAME:
-		// Indent subtasks in table view only
-		if (EXPORTSTYLE == TDLPDS_TABLE)
+		if (IsTableStyle())
 		{
+			// Indent subtasks in table view only
 			if (!pTasks->IsAttributeAvailable(TDCA_POSITION))
 			{
 				while (--nDepth)
@@ -526,7 +511,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			
 			bColor = FALSE;
 			bStrikeThru = FALSE;
-			bBlockQuote = (EXPORTSTYLE != TDLPDS_TABLE);
+			bBlockQuote = !IsTableStyle();
 		}
 		else if (!sItem.IsEmpty())
 		{
@@ -541,7 +526,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			sTextColor = pTasks->IsTaskDone(hTask) ? COMMENTS_DONECOLOR : _T("#606060");
 			sBackColor.Empty();
 			bStrikeThru = FALSE;
-			bBlockQuote = (EXPORTSTYLE != TDLPDS_TABLE);
+			bBlockQuote = !IsTableStyle();
 		}
 		break;
 	}
@@ -576,7 +561,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 	}
 
 	// we've already handled custom attrib above
-	if ((EXPORTSTYLE == TDLPDS_TABLE) && !TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	if (IsTableStyle() && !TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 	{
 		if (sItem.IsEmpty())
 			sItem = SPACE;
