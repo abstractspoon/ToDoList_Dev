@@ -9,7 +9,6 @@
 
 #include <Shared\OSVersion.h>
 #include <Shared\GraphicsMisc.h>
-#include <Shared\Misc.h>
 
 #include <Interfaces\UIThemeFile.h>
 
@@ -20,6 +19,7 @@
 using namespace System::Runtime::InteropServices;
 using namespace System::Windows::Forms;
 using namespace System::Drawing;
+using namespace System::Drawing::Drawing2D;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 using namespace Abstractspoon::Tdl::PluginHelpers::ColorUtil;
@@ -232,28 +232,35 @@ bool UIThemeToolbarRenderer::DrawButtonBackground(Drawing::Graphics^ g, Drawing:
 	if (!ValidColours())
 		return false;
 
-	Color fillColor = Color::Transparent;
+	Brush^ brush = nullptr;
 
 	switch (state)
 	{
 	case Toolbars::ItemState::Hot:
-		fillColor = m_HotFillColor;
+		brush = gcnew SolidBrush(m_HotFillColor);
 		break;
 
 	case Toolbars::ItemState::Pressed:
-	case Toolbars::ItemState::Checked:
-		fillColor = m_PressedFillColor;
+		brush = gcnew SolidBrush(m_PressedFillColor);
 		break;
 
-		// else
+	case Toolbars::ItemState::Checked:
+		if (SystemInformation::HighContrast)
+			brush = gcnew HatchBrush(HatchStyle::Percent50, m_PressedFillColor);
+		else
+			brush = gcnew SolidBrush(m_PressedFillColor);
+		break;
+
 	case Toolbars::ItemState::Disabled:
 	case Toolbars::ItemState::Normal:
 	default:
 		return false;
 	}
 
-	g->FillRectangle(gcnew SolidBrush(fillColor), *btnRect);
-	g->DrawRectangle(gcnew Pen(m_HotBorderColor), *btnRect);
+	Pen^ pen = gcnew Pen(m_HotBorderColor);
+
+	g->FillRectangle(brush, *btnRect);
+	g->DrawRectangle(pen, *btnRect);
 
 	return true;
 }
@@ -266,7 +273,7 @@ void UIThemeToolbarRenderer::OnRenderButtonBackground(ToolStripItemRenderEventAr
 
 void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEventArgs^ e)
 {
-	if ((COSVersion() >= OSV_WIN10) && !Misc::IsHighContrastActive())
+	if ((COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
 	{
 		auto menuItem = ASTYPE(e->Item, ToolStripMenuItem);
 		bool isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
@@ -310,7 +317,8 @@ void UIThemeToolbarRenderer::OnRenderMenuItemBackground(ToolStripItemRenderEvent
 
 void UIThemeToolbarRenderer::OnRenderSeparator(Windows::Forms::ToolStripSeparatorRenderEventArgs^ e)
 {
-	if (!e->Vertical && ISTYPE(e->ToolStrip, ToolStripDropDownMenu) && (COSVersion() >= OSV_WIN10) && !Misc::IsHighContrastActive())
+	if (!e->Vertical && ISTYPE(e->ToolStrip, ToolStripDropDownMenu) && 
+		(COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast)
 	{
 		Drawing::Rectangle rect(Point::Empty, e->Item->Size);
 		e->Graphics->FillRectangle(Drawing::SystemBrushes::ButtonFace, rect);
