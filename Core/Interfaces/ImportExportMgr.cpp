@@ -396,7 +396,9 @@ CString CImportExportMgr::GetExporterPreferenceKey(int nExporter) const
 	if (nExporter >= 0 && nExporter < m_aExporters.GetSize())
 	{
 		ASSERT(m_aExporters[nExporter] != NULL);
-		sKey += ('\\' + m_aExporters[nExporter]->GetTypeID());
+
+		sKey += '\\';
+		sKey += m_aExporters[nExporter]->GetTypeID();
 	}
 
 	return sKey;
@@ -409,7 +411,9 @@ CString CImportExportMgr::GetImporterPreferenceKey(int nImporter) const
 	if (nImporter >= 0 && nImporter < m_aImporters.GetSize())
 	{
 		ASSERT(m_aImporters[nImporter] != NULL);
-		sKey += ('\\' + m_aImporters[nImporter]->GetTypeID());
+
+		sKey += '\\';
+		sKey += m_aImporters[nImporter]->GetTypeID();
 	}
 
 	return sKey;
