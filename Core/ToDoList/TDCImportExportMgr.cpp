@@ -194,7 +194,7 @@ IIMPORTEXPORT_RESULT CTDCImportExportMgr::ExportTaskList(const CTaskFile& tasksS
 	int nByExporter = FindExporterByType(szTypeID);
 	ASSERT(nByExporter != -1);
 
-	return CImportExportMgr::ExportTaskList(&tasksSrc, szDestFile, nByExporter, dwFlags, pPrefs);
+	return ExportTaskList(tasksSrc, szDestFile, nByExporter, dwFlags, pPrefs);
 }
 
 IIMPORTEXPORT_RESULT CTDCImportExportMgr::ExportTaskLists(const CMultiTaskFile& tasksSrc, LPCTSTR szDestFile, LPCTSTR szTypeID, DWORD dwFlags, IPreferences* pPrefs) const

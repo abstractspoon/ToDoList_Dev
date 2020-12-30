@@ -6494,7 +6494,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks);
 
 			// export
-			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, sExporterTypeID, IIEF_PRINTING) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(tasks, sFilePath, sExporterTypeID, IIEF_PRINTING) == IIER_SUCCESS);
 		}
 		break;
 
@@ -6514,7 +6514,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			// export
 			DWORD dwFlags = (IIEF_PRINTING | TDC::MapPrintToExportStyle(nStyle));
 
-			return (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, TDCET_HTML, dwFlags) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(tasks, sFilePath, TDCET_HTML, dwFlags) == IIER_SUCCESS);
 		}
 		break;
 	}
@@ -9942,7 +9942,7 @@ void CToDoListWnd::OnExport()
 		// Do the export
 		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
 
-		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sExportPath, nExporter, dwFlags);
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sExportPath, nExporter, dwFlags);
 
 		HandleExportTasklistResult(nRes, sExportPath, bExportToClipboard, userPrefs.GetPreviewExport());
 	} 
@@ -10069,7 +10069,7 @@ void CToDoListWnd::OnExport()
 				// Do the export
 				DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
 
-				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nExporter, dwFlags);
+				IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ExportTaskList(tasks, sFilePath, nExporter, dwFlags);
 
 				// Show error messages but that's all
 				HandleExportTasklistResult(nRes, _T(""), FALSE, FALSE);
@@ -12555,7 +12555,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
 
 		// Export them
-		if (m_mgrImportExport.ExportTaskList(&tasks, sFilePath, nFormat, dwFlags) != IIER_SUCCESS)
+		if (m_mgrImportExport.ExportTaskList(tasks, sFilePath, nFormat, dwFlags) != IIER_SUCCESS)
 		{
 			// Display error message
 			// TODO
