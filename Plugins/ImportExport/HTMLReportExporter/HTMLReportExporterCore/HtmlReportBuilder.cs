@@ -426,6 +426,8 @@ namespace HTMLReportExporter
 
 		}
 
+		// --------------------------------------------------------------------------
+
 		public class TitleTemplateReporter : TitleTemplate
 		{
 			private Translator m_Trans;
@@ -546,6 +548,8 @@ namespace HTMLReportExporter
 				return true;
 			}
 		}
+
+		// --------------------------------------------------------------------------
 
 		public class TaskTemplateReporter : TaskTemplate
 		{
