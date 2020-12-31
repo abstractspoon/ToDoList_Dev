@@ -1870,13 +1870,15 @@ BOOL CTDLTaskCtrlBase::PrepareSort(TDSORTPARAMS& ss) const
 
 void CTDLTaskCtrlBase::DoSort()
 {
-	// Scope the hold to have finished before resyncing
 	TDSORTPARAMS ss(*this);
 	
 	if (PrepareSort(ss))
 	{
+		// Scope the hold to have finished before resyncing
 		{
-			CHoldListVScroll hold(m_lcColumns);
+			CHoldHScroll hhs(Tasks());
+			CHoldListVScroll hvs(m_lcColumns);
+
 			CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss);
 
 			ResyncSelection(m_lcColumns, Tasks(), FALSE);
