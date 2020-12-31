@@ -232,16 +232,23 @@ bool UIThemeToolbarRenderer::DrawButtonBackground(Drawing::Graphics^ g, Drawing:
 	if (!ValidColours())
 		return false;
 
+	// Ensure consistency with core app
 	Brush^ brush = nullptr;
 
 	switch (state)
 	{
 	case Toolbars::ItemState::Hot:
-		brush = gcnew SolidBrush(m_HotFillColor);
+		if (SystemInformation::HighContrast)
+			brush = gcnew SolidBrush(Color::Transparent);
+		else
+			brush = gcnew SolidBrush(m_HotFillColor);
 		break;
 
 	case Toolbars::ItemState::Pressed:
-		brush = gcnew SolidBrush(m_PressedFillColor);
+		if (SystemInformation::HighContrast)
+			brush = gcnew SolidBrush(Color::Transparent);
+		else
+			brush = gcnew SolidBrush(m_PressedFillColor);
 		break;
 
 	case Toolbars::ItemState::Checked:
@@ -250,17 +257,15 @@ bool UIThemeToolbarRenderer::DrawButtonBackground(Drawing::Graphics^ g, Drawing:
 		else
 			brush = gcnew SolidBrush(m_PressedFillColor);
 		break;
-
-	case Toolbars::ItemState::Disabled:
-	case Toolbars::ItemState::Normal:
-	default:
-		return false;
 	}
 
-	Pen^ pen = gcnew Pen(m_HotBorderColor);
+	if (brush != nullptr)
+	{
+		Pen^ pen = gcnew Pen(m_HotBorderColor);
 
-	g->FillRectangle(brush, *btnRect);
-	g->DrawRectangle(pen, *btnRect);
+		g->FillRectangle(brush, *btnRect);
+		g->DrawRectangle(pen, *btnRect);
+	}
 
 	return true;
 }
