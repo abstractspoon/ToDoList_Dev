@@ -38,6 +38,7 @@ namespace HTMLReportExporter
 		private String m_TemplateFilePath = "";
 		private bool m_FirstPreview = true;
 		private bool m_EditedSinceLastSave = false;
+		private bool m_Printing = false;
 		private HtmlReportUtils.CustomAttributes m_CustomAttributes = null;
 
 		private String PreviewPageName
@@ -57,13 +58,14 @@ namespace HTMLReportExporter
 
 		// --------------------------------------------------------------
 
-		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks, Preferences prefs, String key)
+		public HtmlReportTemplateForm(String typeId, Translator trans, TaskList tasks, bool printing, Preferences prefs, String key)
 		{
 			m_TypeId = typeId;
 			m_Trans = trans;
 			m_Tasklist = tasks;
 			m_Prefs = prefs;
 			m_PrefsKey = key;
+			m_Printing = printing;
 
 			m_Template = new HtmlReportTemplate();
 			m_PrevTemplate = new HtmlReportTemplate();
@@ -562,7 +564,7 @@ namespace HTMLReportExporter
 
 		private bool BuildPreviewPage()
 		{
-			var report = new HtmlReportBuilder(m_Trans, m_Tasklist, m_Prefs, m_Template, true);
+			var report = new HtmlReportBuilder(m_Trans, m_Tasklist, m_Prefs, m_Template, true, m_Printing);
 
 			return report.BuildReport(PreviewPageName);
 		}

@@ -18,6 +18,7 @@ namespace HTMLReportExporter
 		
 		private String m_BodyFontStyle = "";
 		private bool m_StrikeThruDone = true;
+		private bool m_Printing = false;
 
 		private const float ContentPadding = 4; // ems
 
@@ -37,10 +38,12 @@ namespace HTMLReportExporter
 
 		// -------------------------------------------------------------
 
-		public HtmlReportBuilder(Translator trans, TaskList tasks, Preferences prefs, HtmlReportTemplate template, bool preview)
+		public HtmlReportBuilder(Translator trans, TaskList tasks, Preferences prefs, 
+								HtmlReportTemplate template, bool preview, bool printing)
 		{
 			m_Tasklist = tasks;
 			m_Template = template;
+			m_Printing = printing;
 
 			m_StrikeThruDone = prefs.GetProfileBool("Preferences", "StrikethroughDone", true);
 			m_BodyFontStyle = HtmlReportUtils.FormatBodyFontStyle(prefs);
@@ -139,7 +142,9 @@ namespace HTMLReportExporter
 			Title.WriteStyles(html);
 
 			// Print styles
-			html.WriteLine("@page { margin: 0; }");
+			if (!m_Printing)
+				html.WriteLine("@page { margin: 0; }");
+
 			html.WriteLine("@media print ");
 			html.WriteLine("{ "); // open
 			html.WriteLine(".title-page { border: none; } ");
