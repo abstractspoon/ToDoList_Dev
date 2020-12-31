@@ -40,7 +40,10 @@ namespace HTMLReportExporter
 		private bool m_EditedSinceLastSave = false;
 		private HtmlReportUtils.CustomAttributes m_CustomAttributes = null;
 
-		const String PreviewPageName = "HtmlReporterPreview.html";
+		private String PreviewPageName
+		{
+			get { return Path.Combine(Path.GetTempPath(), m_TypeId + ".tmp"); }
+		}
 
 		// --------------------------------------------------------------
 
@@ -557,24 +560,17 @@ namespace HTMLReportExporter
 			RefreshPreview();
 		}
 
-		private String BuildPreviewPage()
+		private bool BuildPreviewPage()
 		{
-			String previewPath = Path.Combine(Path.GetTempPath(), PreviewPageName);
-
 			var report = new HtmlReportBuilder(m_Trans, m_Tasklist, m_Prefs, m_Template, true);
 
-			if (report.BuildReport(previewPath))
-				return previewPath;
-
-			return String.Empty;
+			return report.BuildReport(PreviewPageName);
 		}
 
 		private void RefreshPreview()
 		{
-			String previewPage = BuildPreviewPage();
-
-			if (previewPage != "")
-				browserPreview.Navigate(new System.Uri(previewPage));
+			if (BuildPreviewPage())
+				browserPreview.Navigate(new System.Uri(PreviewPageName));
 		}
 
 		private void OnNewReportTemplate(object sender, EventArgs e)
@@ -760,17 +756,13 @@ namespace HTMLReportExporter
 		private void OnBeforeNavigate(object sender, WebBrowserNavigatingEventArgs e)
 		{
 			// Disallow everything other than the preview itself
-			int lastSegment = (e.Url.Segments.Count() - 1);
-
-			e.Cancel = ((lastSegment == -1) || !e.Url.Segments[lastSegment].Equals(PreviewPageName));
+			e.Cancel = (e.Url.LocalPath != PreviewPageName);
 		}
 
 		private void OnShowPreviewInDefaultBrowser(object sender, EventArgs e)
 		{
-			String previewPage = BuildPreviewPage();
-
-			if (previewPage != "")
-				Process.Start(previewPage);
+			if (BuildPreviewPage())
+				Process.Start(PreviewPageName);
 		}
 	}
 }
