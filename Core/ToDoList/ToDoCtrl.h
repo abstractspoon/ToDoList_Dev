@@ -464,21 +464,21 @@ protected:
 	CAutoComboBox m_cbVersion;
 	CCheckComboBox m_cbCategory, m_cbAllocTo, m_cbTags;
 	CColourPickerEx m_cpColour;
-	CTDLCommentsCtrl m_ctrlComments;
 	CDateTimeCtrlEx m_dtcStart, m_dtcDue, m_dtcDone;
 	CEnEdit m_eExternalID;
-	CTDLTaskDependencyEdit m_eDependency;
 	CFileComboBox m_cbFileLink;
 	CMaskEdit m_ePercentDone, m_eCost;
 	CPopupEditCtrl m_eTaskName;
 	CSpinButtonCtrl m_spinPercent;
+	CTimeComboBox m_cbTimeDue, m_cbTimeStart, m_cbTimeDone;
+	CTimeEdit m_eTimeEstimate, m_eTimeSpent;
+	
+	CTDLCommentsCtrl m_ctrlComments;
+	CTDLInfoTipCtrl m_infoTip;
 	CTDLPriorityComboBox m_cbPriority;
 	CTDLRecurringTaskEdit m_eRecurrence;
 	CTDLRiskComboBox m_cbRisk;
-	CTimeComboBox m_cbTimeDue, m_cbTimeStart, m_cbTimeDone;
-	CTimeEdit m_eTimeEstimate, m_eTimeSpent;
-	CTDLInfoTipCtrl m_infoTip;
-	
+	CTDLTaskDependencyEdit m_eDependency;
 	CTDLTaskTreeCtrl m_taskTree;
 
 	HFONT m_hFontTree, m_hFontComments;
