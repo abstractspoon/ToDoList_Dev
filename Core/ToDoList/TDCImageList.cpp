@@ -7,7 +7,7 @@
 #include "TDCImageList.h"
 
 #include "..\shared\filemisc.h"
-#include "..\shared\enbitmap.h"
+#include "..\shared\enbitmapex.h"
 #include "..\shared\misc.h"
 #include "..\shared\icon.h"
 #include "..\shared\graphicsmisc.h"
@@ -114,26 +114,35 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 			// Load default icon set if no icon set loaded
 			if ((dwResult & TDCIL_LOADEDSET) == 0)
 			{
-				CBitmap bm;
+				CEnBitmapEx bm;
 				
 				if (bm.LoadBitmap(IDB_TASKICONS_STD))
+				{
+					bm.RemapSysColors();
 					AddImage(_T(""), bm, crTransparent, this, nNextNameIndex);
+				}
 			}
 		}
 		
 		if (bWantToolbars)
 		{
-			CBitmap bm;
+			CEnBitmapEx bm;
 			nNextNameIndex = 200;
 			
 			if (bm.LoadBitmap(IDB_APP_TOOLBAR_STD))
+			{
+				bm.RemapSysColors();
 				AddImage(_T(""), bm, crTransparent, this, nNextNameIndex);
+			}
 			
 			bm.DeleteObject();
 			nNextNameIndex = 250;
 			
 			if (bm.LoadBitmap(IDB_APP_EXTRA_STD))
+			{
+				bm.RemapSysColors();
 				AddImage(_T(""), bm, crTransparent, this, nNextNameIndex);
+			}
 		}
 		
 		// then add the user's images
@@ -274,7 +283,7 @@ DWORD CTDCImageList::LoadImagesFromFolder(const CString& sFolder, COLORREF crTra
 
 BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex)
 {
-	CEnBitmap image;
+	CEnBitmapEx image;
 	
 	if (image.LoadImage(sImageFile, crTransparent, 16, 16))
 	{
@@ -282,6 +291,8 @@ BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent,
 			return TRUE;
 
 		// else
+		image.RemapSysColors();
+
 		return AddImage(sImageFile, image, crTransparent, pImages, nNextNameIndex);
 	}
 
