@@ -283,13 +283,13 @@ void CKanbanColumnCtrl::SetBackgroundColor(COLORREF color)
 	}
 }
 
-void CKanbanColumnCtrl::SetExcessColor(COLORREF color)
+void CKanbanColumnCtrl::SetExcessColor(COLORREF /*color*/)
 {
 	// TODO
 	ASSERT(0);
 }
 
-void CKanbanColumnCtrl::SetMaximumTaskCount(int nMaxTasks)
+void CKanbanColumnCtrl::SetMaximumTaskCount(int /*nMaxTasks*/)
 {
 	// TODO
 	ASSERT(0);
@@ -722,7 +722,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 		while (nParent--)
 		{
-			const KANBANITEM* pKIParent = aParents[nParent];
+			pKIParent = aParents[nParent];
 			ASSERT(pKIParent);
 			
 			int iImageIndex = -1;
@@ -1803,7 +1803,7 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM
 	return bHandled;
 }
 
-void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
 {
 	HTREEITEM htiSel = NULL, htiNext = NULL;
 
@@ -1977,7 +1977,7 @@ BOOL CKanbanColumnCtrl::SelectionHasLockedTasks() const
 	return FALSE;
 }
 
-LRESULT CKanbanColumnCtrl::OnSetFont(WPARAM wp, LPARAM lp)
+LRESULT CKanbanColumnCtrl::OnSetFont(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	LRESULT lr = Default();
 
@@ -2010,7 +2010,7 @@ void CKanbanColumnCtrl::RecalcItemLineHeight()
 	if (m_bDrawTaskFlags && (m_aDisplayAttrib.GetSize() == 1))
 		nItemHeight = max(nItemHeight, (IMAGE_SIZE + IMAGE_PADDING));
 
-	SetItemHeight(nItemHeight);
+	SetItemHeight((short)nItemHeight);
 
 	// Recalc the required number of title lines
 	int nNumIcons = (2 + (m_bDrawTaskFlags ? 1 : 0));
@@ -2152,7 +2152,7 @@ BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanC
 // ---------------------------------------------------------------
 // CDragDropData interface
 
-CSize CKanbanColumnCtrl::OnGetDragSize(CDC& dc)
+CSize CKanbanColumnCtrl::OnGetDragSize(CDC& /*dc*/)
 {
 	// Calculate the aggregate height with no gaps
 	CSize sizeTotal(0, 0);

@@ -740,7 +740,7 @@ void CKanbanWnd::SendParentSelectionUpdate()
 	GetParent()->SendMessage(WM_IUI_SELECTTASK, (WPARAM)m_aSelTaskIDs.GetData(), m_aSelTaskIDs.GetSize());
 }
 
-void CKanbanWnd::OnSetFocus(CWnd* pOldWnd) 
+void CKanbanWnd::OnSetFocus(CWnd* /*pOldWnd*/) 
 {
 	m_ctrlKanban.SetFocus();
 }
