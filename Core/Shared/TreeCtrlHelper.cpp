@@ -446,7 +446,7 @@ BOOL CTreeCtrlHelper::IsItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL bHo
 	m_tree.GetClientRect(rClient);
 		
 	// vertically
-	if (rIntersect.IntersectRect(rClient, rItem))
+	if ((rItem.bottom > rClient.top) && (rItem.top < rClient.bottom))
 	{
 		bVertVisible = (bVertPartialOK || (rItem.top >= rClient.top && rItem.bottom <= rClient.bottom));
 	}
@@ -454,7 +454,7 @@ BOOL CTreeCtrlHelper::IsItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL bHo
 	// horizontally
 	rClient.DeflateRect(HVISIBLE, 0);
 
-	if (rIntersect.IntersectRect(rClient, rItem))
+	if ((rItem.right > rClient.left) && (rItem.left < rClient.right))
 	{
 		bHorzVisible = (bHorzPartialOK || (rItem.left >= rClient.left && rItem.right <= rClient.right));
 	}
