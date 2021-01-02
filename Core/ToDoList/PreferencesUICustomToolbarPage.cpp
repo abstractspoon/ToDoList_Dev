@@ -99,6 +99,8 @@ void CPreferencesUICustomToolbarPage::LoadPreferences(const IPreferences* pPrefs
 		aButtons.Add(TOOLBARBUTTON(ID_VIEW_CLEARFILTER,			_T("62")));
 		aButtons.Add(TOOLBARBUTTON(ID_VIEW_REFRESHFILTER,		_T("99")));
 		aButtons.Add(TOOLBARBUTTON());							// separator
+		aButtons.Add(TOOLBARBUTTON(ID_TOOLS_ANALYSELOGGEDTIME,	_T("93")));
+		aButtons.Add(TOOLBARBUTTON());							// separator
 		aButtons.Add(TOOLBARBUTTON(ID_HELP_DONATE,				_T("16")));
 		aButtons.Add(TOOLBARBUTTON());							// separator
 		aButtons.Add(TOOLBARBUTTON(ID_TOOLS_CHECKFORUPDATES,	_T("83")));
