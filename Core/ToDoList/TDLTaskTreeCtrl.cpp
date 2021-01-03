@@ -162,6 +162,8 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_
 
 		if (!TCH().IsItemVisible(hti, FALSE))
 		{
+			// Don't allow any horizontal movement because this 
+			// will break the way we have implemented click-handling
 			{
 				CLockUpdates hr(m_tcTasks);
 				CHoldHScroll hh(m_tcTasks);
@@ -172,8 +174,7 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_
 			if ((nBy == SC_BYMOUSE) && !TCH().IsItemVisible(hti))
 			{
 				// If the item is still not visible because of the horizontal
-				// hold (which is necessary to prevent the default behaviour)
-				// and this was a mouse selection then we post a message to
+				// hold and this was a mouse selection then we post a message to
 				// ensure that whatever called this has already finished
 				m_tcTasks.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
 			}

@@ -106,10 +106,11 @@ CHoldHScroll::CHoldHScroll(HWND hwnd, int nInitialPos) : m_hwnd(hwnd)
 		return;
 
 	// Can only have one active hold at a time
-	// Don't assert if the HWND is the same
 	if (s_hwndGlobal != NULL)
 	{
-		ASSERT(0/*m_hwnd == s_hwndGlobal*/);
+		// Don't assert if the HWND is the same because it
+		// just means we've got a nested call
+		ASSERT(m_hwnd == s_hwndGlobal);
 
 		m_hwnd = NULL;
 		return;
@@ -642,10 +643,10 @@ BOOL CTreeListSyncer::ResyncSelection(HWND hwnd, HWND hwndTo, BOOL bClearTreeSel
 	CAutoFlag af(m_bResyncing, TRUE);
 	BOOL bSynced = FALSE;
 
-	CHoldHScroll hs(WantHoldHScroll(hwnd) ? hwnd : NULL);
-
 	if (IsTree(hwnd) && IsList(hwndTo)) // sync Tree to list
 	{
+		CHoldHScroll hs(WantHoldHScroll(hwnd) ? hwnd : NULL);
+
 		// cache current tree selection
 		HTREEITEM htiSel = GetTreeSelItem(hwnd);
 		
@@ -3573,9 +3574,14 @@ void CTreeListSyncer::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, HTREEITE
 {
 	HWND hwndPrimary = PrimaryWnd();
 	HWND hwndOther = OtherWnd(hwndPrimary);
+	ASSERT(IsList(hwndOther));
 
 	if (IsTree(hwndPrimary))
 	{
+		// Scope holds to end before resyncing scroll pos
+		CHoldListVScroll hvs(hwndOther);
+		CHoldHScroll hs(WantHoldHScroll(hwndPrimary) ? hwndPrimary : NULL);
+
 		ASSERT(IsList(hwndOther));
 
 		// sort primary control
@@ -3590,6 +3596,9 @@ void CTreeListSyncer::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, HTREEITE
 	}
 	else // both lists
 	{
+		// Scope hold to end before resyncing scroll pos
+		CHoldListVScroll hvs(hwndOther);
+
 		ASSERT(IsList(hwndPrimary));
 		ASSERT(IsList(hwndOther));
 
@@ -3617,7 +3626,7 @@ void CTreeListSyncer::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, HTREEITE
 		}
 	}
 	
-	ResyncScrollPos(hwndOther, hwndPrimary);
+	ResyncScrollPos(hwndPrimary, hwndOther);
 }
 
 void CTreeListSyncer::SortTreeItem(HWND hwndTree, HTREEITEM hti, PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, BOOL bRecursive)

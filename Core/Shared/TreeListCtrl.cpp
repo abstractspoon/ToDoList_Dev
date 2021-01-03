@@ -495,6 +495,8 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 	BOOL bWasVisible = IsTreeItemVisible(m_tree, hti);
 	BOOL bWasSelected = TCH().IsSelectedItem(hti);
 
+	// Don't allow any horizontal movement because this 
+	// will break the way we have implemented click-handling
 	{
 		CHoldHScroll hs(m_tree);
 		CTLSHoldResync hr(*this); 
@@ -520,6 +522,12 @@ BOOL CTreeListCtrl::SelectItem(HTREEITEM hti)
 		OnTreeSelectionChange(&nmtv);
 	}
 
+	// If the item is still not visible because of the horizontal
+	// hold and this was a mouse selection then we post a message to
+	// ensure that whatever called this has already finished
+	if ((CWnd::GetCurrentMessage()->message == WM_LBUTTONDOWN) && !TCH().IsItemVisible(hti))
+		m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
+	
 	return TRUE;
 }
 
@@ -1193,10 +1201,6 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 	{
 		CLockUpdates hr(m_tree);
 		SelectItem(hti);
-
-		// Make sure item is visible horizontally
-		if (!TCH().IsItemVisible(hti))
-			m_tree.PostMessage(TVM_ENSUREVISIBLE, 0, (LPARAM)hti);
 
 		return TRUE;
 	}
@@ -2333,16 +2337,10 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 
 void CTreeListCtrl::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort)
 {
-	// Scope the hold to have finished before resyncing
-	{
-		CHoldListVScroll hold(m_list);
-		CLockUpdates lock(m_list);
+	CLockUpdates lock(m_list);
 
-		CTreeListSyncer::Sort(pfnCompare, lParamSort);
+	CTreeListSyncer::Sort(pfnCompare, lParamSort);
 
-		ResyncSelection(m_list, m_tree, FALSE);
-	}
-
-	ResyncScrollPos(m_tree, m_list);
-	m_tree.TCH().EnsureItemVisible(GetSelectedItem());
+	ResyncSelection(m_list, m_tree, FALSE);
+	m_tree.TCH().EnsureItemVisible(GetSelectedItem(), FALSE);
 }

@@ -1874,17 +1874,9 @@ void CTDLTaskCtrlBase::DoSort()
 	
 	if (PrepareSort(ss))
 	{
-		// Scope the hold to have finished before resyncing
-		{
-			CHoldHScroll hhs(Tasks());
-			CHoldListVScroll hvs(m_lcColumns);
+		CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss, NULL);
 
-			CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss);
-
-			ResyncSelection(m_lcColumns, Tasks(), FALSE);
-		}
-
-		ResyncScrollPos(Tasks(), m_lcColumns);
+		ResyncSelection(m_lcColumns, Tasks(), FALSE);
 		EnsureSelectionVisible(TRUE);
 	}
 }
