@@ -4383,7 +4383,7 @@ int CTaskFile::GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArr
 	
 	while (pXI)
 	{
-		if (bAllowEmpty || pXI->GetValueLen())
+		if (bAllowEmpty || pXI->HasValue())
 			aItems.Add(pXI->GetValue());
 
 		pXI = pXI->GetSibling();
