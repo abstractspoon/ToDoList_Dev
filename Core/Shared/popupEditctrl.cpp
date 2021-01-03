@@ -4,8 +4,7 @@
 
 #include "stdafx.h"
 #include "popupEditctrl.h"
-
-#include "..\shared\MouseWheelMgr.h"
+#include "MouseWheelMgr.h"
 
 #include <afxpriv.h>
 

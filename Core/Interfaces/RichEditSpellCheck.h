@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\Interfaces\ISpellCheck.h"
+#include "ISpellCheck.h"
 
 class CRichEditBaseCtrl;
 

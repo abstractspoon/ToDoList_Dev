@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "Compression.h"
 
-#include "..\3rdparty\zlib\zlib.h"
+#include "zlib\zlib.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

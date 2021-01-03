@@ -7,7 +7,7 @@
 // weekdaychecklistbox.h : header file
 //
 
-#include "..\Shared\checklistboxex.h"
+#include "checklistboxex.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CWeekdayCheckListBox window

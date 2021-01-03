@@ -7,14 +7,14 @@
 // SpellCheckDlg.h : header file
 //
 
+#include "richeditspellcheck.h"
+
 #include "..\Shared\runtimedlg.h"
 #include "..\Shared\richeditncborder.h"
 #include "..\Shared\RichEditBaseCtrl.h"
 #include "..\Shared\FileComboBox.h"
 
 #include "..\3rdparty\statlink.h"
-
-#include "..\Interfaces\richeditspellcheck.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CSpellCheckDlg dialog

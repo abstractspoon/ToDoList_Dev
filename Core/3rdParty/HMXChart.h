@@ -6,9 +6,8 @@
 #include <errno.h>
 #include <direct.h>
 
-#include "HMXDataset.h"	// Added by ClassView
-
-#include "..\3rdParty\GdiPlus.h"
+#include "HMXDataset.h"
+#include "GdiPlus.h"
 
 #if _MSC_VER >= 1000
 #pragma once

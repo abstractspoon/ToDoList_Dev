@@ -4,10 +4,9 @@
 
 #include "stdafx.h"
 #include "Rtf2HtmlConverter.h"
-
-#include "..\shared\mswordhelper.h"
-#include "..\shared\filemisc.h"
-#include "..\shared\misc.h"
+#include "mswordhelper.h"
+#include "filemisc.h"
+#include "misc.h"
 
 #include "..\3rdparty\html2rtf.h"
 

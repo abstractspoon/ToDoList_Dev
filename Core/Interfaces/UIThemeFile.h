@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\interfaces\uitheme.h"
+#include "uitheme.h"
 
 #include <afxtempl.h>
 

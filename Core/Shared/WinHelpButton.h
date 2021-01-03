@@ -7,7 +7,7 @@
 // colorbutton.h : header file
 //
 
-#include "..\shared\iconbutton.h"
+#include "iconbutton.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CWinHelpButton window

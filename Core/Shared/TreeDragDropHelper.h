@@ -9,8 +9,9 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+#include "treeselectionhelper.h"
+
 #include "..\3rdparty\dragdrop.h"
-#include "..\shared\treeselectionhelper.h"
 
 enum DDWHERE
 {

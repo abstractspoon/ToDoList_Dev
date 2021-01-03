@@ -7,9 +7,9 @@
 // HMXChartEx.h : header file
 //
 
-#include "..\3rdParty\HMXChart.h"
+#include "TooltipCtrlEx.h"
 
-#include "..\Shared\TooltipCtrlEx.h"
+#include "..\3rdParty\HMXChart.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

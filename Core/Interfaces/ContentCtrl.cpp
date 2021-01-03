@@ -5,16 +5,15 @@
 #include "stdafx.h"
 #include "ContentCtrl.h"
 #include "uithemefile.h"
+#include "IContentControl.h"
+#include "ISpellCheck.h"
+#include "uitheme.h"
 
 #include "..\shared\autoflag.h"
 #include "..\shared\misc.h"
 #include "..\shared\binarydata.h"
 #include "..\shared\tooltipctrlex.h"
 #include "..\shared\dialoghelper.h"
-
-#include "..\Interfaces\IContentControl.h"
-#include "..\Interfaces\ISpellCheck.h"
-#include "..\Interfaces\uitheme.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

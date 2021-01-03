@@ -1,6 +1,6 @@
 #pragma once
 
-#include "..\shared\subclass.h"
+#include "subclass.h"
 
 #include <wtypes.h>
 #include <afxtempl.h>

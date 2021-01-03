@@ -3,10 +3,9 @@
 
 #include "stdafx.h"
 #include "ColorBrewerCombobox.h"
-
-#include "..\shared\Misc.h"
-#include "..\shared\GraphicsMisc.h"
-#include "..\shared\DialogHelper.h"
+#include "Misc.h"
+#include "GraphicsMisc.h"
+#include "DialogHelper.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -3,12 +3,11 @@
 
 #include "stdafx.h"
 #include "orderedtreeCtrl.h"
-
-#include "..\shared\themed.h"
-#include "..\shared\treectrlhelper.h"
-#include "..\shared\misc.h"
-#include "..\shared\graphicsmisc.h"
-#include "..\shared\autoflag.h"
+#include "themed.h"
+#include "treectrlhelper.h"
+#include "misc.h"
+#include "graphicsmisc.h"
+#include "autoflag.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

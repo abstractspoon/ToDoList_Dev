@@ -2,9 +2,9 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-#include "..\shared\autocombobox.h"
-#include "..\shared\fileedit.h"
-#include "..\shared\iconcache.h"
+#include "autocombobox.h"
+#include "fileedit.h"
+#include "iconcache.h"
 
 // CFileComboBox /////////////////////////////////////////////////////////
 

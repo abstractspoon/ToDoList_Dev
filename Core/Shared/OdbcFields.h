@@ -10,7 +10,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\shared\RecordsetEx.h"
+#include "RecordsetEx.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

@@ -5,15 +5,14 @@
 #include "stdafx.h"
 #include "RichEditHelper.h"
 #include "wclassdefines.h"
+#include "misc.h"
+#include "filemisc.h"
+#include "webmisc.h"
+#include "enbitmap.h"
+#include "clipboard.h"
 
 #include "..\3rdParty\TOM.h"
 #include "..\3rdParty\clipboardbackup.h"
-
-#include "..\shared\misc.h"
-#include "..\shared\filemisc.h"
-#include "..\shared\webmisc.h"
-#include "..\shared\enbitmap.h"
-#include "..\shared\clipboard.h"
 
 #include <atlconv.h>
 

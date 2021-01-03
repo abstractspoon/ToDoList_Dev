@@ -3,10 +3,9 @@
 
 #include "stdafx.h"
 #include "StatusBarACTEx.h"
-
-#include "..\shared\GraphicsMisc.h"
-#include "..\shared\enstring.h"
-#include "..\shared\themed.h"
+#include "GraphicsMisc.h"
+#include "enstring.h"
+#include "themed.h"
 
 #include "..\3rdParty\ColorDef.h"
 

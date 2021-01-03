@@ -9,7 +9,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "..\Interfaces\ITasklistStorage.h"
+#include "ITasklistStorage.h"
 
 #include <afxtempl.h>
 

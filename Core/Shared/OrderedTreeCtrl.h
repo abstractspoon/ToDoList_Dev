@@ -7,8 +7,8 @@
 // ToDoCtrl.h : header file
 //
 
-#include "..\shared\ncgutter.h"
-#include "..\shared\treectrlhelper.h"
+#include "ncgutter.h"
+#include "treectrlhelper.h"
 
 #include <afxtempl.h>
 typedef CMap<UINT, UINT, CString, CString&> CMapUIntToString;

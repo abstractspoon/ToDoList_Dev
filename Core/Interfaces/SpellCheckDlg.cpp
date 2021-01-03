@@ -3,7 +3,8 @@
 
 #include "stdafx.h"
 #include "SpellCheckDlg.h"
-#include "ispellcheck.h"
+#include "ISpellCheck.h"
+#include "IPreferences.h"
 
 #include "..\Shared\enfiledialog.h"
 #include "..\Shared\stringres.h"
@@ -13,8 +14,6 @@
 #include "..\Shared\localizer.h"
 #include "..\Shared\dialoghelper.h"
 #include "..\Shared\wclassdefines.h"
-
-#include "..\Interfaces\IPreferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
 

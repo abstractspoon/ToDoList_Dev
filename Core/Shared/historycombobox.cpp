@@ -3,9 +3,9 @@
 
 #include "stdafx.h"
 #include "historycombobox.h"
+#include "misc.h"
 
 #include "..\interfaces\IPreferences.h"
-#include "..\shared\misc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

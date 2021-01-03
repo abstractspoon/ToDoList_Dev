@@ -4,14 +4,13 @@
 
 #include "stdafx.h"
 #include "UIExtensionMgr.h"
+#include "ITaskList.h"
+#include "IUIExtension.h"
 
 #include "..\shared\filemisc.h"
 #include "..\shared\localizer.h"
 #include "..\shared\misc.h"
 #include "..\shared\osversion.h"
-
-#include "..\Interfaces\ITaskList.h"
-#include "..\Interfaces\IUIExtension.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

@@ -4,13 +4,13 @@
 
 #include "stdafx.h"
 #include "ContentMgr.h"
+#include "IContentControl.h"
 
 #include "..\shared\filemisc.h"
 #include "..\shared\binarydata.h"
 #include "..\shared\localizer.h"
 #include "..\shared\osversion.h"
 
-#include "..\Interfaces\IContentControl.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE

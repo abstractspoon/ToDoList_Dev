@@ -3,8 +3,7 @@
 
 #include "stdafx.h"
 #include "odbcvaluecombobox.h"
-
-#include "..\shared\RecordsetEx.h"
+#include "RecordsetEx.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -4,13 +4,12 @@
 
 #include "stdafx.h"
 #include "TasklistStorageMgr.h"
+#include "ITaskList.h"
+#include "ITasklistStorage.h"
 
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
-
-#include "..\Interfaces\ITaskList.h"
-#include "..\Interfaces\ITasklistStorage.h"
 
 #include "..\3rdParty\base64coder.h"
 
