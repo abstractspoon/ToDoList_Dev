@@ -4455,7 +4455,9 @@ int CTaskFile::GetArray(const CString& sItemTag, CStringArray& aItems) const
 
 	while (pXI)
 	{
-		aItems.Add(pXI->GetValue());
+		if (pXI->HasValue())
+			aItems.Add(pXI->GetValue());
+
 		pXI = pXI->GetSibling();
 	}
 
@@ -4471,7 +4473,10 @@ BOOL CTaskFile::SetArray(const CString& sItemTag, const CStringArray& aItems)
 	int nCount = aItems.GetSize();
 	
 	for (int nItem = 0; nItem < nCount; nItem++)
-		AddItem(sItemTag, aItems[nItem], XIT_ELEMENT);
+	{
+		if (!aItems[nItem].IsEmpty())
+			AddItem(sItemTag, aItems[nItem], XIT_ELEMENT);
+	}
 
 	return TRUE;
 }
