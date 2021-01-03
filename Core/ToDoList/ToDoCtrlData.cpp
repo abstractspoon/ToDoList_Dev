@@ -926,14 +926,6 @@ BOOL CToDoCtrlData::GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const
 	return TRUE;
 }
 
-BOOL CToDoCtrlData::IsTaskRecurring(DWORD dwTaskID, BOOL bCheckRemaining) const
-{
-	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FALSE);
-	
-	return (bCheckRemaining ? pTDI->CanRecur() : pTDI->IsRecurring());
-}
-
 BOOL CToDoCtrlData::GetNextTaskOccurrence(DWORD dwTaskID, COleDateTime& dtNext, BOOL& bDue)
 {
 	TODOITEM* pTDI = NULL;
