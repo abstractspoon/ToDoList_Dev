@@ -270,7 +270,6 @@ BOOL CTaskFile::Load(LPCTSTR szFilePath, IXmlParse* pCallback, BOOL bDecrypt)
 			m_dwNextUniqueID = 1; // always > 0
 		
 		ClearHandleMap();
-		UpgradeArrays();
 		CleanUp();
 	}
 	
@@ -356,7 +355,6 @@ BOOL CTaskFile::LoadEx(IXmlParse* pCallback)
 			m_dwNextUniqueID = 1; // always > 0
 
 		ClearHandleMap();
-		UpgradeArrays();
 		CleanUp();
 	}
 
@@ -376,104 +374,6 @@ void CTaskFile::CleanUp(HTASKITEM hTask)
 	while (hChild)
 	{
 		CleanUp(hChild);
-		hChild = GetNextTask(hChild);
-	}
-}
-
-void CTaskFile::UpgradeArrays(HTASKITEM hTask)
-{
-	CStringArray aItems;
-
-	if (hTask == NULL) // root
-	{
-		// test for existence of 'old' arrays
-		BOOL bHasOld = FALSE;
-
-		if (LegacyGetArray(TDL_TASKCATEGORY, aItems) > 1)
-		{
-			bHasOld = TRUE;
-
-			LegacyDeleteArray(TDL_TASKCATEGORY);
-			SetArray(TDL_TASKCATEGORY, aItems);
-		}
-		
-		if (LegacyGetArray(TDL_TASKTAG, aItems) > 1)
-		{
-			bHasOld = TRUE;
-			
-			LegacyDeleteArray(TDL_TASKTAG);
-			SetArray(TDL_TASKTAG, aItems);
-		}
-		
-		if (LegacyGetArray(TDL_TASKALLOCTO, aItems) > 1)
-		{
-			bHasOld = TRUE;
-			
-			LegacyDeleteArray(TDL_TASKALLOCTO);
-			SetArray(TDL_TASKALLOCTO, aItems);
-		}
-		
-		// these don't affect tasks
-		if (LegacyGetArray(TDL_TASKSTATUS, aItems) > 1)
-		{
-			LegacyDeleteArray(TDL_TASKSTATUS);
-			SetArray(TDL_TASKSTATUS, aItems);
-		}
-
-		if (LegacyGetArray(TDL_TASKALLOCBY, aItems) > 1)
-		{
-			LegacyDeleteArray(TDL_TASKALLOCBY);
-			SetArray(TDL_TASKALLOCBY, aItems);
-		}
-		
-		if (LegacyGetArray(TDL_TASKVERSION, aItems) > 1)
-		{
-			LegacyDeleteArray(TDL_TASKVERSION);
-			SetArray(TDL_TASKVERSION, aItems);
-		}
-
-		// process top-level children if any old arrays were found
-		if (!bHasOld)
-			return; // nothing else to do
-	}
-	else
-	{
-		// test for existence of 'old' arrays
-		if (LegacyGetTaskArray(hTask, TDL_TASKNUMCATEGORY_DEP, TDL_TASKCATEGORY, aItems) > 1)
-		{
-			LegacyDeleteTaskArray(hTask, TDL_TASKNUMCATEGORY_DEP, TDL_TASKCATEGORY);
-			SetTaskCategories(hTask, aItems);
-		}
-
-		if (LegacyGetTaskArray(hTask, TDL_TASKNUMTAGS_DEP, TDL_TASKTAG, aItems) > 1)
-		{
-			LegacyDeleteTaskArray(hTask, TDL_TASKNUMTAGS_DEP, TDL_TASKTAG);
-			SetTaskTags(hTask, aItems);
-		}
-		
-		if (LegacyGetTaskArray(hTask, TDL_TASKNUMALLOCTO_DEP, TDL_TASKALLOCTO, aItems) > 1)
-		{
-			LegacyDeleteTaskArray(hTask, TDL_TASKNUMALLOCTO_DEP, TDL_TASKALLOCTO);
-			SetTaskAllocatedTo(hTask, aItems);
-		}
-		
-		if (LegacyGetTaskArray(hTask, TDL_TASKNUMDEPENDENCY_DEP, TDL_TASKDEPENDENCY, aItems) > 1)
-		{
-			LegacyDeleteTaskArray(hTask, TDL_TASKNUMDEPENDENCY_DEP, TDL_TASKDEPENDENCY);
-
-			CTDCDependencyArray aDepends;
-			aDepends.Set(aItems);
-
-			SetTaskDependencies(hTask, aDepends);
-		}
-	}
-
-	// process children
-	HTASKITEM hChild = GetFirstTask(hTask);
-	
-	while (hChild)
-	{
-		UpgradeArrays(hChild);
 		hChild = GetNextTask(hChild);
 	}
 }
@@ -4454,29 +4354,6 @@ CString CTaskFile::GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, in
 	return _T("");
 }
 
-bool CTaskFile::LegacyDeleteTaskArray(HTASKITEM hTask, const CString& sNumItemTag, 
-								const CString& sItemTag)
-{
-	CXmlItem* pXITask = NULL;
-	GET_TASK(pXITask, hTask, false);
-	
-	// delete any existing items
-	pXITask->DeleteItem(sItemTag);
-
-	int nItem, nNumExists = pXITask->GetItemValueI(sNumItemTag);
-
-	for (nItem = 1; nItem < nNumExists; nItem++)
-	{
-		CString sItem;
-		sItem.Format(_T("%s%d"), sItemTag, nItem);
-		pXITask->DeleteItem(sItem);
-	}
-
-	pXITask->DeleteItem(sNumItemTag);
-
-	return true;
-}
-
 bool CTaskFile::AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty)
 {
 	if (!bAllowEmpty && sItem.IsEmpty())
@@ -4513,32 +4390,6 @@ int CTaskFile::GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArr
 	}
 
 	return aItems.GetSize();
-}
-
-int CTaskFile::LegacyGetTaskArray(HTASKITEM hTask, const CString& sNumItemTag,
-				  	 const CString& sItemTag, CStringArray& aItems) const
-{
-	aItems.RemoveAll();
-
-	// first item
-	CString sItem = GetTaskString(hTask, sItemTag);
-
-	if (!sItem.IsEmpty())
-	{
-		aItems.Add(sItem);
-
-		// rest
-		int nCount = GetTaskUChar(hTask, sNumItemTag);
-
-		for (int nItem = 1; nItem < nCount; nItem++)
-		{
-			sItem.Format(_T("%s%d"), sItemTag, nItem);
-			aItems.Add(GetTaskString(hTask, sItem));
-		}
-	}
-
-	return aItems.GetSize();
-
 }
 
 int CTaskFile::GetTaskArraySize(HTASKITEM hTask, const CString& sItemTag) const
@@ -4606,34 +4457,6 @@ int CTaskFile::GetArray(const CString& sItemTag, CStringArray& aItems) const
 	{
 		aItems.Add(pXI->GetValue());
 		pXI = pXI->GetSibling();
-	}
-
-	return aItems.GetSize();
-}
-
-bool CTaskFile::LegacyDeleteArray(const CString& sItemTag)
-{
-	return (DeleteItem(sItemTag) == TRUE);
-}
-
-int CTaskFile::LegacyGetArray(const CString& sItemTag, CStringArray& aItems) const
-{
-	aItems.RemoveAll();
-
-	// first item
-	const CXmlItem* pXI = GetItem(sItemTag);
-
-	if (pXI)
-	{
-		int nCount = pXI->GetItemCount();
-
-		for (int nItem = 0; nItem < nCount; nItem++)
-		{
-			CString sItem;
-			sItem.Format(_T("%s%d"), sItemTag, nItem);
-
-			aItems.Add(pXI->GetItemValue(sItem));
-		}
 	}
 
 	return aItems.GetSize();

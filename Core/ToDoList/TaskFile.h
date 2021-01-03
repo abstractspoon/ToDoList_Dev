@@ -541,8 +541,6 @@ protected:
 	void AddTaskIDs(HTASKITEM hTask, BOOL bIncParents, CDWordArray& aTaskIDs) const;
 	int GetSelectedTaskIDs(HTASKITEM hTask, CDWordArray& aSelTaskIDs) const;
 	void RemoveNonSelectedTasks(HTASKITEM hTask);
-
-	void UpgradeArrays(HTASKITEM hTask = NULL);
 	void CleanUp(HTASKITEM hTask = NULL);
 
 	virtual CXmlItem* NewItem(const CString& sName = _T(""));
@@ -592,15 +590,6 @@ protected:
 	// for handling arrays at *tasklist* level
 	BOOL SetArray(const CString& sItemTag, const CStringArray& aItems);
 	int GetArray(const CString& sItemTag, CStringArray& aItems) const;
-
-	/////////////////////////////////////////////////////////////////////////////////////
-	// legacy support for reading 'old' arrays
-	bool LegacyDeleteArray(const CString& sItemTag);
-	bool LegacyDeleteTaskArray(HTASKITEM hTask, const CString& sNumItemTag, const CString& sItemTag);
-	int LegacyGetArray(const CString& sItemTag, CStringArray& aItems) const;
-	int LegacyGetTaskArray(HTASKITEM hTask, const CString& sNumItemTag, 
-				  	 const CString& sItemTag, CStringArray& aItems) const;
-	/////////////////////////////////////////////////////////////////////////////////////
 
 public:	// helpers
 	static int GetCustomAttributeDefs(const ITaskList* pTasks, CTDCCustomAttribDefinitionArray& aAttribs);
