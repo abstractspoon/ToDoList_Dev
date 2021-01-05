@@ -892,6 +892,7 @@ CXmlFile::CXmlFile(const CString& sRootItemName)
 	: 
 	m_xiRoot(NULL, sRootItemName), 
 	m_xmlDoc(FALSE), // initialise on demand
+	m_xslDoc(FALSE), // initialise on demand
 	m_pCallback(NULL)
 {
 }
