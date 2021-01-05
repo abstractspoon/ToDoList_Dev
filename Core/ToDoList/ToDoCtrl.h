@@ -11,7 +11,6 @@
 #include "todoctrldata.h"
 #include "todoctrldatautils.h"
 #include "todoctrlfind.h"
-#include "taskfile.h"
 #include "tdcstruct.h"
 #include "tdlprioritycombobox.h"
 #include "tdlriskcombobox.h"
