@@ -144,6 +144,7 @@ namespace Abstractspoon
 				List<String^>^ GetCategory();
 				List<String^>^ GetTag();
 				List<String^>^ GetDependency();
+				List<UInt32>^  GetLocalDependency();
 				List<String^>^ GetFileLink();
 
 				String^ FormatAllocatedTo(String^ delimiter);

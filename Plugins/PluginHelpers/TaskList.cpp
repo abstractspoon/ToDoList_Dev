@@ -555,7 +555,7 @@ Int32 Task::GetRisk(bool calculated)
 
 List<String^>^ Task::GetAllocatedTo()
 {
-	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
+	auto items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskAllocatedToCount, 0);
 
 	for (int nIndex = 0; nIndex < numItems; nIndex++)
@@ -566,7 +566,7 @@ List<String^>^ Task::GetAllocatedTo()
 
 List<String^>^ Task::GetCategory()
 {
-	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
+	auto items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskCategoryCount, 0);
 
 	for (int nIndex = 0; nIndex < numItems; nIndex++)
@@ -577,7 +577,7 @@ List<String^>^ Task::GetCategory()
 
 List<String^>^ Task::GetTag()
 {
-	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
+	auto items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskTagCount, 0);
 
 	for (int nIndex = 0; nIndex < numItems; nIndex++)
@@ -588,7 +588,7 @@ List<String^>^ Task::GetTag()
 
 List<String^>^ Task::GetDependency()
 {
-	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
+	auto items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskDependencyCount, 0);
 
 	for (int nIndex = 0; nIndex < numItems; nIndex++)
@@ -597,9 +597,25 @@ List<String^>^ Task::GetDependency()
 	return items;
 }
 
+List<UInt32>^ Task::GetLocalDependency()
+{
+	auto depends = GetDependency();
+	auto localDepends = gcnew System::Collections::Generic::List<UInt32>;
+
+	for (int nDepend = 0; nDepend < depends->Count; nDepend++)
+	{
+		UInt32 localDepend = 0;
+
+		if (UInt32::TryParse(depends[nDepend], localDepend) && (localDepend != 0))
+			localDepends->Add(localDepend);
+	}
+
+	return localDepends;
+}
+
 List<String^>^ Task::GetFileLink()
 {
-	System::Collections::Generic::List<String^>^ items = gcnew System::Collections::Generic::List<String^>;
+	auto items = gcnew System::Collections::Generic::List<String^>;
 	int numItems = GETTASKVAL(GetTaskFileLinkCount, 0);
 
 	for (int nIndex = 0; nIndex < numItems; nIndex++)
