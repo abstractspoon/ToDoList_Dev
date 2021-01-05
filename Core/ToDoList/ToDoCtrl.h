@@ -802,7 +802,6 @@ protected:
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 
-	void SaveGlobals(CTaskFile& tasks) const;
 	void LoadGlobals(const CTaskFile& tasks);
 	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;
 	void LoadCustomAttributeDefinitions(const CTaskFile& tasks);

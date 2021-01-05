@@ -5908,14 +5908,12 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 	// get tasklist
 	GetAllTasks(tasks);
 
-	// save globals
-	SaveGlobals(tasks);
-
 	// attrib visibility
 	SaveAttributeVisibility(tasks);
 
-	// and meta data
+	// global data
 	tasks.SetMetaData(m_mapMetaData);
+	tasks.SetAutoListData(m_tldAll);
 
 	// And password prompting disability
 	if (IsEncrypted() && HasStyle(TDCS_DISABLEPASSWORDPROMPTING))
@@ -5931,15 +5929,6 @@ void CToDoCtrl::BuildTasksForSave(CTaskFile& tasks) const
 	
 	// checkout status
 	m_sourceControl.PrepareTasksForSave(tasks);
-}
-
-void CToDoCtrl::SaveGlobals(CTaskFile& tasks) const
-{
-	// Remove default items before saving
-	TDCAUTOLISTDATA tld(m_tldAll, TDCA_ALL);
-	tld.RemoveItems(m_tldDefault, TDCA_ALL);
-
-	tasks.SetAutoListData(tld);
 }
 
 void CToDoCtrl::LoadGlobals(const CTaskFile& tasks)
