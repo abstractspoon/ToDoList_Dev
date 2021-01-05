@@ -8540,7 +8540,6 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 	
 	tdcShow.SetMaximizeState(m_nMaxState);
 	tdcShow.EnableWindow(TRUE);
-	tdcShow.SetFocusToTasks();
 	tdcShow.ShowWindow(SW_SHOW);
 
 	// if the tasklist is encrypted and todolist always prompts for password
@@ -8556,6 +8555,7 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 		tdcHide.EnableWindow(FALSE);
 	}
 	
+	tdcShow.SetFocusToTasks();
 	tdcShow.Invalidate(TRUE);
 	tdcShow.UpdateWindow();
 	
