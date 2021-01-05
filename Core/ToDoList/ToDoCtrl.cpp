@@ -6303,6 +6303,7 @@ BOOL CToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	LoadSplitPos(prefs);
 	LoadDefaultRecurrence(prefs);
 	LoadAttributeVisibility(tasks, prefs);
+
 	m_findReplace.LoadState(prefs);
 
 	if (tasks.IsPasswordPromptingDisabled())
