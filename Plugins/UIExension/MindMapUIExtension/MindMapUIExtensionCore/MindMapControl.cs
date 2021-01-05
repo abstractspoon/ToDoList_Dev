@@ -166,9 +166,10 @@ namespace MindMapUIExtension
 
         private Point m_DrawOffset;
 		private TreeNode m_DropTarget;
-        private DropPos m_DropPos = DropPos.None;
+        private DropPos m_DropPos;
+		private RootLocation m_RootLocation;
 		private Timer m_DragTimer;
-		private Color m_ConnectionColor = Color.Magenta;
+		private Color m_ConnectionColor;
 		private int m_LastDragTick = 0;
 
         private int m_ThemedGlyphSize = 0;
@@ -187,6 +188,8 @@ namespace MindMapUIExtension
             m_DrawOffset = new Point(0, 0);
 			m_DropTarget = null;
             m_DropPos = DropPos.None;
+			m_ConnectionColor = Color.Magenta;
+			m_RootLocation = RootLocation.Right;
 
 			InitializeComponent();
 		}
@@ -225,6 +228,13 @@ namespace MindMapUIExtension
         {
             m_TreeView.Nodes.Clear();
         }
+
+		public enum RootLocation
+		{
+			Left,
+			Centre,
+			Right
+		}
 
 		public enum ExpandNode
 		{
@@ -1501,47 +1511,72 @@ namespace MindMapUIExtension
 
             using (Graphics graphics = m_TreeView.CreateGraphics())
             {
-                if (rootNode.Nodes.Count < 2)
-                {
+				var rootLoc = m_RootLocation;
+
+				if (rootNode.Nodes.Count < 2)
+					rootLoc = RootLocation.Left;
+
+				switch (rootLoc)
+				{
+				case RootLocation.Left:
                     // One-sided graph
                     RecalculatePositions(graphics, m_TreeView.Nodes, 0, 0);
-                }
-                else // Double-sided graph
-                {
-                    // Right side
-                    int horzOffset = CalculateHorizontalChildOffset(rootNode);
+					break;
 
-                    TreeNode rightFrom = rootNode.Nodes[0];
+				case RootLocation.Right:
+                    // One-sided graph
+					{
+						RecalculatePositions(graphics, m_TreeView.Nodes, 0, 0);
+ 						int horzOffset = CalculateHorizontalChildOffset(rootNode);
 
-				    int iToNode = ((rootNode.Nodes.Count - 1) / 2);
-                    TreeNode rightTo = rootNode.Nodes[iToNode];
+						TreeNode leftFrom = rootNode;
+						TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
 
-                    RecalculatePositions(graphics, rightFrom, rightTo, horzOffset, 0);
+						FlipPositionsHorizontally(leftFrom, leftTo);
+						OffsetPositions(leftFrom, leftTo, horzOffset, 0);
+					}
+					break;
 
-				    // Left side
-                    horzOffset = (ItemHorzSeparation - ExpansionButtonSize);
+				case RootLocation.Centre:
+				default: 
+					// Double-sided graph
+					{
+						// Right side
+						int horzOffset = CalculateHorizontalChildOffset(rootNode);
 
-				    TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
-                    TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
+						TreeNode rightFrom = rootNode.Nodes[0];
 
-                    RecalculatePositions(graphics, leftFrom, leftTo, horzOffset, 0);
-				    FlipPositionsHorizontally(leftFrom, leftTo);
+						int iToNode = ((rootNode.Nodes.Count - 1) / 2);
+						TreeNode rightTo = rootNode.Nodes[iToNode];
 
-				    // Align the centres of the two halves vertically
-				    Rectangle leftBounds = CalculateTotalBoundingBox(leftFrom, leftTo);
-				    Rectangle rightBounds = CalculateTotalBoundingBox(rightFrom, rightTo);
+						RecalculatePositions(graphics, rightFrom, rightTo, horzOffset, 0);
 
-				    Point offset = CalculateCentreToCentreOffset(leftBounds, rightBounds);
+						// Left side
+						horzOffset = (ItemHorzSeparation - ExpansionButtonSize);
 
-				    OffsetPositions(leftFrom, leftTo, 0, offset.Y);
+						TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
+						TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
+
+						RecalculatePositions(graphics, leftFrom, leftTo, horzOffset, 0);
+						FlipPositionsHorizontally(leftFrom, leftTo);
+
+						// Align the centres of the two halves vertically
+						Rectangle leftBounds = CalculateTotalBoundingBox(leftFrom, leftTo);
+						Rectangle rightBounds = CalculateTotalBoundingBox(rightFrom, rightTo);
+
+						Point offset = CalculateCentreToCentreOffset(leftBounds, rightBounds);
+
+						OffsetPositions(leftFrom, leftTo, 0, offset.Y);
 				
-                    // Then align the root with the two halves
-                    Rectangle childBounds = CalculateChildBoundingBox(rootNode);
-                    Rectangle itemBounds = CalculateItemBounds(graphics, rootNode, childBounds, 0, 0);
+						// Then align the root with the two halves
+						Rectangle childBounds = CalculateChildBoundingBox(rootNode);
+						Rectangle itemBounds = CalculateItemBounds(graphics, rootNode, childBounds, 0, 0);
                 
-                    rootItem.ItemBounds = itemBounds;
-                    rootItem.ChildBounds = childBounds;
-                }
+						rootItem.ItemBounds = itemBounds;
+						rootItem.ChildBounds = childBounds;
+					}
+					break;
+				}
             }
 
             // Move the whole graph so that the top-left is (0,0)

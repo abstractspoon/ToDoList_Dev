@@ -47,7 +47,9 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MindMapControl.cs" />
+    <Compile Include="MindMapControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="MindMapControl.Designer.cs">
       <DependentUpon>MindMapControl.cs</DependentUpon>
     </Compile>
