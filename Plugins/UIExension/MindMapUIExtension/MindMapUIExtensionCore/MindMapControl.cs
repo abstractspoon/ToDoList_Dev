@@ -167,7 +167,7 @@ namespace MindMapUIExtension
         private Point m_DrawOffset;
 		private TreeNode m_DropTarget;
         private DropPos m_DropPos;
-		private RootLocation m_RootLocation;
+		private RootAlignment m_Alignment;
 		private Timer m_DragTimer;
 		private Color m_ConnectionColor;
 		private int m_LastDragTick = 0;
@@ -189,7 +189,7 @@ namespace MindMapUIExtension
 			m_DropTarget = null;
             m_DropPos = DropPos.None;
 			m_ConnectionColor = Color.Magenta;
-			m_RootLocation = RootLocation.Right;
+			m_Alignment = RootAlignment.Centre;
 
 			InitializeComponent();
 		}
@@ -229,11 +229,25 @@ namespace MindMapUIExtension
             m_TreeView.Nodes.Clear();
         }
 
-		public enum RootLocation
+		public enum RootAlignment
 		{
-			Left,
 			Centre,
+			Left,
 			Right
+		}
+
+		public RootAlignment Alignment
+		{
+			get { return m_Alignment; }
+
+			set
+			{
+				if (m_Alignment != value)
+				{
+					m_Alignment = value;
+					RecalculatePositions();
+				}
+			}
 		}
 
 		public enum ExpandNode
@@ -1511,19 +1525,19 @@ namespace MindMapUIExtension
 
             using (Graphics graphics = m_TreeView.CreateGraphics())
             {
-				var rootLoc = m_RootLocation;
+				var rootLoc = m_Alignment;
 
 				if (rootNode.Nodes.Count < 2)
-					rootLoc = RootLocation.Left;
+					rootLoc = RootAlignment.Left;
 
 				switch (rootLoc)
 				{
-				case RootLocation.Left:
+				case RootAlignment.Left:
                     // One-sided graph
                     RecalculatePositions(graphics, m_TreeView.Nodes, 0, 0);
 					break;
 
-				case RootLocation.Right:
+				case RootAlignment.Right:
                     // One-sided graph
 					{
 						RecalculatePositions(graphics, m_TreeView.Nodes, 0, 0);
@@ -1537,7 +1551,7 @@ namespace MindMapUIExtension
 					}
 					break;
 
-				case RootLocation.Centre:
+				case RootAlignment.Centre:
 				default: 
 					// Double-sided graph
 					{

@@ -27,6 +27,7 @@ namespace MindMapUIExtension
         private System.Drawing.Font m_ControlsFont;
 
         private TdlMindMapControl m_MindMap;
+		private ComboBox m_AlignmentCombo;
 
         // ----------------------------------------------------------------------------
 
@@ -117,13 +118,14 @@ namespace MindMapUIExtension
 
         public void SetUITheme(UITheme theme)
         {
+			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+
+			// Connection colour
             var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 
             // Make sure it's dark enough
-            color = DrawingColor.SetLuminance(color, 0.6f);
-
-            m_MindMap.ConnectionColor = color;
-        }
+            m_MindMap.ConnectionColor = DrawingColor.SetLuminance(color, 0.6f);
+		}
 
 		public void SetTaskFont(String faceName, int pointSize)
 		{
@@ -137,16 +139,19 @@ namespace MindMapUIExtension
 
         public void SavePreferences(Preferences prefs, String key)
         {
+			prefs.WriteProfileInt(key, "RootAlignment", (int)m_MindMap.Alignment);
         }
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
             if (!appOnly)
             {
-                // private settings
-            }
+				// private settings
+				m_MindMap.Alignment = (MindMapControl.RootAlignment)prefs.GetProfileInt(key, "RootAlignment", (int)m_MindMap.Alignment);
+				m_AlignmentCombo.SelectedIndex = (int)m_MindMap.Alignment;
+			}
 
-            bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
 			m_MindMap.TaskColorIsBackground = taskColorIsBkgnd;
 
 			bool showParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
@@ -223,7 +228,7 @@ namespace MindMapUIExtension
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-            m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
+			m_MindMap = new TdlMindMapControl(m_Trans, m_TaskIcons);
 			m_MindMap.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             m_MindMap.Font = m_ControlsFont;
 
@@ -239,9 +244,37 @@ namespace MindMapUIExtension
             m_MindMap.EditTaskDone += new EditTaskCompletionEventHandler(OnMindMapEditTaskCompletion);
 
             this.Controls.Add(m_MindMap);
-        }
 
-        Boolean OnMindMapEditTaskLabel(object sender, UInt32 taskId)
+			var comboLabel = new Label();
+			comboLabel.Font = m_ControlsFont;
+			comboLabel.Text = m_Trans.Translate("Alignment");
+			comboLabel.AutoSize = true;
+			comboLabel.Location = new Point(-2, 8);
+
+			this.Controls.Add(comboLabel);
+
+			m_AlignmentCombo = new ComboBox();
+			m_AlignmentCombo.Font = m_ControlsFont;
+			m_AlignmentCombo.Width = 120;
+			m_AlignmentCombo.Height = 200;
+			m_AlignmentCombo.Location = new Point(comboLabel.Right + 10, 4);
+			m_AlignmentCombo.DropDownStyle = ComboBoxStyle.DropDownList;
+
+			m_AlignmentCombo.Items.Add(m_Trans.Translate("Centre"));
+			m_AlignmentCombo.Items.Add(m_Trans.Translate("Left"));
+			m_AlignmentCombo.Items.Add(m_Trans.Translate("Right"));
+
+			m_AlignmentCombo.SelectedIndexChanged += new EventHandler(OnMindMapStyleChanged);
+
+			this.Controls.Add(m_AlignmentCombo);
+		}
+
+		void OnMindMapStyleChanged(object sender, EventArgs e)
+		{
+			m_MindMap.Alignment = (MindMapControl.RootAlignment)m_AlignmentCombo.SelectedIndex;
+		}
+
+		Boolean OnMindMapEditTaskLabel(object sender, UInt32 taskId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -290,7 +323,11 @@ namespace MindMapUIExtension
         {
             base.OnSizeChanged(e);
 
-            m_MindMap.Bounds = ClientRectangle;
+			Rectangle rect = ClientRectangle;
+			rect.Y = m_AlignmentCombo.Bottom + 6;
+			rect.Height -= (m_AlignmentCombo.Bottom + 6);
+
+            m_MindMap.Bounds = rect;
 
             Invalidate(true);
         }
