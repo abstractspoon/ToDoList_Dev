@@ -524,8 +524,15 @@ namespace MindMapUIExtension
 
                 if (m_DropTarget != null)
                     DrawInsertionMarker(e.Graphics, m_DropTarget);
-            }
-        }
+
+				PostDraw(e.Graphics, m_TreeView.Nodes);
+			}
+		}
+
+		protected virtual void PostDraw(Graphics graphics, TreeNodeCollection nodes)
+		{
+			// For derived classes
+		}
 
 		protected override void OnPaintBackground(PaintEventArgs e)
 		{
@@ -2221,7 +2228,7 @@ namespace MindMapUIExtension
 			DrawNodeConnection(graphics, ptFrom, ptTo);
 		}
 
-		private Rectangle RectFromPoints(Point pt1, Point pt2)
+		protected Rectangle RectFromPoints(Point pt1, Point pt2)
 		{
 			return Rectangle.FromLTRB(Math.Min(pt1.X, pt2.X),
 										Math.Min(pt1.Y, pt2.Y),
@@ -2229,7 +2236,7 @@ namespace MindMapUIExtension
 										Math.Max(pt1.Y, pt2.Y));
 		}
 
-		private Rectangle GetItemDrawRect(Rectangle itemRect)
+		protected Rectangle GetItemDrawRect(Rectangle itemRect)
 		{
 			Rectangle drawPos = itemRect;
 

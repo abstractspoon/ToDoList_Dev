@@ -11,9 +11,9 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace MindMapUIExtension
 {
-    public delegate Boolean EditTaskLabelEventHandler(object sender, UInt32 taskId);
-    public delegate Boolean EditTaskIconEventHandler(object sender, UInt32 taskId);
-    public delegate Boolean EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
+    public delegate bool EditTaskLabelEventHandler(object sender, UInt32 taskId);
+    public delegate bool EditTaskIconEventHandler(object sender, UInt32 taskId);
+    public delegate bool EditTaskCompletionEventHandler(object sender, UInt32 taskId, bool completed);
 
 	class MindMapTaskItem
 	{
@@ -22,14 +22,15 @@ namespace MindMapUIExtension
 		private UInt32 m_TaskID;
         private UInt32 m_ParentID;
 		private UInt32 m_ReferenceId;
+		private List<UInt32> m_LocalDepends;
 		private Color m_TextColor;
-		private Boolean m_HasIcon;
-		private Boolean m_IsFlagged;
-		private Boolean m_IsParent;
-        private Boolean m_IsDone;
-        private Boolean m_IsGoodAsDone;
-        private Boolean m_SomeSubtasksDone;
-		private Boolean m_IsLocked;
+		private bool m_HasIcon;
+		private bool m_IsFlagged;
+		private bool m_IsParent;
+        private bool m_IsDone;
+        private bool m_IsGoodAsDone;
+        private bool m_SomeSubtasksDone;
+		private bool m_IsLocked;
 
 		// -----------------------------------------------------------------
 
@@ -47,6 +48,7 @@ namespace MindMapUIExtension
             m_SomeSubtasksDone = false;
 			m_IsLocked = false;
 			m_ReferenceId = 0;
+			m_LocalDepends = null;
 		}
 
 		public MindMapTaskItem(Task task)
@@ -63,6 +65,7 @@ namespace MindMapUIExtension
             m_SomeSubtasksDone = task.HasSomeSubtasksDone();
 			m_IsLocked = task.IsLocked(true);
 			m_ReferenceId = task.GetReferenceID();
+			m_LocalDepends = task.GetLocalDependency();
 		}
 
 		public void FixupParentID(MindMapTaskItem parent)
@@ -70,7 +73,7 @@ namespace MindMapUIExtension
             m_ParentID = parent.ID;
 		}
 
-        public Boolean FixupParentalStatus(int nodeCount, UIExtension.TaskIcon taskIcons)
+        public bool FixupParentalStatus(int nodeCount, UIExtension.TaskIcon taskIcons)
         {
             bool wasParent = m_IsParent;
 
@@ -118,15 +121,17 @@ namespace MindMapUIExtension
         public UInt32 ParentID { get { return m_ParentID; } }
 		public UInt32 ReferenceId { get { return m_ReferenceId; } }
 		public Color TextColor { get { return m_TextColor; } }
-		public Boolean HasIcon { get { return m_HasIcon; } }
-		public Boolean IsFlagged { get { return m_IsFlagged; } }
-		public Boolean IsParent { get { return m_IsParent; } }
-		public Boolean IsLocked { get { return m_IsLocked; } }
-		public Boolean IsReference { get { return (m_ReferenceId != 0); } }
-		public Boolean IsTask { get { return (m_TaskID != 0); } }
-        public Boolean HasSomeSubtasksDone { get { return m_SomeSubtasksDone; } }
+		public bool HasIcon { get { return m_HasIcon; } }
+		public bool IsFlagged { get { return m_IsFlagged; } }
+		public bool IsParent { get { return m_IsParent; } }
+		public bool IsLocked { get { return m_IsLocked; } }
+		public bool IsReference { get { return (m_ReferenceId != 0); } }
+		public bool IsTask { get { return (m_TaskID != 0); } }
+        public bool HasSomeSubtasksDone { get { return m_SomeSubtasksDone; } }
+		public bool HasLocalDependencies {  get { return (m_LocalDepends != null) && (m_LocalDepends.Count > 0); } }
+		public List<UInt32> LocalDependencies { get { return m_LocalDepends; } }
 
-        public Boolean IsDone(bool includeGoodAsDone) 
+		public bool IsDone(bool includeGoodAsDone) 
         { 
             if (includeGoodAsDone && m_IsGoodAsDone)
                 return true;
@@ -134,7 +139,7 @@ namespace MindMapUIExtension
             return m_IsDone; 
         }
 
-		public Boolean SetDone(bool done = true)
+		public bool SetDone(bool done = true)
 		{
 			if (m_IsDone == done)
 				return false;
@@ -190,11 +195,11 @@ namespace MindMapUIExtension
 		private UIExtension.TaskIcon m_TaskIcons;
 		private Dictionary<UInt32, MindMapTaskItem> m_Items;
 
-		private Boolean m_ShowParentAsFolder;
-		private Boolean m_TaskColorIsBkgnd;
-		private Boolean m_IgnoreMouseClick;
-        private Boolean m_ShowCompletionCheckboxes;
-		private Boolean m_StrikeThruDone;
+		private bool m_ShowParentAsFolder;
+		private bool m_TaskColorIsBkgnd;
+		private bool m_IgnoreMouseClick;
+        private bool m_ShowCompletionCheckboxes;
+		private bool m_StrikeThruDone;
 
 		private TreeNode m_PreviouslySelectedNode;
 		private Timer m_EditTimer;
@@ -304,12 +309,12 @@ namespace MindMapUIExtension
 			}
 		}
 
-		public Boolean SelectNodeWasPreviouslySelected
+		public bool SelectNodeWasPreviouslySelected
 		{
 			get { return (SelectedNode == m_PreviouslySelectedNode); }
 		}
 
-		public Boolean TaskColorIsBackground
+		public bool TaskColorIsBackground
 		{
 			get { return m_TaskColorIsBkgnd; }
 			set
@@ -322,7 +327,7 @@ namespace MindMapUIExtension
 			}
 		}
 
-		public Boolean ShowParentsAsFolders
+		public bool ShowParentsAsFolders
 		{
 			get { return m_ShowParentAsFolder; }
 			set
@@ -335,7 +340,7 @@ namespace MindMapUIExtension
 			}
 		}
 
-        public Boolean ShowCompletionCheckboxes
+        public bool ShowCompletionCheckboxes
         {
             get { return m_ShowCompletionCheckboxes; }
             set
@@ -392,7 +397,7 @@ namespace MindMapUIExtension
 			return labelRect;
 		}
 
-		public Boolean CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		public bool CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
 			if (FindNode(taskId) == null)
 				return false;
@@ -406,7 +411,7 @@ namespace MindMapUIExtension
 			return true;
 		}
 
-		public Boolean MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
+		public bool MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
 			BeginUpdate();
 
@@ -569,7 +574,7 @@ namespace MindMapUIExtension
 			return false;
 		}
 
-        public Boolean CanSaveToImage()
+        public bool CanSaveToImage()
         {
             return !IsEmpty();
         }
@@ -581,7 +586,7 @@ namespace MindMapUIExtension
             return DPIScaling.Scale(value);
         }
 
-        private bool RefreshItemFont(TreeNode node, Boolean andChildren)
+        private bool RefreshItemFont(TreeNode node, bool andChildren)
         {
             var taskItem = TaskItem(node);
 
@@ -834,7 +839,7 @@ namespace MindMapUIExtension
 			return expandedIDs;
 		}
 
-		private Boolean SetExpandedItems(List<UInt32> expandedNodes)
+		private bool SetExpandedItems(List<UInt32> expandedNodes)
 		{
             if (expandedNodes == null)
                 return false;
@@ -858,7 +863,7 @@ namespace MindMapUIExtension
             return someSucceeded;
 		}
 
-		protected override Boolean IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
+		protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
 		{
 			if (dropPos == MindMapControl.DropPos.On)
 				return !TaskItem(dropTargetItemData).IsLocked;
@@ -867,12 +872,12 @@ namespace MindMapUIExtension
 			return true;
 		}
 
-		protected override Boolean IsAcceptableDragSource(Object itemData)
+		protected override bool IsAcceptableDragSource(Object itemData)
 		{
 			return !TaskItem(itemData).IsLocked;
 		}
 
-		protected override Boolean DoDrop(MindMapDragEventArgs e)
+		protected override bool DoDrop(MindMapDragEventArgs e)
 		{
 			TreeNode prevParentNode = e.dragged.node.Parent;
 
@@ -1072,12 +1077,12 @@ namespace MindMapUIExtension
             return CheckBoxState.UncheckedNormal;
         }
 
-		private Boolean NodeIsTask(TreeNode node)
+		private bool NodeIsTask(TreeNode node)
         {
             return TaskItem(node).IsTask;
         }
 
-		private Boolean TaskHasIcon(MindMapTaskItem taskItem)
+		private bool TaskHasIcon(MindMapTaskItem taskItem)
 		{
 			if ((m_TaskIcons == null) || (taskItem == null) || !taskItem.IsTask)
 				return false;
@@ -1096,7 +1101,76 @@ namespace MindMapUIExtension
 								ptTo);
 		}
 
-        private Rectangle CalcCheckboxRect(Rectangle labelRect)
+
+		protected override void PostDraw(Graphics graphics, TreeNodeCollection nodes)
+		{
+			foreach (TreeNode node in nodes)
+				DrawDependencies(graphics, node);
+		}
+
+		protected void DrawDependencies(Graphics graphics, TreeNode node)
+		{
+			var task = TaskItem(node);
+
+			if ((task != null) && task.HasLocalDependencies)
+			{
+				foreach (var depend in task.LocalDependencies)
+				{
+					var dependNode = FindNode(depend);
+
+					if (dependNode != null)
+						DrawDependency(graphics, node, dependNode);
+				}
+			}
+
+			// children
+			foreach (TreeNode childNode in node.Nodes)
+				DrawDependencies(graphics, childNode);
+		}
+
+		protected void DrawDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
+		{
+			if ((nodeFrom == null) || (nodeTo == null))
+				return;
+
+			MindMapItem itemFrom = Item(nodeFrom);
+			MindMapItem itemTo = Item(nodeTo);
+
+			Rectangle rectFrom = GetItemDrawRect(itemFrom.ItemBounds);
+			Rectangle rectTo = GetItemDrawRect(itemTo.ItemBounds);
+
+			// Various patterns requiring different solutions:
+			//
+			// 1. Sibling leaf tasks
+			//    1.1 Same side of the root
+			//    1.2 Opposing sides of the root (top-level tasks only)
+			//
+			// 2. Sibling parent tasks (which is all the rest)
+			//    2.1 Same side of the root
+			//    2.2 Opposing sides of the root (top-level tasks only) 
+			//
+			// 3. Parent to immediate child (always on same side of root)
+			//    2.1 Child is a leaf task
+			//    2.2 Child is NOT a leaf task
+			//
+			// 4. All other relationships
+			//    2.1 One of the tasks is a leaf task
+			//    2.2 NEITHER task is a leaf task
+
+
+			Point ptFrom = new Point((rectFrom.Left + rectFrom.Right) / 2, ((rectFrom.Top + rectFrom.Bottom) / 2));
+			Point ptTo = new Point((rectTo.Right + rectTo.Left) / 2, ((rectTo.Top + rectTo.Bottom) / 2));
+
+			// Don't draw connections falling wholly outside the client rectangle
+			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
+
+			if (!RectFromPoints(ptFrom, ptTo).IntersectsWith(clipRect))
+				return;
+
+			graphics.DrawLine(Pens.Black, ptFrom, ptTo);
+		}
+		
+		private Rectangle CalcCheckboxRect(Rectangle labelRect)
         {
             if (!m_ShowCompletionCheckboxes)
                 return Rectangle.Empty;
