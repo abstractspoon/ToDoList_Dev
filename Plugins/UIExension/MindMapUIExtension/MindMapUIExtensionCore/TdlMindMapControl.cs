@@ -1136,6 +1136,11 @@ namespace MindMapUIExtension
 			}
 		}
 
+		private bool IsDependencyLeafNode(TreeNode node)
+		{
+			return (!node.IsExpanded || (node.FirstNode == null));
+		}
+
 		protected void DrawTaskDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
 		{
 			if ((nodeFrom == null) || (nodeTo == null))
@@ -1153,12 +1158,14 @@ namespace MindMapUIExtension
 			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
 
 			// Various patterns requiring different solutions:
+			bool processed = false;
+
 			//
 			// 1. Leaf tasks
-			if ((nodeFrom.FirstNode == null) && (nodeTo.FirstNode == null))
+			if (IsDependencyLeafNode(nodeFrom) && IsDependencyLeafNode(nodeTo))
 			{
 				// 1.1 Same side of the root
-				if (itemFrom.IsFlipped == itemFrom.IsFlipped)
+				if (itemFrom.IsFlipped == itemTo.IsFlipped)
 				{
 					int vOffset = (fromIsAboveTo ? 2 : toIsAboveFrom ? -2 : 0);
 					int controlX = 0;
@@ -1188,14 +1195,12 @@ namespace MindMapUIExtension
 					ptControlFrom.Y += vOffset;
 					ptControlTo.Y -= vOffset;
 
+					processed = true;
 					graphics.DrawBezier(Pens.Red/*m_DependencyPen*/, ptFrom, ptControlFrom, ptControlTo, ptTo);
 				}
 				else // 1.2 Opposing sides of the root
 				{
 				}
-
-
-
 			}
 			//
 			// 2. Leaf to Non-leaf (parent) tasks
@@ -1226,8 +1231,31 @@ namespace MindMapUIExtension
 			// 
 			// 			graphics.DrawLine(Pens.Black, ptFrom, ptTo);
 
+			// All the rest
+			if (!processed)
+			{
+				if (itemFrom.IsFlipped)
+				{
+					// Left to right
+					ptFrom = RectUtil.MiddleRight(rectFrom);
+					ptTo = RectUtil.MiddleLeft(rectTo);
+				}
+				else // right to left
+				{
+					ptFrom = RectUtil.MiddleLeft(rectFrom);
+					ptTo = RectUtil.MiddleRight(rectTo);
+				}
+
+				int controlY = (Math.Min(ptFrom.Y, ptTo.Y) - 50);
+
+				ptControlFrom = new Point(ptFrom.X, controlY);
+				ptControlTo = new Point(ptTo.X, controlY);
+
+				graphics.DrawBezier(Pens.Red/*m_DependencyPen*/, ptFrom, ptControlFrom, ptControlTo, ptTo);
+			}
+
 		}
-		
+
 		private Rectangle CalcCheckboxRect(Rectangle labelRect)
         {
             if (!m_ShowCompletionCheckboxes)
