@@ -205,6 +205,7 @@ namespace MindMapUIExtension
 		private Timer m_EditTimer;
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
+		private Pen m_DependencyPen;
 
 		// -------------------------------------------------------------------------
 
@@ -214,6 +215,9 @@ namespace MindMapUIExtension
 			m_TaskIcons = icons;
 
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
+
+			m_DependencyPen = new Pen(Color.Black);
+			m_DependencyPen.DashStyle = DashStyle.Dot;
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
@@ -366,6 +370,7 @@ namespace MindMapUIExtension
 			    case Task.Attribute.Position:
 			    case Task.Attribute.SubtaskDone:
 				case Task.Attribute.ProjectName:
+				case Task.Attribute.Dependency:
 					return true;
             }
 
@@ -1105,10 +1110,10 @@ namespace MindMapUIExtension
 		protected override void PostDraw(Graphics graphics, TreeNodeCollection nodes)
 		{
 			foreach (TreeNode node in nodes)
-				DrawDependencies(graphics, node);
+				DrawTaskDependencies(graphics, node);
 		}
 
-		protected void DrawDependencies(Graphics graphics, TreeNode node)
+		protected void DrawTaskDependencies(Graphics graphics, TreeNode node)
 		{
 			var task = TaskItem(node);
 
@@ -1118,17 +1123,20 @@ namespace MindMapUIExtension
 				{
 					var dependNode = FindNode(depend);
 
-					if (dependNode != null)
-						DrawDependency(graphics, node, dependNode);
+					if ((dependNode != null) && dependNode.Parent.IsExpanded)
+						DrawTaskDependency(graphics, node, dependNode);
 				}
 			}
 
 			// children
+			if (node.IsExpanded)
+			{
 			foreach (TreeNode childNode in node.Nodes)
-				DrawDependencies(graphics, childNode);
+				DrawTaskDependencies(graphics, childNode);
+			}
 		}
 
-		protected void DrawDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
+		protected void DrawTaskDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
 		{
 			if ((nodeFrom == null) || (nodeTo == null))
 				return;
@@ -1139,35 +1147,85 @@ namespace MindMapUIExtension
 			Rectangle rectFrom = GetItemDrawRect(itemFrom.ItemBounds);
 			Rectangle rectTo = GetItemDrawRect(itemTo.ItemBounds);
 
+			bool fromIsAboveTo = (rectFrom.Bottom <= rectTo.Top);
+			bool toIsAboveFrom = (rectTo.Bottom <= rectFrom.Top);
+
+			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
+
 			// Various patterns requiring different solutions:
 			//
-			// 1. Sibling leaf tasks
-			//    1.1 Same side of the root
-			//    1.2 Opposing sides of the root (top-level tasks only)
+			// 1. Leaf tasks
+			if ((nodeFrom.FirstNode == null) && (nodeTo.FirstNode == null))
+			{
+				// 1.1 Same side of the root
+				if (itemFrom.IsFlipped == itemFrom.IsFlipped)
+				{
+					int vOffset = (fromIsAboveTo ? 2 : toIsAboveFrom ? -2 : 0);
+					int controlX = 0;
+
+					if (itemFrom.IsFlipped)
+					{
+						// Left side
+						ptFrom = RectUtil.MiddleLeft(rectFrom);
+						ptTo = RectUtil.MiddleLeft(rectTo);
+
+						controlX = (Math.Min(ptFrom.X, ptTo.X) - 50);
+					}
+					else // right side
+					{
+						ptFrom = RectUtil.MiddleRight(rectFrom);
+						ptTo = RectUtil.MiddleRight(rectTo);
+
+						controlX = (Math.Max(ptFrom.X, ptTo.X) + 50);
+					}
+
+					ptFrom.Y += vOffset;
+					ptTo.Y -= vOffset;
+
+					ptControlFrom = new Point(controlX, ptFrom.Y);
+					ptControlTo = new Point(controlX, ptTo.Y);
+
+					ptControlFrom.Y += vOffset;
+					ptControlTo.Y -= vOffset;
+
+					graphics.DrawBezier(Pens.Red/*m_DependencyPen*/, ptFrom, ptControlFrom, ptControlTo, ptTo);
+				}
+				else // 1.2 Opposing sides of the root
+				{
+				}
+
+
+
+			}
 			//
-			// 2. Sibling parent tasks (which is all the rest)
+			// 2. Leaf to Non-leaf (parent) tasks
 			//    2.1 Same side of the root
-			//    2.2 Opposing sides of the root (top-level tasks only) 
+			//    2.2 Opposing sides of the root
 			//
-			// 3. Parent to immediate child (always on same side of root)
-			//    2.1 Child is a leaf task
-			//    2.2 Child is NOT a leaf task
+			// 3. Non-leaf (parent) to Non-leaf (parent) tasks
+			//    3.1 Same side of the root
+			//    3.2 Opposing sides of the root
 			//
-			// 4. All other relationships
-			//    2.1 One of the tasks is a leaf task
-			//    2.2 NEITHER task is a leaf task
+			// 4. Parent to own child (always on same side of root)
+			//    4.1 Child is a leaf task
+			//    4.2 Child is NOT a leaf task
+			//
+			// 5. All other relationships
+			//    5.1 One of the tasks is a leaf task
+			//    5.2 NEITHER task is a leaf task
 
 
-			Point ptFrom = new Point((rectFrom.Left + rectFrom.Right) / 2, ((rectFrom.Top + rectFrom.Bottom) / 2));
-			Point ptTo = new Point((rectTo.Right + rectTo.Left) / 2, ((rectTo.Top + rectTo.Bottom) / 2));
+			// 			Point ptFrom = new Point((rectFrom.Left + rectFrom.Right) / 2, ((rectFrom.Top + rectFrom.Bottom) / 2));
+			// 			Point ptTo = new Point((rectTo.Right + rectTo.Left) / 2, ((rectTo.Top + rectTo.Bottom) / 2));
+			// 
+			// 			// Don't draw connections falling wholly outside the client rectangle
+			// 			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
+			// 
+			// 			if (!RectFromPoints(ptFrom, ptTo).IntersectsWith(clipRect))
+			// 				return;
+			// 
+			// 			graphics.DrawLine(Pens.Black, ptFrom, ptTo);
 
-			// Don't draw connections falling wholly outside the client rectangle
-			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
-
-			if (!RectFromPoints(ptFrom, ptTo).IntersectsWith(clipRect))
-				return;
-
-			graphics.DrawLine(Pens.Black, ptFrom, ptTo);
 		}
 		
 		private Rectangle CalcCheckboxRect(Rectangle labelRect)
