@@ -1148,6 +1148,38 @@ namespace MindMapUIExtension
 
 		protected override int GraphPadding { get { return DependencyOffset; } }
 
+		private Point[] CalcHorzDependencyArrow(Point point, int itemHeight, bool flipped)
+		{
+			Point[] arrow = new Point[] { point, point, point };
+
+			int ARROW = (itemHeight / 4);
+
+			if (flipped)
+			{
+				arrow[0].Offset(-ARROW, -ARROW);
+				arrow[2].Offset(-ARROW, ARROW);
+			}
+			else
+			{
+				arrow[0].Offset(ARROW, -ARROW);
+				arrow[2].Offset(ARROW, ARROW);
+			}
+
+			return arrow;
+		}
+
+		private void DrawHorzDependencyArrow(Graphics graphics, Point point, int itemHeight, bool flipped)
+		{
+			graphics.DrawLines(Pens.Black, CalcHorzDependencyArrow(point, itemHeight, flipped));
+
+			if (flipped)
+				point.X++;
+			else
+				point.X--;
+
+			graphics.DrawLines(Pens.Black, CalcHorzDependencyArrow(point, itemHeight, flipped));
+		}
+
 		protected void DrawTaskDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
 		{
 			if ((nodeFrom == null) || (nodeTo == null))
@@ -1204,8 +1236,8 @@ namespace MindMapUIExtension
 
 					graphics.DrawBezier(Pens.Red/*m_DependencyPen*/, ptFrom, ptControlFrom, ptControlTo, ptTo);
 
-					// Draw arrow at from end
-					// TODO
+					// Draw arrow at from end (size to match Gantt Chart)
+					DrawHorzDependencyArrow(graphics, ptFrom, rectFrom.Height, itemFrom.IsFlipped);
 
 					processed = true;
 				}
