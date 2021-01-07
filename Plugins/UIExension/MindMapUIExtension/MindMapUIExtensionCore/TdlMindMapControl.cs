@@ -1141,6 +1141,13 @@ namespace MindMapUIExtension
 			return (!node.IsExpanded || (node.FirstNode == null));
 		}
 
+		internal int DependencyOffset
+		{
+			get { return ScaleByDPIFactor(25); }
+		}
+
+		protected override int GraphPadding { get { return DependencyOffset; } }
+
 		protected void DrawTaskDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
 		{
 			if ((nodeFrom == null) || (nodeTo == null))
@@ -1176,14 +1183,14 @@ namespace MindMapUIExtension
 						ptFrom = RectUtil.MiddleLeft(rectFrom);
 						ptTo = RectUtil.MiddleLeft(rectTo);
 
-						controlX = (Math.Min(ptFrom.X, ptTo.X) - 50);
+						controlX = (Math.Min(ptFrom.X, ptTo.X) - DependencyOffset);
 					}
 					else // right side
 					{
 						ptFrom = RectUtil.MiddleRight(rectFrom);
 						ptTo = RectUtil.MiddleRight(rectTo);
 
-						controlX = (Math.Max(ptFrom.X, ptTo.X) + 50);
+						controlX = (Math.Max(ptFrom.X, ptTo.X) + DependencyOffset);
 					}
 
 					ptFrom.Y += vOffset;
@@ -1195,8 +1202,12 @@ namespace MindMapUIExtension
 					ptControlFrom.Y += vOffset;
 					ptControlTo.Y -= vOffset;
 
-					processed = true;
 					graphics.DrawBezier(Pens.Red/*m_DependencyPen*/, ptFrom, ptControlFrom, ptControlTo, ptTo);
+
+					// Draw arrow at from end
+					// TODO
+
+					processed = true;
 				}
 				else // 1.2 Opposing sides of the root
 				{
@@ -1246,10 +1257,10 @@ namespace MindMapUIExtension
 					ptTo = RectUtil.MiddleRight(rectTo);
 				}
 
-				int controlY = (Math.Min(ptFrom.Y, ptTo.Y) - 50);
+				int controlY = (Math.Min(ptFrom.Y, ptTo.Y) - DependencyOffset);
 
-				ptControlFrom = new Point(ptFrom.X, controlY);
-				ptControlTo = new Point(ptTo.X, controlY);
+				ptControlFrom = new Point((ptFrom.X + ptTo.X) / 2, controlY);
+				ptControlTo = ptControlFrom;// new Point(ptTo.X, controlY);
 
 				graphics.DrawBezier(Pens.Red/*m_DependencyPen*/, ptFrom, ptControlFrom, ptControlTo, ptTo);
 			}
