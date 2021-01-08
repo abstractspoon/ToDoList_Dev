@@ -32,6 +32,13 @@ namespace Abstractspoon
 				static Drawing::Point BottomRight(Drawing::Rectangle^ rect);
 			};
 
+			public ref class PointUtil
+			{
+			public:
+				static int Distance(Drawing::Point^ pt1, Drawing::Point^ pt2);
+			
+			};
+
 		}
 	}
 }

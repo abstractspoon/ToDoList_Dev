@@ -2,7 +2,7 @@
 //
 
 #include "stdafx.h"
-#include "RectUtil.h"
+#include "GeometryUtil.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -67,3 +67,10 @@ Drawing::Point RectUtil::BottomRight(Drawing::Rectangle^ rect)
 	return Point(rect->Right, rect->Bottom);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+int PointUtil::Distance(Drawing::Point^ pt1, Drawing::Point^ pt2)
+{
+	return (int)sqrt(((pt1->X - pt2->X) * (pt1->X - pt2->X)) + 
+					 ((pt1->Y - pt2->Y) * (pt1->Y - pt2->Y)));
+}

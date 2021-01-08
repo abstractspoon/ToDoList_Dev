@@ -1148,36 +1148,82 @@ namespace MindMapUIExtension
 
 		protected override int GraphPadding { get { return DependencyOffset; } }
 
-		private Point[] CalcHorzDependencyArrow(Point point, int itemHeight, bool flipped)
+		private Point[] CalcHorzDependencyArrow(Point point, int itemHeight, bool left)
 		{
 			Point[] arrow = new Point[] { point, point, point };
 
+			// Size to match Gantt Chart
 			int ARROW = (itemHeight / 4);
 
-			if (flipped)
+			if (left)
 			{
-				arrow[0].Offset(-ARROW, -ARROW);
-				arrow[2].Offset(-ARROW, ARROW);
-			}
-			else
-			{
+				// <----
+				//
 				arrow[0].Offset(ARROW, -ARROW);
 				arrow[2].Offset(ARROW, ARROW);
+			}
+			else // right
+			{
+				// --->
+				//
+				arrow[0].Offset(-ARROW, -ARROW);
+				arrow[2].Offset(-ARROW, ARROW);
 			}
 
 			return arrow;
 		}
 
-		private void DrawHorzDependencyArrow(Graphics graphics, Point point, int itemHeight, bool flipped)
+		private Point[] CalcVertDependencyArrow(Point point, int itemHeight, bool up)
 		{
-			graphics.DrawLines(Pens.Black, CalcHorzDependencyArrow(point, itemHeight, flipped));
+			Point[] arrow = new Point[] { point, point, point };
 
-			if (flipped)
+			// Size to match Gantt Chart
+			int ARROW = (itemHeight / 4);
+
+			if (up)
+			{
+				//  ^
+				//  |
+				//
+				arrow[0].Offset(-ARROW, ARROW);
+				arrow[2].Offset(ARROW, ARROW);
+			}
+			else // down
+			{
+				//  |
+				//  V
+				//
+				arrow[0].Offset(-ARROW, -ARROW);
+				arrow[2].Offset(ARROW, -ARROW);
+			}
+
+			return arrow;
+		}
+
+		private void DrawHorzDependencyArrow(Graphics graphics, Point point, int itemHeight, bool left)
+		{
+			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
+
+			// Offset and draw again
+			if (left)
 				point.X++;
 			else
 				point.X--;
 
-			graphics.DrawLines(Pens.Black, CalcHorzDependencyArrow(point, itemHeight, flipped));
+			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
+		}
+
+		private void DrawVertDependencyArrow(Graphics graphics, Point point, int itemHeight, bool up)
+		{
+			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, up));
+
+			// Offset and draw again
+			if (up)
+				point.Y++;
+			else
+				point.Y--;
+
+			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, up));
 		}
 
 		protected void DrawTaskDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
@@ -1192,110 +1238,162 @@ namespace MindMapUIExtension
 			Rectangle rectTo = GetItemDrawRect(itemTo.ItemBounds);
 
 			bool fromIsAboveTo = (rectFrom.Bottom <= rectTo.Top);
-			bool toIsAboveFrom = (rectTo.Bottom <= rectFrom.Top);
+			bool fromIsBelowTo = (rectFrom.Top >= rectTo.Bottom);
+
+			int itemHeight = rectFrom.Height;
+			int vOffset = (fromIsAboveTo ? 2 : fromIsBelowTo ? -2 : 0);
 
 			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
 
-			// Various patterns requiring different solutions:
-			bool processed = false;
-
-			//
-			// 1. Leaf tasks
-			if (IsDependencyLeafNode(nodeFrom) && IsDependencyLeafNode(nodeTo))
+			// Leaf tasks on the same side of the root
+			// are a special case
+			if (IsDependencyLeafNode(nodeFrom) && 
+				IsDependencyLeafNode(nodeTo) &&
+				(itemFrom.IsFlipped == itemTo.IsFlipped))
 			{
-				// 1.1 Same side of the root
-				if (itemFrom.IsFlipped == itemTo.IsFlipped)
-				{
-					int vOffset = (fromIsAboveTo ? 2 : toIsAboveFrom ? -2 : 0);
-					int controlX = 0;
+				int controlX = 0;
 
-					if (itemFrom.IsFlipped)
-					{
-						// Left side
-						ptFrom = RectUtil.MiddleLeft(rectFrom);
-						ptTo = RectUtil.MiddleLeft(rectTo);
-
-						controlX = (Math.Min(ptFrom.X, ptTo.X) - DependencyOffset);
-					}
-					else // right side
-					{
-						ptFrom = RectUtil.MiddleRight(rectFrom);
-						ptTo = RectUtil.MiddleRight(rectTo);
-
-						controlX = (Math.Max(ptFrom.X, ptTo.X) + DependencyOffset);
-					}
-
-					ptFrom.Y += vOffset;
-					ptTo.Y -= vOffset;
-
-					ptControlFrom = new Point(controlX, ptFrom.Y);
-					ptControlTo = new Point(controlX, ptTo.Y);
-
-					ptControlFrom.Y += vOffset;
-					ptControlTo.Y -= vOffset;
-
-					graphics.DrawBezier(Pens.Red/*m_DependencyPen*/, ptFrom, ptControlFrom, ptControlTo, ptTo);
-
-					// Draw arrow at from end (size to match Gantt Chart)
-					DrawHorzDependencyArrow(graphics, ptFrom, rectFrom.Height, itemFrom.IsFlipped);
-
-					processed = true;
-				}
-				else // 1.2 Opposing sides of the root
-				{
-				}
-			}
-			//
-			// 2. Leaf to Non-leaf (parent) tasks
-			//    2.1 Same side of the root
-			//    2.2 Opposing sides of the root
-			//
-			// 3. Non-leaf (parent) to Non-leaf (parent) tasks
-			//    3.1 Same side of the root
-			//    3.2 Opposing sides of the root
-			//
-			// 4. Parent to own child (always on same side of root)
-			//    4.1 Child is a leaf task
-			//    4.2 Child is NOT a leaf task
-			//
-			// 5. All other relationships
-			//    5.1 One of the tasks is a leaf task
-			//    5.2 NEITHER task is a leaf task
-
-
-			// 			Point ptFrom = new Point((rectFrom.Left + rectFrom.Right) / 2, ((rectFrom.Top + rectFrom.Bottom) / 2));
-			// 			Point ptTo = new Point((rectTo.Right + rectTo.Left) / 2, ((rectTo.Top + rectTo.Bottom) / 2));
-			// 
-			// 			// Don't draw connections falling wholly outside the client rectangle
-			// 			Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
-			// 
-			// 			if (!RectFromPoints(ptFrom, ptTo).IntersectsWith(clipRect))
-			// 				return;
-			// 
-			// 			graphics.DrawLine(Pens.Black, ptFrom, ptTo);
-
-			// All the rest
-			if (!processed)
-			{
 				if (itemFrom.IsFlipped)
 				{
-					// Left to right
-					ptFrom = RectUtil.MiddleRight(rectFrom);
-					ptTo = RectUtil.MiddleLeft(rectTo);
-				}
-				else // right to left
-				{
+					// Left side
 					ptFrom = RectUtil.MiddleLeft(rectFrom);
+					ptTo = RectUtil.MiddleLeft(rectTo);
+
+					controlX = (Math.Min(ptFrom.X, ptTo.X) - DependencyOffset);
+				}
+				else // right side
+				{
+					ptFrom = RectUtil.MiddleRight(rectFrom);
 					ptTo = RectUtil.MiddleRight(rectTo);
+
+					controlX = (Math.Max(ptFrom.X, ptTo.X) + DependencyOffset);
 				}
 
-				int controlY = (Math.Min(ptFrom.Y, ptTo.Y) - DependencyOffset);
+				ptFrom.Y += vOffset;
+				ptTo.Y -= vOffset;
 
-				ptControlFrom = new Point((ptFrom.X + ptTo.X) / 2, controlY);
-				ptControlTo = ptControlFrom;// new Point(ptTo.X, controlY);
+				ptControlFrom = new Point(controlX, ptFrom.Y);
+				ptControlTo = new Point(controlX, ptTo.Y);
 
-				graphics.DrawBezier(Pens.Red/*m_DependencyPen*/, ptFrom, ptControlFrom, ptControlTo, ptTo);
+				DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, !itemFrom.IsFlipped);
 			}
+			else // All other arrangements are just variations on a theme
+			{
+				bool fromIsLeftOfTo = (rectFrom.Right <= rectTo.Left);
+				bool fromIsRightOfTo = (rectFrom.Left >= rectTo.Right);
+
+				// Deflate the rects vertically to allow for the inter task spacing
+				rectFrom.Inflate(0, -ItemVertSeparation);
+				rectTo.Inflate(0, -ItemVertSeparation);
+
+				if (fromIsLeftOfTo)
+				{
+					if (fromIsAboveTo)
+					{
+						ptFrom = RectUtil.MiddleRight(rectFrom);
+						ptTo = RectUtil.TopCentre(rectTo);
+
+						ptFrom.Y += vOffset;
+
+						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
+						ptControlTo = ptControlFrom;
+					}
+					else if (fromIsBelowTo)
+					{
+						ptFrom = RectUtil.MiddleRight(rectFrom);
+						ptTo = RectUtil.BottomCentre(rectTo);
+
+						ptFrom.Y += vOffset;
+
+						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
+						ptControlTo = ptControlFrom;
+					}
+					else // horizontally aligned
+					{
+						ptFrom = RectUtil.MiddleRight(rectFrom);
+						ptTo = RectUtil.MiddleLeft(rectTo);
+
+						ptFrom.Y += vOffset;
+						ptTo.Y -= vOffset;
+
+						int diff = PointUtil.Distance(ptFrom, ptTo);
+
+						ptControlFrom = new Point(ptFrom.X + diff / 3, ptFrom.Y);
+						ptControlTo = new Point(ptTo.X - diff / 3, ptTo.Y); ;
+					}
+
+					DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, true);
+				}
+				else if (fromIsRightOfTo)
+				{
+					if (fromIsAboveTo)
+					{
+						ptFrom = RectUtil.MiddleLeft(rectFrom);
+						ptTo = RectUtil.TopCentre(rectTo);
+
+						ptFrom.Y += vOffset;
+
+						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
+						ptControlTo = ptControlFrom;
+					}
+					else if (fromIsBelowTo)
+					{
+						ptFrom = RectUtil.MiddleLeft(rectFrom);
+						ptTo = RectUtil.BottomCentre(rectTo);
+
+						ptFrom.Y += vOffset;
+
+						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
+						ptControlTo = ptControlFrom;
+					}
+					else // vertically aligned
+					{
+						ptFrom = RectUtil.MiddleLeft(rectFrom);
+						ptTo = RectUtil.MiddleRight(rectTo);
+
+						ptFrom.Y += vOffset;
+						ptTo.Y -= vOffset;
+
+						int diff = PointUtil.Distance(ptFrom, ptTo);
+
+						ptControlFrom = new Point(ptFrom.X - diff / 3, ptFrom.Y);
+						ptControlTo = new Point(ptTo.X + diff / 3, ptTo.Y); ;
+					}
+
+					DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, false);
+				}
+				else if (fromIsAboveTo)
+				{
+					ptFrom = RectUtil.BottomCentre(rectFrom);
+					ptTo = RectUtil.TopCentre(rectTo);
+
+					int diff = PointUtil.Distance(ptFrom, ptTo);
+
+					ptControlFrom = new Point(ptFrom.X, ptFrom.Y + diff / 3);
+					ptControlTo = new Point(ptTo.X, ptTo.Y - diff / 3);
+
+					DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, true);
+				}
+				else if (fromIsBelowTo)
+				{
+					ptFrom = RectUtil.TopCentre(rectFrom);
+					ptTo = RectUtil.BottomCentre(rectTo);
+
+					int diff = PointUtil.Distance(ptFrom, ptTo);
+
+					ptControlFrom = new Point(ptFrom.X, ptFrom.Y - diff / 3);
+					ptControlTo = new Point(ptTo.X, ptTo.Y + diff / 3); ;
+
+					DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, false);
+				}
+				else
+				{
+					// Overlaps ??
+					return;
+				}
+			}
+
+			graphics.DrawBezier(/*Pens.Red*/m_DependencyPen, ptFrom, ptControlFrom, ptControlTo, ptTo);
 
 		}
 

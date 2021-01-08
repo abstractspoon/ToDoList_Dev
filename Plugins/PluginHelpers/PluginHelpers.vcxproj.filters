@@ -81,7 +81,7 @@
     <ClInclude Include="Compression.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RectUtil.h">
+    <ClInclude Include="GeometryUtil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -149,7 +149,7 @@
     <ClCompile Include="Compression.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RectUtil.cpp">
+    <ClCompile Include="GeometryUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
