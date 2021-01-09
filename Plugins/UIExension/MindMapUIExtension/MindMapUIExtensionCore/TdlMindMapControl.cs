@@ -171,6 +171,9 @@ namespace MindMapUIExtension
             if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
                 m_IsDone = task.IsDone();
 
+			if (task.IsAttributeAvailable(Task.Attribute.Dependency))
+				m_LocalDepends = task.GetLocalDependency();
+
 			m_IsParent = task.IsParent();
 			m_IsLocked = task.IsLocked(true);
             m_IsGoodAsDone = task.IsGoodAsDone();
@@ -1200,7 +1203,7 @@ namespace MindMapUIExtension
 			return arrow;
 		}
 
-		private void DrawHorzDependencyArrow(Graphics graphics, Point point, int itemHeight, bool left)
+		private void DrawHorzDependencyArrowHead(Graphics graphics, Point point, int itemHeight, bool left)
 		{
 			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
 
@@ -1213,9 +1216,9 @@ namespace MindMapUIExtension
 			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
 		}
 
-		private void DrawVertDependencyArrow(Graphics graphics, Point point, int itemHeight, bool up)
+		private void DrawVertDependencyArrowHead(Graphics graphics, Point point, int itemHeight, bool up)
 		{
-			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, up));
+			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcVertDependencyArrow(point, itemHeight, up));
 
 			// Offset and draw again
 			if (up)
@@ -1223,13 +1226,18 @@ namespace MindMapUIExtension
 			else
 				point.Y--;
 
-			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, up));
+			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcVertDependencyArrow(point, itemHeight, up));
 		}
 
 		protected void DrawTaskDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
 		{
 			if ((nodeFrom == null) || (nodeTo == null))
 				return;
+
+			// Disable anti-aliasing for drawing arrow heads
+			// to better match the core app
+			var prevSmoothing = graphics.SmoothingMode;
+			graphics.SmoothingMode = SmoothingMode.None;
 
 			MindMapItem itemFrom = Item(nodeFrom);
 			MindMapItem itemTo = Item(nodeTo);
@@ -1275,7 +1283,7 @@ namespace MindMapUIExtension
 				ptControlFrom = new Point(controlX, ptFrom.Y);
 				ptControlTo = new Point(controlX, ptTo.Y);
 
-				DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, !itemFrom.IsFlipped);
+				DrawHorzDependencyArrowHead(graphics, ptFrom, itemHeight, !itemFrom.IsFlipped);
 			}
 			else // All other arrangements are just variations on a theme
 			{
@@ -1322,7 +1330,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X - diff / 3, ptTo.Y); ;
 					}
 
-					DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, true);
+					DrawHorzDependencyArrowHead(graphics, ptFrom, itemHeight, true);
 				}
 				else if (fromIsRightOfTo)
 				{
@@ -1346,7 +1354,7 @@ namespace MindMapUIExtension
 						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
 						ptControlTo = ptControlFrom;
 					}
-					else // vertically aligned
+					else // horizontally aligned
 					{
 						ptFrom = RectUtil.MiddleLeft(rectFrom);
 						ptTo = RectUtil.MiddleRight(rectTo);
@@ -1360,7 +1368,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X + diff / 3, ptTo.Y); ;
 					}
 
-					DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, false);
+					DrawHorzDependencyArrowHead(graphics, ptFrom, itemHeight, false);
 				}
 				else if (fromIsAboveTo)
 				{
@@ -1372,7 +1380,7 @@ namespace MindMapUIExtension
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y + diff / 3);
 					ptControlTo = new Point(ptTo.X, ptTo.Y - diff / 3);
 
-					DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, true);
+					DrawVertDependencyArrowHead(graphics, ptFrom, itemHeight, true);
 				}
 				else if (fromIsBelowTo)
 				{
@@ -1384,7 +1392,7 @@ namespace MindMapUIExtension
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y - diff / 3);
 					ptControlTo = new Point(ptTo.X, ptTo.Y + diff / 3); ;
 
-					DrawHorzDependencyArrow(graphics, ptFrom, itemHeight, false);
+					DrawVertDependencyArrowHead(graphics, ptFrom, itemHeight, false);
 				}
 				else
 				{
@@ -1393,6 +1401,13 @@ namespace MindMapUIExtension
 				}
 			}
 
+			// Draw 3x3 box at 'to' end
+			Rectangle box = new Rectangle(ptTo.X - 1, ptTo.Y - 1, 3, 3);
+			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
+
+			// Re-enable anti-aliasing for dependency lines
+			graphics.SmoothingMode = prevSmoothing;
+			
 			graphics.DrawBezier(/*Pens.Red*/m_DependencyPen, ptFrom, ptControlFrom, ptControlTo, ptTo);
 
 		}
