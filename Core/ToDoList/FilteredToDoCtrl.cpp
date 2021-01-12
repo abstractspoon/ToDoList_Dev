@@ -258,10 +258,11 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 {
 	// NOTE: we are overriding this function else
 	// filtered out subtasks will not get copied
+	if (!HasAnyFilter())
+		return CTabbedToDoCtrl::CopySelectedTasks();
 
 	// NOTE: We DON'T override GetSelectedTasks because
 	// most often that only wants visible tasks
-
 	if (!GetSelectedCount())
 		return FALSE;
 	
@@ -304,10 +305,10 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 	// extra processing to identify the originally selected tasks
 	// in case the user wants to paste as references
 	// Note: references can always be pasted 'as references'
-	pos = TSH().GetFirstItemPos();
-	
-	while (pos)
-		VERIFY(tasks.SelectTask(TSH().GetNextItemData(pos)));
+	CDWordArray aSelTasks;
+	TSH().GetItemData(aSelTasks);
+
+	tasks.SetSelectedTaskIDs(aSelTasks);
 	
 	// and their titles (including child dupes)
 	CStringArray aTitles;

@@ -958,13 +958,13 @@ BOOL CTaskFile::IsTaskSelected(HTASKITEM hTask) const
 
 int CTaskFile::GetSelectedTaskIDs(CDWordArray& aTaskIDs) const
 {
+	aTaskIDs.RemoveAll();
+
 	return GetSelectedTaskIDs(GetFirstTask(), aTaskIDs);
 }
 
 int CTaskFile::GetSelectedTaskIDs(HTASKITEM hTask, CDWordArray& aTaskIDs) const
 {
-	aTaskIDs.RemoveAll();
-
 	if (hTask)
 	{
 		if (IsTaskSelected(hTask))
