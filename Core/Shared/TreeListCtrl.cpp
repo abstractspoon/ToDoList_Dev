@@ -799,8 +799,9 @@ void CTreeListCtrl::OnTreeHeaderRightClick(NMHDR* /*pNMHDR*/, LRESULT* /*pResult
 void CTreeListCtrl::OnTreeItemExpanded(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	LPNMTREEVIEW pNMTV = (LPNMTREEVIEW)pNMHDR;
-	
-	UpdateColumnWidths((pNMTV->action == TVE_EXPAND) ? UTWA_EXPAND : UTWA_COLLAPSE);
+
+	if (!m_bMovingItem)
+		UpdateColumnWidths((pNMTV->action == TVE_EXPAND) ? UTWA_EXPAND : UTWA_COLLAPSE);
 }
 
 LRESULT CTreeListCtrl::OnTreeDragEnter(WPARAM /*wp*/, LPARAM lp)
@@ -2301,14 +2302,11 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
 	int nPrevPos = TCH().GetItemTop(htiSel);
 
-	HTREEITEM htiNew = NULL;
-	{
-		CAutoFlag af(m_bMovingItem, TRUE);
-		CLockUpdates lu(*this);
-		CHoldRedraw hr(*this);
+	CAutoFlag af(m_bMovingItem, TRUE);
+	CLockUpdates lu(*this);
+	CHoldRedraw hr(*this);
 
-		htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, move.htiDestAfterSibling);
-	}
+	HTREEITEM htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, move.htiDestAfterSibling);
 	
 	if (htiNew)
 	{
