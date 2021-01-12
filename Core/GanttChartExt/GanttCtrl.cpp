@@ -2126,7 +2126,7 @@ BOOL CGanttCtrl::OnTreeMouseMove(UINT /*nFlags*/, CPoint point)
 			HTREEITEM htiHot = m_tree.HitTest(point);
 			
 			if (htiHot)
-				nHotItem = GetListItem(GetTaskID(htiHot));
+				nHotItem = GetListItem(htiHot);
 			
 			SetDropHighlight(htiHot, nHotItem);
 			
@@ -3702,14 +3702,15 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, B
 		HTREEITEM htiParent = m_tree.GetParentItem(GetTreeItem(dwTaskID));
 		ASSERT(htiParent);
 
-		while (htiParent && !TCH().IsParentItemExpanded(htiParent))
+		while (htiParent)
+		{
+			nItem = GetListItem(htiParent);
+
+			if (nItem != -1)
+				break;
+
 			htiParent = m_tree.GetParentItem(htiParent);
-
-		DWORD dwParentID = GetTaskID(htiParent);
-		ASSERT(dwParentID);
-
-		nItem = GetListItem(dwParentID);
-		ASSERT(nItem != -1);
+		}
 	}
 
 	return CalcDependencyEndPos(dwTaskID, nItem, depend, bFrom, lpp);
