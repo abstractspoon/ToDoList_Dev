@@ -2302,35 +2302,35 @@ BOOL CTreeListCtrl::MoveItem(const TLCITEMMOVE& move)
 	BOOL bSameParent = (move.htiDestParent == m_tree.GetParentItem(htiSel));
 	int nPrevPos = TCH().GetItemTop(htiSel);
 
-	CAutoFlag af(m_bMovingItem, TRUE);
-	CLockUpdates lu(*this);
-	CHoldRedraw hr(*this);
-
-	HTREEITEM htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, move.htiDestAfterSibling);
+	HTREEITEM htiNew = NULL;
 	
-	if (htiNew)
 	{
-		SelectItem(htiNew);
+		CAutoFlag af(m_bMovingItem, TRUE);
+		CLockUpdates lu(*this);
+		CHoldRedraw hr(*this);
 
-		if (bSameParent)
+		htiNew = m_tree.MoveItem(htiSel, move.htiDestParent, move.htiDestAfterSibling);
+
+		if (htiNew)
+			SelectItem(htiNew);
+	}
+	
+	if (htiNew && bSameParent)
+	{
+		int nNewPos = TCH().GetItemTop(htiNew);
+
+		if (nNewPos < nPrevPos)
 		{
-			int nNewPos = TCH().GetItemTop(htiNew);
-
-			if (nNewPos < nPrevPos)
-			{
-				TCH().SetMinDistanceToEdge(htiNew, TCHE_TOP, 2);
-			}
-			else if (nNewPos > nPrevPos)
-			{
-				TCH().SetMinDistanceToEdge(htiNew, TCHE_BOTTOM, 2);
-			}
+			TCH().SetMinDistanceToEdge(htiNew, TCHE_TOP, 2);
 		}
-
-		return TRUE;
+		else if (nNewPos > nPrevPos)
+		{
+			TCH().SetMinDistanceToEdge(htiNew, TCHE_BOTTOM, 2);
+		}
 	}
 
-	ASSERT(0);
-	return FALSE;
+	ASSERT(htiNew);
+	return (htiNew != NULL);
 }
 
 void CTreeListCtrl::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort)
