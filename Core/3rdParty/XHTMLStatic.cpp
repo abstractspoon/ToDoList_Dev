@@ -315,6 +315,12 @@ void CXHTMLStatic::Reset()
 	m_hPrevCursor			= NULL;
 	m_bInAnchor				= FALSE;
 	m_bGeneratedText		= FALSE;
+	
+	for (int i = 0; i < m_AnchorRectPtrs.GetSize(); i++)
+		delete (CRect *)m_AnchorRectPtrs[i];
+
+	m_AnchorRectPtrs.RemoveAll();
+	m_AnchorUrls.RemoveAll();
 }
 
 //=============================================================================
@@ -1539,9 +1545,15 @@ void CXHTMLStatic::OnDestroy()
 void CXHTMLStatic::SetWindowText(LPCTSTR lpszString)
 //=============================================================================
 {
+	SendMessage(WM_SETREDRAW, 0);
+
 	Reset();
 	CStatic::SetWindowText(lpszString);
-	RedrawWindow();
+
+	SendMessage(WM_SETREDRAW, 1);
+
+	Invalidate();
+	UpdateWindow();
 }
 
 //=============================================================================
