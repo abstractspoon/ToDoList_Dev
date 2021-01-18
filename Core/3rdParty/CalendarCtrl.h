@@ -135,6 +135,7 @@ protected:
 
 	// helper func
 	static time_t DateToSeconds(const COleDateTime& date);
+	static COleDateTime WholeDays(const COleDateTime& date) { return (double)(int)date.m_dt; }
 
 	//{{AFX_MSG(CCalendarCtrl)
 	afx_msg void OnPaint();

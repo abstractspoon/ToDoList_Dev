@@ -154,12 +154,12 @@ void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 	if ((dtDate < m_BoundUp) && 
 		(dtDate > m_BoundDown))
 	{
-		m_DateCurrent = dtDate;	
+		m_DateCurrent = WholeDays(dtDate);	
 		
 		if (m_nFirstWeekDay<1 || m_nFirstWeekDay>7)
 			m_nFirstWeekDay = 1;
 
-		COleDateTime dtIte(m_DateCurrent.GetYear(), m_DateCurrent.GetMonth(), m_DateCurrent.GetDay(),0,0,0);
+		COleDateTime dtIte = m_DateCurrent;
 		int narr[7];
 
 		for (int d=0; d<7; d++)	
@@ -192,11 +192,11 @@ void CCalendarCtrl::Goto(const COleDateTime& dtDate, bool bSelect)
 			m_SingleSelection.RemoveAll();
 
 			m_SelectionRange[2] = 0;
-			m_SelectionRange[1] = DateToSeconds(COleDateTime(m_DateCurrent.GetYear(), m_DateCurrent.GetMonth(), m_DateCurrent.GetDay(),0,0,0));
+			m_SelectionRange[1] = DateToSeconds(m_DateCurrent);
 			m_SelectionRange[0] = m_SelectionRange[1];
 
 			// Scrolling pos
-			COleDateTime today(time(NULL));
+			COleDateTime today = WholeDays(COleDateTime::GetCurrentTime());
 			m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent-today).GetDays()/7;
 
 			SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
@@ -785,15 +785,15 @@ BOOL CCalendarCtrl::SelectDate(const COleDateTime& dtDate, BOOL bAutoScroll)
 	}
 	else // just select
 	{
-		m_DateCurrent = dtDate;
+		m_DateCurrent = WholeDays(dtDate);
 		m_SingleSelection.RemoveAll();
 		
 		m_SelectionRange[2] = 0;
-		m_SelectionRange[1] = DateToSeconds(COleDateTime(m_DateCurrent.GetYear(), m_DateCurrent.GetMonth(), m_DateCurrent.GetDay(),0,0,0));
+		m_SelectionRange[1] = DateToSeconds(m_DateCurrent);
 		m_SelectionRange[0] = m_SelectionRange[1];
 		
 		// Scrolling pos
-		COleDateTime today(time(NULL));
+		COleDateTime today = WholeDays(COleDateTime::GetCurrentTime());
 		m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent-today).GetDays()/7;
 		
 		SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
