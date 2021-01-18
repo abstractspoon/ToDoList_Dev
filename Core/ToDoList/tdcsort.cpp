@@ -159,6 +159,7 @@ BOOL TDSORTCOLUMN::Matches(TDC_ATTRIBUTE nAttribID,
 	case TDCA_UNDO:
 	case TDCA_PASTE:
 	case TDCA_MERGE:
+	case TDCA_ALL:
 		ASSERT(nAttribCol == TDCC_NONE);
 		return TRUE;
 
