@@ -92,6 +92,7 @@ protected:
 	DWORD m_dwOptions;
 	DWORD m_dwMaximumTaskID;
 	CPoint m_ptDragOrigin;
+	COleDateTime m_dtDragOrigin;
 	int m_nCellVScrollPos;
 	CFont m_fontAltText;
 	CFontCache m_fonts;

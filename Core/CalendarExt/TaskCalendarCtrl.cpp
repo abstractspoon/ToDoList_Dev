@@ -2066,6 +2066,7 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	
 	m_tciPreDrag = *(GetTaskCalItem(dwTaskID));
 	m_ptDragOrigin = ptCursor;
+	VERIFY(GetDateFromPoint(m_ptDragOrigin, m_dtDragOrigin));
 
 	// keep parent informed
 	NotifyParentDragChange();
@@ -2104,19 +2105,12 @@ BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& d
 
 	if (m_bDragging)
 	{
-		COleDateTime dtOrg;
-		GetDateFromPoint(m_ptDragOrigin, dtOrg);
-		
 		// offset from pre-drag position
-		double dOffset = (dtDrag.m_dt - dtOrg.m_dt);
+		double dOffset = (dtDrag.m_dt - m_dtDragOrigin.m_dt);
 
 		if (m_tciPreDrag.IsStartDateSet())
 		{
 			dtDrag = (m_tciPreDrag.GetAnyStartDate().m_dt + dOffset);
-
-			dtDrag.m_dt = min(dtDrag.m_dt, (dtRowMax.m_dt + 1.0 - dSnap));
-			dtDrag.m_dt = max(dtDrag.m_dt, dtRowMin.m_dt);
-
 			bEndOfDay = FALSE;
 		}
 		else
@@ -2124,10 +2118,6 @@ BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& d
 			ASSERT(m_tciPreDrag.IsEndDateSet());
 
 			dtDrag = (m_tciPreDrag.GetAnyEndDate().m_dt + dOffset);
-
-			dtDrag.m_dt = min(dtDrag.m_dt, (dtRowMax.m_dt + 1.0));
-			dtDrag.m_dt = max(dtDrag.m_dt, (dtRowMin.m_dt + dSnap));
-
 			bEndOfDay = TRUE;
 		}
 		
