@@ -927,15 +927,47 @@ BOOL CTreeCtrlHelper::SetMinDistanceToEdge(HTREEITEM htiFrom, TCH_EDGE nToEdge, 
 	return FALSE;
 }
 
+int CTreeCtrlHelper::GetPageCount() const
+{
+	if (m_tree.GetCount() == 0)
+		return 0;
+
+	CRect rClient;
+	m_tree.GetClientRect(rClient);
+
+	if (HasStyle(TVS_NONEVENHEIGHT))
+	{
+		HTREEITEM hti = m_tree.GetFirstVisibleItem();
+		int nCount = 0;
+
+		while (hti)
+		{
+			CRect rItem;
+			m_tree.GetItemRect(hti, rItem, FALSE);
+
+			if (rItem.bottom > rClient.bottom)
+				break;
+
+			nCount++;
+			hti = m_tree.GetNextVisibleItem(hti);
+		}
+
+		return nCount;
+	}
+
+	// else
+	return (rClient.Height() / m_tree.GetItemHeight());
+}
+
 HTREEITEM CTreeCtrlHelper::GetNextPageVisibleItem(HTREEITEM hti) const
 {
 	// if we're the last visible item then its just the page count
 	// figure out how many items to step
-	HTREEITEM htiNext = m_tree.GetNextVisibleItem(hti);
+	HTREEITEM htiNext = m_tree.GetNextVisibleItem(hti), htiOrg(hti);
 
 	if (!htiNext || !IsItemFullyVisible(htiNext))
 	{
-		int nCount = m_tree.GetVisibleCount();
+		int nCount = GetPageCount();
 
 		// keep going until we get NULL and then return
 		// the previous item
@@ -962,18 +994,18 @@ HTREEITEM CTreeCtrlHelper::GetNextPageVisibleItem(HTREEITEM hti) const
 		}
 	}
 
-	return (htiNext != hti) ? htiNext : NULL;
+	return (htiNext != htiOrg) ? htiNext : NULL;
 }
 
 HTREEITEM CTreeCtrlHelper::GetPrevPageVisibleItem(HTREEITEM hti) const
 {
 	// if we're the first visible item then its just the page count
 	// figure out how many items to step
-	HTREEITEM htiPrev = m_tree.GetPrevVisibleItem(hti);
+	HTREEITEM htiPrev = m_tree.GetPrevVisibleItem(hti), htiOrg(hti);
 
 	if (!htiPrev || !IsItemFullyVisible(htiPrev))
 	{
-		int nCount = m_tree.GetVisibleCount();
+		int nCount = GetPageCount();
 
 		// keep going until we get NULL and then return
 		// the previous item
@@ -1000,7 +1032,7 @@ HTREEITEM CTreeCtrlHelper::GetPrevPageVisibleItem(HTREEITEM hti) const
 		}
 	}
 
-	return (htiPrev != hti) ? htiPrev : NULL;
+	return (htiPrev != htiOrg) ? htiPrev : NULL;
 }
 
 HTREEITEM CTreeCtrlHelper::GetNextVisibleItem(HTREEITEM hti, BOOL bAllowChildren) const

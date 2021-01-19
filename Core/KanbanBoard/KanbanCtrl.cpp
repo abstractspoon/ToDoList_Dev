@@ -224,6 +224,12 @@ BOOL CKanbanCtrl::SelectClosestAdjacentItemToSelection(int nAdjacentCol)
 
 BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM /*lp*/)
 {
+	if (!m_pSelectedColumn)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	// We need to process these before they reach the focused column 
 	switch (wp)
 	{
@@ -233,19 +239,6 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM /*lp*/)
 			int nSelCol = GetSelColumnIndex();
 			
 			for (int nCol = (nSelCol - 1); nCol >= 0; nCol--)
-			{
-				if (SelectClosestAdjacentItemToSelection(nCol))
-					return TRUE;
-			}
-		}
-		break;
-
-	case VK_HOME:
-		if (m_pSelectedColumn->GetFirstSelectedItem())
-		{
-			int nSelCol = GetSelColumnIndex();
-
-			for (int nCol = 0; nCol < nSelCol; nCol++)
 			{
 				if (SelectClosestAdjacentItemToSelection(nCol))
 					return TRUE;
@@ -267,26 +260,11 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM /*lp*/)
 		}
 		break;
 
-	case VK_END:
-		if (m_pSelectedColumn->GetFirstSelectedItem())
-		{
-			int nSelCol = GetSelColumnIndex();
-			int nNumCol = m_aColumns.GetSize();
-
-			for (int nCol = (nNumCol - 1); nCol > nSelCol; nCol--)
-			{
-				if (SelectClosestAdjacentItemToSelection(nCol))
-					return TRUE;
-			}
-		}
-		break;
-
 	case VK_ESCAPE:
-		// handle 'escape' during dragging
 		return (CancelOperation() != FALSE);
 
 	case VK_DELETE:
-		if (m_pSelectedColumn && !m_pSelectedColumn->IsBacklog())
+		if (!m_pSelectedColumn->IsBacklog())
 		{
 			// For each of the selected tasks remove the attribute value(s) of the
 			// selected list (column). Tasks having no values remaining are moved 
