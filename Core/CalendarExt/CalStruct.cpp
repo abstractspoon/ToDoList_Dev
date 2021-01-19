@@ -31,7 +31,8 @@ TASKCALITEM::TASKCALITEM()
 	bTopLevel(FALSE),
 	bLocked(FALSE),
 	bIsParent(FALSE),
-	bRecurring(FALSE)
+	bRecurring(FALSE),
+	bTreatOverdueAsDueToday(FALSE)
 {
 
 }
@@ -44,7 +45,8 @@ TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwC
 	bTopLevel(FALSE),
 	bLocked(FALSE),
 	bIsParent(FALSE),
-	bRecurring(FALSE)
+	bRecurring(FALSE),
+	bTreatOverdueAsDueToday(FALSE)
 {
 	UpdateTask(pTasks, hTask, dwCalcDates);
 
@@ -75,6 +77,7 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	bHasIcon = tci.bHasIcon;
 	bIsParent = tci.bIsParent;
 	bRecurring = tci.bRecurring;
+	bTreatOverdueAsDueToday = tci.bTreatOverdueAsDueToday;
 	
 	return (*this);
 }
@@ -82,19 +85,19 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 {
 	return ((sName == tci.sName) &&
-		(color == tci.color) &&
-		(dwTaskID == tci.dwTaskID) &&
-		(bGoodAsDone == tci.bGoodAsDone) &&
-		(bLocked == tci.bLocked) &&
-		(dtCreation == tci.dtCreation) &&
-		(dtStart == tci.dtStart) &&
-		(dtDue == tci.dtDue) &&
-		(dtDone == tci.dtDone) &&
-		(dtStartCalc == tci.dtStartCalc) &&
-		(dtEndCalc == tci.dtEndCalc) &&
-		(bHasIcon == tci.bHasIcon) &&
-		(bIsParent == tci.bIsParent) &&
-		(bRecurring == tci.bRecurring));
+			(color == tci.color) &&
+			(dwTaskID == tci.dwTaskID) &&
+			(bGoodAsDone == tci.bGoodAsDone) &&
+			(bLocked == tci.bLocked) &&
+			(dtCreation == tci.dtCreation) &&
+			(dtStart == tci.dtStart) &&
+			(dtDue == tci.dtDue) &&
+			(dtDone == tci.dtDone) &&
+			(dtStartCalc == tci.dtStartCalc) &&
+			(dtEndCalc == tci.dtEndCalc) &&
+			(bHasIcon == tci.bHasIcon) &&
+			(bIsParent == tci.bIsParent) &&
+			(bRecurring == tci.bRecurring));
 }
 
 void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates)
@@ -141,12 +144,17 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	RecalcDates(dwCalcDates);
 }
 
-void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
+void TASKCALITEM::ClearCalculatedDates()
 {
-	const COleDateTime dtNow = CDateHelper::GetDateOnly(COleDateTime::GetCurrentTime());
-
 	CDateHelper::ClearDate(dtStartCalc);
 	CDateHelper::ClearDate(dtEndCalc);
+
+	bTreatOverdueAsDueToday = FALSE;
+}
+
+void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
+{
+	ClearCalculatedDates();
 
 	BOOL bHasStartDate = CDateHelper::IsDateSet(dtStart);
 	BOOL bHasDueDate = CDateHelper::IsDateSet(dtDue);
@@ -154,6 +162,8 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	BOOL bHasEndDate = (bHasDueDate || bHasDoneDate);
 
 	// calculate missing dates
+	const COleDateTime dtNow = CDateHelper::GetDate(DHD_TODAY);
+
 	if (!bHasStartDate)
 	{
 		if (Misc::HasFlag(dwCalcDates, TCCO_CALCMISSINGSTARTASCREATION))
@@ -201,7 +211,10 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	{
 		// Special case: treat overdue tasks as due today
 		if ((dtDue < dtNow) && Misc::HasFlag(dwCalcDates, TCCO_TREATOVERDUEASDUETODAY))
+		{
 			dtEndCalc = CDateHelper::GetEndOfDay(dtNow);
+			bTreatOverdueAsDueToday = TRUE;
+		}
 
 		// adjust due date to point to end of day if it has no time component
 		if (!CDateHelper::DateHasTime(dtDue))
@@ -306,12 +319,30 @@ COleDateTime TASKCALITEM::GetDate(time64_t tDate)
 
 BOOL TASKCALITEM::IsStartDateSet() const
 {
-	return (CDateHelper::IsDateSet(dtStart) && !CDateHelper::IsDateSet(dtStartCalc));
+	if (CDateHelper::IsDateSet(dtStart))
+	{
+		ASSERT(!CDateHelper::IsDateSet(dtStartCalc));
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL TASKCALITEM::IsEndDateSet() const
 {
-	return ((CDateHelper::IsDateSet(dtDue) || CDateHelper::IsDateSet(dtDone)) && !CDateHelper::IsDateSet(dtEndCalc));
+	if (CDateHelper::IsDateSet(dtDone))
+	{
+		ASSERT(!CDateHelper::IsDateSet(dtEndCalc));
+		return TRUE;
+	}
+
+	if (CDateHelper::IsDateSet(dtDue))
+	{
+		ASSERT(!CDateHelper::IsDateSet(dtEndCalc) || bTreatOverdueAsDueToday);
+		return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL TASKCALITEM::HasAnyStartDate() const

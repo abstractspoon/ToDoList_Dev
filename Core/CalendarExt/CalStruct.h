@@ -73,9 +73,12 @@ protected:
 	DWORD dwTaskID;
 	BOOL bHasIcon, bIsParent;
 
+	BOOL bTreatOverdueAsDueToday;
+
 protected:
 	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates);
 	void ReformatName();
+	void ClearCalculatedDates();
 
 	static COleDateTime GetDate(time64_t tDate);
 	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
