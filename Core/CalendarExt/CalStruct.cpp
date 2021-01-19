@@ -148,7 +148,7 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	CDateHelper::ClearDate(dtStartCalc);
 	CDateHelper::ClearDate(dtEndCalc);
 
-	BOOL bHasStartDate = IsStartDateSet();
+	BOOL bHasStartDate = CDateHelper::IsDateSet(dtStart);
 	BOOL bHasDueDate = CDateHelper::IsDateSet(dtDue);
 	BOOL bHasDoneDate = CDateHelper::IsDateSet(dtDone);
 	BOOL bHasEndDate = (bHasDueDate || bHasDoneDate);
