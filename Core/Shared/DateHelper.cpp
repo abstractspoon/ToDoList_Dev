@@ -1652,7 +1652,7 @@ BOOL CDateHelper::IsSameDay(const COleDateTime& date1, const COleDateTime& date2
 		return FALSE;
 	}
 
-	return (GetDateOnly(date1) == GetDateOnly(date2));
+	return ((int)date1.m_dt == (int)date2.m_dt);
 }
 
 BOOL CDateHelper::IsSameWeek(const COleDateTime& date1, const COleDateTime& date2)
