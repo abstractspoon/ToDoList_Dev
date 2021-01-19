@@ -196,6 +196,7 @@ protected:
 
 protected:
 	void AddVisibleItemToIndex(HTREEITEM hti) const;
+	void AddItemData(HTREEITEM hti, CDWordArray& aItemData, BOOL bIncParents, BOOL bInCollapsedChildren) const;
 	int GetPageCount() const;
 
 	TCH_WHERE GetMoveTarget(HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling, HTREEITEM& htiTarget) const;
