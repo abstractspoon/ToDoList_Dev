@@ -321,7 +321,7 @@ BOOL TASKCALITEM::IsStartDateSet() const
 {
 	if (CDateHelper::IsDateSet(dtStart))
 	{
-		ASSERT(!CDateHelper::IsDateSet(dtStartCalc));
+		ASSERT(!CDateHelper::IsDateSet(dtStartCalc) || (IsDone(FALSE) && (dtStart > dtDone)));
 		return TRUE;
 	}
 
