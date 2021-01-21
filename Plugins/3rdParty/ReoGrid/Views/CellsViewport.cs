@@ -1000,14 +1000,15 @@ namespace unvell.ReoGrid.Views
 							g.FillRectangle(scaledSelectionRect, selectionFillColor);
 						}
 
-						if (selectionBorderColor.A > 0)
+						if (dc.Focused && (selectionBorderColor.A > 0))
 						{
 							g.DrawRectangle(scaledSelectionRect, selectionBorderColor, selectionBorderWidth, LineStyles.Solid);
 						}
 					}
 					else if (this.sheet.SelectionStyle == WorksheetSelectionStyle.FocusRect)
 					{
-						g.DrawRectangle(scaledSelectionRect, SolidColor.Black, 1, LineStyles.Dot);
+						if (dc.Focused)
+							g.DrawRectangle(scaledSelectionRect, SolidColor.Black, 1, LineStyles.Dot);
 					}
 
 					if (sheet.HasSettings(WorksheetSettings.Edit_DragSelectionToFillSerial))

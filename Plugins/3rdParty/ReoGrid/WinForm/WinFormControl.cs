@@ -1369,6 +1369,22 @@ namespace unvell.ReoGrid
 			}
 		}
 
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			Invalidate();
+			Update();
+		}
+
+		protected override void OnLostFocus(EventArgs e)
+		{
+			base.OnLostFocus(e);
+
+			Invalidate();
+			Update();
+		}
+
 		/// <summary>
 		/// Overrides repaint process method
 		/// </summary>
@@ -1386,7 +1402,7 @@ namespace unvell.ReoGrid
 				this.renderer.Reset();
 				this.renderer.PlatformGraphics = e.Graphics;
 
-				CellDrawingContext dc = new CellDrawingContext(this.currentWorksheet, DrawMode.View, renderer);
+				CellDrawingContext dc = new CellDrawingContext(this.currentWorksheet, DrawMode.View, renderer, Focused);
 
 				sheet.ViewportController.Draw(dc);
 

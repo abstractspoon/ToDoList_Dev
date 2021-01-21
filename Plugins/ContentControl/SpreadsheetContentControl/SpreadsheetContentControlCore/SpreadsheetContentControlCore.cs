@@ -166,5 +166,14 @@ namespace SpreadsheetContentControl
              // do nothing
         }
 
-    }
+		protected override void OnGotFocus(EventArgs e)
+		{
+			m_EditorControl.Focus();
+		}
+
+		protected override void OnLostFocus(EventArgs e)
+		{
+		}
+
+	}
 }

@@ -37,8 +37,8 @@ namespace unvell.ReoGrid.Drawing
 		/// </summary>
 		public DrawingObject CurrentObject { get; private set; }
 
-		internal FloatingDrawingContext(Worksheet worksheet, DrawMode drawMode, IRenderer r)
-			: base(worksheet, drawMode, r)
+		internal FloatingDrawingContext(Worksheet worksheet, DrawMode drawMode, IRenderer r, bool focused)
+			: base(worksheet, drawMode, r, focused)
 		{
 		}
 

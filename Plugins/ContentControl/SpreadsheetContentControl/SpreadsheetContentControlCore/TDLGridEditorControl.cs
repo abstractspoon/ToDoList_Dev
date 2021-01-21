@@ -401,5 +401,10 @@ namespace SpreadsheetContentControl
 			return base.ShowDialog(dialog);
 		}
 
+		protected override void OnGotFocus(EventArgs e)
+		{
+			GridCtrl.Focus();
+		}
+
 	}
 }

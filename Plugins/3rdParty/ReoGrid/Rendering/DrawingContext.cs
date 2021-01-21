@@ -64,6 +64,8 @@ namespace unvell.ReoGrid.Rendering
 
 		internal IView CurrentView { get; set; }
 
+		public bool Focused { get; set; }
+
 		/// <summary>
 		/// Draw mode that decides what kind of content will be drawn during this drawing event.
 		/// </summary>
@@ -74,11 +76,12 @@ namespace unvell.ReoGrid.Rendering
 		//{
 		//}
 
-		internal DrawingContext(Worksheet worksheet, DrawMode drawMode, IRenderer r)
+		internal DrawingContext(Worksheet worksheet, DrawMode drawMode, IRenderer r, bool focused)
 		{
 			this.Worksheet = worksheet;
 			this.DrawMode = drawMode;
 			this.Graphics = r;
+			this.Focused = focused;
 		}
 	}
 	#endregion // DrawingContext
@@ -142,12 +145,12 @@ namespace unvell.ReoGrid.Rendering
 #endregion // Cell Methods
 
 		internal CellDrawingContext(Worksheet worksheet, DrawMode drawMode)
-			: this(worksheet, drawMode, null)
+			: this(worksheet, drawMode, null, false)
 		{
 		}
 
-		internal CellDrawingContext(Worksheet worksheet, DrawMode drawMode, IRenderer r)
-			: base(worksheet, drawMode, r)
+		internal CellDrawingContext(Worksheet worksheet, DrawMode drawMode, IRenderer r, bool focused)
+			: base(worksheet, drawMode, r, focused)
 		{
 			this.AllowCellClip = !worksheet.HasSettings(WorksheetSettings.View_AllowCellTextOverflow);
 		}
