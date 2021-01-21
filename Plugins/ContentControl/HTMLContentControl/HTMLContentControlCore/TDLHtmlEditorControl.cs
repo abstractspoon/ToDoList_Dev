@@ -290,7 +290,7 @@ namespace HTMLContentControl
 				case WM_KEYDOWN:
 				case WM_SYSKEYDOWN:
 					{
-						Keys keyPress = (Keys)wParam;
+						Keys keyPress = CommandHandling.GetMenuShortcutFromVirtualKey(wParam);
 
 						if (keyPress == Keys.Return)
 						{
@@ -305,25 +305,8 @@ namespace HTMLContentControl
 
 							return true;
 						}
-						else if (keyPress == Keys.ControlKey)
+						else if (keyPress != Keys.None)
 						{
-							return false;
-						}
-						else if ((keyPress == Keys.Delete) || 
-								 (keyPress == Keys.Tab) ||
-								 (Control.ModifierKeys != Keys.None))
-						{
-							var modifiers = Control.ModifierKeys;
-
-							if ((modifiers & Keys.Control) == Keys.Control)
-								keyPress |= Keys.Control;
-
-							if ((modifiers & Keys.Shift) == Keys.Shift)
-								keyPress |= Keys.Shift;
-
-							if ((modifiers & Keys.Alt) == Keys.Alt)
-								keyPress |= Keys.Alt;
-
 							return base.OnDocumentKeyPress(keyPress);
 						}
 					}

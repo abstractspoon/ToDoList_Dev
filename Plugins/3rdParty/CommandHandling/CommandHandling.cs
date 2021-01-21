@@ -62,6 +62,39 @@ namespace Command.Handling
 			return false;
 		}
 
+		public static Keys GetMenuShortcutFromVirtualKey(UInt32 virtualKeyCode)
+		{
+			Keys keyPress = (Keys)virtualKeyCode;
+
+			if ((keyPress == Keys.ControlKey) ||
+				(keyPress == Keys.ShiftKey) ||
+				(keyPress == Keys.Menu))
+			{
+				return Keys.None;
+			}
+
+			if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+				keyPress |= Keys.Control;
+
+			if ((Control.ModifierKeys & Keys.Shift) == Keys.Shift)
+				keyPress |= Keys.Shift;
+
+			if ((Control.ModifierKeys & Keys.Alt) == Keys.Alt)
+				keyPress |= Keys.Alt;
+
+			return keyPress;
+		}
+
+		public static bool ProcessMenuShortcut(UInt32 virtualKeyCode, ToolStripItemCollection items)
+		{
+			Keys keyPress = GetMenuShortcutFromVirtualKey(virtualKeyCode);
+
+			if (keyPress == Keys.None)
+				return false;
+
+			return ProcessMenuShortcut(keyPress, items);
+		}
+
 		public static Keys GetMenuShortcut(String commandId, ToolStripItemCollection items)
 		{
 			ToolStripMenuItem menu = GetMenuItem(commandId, items);

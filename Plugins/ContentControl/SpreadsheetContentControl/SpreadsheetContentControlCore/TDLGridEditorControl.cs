@@ -183,26 +183,7 @@ namespace SpreadsheetContentControl
 			{
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
-				{
-					Keys keyPress = (Keys)wParam;
-
-					if (keyPress != Keys.ControlKey)
-					{
-						var modifiers = Control.ModifierKeys;
-
-						if ((modifiers & Keys.Control) == Keys.Control)
-							keyPress |= Keys.Control;
-
-						if ((modifiers & Keys.Shift) == Keys.Shift)
-							keyPress |= Keys.Shift;
-
-						if ((modifiers & Keys.Alt) == Keys.Alt)
-							keyPress |= Keys.Alt;
-
-						return CommandHandling.ProcessMenuShortcut(keyPress, MenuBar.Items);
-					}
-				}
-				break;
+				return CommandHandling.ProcessMenuShortcut(wParam, MenuBar.Items);
 			}
 
 			return false;
