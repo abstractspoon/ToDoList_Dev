@@ -1265,29 +1265,25 @@ namespace unvell.ReoGrid
 		}
 		#endregion // InputTextBox
 
-		/// <summary>
-		/// Handle the dialog char input event.
-		/// </summary>
-		/// <param name="charCode">Character code inputted by user.</param>
-		/// <returns>True if event has been handled; Otherwise return false.</returns>
-		protected override bool ProcessDialogChar(char charCode)
+		protected override void OnKeyPress(KeyPressEventArgs e)
 		{
-			if (Toolkit.IsKeyDown(Win32.VKey.VK_MENU)
-				|| Toolkit.IsKeyDown(Win32.VKey.VK_CONTROL)
-				|| charCode == 8			// backspace
-				|| charCode == 13			// enter
-				|| charCode == 27			// escape
-				|| charCode == '\t'		// tab
-				)
+			base.OnKeyPress(e);
+
+			if (Toolkit.IsKeyDown(Win32.VKey.VK_MENU) ||
+				Toolkit.IsKeyDown(Win32.VKey.VK_CONTROL) ||
+				e.KeyChar == 8  ||			// backspace
+				e.KeyChar == 13 ||			// enter
+				e.KeyChar == 27 ||			// escape
+				e.KeyChar == '\t')			// tab
 			{
-				return false;
+				return;
 			}
 
-			int @char = this.currentWorksheet.RaiseCellEditCharInputed(charCode);
-			if (@char <= 0) return false;
+			int @char = this.currentWorksheet.RaiseCellEditCharInputed(e.KeyChar);
+			if (@char <= 0) return;
 
 			// start edit on focus cell position
-			return this.currentWorksheet.StartEdit(((char)(int)@char).ToString());
+			this.currentWorksheet.StartEdit(((char)(int)@char).ToString());
 		}
 
 		private InputTextBox editTextbox;

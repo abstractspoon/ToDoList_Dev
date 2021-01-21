@@ -183,7 +183,22 @@ namespace SpreadsheetContentControl
 			{
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
-				return CommandHandling.ProcessMenuShortcut(wParam, MenuBar.Items);
+				{
+					if (CurrentWorksheet.IsEditing && (wParam == (UInt32)Keys.Escape))
+					{
+						CurrentWorksheet.EndEdit(EndEditReason.Cancel);
+						return true;
+					}
+					else if (!CurrentWorksheet.IsEditing && (wParam == (UInt32)Keys.F2))
+					{
+						CurrentWorksheet.StartEdit();
+						return true;
+					}
+
+					// else
+					return CommandHandling.ProcessMenuShortcut(wParam, MenuBar.Items);
+				}
+				break;
 			}
 
 			return false;
