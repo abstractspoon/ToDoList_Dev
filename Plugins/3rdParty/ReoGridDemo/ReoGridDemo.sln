@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReoGrid", "..\ReoGrid\ReoGr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReoGridEditorControl", "..\ReoGridEditorControl\ReoGridEditorControl.csproj", "{8307DFFB-7E57-42B4-B402-601A80923F4E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolStripEx", "..\ToolStripEx\ToolStripEx.csproj", "{8193B99D-4913-4574-BA3C-A7EF4E2B8627}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{8307DFFB-7E57-42B4-B402-601A80923F4E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8307DFFB-7E57-42B4-B402-601A80923F4E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8307DFFB-7E57-42B4-B402-601A80923F4E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8193B99D-4913-4574-BA3C-A7EF4E2B8627}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8193B99D-4913-4574-BA3C-A7EF4E2B8627}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8193B99D-4913-4574-BA3C-A7EF4E2B8627}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8193B99D-4913-4574-BA3C-A7EF4E2B8627}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

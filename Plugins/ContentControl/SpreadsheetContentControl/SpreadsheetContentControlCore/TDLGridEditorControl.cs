@@ -174,6 +174,40 @@ namespace SpreadsheetContentControl
 			return numChanges;
 		}
 
+		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+		{
+			const int WM_KEYDOWN = 0x0100;
+			const int WM_SYSKEYDOWN = 0x0104;
+
+			switch (message)
+			{
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
+				{
+					Keys keyPress = (Keys)wParam;
+
+					if (keyPress != Keys.ControlKey)
+					{
+						var modifiers = Control.ModifierKeys;
+
+						if ((modifiers & Keys.Control) == Keys.Control)
+							keyPress |= Keys.Control;
+
+						if ((modifiers & Keys.Shift) == Keys.Shift)
+							keyPress |= Keys.Shift;
+
+						if ((modifiers & Keys.Alt) == Keys.Alt)
+							keyPress |= Keys.Alt;
+
+						return CommandHandling.ProcessMenuShortcut(keyPress, MenuBar.Items);
+					}
+				}
+				break;
+			}
+
+			return false;
+		}
+
 		public void SetContentFont(String fontName, int pointSize)
 		{
 			Worksheet.DefaultFontName = fontName;
