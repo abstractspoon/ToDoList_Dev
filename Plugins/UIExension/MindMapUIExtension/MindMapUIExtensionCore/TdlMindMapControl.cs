@@ -1249,8 +1249,6 @@ namespace MindMapUIExtension
 			bool fromIsBelowTo = (rectFrom.Top >= rectTo.Bottom);
 
 			int itemHeight = rectFrom.Height;
-			int vOffset = (fromIsAboveTo ? 2 : fromIsBelowTo ? -2 : 0);
-
 			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
 
 			// Leaf tasks on the same side of the root
@@ -1277,9 +1275,6 @@ namespace MindMapUIExtension
 					controlX = (Math.Max(ptFrom.X, ptTo.X) + DependencyOffset);
 				}
 
-				ptFrom.Y += vOffset;
-				ptTo.Y -= vOffset;
-
 				ptControlFrom = new Point(controlX, ptFrom.Y);
 				ptControlTo = new Point(controlX, ptTo.Y);
 
@@ -1301,8 +1296,6 @@ namespace MindMapUIExtension
 						ptFrom = RectUtil.MiddleRight(rectFrom);
 						ptTo = RectUtil.TopCentre(rectTo);
 
-						ptFrom.Y += vOffset;
-
 						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
 						ptControlTo = ptControlFrom;
 					}
@@ -1311,8 +1304,6 @@ namespace MindMapUIExtension
 						ptFrom = RectUtil.MiddleRight(rectFrom);
 						ptTo = RectUtil.BottomCentre(rectTo);
 
-						ptFrom.Y += vOffset;
-
 						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
 						ptControlTo = ptControlFrom;
 					}
@@ -1320,9 +1311,6 @@ namespace MindMapUIExtension
 					{
 						ptFrom = RectUtil.MiddleRight(rectFrom);
 						ptTo = RectUtil.MiddleLeft(rectTo);
-
-						ptFrom.Y += vOffset;
-						ptTo.Y -= vOffset;
 
 						int diff = PointUtil.Distance(ptFrom, ptTo);
 
@@ -1339,8 +1327,6 @@ namespace MindMapUIExtension
 						ptFrom = RectUtil.MiddleLeft(rectFrom);
 						ptTo = RectUtil.TopCentre(rectTo);
 
-						ptFrom.Y += vOffset;
-
 						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
 						ptControlTo = ptControlFrom;
 					}
@@ -1349,8 +1335,6 @@ namespace MindMapUIExtension
 						ptFrom = RectUtil.MiddleLeft(rectFrom);
 						ptTo = RectUtil.BottomCentre(rectTo);
 
-						ptFrom.Y += vOffset;
-
 						ptControlFrom = new Point(ptTo.X, ptFrom.Y);
 						ptControlTo = ptControlFrom;
 					}
@@ -1358,9 +1342,6 @@ namespace MindMapUIExtension
 					{
 						ptFrom = RectUtil.MiddleLeft(rectFrom);
 						ptTo = RectUtil.MiddleRight(rectTo);
-
-						ptFrom.Y += vOffset;
-						ptTo.Y -= vOffset;
 
 						int diff = PointUtil.Distance(ptFrom, ptTo);
 
