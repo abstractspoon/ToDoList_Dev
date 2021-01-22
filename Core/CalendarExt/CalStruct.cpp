@@ -514,12 +514,11 @@ void TASKCALITEM::ReformatName()
 TASKCALFUTUREITEM::TASKCALFUTUREITEM(const TASKCALITEM& tciOrg, DWORD dwFutureID, const COleDateTimeRange& dtRange)
 	: 
 	TASKCALITEM(tciOrg), 
-	dwRealTaskID(0)
+	dwRealTaskID(tciOrg.GetTaskID())
 {
 	ASSERT(!tciOrg.IsDone(FALSE));
 	ASSERT(dwFutureID && dtRange.IsValid());
 
-	dwRealTaskID = dwTaskID;
 	dwTaskID = dwFutureID;
 	dtStart = dtRange.GetStart();
 	dtDue = dtRange.GetEndInclusive();

@@ -94,7 +94,7 @@ struct TASKCALFUTUREITEM : public TASKCALITEM
 	COLORREF GetBorderColor(BOOL bTextIsBack) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 
-	DWORD dwRealTaskID;
+	const DWORD dwRealTaskID;
 };
 
 /////////////////////////////////////////////////////////////////////////////
