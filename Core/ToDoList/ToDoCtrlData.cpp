@@ -1008,6 +1008,22 @@ DWORD CToDoCtrlData::GetTaskParentID(DWORD dwTaskID) const
 	return pTDS->GetParentTaskID();
 }
 
+int CToDoCtrlData::GetTaskParentIDs(DWORD dwTaskID, CDWordArray& aTaskIDs) const
+{
+	aTaskIDs.RemoveAll();
+
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDS(dwTaskID, pTDS, 0);
+
+	while (!pTDS->ParentIsRoot())
+	{
+		Misc::AddUniqueItemT(pTDS->GetParentTaskID(), aTaskIDs);
+		pTDS = pTDS->GetParentTask();
+	}
+
+	return aTaskIDs.GetSize();
+}
+
 DWORD CToDoCtrlData::GetTaskReferenceID(DWORD dwTaskID) const
 {
 	if (dwTaskID)

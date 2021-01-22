@@ -286,21 +286,21 @@ int CTDLTaskTreeCtrl::GetExpandedTasks(CDWordArray& aExpanded, HTREEITEM hti) co
 	return (aExpanded.GetSize() - nStart);
 }
 
-void CTDLTaskTreeCtrl::SetExpandedTasks(const CDWordArray& aExpanded)
+void CTDLTaskTreeCtrl::ExpandTasks(const CDWordArray& aExpand)
 {
 	CHoldRedraw hr(*this);
 	CTLSHoldResync hr2(*this);
 
-	int nNumExpanded = aExpanded.GetSize();
+	int nNumExpanded = aExpand.GetSize();
 	
 	for (int nItem = 0; nItem < nNumExpanded; nItem++)
 	{
-		HTREEITEM hti = GetItem(aExpanded[nItem]);
+		HTREEITEM hti = GetItem(aExpand[nItem]);
 		
 		if (hti)
 		{
-			// Don't expand parents because they should also be in the list
-			ExpandItemRaw(hti, TRUE, FALSE, FALSE, FALSE);
+			// Don't expand children or fixup the list
+			ExpandItemRaw(hti, TRUE, FALSE, FALSE);
 		}
 	}
 	
@@ -438,7 +438,7 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 		CHoldRedraw hr(*this);
 		CTLSHoldResync hr3(*this);
 		
-		ExpandItemRaw(hti, bExpand, bAndChildren, TRUE);
+		ExpandItemRaw(hti, bExpand, bAndChildren);
 	}
 
 	if (htiSel)
@@ -447,9 +447,9 @@ void CTDLTaskTreeCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren
 	RecalcUntrackedColumnWidths();
 }
 
-void CTDLTaskTreeCtrl::ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bAndParents, BOOL bUpdateList)
+void CTDLTaskTreeCtrl::ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList)
 {
-	TCH().ExpandItem(hti, bExpand, bAndChildren, bAndParents);
+	TCH().ExpandItem(hti, bExpand, bAndChildren, FALSE); // don't expand parents
 
 	if (bUpdateList)
 	{
@@ -2637,7 +2637,7 @@ HTREEITEM CTDLTaskTreeCtrl::LoadState(const CPreferences& prefs, const CString& 
 	CDWordArray aExpanded;
 	
 	if (prefs.GetProfileArray(sKey + _T("\\ExpandedItems"), aExpanded))
-		SetExpandedTasks(aExpanded);
+		ExpandTasks(aExpanded);
 	
 	// restore prev selected item
 	DWORD dwSel = prefs.GetProfileInt(sKey, _T("SelItem"), 0);

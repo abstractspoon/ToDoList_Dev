@@ -9096,7 +9096,7 @@ HTREEITEM CToDoCtrl::RebuildTree(const void* pContext)
 	m_taskTree.OnEndRebuild();
 
 	// Then restore previous state
-	m_taskTree.SetExpandedTasks(aExpanded);
+	m_taskTree.ExpandTasks(aExpanded);
 
 	if (!RestoreTreeSelection(cache))
 	{
@@ -11310,13 +11310,38 @@ void CToDoCtrl::SearchAndExpand(const SEARCHPARAMS& params, BOOL bExpand)
 	CResultArray aResults;
 	int nNumRes = FindTasks(params, aResults);
 	
-	// do the expansion
-	for (int nRes = 0; nRes < nNumRes; nRes++)
+	if (bExpand)
 	{
-		HTREEITEM hti = m_taskTree.GetItem(aResults[nRes].dwTaskID);
-		
-		if (hti)
-			m_taskTree.ExpandItem(hti, bExpand, TRUE);
+		// Get the unique IDs of the found tasks together with their parents
+		CDWordArray aTaskIDs, aParentIDs;
+	
+		for (int nRes = 0; nRes < nNumRes; nRes++)
+		{
+			DWORD dwTaskID = aResults[nRes].dwTaskID;
+
+			// Task must be a parent tree item
+			if (m_taskTree.ItemHasChildren(m_taskTree.GetItem(dwTaskID)))
+			{
+				Misc::AddUniqueItemT(dwTaskID, aTaskIDs);
+
+				// Its parents
+				if (m_data.GetTaskParentIDs(dwTaskID, aParentIDs))
+					Misc::AddUniqueItems(aParentIDs, aTaskIDs);
+			}
+		}
+
+		m_taskTree.ExpandTasks(aTaskIDs);
+	}
+	else // collapsing
+	{
+		for (int nRes = 0; nRes < nNumRes; nRes++)
+		{
+			HTREEITEM hti = m_taskTree.GetItem(aResults[nRes].dwTaskID);
+			ASSERT(hti);
+
+			if (hti && m_taskTree.ItemHasChildren(hti))
+				m_taskTree.ExpandItem(hti, bExpand);
+		}
 	}
 }
 

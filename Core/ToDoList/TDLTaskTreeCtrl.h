@@ -140,9 +140,15 @@ public:
 	HTREEITEM GetItem(DWORD dwTaskID) const;
 	
 	void ExpandAll(BOOL bExpand = TRUE);
-	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
 	int GetExpandedTasks(CDWordArray& aExpanded) const;
-	void SetExpandedTasks(const CDWordArray& aExpanded);
+
+	// Caller is responsible for ensuring that the parent
+	// chain is also expanded
+	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
+
+	// Caller is responsible for ensuring that if parents 
+	// need expanding they are also in the list
+	void ExpandTasks(const CDWordArray& aExpand);
 
 	void DeleteAll();
 	void DeselectAll();
@@ -231,7 +237,7 @@ protected:
 	void EndLabelEditTimer();
 	void RefreshItemBoldState(HTREEITEM hti = NULL, BOOL bAndChildren = TRUE);
 	BOOL TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
-	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bAndParents, BOOL bUpdateList = TRUE);
+	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
 	BOOL ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const;
 
 	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
