@@ -1248,7 +1248,7 @@ namespace MindMapUIExtension
 			bool fromIsAboveTo = (rectFrom.Bottom <= rectTo.Top);
 			bool fromIsBelowTo = (rectFrom.Top >= rectTo.Bottom);
 
-			int itemHeight = rectFrom.Height;
+			int itemHeight = (rectFrom.Height - ItemVertSeparation);
 			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
 
 			// Leaf tasks on the same side of the root
