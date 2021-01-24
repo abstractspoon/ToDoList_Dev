@@ -695,8 +695,24 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 
 void CTDLTaskListCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort)
 {
-	if (IsGrouped() && mapAttribIDs.Has(TDC::MapColumnToAttribute(m_nGroupBy)))
-		UpdateGroupHeaders();
+	if (IsGrouped())
+	{
+		BOOL bUpdateGroups = (mapAttribIDs.Has(TDC::MapColumnToAttribute(m_nGroupBy)) ||
+							  mapAttribIDs.Has(TDCA_UNDO) ||
+							  mapAttribIDs.Has(TDCA_ALL) ||
+							  mapAttribIDs.Has(TDCA_PASTE) ||
+							  mapAttribIDs.Has(TDCA_DELETE) ||
+							  mapAttribIDs.Has(TDCA_ARCHIVE) ||
+							  mapAttribIDs.Has(TDCA_MERGE));
+
+		if (bUpdateGroups)
+		{
+			UpdateGroupHeaders();
+
+			if (bAllowResort)
+				DoSort();
+		}
+	}
 
 	CTDLTaskCtrlBase::SetModified(mapAttribIDs, bAllowResort);
 }
