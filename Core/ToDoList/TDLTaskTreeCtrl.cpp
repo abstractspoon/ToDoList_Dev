@@ -491,28 +491,22 @@ BOOL CTDLTaskTreeCtrl::CanExpandItem(HTREEITEM hti, BOOL bExpand) const
 
 void CTDLTaskTreeCtrl::ResortSelectedTaskParents()
 {
+	CHTIList lstParents;
+	TSH().GetUniqueParents(lstParents);
+		
+	TDSORTPARAMS ss(*this);
+	VERIFY(PrepareSort(ss));
+
+	POSITION pos = lstParents.GetHeadPosition();
+		
+	while (pos)
 	{
-		CHoldListVScroll hold(m_lcColumns);
-	
-		CHTIList lstParents;
-		TSH().GetUniqueParents(lstParents);
-		
-		TDSORTPARAMS ss(*this);
-		VERIFY(PrepareSort(ss));
+		HTREEITEM htiParent = lstParents.GetNext(pos);
 
-		POSITION pos = lstParents.GetHeadPosition();
-		
-		while (pos)
-		{
-			HTREEITEM htiParent = lstParents.GetNext(pos);
-
-			CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss, htiParent);
-		}
-		
-		ResyncSelection(m_lcColumns, Tasks(), FALSE);
+		CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss, htiParent);
 	}
-
-	ResyncScrollPos(Tasks(), m_lcColumns);
+		
+	ResyncSelection(m_lcColumns, Tasks(), FALSE);
 	EnsureSelectionVisible(TRUE);
 }
 
@@ -2760,7 +2754,7 @@ void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 	if (bAllowResort && ModsNeedResort(mapAttribIDs))
 	{
 		// if parent state is not calculated from its subtask values
-		// can do an optimised sort of just the affected branches
+		// we can do an optimised sort of just the affected branches
 		if (!ModsRequireFullResort(mapAttribIDs))
 		{
 			ResortSelectedTaskParents();
