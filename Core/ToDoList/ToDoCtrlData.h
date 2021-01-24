@@ -98,7 +98,6 @@ public:
 	// Gets
 	BOOL GetTaskAttributes(DWORD dwTaskID, TODOITEM& tdi) const;
 
-
 	CString GetTaskTitle(DWORD dwTaskID) const;
 	CString GetTaskIcon(DWORD dwTaskID) const;
 	COleDateTime GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const;
