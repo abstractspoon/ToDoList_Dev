@@ -55,7 +55,7 @@ struct TDSORTCOLUMN
 struct TDSORTCOLUMNS
 {
 	TDSORTCOLUMNS();
-;	TDSORTCOLUMNS(TDC_COLUMN nBy, BOOL bAscending = -1);
+	TDSORTCOLUMNS(TDC_COLUMN nBy, BOOL bAscending = -1);
 
 	BOOL IsSorting() const;
 	BOOL IsSorting(int nCol) const;
