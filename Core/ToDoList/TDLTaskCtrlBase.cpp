@@ -1874,6 +1874,10 @@ void CTDLTaskCtrlBase::DoSort()
 	
 	if (PrepareSort(ss))
 	{
+		// I seem unable to completely prevent horizontal 
+		// scrolling in the tree without locking updates
+		CLockUpdates lu(IsTreeList() ? Tasks() : NULL);
+
 		CTreeListSyncer::Sort(SortFunc, (LPARAM)&ss, NULL);
 
 		ResyncSelection(m_lcColumns, Tasks(), FALSE);
