@@ -2767,6 +2767,9 @@ void CTDLTaskTreeCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 
 BOOL CTDLTaskTreeCtrl::ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const
 {
+	if (!HasStyle(TDCS_RESORTONMODIFY) || !IsSorting())
+		return FALSE;
+
 	if (mapAttribIDs.Has(TDCA_ALL) ||
 		mapAttribIDs.Has(TDCA_UNDO) ||
 		mapAttribIDs.Has(TDCA_PASTE) ||
@@ -2774,8 +2777,24 @@ BOOL CTDLTaskTreeCtrl::ModsRequireFullResort(const CTDCAttributeMap& mapAttribID
 	{
 		return TRUE;
 	}
+
+	// Check for calculated attributes which also match current sort
+	POSITION pos = mapAttribIDs.GetStartPosition();
+
+	while (pos)
+	{
+		TDC_ATTRIBUTE nAttribID = mapAttribIDs.GetNext(pos);
+		TDC_COLUMN nColID = TDC::MapAttributeToColumn(nAttribID);
+
+		if (m_mapVisibleCols.Has(nColID) &&
+			m_calculator.IsCalculatedAttribute(nAttribID, m_aCustomAttribDefs) &&
+			m_sort.Matches(nAttribID, m_styles, m_aCustomAttribDefs))
+		{
+			return TRUE;
+		}
+	}
 	
-	return m_calculator.HasCalculatedAttribute(mapAttribIDs, m_aCustomAttribDefs);
+	return FALSE;
 }
 
 BOOL CTDLTaskTreeCtrl::DoSaveToImage(CBitmap& bmImage, COLORREF crDivider)
