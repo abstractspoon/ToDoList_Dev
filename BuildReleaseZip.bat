@@ -66,6 +66,7 @@ REM Handle dlls explicitly to maintain control over plugins
 
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Calendar.DayView.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\CommandHandling.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\CheckBoxComboBox.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\DayViewUIExtensionBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\DayViewUIExtensionCore.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
