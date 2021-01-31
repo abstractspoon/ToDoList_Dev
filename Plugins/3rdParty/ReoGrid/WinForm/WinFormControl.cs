@@ -1398,7 +1398,7 @@ namespace unvell.ReoGrid
 				this.renderer.Reset();
 				this.renderer.PlatformGraphics = e.Graphics;
 
-				CellDrawingContext dc = new CellDrawingContext(this.currentWorksheet, DrawMode.View, renderer, Focused);
+				CellDrawingContext dc = new CellDrawingContext(this.currentWorksheet, DrawMode.View, renderer, (Focused || this.currentWorksheet.IsEditing));
 
 				sheet.ViewportController.Draw(dc);
 

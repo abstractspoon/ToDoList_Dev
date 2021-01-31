@@ -11,6 +11,7 @@ using unvell.ReoGrid;
 using unvell.ReoGrid.Editor;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 using Command.Handling;
 
@@ -183,22 +184,18 @@ namespace SpreadsheetContentControl
 			{
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
+				if (CurrentWorksheet.IsEditing && (wParam == (UInt32)Keys.Escape))
 				{
-					if (CurrentWorksheet.IsEditing && (wParam == (UInt32)Keys.Escape))
-					{
-						CurrentWorksheet.EndEdit(EndEditReason.Cancel);
-						return true;
-					}
-					else if (!CurrentWorksheet.IsEditing && (wParam == (UInt32)Keys.F2))
-					{
-						CurrentWorksheet.StartEdit();
-						return true;
-					}
-
-					// else
-					return CommandHandling.ProcessMenuShortcut(wParam, MenuBar.Items);
+					CurrentWorksheet.EndEdit(EndEditReason.Cancel);
+					return true;
 				}
-				break;
+				else if (!CurrentWorksheet.IsEditing && (wParam == (UInt32)Keys.F2))
+				{
+					CurrentWorksheet.StartEdit();
+					return true;
+				}
+				// else
+				return CommandHandling.ProcessMenuShortcut(wParam, MenuBar.Items);
 			}
 
 			return false;
@@ -320,37 +317,60 @@ namespace SpreadsheetContentControl
 
 			var backColor = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarLight);
 
+			this.BackColor = backColor;
             MenuBar.BackColor = SystemColors.Menu;
             ToolBar.BackColor = backColor;
 			FontBar.BackColor = backColor;
 			StatusBar.BackColor = backColor;
 			FormulaBar.BackColor = backColor;
+
+			// Unfocused colours
+			var color = theme.GetAppDrawingColor(UITheme.AppColor.ToolbarHot);
+			var gridColor = new unvell.ReoGrid.Graphics.SolidColor(color.A, color.R, color.G, color.B);
+			
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedNotFocusedStart, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedNotFocusedEnd, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadFullSelectedNotFocusedStart, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadFullSelectedNotFocusedEnd, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadSelectedNotFocused, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadFullSelectedNotFocused, gridColor);
+
+			// Focused colours
+			color = DrawingColor.AdjustLighting(color, -0.15f, false);
+			gridColor = new unvell.ReoGrid.Graphics.SolidColor(color.A, color.R, color.G, color.B);
+
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedStart, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadSelectedEnd, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadFullSelectedStart, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.ColHeadFullSelectedEnd, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadSelected, gridColor);
+			GridControl.ControlStyle.SetColor(ControlAppearanceColors.RowHeadFullSelected, gridColor);
 		}
 
 		private void InitialiseChangeCallbacks()
 		{
-			GridCtrl.ActionPerformed += (s, e) =>
+			GridControl.ActionPerformed += (s, e) =>
 			{
 				if (e.Action is unvell.Common.IUndoableAction)
 					NotifyParentContentChange();
 			};
 
-			GridCtrl.WorksheetCreated += (s, e) =>
+			GridControl.WorksheetCreated += (s, e) =>
 			{
 				NotifyParentContentChange();
 			};
 
-			GridCtrl.WorksheetInserted += (s, e) =>
+			GridControl.WorksheetInserted += (s, e) =>
 			{
 				NotifyParentContentChange();
 			};
 
-			GridCtrl.WorksheetRemoved += (s, e) =>
+			GridControl.WorksheetRemoved += (s, e) =>
 			{
 				NotifyParentContentChange();
 			};
 
-			GridCtrl.WorksheetNameChanged += (s, e) =>
+			GridControl.WorksheetNameChanged += (s, e) =>
 			{
 				NotifyParentContentChange();
 			};
@@ -418,7 +438,7 @@ namespace SpreadsheetContentControl
 
 		protected override void OnGotFocus(EventArgs e)
 		{
-			GridCtrl.Focus();
+			GridControl.Focus();
 		}
 
 	}

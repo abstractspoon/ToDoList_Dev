@@ -55,8 +55,12 @@ namespace unvell.ReoGrid
 		ColHeadSelectedEnd = 26,
 		ColHeadFullSelectedStart = 27,
 		ColHeadFullSelectedEnd = 28,
-		ColHeadInvalidStart = 29,
-		ColHeadInvalidEnd = 30,
+		ColHeadSelectedNotFocusedStart = 29,
+		ColHeadSelectedNotFocusedEnd = 30,
+		ColHeadFullSelectedNotFocusedStart = 31,
+		ColHeadFullSelectedNotFocusedEnd = 32,
+		ColHeadInvalidStart = 33,
+		ColHeadInvalidEnd = 34,
 		ColHeadText = 36,
 
 		RowHeadSplitter = 40,
@@ -64,11 +68,15 @@ namespace unvell.ReoGrid
 		RowHeadHover = 42,
 		RowHeadSelected = 43,
 		RowHeadFullSelected = 44,
-		RowHeadInvalid = 45,
+		RowHeadSelectedNotFocused = 45,
+		RowHeadFullSelectedNotFocused = 46,
+		RowHeadInvalid = 47,
 		RowHeadText = 51,
 
 		SelectionBorder = 61,
 		SelectionFill = 62,
+		SelectionNotFocusedBorder = 63,
+		SelectionNotFocusedFill = 64,
 
 		GridBackground = 81,
 		GridText = 82,
@@ -207,6 +215,10 @@ namespace unvell.ReoGrid
 			colors[ControlAppearanceColors.ColHeadSelectedEnd] = salientTheme;
 			colors[ControlAppearanceColors.ColHeadFullSelectedStart] = lightLightLightSalientTheme;
 			colors[ControlAppearanceColors.ColHeadFullSelectedEnd] = lightLightSalientTheme;
+			colors[ControlAppearanceColors.ColHeadSelectedNotFocusedStart] = lightLightLightSalientTheme;
+			colors[ControlAppearanceColors.ColHeadSelectedNotFocusedEnd] = salientTheme;
+			colors[ControlAppearanceColors.ColHeadFullSelectedNotFocusedStart] = lightLightLightSalientTheme;
+			colors[ControlAppearanceColors.ColHeadFullSelectedNotFocusedEnd] = lightLightSalientTheme;
 			colors[ControlAppearanceColors.ColHeadText] = darkDarkMainTheme;
 
 			colors[ControlAppearanceColors.RowHeadSplitter] = mainTheme;
@@ -214,17 +226,23 @@ namespace unvell.ReoGrid
 			colors[ControlAppearanceColors.RowHeadHover] = ColorUtility.DarkColor(leadHead);
 			colors[ControlAppearanceColors.RowHeadSelected] = lightSalientTheme;
 			colors[ControlAppearanceColors.RowHeadFullSelected] = lightLightSalientTheme;
+			colors[ControlAppearanceColors.RowHeadSelectedNotFocused] = lightSalientTheme;
+			colors[ControlAppearanceColors.RowHeadFullSelectedNotFocused] = lightLightSalientTheme;
 			colors[ControlAppearanceColors.RowHeadText] = darkDarkMainTheme;
 
 			if (useSystemHighlight)
 			{
 				colors[ControlAppearanceColors.SelectionFill] = new SolidColor(30, StaticResources.SystemColor_Highlight);
 				colors[ControlAppearanceColors.SelectionBorder] = new SolidColor(180, StaticResources.SystemColor_Highlight);
+				colors[ControlAppearanceColors.SelectionNotFocusedFill] = new SolidColor(30, StaticResources.SystemColor_Control);
+				colors[ControlAppearanceColors.SelectionNotFocusedBorder] = new SolidColor(180, StaticResources.SystemColor_Control);
 			}
 			else
 			{
 				colors[ControlAppearanceColors.SelectionFill] = ColorUtility.FromAlphaColor(30, darkSalientTheme);
 				colors[ControlAppearanceColors.SelectionBorder] = ColorUtility.FromAlphaColor(180, lightSalientTheme);
+				colors[ControlAppearanceColors.SelectionNotFocusedFill] = ColorUtility.FromAlphaColor(30, darkSalientTheme);
+				colors[ControlAppearanceColors.SelectionNotFocusedBorder] = ColorUtility.FromAlphaColor(180, lightSalientTheme);
 			}
 
 			colors[ControlAppearanceColors.GridBackground] = backgroundColor;
@@ -244,44 +262,70 @@ namespace unvell.ReoGrid
 			this.SelectionBorderWidth = 3;
 		}
 
-		internal SolidColor GetColHeadStartColor(bool isHover, bool isSelected, bool isFullSelected, bool isInvalid)
+		internal SolidColor GetColHeadStartColor(bool isHover, bool isSelected, bool isFullSelected, bool isInvalid, bool isFocused)
 		{
 			if (isFullSelected)
-				return colors[ControlAppearanceColors.ColHeadFullSelectedStart];
-			else if (isSelected)
-				return colors[ControlAppearanceColors.ColHeadSelectedStart];
-			else if (isHover)
+				return isFocused ?
+							colors[ControlAppearanceColors.ColHeadFullSelectedStart] :
+							colors[ControlAppearanceColors.ColHeadFullSelectedNotFocusedStart];
+
+			if (isSelected)
+				return isFocused ?
+							colors[ControlAppearanceColors.ColHeadSelectedStart] :
+							colors[ControlAppearanceColors.ColHeadSelectedNotFocusedStart];
+
+			if (isHover)
 				return colors[ControlAppearanceColors.ColHeadHoverStart];
-			else if (isInvalid)
+
+			if (isInvalid)
 				return colors[ControlAppearanceColors.ColHeadInvalidStart];
-			else
-				return colors[ControlAppearanceColors.ColHeadNormalStart];
+
+			// all else
+			return colors[ControlAppearanceColors.ColHeadNormalStart];
 		}
-		internal SolidColor GetColHeadEndColor(bool isHover, bool isSelected, bool isFullSelected, bool isInvalid)
+
+		internal SolidColor GetColHeadEndColor(bool isHover, bool isSelected, bool isFullSelected, bool isInvalid, bool isFocused)
 		{
 			if (isFullSelected)
-				return colors[ControlAppearanceColors.ColHeadFullSelectedEnd];
-			else if (isSelected)
-				return colors[ControlAppearanceColors.ColHeadSelectedEnd];
-			else if (isHover)
+				return isFocused ? 
+							colors[ControlAppearanceColors.ColHeadFullSelectedEnd] :
+							colors[ControlAppearanceColors.ColHeadFullSelectedNotFocusedEnd];
+
+			if (isSelected)
+				return isFocused ?
+							colors[ControlAppearanceColors.ColHeadSelectedEnd] :
+							colors[ControlAppearanceColors.ColHeadSelectedNotFocusedEnd];
+
+			if (isHover)
 				return colors[ControlAppearanceColors.ColHeadHoverEnd];
-			else if (isInvalid)
+
+			if (isInvalid)
 				return colors[ControlAppearanceColors.ColHeadInvalidEnd];
-			else
-				return colors[ControlAppearanceColors.ColHeadNormalEnd];
+
+			// all else
+			return colors[ControlAppearanceColors.ColHeadNormalEnd];
 		}
-		internal SolidColor GetRowHeadEndColor(bool isHover, bool isSelected, bool isFullSelected, bool isInvalid)
+
+		internal SolidColor GetRowHeadColor(bool isHover, bool isSelected, bool isFullSelected, bool isInvalid, bool isFocused)
 		{
 			if (isFullSelected)
-				return colors[ControlAppearanceColors.RowHeadFullSelected];
-			else if (isSelected)
-				return colors[ControlAppearanceColors.RowHeadSelected];
-			else if (isHover)
+				return isFocused ?
+							colors[ControlAppearanceColors.RowHeadFullSelected] :
+							colors[ControlAppearanceColors.RowHeadFullSelectedNotFocused];
+
+			if (isSelected)
+				return isFocused ?
+							colors[ControlAppearanceColors.RowHeadSelected] :
+							colors[ControlAppearanceColors.RowHeadSelectedNotFocused];
+
+			if (isHover)
 				return colors[ControlAppearanceColors.RowHeadHover];
-			else if (isInvalid)
+
+			if (isInvalid)
 				return colors[ControlAppearanceColors.RowHeadInvalid];
-			else
-				return colors[ControlAppearanceColors.RowHeadNormal];
+			
+			// all else
+			return colors[ControlAppearanceColors.RowHeadNormal];
 		}
 
 		/// <summary>
@@ -307,18 +351,26 @@ namespace unvell.ReoGrid
 						{ControlAppearanceColors.ColHeadSelectedEnd, SolidColor.Goldenrod},
 						{ControlAppearanceColors.ColHeadFullSelectedStart, SolidColor.WhiteSmoke},
 						{ControlAppearanceColors.ColHeadFullSelectedEnd, SolidColor.LemonChiffon},
+						{ControlAppearanceColors.ColHeadSelectedNotFocusedStart, SolidColor.LightGoldenrodYellow},
+						{ControlAppearanceColors.ColHeadSelectedNotFocusedEnd, SolidColor.Goldenrod},
+						{ControlAppearanceColors.ColHeadFullSelectedNotFocusedStart, SolidColor.WhiteSmoke},
+						{ControlAppearanceColors.ColHeadFullSelectedNotFocusedEnd, SolidColor.LemonChiffon},
 						{ControlAppearanceColors.ColHeadText, SolidColor.DarkBlue},
 						{ControlAppearanceColors.RowHeadSplitter, SolidColor.LightSteelBlue},
 						{ControlAppearanceColors.RowHeadNormal, SolidColor.AliceBlue},
 						{ControlAppearanceColors.RowHeadHover, SolidColor.LightSteelBlue},
 						{ControlAppearanceColors.RowHeadSelected, SolidColor.PaleGoldenrod},
 						{ControlAppearanceColors.RowHeadFullSelected, SolidColor.LemonChiffon},
+						{ControlAppearanceColors.RowHeadSelectedNotFocused, SolidColor.PaleGoldenrod},
+						{ControlAppearanceColors.RowHeadFullSelectedNotFocused, SolidColor.LemonChiffon},
 						{ControlAppearanceColors.RowHeadText, SolidColor.DarkBlue},
 						{ControlAppearanceColors.GridText, SolidColor.Black},
 						{ControlAppearanceColors.GridBackground, SolidColor.White},
 						{ControlAppearanceColors.GridLine, SolidColor.FromArgb(255, 208, 215, 229)},
 						{ControlAppearanceColors.SelectionBorder, ColorUtility.FromAlphaColor(180, StaticResources.SystemColor_Highlight)},
-						{ControlAppearanceColors.SelectionFill, ColorUtility.FromAlphaColor(30, StaticResources.SystemColor_Highlight)},
+						{ControlAppearanceColors.SelectionFill, ColorUtility.FromAlphaColor(50, StaticResources.SystemColor_Highlight)},
+						{ControlAppearanceColors.SelectionNotFocusedBorder, ColorUtility.FromAlphaColor(180, StaticResources.SystemColor_ControlDark)},
+						{ControlAppearanceColors.SelectionNotFocusedFill, ColorUtility.FromAlphaColor(50, StaticResources.SystemColor_ControlDark)},
 						{ControlAppearanceColors.OutlineButtonBorder, SolidColor.Black},
 						{ControlAppearanceColors.OutlinePanelBackground, StaticResources.SystemColor_Control},
 						{ControlAppearanceColors.OutlinePanelBorder, SolidColor.Silver},

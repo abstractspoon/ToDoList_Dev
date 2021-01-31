@@ -972,52 +972,64 @@ namespace unvell.ReoGrid.Views
 				var g = dc.Graphics;
 				var controlStyle = sheet.workbook.controlAdapter.ControlStyle;
 
-				var selectionBorderWidth = controlStyle.SelectionBorderWidth;
+				var selBorderWidth = controlStyle.SelectionBorderWidth;
+
+				if (!dc.Focused)
+					selBorderWidth -= 1;
 
 				var scaledSelectionRect = GetScaledAndClippedRangeRect(this,
-					sheet.SelectionRange.StartPos, sheet.SelectionRange.EndPos, selectionBorderWidth);
+					sheet.SelectionRange.StartPos, sheet.SelectionRange.EndPos, selBorderWidth);
 
 				if (scaledSelectionRect.Width > 0 || scaledSelectionRect.Height > 0)
 				{
-					SolidColor selectionFillColor = controlStyle.Colors[ControlAppearanceColors.SelectionFill];
+					var selFillColor = dc.Focused ? 
+											controlStyle.Colors[ControlAppearanceColors.SelectionFill] : 
+											controlStyle.Colors[ControlAppearanceColors.SelectionNotFocusedFill];
 
-					if (sheet.SelectionStyle == WorksheetSelectionStyle.Default)
+					var range = this.sheet.GetRangeIfMergedCell(this.sheet.focusPos);
+					var scaledFocusPosRect = GetScaledAndClippedRangeRect(this, range.StartPos, range.EndPos, 0);
+
+					// Fill cells first
+					if (sheet.FocusPosStyle == FocusPosStyle.Default)
 					{
-						var range = this.sheet.GetRangeIfMergedCell(this.sheet.focusPos);
-						var scaledFocusPosRect = GetScaledAndClippedRangeRect(this, range.StartPos, range.EndPos, 0);
-
-						SolidColor selectionBorderColor = controlStyle.Colors[ControlAppearanceColors.SelectionBorder];
-
-						if (sheet.FocusPosStyle == FocusPosStyle.Default)
-						{
-							g.PushClip(g.PlatformGraphics.ClipBounds);
-							g.PlatformGraphics.SetClip(scaledFocusPosRect, System.Drawing.Drawing2D.CombineMode.Exclude);
-							g.FillRectangle(scaledSelectionRect, selectionFillColor);
-							g.PopClip();
-						}
-						else
-						{
-							g.FillRectangle(scaledSelectionRect, selectionFillColor);
-						}
-
-						if (dc.Focused && (selectionBorderColor.A > 0))
-						{
-							g.DrawRectangle(scaledSelectionRect, selectionBorderColor, selectionBorderWidth, LineStyles.Solid);
-						}
+						g.PushClip(g.PlatformGraphics.ClipBounds);
+						g.PlatformGraphics.SetClip(scaledFocusPosRect, System.Drawing.Drawing2D.CombineMode.Exclude);
+						g.FillRectangle(scaledSelectionRect, selFillColor);
+						g.PopClip();
 					}
-					else if (this.sheet.SelectionStyle == WorksheetSelectionStyle.FocusRect)
+					else
 					{
-						if (dc.Focused)
-							g.DrawRectangle(scaledSelectionRect, SolidColor.Black, 1, LineStyles.Dot);
+						g.FillRectangle(scaledSelectionRect, selFillColor);
+					}
+
+					// Cell border
+					switch (sheet.SelectionStyle)
+					{
+					case WorksheetSelectionStyle.Default:
+						{
+							SolidColor selBorderColor = dc.Focused ? 
+															controlStyle.Colors[ControlAppearanceColors.SelectionBorder] : 
+															controlStyle.Colors[ControlAppearanceColors.SelectionNotFocusedBorder];
+
+							g.DrawRectangle(scaledSelectionRect, selBorderColor, selBorderWidth, LineStyles.Solid);
+						}
+						break;
+
+					case WorksheetSelectionStyle.FocusRect:
+						{
+							if (dc.Focused)
+								g.DrawRectangle(scaledSelectionRect, SolidColor.Black, 1, LineStyles.Dot);
+						}
+						break;
 					}
 
 					if (sheet.HasSettings(WorksheetSettings.Edit_DragSelectionToFillSerial))
 					{
 						var sheetBackColor = controlStyle.Colors[ControlAppearanceColors.GridBackground];
 
-						var thumbRect = new Rectangle(scaledSelectionRect.Right - selectionBorderWidth,
-							scaledSelectionRect.Bottom - selectionBorderWidth,
-							selectionBorderWidth + 2, selectionBorderWidth + 2);
+						var thumbRect = new Rectangle(scaledSelectionRect.Right - selBorderWidth,
+							scaledSelectionRect.Bottom - selBorderWidth,
+							selBorderWidth + 2, selBorderWidth + 2);
 
 						g.DrawRectangle(thumbRect, sheetBackColor);
 					}

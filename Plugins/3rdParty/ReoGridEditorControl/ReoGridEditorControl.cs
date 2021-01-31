@@ -77,7 +77,8 @@ namespace unvell.ReoGrid.Editor
 		protected ContextMenuStrip  HeaderContextMenu { get { return this.leadHeaderContextMenuStrip; } }
 		protected ContextMenuStrip  ColumnContextMenu { get { return this.columnContextMenuStrip; } }
 
-		protected ReoGridControl	GridCtrl { get { return grid; }	}
+		public ReoGridControl GridControl { get { return this.grid; } }
+		public Worksheet CurrentWorksheet { get { return this.grid.CurrentWorksheet; } }
 
 		// -------------------------------------------------------------
 
@@ -1029,10 +1030,6 @@ namespace unvell.ReoGrid.Editor
 		bool _Debug_Auto_Validate_All(Worksheet sheet, RangePosition range) { return _Debug_Validate_All(sheet, range); }
 		#endregion // Debug Validations
 #endif // RG_DEBUG
-
-		public ReoGridControl GridControl { get { return this.grid; } }
-
-		public Worksheet CurrentWorksheet { get { return this.grid.CurrentWorksheet; } }
 
 		public RangePosition CurrentSelectionRange
 		{

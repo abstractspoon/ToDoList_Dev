@@ -239,11 +239,8 @@ namespace unvell.ReoGrid.Data
 				{
 					Rectangle bounds = GetColumnFilterButtonRect(headerSize);
 
-					SolidColor color1 = controlStyle.GetColHeadStartColor(isHover: false, isInvalid: false,
-						isSelected: IsDropdown, isFullSelected: false);
-
-					SolidColor color2 = controlStyle.GetColHeadEndColor(isHover: false, isInvalid: false,
-						isSelected: IsDropdown, isFullSelected: false);
+					SolidColor color1 = controlStyle.GetColHeadStartColor(false, IsDropdown, false, false, dc.Focused);
+					SolidColor color2 = controlStyle.GetColHeadEndColor(false, IsDropdown, false, false, dc.Focused);
 
 					var g = dc.Graphics;
 

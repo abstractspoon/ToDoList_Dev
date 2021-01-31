@@ -152,8 +152,8 @@ namespace unvell.ReoGrid.Views
 				{
 					Rectangle rect = new Rectangle(x, 0, width, bounds.Height);
 
-					g.FillRectangleLinear(controlStyle.GetColHeadStartColor(false, isSelected, isSelected && isFullColSelected, false),
-						controlStyle.GetColHeadEndColor(false, isSelected, isSelected && isFullColSelected, false), 90f, rect);
+					g.FillRectangleLinear(controlStyle.GetColHeadStartColor(false, isSelected, isSelected && isFullColSelected, false, dc.Focused),
+						controlStyle.GetColHeadEndColor(false, isSelected, isSelected && isFullColSelected, false, dc.Focused), 90f, rect);
 
 					g.DrawLine(splitterLinePen, x, 0, x, bounds.Height);
 
@@ -512,7 +512,7 @@ namespace unvell.ReoGrid.Views
 
 					if (rect.Height > 0)
 					{
-						g.FillRectangle(rect, controlStyle.GetRowHeadEndColor(false, isSelected, isSelected && isFullRowSelected, false));
+						g.FillRectangle(rect, controlStyle.GetRowHeadColor(false, isSelected, isSelected && isFullRowSelected, false, dc.Focused));
 						g.DrawLine(splitterLinePen, new Point(0, y), new Point(bounds.Width, y));
 
 						var headerText = row.Text != null ? row.Text : (row.Row + 1).ToString();
