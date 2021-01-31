@@ -373,7 +373,7 @@ void UIThemeToolbarRenderer::OnRenderSplitButtonBackground(ToolStripItemRenderEv
 			{
 				DrawButtonBackground(e->Graphics, btn->ButtonBounds, Toolbars::ItemState::Pressed);
 			}
-			else
+			else if (e->Item->Selected) // hot
 			{
 				e->Graphics->FillRectangle(gcnew SolidBrush(m_HotBorderColor), btn->SplitterBounds);
 			}
