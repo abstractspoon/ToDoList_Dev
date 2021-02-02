@@ -538,66 +538,11 @@ BOOL CDateHelper::OffsetDate(COleDateTime& date, int nAmount, DH_UNITS nUnits) c
 		break;
 
 	case DHU_MONTHS:
-		{
-			SYSTEMTIME st;
-			date.GetAsSystemTime(st);
-
-			// are we at months end?
-			int nDaysInMonth = GetDaysInMonth(st.wMonth, st.wYear);
-			BOOL bEndOfMonth = (st.wDay == nDaysInMonth);
-
-			// convert amount to years and months
-			int nYear = st.wYear, nMonth = st.wMonth;
-
-			nYear = (nYear + (nAmount / 12));
-			nMonth = (nMonth + (nAmount % 12));
-
-			// handle over/underflow
-			while (nMonth > 12)
-			{
-				nYear++;
-				nMonth -= 12;
-			}
-
-			while (nMonth < 1)
-			{
-				nYear--;
-				nMonth += 12;
-			}
-
-			st.wYear = (WORD)nYear;
-			st.wMonth = (WORD)nMonth;
-
-			// if our start date was the end of the month make
-			// sure out end date is too
-			nDaysInMonth = GetDaysInMonth(st.wMonth, st.wYear);
-
-			if (bEndOfMonth)
-			{
-				st.wDay = (WORD)nDaysInMonth;
-			}
-			else
-			{
-				// clip dates to the end of the month
-				st.wDay = min(st.wDay, (WORD)nDaysInMonth);
-			}
-
-			// update time
-			date = COleDateTime(st);
-		}
+		IncrementMonth(date, nAmount);
 		break;
 
 	case DHU_YEARS:
-		{
-			SYSTEMTIME st;
-			date.GetAsSystemTime(st);
-
-			// update year
-			st.wYear = (WORD)((int)st.wYear + nAmount);
-
-			// update time
-			date = COleDateTime(st);
-		}
+		IncrementMonth(date, nAmount * 12);
 		break;
 	}
 
@@ -1675,6 +1620,16 @@ BOOL CDateHelper::IsSameMonth(const COleDateTime& date1, const COleDateTime& dat
 	return (GetDateInMonths(date1) == GetDateInMonths(date2));
 }
 
+BOOL CDateHelper::IsEndOfMonth(const COleDateTime& date)
+{
+	return (date.GetDay() == GetDaysInMonth(date));
+}
+
+BOOL CDateHelper::IsEndOfMonth(const SYSTEMTIME& st)
+{
+	return ((int)st.wDay >= GetDaysInMonth((int)st.wMonth, (int)st.wYear));
+}
+
 BOOL CDateHelper::IsSameYear(const COleDateTime& date1, const COleDateTime& date2)
 {
 	return (date1.GetYear() == date2.GetYear());
@@ -2181,7 +2136,7 @@ int CDateHelper::CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTi
 	return ((nNumMonthsTo - nNumMonthsFrom) + (bInclusive ? 1 : 0));
 }
 
-void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy)
+void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy, BOOL bPreserveEndOfMonth)
 {
 	// convert month/year to int
 	int nMonth = st.wMonth;
@@ -2189,23 +2144,30 @@ void CDateHelper::IncrementMonth(SYSTEMTIME& st, int nBy)
 
 	IncrementMonth(nMonth, nYear, nBy);
 
-	// Validate day
+	// Validate day and preserve 'end-of month'
 	int nDayInMonth = GetDaysInMonth(nMonth, nYear);
 
-	st.wDay = max(st.wDay, 1);
-	st.wDay = min(st.wDay, nDayInMonth);
+	if (bPreserveEndOfMonth && IsEndOfMonth(st))
+	{
+		st.wDay = (WORD)nDayInMonth;
+	}
+	else
+	{
+		st.wDay = max(st.wDay, 1);
+		st.wDay = min(st.wDay, nDayInMonth);
+	}
 
 	st.wMonth = (WORD)nMonth;
 	st.wYear = (WORD)nYear;
 }
 
-void CDateHelper::IncrementMonth(COleDateTime& date, int nBy)
+void CDateHelper::IncrementMonth(COleDateTime& date, int nBy, BOOL bPreserveEndOfMonth)
 {
 	SYSTEMTIME st = { 0 };
 	
 	if (date.GetAsSystemTime(st))
 	{
-		IncrementMonth(st, nBy);
+		IncrementMonth(st, nBy, bPreserveEndOfMonth);
 		date = COleDateTime(st);
 	}
 }

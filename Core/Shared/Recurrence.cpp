@@ -223,22 +223,31 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		break;
 		
 	case RECURS_MONTH_SPECIFIC_DAY_NMONTHS:
-	case RECURS_MONTH_EVERY_NMONTHS:
 		{
-			// add number of months specified by dwSpecific1
-			dh.OffsetDate(dtTemp, (int)m_dwSpecific1, DHU_MONTHS);
-			
-			// then enforce the day
 			SYSTEMTIME st;
 			dtTemp.GetAsSystemTime(st);
 			
-			if (m_dwSpecific2)
-				st.wDay = (WORD)m_dwSpecific2;
+			// Set day first and allow IncrementMonth() to clip it as necessary
+			st.wDay = (WORD)m_dwSpecific2;
+
+			// add number of months specified by m_dwSpecific1 
+			// without preserving end of month
+			dh.IncrementMonth(st, (int)m_dwSpecific1, FALSE);
 			
-			if (!ValidateDay(st))
-				return FALSE;
+			dtTemp = st;
+		}
+		break;
+		
+	case RECURS_MONTH_EVERY_NMONTHS:
+		{
+			SYSTEMTIME st;
+			dtTemp.GetAsSystemTime(st);
 			
-			dtTemp = COleDateTime(st);
+			// add number of months specified by m_dwSpecific1 
+			// preserving end of month
+			dh.IncrementMonth(st, (int)m_dwSpecific1, TRUE);
+			
+			dtTemp = st;
 		}
 		break;
 		
@@ -248,14 +257,8 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 			int nMonth = dtTemp.GetMonth();
 			int nYear = dtTemp.GetYear();
 			
-			// increment months
-			nMonth += m_dwSpecific2;
-			
-			while (nMonth > 12)
-			{
-				nMonth -= 12;
-				nYear++;
-			}
+			// add number of months specified by dwSpecific2 
+			dh.IncrementMonth(nMonth, nYear, (int)m_dwSpecific2);
 			
 			// calculate next instance
 			int nWhich = LOWORD(m_dwSpecific1);
@@ -267,24 +270,18 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		
 	case RECURS_MONTH_FIRSTLASTWEEKDAY_NMONTHS:
 		{
-			// work out where we are
-			int nMonth = dtTemp.GetMonth();
-			int nYear = dtTemp.GetYear();
-			
-			// increment months
-			nMonth += m_dwSpecific2;
-			
-			while (nMonth > 12)
-			{
-				nMonth -= 12;
-				nYear++;
-			}
+			SYSTEMTIME st;
+			dtTemp.GetAsSystemTime(st);
+
+			// add number of months specified by dwSpecific2 
+			// WITHOUT preserving end of month
+			dh.IncrementMonth(st, (int)m_dwSpecific2, FALSE);
 			
 			// calculate next instance
 			int bFirst = (m_dwSpecific1 == 0);
-			int nDay = (bFirst ? 1 : CDateHelper::GetDaysInMonth(nMonth, nYear));
+			st.wDay = (bFirst ? 1 : (WORD)CDateHelper::GetDaysInMonth(st));
 			
-			dtTemp.SetDate(nYear, nMonth, nDay);
+			dtTemp = st;
 			dh.WorkingWeek().MakeWeekday(dtTemp, bFirst);
 		}
 		break;
@@ -293,15 +290,6 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 		{
 			// add number of years specified by dwSpecific1
 			CDateHelper().OffsetDate(dtTemp, (int)m_dwSpecific1, DHU_YEARS);
-			
-			// clip dates to the end of the month
-			SYSTEMTIME st;
-			dtTemp.GetAsSystemTime(st);
-			
-			if (!ValidateDay(st))
-				return FALSE;
-			
-			dtTemp = COleDateTime(st);
 		}
 		break;
 		
@@ -317,18 +305,19 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 				return FALSE;
 			
 			// see if this year would work before trying next year
-			dtTemp = COleDateTime(st);
+			dtTemp = st;
 			
 			if (dtTemp <= dtPrev)
 			{
-				// else try incrementing the year
+				// else try restoring the original day and incrementing the year
+				st.wDay = (WORD)m_dwSpecific2;
 				st.wYear++;
 				
 				if (!ValidateDay(st))
 					return FALSE;
 				
 				// calculate date
-				dtTemp = COleDateTime(st);
+				dtTemp = st;
 				ASSERT(dtTemp > dtPrev);
 			}
 		}
@@ -692,15 +681,10 @@ RECURRENCE_REGULARITY CRecurrence::GetRegularity() const
 
 BOOL CRecurrence::ValidateDay(SYSTEMTIME& st) const
 {
-	if ((st.wDay == 29) && (st.wMonth == 2))
-	{
-		int nDaysInMonth = CDateHelper::GetDaysInMonth(st.wMonth, st.wYear);
-		st.wDay = min((WORD)m_dwSpecific2, (WORD)nDaysInMonth);
-		
-		return TRUE;
-	}
+	// Clip date to valid day range for this month
+	int nDaysInMonth = CDateHelper::GetDaysInMonth(st.wMonth, st.wYear);
+	st.wDay = max(1, min((WORD)nDaysInMonth, (WORD)st.wDay));
 	
-	// else
 	return CDateHelper::IsValidDayInMonth(st.wDay, st.wMonth, st.wYear);
 }
 

@@ -151,8 +151,8 @@ public:
 
 	static void GetNextMonth(int& nMonth, int& nYear, BOOL bNext = TRUE);
 	static void IncrementMonth(int& nMonth, int& nYear, int nBy = 1);
-	static void IncrementMonth(SYSTEMTIME& st, int nBy = 1);
-	static void IncrementMonth(COleDateTime& date, int nBy = 1);
+	static void IncrementMonth(SYSTEMTIME& st, int nBy = 1, BOOL bPreserveEndOfMonth = TRUE);
+	static void IncrementMonth(COleDateTime& date, int nBy = 1, BOOL bPreserveEndOfMonth = TRUE);
 	
 	static int CalcMonthsFromTo(const COleDateTime& dateFrom, const COleDateTime& dateTo, BOOL bInclusive);
 	static int GetDateInMonths(int nMonth, int nYear);
@@ -177,6 +177,8 @@ public:
 	static BOOL IsSameWeek(const COleDateTime& date1, const COleDateTime& date2);
 	static BOOL IsThisWeek(const COleDateTime& date);
 	static BOOL IsSameMonth(const COleDateTime& date1, const COleDateTime& date2);
+	static BOOL IsEndOfMonth(const COleDateTime& date);
+	static BOOL IsEndOfMonth(const SYSTEMTIME& st);
 	static BOOL IsSameYear(const COleDateTime& date1, const COleDateTime& date2);
 
 	static void SplitDate(const COleDateTime& date, double& dDateOnly, double& dTimeOnly);
