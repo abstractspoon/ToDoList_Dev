@@ -62,8 +62,8 @@ namespace HTMLContentControl
 		public TDLHtmlEditorControl(System.Drawing.Font font, Translator trans) : base(font, trans, false)
         {
             m_TextChangeTimer = new Timer();
-			
-			InitializeComponent();
+
+            InitializeComponent();
         }
 
 		// Allow parent to add buttons
@@ -344,7 +344,7 @@ namespace HTMLContentControl
 						tooltip = args.tooltip;
 				}
 
-				if (IsEditable)
+				if (IsEditable && !string.IsNullOrEmpty(element.InnerText))
 				{
 					// No need for tooltip if the same as the visible text
 					if (tooltip.Contains(element.InnerText))
