@@ -289,7 +289,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 	case RECURS_YEAR_EVERY_NYEARS:
 		{
 			// add number of years specified by dwSpecific1
-			CDateHelper().OffsetDate(dtTemp, (int)m_dwSpecific1, DHU_YEARS);
+			dh.OffsetDate(dtTemp, (int)m_dwSpecific1, DHU_YEARS);
 		}
 		break;
 		
