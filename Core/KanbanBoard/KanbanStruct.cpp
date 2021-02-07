@@ -334,14 +334,29 @@ CString KANBANITEM::GetTrackedAttributeValue(LPCTSTR szAttrib) const
 	return sValue;
 }
 
-int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const
+int KANBANITEM::GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const
 {
 	aValues.RemoveAll();
 
-	const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+	if ((_tcscmp(szAttrib, _T("PRIORITY")) == 0) || (_tcscmp(szAttrib, _T("RISK")) == 0))
+	{
+		if ((dwOptions & KBCF_DONEHAVELOWESTPRIORITYRISK) && IsDone(TRUE))
+		{
+			aValues.Add("0");
+		}
+		else if ((dwOptions & KBCF_DUEHAVEHIGHESTPRIORITYRISK) && IsDue())
+		{
+			aValues.Add("10");
+		}
+	}
 
-	if (pArray)
-		aValues.Copy(*pArray);
+	if (aValues.GetSize() == 0)
+	{
+		const CStringArray* pArray = mapAttribValues.GetMapping(szAttrib);
+
+		if (pArray)
+			aValues.Copy(*pArray);
+	}
 
 	return aValues.GetSize();
 }
@@ -414,12 +429,12 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_FILELINK:		return sFileLink;
 	case TDCA_ID:			return Misc::Format(dwTaskID);
 	case TDCA_PERCENT:		return Misc::Format(nPercent, _T("%"));
-	case TDCA_CREATEDBY:		return sCreatedBy;
+	case TDCA_CREATEDBY:	return sCreatedBy;
 	case TDCA_EXTERNALID:	return sExternalID;
 	case TDCA_COST:			return Misc::Format(dCost, 2);
 	case TDCA_RECURRENCE:	return sRecurrence;
 	case TDCA_TIMEEST:		return CTimeHelper().FormatTime(dTimeEst, MapUnitsToTHUnits(nTimeEstUnits), 2);
-	case TDCA_TIMESPENT:		return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
+	case TDCA_TIMESPENT:	return CTimeHelper().FormatTime(dTimeSpent, MapUnitsToTHUnits(nTimeSpentUnits), 2);
 
 	case TDCA_FLAG:			// drawn separately
 	case TDCA_PARENT:		// drawn separately
@@ -583,11 +598,38 @@ BOOL KANBANITEM::IsDone(BOOL bIncludeGoodAs) const
 	return (bDone || (bIncludeGoodAs && bGoodAsDone));
 }
 
-int KANBANITEM::GetPriority() const
+BOOL KANBANITEM::IsDue() const
 {
-	CString sPriority(GetTrackedAttributeValue(GetAttributeID(TDCA_PRIORITY)));
+	if (IsDone(FALSE))
+		return FALSE;
 
-	return (sPriority.IsEmpty() ? -2 : _ttoi(sPriority));
+	return (CDateHelper::IsDateSet(dtDue) && 
+			((int)dtDue.m_dt <= CDateHelper::GetDate(DHD_TODAY)));
+}
+
+int KANBANITEM::GetPriority(DWORD dwOptions) const
+{
+	return GetPriorityRisk(TDCA_PRIORITY, dwOptions);
+}
+
+int KANBANITEM::GetRisk(DWORD dwOptions) const
+{
+	return GetPriorityRisk(TDCA_RISK, dwOptions);
+}
+
+int KANBANITEM::GetPriorityRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const
+{
+	ASSERT((nAttrib == TDCA_PRIORITY) || (nAttrib == TDCA_RISK));
+
+	if ((dwOptions & KBCF_DONEHAVELOWESTPRIORITYRISK) && IsDone(TRUE))
+		return -1;
+
+	if ((dwOptions & KBCF_DUEHAVEHIGHESTPRIORITYRISK) && IsDue())
+		return 11;
+
+	CString sValue(GetTrackedAttributeValue(GetAttributeID(nAttrib)));
+
+	return (sValue.IsEmpty() ? -2 : _ttoi(sValue));
 }
 
 CString KANBANITEM::GetAttributeID(TDC_ATTRIBUTE nAttrib)
@@ -820,7 +862,7 @@ void CKanbanItemMap::ClearPinnedItems()
 	}
 }
 
-int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const
+int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, DWORD dwOptions, CKanbanItemArrayMap& map) const
 {
 	ASSERT(!Misc::IsEmpty(szAttribID));
 
@@ -837,7 +879,7 @@ int CKanbanItemMap::BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& m
 		ASSERT(pKI);
 
 		CStringArray aAttribValues;
-		int nVal = pKI->GetTrackedAttributeValues(szAttribID, aAttribValues);
+		int nVal = pKI->GetTrackedAttributeValues(szAttribID, dwOptions, aAttribValues);
 
 		if (nVal == 0)
 		{
@@ -870,11 +912,11 @@ void CKanbanItemMap::AddItemToMap(const KANBANITEM* pKI, const CString& sValue, 
 }
 
 #ifdef _DEBUG
-void CKanbanItemMap::TraceSummary(LPCTSTR szAttribID) const
+void CKanbanItemMap::TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const
 {
 	CKanbanItemArrayMap map;
 
-	if (BuildTempItemMaps(szAttribID, map) == 0)
+	if (BuildTempItemMaps(szAttribID, dwOptions, map) == 0)
 	{
 		TRACE(_T("'%s' contains no unique values\n"), szAttribID);
 		return;
@@ -1014,7 +1056,7 @@ KANBANSORT::KANBANSORT(const CKanbanItemMap& map)
 	data(map),
 	nBy(TDCA_NONE),
 	bAscending(TRUE),
-	bSubtasksBelowParent(FALSE)
+	dwOptions(0)
 {
 }
 	

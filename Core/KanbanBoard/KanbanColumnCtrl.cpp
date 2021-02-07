@@ -823,7 +823,7 @@ void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rIte
 		{
 			if (HasOption(KBCF_COLORBARBYPRIORITY))
 			{
-				int nPriority = pKI->GetPriority();
+				int nPriority = pKI->GetPriority(m_dwOptions);
 
 				if (nPriority != -2)
 				{
@@ -1407,7 +1407,7 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 		if (!pKI1->bPinned && pKI2->bPinned)
 			return 1;
 
-		if (pSort->bSubtasksBelowParent && (pKI1->dwParentID != pKI2->dwParentID))
+		if ((pSort->dwOptions & KBCF_SORTSUBTASTASKSBELOWPARENTS) && (pKI1->dwParentID != pKI2->dwParentID))
 		{
 			// If one is the parent of another always sort below
 			if (pSort->IsParent(lParam2, pKI1))
@@ -1443,18 +1443,38 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 		case TDCA_ALLOCBY:
 		case TDCA_ALLOCTO:
 		case TDCA_CATEGORY:
-		case TDCA_PRIORITY:
-		case TDCA_RISK:
 		case TDCA_STATUS:
 		case TDCA_TAGS:
 		case TDCA_VERSION:
-		{
+			{
 				ASSERT(!pSort->sAttribID.IsEmpty());
 
 				CString sValue1 = pKI1->GetAttributeDisplayValue(pSort->nBy);
 				CString sValue2 = pKI2->GetAttributeDisplayValue(pSort->nBy);
 
 				nCompare = Misc::NaturalCompare(sValue1, sValue2);
+			}
+			break;
+
+		case TDCA_PRIORITY:
+			{
+				ASSERT(!pSort->sAttribID.IsEmpty());
+
+				int nPriority1 = pKI1->GetPriority(pSort->dwOptions);
+				int nPriority2 = pKI2->GetPriority(pSort->dwOptions);
+
+				nCompare = Misc::CompareNumT(nPriority1, nPriority2);
+			}
+			break;
+
+		case TDCA_RISK:
+			{
+				ASSERT(!pSort->sAttribID.IsEmpty());
+
+				int nRisk1 = pKI1->GetRisk(pSort->dwOptions);
+				int nRisk2 = pKI2->GetRisk(pSort->dwOptions);
+
+				nCompare = Misc::CompareNumT(nRisk1, nRisk2);
 			}
 			break;
 
@@ -1488,14 +1508,7 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			break;
 			
 		case TDCA_FLAG:
-			if (pKI1->bFlagged && !pKI2->bFlagged)
-			{
-				nCompare = -1;
-			}
-			else if (!pKI1->bFlagged && pKI2->bFlagged)
-			{
-				nCompare = 1;
-			}
+			nCompare = Misc::CompareNumT(pKI1->bFlagged, pKI2->bFlagged);
 			break;
 			
 		case TDCA_LASTMODDATE:
@@ -1503,7 +1516,7 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			break;
 			
 		case TDCA_PERCENT:
-			nCompare = ((pKI1->nPercent > pKI2->nPercent) ? 1 : -1);
+			nCompare = Misc::CompareNumT(pKI1->nPercent, pKI2->nPercent);
 			break;
 			
 		case TDCA_RECURRENCE:
@@ -1529,7 +1542,7 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 		// reversing the sign. This also handles sorting by 'TDCA_NONE'
 		if ((nCompare == 0) && (pKI1->dwParentID == pKI2->dwParentID))
 		{
-			return ((pKI1->nPosition > pKI2->nPosition) ? 1 : -1);
+			return Misc::CompareNumT(pKI1->nPosition, pKI2->nPosition);
 		}
 	}
 	
@@ -1546,7 +1559,7 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 	
 	ks.nBy = nBy;
 	ks.bAscending = bAscending;
-	ks.bSubtasksBelowParent = HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
+	ks.dwOptions = m_dwOptions;
 
 	switch (nBy)
 	{

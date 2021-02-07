@@ -79,17 +79,19 @@ struct KANBANITEM
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
 	CString sExternalID, sRecurrence, sCreatedBy, sFileLink;
 
-	int GetTrackedAttributeValues(LPCTSTR szAttrib, CStringArray& aValues) const;
+	int GetTrackedAttributeValues(LPCTSTR szAttrib, DWORD dwOptions, CStringArray& aValues) const;
 	BOOL HasTrackedAttributeValues(LPCTSTR szAttrib) const;
 	CString GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const;
 	BOOL HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetFillColor(BOOL bColorIsBkgnd) const;
 	COLORREF GetBorderColor(BOOL bColorIsBkgnd) const;
-	int GetPriority() const;
+	int GetPriority(DWORD dwOptions) const;
+	int GetRisk(DWORD dwOptions) const;
 
 	BOOL HasColor() const;
 	BOOL IsDone(BOOL bIncludeGoodAs) const;
+	BOOL IsDue() const;
 	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const KANBANITEM& ki) const;
 	BOOL AttributeValuesMatch(LPCTSTR szAttrib, const CStringArray& aValues) const;
 	BOOL MatchesAttribute(const IUISELECTTASK& select) const;
@@ -114,6 +116,7 @@ protected:
 
 protected:
 	CString GetTrackedAttributeValue(LPCTSTR szAttrib) const;
+	int GetPriorityRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const;
 };
 typedef CArray<const KANBANITEM*, const KANBANITEM*> CKanbanItemArray;
 
@@ -147,14 +150,14 @@ public:
 	KANBANITEM* NewItem(DWORD dwTaskID, const CString& sTitle);
 
 	void RemoveDeletedItems(const CDWordSet& mapCurIDs);
-	int BuildTempItemMaps(LPCTSTR szAttribID, CKanbanItemArrayMap& map) const;
+	int BuildTempItemMaps(LPCTSTR szAttribID, DWORD dwOptions, CKanbanItemArrayMap& map) const;
 
 	int GetPinnedItems(CDWordArray& aTaskIDs) const;
 	void SetPinnedItems(const CDWordArray& aTaskIDs, BOOL bReset = TRUE);
 	void ClearPinnedItems();
 		
 #ifdef _DEBUG
-	void TraceSummary(LPCTSTR szAttribID) const;
+	void TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const;
 #endif
 
 protected:
@@ -207,7 +210,7 @@ struct KANBANSORT
 	TDC_ATTRIBUTE nBy;
 	CString sAttribID;
 	BOOL bAscending;
-	BOOL bSubtasksBelowParent;
+	DWORD dwOptions;
 };
 
 /////////////////////////////////////////////////////////////////////////////

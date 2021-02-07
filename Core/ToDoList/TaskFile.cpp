@@ -3176,12 +3176,14 @@ bool CTaskFile::IsTaskDone(HTASKITEM hTask) const
 
 bool CTaskFile::IsTaskDue(HTASKITEM hTask) const
 {
-	double dDue = GetTaskDueDateOle(hTask);
+	if (IsTaskDone(hTask))
+		return FALSE;
 
-	if (dDue > 0.0)
+	COleDateTime dtDue = GetTaskDateOle(hTask, TDL_TASKDUEDATE, FALSE); // date only
+
+	if (CDateHelper::IsDateSet(dtDue))
 	{
-		double dToday = floor(COleDateTime::GetCurrentTime());
-		return dDue <= dToday;
+		return (dtDue.m_dt <= CDateHelper::GetDate(DHD_TODAY));
 	}
 
 	return false;
