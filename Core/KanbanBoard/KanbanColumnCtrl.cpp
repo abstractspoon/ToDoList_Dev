@@ -1464,7 +1464,7 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 
 		// Other display attributes
 		case TDCA_COST:
-			nCompare = Misc::NaturalCompare(pKI1->sCost, pKI2->sCost);
+			nCompare = Misc::CompareNumT(pKI1->dCost, pKI2->dCost);
 			break;
 			
 		case TDCA_CREATIONDATE:

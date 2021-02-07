@@ -243,6 +243,12 @@ namespace Misc
 // Template helpers
 namespace Misc  
 {
+	template <class T>
+	int CompareNumT(const T& t1, const T& t2)
+	{
+		return ((t1 > t2) ? 1 : -1);
+	}
+	
 	template <class T> 
 	BOOL MatchAllT(const T& array1, const T& array2, BOOL bOrderSensitive)
 	{

@@ -981,7 +981,13 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 		pKI->dTimeSpent = pTasks->GetTaskTimeSpent(hTask, pKI->nTimeSpentUnits, true);
 	
 	if (pTasks->IsAttributeAvailable(TDCA_COST))
-		pKI->sCost = pTasks->GetTaskAttribute(hTask, TDCA_COST);
+	{
+		bool bIsRate = false;
+		pKI->dCost = pTasks->GetTaskCost(hTask, true, bIsRate); // calculated
+
+		if (bIsRate)
+			pKI->dCost = 0.0;
+	}
 	
 	if (pTasks->IsAttributeAvailable(TDCA_CREATEDBY))
 		pKI->sCreatedBy = pTasks->GetTaskCreatedBy(hTask);
