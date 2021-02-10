@@ -3349,6 +3349,19 @@ CString CTDCTaskFormatter::GetTaskTimeRemaining(DWORD dwTaskID) const
 	return GetTaskTimeRemaining(pTDI, pTDS);
 }
 
+CString CTDCTaskFormatter::FormatDate(const COleDateTime& date) const
+{
+	if (!CDateHelper::IsDateSet(date))
+		return EMPTY_STR;
+
+	DWORD dwDateFmt = m_data.HasStyle(TDCS_SHOWDATESINISO) ? DHFD_ISO : 0;
+
+	if (CDateHelper::DateHasTime(date))
+		dwDateFmt |= DHFD_TIME | DHFD_NOSEC;
+
+	return CDateHelper::FormatDate(date, dwDateFmt);
+}
+
 CString CTDCTaskFormatter::GetDateOnly(const COleDateTime& date, BOOL bWantYear) const
 {
 	if (!CDateHelper::IsDateSet(date))
@@ -3524,6 +3537,31 @@ CString CTDCTaskFormatter::GetTaskRisk(DWORD dwTaskID) const
 	return GetTaskRisk(pTDI, pTDS);
 }
 
+CString CTDCTaskFormatter::GetTaskDoneDate(DWORD dwTaskID) const
+{
+	return GetTaskDate(dwTaskID, TDCC_DONEDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskDueDate(DWORD dwTaskID) const
+{
+	return GetTaskDate(dwTaskID, TDCC_DUEDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskStartDate(DWORD dwTaskID) const
+{
+	return GetTaskDate(dwTaskID, TDCC_STARTDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskCreationDate(DWORD dwTaskID) const
+{
+	return GetTaskDate(dwTaskID, TDCC_CREATIONDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskLastModDate(DWORD dwTaskID) const
+{
+	return GetTaskDate(dwTaskID, TDCC_LASTMODDATE);
+}
+
 CString CTDCTaskFormatter::GetTaskStatus(DWORD dwTaskID, const CString& sCompletionStatus) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -3573,6 +3611,69 @@ CString CTDCTaskFormatter::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE
 	}
 
 	// else
+	return EMPTY_STR;
+}
+
+CString CTDCTaskFormatter::GetTaskDoneDate(const TODOITEM* pTDI) const
+{
+	return GetTaskDate(pTDI, NULL, TDCC_DONEDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	return GetTaskDate(pTDI, pTDS, TDCC_DUEDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+{
+	return GetTaskDate(pTDI, pTDS, TDCC_STARTDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskCreationDate(const TODOITEM* pTDI) const
+{
+	return GetTaskDate(pTDI, NULL, TDCC_CREATIONDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskLastModDate(const TODOITEM* pTDI) const
+{
+	return GetTaskDate(pTDI, NULL, TDCC_LASTMODDATE);
+}
+
+CString CTDCTaskFormatter::GetTaskDate(DWORD dwTaskID, TDC_COLUMN nColID) const
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
+
+	return GetTaskDate(pTDI, pTDS, nColID);
+}
+
+CString CTDCTaskFormatter::GetTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const
+{
+	switch (nColID)
+	{
+	case TDCC_DONEDATE:
+		ASSERT(pTDI);
+		return FormatDate(pTDI->dateDone);
+
+	case TDCC_DUEDATE:
+		ASSERT(pTDI && pTDS);
+		return FormatDate(m_calculator.GetTaskDueDate(pTDI, pTDS));
+
+	case TDCC_STARTDATE:
+		ASSERT(pTDI && pTDS);
+		return FormatDate(m_calculator.GetTaskStartDate(pTDI, pTDS));
+
+	case TDCC_CREATIONDATE:
+		ASSERT(pTDI);
+		return FormatDate(pTDI->dateCreated);
+
+	case TDCC_LASTMODDATE:
+		ASSERT(pTDI);
+		return FormatDate(pTDI->dateLastMod);
+	}
+
+	ASSERT(0);
 	return EMPTY_STR;
 }
 

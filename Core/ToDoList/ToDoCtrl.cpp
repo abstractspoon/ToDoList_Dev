@@ -5572,12 +5572,16 @@ int CToDoCtrl::OnToolHitTest(CPoint point, TOOLINFO * pTI) const
 			CTDCAttributeMap mapAttrib;
 			TDC::MapColumnsToAttributes(m_visColEdit.GetVisibleColumns(), mapAttrib);
 
+			// Always add path for context
+			mapAttrib.Add(TDCA_PATH);
+
 			if (m_nMaxState == TDCMS_NORMAL)
 				mapAttrib.Add(TDCA_COMMENTS);
 
 			CString sInfoTip = m_infoTip.FormatTip(dwTaskID, 
 												   mapAttrib, 
-												   m_nMaxInfotipCommentsLength);
+												   m_nMaxInfotipCommentsLength,
+												   m_sCompletionStatus);
 			ASSERT(!sInfoTip.IsEmpty());
 
 			HWND hwndHit = CDialogHelper::GetWindowFromPoint(GetSafeHwnd(), point);

@@ -61,12 +61,13 @@ int CTDLInfoTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 								   const CTDCAttributeMap& mapAttrib,
-								   int nMaxCommentsLen) const
+								   int nMaxCommentsLen,
+								   const CString& sCompletionStatus) const
 {
 	// Build the attribute array
 	CTDCInfoTipItemArray aItems;
 
-	if (!BuildSortedAttributeArray(dwTaskID, mapAttrib, nMaxCommentsLen, aItems))
+	if (!BuildSortedAttributeArray(dwTaskID, mapAttrib, nMaxCommentsLen, sCompletionStatus, aItems))
 		return EMPTY_STR;
 
 	// Calculate offset to make item values line up
@@ -175,6 +176,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID, 
 											   const CTDCAttributeMap& mapAttrib,
 											   int nMaxCommentsLen,
+											   const CString& sCompletionStatus,
 											   CTDCInfoTipItemArray& aItems) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -217,19 +219,21 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_CATEGORY, IDS_TDLBC_CATEGORY, m_formatter.GetTaskCategories(pTDI));
 	ADDINFOITEM(TDCA_COST, IDS_TDLBC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
 	ADDINFOITEM(TDCA_CREATEDBY, IDS_TDLBC_CREATEDBY, pTDI->sCreatedBy);
-	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, FormatDate(pTDI->dateCreated));
+	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, m_formatter.GetTaskCreationDate(pTDI));
 	ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, pTDI->aDependencies.Format());
-	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, FormatDate(pTDI->dateDone));
+	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, m_formatter.GetTaskDoneDate(pTDI));
 	ADDINFOITEM(TDCA_FLAG, IDS_TDLBC_FLAG, CEnString(pTDI->bFlagged ? IDS_YES : 0));
+	ADDINFOITEM(TDCA_ID, IDS_TDLBC_ID, Misc::Format(dwTaskID));
 	ADDINFOITEM(TDCA_LASTMODBY, IDS_TDLBC_LASTMODBY, pTDI->sLastModifiedBy);
-	ADDINFOITEM(TDCA_LASTMODDATE, IDS_TDLBC_LASTMODDATE, FormatDate(pTDI->dateLastMod));
+	ADDINFOITEM(TDCA_LASTMODDATE, IDS_TDLBC_LASTMODDATE, m_formatter.GetTaskLastModDate(pTDI));
 	ADDINFOITEM(TDCA_LOCK, IDS_TDLBC_LOCK, CEnString(pTDI->bLocked ? IDS_YES : 0));
+	ADDINFOITEM(TDCA_PATH, IDS_TDC_COLUMN_PATH, m_formatter.GetTaskPath(pTDI, pTDS));
 	ADDINFOITEM(TDCA_PERCENT, IDS_TDLBC_PERCENT, m_formatter.GetTaskPercentDone(pTDI, pTDS));
 	ADDINFOITEM(TDCA_POSITION, IDS_TDLBC_POS, m_formatter.GetTaskPosition(pTDS));
 	ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, m_formatter.GetTaskPriority(pTDI, pTDS));
 	ADDINFOITEM(TDCA_RECURRENCE, IDS_TDLBC_RECURRENCE, m_formatter.GetTaskRecurrence(pTDI));
 	ADDINFOITEM(TDCA_RISK, IDS_TDLBC_RISK, m_formatter.GetTaskRisk(pTDI, pTDS));
-	ADDINFOITEM(TDCA_STATUS, IDS_TDLBC_STATUS, pTDI->sStatus);
+	ADDINFOITEM(TDCA_STATUS, IDS_TDLBC_STATUS, m_formatter.GetTaskStatus(pTDI, pTDS, sCompletionStatus));
 	ADDINFOITEM(TDCA_SUBTASKDONE, IDS_TDLBC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 	ADDINFOITEM(TDCA_TAGS, IDS_TDLBC_TAGS, m_formatter.GetTaskTags(pTDI));
 	ADDINFOITEM(TDCA_TIMEEST, IDS_TDLBC_TIMEEST, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
@@ -241,8 +245,8 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 
 	if (!pTDI->IsDone() || !m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
 	{
-		ADDINFOITEM(TDCA_STARTDATE, IDS_TDLBC_STARTDATE, FormatDate(pTDI->dateStart));
-		ADDINFOITEM(TDCA_DUEDATE, IDS_TDLBC_DUEDATE, FormatDate(pTDI->dateDue));
+		ADDINFOITEM(TDCA_STARTDATE, IDS_TDLBC_STARTDATE, m_formatter.GetTaskStartDate(pTDI, pTDS));
+		ADDINFOITEM(TDCA_DUEDATE, IDS_TDLBC_DUEDATE, m_formatter.GetTaskDueDate(pTDI, pTDS));
 	}
 
 	if (mapAttrib.Has(TDCA_DEPENDENCY))
@@ -295,15 +299,3 @@ int CTDLInfoTipCtrl::InfoTipSortProc(const void* pV1, const void* pV2)
 	return Misc::NaturalCompare(pITI1->sLabel, pITI2->sLabel);
 }
 
-CString CTDLInfoTipCtrl::FormatDate(const COleDateTime& date) const
-{
-	if (!CDateHelper::IsDateSet(date))
-		return EMPTY_STR;
-
-	DWORD dwDateFmt = m_data.HasStyle(TDCS_SHOWDATESINISO) ? DHFD_ISO : 0;
-
-	if (CDateHelper::DateHasTime(date))
-		dwDateFmt |= DHFD_TIME | DHFD_NOSEC;
-
-	return CDateHelper::FormatDate(date, dwDateFmt);
-}

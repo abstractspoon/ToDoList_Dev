@@ -29,7 +29,8 @@ public:
 
 	CString FormatTip(DWORD dwTaskID, 
 					  const CTDCAttributeMap& mapAttrib, 
-					  int nMaxCommentsLen) const;
+					  int nMaxCommentsLen,
+					  const CString& sCompletionStatus) const;
 
 protected:
 	const CToDoCtrlData& m_data;
@@ -53,11 +54,10 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	CString FormatDate(const COleDateTime& date) const;
-
 	int BuildSortedAttributeArray(DWORD dwTaskID, 
 								  const CTDCAttributeMap& mapAttrib, 
-								  int nMaxCommentsLen, 
+								  int nMaxCommentsLen,
+								  const CString& sCompletionStatus,
 								  CTDCInfoTipItemArray& aItems) const;
 
 	static int InfoTipSortProc(const void* pV1, const void* pV2);

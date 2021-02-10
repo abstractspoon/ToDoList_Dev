@@ -146,6 +146,11 @@ public:
 	CString GetTaskRecentlyModified(DWORD dwTaskID) const;
 	CString GetTaskRecurrence(DWORD dwTaskID) const;
 	CString GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	CString GetTaskDoneDate(DWORD dwTaskID) const;
+	CString GetTaskDueDate(DWORD dwTaskID) const;
+	CString GetTaskStartDate(DWORD dwTaskID) const;
+	CString GetTaskCreationDate(DWORD dwTaskID) const;
+	CString GetTaskLastModDate(DWORD dwTaskID) const;
 
 	CString GetTaskAllocTo(const TODOITEM* pTDI) const;
 	CString GetTaskCategories(const TODOITEM* pTDI) const;
@@ -165,10 +170,18 @@ public:
 	CString GetTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskRecurrence(const TODOITEM* pTDI) const;
 	CString GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	CString GetTaskDoneDate(const TODOITEM* pTDI) const;
+	CString GetTaskDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskCreationDate(const TODOITEM* pTDI) const;
+	CString GetTaskLastModDate(const TODOITEM* pTDI) const;
 
 	CString GetTaskTimePeriod(DWORD dwTaskID, TDC_COLUMN nColID) const;
 	CString GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 	CString GetTimePeriod(double dTime, TDC_UNITS nUnits, BOOL bAllowNegative) const;
+
+	CString GetTaskDate(DWORD dwTaskID, TDC_COLUMN nColID) const;
+	CString GetTaskDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID) const;
 
 	CString GetDateOnly(const COleDateTime& date, BOOL bWantYear) const;
 	CString GetTimeOnly(const COleDateTime& date, TDC_DATE nDate) const;
@@ -176,6 +189,9 @@ public:
 protected:
 	const CToDoCtrlData& m_data;
 	CTDCTaskCalculator m_calculator;
+
+protected:
+	CString FormatDate(const COleDateTime& date) const;
 };
 
 //////////////////////////////////////////////////////////////////////
