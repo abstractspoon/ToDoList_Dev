@@ -1288,6 +1288,12 @@ DWORD CKanbanColumnCtrl::GetOnlySelectedTask() const
 
 void CKanbanColumnCtrl::SetHotItem(DWORD dwTaskID)
 {
+	if (m_data.IsLocked(dwTaskID))
+	{
+		m_dwHotItem = 0;
+		return;
+	}
+
 	if (m_dwHotItem == dwTaskID)
 		return;
 
@@ -1595,15 +1601,15 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	// indentation of subtasks, because we want clicking to the
 	// left of the task to select the task BUT NOT begin a 
 	// drag operation or a label edit. 
-	DWORD dwPrevOnlyTaskID = GetOnlySelectedTask(), dwHitTaskID = 0;
+	DWORD dwPrevOnlyTaskID = GetOnlySelectedTask();
 
 	HTREEITEM htiHit = NULL;
 	BOOL bHandled = HandleButtonClick(point, TRUE, htiHit);
 
-	if (htiHit)
-	{
-		dwHitTaskID = GetTaskID(htiHit);
+	DWORD dwHitTaskID = GetTaskID(htiHit);
 
+	if (dwHitTaskID && !m_data.IsLocked(dwHitTaskID))
+	{
 		const KANBANITEM* pKI = m_data.GetItem(dwHitTaskID);
 		ASSERT(pKI);
 
@@ -1903,7 +1909,7 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	HTREEITEM hti = HitTest(point);
 
-	if (hti && (HitTestImage(hti, point) != KBCI_NONE))
+	if (hti && !m_data.IsLocked(GetTaskID(hti)) && (HitTestImage(hti, point) != KBCI_NONE))
 		return GraphicsMisc::SetHandCursor();
 
 	// else
@@ -1983,19 +1989,6 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 	}
 		
 	return reqSize;
-}
-
-BOOL CKanbanColumnCtrl::SelectionHasLockedTasks() const
-{
-	int nID = m_aSelTaskIDs.GetSize();
-
-	while (nID--)
-	{
-		if (m_data.IsLocked(m_aSelTaskIDs[nID]))
-			return TRUE;
-	}
-
-	return FALSE;
 }
 
 LRESULT CKanbanColumnCtrl::OnSetFont(WPARAM /*wp*/, LPARAM /*lp*/)

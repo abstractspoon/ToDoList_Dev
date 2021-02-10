@@ -72,7 +72,7 @@ public:
 	HTREEITEM FindItem(const CPoint& ptScreen) const;
 	HTREEITEM FindItem(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart = NULL) const;
 
-	DWORD GetTaskID(HTREEITEM hti) const { return GetItemData(hti); }
+	DWORD GetTaskID(HTREEITEM hti) const { return (hti ? GetItemData(hti) : 0); }
 
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs) const;
 	DWORD GetOnlySelectedTask() const;
@@ -101,7 +101,6 @@ public:
 	void SetOptions(DWORD dwOptions);
 	void OnDisplayAttributeChanged();
 	int CalcAvailableAttributeWidth(int nColWidth = -1) const;
-	BOOL SelectionHasLockedTasks() const;
 	void SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis);
 	void RefreshItemLineHeights();
 	void RefreshItemLineHeights(DWORD dwTaskID);

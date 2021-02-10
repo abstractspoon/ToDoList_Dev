@@ -3050,7 +3050,7 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 			ASSERT(pCol == m_pSelectedColumn);
 			ASSERT(pCol->IsTaskSelected(pNMTV->itemNew.lParam));
 
-			if (!pCol->SelectionHasLockedTasks())
+			if (!SelectionHasNonDraggableTasks(pCol))
 			{
 				TRACE(_T("CKanbanCtrl::OnBeginDragColItem(start drag)\n"));
 
@@ -3086,8 +3086,14 @@ BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	CPoint ptCursor(GetMessagePos());
 	DWORD dwTaskID = HitTestTask(ptCursor);
 
-	if (m_data.IsLocked(dwTaskID))
-		return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+	if (dwTaskID)
+	{
+		if (m_data.IsLocked(dwTaskID))
+			return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
+
+		if (!CanDragTask(dwTaskID))
+			return GraphicsMisc::SetDragDropCursor(GMOC_NO);
+	}
 
 	// else
 	return CWnd::OnSetCursor(pWnd, nHitTest, message);
@@ -3107,7 +3113,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 		CKanbanColumnCtrl* pDestCol = m_aColumns.HitTest(point);
 		CKanbanColumnCtrl* pSrcCol = m_pSelectedColumn;
 
-		if (CanDrag(pSrcCol, pDestCol))
+		if (CanEndDrag(pSrcCol, pDestCol))
 		{
 			CString sDestAttribValue;
 			
@@ -3167,7 +3173,45 @@ void CKanbanCtrl::OnCaptureChanged(CWnd* pWnd)
 	m_ilDrag.DeleteImageList();
 }
 
-BOOL CKanbanCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const
+BOOL CKanbanCtrl::CanDragTask(DWORD dwTaskID) const
+{
+	const KANBANITEM* pKI = NULL;
+	GET_KI_RET(dwTaskID, pKI, FALSE);
+
+	if (pKI->bLocked)
+		return FALSE;
+
+	if ((m_nTrackAttribute == TDCA_PRIORITY) || (m_nTrackAttribute == TDCA_RISK))
+	{
+		// Prevent dragging of any calculated values
+		if (HasOption(KBCF_DONEHAVELOWESTPRIORITYRISK) && pKI->IsDone(TRUE))
+			return FALSE;
+
+		if (HasOption(KBCF_DUEHAVEHIGHESTPRIORITYRISK) && pKI->IsDue())
+			return FALSE;
+
+		if (HasOption(KBCF_PARENTSSHOWHIGHESTPRIORITYRISK) && pKI->bParent)
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+BOOL CKanbanCtrl::SelectionHasNonDraggableTasks(const CKanbanColumnCtrl* pSrcCol) const
+{
+	CDWordArray aSelTasks;
+	int nNumTasks = pSrcCol->GetSelectedTaskIDs(aSelTasks);
+
+	for (int nTask = 0; nTask < nNumTasks; nTask++)
+	{
+		if (!CanDragTask(aSelTasks[nTask]))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CKanbanCtrl::CanEndDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const
 {
 	// Can only copy MULTI-VALUE attributes
 	if (Misc::ModKeysArePressed(MKS_CTRL) && !IsTrackedAttributeMultiValue())
@@ -3179,7 +3223,7 @@ BOOL CKanbanCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnC
 BOOL CKanbanCtrl::EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aTaskIDs, 
 								CKanbanColumnCtrl* pDestCol, const CString& sDestAttribValue)
 {
-	ASSERT(CanDrag(pSrcCol, pDestCol));
+	ASSERT(CanEndDrag(pSrcCol, pDestCol));
 	ASSERT(pSrcCol->HasTasks(aTaskIDs));
 
 	int nID = aTaskIDs.GetSize();
@@ -3291,7 +3335,7 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		m_ilDrag.DragMove(point);
 
 		const CKanbanColumnCtrl* pDestCol = m_aColumns.HitTest(point);
-		BOOL bValidDest = CanDrag(m_pSelectedColumn, pDestCol);
+		BOOL bValidDest = CanEndDrag(m_pSelectedColumn, pDestCol);
 
 		if (bValidDest)
 		{

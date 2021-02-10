@@ -190,7 +190,9 @@ protected:
 
 	BOOL IsDragging() const;
 	BOOL EndDragItems(CKanbanColumnCtrl* pSrcCol, const CDWordArray& aTaskIDs, CKanbanColumnCtrl* pDestCol, const CString& sDestAttribValue);
-	BOOL HandleKeyDown(WPARAM wp, LPARAM lp);
+	BOOL CanEndDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const;
+	BOOL CanDragTask(DWORD dwTaskID) const;
+	BOOL SelectionHasNonDraggableTasks(const CKanbanColumnCtrl* pSrcCol) const;
 	
 	BOOL NotifyParentAttibuteChange(const CDWordArray& aTaskIDs);
 	void NotifyParentSelectionChange();
@@ -202,8 +204,8 @@ protected:
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs, LPCTSTR szAttribID, LPCTSTR szSubKey);
 	BOOL IsTrackedAttributeMultiValue() const;
 	BOOL IsTracking(const CString& sAttribID) const;
-	BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol) const;
 	BOOL UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const;
+	BOOL HandleKeyDown(WPARAM wp, LPARAM lp);
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs);
 
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);

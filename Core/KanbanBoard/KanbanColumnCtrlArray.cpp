@@ -398,7 +398,7 @@ CKanbanColumnCtrl* CKanbanColumnCtrlArray::GetNext(const CKanbanColumnCtrl* pCol
 	{
 		nCol = -1;
 	}
-	else
+	else // prev
 	{
 		nCol = GetSize();
 	}
@@ -423,30 +423,27 @@ CKanbanColumnCtrl* CKanbanColumnCtrlArray::GetNext(const CKanbanColumnCtrl* pCol
 		// return to start
 		return GetFirstNonEmpty();
 	}
-	else // prev
+
+	// else prev
+	int nPrev(nCol);
+
+	while (nPrev--)
 	{
-		int nPrev(nCol);
+		CKanbanColumnCtrl* pPrev = GetAt(nPrev);
+		ASSERT(pPrev);
 
-		while (nPrev--)
-		{
-			CKanbanColumnCtrl* pPrev = GetAt(nPrev);
-			ASSERT(pPrev);
+		if (bExcludeEmpty && !pPrev->GetCount())
+			continue;
 
-			if (bExcludeEmpty && !pPrev->GetCount())
-				continue;
+		if (bFixedColumns && !pPrev->IsWindowVisible())
+			continue;
 
-			if (bFixedColumns && !pPrev->IsWindowVisible())
-				continue;
-
-			// else
-			return pPrev;
-		}
-
-		// return to end
-		return GetLastNonEmpty();
+		// else
+		return pPrev;
 	}
 
-	return NULL;
+	// return to end
+	return GetLastNonEmpty();
 }
 
 CKanbanColumnCtrl* CKanbanColumnCtrlArray::HitTest(const CPoint& ptScreen, HTREEITEM* pHit, UINT* pHitFlags) const
