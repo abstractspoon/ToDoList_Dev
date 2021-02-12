@@ -1757,15 +1757,15 @@ BEGIN
     CONTROL         "DateTimePicker1",IDC_DATETO,"SysDateTimePick32",
                     DTS_RIGHTALIGN | WS_TABSTOP,79,95,100,14
     CONTROL         "By Tas&k",IDC_BYTASK,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,206,20,95,10
+                    WS_GROUP,206,20,110,10
     CONTROL         "By &Day",IDC_BYDAY,"Button",BS_AUTORADIOBUTTON,206,35,
-                    95,10
+                    113,10
     CONTROL         "By W&eek",IDC_BYWEEK,"Button",BS_AUTORADIOBUTTON,206,50,
-                    95,10
+                    109,10
     CONTROL         "By Mo&nth",IDC_BYMONTH,"Button",BS_AUTORADIOBUTTON,206,
-                    65,95,10
+                    65,111,10
     CONTROL         "&Group By",IDC_GROUPBY,"Button",BS_AUTOCHECKBOX | 
-                    WS_GROUP | WS_TABSTOP,206,82,45,10
+                    WS_GROUP | WS_TABSTOP,206,82,111,10
     COMBOBOX        IDC_GROUPBYATTRIB,216,95,101,30,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     LTEXT           "&Format",IDC_STATIC,16,137,61,8
