@@ -146,6 +146,8 @@
 #define IDR_DATETIME_TOOLBAR            318
 #define IDB_DATETIME_TOOLBAR_STD        319
 #define IDD_TASKDEPENDENCY_DIALOG       321
+#define IDI_QUICKFIND_NEXT              322
+#define IDI_QUICKFIND_PREV              323
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -2404,12 +2406,14 @@
 #define IDS_TIMETRACKER_RESTOFITEMS     51589
 #define IDS_LISTVIEW_SORTGROUPSASCENDING 51590
 #define IDS_LISTVIEW_HIDENOGROUPVALUE   51591
+#define IDS_QUICKFIND_PREVMATCH         51592
+#define IDS_QUICKFIND_NEXTMATCH         51593
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        322
+#define _APS_NEXT_RESOURCE_VALUE        324
 #define _APS_NEXT_COMMAND_VALUE         34744
 #define _APS_NEXT_CONTROL_VALUE         1547
 #define _APS_NEXT_SYMED_VALUE           108

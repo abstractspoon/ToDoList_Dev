@@ -2720,6 +2720,8 @@ IDI_TRAY_TIMETRACK_LIGHT ICON    DISCARDABLE     "res\\app_tray_timetrack_light.
 IDI_TRAY_TIMETRACK_DARK ICON    DISCARDABLE     "res\\app_tray_timetrack_dark.ico"
 IDI_TRAY_DARK           ICON    DISCARDABLE     "res\\app_tray_dark.ico"
 IDI_TDLUPDATE           ICON    DISCARDABLE     "..\\TDLUpdate\\RES\\TDLUpdate.ico"
+IDI_QUICKFIND_NEXT      ICON    DISCARDABLE     "res\\quickfind_next.ico"
+IDI_QUICKFIND_PREV      ICON    DISCARDABLE     "res\\quickfind_prev.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -4574,6 +4576,8 @@ BEGIN
     IDS_TIMETRACKER_RESTOFITEMS "Rest of Tasks"
     IDS_LISTVIEW_SORTGROUPSASCENDING "Sort groups ascending"
     IDS_LISTVIEW_HIDENOGROUPVALUE "Hide <none> group"
+    IDS_QUICKFIND_PREVMATCH "Previous Match"
+    IDS_QUICKFIND_NEXTMATCH "Next Match"
 END
 
 STRINGTABLE DISCARDABLE 
