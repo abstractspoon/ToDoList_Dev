@@ -422,12 +422,20 @@ void CEnEdit::OnSize(UINT nType, int cx, int cy)
 	if (m_bParentIsCombo == -1) // first time init
 		m_bParentIsCombo = CWinClasses::IsClass(*GetParent(), WC_COMBOBOX);
 
-	// The only reliable place to initialise tooltips
+	// Late initialisation
 	InitializeTooltips();
 	InitializeImageLists();
+	InitializeHotTracking();
 
 	// update tool rects
 	RecalcBtnHotRects();
+}
+
+void CEnEdit::InitializeHotTracking()
+{
+	// hot tracking
+	if (!m_hotTrack.IsInitialized() && CThemed().AreControlsThemed())
+		m_hotTrack.Initialize(this);
 }
 
 void CEnEdit::OnDestroy()
@@ -452,11 +460,6 @@ BOOL CEnEdit::InitializeTooltips()
 		else if (m_tooltip.Create(this))
 		{
 			m_tooltip.ModifyStyleEx(0, WS_EX_TRANSPARENT);
-
-			// hot tracking
-			if (CThemed().AreControlsThemed())
-				m_hotTrack.Initialize(this);
-
 			return TRUE;
 		}
 	}

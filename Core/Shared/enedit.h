@@ -154,6 +154,7 @@ protected:
 	void ForceRedraw();
 	void FreeButtonResources();
 	void FreeButtonResources(int nBtn);
+	void InitializeHotTracking();
 
 	virtual BOOL InitializeTooltips();
 	virtual BOOL InitializeImageLists();
