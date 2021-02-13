@@ -5940,6 +5940,10 @@ int CTabbedToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResult
 			for (int nItem = 0; nItem < m_taskList.GetItemCount(); nItem++)
 			{
 				DWORD dwTaskID = GetTaskID(nItem);
+
+				if (m_taskList.IsGroupHeaderTask(dwTaskID))
+					continue;
+
 				SEARCHRESULT result;
 
 				if (m_matcher.TaskMatches(dwTaskID, params, result, HasDueTodayColor()))
@@ -6121,6 +6125,9 @@ int CTabbedToDoCtrl::FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, i
 	for (int nItem = nFrom; nItem != nTo; nItem += nInc)
 	{
 		DWORD dwTaskID = GetTaskID(nItem);
+
+		if (m_taskList.IsGroupHeaderTask(dwTaskID))
+			continue;
 
 		if (m_matcher.TaskMatches(dwTaskID, params, result, HasDueTodayColor()))
 			return nItem;
