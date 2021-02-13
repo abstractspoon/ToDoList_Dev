@@ -89,7 +89,7 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const IPreferences* pPrefs, L
 		mapColumns.Add(TDCC_ID);
 		mapColumns.Add(TDCC_PRIORITY);
 		mapColumns.Add(TDCC_PERCENT);
-		mapColumns.Add(TDCC_TIMEEST);
+		mapColumns.Add(TDCC_TIMEESTIMATE);
 		mapColumns.Add(TDCC_TIMESPENT);
 		mapColumns.Add(TDCC_TRACKTIME);
 		mapColumns.Add(TDCC_DUEDATE);

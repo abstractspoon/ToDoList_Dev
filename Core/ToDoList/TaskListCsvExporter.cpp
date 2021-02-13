@@ -211,11 +211,11 @@ CString CTaskListCsvExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTASK
 			}
 			break;
 			
-		case TDCA_TIMEEST:
+		case TDCA_TIMEESTIMATE:
 		case TDCA_TIMESPENT:
 			{
 				TDC_UNITS nUnits;
-				double dTime = (nAttrib == TDCA_TIMEEST) ?
+				double dTime = (nAttrib == TDCA_TIMEESTIMATE) ?
 								pTasks->GetTaskTimeEstimate(hTask, nUnits, TRUE) :
 								pTasks->GetTaskTimeSpent(hTask, nUnits, TRUE);
 				

@@ -236,7 +236,7 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_STATUS, IDS_TDLBC_STATUS, m_formatter.GetTaskStatus(pTDI, pTDS, sCompletionStatus));
 	ADDINFOITEM(TDCA_SUBTASKDONE, IDS_TDLBC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));
 	ADDINFOITEM(TDCA_TAGS, IDS_TDLBC_TAGS, m_formatter.GetTaskTags(pTDI));
-	ADDINFOITEM(TDCA_TIMEEST, IDS_TDLBC_TIMEEST, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
+	ADDINFOITEM(TDCA_TIMEESTIMATE, IDS_TDLBC_TIMEEST, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
 	ADDINFOITEM(TDCA_TIMESPENT, IDS_TDLBC_TIMESPENT, m_formatter.GetTaskTimeSpent(pTDI, pTDS));
 	ADDINFOITEM(TDCA_VERSION, IDS_TDLBC_VERSION, pTDI->sVersion);
 

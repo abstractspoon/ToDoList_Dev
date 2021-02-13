@@ -826,7 +826,7 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 			switch (nModType)
 			{
 			case TDCA_TIMESPENT:
-			case TDCA_TIMEEST:
+			case TDCA_TIMEESTIMATE:
 			case TDCA_COST:
 			case TDCA_COMMENTS:
 				bNeedRefilter = FALSE;

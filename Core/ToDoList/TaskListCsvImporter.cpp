@@ -207,7 +207,7 @@ BOOL CTaskListCsvImporter::ImportTask(ITASKLISTBASE* pTasks, const CString& sLin
 	AddAttributeToTask(pTasks, hTask, TDCA_RISK, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_FLAG, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_LOCK, aValues);
-	AddAttributeToTask(pTasks, hTask, TDCA_TIMEEST, aValues);
+	AddAttributeToTask(pTasks, hTask, TDCA_TIMEESTIMATE, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_TIMESPENT, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_COST, aValues);
 	AddAttributeToTask(pTasks, hTask, TDCA_PERCENT, aValues);
@@ -423,7 +423,7 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 		}
 		break;
 
-	case TDCA_TIMEEST: 
+	case TDCA_TIMEESTIMATE: 
 		{
 			TH_UNITS nUnits = THU_NULL;
 			double dAmount = 0.0;

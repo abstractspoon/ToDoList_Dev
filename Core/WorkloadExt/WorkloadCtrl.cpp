@@ -506,7 +506,7 @@ BOOL CWorkloadCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
 	case TDCA_STARTDATE:
 	case TDCA_SUBTASKDONE:
 	case TDCA_TASKNAME:
-	case TDCA_TIMEEST:
+	case TDCA_TIMEESTIMATE:
 		return TRUE;
 	}
 	
@@ -524,7 +524,7 @@ TDC_ATTRIBUTE CWorkloadCtrl::MapColumnToAttribute(WLC_COLUMNID nCol)
 	case WLCC_PERCENT:		return TDCA_PERCENT;
 	case WLCC_TASKID:		return TDCA_ID;
 	case WLCC_ALLOCTO:		return TDCA_ALLOCTO;
-	case WLCC_DURATION:		return TDCA_TIMEEST;
+	case WLCC_DURATION:		return TDCA_TIMEESTIMATE;
 	}
 	
 	// all else 
@@ -541,7 +541,7 @@ WLC_COLUMNID CWorkloadCtrl::MapAttributeToColumn(TDC_ATTRIBUTE nAttrib)
 	case TDCA_PERCENT:		return WLCC_PERCENT;		
 	case TDCA_ID:			return WLCC_TASKID;		
 	case TDCA_ALLOCTO:		return WLCC_ALLOCTO;		
-	case TDCA_TIMEEST:		return WLCC_DURATION;		
+	case TDCA_TIMEESTIMATE:	return WLCC_DURATION;		
 	}
 	
 	// all else 
@@ -664,7 +664,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 			bAllocationChange = TRUE;
 		}
 
-		if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
+		if (pTasks->IsAttributeAvailable(TDCA_TIMEESTIMATE))
 		{
 			pWI->dTimeEst = GetTaskTimeEstimate(pTasks, hTask);
 

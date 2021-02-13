@@ -260,7 +260,7 @@ BOOL CTDCOutlookImportHelper::ImportTask(const CTDCAttributeMapping& aMapping, O
 			tdi.cost.Parse(sData);
 			break;
 			
-		case TDCA_TIMEEST: 
+		case TDCA_TIMEESTIMATE: 
 			tdi.timeEstimate.dAmount = ImportDuration(sData, tdi.timeEstimate.nUnits);
 			break;
 			

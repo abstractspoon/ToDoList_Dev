@@ -3289,7 +3289,7 @@ LPCTSTR CTaskFile::GetAttribTag(TDC_ATTRIBUTE nAttrib, bool bCalc, bool bDisplay
 	case TDCA_PERCENT:		return (bCalc ? TDL_TASKCALCCOMPLETION : TDL_TASKPERCENTDONE);
 	case TDCA_PRIORITY:		return (bCalc ? TDL_TASKHIGHESTPRIORITY : TDL_TASKPRIORITY);
 	case TDCA_RISK:			return (bCalc ? TDL_TASKHIGHESTRISK : TDL_TASKRISK);
-	case TDCA_TIMEEST:		return (bCalc ? TDL_TASKCALCTIMEESTIMATE : TDL_TASKTIMEESTIMATE);
+	case TDCA_TIMEESTIMATE:		return (bCalc ? TDL_TASKCALCTIMEESTIMATE : TDL_TASKTIMEESTIMATE);
 	case TDCA_TIMESPENT:	return (bCalc ? TDL_TASKCALCTIMESPENT : TDL_TASKTIMESPENT);
 
 	case TDCA_CREATIONDATE:	return (bDisplay ? TDL_TASKCREATIONDATESTRING : TDL_TASKCREATIONDATE);
@@ -3338,11 +3338,11 @@ LPCTSTR CTaskFile::GetTaskAttribute(HTASKITEM hTask, TDC_ATTRIBUTE nAttrib, bool
 			}
 			return DISPLAYSTRING;
 
-		case TDCA_TIMEEST:
+		case TDCA_TIMEESTIMATE:
 		case TDCA_TIMESPENT:
 			{
 				TDCTIMEPERIOD time;
-				time.dAmount = (nAttrib == TDCA_TIMEEST) ?
+				time.dAmount = (nAttrib == TDCA_TIMEESTIMATE) ?
 								GetTaskTimeEstimate(hTask, time.nUnits, bCalc) :
 								GetTaskTimeSpent(hTask, time.nUnits, bCalc);
 

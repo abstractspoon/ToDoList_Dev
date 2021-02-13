@@ -2132,7 +2132,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 		}
 		break;
 		
-	case TDCA_TIMEEST:
+	case TDCA_TIMEESTIMATE:
 		if (dwFlags & UTF_TIMEUNITSONLY)
 			SetSelectedTaskTimeEstimateUnits(m_timeEstimate.nUnits, Misc::HasFlag(dwFlags, UTF_RECALCTIME));
 		else
@@ -2710,7 +2710,7 @@ BOOL CToDoCtrl::CanPasteDateTime() const
 	switch (nAttribID)
 	{
 	case TDCA_COST:
-	case TDCA_TIMEEST:
+	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
 	case TDCA_PERCENT:
 		return FALSE;
@@ -3927,7 +3927,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPercentDone(BOOL bUp)
 
 BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL bOffset)
 {
-	if (!CanEditSelectedTask(TDCA_TIMEEST))
+	if (!CanEditSelectedTask(TDCA_TIMEESTIMATE))
 		return FALSE;
 
 	Flush();
@@ -3993,7 +3993,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 			}
 		}
 
-		CTDCAttributeMap mapAttribIDs(TDCA_TIMEEST);
+		CTDCAttributeMap mapAttribIDs(TDCA_TIMEESTIMATE);
 
 		// may also need to report percent and/or date changes
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4073,7 +4073,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 
 BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime)
 {
-	if (!CanEditSelectedTask(TDCA_TIMEEST))
+	if (!CanEditSelectedTask(TDCA_TIMEESTIMATE))
 		return FALSE;
 
 	Flush();
@@ -4132,7 +4132,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 			}
 		}
 			
-		SetModified(TDCA_TIMEEST, aModTaskIDs);
+		SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
 	}
 	
 	return TRUE;
@@ -4896,7 +4896,7 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 			continue;
 		
 		// Calculate how to apportion time to subtasks
-		BOOL bWantInheritTimeEst = m_data.WantUpdateInheritedAttibute(TDCA_TIMEEST);
+		BOOL bWantInheritTimeEst = m_data.WantUpdateInheritedAttibute(TDCA_TIMEESTIMATE);
 		BOOL bWantInheritStartDate = m_data.WantUpdateInheritedAttibute(TDCA_STARTDATE);
 		BOOL bWantInheritDueDate = m_data.WantUpdateInheritedAttibute(TDCA_DUEDATE);
 		
@@ -4977,7 +4977,7 @@ BOOL CToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 
 		// clear parent time est if not inherited
 		if (!bWantInheritTimeEst)
-			m_data.ClearTaskAttribute(dwTaskID, TDCA_TIMEEST);
+			m_data.ClearTaskAttribute(dwTaskID, TDCA_TIMEESTIMATE);
 
 		m_data.ClearTaskAttribute(dwTaskID, TDCA_TIMESPENT);
 
@@ -6884,7 +6884,7 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
 			mapAttribIDs.Add(TDCA_STARTDATE);
-			mapAttribIDs.Add(TDCA_TIMEEST);
+			mapAttribIDs.Add(TDCA_TIMEESTIMATE);
 		}
 		break;
 
@@ -6892,7 +6892,7 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
-			mapAttribIDs.Add(TDCA_TIMEEST);
+			mapAttribIDs.Add(TDCA_TIMEESTIMATE);
 		}
 		break;
 
@@ -6943,7 +6943,7 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
 		break;
 
-	case TDCA_TIMEEST:
+	case TDCA_TIMEESTIMATE:
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
 			mapAttribIDs.Add(TDCA_PERCENT);
@@ -7998,7 +7998,7 @@ void CToDoCtrl::OnSelCancelVersion()
 
 void CToDoCtrl::OnChangeTimeEstimate()
 {
-	UpdateTask(TDCA_TIMEEST); 
+	UpdateTask(TDCA_TIMEESTIMATE); 
 }
 
 void CToDoCtrl::OnChangeTimeSpent()
@@ -10560,7 +10560,7 @@ LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
 		switch (wParam)
 		{
 		case IDC_TIMEEST:
-			UpdateTask(TDCA_TIMEEST, dwFlags); 
+			UpdateTask(TDCA_TIMEESTIMATE, dwFlags); 
 			break;
 		
 		case IDC_TIMESPENT:
@@ -11907,7 +11907,7 @@ BOOL CToDoCtrl::ClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib)
 	case TDCA_COLOR:		return SetSelectedTaskColor(0);
 	case TDCA_RECURRENCE:	return SetSelectedTaskRecurrence(TDCRECURRENCE());
 		
-	case TDCA_TIMEEST:		
+	case TDCA_TIMEESTIMATE:		
 		{
 			// preserve existing units
 			TDCTIMEPERIOD time;
@@ -12040,7 +12040,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	case TDCA_VERSION:		
 		return SelectedTaskIsUnlocked(dwTaskID);
 
-	case TDCA_TIMEEST:
+	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
 		if (!SelectedTaskIsUnlocked(dwTaskID))
 		{
@@ -12340,11 +12340,11 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nT
 		}
 		break;
 
-	case TDCA_TIMEEST:			
+	case TDCA_TIMEESTIMATE:			
 	case TDCA_TIMESPENT:		
 		switch (nToAttrib)
 		{
-		case TDCA_TIMEEST:			
+		case TDCA_TIMEESTIMATE:			
 		case TDCA_TIMESPENT:		
 			return TRUE;
 		}
@@ -12397,7 +12397,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(TDC_ATTRIBUTE nFromAttrib, const TDCCUSTOMA
 	case TDCA_LOCK:				
 		return attribDefFrom.IsDataType(TDCCA_BOOL);
 
-	case TDCA_TIMEEST:			
+	case TDCA_TIMEESTIMATE:			
 	case TDCA_TIMESPENT:		
 		return attribDefFrom.IsDataType(TDCCA_TIMEPERIOD);
 	}
@@ -12468,7 +12468,7 @@ BOOL CToDoCtrl::CanCopyAttributeData(const TDCCUSTOMATTRIBUTEDEFINITION& attribD
 	case TDCCA_TIMEPERIOD:
 		switch(nToAttrib)
 		{
-		case TDCA_TIMEEST:			
+		case TDCA_TIMEESTIMATE:			
 		case TDCA_TIMESPENT:		
 			return TRUE;
 		}

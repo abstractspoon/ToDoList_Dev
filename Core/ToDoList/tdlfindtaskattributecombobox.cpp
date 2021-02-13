@@ -264,7 +264,7 @@ BOOL CTDLFindTaskAttributeComboBox::AttributeIsTime(TDC_ATTRIBUTE attrib) const
 {
 	switch (attrib)
 	{
-	case TDCA_TIMEEST:
+	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
 		return TRUE;
 

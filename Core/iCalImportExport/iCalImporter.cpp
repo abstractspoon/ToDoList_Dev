@@ -6,8 +6,6 @@
 #include "iCalImportExport.h"
 #include "iCalImporter.h"
 
-#include "..\ToDoList\tdcenum.h"
-
 #include "..\shared\misc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\datehelper.h"

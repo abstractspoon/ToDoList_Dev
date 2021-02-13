@@ -466,7 +466,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			}
 			break;
 			
-		case TDCA_TIMEEST:
+		case TDCA_TIMEESTIMATE:
 			{
 				double dTime = m_calculator.GetTaskTimeEstimate(pTDI, pTDS, TDCU_HOURS);
 				bMatch = ValueMatches(dTime, rule, resTask);
@@ -1047,7 +1047,7 @@ BOOL CTDCTaskMatcher::ValueMatches(const TDCCADATA& data, DWORD dwAttribType, co
 BOOL CTDCTaskMatcher::ValueMatches(double dValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const
 {
 	BOOL bMatch = FALSE;
-	BOOL bTime = (rule.AttributeIs(TDCA_TIMEEST) || rule.AttributeIs(TDCA_TIMESPENT));
+	BOOL bTime = (rule.AttributeIs(TDCA_TIMEESTIMATE) || rule.AttributeIs(TDCA_TIMESPENT));
 	double dSearchVal = rule.ValueAsDouble();
 	
 	if (bTime)
@@ -1372,7 +1372,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 			}
 			break;
 
-		case TDCC_REMAINING:
+		case TDCC_TIMEREMAINING:
 			{
 				TDC_UNITS nUnits1, nUnits2;
 				double dRemain1 = m_calculator.GetTaskRemainingTime(pTDI1, pTDS1, nUnits1);
@@ -1491,7 +1491,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 			}
 			break;
 
-		case TDCC_TIMEEST:
+		case TDCC_TIMEESTIMATE:
 			{
 				double dTime1 = m_calculator.GetTaskTimeEstimate(pTDI1, pTDS1, TDCU_HOURS);
 				double dTime2 = m_calculator.GetTaskTimeEstimate(pTDI2, pTDS2, TDCU_HOURS);
@@ -1898,7 +1898,7 @@ BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 	case TDCA_LASTMODBY:
 	case TDCA_SUBTASKDONE:
 	case TDCA_TIMESPENT:
-	case TDCA_TIMEEST:		
+	case TDCA_TIMEESTIMATE:		
 	case TDCA_CUSTOMATTRIB_ALL:
 		return TRUE;
 
@@ -3332,7 +3332,7 @@ CString CTDCTaskFormatter::GetTaskSubtaskCompletion(DWORD dwTaskID) const
 
 CString CTDCTaskFormatter::GetTaskTimeEstimate(DWORD dwTaskID) const
 {
-	return GetTaskTimePeriod(dwTaskID, TDCC_TIMEEST);
+	return GetTaskTimePeriod(dwTaskID, TDCC_TIMEESTIMATE);
 }
 
 CString CTDCTaskFormatter::GetTaskTimeSpent(DWORD dwTaskID) const
@@ -3688,7 +3688,7 @@ CString CTDCTaskFormatter::GetTaskTimePeriod(DWORD dwTaskID, TDC_COLUMN nColID) 
 
 CString CTDCTaskFormatter::GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
-	return GetTaskTimePeriod(pTDI, pTDS, TDCC_TIMEEST);
+	return GetTaskTimePeriod(pTDI, pTDS, TDCC_TIMEESTIMATE);
 }
 
 CString CTDCTaskFormatter::GetTaskTimeSpent(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
@@ -3759,7 +3759,7 @@ CString CTDCTaskFormatter::GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTR
 
 		switch (nColID)
 		{
-		case TDCC_TIMEEST:
+		case TDCC_TIMEESTIMATE:
 			{
 				if (!pTDS->HasSubTasks() || m_data.HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 					nUnits = pTDI->timeEstimate.nUnits;
@@ -3781,7 +3781,7 @@ CString CTDCTaskFormatter::GetTaskTimePeriod(const TODOITEM* pTDI, const TODOSTR
 			}
 			return GetTimePeriod(dTime, nUnits, TRUE);
 
-		case TDCC_REMAINING:
+		case TDCC_TIMEREMAINING:
 			return GetTaskTimeRemaining(pTDI, pTDS);
 		}
 	}
@@ -4394,7 +4394,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		}
 
 		// time estimate
-		if (filter.WantAttribute(TDCA_TIMEEST))
+		if (filter.WantAttribute(TDCA_TIMEESTIMATE))
 		{
 			if ((pTDI->timeEstimate.dAmount > 0) || (pTDI->timeEstimate.nUnits != TDCU_HOURS))
 				tasks.SetTaskTimeEstimate(hTask, pTDI->timeEstimate.dAmount, pTDI->timeEstimate.nUnits);

@@ -37,7 +37,7 @@ static TDC_ATTRIBUTE ATTRIB_ORDER[] =
 	TDCA_PRIORITY,
 	TDCA_RISK,	
 	TDCA_PERCENT,
-	TDCA_TIMEEST,
+	TDCA_TIMEESTIMATE,
 	TDCA_TIMESPENT,
 	TDCA_CREATIONDATE,
 	TDCA_CREATEDBY,
@@ -426,9 +426,9 @@ CString CTaskListExporterBase::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 		sItem = FormatAttribute(pTasks, hTask, nAttrib, sAttribLabel, TDL_TASKTITLE);
 		break;
 
-	case TDCA_TIMEEST:
+	case TDCA_TIMEESTIMATE:
 		// handle explicitly to localise decimal point
-		if (WantAttribute(TDCA_TIMEEST, pTasks, hTask))
+		if (WantAttribute(TDCA_TIMEESTIMATE, pTasks, hTask))
 		{
 			TDC_UNITS nUnits;
 			double dTime = pTasks->GetTaskTimeEstimate(hTask, nUnits, TRUE);

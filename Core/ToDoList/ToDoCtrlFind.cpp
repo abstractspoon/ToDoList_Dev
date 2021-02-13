@@ -141,9 +141,9 @@ BOOL CTDCLongestItemMap::IsSupportedColumn(TDC_COLUMN nColID)
 	case TDCC_SUBTASKDONE:
 	case TDCC_POSITION:
 	case TDCC_PATH:
-	case TDCC_TIMEEST:
+	case TDCC_TIMEESTIMATE:
 	case TDCC_TIMESPENT:
-	case TDCC_REMAINING:
+	case TDCC_TIMEREMAINING:
 		return TRUE;
 	}
 
@@ -461,7 +461,7 @@ CString CToDoCtrlFind::GetLongestPath(HTREEITEM hti, const TODOITEM* pTDI, const
 
 CString CToDoCtrlFind::GetLongestTimeEstimate(BOOL bVisibleOnly) const
 {
-	return GetLongestTime(TDCC_TIMEEST, bVisibleOnly);
+	return GetLongestTime(TDCC_TIMEESTIMATE, bVisibleOnly);
 }
 
 CString CToDoCtrlFind::GetLongestTimeSpent(BOOL bVisibleOnly) const
@@ -471,7 +471,7 @@ CString CToDoCtrlFind::GetLongestTimeSpent(BOOL bVisibleOnly) const
 
 CString CToDoCtrlFind::GetLongestTimeRemaining(BOOL bVisibleOnly) const
 {
-	return GetLongestTime(TDCC_REMAINING, bVisibleOnly);
+	return GetLongestTime(TDCC_TIMEREMAINING, bVisibleOnly);
 }
 
 CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, BOOL bVisibleOnly) const
@@ -785,9 +785,9 @@ CString CToDoCtrlFind::GetLongestTime(TDC_COLUMN nCol, BOOL bVisibleOnly) const
 	// Sanity check
 	switch (nCol)
 	{
-	case TDCC_TIMEEST:
+	case TDCC_TIMEESTIMATE:
 	case TDCC_TIMESPENT:
-	case TDCC_REMAINING:
+	case TDCC_TIMEREMAINING:
 		return GetLongestTime(NULL, NULL, NULL, nCol, bVisibleOnly);
 	}
 
@@ -1265,14 +1265,14 @@ void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCus
 		if (mapLongest.HasColumn(TDCC_COST))
 			mapLongest.UpdateValue(TDCC_COST, m_formatter.GetTaskCost(pTDI, pTDS));
 
-		if (mapLongest.HasColumn(TDCC_TIMEEST))
-			mapLongest.UpdateValue(TDCC_TIMEEST, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
+		if (mapLongest.HasColumn(TDCC_TIMEESTIMATE))
+			mapLongest.UpdateValue(TDCC_TIMEESTIMATE, m_formatter.GetTaskTimeEstimate(pTDI, pTDS));
 
 		if (mapLongest.HasColumn(TDCC_TIMESPENT))
 			mapLongest.UpdateValue(TDCC_TIMESPENT, m_formatter.GetTaskTimeSpent(pTDI, pTDS));
 
-		if (mapLongest.HasColumn(TDCC_REMAINING))
-			mapLongest.UpdateValue(TDCC_REMAINING, m_formatter.GetTaskTimeRemaining(pTDI, pTDS));
+		if (mapLongest.HasColumn(TDCC_TIMEREMAINING))
+			mapLongest.UpdateValue(TDCC_TIMEREMAINING, m_formatter.GetTaskTimeRemaining(pTDI, pTDS));
 
 		// Rest of Custom columns
 		int nCust = aCustAttribDefs.GetSize();

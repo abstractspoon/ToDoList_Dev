@@ -173,7 +173,7 @@ void STATSITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 		ValidateStartDate();
 	}
 
-	if (pTasks->IsAttributeAvailable(TDCA_TIMEEST))
+	if (pTasks->IsAttributeAvailable(TDCA_TIMEESTIMATE))
 		dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nTimeEstUnits, false);
 
 	if (pTasks->IsAttributeAvailable(TDCA_TIMESPENT))

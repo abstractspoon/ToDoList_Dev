@@ -1247,7 +1247,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 			case TDCA_FLAG:			COPYATTRIB(bFlagged); break;
 			case TDCA_LOCK:			COPYATTRIB(bLocked); break;
 			
-			case TDCA_TIMEEST:		COPYATTRIB(timeEstimate.dAmount); 
+			case TDCA_TIMEESTIMATE:	COPYATTRIB(timeEstimate.dAmount); 
 									COPYATTRIB(timeEstimate.nUnits); break;
 			case TDCA_TIMESPENT:	COPYATTRIB(timeSpent.dAmount);	
 									COPYATTRIB(timeSpent.nUnits); break;
@@ -1433,7 +1433,7 @@ TDC_SET CToDoCtrlData::ClearTaskAttribute(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib,
 		nRes = SetTaskRecurrence(dwTaskID, TDCRECURRENCE());
 		break;
 		
-	case TDCA_TIMEEST:		
+	case TDCA_TIMEESTIMATE:		
 		{
 			// preserve existing units
 			TDCTIMEPERIOD time;
@@ -1712,7 +1712,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 			pTDIChild->nPercentDone = pTDIParent->nPercentDone;
 		break;
 
-	case TDCA_TIMEEST:
+	case TDCA_TIMEESTIMATE:
 		if (bIncludeBlank || pTDIParent->timeEstimate.dAmount > 0)
 			pTDIChild->timeEstimate = pTDIParent->timeEstimate;
 		break;
@@ -2479,7 +2479,7 @@ TDC_SET CToDoCtrlData::SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& 
 	if (bOffset)
 		newEst.AddTime(pTDI->timeEstimate);
 
-	TDC_SET nRes = EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->timeEstimate, newEst);
+	TDC_SET nRes = EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEESTIMATE, pTDI->timeEstimate, newEst);
 
 	if ((nRes == SET_CHANGE) && HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 	{
@@ -2562,7 +2562,7 @@ TDC_SET CToDoCtrlData::RecalcTaskTimeEstimate(DWORD dwTaskID, TODOITEM* pTDI, TD
 					TDCTIMEPERIOD time = pTDI->timeEstimate;
 					time.dAmount = CalcDuration(pTDI->dateStart, pTDI->dateDue, time.nUnits);
 
-					return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEEST, pTDI->timeEstimate, time);
+					return EditTaskTimeAttribute(dwTaskID, pTDI, TDCA_TIMEESTIMATE, pTDI->timeEstimate, time);
 				}
 			}
 			break;
@@ -2818,7 +2818,7 @@ TDC_SET CToDoCtrlData::EditTaskTimeAttribute(DWORD dwTaskID, TODOITEM* pTDI, TDC
 {
 	ASSERT(dwTaskID);
 	ASSERT(pTDI);
-	ASSERT((nAttrib == TDCA_TIMEEST) || (nAttrib == TDCA_TIMESPENT));
+	ASSERT((nAttrib == TDCA_TIMEESTIMATE) || (nAttrib == TDCA_TIMESPENT));
 	
 	// test for actual change
 	if (time == newTime)
@@ -3890,7 +3890,7 @@ BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib
 		}
 		break;
 
-	case TDCA_TIMEEST:			
+	case TDCA_TIMEESTIMATE:			
 		{
 			TDCTIMEPERIOD time;
 			GetTaskTimeEstimate(dwTaskID, time);
@@ -3989,7 +3989,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 		}
 		break;
 
-	case TDCA_TIMEEST:			
+	case TDCA_TIMEESTIMATE:			
 		{
 			TDCTIMEPERIOD time;
 			

@@ -1012,7 +1012,7 @@ BOOL CFilteredToDoCtrl::StyleChangesNeedRefilter(const CTDCStyleMap& styles) con
 			break;
 
 		case TDCS_USEPERCENTDONEINTIMEEST:
-			mapAttribAffected.Add(TDCA_TIMEEST);
+			mapAttribAffected.Add(TDCA_TIMEESTIMATE);
 			break;
 
 		case TDCS_INCLUDEDONEINAVERAGECALC:

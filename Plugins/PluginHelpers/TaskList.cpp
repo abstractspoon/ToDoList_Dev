@@ -1121,7 +1121,7 @@ Task::Attribute Task::MapAttribute(TDC_ATTRIBUTE attrib)
 	case TDCA_STATUS:			return Task::Attribute::Status;
 	case TDCA_CATEGORY:			return Task::Attribute::Category;
 	case TDCA_PERCENT:			return Task::Attribute::Percent;
-	case TDCA_TIMEEST:			return Task::Attribute::TimeEstimate;
+	case TDCA_TIMEESTIMATE:		return Task::Attribute::TimeEstimate;
 	case TDCA_TIMESPENT:		return Task::Attribute::TimeSpent;
 	case TDCA_FILELINK:			return Task::Attribute::FileLink;
 	case TDCA_COMMENTS:			return Task::Attribute::Comments;
@@ -1188,7 +1188,7 @@ TDC_ATTRIBUTE Task::MapAttribute(Task::Attribute attrib)
 	case Task::Attribute::Status:			return TDCA_STATUS;
 	case Task::Attribute::SubtaskDone:		return TDCA_SUBTASKDONE;
 	case Task::Attribute::Tags:				return TDCA_TAGS;
-	case Task::Attribute::TimeEstimate:		return TDCA_TIMEEST;
+	case Task::Attribute::TimeEstimate:		return TDCA_TIMEESTIMATE;
 	case Task::Attribute::TimeSpent:		return TDCA_TIMESPENT;
 	case Task::Attribute::Title:			return TDCA_TASKNAME;
 	case Task::Attribute::Version:			return TDCA_VERSION;
