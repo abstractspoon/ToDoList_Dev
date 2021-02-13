@@ -108,7 +108,8 @@ enum TDC_ATTRIBUTE
 	// pseudo attribute for Find Tasks dialog
 	TDCA_REMINDER,
 
-	// ADD NEW ATTRIBUTES HERE!
+	TDCA_TIMEREMAINING, 
+	// ADD NEW ATTRIBUTES HERE ONLY!
 	
 	// Hack to capture the value of the very last attribute
 	TDCA_DUMMY2,
