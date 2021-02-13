@@ -5258,41 +5258,10 @@ BOOL CToDoListWnd::HasTaskFile(const CTDCStartupOptions& startup) const
 
 BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup)
 {
-	CString sPrefix = startup.GetTitlePrefix();
-
-	if (!bStartup && (sPrefix != m_sTitlePrefix))
-	{
-		m_sTitlePrefix = sPrefix;
-		UpdateCaption();
-	}
-
-	// 1. check if we can handle a task link
-	if (startup.HasFlag(TLD_TASKLINK))
-	{
-		CStringArray aFiles;
-
-		if (startup.GetFilePaths(aFiles))
-		{
-			CString sPath;
-			DWORD dwTaskID = 0;
-
-			CFilteredToDoCtrl::ParseTaskLink(aFiles[0], FALSE, _T(""), dwTaskID, sPath);
-	
-			if (sPath.IsEmpty() || ValidateTaskLinkFilePath(sPath))
-			{
-				return DoTaskLink(sPath, dwTaskID, bStartup);
-			}
-		}
-
-		// else
-		return FALSE;
-	}
-
-	// 2. try open/import file
+	// 1. Select the tasklist --------------------------------
 	if (startup.HasFilePath())
 	{
 		int nFirstSel = -1;
-		BOOL bSuccess = FALSE;
 
 		CStringArray aFilePaths;
 		int nNumFiles = startup.GetFilePaths(aFilePaths);
@@ -5303,45 +5272,299 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			
 			if (startup.HasFlag(TLD_IMPORTFILE))
 			{
-				if (ImportFile(sFilePath, TRUE))
-				{
-					bSuccess = TRUE;
-				}
+				if (!ImportFile(sFilePath, TRUE))
+					return FALSE;
 			}
 			else
 			{
+				// open the first tasklist fully and the rest delayed
 				BOOL bCanDelayLoad = Prefs().GetEnableDelayedLoading();
 
-				// open the first tasklist fully and the rest delayed
-				if (!bSuccess || !Prefs().GetEnableDelayedLoading())
+				if ((nFirstSel == -1) || !Prefs().GetEnableDelayedLoading())
 				{
-					if (OpenTaskList(sFilePath, FALSE) == TDCF_SUCCESS)
-					{
-						bSuccess = TRUE;
-					}
+					if (OpenTaskList(sFilePath, FALSE) != TDCF_SUCCESS)
+						return FALSE;
 				}
-				else if (DelayOpenTaskList(sFilePath) == TDCF_SUCCESS)
+				else if (DelayOpenTaskList(sFilePath) != TDCF_SUCCESS)
 				{
-					bSuccess = TRUE;
+					return FALSE;
 				}
 			}
 
 			// snapshot the first success for subsequent selection
-			if (bSuccess && (nFirstSel == -1))
+			if (nFirstSel == -1)
 				nFirstSel = GetSelToDoCtrl();
 		}
 		
-		// exit on failure
-		if (!bSuccess)
-			return FALSE;
-
 		// set selection to first tasklist loaded
 		ASSERT((nFirstSel != -1) && (nFirstSel < GetTDCCount()));
 
 		SelectToDoCtrl(nFirstSel, FALSE);
 	}
 
-	// 3. execute a command
+	// 2. Select the task ----------------------------------
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (startup.HasFlag(TLD_TASKLINK))
+	{
+		CStringArray aFiles;
+
+		if (!startup.GetFilePaths(aFiles))
+			return FALSE;
+
+		CString sPath;
+		DWORD dwTaskID = 0;
+
+		CFilteredToDoCtrl::ParseTaskLink(aFiles[0], FALSE, _T(""), dwTaskID, sPath);
+	
+		if (!sPath.IsEmpty() && !ValidateTaskLinkFilePath(sPath))
+			return FALSE;
+
+		if (!DoTaskLink(sPath, dwTaskID, bStartup))
+			return FALSE;
+	}
+	else if (startup.HasFlag(TLD_NEWTASK))
+	{
+		CEnString sNewTask;
+		BOOL bEditTask = FALSE;
+
+		// we edit the task name if no name was supplied
+		if (!startup.GetNewTaskTitle(sNewTask))
+		{
+			sNewTask.LoadString(IDS_TASK);
+			bEditTask = TRUE;
+		}
+
+		TDC_INSERTWHERE nWhere = TDC_INSERTATBOTTOM; // default
+
+		// do we have a parent task ?
+		if (SelectTask(tdc, startup.GetParentTaskID()))
+		{
+			nWhere = TDC_INSERTATBOTTOMOFSELTASK;
+		}
+		// or a sibling task ?
+		else if (SelectTask(tdc, startup.GetSiblingTaskID()))
+		{
+			nWhere = TDC_INSERTAFTERSELTASK;
+		}
+
+		if (!CreateNewTask(sNewTask, nWhere, FALSE)) // don't edit
+			return FALSE;
+
+		// creation date
+		COleDateTime date;
+
+		if (startup.GetTaskCreationDate(date))
+			tdc.SetSelectedTaskDate(TDCD_CREATE, date);
+
+		// edit task title?
+		if (bEditTask)
+		{	
+			PostMessage(WM_COMMAND, ID_EDIT_TASKTEXT);
+			return TRUE;
+		}
+	}
+	else if (startup.GetTaskID())
+	{
+		if (!SelectTask(tdc, startup.GetTaskID()))
+			return FALSE;
+	}
+	else if (!startup.IsEmpty(TRUE))
+	{
+		// work on the currently selected item(s)
+		if (tdc.GetSelectedCount() == 0)
+			return FALSE;
+	}
+		
+	// 3. Modify the task's attributes ----------------------------
+	tdc.BeginSelectedTaskEdit();
+
+	CStringArray aItems;
+	CString sItem;
+	int nItem;
+	double dItem;
+
+	if (startup.GetTaskTitle(sItem))
+		tdc.SetSelectedTaskTitle(sItem, TRUE);
+
+	if (startup.GetTaskComments(sItem))
+	{
+		// If it's a file, we first turn it into a URI
+		WebMisc::FormatFileURI(sItem, sItem);
+
+		// append comments
+		CString sComments = tdc.GetSelectedTaskComments();
+
+		if (!sComments.IsEmpty())
+		{
+			sComments += _T("\r\n");
+			sComments += sItem;
+			sItem = sComments;
+		}
+		tdc.SetSelectedTaskComments(sItem);
+	}
+
+	if (startup.GetTaskExternalID(sItem))
+		tdc.SetSelectedTaskExternalID(sItem);
+
+	if (startup.GetTaskVersion(sItem))
+		tdc.SetSelectedTaskVersion(sItem);
+
+	if (startup.GetTaskAllocBy(sItem))
+		tdc.SetSelectedTaskAllocBy(sItem);
+
+	if (startup.GetTaskStatus(sItem))
+		tdc.SetSelectedTaskStatus(sItem);
+
+	if (startup.GetTaskIcon(sItem))
+		tdc.SetSelectedTaskIcon(sItem);
+
+	// Numeric items
+	BOOL bOffset = FALSE;
+
+	if (startup.GetTaskPriority(nItem, bOffset))
+		tdc.SetSelectedTaskPriority(nItem, bOffset);
+
+	if (startup.GetTaskRisk(nItem, bOffset))
+		tdc.SetSelectedTaskRisk(nItem, bOffset);
+
+	if (startup.GetTaskPercentDone(nItem, bOffset))
+		tdc.SetSelectedTaskPercentDone(nItem, bOffset);
+
+	if (startup.GetTaskCost(dItem, bOffset))
+		tdc.SetSelectedTaskCost(TDCCOST(dItem), bOffset);
+
+	// Times
+	TDCTIMEPERIOD time;
+
+	if (startup.GetTaskTimeEst(time.dAmount, time.nUnits, bOffset))
+		tdc.SetSelectedTaskTimeEstimate(time, bOffset);
+
+	if (startup.GetTaskTimeSpent(time.dAmount, time.nUnits, bOffset))
+		tdc.SetSelectedTaskTimeSpent(time, bOffset);
+
+	// Multi-string items
+	BOOL bAppend = FALSE;
+
+	if (startup.GetTaskAllocTo(aItems, bAppend) != -1)
+		tdc.SetSelectedTaskAllocTo(aItems, bAppend);
+
+	if (startup.GetTaskCategories(aItems, bAppend) != -1)
+		tdc.SetSelectedTaskCategories(aItems, bAppend);
+
+	if (startup.GetTaskDependencies(aItems, bAppend) != -1)
+	{
+		CTDCDependencyArray aDepends;
+
+		if (aDepends.Set(aItems))
+			tdc.SetSelectedTaskDependencies(aDepends, bAppend);
+	}
+
+
+	if (startup.GetTaskTags(aItems, bAppend) != -1)
+		tdc.SetSelectedTaskTags(aItems, bAppend);
+
+	if (startup.GetTaskFileLinks(aItems, bAppend) != -1)
+		tdc.SetSelectedTaskFileLinks(aItems, bAppend);
+
+	// start date and time
+	TDC_UNITS nUnits;
+
+	if (startup.GetTaskStartDate(dItem, nUnits, bOffset))
+	{
+		ASSERT(bOffset || (nUnits == DHU_DAYS));
+
+		if (bOffset)
+			tdc.OffsetSelectedTaskDate(TDCD_START, (int)dItem, nUnits, FALSE);
+		else
+			tdc.SetSelectedTaskDate(TDCD_START, dItem);
+	}
+
+	// time overrides if present
+	if (startup.GetTaskStartTime(dItem, nUnits, bOffset))
+	{
+		ASSERT(bOffset || (nUnits == DHU_DAYS));
+
+		if (bOffset)
+			tdc.OffsetSelectedTaskDate(TDCD_STARTTIME, (int)dItem, nUnits, FALSE);
+		else
+			tdc.SetSelectedTaskDate(TDCD_STARTTIME, dItem);
+	}
+
+	// due date and time
+	if (startup.GetTaskDueDate(dItem, nUnits, bOffset))
+	{
+		ASSERT(bOffset || (nUnits == DHU_DAYS));
+
+		if (bOffset)
+			tdc.OffsetSelectedTaskDate(TDCD_DUE, (int)dItem, nUnits, FALSE);
+		else
+			tdc.SetSelectedTaskDate(TDCD_DUE, dItem);
+	}
+
+	// time overrides if present
+	if (startup.GetTaskDueTime(dItem, nUnits, bOffset))
+	{
+		ASSERT(bOffset || (nUnits == DHU_DAYS));
+
+		if (bOffset)
+			tdc.OffsetSelectedTaskDate(TDCD_DUETIME, (int)dItem, nUnits, FALSE);
+		else
+			tdc.SetSelectedTaskDate(TDCD_DUETIME, dItem);
+	}
+
+	// done date and time
+	if (startup.GetTaskDoneDate(dItem, nUnits, bOffset))
+	{
+		ASSERT(bOffset || (nUnits == DHU_DAYS));
+
+		if (bOffset)
+			tdc.OffsetSelectedTaskDate(TDCD_DONE, (int)dItem, nUnits, FALSE);
+		else
+			tdc.SetSelectedTaskDate(TDCD_DONE, dItem);
+	}
+
+	// time overrides if present
+	if (startup.GetTaskDoneTime(dItem, nUnits, bOffset))
+	{
+		ASSERT(bOffset || (nUnits == DHU_DAYS));
+
+		if (bOffset)
+			tdc.OffsetSelectedTaskDate(TDCD_DONETIME, (int)dItem, nUnits, FALSE);
+		else
+			tdc.SetSelectedTaskDate(TDCD_DONETIME, dItem);
+	}
+
+	// Custom attribute
+	CString sAttribID;
+
+	if (startup.GetTaskCustomAttribute(sAttribID, sItem))
+		tdc.SetSelectedTaskCustomAttributeData(sAttribID, sItem);
+
+	// Copying attributes
+	CString sFrom, sTo;
+	TDC_ATTRIBUTE nFrom, nTo;
+
+	if (startup.GetCopyTaskAttribute(nFrom, nTo))
+	{
+		tdc.CopySelectedTaskAttributeData(nFrom, nTo);
+	}
+	else if (startup.GetCopyTaskAttribute(nFrom, sTo))
+	{
+		tdc.CopySelectedTaskAttributeData(nFrom, sTo);
+	}
+	else if (startup.GetCopyTaskAttribute(sFrom, nTo))
+	{
+		tdc.CopySelectedTaskAttributeData(sFrom, nTo);
+	}
+	else if (startup.GetCopyTaskAttribute(sFrom, sTo))
+	{
+		tdc.CopySelectedTaskAttributeData(sFrom, sTo);
+	}
+
+	tdc.EndSelectedTaskEdit();
+	
+	// 4. Execute any commands -------------------------------
 	if (startup.HasCommandID())
 	{
 		CUIntArray aCmdIDs;
@@ -5349,13 +5572,9 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 		for (int nCmd = 0; nCmd < nNumCmd; nCmd++)
 			SendMessage(WM_COMMAND, MAKEWPARAM(aCmdIDs[nCmd], 0), 0);
-
-		return TRUE;
 	}
-	
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	BOOL bRes = FALSE;
 
+	// 5. Save tasklist's intermediate state ------------------
 	if (startup.HasFlag(TLD_SAVEINTERMEDIATE))
 	{
 		CString sOutputFile(GetIntermediateTaskListPath(GetToDoCtrl().GetFilePath()));
@@ -5371,260 +5590,21 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		}
 		else // use last state of transform dialog to determine what tasks to output
 		{
-			CTDLTransformDialog dialog(_T(""), 
-										tdc.GetTaskView(), 
-										_T(""), 
-										tdc.GetCustomAttributeDefs());
+			CTDLTransformDialog dialog(_T(""),
+									   tdc.GetTaskView(),
+									   _T(""),
+									   tdc.GetCustomAttributeDefs());
 
 			GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
 
 			tasks.SetReportDetails(_T(""), dialog.GetDate());
 		}
 
-		VERIFY(tasks.Save(sOutputFile, SFEF_UTF16));
-
-		return TRUE;
+		if (!tasks.Save(sOutputFile, SFEF_UTF16))
+			return FALSE;
 	}
 
-	// New tasks
-	if (startup.HasFlag(TLD_NEWTASK))
-	{
-		CEnString sNewTask;
-		BOOL bEditTask = FALSE;
-		
-		// we edit the task name if no name was supplied
-		if (!startup.GetNewTaskTitle(sNewTask))
-		{
-			sNewTask.LoadString(IDS_TASK);
-			bEditTask = TRUE;
-		}
-		
-		// do we have a parent task ?
-		if (SelectTask(tdc, startup.GetParentTaskID()))
-		{
-			bRes = CreateNewTask(sNewTask, TDC_INSERTATBOTTOMOFSELTASK, FALSE);
-		}
-		// or a sibling task ?
-		else if (SelectTask(tdc, startup.GetSiblingTaskID()))
-		{
-			bRes = CreateNewTask(sNewTask, TDC_INSERTAFTERSELTASK, FALSE);
-		}	
-		else // default
-		{
-			bRes = CreateNewTask(sNewTask, TDC_INSERTATBOTTOM, FALSE);
-		}
-	
-		// creation date
-		COleDateTime date;
-
-		if (startup.GetTaskCreationDate(date))
-			tdc.SetSelectedTaskDate(TDCD_CREATE, date);
-		
-		// edit task title?
-		if (bRes && bEditTask)
-			PostMessage(WM_COMMAND, ID_EDIT_TASKTEXT);
-	}
-	else if (startup.GetTaskID())
-	{
-		bRes = SelectTask(tdc, startup.GetTaskID());
-	}
-	else if (!startup.IsEmpty(TRUE))
-	{
-		// work on the currently selected item(s)
-		bRes = (tdc.GetSelectedCount() > 0);
-	}
-
-	// Attribute modifications
-	if (bRes)
-	{
-		tdc.BeginSelectedTaskEdit();
-
-		CStringArray aItems;
-		CString sItem;
-		int nItem;
-		double dItem;
-		
-		if (startup.GetTaskTitle(sItem))
-			tdc.SetSelectedTaskTitle(sItem, TRUE);
-		
-		if (startup.GetTaskComments(sItem))
-		{
-			// If it's a file, we first turn it into a URI
-			WebMisc::FormatFileURI(sItem, sItem);
-
-			// append comments
-			CString sComments = tdc.GetSelectedTaskComments();
-
-			if (!sComments.IsEmpty())
-			{
-				sComments += _T("\r\n");
-				sComments += sItem;
-				sItem = sComments;
-			}
-			tdc.SetSelectedTaskComments(sItem);
-		}
-
-		if (startup.GetTaskExternalID(sItem))
-			tdc.SetSelectedTaskExternalID(sItem);
-		
-		if (startup.GetTaskVersion(sItem))
-			tdc.SetSelectedTaskVersion(sItem);
-		
-		if (startup.GetTaskAllocBy(sItem))
-			tdc.SetSelectedTaskAllocBy(sItem);
-		
-		if (startup.GetTaskStatus(sItem))
-			tdc.SetSelectedTaskStatus(sItem);
-
-		if (startup.GetTaskIcon(sItem))
-			tdc.SetSelectedTaskIcon(sItem);
-		
-		// Numeric items
-		BOOL bOffset = FALSE;
-
-		if (startup.GetTaskPriority(nItem, bOffset))
-			tdc.SetSelectedTaskPriority(nItem, bOffset);
-
-		if (startup.GetTaskRisk(nItem, bOffset))
-			tdc.SetSelectedTaskRisk(nItem, bOffset);
-
-		if (startup.GetTaskPercentDone(nItem, bOffset))
-			tdc.SetSelectedTaskPercentDone(nItem, bOffset);
-
-		if (startup.GetTaskCost(dItem, bOffset))
-			tdc.SetSelectedTaskCost(TDCCOST(dItem), bOffset);
-
-		// Times
-		TDCTIMEPERIOD time;
-
-		if (startup.GetTaskTimeEst(time.dAmount, time.nUnits, bOffset))
-			tdc.SetSelectedTaskTimeEstimate(time, bOffset);
-
-		if (startup.GetTaskTimeSpent(time.dAmount, time.nUnits, bOffset))
-			tdc.SetSelectedTaskTimeSpent(time, bOffset); 
-
-		// Multi-string items
-		BOOL bAppend = FALSE;
-
-		if (startup.GetTaskAllocTo(aItems, bAppend) != -1)
-			tdc.SetSelectedTaskAllocTo(aItems, bAppend);
-		
-		if (startup.GetTaskCategories(aItems, bAppend) != -1)
-			tdc.SetSelectedTaskCategories(aItems, bAppend);
-		
-		if (startup.GetTaskDependencies(aItems, bAppend) != -1)
-		{
-			CTDCDependencyArray aDepends;
-
-			if (aDepends.Set(aItems))
-				tdc.SetSelectedTaskDependencies(aDepends, bAppend);
-		}
-		
-		if (startup.GetTaskTags(aItems, bAppend) != -1)
-			tdc.SetSelectedTaskTags(aItems, bAppend);
-		
-		if (startup.GetTaskFileLinks(aItems, bAppend) != -1)
-			tdc.SetSelectedTaskFileLinks(aItems, bAppend);
-		
-		// start date and time
-		TDC_UNITS nUnits;
-
-		if (startup.GetTaskStartDate(dItem, nUnits, bOffset))
-		{
-			ASSERT(bOffset || (nUnits == DHU_DAYS));
-
-			if (bOffset)
-				tdc.OffsetSelectedTaskDate(TDCD_START, (int)dItem, nUnits, FALSE);
-			else
-				tdc.SetSelectedTaskDate(TDCD_START, dItem);
-		}
-			
-		// time overrides if present
-		if (startup.GetTaskStartTime(dItem, nUnits, bOffset))
-		{
-			ASSERT(bOffset || (nUnits == DHU_DAYS));
-
-			if (bOffset)
-				tdc.OffsetSelectedTaskDate(TDCD_STARTTIME, (int)dItem, nUnits, FALSE);
-			else
-				tdc.SetSelectedTaskDate(TDCD_STARTTIME, dItem);
-		}
-
-		// due date and time
-		if (startup.GetTaskDueDate(dItem, nUnits, bOffset))
-		{
-			ASSERT(bOffset || (nUnits == DHU_DAYS));
-
-			if (bOffset)
-				tdc.OffsetSelectedTaskDate(TDCD_DUE, (int)dItem, nUnits, FALSE);
-			else
-				tdc.SetSelectedTaskDate(TDCD_DUE, dItem);
-		}
-
-		// time overrides if present
-		if (startup.GetTaskDueTime(dItem, nUnits, bOffset))
-		{
-			ASSERT(bOffset || (nUnits == DHU_DAYS));
-
-			if (bOffset)
-				tdc.OffsetSelectedTaskDate(TDCD_DUETIME, (int)dItem, nUnits, FALSE);
-			else
-				tdc.SetSelectedTaskDate(TDCD_DUETIME, dItem);
-		}
-
-		// done date and time
-		if (startup.GetTaskDoneDate(dItem, nUnits, bOffset))
-		{
-			ASSERT(bOffset || (nUnits == DHU_DAYS));
-
-			if (bOffset)
-				tdc.OffsetSelectedTaskDate(TDCD_DONE, (int)dItem, nUnits, FALSE);
-			else
-				tdc.SetSelectedTaskDate(TDCD_DONE, dItem);
-		}
-			
-		// time overrides if present
-		if (startup.GetTaskDoneTime(dItem, nUnits, bOffset))
-		{
-			ASSERT(bOffset || (nUnits == DHU_DAYS));
-
-			if (bOffset)
-				tdc.OffsetSelectedTaskDate(TDCD_DONETIME, (int)dItem, nUnits, FALSE);
-			else
-				tdc.SetSelectedTaskDate(TDCD_DONETIME, dItem);
-		}
-
-		// Custom attribute
-		CString sAttribID;
-
-		if (startup.GetTaskCustomAttribute(sAttribID, sItem))
-			tdc.SetSelectedTaskCustomAttributeData(sAttribID, sItem);
-
-		// Copying attributes
-		CString sFrom, sTo;
-		TDC_ATTRIBUTE nFrom, nTo;
-
-		if (startup.GetCopyTaskAttribute(nFrom, nTo))
-		{
-			tdc.CopySelectedTaskAttributeData(nFrom, nTo);
-		}
-		else if (startup.GetCopyTaskAttribute(nFrom, sTo))
-		{
-			tdc.CopySelectedTaskAttributeData(nFrom, sTo);
-		}
-		else if (startup.GetCopyTaskAttribute(sFrom, nTo))
-		{
-			tdc.CopySelectedTaskAttributeData(sFrom, nTo);
-		}
-		else if (startup.GetCopyTaskAttribute(sFrom, sTo))
-		{
-			tdc.CopySelectedTaskAttributeData(sFrom, sTo);
-		}
-		
-		tdc.EndSelectedTaskEdit();
-	}
-
-	return bRes;
+	return TRUE;
 }
 
 BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
