@@ -3553,9 +3553,7 @@ int CTabbedToDoCtrl::PopulateExtensionViewAttributes(const IUIExtensionWindow* p
 
 	if (pData->mapWantedAttrib.IsEmpty())
 	{
-		int nAttrib = TDCA_ALLATTRIB;
-		
-		while (nAttrib--)
+		for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_ATTRIBUTE; nAttrib++)
 		{
 			if (pExtWnd->WantTaskUpdate((TDC_ATTRIBUTE)nAttrib))
 				pData->mapWantedAttrib.Add((TDC_ATTRIBUTE)nAttrib);
@@ -4680,9 +4678,7 @@ int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			int nAttrib = TDCA_ALLATTRIB;
-
-			while (nAttrib--)
+			for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_ATTRIBUTE; nAttrib++)
 			{
 				TDC_ATTRIBUTE nBy = (TDC_ATTRIBUTE)nAttrib;
 

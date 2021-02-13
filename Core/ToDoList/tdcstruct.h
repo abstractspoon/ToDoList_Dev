@@ -2680,7 +2680,7 @@ protected:
 		{
 			mapVisibleEdits.RemoveAll();
 			
-			for (int nEdit = TDCA_FIRSTATTRIBUTE; nEdit < TDCA_ATTRIBUTECOUNT; nEdit++)
+			for (int nEdit = TDCA_FIRST_ATTRIBUTE; nEdit <= TDCA_LAST_REALATTRIBUTE; nEdit++)
 			{
 				if (IsEditFieldVisible((TDC_ATTRIBUTE)nEdit))
 					mapVisibleEdits.Add((TDC_ATTRIBUTE)nEdit);
@@ -2694,7 +2694,7 @@ protected:
 	{
 		mapAttrib.RemoveAll();
 		
-		for (int nAttrib = TDCA_FIRSTATTRIBUTE; nAttrib < TDCA_ATTRIBUTECOUNT; nAttrib++)
+		for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_REALATTRIBUTE; nAttrib++)
 		{
 			if (IsSupportedEdit((TDC_ATTRIBUTE)nAttrib))
 				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);
@@ -2917,7 +2917,7 @@ protected:
 		{
 			mapVisibleFilters.RemoveAll();
 
-			for (int nFilter = TDCA_FIRSTATTRIBUTE; nFilter < TDCA_ATTRIBUTECOUNT; nFilter++)
+			for (int nFilter = TDCA_FIRST_ATTRIBUTE; nFilter <= TDCA_LAST_REALATTRIBUTE; nFilter++)
 			{
 				if (IsFilterFieldVisible((TDC_ATTRIBUTE)nFilter))
 					mapVisibleFilters.Add((TDC_ATTRIBUTE)nFilter);
@@ -2931,7 +2931,7 @@ protected:
 	{
 		mapAttrib.RemoveAll();
 		
-		for (int nAttrib = TDCA_FIRSTATTRIBUTE; nAttrib < TDCA_ATTRIBUTECOUNT; nAttrib++)
+		for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_REALATTRIBUTE; nAttrib++)
 		{
 			if (IsSupportedFilter((TDC_ATTRIBUTE)nAttrib))
 				mapAttrib.Add((TDC_ATTRIBUTE)nAttrib);

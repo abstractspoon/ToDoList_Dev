@@ -1223,7 +1223,7 @@ TDC_SET CToDoCtrlData::CopyTaskAttributes(TODOITEM* pToTDI, DWORD dwFromTaskID, 
 	
 	// note: we don't use the public SetTask* methods purely so we can
 	// capture all the edits as a single atomic change that can be undone
-	for (int nAttrib = TDCA_FIRSTATTRIBUTE; nAttrib < TDCA_ATTRIBUTECOUNT; nAttrib++)
+	for (int nAttrib = TDCA_FIRST_ATTRIBUTE; nAttrib <= TDCA_LAST_REALATTRIBUTE; nAttrib++)
 	{
 		if (mapAttribs.Has((TDC_ATTRIBUTE)nAttrib))
 		{

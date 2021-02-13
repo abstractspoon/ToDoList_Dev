@@ -11868,8 +11868,8 @@ BOOL CToDoCtrl::CanClearSelectedTaskAttribute(TDC_ATTRIBUTE nAttrib) const
 	if (!CanEditSelectedTask(nAttrib))
 		return FALSE;
 
-	return ((nAttrib >= TDCA_FIRSTATTRIBUTE && 
-			 nAttrib < TDCA_ATTRIBUTECOUNT &&
+	return ((nAttrib >= TDCA_FIRST_ATTRIBUTE && 
+			 nAttrib <= TDCA_LAST_REALATTRIBUTE &&
 			 nAttrib != TDCA_TASKNAME && 
 			 nAttrib != TDCA_PROJECTNAME) ||
 			TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib));
