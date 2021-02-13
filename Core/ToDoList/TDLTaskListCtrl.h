@@ -97,6 +97,7 @@ public:
 	UINT GetGroupCount() const;
 	void SetSortGroupsAscending(BOOL bAscending = TRUE);
 	BOOL TaskHasGroupValue(DWORD dwTaskID) const;
+	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBuildComplete();
@@ -174,7 +175,6 @@ protected:
 	CString GetTaskGroupValue(DWORD dwTaskID) const;
 	CString FormatTaskGroupHeaderText(DWORD dwTaskID) const;
 	CString GetGroupByColumnName() const;
-	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
 	int CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& mapOldHeaders, CIntArray& aOldHeaderItems) const;
 
