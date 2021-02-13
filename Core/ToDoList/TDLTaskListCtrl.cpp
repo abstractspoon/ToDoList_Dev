@@ -1788,33 +1788,35 @@ BOOL CTDLTaskListCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 
 void CTDLTaskListCtrl::SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID)
 {
-	// Prevent re-entrancy
-	CTLSHoldResync hr(*this);
-
-	DeselectAll();
-
-	int nID = aTaskIDs.GetSize();
-
-	while (nID--)
 	{
-		DWORD dwTaskID = aTaskIDs[nID];
-		int nItem = FindTaskItem(dwTaskID);
+		// Scope hold to end before ensuring task visibility
+		CTLSHoldResync hr(*this);
 
-		if (nItem != -1)
+		DeselectAll();
+
+		int nID = aTaskIDs.GetSize();
+
+		while (nID--)
 		{
-			BOOL bAnchor = (dwTaskID == dwFocusedTaskID);
-			DWORD dwState = LVIS_SELECTED;
+			DWORD dwTaskID = aTaskIDs[nID];
+			int nItem = FindTaskItem(dwTaskID);
 
-			if (bAnchor)
+			if (nItem != -1)
 			{
-				dwState |= LVIS_FOCUSED;
+				BOOL bAnchor = (dwTaskID == dwFocusedTaskID);
+				DWORD dwState = LVIS_SELECTED;
 
-				m_lcTasks.SetSelectionMark(nItem);
-				m_lcColumns.SetSelectionMark(nItem);
+				if (bAnchor)
+				{
+					dwState |= LVIS_FOCUSED;
+
+					m_lcTasks.SetSelectionMark(nItem);
+					m_lcColumns.SetSelectionMark(nItem);
+				}
+
+				m_lcTasks.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
+				m_lcColumns.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
 			}
-
-			m_lcTasks.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
-			m_lcColumns.SetItemState(nItem, dwState, (LVIS_SELECTED | LVIS_FOCUSED));
 		}
 	}
 
