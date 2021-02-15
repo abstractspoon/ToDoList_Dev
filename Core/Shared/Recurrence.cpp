@@ -231,8 +231,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 			st.wDay = (WORD)m_dwSpecific2;
 
 			// add number of months specified by m_dwSpecific1 
-			// without preserving end of month
-			dh.IncrementMonth(st, (int)m_dwSpecific1, FALSE);
+			dh.IncrementMonth(st, (int)m_dwSpecific1);
 			
 			dtTemp = st;
 		}
@@ -244,8 +243,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 			dtTemp.GetAsSystemTime(st);
 			
 			// add number of months specified by m_dwSpecific1 
-			// preserving end of month
-			dh.IncrementMonth(st, (int)m_dwSpecific1, TRUE);
+			dh.IncrementMonth(st, (int)m_dwSpecific1);
 			
 			dtTemp = st;
 		}
@@ -274,8 +272,7 @@ BOOL CRecurrence::CalcNextOccurence(const COleDateTime& dtPrev, COleDateTime& dt
 			dtTemp.GetAsSystemTime(st);
 
 			// add number of months specified by dwSpecific2 
-			// WITHOUT preserving end of month
-			dh.IncrementMonth(st, (int)m_dwSpecific2, FALSE);
+			dh.IncrementMonth(st, (int)m_dwSpecific2);
 			
 			// calculate next instance
 			int bFirst = (m_dwSpecific1 == 0);
