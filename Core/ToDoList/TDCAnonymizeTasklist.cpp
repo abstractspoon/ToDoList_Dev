@@ -193,17 +193,18 @@ void CTDCAnonymizeTasklist::AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask)
 		if (!tdi.customComments.IsEmpty())
 			tasks.SetTaskCustomComments(hTask, CBinaryData(_T("__")), tdi.cfComments); // Too hard
 		
-		AnonymizeListItems(tdi.aAllocTo,	*m_mapSharedData.GetAddMapping(_T("ALLOCTO")));
-		AnonymizeListItems(tdi.aCategories,	*m_mapSharedData.GetAddMapping(_T("CATEGORY")));
-		AnonymizeListItems(tdi.aTags,		*m_mapSharedData.GetAddMapping(_T("TAGS")));
-		AnonymizeListItems(tdi.aFileLinks,	*m_mapSharedData.GetAddMapping(_T("FILELINK")));
+		AnonymizeListItems(tdi.aAllocTo,		*m_mapSharedData.GetAddMapping(_T("ALLOCTO")));
+		AnonymizeListItems(tdi.aCategories,		*m_mapSharedData.GetAddMapping(_T("CATEGORY")));
+		AnonymizeListItems(tdi.aTags,			*m_mapSharedData.GetAddMapping(_T("TAGS")));
+		AnonymizeListItems(tdi.aFileLinks,		*m_mapSharedData.GetAddMapping(_T("FILELINK")));
 		
-		AnonymizeListItem(tdi.sAllocBy,		*m_mapSharedData.GetAddMapping(_T("ALLOCBY")));
-		AnonymizeListItem(tdi.sStatus,		*m_mapSharedData.GetAddMapping(_T("STATUS")));
-		AnonymizeListItem(tdi.sVersion,		*m_mapSharedData.GetAddMapping(_T("VERSION")));
-		
-		AnonymizeListItem(tdi.sExternalID,	*m_mapSharedData.GetAddMapping(_T("EXTERNALID")));
-		AnonymizeListItem(tdi.sCreatedBy,	*m_mapSharedData.GetAddMapping(_T("CREATEDBY")));
+		AnonymizeListItem(tdi.sAllocBy,			*m_mapSharedData.GetAddMapping(_T("ALLOCBY")));
+		AnonymizeListItem(tdi.sStatus,			*m_mapSharedData.GetAddMapping(_T("STATUS")));
+		AnonymizeListItem(tdi.sVersion,			*m_mapSharedData.GetAddMapping(_T("VERSION")));
+
+		AnonymizeListItem(tdi.sExternalID,		*m_mapSharedData.GetAddMapping(_T("EXTERNALID")));
+		AnonymizeListItem(tdi.sCreatedBy,		*m_mapSharedData.GetAddMapping(_T("CREATEDBY")));
+		AnonymizeListItem(tdi.sLastModifiedBy,	*m_mapSharedData.GetAddMapping(_T("LASTMODBY")));
 		
 		VERIFY(tasks.SetTaskAllocatedTo(hTask, tdi.aAllocTo));
 		VERIFY(tasks.SetTaskCategories(hTask, tdi.aCategories));
