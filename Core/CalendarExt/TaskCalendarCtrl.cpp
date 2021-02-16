@@ -1506,7 +1506,7 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit) 
 				nHit = TCCHT_MIDDLE;
 			}
 			
-			return ((nHit == TCCHT_NOWHERE) ? 0 : dwTaskID);
+			return ((nHit == TCCHT_NOWHERE) ? 0 : GetRealTaskID(dwTaskID));
 		}
 	}
 
