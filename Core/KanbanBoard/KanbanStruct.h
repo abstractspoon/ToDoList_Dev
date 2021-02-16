@@ -88,6 +88,7 @@ struct KANBANITEM
 	COLORREF GetBorderColor(BOOL bColorIsBkgnd) const;
 	int GetPriority(DWORD dwOptions) const;
 	int GetRisk(DWORD dwOptions) const;
+	BOOL HasDueOrDonePriorityOrRisk(DWORD dwOptions) const;
 
 	BOOL HasColor() const;
 	BOOL IsDone(BOOL bIncludeGoodAs) const;
@@ -116,7 +117,7 @@ protected:
 
 protected:
 	CString GetTrackedAttributeValue(LPCTSTR szAttrib) const;
-	int GetPriorityRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const;
+	int GetPriorityOrRisk(TDC_ATTRIBUTE nAttrib, DWORD dwOptions) const;
 };
 typedef CArray<const KANBANITEM*, const KANBANITEM*> CKanbanItemArray;
 

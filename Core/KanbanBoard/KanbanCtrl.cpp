@@ -1380,7 +1380,6 @@ CString CKanbanCtrl::GetXMLTag(TDC_ATTRIBUTE nAttrib)
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, int nNewValue)
 {
-#ifdef _DEBUG
 	switch (nAttrib)
 	{
 	case TDCA_PRIORITY:
@@ -1389,17 +1388,26 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nA
 
 	default:
 		ASSERT(0);
-		break;
+		return FALSE;
 	}
-#endif
 
-	CString sValue; // empty
+	CString sNewValue;
 
 	if (nNewValue >= 0)
-		sValue = Misc::Format(nNewValue);
-	
-	// else empty
-	return UpdateTrackableTaskAttribute(pKI, nAttrib, sValue);
+		sNewValue = Misc::Format(nNewValue);
+
+	// special handling for tasks which ought not to be moved
+	if (pKI->HasDueOrDonePriorityOrRisk(m_dwOptions))
+	{
+		CStringArray aNewValues;
+		aNewValues.Add(sNewValue);
+
+		pKI->SetTrackedAttributeValues(KANBANITEM::GetAttributeID(nAttrib), aNewValues);
+		return FALSE;
+	}
+
+	// all else
+	return UpdateTrackableTaskAttribute(pKI, nAttrib, sNewValue);
 }
 
 BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
@@ -1424,7 +1432,6 @@ BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 			
 			if (nDef != -1)
 				return m_aCustomAttribDefs[nDef].bMultiValue;
-
 		}
 		break;
 	}
@@ -1436,27 +1443,23 @@ BOOL CKanbanCtrl::IsTrackedAttributeMultiValue() const
 
 BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, TDC_ATTRIBUTE nAttrib, const CString& sNewValue)
 {
-	CStringArray aNewValues;
-
 	switch (nAttrib)
 	{
 	case TDCA_PRIORITY:
 	case TDCA_RISK:
-		if (!sNewValue.IsEmpty())
-			aNewValues.Add(sNewValue);
-		break;
-
 	case TDCA_ALLOCBY:
 	case TDCA_STATUS:
 	case TDCA_VERSION:
-		aNewValues.Add(sNewValue);
 		break;
 
 	default:
 		ASSERT(0);
-		break;
+		return FALSE;
 	}
 	
+	CStringArray aNewValues;
+	aNewValues.Add(sNewValue);
+
 	return UpdateTrackableTaskAttribute(pKI, KANBANITEM::GetAttributeID(nAttrib), aNewValues);
 }
 
