@@ -3095,7 +3095,7 @@ BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 			return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 		if (!CanDragTask(dwTaskID))
-			return GraphicsMisc::SetDragDropCursor(GMOC_NO);
+			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
 	}
 
 	// else
