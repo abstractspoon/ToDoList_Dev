@@ -1544,8 +1544,8 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 			break;
 		}
 
-		// In the absence of a result we sort by IUI_POSITION, but without 
-		// reversing the sign. This also handles sorting by 'TDCA_NONE'
+		// In the absence of a result we sort by POSITION to ensure a stable sort, 
+		// but without reversing the sign. This also handles sorting by 'TDCA_NONE'
 		if ((nCompare == 0) && (pKI1->dwParentID == pKI2->dwParentID))
 		{
 			return Misc::CompareNumT(pKI1->nPosition, pKI2->nPosition);

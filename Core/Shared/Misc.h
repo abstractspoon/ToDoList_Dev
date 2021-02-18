@@ -246,7 +246,7 @@ namespace Misc
 	template <class T>
 	int CompareNumT(const T& t1, const T& t2)
 	{
-		return ((t1 > t2) ? 1 : -1);
+		return ((t1 == t2) ? 0 : (t1 > t2) ? 1 : -1);
 	}
 	
 	template <class T> 

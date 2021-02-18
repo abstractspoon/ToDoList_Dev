@@ -2558,19 +2558,33 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nC
 void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
 	// if the sort attribute equals the track attribute then
-	// tasks are already sorted into separate columns so we  
-	// sort by title instead
-	if ((nBy != TDCA_NONE) && (nBy == m_nTrackAttribute))
-		nBy = TDCA_TASKNAME;
-	
-	ASSERT((nBy == TDCA_NONE) || (bAscending != -1));
-
-	if ((m_nSortBy != nBy) || (nBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+	// tasks are already sorted into separate columns so we sort
+	// by position instead but without changing the underlying 
+	// sort state unless it's currently not set
+	if (nBy == m_nTrackAttribute)
 	{
-		m_nSortBy = nBy;
-		m_bSortAscending = bAscending;
+		if (nBy != TDCA_NONE)
+		{
+			if (m_nSortBy == TDCA_NONE)
+			{
+				m_nSortBy = nBy;
+				m_bSortAscending = bAscending;
+			}
 
-		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+			m_aColumns.Sort(TDCA_POSITION, bAscending);
+		}
+	}
+	else
+	{
+		ASSERT((nBy == TDCA_NONE) || (bAscending != -1));
+
+		if ((m_nSortBy != nBy) || (nBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+		{
+			m_nSortBy = nBy;
+			m_bSortAscending = bAscending;
+
+			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+		}
 	}
 }
 
