@@ -230,7 +230,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	m_bSortSubtaskBelowParent = pPrefs->GetProfileInt(szKey, _T("SortSubtaskBelowParent"), TRUE);
 	m_bShowTaskColorAsBar = pPrefs->GetProfileInt(szKey, _T("ShowTaskColorAsBar"), FALSE);
 	m_bColorBarByPriority = pPrefs->GetProfileInt(szKey, _T("ColorBarByPriority"), FALSE);
-	m_bIndentSubtasks = pPrefs->GetProfileInt(szKey, _T("IndentSubtasks"), TRUE);
+	m_bIndentSubtasks = pPrefs->GetProfileInt(szKey, _T("IndentSubtasks"), FALSE);
 	m_bHideEmptyAttributeValues = pPrefs->GetProfileInt(szKey, _T("HideEmptyAttributeValues"), TRUE);
 
 	// column defs
