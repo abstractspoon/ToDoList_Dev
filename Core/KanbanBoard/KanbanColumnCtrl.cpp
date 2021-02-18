@@ -64,6 +64,7 @@ enum // Icon images
 	FLAG_HOVER,
 	PIN_SET,
 	PIN_HOVER,
+	ICON_HOVER,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -756,24 +757,34 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 	rIcon.top += IMAGE_PADDING;
 	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
 
+	BOOL bLocked = pKI->bLocked;
+	BOOL bHot = (!m_bSavingToImage && (pKI->dwTaskID == m_dwHotItem));
+	BOOL bIconDrawn = FALSE;
+
 	if (pKI->bHasIcon || pKI->bParent)
 	{
 		int iImageIndex = -1;
 		HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKI->dwTaskID, (LPARAM)&iImageIndex);
 
 		if (hilTask && (iImageIndex != -1))
+		{
 			DrawItemImage(pDC, rIcon, KBCI_ICON, FALSE, hilTask, iImageIndex);
+			bIconDrawn = TRUE;
+		}
+	}
+
+	if (!bLocked && bHot && !bIconDrawn)
+	{
+		DrawItemImage(pDC, rIcon, KBCI_ICON, TRUE);
 	}
 
 	// Always leave space for icon
 	rIcon.OffsetRect(0, IMAGE_SIZE);
 
-	BOOL bHot = (!m_bSavingToImage && (pKI->dwTaskID == m_dwHotItem));
-
 	if (m_bDrawTaskFlags)
 	{
-		if (pKI->bFlagged || bHot)
-			DrawItemImage(pDC, rIcon, KBCI_FLAG, (bHot && !pKI->bFlagged));
+		if (pKI->bFlagged || (!bLocked && bHot))
+			DrawItemImage(pDC, rIcon, KBCI_FLAG, (!bLocked && bHot && !pKI->bFlagged));
 
 		rIcon.OffsetRect(0, IMAGE_SIZE);
 	}
@@ -789,7 +800,15 @@ void CKanbanColumnCtrl::DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETY
 	switch (nType)
 	{
 	case KBCI_ICON:
-		ASSERT(hIL && (nIndex != -1));
+		if (bHover)
+		{
+			hIL = m_ilIcons;
+			nIndex = ICON_HOVER;
+		}
+		else
+		{
+			ASSERT(hIL && (nIndex != -1));
+		}
 		break;
 
 	case KBCI_FLAG:
@@ -1288,12 +1307,6 @@ DWORD CKanbanColumnCtrl::GetOnlySelectedTask() const
 
 void CKanbanColumnCtrl::SetHotItem(DWORD dwTaskID)
 {
-	if (m_data.IsLocked(dwTaskID))
-	{
-		m_dwHotItem = 0;
-		return;
-	}
-
 	if (m_dwHotItem == dwTaskID)
 		return;
 
@@ -1608,7 +1621,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 	DWORD dwHitTaskID = GetTaskID(htiHit);
 
-	if (dwHitTaskID && !m_data.IsLocked(dwHitTaskID))
+	if (dwHitTaskID)
 	{
 		const KANBANITEM* pKI = m_data.GetItem(dwHitTaskID);
 		ASSERT(pKI);
@@ -1625,13 +1638,17 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		{
 			switch (HitTestImage(htiHit, point))
 			{
-			case KBCI_ICON:	
-				nMsgID = WM_KLCN_EDITTASKICON;
+			case KBCI_ICON:
+				if (!pKI->bLocked)
+					nMsgID = WM_KLCN_EDITTASKICON;
 				break;
 
 			case KBCI_FLAG:
-				nMsgID = WM_KLCN_EDITTASKFLAG;
-				bSet = !pKI->bFlagged;
+				if (!pKI->bLocked)
+				{
+					nMsgID = WM_KLCN_EDITTASKFLAG;
+					bSet = !pKI->bFlagged;
+				}
 				break;
 
 			case KBCI_PIN:
@@ -1909,8 +1926,20 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	HTREEITEM hti = HitTest(point);
 
-	if (hti && !m_data.IsLocked(GetTaskID(hti)) && (HitTestImage(hti, point) != KBCI_NONE))
-		return GraphicsMisc::SetHandCursor();
+	if (hti)
+	{
+		switch (HitTestImage(hti, point))
+		{
+		case KBCI_FLAG:
+		case KBCI_ICON:
+			if (!m_data.IsLocked(GetTaskID(hti)))
+				return GraphicsMisc::SetHandCursor();
+			break;
+
+		case  KBCI_PIN:
+			return GraphicsMisc::SetHandCursor();
+		}
+	}
 
 	// else
 	return CTreeCtrl::OnSetCursor(pWnd, nHitTest, message);
