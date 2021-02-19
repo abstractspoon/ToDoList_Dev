@@ -384,8 +384,23 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	// Custom attribute
 	CStringArray aValues;
 
-	if (cmdInfo.GetOptions(SWITCH_TASKCUSTOMATTRIB, aValues) && (aValues.GetSize() == 2))
-		m_sTaskCustomAttrib.SetValue(Misc::FormatArray(aValues, '|'));
+	if (cmdInfo.GetOptions(SWITCH_TASKCUSTOMATTRIB, aValues))
+	{
+		switch (aValues.GetSize())
+		{
+		case 0:
+		default:
+			break;
+
+		case 1:
+			m_sTaskCustomAttrib.SetValue(aValues[0] + '|');
+			break;
+
+		case 2:
+			m_sTaskCustomAttrib.SetValue(Misc::FormatArray(aValues, '|'));
+			break;
+		}
+	}
 
 	// Copying task attributes
 	if (cmdInfo.GetOptions(SWITCH_COPYTASKATTRIB, aValues) && (aValues.GetSize() == 2))
@@ -768,23 +783,9 @@ BOOL CTDCStartupOptions::GetTaskRisk(int& nValue, BOOL& bOffset) const
 
 BOOL CTDCStartupOptions::GetTaskCustomAttribute(CString& sCustomID, CString& sValue) const
 {
-	if (!m_sTaskCustomAttrib.IsEmpty())
-	{
-		CStringArray aValues;
-		
-		if (Misc::Split(m_sTaskCustomAttrib.GetValue(), aValues, '|') == 2)
-		{
-			sCustomID = aValues[0];
-			sValue = aValues[1];
-			
-			return !(sCustomID.IsEmpty() || sValue.IsEmpty());
-		}
-	}
+	sCustomID = m_sTaskCustomAttrib.GetValue();
 
-	sCustomID.Empty();
-	sValue.Empty();
-
-	return FALSE;
+	return Misc::Split(sCustomID, sValue, '|');
 }
 
 int CTDCStartupOptions::GetCommandIDs(CUIntArray& aCmdIDs) const
