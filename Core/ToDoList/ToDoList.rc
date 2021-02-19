@@ -843,7 +843,7 @@ FONT 8, "Tahoma"
 BEGIN
     LTEXT           "1. Where do you want ToDoList to store your program settings ?",
                     IDC_STATIC,7,7,261,9
-    CONTROL         "&Windows registry",IDC_REGISTRY,"Button",
+    CONTROL         "&Windows Registry",IDC_REGISTRY,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,16,21,252,10
     CONTROL         "&Ini file ",IDC_INIFILE,"Button",BS_AUTORADIOBUTTON,16,
                     35,252,10
