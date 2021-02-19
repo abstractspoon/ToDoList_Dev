@@ -93,8 +93,17 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		iti.nLabelWidth = rItem.Width();
 		nMaxLabelWidth = max(nMaxLabelWidth, iti.nLabelWidth);
 
-		if (iti.nAttribID != TDCA_COMMENTS)
+		// omit comments and filelinks from checks
+		switch (iti.nAttribID)
+		{
+		case TDCA_COMMENTS:
+		case TDCA_FILELINK:
+			break;
+
+		default:
 			nMaxValueLen = max(nMaxValueLen, iti.sValue.GetLength());
+			break;
+		}
 	}
 
 	// Now add tabs to each label until they all have the same length 
@@ -122,21 +131,20 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 	{
 		TDCINFOTIPITEM& iti = aItems[nItem];
 
-		// Multi-line or long comments are special case
-		if ((iti.nAttribID == TDCA_COMMENTS) && !iti.sValue.IsEmpty())
+		// Multi-line or long attributes are special case
+		if (!iti.sValue.IsEmpty())
 		{
 			const int MAX_LINELEN = max(75, (nMaxValueLen + 10));
 
-			// Note: we don't pre-add the ellipsis because we 
-			// we don't want it to affect the line splitting
-			BOOL bWantEllipsis = (iti.sValue.GetLength() < m_data.GetTaskCommentsLength(dwTaskID));
+			// Note: Add the ellipsis at the end else it messes up the line splitting
+			BOOL bWantEllipsis = ((iti.nAttribID == TDCA_COMMENTS) && (iti.sValue.GetLength() < m_data.GetTaskCommentsLength(dwTaskID)));
 
 			if (((iti.sValue.Find('\n') != -1) || (iti.sValue.GetLength() > MAX_LINELEN)))
 			{
-				CStringArray aCommentLines;
+				CStringArray aLines;
 
-				int nNumLines = Misc::SplitLines(iti.sValue, aCommentLines, MAX_LINELEN);
-				nNumLines -= Misc::RemoveEmptyItems(aCommentLines);
+				int nNumLines = Misc::SplitLines(iti.sValue, aLines, MAX_LINELEN);
+				nNumLines -= Misc::RemoveEmptyItems(aLines);
 
 				if (nNumLines > 1)
 				{
@@ -147,7 +155,7 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 						else
 							sTip += CString('\t', (nMaxLabelWidth / nTabWidth));
 
-						sTip += aCommentLines[nLine];
+						sTip += aLines[nLine];
 
 						if ((nLine == (nNumLines - 1)) && bWantEllipsis)
 							sTip += _T("...");
@@ -222,6 +230,7 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_CREATIONDATE, IDS_TDLBC_CREATEDATE, m_formatter.GetTaskCreationDate(pTDI));
 	ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDS, pTDI->aDependencies.Format());
 	ADDINFOITEM(TDCA_DONEDATE, IDS_TDLBC_DONEDATE, m_formatter.GetTaskDoneDate(pTDI));
+	ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, Misc::FormatArray(pTDI->aFileLinks, '\n')); // separate lines
 	ADDINFOITEM(TDCA_FLAG, IDS_TDLBC_FLAG, CEnString(pTDI->bFlagged ? IDS_YES : 0));
 	ADDINFOITEM(TDCA_ID, IDS_TDLBC_ID, Misc::Format(dwTaskID));
 	ADDINFOITEM(TDCA_LASTMODBY, IDS_TDLBC_LASTMODBY, pTDI->sLastModifiedBy);
@@ -240,10 +249,7 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_TIMEREMAINING, IDS_TDLBC_REMAINING, m_formatter.GetTaskTimeRemaining(pTDI, pTDS));
 	ADDINFOITEM(TDCA_TIMESPENT, IDS_TDLBC_TIMESPENT, m_formatter.GetTaskTimeSpent(pTDI, pTDS));
 	ADDINFOITEM(TDCA_VERSION, IDS_TDLBC_VERSION, pTDI->sVersion);
-
-	if (pTDI->aFileLinks.GetSize())
-		ADDINFOITEM(TDCA_FILELINK, IDS_TDLBC_FILELINK, pTDI->aFileLinks[0]);
-
+	
 	if (!pTDI->IsDone() || !m_data.HasStyle(TDCS_HIDESTARTDUEFORDONETASKS))
 	{
 		ADDINFOITEM(TDCA_STARTDATE, IDS_TDLBC_STARTDATE, m_formatter.GetTaskStartDate(pTDI, pTDS));
