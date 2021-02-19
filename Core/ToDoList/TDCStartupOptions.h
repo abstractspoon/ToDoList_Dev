@@ -79,6 +79,9 @@ public:
 	BOOL HasFilePath() const { return (lstrlen(m_szFilePaths) > 0); }
 	int GetFilePaths(CStringArray& aFiles) const;
 
+	BOOL WantCheckOut() const { return m_bCheckOut; }
+	BOOL WantCheckIn() const { return m_bCheckIn; }
+
 	BOOL HasNewTaskTitle() const { return !m_sNewTaskTitle.IsEmpty(); }
 	BOOL GetNewTaskTitle(CString& sValue) const { return (!m_sNewTaskTitle.IsEmpty() && m_sNewTaskTitle.GetValue(sValue)); }
 	BOOL GetTaskTitle(CString& sValue) const { return (!m_sTaskTitle.IsEmpty() && m_sTaskTitle.GetValue(sValue)); }
@@ -143,6 +146,7 @@ protected:
 
 	DWORD m_dwFlags;
 	BOOL m_bSaveIntermediateAll;
+	BOOL m_bCheckOut, m_bCheckIn;
 
 protected:
 	void SetCmdInfo(const CEnCommandLineInfo& cmdInfo);

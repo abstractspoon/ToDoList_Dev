@@ -5302,9 +5302,40 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		SelectToDoCtrl(nFirstSel, FALSE);
 	}
 
-	// 2. Select the task ----------------------------------
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
+	// 2. Source control
+	// 
+	// A) If WantCheckOut AND WantCheckIn are set then '-ssc' was used 
+	//    without an argument
+	// B) Otherwise '-ssc' was followed by 'out' or 'in but not both
+	// c) If both are set (no argument used) but the tasklist was
+	//    already checked out then we don't checkin at the end
+	BOOL bWantCheckIn = FALSE;
+
+	if (tdc.IsSourceControlled())
+	{
+		bWantCheckIn = startup.WantCheckIn();
+		
+		if (startup.WantCheckOut())
+		{
+			if (!tdc.IsCheckedOut())
+			{
+				OnToolsCheckout();
+
+				if (!tdc.IsCheckedOut())
+					return FALSE;
+
+				m_toolbarMain.RefreshButtonStates();
+			}
+			else
+			{
+				bWantCheckIn = FALSE;
+			}
+		}
+	}
+	
+	// 3. Select/Create the task ----------------------------------
 	if (startup.HasFlag(TLD_TASKLINK))
 	{
 		CStringArray aFiles;
@@ -5376,7 +5407,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			return FALSE;
 	}
 		
-	// 3. Modify the task's attributes ----------------------------
+	// 4. Modify the task --------------------------------------
 	tdc.BeginSelectedTaskEdit();
 
 	CStringArray aItems;
@@ -5459,7 +5490,6 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		if (aDepends.Set(aItems))
 			tdc.SetSelectedTaskDependencies(aDepends, bAppend);
 	}
-
 
 	if (startup.GetTaskTags(aItems, bAppend) != -1)
 		tdc.SetSelectedTaskTags(aItems, bAppend);
@@ -5564,7 +5594,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 	tdc.EndSelectedTaskEdit();
 	
-	// 4. Execute any commands -------------------------------
+	// 5. Execute any commands -------------------------------
 	if (startup.HasCommandID())
 	{
 		CUIntArray aCmdIDs;
@@ -5574,7 +5604,13 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			SendMessage(WM_COMMAND, MAKEWPARAM(aCmdIDs[nCmd], 0), 0);
 	}
 
-	// 5. Save tasklist's intermediate state ------------------
+	// 6. Source Control --------------------------------------
+	if (bWantCheckIn)
+	{
+		OnToolsCheckin();
+	}
+
+	// 7. Save tasklist intermediate state ------------------
 	if (startup.HasFlag(TLD_SAVEINTERMEDIATE))
 	{
 		CString sOutputFile(GetIntermediateTaskListPath(GetToDoCtrl().GetFilePath()));

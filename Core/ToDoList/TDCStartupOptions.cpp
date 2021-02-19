@@ -424,6 +424,23 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 		m_bSaveIntermediateAll = (sValue == _T("ALL"));
 	}
 
+	if (cmdInfo.GetOption(SWITCH_SIMPLESOURCECONTROL, sValue))
+	{
+		if (sValue.CompareNoCase(_T("out")) == 0)
+		{
+			m_bCheckOut = TRUE;
+		}
+		else if (sValue.CompareNoCase(_T("in")) == 0)
+		{
+			m_bCheckIn = TRUE;
+		}
+		else
+		{
+			m_bCheckOut = TRUE;
+			m_bCheckIn = TRUE;
+		}
+	}
+
 	if (cmdInfo.HasOption(SWITCH_TASKLINK))
 	{
 		if (!HasFilePath())
@@ -481,7 +498,10 @@ CTDCStartupOptions& CTDCStartupOptions::operator=(const CTDCStartupOptions& star
 	m_dwParentID = startup.m_dwParentID; 
 	m_dwSiblingID = startup.m_dwSiblingID; 
 	m_dwFlags = startup.m_dwFlags;
+
 	m_bSaveIntermediateAll = startup.m_bSaveIntermediateAll;
+	m_bCheckOut = startup.m_bCheckOut;
+	m_bCheckIn = startup.m_bCheckIn;
 
 	m_sCopyFromTaskAttrib = startup.m_sCopyFromTaskAttrib;
 	m_sCopyToTaskAttrib = startup.m_sCopyToTaskAttrib;
@@ -531,7 +551,10 @@ BOOL CTDCStartupOptions::operator==(const CTDCStartupOptions& startup) const
 		(m_dwParentID == startup.m_dwParentID) &&
 		(m_dwSiblingID == startup.m_dwSiblingID) &&
 		(m_dwFlags == startup.m_dwFlags) &&
+
 		(m_bSaveIntermediateAll == startup.m_bSaveIntermediateAll) &&
+		(m_bCheckOut == startup.m_bCheckOut) &&
+		(m_bCheckIn == startup.m_bCheckIn) &&
 
 		(m_sCopyFromTaskAttrib == startup.m_sCopyFromTaskAttrib) && 
 		(m_sCopyToTaskAttrib == startup.m_sCopyToTaskAttrib)
@@ -686,7 +709,10 @@ void CTDCStartupOptions::Reset()
 	m_dwParentID = 0; 
 	m_dwSiblingID = 0; 
 	m_dwFlags = TLD_PASSWORDPROMPTING;
+
 	m_bSaveIntermediateAll = FALSE;
+	m_bCheckOut = FALSE;
+	m_bCheckIn = FALSE;
 
 	m_sCopyFromTaskAttrib.ClearValue();
 	m_sCopyToTaskAttrib.ClearValue();
