@@ -36,7 +36,12 @@ BOOL TDCSTARTUPATTRIB::operator==(const CString& sValue) const
 
 BOOL TDCSTARTUPATTRIB::IsEmpty() const 
 { 
-	return (!bSet || !lstrlen(szValue)); 
+	return (!IsSet() || !lstrlen(szValue)); 
+}
+
+BOOL TDCSTARTUPATTRIB::IsSet() const
+{
+	return bSet;
 }
 
 void TDCSTARTUPATTRIB::SetValue(const CString& sValue)
@@ -736,8 +741,7 @@ BOOL CTDCStartupOptions::GetTaskCreationDate(COleDateTime& dtValue) const
 
 BOOL CTDCStartupOptions::GetTaskPriority(int& nValue, BOOL& bOffset) const 
 { 
-	// handle 'n' for none
-	if (m_nTaskPriority == _T("n"))
+	if (m_nTaskPriority.IsSet() && m_nTaskPriority.IsEmpty())
 	{
 		nValue = -2;
 		bOffset = FALSE;
@@ -751,8 +755,7 @@ BOOL CTDCStartupOptions::GetTaskPriority(int& nValue, BOOL& bOffset) const
 
 BOOL CTDCStartupOptions::GetTaskRisk(int& nValue, BOOL& bOffset) const 
 { 
-	// handle 'n' for none
-	if (m_nTaskRisk == _T("n"))
+	if (m_nTaskRisk.IsSet() && m_nTaskRisk.IsEmpty())
 	{
 		nValue = -2;
 		bOffset = FALSE;

@@ -26,6 +26,7 @@ public:
 	BOOL operator==(const CString& sValue) const;
 
 	BOOL IsEmpty() const;
+	BOOL IsSet() const;
 	void SetValue(const CString& sValue);
 	BOOL GetValue(CString& sValue) const;
 	BOOL GetValue(int& nValue, BOOL& bOffset) const;
