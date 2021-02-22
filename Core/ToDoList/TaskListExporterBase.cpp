@@ -55,7 +55,7 @@ static TDC_ATTRIBUTE ATTRIB_ORDER[] =
 	TDCA_EXTERNALID,
 	TDCA_COST,		
 	TDCA_VERSION,	
-	TDCA_CUSTOMATTRIB,
+	TDCA_CUSTOMATTRIB, // placeholder only
 	TDCA_FLAG,		
 	TDCA_DEPENDENCY,
 	TDCA_FILELINK,	
@@ -601,7 +601,7 @@ void CTaskListExporterBase::BuildLabelMap()
 			ATTRIBLABELS[attrib.nAttribID] = CEnString(attrib.nAttribResID);
 		}
 
-		ATTRIBLABELS[TDCA_CUSTOMATTRIB] = "";
+		ATTRIBLABELS[TDCA_CUSTOMATTRIB] = ""; // placeholder only
 	}
 }
 
@@ -624,6 +624,11 @@ void CTaskListExporterBase::BuildAttribList(const ITASKLISTBASE* pTasks)
 			case TDCA_COMMENTS:
 				if (pTasks->IsAttributeAvailable(TDCA_HTMLCOMMENTS))
 					ARRATTRIBUTES.Add(nAttrib);
+				break;
+
+			case TDCA_CUSTOMATTRIB:
+				if (pTasks->GetCustomAttributeCount())
+					ARRATTRIBUTES.Add(TDCA_CUSTOMATTRIB); // placeholder only
 				break;
 			}
 		}
