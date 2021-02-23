@@ -137,6 +137,7 @@ protected:
 	afx_msg void OnHeaderClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnDestroy();
 
 	afx_msg LRESULT OnColumnEditLabel(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColumnEditTaskDone(WPARAM wp, LPARAM lp);

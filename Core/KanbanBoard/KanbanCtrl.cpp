@@ -125,6 +125,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_WM_SETFOCUS()
 	ON_WM_SETCURSOR()
 	ON_WM_CAPTURECHANGED()
+	ON_WM_DESTROY()
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_MESSAGE(WM_KLCN_EDITTASKDONE, OnColumnEditTaskDone)
 	ON_MESSAGE(WM_KLCN_EDITTASKFLAG, OnColumnEditTaskFlag)
@@ -159,6 +160,17 @@ int CKanbanCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	}
 
 	return 0;
+}
+
+void CKanbanCtrl::OnDestroy()
+{
+	// Prevent focus changes during shutdown
+	// because these can cause a hang whose exact
+	// cause I have yet to determine
+	m_aColumns.SetSelectedColumn(NULL);
+	m_aColumns.RemoveAll();
+
+	CWnd::OnDestroy();
 }
 
 void CKanbanCtrl::FilterToolTipMessage(MSG* pMsg) 
