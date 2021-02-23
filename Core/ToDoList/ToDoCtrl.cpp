@@ -5151,7 +5151,8 @@ BOOL CToDoCtrl::GetLabelEditRect(CRect& rScreen)
 
 BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 {
-	m_infoTip.Pop();
+	if (HasStyle(TDCS_SHOWINFOTIPS) && m_infoTip.GetSafeHwnd())
+		m_infoTip.Pop();
 
 	if (!CanEditSelectedTask(TDCA_TASKNAME))
 		return FALSE;
