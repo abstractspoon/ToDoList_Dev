@@ -4686,32 +4686,12 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	if (!CanEditSelectedTask(TDCA_NEWTASK))
 		return FALSE;
 
-	int nNumSel = GetSelectedCount();
-
-	HTREEITEM htiParent = NULL, htiAfter = NULL;
-
-	switch (nNumSel)
-	{
-	case 1:
-		VERIFY (m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
-		break;
-
-	case 0:
-		// parent and sibling are NULL
-		break; 
-
-	default:
-		// can't handle multiple selection
-		return FALSE;
-	}
-
 	switch (nInsertWhere)
 	{
 	case TDC_INSERTATTOP:
 	case TDC_INSERTATBOTTOM:
 		return TRUE;
 
-	// Selected item cannot be NULL and parent cannot be reference
 	case TDC_INSERTATTOPOFSELTASKPARENT:
 	case TDC_INSERTATBOTTOMOFSELTASKPARENT:
 	case TDC_INSERTAFTERSELTASK:
@@ -4719,10 +4699,29 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	case TDC_INSERTATTOPOFSELTASK: 
 	case TDC_INSERTATBOTTOMOFSELTASK:
 		{
+			HTREEITEM htiParent = NULL, htiAfter = NULL;
+
+			switch (GetSelectedCount())
+			{
+			case 0:
+				break; // handled below
+
+			case 1:
+				VERIFY (m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
+				break;
+
+			default:
+				if (!m_taskTree.SelectionHasSameParent())
+					return FALSE;
+
+				VERIFY(m_taskTree.GetInsertLocation(nInsertWhere, htiParent, htiAfter));
+				break;
+			}
+
+			// Selected item cannot be NULL and parent cannot be reference
  			if (GetSelectedItem() == NULL)
  				return FALSE;
 		
-			// else
 			return !m_data.IsTaskReference(GetTaskID(htiParent));
 		}
 		break;

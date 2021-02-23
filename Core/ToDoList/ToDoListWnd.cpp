@@ -5366,7 +5366,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 			bEditTask = TRUE;
 		}
 
-		TDC_INSERTWHERE nWhere = TDC_INSERTATBOTTOM; // default
+		TDC_INSERTWHERE nWhere = TDC::MapInsertIDToInsertWhere(GetNewTaskCmdID()); // default
 
 		// do we have a parent task ?
 		if (SelectTask(tdc, startup.GetParentTaskID()))
@@ -5378,8 +5378,14 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		{
 			nWhere = TDC_INSERTAFTERSELTASK;
 		}
+		else if (!tdc.CanCreateNewTask(nWhere))
+		{
+			nWhere = TDC_INSERTATBOTTOM;
+		}
 
-		if (!CreateNewTask(sNewTask, nWhere, FALSE)) // don't edit
+		ASSERT(tdc.CanCreateNewTask(nWhere));
+
+		if (!CreateNewTask(sNewTask, nWhere, FALSE)) // don't edit label immediately
 			return FALSE;
 
 		// creation date

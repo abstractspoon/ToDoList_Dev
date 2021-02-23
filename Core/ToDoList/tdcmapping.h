@@ -61,7 +61,7 @@ namespace TDC
 
 		// all else
 		ASSERT(0);
-		return (TDC_INSERTWHERE)-1;
+		return TDC_INSERTATBOTTOM;
 	}
 
 	static TDC_COLUMN MapSortIDToColumn(UINT nSortID) 
