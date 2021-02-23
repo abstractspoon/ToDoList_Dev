@@ -46,11 +46,12 @@ public:
 	BOOL InsertSeparator(int nPos);
 	int InsertSeparatorAfter(UINT nCmdID); // returns pos
 	BOOL DeleteLastItem();
+	BOOL DeleteTrailingSeparator();
+	int DeleteDuplicateSeparators(int nStartPos = 0);
 	BOOL DeleteItem(int nPos);
 	BOOL SetItemWidth(int nPos, int nWidth, CRect& rect);
 	BOOL SetItemWidth(int nPos, int nWidth);
 	int GetItemWidth(int nPos) const;
-	void RemoveDuplicateSeparators(int nStartPos = 0);
 	int GetItemImage(int nPos) const;
 	BOOL SetItemImage(int nPos, int iImage);
 

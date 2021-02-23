@@ -336,35 +336,71 @@ CString CTDCToolsHelper::EscapeCharacters(const CString& sValue, BOOL bWebTool)
 int CTDCToolsHelper::RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter)
 {
 	ASSERT(toolbar.GetSafeHwnd());
-	int nRemoved = 0;
-	CImageList* pIL = toolbar.GetToolBarCtrl().GetImageList();
 
-	int nNumPos = toolbar.GetToolBarCtrl().GetButtonCount();
-	
-	for (UINT nToolID = FIRST_TOOLID; nToolID <= LAST_TOOLID; nToolID++)
+	int nNumRemoved = 0, nFirstBtn, nLastBtn;
+
+	if (GetToolButtonRange(toolbar, nFirstBtn, nLastBtn))
 	{
-		int nBtn = toolbar.CommandToIndex(nToolID);
-		
-		if (nBtn != -1)
+		// Remove the range working backwards
+		CToolBarCtrl& tbc = toolbar.GetToolBarCtrl();
+		CImageList* pIL = tbc.GetImageList();
+
+		for (int nBtn = nLastBtn; nBtn >= nFirstBtn; nBtn--)
 		{
-			TBBUTTON tbb;
-			VERIFY(toolbar.GetToolBarCtrl().GetButton(nBtn, &tbb));
-			
-			if (toolbar.GetToolBarCtrl().DeleteButton(nBtn))
+			if (!toolbar.IsItemSeparator(nBtn))
 			{
 				// delete the image too
+				TBBUTTON tbb;
+				VERIFY(toolbar.GetToolBarCtrl().GetButton(nBtn, &tbb));
+			
 				pIL->Remove(tbb.iBitmap);
-				
-				nRemoved++;
+				nNumRemoved++; // only count actual tools
 			}
+
+			VERIFY(toolbar.GetToolBarCtrl().DeleteButton(nBtn));
+		}
+	
+		// Cleanup extra separator added in AddToolsToToolbar
+		if (nNumRemoved)
+		{
+			toolbar.DeleteDuplicateSeparators(toolbar.CommandToIndex(nCmdAfter) + 1);
+			toolbar.DeleteTrailingSeparator();
 		}
 	}
-	
-	// Cleanup extra separator added in AddToolsToToolbar
-	if (nRemoved)
-		toolbar.RemoveDuplicateSeparators(toolbar.CommandToIndex(nCmdAfter) + 1);
 
-	return nRemoved;
+	return nNumRemoved;
+}
+
+BOOL CTDCToolsHelper::GetToolButtonRange(const CEnToolBar& toolbar, int& nFirstBtn, int& nLastBtn)
+{
+	nFirstBtn = nLastBtn = -1;
+
+	// Tools are a contiguous range
+	int nNumBtns = toolbar.GetToolBarCtrl().GetButtonCount(), nBtn;
+	
+	// First
+	for (nBtn = 0; nBtn < nNumBtns; nBtn++)
+	{
+		if (IsToolCmdID(toolbar.GetItemID(nBtn)))
+		{
+			nFirstBtn = nBtn;
+			break;
+		}
+	}
+
+	// Last
+	nBtn = nNumBtns;
+
+	while (nBtn--)
+	{
+		if (IsToolCmdID(toolbar.GetItemID(nBtn)))
+		{
+			nLastBtn = nBtn;
+			break;
+		}
+	}
+
+	return ((nFirstBtn != -1) && (nLastBtn >= nFirstBtn));
 }
 
 void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped)
@@ -376,7 +412,7 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 	
 	// then re-add
 	CToolIndexArray aIndices;
-	int nNumItems = BuildToolIndexArray(aTools, aIndices, bGrouped, TRUE);
+	int nNumItems = BuildToolIndexArray(aTools, aIndices, bGrouped);
 
 	if (nNumItems == 0)
 		return;
@@ -389,8 +425,11 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 
 	// work out where to start adding
 	int nStartPos = toolbar.CommandToIndex(nCmdAfter) + 1;
-	
-	for (int nItem = 0, nAdded = 0; nItem < nNumItems; nItem++)
+
+	// Leading separator
+	toolbar.InsertSeparator(nStartPos);
+		
+	for (int nItem = 0, nAdded = 1; nItem < nNumItems; nItem++)
 	{
 		const int nTool = aIndices[nItem];
 		int nPos = (nStartPos + nAdded);
@@ -400,7 +439,7 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 			// Prevent duplicate separators
 			if (!toolbar.IsItemSeparator(nPos - 1) && toolbar.InsertSeparator(nPos))
 			{
-				nPos++;
+				nAdded++;
 			}
 		}
 		else
@@ -415,7 +454,7 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 
 				if (toolbar.GetToolBarCtrl().InsertButton(nPos, &tbb))
 				{
-					nPos++;
+					nAdded++;
 				}
 				else
 				{
@@ -425,7 +464,7 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 		}
 	}
 
-	toolbar.RemoveDuplicateSeparators(nStartPos);
+	toolbar.DeleteDuplicateSeparators(nStartPos);
 }
 
 void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped)
@@ -447,7 +486,7 @@ void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, 
 
 	// if we have any tools to add we do it here
 	CToolIndexArray aIndices;
-	int nNumItems = CTDCToolsHelper::BuildToolIndexArray(aTools, aIndices, bGrouped, FALSE);
+	int nNumItems = CTDCToolsHelper::BuildToolIndexArray(aTools, aIndices, bGrouped);
 
 	if (nNumItems)
 	{
@@ -496,11 +535,11 @@ LPCTSTR CTDCToolsHelper::GetDefaultFileExt()
 	return m_bTDLEnabled ? TDLEXT : XMLEXT;
 }
 
-int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped, BOOL bIncTrailingSeparator)
+int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped)
 {
 	aIndices.RemoveAll();
 
-	int nNumTools = aTools.GetSize();
+	int nNumTools = aTools.GetSize(), nNumGroups = 1;
 
 	if (nNumTools == 0)
 		return 0;
@@ -526,9 +565,15 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 
 			CString sGroup(sExt); // default
 
-			// Special case: Group executables by filename
+			// Special cases: executables and folders
 			if (sExt == _T(".exe"))
+			{
 				sGroup = (sFileName + sExt);
+			}
+			else if (sExt.IsEmpty())
+			{
+				sGroup = _T("_FOLDER_");
+			}
 				
 			CToolIndexArray* pIndices = mapTools.GetAddMapping(sGroup);
 			ASSERT(pIndices);
@@ -536,7 +581,7 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 			pIndices->Add(nTool);
 		}
 
-		int nNumGroups = mapTools.GetCount();
+		nNumGroups = mapTools.GetCount();
 
 		if (nNumGroups > 1)
 		{
@@ -562,29 +607,17 @@ int CTDCToolsHelper::BuildToolIndexArray(const CUserToolArray& aTools, CToolInde
 			{
 				aIndices.Append(*aIndexArrays[nGroup]);
 
-				int nSeparator = -1;
-				aIndices.Add(nSeparator);
+				// Omit trailing separator
+				if (nGroup < (nNumGroups - 1))
+				{
+					int nSeparator = -1;
+					aIndices.Add(nSeparator);
+				}
 			}
 		}
 	}
 
-	if (bIncTrailingSeparator)
-	{
-		if (aIndices[aIndices.GetSize() - 1] != -1)
-		{
-			int nSeparator = -1;
-			aIndices.Add(nSeparator);
-		}
-	}
-	else
-	{
-		if (aIndices[aIndices.GetSize() - 1] == -1)
-		{
-			aIndices.RemoveAt(aIndices.GetSize() - 1);
-		}
-	}
-
-	ASSERT(aIndices.GetSize() >= aTools.GetSize());
+	ASSERT(aIndices.GetSize() == (aTools.GetSize() + nNumGroups - 1));
 
 	return aIndices.GetSize();
 }

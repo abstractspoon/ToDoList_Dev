@@ -97,7 +97,8 @@ protected:
 	static CString EscapeCharacters(const CString& sValue, BOOL bWebTool);
 
 	static int IndexArraySortProc(const void* pV1, const void* pV2);
-	static int BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped, BOOL bIncTrailingSeparator);
+	static int BuildToolIndexArray(const CUserToolArray& aTools, CToolIndexArray& aIndices, BOOL bGrouped);
+	static BOOL GetToolButtonRange(const CEnToolBar& toolbar, int& nFirstBtn, int& nLastBtn);
 };
 
 #endif // !defined(AFX_TOOLSHELPER_H__6BAD432D_0189_46A9_95ED_EF869CFC6CE1__INCLUDED_)
