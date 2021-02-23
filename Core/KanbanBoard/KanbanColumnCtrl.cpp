@@ -846,7 +846,7 @@ void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rIte
 
 				if (nPriority != -2)
 				{
-					COLORREF crFill = m_aPriorityColors[nPriority];
+					COLORREF crFill = m_aPriorityColors[min(nPriority, 10)];
 					COLORREF crBorder = GraphicsMisc::Darker(crFill, 0.4);
 
 					GraphicsMisc::DrawRect(pDC, rBar, crFill, crBorder);
