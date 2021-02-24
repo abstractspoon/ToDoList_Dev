@@ -185,7 +185,7 @@ protected:
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
 
-	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit) const;
+	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect = NULL) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient, CRect& rBtn) const;
 	DWORD GetRealTaskID(DWORD dwTaskID) const;

@@ -1438,10 +1438,12 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
-	return HitTestTask(ptClient, nHit);
+	DWORD dwTaskID = HitTestTask(ptClient, nHit);
+
+	return ((nHit == TCCHT_NOWHERE) ? 0 : GetRealTaskID(dwTaskID));
 }
 
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit) const
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect) const
 {
 	nHit = TCCHT_NOWHERE;
 
@@ -1508,8 +1510,17 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit) 
 			{
 				nHit = TCCHT_MIDDLE;
 			}
+
+			if (pRect)
+			{
+				pRect->left = rCell.left;
+				pRect->right = rCell.right;
+
+				pRect->top = (rCell.top + (nPos * nTaskHeight));
+				pRect->bottom = (pRect->top + nTaskHeight);
+			}
 			
-			return ((nHit == TCCHT_NOWHERE) ? 0 : GetRealTaskID(dwTaskID));
+			return ((nHit == TCCHT_NOWHERE) ? 0 : dwTaskID);
 		}
 	}
 
@@ -2733,8 +2744,9 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		return CToolTipCtrlEx::SetToolInfo(*pTI, this, CEnString(IDS_OVERFLOWBTN_TIP), OVERFLOWBTN_TIPID, rOverflowBtn);
 	}
 
-	// perform a hit-test
-	DWORD dwTaskID = HitTestTask(point);
+	TCC_HITTEST nUnused;
+	CRect rHit;
+	DWORD dwTaskID = HitTestTask(point, nUnused, rHit);
 
 	if (dwTaskID)
 	{
@@ -2747,13 +2759,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include future items
 			ASSERT(pTCI);
 
-			CRect rLabel;
-			VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
-
-			if (rLabel.PtInRect(point))
-			{
-				return CToolTipCtrlEx::SetToolInfo(*pTI, this, pTCI->GetName(), dwTaskID, rLabel);
-			}
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, pTCI->GetName(), dwTaskID, rHit);
 		}
 	}
 
@@ -2796,7 +2802,20 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 
 	// Calculate exact position required
 	CRect rLabel;
-	VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
+
+	if (HasOption(TCCO_DISPLAYCONTINUOUS))
+	{
+		VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
+	}
+	else
+	{
+		CPoint ptTip(::GetMessagePos());
+		ScreenToClient(&ptTip);
+
+		TCC_HITTEST nUnused;
+		VERIFY(HitTestTask(ptTip, nUnused, rLabel));
+	}
+
 	ClientToScreen(rLabel);
 
 	CRect rTip(rLabel);
