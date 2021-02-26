@@ -776,11 +776,11 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		}
 		else // draw task border/background
 		{
-			DWORD dwFlags = GMDR_TOP;
+			DWORD dwBorders = GMDR_TOP;
 			
 			if (rTask.left > rAvailCell.left)
 			{
-				dwFlags |= GMDR_LEFT;
+				dwBorders |= GMDR_LEFT;
 			}
 			else if (bContinuous)
 			{
@@ -788,15 +788,17 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			}
 			
 			if (rTask.right < rAvailCell.right)
-				dwFlags |= GMDR_RIGHT;
+				dwBorders |= GMDR_RIGHT;
 			
 			if (rTask.bottom < rAvailCell.bottom)
-				dwFlags |= GMDR_BOTTOM;
+				dwBorders |= GMDR_BOTTOM;
 			
 			COLORREF crFill = pTCI->GetFillColor(bTextColorIsBkgnd);
 			COLORREF crBorder = pTCI->GetBorderColor(bTextColorIsBkgnd);
 						
-			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwFlags);
+			int nBorderStyle = ((dwTaskID == dwRealTaskID) ? PS_SOLID : PS_DOT);
+
+			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwBorders, 255, nBorderStyle);
 		}
 
 		// draw icon and text

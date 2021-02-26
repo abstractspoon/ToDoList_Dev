@@ -1113,7 +1113,7 @@ BOOL TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<doubl
 	if (!CanRecur())
 		return FALSE;
 
-	if (!HasStart() || !HasDue())
+	if (!HasStart() || !HasDue() || (dateDue < dateStart))
 		return FALSE;
 
 	switch (trRecurrence.nRecalcFrom)

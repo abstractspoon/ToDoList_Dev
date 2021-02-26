@@ -218,8 +218,15 @@ namespace GraphicsMisc
 	COLORREF ParseWebColor(const CString& sHexColor);
 	void CalculateBoxColors(COLORREF crBase, BOOL bEnabled, COLORREF& crFill, COLORREF& crBorder);
 
-	void DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder = CLR_NONE, 
-					int nCornerRadius = 0, DWORD dwEdges = GMDR_ALL, BYTE cFillOpacity = 255);
+	void DrawRect(CDC* pDC, 
+				  const CRect& rect, 
+				  COLORREF crFill, 
+				  COLORREF crBorder = CLR_NONE, 
+				  int nCornerRadius = 0, 
+				  DWORD dwBorders = GMDR_ALL, 
+				  BYTE cFillOpacity = 255,
+				  int nBorderStyle = PS_SOLID);
+
 	BOOL FillItemRect(CDC* pDC, CRect& rItem, COLORREF color, HWND hwnd); // will update rItem
 	BOOL FillItemRect(CDC* pDC, LPCRECT prcItem, COLORREF color, HWND hwnd);
 	BOOL CentreRect(LPRECT pRect, LPCRECT prcOther, BOOL bCentreHorz = TRUE, BOOL bCentreVert = TRUE);

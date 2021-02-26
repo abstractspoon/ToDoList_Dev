@@ -1095,7 +1095,8 @@ int GraphicsMisc::DrawAnsiSymbol(CDC* pDC, char cSymbol, const CRect& rText, UIN
 	return nResult;
 }
 
-void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder, int nCornerRadius, DWORD dwEdges, BYTE cFillOpacity)
+void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORREF crBorder, 
+							int nCornerRadius, DWORD dwBorders, BYTE cFillOpacity, int nBorderStyle)
 {
 	ASSERT(HasColor(crBorder) || HasColor(crFill));
 	ASSERT((cFillOpacity == 255) || (nCornerRadius == 0));
@@ -1118,11 +1119,12 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 	if (nCornerRadius == 0)
 	{
 		// can't have border color and no edges
-		if (dwEdges == 0)
+		if (dwBorders == GMDR_NONE)
 			crBorder = CLR_NONE;
 
-		// if both colours are set and fully opaque there's an optimisation we can do
-		if (HasColor(crFill) && HasColor(crBorder) && (cFillOpacity == 255))
+		// if both colours are set, the fill is opaque and the border is not dotted
+		// there's an optimisation we can do
+		if (HasColor(crFill) && HasColor(crBorder) && (cFillOpacity == 255) && (nBorderStyle == PS_SOLID))
 		{
 			pDC->FillSolidRect(rect, crBorder);
 
@@ -1130,22 +1132,22 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 			{
 				CRect rFill(rect);
 
-				if ((dwEdges & GMDR_ALL) == GMDR_ALL)
+				if ((dwBorders & GMDR_ALL) == GMDR_ALL)
 				{
 					rFill.DeflateRect(1, 1);
 				}
 				else
 				{
-					if (dwEdges & GMDR_LEFT)
+					if (dwBorders & GMDR_LEFT)
 						rFill.left++;
 
-					if (dwEdges & GMDR_TOP)
+					if (dwBorders & GMDR_TOP)
 						rFill.top++;
 
-					if (dwEdges & GMDR_RIGHT)
+					if (dwBorders & GMDR_RIGHT)
 						rFill.right--;
 
-					if (dwEdges & GMDR_BOTTOM)
+					if (dwBorders & GMDR_BOTTOM)
 						rFill.bottom--;
 				}
 
@@ -1167,20 +1169,56 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 
 		if (HasColor(crBorder)) // border
 		{
-			if (dwEdges & GMDR_TOP)
-				pDC->FillSolidRect(rect.left, rect.top, rect.Width(), 1, crBorder);
+			if (nBorderStyle == PS_SOLID)
+			{
+				if (dwBorders & GMDR_TOP)
+					pDC->FillSolidRect(rect.left, rect.top, rect.Width(), 1, crBorder);
 
-			if (dwEdges & GMDR_BOTTOM)
-				pDC->FillSolidRect(rect.left, rect.bottom - 1, rect.Width(), 1, crBorder);
+				if (dwBorders & GMDR_BOTTOM)
+					pDC->FillSolidRect(rect.left, rect.bottom - 1, rect.Width(), 1, crBorder);
 
-			if (dwEdges & GMDR_LEFT)
-				pDC->FillSolidRect(rect.left, rect.top, 1, rect.Height(), crBorder);
+				if (dwBorders & GMDR_LEFT)
+					pDC->FillSolidRect(rect.left, rect.top, 1, rect.Height(), crBorder);
 
-			if (dwEdges & GMDR_RIGHT)
-				pDC->FillSolidRect(rect.right - 1, rect.top, 1, rect.Height(), crBorder);
+				if (dwBorders & GMDR_RIGHT)
+					pDC->FillSolidRect(rect.right - 1, rect.top, 1, rect.Height(), crBorder);
+			}
+			else
+			{
+				CPen pen;
+				VERIFY(pen.CreatePen(nBorderStyle, 1, crBorder));
+				
+				CPen* pOldPen = pDC->SelectObject(&pen);
+
+				if (dwBorders & GMDR_TOP)
+				{
+					pDC->MoveTo(rect.left, rect.top);
+					pDC->LineTo(rect.right, rect.top);
+				}
+
+				if (dwBorders & GMDR_BOTTOM)
+				{
+					pDC->MoveTo(rect.left, rect.bottom - 1);
+					pDC->LineTo(rect.right, rect.bottom - 1);
+				}
+
+				if (dwBorders & GMDR_LEFT)
+				{
+					pDC->MoveTo(rect.left, rect.top);
+					pDC->LineTo(rect.left, rect.bottom - 1);
+				}
+
+				if (dwBorders & GMDR_RIGHT)
+				{
+					pDC->MoveTo(rect.right, rect.top);
+					pDC->LineTo(rect.right, rect.bottom - 1);
+				}
+
+				pDC->SelectObject(pOldPen);
+			}
 		}
 	}
-	else // round-rect
+	else // round-rect or dotted pen
 	{
 		CPen* pOldPen = NULL, penBorder;
 		CBrush* pOldBrush = NULL, brFill;
@@ -1199,7 +1237,7 @@ void GraphicsMisc::DrawRect(CDC* pDC, const CRect& rect, COLORREF crFill, COLORR
 		// border
 		if (HasColor(crBorder))
 		{
-			penBorder.CreatePen(PS_SOLID, 1, crBorder);
+			penBorder.CreatePen(nBorderStyle, 1, crBorder);
 			pOldPen = pDC->SelectObject(&penBorder);
 		}
 		else
