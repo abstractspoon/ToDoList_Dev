@@ -200,7 +200,7 @@ BEGIN
     CONTROL         "Display &future occurrences of recurring tasks",
                     IDC_SHOWFUTUREITEMS,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,65,334,10
-    CONTROL         "Dynamically adjust the height of tasks to ensure full visibility",
+    CONTROL         "Dynamically reduce items heights to display more tasks",
                     IDC_DYNAMICTASKHEIGHT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,80,334,10
     CONTROL         "Display tasks as continuous between their 'Start' and 'Due' dates",
