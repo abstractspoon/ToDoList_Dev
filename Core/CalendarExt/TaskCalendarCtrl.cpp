@@ -1463,17 +1463,27 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 	if (pCell == NULL)
 		return 0;
 
-	const CTaskCalItemArray* pTasks = static_cast<CTaskCalItemArray*>(pCell->pUserData);
-	ASSERT(pTasks);
-	
-	if (!pTasks || !pTasks->GetSize())
-		return 0;
-	
 	// handle clicking above tasks
 	CRect rCell;
 	GetGridCellRect(nRow, nCol, rCell, TRUE);
 	
 	if (ptClient.y < rCell.top)
+		return 0;
+	
+	// exclude visible scrollbar
+	if (IsCellScrollBarActive() && IsGridCellSelected(pCell))
+	{
+		CRect rScroll;
+		CalcScrollBarRect(rCell, rScroll);
+
+		if (rScroll.PtInRect(ptClient))
+			return 0;
+	}
+
+	const CTaskCalItemArray* pTasks = static_cast<CTaskCalItemArray*>(pCell->pUserData);
+	ASSERT(pTasks);
+	
+	if (!pTasks || !pTasks->GetSize())
 		return 0;
 	
 	// Find the task beneath the mouse
