@@ -42,6 +42,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.BtnCancel = new System.Windows.Forms.Button();
 			this.BtnOK = new System.Windows.Forms.Button();
+			this.m_ShowFutureOcurrences = new System.Windows.Forms.CheckBox();
 			this.panel1.SuspendLayout();
 			this.groupBox1.SuspendLayout();
 			this.SuspendLayout();
@@ -63,7 +64,7 @@
 			this.panel1.Location = new System.Drawing.Point(9, 10);
 			this.panel1.Margin = new System.Windows.Forms.Padding(0);
 			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(501, 223);
+			this.panel1.Size = new System.Drawing.Size(501, 243);
 			this.panel1.TabIndex = 2;
 			// 
 			// m_DisplayContinuous
@@ -80,13 +81,14 @@
 			// 
 			// groupBox1
 			// 
+			this.groupBox1.Controls.Add(this.m_ShowFutureOcurrences);
 			this.groupBox1.Controls.Add(this.m_HideParentTasks);
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningDays);
 			this.groupBox1.Controls.Add(this.m_HideTasksSpanningWeekends);
 			this.groupBox1.Controls.Add(this.m_HideTasksWithoutTimes);
 			this.groupBox1.Location = new System.Drawing.Point(13, 91);
 			this.groupBox1.Name = "groupBox1";
-			this.groupBox1.Size = new System.Drawing.Size(475, 113);
+			this.groupBox1.Size = new System.Drawing.Size(475, 137);
 			this.groupBox1.TabIndex = 5;
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Task Visibility";
@@ -177,7 +179,7 @@
 			// 
 			this.BtnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.BtnCancel.Location = new System.Drawing.Point(435, 245);
+			this.BtnCancel.Location = new System.Drawing.Point(435, 265);
 			this.BtnCancel.Name = "BtnCancel";
 			this.BtnCancel.Size = new System.Drawing.Size(75, 23);
 			this.BtnCancel.TabIndex = 1;
@@ -188,7 +190,7 @@
 			// 
 			this.BtnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
 			this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-			this.BtnOK.Location = new System.Drawing.Point(353, 245);
+			this.BtnOK.Location = new System.Drawing.Point(353, 265);
 			this.BtnOK.Margin = new System.Windows.Forms.Padding(0);
 			this.BtnOK.Name = "BtnOK";
 			this.BtnOK.Size = new System.Drawing.Size(75, 23);
@@ -196,12 +198,24 @@
 			this.BtnOK.Text = "OK";
 			this.BtnOK.UseVisualStyleBackColor = true;
 			// 
+			// m_ShowFutureOcurrences
+			// 
+			this.m_ShowFutureOcurrences.AutoSize = true;
+			this.m_ShowFutureOcurrences.Checked = true;
+			this.m_ShowFutureOcurrences.CheckState = System.Windows.Forms.CheckState.Checked;
+			this.m_ShowFutureOcurrences.Location = new System.Drawing.Point(10, 111);
+			this.m_ShowFutureOcurrences.Name = "m_ShowFutureOcurrences";
+			this.m_ShowFutureOcurrences.Size = new System.Drawing.Size(236, 17);
+			this.m_ShowFutureOcurrences.TabIndex = 4;
+			this.m_ShowFutureOcurrences.Text = "Display &future occurrences of recurring tasks";
+			this.m_ShowFutureOcurrences.UseVisualStyleBackColor = true;
+			// 
 			// DayViewPreferencesDlg
 			// 
 			this.AcceptButton = this.BtnOK;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.ClientSize = new System.Drawing.Size(520, 277);
+			this.ClientSize = new System.Drawing.Size(520, 297);
 			this.Controls.Add(this.BtnOK);
 			this.Controls.Add(this.BtnCancel);
 			this.Controls.Add(this.panel1);
@@ -236,5 +250,6 @@
 		private System.Windows.Forms.ComboBox m_SlotMinuteCombo;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.CheckBox m_DisplayContinuous;
+		private System.Windows.Forms.CheckBox m_ShowFutureOcurrences;
 	}
 }

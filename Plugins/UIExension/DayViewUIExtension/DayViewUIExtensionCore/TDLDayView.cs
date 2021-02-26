@@ -23,8 +23,9 @@ namespace DayViewUIExtension
 		private Boolean m_HideTasksWithoutTimes = true;
         private Boolean m_HideTasksSpanningWeekends = false;
         private Boolean m_HideTasksSpanningDays = false;
+		private Boolean m_ShowFutureOcurrences = true;
 
-        private Dictionary<UInt32, CalendarItem> m_Items;
+		private Dictionary<UInt32, CalendarItem> m_Items;
         private Dictionary<UInt32, CalendarFutureItem> m_FutureItems;
 
         private TDLRenderer m_Renderer;
@@ -229,6 +230,19 @@ namespace DayViewUIExtension
                 }
             }
         }
+
+		public Boolean ShowFutureOccurrences
+		{
+			get { return m_ShowFutureOcurrences; }
+			set
+			{
+				if (value != m_ShowFutureOcurrences)
+				{
+					m_ShowFutureOcurrences = value;
+					Invalidate();
+				}
+			}
+		}
 
 		public Boolean AutoCalculateDependencyDates
 		{
@@ -983,7 +997,7 @@ namespace DayViewUIExtension
 				if (IsItemWithinRange(item, start, end))
 					appts.Add(item);
 
-				if (item.IsRecurring)
+				if (m_ShowFutureOcurrences && item.IsRecurring)
 				{
 					// Add this task's future items for the current date range
 					// Note: we deliberately double the range else we lose 

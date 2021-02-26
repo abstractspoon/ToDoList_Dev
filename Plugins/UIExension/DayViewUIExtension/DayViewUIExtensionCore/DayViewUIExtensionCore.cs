@@ -523,6 +523,7 @@ namespace DayViewUIExtension
 			m_DayView.HideTasksWithoutTimes = m_PrefsDlg.HideTasksWithoutTimes;
             m_DayView.HideTasksSpanningWeekends = m_PrefsDlg.HideTasksSpanningWeekends;
             m_DayView.HideTasksSpanningDays = m_PrefsDlg.HideTasksSpanningDays;
+			m_DayView.ShowFutureOccurrences = m_PrefsDlg.ShowFutureOccurrences;
 
 			m_DayView.SlotsPerHour = (60 / m_PrefsDlg.SlotMinutes);
 			m_DayView.MinSlotHeight = DPIScaling.Scale(m_PrefsDlg.MinSlotHeight);
