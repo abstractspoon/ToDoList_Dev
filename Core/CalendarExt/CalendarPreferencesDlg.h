@@ -36,6 +36,7 @@ public:
 	BOOL GetDisplayDue() const { return m_bShowDueDates; }
 	BOOL GetDisplayCalcDue() const { return (m_bShowDueDates && m_bShowCalcDueDates); }
 	BOOL GetDisplayDone() const { return m_bShowDoneDates; }
+	BOOL GetDisplayFutureOcurrences() const { return m_bShowFutureOcurrences; }
 
 	BOOL GetCalcMissingStartAsCreation() const;
 	BOOL GetCalcMissingStartAsDue() const;
@@ -68,7 +69,8 @@ protected:
 	int		m_nCalcMissingStartDates;
 	int		m_nCalcMissingDueDates;
 	BOOL	m_bHideParentTasks;
-
+	BOOL	m_bShowFutureOcurrences;
+	
 	CComboBox m_cbHeatMapAttribute;
 	CColorBrewerComboBox m_cbHeatMapPalette;
 	CDWordArray m_aSelPalette;
@@ -117,6 +119,7 @@ public:
 	BOOL GetDisplayDue() const { return m_page.GetDisplayDue(); }
 	BOOL GetDisplayCalcDue() const { return m_page.GetDisplayCalcDue(); }
 	BOOL GetDisplayDone() const { return m_page.GetDisplayDone(); }
+	BOOL GetDisplayFutureOcurrences() const { return m_page.GetDisplayFutureOcurrences(); }
 
 	BOOL GetCalcMissingStartAsCreation() const { return m_page.GetCalcMissingStartAsCreation(); }
 	BOOL GetCalcMissingStartAsDue() const { return m_page.GetCalcMissingStartAsDue(); }

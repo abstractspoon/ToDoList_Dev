@@ -1254,7 +1254,7 @@ void CTaskCalendarCtrl::RebuildFutureOccurrences()
 {
 	m_mapFutureOccurrences.RemoveAll();
 
-	if (m_mapRecurringTaskIDs.GetCount())
+	if (HasOption(TCCO_SHOWFUTUREITEMS) && m_mapRecurringTaskIDs.GetCount())
 	{
 		// Go through all the known recurring tasks to see if any 
 		// of them have future occurrences within the visible cells

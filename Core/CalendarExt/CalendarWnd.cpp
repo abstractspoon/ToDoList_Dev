@@ -290,6 +290,7 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_ADJUSTTASKHEIGHTS,				m_dlgPrefs.GetAdjustTaskHeights());
 	Misc::SetFlag(dwOptions, TCCO_TREATOVERDUEASDUETODAY,			m_dlgPrefs.GetTreatOverdueAsDueToday());
 	Misc::SetFlag(dwOptions, TCCO_HIDEPARENTTASKS,					m_dlgPrefs.GetHideParentTasks());
+	Misc::SetFlag(dwOptions, TCCO_SHOWFUTUREITEMS,					m_dlgPrefs.GetDisplayFutureOcurrences());
 
 	// Preserve app preferences
 	Misc::SetFlag(dwOptions, TCCO_TASKTEXTCOLORISBKGND,				m_BigCalendar.HasOption(TCCO_TASKTEXTCOLORISBKGND));
