@@ -1479,7 +1479,15 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 		if (rScroll.PtInRect(ptClient))
 			return 0;
 	}
+	else // exclude 'More Tasks...' button
+	{
+		CRect rOverflow;
+		CalcOverflowBtnRect(rCell, rOverflow);
 
+		if (rOverflow.PtInRect(ptClient))
+			return 0;
+	}
+	
 	const CTaskCalItemArray* pTasks = static_cast<CTaskCalItemArray*>(pCell->pUserData);
 	ASSERT(pTasks);
 	
