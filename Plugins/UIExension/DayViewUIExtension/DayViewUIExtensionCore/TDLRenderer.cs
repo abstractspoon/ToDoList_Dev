@@ -483,9 +483,15 @@ namespace DayViewUIExtension
 							rect.Width--;
 						}
 
-                        using (Pen pen = new Pen(borderColor, 1))
-                            g.DrawRectangle(pen, rect);
-                    }
+
+						using (Pen pen = new Pen(borderColor, 1))
+						{
+							if (isFutureItem)
+								pen.DashStyle = DashStyle.Dash;
+
+							g.DrawRectangle(pen, rect);
+						}
+					}
                 }
 
                 // Draw appointment icon
