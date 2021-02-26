@@ -3880,13 +3880,13 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 				if (rProgress.right > (rProgress.left + 1))
 				{
 					// Just fill, no borders
-					GraphicsMisc::DrawRect(pDC, rProgress, crProgress, CLR_NONE, 0, 0);
+					GraphicsMisc::DrawRect(pDC, rProgress, crProgress);
 
 					// Draw the 'non-progress' part
 					rProgress.left = rProgress.right;
 					rProgress.right = rBar.right;
 
-					GraphicsMisc::DrawRect(pDC, rProgress, crRest, CLR_NONE, 0, 0);
+					GraphicsMisc::DrawRect(pDC, rProgress, crRest);
 					crFill = CLR_NONE;
 				}
 				else // no width -> no progress
