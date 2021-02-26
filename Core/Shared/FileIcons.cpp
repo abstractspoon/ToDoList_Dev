@@ -177,7 +177,7 @@ BOOL CFileIcons::GetFileImage(LPCTSTR szFilePath, BOOL bLargeIcon, HIMAGELIST& h
 					VERIFY(GetImage(szFilePath, bLargeIcon, hIL, nIndex)); 
 				}
 			}
-			else if (!GetImage(szFilePath, bLargeIcon, hIL, nIndex))
+			else if (!GetImage(szFilePath, bLargeIcon, hIL, nIndex) && !sExt.IsEmpty())
 			{
 				// can fail with full path, so we then revert to extension only
 				VERIFY(GetImage(sExt, bLargeIcon, hIL, nIndex));
