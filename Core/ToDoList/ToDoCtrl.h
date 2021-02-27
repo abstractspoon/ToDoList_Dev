@@ -496,7 +496,7 @@ protected:
 	CString m_sCompletionStatus;
 	CTreeDragDropHelper m_treeDragDrop;
 	CWndPromptManager m_mgrPrompts;
-	COleDateTime m_dtLastTaskMod;
+	COleDateTime m_dtLastTaskMod, m_dtLastDayCheck;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;
 	TDC_MAXSTATE m_nMaxState;
 	TDC_UILOCATION m_nControlsPos, m_nCommentsPos;

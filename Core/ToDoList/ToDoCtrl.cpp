@@ -227,7 +227,8 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
-	m_matcher(m_data, m_reminders)
+	m_matcher(m_data, m_reminders),
+	m_dtLastDayCheck(CDateHelper::GetDate(DHD_TODAY))
 {
 	SetBordersDLU(0);
 	
@@ -11119,13 +11120,14 @@ void CToDoCtrl::OnTimer(UINT nIDEvent)
 		{
 			// check if we've just passed midnight, in which case some tasks
 			// may have just become due
-			static double dPrev = CDateHelper::GetDate(DHD_TODAY); // once only
-			double dNow = CDateHelper::GetDate(DHD_TODAY);
+			ASSERT(CDateHelper::IsDateSet(m_dtLastDayCheck));
 
-			if (dNow > dPrev)
+			COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
+
+			if (dtToday > m_dtLastDayCheck)
 				OnTimerMidnight();  
 
-			dPrev = dNow;
+			m_dtLastDayCheck = dtToday;
 		}
 		break;
 	}
