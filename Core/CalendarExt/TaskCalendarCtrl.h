@@ -100,6 +100,7 @@ protected:
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
 	COLORREF m_crWeekend, m_crToday; // Grid color handled by base class
+	COleDateTime m_dtLastDayCheck;
 
 	struct CONTINUOUSDRAWINFO
 	{
@@ -136,14 +137,13 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pFocus);
 	afx_msg void OnKillFocus(CWnd* pFocus);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
-
-	virtual void OnVisibleDateRangeChanged();
-
+	
 protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -154,6 +154,7 @@ protected:
 	virtual void DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
 	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
+	virtual void OnVisibleDateRangeChanged();
 	
 	const CTaskCalItemArray* GetCellTasks(const CCalendarCell* pCell) const;
 	CTaskCalItemArray* GetCellTasks(CCalendarCell* pCell);

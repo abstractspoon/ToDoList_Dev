@@ -36,6 +36,7 @@ const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 const int DEF_TASK_HEIGHT = (IMAGE_SIZE + 3); // Effective height is 1 less
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 const int OVERFLOWBTN_TIPID = INT_MAX;
+const int TIMER_MIDNIGHT = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -113,6 +114,7 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_TIMER()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
@@ -170,6 +172,17 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 		FixupSelection(bScrollToTask);
 
 		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
+
+		// If calculating missing dates includes 'today' start 
+		// a timer so we can recalc the dates when midnight comes
+		KillTimer(TIMER_MIDNIGHT);
+
+		if (HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
+			HasOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY))
+		{
+			m_dtLastDayCheck = CDateHelper::GetDate(DHD_TODAY);
+			SetTimer(TIMER_MIDNIGHT, 60000, NULL); // 1 minute
+		}
 	}
 }
 
@@ -2953,4 +2966,33 @@ void CTaskCalendarCtrl::RecalcDataRange()
 		m_mapData.GetNextAssoc(pos, dwTaskID, pTCI);
 		pTCI->MinMax(m_dtMin, m_dtMax);
 	}
+}
+
+void CTaskCalendarCtrl::OnTimer(UINT_PTR nIDEvent)
+{
+	switch (nIDEvent)
+	{
+	case TIMER_MIDNIGHT:
+		{
+			// check if we've just passed midnight, in which case some tasks
+			// may need dates to be recalculated
+			ASSERT(CDateHelper::IsDateSet(m_dtLastDayCheck));
+
+			ASSERT(HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
+					HasOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY));
+
+			COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
+
+			if (dtToday > m_dtLastDayCheck)
+			{
+				m_dtLastDayCheck = dtToday;
+
+				RecalcTaskDates();
+				Invalidate(FALSE);
+			}
+		}
+		break;
+	}
+
+	CCalendarCtrlEx::OnTimer(nIDEvent);
 }
