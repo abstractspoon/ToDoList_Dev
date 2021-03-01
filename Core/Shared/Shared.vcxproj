@@ -364,6 +364,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="MessageBox.cpp" />
+    <ClCompile Include="MidnightTimer.cpp" />
     <ClCompile Include="MiniCalendarCtrl.cpp" />
     <ClCompile Include="MiniCalendarListCtrl.cpp" />
     <ClCompile Include="Misc.cpp">
@@ -729,6 +730,7 @@
     <ClInclude Include="MenuComboBox.h" />
     <ClInclude Include="MenuIconMgr.h" />
     <ClInclude Include="MessageBox.h" />
+    <ClInclude Include="MidnightTimer.h" />
     <ClInclude Include="MiniCalendarCtrl.h" />
     <ClInclude Include="MiniCalendarListCtrl.h" />
     <ClInclude Include="Misc.h" />

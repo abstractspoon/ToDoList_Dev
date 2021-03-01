@@ -92,16 +92,16 @@ protected:
 protected:
 	// Generated message map functions
 	//{{AFX_MSG(CFilteredToDoCtrl)
+		//}}AFX_MSG
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT nIDEvent);
-	//}}AFX_MSG
 	afx_msg void OnEditChangeDueTime();
+	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
-	// pseudo-message handlers
+	// pseudo-message handler
 	void OnTimerNow();
-	void OnTimerMidnight();
 
 protected:
 	BOOL ModsNeedRefilter(const CTDCAttributeMap& attribIDs, const CDWordArray& aModTaskIDs) const;

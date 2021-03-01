@@ -86,6 +86,7 @@ BEGIN_MESSAGE_MAP(CFilteredToDoCtrl, CTabbedToDoCtrl)
 	ON_WM_TIMER()
 	//}}AFX_MSG_MAP
 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnEditChangeDueTime)
+	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 END_MESSAGE_MAP()
 
 ///////////////////////////////////////////////////////////////////////////
@@ -1036,30 +1037,32 @@ void CFilteredToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 	CTabbedToDoCtrl::Sort(nBy, bAllowToggle);
 }
 
-void CFilteredToDoCtrl::OnTimerMidnight()
+LRESULT CFilteredToDoCtrl::OnMidnight(WPARAM wParam, LPARAM lParam)
 {
-	CTabbedToDoCtrl::OnTimerMidnight();
+	LRESULT lr = CTabbedToDoCtrl::OnMidnight(wParam, lParam);
 
 	// don't re-filter delay-loaded tasklists
-	if (IsDelayLoaded())
-		return;
+	if (!IsDelayLoaded())
+	{
+		BOOL bRefilter = FALSE;
+		TDCFILTER filter;
 
-	BOOL bRefilter = FALSE;
-	TDCFILTER filter;
-	
-	if (m_filter.GetFilter(filter) == FS_ADVANCED)
-	{
-		bRefilter = (m_filter.HasAdvancedFilterAttribute(TDCA_STARTDATE) || 
-						m_filter.HasAdvancedFilterAttribute(TDCA_DUEDATE));
+		if (m_filter.GetFilter(filter) == FS_ADVANCED)
+		{
+			bRefilter = (m_filter.HasAdvancedFilterAttribute(TDCA_STARTDATE) ||
+						 m_filter.HasAdvancedFilterAttribute(TDCA_DUEDATE));
+		}
+		else
+		{
+			bRefilter = (((filter.nStartBy != FD_NONE) && (filter.nStartBy != FD_ANY)) ||
+						((filter.nDueBy != FD_NONE) && (filter.nDueBy != FD_ANY)));
+		}
+
+		if (bRefilter)
+			RefreshFilter();
 	}
-	else
-	{
-		bRefilter = (((filter.nStartBy != FD_NONE) && (filter.nStartBy != FD_ANY)) ||
-					((filter.nDueBy != FD_NONE) && (filter.nDueBy != FD_ANY)));
-	}
-	
-	if (bRefilter)
-		RefreshFilter();
+
+	return lr;
 }
 
 void CFilteredToDoCtrl::ResetNowFilterTimer()

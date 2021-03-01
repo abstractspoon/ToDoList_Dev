@@ -193,7 +193,6 @@ protected:
 	//}}AFX_VIRTUAL
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
-	virtual void OnTimerMidnight();
 
 public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
@@ -219,6 +218,7 @@ protected:
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnRestoreLastTaskView(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnUIExtSelectTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam);

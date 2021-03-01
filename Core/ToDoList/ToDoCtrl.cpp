@@ -91,7 +91,6 @@ const int COMMENTSTYPELEN	= 85;
 /////////////////////////////////////////////////////////////////////////////
 
 const int TIMETRACKPERIOD	= 10000; // 10 secs
-const int MIDNIGHTPERIOD	= 60000; // 1 minute
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -227,8 +226,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
-	m_matcher(m_data, m_reminders),
-	m_dtLastDayCheck(CDateHelper::GetDate(DHD_TODAY))
+	m_matcher(m_data, m_reminders)
 {
 	SetBordersDLU(0);
 	
@@ -456,6 +454,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_REPLACEALLTASKS, OnFindReplaceAllTasks)
 	ON_REGISTERED_MESSAGE(WM_TDCFR_SELECTNEXTTASK, OnFindReplaceSelectNextTask)
 	ON_REGISTERED_MESSAGE(WM_TDCTI_RELOADICONS, OnTaskIconDlgReloadIcons)
+	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 
 	ON_NOTIFY_RANGE(DTN_DATETIMECHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
 	ON_CONTROL_RANGE(EN_CHANGE, IDC_FIRST_CUSTOMEDITFIELD, IDC_LAST_CUSTOMEDITFIELD, OnCustomAttributeChange)
@@ -632,7 +631,7 @@ BOOL CToDoCtrl::OnInitDialog()
 
 	// Start the timer which checks for midnight (day changeover)
 	// which runs persistently
-	SetTimer(TIMER_MIDNIGHT, MIDNIGHTPERIOD, NULL);
+	m_timerMidnight.Enable(*this);
 	
 	return FALSE;  // return TRUE unless you set the focus to a control
 	// EXCEPTION: OCX Property Pages should return FALSE
@@ -11115,32 +11114,17 @@ void CToDoCtrl::OnTimer(UINT nIDEvent)
 	case TIMER_TRACK:
 		IncrementTrackedTime(FALSE);
 		break;
-
-	case TIMER_MIDNIGHT:
-		{
-			// check if we've just passed midnight, in which case some tasks
-			// may have just become due
-			ASSERT(CDateHelper::IsDateSet(m_dtLastDayCheck));
-
-			COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
-
-			if (dtToday > m_dtLastDayCheck)
-				OnTimerMidnight();  
-
-			m_dtLastDayCheck = dtToday;
-		}
-		break;
 	}
-
 	
 	CRuntimeDlg::OnTimer(nIDEvent);
 }
 
-void CToDoCtrl::OnTimerMidnight()
+LRESULT CToDoCtrl::OnMidnight(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	FileMisc::LogText(_T("CToDoCtrl::OnTimerMidnight"));
-
+	FileMisc::LogText(_T("CToDoCtrl::OnMidnight"));
 	Invalidate();
+
+	return 0L;
 }
 
 void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)

@@ -114,10 +114,10 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
-	ON_WM_TIMER()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
+	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 
 END_MESSAGE_MAP()
 
@@ -172,17 +172,6 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 		FixupSelection(bScrollToTask);
 
 		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
-
-		// If calculating missing dates includes 'today' start 
-		// a timer so we can recalc the dates when midnight comes
-		KillTimer(TIMER_MIDNIGHT);
-
-		if (HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
-			HasOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY))
-		{
-			m_dtLastDayCheck = CDateHelper::GetDate(DHD_TODAY);
-			SetTimer(TIMER_MIDNIGHT, 60000, NULL); // 1 minute
-		}
 	}
 }
 
@@ -2720,6 +2709,7 @@ int CTaskCalendarCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	m_fonts.Initialise(*this);
+	m_timerMidnight.Enable(*this);
 
 	EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
 	
@@ -2968,31 +2958,17 @@ void CTaskCalendarCtrl::RecalcDataRange()
 	}
 }
 
-void CTaskCalendarCtrl::OnTimer(UINT_PTR nIDEvent)
+LRESULT CTaskCalendarCtrl::OnMidnight(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	switch (nIDEvent)
+	if (HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
+		HasOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY))
 	{
-	case TIMER_MIDNIGHT:
-		{
-			// check if we've just passed midnight, in which case some tasks
-			// may need dates to be recalculated
-			ASSERT(CDateHelper::IsDateSet(m_dtLastDayCheck));
+		RecalcTaskDates();
+		RebuildCellTasks();
 
-			ASSERT(HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
-					HasOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY));
-
-			COleDateTime dtToday = CDateHelper::GetDate(DHD_TODAY);
-
-			if (dtToday > m_dtLastDayCheck)
-			{
-				m_dtLastDayCheck = dtToday;
-
-				RecalcTaskDates();
-				Invalidate(FALSE);
-			}
-		}
-		break;
+		Invalidate(FALSE);
 	}
 
-	CCalendarCtrlEx::OnTimer(nIDEvent);
+	return 0L;
 }
+

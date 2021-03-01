@@ -397,6 +397,10 @@ SOURCE=.\MessageBox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MidnightTimer.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\MiniCalendarCtrl.cpp
 # End Source File
 # Begin Source File
@@ -1078,6 +1082,10 @@ SOURCE=.\MenuIconMgr.h
 # Begin Source File
 
 SOURCE=.\MessageBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MidnightTimer.h
 # End Source File
 # Begin Source File
 

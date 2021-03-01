@@ -44,6 +44,7 @@
 #include "..\shared\icon.h"
 #include "..\shared\FindReplace.h"
 #include "..\shared\colourpickerEx.h"
+#include "..\shared\midnighttimer.h"
 
 #include "..\Interfaces\uithemefile.h"
 #include "..\Interfaces\contentmgr.h"
@@ -453,7 +454,6 @@ protected:
 	enum  // visible for derived classes
 	{ 
 		TIMER_TRACK = 1, 
-		TIMER_MIDNIGHT,
 		TIMER_LAST
 	};
 	
@@ -485,6 +485,7 @@ protected:
 	CBrush m_brUIBack;
 	CUIThemeFile m_theme;
 	CIcon m_iconTrackTime, m_iconAddTime, m_iconLink;
+	CMidnightTimer m_timerMidnight;
 
 	CTDCStyleMap m_styles;
 	CString m_sXmlHeader, m_sXslHeader;
@@ -496,7 +497,7 @@ protected:
 	CString m_sCompletionStatus;
 	CTreeDragDropHelper m_treeDragDrop;
 	CWndPromptManager m_mgrPrompts;
-	COleDateTime m_dtLastTaskMod, m_dtLastDayCheck;
+	COleDateTime m_dtLastTaskMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;
 	TDC_MAXSTATE m_nMaxState;
 	TDC_UILOCATION m_nControlsPos, m_nCommentsPos;
@@ -581,7 +582,6 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual BOOL OnInitDialog();
-	virtual void OnTimerMidnight();
 
 	// Implementation
 protected:
@@ -686,6 +686,7 @@ protected:
 	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTaskIconDlgReloadIcons(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnMidnight(WPARAM wParam, LPARAM lParam);
 
 	afx_msg LRESULT OnFindReplaceMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM lParam);

@@ -158,6 +158,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
+	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 
 	ON_MESSAGE(WM_TDC_RECREATERECURRINGTASK, OnRecreateRecurringTask)
 	ON_MESSAGE(WM_TDC_RESTORELASTTASKVIEW, OnRestoreLastTaskView)
@@ -6401,58 +6402,56 @@ void CTabbedToDoCtrl::OnListSelChanged()
 	}
 }
 
-void CTabbedToDoCtrl::OnTimerMidnight()
+LRESULT CTabbedToDoCtrl::OnMidnight(WPARAM wParam, LPARAM lParam)
 {
-	// Check whether extensions need a color update
-	if (!HasAnyExtensionViews())
-		return;
+	// Update extensions task colours
+	BOOL bWantColorUpdate = (HasAnyExtensionViews() &&
+							(m_taskTree.ModCausesTaskTextColorChange(TDCA_STARTDATE) ||
+							 m_taskTree.ModCausesTaskTextColorChange(TDCA_DUEDATE)));
 
-	if (!m_taskTree.ModCausesTaskTextColorChange(TDCA_STARTDATE) &&
-		!m_taskTree.ModCausesTaskTextColorChange(TDCA_DUEDATE))
+	if (bWantColorUpdate)
 	{
-		return;
-	}
+		CAutoFlag af(m_bUpdatingExtensions, TRUE);
 
-	CAutoFlag af(m_bUpdatingExtensions, TRUE);
+		int nExt = m_aExtViews.GetSize();
+		FTC_VIEW nCurView = GetTaskView();
 
-	int nExt = m_aExtViews.GetSize();
-	FTC_VIEW nCurView = GetTaskView();
-
-	while (nExt--)
-	{
-		if (!ExtensionViewWantsChange(nExt, TDCA_COLOR))
-			continue;
-
-		FTC_VIEW nExtView = GetExtensionView(nExt);
-
-		IUIExtensionWindow* pExtWnd = NULL;
-		VIEWDATA* pVData = NULL;
-
-		if (!GetExtensionWnd(nExtView, pExtWnd, pVData))
-			continue;
-
-		if (nExtView == nCurView)
+		while (nExt--)
 		{
-			BeginExtensionProgress(pVData);
+			if (!ExtensionViewWantsChange(nExt, TDCA_COLOR))
+				continue;
 
-			CTaskFile tasks;
-			CWaitCursor cursor;
+			FTC_VIEW nExtView = GetExtensionView(nExt);
 
-			if (GetAllTasksForExtensionViewUpdate(TDCA_COLOR, tasks))
+			IUIExtensionWindow* pExtWnd = NULL;
+			VIEWDATA* pVData = NULL;
+
+			if (!GetExtensionWnd(nExtView, pExtWnd, pVData))
+				continue;
+
+			if (nExtView == nCurView)
 			{
-				pVData->bNeedFullTaskUpdate = FALSE;
-				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
-			}
+				BeginExtensionProgress(pVData);
 
-			EndExtensionProgress();
-		}
-		else
-		{
-			pVData->bNeedFullTaskUpdate = TRUE;
+				CTaskFile tasks;
+				CWaitCursor cursor;
+
+				if (GetAllTasksForExtensionViewUpdate(TDCA_COLOR, tasks))
+				{
+					pVData->bNeedFullTaskUpdate = FALSE;
+					UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
+				}
+
+				EndExtensionProgress();
+			}
+			else
+			{
+				pVData->bNeedFullTaskUpdate = TRUE;
+			}
 		}
 	}
 
-	CToDoCtrl::OnTimerMidnight();
+	return CToDoCtrl::OnMidnight(wParam, lParam);
 }
 
 HTREEITEM CTabbedToDoCtrl::GetTreeItem(int nItem) const

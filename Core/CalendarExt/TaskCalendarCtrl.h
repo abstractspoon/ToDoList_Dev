@@ -16,6 +16,7 @@
 #include "..\shared\tooltipctrlex.h"
 #include "..\shared\fontcache.h"
 #include "..\shared\CalendarCtrlEx.h"
+#include "..\shared\MidnightTimer.h"
 
 #include "..\Interfaces\IUIExtension.h"
 #include "..\Interfaces\ITaskList.h"
@@ -87,6 +88,7 @@ protected:
 
 	CScrollBar m_sbCellVScroll;
 	CToolTipCtrlEx m_tooltip;
+	CMidnightTimer m_timerMidnight;
 
 	DWORD m_dwSelectedTaskID;
 	DWORD m_dwOptions;
@@ -100,7 +102,6 @@ protected:
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
 	COLORREF m_crWeekend, m_crToday; // Grid color handled by base class
-	COleDateTime m_dtLastDayCheck;
 
 	struct CONTINUOUSDRAWINFO
 	{
@@ -137,10 +138,10 @@ protected:
 	afx_msg void OnSetFocus(CWnd* pFocus);
 	afx_msg void OnKillFocus(CWnd* pFocus);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 	
