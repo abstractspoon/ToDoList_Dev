@@ -1426,6 +1426,12 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 		if (!pKI1->bPinned && pKI2->bPinned)
 			return 1;
 
+		// Sorting by 'none' means sort by 'full' position
+		if (pSort->nBy == TDCA_NONE)
+		{
+			return Misc::NaturalCompare(pKI1->sFullPosition, pKI2->sFullPosition);
+		}
+
 		if ((pSort->dwOptions & KBCF_SORTSUBTASTASKSBELOWPARENTS) && (pKI1->dwParentID != pKI2->dwParentID))
 		{
 			// If one is the parent of another always sort below

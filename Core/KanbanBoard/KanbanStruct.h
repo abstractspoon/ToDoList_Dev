@@ -73,7 +73,7 @@ struct KANBANITEM
 	int nPercent, nLevel, nPosition;
 	BOOL bLocked, bHasIcon;
 
-	CString sTitle;
+	CString sTitle, sFullPosition;
 	double dTimeEst, dTimeSpent, dCost;
 	TDC_UNITS nTimeEstUnits, nTimeSpentUnits;
 	COleDateTime dtDone, dtDue, dtStart, dtLastMod, dtCreate;
