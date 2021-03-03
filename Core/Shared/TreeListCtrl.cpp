@@ -644,6 +644,19 @@ void CTreeListCtrl::OnResize(int cx, int cy)
 
 void CTreeListCtrl::ExpandAll(BOOL bExpand)
 {
+	// if we're collapsing the tasklist find the 
+	// currently selected item's top-level parent and
+	// move the selection there else the branch
+	// containing the selected item never closes
+	if (!bExpand)
+	{
+		HTREEITEM htiSel = GetSelectedItem();
+		HTREEITEM htiParent = TCH().GetTopLevelItem(htiSel);
+
+		if (htiParent != htiSel)
+			SelectItem(htiParent);
+	}
+
 	ExpandItem(NULL, bExpand, TRUE);
 }
 
@@ -679,7 +692,9 @@ void CTreeListCtrl::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren)
 				ExpandList(hti, nNextIndex);
 			}
 			else
+			{
 				ExpandList(); // all
+			}
 		}
 		else
 		{
