@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "ToolTipCtrlEx.h"
 #include "OSVersion.h"
+#include "GraphicsMisc.h"
 
 #include "..\3rdParty\MemDC.h"
 
@@ -167,7 +168,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 //				ti.uFlags &= ~(TTF_NOTBUTTON|TTF_ALWAYSTIP);
 
  				if (IsTracking())
- 					ti.uFlags |= TTF_TRACK | TTF_ABSOLUTE | TTF_NOTBUTTON;
+					ti.uFlags |= TTF_TRACK | TTF_ABSOLUTE | TTF_NOTBUTTON;
 
 				VERIFY(SendMessage(TTM_ADDTOOL, 0, (LPARAM)&ti));
 
@@ -175,7 +176,6 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 				{
 					// allow the tooltip to popup when it should
 					Activate(TRUE);
-
 #ifdef _DEBUG
 					//if (tiHit.lpszText != LPSTR_TEXTCALLBACK)
 					//	TRACE(_T("CToolTipCtrlEx::Activate(TRUE, \"%s\")\n"), tiHit.lpszText);
@@ -183,7 +183,12 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 					//	TRACE(_T("CToolTipCtrlEx::Activate(TRUE, -callback-)\n"), tiHit.lpszText);
 #endif
  					if (IsTracking())
+					{
  						SendMessage(TTM_TRACKACTIVATE, TRUE, (LPARAM)&ti);
+
+						// Hook the hit tested window so we can handle the TTN_SHOW message
+						m_scTracking.HookWindow(ti.hwnd, this);
+					}
 
 					// bring the tooltip window above other popup windows
 					SetWindowPos(&CWnd::wndTop, 0, 0, 0, 0,
@@ -196,6 +201,7 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 			else
 			{
 				Activate(FALSE);
+
 			}
 
 			CToolTipCtrl::RelayEvent(pMsg);
@@ -219,8 +225,78 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 	else if (!IsTracking() && (IsKeypress(message) || IsMouseDown(message)))
 	{
 		Pop();
-		//Activate(FALSE);
 	}
+}
+
+LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
+{
+	switch (msg)
+	{
+	case WM_NOTIFY:
+		{
+			NMHDR* pNMHDR = (NMHDR*)lp;
+
+			switch (pNMHDR->code)
+			{
+			case TTN_SHOW:
+				{
+					// Ensure the tooltip is wholly on the same monitor
+					// as the tooltip's 'target'
+					CRect rTooltip;
+					GetWindowRect(rTooltip);
+
+					CRect rMonitor;
+					GraphicsMisc::GetAvailableScreenSpace(hRealWnd, rMonitor, MONITOR_DEFAULTTONEAREST);
+					
+					CRect rIntersect;
+
+					if (rIntersect.IntersectRect(rTooltip, rMonitor) && (rIntersect != rTooltip))
+					{
+						BOOL bHorzMove = FALSE, bVertMove = FALSE;
+
+						if (rTooltip.right > rMonitor.right)
+						{
+							rTooltip.left = rMonitor.right - rTooltip.Width();
+							rTooltip.right = rMonitor.right;
+
+							bHorzMove = TRUE;
+						}
+						else if (rTooltip.left < rMonitor.left)
+						{
+							rTooltip.right = rMonitor.left + rTooltip.Width();
+							rTooltip.left = rMonitor.left;
+
+							bHorzMove = TRUE;
+						}
+
+						if (rTooltip.bottom > rMonitor.bottom)
+						{
+							if (bHorzMove)
+							{
+							}
+							else
+							{
+								rTooltip.top = rMonitor.bottom - rTooltip.Height();
+								rTooltip.bottom = rMonitor.bottom;
+							}
+
+							bVertMove = TRUE;
+						}
+
+						if (bHorzMove || bVertMove)
+						{
+							SetWindowPos(NULL, rTooltip.left, rTooltip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
+							return 1L;
+						}
+					}
+				}
+				break;
+			}
+		}
+		break;
+	}
+
+	return ScDefault(m_scTracking);
 }
 
 BOOL CToolTipCtrlEx::IsMouseDown(UINT nMsgID)
@@ -379,17 +455,19 @@ void CToolTipCtrlEx::Activate(BOOL bActivate)
 {
 	CToolTipCtrl::Activate(bActivate);
 
-	if (!bActivate)
+	if (bActivate)
 	{
+		// Our own implementation of WM_MOUSELEAVE
+		SetTimer(ID_TIMERLEAVE, 500, NULL);
+	}
+	else
+	{
+		m_scTracking.HookWindow(NULL);
+
 		SendMessage(TTM_DELTOOL, 0, (LPARAM)&m_tiLast);
 		
 		InitToolInfo(m_tiLast, FALSE);
 		m_nLastHit = -1;
-	}
-	else
-	{
-		// Our own implementation of WM_MOUSELEAVE
-		SetTimer(ID_TIMERLEAVE, 500, NULL);
 	}
 }
 

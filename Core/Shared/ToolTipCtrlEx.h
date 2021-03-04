@@ -6,6 +6,8 @@
 #endif // _MSC_VER > 1000
 // TaskCalendarCtrl.h : header file
 
+#include "Subclass.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 // For MFC non-extension Dlls using FilterToolTipMessage
@@ -13,7 +15,7 @@ const UINT WM_TTC_TOOLHITTEST = ::RegisterWindowMessage(_T("WM_TTC_TOOLHITTEST")
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CToolTipCtrlEx : public CToolTipCtrl
+class CToolTipCtrlEx : public CToolTipCtrl, protected CSubclasser
 {
 	DECLARE_DYNAMIC(CToolTipCtrlEx)
 
@@ -44,6 +46,7 @@ protected:
 	int m_nLastHit;
 	TOOLINFO m_tiLast;
 	CPoint m_ptTrackingOffset;
+	CSubclassWnd m_scTracking;
 
 protected:
 	afx_msg void OnPaint();
@@ -52,6 +55,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
+
 	static void InitToolInfo(TOOLINFO& ti, BOOL bInitSize);
 	static int DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti, BOOL bSendHitTestMessage);
 	static BOOL IsTopParentActive(CWnd* pOwner);
