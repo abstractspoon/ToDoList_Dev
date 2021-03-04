@@ -247,11 +247,15 @@ namespace GraphicsMisc
 	BOOL DwmGetWindowAttributeEx(HWND hWnd, DWORD dwAttrib, PVOID pData, DWORD dwDataSize);
 	BOOL DwmIsCompositionEnabled();
 
+	BOOL GetAvailableScreenSpace(const CPoint& point, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);
 	BOOL GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);
 	BOOL GetAvailableScreenSpace(HWND hWnd, CRect& rScreen, UINT nFallback = MONITOR_DEFAULTTONULL);
+
+	BOOL GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen, UINT nFallback/* = MONITOR_DEFAULTTONULL*/);
+	BOOL GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen);
+
 	BOOL GetTotalAvailableScreenSpace(CRect& rScreen);
 	BOOL GetPrimaryMonitorScreenSpace(CRect& rScreen);
-	BOOL GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen);
 	int GetScreenBitDepth();
 
 	DPI_AWARENESS_CONTEXT SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT nContext);

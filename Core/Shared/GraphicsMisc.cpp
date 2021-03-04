@@ -1563,10 +1563,8 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 	return bDrawn;
 }
 
-BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback)
+BOOL GraphicsMisc::GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen, UINT nFallback)
 {
-	HMONITOR hMon = MonitorFromRect(rWnd, nFallback);
-
 	if (hMon && GetMonitorAvailableScreenSpace(hMon, rScreen))
 		return TRUE;
 
@@ -1574,25 +1572,34 @@ BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UI
 	if (nFallback == MONITOR_DEFAULTTOPRIMARY)
 		return GetPrimaryMonitorScreenSpace(rScreen);
 
+	rScreen.SetRectEmpty();
 	return FALSE;
+}
+
+BOOL GraphicsMisc::GetAvailableScreenSpace(const CPoint& point, CRect& rScreen, UINT nFallback)
+{
+	HMONITOR hMon = MonitorFromPoint(point, nFallback);
+
+	return GetMonitorAvailableScreenSpace(hMon, rScreen, nFallback);
+}
+
+BOOL GraphicsMisc::GetAvailableScreenSpace(const CRect& rWnd, CRect& rScreen, UINT nFallback)
+{
+	HMONITOR hMon = MonitorFromRect(rWnd, nFallback);
+
+	return GetMonitorAvailableScreenSpace(hMon, rScreen, nFallback);
 }
 
 BOOL GraphicsMisc::GetAvailableScreenSpace(HWND hWnd, CRect& rScreen, UINT nFallback)
 {
-	if (hWnd != NULL)
-	{
-		CRect rWnd;
-		::GetWindowRect(hWnd, rWnd);
+	if (hWnd == NULL)
+		return GetMonitorAvailableScreenSpace(NULL, rScreen, nFallback);
 
-		return GetAvailableScreenSpace(rWnd, rScreen, nFallback);
-	}
+	// else
+	CRect rWnd;
+	::GetWindowRect(hWnd, rWnd);
 
-	// all else
-	if (nFallback == MONITOR_DEFAULTTOPRIMARY)
-		return GetPrimaryMonitorScreenSpace(rScreen);
-
-	rScreen.SetRectEmpty();
-	return FALSE;
+	return GetAvailableScreenSpace(rWnd, rScreen, nFallback);
 }
 
 BOOL GraphicsMisc::GetPrimaryMonitorScreenSpace(CRect& rScreen)

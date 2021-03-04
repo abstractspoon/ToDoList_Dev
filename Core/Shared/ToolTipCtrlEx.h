@@ -43,10 +43,12 @@ public:
 
 protected:
 	BOOL m_bUsingRelayEvent;
-	int m_nLastHit;
-	TOOLINFO m_tiLast;
 	CPoint m_ptTrackingOffset;
 	CSubclassWnd m_scTracking;
+
+	int m_nLastHit;
+	TOOLINFO m_tiLast;
+	CSize m_sizeTooltip;
 
 protected:
 	afx_msg void OnPaint();
@@ -56,6 +58,8 @@ protected:
 
 protected:
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
+
+	CPoint FitTooltipRectToScreen(const CRect& rTooltip) const;
 
 	static void InitToolInfo(TOOLINFO& ti, BOOL bInitSize);
 	static int DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti, BOOL bSendHitTestMessage);

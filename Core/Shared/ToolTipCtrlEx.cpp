@@ -201,7 +201,6 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 			else
 			{
 				Activate(FALSE);
-
 			}
 
 			CToolTipCtrl::RelayEvent(pMsg);
@@ -212,6 +211,11 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 			{
 				CPoint ptTip(pMsg->pt);
 				ptTip.Offset(m_ptTrackingOffset);
+
+				ASSERT(m_scTracking.IsValid());
+
+				CRect rTooltip(ptTip, m_sizeTooltip);
+				ptTip = FitTooltipRectToScreen(rTooltip);
 
 				SendMessage(TTM_TRACKPOSITION, 0, MAKELPARAM(ptTip.x, ptTip.y));
 				SendMessage(TTM_UPDATETIPTEXT, 0, (LPARAM)&tiHit);
@@ -240,63 +244,48 @@ LRESULT CToolTipCtrlEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 			{
 			case TTN_SHOW:
 				{
-					// Ensure the tooltip is wholly on the same monitor
-					// as the tooltip's 'target'
+					// Ensure the tooltip is wholly on the same monitor as the cursor
 					CRect rTooltip;
 					GetWindowRect(rTooltip);
 
-					CRect rMonitor;
-					GraphicsMisc::GetAvailableScreenSpace(hRealWnd, rMonitor, MONITOR_DEFAULTTONEAREST);
-					
-					CRect rIntersect;
+					CPoint ptTip = FitTooltipRectToScreen(rTooltip);
+					SetWindowPos(NULL, ptTip.x, ptTip.y, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
 
-					if (rIntersect.IntersectRect(rTooltip, rMonitor) && (rIntersect != rTooltip))
-					{
-						BOOL bHorzMove = FALSE, bVertMove = FALSE;
-
-						if (rTooltip.right > rMonitor.right)
-						{
-							rTooltip.left = rMonitor.right - rTooltip.Width();
-							rTooltip.right = rMonitor.right;
-
-							bHorzMove = TRUE;
-						}
-						else if (rTooltip.left < rMonitor.left)
-						{
-							rTooltip.right = rMonitor.left + rTooltip.Width();
-							rTooltip.left = rMonitor.left;
-
-							bHorzMove = TRUE;
-						}
-
-						if (rTooltip.bottom > rMonitor.bottom)
-						{
-							if (bHorzMove)
-							{
-							}
-							else
-							{
-								rTooltip.top = rMonitor.bottom - rTooltip.Height();
-								rTooltip.bottom = rMonitor.bottom;
-							}
-
-							bVertMove = TRUE;
-						}
-
-						if (bHorzMove || bVertMove)
-						{
-							SetWindowPos(NULL, rTooltip.left, rTooltip.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
-							return 1L;
-						}
-					}
+					m_sizeTooltip = rTooltip.Size();
 				}
-				break;
+				return TRUE; // we handled it
 			}
 		}
 		break;
 	}
 
 	return ScDefault(m_scTracking);
+}
+
+CPoint CToolTipCtrlEx::FitTooltipRectToScreen(const CRect& rTooltip) const
+{
+	CPoint ptCursor(::GetMessagePos()), ptTooltip(rTooltip.TopLeft());
+
+	CRect rMonitor;
+	GraphicsMisc::GetAvailableScreenSpace(ptCursor, rMonitor, MONITOR_DEFAULTTONEAREST);
+
+	BOOL bHorzMove = FALSE;
+
+	if (rTooltip.right > rMonitor.right)
+	{
+		ptTooltip.x = rMonitor.right - rTooltip.Width();
+		bHorzMove = TRUE;
+	}
+
+	if (rTooltip.bottom > rMonitor.bottom)
+	{
+		if (bHorzMove)
+			ptTooltip.y = (ptCursor.y - rTooltip.Height() - (m_ptTrackingOffset.y / 2)); // flip above
+		else
+			ptTooltip.y = (rMonitor.bottom - rTooltip.Height());
+	}
+
+	return ptTooltip;
 }
 
 BOOL CToolTipCtrlEx::IsMouseDown(UINT nMsgID)
@@ -462,7 +451,8 @@ void CToolTipCtrlEx::Activate(BOOL bActivate)
 	}
 	else
 	{
-		m_scTracking.HookWindow(NULL);
+		if (m_scTracking.IsValid())
+			m_scTracking.HookWindow(NULL);
 
 		SendMessage(TTM_DELTOOL, 0, (LPARAM)&m_tiLast);
 		
