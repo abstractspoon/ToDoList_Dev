@@ -93,12 +93,13 @@ CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,
 		iti.nLabelWidth = rItem.Width();
 		nMaxLabelWidth = max(nMaxLabelWidth, iti.nLabelWidth);
 
-		// omit various attributes from checks
+		// omit various 'longer than normal' attributes from checks
 		switch (iti.nAttribID)
 		{
 		case TDCA_COMMENTS:
 		case TDCA_FILELINK:
 		case TDCA_TASKNAME:
+		case TDCA_PATH:
 			break;
 
 		default:
