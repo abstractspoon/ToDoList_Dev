@@ -141,6 +141,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKLABEL, OnColumnEditLabel)
+	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 
 END_MESSAGE_MAP()
 
@@ -3606,4 +3607,15 @@ void CKanbanCtrl::OnColumnSetFocus(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	{
 		FixupColumnFocus();
 	}
+}
+
+LRESULT CKanbanCtrl::OnMidnight(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	if (HasOption(KBCF_DUEHAVEHIGHESTPRIORITYRISK))
+	{
+		// Column visibility AND contents may have changed
+		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
+	}
+
+	return 0L;
 }
