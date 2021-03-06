@@ -171,6 +171,16 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 		FixupSelection(bScrollToTask);
 
 		EnableLabelTips(HasOption(TCCO_ENABLELABELTIPS));
+
+		if (HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
+			HasOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY))
+		{
+			m_timerMidnight.Enable(*this);
+		}
+		else
+		{
+			m_timerMidnight.Disable();
+		}
 	}
 }
 
@@ -2959,14 +2969,13 @@ void CTaskCalendarCtrl::RecalcDataRange()
 
 LRESULT CTaskCalendarCtrl::OnMidnight(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	if (HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
-		HasOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY))
-	{
-		RecalcTaskDates();
-		RebuildCellTasks();
+	ASSERT(HasOption(TCCO_CALCMISSINGSTARTASEARLIESTDUEANDTODAY) ||
+			HasOption(TCCO_CALCMISSINGDUEASLATESTSTARTANDTODAY));
 
-		Invalidate(FALSE);
-	}
+	RecalcTaskDates();
+	RebuildCellTasks();
+
+	Invalidate(FALSE);
 
 	return 0L;
 }

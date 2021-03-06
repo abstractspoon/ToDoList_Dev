@@ -2324,6 +2324,11 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 		{
 			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 		}
+
+		if (HasOption(KBCF_DUEHAVEHIGHESTPRIORITYRISK))
+			m_timerMidnight.Enable(*this);
+		else
+			m_timerMidnight.Disable();
 	}
 }
 

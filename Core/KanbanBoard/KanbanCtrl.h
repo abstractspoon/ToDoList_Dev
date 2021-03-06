@@ -112,6 +112,7 @@ protected:
 	CEnHeaderCtrl m_header;
 	CFontCache m_fonts;
 	CImageList m_ilDrag;
+	CMidnightTimer m_timerMidnight;
 
 	CKanbanItemMap m_data;
 	CKanbanAttributeValueMap m_mapAttributeValues;
