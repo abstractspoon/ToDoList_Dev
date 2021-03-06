@@ -36,7 +36,6 @@ const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 const int DEF_TASK_HEIGHT = (IMAGE_SIZE + 3); // Effective height is 1 less
 const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
 const int OVERFLOWBTN_TIPID = INT_MAX;
-const int TIMER_MIDNIGHT = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 
