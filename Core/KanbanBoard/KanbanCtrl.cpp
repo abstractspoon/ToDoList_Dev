@@ -52,6 +52,14 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+enum // RebuildColumns
+{
+	KCRC_REBUILDCONTENTS	= 0x01,
+	KCRC_RESTORESELECTION	= 0x02,
+};
+
+//////////////////////////////////////////////////////////////////////
+
 const UINT IDC_COLUMNCTRL	= 101;
 const UINT IDC_HEADER		= 102;
 
@@ -327,7 +335,9 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM /*lp*/)
 				}
 			}
 
-			RebuildColumns(FALSE, FALSE, aTaskIDs);
+			// No need to rebuild column contents as
+			// we've already done a manual adjustment
+			RebuildColumns(KCRC_RESTORESELECTION, aTaskIDs);
 
 			return TRUE;
 		}
@@ -539,29 +549,11 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	{
 	case IUI_ALL:
 		RebuildData(pTasks);
- 		RebuildColumns(TRUE, TRUE);
 		break;
 		
 	case IUI_NEW:
 	case IUI_EDIT:
-		{
- 			// update the task(s)
-			BOOL bChange = UpdateGlobalAttributeValues(pTasks);
-			bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), TRUE);
-
-			if (bChange)
-			{
-				RebuildColumns(TRUE, TRUE);
-			}
-			else if (UpdateNeedsItemHeightRefresh(pTasks))
-			{
-				m_aColumns.RefreshItemLineHeights();
-			}
-			else
-			{
-				m_aColumns.Redraw(FALSE);
-			}
-		}
+		UpdateData(pTasks);
 		break;
 		
 	case IUI_DELETE:
@@ -704,7 +696,7 @@ BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
 	return WantEditUpdate(nAttrib);
 }
 
-BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
+void CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 {
 	// Preserve pinned items
 	if (!m_aPrevPinnedTasks.GetSize())
@@ -719,13 +711,13 @@ BOOL CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 	// Rebuild data
 	m_data.RemoveAll();
 
-	if (!AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE))
-		return FALSE;
+	VERIFY(AddTaskToData(pTasks, pTasks->GetFirstTask(), 0, TRUE));
 
 	m_data.SetPinnedItems(m_aPrevPinnedTasks, FALSE);
 	m_aPrevPinnedTasks.RemoveAll();
 
-	return TRUE;
+	// App will take care of restoring selection
+	RebuildColumns(KCRC_REBUILDCONTENTS);
 }
 
 BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings)
@@ -831,6 +823,27 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	}
 
 	return TRUE;
+}
+
+void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks)
+{
+	// update the task(s)
+	BOOL bChange = UpdateGlobalAttributeValues(pTasks);
+	bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), TRUE);
+
+	if (bChange)
+	{
+		// App will take care of restoring selection
+		RebuildColumns(KCRC_REBUILDCONTENTS);
+	}
+	else if (UpdateNeedsItemHeightRefresh(pTasks))
+	{
+		m_aColumns.RefreshItemLineHeights();
+	}
+	else
+	{
+		m_aColumns.Redraw(FALSE);
+	}
 }
 
 BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
@@ -1320,7 +1333,10 @@ void CKanbanCtrl::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, boo
 	}
 
 	if (m_nTrackAttribute != TDCA_NONE)
-		RebuildColumns(FALSE, FALSE);
+	{
+		// Both column visibility AND contents may have changed
+		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
+	}
 }
 
 void CKanbanCtrl::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -1771,7 +1787,7 @@ BOOL CKanbanCtrl::CheckAddBacklogColumn()
 	return FALSE;
 }
 
-void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate)
+void CKanbanCtrl::RebuildColumns(DWORD dwFlags)
 {
 	if (m_sTrackAttribID.IsEmpty())
 	{
@@ -1780,13 +1796,17 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate)
 	}
 
 	CDWordArray aTaskIDs;
-	GetSelectedTaskIDs(aTaskIDs);
 
-	RebuildColumns(bRebuildData, bTaskUpdate, aTaskIDs);
+	if (dwFlags & KCRC_RESTORESELECTION)
+		GetSelectedTaskIDs(aTaskIDs);
+
+	RebuildColumns(dwFlags, aTaskIDs);
 }
 
-void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate, const CDWordArray& aSelTaskIDs)
+void CKanbanCtrl::RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs)
 {
+	ASSERT((aSelTaskIDs.GetSize() == 0) || (dwFlags & KCRC_RESTORESELECTION));
+
 	if (m_sTrackAttribID.IsEmpty())
 	{
 		ASSERT(m_nTrackAttribute == TDCA_NONE);
@@ -1798,15 +1818,16 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate, const CDWo
 	CKanbanItemArrayMap mapKIArray;
 	m_data.BuildTempItemMaps(m_sTrackAttribID, m_dwOptions, mapKIArray);
 
+	// Rebuild columns
 	if (UsingDynamicColumns())
 		RebuildDynamicColumns(mapKIArray);
 	else
 		RebuildFixedColumns(mapKIArray);
 
-	// Rebuild the list data for each list (which can be empty)
-	if (bRebuildData)
+	// Rebuild column contents
+	if (dwFlags & KCRC_REBUILDCONTENTS)
 	{
-		RebuildColumnsData(mapKIArray);
+		RebuildColumnsContents(mapKIArray);
 	}
 	else if (UsingDynamicColumns())
 	{
@@ -1818,10 +1839,9 @@ void CKanbanCtrl::RebuildColumns(BOOL bRebuildData, BOOL bTaskUpdate, const CDWo
 
 	RebuildColumnHeader();
 	Resize();
-		
-	// We only need to restore selection if not doing a task update
-	// because otherwise the app takes care of that
-	if (!bTaskUpdate && aSelTaskIDs.GetSize())
+
+	// Restore selection
+	if (aSelTaskIDs.GetSize())
 	{
 		if (m_aColumns.Find(aSelTaskIDs) != -1)
 		{
@@ -1914,7 +1934,7 @@ void CKanbanCtrl::RebuildColumnHeader()
 	}
 }
 
-void CKanbanCtrl::RebuildColumnsData(const CKanbanItemArrayMap& mapKIArray)
+void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 {
 	int nCol = m_aColumns.GetSize();
 	
@@ -2095,7 +2115,8 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 	m_pSelectedColumn = NULL;
 	m_aColumns.RemoveAll();
 
-	RebuildColumns(TRUE, TRUE);
+	// Don't attempt to restore selection
+	RebuildColumns(KCRC_REBUILDCONTENTS);
 	Resize();
 
 	return TRUE;
@@ -2204,7 +2225,11 @@ void CKanbanCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 	m_data.RemoveDeletedItems(mapIDs);
 
 	if (bRebuildColumns)
-		RebuildColumns(FALSE, TRUE);
+	{
+		// No need to rebuild column contents as
+		// we've already done a manual adjustment
+		RebuildColumns(KCRC_RESTORESELECTION);
+	}
 }
 
 KANBANITEM* CKanbanCtrl::GetKanbanItem(DWORD dwTaskID) const
@@ -2273,15 +2298,18 @@ void CKanbanCtrl::SetOptions(DWORD dwOptions)
 
 		if (Misc::FlagHasChanged(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS, m_dwOptions, dwPrevOptions))
 		{
-			RebuildColumns(TRUE, FALSE);
+			// Column visibility AND contents may have changed
+			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
 		}
 		else if (Misc::FlagHasChanged(KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG, m_dwOptions, dwPrevOptions))
 		{
-			RebuildColumns(FALSE, FALSE);
+			// Update column visibility only
+			RebuildColumns(KCRC_RESTORESELECTION);
 		}
 		else if (((m_nTrackAttribute == TDCA_PRIORITY) || (m_nTrackAttribute == TDCA_RISK)) && Misc::FlagHasChanged(KBCF_DUEHAVEHIGHESTPRIORITYRISK | KBCF_DONEHAVELOWESTPRIORITYRISK, m_dwOptions, dwPrevOptions))
 		{
-			RebuildColumns(TRUE, FALSE);
+			// Column visibility AND contents may have changed
+			RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_RESTORESELECTION);
 		}
 
 		dwOptions &= ~(KBCF_HIDEPARENTTASKS | KBCF_HIDESUBTASKS | KBCF_HIDEEMPTYCOLUMNS | KBCF_ALWAYSSHOWBACKLOG);
