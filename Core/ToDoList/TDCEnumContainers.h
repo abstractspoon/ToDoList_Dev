@@ -28,18 +28,30 @@ public:
 		if (bPreDeleteSection)
 			pPrefs->DeleteProfileSection(szSection);
 
-		CArray<T, T&> aEnums;
-		CopyTo(aEnums);
+		if (IsEmpty())
+		{
+			// Have to write something else we've no way of
+			// detecting a successful read
+			pPrefs->WriteProfileString(szSection, _T("Items"), _T("|"));
+		}
+		else
+		{
+			CArray<T, T&> aEnums;
+			CopyTo(aEnums);
 
-		CString sItems = Misc::FormatArrayT(aEnums, _T("%d"), '|');
-		pPrefs->WriteProfileString(szSection, _T("Items"), sItems);
+			CString sItems = Misc::FormatArrayT(aEnums, _T("%d"), '|');
+			pPrefs->WriteProfileString(szSection, _T("Items"), sItems);
+		}
 	}
 
-	int Load(const IPreferences* pPrefs, LPCTSTR szSection) 
+	BOOL Load(const IPreferences* pPrefs, LPCTSTR szSection) 
 	{
 		RemoveAll();
 
 		CString sItems = pPrefs->GetProfileString(szSection, _T("Items"));
+
+		if (sItems.IsEmpty())
+			return FALSE;
 
 		CDWordArray aEnums;
 		int nItem = Misc::Split(sItems, aEnums, '|');
@@ -47,14 +59,18 @@ public:
 		while (nItem--)
 			Add((T)aEnums[nItem]);
 
-		return GetCount();
+		return TRUE;
 	}
 
-	int LegacyLoad(const IPreferences* pPrefs, LPCTSTR szSection, LPCTSTR szValueKeyFmt)
+	BOOL LegacyLoad(const IPreferences* pPrefs, LPCTSTR szSection, LPCTSTR szValueKeyFmt)
 	{
 		RemoveAll();
 
-		int nItem = pPrefs->GetProfileInt(szSection, _T("Count"));
+		int nItem = pPrefs->GetProfileInt(szSection, _T("Count"), -1);
+
+		if (nItem == -1)
+			return FALSE;
+
 		T tDef = GetDefaultValue();
 
 		while (nItem--)
@@ -63,7 +79,7 @@ public:
 			Add((T)pPrefs->GetProfileInt(szSection, sValueKey, tDef));
 		}
 
-		return GetCount();
+		return TRUE;
 	}
 
 protected:
