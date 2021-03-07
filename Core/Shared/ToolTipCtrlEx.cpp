@@ -337,7 +337,7 @@ int CToolTipCtrlEx::DoToolHitTest(CWnd* pOwner, CPoint point, TOOLINFO& ti, BOOL
 	return pOwner->SendMessage(WM_TTC_TOOLHITTEST, MAKEWPARAM(point.x, point.y), (LPARAM)&ti);
 }
 
-void CToolTipCtrlEx::OnTimer(UINT_PTR nIDEvent)
+void CToolTipCtrlEx::OnTimer(UINT nIDEvent)
 {
 	if (nIDEvent == ID_TIMERLEAVE)
 	{

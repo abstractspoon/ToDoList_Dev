@@ -42,7 +42,7 @@ BOOL CMidnightTimer::Disable()
 	return KillTimer(hwndNotify, (UINT)this);
 }
 
-VOID CALLBACK CMidnightTimer::Timerproc(HWND hWnd, UINT nMsgID, UINT_PTR nTimerID, DWORD dwTick)
+VOID CALLBACK CMidnightTimer::Timerproc(HWND hWnd, UINT nMsgID, UINT nTimerID, DWORD dwTick)
 {
 	CMidnightTimer* pTimer = (CMidnightTimer*)nTimerID;
 

@@ -25,7 +25,7 @@ protected:
 	COleDateTime m_dtLastDayCheck;
 
 	void OnTimer();
-	static VOID CALLBACK Timerproc(HWND hWnd, UINT nMsgID, UINT_PTR nTimerID, DWORD dwTick);
+	static VOID CALLBACK Timerproc(HWND hWnd, UINT nMsgID, UINT nTimerID, DWORD dwTick);
 };
 
 #endif // !defined(AFX_MIDNIGHTTIMER_H__E49A251F_2E91_4591_AFD2_8B50719B4BC6__INCLUDED_)

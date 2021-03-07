@@ -52,7 +52,7 @@ protected:
 
 protected:
 	afx_msg void OnPaint();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnTimer(UINT nIDEvent);
 
 	DECLARE_MESSAGE_MAP()
 
