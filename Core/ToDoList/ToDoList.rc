@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,0,997,5
+ FILEVERSION 8,0,997,6
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,15 +47,15 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 0, 997, 5\0"
+            VALUE "FileVersion", "8, 0, 997, 6\0"
             VALUE "InternalName", "ToDoList\0"
-            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-20\0"
+            VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-21 \0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "ToDoList.exe\0"
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "8.1 Development Preview\0"
+            VALUE "SpecialBuild", "Development Preview of ToDoList 8.1\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1828,7 +1828,7 @@ BEGIN
     LTEXT           "License:",IDC_STATIC,7,161,27,8
     EDITTEXT        IDC_TITLE,34,7,173,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
                     WS_BORDER
-    LTEXT           "(c) Abstractspoon 2003-20",IDC_STATIC,213,7,87,8
+    LTEXT           "(c) Abstractspoon 2003-21",IDC_STATIC,213,7,87,8
 END
 
 IDD_SHOWREMINDER_DIALOG DIALOG DISCARDABLE  0, 0, 338, 224
