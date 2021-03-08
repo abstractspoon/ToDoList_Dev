@@ -94,6 +94,7 @@ CLockUpdates::CLockUpdates(HWND hwnd) : m_hWnd(hwnd)
 	}
 	else if (m_hWnd && !::LockWindowUpdate(m_hWnd))
 	{
+		// Means someone else has an active lock
 		ASSERT(0);
 		m_hWnd = NULL;
 	}

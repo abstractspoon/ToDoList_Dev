@@ -5214,57 +5214,65 @@ LRESULT CToDoCtrl::OnLabelEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 {
 	ASSERT(m_dwEditTitleTaskID);
 
-	CLockUpdates lu(m_taskTree);
-
 	CString sText;
 	m_eTaskName.GetWindowText(sText);
 
-	if (GetSelectedCount() == 0) // user clicked into space
-		SelectTask(m_dwEditTitleTaskID);
+	BOOL bResort = FALSE;
 
-	// end can occurs either when the user selected return
-	// or if the edit box loses the focus so we need to check
-	// the lParam and only set the focus if the user chose return
-	if (lParam)
-		SetFocusToTasks();
-
-	if (!sText.IsEmpty())
+	// Scope locking to end before resorting which also wants
+	// to take a lock
 	{
-		Flush();
+		CLockUpdates lu(m_taskTree);
 
-		// Special handling: For new tasks we extend the previous undo
-		BOOL bNewTask = (m_dwEditTitleTaskID == m_dwLastAddedID);
-		TDC_UNDOACTIONTYPE nAction = (bNewTask ? TDCUAT_ADD : TDCUAT_EDIT);
+		if (GetSelectedCount() == 0) // user clicked into space
+			SelectTask(m_dwEditTitleTaskID);
 
-		IMPLEMENT_DATA_UNDO_EXTEND(m_data, nAction, bNewTask);
-		
-		int nRes = m_data.SetTaskTitle(m_dwEditTitleTaskID, sText);
-		
-		if ((nRes == SET_CHANGE) || bNewTask)
+		// end can occurs either when the user selected return
+		// or if the edit box loses the focus so we need to check
+		// the lParam and only set the focus if the user chose return
+		if (lParam)
+			SetFocusToTasks();
+
+		if (!sText.IsEmpty())
 		{
-			CDWordArray aModTaskIDs;
-			aModTaskIDs.Add(m_dwEditTitleTaskID);
+			Flush();
 
-			m_taskTree.InvalidateSelection(TRUE);
-			SetModified(TDCA_TASKNAME, aModTaskIDs);
+			// Special handling: For new tasks we extend the previous undo
+			BOOL bNewTask = (m_dwEditTitleTaskID == m_dwLastAddedID);
+			TDC_UNDOACTIONTYPE nAction = (bNewTask ? TDCUAT_ADD : TDCUAT_EDIT);
 
-			if (bNewTask)
+			IMPLEMENT_DATA_UNDO_EXTEND(m_data, nAction, bNewTask);
+		
+			int nRes = m_data.SetTaskTitle(m_dwEditTitleTaskID, sText);
+		
+			if ((nRes == SET_CHANGE) || bNewTask)
 			{
-				// If this was a new task and the parent was marked as done, 
-				// now mark it as incomplete
-				DWORD dwParentID = m_data.GetTaskParentID(m_dwEditTitleTaskID);
-				
-				if (dwParentID && m_data.IsTaskDone(dwParentID))
-					FixupParentCompletion(dwParentID);
+				CDWordArray aModTaskIDs;
+				aModTaskIDs.Add(m_dwEditTitleTaskID);
 
-				// For new tasks we did not sort so we may need to do so
-				// now if sorting by anything other than 'title' because 
-				// will already have been handled by SetModified
-				if (m_taskTree.IsMultiSorting() || (m_taskTree.IsSorting() && !m_taskTree.IsSortingBy(TDCC_CLIENT)))
-					m_taskTree.Resort();
+				m_taskTree.InvalidateSelection(TRUE);
+				SetModified(TDCA_TASKNAME, aModTaskIDs);
+
+				if (bNewTask)
+				{
+					// If this was a new task and the parent was marked as done, 
+					// now mark it as incomplete
+					DWORD dwParentID = m_data.GetTaskParentID(m_dwEditTitleTaskID);
+				
+					if (dwParentID && m_data.IsTaskDone(dwParentID))
+						FixupParentCompletion(dwParentID);
+
+					// For new tasks we did not sort so we may need to do so
+					// now if sorting by anything other than 'title' because 
+					// will already have been handled by SetModified
+					bResort = (m_taskTree.IsMultiSorting() || (m_taskTree.IsSorting() && !m_taskTree.IsSortingBy(TDCC_CLIENT)));
+				}
 			}
 		}
 	}
+
+	if (bResort)
+		m_taskTree.Resort();
 
 	SetEditTitleTaskID(0);
 
