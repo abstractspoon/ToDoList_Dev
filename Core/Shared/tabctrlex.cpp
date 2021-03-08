@@ -186,7 +186,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab)
 	if ((nTab == GetCurSel()) && HasFlag(TCE_BOLDSELTEXT))
 	{
 		// handle '&'
-		sTab.Replace(_T("&"), _T("&&"));
+		int nNumAmpersand = sTab.Replace(_T("&"), _T("&&"));
 
 		int nWidth = GraphicsMisc::GetTextWidth(sTab, *this);
 		int nBoldWidth = GraphicsMisc::GetTextWidth(sTab, *this, GetTabFont(nTab));
@@ -194,7 +194,23 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab)
 		nExtra += (nBoldWidth - nWidth);
 
 		// restore '&'
-		sTab.Replace(_T("&&"), _T("&"));
+		if (nNumAmpersand)
+			sTab.Replace(_T("&&"), _T("&"));
+	}
+	else 
+	{
+		// Add space for embedded '&' which the tab control 
+		// does not handle well
+		int nNumAmpersand = sTab.Replace(_T("&"), _T("&&"));
+
+		if (nNumAmpersand)
+		{
+			int nWidth = GraphicsMisc::GetTextWidth(_T("&"), *this);
+			nExtra += (nWidth * nNumAmpersand);
+
+			// restore '&'
+			sTab.Replace(_T("&&"), _T("&"));
+		}
 	}
 
 	if (nExtra)
@@ -205,12 +221,13 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab)
 		int nSpaceWidth = GraphicsMisc::GetTextWidth(SPACE, *this, GetTabFont(nTab));
 		ASSERT(nSpaceWidth);
 
-		sTab += CString(' ', (nExtra / nSpaceWidth));
-	}
+		int nNumSpace = (nExtra / nSpaceWidth);
 
-	// add leading spaces if no image
-	if (GetItemImage(nTab) == -1)
-		sTab = (_T("   ") + sTab);
+		if (nExtra % nSpaceWidth)
+			nNumSpace++;
+
+		sTab += CString(' ', nNumSpace);
+	}
 
 	return sTab;
 }
