@@ -3672,7 +3672,11 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 
 	// Update UI
 	UpdateStatusbar();
-	UpdateCaption();
+
+	if (nTDC == GetSelToDoCtrl())
+		UpdateCaption();
+	else
+		m_mgrToDoCtrls.UpdateTabItemText(nTDC);
 
 	// refresh toolbar states
 	PostMessage(WM_IDLEUPDATECMDUI, TRUE);
