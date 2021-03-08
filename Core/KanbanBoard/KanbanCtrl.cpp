@@ -2621,17 +2621,12 @@ void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 			m_aColumns.Sort(TDCA_POSITION, bAscending);
 		}
 	}
-	else
+	else if ((m_nSortBy != nBy) || (bAscending != m_bSortAscending) || (nBy == TDCA_NONE))
 	{
-		ASSERT((nBy == TDCA_NONE) || (bAscending != -1));
+		m_nSortBy = nBy;
+		m_bSortAscending = bAscending;
 
-		if ((m_nSortBy != nBy) || (nBy == TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
-		{
-			m_nSortBy = nBy;
-			m_bSortAscending = bAscending;
-
-			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
-		}
+		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 	}
 }
 
