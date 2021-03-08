@@ -99,6 +99,7 @@ protected:
 	BOOL m_bSettingColumnFocus;
 	BOOL m_bResizingHeader;
 	BOOL m_bSavingToImage;
+	BOOL m_bClosing;
 
 	DWORD m_dwOptions;
 	UINT m_nNextColor;
