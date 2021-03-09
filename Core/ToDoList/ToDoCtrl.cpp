@@ -3354,25 +3354,41 @@ void CToDoCtrl::SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs,
 
 int CToDoCtrl::CheckWantSubtasksCompleted()
 {
-	if (m_taskTree.SelectionHasIncompleteSubtasks(TRUE))
-	{
-		// ask the user what to do
-		UINT nIDMessage = (GetSelectedCount() == 1) ? 
-							IDS_TDC_SELTASKHASINCOMPLETE : IDS_TDC_TASKHASINCOMPLETE;
-		
-		int nRet = AfxMessageBox(CEnString(nIDMessage), MB_YESNOCANCEL | MB_ICONQUESTION);
+	// Quick exit
+	if (!m_taskTree.SelectionHasIncompleteSubtasks(TRUE))
+		return 0;
 
-		if (nRet == IDYES)
-		{
-			return 1;
-		}
-		else if (nRet == IDCANCEL)
-		{
-			return -1;
-		}
+	// If the selected tasks are both recurring AND reusable
+	// AND none of the selected task's subtasks are recurring
+	// then we don't need to ask because we are going to reset
+	// the subtasks' completion states anyway
+	BOOL bNeedAsk = FALSE;
+	POSITION pos = m_taskTree.TSH().GetFirstItemPos();
+
+	while (pos && !bNeedAsk)
+	{
+		DWORD dwTaskID = m_data.GetTrueTaskID(m_taskTree.TSH().GetNextItemData(pos));
+		
+		bNeedAsk = (!m_data.IsTaskReusableRecurring(dwTaskID) ||
+					m_data.TaskHasRecurringSubtasks(dwTaskID));
 	}
 
-	return 0; // no incomplete subtasks or IDNO
+	if (!bNeedAsk)
+		return 0;
+
+	// Do the asking
+	UINT nIDMessage = (GetSelectedCount() == 1) ? 
+						IDS_TDC_SELTASKHASINCOMPLETE : IDS_TDC_TASKHASINCOMPLETE;
+		
+	int nRet = AfxMessageBox(CEnString(nIDMessage), MB_YESNOCANCEL | MB_ICONQUESTION);
+
+	switch (nRet)
+	{
+	case IDYES:		return 1;
+	case IDCANCEL:	return -1;
+	}
+
+	return 0; // IDNO
 }
 
 BOOL CToDoCtrl::SetSelectedTaskDone(BOOL bDone)

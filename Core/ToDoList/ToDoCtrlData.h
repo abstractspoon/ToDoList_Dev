@@ -128,6 +128,7 @@ public:
 	BOOL CalcNextTaskOccurences(DWORD dwTaskID, const COleDateTimeRange& dtRange, CArray<double, double&>& aDates, BOOL& bDue) const;
 	BOOL ResetRecurringSubtaskOccurrences(DWORD dwTaskID);
 	BOOL IsTaskRecurring(DWORD dwTaskID) const;
+	BOOL IsTaskReusableRecurring(DWORD dwTaskID) const;
 	BOOL CanTaskRecur(DWORD dwTaskID) const;
 	CString GetTaskVersion(DWORD dwTaskID) const;
 	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
@@ -168,9 +169,11 @@ public:
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasSubtasks(DWORD dwTaskID) const;
 	BOOL TaskHasFileLink(DWORD dwTaskID) const;
+	BOOL TaskHasRecurringSubtasks(DWORD dwTaskID) const;
 
 	BOOL TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const;
+	BOOL TaskHasRecurringSubtasks(const TODOSTRUCTURE* pTDS) const;
 
 	// Sets
 	TDC_SET SetTaskAttributes(DWORD dwTaskID, const TODOITEM& tdi);

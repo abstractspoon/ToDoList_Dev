@@ -917,6 +917,14 @@ BOOL CToDoCtrlData::IsTaskRecurring(DWORD dwTaskID) const
 	return pTDI->IsRecurring();
 }
 
+BOOL CToDoCtrlData::IsTaskReusableRecurring(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, FALSE);
+
+	return (pTDI->IsRecurring() && (pTDI->trRecurrence.nReuse == TDIRO_REUSE));
+}
+
 BOOL CToDoCtrlData::GetTaskRecurrence(DWORD dwTaskID, TDCRECURRENCE& tr) const
 {
 	const TODOITEM* pTDI = NULL;
@@ -3271,10 +3279,7 @@ BOOL CToDoCtrlData::TaskHasSubtasks(DWORD dwTaskID) const
 
 BOOL CToDoCtrlData::TaskHasCompletedSubtasks(DWORD dwTaskID) const
 {
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDS(dwTaskID, pTDS, FALSE);
-
-	return TaskHasCompletedSubtasks(pTDS);
+	return TaskHasCompletedSubtasks(LocateTask(dwTaskID));
 }
 
 BOOL CToDoCtrlData::TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const
@@ -3306,10 +3311,7 @@ BOOL CToDoCtrlData::TaskHasCompletedSubtasks(const TODOSTRUCTURE* pTDS) const
 
 BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const
 {
-	const TODOSTRUCTURE* pTDS = NULL;
-	GET_TDS(dwTaskID, pTDS, FALSE);
-
-	return TaskHasIncompleteSubtasks(pTDS, bExcludeRecurring);
+	return TaskHasIncompleteSubtasks(LocateTask(dwTaskID), bExcludeRecurring);
 }
 
 BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bExcludeRecurring) const
@@ -3352,6 +3354,38 @@ BOOL CToDoCtrlData::TaskHasIncompleteSubtasks(const TODOSTRUCTURE* pTDS, BOOL bE
 			return TRUE;
 	}
 
+	return FALSE;
+}
+
+BOOL CToDoCtrlData::TaskHasRecurringSubtasks(DWORD dwTaskID) const
+{
+	return TaskHasRecurringSubtasks(LocateTask(dwTaskID));
+}
+
+BOOL CToDoCtrlData::TaskHasRecurringSubtasks(const TODOSTRUCTURE* pTDS) const
+{
+	if (!pTDS)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// process its subtasks
+	int nPos = pTDS->GetSubTaskCount();
+	
+	while (nPos--)
+	{
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nPos);
+		
+		if (IsTaskRecurring(pTDSChild->GetTaskID()))
+			return TRUE;
+		
+		// Grandchildren
+		if (TaskHasRecurringSubtasks(pTDSChild))
+			return TRUE;
+	}
+	
+	// else
 	return FALSE;
 }
 
