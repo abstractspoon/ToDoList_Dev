@@ -4363,9 +4363,13 @@ TDC_SET CToDoCtrlData::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
 			if (bStateChange && !m_sCompletionStatus.IsEmpty())
 			{
 				if (bDone)
+				{
 					SetTaskStatus(dwTaskID, m_sCompletionStatus);
-				else
+				}
+				else if (GetTaskStatus(dwTaskID) == m_sCompletionStatus)
+				{
 					SetTaskStatus(dwTaskID, _T(""));
+				}
 			}
 		}
 	}
