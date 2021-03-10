@@ -173,6 +173,8 @@ namespace Misc
 	BOOL IsEmpty(LPCTSTR szText);
 	BOOL IsEmpty(LPCSTR szText);
 	BOOL HasEmpty(const CStringArray& aItems);
+	const CString& Last(const CStringArray& aText);
+	CString& Last(CStringArray& aText);
 
 	int FindNextOneOf(const CString& sSearchForOneOf, const CString& sSearchIn, BOOL bForward, int nStartPos = -1);
 	int FindFirstOf(const CString& sSearchFor, const CString& sSearchIn, BOOL bCaseSensitive = FALSE);

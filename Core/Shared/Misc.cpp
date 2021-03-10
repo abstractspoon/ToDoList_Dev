@@ -840,6 +840,32 @@ BOOL Misc::HasEmpty(const CStringArray& aItems)
 	return FALSE;
 }
 
+const CString& Misc::Last(const CStringArray& aText)
+{
+	int nSize = aText.GetSize();
+
+	if (nSize > 0)
+		return aText[nSize - 1];
+
+	static CString sEmpty;
+	sEmpty.Empty();
+	
+	return sEmpty;
+}
+
+CString& Misc::Last(CStringArray& aText)
+{
+	int nSize = aText.GetSize();
+
+	if (nSize > 0)
+		return aText[nSize - 1];
+
+	static CString sEmpty;
+	sEmpty.Empty();
+
+	return sEmpty;
+}
+
 int Misc::LastIndex(const CString& sText)
 {
 	return (sText.GetLength() - 1);

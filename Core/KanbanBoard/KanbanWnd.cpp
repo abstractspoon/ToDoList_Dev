@@ -816,6 +816,8 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 	CArray<IUITASKMOD, IUITASKMOD&> aMods;
 	aMods.SetSize(nNumMods);
 
+	CStringArray aTemp; // because string items are passed as pointers
+
 	for (int nMod = 0; nMod < nNumMods; nMod++)
 	{
 		IUITASKMOD& mod = aMods[nMod];
@@ -824,9 +826,7 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 		mod.dwSelectedTaskID = pTaskIDs[nMod];
 
 		CStringArray aTaskValues;
-		m_ctrlKanban.GetTaskTrackedAttributeValues(mod.dwSelectedTaskID, aTaskValues);
-
-		CString sModValue = Misc::FormatArray(aTaskValues, '\n');
+		int nNumVal = m_ctrlKanban.GetTaskTrackedAttributeValues(mod.dwSelectedTaskID, aTaskValues);
 
 		switch (nAttrib)
 		{
@@ -836,21 +836,21 @@ LRESULT CKanbanWnd::OnKanbanNotifyValueChange(WPARAM wp, LPARAM lp)
 			case TDCA_STATUS:
 			case TDCA_ALLOCBY:
 			case TDCA_VERSION:
-				mod.szValue = sModValue; // temporary string
+				aTemp.Add(Misc::FormatArray(aTaskValues, '\n'));
+				mod.szValue = Misc::Last(aTemp);
 				break;
 
 			case TDCA_PRIORITY:
 			case TDCA_RISK:
-				if (aTaskValues.GetSize() == 0)
-					mod.nValue = -2; // None
-				else
-					mod.nValue = _ttoi(aTaskValues[0]);
+				mod.nValue = ((nNumVal == 0) ? -2 : _ttoi(aTaskValues[0]));
 				break;
 
 			case TDCA_CUSTOMATTRIB:
 				ASSERT(!sCustAttribID.IsEmpty());
 
-				mod.szValue = sModValue;
+				aTemp.Add(Misc::FormatArray(aTaskValues, '\n'));
+
+				mod.szValue = Misc::Last(aTemp);
 				mod.szCustomAttribID = sCustAttribID;
 
 				// TODO - multi value items and time periods
