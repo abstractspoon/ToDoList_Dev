@@ -1255,6 +1255,15 @@ BOOL CToDoListWnd::InitStatusbar()
 	if (!m_statusBar.SetPanes(SB_PANES, SB_PANECOUNT))
 		return FALSE;
 
+	// Translate tooltips
+	if (CLocalizer::IsInitialized())
+	{
+		int nPane = SB_PANECOUNT;
+
+		while (nPane--)
+			m_statusBar.SetPaneTooltip(SB_PANES[nPane].nID, CEnString((UINT)SB_PANES[nPane].lpszTip));
+	}
+
 	return TRUE;
 }
 
