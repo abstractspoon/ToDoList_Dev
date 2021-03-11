@@ -62,10 +62,12 @@ const UINT DEFTEXTFLAGS   = (DT_END_ELLIPSIS | DT_VCENTER | DT_SINGLELINE | DT_N
 
 enum // ProcessUIExtensionMod
 {
-	UIEXTMOD_SUCCESS		= 0x1,
-	UIEXTMOD_DEPENDCHANGE	= 0x2,
-	UIEXTMOD_OFFSETDATES	= 0x4,
-	UIEXTMOD_INHERITATTRIB	= 0x8,
+	UIEXTMOD_SUCCESS		= 0x01,
+	UIEXTMOD_DEPENDCHANGE	= 0x02,
+	UIEXTMOD_OFFSETDATES	= 0x04,
+	UIEXTMOD_INHERITATTRIB	= 0x08,
+	UIEXTMOD_DONEBYSTATUS	= 0x10,
+	UIEXTMOD_DONECHANGE		= 0x20,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -1664,9 +1666,40 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 	case TDCA_STATUS:		
 		{
 			if (dwTaskID)
+			{
 				bChange = (SET_CHANGE == m_data.SetTaskStatus(dwTaskID, mod.szValue));
+
+				if (!m_sCompletionStatus.IsEmpty() && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
+				{
+					// Handle synchronizing status and completion 
+					BOOL bwasDone = m_data.IsTaskDone(dwTaskID);
+					BOOL bIsDone = (m_sCompletionStatus == mod.szValue);
+
+					if (bwasDone && !bIsDone)
+					{
+						m_data.SetTaskDone(dwTaskID, CDateHelper::NullDate(), FALSE, FALSE);
+						dwResults |= UIEXTMOD_DONECHANGE;
+					}
+					else if (!bwasDone && bIsDone)
+					{
+						if (!m_data.TaskHasSubtasks(dwTaskID))
+						{
+							m_data.SetTaskDone(dwTaskID, COleDateTime::GetCurrentTime(), FALSE, FALSE);
+							dwResults |= UIEXTMOD_DONECHANGE;
+						}
+						else
+						{
+							// we handle this afterwards because we need 
+							// and we don't want to do it multiple times
+							dwResults |= UIEXTMOD_DONEBYSTATUS;
+						}
+					}
+				}
+			}
 			else
+			{
 				bChange = SetSelectedTaskStatus(mod.szValue);
+			}
 		}
 		break;
 
@@ -2081,13 +2114,29 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 			pVData->bNeedFullTaskUpdate = FALSE;
 		}
-		else if (dwResults & UIEXTMOD_OFFSETDATES)
+		else
 		{
-			UpdateExtensionViewsSelection(TDCA_OFFSETTASK);
-		}
-		else if (dwResults & UIEXTMOD_INHERITATTRIB)
-		{
-			UpdateExtensionViewsSelection(TDCA_ALL);
+			CTDCAttributeMap mapChangedAttrib;
+
+			if (dwResults & UIEXTMOD_INHERITATTRIB)
+				mapChangedAttrib.Add(TDCA_ALL);
+
+			if (dwResults & UIEXTMOD_OFFSETDATES)
+				mapChangedAttrib.Add(TDCA_OFFSETTASK);
+
+			if (dwResults & UIEXTMOD_DONEBYSTATUS)
+			{
+				// TODO
+				ASSERT(0);
+				mapChangedAttrib.Add(TDCA_DONEDATE);
+			}
+			else if (dwResults & UIEXTMOD_DONECHANGE)
+			{
+				mapChangedAttrib.Add(TDCA_DONEDATE);
+			}
+
+			if (!mapChangedAttrib.IsEmpty())
+				UpdateExtensionViewsSelection(mapChangedAttrib);
 		}
 	}
 	
