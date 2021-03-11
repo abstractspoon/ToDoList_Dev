@@ -69,7 +69,6 @@ public:
 	BOOL CreateDragImage(CImageList& ilDrag, CSize& sizeImage);
 
 	HTREEITEM FindItem(DWORD dwTaskID) const;
-	HTREEITEM FindItem(const CPoint& ptScreen) const;
 	HTREEITEM FindItem(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart = NULL) const;
 
 	DWORD GetTaskID(HTREEITEM hti) const { return (hti ? GetItemData(hti) : 0); }
@@ -88,6 +87,8 @@ public:
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
+	HTREEITEM HitTest(const CPoint& ptScreen, UINT* pFlags = NULL) const;
+	HTREEITEM HitTestItemSidebar(const CPoint& ptScreen) const;
 
 	void ClearSelection();
 	void SetSelected(BOOL bSelected);
@@ -190,23 +191,23 @@ protected:
 	void RefreshBkgndColor();
 	BOOL HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM& htiHit);
 	BOOL HandleExtendedSelection(HTREEITEM htiSelected);
-	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
 	BOOL InitTooltip();
-	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
-	BOOL GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
 	void RefreshItemLineHeights(HTREEITEM hti);
 	int GetItemDisplayAttributeCount(const KANBANITEM& ki) const;
-	BOOL GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
-	BOOL GetItemCheckboxRect(CRect& rItem) const;
-	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
 	void NotifyParentSelectionChange(HTREEITEM hItem, BOOL bByMouse);
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL IsOnlySelectedTask(DWORD dwTaskID);
+	int BuildSortedSelection(CHTIList& lstHTI) const;
+	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
+
+	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
+	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
+	BOOL GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
+	BOOL GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
+	BOOL GetItemCheckboxRect(CRect& rItem) const;
 
 	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
-	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL = NULL, int nIndex = -1) const;
-
-	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
+	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
 
 	void DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem);
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
@@ -217,7 +218,7 @@ protected:
 	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
-	int BuildSortedSelection(CHTIList& lstHTI) const;
+	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL = NULL, int nIndex = -1) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);

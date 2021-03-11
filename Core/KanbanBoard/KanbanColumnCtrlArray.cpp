@@ -488,7 +488,7 @@ DWORD CKanbanColumnCtrlArray::HitTestTask(const CPoint& ptScreen, CKanbanColumnC
 
 	if (pCol)
 	{
-		HTREEITEM hti = pCol->FindItem(ptScreen);
+		HTREEITEM hti = pCol->HitTest(ptScreen);
 
 		if (hti)
 			return pCol->GetTaskID(hti);
@@ -508,9 +508,6 @@ void CKanbanColumnCtrlArray::FilterToolTipMessage(MSG* pMsg)
 
 void CKanbanColumnCtrlArray::UpdateHotItem(const CPoint& ptScreen)
 {
-	CKanbanColumnCtrl* pHotCol = NULL;
-	DWORD dwHotItem = HitTestTask(ptScreen, pHotCol);
-
 	int nCol = GetSize();
 
 	while (nCol--)
@@ -518,10 +515,8 @@ void CKanbanColumnCtrlArray::UpdateHotItem(const CPoint& ptScreen)
 		CKanbanColumnCtrl* pCol = GetAt(nCol);
 		ASSERT(pCol);
 
-		if (pCol == pHotCol)
-			pCol->SetHotItem(dwHotItem);
-		else
-			pCol->SetHotItem(0);
+		HTREEITEM htiHit = pCol->HitTestItemSidebar(ptScreen);
+		pCol->SetHotItem(htiHit ? pCol->GetTaskID(htiHit) : 0);
 	}
 }
 

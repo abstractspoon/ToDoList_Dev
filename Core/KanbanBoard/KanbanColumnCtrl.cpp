@@ -1324,12 +1324,39 @@ HTREEITEM CKanbanColumnCtrl::FindItem(DWORD dwTaskID) const
 	return m_mapHTItems.GetItem(dwTaskID);
 }
 
-HTREEITEM CKanbanColumnCtrl::FindItem(const CPoint& ptScreen) const
+HTREEITEM CKanbanColumnCtrl::HitTest(const CPoint& ptScreen, UINT* pFlags) const
 {
 	CPoint ptClient(ptScreen);
 	ScreenToClient(&ptClient);
 	
-	return CTreeCtrl::HitTest(ptClient);
+	return CTreeCtrl::HitTest(ptClient, pFlags);
+}
+
+HTREEITEM CKanbanColumnCtrl::HitTestItemSidebar(const CPoint& ptScreen) const
+{
+	HTREEITEM htiHit = HitTest(ptScreen);
+
+	if (htiHit)
+	{
+		CRect rSidebar;
+		GetItemBounds(htiHit, rSidebar);
+
+		CRect rLabel;
+		GetItemLabelTextRect(htiHit, rLabel, TRUE);
+
+		rSidebar.left = (rLabel.left - (IMAGE_SIZE + IMAGE_PADDING));
+		rSidebar.right = rLabel.left;
+
+		if (HasOption(KBCF_SHOWTASKCOLORASBAR))
+			rSidebar.left -= (BAR_WIDTH + IMAGE_PADDING);
+
+		ClientToScreen(rSidebar);
+
+		if (!rSidebar.PtInRect(ptScreen))
+			htiHit = NULL;
+	}
+
+	return htiHit;
 }
 
 HTREEITEM CKanbanColumnCtrl::FindItem(const IUISELECTTASK& select, BOOL bNext, HTREEITEM htiStart) const
@@ -2017,8 +2044,8 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 
 	CRect rFirst, rLast;
 
-	if (GetItemRect(TCH().GetFirstItem(), rFirst, FALSE) &&
-		GetItemRect(TCH().GetLastVisibleItem(), rLast, FALSE))
+	if (GetItemBounds(TCH().GetFirstItem(), rFirst) &&
+		GetItemBounds(TCH().GetLastVisibleItem(), rLast))
 	{
 		reqSize.cy = (rLast.bottom - rFirst.top);
 	}
