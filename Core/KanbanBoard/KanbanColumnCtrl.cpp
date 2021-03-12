@@ -1324,17 +1324,12 @@ HTREEITEM CKanbanColumnCtrl::FindItem(DWORD dwTaskID) const
 	return m_mapHTItems.GetItem(dwTaskID);
 }
 
-HTREEITEM CKanbanColumnCtrl::HitTest(const CPoint& ptScreen, UINT* pFlags) const
+HTREEITEM CKanbanColumnCtrl::HitTestItemSidebar(const CPoint& ptScreen) const
 {
 	CPoint ptClient(ptScreen);
 	ScreenToClient(&ptClient);
-	
-	return CTreeCtrl::HitTest(ptClient, pFlags);
-}
 
-HTREEITEM CKanbanColumnCtrl::HitTestItemSidebar(const CPoint& ptScreen) const
-{
-	HTREEITEM htiHit = HitTest(ptScreen);
+	HTREEITEM htiHit = HitTest(ptClient);
 
 	if (htiHit)
 	{
@@ -1350,9 +1345,7 @@ HTREEITEM CKanbanColumnCtrl::HitTestItemSidebar(const CPoint& ptScreen) const
 		if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 			rSidebar.left -= (BAR_WIDTH + IMAGE_PADDING);
 
-		ClientToScreen(rSidebar);
-
-		if (!rSidebar.PtInRect(ptScreen))
+		if (!rSidebar.PtInRect(ptClient))
 			htiHit = NULL;
 	}
 

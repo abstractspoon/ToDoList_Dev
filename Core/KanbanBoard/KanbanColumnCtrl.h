@@ -87,7 +87,6 @@ public:
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
-	HTREEITEM HitTest(const CPoint& ptScreen, UINT* pFlags = NULL) const;
 	HTREEITEM HitTestItemSidebar(const CPoint& ptScreen) const;
 
 	void ClearSelection();
