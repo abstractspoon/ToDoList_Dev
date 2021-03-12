@@ -10,6 +10,7 @@
 #include "..\shared\HoldRedraw.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\localizer.h"
+#include "..\shared\GraphicsMisc.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -42,6 +43,10 @@ enum
 	CUSTOMICON_ID,
 	RECURRENCE_ID,
 };
+
+/////////////////////////////////////////////////////////////////////////////
+
+const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -1549,11 +1554,12 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 
 		if (rule.HasIcon())
 		{
+			// Don't use sText because it might have been truncated
 			CStringArray aIcons;
-			int nNumIcons = Misc::Split(sText, aIcons);
+			int nNumIcons = Misc::Split(GetItemText(nRow, nCol), aIcons);
 
 			CRect rIcon(rText);
-			rIcon.DeflateRect(0, ((rText.Height() - 16) / 2));
+			rIcon.DeflateRect(0, ((rText.Height() - IMAGE_SIZE) / 2));
 
 			for (int nIcon = 0; nIcon < nNumIcons; nIcon++)
 			{
@@ -1562,7 +1568,7 @@ void CTDLFindTaskExpressionListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 				if (nIconIdx != -1)
 				{
 					m_ilIcons.Draw(pDC, nIconIdx, rIcon.TopLeft(), ILD_TRANSPARENT);
-					rIcon.left += 18;
+					rIcon.left += (IMAGE_SIZE + 2);
 				}
 			}
 

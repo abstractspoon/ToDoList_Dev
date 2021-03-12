@@ -221,7 +221,8 @@ void CTDLToolbarButtonListCtrl::DrawCellText(CDC* pDC, int nRow, int nCol,
 		if (GetItemData(nRow) == ID_SEPARATOR)
 			return;
 
-		int nImage = m_ilImages.GetImageIndex(sText);
+		// Don't use sText because it might have been truncated
+		int nImage = m_ilImages.GetImageIndex(GetItemText(nRow, nCol));
 				
 		if (nImage != -1)
 		{
