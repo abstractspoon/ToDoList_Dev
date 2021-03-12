@@ -302,14 +302,72 @@ DWORD CTDCImageList::LoadImagesFromFolder(const CString& sFolder, COLORREF crTra
 
 BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex)
 {
-	HICON hIcon = CEnBitmapEx::LoadImageFileAsIcon(sImageFile, crTransparent, 16, 16);
-
-	if (hIcon)
+	switch (CEnBitmap::GetFileType(sImageFile))
 	{
- 		if (pImages == NULL)
- 			return TRUE;
- 
- 		return AddImage(sImageFile, hIcon, pImages, nNextNameIndex);
+	case FT_ICO:
+		{
+			HICON hIcon = CEnBitmapEx::LoadImageFileAsIcon(sImageFile, CLR_NONE, 16, 16);
+
+			if (hIcon)
+			{
+				if (pImages == NULL)
+					return TRUE;
+
+				return AddImage(sImageFile, hIcon, pImages, nNextNameIndex);
+			}
+		}
+		break;
+
+	case FT_PNG:
+		{
+			HICON hIcon = CEnBitmapEx::LoadImageFileAsIcon(sImageFile);	// Let the image list do the resizing
+			
+			if (hIcon)
+			{
+				if (pImages == NULL)
+					return TRUE;
+
+				return AddImage(sImageFile, hIcon, pImages, nNextNameIndex);
+			}
+		}
+		break;
+
+	case FT_BMP:
+		{
+			CEnBitmapEx image;
+
+			if (image.LoadImage(sImageFile, crTransparent, 16, 16))
+			{
+				if (pImages == NULL)
+					return TRUE;
+
+				// else
+				image.RemapSysColors();
+
+				return AddImage(sImageFile, image, crTransparent, pImages, nNextNameIndex);
+			}
+		}
+		break;
+
+	case FT_GIF:
+	case FT_JPG:
+		{
+			CEnBitmapEx image;
+
+			if (image.LoadImage(sImageFile, crTransparent, 16, 16))
+			{
+				if (pImages == NULL)
+					return TRUE;
+
+				// else
+				return AddImage(sImageFile, image, crTransparent, pImages, nNextNameIndex);
+			}
+		}
+		break;
+
+	default:
+		ASSERT(0);
+		break;
 	}
 
 	return FALSE;
