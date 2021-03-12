@@ -509,7 +509,12 @@ namespace DayViewUIExtension
 			Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
 
 			if (appointment != null)
+			{
+				if (appointment is CalendarFutureItem)
+					return (appointment as CalendarFutureItem).RealTaskId;
+
 				return appointment.Id;
+			}
 
 			return 0;
 		}
@@ -1138,35 +1143,47 @@ namespace DayViewUIExtension
 
 			// Note: base class only shows 'resize' cursors for the currently
 			// selected item but we want them for all tasks
-			var taskItem = (GetAppointmentAt(e.Location.X, e.Location.Y) as CalendarItem);
-
-			if ((taskItem != null) && !ReadOnly)
+			if (!ReadOnly)
 			{
-				if (taskItem.Locked)
-					return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+				var calItem = GetAppointmentAt(e.Location.X, e.Location.Y);
+				var taskItem = (calItem as CalendarItem);
 
-				if (taskItem.IconRect.Contains(e.Location))
-					return UIExtension.HandCursor();
-
-				var mode = GetMode(taskItem, e.Location);
-
-				if (!CanResizeTask(taskItem, mode))
-					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-
-				// Same as Calendar.SelectionTool
-				switch (mode)
+				if (taskItem != null)
 				{
-					case Calendar.SelectionTool.Mode.ResizeBottom:
-					case Calendar.SelectionTool.Mode.ResizeTop:
-						return Cursors.SizeNS;
+					if (taskItem.Locked)
+					{
+						if (taskItem is CalendarFutureItem)
+							taskItem = GetRealAppointment(calItem) as CalendarItem;
 
-					case Calendar.SelectionTool.Mode.ResizeLeft:
-					case Calendar.SelectionTool.Mode.ResizeRight:
-						return Cursors.SizeWE;
+						if (taskItem.Locked)
+							return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
-					case Calendar.SelectionTool.Mode.Move:
-						// default cursor below
-						break;
+						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+					}
+
+					if (taskItem.IconRect.Contains(e.Location))
+						return UIExtension.HandCursor();
+
+					var mode = GetMode(taskItem, e.Location);
+
+					if (!CanResizeTask(taskItem, mode))
+						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+
+					// Same as Calendar.SelectionTool
+					switch (mode)
+					{
+						case Calendar.SelectionTool.Mode.ResizeBottom:
+						case Calendar.SelectionTool.Mode.ResizeTop:
+							return Cursors.SizeNS;
+
+						case Calendar.SelectionTool.Mode.ResizeLeft:
+						case Calendar.SelectionTool.Mode.ResizeRight:
+							return Cursors.SizeWE;
+
+						case Calendar.SelectionTool.Mode.Move:
+							// default cursor below
+							break;
+					}
 				}
 			}
 
