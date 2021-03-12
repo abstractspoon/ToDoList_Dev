@@ -26,6 +26,7 @@ CTDLQuickFindComboBox::~CTDLQuickFindComboBox()
 
 BEGIN_MESSAGE_MAP(CTDLQuickFindComboBox, CAutoComboBox)
 	ON_WM_CTLCOLOR()
+	ON_WM_DESTROY()
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEBtnClick)
 END_MESSAGE_MAP()
 
@@ -49,6 +50,14 @@ HBRUSH CTDLQuickFindComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	}
 
 	return hbr;
+}
+
+void CTDLQuickFindComboBox::OnDestroy()
+{
+	if (m_edit.GetSafeHwnd())
+		m_edit.UnsubclassWindow();
+
+	CAutoComboBox::OnDestroy();
 }
 
 int CTDLQuickFindComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const

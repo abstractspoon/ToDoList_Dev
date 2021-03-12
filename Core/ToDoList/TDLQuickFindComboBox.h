@@ -43,9 +43,11 @@ protected:
 	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 protected:
+	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wp, LPARAM lp);
+
 	DECLARE_MESSAGE_MAP()
 
 	void ResizeEdit();
