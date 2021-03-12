@@ -280,6 +280,7 @@ public:
 	static BOOL CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap);
 	static BOOL CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitmap **bitmap);
 	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
+	static BOOL CreateHICONFromBitmap(gdix_Bitmap* bitmap, HICON* hicoReturn);
 	static BOOL DeleteBitmap(gdix_Bitmap* bitmap);
 	static BOOL SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename);
 

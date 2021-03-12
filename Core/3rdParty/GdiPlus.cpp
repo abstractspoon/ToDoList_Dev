@@ -304,6 +304,7 @@ typedef gdix_Status (STDAPICALLTYPE *PFNMEASURESTRING)(gdix_Graphics*,const WCHA
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMSTREAM)(IStream*, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE)(const WCHAR*, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
+typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHICONFROMBITMAP)(gdix_Bitmap*, HICON*);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMHBITMAP)(HBITMAP, HPALETTE, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNDELETEBITMAP)(gdix_Bitmap*);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE2)(const WCHAR*, gdix_Bitmap**);
@@ -425,8 +426,18 @@ BOOL CGdiPlus::CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap)
 
 BOOL CGdiPlus::CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background)
 {
+	*hbmReturn = NULL;
+
 	GETPROCADDRESS(PFNCREATEHBITMAPFROMBITMAP, "GdipCreateHBITMAPFromBitmap");
 	return (pFN(bitmap, hbmReturn, background) == gdix_Ok);
+}
+
+BOOL CGdiPlus::CreateHICONFromBitmap(gdix_Bitmap* bitmap, HICON* hicoReturn)
+{
+	*hicoReturn = NULL;
+
+	GETPROCADDRESS(PFNCREATEHICONFROMBITMAP, "GdipCreateHICONFromBitmap");
+	return (pFN(bitmap, hicoReturn) == gdix_Ok);
 }
 
 BOOL CGdiPlus::CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitmap **bitmap)

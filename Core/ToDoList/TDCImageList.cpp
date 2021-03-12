@@ -213,34 +213,53 @@ BOOL CTDCImageList::AddImage(const CString& sImageFile, CBitmap& bmImage, COLORR
 	int nStartIndex = pImages->GetImageCount();
 	
 	if (pImages->Add(&bmImage, crTransparent) == nStartIndex)
-	{
-		// map the images
-		int nEndIndex = (pImages->GetImageCount() - 1);
-		
-		// single image -> map by filename
-		if (nEndIndex == nStartIndex)
-		{
-			CString sName = FileMisc::GetFileNameFromPath(sImageFile);
-			pImages->MapImage(nStartIndex, sName);
-		}
-		else if (nStartIndex > nNextNameIndex)
-		{
-			ASSERT(0);
-			return FALSE;
-		}
-		else // map by image index
-		{
-			for (int nIndex = nStartIndex; nIndex <= nEndIndex; nIndex++)
-			{
-				CString sName = Misc::Format(nNextNameIndex++);
-				pImages->MapImage(nIndex, sName);
-			}
-		}
-
-		return TRUE;
-	}
+		return MapLastImage(sImageFile, nStartIndex, pImages, nNextNameIndex);
 
 	return FALSE;
+}
+
+BOOL CTDCImageList::AddImage(const CString& sImageFile, HICON hIcon, CTDCImageList* pImages, int& nNextNameIndex)
+{
+	if (!pImages)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	int nStartIndex = pImages->GetImageCount();
+	
+	if (pImages->Add(hIcon) == nStartIndex)
+		return MapLastImage(sImageFile, nStartIndex, pImages, nNextNameIndex);
+
+	return FALSE;
+}
+
+BOOL CTDCImageList::MapLastImage(const CString& sImageFile, int nStartIndex, CTDCImageList* pImages, int& nNextNameIndex)
+{
+	// map the images
+	int nEndIndex = (pImages->GetImageCount() - 1);
+
+	// single image -> map by filename
+	if (nEndIndex == nStartIndex)
+	{
+		CString sName = FileMisc::GetFileNameFromPath(sImageFile);
+		pImages->MapImage(nStartIndex, sName);
+	}
+	else if (nStartIndex > nNextNameIndex)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	else // map by image index
+	{
+		for (int nIndex = nStartIndex; nIndex <= nEndIndex; nIndex++)
+		{
+			CString sName = Misc::Format(nNextNameIndex++);
+			pImages->MapImage(nIndex, sName);
+		}
+	}
+
+	return TRUE;
 }
 
 void CTDCImageList::MapImage(int nIndex, const CString& sName)
@@ -283,17 +302,14 @@ DWORD CTDCImageList::LoadImagesFromFolder(const CString& sFolder, COLORREF crTra
 
 BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent, CTDCImageList* pImages, int& nNextNameIndex)
 {
-	CEnBitmapEx image;
-	
-	if (image.LoadImage(sImageFile, crTransparent, 16, 16))
+	HICON hIcon = CEnBitmapEx::LoadImageFileAsIcon(sImageFile, crTransparent, 16, 16);
+
+	if (hIcon)
 	{
-		if (pImages == NULL)
-			return TRUE;
-
-		// else
-		image.RemapSysColors();
-
-		return AddImage(sImageFile, image, crTransparent, pImages, nNextNameIndex);
+ 		if (pImages == NULL)
+ 			return TRUE;
+ 
+ 		return AddImage(sImageFile, hIcon, pImages, nNextNameIndex);
 	}
 
 	return FALSE;

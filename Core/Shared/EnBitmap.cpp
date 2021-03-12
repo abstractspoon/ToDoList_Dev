@@ -339,10 +339,41 @@ HICON CEnBitmap::LoadImageFileAsIcon(LPCTSTR szImagePath, COLORREF crMask, int c
 	case FT_ICO:
 		return (HICON)::LoadImage(NULL, szImagePath, IMAGE_ICON, cx, cy, LR_LOADFROMFILE);
 
+	case FT_PNG:
+		{
+			gdix_Bitmap* gdBitmap = NULL;
+			HICON hicoGdip = NULL;
+
+			if (CGdiPlus::CreateBitmapFromFile(szImagePath, &gdBitmap))
+			{
+				VERIFY(CGdiPlus::CreateHICONFromBitmap(gdBitmap, &hicoGdip));
+
+				if (hicoGdip && cx && cy)
+				{
+					CSize size = GraphicsMisc::GetIconSize(hicoGdip);
+
+					if ((cx != size.cx) || (cy != size.cy))
+					{
+						CImageList ilTemp;
+
+						if (ilTemp.Create(cx, cy, ILC_COLOR32, 1, 1) && (ilTemp.Add(hicoGdip) == 0))
+						{
+							::DestroyIcon(hicoGdip);
+							hicoGdip = ilTemp.ExtractIcon(0);
+						}
+					}
+				}
+
+				VERIFY(CGdiPlus::DeleteBitmap(gdBitmap));
+			}
+
+			return hicoGdip;
+		}
+		break;
+
 	case FT_BMP:
 	case FT_JPG:
 	case FT_GIF:
-	case FT_PNG:
 		{
 			CEnBitmap bmp;
 
