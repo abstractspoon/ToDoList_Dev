@@ -1639,7 +1639,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 	case TDCA_PRIORITY:		
 		{
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskPriority(dwTaskID, mod.nAttrib));
+				bChange = (SET_CHANGE == m_data.SetTaskPriority(dwTaskID, mod.nValue));
 			else
 				bChange = SetSelectedTaskPriority(mod.nValue);
 		}
