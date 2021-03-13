@@ -187,7 +187,9 @@ HBITMAP CEnBitmap::LoadImageFile(LPCTSTR szImagePath, COLORREF crBack, int cx, i
 					if (cx && cy)
 					{
 						hbm = ResizeImage(hbmGdip, cx, cy);
-						GraphicsMisc::VerifyDeleteObject(hbmGdip);
+
+						if (hbm != hbmGdip)
+							GraphicsMisc::VerifyDeleteObject(hbmGdip);
 					}
 					else // as-is
 					{
