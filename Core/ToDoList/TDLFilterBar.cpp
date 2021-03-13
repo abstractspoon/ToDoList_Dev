@@ -416,6 +416,8 @@ void CTDLFilterBar::OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFil
 
 void CTDLFilterBar::OnChangeDateFilter(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
+	UpdateData();
+
 	NotifyParentFilterChange();
 
 	*pResult = 0;
