@@ -173,6 +173,7 @@ namespace MindMapUIExtension
 		private int m_LastDragTick = 0;
 
         private int m_ThemedGlyphSize = 0;
+		private float m_ZoomFactor = 1f;
 
 		private bool m_FirstPaint = true;
         private bool m_HoldRedraw = false;
@@ -621,6 +622,36 @@ namespace MindMapUIExtension
 			}
         }
 
+		protected override void OnMouseWheel(MouseEventArgs e)
+		{
+			if ((ModifierKeys & Keys.Control) == Keys.Control)
+			{
+				float newFactor = m_ZoomFactor;
+
+				if (e.Delta > 0)
+				{
+					newFactor += 0.1f;
+					newFactor = Math.Min(newFactor, 1.0f);
+				}
+				else
+				{
+					newFactor -= 0.1f;
+					newFactor = Math.Max(newFactor, 0.3f);
+				}
+
+				if (newFactor != m_ZoomFactor)
+				{
+					m_ZoomFactor = newFactor;
+					UpdateTreeFont();
+				}
+			}
+			else
+			{
+				// Default scroll
+				base.OnMouseWheel(e);
+			}
+		}
+
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
@@ -817,11 +848,20 @@ namespace MindMapUIExtension
 		{
 			base.OnFontChanged(e);
 
-			m_TreeView.Font = this.Font;
+			UpdateTreeFont();
+		}
+
+		private void UpdateTreeFont()
+		{
+			if (m_ZoomFactor < 1.0)
+				m_TreeView.Font = new Font(this.Font.FontFamily, this.Font.Size * m_ZoomFactor, this.Font.Style);
+			else
+				m_TreeView.Font = this.Font;
+
 			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
 
 			int itemHeight = SendMessage(m_TreeView.Handle, TVM_GETITEMHEIGHT);
-			itemHeight = Math.Max(itemHeight, GetMinItemHeight());
+			itemHeight = Math.Max(itemHeight, (int)(GetMinItemHeight() * m_ZoomFactor));
 
 			// Make even height
 			m_TreeView.ItemHeight = (itemHeight + (itemHeight % 2) + ItemVertSeparation);
@@ -1511,7 +1551,7 @@ namespace MindMapUIExtension
 
         private int CalculateHorizontalChildOffset(TreeNode node)
         {
-            int horzOffset = (node.Bounds.Width + ItemHorzSeparation + GetExtraWidth(node));
+            int horzOffset = (node.Bounds.Width + (int)(ItemHorzSeparation * m_ZoomFactor) + GetExtraWidth(node));
 
             if (!IsRoot(node))
                 horzOffset += ExpansionButtonSize;
@@ -1573,7 +1613,7 @@ namespace MindMapUIExtension
 						RecalculatePositions(graphics, rightFrom, rightTo, horzOffset, 0);
 
 						// Left side
-						horzOffset = (ItemHorzSeparation - ExpansionButtonSize);
+						horzOffset = ((int)(ItemHorzSeparation * m_ZoomFactor) - ExpansionButtonSize);
 
 						TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
 						TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
@@ -1934,13 +1974,21 @@ namespace MindMapUIExtension
 
         virtual protected Font GetNodeFont(TreeNode node)
         {
-            if (node.NodeFont != null)
-                return node.NodeFont;
+			Font font = ((node.NodeFont != null) ? node.NodeFont : m_TreeView.Font);
 
-            return m_TreeView.Font;
+			return ScaledFont(font);
         }
 
-        private Rectangle CalculateInsertionMarkerRect(TreeNode node, DropPos dropPos)
+		protected Font ScaledFont(Font font)
+		{
+			if (m_ZoomFactor < 1.0)
+				return new Font(font.FontFamily, font.Size * m_ZoomFactor, font.Style);
+
+			// else
+			return font;
+		}
+
+		private Rectangle CalculateInsertionMarkerRect(TreeNode node, DropPos dropPos)
         {
             if (node == null)
                 return Rectangle.Empty;

@@ -937,7 +937,7 @@ namespace MindMapUIExtension
 				if (m_Items.TryGetValue(taskItem.ReferenceId, out refItem))
 				{
 					if (refItem.ParentID == 0)
-						return m_BoldLabelFont;
+						return ScaledFont(m_BoldLabelFont);
 				}
             }
 
