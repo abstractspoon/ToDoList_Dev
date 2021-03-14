@@ -2219,7 +2219,7 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		return FALSE;
 	}
 
-	return CDateHelper::IsDateSet(GetTaskDate(dwTaskID, nDate));
+	return TaskHasDate(dwTaskID, nDate);
 }
 
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
@@ -2355,36 +2355,12 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	return AddDuration(dtNewStart, dCurDuration, nUnits, TRUE); // updates dtNewStart
 }
 
-TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date, BOOL bAndSubtasks)
+TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
 {
-	TODOITEM* pTDI = NULL;
-	EDIT_GET_TDI(dwTaskID, pTDI);
-	
-	COleDateTime dtTask = pTDI->GetDate(nDate);
-	TDC_SET nRes = SET_NOCHANGE;
+	if (TaskHasDate(dwTaskID, nDate))
+		return SET_NOCHANGE;
 
-	if (!CDateHelper::IsDateSet(dtTask))
-		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
-	
-	// children
-	if (bAndSubtasks)
-	{
-		TODOSTRUCTURE* pTDS = m_struct.FindTask(dwTaskID);
-		ASSERT(pTDS);
-
-		if (pTDS)
-		{
-			for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
-			{
-				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
-				
-				if (InitMissingTaskDate(dwChildID, nDate, date, TRUE) == SET_CHANGE)
-					nRes = SET_CHANGE;
-			}
-		}
-	}
-	
-	return nRes;
+	return SetTaskDate(dwTaskID, NULL, nDate, date, TRUE); // Recalc time estimate
 }
 
 TDC_SET CToDoCtrlData::SetTaskPercent(DWORD dwTaskID, int nPercent, BOOL bOffset)
@@ -4189,16 +4165,13 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 		{
 			if (bHasDue)
 			{
-				// Before we offset, make sure all subtasks have valid due dates
-				// And make sure the new date fits the recurring scheme
-				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
-
+				// Make sure the new date fits the recurring scheme
 				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 			else
 			{
-				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_DUE, dtNext, TRUE);
+				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_DUE, dtNext);
 			}
 		}
 
@@ -4217,9 +4190,6 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			}
 			else // offset children
 			{
-				// Before we offset, make sure all subtasks have valid start dates
-				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
-
 				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
@@ -4241,16 +4211,13 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 		{
 			if (bHasStart)
 			{
-				// Before we offset, make sure all subtasks have valid start dates
-				// And make sure the new date fits the recurring scheme
-				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_STARTDATE, dtStart, TRUE);
-
+				// Make sure the new date fits the recurring scheme
 				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 			else
 			{
-				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_START, dtNext, TRUE);
+				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_START, dtNext);
 			}
 		}
 
@@ -4269,9 +4236,6 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			}
 			else // bump
 			{
-				// Before we offset, make sure all subtasks have valid due dates
-				nRes = InitMissingTaskDate(dwNewTaskID, TDCD_DUEDATE, dtDue, TRUE);
-
 				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
