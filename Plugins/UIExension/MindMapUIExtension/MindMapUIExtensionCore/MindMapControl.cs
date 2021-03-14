@@ -2247,6 +2247,13 @@ namespace MindMapUIExtension
 			return drawPos;
 		}
 
+		protected Rectangle GetItemHitRect(Rectangle itemRect)
+		{
+			Rectangle drawPos = GetItemDrawRect(itemRect);
+
+			return Rectangle.Inflate(drawPos, 2, 0);
+		}
+
 		virtual protected Color GetNodeBackgroundColor(Object itemData)
 		{
 			return Color.Empty;
@@ -2314,10 +2321,10 @@ namespace MindMapUIExtension
 
             MindMapItem item = Item(node);
 
-            if (GetItemDrawRect(Rectangle.Inflate(item.TotalBounds, 2, 0)).Contains(point))
+            if (GetItemHitRect(item.TotalBounds).Contains(point))
             {
 				// Check child nodes first for exact hit
-                if (GetItemDrawRect(Rectangle.Inflate(item.ChildBounds, 2, 0)).Contains(point))
+                if (GetItemHitRect(item.ChildBounds).Contains(point))
                 {
                     foreach (TreeNode child in node.Nodes)
                     {
@@ -2328,7 +2335,9 @@ namespace MindMapUIExtension
                     }
                 }
 
-                return node;
+				// check we actually hit the label
+				if (GetItemHitRect(item.ItemBounds).Contains(point))
+					return node;
             }
 
             // all else
