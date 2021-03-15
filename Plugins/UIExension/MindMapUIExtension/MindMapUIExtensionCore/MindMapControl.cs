@@ -636,7 +636,7 @@ namespace MindMapUIExtension
 				else
 				{
 					newFactor -= 0.1f;
-					newFactor = Math.Max(newFactor, 0.3f);
+					newFactor = Math.Max(newFactor, 0.4f);
 				}
 
 				if (newFactor != m_ZoomFactor)
@@ -851,13 +851,20 @@ namespace MindMapUIExtension
 			UpdateTreeFont();
 		}
 
+		// Hook for derived classes
+		virtual protected bool RefreshNodeFont(TreeNode node, bool andChildren)
+		{
+			return false;
+		}
+
 		private void UpdateTreeFont()
 		{
-			if (m_ZoomFactor < 1.0)
-				m_TreeView.Font = new Font(this.Font.FontFamily, this.Font.Size * m_ZoomFactor, this.Font.Style);
-			else
-				m_TreeView.Font = this.Font;
+			// Need to do this first so that the following code
+			// properly triggers the tree into recalculating the
+			// new item rects
+			RefreshNodeFont(RootNode, true);
 
+			m_TreeView.Font = ScaledFont(this.Font);
 			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
 
 			int itemHeight = SendMessage(m_TreeView.Handle, TVM_GETITEMHEIGHT);
@@ -1906,6 +1913,9 @@ namespace MindMapUIExtension
 
 					if (DebugMode())
 					{
+						labelRect = new Rectangle(labelRect.Location, node.Bounds.Size);
+						graphics.DrawRectangle(new Pen(Color.Blue), labelRect);
+
 						labelRect = GetItemDrawRect(item.ChildBounds);
 						labelRect.Inflate(-1, -1);
 						graphics.DrawRectangle(new Pen(Color.Black), labelRect);
@@ -1972,16 +1982,18 @@ namespace MindMapUIExtension
 			graphics.DrawString(label, nodeFont, textColor, rect, format);
 		}
 
-        virtual protected Font GetNodeFont(TreeNode node)
+        protected Font GetNodeFont(TreeNode node)
         {
-			Font font = ((node.NodeFont != null) ? node.NodeFont : m_TreeView.Font);
-
-			return ScaledFont(font);
+			if (node.NodeFont != null)
+				return node.NodeFont;
+			
+			// else
+			return m_TreeView.Font;
         }
 
 		protected Font ScaledFont(Font font)
 		{
-			if (m_ZoomFactor < 1.0)
+			if ((font != null) && (m_ZoomFactor < 1.0))
 				return new Font(font.FontFamily, font.Size * m_ZoomFactor, font.Style);
 
 			// else

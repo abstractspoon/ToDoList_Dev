@@ -271,7 +271,7 @@ namespace MindMapUIExtension
                 }
             }
 
-            if ((baseFontChange || doneFontChange) && RefreshItemFont(RootNode, true))
+            if ((baseFontChange || doneFontChange) && RefreshNodeFont(RootNode, true))
                 RecalculatePositions();
             
             base.SetFont(fontName, fontSize);
@@ -594,9 +594,9 @@ namespace MindMapUIExtension
             return DPIScaling.Scale(value);
         }
 
-        private bool RefreshItemFont(TreeNode node, bool andChildren)
+        override protected bool RefreshNodeFont(TreeNode node, bool andChildren)
         {
-            var taskItem = TaskItem(node);
+            var taskItem = RealTaskItem(node);
 
             if (taskItem == null)
                 return false;
@@ -618,6 +618,8 @@ namespace MindMapUIExtension
                 }
             }
 
+			newFont = ScaledFont(newFont);
+
             bool fontChange = (newFont != curFont);
 
             if (fontChange)
@@ -627,7 +629,7 @@ namespace MindMapUIExtension
             if (andChildren)
             {
                 foreach (TreeNode childNode in node.Nodes)
-                    fontChange |= RefreshItemFont(childNode, true);
+                    fontChange |= RefreshNodeFont(childNode, true);
             }
 
             return fontChange;
@@ -700,7 +702,7 @@ namespace MindMapUIExtension
 				foreach (var id in changedTaskIds)
 				{
 					var node = FindNode(id);
-					RefreshItemFont(node, false);
+					RefreshNodeFont(node, false);
 				}
 			}
 
@@ -791,7 +793,6 @@ namespace MindMapUIExtension
                 m_Items.Add(taskItem.ID, taskItem);
 				rootNode = AddRootNode(taskItem, taskItem.ID);
 
-                RefreshItemFont(rootNode, false);
 
 				// First Child
 				AddTaskToTree(task.GetFirstSubtask(), rootNode);
@@ -811,6 +812,9 @@ namespace MindMapUIExtension
 
 			EndUpdate();
 			SetSelectedNode(selID);
+
+			if (rootNode != null)
+				RefreshNodeFont(rootNode, true);
 		}
 
 		private String GetProjectName(TaskList tasks)
@@ -922,28 +926,9 @@ namespace MindMapUIExtension
             if (taskItem != null)
             {
                 taskItem.FixupParentID(TaskItem(parent));
-                RefreshItemFont(node, false);
+                RefreshNodeFont(node, false);
             }
         }
-
-		protected override Font GetNodeFont(TreeNode node)
-		{
-            var taskItem = TaskItem(node);
-
-            if ((taskItem != null) && taskItem.IsReference)
-            {
-				MindMapTaskItem refItem;
-
-				if (m_Items.TryGetValue(taskItem.ReferenceId, out refItem))
-				{
-					if (refItem.ParentID == 0)
-						return ScaledFont(m_BoldLabelFont);
-				}
-            }
-
-			// all else
-			return base.GetNodeFont(node);
-		}
 
 		private MindMapTaskItem GetRealTaskItem(MindMapTaskItem taskItem)
 		{
@@ -1437,7 +1422,7 @@ namespace MindMapUIExtension
 			if (node == null)
 				return false;
 
-            RefreshItemFont(node, false);
+            RefreshNodeFont(node, false);
 
 			// First Child
 			if (!AddTaskToTree(task.GetFirstSubtask(), node))
