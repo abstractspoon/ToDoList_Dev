@@ -641,6 +641,11 @@ namespace MindMapUIExtension
 
 				if (newFactor != m_ZoomFactor)
 				{
+					// Convert mouse pos to 'unzoomed' coordinates
+					int realX = (int)(e.Location.X / m_ZoomFactor);
+					int realY = (int)(e.Location.Y / m_ZoomFactor);
+
+					// Update zoom factor
 					m_ZoomFactor = newFactor;
 					UpdateTreeFont();
 				}
@@ -1620,7 +1625,7 @@ namespace MindMapUIExtension
 						RecalculatePositions(graphics, rightFrom, rightTo, horzOffset, 0);
 
 						// Left side
-						horzOffset = ((int)(ItemHorzSeparation * m_ZoomFactor) - ExpansionButtonSize);
+						horzOffset = (int)(ItemHorzSeparation * m_ZoomFactor);
 
 						TreeNode leftFrom = rootNode.Nodes[iToNode + 1];
 						TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
