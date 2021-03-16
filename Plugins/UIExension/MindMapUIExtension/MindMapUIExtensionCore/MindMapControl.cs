@@ -166,6 +166,7 @@ namespace MindMapUIExtension
 
         private Point m_DrawOffset;
 		private TreeNode m_DropTarget;
+		private TreeNode m_PrevSelection;
         private DropPos m_DropPos;
 		private RootAlignment m_Alignment;
 		private Timer m_DragTimer;
@@ -817,9 +818,14 @@ namespace MindMapUIExtension
 			var item = Item(e.Node);
 
 			if (!ClientRectangle.Contains(GetItemDrawRect(item.ItemBounds)))
+			{
 				EnsureItemVisible(item);
+			}
 			else
-				Invalidate();
+			{
+ 				RedrawNode(e.Node);
+ 				RedrawNode(m_PrevSelection);
+			}
 
 			if (SelectionChange != null)
 				SelectionChange(this, item.ItemData);
@@ -1383,7 +1389,15 @@ namespace MindMapUIExtension
 		protected TreeNode SelectedNode
 		{
 			get { return m_TreeView.SelectedNode; }
-			set { m_TreeView.SelectedNode = value; }
+
+			set
+			{
+				if (m_TreeView.SelectedNode != value)
+				{
+					m_PrevSelection = m_TreeView.SelectedNode;
+					m_TreeView.SelectedNode = value;
+				}
+			}
 		}
 
 		protected MindMapItem SelectedItem
@@ -1404,7 +1418,6 @@ namespace MindMapUIExtension
 
 			// Always just the first of the root's children
 			return RootNode.FirstNode;
-			
 		}
 
 		protected TreeNode FirstLeftNode()
@@ -1887,7 +1900,7 @@ namespace MindMapUIExtension
 		{
 			foreach (TreeNode node in nodes)
 			{
-				// Don't draw items falling wholly outside the client rectangle
+				// Don't draw items falling wholly outside the clip rectangle
 				MindMapItem item = Item(node);
 				Rectangle clipRect = Rectangle.Round(graphics.ClipBounds);
 
@@ -2180,6 +2193,9 @@ namespace MindMapUIExtension
 
 		protected void RedrawNode(TreeNode node, bool update = true)
 		{
+			if (node == null)
+				return;
+
 			Invalidate(GetItemDrawRect(Item(node).ItemBounds));
 
 			if (update)
