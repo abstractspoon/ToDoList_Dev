@@ -1146,20 +1146,21 @@ namespace DayViewUIExtension
 			if (!ReadOnly)
 			{
 				var calItem = GetAppointmentAt(e.Location.X, e.Location.Y);
-				var taskItem = (calItem as CalendarItem);
 
-				if (taskItem != null)
+				if (calItem != null)
 				{
-					if (taskItem.Locked)
+					if (calItem.Locked)
 					{
-						if (taskItem is CalendarFutureItem)
-							taskItem = GetRealAppointment(calItem) as CalendarItem;
+						if (calItem is CalendarFutureItem)
+							calItem = GetRealAppointment(calItem);
 
-						if (taskItem.Locked)
+						if (calItem.Locked)
 							return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 					}
+
+					var taskItem = (calItem as CalendarItem);
 
 					if (taskItem.IconRect.Contains(e.Location))
 						return UIExtension.HandCursor();
