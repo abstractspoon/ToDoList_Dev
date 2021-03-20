@@ -67,8 +67,9 @@ namespace MindMapUIExtension
 			m_TreeView.AfterExpand += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
 			m_TreeView.AfterCollapse += new TreeViewEventHandler(OnTreeViewAfterExpandCollapse);
 			m_TreeView.AfterSelect += new TreeViewEventHandler(OnTreeViewAfterSelect);
+			m_TreeView.BeforeCollapse += new TreeViewCancelEventHandler(OnTreeViewBeforeCollapse);
 
-            this.Controls.Add(this.m_TreeView);
+			this.Controls.Add(this.m_TreeView);
             // 
             // MindMapControl
             // 

@@ -172,13 +172,16 @@ namespace MindMapUIExtension
 		private Timer m_DragTimer;
 		private Color m_ConnectionColor;
 		private int m_LastDragTick = 0;
-
         private int m_ThemedGlyphSize = 0;
 		private float m_ZoomFactor = 1f;
 
 		private bool m_FirstPaint = true;
         private bool m_HoldRedraw = false;
         private bool m_IsSavingToImage = false;
+
+#if DEBUG
+		private int m_RecalcDuration;
+#endif
 
 		// Public ------------------------------------------------------------------------
 
@@ -516,6 +519,9 @@ namespace MindMapUIExtension
 
             if (!m_HoldRedraw)
             {
+#if DEBUG
+				var startTick = Environment.TickCount;
+#endif
 				e.Graphics.FillRectangle(SystemBrushes.Window, e.ClipRectangle);
 			    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
@@ -528,6 +534,17 @@ namespace MindMapUIExtension
                     DrawInsertionMarker(e.Graphics, m_DropTarget);
 
 				PostDraw(e.Graphics, m_TreeView.Nodes);
+
+#if DEBUG
+				int xOffset = (DebugMode() ? m_TreeView.Width : 0);
+				int yOffset = 0;
+
+				e.Graphics.DrawString(String.Format("OnPaint took {0} ms", Environment.TickCount - startTick), this.Font, Brushes.Black, xOffset, yOffset);
+				e.Graphics.DrawString(String.Format("RecalcPositions took {0} ms", m_RecalcDuration), this.Font, Brushes.Black, xOffset, yOffset + 16);
+				e.Graphics.DrawString(String.Format("Font Height = {0}", m_TreeView.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
+				e.Graphics.DrawString(String.Format("Item Height = {0}", m_TreeView.ItemHeight), this.Font, Brushes.Black, xOffset, yOffset + 48);
+				e.Graphics.DrawString(String.Format("Zoom = {0}", m_ZoomFactor), this.Font, Brushes.Black, xOffset, yOffset + 64);
+#endif
 			}
 		}
 
@@ -642,13 +659,43 @@ namespace MindMapUIExtension
 
 				if (newFactor != m_ZoomFactor)
 				{
-					// Convert mouse pos to 'unzoomed' coordinates
-					int realX = (int)(e.Location.X / m_ZoomFactor);
-					int realY = (int)(e.Location.Y / m_ZoomFactor);
+					// Convert mouse pos to relative coordinates
+					float relX = ((e.Location.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
+					float relY = ((e.Location.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
 
-					// Update zoom factor
+					// Prevent all selection and expansion changes for the duration
+ 					BeginUpdate();
+
+					// The process of changing the fonts and recalculating the 
+					// item height can cause the tree-view to spontaneously 
+					// collapse tree nodes so we save the expansion state
+					// and restore it afterwards
+					var expandedNodes = GetExpandedItems();
+
 					m_ZoomFactor = newFactor;
-					UpdateTreeFont();
+					UpdateTreeFont(false);
+
+					// 'Cleanup'
+					SetExpandedItems(expandedNodes);
+ 					EndUpdate();
+
+					// Scroll the view to keep the mouse located in the 
+					// same relative position as before
+					if (HorizontalScroll.Visible)
+					{
+						int newX = (int)(relX * HorizontalScroll.Maximum) - e.Location.X;
+
+						HorizontalScroll.Value = Validate(newX, HorizontalScroll);
+					}
+
+					if (VerticalScroll.Visible)
+					{
+						int newY = (int)(relY * VerticalScroll.Maximum) - e.Location.Y;
+
+						VerticalScroll.Value = Validate(newY, VerticalScroll);
+					}
+
+					PerformLayout();
 				}
 			}
 			else
@@ -658,6 +705,49 @@ namespace MindMapUIExtension
 			}
 		}
 
+		static int Validate(int pos, ScrollProperties scroll)
+		{
+			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
+		}
+
+		List<TreeNode> GetExpandedItems()
+		{
+			var expanded = new List<TreeNode>();
+
+			foreach (TreeNode node in m_TreeView.Nodes)
+			{
+				expanded.AddRange(GetExpandedItems(node));
+			}
+
+			return expanded;
+		}
+
+		List<TreeNode> GetExpandedItems(TreeNode node)
+		{
+			var expanded = new List<TreeNode>();
+
+			if (node.IsExpanded)
+			{
+				expanded.Add(node);
+
+				// child nodes
+				foreach (TreeNode child in node.Nodes)
+				{
+					expanded.AddRange(GetExpandedItems(child));
+				}
+			}
+
+			return expanded;
+		}
+
+		void SetExpandedItems(List<TreeNode> nodes)
+		{
+			foreach (var node in nodes)
+			{
+				node.Expand();
+			}
+		}
+		
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
@@ -813,7 +903,13 @@ namespace MindMapUIExtension
             EnsureItemVisible(Item(e.Node));
 		}
 
-        protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
+		protected void OnTreeViewBeforeCollapse(object sender, TreeViewCancelEventArgs e)
+		{
+			// Prevent the root node from ever collapsing
+			e.Cancel = IsRoot(e.Node);
+		}
+
+		protected void OnTreeViewAfterSelect(object sender, TreeViewEventArgs e)
         {
 			var item = Item(e.Node);
 
@@ -852,14 +948,21 @@ namespace MindMapUIExtension
 		{
 			base.OnLostFocus(e);
 
+			if (m_TreeView.Focused)
+				Focus();
+
 			Invalidate(GetSelectedItemLabelRect());
 		}
 
 		protected override void OnFontChanged(EventArgs e)
 		{
 			base.OnFontChanged(e);
+			
+			// Always reset the logical zoom else we've no way of 
+			// accurately calculating the actual zoom
+			m_ZoomFactor = 1f;
 
-			UpdateTreeFont();
+			UpdateTreeFont(true);
 		}
 
 		// Hook for derived classes
@@ -868,11 +971,10 @@ namespace MindMapUIExtension
 			return false;
 		}
 
-		private void UpdateTreeFont()
+		private void UpdateTreeFont(bool recalcPositions)
 		{
-			// Need to do this first so that the following code
-			// properly triggers the tree into recalculating the
-			// new item rects
+			// Update the node fonts first so the tree is ready
+			// when we ask to recalculate the items heights
 			RefreshNodeFont(RootNode, true);
 
 			m_TreeView.Font = ScaledFont(this.Font);
@@ -881,10 +983,10 @@ namespace MindMapUIExtension
 			int itemHeight = SendMessage(m_TreeView.Handle, TVM_GETITEMHEIGHT);
 			itemHeight = Math.Max(itemHeight, (int)(GetMinItemHeight() * m_ZoomFactor));
 
-			// Make even height
-			m_TreeView.ItemHeight = (itemHeight + (itemHeight % 2) + ItemVertSeparation);
-
-            RecalculatePositions();
+			m_TreeView.ItemHeight = (itemHeight + (int)(ItemVertSeparation * m_ZoomFactor));
+			
+			if (recalcPositions)
+				RecalculatePositions();
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -1177,9 +1279,8 @@ namespace MindMapUIExtension
                 if (xOffset != 0)
                 {
                     int scrollX = (HorizontalScroll.Value + xOffset);
-                    scrollX = Math.Min(Math.Max(HorizontalScroll.Minimum, scrollX), HorizontalScroll.Maximum);
   
-                    HorizontalScroll.Value = scrollX;
+                    HorizontalScroll.Value = Validate(scrollX, HorizontalScroll);
                 }
             }
 
@@ -1199,9 +1300,8 @@ namespace MindMapUIExtension
                 if (yOffset != 0)
                 {
                     int scrollY = (VerticalScroll.Value + yOffset);
-                    scrollY = Math.Min(Math.Max(VerticalScroll.Minimum, scrollY), VerticalScroll.Maximum);
   
-                    VerticalScroll.Value = scrollY;
+                    VerticalScroll.Value = Validate(scrollY, VerticalScroll);
                 }
             }
 
@@ -1589,8 +1689,11 @@ namespace MindMapUIExtension
             // There must be a single root task to proceed
             if (IsEmpty())
                 return;
-			
-            TreeNode rootNode = RootNode;
+#if DEBUG
+			var startTick = Environment.TickCount;
+#endif
+
+			TreeNode rootNode = RootNode;
             MindMapItem rootItem = RootItem;
 
 			ResetPositions(rootNode);
@@ -1670,9 +1773,14 @@ namespace MindMapUIExtension
             OffsetPositions(rootNode, -graphRect.Left, -graphRect.Top);
             
 			this.AutoScrollMinSize = graphRect.Size;
+			this.VerticalScroll.SmallChange = graphRect.Height / 100;
 
             RecalculateDrawOffset();
 			Invalidate();
+
+#if DEBUG
+			m_RecalcDuration = (Environment.TickCount - startTick);
+#endif
 		}
 
         protected Point CentrePoint(Rectangle rect)
@@ -2350,7 +2458,7 @@ namespace MindMapUIExtension
 			{
 				itemRect = GetItemDrawRect(item.ItemBounds);
 
-				// subtract the vertical separation from selected items
+				// subtract the vertical separation
 				itemRect.Inflate(0, -(ItemVertSeparation / 2));
 			}
 
