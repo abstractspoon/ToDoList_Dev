@@ -659,6 +659,8 @@ namespace MindMapUIExtension
 
 				if (newFactor != m_ZoomFactor)
 				{
+					Cursor = Cursors.WaitCursor;
+
 					// Convert mouse pos to relative coordinates
 					float relX = ((e.Location.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
 					float relY = ((e.Location.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
