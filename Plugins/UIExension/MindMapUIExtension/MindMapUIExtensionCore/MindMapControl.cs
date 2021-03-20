@@ -670,13 +670,13 @@ namespace MindMapUIExtension
 					// item height can cause the tree-view to spontaneously 
 					// collapse tree nodes so we save the expansion state
 					// and restore it afterwards
-					var expandedNodes = GetExpandedItems();
+					var expandedNodes = GetExpandedNodes(RootNode);
 
 					m_ZoomFactor = newFactor;
 					UpdateTreeFont(false);
 
 					// 'Cleanup'
-					SetExpandedItems(expandedNodes);
+					SetExpandedNodes(expandedNodes);
  					EndUpdate();
 
 					// Scroll the view to keep the mouse located in the 
@@ -710,44 +710,41 @@ namespace MindMapUIExtension
 			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
 		}
 
-		List<TreeNode> GetExpandedItems()
+		protected List<TreeNode> GetExpandedNodes(TreeNode node)
 		{
-			var expanded = new List<TreeNode>();
-
-			foreach (TreeNode node in m_TreeView.Nodes)
+			if ((node != null) && (node.IsExpanded || IsRoot(node)))
 			{
-				expanded.AddRange(GetExpandedItems(node));
-			}
-
-			return expanded;
-		}
-
-		List<TreeNode> GetExpandedItems(TreeNode node)
-		{
-			var expanded = new List<TreeNode>();
-
-			if (node.IsExpanded)
-			{
+				var expanded = new List<TreeNode>();
 				expanded.Add(node);
 
 				// child nodes
 				foreach (TreeNode child in node.Nodes)
 				{
-					expanded.AddRange(GetExpandedItems(child));
+					var expandedChildren = GetExpandedNodes(child); // RECURSIVE CALL
+
+					if (expandedChildren != null)
+						expanded.AddRange(expandedChildren);
+				}
+
+				return expanded;
+			}
+
+			// else
+			return null;
+		}
+
+		protected void SetExpandedNodes(List<TreeNode> nodes)
+		{
+			// Can be null for an empty mind map
+			if (nodes != null)
+			{
+				foreach (var node in nodes)
+				{
+					node.Expand();
 				}
 			}
-
-			return expanded;
 		}
 
-		void SetExpandedItems(List<TreeNode> nodes)
-		{
-			foreach (var node in nodes)
-			{
-				node.Expand();
-			}
-		}
-		
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);

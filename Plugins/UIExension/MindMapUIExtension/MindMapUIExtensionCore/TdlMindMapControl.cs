@@ -772,7 +772,7 @@ namespace MindMapUIExtension
 		private void RebuildTreeView(TaskList tasks)
 		{
 			// Snapshot the expanded tasks so we can restore them afterwards
-			var expandedIDs = GetExpandedItems(RootNode);
+			var expandedIDs = GetExpandedItems();
 
 			// And the selection
 			var selID = UniqueID(SelectedNode);
@@ -831,51 +831,38 @@ namespace MindMapUIExtension
 			return m_Trans.Translate("Root");
 		}
 
-		private List<UInt32> GetExpandedItems(TreeNode node)
+		protected List<UInt32> GetExpandedItems()
 		{
-			List<UInt32> expandedIDs = null;
+			var nodes = GetExpandedNodes(RootNode);
 
-			if ((node != null) && node.IsExpanded)
+			if (nodes == null)
+				return null;
+
+			// else
+			var expandedIDs = new List<UInt32>();
+
+			foreach (TreeNode node in nodes)
 			{
-				expandedIDs = new List<UInt32>();
-    
-                if (!IsRoot(node))
-    				expandedIDs.Add(UniqueID(node));
-
-				foreach (TreeNode child in node.Nodes)
-				{
-					var childIDs = GetExpandedItems(child);
-
-					if (childIDs != null)
-						expandedIDs.AddRange(childIDs);
-				}
+   				expandedIDs.Add(UniqueID(node));
 			}
 
 			return expandedIDs;
 		}
 
-		private bool SetExpandedItems(List<UInt32> expandedNodes)
+		private bool SetExpandedItems(List<UInt32> expandedItems)
 		{
-            if (expandedNodes == null)
+            if (expandedItems == null)
                 return false;
 
-            if (expandedNodes.Count == 0)
-                return false;
-
-            bool someSucceeded = false;
-
-			foreach (var id in expandedNodes)
+			foreach (var id in expandedItems)
 			{
 				var node = FindNode(id);
 
                 if (node != null)
-                {
                     node.Expand();
-                    someSucceeded = true;
-                }
 			}
 
-            return someSucceeded;
+            return true;
 		}
 
 		protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
