@@ -296,8 +296,8 @@ namespace MindMapUIExtension
 
 				case ExpandNode.CollapseSelection:
 					if (!IsRoot(SelectedNode))
-						SelectedNode.Collapse();
-					break;
+						SelectedNode.Collapse(true); // don't collapse children
+				break;
 			}
 
 			EndUpdate();
@@ -619,7 +619,7 @@ namespace MindMapUIExtension
 						BeginUpdate();
 
 						if (hit.IsExpanded)
-							hit.Collapse();
+							hit.Collapse(true); // don't collapse children
 						else
 							hit.Expand();
 
@@ -1009,7 +1009,7 @@ namespace MindMapUIExtension
 				case Keys.Subtract:
 					if ((SelectedNode != null) && !IsRoot(SelectedNode))
 					{
-						SelectedNode.Collapse();
+						SelectedNode.Collapse(true); // don't collapse children
 						return;
 					}
 					break;
