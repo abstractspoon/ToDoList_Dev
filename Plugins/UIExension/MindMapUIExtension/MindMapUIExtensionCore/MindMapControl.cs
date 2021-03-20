@@ -1674,9 +1674,13 @@ namespace MindMapUIExtension
 			}
 		}
 
-        private int CalculateHorizontalChildOffset(TreeNode node)
+        private int CalculateHorizontalChildOffset(Graphics graphics, TreeNode node)
         {
-            int horzOffset = (node.Bounds.Width + (int)(ItemHorzSeparation * m_ZoomFactor) + GetExtraWidth(node));
+			// Always calculate the width of the text because the tree 
+			// doesn't seem to return the same widths as the Graphics object
+			// which is what we will be using to render the text
+			int nodeWidth = Size.Ceiling(graphics.MeasureString(node.Text, GetNodeFont(node))).Width;
+			int horzOffset = (nodeWidth + (int)(ItemHorzSeparation * m_ZoomFactor) + GetExtraWidth(node));
 
             if (!IsRoot(node))
                 horzOffset += ExpansionButtonSize;
@@ -1716,7 +1720,7 @@ namespace MindMapUIExtension
                     // One-sided graph
 					{
 						RecalculatePositions(graphics, m_TreeView.Nodes, 0, 0);
- 						int horzOffset = CalculateHorizontalChildOffset(rootNode);
+ 						int horzOffset = CalculateHorizontalChildOffset(graphics, rootNode);
 
 						TreeNode leftFrom = rootNode;
 						TreeNode leftTo = rootNode.Nodes[rootNode.Nodes.Count - 1];
@@ -1731,7 +1735,7 @@ namespace MindMapUIExtension
 					// Double-sided graph
 					{
 						// Right side
-						int horzOffset = CalculateHorizontalChildOffset(rootNode);
+						int horzOffset = CalculateHorizontalChildOffset(graphics, rootNode);
 
 						TreeNode rightFrom = rootNode.Nodes[0];
 
@@ -1824,7 +1828,7 @@ namespace MindMapUIExtension
             while (node != null)
 			{
 				// Children of this node First
-                int childOffset = (horzOffset + CalculateHorizontalChildOffset(node));
+                int childOffset = (horzOffset + CalculateHorizontalChildOffset(graphics, node));
 
                 RecalculatePositions(graphics, node.Nodes, childOffset, vertOffset);
 
