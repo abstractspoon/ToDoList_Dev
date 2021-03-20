@@ -1456,7 +1456,7 @@ namespace MindMapUIExtension
 
 		protected override int GetMinItemHeight()
 		{
-            return (ScaleByDPIFactor(16) + 2);
+            return (ScaleByDPIFactor(16) + 1);
 		}
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
