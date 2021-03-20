@@ -402,6 +402,9 @@ namespace MindMapUIExtension
 			labelRect.X -= LabelPadding;
 			labelRect.X += GetExtraWidth(SelectedNode);
 
+			// Make sure the rect is big enough for the unscaled font
+			labelRect.Height = Math.Max(labelRect.Height, (this.Font.Height + (2 * LabelPadding))); 
+
 			return labelRect;
 		}
 
