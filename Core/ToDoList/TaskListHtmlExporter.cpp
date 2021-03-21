@@ -107,7 +107,9 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 	STRIKETHRUDONE = pPrefs->GetProfileInt(szKey, _T("StrikethroughDone"), TRUE);
 	EXPORTSTYLE = GetExportStyle(dwFlags);
 
+#ifndef _DEBUG
 	if (pPrefs->GetProfileInt(szKey, _T("EnableTDLProtocol"), FALSE))
+#endif
 	{
 		TASKLISTLINK.Format(_T("tdl://%s?"), pTasks->GetFileName(true));
 		TASKLISTLINK.Replace('\\', '/');
