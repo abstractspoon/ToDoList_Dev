@@ -3,6 +3,7 @@
 #include "tdcenum.h"
 #include "tdcswitch.h"
 #include "tdcmapping.h"
+#include "todoitem.h"
 
 #include "..\Shared\EnCommandLineInfo.h"
 #include "..\Shared\misc.h"
@@ -463,13 +464,22 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 
 	if (cmdInfo.HasOption(SWITCH_TASKLINK))
 	{
+		m_dwFlags |= TLD_TASKLINK;
+
 		if (!HasFilePath())
 		{
-			CString sLink(cmdInfo.GetOption(SWITCH_TASKLINK));
-			lstrcpyn(m_szFilePaths, sLink, FILEPATHSLEN);
-		}
+			CString sPath, sLink(cmdInfo.GetOption(SWITCH_TASKLINK));
+			DWORD dwTaskID = 0;
 
-		m_dwFlags |= TLD_TASKLINK;
+			if (TDCTASKLINK::Parse(sLink, FALSE, _T(""), dwTaskID, sPath))
+			{
+				lstrcpyn(m_szFilePaths, sPath, FILEPATHSLEN);
+				m_dwIDSel = dwTaskID;
+
+				// We converted it
+				m_dwFlags &= ~TLD_TASKLINK;
+			}
+		}
 	}
 }
 
