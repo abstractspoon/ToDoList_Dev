@@ -5272,7 +5272,7 @@ BOOL CToDoListWnd::HasTaskFile(const CTDCStartupOptions& startup) const
 
 BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup)
 {
-	// 1. Select the tasklist --------------------------------
+	// 1. Select the tasklist ------------------------------------
 	if (startup.HasFilePath())
 	{
 		int nFirstSel = -1;
@@ -5318,7 +5318,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-	// 2. Source control
+	// 2. Source control ------------------------------------------
 	// 
 	// A) If WantCheckOut AND WantCheckIn are set then '-ssc' was used 
 	//    without an argument
