@@ -3170,20 +3170,22 @@ LPCTSTR CTaskFile::GetTaskPositionString(HTASKITEM hTask) const
 
 bool CTaskFile::IsTaskDone(HTASKITEM hTask) const
 {
-	return (TaskHasAttribute(hTask, TDL_TASKDONEDATE/*, FALSE*/) ||
-			(GetTaskPercentDone(hTask, FALSE) == 100));
+	if (GetTaskPercentDone(hTask, FALSE) == 100)
+		return true;
+
+	return (CDateHelper::IsDateSet(GetTaskDateOle(hTask, TDL_TASKDONEDATE, FALSE)) != FALSE);
 }
 
 bool CTaskFile::IsTaskDue(HTASKITEM hTask) const
 {
-	if (IsTaskDone(hTask))
-		return FALSE;
-
-	COleDateTime dtDue = GetTaskDateOle(hTask, TDL_TASKDUEDATE, FALSE); // date only
-
-	if (CDateHelper::IsDateSet(dtDue))
+	if (!IsTaskDone(hTask))
 	{
-		return (dtDue.m_dt <= CDateHelper::GetDate(DHD_TODAY));
+		COleDateTime dtDue = GetTaskDateOle(hTask, TDL_TASKDUEDATE, FALSE); // date only
+
+		if (CDateHelper::IsDateSet(dtDue))
+		{
+			return (dtDue.m_dt <= CDateHelper::GetDate(DHD_TODAY));
+		}
 	}
 
 	return false;
