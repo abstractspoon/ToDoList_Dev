@@ -117,7 +117,8 @@ CTaskFile::~CTaskFile()
 
 HRESULT CTaskFile::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObject)
 {
-	*ppvObject = NULL;
+	// Default interface
+	*ppvObject = reinterpret_cast<ITaskList*>(this);
 
 	// compare riid against our supported version numbers
 	if (IsEqualIID(riid, IID_TASKLIST2))
