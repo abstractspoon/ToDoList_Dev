@@ -2006,14 +2006,6 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			}
 			break;
 
-		case WM_KEYDOWN:
-			if (wp == VK_ESCAPE && IsDragging())
-			{
-				CancelDrag(TRUE);
-				return FALSE; // eat
-			}
-			break;
-
 		case WM_HSCROLL:
 			// If we're dragging the 'thumb' and we're double height 
 			// then ensure the top row of our header gets redrawn
@@ -2049,6 +2041,15 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 					if (nFlags & TVHT_ONITEMICON)
 						return GraphicsMisc::SetHandCursor();
 				}
+			}
+			break;
+
+		case WM_KEYDOWN:
+			// Even though we are dragging in the list, the focus is on the tree
+			if (wp == VK_ESCAPE && IsDragging())
+			{
+				CancelDrag(TRUE);
+				return FALSE; // eat
 			}
 			break;
 		}
