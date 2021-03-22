@@ -3595,23 +3595,29 @@ UINT CToDoCtrlData::SetNewTaskDependencyStartDate(DWORD dwTaskID, const COleDate
 	// bump the due date too if present but before
 	// we set the start date
 	COleDateTime dtStart(dtNewStart); // start can change too
+	COleDateTime dtNewDue;
+
 	UINT nAdjusted = ADJUSTED_NONE;
 
 	if (pTDI->HasDue() && pTDI->HasStart())
 	{
-		COleDateTime dtNewDue = CalcNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
-
-		if (dtNewDue != pTDI->dateDue)
-		{
-			// save undo info
-			SaveEditUndo(dwTaskID, pTDI, TDCA_DUEDATE);
-
-			// make the change
-			pTDI->dateDue = dtNewDue;
-			nAdjusted |= ADJUSTED_DUE;
-		}
+		dtNewDue = CalcNewDueDate(pTDI->dateStart, pTDI->dateDue, pTDI->timeEstimate.nUnits, dtStart);
+	}
+	else if ((pTDI->timeEstimate.dAmount > 0.0) && HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
+	{
+		dtNewDue = AddDuration(dtStart, pTDI->timeEstimate.dAmount, pTDI->timeEstimate.nUnits, TRUE);
 	}
 
+	if (CDateHelper::IsDateSet(dtNewDue) && (dtNewDue != pTDI->dateDue))
+	{
+		// save undo info
+		SaveEditUndo(dwTaskID, pTDI, TDCA_DUEDATE);
+
+		// make the change
+		pTDI->dateDue = dtNewDue;
+		nAdjusted |= ADJUSTED_DUE;
+	}
+	
 	// save undo info
 	SaveEditUndo(dwTaskID, pTDI, TDCA_STARTDATE);
 
@@ -3822,7 +3828,7 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 		// if the due date was actually modified
 		if (Misc::HasFlag(nAdjusted, ADJUSTED_DUE))
 		{
-			FixupTaskLocalDependentsDates(dwIDDependent, TDCD_DUE);
+			FixupTaskLocalDependentsDates(dwIDDependent, TDCD_DUE); // RECURSIVE CALL
 		}
 	}
 }
