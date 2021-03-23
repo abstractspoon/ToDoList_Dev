@@ -3505,7 +3505,7 @@ void CToDoListWnd::StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom)
 	if (!m_bClosing)
 	{
 		ASSERT(nTDC != -1);
-		ASSERT((nFrom == FROM_TRACKER) || (nTDC == GetSelToDoCtrl()));
+		ASSERT((nFrom != FROM_TASKLIST) || (nTDC == GetSelToDoCtrl()));
 
 		// Update Time track widget AND/OR todoctrl depending on who notified
 		CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
@@ -8273,6 +8273,14 @@ TDC_FILE CToDoListWnd::ConfirmSaveTaskList(int nIndex, DWORD dwFlags)
 	// save changes
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 	
+	if (bClosingTaskList && tdc.IsActivelyTimeTracking())
+	{
+		if (bClosingWindows)
+			tdc.EndTimeTracking(FALSE);
+		else
+			StopTimeTrackingTask(nIndex, FROM_APP);
+	}
+
 	if (tdc.IsModified())
 	{
 		BOOL bFirstTimeSave = (!tdc.HasFilePath() && !m_mgrToDoCtrls.UsesStorage(nIndex));
