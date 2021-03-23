@@ -212,10 +212,11 @@ void CToolTipCtrlEx::FilterToolTipMessage(MSG* pMsg, BOOL bSendHitTestMessage)
 				CPoint ptTip(pMsg->pt);
 				ptTip.Offset(m_ptTrackingOffset);
 
-				ASSERT(m_scTracking.IsValid());
-
-				CRect rTooltip(ptTip, m_sizeTooltip);
-				ptTip = FitTooltipRectToScreen(rTooltip);
+				if (m_scTracking.IsValid())
+				{
+					CRect rTooltip(ptTip, m_sizeTooltip);
+					ptTip = FitTooltipRectToScreen(rTooltip);
+				}
 
 				SendMessage(TTM_TRACKPOSITION, 0, MAKELPARAM(ptTip.x, ptTip.y));
 				SendMessage(TTM_UPDATETIPTEXT, 0, (LPARAM)&tiHit);
