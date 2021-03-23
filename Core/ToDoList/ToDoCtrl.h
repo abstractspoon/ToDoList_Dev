@@ -112,7 +112,7 @@ public:
 	BOOL AddToSourceControl(BOOL bAdd = TRUE);
 	BOOL CanAddToSourceControl(BOOL bAdd = TRUE) const;
 
-	void Flush(BOOL bEndTimeTracking = FALSE); // called to end current editing actions
+	void Flush(); // called to end current editing actions
 	BOOL IsModified() const;
 	void SetModified(BOOL bMod = TRUE);
 	BOOL IsPristine() const;

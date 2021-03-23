@@ -10125,7 +10125,7 @@ void CToDoCtrl::EndLabelEdit(BOOL bCancel)
 	m_eTaskName.EndEdit(bCancel);
 }
 
-void CToDoCtrl::Flush(BOOL bEndTimeTracking) // called to end current editing actions
+void CToDoCtrl::Flush() 
 {
 	CWnd* pFocus = GetFocus();
 
@@ -10164,14 +10164,12 @@ void CToDoCtrl::Flush(BOOL bEndTimeTracking) // called to end current editing ac
 	m_treeDragDrop.CancelDrag();
 
 	HandleUnsavedComments();
-
-	if (bEndTimeTracking)
-		EndTimeTracking(TRUE, FALSE);
 }
 
 TDC_FILE CToDoCtrl::CheckIn()
 {
-	Flush(TRUE);
+	Flush();
+	EndTimeTracking(TRUE, FALSE);
 
 	return m_sourceControl.CheckIn();
 }

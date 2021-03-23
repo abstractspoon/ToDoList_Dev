@@ -8415,7 +8415,7 @@ void CToDoListWnd::CheckCloseTasklist(int nIndex)
 	}
 
 	// make sure there are no edits pending
-	GetToDoCtrl(nIndex).Flush(TRUE); 
+	GetToDoCtrl(nIndex).Flush(); 
 	
 	// Don't close the tab if it's the only pristine tasklist
 	if (m_mgrToDoCtrls.IsPristine())
