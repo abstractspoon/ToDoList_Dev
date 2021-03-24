@@ -1733,26 +1733,27 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Analyse Logged Time"
 FONT 8, "Tahoma"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,221,176,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,276,176,50,14
-    GROUPBOX        "Time Period",IDC_STATIC,7,7,181,110
-    GROUPBOX        "Breakdown",IDC_STATIC,197,7,129,110
-    GROUPBOX        "Output",IDC_STATIC,7,121,319,50
+    DEFPUSHBUTTON   "OK",IDOK,221,192,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,276,192,50,14
+    GROUPBOX        "Time Period",IDC_STATIC,7,7,181,125
+    GROUPBOX        "Breakdown",IDC_STATIC,197,7,129,125
     CONTROL         "&Today",IDC_TODAY,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP,16,20,165,10
+                    WS_GROUP,16,34,165,10
     CONTROL         "This &Week",IDC_THISWEEK,"Button",BS_AUTORADIOBUTTON,16,
-                    35,165,10
+                    49,165,10
     CONTROL         "This &Month",IDC_THISMONTH,"Button",BS_AUTORADIOBUTTON,
-                    16,50,165,10
+                    16,64,165,10
     CONTROL         "This &Year",IDC_THISYEAR,"Button",BS_AUTORADIOBUTTON,16,
-                    65,165,10
-    CONTROL         "&From:",IDC_DATERANGE,"Button",BS_AUTORADIOBUTTON,16,80,
+                    79,165,10
+    CONTROL         "&From:",IDC_DATERANGE,"Button",BS_AUTORADIOBUTTON,16,94,
                     59,10
+    CONTROL         "&Yesterday",IDC_YESTERDAY,"Button",BS_AUTORADIOBUTTON,
+                    16,19,165,10
     CONTROL         "DateTimePicker1",IDC_DATEFROM,"SysDateTimePick32",
-                    DTS_RIGHTALIGN | WS_GROUP | WS_TABSTOP,79,77,100,14
-    LTEXT           "T&o:",IDC_STATIC,27,98,50,10,SS_CENTERIMAGE
+                    DTS_RIGHTALIGN | WS_GROUP | WS_TABSTOP,79,91,100,14
+    LTEXT           "T&o:",IDC_STATIC,27,112,50,10,SS_CENTERIMAGE
     CONTROL         "DateTimePicker1",IDC_DATETO,"SysDateTimePick32",
-                    DTS_RIGHTALIGN | WS_TABSTOP,79,95,100,14
+                    DTS_RIGHTALIGN | WS_TABSTOP,79,109,100,14
     CONTROL         "By Tas&k",IDC_BYTASK,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP,206,20,110,10
     CONTROL         "By &Day",IDC_BYDAY,"Button",BS_AUTORADIOBUTTON,206,35,
@@ -1762,14 +1763,15 @@ BEGIN
     CONTROL         "By Mo&nth",IDC_BYMONTH,"Button",BS_AUTORADIOBUTTON,206,
                     65,111,10
     CONTROL         "&Group By",IDC_GROUPBY,"Button",BS_AUTOCHECKBOX | 
-                    WS_GROUP | WS_TABSTOP,206,82,111,10
-    COMBOBOX        IDC_GROUPBYATTRIB,216,95,101,30,CBS_DROPDOWNLIST | 
+                    WS_GROUP | WS_TABSTOP,206,97,111,10
+    COMBOBOX        IDC_GROUPBYATTRIB,216,110,101,30,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "&Format",IDC_STATIC,16,137,61,8
-    COMBOBOX        IDC_OUTPUTFORMAT,79,134,100,109,CBS_DROPDOWNLIST | 
+    GROUPBOX        "Output",IDC_STATIC,7,137,319,50
+    LTEXT           "&Format",IDC_STATIC,16,153,61,8
+    COMBOBOX        IDC_OUTPUTFORMAT,79,150,100,109,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    LTEXT           "File &Path",IDC_STATIC,16,153,62,8
-    EDITTEXT        IDC_OUTPUTFILEPATH,79,151,240,13,ES_AUTOHSCROLL
+    LTEXT           "File &Path",IDC_STATIC,16,169,62,8
+    EDITTEXT        IDC_OUTPUTFILEPATH,79,167,240,13,ES_AUTOHSCROLL
 END
 
 IDD_RECURRING_ONCE_PAGE DIALOG DISCARDABLE  0, 0, 254, 84

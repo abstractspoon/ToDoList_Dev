@@ -245,6 +245,7 @@ void CTDLAnalyseLoggedTimeDlg::OnChangePeriod()
 	case TTLP_FROMTO:
 		break;
 
+	case TTLP_YESTERDAY:
 	case TTLP_TODAY:
 		nBreakdown = min(nBreakdown, TTLB_BYDAY);
 		break;
@@ -302,6 +303,11 @@ BOOL CTDLAnalyseLoggedTimeDlg::GetDateRange(COleDateTime& dtFrom, COleDateTime& 
 		dtTo = (CDateHelper::GetDateOnly(m_dtTo).m_dt + 1.0);
 		break;
 
+	case TTLP_YESTERDAY:
+		dtFrom = (dtNow.m_dt - 1.0);
+		dtTo = dtNow;
+		break;
+
 	case TTLP_TODAY:
 		dtFrom = dtNow;
 		dtTo = (dtNow.m_dt + 1.0);
@@ -309,7 +315,7 @@ BOOL CTDLAnalyseLoggedTimeDlg::GetDateRange(COleDateTime& dtFrom, COleDateTime& 
 
 	case TTLP_THISWEEK:
 		dtFrom = CDateHelper::GetDate(DHD_BEGINTHISWEEK);
-		dtTo = (dtNow.m_dt + 7.0);
+		dtTo = (dtFrom.m_dt + 7.0);
 		break;
 
 	case TTLP_THISMONTH:

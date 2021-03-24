@@ -92,6 +92,8 @@ BOOL CTDLDialog::OnInitDialog()
 		}
 	}
 
+	CDialogHelper::ResizeButtonStaticTextFieldsToFit(this);
+
 	return TRUE;
 }
 
