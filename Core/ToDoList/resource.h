@@ -702,6 +702,7 @@
 #define IDC_DATEFROM                    1423
 #define IDC_OUTPUTFORMAT                1424
 #define IDC_PROMPT                      1425
+#define IDC_YESTERDAY                   1425
 #define IDC_CHANGES                     1426
 #define IDC_PROGRESS                    1427
 #define IDC_LABEL                       1431
