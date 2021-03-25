@@ -11255,7 +11255,9 @@ BOOL CToDoCtrl::GotoFile(const CString& sFile, BOOL bShellExecute)
 	}
 
 	// all else, pass to parent
-	return GetParent()->SendMessage(WM_TDCM_FAILEDLINK, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sFile);
+	GetParent()->SendMessage(WM_TDCM_FAILEDLINK, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sFile);
+
+	return TRUE; // parent will handle errors
 }
 
 void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)

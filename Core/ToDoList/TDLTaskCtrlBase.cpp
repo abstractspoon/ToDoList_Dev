@@ -419,7 +419,10 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 
 			if (nIndex != -1)
 			{
-				sTooltip = FileMisc::GetFullPath(pTDI->aFileLinks[nIndex], m_sTasklistFolder);
+				CString sFile(pTDI->aFileLinks[nIndex]);
+				VERIFY(FileMisc::ExpandPathEnvironmentVariables(sFile));
+
+				sTooltip = FileMisc::GetFullPath(sFile, m_sTasklistFolder);
 				return GetUniqueToolTipID(dwTaskID, nColID, nIndex);
 			}
 		}
