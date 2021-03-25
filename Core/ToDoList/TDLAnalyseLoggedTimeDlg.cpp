@@ -79,7 +79,7 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 	m_nOutputFormat = prefs.GetProfileEnum(m_sPrefsKey, _T("AnalysisOutputFormat"), TTLF_CSV);
 
 	m_bGroupBy = prefs.GetProfileInt(m_sPrefsKey, _T("GroupBy"), FALSE);
-	m_nGroupByAttrib = prefs.GetProfileEnum(m_sPrefsKey, _T("GroupByAttrib"), TDCA_NONE);
+	m_nGroupByAttrib = prefs.GetProfileEnum(m_sPrefsKey, _T("GroupByAttrib"), TDCA_STATUS);
 
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(m_nGroupByAttrib))
 	{
@@ -87,7 +87,7 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 
 		if (nCust == -1)
 		{
-			m_nGroupByAttrib = TDCA_NONE;
+			m_nGroupByAttrib = TDCA_STATUS;
 		}
 		else
 		{
@@ -96,7 +96,7 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 			if (attribDef.IsList() && !attribDef.IsMultiList())
 				m_nGroupByAttrib = m_aCustomAttribDefs[nCust].GetAttributeID();
 			else
-				m_nGroupByAttrib = TDCA_NONE;
+				m_nGroupByAttrib = TDCA_STATUS;
 		}
 	}
 
@@ -124,26 +124,23 @@ void CTDLAnalyseLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_DateTimeCtrl(pDX, IDC_DATETO, m_dtTo);
 	DDX_Text(pDX, IDC_OUTPUTFILEPATH, m_sOutputFilePath);
 	//}}AFX_DATA_MAP
-	DDX_Radio(pDX, IDC_TODAY, (int&)m_nTimePeriod);
-	DDX_Radio(pDX, IDC_BYTASK, (int&)m_nBreakdown);
 	DDX_Control(pDX, IDC_OUTPUTFILEPATH, m_eOutputFile);
+	DDX_Control(pDX, IDC_TIMEPERIODS, m_cbTimePeriod);
+	DDX_Control(pDX, IDC_BREAKDOWNS, m_cbBreakdown);
 	DDX_Control(pDX, IDC_GROUPBYATTRIB, m_cbGroupByAttrib);
 	DDX_Check(pDX, IDC_GROUPBY, m_bGroupBy);
 
+	CDialogHelper::DDX_CBData(pDX, m_cbTimePeriod, m_nTimePeriod, TTLP_THISMONTH);
+	CDialogHelper::DDX_CBData(pDX, m_cbBreakdown, m_nBreakdown, TTLB_BYDAY);
 	CDialogHelper::DDX_CBData(pDX, m_cbOutputFormat, m_nOutputFormat, TTLF_CSV);
-	CDialogHelper::DDX_CBData(pDX, m_cbGroupByAttrib, m_nGroupByAttrib, TDCA_NONE);
+	CDialogHelper::DDX_CBData(pDX, m_cbGroupByAttrib, m_nGroupByAttrib, TDCA_STATUS);
 }
 
 BEGIN_MESSAGE_MAP(CTDLAnalyseLoggedTimeDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLAnalyseLoggedTimeDlg)
-	ON_BN_CLICKED(IDC_TODAY, OnChangePeriod)
 	ON_CBN_SELCHANGE(IDC_OUTPUTFORMAT, OnSelchangeOutputFormat)
-	ON_BN_CLICKED(IDC_THISYEAR, OnChangePeriod)
-	ON_BN_CLICKED(IDC_THISWEEK, OnChangePeriod)
-	ON_BN_CLICKED(IDC_THISMONTH, OnChangePeriod)
-	ON_BN_CLICKED(IDC_DATERANGE, OnChangePeriod)
+	ON_CBN_SELCHANGE(IDC_TIMEPERIODS, OnSelChangeTimePeriod)
 	//}}AFX_MSG_MAP
-	ON_BN_CLICKED(IDC_ALLTASKS, OnChangePeriod)
 	ON_BN_CLICKED(IDC_GROUPBY, OnGroupBy)
 END_MESSAGE_MAP()
 
@@ -154,7 +151,65 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
-	// Build the 'Group by' attribute combo
+	BuildTimePeriodCombo();
+	BuildBreakdownCombo(m_nTimePeriod);
+	BuildGroupByCombo();
+	BuildOutputFormatCombo();
+
+	m_cbGroupByAttrib.EnableWindow(m_bGroupBy);
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CTDLAnalyseLoggedTimeDlg::BuildTimePeriodCombo()
+{
+	CDialogHelper::AddString(m_cbTimePeriod, _T("Last year"),			TTLP_LASTYEAR);
+	CDialogHelper::AddString(m_cbTimePeriod, _T("Last month"),			TTLP_LASTMONTH);
+	CDialogHelper::AddString(m_cbTimePeriod, _T("Last week"),			TTLP_LASTWEEK);
+	CDialogHelper::AddString(m_cbTimePeriod, _T("Yesterday"),			TTLP_YESTERDAY);
+	CDialogHelper::AddString(m_cbTimePeriod, _T("Today"),				TTLP_TODAY);
+	CDialogHelper::AddString(m_cbTimePeriod, _T("This week"),			TTLP_THISWEEK);
+	CDialogHelper::AddString(m_cbTimePeriod, _T("This month"),			TTLP_THISMONTH);
+	CDialogHelper::AddString(m_cbTimePeriod, _T("This year"),			TTLP_THISYEAR);
+	CDialogHelper::AddString(m_cbTimePeriod, _T("<specific dates>"),	TTLP_FROMTO);
+
+	CDialogHelper::SelectItemByData(m_cbTimePeriod, m_nTimePeriod);
+	UpdateDateFields();
+}
+
+void CTDLAnalyseLoggedTimeDlg::BuildBreakdownCombo(TDCTTL_PERIOD nPeriod)
+{
+	TDCTTL_BREAKDOWN nPrevBreakdown = m_nBreakdown;
+
+	m_cbBreakdown.ResetContent();
+		
+	CDialogHelper::AddString(m_cbBreakdown, _T("By task"),	TTLB_BYTASK); // Always
+	CDialogHelper::AddString(m_cbBreakdown, _T("By day"),	TTLB_BYDAY); // Always
+
+	if (nPeriod == TTLP_LASTYEAR || 
+		nPeriod == TTLP_THISYEAR ||
+		nPeriod == TTLP_LASTMONTH ||
+		nPeriod == TTLP_THISMONTH)
+	{
+		CDialogHelper::AddString(m_cbBreakdown, _T("By week"), TTLB_BYWEEK);
+		CDialogHelper::AddString(m_cbBreakdown, _T("By month"), TTLB_BYMONTH);
+	}
+	else if (nPeriod == TTLP_LASTWEEK || nPeriod == TTLP_THISWEEK)
+	{
+		CDialogHelper::AddString(m_cbBreakdown, _T("By week"), TTLB_BYWEEK);
+	}
+
+	if (CDialogHelper::SelectItemByData(m_cbBreakdown, nPrevBreakdown) == -1)
+	{
+		m_nBreakdown = TTLB_BYDAY;
+
+		VERIFY(CDialogHelper::SelectItemByData(m_cbBreakdown, m_nBreakdown) != -1);
+	}
+}
+
+void CTDLAnalyseLoggedTimeDlg::BuildGroupByCombo()
+{
 	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_ALLOCBY,		TDCA_ALLOCBY);
 	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_ALLOCTO,		TDCA_ALLOCTO);
 	CDialogHelper::AddString(m_cbGroupByAttrib, IDS_TDLBC_CATEGORY,		TDCA_CATEGORY);
@@ -182,8 +237,10 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 	}
 
 	CDialogHelper::SelectItemByData(m_cbGroupByAttrib, m_nGroupByAttrib);
+}
 
-	// Build the 'output format' combo
+void CTDLAnalyseLoggedTimeDlg::BuildOutputFormatCombo()
+{
 	int nFmt = NUM_FORMATS;
 
 	while (nFmt--)
@@ -197,13 +254,6 @@ BOOL CTDLAnalyseLoggedTimeDlg::OnInitDialog()
 
 	if (CDialogHelper::SelectItemByData(m_cbOutputFormat, m_nOutputFormat) != CB_ERR)
 		OnSelchangeOutputFormat();
-
-	// enable/disable controls
-	OnChangePeriod();
-	OnGroupBy();
-	
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void CTDLAnalyseLoggedTimeDlg::OnOK()
@@ -230,46 +280,28 @@ void CTDLAnalyseLoggedTimeDlg::OnOK()
 	}
 }
 
-void CTDLAnalyseLoggedTimeDlg::OnChangePeriod() 
+void CTDLAnalyseLoggedTimeDlg::OnSelChangeTimePeriod() 
 {
 	UpdateData();
 
+	BuildBreakdownCombo(m_nTimePeriod);
+	UpdateDateFields();
+}
+
+void CTDLAnalyseLoggedTimeDlg::UpdateDateFields()
+{
 	GetDlgItem(IDC_DATEFROM)->EnableWindow(m_nTimePeriod == TTLP_FROMTO);
 	GetDlgItem(IDC_DATETO)->EnableWindow(m_nTimePeriod == TTLP_FROMTO);
 
-	// enable/disable breakdowns
-	TDCTTL_BREAKDOWN nBreakdown = m_nBreakdown;
-
-	switch (m_nTimePeriod)
+	if (m_nTimePeriod != TTLP_FROMTO)
 	{
-	case TTLP_FROMTO:
-		break;
+		GetDateRange(m_dtFrom, m_dtTo);
 
-	case TTLP_YESTERDAY:
-	case TTLP_TODAY:
-		nBreakdown = min(nBreakdown, TTLB_BYDAY);
-		break;
+		// 'To' date is always start of the next day
+		m_dtTo.m_dt--;
 
-	case TTLP_THISWEEK:
-		nBreakdown = min(nBreakdown, TTLB_BYWEEK);
-		break;
-
-	case TTLP_THISMONTH:
-	case TTLP_THISYEAR:
-		nBreakdown = min(nBreakdown, TTLB_BYMONTH);
-		break;
-	}
-
-	if (nBreakdown < m_nBreakdown)
-	{
-		m_nBreakdown = nBreakdown;
 		UpdateData(FALSE);
 	}
-
-	// Note: BY_TASK always enabled
-	GetDlgItem(IDC_BYDAY)->EnableWindow(m_nTimePeriod >= TTLP_TODAY);
-	GetDlgItem(IDC_BYWEEK)->EnableWindow(m_nTimePeriod >= TTLP_THISWEEK);
-	GetDlgItem(IDC_BYMONTH)->EnableWindow(m_nTimePeriod >= TTLP_THISMONTH);
 }
 
 void CTDLAnalyseLoggedTimeDlg::OnSelchangeOutputFormat() 
@@ -313,14 +345,30 @@ BOOL CTDLAnalyseLoggedTimeDlg::GetDateRange(COleDateTime& dtFrom, COleDateTime& 
 		dtTo = (dtNow.m_dt + 1.0);
 		break;
 
+	case TTLP_LASTWEEK:
+		dtTo = CDateHelper::GetDate(DHD_BEGINTHISWEEK);
+		dtFrom = (dtTo.m_dt - 7.0);
+		break;
+
 	case TTLP_THISWEEK:
 		dtFrom = CDateHelper::GetDate(DHD_BEGINTHISWEEK);
 		dtTo = (dtFrom.m_dt + 7.0);
 		break;
 
+	case TTLP_LASTMONTH:
+		CDateHelper::IncrementMonth(dtNow, -1);
+		dtFrom.SetDate(dtNow.GetYear(), dtNow.GetMonth(), 1);
+		dtTo = (CDateHelper::GetEndOfMonth(dtNow).m_dt + 1.0);
+		break;
+
 	case TTLP_THISMONTH:
 		dtFrom.SetDate(dtNow.GetYear(), dtNow.GetMonth(), 1);
 		dtTo = (CDateHelper::GetEndOfMonth(dtNow).m_dt + 1.0);
+		break;
+
+	case TTLP_LASTYEAR:
+		dtFrom.SetDate(dtNow.GetYear() - 1, 1, 1);
+		dtTo = CDateHelper::GetStartOfYear(dtNow);
 		break;
 
 	case TTLP_THISYEAR:

@@ -23,7 +23,6 @@ public:
 	CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, CWnd* pParent = NULL);   // standard constructor
 
 	TDCTTL_BREAKDOWN GetBreakdown() const { return m_nBreakdown; }
-	TDCTTL_PERIOD GetPeriod() const { return m_nTimePeriod; }
 	TDCTTL_FORMAT GetOutputFormat() const { return m_nOutputFormat; }
 	TDC_ATTRIBUTE GetGroupBy() const { return m_nGroupByAttrib; }
 
@@ -46,8 +45,10 @@ protected:
 	CString	m_sOutputFilePath;
 
 	CFileEdit m_eOutputFile;
+	CComboBox m_cbTimePeriod;
+	CComboBox m_cbBreakdown;
 	CComboBox m_cbGroupByAttrib;
-	CComboBox	m_cbOutputFormat;
+	CComboBox m_cbOutputFormat;
 
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
@@ -65,13 +66,18 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLAnalyseLoggedTimeDlg)
-	afx_msg void OnChangePeriod();
+	afx_msg void OnSelChangeTimePeriod();
 	afx_msg void OnSelchangeOutputFormat();
 	//}}AFX_MSG
 	afx_msg void OnGroupBy();
 	DECLARE_MESSAGE_MAP()
 
 protected:
+	void BuildTimePeriodCombo();
+	void BuildBreakdownCombo(TDCTTL_PERIOD nPeriod);
+	void BuildGroupByCombo();
+	void BuildOutputFormatCombo();
+	void UpdateDateFields();
 };
 
 //{{AFX_INSERT_LOCATION}}
