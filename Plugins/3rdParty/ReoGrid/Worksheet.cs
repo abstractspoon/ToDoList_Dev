@@ -106,28 +106,57 @@ namespace unvell.ReoGrid
 		/// </summary>
 		internal const int OutlineButtonSize = 13;
 
+		internal static string m_DefaultFontName = "Calibri";
+		internal static float m_DefaultFontSize = 10.25f;
+
 		/// <summary>
 		/// Default root style of entire range of grid control
 		/// </summary>
 		public static readonly WorksheetRangeStyle DefaultStyle = new WorksheetRangeStyle
 		{
 			Flag = PlainStyleFlag.FontName | PlainStyleFlag.FontSize | PlainStyleFlag.AlignAll,
-			FontName = "Calibri",
-			FontSize = 10.25f,
+			FontName = m_DefaultFontName,
+			FontSize = m_DefaultFontSize,
 			HAlign = ReoGridHorAlign.General,
 			VAlign = ReoGridVerAlign.General,
 		};
 
 		public static String DefaultFontName
 		{
-			get { return DefaultStyle.FontName; }
-			set { DefaultStyle.FontName = value; }
+			get { return m_DefaultFontName; }
+
+			set
+			{
+				m_DefaultFontName = value;
+
+				if (DefaultStyle != null)
+					DefaultStyle.FontName = value;
+			}
 		}
 
 		public static float DefaultFontSize
 		{
-			get { return DefaultStyle.FontSize; }
-			set { DefaultStyle.FontSize = value; }
+			get { return m_DefaultFontSize; }
+
+			set
+			{
+				m_DefaultFontSize = value;
+
+				if (DefaultStyle != null)
+					DefaultStyle.FontSize = value;
+			}
+		}
+
+		public String FontName
+		{
+			get { return RootStyle.FontName; }
+			set { RootStyle.FontName = value; }
+		}
+
+		public float FontSize
+		{
+			get { return RootStyle.FontSize; }
+			set { RootStyle.FontSize = value; }
 		}
 		#endregion
 

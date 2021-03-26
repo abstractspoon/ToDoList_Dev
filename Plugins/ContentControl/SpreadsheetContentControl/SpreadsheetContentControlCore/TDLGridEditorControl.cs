@@ -80,8 +80,12 @@ namespace SpreadsheetContentControl
  			{
  				var memStream = new MemoryStream(Compression.Decompress(content));
  				GridControl.Load(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
- 
- 				return true;
+
+				// Restore the content font because loading changes it
+				CurrentWorksheet.FontName = Worksheet.DefaultFontName;
+				CurrentWorksheet.FontSize = Worksheet.DefaultFontSize;
+
+				return true;
  			}
  			catch (Exception)
  			{
@@ -203,19 +207,32 @@ namespace SpreadsheetContentControl
 
 		public void SetContentFont(String fontName, int pointSize)
 		{
+			AllowParentChangeNotifications = false;
+
 			Worksheet.DefaultFontName = fontName;
 			Worksheet.DefaultFontSize = pointSize;
+
+			if (CurrentWorksheet != null)
+			{
+				CurrentWorksheet.FontName = fontName;
+				CurrentWorksheet.FontSize = pointSize;
+			}
+
+			this.FontBar.Items["fontToolStripComboBox"].Text = fontName;
+			this.FontBar.Items["fontSizeToolStripComboBox"].Text = pointSize.ToString();
+
+			AllowParentChangeNotifications = true;
 		}
 
-		private bool IsLoading { get; set; }
+		private bool AllowParentChangeNotifications { get; set; }
 
 		protected override void OnLoad(EventArgs e)
 		{
-			IsLoading = true;
+			AllowParentChangeNotifications = false;
 
 			base.OnLoad(e);
 
-			IsLoading = false;
+			AllowParentChangeNotifications = true;
 		}
 
 		private void InitialiseToolbars()
@@ -378,10 +395,8 @@ namespace SpreadsheetContentControl
 
 		protected void NotifyParentContentChange()
 		{
-			if (IsLoading)
-				return;
-
-			ContentChanged?.Invoke(this, new EventArgs());
+			if (AllowParentChangeNotifications)
+				ContentChanged?.Invoke(this, new EventArgs());
 		}
 
 		override public void Undo()
