@@ -589,6 +589,20 @@ namespace MSDN.Html.Editor
 				document.selection.clear();
 		}
 
+		public void CollapseSelection(bool start)
+		{
+			if (document.selection != null)
+			{
+				var rng = (document.selection.createRange() as mshtmlTextRange);
+
+				if (rng != null)
+				{
+					rng.collapse(start);
+					rng.select();
+				}
+			}
+		}
+
 		public void SelectElement(HtmlElement element)
 		{
 			if (document.selection != null)

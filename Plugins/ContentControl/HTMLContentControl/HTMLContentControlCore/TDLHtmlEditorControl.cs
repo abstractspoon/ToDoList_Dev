@@ -35,19 +35,18 @@ namespace HTMLContentControl
 		public List<String> values;
 	}
 
-	delegate void ItemSelectedEventHandler(object sender, EventArgs args);
-
 	// --------------------------------------------------------------
 
 	class PopupListBox : Luminous.Windows.Forms.Popup
 	{
-		public event ItemSelectedEventHandler ItemSelected;
-
-		// --------------------------------------------------------------
-
 		class TrackingListBox : ListBox
 		{
-			Point m_LastMouseMove = new Point(0, 0);
+			public TrackingListBox()
+			{
+				m_LastMouseMove = PointToClient(MousePosition);
+			}
+
+			Point m_LastMouseMove;
 
 			protected override void OnMouseMove(MouseEventArgs e)
 			{
@@ -95,8 +94,7 @@ namespace HTMLContentControl
 
 				if (hit != -1)
 				{
-					ItemSelected?.Invoke(ListBox, new EventArgs());
-					Close();
+					Close(ToolStripDropDownCloseReason.ItemClicked);
 				}
 			}
 		}
@@ -105,8 +103,7 @@ namespace HTMLContentControl
 		{
 			if ((e.KeyCode == Keys.Return) && (ListBox.SelectedIndex != -1))
 			{
-				ItemSelected?.Invoke(ListBox, new EventArgs());
-				Close();
+				Close(ToolStripDropDownCloseReason.ItemClicked);
 			}
 		}
 	}
@@ -433,7 +430,7 @@ namespace HTMLContentControl
 						font.ToLogFont(logFont);
 
 						PopupListBox popup = new PopupListBox(args.values.ToArray());
-						popup.ItemSelected += new ItemSelectedEventHandler(OnAttributeListBoxItemSelected);
+						popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
 
 						pos.Offset(0, popup.Height + Math.Abs(logFont.lfHeight));
 						popup.Show(this, pos, ToolStripDropDownDirection.BelowRight);
@@ -447,15 +444,19 @@ namespace HTMLContentControl
 			return base.OnDocumentKeyPress(keyPress);
 		}
 
-		protected void OnAttributeListBoxItemSelected(object sender, EventArgs e)
+		protected void OnAttributeListBoxClosed(object sender, ToolStripDropDownClosedEventArgs e)
 		{
-			var listbox = (sender as ListBox);
-
-			if ((listbox != null) && (listbox.SelectedIndex != -1))
+			if ((sender is PopupListBox) && (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked))
 			{
-				SelectedHtml = (listbox.SelectedItem as string);
-				Focus();
+				var popup = (sender as PopupListBox);
+				SelectedHtml = (popup.ListBox.SelectedItem as string);
 			}
+			else
+			{
+				CollapseSelection(false);
+			}
+
+			Focus();
 		}
 
 		override protected bool IsValidHref(string href)
