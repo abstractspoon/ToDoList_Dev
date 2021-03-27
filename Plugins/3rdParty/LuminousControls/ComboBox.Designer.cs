@@ -1,6 +1,6 @@
-﻿namespace PresentationControls
+﻿namespace Luminous.Windows.Forms
 {
-    partial class PopupComboBox
+    partial class ComboBox
     {
         /// <summary>
         /// Required designer variable.
@@ -19,10 +19,6 @@
                 {
                     components.Dispose();
                 }
-                if (dropDown != null)
-                {
-                    dropDown.Dispose();
-                }
             }
             base.Dispose(disposing);
         }
@@ -37,7 +33,7 @@
         {
             this.SuspendLayout();
             // 
-            // PopupComboBox
+            // ComboBox
             // 
             this.ResumeLayout(false);
 

@@ -89,6 +89,10 @@
       <Project>{70A25201-8EA4-48F8-A4A6-ED13ADF8823C}</Project>
       <Name>CheckBoxComboBox</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LuminousControls\LuminousControls.csproj">
+      <Project>{ecae34bb-d9cc-487f-9922-fa32291181ae}</Project>
+      <Name>LuminousControls</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

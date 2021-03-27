@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckBoxComboBox", "..\Chec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DemoApp", "DemoApp.csproj", "{8131B3D3-1BAF-438F-946E-56DA6D6FC53A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuminousControls", "..\LuminousControls\LuminousControls.csproj", "{ECAE34BB-D9CC-487F-9922-FA32291181AE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{8131B3D3-1BAF-438F-946E-56DA6D6FC53A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8131B3D3-1BAF-438F-946E-56DA6D6FC53A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8131B3D3-1BAF-438F-946E-56DA6D6FC53A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECAE34BB-D9CC-487F-9922-FA32291181AE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECAE34BB-D9CC-487F-9922-FA32291181AE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECAE34BB-D9CC-487F-9922-FA32291181AE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECAE34BB-D9CC-487F-9922-FA32291181AE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

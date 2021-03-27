@@ -9,6 +9,8 @@ using System.Reflection;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 
+using Luminous.Windows.Forms;
+
 namespace PresentationControls
 {
     /// <summary>

@@ -1,11 +1,11 @@
-﻿namespace PresentationControls
+﻿namespace Luminous.Windows.Forms
 {
     partial class Popup
     {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private System.ComponentModel.IContainer components;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -19,10 +19,10 @@
                 {
                     components.Dispose();
                 }
-                if (content != null)
+                if (Content != null)
                 {
-                    System.Windows.Forms.Control _content = content;
-                    content = null;
+                    System.Windows.Forms.Control _content = Content;
+                    Content = null;
                     _content.Dispose();
                 }
             }

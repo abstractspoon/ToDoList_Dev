@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.20404</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{70A25201-8EA4-48F8-A4A6-ED13ADF8823C}</ProjectGuid>
+    <ProjectGuid>{ECAE34BB-D9CC-487F-9922-FA32291181AE}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CheckBoxComboBox</RootNamespace>
-    <AssemblyName>CheckBoxComboBox</AssemblyName>
+    <RootNamespace>LuminousControls</RootNamespace>
+    <AssemblyName>LuminousControls</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <FileUpgradeFlags>
@@ -49,21 +49,34 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CheckBoxComboBox.cs">
+    <Compile Include="ComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="CheckBoxComboBox.Designer.cs">
-      <DependentUpon>CheckBoxComboBox.cs</DependentUpon>
+    <Compile Include="ComboBox.Designer.cs">
+      <DependentUpon>ComboBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Selection Wrappers\ListSelectionWrapper.cs" />
-    <Compile Include="Selection Wrappers\ObjectSelectionWrapper.cs" />
+    <Compile Include="GripBounds.cs" />
+    <Compile Include="NativeMethods.cs" />
+    <Compile Include="PopupAnimations.cs" />
+    <Compile Include="Popup.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Popup.Designer.cs">
+      <DependentUpon>Popup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="PopupComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PopupComboBox.Designer.cs">
+      <DependentUpon>PopupComboBox.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LuminousControls\LuminousControls.csproj">
-      <Project>{ecae34bb-d9cc-487f-9922-fa32291181ae}</Project>
-      <Name>LuminousControls</Name>
-    </ProjectReference>
+    <EmbeddedResource Include="PopupComboBox.resx">
+      <DependentUpon>PopupComboBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
