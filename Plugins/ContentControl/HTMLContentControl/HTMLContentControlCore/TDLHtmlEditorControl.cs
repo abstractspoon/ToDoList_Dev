@@ -39,8 +39,6 @@ namespace HTMLContentControl
 
 	// --------------------------------------------------------------
 
-	// --------------------------------------------------------------
-
 	class PopupListBox : Luminous.Windows.Forms.Popup
 	{
 		public event ItemSelectedEventHandler ItemSelected;
@@ -50,8 +48,6 @@ namespace HTMLContentControl
 		class TrackingListBox : ListBox
 		{
 			Point m_LastMouseMove = new Point(0, 0);
-
-			// --------------------------------------------------------------
 
 			protected override void OnMouseMove(MouseEventArgs e)
 			{
@@ -66,10 +62,6 @@ namespace HTMLContentControl
 				}
 			}
 		}
-
-		// --------------------------------------------------------------
-
-		Point m_LastMouseMove = new Point(0, 0);
 
 		// --------------------------------------------------------------
 
