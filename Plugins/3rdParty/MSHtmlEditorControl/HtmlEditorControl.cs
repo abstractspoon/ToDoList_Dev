@@ -562,6 +562,27 @@ namespace MSDN.Html.Editor
 				SelectWord(document.selection.createRange() as mshtmlTextRange);
 		}
 
+		protected void SelectCharacterAtCaret(bool forward)
+		{
+			if (document.selection != null)
+			{
+				var rng = (document.selection.createRange() as mshtmlTextRange);
+
+				if ((rng != null) && String.IsNullOrEmpty(rng.text))
+				{
+					if (forward)
+						rng.moveEnd("character", 1);
+					else
+						rng.moveStart("character", -1);
+
+					rng.select();
+
+					// Must reset focus else over-typing fails
+					document.focus();
+				}
+			}
+		}
+
 		public void ClearSelection()
 		{
 			if (document.selection != null)

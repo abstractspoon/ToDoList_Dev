@@ -108,6 +108,14 @@ namespace MSDN.Html.Editor
             }
         } //Size
 
+        public float SizeInPoints
+		{
+            get
+            {
+                return HtmlFontConversion.PointsFromHtml(_size);
+            }
+        } //Size
+
 		public String SizeAsString
 		{
 			get

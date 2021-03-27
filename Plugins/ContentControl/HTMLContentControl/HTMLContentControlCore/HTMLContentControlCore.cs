@@ -9,8 +9,6 @@ using System.Collections.Generic;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-// PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
-
 namespace HTMLContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
@@ -203,6 +201,7 @@ namespace HTMLContentControl
 			m_HtmlEditControl.LostFocus += new System.EventHandler(OnInputTextLostFocus);
 			m_HtmlEditControl.HtmlNavigation += new MSDN.Html.Editor.HtmlNavigationEventHandler(OnNavigateLink);
 			m_HtmlEditControl.NeedLinkTooltip += new NeedLinkTooltipEventHandler(OnNeedLinkTooltip);
+			m_HtmlEditControl.NeedAttributeValues += new NeedAttributeValuesEventHandler(OnNeedAttributeList);
 
 			this.Controls.Add(this.m_HtmlEditControl);
 
@@ -308,7 +307,13 @@ namespace HTMLContentControl
 		private void OnNeedLinkTooltip(object sender, NeedLinkTooltipEventArgs e)
 		{
 			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
-			e.tooltip = notify.NotifyWantLinkTooltip(e.linkUri);
+			e.tooltip = notify.GetLinkTooltip(e.linkUri);
+		}
+
+		private void OnNeedAttributeList(object sender, NeedAttributeValuesEventArgs e)
+		{
+			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
+			e.values = notify.GetAttributeValues(e.attrib);
 		}
 	}
 }

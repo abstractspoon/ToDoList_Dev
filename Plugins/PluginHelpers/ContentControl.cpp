@@ -52,7 +52,7 @@ bool ContentControlWnd::ParentNotify::NotifyKillFocus()
 	return NotifySimple(WM_ICC_KILLFOCUS);
 }
 
-String^ ContentControlWnd::ParentNotify::NotifyWantLinkTooltip(String^ sLink)
+String^ ContentControlWnd::ParentNotify::GetLinkTooltip(String^ sLink)
 {
 	if (IsWindow(m_hwndParent))
 	{
@@ -67,6 +67,22 @@ String^ ContentControlWnd::ParentNotify::NotifyWantLinkTooltip(String^ sLink)
 
 	// all else
 	return gcnew String("");
+}
+
+List<String^>^ ContentControlWnd::ParentNotify::GetAttributeValues(Task::Attribute attrib)
+{
+	if (IsWindow(m_hwndParent))
+	{
+		TDC_ATTRIBUTE nAttrib = Task::MapAttribute(attrib);
+		LPCWSTR szList = (LPCWSTR)::SendMessage(m_hwndParent, WM_ICC_GETATTRIBUTELIST, nAttrib, (LPARAM)'\n');
+
+		String^ attribs = gcnew String(szList);
+
+		return gcnew List<String^>(attribs->Split('\n'));
+	}
+
+	// all else
+	return gcnew List<String^>();
 }
 
 bool ContentControlWnd::ParentNotify::NotifyFailedLink(String^ sFailedLink)

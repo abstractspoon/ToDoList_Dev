@@ -5,6 +5,11 @@
 #include "PluginHelpers.h"
 #include "Preferences.h"
 #include "UITheme.h"
+#include "Tasklist.h"
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+using namespace System::Collections::Generic;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -28,7 +33,9 @@ namespace Abstractspoon
 					bool NotifyFailedLink(String^ sFailedLink);
 					bool NotifyTaskLink(String^ sTaskLink);
 					bool NotifyWantSpellcheck();
-					String^ NotifyWantLinkTooltip(String^ sLink);
+					
+					String^ GetLinkTooltip(String^ sLink);
+					List<String^>^ GetAttributeValues(Task::Attribute attrib);
 
 					//bool GetClipboard();
 					bool HasClipboard();

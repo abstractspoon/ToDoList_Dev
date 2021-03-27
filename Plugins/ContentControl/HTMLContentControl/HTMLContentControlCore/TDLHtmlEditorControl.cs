@@ -25,6 +25,100 @@ namespace HTMLContentControl
 		public String tooltip;
 	}
 
+	delegate void NeedAttributeValuesEventHandler(object sender, NeedAttributeValuesEventArgs args);
+
+	public class NeedAttributeValuesEventArgs : EventArgs
+	{
+		public NeedAttributeValuesEventArgs(Task.Attribute a) { attrib = a; }
+
+		public Task.Attribute attrib;
+		public List<String> values;
+	}
+
+	delegate void ItemSelectedEventHandler(object sender, EventArgs args);
+
+	// --------------------------------------------------------------
+
+	// --------------------------------------------------------------
+
+	class PopupListBox : Luminous.Windows.Forms.Popup
+	{
+		public event ItemSelectedEventHandler ItemSelected;
+
+		// --------------------------------------------------------------
+
+		class TrackingListBox : ListBox
+		{
+			Point m_LastMouseMove = new Point(0, 0);
+
+			// --------------------------------------------------------------
+
+			protected override void OnMouseMove(MouseEventArgs e)
+			{
+				if (m_LastMouseMove != e.Location)
+				{
+					m_LastMouseMove = e.Location;
+
+					int hit = IndexFromPoint(e.Location);
+
+					if (hit != -1)
+						SelectedIndex = hit;
+				}
+			}
+		}
+
+		// --------------------------------------------------------------
+
+		Point m_LastMouseMove = new Point(0, 0);
+
+		// --------------------------------------------------------------
+
+		public PopupListBox() : base(new TrackingListBox())
+		{
+			ListBox.MouseDown += new MouseEventHandler(OnListMouseDown);
+			ListBox.KeyDown += new KeyEventHandler(OnListKeyDown);
+		}
+
+		public PopupListBox(object[] items) : this()
+		{
+			ListBox.Items.AddRange(items);
+			ListBox.SelectedIndex = 0;
+		}
+
+		public ListBox ListBox
+		{
+			get { return base.Content as ListBox; }
+		}
+
+		protected void OnListMouseDown(object sender, MouseEventArgs e)
+		{
+			// We receive a bogus mouse-down immediately 
+			// after showing so we check it first
+			Point mousePos = MousePosition;
+			mousePos = ListBox.PointToClient(mousePos);
+
+			if (e.Location == mousePos)
+			{
+				int hit = ListBox.IndexFromPoint(e.Location);
+
+				if (hit != -1)
+				{
+					ItemSelected?.Invoke(ListBox, new EventArgs());
+					Close();
+				}
+			}
+		}
+
+		protected void OnListKeyDown(object sender, KeyEventArgs e)
+		{
+			if ((e.KeyCode == Keys.Return) && (ListBox.SelectedIndex != -1))
+			{
+				ItemSelected?.Invoke(ListBox, new EventArgs());
+				Close();
+			}
+		}
+	}
+
 	// --------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
@@ -35,6 +129,9 @@ namespace HTMLContentControl
 
 		[DllImport("User32.dll")]
 		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
+
+		[DllImport("user32.dll")]
+		public static extern bool GetCaretPos(ref Point pt);
 
 		const int WM_CHAR		= 0x0102;
 		const int WM_KEYDOWN	= 0x0100;
@@ -55,7 +152,9 @@ namespace HTMLContentControl
 
 		public new event EventHandler TextChanged;
 		public new event MSDN.Html.Editor.HtmlNavigationEventHandler HtmlNavigation;
+
 		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
+		public event NeedAttributeValuesEventHandler NeedAttributeValues;
 
 		// ---------------------------------------------------------------
 
@@ -289,31 +388,82 @@ namespace HTMLContentControl
 			{
 				case WM_KEYDOWN:
 				case WM_SYSKEYDOWN:
+				{
+					Keys keyPress = CommandHandling.GetMenuShortcutFromVirtualKey(wParam);
+
+					if (keyPress == Keys.Return)
 					{
-						Keys keyPress = CommandHandling.GetMenuShortcutFromVirtualKey(wParam);
+						// Handle <enter> manually because the default handling
+						// appears to fail when we are hosted in a win32 modal dialog
+						IntPtr hwndFind = FindWindowEx(WebBrowser.Handle, IntPtr.Zero, "Shell Embedding", "");
+						hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
+						hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
 
-						if (keyPress == Keys.Return)
-						{
-							// Handle <enter> manually because the default handling
-							// appears to fail when we are hosted in a win32 modal dialog
-							IntPtr hwndFind = FindWindowEx(WebBrowser.Handle, IntPtr.Zero, "Shell Embedding", "");
-							hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
-							hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
+						if (hwndFind != null)
+							SendMessage(hwndFind, WM_CHAR, VK_RETURN, 0);
 
-							if (hwndFind != null)
-								SendMessage(hwndFind, WM_CHAR, VK_RETURN, 0);
-
-							return true;
-						}
-						else if (keyPress != Keys.None)
-						{
-							return base.OnDocumentKeyPress(keyPress);
-						}
+						return true;
 					}
-					break;
+
+					if (keyPress != Keys.None)
+						return OnDocumentKeyPress(keyPress);
+				}
+				break;
 			}
 
 			return false;
+		}
+
+		protected override bool OnDocumentKeyPress(Keys keyPress)
+		{
+			switch (keyPress)
+			{
+			case Keys.Shift | Keys.D2: // @
+				if (NeedAttributeValues != null)
+				{
+					// Insert the '@' first and select it
+					SelectedHtml = "@";
+					SelectCharacterAtCaret(false);
+
+					var args = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedTo);
+					NeedAttributeValues(this, args);
+
+					if ((args.values != null) && (args.values.Count > 0))
+					{
+						// show popup below the caret
+						Point pos = new Point();
+						GetCaretPos(ref pos);
+
+						var fontAttrib = GetFontAttributes();
+						var font = new Font(fontAttrib.Name, fontAttrib.SizeInPoints);
+
+						var logFont = new unvell.Common.Win32Lib.Win32.LOGFONT();
+						font.ToLogFont(logFont);
+
+						PopupListBox popup = new PopupListBox(args.values.ToArray());
+						popup.ItemSelected += new ItemSelectedEventHandler(OnAttributeListBoxItemSelected);
+
+						pos.Offset(0, popup.Height + Math.Abs(logFont.lfHeight));
+						popup.Show(this, pos, ToolStripDropDownDirection.BelowRight);
+					}
+
+					return true; // always because we already added the '@'
+				}
+				break;
+			}
+
+			return base.OnDocumentKeyPress(keyPress);
+		}
+
+		protected void OnAttributeListBoxItemSelected(object sender, EventArgs e)
+		{
+			var listbox = (sender as ListBox);
+
+			if ((listbox != null) && (listbox.SelectedIndex != -1))
+			{
+				SelectedHtml = (listbox.SelectedItem as string);
+				Focus();
+			}
 		}
 
 		override protected bool IsValidHref(string href)
