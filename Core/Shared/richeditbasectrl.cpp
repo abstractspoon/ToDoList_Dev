@@ -346,6 +346,38 @@ int CRichEditBaseCtrl::GetSelEnd() const
 	return cr.cpMax;
 }
 
+void CRichEditBaseCtrl::CollapseSelection(BOOL bStart)
+{
+	CHARRANGE cr;
+	GetSel(cr);
+
+	if (bStart)
+		cr.cpMax = cr.cpMin;
+	else
+		cr.cpMin = cr.cpMax;
+
+	SetSel(cr);
+}
+
+void CRichEditBaseCtrl::SelectCharacterAtCaret(BOOL bForwards)
+{
+	CHARRANGE cr;
+	GetSel(cr);
+
+	if (bForwards)
+	{
+		cr.cpMin = cr.cpMax;
+		cr.cpMax++;
+	}
+	else
+	{
+		cr.cpMax = cr.cpMin;
+		cr.cpMin--;
+	}
+
+	SetSel(cr);
+}
+
 CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
 {
 	int nLength = int(cr.cpMax - cr.cpMin + 1);
@@ -1608,6 +1640,7 @@ LRESULT CRichEditBaseCtrl::OnDropListCancelEdit(WPARAM /*wp*/, LPARAM /*lp*/)
 	m_lbPopupList.DestroyWindow();
 	m_pPopupListOwner = NULL;
 
+	CollapseSelection(FALSE);
 	SetFocus();
 
 	return 0L;

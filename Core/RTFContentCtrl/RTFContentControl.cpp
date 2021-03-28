@@ -158,19 +158,7 @@ LRESULT CRTFContentControl::OnSelectPopupListItem(WPARAM wp, LPARAM lp)
 		CString sSelItem((LPCTSTR)lp);
 
 		if (!sSelItem.IsEmpty())
-		{
-			// replace the preceding '@' with this item
-			CHARRANGE crSel = { 0 };
-
-			m_rtf.GetSel(crSel);
-			ASSERT(crSel.cpMin == crSel.cpMax);
-
-			crSel.cpMin--;
-			ASSERT(m_rtf.GetTextRange(crSel) == _T("@"));
-
-			m_rtf.SetSel(crSel);
 			m_rtf.ReplaceSel(sSelItem, TRUE);
-		}
 	}
 
 	return 0L;
@@ -652,7 +640,13 @@ bool CRTFContentControl::ProcessMessage(MSG* pMsg)
 						Misc::AddUniqueItems(aTemp, aListData);
 
 						if (aListData.GetSize())
-							m_rtf.ShowPopupListBoxAtCaret(aListData, this);
+						{
+							// Add the '@' and select it
+							m_rtf.ReplaceSel(_T("@"), TRUE);
+							m_rtf.SelectCharacterAtCaret(FALSE);
+
+							return (m_rtf.ShowPopupListBoxAtCaret(aListData, this) != FALSE);
+						}
 					}
 					break;
 				}

@@ -139,6 +139,8 @@ public:
 	BOOL SetTextEx(const CString& sText, DWORD dwFlags = ST_KEEPUNDO | ST_SELECTION, UINT nCodePage = CP_ACP); 
 	int GetSelStart() const;
 	int GetSelEnd() const;
+	void CollapseSelection(BOOL bStart);
+	void SelectCharacterAtCaret(BOOL bForwards);
 
 	void EnableSelectOnFocus(BOOL bEnable) { m_bEnableSelectOnFocus = bEnable; }
 	BOOL CanEdit() const;

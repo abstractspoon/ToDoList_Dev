@@ -273,7 +273,13 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 					Misc::AddUniqueItems(aTemp, aListData);
 
 					if (aListData.GetSize())
-						ShowPopupListBoxAtCaret(aListData);
+					{
+						// Add the '@' and select it
+						ReplaceSel(_T("@"), TRUE);
+						SelectCharacterAtCaret(FALSE);
+
+						return (ShowPopupListBoxAtCaret(aListData) != FALSE);
+					}
 				}
 				break;
 			}
@@ -286,19 +292,7 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 void CTDLSimpleTextContentCtrl::OnSelectPopupListItem(const CString& sSelItem)
 {
 	if (!sSelItem.IsEmpty())
-	{
-		// replace the preceding '@' with this item
-		CHARRANGE crSel = { 0 };
-		
-		GetSel(crSel);
-		ASSERT(crSel.cpMin == crSel.cpMax);
-
-		crSel.cpMin--;
-		ASSERT(GetTextRange(crSel) == _T("@"));
-
-		SetSel(crSel);
 		ReplaceSel(sSelItem, TRUE);
-	}
 }
 
 void CTDLSimpleTextContentCtrl::FilterToolTipMessage(MSG* /*pMsg*/) 
