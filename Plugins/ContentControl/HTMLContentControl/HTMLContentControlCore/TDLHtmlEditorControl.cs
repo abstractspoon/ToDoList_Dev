@@ -338,15 +338,15 @@ namespace HTMLContentControl
 			case Keys.Shift | Keys.D2: // @
 				if (NeedAttributeValues != null)
 				{
-					// Insert the '@' first and select it
-					SelectedHtml = "@";
-					SelectCharacterAtCaret(false);
-
 					var args = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedTo);
 					NeedAttributeValues(this, args);
 
 					if ((args.values != null) && (args.values.Count > 0))
 					{
+						// Insert the '@' first and select it
+						SelectedHtml = "@";
+						SelectCharacterAtCaret(false);
+
 						// show popup below the caret
 						Point pos = new Point();
 						GetCaretPos(ref pos);
@@ -360,11 +360,11 @@ namespace HTMLContentControl
 						var popup = new PopupListBox(args.values.ToArray());
 						popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
 
-						pos.Offset(0, popup.Height + Math.Abs(logFont.lfHeight));
-						popup.Show(this, pos, ToolStripDropDownDirection.BelowRight);
-					}
+						pos.Y += Math.Abs(logFont.lfHeight);
+						popup.Show(BrowserPanel, pos, ToolStripDropDownDirection.BelowRight);
 
-					return true; // always because we already added the '@'
+						return true; // we already added the '@'
+					}
 				}
 				break;
 			}
