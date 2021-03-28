@@ -17,16 +17,16 @@ namespace Luminous.Windows.Forms
 		{
 			public TrackingListBox()
 			{
-				m_LastMouseMove = PointToClient(MousePosition);
+				m_LastScreenMouseMove = MousePosition;
 			}
 
-			Point m_LastMouseMove;
+			Point m_LastScreenMouseMove;
 
 			protected override void OnMouseMove(MouseEventArgs e)
 			{
-				if (m_LastMouseMove != e.Location)
+				if (m_LastScreenMouseMove != PointToScreen(e.Location))
 				{
-					m_LastMouseMove = e.Location;
+					m_LastScreenMouseMove = PointToScreen(e.Location);
 
 					int hit = IndexFromPoint(e.Location);
 
