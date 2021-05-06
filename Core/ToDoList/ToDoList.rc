@@ -439,7 +439,8 @@ BEGIN
                     WS_TABSTOP
     LTEXT           "&Risk",IDC_STATIC,7,145,87,8
     COMBOBOX        IDC_DEFAULTRISK,103,143,122,136,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
     LTEXT           "&Time estimate",IDC_STATIC,7,162,87,8
     EDITTEXT        IDC_DEFAULTTIMEEST,103,160,122,13,ES_AUTOHSCROLL
     LTEXT           "&Time spent",IDC_STATIC,7,179,87,8
@@ -1241,7 +1242,8 @@ BEGIN
                     WS_TABSTOP
     LTEXT           "R&emind me ",IDC_STATIC,17,108,84,8
     COMBOBOX        IDC_RELATIVELEADIN,17,120,97,30,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
     LTEXT           "&Before this task",IDC_STATIC,122,108,84,8
     COMBOBOX        IDC_RELATIVEFROMWHERE,122,120,97,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
@@ -1831,11 +1833,13 @@ BEGIN
     CONTROL         "&Remind me again at:",IDC_SNOOZEOPTIONUNTIL,"Button",
                     BS_AUTORADIOBUTTON,7,160,210,10
     COMBOBOX        IDC_SNOOZEFOR,17,140,97,386,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_GROUP | WS_TABSTOP
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_GROUP | WS_TABSTOP
     CONTROL         "DateTimePicker1",IDC_SNOOZEUNTILDATE,"SysDateTimePick32",
                     DTS_RIGHTALIGN | WS_TABSTOP,17,173,97,14
     COMBOBOX        IDC_SNOOZEUNTILTIME,121,173,97,30,CBS_DROPDOWN | 
-                    WS_VSCROLL | WS_TABSTOP
+                    CBS_OWNERDRAWFIXED | CBS_HASSTRINGS | WS_VSCROLL | 
+                    WS_TABSTOP
     PUSHBUTTON      "&Snooze",IDC_SNOOZE,269,145,62,14
     PUSHBUTTON      "Snooze &All",IDC_SNOOZEALL,269,164,62,14
     PUSHBUTTON      "&Dismiss",IDC_DISMISS,157,203,50,14
@@ -4374,6 +4378,7 @@ BEGIN
     BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 331
+        VERTGUIDE, 126
         TOPMARGIN, 7
         BOTTOMMARGIN, 217
     END
