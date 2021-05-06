@@ -50,8 +50,8 @@
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
-    <OutDir>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</OutDir>
-    <IntDir>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</IntDir>
+    <OutDir>$(SolutionDir)Core\$(ProjectName)\Unicode_Debug\</OutDir>
+    <IntDir>$(SolutionDir)Core\$(ProjectName)\Unicode_Debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
