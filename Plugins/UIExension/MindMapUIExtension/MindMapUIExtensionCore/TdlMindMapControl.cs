@@ -185,8 +185,16 @@ namespace MindMapUIExtension
 
 	// ------------------------------------------------------------
 
-	[System.ComponentModel.DesignerCategory("")]
+	[Flags]
+	enum MindMapOption
+	{
+		None = 0x00,
+		ShowDependencies = 0x01,
+	}
 
+	// ------------------------------------------------------------
+
+	[System.ComponentModel.DesignerCategory("")]
 	class TdlMindMapControl : MindMapControl
 	{
 		public event EditTaskLabelEventHandler      EditTaskLabel;
@@ -209,6 +217,7 @@ namespace MindMapUIExtension
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
 		private Pen m_DependencyPen;
+		private MindMapOption m_Options;
 
 		// -------------------------------------------------------------------------
 
@@ -312,6 +321,20 @@ namespace MindMapUIExtension
 						rootItem.Title = projName;
 						RootNode.Text = projName;
 					}
+				}
+			}
+		}
+
+		public MindMapOption Options
+		{
+			get { return m_Options; }
+
+			set
+			{
+				if (value != m_Options)
+				{
+					m_Options = value;
+					Invalidate();
 				}
 			}
 		}
@@ -1087,8 +1110,11 @@ namespace MindMapUIExtension
 
 		protected override void PostDraw(Graphics graphics, TreeNodeCollection nodes)
 		{
-			foreach (TreeNode node in nodes)
-				DrawTaskDependencies(graphics, node);
+			if (m_Options.HasFlag(MindMapOption.ShowDependencies))
+			{
+				foreach (TreeNode node in nodes)
+					DrawTaskDependencies(graphics, node);
+			}
 		}
 
 		protected void DrawTaskDependencies(Graphics graphics, TreeNode node)

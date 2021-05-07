@@ -12,6 +12,123 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace MindMapUIExtension
 {
+	// -------------------------------------------------------------------
+
+	class MindMapAlignmentComboBox : ComboBox
+	{
+		class MindMapAlignmentItem
+		{
+			public MindMapAlignmentItem(string label, MindMapControl.RootAlignment align)
+			{
+				Label = label;
+				Alignment = align;
+			}
+
+			public override string ToString()
+			{
+				return Label;
+			}
+
+			public string Label;
+			public MindMapControl.RootAlignment Alignment { get; private set; }
+		}
+
+		// ----------------------------------------------------------------
+
+		public MindMapAlignmentComboBox(Translator trans)
+		{
+			Items.Add(new MindMapAlignmentItem(trans.Translate("Left"), MindMapControl.RootAlignment.Left));
+			Items.Add(new MindMapAlignmentItem(trans.Translate("Right"), MindMapControl.RootAlignment.Right));
+			Items.Add(new MindMapAlignmentItem(trans.Translate("Centre"), MindMapControl.RootAlignment.Centre));
+		}
+
+		public MindMapControl.RootAlignment SelectedAlignment
+		{
+			get
+			{
+				if (SelectedItem != null)
+					return ((MindMapAlignmentItem)SelectedItem).Alignment;
+
+				return MindMapControl.RootAlignment.Centre;
+			}
+
+			set
+			{
+				foreach (var item in Items)
+				{
+					if (((MindMapAlignmentItem)item).Alignment == value)
+					{
+						SelectedItem = item;
+						break;
+					}
+				}
+			}
+		}
+
+		protected override void OnResize(EventArgs e)
+		{
+			FormsUtil.RecalcDropWidth(this);
+		}
+	}
+
+	// -------------------------------------------------------------------
+
+	class MindMapOptionsComboBox : CustomComboBox.CheckedComboBox
+	{
+		class MindMapOptionItem
+		{
+			public MindMapOptionItem(string label, MindMapOption option)
+			{
+				Label = label;
+				Option = option;
+			}
+
+			public override string ToString()
+			{
+				return Label;
+			}
+
+			public string Label;
+			public MindMapOption Option { get; private set; }
+		}
+
+		// ----------------------------------------------------------------
+		
+		public MindMapOptionsComboBox(Translator trans)
+		{
+			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies"), MindMapOption.ShowDependencies));
+		}
+
+		public MindMapOption SelectedOptions
+		{
+			get
+			{
+				MindMapOption options = MindMapOption.None;
+
+				foreach (var checkItem in CheckedItems)
+				{
+					var item = (MindMapOptionItem)checkItem;
+
+					options |= item.Option;
+				}
+
+				return options;
+			}
+
+			set
+			{
+				for (int index = 0; index < Items.Count; index++)
+				{
+					var item = (MindMapOptionItem)Items[index];
+
+					ListBox.SetItemChecked(index, value.HasFlag(item.Option));
+				}
+			}
+		}
+	}
+
+	// ----------------------------------------------------------------------------
+
 	[System.ComponentModel.DesignerCategory("")]
 	public class MindMapUIExtensionCore : Panel, IUIExtension
     {
@@ -27,7 +144,8 @@ namespace MindMapUIExtension
         private System.Drawing.Font m_ControlsFont;
 
         private TdlMindMapControl m_MindMap;
-		private ComboBox m_AlignmentCombo;
+		private MindMapAlignmentComboBox m_AlignmentCombo;
+		private MindMapOptionsComboBox m_OptionsCombo;
 
         // ----------------------------------------------------------------------------
 
@@ -140,15 +258,19 @@ namespace MindMapUIExtension
         public void SavePreferences(Preferences prefs, String key)
         {
 			prefs.WriteProfileInt(key, "RootAlignment", (int)m_MindMap.Alignment);
-        }
+			prefs.WriteProfileInt(key, "Options", (int)m_MindMap.Options);
+		}
 
-        public void LoadPreferences(Preferences prefs, String key, bool appOnly)
+		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
             if (!appOnly)
             {
 				// private settings
 				m_MindMap.Alignment = (MindMapControl.RootAlignment)prefs.GetProfileInt(key, "RootAlignment", (int)m_MindMap.Alignment);
-				m_AlignmentCombo.SelectedIndex = (int)m_MindMap.Alignment;
+				m_AlignmentCombo.SelectedAlignment = m_MindMap.Alignment;
+
+				m_MindMap.Options = (MindMapOption)prefs.GetProfileInt(key, "Options", (int)m_MindMap.Options);
+				m_OptionsCombo.SelectedOptions = m_MindMap.Options;
 			}
 
 			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
@@ -245,33 +367,63 @@ namespace MindMapUIExtension
 
             this.Controls.Add(m_MindMap);
 
-			var comboLabel = new Label();
-			comboLabel.Font = m_ControlsFont;
-			comboLabel.Text = m_Trans.Translate("Alignment");
-			comboLabel.AutoSize = true;
-			comboLabel.Location = new Point(-2, 8);
+			// Alignment combo and label
+ 			var alignLabel = CreateLabel("Alignment", null);
+			this.Controls.Add(alignLabel);
 
-			this.Controls.Add(comboLabel);
+			m_AlignmentCombo = new MindMapAlignmentComboBox(m_Trans);
+			m_AlignmentCombo.DropDownClosed += new EventHandler(OnAlignmentComboClosed);
 
-			m_AlignmentCombo = new ComboBox();
-			m_AlignmentCombo.Font = m_ControlsFont;
-			m_AlignmentCombo.Width = 120;
-			m_AlignmentCombo.Height = 200;
-			m_AlignmentCombo.Location = new Point(comboLabel.Right + 10, 4);
-			m_AlignmentCombo.DropDownStyle = ComboBoxStyle.DropDownList;
-
-			m_AlignmentCombo.Items.Add(m_Trans.Translate("Centre"));
-			m_AlignmentCombo.Items.Add(m_Trans.Translate("Left"));
-			m_AlignmentCombo.Items.Add(m_Trans.Translate("Right"));
-
-			m_AlignmentCombo.SelectedIndexChanged += new EventHandler(OnMindMapStyleChanged);
-
+			InitialiseCombo(m_AlignmentCombo, alignLabel);
 			this.Controls.Add(m_AlignmentCombo);
+
+			// Options combo and label
+ 			var optionsLabel = CreateLabel("Options", m_AlignmentCombo);
+			this.Controls.Add(optionsLabel);
+
+			m_OptionsCombo = new MindMapOptionsComboBox(m_Trans);
+			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
+			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
+			
+			InitialiseCombo(m_OptionsCombo as ComboBox, optionsLabel);
+			this.Controls.Add(m_OptionsCombo);
 		}
 
-		void OnMindMapStyleChanged(object sender, EventArgs e)
+		Label CreateLabel(string untranslatedText, Control prevControl)
 		{
-			m_MindMap.Alignment = (MindMapControl.RootAlignment)m_AlignmentCombo.SelectedIndex;
+			var label = new Label();
+
+			label.Font = m_ControlsFont;
+			label.Text = m_Trans.Translate(untranslatedText);
+			label.AutoSize = true;
+
+			if (prevControl != null)
+				label.Location = new Point((prevControl.Bounds.Right + 20), 8);
+			else
+				label.Location = new Point(-2, 8);
+
+			return label;
+		}
+
+		void InitialiseCombo(ComboBox combo, Label prevLabel)
+		{
+			combo.Font = m_ControlsFont;
+			combo.Width = 120;
+			combo.Height = 200;
+			combo.Location = new Point(prevLabel.Right + 5, 4);
+			combo.DropDownStyle = ComboBoxStyle.DropDownList;
+			combo.Sorted = true;
+		}
+
+		void OnAlignmentComboClosed(object sender, EventArgs e)
+		{
+			m_MindMap.Alignment = m_AlignmentCombo.SelectedAlignment;
+		}
+
+		void OnOptionsComboClosed(object sender, EventArgs e)
+		{
+			if (!m_OptionsCombo.Cancelled)
+				m_MindMap.Options = m_OptionsCombo.SelectedOptions;
 		}
 
 		Boolean OnMindMapEditTaskLabel(object sender, UInt32 taskId)
