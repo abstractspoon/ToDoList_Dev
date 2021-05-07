@@ -31,6 +31,7 @@ namespace Abstractspoon
 				static Windows::Forms::Control^ Find(Windows::Forms::Control^ parent, String^ childName, bool recursive);
 
 				static void RecalcDropWidth(Windows::Forms::ComboBox^ combo);
+				static int CalcWidestItem(Windows::Forms::ComboBox^ combo);
 			};
 
 		}

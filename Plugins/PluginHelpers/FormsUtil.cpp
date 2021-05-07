@@ -60,20 +60,26 @@ bool FormsUtil::SetEditCue(Control^ parent, String^ childName, String^ sCueText,
 
 void FormsUtil::RecalcDropWidth(ComboBox^ combo)
 {
+	int maxWidth = CalcWidestItem(combo);
+
+	combo->DropDownWidth = (maxWidth + SystemInformation::VerticalScrollBarWidth);
+}
+
+int FormsUtil::CalcWidestItem(Windows::Forms::ComboBox^ combo)
+{
 	int maxWidth = 0;
 	int nItem = combo->Items->Count;
 
 	while (nItem--)
 	{
-		auto item = ASTYPE(combo->Items[nItem], String);
+		auto item = combo->Items[nItem]->ToString();
 
-		if (item == nullptr)
-			return;
-
-		int itemWidth = TextRenderer::MeasureText(item, combo->Font).Width;
-		maxWidth = Math::Max(itemWidth, maxWidth);
+		if (item != nullptr)
+		{
+			int itemWidth = TextRenderer::MeasureText(item, combo->Font).Width;
+			maxWidth = Math::Max(itemWidth, maxWidth);
+		}
 	}
 
-	combo->DropDownWidth = (maxWidth + SystemInformation::VerticalScrollBarWidth);
+	return maxWidth;
 }
-
