@@ -5747,24 +5747,27 @@ void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 	TDCCOLEDITVISIBILITY visPrev = m_visColEdit;
 	m_visColEdit = vis;
 
-	if (bColumnChange)
+	if (!IsDelayLoaded())
 	{
-		CTDCColumnIDMap mapChanges;
-		VERIFY(visPrev.GetVisibleColumns().GetDifferences(vis.GetVisibleColumns(), mapChanges));
+		if (bColumnChange)
+		{
+			CTDCColumnIDMap mapChanges;
+			VERIFY(visPrev.GetVisibleColumns().GetDifferences(vis.GetVisibleColumns(), mapChanges));
 
-		UpdateVisibleColumns(mapChanges);
-	}
+			UpdateVisibleColumns(mapChanges);
+		}
 		
-	// hide/show controls which may have been affected
-	if (bEditChange || (bColumnChange && (vis.GetShowFields() == TDLSA_ASCOLUMN)))
-	{		
-		Invalidate();
-		Resize();
-		UpdateControls(FALSE); // don't update comments
-	}
+		// hide/show controls which may have been affected
+		if (bEditChange || (bColumnChange && (vis.GetShowFields() == TDLSA_ASCOLUMN)))
+		{		
+			Invalidate();
+			Resize();
+			UpdateControls(FALSE); // don't update comments
+		}
 
-	if (bChange && HasStyle(TDCS_SAVEUIVISINTASKLIST))
-		m_bModified = TRUE;
+		if (bChange && HasStyle(TDCS_SAVEUIVISINTASKLIST))
+			m_bModified = TRUE;
+	}
 }
 
 void CToDoCtrl::GetColumnFieldVisibility(TDCCOLEDITVISIBILITY& vis) const
@@ -5837,8 +5840,8 @@ TDC_FILE CToDoCtrl::Save(CTaskFile& tasks/*out*/, const CString& sFilePath, BOOL
 	if (!GetSafeHwnd())
 		return TDCF_OTHER;
 
-	// can't save if file is readonly
-	if (CDriveInfo::IsReadonlyPath(sFilePath) > 0)
+	// can't save if file is readonly or delay-loaded
+	if (IsDelayLoaded() || (CDriveInfo::IsReadonlyPath(sFilePath) > 0))
 	{
 		return TDCF_NOTALLOWED;
 	}
@@ -6832,7 +6835,7 @@ void CToDoCtrl::SetModified(BOOL bMod)
 
 BOOL CToDoCtrl::IsModified() const 
 { 
-	if (IsReadOnly())
+	if (IsReadOnly() || IsDelayLoaded())
 		return FALSE;
 
 	if (m_bModified)
