@@ -1624,7 +1624,7 @@ BOOL CTDLTaskTreeCtrl::GetItemTitleRect(HTREEITEM hti, TDC_LABELRECT nArea, CRec
 	ASSERT(hti);
 
 	// basic title rect
-	m_tcTasks.GetItemRect(hti, rect, TRUE);
+	VERIFY(m_tcTasks.GetItemRect(hti, rect, TRUE));
 	int nHdrWidth = m_hdrTasks.GetItemWidth(0);
 
 	switch (nArea)

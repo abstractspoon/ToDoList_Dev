@@ -325,8 +325,9 @@ void CTreeCtrlHelper::GetClientRect(LPRECT lpRect, HTREEITEM htiFrom)
 	if (htiFrom)
 	{
 		CRect rItem;
-		m_tree.GetItemRect(htiFrom, rItem, FALSE);
-		lpRect->top = max(0, rItem.top); // rItem.top could be invisible
+
+		if (m_tree.GetItemRect(htiFrom, rItem, FALSE))
+			lpRect->top = max(0, rItem.top); // rItem.top could be invisible
 	}
 }
 
@@ -441,7 +442,7 @@ BOOL CTreeCtrlHelper::IsItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL bHo
 	CRect rItem;
     
 	if (!m_tree.GetItemRect(hti, rItem, TRUE))
-		return FALSE; // parent not expanded
+		return FALSE; 
 
 	CRect rClient, rIntersect;
 	m_tree.GetClientRect(rClient);
@@ -500,7 +501,9 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 		CRect rClient, rItem;
 		m_tree.GetClientRect(rClient);
 
-		m_tree.GetItemRect(hti, rItem, TRUE);
+		if (!m_tree.GetItemRect(hti, rItem, TRUE))
+			return;
+
 		rItem.DeflateRect(HVISIBLE, 0);
 
 		CRect rOrg(rItem);
@@ -512,7 +515,9 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 				m_tree.SendMessage(WM_HSCROLL, SB_LINELEFT);
 
 				// check for no change
-				m_tree.GetItemRect(hti, rItem, TRUE);
+				if (!m_tree.GetItemRect(hti, rItem, TRUE))
+					break;
+
 				rItem.DeflateRect(HVISIBLE, 0);
 
 				if (rItem == rOrg)
@@ -528,7 +533,9 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 				m_tree.SendMessage(WM_HSCROLL, SB_LINERIGHT);
 
 				// check for no change
-				m_tree.GetItemRect(hti, rItem, TRUE);
+				if (!m_tree.GetItemRect(hti, rItem, TRUE))
+					break;
+
 				rItem.DeflateRect(HVISIBLE, 0);
 
 				if (rItem == rOrg)
@@ -541,118 +548,6 @@ void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL
 
 	m_tree.UpdateWindow();
 }
-/*
-
-void CTreeCtrlHelper::EnsureItemVisible(HTREEITEM hti, BOOL bVertPartialOK, BOOL bHorzPartialOK)
-{
-	if (!hti)
-		return;
-
-	if (IsItemVisible(hti, bVertPartialOK, bHorzPartialOK, bVertVisible, bHorzVisible))
-		return;
-
-	CRect rItem;
-
-	if (m_tree.GetItemRect(hti, rItem, FALSE))
-	{
-		BOOL bVertVisible = FALSE, bHorzVisible = FALSE;
-
-		CRect rClient;
-		m_tree.GetClientRect(rClient);
-	
-		// vertical scroll
-		if (!bVertVisible)
-		{
-			// now get us as close as possible first
-			// Only use CTreeCtrl::EnsureVisible if we're not in the right vertical pos
-			// because it will also modify the horizontal pos which we don't want
-			m_tree.EnsureVisible(hti);
-			m_tree.GetItemRect(hti, rItem, FALSE);
-
-			CRect rOrg(rItem);
-			
-			if (rItem.top < rClient.top || (bVertPartialOK && rItem.bottom < rClient.top))
-			{
-				while (rClient.top > (bVertPartialOK ? rItem.bottom : rItem.top))
-				{
-					m_tree.SendMessage(WM_VSCROLL, SB_LINEUP);
-					m_tree.GetItemRect(hti, rItem, TRUE); // check again
-					
-					// check for no change
-					if (rItem == rOrg)
-						break;
-					
-					rOrg = rItem;
-				}
-			}
-			else if (rItem.bottom > rClient.bottom || (bVertPartialOK && rItem.top > rClient.bottom))
-			{
-				while (rClient.bottom < (bVertPartialOK ? rItem.top : rItem.bottom))
-				{
-					m_tree.SendMessage(WM_VSCROLL, SB_LINEDOWN);
-					m_tree.GetItemRect(hti, rItem, TRUE); // check again
-					
-					// check for no change
-					if (rItem == rOrg)
-						break;
-					
-					rOrg = rItem;
-				}
-			}
-			
-			bHorzVisible = FALSE;
-		}
-
-		// horizontal scroll
-		if (!bHorzVisible)
-		{
-			m_tree.GetItemRect(hti, rItem, TRUE);
-			rItem.DeflateRect(HVISIBLE, 0);
-
-			CRect rOrg(rItem);
-
-			if (rItem.left < rClient.left || (bHorzPartialOK && rItem.right < rClient.left))
-			{
-				while (rClient.left > (bHorzPartialOK ? rItem.right : rItem.left))
-				{
-					m_tree.SendMessage(WM_HSCROLL, SB_LINELEFT);
-
-					// check for no change
-					m_tree.GetItemRect(hti, rItem, TRUE);
-					rItem.DeflateRect(HVISIBLE, 0);
-
-					if (rItem == rOrg)
-						break;
-
-					rOrg = rItem;
-				}
-			}
-			else if (rItem.right > rClient.right || (bHorzPartialOK && rItem.left > rClient.right))
-			{
-				while (rClient.right < (bHorzPartialOK ? rItem.left : rItem.right))
-				{
-					m_tree.SendMessage(WM_HSCROLL, SB_LINERIGHT);
-
-					// check for no change
-					m_tree.GetItemRect(hti, rItem, TRUE);
-					rItem.DeflateRect(HVISIBLE, 0);
-
-					if (rItem == rOrg)
-						break;
-
-					rOrg = rItem;
-				}
-			}
-		}
-	}
-	else
-	{
-		m_tree.EnsureVisible(hti);
-	}
-
-	m_tree.UpdateWindow();
-}
-*/
 
 BOOL CTreeCtrlHelper::ItemLineIsOdd(HTREEITEM hti) const
 {
@@ -954,7 +849,9 @@ int CTreeCtrlHelper::GetPageCount() const
 		while (hti)
 		{
 			CRect rItem;
-			m_tree.GetItemRect(hti, rItem, FALSE);
+			
+			if (!m_tree.GetItemRect(hti, rItem, FALSE))
+				break;
 
 			if (rItem.bottom > rClient.bottom)
 				break;
