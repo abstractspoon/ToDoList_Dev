@@ -287,10 +287,17 @@ BOOL CDateTimeCtrlEx::OnCloseUp(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	
 	if (bCancel)
 	{
-		// just set the checkbox state if originally unset
 		if (!m_bWasSet)
+		{
+			// just clear the checkbox state if originally unset
 			SendMessage(DTM_SETSYSTEMTIME, GDT_NONE);
-	}
+		}
+		else if (m_nmdtcLast.st.wYear != 0)
+		{
+			// Restore original date
+			SetTime(&m_nmdtcLast.st);
+		}
+ 	}
 	else if (bSetDate)
 	{
 		// notify our parent of the last change
