@@ -45,8 +45,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">
-    <OutDir>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</OutDir>
-    <IntDir>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</IntDir>
+    <OutDir>$(SolutionDir)Core\$(ProjectName)\Unicode_Release\</OutDir>
+    <IntDir>$(SolutionDir)Core\$(ProjectName)\Unicode_Release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
@@ -64,10 +64,10 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</AssemblerListingLocation>
+      <AssemblerListingLocation>$(SolutionDir)Core\$(ProjectName)\Unicode_Release\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Unicode_Release\Interfaces.pch</PrecompiledHeaderOutputFile>
-      <ObjectFileName>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</ObjectFileName>
-      <ProgramDataBaseFileName>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\</ProgramDataBaseFileName>
+      <ObjectFileName>$(SolutionDir)Core\$(ProjectName)\Unicode_Release\</ObjectFileName>
+      <ProgramDataBaseFileName>$(SolutionDir)Core\$(ProjectName)\Unicode_Release\</ProgramDataBaseFileName>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0c09</Culture>
@@ -79,7 +79,7 @@
     </Bscmake>
     <Lib>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Release\Interfaces.lib</OutputFile>
+      <OutputFile>$(SolutionDir)Core\$(ProjectName)\Unicode_Release\Interfaces.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">
@@ -93,10 +93,10 @@
       <MinimalRebuild>true</MinimalRebuild>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</AssemblerListingLocation>
+      <AssemblerListingLocation>$(SolutionDir)Core\$(ProjectName)\Unicode_Debug\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\Unicode_Debug\Interfaces.pch</PrecompiledHeaderOutputFile>
-      <ObjectFileName>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</ObjectFileName>
-      <ProgramDataBaseFileName>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\</ProgramDataBaseFileName>
+      <ObjectFileName>$(SolutionDir)Core\$(ProjectName)\Unicode_Debug\</ObjectFileName>
+      <ProgramDataBaseFileName>$(SolutionDir)Core\$(ProjectName)\Unicode_Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
     </ClCompile>
     <ResourceCompile>
@@ -109,7 +109,7 @@
     </Bscmake>
     <Lib>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>$(SolutionDir)..\Core\$(ProjectName)\Unicode_Debug\Interfaces.lib</OutputFile>
+      <OutputFile>$(SolutionDir)Core\$(ProjectName)\Unicode_Debug\Interfaces.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
