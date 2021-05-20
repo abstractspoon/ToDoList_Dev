@@ -65,7 +65,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Shared.lib;3rdParty.lib;Interfaces.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)..\Core\3rdParty\Unicode_Debug;$(SolutionDir)..\Core\Shared\Unicode_Debug;$(SolutionDir)..\Core\Interfaces\Unicode_Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Core\3rdParty\Unicode_Debug;$(SolutionDir)Core\Shared\Unicode_Debug;$(SolutionDir)Core\Interfaces\Unicode_Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalOptions>/IGNORE:4248 %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <PostBuildEvent>
