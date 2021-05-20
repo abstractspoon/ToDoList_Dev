@@ -26,6 +26,7 @@ namespace CustomComboBox
 			m_ListBox.IntegralHeight = true;
 			m_ListBox.ItemCheck += new ItemCheckEventHandler(OnListItemCheck);
 			m_ListBox.MouseMove += new MouseEventHandler(OnListMouseMove);
+			m_ListBox.KeyDown += new KeyEventHandler(OnListKeyDown);
 
 			AllowResizeDropDown = false;
 			ControlSize = new Size(1, 1);
@@ -128,6 +129,15 @@ namespace CustomComboBox
 		private void OnListItemCheck(object sender, ItemCheckEventArgs e)
 		{
 			Invalidate();
+		}
+
+		private void OnListKeyDown(object sender, KeyEventArgs e)
+		{
+			if ((e.KeyCode == Keys.Enter) && IsDroppedDown)
+			{
+				e.Handled = true;
+				HideDropDown();
+			}
 		}
 
 		private void OnListMouseMove(object sender, MouseEventArgs e)
