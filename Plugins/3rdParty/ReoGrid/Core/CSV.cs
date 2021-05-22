@@ -123,7 +123,7 @@ namespace unvell.ReoGrid
 		/// <param name="bufferLines">decide how many lines int the buffer to read and fill csv data</param>
 		public void LoadCSV(Stream s, Encoding encoding, RangePosition targetRange, bool autoSpread, int bufferLines)
 		{
-			this.controlAdapter.ChangeCursor(CursorStyle.Busy);
+			this.controlAdapter?.ChangeCursor(CursorStyle.Busy);
 
 			try
 			{
@@ -142,7 +142,7 @@ namespace unvell.ReoGrid
 			}
 			finally
 			{
-				this.controlAdapter.ChangeCursor(CursorStyle.PlatformDefault);
+				this.controlAdapter?.ChangeCursor(CursorStyle.PlatformDefault);
 			}
 		}
 
@@ -273,20 +273,22 @@ namespace unvell.ReoGrid
 						var cell = this.GetCell(r, c);
 						if (cell == null || !cell.IsValidCell)
 						{
-							sb.Append(',');
 							c++;
 						}
 						else
 						{
 							var data = cell.Data;
-							string str = null;
 							bool quota = false;
-
+							string str;
+							
 							if (data is string)
 							{
 								str = (string)data;
 
-								if (str.IndexOf('"') >= 0)
+								if (!string.IsNullOrEmpty(str)
+									&& (cell.DataFormat == CellDataFormatFlag.Text
+									|| str.IndexOf(',') >= 0 || str.IndexOf('"') >= 0
+									|| str.StartsWith(" ") || str.EndsWith(" ")))
 								{
 									quota = true;
 								}
@@ -296,18 +298,10 @@ namespace unvell.ReoGrid
 								str = Convert.ToString(data);
 							}
 
-							if (!quota)
-							{
-								if (cell.DataFormat == CellDataFormatFlag.Text)
-								{
-									quota = true;
-								}
-							}
-
 							if (quota)
 							{
 								sb.Append('"');
-								sb.Append(str);
+								sb.Append(str.Replace("\"", "\"\""));
 								sb.Append('"');
 							}
 							else

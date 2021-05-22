@@ -259,8 +259,8 @@ namespace unvell.ReoGrid.Views
 
 		public override Point PointToView(Point p)
 		{
-			return new Point(p.X + (ViewLeft * this.scaleFactor - bounds.X),
-				p.Y + (ViewTop * this.scaleFactor - bounds.Y));
+			return new Point(p.X + (ScrollViewLeft * this.scaleFactor - bounds.X),
+				p.Y + (ScrollViewTop * this.scaleFactor - bounds.Y));
 		}
 
 		#region Mouse

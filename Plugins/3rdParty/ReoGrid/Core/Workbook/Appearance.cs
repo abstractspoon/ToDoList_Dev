@@ -28,10 +28,6 @@ using unvell.ReoGrid.Utility;
 namespace unvell.ReoGrid
 {
 	#region Appearance
-	[Obsolete("use ControlAppearanceColors instead")]
-	public enum ReoGridControlColors
-	{
-	}
 
 	/// <summary>
 	/// Key of control appearance item
@@ -99,16 +95,10 @@ namespace unvell.ReoGrid
 	/// <summary>
 	/// ReoGrid Control Appearance Colors
 	/// </summary>
-	//[Obsolete("use ControlAppearanceStyle instead")]
-	public sealed class ReoGridControlStyle : ControlAppearanceStyle
-	{
-	}
-
-	/// <summary>
-	/// ReoGrid Control Appearance Colors
-	/// </summary>
 	public class ControlAppearanceStyle
 	{
+		internal ReoGridControl CurrentControl { get; set; }
+
 		private Dictionary<ControlAppearanceColors, SolidColor> colors = new Dictionary<ControlAppearanceColors, SolidColor>(100);
 
 		internal Dictionary<ControlAppearanceColors, SolidColor> Colors
@@ -136,6 +126,7 @@ namespace unvell.ReoGrid
 		public void SetColor(ControlAppearanceColors colorKey, SolidColor color)
 		{
 			colors[colorKey] = color;
+			this.CurrentControl?.ApplyControlStyle();
 		}
 
 		/// <summary>
@@ -153,7 +144,10 @@ namespace unvell.ReoGrid
 				else
 					return SolidColor.Black;
 			}
-			set { SetColor(colorKey, value); }
+			set
+			{
+				SetColor(colorKey, value);
+			}
 		}
 
 		/// <summary>

@@ -48,6 +48,7 @@ namespace unvell.ReoGrid
 		private IRenderer renderer;
 
 		#region Initialize
+
 		private void InitControl()
 		{
 			// initialize cursors
@@ -66,7 +67,7 @@ namespace unvell.ReoGrid
 
 			this.builtInCrossCursor = LoadCursorFromResource(unvell.ReoGrid.Properties.Resources.cross);
 
-			this.controlStyle = ControlAppearanceStyle.CreateDefaultControlStyle();
+			this.ControlStyle = ControlAppearanceStyle.CreateDefaultControlStyle();
 		}
 
 		private void InitWorkbook(IControlAdapter adapter)
@@ -144,13 +145,10 @@ namespace unvell.ReoGrid
 					HideVerScrollBar();
 				}
 
-				if (this.SettingsChanged != null)
-				{
-					this.SettingsChanged(this, null);
-				}
+				this.SettingsChanged?.Invoke(this, null);
 			};
 
-			this.workbook.ExceptionHappened += workbook_ErrorHappened;
+			this.workbook.ExceptionHappened += Workbook_ErrorHappened;
 
 			#endregion // Workbook Event Attach
 
@@ -408,10 +406,7 @@ namespace unvell.ReoGrid
 						scrollableViewportController.SynchronizeScrollBar();
 					}
 
-					if (this.CurrentWorksheetChanged != null)
-					{
-						this.CurrentWorksheetChanged(this, null);
-					}
+					this.CurrentWorksheetChanged?.Invoke(this, null);
 
 					this.sheetTab.SelectedIndex = GetWorksheetIndex(this.currentWorksheet);
 					this.sheetTab.ScrollToItem(this.sheetTab.SelectedIndex);
@@ -804,7 +799,7 @@ namespace unvell.ReoGrid
 					}
 				}
 
-				if (Undid != null) Undid(this, new WorkbookActionEventArgs(action));
+				Undid?.Invoke(this, new WorkbookActionEventArgs(action));
 			}
 		}
 
@@ -932,9 +927,6 @@ namespace unvell.ReoGrid
 		public void ClearActionHistoryForWorksheet(Worksheet sheet)
 		{
 			List<IUndoableAction> undoActions = this.actionManager.UndoStack;
-
-			int totalActions = 0;
-
 			for (int i = 0; i < undoActions.Count;)
 			{
 				var action = undoActions[i];
@@ -950,8 +942,7 @@ namespace unvell.ReoGrid
 				i++;
 			}
 
-			totalActions = undoActions.Count;
-
+			int totalActions = undoActions.Count;
 			var redoActions = new List<IUndoableAction>(this.actionManager.RedoStack);
 
 			for (int i = 0; i < redoActions.Count;)
@@ -1110,12 +1101,9 @@ namespace unvell.ReoGrid
 		/// </summary>
 		public event EventHandler<ExceptionHappenEventArgs> ExceptionHappened;
 
-		void workbook_ErrorHappened(object sender, ExceptionHappenEventArgs e)
+		void Workbook_ErrorHappened(object sender, ExceptionHappenEventArgs e)
 		{
-			if (this.ExceptionHappened != null)
-			{
-				this.ExceptionHappened(this, e);
-			}
+			this.ExceptionHappened?.Invoke(this, e);
 		}
 
 		/// <summary>
@@ -1252,14 +1240,25 @@ namespace unvell.ReoGrid
 				if (value == null)
 					throw new ArgumentNullException("ControlStyle", "cannot set ControlStyle to null");
 
-				this.controlStyle = value;
+				if (this.controlStyle != value)
+				{
+					if (this.controlStyle != null) this.controlStyle.CurrentControl = null;
+					this.controlStyle = value;
+				}
 				//workbook.SetControlStyle(value);
 
-				this.adapter.Invalidate();
-
-				sheetTab.BackColor = value[ControlAppearanceColors.SheetTabBackground];
-				this.BackColor = value[ControlAppearanceColors.GridBackground];
+				this.ApplyControlStyle();
 			}
+		}
+
+		internal void ApplyControlStyle()
+		{
+			this.controlStyle.CurrentControl = this;
+
+			sheetTab.BackColor = this.controlStyle[ControlAppearanceColors.SheetTabBackground];
+			this.BackColor = this.controlStyle[ControlAppearanceColors.GridBackground];
+
+			this.adapter?.Invalidate();
 		}
 		#endregion // App
 
@@ -1281,10 +1280,7 @@ namespace unvell.ReoGrid
 					}
 				}
 
-				if (sheet.ViewportController != null)
-				{
-					sheet.ViewportController.OnMouseDown(location, buttons);
-				}
+				sheet.ViewportController?.OnMouseDown(location, buttons);
 			}
 		}
 
@@ -1390,6 +1386,7 @@ namespace unvell.ReoGrid
 				if (svc != null)
 				{
 					svc.ScrollViews(ScrollDirection.Both, offsetX, offsetY);
+					svc.SynchronizeScrollBar();
 				}
 			}
 		}

@@ -259,7 +259,7 @@ namespace unvell.ReoGrid.Editor
 							this.CurrentWorksheet.ExportAsHTML(fs);
 						}
 
-						Process.Start(sfd.FileName);
+						RGUtility.OpenFileOrLink(sfd.FileName);
 					}
 				}
 			};
@@ -300,7 +300,7 @@ namespace unvell.ReoGrid.Editor
 					this.CurrentWorksheet.Save(fs);
 				}
 
-				Process p = Process.Start("notepad.exe", filepath);
+				Process p = RGUtility.OpenFileOrLink("notepad.exe", filepath);
 				p.WaitForExit();
 
 				if (p.ExitCode == 0)
@@ -668,7 +668,6 @@ namespace unvell.ReoGrid.Editor
 
 					Cursor = Cursors.Default;
 
-//					runFuncForm.ShowDialog(this);
 					ShowDialog(runFuncForm);
 				}
 			};
@@ -686,7 +685,7 @@ namespace unvell.ReoGrid.Editor
 			{
 				try
 				{
-					Process.Start(LangResource.HP_Homepage);
+					RGUtility.OpenFileOrLink(LangResource.HP_Homepage);
 				}
 				catch { }
 			};
@@ -695,7 +694,7 @@ namespace unvell.ReoGrid.Editor
 			{
 				try
 				{
-					Process.Start(LangResource.HP_Homepage_Document);
+					RGUtility.OpenFileOrLink(LangResource.HP_Homepage_Document);
 				}
 				catch { }
 			};
@@ -822,7 +821,7 @@ namespace unvell.ReoGrid.Editor
 					}
 
 #if DEBUG
-					Process.Start(dlg.FileName);
+					RGUtility.OpenFileOrLink(dlg.FileName);
 #endif
 				}
 			};
@@ -915,7 +914,10 @@ namespace unvell.ReoGrid.Editor
 
 			var menuItem = sender as ToolStripMenuItem;
 
-			if (menuItem != null && menuItem.Tag is Type && worksheet != null)
+			if (menuItem != null && 
+				menuItem.Tag is Type && 
+				worksheet != null && 
+				!worksheet.SelectionRange.IsEmpty)
 			{
 				foreach (var cell in worksheet.Ranges[worksheet.SelectionRange].Cells)
 				{
@@ -1695,7 +1697,7 @@ namespace unvell.ReoGrid.Editor
 				this.SetCurrentDocumentFile(path);
 
 #if DEBUG
-				Process.Start(path);
+				RGUtility.OpenFileOrLink(path);
 #endif
 			}
 			catch (Exception ex)

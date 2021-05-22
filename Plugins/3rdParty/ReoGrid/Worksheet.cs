@@ -907,7 +907,7 @@ namespace unvell.ReoGrid
 				InternalCol = col,
 				Colspan = 1,
 				Rowspan = 1,
-				Bounds = GetGridBounds(row, col),
+				Bounds = GetCellRectFromHeader(row, col),
 			};
 
 			StyleUtility.UpdateCellParentStyle(this, cell);
@@ -1192,41 +1192,6 @@ namespace unvell.ReoGrid
 		public bool IsCellVisible(int row, int col)
 		{
 			return IsRowVisible(row) && IsColumnVisible(col);
-		}
-
-		/// <summary>
-		/// Check whether a cell is on hidden row or column.
-		/// </summary>
-		/// <param name="cell">Instance of cell to be checked.</param>
-		/// <returns>True if the cell is on hidden row or column.</returns>
-		[Obsolete("use !IsCellVisible instead")]
-		public bool IsHiddenCell(Cell cell)
-		{
-			if (cell == null) return false;
-			return IsHiddenCell(cell.InternalPos);
-		}
-
-		/// <summary>
-		/// Check whether a cell is on hidden row or column.
-		/// </summary>
-		/// <param name="pos">Position of cell to be checked.</param>
-		/// <returns>True if the cell is on hidden row or column.</returns>
-		[Obsolete("use !IsCellVisible instead")]
-		public bool IsHiddenCell(CellPosition pos)
-		{
-			return IsHiddenCell(pos.Row, pos.Col);
-		}
-
-		/// <summary>
-		/// Check whether a cell is on hidden row or column.
-		/// </summary>
-		/// <param name="row">Number of row to be checked.</param>
-		/// <param name="col">Number of column to be checked.</param>
-		/// <returns>True if the cell is on hidden row or column.</returns>
-		[Obsolete("use !IsCellVisible instead")]
-		public bool IsHiddenCell(int row, int col)
-		{
-			return IsHiddenRow(row) || IsHiddenColumn(col);
 		}
 
 		/// <summary>

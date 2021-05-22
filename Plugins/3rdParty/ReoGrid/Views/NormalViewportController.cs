@@ -1095,7 +1095,7 @@ namespace unvell.ReoGrid.Views
 			//this.FreezeArea = position;
 
 			// origin freeze-viewports 
-			Rectangle gridLoc = worksheet.GetGridBounds(row, col);
+			Rectangle gridLoc = worksheet.GetCellBounds(row, col);
 
 			if (row == 0 && col == 0)
 			{
