@@ -25,7 +25,7 @@ namespace HTMLContentControl
 		// --------------------------------------------------------------------------------------
 
 		// For implementing static watermark images
-		static HashSet<HTMLContentControlCore> s_CtrlList = new HashSet<HTMLContentControlCore>();
+		static HashSet<HTMLContentControlCore> s_CoreList = new HashSet<HTMLContentControlCore>();
 
 		// --------------------------------------------------------------------------------------
 
@@ -42,10 +42,10 @@ namespace HTMLContentControl
 			m_HtmlEditControl = new TDLHtmlEditorControl(m_ControlsFont, m_Trans);
 			m_PrefsDlg = new HTMLPreferencesDlg(m_ControlsFont, m_Trans);
 
-			if (s_CtrlList.Count > 0)
-				UpdateWatermark(s_CtrlList.First().m_PrefsDlg);
+			if (s_CoreList.Count > 0)
+				UpdateWatermark(s_CoreList.First().m_PrefsDlg);
 
-			s_CtrlList.Add(this);
+			s_CoreList.Add(this);
 
 			InitializeComponent();
 		}
@@ -137,8 +137,8 @@ namespace HTMLContentControl
 
 				m_PrefsDlg.LoadPreferences(prefs, key);
 
-				if (s_CtrlList.Count > 1)
-					UpdateWatermark(s_CtrlList.First().m_PrefsDlg);
+				if (s_CoreList.Count > 1)
+					UpdateWatermark(s_CoreList.First().m_PrefsDlg);
 				else
 					UpdateControlPreferences();
 			}
@@ -158,7 +158,7 @@ namespace HTMLContentControl
 		{
 			base.OnHandleDestroyed(e);
 
-			s_CtrlList.Remove(this);
+			s_CoreList.Remove(this);
 		}
 
 		protected override void OnGotFocus(EventArgs e)
@@ -257,7 +257,7 @@ namespace HTMLContentControl
 				if ((m_PrefsDlg.WatermarkPath != curWatermark) ||
 					(m_PrefsDlg.WatermarkEnabled != curEnabled))
 				{
-					foreach (var ctrl in s_CtrlList)
+					foreach (var ctrl in s_CoreList)
 						ctrl.UpdateWatermark(m_PrefsDlg);
 				}
 				else
