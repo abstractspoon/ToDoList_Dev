@@ -54,6 +54,7 @@ namespace PDFExporter
 		private BaseFont m_BaseFont;
 		private float m_BaseFontSize;
 		private StyleSheet m_ParseStyles;
+		private string m_WatermarkImagePath;
 
 		// --------------------------------------------------------------------------------------
 
@@ -84,27 +85,31 @@ namespace PDFExporter
 			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
 
 			var htmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
-			var defaultInstalledFontFile = PDFExporterForm.GetFileNameFromFont(htmlFont);
+			var defaultInstalledFontFile = PDFExporterOptionsForm.GetFileNameFromFont(htmlFont);
 
 			if (string.IsNullOrEmpty(installedFontFile))
 				installedFontFile = defaultInstalledFontFile;
 
-			var fontDlg = new PDFExporterForm(installedFontFile, otherFontFile, useOtherFont);
+			var bkgndImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "");
 
-			if (!silent && (fontDlg.ShowDialog() == DialogResult.Cancel))
+			var optionsDlg = new PDFExporterOptionsForm(installedFontFile, otherFontFile, useOtherFont, bkgndImagePath);
+
+			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
 				return false;
 
 			// Clear the installed font setting if it's the same 
 			// as the default so changes to the default will be picked up
-			if (string.Compare(fontDlg.InstalledFontPath, defaultInstalledFontFile, true) == 0)
+			if (string.Compare(optionsDlg.InstalledFontPath, defaultInstalledFontFile, true) == 0)
 				prefs.DeleteProfileEntry(sKey, "InstalledFontFile");
 			else
-				prefs.WriteProfileString(sKey, "InstalledFontFile", fontDlg.InstalledFontPath);
+				prefs.WriteProfileString(sKey, "InstalledFontFile", optionsDlg.InstalledFontPath);
 
-			prefs.WriteProfileString(sKey, "OtherFontFile", fontDlg.OtherFontPath);
-			prefs.WriteProfileBool(sKey, "UseOtherFont", fontDlg.UseOtherFont);
+			prefs.WriteProfileString(sKey, "OtherFontFile", optionsDlg.OtherFontPath);
+			prefs.WriteProfileBool(sKey, "UseOtherFont", optionsDlg.UseOtherFont);
+			prefs.WriteProfileString(sKey, "BkgndImagePath", optionsDlg.WatermarkImagePath);
 
-			m_BaseFont = BaseFont.CreateFont(fontDlg.SelectedFontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+			m_BaseFont = BaseFont.CreateFont(optionsDlg.SelectedFontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+			m_WatermarkImagePath = optionsDlg.WatermarkImagePath;
 
 			// Build attribute list
 			m_AvailAttributes = new List<TaskAttribute>();
@@ -177,12 +182,41 @@ namespace PDFExporter
 			return true;
 		}
 
+		public class PDFBackgroundImage : IPdfPageEvent
+		{
+			private Image m_WatermarkImage;
+
+			public PDFBackgroundImage(string imagePath)
+			{
+				m_WatermarkImage = Image.GetInstance(imagePath);
+			}
+
+			public void OnChapter(PdfWriter writer, Document document, float paragraphPosition, Paragraph title) { }
+			public void OnChapterEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+			public void OnCloseDocument(PdfWriter writer, Document document) { }
+			public void OnGenericTag(PdfWriter writer, Document document, Rectangle rect, string text) { }
+			public void OnOpenDocument(PdfWriter writer, Document document) { }
+			public void OnParagraph(PdfWriter writer, Document document, float paragraphPosition) { }
+			public void OnParagraphEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+			public void OnSection(PdfWriter writer, Document document, float paragraphPosition, int depth, Paragraph title) { }
+			public void OnSectionEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+			public void OnStartPage(PdfWriter writer, Document document) { }
+
+			public void OnEndPage(PdfWriter writer, Document document)
+			{
+				m_WatermarkImage.SetAbsolutePosition(0, document.PageSize.Height - m_WatermarkImage.Height);
+
+				writer.DirectContentUnder.AddImage(m_WatermarkImage, false/*m_BkgndImage.Width, 0, 0, m_BkgndImage.Height, 0, 0*/);
+			}
+		}
 
 		private byte[] CreatePDFDocument(TaskList tasks)
 		{
 			MemoryStream workStream = new MemoryStream();
 			Document pdfDoc = new Document(PageSize.A4);
-			PdfWriter.GetInstance(pdfDoc, workStream).CloseStream = false;
+			PdfWriter pdfWriter = PdfWriter.GetInstance(pdfDoc, workStream);
+			pdfWriter.CloseStream = false;
+			pdfWriter.PageEvent = new PDFBackgroundImage(m_WatermarkImagePath);
 			HTMLWorker parser = new HTMLWorker(pdfDoc);
 
 			pdfDoc.Open();

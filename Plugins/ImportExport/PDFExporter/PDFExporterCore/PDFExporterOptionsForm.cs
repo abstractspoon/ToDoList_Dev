@@ -14,9 +14,9 @@ using Microsoft.Win32;
 
 namespace PDFExporter
 {
-	public partial class PDFExporterForm : Form
+	public partial class PDFExporterOptionsForm : Form
 	{
-		public PDFExporterForm(string installedFontPath, string otherFontPath, bool useOtherFont)
+		public PDFExporterOptionsForm(string installedFontPath, string otherFontPath, bool useOtherFont, string bkgndImagePath)
 		{
 			InitializeComponent();
 
@@ -27,6 +27,7 @@ namespace PDFExporter
 			editOtherFont.Enabled = useOtherFont;
 			editOtherFont.Text = otherFontPath;
 			btnBrowseOtherFont.Enabled = useOtherFont;
+			editWatermarkImage.Text = bkgndImagePath;
 
 			UpdateOKButton();
 		}
@@ -47,6 +48,7 @@ namespace PDFExporter
 		public string OtherFontPath { get { return editOtherFont.Text; } }
 		public bool UseOtherFont { get { return (checkOtherFont.Checked && !string.IsNullOrWhiteSpace(OtherFontPath)); } }
 		public string SelectedFontPath { get { return (UseOtherFont ? OtherFontPath : InstalledFontPath); } }
+		public string WatermarkImagePath { get { return editWatermarkImage.Text; } }
 
 		private class FontItem
 		{
@@ -215,6 +217,25 @@ namespace PDFExporter
 		private void UpdateOKButton()
 		{
 			btnOK.Enabled = (!UseOtherFont || File.Exists(editOtherFont.Text));
+		}
+
+		private void OnBrowseWatermarkImage(object sender, EventArgs e)
+		{
+			var dlg = new OpenFileDialog
+			{
+				Title = this.Text,
+
+				AutoUpgradeEnabled = true,
+				CheckFileExists = true,
+				CheckPathExists = true,
+				Filter = MSDN.Html.Editor.EnterImageForm.ImageFilter,
+				FilterIndex = 0,
+			};
+
+			if (dlg.ShowDialog() == DialogResult.OK)
+			{
+				editWatermarkImage.Text = dlg.FileName;
+			}
 		}
 	}
 }
