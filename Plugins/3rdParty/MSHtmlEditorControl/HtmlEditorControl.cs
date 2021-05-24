@@ -1589,6 +1589,8 @@ namespace MSDN.Html.Editor
 						bodyStyle.backgroundImage = String.Empty;
 					else
 						bodyStyle.backgroundImage = String.Format("url({0})", value);
+
+					bodyStyle.backgroundRepeat = "no-repeat";
 				}
             }
 
