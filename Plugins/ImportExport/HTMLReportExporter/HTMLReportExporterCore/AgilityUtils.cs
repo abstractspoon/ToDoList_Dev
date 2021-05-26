@@ -5,7 +5,7 @@ using System.Text;
 
 namespace HTMLReportExporter
 {
-	class AgilityUtils
+	public class AgilityUtils
 	{
 		public static HtmlAgilityPack.HtmlNode FindElement(HtmlAgilityPack.HtmlNode elm, string name, bool recursive = true)
 		{
@@ -17,7 +17,7 @@ namespace HTMLReportExporter
 			if (elm == null)
 				return null;
 
-			if (elm.Name.ToUpper().Equals(name))
+			if (elm.Name.Equals(name, StringComparison.InvariantCultureIgnoreCase))
 			{
 				if (String.IsNullOrEmpty(contents) || elm.InnerText.Contains(contents))
 					return elm;
