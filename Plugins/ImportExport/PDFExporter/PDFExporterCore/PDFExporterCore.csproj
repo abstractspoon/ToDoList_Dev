@@ -42,8 +42,16 @@
     </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="iTextSharp">
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\..\..\3rdParty\HtmlAgilityPack\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="iTextSharp, Version=5.5.13.2, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\3rdParty\iText\iTextSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp.xmlworker, Version=5.5.13.2, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\3rdParty\iText\itextsharp.xmlworker.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -102,7 +110,10 @@ mkdir "$(SolutionDir)..\Core\ToDoList"
 mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
-copy $(SolutionDir)3rdParty\iText\iTextSharp.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"</PostBuildEvent>
+copy $(SolutionDir)3rdParty\iText\iTextSharp.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(SolutionDir)3rdParty\iText\iTextSharp.XmlWorker.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+copy $(SolutionDir)3rdParty\iText\BouncyCastle.Crypto.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

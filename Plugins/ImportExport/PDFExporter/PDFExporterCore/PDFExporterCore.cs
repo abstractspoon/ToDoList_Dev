@@ -8,13 +8,10 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.Net;
 
-using iTextSharp;
 using iTextSharp.text;
-using iTextSharp.text.html;
-using iTextSharp.text.html.simpleparser;
 using iTextSharp.text.pdf;
-using MSDN.Html.Editor;
 
+using MSDN.Html.Editor;
 using Abstractspoon.Tdl.PluginHelpers;
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +50,7 @@ namespace PDFExporter
 
 		private BaseFont m_BaseFont;
 		private float m_BaseFontSize;
-		private StyleSheet m_ParseStyles;
+		private string m_ParseStyles;
 		private string m_WatermarkImagePath;
 
 		// --------------------------------------------------------------------------------------
@@ -66,11 +63,7 @@ namespace PDFExporter
 
 			m_BaseFont = BaseFont.CreateFont();
 			m_BaseFontSize = 10f;
-			m_ParseStyles = new StyleSheet();
-
-			// m_ParseStyles.LoadTagStyle("h2", HtmlTags.HORIZONTALALIGN, "center");
-			// m_ParseStyles.LoadTagStyle("h2", HtmlTags.COLOR, "#F90");
-			// m_ParseStyles.LoadTagStyle("pre", "size", "10pt");
+			m_ParseStyles = "";
 		}
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
@@ -182,34 +175,6 @@ namespace PDFExporter
 			return true;
 		}
 
-		public class PDFBackgroundImage : IPdfPageEvent
-		{
-			private Image m_WatermarkImage;
-
-			public PDFBackgroundImage(string imagePath)
-			{
-				m_WatermarkImage = Image.GetInstance(imagePath);
-			}
-
-			public void OnChapter(PdfWriter writer, Document document, float paragraphPosition, Paragraph title) { }
-			public void OnChapterEnd(PdfWriter writer, Document document, float paragraphPosition) { }
-			public void OnCloseDocument(PdfWriter writer, Document document) { }
-			public void OnGenericTag(PdfWriter writer, Document document, Rectangle rect, string text) { }
-			public void OnOpenDocument(PdfWriter writer, Document document) { }
-			public void OnParagraph(PdfWriter writer, Document document, float paragraphPosition) { }
-			public void OnParagraphEnd(PdfWriter writer, Document document, float paragraphPosition) { }
-			public void OnSection(PdfWriter writer, Document document, float paragraphPosition, int depth, Paragraph title) { }
-			public void OnSectionEnd(PdfWriter writer, Document document, float paragraphPosition) { }
-			public void OnStartPage(PdfWriter writer, Document document) { }
-
-			public void OnEndPage(PdfWriter writer, Document document)
-			{
-				m_WatermarkImage.SetAbsolutePosition(0, document.PageSize.Height - m_WatermarkImage.Height);
-
-				writer.DirectContentUnder.AddImage(m_WatermarkImage, false/*m_BkgndImage.Width, 0, 0, m_BkgndImage.Height, 0, 0*/);
-			}
-		}
-
 		private byte[] CreatePDFDocument(TaskList tasks)
 		{
 			MemoryStream workStream = new MemoryStream();
@@ -217,7 +182,6 @@ namespace PDFExporter
 			PdfWriter pdfWriter = PdfWriter.GetInstance(pdfDoc, workStream);
 			pdfWriter.CloseStream = false;
 			pdfWriter.PageEvent = new PDFBackgroundImage(m_WatermarkImagePath);
-			HTMLWorker parser = new HTMLWorker(pdfDoc);
 
 			pdfDoc.Open();
 
@@ -239,6 +203,39 @@ namespace PDFExporter
 			return byteInfo;
 		}
 
+		public class PDFBackgroundImage : IPdfPageEvent
+		{
+			private Image m_WatermarkImage = null;
+
+			public PDFBackgroundImage(string imagePath)
+			{
+				if (!string.IsNullOrWhiteSpace(imagePath))
+					m_WatermarkImage = Image.GetInstance(imagePath);
+			}
+
+			public void OnChapter(PdfWriter writer, Document document, float paragraphPosition, Paragraph title) { }
+			public void OnChapterEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+			public void OnCloseDocument(PdfWriter writer, Document document) { }
+			public void OnGenericTag(PdfWriter writer, Document document, Rectangle rect, string text) { }
+			public void OnOpenDocument(PdfWriter writer, Document document) { }
+			public void OnParagraph(PdfWriter writer, Document document, float paragraphPosition) { }
+			public void OnParagraphEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+			public void OnSection(PdfWriter writer, Document document, float paragraphPosition, int depth, Paragraph title) { }
+			public void OnSectionEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+			public void OnStartPage(PdfWriter writer, Document document) { }
+
+			public void OnEndPage(PdfWriter writer, Document document)
+			{
+				if (m_WatermarkImage != null)
+				{
+					// top-left corner
+					m_WatermarkImage.SetAbsolutePosition(0, document.PageSize.Height - m_WatermarkImage.Height);
+
+					writer.DirectContentUnder.AddImage(m_WatermarkImage, false);
+				}
+			}
+		}
+
 		private String GetTitle(Task task)
 		{
 			if (m_WantPosition)
@@ -250,48 +247,46 @@ namespace PDFExporter
 
 		private Paragraph CreateTitleElement(Task task)
 		{
-			var font = new Font(m_BaseFont, 16, Font.NORMAL, new Color(task.GetTextDrawingColor()));
+			var font = new Font(m_BaseFont, 16, Font.NORMAL, new BaseColor(task.GetTextDrawingColor()));
 
 			return new Paragraph(GetTitle(task), font);
 		}
 
 		private void AddContent(string html, Section section)
 		{
-			foreach (IElement element in HTMLWorker.ParseToList(new StringReader(html), m_ParseStyles))
+			html = ValidateHtmlInput(html);
+			var elements = iTextSharp.tool.xml.XMLWorkerHelper.ParseToElementList(html, m_ParseStyles);
+
+			foreach (IElement element in elements)
+				section.Add(element);
+		}
+
+		static string ValidateHtmlInput(string htmlInput)
+		{
+			var htmlDoc = new HtmlAgilityPack.HtmlDocument()
+				{
+					OptionAutoCloseOnEnd = true,
+					OptionFixNestedTags = true,
+					OptionWriteEmptyNodes = true
+				};
+
+			htmlDoc.LoadHtml(htmlInput);
+
+			// Remove comment nodes
+			var comments = htmlDoc.DocumentNode.SelectNodes("//comment()");
+
+			if (comments != null)
 			{
-				if (element.IsContent())
-				{
-					var para = new Paragraph();
-
-					foreach (var obj in element.Chunks)
-					{
-						var chunk = (obj as Chunk);
-
-						if (chunk != null)
-						{
-							var font = chunk.Font;
-
-							if (font == null)
-								font = new Font(m_BaseFont, m_BaseFontSize);
-							else
-								font = new Font(m_BaseFont, font.Size, font.Style, font.Color);
-
-							chunk.Font = font;
-							para.Add(chunk);
-						}
-						else
-						{
-							para.Add(obj);
-						}
-					}
-
-					section.Add(para);
-				}
-				else
-				{
-					section.Add(element);
-				}
+				foreach (var node in comments)
+					node.Remove();
 			}
+
+			if (htmlDoc.DocumentNode.SelectNodes("child::*") != null)
+				htmlInput = htmlDoc.DocumentNode.WriteTo();
+			else
+				htmlInput = string.Format("<span>{0}</span>", htmlInput);
+
+			return htmlInput;
 		}
 
 		private Section CreateSection(Task task, Section parent)

@@ -102,6 +102,8 @@ REM - All other components
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.XmlWorker.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\BouncyCastle.Crypto.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
