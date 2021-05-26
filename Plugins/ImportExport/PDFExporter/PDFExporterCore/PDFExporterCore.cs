@@ -247,7 +247,11 @@ namespace PDFExporter
 
 		private Paragraph CreateTitleElement(Task task)
 		{
-			var font = new Font(m_BaseFont, 16, Font.NORMAL, new BaseColor(task.GetTextDrawingColor()));
+			var font = new Font(m_BaseFont, 24f);
+			var color = task.GetTextDrawingColor();
+
+			if (!color.IsEmpty)
+				font.Color = new BaseColor(color);
 
 			return new Paragraph(GetTitle(task), font);
 		}
