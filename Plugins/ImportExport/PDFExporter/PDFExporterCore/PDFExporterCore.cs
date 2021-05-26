@@ -333,11 +333,17 @@ namespace PDFExporter
 
                 if (String.IsNullOrWhiteSpace(html))
                 {
+					// Text comments
                     html = WebUtility.HtmlEncode(task.GetComments());
-                    html = html.Replace("\n", "<br>");
-                }
 
-                if (!String.IsNullOrWhiteSpace(html))
+					if (!String.IsNullOrWhiteSpace(html))
+					{
+						html = html.Replace("\n", "<br>");
+						html = string.Format("<span>{0}</span>", html);
+					}
+				}
+
+				if (!String.IsNullOrWhiteSpace(html))
                 {
 					// Add spacer before comments
 					section.Add(Chunk.NEWLINE);
