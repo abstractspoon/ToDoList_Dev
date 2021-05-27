@@ -247,22 +247,64 @@ namespace PDFExporter
 
 		private Paragraph CreateTitleElement(Task task)
 		{
-			var font = new Font(m_BaseFont, 24f);
+			var font = new Font(m_BaseFont, (m_BaseFontSize * 1.5f));
 			var color = task.GetTextDrawingColor();
 
 			if (!color.IsEmpty)
 				font.Color = new BaseColor(color);
 
-			return new Paragraph(GetTitle(task), font);
+			var chunk = new Chunk(GetTitle(task), font);
+			chunk.setLineHeight(font.Size);
+
+			return new Paragraph(chunk);
 		}
 
-		private void AddContent(string html, Section section)
+		private void AddContent(string html, Section section, bool wantFont)
 		{
 			html = ValidateHtmlInput(html);
 			var elements = iTextSharp.tool.xml.XMLWorkerHelper.ParseToElementList(html, m_ParseStyles);
 
 			foreach (IElement element in elements)
+			{
+				if (element.IsContent())
+				{
+					foreach (var chunk in element.Chunks)
+					{
+						if ((chunk.Attributes != null) && !chunk.Attributes.ContainsKey(Chunk.IMAGE))
+						{
+							var fontSize = chunk.Font.Size;
+
+							if (wantFont)
+							{
+								var fontFamily = chunk.Font.Family;
+								var fontStyle = chunk.Font.Style;
+								var fontColor = chunk.Font.Color;
+
+								if (fontFamily == Font.FontFamily.UNDEFINED)
+								{
+									if (fontColor == null)
+										fontColor = BaseColor.BLACK;
+
+									if (fontSize <= 0f)
+										fontSize = m_BaseFontSize;
+
+									if (fontStyle < 0)
+										fontStyle = Font.NORMAL;
+
+									chunk.Font = new Font(m_BaseFont, fontSize, fontStyle, fontColor);
+								}
+							}
+
+							if (!chunk.Attributes.ContainsKey(Chunk.LINEHEIGHT))
+							{
+								chunk.setLineHeight(fontSize);
+							}
+						}
+					}
+				}
+
 				section.Add(element);
+			}
 		}
 
 		static string ValidateHtmlInput(string htmlInput)
@@ -330,6 +372,7 @@ namespace PDFExporter
             if (m_WantComments)
             {
                 string html = task.GetHtmlComments();
+				bool wantFont = false;
 
                 if (String.IsNullOrWhiteSpace(html))
                 {
@@ -340,6 +383,8 @@ namespace PDFExporter
 					{
 						html = html.Replace("\n", "<br>");
 						html = string.Format("<span>{0}</span>", html);
+
+						wantFont = true;
 					}
 				}
 
@@ -348,7 +393,7 @@ namespace PDFExporter
 					// Add spacer before comments
 					section.Add(Chunk.NEWLINE);
 
-					AddContent(html, section);
+					AddContent(html, section, wantFont);
 				}
             }
 
