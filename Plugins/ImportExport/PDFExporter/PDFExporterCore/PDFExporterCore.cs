@@ -39,6 +39,43 @@ namespace PDFExporter
         public String Name;
     }
 
+	// ------------------------------------------------------------------
+
+	public class PDFBackgroundImage : IPdfPageEvent
+	{
+		private Image m_WatermarkImage = null;
+
+		public PDFBackgroundImage(string imagePath)
+		{
+			if (!string.IsNullOrWhiteSpace(imagePath))
+				m_WatermarkImage = Image.GetInstance(imagePath);
+		}
+
+		public void OnChapter(PdfWriter writer, Document document, float paragraphPosition, Paragraph title) { }
+		public void OnChapterEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+		public void OnCloseDocument(PdfWriter writer, Document document) { }
+		public void OnGenericTag(PdfWriter writer, Document document, Rectangle rect, string text) { }
+		public void OnOpenDocument(PdfWriter writer, Document document) { }
+		public void OnParagraph(PdfWriter writer, Document document, float paragraphPosition) { }
+		public void OnParagraphEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+		public void OnSection(PdfWriter writer, Document document, float paragraphPosition, int depth, Paragraph title) { }
+		public void OnSectionEnd(PdfWriter writer, Document document, float paragraphPosition) { }
+		public void OnStartPage(PdfWriter writer, Document document) { }
+
+		public void OnEndPage(PdfWriter writer, Document document)
+		{
+			if (m_WatermarkImage != null)
+			{
+				// top-left corner
+				m_WatermarkImage.SetAbsolutePosition(0, document.PageSize.Height - m_WatermarkImage.Height);
+
+				writer.DirectContentUnder.AddImage(m_WatermarkImage, false);
+			}
+		}
+	}
+
+	// ------------------------------------------------------------------
+
 	[System.ComponentModel.DesignerCategory("")]
 	public class PDFExporterCore
 	{
@@ -66,6 +103,49 @@ namespace PDFExporter
 			m_FontMappings = new FontMappings();
 			m_BaseFontSize = 10f;
 			m_BaseFontName = "Verdana";
+		}
+
+		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
+		{
+			// Load Settings
+			var installedFontFile = prefs.GetProfileString(sKey, "InstalledFontFile", "");
+			var otherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", "");
+			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
+			var watermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "");
+
+			int fontSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
+			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
+
+			var htmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
+			var defaultInstalledFontFile = m_FontMappings.GetFontFileName(htmlFont);
+
+			if (string.IsNullOrEmpty(installedFontFile))
+				installedFontFile = defaultInstalledFontFile;
+
+			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, installedFontFile, otherFontFile, useOtherFont, watermarkImagePath);
+
+			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
+				return false;
+
+			// Clear the installed font setting if it's the same 
+			// as the default so changes to the default will be picked up
+			if (string.Compare(optionsDlg.InstalledFontPath, defaultInstalledFontFile, true) == 0)
+				prefs.DeleteProfileEntry(sKey, "InstalledFontFile");
+			else
+				prefs.WriteProfileString(sKey, "InstalledFontFile", optionsDlg.InstalledFontPath);
+
+			prefs.WriteProfileString(sKey, "OtherFontFile", optionsDlg.OtherFontPath);
+			prefs.WriteProfileBool(sKey, "UseOtherFont", optionsDlg.UseOtherFont);
+			prefs.WriteProfileString(sKey, "BkgndImagePath", optionsDlg.WatermarkImagePath);
+
+			m_BaseFontName = m_FontMappings.GetFontFromFileName(optionsDlg.SelectedFontPath);
+			RegisterFont(m_BaseFontName); // always
+
+			m_WatermarkImagePath = optionsDlg.WatermarkImagePath;
+
+			BuildAttributeList(tasks);
+
+            return true;
 		}
 
 		private void BuildAttributeList(TaskList tasks)
@@ -119,49 +199,6 @@ namespace PDFExporter
 			m_AvailAttributes.Sort((a, b) => String.Compare(a.Name, b.Name));
 		}
 
-		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
-		{
-			// Load Settings
-			var installedFontFile = prefs.GetProfileString(sKey, "InstalledFontFile", "");
-			var otherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", "");
-			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
-			var watermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "");
-
-			int fontSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
-			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
-
-			var htmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
-			var defaultInstalledFontFile = m_FontMappings.GetFontFileName(htmlFont);
-
-			if (string.IsNullOrEmpty(installedFontFile))
-				installedFontFile = defaultInstalledFontFile;
-
-			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, installedFontFile, otherFontFile, useOtherFont, watermarkImagePath);
-
-			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
-				return false;
-
-			// Clear the installed font setting if it's the same 
-			// as the default so changes to the default will be picked up
-			if (string.Compare(optionsDlg.InstalledFontPath, defaultInstalledFontFile, true) == 0)
-				prefs.DeleteProfileEntry(sKey, "InstalledFontFile");
-			else
-				prefs.WriteProfileString(sKey, "InstalledFontFile", optionsDlg.InstalledFontPath);
-
-			prefs.WriteProfileString(sKey, "OtherFontFile", optionsDlg.OtherFontPath);
-			prefs.WriteProfileBool(sKey, "UseOtherFont", optionsDlg.UseOtherFont);
-			prefs.WriteProfileString(sKey, "BkgndImagePath", optionsDlg.WatermarkImagePath);
-
-			m_BaseFontName = m_FontMappings.GetFontFromFileName(optionsDlg.SelectedFontPath);
-			RegisterFont(m_BaseFontName); // always
-
-			m_WatermarkImagePath = optionsDlg.WatermarkImagePath;
-
-			BuildAttributeList(tasks);
-
-            return true;
-		}
-
 		public bool Export(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
 			if (!InitConsts(tasks, destFilePath, silent, prefs, sKey))
@@ -209,37 +246,76 @@ namespace PDFExporter
 			return byteInfo;
 		}
 
-		public class PDFBackgroundImage : IPdfPageEvent
+		private Section CreateSection(Task task, Section parent)
 		{
-			private Image m_WatermarkImage = null;
+			Section section = null;
 
-			public PDFBackgroundImage(string imagePath)
+			if (parent == null)
 			{
-				if (!string.IsNullOrWhiteSpace(imagePath))
-					m_WatermarkImage = Image.GetInstance(imagePath);
+				section = new Chapter(CreateTitleElement(task), 0);
+			}
+			else
+			{
+				section = parent.AddSection(CreateTitleElement(task));
+				section.TriggerNewPage = true;
 			}
 
-			public void OnChapter(PdfWriter writer, Document document, float paragraphPosition, Paragraph title) { }
-			public void OnChapterEnd(PdfWriter writer, Document document, float paragraphPosition) { }
-			public void OnCloseDocument(PdfWriter writer, Document document) { }
-			public void OnGenericTag(PdfWriter writer, Document document, Rectangle rect, string text) { }
-			public void OnOpenDocument(PdfWriter writer, Document document) { }
-			public void OnParagraph(PdfWriter writer, Document document, float paragraphPosition) { }
-			public void OnParagraphEnd(PdfWriter writer, Document document, float paragraphPosition) { }
-			public void OnSection(PdfWriter writer, Document document, float paragraphPosition, int depth, Paragraph title) { }
-			public void OnSectionEnd(PdfWriter writer, Document document, float paragraphPosition) { }
-			public void OnStartPage(PdfWriter writer, Document document) { }
+			section.NumberDepth = 0;
+			section.BookmarkTitle = GetTitle(task);
+			section.BookmarkOpen = true;
 
-			public void OnEndPage(PdfWriter writer, Document document)
+			// Create content
+			if (m_AvailAttributes.Count > 0)
 			{
-				if (m_WatermarkImage != null)
-				{
-					// top-left corner
-					m_WatermarkImage.SetAbsolutePosition(0, document.PageSize.Height - m_WatermarkImage.Height);
+				// Add spacer beneath title
+				section.Add(Chunk.NEWLINE);
 
-					writer.DirectContentUnder.AddImage(m_WatermarkImage, false);
+				foreach (var attrib in m_AvailAttributes)
+				{
+					var attribVal = task.GetAttributeValue(attrib.Attribute, true, true);
+
+					if (!string.IsNullOrWhiteSpace(attribVal))
+					{
+						string html = FormatTextInputAsHtml(String.Format("{0}: {1}\n", attrib.Name, attribVal));
+						AddContent(html, section);
+					}
 				}
 			}
+
+			// Comments is always last
+			if (m_WantComments)
+			{
+				string html = task.GetHtmlComments();
+
+				if (String.IsNullOrWhiteSpace(html))
+				{
+					// Text comments
+					html = WebUtility.HtmlEncode(task.GetComments());
+
+					if (!String.IsNullOrWhiteSpace(html))
+					{
+						html = FormatTextInputAsHtml(html);
+					}
+				}
+
+				if (!String.IsNullOrWhiteSpace(html))
+				{
+					// Add spacer before comments
+					section.Add(Chunk.NEWLINE);
+					AddContent(html, section);
+				}
+			}
+
+			// Add subtasks as nested Sections on new pages
+			var subtask = task.GetFirstSubtask();
+
+			while (subtask.IsValid())
+			{
+				CreateSection(subtask, section);
+				subtask = subtask.GetNextTask();
+			}
+
+			return section;
 		}
 
 		private String GetTitle(Task task)
@@ -401,78 +477,6 @@ namespace PDFExporter
 				htmlInput = FormatTextInputAsHtml(htmlInput);
 
 			return htmlInput;
-		}
-
-		private Section CreateSection(Task task, Section parent)
-		{
-			Section section = null;
-
-			if (parent == null)
-			{
-				section = new Chapter(CreateTitleElement(task), 0);
-			}
-			else
-			{
-				section = parent.AddSection(CreateTitleElement(task));
-				section.TriggerNewPage = true;
-			}
-
-			section.NumberDepth = 0;
-			section.BookmarkTitle = GetTitle(task);
-			section.BookmarkOpen = true;
-
-			// Create content
-			if (m_AvailAttributes.Count > 0)
-			{
-				// Add spacer beneath title
-				section.Add(Chunk.NEWLINE);
-
-				foreach (var attrib in m_AvailAttributes)
-				{
-					var attribVal = task.GetAttributeValue(attrib.Attribute, true, true);
-
-					if (!string.IsNullOrWhiteSpace(attribVal))
-					{
-						string html = FormatTextInputAsHtml(String.Format("{0}: {1}\n", attrib.Name, attribVal));
-						AddContent(html, section);
-					}
-				}
-			}
-
-            // Comments is always last
-            if (m_WantComments)
-            {
-                string html = task.GetHtmlComments();
-
-                if (String.IsNullOrWhiteSpace(html))
-                {
-					// Text comments
-                    html = WebUtility.HtmlEncode(task.GetComments());
-
-					if (!String.IsNullOrWhiteSpace(html))
-					{
-						html = FormatTextInputAsHtml(html);
-					}
-				}
-
-				if (!String.IsNullOrWhiteSpace(html))
-                {
-					// Add spacer before comments
-					section.Add(Chunk.NEWLINE);
-					AddContent(html, section);
-				}
-			}
-
-            // Add subtasks as nested Sections on new pages
-            var subtask = task.GetFirstSubtask();
-
-			while (subtask.IsValid())
-            {
-                CreateSection(subtask, section);
-                subtask = subtask.GetNextTask();
-            }
-
-            return section;
 		}
 
 		string FormatTextInputAsHtml(string text)
