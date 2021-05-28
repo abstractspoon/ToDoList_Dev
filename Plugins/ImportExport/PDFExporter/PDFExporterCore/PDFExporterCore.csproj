@@ -64,6 +64,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FontUtils.cs" />
     <Compile Include="PDFExporterCore.cs" />
     <Compile Include="PDFExporterOptionsForm.cs">
       <SubType>Form</SubType>

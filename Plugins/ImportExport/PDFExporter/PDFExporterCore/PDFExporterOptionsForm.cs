@@ -16,11 +16,11 @@ namespace PDFExporter
 {
 	public partial class PDFExporterOptionsForm : Form
 	{
-		public PDFExporterOptionsForm(string installedFontPath, string otherFontPath, bool useOtherFont, string bkgndImagePath)
+		public PDFExporterOptionsForm(FontMappings fonts, string installedFontPath, string otherFontPath, bool useOtherFont, string bkgndImagePath)
 		{
 			InitializeComponent();
 
-			BuildFontCombo(installedFontPath);
+			BuildFontCombo(fonts, installedFontPath);
 
 			comboFont.Enabled = !useOtherFont;
 			checkOtherFont.Checked = useOtherFont;
@@ -67,111 +67,16 @@ namespace PDFExporter
 			public string File;
 		}
 
-		private void BuildFontCombo(string selFontPath)
+		private void BuildFontCombo(FontMappings fonts, string selFontPath)
 		{
-			// iTextSharp only supports .ttf files
-			var fontFolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-			var fontFiles = Directory.GetFiles(fontFolder, "*.ttf");
-
-			// Avoid duplicates
-			var addedFonts = new HashSet<string>();
-			
-			foreach (var fontFile in fontFiles)
+			foreach (var font in fonts.NameToFile)
 			{
-				var fontName = GetFontFromFileName(fontFile);
+				var fontItem = new FontItem(font.Key, font.Value);
+				comboFont.Items.Add(fontItem);
 
-				if (!string.IsNullOrEmpty(fontName) && !addedFonts.Contains(fontName))
-				{
-					var fontItem = new FontItem(fontName, fontFile);
-					comboFont.Items.Add(fontItem);
-
-					if (String.Compare(fontFile, selFontPath, true) == 0)
-						comboFont.SelectedItem = fontItem;
-
-					addedFonts.Add(fontName);
-				}
+				if (String.Compare(font.Value, selFontPath, true) == 0)
+					comboFont.SelectedItem = fontItem;
 			}
-		}
-
-		// ------------------------------------------------------------------
-		[DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-		public static extern int RemoveFontResourceEx(string lpszFilename, int fl, IntPtr pdv);
-
-		private static int FR_PRIVATE = 16;
-		// ------------------------------------------------------------------
-
-		public static string GetFontFromFileName(string fileName)
-		{
-			var fontName = string.Empty;
-			var fc = new PrivateFontCollection();
-
-			try
-			{
-				fc.AddFontFile(fileName);
-				fontName = fc.Families[0].Name;
-			}
-			catch (FileNotFoundException)
-			{
-			}
-
-			fc.Dispose();
-
-			// There is a bug in PrivateFontCollection::Dispose()
-			// which does not release the font file in GDI32.dll
-			// This results in duplicate font names for anyone 
-			// calling the Win32 function EnumFonts.
-			RemoveFontResourceEx(fileName, FR_PRIVATE, IntPtr.Zero);
-
-			return fontName;
-		}
-
-		public static string GetFontFileName(string fontName, bool bold = false, bool italic = false)
-		{
-			RegistryKey fonts = null;
-			string fontFile = String.Empty;
-
-			try
-			{
-				fonts = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\Fonts", false);
-
-				if (fonts == null)
-					fonts = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Fonts", false);
-
-				if (fonts != null)
-				{
-					string suffix = "";
-
-					if (bold)
-						suffix += "(?: Bold)?";
-
-					if (italic)
-						suffix += "(?: Italic)?";
-
-					var regex = new Regex(@"^(?:.+ & )?" + Regex.Escape(fontName) + @"(?: & .+)?(?<suffix>" + suffix + @") \(TrueType\)$", RegexOptions.Compiled);
-
-					string[] names = fonts.GetValueNames();
-
-					string name = names.Select(n => regex.Match(n)).Where(m => m.Success).OrderByDescending(m => m.Groups["suffix"].Length).Select(m => m.Value).FirstOrDefault();
-
-					if (name != null)
-						fontFile = fonts.GetValue(name).ToString();
-				}
-			}
-			finally
-			{
-				if (fonts != null)
-					fonts.Dispose();
-			}
-
-			if (!string.IsNullOrEmpty(fontFile))
-				fontFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), fontFile);
-
-			return fontFile;
-		}
-
-		public static string GetFontFileName(Font font)
-		{
-			return GetFontFileName(font.Name, font.Bold, font.Italic);
 		}
 
 		private void OnCheckChangeOtherFont(object sender, EventArgs e)

@@ -45,9 +45,11 @@ namespace PDFExporter
 		private Translator m_Trans;
 		private String m_TypeId;
         private String m_TempFolder;
-        private System.Collections.Generic.List<TaskAttribute> m_AvailAttributes = null;
         private bool m_WantComments = false, m_WantPosition = false;
 
+		private System.Collections.Generic.List<TaskAttribute> m_AvailAttributes = null;
+
+		private FontMappings m_FontMappings;
 		private BaseFont m_BaseFont;
 		private float m_BaseFontSize;
 		private string m_ParseStyles;
@@ -61,6 +63,7 @@ namespace PDFExporter
 			m_Trans = trans;
 			m_TempFolder = (Path.GetTempPath() + typeId);
 
+			m_FontMappings = new FontMappings();
 			m_BaseFont = BaseFont.CreateFont();
 			m_BaseFontSize = 10f;
 			m_ParseStyles = "";
@@ -78,14 +81,14 @@ namespace PDFExporter
 			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
 
 			var htmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
-			var defaultInstalledFontFile = PDFExporterOptionsForm.GetFontFileName(htmlFont);
+			var defaultInstalledFontFile = m_FontMappings.GetFontFileName(htmlFont);
 
 			if (string.IsNullOrEmpty(installedFontFile))
 				installedFontFile = defaultInstalledFontFile;
 
 			var bkgndImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "");
 
-			var optionsDlg = new PDFExporterOptionsForm(installedFontFile, otherFontFile, useOtherFont, bkgndImagePath);
+			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, installedFontFile, otherFontFile, useOtherFont, bkgndImagePath);
 
 			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
 				return false;
