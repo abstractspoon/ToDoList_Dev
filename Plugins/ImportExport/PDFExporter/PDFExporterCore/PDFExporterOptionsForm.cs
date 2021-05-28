@@ -69,12 +69,12 @@ namespace PDFExporter
 
 		private void BuildFontCombo(FontMappings fonts, string selFontPath)
 		{
-			foreach (var font in fonts.NameToFile)
+			foreach (var font in fonts.FileToName)
 			{
-				var fontItem = new FontItem(font.Key, font.Value);
+				var fontItem = new FontItem(font.Value, font.Key);
 				comboFont.Items.Add(fontItem);
 
-				if (String.Compare(font.Value, selFontPath, true) == 0)
+				if (String.Compare(font.Key, selFontPath, true) == 0)
 					comboFont.SelectedItem = fontItem;
 			}
 		}

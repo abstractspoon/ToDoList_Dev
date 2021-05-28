@@ -10,6 +10,7 @@ using System.Net;
 
 using iTextSharp.text;
 using iTextSharp.text.pdf;
+using iTextSharp.tool.xml;
 
 using MSDN.Html.Editor;
 using Abstractspoon.Tdl.PluginHelpers;
@@ -50,9 +51,8 @@ namespace PDFExporter
 		private System.Collections.Generic.List<TaskAttribute> m_AvailAttributes = null;
 
 		private FontMappings m_FontMappings;
-		private BaseFont m_BaseFont;
+		private string m_BaseFontName;
 		private float m_BaseFontSize;
-		private string m_ParseStyles;
 		private string m_WatermarkImagePath;
 
 		// --------------------------------------------------------------------------------------
@@ -64,20 +64,70 @@ namespace PDFExporter
 			m_TempFolder = (Path.GetTempPath() + typeId);
 
 			m_FontMappings = new FontMappings();
-			m_BaseFont = BaseFont.CreateFont();
 			m_BaseFontSize = 10f;
-			m_ParseStyles = "";
+			m_BaseFontName = "Verdana";
+		}
+
+		private void BuildAttributeList(TaskList tasks)
+		{
+			m_AvailAttributes = new List<TaskAttribute>();
+
+			var attribs = tasks.GetAvailableAttributes();
+
+			foreach (var attrib in attribs)
+			{
+				switch (attrib)
+				{
+				case Task.Attribute.Comments:
+					m_WantComments = true;
+					break;
+
+				case Task.Attribute.HtmlComments:
+					m_WantComments = true;
+					break;
+
+				case Task.Attribute.Position:
+					m_WantPosition = true;
+					break;
+
+				// case Task.Attribute.CustomAttribute:
+				// // TODO
+				// break;
+
+				case Task.Attribute.MetaData:
+					// Not a user attribute
+					break;
+
+				case Task.Attribute.ProjectName:
+					// Not a task attribute
+					break;
+
+				case Task.Attribute.Color:
+					// handled separately
+					break;
+
+				case Task.Attribute.Title:
+					// handled separately
+					break;
+
+				default:
+					m_AvailAttributes.Add(new TaskAttribute(attrib, m_Trans.Translate(TaskList.GetAttributeName(attrib))));
+					break;
+				}
+			}
+
+			m_AvailAttributes.Sort((a, b) => String.Compare(a.Name, b.Name));
 		}
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
-			// Create base font
+			// Load Settings
 			var installedFontFile = prefs.GetProfileString(sKey, "InstalledFontFile", "");
 			var otherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", "");
 			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
+			var watermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "");
 
 			int fontSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
-
 			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
 
 			var htmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
@@ -86,9 +136,7 @@ namespace PDFExporter
 			if (string.IsNullOrEmpty(installedFontFile))
 				installedFontFile = defaultInstalledFontFile;
 
-			var bkgndImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "");
-
-			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, installedFontFile, otherFontFile, useOtherFont, bkgndImagePath);
+			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, installedFontFile, otherFontFile, useOtherFont, watermarkImagePath);
 
 			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
 				return false;
@@ -104,57 +152,12 @@ namespace PDFExporter
 			prefs.WriteProfileBool(sKey, "UseOtherFont", optionsDlg.UseOtherFont);
 			prefs.WriteProfileString(sKey, "BkgndImagePath", optionsDlg.WatermarkImagePath);
 
-			m_BaseFont = BaseFont.CreateFont(optionsDlg.SelectedFontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+			m_BaseFontName = m_FontMappings.GetFontFromFileName(optionsDlg.SelectedFontPath);
+			RegisterFont(m_BaseFontName); // always
+
 			m_WatermarkImagePath = optionsDlg.WatermarkImagePath;
 
-			// Build attribute list
-			m_AvailAttributes = new List<TaskAttribute>();
-
-            var attribs = tasks.GetAvailableAttributes();
-
-            foreach (var attrib in attribs)
-            {
-                switch (attrib)
-                {
-                case Task.Attribute.Comments:
-                    m_WantComments = true;
-                    break;
-
-                case Task.Attribute.HtmlComments:
-                    m_WantComments = true;
-                    break;
-
-                case Task.Attribute.Position:
-                    m_WantPosition = true;
-                    break;
-
-// 				case Task.Attribute.CustomAttribute:
-// 					// TODO
-// 					break;
-
-				case Task.Attribute.MetaData:
-					// Not a user attribute
-					break;
-
- 				case Task.Attribute.ProjectName:
-					// Not a task attribute
- 					break;
-
-				case Task.Attribute.Color:
-					// handled separately
-					break;
-
-				case Task.Attribute.Title:
-					// handled separately
-					break;
-
-				default:
-                    m_AvailAttributes.Add(new TaskAttribute(attrib, m_Trans.Translate(TaskList.GetAttributeName(attrib))));
-                    break;
-                }
-            }
-
-            m_AvailAttributes.Sort((a, b) => String.Compare(a.Name, b.Name));
+			BuildAttributeList(tasks);
 
             return true;
 		}
@@ -250,7 +253,7 @@ namespace PDFExporter
 
 		private Paragraph CreateTitleElement(Task task)
 		{
-			var font = new Font(m_BaseFont, (m_BaseFontSize * 1.5f));
+			var font = FontFactory.GetFont(m_BaseFontName, (m_BaseFontSize * 1.5f), Font.BOLD | Font.UNDERLINE);
 			var color = task.GetTextDrawingColor();
 
 			if (!color.IsEmpty)
@@ -262,10 +265,12 @@ namespace PDFExporter
 			return new Paragraph(chunk);
 		}
 
-		private void AddContent(string html, Section section, bool wantFont)
+		private void AddContent(string html, Section section)
 		{
+			html = RegisterFonts(html);
 			html = ValidateHtmlInput(html);
-			var elements = iTextSharp.tool.xml.XMLWorkerHelper.ParseToElementList(html, m_ParseStyles);
+			
+			var elements = XMLWorkerHelper.ParseToElementList(html, "");
 
 			foreach (IElement element in elements)
 			{
@@ -273,35 +278,11 @@ namespace PDFExporter
 				{
 					foreach (var chunk in element.Chunks)
 					{
-						if ((chunk.Attributes != null) && !chunk.Attributes.ContainsKey(Chunk.IMAGE))
+						if ((chunk.Attributes != null) && 
+							!chunk.Attributes.ContainsKey(Chunk.IMAGE) &&
+							!chunk.Attributes.ContainsKey(Chunk.LINEHEIGHT))
 						{
-							var fontSize = chunk.Font.Size;
-
-							if (wantFont)
-							{
-								var fontFamily = chunk.Font.Family;
-								var fontStyle = chunk.Font.Style;
-								var fontColor = chunk.Font.Color;
-
-								if (fontFamily == Font.FontFamily.UNDEFINED)
-								{
-									if (fontColor == null)
-										fontColor = BaseColor.BLACK;
-
-									if (fontSize <= 0f)
-										fontSize = m_BaseFontSize;
-
-									if (fontStyle < 0)
-										fontStyle = Font.NORMAL;
-
-									chunk.Font = new Font(m_BaseFont, fontSize, fontStyle, fontColor);
-								}
-							}
-
-							if (!chunk.Attributes.ContainsKey(Chunk.LINEHEIGHT))
-							{
-								chunk.setLineHeight(fontSize);
-							}
+							chunk.setLineHeight(chunk.Font.Size * 1.1f);
 						}
 					}
 				}
@@ -310,14 +291,98 @@ namespace PDFExporter
 			}
 		}
 
-		static string ValidateHtmlInput(string htmlInput)
+		string RegisterFonts(string html)
+		{
+			var htmlDoc = new HtmlAgilityPack.HtmlDocument();
+			htmlDoc.LoadHtml(html);
+
+			var elementsWithStyleAttribute = htmlDoc.DocumentNode.SelectNodes("//span");
+			bool docModified = false;
+
+			if (null != elementsWithStyleAttribute)
+			{
+				foreach (var element in elementsWithStyleAttribute)
+				{
+					string curStyles = element.GetAttributeValue("style", null);
+					string newStyles = null;
+
+					if (!string.IsNullOrWhiteSpace(curStyles))
+					{
+						string[] styles = curStyles.Split(';');
+
+						if (styles?.Length > 0)
+						{
+							bool hasFontName = false, hasFontSize = false;
+
+							foreach (var style in styles)
+							{
+								string[] styleParts = style.Split(':');
+
+								if (styleParts?.Length == 2)
+								{
+									if (string.Compare(styleParts[0], "font-family", true) == 0)
+									{
+										string fontName = styleParts[1];
+
+										if (!RegisterFont(fontName))
+										{
+											newStyles = curStyles.Replace(style, FormatBaseFontNameStyle());
+										}
+
+										hasFontName = true;
+									}
+									else if (string.Compare(styleParts[0], "font-size", true) == 0)
+									{
+										hasFontSize = true;
+									}
+								}
+							}
+
+							if (!hasFontName)
+							{
+								newStyles = curStyles + FormatBaseFontNameStyle() + FormatBaseFontSizeStyle();
+							}
+							else if (!hasFontSize)
+							{
+								newStyles = curStyles + FormatBaseFontSizeStyle();
+							}
+						}
+					}
+					else
+					{
+						newStyles = FormatBaseFontNameStyle() + FormatBaseFontSizeStyle();
+					}
+
+					if (newStyles != null)
+					{
+						element.SetAttributeValue("style", newStyles);
+						docModified = true;
+					}
+				}
+			}
+
+			return (docModified ? htmlDoc.DocumentNode.InnerHtml : html);
+		}
+
+		private bool RegisterFont(string fontName)
+		{
+			if (!m_FontMappings.HasFontName(fontName))
+				return false;
+			
+			if (!FontFactory.Contains(fontName))
+				FontFactory.Register(m_FontMappings.GetFontFileName(fontName), fontName);
+
+			return true;
+		}
+
+		string ValidateHtmlInput(string htmlInput)
 		{
 			var htmlDoc = new HtmlAgilityPack.HtmlDocument()
-				{
-					OptionAutoCloseOnEnd = true,
-					OptionFixNestedTags = true,
-					OptionWriteEmptyNodes = true
-				};
+			{
+				OptionAutoCloseOnEnd = true,
+				OptionFixNestedTags = true,
+				OptionWriteEmptyNodes = true
+			};
 
 			htmlDoc.LoadHtml(htmlInput);
 
@@ -333,7 +398,7 @@ namespace PDFExporter
 			if (htmlDoc.DocumentNode.SelectNodes("child::*") != null)
 				htmlInput = htmlDoc.DocumentNode.WriteTo();
 			else
-				htmlInput = string.Format("<span>{0}</span>", htmlInput);
+				htmlInput = FormatTextInputAsHtml(htmlInput);
 
 			return htmlInput;
 		}
@@ -367,7 +432,10 @@ namespace PDFExporter
 					var attribVal = task.GetAttributeValue(attrib.Attribute, true, true);
 
 					if (!string.IsNullOrWhiteSpace(attribVal))
-						AddContent(String.Format("{0}: {1}", attrib.Name, attribVal), section, true);
+					{
+						string html = FormatTextInputAsHtml(String.Format("{0}: {1}\n", attrib.Name, attribVal));
+						AddContent(html, section);
+					}
 				}
 			}
 
@@ -375,7 +443,6 @@ namespace PDFExporter
             if (m_WantComments)
             {
                 string html = task.GetHtmlComments();
-				bool wantFont = false;
 
                 if (String.IsNullOrWhiteSpace(html))
                 {
@@ -384,10 +451,7 @@ namespace PDFExporter
 
 					if (!String.IsNullOrWhiteSpace(html))
 					{
-						html = html.Replace("\n", "<br>");
-						html = string.Format("<span>{0}</span>", html);
-
-						wantFont = true;
+						html = FormatTextInputAsHtml(html);
 					}
 				}
 
@@ -395,10 +459,9 @@ namespace PDFExporter
                 {
 					// Add spacer before comments
 					section.Add(Chunk.NEWLINE);
-
-					AddContent(html, section, wantFont);
+					AddContent(html, section);
 				}
-            }
+			}
 
             // Add subtasks as nested Sections on new pages
             var subtask = task.GetFirstSubtask();
@@ -412,6 +475,22 @@ namespace PDFExporter
             return section;
 		}
 
+		string FormatTextInputAsHtml(string text)
+		{
+			var html = text.Replace("\n", "<br>");
+
+			return string.Format("<span {1}{2}>{0}</span>", html, FormatBaseFontNameStyle(), FormatBaseFontSizeStyle());
+		}
+
+		string FormatBaseFontNameStyle()
+		{
+			return string.Format("font-family:{0};", m_BaseFontName);
+		}
+
+		string FormatBaseFontSizeStyle(float multiplier = 1.0f)
+		{
+			return string.Format("font-size:{0}pt;", (m_BaseFontSize * multiplier));
+		}
 	}
 }
 

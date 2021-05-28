@@ -44,8 +44,8 @@ namespace PDFExporter
 
 				if (!string.IsNullOrEmpty(fontName) && !addedFonts.Contains(fontName))
 				{
-					m_NameToFile[fontName] = fontFile;
-					m_FileToName[fontFile] = fontName;
+					m_NameToFile[fontName.ToUpper()] = fontFile;
+					m_FileToName[fontFile.ToUpper()] = fontName;
 
 					addedFonts.Add(fontName);
 				}
@@ -86,12 +86,21 @@ namespace PDFExporter
 
 		public string GetFontFromFileName(string fileName)
 		{
+			fileName = fileName.ToUpper();
+
 			return m_FileToName.ContainsKey(fileName) ? m_FileToName[fileName] : "";
 		}
 
 		public string GetFontFileName(string fontName)
 		{
+			fontName = fontName.ToUpper();
+
 			return m_NameToFile.ContainsKey(fontName) ? m_NameToFile[fontName] : "";
+		}
+
+		public bool HasFontName(string fontName)
+		{
+			return m_NameToFile.ContainsKey(fontName.ToUpper());
 		}
 
 		public IEnumerable<KeyValuePair<string, string>> NameToFile
