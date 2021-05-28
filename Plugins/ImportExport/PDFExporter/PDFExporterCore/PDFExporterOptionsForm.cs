@@ -125,7 +125,7 @@ namespace PDFExporter
 			return fontName;
 		}
 
-		public static string GetFileNameFromFont(string fontName, bool bold = false, bool italic = false)
+		public static string GetFontFileName(string fontName, bool bold = false, bool italic = false)
 		{
 			RegistryKey fonts = null;
 			string fontFile = String.Empty;
@@ -169,9 +169,9 @@ namespace PDFExporter
 			return fontFile;
 		}
 
-		public static string GetFileNameFromFont(Font font)
+		public static string GetFontFileName(Font font)
 		{
-			return GetFileNameFromFont(font.Name, font.Bold, font.Italic);
+			return GetFontFileName(font.Name, font.Bold, font.Italic);
 		}
 
 		private void OnCheckChangeOtherFont(object sender, EventArgs e)

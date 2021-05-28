@@ -78,7 +78,7 @@ namespace PDFExporter
 			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
 
 			var htmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
-			var defaultInstalledFontFile = PDFExporterOptionsForm.GetFileNameFromFont(htmlFont);
+			var defaultInstalledFontFile = PDFExporterOptionsForm.GetFontFileName(htmlFont);
 
 			if (string.IsNullOrEmpty(installedFontFile))
 				installedFontFile = defaultInstalledFontFile;
@@ -364,7 +364,7 @@ namespace PDFExporter
 					var attribVal = task.GetAttributeValue(attrib.Attribute, true, true);
 
 					if (!string.IsNullOrWhiteSpace(attribVal))
-						AddContent(String.Format("{0}: {1}", attrib.Name, attribVal), section);
+						AddContent(String.Format("{0}: {1}", attrib.Name, attribVal), section, true);
 				}
 			}
 
