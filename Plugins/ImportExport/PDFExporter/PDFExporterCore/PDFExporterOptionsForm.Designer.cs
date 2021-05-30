@@ -38,8 +38,8 @@
 			this.checkOtherFont = new System.Windows.Forms.CheckBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
-			this.editWatermarkImage = new System.Windows.Forms.TextBox();
 			this.btnBrowseWatermarkImage = new System.Windows.Forms.Button();
+			this.editWatermarkImage = new System.Windows.Forms.TextBox();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
 			this.SuspendLayout();
@@ -75,6 +75,7 @@
 			this.comboFont.Location = new System.Drawing.Point(10, 20);
 			this.comboFont.Name = "comboFont";
 			this.comboFont.Size = new System.Drawing.Size(209, 21);
+			this.comboFont.Sorted = true;
 			this.comboFont.TabIndex = 3;
 			// 
 			// label2
@@ -144,17 +145,6 @@
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Content Watermark Image";
 			// 
-			// editWatermarkImage
-			// 
-			this.editWatermarkImage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.editWatermarkImage.Location = new System.Drawing.Point(10, 19);
-			this.editWatermarkImage.Name = "editWatermarkImage";
-			this.editWatermarkImage.Size = new System.Drawing.Size(363, 20);
-			this.editWatermarkImage.TabIndex = 5;
-			this.editWatermarkImage.WordWrap = false;
-			this.editWatermarkImage.TextChanged += new System.EventHandler(this.OnOtherFontChanged);
-			// 
 			// btnBrowseWatermarkImage
 			// 
 			this.btnBrowseWatermarkImage.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -166,6 +156,17 @@
 			this.btnBrowseWatermarkImage.Text = "...";
 			this.btnBrowseWatermarkImage.UseVisualStyleBackColor = true;
 			this.btnBrowseWatermarkImage.Click += new System.EventHandler(this.OnBrowseWatermarkImage);
+			// 
+			// editWatermarkImage
+			// 
+			this.editWatermarkImage.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.editWatermarkImage.Location = new System.Drawing.Point(10, 19);
+			this.editWatermarkImage.Name = "editWatermarkImage";
+			this.editWatermarkImage.Size = new System.Drawing.Size(363, 20);
+			this.editWatermarkImage.TabIndex = 5;
+			this.editWatermarkImage.WordWrap = false;
+			this.editWatermarkImage.TextChanged += new System.EventHandler(this.OnOtherFontChanged);
 			// 
 			// PDFExporterOptionsForm
 			// 

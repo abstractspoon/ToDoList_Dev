@@ -11,6 +11,8 @@ using System.Net;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using iTextSharp.tool.xml;
+using iTextSharp.text.html;
+using iTextSharp.text.html.simpleparser;
 
 using MSDN.Html.Editor;
 using Abstractspoon.Tdl.PluginHelpers;
@@ -108,7 +110,7 @@ namespace PDFExporter
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
 			// Load Settings
-			var installedFontFile = prefs.GetProfileString(sKey, "InstalledFontFile", "");
+			var installedFont = prefs.GetProfileString(sKey, "InstalledFont", "");
 			var otherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", "");
 			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
 			var watermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "");
@@ -116,29 +118,32 @@ namespace PDFExporter
 			int fontSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
 			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
 
-			var htmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
-			var defaultInstalledFontFile = m_FontMappings.GetFontFileName(htmlFont);
+			var defaultHtmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
 
-			if (string.IsNullOrEmpty(installedFontFile))
-				installedFontFile = defaultInstalledFontFile;
+			if (string.IsNullOrEmpty(installedFont))
+				installedFont = defaultHtmlFont;
 
-			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, installedFontFile, otherFontFile, useOtherFont, watermarkImagePath);
+			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, installedFont, otherFontFile, useOtherFont, watermarkImagePath);
 
 			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
 				return false;
 
 			// Clear the installed font setting if it's the same 
 			// as the default so changes to the default will be picked up
-			if (string.Compare(optionsDlg.InstalledFontPath, defaultInstalledFontFile, true) == 0)
-				prefs.DeleteProfileEntry(sKey, "InstalledFontFile");
+			if (string.Compare(optionsDlg.InstalledFont, defaultHtmlFont, true) == 0)
+				prefs.DeleteProfileEntry(sKey, "InstalledFont");
 			else
-				prefs.WriteProfileString(sKey, "InstalledFontFile", optionsDlg.InstalledFontPath);
+				prefs.WriteProfileString(sKey, "InstalledFont", optionsDlg.InstalledFont);
 
 			prefs.WriteProfileString(sKey, "OtherFontFile", optionsDlg.OtherFontPath);
 			prefs.WriteProfileBool(sKey, "UseOtherFont", optionsDlg.UseOtherFont);
 			prefs.WriteProfileString(sKey, "BkgndImagePath", optionsDlg.WatermarkImagePath);
 
-			m_BaseFontName = m_FontMappings.GetFontFromFileName(optionsDlg.SelectedFontPath);
+			if (optionsDlg.UseOtherFont)
+				m_BaseFontName = m_FontMappings.GetFontFromFileName(optionsDlg.OtherFontPath);
+			else
+				m_BaseFontName = optionsDlg.InstalledFont;
+
 			RegisterFont(m_BaseFontName); // always
 
 			m_WatermarkImagePath = optionsDlg.WatermarkImagePath;
@@ -210,7 +215,7 @@ namespace PDFExporter
 			
 				File.WriteAllBytes(destFilePath, pdfContent);
 			}
-			catch (Exception /*e*/)
+			catch (Exception e)
 			{
 				return false;
 			}
@@ -329,7 +334,7 @@ namespace PDFExporter
 
 		private Paragraph CreateTitleElement(Task task)
 		{
-			var font = FontFactory.GetFont(m_BaseFontName, (m_BaseFontSize * 1.5f), Font.BOLD | Font.UNDERLINE);
+			var font = CreateFont(m_BaseFontName, (m_BaseFontSize * 1.5f), Font.BOLD | Font.UNDERLINE);
 			var color = task.GetTextDrawingColor();
 
 			if (!color.IsEmpty)
@@ -346,25 +351,52 @@ namespace PDFExporter
 			html = RegisterFonts(html);
 			html = ValidateHtmlInput(html);
 			
-			var elements = XMLWorkerHelper.ParseToElementList(html, "");
+			//var elements = XMLWorkerHelper.ParseToElementList(html, "");
+			var elements = HTMLWorker.ParseToList(new StringReader(html), new StyleSheet());
 
 			foreach (IElement element in elements)
 			{
 				if (element.IsContent())
 				{
-					foreach (var chunk in element.Chunks)
+					foreach (Chunk chunk in element.Chunks)
 					{
-						if ((chunk.Attributes != null) && 
-							!chunk.Attributes.ContainsKey(Chunk.IMAGE) &&
-							!chunk.Attributes.ContainsKey(Chunk.LINEHEIGHT))
+						if (chunk.IsContent() && !chunk.IsEmpty() && (chunk.Attributes != null) && !chunk.Attributes.ContainsKey(Chunk.IMAGE))
 						{
-							chunk.setLineHeight(chunk.Font.Size * 1.1f);
+							// Create a font encoded to show unicode characters
+							if (chunk.Font == null || chunk.Font.Familyname == "unknown")
+							{
+								var font = CreateFont(m_BaseFontName, m_BaseFontSize);
+								chunk.Font = font;
+							}
+							else
+							{
+								var font = CreateFont(chunk.Font.Familyname, chunk.Font.Size, chunk.Font.Style, chunk.Font.Color);
+								chunk.Font = font;
+							}
+
+							if (!chunk.Attributes.ContainsKey(Chunk.LINEHEIGHT))
+							{
+								chunk.setLineHeight(chunk.Font.Size * 1.1f);
+							}
 						}
 					}
 				}
 
 				section.Add(element);
 			}
+		}
+
+		Font CreateFont(string name, float size, int style = Font.NORMAL)
+		{
+			return CreateFont(name, size, style, BaseColor.BLACK);
+		}
+
+		Font CreateFont(string name, float size, int style, BaseColor color)
+		{
+			string fontFile = m_FontMappings.GetFontFileName(name);
+			BaseFont bf = BaseFont.CreateFont(fontFile, BaseFont.IDENTITY_H, true);
+
+			return new Font(bf, size, style, color);
 		}
 
 		string RegisterFonts(string html)

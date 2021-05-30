@@ -16,11 +16,9 @@ namespace PDFExporter
 {
 	public partial class PDFExporterOptionsForm : Form
 	{
-		public PDFExporterOptionsForm(FontMappings fonts, string installedFontPath, string otherFontPath, bool useOtherFont, string bkgndImagePath)
+		public PDFExporterOptionsForm(FontMappings fonts, string installedFont, string otherFontPath, bool useOtherFont, string bkgndImagePath)
 		{
 			InitializeComponent();
-
-			BuildFontCombo(fonts, installedFontPath);
 
 			comboFont.Enabled = !useOtherFont;
 			checkOtherFont.Checked = useOtherFont;
@@ -29,53 +27,35 @@ namespace PDFExporter
 			btnBrowseOtherFont.Enabled = useOtherFont;
 			editWatermarkImage.Text = bkgndImagePath;
 
+			BuildFontCombo(fonts, installedFont);
 			UpdateOKButton();
 		}
 
-		public string InstalledFontPath
+		public string InstalledFont
 		{
 			get
 			{
-				var font = (comboFont.SelectedItem as FontItem);
-
-				if (font == null)
-					return String.Empty;
-
-				return font.File;
+				return comboFont.SelectedItem?.ToString();
 			}
 		}
 
 		public string OtherFontPath { get { return editOtherFont.Text; } }
 		public bool UseOtherFont { get { return (checkOtherFont.Checked && !string.IsNullOrWhiteSpace(OtherFontPath)); } }
-		public string SelectedFontPath { get { return (UseOtherFont ? OtherFontPath : InstalledFontPath); } }
 		public string WatermarkImagePath { get { return editWatermarkImage.Text; } }
 
-		private class FontItem
+		private void BuildFontCombo(FontMappings fonts, string installedFont)
 		{
-			public FontItem(string name, string file)
+			comboFont.SelectedItem = null;
+
+			foreach (var fileFont in fonts.FileToName)
 			{
-				Name = name;
-				File = file;
-			}
+				comboFont.Items.Add(fileFont.Value);
 
-			public override string ToString()
-			{
-				return Name;
-			}
-
-			public string Name;
-			public string File;
-		}
-
-		private void BuildFontCombo(FontMappings fonts, string selFontPath)
-		{
-			foreach (var font in fonts.FileToName)
-			{
-				var fontItem = new FontItem(font.Value, font.Key);
-				comboFont.Items.Add(fontItem);
-
-				if (String.Compare(font.Key, selFontPath, true) == 0)
-					comboFont.SelectedItem = fontItem;
+				if (comboFont.SelectedItem == null)
+				{
+					if (String.Compare(fileFont.Value, installedFont, true) == 0)
+						comboFont.SelectedItem = fileFont.Value;
+				}
 			}
 		}
 

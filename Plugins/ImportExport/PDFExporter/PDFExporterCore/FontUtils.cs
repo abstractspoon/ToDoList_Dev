@@ -14,6 +14,14 @@ using Microsoft.Win32;
 
 namespace PDFExporter
 {
+	public class FontUtils
+	{
+		public static bool IsTTFFile(string filename)
+		{
+			return (string.Compare(Path.GetExtension(filename), ".ttf", true) == 0);
+		}
+	}
+
 	public class FontMappings
 	{
 		private Dictionary<string, string> m_NameToFile;
@@ -31,57 +39,76 @@ namespace PDFExporter
 			m_NameToFile = new Dictionary<string, string>();
 			m_FileToName = new Dictionary<string, string>();
 
-			// iTextSharp only supports .ttf files
-			var fontFolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
-			var fontFiles = Directory.GetFiles(fontFolder, "*.ttf");
-
 			// Avoid duplicates
 			var addedFonts = new HashSet<string>();
 
-			foreach (var fontFile in fontFiles)
+			foreach (var family in FontFamily.Families)
 			{
-				var fontName = ExtractFontFromFileName(fontFile);
+				var fontName = family.Name;
 
 				if (!string.IsNullOrEmpty(fontName) && !addedFonts.Contains(fontName))
 				{
-					m_NameToFile[fontName.ToUpper()] = fontFile;
-					m_FileToName[fontFile.ToUpper()] = fontName;
+					var fontFile = GetFileNameFromFont(fontName);
+
+					if (!string.IsNullOrEmpty(fontFile))
+					{
+						m_NameToFile[fontName.ToUpper()] = fontFile;
+						m_FileToName[fontFile.ToUpper()] = fontName;
+					}
 
 					addedFonts.Add(fontName);
 				}
 			}
 		}
 
-		// ------------------------------------------------------------------
-		[DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-		public static extern int RemoveFontResourceEx(string lpszFilename, int fl, IntPtr pdv);
-
-		private static int FR_PRIVATE = 16;
-		// ------------------------------------------------------------------
-
-		private static string ExtractFontFromFileName(string fileName)
+		public static string GetFileNameFromFont(string fontName, bool bold = false, bool italic = false)
 		{
-			var fontName = string.Empty;
-			var fc = new PrivateFontCollection();
+			RegistryKey fonts = null;
+			string fontFile = String.Empty;
 
 			try
 			{
-				fc.AddFontFile(fileName);
-				fontName = fc.Families[0].Name;
+				fonts = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\Fonts", false);
+
+				if (fonts == null)
+					fonts = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Fonts", false);
+
+				if (fonts != null)
+				{
+					string suffix = "";
+
+					if (bold)
+						suffix += "(?: Bold)?";
+
+					if (italic)
+						suffix += "(?: Italic)?";
+
+					var regex = new Regex(@"^(?:.+ & )?" + Regex.Escape(fontName) + @"(?: & .+)?(?<suffix>" + suffix + @") \(TrueType\)$", RegexOptions.Compiled);
+
+					string[] names = fonts.GetValueNames();
+
+					string name = names.Select(n => regex.Match(n)).Where(m => m.Success).OrderByDescending(m => m.Groups["suffix"].Length).Select(m => m.Value).FirstOrDefault();
+
+					if (name != null)
+					{
+						fontFile = fonts.GetValue(name).ToString();
+
+						// iTextSharp only supports .ttf files
+						if (!FontUtils.IsTTFFile(fontFile))
+							fontFile = null;
+					}
+				}
 			}
-			catch (FileNotFoundException)
+			finally
 			{
+				if (fonts != null)
+					fonts.Dispose();
 			}
 
-			fc.Dispose();
+			if (!string.IsNullOrEmpty(fontFile))
+				fontFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), fontFile);
 
-			// There is a bug in PrivateFontCollection::Dispose()
-			// which does not release the font file in GDI32.dll
-			// This results in duplicate font names for anyone 
-			// calling the Win32 function EnumFonts.
-			RemoveFontResourceEx(fileName, FR_PRIVATE, IntPtr.Zero);
-
-			return fontName;
+			return fontFile;
 		}
 
 		public string GetFontFromFileName(string fileName)
