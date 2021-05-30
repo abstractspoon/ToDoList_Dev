@@ -7,11 +7,10 @@ using System.IO;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Net;
+using System.Globalization;
 
 using iTextSharp.text;
 using iTextSharp.text.pdf;
-using iTextSharp.tool.xml;
-using iTextSharp.text.html;
 using iTextSharp.text.html.simpleparser;
 
 using MSDN.Html.Editor;
@@ -346,13 +345,82 @@ namespace PDFExporter
 			return new Paragraph(chunk);
 		}
 
+		private class MyHTMLWorker : HTMLWorker
+		{
+			BaseColor CurrentBackColor { get; set; }
+
+			MyHTMLWorker(IDocListener document) : base(document)
+			{
+			}
+
+			public static List<IElement> ParseToList(string html)
+			{
+				MyHTMLWorker hTMLWorker = new MyHTMLWorker(null);
+				hTMLWorker.document = hTMLWorker;
+				hTMLWorker.objectList = new List<IElement>();
+				hTMLWorker.Parse(new StringReader(html));
+				return hTMLWorker.objectList;
+			}
+
+			public override Chunk CreateChunk(string content)
+			{
+				var chunk = base.CreateChunk(content);
+
+				if (chunk.IsContent() && !chunk.IsEmpty() && !chunk.IsWhitespace() && CurrentBackColor != null)
+				{
+					chunk.SetBackground(CurrentBackColor);
+				}
+
+				CurrentBackColor = null;
+
+				return chunk;
+			}
+
+// 			public override iTextSharp.text.Image CreateImage(IDictionary<string, string> attrs)
+// 			{
+// 				var image = base.CreateImage(attrs);
+// 
+// 				return image;
+// 			}
+
+			public override void UpdateChain(string tag, IDictionary<string, string> attrs)
+			{
+				base.UpdateChain(tag, attrs);
+
+				// HTMLWorker does not handle 'background-color'
+				CurrentBackColor = null;
+
+				if (attrs.ContainsKey("style") && attrs["style"].Contains("background-color"))
+				{
+					var styles = attrs["style"].Split(';');
+
+					foreach (var style in styles)
+					{
+						if (style.Contains("background-color"))
+						{
+							string color = style.Split(':')[1];
+							color = color.Replace("#", "");
+
+							if (color.Length == 6)
+								color = "FF" + color;
+
+							int argb = Int32.Parse(color, NumberStyles.HexNumber);
+
+							CurrentBackColor = new BaseColor(argb);
+							break;
+						}
+					}
+				}
+			}
+		}
+
 		private void AddContent(string html, Section section)
 		{
 			html = RegisterFonts(html);
 			html = ValidateHtmlInput(html);
-			
-			//var elements = XMLWorkerHelper.ParseToElementList(html, "");
-			var elements = HTMLWorker.ParseToList(new StringReader(html), new StyleSheet());
+
+ 			//var elements = XMLWorkerHelper.ParseToElementList(html, "");
+			var elements = MyHTMLWorker.ParseToList(html);
 
 			foreach (IElement element in elements)
 			{
@@ -362,19 +430,21 @@ namespace PDFExporter
 					{
 						if (chunk.IsContent() && !chunk.IsEmpty() && (chunk.Attributes != null) && !chunk.Attributes.ContainsKey(Chunk.IMAGE))
 						{
-							// Create a font encoded to show unicode characters
-							if (chunk.Font == null || chunk.Font.Familyname == "unknown")
+							if (chunk.Font == null)
 							{
-								var font = CreateFont(m_BaseFontName, m_BaseFontSize);
-								chunk.Font = font;
+								chunk.Font = CreateFont(m_BaseFontName, m_BaseFontSize);
 							}
 							else
 							{
-								var font = CreateFont(chunk.Font.Familyname, chunk.Font.Size, chunk.Font.Style, chunk.Font.Color);
-								chunk.Font = font;
+								string fontName = chunk.Font.Familyname;
+
+ 								//if (fontName == "unknown")
+									fontName = m_BaseFontName;
+
+								chunk.Font = CreateFont(fontName, chunk.Font.Size, chunk.Font.Style, chunk.Font.Color);
 							}
 
-							if (!chunk.Attributes.ContainsKey(Chunk.LINEHEIGHT))
+							//if (!chunk.Attributes.ContainsKey(Chunk.LINEHEIGHT))
 							{
 								chunk.setLineHeight(chunk.Font.Size * 1.1f);
 							}
@@ -393,6 +463,7 @@ namespace PDFExporter
 
 		Font CreateFont(string name, float size, int style, BaseColor color)
 		{
+			// IDENTITY_H creates a unicode font
 			string fontFile = m_FontMappings.GetFontFileName(name);
 			BaseFont bf = BaseFont.CreateFont(fontFile, BaseFont.IDENTITY_H, true);
 
@@ -446,13 +517,15 @@ namespace PDFExporter
 								}
 							}
 
-							if (!hasFontName)
+							if (!hasFontName || !hasFontSize)
 							{
-								newStyles = curStyles + FormatBaseFontNameStyle() + FormatBaseFontSizeStyle();
-							}
-							else if (!hasFontSize)
-							{
-								newStyles = curStyles + FormatBaseFontSizeStyle();
+								newStyles = curStyles + ';';
+
+								if (!hasFontName)
+									newStyles = newStyles + FormatBaseFontNameStyle();
+
+								if (!hasFontSize)
+									newStyles = newStyles + FormatBaseFontSizeStyle();
 							}
 						}
 					}
