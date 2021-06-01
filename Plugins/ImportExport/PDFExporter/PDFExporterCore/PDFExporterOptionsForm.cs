@@ -16,18 +16,11 @@ namespace PDFExporter
 {
 	public partial class PDFExporterOptionsForm : Form
 	{
-		public PDFExporterOptionsForm(FontMappings fonts, string installedFont, string otherFontPath, bool useOtherFont, string bkgndImagePath)
+		public PDFExporterOptionsForm(FontMappings fonts/*, string installedFont, bool useOtherFont, string otherFontPath, bool useWatermark, string bkgndImagePath*/)
 		{
 			InitializeComponent();
 
-			comboFont.Enabled = !useOtherFont;
-			checkOtherFont.Checked = useOtherFont;
-			editOtherFont.Enabled = useOtherFont;
-			editOtherFont.Text = otherFontPath;
-			btnBrowseOtherFont.Enabled = useOtherFont;
-			editWatermarkImage.Text = bkgndImagePath;
-
-			BuildFontCombo(fonts, installedFont);
+			BuildFontCombo(fonts);
 			UpdateOKButton();
 		}
 
@@ -35,39 +28,100 @@ namespace PDFExporter
 		{
 			get
 			{
-				return comboFont.SelectedItem?.ToString();
+				var font = comboInstalledFont.SelectedItem?.ToString();
+				return string.IsNullOrWhiteSpace(font) ? "Verdana" : font;
 			}
-		}
 
-		public string OtherFontPath { get { return editOtherFont.Text; } }
-		public bool UseOtherFont { get { return (checkOtherFont.Checked && !string.IsNullOrWhiteSpace(OtherFontPath)); } }
-		public string WatermarkImagePath { get { return editWatermarkImage.Text; } }
-
-		private void BuildFontCombo(FontMappings fonts, string installedFont)
-		{
-			comboFont.SelectedItem = null;
-
-			foreach (var fileFont in fonts.FileToName)
+			set
 			{
-				comboFont.Items.Add(fileFont.Value);
-
-				if (comboFont.SelectedItem == null)
+				if (!string.IsNullOrWhiteSpace(value))
 				{
-					if (String.Compare(fileFont.Value, installedFont, true) == 0)
-						comboFont.SelectedItem = fileFont.Value;
+					int font = comboInstalledFont.FindStringExact(value);
+
+					if (font != -1)
+						comboInstalledFont.SelectedIndex = font;
 				}
 			}
 		}
 
-		private void OnCheckChangeOtherFont(object sender, EventArgs e)
+		public bool UseOtherFont
 		{
-			bool otherFont = checkOtherFont.Checked;
+			get
+			{
+				return (radioOtherFont.Checked && !string.IsNullOrWhiteSpace(OtherFontFile));
+			}
 
-			comboFont.Enabled = !otherFont;
-			editOtherFont.Enabled = otherFont;
-			btnBrowseOtherFont.Enabled = otherFont;
+			set
+			{
+				editOtherFont.Enabled = value;
+				btnBrowseOtherFont.Enabled = value;
+				comboInstalledFont.Enabled = !value;
+			}
+		}
 
-			UpdateOKButton();
+		public string OtherFontFile
+		{
+			get
+			{
+				return editOtherFont.Text;
+			}
+
+			set
+			{
+				editOtherFont.Text = value;
+			}
+		}
+
+		public bool ApplyFontToAllContent
+		{
+			get
+			{
+				return radioApplyFontToAll.Checked;
+			}
+
+			set
+			{
+				radioApplyFontToAll.Checked = value;
+				radioApplyFontAsReq.Checked = !value;
+			}
+		}
+
+		public bool UseWatermarkImage
+		{
+			get
+			{
+				return (checkWatermarkImage.Checked && !string.IsNullOrWhiteSpace(WatermarkImagePath));
+			}
+
+			set
+			{
+				checkWatermarkImage.Checked = value;
+
+				editWatermarkImage.Enabled = value;
+				btnBrowseWatermarkImage.Enabled = value;
+			}
+
+		}
+
+		public string WatermarkImagePath
+		{
+			get
+			{
+				return editWatermarkImage.Text;
+			}
+
+			set
+			{
+				editWatermarkImage.Text = value;
+			}
+		}
+
+		private void BuildFontCombo(FontMappings fonts)
+		{
+			comboInstalledFont.SelectedItem = null;
+
+			foreach (var fileFont in fonts.FileToName)
+				comboInstalledFont.Items.Add(fileFont.Value);
 		}
 
 		private void OnBrowseOtherFont(object sender, EventArgs e)
@@ -101,7 +155,10 @@ namespace PDFExporter
 
 		private void UpdateOKButton()
 		{
-			btnOK.Enabled = (!UseOtherFont || File.Exists(editOtherFont.Text));
+			if (UseOtherFont)
+				btnOK.Enabled = File.Exists(OtherFontFile);
+			else
+				btnOK.Enabled = !string.IsNullOrWhiteSpace(InstalledFont);
 		}
 
 		private void OnBrowseWatermarkImage(object sender, EventArgs e)
@@ -121,6 +178,25 @@ namespace PDFExporter
 			{
 				editWatermarkImage.Text = dlg.FileName;
 			}
+		}
+
+		private void OnCheckChangeWatermark(object sender, EventArgs e)
+		{
+			bool useWatermark = checkWatermarkImage.Checked;
+
+			editWatermarkImage.Enabled = useWatermark;
+			btnBrowseWatermarkImage.Enabled = useWatermark;
+		}
+
+		private void OnChangeFontType(object sender, EventArgs e)
+		{
+			bool otherFont = radioOtherFont.Checked;
+
+			comboInstalledFont.Enabled = !otherFont;
+			editOtherFont.Enabled = otherFont;
+			btnBrowseOtherFont.Enabled = otherFont;
+
+			UpdateOKButton();
 		}
 	}
 }

@@ -92,6 +92,7 @@ namespace PDFExporter
 		private string m_BaseFontName;
 		private float m_BaseFontSize;
 		private string m_WatermarkImagePath;
+		private bool m_ApplyBaseFontToAllContent;
 
 		// --------------------------------------------------------------------------------------
 
@@ -104,25 +105,30 @@ namespace PDFExporter
 			m_FontMappings = new FontMappings();
 			m_BaseFontSize = 10f;
 			m_BaseFontName = "Verdana";
+			m_ApplyBaseFontToAllContent = true;
 		}
 
 		protected bool InitConsts(TaskList tasks, string destFilePath, bool silent, Preferences prefs, string sKey)
 		{
 			// Load Settings
-			var installedFont = prefs.GetProfileString(sKey, "InstalledFont", "");
-			var otherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", "");
-			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
-			var watermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "");
-
 			int fontSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
 			m_BaseFontSize = HtmlFontConversion.PointsFromHtml((HtmlFontSize)fontSize);
 
+			var installedFont = prefs.GetProfileString(sKey, "InstalledFont", "");
 			var defaultHtmlFont = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
 
 			if (string.IsNullOrEmpty(installedFont))
 				installedFont = defaultHtmlFont;
 
-			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings, installedFont, otherFontFile, useOtherFont, watermarkImagePath);
+			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings)
+			{
+				InstalledFont = installedFont,
+				UseOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false),
+				OtherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", ""),
+				ApplyFontToAllContent = prefs.GetProfileBool(sKey, "ApplyFontToAllContent", true),
+				UseWatermarkImage = prefs.GetProfileBool(sKey, "UseWatermarkImage", false),
+				WatermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "")
+			};
 
 			if (!silent && (optionsDlg.ShowDialog() == DialogResult.Cancel))
 				return false;
@@ -134,18 +140,25 @@ namespace PDFExporter
 			else
 				prefs.WriteProfileString(sKey, "InstalledFont", optionsDlg.InstalledFont);
 
-			prefs.WriteProfileString(sKey, "OtherFontFile", optionsDlg.OtherFontPath);
 			prefs.WriteProfileBool(sKey, "UseOtherFont", optionsDlg.UseOtherFont);
-			prefs.WriteProfileString(sKey, "BkgndImagePath", optionsDlg.WatermarkImagePath);
+			prefs.WriteProfileString(sKey, "OtherFontFile", optionsDlg.OtherFontFile);
+			prefs.WriteProfileBool(sKey, "ApplyFontToAllContent", optionsDlg.ApplyFontToAllContent);
+			prefs.WriteProfileBool(sKey, "UseWatermarkImage", optionsDlg.UseWatermarkImage);
+			prefs.WriteProfileString(sKey, "WatermarkImagePath", optionsDlg.WatermarkImagePath);
+
+			m_ApplyBaseFontToAllContent = optionsDlg.ApplyFontToAllContent;
 
 			if (optionsDlg.UseOtherFont)
-				m_BaseFontName = m_FontMappings.GetFontFromFileName(optionsDlg.OtherFontPath);
+				m_BaseFontName = m_FontMappings.GetFontFromFileName(optionsDlg.OtherFontFile);
 			else
 				m_BaseFontName = optionsDlg.InstalledFont;
 
 			RegisterFont(m_BaseFontName); // always
 
-			m_WatermarkImagePath = optionsDlg.WatermarkImagePath;
+			if (optionsDlg.UseWatermarkImage)
+				m_WatermarkImagePath = optionsDlg.WatermarkImagePath;
+			else
+				m_WatermarkImagePath = "";
 
 			BuildAttributeList(tasks);
 
@@ -438,7 +451,7 @@ namespace PDFExporter
 							{
 								string fontName = chunk.Font.Familyname;
 
- 								//if (fontName == "unknown")
+ 								if (m_ApplyBaseFontToAllContent || (fontName == "unknown"))
 									fontName = m_BaseFontName;
 
 								chunk.Font = CreateFont(fontName, chunk.Font.Size, chunk.Font.Style, chunk.Font.Color);
