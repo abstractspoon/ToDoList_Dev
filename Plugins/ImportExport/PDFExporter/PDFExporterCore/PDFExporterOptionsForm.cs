@@ -16,7 +16,7 @@ namespace PDFExporter
 {
 	public partial class PDFExporterOptionsForm : Form
 	{
-		public PDFExporterOptionsForm(FontMappings fonts/*, string installedFont, bool useOtherFont, string otherFontPath, bool useWatermark, string bkgndImagePath*/)
+		public PDFExporterOptionsForm(FontMappings fonts)
 		{
 			InitializeComponent();
 
