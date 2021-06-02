@@ -33,7 +33,7 @@ namespace unvell.UIControls
 	{
 		public FontToolStripDropDown()
 		{
-			ComboBox.DrawMode = DrawMode.OwnerDrawFixed;
+			//ComboBox.DrawMode = DrawMode.OwnerDrawFixed;
 			ComboBox.DropDownHeight = 400;
 			ComboBox.DrawItem += new DrawItemEventHandler(ComboBox_DrawItem);
 
