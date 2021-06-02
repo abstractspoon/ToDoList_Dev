@@ -173,6 +173,7 @@ namespace MSDN.Html.Editor
         private const string INTERNAL_COMMAND_FORMATSUPERSCRIPT = "FormatSuperscript";
         private const string INTERNAL_COMMAND_FORMATSUBSCRIPT = "FormatSubscript";
         private const string INTERNAL_COMMAND_FORMATSTRIKEOUT = "FormatStrikeout";
+        private const string INTERNAL_COMMAND_FONTCOMBO = "FontCombo";
         private const string INTERNAL_COMMAND_FONTDIALOG = "FontDialog";
         private const string INTERNAL_COMMAND_FONTNORMAL = "FontNormal";
         private const string INTERNAL_COMMAND_TEXTCOLOR = "TextColor";
@@ -347,9 +348,13 @@ namespace MSDN.Html.Editor
             // This call is required by the Windows.Forms Form Designer.
             InitializeComponent();
 
-            // define the default values
-            // browser constants and commands
-            EMPTY_PARAMETER = System.Reflection.Missing.Value;
+			// Build font combo
+			foreach (var family in FontFamily.Families)
+				toolstripFontComboBox.ComboBox.Items.Add(family.Name);
+
+			// define the default values
+			// browser constants and commands
+			EMPTY_PARAMETER = System.Reflection.Missing.Value;
 
             // default values used to reset values
             _defaultBodyBackColor = Color.White;
@@ -2158,20 +2163,42 @@ namespace MSDN.Html.Editor
 
         } //EditRedo
 
-        #endregion
+		#endregion
 
-        #region Selected Text Formatting Operations
+		#region Selected Text Formatting Operations
 
-        /// <summary>
-        /// Ensures the toolbar is correctly displaying state
-        /// </summary>
-        virtual protected void OnSelectionChange()
+		/// <summary>
+		/// Ensures the toolbar is correctly displaying state
+		/// </summary>
+
+		[DllImport("User32.dll")]
+		static extern int PostMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
+
+		protected const int CB_SETCURSEL = 0x014E;
+
+		virtual protected void OnSelectionChange()
         {
             this.toolstripEditUndo.Enabled = CanEditUndo();
             this.contextEditUndo.Enabled = CanEditUndo();
-			
-            // review the bold state of the selected text
-            if (ExecuteCommandQuery(HTML_COMMAND_BOLD))
+
+			// Update font combo
+			var fontName = GetFontAttributes().Name;
+
+			if (!string.IsNullOrWhiteSpace(fontName))
+			{
+				int font = toolstripFontComboBox.FindStringExact(fontName);
+
+				if (font != toolstripFontComboBox.SelectedIndex)
+				{
+					// Post the change because:
+					// 1. Otherwise it will terminate any ongoing selection drag
+					// 2. It does not cause a selection change which we would need to ignore
+					PostMessage(toolstripFontComboBox.ComboBox.Handle, CB_SETCURSEL, font);
+				}
+			}
+
+			// review the bold state of the selected text
+			if (ExecuteCommandQuery(HTML_COMMAND_BOLD))
             {
                 this.toolstripFormatBold.Checked = true;
                 this.contextFormatBold.Checked = true;
@@ -2231,6 +2258,8 @@ namespace MSDN.Html.Editor
                 this.contextFormatStrikeout.Checked = false;
             }
 
+
+
         } //FormatSelectionChange
 
 		protected void UpdateEnabledState()
@@ -2253,6 +2282,7 @@ namespace MSDN.Html.Editor
 				this.toolstripFormatBold.Enabled = editable;
 				this.toolstripFormatUnderline.Enabled = editable;
 				this.toolstripFormatItalic.Enabled = editable;
+				this.toolstripFontComboBox.Enabled = editable;
 				this.toolstripFontDialog.Enabled = editable;
 				this.toolstripFontNormal.Enabled = editable;
 				this.toolstripTextColor.Enabled = editable;
@@ -3031,12 +3061,21 @@ namespace MSDN.Html.Editor
 
         } //FormatFontAttributesPrompt
 
+        public void FormatFontComboName()
+        {
+			var fontName = toolstripFontComboBox.SelectedItem?.ToString();
+			var font = GetFontAttributes();
 
-        /// <summary>
-        /// Method to display the system color dialog
-        /// Use use to set the selected text Color
-        /// </summary>
-        public void FormatTextColorPrompt()
+			if (!string.IsNullOrWhiteSpace(fontName) && (fontName != font.Name))
+                FormatFontAttributes(new HtmlFontProperty(fontName, font.Size, font.Bold, font.Italic, font.Underline, font.Strikeout, font.Subscript, font.Superscript));
+
+		} //FormatFontComboName
+
+		/// <summary>
+		/// Method to display the system color dialog
+		/// Use use to set the selected text Color
+		/// </summary>
+		public void FormatTextColorPrompt()
         {
             // display the Color dialog and use the selected color to modify text
             using (ColorDialog colorDialog = new ColorDialog())
@@ -4335,6 +4374,13 @@ namespace MSDN.Html.Editor
 			EditEnabled = !EditEnabled;
 		}
 
+		private void toolstripFontSelectionChanged(object sender, EventArgs e)
+		{
+			ToolStripItem combo = (ToolStripItem)sender;
+			string command = (string)combo.Tag;
+			ProcessCommand(command);
+		}
+
 		/// <summary>
 		/// General Context Meun processing method
 		/// Calls the ProcessCommand with the selected command Tag Text
@@ -4421,6 +4467,9 @@ namespace MSDN.Html.Editor
                         // FONT style creation
                         FormatFontAttributesPrompt();
                         break;
+                    case INTERNAL_COMMAND_FONTCOMBO:
+						FormatFontComboName();
+						break;
                     case INTERNAL_COMMAND_FONTNORMAL:
                         // FONT style remove
                         FormatRemove();

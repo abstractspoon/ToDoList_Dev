@@ -40,6 +40,8 @@
 			this.toolstripEditUndo = new System.Windows.Forms.ToolStripButton();
 			this.toolstripEditRedo = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+			this.toolstripFontComboBox = new System.Windows.Forms.ToolStripComboBox();
+			this.toolStripSeparator26 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolstripFormatBold = new System.Windows.Forms.ToolStripButton();
 			this.toolstripFormatUnderline = new System.Windows.Forms.ToolStripButton();
 			this.toolstripFormatItalic = new System.Windows.Forms.ToolStripButton();
@@ -96,6 +98,8 @@
 			this.toolStripSeparator16 = new System.Windows.Forms.ToolStripSeparator();
 			this.contextEditSelectAll = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextEditDelete = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator25 = new System.Windows.Forms.ToolStripSeparator();
+			this.contextDocumentEditHTML = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocument = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentNew = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextDocumentOpen = new System.Windows.Forms.ToolStripMenuItem();
@@ -149,8 +153,6 @@
 			this.contextInsertText = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertHtml = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextInsertTable = new System.Windows.Forms.ToolStripMenuItem();
-			this.contextDocumentEditHTML = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator25 = new System.Windows.Forms.ToolStripSeparator();
 			this.browserPanel.SuspendLayout();
 			this.toolstripEditor.SuspendLayout();
 			this.contextEditor.SuspendLayout();
@@ -188,6 +190,8 @@
             this.toolstripEditUndo,
             this.toolstripEditRedo,
             this.toolStripSeparator2,
+            this.toolstripFontComboBox,
+            this.toolStripSeparator26,
             this.toolstripFormatBold,
             this.toolstripFormatUnderline,
             this.toolstripFormatItalic,
@@ -225,6 +229,7 @@
 			this.toolstripEditor.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
 			this.toolstripEditor.Name = "toolstripEditor";
 			this.toolstripEditor.RenderMode = System.Windows.Forms.ToolStripRenderMode.System;
+			this.toolstripEditor.ShowItemToolTips = false;
 			// 
 			// toolstripEnableEditing
 			// 
@@ -293,6 +298,24 @@
 			// 
 			this.toolStripSeparator2.Name = "toolStripSeparator2";
 			resources.ApplyResources(this.toolStripSeparator2, "toolStripSeparator2");
+			// 
+			// toolstripFontComboBox
+			// 
+			this.toolstripFontComboBox.DropDownHeight = 400;
+			this.toolstripFontComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.toolstripFontComboBox.DropDownWidth = 200;
+			this.toolstripFontComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.toolstripFontComboBox.IntegralHeight = false;
+			this.toolstripFontComboBox.Name = "fontToolStripComboBox";
+			this.toolstripFontComboBox.Size = new System.Drawing.Size(200, 25);
+			this.toolstripFontComboBox.Tag = "FontCombo";
+			this.toolstripFontComboBox.ToolTipText = "Change font";
+			this.toolstripFontComboBox.SelectedIndexChanged += new System.EventHandler(this.toolstripFontSelectionChanged);
+			// 
+			// toolStripSeparator26
+			// 
+			this.toolStripSeparator26.Name = "toolStripSeparator26";
+			resources.ApplyResources(this.toolStripSeparator26, "toolStripSeparator26");
 			// 
 			// toolstripFormatBold
 			// 
@@ -734,6 +757,19 @@
 			this.contextEditDelete.Tag = "TextDelete";
 			this.contextEditDelete.Click += new System.EventHandler(this.contextEditorClick);
 			// 
+			// toolStripSeparator25
+			// 
+			this.toolStripSeparator25.Name = "toolStripSeparator25";
+			resources.ApplyResources(this.toolStripSeparator25, "toolStripSeparator25");
+			// 
+			// contextDocumentEditHTML
+			// 
+			this.contextDocumentEditHTML.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarEditHtml;
+			resources.ApplyResources(this.contextDocumentEditHTML, "contextDocumentEditHTML");
+			this.contextDocumentEditHTML.Name = "contextDocumentEditHTML";
+			this.contextDocumentEditHTML.Tag = "EditHTML";
+			this.contextDocumentEditHTML.Click += new System.EventHandler(this.contextEditorClick);
+			// 
 			// contextDocument
 			// 
 			this.contextDocument.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1149,19 +1185,6 @@
 			this.contextInsertTable.Tag = "InsertTable";
 			this.contextInsertTable.Click += new System.EventHandler(this.contextEditorClick);
 			// 
-			// contextDocumentEditHTML
-			// 
-			this.contextDocumentEditHTML.Image = global::MSDN.Html.Editor.Properties.Resources.ToolbarEditHtml;
-			resources.ApplyResources(this.contextDocumentEditHTML, "contextDocumentEditHTML");
-			this.contextDocumentEditHTML.Name = "contextDocumentEditHTML";
-			this.contextDocumentEditHTML.Tag = "EditHTML";
-			this.contextDocumentEditHTML.Click += new System.EventHandler(this.contextEditorClick);
-			// 
-			// toolStripSeparator25
-			// 
-			this.toolStripSeparator25.Name = "toolStripSeparator25";
-			resources.ApplyResources(this.toolStripSeparator25, "toolStripSeparator25");
-			// 
 			// HtmlEditorControl
 			// 
 			this.Controls.Add(this.toolstripEditor);
@@ -1301,5 +1324,7 @@
 		private System.Windows.Forms.ToolStripButton toolstripDocumentEditHTML;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator25;
 		private System.Windows.Forms.ToolStripMenuItem contextDocumentEditHTML;
+		private System.Windows.Forms.ToolStripComboBox toolstripFontComboBox;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator26;
 	}
 }
