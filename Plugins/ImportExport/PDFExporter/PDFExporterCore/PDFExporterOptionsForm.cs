@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
 using Microsoft.Win32;
+using Abstractspoon.Tdl.PluginHelpers;
 
 namespace PDFExporter
 {
@@ -53,6 +54,9 @@ namespace PDFExporter
 
 			set
 			{
+				radioOtherFont.Checked = value;
+				radioInstalledFont.Checked = !value;
+
 				editOtherFont.Enabled = value;
 				btnBrowseOtherFont.Enabled = value;
 				comboInstalledFont.Enabled = !value;
@@ -120,8 +124,13 @@ namespace PDFExporter
 		{
 			comboInstalledFont.SelectedItem = null;
 
-			foreach (var fileFont in fonts.FileToName)
-				comboInstalledFont.Items.Add(fileFont.Value);
+			foreach (var fileFont in fonts.FileToNames)
+			{
+				foreach (var fontName in fileFont.Value)
+					comboInstalledFont.Items.Add(fontName);
+			}
+
+			FormsUtil.RecalcDropWidth(comboInstalledFont);
 		}
 
 		private void OnBrowseOtherFont(object sender, EventArgs e)

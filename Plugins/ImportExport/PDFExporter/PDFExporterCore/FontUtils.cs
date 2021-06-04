@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
-using System.Windows.Forms;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 using Microsoft.Win32;
@@ -20,51 +20,65 @@ namespace PDFExporter
 		{
 			return (string.Compare(Path.GetExtension(filename), ".ttf", true) == 0);
 		}
+
+		// ------------------------------------------------------------------
+		[DllImport("gdi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+		public static extern int RemoveFontResourceEx(string lpszFilename, int fl, IntPtr pdv);
+
+		private static int FR_PRIVATE = 16;
+		// ------------------------------------------------------------------
+
+		public static List<string> GetFontNamesFromFile(string fileName)
+		{
+			var fontNames = new List<string>();
+
+			if (FontUtils.IsTTFFile(fileName))
+			{
+				var fc = new PrivateFontCollection();
+				try
+				{
+					fc.AddFontFile(fileName);
+
+					foreach (var family in fc.Families)
+						fontNames.Add(family.Name);
+				}
+				catch (Exception)
+				{
+					fontNames.Clear();
+				}
+
+				fc.Dispose();
+
+				// There is a bug in PrivateFontCollection::Dispose()
+				// which does not release the font file in GDI32.dll
+				// This results in duplicate font names for anyone 
+				// calling the Win32 function EnumFonts.
+				RemoveFontResourceEx(fileName, FR_PRIVATE, IntPtr.Zero);
+			}
+
+			return fontNames;
+		}
 	}
 
 	public class FontMappings
 	{
 		private Dictionary<string, string> m_NameToFile;
-		private Dictionary<string, string> m_FileToName;
+		private Dictionary<string, IEnumerable<string>> m_FileToNames;
 
 		// ---------------------------------------------------------------
 
 		public FontMappings()
 		{
-			BuildFontMappings();
+			BuildInstalledFontMappings();
 		}
 
-		private void BuildFontMappings()
+		private void BuildInstalledFontMappings()
 		{
 			m_NameToFile = new Dictionary<string, string>();
-			m_FileToName = new Dictionary<string, string>();
+			m_FileToNames = new Dictionary<string, IEnumerable<string>>();
 
-			// Avoid duplicates
-			var addedFonts = new HashSet<string>();
-
-			foreach (var family in FontFamily.Families)
-			{
-				var fontName = family.Name;
-
-				if (!string.IsNullOrEmpty(fontName) && !addedFonts.Contains(fontName))
-				{
-					var fontFile = GetFileNameFromFont(fontName);
-
-					if (!string.IsNullOrEmpty(fontFile))
-					{
-						m_NameToFile[fontName.ToUpper()] = fontFile;
-						m_FileToName[fontFile.ToUpper()] = fontName;
-					}
-
-					addedFonts.Add(fontName);
-				}
-			}
-		}
-
-		public static string GetFileNameFromFont(string fontName, bool bold = false, bool italic = false)
-		{
+			// Build font file list, ordered by 'Regular' font first
 			RegistryKey fonts = null;
-			string fontFile = String.Empty;
 
 			try
 			{
@@ -75,27 +89,28 @@ namespace PDFExporter
 
 				if (fonts != null)
 				{
-					string suffix = "";
+					string[] regFontNames = fonts.GetValueNames();
 
-					if (bold)
-						suffix += "(?: Bold)?";
-
-					if (italic)
-						suffix += "(?: Italic)?";
-
-					var regex = new Regex(@"^(?:.+ & )?" + Regex.Escape(fontName) + @"(?: & .+)?(?<suffix>" + suffix + @") \(TrueType\)$", RegexOptions.Compiled);
-
-					string[] names = fonts.GetValueNames();
-
-					string name = names.Select(n => regex.Match(n)).Where(m => m.Success).OrderByDescending(m => m.Groups["suffix"].Length).Select(m => m.Value).FirstOrDefault();
-
-					if (name != null)
+					foreach (var regFontName in regFontNames)
 					{
-						fontFile = fonts.GetValue(name).ToString();
+						var fontFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), 
+													fonts.GetValue(regFontName).ToString());
 
-						// iTextSharp only supports .ttf files
 						if (!FontUtils.IsTTFFile(fontFile))
-							fontFile = null;
+							continue;
+
+						var fontNames = FontUtils.GetFontNamesFromFile(fontFile);
+
+						foreach (var fontName in fontNames)
+						{
+							var name = fontName;
+
+							name = name.Replace(" Bold", "");
+							name = name.Replace(" Italic", "");
+							name = name.Replace(" (TrueType)", "");
+
+							RegisterFont(name, fontFile);
+						}
 					}
 				}
 			}
@@ -104,18 +119,18 @@ namespace PDFExporter
 				if (fonts != null)
 					fonts.Dispose();
 			}
-
-			if (!string.IsNullOrEmpty(fontFile))
-				fontFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), fontFile);
-
-			return fontFile;
 		}
 
 		public string GetFontFromFileName(string fileName)
 		{
 			fileName = fileName.ToUpper();
 
-			return m_FileToName.ContainsKey(fileName) ? m_FileToName[fileName] : "";
+			if (!m_FileToNames.ContainsKey(fileName))
+				return "";
+
+			var names = m_FileToNames[fileName] as List<string>;
+
+			return names[0];
 		}
 
 		public string GetFontFileName(string fontName)
@@ -135,9 +150,52 @@ namespace PDFExporter
 			get { return m_NameToFile; }
 		}
 
-		public IEnumerable<KeyValuePair<string, string>> FileToName
+		public IEnumerable<KeyValuePair<string, IEnumerable<string>>> FileToNames
 		{
-			get { return m_FileToName; }
+			get { return m_FileToNames; }
+		}
+
+		public bool RegisterFile(string fontFile)
+		{
+			if (m_FileToNames.ContainsKey(fontFile.ToUpper()))
+				return true;
+
+			if (!FontUtils.IsTTFFile(fontFile))
+				return false;
+
+			var fontNames = FontUtils.GetFontNamesFromFile(fontFile);
+
+			if (fontNames.Count == 0)
+				return false;
+			
+			return RegisterFont(fontNames[0], fontFile);
+		}
+
+		private bool RegisterFont(string fontName, string fontFile)
+		{
+			if (string.IsNullOrWhiteSpace(fontName) || !File.Exists(fontFile))
+				return false;
+
+			// Register file to name, first checking for prior registration
+			var nameKey = fontName.ToUpper();
+
+			if (m_NameToFile.ContainsKey(nameKey))
+				return false;
+
+			m_NameToFile[nameKey] = fontFile;
+
+			// Register name to file
+			var fileKey = fontFile.ToUpper();
+
+			if (!m_FileToNames.ContainsKey(fileKey))
+				m_FileToNames[fileKey] = new List<string>();
+
+			var names = (m_FileToNames[fileKey] as List<string>);
+			Debug.Assert(!names.Contains(fontName)); // name check above should prevent this
+
+			names.Add(fontName);
+
+			return true;
 		}
 	}
 }

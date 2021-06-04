@@ -120,11 +120,13 @@ namespace PDFExporter
 			if (string.IsNullOrEmpty(installedFont))
 				installedFont = defaultHtmlFont;
 
+			bool useOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false);
+
 			var optionsDlg = new PDFExporterOptionsForm(m_FontMappings)
 			{
 				InstalledFont = installedFont,
-				UseOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false),
 				OtherFontFile = prefs.GetProfileString(sKey, "OtherFontFile", ""),
+				UseOtherFont = prefs.GetProfileBool(sKey, "UseOtherFont", false),
 				ApplyFontToAllContent = prefs.GetProfileBool(sKey, "ApplyFontToAllContent", true),
 				UseWatermarkImage = prefs.GetProfileBool(sKey, "UseWatermarkImage", false),
 				WatermarkImagePath = prefs.GetProfileString(sKey, "WatermarkImagePath", "")
@@ -148,7 +150,7 @@ namespace PDFExporter
 
 			m_ApplyBaseFontToAllContent = optionsDlg.ApplyFontToAllContent;
 
-			if (optionsDlg.UseOtherFont)
+			if (optionsDlg.UseOtherFont && m_FontMappings.RegisterFile(optionsDlg.OtherFontFile))
 				m_BaseFontName = m_FontMappings.GetFontFromFileName(optionsDlg.OtherFontFile);
 			else
 				m_BaseFontName = optionsDlg.InstalledFont;
