@@ -1548,8 +1548,10 @@ namespace MSDN.Html.Editor
             set
             {
                 // set the new value using the default if set to null
-                if (HtmlFontProperty.IsNotNull(value)) _bodyFont = value;
-                else _bodyFont = _defaultFont;
+                if (HtmlFontProperty.IsNotNull(value))
+					_bodyFont = value;
+                else
+					_bodyFont = _defaultFont;
 
                 // set the font attributes based on any body styles
                 mshtmlStyle bodyStyle = body.style;
@@ -1571,6 +1573,8 @@ namespace MSDN.Html.Editor
 						bodyStyle.fontSize = _bodyFont.SizeAsString;
                     }
                 }
+
+				OnSelectionChange();
             }
 
         } //BodyFont
@@ -3129,8 +3133,8 @@ namespace MSDN.Html.Editor
             }
             else
             {
-                // no rnage selected so return null
-                return _defaultFont;
+                // no rnage selected so return default
+                return _bodyFont;
             }
 
         } //GetFontAttributes
