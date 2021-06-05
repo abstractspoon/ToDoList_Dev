@@ -34,6 +34,7 @@
 #include "..\shared\enstring.h"
 #include "..\shared\colourpopupEx.h"
 #include "..\shared\Localizer.h"
+#include "..\shared\DialogHelper.h"
 
 
 #include <tchar.h>
@@ -52,7 +53,7 @@ extern UINT urm_SETCURRENTFONTCOLOR;
 /////////////////////////////////////////////////////////////////////////////
 
 const int COMBO_VOFFSET			= (GraphicsMisc::ScaleByDPIFactor(2) - 1);
-const int FONT_COMBO_WIDTH		= GraphicsMisc::ScaleByDPIFactor(128);
+const int FONT_COMBO_WIDTH		= GraphicsMisc::ScaleByDPIFactor(160);
 const int SIZE_COMBO_WIDTH		= GraphicsMisc::ScaleByDPIFactor(48);
 const int COMBO_HEIGHT			= GraphicsMisc::ScaleByDPIFactor(256);
 const int COMBO_WIDTH			= GraphicsMisc::ScaleByDPIFactor(40);
@@ -148,7 +149,7 @@ BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
 		CLocalizer::EnableTranslation(m_font, FALSE);
 		m_font.SetFont(CFont::FromHandle((HFONT) ::GetStockObject(DEFAULT_GUI_FONT)));
 		m_font.FillCombo();
-		m_font.SetMaxWidth(FONT_COMBO_WIDTH);
+		CDialogHelper::RefreshMaxDropWidth(m_font);
 		
 		// The font size combo
 		tbi.cx = (WORD)COMBO_WIDTH;
