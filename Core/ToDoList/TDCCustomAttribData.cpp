@@ -167,6 +167,13 @@ COleDateTime TDCCADATA::AsDate() const
 	if (sData.IsEmpty())
 		return CDateHelper::NullDate();
 
+	// Try decoding the date string first
+	COleDateTime date;
+
+	if (CDateHelper::DecodeDate(sData, date, TRUE))
+		return date;
+	
+	// else
 	return _ttof(sData); 
 }
 
