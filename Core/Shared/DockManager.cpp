@@ -248,6 +248,14 @@ LRESULT CDockManager::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM 
 			}
 			break;
 
+		case SC_MINIMIZE:
+			{
+				// Don't update position of dock window at all
+				CAutoFlag af(m_bResizeUpdate, FALSE);
+				return Default();
+			}
+			break;
+
 		case SC_CLOSE:
 			// Don't update position of dock window at all
 			// Note: Don't use CAutoFlag because 'm_bResizeUpdate'
