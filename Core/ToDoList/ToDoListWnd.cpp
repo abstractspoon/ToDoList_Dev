@@ -1193,13 +1193,13 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 				m_sCurrentFocus.LoadString(IDS_QUICKFIND);
 			}
 			else if (m_dlgFindTasks.GetSafeHwnd() && m_dlgFindTasks.IsChild(pFocus))
-				{
-					m_sCurrentFocus.LoadString(IDS_FINDTASKS);
-				}
-				else if (m_filterBar.GetSafeHwnd() && m_filterBar.IsChild(pFocus))
-				{
-					m_sCurrentFocus.LoadString(IDS_FOCUS_FILTERBAR);
-				}
+			{
+				m_sCurrentFocus.LoadString(IDS_FINDTASKS);
+			}
+			else if (m_filterBar.GetSafeHwnd() && m_filterBar.IsChild(pFocus))
+			{
+				m_sCurrentFocus.LoadString(IDS_FOCUS_FILTERBAR);
+			}
 			else if (m_dlgTimeTracker.GetSafeHwnd() && m_dlgTimeTracker.IsChild(pFocus))
 			{
 				m_sCurrentFocus.LoadString(IDS_FOCUS_TIMETRACKER);
