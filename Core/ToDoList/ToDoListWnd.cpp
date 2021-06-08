@@ -645,6 +645,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_TOOLS_USERTOOL1, ID_TOOLS_USERTOOL50, OnUpdateUserTool)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDTASK, ID_VIEW_COLLAPSEALL, OnUpdateViewExpandTasks)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnUpdateViewExpandTasks)
+	ON_WM_ACTIVATE()
 	ON_WM_ACTIVATEAPP()
 	ON_WM_CONTEXTMENU()
 	ON_WM_COPYDATA()
@@ -1187,13 +1188,11 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 				m_sCurrentFocus += ": ";
 				m_sCurrentFocus += tdc.GetControlDescription(pFocus);
 			}
-			else if (m_cbQuickFind.GetSafeHwnd() && (pFocus == m_cbQuickFind.GetWindow(GW_CHILD)))
+			else if (m_cbQuickFind.GetSafeHwnd() && m_cbQuickFind.IsChild(pFocus))
 			{
 				m_sCurrentFocus.LoadString(IDS_QUICKFIND);
 			}
-			else
-			{
-				if (m_dlgFindTasks.GetSafeHwnd() && m_dlgFindTasks.IsChild(pFocus))
+			else if (m_dlgFindTasks.GetSafeHwnd() && m_dlgFindTasks.IsChild(pFocus))
 				{
 					m_sCurrentFocus.LoadString(IDS_FINDTASKS);
 				}
@@ -1201,11 +1200,13 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 				{
 					m_sCurrentFocus.LoadString(IDS_FOCUS_FILTERBAR);
 				}
-			
-				if (!m_sCurrentFocus.IsEmpty())
-					m_sCurrentFocus += ": ";
-			
-				m_sCurrentFocus += GetCtrlLabel(pFocus);
+			else if (m_dlgTimeTracker.GetSafeHwnd() && m_dlgTimeTracker.IsChild(pFocus))
+			{
+				m_sCurrentFocus.LoadString(IDS_FOCUS_TIMETRACKER);
+			}
+			else if (m_dlgReminders.GetSafeHwnd() && m_dlgReminders.IsChild(pFocus))
+			{
+				m_sCurrentFocus.LoadString(IDS_FOCUS_REMINDERS);
 			}		
 
 			// limit length of string
@@ -11173,6 +11174,8 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, DWORD dwThreadID)
 void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask) 
 #endif
 {
+ 	//TRACE(_T("OnActivateApp(%s)\n"), bActive ? _T("TRUE") : _T("FALSE"));
+
 	// don't activate when in the middle of loading
 	if (m_bReloading && !bActive)
 		return;
@@ -11191,9 +11194,9 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 	if (bActive)
 		OnTimerCheckReloadTasklists(-1, TRUE);
 
-	// Don't do any further processing if the Reminder dialog is active
-	// because the two windows get into a fight for activation!
-	if (m_dlgReminders.IsForegroundWindow())
+	// Don't do any further processing if the Reminder window or Time tracker
+	// is active because the two windows get into a fight for activation!
+	if (m_dlgReminders.IsForegroundWindow() || m_dlgTimeTracker.IsForegroundWindow())
 		return;
 
 	if (!bActive)
@@ -11235,6 +11238,20 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 			PostAppRestoreFocus();
 
 		UpdateCwd();
+	}
+}
+
+void CToDoListWnd::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
+{
+	CFrameWnd::OnActivate(nState, pWndOther, bMinimized);
+
+	// If we are being activated as a consequence of closing
+	// the time tracker or the reminder window then we set the 
+	// focus back to the active tasklist
+	if ((nState == WA_ACTIVE) && (GetTDCCount() > 0) &&
+		((pWndOther == &m_dlgReminders) || (pWndOther == &m_dlgTimeTracker)))
+	{
+		GetToDoCtrl().SetFocusToTasks();
 	}
 }
 

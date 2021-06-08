@@ -46,6 +46,7 @@ public:
 	const CFilteredToDoCtrl* GetSelectedTasklist() const;
 	DWORD GetSelectedTaskID() const { return m_cbTasks.GetSelectedTaskID(); }
 	BOOL IsAlwaysOnTop() const { return m_bAlwaysOnTop; }
+	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
 		
 protected:
 	enum { IDD = IDD_TIMETRACK_DIALOG };

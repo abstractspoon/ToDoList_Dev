@@ -2411,6 +2411,8 @@
 #define IDS_LISTVIEW_HIDENOGROUPVALUE   51591
 #define IDS_QUICKFIND_PREVMATCH         51592
 #define IDS_QUICKFIND_NEXTMATCH         51593
+#define IDS_FOCUS_REMINDERS             51594
+#define IDS_FOCUS_TIMETRACKER           51595
 
 // Next default values for new objects
 // 

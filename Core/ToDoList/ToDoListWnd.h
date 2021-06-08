@@ -355,6 +355,7 @@ protected:
 #else
 	afx_msg void OnActivateApp(BOOL bActive, HTASK hTask);
 #endif
+	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);

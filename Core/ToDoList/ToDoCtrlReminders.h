@@ -23,7 +23,7 @@ class CTDCAttributeMap;
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrlReminders window
 
-class CToDoCtrlReminders : protected CTDLShowReminderDlg
+class CToDoCtrlReminders : public CTDLShowReminderDlg
 {
 // Construction
 public:
@@ -33,7 +33,6 @@ public:
 	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath);
 
 	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
-	BOOL DestroyWindow() { return CTDLShowReminderDlg::DestroyWindow(); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
 
 	void AddToDoCtrl(const CFilteredToDoCtrl* pTDC);
