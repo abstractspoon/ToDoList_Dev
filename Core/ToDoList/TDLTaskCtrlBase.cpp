@@ -368,16 +368,11 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 
 				const TDCDEPENDENCY& depend = pTDI->aDependencies[nDepend];
 				
-				sTooltip += depend.Format(); // always
-
 				// If local, append task name
 				if (depend.IsLocal() && m_data.HasTask(depend.dwTaskID))
-				{
-					sTooltip += ' ';
-					sTooltip += '(';
-					sTooltip += m_data.GetTaskTitle(depend.dwTaskID);
-					sTooltip += ')';
-				}
+					sTooltip += Misc::Format(_T("%s (%s)"), depend.Format(), m_data.GetTaskTitle(depend.dwTaskID));
+				else
+					sTooltip += depend.Format();
 			}			
 			return GetUniqueToolTipID(dwTaskID, nColID);
 		}
@@ -419,10 +414,23 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 
 			if (nIndex != -1)
 			{
-				CString sFile(pTDI->aFileLinks[nIndex]);
-				VERIFY(FileMisc::ExpandPathEnvironmentVariables(sFile));
+				// Append the task name if the link is to a local task 
+				CString sFile;
+				DWORD dwRefTaskID = 0;
 
-				sTooltip = FileMisc::GetFullPath(sFile, m_sTasklistFolder);
+				if (TDCTASKLINK::Parse(pTDI->aFileLinks[nIndex], TRUE, m_sTasklistFolder, dwRefTaskID, sFile) && 
+					m_data.HasTask(dwRefTaskID) && sFile.IsEmpty())
+				{
+					sTooltip.Format(_T("%s (%s)"), pTDI->aFileLinks[nIndex], m_data.GetTaskTitle(dwRefTaskID));
+				}
+				else
+				{
+					CString sFile(pTDI->aFileLinks[nIndex]);
+					VERIFY(FileMisc::ExpandPathEnvironmentVariables(sFile));
+
+					sTooltip = FileMisc::GetFullPath(sFile, m_sTasklistFolder);
+				}
+				
 				return GetUniqueToolTipID(dwTaskID, nColID, nIndex);
 			}
 		}
