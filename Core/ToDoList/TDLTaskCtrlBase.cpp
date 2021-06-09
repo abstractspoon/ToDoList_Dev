@@ -368,9 +368,17 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 
 				const TDCDEPENDENCY& depend = pTDI->aDependencies[nDepend];
 				
-				// If local, append task name
-				if (depend.IsLocal() && m_data.HasTask(depend.dwTaskID))
-					sTooltip += Misc::Format(_T("%s (%s)"), depend.Format(), m_data.GetTaskTitle(depend.dwTaskID));
+				// Convert to a task link and send to parent
+				CString sLink = depend.Format(_T(""), TRUE);
+
+				TOOLTIPTEXT tip = { 0 };
+
+				tip.hdr.hwndFrom = GetSafeHwnd();
+				tip.hdr.idFrom = CWnd::GetDlgCtrlID();
+				tip.hdr.code = TTN_NEEDTEXT;
+
+				if (CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)(LPCTSTR)sLink, (LPARAM)&tip))
+					sTooltip += tip.szText;
 				else
 					sTooltip += depend.Format();
 			}			
@@ -414,14 +422,19 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 
 			if (nIndex != -1)
 			{
-				// Append the task name if the link is to a local task 
-				CString sFile;
-				DWORD dwRefTaskID = 0;
-
-				if (TDCTASKLINK::Parse(pTDI->aFileLinks[nIndex], TRUE, m_sTasklistFolder, dwRefTaskID, sFile) && 
-					m_data.HasTask(dwRefTaskID) && sFile.IsEmpty())
+				// Forward to parent
+				if (TDCTASKLINK::IsTaskLink(pTDI->aFileLinks[nIndex], TRUE))
 				{
-					sTooltip.Format(_T("%s (%s)"), pTDI->aFileLinks[nIndex], m_data.GetTaskTitle(dwRefTaskID));
+					TOOLTIPTEXT tip = { 0 };
+
+					tip.hdr.hwndFrom = GetSafeHwnd();
+					tip.hdr.idFrom = CWnd::GetDlgCtrlID();
+					tip.hdr.code = TTN_NEEDTEXT;
+
+					sTooltip = pTDI->aFileLinks[nIndex];
+
+					if (CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)(LPCTSTR)sTooltip, (LPARAM)&tip))
+						sTooltip = tip.szText;
 				}
 				else
 				{

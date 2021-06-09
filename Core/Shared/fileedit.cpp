@@ -634,17 +634,27 @@ CString CFileEdit::GetBrowseTitle(BOOL bFolder) const
 
 int CFileEdit::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 {
-	if (m_bTipNeeded)
+	CRect rClient;
+	GetClientRect(rClient);
+
+	if (rClient.PtInRect(point))
 	{
-		CRect rClient;
-		GetClientRect(rClient);
+		CString sFilePath;
+		GetWindowText(sFilePath);
 
-		if (rClient.PtInRect(point))
+		if (!sFilePath.IsEmpty())
 		{
-			CString sFilePath;
-			GetWindowText(sFilePath);
+			// If the parent provides a tooltip then we always show it
+			// else we just use the filepath
+			CString sTooltip((LPCTSTR)GetParent()->SendMessage(WM_FE_GETFILETOOLTIP, GetDlgCtrlID(), (LPARAM)(LPCTSTR)sFilePath));
 
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sFilePath, 0xffff, rClient);
+			if (!sTooltip.IsEmpty() || m_bTipNeeded)
+			{
+				if (sTooltip.IsEmpty())
+					sTooltip = sFilePath;
+
+				return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, 0xffff, rClient);
+			}
 		}
 	}
 

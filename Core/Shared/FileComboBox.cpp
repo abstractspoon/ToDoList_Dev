@@ -67,6 +67,7 @@ BEGIN_MESSAGE_MAP(CFileComboBox, CAutoComboBox)
 	ON_WM_SIZE()
 	ON_REGISTERED_MESSAGE(WM_FEN_BROWSECHANGE, OnFileEditBrowseChange)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditGetFileIcon)
+	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileEditGetFileTooltip)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
 	ON_WM_CTLCOLOR()
@@ -198,8 +199,17 @@ LRESULT CFileComboBox::OnFileEditGetFileIcon(WPARAM wp, LPARAM lp)
 	ASSERT(wp == 1001);
 	ASSERT(lp);
 
-	// pass to parent
+	// forward request to parent
 	return GetParent()->SendMessage(WM_FE_GETFILEICON, GetDlgCtrlID(), lp);
+}
+
+LRESULT CFileComboBox::OnFileEditGetFileTooltip(WPARAM wp, LPARAM lp)
+{
+	ASSERT(wp == 1001);
+	ASSERT(lp);
+
+	// forward request to parent
+	return GetParent()->SendMessage(WM_FE_GETFILETOOLTIP, GetDlgCtrlID(), lp);
 }
 
 LRESULT CFileComboBox::OnFileEditDisplayFile(WPARAM wp, LPARAM lp)
@@ -207,7 +217,7 @@ LRESULT CFileComboBox::OnFileEditDisplayFile(WPARAM wp, LPARAM lp)
 	ASSERT(wp == 1001);
 	ASSERT(lp);
 
-	// pass to parent
+	// forward request to parent
 	return GetParent()->SendMessage(WM_FE_DISPLAYFILE, GetDlgCtrlID(), lp);
 }
 

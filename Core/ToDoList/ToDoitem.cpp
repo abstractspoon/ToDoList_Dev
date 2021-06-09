@@ -294,9 +294,9 @@ BOOL TDCDEPENDENCY::operator!=(const TDCDEPENDENCY& other) const
 	return !(*this == other);
 }
 
-CString TDCDEPENDENCY::Format(const CString& sFolder) const
+CString TDCDEPENDENCY::Format(const CString& sFolder, BOOL bUrl) const
 {
-	return Format(dwTaskID, sTasklist, sFolder);
+	return Format(dwTaskID, sTasklist, sFolder, bUrl);
 }
 
 CString TDCDEPENDENCY::GetFullPath(const CString& sFolder) const
@@ -330,13 +330,19 @@ BOOL TDCDEPENDENCY::IsLocal() const
 	return (dwTaskID && sTasklist.IsEmpty());
 }
 
-CString TDCDEPENDENCY::Format(DWORD dwTaskID, const CString& sFile, const CString& sFolder)
+CString TDCDEPENDENCY::Format(DWORD dwTaskID, const CString& sFile, const CString& sFolder, BOOL bUrl)
 {
 	if (!sFile.IsEmpty())
-		return TDCTASKLINK::Format(dwTaskID, FALSE, FileMisc::GetFullPath(sFile, sFolder));
+	{
+		if (!sFolder.IsEmpty())
+			return TDCTASKLINK::Format(dwTaskID, bUrl, FileMisc::GetFullPath(sFile, sFolder));
+
+		// else
+		return TDCTASKLINK::Format(dwTaskID, bUrl, sFile);
+	}
 
 	// else
-	return TDCTASKLINK::Format(dwTaskID, FALSE);
+	return TDCTASKLINK::Format(dwTaskID, bUrl);
 }
 
 BOOL TDCDEPENDENCY::IsValid() const

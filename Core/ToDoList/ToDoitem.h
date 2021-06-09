@@ -98,14 +98,14 @@ struct TDCDEPENDENCY
 	BOOL operator==(const TDCDEPENDENCY& other) const;
 	BOOL operator!=(const TDCDEPENDENCY& other) const;
 
-	CString Format(const CString& sFolder = _T("")) const;
+	CString Format(const CString& sFolder = _T(""), BOOL bUrl = FALSE) const;
 	CString GetFullPath(const CString& sFolder) const;
 
 	BOOL Parse(LPCTSTR szDepends);
 	BOOL IsLocal() const;
 	BOOL IsValid() const;
 
-	static CString Format(DWORD dwTaskID, const CString& sFile = _T(""), const CString& sFolder = _T(""));
+	static CString Format(DWORD dwTaskID, const CString& sFile = _T(""), const CString& sFolder = _T(""), BOOL bUrl = FALSE);
 	static BOOL IsValid(DWORD dwTaskID, const CString& sFile = _T(""));
 
 	DWORD dwTaskID;

@@ -388,6 +388,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 
 	ON_REGISTERED_MESSAGE(WM_TDCN_COLUMNEDITCLICK, OnTDCColumnEditClick)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
+	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnTDCTaskIsDone)
 
@@ -441,6 +442,7 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_DD_PREDRAGMOVE, OnTreeDragPreMove)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditWantIcon)
+	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileEditWantTooltip)
 	ON_REGISTERED_MESSAGE(WM_PCANCELEDIT, OnLabelEditCancel)
 	ON_REGISTERED_MESSAGE(WM_PENDEDIT, OnLabelEditEnd)
 	ON_REGISTERED_MESSAGE(WM_TDL_APPLYADDLOGGEDTIME, OnApplyAddLoggedTime)
@@ -7002,45 +7004,70 @@ LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
 	ASSERT(lParam);
 
 	ICCLINKTOOLTIP* pTT = (ICCLINKTOOLTIP*)lParam;
-	CString sLink(pTT->szLink);
+	CString sTooltip = GetTaskLinkTooltip(pTT->szLink);
 
-	if (!sLink.IsEmpty())
+	if (!sTooltip.IsEmpty())
 	{
-		CString sTooltip;
-		CString sFile;
-		DWORD dwTaskID = 0;
 
-		// Handle Local task links only
-		if (ParseTaskLink(sLink, TRUE, dwTaskID, sFile) && dwTaskID && sFile.IsEmpty())
-		{
-			sTooltip = m_data.GetTaskTitle(dwTaskID);
-			ASSERT(!sTooltip.IsEmpty());
-		}
-		else // forward to parent
-		{
-			TOOLTIPTEXT tip = { 0 };
-
-			tip.hdr.hwndFrom = GetSafeHwnd();
-			tip.hdr.idFrom = GetDlgCtrlID();
-			tip.hdr.code = TTN_NEEDTEXT;
-
-			if (GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)pTT->szLink, (LPARAM)&tip))
-			{
-				sTooltip = tip.szText;
-
-				if (sTooltip.IsEmpty())
-					sTooltip = tip.lpszText;
-			}
-		}
-
-		if (!sTooltip.IsEmpty())
-		{
-			lstrcpyn(pTT->szTooltip, sTooltip, ICCLINKTOOLTIPLEN);
-			return TRUE;
-		}
+		lstrcpyn(pTT->szTooltip, sTooltip, ICCLINKTOOLTIPLEN);
+		return TRUE;
 	}
 
 	return FALSE;
+}
+
+LRESULT CToDoCtrl::OnTDCGetLinkTooltip(WPARAM wp, LPARAM lp)
+{
+	ASSERT(lp);
+
+	CString sTooltip = GetTaskLinkTooltip((LPCTSTR)wp);
+
+	if (!sTooltip.IsEmpty())
+	{
+		TOOLTIPTEXT* pTT = (TOOLTIPTEXT*)lp;
+
+		lstrcpyn(pTT->szText, sTooltip, 80);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+CString CToDoCtrl::GetTaskLinkTooltip(const CString& sLink)
+{
+	if (!TDCTASKLINK::IsTaskLink(sLink, TRUE))
+	{
+		ASSERT(0);
+		return _T("");
+	}
+
+	CString sTooltip, sFile;
+	DWORD dwTaskID = 0;
+
+	// Handle Local task links only
+	if (ParseTaskLink(sLink, TRUE, dwTaskID, sFile) && dwTaskID && sFile.IsEmpty())
+	{
+		sTooltip = m_data.GetTaskTitle(dwTaskID);
+		ASSERT(!sTooltip.IsEmpty());
+	}
+	else // else forward to parent
+	{
+		TOOLTIPTEXT tip = { 0 };
+
+		tip.hdr.hwndFrom = GetSafeHwnd();
+		tip.hdr.idFrom = GetDlgCtrlID();
+		tip.hdr.code = TTN_NEEDTEXT;
+
+		if (GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)(LPCTSTR)sLink, (LPARAM)&tip))
+		{
+			sTooltip = tip.szText;
+
+			if (sTooltip.IsEmpty())
+				sTooltip = tip.lpszText;
+		}
+	}
+
+	return sTooltip;
 }
 
 LRESULT CToDoCtrl::OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam)
@@ -11220,12 +11247,31 @@ LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == IDC_FILEPATH)
 	{
-		const CString& sUrl = (LPCTSTR)lParam;
-		
-		if (TDCTASKLINK::IsTaskLink(sUrl, TRUE))
+		if (TDCTASKLINK::IsTaskLink((LPCTSTR)lParam, TRUE))
 			return (LRESULT)GraphicsMisc::GetAppWindowIcon(FALSE);
 	}
 	
+	return 0;
+}
+
+LRESULT CToDoCtrl::OnFileEditWantTooltip(WPARAM wParam, LPARAM lParam)
+{
+	if (wParam == IDC_FILEPATH)
+	{
+		DWORD dwTaskID;
+		CString sFile;
+
+		// Return the task name if the file is a link is to a local task 
+		const CString sUrl((LPCTSTR)lParam);
+
+		if (TDCTASKLINK::Parse(sUrl, TRUE, _T(""), dwTaskID, sFile) &&
+			sFile.IsEmpty() && m_data.HasTask(dwTaskID))
+		{
+			return (LRESULT)(LPCTSTR)m_data.GetTaskTitle(dwTaskID);
+		}
+	}
+
+	// all else
 	return 0;
 }
 

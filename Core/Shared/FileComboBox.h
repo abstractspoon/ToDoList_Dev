@@ -17,6 +17,7 @@ public:
 	virtual ~CFileComboBox();
 
 	void SetCurrentFolder(LPCTSTR szFolder) { m_fileEdit.SetCurrentFolder(szFolder); }
+	CString GetCurrentFolder() const { return m_fileEdit.GetCurrentFolder(); }
 	void SetReadOnly(BOOL bReadOnly = TRUE);
 
 	int GetFileList(CStringArray& aFiles);
@@ -49,6 +50,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnFileEditBrowseChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditGetFileIcon(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnFileEditGetFileTooltip(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSelChange();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);

@@ -661,6 +661,7 @@ protected:
 	afx_msg LRESULT OnTDCDoTaskLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnTDCGetLinkTooltip(WPARAM wp, LPARAM lp);
 
 	afx_msg LRESULT OnEEBtnClick(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCustomUrl(WPARAM wParam, LPARAM lParam);
@@ -668,6 +669,7 @@ protected:
 	afx_msg LRESULT OnDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCanDropObject(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditWantIcon(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnFileEditWantTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnAutoComboAddDelete(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetFont(WPARAM wParam, LPARAM lParam);
@@ -874,6 +876,7 @@ protected:
 	CString GetFullPath(const CString& sFile) const;
 	CString GetLastSaveFolder() const;
 	BOOL CheckRestoreBackupFile(const CString& sFilePath);
+	CString GetTaskLinkTooltip(const CString& sLink);
 
 	void HandleUnsavedComments();
 	BOOL UndoLastActionItems(const CArrayUndoElements& aElms);

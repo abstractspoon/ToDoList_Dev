@@ -12,9 +12,10 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-const UINT WM_FE_GETFILEICON = ::RegisterWindowMessage(_T("WM_FE_GETFILEICON")); // wParam == GetDlgCtrlID, lParam == <filepath>
-const UINT WM_FE_DISPLAYFILE = ::RegisterWindowMessage(_T("WM_FE_DISPLAYFILE")); // wParam == GetDlgCtrlID, lParam == <filepath>
-const UINT WM_FEN_BROWSECHANGE = ::RegisterWindowMessage(_T("WM_FEN_BROWSEFILE")); // wParam == GetDlgCtrlID, lParam == <filepath>
+const UINT WM_FE_GETFILEICON	= ::RegisterWindowMessage(_T("WM_FE_GETFILEICON")); // wParam == GetDlgCtrlID, lParam == <filepath>
+const UINT WM_FE_GETFILETOOLTIP = ::RegisterWindowMessage(_T("WM_FE_GETFILETOOLTIP")); // wParam == GetDlgCtrlID, lParam == <filepath>
+const UINT WM_FE_DISPLAYFILE	= ::RegisterWindowMessage(_T("WM_FE_DISPLAYFILE")); // wParam == GetDlgCtrlID, lParam == <filepath>
+const UINT WM_FEN_BROWSECHANGE	= ::RegisterWindowMessage(_T("WM_FEN_BROWSEFILE")); // wParam == GetDlgCtrlID, lParam == <filepath>
 
 /////////////////////////////////////////////////////////////////////////////
 
