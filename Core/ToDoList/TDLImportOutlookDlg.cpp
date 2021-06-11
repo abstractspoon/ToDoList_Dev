@@ -55,7 +55,11 @@ int NUM_ICONS = (sizeof(ICONS) / sizeof(ICONS[0]));
 // COutlookImportDlg dialog
 
 CTDLImportOutlookDlg::CTDLImportOutlookDlg(CWnd* pParent /*=NULL*/)
-: CDialog(IDD_IMPORT_OUTLOOK_DIALOG, pParent), m_pDestTaskFile(NULL), m_pOutlook(NULL)
+	: 
+	CDialog(IDD_IMPORT_OUTLOOK_DIALOG, pParent), 
+	m_pDestTaskFile(NULL), 
+	m_pOutlook(NULL),
+	m_pFolder(NULL)
 {
 	//{{AFX_DATA_INIT(COutlookImportDlg)
 	m_sCurFolder = _T("");
