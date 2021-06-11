@@ -6999,75 +6999,26 @@ LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return 0L;
 }
 
-LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM /*wParam*/, LPARAM lParam)
+LRESULT CToDoCtrl::OnCommentsGetTooltip(WPARAM wp, LPARAM lp)
 {
-	ASSERT(lParam);
-
-	ICCLINKTOOLTIP* pTT = (ICCLINKTOOLTIP*)lParam;
-	CString sTooltip = GetTaskLinkTooltip(pTT->szLink);
-
-	if (!sTooltip.IsEmpty())
-	{
-
-		lstrcpyn(pTT->szTooltip, sTooltip, ICCLINKTOOLTIPLEN);
-		return TRUE;
-	}
-
-	return FALSE;
+	return OnGetLinkTooltip(wp, lp);
 }
 
 LRESULT CToDoCtrl::OnTDCGetLinkTooltip(WPARAM wp, LPARAM lp)
 {
-	ASSERT(lp);
-
-	CString sTooltip = GetTaskLinkTooltip((LPCTSTR)wp);
-
-	if (!sTooltip.IsEmpty())
-	{
-		TOOLTIPTEXT* pTT = (TOOLTIPTEXT*)lp;
-
-		lstrcpyn(pTT->szText, sTooltip, 80);
-		return TRUE;
-	}
-
-	return FALSE;
+	return OnGetLinkTooltip(wp, lp);
 }
 
-CString CToDoCtrl::GetTaskLinkTooltip(const CString& sLink)
+LRESULT CToDoCtrl::OnGetLinkTooltip(WPARAM /*wp*/, LPARAM lp)
 {
-	if (!TDCTASKLINK::IsTaskLink(sLink, TRUE))
-	{
-		ASSERT(0);
-		return _T("");
-	}
+	ASSERT(lp);
 
-	CString sTooltip, sFile;
-	DWORD dwTaskID = 0;
+	LPCTSTR szTooltip = (LPCTSTR)GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), lp);
 
-	// Handle Local task links only
-	if (ParseTaskLink(sLink, TRUE, dwTaskID, sFile) && dwTaskID && sFile.IsEmpty())
-	{
-		sTooltip = m_data.GetTaskTitle(dwTaskID);
-		ASSERT(!sTooltip.IsEmpty());
-	}
-	else // else forward to parent
-	{
-		TOOLTIPTEXT tip = { 0 };
+	if (!Misc::IsEmpty(szTooltip))
+		return (LRESULT)szTooltip;
 
-		tip.hdr.hwndFrom = GetSafeHwnd();
-		tip.hdr.idFrom = GetDlgCtrlID();
-		tip.hdr.code = TTN_NEEDTEXT;
-
-		if (GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)(LPCTSTR)sLink, (LPARAM)&tip))
-		{
-			sTooltip = tip.szText;
-
-			if (sTooltip.IsEmpty())
-				sTooltip = tip.lpszText;
-		}
-	}
-
-	return sTooltip;
+	return 0;
 }
 
 LRESULT CToDoCtrl::OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam)
@@ -11257,19 +11208,7 @@ LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
 LRESULT CToDoCtrl::OnFileEditWantTooltip(WPARAM wParam, LPARAM lParam)
 {
 	if (wParam == IDC_FILEPATH)
-	{
-		DWORD dwTaskID;
-		CString sFile;
-
-		// Return the task name if the file is a link is to a local task 
-		const CString sUrl((LPCTSTR)lParam);
-
-		if (TDCTASKLINK::Parse(sUrl, TRUE, _T(""), dwTaskID, sFile) &&
-			sFile.IsEmpty() && m_data.HasTask(dwTaskID))
-		{
-			return (LRESULT)(LPCTSTR)m_data.GetTaskTitle(dwTaskID);
-		}
-	}
+		return OnGetLinkTooltip(wParam, lParam);
 
 	// all else
 	return 0;

@@ -12045,12 +12045,10 @@ LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 
 LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 {
-	LPCTSTR szLink = (LPCTSTR)wParam;
-	TOOLTIPTEXT* pTT = (TOOLTIPTEXT*)lParam;
+	LPCTSTR szLink = (LPCTSTR)lParam;
 
-	CString sTooltip;
+	static CString sTooltip;
 
-	// if it's an Outlook link then run it directly
 	if (CMSOutlookHelper::IsOutlookUrl(szLink))
 	{
 		// TODO
@@ -12077,13 +12075,10 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 	}
 
 	if (!sTooltip.IsEmpty())
-	{
-		lstrcpyn(pTT->szText, sTooltip, 80);
-		return TRUE;
-	}
+		return (LRESULT)(LPCTSTR)sTooltip;
 
 	// all else
-	return FALSE;
+	return 0;
 }
 
 LRESULT CToDoListWnd::OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam)

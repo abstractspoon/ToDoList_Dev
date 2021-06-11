@@ -28,7 +28,7 @@ const UINT WM_TDCM_GETCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_GETCLIP
 const UINT WM_TDCM_HASCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_HASCLIPBOARD"));			// lParam == match hwnd
 const UINT WM_TDCM_ISTASKDONE				= ::RegisterWindowMessage(_T("WM_TDCM_ISTASKDONE"));			// wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_GETTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_GETTASKREMINDER"));		// wParam = hwnd, lParam = TaskID
-const UINT WM_TDCM_GETLINKTOOLTIP			= ::RegisterWindowMessage(_T("WM_TDCM_GETLINKTOOLTIP"));		// wParam = url, lParam = TOOLTIPTEXT*
+const UINT WM_TDCM_GETLINKTOOLTIP			= ::RegisterWindowMessage(_T("WM_TDCM_GETLINKTOOLTIP"));		// wParam = hwnd, lParam = url
 const UINT WM_TDCM_SELECTTASK				= ::RegisterWindowMessage(_T("WM_TDCM_SELECTTASK"));			// wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLINK"));			// wParam = hwnd, lParam = url
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION"));		// wParam = start/stop, lParam = text to display

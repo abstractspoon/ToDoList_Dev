@@ -701,6 +701,9 @@ protected:
 	afx_msg void OnCustomAttributeCancel(UINT nCtrlID);
 	DECLARE_MESSAGE_MAP()
 
+	// Pseudo message handler
+	LRESULT OnGetLinkTooltip(WPARAM wp, LPARAM lp);
+
 	// -------------------------------------------------------------------------------
 
 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return m_taskTree.GetTask(dwTaskID); }
@@ -876,7 +879,6 @@ protected:
 	CString GetFullPath(const CString& sFile) const;
 	CString GetLastSaveFolder() const;
 	BOOL CheckRestoreBackupFile(const CString& sFilePath);
-	CString GetTaskLinkTooltip(const CString& sLink);
 
 	void HandleUnsavedComments();
 	BOOL UndoLastActionItems(const CArrayUndoElements& aElms);

@@ -370,18 +370,14 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 				
 				// Convert to a task link and send to parent
 				CString sLink = depend.Format(_T(""), TRUE);
-
-				TOOLTIPTEXT tip = { 0 };
-
-				tip.hdr.hwndFrom = GetSafeHwnd();
-				tip.hdr.idFrom = CWnd::GetDlgCtrlID();
-				tip.hdr.code = TTN_NEEDTEXT;
-
-				if (CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)(LPCTSTR)sLink, (LPARAM)&tip))
-					sTooltip += tip.szText;
+				LPCTSTR szTitle = (LPCTSTR)CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sLink);
+				
+				if (!Misc::IsEmpty(szTitle))
+					sTooltip += Misc::Format(_T("%s (%s)"), depend.Format(), szTitle);
 				else
 					sTooltip += depend.Format();
-			}			
+			}		
+
 			return GetUniqueToolTipID(dwTaskID, nColID);
 		}
 		break;
@@ -422,23 +418,17 @@ int CTDLTaskCtrlBase::GetTaskColumnTooltip(const CPoint& ptScreen, CString& sToo
 
 			if (nIndex != -1)
 			{
-				// Forward to parent
-				if (TDCTASKLINK::IsTaskLink(pTDI->aFileLinks[nIndex], TRUE))
+				CString sFile(pTDI->aFileLinks[nIndex]);
+
+				// Forward to parent first
+				LPCTSTR szTitle = (LPCTSTR)CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sFile);
+
+				if (!Misc::IsEmpty(szTitle))
 				{
-					TOOLTIPTEXT tip = { 0 };
-
-					tip.hdr.hwndFrom = GetSafeHwnd();
-					tip.hdr.idFrom = CWnd::GetDlgCtrlID();
-					tip.hdr.code = TTN_NEEDTEXT;
-
-					sTooltip = pTDI->aFileLinks[nIndex];
-
-					if (CWnd::GetParent()->SendMessage(WM_TDCM_GETLINKTOOLTIP, (WPARAM)(LPCTSTR)sTooltip, (LPARAM)&tip))
-						sTooltip = tip.szText;
+					sTooltip = Misc::Format(_T("%s (%s)"), sFile, szTitle);
 				}
 				else
 				{
-					CString sFile(pTDI->aFileLinks[nIndex]);
 					VERIFY(FileMisc::ExpandPathEnvironmentVariables(sFile));
 
 					sTooltip = FileMisc::GetFullPath(sFile, m_sTasklistFolder);

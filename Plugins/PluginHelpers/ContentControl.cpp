@@ -57,12 +57,10 @@ String^ ContentControlWnd::ParentNotify::GetLinkTooltip(String^ sLink)
 	if (IsWindow(m_hwndParent))
 	{
 		MarshalledString link(ValidateLink(sLink));
+		LPCWSTR szTitle = (LPCWSTR)::SendMessage(m_hwndParent, WM_ICC_GETLINKTOOLTIP, 0, (LPARAM)(LPCWSTR)link);
 
-		ICCLINKTOOLTIP tt = { 0 };
-		tt.szLink = link;
-
-		if (::SendMessage(m_hwndParent, WM_ICC_GETLINKTOOLTIP, 0, (LPARAM)&tt))
-			return gcnew String(tt.szTooltip);
+		if (szTitle)
+			return gcnew String(szTitle);
 	}
 
 	// all else

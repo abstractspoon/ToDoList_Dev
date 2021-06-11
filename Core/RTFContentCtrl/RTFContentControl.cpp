@@ -1083,12 +1083,11 @@ void CRTFContentControl::OnGetTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	TOOLTIPTEXT* pTTN = (TOOLTIPTEXT*)pNMHDR;
 	*pResult = 0;
 
-	ICCLINKTOOLTIP tooltip = { 0 };
-	tooltip.szLink = pTTN->lpszText;
+	LPCTSTR szTooltip = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)pTTN->lpszText);
 
-	if (GetParent()->SendMessage(WM_ICC_GETLINKTOOLTIP, (WPARAM)GetSafeHwnd(), (LPARAM)&tooltip))
+	if (!Misc::IsEmpty(szTooltip))
 	{
-		lstrcpyn(pTTN->szText, tooltip.szTooltip, ICCLINKTOOLTIPLEN);
+		lstrcpyn(pTTN->szText, szTooltip, (sizeof(pTTN->szText) / sizeof(pTTN->szText[0])));
 		*pResult = TRUE;
 	}
 }
