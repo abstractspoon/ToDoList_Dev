@@ -12048,10 +12048,18 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 	LPCTSTR szLink = (LPCTSTR)lParam;
 
 	static CString sTooltip;
+	sTooltip.Empty();
 
 	if (CMSOutlookHelper::IsOutlookUrl(szLink))
 	{
-		// TODO
+		CString sItemID(szLink);
+		sItemID.Replace(_T("outlook:"), _T(""));
+
+		CMSOutlookHelper outlook;
+		OutlookAPI::_Item* pItem = outlook.GetItemByID(Misc::Trim(sItemID));
+
+		if (pItem)
+			sTooltip = outlook.GetItemData(*pItem, OA_TITLE);
 	}
 	else // see if it's a task link
 	{

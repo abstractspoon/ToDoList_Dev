@@ -13,6 +13,7 @@
 #include "..\3rdparty\msoutl.h"
 
 #include <afxole.h>
+#include <comutil.h>
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -604,6 +605,21 @@ _Item* CMSOutlookHelper::GetFirstSelectedObject()
 	delete pSelection;
 
 	return pItem;
+}
+
+_Item* CMSOutlookHelper::GetItemByID(LPCTSTR szItemID)
+{
+	if (s_pOutlook == NULL)
+		return NULL;
+
+	// Validate the string
+	if (!_tcsspn(szItemID, _T("0123456789ABCDEFGabcdef")))
+		return NULL;
+
+	_NameSpace nmspc(s_pOutlook->GetNamespace(_T("MAPI")));
+	LPDISPATCH pDispatch = nmspc.GetItemFromID(szItemID, vtMissing);
+
+	return (pDispatch ? new _Item(pDispatch) : NULL);
 }
 
 OutlookAPI::_Item* CMSOutlookHelper::GetFirstObject(OutlookAPI::Selection* pSelection)

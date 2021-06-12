@@ -61,6 +61,7 @@ public:
 	OutlookAPI::Selection* GetSelection();
 	int GetSelectionCount();
 	OutlookAPI::_Item* GetFirstSelectedObject();
+	OutlookAPI::_Item* GetItemByID(LPCTSTR szItemID);
 
 	static OutlookAPI::_Item* GetFirstObject(OutlookAPI::Selection* pSelection);
 	static int GetItemData(OutlookAPI::_Item& obj, CMSOutlookItemDataMap& mapData, BOOL bIncludeConfidential = TRUE);
