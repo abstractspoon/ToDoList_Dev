@@ -374,7 +374,7 @@ namespace MindMapUIExtension
 			m_AlignmentCombo = new MindMapAlignmentComboBox(m_Trans);
 			m_AlignmentCombo.DropDownClosed += new EventHandler(OnAlignmentComboClosed);
 
-			InitialiseCombo(m_AlignmentCombo, alignLabel);
+			InitialiseCombo(m_AlignmentCombo, alignLabel, 100);
 			this.Controls.Add(m_AlignmentCombo);
 
 			// Options combo and label
@@ -385,7 +385,7 @@ namespace MindMapUIExtension
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 			
-			InitialiseCombo(m_OptionsCombo as ComboBox, optionsLabel);
+			InitialiseCombo(m_OptionsCombo as ComboBox, optionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
 		}
 
@@ -405,10 +405,10 @@ namespace MindMapUIExtension
 			return label;
 		}
 
-		void InitialiseCombo(ComboBox combo, Label prevLabel)
+		void InitialiseCombo(ComboBox combo, Label prevLabel, int width)
 		{
 			combo.Font = m_ControlsFont;
-			combo.Width = DPIScaling.Scale(120);
+			combo.Width = DPIScaling.Scale(width);
 			combo.Height = DPIScaling.Scale(200);
 			combo.Location = new Point(prevLabel.Right + 5, 4);
 			combo.DropDownStyle = ComboBoxStyle.DropDownList;
