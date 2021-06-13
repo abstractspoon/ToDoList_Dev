@@ -96,21 +96,20 @@ FOR %%f IN (%TDLFILELIST%) DO (
 )
 
 REM - All other components
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Calendar.DayView.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\CheckBoxComboBox.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\CustomComboBox.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.XmlWorker.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\BouncyCastle.Crypto.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\LuminousControls.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\UIComponents.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGrid.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGridEditorControl.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
 
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest
