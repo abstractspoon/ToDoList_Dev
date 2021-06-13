@@ -408,8 +408,8 @@ namespace MindMapUIExtension
 		void InitialiseCombo(ComboBox combo, Label prevLabel)
 		{
 			combo.Font = m_ControlsFont;
-			combo.Width = 120;
-			combo.Height = 200;
+			combo.Width = DPIScaling.Scale(120);
+			combo.Height = DPIScaling.Scale(200);
 			combo.Location = new Point(prevLabel.Right + 5, 4);
 			combo.DropDownStyle = ComboBoxStyle.DropDownList;
 			combo.Sorted = true;

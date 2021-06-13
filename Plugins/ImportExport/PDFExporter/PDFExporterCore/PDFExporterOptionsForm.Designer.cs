@@ -35,15 +35,15 @@
 			this.btnBrowseOtherFont = new System.Windows.Forms.Button();
 			this.editOtherFont = new System.Windows.Forms.TextBox();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
+			this.radioOtherFont = new System.Windows.Forms.RadioButton();
+			this.radioInstalledFont = new System.Windows.Forms.RadioButton();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
+			this.checkWatermarkImage = new System.Windows.Forms.CheckBox();
 			this.btnBrowseWatermarkImage = new System.Windows.Forms.Button();
 			this.editWatermarkImage = new System.Windows.Forms.TextBox();
-			this.checkWatermarkImage = new System.Windows.Forms.CheckBox();
 			this.groupBox3 = new System.Windows.Forms.GroupBox();
-			this.radioApplyFontToAll = new System.Windows.Forms.RadioButton();
 			this.radioApplyFontAsReq = new System.Windows.Forms.RadioButton();
-			this.radioInstalledFont = new System.Windows.Forms.RadioButton();
-			this.radioOtherFont = new System.Windows.Forms.RadioButton();
+			this.radioApplyFontToAll = new System.Windows.Forms.RadioButton();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.groupBox1.SuspendLayout();
 			this.groupBox2.SuspendLayout();
@@ -122,6 +122,30 @@
 			this.groupBox1.TabStop = false;
 			this.groupBox1.Text = "Content Font";
 			// 
+			// radioOtherFont
+			// 
+			this.radioOtherFont.AutoSize = true;
+			this.radioOtherFont.Location = new System.Drawing.Point(10, 67);
+			this.radioOtherFont.Name = "radioOtherFont";
+			this.radioOtherFont.Size = new System.Drawing.Size(72, 17);
+			this.radioOtherFont.TabIndex = 9;
+			this.radioOtherFont.Text = "&Other font";
+			this.radioOtherFont.UseVisualStyleBackColor = true;
+			this.radioOtherFont.CheckedChanged += new System.EventHandler(this.OnChangeFontType);
+			// 
+			// radioInstalledFont
+			// 
+			this.radioInstalledFont.AutoSize = true;
+			this.radioInstalledFont.Checked = true;
+			this.radioInstalledFont.Location = new System.Drawing.Point(10, 20);
+			this.radioInstalledFont.Name = "radioInstalledFont";
+			this.radioInstalledFont.Size = new System.Drawing.Size(85, 17);
+			this.radioInstalledFont.TabIndex = 8;
+			this.radioInstalledFont.TabStop = true;
+			this.radioInstalledFont.Text = "&Installed font";
+			this.radioInstalledFont.UseVisualStyleBackColor = true;
+			this.radioInstalledFont.CheckedChanged += new System.EventHandler(this.OnChangeFontType);
+			// 
 			// groupBox2
 			// 
 			this.groupBox2.BackColor = System.Drawing.Color.White;
@@ -134,6 +158,17 @@
 			this.groupBox2.TabIndex = 9;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Watermark";
+			// 
+			// checkWatermarkImage
+			// 
+			this.checkWatermarkImage.AutoSize = true;
+			this.checkWatermarkImage.Location = new System.Drawing.Point(10, 25);
+			this.checkWatermarkImage.Name = "checkWatermarkImage";
+			this.checkWatermarkImage.Size = new System.Drawing.Size(212, 17);
+			this.checkWatermarkImage.TabIndex = 7;
+			this.checkWatermarkImage.Text = "&Display an image behind content pages";
+			this.checkWatermarkImage.UseVisualStyleBackColor = true;
+			this.checkWatermarkImage.CheckedChanged += new System.EventHandler(this.OnCheckChangeWatermark);
 			// 
 			// btnBrowseWatermarkImage
 			// 
@@ -158,17 +193,6 @@
 			this.editWatermarkImage.WordWrap = false;
 			this.editWatermarkImage.TextChanged += new System.EventHandler(this.OnOtherFontChanged);
 			// 
-			// checkWatermarkImage
-			// 
-			this.checkWatermarkImage.AutoSize = true;
-			this.checkWatermarkImage.Location = new System.Drawing.Point(10, 25);
-			this.checkWatermarkImage.Name = "checkWatermarkImage";
-			this.checkWatermarkImage.Size = new System.Drawing.Size(212, 17);
-			this.checkWatermarkImage.TabIndex = 7;
-			this.checkWatermarkImage.Text = "&Display an image behind content pages";
-			this.checkWatermarkImage.UseVisualStyleBackColor = true;
-			this.checkWatermarkImage.CheckedChanged += new System.EventHandler(this.OnCheckChangeWatermark);
-			// 
 			// groupBox3
 			// 
 			this.groupBox3.BackColor = System.Drawing.Color.White;
@@ -181,6 +205,16 @@
 			this.groupBox3.TabStop = false;
 			this.groupBox3.Text = "Font Options";
 			// 
+			// radioApplyFontAsReq
+			// 
+			this.radioApplyFontAsReq.AutoSize = true;
+			this.radioApplyFontAsReq.Location = new System.Drawing.Point(10, 43);
+			this.radioApplyFontAsReq.Name = "radioApplyFontAsReq";
+			this.radioApplyFontAsReq.Size = new System.Drawing.Size(205, 17);
+			this.radioApplyFontAsReq.TabIndex = 0;
+			this.radioApplyFontAsReq.Text = "Only apply font to unformatted content";
+			this.radioApplyFontAsReq.UseVisualStyleBackColor = true;
+			// 
 			// radioApplyFontToAll
 			// 
 			this.radioApplyFontToAll.AutoSize = true;
@@ -192,40 +226,6 @@
 			this.radioApplyFontToAll.TabStop = true;
 			this.radioApplyFontToAll.Text = "Apply font to all content";
 			this.radioApplyFontToAll.UseVisualStyleBackColor = true;
-			// 
-			// radioApplyFontAsReq
-			// 
-			this.radioApplyFontAsReq.AutoSize = true;
-			this.radioApplyFontAsReq.Location = new System.Drawing.Point(10, 43);
-			this.radioApplyFontAsReq.Name = "radioApplyFontAsReq";
-			this.radioApplyFontAsReq.Size = new System.Drawing.Size(205, 17);
-			this.radioApplyFontAsReq.TabIndex = 0;
-			this.radioApplyFontAsReq.Text = "Only apply font to unformatted content";
-			this.radioApplyFontAsReq.UseVisualStyleBackColor = true;
-			// 
-			// radioInstalledFont
-			// 
-			this.radioInstalledFont.AutoSize = true;
-			this.radioInstalledFont.Checked = true;
-			this.radioInstalledFont.Location = new System.Drawing.Point(10, 20);
-			this.radioInstalledFont.Name = "radioInstalledFont";
-			this.radioInstalledFont.Size = new System.Drawing.Size(85, 17);
-			this.radioInstalledFont.TabIndex = 8;
-			this.radioInstalledFont.TabStop = true;
-			this.radioInstalledFont.Text = "&Installed font";
-			this.radioInstalledFont.UseVisualStyleBackColor = true;
-			this.radioInstalledFont.CheckedChanged += new System.EventHandler(this.OnChangeFontType);
-			// 
-			// radioOtherFont
-			// 
-			this.radioOtherFont.AutoSize = true;
-			this.radioOtherFont.Location = new System.Drawing.Point(10, 67);
-			this.radioOtherFont.Name = "radioOtherFont";
-			this.radioOtherFont.Size = new System.Drawing.Size(72, 17);
-			this.radioOtherFont.TabIndex = 9;
-			this.radioOtherFont.Text = "&Other font";
-			this.radioOtherFont.UseVisualStyleBackColor = true;
-			this.radioOtherFont.CheckedChanged += new System.EventHandler(this.OnChangeFontType);
 			// 
 			// panel1
 			// 
@@ -254,7 +254,7 @@
 			this.Name = "PDFExporterOptionsForm";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-			this.Text = "Options";
+			this.Text = "PDF Exporter Options";
 			this.groupBox1.ResumeLayout(false);
 			this.groupBox1.PerformLayout();
 			this.groupBox2.ResumeLayout(false);
