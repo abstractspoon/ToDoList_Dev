@@ -424,10 +424,14 @@ namespace Calendar
 					}
 				}
 
-				// all else
-				return Mode.Move;
+				// Must fall within appt rect
+				if (view.Rectangle.Contains(mousePos))
+				{
+					return Mode.Move;
+				}
 			}
 
+			// all else
 			return Mode.None;
 		}
 
