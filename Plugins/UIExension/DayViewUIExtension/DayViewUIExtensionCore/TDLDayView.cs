@@ -463,7 +463,7 @@ namespace DayViewUIExtension
         {
             StartDate = DateTime.Now;
 
-			// And scroll to first task
+			// And scroll vertically to first short task
 			var appointments = GetMatchingAppointments(StartDate, EndDate, true);
 
 			if (appointments != null)
@@ -471,9 +471,14 @@ namespace DayViewUIExtension
 				foreach (var appt in appointments)
 				{
 					if (!IsItemWithinRange(appt as CalendarItem, StartDate, EndDate))
+					{
+						// What is this check for? Surely all matching 
+						// appointments must be, by definition, within range?
+						Debug.Assert(false);
 						break;
+					}
 					
-					if (EnsureVisible(appt, false))
+					if (!IsLongAppt(appt) && EnsureVisible(appt, false))
 						break;
 				}
 			}

@@ -473,8 +473,14 @@ namespace Calendar
 			if (appt.StartDate == DateTime.MinValue)
 				return false;
 
-            if ((appt.StartDate < StartDate) || (appt.StartDate >= EndDate))
-			    StartDate = appt.StartDate;
+			if (appt.EndDate <= StartDate)
+			{
+				StartDate = appt.EndDate;
+			}
+			else if (appt.StartDate >= EndDate)
+			{
+				StartDate = appt.StartDate;
+			}
 
 			if (!IsLongAppt(appt))
 			{
