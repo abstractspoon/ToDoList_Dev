@@ -303,7 +303,6 @@
 			// 
 			this.toolstripFontComboBox.DropDownHeight = 400;
 			this.toolstripFontComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.toolstripFontComboBox.DropDownWidth = 300;
 			this.toolstripFontComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.toolstripFontComboBox.IntegralHeight = false;
 			this.toolstripFontComboBox.Name = "fontToolStripComboBox";
