@@ -1007,7 +1007,7 @@ namespace DayViewUIExtension
 				if (IsItemWithinRange(item, start, end))
 					appts.Add(item);
 
-				if (m_ShowFutureOcurrences && item.IsRecurring)
+				if (m_ShowFutureOcurrences && IsItemDisplayable(item) && item.IsRecurring)
 				{
 					// Add this task's future items for the current date range
 					// Note: we deliberately double the range else we lose 
