@@ -13,10 +13,6 @@ namespace DayViewUIExtension
 {
 	public class CalendarItem : Calendar.Appointment
 	{
-		static DateTime NullDate = DateTime.MinValue;
-
-		// --------------------
-
 		private DateTime m_OrgStartDate = NullDate;
 		private DateTime m_OrgEndDate = NullDate;
 		private DateTime m_PrevDueDate = NullDate;
@@ -156,7 +152,7 @@ namespace DayViewUIExtension
 		protected override void OnEndDateChanged()
 		{
 			// Prevent end date being set to exactly midnight
-			if (EndDate == EndDate.Date)
+			if ((EndDate != NullDate) && (EndDate == EndDate.Date))
 				EndDate = EndDate.AddSeconds(-1);
 		}
 
@@ -199,13 +195,6 @@ namespace DayViewUIExtension
 				return true;
 
 			return false;
-		}
-
-		public bool HasValidDates()
-		{
-			return ((StartDate != NullDate) &&
-					(EndDate != NullDate) &&
-					(EndDate > StartDate));
 		}
 
 		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask)
@@ -308,7 +297,7 @@ namespace DayViewUIExtension
 
 		static protected DateTime CheckGetEndOfDay(DateTime date)
 		{
-			if (date == date.Date)
+			if ((date != NullDate) && (date == date.Date))
 				return date.AddDays(1).AddSeconds(-1);
 
 			// else

@@ -316,8 +316,10 @@ namespace DayViewUIExtension
 			return m_SelectedTaskID;
         }
 
-		public bool GetSelectedTaskDates(ref DateTime from, ref DateTime to)
+		public bool GetSelectedTaskDates(out DateTime from, out DateTime to)
 		{
+			from = to = Calendar.Appointment.NullDate;
+
 			UInt32 selTaskID = GetSelectedTaskID();
 
 			if (selTaskID == 0)
@@ -326,6 +328,9 @@ namespace DayViewUIExtension
 			CalendarItem item;
 
 			if (!m_Items.TryGetValue(selTaskID, out item))
+				return false;
+
+			if (!item.HasValidDates())
 				return false;
 
 			from = item.StartDate;
@@ -416,7 +421,7 @@ namespace DayViewUIExtension
                 {
                     if (scrollToTask)
                     {
-                        if (item.StartDate != DateTime.MinValue)
+                        if (item.StartDate != Calendar.Appointment.NullDate)
                         {
                             if (!IsItemWithinRange(item, StartDate, EndDate))
                                 StartDate = item.StartDate;
@@ -603,7 +608,7 @@ namespace DayViewUIExtension
 			// Provide infinite range because this check
 			// is uninterested in the current week, it's more
 			// of a 'static' kind of check
-			return IsItemWithinRange(item, DateTime.MinValue, DateTime.MaxValue);
+			return IsItemWithinRange(item, DateTime.MinValue.AddSeconds(1), DateTime.MaxValue);
 		}
 
 		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)

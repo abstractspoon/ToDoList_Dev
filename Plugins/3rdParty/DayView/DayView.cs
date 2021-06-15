@@ -467,11 +467,10 @@ namespace Calendar
 
 		virtual public bool EnsureVisible(Appointment appt, bool partialOK)
 		{
-			if (appt == null)
+			if ((appt == null) || !appt.HasValidDates())
+			{
 				return false;
-
-			if (appt.StartDate == DateTime.MinValue)
-				return false;
+			}
 
 			if (appt.EndDate <= StartDate)
 			{

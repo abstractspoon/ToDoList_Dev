@@ -42,6 +42,15 @@ namespace Calendar
         public string Group { get; set; }
 		public bool DrawBorder { get; set; }
 
+		static public DateTime NullDate { get { return DateTime.MinValue; } }
+
+		public bool HasValidDates()
+		{
+			return ((StartDate != NullDate) &&
+					(EndDate != NullDate) &&
+					(EndDate > StartDate));
+		}
+		
 		private DateTime startDate;
 
         public virtual DateTime StartDate
@@ -223,6 +232,9 @@ namespace Calendar
 
 		public bool IntersectsWith(Appointment other)
 		{
+			if (!HasValidDates())
+				return false;
+
 			if (StartDate >= other.EndDate)
 				return false;
 
@@ -234,6 +246,9 @@ namespace Calendar
 
 		public virtual bool IsLongAppt(DateTime start, DateTime end)
 		{
+			if (!HasValidDates())
+				return false;
+
 			return (start.Date != end.Date);
 		}
 

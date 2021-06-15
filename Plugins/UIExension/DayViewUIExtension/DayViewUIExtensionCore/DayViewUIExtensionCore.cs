@@ -669,11 +669,9 @@ namespace DayViewUIExtension
 
 		private void UpdatedSelectedTaskDatesText()
 		{
-			DateTime from = DateTime.MinValue, to = DateTime.MinValue;
+			DateTime from, to;
 
-			if (m_DayView.GetSelectedTaskDates(ref from, ref to) &&
-				(from != DateTime.MinValue) &&
-				(to != DateTime.MinValue))
+			if (m_DayView.GetSelectedTaskDates(out from, out to))
 			{
 				String label = String.Format("{0}: ", m_Trans.Translate("Selected Task Date Range"));
 
