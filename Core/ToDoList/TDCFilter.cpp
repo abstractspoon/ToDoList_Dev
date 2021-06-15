@@ -507,7 +507,7 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 	CTDCSearchParamHelper::AppendArrayRule(filter.aAllocBy, TDCA_ALLOCBY, params.aRules);
 	CTDCSearchParamHelper::AppendArrayRule(filter.aStatus, TDCA_STATUS, params.aRules);
 	CTDCSearchParamHelper::AppendArrayRule(filter.aVersions, TDCA_VERSION, params.aRules);
-	CTDCSearchParamHelper::AppendArrayRule(filter.aTags, TDCA_TAGS, params.aRules);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aTags, TDCA_TAGS, params.aRules, filter.dwFlags, FO_ANYTAG);
 
 	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nPriority, TDCA_PRIORITY, params.aRules, FM_ANYPRIORITY, FM_NOPRIORITY);
 	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nRisk, TDCA_RISK, params.aRules, FM_ANYRISK, FM_NORISK);
