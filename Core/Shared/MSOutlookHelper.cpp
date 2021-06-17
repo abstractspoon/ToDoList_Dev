@@ -547,7 +547,7 @@ BOOL CMSOutlookHelper::IsOutlookObject(LPCTSTR szFilePath)
 // static
 BOOL CMSOutlookHelper::IsOutlookUrl(LPCTSTR szURL)
 {
-	return (CString(szURL).Find(_T("outlook:")) == 0);
+	return (_tcsstr(szURL, _T("outlook:")) == szURL);
 }
 
 OutlookAPI::_Item* CMSOutlookHelper::GetFirstFileObject(const CStringArray& aFiles)

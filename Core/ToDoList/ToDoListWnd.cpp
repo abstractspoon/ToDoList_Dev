@@ -12055,11 +12055,14 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 		CString sItemID(szLink);
 		sItemID.Replace(_T("outlook:"), _T(""));
 
-		CMSOutlookHelper outlook;
-		OutlookAPI::_Item* pItem = outlook.GetItemByID(Misc::Trim(sItemID));
+		if (!Misc::Trim(sItemID).IsEmpty() && (sItemID[0] != '/'))
+		{
+			CMSOutlookHelper outlook;
+			OutlookAPI::_Item* pItem = outlook.GetItemByID(sItemID);
 
-		if (pItem)
-			sTooltip = outlook.GetItemData(*pItem, OA_TITLE);
+			if (pItem)
+				sTooltip = outlook.GetItemData(*pItem, OA_TITLE);
+		}
 	}
 	else // see if it's a task link
 	{
