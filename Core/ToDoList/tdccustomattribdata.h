@@ -20,13 +20,14 @@ struct TDCTIMEPERIOD;
 
 struct TDCCADATA
 {
-	TDCCADATA(const CString& sValue = _T(""), TCHAR cSep = 0);
-	TDCCADATA(LPCTSTR szValue, TCHAR cSep = 0);
+	TDCCADATA();
+	TDCCADATA(const CString& sValue);
+	TDCCADATA(LPCTSTR szValue);
 	TDCCADATA(double dValue);
 	TDCCADATA(const TDCCOST& cost);
 	TDCCADATA(const TDCTIMEPERIOD& time);
-	TDCCADATA(const CStringArray& aValues);
-	TDCCADATA(const CStringArray& aValues, const CStringArray& aExtra);
+	TDCCADATA(const CStringArray& aValues, BOOL bAllowEmpty = FALSE);
+	TDCCADATA(const CStringArray& aValues, const CStringArray& aExtra, BOOL bAllowEmpty = FALSE);
 	TDCCADATA(int nValue);
 	TDCCADATA(const COleDateTime& dtValue);
 	TDCCADATA(bool bValue);
@@ -62,12 +63,12 @@ struct TDCCADATA
 	void Set(double dValue);
 	void Set(int nValue);
 	void Set(const COleDateTime& dtValue);
-	void Set(const CString& sValue, TCHAR cSep = 0);
+	void Set(const CString& sValue);
 	void Set(const TDCTIMEPERIOD& time);
 	void Set(const TDCCOST& cost);
-	void Set(bool bValue, TCHAR nChar = 0);
-	void Set(const CStringArray& aValues);
-	void Set(const CStringArray& aValues, const CStringArray& aExtra);
+	void Set(bool bValue, TCHAR nChar = '+');
+	void Set(const CStringArray& aValues, BOOL bAllowEmpty = FALSE);
+	void Set(const CStringArray& aValues, const CStringArray& aExtra, BOOL bAllowEmpty = FALSE);
 
 	CString FormatAsArray(TCHAR cSep = 0) const;
 	CString FormatAsDate(BOOL bISO, BOOL bWithTime) const;
@@ -77,7 +78,7 @@ protected:
 	CString sData, sExtra;
 
 protected:
-	static void Set(const CStringArray& aValues, CString& sValue);
+	static void Set(const CStringArray& aValues, BOOL bAllowEmpty, CString& sValue);
 	static int AsArray(const CString& sValue, CStringArray& aValues);
 
 };

@@ -725,7 +725,7 @@ void CTDCFilter::LoadFilter(const CPreferences& prefs, const CString& sKey, TDCF
 			CString sAttribID = prefs.GetProfileString(sItemKey, _T("AttributeID"));
 			ASSERT(!sAttribID.IsEmpty());
 
-			filter.mapCustomAttrib[sAttribID] = TDCCADATA(aItems).AsString();
+			filter.mapCustomAttrib[sAttribID].Set(aItems, TRUE);
 		}
 	}
 }

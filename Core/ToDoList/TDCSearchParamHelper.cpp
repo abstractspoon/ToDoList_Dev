@@ -18,8 +18,9 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-static LPCTSTR REALQUOTE = _T("\"");
-static LPCTSTR SAFEQUOTE = _T("{QUOTES}");
+const LPCTSTR REALQUOTE = _T("\"");
+const LPCTSTR SAFEQUOTE = _T("{QUOTES}");
+const LPCTSTR NULLSTRING = NULL;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -278,7 +279,7 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAtt
 				rule.SetCustomAttribute(attribDef.GetAttributeID(), sAttribID, FT_STRING);
 				rule.SetMatchWholeWord(TRUE); // because lists are read-only
 
-				CString sMatchBy = Misc::FormatArray(aValues);
+				CString sMatchBy = Misc::FormatArray(aValues, NULLSTRING, TRUE);
 
 				// special case: 1 empty value
 				if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
@@ -466,7 +467,7 @@ void CTDCSearchParamHelper::AppendArrayRule(const CStringArray& aValues, TDC_ATT
 {
 	if (aValues.GetSize())
 	{
-		CString sMatchBy = Misc::FormatArray(aValues);
+		CString sMatchBy = Misc::FormatArray(aValues, NULLSTRING, TRUE);
 		int nRule = -1;
 
 		if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())

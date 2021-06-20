@@ -16,14 +16,19 @@ const TCHAR NEWLINE = '\n';
 
 /////////////////////////////////////////////////////////////////////////////
 
-TDCCADATA::TDCCADATA(const CString& sValue, TCHAR cSep) 
-{ 
-	Set(sValue, cSep); 
+TDCCADATA::TDCCADATA()
+{
+
 }
 
-TDCCADATA::TDCCADATA(LPCTSTR szValue, TCHAR cSep) 
-{ 
-	Set(CString(szValue), cSep); 
+TDCCADATA::TDCCADATA(const CString& sValue)
+{
+	Set(sValue);
+}
+
+TDCCADATA::TDCCADATA(LPCTSTR szValue)
+{
+	Set(CString(szValue));
 }
 
 TDCCADATA::TDCCADATA(double dValue) 
@@ -41,14 +46,14 @@ TDCCADATA::TDCCADATA(const TDCCOST& cost)
 	Set(cost); 
 }
 
-TDCCADATA::TDCCADATA(const CStringArray& aValues) 
+TDCCADATA::TDCCADATA(const CStringArray& aValues, BOOL bAllowEmpty) 
 { 
-	Set(aValues); 
+	Set(aValues, bAllowEmpty); 
 }
 
-TDCCADATA::TDCCADATA(const CStringArray& aValues, const CStringArray& aExtra) 
+TDCCADATA::TDCCADATA(const CStringArray& aValues, const CStringArray& aExtra, BOOL bAllowEmpty) 
 { 
-	Set(aValues, aExtra); 
+	Set(aValues, aExtra, bAllowEmpty); 
 }
 
 TDCCADATA::TDCCADATA(int nValue) 
@@ -294,20 +299,8 @@ void TDCCADATA::Set(const COleDateTime& dtValue)
 	sData.Format(_T("%lf"), dtValue); 
 }
 
-void TDCCADATA::Set(const CString& sValue, TCHAR cSep) 
+void TDCCADATA::Set(const CString& sValue) 
 { 
-	if (cSep != 0)
-	{
-		CStringArray aItems;
-		
-		if (Misc::Split(sValue, aItems, cSep, TRUE))
-		{
-			Set(aItems);
-			return;
-		}
-	}
-	
-	// all else
 	sData = sValue; 
 }
 
@@ -327,32 +320,29 @@ void TDCCADATA::Set(bool bValue, TCHAR nChar)
 	sData.Empty(); 
 	
 	if (bValue)
-	{
-		if (nChar > 0)
-			sData.Insert(0, nChar);
-		else
-			sData.Insert(0, '+');
-	}
+		sData.Insert(0, (nChar ? nChar : '+'));
 }
 
-void TDCCADATA::Set(const CStringArray& aValues) 
+void TDCCADATA::Set(const CStringArray& aValues, BOOL bAllowEmpty) 
 { 
-	Set(aValues, sData);
+	Set(aValues, bAllowEmpty, sData);
 }
 
-void TDCCADATA::Set(const CStringArray& aValues, const CStringArray& aExtra) 
+void TDCCADATA::Set(const CStringArray& aValues, const CStringArray& aExtra, BOOL bAllowEmpty) 
 { 
-	Set(aValues, sData);
-	Set(aExtra, sExtra);
+	Set(aValues, bAllowEmpty, sData);
+	Set(aExtra, bAllowEmpty, sExtra);
 }
 
-void TDCCADATA::Set(const CStringArray& aValues, CString& sValue)
+void TDCCADATA::Set(const CStringArray& aValues, BOOL bAllowEmpty, CString& sValue)
 {
+	ASSERT(bAllowEmpty || !Misc::HasEmpty(aValues));
+
 	// Special case: 1 empty value
-	if ((aValues.GetSize() == 1) && aValues[0].IsEmpty())
+	if (bAllowEmpty && (aValues.GetSize() == 1) && aValues[0].IsEmpty())
 		sValue = NEWLINE;
-	else
-		sValue = Misc::FormatArray(aValues, NEWLINE);
+	else	
+		sValue = Misc::FormatArray(aValues, NEWLINE, bAllowEmpty);
 }
 
 CString TDCCADATA::FormatAsArray(TCHAR cSep) const

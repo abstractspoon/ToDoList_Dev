@@ -1105,7 +1105,7 @@ TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pPa
 		ASSERT(pCtrl->IsKindOf(RUNTIME_CLASS(CEnCheckComboBox)));
 
 		((CEnCheckComboBox*)pCtrl)->GetChecked(aItems);
-		data.Set(aItems);
+		data.Set(aItems, bFilter);
 	}
 	else 
 	{
