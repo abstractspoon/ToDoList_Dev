@@ -147,7 +147,7 @@ void CTDLFilterDlg::DoDataExchange(CDataExchange* pDX)
 		// options states set in OnInitDialog
 		if (m_sAdvancedFilter.IsEmpty())
 		{
-			m_cbOptions.Initialize(m_filter);
+			m_cbOptions.Initialize(m_filter, TDCA_ALL, TRUE);
 		}
 		else
 		{
@@ -285,7 +285,7 @@ void CTDLFilterDlg::OnSelchangeFiltercombo()
 	UpdateData();
 	EnableDisableControls();
 
-	m_cbOptions.Initialize(m_filter);
+	m_cbOptions.Initialize(m_filter, TDCA_ALL, m_cbCategoryFilter.IsMultiSelectionEnabled());
 }
 
 void CTDLFilterDlg::OnSelchangeFilter() 

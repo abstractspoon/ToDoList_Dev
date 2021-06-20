@@ -503,10 +503,10 @@ void CTDCFilter::BuildFilterQuery(const TDCFILTER& filter, const CTDCCustomAttri
 	}
 
 	CTDCSearchParamHelper::AppendArrayRule(filter.aCategories, TDCA_CATEGORY, params.aRules, filter.dwFlags, FO_ANYCATEGORY);
-	CTDCSearchParamHelper::AppendArrayRule(filter.aAllocTo, TDCA_ALLOCTO, params.aRules, filter.dwFlags, FO_ANYALLOCTO);
-	CTDCSearchParamHelper::AppendArrayRule(filter.aAllocBy, TDCA_ALLOCBY, params.aRules);
-	CTDCSearchParamHelper::AppendArrayRule(filter.aStatus, TDCA_STATUS, params.aRules);
-	CTDCSearchParamHelper::AppendArrayRule(filter.aVersions, TDCA_VERSION, params.aRules);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aAllocTo, TDCA_ALLOCTO, params.aRules, filter.dwFlags, FO_ANYPERSON);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aAllocBy, TDCA_ALLOCBY, params.aRules, filter.dwFlags, FO_ANYPERSON);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aStatus, TDCA_STATUS, params.aRules, filter.dwFlags, FO_ANYSTATUS);
+	CTDCSearchParamHelper::AppendArrayRule(filter.aVersions, TDCA_VERSION, params.aRules, filter.dwFlags, FO_ANYVERSION);
 	CTDCSearchParamHelper::AppendArrayRule(filter.aTags, TDCA_TAGS, params.aRules, filter.dwFlags, FO_ANYTAG);
 
 	CTDCSearchParamHelper::AppendPriorityRiskRule(filter.nPriority, TDCA_PRIORITY, params.aRules, FM_ANYPRIORITY, FM_NOPRIORITY);
@@ -735,8 +735,10 @@ DWORD CTDCFilter::LoadFlags(const CPreferences& prefs, const CString& sKey)
 	DWORD dwFlags = 0;
 
 	Misc::SetFlag(dwFlags, FO_ANYCATEGORY,	prefs.GetProfileInt(sKey, _T("AnyCategory"), TRUE));
-	Misc::SetFlag(dwFlags, FO_ANYALLOCTO,	prefs.GetProfileInt(sKey, _T("AnyAllocTo"), TRUE));
+	Misc::SetFlag(dwFlags, FO_ANYPERSON,	prefs.GetProfileInt(sKey, _T("AnyAllocTo"), TRUE));
 	Misc::SetFlag(dwFlags, FO_ANYTAG,		prefs.GetProfileInt(sKey, _T("AnyTag"), TRUE));
+	Misc::SetFlag(dwFlags, FO_ANYSTATUS,	prefs.GetProfileInt(sKey, _T("AnyStatus"), TRUE));
+	Misc::SetFlag(dwFlags, FO_ANYVERSION,	prefs.GetProfileInt(sKey, _T("AnyVersion"), TRUE));
 	Misc::SetFlag(dwFlags, FO_HIDEOVERDUE,	prefs.GetProfileInt(sKey, _T("HideOverDue"), FALSE));
 	Misc::SetFlag(dwFlags, FO_HIDEDONE,		prefs.GetProfileInt(sKey, _T("HideDone"), FALSE));
 	Misc::SetFlag(dwFlags, FO_SHOWALLSUB,	prefs.GetProfileInt(sKey, _T("ShowAllSubtasks"), FALSE));
@@ -800,9 +802,11 @@ void CTDCFilter::SaveFilter(CPreferences& prefs, const CString& sKey, const TDCF
 
 void CTDCFilter::SaveFlags(DWORD dwFlags, CPreferences& prefs, const CString& sKey)
 {
-	prefs.WriteProfileInt(sKey, _T("AnyAllocTo"),		Misc::HasFlag(dwFlags, FO_ANYALLOCTO));
+	prefs.WriteProfileInt(sKey, _T("AnyAllocTo"),		Misc::HasFlag(dwFlags, FO_ANYPERSON));
 	prefs.WriteProfileInt(sKey, _T("AnyCategory"),		Misc::HasFlag(dwFlags, FO_ANYCATEGORY));
 	prefs.WriteProfileInt(sKey, _T("AnyTag"),			Misc::HasFlag(dwFlags, FO_ANYTAG));
+	prefs.WriteProfileInt(sKey, _T("AnyStatus"),		Misc::HasFlag(dwFlags, FO_ANYSTATUS));
+	prefs.WriteProfileInt(sKey, _T("AnyVersion"),		Misc::HasFlag(dwFlags, FO_ANYVERSION));
 	prefs.WriteProfileInt(sKey, _T("HideOverDue"),		Misc::HasFlag(dwFlags, FO_HIDEOVERDUE));
 	prefs.WriteProfileInt(sKey, _T("HideDone"),			Misc::HasFlag(dwFlags, FO_HIDEDONE));
 	prefs.WriteProfileInt(sKey, _T("ShowAllSubtasks"),	Misc::HasFlag(dwFlags, FO_SHOWALLSUB));

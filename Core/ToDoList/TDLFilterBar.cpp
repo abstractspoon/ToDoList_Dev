@@ -164,18 +164,7 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 		m_cbTagFilter.SetChecked(m_filter.aTags);
 
 		// options
-		if (m_filter.IsAdvanced())
-		{
-			DWORD dwFlags = TDCFILTER().dwFlags; // default
-			m_mapCustomFlags.Lookup(m_sAdvancedFilter, dwFlags);
-
-			DWORD dwOptions = (FO_HIDEOVERDUE | FO_HIDEDONE | FO_SHOWALLSUB);
-			m_cbOptions.Initialize(dwOptions, dwFlags);
-		}
-		else
-		{
-			m_cbOptions.Initialize(m_filter);
-		}
+		RebuildOptionsCombo();
 	}
 }
 
@@ -559,7 +548,13 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 		CHoldRedraw hr(GetSafeHwnd(), NCR_PAINT | NCR_ERASEBKGND);
 
 		// column visibility
-		SetVisibleFilters(tdc.GetVisibleFilterFields(), FALSE);
+		CTDCAttributeMap mapDiffs;
+
+		if (m_mapVisibility.GetDifferences(tdc.GetVisibleFilterFields(), mapDiffs))
+		{
+			m_mapVisibility.Copy(tdc.GetVisibleFilterFields());
+			RebuildOptionsCombo();
+		}
 
 		// get filter
 		if (tdc.GetFilter(m_filter) == FS_ADVANCED)
@@ -714,20 +709,19 @@ int CTDLFilterBar::CalcHeight(int nWidth)
 	return ReposControls(nWidth, TRUE);
 }
 
-void CTDLFilterBar::SetVisibleFilters(const CTDCAttributeMap& mapFilters)
+void CTDLFilterBar::RebuildOptionsCombo()
 {
-	SetVisibleFilters(mapFilters, TRUE);
-}
-
-void CTDLFilterBar::SetVisibleFilters(const CTDCAttributeMap& mapFilters, BOOL bRepos)
-{
-	if (!m_mapVisibility.MatchAll(mapFilters))
+	if (m_filter.IsAdvanced())
 	{
-		m_mapVisibility.Copy(mapFilters);
+		DWORD dwFlags = TDCFILTER().dwFlags; // default
+		m_mapCustomFlags.Lookup(m_sAdvancedFilter, dwFlags);
 
-		// update controls
-		if (bRepos)
-			ReposControls();
+		DWORD dwOptions = (FO_HIDEOVERDUE | FO_HIDEDONE | FO_SHOWALLSUB);
+		m_cbOptions.Initialize(dwOptions, dwFlags);
+	}
+	else
+	{
+		m_cbOptions.Initialize(m_filter, m_mapVisibility, m_bMultiSelection);
 	}
 }
 
@@ -763,8 +757,10 @@ void CTDLFilterBar::EnableMultiSelection(BOOL bEnable)
 		m_cbVersionFilter.EnableMultiSelection(bEnable);
 		m_cbTagFilter.EnableMultiSelection(bEnable);
 
-		CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(m_aCustomControls, this, bEnable);
+		RebuildOptionsCombo();
 
+		CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(m_aCustomControls, this, bEnable);
+		
 		UpdateData(); // Pick up any changes
 	}
 }

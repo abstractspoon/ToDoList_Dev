@@ -2413,6 +2413,8 @@
 #define IDS_QUICKFIND_NEXTMATCH         51593
 #define IDS_FOCUS_REMINDERS             51594
 #define IDS_FOCUS_TIMETRACKER           51595
+#define IDS_FILTER_ANYSTATUS            51596
+#define IDS_FILTER_ANYVERSION           51597
 
 // Next default values for new objects
 // 

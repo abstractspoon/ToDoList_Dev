@@ -57,16 +57,16 @@ void CTDLFilterOptionComboBox::Initialize(DWORD dwFlags, DWORD dwOptions)
 	SetCheckedByItemData(dwOptions);
 }
 
-void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter)
+void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter, const CTDCAttributeMap& mapVisibleFilters, BOOL bMultiSelection)
 {
 	// translation done via CEnString
 	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
 
 	ResetContent();
-	m_dwOptions = (DWORD)-1;
+	m_dwOptions = (DWORD)-1; // all
 
 	// add flags to droplist depending on the filter being used
-	CEnString sFlag;
+	DWORD dwFlags = filter.GetFlags();
 
 	for (int nItem = 0; nItem < NUM_FILTEROPT; nItem++)
 	{
@@ -76,9 +76,45 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter)
 		switch (nFlag)
 		{
 		case FO_ANYCATEGORY:
-		case FO_ANYALLOCTO:
+			if (!filter.IsAdvanced() && (filter.nShow != FS_SELECTED))
+			{
+				bAddFlag = mapVisibleFilters.Has(TDCA_CATEGORY);
+			}
+			break;
+
 		case FO_ANYTAG:
-			bAddFlag = (!filter.IsAdvanced() && (filter.nShow != FS_SELECTED));
+			if (!filter.IsAdvanced() && (filter.nShow != FS_SELECTED))
+			{
+				bAddFlag = mapVisibleFilters.Has(TDCA_TAGS);
+			}
+			break;
+
+		case FO_ANYPERSON:
+			if (!filter.IsAdvanced() && (filter.nShow != FS_SELECTED))
+			{
+				if (mapVisibleFilters.Has(TDCA_ALLOCTO))
+				{
+					bAddFlag = TRUE;
+				}
+				else if (mapVisibleFilters.Has(TDCA_ALLOCBY))
+				{
+					bAddFlag = bMultiSelection;
+				}
+			}
+			break;
+
+		case FO_ANYSTATUS:
+			if (!filter.IsAdvanced() && (filter.nShow != FS_SELECTED))
+			{
+				bAddFlag = (mapVisibleFilters.Has(TDCA_STATUS) && bMultiSelection);
+			}
+			break;
+
+		case FO_ANYVERSION:
+			if (!filter.IsAdvanced() && (filter.nShow != FS_SELECTED))
+			{
+				bAddFlag = (mapVisibleFilters.Has(TDCA_VERSION) && bMultiSelection);
+			}
 			break;
 
 		case FO_SHOWALLSUB:
@@ -109,10 +145,12 @@ void CTDLFilterOptionComboBox::Initialize(const TDCFILTER& filter)
 
 		if (bAddFlag)
 			CDialogHelper::AddString(*this, FILTER_OPTIONS[nItem][0], nFlag);
+		else
+			dwFlags &= ~nFlag;
 	}
 
 	// set states
-	SetSelectedOptions(filter.dwFlags);
+	SetSelectedOptions(dwFlags);
 }
 
 void CTDLFilterOptionComboBox::OnCheckChange(int /*nIndex*/)

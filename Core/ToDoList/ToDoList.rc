@@ -4569,6 +4569,8 @@ BEGIN
     IDS_QUICKFIND_NEXTMATCH "Next Match"
     IDS_FOCUS_REMINDERS     "Task Reminders"
     IDS_FOCUS_TIMETRACKER   "Time Tracker"
+    IDS_FILTER_ANYSTATUS    "Any status can match"
+    IDS_FILTER_ANYVERSION   "Any version can match"
 END
 
 STRINGTABLE DISCARDABLE 

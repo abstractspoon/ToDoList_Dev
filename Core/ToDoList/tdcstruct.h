@@ -1800,7 +1800,7 @@ struct TDCFILTER
 		nDueBy(FD_ANY), 
 		nPriority(FM_ANYPRIORITY), 
 		nRisk(FM_ANYRISK), 
-		dwFlags(FO_ANYALLOCTO | FO_ANYCATEGORY | FO_ANYTAG), 
+		dwFlags(FO_ATTRIBUTES), 
 		nTitleOption(FT_FILTERONTITLEONLY),
 		nStartNextNDays(7), 
 		nDueNextNDays(7)
@@ -1928,8 +1928,10 @@ struct TDCFILTER
 			switch (dwFlag)
 			{
 			case FO_ANYCATEGORY:
-			case FO_ANYALLOCTO:
+			case FO_ANYPERSON:
 			case FO_ANYTAG:
+			case FO_ANYSTATUS:
+			case FO_ANYVERSION:
 			case FO_SHOWALLSUB:
 				break; // always allowed
 
@@ -1979,107 +1981,6 @@ struct TDCFILTER
 		return FiltersMatch(*this, filter);
 	}
 
-	static BOOL FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2)
-	{
-		// simple exclusion test first
-		if ((filter1.nShow != filter2.nShow) ||
-			(filter1.nStartBy != filter2.nStartBy) ||
-			(filter1.nDueBy != filter2.nDueBy) ||
-			(filter1.nPriority != filter2.nPriority) ||
-			(filter1.nRisk != filter2.nRisk) ||
-			(filter1.sTitle != filter2.sTitle) ||
-			(filter1.dwFlags != filter2.dwFlags) ||
-			((filter1.nTitleOption != filter2.nTitleOption) && !filter1.sTitle.IsEmpty()))
-		{
-			return FALSE;
-		}
-
-		// user-specified due date
-		if (filter1.nDueBy == FD_USER) // == filter2.nDueBy
-		{
-			if (filter1.dtUserDue != filter2.dtUserDue)
-				return FALSE;
-		}
-
-		// user-specified start date
-		if (filter1.nStartBy == FD_USER) // == filter2.nStartBy
-		{
-			if (filter1.dtUserStart != filter2.dtUserStart)
-				return FALSE;
-		}
-
-		// user-specified day range
-		if (filter1.nDueBy == FD_NEXTNDAYS) // == filter2.nStartBy
-		{
-			if (filter1.nDueNextNDays != filter2.nDueNextNDays)
-				return FALSE;
-		}
-
-		// user-specified day range
-		if (filter1.nStartBy == FD_NEXTNDAYS) // == filter2.nStartBy
-		{
-			if (filter1.nStartNextNDays != filter2.nStartNextNDays)
-				return FALSE;
-		}
-
-		// compare categories disregarding dwFlags if there's not actually something to compare
-		if (filter1.aCategories.GetSize() || filter2.aCategories.GetSize())
-		{
-			if (!Misc::MatchAll(filter1.aCategories, filter2.aCategories) ||
-				filter1.HasFlag(FO_ANYCATEGORY) != filter2.HasFlag(FO_ANYCATEGORY))
-			{
-				return FALSE;
-			}
-		}
-
-		// do the same with Alloc_To
-		if (filter1.aAllocTo.GetSize() || filter2.aAllocTo.GetSize())
-		{
-			if (!Misc::MatchAll(filter1.aAllocTo, filter2.aAllocTo) ||
-				filter1.HasFlag(FO_ANYALLOCTO) != filter2.HasFlag(FO_ANYALLOCTO))
-			{
-				return FALSE;
-			}
-		}
-
-		// and the same with Tags
-		if (filter1.aTags.GetSize() || filter2.aTags.GetSize())
-		{
-			if (!Misc::MatchAll(filter1.aTags, filter2.aTags) ||
-				filter1.HasFlag(FO_ANYTAG) != filter2.HasFlag(FO_ANYTAG))
-			{
-				return FALSE;
-			}
-		}
-
-		// and the same with Alloc_By
-		if (filter1.aAllocBy.GetSize() || filter2.aAllocBy.GetSize())
-		{
-			if (!Misc::MatchAll(filter1.aAllocBy, filter2.aAllocBy))
-				return FALSE;
-		}
-
-		// and the same with Status
-		if (filter1.aStatus.GetSize() || filter2.aStatus.GetSize())
-		{
-			if (!Misc::MatchAll(filter1.aStatus, filter2.aStatus))
-				return FALSE;
-		}
-
-		// and the same with Version
-		if (filter1.aVersions.GetSize() || filter2.aVersions.GetSize())
-		{
-			if (!Misc::MatchAll(filter1.aVersions, filter2.aVersions))
-				return FALSE;
-		}
-
-		// Custom attributes
-		if (!filter1.mapCustomAttrib.MatchAll(filter2.mapCustomAttrib))
-			return FALSE;
-
-		return TRUE;
-	}
-
 	CString GetTitleFilterLabel() const
 	{
 		CEnString sLabel; 
@@ -2119,6 +2020,121 @@ struct TDCFILTER
 	int nStartNextNDays, nDueNextNDays;
 
 	CTDCCustomAttributeDataMap mapCustomAttrib;
+
+protected:
+	static BOOL FiltersMatch(const TDCFILTER& filter1, const TDCFILTER& filter2)
+	{
+		// simple exclusion test first
+		if ((filter1.nShow != filter2.nShow) ||
+			(filter1.nStartBy != filter2.nStartBy) ||
+			(filter1.nDueBy != filter2.nDueBy) ||
+			(filter1.nPriority != filter2.nPriority) ||
+			(filter1.nRisk != filter2.nRisk) ||
+			(filter1.sTitle != filter2.sTitle) ||
+			((filter1.nTitleOption != filter2.nTitleOption) && !filter1.sTitle.IsEmpty()))
+		{
+			return FALSE;
+		}
+
+		// user-specified due date
+		if (filter1.nDueBy == FD_USER) // == filter2.nDueBy
+		{
+			if (filter1.dtUserDue != filter2.dtUserDue)
+				return FALSE;
+		}
+
+		// user-specified start date
+		if (filter1.nStartBy == FD_USER) // == filter2.nStartBy
+		{
+			if (filter1.dtUserStart != filter2.dtUserStart)
+				return FALSE;
+		}
+
+		// user-specified day range
+		if (filter1.nDueBy == FD_NEXTNDAYS) // == filter2.nStartBy
+		{
+			if (filter1.nDueNextNDays != filter2.nDueNextNDays)
+				return FALSE;
+		}
+
+		// user-specified day range
+		if (filter1.nStartBy == FD_NEXTNDAYS) // == filter2.nStartBy
+		{
+			if (filter1.nStartNextNDays != filter2.nStartNextNDays)
+				return FALSE;
+		}
+
+		// 'Global' flags
+		if ((filter1.dwFlags & FO_GLOBALS) != (filter2.dwFlags & FO_GLOBALS))
+			return FALSE;
+
+		// compare categories disregarding dwFlags if there's not actually something to compare
+		if (filter1.aCategories.GetSize() || filter2.aCategories.GetSize())
+		{
+			if (!Misc::MatchAll(filter1.aCategories, filter2.aCategories))
+				return FALSE;
+
+			if (filter1.HasFlag(FO_ANYCATEGORY) != filter2.HasFlag(FO_ANYCATEGORY))
+				return FALSE;
+		}
+
+		// do the same with Alloc_To
+		if (filter1.aAllocTo.GetSize() || filter2.aAllocTo.GetSize())
+		{
+			if (!Misc::MatchAll(filter1.aAllocTo, filter2.aAllocTo))
+				return FALSE;
+
+			if (filter1.HasFlag(FO_ANYPERSON) != filter2.HasFlag(FO_ANYPERSON))
+				return FALSE;
+		}
+
+		// and the same with Tags
+		if (filter1.aTags.GetSize() || filter2.aTags.GetSize())
+		{
+			if (!Misc::MatchAll(filter1.aTags, filter2.aTags))
+				return FALSE;
+
+			if (filter1.HasFlag(FO_ANYTAG) != filter2.HasFlag(FO_ANYTAG))
+				return FALSE;
+		}
+
+		// and the same with Alloc_By
+		if (filter1.aAllocBy.GetSize() || filter2.aAllocBy.GetSize())
+		{
+			if (!Misc::MatchAll(filter1.aAllocBy, filter2.aAllocBy))
+				return FALSE;
+
+			if (filter1.HasFlag(FO_ANYPERSON) != filter2.HasFlag(FO_ANYPERSON))
+				return FALSE;
+		}
+
+		// and the same with Status
+		if (filter1.aStatus.GetSize() || filter2.aStatus.GetSize())
+		{
+			if (!Misc::MatchAll(filter1.aStatus, filter2.aStatus))
+				return FALSE;
+
+			if (filter1.HasFlag(FO_ANYSTATUS) != filter2.HasFlag(FO_ANYSTATUS))
+				return FALSE;
+		}
+
+		// and the same with Version
+		if (filter1.aVersions.GetSize() || filter2.aVersions.GetSize())
+		{
+			if (!Misc::MatchAll(filter1.aVersions, filter2.aVersions))
+				return FALSE;
+
+			if (filter1.HasFlag(FO_ANYVERSION) != filter2.HasFlag(FO_ANYVERSION))
+				return FALSE;
+		}
+
+		// Custom attributes
+		if (!filter1.mapCustomAttrib.MatchAll(filter2.mapCustomAttrib))
+			return FALSE;
+
+		return TRUE;
+	}
+
 };
 
 struct TDCADVANCEDFILTER

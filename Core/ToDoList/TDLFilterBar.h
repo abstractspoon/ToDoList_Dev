@@ -51,11 +51,10 @@ public:
 	BOOL SetAdvancedFilterFlags(const CString& sCustom, DWORD dwFlags);
 
 	void ShowDefaultFilters(BOOL bShow);
-	void RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
+	void RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID = TDCA_ALL);
 	void SetFilterLabelAlignment(BOOL bLeft);
 	void SetPriorityColors(const CDWordArray& aColors);
 	int CalcHeight(int nWidth);
-	void SetVisibleFilters(const CTDCAttributeMap& mapFilters);
 	BOOL FilterMatches(const TDCFILTER& filter) { return (filter == m_filter); }
 	BOOL SetTitleFilterOption(FILTER_TITLE nOption);
 	void ClearCheckboxHistory();
@@ -151,12 +150,12 @@ protected:
 protected:
 	int ReposControls(int nWidth = -1, BOOL bCalcOnly = FALSE);
 	BOOL WantShowFilter(TDC_ATTRIBUTE nType) const;
-	void SetVisibleFilters(const CTDCAttributeMap& mapFilters, BOOL bRepos);
 	void RefreshUIBkgndBrush();
 	int GetControls(CTDCControlArray& aControls) const;
 	void UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 	void UpdateAutoDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 	void NotifyParentFilterChange();
+	void RebuildOptionsCombo();
 };
 
 //{{AFX_INSERT_LOCATION}}

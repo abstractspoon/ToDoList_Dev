@@ -28,7 +28,7 @@ protected:
 
 // Operations
 public:
-	void Initialize(const TDCFILTER& filter);
+	void Initialize(const TDCFILTER& filter, const CTDCAttributeMap& mapVisibleFilters, BOOL bMultiSelection);
 	void Initialize(DWORD dwFlags, DWORD dwOptions = 0);
 
 	DWORD GetSelectedOptions() const;
