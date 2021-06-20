@@ -88,7 +88,6 @@ void DoTests(const CTestUtils& utils)
 	res += CTimeHelperTest(utils).Run();
 	res += CToDoCtrlDataTest(utils).Run();
 	res += CToDoCtrlTaskLinkTest(utils).Run();
-	res += CToDoCtrlTaskLinkTest(utils).Run();
 	res += CWorkingDayTest(utils).Run();
 	res += CWorkingWeekTest(utils).Run();
 
