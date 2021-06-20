@@ -341,26 +341,13 @@ CString CEnCheckComboBox::GetItemText(int nItem, const CString& sHint) const
 
 	if (m_bMultiSel)
 	{
-		if (nItem == -1)
+		if (sItem.IsEmpty()) 
 		{
-			if (IsItemAnyChecked())
+			if (nItem == -1)
 			{
 				sItem = m_sAny;
 			}
-			else if (IsItemNoneChecked())
-			{
-				// if drawing the comma-delimited list and it includes
-				// a blank item, prefix the text with <none>
-				sItem = (m_sNone + m_sText);
-			}
-			else if (sItem.IsEmpty())
-			{
-				sItem = m_sAny;
-			}
-		}
-		else if (sItem.IsEmpty()) 
-		{
-			if (IsItemAnyIndex(nItem))
+			else if (IsItemAnyIndex(nItem))
 			{
 				sItem = m_sAny;
 			}
@@ -370,6 +357,7 @@ CString CEnCheckComboBox::GetItemText(int nItem, const CString& sHint) const
 			}
 			else
 			{
+				// Text shouldn't be empty
 				ASSERT(0);
 			}
 		}

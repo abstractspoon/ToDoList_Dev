@@ -226,11 +226,8 @@ int CCheckComboBox::GetCheckStates(CArray<CCB_CHECKSTATE, CCB_CHECKSTATE>& aStat
 
 void CCheckComboBox::RecalcText(BOOL bUpdate, BOOL bNotify)
 {
-	CStringArray aItems;
-	GetChecked(aItems);
-	
 	CString sPrevText = m_sText;
-	m_sText = Misc::FormatArray(aItems);
+	m_sText = FormatCheckedItems();
 	
 	// update edit field if necessary
 	if (CDialogHelper::ComboHasEdit(*this))
