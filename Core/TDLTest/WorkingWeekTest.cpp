@@ -66,7 +66,7 @@ void CWorkingWeekTest::TestAddDuration()
 	{
 		CWorkingWeek week(0,		// no weekend (hard to test)
 						  8,		// 8 hour day
-						  9,		// 9 am - 6pm
+						  9,		// 9 am - 6pm (0.375 - 0.75)
 						  12, 13);	// 12-1pm lunch
 
 		COleDateTime date(44000.0);
@@ -89,7 +89,7 @@ void CWorkingWeekTest::TestAddDuration()
 	{
 		CWorkingWeek week(0,		// no weekend (hard to test)
 						  8,		// 8 hour day
-						  9,		// 9 am - 6pm
+						  9,		// 9 am - 6pm (0.375 - 0.75)
 						  12, 13);	// 12-1pm lunch
 
 		COleDateTime date(-44000.0);
@@ -97,14 +97,17 @@ void CWorkingWeekTest::TestAddDuration()
 		ExpectEQ(week.AddDurationInMinutes(date, 30).m_dt, CWorkingDay::GetDateAtTimeInHours(-44000.0, 9.5));
 		ExpectEQ(week.AddDurationInMinutes(date, -30).m_dt, CWorkingDay::GetDateAtTimeInHours(-44001.0, 17.5));
 
+		ASSERT(date.m_dt == -44000.0);
 		ExpectEQ(week.AddDurationInHours(date, 9).m_dt, CWorkingDay::GetDateAtTimeInHours(-43999.0, 10));
 		ExpectEQ(week.AddDurationInHours(date, -9).m_dt, CWorkingDay::GetDateAtTimeInHours(-44002.0, 17));
 
-		ExpectEQ(week.AddDurationInDays(date, 9).m_dt, -43991.75);   // end of 9th day
-		ExpectEQ(week.AddDurationInDays(date, -9).m_dt, -44008.375); // start of 9th previous day
+		ASSERT(date.m_dt == -44000.0);
+		ExpectEQ(week.AddDurationInDays(date, 9).m_dt, -43992.75);   // end of 9th day
+		ExpectEQ(week.AddDurationInDays(date, -9).m_dt, -44009.375); // start of 9th previous day
 
-		ExpectEQ(week.AddDurationInWeeks(date, 2).m_dt, -43986.75);  // end of 14th day
-		ExpectEQ(week.AddDurationInWeeks(date, -2).m_dt, -44013.375);// start of 14th previous day
+		ASSERT(date.m_dt == -44000.0);
+		ExpectEQ(week.AddDurationInWeeks(date, 2).m_dt, -43987.75);  // end of 14th day
+		ExpectEQ(week.AddDurationInWeeks(date, -2).m_dt, -44014.375);// start of 14th previous day
 	}
 
 	// -----------------------------------------------------------------------
@@ -178,7 +181,7 @@ void CWorkingDayTest::TestAddDurationInHours()
 	{
 		// Add hours to positive date
 		CWorkingDay day(8,			// 8 hour day
-						9,			// 9 am - 6pm
+						9,			// 9 am - 6pm (0.375 - 0.75)
 						12, 13);	// 12-1pm lunch
 		COleDateTime date(44000.0);
 
