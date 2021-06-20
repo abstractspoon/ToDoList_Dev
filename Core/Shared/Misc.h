@@ -101,7 +101,6 @@ namespace Misc
 	CString GetLongestItem(const CStringArray& aValues);
 	int GetMaximumItemLength(const CStringArray& aValues);
 	int GetFormattedLength(const CStringArray& aValues, LPCTSTR szSep = NULL, BOOL bIncEmpty = FALSE);
-	int GetFormattedLength(const CStringArray& aValues, TCHAR cSep, BOOL bIncEmpty = FALSE);
 
 	const CString& GetItem(const CStringArray& aValues, int nItem);
 
@@ -569,7 +568,7 @@ namespace Misc
 	}
 
 	template <class T>
-	int GetFormattedLength(T tVal, int nDecimals)
+	int GetFormattedLengthT(T tVal, int nDecimals)
 	{
 		int nNumDigits = 0;
 

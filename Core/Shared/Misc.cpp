@@ -381,19 +381,20 @@ CString Misc::FormatArray(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncE
 	case 1:	return aValues[0];
 	}
 
-	// All else
+	// VC6 has very poor performance with big arrays
+	// So we do in-place copying to avoid concatenation
 	CString sSep(szSep), sText;
 
 	if (sSep.IsEmpty())
 		sSep = GetListSeparator() + ' ';
 
-	// VC6 has very poor performance with big arrays
-	// So we do in-place copying to avoid concatenation
 	int nReqLen = GetFormattedLength(aValues, sSep, bIncEmpty);
+	ASSERT(nReqLen == GetFormattedLength(aValues, szSep, bIncEmpty));
 
 	if (nReqLen > 0)
 	{
-		LPTSTR szBuffer = sText.GetBuffer(nReqLen);
+		LPTSTR szBuffer = sText.GetBuffer(nReqLen), szBufPtr = szBuffer;
+		BOOL bFirstItem = TRUE;
 		
 		for (int nItem = 0; nItem < nCount; nItem++)
 		{
@@ -401,17 +402,21 @@ CString Misc::FormatArray(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncE
 			
 			if (bIncEmpty || !sItem.IsEmpty())
 			{
-				if (nItem > 0)
+				if (!bFirstItem)
 				{
-					_tcscpy(szBuffer, sSep);
-					szBuffer += sSep.GetLength();
+					_tcscpy(szBufPtr, sSep);
+					szBufPtr += sSep.GetLength();
 				}
 				
-				_tcscpy(szBuffer, sItem);
-				szBuffer += sItem.GetLength();
+				_tcscpy(szBufPtr, sItem);
+				szBufPtr += sItem.GetLength();
+
+				bFirstItem = FALSE;
 			}
 		}
 		
+		ASSERT(szBufPtr == (szBuffer + nReqLen));
+
 		sText.ReleaseBuffer(nReqLen);
 	}
 
@@ -504,16 +509,20 @@ int Misc::GetFormattedLength(const CStringArray& aValues, LPCTSTR szSep, BOOL bI
 	}
 
 	// All else
-	int nLenSep = (szSep ? lstrlen(szSep) : (GetListSeparator().GetLength() + 1));
 	int nTotalLen = 0;
+	int nLenSep = lstrlen(szSep);
+	
+	if (nLenSep == 0)
+		nLenSep = (GetListSeparator().GetLength() + 1);
 
 	for (int nItem = 0; nItem < nCount; nItem++)
 	{
 		int nItemLen = GetItem(aValues, nItem).GetLength();
-		nTotalLen += nItemLen;
 
-		if (bIncEmpty || nItemLen)
-			nTotalLen += nLenSep;
+		if (!bIncEmpty && !nItemLen)
+			continue;
+
+		nTotalLen += (nItemLen + nLenSep);
 	}
 
 	// Remove trailing separator
@@ -521,13 +530,6 @@ int Misc::GetFormattedLength(const CStringArray& aValues, LPCTSTR szSep, BOOL bI
 		nTotalLen -= nLenSep;
 
 	return nTotalLen;
-}
-
-int Misc::GetFormattedLength(const CStringArray& aValues, TCHAR cSep, BOOL bIncEmpty)
-{
-	TCHAR szSep[2] = { cSep, 0 };
-
-	return GetFormattedLength(aValues, szSep, bIncEmpty);
 }
 
 BOOL Misc::Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim)

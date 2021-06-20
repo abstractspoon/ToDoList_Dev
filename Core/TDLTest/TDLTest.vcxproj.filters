@@ -46,6 +46,9 @@
     <ClCompile Include="WorkingWeekTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MiscTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImportExportMgrTest.h">
@@ -97,6 +100,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WorkingWeekTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MiscTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
