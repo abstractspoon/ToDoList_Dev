@@ -8658,7 +8658,7 @@ void CToDoListWnd::CheckUpdateActiveToDoCtrlPreferences()
 		UpdateToDoCtrlPreferences(&tdc);
 
 		// and filter bar relies on this tdc's visible columns
-		m_filterBar.SetVisibleFilters(tdc.GetVisibleFilterFields());
+		RefreshFilterBarControls(TDCA_ALL);
 	}
 }
 
@@ -11646,8 +11646,6 @@ void CToDoListWnd::OnTasklistSelectColumns()
 			m_pPrefs->SetDefaultColumnEditFilterVisibility(vis);
 		}
 
-		m_filterBar.SetVisibleFilters(vis.GetVisibleFilterFields());
-
 		if (dialog.GetApplyActiveTasklist())
 		{
 			tdc.SetColumnFieldVisibility(vis);
@@ -11658,11 +11656,10 @@ void CToDoListWnd::OnTasklistSelectColumns()
 			int nTDC = GetTDCCount();
 
 			while (nTDC--)
-			{
-				CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-				tdc.SetColumnFieldVisibility(vis);
-			}
+				GetToDoCtrl(nTDC).SetColumnFieldVisibility(vis);
 		}
+
+		RefreshFilterBarControls(TDCA_ALL);
 
 		// reload the menu if we dynamically alter it
 		if (Prefs().GetShowEditMenuAsColumns())
