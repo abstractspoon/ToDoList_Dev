@@ -1667,22 +1667,39 @@ int CKanbanCtrl::RemoveOldDynamicColumns(const CKanbanItemArrayMap& mapKIArray)
 	{
 		CKanbanColumnCtrl* pCol = m_aColumns[nCol];
 		ASSERT(pCol && !pCol->HasMultipleValues());
+
+		BOOL bDeleteCol = FALSE;
 		
 		if ((pGlobals == NULL) || !WantShowColumn(pCol))
 		{
-			DeleteColumn(nCol);
-			nNumRemoved++;
+			bDeleteCol = TRUE;
 		}
 		else
 		{
 			CString sAttribValueID(pCol->GetAttributeValueID());
 			
-			if (!Misc::HasKey(*pGlobals, sAttribValueID) || 
-				!WantShowColumn(sAttribValueID, mapKIArray))
+			if (!WantShowColumn(sAttribValueID, mapKIArray))
 			{
-				DeleteColumn(nCol);
-				nNumRemoved++;
+				bDeleteCol = TRUE;
 			}
+			else if (m_nTrackAttribute == TDCA_CUSTOMATTRIB)
+			{
+				// Custom neither have globals in the same sense
+				// as default attributes nor do all the types of
+				// custom attributes have globals at all.
+				// So we can't use them to check for the validity
+				// of an attribute's values as we do below
+			}
+			else if (!Misc::HasKey(*pGlobals, sAttribValueID))
+			{
+				bDeleteCol = TRUE;
+			}
+		}
+
+		if (bDeleteCol)
+		{
+			DeleteColumn(nCol);
+			nNumRemoved++;
 		}
 	}
 
