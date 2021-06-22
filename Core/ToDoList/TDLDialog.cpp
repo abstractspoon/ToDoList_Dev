@@ -7,6 +7,7 @@
 
 #include "..\shared\FileMisc.h"
 #include "..\shared\FileEdit.h"
+#include "..\shared\Localizer.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -52,6 +53,7 @@ BEGIN_MESSAGE_MAP(CTDLDialog, CDialog)
 	ON_WM_HELPINFO()
 	ON_WM_GETMINMAXINFO()
 	ON_WM_DESTROY()
+	ON_WM_SHOWWINDOW()
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnGetFileIcon)
 END_MESSAGE_MAP()
 
@@ -91,15 +93,21 @@ BOOL CTDLDialog::OnInitDialog()
 			}
 		}
 	}
-
-	CDialogHelper::ResizeButtonStaticTextFieldsToFit(this);
-
+	
 	return TRUE;
 }
 
 BOOL CTDLDialog::IsResizable() const
 {
 	return (GetStyle() & WS_THICKFRAME);
+}
+
+void CTDLDialog::OnShowWindow(BOOL bShow, UINT nStatus)
+{
+	if (bShow && CLocalizer::IsInitialized())
+		CDialogHelper::ResizeButtonStaticTextFieldsToFit(this);
+
+	CDialog::OnShowWindow(bShow, nStatus);
 }
 
 void CTDLDialog::OnDestroy()

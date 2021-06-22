@@ -43,6 +43,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnDestroy();
 	//}}AFX_MSG
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnGetMinMaxInfo(MINMAXINFO* lpMMI);
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
