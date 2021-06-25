@@ -11872,8 +11872,9 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 										dialog.GetOutputFormat(), 
 										dialog.GetOutputFilepath()))
 				{
-					// query the user to view the results
-					if (CMessageBox::AfxShow(IDS_LOGANALYSIS_QUERYOPEN, MB_YESNO) == IDYES)
+					// Show the report
+					if (dialog.GetAutoDisplayReport() ||
+						CMessageBox::AfxShow(IDS_LOGANALYSIS_QUERYOPEN, MB_YESNO) == IDYES)
 					{
 						FileMisc::Run(*this, dialog.GetOutputFilepath());
 					}

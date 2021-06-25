@@ -28,6 +28,7 @@ public:
 
 	CString GetOutputFilepath() const { return m_sOutputFilePath; }
 	BOOL GetDateRange(COleDateTime& dtFrom, COleDateTime& dtTo) const;
+	BOOL GetAutoDisplayReport() const { return m_bAutoDisplayReport; }
 
 protected:
 // Dialog Data
@@ -38,6 +39,7 @@ protected:
 	TDCTTL_PERIOD m_nTimePeriod;
 	TDCTTL_BREAKDOWN m_nBreakdown;
 	TDC_ATTRIBUTE m_nGroupByAttrib;
+	BOOL m_bAutoDisplayReport;
 
 	BOOL m_bGroupBy;
 	COleDateTime m_dtFrom;

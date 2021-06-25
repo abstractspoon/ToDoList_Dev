@@ -77,6 +77,7 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 	m_nTimePeriod = prefs.GetProfileEnum(m_sPrefsKey, _T("AnalysisTimePeriod"), TTLP_THISMONTH);
 	m_nBreakdown = prefs.GetProfileEnum(m_sPrefsKey, _T("AnalysisBreakdown"), TTLB_BYDAY);
 	m_nOutputFormat = prefs.GetProfileEnum(m_sPrefsKey, _T("AnalysisOutputFormat"), TTLF_CSV);
+	m_bAutoDisplayReport = prefs.GetProfileInt(m_sPrefsKey, _T("AutoDisplayReport"), FALSE);
 
 	m_bGroupBy = prefs.GetProfileInt(m_sPrefsKey, _T("GroupBy"), FALSE);
 	m_nGroupByAttrib = prefs.GetProfileEnum(m_sPrefsKey, _T("GroupByAttrib"), TDCA_STATUS);
@@ -129,6 +130,7 @@ void CTDLAnalyseLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_BREAKDOWNS, m_cbBreakdown);
 	DDX_Control(pDX, IDC_GROUPBYATTRIB, m_cbGroupByAttrib);
 	DDX_Check(pDX, IDC_GROUPBY, m_bGroupBy);
+	DDX_Check(pDX, IDC_AUTODISPLAYREPORT, m_bAutoDisplayReport);
 
 	CDialogHelper::DDX_CBData(pDX, m_cbTimePeriod, m_nTimePeriod, TTLP_THISMONTH);
 	CDialogHelper::DDX_CBData(pDX, m_cbBreakdown, m_nBreakdown, TTLB_BYDAY);
@@ -263,13 +265,14 @@ void CTDLAnalyseLoggedTimeDlg::OnOK()
 	// save state
 	CPreferences prefs;
 
-	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisTimePeriod"), m_nTimePeriod);
-	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisBreakdown"), m_nBreakdown);
-	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisOutputFormat"), m_nOutputFormat);
 	prefs.WriteProfileDouble(m_sPrefsKey, _T("AnalysisFromDate"), m_dtFrom);
 	prefs.WriteProfileDouble(m_sPrefsKey, _T("AnalysisToDate"), m_dtTo);
 	prefs.WriteProfileString(m_sPrefsKey, _T("AnalysisFolder"), FileMisc::GetFolderFromFilePath(m_sOutputFilePath));
 
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisTimePeriod"), m_nTimePeriod);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisBreakdown"), m_nBreakdown);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AnalysisOutputFormat"), m_nOutputFormat);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("AutoDisplayReport"), m_bAutoDisplayReport);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("GroupBy"), m_bGroupBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("GroupByAttrib"), m_nGroupByAttrib);
 
