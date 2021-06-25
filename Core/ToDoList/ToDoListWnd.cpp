@@ -9248,7 +9248,7 @@ void CToDoListWnd::HandleExportTasklistResult(IIMPORTEXPORT_RESULT nRes, const C
 	}
 
 	if (nMessageID)
-		CMessageBox::AfxShow(nMessageID), (MB_OK | nIcon);
+		CMessageBox::AfxShow(nMessageID, (MB_OK | nIcon));
 }
 
 void CToDoListWnd::OnSetPriority(UINT nCmdID) 
@@ -9903,7 +9903,7 @@ BOOL CToDoListWnd::CanOverwriteExportFiles(const CStringArray& aExportPaths) con
 
 	while (FileMisc::GetNonWritableFiles(aExistPaths, aLockedPaths))
 	{
-		if (IDCANCEL == CMessageBox::AfxShow(IDS_ERROR_EXPORT_LOCKEDFILES, Misc::FormatArray(aLockedPaths, _T("\n\n")), MB_ICONERROR | MB_OKCANCEL))
+		if (IDCANCEL == CMessageBox::AfxShow(IDS_ERROR_LOCKEDFILES, Misc::FormatArray(aLockedPaths, _T("\n\n")), MB_ICONERROR | MB_OKCANCEL))
 			return FALSE;
 	}
 
@@ -11851,9 +11851,21 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 			{
 				SetLastError(0);
 				
-				// else do the analysis
-				CTDCTaskTimeLogAnalysis ttla(sTaskFile, aCustAttribDefs, userPrefs.GetLogTaskTimeSeparately());
-				
+				CTDCTaskTimeLogAnalysis ttla(sTaskFile, aCustAttribDefs);
+
+				// Check all the files are accessible
+				CStringArray aLogFiles, aLockedPaths;
+
+				VERIFY(ttla.GetLogFilePaths(aLogFiles));
+				aLogFiles.Add(dialog.GetOutputFilepath());
+
+				while (FileMisc::GetNonWritableFiles(aLogFiles, aLockedPaths))
+				{
+					if (IDCANCEL == CMessageBox::AfxShow(IDS_ERROR_LOCKEDFILES, Misc::FormatArray(aLockedPaths, _T("\n\n")), MB_ICONERROR | MB_OKCANCEL))
+						return;
+				}
+
+				// Do the analysis
 				if (ttla.AnalyseTaskLog(dtFrom, dtTo, 
 										dialog.GetBreakdown(), 
 										dialog.GetGroupBy(),

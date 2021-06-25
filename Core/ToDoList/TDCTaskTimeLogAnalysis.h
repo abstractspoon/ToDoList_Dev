@@ -19,8 +19,7 @@
 class CTDCTaskTimeLogAnalysis
 {
 public:
-	CTDCTaskTimeLogAnalysis(const CString& sTaskList, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, 
-							BOOL bLogTaskTimeSeparately);
+	CTDCTaskTimeLogAnalysis(const CString& sTaskList, const CTDCCustomAttribDefinitionArray& aCustomAttribDefs);
 	~CTDCTaskTimeLogAnalysis();
 
 	BOOL AnalyseTaskLog(const COleDateTime& dtFrom, 
@@ -30,9 +29,10 @@ public:
 						TDCTTL_FORMAT nFormat,
 						LPCTSTR szOutputFile);
 
+	int GetLogFilePaths(CStringArray& aFilePaths) const;
+
 protected:
 	CString m_sTaskFile;
-	BOOL m_bLogTaskTimeSeparately;
 	CString m_sCsvDelim;
 	TDC_ATTRIBUTE m_nGroupBy;
 

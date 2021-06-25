@@ -171,12 +171,10 @@ int CTDCTaskTimeLogAnalysis::CMapIDToTimeAndPeriodArray::SortProc(const void* pp
 //////////////////////////////////////////////////////////////////////
 
 CTDCTaskTimeLogAnalysis::CTDCTaskTimeLogAnalysis(const CString& sTaskList, 
-												 const CTDCCustomAttribDefinitionArray& aCustomAttribDefs, 
-												 BOOL bLogTaskTimeSeparately)
+												 const CTDCCustomAttribDefinitionArray& aCustomAttribDefs)
 	:
 	m_sTaskFile(sTaskList), 
 	m_aCustomAttribDefs(aCustomAttribDefs),
-	m_bLogTaskTimeSeparately(bLogTaskTimeSeparately),
 	m_nGroupBy(TDCA_NONE)
 {
 	ASSERT(FileMisc::FileExists(m_sTaskFile));
@@ -202,7 +200,7 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
 		return FALSE;
 
 	m_nGroupBy = nGroupBy;
-	ASSERT(!GetGroupByHeader().IsEmpty());
+	ASSERT((nGroupBy == TDCA_NONE) || !GetGroupByHeader().IsEmpty());
 
 	BuildGroupByMapping();
 	
@@ -236,32 +234,37 @@ BOOL CTDCTaskTimeLogAnalysis::AnalyseTaskLog(const COleDateTime& dtFrom,
 	return FALSE;
 }
 
+int CTDCTaskTimeLogAnalysis::GetLogFilePaths(CStringArray& aFilePaths) const
+{
+	CTDCTaskTimeLog log(m_sTaskFile);
+
+	// Get the individual task log files if they exist
+	CString sFilter = log.GetLogPath(MAGIC_TASKID, TRUE);
+	sFilter.Replace(MAGIC_TASKIDSTR, _T("*"));
+
+	FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sFilter),
+						aFilePaths, 
+						TRUE, 
+						FileMisc::GetFileNameFromPath(sFilter));
+
+	// Prepend the 'global' log file if it exists
+	CString sLogPath(log.GetLogPath());
+
+	if (FileMisc::FileExists(sLogPath))
+		aFilePaths.InsertAt(0, sLogPath);
+
+	return aFilePaths.GetSize();
+}
+
 int CTDCTaskTimeLogAnalysis::BuildLogItemArray()
 {
 	m_aLogItems.RemoveAll();
 	m_mapIDtoRefLogItem.RemoveAll();
 
-	// Build a list of log files needing processing
-	CTDCTaskTimeLog log(m_sTaskFile);
+	// Get a list of log files needing processing
 	CStringArray aLogFiles;
 
-	if (m_bLogTaskTimeSeparately)
-	{
-		// get a file filter
-		CString sFilter = log.GetLogPath(MAGIC_TASKID, TRUE);
-		sFilter.Replace(MAGIC_TASKIDSTR, _T("*"));
-
-		FileMisc::FindFiles(FileMisc::GetFolderFromFilePath(sFilter),
-							aLogFiles, 
-							TRUE, 
-							FileMisc::GetFileNameFromPath(sFilter));
-	}
-	else
-	{
-		aLogFiles.Add(log.GetLogPath());
-	}
-
-	int nNumLogFiles = aLogFiles.GetSize();
+	int nNumLogFiles = GetLogFilePaths(aLogFiles);
 
 	if (nNumLogFiles == 0)
 		return FALSE;
@@ -733,12 +736,6 @@ CString CTDCTaskTimeLogAnalysis::GetGroupByHeader() const
 {
 	if (WantGroupBy())
 	{
-		int nCust = m_aCustomAttribDefs.Find(m_nGroupBy);
-
-		if (nCust != -1)
-			return m_aCustomAttribDefs[nCust].sLabel;
-
-		// else
 		switch (m_nGroupBy)
 		{
 		case TDCA_PRIORITY:		return CEnString(IDS_TDLBC_PRIORITY);
@@ -754,6 +751,13 @@ CString CTDCTaskTimeLogAnalysis::GetGroupByHeader() const
 		case TDCA_LASTMODBY:	return CEnString(IDS_TDLBC_LASTMODBY);
 		}
 
+		// else
+		int nCust = m_aCustomAttribDefs.Find(m_nGroupBy);
+
+		if (nCust != -1)
+			return m_aCustomAttribDefs[nCust].sLabel;
+
+		// else
 		ASSERT(0);
 	}
 

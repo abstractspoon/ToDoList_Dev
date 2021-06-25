@@ -24,7 +24,7 @@ public:
 
 	TDCTTL_BREAKDOWN GetBreakdown() const { return m_nBreakdown; }
 	TDCTTL_FORMAT GetOutputFormat() const { return m_nOutputFormat; }
-	TDC_ATTRIBUTE GetGroupBy() const { return m_nGroupByAttrib; }
+	TDC_ATTRIBUTE GetGroupBy() const { return (m_bGroupBy? m_nGroupByAttrib : TDCA_NONE); }
 
 	CString GetOutputFilepath() const { return m_sOutputFilePath; }
 	BOOL GetDateRange(COleDateTime& dtFrom, COleDateTime& dtTo) const;

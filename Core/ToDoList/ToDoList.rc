@@ -5456,8 +5456,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_BROWSEFOLDER_TITLE  "Select Folder"
-    IDS_ERROR_EXPORT_LOCKEDFILES 
-                            "Please ensure that the following files are not open in another application"
+    IDS_ERROR_LOCKEDFILES   "Please ensure that the following files are not open in another application"
     IDS_TDLBC_DEPENDENTS    "Dependents"
     IDS_EXPORTDONEDATE      "(completed: %s)"
     IDS_CAD_ICON            "Icon"
