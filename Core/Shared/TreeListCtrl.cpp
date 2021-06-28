@@ -1532,18 +1532,21 @@ void CTreeListCtrl::OnNotifySplitterChange(int nSplitPos)
 	if (m_tree.GetCount() == 0)
 		return;
 
-	// Adjust 'Title' column to suit
-	int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
-	int nTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nSplitPos - nRestTreeColsWidth));
+	// Adjust 'Title' column to suit unless it's the title column we are actively tracking
+	if (!IsHeaderTracking(m_hwndPrimaryHeader, 0))
+	{
+		int nRestTreeColsWidth = m_treeHeader.CalcTotalItemWidth(0);
+		int nTitleColWidth = max(m_nMinTreeTitleColumnWidth, (nSplitPos - nRestTreeColsWidth));
 
-	m_treeHeader.SetItemWidth(0, nTitleColWidth);
+		m_treeHeader.SetItemWidth(0, nTitleColWidth);
 
-	if (m_bSplitting)
-		m_treeHeader.SetItemTracked(0, TRUE);
+		if (m_bSplitting)
+			m_treeHeader.SetItemTracked(0, TRUE);
 
-	m_treeHeader.UpdateWindow();
+		m_treeHeader.UpdateWindow();
 
-	UpdateWindow();
+		UpdateWindow();
+	}
 }
 
 BOOL CTreeListCtrl::HandleEraseBkgnd(CDC* pDC)

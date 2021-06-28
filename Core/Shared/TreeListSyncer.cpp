@@ -196,6 +196,7 @@ CTreeListSyncer::CTreeListSyncer(DWORD dwFlags)
 	m_nHidden(TLSH_NONE),
 	m_bSavingToImage(FALSE),
 	m_hwndTrackedHeader(NULL),
+	m_nTrackedColumn(-1),
 	m_hwndIgnoreNcCalcSize(NULL)
 {
 }
@@ -1342,6 +1343,10 @@ TLS_TYPE CTreeListSyncer::GetType(HWND hwnd)
 		{
 			nType = TLST_HEADER;
 		}
+		else
+		{
+			int breakpoint = 0;
+		}
 		ASSERT(nType != TLST_NONE);
 
 		s_mapTypes[hwnd] = nType;
@@ -1757,12 +1762,15 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 			case HDN_BEGINTRACK:
 				if (hwnd == m_hwndPrimaryHeader)
 				{
-					ASSERT(m_hwndTrackedHeader == NULL);
+					ASSERT((m_hwndTrackedHeader == NULL) && (m_nTrackedColumn == -1));
 
 					if (!OnPrimaryHeaderBeginTracking((NMHEADER*)pNMHDR))
 						return 1L;
 
+					NMHEADER* pHDN = (NMHEADER*)pNMHDR;
+
 					m_hwndTrackedHeader = hwnd;
+					m_nTrackedColumn = pHDN->iItem;
 				}
 				break;
 
@@ -1770,6 +1778,8 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 				if (hwnd == m_hwndPrimaryHeader)
 				{
 					m_hwndTrackedHeader = NULL;
+					m_nTrackedColumn = -1;
+
 					OnPrimaryHeaderEndTracking((NMHEADER*)pNMHDR);
 				}
 				break;
@@ -1787,6 +1797,24 @@ LRESULT CTreeListSyncer::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM l
 	}
 	
 	return CSubclassWnd::Default();
+}
+
+BOOL CTreeListSyncer::IsHeaderTracking(HWND hwndHeader, int nCol) const
+{
+	if (!hwndHeader)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (hwndHeader != m_hwndTrackedHeader)
+		return FALSE;
+	
+	if (nCol == -1)
+		return TRUE;
+	
+	// else
+	return (nCol == m_nTrackedColumn);
 }
 
 BOOL CTreeListSyncer::OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth)
@@ -1911,12 +1939,15 @@ void CTreeListSyncer::OnListHeaderEndTracking(NMHEADER* pHDN)
 
 BOOL CTreeListSyncer::OnPrimaryHeaderTrackItem(NMHEADER* pHDN, int nMinWidth)
 {
+	TRACE(_T("CTreeListSyncer::OnPrimaryHeaderTrackItem(begin)\n"));
+
 	int nWidth = CalcTotalHeaderItemWidth(pHDN->hdr.hwndFrom);
 	SetSplitPos(nWidth);
 
 	RefreshSize();
 	UpdateAll();
 
+	TRACE(_T("CTreeListSyncer::OnPrimaryHeaderTrackItem(end)\n"));
 	return TRUE;
 }
 
@@ -3490,6 +3521,8 @@ void CTreeListSyncer::SetSplitPos(int nPos)
 {
 	if ((nPos >= MIN_SPLIT_WIDTH) && (nPos != m_nSplitPos))
 	{
+		TRACE(_T("CTreeListSyncer::SetSplitPos(%d)\n"), nPos);
+
 		m_nSplitPos = nPos;
 		OnNotifySplitterChange(nPos);
 	}

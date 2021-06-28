@@ -170,6 +170,7 @@ private:
 	BOOL m_bResyncEnabled;
 	TLS_HIDE m_nHidden;
 	HWND m_hwndTrackedHeader;
+	int m_nTrackedColumn;
 	HWND m_hwndIgnoreNcCalcSize;
 
 protected:
@@ -275,6 +276,7 @@ protected:
 	int GetSelectedListItems(HWND hwndList, CIntArray& aItems);
 	BOOL ResyncListToTreeSelection(HWND hwndTree, const CList<HTREEITEM, HTREEITEM>& htItems, HTREEITEM htiFocused);
 	BOOL WantHoldHScroll(HWND hWnd) const;
+	BOOL IsHeaderTracking(HWND hwndHeader, int nCol = -1) const;
 
 	void ExpandList(HWND hwndList, HWND hwndTree, HTREEITEM hti, int& nNextIndex);
 	void CollapseList(HWND hwndList, HWND hwndTree, HTREEITEM hti);
