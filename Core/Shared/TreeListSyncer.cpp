@@ -1939,15 +1939,12 @@ void CTreeListSyncer::OnListHeaderEndTracking(NMHEADER* pHDN)
 
 BOOL CTreeListSyncer::OnPrimaryHeaderTrackItem(NMHEADER* pHDN, int nMinWidth)
 {
-	TRACE(_T("CTreeListSyncer::OnPrimaryHeaderTrackItem(begin)\n"));
-
 	int nWidth = CalcTotalHeaderItemWidth(pHDN->hdr.hwndFrom);
 	SetSplitPos(nWidth);
 
 	RefreshSize();
 	UpdateAll();
 
-	TRACE(_T("CTreeListSyncer::OnPrimaryHeaderTrackItem(end)\n"));
 	return TRUE;
 }
 
@@ -3521,8 +3518,6 @@ void CTreeListSyncer::SetSplitPos(int nPos)
 {
 	if ((nPos >= MIN_SPLIT_WIDTH) && (nPos != m_nSplitPos))
 	{
-		TRACE(_T("CTreeListSyncer::SetSplitPos(%d)\n"), nPos);
-
 		m_nSplitPos = nPos;
 		OnNotifySplitterChange(nPos);
 	}
