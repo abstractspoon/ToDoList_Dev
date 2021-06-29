@@ -127,6 +127,7 @@ namespace MindMapUIExtension
                 return DefaultExpansionButtonSize; 
             } 
         }
+
 		private int ExpansionButtonSeparation 
         { 
             get 
@@ -139,6 +140,9 @@ namespace MindMapUIExtension
                 return separation; 
             } 
         }
+
+		protected float ZoomFactor { get { return m_ZoomFactor; } }
+		protected bool IsZoomed { get { return (m_ZoomFactor < 1.0f); } }
 
 		protected enum NodeDrawState
 		{

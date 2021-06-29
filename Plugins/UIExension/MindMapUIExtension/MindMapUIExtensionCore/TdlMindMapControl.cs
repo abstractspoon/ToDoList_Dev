@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
@@ -382,6 +383,12 @@ namespace MindMapUIExtension
                 }
             }
         }
+
+		protected float ImageZoomFactor
+		{
+			// Zoom images only half as much as text
+			get { return (ZoomFactor + ((1.0f - ZoomFactor) / 2)); }
+		}
 
         public bool WantTaskUpdate(Task.Attribute attrib)
         {
@@ -972,6 +979,22 @@ namespace MindMapUIExtension
 			return base.GetNodeBackgroundColor(itemData);
 		}
 
+		protected void DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect)
+		{
+			Debug.Assert(IsZoomed);
+
+			var gSave = graphics.Save();
+
+			graphics.CompositingMode = CompositingMode.SourceCopy;
+			graphics.CompositingQuality = CompositingQuality.HighQuality;
+			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+			graphics.SmoothingMode = SmoothingMode.HighQuality;
+			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
+			graphics.Restore(gSave);
+		}
+
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
 											  NodeDrawState nodeState, NodeDrawPos nodePos,
                                               Font nodeFont, Object itemData)
@@ -988,17 +1011,51 @@ namespace MindMapUIExtension
                 Rectangle checkRect = CalcCheckboxRect(rect);
 
                 if (m_ShowCompletionCheckboxes)
-                    CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
+				{
+					if (!IsZoomed)
+					{
+						CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
+					}
+					else
+					{
+						var tempImage = new Bitmap(m_CheckboxSize.Width, m_CheckboxSize.Height); // original size
 
-			    // Task icon
-                if (TaskHasIcon(realItem))
+						using (var gTemp = Graphics.FromImage(tempImage))
+						{
+							CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
+
+							DrawZoomedImage(tempImage, graphics, checkRect);
+						}
+					}
+				}
+
+				// Task icon
+				if (TaskHasIcon(realItem))
                 {
                     iconRect = CalcIconRect(rect);
 
                     if (m_TaskIcons.Get(realItem.ID))
-                        m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+					{
+						if (!IsZoomed)
+						{
+							m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+						}
+						else
+						{
+							int imageSize = ScaleByDPIFactor(16);
+							var tempImage = new Bitmap(imageSize, imageSize); // original size
 
-                    rect.Width = (rect.Right - iconRect.Right - 2);
+							using (var gTemp = Graphics.FromImage(tempImage))
+							{
+								gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
+								m_TaskIcons.Draw(gTemp, 0, 0);
+
+								DrawZoomedImage(tempImage, graphics, iconRect);
+							}
+						}
+					}
+
+					rect.Width = (rect.Right - iconRect.Right - 2);
                     rect.X = iconRect.Right + 2;
                 }
                 else if (m_ShowCompletionCheckboxes)
@@ -1399,10 +1456,13 @@ namespace MindMapUIExtension
             if (!m_ShowCompletionCheckboxes)
                 return Rectangle.Empty;
 
-            int left = labelRect.X;
-            int top = (CentrePoint(labelRect).Y - (m_CheckboxSize.Height / 2));
+			int width = (int)(m_CheckboxSize.Width * ImageZoomFactor);
+			int height = (int)(m_CheckboxSize.Height * ImageZoomFactor);
 
-            return new Rectangle(left, top, m_CheckboxSize.Width, m_CheckboxSize.Height);
+            int left = labelRect.X;
+            int top = (CentrePoint(labelRect).Y - (height / 2));
+
+            return new Rectangle(left, top, width, height);
         }
 
         private Rectangle CalcIconRect(Rectangle labelRect)
@@ -1410,12 +1470,14 @@ namespace MindMapUIExtension
             int left = (labelRect.X + 2);
             
             if (m_ShowCompletionCheckboxes)
-                left += m_CheckboxSize.Width;
+                left += (int)(m_CheckboxSize.Width * ImageZoomFactor);
 
-            int imageSize = ScaleByDPIFactor(16);
-            int top = (CentrePoint(labelRect).Y - (imageSize / 2));
+			int width = (int)(ScaleByDPIFactor(16) * ImageZoomFactor);
+			int height = width;
 
-            return new Rectangle(left, top, imageSize, imageSize);
+            int top = (CentrePoint(labelRect).Y - (height / 2));
+
+            return new Rectangle(left, top, width, height);
 		}
 
 		private new void Clear()
@@ -1462,10 +1524,10 @@ namespace MindMapUIExtension
             var taskItem = RealTaskItem(node);
 
             if (m_ShowCompletionCheckboxes && taskItem.IsTask)
-                extraWidth += m_CheckboxSize.Width;
+                extraWidth += (int)(m_CheckboxSize.Width * ImageZoomFactor);
 
 			if (TaskHasIcon(taskItem))
-				extraWidth += (ScaleByDPIFactor(16) + 2);
+				extraWidth += (int)((ScaleByDPIFactor(16) + 2) * ImageZoomFactor);
 
 			return extraWidth;
 		}
