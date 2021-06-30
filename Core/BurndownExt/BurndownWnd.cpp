@@ -584,6 +584,10 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 BOOL CBurndownWnd::OnEraseBkgnd(CDC* pDC) 
 {
 	CDialogHelper::ExcludeChild(&m_chart, pDC);
+	CDialogHelper::ExcludeChild(&m_cbGraphs, pDC);
+	CDialogHelper::ExcludeChild(&m_cbOptions, pDC);
+	CDialogHelper::ExcludeChild(&m_sliderDateRange, pDC);
+	CDialogHelper::ExcludeChild(&m_toolbar, pDC);
 
 	// then our background
 	if (m_brBack.GetSafeHandle())
