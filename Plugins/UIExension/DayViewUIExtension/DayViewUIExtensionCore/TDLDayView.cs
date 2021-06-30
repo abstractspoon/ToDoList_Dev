@@ -205,7 +205,7 @@ namespace DayViewUIExtension
 
 			CalendarFutureItem futureItem;
 
-			if (m_FutureItems.TryGetValue(m_SelectedTaskID, out futureItem))
+			if (m_FutureItems.TryGetValue(dwTaskID, out futureItem))
 				return IsItemDisplayable(futureItem);
 			
 			// else
