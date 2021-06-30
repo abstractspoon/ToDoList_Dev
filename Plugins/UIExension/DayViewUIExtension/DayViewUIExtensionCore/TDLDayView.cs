@@ -1025,10 +1025,11 @@ namespace DayViewUIExtension
 						{
 							var futureAppt = new CalendarFutureItem(item, nextFutureId, futureItem);
 
-							m_FutureItems[nextFutureId] = futureAppt;
-							appts.Add(futureAppt);
-
-							nextFutureId++;
+							if (IsItemWithinRange(futureAppt, start, end))
+							{
+								m_FutureItems[nextFutureId++] = futureAppt;
+								appts.Add(futureAppt);
+							}
 						}
 					}
 				}
