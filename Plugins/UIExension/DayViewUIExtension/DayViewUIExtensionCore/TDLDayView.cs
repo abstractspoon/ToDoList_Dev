@@ -196,9 +196,8 @@ namespace DayViewUIExtension
 			CalendarFutureItem futureItem;
 
 			if (m_FutureItems.TryGetValue(dwTaskID, out futureItem))
-				return IsItemDisplayable(futureItem);
+				dwTaskID = futureItem.RealTaskId;
 			
-			// else
 			CalendarItem item;
 
 			if (m_Items.TryGetValue(dwTaskID, out item))
@@ -587,35 +586,15 @@ namespace DayViewUIExtension
 
 		public bool IsItemDisplayable(CalendarItem item)
 		{
-			// Provide infinite range because this check
-			// is uninterested in the current week, it's more
-			// of a 'static' kind of check
-			return IsItemWithinRange(item, DateTime.MinValue.AddSeconds(1), DateTime.MaxValue);
-		}
-
-		private bool IsItemWithinRange(CalendarItem item, DateTime startDate, DateTime endDate)
-		{
 			// Always show a task if it is currently being dragged
 			if (IsResizingAppointment() && (item == SelectedAppointment))
 				return true;
 
-            if (HideParentTasks && item.IsParent)
-                return false;
+			if (HideParentTasks && item.IsParent)
+				return false;
 
 			if (!item.HasValidDates())
 				return false;
-
-			// Task must at least intersect the range
-			if ((item.StartDate >= endDate) || (item.EndDate <= startDate))
-			{
-				return false;
-			}
-
-			if (!DisplayTasksContinuous)
-			{
-				if ((item.StartDate < startDate) && (item.EndDate > endDate))
-					return false;
-			}
 
 			if (HideTasksSpanningWeekends)
 			{
@@ -632,6 +611,25 @@ namespace DayViewUIExtension
 			if (HideTasksWithoutTimes)
 			{
 				if (CalendarItem.IsStartOfDay(item.StartDate) && CalendarItem.IsEndOfDay(item.EndDate))
+					return false;
+			}
+
+			return true;
+		}
+
+		private bool IsItemWithinRange(Calendar.Appointment appt, DateTime startDate, DateTime endDate)
+		{
+			// sanity check
+			if (!appt.HasValidDates())
+				return false;
+
+			// Task must at least intersect the range
+			if ((appt.StartDate >= endDate) || (appt.EndDate <= startDate))
+				return false;
+
+			if (!DisplayTasksContinuous)
+			{
+				if ((appt.StartDate < startDate) && (appt.EndDate > endDate))
 					return false;
 			}
 
@@ -934,7 +932,6 @@ namespace DayViewUIExtension
 
             // If the start date precedes the start of the week then extend the
             // draw rect to the left so the edge is clipped and likewise for the right.
-            CalendarItem taskItem = (appointment as CalendarItem);
             bool longAppt = IsLongAppt(appointment);
 
             if (longAppt)
@@ -962,7 +959,7 @@ namespace DayViewUIExtension
             }
             else // day appointment
             {
-                if (taskItem.StartDate.TimeOfDay.TotalHours == 0.0)
+                if (appointment.StartDate.TimeOfDay.TotalHours == 0.0)
                 {
                     rect.Y++;
                     rect.Height--;
@@ -991,10 +988,13 @@ namespace DayViewUIExtension
 			{
 				CalendarItem item = pair.Value;
 
+				if (!IsItemDisplayable(item))
+					continue;
+
 				if (IsItemWithinRange(item, start, end))
 					appts.Add(item);
 
-				if (m_ShowFutureOcurrences && IsItemDisplayable(item) && item.IsRecurring)
+				if (m_ShowFutureOcurrences && item.IsRecurring)
 				{
 					// Add this task's future items for the current date range
 					// Note: we deliberately double the range else we lose 
