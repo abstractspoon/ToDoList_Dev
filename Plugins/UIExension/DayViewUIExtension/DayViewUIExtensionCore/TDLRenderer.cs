@@ -483,7 +483,6 @@ namespace DayViewUIExtension
 							rect.Width--;
 						}
 
-
 						using (Pen pen = new Pen(borderColor, 1))
 						{
 							if (isFutureItem)
