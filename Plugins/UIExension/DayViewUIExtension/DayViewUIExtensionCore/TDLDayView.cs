@@ -465,14 +465,6 @@ namespace DayViewUIExtension
 			{
 				foreach (var appt in appointments)
 				{
-					if (!IsItemWithinRange(appt as CalendarItem, StartDate, EndDate))
-					{
-						// What is this check for? Surely all matching 
-						// appointments must be, by definition, within range?
-						Debug.Assert(false);
-						break;
-					}
-					
 					if (!IsLongAppt(appt) && EnsureVisible(appt, false))
 						break;
 				}
