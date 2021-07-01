@@ -188,16 +188,6 @@ namespace DayViewUIExtension
 			get { return m_LabelTip.Active; }
 		}
 
-		public bool IsTaskWithinRange(UInt32 dwTaskID)
-        {
-			CalendarItem item;
-
-			if (m_Items.TryGetValue(dwTaskID, out item))
-                return IsItemWithinRange(item, StartDate, EndDate);
-
-            return false;
-        }
-
         public bool IsTaskDisplayable(UInt32 dwTaskID)
         {
             if (dwTaskID == 0)
