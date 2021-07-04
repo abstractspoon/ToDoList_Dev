@@ -99,6 +99,7 @@ namespace DayViewUIExtension
                 case Task.Attribute.TimeEstimate:
 				case Task.Attribute.Dependency:
 				case Task.Attribute.Recurrence:
+				case Task.Attribute.CustomAttribute:
 					return true;
 			}
 

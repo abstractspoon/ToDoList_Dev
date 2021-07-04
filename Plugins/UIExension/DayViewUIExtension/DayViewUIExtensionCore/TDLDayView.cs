@@ -27,10 +27,12 @@ namespace DayViewUIExtension
 
 		private Dictionary<UInt32, CalendarItem> m_Items;
         private Dictionary<UInt32, CalendarFutureItem> m_FutureItems;
+        private Dictionary<UInt32, CalendarCustomItem> m_CustomItems;
 
         private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
 		private UIExtension.TaskRecurrences m_TaskRecurrences;
+		private List<CustomAttributeDefinition> m_CustomDates;
 
 		private int LabelTipBorder
 		{
@@ -62,13 +64,16 @@ namespace DayViewUIExtension
 			dayGripWidth = 1; // to match app styling
 
             m_Renderer = new TDLRenderer(Handle, taskIcons);
-			m_Items = new System.Collections.Generic.Dictionary<UInt32, CalendarItem>();
 			m_UserMinSlotHeight = minSlotHeight;
             m_LabelTip = new LabelTip(this);
 			m_TaskRecurrences = taskRecurrences;
 
+			m_Items = new Dictionary<UInt32, CalendarItem>();
 			m_FutureItems = new Dictionary<uint, CalendarFutureItem>();
-			
+
+			m_CustomDates = new List<CustomAttributeDefinition>();
+			m_CustomItems = new Dictionary<uint, CalendarCustomItem>();
+
 			InitializeComponent();
         }
 
@@ -654,7 +659,10 @@ namespace DayViewUIExtension
 					break;
 			}
 
-            // Update the tasks
+			// Update custom attribute definitions
+			m_CustomDates = tasks.GetCustomAttributes(CustomAttributeDefinition.Attribute.Date);
+
+			// Update the tasks
 			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid() && ProcessTaskUpdate(task, type))
@@ -680,6 +688,7 @@ namespace DayViewUIExtension
 
 			m_MaxTaskID = Math.Max(m_MaxTaskID, taskID); // needed for future occurrences
 
+			// Built-in of attributes
 			if (m_Items.TryGetValue(taskID, out item))
 			{
 				item.UpdateTaskAttributes(task, type, false);
@@ -978,11 +987,12 @@ namespace DayViewUIExtension
 
 		private List<Calendar.Appointment> GetMatchingAppointments(DateTime start, DateTime end, bool sorted = false)
 		{
-			// Future items are always populated on demand
-			m_FutureItems = new Dictionary<uint, CalendarFutureItem>();
+			// Future and Custom items are always populated on demand
+			m_FutureItems.Clear();
+			m_CustomItems.Clear();
 
 			var appts = new List<Calendar.Appointment>();
-			UInt32 nextFutureId = (((m_MaxTaskID / 1000) + 1) * 1000);
+			UInt32 nextId = (((m_MaxTaskID / 1000) + 1) * 1000);
 
 			foreach (System.Collections.Generic.KeyValuePair<UInt32, CalendarItem> pair in m_Items)
 			{
@@ -1005,12 +1015,32 @@ namespace DayViewUIExtension
 					{
 						foreach (var futureItem in futureItems)
 						{
-							var futureAppt = new CalendarFutureItem(item, nextFutureId, futureItem);
+							var futureAppt = new CalendarFutureItem(item, nextId, futureItem);
 
 							if (IsItemWithinRange(futureAppt, start, end))
 							{
-								m_FutureItems[nextFutureId++] = futureAppt;
+								m_FutureItems[nextId++] = futureAppt;
 								appts.Add(futureAppt);
+							}
+						}
+					}
+				}
+
+				if (m_CustomDates.Count > 0)
+				{
+					foreach (var attrib in m_CustomDates)
+					{
+						DateTime date;
+
+						if (item.CustomAttributeValues.ContainsKey(attrib.Id) &&
+							DateTime.TryParse(item.CustomAttributeValues[attrib.Id], out date))
+						{
+							var customAppt = new CalendarCustomItem(item, nextId, date);
+
+							if (IsItemWithinRange(customAppt, start, end))
+							{
+								m_CustomItems[nextId++] = customAppt;
+								appts.Add(customAppt);
 							}
 						}
 					}

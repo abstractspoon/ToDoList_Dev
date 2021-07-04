@@ -46,6 +46,11 @@ namespace DayViewUIExtension
 		{
 		}
 
+		public Dictionary<string, string> CustomAttributeValues
+		{
+			get; private set;
+		}
+
 		public Boolean HasTaskTextColor
 		{
 			get { return !m_TaskTextColor.IsEmpty; }
@@ -227,6 +232,8 @@ namespace DayViewUIExtension
 
 				m_PrevDueDate = CheckGetEndOfDay(task.GetDueDate(false));
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
+
+				CustomAttributeValues = task.GetCustomAttributeValues(true);
 			}
 			else
 			{
@@ -288,9 +295,12 @@ namespace DayViewUIExtension
 						EndDate = CheckGetEndOfDay(m_PrevDueDate);
 					}
 				}
-            }
 
-            UpdateOriginalDates();
+				if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
+					CustomAttributeValues = task.GetCustomAttributeValues(true);
+			}
+
+			UpdateOriginalDates();
 
 			return true;
 		}
@@ -319,6 +329,24 @@ namespace DayViewUIExtension
 
 			StartDate = futureDates.Item1;
 			EndDate = CheckGetEndOfDay(futureDates.Item2);
+		}
+
+		public UInt32 RealTaskId { get { return m_RealTaskId; } }
+	}
+
+	// ---------------------------------------------------------------
+
+	public class CalendarCustomItem : CalendarItem
+	{
+		private UInt32 m_RealTaskId;
+
+		public CalendarCustomItem(CalendarItem item, UInt32 customId, DateTime date) : base(item)
+		{
+			m_RealTaskId = item.Id;
+			Id = customId;
+
+			StartDate = date.Date;
+			EndDate = CheckGetEndOfDay(date.Date);
 		}
 
 		public UInt32 RealTaskId { get { return m_RealTaskId; } }

@@ -121,6 +121,79 @@ Boolean TaskList::HasCustomAttributes()
 	return (GetCustomAttributeCount() > 0);
 }
 
+List<CustomAttributeDefinition^>^ TaskList::GetCustomAttributes()
+{
+	return GetCustomAttributes(CustomAttributeDefinition::Attribute::All);
+}
+
+List<CustomAttributeDefinition^>^ TaskList::GetCustomAttributes(CustomAttributeDefinition::Attribute filter)
+{
+	auto attribs = gcnew List<CustomAttributeDefinition^>();
+
+	int numAttrib = GetCustomAttributeCount();
+
+	for (int i = 0; i < numAttrib; i++)
+	{
+		if (!IsCustomAttributeEnabled(i))
+			continue;
+
+		CustomAttributeDefinition::Attribute attribType = GetCustomAttributeType(i);
+
+		if (attribType == CustomAttributeDefinition::Attribute::Unknown)
+			continue;
+
+		if ((filter == CustomAttributeDefinition::Attribute::All) || (attribType == filter))
+		{
+			auto attrib = gcnew CustomAttributeDefinition();
+
+			attrib->AttributeType = attribType;
+			attrib->Id = GetCustomAttributeID(i);
+			attrib->Label = GetCustomAttributeLabel(i);
+			attrib->ListData = GetCustomAttributeListData(i);
+			attrib->ListType = GetCustomAttributeListType(i);
+
+			attribs->Add(attrib);
+		}
+	}
+
+	return attribs;
+}
+
+CustomAttributeDefinition::Attribute TaskList::GetCustomAttributeType(int nIndex)
+{
+	UInt32 types = GETVAL_ARG(GetCustomAttributeType, nIndex, 0);
+
+	switch (types & TDCCA_DATAMASK)
+	{
+	case TDCCA_STRING:		return CustomAttributeDefinition::Attribute::String;
+	case TDCCA_DATE:		return CustomAttributeDefinition::Attribute::Date;
+	case TDCCA_INTEGER:		return CustomAttributeDefinition::Attribute::Integer;
+	case TDCCA_DOUBLE:		return CustomAttributeDefinition::Attribute::Decimal;
+	case TDCCA_BOOL:		return CustomAttributeDefinition::Attribute::Boolean;
+	case TDCCA_ICON:		return CustomAttributeDefinition::Attribute::Icon;
+	case TDCCA_FILELINK:	return CustomAttributeDefinition::Attribute::FileLink;
+	case TDCCA_TIMEPERIOD:	return CustomAttributeDefinition::Attribute::TimePeriod;
+	case TDCCA_FRACTION:	return CustomAttributeDefinition::Attribute::Fraction;
+	}
+
+	return CustomAttributeDefinition::Attribute::Unknown;
+}
+
+CustomAttributeDefinition::List TaskList::GetCustomAttributeListType(int nIndex)
+{
+	UInt32 types = GETVAL_ARG(GetCustomAttributeType, nIndex, 0);
+
+	switch (types & TDCCA_LISTMASK)
+	{
+	case TDCCA_AUTOLIST:		return CustomAttributeDefinition::List::AutoSingle;
+	case TDCCA_FIXEDLIST:		return CustomAttributeDefinition::List::FixedSingle;
+	case TDCCA_AUTOMULTILIST:	return CustomAttributeDefinition::List::AutoMulti;
+	case TDCCA_FIXEDMULTILIST:	return CustomAttributeDefinition::List::FixedMulti;
+	}
+
+	return CustomAttributeDefinition::List::None;
+}
+
 UInt32 TaskList::GetCustomAttributeCount()
 {
 	return GETVAL(GetCustomAttributeCount, 0);
@@ -134,11 +207,6 @@ String^ TaskList::GetCustomAttributeLabel(int nIndex)
 String^ TaskList::GetCustomAttributeID(int nIndex)
 {
 	return GETSTR_ARG(GetCustomAttributeID, nIndex);
-}
-
-UInt32  TaskList::GetCustomAttributeType(int nIndex)
-{
-	return GETVAL_ARG(GetCustomAttributeType, nIndex, 0);
 }
 
 String^ TaskList::GetCustomAttributeListData(int nIndex)
@@ -235,7 +303,19 @@ String^ TaskList::GetAttributeName(Task::Attribute attrib)
 	return L"";
 }
 
-// ---------------------------------------------------------
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+CustomAttributeDefinition::CustomAttributeDefinition()
+{
+	AttributeType = Attribute::Unknown;
+	ListType = List::None;
+
+	Id = nullptr;
+	Label = nullptr;
+	ListData = nullptr;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 #define GETTASKVAL(fn, errret) \
 	(m_pConstTaskList ? m_pConstTaskList->fn(m_hTask) : (m_pTaskList ? m_pTaskList->fn(m_hTask) : errret))
@@ -829,6 +909,24 @@ String^ Task::GetCustomAttributeValue(String^ sID, bool display)
 						(m_pTaskList ? m_pTaskList->GetTaskCustomAttributeData(m_hTask, MS(sID), display) : L""));
 
 	return gcnew String(szValue);
+}
+
+Dictionary<String^, String^>^ Task::GetCustomAttributeValues(bool display)
+{
+	auto values = gcnew Dictionary<String^, String^>();
+
+	int nIndex = GETVAL(GetCustomAttributeCount, 0);
+
+	while (nIndex--)
+	{
+		auto attribId = GETSTR_ARG(GetCustomAttributeID, nIndex);
+		auto attribValue = GetCustomAttributeValue(attribId, display);
+
+		if (attribValue->Length > 0)
+			values->Add(attribId, attribValue);
+	}
+
+	return values;
 }
 
 String^ Task::GetMetaDataValue(String^ sKey)
