@@ -120,7 +120,7 @@ CString TransText::GetTextClassIDName()
 BOOL TransText::PrepareLookupText(CString& sText, BOOL bDecodeChars)
 {
 	// remove trailing/leading spaces and delimiters
-	Misc::Trim(sText, ' ').TrimRight(':');
+	Misc::Trim(sText, ' ').TrimRight(_T("':."));
 	
 	// remove accelerators
 	if (sText.Find('&') >= 0)
