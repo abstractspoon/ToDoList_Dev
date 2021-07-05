@@ -8693,7 +8693,7 @@ void CToDoListWnd::OnCloseall()
 
 	// if empty then create a new dummy tasklist		
 	if (!GetTDCCount())
-		CreateNewTaskList(FALSE);
+		CreateNewTaskList(FALSE, FALSE);
 
 	Resize();
 }
