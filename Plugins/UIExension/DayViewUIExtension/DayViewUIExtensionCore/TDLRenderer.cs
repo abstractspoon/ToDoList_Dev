@@ -402,13 +402,16 @@ namespace DayViewUIExtension
 
             if (rect.Width != 0 && rect.Height != 0)
             {
-				CalendarItem taskItem = (appointment as CalendarItem);
+				bool isFutureItem = (appointment is CalendarFutureItem);
+				CalendarItem taskItem;
 
-				UInt32 taskId = taskItem.Id;
-				UInt32 realTaskId = GetRealTaskId(taskItem);
+				if (isFutureItem)
+					taskItem = (appointment as CalendarFutureItem).RealTask;
+				else
+					taskItem = (appointment as CalendarItem);
 
-				bool isFutureItem = (taskId != realTaskId);
-
+				UInt32 realTaskId = taskItem.Id;
+				
 				// Recalculate colours
 				Color textColor = taskItem.TaskTextColor;
 				Color fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
@@ -562,39 +565,46 @@ namespace DayViewUIExtension
                 }
 
                 // draw appointment text
-                using (StringFormat format = new StringFormat())
-                {
-                    format.Alignment = StringAlignment.Near;
-                    format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
+				if (rect.Width > 2)
+				{
+					using (StringFormat format = new StringFormat())
+					{
+						format.Alignment = StringAlignment.Near;
+						format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
 
-                    rect.Y += 3;
+						rect.Y += 3;
 
-					if (isLong)
-						rect.Height = m_BaseFont.Height;
-					else
-						rect.Height -= 3;
+						if (isLong)
+							rect.Height = m_BaseFont.Height;
+						else
+							rect.Height -= 3;
 
-					taskItem.TextRect = rect;
-                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+						taskItem.TextRect = rect;
+						g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-                    using (SolidBrush brush = new SolidBrush(textColor))
-                    {
-                        if (taskItem.IsDone && StrikeThruDoneTasks)
-                        {
-                            using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
-                            {
-                                g.DrawString(appointment.Title, font, brush, rect, format);
-                            }
-                        }
-                        else
-                        {
-                            g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);
-                        }
-                    }
+						using (SolidBrush brush = new SolidBrush(textColor))
+						{
+							if (taskItem.IsDone && StrikeThruDoneTasks)
+							{
+								using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
+								{
+									g.DrawString(appointment.Title, font, brush, rect, format);
+								}
+							}
+							else
+							{
+								g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);
+							}
+						}
 
-                    g.TextRenderingHint = TextRenderingHint.SystemDefault;
-                }
-            }
+						g.TextRenderingHint = TextRenderingHint.SystemDefault;
+					}
+				}
+				else
+				{
+					taskItem.TextRect = Rectangle.Empty;
+				}
+			}
         }
     }
 }

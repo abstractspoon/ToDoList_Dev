@@ -524,15 +524,17 @@ namespace DayViewUIExtension
 		{
 			if (appt != null)
 			{
-				CalendarFutureItem futureItem;
-
-				if (m_FutureItems.TryGetValue(appt.Id, out futureItem))
-				{
-					CalendarItem taskItem;
-
-					if (m_Items.TryGetValue(futureItem.RealTaskId, out taskItem))
-						return taskItem;
-				}
+				if (appt is CalendarFutureItem)
+					appt = (appt as CalendarFutureItem).RealTask;
+// 				CalendarFutureItem futureItem;
+// 
+// 				if (m_FutureItems.TryGetValue(appt.Id, out futureItem))
+// 				{
+// 					CalendarItem taskItem;
+// 
+// 					if (m_Items.TryGetValue(futureItem.RealTaskId, out taskItem))
+// 						return taskItem;
+// 				}
 			}
 
 			return appt;

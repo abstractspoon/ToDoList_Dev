@@ -305,7 +305,7 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		static protected DateTime CheckGetEndOfDay(DateTime date)
+		static public DateTime CheckGetEndOfDay(DateTime date)
 		{
 			if ((date != NullDate) && (date == date.Date))
 				return date.AddDays(1).AddSeconds(-1);
@@ -317,21 +317,27 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class CalendarFutureItem : CalendarItem
+	public class CalendarFutureItem : Calendar.Appointment
 	{
-		private UInt32 m_RealTaskId;
+		private CalendarItem m_RealItem;
 
-		public CalendarFutureItem(CalendarItem item, UInt32 futureId, Tuple<DateTime, DateTime> futureDates) : base(item)
+		public CalendarFutureItem(CalendarItem item, UInt32 id, Tuple<DateTime, DateTime> futureDates) : base(item)
 		{
-			m_RealTaskId = item.Id;
-			Id = futureId;
+			m_RealItem = item;
+			Id = id;
 			Locked = true; // always (for now)
 
 			StartDate = futureDates.Item1;
-			EndDate = CheckGetEndOfDay(futureDates.Item2);
+			EndDate = CalendarItem.CheckGetEndOfDay(futureDates.Item2);
 		}
 
-		public UInt32 RealTaskId { get { return m_RealTaskId; } }
+		public override bool IsLongAppt(DateTime start, DateTime end)
+		{
+			return RealTask.IsLongAppt(start, end);
+		}
+
+		public UInt32 RealTaskId { get { return m_RealItem.Id; } }
+		public CalendarItem RealTask { get { return m_RealItem; } }
 	}
 
 	// ---------------------------------------------------------------
