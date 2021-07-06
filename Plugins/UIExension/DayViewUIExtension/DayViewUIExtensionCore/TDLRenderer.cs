@@ -377,7 +377,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool TaskHasIcon(CalendarItem taskItem)
+		public bool TaskHasIcon(TaskItem taskItem)
 		{
 			return ((m_TaskIcons != null) &&
 					(taskItem != null) &&
@@ -386,15 +386,15 @@ namespace DayViewUIExtension
 
 		private UInt32 GetRealTaskId(Calendar.Appointment appt)
 		{
-			if (appt is CalendarFutureItem)
-				return (appt as CalendarFutureItem).RealTaskId;
+			if (appt is FutureOccurrence)
+				return (appt as FutureOccurrence).RealTaskId;
 
 			return appt.Id;
 		}
 
-		public override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isLong, bool isSelected, Rectangle gripRect)
+		public override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appt, bool isLong, bool isSelected, Rectangle gripRect)
         {
-            if (appointment == null)
+            if (appt == null)
                 throw new ArgumentNullException("appointment");
 
             if (g == null)
@@ -402,13 +402,13 @@ namespace DayViewUIExtension
 
             if (rect.Width != 0 && rect.Height != 0)
             {
-				bool isFutureItem = (appointment is CalendarFutureItem);
-				CalendarItem taskItem;
+				TaskItem taskItem;
+				bool isExtItem = (appt is CalendarExtensionItem);
 
-				if (isFutureItem)
-					taskItem = (appointment as CalendarFutureItem).RealTask;
+				if (isExtItem)
+					taskItem = (appt as CalendarExtensionItem).RealTask;
 				else
-					taskItem = (appointment as CalendarItem);
+					taskItem = (appt as TaskItem);
 
 				UInt32 realTaskId = taskItem.Id;
 				
@@ -416,6 +416,7 @@ namespace DayViewUIExtension
 				Color textColor = taskItem.TaskTextColor;
 				Color fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
 
+				bool isFutureItem = (appt is FutureOccurrence);
 				if (isFutureItem)
 				{
 					fillColor = SystemColors.Window;
@@ -498,11 +499,10 @@ namespace DayViewUIExtension
 
                 // Draw appointment icon
                 bool hasIcon = false;
-                taskItem.IconRect = Rectangle.Empty;
+				Rectangle rectIcon = Rectangle.Empty;
 
                 if (TaskHasIcon(taskItem))
                 {
-                    Rectangle rectIcon;
                     int imageSize = DPIScaling.Scale(16);
 
                     if (isLong)
@@ -537,15 +537,20 @@ namespace DayViewUIExtension
                         g.Clip = clipRgn;
 
                         hasIcon = true;
-                        taskItem.IconRect = rectIcon;
+
+						if (!isExtItem)
+							taskItem.IconRect = rectIcon;
 
                         rect.Width -= (rectIcon.Right - rect.Left);
                         rect.X = rectIcon.Right;
                     }
                 }
 
-                // Draw gripper bar
-                if (gripRect.Width > 0)
+				if (!isExtItem)
+					taskItem.IconRect = rectIcon;
+
+				// Draw gripper bar
+				if (gripRect.Width > 0)
                 {
                     using (SolidBrush brush = new SolidBrush(barColor))
                         g.FillRectangle(brush, gripRect);
@@ -588,12 +593,12 @@ namespace DayViewUIExtension
 							{
 								using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
 								{
-									g.DrawString(appointment.Title, font, brush, rect, format);
+									g.DrawString(appt.Title, font, brush, rect, format);
 								}
 							}
 							else
 							{
-								g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);
+								g.DrawString(appt.Title, this.BaseFont, brush, rect, format);
 							}
 						}
 

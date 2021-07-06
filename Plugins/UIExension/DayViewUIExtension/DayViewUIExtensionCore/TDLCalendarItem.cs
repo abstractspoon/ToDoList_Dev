@@ -11,7 +11,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
-	public class CalendarItem : Calendar.Appointment
+	public class TaskItem : Calendar.Appointment
 	{
 		private DateTime m_OrgStartDate = NullDate;
 		private DateTime m_OrgEndDate = NullDate;
@@ -21,7 +21,7 @@ namespace DayViewUIExtension
 
 		// --------------------
 
-		protected CalendarItem(CalendarItem item) : base(item)
+		protected TaskItem(TaskItem item) : base(item)
 		{
             if (item == null)
                 return;
@@ -42,11 +42,11 @@ namespace DayViewUIExtension
 
 		// --------------------
 
-		public CalendarItem()
+		public TaskItem()
 		{
 		}
 
-		public Dictionary<string, string> CustomAttributeValues
+		public Dictionary<string, DateTime> CustomDates
 		{
 			get; private set;
 		}
@@ -202,7 +202,20 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask)
+		private void UpdateCustomDateAttributes(Task task, List<CustomAttributeDefinition> dateAttribs)
+		{
+			CustomDates = new Dictionary<string, DateTime>();
+
+			foreach (var attrib in dateAttribs)
+			{
+				DateTime date;
+
+				if (DateTime.TryParse(task.GetCustomAttributeValue(attrib.Id, true), out date))
+					CustomDates.Add(attrib.Id, date);
+			}
+		}
+
+		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask)
 		{
 			if (!task.IsValid())
 				return false;
@@ -233,7 +246,7 @@ namespace DayViewUIExtension
 				m_PrevDueDate = CheckGetEndOfDay(task.GetDueDate(false));
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
 
-				CustomAttributeValues = task.GetCustomAttributeValues(true);
+				UpdateCustomDateAttributes(task, dateAttribs);
 			}
 			else
 			{
@@ -297,7 +310,7 @@ namespace DayViewUIExtension
 				}
 
 				if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
-					CustomAttributeValues = task.GetCustomAttributeValues(true);
+					UpdateCustomDateAttributes(task, dateAttribs);
 			}
 
 			UpdateOriginalDates();
@@ -317,45 +330,59 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class CalendarFutureItem : Calendar.Appointment
+	public class CalendarExtensionItem : Calendar.Appointment
 	{
-		private CalendarItem m_RealItem;
+		protected TaskItem m_RealItem;
 
-		public CalendarFutureItem(CalendarItem item, UInt32 id, Tuple<DateTime, DateTime> futureDates) : base(item)
+		protected CalendarExtensionItem(TaskItem item, UInt32 id) : base(item)
 		{
 			m_RealItem = item;
 			Id = id;
+		}
+
+		public UInt32 RealTaskId { get { return m_RealItem.Id; } }
+		public TaskItem RealTask { get { return m_RealItem; } }
+	}
+
+	// ---------------------------------------------------------------
+
+	public class FutureOccurrence : CalendarExtensionItem
+	{
+		public FutureOccurrence(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
+		{
 			Locked = true; // always (for now)
 
-			StartDate = futureDates.Item1;
-			EndDate = CalendarItem.CheckGetEndOfDay(futureDates.Item2);
+			StartDate = start;
+			EndDate = TaskItem.CheckGetEndOfDay(end);
 		}
 
 		public override bool IsLongAppt(DateTime start, DateTime end)
 		{
 			return RealTask.IsLongAppt(start, end);
 		}
-
-		public UInt32 RealTaskId { get { return m_RealItem.Id; } }
-		public CalendarItem RealTask { get { return m_RealItem; } }
 	}
 
 	// ---------------------------------------------------------------
 
-	public class CalendarCustomItem : CalendarItem
+	public class CustomDateAttribute : CalendarExtensionItem
 	{
-		private UInt32 m_RealTaskId;
-
-		public CalendarCustomItem(CalendarItem item, UInt32 customId, DateTime date) : base(item)
+		public CustomDateAttribute(TaskItem item, UInt32 id, string attribId, DateTime date) : base(item, id)
 		{
-			m_RealTaskId = item.Id;
-			Id = customId;
+			AttributeId = attribId;
+			StartDate = OriginalDate = date;
+			EndDate = StartDate.AddDays(1);
 
-			StartDate = date.Date;
-			EndDate = CheckGetEndOfDay(date.Date);
+			if (EndDate == EndDate.Date)
+				EndDate = EndDate.AddSeconds(-1);
 		}
 
-		public UInt32 RealTaskId { get { return m_RealTaskId; } }
+		public override bool IsLongAppt(DateTime start, DateTime end)
+		{
+			return true; // always 24 hours
+		}
+
+		public string AttributeId { get; private set; }
+		public DateTime OriginalDate { get; private set; }
 	}
 
 }

@@ -121,7 +121,7 @@ namespace DayViewUIExtension
 
                 DateTime endDate = m_DayView.SelectionEnd;
 
-                if (CalendarItem.IsStartOfDay(endDate))
+                if (TaskItem.IsStartOfDay(endDate))
                     endDate = endDate.AddSeconds(-1);
 
                 task.SetDueDate(endDate);
@@ -609,12 +609,12 @@ namespace DayViewUIExtension
 			if (m_DayView.ReadOnly)
 				return;
 
-			var appointment = m_DayView.GetRealAppointmentAt(e.Location.X, e.Location.Y);
+			var appt = m_DayView.GetAppointmentAt(e.Location.X, e.Location.Y);
 
-			if (appointment == null)
+			if ((appt == null) || (appt is CustomDateAttribute))
 				return;
 
-			var taskItem = (appointment as CalendarItem);
+			var taskItem = (m_DayView.GetRealAppointment(appt) as TaskItem);
 
 			if ((taskItem == null) || taskItem.Locked)
 				return;
@@ -739,7 +739,7 @@ namespace DayViewUIExtension
                 return;
             }
 
-			var item = args.Appointment as CalendarItem;
+			var item = args.Appointment as TaskItem;
 
 			if (item == null)
 				return;
@@ -748,7 +748,7 @@ namespace DayViewUIExtension
 			UpdatedSelectedTaskDatesText();
         }
 
-		private bool PrepareTaskNotify(CalendarItem item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
+		private bool PrepareTaskNotify(TaskItem item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
 		{
 			switch (mode)
 			{
@@ -819,7 +819,7 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		private void ProcessTaskAppointmentChange(CalendarItem item, Calendar.SelectionTool.Mode mode)
+		private void ProcessTaskAppointmentChange(TaskItem item, Calendar.SelectionTool.Mode mode)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -842,7 +842,7 @@ namespace DayViewUIExtension
 			m_DayView.Invalidate();
 		}
 
-        private bool WantModifyTimeEstimate(CalendarItem item)
+        private bool WantModifyTimeEstimate(TaskItem item)
         {
 			if (!m_AllowModifyTimeEstimate)
 				return false;
