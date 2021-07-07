@@ -305,7 +305,7 @@ namespace DayViewUIExtension
 
 			m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(OnDayViewNewAppointment);
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
-			m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
+			m_DayView.AppointmentMove += new TDLAppointmentEventHandler(OnDayViewAppointmentChanged);
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
 			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
 			m_DayView.MouseDoubleClick += new MouseEventHandler(OnDayViewMouseDoubleClick);
@@ -725,15 +725,10 @@ namespace DayViewUIExtension
 			}
 		}
 
-        private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
+        private void OnDayViewAppointmentChanged(object sender, TDLMoveAppointmentEventArgs args)
 		{
-			var move = args as Calendar.MoveAppointmentEventArgs;
-
-			if (move == null)
-				return;
-
             // Whilst move is in progress only update selected task dates 
-            if (!move.Finished)
+            if (!args.Finished)
             {
                 UpdatedSelectedTaskDatesText();
                 return;
@@ -744,7 +739,7 @@ namespace DayViewUIExtension
 			if (item == null)
 				return;
 
-			ProcessTaskAppointmentChange(item, move.Mode);
+			ProcessTaskAppointmentChange(item, args.CustomAttributeId, args.Mode);
 			UpdatedSelectedTaskDatesText();
         }
 
@@ -819,10 +814,19 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		private void ProcessTaskAppointmentChange(TaskItem item, Calendar.SelectionTool.Mode mode)
+		private void ProcessTaskAppointmentChange(TaskItem item, string customAttribId, Calendar.SelectionTool.Mode mode)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
+			if (!string.IsNullOrEmpty(customAttribId))
+			{
+				notify.AddMod(customAttribId, item.CustomDates[customAttribId].ToString());
+				notify.NotifyMod();
+
+				return;
+			}
+
+			// Start/Due change
 			if (PrepareTaskNotify(item, mode, notify))
 			{
 				bool modifyTimeEst = WantModifyTimeEstimate(item);

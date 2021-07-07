@@ -9,6 +9,21 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace DayViewUIExtension
 {
+	// ------------------------------------------------------------------------------
+
+	public class TDLMoveAppointmentEventArgs : Calendar.MoveAppointmentEventArgs
+	{
+		public string CustomAttributeId { get; private set; }
+
+		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, string attribId, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
+		{
+			CustomAttributeId = attribId;
+		}
+	}
+
+	public delegate void TDLAppointmentEventHandler(object sender, TDLMoveAppointmentEventArgs args);
+
+	// ------------------------------------------------------------------------------
 
 	public class TDLDayView : Calendar.DayView, ILabelTipHandler
     {
@@ -26,7 +41,7 @@ namespace DayViewUIExtension
 		private Boolean m_ShowFutureOcurrences = true;
 
 		private Dictionary<UInt32, TaskItem> m_Items;
-        private Dictionary<UInt32, CalendarExtensionItem> m_ExtensionItems;
+        private Dictionary<UInt32, TaskExtensionItem> m_ExtensionItems;
 		private List<CustomAttributeDefinition> m_CustomDates;
 
 		private TDLRenderer m_Renderer;
@@ -50,9 +65,13 @@ namespace DayViewUIExtension
             }
         }
 
+		public Boolean ReadOnly { get; set; }
+
 		// ----------------------------------------------------------------
 
-		public Boolean ReadOnly { get; set; }
+		public new event TDLAppointmentEventHandler AppointmentMove;
+
+		// ----------------------------------------------------------------
 
         public TDLDayView(UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
         {
@@ -68,8 +87,10 @@ namespace DayViewUIExtension
 			m_TaskRecurrences = taskRecurrences;
 
 			m_Items = new Dictionary<UInt32, TaskItem>();
-			m_ExtensionItems = new Dictionary<uint, CalendarExtensionItem>();
+			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
 			m_CustomDates = new List<CustomAttributeDefinition>();
+
+			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
 
 			InitializeComponent();
         }
@@ -91,55 +112,97 @@ namespace DayViewUIExtension
 				return 0;
 
             var pt = PointToClient(ptScreen);
-            Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
+            Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y, out toolRect);
 
             if (appt == null)
                 return 0;
 
-            var taskItem = appt as TaskItem;
-
-            if ((taskItem == null) || !taskItem.TextRect.Contains(pt))
-                return 0;
-
-			toolRect = taskItem.TextRect;
-			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
-
-			if (IsLongAppt(appt))
+			if (appt is TaskExtensionItem)
 			{
-				// single line tooltips
-				if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) <= toolRect.Height)
-					return 0;
-
-				multiLine = false; // always
-			}
-			else
-			{
-				var availRect = GetTrueRectangle();
-
-				if (taskItem.TextRect.Top < availRect.Top)
+				// TODO
+				if (appt is FutureOccurrence)
 				{
-					// If the top of the text rectangle is hidden we always 
-					// need a label tip so we just clip to the avail space
-					toolRect.Intersect(availRect);
+					tipText = "Future Occurrence";
+				}
+				else if (appt is CustomDateAttribute)
+				{
+					tipText = "Custom Date";
+				}
+
+				var pos = PointToClient(MousePosition);
+				pos.Offset(0, 16);
+				toolRect.Location = pos;
+			}
+			else // TaskItem
+			{
+				var taskItem = (appt as TaskItem);
+
+				toolRect = taskItem.TextRect;
+				toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
+
+				if (IsLongAppt(appt))
+				{
+					// single line tooltips
+					Size tipSize = m_LabelTip.CalcTipSize(taskItem.Title, toolRect.Width);
+
+					if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
+						return 0;
+
+					multiLine = false; // always
 				}
 				else
 				{
-					// Determine if text will fit in what's visible of the task
-					toolRect.Intersect(availRect);
+					var availRect = GetTrueRectangle();
 
-					if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) < toolRect.Height)
-						return 0;
+					if (taskItem.TextRect.Top < availRect.Top)
+					{
+						// If the top of the text rectangle is hidden we always 
+						// need a label tip so we just clip to the avail space
+						toolRect.Intersect(availRect);
+					}
+					else
+					{
+						// Determine if text will fit in what's visible of the task
+						toolRect.Intersect(availRect);
+
+						Size tipSize = m_LabelTip.CalcTipSize(taskItem.Title, toolRect.Width);
+
+						if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
+							return 0;
+					}
+
+					multiLine = true; // always
 				}
 
-				multiLine = true; // always
+				tipText = taskItem.Title;
 			}
 
-			tipText = taskItem.Title;
+			return appt.Id;
+		}
 
-            return taskItem.Id;
-        }
+		private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
+		{
+			// Repackage and forward to parent
+			if (AppointmentMove != null)
+			{
+				var move = (args as Calendar.MoveAppointmentEventArgs);
 
-        protected override void WndProc(ref Message m)
+				if (move != null)
+				{
+					TaskItem taskItem = (GetRealAppointment(move.Appointment) as TaskItem);
+					string custAttribId = String.Empty;
+
+					if (args.Appointment is CustomDateAttribute)
+					{
+						custAttribId = (args.Appointment as CustomDateAttribute).AttributeId;
+					}
+
+					AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
+				}
+			}
+		}
+
+		protected override void WndProc(ref Message m)
         {
             if (m_LabelTip!= null)
                 m_LabelTip.ProcessMessage(m);
@@ -195,7 +258,7 @@ namespace DayViewUIExtension
             if (dwTaskID == 0)
                 return false;
 
-			CalendarExtensionItem extItem;
+			TaskExtensionItem extItem;
 
 			if (m_ExtensionItems.TryGetValue(dwTaskID, out extItem))
 				dwTaskID = extItem.RealTaskId;
@@ -298,7 +361,7 @@ namespace DayViewUIExtension
                 return 0;
 
 			// If an extension item is selected, return the 'real' task Id
-			CalendarExtensionItem extItem;
+			TaskExtensionItem extItem;
 
 			if (m_ExtensionItems.TryGetValue(m_SelectedTaskID, out extItem))
 				return extItem.RealTaskId;
@@ -503,8 +566,8 @@ namespace DayViewUIExtension
 
 			if (appt != null)
 			{
-				if (appt is CalendarExtensionItem)
-					return (appt as CalendarExtensionItem).RealTaskId;
+				if (appt is TaskExtensionItem)
+					return (appt as TaskExtensionItem).RealTaskId;
 
 				return appt.Id;
 			}
@@ -519,7 +582,7 @@ namespace DayViewUIExtension
 
 		public Calendar.Appointment GetAppointment(UInt32 taskID)
 		{
-			CalendarExtensionItem extItem;
+			TaskExtensionItem extItem;
 
 			if (m_ExtensionItems.TryGetValue(taskID, out extItem))
 				return extItem;
@@ -534,8 +597,8 @@ namespace DayViewUIExtension
 
 		public Calendar.Appointment GetRealAppointment(Calendar.Appointment appt)
 		{
-			if ((appt != null) && (appt is CalendarExtensionItem))
-				return (appt as CalendarExtensionItem).RealTask;
+			if ((appt != null) && (appt is TaskExtensionItem))
+				return (appt as TaskExtensionItem).RealTask;
 
 			return appt;
 		}
@@ -662,7 +725,8 @@ namespace DayViewUIExtension
 			}
 
 			// Update custom attribute definitions
-			m_CustomDates = tasks.GetCustomAttributes(CustomAttributeDefinition.Attribute.Date);
+			if (tasks.IsAttributeAvailable(Task.Attribute.CustomAttribute))
+				m_CustomDates = tasks.GetCustomAttributes(CustomAttributeDefinition.Attribute.Date);
 
 			// Update the tasks
 			Task task = tasks.GetFirstTask();
@@ -1191,7 +1255,7 @@ namespace DayViewUIExtension
 				{
 					if (appt.Locked)
 					{
-						if (appt is CalendarExtensionItem)
+						if (appt is TaskExtensionItem)
 							appt = GetRealAppointment(appt);
 
 						if (appt.Locked)

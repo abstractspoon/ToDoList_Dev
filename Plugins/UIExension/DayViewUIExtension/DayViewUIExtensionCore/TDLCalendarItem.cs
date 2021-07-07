@@ -21,27 +21,6 @@ namespace DayViewUIExtension
 
 		// --------------------
 
-		protected TaskItem(TaskItem item) : base(item)
-		{
-            if (item == null)
-                return;
-
-			AllocTo = item.AllocTo;
-			HasIcon = item.HasIcon;
-			IsParent = item.IsParent;
-			TaskTextColor = item.TaskTextColor;
-			HasDependencies = item.HasDependencies;
-			IsDone = item.IsDone;
-			IsGoodAsDone = item.IsGoodAsDone;
-			TimeEstimate = item.TimeEstimate;
-			TimeEstUnits = item.TimeEstUnits;
-			IsRecurring = item.IsRecurring;
-
-            UpdateOriginalDates();
-		}
-
-		// --------------------
-
 		public TaskItem()
 		{
 		}
@@ -102,7 +81,8 @@ namespace DayViewUIExtension
         public Task.TimeUnits TimeEstUnits { get; set; }
 
         // This is a hack because the underlying DayView does
-        // not allow overriding the AppointmentView class
+        // not allow overriding the AppointmentView class to
+		// add extra attributes
         public Rectangle IconRect { get; set; }
 		public Rectangle TextRect { get; set; }
 
@@ -330,11 +310,11 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class CalendarExtensionItem : Calendar.Appointment
+	public class TaskExtensionItem : Calendar.Appointment
 	{
 		protected TaskItem m_RealItem;
 
-		protected CalendarExtensionItem(TaskItem item, UInt32 id) : base(item)
+		protected TaskExtensionItem(TaskItem item, UInt32 id) : base(item)
 		{
 			m_RealItem = item;
 			Id = id;
@@ -346,7 +326,7 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class FutureOccurrence : CalendarExtensionItem
+	public class FutureOccurrence : TaskExtensionItem
 	{
 		public FutureOccurrence(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
 		{
@@ -364,7 +344,7 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class CustomDateAttribute : CalendarExtensionItem
+	public class CustomDateAttribute : TaskExtensionItem
 	{
 		public CustomDateAttribute(TaskItem item, UInt32 id, string attribId, DateTime date) : base(item, id)
 		{

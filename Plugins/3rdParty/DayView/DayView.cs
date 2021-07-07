@@ -1345,27 +1345,44 @@ namespace Calendar
 
         public Appointment GetAppointmentAt(int x, int y)
         {
+			Rectangle unused;
+			return GetAppointmentAt(x, y, out unused);
+        }
+
+		public Appointment GetAppointmentAt(int x, int y, out Rectangle apptRect)
+		{
 			if (GetFullDayApptsRectangle().Contains(x, y))
 			{
 				foreach (AppointmentView view in longAppointmentViews.Values)
+				{
 					if (view.Rectangle.Contains(x, y))
+					{
+						apptRect = view.Rectangle;
 						return view.Appointment;
+					}
+				}
 			}
 			else
 			{
 				foreach (AppointmentView view in appointmentViews.Values)
+				{
 					if (view.Rectangle.Contains(x, y))
+					{
+						apptRect = view.Rectangle;
 						return view.Appointment;
+					}
+				}
 			}
 
+			apptRect = Rectangle.Empty;
 			return null;
-        }
+		}
 
-        #endregion
+		#endregion
 
-        #region Drawing Methods
+		#region Drawing Methods
 
-        protected override void OnPaint(PaintEventArgs e)
+		protected override void OnPaint(PaintEventArgs e)
         {
             if (CurrentlyEditing)
             {

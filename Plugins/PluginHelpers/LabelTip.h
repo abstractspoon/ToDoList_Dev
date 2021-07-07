@@ -29,6 +29,7 @@ namespace Abstractspoon
 
 				void ProcessMessage(Windows::Forms::Message^ msg);
 				int CalcTipHeight(String^ tipText, int availWidth);
+				Drawing::Size CalcTipSize(String^ tipText, int availWidth);
 
 			protected:
 				ILabelTipHandler^ m_Handler;

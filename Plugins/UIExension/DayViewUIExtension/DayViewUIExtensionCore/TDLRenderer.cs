@@ -403,10 +403,10 @@ namespace DayViewUIExtension
             if (rect.Width != 0 && rect.Height != 0)
             {
 				TaskItem taskItem;
-				bool isExtItem = (appt is CalendarExtensionItem);
+				bool isExtItem = (appt is TaskExtensionItem);
 
 				if (isExtItem)
-					taskItem = (appt as CalendarExtensionItem).RealTask;
+					taskItem = (appt as TaskExtensionItem).RealTask;
 				else
 					taskItem = (appt as TaskItem);
 
@@ -569,7 +569,14 @@ namespace DayViewUIExtension
                     }
                 }
 
-                // draw appointment text
+				// draw appointment text
+				rect.Y += 3;
+
+				if (isLong)
+					rect.Height = m_BaseFont.Height;
+				else
+					rect.Height -= 3;
+
 				if (rect.Width > 2)
 				{
 					using (StringFormat format = new StringFormat())
@@ -577,14 +584,6 @@ namespace DayViewUIExtension
 						format.Alignment = StringAlignment.Near;
 						format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
 
-						rect.Y += 3;
-
-						if (isLong)
-							rect.Height = m_BaseFont.Height;
-						else
-							rect.Height -= 3;
-
-						taskItem.TextRect = rect;
 						g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
 						using (SolidBrush brush = new SolidBrush(textColor))
@@ -605,11 +604,10 @@ namespace DayViewUIExtension
 						g.TextRenderingHint = TextRenderingHint.SystemDefault;
 					}
 				}
-				else
-				{
-					taskItem.TextRect = Rectangle.Empty;
-				}
+
+				if (!isExtItem)
+					taskItem.TextRect = rect;
 			}
-        }
+		}
     }
 }
