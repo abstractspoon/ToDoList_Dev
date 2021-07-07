@@ -11,6 +11,21 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
+	public class TDLAppointmentView : Calendar.AppointmentView
+	{
+		public TDLAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect) 
+			: 
+			base(appt, rect, gripRect)
+		{
+			IconRect = TextRect = Rectangle.Empty;
+		}
+
+		public Rectangle IconRect;
+		public Rectangle TextRect;
+	}
+
+	// ---------------------------------------------------------------
+
 	public class CalendarItem : Calendar.Appointment
 	{
 		private DateTime m_OrgStartDate = NullDate;
@@ -95,11 +110,6 @@ namespace DayViewUIExtension
 		public Boolean IsRecurring { get; set; }
 		public double TimeEstimate { get; set; }
         public Task.TimeUnits TimeEstUnits { get; set; }
-
-        // This is a hack because the underlying DayView does
-        // not allow overriding the AppointmentView class
-        public Rectangle IconRect { get; set; }
-		public Rectangle TextRect { get; set; }
 
 		public override TimeSpan Length
         {

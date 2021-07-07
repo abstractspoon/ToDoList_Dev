@@ -172,7 +172,7 @@ namespace Calendar
 			}
         }
 
-        public abstract void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isLong, bool isSelected, Rectangle gripRect);
+        public abstract void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isLong, bool isSelected);
 
         public void DrawAllDayBackground(Graphics g, Rectangle rect)
         {

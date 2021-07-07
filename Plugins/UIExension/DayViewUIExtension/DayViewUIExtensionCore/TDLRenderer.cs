@@ -392,17 +392,23 @@ namespace DayViewUIExtension
 			return appt.Id;
 		}
 
-		public override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isLong, bool isSelected, Rectangle gripRect)
+		public override void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isLong, bool isSelected)
         {
-            if (appointment == null)
-                throw new ArgumentNullException("appointment");
+            if (apptView == null)
+                throw new ArgumentNullException("appointment view");
 
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            if (rect.Width != 0 && rect.Height != 0)
+			var appt = apptView.Appointment;
+			var rect = apptView.Rectangle;
+			var gripRect = apptView.GripRect;
+
+			var tdlView = (apptView as TDLAppointmentView);
+
+			if (rect.Width != 0 && rect.Height != 0)
             {
-				CalendarItem taskItem = (appointment as CalendarItem);
+				var taskItem = (appt as CalendarItem);
 
 				UInt32 taskId = taskItem.Id;
 				UInt32 realTaskId = GetRealTaskId(taskItem);
@@ -495,7 +501,7 @@ namespace DayViewUIExtension
 
                 // Draw appointment icon
                 bool hasIcon = false;
-                taskItem.IconRect = Rectangle.Empty;
+				tdlView.IconRect = Rectangle.Empty;
 
                 if (TaskHasIcon(taskItem))
                 {
@@ -534,7 +540,7 @@ namespace DayViewUIExtension
                         g.Clip = clipRgn;
 
                         hasIcon = true;
-                        taskItem.IconRect = rectIcon;
+						tdlView.IconRect = rectIcon;
 
                         rect.Width -= (rectIcon.Right - rect.Left);
                         rect.X = rectIcon.Right;
@@ -574,7 +580,7 @@ namespace DayViewUIExtension
 					else
 						rect.Height -= 3;
 
-					taskItem.TextRect = rect;
+					tdlView.TextRect = rect;
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
                     using (SolidBrush brush = new SolidBrush(textColor))
@@ -583,12 +589,12 @@ namespace DayViewUIExtension
                         {
                             using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
                             {
-                                g.DrawString(appointment.Title, font, brush, rect, format);
+                                g.DrawString(appt.Title, font, brush, rect, format);
                             }
                         }
                         else
                         {
-                            g.DrawString(appointment.Title, this.BaseFont, brush, rect, format);
+                            g.DrawString(appt.Title, this.BaseFont, brush, rect, format);
                         }
                     }
 

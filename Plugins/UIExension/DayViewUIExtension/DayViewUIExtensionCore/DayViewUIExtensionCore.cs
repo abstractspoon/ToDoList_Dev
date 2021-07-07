@@ -608,17 +608,12 @@ namespace DayViewUIExtension
 			if (m_DayView.ReadOnly)
 				return;
 
-			var appointment = m_DayView.GetRealAppointmentAt(e.Location.X, e.Location.Y);
+			var appt = m_DayView.GetRealAppointmentAt(e.Location.X, e.Location.Y);
 
-			if (appointment == null)
+			if (appt == null || appt.Locked)
 				return;
 
-			var taskItem = (appointment as CalendarItem);
-
-			if ((taskItem == null) || taskItem.Locked)
-				return;
-
-			if (taskItem.IconRect.Contains(e.Location))
+			if (m_DayView.IconHitTest(m_DayView.PointToScreen(e.Location)) > 0)
 			{
 				var notify = new UIExtension.ParentNotify(m_HwndParent);
 				notify.NotifyEditIcon();

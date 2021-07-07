@@ -89,23 +89,23 @@ namespace DayViewUIExtension
 				return 0;
 
             var pt = PointToClient(ptScreen);
-            Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
+            Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-            if (appointment == null)
+            if (appt == null)
                 return 0;
 
-            var taskItem = appointment as CalendarItem;
+			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
 
-            if ((taskItem == null) || !taskItem.TextRect.Contains(pt))
+            if ((apptView == null) || !apptView.TextRect.Contains(pt))
                 return 0;
 
-			toolRect = taskItem.TextRect;
+			toolRect = apptView.TextRect;
 			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
 
-			if (IsLongAppt(appointment))
+			if (IsLongAppt(appt))
 			{
 				// single line tooltips
-				if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) <= toolRect.Height)
+				if (m_LabelTip.CalcTipHeight(appt.Title, toolRect.Width) <= toolRect.Height)
 					return 0;
 
 				multiLine = false; // always
@@ -114,7 +114,7 @@ namespace DayViewUIExtension
 			{
 				var availRect = GetTrueRectangle();
 
-				if (taskItem.TextRect.Top < availRect.Top)
+				if (apptView.TextRect.Top < availRect.Top)
 				{
 					// If the top of the text rectangle is hidden we always 
 					// need a label tip so we just clip to the avail space
@@ -125,16 +125,32 @@ namespace DayViewUIExtension
 					// Determine if text will fit in what's visible of the task
 					toolRect.Intersect(availRect);
 
-					if (m_LabelTip.CalcTipHeight(taskItem.Title, toolRect.Width) < toolRect.Height)
+					if (m_LabelTip.CalcTipHeight(appt.Title, toolRect.Width) < toolRect.Height)
 						return 0;
 				}
 
 				multiLine = true; // always
 			}
 
-			tipText = taskItem.Title;
+			tipText = appt.Title;
 
-            return taskItem.Id;
+            return appt.Id;
+        }
+
+        public UInt32 IconHitTest(Point ptScreen)
+        {
+            var pt = PointToClient(ptScreen);
+            Calendar.Appointment appt = GetRealAppointmentAt(pt.X, pt.Y);
+
+            if (appt == null)
+                return 0;
+
+			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+
+            if ((apptView == null) || !apptView.IconRect.Contains(pt))
+                return 0;
+
+			return apptView.Appointment.Id;
         }
 
         protected override void WndProc(ref Message m)
@@ -150,7 +166,12 @@ namespace DayViewUIExtension
 			return new TDLSelectionTool();
 		}
 
-        protected void InitializeComponent()
+		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect)
+		{
+			return new TDLAppointmentView(appt, rect, gripRect);
+		}
+
+		protected void InitializeComponent()
         {
             Calendar.DrawTool drawTool = new Calendar.DrawTool();
             drawTool.DayView = this;
@@ -395,7 +416,7 @@ namespace DayViewUIExtension
 
         public Calendar.Appointment FixupSelection(bool scrollToTask, bool allowNotify)
         {
-			// Our base class clears the selected appointment whenever
+			// Our base class clears the selected appt whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
             UInt32 prevSelTaskID = m_VisibleSelectedTaskID;
             UInt32 selTaskID = GetSelectedTaskID();
@@ -479,9 +500,9 @@ namespace DayViewUIExtension
 		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
 		{
 			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
-			Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
+			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-			if (appointment != null)
+			if (appt != null)
 			{
 				return UIExtension.HitResult.Task;
 			}
@@ -497,14 +518,14 @@ namespace DayViewUIExtension
 		public UInt32 HitTestTask(Int32 xScreen, Int32 yScreen)
 		{
 			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
-			Calendar.Appointment appointment = GetAppointmentAt(pt.X, pt.Y);
+			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-			if (appointment != null)
+			if (appt != null)
 			{
-				if (appointment is CalendarFutureItem)
-					return (appointment as CalendarFutureItem).RealTaskId;
+				if (appt is CalendarFutureItem)
+					return (appt as CalendarFutureItem).RealTaskId;
 
-				return appointment.Id;
+				return appt.Id;
 			}
 
 			return 0;
@@ -536,20 +557,20 @@ namespace DayViewUIExtension
 		public bool GetSelectedItemLabelRect(ref Rectangle rect)
 		{
 			FixupSelection(true, false);
-			var appointment = GetRealAppointment(SelectedAppointment);
+			var appt = GetRealAppointment(SelectedAppointment);
 
-			EnsureVisible(appointment, false);
+			EnsureVisible(appt, false);
 			Update(); // make sure draw rects are updated
 
-			if (GetAppointmentRect(appointment, ref rect))
+			if (GetAppointmentRect(appt, ref rect))
 			{
-				CalendarItem item = (appointment as CalendarItem);
+				CalendarItem item = (appt as CalendarItem);
 				bool hasIcon = m_Renderer.TaskHasIcon(item);
 
-				if (IsLongAppt(appointment))
+				if (IsLongAppt(appt))
 				{
 					// Gripper
-					if (appointment.StartDate >= StartDate)
+					if (appt.StartDate >= StartDate)
 						rect.X += 8;
 					else
 						rect.X -= 3;
@@ -896,21 +917,21 @@ namespace DayViewUIExtension
 			return base.EnsureVisible(appt, partialOK);
 		}
 
-		bool WantDrawAppointmentSelected(Calendar.Appointment appointment)
+		bool WantDrawAppointmentSelected(Calendar.Appointment appt)
 		{
 			// When a real or future task item is selected we want
 			// all the other related tasks to also appear selected
-			if (m_SelectedTaskID == appointment.Id)
+			if (m_SelectedTaskID == appt.Id)
 				return true;
 
 			var selTaskID = GetSelectedTaskID();
 
-			if (selTaskID == appointment.Id)
+			if (selTaskID == appt.Id)
 				return true;
 
 			// If the argument is a future item, check to see
 			// if its real task ID matches the selected task
-			var futureItem = (appointment as CalendarFutureItem);
+			var futureItem = (appt as CalendarFutureItem);
 
 			if (futureItem != null)
 			{
@@ -921,22 +942,25 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		protected override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isSelected, Rectangle gripRect)
+		protected override void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected)
 		{
-			isSelected = WantDrawAppointmentSelected(appointment);
+			var appt = apptView.Appointment;
+			var rect = apptView.Rectangle;
+
+			isSelected = WantDrawAppointmentSelected(appt);
 			
 			// Our custom gripper bar
-			gripRect = rect;
+			var gripRect = rect;
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
 
             // If the start date precedes the start of the week then extend the
             // draw rect to the left so the edge is clipped and likewise for the right.
-            bool longAppt = IsLongAppt(appointment);
+            bool longAppt = IsLongAppt(appt);
 
             if (longAppt)
             {
-                if (appointment.StartDate < StartDate)
+                if (appt.StartDate < StartDate)
                 {
                     rect.X -= 4;
                     rect.Width += 4;
@@ -944,7 +968,7 @@ namespace DayViewUIExtension
                     gripRect.X = rect.X;
                     gripRect.Width = 0;
                 }
-                else if (appointment.StartDate > StartDate)
+                else if (appt.StartDate > StartDate)
                 {
                     rect.X++;
                     rect.Width--;
@@ -952,14 +976,14 @@ namespace DayViewUIExtension
                     gripRect.X++;
                 }
 
-                if (appointment.EndDate >= EndDate)
+                if (appt.EndDate >= EndDate)
                 {
                     rect.Width += 5;
                 }
             }
-            else // day appointment
+            else // day appt
             {
-                if (appointment.StartDate.TimeOfDay.TotalHours == 0.0)
+                if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
                 {
                     rect.Y++;
                     rect.Height--;
@@ -967,8 +991,11 @@ namespace DayViewUIExtension
 
                 rect.Width -= 1;
             }
-			
-			m_Renderer.DrawAppointment(g, rect, appointment, longAppt, isSelected, gripRect);
+
+			apptView.Rectangle = rect;
+			apptView.GripRect = gripRect;
+
+			m_Renderer.DrawAppointment(g, apptView, longAppt, isSelected);
 		}
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
@@ -1073,9 +1100,9 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appointment, Point mousePos)
+		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appt, Point mousePos)
 		{
-			if (ReadOnly || (appointment == null))
+			if (ReadOnly || (appt == null))
 				return Calendar.SelectionTool.Mode.None;
 
 			var selTool = (ActiveTool as Calendar.SelectionTool);
@@ -1086,7 +1113,7 @@ namespace DayViewUIExtension
 				selTool.DayView = this;
 			}
 
-			return selTool.GetMode(mousePos, appointment);
+			return selTool.GetMode(mousePos, appt);
 		}
 
 		public new bool CancelAppointmentResizing()
@@ -1138,34 +1165,36 @@ namespace DayViewUIExtension
 			// selected item but we want them for all tasks
 			if (!ReadOnly)
 			{
-				var calItem = GetAppointmentAt(e.Location.X, e.Location.Y);
+				var appt = GetAppointmentAt(e.Location.X, e.Location.Y);
 
-				if (calItem != null)
+				if (appt != null)
 				{
-					if (calItem.Locked)
+					if (appt.Locked)
 					{
-						if (calItem is CalendarFutureItem)
-							calItem = GetRealAppointment(calItem);
+						if (appt is CalendarFutureItem)
+							appt = GetRealAppointment(appt);
 
-						if (calItem.Locked)
+						if (appt.Locked)
 							return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 
 						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 					}
 
-					var taskItem = (calItem as CalendarItem);
+					var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
 
-					if (taskItem.IconRect.Contains(e.Location))
-						return UIExtension.HandCursor();
-
-					var mode = GetMode(taskItem, e.Location);
-
-					if (!CanResizeTask(taskItem, mode))
-						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-
-					// Same as Calendar.SelectionTool
-					switch (mode)
+					if (apptView != null)
 					{
+						if (apptView.IconRect.Contains(e.Location))
+							return UIExtension.HandCursor();
+
+						var mode = GetMode(appt, e.Location);
+
+						if (!CanResizeTask(appt as CalendarItem, mode))
+							return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+
+						// Same as Calendar.SelectionTool
+						switch (mode)
+						{
 						case Calendar.SelectionTool.Mode.ResizeBottom:
 						case Calendar.SelectionTool.Mode.ResizeTop:
 							return Cursors.SizeNS;
@@ -1177,6 +1206,7 @@ namespace DayViewUIExtension
 						case Calendar.SelectionTool.Mode.Move:
 							// default cursor below
 							break;
+						}
 					}
 				}
 			}
