@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Diagnostics;
 
+using IIControls;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -138,7 +139,7 @@ namespace DayViewUIExtension
 				}
 
 				var pos = PointToClient(MousePosition);
-				pos.Offset(0, DPIScaling.Scale(16));
+				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
 				toolRect.Location = pos;
 			}
 			else // TaskItem
