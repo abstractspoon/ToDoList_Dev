@@ -392,15 +392,21 @@ namespace DayViewUIExtension
 			return appt.Id;
 		}
 
-		public override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appt, bool isLong, bool isSelected, Rectangle gripRect)
+		public override void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isLong, bool isSelected)
         {
-            if (appt == null)
-                throw new ArgumentNullException("appointment");
+            if (apptView == null)
+                throw new ArgumentNullException("appointment view");
 
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            if (rect.Width != 0 && rect.Height != 0)
+			var appt = apptView.Appointment;
+			var rect = apptView.Rectangle;
+			var gripRect = apptView.GripRect;
+
+			var tdlView = (apptView as TDLAppointmentView);
+
+			if (rect.Width != 0 && rect.Height != 0)
             {
 				TaskItem taskItem;
 				bool isExtItem = (appt is TaskExtensionItem);
@@ -499,10 +505,11 @@ namespace DayViewUIExtension
 
                 // Draw appointment icon
                 bool hasIcon = false;
-				Rectangle rectIcon = Rectangle.Empty;
+				tdlView.IconRect = Rectangle.Empty;
 
                 if (TaskHasIcon(taskItem))
                 {
+                    Rectangle rectIcon;
                     int imageSize = DPIScaling.Scale(16);
 
                     if (isLong)
@@ -537,20 +544,15 @@ namespace DayViewUIExtension
                         g.Clip = clipRgn;
 
                         hasIcon = true;
-
-						if (!isExtItem)
-							taskItem.IconRect = rectIcon;
+						tdlView.IconRect = rectIcon;
 
                         rect.Width -= (rectIcon.Right - rect.Left);
                         rect.X = rectIcon.Right;
                     }
                 }
 
-				if (!isExtItem)
-					taskItem.IconRect = rectIcon;
-
-				// Draw gripper bar
-				if (gripRect.Width > 0)
+                // Draw gripper bar
+                if (gripRect.Width > 0)
                 {
                     using (SolidBrush brush = new SolidBrush(barColor))
                         g.FillRectangle(brush, gripRect);
@@ -605,8 +607,7 @@ namespace DayViewUIExtension
 					}
 				}
 
-				if (!isExtItem)
-					taskItem.TextRect = rect;
+				tdlView.TextRect = rect;
 			}
 		}
     }

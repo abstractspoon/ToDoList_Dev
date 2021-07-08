@@ -87,36 +87,40 @@ namespace Calendar
                 g.FillRectangle(m_Brush, rect);
         }
 
-        public override void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isLong, bool isSelected, Rectangle gripRect)
+        public override void DrawAppointment(Graphics g, AppointmentView apptView, bool isLong, bool isSelected)
         {
-            if (appointment == null)
-                throw new ArgumentNullException("appointment");
+            if (apptView == null)
+                throw new ArgumentNullException("apptView");
 
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            if (rect.Width != 0 && rect.Height != 0)
+			var appt = apptView.Appointment;
+			var rect = apptView.Rectangle;
+			var gripRect = apptView.GripRect;
+
+			if (rect.Width != 0 && rect.Height != 0)
                 using (StringFormat format = new StringFormat())
                 {
                     format.Alignment = StringAlignment.Near;
                     format.LineAlignment = StringAlignment.Near;
 
-                    if ((appointment.Locked) && isSelected)
+                    if ((appt.Locked) && isSelected)
                     {
                         // Draw back
-                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.Wave, Color.LightGray, appointment.BarColor))
+                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.Wave, Color.LightGray, appt.BarColor))
                             g.FillRectangle(m_Brush, rect);
                     }
                     else
                     {
                         // Draw back
-                        using (SolidBrush m_Brush = new SolidBrush(appointment.BarColor))
+                        using (SolidBrush m_Brush = new SolidBrush(appt.BarColor))
                             g.FillRectangle(m_Brush, rect);
                     }
 
                     if (isSelected)
                     {
-                        using (Pen m_Pen = new Pen(appointment.BorderColor, 4))
+                        using (Pen m_Pen = new Pen(appt.BorderColor, 4))
                             g.DrawRectangle(m_Pen, rect);
 
                         Rectangle m_BorderRectangle = rect;
@@ -133,10 +137,10 @@ namespace Calendar
                     }
                     else
                     {
-                        // Draw gripper
+						// Draw gripper
                         gripRect.Width += 1;
 
-                        using (SolidBrush m_Brush = new SolidBrush(appointment.BorderColor))
+                        using (SolidBrush m_Brush = new SolidBrush(appt.BorderColor))
                             g.FillRectangle(m_Brush, gripRect);
 
                         using (Pen m_Pen = new Pen(SystemColors.WindowFrame, 1))
@@ -144,7 +148,7 @@ namespace Calendar
                     }
 
                     rect.X += gripRect.Width;
-                    g.DrawString(appointment.Title, this.BaseFont, SystemBrushes.WindowText, rect, format);
+                    g.DrawString(appt.Title, this.BaseFont, SystemBrushes.WindowText, rect, format);
                 }
         }
     }

@@ -117,6 +117,14 @@ namespace DayViewUIExtension
             if (appt == null)
                 return 0;
 
+			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+
+            if ((apptView == null) || !apptView.TextRect.Contains(pt))
+                return 0;
+
+			toolRect = apptView.TextRect;
+			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
+
 			if (appt is TaskExtensionItem)
 			{
 				// TODO
@@ -130,20 +138,15 @@ namespace DayViewUIExtension
 				}
 
 				var pos = PointToClient(MousePosition);
-				pos.Offset(0, 16);
+				pos.Offset(0, DPIScaling.Scale(16));
 				toolRect.Location = pos;
 			}
 			else // TaskItem
 			{
-				var taskItem = (appt as TaskItem);
-
-				toolRect = taskItem.TextRect;
-				toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
-
 				if (IsLongAppt(appt))
 				{
 					// single line tooltips
-					Size tipSize = m_LabelTip.CalcTipSize(taskItem.Title, toolRect.Width);
+					Size tipSize = m_LabelTip.CalcTipSize(appt.Title, toolRect.Width);
 
 					if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
 						return 0;
@@ -154,7 +157,7 @@ namespace DayViewUIExtension
 				{
 					var availRect = GetTrueRectangle();
 
-					if (taskItem.TextRect.Top < availRect.Top)
+					if (apptView.TextRect.Top < availRect.Top)
 					{
 						// If the top of the text rectangle is hidden we always 
 						// need a label tip so we just clip to the avail space
@@ -165,7 +168,7 @@ namespace DayViewUIExtension
 						// Determine if text will fit in what's visible of the task
 						toolRect.Intersect(availRect);
 
-						Size tipSize = m_LabelTip.CalcTipSize(taskItem.Title, toolRect.Width);
+						Size tipSize = m_LabelTip.CalcTipSize(appt.Title, toolRect.Width);
 
 						if ((tipSize.Width <= toolRect.Width) && (tipSize.Height <= toolRect.Height))
 							return 0;
@@ -174,7 +177,7 @@ namespace DayViewUIExtension
 					multiLine = true; // always
 				}
 
-				tipText = taskItem.Title;
+				tipText = appt.Title;
 			}
 
 			return appt.Id;
@@ -202,6 +205,22 @@ namespace DayViewUIExtension
 			}
 		}
 
+        public UInt32 IconHitTest(Point ptScreen)
+        {
+            var pt = PointToClient(ptScreen);
+            Calendar.Appointment appt = GetRealAppointmentAt(pt.X, pt.Y);
+
+            if (appt == null)
+                return 0;
+
+			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+
+            if ((apptView == null) || !apptView.IconRect.Contains(pt))
+                return 0;
+
+			return apptView.Appointment.Id;
+        }
+
 		protected override void WndProc(ref Message m)
         {
             if (m_LabelTip!= null)
@@ -213,6 +232,11 @@ namespace DayViewUIExtension
 		protected override Calendar.SelectionTool NewSelectionTool()
 		{
 			return new TDLSelectionTool();
+		}
+
+		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect)
+		{
+			return new TDLAppointmentView(appt, rect, gripRect);
 		}
 
         protected void InitializeComponent()
@@ -994,22 +1018,25 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		protected override void DrawAppointment(Graphics g, Rectangle rect, Calendar.Appointment appointment, bool isSelected, Rectangle gripRect)
+		protected override void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected)
 		{
-			isSelected = WantDrawAppointmentSelected(appointment);
+			var appt = apptView.Appointment;
+			var rect = apptView.Rectangle;
+
+			isSelected = WantDrawAppointmentSelected(appt);
 			
 			// Our custom gripper bar
-			gripRect = rect;
+			var gripRect = rect;
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
 
             // If the start date precedes the start of the week then extend the
             // draw rect to the left so the edge is clipped and likewise for the right.
-            bool longAppt = IsLongAppt(appointment);
+            bool longAppt = IsLongAppt(appt);
 
             if (longAppt)
             {
-                if (appointment.StartDate < StartDate)
+                if (appt.StartDate < StartDate)
                 {
                     rect.X -= 4;
                     rect.Width += 4;
@@ -1017,7 +1044,7 @@ namespace DayViewUIExtension
                     gripRect.X = rect.X;
                     gripRect.Width = 0;
                 }
-                else if (appointment.StartDate > StartDate)
+                else if (appt.StartDate > StartDate)
                 {
                     rect.X++;
                     rect.Width--;
@@ -1025,14 +1052,14 @@ namespace DayViewUIExtension
                     gripRect.X++;
                 }
 
-                if (appointment.EndDate >= EndDate)
+                if (appt.EndDate >= EndDate)
                 {
                     rect.Width += 5;
                 }
             }
-            else // day appointment
+            else // day appt
             {
-                if (appointment.StartDate.TimeOfDay.TotalHours == 0.0)
+                if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
                 {
                     rect.Y++;
                     rect.Height--;
@@ -1040,8 +1067,11 @@ namespace DayViewUIExtension
 
                 rect.Width -= 1;
             }
-			
-			m_Renderer.DrawAppointment(g, rect, appointment, longAppt, isSelected, gripRect);
+
+			apptView.Rectangle = rect;
+			apptView.GripRect = gripRect;
+
+			m_Renderer.DrawAppointment(g, apptView, longAppt, isSelected);
 		}
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
@@ -1264,9 +1294,9 @@ namespace DayViewUIExtension
 						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 					}
 
-					var taskItem = (appt as TaskItem);
+					var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
 
-					if ((taskItem != null) && taskItem.IconRect.Contains(e.Location))
+					if ((apptView != null) && apptView.IconRect.Contains(e.Location))
 						return UIExtension.HandCursor();
 
 					var mode = GetMode(appt, e.Location);

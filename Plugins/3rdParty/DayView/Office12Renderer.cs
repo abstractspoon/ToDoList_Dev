@@ -227,30 +227,33 @@ namespace Calendar
                 g.FillRectangle(backBrush, rect);
         }
 
-        public override void DrawAppointment(System.Drawing.Graphics g, System.Drawing.Rectangle rect, Appointment appointment, bool isLong, bool isSelected, System.Drawing.Rectangle gripRect)
+        public override void DrawAppointment(System.Drawing.Graphics g, AppointmentView apptView, bool isLong, bool isSelected)
         {
-            if (appointment == null)
-                throw new ArgumentNullException("appointment");
+            if (apptView == null)
+                throw new ArgumentNullException("apptView");
 
             if (g == null)
                 throw new ArgumentNullException("g");
 
-            /*
-             * Logic for drawing the appointment: 
+			/*
+             * Logic for drawing the appt: 
              * 1) Do something messy with the colours
              * 
              * 2) Determine background pattern
              * 2.1) App is locked -> HatchBrush
              * 2.2) Normal app -> Nothing
              * 
-             * 3) Draw the background of appointment
+             * 3) Draw the background of appt
              * 
-             * 4) Draw the edges of appointment
+             * 4) Draw the edges of appt
              * 4.1) If app is selected -> just draw the selection rectangle
              * 4.2) If not -> draw the gripper, border (if required) and shadows
              */
+			var appt = apptView.Appointment;
+			var rect = apptView.Rectangle;
+			var gripRect = apptView.GripRect;
 
-            if (rect.Width != 0 && rect.Height != 0)
+			if (rect.Width != 0 && rect.Height != 0)
             {
 
                 using (StringFormat format = new StringFormat())
@@ -258,13 +261,13 @@ namespace Calendar
                     format.Alignment = StringAlignment.Near;
                     format.LineAlignment = StringAlignment.Near;
 
-                    Color start = InterpolateColors(appointment.BarColor, Color.White, 0.4f);
-                    Color end = InterpolateColors(appointment.BarColor, Color.FromArgb(191, 210, 234), 0.7f);
-                    // if appointment is locked, draw different background pattern
-                    if ((appointment.Locked))
+                    Color start = InterpolateColors(appt.BarColor, Color.White, 0.4f);
+                    Color end = InterpolateColors(appt.BarColor, Color.FromArgb(191, 210, 234), 0.7f);
+                    // if appt is locked, draw different background pattern
+                    if ((appt.Locked))
                     {
                         // Draw back
-                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LargeConfetti, Color.Blue, appointment.BarColor))
+                        using (Brush m_Brush = new System.Drawing.Drawing2D.HatchBrush(System.Drawing.Drawing2D.HatchStyle.LargeConfetti, Color.Blue, appt.BarColor))
                             g.FillRectangle(m_Brush, rect);
 
                         // little transparent
@@ -276,18 +279,18 @@ namespace Calendar
 
                     }
 
-                    // Draw the background of the appointment
+                    // Draw the background of the appt
 
                     using (LinearGradientBrush aGB = new LinearGradientBrush(rect, start, end, LinearGradientMode.Vertical))
                         g.FillRectangle(aGB, rect);
 
-                    // If the appointment is selected, only need to draw the selection frame
+                    // If the appt is selected, only need to draw the selection frame
 
                     if (isSelected)
                     {
                         Rectangle m_BorderRectangle = rect;
 
-                        using (Pen m_Pen = new Pen(appointment.BorderColor, 3))
+                        using (Pen m_Pen = new Pen(appt.BorderColor, 3))
                             g.DrawRectangle(m_Pen, rect);
 
                         m_BorderRectangle.Inflate(2, 2);
@@ -306,14 +309,14 @@ namespace Calendar
 
                         gripRect.Width += 1;
 
-                        start = InterpolateColors(appointment.BorderColor, appointment.BarColor, 0.2f);
-                        end = InterpolateColors(appointment.BorderColor, Color.White, 0.6f);
+                        start = InterpolateColors(appt.BorderColor, appt.BarColor, 0.2f);
+                        end = InterpolateColors(appt.BorderColor, Color.White, 0.6f);
 
                         using (LinearGradientBrush aGB = new LinearGradientBrush(rect, start, end, LinearGradientMode.Vertical))
                             g.FillRectangle(aGB, gripRect);
 
                         //  Draw border if needed
-                        if (appointment.DrawBorder)
+                        if (appt.DrawBorder)
                             using (Pen m_Pen = new Pen(SystemColors.WindowFrame, 1))
                                 g.DrawRectangle(m_Pen, rect);
 
@@ -334,14 +337,14 @@ namespace Calendar
 
                     }
 
-                    // draw appointment text
+                    // draw appt text
 
                     rect.X += gripRect.Width;
                     // width of shadow is 6.
                     rect.Width -= 6;
 
                     g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
-                    g.DrawString(appointment.Title, this.BaseFont, SystemBrushes.WindowText, rect, format);
+                    g.DrawString(appt.Title, this.BaseFont, SystemBrushes.WindowText, rect, format);
                     g.TextRenderingHint = TextRenderingHint.SystemDefault;
                 }
             }

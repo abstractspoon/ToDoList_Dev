@@ -912,9 +912,9 @@ namespace Calendar
 					}
 
 					ITool newTool = null;
-					Appointment appointment = GetAppointmentAt(e.X, e.Y);
+					Appointment appt = GetAppointmentAt(e.X, e.Y);
 
-					if (appointment == null)
+					if (appt == null)
 					{
 						if (e.Y < HeaderHeight && e.Y > dayHeadersHeight)
 						{
@@ -931,7 +931,7 @@ namespace Calendar
 					else
 					{
 						newTool = selectionTool;
-						selectedAppointment = appointment;
+						selectedAppointment = appt;
 						selection = SelectionType.Appointment;
 
 						Invalidate();
@@ -954,10 +954,10 @@ namespace Calendar
 				{
 					// If we right-click outside the area of selection,
 					// select whatever is under the cursor
-					Appointment appointment = GetAppointmentAt(e.X, e.Y);
+					Appointment appt = GetAppointmentAt(e.X, e.Y);
 					bool redraw = false;
 
-					if (appointment == null)
+					if (appt == null)
 					{
 						if (selectedAppointment != null)
 							redraw = true;
@@ -977,9 +977,9 @@ namespace Calendar
 							redraw = true;
 						}
 					}
-					else if (appointment != selectedAppointment)
+					else if (appt != selectedAppointment)
 					{
-						selectedAppointment = appointment;
+						selectedAppointment = appt;
 						selection = SelectionType.Appointment;
 
 						RaiseSelectionChanged(new AppointmentEventArgs(selectedAppointment));
@@ -1047,9 +1047,9 @@ namespace Calendar
                 }
             }
 
-            foreach (Appointment appointment in args.Appointments)
+            foreach (Appointment appt in args.Appointments)
             {
-				int key = (IsLongAppt(appointment) ? -1 : appointment.StartDate.DayOfYear);
+				int key = (IsLongAppt(appt) ? -1 : appt.StartDate.DayOfYear);
                 AppointmentList list = (AppointmentList)cachedAppointments[key];
 
                 if (list == null)
@@ -1058,7 +1058,7 @@ namespace Calendar
                     cachedAppointments[key] = list;
                 }
 
-                list.Add(appointment);
+                list.Add(appt);
             }
         }
 
@@ -1112,12 +1112,12 @@ namespace Calendar
 
         private void EnterNewAppointmentMode(char key)
         {
-            Appointment appointment = new Appointment();
-            appointment.StartDate = selectionStart;
-            appointment.EndDate = selectionEnd;
-            appointment.Title = key.ToString();
+            Appointment appt = new Appointment();
+            appt.StartDate = selectionStart;
+            appt.EndDate = selectionEnd;
+            appt.Title = key.ToString();
 
-            selectedAppointment = appointment;
+            selectedAppointment = appt;
             selectedAppointmentIsNew = true;
 
             activeTool = selectionTool;
@@ -1345,36 +1345,40 @@ namespace Calendar
 
         public Appointment GetAppointmentAt(int x, int y)
         {
-			Rectangle unused;
-			return GetAppointmentAt(x, y, out unused);
+			var apptView = GetAppointmentViewAt(x, y);
+
+			return (apptView == null) ? null : apptView.Appointment;
         }
 
 		public Appointment GetAppointmentAt(int x, int y, out Rectangle apptRect)
 		{
+			var apptView = GetAppointmentViewAt(x, y);
+
+			if (apptView == null)
+			{
+				apptRect = Rectangle.Empty;
+				return null;
+			}
+
+			apptRect = apptView.Rectangle;
+			return apptView.Appointment;
+		}
+
+		protected AppointmentView GetAppointmentViewAt(int x, int y)
+		{
 			if (GetFullDayApptsRectangle().Contains(x, y))
 			{
 				foreach (AppointmentView view in longAppointmentViews.Values)
-				{
 					if (view.Rectangle.Contains(x, y))
-					{
-						apptRect = view.Rectangle;
-						return view.Appointment;
-					}
-				}
+						return view;
 			}
 			else
 			{
 				foreach (AppointmentView view in appointmentViews.Values)
-				{
 					if (view.Rectangle.Contains(x, y))
-					{
-						apptRect = view.Rectangle;
-						return view.Appointment;
-					}
-				}
+						return view;
 			}
 
-			apptRect = Rectangle.Empty;
 			return null;
 		}
 
@@ -1630,31 +1634,37 @@ namespace Calendar
 			DrawDayAppointments(e, rect, time);
         }
 
-        internal Dictionary<Appointment, AppointmentView> appointmentViews = new Dictionary<Appointment, AppointmentView>();
-        internal Dictionary<Appointment, AppointmentView> longAppointmentViews = new Dictionary<Appointment, AppointmentView>();
+        private Dictionary<Appointment, AppointmentView> appointmentViews = new Dictionary<Appointment, AppointmentView>();
+        private Dictionary<Appointment, AppointmentView> longAppointmentViews = new Dictionary<Appointment, AppointmentView>();
 
-        public bool GetAppointmentRect(Appointment appointment, ref Rectangle rect)
+		virtual protected AppointmentView NewAppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect)
+		{
+			return new AppointmentView(appt, rect, gripRect);
+		}
+
+		protected AppointmentView GetAppointmentView(Appointment appt)
         {
-            if (appointment == null)
-                return false;
-
-            AppointmentView view;
+            AppointmentView view = null;
 
 			// Short appointments
-            if (appointmentViews.TryGetValue(appointment, out view))
-            {
-                rect = view.Rectangle;
-                return true;
-            }
-
-			// Long appointments
-			if (longAppointmentViews.TryGetValue(appointment, out view))
+			if (!appointmentViews.TryGetValue(appt, out view))
 			{
-				rect = view.Rectangle;
-				return true;
+				// Long appointments
+				longAppointmentViews.TryGetValue(appt, out view);
 			}
 
-            return false;
+			return view;
+        }
+
+		public bool GetAppointmentRect(Appointment appt, ref Rectangle rect)
+        {
+            AppointmentView view = GetAppointmentView(appt);
+
+			if (view == null)
+				return false;
+
+			rect = view.Rectangle;
+			return true;
         }
 
         private void DrawDayGroupAppointments(PaintEventArgs e, Rectangle rect, DateTime time, string group)
@@ -1712,6 +1722,9 @@ namespace Calendar
 
                 foreach (var appt in bucket)
                 {
+                    DateTime apptStart, apptEnd;
+                    GetAppointmentDrawTimes(appt, out apptStart, out apptEnd);
+
                     Rectangle apptRect = rect;
                     apptRect.X += (appt.Layer * layerWidth);
                     apptRect.Width = (layerWidth - ((numBucketLayers > 1) ? appointmentSpacing : 0));
@@ -1720,74 +1733,73 @@ namespace Calendar
                     if (appt.Layer == (numBucketLayers - 1))
                         apptRect.Width += leftOverWidth;
 
-                    DateTime apptStart, apptEnd;
-                    GetAppointmentDrawTimes(appt, out apptStart, out apptEnd);
-
                     apptRect = GetHourRangeRectangle(apptStart, apptEnd, apptRect);
-                    appointmentViews[appt] = new AppointmentView(appt, apptRect);
-
-                    if (this.DrawAllAppBorder)
-                        appt.DrawBorder = true;
 
                     Rectangle gripRect = GetHourRangeRectangle(appt.StartDate, appt.EndDate, apptRect);
                     gripRect.Width = appointmentGripWidth;
 
+					var apptView = NewAppointmentView(appt, apptRect, gripRect);
+                    appointmentViews[appt] = apptView;
+
+                    if (this.DrawAllAppBorder)
+                        appt.DrawBorder = true;
+
                     bool isSelected = ((activeTool != drawTool) && (appt == selectedAppointment));
-                    DrawAppointment(e.Graphics, apptRect, appt, isSelected, gripRect);
+                    DrawAppointment(e.Graphics, apptView, isSelected);
                 }
             }
         }
 
-        private void GetAppointmentDrawTimes(Appointment appointment, out DateTime apptStart, out DateTime apptEnd)
+        private void GetAppointmentDrawTimes(Appointment appt, out DateTime apptStart, out DateTime apptEnd)
         {
-            apptStart = appointment.StartDate;
-            apptEnd = appointment.EndDate;
+            apptStart = appt.StartDate;
+            apptEnd = appt.EndDate;
 
             // Adjust depending on the height display mode 
             switch (this.AppHeightMode)
             {
                 case AppHeightDrawMode.FullHalfHourBlocksShort:
-                    if (appointment.EndDate.Subtract(appointment.StartDate).TotalMinutes < (60 / slotsPerHour))
+                    if (appt.EndDate.Subtract(appt.StartDate).TotalMinutes < (60 / slotsPerHour))
                     {
                         // Round the start/end time to the last/next halfhour
-                        apptStart = appointment.StartDate.AddMinutes(-appointment.StartDate.Minute);
-                        apptEnd = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
+                        apptStart = appt.StartDate.AddMinutes(-appt.StartDate.Minute);
+                        apptEnd = appt.EndDate.AddMinutes((60 / slotsPerHour) - appt.EndDate.Minute);
 
                         // Make sure we've rounded it to the correct halfhour :)
-                        if (appointment.StartDate.Minute >= (60 / slotsPerHour))
+                        if (appt.StartDate.Minute >= (60 / slotsPerHour))
                             apptStart = apptStart.AddMinutes((60 / slotsPerHour));
 
-                        if (appointment.EndDate.Minute > (60 / slotsPerHour))
+                        if (appt.EndDate.Minute > (60 / slotsPerHour))
                             apptEnd = apptEnd.AddMinutes((60 / slotsPerHour));
                     }
                     break;
 
                 case AppHeightDrawMode.FullHalfHourBlocksAll:
                     {
-                        apptStart = appointment.StartDate.AddMinutes(-appointment.StartDate.Minute);
+                        apptStart = appt.StartDate.AddMinutes(-appt.StartDate.Minute);
 
-                        if (appointment.EndDate.Minute != 0 && appointment.EndDate.Minute != (60 / slotsPerHour))
-                            apptEnd = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
+                        if (appt.EndDate.Minute != 0 && appt.EndDate.Minute != (60 / slotsPerHour))
+                            apptEnd = appt.EndDate.AddMinutes((60 / slotsPerHour) - appt.EndDate.Minute);
                         else
-                            apptEnd = appointment.EndDate;
+                            apptEnd = appt.EndDate;
 
-                        if (appointment.StartDate.Minute >= (60 / slotsPerHour))
+                        if (appt.StartDate.Minute >= (60 / slotsPerHour))
                             apptStart = apptStart.AddMinutes((60 / slotsPerHour));
 
-                        if (appointment.EndDate.Minute > (60 / slotsPerHour))
+                        if (appt.EndDate.Minute > (60 / slotsPerHour))
                             apptEnd = apptEnd.AddMinutes((60 / slotsPerHour));
                     }
                     break;
 
                 // Based on previous code
                 case AppHeightDrawMode.EndHalfHourBlocksShort:
-                    if (appointment.EndDate.Subtract(appointment.StartDate).TotalMinutes < (60 / slotsPerHour))
+                    if (appt.EndDate.Subtract(appt.StartDate).TotalMinutes < (60 / slotsPerHour))
                     {
                         // Round the end time to the next halfhour
-                        apptEnd = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
+                        apptEnd = appt.EndDate.AddMinutes((60 / slotsPerHour) - appt.EndDate.Minute);
 
                         // Make sure we've rounded it to the correct halfhour :)
-                        if (appointment.EndDate.Minute > (60 / slotsPerHour))
+                        if (appt.EndDate.Minute > (60 / slotsPerHour))
                             apptEnd = apptEnd.AddMinutes((60 / slotsPerHour));
                     }
                     break;
@@ -1795,13 +1807,13 @@ namespace Calendar
                 case AppHeightDrawMode.EndHalfHourBlocksAll:
                     {
                         // Round the end time to the next halfhour
-                        if (appointment.EndDate.Minute != 0 && appointment.EndDate.Minute != (60 / slotsPerHour))
-                            apptEnd = appointment.EndDate.AddMinutes((60 / slotsPerHour) - appointment.EndDate.Minute);
+                        if (appt.EndDate.Minute != 0 && appt.EndDate.Minute != (60 / slotsPerHour))
+                            apptEnd = appt.EndDate.AddMinutes((60 / slotsPerHour) - appt.EndDate.Minute);
                         else
-                            apptEnd = appointment.EndDate;
+                            apptEnd = appt.EndDate;
 
                         // Make sure we've rounded it to the correct halfhour :)
-                        if (appointment.EndDate.Minute > (60 / slotsPerHour))
+                        if (appt.EndDate.Minute > (60 / slotsPerHour))
                             apptEnd = apptEnd.AddMinutes((60 / slotsPerHour));
                     }
                     break;
@@ -1851,7 +1863,7 @@ namespace Calendar
                 {
 					// Look through the previously processed 
 					// appointments, one layer at a time, for 
-					// any which intersect this appointment
+					// any which intersect this appt
 					foreach (int lay in layers)
                     {
 						bool intersect = false;
@@ -1861,7 +1873,7 @@ namespace Calendar
                             if ((processedAppt.Layer == lay) && appt.IntersectsWith(processedAppt))
                             {
 								// If we find an intersection we update the current
-								// appointment's layer and move on to the next layer
+								// appt's layer and move on to the next layer
 								// looking for a further intersection
 								appt.Layer = (lay + 1);
 								intersect = true;
@@ -1909,35 +1921,36 @@ namespace Calendar
 
             var endOfLastDay = EndDate.AddSeconds(-1);
 
-            foreach (Appointment appointment in appointments)
+            foreach (Appointment appt in appointments)
             {
-                Rectangle appointmenRect = rect;
+                Rectangle apptRect = rect;
 
-                double startDay = (appointment.StartDate - startDate).TotalDays;
+                double startDay = (appt.StartDate - startDate).TotalDays;
                 int startPos = (rect.X + (int)(startDay * dayWidth));
 
                 if (startPos <= rect.Left)
                     startPos = (rect.Left + 2);
 
-                double endDay = (appointment.EndDate - startDate).TotalDays;
+                double endDay = (appt.EndDate - startDate).TotalDays;
                 int endPos = (rect.X + (int)(endDay * dayWidth));
 
-                if ((endPos >= rect.Right) || (appointment.EndDate >= endOfLastDay))
+                if ((endPos >= rect.Right) || (appt.EndDate >= endOfLastDay))
                     endPos = (rect.Right - 1);
 
-                appointmenRect.X = startPos;
-                appointmenRect.Width = (endPos - startPos);
+                apptRect.X = startPos;
+                apptRect.Width = (endPos - startPos);
 
-                appointmenRect.Y = y + (appointment.Layer * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing;
-                appointmenRect.Height = longAppointmentHeight;
+                apptRect.Y = y + (appt.Layer * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing;
+                apptRect.Height = longAppointmentHeight;
 
-                longAppointmentViews[appointment] = new AppointmentView(appointment, appointmenRect);
-
-                Rectangle gripRect = appointmenRect;
+                Rectangle gripRect = apptRect;
                 gripRect.Width = appointmentGripWidth;
 
-                bool isSelected = ((activeTool != drawTool) && (appointment == selectedAppointment));
-                DrawAppointment(g, appointmenRect, appointment, isSelected, gripRect);
+				var apptView = NewAppointmentView(appt, apptRect, gripRect);
+				longAppointmentViews[appt] = apptView;
+
+                bool isSelected = ((activeTool != drawTool) && (appt == selectedAppointment));
+                DrawAppointment(g, apptView, isSelected);
             }
 
             // Draw a vertical line to close off the long appointments on the left
@@ -1947,10 +1960,9 @@ namespace Calendar
             g.SetClip(rect);
         }
 
-        protected virtual void DrawAppointment(Graphics g, Rectangle rect, Appointment appointment, bool isSelected, Rectangle gripRect)
+        protected virtual void DrawAppointment(Graphics g, AppointmentView apptView, bool isSelected)
 		{
-
-			renderer.DrawAppointment(g, rect, appointment, IsLongAppt(appointment), isSelected, gripRect);
+			renderer.DrawAppointment(g, apptView, IsLongAppt(apptView.Appointment), isSelected);
 		}
 
 		#endregion
@@ -1962,31 +1974,6 @@ namespace Calendar
 			hscroll.Width = (HourLabelWidth + hourLabelIndent);
 			hscroll.Height = dayHeadersHeight;
 		}
-
-		internal class AppointmentView
-        {
-            public AppointmentView(Appointment appt, Rectangle rect)
-            {
-                Appointment = appt;
-                Rectangle = rect;
-            }
-
-            public Appointment Appointment;
-            public Rectangle Rectangle;
-        }
-
-        class AppointmentList : List<Appointment>
-        {
-            public AppointmentList() : base() { }
-            public AppointmentList(IEnumerable<Appointment> appts) : base(appts) { }
-
-            public void SortByStartDate()
-            {
-                // If two tasks sort the same, attempt to keep things stable 
-                // by retaining their existing layer order
-                Sort((x, y) => ((x.StartDate < y.StartDate) ? -1 : ((x.StartDate > y.StartDate) ? 1 : (x.Layer - y.Layer))));
-            }
-        }
 
         #endregion
 
