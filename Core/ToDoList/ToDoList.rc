@@ -3599,8 +3599,8 @@ BEGIN
         MENUITEM "User Defined Tool 49",        ID_TOOLS_USERTOOL49, GRAYED
         MENUITEM "User Defined Tool 50",        ID_TOOLS_USERTOOL50, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "Enable Lo&gging",             ID_TOOLS_TOGGLE_LOGGING
-        MENUITEM "&View Log File",              ID_TOOLS_VIEWLOG
+        MENUITEM "Enable Debug Lo&gging",       ID_TOOLS_TOGGLE_LOGGING
+        MENUITEM "&View Debug Log File",        ID_TOOLS_VIEWLOG
         MENUITEM SEPARATOR
         MENUITEM "Anon&ymise Tasklist",         ID_TOOLS_ANONYMIZE_TASKLIST
     END
