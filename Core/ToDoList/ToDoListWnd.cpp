@@ -12046,7 +12046,7 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 {
 	LPCTSTR szLink = (LPCTSTR)lParam;
 
-	static CString sTooltip;
+	static CEnString sTooltip;
 	sTooltip.Empty();
 
 	if (CMSOutlookHelper::IsOutlookUrl(szLink))
@@ -12072,14 +12072,29 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 		{
 			if (sPath.IsEmpty())
 			{
-				sTooltip = GetToDoCtrl().GetTaskTitle(dwTaskID);
+				if (GetToDoCtrl().HasTask(dwTaskID))
+					sTooltip = GetToDoCtrl().GetTaskTitle(dwTaskID);
+				else 
+					sTooltip.LoadString(IDS_GOTOTASK_NOSUCHTASK);
 			}
 			else
 			{
 				int nTDC = m_mgrToDoCtrls.FindToDoCtrl(sPath);
 
-				if ((nTDC != -1) && m_mgrToDoCtrls.IsLoaded(nTDC))
-					sTooltip = GetToDoCtrl(nTDC).GetTaskTitle(dwTaskID);
+				if (nTDC != -1)
+				{
+					if (m_mgrToDoCtrls.IsLoaded(nTDC))
+					{
+						if (GetToDoCtrl(nTDC).HasTask(dwTaskID))
+							sTooltip = GetToDoCtrl(nTDC).GetTaskTitle(dwTaskID);
+						else
+							sTooltip.LoadString(IDS_GOTOTASK_NOSUCHTASK);
+					}
+					else
+					{
+						sTooltip.Format(IDS_TABTIP_NOTLOADED, sPath);
+					}
+				}
 			}
 		}
 	}
