@@ -13390,7 +13390,7 @@ void CToDoListWnd::OnViewIncrementTaskViewFontSize(BOOL bLarger)
 {
 	if (m_pPrefs->IncrementTreeFontSize(bLarger, m_fontMain))
 	{
-		RebuildTreeAndCommentsFonts();
+		UpdateTreeAndCommentsFonts();
 	}
 }
 
@@ -13403,15 +13403,12 @@ void CToDoListWnd::OnViewRestoreDefaultTaskViewFontSize()
 {
 	if (m_pPrefs->RestoreTreeFontSize(m_fontMain))
 	{
-		RebuildTreeAndCommentsFonts();
+		UpdateTreeAndCommentsFonts();
 	}
 }
 
-void CToDoListWnd::RebuildTreeAndCommentsFonts()
+void CToDoListWnd::UpdateTreeAndCommentsFonts()
 {
-	GraphicsMisc::VerifyDeleteObject(m_fontTree);
-	GraphicsMisc::VerifyDeleteObject(m_fontComments);
-
 	CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(GetToDoCtrl(), Prefs(), m_fontMain, m_fontTree, m_fontComments);
 }
 

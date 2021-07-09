@@ -773,7 +773,7 @@ protected:
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
 	void SaveCurrentFocus(HWND hwndFocus = NULL);
 	void PostAppRestoreFocus(HWND hwndFocus = NULL);
-	void RebuildTreeAndCommentsFonts();
+	void UpdateTreeAndCommentsFonts();
 
 	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);

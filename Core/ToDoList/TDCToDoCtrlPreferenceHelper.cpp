@@ -31,14 +31,26 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrl(CFilteredToDoCtrl& tdc, const 
 	CString sFaceName;
 	int nFontSize;
 
-	if (!fontTree.GetSafeHandle() && prefs.GetTreeFont(sFaceName, nFontSize))
+	if (!prefs.GetTreeFont(sFaceName, nFontSize))
+	{
+		fontTree.DeleteObject();
+	}
+	else if (!GraphicsMisc::SameFont(fontTree, sFaceName, nFontSize))
+	{
 		VERIFY(GraphicsMisc::CreateFont(fontTree, sFaceName, nFontSize));
+	}
 
 	tdc.SetTreeFont(fontTree.GetSafeHandle() ? fontTree : fontMain);
 
 	// Comments font
-	if (!fontComments.GetSafeHandle() && prefs.GetCommentsFont(sFaceName, nFontSize))
+	if (!prefs.GetCommentsFont(sFaceName, nFontSize))
+	{
+		fontComments.DeleteObject();
+	}
+	else if (!GraphicsMisc::SameFont(fontComments, sFaceName, nFontSize))
+	{
 		VERIFY(GraphicsMisc::CreateFont(fontComments, sFaceName, nFontSize));
+	}
 
 	if (fontComments.GetSafeHandle())
 	{
