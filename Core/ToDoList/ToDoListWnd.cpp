@@ -214,7 +214,7 @@ CToDoListWnd::CToDoListWnd()
 	m_bReshowTimeTrackerOnEnable(FALSE),
 	m_bPromptLanguageChangeRestartOnActivate(FALSE),
 	m_bPromptRegionalSettingsRestartOnActivate(-1),
-	m_bIgnoreNextResize(FALSE),
+	m_bIgnoreResize(FALSE),
 	m_bAllowForcedCheckOut(FALSE),
 	m_nContextColumnID(TDCC_NONE),
 	m_nContextMenuID(0),
@@ -286,6 +286,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SETPERCENTTOTODAY, OnUpdateEditSetPercentToToday)
 	ON_COMMAND(ID_TOOLS_ANONYMIZE_TASKLIST, OnToolsAnonymizeTasklist)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ANONYMIZE_TASKLIST, OnUpdateToolsAnonymizeTasklist)
+	ON_COMMAND(ID_VIEW_HIDEALLBARS, OnViewHideAllBars)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_HIDEALLBARS, OnUpdateViewHideAllBars)
+	ON_COMMAND(ID_VIEW_SHOWALLBARS, OnViewShowAllBars)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOWALLBARS, OnUpdateViewShowAllBars)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_VIEW_SHOWTIMETRACKER, OnViewShowTimeTracker)
 	ON_WM_NCLBUTTONDBLCLK()
@@ -2766,7 +2770,7 @@ void CToDoListWnd::RestoreVisibility()
 	if (m_bVisible)
 	{
 		{
-			CAutoFlag af(m_bIgnoreNextResize, bMaximized);
+			CAutoFlag af(m_bIgnoreResize, bMaximized);
 			RestorePosition();
 		}
 		
@@ -6068,7 +6072,7 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 {
 	CFrameWnd::OnSize(nType, cx, cy);
 
-	if (m_bIgnoreNextResize)
+	if (m_bIgnoreResize)
 	{
 		ASSERT(nType == SIZE_RESTORED);
 		//TRACE(_T("CToDoListWnd::OnSize(Ignoring Resize)\n"));
@@ -6194,6 +6198,9 @@ BOOL CToDoListWnd::CalcToDoCtrlRect(CRect& rect, int cx, int cy, BOOL bMaximized
 
 void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 {
+	if (m_bIgnoreResize)
+		return;
+
 	// Don't resize if hidden in any way
 	if ((m_bVisible <= 0) || IsIconic())
 		return;
@@ -13666,4 +13673,62 @@ void CToDoListWnd::OnToolsAnonymizeTasklist()
 void CToDoListWnd::OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(GetToDoCtrl().HasFilePath());
+}
+
+void CToDoListWnd::OnViewHideAllBars() 
+{
+	OnViewShowHideAllBars(FALSE);
+}
+
+void CToDoListWnd::OnUpdateViewHideAllBars(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(m_bShowFilterBar ||
+				   m_bShowStatusBar || 
+				   m_bShowingMainToolbar || 
+				   m_bShowingCustomToolbar || 
+				   m_bShowTasklistBar || 
+				   m_bShowTreeListBar);
+}
+
+void CToDoListWnd::OnViewShowAllBars() 
+{
+	OnViewShowHideAllBars(TRUE);
+}
+
+void CToDoListWnd::OnUpdateViewShowAllBars(CCmdUI* pCmdUI) 
+{
+	pCmdUI->Enable(!m_bShowFilterBar ||
+				   !m_bShowStatusBar ||
+				   !m_bShowingMainToolbar ||
+				   !m_bShowingCustomToolbar ||
+				   !m_bShowTasklistBar ||
+				   !m_bShowTreeListBar);
+}
+
+void CToDoListWnd::OnViewShowHideAllBars(BOOL bShow)
+{
+	{
+		CLockUpdates lu(*this);
+		CAutoFlag af(m_bIgnoreResize, TRUE);
+
+		if ((!m_bShowFilterBar && bShow) || (m_bShowFilterBar && !bShow))
+			OnViewShowfilterbar();
+
+		if ((!m_bShowStatusBar && bShow) || (m_bShowStatusBar && !bShow))
+			OnViewStatusBar();
+
+		if ((!m_bShowingMainToolbar && bShow) || (m_bShowingMainToolbar && !bShow))
+			OnViewMainToolbar();
+
+		if ((!m_bShowingCustomToolbar && bShow) || (m_bShowingCustomToolbar && !bShow))
+			OnViewCustomToolbar();
+
+		if ((!m_bShowTasklistBar && bShow) || (m_bShowTasklistBar && !bShow))
+			OnViewShowTasklistTabbar();
+
+		if ((!m_bShowTreeListBar && bShow) || (m_bShowTreeListBar && !bShow))
+			OnViewShowTreeListTabbar();
+	}
+
+	Resize();
 }

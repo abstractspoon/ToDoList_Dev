@@ -166,7 +166,7 @@ protected:
 	BOOL m_bReshowTimeTrackerOnEnable;
 	BOOL m_bSettingAttribDefs;
 	BOOL m_bAllowForcedCheckOut;
-	BOOL m_bIgnoreNextResize;
+	BOOL m_bIgnoreResize;
 	BOOL m_bFirstEraseBkgnd;
 	
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
@@ -203,6 +203,10 @@ protected:
 	afx_msg void OnUpdateEditSetPercentToToday(CCmdUI* pCmdUI);
 	afx_msg void OnToolsAnonymizeTasklist();
 	afx_msg void OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI);
+	afx_msg void OnViewHideAllBars();
+	afx_msg void OnUpdateViewHideAllBars(CCmdUI* pCmdUI);
+	afx_msg void OnViewShowAllBars();
+	afx_msg void OnUpdateViewShowAllBars(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();
@@ -602,6 +606,10 @@ protected:
 	void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bLarger);
 	void OnTasklistCopyColumnValues(BOOL bSelectedTasks);
 	void OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks);
+
+	void OnViewShowHideAllBars(BOOL bShow);
+
+	// -------------------------------------
 
 	void KillTimers();
 	void RestoreTimers();

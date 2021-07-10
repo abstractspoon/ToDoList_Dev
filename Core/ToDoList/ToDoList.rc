@@ -3417,6 +3417,9 @@ BEGIN
             MENUITEM "&Main Toolbar",               ID_VIEW_MAINTOOLBAR
             MENUITEM "&Custom Toolbar",             ID_VIEW_CUSTOMTOOLBAR
             MENUITEM "Stat&us Bar",                 ID_VIEW_STATUS_BAR
+            MENUITEM SEPARATOR
+            MENUITEM "&Show All",                   ID_VIEW_SHOWALLBARS
+            MENUITEM "&Hide All",                   ID_VIEW_HIDEALLBARS
         END
     END
     POPUP "&Move"
