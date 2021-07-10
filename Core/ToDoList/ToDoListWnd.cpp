@@ -7600,7 +7600,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 			bAddToCustomToolbar = m_bShowingCustomToolbar;
 
 			// Custom toolbar previously had the UDTs so we must remove them
-			bRemoveFromCustomToolbar = TRUE;
+			bRemoveFromCustomToolbar = m_bShowingCustomToolbar;
 		}
 		break;
 	}
