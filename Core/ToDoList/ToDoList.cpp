@@ -2089,7 +2089,7 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 	{
 		CScopedLogTimer log(_T("FixupExampleTasklistsTaskDates"));
 
-		CString sFolder = FileMisc::GetAppResourceFolder(_T("Resources\\Examples\\"));
+		CString sFolder = FileMisc::GetAppResourceFolder(_T("Resources\\Examples"));
 		FileMisc::TerminatePath(sFolder);
 
 		LPCTSTR aFiles[] = 
@@ -2098,24 +2098,22 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 			_T("Gantt Chart.tdl"),
 			_T("Workload.tdl"),
 		};
+
 		int nNumExamples = (sizeof(aFiles) / sizeof(aFiles[0]));
+		COleDateTime dtNow = COleDateTime::GetCurrentTime(), dtEarliest;
 
 		for (int nFile = 0; nFile < nNumExamples; nFile++)
 		{
 			CTaskFile tasks;
 			CString sExample = (sFolder + aFiles[nFile]);
 
-			if (tasks.Load(sExample))
+			if (tasks.Load(sExample) && 
+				tasks.GetEarliestTaskStartDate(dtEarliest))
 			{
-				COleDateTime dtNow = COleDateTime::GetCurrentTime(), dtEarliest;
-
-				if (tasks.GetEarliestTaskStartDate(dtEarliest))
-				{
-					int nOffset = (int)(dtNow.m_dt - dtEarliest.m_dt); // whole days
+				int nOffset = (int)(dtNow.m_dt - dtEarliest.m_dt); // whole days
 				
-					if (tasks.OffsetDates(nOffset))
-						tasks.Save(sExample, SFEF_UTF16);
-				}
+				if (tasks.OffsetDates(nOffset))
+					tasks.Save(sExample, SFEF_UTF16);
 			}
 		}
 	}
