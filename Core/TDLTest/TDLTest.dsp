@@ -108,6 +108,10 @@ SOURCE=.\ImportExportMgrTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MiscTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\PreferencesTest.cpp
 # End Source File
 # Begin Source File
@@ -175,6 +179,10 @@ SOURCE=.\FileMiscTest.h
 # Begin Source File
 
 SOURCE=.\ImportExportMgrTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MiscTest.h
 # End Source File
 # Begin Source File
 

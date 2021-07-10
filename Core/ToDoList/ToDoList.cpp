@@ -2089,7 +2089,8 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 	{
 		CScopedLogTimer log(_T("FixupExampleTasklistsTaskDates"));
 
-		CString sFolder = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples\\")));
+		CString sFolder = FileMisc::GetAppResourceFolder(_T("Resources\\Examples\\"));
+		FileMisc::TerminatePath(sFolder);
 
 		LPCTSTR aFiles[] = 
 		{

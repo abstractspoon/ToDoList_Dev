@@ -842,7 +842,7 @@ BOOL Misc::HasEmpty(const CStringArray& aItems)
 	return FALSE;
 }
 
-const CString& Misc::Last(const CStringArray& aText)
+CString Misc::Last(const CStringArray& aText)
 {
 	int nSize = aText.GetSize();
 
