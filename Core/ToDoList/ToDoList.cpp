@@ -1471,9 +1471,6 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	// pass our app id to app 
 	params.SetOption(SWITCH_APPID, TDLAPPID);
 
-	// to handle UAC on Vista and above we use the "RunAs" verb
-	LPCTSTR szVerb = ((COSVersion() >= OSV_VISTA) ? _T("runas") : NULL);
-
 	// Pass the centroid of the main wnd so that the
 	// updater appears in that same location
 	if (m_pMainWnd && (GetSystemMetrics(SM_CMONITORS) > 1))
@@ -1532,6 +1529,9 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	// And whether we want to be restarted with admin rights
 	if (FileMisc::IsAdminProcess())
 		params.SetOption(SWITCH_RESTARTELEVATED);
+
+	// Use the "RunAs" verb if the install folder is readonly
+	LPCTSTR szVerb = (FileMisc::IsFolderWritable(sAppFolder) ? NULL : _T("runas"));
 
 	return RunHelperApp(sAppPath, params, nIDGenErrorMsg, nIDSmartScreenErrorMsg, szVerb);
 }
