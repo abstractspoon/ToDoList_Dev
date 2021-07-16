@@ -93,14 +93,8 @@ namespace HTMLReportExporter
 			WriteMetadata(html);
 
 			html.RenderBeginTag(HtmlTextWriterTag.Title);
-#if DEBUG
-            if (m_Template.FilePath.Contains("index.rbt"))
-                html.Write("ToDoList - Free Open-Source Task Management Software with Gantt Chart, Mindmap, Kanban Board and Calendar Views");
-            else
-                html.Write(m_Tasklist.GetReportTitle());
-#else
 			html.Write(m_Tasklist.GetReportTitle());
-#endif
+
 			html.RenderEndTag(); // Title
 			html.WriteLine();
 
@@ -133,10 +127,7 @@ namespace HTMLReportExporter
 			html.WriteLine(".top-level-task { page-break-after: always; border-bottom: 2px dashed; width: 100%; margin-bottom:20px }");
 			html.WriteLine(".page {	page-break-after: always; }");
 			html.WriteLine("p {	margin: 0; }");
-#if DEBUG
-			if (m_Template.FilePath.Contains("index.rbt"))
-				html.WriteLine("a {	color: white; }");
-#endif
+
 			Header.WriteStyles(html);
 			Footer.WriteStyles(html);
 			Title.WriteStyles(html);
@@ -171,17 +162,6 @@ namespace HTMLReportExporter
 			html.RenderBeginTag(HtmlTextWriterTag.Meta);
 			html.RenderEndTag(); // Meta
 			html.WriteLine();
-
-#if DEBUG
-            if (m_Template.FilePath.Contains("index.rbt"))
-            {
-                html.AddAttribute("name", "description");
-                html.AddAttribute("content", "ToDoList - Free Open-Source Task Management Software with Gantt Chart, Mindmap, Kanban Board and Calendar Views");
-			    html.RenderBeginTag(HtmlTextWriterTag.Meta);
-			    html.RenderEndTag(); // Meta
-			    html.WriteLine();
-            }
-#endif
 		}
 
 		private void WriteBody(HtmlTextWriter html)
