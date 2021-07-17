@@ -76,7 +76,8 @@ public:
 
 protected:
 	CTaskCalItemMap m_mapData;
-	CTaskCalFutureItemMap m_mapFutureOccurrences;
+	CTaskCalExtensionItemMap m_mapExtensionItems;
+	CStringSet m_mapCustomDateAttrib;
 	CDWordSet m_mapRecurringTaskIDs;
 	TASKCALITEM m_tciPreDrag;
 
@@ -166,7 +167,7 @@ protected:
 	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const;
 
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
-	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID, BOOL bIncFutureItems = FALSE) const;
+	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID, BOOL bIncExtItems = FALSE) const;
 	BOOL IsTaskLocked(DWORD dwTaskID) const;
 	BOOL IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL TaskHasDependencies(DWORD dwTaskID) const;
@@ -216,11 +217,13 @@ protected:
 	void DeleteData();
 	void RecalcDataRange();
 	void RecalcTaskDates();
+	BOOL UpdateCustomDateAttributes(const ITASKLISTBASE* pTasks);
 
 	int RebuildCellTasks(BOOL bIncFutureItems = TRUE);
 	int RebuildCellTasks(CCalendarCell* pCell);
 	void RebuildCellTaskDrawInfo();
-	void RebuildFutureOccurrences();
+	void RebuildFutureOccurrences(DWORD& dwNextExtID);
+	void RebuildCustomDates(DWORD& dwNextExtID);
 	void AddTasksToCell(const CTaskCalItemMap& mapTasks, const COleDateTime& dtCell, CTaskCalItemArray* pTasks);
 
 	// helpers

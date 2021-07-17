@@ -24,13 +24,13 @@ struct TASKCALITEM
 public:
 	TASKCALITEM();
 	TASKCALITEM(const TASKCALITEM& tci);
-	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates);
+	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates);
 	virtual ~TASKCALITEM() {}
 
 	TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci);
 	BOOL TASKCALITEM::operator==(const TASKCALITEM& tci);
 
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates);
 	void RecalcDates(DWORD dwCalcDates);
 	inline DWORD GetTaskID() const { return dwTaskID; }
 
@@ -66,6 +66,8 @@ public:
 	BOOL bGoodAsDone, bTopLevel;
 	BOOL bLocked, bHasDepends, bRecurring;
 
+	CMap<CString, LPCTSTR, COleDateTime, COleDateTime&> mapCustomDates;
+
 protected:
 	COleDateTime dtCreation, dtStart, dtDue, dtDone;
 	COleDateTime dtStartCalc, dtEndCalc;
@@ -76,7 +78,7 @@ protected:
 	BOOL bTreatOverdueAsDueToday;
 
 protected:
-	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates);
+	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates);
 	void ReformatName();
 	void ClearCalculatedDates();
 
@@ -86,15 +88,30 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct TASKCALFUTUREITEM : public TASKCALITEM
+struct TASKCALEXTENSIONITEM : public TASKCALITEM
 {
-	TASKCALFUTUREITEM(const TASKCALITEM& tciOrg, DWORD dwFutureID, const COleDateTimeRange& dtRange);
+	TASKCALEXTENSIONITEM(const TASKCALITEM& tciOrg, DWORD dwExtID);
 
 	COLORREF GetFillColor(BOOL bTextIsBack) const;
 	COLORREF GetBorderColor(BOOL bTextIsBack) const;
 	COLORREF GetTextColor(BOOL bSelected, BOOL bTextIsBack) const;
 
 	const DWORD dwRealTaskID;
+};
+/////////////////////////////////////////////////////////////////////////////
+
+struct TASKCALFUTUREOCURRENCE : public TASKCALEXTENSIONITEM
+{
+	TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
+struct TASKCALCUSTOMDATE : public TASKCALEXTENSIONITEM
+{
+	TASKCALCUSTOMDATE(const TASKCALITEM& tciOrg, DWORD dwExtID, const CString& sCustAttribID, const COleDateTime& date);
+
+	const CString sCustomAttribID;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -127,7 +144,7 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTaskCalFutureItemMap : public CTaskCalItemMap
+class CTaskCalExtensionItemMap : public CTaskCalItemMap
 {
 public:
 	DWORD GetRealTaskID(DWORD dwTaskID) const;

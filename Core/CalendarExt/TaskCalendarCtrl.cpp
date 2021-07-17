@@ -249,6 +249,7 @@ BOOL CTaskCalendarCtrl::WantEditUpdate(TDC_ATTRIBUTE nEditAttrib)
 	case TDCA_DEPENDENCY:
 	case TDCA_ICON:
 	case TDCA_RECURRENCE:
+	case TDCA_CUSTOMATTRIB:
 		return true;
 	}
 	
@@ -289,6 +290,7 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	{
 	case IUI_ALL:
 		DeleteData();
+		UpdateCustomDateAttributes(pTasks);
 		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
 		bChange = TRUE;
 		break;
@@ -320,6 +322,26 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	}
 
 	return bChange;
+}
+
+BOOL CTaskCalendarCtrl::UpdateCustomDateAttributes(const ITASKLISTBASE* pTasks)
+{
+	CStringSet mapPrevAttrib = m_mapCustomDateAttrib;
+	m_mapCustomDateAttrib.RemoveAll();
+
+	int nAttrib = pTasks->GetCustomAttributeCount();
+
+	while (nAttrib--)
+	{
+		if (pTasks->IsCustomAttributeEnabled(nAttrib) && 
+			((pTasks->GetCustomAttributeType(nAttrib) & TDCCA_DATAMASK) == TDCCA_DATE))
+		{
+			CString sAttribID = pTasks->GetCustomAttributeID(nAttrib);
+			m_mapCustomDateAttrib.Add(sAttribID);
+		}
+	}
+
+	return !m_mapCustomDateAttrib.MatchAll(mapPrevAttrib);
 }
 
 void CTaskCalendarCtrl::FixupSelection(BOOL bScrollToTask)
@@ -407,7 +429,7 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		{
 			TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
-			bChange = pTCI->UpdateTask(pTasks, hTask, m_dwOptions);
+			bChange = pTCI->UpdateTask(pTasks, hTask, m_mapCustomDateAttrib, m_dwOptions);
 
 			// Update our list of recurring tasks
 			if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
@@ -482,7 +504,7 @@ void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 	if (!HasTask(dwTaskID, FALSE)) // don't exclude hidden tasks
 	{
 		// Only interested in new tasks
-		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, m_dwOptions);
+		TASKCALITEM* pTCI = new TASKCALITEM(pTasks, hTask, m_mapCustomDateAttrib, m_dwOptions);
 		m_mapData[dwTaskID] = pTCI;
 
 		// Keep track of recurring tasks
@@ -1234,14 +1256,20 @@ CTaskCalItemArray* CTaskCalendarCtrl::GetCellTasks(int nRow, int nCol)
 	return GetCellTasks(GetCell(nRow, nCol));
 }
 
-int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncFutureItems)
+int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncExtItems)
 {
 	CScopedTraceTimer timing(_T("CTaskCalendarCtrl::RebuildCellTasks()"));
 
-	// Rebuild future occurrences first because these are
+	m_mapExtensionItems.RemoveAll();
+	DWORD dwNextExtID = (((m_dwMaximumTaskID / 1000) + 1) * 1000);
+
+	// Rebuild extension items first because they are
 	// needed for building the cell tasks
-	if (bIncFutureItems)
-		RebuildFutureOccurrences();
+	if (bIncExtItems)
+	{
+		RebuildFutureOccurrences(dwNextExtID);
+		RebuildCustomDates(dwNextExtID);
+	}
 	
 	// Now rebuild the cell tasks
 	int nTotal = 0;
@@ -1263,10 +1291,8 @@ int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncFutureItems)
 	return nTotal;
 }
 
-void CTaskCalendarCtrl::RebuildFutureOccurrences()
+void CTaskCalendarCtrl::RebuildFutureOccurrences(DWORD& dwNextExtID)
 {
-	m_mapFutureOccurrences.RemoveAll();
-
 	if (HasOption(TCCO_SHOWFUTUREITEMS) && m_mapRecurringTaskIDs.GetCount())
 	{
 		// Go through all the known recurring tasks to see if any 
@@ -1275,14 +1301,13 @@ void CTaskCalendarCtrl::RebuildFutureOccurrences()
 		VERIFY(dtFuture.dtRange.Set(GetMinDate(), GetMaxDate()));
 
 		POSITION pos = m_mapRecurringTaskIDs.GetStartPosition();
-		DWORD dwNextFutureTaskID = (((m_dwMaximumTaskID / 1000) + 1) * 1000);
 
 		while (pos)
 		{
 			DWORD dwTaskID = m_mapRecurringTaskIDs.GetNext(pos);
 			ASSERT(dwTaskID);
 
-			TASKCALITEM* pTCIReal = GetTaskCalItem(dwTaskID, FALSE); // exclude future items
+			TASKCALITEM* pTCIReal = GetTaskCalItem(dwTaskID); // exclude extension items
 
 			if (!pTCIReal)
 			{
@@ -1302,10 +1327,43 @@ void CTaskCalendarCtrl::RebuildFutureOccurrences()
 
 			while (nItem--)
 			{
-				TASKCALITEM* pTCIFuture = new TASKCALFUTUREITEM(*pTCIReal, dwNextFutureTaskID, dtFuture.dtOccurrences[nItem]);
-				m_mapFutureOccurrences[dwNextFutureTaskID] = pTCIFuture;
+				TASKCALITEM* pTCIFuture = new TASKCALFUTUREOCURRENCE(*pTCIReal, dwNextExtID, dtFuture.dtOccurrences[nItem]);
+				m_mapExtensionItems[dwNextExtID++] = pTCIFuture;
+			}
+		}
+	}
+}
 
-				dwNextFutureTaskID++;
+void CTaskCalendarCtrl::RebuildCustomDates(DWORD& dwNextExtID)
+{
+	double dStart = GetMinDate(), dEnd = (GetMaxDate().m_dt + 1.0);
+	POSITION pos = m_mapData.GetStartPosition();
+
+	while (pos)
+	{
+		TASKCALITEM* pTCI = m_mapData.GetNextTask(pos);
+		ASSERT(pTCI);
+
+		if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
+			continue;
+
+		// ignore completed tasks as required
+		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
+			continue;
+
+		POSITION posDate = pTCI->mapCustomDates.GetStartPosition();
+
+		while (posDate)
+		{
+			CString sCustAttribID;
+			COleDateTime date;
+
+			pTCI->mapCustomDates.GetNextAssoc(posDate, sCustAttribID, date);
+
+			if ((date.m_dt >= dStart) && (date.m_dt < dEnd))
+			{
+				TASKCALCUSTOMDATE* pTCIDate = new TASKCALCUSTOMDATE(*pTCI, dwNextExtID, sCustAttribID, date);
+				m_mapExtensionItems[dwNextExtID++] = pTCIDate;
 			}
 		}
 	}
@@ -1370,8 +1428,8 @@ int CTaskCalendarCtrl::RebuildCellTasks(CCalendarCell* pCell)
 	// 'Real' tasks
 	AddTasksToCell(m_mapData, pCell->date, pTasks);
 
-	// Future task occurrences
-	AddTasksToCell(m_mapFutureOccurrences, pCell->date, pTasks);
+	// Extension tasks
+	AddTasksToCell(m_mapExtensionItems, pCell->date, pTasks);
 
 	// Sort them in order of task start date
 	pTasks->SortItems(m_nSortBy, m_bSortAscending);
@@ -1793,7 +1851,8 @@ BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const
 	if (!CalcTaskCellRect(nTask, pCell, rCell, rLabel))
 		return FALSE;
 
-	const TASKCALITEM* pTCI = GetTaskCalItem(GetRealTaskID(dwTaskID), FALSE);
+	DWORD dwRealID = GetRealTaskID(dwTaskID);
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwRealID, FALSE);
 	
 	if (!pTCI)
 	{
@@ -1896,7 +1955,7 @@ CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawI
 			break;
 	}
 
-	if (nItem == nNumItem)
+	if (nItem == nNumItem) // not found
 	{
 		CONTINUOUSDRAWINFO cdi(dwTaskID);
 		nItem = m_aContinuousDrawInfo.Add(cdi);
@@ -1905,14 +1964,14 @@ CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawI
 	return m_aContinuousDrawInfo[nItem];
 }
 
-TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID, BOOL bIncFutureItems) const
+TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID, BOOL bIncExtItems) const
 {
 	ASSERT(dwTaskID);
 	TASKCALITEM* pTCI = m_mapData.GetTaskItem(dwTaskID);
 
-	if (!pTCI && bIncFutureItems && (dwTaskID > m_dwMaximumTaskID))
+	if (!pTCI && bIncExtItems && (dwTaskID > m_dwMaximumTaskID))
 	{
-		pTCI = m_mapFutureOccurrences.GetTaskItem(dwTaskID);
+		pTCI = m_mapExtensionItems.GetTaskItem(dwTaskID);
 		ASSERT(pTCI);
 	}
 
@@ -2057,8 +2116,8 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 DWORD CTaskCalendarCtrl::GetRealTaskID(DWORD dwTaskID) const
 {
-	if (m_mapFutureOccurrences.HasTask(dwTaskID))
-		return m_mapFutureOccurrences.GetRealTaskID(dwTaskID);
+	if (m_mapExtensionItems.HasTask(dwTaskID))
+		return m_mapExtensionItems.GetRealTaskID(dwTaskID);
 
 	// else
 	return dwTaskID;
@@ -2320,7 +2379,7 @@ BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 			}
 
 			// Rebuild the cell tasks because the task may have moved cells
-			// but without rebuilding future tasks because we do that at the 
+			// but without rebuilding extension tasks because we do that at the 
 			// end of the drag only
 			RebuildCellTasks(FALSE);
 
@@ -2483,7 +2542,7 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 	
 	if (dwTaskID)
 	{
-		if (m_mapFutureOccurrences.HasTask(dwTaskID))
+		if (m_mapExtensionItems.HasTask(dwTaskID))
 			return FALSE;
 
 		if (IsTaskLocked(dwTaskID))
@@ -2775,7 +2834,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	// Don't show tooltip when hovering over 'ends'
 	if (dwTaskID && (nHit == TCCHT_MIDDLE))
 	{
-		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include future items
+		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include extension items
 		ASSERT(pTCI);
 
 		BOOL bWantTooltip = (GetTaskHeight() < MIN_TASK_HEIGHT);
@@ -2829,7 +2888,7 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 	}
 	
 	// Set the font first, bold for top level items
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include future items
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include extension items
 
 	if (!pTCI)
 	{
