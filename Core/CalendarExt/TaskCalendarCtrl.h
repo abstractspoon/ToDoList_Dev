@@ -77,7 +77,7 @@ public:
 protected:
 	CTaskCalItemMap m_mapData;
 	CTaskCalExtensionItemMap m_mapExtensionItems;
-	CStringSet m_mapCustomDateAttrib;
+	CMapStringToString m_mapCustomDateAttrib;
 	CDWordSet m_mapRecurringTaskIDs;
 	TASKCALITEM m_tciPreDrag;
 
@@ -168,9 +168,6 @@ protected:
 
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
 	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID, BOOL bIncExtItems = FALSE) const;
-	BOOL IsTaskLocked(DWORD dwTaskID) const;
-	BOOL IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
-	BOOL TaskHasDependencies(DWORD dwTaskID) const;
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
@@ -192,6 +189,7 @@ protected:
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient, CRect& rBtn) const;
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
+	BOOL IsExtensionItem(DWORD dwTaskID) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);
@@ -230,6 +228,8 @@ protected:
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew);
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
+	static BOOL IsFutureOccurrence(const TASKCALITEM* pTCI);
+	static BOOL IsCustomDate(const TASKCALITEM* pTCI);
 
 };
 

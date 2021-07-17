@@ -326,7 +326,9 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 
 BOOL CTaskCalendarCtrl::UpdateCustomDateAttributes(const ITASKLISTBASE* pTasks)
 {
-	CStringSet mapPrevAttrib = m_mapCustomDateAttrib;
+	CMapStringToString mapPrevAttrib;
+	Misc::Copy(m_mapCustomDateAttrib, mapPrevAttrib);
+
 	m_mapCustomDateAttrib.RemoveAll();
 
 	int nAttrib = pTasks->GetCustomAttributeCount();
@@ -337,11 +339,11 @@ BOOL CTaskCalendarCtrl::UpdateCustomDateAttributes(const ITASKLISTBASE* pTasks)
 			((pTasks->GetCustomAttributeType(nAttrib) & TDCCA_DATAMASK) == TDCCA_DATE))
 		{
 			CString sAttribID = pTasks->GetCustomAttributeID(nAttrib);
-			m_mapCustomDateAttrib.Add(sAttribID);
+			m_mapCustomDateAttrib[Misc::ToUpper(sAttribID)] = pTasks->GetCustomAttributeLabel(nAttrib);
 		}
 	}
 
-	return !m_mapCustomDateAttrib.MatchAll(mapPrevAttrib);
+	return !Misc::MatchAll(m_mapCustomDateAttrib, mapPrevAttrib);
 }
 
 void CTaskCalendarCtrl::FixupSelection(BOOL bScrollToTask)
@@ -1528,17 +1530,17 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 
 	const CCalendarCell* pCell = GetCell(nRow, nCol);
 	ASSERT(pCell);
-	
+
 	if (pCell == NULL)
 		return 0;
 
 	// handle clicking above tasks
 	CRect rCell;
 	GetGridCellRect(nRow, nCol, rCell, TRUE);
-	
+
 	if (ptClient.y < rCell.top)
 		return 0;
-	
+
 	// exclude visible scrollbar
 	if (IsCellScrollBarActive() && IsGridCellSelected(pCell))
 	{
@@ -1556,13 +1558,13 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 		if (rOverflow.PtInRect(ptClient))
 			return 0;
 	}
-	
+
 	const CTaskCalItemArray* pTasks = static_cast<CTaskCalItemArray*>(pCell->pUserData);
 	ASSERT(pTasks);
-	
+
 	if (!pTasks || !pTasks->GetSize())
 		return 0;
-	
+
 	// Find the task beneath the mouse
 	for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
 	{
@@ -1570,7 +1572,7 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 
 		if (!CalcTaskCellRect(nTask, pCell, rCell, rTask))
 			continue;
-		
+
 		if (rTask.PtInRect(ptClient))
 		{
 			// now check for closeness to ends
@@ -1969,34 +1971,13 @@ TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID, BOOL bIncExtItems
 	ASSERT(dwTaskID);
 	TASKCALITEM* pTCI = m_mapData.GetTaskItem(dwTaskID);
 
-	if (!pTCI && bIncExtItems && (dwTaskID > m_dwMaximumTaskID))
+	if (!pTCI && bIncExtItems && IsExtensionItem(dwTaskID))
 	{
 		pTCI = m_mapExtensionItems.GetTaskItem(dwTaskID);
 		ASSERT(pTCI);
 	}
 
 	return pTCI;
-}
-
-BOOL CTaskCalendarCtrl::IsTaskLocked(DWORD dwTaskID) const
-{
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
-
-	return (pTCI && pTCI->bLocked);
-}
-
-BOOL CTaskCalendarCtrl::IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAs) const
-{
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
-	
-	return (pTCI && pTCI->IsDone(bIncGoodAs));
-}
-
-BOOL CTaskCalendarCtrl::TaskHasDependencies(DWORD dwTaskID) const
-{
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
-	
-	return (pTCI && pTCI->bHasDepends);
 }
 
 BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
@@ -2116,11 +2097,33 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 DWORD CTaskCalendarCtrl::GetRealTaskID(DWORD dwTaskID) const
 {
-	if (m_mapExtensionItems.HasTask(dwTaskID))
+	if (IsExtensionItem(dwTaskID))
 		return m_mapExtensionItems.GetRealTaskID(dwTaskID);
 
 	// else
 	return dwTaskID;
+}
+
+BOOL CTaskCalendarCtrl::IsExtensionItem(DWORD dwTaskID) const
+{
+	if (dwTaskID > m_dwMaximumTaskID)
+	{
+		ASSERT(m_mapExtensionItems.HasTask(dwTaskID));
+		return TRUE;
+	}
+
+	ASSERT(dwTaskID <= m_dwMaximumTaskID);
+	return FALSE;
+}
+
+BOOL CTaskCalendarCtrl::IsFutureOccurrence(const TASKCALITEM* pTCI)
+{
+	return (dynamic_cast<const TASKCALFUTUREOCURRENCE*>(pTCI) != nullptr);
+}
+
+BOOL CTaskCalendarCtrl::IsCustomDate(const TASKCALITEM* pTCI)
+{
+	return (dynamic_cast<const TASKCALCUSTOMDATE*>(pTCI) != nullptr);
 }
 
 BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
@@ -2540,31 +2543,37 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 {
 	ASSERT((nHit == TCCHT_NOWHERE) || (dwTaskID != 0));
 	
-	if (dwTaskID)
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // inc extension tasks
+
+	// Sanity check
+	if (!pTCI)
 	{
-		if (m_mapExtensionItems.HasTask(dwTaskID))
-			return FALSE;
+		ASSERT(0);
+		return FALSE;
+	}
 
-		if (IsTaskLocked(dwTaskID))
-			return FALSE;
+	if (pTCI->IsDone(FALSE))
+		return FALSE;
 
-		if (IsTaskDone(dwTaskID, FALSE))
-			return FALSE;
-		
-		BOOL bCanDrag = !HasOption(TCCO_PREVENTDEPENDENTDRAGGING) ||
-						!TaskHasDependencies(dwTaskID);
+	if (pTCI->bLocked)
+		return FALSE;
+
+	if (IsFutureOccurrence(pTCI))
+		return FALSE;
+
+	BOOL bCustomDate = IsCustomDate(pTCI);
+	BOOL bHasDepends = (HasOption(TCCO_PREVENTDEPENDENTDRAGGING) && pTCI->bHasDepends);
 			
-		switch (nHit)
-		{
-		case TCCHT_BEGIN:
-			return bCanDrag;
-			
-		case TCCHT_END:
-			return TRUE; // always
-			
-		case TCCHT_MIDDLE:
-			return bCanDrag;
-		}
+	switch (nHit)
+	{
+	case TCCHT_BEGIN:
+		return !bCustomDate && !bHasDepends;
+
+	case TCCHT_MIDDLE:
+		return !bHasDepends;
+
+	case TCCHT_END:
+		return !bCustomDate;
 	}
 
 	// all else
@@ -2603,7 +2612,10 @@ BOOL CTaskCalendarCtrl::SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const
 	{
 		if (!CanDragTask(dwTaskID, nHit))
 		{
-			if (IsTaskLocked(dwTaskID))
+			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // inc extension items
+			ASSERT(pTCI);
+
+			if (pTCI && pTCI->bLocked)
 				return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 
 			// else
@@ -2837,26 +2849,44 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include extension items
 		ASSERT(pTCI);
 
-		BOOL bWantTooltip = (GetTaskHeight() < MIN_TASK_HEIGHT);
+		CString sTooltip;
 
-		if (!bWantTooltip)
+		if (IsFutureOccurrence(pTCI))
 		{
-			if (HasOption(TCCO_DISPLAYCONTINUOUS))
-			{
-				int nTextOffset = GetTaskContinuousDrawInfo(dwTaskID).nTextOffset;
-				bWantTooltip = (nTextOffset > 0);
-			}
-			else
-			{
-				CFontCache& fonts = const_cast<CFontCache&>(m_fonts);
+			// TODO - Must match 'Week Planner' view in 'Plugins' project
+			sTooltip = "Future Occurrence";
+		}
+		else if (IsCustomDate(pTCI))
+		{
+			// TODO - Must match 'Week Planner' view in 'Plugins' project
+			sTooltip = "Custom Date";
+		}
+		else
+		{
+			BOOL bWantTooltip = (GetTaskHeight() < MIN_TASK_HEIGHT);
 
-				int nTextLen = GraphicsMisc::GetTextWidth(pTCI->GetName(), m_tooltip, fonts.GetHFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
-				bWantTooltip = (nTextLen > rHit.Width());
+			if (!bWantTooltip)
+			{
+				if (HasOption(TCCO_DISPLAYCONTINUOUS))
+				{
+					int nTextOffset = GetTaskContinuousDrawInfo(dwTaskID).nTextOffset;
+					bWantTooltip = (nTextOffset > 0);
+				}
+				else
+				{
+					CFontCache& fonts = const_cast<CFontCache&>(m_fonts);
+
+					int nTextLen = GraphicsMisc::GetTextWidth(pTCI->GetName(), m_tooltip, fonts.GetHFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
+					bWantTooltip = (nTextLen > rHit.Width());
+				}
 			}
+
+			if (bWantTooltip)
+				sTooltip = pTCI->GetName();
 		}
 
-		if (bWantTooltip)
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, pTCI->GetName(), dwTaskID, rHit);
+		if (!sTooltip.IsEmpty())
+			return CToolTipCtrlEx::SetToolInfo(*pTI, this, sTooltip, dwTaskID, rHit);
 	}
 
 	// else
@@ -2896,33 +2926,42 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 
-	m_tooltip.SetFont(m_fonts.GetFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
-
-	// Calculate exact position required
-	CRect rLabel;
-
-	if (HasOption(TCCO_DISPLAYCONTINUOUS))
+	// Calculate label rect for real tasks only
+	if (!IsExtensionItem(dwTaskID))
 	{
-		VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
+		// Embolden top-level tooltips
+		m_tooltip.SetFont(m_fonts.GetFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
+
+		CRect rLabel;
+
+		if (HasOption(TCCO_DISPLAYCONTINUOUS))
+		{
+			VERIFY(GetTaskLabelRect(dwTaskID, rLabel));
+		}
+		else
+		{
+			CPoint ptTip(::GetMessagePos());
+			ScreenToClient(&ptTip);
+
+			TCC_HITTEST nUnused;
+			VERIFY(HitTestTask(ptTip, nUnused, rLabel));
+		}
+
+		ClientToScreen(rLabel);
+
+		CRect rTip(rLabel);
+		m_tooltip.AdjustRect(rTip, TRUE);
+		rTip.OffsetRect(TIP_PADDING, 0);
+
+		m_tooltip.SetWindowPos(NULL, rTip.left, rLabel.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
+
+		*pResult = TRUE; // we do the positioning
 	}
 	else
 	{
-		CPoint ptTip(::GetMessagePos());
-		ScreenToClient(&ptTip);
-
-		TCC_HITTEST nUnused;
-		VERIFY(HitTestTask(ptTip, nUnused, rLabel));
+		// Never embolden extension item tooltips
+		m_tooltip.SetFont(m_fonts.GetFont());
 	}
-
-	ClientToScreen(rLabel);
-
-	CRect rTip(rLabel);
-	m_tooltip.AdjustRect(rTip, TRUE);
-	rTip.OffsetRect(TIP_PADDING, 0);
-
-	m_tooltip.SetWindowPos(NULL, rTip.left, rLabel.top, 0, 0, (SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOSIZE));
-
-	*pResult = TRUE; // we do the positioning
 }
 
 BOOL CTaskCalendarCtrl::SaveToImage(CBitmap& bmImage)

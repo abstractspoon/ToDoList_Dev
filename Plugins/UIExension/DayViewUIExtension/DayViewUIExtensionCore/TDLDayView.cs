@@ -128,7 +128,7 @@ namespace DayViewUIExtension
 
 			if (appt is TaskExtensionItem)
 			{
-				// TODO
+				// TODO - Much match 'Calendar' View in 'Core' project
 				if (appt is FutureOccurrence)
 				{
 					tipText = "Future Occurrence";

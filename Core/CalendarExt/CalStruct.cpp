@@ -37,7 +37,7 @@ TASKCALITEM::TASKCALITEM()
 
 }
 	
-TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates) 
+TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates) 
 	: 
 	color(CLR_NONE), 
 	bGoodAsDone(FALSE),
@@ -75,6 +75,7 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	dtStartCalc = tci.dtStartCalc;
 	dtEndCalc = tci.dtEndCalc;
 	bHasIcon = tci.bHasIcon;
+	bHasDepends = tci.bHasDepends;
 	bIsParent = tci.bIsParent;
 	bRecurring = tci.bRecurring;
 	bTreatOverdueAsDueToday = tci.bTreatOverdueAsDueToday;
@@ -100,7 +101,7 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
 			(bRecurring == tci.bRecurring));
 }
 
-void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates)
+void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates)
 {
 	// check for quick exit
 	if (!pTasks->IsAttributeAvailable(TDCA_STARTDATE) &&
@@ -151,9 +152,10 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 
 		while (pos)
 		{
-			CString sAttribID = mapCustDateAttribIDs.GetNext(pos);
-			CString sDate = pTasks->GetTaskCustomDateString(hTask, sAttribID);
+			CString sAttribID, sAttribLabel;
+			mapCustDateAttribIDs.GetNextAssoc(pos, sAttribID, sAttribLabel);
 
+			CString sDate = pTasks->GetTaskCustomDateString(hTask, sAttribID);
 			COleDateTime date;
 
 			if (CDateHelper::DecodeDate(sDate, date, TRUE))
@@ -255,7 +257,7 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	}
 }
 
-BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates)
+BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates)
 {
 	ASSERT(dwTaskID == 0 || pTasks->GetTaskID(hTask) == dwTaskID);
 

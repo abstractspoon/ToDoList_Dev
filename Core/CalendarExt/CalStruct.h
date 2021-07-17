@@ -24,13 +24,13 @@ struct TASKCALITEM
 public:
 	TASKCALITEM();
 	TASKCALITEM(const TASKCALITEM& tci);
-	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates);
+	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
 	virtual ~TASKCALITEM() {}
 
 	TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci);
 	BOOL TASKCALITEM::operator==(const TASKCALITEM& tci);
 
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates);
+	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
 	void RecalcDates(DWORD dwCalcDates);
 	inline DWORD GetTaskID() const { return dwTaskID; }
 
@@ -78,7 +78,7 @@ protected:
 	BOOL bTreatOverdueAsDueToday;
 
 protected:
-	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CStringSet& mapCustDateAttribIDs, DWORD dwCalcDates);
+	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
 	void ReformatName();
 	void ClearCalculatedDates();
 
@@ -140,6 +140,7 @@ public:
 
 	DWORD GetNextTaskID(POSITION& pos) const;
 	BOOL HasTask(DWORD dwTaskID) const;
+
 };
 
 /////////////////////////////////////////////////////////////////////////////
