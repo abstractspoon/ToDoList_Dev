@@ -295,8 +295,8 @@ namespace DayViewUIExtension
 			TaskExtensionItem extItem;
 
 			if (m_ExtensionItems.TryGetValue(dwTaskID, out extItem))
-				dwTaskID = extItem.RealTaskId;
-			
+				return IsItemDisplayable(extItem);
+
 			TaskItem item;
 
 			if (m_Items.TryGetValue(dwTaskID, out item))
@@ -688,33 +688,38 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool IsItemDisplayable(TaskItem item)
+		public bool IsItemDisplayable(Calendar.Appointment appt)
 		{
 			// Always show a task if it is currently being dragged
-			if (IsResizingAppointment() && (item == SelectedAppointment))
-				return true;
+			if (IsResizingAppointment())
+			{
+				if (appt.Id == SelectedAppointment.Id)
+					return true;
+			}
 
-			if (HideParentTasks && item.IsParent)
+			var	realAppt = GetRealAppointment(appt);
+
+			if (HideParentTasks && (realAppt as TaskItem).IsParent)
 				return false;
 
-			if (!item.HasValidDates())
+			if (!appt.HasValidDates())
 				return false;
 
 			if (HideTasksSpanningWeekends)
 			{
-				if (DateUtil.WeekOfYear(item.StartDate) != DateUtil.WeekOfYear(item.EndDate))
+				if (DateUtil.WeekOfYear(appt.StartDate) != DateUtil.WeekOfYear(appt.EndDate))
 					return false;
 			}
 
             if (HideTasksSpanningDays)
             {
-                if (item.StartDate.Date != item.EndDate.Date)
+                if (appt.StartDate.Date != appt.EndDate.Date)
                     return false;
             }
 
 			if (HideTasksWithoutTimes)
 			{
-				if (TaskItem.IsStartOfDay(item.StartDate) && TaskItem.IsEndOfDay(item.EndDate))
+				if (TaskItem.IsStartOfDay(appt.StartDate) && TaskItem.IsEndOfDay(appt.EndDate))
 					return false;
 			}
 
@@ -760,7 +765,7 @@ namespace DayViewUIExtension
 
 			// Update custom attribute definitions
 			if (tasks.IsAttributeAvailable(Task.Attribute.CustomAttribute))
-				m_CustomDates = tasks.GetCustomAttributes(CustomAttributeDefinition.Attribute.Date);
+				m_CustomDateDefs = tasks.GetCustomAttributes(CustomAttributeDefinition.Attribute.Date);
 
 			// Update the tasks
 			Task task = tasks.GetFirstTask();
@@ -791,12 +796,12 @@ namespace DayViewUIExtension
 			// Built-in of attributes
 			if (m_Items.TryGetValue(taskID, out item))
 			{
-				item.UpdateTaskAttributes(task, m_CustomDates, type, false);
+				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false);
 			}
 			else
 			{
 				item = new TaskItem();
-				item.UpdateTaskAttributes(task, m_CustomDates, type, true);
+				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, true);
 			}
 
 			m_Items[taskID] = item;
@@ -1101,37 +1106,37 @@ namespace DayViewUIExtension
 			{
 				TaskItem item = pair.Value;
 
-				if (!IsItemDisplayable(item))
-					continue;
-
-				if (IsItemWithinRange(item, start, end))
-					appts.Add(item);
-
-				if (m_ShowFutureOcurrences && item.IsRecurring)
+				if (IsItemDisplayable(item))
 				{
-					// Add this task's future items for the current date range
-					// Note: we deliberately double the range else we lose 
-					// future items which overlap the the current item
-					var futureItems = m_TaskRecurrences.Get(item.Id, StartDate, EndDate.AddDays(DaysShowing));
+					if (IsItemWithinRange(item, start, end))
+						appts.Add(item);
 
-					if (futureItems != null)
+					if (m_ShowFutureOcurrences && item.IsRecurring)
 					{
-						foreach (var futureItem in futureItems)
-						{
-							var futureAppt = new FutureOccurrence(item, nextExtId, futureItem.Item1, futureItem.Item2);
+						// Add this task's future items for the current date range
+						// Note: we deliberately double the range else we lose 
+						// future items which overlap the the current item
+						var futureItems = m_TaskRecurrences.Get(item.Id, StartDate, EndDate.AddDays(DaysShowing));
 
-							if (IsItemWithinRange(futureAppt, start, end))
+						if (futureItems != null)
+						{
+							foreach (var futureItem in futureItems)
 							{
-								m_ExtensionItems[nextExtId++] = futureAppt;
-								appts.Add(futureAppt);
+								var futureAppt = new FutureOccurrence(item, nextExtId, futureItem.Item1, futureItem.Item2);
+
+								if (IsItemWithinRange(futureAppt, start, end))
+								{
+									m_ExtensionItems[nextExtId++] = futureAppt;
+									appts.Add(futureAppt);
+								}
 							}
 						}
 					}
 				}
 
-				if (m_CustomDates.Count > 0)
+				if (m_CustomDateDefs.Count > 0)
 				{
-					foreach (var attrib in m_CustomDates)
+					foreach (var attrib in m_CustomDateDefs)
 					{
 						DateTime date;
 
@@ -1139,7 +1144,7 @@ namespace DayViewUIExtension
 						{
 							var customDate = new CustomDateAttribute(item, nextExtId, attrib.Id, date);
 
-							if (IsItemWithinRange(customDate, start, end))
+							if (IsItemDisplayable(customDate) && IsItemWithinRange(customDate, start, end))
 							{
 								m_ExtensionItems[nextExtId++] = customDate;
 								appts.Add(customDate);
