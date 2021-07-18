@@ -788,9 +788,6 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		DWORD dwTaskID = pTCI->GetTaskID();
 		ASSERT(dwTaskID);
 
-		DWORD dwRealTaskID = GetRealTaskID(dwTaskID);
-		ASSERT(dwRealTaskID);
-		
 		// draw selection
 		BOOL bSelTask = WantDrawTaskSelected(pTCI);
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
@@ -821,7 +818,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				nState = GMIS_SELECTEDNOTFOCUSED;
 			}
-			else if (dwTaskID != dwRealTaskID)
+			else if (IsFutureOccurrence(pTCI))
 			{
 				nState = GMIS_DROPHILITED;
 			}
@@ -852,7 +849,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			COLORREF crFill = pTCI->GetFillColor(bTextColorIsBkgnd);
 			COLORREF crBorder = pTCI->GetBorderColor(bTextColorIsBkgnd);
 						
-			int nBorderStyle = ((dwTaskID == dwRealTaskID) ? PS_SOLID : PS_DOT);
+			int nBorderStyle = (IsFutureOccurrence(pTCI) ? PS_DOT : PS_SOLID);
 
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwBorders, 255, nBorderStyle);
 		}
@@ -871,6 +868,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			if ((cdi.nIconOffset >= 0) && (cdi.nIconOffset < nReqWidth))
 			{
 				int iImageIndex = -1;
+				DWORD dwRealTaskID = GetRealTaskID(dwTaskID);
+
 				HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_CALENDAR_GETTASKICON, dwRealTaskID, (LPARAM)&iImageIndex);
 
 				if (hilTask && (iImageIndex != -1))

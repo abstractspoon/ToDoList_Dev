@@ -619,24 +619,6 @@ TASKCALEXTENSIONITEM::TASKCALEXTENSIONITEM(const TASKCALITEM& tciOrg, DWORD dwEx
 	dwTaskID = dwExtID;
 }
 
-COLORREF TASKCALEXTENSIONITEM::GetFillColor(BOOL /*bTextIsBack*/) const
-{
-	return CLR_NONE;
-}
-
-COLORREF TASKCALEXTENSIONITEM::GetBorderColor(BOOL /*bTextIsBack*/) const
-{
-	return GetTextColor(FALSE, FALSE);
-}
-
-COLORREF TASKCALEXTENSIONITEM::GetTextColor(BOOL /*bSelected*/, BOOL /*bTextIsBack*/) const
-{
-	HLSX crText(TASKCALITEM::GetTextColor(FALSE, FALSE));
-	crText.fLuminosity = min(crText.fLuminosity + 0.2f, 0.7f);
-
-	return crText;
-}
-
 /////////////////////////////////////////////////////////////////////////////
 
 TASKCALFUTUREOCURRENCE::TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange)
@@ -647,6 +629,24 @@ TASKCALFUTUREOCURRENCE::TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD 
 
 	SetStartDate(dtRange.GetStart());
 	SetDueDate(dtRange.GetEndInclusive());
+}
+
+COLORREF TASKCALFUTUREOCURRENCE::GetFillColor(BOOL /*bTextIsBack*/) const
+{
+	return CLR_NONE;
+}
+
+COLORREF TASKCALFUTUREOCURRENCE::GetBorderColor(BOOL /*bTextIsBack*/) const
+{
+	return GetTextColor(FALSE, FALSE);
+}
+
+COLORREF TASKCALFUTUREOCURRENCE::GetTextColor(BOOL /*bSelected*/, BOOL /*bTextIsBack*/) const
+{
+	HLSX crText(TASKCALITEM::GetTextColor(FALSE, FALSE));
+	crText.fLuminosity = min(crText.fLuminosity + 0.2f, 0.7f);
+
+	return crText;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -677,6 +677,21 @@ void TASKCALCUSTOMDATE::SetDate(const COleDateTime& date)
 	{
 		ASSERT(0);
 	}
+}
+
+COLORREF TASKCALCUSTOMDATE::GetFillColor(BOOL /*bTextIsBack*/) const
+{
+	return TASKCALEXTENSIONITEM::GetFillColor(FALSE);
+}
+
+COLORREF TASKCALCUSTOMDATE::GetBorderColor(BOOL /*bTextIsBack*/) const
+{
+	return TASKCALEXTENSIONITEM::GetBorderColor(FALSE);
+}
+
+COLORREF TASKCALCUSTOMDATE::GetTextColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
+{
+	return TASKCALEXTENSIONITEM::GetTextColor(bSelected, FALSE);
 }
 
 /////////////////////////////////////////////////////////////////////////////
