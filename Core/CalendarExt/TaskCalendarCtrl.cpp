@@ -2988,17 +2988,29 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID); 
 		ASSERT(pTCI);
 
-		CString sTooltip;
+		CEnString sTooltip;
 
-		if (IsFutureOccurrence(pTCI))
+		if (IsExtensionItem(pTCI))
 		{
-			// TODO - Must match 'Week Planner' view in 'Plugins' project
-			sTooltip = "Future Occurrence";
-		}
-		else if (IsCustomDate(pTCI))
-		{
-			// TODO - Must match 'Week Planner' view in 'Plugins' project
-			sTooltip = "Custom Date";
+			// NOTE: - Must match 'Week Planner' View in 'Plugins' project
+			if (IsFutureOccurrence(pTCI))
+			{
+				sTooltip.LoadString(IDS_FUTUREOCCURRENCE_TOOLTIP);
+			}
+			else if (IsCustomDate(pTCI))
+			{
+				const TASKCALCUSTOMDATE* pTCIDate = dynamic_cast<const TASKCALCUSTOMDATE*>(pTCI);
+				ASSERT(pTCIDate);
+
+				CString sAttribLabel;
+				VERIFY(m_mapCustomDateAttrib.Lookup(pTCIDate->sCustomAttribID, sAttribLabel));
+
+				sTooltip.Format(IDS_CUSTOMDATE_TOOLTIP, sAttribLabel);
+			}
+			else
+			{
+				ASSERT(0);
+			}
 		}
 		else
 		{

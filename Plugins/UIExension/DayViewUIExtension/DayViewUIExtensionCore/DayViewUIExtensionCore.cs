@@ -299,7 +299,8 @@ namespace DayViewUIExtension
 
 		private void CreateDayView()
 		{
-			m_DayView = new TDLDayView(new UIExtension.TaskIcon(m_HwndParent),
+			m_DayView = new TDLDayView(m_Trans,
+										new UIExtension.TaskIcon(m_HwndParent),
 										new UIExtension.TaskRecurrences(m_HwndParent),
 										DPIScaling.Scale(5));
 

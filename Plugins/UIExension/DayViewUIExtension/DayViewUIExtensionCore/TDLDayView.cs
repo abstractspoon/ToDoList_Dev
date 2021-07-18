@@ -43,11 +43,12 @@ namespace DayViewUIExtension
 
 		private Dictionary<UInt32, TaskItem> m_Items;
         private Dictionary<UInt32, TaskExtensionItem> m_ExtensionItems;
-		private List<CustomAttributeDefinition> m_CustomDates;
+		private List<CustomAttributeDefinition> m_CustomDateDefs;
 
 		private TDLRenderer m_Renderer;
 		private LabelTip m_LabelTip;
 		private UIExtension.TaskRecurrences m_TaskRecurrences;
+		private Translator m_Trans;
 
 		private int LabelTipBorder
 		{
@@ -74,7 +75,7 @@ namespace DayViewUIExtension
 
 		// ----------------------------------------------------------------
 
-        public TDLDayView(UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
+        public TDLDayView(Translator trans, UIExtension.TaskIcon taskIcons, UIExtension.TaskRecurrences taskRecurrences, int minSlotHeight)
         {
             minHourLabelWidth = DPIScaling.Scale(minHourLabelWidth);
             hourLabelIndent = DPIScaling.Scale(hourLabelIndent);
@@ -82,14 +83,15 @@ namespace DayViewUIExtension
             longAppointmentSpacing = DPIScaling.Scale(longAppointmentSpacing);
 			dayGripWidth = 1; // to match app styling
 
-            m_Renderer = new TDLRenderer(Handle, taskIcons);
+			m_Trans = trans;
+			m_Renderer = new TDLRenderer(Handle, taskIcons);
 			m_UserMinSlotHeight = minSlotHeight;
             m_LabelTip = new LabelTip(this);
 			m_TaskRecurrences = taskRecurrences;
 
 			m_Items = new Dictionary<UInt32, TaskItem>();
 			m_ExtensionItems = new Dictionary<uint, TaskExtensionItem>();
-			m_CustomDates = new List<CustomAttributeDefinition>();
+			m_CustomDateDefs = new List<CustomAttributeDefinition>();
 
 			base.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
 
@@ -128,21 +130,28 @@ namespace DayViewUIExtension
 
 			if (appt is TaskExtensionItem)
 			{
-				// TODO - Much match 'Calendar' View in 'Core' project
+				// NOTE: - Must match 'Calendar' View in 'Core' project
 				if (appt is FutureOccurrence)
 				{
-					tipText = "Future Occurrence";
+					tipText = m_Trans.Translate("Future Occurrence");
 				}
 				else if (appt is CustomDateAttribute)
 				{
-					tipText = "Custom Date";
+					var apptDate = (appt as CustomDateAttribute);
+					var custAttrib = m_CustomDateDefs.Find(x => (x.Id == apptDate.AttributeId));
+
+					tipText = string.Format(m_Trans.Translate("{0} (Custom)"), custAttrib.Label);
+				}
+				else
+				{
+					Debug.Assert(false);
 				}
 
 				var pos = PointToClient(MousePosition);
 				pos.Offset(0, ToolStripEx.GetActualCursorHeight(Cursor));
 				toolRect.Location = pos;
 			}
-			else // TaskItem
+			else // 'Real' task
 			{
 				if (IsLongAppt(appt))
 				{
