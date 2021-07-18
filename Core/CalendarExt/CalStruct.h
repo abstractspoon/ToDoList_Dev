@@ -19,6 +19,60 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
+typedef CMap<CString, LPCTSTR, COleDateTime, COleDateTime&> CMapCustomDates; 
+
+struct TASKCALITEMDATES
+{
+public:
+	TASKCALITEMDATES();
+	TASKCALITEMDATES(const TASKCALITEMDATES& tcid);
+	TASKCALITEMDATES(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
+
+	TASKCALITEMDATES& operator=(const TASKCALITEMDATES& tcid);
+	BOOL operator==(const TASKCALITEMDATES& tcid) const;
+
+	void Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
+	void Recalc(DWORD dwCalcDates);
+
+	BOOL IsValid() const;
+	BOOL IsDone() const;
+
+	BOOL IsStartSet() const;
+	BOOL IsEndSet() const;
+
+	COleDateTime GetAnyStart() const;
+	COleDateTime GetAnyEnd() const;
+	COleDateTime GetDone() const;
+
+	BOOL HasAnyStart() const;
+	BOOL HasAnyEnd() const;
+	
+	void SetStart(const COleDateTime& date);
+	void SetDue(const COleDateTime& date);
+	
+	const CMapCustomDates& Custom() const { return mapCustomDates; }
+	COleDateTime GetCustomDate(const CString& sCustAttribID) const;
+	void SetCustomDate(const CString& sCustAttribID, const COleDateTime& date);
+	void SetCustomDates(const CMapCustomDates& dates);
+
+	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
+
+protected:
+	COleDateTime dtCreation, dtStart, dtDue, dtDone;
+	COleDateTime dtStartCalc, dtEndCalc;
+	BOOL bTreatOverdueAsDueToday;
+
+	CMapCustomDates mapCustomDates;
+
+protected:
+	void ClearCalculatedDates();
+
+	static COleDateTime GetDate(time64_t tDate);
+	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 struct TASKCALITEM
 {
 public:
@@ -27,30 +81,12 @@ public:
 	TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
 	virtual ~TASKCALITEM() {}
 
-	TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci);
-	BOOL TASKCALITEM::operator==(const TASKCALITEM& tci);
+	TASKCALITEM& operator=(const TASKCALITEM& tci);
+	TASKCALITEM& operator=(const TASKCALITEMDATES& tcid);
+	BOOL operator==(const TASKCALITEM& tci) const;
 
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
-	void RecalcDates(DWORD dwCalcDates);
 	inline DWORD GetTaskID() const { return dwTaskID; }
-
-	BOOL IsValid() const;
-	BOOL IsDone(BOOL bIncGoodAs) const;
-	BOOL IsParent() const;
-	BOOL HasIcon(BOOL bShowParentsAsFolder) const;
-	
-	BOOL IsStartDateSet() const;
-	void SetStartDate(const COleDateTime& date);
-
-	COleDateTime GetAnyStartDate() const;
-	BOOL HasAnyStartDate() const;
-
-	BOOL IsEndDateSet() const;
-	void SetDueDate(const COleDateTime& date);
-
-	COleDateTime GetAnyEndDate() const;
-	COleDateTime GetDoneDate() const;
-	BOOL HasAnyEndDate() const;
 
 	virtual COLORREF GetFillColor(BOOL bTextIsBack) const;
 	virtual COLORREF GetBorderColor(BOOL bTextIsBack) const;
@@ -59,31 +95,49 @@ public:
 
 	CString GetName(BOOL bFormatted = TRUE) const;
 
-	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
+	BOOL IsParent() const;
+	BOOL HasIcon(BOOL bShowParentsAsFolder) const;
+
+	// Date wrappers
+	void RecalcDates(DWORD dwCalcDates) { dates.Recalc(dwCalcDates); }
+	BOOL IsValid() const { return dates.IsValid(); }
+	BOOL IsDone(BOOL bIncGoodAs) const;
+
+	BOOL IsStartDateSet() const { return dates.IsStartSet(); }
+	void SetStartDate(const COleDateTime& date);
+
+	COleDateTime GetAnyStartDate() const { return dates.GetAnyStart(); }
+	BOOL HasAnyStartDate() const { return dates.HasAnyStart(); }
+
+	BOOL IsEndDateSet() const { return dates.IsEndSet(); }
+	void SetDueDate(const COleDateTime& date) { return dates.SetDue(date); }
+
+	COleDateTime GetAnyEndDate() const { return dates.GetAnyEnd(); }
+	COleDateTime GetDoneDate() const { return dates.GetDone(); }
+	BOOL HasAnyEndDate() const { return dates.HasAnyEnd(); }
+
+	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const { return dates.MinMax(dtMin, dtMax); }
+
+	const TASKCALITEMDATES& Dates() const { return dates; }
+
+	COleDateTime GetCustomDate(const CString& sCustAttribID) const { return dates.GetCustomDate(sCustAttribID); }
+	void SetCustomDate(const CString& sCustAttribID, const COleDateTime& date) { dates.SetCustomDate(sCustAttribID, date); }
+	void SetCustomDates(const CMapCustomDates& other) { dates.SetCustomDates(other); }
 
 public:
 	COLORREF color;
 	BOOL bGoodAsDone, bTopLevel;
 	BOOL bLocked, bHasDepends, bRecurring;
 
-	CMap<CString, LPCTSTR, COleDateTime, COleDateTime&> mapCustomDates;
-
 protected:
-	COleDateTime dtCreation, dtStart, dtDue, dtDone;
-	COleDateTime dtStartCalc, dtEndCalc;
 	CString sName, sFormattedName;
 	DWORD dwTaskID;
 	BOOL bHasIcon, bIsParent;
 
-	BOOL bTreatOverdueAsDueToday;
+	TASKCALITEMDATES dates;
 
 protected:
-	void UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates);
 	void ReformatName();
-	void ClearCalculatedDates();
-
-	static COleDateTime GetDate(time64_t tDate);
-	static void MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax);
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -110,6 +164,9 @@ struct TASKCALFUTUREOCURRENCE : public TASKCALEXTENSIONITEM
 struct TASKCALCUSTOMDATE : public TASKCALEXTENSIONITEM
 {
 	TASKCALCUSTOMDATE(const TASKCALITEM& tciOrg, DWORD dwExtID, const CString& sCustAttribID, const COleDateTime& date);
+
+	void SetDate(const COleDateTime& date);
+	COleDateTime GetDate() const { return dates.GetAnyStart(); }
 
 	const CString sCustomAttribID;
 };

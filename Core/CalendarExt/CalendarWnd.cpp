@@ -461,9 +461,8 @@ bool CCalendarWnd::GetLabelEditRect(LPRECT pEdit)
 	m_BigCalendar.EnsureSelectionVisible();
 
 	CRect rLabel;
-	DWORD dwSelTask = m_BigCalendar.GetSelectedTaskID();
 
-	if (m_BigCalendar.GetTaskLabelRect(dwSelTask, rLabel))
+	if (m_BigCalendar.GetSelectedTaskLabelRect(rLabel))
 	{
 		m_BigCalendar.ClientToScreen(rLabel);
 
@@ -729,39 +728,60 @@ void CCalendarWnd::OnGototoday()
 
 LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 {
-	COleDateTime dtStart, dtDue;
+	TCINOTIFYDATECHANGE* notify = (TCINOTIFYDATECHANGE*)wp;
+	IUITASKMOD mod = { TDCA_NONE, 0 };
+	CString sCustAttribValue; // must persist for duration of parent callback
 
-	if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
+	if (notify->sCustAttribID.IsEmpty())
 	{
-		IUITASKMOD mod = { TDCA_NONE, 0 };
-		
-		switch (wp)
+		COleDateTime dtStart, dtDue;
+
+		if (m_BigCalendar.GetSelectedTaskDates(dtStart, dtDue))
 		{
-		case TCCHT_BEGIN:
-			if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
-				mod.nAttrib = TDCA_STARTDATE;
-			break;
-			
-		case TCCHT_MIDDLE:
-			if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
-				mod.nAttrib = TDCA_OFFSETTASK;
-			break;
-			
-		case TCCHT_END:
-			if (CDateHelper::GetTimeT64(dtDue, mod.tValue))
-				mod.nAttrib = TDCA_DUEDATE;
-			break;
-		}
-		
-		if (mod.nAttrib != TDCA_NONE)
-		{
-			if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
+			switch (notify->nHit)
 			{
-				m_MiniCalendar.OnUpdateTasks();
-				return TRUE;
+			case TCCHT_BEGIN:
+				if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
+					mod.nAttrib = TDCA_STARTDATE;
+				break;
+
+			case TCCHT_MIDDLE:
+				if (CDateHelper::GetTimeT64(dtStart, mod.tValue))
+					mod.nAttrib = TDCA_OFFSETTASK;
+				break;
+
+			case TCCHT_END:
+				if (CDateHelper::GetTimeT64(dtDue, mod.tValue))
+					mod.nAttrib = TDCA_DUEDATE;
+				break;
 			}
 		}
 	}
+	else
+	{
+		COleDateTime date;
+
+		if (m_BigCalendar.GetSelectedTaskCustomDate(notify->sCustAttribID, date))
+		{
+			ASSERT(notify->nHit == TCCHT_MIDDLE);
+
+			mod.szCustomAttribID = notify->sCustAttribID;
+			mod.nAttrib = TDCA_CUSTOMATTRIB;
+			
+			sCustAttribValue = CDateHelper::FormatDate(date, DHFD_TIME);
+			mod.szValue = sCustAttribValue;
+		}
+	}
+
+	if (mod.nAttrib != TDCA_NONE)
+	{
+		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
+		{
+			m_MiniCalendar.OnUpdateTasks();
+			return TRUE;
+		}
+	}
+
 
 	return 0L;
 }

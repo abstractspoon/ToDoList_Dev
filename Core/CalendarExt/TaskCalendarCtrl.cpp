@@ -289,24 +289,34 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		DeleteData();
-		UpdateCustomDateAttributes(pTasks);
-		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-		bChange = TRUE;
+		{
+			DeleteData();
+			UpdateCustomDateAttributes(pTasks);
+			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+
+			bChange = TRUE;
+		}
 		break;
 
 	case IUI_NEW:
-		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-		bChange = TRUE;
+		{
+			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+
+			bChange = TRUE;
+		}
 		break;
 		
 	case IUI_EDIT:
-		bChange = (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) ||
-					pTasks->IsAttributeAvailable(TDCA_RECURRENCE));
+		{
+			bChange = UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
+			bChange |= (pTasks->IsAttributeAvailable(TDCA_RECURRENCE) ? TRUE : FALSE);
+		}
 		break;
 		
 	case IUI_DELETE:
-		bChange = RemoveDeletedTasks(pTasks);
+		{
+			bChange = RemoveDeletedTasks(pTasks);
+		}
 		break;
 		
 	default:
@@ -472,13 +482,20 @@ BOOL CTaskCalendarCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 	return bChange;
 }
 
-BOOL CTaskCalendarCtrl::NotifyParentDateChange(TCC_HITTEST nHit)
+BOOL CTaskCalendarCtrl::NotifyParentDateChange(TCC_HITTEST nHit, const CString& sCustAttribID)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(m_dwSelectedTaskID);
 
 	if (nHit != TCCHT_NOWHERE)
-		return GetParent()->SendMessage(WM_CALENDAR_DATECHANGE, (WPARAM)nHit, m_dwSelectedTaskID);
+	{
+		TCINOTIFYDATECHANGE notify;
+
+		notify.nHit = nHit;
+		notify.sCustAttribID = sCustAttribID;
+
+		return GetParent()->SendMessage(WM_CALENDAR_DATECHANGE, (WPARAM)&notify, m_dwSelectedTaskID);
+	}
 
 	// else
 	return FALSE;
@@ -489,6 +506,11 @@ void CTaskCalendarCtrl::NotifyParentDragChange()
 	ASSERT(m_dwSelectedTaskID);
 
 	GetParent()->SendMessage(WM_CALENDAR_DRAGCHANGE, (WPARAM)GetSnapMode(), m_dwSelectedTaskID);
+}
+
+void CTaskCalendarCtrl::NotifyParentSelChange()
+{
+	GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetRealTaskID(GetSelectedTaskID()));
 }
 
 void CTaskCalendarCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings)
@@ -770,8 +792,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 		ASSERT(dwRealTaskID);
 		
 		// draw selection
-		BOOL bSelTask = (!m_bSavingToImage && (dwRealTaskID == m_dwSelectedTaskID));
-
+		BOOL bSelTask = WantDrawTaskSelected(pTCI);
 		COLORREF crText = pTCI->GetTextColor(bSelTask, bTextColorIsBkgnd);
 
 		if (bSelTask)
@@ -938,6 +959,36 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			CThemed::DrawFrameControl(this, pDC, rOverflow, DFC_SCROLL, DFCS_SCROLLDOWN, rCell);
 		}
 	}
+}
+
+BOOL CTaskCalendarCtrl::WantDrawTaskSelected(const TASKCALITEM* pTCI) const
+{
+	if (m_bSavingToImage)
+		return FALSE;
+
+	DWORD dwTaskID = pTCI->GetTaskID();
+
+	if (dwTaskID == m_dwSelectedTaskID)
+		return TRUE;
+
+	// Show real task as selected when a future item 
+	// is selected and vice versa
+	const TASKCALITEM* pTCISel = GetTaskCalItem(m_dwSelectedTaskID);
+
+	if (!IsCustomDate(pTCISel))
+	{
+		DWORD dwRealID = GetRealTaskID(dwTaskID);
+		DWORD dwSelRealID = GetRealTaskID(m_dwSelectedTaskID);
+
+		if (IsFutureOccurrence(pTCI))
+			return (dwSelRealID == dwRealID);
+
+		if (IsFutureOccurrence(pTCISel))
+			return (dwSelRealID == dwTaskID);
+	}
+
+	// all else
+	return FALSE;
 }
 
 CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
@@ -1262,15 +1313,25 @@ int CTaskCalendarCtrl::RebuildCellTasks(BOOL bIncExtItems)
 {
 	CScopedTraceTimer timing(_T("CTaskCalendarCtrl::RebuildCellTasks()"));
 
-	m_mapExtensionItems.RemoveAll();
-	DWORD dwNextExtID = (((m_dwMaximumTaskID / 1000) + 1) * 1000);
-
 	// Rebuild extension items first because they are
 	// needed for building the cell tasks
 	if (bIncExtItems)
 	{
+		// Cache before clearing the map
+		BOOL bSelItemIsCustomDate = IsCustomDate(m_dwSelectedTaskID);
+
+		m_mapExtensionItems.RemoveAll();
+		DWORD dwNextExtID = (((m_dwMaximumTaskID / 1000) + 1) * 1000);
+
 		RebuildFutureOccurrences(dwNextExtID);
 		RebuildCustomDates(dwNextExtID);
+
+		// Check for disappearing selected 'custom date'
+		if (bSelItemIsCustomDate &&	!HasTask(m_dwSelectedTaskID, FALSE))
+		{
+			m_dwSelectedTaskID = 0;
+			NotifyParentSelChange();
+		}
 	}
 	
 	// Now rebuild the cell tasks
@@ -1353,14 +1414,14 @@ void CTaskCalendarCtrl::RebuildCustomDates(DWORD& dwNextExtID)
 		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
 			continue;
 
-		POSITION posDate = pTCI->mapCustomDates.GetStartPosition();
+		POSITION posDate = pTCI->Dates().Custom().GetStartPosition();
 
 		while (posDate)
 		{
 			CString sCustAttribID;
 			COleDateTime date;
 
-			pTCI->mapCustomDates.GetNextAssoc(posDate, sCustAttribID, date);
+			pTCI->Dates().Custom().GetNextAssoc(posDate, sCustAttribID, date);
 
 			if ((date.m_dt >= dStart) && (date.m_dt < dEnd))
 			{
@@ -1513,7 +1574,13 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient) const
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	DWORD dwTaskID = HitTestTask(ptClient, nHit);
 
-	return ((nHit == TCCHT_NOWHERE) ? 0 : GetRealTaskID(dwTaskID));
+	if (nHit == TCCHT_NOWHERE)
+		return 0;
+	
+	if (!IsCustomDate(dwTaskID))
+		dwTaskID = GetRealTaskID(dwTaskID);
+
+	return dwTaskID;
 }
 
 DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect) const
@@ -1833,6 +1900,11 @@ BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& n
 	return false;
 }
 
+BOOL CTaskCalendarCtrl::GetSelectedTaskLabelRect(CRect& rLabel) const
+{
+	return GetTaskLabelRect(GetRealTaskID(m_dwSelectedTaskID), rLabel);
+}
+
 BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const
 {
 	int nRow, nCol, nTask;
@@ -1854,7 +1926,7 @@ BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const
 		return FALSE;
 
 	DWORD dwRealID = GetRealTaskID(dwTaskID);
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwRealID, FALSE);
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwRealID);
 	
 	if (!pTCI)
 	{
@@ -1966,12 +2038,12 @@ CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawI
 	return m_aContinuousDrawInfo[nItem];
 }
 
-TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID, BOOL bIncExtItems) const
+TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
 {
 	ASSERT(dwTaskID);
 	TASKCALITEM* pTCI = m_mapData.GetTaskItem(dwTaskID);
 
-	if (!pTCI && bIncExtItems && IsExtensionItem(dwTaskID))
+	if (!pTCI && IsExtensionItem(dwTaskID))
 	{
 		pTCI = m_mapExtensionItems.GetTaskItem(dwTaskID);
 		ASSERT(pTCI);
@@ -1987,8 +2059,11 @@ BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 
 	TASKCALITEM* pTCI = NULL;
 	
-	if (!m_mapData.Lookup(dwTaskID, pTCI))
+	if (!m_mapData.Lookup(dwTaskID, pTCI) && 
+		!m_mapExtensionItems.Lookup(dwTaskID, pTCI))
+	{
 		return FALSE;
+	}
 
 	if (bExcludeHidden)
 	{
@@ -2019,12 +2094,14 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNo
 	if (!HasTask(dwTaskID, FALSE)) // don't exclude hidden tasks
 		return FALSE;
 
-	if (dwTaskID != GetSelectedTaskID())
+	DWORD dwSelTaskID = GetSelectedTaskID();
+
+	if ((dwTaskID != dwSelTaskID) && (dwTaskID != GetRealTaskID(dwSelTaskID)))
 	{
 		m_dwSelectedTaskID = dwTaskID;
 
 		if (bNotify)
-			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetSelectedTaskID());
+			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetRealTaskID(GetSelectedTaskID()));
 
 		if (bEnsureVisible)
 			EnsureSelectionVisible();
@@ -2077,8 +2154,11 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	
 	if (dwSelID)
 	{
+		if (!IsCustomDate(dwSelID))
+			dwSelID = GetRealTaskID(dwSelID);
+
 		SetFocus();
-		SelectTask(GetRealTaskID(dwSelID), FALSE, TRUE);
+		SelectTask(dwSelID, FALSE, TRUE);
 
 		const CCalendarCell* pCell = HitTestGridCell(point);
 		ASSERT(pCell);
@@ -2116,6 +2196,27 @@ BOOL CTaskCalendarCtrl::IsExtensionItem(DWORD dwTaskID) const
 	return FALSE;
 }
 
+BOOL CTaskCalendarCtrl::IsFutureOccurrence(DWORD dwTaskID) const
+{
+	if (!IsExtensionItem(dwTaskID))
+		return FALSE;
+
+	return IsFutureOccurrence(GetTaskCalItem(dwTaskID));
+}
+
+BOOL CTaskCalendarCtrl::IsCustomDate(DWORD dwTaskID) const
+{
+	if (!IsExtensionItem(dwTaskID))
+		return FALSE;
+
+	return IsCustomDate(GetTaskCalItem(dwTaskID));
+}
+
+BOOL CTaskCalendarCtrl::IsExtensionItem(const TASKCALITEM* pTCI)
+{
+	return (dynamic_cast<const TASKCALEXTENSIONITEM*>(pTCI) != nullptr);
+}
+
 BOOL CTaskCalendarCtrl::IsFutureOccurrence(const TASKCALITEM* pTCI)
 {
 	return (dynamic_cast<const TASKCALFUTUREOCURRENCE*>(pTCI) != nullptr);
@@ -2131,17 +2232,20 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	ASSERT(!m_bReadOnly);
 
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
+	//m_dwSelectedTaskID = 0;
+
 	DWORD dwTaskID = HitTestTask(ptCursor, nHit);
 	
-	BOOL bCanDrag = CanDragTask(dwTaskID, nHit);
-
-	if (bCanDrag <= 0)
+	if (!CanDragTask(dwTaskID, nHit))
 		return FALSE;
+
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+	ASSERT(pTCI);
 
 	// when not drawing tasks continuously, it's possible
 	// for the act of selecting a task to change its
 	// position and thus its hit-test result
-	if (dwTaskID != m_dwSelectedTaskID)
+	if ((dwTaskID != m_dwSelectedTaskID) && !IsCustomDate(pTCI))
 		return FALSE;
 
 	if (nHit == TCCHT_BEGIN || nHit == TCCHT_END)
@@ -2163,8 +2267,9 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 		return FALSE;
 	}
 	
-	m_tciPreDrag = *(GetTaskCalItem(dwTaskID));
+	m_tcidPreDrag = pTCI->Dates();
 	m_ptDragOrigin = ptCursor;
+
 	VERIFY(GetDateFromPoint(m_ptDragOrigin, m_dtDragOrigin));
 
 	// keep parent informed
@@ -2207,16 +2312,16 @@ BOOL CTaskCalendarCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& d
 		// offset from pre-drag position
 		double dOffset = (dtDrag.m_dt - m_dtDragOrigin.m_dt);
 
-		if (m_tciPreDrag.IsStartDateSet())
+		if (m_tcidPreDrag.IsStartSet())
 		{
-			dtDrag = (m_tciPreDrag.GetAnyStartDate().m_dt + dOffset);
+			dtDrag = (m_tcidPreDrag.GetAnyStart().m_dt + dOffset);
 			bEndOfDay = FALSE;
 		}
 		else
 		{
-			ASSERT(m_tciPreDrag.IsEndDateSet());
+			ASSERT(m_tcidPreDrag.IsEndSet());
 
-			dtDrag = (m_tciPreDrag.GetAnyEndDate().m_dt + dOffset);
+			dtDrag = (m_tcidPreDrag.GetAnyEnd().m_dt + dOffset);
 			bEndOfDay = TRUE;
 		}
 		
@@ -2316,104 +2421,101 @@ void CTaskCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 BOOL CTaskCalendarCtrl::UpdateDragging(const CPoint& ptCursor)
 {
-	if (IsDragging())
+	if (!IsDragging())
+		return FALSE;
+
+	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+	ASSERT(pTCI && !IsFutureOccurrence(pTCI));
+
+	if (IsValidDrag(ptCursor))
 	{
-		TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
-		ASSERT(pTCI);
-			
-		if (IsValidDrag(ptCursor))
+		COleDateTime dtDrag;
+
+		if (GetValidDragDate(ptCursor, dtDrag))
 		{
-			COleDateTime dtDrag;
-
-			if (GetValidDragDate(ptCursor, dtDrag))
+			// prevent the start and end dates from overlapping
+			if (m_bDraggingStart)
 			{
-				// prevent the start and end dates from overlapping
-				if (m_bDraggingStart)
+				// but only if the due date is set
+				if (pTCI->IsEndDateSet())
+					pTCI->SetStartDate(min(dtDrag.m_dt, pTCI->GetAnyEndDate().m_dt - ONE_HOUR));
+				else
+					pTCI->SetStartDate(dtDrag);
+			}
+			else if (m_bDraggingEnd)
+			{
+				// but only if the start date is set
+				if (pTCI->IsStartDateSet())
+					pTCI->SetDueDate(max(dtDrag.m_dt, pTCI->GetAnyStartDate().m_dt + ONE_HOUR));
+				else
+					pTCI->SetDueDate(dtDrag);
+			}
+			else // m_bDragging
+			{
+				if (pTCI->IsStartDateSet() && pTCI->IsEndDateSet())
 				{
-					// but only if the due date is set
-					if (pTCI->IsEndDateSet())
-						pTCI->SetStartDate(min(dtDrag.m_dt, pTCI->GetAnyEndDate().m_dt - ONE_HOUR));
-					else
-						pTCI->SetStartDate(dtDrag);
+					COleDateTime dtStart = pTCI->GetAnyStartDate();
+					COleDateTime dtEnd = pTCI->GetAnyEndDate();
+
+					// If the end date is currently at 'end of day'
+					// then bump it to the start of the next day so
+					// that the calculated duration is accurate
+					if (CDateHelper::GetEndOfDay(dtEnd) == dtEnd)
+						dtEnd = CDateHelper::GetStartOfNextDay(dtEnd);
+
+					double dDuration = (dtEnd.m_dt - dtStart.m_dt);
+
+					pTCI->SetStartDate(dtDrag);
+
+					// If end date would fall on the start of a new day
+					// move it to the previous day
+					dtEnd = (dtDrag.m_dt + dDuration);
+
+					if (!CDateHelper::DateHasTime(dtEnd))
+						dtEnd = CDateHelper::GetEndOfPreviousDay(dtEnd);
+
+					pTCI->SetDueDate(dtEnd);
 				}
-				else if (m_bDraggingEnd)
+				else if (pTCI->IsStartDateSet())
 				{
-					// but only if the start date is set
-					if (pTCI->IsStartDateSet())
-						pTCI->SetDueDate(max(dtDrag.m_dt, pTCI->GetAnyStartDate().m_dt + ONE_HOUR));
-					else
-						pTCI->SetDueDate(dtDrag);
+					pTCI->SetStartDate(dtDrag);
 				}
-				else // m_bDragging
+				else if (pTCI->IsEndDateSet())
 				{
-					if (pTCI->IsStartDateSet() && pTCI->IsEndDateSet())
-					{
-						COleDateTime dtStart = pTCI->GetAnyStartDate();
-						COleDateTime dtEnd = pTCI->GetAnyEndDate();
-
-						// If the end date is currently at 'end of day'
-						// then bump it to the start of the next day so
-						// that the calculated duration is accurate
-						if (CDateHelper::GetEndOfDay(dtEnd) == dtEnd)
-							dtEnd = CDateHelper::GetStartOfNextDay(dtEnd);
-
-						double dDuration = (dtEnd.m_dt - dtStart.m_dt);
-						
-						pTCI->SetStartDate(dtDrag);
-
-						// If end date would fall on the start of a new day
-						// move it to the previous day
-						dtEnd = (dtDrag.m_dt + dDuration);
-
-						if (!CDateHelper::DateHasTime(dtEnd))
-							dtEnd = CDateHelper::GetEndOfPreviousDay(dtEnd);
-						
-						pTCI->SetDueDate(dtEnd);
-					}
-					else if (pTCI->IsStartDateSet())
-					{
-						pTCI->SetStartDate(dtDrag);
-					}
-					else if (pTCI->IsEndDateSet())
-					{
-						pTCI->SetDueDate(dtDrag);
-					}
+					pTCI->SetDueDate(dtDrag);
 				}
 			}
-
-			// Rebuild the cell tasks because the task may have moved cells
-			// but without rebuilding extension tasks because we do that at the 
-			// end of the drag only
-			RebuildCellTasks(FALSE);
-
-			// Select the cell under the mouse because we know it must contain the dragged task
-			int nRow, nCol;
-			
-			if (HitTestGridCell(ptCursor, nRow, nCol))
-				SelectGridCell(nRow, nCol);
-
-			EnsureSelectionVisible();
-		}
-		else
-		{
-			*pTCI = m_tciPreDrag;
 		}
 
-		// Recalc dates if either start/end is not set
-		if (!pTCI->IsStartDateSet() || !pTCI->IsEndDateSet())
-			pTCI->RecalcDates(m_dwOptions);
-			
-		Invalidate();
-		UpdateWindow();
+		// Rebuild the cell tasks because the task may have moved cells
+		// but without rebuilding extension tasks because we do that at the 
+		// end of the drag only
+		RebuildCellTasks(FALSE);
 
-		// keep parent informed
-		NotifyParentDragChange();
+		// Select the cell under the mouse because we know it must contain the dragged task
+		int nRow, nCol;
 
-		return TRUE;
+		if (HitTestGridCell(ptCursor, nRow, nCol))
+			SelectGridCell(nRow, nCol);
+
+		EnsureSelectionVisible();
+	}
+	else
+	{
+		*pTCI = m_tcidPreDrag;
 	}
 
-	// else
-	return FALSE;
+	// Recalc dates if either start/end is not set
+	if (!pTCI->IsStartDateSet() || !pTCI->IsEndDateSet())
+		pTCI->RecalcDates(m_dwOptions);
+
+	Invalidate();
+	UpdateWindow();
+
+	// keep parent informed
+	NotifyParentDragChange();
+
+	return TRUE;
 }
 
 void CTaskCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point) 
@@ -2426,22 +2528,45 @@ void CTaskCalendarCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 {
-	if (IsDragging())
+	if (!IsDragging())
+		return FALSE;
+
+	// dropping outside the calendar is a cancel
+	CRect rLimits;
+	GetAllowableDragLimits(rLimits);
+
+	TCC_HITTEST nDragWhat = TCCHT_NOWHERE;
+	CString sCustAttribID;
+
+	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+	ASSERT(pTCI);
+
+	BOOL bExtItem = IsExtensionItem(pTCI);
+
+	if (!rLimits.PtInRect(ptCursor) || !IsValidDrag(ptCursor))
 	{
-		TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
-		ASSERT(pTCI);
+		*pTCI = m_tcidPreDrag;
+	}
+	else if (bExtItem)
+	{
+		const TASKCALCUSTOMDATE* pTCICust = dynamic_cast<const TASKCALCUSTOMDATE*>(pTCI);
+		ASSERT(pTCICust);
 
-		// dropping outside the calendar is a cancel
-		CRect rLimits;
-		GetAllowableDragLimits(rLimits);
-
-		TCC_HITTEST nDragWhat = TCCHT_NOWHERE;
-
-		if (!rLimits.PtInRect(ptCursor) || !IsValidDrag(ptCursor))
+		if (pTCICust)
 		{
-			*pTCI = m_tciPreDrag;
+			sCustAttribID = pTCICust->sCustomAttribID;
+			nDragWhat = TCCHT_MIDDLE; // always
+
+			// copy changes back to real task
+			TASKCALITEM* pTCIReal = GetTaskCalItem(pTCICust->dwRealTaskID);
+			ASSERT(pTCIReal);
+ 
+			pTCIReal->SetCustomDate(pTCICust->sCustomAttribID, pTCICust->GetDate());
 		}
-		else if (m_bDraggingStart)
+	}
+	else // real task
+	{
+		if (m_bDraggingStart)
 		{
 			nDragWhat = TCCHT_BEGIN;
 		}
@@ -2468,29 +2593,26 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 				nDragWhat = TCCHT_MIDDLE;
 			}
 		}
-
-		// cleanup
-		m_bDraggingStart = m_bDraggingEnd = m_bDragging = FALSE;
-		ReleaseCapture();
-
-		// keep parent informed
-		if (!NotifyParentDateChange(nDragWhat))
-		{
-			*pTCI = m_tciPreDrag;
-		}
-		else if (m_mapRecurringTaskIDs.Has(m_dwSelectedTaskID))
-		{
-			RebuildCellTasks();
-		}
-
-		Invalidate(FALSE);
-		NotifyParentDragChange();
-
-		return TRUE;
 	}
 
-	// else
-	return FALSE;
+	// cleanup
+	m_bDraggingStart = m_bDraggingEnd = m_bDragging = FALSE;
+	ReleaseCapture();
+
+	// keep parent informed
+	if (!NotifyParentDateChange(nDragWhat, sCustAttribID))
+	{
+		*pTCI = m_tcidPreDrag;
+	}
+	else if (m_mapRecurringTaskIDs.Has(m_dwSelectedTaskID) || bExtItem)
+	{
+		RebuildCellTasks();
+	}
+
+	Invalidate(FALSE);
+	NotifyParentDragChange();
+
+	return TRUE;
 }
 
 BOOL CTaskCalendarCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
@@ -2498,7 +2620,9 @@ BOOL CTaskCalendarCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime
 	if (GetSelectedTaskID() == 0)
 		return FALSE;
 
-	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+	DWORD dwRealTaskID = GetRealTaskID(m_dwSelectedTaskID);
+
+	TASKCALITEM* pTCI = GetTaskCalItem(dwRealTaskID);
 	ASSERT(pTCI);
 
 	if (!pTCI)
@@ -2514,6 +2638,21 @@ BOOL CTaskCalendarCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime
 		dtDue = dtEndOfDueDay;
 
 	return TRUE;
+}
+
+BOOL CTaskCalendarCtrl::GetSelectedTaskCustomDate(const CString& sCustAttribID, COleDateTime& date) const
+{
+	if (GetSelectedTaskID() == 0)
+		return FALSE;
+
+	TASKCALITEM* pTCI = GetTaskCalItem(GetRealTaskID(m_dwSelectedTaskID));
+	ASSERT(pTCI);
+
+	if (!pTCI)
+		return FALSE;
+
+	date = pTCI->GetCustomDate(sCustAttribID);
+	return CDateHelper::IsDateSet(date);
 }
 
 BOOL CTaskCalendarCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const
@@ -2543,7 +2682,7 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 {
 	ASSERT((nHit == TCCHT_NOWHERE) || (dwTaskID != 0));
 	
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // inc extension tasks
+	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
 	// Sanity check
 	if (!pTCI)
@@ -2577,7 +2716,7 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 	}
 
 	// all else
-	return -1;
+	return FALSE;
 }
 
 BOOL CTaskCalendarCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message) 
@@ -2612,7 +2751,7 @@ BOOL CTaskCalendarCtrl::SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const
 	{
 		if (!CanDragTask(dwTaskID, nHit))
 		{
-			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // inc extension items
+			const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID); 
 			ASSERT(pTCI);
 
 			if (pTCI && pTCI->bLocked)
@@ -2759,15 +2898,16 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 	ASSERT(IsDragging());
 
 	// cancel drag, restoring original task dates
-	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID); 
 	ASSERT(pTCI);
-	
-	*pTCI = m_tciPreDrag;
+
+	*pTCI = m_tcidPreDrag;
 	m_bDragging = m_bDraggingStart = m_bDraggingEnd = FALSE;
-	
+
 	if (bReleaseCapture)
 		ReleaseCapture();
 
+	RebuildCellTasks(IsExtensionItem(m_dwSelectedTaskID));
 	Invalidate(FALSE);
 	UpdateWindow();
 
@@ -2846,7 +2986,7 @@ int CTaskCalendarCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	// Don't show tooltip when hovering over 'ends'
 	if (dwTaskID && (nHit == TCCHT_MIDDLE))
 	{
-		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include extension items
+		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID); 
 		ASSERT(pTCI);
 
 		CString sTooltip;
@@ -2917,19 +3057,18 @@ void CTaskCalendarCtrl::OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult)
 		return;
 	}
 	
-	// Set the font first, bold for top level items
-	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID, TRUE); // include extension items
-
-	if (!pTCI)
-	{
-		ASSERT(0);
-		return;
-	}
-
 	// Calculate label rect for real tasks only
 	if (!IsExtensionItem(dwTaskID))
 	{
-		// Embolden top-level tooltips
+		// Set the font first, bold for top level items
+		const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
+
+		if (!pTCI)
+		{
+			ASSERT(0);
+			return;
+		}
+
 		m_tooltip.SetFont(m_fonts.GetFont(pTCI->bTopLevel ? GMFS_BOLD : 0));
 
 		CRect rLabel;
