@@ -39,6 +39,7 @@ static TDLCAD_TYPE DATA_TYPES[] =
 	{ IDS_CAD_ICON,			TDCCA_ICON },
 	{ IDS_CAD_FILELINK,		TDCCA_FILELINK },
 	{ IDS_CAD_TIMEPERIOD,	TDCCA_TIMEPERIOD },
+	{ IDS_CAD_CALCULATION,	TDCCA_CALCULATION },
 };
 const int NUM_DATATYPES = sizeof(DATA_TYPES) / sizeof(TDLCAD_TYPE);
 
@@ -93,12 +94,12 @@ const UINT NUM_SYMBOLS = sizeof(SYMBOLS) / sizeof(TCHAR);
 /////////////////////////////////////////////////////////////////////////////
 // CCustomAttributeListPage dialog
 
-CCustomAttributeListPage::CCustomAttributeListPage(const CToDoCtrl& tdc, COLORREF crBackColor)
+CCustomAttributeListPage::CCustomAttributeListPage(const CToDoCtrl& tdc)
 	:
 	m_btInsertSymbol(1, 0, (MBS_DOWN | MBS_RETURNCMD)),
 	m_tdc(tdc)
 {
-	//{{AFX_DATA_INIT(CTDLCustomAttributeDlg)
+	//{{AFX_DATA_INIT(CCustomAttributeListPage)
 	//}}AFX_DATA_INIT
 	m_dwListType = TDCCA_NOTALIST;
 	m_dwDataType = TDCCA_STRING;
@@ -107,7 +108,7 @@ CCustomAttributeListPage::CCustomAttributeListPage(const CToDoCtrl& tdc, COLORRE
 void CCustomAttributeListPage::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CTDLCustomAttributeDlg)
+	//{{AFX_DATA_MAP(CCustomAttributeListPage)
 	DDX_Control(pDX, IDC_LISTTYPE, m_cbListType);
 	DDX_Text(pDX, IDC_DEFAULTLISTDATA, m_sDefaultListData);
 	DDX_Control(pDX, IDC_INSERTSYMBOL, m_btInsertSymbol);
@@ -128,7 +129,7 @@ void CCustomAttributeListPage::DoDataExchange(CDataExchange* pDX)
 
 
 BEGIN_MESSAGE_MAP(CCustomAttributeListPage, CDialog)
-	//{{AFX_MSG_MAP(CTDLCustomAttributeDlg)
+	//{{AFX_MSG_MAP(CCustomAttributeListPage)
 	ON_CBN_SELCHANGE(IDC_LISTTYPE, OnSelchangeListtype)
 	ON_EN_CHANGE(IDC_DEFAULTLISTDATA, OnChangeDefaultlistdata)
 	ON_BN_CLICKED(IDC_BROWSEIMAGES, OnBrowseimages)
@@ -187,6 +188,7 @@ void CCustomAttributeListPage::BuildListCombo()
 		case TDCCA_DATE:
 		case TDCCA_BOOL:
 		case TDCCA_TIMEPERIOD:
+		case TDCCA_CALCULATION:
 			if (dwListType != TDCCA_NOTALIST)
 			{
 				continue;
@@ -300,6 +302,7 @@ void CCustomAttributeListPage::EnableControls()
 	case TDCCA_DATE:
 	case TDCCA_BOOL:
 	case TDCCA_TIMEPERIOD:
+	case TDCCA_CALCULATION:
 		bEnableList = bEnableListData = FALSE;
 		break;
 
@@ -336,6 +339,7 @@ void CCustomAttributeListPage::UpdateListDataMask()
 	case TDCCA_ICON:
 	case TDCCA_FILELINK:
 	case TDCCA_TIMEPERIOD:
+	case TDCCA_CALCULATION:
 		m_eListData.ClearMask();
 		break;
 
@@ -364,7 +368,7 @@ void CCustomAttributeListPage::OnSelchangeListtype()
 	EnableControls();
 
 	// Forward to parent
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_LISTTYPE, CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
 }
 
 void CCustomAttributeListPage::OnChangeDefaultlistdata()
@@ -372,7 +376,7 @@ void CCustomAttributeListPage::OnChangeDefaultlistdata()
 	UpdateData();
 
 	// Forward to parent
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), EN_CHANGE), (LPARAM)GetSafeHwnd());
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_DEFAULTLISTDATA, EN_CHANGE), (LPARAM)GetSafeHwnd());
 }
 
 void CCustomAttributeListPage::OnInsertsymbol()
@@ -475,16 +479,138 @@ void CCustomAttributeListPage::OnBrowseimages()
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// CCustomAttributeCalcPage dialog
+
+CCustomAttributeCalcPage::CCustomAttributeCalcPage()
+{
+	//{{AFX_DATA_INIT(CCustomAttributeCalcPage)
+	//}}AFX_DATA_INIT
+}
+
+void CCustomAttributeCalcPage::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CCustomAttributeCalcPage)
+	DDX_Control(pDX, IDC_FIRSTOPERAND, m_cbFirstOperand);
+	DDX_Control(pDX, IDC_OPERATOR, m_cbOperators);
+	DDX_Control(pDX, IDC_SECONDOPERAND, m_cbSecondOperand);
+	//}}AFX_DATA_MAP
+
+}
+
+
+BEGIN_MESSAGE_MAP(CCustomAttributeCalcPage, CDialog)
+	//{{AFX_MSG_MAP(CCustomAttributeCalcPage)
+	ON_CBN_SELCHANGE(IDC_FIRSTOPERAND, OnSelChangeFirstOperand)
+	ON_CBN_SELCHANGE(IDC_OPERATOR, OnSelChangeOperator)
+	ON_CBN_SELCHANGE(IDC_SECONDOPERAND, OnSelChangeSecondOperand)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLCustomAttributeDlg message handlers
+
+BOOL CCustomAttributeCalcPage::Create(CWnd* pParent)
+{
+	if (!CDialog::Create(IDD_CUSTOMATTRIBCALC_PAGE, pParent))
+		return FALSE;
+
+	CRect rHost = CDialogHelper::GetCtrlRect(pParent, IDC_PAGEHOST);
+	MoveWindow(rHost);
+
+	return TRUE;
+}
+
+BOOL CCustomAttributeCalcPage::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	// disable localization because we do it ourselves by using CEnString
+	CLocalizer::EnableTranslation(m_cbFirstOperand, FALSE);
+	CLocalizer::EnableTranslation(m_cbOperators, FALSE);
+	CLocalizer::EnableTranslation(m_cbSecondOperand, FALSE);
+
+	BuildFirstOperandCombo();
+	BuildOperatorCombo();
+	BuildSecondOperandCombo();
+	EnableControls();
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CCustomAttributeCalcPage::BuildFirstOperandCombo()
+{
+	m_cbFirstOperand.ResetContent();
+
+	// TODO
+
+	// restore selection
+// 	if (CDialogHelper::SelectItem(m_cbListType, m_dwListType) == CB_ERR)
+// 		SetListType(TDCCA_NOTALIST);
+}
+
+void CCustomAttributeCalcPage::BuildOperatorCombo()
+{
+	m_cbOperators.ResetContent();
+
+	// TODO
+
+	// restore selection
+// 	if (CDialogHelper::SelectItem(m_cbListType, m_dwListType) == CB_ERR)
+// 		SetListType(TDCCA_NOTALIST);
+}
+
+void CCustomAttributeCalcPage::BuildSecondOperandCombo()
+{
+	m_cbSecondOperand.ResetContent();
+
+	// TODO
+
+	// restore selection
+// 	if (CDialogHelper::SelectItem(m_cbListType, m_dwListType) == CB_ERR)
+// 		SetListType(TDCCA_NOTALIST);
+}
+
+void CCustomAttributeCalcPage::EnableControls()
+{
+	// TODO
+}
+
+void CCustomAttributeCalcPage::OnSelChangeFirstOperand()
+{
+	UpdateData();
+
+	// Forward to parent
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_FIRSTOPERAND, CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+}
+
+void CCustomAttributeCalcPage::OnSelChangeOperator()
+{
+	UpdateData();
+
+	// Forward to parent
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_OPERATOR, CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+}
+
+void CCustomAttributeCalcPage::OnSelChangeSecondOperand()
+{
+	UpdateData();
+
+	// Forward to parent
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_SECONDOPERAND, CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttributeDlg dialog
 
-CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, const CUIThemeFile& theme, CWnd* pParent /*=NULL*/)
+CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLCustomAttributeDlg::IDD, _T("CustomAttributes"), pParent), 
 	m_eTaskfile(FES_NOBROWSE), 
-	m_theme(theme),
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),
 	m_sTaskFile(tdc.GetFilePath()),
-	m_pageList(tdc, m_theme.crAppBackLight),
+	m_pageList(tdc),
 	m_tdc(tdc)
 {
 	//{{AFX_DATA_INIT(CTDLCustomAttributeDlg)
@@ -566,7 +692,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttributeDlg message handlers
 
-BOOL CTDLCustomAttributeDlg::OnInitDialog() 
+BOOL CTDLCustomAttributeDlg::OnInitDialog()
 {
 	CTDLDialog::OnInitDialog();
 
@@ -575,6 +701,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	CLocalizer::EnableTranslation(ListView_GetHeader(m_lcAttributes), FALSE);
 
 	VERIFY(m_pageList.Create(this));
+	VERIFY(m_pageCalc.Create(this));
 	VERIFY(InitializeToolbar());
 
 	BuildDataTypeCombo();
@@ -807,6 +934,9 @@ void CTDLCustomAttributeDlg::EnableControls()
 
 	m_pageList.EnableWindow(!bCalculationType);
 	m_pageList.ShowWindow(bCalculationType ? SW_HIDE : SW_SHOW);
+
+	m_pageCalc.EnableWindow(bCalculationType);
+	m_pageCalc.ShowWindow(bCalculationType ? SW_SHOW : SW_HIDE);
 }
 
 int CTDLCustomAttributeDlg::GetCurSel()

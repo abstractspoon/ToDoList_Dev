@@ -156,6 +156,7 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 			// these don't have controls
 		case TDCCA_BOOL:
 		case TDCCA_ICON:
+		case TDCCA_CALCULATION:
 			break;
 
 		default:
@@ -653,6 +654,7 @@ BOOL CTDCCustomAttributeUIHelper::RebuildControls(CWnd* pParent,
 		switch (attribDef.GetDataType())
 		{
 		case TDCCA_BOOL:
+		case TDCCA_CALCULATION:
 			break;
 
 		case TDCCA_ICON:

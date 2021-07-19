@@ -263,6 +263,11 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 	case TDCCA_ICON:
 		break;
 
+	case TDCCA_CALCULATION:
+		// Tricky depending on the type of the operands
+		// TODO
+		break;
+
 	default:
 		ASSERT(0);
 		break;
@@ -449,6 +454,8 @@ DWORD TDCCUSTOMATTRIBUTEDEFINITION::ValidateListType(DWORD dwDataType, DWORD dwL
 
 	case TDCCA_DATE:
 	case TDCCA_TIMEPERIOD:
+	case TDCCA_BOOL:
+	case TDCCA_CALCULATION:
 		dwListType = TDCCA_NOTALIST;
 		break;
 
@@ -457,13 +464,6 @@ DWORD TDCCUSTOMATTRIBUTEDEFINITION::ValidateListType(DWORD dwDataType, DWORD dwL
 		{
 			if ((dwListType != TDCCA_FIXEDLIST) && (dwListType != TDCCA_AUTOLIST))
 				dwListType = TDCCA_FIXEDLIST;
-		}
-		break;
-
-	case TDCCA_BOOL:
-		if (dwListType)
-		{
-			dwListType = TDCCA_FIXEDLIST;
 		}
 		break;
 

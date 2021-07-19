@@ -13072,7 +13072,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 
 	if (!tdc.IsReadOnly())
 	{
-		CTDLCustomAttributeDlg dialog(tdc, m_theme);
+		CTDLCustomAttributeDlg dialog(tdc);
 
 		if (dialog.DoModal() == IDOK)
 		{

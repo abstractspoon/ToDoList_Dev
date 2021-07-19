@@ -149,6 +149,7 @@
 #define IDI_QUICKFIND_NEXT              322
 #define IDI_QUICKFIND_PREV              323
 #define IDD_CUSTOMATTRIBLIST_PAGE       324
+#define IDD_CUSTOMATTRIBCALC_PAGE       325
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -622,6 +623,7 @@
 #define IDC_PAGE_TITLE                  1341
 #define IDC_DATATYPE                    1342
 #define IDC_LISTTYPE                    1343
+#define IDC_OPERATOR                    1344
 #define IDC_ATTRIBUTELIST               1345
 #define IDC_TASKFILE                    1346
 #define IDC_ALIGNMENT                   1347
@@ -835,6 +837,9 @@
 #define IDC_AUTODISPLAYREPORT           1548
 #define IDC_LISTTYPE_LABEL              1549
 #define IDC_DEFLISTDATA_LABEL           1550
+#define IDC_FIRSTOPERAND                1551
+#define IDC_SECONDOPERAND               1552
+#define IDC_SUMMARY                     1554
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2419,6 +2424,7 @@
 #define IDS_FOCUS_TIMETRACKER           51595
 #define IDS_FILTER_ANYSTATUS            51596
 #define IDS_FILTER_ANYVERSION           51597
+#define IDS_CAD_CALCULATION             51598
 
 // Next default values for new objects
 // 
@@ -2426,7 +2432,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        327
 #define _APS_NEXT_COMMAND_VALUE         34746
-#define _APS_NEXT_CONTROL_VALUE         1552
+#define _APS_NEXT_CONTROL_VALUE         1555
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

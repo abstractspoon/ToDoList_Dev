@@ -859,8 +859,9 @@ enum // custom attribute data types
 	TDCCA_FILELINK			= 0x0006,
 	TDCCA_TIMEPERIOD		= 0x0007,
 	TDCCA_FRACTION			= 0x0008,
+	TDCCA_CALCULATION		= 0x0009,
 
-	TDCCA_DATAMASK			= 0x00ff,
+	TDCCA_DATAMASK			= 0x00ff, // 256 possible types!
 };
 
 enum // custom attribute list types

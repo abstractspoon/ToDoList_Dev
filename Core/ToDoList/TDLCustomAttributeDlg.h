@@ -23,12 +23,13 @@
 #include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////////
+// CCustomAttributeListPage dialog
 
 class CCustomAttributeListPage : public CDialog
 {
 // Construction
 public:
-	CCustomAttributeListPage(const CToDoCtrl& tdc, COLORREF crBackColor);
+	CCustomAttributeListPage(const CToDoCtrl& tdc);
 
 	BOOL Create(CWnd* pParent);
 
@@ -43,7 +44,7 @@ public:
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CTDLCustomAttributeDlg)
+	//{{AFX_DATA(CCustomAttributeListPage)
 	CComboBox	m_cbListType;
 	CString	m_sDefaultListData;
 	//}}AFX_DATA
@@ -56,7 +57,7 @@ protected:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTDLCustomAttributeDlg)
+	//{{AFX_VIRTUAL(CCustomAttributeListPage)
 protected:
 	//}}AFX_VIRTUAL
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -64,9 +65,8 @@ protected:
 
 // Implementation
 protected:
-
 	// Generated message map functions
-	//{{AFX_MSG(CTDLCustomAttributeDlg)
+	//{{AFX_MSG(CCustomAttributeListPage)
 	afx_msg void OnSelchangeListtype();
 	afx_msg void OnChangeDefaultlistdata();
 	afx_msg void OnBrowseimages();
@@ -81,6 +81,55 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////
+// CCustomAttributeCalcPage dialog
+
+class CCustomAttributeCalcPage : public CDialog
+{
+// Construction
+public:
+	CCustomAttributeCalcPage();
+
+	BOOL Create(CWnd* pParent);
+
+	// TODO
+
+protected:
+// Dialog Data
+	//{{AFX_DATA(CTDLCustomAttributeDlg)
+	CComboBox	m_cbFirstOperand;
+	CComboBox	m_cbOperators;
+	CComboBox	m_cbSecondOperand;
+	//}}AFX_DATA
+	CString m_sFirstOperand;
+	CString m_sOperator;
+	CString m_sSecondOperand;
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CCustomAttributeCalcPage)
+protected:
+	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+
+// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(CCustomAttributeCalcPage)
+	afx_msg void OnSelChangeFirstOperand();
+	afx_msg void OnSelChangeOperator();
+	afx_msg void OnSelChangeSecondOperand();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+	void BuildFirstOperandCombo();
+	void BuildOperatorCombo();
+	void BuildSecondOperandCombo();
+	void EnableControls();
+
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttributeDlg dialog
 
 class CTDLCustomAttributeDlg : public CTDLDialog
@@ -88,7 +137,6 @@ class CTDLCustomAttributeDlg : public CTDLDialog
 // Construction
 public:
 	CTDLCustomAttributeDlg(const CToDoCtrl& tdc, 
-							const CUIThemeFile& theme, 
 							CWnd* pParent = NULL);   // standard constructor
 
 	int GetAttributes(CTDCCustomAttribDefinitionArray& aAttrib) const;
@@ -111,7 +159,6 @@ protected:
 	CMaskEdit	m_eUniqueID;
 	CComboBox	m_cbDataType;
 	CComboBox	m_cbAlign;
-	CUIThemeFile m_theme;
 	CTDLCustomAttribFeatureComboBox	m_cbFeatures;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
@@ -119,6 +166,8 @@ protected:
 	CEnEdit		m_eColumnTitle;
 
 	CCustomAttributeListPage m_pageList;
+	CCustomAttributeCalcPage m_pageCalc;
+
 	const CToDoCtrl& m_tdc;
 
 // Overrides
