@@ -7,13 +7,12 @@
 // tdlfindtaskattributecombobox.h : header file
 //
 
-#include "tdcenum.h"
-#include "tdcstruct.h"
+#include "TDLAttributeComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTaskAttributeComboBox window
 
-class CTDLFindTaskAttributeComboBox : public CComboBox
+class CTDLFindTaskAttributeComboBox : public CTDLAttributeComboBox
 {
 // Construction
 public:
@@ -21,13 +20,10 @@ public:
 
 // Operations
 public:
-	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
-
 	BOOL SelectAttribute(const SEARCHPARAM& sp);
 	BOOL GetSelectedAttribute(SEARCHPARAM& sp) const;
 	BOOL SelectedAttributeIsDate() const;
 
-	CString GetSelectedAttributeText() const;
 	CString GetAttributeName(const SEARCHPARAM& sp) const;
 
 	// Attributes
@@ -50,14 +46,6 @@ protected:
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()
-
-protected:
-	TDC_ATTRIBUTE GetSelectedAttribute() const;
-	void BuildCombo();
-	DWORD EncodeItemData(TDC_ATTRIBUTE nAttrib, BOOL bRelativeDate = FALSE) const;
-	void DecodeItemData(DWORD dwItemData, TDC_ATTRIBUTE& nAttrib, BOOL& bRelativeDate) const;
-	BOOL AttributeIsDate(TDC_ATTRIBUTE attrib) const;
-	BOOL AttributeIsTime(TDC_ATTRIBUTE attrib) const;
 
 };
 
