@@ -94,10 +94,10 @@ const UINT NUM_SYMBOLS = sizeof(SYMBOLS) / sizeof(TCHAR);
 /////////////////////////////////////////////////////////////////////////////
 // CCustomAttributeListPage dialog
 
-CCustomAttributeListPage::CCustomAttributeListPage(const CToDoCtrl& tdc)
+CCustomAttributeListPage::CCustomAttributeListPage(const CTDCImageList& ilTaskIcons)
 	:
 	m_btInsertSymbol(1, 0, (MBS_DOWN | MBS_RETURNCMD)),
-	m_tdc(tdc)
+	m_ilTaskIcons(ilTaskIcons)
 {
 	//{{AFX_DATA_INIT(CCustomAttributeListPage)
 	//}}AFX_DATA_INIT
@@ -448,7 +448,7 @@ void CCustomAttributeListPage::OnBrowseimages()
 	}
 
 	// show dialog and rebuild list
-	CTDLTaskIconDlg dialog(m_tdc.GetTaskIconImageList(), aImages/*, (CWnd*)&m_tdc*/);
+	CTDLTaskIconDlg dialog(m_ilTaskIcons, aImages/*, (CWnd*)&m_tdc*/);
 
 	if (dialog.DoModal() == IDOK)
 	{
@@ -604,14 +604,19 @@ void CCustomAttributeCalcPage::OnSelChangeSecondOperand()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttributeDlg dialog
 
-CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, CWnd* pParent /*=NULL*/)
+CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
+											   const CTDCCustomAttribDefinitionArray& aAttribDef,
+											   const CTDCImageList& ilTaskIcons,
+											   const CImageList& ilCheckBoxes, 
+											   CWnd* pParent)
 	: 
 	CTDLDialog(CTDLCustomAttributeDlg::IDD, _T("CustomAttributes"), pParent), 
 	m_eTaskfile(FES_NOBROWSE), 
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),
-	m_sTaskFile(tdc.GetFilePath()),
-	m_pageList(tdc),
-	m_tdc(tdc)
+	m_sTaskFile(sTaskFile),
+	m_pageList(ilTaskIcons),
+	m_ilCheckBoxes(ilCheckBoxes),
+	m_aAttribDef(aAttribDef)
 {
 	//{{AFX_DATA_INIT(CTDLCustomAttributeDlg)
 	m_sUniqueID = _T("");
@@ -620,9 +625,7 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, CWnd* pPare
 	m_dwDataType = TDCCA_STRING;
 	m_dwFeatures = TDCCAF_SORT;
 	m_nAlignment = DT_LEFT;
-
-	tdc.GetCustomAttributeDefs(m_aAttrib);
-
+	
 #ifdef _UNICODE
 	m_eColumnTitle.AddButton(1, 0x2211, CEnString(IDS_SYMBOLS), CALC_BTNWIDTH);
 	m_eColumnTitle.SetDropMenuButton(1);
@@ -720,16 +723,16 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	ListView_SetExtendedListViewStyleEx(m_lcAttributes, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(m_lcAttributes, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
 
-	for (int nAttrib = 0; nAttrib < m_aAttrib.GetSize(); nAttrib++)
+	for (int nAttrib = 0; nAttrib < m_aAttribDef.GetSize(); nAttrib++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAttrib];
 		VERIFY (AddAttributeToListCtrl(attrib, FALSE) >= 0);
 	}
 
 	m_lcAttributes.SetItemState(0, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 	OnItemchangedAttriblist(NULL, NULL);
 
-	ListView_SetImageList(m_lcAttributes, m_tdc.GetCheckImageList(), LVSIL_SMALL);
+	ListView_SetImageList(m_lcAttributes, m_ilCheckBoxes, LVSIL_SMALL);
 	CThemed::SetWindowTheme(&m_lcAttributes, _T("Explorer"));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -793,18 +796,18 @@ CString CTDLCustomAttributeDlg::FormatFeatureList(DWORD dwFeatures)
 	return CTDLCustomAttribFeatureComboBox::FormatFeatureList(dwFeatures);
 }
 
-int CTDLCustomAttributeDlg::GetAttributes(CTDCCustomAttribDefinitionArray& aAttrib) const
+int CTDLCustomAttributeDlg::GetAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDef) const
 {
-	aAttrib.Copy(m_aAttrib);
-	return aAttrib.GetSize();
+	aAttribDef.Copy(m_aAttribDef);
+	return aAttribDef.GetSize();
 }
 
 void CTDLCustomAttributeDlg::OnOK()
 {
 	// check for duplicate unique IDs
-	for (int nAttrib = 0; nAttrib < m_aAttrib.GetSize(); nAttrib++)
+	for (int nAttrib = 0; nAttrib < m_aAttribDef.GetSize(); nAttrib++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nAttrib];
 
 		if (UniqueIDExists(attrib.sUniqueID, nAttrib))
 		{
@@ -875,7 +878,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 
 	if (nSel >= 0)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 
 		m_sColumnTitle = attrib.sColumnTitle;
 		m_dwFeatures = attrib.dwFeatures;
@@ -929,7 +932,7 @@ void CTDLCustomAttributeDlg::EnableControls()
 		m_eUniqueID.EnableWindow(FALSE);
 	}
 	
-	const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 	BOOL bCalculationType = (attrib.GetDataType() == TDCCA_CALCULATION);
 
 	m_pageList.EnableWindow(!bCalculationType);
@@ -957,7 +960,7 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	// update data type
 	int nSel = GetCurSel();
 
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 	attrib.SetDataType(m_dwDataType);
 
 	CString sDataType, sUnused;
@@ -998,7 +1001,7 @@ void CTDLCustomAttributeDlg::OnSelchangeAlignment()
 	int nSel = GetCurSel();
 
 	// update attribute
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 	attrib.nTextAlignment = m_nAlignment;
 
 	// and list
@@ -1011,7 +1014,7 @@ void CTDLCustomAttributeDlg::OnSelchangeListtype()
 
 	// update attribute
 	int nSel = GetCurSel();
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 
 	BOOL bWasList = attrib.IsList();
 	DWORD dwListType = m_pageList.GetListType();
@@ -1053,7 +1056,7 @@ void CTDLCustomAttributeDlg::OnChangeColumntitle()
 
 	// update attribute
 	int nSel = GetCurSel();
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 
 	attrib.sColumnTitle = m_sColumnTitle;
 
@@ -1067,9 +1070,9 @@ void CTDLCustomAttributeDlg::OnChangeDefaultlistdata()
 
 	// update attribute
 	int nSel = GetCurSel();
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 
-	m_pageList.GetDefaultListData(m_aAttrib[nSel].aDefaultListData);
+	m_pageList.GetDefaultListData(m_aAttribDef[nSel].aDefaultListData);
 }
 
 CString CTDLCustomAttributeDlg::MakeID(const CString& sLabel)
@@ -1103,7 +1106,7 @@ void CTDLCustomAttributeDlg::MakeUniqueID(CString& sID, int nIgnore) const
 
 BOOL CTDLCustomAttributeDlg::UniqueIDExists(const CString& sID, int nIgnore) const
 {
-	return (m_aAttrib.Find(sID, nIgnore) != -1);
+	return (m_aAttribDef.Find(sID, nIgnore) != -1);
 }
 
 void CTDLCustomAttributeDlg::OnBeginlabeleditAttributelist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
@@ -1135,7 +1138,7 @@ void CTDLCustomAttributeDlg::OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT*
 			return;
 		}
 		
-		TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+		TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 		
 		// if this is the first edit then use the text to create a UNIQUE ID
 		// for the attrib
@@ -1167,7 +1170,7 @@ void CTDLCustomAttributeDlg::OnChangeUniqueid()
 	int nSel = GetCurSel();
 
 	// update attribute
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 	attrib.sUniqueID = m_sUniqueID;
 }
 
@@ -1206,7 +1209,7 @@ void CTDLCustomAttributeDlg::OnImport()
 						continue; // skip item
 				}
 
-				m_aAttrib.Add(attribDef);
+				m_aAttribDef.Add(attribDef);
 				AddAttributeToListCtrl(attribDef, FALSE);
 				nNumImported++;
 			}
@@ -1233,7 +1236,7 @@ void CTDLCustomAttributeDlg::OnClickAttributelist(NMHDR* pNMHDR, LRESULT* pResul
 		if (m_lcAttributes.GetItemRect(pNMIA->iItem, rCheck, LVIR_ICON) &&
 			rCheck.PtInRect(pNMIA->ptAction))
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[pNMIA->iItem];
+			TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[pNMIA->iItem];
 			
 			attrib.bEnabled = !attrib.bEnabled;
 			m_lcAttributes.SetItem(pNMIA->iItem, 0, LVIF_IMAGE, NULL, attrib.bEnabled ? 2 : 1, 0, 0, 0);
@@ -1258,7 +1261,7 @@ BOOL CTDLCustomAttributeDlg::PreTranslateMessage(MSG* pMsg)
 			case VK_SPACE:
 				if (pMsg->hwnd == m_lcAttributes)
 				{
-					TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+					TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 					
 					attrib.bEnabled = !attrib.bEnabled;
 					m_lcAttributes.SetItem(nSel, 0, LVIF_IMAGE, NULL, attrib.bEnabled ? 2 : 1, 0, 0, 0);
@@ -1320,7 +1323,7 @@ void CTDLCustomAttributeDlg::OnNewAttribute()
 	// add to attrib array
 	TDCCUSTOMATTRIBUTEDEFINITION attrib(CEnString(IDS_CAD_NEWATTRIB));
 
-	m_aAttrib.Add(attrib);
+	m_aAttribDef.Add(attrib);
 	int nIndex = AddAttributeToListCtrl(attrib, TRUE);
 
 	// select
@@ -1345,7 +1348,7 @@ void CTDLCustomAttributeDlg::OnDeleteAttribute()
 	if (nSel >= 0)
 	{
 		m_lcAttributes.DeleteItem(nSel);
-		m_aAttrib.RemoveAt(nSel);
+		m_aAttribDef.RemoveAt(nSel);
 
 		// Move selection to next attribute
 		if (nSel == m_lcAttributes.GetItemCount())
@@ -1413,16 +1416,16 @@ void CTDLCustomAttributeDlg::MoveAttribute(int nRows)
 
 	// save off attribute
 	CHoldRedraw hr(m_lcAttributes, NCR_PAINT);
-	TDCCUSTOMATTRIBUTEDEFINITION attrib = m_aAttrib[nRow];
+	TDCCUSTOMATTRIBUTEDEFINITION attrib = m_aAttribDef[nRow];
 
 	// delete attrib
-	m_aAttrib.RemoveAt(nRow);
+	m_aAttribDef.RemoveAt(nRow);
 	m_lcAttributes.DeleteItem(nRow);
 
 	// reinsert attribute
 	nRow += nRows;
 
-	m_aAttrib.InsertAt(nRow, attrib);
+	m_aAttribDef.InsertAt(nRow, attrib);
 	nRow = AddAttributeToListCtrl(attrib, FALSE, nRow);
 
 	// restore selection
@@ -1436,7 +1439,7 @@ void CTDLCustomAttributeDlg::OnChangeFeatures()
 	int nSel = GetCurSel();
 
 	// update attribute
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 
 	if (attrib.dwFeatures != m_dwFeatures)
 	{

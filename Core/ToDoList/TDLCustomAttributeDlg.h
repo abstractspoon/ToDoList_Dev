@@ -23,13 +23,17 @@
 #include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CTDCImageList;
+
+/////////////////////////////////////////////////////////////////////////////
 // CCustomAttributeListPage dialog
 
 class CCustomAttributeListPage : public CDialog
 {
 // Construction
 public:
-	CCustomAttributeListPage(const CToDoCtrl& tdc);
+	CCustomAttributeListPage(const CTDCImageList& ilTaskIcons);
 
 	BOOL Create(CWnd* pParent);
 
@@ -53,7 +57,7 @@ protected:
 	DWORD m_dwListType, m_dwDataType;
 	CIconButton m_btBrowseImages;
 
-	const CToDoCtrl& m_tdc;
+	const CTDCImageList& m_ilTaskIcons;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -136,10 +140,13 @@ class CTDLCustomAttributeDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLCustomAttributeDlg(const CToDoCtrl& tdc, 
-							CWnd* pParent = NULL);   // standard constructor
+	CTDLCustomAttributeDlg(const CString& sTaskFile, 
+						   const CTDCCustomAttribDefinitionArray& aAttribDef,
+						   const CTDCImageList& ilTaskIcons,
+						   const CImageList& ilCheckBoxes,
+						   CWnd* pParent = NULL);   // standard constructor
 
-	int GetAttributes(CTDCCustomAttribDefinitionArray& aAttrib) const;
+	int GetAttributeDefinitions(CTDCCustomAttribDefinitionArray& aAttribDef) const;
 
 protected:
 // Dialog Data
@@ -153,7 +160,7 @@ protected:
 	DWORD m_dwDataType;
 	DWORD m_dwFeatures;
 
-	CTDCCustomAttribDefinitionArray m_aAttrib;
+	CTDCCustomAttribDefinitionArray m_aAttribDef;
 
 	CListCtrl	m_lcAttributes;
 	CMaskEdit	m_eUniqueID;
@@ -168,7 +175,7 @@ protected:
 	CCustomAttributeListPage m_pageList;
 	CCustomAttributeCalcPage m_pageCalc;
 
-	const CToDoCtrl& m_tdc;
+	const CImageList& m_ilCheckBoxes;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
