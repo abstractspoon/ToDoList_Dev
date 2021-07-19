@@ -148,6 +148,7 @@
 #define IDD_TASKDEPENDENCY_DIALOG       321
 #define IDI_QUICKFIND_NEXT              322
 #define IDI_QUICKFIND_PREV              323
+#define IDD_CUSTOMATTRIBLIST_PAGE       324
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -832,6 +833,8 @@
 #define IDC_HTMLOPTIONS_LABEL           1546
 #define IDC_TIMEPERIODS                 1547
 #define IDC_AUTODISPLAYREPORT           1548
+#define IDC_LISTTYPE_LABEL              1549
+#define IDC_DEFLISTDATA_LABEL           1550
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -1704,7 +1707,6 @@
 #define IDS_NODUETHISMONTH              50784
 #define IDS_NODUENEXTMONTH              50785
 #define IDS_OPENTASKLIST_TIP            50790
-#define IDS_TDLFILEOPENFILTER           50804
 #define IDS_XSLFILEFILTER               50805
 #define IDS_TRANSFORMFILEFILTER         50806
 #define IDS_ALLFILEFILTER               50807
@@ -1879,7 +1881,6 @@
 #define IDS_TDC_RECALCPROMPT            51028
 #define IDS_TDC_RECALCTITLE             51029
 #define IDS_INIHASNOTOOLS               51030
-#define IDS_TDLFILESAVEFILTER           51032
 #define IDS_TDLFILEFILTER               51032
 #define IDS_XMLFILESAVEFILTER           51033
 #define IDS_COMMANDLINETASKOPTIONS      51034
@@ -2423,9 +2424,9 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        324
+#define _APS_NEXT_RESOURCE_VALUE        327
 #define _APS_NEXT_COMMAND_VALUE         34746
-#define _APS_NEXT_CONTROL_VALUE         1549
+#define _APS_NEXT_CONTROL_VALUE         1552
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

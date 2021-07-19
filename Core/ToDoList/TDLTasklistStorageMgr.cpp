@@ -68,7 +68,7 @@ bool CBaseCloudStorage::RetrieveTasklist(ITS_TASKLISTINFO* pFInfo, ITaskList* / 
 									_T("tdl"), 
 									NULL, 
 									EOFN_DEFAULTOPEN, 
-									CEnString(IDS_TDLFILEOPENFILTER));
+									CEnString(IDS_TDLFILEFILTER));
 
 			dialog.m_ofn.lpstrInitialDir = sUserFolder;
 			

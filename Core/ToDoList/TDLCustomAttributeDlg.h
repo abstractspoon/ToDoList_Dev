@@ -23,9 +23,65 @@
 #include "..\Interfaces\uithemefile.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CTDLCustomAttributeDlg dialog
 
-class CTDCImageList;
+class CCustomAttributeListPage : public CDialog
+{
+// Construction
+public:
+	CCustomAttributeListPage(const CToDoCtrl& tdc, COLORREF crBackColor);
+
+	BOOL Create(CWnd* pParent);
+
+	BOOL SetDataType(DWORD dwDataType);
+	BOOL SetListType(DWORD dwListType);
+	void SetDefaultListData(const  CStringArray& aData);
+
+	DWORD GetListType() const { return m_dwListType; }
+	int GetDefaultListData(CStringArray& aData) const;
+	
+	static BOOL BuildSymbolPopupMenu(CMenu& menu);
+
+protected:
+// Dialog Data
+	//{{AFX_DATA(CTDLCustomAttributeDlg)
+	CComboBox	m_cbListType;
+	CString	m_sDefaultListData;
+	//}}AFX_DATA
+	CMenuButton	m_btInsertSymbol;
+	CMaskEdit	m_eListData;
+	DWORD m_dwListType, m_dwDataType;
+	CIconButton m_btBrowseImages;
+
+	const CToDoCtrl& m_tdc;
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(CTDLCustomAttributeDlg)
+protected:
+	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnInitDialog();
+
+// Implementation
+protected:
+
+	// Generated message map functions
+	//{{AFX_MSG(CTDLCustomAttributeDlg)
+	afx_msg void OnSelchangeListtype();
+	afx_msg void OnChangeDefaultlistdata();
+	afx_msg void OnBrowseimages();
+	afx_msg void OnInsertsymbol();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+	void BuildListCombo();
+	void UpdateListDataMask();
+	void EnableControls();
+
+};
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLCustomAttributeDlg dialog
 
 class CTDLCustomAttributeDlg : public CTDLDialog
 {
@@ -41,31 +97,28 @@ protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLCustomAttributeDlg)
 	enum { IDD = IDD_ADDCUSTOMATTRIB_DIALOG };
-	CMaskEdit	m_eUniqueID;
-	CComboBox	m_cbListType;
-	CComboBox	m_cbDataType;
-	CComboBox	m_cbAlign;
-	CListCtrl	m_lcAttributes;
 	CString	m_sTaskFile;
 	CString	m_sColumnTitle;
-	CString	m_sDefaultListData;
 	int		m_nAlignment;
 	CString	m_sUniqueID;
 	//}}AFX_DATA
+	DWORD m_dwDataType;
+	DWORD m_dwFeatures;
+
+	CTDCCustomAttribDefinitionArray m_aAttrib;
+
+	CListCtrl	m_lcAttributes;
+	CMaskEdit	m_eUniqueID;
+	CComboBox	m_cbDataType;
+	CComboBox	m_cbAlign;
+	CUIThemeFile m_theme;
 	CTDLCustomAttribFeatureComboBox	m_cbFeatures;
-	CMenuButton	m_btInsertSymbol;
 	CEnToolBar m_toolbar;
 	CToolbarHelper m_tbHelper;
-	CMaskEdit	m_eListData;
 	CFileEdit	m_eTaskfile;
 	CEnEdit		m_eColumnTitle;
-	DWORD m_dwDataType;
-	DWORD m_dwListType;
-	DWORD m_dwFeatures;
-	CTDCCustomAttribDefinitionArray m_aAttrib;
-	CUIThemeFile m_theme;
-	CIconButton m_btBrowseImages;
 
+	CCustomAttributeListPage m_pageList;
 	const CToDoCtrl& m_tdc;
 
 // Overrides
@@ -103,8 +156,6 @@ protected:
 	afx_msg void OnUpdateMoveAttributeDown(CCmdUI* pCmdUI);
 	afx_msg void OnMoveAttributeUp();
 	afx_msg void OnUpdateMoveAttributeUp(CCmdUI* pCmdUI);
-	afx_msg void OnBrowseimages();
-	afx_msg void OnInsertsymbol();
 	afx_msg void OnChangeFeatures();
 	//}}AFX_MSG
 	afx_msg void OnUpdateEditAttribute(CCmdUI* pCmdUI);
@@ -113,16 +164,13 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	void BuildDataTypeCombo();
-	void BuildListTypeCombo(DWORD dwDataType);
 	BOOL AddAttributeToListCtrl(const TDCCUSTOMATTRIBUTEDEFINITION& attrib, BOOL bNew, int nPos = -1);
 	void EnableControls();
 	int GetCurSel();
 	BOOL UniqueIDExists(const CString& sID, int nIgnore = -1) const;
-	void UpdateListDataMask();
 	void MakeUniqueID(CString& sID, int nIgnore = -1) const;
 	BOOL InitializeToolbar();
 	void MoveAttribute(int nRows = 1);
-	BOOL BuildSymbolPopupMenu(CMenu& menu) const;
 
 	static CString FormatFeatureList(DWORD dwFeatures);
 	static void GetTypeStrings(const TDCCUSTOMATTRIBUTEDEFINITION& attrib, CString& sDataType, CString& sListType);

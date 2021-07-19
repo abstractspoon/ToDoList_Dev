@@ -91,6 +91,390 @@ const UINT NUM_SYMBOLS = sizeof(SYMBOLS) / sizeof(TCHAR);
 #endif
 
 /////////////////////////////////////////////////////////////////////////////
+// CCustomAttributeListPage dialog
+
+CCustomAttributeListPage::CCustomAttributeListPage(const CToDoCtrl& tdc, COLORREF crBackColor)
+	:
+	m_btInsertSymbol(1, 0, (MBS_DOWN | MBS_RETURNCMD)),
+	m_tdc(tdc)
+{
+	//{{AFX_DATA_INIT(CTDLCustomAttributeDlg)
+	//}}AFX_DATA_INIT
+	m_dwListType = TDCCA_NOTALIST;
+	m_dwDataType = TDCCA_STRING;
+}
+
+void CCustomAttributeListPage::DoDataExchange(CDataExchange* pDX)
+{
+	CDialog::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(CTDLCustomAttributeDlg)
+	DDX_Control(pDX, IDC_LISTTYPE, m_cbListType);
+	DDX_Text(pDX, IDC_DEFAULTLISTDATA, m_sDefaultListData);
+	DDX_Control(pDX, IDC_INSERTSYMBOL, m_btInsertSymbol);
+	DDX_Control(pDX, IDC_BROWSEIMAGES, m_btBrowseImages);
+	DDX_Control(pDX, IDC_DEFAULTLISTDATA, m_eListData);
+	//}}AFX_DATA_MAP
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		int nSel = m_cbListType.GetCurSel();
+		m_dwListType = (nSel == -1) ? TDCCA_NOTALIST : m_cbListType.GetItemData(nSel);
+	}
+	else
+	{
+		CDialogHelper::SelectItemByData(m_cbListType, m_dwListType);
+	}
+}
+
+
+BEGIN_MESSAGE_MAP(CCustomAttributeListPage, CDialog)
+	//{{AFX_MSG_MAP(CTDLCustomAttributeDlg)
+	ON_CBN_SELCHANGE(IDC_LISTTYPE, OnSelchangeListtype)
+	ON_EN_CHANGE(IDC_DEFAULTLISTDATA, OnChangeDefaultlistdata)
+	ON_BN_CLICKED(IDC_BROWSEIMAGES, OnBrowseimages)
+	ON_BN_CLICKED(IDC_INSERTSYMBOL, OnInsertsymbol)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+/////////////////////////////////////////////////////////////////////////////
+// CTDLCustomAttributeDlg message handlers
+
+BOOL CCustomAttributeListPage::Create(CWnd* pParent)
+{
+	if (!CDialog::Create(IDD_CUSTOMATTRIBLIST_PAGE, pParent))
+		return FALSE;
+
+	CRect rHost = CDialogHelper::GetCtrlRect(pParent, IDC_PAGEHOST);
+	MoveWindow(rHost);
+
+	return TRUE;
+}
+
+BOOL CCustomAttributeListPage::OnInitDialog()
+{
+	CDialog::OnInitDialog();
+
+	// disable localization because we do it ourselves by using CEnString
+	CLocalizer::EnableTranslation(m_cbListType, FALSE);
+
+	BuildListCombo();
+	UpdateListDataMask();
+	EnableControls();
+
+	// initialize buttons
+	m_btBrowseImages.SetIcon(AfxGetApp()->LoadIcon(IDI_CUST_ATTRIB_ICONS));
+	m_btBrowseImages.SetTooltip(CEnString(IDS_CAD_BROWSEIMAGES));
+
+	m_btInsertSymbol.SetWindowText(0x2211);
+	m_btInsertSymbol.SetTooltip(CEnString(IDS_CAD_INSERTSYMBOL));
+
+	return TRUE;  // return TRUE unless you set the focus to a control
+				  // EXCEPTION: OCX Property Pages should return FALSE
+}
+
+void CCustomAttributeListPage::BuildListCombo()
+{
+	m_cbListType.ResetContent();
+
+	int nNumList = NUM_LISTTYPES;
+
+	for (int nList = 0; nList < nNumList; nList++)
+	{
+		DWORD dwListType = LIST_TYPES[nList].dwType;
+
+		switch (m_dwDataType)
+		{
+		case TDCCA_DATE:
+		case TDCCA_BOOL:
+		case TDCCA_TIMEPERIOD:
+			if (dwListType != TDCCA_NOTALIST)
+			{
+				continue;
+			}
+			break;
+
+		case TDCCA_FILELINK:
+			if ((dwListType != TDCCA_NOTALIST) &&
+				(dwListType != TDCCA_AUTOLIST))
+			{
+				continue;
+			}
+			break;
+
+		case TDCCA_STRING:
+		case TDCCA_INTEGER:
+		case TDCCA_DOUBLE:
+			// all list types accepted
+			break;
+
+		case TDCCA_ICON:
+			// fixed list type accepted only
+			if ((dwListType != TDCCA_NOTALIST) &&
+				(dwListType != TDCCA_FIXEDLIST) &&
+				(dwListType != TDCCA_FIXEDMULTILIST))
+			{
+				continue;
+			}
+			break;
+
+		case TDCCA_FRACTION:
+			// single selection list type accepted only
+			if ((dwListType != TDCCA_NOTALIST) &&
+				(dwListType != TDCCA_FIXEDLIST) &&
+				(dwListType != TDCCA_AUTOLIST))
+			{
+				continue;
+			}
+			break;
+
+		default:
+			ASSERT(0);
+			break;
+		}
+
+		int nIndex = m_cbListType.AddString(CEnString(LIST_TYPES[nList].nIDName));
+		m_cbListType.SetItemData(nIndex, LIST_TYPES[nList].dwType);
+	}
+
+	// restore selection
+	if (CDialogHelper::SelectItemByData(m_cbListType, m_dwListType) == CB_ERR)
+		SetListType(TDCCA_NOTALIST);
+}
+
+BOOL CCustomAttributeListPage::SetDataType(DWORD dwDataType)
+{
+	if (dwDataType != m_dwDataType)
+	{
+		m_dwDataType = dwDataType;
+
+		BuildListCombo();
+		UpdateListDataMask();
+		EnableControls();
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CCustomAttributeListPage::SetListType(DWORD dwListType)
+{
+	if (CDialogHelper::SelectItemByData(m_cbListType, dwListType) != CB_ERR)
+	{
+		m_dwListType = dwListType;
+
+		if (dwListType == TDCCA_NOTALIST)
+		{
+			m_sDefaultListData.Empty();
+			UpdateData(FALSE);
+		}
+
+		UpdateListDataMask();
+		EnableControls();
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+void CCustomAttributeListPage::SetDefaultListData(const CStringArray& aData)
+{
+	m_sDefaultListData = Misc::FormatArray(aData, _T("\r\n"));
+	UpdateData(FALSE);
+}
+
+int CCustomAttributeListPage::GetDefaultListData(CStringArray& aData) const
+{
+	return Misc::Split(m_sDefaultListData, aData, _T("\r\n"));
+}
+
+void CCustomAttributeListPage::EnableControls()
+{
+	BOOL bEnableList = TRUE;
+	BOOL bEnableListData = bEnableList;
+	BOOL bEnableIconBtn = FALSE;
+
+	switch (m_dwDataType)
+	{
+	case TDCCA_DATE:
+	case TDCCA_BOOL:
+	case TDCCA_TIMEPERIOD:
+		bEnableList = bEnableListData = FALSE;
+		break;
+
+	case TDCCA_STRING:
+	case TDCCA_INTEGER:
+	case TDCCA_DOUBLE:
+	case TDCCA_FILELINK:
+	case TDCCA_FRACTION:
+		bEnableListData = (m_dwListType != TDCCA_NOTALIST);
+		break;
+
+	case TDCCA_ICON:
+		bEnableListData = bEnableIconBtn = (m_dwListType != TDCCA_NOTALIST);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+
+	GetDlgItem(IDC_LISTTYPE)->EnableWindow(bEnableList);
+	GetDlgItem(IDC_DEFAULTLISTDATA)->EnableWindow(bEnableListData);
+	GetDlgItem(IDC_INSERTSYMBOL)->EnableWindow(bEnableListData);
+	GetDlgItem(IDC_BROWSEIMAGES)->EnableWindow(bEnableIconBtn);
+}
+
+void CCustomAttributeListPage::UpdateListDataMask()
+{
+	switch (m_dwDataType)
+	{
+	case TDCCA_STRING:
+	case TDCCA_DATE:
+	case TDCCA_BOOL:
+	case TDCCA_ICON:
+	case TDCCA_FILELINK:
+	case TDCCA_TIMEPERIOD:
+		m_eListData.ClearMask();
+		break;
+
+	case TDCCA_INTEGER:
+		m_eListData.SetMask(_T("-0123456789"));
+		break;
+
+	case TDCCA_FRACTION:
+		m_eListData.SetMask(_T("-0123456789/"));
+		break;
+
+	case TDCCA_DOUBLE:
+		m_eListData.SetMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
+		break;
+
+	default:
+		ASSERT(0);
+		break;
+	}
+}
+
+void CCustomAttributeListPage::OnSelchangeListtype()
+{
+	UpdateData();
+	UpdateListDataMask();
+	EnableControls();
+
+	// Forward to parent
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+}
+
+void CCustomAttributeListPage::OnChangeDefaultlistdata()
+{
+	UpdateData();
+
+	// Forward to parent
+	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), EN_CHANGE), (LPARAM)GetSafeHwnd());
+}
+
+void CCustomAttributeListPage::OnInsertsymbol()
+{
+	CMenu menu;
+
+	// build our unicode 'symbol' menu
+	if (BuildSymbolPopupMenu(menu))
+	{
+		UINT nID = m_btInsertSymbol.TrackPopupMenu(&menu);
+
+		if (nID > 0)
+		{
+			TCHAR szItem[2] = { SYMBOLS[nID - 1], 0 };
+			m_eListData.ReplaceSel(szItem, TRUE);
+		}
+	}
+}
+
+BOOL CCustomAttributeListPage::BuildSymbolPopupMenu(CMenu& menu)
+{
+	ASSERT(menu.GetSafeHmenu() == NULL);
+
+	if (menu.GetSafeHmenu() != NULL)
+		return FALSE;
+
+	if (menu.CreatePopupMenu())
+	{
+		TCHAR szItem[2] = { 0 };
+
+		for (int nSymbol = 0; nSymbol < NUM_SYMBOLS; nSymbol++)
+		{
+			szItem[0] = SYMBOLS[nSymbol];
+
+			UINT nFlags = MF_STRING;
+
+			// insert vertical separator every 10 symbols
+			if (nSymbol && (nSymbol % 10) == 0)
+				nFlags |= MF_MENUBREAK;
+
+			menu.AppendMenu(nFlags, nSymbol + 1, szItem);
+		}
+
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+void CCustomAttributeListPage::OnBrowseimages()
+{
+	// extract icon names from list data
+	CString sImage, sName;
+	CStringArray aList, aImages;
+	CMapStringToString mapImages;
+
+	if (Misc::Split(m_sDefaultListData, aList, '\n'))
+	{
+		for (int nItem = 0; nItem < aList.GetSize(); nItem++)
+		{
+			const CString& sTag = aList[nItem];
+
+			if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(sTag, sImage, sName))
+			{
+				mapImages[sImage] = sName;
+				aImages.Add(sImage);
+			}
+		}
+	}
+
+	// show dialog and rebuild list
+	CTDLTaskIconDlg dialog(m_tdc.GetTaskIconImageList(), aImages/*, (CWnd*)&m_tdc*/);
+
+	if (dialog.DoModal() == IDOK)
+	{
+		if (dialog.GetIconNames(aImages))
+		{
+			m_sDefaultListData.Empty();
+
+			for (int nImg = 0; nImg < aImages.GetSize(); nImg++)
+			{
+				sImage = aImages[nImg];
+
+				// if we already had this image use it, else new item
+				sName = dialog.GetUserIconName(sImage);
+
+				if (sName.IsEmpty())
+					mapImages.Lookup(sImage, sName);
+
+				m_sDefaultListData += TDCCUSTOMATTRIBUTEDEFINITION::EncodeImageTag(sImage, sName);
+				m_sDefaultListData += _T("\r\n");
+			}
+
+			UpdateData(FALSE);
+
+			// sync data
+			OnChangeDefaultlistdata();
+		}
+	}
+}
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLCustomAttributeDlg dialog
 
 CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, const CUIThemeFile& theme, CWnd* pParent /*=NULL*/)
@@ -99,8 +483,8 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, const CUITh
 	m_eTaskfile(FES_NOBROWSE), 
 	m_theme(theme),
 	m_eUniqueID(_T(". \r\n\t"), ME_EXCLUDE),
-	m_btInsertSymbol(1, 0, (MBS_DOWN | MBS_RETURNCMD)),
 	m_sTaskFile(tdc.GetFilePath()),
+	m_pageList(tdc, m_theme.crAppBackLight),
 	m_tdc(tdc)
 {
 	//{{AFX_DATA_INIT(CTDLCustomAttributeDlg)
@@ -108,8 +492,6 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CToDoCtrl& tdc, const CUITh
 	//}}AFX_DATA_INIT
 	m_sColumnTitle = _T("");
 	m_dwDataType = TDCCA_STRING;
-	m_dwListType = TDCCA_NOTALIST;
-	m_sDefaultListData = _T("");
 	m_dwFeatures = TDCCAF_SORT;
 	m_nAlignment = DT_LEFT;
 
@@ -127,19 +509,14 @@ void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CTDLCustomAttributeDlg)
 	DDX_Control(pDX, IDC_FEATURES, m_cbFeatures);
 	DDX_Control(pDX, IDC_UNIQUEID, m_eUniqueID);
-	DDX_Control(pDX, IDC_LISTTYPE, m_cbListType);
 	DDX_Control(pDX, IDC_DATATYPE, m_cbDataType);
 	DDX_Control(pDX, IDC_ALIGNMENT, m_cbAlign);
 	DDX_Control(pDX, IDC_ATTRIBUTELIST, m_lcAttributes);
 	DDX_Text(pDX, IDC_TASKFILE, m_sTaskFile);
 	DDX_Text(pDX, IDC_COLUMNTITLE, m_sColumnTitle);
-	DDX_Text(pDX, IDC_DEFAULTLISTDATA, m_sDefaultListData);
 	DDX_CBIndex(pDX, IDC_ALIGNMENT, m_nAlignment);
 	DDX_Text(pDX, IDC_UNIQUEID, m_sUniqueID);
-	DDX_Control(pDX, IDC_INSERTSYMBOL, m_btInsertSymbol);
-	DDX_Control(pDX, IDC_BROWSEIMAGES, m_btBrowseImages);
 	DDX_Control(pDX, IDC_COLUMNTITLE, m_eColumnTitle);
-	DDX_Control(pDX, IDC_DEFAULTLISTDATA, m_eListData);
 	DDX_Control(pDX, IDC_TASKFILE, m_eTaskfile);
 	//}}AFX_DATA_MAP
 
@@ -148,15 +525,11 @@ void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
 		int nSel = m_cbDataType.GetCurSel();
 		m_dwDataType = (nSel == -1) ? TDCCA_STRING : m_cbDataType.GetItemData(nSel);
 
-		nSel = m_cbListType.GetCurSel();
-		m_dwListType = (nSel == -1) ? TDCCA_NOTALIST : m_cbListType.GetItemData(nSel);
-
 		m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
 	}
 	else
 	{
 		SelectItemByData(m_cbDataType, m_dwDataType);
-		SelectItemByData(m_cbListType, m_dwListType);
 	}
 }
 
@@ -183,8 +556,6 @@ BEGIN_MESSAGE_MAP(CTDLCustomAttributeDlg, CTDLDialog)
 	ON_UPDATE_COMMAND_UI(ID_CUSTATTRIB_MOVEDOWN, OnUpdateMoveAttributeDown)
 	ON_COMMAND(ID_CUSTATTRIB_MOVEUP, OnMoveAttributeUp)
 	ON_UPDATE_COMMAND_UI(ID_CUSTATTRIB_MOVEUP, OnUpdateMoveAttributeUp)
-	ON_BN_CLICKED(IDC_BROWSEIMAGES, OnBrowseimages)
-	ON_BN_CLICKED(IDC_INSERTSYMBOL, OnInsertsymbol)
 	ON_CBN_CLOSEUP(IDC_FEATURES, OnChangeFeatures)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_CUSTATTRIB_EDIT, OnEditAttribute)
@@ -200,10 +571,10 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	CTDLDialog::OnInitDialog();
 
 	// disable localization because we do it ourselves by using CEnString
-	CLocalizer::EnableTranslation(m_cbListType, FALSE);
 	CLocalizer::EnableTranslation(m_cbDataType, FALSE);
 	CLocalizer::EnableTranslation(ListView_GetHeader(m_lcAttributes), FALSE);
 
+	VERIFY(m_pageList.Create(this));
 	VERIFY(InitializeToolbar());
 
 	BuildDataTypeCombo();
@@ -233,13 +604,6 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 
 	ListView_SetImageList(m_lcAttributes, m_tdc.GetCheckImageList(), LVSIL_SMALL);
 	CThemed::SetWindowTheme(&m_lcAttributes, _T("Explorer"));
-
-	// initialize buttons
-	m_btBrowseImages.SetIcon(AfxGetApp()->LoadIcon(IDI_CUST_ATTRIB_ICONS));
-	m_btBrowseImages.SetTooltip(CEnString(IDS_CAD_BROWSEIMAGES));
-
-	m_btInsertSymbol.SetWindowText(0x2211);
-	m_btInsertSymbol.SetTooltip(CEnString(IDS_CAD_INSERTSYMBOL));
 
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
@@ -367,69 +731,6 @@ void CTDLCustomAttributeDlg::BuildDataTypeCombo()
 	}
 }
 
-void CTDLCustomAttributeDlg::BuildListTypeCombo(DWORD dwDataType)
-{
-	m_cbListType.ResetContent();
-
-	int nNumList = NUM_LISTTYPES;
-
-	for (int nList = 0; nList < nNumList; nList++)
-	{
-		DWORD dwListType = LIST_TYPES[nList].dwType;
-
-		switch (dwDataType)
-		{
-		case TDCCA_DATE:
-		case TDCCA_BOOL:
-			if (dwListType != TDCCA_NOTALIST)
-			{
-				continue;
-			}
-			break;
-
-		case TDCCA_FILELINK:
-			if ((dwListType != TDCCA_NOTALIST) &&
-				(dwListType != TDCCA_AUTOLIST))
-			{
-				continue;
-			}
-			break;
-			
-		case TDCCA_STRING:
-		case TDCCA_INTEGER:
-		case TDCCA_DOUBLE:
-			// all list types accepted
-			break;
-
-		case TDCCA_ICON:
-			// fixed list type accepted only
-			if ((dwListType != TDCCA_NOTALIST) && 
-				(dwListType != TDCCA_FIXEDLIST) &&
-				(dwListType != TDCCA_FIXEDMULTILIST))
-			{
-				continue;
-			}
-			break;
-
-		case TDCCA_FRACTION:
-			// single selection list type accepted only
-			if ((dwListType != TDCCA_NOTALIST) && 
-				(dwListType != TDCCA_FIXEDLIST) &&
-				(dwListType != TDCCA_AUTOLIST))
-			{
-				continue;
-			}
-			break;
-		}
-
-		int nIndex = m_cbListType.AddString(CEnString(LIST_TYPES[nList].nIDName));
-		m_cbListType.SetItemData(nIndex, LIST_TYPES[nList].dwType);
-	}
-
-	// restore selection
-	SelectItemByData(m_cbListType, m_dwListType);
-}
-
 void CTDLCustomAttributeDlg::OnDoubleClickItem(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	CPoint ptCursor(GetMessagePos());
@@ -453,14 +754,13 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 		m_dwFeatures = attrib.dwFeatures;
 		m_nAlignment = attrib.nTextAlignment;
 		m_dwDataType = attrib.GetDataType();
-		m_dwListType = attrib.GetListType();
-		m_sDefaultListData = Misc::FormatArray(attrib.aDefaultListData, _T("\r\n"));
 
 		// unique ID is special
 		m_sUniqueID = attrib.sUniqueID;
 		m_sUniqueID.MakeLower();
 
-		BuildListTypeCombo(m_dwDataType);
+		m_pageList.SetDataType(m_dwDataType);
+		m_pageList.SetDefaultListData(attrib.aDefaultListData);
 
 		m_cbFeatures.SetAttributeDefinition(attrib);
 	}
@@ -470,14 +770,13 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 		m_dwFeatures = TDCCAF_SORT;
 		m_nAlignment = DT_LEFT;
 		m_dwDataType = TDCCA_STRING;
-		m_dwListType = TDCCA_NOTALIST;
-		m_sDefaultListData.Empty();
 		m_sUniqueID.Empty();
+
+		m_pageList.SetListType(TDCCA_NOTALIST);
 		m_cbFeatures.ResetContent();
 	}
 
 	EnableControls();
-	UpdateListDataMask();
 	UpdateData(FALSE);
 }
 
@@ -503,45 +802,11 @@ void CTDLCustomAttributeDlg::EnableControls()
 		m_eUniqueID.EnableWindow(FALSE);
 	}
 	
-	// certain data types cannot be lists
-	BOOL bEnableList = (nSel >= 0);
-	BOOL bEnableListData = bEnableList;
+	const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+	BOOL bCalculationType = (attrib.GetDataType() == TDCCA_CALCULATION);
 
-	if (bEnableList)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
-		
-		DWORD dwDataType = attrib.GetDataType();
-		DWORD dwListType = attrib.GetListType();
-
-		switch (dwDataType)
-		{
-		case TDCCA_DATE:
-		case TDCCA_BOOL:
-		case TDCCA_TIMEPERIOD:
-			bEnableList = bEnableListData = FALSE;
-			break;
-
-		case TDCCA_STRING:
-		case TDCCA_INTEGER:
-		case TDCCA_DOUBLE:
-		case TDCCA_ICON:
-		case TDCCA_FILELINK:
-		case TDCCA_FRACTION:
-			bEnableListData = (dwListType != TDCCA_NOTALIST);
-			break;
-
-		default:
-			ASSERT(0);
-			break;
-		}
-
-		GetDlgItem(IDC_BROWSEIMAGES)->EnableWindow(bEnableListData && (dwDataType == TDCCA_ICON));
-	}
-
-	GetDlgItem(IDC_LISTTYPE)->EnableWindow(bEnableList);
-	GetDlgItem(IDC_DEFAULTLISTDATA)->EnableWindow(bEnableListData);
-	GetDlgItem(IDC_INSERTSYMBOL)->EnableWindow(bEnableListData);
+	m_pageList.EnableWindow(!bCalculationType);
+	m_pageList.ShowWindow(bCalculationType ? SW_HIDE : SW_SHOW);
 }
 
 int CTDLCustomAttributeDlg::GetCurSel()
@@ -558,9 +823,10 @@ int CTDLCustomAttributeDlg::GetCurSel()
 void CTDLCustomAttributeDlg::OnSelchangeDatatype() 
 {
 	UpdateData();
-	int nSel = GetCurSel();
 
 	// update data type
+	int nSel = GetCurSel();
+
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
 	attrib.SetDataType(m_dwDataType);
 
@@ -591,43 +857,9 @@ void CTDLCustomAttributeDlg::OnSelchangeDatatype()
 	}
 
 	// update list type in case it has changed
-	m_dwListType = attrib.GetListType();
-	
-	BuildListTypeCombo(m_dwDataType);
-	UpdateListDataMask();
+	m_pageList.SetDataType(m_dwDataType);
 
 	EnableControls();
-}
-
-void CTDLCustomAttributeDlg::UpdateListDataMask()
-{
-	switch (m_dwDataType)
-	{
-	case TDCCA_STRING:
-	case TDCCA_DATE:
-	case TDCCA_BOOL:
-	case TDCCA_ICON:
-	case TDCCA_FILELINK:
-	case TDCCA_TIMEPERIOD:
-		m_eListData.ClearMask();
-		break;
-
-	case TDCCA_INTEGER:
-		m_eListData.SetMask(_T("-0123456789"));
-		break;
-
-	case TDCCA_FRACTION:
-		m_eListData.SetMask(_T("-0123456789/"));
-		break;
-			
-	case TDCCA_DOUBLE:
-		m_eListData.SetMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
-		break;
-
-	default:
-		ASSERT(0);
-		break;
-	}
 }
 
 void CTDLCustomAttributeDlg::OnSelchangeAlignment() 
@@ -646,13 +878,15 @@ void CTDLCustomAttributeDlg::OnSelchangeAlignment()
 void CTDLCustomAttributeDlg::OnSelchangeListtype() 
 {
 	UpdateData();
-	int nSel = GetCurSel();
 
 	// update attribute
+	int nSel = GetCurSel();
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
-	BOOL bWasList = attrib.IsList();
 
-	attrib.SetListType(m_dwListType);
+	BOOL bWasList = attrib.IsList();
+	DWORD dwListType = m_pageList.GetListType();
+
+	attrib.SetListType(dwListType);
 
 	// If we've switched from non-left to list
 	// then automatically add 'filterable'
@@ -660,7 +894,7 @@ void CTDLCustomAttributeDlg::OnSelchangeListtype()
 		attrib.dwFeatures |= TDCCAF_FILTER;
 
 	// update list type in case it has changed
-	m_dwListType = attrib.GetListType();
+	m_pageList.SetListType(attrib.GetListType());
 
 	// update feature combo
 	m_cbFeatures.SetAttributeDefinition(attrib);
@@ -681,18 +915,16 @@ void CTDLCustomAttributeDlg::OnSelchangeListtype()
 	GetTypeStrings(attrib, sDummy, sListType);
 
 	m_lcAttributes.SetItemText(nSel, COL_LISTTYPE, sListType);
-
-	// set list data mask
-	UpdateListDataMask();
 }
 
 void CTDLCustomAttributeDlg::OnChangeColumntitle() 
 {
 	UpdateData();
-	int nSel = GetCurSel();
 
 	// update attribute
+	int nSel = GetCurSel();
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
+
 	attrib.sColumnTitle = m_sColumnTitle;
 
 	// and list
@@ -702,12 +934,12 @@ void CTDLCustomAttributeDlg::OnChangeColumntitle()
 void CTDLCustomAttributeDlg::OnChangeDefaultlistdata() 
 {
 	UpdateData();
-	int nSel = GetCurSel();
 
 	// update attribute
+	int nSel = GetCurSel();
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttrib[nSel];
 
-	Misc::Split(m_sDefaultListData, attrib.aDefaultListData, '\n');
+	m_pageList.GetDefaultListData(m_aAttrib[nSel].aDefaultListData);
 }
 
 CString CTDLCustomAttributeDlg::MakeID(const CString& sLabel)
@@ -817,7 +1049,7 @@ void CTDLCustomAttributeDlg::OnImport()
 							NULL, 
 							NULL, 
 							EOFN_DEFAULTOPEN, 
-							CEnString(IDS_TDLFILEOPENFILTER), 
+							CEnString(IDS_TDLFILEFILTER), 
 							this);
 
 	if (dialog.DoModal(prefs) == IDOK)
@@ -939,7 +1171,7 @@ LRESULT CTDLCustomAttributeDlg::OnEEClick(WPARAM /*wp*/, LPARAM lp)
 	CMenu menu;
 
 	// build our unicode 'symbol' menu
-	if (BuildSymbolPopupMenu(menu))
+	if (CCustomAttributeListPage::BuildSymbolPopupMenu(menu))
 	{
 		UINT nID = m_eColumnTitle.TrackPopupMenu(lp, &menu, EETPM_RETURNCMD);
 
@@ -951,53 +1183,6 @@ LRESULT CTDLCustomAttributeDlg::OnEEClick(WPARAM /*wp*/, LPARAM lp)
 	}
 
 	return 0L;
-}
-
-void CTDLCustomAttributeDlg::OnInsertsymbol() 
-{
-	CMenu menu;
-
-	// build our unicode 'symbol' menu
-	if (BuildSymbolPopupMenu(menu))
-	{
-		UINT nID = m_btInsertSymbol.TrackPopupMenu(&menu);
-
-		if (nID > 0)
-		{
-			TCHAR szItem[2] = { SYMBOLS[nID - 1], 0 };
-			m_eListData.ReplaceSel(szItem, TRUE);
-		}
-	}
-}
-
-BOOL CTDLCustomAttributeDlg::BuildSymbolPopupMenu(CMenu& menu) const
-{
-	ASSERT(menu.GetSafeHmenu() == NULL);
-
-	if (menu.GetSafeHmenu() != NULL)
-		return FALSE;
-
-	if (menu.CreatePopupMenu())
-	{
-		TCHAR szItem[2] = { 0 };
-		
-		for (int nSymbol = 0; nSymbol < NUM_SYMBOLS; nSymbol++)
-		{
-			szItem[0] = SYMBOLS[nSymbol];
-
-			UINT nFlags = MF_STRING;
-
-			// insert vertical separator every 10 symbols
-			if (nSymbol && (nSymbol % 10) == 0)
-				nFlags |= MF_MENUBREAK;
-
-			menu.AppendMenu(nFlags, nSymbol + 1, szItem);
-		}
-
-		return TRUE;
-	}
-
-	return FALSE;
 }
 
 void CTDLCustomAttributeDlg::OnNewAttribute() 
@@ -1112,58 +1297,6 @@ void CTDLCustomAttributeDlg::MoveAttribute(int nRows)
 
 	// restore selection
 	m_lcAttributes.SetItemState(nRow, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
-}
-
-void CTDLCustomAttributeDlg::OnBrowseimages() 
-{
-	// extract icon names from list data
-	CString sImage, sName;
-	CStringArray aList, aImages;
-	CMapStringToString mapImages;
-
-	if (Misc::Split(m_sDefaultListData, aList, '\n'))
-	{
-		for (int nItem = 0; nItem < aList.GetSize(); nItem++)
-		{ 
-			const CString& sTag = aList[nItem];
-
-			if (TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(sTag, sImage, sName))
-			{
-				mapImages[sImage] = sName;
-				aImages.Add(sImage);
-			}
-		}
-	}
-
-	// show dialog and rebuild list
-	CTDLTaskIconDlg dialog(m_tdc.GetTaskIconImageList(), aImages, (CWnd*)&m_tdc);
-
-	if (dialog.DoModal() == IDOK)
-	{
-		if (dialog.GetIconNames(aImages))
-		{
-			m_sDefaultListData.Empty();
-
-			for (int nImg = 0; nImg < aImages.GetSize(); nImg++)
-			{
-				sImage = aImages[nImg];
-
-				// if we already had this image use it, else new item
-				sName = dialog.GetUserIconName(sImage);
-
-				if (sName.IsEmpty())
-					mapImages.Lookup(sImage, sName);
-
-				m_sDefaultListData += TDCCUSTOMATTRIBUTEDEFINITION::EncodeImageTag(sImage, sName);
-				m_sDefaultListData += _T("\r\n");
-			}
-
-			UpdateData(FALSE);
-
-			// sync data
-			OnChangeDefaultlistdata();
-		}
-	}
 }
 
 void CTDLCustomAttributeDlg::OnChangeFeatures() 
