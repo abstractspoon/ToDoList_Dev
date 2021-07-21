@@ -56,8 +56,8 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	BOOL DecodeListData(const CString& sListData);
 
 	BOOL SupportsFeature(DWORD dwFeature) const;
-	BOOL SupportsCalculation() const;
-	BOOL IsCalculated() const;
+//	BOOL SupportsAggregation() const;
+	BOOL IsAggregated() const;
 
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const;
 	CString GetImageName(const CString& sImage) const;

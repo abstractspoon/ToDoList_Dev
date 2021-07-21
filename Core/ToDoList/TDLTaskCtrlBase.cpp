@@ -4793,7 +4793,7 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 				{
 					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs.GetData()[nAttrib];
 
-					if (attribDef.IsCalculated())
+					if (attribDef.IsAggregated())
 						AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);
 				}
 			}

@@ -4027,7 +4027,7 @@ BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
 			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
 			if (m_aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef))
-				return attribDef.SupportsCalculation();
+				return attribDef.IsAggregated();
 		}
 		break;
 	}

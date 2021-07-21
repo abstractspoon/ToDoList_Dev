@@ -276,14 +276,14 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 	return FALSE;
 }
 
-BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsCalculation() const
-{
-	return SupportsFeature(TDCCAF_ACCUMULATE) ||
-			SupportsFeature(TDCCAF_MAXIMIZE) ||
-			SupportsFeature(TDCCAF_MINIMIZE);
-}
+// BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsAggregation() const
+// {
+// 	return SupportsFeature(TDCCAF_ACCUMULATE) ||
+// 			SupportsFeature(TDCCAF_MAXIMIZE) ||
+// 			SupportsFeature(TDCCAF_MINIMIZE);
+// }
 
-BOOL TDCCUSTOMATTRIBUTEDEFINITION::IsCalculated() const
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::IsAggregated() const
 {
 	return HasFeature(TDCCAF_ACCUMULATE) ||
 			HasFeature(TDCCAF_MAXIMIZE) ||

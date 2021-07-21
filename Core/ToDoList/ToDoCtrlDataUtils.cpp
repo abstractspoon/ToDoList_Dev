@@ -1909,7 +1909,7 @@ BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 			int nAttrib = aAttribDefs.Find(nAttribID);
 
 			if (nAttrib != -1)
-				return aAttribDefs[nAttrib].IsCalculated();
+				return aAttribDefs[nAttrib].IsAggregated();
 		}
 	}
 
