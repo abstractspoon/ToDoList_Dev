@@ -11,6 +11,7 @@
 #include "todoctrl.h"
 #include "tdcimagelist.h"
 #include "TDLCustomAttribFeatureComboBox.h"
+#include "TDLAttributeComboBox.h"
 #include "TDLDialog.h"
 
 #include "..\shared\fileedit.h"
@@ -27,9 +28,21 @@
 class CTDCImageList;
 
 /////////////////////////////////////////////////////////////////////////////
+// CCustomAttributePageBase dialog
+
+class CCustomAttributePageBase : public CDialog
+{
+protected:
+	BOOL Create(UINT nDialogResID, CWnd* pParent);
+
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CCustomAttributeListPage dialog
 
-class CCustomAttributeListPage : public CDialog
+const UINT WM_CUSTATTRIBLISTCHANGE = (WM_APP + 1);
+
+class CCustomAttributeListPage : public CCustomAttributePageBase
 {
 // Construction
 public:
@@ -87,26 +100,32 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CCustomAttributeCalcPage dialog
 
-class CCustomAttributeCalcPage : public CDialog
+const UINT WM_CUSTATTRIBCALCCHANGE = (WM_APP + 2);
+
+class CCustomAttributeCalcPage : public CCustomAttributePageBase
 {
 // Construction
 public:
 	CCustomAttributeCalcPage();
 
 	BOOL Create(CWnd* pParent);
+	void SetAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDef);
 
-	// TODO
+	void SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc);
+	void GetCalculation(TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLCustomAttributeDlg)
-	CComboBox	m_cbFirstOperand;
+	CTDLAttributeComboBox	m_cbFirstOperand;
 	CComboBox	m_cbOperators;
-	CComboBox	m_cbSecondOperand;
+	CTDLAttributeComboBox	m_cbSecondOperandAttrib;
+	CMaskEdit	m_eSecondOperandValue;
 	//}}AFX_DATA
-	CString m_sFirstOperand;
-	CString m_sOperator;
-	CString m_sSecondOperand;
+	BOOL m_bSecondOperandIsValue;
+
+	TDCCUSTOMATTRIBUTECALCULATION m_calc;
+	CTDCCustomAttribDefinitionArray m_aAttribDef;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -122,7 +141,9 @@ protected:
 	//{{AFX_MSG(CCustomAttributeCalcPage)
 	afx_msg void OnSelChangeFirstOperand();
 	afx_msg void OnSelChangeOperator();
-	afx_msg void OnSelChangeSecondOperand();
+	afx_msg void OnSelChangeSecondOperandAttribute();
+	afx_msg void OnSelChangeSecondOperandValue();
+	afx_msg void OnChangeSecondOperandType();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 
@@ -131,6 +152,9 @@ protected:
 	void BuildSecondOperandCombo();
 	void EnableControls();
 
+	int BuildFirstOperandFilter(CTDCAttributeMap& mapAttrib) const;
+	BOOL IsDate(TDC_ATTRIBUTE nAttrib) const;
+	BOOL IsTimePeriod(TDC_ATTRIBUTE nAttrib) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -196,9 +220,7 @@ protected:
 	afx_msg void OnDoubleClickItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnSelchangeDatatype();
 	afx_msg void OnSelchangeAlignment();
-	afx_msg void OnSelchangeListtype();
 	afx_msg void OnChangeColumntitle();
-	afx_msg void OnChangeDefaultlistdata();
 	afx_msg void OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnBeginlabeleditAttributelist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnChangeUniqueid();
@@ -216,7 +238,10 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnUpdateEditAttribute(CCmdUI* pCmdUI);
 	afx_msg void OnEditAttribute();
+
 	afx_msg LRESULT OnEEClick(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnChangeListAttributes(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnChangeCalculationAttributes(WPARAM wp, LPARAM lp);
 	DECLARE_MESSAGE_MAP()
 
 	void BuildDataTypeCombo();

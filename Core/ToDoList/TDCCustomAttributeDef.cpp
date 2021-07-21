@@ -12,6 +12,171 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+TDCCUSTOMATTRIBUTECALCULATION::TDCCUSTOMATTRIBUTECALCULATION()
+{
+	Clear();
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::operator==(const TDCCUSTOMATTRIBUTECALCULATION& calc) const
+{
+	return ((nFirstOperandAttribID == calc.nFirstOperandAttribID) &&
+			(sFirstOperandCustAttribID == calc.sFirstOperandCustAttribID) &&
+			(nOperator == calc.nOperator) &&
+			(nSecondOperandAttribID == calc.nSecondOperandAttribID) &&
+			(sSecondOperandCustAttribID == calc.sSecondOperandCustAttribID) &&
+			(dSecondOperandValue == calc.dSecondOperandValue));
+}
+
+void TDCCUSTOMATTRIBUTECALCULATION::Clear()
+{
+	nFirstOperandAttribID = TDCA_NONE;
+	sFirstOperandCustAttribID.Empty();
+
+	nOperator = TDCCAC_ADD;
+
+	nSecondOperandAttribID = TDCA_NONE;
+	sSecondOperandCustAttribID.Empty();
+	dSecondOperandValue = 0.0;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::Set(const TDCCUSTOMATTRIBUTECALCULATION& calc)
+{
+	if (!calc.IsValid())
+		return FALSE;
+
+	// else
+	*this = calc;
+	return TRUE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::Set(TDC_ATTRIBUTE nFirstOpAttribID,
+										const CString& sFirstOpCustAttribID,
+										TDCCA_CALC_OPERATOR nOp,
+										TDC_ATTRIBUTE nSecondOpAttribID,
+										const CString& sSecondOpCustAttribID)
+{
+	if (!IsValidOperand(nFirstOpAttribID, sFirstOpCustAttribID))
+		return FALSE;
+
+	if (!IsValidOperand(nSecondOpAttribID, sSecondOpCustAttribID))
+		return FALSE;
+
+	if (!IsValidOperator(nOp))
+		return FALSE;
+
+	nFirstOperandAttribID = nFirstOpAttribID;
+	sFirstOperandCustAttribID = sFirstOpCustAttribID;
+
+	nOperator = nOp;
+
+	nSecondOperandAttribID = nSecondOpAttribID;
+	sSecondOperandCustAttribID = sSecondOpCustAttribID;
+	dSecondOperandValue = 0.0;
+	
+	return TRUE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::Set(TDC_ATTRIBUTE nFirstOpAttribID,
+										const CString& sFirstOpCustAttribID,
+										TDCCA_CALC_OPERATOR nOp,
+										double dSecondOpValue)
+{
+	if (!IsValidOperand(nFirstOpAttribID, sFirstOpCustAttribID))
+		return FALSE;
+
+	if (!IsValidOperator(nOp))
+		return FALSE;
+
+	nFirstOperandAttribID = nFirstOpAttribID;
+	sFirstOperandCustAttribID = sFirstOpCustAttribID;
+
+	nOperator = nOp;
+
+	nSecondOperandAttribID = TDCA_NONE;
+	sSecondOperandCustAttribID.Empty();
+	dSecondOperandValue = dSecondOpValue;
+	
+	return TRUE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsFirstOperandCustom() const
+{
+	ASSERT(IsValidOperand(nFirstOperandAttribID, sFirstOperandCustAttribID));
+
+	return (nFirstOperandAttribID == TDCA_CUSTOMATTRIB);
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsSecondOperandCustom() const
+{
+	ASSERT(IsValidOperand(nSecondOperandAttribID, sSecondOperandCustAttribID));
+
+	return (nFirstOperandAttribID == TDCA_CUSTOMATTRIB);
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsSecondOperandValue() const
+{
+	ASSERT(IsValidOperand(nSecondOperandAttribID, sSecondOperandCustAttribID));
+
+	return (nFirstOperandAttribID == TDCA_NONE);
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValidOperator(TDCCA_CALC_OPERATOR nOperator)
+{
+	switch (nOperator)
+	{
+	case TDCCAC_ADD:
+	case TDCCAC_SUBTRACT:
+	case TDCCAC_MULTIPLY:
+	case TDCCAC_DIVIDE:
+		return TRUE;
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValidOperand(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID)
+{
+	switch (nAttribID)
+	{
+		case TDCA_COST:
+		case TDCA_CREATIONDATE:
+		case TDCA_DONEDATE:
+		case TDCA_DUEDATE:
+		case TDCA_LASTMODDATE:
+		case TDCA_PERCENT:
+		case TDCA_PRIORITY:
+		case TDCA_RISK:
+		case TDCA_STARTDATE:
+		case TDCA_TIMEESTIMATE:
+		case TDCA_TIMESPENT:
+		case TDCA_NONE:
+			return sCustAttribID.IsEmpty();
+
+		case TDCA_CUSTOMATTRIB:
+			return !sCustAttribID.IsEmpty();
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValid() const
+{
+	if (!IsValidOperand(nFirstOperandAttribID, sFirstOperandCustAttribID))
+		return FALSE;
+
+	if (!IsValidOperator(nOperator))
+		return FALSE;
+
+	if (IsValidOperand(nSecondOperandAttribID, sSecondOperandCustAttribID))
+		return TRUE;
+
+	// else
+	return ((nSecondOperandAttribID == TDCA_NONE) && sSecondOperandCustAttribID.IsEmpty());
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
 
 TDCCUSTOMATTRIBUTEDEFINITION::TDCCUSTOMATTRIBUTEDEFINITION(LPCTSTR szLabel)
 	:
@@ -50,6 +215,14 @@ TDCCUSTOMATTRIBUTEDEFINITION& TDCCUSTOMATTRIBUTEDEFINITION::operator=(const TDCC
 		if (attribDef.IsAutoList())
 			aAutoListData.Copy(attribDef.aAutoListData);
 	}
+	else if (IsDataType(TDCCA_CALCULATION))
+	{
+		calculation = attribDef.calculation;
+	}
+	else
+	{
+		calculation.Clear();
+	}
 
 	return *this;
 }
@@ -75,6 +248,11 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::Matches(const TDCCUSTOMATTRIBUTEDEFINITION& a
 			return FALSE;
 
 		if (bIncAutoListData && !Misc::MatchAll(aAutoListData, attribDef.aAutoListData, TRUE, TRUE))
+			return FALSE;
+	}
+	else if (IsDataType(TDCCA_CALCULATION))
+	{
+		if (!(calculation == attribDef.calculation))
 			return FALSE;
 	}
 
@@ -138,16 +316,19 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::HasDefaultTextAlignment() const
 	return (nTextAlignment == GetDefaultTextAlignment(dwAttribType));
 }
 
-void TDCCUSTOMATTRIBUTEDEFINITION::SetAttributeType(DWORD dwType)
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetAttributeType(DWORD dwType)
 {
-	SetTypes((dwType & TDCCA_DATAMASK), (dwType & TDCCA_LISTMASK));
+	// Must be a valid data/list pairing
+	return SetTypes((dwType & TDCCA_DATAMASK), (dwType & TDCCA_LISTMASK));
 }
 
-void TDCCUSTOMATTRIBUTEDEFINITION::SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment)
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment)
 {
-	DWORD dwPrevType = GetDataType();
+	// Forcibly validate the existing list type to match this data type
+	DWORD dwListType = ValidateListType(dwDataType, GetListType());
 
-	SetTypes((dwDataType & TDCCA_DATAMASK), GetListType());
+	DWORD dwPrevType = GetDataType();
+	VERIFY(SetTypes((dwDataType & TDCCA_DATAMASK), dwListType));
 
 	// Set default alignment if the previous also had the default
 	if (bUpdateDefaultAlignment)
@@ -155,11 +336,14 @@ void TDCCUSTOMATTRIBUTEDEFINITION::SetDataType(DWORD dwDataType, BOOL bUpdateDef
 		if (nTextAlignment == GetDefaultTextAlignment(dwPrevType))
 			nTextAlignment = GetDefaultTextAlignment(dwAttribType);
 	}
+
+	return TRUE;
 }
 
-void TDCCUSTOMATTRIBUTEDEFINITION::SetListType(DWORD dwListType)
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetListType(DWORD dwListType)
 {
-	SetTypes(GetDataType(), (dwListType & TDCCA_LISTMASK));
+	// Must be a valid list type for this data type
+	return SetTypes(GetDataType(), (dwListType & TDCCA_LISTMASK));
 }
 
 int TDCCUSTOMATTRIBUTEDEFINITION::GetUniqueListData(CStringArray& aData) const
@@ -288,6 +472,11 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::IsAggregated() const
 	return HasFeature(TDCCAF_ACCUMULATE) ||
 			HasFeature(TDCCAF_MAXIMIZE) ||
 			HasFeature(TDCCAF_MINIMIZE);
+}
+
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc)
+{
+	return calculation.Set(calc);
 }
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::GetNextListItem(const CString& sItem, BOOL bNext) const
@@ -435,9 +624,28 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::DecodeImageTag(const CString& sTag, CString& 
 	return !sImage.IsEmpty();
 }
 
-void TDCCUSTOMATTRIBUTEDEFINITION::SetTypes(DWORD dwDataType, DWORD dwListType)
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetTypes(DWORD dwDataType, DWORD dwListType)
 {
-	dwAttribType = (dwDataType | ValidateListType(dwDataType, dwListType));
+	// List type must have been validate before this point
+	DWORD dwValidListType = ValidateListType(dwDataType, dwListType);
+
+	if (dwValidListType != dwListType)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	BOOL bWasCalc = IsDataType(TDCCA_CALCULATION);
+
+	dwAttribType = (dwDataType | dwListType);
+
+	// Update calculation
+	BOOL bIsCalc = IsDataType(TDCCA_CALCULATION);
+
+	if ((bWasCalc && !bIsCalc) || (!bWasCalc && bIsCalc))
+		calculation.Clear();
+
+	return TRUE;
 }
 
 DWORD TDCCUSTOMATTRIBUTEDEFINITION::ValidateListType(DWORD dwDataType, DWORD dwListType)

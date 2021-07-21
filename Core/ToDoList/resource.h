@@ -838,8 +838,10 @@
 #define IDC_LISTTYPE_LABEL              1549
 #define IDC_DEFLISTDATA_LABEL           1550
 #define IDC_FIRSTOPERAND                1551
-#define IDC_SECONDOPERAND               1552
-#define IDC_SUMMARY                     1554
+#define IDC_SECONDOPERANDATTRIBUTE      1552
+#define IDC_SECONDOPISATTRIBUTE         1555
+#define IDC_SECONDOPISVALUE             1556
+#define IDC_SECONDOPERANDVALUE          1557
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2432,7 +2434,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        327
 #define _APS_NEXT_COMMAND_VALUE         34746
-#define _APS_NEXT_CONTROL_VALUE         1555
+#define _APS_NEXT_CONTROL_VALUE         1558
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif

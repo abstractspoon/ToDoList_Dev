@@ -15,6 +15,47 @@ struct TDCCADATA;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+struct TDCCUSTOMATTRIBUTECALCULATION
+{
+	TDCCUSTOMATTRIBUTECALCULATION();
+
+	BOOL operator==(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
+
+	void Clear();
+	BOOL IsValid() const;
+
+	BOOL Set(const TDCCUSTOMATTRIBUTECALCULATION& calc);
+
+	BOOL Set(TDC_ATTRIBUTE nFirstOpAttribID,
+			 const CString& sFirstOpCustAttribID,
+			 TDCCA_CALC_OPERATOR nOp,
+			 TDC_ATTRIBUTE nSecondOpAttribID,
+			 const CString& sSecondOpCustAttribID);
+
+	BOOL Set(TDC_ATTRIBUTE nFirstOpAttribID,
+			 const CString& sFirstOpCustAttribID,
+			 TDCCA_CALC_OPERATOR nOp,
+			 double dSecondOpValue);
+
+	BOOL IsFirstOperandCustom() const;
+	BOOL IsSecondOperandCustom() const;
+	BOOL IsSecondOperandValue() const;
+
+	static BOOL IsValidOperator(TDCCA_CALC_OPERATOR nOperator);
+	static BOOL IsValidOperand(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID);
+
+	TDC_ATTRIBUTE nFirstOperandAttribID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
+	CString sFirstOperandCustAttribID;
+
+	TDCCA_CALC_OPERATOR nOperator;
+
+	TDC_ATTRIBUTE nSecondOperandAttribID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
+	CString sSecondOperandCustAttribID;
+	double dSecondOperandValue;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 struct TDCCUSTOMATTRIBUTEDEFINITION
 {
 	friend class CTDCCustomAttribDefinitionArray;
@@ -37,9 +78,9 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	UINT GetColumnHeaderAlignment() const;
 	BOOL HasDefaultTextAlignment() const;
 
-	void SetAttributeType(DWORD dwType);
-	void SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
-	void SetListType(DWORD dwListType);
+	BOOL SetAttributeType(DWORD dwType);
+	BOOL SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
+	BOOL SetListType(DWORD dwListType);
 
 	inline DWORD GetDataType() const { return (dwAttribType & TDCCA_DATAMASK); }
 	inline DWORD GetListType() const { return (dwAttribType & TDCCA_LISTMASK); }
@@ -58,6 +99,9 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	BOOL SupportsFeature(DWORD dwFeature) const;
 //	BOOL SupportsAggregation() const;
 	BOOL IsAggregated() const;
+
+	BOOL SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc);
+	const TDCCUSTOMATTRIBUTECALCULATION& Calculation() const { return calculation; }
 
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const;
 	CString GetImageName(const CString& sImage) const;
@@ -89,9 +133,10 @@ private:
 	DWORD dwAttribType;
 	TDC_COLUMN nColID;
 	TDC_ATTRIBUTE nAttribID;
+	TDCCUSTOMATTRIBUTECALCULATION calculation;
 	// ----------------------------------------------------------------
 
-	void SetTypes(DWORD dwDataType, DWORD dwListType);
+	BOOL SetTypes(DWORD dwDataType, DWORD dwListType);
 	static DWORD ValidateListType(DWORD dwDataType, DWORD dwListType);
 };
 

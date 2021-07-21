@@ -56,17 +56,47 @@ void CTDLAttributeComboBox::SetAttributeFilter(const CTDCAttributeMap& mapAttrib
 	}
 }
 
-BOOL CTDLAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, BOOL bRelative) const
+BOOL CTDLAttributeComboBox::SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, BOOL bRelative)
 {
 	DWORD dwItemData = EncodeItemData(nAttrib, bRelative);
 
-	return (CDialogHelper::FindItemByData(*this, dwItemData) != CB_ERR);
+	return (CDialogHelper::SelectItemByData(*this, dwItemData) != CB_ERR);
+}
+
+BOOL CTDLAttributeComboBox::SetSelectedAttribute(const CString& sCustAttribID, BOOL bRelative)
+{
+	TDC_ATTRIBUTE nAttrib = m_aAttribDefs.GetAttributeID(sCustAttribID);
+
+	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return SetSelectedAttribute(nAttrib, bRelative);
 }
 
 TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute() const
 {
 	BOOL bUnused;
 	return GetSelectedAttribute(bUnused);
+}
+
+TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute(CString sCustAttribID) const
+{
+	TDC_ATTRIBUTE nAttrib = GetSelectedAttribute();
+
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	{
+		sCustAttribID = m_aAttribDefs.GetAttributeTypeID(nAttrib);
+		ASSERT(!sCustAttribID.IsEmpty());
+	}
+	else
+	{
+		sCustAttribID.Empty();
+	}
+
+	return nAttrib;
 }
 
 TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute(BOOL& bRelative) const
@@ -85,6 +115,29 @@ TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute(BOOL& bRelative) const
 	return nAttrib;
 }
 
+void CTDLAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttrib)
+{
+	if (pDX->m_bSaveAndValidate)
+		nAttrib = GetSelectedAttribute();
+	else
+		SetSelectedAttribute(nAttrib);
+}
+
+void CTDLAttributeComboBox::DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttrib, CString& sCustAttribID)
+{
+	if (pDX->m_bSaveAndValidate)
+	{
+		nAttrib = GetSelectedAttribute(sCustAttribID);
+	}
+	else
+	{
+		if (sCustAttribID.IsEmpty())
+			SetSelectedAttribute(nAttrib);
+		else
+			SetSelectedAttribute(sCustAttribID);
+	}
+}
+
 CString CTDLAttributeComboBox::GetSelectedAttributeText() const
 {
 	int nSel = GetCurSel();
@@ -99,6 +152,7 @@ CString CTDLAttributeComboBox::GetSelectedAttributeText() const
 
 void CTDLAttributeComboBox::BuildCombo()
 {
+	TDC_ATTRIBUTE nSelAttrib = GetSelectedAttribute();
 	ResetContent();
 
 	CLocalizer::EnableTranslation(*this, FALSE);
@@ -157,6 +211,9 @@ void CTDLAttributeComboBox::BuildCombo()
 	// Misc others
 	if (WantAttribute(TDCA_REMINDER))
 		CDialogHelper::AddString(*this, IDS_TDLBC_REMINDER, EncodeItemData(TDCA_REMINDER));
+
+	// restore selection
+	SetSelectedAttribute(nSelAttrib);
 
 	// recalc combo drop width
 	CDialogHelper::RefreshMaxDropWidth(*this);

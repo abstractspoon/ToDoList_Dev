@@ -45,11 +45,11 @@ const int NUM_DATATYPES = sizeof(DATA_TYPES) / sizeof(TDLCAD_TYPE);
 
 static TDLCAD_TYPE LIST_TYPES[] = 
 {
-	{ IDS_CAD_NOTLIST, TDCCA_NOTALIST },
-	{ IDS_CAD_AUTOLIST, TDCCA_AUTOLIST },
-	{ IDS_CAD_FIXEDLIST, TDCCA_FIXEDLIST },
-	{ IDS_CAD_AUTOMULTILIST, TDCCA_AUTOMULTILIST },
-	{ IDS_CAD_FIXEDMULTILIST, TDCCA_FIXEDMULTILIST },
+	{ IDS_CAD_NOTLIST,			TDCCA_NOTALIST },
+	{ IDS_CAD_AUTOLIST,			TDCCA_AUTOLIST },
+	{ IDS_CAD_FIXEDLIST,		TDCCA_FIXEDLIST },
+	{ IDS_CAD_AUTOMULTILIST,	TDCCA_AUTOMULTILIST },
+	{ IDS_CAD_FIXEDMULTILIST,	TDCCA_FIXEDMULTILIST },
 };
 
 const int NUM_LISTTYPES = sizeof(LIST_TYPES) / sizeof(TDLCAD_TYPE);
@@ -90,6 +90,24 @@ const UINT NUM_SYMBOLS = sizeof(SYMBOLS) / sizeof(TCHAR);
 #ifndef LVS_EX_DOUBLEBUFFER
 #	define LVS_EX_DOUBLEBUFFER (0x00010000)
 #endif
+
+/////////////////////////////////////////////////////////////////////////////
+// CCustomAttributePageBase dialog
+
+BOOL CCustomAttributePageBase::Create(UINT nDialogResID, CWnd* pParent)
+{
+	if (!CDialog::Create(nDialogResID, pParent))
+		return FALSE;
+
+	CRect rHost = CDialogHelper::GetCtrlRect(pParent, IDC_PAGEHOST);
+	MoveWindow(rHost);
+
+	// Fixup our Z order
+	CWnd* pHost = pParent->GetDlgItem(IDC_PAGEHOST);
+	SetWindowPos(pHost, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+
+	return TRUE;
+}
 
 /////////////////////////////////////////////////////////////////////////////
 // CCustomAttributeListPage dialog
@@ -142,13 +160,7 @@ END_MESSAGE_MAP()
 
 BOOL CCustomAttributeListPage::Create(CWnd* pParent)
 {
-	if (!CDialog::Create(IDD_CUSTOMATTRIBLIST_PAGE, pParent))
-		return FALSE;
-
-	CRect rHost = CDialogHelper::GetCtrlRect(pParent, IDC_PAGEHOST);
-	MoveWindow(rHost);
-
-	return TRUE;
+	return CCustomAttributePageBase::Create(IDD_CUSTOMATTRIBLIST_PAGE, pParent);
 }
 
 BOOL CCustomAttributeListPage::OnInitDialog()
@@ -367,16 +379,16 @@ void CCustomAttributeListPage::OnSelchangeListtype()
 	UpdateListDataMask();
 	EnableControls();
 
-	// Forward to parent
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_LISTTYPE, CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+	// Notify parent
+	GetParent()->SendMessage(WM_CUSTATTRIBLISTCHANGE, 0, (LPARAM)GetSafeHwnd());
 }
 
 void CCustomAttributeListPage::OnChangeDefaultlistdata()
 {
 	UpdateData();
 
-	// Forward to parent
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_DEFAULTLISTDATA, EN_CHANGE), (LPARAM)GetSafeHwnd());
+	// Notify parent
+	GetParent()->SendMessage(WM_CUSTATTRIBLISTCHANGE, 0, (LPARAM)GetSafeHwnd());
 }
 
 void CCustomAttributeListPage::OnInsertsymbol()
@@ -481,7 +493,12 @@ void CCustomAttributeListPage::OnBrowseimages()
 /////////////////////////////////////////////////////////////////////////////
 // CCustomAttributeCalcPage dialog
 
-CCustomAttributeCalcPage::CCustomAttributeCalcPage()
+CCustomAttributeCalcPage::CCustomAttributeCalcPage() 
+	:
+	m_eSecondOperandValue(_T("-.0123456789"), ME_LOCALIZEDECIMAL),
+	m_cbFirstOperand(FALSE), // don't want relative tasks
+	m_cbSecondOperandAttrib(FALSE), // don't want relative tasks
+	m_bSecondOperandIsValue(TRUE)
 {
 	//{{AFX_DATA_INIT(CCustomAttributeCalcPage)
 	//}}AFX_DATA_INIT
@@ -493,18 +510,34 @@ void CCustomAttributeCalcPage::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CCustomAttributeCalcPage)
 	DDX_Control(pDX, IDC_FIRSTOPERAND, m_cbFirstOperand);
 	DDX_Control(pDX, IDC_OPERATOR, m_cbOperators);
-	DDX_Control(pDX, IDC_SECONDOPERAND, m_cbSecondOperand);
+	DDX_Control(pDX, IDC_SECONDOPERANDATTRIBUTE, m_cbSecondOperandAttrib);
+	DDX_Control(pDX, IDC_SECONDOPERANDVALUE, m_eSecondOperandValue);
 	//}}AFX_DATA_MAP
+	DDX_Radio(pDX, IDC_SECONDOPISATTRIBUTE, m_bSecondOperandIsValue);
 
+	m_cbFirstOperand.DDX(pDX, m_calc.nFirstOperandAttribID, m_calc.sFirstOperandCustAttribID);
+
+	if (m_bSecondOperandIsValue)
+		DDX_Text(pDX, IDC_SECONDOPERANDVALUE, m_calc.dSecondOperandValue);
+	else
+		m_cbSecondOperandAttrib.DDX(pDX, m_calc.nSecondOperandAttribID, m_calc.sSecondOperandCustAttribID);
+
+	// Update calculation arguments
+	if (pDX->m_bSaveAndValidate)
+		m_calc.nOperator = CDialogHelper::GetSelectedItemData(m_cbOperators, TDCCAC_ADD);
+	else
+		CDialogHelper::SelectItemByData(m_cbOperators, m_calc.nOperator);
 }
-
 
 BEGIN_MESSAGE_MAP(CCustomAttributeCalcPage, CDialog)
 	//{{AFX_MSG_MAP(CCustomAttributeCalcPage)
 	ON_CBN_SELCHANGE(IDC_FIRSTOPERAND, OnSelChangeFirstOperand)
 	ON_CBN_SELCHANGE(IDC_OPERATOR, OnSelChangeOperator)
-	ON_CBN_SELCHANGE(IDC_SECONDOPERAND, OnSelChangeSecondOperand)
+	ON_CBN_SELCHANGE(IDC_SECONDOPERANDATTRIBUTE, OnSelChangeSecondOperandAttribute)
+	ON_EN_CHANGE(IDC_SECONDOPERANDVALUE, OnSelChangeSecondOperandValue)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_SECONDOPISATTRIBUTE, OnChangeSecondOperandType)
+	ON_BN_CLICKED(IDC_SECONDOPISVALUE, OnChangeSecondOperandType)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -512,13 +545,7 @@ END_MESSAGE_MAP()
 
 BOOL CCustomAttributeCalcPage::Create(CWnd* pParent)
 {
-	if (!CDialog::Create(IDD_CUSTOMATTRIBCALC_PAGE, pParent))
-		return FALSE;
-
-	CRect rHost = CDialogHelper::GetCtrlRect(pParent, IDC_PAGEHOST);
-	MoveWindow(rHost);
-
-	return TRUE;
+	return CCustomAttributePageBase::Create(IDD_CUSTOMATTRIBCALC_PAGE, pParent);
 }
 
 BOOL CCustomAttributeCalcPage::OnInitDialog()
@@ -528,7 +555,7 @@ BOOL CCustomAttributeCalcPage::OnInitDialog()
 	// disable localization because we do it ourselves by using CEnString
 	CLocalizer::EnableTranslation(m_cbFirstOperand, FALSE);
 	CLocalizer::EnableTranslation(m_cbOperators, FALSE);
-	CLocalizer::EnableTranslation(m_cbSecondOperand, FALSE);
+	CLocalizer::EnableTranslation(m_cbSecondOperandAttrib, FALSE);
 
 	BuildFirstOperandCombo();
 	BuildOperatorCombo();
@@ -539,66 +566,277 @@ BOOL CCustomAttributeCalcPage::OnInitDialog()
 				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
+void CCustomAttributeCalcPage::SetAttributeDefinitions(const CTDCCustomAttribDefinitionArray& aAttribDef)
+{
+	m_aAttribDef.Copy(aAttribDef); // needed in OnInitDialog
+	m_cbFirstOperand.SetCustomAttributes(m_aAttribDef);
+
+	if (GetSafeHwnd())
+	{
+		UpdateData();
+
+		BuildOperatorCombo();
+		BuildSecondOperandCombo();
+		EnableControls();
+	}
+}
+
+void CCustomAttributeCalcPage::SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc)
+{
+	m_calc = calc;
+	m_bSecondOperandIsValue = calc.IsSecondOperandValue();
+
+	BuildOperatorCombo();
+	BuildSecondOperandCombo();
+
+	UpdateData(FALSE);
+	EnableControls();
+}
+
+void CCustomAttributeCalcPage::GetCalculation(TDCCUSTOMATTRIBUTECALCULATION& calc) const
+{
+	calc = m_calc;
+}
+
+BOOL CCustomAttributeCalcPage::IsDate(TDC_ATTRIBUTE nAttrib) const
+{
+	switch (nAttrib)
+	{
+	case TDCA_CREATIONDATE:
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_STARTDATE:
+		return TRUE;
+
+	case TDCA_CUSTOMATTRIB:
+		{
+			int nDef = m_aAttribDef.Find(nAttrib);
+			ASSERT(nDef >= 0);
+
+			if (nDef >= 0)
+				return (m_aAttribDef[nDef].IsDataType(TDCCA_DATE));
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
+BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttrib) const
+{
+	switch (nAttrib)
+	{
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		return TRUE;
+
+	case TDCA_CUSTOMATTRIB:
+		{
+			int nDef = m_aAttribDef.Find(nAttrib);
+			ASSERT(nDef >= 0);
+
+			if (nDef >= 0)
+				return (m_aAttribDef[nDef].IsDataType(TDCCA_TIMEPERIOD));
+		}
+		break;
+	}
+
+	return FALSE;
+}
+
+int CCustomAttributeCalcPage::BuildFirstOperandFilter(CTDCAttributeMap& mapAttrib) const
+{
+	mapAttrib.RemoveAll();
+
+	mapAttrib.Add(TDCA_COST);
+	mapAttrib.Add(TDCA_CREATIONDATE);
+	mapAttrib.Add(TDCA_DONEDATE);
+	mapAttrib.Add(TDCA_DUEDATE);
+	mapAttrib.Add(TDCA_LASTMODDATE);
+	mapAttrib.Add(TDCA_PERCENT);
+	mapAttrib.Add(TDCA_PRIORITY);
+	mapAttrib.Add(TDCA_RISK);
+	mapAttrib.Add(TDCA_STARTDATE);
+	mapAttrib.Add(TDCA_TIMEESTIMATE);
+	mapAttrib.Add(TDCA_TIMESPENT);
+
+	for (int nDef = 0; nDef < m_aAttribDef.GetSize(); nDef++)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDef[nDef];
+
+		switch (attribDef.GetDataType())
+		{
+		case TDCCA_DATE:
+		case TDCCA_DOUBLE:
+		case TDCCA_TIMEPERIOD:
+		case TDCCA_FRACTION:
+		case TDCCA_INTEGER:
+			mapAttrib.Add(attribDef.GetAttributeID());
+			break;
+		}
+	}
+
+	return mapAttrib.GetCount();
+}
+
 void CCustomAttributeCalcPage::BuildFirstOperandCombo()
 {
-	m_cbFirstOperand.ResetContent();
+	// Build attribute filter
+	CTDCAttributeMap mapAttrib;
+	BuildFirstOperandFilter(mapAttrib);
 
-	// TODO
+	m_cbFirstOperand.SetAttributeFilter(mapAttrib);
 
-	// restore selection
-// 	if (CDialogHelper::SelectItem(m_cbListType, m_dwListType) == CB_ERR)
-// 		SetListType(TDCCA_NOTALIST);
+	// Restore selection
+	if (m_calc.IsFirstOperandCustom())
+		m_cbFirstOperand.SetSelectedAttribute(m_calc.sFirstOperandCustAttribID);
+	else
+		m_cbFirstOperand.SetSelectedAttribute(m_calc.nFirstOperandAttribID);
 }
 
 void CCustomAttributeCalcPage::BuildOperatorCombo()
 {
 	m_cbOperators.ResetContent();
 
-	// TODO
+	// Add/subtract supported by all
+	CDialogHelper::AddString(m_cbOperators, _T("Add (+)"), TDCCAC_ADD);
+	CDialogHelper::AddString(m_cbOperators, _T("Subtract(-)"), TDCCAC_SUBTRACT);
+
+	// Multiply/divide supported by numerics only
+	if (!IsDate(m_calc.nFirstOperandAttribID) &&
+		!IsTimePeriod(m_calc.nFirstOperandAttribID))
+	{
+		CDialogHelper::AddString(m_cbOperators, _T("Multiply (*)"), TDCCAC_MULTIPLY);
+		CDialogHelper::AddString(m_cbOperators, _T("Divide (/)"), TDCCAC_DIVIDE);
+	}
 
 	// restore selection
-// 	if (CDialogHelper::SelectItem(m_cbListType, m_dwListType) == CB_ERR)
-// 		SetListType(TDCCA_NOTALIST);
+	if (CDialogHelper::SelectItemByData(m_cbOperators, m_calc.nOperator) == CB_ERR)
+	{
+		m_calc.nOperator = TDCCAC_ADD;
+		UpdateData(FALSE);
+	}
 }
 
 void CCustomAttributeCalcPage::BuildSecondOperandCombo()
 {
-	m_cbSecondOperand.ResetContent();
+	// Build attribute filter
+	CTDCAttributeMap mapAttrib;
+	BuildFirstOperandFilter(mapAttrib);
 
-	// TODO
+	// Remove invalid combinations
+	//
+	// First Operand  | Op  | Second Operand    | Valid
+	// --------------------------------------------------
+	// Numeric        | Any | Numeric           | Y
+	// Numeric        | Any | Date              | N
+	// Numeric        | Any | Time Period       | N
+	//                |     |                   |
+	// Date           | Any | Time Period       | Y
+	// Date           | Any | Numeric           | Y (units are 'days')
+	// Date           | +   | Date              | N
+	// Date           | -   | Date              | Y
+	//                |     |                   |
+	// Time Period    | Any | Numeric           | Y (units are those of time period)
+	// Time Period    | + - | Date              | N
+	// Time Period    | + - | Time Period       | Y
+	//
+	BOOL bFirstIsDate = IsDate(m_calc.nFirstOperandAttribID);
+	BOOL bFirstIsTime = IsTimePeriod(m_calc.nFirstOperandAttribID);
 
-	// restore selection
-// 	if (CDialogHelper::SelectItem(m_cbListType, m_dwListType) == CB_ERR)
-// 		SetListType(TDCCA_NOTALIST);
+	POSITION pos = mapAttrib.GetStartPosition();
+
+	while (pos)
+	{
+		TDC_ATTRIBUTE nSecondAttrib = mapAttrib.GetNext(pos);
+		BOOL bDelete = (nSecondAttrib == m_calc.nFirstOperandAttribID);
+
+		if (!bDelete)
+		{
+			if (bFirstIsTime)
+			{
+				bDelete = IsDate(nSecondAttrib);
+			}
+			else if (bFirstIsDate)
+			{
+				bDelete = ((m_calc.nOperator == TDCCAC_ADD) && IsDate(nSecondAttrib));
+			}
+			else // numeric
+			{
+				bDelete = IsDate(nSecondAttrib) || IsTimePeriod(nSecondAttrib);
+			}
+		}
+
+		if (bDelete)
+			mapAttrib.Remove(nSecondAttrib);
+	}
+
+	m_cbSecondOperandAttrib.SetAttributeFilter(mapAttrib);
+	ASSERT(m_cbSecondOperandAttrib.GetCount());
+
+	// Restore selection
+	if (m_calc.IsSecondOperandCustom())
+		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.sSecondOperandCustAttribID);
+	else
+		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.nSecondOperandAttribID);
 }
 
 void CCustomAttributeCalcPage::EnableControls()
 {
-	// TODO
+	BOOL bHasFirstOp = (m_calc.nFirstOperandAttribID != TDCA_NONE);
+
+	GetDlgItem(IDC_SECONDOPISATTRIBUTE)->EnableWindow(bHasFirstOp);
+	GetDlgItem(IDC_SECONDOPISVALUE)->EnableWindow(bHasFirstOp);
+	GetDlgItem(IDC_SECONDOPERANDATTRIBUTE)->EnableWindow(bHasFirstOp && !m_bSecondOperandIsValue);
+	GetDlgItem(IDC_SECONDOPERANDVALUE)->EnableWindow(bHasFirstOp && m_bSecondOperandIsValue);
 }
 
 void CCustomAttributeCalcPage::OnSelChangeFirstOperand()
 {
 	UpdateData();
 
-	// Forward to parent
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_FIRSTOPERAND, CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+	BuildOperatorCombo();
+	BuildSecondOperandCombo();
+	EnableControls();
+
+	// Notify parent
+	GetParent()->SendMessage(WM_CUSTATTRIBCALCCHANGE, 0, (LPARAM)GetSafeHwnd());
 }
 
 void CCustomAttributeCalcPage::OnSelChangeOperator()
 {
 	UpdateData();
+	BuildSecondOperandCombo();
+	EnableControls();
 
-	// Forward to parent
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_OPERATOR, CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+	// Notify parent
+	GetParent()->SendMessage(WM_CUSTATTRIBCALCCHANGE, 0, (LPARAM)GetSafeHwnd());
 }
 
-void CCustomAttributeCalcPage::OnSelChangeSecondOperand()
+void CCustomAttributeCalcPage::OnSelChangeSecondOperandAttribute()
 {
 	UpdateData();
 
-	// Forward to parent
-	GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(IDC_SECONDOPERAND, CBN_SELCHANGE), (LPARAM)GetSafeHwnd());
+	// Notify parent
+	GetParent()->SendMessage(WM_CUSTATTRIBCALCCHANGE, 0, (LPARAM)GetSafeHwnd());
+}
+
+void CCustomAttributeCalcPage::OnSelChangeSecondOperandValue()
+{
+	UpdateData();
+
+	// Notify parent
+	GetParent()->SendMessage(WM_CUSTATTRIBCALCCHANGE, 0, (LPARAM)GetSafeHwnd());
+}
+
+void CCustomAttributeCalcPage::OnChangeSecondOperandType()
+{
+	UpdateData();
+	EnableControls();
+
+	// Notify parent
+	GetParent()->SendMessage(WM_CUSTATTRIBCALCCHANGE, 0, (LPARAM)GetSafeHwnd());
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -630,6 +868,8 @@ CTDLCustomAttributeDlg::CTDLCustomAttributeDlg(const CString& sTaskFile,
 	m_eColumnTitle.AddButton(1, 0x2211, CEnString(IDS_SYMBOLS), CALC_BTNWIDTH);
 	m_eColumnTitle.SetDropMenuButton(1);
 #endif
+
+	m_pageCalc.SetAttributeDefinitions(aAttribDef);
 }
 
 void CTDLCustomAttributeDlg::DoDataExchange(CDataExchange* pDX)
@@ -669,9 +909,7 @@ BEGIN_MESSAGE_MAP(CTDLCustomAttributeDlg, CTDLDialog)
 	ON_NOTIFY(NM_DBLCLK, IDC_ATTRIBUTELIST, OnDoubleClickItem)
 	ON_CBN_SELCHANGE(IDC_DATATYPE, OnSelchangeDatatype)
 	ON_CBN_SELCHANGE(IDC_ALIGNMENT, OnSelchangeAlignment)
-	ON_CBN_SELCHANGE(IDC_LISTTYPE, OnSelchangeListtype)
 	ON_EN_CHANGE(IDC_COLUMNTITLE, OnChangeColumntitle)
-	ON_EN_CHANGE(IDC_DEFAULTLISTDATA, OnChangeDefaultlistdata)
 	ON_NOTIFY(LVN_ENDLABELEDIT, IDC_ATTRIBUTELIST, OnEndlabeleditAttributelist)
 	ON_NOTIFY(LVN_BEGINLABELEDIT, IDC_ATTRIBUTELIST, OnBeginlabeleditAttributelist)
 	ON_EN_CHANGE(IDC_UNIQUEID, OnChangeUniqueid)
@@ -689,7 +927,10 @@ BEGIN_MESSAGE_MAP(CTDLCustomAttributeDlg, CTDLDialog)
 	//}}AFX_MSG_MAP
 	ON_COMMAND(ID_CUSTATTRIB_EDIT, OnEditAttribute)
 	ON_UPDATE_COMMAND_UI(ID_CUSTATTRIB_EDIT, OnUpdateEditAttribute)
+
 	ON_REGISTERED_MESSAGE(WM_EE_BTNCLICK, OnEEClick)
+	ON_MESSAGE(WM_CUSTATTRIBLISTCHANGE, OnChangeListAttributes)
+	ON_MESSAGE(WM_CUSTATTRIBCALCCHANGE, OnChangeCalculationAttributes)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -705,6 +946,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 
 	VERIFY(m_pageList.Create(this));
 	VERIFY(m_pageCalc.Create(this));
+
 	VERIFY(InitializeToolbar());
 
 	BuildDataTypeCombo();
@@ -891,6 +1133,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 
 		m_pageList.SetDataType(m_dwDataType);
 		m_pageList.SetDefaultListData(attrib.aDefaultListData);
+		m_pageCalc.SetCalculation(attrib.Calculation());
 
 		m_cbFeatures.SetAttributeDefinition(attrib);
 	}
@@ -903,6 +1146,8 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 		m_sUniqueID.Empty();
 
 		m_pageList.SetListType(TDCCA_NOTALIST);
+		m_pageCalc.SetCalculation(TDCCUSTOMATTRIBUTECALCULATION());
+
 		m_cbFeatures.ResetContent();
 	}
 
@@ -913,6 +1158,7 @@ void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT*
 void CTDLCustomAttributeDlg::EnableControls()
 {
 	int nSel = GetCurSel();
+	BOOL bIsCalculation = FALSE;
 
 	m_toolbar.RefreshButtonStates();
 
@@ -926,20 +1172,20 @@ void CTDLCustomAttributeDlg::EnableControls()
 	{
 		m_eUniqueID.EnableWindow(TRUE);
 		m_eUniqueID.SetReadOnly(m_lcAttributes.GetItemData(nSel) == 0);
+
+		const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+		bIsCalculation = (attrib.GetDataType() == TDCCA_CALCULATION);
 	}
 	else
 	{
 		m_eUniqueID.EnableWindow(FALSE);
 	}
 	
-	const TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
-	BOOL bCalculationType = (attrib.GetDataType() == TDCCA_CALCULATION);
+	m_pageList.EnableWindow(!bIsCalculation);
+	m_pageList.ShowWindow(bIsCalculation ? SW_HIDE : SW_SHOW);
 
-	m_pageList.EnableWindow(!bCalculationType);
-	m_pageList.ShowWindow(bCalculationType ? SW_HIDE : SW_SHOW);
-
-	m_pageCalc.EnableWindow(bCalculationType);
-	m_pageCalc.ShowWindow(bCalculationType ? SW_SHOW : SW_HIDE);
+	m_pageCalc.EnableWindow(bIsCalculation);
+	m_pageCalc.ShowWindow(bIsCalculation ? SW_SHOW : SW_HIDE);
 }
 
 int CTDLCustomAttributeDlg::GetCurSel()
@@ -1008,46 +1254,73 @@ void CTDLCustomAttributeDlg::OnSelchangeAlignment()
 	m_lcAttributes.SetItemText(nSel, COL_ALIGNMENT, CEnString(ALIGNMENT[m_nAlignment]));
 }
 
-void CTDLCustomAttributeDlg::OnSelchangeListtype() 
+LRESULT CTDLCustomAttributeDlg::OnChangeListAttributes(WPARAM wp, LPARAM lp)
 {
-	UpdateData();
+	ASSERT(lp == (LPARAM)m_pageList.GetSafeHwnd());
 
 	// update attribute
 	int nSel = GetCurSel();
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 
-	BOOL bWasList = attrib.IsList();
 	DWORD dwListType = m_pageList.GetListType();
 
-	attrib.SetListType(dwListType);
-
-	// If we've switched from non-left to list
-	// then automatically add 'filterable'
-	if (!bWasList && attrib.IsList())
-		attrib.dwFeatures |= TDCCAF_FILTER;
-
-	// update list type in case it has changed
-	m_pageList.SetListType(attrib.GetListType());
-
-	// update feature combo
-	m_cbFeatures.SetAttributeDefinition(attrib);
-
-	// And features in case they changed
-	m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
-	
-	if ((attrib.dwFeatures != m_dwFeatures) || (!bWasList && attrib.IsList()))
+	if (dwListType != attrib.GetListType())
 	{
-		attrib.dwFeatures = m_dwFeatures;
-		m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
+		BOOL bWasList = attrib.IsList();
+
+		attrib.SetListType(dwListType);
+
+		// If we've switched from non-left to list
+		// then automatically add 'filterable'
+		if (!bWasList && attrib.IsList())
+			attrib.dwFeatures |= TDCCAF_FILTER;
+
+		// update list type in case it has changed
+		m_pageList.SetListType(attrib.GetListType());
+
+		// update feature combo
+		m_cbFeatures.SetAttributeDefinition(attrib);
+
+		// And features in case they changed
+		m_dwFeatures = m_cbFeatures.GetSelectedFeatures();
+	
+		if ((attrib.dwFeatures != m_dwFeatures) || (!bWasList && attrib.IsList()))
+		{
+			attrib.dwFeatures = m_dwFeatures;
+			m_lcAttributes.SetItemText(nSel, COL_FEATURES, FormatFeatureList(m_dwFeatures));
+		}
+
+		// and list
+		CString sDummy, sListType;
+		GetTypeStrings(attrib, sDummy, sListType);
+
+		m_lcAttributes.SetItemText(nSel, COL_LISTTYPE, sListType);
+
+		EnableControls();
+	}
+	else
+	{
+		m_pageList.GetDefaultListData(m_aAttribDef[nSel].aDefaultListData);
 	}
 
-	EnableControls();
+	return 0L;
+}
 
-	// and list
-	CString sDummy, sListType;
-	GetTypeStrings(attrib, sDummy, sListType);
+LRESULT CTDLCustomAttributeDlg::OnChangeCalculationAttributes(WPARAM wp, LPARAM lp)
+{
+	ASSERT(lp == (LPARAM)m_pageCalc.GetSafeHwnd());
 
-	m_lcAttributes.SetItemText(nSel, COL_LISTTYPE, sListType);
+	// update attribute
+	TDCCUSTOMATTRIBUTECALCULATION calc;
+	m_pageCalc.GetCalculation(calc);
+
+	int nSel = GetCurSel();
+
+	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
+	attrib.SetCalculation(calc);
+	// TODO?
+
+	return 0L;
 }
 
 void CTDLCustomAttributeDlg::OnChangeColumntitle() 
@@ -1062,17 +1335,6 @@ void CTDLCustomAttributeDlg::OnChangeColumntitle()
 
 	// and list
 	m_lcAttributes.SetItemText(nSel, COL_COLUMNTITLE, m_sColumnTitle);
-}
-
-void CTDLCustomAttributeDlg::OnChangeDefaultlistdata() 
-{
-	UpdateData();
-
-	// update attribute
-	int nSel = GetCurSel();
-	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
-
-	m_pageList.GetDefaultListData(m_aAttribDef[nSel].aDefaultListData);
 }
 
 CString CTDLCustomAttributeDlg::MakeID(const CString& sLabel)
@@ -1157,6 +1419,8 @@ void CTDLCustomAttributeDlg::OnEndlabeleditAttributelist(NMHDR* pNMHDR, LRESULT*
 
 	UpdateData(FALSE); // update unique ID field
 	EnableControls();
+
+	m_pageCalc.SetAttributeDefinitions(m_aAttribDef);
 
 	// Strangely, it seems the act of auto-editing the label
 	// interferes with the update of the toolbar button states

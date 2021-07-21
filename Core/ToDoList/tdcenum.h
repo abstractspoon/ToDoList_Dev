@@ -890,6 +890,14 @@ enum // custom attribute features
 	TDCCAF_ONEDECIMAL			= 0x0400, // Decimals/Fractions only
 };
 
+enum TDCCA_CALC_OPERATOR
+{
+	TDCCAC_ADD		= '+',
+	TDCCAC_SUBTRACT	= '-',
+	TDCCAC_MULTIPLY = '*',
+	TDCCAC_DIVIDE	= '/',
+};
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum TDC_PREPAREPATH 

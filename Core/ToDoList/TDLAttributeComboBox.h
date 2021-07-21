@@ -23,11 +23,16 @@ public:
 public:
 	void SetAttributeFilter(const CTDCAttributeMap& mapAttrib);
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aAttribDefs);
-	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, BOOL bRelative) const;
+	BOOL SetSelectedAttribute(TDC_ATTRIBUTE nAttrib, BOOL bRelative = FALSE);
+	BOOL SetSelectedAttribute(const CString& sCustAttribID, BOOL bRelative = FALSE);
 
 	TDC_ATTRIBUTE GetSelectedAttribute() const;
+	TDC_ATTRIBUTE GetSelectedAttribute(CString sCustAttribID) const;
 	TDC_ATTRIBUTE GetSelectedAttribute(BOOL& bRelative) const;
 	CString GetSelectedAttributeText() const;
+
+	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttrib);
+	void DDX(CDataExchange* pDX, TDC_ATTRIBUTE& nAttrib, CString& sCustAttribID);
 
 	// Attributes
 protected:
