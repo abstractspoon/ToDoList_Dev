@@ -2787,7 +2787,7 @@ BOOL CTDLTaskTreeCtrl::ModsRequireFullResort(const CTDCAttributeMap& mapAttribID
 		TDC_COLUMN nColID = TDC::MapAttributeToColumn(nAttribID);
 
 		if (m_mapVisibleCols.Has(nColID) &&
-			m_calculator.IsCalculatedAttribute(nAttribID, m_aCustomAttribDefs) &&
+			m_calculator.IsAggregatedAttribute(nAttribID, m_aCustomAttribDefs) &&
 			m_sort.Matches(nAttribID, m_styles, m_aCustomAttribDefs))
 		{
 			return TRUE;

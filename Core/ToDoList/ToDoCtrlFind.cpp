@@ -482,7 +482,7 @@ CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attri
 	{
 		ASSERT(0);
 	}
-	else if (!GetLongestCalculatedValue(attribDef, sLongest))
+	else if (!GetLongestAggregatedValue(attribDef, sLongest))
 	{
 		sLongest = GetLongestValue(attribDef, NULL, NULL, bVisibleOnly);
 	}
@@ -496,7 +496,7 @@ CString CToDoCtrlFind::GetLongestValue(const TDCCUSTOMATTRIBUTEDEFINITION& attri
 	return sLongest;
 }
 
-BOOL CToDoCtrlFind::GetLongestCalculatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CString& sLongest) const
+BOOL CToDoCtrlFind::GetLongestAggregatedValue(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CString& sLongest) const
 {
 	if (!CTDCLongestItemMap::IsSupportedColumn(attribDef))
 	{
@@ -1192,7 +1192,7 @@ int CToDoCtrlFind::GetLongestValues(const CTDCColumnIDMap& mapCols,
 			{
 				CString sLongest;
 
-				if (GetLongestCalculatedValue(attribDef, sLongest))
+				if (GetLongestAggregatedValue(attribDef, sLongest))
 				{
 					mapLongest.UpdateValue(attribDef.GetColumnID(), sLongest);
 					aRestAttribDefs.RemoveAt(nCust);

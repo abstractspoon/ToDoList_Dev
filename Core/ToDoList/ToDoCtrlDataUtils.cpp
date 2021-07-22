@@ -1851,20 +1851,20 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	return TRUE;
 }
 
-BOOL CTDCTaskCalculator::HasCalculatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+BOOL CTDCTaskCalculator::HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
 {
 	POSITION pos = mapAttribIDs.GetStartPosition();
 
 	while (pos)
 	{
-		if (IsCalculatedAttribute(mapAttribIDs.GetNext(pos), aAttribDefs))
+		if (IsAggregatedAttribute(mapAttribIDs.GetNext(pos), aAttribDefs))
 			return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
 {
 	switch (nAttribID)
 	{
@@ -1874,11 +1874,18 @@ BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 
 	case TDCA_DUETIME:
 	case TDCA_DUEDATE:		
-		return (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || m_data.HasStyle(TDCS_USELATESTDUEDATE));
+		return (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || 
+				m_data.HasStyle(TDCS_USELATESTDUEDATE));
 
 	case TDCA_STARTTIME:
 	case TDCA_STARTDATE:	
-		return (m_data.HasStyle(TDCS_USEEARLIESTSTARTDATE) || m_data.HasStyle(TDCS_USELATESTSTARTDATE));
+		return (m_data.HasStyle(TDCS_USEEARLIESTSTARTDATE) || 
+				m_data.HasStyle(TDCS_USELATESTSTARTDATE));
+
+	case TDCA_LASTMODDATE:
+	case TDCA_LASTMODBY:
+	case TDCA_RECENTMODIFIED:
+		return m_data.HasStyle(TDCS_USELATESTLASTMODIFIED);
 
 	case TDCA_PRIORITY:		
 		return m_data.HasStyle(TDCS_USEHIGHESTPRIORITY);
@@ -1893,9 +1900,6 @@ BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 		return m_data.HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS);
 
 	case TDCA_COST:
-	case TDCA_LASTMODDATE:
-	case TDCA_RECENTMODIFIED:
-	case TDCA_LASTMODBY:
 	case TDCA_SUBTASKDONE:
 	case TDCA_TIMESPENT:
 	case TDCA_TIMEESTIMATE:		

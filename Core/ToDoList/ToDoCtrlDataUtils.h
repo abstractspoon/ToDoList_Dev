@@ -91,8 +91,8 @@ public:
 	double GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	BOOL GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 
-	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
-	BOOL HasCalculatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
+	BOOL IsAggregatedAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
+	BOOL HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 
 protected:
 	const CToDoCtrlData& m_data;

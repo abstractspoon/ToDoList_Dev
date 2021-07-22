@@ -2050,8 +2050,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 		{
 			const IUITASKMOD& mod = pMods[nMod];
 
-			// prevent the active view's change being propagated 
-			// back to itself
+			// prevent the active view's change being propagated back to itself
 			m_nExtModifyingAttrib = mod.nAttrib;
 
 			DWORD dwModResults = ProcessUIExtensionMod(mod);
@@ -3864,7 +3863,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 		// Include parents if there is a colour change 
 		// or a calculated attribute change
-		if (mapAttribIDs.Has(TDCA_COLOR) || HasCalculatedAttributes(mapAttribIDs))
+		if (mapAttribIDs.Has(TDCA_COLOR) || ModAffectsAggregatedAttributes(mapAttribIDs))
 			dwFlags |= TDCGSTF_ALLPARENTS;
 
 		// DONT include subtasks UNLESS the completion date has changed
@@ -3925,13 +3924,13 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	}
 }
 
-BOOL CTabbedToDoCtrl::HasCalculatedAttributes(const CTDCAttributeMap& mapAttribIDs) const
+BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const
 {
 	POSITION pos = mapAttribIDs.GetStartPosition();
 
 	while (pos)
 	{
-		if (IsCalculatedAttribute(mapAttribIDs.GetNext(pos)))
+		if (ModAffectsAggregatedAttributes(mapAttribIDs.GetNext(pos)))
 			return TRUE;
 	}
 
@@ -3951,89 +3950,41 @@ BOOL CTabbedToDoCtrl::WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAt
 	return FALSE;
 }
 
-BOOL CTabbedToDoCtrl::IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const
+BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttrib) const
 {
+	if (m_calculator.IsAggregatedAttribute(nAttrib, m_aCustomAttribDefs))
+		return TRUE;
+
+	// Cross dependencies
 	switch (nAttrib)
 	{
-	case TDCA_TASKNAME:
-	case TDCA_COLOR:
-	case TDCA_ALLOCTO:
-	case TDCA_ALLOCBY:
-	case TDCA_STATUS:
-	case TDCA_CATEGORY:
-	case TDCA_TAGS:
-	case TDCA_FILELINK:
-	case TDCA_COMMENTS:
-	case TDCA_FLAG:
-	case TDCA_ICON:
-	case TDCA_CREATIONDATE:
-	case TDCA_CREATEDBY:
-	case TDCA_EXTERNALID: 
-	case TDCA_DEPENDENCY: 
-	case TDCA_RECURRENCE: 
-	case TDCA_VERSION:
-		return FALSE;
-
-	case TDCA_LOCK:
-		// TODO
-		return FALSE;
-
 	case TDCA_DONEDATE:
-		return ((HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && HasStyle(TDCS_INCLUDEDONEINAVERAGECALC)) ||
-				(HasStyle(TDCS_INCLUDEDONEINRISKCALC) && HasStyle(TDCS_USEHIGHESTRISK)) ||
-				(HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) && HasStyle(TDCS_USEHIGHESTPRIORITY)));
+		if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) && 
+			HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
+		{
+			return TRUE;
+		}
 
-	case TDCA_COST: 
-	case TDCA_TIMESPENT:
-	case TDCA_TIMEESTIMATE:
-		return TRUE;
+		if (HasStyle(TDCS_USEHIGHESTPRIORITY) &&
+			HasStyle(TDCS_DONEHAVELOWESTPRIORITY) && 
+			HasStyle(TDCS_INCLUDEDONEINRISKCALC))
+		{
+			return TRUE;
+		}
 		
-	case TDCA_RISK: 
-		return HasStyle(TDCS_USEHIGHESTRISK);
-
-	case TDCA_PRIORITY:
-		return HasStyle(TDCS_USEHIGHESTPRIORITY);
-
-	case TDCA_PERCENT:
-		return HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION);
+		if (HasStyle(TDCS_USEHIGHESTPRIORITY) &&
+			HasStyle(TDCS_DONEHAVELOWESTRISK) && 
+			HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC))
+		{
+			return TRUE;
+		}
 
 	case TDCA_DUEDATE:
-		return (HasStyle(TDCS_USEEARLIESTDUEDATE) || 
-				HasStyle(TDCS_USELATESTDUEDATE) || 
-				(HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && HasStyle(TDCS_USEHIGHESTPRIORITY)));
-
-	case TDCA_STARTDATE:
-		return (HasStyle(TDCS_USEEARLIESTSTARTDATE) || HasStyle(TDCS_USELATESTSTARTDATE));
-
-	case TDCA_ALL:
-	case TDCA_NEWTASK: 
-	case TDCA_DELETE:
-	case TDCA_UNDO:
-	case TDCA_PASTE:
-	case TDCA_MERGE:
-	case TDCA_ARCHIVE:
-	case TDCA_CUSTOMATTRIBDEFS:
-	case TDCA_PROJECTNAME:
-	case TDCA_ENCRYPT:
-		return FALSE;
-
-	case TDCA_POSITION:
-	case TDCA_POSITION_SAMEPARENT:
-	case TDCA_POSITION_DIFFERENTPARENT:
-		return FALSE;
-
-	default:
-		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-
-			if (m_aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef))
-				return attribDef.IsAggregated();
-		}
-		break;
+		return (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && 
+				HasStyle(TDCS_USEHIGHESTPRIORITY));
 	}
 
 	// all else
-	ASSERT(0);
 	return FALSE;
 }
 
