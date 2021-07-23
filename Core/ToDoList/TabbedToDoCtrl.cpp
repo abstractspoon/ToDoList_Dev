@@ -3952,7 +3952,7 @@ BOOL CTabbedToDoCtrl::WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAt
 
 BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttrib) const
 {
-	if (m_calculator.IsAggregatedAttribute(nAttrib, m_aCustomAttribDefs))
+	if (m_calculator.IsAggregatedAttribute(nAttrib))
 		return TRUE;
 
 	// Cross dependencies

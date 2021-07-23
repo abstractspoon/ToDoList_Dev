@@ -835,6 +835,12 @@ void CCustomAttributeCalcPage::OnChangeSecondOperandType()
 	UpdateData();
 	EnableControls();
 
+	if (m_bSecondOperandIsValue)
+	{
+		m_calc.nSecondOperandAttribID = TDCA_NONE;
+		m_calc.sSecondOperandCustAttribID.Empty();
+	}
+
 	// Notify parent
 	GetParent()->SendMessage(WM_CUSTATTRIBCALCCHANGE, 0, (LPARAM)GetSafeHwnd());
 }

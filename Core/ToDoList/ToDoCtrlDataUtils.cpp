@@ -1754,6 +1754,7 @@ BOOL CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUS
 		dValue = data.AsFraction();
 		return TRUE;
 
+	case TDCCA_CALCULATION:
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
 	case TDCCA_DATE:
@@ -1765,12 +1766,103 @@ BOOL CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUS
 	return FALSE;
 }
 
+double CTDCTaskCalculator::GetTaskAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, TDC_UNITS nUnits) const
+{
+	// Numeric types only
+	switch (nAttribID)
+	{
+	case TDCA_COST:			return GetTaskCost(pTDI, pTDS);
+	case TDCA_PERCENT:		return GetTaskPercentDone(pTDI, pTDS);
+	case TDCA_PRIORITY:		return GetTaskPriority(pTDI, pTDS);
+	case TDCA_RISK:			return GetTaskRisk(pTDI, pTDS);
+	case TDCA_CREATIONDATE: return pTDI->dateCreated;
+	case TDCA_DONEDATE:		return pTDI->dateDone;
+	case TDCA_DUEDATE:		return GetTaskDueDate(pTDI, pTDS);
+	case TDCA_LASTMODDATE:	return GetTaskLastModifiedDate(pTDI, pTDS);
+	case TDCA_STARTDATE:	return GetTaskStartDate(pTDI, pTDS);
+	case TDCA_TIMEESTIMATE: return GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+	case TDCA_TIMESPENT:	return GetTaskTimeSpent(pTDI, pTDS, nUnits);
+	}
+
+	return 0.0;
+}
+
+BOOL CTDCTaskCalculator::DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits) const
+{
+	if (!calc.IsValid(FALSE))
+		return FALSE;
+
+	double dFirstVal = 0.0, dSecondVal = 0.0;
+
+	if (calc.IsFirstOperandCustom())
+	{
+		// TODO
+
+	}
+	else // built-in attribute
+	{
+		dFirstVal = GetTaskAttributeData(pTDI, pTDS, calc.nFirstOperandAttribID, nUnits);
+	}
+
+	if (calc.IsSecondOperandValue())
+	{
+		dSecondVal = calc.dSecondOperandValue;
+	}
+	else if (calc.IsSecondOperandCustom())
+	{
+		// TODO
+
+	}
+	else // built-in attribute
+	{
+		// Convert time periods to days if adding to dates
+		TDC_UNITS nSecondUnits = nUnits;
+		
+		if (calc.GetFirstOperandDataType(m_data.m_aCustomAttribDefs) == TDCCA_DATE)
+			nSecondUnits = TDCU_DAYS;
+
+		dSecondVal = GetTaskAttributeData(pTDI, pTDS, calc.nSecondOperandAttribID, nUnits);
+	}
+	
+	switch (calc.nOperator)
+	{
+	case TDCCAC_ADD:
+		dResult = (dFirstVal + dSecondVal);
+		break;
+
+	case TDCCAC_SUBTRACT:
+		dResult = (dFirstVal - dSecondVal);
+		break;
+
+	case TDCCAC_MULTIPLY:
+		dResult = (dFirstVal * dSecondVal);
+		break;
+
+	case TDCCAC_DIVIDE:
+		dResult = (dFirstVal / dSecondVal);
+		break;
+	}
+
+	return TRUE;
+}
+
 BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
 {
 	double dCalcValue = DBL_NULL, dSubtaskVal;
-
+	
 	TDCCADATA data;
-	pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+
+	if (attribDef.IsDataType(TDCCA_CALCULATION))
+	{
+		if (!DoCalculation(pTDI, pTDS, attribDef.Calculation(), dCalcValue, nUnits))
+			return FALSE;
+
+		data.Set(dCalcValue);
+	}
+	else
+	{
+		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+	}
 
 	// -----------------------------------------------------------
 	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
@@ -1851,20 +1943,20 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	return TRUE;
 }
 
-BOOL CTDCTaskCalculator::HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+BOOL CTDCTaskCalculator::HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs) const
 {
 	POSITION pos = mapAttribIDs.GetStartPosition();
 
 	while (pos)
 	{
-		if (IsAggregatedAttribute(mapAttribIDs.GetNext(pos), aAttribDefs))
+		if (IsAggregatedAttribute(mapAttribIDs.GetNext(pos)))
 			return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	switch (nAttribID)
 	{
@@ -1910,10 +2002,10 @@ BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 		// check custom attributes
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nAttrib = aAttribDefs.Find(nAttribID);
+			int nAttrib = m_data.m_aCustomAttribDefs.Find(nAttribID);
 
 			if (nAttrib != -1)
-				return aAttribDefs[nAttrib].IsAggregated();
+				return m_data.m_aCustomAttribDefs[nAttrib].IsAggregated();
 		}
 	}
 
@@ -3914,6 +4006,45 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 
 	switch (dwDataType)
 	{
+	case TDCCA_CALCULATION:
+		{
+			double dValue = 0.0;
+			TDC_UNITS nUnits = TDCU_DAYS;
+
+			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
+				return EMPTY_STR;
+
+			DWORD dwResultType = attribDef.Calculation().GetCalculationResultDataType(m_data.m_aCustomAttribDefs);
+			
+			switch (dwResultType)
+			{
+			case TDCCA_TIMEPERIOD:
+				return GetTimePeriod(dValue, nUnits, TRUE);
+
+			case TDCCA_DATE:
+				return TDCCADATA(dValue).FormatAsDate(m_data.HasStyle(TDCS_SHOWDATESINISO), attribDef.HasFeature(TDCCAF_SHOWTIME));
+
+			case TDCCA_DOUBLE:
+			case TDCCA_INTEGER:
+			case TDCCA_FRACTION:
+				{
+					if ((dValue == 0.0) && attribDef.HasFeature(TDCCAF_HIDEZERO))
+						return EMPTY_STR;
+
+					// Temp attribute definition just for formatting
+					TDCCUSTOMATTRIBUTEDEFINITION tempDef;
+					tempDef.SetDataType(dwResultType);
+
+					return tempDef.FormatNumber(dValue);
+				}
+				break;
+
+			}
+
+			return EMPTY_STR;
+		}
+		break;
+
 	case TDCCA_TIMEPERIOD:
 		{
 			double dValue = 0.0;
@@ -3998,7 +4129,10 @@ int CTDCTaskExporter::ExportAllTasks(CTaskFile& tasks, BOOL bIncDuplicateComplet
 	tasks.SetCustomAttributeDefs(m_data.m_aCustomAttribDefs);
 	tasks.EnableISODates(m_data.HasStyle(TDCS_SHOWDATESINISO));
 
-	if (ExportSubTasks(m_data.GetStructure(), tasks, NULL, bIncDuplicateCompletedRecurringSubtasks))
+	if (ExportSubTasks(m_data.GetStructure(), 
+					   tasks, 
+					   NULL, 
+					   bIncDuplicateCompletedRecurringSubtasks))
 	{
 		return tasks.GetTaskCount();
 	}

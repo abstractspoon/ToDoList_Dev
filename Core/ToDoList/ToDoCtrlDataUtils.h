@@ -91,8 +91,8 @@ public:
 	double GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	BOOL GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 
-	BOOL IsAggregatedAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
-	BOOL HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
+	BOOL IsAggregatedAttribute(TDC_ATTRIBUTE nAttrib) const;
+	BOOL HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs) const;
 
 protected:
 	const CToDoCtrlData& m_data;
@@ -109,6 +109,9 @@ protected:
 	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const;
+
+	BOOL DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits) const;
+	double GetTaskAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, TDC_UNITS nUnits = TDCU_NULL) const;
 	
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
@@ -276,9 +279,9 @@ protected:
 class CTDCTaskExporter
 {
 public:
-	CTDCTaskExporter(const CToDoCtrlData& data, 
-		const CTDLTaskCtrlBase& colors,
-		const CContentMgr& comments);
+	CTDCTaskExporter(const CToDoCtrlData& data,
+					 const CTDLTaskCtrlBase& colors,
+					 const CContentMgr& comments);
 
 	int ExportAllTasks(CTaskFile& tasks, BOOL bIncDuplicateCompletedRecurringSubtasks = TRUE) const;
 	int ExportCompletedTasks(CTaskFile& tasks) const;
