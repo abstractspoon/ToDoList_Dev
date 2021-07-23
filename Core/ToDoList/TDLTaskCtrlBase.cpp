@@ -2080,7 +2080,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 
 				if (bDueToday)
 				{
-					nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE); // ignore due tasks
+					nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE); // ignore due tasks
 				}
 				else if (bOverDue && HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY))
 				{
@@ -2088,7 +2088,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 				}
 				else
 				{
-					nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS);
+					nPriority = m_calculator.GetTaskPriority(pTDI, pTDS);
 				}
 
 				if (nPriority != FM_NOPRIORITY)
@@ -2760,7 +2760,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				rSubItem.DeflateRect(2, 1, 3, 2);
 				
 				// first draw the priority colour
-				int nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+				int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
 				BOOL bHasPriority = (nPriority != FM_NOPRIORITY);
 				
 				if (bHasPriority)
@@ -2832,7 +2832,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 					
 					if (!bDone || !HasStyle(TDCS_DONEHAVELOWESTPRIORITY)) // determine appropriate priority
 					{
-						int nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+						int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
 						crBar = GetPriorityColor(nPriority);
 						
 						// check for due
