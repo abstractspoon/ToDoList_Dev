@@ -155,6 +155,8 @@ protected:
 	int BuildFirstOperandFilter(CTDCAttributeMap& mapAttrib) const;
 	BOOL IsDate(TDC_ATTRIBUTE nAttrib) const;
 	BOOL IsTimePeriod(TDC_ATTRIBUTE nAttrib) const;
+
+	static void DDX_Operand(CDataExchange* pDX, CTDLAttributeComboBox& combo, TDC_ATTRIBUTE& nAttrib, CString& sCustAttribID);
 };
 
 /////////////////////////////////////////////////////////////////////////////

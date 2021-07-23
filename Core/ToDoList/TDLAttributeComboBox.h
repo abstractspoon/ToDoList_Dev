@@ -27,7 +27,7 @@ public:
 	BOOL SetSelectedAttribute(const CString& sCustAttribID, BOOL bRelative = FALSE);
 
 	TDC_ATTRIBUTE GetSelectedAttribute() const;
-	TDC_ATTRIBUTE GetSelectedAttribute(CString sCustAttribID) const;
+	TDC_ATTRIBUTE GetSelectedAttribute(CString& sCustAttribID) const;
 	TDC_ATTRIBUTE GetSelectedAttribute(BOOL& bRelative) const;
 	CString GetSelectedAttributeText() const;
 

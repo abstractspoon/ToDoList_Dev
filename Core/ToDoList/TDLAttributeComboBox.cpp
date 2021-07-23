@@ -82,7 +82,7 @@ TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute() const
 	return GetSelectedAttribute(bUnused);
 }
 
-TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute(CString sCustAttribID) const
+TDC_ATTRIBUTE CTDLAttributeComboBox::GetSelectedAttribute(CString& sCustAttribID) const
 {
 	TDC_ATTRIBUTE nAttrib = GetSelectedAttribute();
 

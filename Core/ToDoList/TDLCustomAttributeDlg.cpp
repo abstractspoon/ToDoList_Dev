@@ -515,18 +515,29 @@ void CCustomAttributeCalcPage::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_SECONDOPISATTRIBUTE, m_bSecondOperandIsValue);
 
-	m_cbFirstOperand.DDX(pDX, m_calc.nFirstOperandAttribID, m_calc.sFirstOperandCustAttribID);
+	DDX_Operand(pDX, m_cbFirstOperand, m_calc.nFirstOperandAttribID, m_calc.sFirstOperandCustAttribID);
 
 	if (m_bSecondOperandIsValue)
 		DDX_Text(pDX, IDC_SECONDOPERANDVALUE, m_calc.dSecondOperandValue);
 	else
-		m_cbSecondOperandAttrib.DDX(pDX, m_calc.nSecondOperandAttribID, m_calc.sSecondOperandCustAttribID);
+		DDX_Operand(pDX, m_cbSecondOperandAttrib, m_calc.nSecondOperandAttribID, m_calc.sSecondOperandCustAttribID);
 
 	// Update calculation arguments
 	if (pDX->m_bSaveAndValidate)
 		m_calc.nOperator = CDialogHelper::GetSelectedItemData(m_cbOperators, TDCCAC_ADD);
 	else
 		CDialogHelper::SelectItemByData(m_cbOperators, m_calc.nOperator);
+}
+
+void CCustomAttributeCalcPage::DDX_Operand(CDataExchange* pDX, CTDLAttributeComboBox& cbOperand, TDC_ATTRIBUTE& nAttribID, CString& sCustAttribID)
+{
+	cbOperand.DDX(pDX, nAttribID, sCustAttribID);
+
+	if (pDX->m_bSaveAndValidate)
+	{
+		if (!sCustAttribID.IsEmpty())
+			nAttribID = TDCA_CUSTOMATTRIB;
+	}
 }
 
 BEGIN_MESSAGE_MAP(CCustomAttributeCalcPage, CDialog)
@@ -570,6 +581,7 @@ void CCustomAttributeCalcPage::SetAttributeDefinitions(const CTDCCustomAttribDef
 {
 	m_aAttribDef.Copy(aAttribDef); // needed in OnInitDialog
 	m_cbFirstOperand.SetCustomAttributes(m_aAttribDef);
+	m_cbSecondOperandAttrib.SetCustomAttributes(m_aAttribDef);
 
 	if (GetSafeHwnd())
 	{
