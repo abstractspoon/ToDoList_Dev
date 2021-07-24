@@ -268,8 +268,8 @@ protected:
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void LoadPrefs();
 	void SavePrefs();
-	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const;
-	BOOL HasCalculatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttrib) const;
+	BOOL ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);

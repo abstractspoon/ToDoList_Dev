@@ -1704,7 +1704,6 @@
 #define IDS_NODUETHISMONTH              50784
 #define IDS_NODUENEXTMONTH              50785
 #define IDS_OPENTASKLIST_TIP            50790
-#define IDS_TDLFILEOPENFILTER           50804
 #define IDS_XSLFILEFILTER               50805
 #define IDS_TRANSFORMFILEFILTER         50806
 #define IDS_ALLFILEFILTER               50807
@@ -1879,7 +1878,6 @@
 #define IDS_TDC_RECALCPROMPT            51028
 #define IDS_TDC_RECALCTITLE             51029
 #define IDS_INIHASNOTOOLS               51030
-#define IDS_TDLFILESAVEFILTER           51032
 #define IDS_TDLFILEFILTER               51032
 #define IDS_XMLFILESAVEFILTER           51033
 #define IDS_COMMANDLINETASKOPTIONS      51034

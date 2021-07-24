@@ -817,7 +817,7 @@ void CTDLCustomAttributeDlg::OnImport()
 							NULL, 
 							NULL, 
 							EOFN_DEFAULTOPEN, 
-							CEnString(IDS_TDLFILEOPENFILTER), 
+							CEnString(IDS_TDLFILEFILTER), 
 							this);
 
 	if (dialog.DoModal(prefs) == IDOK)

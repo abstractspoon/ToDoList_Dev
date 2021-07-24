@@ -521,8 +521,8 @@ void CTDCToolsHelper::AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, 
 
 LPCTSTR CTDCToolsHelper::GetFileFilter()
 {
-	static CEnString TDLFILEFILTER(IDS_TDLFILEOPENFILTER);
-	static CEnString XMLFILEFILTER(IDS_XMLFILEOPENFILTER);
+	static CEnString TDLFILEFILTER(IDS_TDLFILEFILTER);
+	static CEnString XMLFILEFILTER(IDS_XMLFILEFILTER);
 
 	return m_bTDLEnabled ? TDLFILEFILTER : XMLFILEFILTER;
 }

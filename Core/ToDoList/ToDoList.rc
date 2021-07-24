@@ -5426,8 +5426,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_CAD_STRING          "Text"
     IDS_CAD_DATE            "Date"
-    IDS_CAD_INT             "Number (integer eg. 13)"
-    IDS_CAD_FLOAT           "Number (decimal eg. 5.62)"
+    IDS_CAD_INT             "Integer (eg. 13)"
+    IDS_CAD_FLOAT           "Decimal (eg. 5.62)"
     IDS_CAD_BOOL            "Checkbox"
     IDS_CAD_NOTLIST         "Not a list"
     IDS_CAD_AUTOLIST        "Dynamic data, single-selection"
@@ -5741,7 +5741,7 @@ BEGIN
     IDS_FINDINTASKCOMMENTS  "Find in Comments"
     IDS_SEARCHPREFS_PROMPT  "Search Preferences"
     IDS_SD_TITLE            "Remote Server Details"
-    IDS_CAD_FRACTION        "Number (fraction eg. 2/3)"
+    IDS_CAD_FRACTION        "Fraction (eg. 2/3)"
     IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
     IDS_FILTERPLACEHOLDER   "Filters"
     IDS_ERROR_EXPORT_OVERWRITETASKLIST 
