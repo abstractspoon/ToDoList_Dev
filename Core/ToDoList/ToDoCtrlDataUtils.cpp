@@ -1766,7 +1766,7 @@ BOOL CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUS
 	return FALSE;
 }
 
-double CTDCTaskCalculator::GetTaskAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, TDC_UNITS nUnits) const
+double CTDCTaskCalculator::GetTaskNumericAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, TDC_UNITS nUnits) const
 {
 	// Numeric types only
 	switch (nAttribID)
@@ -1787,6 +1787,25 @@ double CTDCTaskCalculator::GetTaskAttributeData(const TODOITEM* pTDI, const TODO
 	return 0.0;
 }
 
+BOOL CTDCTaskCalculator::GetCalculationOperandData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, double& dValue, TDC_UNITS nUnits) const
+{
+	if (!sCustAttribID.IsEmpty())
+	{
+		int nAttrib = m_data.m_aCustomAttribDefs.Find(sCustAttribID);
+
+		if (nAttrib < 0)
+			return FALSE;
+
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nAttrib];
+
+		return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
+	}
+
+	// else built-in attribute
+	dValue = GetTaskNumericAttributeData(pTDI, pTDS, nAttribID, nUnits);
+	return TRUE;
+}
+
 BOOL CTDCTaskCalculator::DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits) const
 {
 	if (!calc.IsValid(FALSE))
@@ -1794,26 +1813,14 @@ BOOL CTDCTaskCalculator::DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE
 
 	double dFirstVal = 0.0, dSecondVal = 0.0;
 
-	if (calc.IsFirstOperandCustom())
-	{
-		// TODO
-
-	}
-	else // built-in attribute
-	{
-		dFirstVal = GetTaskAttributeData(pTDI, pTDS, calc.nFirstOperandAttribID, nUnits);
-	}
+	if (!GetCalculationOperandData(pTDI, pTDS, calc.nFirstOperandAttribID, calc.sFirstOperandCustAttribID, dFirstVal, nUnits))
+		return FALSE;
 
 	if (calc.IsSecondOperandValue())
 	{
 		dSecondVal = calc.dSecondOperandValue;
 	}
-	else if (calc.IsSecondOperandCustom())
-	{
-		// TODO
-
-	}
-	else // built-in attribute
+	else
 	{
 		// Convert time periods to days if adding to dates
 		TDC_UNITS nSecondUnits = nUnits;
@@ -1821,7 +1828,8 @@ BOOL CTDCTaskCalculator::DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE
 		if (calc.GetFirstOperandDataType(m_data.m_aCustomAttribDefs) == TDCCA_DATE)
 			nSecondUnits = TDCU_DAYS;
 
-		dSecondVal = GetTaskAttributeData(pTDI, pTDS, calc.nSecondOperandAttribID, nUnits);
+		if (!GetCalculationOperandData(pTDI, pTDS, calc.nSecondOperandAttribID, calc.sSecondOperandCustAttribID, dSecondVal, nUnits))
+			return FALSE;
 	}
 	
 	switch (calc.nOperator)
@@ -1839,7 +1847,12 @@ BOOL CTDCTaskCalculator::DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE
 		break;
 
 	case TDCCAC_DIVIDE:
-		dResult = (dFirstVal / dSecondVal);
+		{
+			if (dSecondVal == 0.0)
+				return FALSE;
+
+			dResult = (dFirstVal / dSecondVal);
+		}
 		break;
 	}
 
@@ -4014,7 +4027,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
 				return EMPTY_STR;
 
-			DWORD dwResultType = attribDef.Calculation().GetCalculationResultDataType(m_data.m_aCustomAttribDefs);
+			DWORD dwResultType = attribDef.Calculation().GetResultDataType(m_data.m_aCustomAttribDefs);
 			
 			switch (dwResultType)
 			{

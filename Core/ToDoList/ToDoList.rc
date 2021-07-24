@@ -2165,6 +2165,8 @@ BEGIN
     COMBOBOX        IDC_SECONDOPERANDATTRIBUTE,54,35,118,30,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_GROUP | WS_TABSTOP
     EDITTEXT        IDC_SECONDOPERANDVALUE,54,53,118,13,ES_AUTOHSCROLL
+    LTEXT           "Result type",IDC_STATIC,0,72,38,8
+    EDITTEXT        IDC_RESULTTYPE,54,70,118,13,ES_AUTOHSCROLL | ES_READONLY
 END
 
 
@@ -5469,8 +5471,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_CAD_STRING          "Text"
     IDS_CAD_DATE            "Date"
-    IDS_CAD_INT             "Number - Integer (eg. 13)"
-    IDS_CAD_FLOAT           "Number - Decimal (eg. 5.62)"
+    IDS_CAD_INT             "Integer (eg. 13)"
+    IDS_CAD_FLOAT           "Decimal (eg. 5.62)"
     IDS_CAD_BOOL            "Checkbox"
     IDS_CAD_NOTLIST         "Not a list"
     IDS_CAD_AUTOLIST        "Dynamic data, single-selection"
@@ -5784,7 +5786,7 @@ BEGIN
     IDS_FINDINTASKCOMMENTS  "Find in Comments"
     IDS_SEARCHPREFS_PROMPT  "Search Preferences"
     IDS_SD_TITLE            "Remote Server Details"
-    IDS_CAD_FRACTION        "Number - Fraction (eg. 2/3)"
+    IDS_CAD_FRACTION        "Fraction (eg. 2/3)"
     IDS_CUSTOM_FEATURE_PERCENTAGE "Display as percentage"
     IDS_FILTERPLACEHOLDER   "Filters"
     IDS_ERROR_EXPORT_OVERWRITETASKLIST 

@@ -153,7 +153,7 @@ DWORD TDCCUSTOMATTRIBUTECALCULATION::GetOperandDataType(TDC_ATTRIBUTE nAttribID,
 	return TDCCA_STRING;
 }
 
-DWORD TDCCUSTOMATTRIBUTECALCULATION::GetCalculationResultDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const
+DWORD TDCCUSTOMATTRIBUTECALCULATION::GetResultDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const
 {
 	DWORD dwFirstOpDataType = GetFirstOperandDataType(aAttribDef);
 	DWORD dwSecondOpDataType = GetSecondOperandDataType(aAttribDef);
@@ -187,7 +187,7 @@ DWORD TDCCUSTOMATTRIBUTECALCULATION::GetCalculationResultDataType(const CTDCCust
 
 		case TDCCA_DATE:
 			if (nOperator == TDCCAC_SUBTRACT)
-				return TDCCA_DOUBLE;
+				return TDCCA_TIMEPERIOD;
 			break;
 		}
 		break;
@@ -205,7 +205,6 @@ DWORD TDCCUSTOMATTRIBUTECALCULATION::GetCalculationResultDataType(const CTDCCust
 	}
 
 	// all else
-	ASSERT(0);
 	return TDCCA_STRING; // invalid
 }
 

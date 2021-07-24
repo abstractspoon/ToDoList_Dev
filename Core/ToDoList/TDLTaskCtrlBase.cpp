@@ -3160,11 +3160,20 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 											CDC* pDC, const CRect& rSubItem, COLORREF crText)
 {
 	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 	
-	if (!m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef) || !attribDef.bEnabled)
+	if (!m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (!attribDef.bEnabled)
 		return TRUE;
 
 	TDCCADATA data;

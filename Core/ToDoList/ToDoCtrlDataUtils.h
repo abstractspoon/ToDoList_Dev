@@ -111,7 +111,8 @@ protected:
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const;
 
 	BOOL DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits) const;
-	double GetTaskAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, TDC_UNITS nUnits = TDCU_NULL) const;
+	double GetTaskNumericAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, TDC_UNITS nUnits = TDCU_NULL) const;
+	BOOL GetCalculationOperandData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 	
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 

@@ -123,6 +123,7 @@ protected:
 	CMaskEdit	m_eSecondOperandValue;
 	//}}AFX_DATA
 	BOOL m_bSecondOperandIsValue;
+	CString m_sResultType;
 
 	TDCCUSTOMATTRIBUTECALCULATION m_calc;
 	CTDCCustomAttribDefinitionArray m_aAttribDef;
@@ -142,7 +143,7 @@ protected:
 	afx_msg void OnSelChangeFirstOperand();
 	afx_msg void OnSelChangeOperator();
 	afx_msg void OnSelChangeSecondOperandAttribute();
-	afx_msg void OnSelChangeSecondOperandValue();
+	afx_msg void OnChangeSecondOperandValue();
 	afx_msg void OnChangeSecondOperandType();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
@@ -151,6 +152,7 @@ protected:
 	void BuildOperatorCombo();
 	void BuildSecondOperandCombo();
 	void EnableControls();
+	void UpdateResultType();
 
 	int BuildFirstOperandFilter(CTDCAttributeMap& mapAttrib) const;
 	BOOL IsDate(TDC_ATTRIBUTE nAttrib) const;

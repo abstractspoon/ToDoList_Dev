@@ -45,7 +45,7 @@ struct TDCCUSTOMATTRIBUTECALCULATION
 
 	DWORD GetFirstOperandDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const;
 	DWORD GetSecondOperandDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const;
-	DWORD GetCalculationResultDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const;
+	DWORD GetResultDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const;
 
 	static BOOL IsValidOperator(TDCCA_CALC_OPERATOR nOperator);
 	static BOOL IsValidOperand(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone = TRUE);

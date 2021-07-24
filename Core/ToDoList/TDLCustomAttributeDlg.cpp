@@ -43,6 +43,20 @@ static TDLCAD_TYPE DATA_TYPES[] =
 };
 const int NUM_DATATYPES = sizeof(DATA_TYPES) / sizeof(TDLCAD_TYPE);
 
+static CString GetDataTypeLabel(DWORD dwDataType)
+{
+	int nType = NUM_DATATYPES;
+
+	while (nType--)
+	{
+		if (DATA_TYPES[nType].dwType == dwDataType)
+			return CEnString(DATA_TYPES[nType].nIDName);
+	}
+
+	ASSERT(0);
+	return _T("");
+}
+
 static TDLCAD_TYPE LIST_TYPES[] = 
 {
 	{ IDS_CAD_NOTLIST,			TDCCA_NOTALIST },
@@ -514,6 +528,7 @@ void CCustomAttributeCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SECONDOPERANDVALUE, m_eSecondOperandValue);
 	//}}AFX_DATA_MAP
 	DDX_Radio(pDX, IDC_SECONDOPISATTRIBUTE, m_bSecondOperandIsValue);
+	DDX_Text(pDX, IDC_RESULTTYPE, m_sResultType);
 
 	DDX_Operand(pDX, m_cbFirstOperand, m_calc.nFirstOperandAttribID, m_calc.sFirstOperandCustAttribID);
 
@@ -545,7 +560,7 @@ BEGIN_MESSAGE_MAP(CCustomAttributeCalcPage, CDialog)
 	ON_CBN_SELCHANGE(IDC_FIRSTOPERAND, OnSelChangeFirstOperand)
 	ON_CBN_SELCHANGE(IDC_OPERATOR, OnSelChangeOperator)
 	ON_CBN_SELCHANGE(IDC_SECONDOPERANDATTRIBUTE, OnSelChangeSecondOperandAttribute)
-	ON_EN_CHANGE(IDC_SECONDOPERANDVALUE, OnSelChangeSecondOperandValue)
+	ON_EN_CHANGE(IDC_SECONDOPERANDVALUE, OnChangeSecondOperandValue)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_SECONDOPISATTRIBUTE, OnChangeSecondOperandType)
 	ON_BN_CLICKED(IDC_SECONDOPISVALUE, OnChangeSecondOperandType)
@@ -600,6 +615,7 @@ void CCustomAttributeCalcPage::SetCalculation(const TDCCUSTOMATTRIBUTECALCULATIO
 
 	BuildOperatorCombo();
 	BuildSecondOperandCombo();
+	UpdateResultType();
 
 	UpdateData(FALSE);
 	EnableControls();
@@ -715,9 +731,8 @@ void CCustomAttributeCalcPage::BuildOperatorCombo()
 	CDialogHelper::AddString(m_cbOperators, _T("Add (+)"), TDCCAC_ADD);
 	CDialogHelper::AddString(m_cbOperators, _T("Subtract(-)"), TDCCAC_SUBTRACT);
 
-	// Multiply/divide supported by numerics only
-	if (!IsDate(m_calc.nFirstOperandAttribID) &&
-		!IsTimePeriod(m_calc.nFirstOperandAttribID))
+	// Multiply/divide NOT supported by DATES
+	if (!IsDate(m_calc.nFirstOperandAttribID))
 	{
 		CDialogHelper::AddString(m_cbOperators, _T("Multiply (*)"), TDCCAC_MULTIPLY);
 		CDialogHelper::AddString(m_cbOperators, _T("Divide (/)"), TDCCAC_DIVIDE);
@@ -804,14 +819,25 @@ void CCustomAttributeCalcPage::EnableControls()
 	GetDlgItem(IDC_SECONDOPERANDVALUE)->EnableWindow(bHasFirstOp && m_bSecondOperandIsValue);
 }
 
+void CCustomAttributeCalcPage::UpdateResultType()
+{
+	if (!m_calc.IsValid(FALSE))
+		m_sResultType.Empty();
+	else
+		m_sResultType = GetDataTypeLabel(m_calc.GetResultDataType(m_aAttribDef));
+
+	UpdateData(FALSE);
+}
+
 void CCustomAttributeCalcPage::OnSelChangeFirstOperand()
 {
 	UpdateData();
 
 	BuildOperatorCombo();
 	BuildSecondOperandCombo();
+	UpdateResultType();
 	EnableControls();
-
+	
 	// Notify parent
 	GetParent()->SendMessage(WM_CUSTATTRIBCALCCHANGE, 0, (LPARAM)GetSafeHwnd());
 }
@@ -820,6 +846,7 @@ void CCustomAttributeCalcPage::OnSelChangeOperator()
 {
 	UpdateData();
 	BuildSecondOperandCombo();
+	UpdateResultType();
 	EnableControls();
 
 	// Notify parent
@@ -829,12 +856,13 @@ void CCustomAttributeCalcPage::OnSelChangeOperator()
 void CCustomAttributeCalcPage::OnSelChangeSecondOperandAttribute()
 {
 	UpdateData();
+	UpdateResultType();
 
 	// Notify parent
 	GetParent()->SendMessage(WM_CUSTATTRIBCALCCHANGE, 0, (LPARAM)GetSafeHwnd());
 }
 
-void CCustomAttributeCalcPage::OnSelChangeSecondOperandValue()
+void CCustomAttributeCalcPage::OnChangeSecondOperandValue()
 {
 	UpdateData();
 
@@ -845,6 +873,7 @@ void CCustomAttributeCalcPage::OnSelChangeSecondOperandValue()
 void CCustomAttributeCalcPage::OnChangeSecondOperandType()
 {
 	UpdateData();
+	UpdateResultType();
 	EnableControls();
 
 	if (m_bSecondOperandIsValue)
@@ -1278,6 +1307,8 @@ LRESULT CTDLCustomAttributeDlg::OnChangeListAttributes(WPARAM wp, LPARAM lp)
 
 	// update attribute
 	int nSel = GetCurSel();
+	ASSERT(nSel >= 0);
+
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 
 	DWORD dwListType = m_pageList.GetListType();
@@ -1318,7 +1349,7 @@ LRESULT CTDLCustomAttributeDlg::OnChangeListAttributes(WPARAM wp, LPARAM lp)
 	}
 	else
 	{
-		m_pageList.GetDefaultListData(m_aAttribDef[nSel].aDefaultListData);
+		m_pageList.GetDefaultListData(attrib.aDefaultListData);
 	}
 
 	return 0L;
@@ -1333,10 +1364,10 @@ LRESULT CTDLCustomAttributeDlg::OnChangeCalculationAttributes(WPARAM wp, LPARAM 
 	m_pageCalc.GetCalculation(calc);
 
 	int nSel = GetCurSel();
+	ASSERT(nSel >= 0);
 
 	TDCCUSTOMATTRIBUTEDEFINITION& attrib = m_aAttribDef[nSel];
 	attrib.SetCalculation(calc);
-	// TODO?
 
 	return 0L;
 }

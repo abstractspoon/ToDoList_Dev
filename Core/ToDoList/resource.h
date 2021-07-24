@@ -842,6 +842,7 @@
 #define IDC_SECONDOPISATTRIBUTE         1555
 #define IDC_SECONDOPISVALUE             1556
 #define IDC_SECONDOPERANDVALUE          1557
+#define IDC_RESULTTYPE                  1560
 #define IDC_TASKLIST                    2000
 #define IDD_IMPORT_OUTLOOK_DIALOG       2000
 #define IDI_OUTLOOK                     2001
@@ -2434,7 +2435,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        327
 #define _APS_NEXT_COMMAND_VALUE         34746
-#define _APS_NEXT_CONTROL_VALUE         1558
+#define _APS_NEXT_CONTROL_VALUE         1561
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
 #endif
