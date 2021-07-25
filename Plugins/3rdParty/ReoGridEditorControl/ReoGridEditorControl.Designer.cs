@@ -58,9 +58,10 @@ namespace unvell.ReoGrid.Editor
 			this.loadToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.saveToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.printPreviewToolStripButton = new System.Windows.Forms.ToolStripButton();
-			this.copyToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.cutToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.copyToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.pasteToolStripButton = new System.Windows.Forms.ToolStripButton();
+			this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
 			this.styleBrushToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator10 = new System.Windows.Forms.ToolStripSeparator();
 			this.undoToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -382,7 +383,6 @@ namespace unvell.ReoGrid.Editor
 			this.leadHeaderContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.resetAllPageBreaksToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
 			this.formulaBar = new unvell.ReoGrid.Editor.FormulaBarControl();
-			this.toolStripSeparator14 = new System.Windows.Forms.ToolStripSeparator();
 			this.toolStrip1.SuspendLayout();
 			this.columnContextMenuStrip.SuspendLayout();
 			this.rowContextMenuStrip.SuspendLayout();
@@ -495,16 +495,6 @@ namespace unvell.ReoGrid.Editor
 			this.printPreviewToolStripButton.ToolTipText = "Print Preview";
 			this.printPreviewToolStripButton.Click += new System.EventHandler(this.printPreviewToolStripButton_Click);
 			// 
-			// copyToolStripButton
-			// 
-			this.copyToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-			this.copyToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.CopyHS;
-			this.copyToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
-			this.copyToolStripButton.Name = "copyToolStripButton";
-			this.copyToolStripButton.Size = new System.Drawing.Size(23, 22);
-			this.copyToolStripButton.Text = "Copy";
-			this.copyToolStripButton.Click += new System.EventHandler(this.copyRangeToolStripMenuItem_Click);
-			// 
 			// cutToolStripButton
 			// 
 			this.cutToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -515,6 +505,16 @@ namespace unvell.ReoGrid.Editor
 			this.cutToolStripButton.Text = "Cut";
 			this.cutToolStripButton.Click += new System.EventHandler(this.cutRangeToolStripMenuItem_Click);
 			// 
+			// copyToolStripButton
+			// 
+			this.copyToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+			this.copyToolStripButton.Image = global::unvell.ReoGrid.Editor.Properties.Resources.CopyHS;
+			this.copyToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
+			this.copyToolStripButton.Name = "copyToolStripButton";
+			this.copyToolStripButton.Size = new System.Drawing.Size(23, 22);
+			this.copyToolStripButton.Text = "Copy";
+			this.copyToolStripButton.Click += new System.EventHandler(this.copyRangeToolStripMenuItem_Click);
+			// 
 			// pasteToolStripButton
 			// 
 			this.pasteToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -524,6 +524,11 @@ namespace unvell.ReoGrid.Editor
 			this.pasteToolStripButton.Size = new System.Drawing.Size(23, 22);
 			this.pasteToolStripButton.Text = "Paste";
 			this.pasteToolStripButton.Click += new System.EventHandler(this.pasteRangeToolStripMenuItem_Click);
+			// 
+			// toolStripSeparator14
+			// 
+			this.toolStripSeparator14.Name = "toolStripSeparator14";
+			this.toolStripSeparator14.Size = new System.Drawing.Size(6, 25);
 			// 
 			// styleBrushToolStripButton
 			// 
@@ -1621,7 +1626,7 @@ namespace unvell.ReoGrid.Editor
 			this.fontToolStripComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.fontToolStripComboBox.IntegralHeight = false;
 			this.fontToolStripComboBox.Name = "fontToolStripComboBox";
-			this.fontToolStripComboBox.Size = new System.Drawing.Size(200, 25);
+			this.fontToolStripComboBox.Size = new System.Drawing.Size(160, 23);
 			this.fontToolStripComboBox.Text = "Segoe UI";
 			this.fontToolStripComboBox.ToolTipText = "Change font";
 			this.fontToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.fontToolStripComboBox_SelectedIndexChanged);
@@ -1631,7 +1636,7 @@ namespace unvell.ReoGrid.Editor
 			this.fontSizeToolStripComboBox.AutoSize = false;
 			this.fontSizeToolStripComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.fontSizeToolStripComboBox.Name = "fontSizeToolStripComboBox";
-			this.fontSizeToolStripComboBox.Size = new System.Drawing.Size(60, 23);
+			this.fontSizeToolStripComboBox.Size = new System.Drawing.Size(40, 23);
 			this.fontSizeToolStripComboBox.Text = "8";
 			this.fontSizeToolStripComboBox.ToolTipText = "Change font size";
 			this.fontSizeToolStripComboBox.TextChanged += new System.EventHandler(this.fontSizeToolStripComboBox_TextChanged);
@@ -3170,11 +3175,6 @@ namespace unvell.ReoGrid.Editor
 			this.formulaBar.Padding = new System.Windows.Forms.Padding(0, 0, 0, 1);
 			this.formulaBar.Size = new System.Drawing.Size(1002, 28);
 			this.formulaBar.TabIndex = 6;
-			// 
-			// toolStripSeparator14
-			// 
-			this.toolStripSeparator14.Name = "toolStripSeparator14";
-			this.toolStripSeparator14.Size = new System.Drawing.Size(6, 25);
 			// 
 			// ReoGridEditorControl
 			// 

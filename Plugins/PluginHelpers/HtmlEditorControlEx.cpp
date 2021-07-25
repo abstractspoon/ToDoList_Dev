@@ -72,7 +72,7 @@ void HtmlEditorControlEx::InitializeComponentEx()
 		ToolBar->Font = m_ControlsFont;
 		ContextMenu->Font = m_ControlsFont;
 
-		ToolBar->Items["fontToolStripComboBox"]->Font = m_ControlsFont;
+		ToolBar->Items["toolstripFontComboBox"]->Font = m_ControlsFont;
 	}
 
 	if (DPIScaling::WantScaling())

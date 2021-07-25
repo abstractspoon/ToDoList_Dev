@@ -26,7 +26,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HtmlEditorControl));
 			this.browserPanel = new System.Windows.Forms.Panel();
 			this.editorWebBrowser = new WebBrowserEx.WebBrowserEx();
@@ -76,7 +75,7 @@
 			this.toolstripDocumentPrint = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
 			this.toolstripDocumentHelp = new System.Windows.Forms.ToolStripButton();
-			this.contextEditor = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.contextEditor = new System.Windows.Forms.ContextMenuStrip();
 			this.contextTable = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextTableModify = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator22 = new System.Windows.Forms.ToolStripSeparator();
@@ -303,12 +302,10 @@
 			// 
 			this.toolstripFontComboBox.DropDownHeight = 400;
 			this.toolstripFontComboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-			this.toolstripFontComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.toolstripFontComboBox.IntegralHeight = false;
-			this.toolstripFontComboBox.Name = "fontToolStripComboBox";
-			this.toolstripFontComboBox.Size = new System.Drawing.Size(200, 25);
+			this.toolstripFontComboBox.DropDownWidth = 200;
+			resources.ApplyResources(this.toolstripFontComboBox, "toolstripFontComboBox");
+			this.toolstripFontComboBox.Name = "toolstripFontComboBox";
 			this.toolstripFontComboBox.Tag = "FontCombo";
-			this.toolstripFontComboBox.ToolTipText = "Change font";
 			this.toolstripFontComboBox.SelectedIndexChanged += new System.EventHandler(this.toolstripFontSelectionChanged);
 			// 
 			// toolStripSeparator26
