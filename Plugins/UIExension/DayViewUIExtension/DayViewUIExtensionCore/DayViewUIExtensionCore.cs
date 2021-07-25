@@ -1,8 +1,6 @@
 ﻿
 using System;
-using System.IO;
 using System.Reflection;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -12,6 +10,7 @@ using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace DayViewUIExtension
 {
+
 	[System.ComponentModel.DesignerCategory("")]
 	public class DayViewUIExtensionCore : Panel, IUIExtension
 	{
@@ -40,7 +39,7 @@ namespace DayViewUIExtension
         private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
-		private LinkLabel m_SelectedTaskDatesLabel;
+		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
 
 		// --------------------------------------------------------------------------------------
@@ -342,7 +341,7 @@ namespace DayViewUIExtension
 
 		private void CreateSelectedTaskDatesLabel()
 		{
-			m_SelectedTaskDatesLabel = new LinkLabel();
+			m_SelectedTaskDatesLabel = new LinkLabelEx.LinkLabelEx();
 
 			m_SelectedTaskDatesLabel.Font = m_ControlsFont;
 			m_SelectedTaskDatesLabel.Location = new Point(m_Toolbar.Right, m_Toolbar.Top);
