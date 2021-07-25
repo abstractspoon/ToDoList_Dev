@@ -629,10 +629,6 @@ void CCalendarWnd::OnPreferences()
 
 void CCalendarWnd::ResizeControls(int cx, int cy)
 {
-	// selected task dates takes available space
-	int nOffset = cx - CDialogHelper::GetCtrlRect(this, IDC_SELECTEDTASKDATES).right;
-	CDialogHelper::ResizeCtrl(this, IDC_SELECTEDTASKDATES, nOffset, 0);
-
 	// calendar frame
 	CRect rFrame = CDialogHelper::GetCtrlRect(this, IDC_CALENDAR_FRAME);
 
