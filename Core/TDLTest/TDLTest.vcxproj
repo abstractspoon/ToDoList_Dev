@@ -173,6 +173,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="TDCCUSTOMATTRIBUTECALCULATIONTest.cpp" />
     <ClCompile Include="TDCDEPENDENCYTest.cpp" />
     <ClCompile Include="TDCRECURRENCETest.cpp" />
     <ClCompile Include="TDLTest.cpp">
@@ -208,6 +209,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="Resource.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="TaskFileTest.h" />
+    <ClInclude Include="TDCCUSTOMATTRIBUTECALCULATIONTest.h" />
     <ClInclude Include="TDCDEPENDENCYTest.h" />
     <ClInclude Include="TDCRECURRENCETest.h" />
     <ClInclude Include="TDLTest.h" />

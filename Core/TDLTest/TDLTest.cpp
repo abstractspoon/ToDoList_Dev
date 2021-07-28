@@ -11,6 +11,7 @@
 #include "PreferencesTest.h"
 #include "RemapMenuIDsTest.h"
 #include "TaskFileTest.h"
+#include "TDCCustomAttributeCalculationTest.h"
 #include "TDCDependencyTest.h"
 #include "TDCRecurrenceTest.h"
 #include "TimeHelperTest.h"
@@ -83,6 +84,7 @@ void DoTests(const CTestUtils& utils)
 	res += CPreferencesTest(utils).Run();
 	res += CRemapMenuIDsTest(utils).Run();
 	res += CTaskFileTest(utils).Run();
+	res += CTDCCUSTOMATTRIBUTECALCULATIONTest(utils).Run();
 	res += CTDCDEPENDENCYTest(utils).Run();
 	res += CTDCRECURRENCETest(utils).Run();
 	res += CTimeHelperTest(utils).Run();

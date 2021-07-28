@@ -56,8 +56,6 @@ void CTDCDEPENDENCYTest::TestTDCDEPENDENCY()
 {
 	BeginTest(_T("TDCDEPENDENCY"));
 
-	//  ---------------------------------------
-
 	{
 		TDCDEPENDENCY depend;
 		ExpectFalse(depend.IsValid());

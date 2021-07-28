@@ -13,9 +13,32 @@
 
 struct TDCCADATA;
 
-class CTDCCustomAttribDefinitionArray;
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+struct TDCCUSTOMATTRIBUTECALCULATIONOPERAND
+{
+	TDCCUSTOMATTRIBUTECALCULATIONOPERAND();
+
+	BOOL operator==(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
+
+	void Clear();
+	BOOL Set(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op);
+	BOOL Set( TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID);
+
+	BOOL IsValid(BOOL bAllowNone = TRUE) const;
+	BOOL IsCustom() const;
+
+	TDC_ATTRIBUTE nAttribID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
+	CString sCustAttribID;
+
+	static BOOL IsValid(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone = TRUE);
+	static DWORD GetDataType(TDC_ATTRIBUTE nAttribID);
+
+};
 
 /////////////////////////////////////////////////////////////////////////////////////////////
+
+const DWORD TDCCA_INVALID = TDCCA_STRING;
 
 struct TDCCUSTOMATTRIBUTECALCULATION
 {
@@ -42,28 +65,18 @@ struct TDCCUSTOMATTRIBUTECALCULATION
 	BOOL IsFirstOperandCustom() const;
 	BOOL IsSecondOperandCustom() const;
 	BOOL IsSecondOperandValue() const;
-
-	DWORD GetFirstOperandDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const;
-	DWORD GetSecondOperandDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const;
-	DWORD GetResultDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const;
-
+	
 	static BOOL IsValidOperator(TDCCA_CALC_OPERATOR nOperator);
-	static BOOL IsValidOperand(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone = TRUE);
+	static BOOL IsValidOperator(TDCCA_CALC_OPERATOR nOperator, DWORD dwFirstOpDataType, DWORD dwSecondOpDataType);
+
+	static DWORD GetResultDataType(DWORD dwFirstOpDataType, TDCCA_CALC_OPERATOR nOperator, DWORD dwSecondOpDataType);
 
 public:
-	TDC_ATTRIBUTE nFirstOperandAttribID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
-	CString sFirstOperandCustAttribID;
-
+	TDCCUSTOMATTRIBUTECALCULATIONOPERAND opFirst;
 	TDCCA_CALC_OPERATOR nOperator;
 
-	TDC_ATTRIBUTE nSecondOperandAttribID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
-	CString sSecondOperandCustAttribID;
+	TDCCUSTOMATTRIBUTECALCULATIONOPERAND opSecond;
 	double dSecondOperandValue;
-
-protected:
-	static DWORD GetOperandDataType(TDC_ATTRIBUTE nAttribID,
-									const CString& sCustAttribID,
-									const CTDCCustomAttribDefinitionArray& aAttribDef);
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -191,6 +204,10 @@ public:
 	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
 	BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nCustAttribID) const;
 
+	// Calculation helpers requiring access to all attribute definitions
+	BOOL IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone = TRUE) const;
+	DWORD GetOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
+	DWORD GetResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 
 protected:
 	void RebuildIDs();

@@ -12,6 +12,120 @@
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+TDCCUSTOMATTRIBUTECALCULATIONOPERAND::TDCCUSTOMATTRIBUTECALCULATIONOPERAND()
+{
+	Clear();
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATIONOPERAND::operator==(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
+{
+	return ((nAttribID == op.nAttribID) &&
+			(sCustAttribID == op.sCustAttribID));
+}
+
+void TDCCUSTOMATTRIBUTECALCULATIONOPERAND::Clear()
+{
+	nAttribID = TDCA_NONE;
+	sCustAttribID.Empty();
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATIONOPERAND::Set(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op)
+{
+	if (!op.IsValid())
+		return FALSE;
+
+	*this = op;
+	return TRUE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATIONOPERAND::Set(TDC_ATTRIBUTE nAttID, const CString& sCustID)
+{
+	if (!IsValid(nAttID, sCustID))
+		return FALSE;
+
+	nAttribID = nAttID;
+	sCustAttribID = sCustID;
+
+	return TRUE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATIONOPERAND::IsValid(BOOL bAllowNone) const
+{
+	return IsValid(nAttribID, sCustAttribID, bAllowNone);
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATIONOPERAND::IsValid(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone)
+{
+	switch (nAttribID)
+	{
+	case TDCA_COST:
+	case TDCA_CREATIONDATE:
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_PERCENT:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+	case TDCA_STARTDATE:
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		return sCustAttribID.IsEmpty();
+
+	case TDCA_NONE:
+		if (bAllowNone)
+			return sCustAttribID.IsEmpty();
+		break;
+
+	case TDCA_CUSTOMATTRIB:
+		return !sCustAttribID.IsEmpty();
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATIONOPERAND::IsCustom() const
+{
+	return (IsValid(FALSE) && (nAttribID == TDCA_CUSTOMATTRIB));
+}
+
+DWORD TDCCUSTOMATTRIBUTECALCULATIONOPERAND::GetDataType(TDC_ATTRIBUTE nAttribID)
+{
+	switch (nAttribID)
+	{
+	case TDCA_COST:
+		return TDCCA_DOUBLE;
+
+	case TDCA_PERCENT:
+	case TDCA_PRIORITY:
+	case TDCA_RISK:
+		return TDCCA_INTEGER;
+
+	case TDCA_CREATIONDATE:
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_STARTDATE:
+		return TDCCA_DATE;
+
+	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMESPENT:
+		return TDCCA_TIMEPERIOD;
+
+	case TDCA_NONE:
+		break;
+
+	case TDCA_CUSTOMATTRIB:
+		// unknowable
+		break;
+	}
+
+	// all else
+	return TDCCA_INVALID;
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 TDCCUSTOMATTRIBUTECALCULATION::TDCCUSTOMATTRIBUTECALCULATION()
 {
 	Clear();
@@ -19,23 +133,17 @@ TDCCUSTOMATTRIBUTECALCULATION::TDCCUSTOMATTRIBUTECALCULATION()
 
 BOOL TDCCUSTOMATTRIBUTECALCULATION::operator==(const TDCCUSTOMATTRIBUTECALCULATION& calc) const
 {
-	return ((nFirstOperandAttribID == calc.nFirstOperandAttribID) &&
-			(sFirstOperandCustAttribID == calc.sFirstOperandCustAttribID) &&
+	return ((opFirst == calc.opFirst) &&
 			(nOperator == calc.nOperator) &&
-			(nSecondOperandAttribID == calc.nSecondOperandAttribID) &&
-			(sSecondOperandCustAttribID == calc.sSecondOperandCustAttribID) &&
+			(opSecond == calc.opSecond) &&
 			(dSecondOperandValue == calc.dSecondOperandValue));
 }
 
 void TDCCUSTOMATTRIBUTECALCULATION::Clear()
 {
-	nFirstOperandAttribID = TDCA_NONE;
-	sFirstOperandCustAttribID.Empty();
-
+	opFirst.Clear();
 	nOperator = TDCCAC_ADD;
-
-	nSecondOperandAttribID = TDCA_NONE;
-	sSecondOperandCustAttribID.Empty();
+	opSecond.Clear();
 	dSecondOperandValue = 0.0;
 }
 
@@ -55,24 +163,20 @@ BOOL TDCCUSTOMATTRIBUTECALCULATION::Set(TDC_ATTRIBUTE nFirstOpAttribID,
 										TDC_ATTRIBUTE nSecondOpAttribID,
 										const CString& sSecondOpCustAttribID)
 {
-	if (!IsValidOperand(nFirstOpAttribID, sFirstOpCustAttribID))
+	TDCCUSTOMATTRIBUTECALCULATION temp;
+
+	if (!temp.opFirst.Set(nFirstOpAttribID, sFirstOpCustAttribID))
 		return FALSE;
 
-	if (!IsValidOperand(nSecondOpAttribID, sSecondOpCustAttribID))
+	if (!temp.opSecond.Set(nSecondOpAttribID, sSecondOpCustAttribID))
 		return FALSE;
 
-	if (!IsValidOperator(nOp))
+	temp.nOperator = nOp;
+
+	if (!temp.IsValid())
 		return FALSE;
 
-	nFirstOperandAttribID = nFirstOpAttribID;
-	sFirstOperandCustAttribID = sFirstOpCustAttribID;
-
-	nOperator = nOp;
-
-	nSecondOperandAttribID = nSecondOpAttribID;
-	sSecondOperandCustAttribID = sSecondOpCustAttribID;
-	dSecondOperandValue = 0.0;
-	
+	*this = temp;
 	return TRUE;
 }
 
@@ -81,82 +185,131 @@ BOOL TDCCUSTOMATTRIBUTECALCULATION::Set(TDC_ATTRIBUTE nFirstOpAttribID,
 										TDCCA_CALC_OPERATOR nOp,
 										double dSecondOpValue)
 {
-	if (!IsValidOperand(nFirstOpAttribID, sFirstOpCustAttribID))
+	TDCCUSTOMATTRIBUTECALCULATION temp;
+
+	if (!temp.opFirst.Set(nFirstOpAttribID, sFirstOpCustAttribID))
 		return FALSE;
 
-	if (!IsValidOperator(nOp))
+	temp.nOperator = nOp;
+	temp.opSecond.Clear();
+	temp.dSecondOperandValue = dSecondOpValue;
+
+	if (!temp.IsValid())
 		return FALSE;
 
-	nFirstOperandAttribID = nFirstOpAttribID;
-	sFirstOperandCustAttribID = sFirstOpCustAttribID;
-
-	nOperator = nOp;
-
-	nSecondOperandAttribID = TDCA_NONE;
-	sSecondOperandCustAttribID.Empty();
-	dSecondOperandValue = dSecondOpValue;
-	
+	*this = temp;
 	return TRUE;
 }
 
-DWORD TDCCUSTOMATTRIBUTECALCULATION::GetFirstOperandDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsFirstOperandCustom() const
 {
-	return GetOperandDataType(nFirstOperandAttribID, sFirstOperandCustAttribID, aAttribDef);
+	return opFirst.IsCustom();
 }
 
-DWORD TDCCUSTOMATTRIBUTECALCULATION::GetSecondOperandDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsSecondOperandCustom() const
 {
-	if (IsSecondOperandValue())
-		return TDCCA_DOUBLE;
-
-	// else
-	return GetOperandDataType(nSecondOperandAttribID, sSecondOperandCustAttribID, aAttribDef);
+	return opSecond.IsCustom();
 }
 
-DWORD TDCCUSTOMATTRIBUTECALCULATION::GetOperandDataType(TDC_ATTRIBUTE nAttribID,
-									const CString& sCustAttribID,
-									const CTDCCustomAttribDefinitionArray& aAttribDef)
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsSecondOperandValue() const
 {
-	switch (nAttribID)
-	{
-	case TDCA_COST:
-		return TDCCA_DOUBLE;
+	return (opSecond.IsValid() && (opSecond.nAttribID == TDCA_NONE));
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValidOperator(TDCCA_CALC_OPERATOR nOperator, DWORD dwFirstOpDataType, DWORD dwSecondOpDataType)
+{
+	if (!IsValidOperator(nOperator))
+		return FALSE;
 	
-	case TDCA_PERCENT:
-	case TDCA_PRIORITY:
-	case TDCA_RISK:
-		return TDCCA_INTEGER;
+	switch (dwFirstOpDataType)
+	{
+	case TDCCA_INTEGER:
+	case TDCCA_DOUBLE:
+	case TDCCA_FRACTION:
+		switch (dwSecondOpDataType)
+		{
+		case TDCCA_DOUBLE:
+		case TDCCA_FRACTION:
+		case TDCCA_INTEGER:
+			return TRUE; // all operators
+		}
+		break;
 
-	case TDCA_CREATIONDATE:
-	case TDCA_DONEDATE:
-	case TDCA_DUEDATE:
-	case TDCA_LASTMODDATE:
-	case TDCA_STARTDATE:
-		return TDCCA_DATE;
+	case TDCCA_DATE:
+		switch (dwSecondOpDataType)
+		{
+		case TDCCA_DOUBLE:
+		case TDCCA_INTEGER:
+		case TDCCA_FRACTION:
+		case TDCCA_TIMEPERIOD:
+			return ((nOperator == TDCCAC_ADD) || (nOperator == TDCCAC_SUBTRACT));
 
-	case TDCA_TIMEESTIMATE:
-	case TDCA_TIMESPENT:
-		return TDCCA_TIMEPERIOD;
+		case TDCCA_DATE:
+			return (nOperator == TDCCAC_SUBTRACT);
+		}
+		break;
 
-	case TDCA_NONE:
-		break; // don't assert
+	case TDCCA_TIMEPERIOD:
+		switch (dwSecondOpDataType)
+		{
+		case TDCCA_DOUBLE:
+		case TDCCA_INTEGER:
+		case TDCCA_FRACTION:
+			return TRUE; // all operators
 
-	case TDCA_CUSTOMATTRIB:
-		return aAttribDef.GetAttributeDataType(sCustAttribID);
-
-	default:
-		ASSERT(0);
+		case TDCCA_TIMEPERIOD:
+			return ((nOperator == TDCCAC_ADD) || (nOperator == TDCCAC_SUBTRACT));
+		}
 		break;
 	}
 
 	// all else
-	return TDCCA_STRING;
+	return FALSE;
 }
 
-DWORD TDCCUSTOMATTRIBUTECALCULATION::GetResultDataType(const CTDCCustomAttribDefinitionArray& aAttribDef) const
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValidOperator(TDCCA_CALC_OPERATOR nOperator)
 {
-	DWORD dwFirstOpDataType = GetFirstOperandDataType(aAttribDef);
-	DWORD dwSecondOpDataType = GetSecondOperandDataType(aAttribDef);
+	switch (nOperator)
+	{
+	case TDCCAC_ADD:
+	case TDCCAC_SUBTRACT:
+	case TDCCAC_MULTIPLY:
+	case TDCCAC_DIVIDE:
+		return TRUE;
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValid(BOOL bAllowNone) const
+{
+	if (!opFirst.IsValid(bAllowNone))
+		return FALSE;
+
+	if (!IsValidOperator(nOperator))
+		return FALSE;
+
+	if (!IsSecondOperandValue() && !opSecond.IsValid(bAllowNone))
+		return FALSE;
+
+	if (!IsFirstOperandCustom() && opFirst.IsValid(FALSE) &&
+		!IsSecondOperandCustom() && opSecond.IsValid(FALSE))
+	{
+		DWORD dwFirstOpDataType = TDCCUSTOMATTRIBUTECALCULATIONOPERAND::GetDataType(opFirst.nAttribID);
+		DWORD dwSecondOpDataType = TDCCUSTOMATTRIBUTECALCULATIONOPERAND::GetDataType(opSecond.nAttribID);
+
+		if (TDCCA_INVALID == GetResultDataType(dwFirstOpDataType, nOperator, dwSecondOpDataType))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
+DWORD TDCCUSTOMATTRIBUTECALCULATION::GetResultDataType(DWORD dwFirstOpDataType, TDCCA_CALC_OPERATOR nOperator, DWORD dwSecondOpDataType)
+{
+	if (!IsValidOperator(nOperator, dwFirstOpDataType, dwSecondOpDataType))
+		return TDCCA_INVALID;
 
 	switch (dwFirstOpDataType)
 	{
@@ -183,12 +336,12 @@ DWORD TDCCUSTOMATTRIBUTECALCULATION::GetResultDataType(const CTDCCustomAttribDef
 		case TDCCA_INTEGER:
 		case TDCCA_FRACTION:
 		case TDCCA_TIMEPERIOD:
+			ASSERT((nOperator == TDCCAC_ADD) || (nOperator == TDCCAC_SUBTRACT));
 			return TDCCA_DATE;
 
 		case TDCCA_DATE:
-			if (nOperator == TDCCAC_SUBTRACT)
-				return TDCCA_TIMEPERIOD;
-			break;
+			ASSERT(nOperator == TDCCAC_SUBTRACT);
+			return TDCCA_TIMEPERIOD;
 		}
 		break;
 
@@ -205,87 +358,7 @@ DWORD TDCCUSTOMATTRIBUTECALCULATION::GetResultDataType(const CTDCCustomAttribDef
 	}
 
 	// all else
-	return TDCCA_STRING; // invalid
-}
-
-BOOL TDCCUSTOMATTRIBUTECALCULATION::IsFirstOperandCustom() const
-{
-	ASSERT(IsValidOperand(nFirstOperandAttribID, sFirstOperandCustAttribID));
-
-	return (nFirstOperandAttribID == TDCA_CUSTOMATTRIB);
-}
-
-BOOL TDCCUSTOMATTRIBUTECALCULATION::IsSecondOperandCustom() const
-{
-	ASSERT(IsValidOperand(nSecondOperandAttribID, sSecondOperandCustAttribID));
-
-	return (nSecondOperandAttribID == TDCA_CUSTOMATTRIB);
-}
-
-BOOL TDCCUSTOMATTRIBUTECALCULATION::IsSecondOperandValue() const
-{
-	ASSERT(IsValidOperand(nSecondOperandAttribID, sSecondOperandCustAttribID));
-
-	return (nSecondOperandAttribID == TDCA_NONE);
-}
-
-BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValidOperator(TDCCA_CALC_OPERATOR nOperator)
-{
-	switch (nOperator)
-	{
-	case TDCCAC_ADD:
-	case TDCCAC_SUBTRACT:
-	case TDCCAC_MULTIPLY:
-	case TDCCAC_DIVIDE:
-		return TRUE;
-	}
-
-	// all else
-	return FALSE;
-}
-
-BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValidOperand(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone)
-{
-	switch (nAttribID)
-	{
-		case TDCA_COST:
-		case TDCA_CREATIONDATE:
-		case TDCA_DONEDATE:
-		case TDCA_DUEDATE:
-		case TDCA_LASTMODDATE:
-		case TDCA_PERCENT:
-		case TDCA_PRIORITY:
-		case TDCA_RISK:
-		case TDCA_STARTDATE:
-		case TDCA_TIMEESTIMATE:
-		case TDCA_TIMESPENT:
-			return sCustAttribID.IsEmpty();
-
-		case TDCA_NONE:
-			if (bAllowNone)
-				return sCustAttribID.IsEmpty();
-			break;
-
-		case TDCA_CUSTOMATTRIB:
-			return !sCustAttribID.IsEmpty();
-	}
-
-	// all else
-	return FALSE;
-}
-
-BOOL TDCCUSTOMATTRIBUTECALCULATION::IsValid(BOOL bAllowNone) const
-{
-	if (!IsValidOperand(nFirstOperandAttribID, sFirstOperandCustAttribID, bAllowNone))
-		return FALSE;
-
-	if (!IsValidOperator(nOperator))
-		return FALSE;
-
-	if (IsSecondOperandValue())
-		return TRUE;
-
-	return IsValidOperand(nSecondOperandAttribID, sSecondOperandCustAttribID, bAllowNone);
+	return TDCCA_INVALID;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -1180,6 +1253,39 @@ void CTDCCustomAttribDefinitionArray::RebuildIDs()
 		attribDef.nColID = (TDC_COLUMN)nCustColID++;
 		attribDef.nAttribID = (TDC_ATTRIBUTE)nCustAttribID++;
 	}
+}
+
+DWORD CTDCCustomAttribDefinitionArray::GetOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
+{
+	DWORD dwDataType = TDCCUSTOMATTRIBUTECALCULATIONOPERAND::GetDataType(op.nAttribID);
+
+	if ((dwDataType == TDCCA_INVALID) && (op.nAttribID == TDCA_CUSTOMATTRIB))
+	{
+		int nAttrib = Find(op.sCustAttribID);
+
+		if (nAttrib != -1)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
+
+			if (!attribDef.IsMultiList())
+				return attribDef.GetDataType();
+		}
+	}
+
+	return dwDataType;
+}
+
+DWORD CTDCCustomAttribDefinitionArray::GetResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const
+{
+	DWORD dwFirstOpDataType = GetOperandDataType(calc.opFirst);
+	DWORD dwSecondOpDataType = (calc.IsSecondOperandValue() ? TDCCA_DOUBLE : GetOperandDataType(calc.opSecond));
+
+	return TDCCUSTOMATTRIBUTECALCULATION::GetResultDataType(dwFirstOpDataType, calc.nOperator, dwSecondOpDataType);
+}
+
+BOOL CTDCCustomAttribDefinitionArray::IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone) const
+{
+	return (calc.IsValid(bAllowNone) && (GetResultDataType(calc) != TDCCA_INVALID));
 }
 
 /////////////////////////////////////////////////////////////////////////////

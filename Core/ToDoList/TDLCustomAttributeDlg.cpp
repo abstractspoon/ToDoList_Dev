@@ -530,12 +530,12 @@ void CCustomAttributeCalcPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Radio(pDX, IDC_SECONDOPISATTRIBUTE, m_bSecondOperandIsValue);
 	DDX_Text(pDX, IDC_RESULTTYPE, m_sResultType);
 
-	DDX_Operand(pDX, m_cbFirstOperand, m_calc.nFirstOperandAttribID, m_calc.sFirstOperandCustAttribID);
+	DDX_Operand(pDX, m_cbFirstOperand, m_calc.opFirst.nAttribID, m_calc.opFirst.sCustAttribID);
 
 	if (m_bSecondOperandIsValue)
 		DDX_Text(pDX, IDC_SECONDOPERANDVALUE, m_calc.dSecondOperandValue);
 	else
-		DDX_Operand(pDX, m_cbSecondOperandAttrib, m_calc.nSecondOperandAttribID, m_calc.sSecondOperandCustAttribID);
+		DDX_Operand(pDX, m_cbSecondOperandAttrib, m_calc.opSecond.nAttribID, m_calc.opSecond.sCustAttribID);
 
 	// Update calculation arguments
 	if (pDX->m_bSaveAndValidate)
@@ -718,9 +718,9 @@ void CCustomAttributeCalcPage::BuildFirstOperandCombo()
 
 	// Restore selection
 	if (m_calc.IsFirstOperandCustom())
-		m_cbFirstOperand.SetSelectedAttribute(m_calc.sFirstOperandCustAttribID);
+		m_cbFirstOperand.SetSelectedAttribute(m_calc.opFirst.sCustAttribID);
 	else
-		m_cbFirstOperand.SetSelectedAttribute(m_calc.nFirstOperandAttribID);
+		m_cbFirstOperand.SetSelectedAttribute(m_calc.opFirst.nAttribID);
 }
 
 void CCustomAttributeCalcPage::BuildOperatorCombo()
@@ -732,7 +732,7 @@ void CCustomAttributeCalcPage::BuildOperatorCombo()
 	CDialogHelper::AddString(m_cbOperators, _T("Subtract(-)"), TDCCAC_SUBTRACT);
 
 	// Multiply/divide NOT supported by DATES
-	if (!IsDate(m_calc.nFirstOperandAttribID))
+	if (!IsDate(m_calc.opFirst.nAttribID))
 	{
 		CDialogHelper::AddString(m_cbOperators, _T("Multiply (*)"), TDCCAC_MULTIPLY);
 		CDialogHelper::AddString(m_cbOperators, _T("Divide (/)"), TDCCAC_DIVIDE);
@@ -769,15 +769,15 @@ void CCustomAttributeCalcPage::BuildSecondOperandCombo()
 	// Time Period    | + - | Date              | N
 	// Time Period    | + - | Time Period       | Y
 	//
-	BOOL bFirstIsDate = IsDate(m_calc.nFirstOperandAttribID);
-	BOOL bFirstIsTime = IsTimePeriod(m_calc.nFirstOperandAttribID);
+	BOOL bFirstIsDate = IsDate(m_calc.opFirst.nAttribID);
+	BOOL bFirstIsTime = IsTimePeriod(m_calc.opFirst.nAttribID);
 
 	POSITION pos = mapAttrib.GetStartPosition();
 
 	while (pos)
 	{
 		TDC_ATTRIBUTE nSecondAttrib = mapAttrib.GetNext(pos);
-		BOOL bDelete = (nSecondAttrib == m_calc.nFirstOperandAttribID);
+		BOOL bDelete = (nSecondAttrib == m_calc.opFirst.nAttribID);
 
 		if (!bDelete)
 		{
@@ -804,14 +804,14 @@ void CCustomAttributeCalcPage::BuildSecondOperandCombo()
 
 	// Restore selection
 	if (m_calc.IsSecondOperandCustom())
-		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.sSecondOperandCustAttribID);
+		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.opSecond.sCustAttribID);
 	else
-		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.nSecondOperandAttribID);
+		m_cbSecondOperandAttrib.SetSelectedAttribute(m_calc.opSecond.nAttribID);
 }
 
 void CCustomAttributeCalcPage::EnableControls()
 {
-	BOOL bHasFirstOp = (m_calc.nFirstOperandAttribID != TDCA_NONE);
+	BOOL bHasFirstOp = (m_calc.opFirst.nAttribID != TDCA_NONE);
 
 	GetDlgItem(IDC_SECONDOPISATTRIBUTE)->EnableWindow(bHasFirstOp);
 	GetDlgItem(IDC_SECONDOPISVALUE)->EnableWindow(bHasFirstOp);
@@ -824,7 +824,7 @@ void CCustomAttributeCalcPage::UpdateResultType()
 	if (!m_calc.IsValid(FALSE))
 		m_sResultType.Empty();
 	else
-		m_sResultType = GetDataTypeLabel(m_calc.GetResultDataType(m_aAttribDef));
+		m_sResultType = GetDataTypeLabel(m_aAttribDef.GetResultDataType(m_calc));
 
 	UpdateData(FALSE);
 }
@@ -878,8 +878,8 @@ void CCustomAttributeCalcPage::OnChangeSecondOperandType()
 
 	if (m_bSecondOperandIsValue)
 	{
-		m_calc.nSecondOperandAttribID = TDCA_NONE;
-		m_calc.sSecondOperandCustAttribID.Empty();
+		m_calc.opSecond.nAttribID = TDCA_NONE;
+		m_calc.opSecond.sCustAttribID.Empty();
 	}
 
 	// Notify parent
