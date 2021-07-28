@@ -1163,7 +1163,7 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		// format auto list data to follow default list data
 		if (attribDef.IsList())
 		{
-			ASSERT(!attribDef.Calculation().IsValid());
+			ASSERT(!attribDef.Calculation().IsValid(FALSE));
 
 			pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBLISTDATA, attribDef.EncodeListData());
 		}
