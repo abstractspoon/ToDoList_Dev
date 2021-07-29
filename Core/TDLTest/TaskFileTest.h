@@ -11,6 +11,8 @@
 
 #include "TDLTestBase.h"
 
+#include "..\todolist\taskfile.h"
+
 class CTaskFileTest : public CTDLTestBase  
 {
 public:
@@ -18,6 +20,15 @@ public:
 	virtual ~CTaskFileTest();
 
 	TESTRESULT Run();
+
+	void PopulateHierarchy(CTaskFile& tasks, int nNumLevels);
+	void PopulateFlatList(CTaskFile& tasks, int nNumTasks);
+	
+	void TestHierarchyConstructionPerformance();
+	void TestFlatListConstructionPerformance();
+
+protected:
+	static void PopulateTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
 
 };
 

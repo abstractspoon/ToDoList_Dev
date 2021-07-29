@@ -12,6 +12,7 @@
 #include "TDLTestBase.h"
 
 #include "..\todolist\taskfile.h"
+#include "..\todolist\tdcstruct.h"
 
 class CToDoCtrlData;
 class CTaskFile;
@@ -25,12 +26,15 @@ public:
 	TESTRESULT Run();
 
 protected:
-	void TestDataModelCreationPerformance(const CTaskFile& tasks, CToDoCtrlData& data);
-	void TestDataModelCalculationPerformance(const CToDoCtrlData& data);
+	CTDCStyleMap m_aStyles;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
-	void InitialiseTasks(CTaskFile& tasks, int nNumLevels = 3);
-	
-	static void PopulateTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
+protected:
+	void TestHierarchyDataModelPerformance();
+	void TestFlatListDataModelPerformance();
+	void TestDataModelCreationPerformance(const CTaskFile& tasks, CToDoCtrlData& data, LPCTSTR szTaskType);
+	void TestDataModelCalculationPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
+
 };
 
 #endif // !defined(AFX_TODOCTRLDATATEST_H__DD08C7F5_76D6_4587_8325_41F964BFB927__INCLUDED_)
