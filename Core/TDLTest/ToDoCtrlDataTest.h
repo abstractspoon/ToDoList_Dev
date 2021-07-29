@@ -11,6 +11,11 @@
 
 #include "TDLTestBase.h"
 
+#include "..\todolist\taskfile.h"
+
+class CToDoCtrlData;
+class CTaskFile;
+
 class CToDoCtrlDataTest : public CTDLTestBase  
 {
 public:
@@ -19,6 +24,13 @@ public:
 	
 	TESTRESULT Run();
 
+protected:
+	void TestDataModelCreationPerformance(const CTaskFile& tasks, CToDoCtrlData& data);
+	void TestDataModelCalculationPerformance(const CToDoCtrlData& data);
+
+	void InitialiseTasks(CTaskFile& tasks, int nNumLevels = 3);
+	
+	static void PopulateTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
 };
 
 #endif // !defined(AFX_TODOCTRLDATATEST_H__DD08C7F5_76D6_4587_8325_41F964BFB927__INCLUDED_)
