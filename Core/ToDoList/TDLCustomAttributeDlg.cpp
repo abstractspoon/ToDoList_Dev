@@ -1001,6 +1001,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	// build list ctrl from attribute list
 	CRect rList;
 	m_lcAttributes.GetClientRect(rList);
+	m_lcAttributes.AllowOffItemClickDeselection(FALSE);
 
 	m_lcAttributes.InsertColumn(COL_ATTRIBLABEL, CEnString(IDS_CAD_COLATTRIBLABEL), LVCFMT_LEFT, 125);
 	m_lcAttributes.InsertColumn(COL_DATATYPE, CEnString(IDS_CAD_COLDATATYPE), LVCFMT_LEFT, 125);
@@ -1164,6 +1165,12 @@ void CTDLCustomAttributeDlg::OnDoubleClickItem(NMHDR* pNMHDR, LRESULT* pResult)
 void CTDLCustomAttributeDlg::OnItemchangedAttriblist(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/) 
 {
 	int nSel = GetCurSel();
+
+	// Changing a single selection listctrl always cycles
+	// through and 'no selection' state which causes flicker
+	// so ignore it if there are items in the list
+	if ((nSel == -1) && m_lcAttributes.GetItemCount())
+		return;
 
 	if (nSel >= 0)
 	{

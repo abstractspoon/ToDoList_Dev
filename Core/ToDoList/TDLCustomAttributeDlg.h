@@ -20,6 +20,7 @@
 #include "..\shared\menubutton.h"
 #include "..\shared\iconbutton.h"
 #include "..\shared\checklistboxex.h"
+#include "..\shared\enlistctrl.h"
 
 #include "..\Interfaces\uithemefile.h"
 
@@ -190,7 +191,7 @@ protected:
 
 	CTDCCustomAttribDefinitionArray m_aAttribDef;
 
-	CListCtrl	m_lcAttributes;
+	CEnListCtrl	m_lcAttributes;
 	CMaskEdit	m_eUniqueID;
 	CComboBox	m_cbDataType;
 	CComboBox	m_cbAlign;
