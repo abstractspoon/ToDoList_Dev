@@ -34,6 +34,7 @@ protected:
 	void TestFlatListDataModelPerformance();
 	void TestDataModelCreationPerformance(const CTaskFile& tasks, CToDoCtrlData& data, LPCTSTR szTaskType);
 	void TestDataModelCalculationPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
+	void TestDataModelFormattingPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
 
 };
 

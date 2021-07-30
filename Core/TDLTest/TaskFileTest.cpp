@@ -46,7 +46,7 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 
 	BeginTest(_T("CTaskFileTest::HierarchyConstructionPerformance"));
 
-	for (int nNumLevels = 2; nNumLevels <= 5; nNumLevels++)
+	for (int nNumLevels = 2; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
 	{
 		CTaskFile tasks;
 		DWORD dwTickStart = GetTickCount();
@@ -70,7 +70,7 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 
 	BeginTest(_T("CTaskFileTest::FlatListConstructionPerformance"));
 
-	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= 4/*5*/; nNumLevels++)
+	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
 	{
 		// Numbers to match hierarchical test
 		nNumTasks += (int)pow(10, nNumLevels);
@@ -89,7 +89,7 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 
 void CTaskFileTest::PopulateHierarchy(CTaskFile& tasks, int nNumLevels)
 {
-	ASSERT(nNumLevels > 0 && nNumLevels <= 5);
+	ASSERT(nNumLevels > 0 && nNumLevels <= MAX_TESTLEVELS);
 
 	for (int i = 0; i < 10; i++)
 	{
@@ -163,6 +163,8 @@ void CTaskFileTest::PopulateTaskAttributes(CTaskFile& tasks, HTASKITEM hTask)
 	tasks.SetTaskDueDate(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)));
 	tasks.SetTaskStartDate(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)));
 	tasks.SetTaskLastModified(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)), _T(""));
+	tasks.SetTaskTimeEstimate(hTask, rand() % 20, TDCU_DAYS);
+	tasks.SetTaskTimeSpent(hTask, rand() % 20, TDCU_DAYS);
 
 	if ((rand() % 10) == 0)
 		tasks.SetTaskDoneDate(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)));
