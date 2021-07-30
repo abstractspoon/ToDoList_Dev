@@ -88,7 +88,9 @@ CToDoCtrlData::CToDoCtrlData(const CTDCStyleMap& styles, const CTDCCustomAttribD
 	: 
 	m_styles(styles),
 	m_aCustomAttribDefs(aCustomAttribDefs),
-	m_bUndoRedoing(FALSE)
+	m_bUndoRedoing(FALSE),
+	m_nDefTimeEstUnits(TDCU_DAYS),
+	m_nDefTimeSpentUnits(TDCU_DAYS)
 {
 }
 
