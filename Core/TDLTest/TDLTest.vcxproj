@@ -190,6 +190,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     </ClCompile>
     <ClCompile Include="ToDoCtrlTaskLinkTest.cpp" />
     <ClCompile Include="WorkingWeekTest.cpp" />
+    <ClCompile Include="XmlFileTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TDLTest.rc">
@@ -216,6 +217,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="ToDoCtrlDataTest.h" />
     <ClInclude Include="ToDoCtrlTaskLinkTest.h" />
     <ClInclude Include="WorkingWeekTest.h" />
+    <ClInclude Include="XmlFileTest.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rdParty\3rdParty.vcxproj">

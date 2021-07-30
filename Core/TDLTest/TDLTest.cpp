@@ -17,6 +17,7 @@
 #include "ToDoCtrlDataTest.h"
 #include "ToDoCtrlTaskLinkTest.h"
 #include "WorkingWeekTest.h"
+#include "XmlFileTest.h"
 
 #include "..\shared\EnCommandLineInfo.h"
 
@@ -86,10 +87,11 @@ void DoTests(const CTestUtils& utils)
 // 	res += CTDCDEPENDENCYTest(utils).Run();
 // 	res += CTDCRECURRENCETest(utils).Run();
 // 	res += CTimeHelperTest(utils).Run();
-	res += CToDoCtrlDataTest(utils).Run();
+//	res += CToDoCtrlDataTest(utils).Run();
 // 	res += CToDoCtrlTaskLinkTest(utils).Run();
 // 	res += CWorkingDayTest(utils).Run();
 // 	res += CWorkingWeekTest(utils).Run();
+	res += CXmlFileTest(utils).Run();
 
 	// More...
 
