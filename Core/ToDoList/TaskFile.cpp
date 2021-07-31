@@ -2280,11 +2280,6 @@ int CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, CStringArray& aAllocTo) const
 	return GetTaskArray(hTask, TDL_TASKALLOCTO, aAllocTo, FALSE);
 }
 
-CXmlItem* CTaskFile::NewItem(const CString& sName)
-{
-	return new CXmlItem(NULL, sName);
-}
-
 ///////////////////////////////////////////////////////////////////////
 
 HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent)
