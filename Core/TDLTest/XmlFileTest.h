@@ -23,7 +23,8 @@ public:
 
 	TESTRESULT Run();
 
-	void TestAddSiblingPerformance();
+	void TestAddPerformance();
+	void TestAddItemPerformance(int nNumItems);
 	void TestAddSiblingPerformance(int nNumItems);
 
 };

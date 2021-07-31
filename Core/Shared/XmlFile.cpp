@@ -509,6 +509,14 @@ BOOL CXmlItem::DeleteItem(const CString& sItemName, const CString& sSubItemName)
 	return (pXI != NULL);
 }
 
+CXmlItem* CXmlItem::AddSibling(const CString& sValue)
+{
+	CXmlItem* pXI = new CXmlItem(GetParent(), GetName(), sValue, XIT_ELEMENT);
+	VERIFY(AddSibling(pXI));
+
+	return pXI;
+}
+
 BOOL CXmlItem::AddSibling(CXmlItem* pXI)
 {
 	if (!pXI)
@@ -1254,6 +1262,7 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 	
 	CXmlNodeWrapper nodeChild(pNode->GetFirstChildNode());
 	CString sItemVal;
+	CXmlItem* pXIPrevSibling = NULL;
 	
 	while (nodeChild.IsValid())
 	{
@@ -1281,7 +1290,15 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 
 		if (!sChildName.IsEmpty())
 		{
-			CXmlItem* pXI = xi.AddItem(sChildName, sChildVal, nType);
+			CXmlItem* pXI = NULL;
+
+			// Optimisation: Add directly to prev sibling if it has the same name
+			if ((pXIPrevSibling == NULL) || !pXIPrevSibling->NameIs(sChildName))
+				pXI = xi.AddItem(sChildName, sChildVal, nType);
+			else
+				pXI = pXIPrevSibling->AddSibling(sChildVal);
+
+			pXIPrevSibling = pXI;
 			
 			if (!ContinueParsing(sChildName, sChildVal))
 				return TRUE;

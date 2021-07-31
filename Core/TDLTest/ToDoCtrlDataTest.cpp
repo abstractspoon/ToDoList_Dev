@@ -74,6 +74,8 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 		TestDataModelCreationPerformance(tasks, data, _T("nested"));
 		TestDataModelCalculationPerformance(data, _T("nested"));
 		TestDataModelFormattingPerformance(data, _T("nested"));
+
+		printf("\n");
 	}
 
 	EndTest();
@@ -86,9 +88,6 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 		_tprintf(_T("Add '-p' to run CToDoCtrlDataTest::FlatListDataModelPerformance\n"));
 		return;
 	}
-
-	// Initialise styles and custom attributes
-	// TODO
 
 	BeginTest(_T("CToDoCtrlDataTest::FlatListDataModelPerformance"));
 
@@ -105,6 +104,8 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 		TestDataModelCreationPerformance(tasks, data, _T("flat"));
 		TestDataModelCalculationPerformance(data, _T("flat"));
 		TestDataModelFormattingPerformance(data, _T("flat"));
+
+		printf("\n");
 	}
 
 	EndTest();

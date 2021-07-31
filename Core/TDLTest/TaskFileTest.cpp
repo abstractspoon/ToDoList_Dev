@@ -48,13 +48,16 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 
 	for (int nNumLevels = 2; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
 	{
-		CTaskFile tasks;
 		DWORD dwTickStart = GetTickCount();
 
+		CTaskFile tasks;
 		PopulateHierarchy(tasks, nNumLevels);
 		
 		DWORD dwDuration = (GetTickCount() - dwTickStart);
-		_tprintf(_T("Test took %ld ms to build a tasklist with %d nested tasks\n"), dwDuration, tasks.GetTaskCount());
+		_tprintf(_T("Test took %ld ms to build a tasklist with %d nested tasks (%.1f ms/100)\n"), 
+				 dwDuration, 
+				 tasks.GetTaskCount(),
+				 (dwDuration * 100.0) / tasks.GetTaskCount());
 	}
 	
 	EndTest();
@@ -72,16 +75,19 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 
 	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
 	{
+		DWORD dwTickStart = GetTickCount();
+
 		// Numbers to match hierarchical test
 		nNumTasks += (int)pow(10, nNumLevels);
 
 		CTaskFile tasks;
-		DWORD dwTickStart = GetTickCount();
-
 		PopulateFlatList(tasks, nNumTasks);
 
 		DWORD dwDuration = (GetTickCount() - dwTickStart);
-		_tprintf(_T("Test took %ld ms to build a tasklist with %d flat tasks\n"), dwDuration, tasks.GetTaskCount());
+		_tprintf(_T("Test took %ld ms to build a tasklist with %d flat tasks (%.1f ms/100)\n"), 
+				 dwDuration, 
+				 tasks.GetTaskCount(),
+				 (dwDuration * 100.0) / tasks.GetTaskCount());
 	}
 
 	EndTest();
@@ -91,68 +97,50 @@ void CTaskFileTest::PopulateHierarchy(CTaskFile& tasks, int nNumLevels)
 {
 	ASSERT(nNumLevels > 0 && nNumLevels <= MAX_TESTLEVELS);
 
+	Add10TasksToHierarchy(tasks, NULL, 1, nNumLevels);
+}
+
+void CTaskFileTest::Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTask, int nLevel, int nNumLevels)
+{
+	if (nLevel > nNumLevels)
+		return;
+
+	HTASKITEM hPrevSiblingTask = NULL, hTask = NULL;
+
 	for (int i = 0; i < 10; i++)
 	{
-		HTASKITEM hTask_I = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
-		PopulateTaskAttributes(tasks, hTask_I);
+//		if (hPrevSiblingTask == NULL)
+			hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
+// 		else
+// 			hTask = tasks.NewSiblingTask(Misc::Format(_T("Task_%d"), i), hPrevSiblingTask, 0, TRUE);
 
-		if (nNumLevels < 2)
-			continue;
+		hPrevSiblingTask = hTask;
 
-		DWORD dwTaskID_I = tasks.GetTaskID(hTask_I);
-		DWORD dwPrevTaskID_J = 0;
+		PopulateNumericTaskAttributes(tasks, hTask);
 
-		for (int j = 0; j < 10; j++)
-		{
-			HTASKITEM hTask_J = tasks.NewTask(Misc::Format(_T("Task_%d"), j), hTask_I, 0, dwTaskID_I, TRUE);
-			PopulateTaskAttributes(tasks, hTask_J);
-
-			if (nNumLevels < 3)
-				continue;
-
-			DWORD dwTaskID_J = tasks.GetTaskID(hTask_J);
-
-			for (int k = 0; k < 10; k++)
-			{
-				HTASKITEM hTask_K = tasks.NewTask(Misc::Format(_T("Task_%d"), k), hTask_J, 0, dwTaskID_J, TRUE);
-				PopulateTaskAttributes(tasks, hTask_K);
-
-				if (nNumLevels < 4)
-					continue;
-
-				DWORD dwTaskID_K = tasks.GetTaskID(hTask_K);
-
-				for (int m = 0; m < 10; m++)
-				{
-					HTASKITEM hTask_M = tasks.NewTask(Misc::Format(_T("Task_%d"), m), hTask_K, 0, dwTaskID_K, TRUE);
-					PopulateTaskAttributes(tasks, hTask_M);
-
-					if (nNumLevels < 5)
-						continue;
-
-					DWORD dwTaskID_M = tasks.GetTaskID(hTask_M);
-
-					for (int n = 0; n < 10; n++)
-					{
-						HTASKITEM hTask_N = tasks.NewTask(Misc::Format(_T("Task_%d"), n), hTask_M, 0, dwTaskID_M, TRUE);
-						PopulateTaskAttributes(tasks, hTask_N);
-					}
-				}
-			}
-		}
+		// Add next level of tasks
+		Add10TasksToHierarchy(tasks, hTask, nLevel + 1, nNumLevels);
 	}
 }
 
 void CTaskFileTest::PopulateFlatList(CTaskFile& tasks, int nNumTasks)
 {
+	HTASKITEM hPrevSiblingTask = NULL, hTask = NULL;
+
 	for (int i = 0; i < nNumTasks; i++)
 	{
-		HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
-		PopulateTaskAttributes(tasks, hTask);
+		if (hPrevSiblingTask == NULL)
+			hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
+		else
+			hTask = tasks.NewSiblingTask(Misc::Format(_T("Task_%d"), i), hPrevSiblingTask, 0, TRUE);
+
+		hPrevSiblingTask = hTask;
+
+		PopulateNumericTaskAttributes(tasks, hTask);
 	}
 }
 
-void CTaskFileTest::PopulateTaskAttributes(CTaskFile& tasks, HTASKITEM hTask)
+void CTaskFileTest::PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask)
 {
 	COleDateTime dtNow = COleDateTime::GetCurrentTime();
 

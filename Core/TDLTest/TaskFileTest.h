@@ -15,7 +15,7 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const int NUM_TESTLEVELS = 4;
+const int NUM_TESTLEVELS = 5;
 const int MAX_TESTLEVELS = 5;
 
 //////////////////////////////////////////////////////////////////////
@@ -35,7 +35,8 @@ public:
 	void TestFlatListConstructionPerformance();
 
 protected:
-	static void PopulateTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
+	static void PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
+	static void Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTask, int nLevel, int nNumLevels);
 
 };
 

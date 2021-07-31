@@ -83,7 +83,7 @@ void DoTests(const CTestUtils& utils)
 // 	res += CMiscTest(utils).Run();
 // 	res += CPreferencesTest(utils).Run();
 // 	res += CRemapMenuIDsTest(utils).Run();
-// 	res += CTaskFileTest(utils).Run();
+ 	res += CTaskFileTest(utils).Run();
 // 	res += CTDCDEPENDENCYTest(utils).Run();
 // 	res += CTDCRECURRENCETest(utils).Run();
 // 	res += CTimeHelperTest(utils).Run();
@@ -91,7 +91,7 @@ void DoTests(const CTestUtils& utils)
 // 	res += CToDoCtrlTaskLinkTest(utils).Run();
 // 	res += CWorkingDayTest(utils).Run();
 // 	res += CWorkingWeekTest(utils).Run();
-	res += CXmlFileTest(utils).Run();
+//	res += CXmlFileTest(utils).Run();
 
 	// More...
 
