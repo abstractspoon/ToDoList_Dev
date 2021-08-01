@@ -105,17 +105,10 @@ void CTaskFileTest::Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTas
 	if (nLevel > nNumLevels)
 		return;
 
-	HTASKITEM hPrevSiblingTask = NULL, hTask = NULL;
-
+	// Note: there's no benefit to using 'NewSiblingTask' for so few tasks
 	for (int i = 0; i < 10; i++)
 	{
-//		if (hPrevSiblingTask == NULL)
-			hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
-// 		else
-// 			hTask = tasks.NewSiblingTask(Misc::Format(_T("Task_%d"), i), hPrevSiblingTask, 0, TRUE);
-
-		hPrevSiblingTask = hTask;
-
+		HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), hParentTask, 0, 0, TRUE);
 		PopulateNumericTaskAttributes(tasks, hTask);
 
 		// Add next level of tasks
