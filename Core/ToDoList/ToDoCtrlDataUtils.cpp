@@ -3979,10 +3979,10 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 /////////////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskExporter::CTDCTaskExporter(const CToDoCtrlData& data, 
-	const CTDLTaskCtrlBase& colors,
-	const CContentMgr& comments) 
+								   const CTDLTaskCtrlBase& colors,
+								   const CContentMgr& comments)
 	: 
-m_data(data),
+	m_data(data),
 	m_colors(colors),
 	m_comments(comments),
 	m_calculator(m_data),

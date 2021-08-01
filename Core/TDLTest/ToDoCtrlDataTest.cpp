@@ -8,6 +8,14 @@
 
 #include "..\todolist\todoctrldata.h"
 #include "..\todolist\todoctrldatautils.h"
+#include "..\todolist\tdcimagelist.h"
+#include "..\todolist\todoctrlfind.h"
+#include "..\todolist\tdcstruct.h"
+#include "..\todolist\tdltasktreectrl.h"
+
+#include "..\shared\treectrlhelper.h"
+
+#include "..\interfaces\contentmgr.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -78,6 +86,7 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
  		TestDataModelCreationPerformance(tasks, data, _T("nested"));
 		TestDataModelCalculationPerformance(data, _T("nested"));
 		TestDataModelFormattingPerformance(data, _T("nested"));
+		TestDataModelExporterPerformance(data, _T("nested"));
 		TestDataModelGetTaskPerformance(data, _T("nested"));
 
 		printf("\n");
@@ -109,6 +118,7 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
  		TestDataModelCreationPerformance(tasks, data, _T("flat"));
 		TestDataModelCalculationPerformance(data, _T("flat"));
 		TestDataModelFormattingPerformance(data, _T("flat"));
+		TestDataModelExporterPerformance(data, _T("flat"));
 		TestDataModelGetTaskPerformance(data, _T("flat"));
 
 		printf("\n");
@@ -220,6 +230,42 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 			 (dwDuration * 100.0) / data.GetTaskCount());
 }
 
+void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
+{
+	ASSERT(m_utils.HasCommandlineFlag('p'));
+
+	// Mocks ----------------------------------------
+	CTreeCtrl tree;
+	const CTreeCtrlHelper tch(tree);
+
+	const CTDCImageList ilIcons;
+	const CTDCStyleMap styles;
+	const TDCAUTOLISTDATA tld;
+	const CTDCColumnIDMap mapVisibleCols;
+	const CTDCCustomAttribDefinitionArray aCustAttribDefs;
+
+	const CTDLTaskTreeCtrl colors(ilIcons,
+								  data,
+								  styles,
+								  tld,
+								  mapVisibleCols,
+								  aCustAttribDefs);
+	CContentMgr comments;
+	// ----------------------------------------------
+	
+	DWORD dwTickStart = GetTickCount();
+	CTaskFile tasks;
+	
+	CTDCTaskExporter exporter(data, colors, comments);
+	exporter.ExportAllTasks(tasks);
+	
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+	_tprintf(_T("Test took %ld ms to export %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
+}
 
 void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
