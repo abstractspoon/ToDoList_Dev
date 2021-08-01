@@ -16,6 +16,10 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
+
+int NUM_TESTLEVELS = CTaskFileTest::NUM_TESTLEVELS;
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -71,9 +75,10 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
-		TestDataModelCreationPerformance(tasks, data, _T("nested"));
+ 		TestDataModelCreationPerformance(tasks, data, _T("nested"));
 		TestDataModelCalculationPerformance(data, _T("nested"));
 		TestDataModelFormattingPerformance(data, _T("nested"));
+		TestDataModelGetTaskPerformance(data, _T("nested"));
 
 		printf("\n");
 	}
@@ -101,9 +106,10 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
-		TestDataModelCreationPerformance(tasks, data, _T("flat"));
+ 		TestDataModelCreationPerformance(tasks, data, _T("flat"));
 		TestDataModelCalculationPerformance(data, _T("flat"));
 		TestDataModelFormattingPerformance(data, _T("flat"));
+		TestDataModelGetTaskPerformance(data, _T("flat"));
 
 		printf("\n");
 	}
@@ -120,7 +126,11 @@ void CToDoCtrlDataTest::TestDataModelCreationPerformance(const CTaskFile& tasks,
 	data.BuildDataModel(tasks);
 
 	DWORD dwDuration = (GetTickCount() - dwTickStart);
-	_tprintf(_T("Test took %ld ms to build data model with %d %s tasks\n"), dwDuration, data.GetTaskCount(), szTaskType);
+	_tprintf(_T("Test took %ld ms to build data model with %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
 }
 
 void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
@@ -158,7 +168,11 @@ void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData&
 	}
 
 	DWORD dwDuration = (GetTickCount() - dwTickStart);
-	_tprintf(_T("Test took %ld ms to perform calculations on %d %s tasks\n"), dwDuration, data.GetTaskCount(), szTaskType);
+	_tprintf(_T("Test took %ld ms to perform calculations on %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
 }
 
 void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
@@ -199,7 +213,34 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 	}
 
 	DWORD dwDuration = (GetTickCount() - dwTickStart);
-	_tprintf(_T("Test took %ld ms to format attributes for %d %s tasks\n"), dwDuration, data.GetTaskCount(), szTaskType);
+	_tprintf(_T("Test took %ld ms to format attributes for %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
 }
 
 
+void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
+{
+	ASSERT(m_utils.HasCommandlineFlag('p'));
+
+	DWORD dwTickStart = GetTickCount();
+
+	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+
+	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	{
+		const TODOITEM* pTDI = NULL;
+		const TODOSTRUCTURE* pTDS = NULL;
+
+		data.GetTask(dwTaskID, pTDI, pTDS);
+	}
+
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+	_tprintf(_T("Test took %ld ms to locate %d %s tasks (%.1f ms/100)\n"),
+			 dwDuration,
+			 data.GetTaskCount(),
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
+}

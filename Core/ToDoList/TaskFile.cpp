@@ -809,6 +809,8 @@ DWORD CTaskFile::GetNextUniqueID() const
 
 void CTaskFile::BuildHandleMap() const
 {
+	m_mapHandles.InitHashTable(5000);
+
 	ClearHandleMap();
 	AddTaskToMap(GetItem(TDL_TASK), TRUE, TRUE); // first top level item
 }

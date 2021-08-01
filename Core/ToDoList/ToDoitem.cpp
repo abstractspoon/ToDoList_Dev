@@ -23,6 +23,10 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+const int HASHTABLE_SIZE = 5000;
+
+//////////////////////////////////////////////////////////////////////
+
 COleDateTimeSpan TODOITEM::dtsRecentModPeriod = (1.0 / 24); // one hour
 
 CString TODOITEM::sModifierName;
@@ -1296,7 +1300,7 @@ BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 
 CToDoCtrlDataItems::CToDoCtrlDataItems() 
 {
-	InitHashTable(1991); // prime number closest to 2000
+	InitHashTable(HASHTABLE_SIZE);
 }
 
 CToDoCtrlDataItems::~CToDoCtrlDataItems() 
@@ -1683,9 +1687,16 @@ void TODOSTRUCTURE::Trace(const CString& sIndent) const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+CToDoCtrlDataStructure::CToDoCtrlDataStructure()
+{
+	m_mapStructure.InitHashTable(HASHTABLE_SIZE);
+}
+
 CToDoCtrlDataStructure::CToDoCtrlDataStructure(const CToDoCtrlDataStructure& tds)
 {
-   *this = tds;
+	m_mapStructure.InitHashTable(HASHTABLE_SIZE);
+
+	*this = tds;
 }
 
 CToDoCtrlDataStructure::~CToDoCtrlDataStructure()
@@ -1834,7 +1845,7 @@ void CToDoCtrlDataStructure::BuildMap()
 		TODOSTRUCTURE* pTDSChild = GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 
-      AddToMap(pTDSChild);
+		AddToMap(pTDSChild);
 	}
 }
 

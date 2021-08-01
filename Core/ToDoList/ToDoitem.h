@@ -383,7 +383,7 @@ private:
 class CToDoCtrlDataStructure : public TODOSTRUCTURE
 {
 public:
-	CToDoCtrlDataStructure() : TODOSTRUCTURE() {}
+	CToDoCtrlDataStructure();
 	CToDoCtrlDataStructure(const CToDoCtrlDataStructure& tds); 
 	~CToDoCtrlDataStructure();
 	
