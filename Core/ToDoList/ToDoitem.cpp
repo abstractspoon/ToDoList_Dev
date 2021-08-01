@@ -23,10 +23,6 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int HASHTABLE_SIZE = 5000;
-
-//////////////////////////////////////////////////////////////////////
-
 COleDateTimeSpan TODOITEM::dtsRecentModPeriod = (1.0 / 24); // one hour
 
 CString TODOITEM::sModifierName;
@@ -1300,7 +1296,7 @@ BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 
 CToDoCtrlDataItems::CToDoCtrlDataItems() 
 {
-	InitHashTable(HASHTABLE_SIZE);
+	InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
 }
 
 CToDoCtrlDataItems::~CToDoCtrlDataItems() 
@@ -1689,12 +1685,12 @@ void TODOSTRUCTURE::Trace(const CString& sIndent) const
 
 CToDoCtrlDataStructure::CToDoCtrlDataStructure()
 {
-	m_mapStructure.InitHashTable(HASHTABLE_SIZE);
+	m_mapStructure.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
 }
 
 CToDoCtrlDataStructure::CToDoCtrlDataStructure(const CToDoCtrlDataStructure& tds)
 {
-	m_mapStructure.InitHashTable(HASHTABLE_SIZE);
+	m_mapStructure.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
 
 	*this = tds;
 }
