@@ -278,29 +278,34 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 	
 	// copy items
 	POSITION pos = selection.GetHeadPosition();
+	HTASKITEM hPrevSiblingTask = NULL, hTask = NULL;
 	
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
 		DWORD dwTaskID = GetTaskID(hti);
 
-		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
-
-		if (!pTDS || !pTDI)
-			return FALSE;
-
-		// add task
-		HTASKITEM hTask = tasks.NewTask(pTDI->sTitle, NULL, dwTaskID, 0);
-		ASSERT(hTask);
-		
-		if (!hTask)
-			return FALSE;
-
-		m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, TDCGT_ALL);
-
-		// and subtasks
-		m_exporter.ExportSubTasks(pTDS, tasks, hTask, TRUE);
+		if (hPrevSiblingTask == NULL)
+			hTask = m_exporter.ExportTask(dwTaskID, tasks, NULL);
+		else
+			hTask = m_exporter.ExportSiblingTask(dwTaskID, tasks, hPrevSiblingTask);
+// 		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+// 		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
+// 
+// 		if (!pTDS || !pTDI)
+// 			return FALSE;
+// 
+// 		// add task
+// 		HTASKITEM hTask = tasks.NewTask(pTDI->sTitle, NULL, dwTaskID, 0);
+// 		ASSERT(hTask);
+// 		
+// 		if (!hTask)
+// 			return FALSE;
+// 
+// 		m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, TDCGT_ALL);
+// 
+// 		// and subtasks
+// 		m_exporter.ExportSubTasks(pTDS, tasks, hTask, TRUE);
 	}
 	
 	// extra processing to identify the originally selected tasks

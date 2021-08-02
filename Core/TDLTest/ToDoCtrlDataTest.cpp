@@ -84,10 +84,11 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
  		TestDataModelCreationPerformance(tasks, data, _T("nested"));
-		TestDataModelCalculationPerformance(data, _T("nested"));
-		TestDataModelFormattingPerformance(data, _T("nested"));
-		TestDataModelExporterPerformance(data, _T("nested"));
-		TestDataModelGetTaskPerformance(data, _T("nested"));
+// 		TestDataModelCalculationPerformance(data, _T("nested"));
+// 		TestDataModelFormattingPerformance(data, _T("nested"));
+// 		TestDataModelExporterPerformance(data, _T("nested"));
+		TestDataModelGetTaskPositionPerformance(data, _T("nested"));
+//		TestDataModelGetTaskPerformance(data, _T("nested"));
 
 		printf("\n");
 	}
@@ -116,10 +117,11 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
  		TestDataModelCreationPerformance(tasks, data, _T("flat"));
-		TestDataModelCalculationPerformance(data, _T("flat"));
-		TestDataModelFormattingPerformance(data, _T("flat"));
-		TestDataModelExporterPerformance(data, _T("flat"));
-		TestDataModelGetTaskPerformance(data, _T("flat"));
+// 		TestDataModelCalculationPerformance(data, _T("flat"));
+// 		TestDataModelFormattingPerformance(data, _T("flat"));
+// 		TestDataModelExporterPerformance(data, _T("flat"));
+		TestDataModelGetTaskPositionPerformance(data, _T("flat"));
+//		TestDataModelGetTaskPerformance(data, _T("flat"));
 
 		printf("\n");
 	}
@@ -230,6 +232,31 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 			 (dwDuration * 100.0) / data.GetTaskCount());
 }
 
+void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
+{
+	ASSERT(m_utils.HasCommandlineFlag('p'));
+
+	DWORD dwTickStart = GetTickCount();
+
+	CTDCTaskFormatter formatter(data);
+	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+
+	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	{
+		const TODOSTRUCTURE* pTDS = data.LocateTask(dwTaskID);
+
+		pTDS->GetPosition();
+		formatter.GetTaskPosition(pTDS);
+	}
+
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+	_tprintf(_T("Test took %ld ms to get task position for %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
+}
+
 void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
 {
 	ASSERT(m_utils.HasCommandlineFlag('p'));
@@ -239,17 +266,15 @@ void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& da
 	const CTreeCtrlHelper tch(tree);
 
 	const CTDCImageList ilIcons;
-	const CTDCStyleMap styles;
 	const TDCAUTOLISTDATA tld;
 	const CTDCColumnIDMap mapVisibleCols;
-	const CTDCCustomAttribDefinitionArray aCustAttribDefs;
 
 	const CTDLTaskTreeCtrl colors(ilIcons,
 								  data,
-								  styles,
+								  m_aStyles,
 								  tld,
 								  mapVisibleCols,
-								  aCustAttribDefs);
+								  m_aCustomAttribDefs);
 	CContentMgr comments;
 	// ----------------------------------------------
 	

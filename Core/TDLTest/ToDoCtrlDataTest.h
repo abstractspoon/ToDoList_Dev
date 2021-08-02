@@ -37,6 +37,7 @@ protected:
 	void TestDataModelFormattingPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
 	void TestDataModelExporterPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
 	void TestDataModelGetTaskPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
+	void TestDataModelGetTaskPositionPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
 
 };
 
