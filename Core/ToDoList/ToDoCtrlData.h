@@ -117,6 +117,7 @@ public:
 	CString GetTaskFileLink(DWORD dwTaskID, int nFileLink) const;
 	CString GetTaskExtID(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
+	int GetSubtaskPosition(DWORD dwTaskID) const;
 
 	int GetTaskPriority(DWORD dwTaskID) const;
 	int GetTaskRisk(DWORD dwTaskID) const;
@@ -333,6 +334,7 @@ protected:
 	BOOL IsValidMoveDestination(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const;
 	BOOL SetTaskModified(DWORD dwTaskID);
+	int GetSubtaskPosition(const TODOSTRUCTURE* pTDS) const { return GetSubtaskPosition(pTDS->GetTaskID()); }
 
 	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
 	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);

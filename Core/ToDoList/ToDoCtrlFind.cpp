@@ -416,7 +416,9 @@ CString CToDoCtrlFind::GetLongestPosition(HTREEITEM hti, const TODOITEM* pTDI, c
 	if (!CheckGetTask(hti, pTDI, pTDS))
 		return EMPTY_STR;
 
-	CString sPos = (pTDS ? Misc::Format(pTDS->GetPosition() + 1) : EMPTY_STR);
+	int nPos = (pTDS ? m_data.GetSubtaskPosition(pTDS->GetTaskID()) : -1);
+	CString sPos = (pTDS ? Misc::Format(nPos + 1) : EMPTY_STR);
+
 	CString sLongestChild;
 
 	if (WantSearchChildren(hti, bVisibleOnly))

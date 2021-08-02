@@ -320,10 +320,12 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////////
 
+// This is a const class publicly because we don't want any changes 
+// to be made without proper supervision (aka CToDoCtrlDataStructure)
 class TODOSTRUCTURE
 {
 	friend class CToDoCtrlDataStructure;
-	
+
 public:
 	TODOSTRUCTURE() : m_dwID(0), m_pTDSParent(NULL) {}
 	TODOSTRUCTURE(DWORD dwID);
@@ -334,10 +336,7 @@ public:
 	DWORD GetPreviousSubTaskID(int nPos) const;
 	DWORD GetNextSubTaskID(int nPos) const;
 	BOOL HasParent(DWORD dwParentID, BOOL bImmediate = TRUE) const;
-	
-	int GetSubTaskPosition(DWORD dwID) const;
-	int GetPosition() const;
-	
+		
 	TODOSTRUCTURE* GetParentTask() const;
 	DWORD GetParentTaskID() const;
 	BOOL HasSameParent(const TODOSTRUCTURE* pTDS) const;
@@ -345,17 +344,13 @@ public:
 	BOOL ParentIsRoot() const { return (GetParentTaskID() == 0); }
 	BOOL IsRoot() const { return (GetTaskID() == 0); }
 	
+	TODOSTRUCTURE* GetSubTask(int nPos) const;
+	BOOL CanMoveSubTask(int nPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const;
+
 	int GetSubTaskCount() const { return m_aSubTasks.GetSize(); }
 	BOOL HasSubTasks() const { return GetSubTaskCount() > 0; }
 	int GetLeafCount() const;
 	
-	TODOSTRUCTURE* GetSubTask(int nPos) const;
-	int GetSubTaskPosition(const TODOSTRUCTURE* pTDS) const;
-	
-	void DeleteAll() { CleanUp(); }
-	
-	int MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
-
 #ifdef _DEBUG
 	void Trace(const CString& sIndent) const;
 #endif
@@ -365,17 +360,22 @@ protected:
 	TODOSTRUCTURE* m_pTDSParent;
 	CArray<TODOSTRUCTURE*, TODOSTRUCTURE*&> m_aSubTasks; 
 	
-protected:
-	// For CToDoCtrlDataStructure only
+private:
+	// For CToDoCtrlDataStructure only ----------------------
 	TODOSTRUCTURE(const TODOSTRUCTURE& tds);
 	const TODOSTRUCTURE& operator=(const TODOSTRUCTURE& tds); 
-	
-private:
+
+	int MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
+	void DeleteAll() { CleanUp(); }
 	void CleanUp();
 	BOOL DeleteSubTask(int nPos);
 	BOOL InsertSubTask(TODOSTRUCTURE* pTDS, int nPos);
-	BOOL AddSubTask(TODOSTRUCTURE* pTDS);
-	TODOSTRUCTURE* AddSubTask(DWORD dwID);
+	TODOSTRUCTURE* InsertSubTask(DWORD dwID, int nPos);
+	// ------------------------------------------------------
+
+#ifdef _DEBUG
+	int GetSubtaskPosition(DWORD dwID) const;
+#endif
 };
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -392,10 +392,14 @@ public:
 	DWORD GetPreviousTaskID(DWORD dwID) const;
 	
 	TODOSTRUCTURE* AddTask(DWORD dwID, TODOSTRUCTURE* pTDSParent);
-	BOOL InsertTask(DWORD dwID, TODOSTRUCTURE* pTDSParent, int nPos);
+	TODOSTRUCTURE* InsertTask(DWORD dwID, TODOSTRUCTURE* pTDSParent, int nPos);
 	
 	TODOSTRUCTURE* FindTask(DWORD dwID) const;
 	BOOL FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
+
+	int GetSubtaskPosition(DWORD dwTaskID) const;
+	int MoveSubTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
+	BOOL CanMoveSubTask(const TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const;
 
 	BOOL DeleteTask(DWORD dwID);
 	void DeleteAll();
@@ -404,15 +408,20 @@ public:
 	
 protected:
 	CMap<DWORD, DWORD, TODOSTRUCTURE*, TODOSTRUCTURE*&> m_mapStructure;
-	
+
+	mutable	CMap<DWORD, DWORD, int, int> m_mapSubtaskPositions;
+		
 protected:
-	void BuildMap();
-	void AddToMap(const TODOSTRUCTURE* pTDS);
-	void RemoveFromMap(const TODOSTRUCTURE* pTDS);
+	void BuildStructureMap();
+	void AddToStructureMap(const TODOSTRUCTURE* pTDS);
+	void RemoveFromStructureMap(const TODOSTRUCTURE* pTDS);
+
+	// These must be callable from const Getters
+	void BuildPositionMap() const;
+	void AddToPositionMap(const TODOSTRUCTURE* pTDS, int nPos) const;
+	void ClearPositionMap() { m_mapSubtaskPositions.RemoveAll(); }
 
 	const CToDoCtrlDataStructure& operator=(const CToDoCtrlDataStructure& tds); 
-	
-	BOOL InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDSParent, int nPos);
 	
 	static void AddTaskIDs(TODOSTRUCTURE* pTDS, CDWordArray& aTaskIDs);
 };

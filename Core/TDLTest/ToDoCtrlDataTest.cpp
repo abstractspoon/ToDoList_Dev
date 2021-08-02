@@ -84,11 +84,11 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
  		TestDataModelCreationPerformance(tasks, data, _T("nested"));
-// 		TestDataModelCalculationPerformance(data, _T("nested"));
-// 		TestDataModelFormattingPerformance(data, _T("nested"));
-// 		TestDataModelExporterPerformance(data, _T("nested"));
+		TestDataModelCalculationPerformance(data, _T("nested"));
+		TestDataModelFormattingPerformance(data, _T("nested"));
+		TestDataModelExporterPerformance(data, _T("nested"));
 		TestDataModelGetTaskPositionPerformance(data, _T("nested"));
-//		TestDataModelGetTaskPerformance(data, _T("nested"));
+		TestDataModelGetTaskPerformance(data, _T("nested"));
 
 		printf("\n");
 	}
@@ -117,11 +117,11 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
  		TestDataModelCreationPerformance(tasks, data, _T("flat"));
-// 		TestDataModelCalculationPerformance(data, _T("flat"));
-// 		TestDataModelFormattingPerformance(data, _T("flat"));
-// 		TestDataModelExporterPerformance(data, _T("flat"));
+		TestDataModelCalculationPerformance(data, _T("flat"));
+		TestDataModelFormattingPerformance(data, _T("flat"));
+		TestDataModelExporterPerformance(data, _T("flat"));
 		TestDataModelGetTaskPositionPerformance(data, _T("flat"));
-//		TestDataModelGetTaskPerformance(data, _T("flat"));
+		TestDataModelGetTaskPerformance(data, _T("flat"));
 
 		printf("\n");
 	}
@@ -243,10 +243,8 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlD
 
 	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
 	{
-		const TODOSTRUCTURE* pTDS = data.LocateTask(dwTaskID);
-
-		pTDS->GetPosition();
-		formatter.GetTaskPosition(pTDS);
+		data.GetSubtaskPosition(dwTaskID);
+		formatter.GetTaskPosition(dwTaskID);
 	}
 
 	DWORD dwDuration = (GetTickCount() - dwTickStart);
