@@ -543,8 +543,6 @@ protected:
 	void RemoveNonSelectedTasks(HTASKITEM hTask);
 	void CleanUp(HTASKITEM hTask = NULL);
 
-	virtual CXmlItem* NewItem(const CString& sName = _T(""));
-	
 	double GetTaskTime(HTASKITEM hTask, const CString& sTimeItem) const;
 	time_t GetTaskDate(HTASKITEM hTask, const CString& sDateItem, BOOL bIncTime) const;
 	COleDateTime GetTaskDateOle(HTASKITEM hTask, const CString& sDateItem, BOOL bIncTime) const;

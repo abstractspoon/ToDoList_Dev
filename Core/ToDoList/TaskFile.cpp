@@ -2280,11 +2280,6 @@ int CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, CStringArray& aAllocTo) const
 	return GetTaskArray(hTask, TDL_TASKALLOCTO, aAllocTo, FALSE);
 }
 
-CXmlItem* CTaskFile::NewItem(const CString& sName)
-{
-	return new CXmlItem(NULL, sName);
-}
-
 ///////////////////////////////////////////////////////////////////////
 
 HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent)
@@ -2314,7 +2309,7 @@ HTASKITEM CTaskFile::NewTask(const CString& sTitle, HTASKITEM hParent, DWORD dwI
 			return NULL;
 	}
 
-	CXmlItem* pXINew = NewItem(TDL_TASK);
+	CXmlItem* pXINew = pXIParent->AddItem(TDL_TASK, NULL, XIT_ELEMENT);
 
 	if (pXINew)
 	{
@@ -2327,7 +2322,6 @@ HTASKITEM CTaskFile::NewTask(const CString& sTitle, HTASKITEM hParent, DWORD dwI
 		VERIFY(pXINew->SetItemValue(TDL_TASKID, (int)dwID));
 		
 		// Add to map
-		pXIParent->AddItem(pXINew);
 		AddTaskToMap(pXINew, FALSE, FALSE);
 
 		// Set name, parent ID and creation date
