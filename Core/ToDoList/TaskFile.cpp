@@ -91,6 +91,7 @@ CTaskFile::CTaskFile(LPCTSTR szPassword)
 	m_dwNextUniqueID(1), 
 	m_bISODates(FALSE)
 {
+	m_mapHandles.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
 }
 
 CTaskFile::CTaskFile(const CTaskFile& tasks, LPCTSTR szPassword)
@@ -99,6 +100,8 @@ CTaskFile::CTaskFile(const CTaskFile& tasks, LPCTSTR szPassword)
 	m_dwNextUniqueID(1), 
 	m_bISODates(FALSE)
 {
+	m_mapHandles.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
+
 	CopyFrom(tasks);
 }
 
@@ -108,6 +111,8 @@ CTaskFile::CTaskFile(const ITaskList* pTasks, LPCTSTR szPassword)
 	m_dwNextUniqueID(1), 
 	m_bISODates(FALSE)
 {
+	m_mapHandles.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
+
 	CopyFrom(pTasks);
 }
 

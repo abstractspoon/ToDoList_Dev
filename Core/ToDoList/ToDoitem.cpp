@@ -1296,7 +1296,7 @@ BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 
 CToDoCtrlDataItems::CToDoCtrlDataItems() 
 {
-	InitHashTable(1991); // prime number closest to 2000
+	InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
 }
 
 CToDoCtrlDataItems::~CToDoCtrlDataItems() 
@@ -1683,8 +1683,15 @@ void TODOSTRUCTURE::Trace(const CString& sIndent) const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+CToDoCtrlDataStructure::CToDoCtrlDataStructure()
+{
+	m_mapStructure.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
+}
+
 CToDoCtrlDataStructure::CToDoCtrlDataStructure(const CToDoCtrlDataStructure& tds)
 {
+	m_mapStructure.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
+
    *this = tds;
 }
 
