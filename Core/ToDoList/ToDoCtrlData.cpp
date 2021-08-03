@@ -1088,7 +1088,7 @@ BOOL CToDoCtrlData::DeleteTask(TODOSTRUCTURE* pTDSParent, int nPos, BOOL bWithUn
 	
 	// do children first to ensure entire branch is deleted
 	while (pTDS->GetSubTaskCount() > 0)
-		DeleteTask(pTDS, 0, bWithUndo);
+		DeleteTask(pTDS, 0, bWithUndo); // RECURSIVE CALL
 
 	// is this task a reference?
 	DWORD dwTaskID = pTDS->GetTaskID();
@@ -3073,10 +3073,6 @@ BOOL CToDoCtrlData::MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestP
 		return FALSE;
 	}
 
-	// check that a move is actually happening
-	if ((pTDSDestParent == pTDSSrcParent) && (nDestPos == nSrcPos))
-		return FALSE;
-
 	return (MoveTask(pTDSSrcParent, nSrcPos, dwSrcPrevSiblingID, pTDSDestParent, nDestPos) != -1);
 }
 
@@ -3084,18 +3080,20 @@ BOOL CToDoCtrlData::MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestP
 int CToDoCtrlData::MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID,
 							TODOSTRUCTURE* pTDSDestParent, int nDestPos)
 {
-	DWORD dwTaskID = pTDSSrcParent->GetSubTaskID(nSrcPos);
-	DWORD dwSrcParentID = pTDSSrcParent->GetTaskID();
-
 	// check if there's anything to do
-	if ((pTDSSrcParent == pTDSDestParent) && (nSrcPos == nDestPos))
+	if (!m_struct.CanMoveSubTask(pTDSSrcParent, nSrcPos, pTDSDestParent, nDestPos))
 		return -1;
 	
 	// save undo info
+	DWORD dwTaskID = pTDSSrcParent->GetSubTaskID(nSrcPos);
+	DWORD dwSrcParentID = pTDSSrcParent->GetTaskID();
+
 	VERIFY(m_bUndoRedoing || AddUndoElement(TDCUEO_MOVE, dwTaskID, dwSrcParentID, dwSrcPrevSiblingID));
 	
-	int nPos = pTDSSrcParent->MoveSubTask(nSrcPos, pTDSDestParent, nDestPos);
-	
+	int nPos = m_struct.MoveSubTask(pTDSSrcParent, nSrcPos, pTDSDestParent, nDestPos);
+	ASSERT(nPos != -1);
+
+	// sanity check
 	if (nPos != -1)
 	{
 		// mark affected tasks as modified

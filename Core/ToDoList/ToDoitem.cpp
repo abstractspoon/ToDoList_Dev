@@ -1455,7 +1455,7 @@ int TODOSTRUCTURE::GetLeafCount() const
 
 	for (int nSubTask = 0; nSubTask < GetSubTaskCount(); nSubTask++)
 	{
-		nLeafCount += GetSubTask(nSubTask)->GetLeafCount();
+		nLeafCount += GetSubTask(nSubTask)->GetLeafCount(); // RECURSIVE CALL
 	}
 
 	return (nLeafCount == 0) ? 1 : nLeafCount;
@@ -1577,13 +1577,12 @@ BOOL TODOSTRUCTURE::InsertSubTask(TODOSTRUCTURE* pTDS, int nPos)
 	if (nPos < 0 || nPos > GetSubTaskCount())
 		return FALSE;
 	
-	// check task with this ID does not already exist
-	if (GetSubTaskPosition(pTDS->GetTaskID()) != -1)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-	
+	// This is an expensive operation if we have many
+	// siblings so we only ASSERT on it and assume
+	// that CToDoCtrlDataStructure has ensured that
+	// this element is unique
+	ASSERT(GetSubTaskPosition(pTDS->GetTaskID()) == -1);
+
 	if (nPos == GetSubTaskCount())
 		m_aSubTasks.Add(pTDS);
 	else
@@ -1604,7 +1603,10 @@ BOOL TODOSTRUCTURE::AddSubTask(TODOSTRUCTURE* pTDS)
 	if (!pTDS || pTDS->GetTaskID() == 0)
 		return FALSE;
 	
-	// check task with this ID does not already exist
+	// This is an expensive operation if we have many
+	// siblings so we only ASSERT on it and assume
+	// that CToDoCtrlDataStructure has ensured that
+	// this element is unique
 	ASSERT(GetSubTaskPosition(pTDS->GetTaskID()) == -1);
 	
 	m_aSubTasks.Add(pTDS);
@@ -1651,26 +1653,36 @@ void TODOSTRUCTURE::CleanUp()
 	m_aSubTasks.RemoveAll();
 }
 
+BOOL TODOSTRUCTURE::CanMoveSubTask(int nPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const
+{
+	if ((nPos < 0) ||
+		(nPos >= GetSubTaskCount()) ||
+		(pTDSDestParent == NULL) ||
+		(nDestPos < 0) ||
+		(nDestPos > pTDSDestParent->GetSubTaskCount()))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return ((pTDSDestParent != this) || (nPos != nDestPos));
+}
+
+// private helper for CToDoCtrlDataStructure
 int TODOSTRUCTURE::MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos)
 {
-	// check destination is okay
-	ASSERT (pTDSDestParent && nDestPos >= 0 && nDestPos <= pTDSDestParent->GetSubTaskCount());
-	
-	if (!pTDSDestParent || nDestPos < 0 || nDestPos > pTDSDestParent->GetSubTaskCount())
+	if (!CanMoveSubTask(nPos, pTDSDestParent, nDestPos))
 		return -1;
 	
 	TODOSTRUCTURE* pTDS = GetSubTask(nPos);
 	ASSERT(pTDS);
-	
-	if (!pTDS)
-		return -1;
 	
 	m_aSubTasks.RemoveAt(nPos); // remove from 'this' TODOSTRUCTURE
 	
 	// special case: the the source and destination are the same and the source
 	// pos precedes the destination then we need to decrement the destination
 	// to allow for having just deleted the source
-	if (this == pTDSDestParent && nPos < nDestPos)
+	if ((this == pTDSDestParent) && (nPos < nDestPos))
 		nDestPos--;
 	
 	// add to destination
@@ -1826,6 +1838,25 @@ BOOL CToDoCtrlDataStructure::FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, in
 	ASSERT(nPos != -1);
 	
 	return (nPos != -1);
+}
+
+int CToDoCtrlDataStructure::MoveSubTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos)
+{
+	if (!CanMoveSubTask(pTDSSrcParent, nSrcPos, pTDSDestParent, nDestPos))
+		return -1;
+
+	return pTDSSrcParent->MoveSubTask(nSrcPos, pTDSDestParent, nDestPos);
+}
+
+BOOL CToDoCtrlDataStructure::CanMoveSubTask(const TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const
+{
+	if (pTDSSrcParent == NULL)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return pTDSSrcParent->CanMoveSubTask(nSrcPos, pTDSDestParent, nDestPos);
 }
 
 BOOL CToDoCtrlDataStructure::InsertTask(DWORD dwID, TODOSTRUCTURE* pTDSParent, int nPos)

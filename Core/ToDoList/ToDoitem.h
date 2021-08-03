@@ -348,17 +348,14 @@ public:
 	BOOL ParentIsRoot() const { return (GetParentTaskID() == 0); }
 	BOOL IsRoot() const { return (GetTaskID() == 0); }
 	
+	TODOSTRUCTURE* GetSubTask(int nPos) const;
+	BOOL CanMoveSubTask(int nPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const;
+
+	int GetSubTaskPosition(const TODOSTRUCTURE* pTDS) const;
 	int GetSubTaskCount() const { return m_aSubTasks.GetSize(); }
 	BOOL HasSubTasks() const { return GetSubTaskCount() > 0; }
 	int GetLeafCount() const;
 	
-	TODOSTRUCTURE* GetSubTask(int nPos) const;
-	int GetSubTaskPosition(const TODOSTRUCTURE* pTDS) const;
-	
-	void DeleteAll() { CleanUp(); }
-	
-	int MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
-
 #ifdef _DEBUG
 	void Trace(const CString& sIndent) const;
 #endif
@@ -374,6 +371,8 @@ protected:
 	const TODOSTRUCTURE& operator=(const TODOSTRUCTURE& tds); 
 	
 private:
+	int MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
+	void DeleteAll() { CleanUp(); }
 	void CleanUp();
 	BOOL DeleteSubTask(int nPos);
 	BOOL InsertSubTask(TODOSTRUCTURE* pTDS, int nPos);
@@ -399,6 +398,9 @@ public:
 	
 	TODOSTRUCTURE* FindTask(DWORD dwID) const;
 	BOOL FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
+	
+	int MoveSubTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
+	BOOL CanMoveSubTask(const TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const;
 
 	BOOL DeleteTask(DWORD dwID);
 	void DeleteAll();
