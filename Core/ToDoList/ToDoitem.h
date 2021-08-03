@@ -409,9 +409,10 @@ protected:
 	CMap<DWORD, DWORD, TODOSTRUCTURE*, TODOSTRUCTURE*&> m_mapStructure;
 	
 protected:
-	void BuildMap();
-	void AddToMap(const TODOSTRUCTURE* pTDS);
-	void RemoveFromMap(const TODOSTRUCTURE* pTDS);
+	void BuildStructureMap();
+	void AddToStructureMap(TODOSTRUCTURE* pTDS);
+	void RemoveFromStructureMap(TODOSTRUCTURE* pTDS);
+
 
 	const CToDoCtrlDataStructure& operator=(const CToDoCtrlDataStructure& tds); 
 	

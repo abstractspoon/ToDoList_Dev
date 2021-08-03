@@ -1721,7 +1721,7 @@ const CToDoCtrlDataStructure& CToDoCtrlDataStructure::operator=(const CToDoCtrlD
 {
    TODOSTRUCTURE::operator=(tds);
 
-   BuildMap();
+   BuildStructureMap();
 
    return *this;
 }
@@ -1764,7 +1764,7 @@ TODOSTRUCTURE* CToDoCtrlDataStructure::AddTask(DWORD dwID, TODOSTRUCTURE* pTDSPa
 	TODOSTRUCTURE* pTDSChild = pTDSParent->AddSubTask(dwID);
 	
 	if (pTDSChild)
-		AddToMap(pTDSChild);
+		AddToStructureMap(pTDSChild);
 	else
 		ASSERT(0);
 
@@ -1776,14 +1776,16 @@ BOOL CToDoCtrlDataStructure::DeleteTask(DWORD dwID)
 	TODOSTRUCTURE* pTDSParent = NULL;
 	int nPos = -1;
 
-	if (FindTask(dwID, pTDSParent, nPos))
+	if (!FindTask(dwID, pTDSParent, nPos))
 	{
-		return (m_mapStructure.RemoveKey(dwID) &&
-				pTDSParent->DeleteSubTask(nPos));
+		ASSERT(0);
+		return FALSE;
 	}
 
-	// else
-	return FALSE;
+	RemoveFromStructureMap(pTDSParent->GetSubTask(nPos));
+	VERIFY(pTDSParent->DeleteSubTask(nPos));
+
+	return TRUE;
 }
 
 void CToDoCtrlDataStructure::DeleteAll()
@@ -1843,7 +1845,7 @@ BOOL CToDoCtrlDataStructure::InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDS
 {
 	if (pTDSParent->InsertSubTask(pTDS, nPos))
 	{
-		AddToMap(pTDS);
+		AddToStructureMap(pTDS);
 		return TRUE;
 	}
 	
@@ -1851,25 +1853,25 @@ BOOL CToDoCtrlDataStructure::InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDS
 	return FALSE;
 }
 
-void CToDoCtrlDataStructure::BuildMap()
+void CToDoCtrlDataStructure::BuildStructureMap()
 {
 	for (int nSubTask = 0; nSubTask < GetSubTaskCount(); nSubTask++)
 	{
 		TODOSTRUCTURE* pTDSChild = GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 
-      AddToMap(pTDSChild);
+		AddToStructureMap(pTDSChild);
 	}
 }
 
-void CToDoCtrlDataStructure::AddToMap(const TODOSTRUCTURE* pTDS)
+void CToDoCtrlDataStructure::AddToStructureMap(TODOSTRUCTURE* pTDS)
 {
 	ASSERT(!pTDS->IsRoot());
 	
 	if (pTDS->IsRoot())
 		return;
 	
-	m_mapStructure[pTDS->GetTaskID()] = const_cast<TODOSTRUCTURE*>(pTDS);
+	m_mapStructure[pTDS->GetTaskID()] = pTDS;
 	
 	// children
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
@@ -1877,11 +1879,11 @@ void CToDoCtrlDataStructure::AddToMap(const TODOSTRUCTURE* pTDS)
 		TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 		
-		AddToMap(pTDSChild);
+		AddToStructureMap(pTDSChild); // RESURSIVE CALL
 	}
 }
 
-void CToDoCtrlDataStructure::RemoveFromMap(const TODOSTRUCTURE* pTDS)
+void CToDoCtrlDataStructure::RemoveFromStructureMap(TODOSTRUCTURE* pTDS)
 {
 	ASSERT(!pTDS->IsRoot());
 	
@@ -1896,7 +1898,8 @@ void CToDoCtrlDataStructure::RemoveFromMap(const TODOSTRUCTURE* pTDS)
 		TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 		
-		RemoveFromMap(pTDSChild);
+		RemoveFromStructureMap(pTDSChild); // RESURSIVE CALL
+
 	}
 }
 
