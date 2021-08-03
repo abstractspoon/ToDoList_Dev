@@ -1550,7 +1550,7 @@ BOOL TODOSTRUCTURE::InsertSubTask(TODOSTRUCTURE* pTDS, int nPos)
 	// siblings so we only ASSERT on it and assume
 	// that CToDoCtrlDataStructure has ensured that
 	// this element is unique
-	ASSERT(GetSubTaskPosition(pTDS->GetTaskID()) == -1);
+	ASSERT(GetSubtaskPosition(pTDS->GetTaskID()) == -1);
 
 	if (nPos == GetSubTaskCount())
 		m_aSubTasks.Add(pTDS);
@@ -1730,16 +1730,18 @@ BOOL CToDoCtrlDataStructure::DeleteTask(DWORD dwID)
 	TODOSTRUCTURE* pTDSParent = NULL;
 	int nPos = -1;
 
-	if (FindTask(dwID, pTDSParent, nPos))
+	if (!FindTask(dwID, pTDSParent, nPos))
 	{
-		ClearPositionMap();
-
-		return (m_mapStructure.RemoveKey(dwID) &&
-				pTDSParent->DeleteSubTask(nPos));
+		ASSERT(0);
+		return FALSE;
 	}
 
-	// else
-	return FALSE;
+	ClearPositionMap();
+
+	RemoveFromStructureMap(pTDSParent->GetSubTask(nPos));
+	VERIFY(pTDSParent->DeleteSubTask(nPos));
+
+	return TRUE;
 }
 
 void CToDoCtrlDataStructure::DeleteAll()
@@ -1800,6 +1802,8 @@ int CToDoCtrlDataStructure::MoveSubTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPo
 	if (!CanMoveSubTask(pTDSSrcParent, nSrcPos, pTDSDestParent, nDestPos))
 		return -1;
 
+	ClearPositionMap();
+
 	return pTDSSrcParent->MoveSubTask(nSrcPos, pTDSDestParent, nDestPos);
 }
 
@@ -1827,6 +1831,8 @@ TODOSTRUCTURE* CToDoCtrlDataStructure::InsertTask(DWORD dwID, TODOSTRUCTURE* pTD
 		return FALSE;
 	}
 
+	ClearPositionMap();
+
 	TODOSTRUCTURE* pTDSChild = pTDSParent->InsertSubTask(dwID, nPos);
 
 	if (!pTDSChild)
@@ -1835,7 +1841,6 @@ TODOSTRUCTURE* CToDoCtrlDataStructure::InsertTask(DWORD dwID, TODOSTRUCTURE* pTD
 		return FALSE;
 	}
 
-	ClearPositionMap();
 	AddToStructureMap(pTDSChild);
 
 	return pTDSChild;
@@ -1843,6 +1848,8 @@ TODOSTRUCTURE* CToDoCtrlDataStructure::InsertTask(DWORD dwID, TODOSTRUCTURE* pTD
 
 void CToDoCtrlDataStructure::BuildStructureMap()
 {
+	ClearPositionMap();
+
 	for (int nSubTask = 0; nSubTask < GetSubTaskCount(); nSubTask++)
 	{
 		TODOSTRUCTURE* pTDSChild = GetSubTask(nSubTask);
@@ -1896,21 +1903,17 @@ void CToDoCtrlDataStructure::BuildPositionMap() const
 	if (m_mapSubtaskPositions.GetCount())
 		return;
 
-	AddToPositionMap(this, -1);
+	AddSubtasksToPositionMap(this);
 }
 
-void CToDoCtrlDataStructure::AddToPositionMap(const TODOSTRUCTURE* pTDS, int nPos) const
+void CToDoCtrlDataStructure::AddSubtasksToPositionMap(const TODOSTRUCTURE* pTDS) const
 {
-	if (!pTDS->IsRoot())
-	{
-		ASSERT(nPos == -1);
-		m_mapSubtaskPositions[pTDS->GetTaskID()] = nPos;
-	}
-
-	// children
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
 	{
-		AddToPositionMap(pTDS->GetSubTask(nSubTask), nSubTask); // RESURSIVE CALL
+		const TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
+		m_mapSubtaskPositions[pTDSChild->GetTaskID()] = nSubTask;
+
+		AddSubtasksToPositionMap(pTDSChild); // RESURSIVE CALL
 	}
 }
 

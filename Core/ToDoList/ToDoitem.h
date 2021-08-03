@@ -418,7 +418,7 @@ protected:
 
 	// These must be callable from const Getters
 	void BuildPositionMap() const;
-	void AddToPositionMap(const TODOSTRUCTURE* pTDS, int nPos) const;
+	void AddSubtasksToPositionMap(const TODOSTRUCTURE* pTDS) const;
 	void ClearPositionMap() { m_mapSubtaskPositions.RemoveAll(); }
 
 	const CToDoCtrlDataStructure& operator=(const CToDoCtrlDataStructure& tds); 
