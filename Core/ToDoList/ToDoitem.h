@@ -306,8 +306,11 @@ public:
 	int GetCount() const;
 	TODOITEM* GetTask(DWORD dwTaskID) const;
 	BOOL HasTask(DWORD dwTaskID) const;
-	POSITION GetStartPosition() const;
-	void GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const;
+
+	POSITION GetStart() const;
+	void GetNext(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const;
+	DWORD GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const;
+	DWORD GetNextTaskID(POSITION& pos) const;
 
 	void DeleteAll() { CleanUp(); }
 	BOOL DeleteTask(DWORD dwTaskID);

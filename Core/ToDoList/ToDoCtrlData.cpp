@@ -284,28 +284,6 @@ BOOL CToDoCtrlData::TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImme
 			(pTDSParent->GetNextSubTaskID(nPos) == dwSiblingID));
 }
 
-POSITION CToDoCtrlData::GetFirstTaskPosition() const
-{
-	return m_items.GetStartPosition();
-}
-
-DWORD CToDoCtrlData::GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const
-{
-	DWORD dwTaskID = 0;
-	TODOITEM* pTemp = NULL;
-
-	m_items.GetNextAssoc(pos, dwTaskID, pTemp);
-
-	pTDI = pTemp;
-	return dwTaskID;
-}
-
-DWORD CToDoCtrlData::GetNextTaskID(POSITION& pos) const
-{
-	const TODOITEM* pUnused;
-	return GetNextTask(pos, pUnused);
-}
-
 // external version returning const
 const TODOITEM* CToDoCtrlData::GetTask(DWORD dwTaskID) const
 {
@@ -686,11 +664,11 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 	// Search the entire tasklist for tasks having 'dwTaskID'
 	// in their list of local dependencies
 	const TODOITEM* pTDI = NULL;
-	POSITION pos = GetFirstTaskPosition();
+	POSITION pos = m_items.GetStart();
 		
 	while (pos)
 	{
-		DWORD dwDependsID = GetNextTask(pos, pTDI);
+		DWORD dwDependsID = m_items.GetNextTask(pos, pTDI);
 		ASSERT (dwDependsID && pTDI);
 
 		if (pTDI && (dwDependsID != dwTaskID) && pTDI->HasLocalDependency(dwTaskID))
@@ -709,11 +687,11 @@ int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependen
 	{
 		// Find all tasks dependent on 'dwTaskID' within the same task list
 		const TODOITEM* pTDI = NULL;
-		POSITION pos = GetFirstTaskPosition();
+		POSITION pos = m_items.GetStart();
 		
 		while (pos)
 		{
-			DWORD dwDependentID = GetNextTask(pos, pTDI);
+			DWORD dwDependentID = m_items.GetNextTask(pos, pTDI);
 			ASSERT (dwDependentID && pTDI);
 			
 			if (pTDI && (dwDependentID != dwTaskID))
@@ -4058,11 +4036,11 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(const CString& sAttribID, const
 
 	DWORD dwTaskID = 0;
 	TODOITEM* pTDI = NULL;
-	POSITION pos = m_items.GetStartPosition();
+	POSITION pos = m_items.GetStart();
 	
 	while (pos && (nRes != SET_FAILED))
 	{
-		m_items.GetNextAssoc(pos, dwTaskID, pTDI);
+		m_items.GetNext(pos, dwTaskID, pTDI);
 
 		if (pTDI->GetCustomAttributeValue(sAttribID, data))
 		{
@@ -4090,11 +4068,11 @@ TDC_SET CToDoCtrlData::RenameTasksAttributeValue(TDC_ATTRIBUTE nAttrib, const CS
 	TDC_SET nRes = SET_NOCHANGE;
 	DWORD dwTaskID = 0;
 	TODOITEM* pTDI = NULL;
-	POSITION pos = m_items.GetStartPosition();
+	POSITION pos = m_items.GetStart();
 	
 	while (pos && (nRes != SET_FAILED))
 	{
-		m_items.GetNextAssoc(pos, dwTaskID, pTDI);
+		m_items.GetNext(pos, dwTaskID, pTDI);
 
 		if (TaskHasAttributeValue(pTDI, nAttrib, sFrom, bCaseSensitive, bWholeWord))
 		{
