@@ -32,31 +32,31 @@ TESTRESULT CXmlFileTest::Run()
 {
 	ClearTotals();
 
-	TestAddSiblingPerformance();
+	TestAddPerformance();
 
 	return GetTotals();
 }
 
-void CXmlFileTest::TestAddSiblingPerformance()
+void CXmlFileTest::TestAddPerformance()
 {
 	if (!m_utils.HasCommandlineFlag('p'))
 	{
-		_tprintf(_T("Add '-p' to run CXmlFileTest::AddSiblingPerformance\n"));
+		_tprintf(_T("Add '-p' to run CXmlFileTest::TestAddPerformance\n"));
 		return;
 	}
 
-	BeginTest(_T("CXmlFileTest::TestAddSiblingPerformance"));
+	BeginTest(_T("CXmlFileTest::TestAddPerformance"));
 	
 	for (int nLevel = 2, nNumTasks = 10; nLevel <= 5; nLevel++)
 	{
 		nNumTasks *= 10;
-		TestAddSiblingPerformance(nNumTasks);
+		TestAddItemPerformance(nNumTasks);
 	}
 
 	EndTest();
 }
 
-void CXmlFileTest::TestAddSiblingPerformance(int nNumItems)
+void CXmlFileTest::TestAddItemPerformance(int nNumItems)
 {
 	DWORD dwTickStart = GetTickCount();
 	CXmlFile xml;
@@ -67,6 +67,6 @@ void CXmlFileTest::TestAddSiblingPerformance(int nNumItems)
 	}
 
 	DWORD dwDuration = (GetTickCount() - dwTickStart);
-	_tprintf(_T("Test took %ld ms to add %d siblings\n"), dwDuration, nNumItems);
+	_tprintf(_T("Test took %ld ms to add %d items\n"), dwDuration, nNumItems);
 }
 

@@ -8,6 +8,14 @@
 
 #include "..\todolist\todoctrldata.h"
 #include "..\todolist\todoctrldatautils.h"
+#include "..\todolist\tdcimagelist.h"
+#include "..\todolist\todoctrlfind.h"
+#include "..\todolist\tdcstruct.h"
+#include "..\todolist\tdltasktreectrl.h"
+
+#include "..\shared\treectrlhelper.h"
+
+#include "..\interfaces\contentmgr.h"
 
 #include <math.h>
 
@@ -16,6 +24,10 @@
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+//////////////////////////////////////////////////////////////////////
+
+int NUM_TESTLEVELS = CTaskFileTest::NUM_TESTLEVELS;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -73,9 +85,14 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
-		TestDataModelCreationPerformance(tasks, data, _T("nested"));
+ 		TestDataModelCreationPerformance(tasks, data, _T("nested"));
 		TestDataModelCalculationPerformance(data, _T("nested"));
 		TestDataModelFormattingPerformance(data, _T("nested"));
+		TestDataModelExporterPerformance(data, _T("nested"));
+		TestDataModelGetTaskPositionPerformance(data, _T("nested"));
+		TestDataModelGetTaskPerformance(data, _T("nested"));
+
+		printf("\n");
 	}
 
 	EndTest();
@@ -89,9 +106,6 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 		return;
 	}
 
-	// Initialise styles and custom attributes
-	// TODO
-
 	BeginTest(_T("CToDoCtrlDataTest::FlatListDataModelPerformance"));
 
 	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= NUM_TESTLEVELS; nNumLevels++)
@@ -104,9 +118,14 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
-		TestDataModelCreationPerformance(tasks, data, _T("flat"));
+ 		TestDataModelCreationPerformance(tasks, data, _T("flat"));
 		TestDataModelCalculationPerformance(data, _T("flat"));
 		TestDataModelFormattingPerformance(data, _T("flat"));
+		TestDataModelExporterPerformance(data, _T("flat"));
+		TestDataModelGetTaskPositionPerformance(data, _T("flat"));
+		TestDataModelGetTaskPerformance(data, _T("flat"));
+
+		printf("\n");
 	}
 
 	EndTest();
@@ -121,7 +140,11 @@ void CToDoCtrlDataTest::TestDataModelCreationPerformance(const CTaskFile& tasks,
 	data.BuildDataModel(tasks);
 
 	DWORD dwDuration = (GetTickCount() - dwTickStart);
-	_tprintf(_T("Test took %ld ms to build data model with %d %s tasks\n"), dwDuration, data.GetTaskCount(), szTaskType);
+	_tprintf(_T("Test took %ld ms to build data model with %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
 }
 
 void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
@@ -159,7 +182,11 @@ void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData&
 	}
 
 	DWORD dwDuration = (GetTickCount() - dwTickStart);
-	_tprintf(_T("Test took %ld ms to perform calculations on %d %s tasks\n"), dwDuration, data.GetTaskCount(), szTaskType);
+	_tprintf(_T("Test took %ld ms to perform calculations on %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
 }
 
 void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
@@ -200,7 +227,90 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 	}
 
 	DWORD dwDuration = (GetTickCount() - dwTickStart);
-	_tprintf(_T("Test took %ld ms to format attributes for %d %s tasks\n"), dwDuration, data.GetTaskCount(), szTaskType);
+	_tprintf(_T("Test took %ld ms to format attributes for %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
 }
 
+void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
+{
+	ASSERT(m_utils.HasCommandlineFlag('p'));
 
+	DWORD dwTickStart = GetTickCount();
+
+	CTDCTaskFormatter formatter(data);
+	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+
+	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	{
+		formatter.GetTaskPosition(dwTaskID);
+	}
+
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+	_tprintf(_T("Test took %ld ms to get task position for %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
+}
+
+void CToDoCtrlDataTest::TestDataModelExporterPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
+{
+	ASSERT(m_utils.HasCommandlineFlag('p'));
+
+	// Mocks ----------------------------------------
+	CTreeCtrl tree;
+	const CTreeCtrlHelper tch(tree);
+
+	const CTDCImageList ilIcons;
+	const TDCAUTOLISTDATA tld;
+	const CTDCColumnIDMap mapVisibleCols;
+
+	const CTDLTaskTreeCtrl colors(ilIcons,
+								  data,
+								  m_aStyles,
+								  tld,
+								  mapVisibleCols,
+								  m_aCustomAttribDefs);
+	CContentMgr comments;
+	// ----------------------------------------------
+	
+	DWORD dwTickStart = GetTickCount();
+	CTaskFile tasks;
+	
+	CTDCTaskExporter exporter(data, colors, comments);
+	exporter.ExportAllTasks(tasks);
+	
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+	_tprintf(_T("Test took %ld ms to export %d %s tasks (%.1f ms/100)\n"), 
+			 dwDuration, 
+			 data.GetTaskCount(), 
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
+}
+
+void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType)
+{
+	ASSERT(m_utils.HasCommandlineFlag('p'));
+
+	DWORD dwTickStart = GetTickCount();
+
+	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+
+	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	{
+		const TODOITEM* pTDI = NULL;
+		const TODOSTRUCTURE* pTDS = NULL;
+
+		data.GetTask(dwTaskID, pTDI, pTDS);
+	}
+
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+	_tprintf(_T("Test took %ld ms to locate %d %s tasks (%.1f ms/100)\n"),
+			 dwDuration,
+			 data.GetTaskCount(),
+			 szTaskType,
+			 (dwDuration * 100.0) / data.GetTaskCount());
+}

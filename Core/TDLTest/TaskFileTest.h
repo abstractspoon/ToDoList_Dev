@@ -15,11 +15,6 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const int NUM_TESTLEVELS = 4;
-const int MAX_TESTLEVELS = 5;
-
-//////////////////////////////////////////////////////////////////////
-
 class CTaskFileTest : public CTDLTestBase  
 {
 public:
@@ -34,8 +29,12 @@ public:
 	void TestHierarchyConstructionPerformance();
 	void TestFlatListConstructionPerformance();
 
+	static int NUM_TESTLEVELS;
+	static int MAX_TESTLEVELS;
+
 protected:
-	static void PopulateTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
+	static void PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
+	static void Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTask, int nLevel, int nNumLevels);
 
 };
 
