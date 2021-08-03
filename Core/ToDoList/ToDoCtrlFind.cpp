@@ -228,7 +228,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, BOOL bVisibleOnly) con
 	switch (nColID)
 	{
 	case TDCC_POSITION:
-		return GetLongestPosition(NULL, NULL, NULL, bVisibleOnly);
+		return GetLongestPosition(NULL, NULL, bVisibleOnly);
 
 	case TDCC_RECURRENCE:
 		return GetLongestValue(nColID, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
@@ -411,31 +411,17 @@ CString CToDoCtrlFind::GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI
 	return sLongest;
 }
 
-CString CToDoCtrlFind::GetLongestPosition(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestPosition(HTREEITEM hti, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
 {
-	if (!CheckGetTask(hti, pTDI, pTDS))
-		return EMPTY_STR;
-
-	int nPos = (pTDS ? m_data.GetSubtaskPosition(pTDS->GetTaskID()) : -1);
-	CString sPos = (pTDS ? Misc::Format(nPos + 1) : EMPTY_STR);
-
-	CString sLongestChild;
+	DWORD dwTaskID = GetTaskID(hti);
+	CString sLongest = m_formatter.GetTaskPosition(dwTaskID);
 
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
 		// Find the longest child
-		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongestChild, GetLongestPosition(htiChild, NULL, NULL, bVisibleOnly));
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestPosition(htiChild, NULL, bVisibleOnly));
 	}
 
-	if (sPos.IsEmpty())
-		return sLongestChild;
-
-	if (sLongestChild.IsEmpty())
-		return sPos;
-	
-	CString sLongest;
-	sLongest.Format(_T("%s.%s"), sPos, sLongestChild);
-	
 	return sLongest;
 }
 

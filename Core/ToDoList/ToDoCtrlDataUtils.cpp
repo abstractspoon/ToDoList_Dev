@@ -550,7 +550,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 
 		case TDCA_POSITION:
 			// Position is 1-based in the UI, but 0-based internally
-			bMatch = ValueMatches((m_data.GetSubtaskPosition(pTDS) + 1), rule, resTask);
+			bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, resTask);
 
 			if (bMatch)
 			{
@@ -1301,7 +1301,7 @@ int CTDCTaskComparer::CompareTasks(DWORD dwTask1ID, DWORD dwTask2ID, TDC_COLUMN 
 		case TDCC_POSITION:
 			if (pTDS1->HasSameParent(pTDS2))
 			{
-				nCompare = (m_data.GetSubtaskPosition(pTDS1) - m_data.GetSubtaskPosition(pTDS2));
+				nCompare = (m_data.GetTaskPosition(pTDS1) - m_data.GetTaskPosition(pTDS2));
 			}
 			else
 			{
@@ -3243,30 +3243,10 @@ CString CTDCTaskFormatter::GetTaskSubtaskCompletion(const TODOITEM* pTDI, const 
 
 CString CTDCTaskFormatter::GetTaskPosition(const TODOSTRUCTURE* pTDS) const
 {
-	ASSERT (pTDS && pTDS->GetParentTask());
+	CArray<int, int> aPositions;
+	VERIFY(m_data.GetTaskPositions(pTDS->GetTaskID(), aPositions, FALSE)); // one-based
 
-	if (!pTDS)
-		return EMPTY_STR;
-
-	const TODOSTRUCTURE* pTDSParent = pTDS->GetParentTask();
-
-	if (!pTDSParent)
-		return EMPTY_STR;
-
-	CString sPosition;
-	int nPos = m_data.GetSubtaskPosition(pTDS);
-
-	if (pTDSParent->IsRoot())
-	{
-		sPosition = Misc::Format(nPos + 1); // one-based
-	}
-	else
-	{
-		CString sParentPos = GetTaskPosition(pTDSParent); // RECURSIVE CALL
-		sPosition.Format(_T("%s.%d"), sParentPos, (nPos + 1));
-	}
-
-	return sPosition;
+	return Misc::FormatArrayT(aPositions, _T("%d"), '.');
 }
 
 CString CTDCTaskFormatter::GetTaskPath(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
@@ -4142,7 +4122,7 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	// 'true' tasks
 	tasks.SetTaskAttributes(hTask, *pTDI);
 
-	tasks.SetTaskPosition(hTask, m_data.GetSubtaskPosition(pTDS));
+	tasks.SetTaskPosition(hTask, m_data.GetTaskPosition(pTDS));
 	tasks.SetTaskPosition(hTask, m_formatter.GetTaskPosition(pTDS));
 
 	// dynamically calculated attributes
@@ -4313,7 +4293,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 	{
 		if (filter.WantAttribute(TDCA_POSITION))
 		{
-			tasks.SetTaskPosition(hTask, m_data.GetSubtaskPosition(pTDS));
+			tasks.SetTaskPosition(hTask, m_data.GetTaskPosition(pTDS));
 			tasks.SetTaskPosition(hTask, m_formatter.GetTaskPosition(pTDS));
 		}
 

@@ -306,8 +306,11 @@ public:
 	int GetCount() const;
 	TODOITEM* GetTask(DWORD dwTaskID) const;
 	BOOL HasTask(DWORD dwTaskID) const;
-	POSITION GetStartPosition() const;
-	void GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const;
+
+	POSITION GetStart() const;
+	void GetNext(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const;
+	DWORD GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const;
+	DWORD GetNextTaskID(POSITION& pos) const;
 
 	void DeleteAll() { CleanUp(); }
 	BOOL DeleteTask(DWORD dwTaskID);
@@ -339,6 +342,7 @@ public:
 		
 	TODOSTRUCTURE* GetParentTask() const;
 	DWORD GetParentTaskID() const;
+	int GetParentTaskIDs(CDWordArray& aParentIDs) const;
 	BOOL HasSameParent(const TODOSTRUCTURE* pTDS) const;
 	
 	BOOL ParentIsRoot() const { return (GetParentTaskID() == 0); }
@@ -374,7 +378,7 @@ private:
 	// ------------------------------------------------------
 
 #ifdef _DEBUG
-	int GetSubtaskPosition(DWORD dwID) const;
+	int GetTaskPosition(DWORD dwID) const;
 #endif
 };
 
@@ -397,7 +401,9 @@ public:
 	TODOSTRUCTURE* FindTask(DWORD dwID) const;
 	BOOL FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 
-	int GetSubtaskPosition(DWORD dwTaskID) const;
+	int GetTaskPosition(DWORD dwTaskID, BOOL bZeroBased = TRUE) const;
+	int GetTaskPositions(DWORD dwTaskID, CArray<int, int>& aPositions, BOOL bZeroBased = TRUE) const;
+
 	int MoveSubTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
 	BOOL CanMoveSubTask(const TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const;
 

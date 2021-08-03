@@ -75,10 +75,6 @@ public:
 	BOOL GetTask(DWORD dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;
 	BOOL GetTrueTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;
 
-	POSITION GetFirstTaskPosition() const;
-	DWORD GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const;
-	DWORD GetNextTaskID(POSITION& pos) const;
-
 	BOOL CanMoveTask(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
@@ -117,7 +113,7 @@ public:
 	CString GetTaskFileLink(DWORD dwTaskID, int nFileLink) const;
 	CString GetTaskExtID(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
-	int GetSubtaskPosition(DWORD dwTaskID) const;
+	int GetTaskPositions(DWORD dwTaskID, CArray<int, int>& aPositions, BOOL bZeroBased = TRUE) const;
 
 	int GetTaskPriority(DWORD dwTaskID) const;
 	int GetTaskRisk(DWORD dwTaskID) const;
@@ -334,7 +330,7 @@ protected:
 	BOOL IsValidMoveDestination(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const;
 	BOOL SetTaskModified(DWORD dwTaskID);
-	int GetSubtaskPosition(const TODOSTRUCTURE* pTDS) const { return GetSubtaskPosition(pTDS->GetTaskID()); }
+	int GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased = TRUE) const;
 
 	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
 	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);

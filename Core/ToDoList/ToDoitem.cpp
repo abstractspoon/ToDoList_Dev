@@ -1313,11 +1313,11 @@ void CToDoCtrlDataItems::CleanUp()
 {
 	DWORD dwID = 0;
 	TODOITEM* pTDI = NULL;
-	POSITION pos = GetStartPosition();
+	POSITION pos = GetStart();
 
 	while (pos)
 	{
-		GetNextAssoc(pos, dwID, pTDI);
+		GetNext(pos, dwID, pTDI);
 		delete pTDI;
 	}
 
@@ -1378,14 +1378,31 @@ BOOL CToDoCtrlDataItems::HasTask(DWORD dwTaskID) const
 	return (GetTask(dwTaskID) != NULL);
 }
 
-POSITION CToDoCtrlDataItems::GetStartPosition() const
+POSITION CToDoCtrlDataItems::GetStart() const
 {
 	return CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&>::GetStartPosition();
 }
 
-void CToDoCtrlDataItems::GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const
+void CToDoCtrlDataItems::GetNext(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const
 {
 	CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&>::GetNextAssoc(rNextPosition, dwTaskID, pTDI);
+}
+
+DWORD CToDoCtrlDataItems::GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const
+{
+	DWORD dwTaskID = 0;
+	TODOITEM* pTemp = NULL;
+
+	GetNext(pos, dwTaskID, pTemp);
+
+	pTDI = pTemp;
+	return dwTaskID;
+}
+
+DWORD CToDoCtrlDataItems::GetNextTaskID(POSITION& pos) const
+{
+	const TODOITEM* pUnused;
+	return GetNextTask(pos, pUnused);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -1479,7 +1496,7 @@ DWORD TODOSTRUCTURE::GetNextSubTaskID(int nPos) const
 }
 
 #ifdef _DEBUG
-int TODOSTRUCTURE::GetSubtaskPosition(DWORD dwID) const
+int TODOSTRUCTURE::GetTaskPosition(DWORD dwID) const
 {
 	ASSERT(dwID);
 	
@@ -1520,6 +1537,21 @@ DWORD TODOSTRUCTURE::GetParentTaskID() const
 	return m_pTDSParent->GetTaskID();
 }
 
+int TODOSTRUCTURE::GetParentTaskIDs(CDWordArray& aParentIDs) const
+{
+	aParentIDs.RemoveAll();
+	const TODOSTRUCTURE* pTDSParent = GetParentTask();
+
+	while (pTDSParent && !pTDSParent->IsRoot())
+	{
+		// Insert such that uppermost parent comes first
+		aParentIDs.InsertAt(0, pTDSParent->GetTaskID());
+		pTDSParent = pTDSParent->GetParentTask();
+	}
+
+	return aParentIDs.GetSize();
+}
+
 TODOSTRUCTURE* TODOSTRUCTURE::GetParentTask() const
 {
 	ASSERT(this != m_pTDSParent);
@@ -1550,7 +1582,7 @@ BOOL TODOSTRUCTURE::InsertSubTask(TODOSTRUCTURE* pTDS, int nPos)
 	// siblings so we only ASSERT on it and assume
 	// that CToDoCtrlDataStructure has ensured that
 	// this element is unique
-	ASSERT(GetSubtaskPosition(pTDS->GetTaskID()) == -1);
+	ASSERT(GetTaskPosition(pTDS->GetTaskID()) == -1);
 
 	if (nPos == GetSubTaskCount())
 		m_aSubTasks.Add(pTDS);
@@ -1780,21 +1812,50 @@ BOOL CToDoCtrlDataStructure::FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, in
 	if (!pTDSParent)
 		return FALSE;
 	
-	nPos = GetSubtaskPosition(dwID);
+	nPos = GetTaskPosition(dwID);
 	ASSERT(nPos != -1);
 	
 	return (nPos != -1);
 }
 
-int CToDoCtrlDataStructure::GetSubtaskPosition(DWORD dwTaskID) const
+int CToDoCtrlDataStructure::GetTaskPosition(DWORD dwTaskID, BOOL bZeroBased) const
 {
 	BuildPositionMap();
 
 	int nPos = -1;
 	m_mapSubtaskPositions.Lookup(dwTaskID, nPos);
-	ASSERT(nPos != -1);
+	
+	if (nPos != -1)
+	{
+		if (!bZeroBased)
+			nPos++;
+	}
+	else
+	{
+		ASSERT(0);
+	}
 
 	return nPos;
+}
+
+int CToDoCtrlDataStructure::GetTaskPositions(DWORD dwTaskID, CArray<int, int>& aPositions, BOOL bZeroBased) const
+{
+	aPositions.RemoveAll();
+
+	const TODOSTRUCTURE* pTDS = FindTask(dwTaskID);
+
+	if (pTDS)
+	{
+		CDWordArray aPosTaskIDs;
+		pTDS->GetParentTaskIDs(aPosTaskIDs);
+		
+		int nNumIDs = (aPosTaskIDs.Add(dwTaskID) + 1);
+
+		for (int nID = 0; nID < nNumIDs; nID++)
+			aPositions.Add(GetTaskPosition(aPosTaskIDs[nID], bZeroBased));
+	}
+
+	return aPositions.GetSize();
 }
 
 int CToDoCtrlDataStructure::MoveSubTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos)
