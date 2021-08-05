@@ -7,7 +7,6 @@
 // tdlcommentsctrl.h : header file
 //
 
-#include "..\shared\icon.h"
 #include "..\shared\urlricheditctrl.h"
 
 #include "..\Interfaces\richeditspellcheck.h"

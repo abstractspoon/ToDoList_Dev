@@ -20,6 +20,7 @@
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\clipboard.h"
 #include "..\shared\localizer.h"
+#include "..\shared\holdredraw.h"
 
 #include "..\3rdparty\compression.h"
 #include "..\3rdparty\zlib\zlib.h"
@@ -607,24 +608,42 @@ bool CRTFContentControl::ProcessMessage(MSG* pMsg)
 				switch (pMsg->wParam)
 				{
 				case VK_TAB:
-				{
-					CHARRANGE cr;
-					m_rtf.GetSel(cr);
+					{
+						CHARRANGE cr;
+						m_rtf.GetSel(cr);
 
-					// if nothing is selected then just insert tabs
-					if (cr.cpMin == cr.cpMax)
-					{
-						m_rtf.ReplaceSel(_T("\t"), TRUE);
+						BOOL bHasSel = (cr.cpMax > cr.cpMin), bOutdent = bShift;
+
+						if (bHasSel)
+						{
+							// Block shifting
+							if (bOutdent)
+								DoOutdent();
+							else
+								DoIndent();
+						}
+						else // Remove/insert leading tab
+						{
+							if (bOutdent) // Remove
+							{
+								cr.cpMin--;
+
+								if (m_rtf.GetTextRange(cr) == _T("\t"))
+								{
+									// prevent char selection being seen
+									CHoldRedraw hr(m_rtf);
+
+									m_rtf.SetSel(cr);
+									m_rtf.ReplaceSel(_T(""), TRUE);
+								}
+							}
+							else // Insert
+							{
+								m_rtf.ReplaceSel(_T("\t"), TRUE);
+							}
+						}
 					}
-					else
-					{
-						if (!bShift)
-							DoIndent();
-						else
-							DoOutdent();
-					}
-				}
-				return true;
+					return true;
 
 				case '2':
 					if (bShift) // '@'

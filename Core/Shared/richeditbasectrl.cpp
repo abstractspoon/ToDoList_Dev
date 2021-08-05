@@ -324,7 +324,7 @@ BOOL CRichEditBaseCtrl::SetTextEx(const CString& sText, DWORD dwFlags, UINT nCod
 
 CString CRichEditBaseCtrl::GetSelText() const
 {
-	CHARRANGE cr;
+	CHARRANGE cr = { 0 };
 	GetSel(cr);
 
 	return GetTextRange(cr);
@@ -332,7 +332,7 @@ CString CRichEditBaseCtrl::GetSelText() const
 
 int CRichEditBaseCtrl::GetSelStart() const
 {
-	CHARRANGE cr;
+	CHARRANGE cr = { 0 };
 	GetSel(cr);
 	
 	return cr.cpMin;
@@ -340,7 +340,7 @@ int CRichEditBaseCtrl::GetSelStart() const
 
 int CRichEditBaseCtrl::GetSelEnd() const
 {
-	CHARRANGE cr;
+	CHARRANGE cr = { 0 };
 	GetSel(cr);
 	
 	return cr.cpMax;
@@ -348,7 +348,7 @@ int CRichEditBaseCtrl::GetSelEnd() const
 
 void CRichEditBaseCtrl::CollapseSelection(BOOL bStart)
 {
-	CHARRANGE cr;
+	CHARRANGE cr = { 0 };
 	GetSel(cr);
 
 	if (bStart)
@@ -359,9 +359,8 @@ void CRichEditBaseCtrl::CollapseSelection(BOOL bStart)
 	SetSel(cr);
 }
 
-void CRichEditBaseCtrl::SelectCharacterAtCaret(BOOL bForwards)
+void CRichEditBaseCtrl::GetCharacterAtCaret(CHARRANGE& cr, BOOL bForwards) const
 {
-	CHARRANGE cr;
 	GetSel(cr);
 
 	if (bForwards)
@@ -374,8 +373,22 @@ void CRichEditBaseCtrl::SelectCharacterAtCaret(BOOL bForwards)
 		cr.cpMax = cr.cpMin;
 		cr.cpMin--;
 	}
+}
+
+void CRichEditBaseCtrl::SelectCharacterAtCaret(BOOL bForwards)
+{
+	CHARRANGE cr = { 0 };
+	GetCharacterAtCaret(cr, bForwards);
 
 	SetSel(cr);
+}
+
+CString CRichEditBaseCtrl::GetCharacterAtCaret(BOOL bForwards) const
+{
+	CHARRANGE cr = { 0 };
+	GetCharacterAtCaret(cr, bForwards);
+
+	return GetTextRange(cr);
 }
 
 CString CRichEditBaseCtrl::GetTextRange(const CHARRANGE& cr) const
@@ -1467,7 +1480,7 @@ int CRichEditBaseCtrl::GetParaAlignment() const
 
 BOOL CRichEditBaseCtrl::SetSelectedWebLink(const CString& sWebLink, const CString& sText)
 {
-	CHARRANGE cr;
+	CHARRANGE cr = { 0 };
 	GetSel(cr);
 
 	CString sLinkText = (sText.IsEmpty() ? GetTextRange(cr) : sText);
