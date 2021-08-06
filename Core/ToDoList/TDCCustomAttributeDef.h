@@ -206,8 +206,8 @@ public:
 
 	// Calculation helpers requiring access to all attribute definitions
 	BOOL IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone = TRUE) const;
-	DWORD GetOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
-	DWORD GetResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
+	DWORD GetCalculationOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
+	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 
 protected:
 	void RebuildIDs();

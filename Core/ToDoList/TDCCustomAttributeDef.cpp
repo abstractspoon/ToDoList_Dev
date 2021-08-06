@@ -1255,7 +1255,7 @@ void CTDCCustomAttribDefinitionArray::RebuildIDs()
 	}
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
+DWORD CTDCCustomAttribDefinitionArray::GetCalculationOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
 {
 	DWORD dwDataType = TDCCUSTOMATTRIBUTECALCULATIONOPERAND::GetDataType(op.nAttribID);
 
@@ -1269,7 +1269,7 @@ DWORD CTDCCustomAttribDefinitionArray::GetOperandDataType(const TDCCUSTOMATTRIBU
 
 			if (attribDef.IsDataType(TDCCA_CALCULATION))
 			{
-				return GetResultDataType(attribDef.Calculation()); // RECURSIVE CALL
+				return GetCalculationResultDataType(attribDef.Calculation()); // RECURSIVE CALL
 			}
 			else if (!attribDef.IsMultiList())
 			{
@@ -1281,17 +1281,17 @@ DWORD CTDCCustomAttribDefinitionArray::GetOperandDataType(const TDCCUSTOMATTRIBU
 	return dwDataType;
 }
 
-DWORD CTDCCustomAttribDefinitionArray::GetResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const
+DWORD CTDCCustomAttribDefinitionArray::GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const
 {
-	DWORD dwFirstOpDataType = GetOperandDataType(calc.opFirst);
-	DWORD dwSecondOpDataType = (calc.IsSecondOperandValue() ? TDCCA_DOUBLE : GetOperandDataType(calc.opSecond));
+	DWORD dwFirstOpDataType = GetCalculationOperandDataType(calc.opFirst);
+	DWORD dwSecondOpDataType = (calc.IsSecondOperandValue() ? TDCCA_DOUBLE : GetCalculationOperandDataType(calc.opSecond));
 
 	return TDCCUSTOMATTRIBUTECALCULATION::GetResultDataType(dwFirstOpDataType, calc.nOperator, dwSecondOpDataType);
 }
 
 BOOL CTDCCustomAttribDefinitionArray::IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone) const
 {
-	return (calc.IsValid(bAllowNone) && (GetResultDataType(calc) != TDCCA_INVALID));
+	return (calc.IsValid(bAllowNone) && (GetCalculationResultDataType(calc) != TDCCA_INVALID));
 }
 
 /////////////////////////////////////////////////////////////////////////////

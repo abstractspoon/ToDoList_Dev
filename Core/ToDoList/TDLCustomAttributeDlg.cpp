@@ -677,12 +677,12 @@ BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttrib) const
 
 BOOL CCustomAttributeCalcPage::IsDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
 {
-	return (m_aAttribDef.GetOperandDataType(op) == TDCCA_DATE);
+	return (m_aAttribDef.GetCalculationOperandDataType(op) == TDCCA_DATE);
 }
 
 BOOL CCustomAttributeCalcPage::IsTimePeriod(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
 {
-	return (m_aAttribDef.GetOperandDataType(op) == TDCCA_TIMEPERIOD);
+	return (m_aAttribDef.GetCalculationOperandDataType(op) == TDCCA_TIMEPERIOD);
 }
 
 int CCustomAttributeCalcPage::BuildFirstOperandFilter(CTDCAttributeMap& mapAttrib) const
@@ -837,7 +837,7 @@ void CCustomAttributeCalcPage::UpdateResultType()
 	if (!m_calc.IsValid(FALSE))
 		m_sResultType.Empty();
 	else
-		m_sResultType = GetDataTypeLabel(m_aAttribDef.GetResultDataType(m_calc));
+		m_sResultType = GetDataTypeLabel(m_aAttribDef.GetCalculationResultDataType(m_calc));
 
 	UpdateData(FALSE);
 }

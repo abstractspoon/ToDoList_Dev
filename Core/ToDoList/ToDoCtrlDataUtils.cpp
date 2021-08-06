@@ -1825,7 +1825,7 @@ BOOL CTDCTaskCalculator::DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE
 		// Convert time periods to days if adding to dates
 		TDC_UNITS nSecondUnits = nUnits;
 		
-		if (m_data.m_aCustomAttribDefs.GetOperandDataType(calc.opSecond) == TDCCA_DATE)
+		if (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opSecond) == TDCCA_DATE)
 			nSecondUnits = TDCU_DAYS;
 
 		if (!GetCalculationOperandData(pTDI, pTDS, calc.opSecond, dSecondVal, nUnits))
@@ -4027,7 +4027,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 			if (!m_calculator.GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits))
 				return EMPTY_STR;
 
-			DWORD dwResultType = m_data.m_aCustomAttribDefs.GetResultDataType(attribDef.Calculation());
+			DWORD dwResultType = m_data.m_aCustomAttribDefs.GetCalculationResultDataType(attribDef.Calculation());
 			
 			switch (dwResultType)
 			{

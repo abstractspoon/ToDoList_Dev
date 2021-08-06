@@ -88,7 +88,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectFalse(calc.IsValid(FALSE));
 		ExpectTrue(calc.IsValid());
-		ExpectTrue(TDCCA_INVALID == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_INVALID == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -102,7 +102,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectTrue(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_INTEGER == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_INTEGER == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -115,7 +115,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectTrue(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_DOUBLE == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_DOUBLE == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -128,7 +128,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectTrue(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_TIMEPERIOD == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_TIMEPERIOD == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -141,7 +141,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectFalse(calc.IsValid(FALSE));
 		ExpectFalse(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_INVALID == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_INVALID == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -154,7 +154,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 		
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectFalse(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_INVALID == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_INVALID == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -167,7 +167,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectTrue(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_DATE == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_DATE == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -180,7 +180,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectFalse(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_INVALID == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_INVALID == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -193,7 +193,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectFalse(aAttribDef.IsValidCalculation(calc)); 
-		ExpectTrue(TDCCA_INVALID == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_INVALID == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -208,7 +208,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectTrue(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_DATE == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_DATE == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -223,7 +223,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 
 		ExpectTrue(calc.IsValid(FALSE));
 		ExpectTrue(aAttribDef.IsValidCalculation(calc));
-		ExpectTrue(TDCCA_TIMEPERIOD == aAttribDef.GetResultDataType(calc));
+		ExpectTrue(TDCCA_TIMEPERIOD == aAttribDef.GetCalculationResultDataType(calc));
 	}
 
 	{
@@ -260,7 +260,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 					int breakpoint = 0;
 				}
 
-				bool bValidResult = (TDCCA_INVALID != aAttribDef.GetResultDataType(calcManual));
+				bool bValidResult = (TDCCA_INVALID != aAttribDef.GetCalculationResultDataType(calcManual));
 
 				if (!ExpectEQ(bManualSuccess, bValidResult))
 				{
@@ -303,7 +303,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 				}
 
 				bManualSuccess = (FALSE != aAttribDef.IsValidCalculation(calcManual));
-				bool bValidResult = (TDCCA_INVALID != aAttribDef.GetResultDataType(calcManual));
+				bool bValidResult = (TDCCA_INVALID != aAttribDef.GetCalculationResultDataType(calcManual));
 
 				if (!ExpectEQ(bManualSuccess, bValidResult))
 				{
@@ -344,7 +344,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 				}
 
 				bManualSuccess = (FALSE != aAttribDef.IsValidCalculation(calcManual));
-				bool bValidResult = (TDCCA_INVALID != aAttribDef.GetResultDataType(calcManual));
+				bool bValidResult = (TDCCA_INVALID != aAttribDef.GetCalculationResultDataType(calcManual));
 
 				if (!ExpectEQ(bManualSuccess, bValidResult))
 				{
@@ -387,7 +387,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 				}
 
 				bManualSuccess = (FALSE != aAttribDef.IsValidCalculation(calcManual));
-				bool bValidResult = (TDCCA_INVALID != aAttribDef.GetResultDataType(calcManual));
+				bool bValidResult = (TDCCA_INVALID != aAttribDef.GetCalculationResultDataType(calcManual));
 
 				if (!ExpectEQ(bManualSuccess, bValidResult))
 				{
