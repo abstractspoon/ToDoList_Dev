@@ -19,6 +19,9 @@ namespace Abstractspoon
 			public ref class Win32
 			{
 			public:
+				static HWND GetHwnd(IntPtr hWnd);
+				static HFONT GetHfont(IntPtr hFont);
+
 				static void RemoveBorder(IntPtr hWnd);
 				static void AddBorder(IntPtr hWnd);
 				static void RemoveClientEdge(IntPtr hWnd);
@@ -26,8 +29,6 @@ namespace Abstractspoon
 
 				static bool RemoveStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
 				static bool AddStyle(IntPtr hWnd, UInt32 nStyle, bool bExStyle);
-
-				static HWND GetHwnd(IntPtr hWnd);
 
 				static int GetHScrollPos(IntPtr hWnd);
 				static int GetVScrollPos(IntPtr hWnd);
@@ -39,6 +40,8 @@ namespace Abstractspoon
 
 				static String^ GetFaceName(HFONT hFont);
 				static int GetPointSize(HFONT hFont);
+				static int GetPixelHeight(HFONT hFont);
+				static int GetPixelHeight(IntPtr hFont);
 				static float PointsToEms(int nPointSize);
 
 				static bool SetEditCue(IntPtr hWnd, String^ sCueText);

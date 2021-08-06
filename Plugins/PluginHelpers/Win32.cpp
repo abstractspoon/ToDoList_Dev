@@ -21,6 +21,11 @@ HWND Win32::GetHwnd(IntPtr hWnd)
 	return static_cast<HWND>(hWnd.ToPointer());
 }
 
+HFONT Win32::GetHfont(IntPtr hFont)
+{
+	return static_cast<HFONT>(hFont.ToPointer());
+}
+
 void Win32::RemoveClientEdge(IntPtr hWnd)
 {
 	// remove client edge
@@ -152,14 +157,24 @@ int Win32::GetPointSize(HFONT hFont)
 	if (!hFont)
 		return 8;
 
-	LOGFONT lf = { 0 };
-	::GetObject(hFont, sizeof(lf), &lf);
-
 	HDC hDC = ::GetDC(NULL);
 	int nPPI = GetDeviceCaps(hDC, LOGPIXELSY);
 	::ReleaseDC(NULL, hDC);
 
-	return MulDiv(abs(lf.lfHeight), 72, nPPI);
+	return MulDiv(GetPixelHeight(hFont), 72, nPPI);
+}
+
+int Win32::GetPixelHeight(HFONT hFont)
+{
+	LOGFONT lf = { 0 };
+	::GetObject(hFont, sizeof(lf), &lf);
+
+	return abs(lf.lfHeight);
+}
+
+int Win32::GetPixelHeight(IntPtr hFont)
+{
+	return GetPixelHeight(GetHfont(hFont));
 }
 
 float Win32::PointsToEms(int nPointSize)

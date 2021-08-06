@@ -744,7 +744,11 @@ namespace DayViewUIExtension
         {
             m_Renderer.SetFont(fontName, fontSize);
 
-            LongAppointmentHeight = Math.Max(m_Renderer.BaseFont.Height + 4, 17);
+			// Long appt height to match Calendar in core app
+			int nFontHeight = Win32.GetPixelHeight(m_Renderer.BaseFont.ToHfont());
+			int nItemHeight = (nFontHeight + 6 - longAppointmentSpacing);
+
+            LongAppointmentHeight = Math.Max(nItemHeight, 17);
         }
         
         public int GetFontHeight()
