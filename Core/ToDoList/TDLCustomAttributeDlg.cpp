@@ -1015,6 +1015,7 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	CRect rList;
 	m_lcAttributes.GetClientRect(rList);
 	m_lcAttributes.AllowOffItemClickDeselection(FALSE);
+	m_lcAttributes.ModifyStyle(0, WS_CLIPCHILDREN);
 
 	m_lcAttributes.InsertColumn(COL_ATTRIBLABEL, CEnString(IDS_CAD_COLATTRIBLABEL), LVCFMT_LEFT, 125);
 	m_lcAttributes.InsertColumn(COL_DATATYPE, CEnString(IDS_CAD_COLDATATYPE), LVCFMT_LEFT, 125);
