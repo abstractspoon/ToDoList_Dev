@@ -757,15 +757,15 @@ namespace MSDN.Html.Editor
 						range.moveStart("character", -2);
 						range.select();
 
-						//SelectCharactersAtCaret(2, false);
-
 						if (SelectedText == TAB)
 						{
 							SelectedText = "";
-
-							// reselect previous selection
-							SelectCharactersAtCaret(nLenSel, true);
 						}
+
+						// restore previous selection
+						range.collapse(false);
+						range.moveEnd("character", nLenSel);
+						range.select();
 					}
 					else
 					{
