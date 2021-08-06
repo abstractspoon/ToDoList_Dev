@@ -805,7 +805,13 @@ void CEnListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	int nSel = HitTest(point);
 
 	if (!WantSelChange(nSel))
+	{
+		// Make sure we finish editing
+		if (GetEditControl() != NULL)
+			SetFocus();
+
 		return;
+	}
 
 	BOOL bChangedEditLabels = FALSE;
 
