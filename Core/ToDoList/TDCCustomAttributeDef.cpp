@@ -576,28 +576,32 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::DecodeListData(const CString& sListData)
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 {
+	return AttributeSupportsFeature(GetDataType(), GetListType(), dwFeature);
+}
+
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DWORD dwListType, DWORD dwFeature)
+{
 	switch (dwFeature)
 	{
-		// sorting and inheritance works on all data types
 	case TDCCAF_SORT:
 	case TDCCAF_INHERITPARENTCHANGES:
+		// sorting and inheritance works on all data types
 		return TRUE;
 
 	case TDCCAF_FILTER:
-		return (IsDataType(TDCCA_DATE) || IsList());
+		return ((dwDataType == TDCCA_DATE) || (dwListType != TDCCA_NOTALIST));
 
 	case TDCCAF_EXCLUDEBLANKITEM:
-		return (IsList() && !IsMultiList());
+		return ((dwListType == TDCCA_AUTOLIST) || (dwListType == TDCCA_FIXEDLIST));
 
 	default:
-		// calculations not supported on multi-list types
-		if (IsMultiList())
+		// Aggregations not supported on multi-list types
+		if ((dwListType == TDCCA_AUTOMULTILIST) || (dwListType == TDCCA_FIXEDMULTILIST))
 			return FALSE;
 		break;
 	}
 
-	DWORD dwDataType = GetDataType();
-
+	// Aggregations
 	switch (dwDataType)
 	{
 	case TDCCA_DOUBLE:
@@ -633,9 +637,9 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 		break;
 
 	case TDCCA_CALCULATION:
-		// Tricky depending on the type of the operands
-		// TODO
-		break;
+		// Unknowable. Caller responsible for extracting the 
+		// calculation result type and using that as the argument
+ 		break;
 
 	default:
 		ASSERT(0);
@@ -644,13 +648,6 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsFeature(DWORD dwFeature) const
 
 	return FALSE;
 }
-
-// BOOL TDCCUSTOMATTRIBUTEDEFINITION::SupportsAggregation() const
-// {
-// 	return SupportsFeature(TDCCAF_ACCUMULATE) ||
-// 			SupportsFeature(TDCCAF_MAXIMIZE) ||
-// 			SupportsFeature(TDCCAF_MINIMIZE);
-// }
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::IsAggregated() const
 {

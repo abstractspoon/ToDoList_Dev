@@ -141,7 +141,8 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	static BOOL IsEncodedImageTag(const CString& sImage);
 	static CString EncodeImageTag(const CString& sImage, const CString& sName);
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);
-	
+	static BOOL AttributeSupportsFeature(DWORD dwDataType, DWORD dwListType, DWORD dwFeature);
+
 	// ----------------------------------------------------------------
 	CString sUniqueID;
 	CString sColumnTitle;
