@@ -1267,8 +1267,14 @@ DWORD CTDCCustomAttribDefinitionArray::GetOperandDataType(const TDCCUSTOMATTRIBU
 		{
 			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
 
-			if (!attribDef.IsMultiList())
+			if (attribDef.IsDataType(TDCCA_CALCULATION))
+			{
+				return GetResultDataType(attribDef.Calculation()); // RECURSIVE CALL
+			}
+			else if (!attribDef.IsMultiList())
+			{
 				return attribDef.GetDataType();
+			}
 		}
 	}
 

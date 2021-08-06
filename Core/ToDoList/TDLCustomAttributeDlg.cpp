@@ -637,7 +637,8 @@ BOOL CCustomAttributeCalcPage::IsDate(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_STARTDATE:
 		return TRUE;
 
-	case TDCA_CUSTOMATTRIB:
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		{
 			int nDef = m_aAttribDef.Find(nAttrib);
 			ASSERT(nDef >= 0);
@@ -659,7 +660,8 @@ BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_TIMESPENT:
 		return TRUE;
 
-	case TDCA_CUSTOMATTRIB:
+	default:
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		{
 			int nDef = m_aAttribDef.Find(nAttrib);
 			ASSERT(nDef >= 0);
@@ -671,6 +673,16 @@ BOOL CCustomAttributeCalcPage::IsTimePeriod(TDC_ATTRIBUTE nAttrib) const
 	}
 
 	return FALSE;
+}
+
+BOOL CCustomAttributeCalcPage::IsDate(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
+{
+	return (m_aAttribDef.GetOperandDataType(op) == TDCCA_DATE);
+}
+
+BOOL CCustomAttributeCalcPage::IsTimePeriod(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const
+{
+	return (m_aAttribDef.GetOperandDataType(op) == TDCCA_TIMEPERIOD);
 }
 
 int CCustomAttributeCalcPage::BuildFirstOperandFilter(CTDCAttributeMap& mapAttrib) const
@@ -700,6 +712,7 @@ int CCustomAttributeCalcPage::BuildFirstOperandFilter(CTDCAttributeMap& mapAttri
 		case TDCCA_TIMEPERIOD:
 		case TDCCA_FRACTION:
 		case TDCCA_INTEGER:
+		case TDCCA_CALCULATION:
 			mapAttrib.Add(attribDef.GetAttributeID());
 			break;
 		}
@@ -769,8 +782,8 @@ void CCustomAttributeCalcPage::BuildSecondOperandCombo()
 	// Time Period    | + - | Date              | N
 	// Time Period    | + - | Time Period       | Y
 	//
-	BOOL bFirstIsDate = IsDate(m_calc.opFirst.nAttribID);
-	BOOL bFirstIsTime = IsTimePeriod(m_calc.opFirst.nAttribID);
+	BOOL bFirstIsDate = IsDate(m_calc.opFirst);
+	BOOL bFirstIsTime = IsTimePeriod(m_calc.opFirst);
 
 	POSITION pos = mapAttrib.GetStartPosition();
 
