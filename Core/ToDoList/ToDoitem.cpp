@@ -763,7 +763,6 @@ TODOITEM::TODOITEM(LPCTSTR szTitle, LPCTSTR szComments) :
 	nPercentDone(0),
 	bFlagged(FALSE),
 	bLocked(FALSE),
-	dateCreated(COleDateTime::GetCurrentTime()),
 	dwTaskRefID(0)
 { 
 	CDateHelper::ClearDate(dateStart);
