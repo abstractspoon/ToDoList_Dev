@@ -6,6 +6,9 @@
 #include "TDLTest.h"
 #include "TDCCUSTOMATTRIBUTECALCULATIONTest.h"
 
+#include "..\ToDoList\TDCStruct.h"
+#include "..\ToDoList\ToDoCtrlData.h"
+#include "..\ToDoList\ToDoCtrlDataUtils.h"
 #include "..\ToDoList\TDCCustomAttributeDef.h"
 
 #ifdef _DEBUG
@@ -22,6 +25,17 @@ const LPCTSTR ID_INTEGER_MULTILIST = _T("IntegerMultiList");
 const LPCTSTR ID_DATE = _T("Date");
 const LPCTSTR ID_TIMEPERIOD = _T("TimePeriod");
 const LPCTSTR ID_DOUBLE = _T("Double");
+
+const LPCTSTR ID_PRORITYMULTRISK = _T("Priority*Risk");
+const LPCTSTR ID_TIMEESTMINUSVALUE = _T("Time-Value");
+const LPCTSTR ID_DATEPLUSDOUBLE = _T("Date+Double");
+
+//////////////////////////////////////////////////////////////////////
+
+const DWORD ID_ROOT = 0;
+const DWORD ID_PARENT = 1;
+const DWORD ID_CHILD1 = 2;
+const DWORD ID_CHILD2 = 3;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -44,6 +58,7 @@ TESTRESULT CTDCCUSTOMATTRIBUTECALCULATIONTest::Run()
 	ClearTotals();
 
 	TestTDCCUSTOMATTRIBUTECALCULATION();
+	TestTDCCUSTOMATTRIBUTECALCULATIONSimple();
 
 	return GetTotals();
 }
@@ -52,6 +67,7 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::InitCustomAttributes(CTDCCustomAttribDe
 {
 	aAttribDef.RemoveAll();
 
+	// Simple attributes
 	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
 	attribDef.sUniqueID = ID_STRING;
@@ -73,6 +89,41 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::InitCustomAttributes(CTDCCustomAttribDe
 	attribDef.sUniqueID = ID_DOUBLE;
 	attribDef.SetAttributeType(TDCCA_DOUBLE);
 	aAttribDef.Add(attribDef);
+
+	// Calculations
+	TDCCUSTOMATTRIBUTECALCULATION calc;
+
+	{
+		attribDef.sUniqueID = ID_PRORITYMULTRISK;
+		calc.Set(TDCA_PRIORITY,
+				 NONE,
+				 TDCCAC_MULTIPLY,
+				 TDCA_RISK,
+				 NONE);
+		attribDef.SetCalculation(calc);
+		aAttribDef.Add(attribDef);
+	}
+
+	{
+		attribDef.sUniqueID = ID_TIMEESTMINUSVALUE;
+		calc.Set(TDCA_TIMEESTIMATE,
+				 NONE,
+				 TDCCAC_SUBTRACT,
+				 1.75);
+		attribDef.SetCalculation(calc);
+		aAttribDef.Add(attribDef);
+	}
+
+	{
+		attribDef.sUniqueID = ID_DATEPLUSDOUBLE;
+		calc.Set(TDCA_CUSTOMATTRIB,
+				 ID_DATE,
+				 TDCCAC_ADD,
+				 TDCA_CUSTOMATTRIB,
+				 ID_DOUBLE);
+		attribDef.SetCalculation(calc);
+		aAttribDef.Add(attribDef);
+	}
 }
 
 void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
@@ -400,3 +451,116 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATION()
 	EndTest();
 }
 
+void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONSimple()
+{
+	CTDCCustomAttribDefinitionArray aAttribDefs;
+	InitCustomAttributes(aAttribDefs);
+
+	CTDCStyleMap aStyles; // Simple == No calculation styles
+
+	CToDoCtrlData data(aStyles, aAttribDefs);
+	InitDataModel(data);
+
+	CTDCTaskCalculator calc(data);
+
+	{
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		double dValue = 0.0;
+
+		ExpectTrue(aAttribDefs.GetAttributeDef(ID_PRORITYMULTRISK, attribDef));
+
+		data.SetTaskPriority(ID_PARENT, 3);
+		data.SetTaskPriority(ID_CHILD1, 5);
+		data.SetTaskPriority(ID_CHILD2, 7);
+
+		data.SetTaskRisk(ID_PARENT, 4);
+		data.SetTaskRisk(ID_CHILD1, 6);
+		data.SetTaskRisk(ID_CHILD2, 8);
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
+		ExpectEQ(dValue, 12.0);
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
+		ExpectEQ(dValue, 30.0);
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
+		ExpectEQ(dValue, 56.0);
+	}
+
+	{
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		double dValue = 0.0;
+
+		ExpectTrue(aAttribDefs.GetAttributeDef(ID_TIMEESTMINUSVALUE, attribDef));
+
+		data.SetTaskTimeEstimate(ID_PARENT, TDCTIMEPERIOD(8, TDCU_DAYS));
+		data.SetTaskTimeEstimate(ID_CHILD1, TDCTIMEPERIOD(6, TDCU_DAYS));
+		data.SetTaskTimeEstimate(ID_CHILD2, TDCTIMEPERIOD(4, TDCU_DAYS));
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue, TDCU_DAYS));
+		ExpectEQ(dValue, 6.25);
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue, TDCU_DAYS));
+		ExpectEQ(dValue, 4.25);
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue, TDCU_DAYS));
+		ExpectEQ(dValue, 2.25);
+	}
+
+	{
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		double dValue = 0.0;
+
+		ExpectTrue(aAttribDefs.GetAttributeDef(ID_DATEPLUSDOUBLE, attribDef));
+
+		data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T("41254.0"));
+		data.SetTaskCustomAttributeData(ID_CHILD1, ID_DATE, _T("41258.0"));
+		data.SetTaskCustomAttributeData(ID_CHILD2, ID_DATE, _T("41262.0"));
+
+		data.SetTaskCustomAttributeData(ID_PARENT, ID_DOUBLE, _T("4.0"));
+		data.SetTaskCustomAttributeData(ID_CHILD1, ID_DOUBLE, _T("8.0"));
+		data.SetTaskCustomAttributeData(ID_CHILD2, ID_DOUBLE, _T("2.0"));
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
+		ExpectEQ(dValue, 41258.0);
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
+		ExpectEQ(dValue, 41266.0);
+
+		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
+		ExpectEQ(dValue, 41264.0);
+	}
+}
+
+void CTDCCUSTOMATTRIBUTECALCULATIONTest::InitDataModel(CToDoCtrlData& data)
+{
+	data.DeleteAllTasks();
+	
+	CUndoAction ua(data, TDCUAT_ADD, FALSE);
+	TODOITEM tdiRef; // empty
+	
+	VERIFY(data.AddTask(ID_PARENT, data.NewTask(tdiRef), ID_ROOT, 0));
+	VERIFY(data.AddTask(ID_CHILD1, data.NewTask(tdiRef), ID_PARENT, 0));
+	VERIFY(data.AddTask(ID_CHILD2, data.NewTask(tdiRef), ID_PARENT, ID_CHILD1));
+	
+}
+
+void CTDCCUSTOMATTRIBUTECALCULATIONTest::InitStyles(CTDCStyleMap& aStyles)
+{
+	// Initialise styles and custom attributes
+	aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
+//	aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
+	aStyles[TDCS_USELATESTDUEDATE] = TRUE;
+//	aStyles[TDCS_USEEARLIESTSTARTDATE] = TRUE;
+	aStyles[TDCS_USELATESTSTARTDATE] = TRUE;
+	aStyles[TDCS_USELATESTLASTMODIFIED] = TRUE;
+	aStyles[TDCS_USEHIGHESTPRIORITY] = TRUE;
+	aStyles[TDCS_USEHIGHESTRISK] = TRUE;
+	aStyles[TDCS_AVERAGEPERCENTSUBCOMPLETION] = TRUE;
+	aStyles[TDCS_INCLUDEDONEINAVERAGECALC] = TRUE;
+	aStyles[TDCS_DONEHAVELOWESTPRIORITY] = TRUE;
+	aStyles[TDCS_INCLUDEDONEINRISKCALC] = TRUE;
+	aStyles[TDCS_INCLUDEDONEINPRIORITYCALC] = TRUE;
+	aStyles[TDCS_DONEHAVELOWESTRISK] = TRUE;
+	aStyles[TDCS_DUEHAVEHIGHESTPRIORITY] = TRUE;
+}

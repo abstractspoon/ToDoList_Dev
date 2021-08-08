@@ -11,6 +11,8 @@
 
 #include "TDLTestBase.h"
 
+class CTDCStyleMap;
+class CToDoCtrlData;
 class CTDCCustomAttribDefinitionArray;
 
 class CTDCCUSTOMATTRIBUTECALCULATIONTest : public CTDLTestBase
@@ -23,7 +25,11 @@ public:
 
 protected:
 	void TestTDCCUSTOMATTRIBUTECALCULATION();
+	void TestTDCCUSTOMATTRIBUTECALCULATIONSimple();
+
 	void InitCustomAttributes(CTDCCustomAttribDefinitionArray& aAttribDef);
+	void InitDataModel(CToDoCtrlData& data);
+	void InitStyles(CTDCStyleMap& styles);
 };
 
 #endif // !defined(AFX_TDCCUSTOMATTRIBUTECALCULATIONTEST_H__21479206_861C_4C47_9837_75F9B9171F90__INCLUDED_)
