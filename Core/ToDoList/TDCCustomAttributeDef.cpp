@@ -658,7 +658,11 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::IsAggregated() const
 
 BOOL TDCCUSTOMATTRIBUTEDEFINITION::SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc)
 {
-	return calculation.Set(calc);
+	if (!calculation.Set(calc))
+		return FALSE;
+
+	dwAttribType = TDCCA_CALCULATION;
+	return TRUE;
 }
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::GetNextListItem(const CString& sItem, BOOL bNext) const
@@ -923,26 +927,31 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatData(const TDCCADATA& data, BOOL bIS
 
 CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
 {
+	return FormatNumber(dValue, GetDataType(), dwFeatures);
+}
+
+CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue, DWORD dwDataType, DWORD dwFeatures)
+{
 	int nDecimals = 0;
 	LPCTSTR szTrail = NULL;
 
-	switch (GetDataType())
+	switch (dwDataType)
 	{
 	case TDCCA_FRACTION:
-		if (HasFeature(TDCCAF_DISPLAYASPERCENT))
+		if (dwFeatures & TDCCAF_DISPLAYASPERCENT)
 		{
 			dValue *= 100;
 			szTrail = _T("%");
-			nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 0);
+			nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 0);
 		}
 		else
 		{
-			nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 2);
+			nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 2);
 		}
 		break;
 
 	case TDCCA_DOUBLE:
-		nDecimals = (HasFeature(TDCCAF_ONEDECIMAL) ? 1 : 2);
+		nDecimals = ((dwFeatures & TDCCAF_ONEDECIMAL) ? 1 : 2);
 		break;
 
 	case TDCCA_INTEGER:
@@ -954,6 +963,7 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue) const
 	}
 
 	return Misc::Format(dValue, nDecimals, szTrail);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

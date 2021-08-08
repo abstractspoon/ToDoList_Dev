@@ -142,6 +142,7 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	static CString EncodeImageTag(const CString& sImage, const CString& sName);
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);
 	static BOOL AttributeSupportsFeature(DWORD dwDataType, DWORD dwListType, DWORD dwFeature);
+	static CString FormatNumber(double dValue, DWORD dwDataType, DWORD dwFeatures);
 
 	// ----------------------------------------------------------------
 	CString sUniqueID;
