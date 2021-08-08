@@ -132,7 +132,8 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	CString FormatData(const TDCCADATA& data, BOOL bISODates, TCHAR cListSep = 0) const;
 	CString FormatNumber(double dValue) const;
-	
+	BOOL GetDataAsDouble(const TDCCADATA& data, double& dValue, TDC_UNITS nUnits) const;
+
 	int CalcLongestListItem(CDC* pDC) const;
 
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);

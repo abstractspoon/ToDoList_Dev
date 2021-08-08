@@ -6,6 +6,7 @@
 #include "tdccustomattributeDef.h"
 #include "tdccustomattribdata.h"
 #include "tdcmapping.h"
+#include "todoitem.h"
 
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
@@ -963,7 +964,41 @@ CString TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(double dValue, DWORD dwDataTy
 	}
 
 	return Misc::Format(dValue, nDecimals, szTrail);
+}
 
+BOOL TDCCUSTOMATTRIBUTEDEFINITION::GetDataAsDouble(const TDCCADATA& data, double& dValue, TDC_UNITS nUnits) const
+{
+	switch (GetDataType())
+	{
+	case TDCCA_TIMEPERIOD:
+		if (IsValidUnits(nUnits))
+		{
+			TDCTIMEPERIOD time;
+
+			if (data.AsTimePeriod(time))
+			{
+				time.SetUnits(nUnits, TRUE); // Convert to requested units
+				dValue = time.dAmount;
+
+				return TRUE;
+			}
+		}
+		break;
+
+	case TDCCA_FRACTION:
+		dValue = data.AsFraction();
+		return TRUE;
+
+	case TDCCA_CALCULATION:
+	case TDCCA_DOUBLE:
+	case TDCCA_INTEGER:
+	case TDCCA_DATE:
+		dValue = data.AsDouble();
+		return TRUE;
+	}
+
+	// All else
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

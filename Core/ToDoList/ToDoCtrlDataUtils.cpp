@@ -1716,246 +1716,6 @@ CTDCTaskCalculator::CTDCTaskCalculator(const CToDoCtrlData& data)
 
 }
 
-BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
-{
-	if (!attribDef.bEnabled)
-		return FALSE;
-
-	const TODOITEM* pTDI = NULL;
-	const TODOSTRUCTURE* pTDS = NULL;
-
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
-
-	return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
-}
-
-BOOL CTDCTaskCalculator::GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits)
-{
-	ASSERT(attribDef.bEnabled);
-
-	switch (attribDef.GetDataType())
-	{
-	case TDCCA_TIMEPERIOD:
-		if (IsValidUnits(nUnits))
-		{
-			TDCTIMEPERIOD time;
-
-			if (data.AsTimePeriod(time))
-			{
-				time.SetUnits(nUnits, TRUE); // Convert to requested units
-				dValue = time.dAmount;
-
-				return TRUE;
-			}
-		}
-		break;
-
-	case TDCCA_FRACTION:
-		dValue = data.AsFraction();
-		return TRUE;
-
-	case TDCCA_CALCULATION:
-	case TDCCA_DOUBLE:
-	case TDCCA_INTEGER:
-	case TDCCA_DATE:
-		dValue = data.AsDouble();
-		return TRUE;
-	}
-
-	// All else
-	return FALSE;
-}
-
-double CTDCTaskCalculator::GetTaskNumericAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, TDC_UNITS nUnits) const
-{
-	// Numeric types only
-	switch (nAttribID)
-	{
-	case TDCA_COST:			return GetTaskCost(pTDI, pTDS);
-	case TDCA_PERCENT:		return GetTaskPercentDone(pTDI, pTDS);
-	case TDCA_PRIORITY:		return GetTaskPriority(pTDI, pTDS);
-	case TDCA_RISK:			return GetTaskRisk(pTDI, pTDS);
-	case TDCA_CREATIONDATE: return pTDI->dateCreated;
-	case TDCA_DONEDATE:		return pTDI->dateDone;
-	case TDCA_DUEDATE:		return GetTaskDueDate(pTDI, pTDS);
-	case TDCA_LASTMODDATE:	return GetTaskLastModifiedDate(pTDI, pTDS);
-	case TDCA_STARTDATE:	return GetTaskStartDate(pTDI, pTDS);
-	case TDCA_TIMEESTIMATE: return GetTaskTimeEstimate(pTDI, pTDS, nUnits);
-	case TDCA_TIMESPENT:	return GetTaskTimeSpent(pTDI, pTDS, nUnits);
-	}
-
-	return 0.0;
-}
-
-BOOL CTDCTaskCalculator::GetCalculationOperandData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op, double& dValue, TDC_UNITS nUnits) const
-{
-	if (op.IsCustom())
-	{
-		int nAttrib = m_data.m_aCustomAttribDefs.Find(op.sCustAttribID);
-
-		if (nAttrib < 0)
-			return FALSE;
-
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nAttrib];
-
-		return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
-	}
-
-	// else built-in attribute
-	dValue = GetTaskNumericAttributeData(pTDI, pTDS, op.nAttribID, nUnits);
-	return TRUE;
-}
-
-BOOL CTDCTaskCalculator::DoCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits) const
-{
-	if (!m_data.m_aCustomAttribDefs.IsValidCalculation(calc))
-		return FALSE;
-
-	double dFirstVal = 0.0, dSecondVal = 0.0;
-
-	if (!GetCalculationOperandData(pTDI, pTDS, calc.opFirst, dFirstVal, nUnits))
-		return FALSE;
-
-	if (calc.IsSecondOperandValue())
-	{
-		dSecondVal = calc.dSecondOperandValue;
-	}
-	else
-	{
-		// Convert time periods to days if adding to dates
-		TDC_UNITS nSecondUnits = nUnits;
-		
-		if (m_data.m_aCustomAttribDefs.GetCalculationOperandDataType(calc.opSecond) == TDCCA_DATE)
-			nSecondUnits = TDCU_DAYS;
-
-		if (!GetCalculationOperandData(pTDI, pTDS, calc.opSecond, dSecondVal, nUnits))
-			return FALSE;
-	}
-	
-	switch (calc.nOperator)
-	{
-	case TDCCAC_ADD:
-		dResult = (dFirstVal + dSecondVal);
-		break;
-
-	case TDCCAC_SUBTRACT:
-		dResult = (dFirstVal - dSecondVal);
-		break;
-
-	case TDCCAC_MULTIPLY:
-		dResult = (dFirstVal * dSecondVal);
-		break;
-
-	case TDCCAC_DIVIDE:
-		{
-			if (dSecondVal == 0.0)
-				return FALSE;
-
-			dResult = (dFirstVal / dSecondVal);
-		}
-		break;
-	}
-
-	return TRUE;
-}
-
-BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
-{
-	double dCalcValue = DBL_NULL, dSubtaskVal;
-	
-	TDCCADATA data;
-
-	if (attribDef.IsDataType(TDCCA_CALCULATION))
-	{
-		if (!DoCalculation(pTDI, pTDS, attribDef.Calculation(), dCalcValue, nUnits))
-			return FALSE;
-
-		data.Set(dCalcValue);
-	}
-	else
-	{
-		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
-	}
-
-	// -----------------------------------------------------------
-	if (attribDef.HasFeature(TDCCAF_ACCUMULATE))
-	{
-		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE));
-
-		// our value
-		GetCalculationValue(data, attribDef, dCalcValue, nUnits);
-
-		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
-		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
-
-			// ignore references else risk of infinite loop
-			if (!IsTaskReference(dwSubtaskID))
-			{
-				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
-					dCalcValue += dSubtaskVal;
-			}
-		}
-	}
-	// -----------------------------------------------------------
-	else if (attribDef.HasFeature(TDCCAF_MAXIMIZE))
-	{
-		ASSERT(attribDef.SupportsFeature(TDCCAF_MAXIMIZE));
-
-		if (data.IsEmpty())
-			dCalcValue = -DBL_MAX;
-		else
-			GetCalculationValue(data, attribDef, dCalcValue, nUnits);
-
-		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
-		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
-
-			// ignore references else risk of infinite loop
-			if (!IsTaskReference(dwSubtaskID) && GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
-				dCalcValue = max(dSubtaskVal, dCalcValue);
-		}
-
-		if (dCalcValue <= -DBL_MAX)
-			dCalcValue = DBL_NULL;
-	}
-	// -----------------------------------------------------------
-	else if (attribDef.HasFeature(TDCCAF_MINIMIZE))
-	{
-		ASSERT(attribDef.SupportsFeature(TDCCAF_MINIMIZE));
-
-		if (data.IsEmpty())
-			dCalcValue = DBL_MAX;
-		else
-			GetCalculationValue(data, attribDef, dCalcValue, nUnits);
-
-		// our children's values
-		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
-		{
-			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
-
-			// ignore references else risk of infinite loop
-			if (!IsTaskReference(dwSubtaskID) && GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
-				dCalcValue = min(dSubtaskVal, dCalcValue);
-		}
-
-		if (dCalcValue >= DBL_MAX)
-			dCalcValue = DBL_NULL;
-	}
-	else
-	{
-		GetCalculationValue(data, attribDef, dCalcValue, nUnits);
-	}
-
-	if (dCalcValue == DBL_NULL)
-		return FALSE;
-
-	dValue = dCalcValue;
-	return TRUE;
-}
-
 BOOL CTDCTaskCalculator::HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs) const
 {
 	POSITION pos = mapAttribIDs.GetStartPosition();
@@ -2024,11 +1784,6 @@ BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID) const
 
 	// all else
 	return FALSE;
-}
-
-BOOL CTDCTaskCalculator::IsTaskReference(DWORD dwTaskID) const
-{
-	return (m_data.GetTaskReferenceID(dwTaskID) != 0);
 }
 
 BOOL CTDCTaskCalculator::IsTaskRecentlyModified(DWORD dwTaskID) const
@@ -3321,6 +3076,364 @@ BOOL CTDCTaskCalculator::IsParentTaskDone(const TODOSTRUCTURE* pTDS) const
 	return IsParentTaskDone(pTDSParent);
 }
 
+// Custom attribute handling (and calculation) hereafter
+BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(DWORD dwTaskID, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
+{
+	if (!attribDef.bEnabled)
+		return FALSE;
+
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FALSE);
+
+	return GetTaskCustomAttributeData(pTDI, pTDS, attribDef, dValue, nUnits);
+}
+
+BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits) const
+{
+	double dCalcValue = DBL_NULL, dSubtaskVal;
+	TDCCADATA data;
+
+	if (attribDef.IsDataType(TDCCA_CALCULATION))
+	{
+		if (!DoCustomAttributeCalculation(pTDI, pTDS, attribDef.Calculation(), dCalcValue, nUnits, attribDef.IsAggregated()))
+			return FALSE;
+
+		data.Set(dCalcValue);
+	}
+	else
+	{
+		pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+	}
+
+	// -----------------------------------------------------------
+	if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_ACCUMULATE))
+	{
+		ASSERT(attribDef.SupportsFeature(TDCCAF_ACCUMULATE) ||
+			   attribDef.IsDataType(TDCCA_CALCULATION));
+
+		// our value
+		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
+
+		// our children's values
+		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		{
+			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+
+			// ignore references else risk of infinite loop
+			if (!m_data.IsTaskReference(dwSubtaskID))
+			{
+				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+					dCalcValue += dSubtaskVal;
+			}
+		}
+	}
+	// -----------------------------------------------------------
+	else if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_MAXIMIZE))
+	{
+		ASSERT(attribDef.SupportsFeature(TDCCAF_MAXIMIZE) ||
+			   attribDef.IsDataType(TDCCA_CALCULATION));
+
+		if (data.IsEmpty())
+			dCalcValue = -DBL_MAX;
+		else
+			attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
+
+		// our children's values
+		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		{
+			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+
+			// ignore references else risk of infinite loop
+			if (!m_data.IsTaskReference(dwSubtaskID))
+			{
+				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+					dCalcValue = max(dSubtaskVal, dCalcValue);
+			}
+		}
+
+		if (dCalcValue <= -DBL_MAX)
+			dCalcValue = DBL_NULL;
+	}
+	// -----------------------------------------------------------
+	else if (Misc::HasFlag(attribDef.dwFeatures, TDCCAF_MINIMIZE))
+	{
+		ASSERT(attribDef.SupportsFeature(TDCCAF_MINIMIZE) ||
+			   attribDef.IsDataType(TDCCA_CALCULATION));
+
+		if (data.IsEmpty())
+			dCalcValue = DBL_MAX;
+		else
+			attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
+
+		// our children's values
+		for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
+		{
+			DWORD dwSubtaskID = pTDS->GetSubTaskID(nSubTask);
+
+			// ignore references else risk of infinite loop
+			if (!m_data.IsTaskReference(dwSubtaskID))
+			{
+				if (GetTaskCustomAttributeData(dwSubtaskID, attribDef, dSubtaskVal, nUnits))
+					dCalcValue = min(dSubtaskVal, dCalcValue);
+			}
+		}
+
+		if (dCalcValue >= DBL_MAX)
+			dCalcValue = DBL_NULL;
+	}
+	else
+	{
+		attribDef.GetDataAsDouble(data, dCalcValue, nUnits);
+	}
+
+	if (dCalcValue == DBL_NULL)
+		return FALSE;
+
+	dValue = dCalcValue;
+	return TRUE;
+}
+
+BOOL CTDCTaskCalculator::DoCustomAttributeCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const
+{
+	if (!m_data.m_aCustomAttribDefs.IsValidCalculation(calc))
+		return FALSE;
+
+	double dFirstVal = 0.0, dSecondVal = 0.0;
+
+	if (!GetFirstCustomAttributeOperandValue(pTDI, pTDS, calc, dFirstVal, nUnits, bAggregated))
+		return FALSE;
+
+	if (!GetSecondCustomAttributeOperandValue(pTDI, pTDS, calc, dSecondVal, nUnits, bAggregated))
+		return FALSE;
+
+	switch (calc.nOperator)
+	{
+	case TDCCAC_ADD:
+		dResult = (dFirstVal + dSecondVal);
+		break;
+
+	case TDCCAC_SUBTRACT:
+		dResult = (dFirstVal - dSecondVal);
+		break;
+
+	case TDCCAC_MULTIPLY:
+		dResult = (dFirstVal * dSecondVal);
+		break;
+
+	case TDCCAC_DIVIDE:
+		{
+			if (dSecondVal == 0.0)
+				return FALSE;
+
+			dResult = (dFirstVal / dSecondVal);
+		}
+		break;
+	}
+
+	return TRUE;
+}
+
+BOOL CTDCTaskCalculator::GetFirstCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const  TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+{
+	ASSERT(calc.IsValid(FALSE));
+
+	if (calc.IsFirstOperandCustom())
+	{
+		int nAttrib = m_data.m_aCustomAttribDefs.Find(calc.opFirst.sCustAttribID);
+
+		if (nAttrib < 0)
+			return FALSE;
+
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nAttrib];
+
+		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, attribDef, dValue, nUnits, bAggregated);
+	}
+
+	// else built-in attribute
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opFirst.nAttribID, dValue, nUnits, bAggregated);
+}
+
+BOOL CTDCTaskCalculator::GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+{
+	ASSERT(calc.IsValid(FALSE));
+
+	if (calc.IsSecondOperandValue())
+	{
+		dValue = calc.dSecondOperandValue;
+		return TRUE;
+	}
+	else if (calc.IsSecondOperandCustom())
+	{
+		int nAttrib = m_data.m_aCustomAttribDefs.Find(calc.opSecond.sCustAttribID);
+
+		if (nAttrib < 0)
+			return FALSE;
+
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_data.m_aCustomAttribDefs[nAttrib];
+
+		return GetTaskCustomAttributeOperandValue(pTDI, pTDS, attribDef, dValue, nUnits, bAggregated);
+	}
+
+	// else built-in attribute
+	return GetTaskCustomAttributeOperandValue(pTDI, pTDS, calc.opSecond.nAttribID, dValue, nUnits, bAggregated);
+}
+
+BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+{
+	if (!pTDI)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Numeric types only
+	switch (nAttribID)
+	{
+	case TDCA_COST:
+		if (bAggregated)
+		{
+			dValue = GetTaskCost(pTDI, pTDS);
+		}
+		else
+		{
+			if (pTDI->cost.bIsRate)
+				dValue = (pTDI->cost.dAmount * pTDI->timeEstimate.dAmount);
+			else
+				dValue = pTDI->cost.dAmount;
+		}
+		return TRUE;
+
+	case TDCA_PERCENT:
+		{
+			if (bAggregated)
+				dValue = GetTaskPercentDone(pTDI, pTDS);
+			else
+				dValue = pTDI->nPercentDone;
+		}
+		return TRUE;
+
+	case TDCA_PRIORITY:
+		{
+			if (bAggregated)
+				dValue = GetTaskPriority(pTDI, pTDS);
+			else
+				dValue = pTDI->nPriority;
+		}
+		return (dValue >= 0);
+
+	case TDCA_RISK:
+		{
+			if (bAggregated)
+				dValue = GetTaskRisk(pTDI, pTDS);
+			else
+				dValue = pTDI->nRisk;
+		}
+		return (dValue >= 0);
+
+	case TDCA_CREATIONDATE:
+		if (pTDI->HasCreation())
+		{
+			dValue = pTDI->dateCreated;
+			return TRUE;
+		}
+		break;
+
+	case TDCA_DONEDATE:
+		if (pTDI->IsDone())
+		{
+			dValue = pTDI->dateDone;
+			return TRUE;
+		}
+		break;
+
+	case TDCA_DUEDATE:
+		{
+			if (bAggregated)
+				dValue = GetTaskDueDate(pTDI, pTDS);
+			else
+				dValue = pTDI->dateDue;
+		}
+		return (dValue != 0);
+
+	case TDCA_LASTMODDATE:
+		{
+			if (bAggregated)
+				dValue = GetTaskLastModifiedDate(pTDI, pTDS);
+			else
+				dValue = pTDI->dateLastMod;
+		}
+		return (dValue != 0);
+
+	case TDCA_STARTDATE:
+		{
+			if (bAggregated)
+				dValue = GetTaskStartDate(pTDI, pTDS);
+			else
+				dValue = pTDI->dateStart;
+		}
+		return (dValue != 0);
+
+	case TDCA_TIMEESTIMATE:
+		{
+			if (bAggregated)
+			{
+				dValue = GetTaskTimeEstimate(pTDI, pTDS, nUnits);
+			}
+			else
+			{
+				TDCTIMEPERIOD time = pTDI->timeEstimate;
+				time.SetUnits(nUnits, TRUE);
+
+				dValue = time.dAmount;
+			}
+		}
+		return TRUE;
+
+	case TDCA_TIMESPENT:
+		{
+			if (bAggregated)
+			{
+				dValue = GetTaskTimeSpent(pTDI, pTDS, nUnits);
+			}
+			else
+			{
+				TDCTIMEPERIOD time = pTDI->timeSpent;
+				time.SetUnits(nUnits, TRUE);
+
+				dValue = time.dAmount;
+			}
+		}
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const
+{
+	if (!pTDI || !attribDef.bEnabled)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	TDCCADATA data;
+
+	if (attribDef.IsDataType(TDCCA_CALCULATION))
+	{
+		return DoCustomAttributeCalculation(pTDI, pTDS, attribDef.Calculation(), dValue, nUnits, bAggregated);
+	}
+	else if (pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data))
+	{
+		return attribDef.GetDataAsDouble(data, dValue, nUnits);
+	}
+
+	// else
+	return FALSE;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskFormatter::CTDCTaskFormatter(const CToDoCtrlData& data) 
@@ -4044,11 +4157,7 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 					if ((dValue == 0.0) && attribDef.HasFeature(TDCCAF_HIDEZERO))
 						return EMPTY_STR;
 
-					// Temp attribute definition just for formatting
-					TDCCUSTOMATTRIBUTEDEFINITION tempDef;
-					tempDef.SetDataType(dwResultType);
-
-					return tempDef.FormatNumber(dValue);
+					return TDCCUSTOMATTRIBUTEDEFINITION::FormatNumber(dValue, dwResultType, attribDef.dwFeatures);
 				}
 				break;
 
