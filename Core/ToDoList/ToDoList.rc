@@ -2150,7 +2150,7 @@ END
 IDD_CUSTOMATTRIBCALC_PAGE DIALOGEX 0, 0, 197, 83
 STYLE WS_CHILD
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "1st &Attribute",IDC_STATIC,0,2,54,8
     COMBOBOX        IDC_FIRSTOPERAND,79,0,118,30,CBS_DROPDOWNLIST | CBS_SORT | 
@@ -4621,6 +4621,7 @@ BEGIN
     IDS_FILTER_ANYSTATUS    "Any status can match"
     IDS_FILTER_ANYVERSION   "Any version can match"
     IDS_CAD_CALCULATION     "Calculation"
+    IDS_CAD_CALC_ADD        "Add (+)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5831,6 +5832,13 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INSERTDATE      "\nInsert Date"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_CAD_CALC_SUBTRACT   "Subtract (-)"
+    IDS_CAD_CALC_MULTIPLY   "Multiply (*)"
+    IDS_CAD_CALC_DIVIDE     "Divide (/)"
 END
 
 #endif    // English (Australia) resources

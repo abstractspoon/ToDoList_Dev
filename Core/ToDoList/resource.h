@@ -2428,6 +2428,10 @@
 #define IDS_FILTER_ANYSTATUS            51596
 #define IDS_FILTER_ANYVERSION           51597
 #define IDS_CAD_CALCULATION             51598
+#define IDS_CAD_CALC_ADD                51599
+#define IDS_CAD_CALC_SUBTRACT           51600
+#define IDS_CAD_CALC_MULTIPLY           51601
+#define IDS_CAD_CALC_DIVIDE             51602
 
 // Next default values for new objects
 // 
