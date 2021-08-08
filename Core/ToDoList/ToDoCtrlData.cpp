@@ -107,25 +107,28 @@ void CToDoCtrlData::SetInheritedParentAttributes(const CTDCAttributeMap& mapAttr
 	m_bUpdateInheritAttrib = bUpdateAttrib;
 }
 
-BOOL CToDoCtrlData::WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const
+BOOL CToDoCtrlData::WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttribID) const
 {
 	if (m_bUpdateInheritAttrib)
 	{
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib) &&
-			m_mapParentAttribs.Has(TDCA_CUSTOMATTRIB))
+		if (m_mapParentAttribs.Has(TDCA_CUSTOMATTRIB) &&
+			TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			VERIFY(m_aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef));
+			int nAttrib = m_aCustomAttribDefs.Find(nAttribID);
 
-			return attribDef.HasFeature(TDCCAF_INHERITPARENTCHANGES);
+			if (nAttrib != -1)
+				return m_aCustomAttribDefs[nAttrib].HasFeature(TDCCAF_INHERITPARENTCHANGES);
+
+			// else
+			ASSERT(0);
 		}
-		else if ((nAttrib == TDCA_ALL) && !m_mapParentAttribs.IsEmpty())
+		else if ((nAttribID == TDCA_ALL) && !m_mapParentAttribs.IsEmpty())
 		{
 			return TRUE;
 		}
 
 		// else
-		return m_mapParentAttribs.Has(nAttrib);
+		return m_mapParentAttribs.Has(nAttribID);
 	}
 
 	// All else
@@ -1613,7 +1616,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtasks(const TODOITEM* pTDI, const TODOST
 }
 
 BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const TODOSTRUCTURE* pTDSParent, 
-											int nChildPos, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank)
+											int nChildPos, TDC_ATTRIBUTE nAttribID, BOOL bIncludeBlank)
 {
 	ASSERT(m_undo.IsActive());
 
@@ -1633,10 +1636,10 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 	GET_TDI(dwSubtaskID, pTDIChild, FALSE);
 
 	// save undo data
-	SaveEditUndo(dwSubtaskID, pTDIChild, nAttrib);
+	SaveEditUndo(dwSubtaskID, pTDIChild, nAttribID);
 
 	// apply the change based on nAttrib
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_DONEDATE:
 		if (bIncludeBlank || pTDIParent->IsDone())
@@ -1731,19 +1734,24 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 		break;
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			VERIFY(m_aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef));
+			int nAttrib = m_aCustomAttribDefs.Find(nAttribID);
+			ASSERT(nAttrib != -1);
 
-			if (attribDef.HasFeature(TDCCAF_INHERITPARENTCHANGES))
+			if (nAttrib != -1)
 			{
-				if (bIncludeBlank || pTDIParent->HasCustomAttributeValue(attribDef.sUniqueID))
-				{
-					TDCCADATA data;
-					pTDIParent->GetCustomAttributeValue(attribDef.sUniqueID, data);
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
 
-					pTDIChild->SetCustomAttributeValue(attribDef.sUniqueID, data);
+				if (attribDef.HasFeature(TDCCAF_INHERITPARENTCHANGES))
+				{
+					if (bIncludeBlank || pTDIParent->HasCustomAttributeValue(attribDef.sUniqueID))
+					{
+						TDCCADATA data;
+						pTDIParent->GetCustomAttributeValue(attribDef.sUniqueID, data);
+
+						pTDIChild->SetCustomAttributeValue(attribDef.sUniqueID, data);
+					}
 				}
 			}
 		}
@@ -1755,7 +1763,7 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 	}
 
 	// and its children too
-	return ApplyLastChangeToSubtasks(pTDIChild, pTDSParent->GetSubTask(nChildPos), nAttrib, bIncludeBlank);
+	return ApplyLastChangeToSubtasks(pTDIChild, pTDSParent->GetSubTask(nChildPos), nAttribID, bIncludeBlank);
 }
 
 TDC_SET CToDoCtrlData::SetTaskColor(DWORD dwTaskID, COLORREF color)
@@ -1856,13 +1864,15 @@ TDC_SET CToDoCtrlData::SetTaskLock(DWORD dwTaskID, BOOL bLocked)
 
 TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const TDCCADATA& data)
 {
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+	int nAttrib = m_aCustomAttribDefs.Find(sAttribID);
 
-	if (!m_aCustomAttribDefs.GetAttributeDef(sAttribID, attribDef))
+	if (nAttrib == -1)
 	{
 		ASSERT(0);
 		return SET_FAILED;
 	}
+
+	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
 
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
@@ -1916,6 +1926,8 @@ TDC_SET CToDoCtrlData::SetTaskCustomAttributeData(DWORD dwTaskID, const CString&
 		
 		return SET_CHANGE;
 	}
+
+	// else
 	return SET_NOCHANGE;
 }
 

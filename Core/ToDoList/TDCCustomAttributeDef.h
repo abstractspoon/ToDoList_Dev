@@ -32,7 +32,6 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 
 	inline TDC_COLUMN GetColumnID() const { return nColID; }
 	inline TDC_ATTRIBUTE GetAttributeID() const { return nAttribID; }
-	inline DWORD GetAttributeType() const { return dwAttribType; }
 
 	UINT GetColumnHeaderAlignment() const;
 	BOOL HasDefaultTextAlignment() const;
@@ -41,10 +40,11 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	BOOL SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
 	BOOL SetListType(DWORD dwListType);
 
+	inline DWORD GetAttributeType() const { return dwAttribType; }
 	inline DWORD GetDataType() const { return (dwAttribType & TDCCA_DATAMASK); }
 	inline DWORD GetListType() const { return (dwAttribType & TDCCA_LISTMASK); }
-	inline BOOL HasFeature(DWORD dwFeature) const { return SupportsFeature(dwFeature) && (dwFeatures & dwFeature); }
 
+	inline BOOL HasFeature(DWORD dwFeature) const { return SupportsFeature(dwFeature) && (dwFeatures & dwFeature); }
 	inline BOOL IsDataType(DWORD dwDataType) const { return (GetDataType() == dwDataType); }
 	inline BOOL IsList() const { return (GetListType() != TDCCA_NOTALIST); }
 	inline BOOL IsAutoList() const { return ((GetListType() == TDCCA_AUTOLIST) || (GetListType() == TDCCA_AUTOMULTILIST)); }
@@ -124,16 +124,12 @@ public:
 
 	int GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const;
 
-	BOOL GetAttributeDef(TDC_ATTRIBUTE nCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-	BOOL GetAttributeDef(const CString& sCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-	BOOL GetAttributeDef(TDC_COLUMN nCustColID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-
 	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const;
+	DWORD GetAttributeDataType(TDC_COLUMN nCustColID) const;
 	DWORD GetAttributeDataType(const CString& sCustAttribID) const;
 
 	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
 	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
-	BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nCustAttribID) const;
 
 
 protected:

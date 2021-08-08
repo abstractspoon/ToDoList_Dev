@@ -761,51 +761,20 @@ int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCol
 	return (mapCols.GetCount() - nColsSize);
 }
 
-BOOL CTDCCustomAttribDefinitionArray::GetAttributeDef(TDC_ATTRIBUTE nCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
-{
-	int nAttrib = Find(nCustAttribID);
-
-	if (nAttrib != -1)
-	{
-		attribDef = GetData()[nAttrib];
-		return TRUE;
-	}
-
-	// all else
-	return FALSE;
-}
-
-BOOL CTDCCustomAttribDefinitionArray::GetAttributeDef(const CString& sCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
-{
-	int nAttrib = Find(sCustAttribID);
-
-	if (nAttrib != -1)
-	{
-		attribDef = GetData()[nAttrib];
-		return TRUE;
-	}
-
-	// all else
-	return FALSE;
-}
-
-BOOL CTDCCustomAttribDefinitionArray::GetAttributeDef(TDC_COLUMN nCustColID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const
-{
-	int nAttrib = Find(nCustColID);
-
-	if (nAttrib != -1)
-	{
-		attribDef = GetData()[nAttrib];
-		return TRUE;
-	}
-
-	// all else
-	return FALSE;
-}
-
 DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const
 {
 	int nAttrib = Find(nCustAttribID);
+
+	if (nAttrib != -1)
+		return GetData()[nAttrib].GetDataType();
+
+	// all else
+	return TDCCA_STRING;
+}
+
+DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_COLUMN nCustColID) const
+{
+	int nAttrib = Find(nCustColID);
 
 	if (nAttrib != -1)
 		return GetData()[nAttrib].GetDataType();
@@ -837,18 +806,16 @@ BOOL CTDCCustomAttribDefinitionArray::IsColumnSortable(TDC_COLUMN nCustColID) co
 	return FALSE;
 }
 
-BOOL CTDCCustomAttribDefinitionArray::IsColumnEnabled(TDC_COLUMN nColID) const
+BOOL CTDCCustomAttribDefinitionArray::IsColumnEnabled(TDC_COLUMN nCustColID) const
 {
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+	int nAttrib = Find(nCustColID);
 
-	return (GetAttributeDef(nColID, attribDef) && attribDef.bEnabled);
-}
+	if (nAttrib != -1)
+		return GetData()[nAttrib].bEnabled;
 
-BOOL CTDCCustomAttribDefinitionArray::IsCustomAttributeEnabled(TDC_ATTRIBUTE nCustAttribID) const
-{
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-
-	return (GetAttributeDef(nCustAttribID, attribDef) && attribDef.bEnabled);
+	// else
+//	ASSERT(0);
+	return FALSE;
 }
 
 void CTDCCustomAttribDefinitionArray::RebuildIDs()

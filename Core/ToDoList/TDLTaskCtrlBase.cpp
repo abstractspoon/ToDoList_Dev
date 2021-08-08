@@ -1002,10 +1002,7 @@ BOOL CTDLTaskCtrlBase::CanCopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelected
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			VERIFY(m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef));
-
-			switch (attribDef.GetAttributeType())
+			switch (m_aCustomAttribDefs.GetAttributeDataType(nColID))
 			{
 			case TDCCA_BOOL:
 			case TDCCA_ICON:
@@ -1067,10 +1064,11 @@ CString CTDLTaskCtrlBase::GetColumnName(TDC_COLUMN nColID) const
 {
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		VERIFY(m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef));
+		int nAttrib = m_aCustomAttribDefs.Find(nColID);
+		ASSERT(nAttrib != -1);
 
-		return attribDef.sLabel;
+		if (nAttrib != -1)
+			return m_aCustomAttribDefs[nAttrib].sLabel;
 	}
 
 	// else
@@ -1513,13 +1511,14 @@ int CTDLTaskCtrlBase::CompareTasks(LPARAM lParam1,
 	}
 	else if (sort.IsSortingByCustom())
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		
+		int nAttrib = m_aCustomAttribDefs.Find(sort.nBy);
+
 		// this can still fail
-		if (!m_aCustomAttribDefs.GetAttributeDef(sort.nBy, attribDef))
+		if (nAttrib == -1)
 			return 0;
-		
-		return m_comparer.CompareTasks(dwTaskID1, dwTaskID2, attribDef, sort.bAscending);
+
+		// else
+		return m_comparer.CompareTasks(dwTaskID1, dwTaskID2, m_aCustomAttribDefs[nAttrib], sort.bAscending);
 	}
 	
 	// else default attribute
@@ -3165,13 +3164,15 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 		return FALSE;
 	}
 
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-	
-	if (!m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
+	int nAttrib = m_aCustomAttribDefs.Find(nColID);
+
+	if (nAttrib == -1)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
+
+	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
 
 	if (!attribDef.bEnabled)
 		return TRUE;
@@ -3843,10 +3844,13 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 		{
 			if (!bDrawing)
 			{
-				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+				int nAttrib = m_aCustomAttribDefs.Find(nColID);
+				ASSERT(nAttrib != -1);
 
-				if (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
+				if (nAttrib != -1)
 				{
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+
 					switch (attribDef.GetDataType())
 					{
 					case TDCCA_BOOL:
@@ -4583,10 +4587,13 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 		default: // try custom columns
 			if (!bLocked && TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 			{
-				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			
-				if (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
+				int nAttrib = m_aCustomAttribDefs.Find(nColID);
+				ASSERT(nAttrib != -1);
+
+				if (nAttrib != -1)
 				{
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+			
 					switch (attribDef.GetDataType())
 					{
 					case TDCCA_BOOL:
@@ -4629,16 +4636,11 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 	default: // try custom columns
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			
-			if (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
+			switch (m_aCustomAttribDefs.GetAttributeDataType(nColID))
 			{
-				switch (attribDef.GetDataType())
-				{
-				case TDCCA_FILELINK:
-					// TODO
-					return TRUE;
-				}
+			case TDCCA_FILELINK:
+				// TODO
+				return TRUE;
 			}
 		}
 		break;
@@ -5300,61 +5302,66 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 		return 0;
 	}
 
-	// determine the longest visible string depending on type
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+	int nAttrib = m_aCustomAttribDefs.Find(nColID);
 
-	if (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef))
+	if (nAttrib == -1)
 	{
-		if (!attribDef.bEnabled)
+		//ASSERT(0);
+		return 0;
+	}
+		
+	// determine the longest visible string depending on type
+	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+
+	if (!attribDef.bEnabled)
+	{
+		return 0; // hidden
+	}
+	else
+	{
+		switch (attribDef.GetDataType())
 		{
-			return 0; // hidden
-		}
-		else
-		{
-			switch (attribDef.GetDataType())
+		case TDCCA_DATE:
+			return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, attribDef.HasFeature(TDCCAF_SHOWTIME));
+
+		case TDCCA_ICON:
+			if (attribDef.IsList())
 			{
-			case TDCCA_DATE:
-				return CalcMaxDateColWidth(TDCD_CUSTOM, pDC, attribDef.HasFeature(TDCCAF_SHOWTIME));
-
-			case TDCCA_ICON:
-				if (attribDef.IsList())
+				switch (attribDef.GetListType())
 				{
-					switch (attribDef.GetListType())
-					{
-					case TDCCA_FIXEDLIST:
-						return attribDef.CalcLongestListItem(pDC);
+				case TDCCA_FIXEDLIST:
+					return attribDef.CalcLongestListItem(pDC);
 
-					case TDCCA_FIXEDMULTILIST:
-						{
-							int nNumIcons = m_find.GetLargestCustomAttributeArraySize(attribDef, bVisibleTasksOnly);
-							return ((nNumIcons * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
-						}
+				case TDCCA_FIXEDMULTILIST:
+					{
+						int nNumIcons = m_find.GetLargestCustomAttributeArraySize(attribDef, bVisibleTasksOnly);
+						return ((nNumIcons * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
 					}
 				}
-				// else single icon, no text: use MINCOLWIDTH
-				return COL_ICON_SIZE;
-
-			case TDCCA_FRACTION:
-			case TDCCA_DOUBLE:
-			case TDCCA_INTEGER:
-				{
-					// numerals are always the same width so we don't need average width
-					CString sLongest = m_find.GetLongestValue(attribDef, bVisibleTasksOnly);
-					return pDC->GetTextExtent(sLongest).cx;
-				}
-				break;
-
-			case TDCCA_BOOL:
-			case TDCCA_FILELINK:
-				return COL_ICON_SIZE;
-
-			default:
-				{
-					CString sLongest = m_find.GetLongestValue(attribDef, bVisibleTasksOnly);
-					return GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
-				}
-				break;
 			}
+			// else single icon, no text: use MINCOLWIDTH
+			return COL_ICON_SIZE;
+
+		case TDCCA_FRACTION:
+		case TDCCA_DOUBLE:
+		case TDCCA_INTEGER:
+			{
+				// numerals are always the same width so we don't need average width
+				CString sLongest = m_find.GetLongestValue(attribDef, bVisibleTasksOnly);
+				return pDC->GetTextExtent(sLongest).cx;
+			}
+			break;
+
+		case TDCCA_BOOL:
+		case TDCCA_FILELINK:
+			return COL_ICON_SIZE;
+
+		default:
+			{
+				CString sLongest = m_find.GetLongestValue(attribDef, bVisibleTasksOnly);
+				return GraphicsMisc::GetAverageMaxStringWidth(sLongest, pDC);
+			}
+			break;
 		}
 	}
 
@@ -6153,8 +6160,15 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 
 	if (nSelCount)
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		VERIFY(m_aCustomAttribDefs.GetAttributeDef(sAttribID, attribDef));
+		int nAttrib = m_aCustomAttribDefs.Find(sAttribID);
+
+		if (nAttrib == -1)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
 
 		// Multi-selection check lists need special handling
 		if (attribDef.IsMultiList())

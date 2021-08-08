@@ -294,14 +294,20 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 				default:
 					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 					{
-						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+						int nAttrib = m_aAttribDefs.Find(nAttribID);
+						ASSERT(nAttrib != -1);
 
-						if (m_aAttribDefs.GetAttributeDef(nAttribID, attribDef) && attribDef.IsList())
+						if (nAttrib != -1)
 						{
-							if (attribDef.GetDataType() == TDCCA_ICON)
-								return &m_cbCustomIcons;
-							else
-								return &m_cbListValues;
+							const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAttrib];
+
+							if (attribDef.IsList())
+							{
+								if (attribDef.GetDataType() == TDCCA_ICON)
+									return &m_cbCustomIcons;
+								else
+									return &m_cbListValues;
+							}
 						}
 					}
 					break;
@@ -368,10 +374,11 @@ void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClic
 
 					if (!bBrowse)
 					{
-						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+						int nAttrib = m_aAttribDefs.Find(rule.GetAttribute());
+						ASSERT(nAttrib != -1);
 
-						if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
-							bBrowse = !attribDef.IsList();
+						if (nAttrib != -1)
+							bBrowse = !m_aAttribDefs[nAttrib].IsList();
 					}
 					
 					if (bBrowse)
@@ -456,9 +463,10 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 			case FT_ICON:
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 				{
-					TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+					int nAttrib = m_aAttribDefs.Find(nAttribID);
+					ASSERT(nAttrib != -1);
 
-					if (m_aAttribDefs.GetAttributeDef(nAttribID, attribDef) && attribDef.IsList())
+					if (m_aAttribDefs[nAttrib].IsList())
 						return ILCT_DROPLIST;
 				}
 				return ILCT_BROWSE;
@@ -489,11 +497,11 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				default:
 					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 					{
-						TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+						int nAttrib = m_aAttribDefs.Find(nAttribID);
+						ASSERT(nAttrib != -1);
 
-						if (m_aAttribDefs.GetAttributeDef(nAttribID, attribDef) && attribDef.IsList())
+						if (m_aAttribDefs[nAttrib].IsList())
 							return ILCT_DROPLIST;
-
 					}
 					break;
 				}
@@ -858,13 +866,12 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		}
 		else if (&ctrl == &m_cbCustomIcons)
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+			int nAttrib = m_aAttribDefs.Find(rule.GetAttribute());
+			ASSERT((nAttrib != -1) && m_aAttribDefs[nAttrib].IsList());
 
-			if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
+			if (nAttrib != -1)
 			{
-				ASSERT(attribDef.IsList());
-
- 				CDialogHelper::SetComboBoxItems(m_cbCustomIcons, attribDef.aDefaultListData);
+ 				CDialogHelper::SetComboBoxItems(m_cbCustomIcons, m_aAttribDefs[nAttrib].aDefaultListData);
 
 				CStringArray aIcons;
 				Misc::Split(rule.ValueAsString(), aIcons);
@@ -876,10 +883,13 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		{
 			m_cbListValues.ResetContent();
 
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+			int nAttrib = m_aAttribDefs.Find(rule.GetAttribute());
 
-			if (m_aAttribDefs.GetAttributeDef(rule.GetAttribute(), attribDef))
+			if (nAttrib != -1)
 			{
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAttrib];
+				ASSERT(attribDef.IsList());
+
 				if (attribDef.IsList())
 				{
 					int nItem = attribDef.aDefaultListData.GetSize();
