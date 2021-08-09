@@ -35,6 +35,7 @@ public:
 protected:
 	static void PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
 	static void Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTask, int nLevel, int nNumLevels);
+	static void CreateFlatTasklistsWithTags();
 
 };
 

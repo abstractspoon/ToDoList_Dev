@@ -6,6 +6,8 @@
 #include "TDLTest.h"
 #include "TaskFileTest.h"
 
+#include "..\todolist\tdcstruct.h"
+
 #include <math.h>
 
 #ifdef _DEBUG
@@ -39,6 +41,7 @@ TESTRESULT CTaskFileTest::Run()
 
 	TestHierarchyConstructionPerformance();
 	TestFlatListConstructionPerformance();
+// 	CreateFlatTasklistsWithTags();
 
 	return GetTotals();
 }
@@ -149,4 +152,46 @@ void CTaskFileTest::PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hT
 
 	if ((rand() % 10) == 0)
 		tasks.SetTaskDoneDate(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)));
+}
+
+void CTaskFileTest::CreateFlatTasklistsWithTags()
+{
+	CoInitialize(NULL);
+
+	// Global tags
+	TDCAUTOLISTDATA tld;
+	tld.aTags.SetSize(200);
+
+	for (int t = 0; t < 200; t++)
+		tld.aTags[t] = Misc::Format(_T("Tag_%d"), t + 1);
+
+	// Multiple tasklists
+	int numTasks[3] = { 1000, 5000, 10000 };
+
+	for (int i = 0; i < 3; i++)
+	{
+		CTaskFile tasks;
+		tasks.SetXmlHeader(DEFAULT_UNICODE_HEADER);
+		tasks.SetAutoListData(tld);
+
+		for (int j = 0; j < numTasks[i]; j++)
+		{
+			HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), j + 1), NULL, 0, 0, TRUE);
+			
+			// 20 random tags per task
+			CStringArray aTags;
+			aTags.SetSize(20);
+
+			for (int k = 0; k < 20; k++)
+			{
+				int t = (rand() % 200);
+				aTags[k] = tld.aTags[t];
+			}
+
+			tasks.SetTaskTags(hTask, aTags);
+		}
+
+		// Save tasklist
+		tasks.Save(Misc::Format(_T("%d_FlatList_w200Tags.tdl"), numTasks[i]), SFEF_UTF16);
+	}
 }
