@@ -1539,19 +1539,13 @@ BOOL CTDCCustomAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTR
 		return FALSE;
 
 	// search attribute defs for unique ID
-	int nAttribDef = aAttribDefs.Find(ctrl.sAttribID);
-
-	if (nAttribDef != -1)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttribDef];
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+	GET_DEF_RET(aAttribDefs, ctrl.sAttribID, pDef, FALSE);
 	
-		dwDataType = attribDef.GetDataType();
-		dwListType = attribDef.GetListType();
-		return TRUE;
-	}
+	dwDataType = pDef->GetDataType();
+	dwListType = pDef->GetListType();
 
-	// not found
-	return FALSE;
+	return TRUE;
 }
 
 int CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 

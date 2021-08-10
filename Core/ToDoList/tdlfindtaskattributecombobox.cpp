@@ -181,10 +181,10 @@ void CTDLFindTaskAttributeComboBox::BuildCombo()
 
 CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule) const
 {
-	TDC_ATTRIBUTE attrib = rule.GetAttribute();
+	TDC_ATTRIBUTE nAttribID = rule.GetAttribute();
 	CEnString sName;
 
-	switch (attrib)
+	switch (nAttribID)
 	{
 	case TDCA_PATH:
 		sName.LoadString(IDS_TDC_COLUMN_PATH);
@@ -195,24 +195,21 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 		break;
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
 			// try custom attributes
 			int nAttrib = m_aAttribDefs.GetSize();
 
 			while (nAttrib--)
 			{
-				if (m_aAttribDefs[nAttrib].GetAttributeID() == attrib)
+				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAttrib];
+
+				if (attribDef.GetAttributeID() == nAttribID)
 				{
-					if (m_aAttribDefs[nAttrib].IsDataType(TDCCA_DATE) && 
-						(rule.GetAttribType() == FT_DATERELATIVE))
-					{
-						sName.Format(IDS_CUSTOMRELDATECOLUMN, m_aAttribDefs[nAttrib].sLabel);
-					}
+					if (attribDef.IsDataType(TDCCA_DATE) && (rule.GetAttribType() == FT_DATERELATIVE))
+						sName.Format(IDS_CUSTOMRELDATECOLUMN, attribDef.sLabel);
 					else
-					{
-						sName.Format(IDS_CUSTOMCOLUMN, m_aAttribDefs[nAttrib].sLabel);
-					}
+						sName.Format(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 					break;
 				}
 			}
@@ -224,14 +221,14 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 
 			while (nAttrib--)
 			{
-				if (ATTRIBUTES[nAttrib].nAttribID == attrib)
+				if (ATTRIBUTES[nAttrib].nAttribID == nAttribID)
 				{
 					if (ATTRIBUTES[nAttrib].nAttribResID)
 					{
 						// handle relative dates
 						sName.LoadString(ATTRIBUTES[nAttrib].nAttribResID);
 
-						if (AttributeIsDate(attrib) && rule.IsRelativeDate())
+						if (AttributeIsDate(nAttribID) && rule.IsRelativeDate())
 						{
 							sName += ' ';
 							sName += CEnString(IDS_TDLBC_RELATIVESUFFIX);
@@ -271,10 +268,10 @@ BOOL CTDLFindTaskAttributeComboBox::AttributeIsTime(TDC_ATTRIBUTE nAttribID) con
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nAttrib = m_aAttribDefs.Find(nAttribID);
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_DEF_RET(m_aAttribDefs, nAttribID, pDef, FALSE);
 
-			if (nAttrib != -1)
-				return m_aAttribDefs[nAttrib].IsDataType(TDCCA_TIMEPERIOD);
+			return pDef->IsDataType(TDCCA_TIMEPERIOD);
 		}
 		break;
 	}
@@ -297,10 +294,10 @@ BOOL CTDLFindTaskAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE nAttribID) con
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nAttrib = m_aAttribDefs.Find(nAttribID);
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_DEF_RET(m_aAttribDefs, nAttribID, pDef, FALSE);
 
-			if (nAttrib != -1)
-				return m_aAttribDefs[nAttrib].IsDataType(TDCCA_DATE);
+			return pDef->IsDataType(TDCCA_DATE);
 		}
 		break;
 	}

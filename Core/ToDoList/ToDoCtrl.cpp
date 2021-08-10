@@ -1259,22 +1259,21 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 	default:
 		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(ctrl.nCtrlID))
 		{
-			int nAttrib = m_aCustomAttribDefs.Find(ctrl.nAttrib);
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_DEF_ALT(m_aCustomAttribDefs, ctrl.nAttrib, pDef, break);
 
-			if (nAttrib != -1)
+			if (pDef->IsList())
 			{
-				if (m_aCustomAttribDefs[nAttrib].IsList())
-				{
-					// same as combos above
-					CRect rPos;
-					GetCtrlRect(ctrl.nCtrlID);
-					
-					if (rPos == rCtrl)
-						return; 
-					
-					// else
-					rCtrl.bottom += COMBODROPHEIGHT;
-				}
+				// same as combos above
+				CRect rPos;
+				GetCtrlRect(ctrl.nCtrlID);
+
+				if (rPos == rCtrl)
+					return;
+
+				// else
+				rCtrl.bottom += COMBODROPHEIGHT;
+
 			}
 		}
 		break;
@@ -8558,20 +8557,14 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		return FALSE;
 
-	int nAttrib = m_aCustomAttribDefs.Find(nColID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+	GET_DEF_RET(m_aCustomAttribDefs, nColID, pDef, FALSE);
 
-	if (nAttrib == -1)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
 	
 	TDCCADATA data;
-	GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, data);
+	GetSelectedTaskCustomAttributeData(pDef->sUniqueID, data);
 	
-	switch (attribDef.GetDataType())
+	switch (pDef->GetDataType())
 	{
 	case TDCCA_BOOL:
 		// toggle the flag state
@@ -8583,26 +8576,26 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 		{
 			TCHAR nChar = 0;
 
-			if (attribDef.aDefaultListData.GetSize())
-				nChar = attribDef.aDefaultListData[0][0];
+			if (pDef->aDefaultListData.GetSize())
+				nChar = pDef->aDefaultListData[0][0];
 		
 			data.Set(true, nChar);
 		}
-		SetSelectedTaskCustomAttributeData(attribDef.sUniqueID, data.AsString(), FALSE);
+		SetSelectedTaskCustomAttributeData(pDef->sUniqueID, data.AsString(), FALSE);
 		return TRUE; // handled
 		
 	case TDCCA_ICON:
-		switch (attribDef.GetListType())
+		switch (pDef->GetListType())
 		{
 		case TDCCA_FIXEDLIST:
 			{
 				CString sImage, sDummy;
 				BOOL bNext = (!Misc::IsKeyPressed(VK_SHIFT));
-				CString sTag = attribDef.GetNextListItem(data.AsString(), bNext);
+				CString sTag = pDef->GetNextListItem(data.AsString(), bNext);
 				
-				if (sTag.IsEmpty() || attribDef.DecodeImageTag(sTag, sImage, sDummy))
+				if (sTag.IsEmpty() || pDef->DecodeImageTag(sTag, sImage, sDummy))
 				{
-					SetSelectedTaskCustomAttributeData(attribDef.sUniqueID, sImage, FALSE);
+					SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sImage, FALSE);
 					return TRUE; // handled
 				}
 			}
@@ -8618,7 +8611,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 				
 				if (dialog.DoModal() == IDOK)
 				{
-					SetSelectedTaskCustomAttributeData(attribDef.sUniqueID, dialog.GetIconName(), FALSE);
+					SetSelectedTaskCustomAttributeData(pDef->sUniqueID, dialog.GetIconName(), FALSE);
 					return TRUE; // handled
 				}
 			}
@@ -8628,12 +8621,12 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 		
 	default:
 		// do item cycling for fixed lists unless they support calculation
-		if (attribDef.GetListType() == TDCCA_FIXEDLIST)
+		if (pDef->GetListType() == TDCCA_FIXEDLIST)
 		{
 			BOOL bNext = (!Misc::IsKeyPressed(VK_SHIFT));
-			CString sItem = attribDef.GetNextListItem(data.AsString(), bNext);
+			CString sItem = pDef->GetNextListItem(data.AsString(), bNext);
 			
-			SetSelectedTaskCustomAttributeData(attribDef.sUniqueID, sItem, FALSE);
+			SetSelectedTaskCustomAttributeData(pDef->sUniqueID, sItem, FALSE);
 			return TRUE; // handled
 		}
 		break;
@@ -12153,15 +12146,10 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
 {
-	int nToAttrib = m_aCustomAttribDefs.Find(sToCustomAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pToDef = NULL;
+	GET_DEF_RET(m_aCustomAttribDefs, sToCustomAttribID, pToDef, FALSE);
 
-	if (nToAttrib == -1)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-	
-	if (!CanCopyAttributeData(nFromAttrib, m_aCustomAttribDefs[nToAttrib]))
+	if (!CanCopyAttributeData(nFromAttrib, *pToDef))
 		return FALSE;
 
 	Flush();
@@ -12192,15 +12180,10 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
 {
-	int nFromAttrib = m_aCustomAttribDefs.Find(sFromCustomAttribID);
+	const TDCCUSTOMATTRIBUTEDEFINITION* pFromDef = NULL;
+	GET_DEF_RET(m_aCustomAttribDefs, sFromCustomAttribID, pFromDef, FALSE);
 
-	if (nFromAttrib == -1)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	if (!CanCopyAttributeData(m_aCustomAttribDefs[nFromAttrib], nToAttrib))
+	if (!CanCopyAttributeData(*pFromDef, nToAttrib))
 		return FALSE;
 
 	Flush();

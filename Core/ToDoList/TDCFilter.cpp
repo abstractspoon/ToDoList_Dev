@@ -815,13 +815,9 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 {
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
-	BOOL bNeedRefilter = FALSE;
-
 	if (m_nState == TDCFS_ADVANCED) // 'Find' filter
 	{
-		bNeedRefilter = HasAdvancedFilterAttribute(nModType); 
-
-		if (bNeedRefilter)
+		if (HasAdvancedFilterAttribute(nModType))
 		{
 			// don't refilter on Time Estimate/Spent, Cost or Comments, or 
 			// similar custom attributes because the user typically hasn't 
@@ -832,40 +828,37 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 			case TDCA_TIMEESTIMATE:
 			case TDCA_COST:
 			case TDCA_COMMENTS:
-				bNeedRefilter = FALSE;
-				break;
+				return FALSE;
 
 			default:
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nModType))
 				{
-					int nAttrib = aCustomAttribDefs.Find(nModType);
+					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+					GET_DEF_RET(aCustomAttribDefs, nModType, pDef, FALSE);
 
-					if (nAttrib != -1)
+					if (!pDef->IsList())
 					{
-						const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aCustomAttribDefs[nAttrib];
-
-						if (!attribDef.IsList())
+						switch (pDef->GetDataType())
 						{
-							switch (attribDef.GetDataType())
-							{
-							case TDCCA_DOUBLE:
-							case TDCCA_INTEGER:
-							case TDCCA_STRING:
-								bNeedRefilter = FALSE;
-								break;
-							}
+						case TDCCA_DOUBLE:
+						case TDCCA_INTEGER:
+						case TDCCA_STRING:
+							return FALSE;
 						}
 					}
 				}
 			}
+
+			// all else
+			return TRUE;
 		}
 	}
 	else if (m_nState == TDCFS_FILTER) // 'Filter Bar' filter
 	{
-		bNeedRefilter = HasFilterAttribute(nModType, aCustomAttribDefs);
+		return HasFilterAttribute(nModType, aCustomAttribDefs);
 	}
 
-	return bNeedRefilter;
+	return FALSE;
 }
 
 const CStringArray& CTDCFilter::GetDefaultFilterNames()

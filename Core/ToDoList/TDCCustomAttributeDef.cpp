@@ -605,7 +605,7 @@ BOOL CTDCCustomAttribDefinitionArray::MatchAny(const CTDCCustomAttribDefinitionA
 {
 	for (int nAttrib = 0; nAttrib < aAttribDefs.GetSize(); nAttrib++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
 
 		if (Find(attribDef.GetAttributeID()) != -1)
 			return TRUE;
@@ -624,7 +624,7 @@ int CTDCCustomAttribDefinitionArray::Find(const CString& sAttribID, int nIgnore)
 
 		while (nAttrib--)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAttrib);
 
 			if ((nAttrib != nIgnore) && (attribDef.sUniqueID.CompareNoCase(sAttribID) == 0))
 				return nAttrib;
@@ -654,7 +654,7 @@ int CTDCCustomAttribDefinitionArray::Find(TDC_ATTRIBUTE nCustAttribID, int nIgno
 
 	while (nAttrib--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = GetData()[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = ElementAt(nAttrib);
 
 		if ((nAttrib != nIgnore) && (attribDef.GetAttributeID() == nCustAttribID))
 			return nAttrib;
@@ -669,7 +669,7 @@ int CTDCCustomAttribDefinitionArray::Append(const CTDCCustomAttribDefinitionArra
 
 	for (int nAttrib = 0; nAttrib < aSrc.GetSize(); nAttrib++)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aSrc.GetData()[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aSrc[nAttrib];
 
 		// Append unique items only
 		if (Find(attribDef.sUniqueID) == -1)
@@ -689,7 +689,7 @@ BOOL CTDCCustomAttribDefinitionArray::AnyHasFeature(DWORD dwFeature) const
 
 	while (nDef--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& def = GetData()[nDef];
+		const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
 
 		if (def.HasFeature(dwFeature))
 			return TRUE;
@@ -703,7 +703,7 @@ TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(TDC_COLUMN nCustCo
 	int nAttrib = Find(nCustColID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].GetAttributeID();
+		return ElementAt(nAttrib).GetAttributeID();
 
 	// all else
 	return TDCA_NONE;
@@ -714,7 +714,7 @@ TDC_ATTRIBUTE CTDCCustomAttribDefinitionArray::GetAttributeID(const CString& sCu
 	int nAttrib = Find(sCustAttribID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].GetAttributeID();
+		return ElementAt(nAttrib).GetAttributeID();
 
 	// all else
 	return TDCA_NONE;
@@ -725,7 +725,7 @@ CString CTDCCustomAttribDefinitionArray::GetAttributeTypeID(TDC_ATTRIBUTE nCustA
 	int nAttrib = Find(nCustAttribID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].sUniqueID;
+		return ElementAt(nAttrib).sUniqueID;
 
 	// all else
 	return _T("");
@@ -736,7 +736,7 @@ CString CTDCCustomAttribDefinitionArray::GetAttributeTypeID(TDC_COLUMN nCustColI
 	int nAttrib = Find(nCustColID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].sUniqueID;
+		return ElementAt(nAttrib).sUniqueID;
 
 	// all else
 	return _T("");
@@ -752,7 +752,7 @@ int CTDCCustomAttribDefinitionArray::GetVisibleColumnIDs(CTDCColumnIDMap& mapCol
 
 	while (nDef--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& def = GetData()[nDef];
+		const TDCCUSTOMATTRIBUTEDEFINITION& def = ElementAt(nDef);
 
 		if (def.bEnabled)
 			mapCols.Add(def.GetColumnID());
@@ -766,7 +766,8 @@ DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_ATTRIBUTE nCustA
 	int nAttrib = Find(nCustAttribID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].GetDataType();
+		return ElementAt(nAttrib).GetDataType();
+
 
 	// all else
 	return TDCCA_STRING;
@@ -777,7 +778,8 @@ DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(TDC_COLUMN nCustColI
 	int nAttrib = Find(nCustColID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].GetDataType();
+		return ElementAt(nAttrib).GetDataType();
+
 
 	// all else
 	return TDCCA_STRING;
@@ -788,7 +790,7 @@ DWORD CTDCCustomAttribDefinitionArray::GetAttributeDataType(const CString& sCust
 	int nAttrib = Find(sCustAttribID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].GetDataType();
+		return ElementAt(nAttrib).GetDataType();
 
 	// all else
 	return TDCCA_STRING;
@@ -799,7 +801,7 @@ BOOL CTDCCustomAttribDefinitionArray::IsColumnSortable(TDC_COLUMN nCustColID) co
 	int nAttrib = Find(nCustColID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].HasFeature(TDCCAF_SORT);
+		return ElementAt(nAttrib).HasFeature(TDCCAF_SORT);
 
 	// else
 	ASSERT(0);
@@ -811,10 +813,10 @@ BOOL CTDCCustomAttribDefinitionArray::IsColumnEnabled(TDC_COLUMN nCustColID) con
 	int nAttrib = Find(nCustColID);
 
 	if (nAttrib != -1)
-		return GetData()[nAttrib].bEnabled;
+		return ElementAt(nAttrib).bEnabled;
+
 
 	// else
-//	ASSERT(0);
 	return FALSE;
 }
 

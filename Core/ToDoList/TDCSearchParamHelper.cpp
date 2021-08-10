@@ -202,24 +202,17 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(const CString& sUniq
 FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate,
 																const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-		return SEARCHPARAM::GetAttribType(nAttribID, bRelativeDate);
-
-	int nAttrib = aAttribDefs.Find(nAttribID);
-	ASSERT(nAttrib == -1);
-
-	if (nAttrib == -1)
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(aAttribDefs, nAttribID, pDef, FT_NONE);
 
 		// treat lists as strings, except for icon lists
-		if (attribDef.IsList() && (attribDef.GetDataType() != TDCCA_ICON))
+		if (pDef->IsList() && !pDef->IsDataType(TDCCA_ICON))
 			return FT_STRING;
 
 		// else
-		DWORD dwDataType = attribDef.GetDataType();
-
-		switch (dwDataType)
+		switch (pDef->GetDataType())
 		{
 		case TDCCA_STRING:		return FT_STRING;
 		case TDCCA_INTEGER:		return FT_INTEGER;
@@ -229,10 +222,16 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttri
 		case TDCCA_BOOL:		return FT_BOOL;
 		case TDCCA_ICON:		return FT_ICON;
 		case TDCCA_TIMEPERIOD:	return FT_TIMEPERIOD;
+			
+		default:
+			ASSERT(0);
+			return FT_NONE;
 		}
+
 	}
 
-	return FT_NONE;
+	// else
+	return SEARCHPARAM::GetAttribType(nAttribID, bRelativeDate);
 }
 
 BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAttributeDataMap& mapData,
@@ -248,62 +247,57 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAtt
 		TDCCADATA data;
 		mapData.GetNextAssoc(pos, sAttribID, data);
 
-		int nAttrib = aAttribDefs.Find(sAttribID);
-		ASSERT(nAttrib == -1);
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_ALT(aAttribDefs, sAttribID, pDef, continue);
 
-		if (nAttrib == -1)
+		if (!pDef->IsList())
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
-
-			if (attribDef.GetListType() == TDCCA_NOTALIST)
+			switch (pDef->GetDataType())
 			{
-				switch (attribDef.GetDataType())
-				{
-				case TDCCA_STRING:
-				case TDCCA_INTEGER:
-				case TDCCA_DOUBLE:
-				case TDCCA_FRACTION:
-				case TDCCA_FILELINK:
-				case TDCCA_TIMEPERIOD:
-				case TDCCA_ICON:
-				case TDCCA_BOOL:
-					// Not yet supported
-					ASSERT(0);
-					break;
+			case TDCCA_STRING:
+			case TDCCA_INTEGER:
+			case TDCCA_DOUBLE:
+			case TDCCA_FRACTION:
+			case TDCCA_FILELINK:
+			case TDCCA_TIMEPERIOD:
+			case TDCCA_ICON:
+			case TDCCA_BOOL:
+				// Not yet supported
+				ASSERT(0);
+				break;
 
-				case TDCCA_DATE:
-					if (AppendCustomAttributeDateFilter(data, attribDef, aRules))
-						bRulesAdded = TRUE;
-					break;
-				}
-			}
-			else // list types
-			{
-				CStringArray aValues;
-
-				if (data.AsArray(aValues))
-				{
-					SEARCHPARAM rule;
-
-					rule.SetCustomAttribute(attribDef.GetAttributeID(), sAttribID, FT_STRING);
-					rule.SetMatchWholeWord(TRUE); // because lists are read-only
-
-					CString sMatchBy = Misc::FormatArray(aValues, NULLSTRING, TRUE);
-
-					// special case: 1 empty value
-					if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
-					{
-						rule.SetOperator(FOP_NOT_SET);
-					}
-					else
-					{
-						rule.SetOperator(FOP_INCLUDES);
-						rule.SetValue(sMatchBy);
-					}
-
-					aRules.Add(rule);
+			case TDCCA_DATE:
+				if (AppendCustomAttributeDateFilter(data, *pDef, aRules))
 					bRulesAdded = TRUE;
+				break;
+			}
+		}
+		else // list types
+		{
+			CStringArray aValues;
+
+			if (data.AsArray(aValues))
+			{
+				SEARCHPARAM rule;
+
+				rule.SetCustomAttribute(pDef->GetAttributeID(), sAttribID, FT_STRING);
+				rule.SetMatchWholeWord(TRUE); // because lists are read-only
+
+				CString sMatchBy = Misc::FormatArray(aValues, NULLSTRING, TRUE);
+
+				// special case: 1 empty value
+				if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
+				{
+					rule.SetOperator(FOP_NOT_SET);
 				}
+				else
+				{
+					rule.SetOperator(FOP_INCLUDES);
+					rule.SetValue(sMatchBy);
+				}
+
+				aRules.Add(rule);
+				bRulesAdded = TRUE;
 			}
 		}
 	}

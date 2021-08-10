@@ -259,30 +259,25 @@ void CTDCAnonymizeTasklist::AnonymizeCustomAttributeData(const CTDCCustomAttribu
 			pMapIDs->SetAt(sCustID, sRndID);
 		}
 
-		int nDef = m_aAttribDefs.Find(sRndID);
-		ASSERT(nDef != -1);
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_ALT(m_aAttribDefs, sRndID, pDef, continue);
 
-		if (nDef != -1)
+		// Anonymise list content
+		if (pDef->IsDataType(TDCCA_STRING) || pDef->IsDataType(TDCCA_FILELINK))
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& def = m_aAttribDefs[nDef];
-
-			// Anonymise list content
-			if (def.IsDataType(TDCCA_STRING) || def.IsDataType(TDCCA_FILELINK))
+			if (pDef->IsList())
 			{
-				if (def.IsList())
-				{
-					CStringArray aListData;
+				CStringArray aListData;
 
-					if (data.AsArray(aListData))
-					{
-						AnonymizeListItems(aListData, *m_mapSharedData.GetAddMapping(sRndID));
-						data.Set(aListData);
-					}
-				}
-				else
+				if (data.AsArray(aListData))
 				{
-					data.Set(AnonymizeText(data.AsString()));
+					AnonymizeListItems(aListData, *m_mapSharedData.GetAddMapping(sRndID));
+					data.Set(aListData);
 				}
+			}
+			else
+			{
+				data.Set(AnonymizeText(data.AsString()));
 			}
 		}
 
