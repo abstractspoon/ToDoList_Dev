@@ -64,12 +64,10 @@ BOOL CTDCLongestItemMap::Initialise(const CTDCColumnIDMap& mapCols, const CTDCCu
 
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		{
-			int nAttrib = aCustAttribDefs.Find(nColID);
+			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+			VERIFY(aCustAttribDefs.GetAttributeDef(nColID, attribDef));
 
-			if (nAttrib == -1)
-				continue;
-
-			if (!IsSupportedColumn(aCustAttribDefs[nAttrib]))
+			if (!IsSupportedColumn(attribDef))
 				continue;
 		}
 

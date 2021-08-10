@@ -205,31 +205,26 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttri
 	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		return SEARCHPARAM::GetAttribType(nAttribID, bRelativeDate);
 
-	int nAttrib = aAttribDefs.Find(nAttribID);
-	ASSERT(nAttrib == -1);
+	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+	VERIFY(aAttribDefs.GetAttributeDef(nAttribID, attribDef));
 
-	if (nAttrib == -1)
+	// treat lists as strings, except for icon lists
+	if (attribDef.IsList() && (attribDef.GetDataType() != TDCCA_ICON))
+		return FT_STRING;
+
+	// else
+	DWORD dwDataType = attribDef.GetDataType();
+
+	switch (dwDataType)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
-
-		// treat lists as strings, except for icon lists
-		if (attribDef.IsList() && (attribDef.GetDataType() != TDCCA_ICON))
-			return FT_STRING;
-
-		// else
-		DWORD dwDataType = attribDef.GetDataType();
-
-		switch (dwDataType)
-		{
-		case TDCCA_STRING:		return FT_STRING;
-		case TDCCA_INTEGER:		return FT_INTEGER;
-		case TDCCA_DOUBLE:		return FT_DOUBLE;
-		case TDCCA_FRACTION:	return FT_DOUBLE; // TODO
-		case TDCCA_DATE:		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
-		case TDCCA_BOOL:		return FT_BOOL;
-		case TDCCA_ICON:		return FT_ICON;
-		case TDCCA_TIMEPERIOD:	return FT_TIMEPERIOD;
-		}
+	case TDCCA_STRING:		return FT_STRING;
+	case TDCCA_INTEGER:		return FT_INTEGER;
+	case TDCCA_DOUBLE:		return FT_DOUBLE;
+	case TDCCA_FRACTION:	return FT_DOUBLE; // TODO
+	case TDCCA_DATE:		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
+	case TDCCA_BOOL:		return FT_BOOL;
+	case TDCCA_ICON:		return FT_ICON;
+	case TDCCA_TIMEPERIOD:	return FT_TIMEPERIOD;
 	}
 
 	return FT_NONE;
@@ -248,62 +243,57 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAtt
 		TDCCADATA data;
 		mapData.GetNextAssoc(pos, sAttribID, data);
 
-		int nAttrib = aAttribDefs.Find(sAttribID);
-		ASSERT(nAttrib == -1);
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		VERIFY(aAttribDefs.GetAttributeDef(sAttribID, attribDef));
 
-		if (nAttrib == -1)
+		if (attribDef.GetListType() == TDCCA_NOTALIST)
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
-
-			if (attribDef.GetListType() == TDCCA_NOTALIST)
+			switch (attribDef.GetDataType())
 			{
-				switch (attribDef.GetDataType())
-				{
-				case TDCCA_STRING:
-				case TDCCA_INTEGER:
-				case TDCCA_DOUBLE:
-				case TDCCA_FRACTION:
-				case TDCCA_FILELINK:
-				case TDCCA_TIMEPERIOD:
-				case TDCCA_ICON:
-				case TDCCA_BOOL:
-					// Not yet supported
-					ASSERT(0);
-					break;
+			case TDCCA_STRING:
+			case TDCCA_INTEGER:
+			case TDCCA_DOUBLE:
+			case TDCCA_FRACTION:
+			case TDCCA_FILELINK:
+			case TDCCA_TIMEPERIOD:
+			case TDCCA_ICON:
+			case TDCCA_BOOL:
+				// Not yet supported
+				ASSERT(0);
+				break;
 
-				case TDCCA_DATE:
-					if (AppendCustomAttributeDateFilter(data, attribDef, aRules))
-						bRulesAdded = TRUE;
-					break;
-				}
-			}
-			else // list types
-			{
-				CStringArray aValues;
-
-				if (data.AsArray(aValues))
-				{
-					SEARCHPARAM rule;
-
-					rule.SetCustomAttribute(attribDef.GetAttributeID(), sAttribID, FT_STRING);
-					rule.SetMatchWholeWord(TRUE); // because lists are read-only
-
-					CString sMatchBy = Misc::FormatArray(aValues, NULLSTRING, TRUE);
-
-					// special case: 1 empty value
-					if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
-					{
-						rule.SetOperator(FOP_NOT_SET);
-					}
-					else
-					{
-						rule.SetOperator(FOP_INCLUDES);
-						rule.SetValue(sMatchBy);
-					}
-
-					aRules.Add(rule);
+			case TDCCA_DATE:
+				if (AppendCustomAttributeDateFilter(data, attribDef, aRules))
 					bRulesAdded = TRUE;
+				break;
+			}
+		}
+		else // list types
+		{
+			CStringArray aValues;
+
+			if (data.AsArray(aValues))
+			{
+				SEARCHPARAM rule;
+
+				rule.SetCustomAttribute(attribDef.GetAttributeID(), sAttribID, FT_STRING);
+				rule.SetMatchWholeWord(TRUE); // because lists are read-only
+
+				CString sMatchBy = Misc::FormatArray(aValues, NULLSTRING, TRUE);
+
+				// special case: 1 empty value
+				if ((aValues.GetSize() == 1) && sMatchBy.IsEmpty())
+				{
+					rule.SetOperator(FOP_NOT_SET);
 				}
+				else
+				{
+					rule.SetOperator(FOP_INCLUDES);
+					rule.SetValue(sMatchBy);
+				}
+
+				aRules.Add(rule);
+				bRulesAdded = TRUE;
 			}
 		}
 	}
@@ -336,7 +326,7 @@ BOOL CTDCSearchParamHelper::AppendDateFilter(FILTER_DATE nFilter, const COleDate
 	return TRUE;
 }
 
-BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules)
+BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& data, TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules)
 {
 	COleDateTime date, dtUser(CDateHelper::NullDate());
 	int nNextNDays = 0;

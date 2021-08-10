@@ -1182,22 +1182,18 @@ CWnd* CTDCCustomAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pPar
 
 	if (!pBuddy)
 	{
-		int nAttrib = aAttribDefs.Find(ctrl.sAttribID);
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		VERIFY(aAttribDefs.GetAttributeDef(ctrl.sAttribID, attribDef));
 
-		if (nAttrib != -1)
-		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+		pBuddy = CreateAttributeCtrl(const_cast<CWnd*>(pParent), 
+									 attribDef,
+									 TDCCADATA(nFilter),	// new type
+									 CTDCImageList(),		// not required
+									 ctrl.nBuddyCtrlID, 
+									 TRUE,					// buddy
+									 FALSE);				// multi-selection droplist
 
-			pBuddy = CreateAttributeCtrl(const_cast<CWnd*>(pParent), 
-										 attribDef,
-										 TDCCADATA(nFilter),	// new type
-										 CTDCImageList(),		// not required
-										 ctrl.nBuddyCtrlID, 
-										 TRUE,					// buddy
-										 FALSE);				// multi-selection droplist
-
-			bCreated = TRUE;
-		}
+		bCreated = TRUE;
 	}
 
 	ASSERT_VALID(pBuddy);

@@ -44,7 +44,7 @@ public:
 									   int nAnyValue, int nNoValue);
 
 protected:
-	static BOOL AppendCustomAttributeDateFilter(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules);
+	static BOOL AppendCustomAttributeDateFilter(const TDCCADATA& data, TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules);
 
 	static BOOL DecodeAttribute(const CString& sAttrib, DWORD dwFlags,
 								const CTDCCustomAttribDefinitionArray& aCustAttribDefs, 

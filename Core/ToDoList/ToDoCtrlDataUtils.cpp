@@ -604,14 +604,14 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				CString sUniqueID = rule.GetCustomAttributeID();
 				ASSERT (!sUniqueID.IsEmpty());
 
-				int nAttrib = query.aAttribDefs.Find(sUniqueID);
+				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-				if (nAttrib != -1)
+				if (query.aAttribDefs.GetAttributeDef(sUniqueID, attribDef))
 				{
 					TDCCADATA data;
-					pTDI->GetCustomAttributeValue(sUniqueID, data);
+					pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
 
-					bMatch = ValueMatches(data, query.aAttribDefs[nAttrib].GetAttributeType(), rule, resTask, bCaseSensitive);
+					bMatch = ValueMatches(data, attribDef.GetAttributeType(), rule, resTask, bCaseSensitive);
 				}
 				else
 				{

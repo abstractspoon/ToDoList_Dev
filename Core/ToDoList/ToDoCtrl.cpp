@@ -1259,11 +1259,11 @@ void CToDoCtrl::ReposControl(const CTRLITEM& ctrl, CDeferWndMove* pDWM,
 	default:
 		if (CTDCCustomAttributeUIHelper::IsCustomEditControl(ctrl.nCtrlID))
 		{
-			int nAttrib = m_aCustomAttribDefs.Find(ctrl.nAttrib);
+			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
 
-			if (nAttrib != -1)
+			if (m_aCustomAttribDefs.GetAttributeDef(ctrl.nAttrib, attribDef))
 			{
-				if (m_aCustomAttribDefs[nAttrib].IsList())
+				if (attribDef.IsList())
 				{
 					// same as combos above
 					CRect rPos;
@@ -1490,46 +1490,37 @@ void CToDoCtrl::EnableDisableCustomControl(const CUSTOMATTRIBCTRLITEM& ctrl, DWO
 
 	if (ctrl.GetBuddy(buddy))
 	{
-		int nAttrib = m_aCustomAttribDefs.Find(ctrl.nAttrib);
-		ASSERT(nAttrib != -1);
+		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+		m_aCustomAttribDefs.GetAttributeDef(ctrl.sAttribID, attribDef);
 
-		if (nAttrib != -1)
+		switch (attribDef.GetDataType())
 		{
-			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
-
-			switch (attribDef.GetDataType())
-			{
-			case TDCCA_STRING:
-			case TDCCA_INTEGER:	
-			case TDCCA_DOUBLE:	
-			case TDCCA_BOOL:
-			case TDCCA_ICON:
-				break;
+		case TDCCA_STRING:
+		case TDCCA_INTEGER:	
+		case TDCCA_DOUBLE:	
+		case TDCCA_BOOL:
+		case TDCCA_ICON:
+			break;
 			
-			case TDCCA_DATE:
-				// Buddy is time
-				if (bEnable && !bReadOnly)
-				{
-					TDCCADATA data;
-					GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, data, FALSE);
+		case TDCCA_DATE:
+			// Buddy is time
+			if (bEnable && !bReadOnly)
+			{
+				TDCCADATA data;
+				GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, data, FALSE);
 				
-					if (!CDateHelper::IsDateSet(data.AsDate()))
-					{
-						bReadOnly = TRUE;
+				if (!CDateHelper::IsDateSet(data.AsDate()))
+				{
+					bReadOnly = TRUE;
 
-						// clear any existing value
-						CTimeComboBox* pBuddy = (CTimeComboBox*)GetDlgItem(ctrl.nBuddyCtrlID);
-						ASSERT(pBuddy);
+					// clear any existing value
+					CTimeComboBox* pBuddy = (CTimeComboBox*)GetDlgItem(ctrl.nBuddyCtrlID);
+					ASSERT(pBuddy);
 
-						if (pBuddy)
-							pBuddy->SetOleTime(-1);
-					}
+					if (pBuddy)
+						pBuddy->SetOleTime(-1);
 				}
 			}
-		}
-		else
-		{
-			bEnable = FALSE;
 		}
 		
 		EnableDisableControl(buddy, dwTaskID, bEnable, bReadOnly, FALSE);
@@ -8558,15 +8549,8 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
 		return FALSE;
 
-	int nAttrib = m_aCustomAttribDefs.Find(nColID);
-
-	if (nAttrib == -1)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
+	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+	VERIFY (m_aCustomAttribDefs.GetAttributeDef(nColID, attribDef));
 	
 	TDCCADATA data;
 	GetSelectedTaskCustomAttributeData(attribDef.sUniqueID, data);
@@ -12153,15 +12137,12 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const CString& sToCustomAttribID)
 {
-	int nToAttrib = m_aCustomAttribDefs.Find(sToCustomAttribID);
+	TDCCUSTOMATTRIBUTEDEFINITION attribDefTo;
 
-	if (nToAttrib == -1)
-	{
-		ASSERT(0);
+	if (!m_aCustomAttribDefs.GetAttributeDef(sToCustomAttribID, attribDefTo))
 		return FALSE;
-	}
 	
-	if (!CanCopyAttributeData(nFromAttrib, m_aCustomAttribDefs[nToAttrib]))
+	if (!CanCopyAttributeData(nFromAttrib, attribDefTo))
 		return FALSE;
 
 	Flush();
@@ -12192,15 +12173,12 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 
 BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
 {
-	int nFromAttrib = m_aCustomAttribDefs.Find(sFromCustomAttribID);
+	TDCCUSTOMATTRIBUTEDEFINITION attribDefFrom;
 
-	if (nFromAttrib == -1)
-	{
-		ASSERT(0);
+	if (!m_aCustomAttribDefs.GetAttributeDef(sFromCustomAttribID, attribDefFrom))
 		return FALSE;
-	}
 
-	if (!CanCopyAttributeData(m_aCustomAttribDefs[nFromAttrib], nToAttrib))
+	if (!CanCopyAttributeData(attribDefFrom, nToAttrib))
 		return FALSE;
 
 	Flush();

@@ -306,9 +306,10 @@ BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttri
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		{
-			CString sAttribID = aCustomAttribDefs.GetAttributeTypeID(nAttrib);
+			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+			VERIFY(aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef));
 
-			return m_filter.mapCustomAttrib.HasKey(sAttribID);
+			return m_filter.mapCustomAttrib.HasKey(attribDef.sUniqueID);
 		}
 		break;
 	}
@@ -838,22 +839,18 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 			default:
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nModType))
 				{
-					int nAttrib = aCustomAttribDefs.Find(nModType);
+					TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+					VERIFY(aCustomAttribDefs.GetAttributeDef(nModType, attribDef));
 
-					if (nAttrib != -1)
+					if (!attribDef.IsList())
 					{
-						const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aCustomAttribDefs[nAttrib];
-
-						if (!attribDef.IsList())
+						switch (attribDef.GetDataType())
 						{
-							switch (attribDef.GetDataType())
-							{
-							case TDCCA_DOUBLE:
-							case TDCCA_INTEGER:
-							case TDCCA_STRING:
-								bNeedRefilter = FALSE;
-								break;
-							}
+						case TDCCA_DOUBLE:
+						case TDCCA_INTEGER:
+						case TDCCA_STRING:
+							bNeedRefilter = FALSE;
+							break;
 						}
 					}
 				}
