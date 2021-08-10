@@ -22,6 +22,11 @@ int CTaskFileTest::NUM_TESTLEVELS = 5;
 int CTaskFileTest::MAX_TESTLEVELS = 5;
 
 //////////////////////////////////////////////////////////////////////
+
+const int NUM_GLOBAL_STRINGS = 100;
+const int NUM_TASK_STRINGS = 10;
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -41,7 +46,6 @@ TESTRESULT CTaskFileTest::Run()
 
 	TestHierarchyConstructionPerformance();
 	TestFlatListConstructionPerformance();
-// 	CreateFlatTasklistsWithTags();
 
 	return GetTotals();
 }
@@ -107,6 +111,9 @@ void CTaskFileTest::PopulateHierarchy(CTaskFile& tasks, int nNumLevels)
 {
 	ASSERT(nNumLevels > 0 && nNumLevels <= MAX_TESTLEVELS);
 
+	tasks.Reset();
+	AddGlobalsToTasklist(tasks);
+	
 	Add10TasksToHierarchy(tasks, NULL, 1, nNumLevels);
 }
 
@@ -119,7 +126,9 @@ void CTaskFileTest::Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTas
 	for (int i = 0; i < 10; i++)
 	{
 		HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), hParentTask, 0, 0, TRUE);
+
 		PopulateNumericTaskAttributes(tasks, hTask);
+		PopulateStringTaskAttributes(tasks, hTask, NUM_TASK_STRINGS);
 
 		// Add next level of tasks
 		Add10TasksToHierarchy(tasks, hTask, nLevel + 1, nNumLevels);
@@ -128,12 +137,41 @@ void CTaskFileTest::Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTas
 
 void CTaskFileTest::PopulateFlatList(CTaskFile& tasks, int nNumTasks)
 {
+	tasks.Reset();
+	AddGlobalsToTasklist(tasks);
+	
+	// Create tasks
 	for (int i = 0; i < nNumTasks; i++)
 	{
 		HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
 
 		PopulateNumericTaskAttributes(tasks, hTask);
+		PopulateStringTaskAttributes(tasks, hTask, NUM_TASK_STRINGS);
 	}
+}
+
+void CTaskFileTest::AddGlobalsToTasklist(CTaskFile& tasks)
+{
+	TDCAUTOLISTDATA tld;
+
+	tld.aAllocBy.SetSize(NUM_GLOBAL_STRINGS);
+	tld.aAllocTo.SetSize(NUM_GLOBAL_STRINGS);
+	tld.aCategory.SetSize(NUM_GLOBAL_STRINGS);
+	tld.aStatus.SetSize(NUM_GLOBAL_STRINGS);
+	tld.aTags.SetSize(NUM_GLOBAL_STRINGS);
+	tld.aVersion.SetSize(NUM_GLOBAL_STRINGS);
+
+	for (int i = 0; i < NUM_GLOBAL_STRINGS; i++)
+	{
+		tld.aAllocBy[i] = Misc::Format(_T("AllocBy_%d"), i + 1);
+		tld.aAllocTo[i] = Misc::Format(_T("AllocTo_%d"), i + 1);
+		tld.aCategory[i] = Misc::Format(_T("Category_%d"), i + 1);
+		tld.aStatus[i] = Misc::Format(_T("Status_%d"), i + 1);
+		tld.aTags[i] = Misc::Format(_T("Tag_%d"), i + 1);
+		tld.aVersion[i] = Misc::Format(_T("Version_%d"), i + 1);
+	}
+
+	tasks.SetAutoListData(tld);
 }
 
 void CTaskFileTest::PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask)
@@ -154,44 +192,41 @@ void CTaskFileTest::PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hT
 		tasks.SetTaskDoneDate(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)));
 }
 
-void CTaskFileTest::CreateFlatTasklistsWithTags()
+void CTaskFileTest::PopulateStringTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, int nNumMultiAttrib)
 {
-	CoInitialize(NULL);
-
-	// Global tags
-	TDCAUTOLISTDATA tld;
-	tld.aTags.SetSize(200);
-
-	for (int t = 0; t < 200; t++)
-		tld.aTags[t] = Misc::Format(_T("Tag_%d"), t + 1);
-
-	// Multiple tasklists
-	int numTasks[3] = { 1000, 5000, 10000 };
-
-	for (int i = 0; i < 3; i++)
 	{
-		CTaskFile tasks;
-		tasks.SetXmlHeader(DEFAULT_UNICODE_HEADER);
-		tasks.SetAutoListData(tld);
+		CStringArray aValues;
+		PopulateArrayWithRandomStrings(aValues, nNumMultiAttrib, _T("AllocTo_%d"));
+		tasks.SetTaskAllocatedTo(hTask, aValues);
+	}
 
-		for (int j = 0; j < numTasks[i]; j++)
-		{
-			HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), j + 1), NULL, 0, 0, TRUE);
-			
-			// 20 random tags per task
-			CStringArray aTags;
-			aTags.SetSize(20);
+	{
+		CStringArray aValues;
+		PopulateArrayWithRandomStrings(aValues, nNumMultiAttrib, _T("Category_%d"));
+		tasks.SetTaskCategories(hTask, aValues);
+	}
 
-			for (int k = 0; k < 20; k++)
-			{
-				int t = (rand() % 200);
-				aTags[k] = tld.aTags[t];
-			}
+	{
+		CStringArray aValues;
+		PopulateArrayWithRandomStrings(aValues, nNumMultiAttrib, _T("Tags_%d"));
+		tasks.SetTaskTags(hTask, aValues);
+	}
 
-			tasks.SetTaskTags(hTask, aTags);
-		}
+	int i = (rand() % NUM_GLOBAL_STRINGS);
 
-		// Save tasklist
-		tasks.Save(Misc::Format(_T("%d_FlatList_w200Tags.tdl"), numTasks[i]), SFEF_UTF16);
+	tasks.SetTaskAllocatedBy(hTask, Misc::Format(_T("AllocBy_%d"), i + 1));
+	tasks.SetTaskStatus(hTask, Misc::Format(_T("Status_%d"), i + 1));
+	tasks.SetTaskVersion(hTask, Misc::Format(_T("Version_%d"), i + 1));
+}
+
+void CTaskFileTest::PopulateArrayWithRandomStrings(CStringArray& aValues, int nCount, LPCTSTR szFormat)
+{
+	aValues.SetSize(nCount);
+
+	while (nCount--)
+	{
+		int i = (rand() % NUM_GLOBAL_STRINGS);
+		aValues[nCount] = Misc::Format(szFormat, i + 1);
 	}
 }
+

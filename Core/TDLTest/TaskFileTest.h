@@ -15,6 +15,10 @@
 
 //////////////////////////////////////////////////////////////////////
 
+struct TDCAUTOLISTDATA;
+
+//////////////////////////////////////////////////////////////////////
+
 class CTaskFileTest : public CTDLTestBase  
 {
 public:
@@ -33,10 +37,11 @@ public:
 	static int MAX_TESTLEVELS;
 
 protected:
-	static void PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
 	static void Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTask, int nLevel, int nNumLevels);
-	static void CreateFlatTasklistsWithTags();
-
+	static void PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
+	static void PopulateStringTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, int nNumMultiAttrib);
+	static void PopulateArrayWithRandomStrings(CStringArray& aValues, int nCount, LPCTSTR szFormat);
+	static void AddGlobalsToTasklist(CTaskFile& tasks);
 };
 
 #endif // !defined(AFX_TASKFILETEST_H__21479206_861C_4C47_9837_75F9B9171F90__INCLUDED_)
