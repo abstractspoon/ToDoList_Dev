@@ -1295,6 +1295,11 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 	if (!bZeroOthers && !aColIDs.GetCount())
 		return;
 
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(start)"));
+	log.LogStart();
+	///////////////////////////////////////////////////////////////////
+	
 	// Weed out all the tracked columns
 	CTDCColumnIDMap mapCols(aColIDs);
 	int nNumCols = m_hdrColumns.GetItemCount();
@@ -1307,6 +1312,10 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 			mapCols.RemoveKey(GetColumnID(nItem));
 		}
 	}
+
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(Weed out tracked columns)"));
+	///////////////////////////////////////////////////////////////////
 
 	if (!bZeroOthers && !mapCols.GetCount())
 		return;
@@ -1334,6 +1343,11 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 		CTDCLongestItemMap mapLongest;
 		m_find.GetLongestValues(mapCols, m_aCustomAttribDefs, mapLongest, bVisibleTasksOnly);
 
+		// PERMANENT LOGGING //////////////////////////////////////////////
+		log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(GetLongestValues)"));
+		///////////////////////////////////////////////////////////////////
+
+		CHoldRedraw hr(m_hdrColumns);
 		m_hdrColumns.SetItemWidth(0, 0); // always
 
 		for (int nItem = 1; nItem < nNumCols; nItem++)
@@ -1346,6 +1360,15 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 				if (mapLongest.HasColumn(nColID))
 				{
 					CString sLongest = mapLongest.GetLongestValue(nColID);
+
+					// Special handling
+					switch (nColID)
+					{
+					case TDCC_FILELINK:
+						nColWidth = ((_ttoi(sLongest) * (CFileIcons::GetImageSize() + COL_ICON_SPACING)) - COL_ICON_SPACING);
+						sLongest.Empty();
+						break;
+					}
 
 					if (sLongest.GetLength())
 						nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, &dc);
@@ -1362,6 +1385,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 				}
 				else
 				{
+					//FileMisc::LogText(_T("CalcColumnWidth(%s)"), GetColumnName(nColID));
 					nColWidth = CalcColumnWidth(nItem, &dc, bVisibleTasksOnly);
 				}
 			}
@@ -1376,6 +1400,10 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 			m_hdrColumns.SetItemWidth(nItem, nColWidth);
 		}
+
+		// PERMANENT LOGGING //////////////////////////////////////////////
+		log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(SetItemWidths)"));
+		///////////////////////////////////////////////////////////////////
 	}
 
 	// cleanup
