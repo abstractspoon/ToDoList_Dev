@@ -490,7 +490,7 @@ protected:
 	static BOOL IsDateWithin7DaysOfToday(const COleDateTime& date, TDC_DATE nDate);
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);
 	static int GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex = 0);
-	static int CalcRequiredIconColumnWidth(int nNumImage);
+	static int CalcRequiredIconColumnWidth(int nNumImage, BOOL bWithPadding = TRUE, int nImageWidth = -1);
 	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, 
 												CStringArray& aMatched, CStringArray& aMixed);
 	static BOOL CheckUpdateDueBrushColor(COLORREF crNew, COLORREF& crCur, CBrush& brCur);

@@ -1365,7 +1365,7 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 					switch (nColID)
 					{
 					case TDCC_FILELINK:
-						nColWidth = ((_ttoi(sLongest) * (CFileIcons::GetImageSize() + COL_ICON_SPACING)) - COL_ICON_SPACING);
+						nColWidth = CalcRequiredIconColumnWidth(_ttoi(sLongest), FALSE, CFileIcons::GetImageSize());
 						sLongest.Empty();
 						break;
 					}
@@ -3161,10 +3161,13 @@ void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_
 CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize, int nImage, int nCount) const
 {
 	CRect rImage(rSubItem.TopLeft(), CSize(nImageSize, nImageSize));
+	
+	rImage.OffsetRect(LV_COLPADDING, 0);
+
 	GraphicsMisc::CentreRect(rImage, rSubItem, (nCount == 1), TRUE);
 	
 	if (nCount > 1)
-		rImage.OffsetRect((nImage * (nImageSize + 1)), 0);
+		rImage.OffsetRect((nImage * (nImageSize + COL_ICON_SPACING)), 0);
 
 	return rImage.TopLeft();
 }
@@ -3320,9 +3323,17 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	return TRUE; // we handled it
 }
 
-int CTDLTaskCtrlBase::CalcRequiredIconColumnWidth(int nNumImage)
+int CTDLTaskCtrlBase::CalcRequiredIconColumnWidth(int nNumImage, BOOL bWithPadding, int nImageWidth)
 {
-	return ((nNumImage * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING + (LV_COLPADDING * 2));
+	if (nImageWidth == -1)
+		nImageWidth = COL_ICON_SIZE;
+
+	int nColWidth = ((nNumImage * (nImageWidth + COL_ICON_SPACING)) - COL_ICON_SPACING);
+
+	if (bWithPadding)
+		nColWidth += (LV_COLPADDING * 2);
+
+	return nColWidth;
 }
 
 BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime) const
@@ -5260,12 +5271,8 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 			int nMaxCount = m_find.GetLargestFileLinkCount(bVisibleTasksOnly);
 
 			if (nMaxCount >= 1)
-			{
-				nColWidth = ((nMaxCount * (CFileIcons::GetImageSize() + COL_ICON_SPACING)) - COL_ICON_SPACING);
+				nColWidth = CalcRequiredIconColumnWidth(nMaxCount, FALSE, CFileIcons::GetImageSize());
 
-				// compensate for extra padding we don't want 
-				nColWidth -= (2 * LV_COLPADDING);
-			}
 			// else use MINCOLWIDTH
 		}
 		break; 
@@ -5355,7 +5362,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 					case TDCCA_FIXEDMULTILIST:
 						{
 							int nNumIcons = m_find.GetLargestCustomAttributeArraySize(attribDef, bVisibleTasksOnly);
-							return ((nNumIcons * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
+							return CalcRequiredIconColumnWidth(nNumIcons, FALSE);
 						}
 					}
 				}
