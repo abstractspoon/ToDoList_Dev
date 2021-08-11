@@ -48,6 +48,7 @@ public:
 	CString GetLongestValue(TDC_COLUMN nColID) const;
 
 protected:
+	// Used by CToDoCtrlFind
 	static BOOL IsSupportedColumn(TDC_COLUMN nColID);
 	static BOOL IsSupportedColumn(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 };

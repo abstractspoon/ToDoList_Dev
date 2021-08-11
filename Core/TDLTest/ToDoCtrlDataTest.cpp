@@ -35,7 +35,6 @@ int NUM_TESTLEVELS = CTaskFileTest::NUM_TESTLEVELS;
 
 CToDoCtrlDataTest::CToDoCtrlDataTest(const CTestUtils& utils) : CTDLTestBase(utils)
 {
-	// Initialise styles and custom attributes
 	m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 //	m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
 	m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
@@ -154,9 +153,9 @@ void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData&
 	DWORD dwTickStart = GetTickCount();
 
 	CTDCTaskCalculator calc(data);
-	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+	DWORD dwMaxTaskID = data.GetTaskCount();
 
-	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
 		calc.GetTaskSubtaskCompletion(dwTaskID);
 		calc.GetTaskTimeEstimate(dwTaskID, TDCU_DAYS);
@@ -196,9 +195,9 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 	DWORD dwTickStart = GetTickCount();
 
 	CTDCTaskFormatter formatter(data);
-	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+	DWORD dwMaxTaskID = data.GetTaskCount();
 
-	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
 		formatter.GetTaskSubtaskCompletion(dwTaskID);
 		formatter.GetTaskPath(dwTaskID);
@@ -241,9 +240,9 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlD
 	DWORD dwTickStart = GetTickCount();
 
 	CTDCTaskFormatter formatter(data);
-	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+	DWORD dwMaxTaskID = data.GetTaskCount();
 
-	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
 		formatter.GetTaskPosition(dwTaskID);
 	}
@@ -296,10 +295,9 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& dat
 	ASSERT(m_utils.HasCommandlineFlag('p'));
 
 	DWORD dwTickStart = GetTickCount();
+	DWORD dwMaxTaskID = data.GetTaskCount();
 
-	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
-
-	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;
