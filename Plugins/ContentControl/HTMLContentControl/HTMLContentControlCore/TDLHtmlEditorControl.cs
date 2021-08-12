@@ -335,10 +335,21 @@ namespace HTMLContentControl
 					{
 						// Can't handle this with WM_KEYDOWN because different
 						// keyboard layouts place '@' in different locations
-						var args = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedTo);
-						NeedAttributeValues(this, args);
+						var values = new List<string>();
 
-						if ((args.values != null) && (args.values.Count > 0))
+						var allocTo = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedTo);
+						NeedAttributeValues(this, allocTo);
+
+						if (allocTo.values != null)
+							values.AddRange(allocTo.values);
+
+						var allocBy = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedBy);
+						NeedAttributeValues(this, allocBy);
+
+						if (allocBy.values != null)
+							values.AddRange(allocBy.values);
+						
+						if (values.Count > 0)
 						{
 							// Insert the '@' first and select it
 							SelectedHtml = "@";
@@ -354,7 +365,7 @@ namespace HTMLContentControl
 							var logFont = new unvell.Common.Win32Lib.Win32.LOGFONT();
 							font.ToLogFont(logFont);
 
-							var popup = new PopupListBox(args.values.ToArray());
+							var popup = new PopupListBox(values.ToArray());
 							popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
 
 							pos.Y += Math.Abs(logFont.lfHeight);
