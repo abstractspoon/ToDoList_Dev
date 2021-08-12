@@ -6863,7 +6863,14 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	
 	SetModified(TRUE);
 	
-	m_taskTree.SetModified(mapAttribIDs, bAllowResort);
+	// Avoid notifying the tree ctrl when the user is in 
+	// the process of creating a new task because this will
+	// recalculate the column widths which could have a
+	// significant impact on the responsiveness of the UI
+	BOOL bNewTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
+
+	if (!bNewTask)
+		m_taskTree.SetModified(mapAttribIDs, bAllowResort);
 
 	TDCNOTIFYMOD mod(mapAttribIDs, aModTaskIDs);
 	GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)&mod);

@@ -1273,8 +1273,7 @@ void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 {
-	if (m_bEnableRecalcColumns)
-		RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
+	RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
 }
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
@@ -1292,6 +1291,9 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers, BOOL bCustomOnly)
 {
+	if (!m_bEnableRecalcColumns)
+		return;
+
 	if (!bZeroOthers && !aColIDs.GetCount())
 		return;
 
