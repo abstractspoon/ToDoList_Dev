@@ -1735,10 +1735,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	if (m_bDeletingTasks)
 		return;
 
-#ifdef _DEBUG
-	//DWORD dwTick = GetTickCount();
-#endif
-
+	CScopedLogTimer log(_T("CToDoCtrl::UpdateControls()"));
+	
 	if (!hti)
 		hti = GetUpdateControlsItem();
 	
@@ -1896,10 +1894,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	UpdateSelectedTaskPath();
 	
 	EnableDisableControls(hti);
-
-#ifdef _DEBUG
-//	TRACE(_T("CToDoCtrl::UpdateControls(took %d ms)\n"), (GetTickCount() - dwTick));
-#endif
 }
 
 void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
@@ -8939,13 +8933,17 @@ BOOL CToDoCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 
 void CToDoCtrl::SelectItem(HTREEITEM hti) 
 { 
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CToDoCtrl::SelectItem()"));
+	///////////////////////////////////////////////////////////////////
+
 	Flush();
 
 	if (m_taskTree.GetSafeHwnd()) 
 	{
 		if (!m_taskTree.SelectItem(hti))
 			UpdateControls(); // disable controls
-		
+
 		UpdateSelectedTaskPath();
 
 		// notify parent
