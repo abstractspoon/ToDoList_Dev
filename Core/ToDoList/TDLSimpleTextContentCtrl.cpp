@@ -292,9 +292,20 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 					return true;
 				}
 				break;
+			}
+		}
+	}
+	else if (pMsg->message == WM_CHAR)
+	{
+		BOOL bEnabled = !(GetStyle() & ES_READONLY);
 
-			case '2':
-				if (bShift) // '@'
+		if (bEnabled)
+		{
+			switch (pMsg->wParam)
+			{
+			case '@':
+				// Can't handle this with WM_KEYDOWN because different
+				// keyboard layouts place '@' in different locations
 				{
 					// Get both allocated by and allocated to
 					CString sAllocTo = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, TDCA_ALLOCTO, '\n');
@@ -319,7 +330,7 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 			}
 		}
 	}
-
+	
 	return false;
 }
 

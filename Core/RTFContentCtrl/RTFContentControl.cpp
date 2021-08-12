@@ -644,9 +644,24 @@ bool CRTFContentControl::ProcessMessage(MSG* pMsg)
 						}
 					}
 					return true;
+				}
+			}
+		}
+		break;
 
-				case '2':
-					if (bShift) // '@'
+	case WM_CHAR:
+		{
+			AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+			BOOL bEnabled = !GetReadOnly();
+
+			if (bEnabled)
+			{
+				switch (pMsg->wParam)
+				{
+				case '@':
+					// Can't handle this with WM_KEYDOWN because different
+					// keyboard layouts place '@' in different locations
 					{
 						// Get both allocated by and allocated to
 						CString sAllocTo = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, TDCA_ALLOCTO, '\n');
