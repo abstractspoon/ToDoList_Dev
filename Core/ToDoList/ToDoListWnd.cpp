@@ -12063,11 +12063,17 @@ LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
 
 		if (!Misc::Trim(sItemID).IsEmpty() && (sItemID[0] != '/'))
 		{
+			// Outlook pops up an error message which is a pain for
+			// the user if the issue is that they archive old messages
+			CMessageBox::DisableSimpleErrorMessages(TRUE);
+
 			CMSOutlookHelper outlook;
 			OutlookAPI::_Item* pItem = outlook.GetItemByID(sItemID);
 
 			if (pItem)
 				sTooltip = outlook.GetItemData(*pItem, OA_TITLE);
+
+			CMessageBox::DisableSimpleErrorMessages(FALSE);
 		}
 	}
 	else // see if it's a task link
