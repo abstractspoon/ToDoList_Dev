@@ -110,6 +110,7 @@ REM - All other components
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\UIComponents.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGrid.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGridEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\LinkLabelEx.dll
 
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest
