@@ -2454,6 +2454,9 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 
 					nItem = InsertListItem(otherList, nItem, dwItemData);
 					ASSERT(nItem != -1);
+
+					// and then fix up linkage of subsequent items
+					FixupListListItemIsDataLinkage(nItem + 1);
 				}
 
 				InitItemHeights();
@@ -2470,16 +2473,8 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 			HWND hwndOther = OtherWnd(hRealWnd);
 			VERIFY(::SendMessage(hwndOther, LVM_DELETEITEM, wp, lp));
 
-			// and then fix up itemdata of following items
-			if ((IsRight(hwndOther) && (m_nLinkage == TLSL_RIGHTDATA_IS_LEFTITEM)) ||
-				(IsLeft(hwndOther) && (m_nLinkage == TLSL_LEFTDATA_IS_RIGHTITEM)))
-			{
-				CAutoFlag af(m_bResyncing, TRUE);
-				int nNumItems = ListView_GetItemCount(hwndOther);
-
-				for (int nItem = (int)wp; nItem < nNumItems; nItem++)
-					SetListItemData(hwndOther, nItem, (int)nItem);
-			}
+			// and then fix up linkage of subsequent items
+			FixupListListItemIsDataLinkage((int)wp);
 		}
 		break;
 
@@ -2705,6 +2700,40 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		lr = ScDefault(hRealWnd);
 	
 	return lr;
+}
+
+void CTreeListSyncer::FixupListListItemIsDataLinkage(int nFrom)
+{
+	// Only Interested in itemdata being index of other wnd
+	// because Itemdata linkage takes care of itself
+	if ((m_nLinkage == TLSL_LEFTDATA_IS_RIGHTDATA) ||
+		(m_nLinkage == TLSL_RIGHTDATA_IS_LEFTDATA))
+	{
+		return;
+	}
+
+	HWND hwndPrimary = PrimaryWnd();
+	HWND hwndOther = OtherWnd(hwndPrimary);
+
+	// Sanity check
+	if (!IsList(hwndPrimary) || !IsList(hwndOther))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	int nNumItems = ListView_GetItemCount(hwndPrimary);
+
+	if (nNumItems != ListView_GetItemCount(hwndOther))
+	{
+		ASSERT(0);
+		return;
+	}
+
+	CAutoFlag af(m_bResyncing, TRUE);
+
+	for (int nItem = nFrom; nItem < nNumItems; nItem++)
+		SetListItemData(hwndOther, nItem, (DWORD)nItem);
 }
 
 BOOL CTreeListSyncer::HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp)
@@ -3643,15 +3672,7 @@ void CTreeListSyncer::Sort(PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, HTREEITE
 		// if the 'other' list is linked to the 'primary'
 		// via the item index then this will have changed 
 		// so we need to resync them
-		if ((m_nLinkage == TLSL_LEFTDATA_IS_RIGHTITEM) || 
-			(m_nLinkage == TLSL_RIGHTDATA_IS_LEFTITEM))
-		{
-			CAutoFlag af(m_bResyncing, TRUE);
-			int nItem = ListView_GetItemCount(hwndPrimary);
-
-			while (nItem--)
-				SetListItemData(hwndOther, nItem, nItem);
-		}
+		FixupListListItemIsDataLinkage();
 	}
 	
 	ResyncScrollPos(hwndPrimary, hwndOther);
