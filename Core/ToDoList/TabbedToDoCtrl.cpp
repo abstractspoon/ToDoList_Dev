@@ -4522,12 +4522,6 @@ void CTabbedToDoCtrl::OnTabCtrlRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	*pResult = 0;
 }
 
-void CTabbedToDoCtrl::OnListSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
-{
-	*pResult = 0;
-	OnListSelChanged();
-}
-
 void CTabbedToDoCtrl::OnListClick(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	// special case - ALT key
@@ -6364,6 +6358,12 @@ void CTabbedToDoCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)
 	default:
 		ASSERT(0);
 	}
+}
+
+void CTabbedToDoCtrl::OnListSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{
+	*pResult = 0;
+	OnListSelChanged();
 }
 
 void CTabbedToDoCtrl::OnListSelChanged()
