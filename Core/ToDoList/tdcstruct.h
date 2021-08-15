@@ -2290,7 +2290,7 @@ struct TDCCOLEDITVISIBILITY
 		return nShowFields;
 	}
 	
-	void SetShowFields(TDL_SHOWATTRIB nShow)
+	virtual void SetShowFields(TDL_SHOWATTRIB nShow)
 	{
 		nShowFields = nShow;
 
