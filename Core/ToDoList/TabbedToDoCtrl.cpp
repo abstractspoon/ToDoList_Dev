@@ -2204,9 +2204,10 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 
 void CTabbedToDoCtrl::RebuildCustomAttributeUI()
 {
-	CToDoCtrl::RebuildCustomAttributeUI();
-
+	// Must remove any deleted attribute columns before resizing/redrawing
 	m_taskList.OnCustomAttributeChange();
+
+	CToDoCtrl::RebuildCustomAttributeUI();
 }
 
 void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)

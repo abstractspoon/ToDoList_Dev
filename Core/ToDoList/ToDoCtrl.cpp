@@ -6040,9 +6040,10 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 
 	CTDCCustomAttributeUIHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
 
-	Resize();
-
+	// Must remove any deleted attribute columns before resizing/redrawing
 	m_taskTree.OnCustomAttributeChange();
+
+	Resize();
 }
 
 BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
