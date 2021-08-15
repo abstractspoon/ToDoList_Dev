@@ -681,7 +681,7 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 		SetCheck(nItem, CCBC_UNCHECKED, FALSE);
 	
 	// now set the check states
-	if (!ModifyChecked(aChecked, CCBC_CHECKED, FALSE) || 
+	if (!ModifyChecked(aChecked, CCBC_CHECKED, FALSE) && 
 		!ModifyChecked(aMixed, CCBC_MIXED, FALSE))
 	{
 		return FALSE;

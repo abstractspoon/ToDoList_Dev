@@ -355,7 +355,7 @@ CString TDCCADATA::FormatAsArray(TCHAR cSep) const
 	if (cSep != 0)
 		sArray.Replace(NEWLINE, cSep);
 	else
-		sArray.Replace(_T("\n"), Misc::GetListSeparator());
+		sArray.Replace(_T("\n"), (Misc::GetListSeparator() + ' '));
 	
 	return sArray;
 }

@@ -3957,6 +3957,10 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
+		if (attribDef.IsList())
+			return data.FormatAsArray();
+		// else fall thru
+
 	case TDCCA_FRACTION:
 		{
 			double dValue = 0.0;
