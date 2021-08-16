@@ -486,11 +486,8 @@ int CTDCDependencyArray::FindDependency(const TDCDEPENDENCY& other) const
 		}
 		else if (!bLocal && !bOtherLocal)
 		{
-			if ((depend.dwTaskID == other.dwTaskID) &&
-				FileMisc::IsSamePath(depend.sTasklist, other.sTasklist))
-			{
-				return nDepnd;
-			}
+			if (depend == other)
+				return nDepend;
 		}
 	}
 
