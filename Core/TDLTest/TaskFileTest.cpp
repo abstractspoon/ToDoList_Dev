@@ -32,7 +32,7 @@ const int NUM_TASK_STRINGS = 10;
 
 CTaskFileTest::CTaskFileTest(const CTestUtils& utils) : CTDLTestBase(utils)
 {
-
+	CoInitialize(NULL);
 }
 
 CTaskFileTest::~CTaskFileTest()
@@ -72,6 +72,13 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 				 dwDuration, 
 				 tasks.GetTaskCount(),
 				 (dwDuration * 100.0) / tasks.GetTaskCount());
+
+		// -----------------------------------------------------------------
+
+		CString sFilePath = Misc::Format(_T("TestTasklist_Tree_%d.tdl"), tasks.GetTaskCount());
+
+		TestSaveTasklist(tasks, sFilePath, _T("nested"));
+		TestLoadTasklist(sFilePath, _T("nested"));
 	}
 	
 	EndTest();
@@ -102,9 +109,49 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 				 dwDuration, 
 				 tasks.GetTaskCount(),
 				 (dwDuration * 100.0) / tasks.GetTaskCount());
+
+		// -----------------------------------------------------------------
+
+		CString sFilePath = Misc::Format(_T("TestTasklist_Flat_%d.tdl"), tasks.GetTaskCount());
+
+		TestSaveTasklist(tasks, sFilePath, _T("flat"));
+		TestLoadTasklist(sFilePath, _T("flat"));
 	}
 
 	EndTest();
+}
+
+void CTaskFileTest::TestSaveTasklist(CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szType)
+{
+	DWORD dwTickStart = GetTickCount();
+	
+	tasks.SetXmlHeader(DEFAULT_UNICODE_HEADER);
+	tasks.Save(szFilePath, SFEF_UTF16);
+	
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+
+	_tprintf(_T("Test took %ld ms to save a tasklist with %d %s tasks (%.1f ms/100)\n"), 
+			dwDuration, 
+			tasks.GetTaskCount(),
+			szType,
+			(dwDuration * 100.0) / tasks.GetTaskCount());
+
+}
+
+void CTaskFileTest::TestLoadTasklist(LPCTSTR szFilePath, LPCTSTR szType)
+{
+	DWORD dwTickStart = GetTickCount();
+	
+	CTaskFile tasks;
+	tasks.Load(szFilePath);
+				
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+
+	_tprintf(_T("Test took %ld ms to load a tasklist with %d %s tasks (%.1f ms/100)\n"), 
+			dwDuration, 
+			tasks.GetTaskCount(),
+			szType,
+			(dwDuration * 100.0) / tasks.GetTaskCount());
 }
 
 void CTaskFileTest::PopulateHierarchy(CTaskFile& tasks, int nNumLevels, const CTDCAttributeMap& mapAttrib) const

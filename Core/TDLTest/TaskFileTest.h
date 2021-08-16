@@ -39,6 +39,9 @@ protected:
 	void TestHierarchyConstructionPerformance();
 	void TestFlatListConstructionPerformance();
 
+	static void TestSaveTasklist(CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szType);
+	static void TestLoadTasklist(LPCTSTR szFilePath, LPCTSTR szType);
+
 	static void Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTask, int nLevel, int nNumLevels, const CTDCAttributeMap& mapAtrrib);
 	static void PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAtrrib);
 	static void PopulateStringTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, int nNumMultiAttrib, const CTDCAttributeMap& mapAtrrib);
