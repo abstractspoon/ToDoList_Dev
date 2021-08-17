@@ -18,8 +18,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-int CTaskFileTest::NUM_TESTLEVELS = 5;
-int CTaskFileTest::MAX_TESTLEVELS = 5;
+const TCHAR NO_ATTRIBUTES = 'n';
 
 //////////////////////////////////////////////////////////////////////
 
@@ -30,7 +29,11 @@ const int MAX_TASK_STRINGS = 10;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTaskFileTest::CTaskFileTest(const CTestUtils& utils) : CTDLTestBase(utils)
+CTaskFileTest::CTaskFileTest(const CTestUtils& utils) 
+	: 
+	CTDLTestBase(utils),
+	NUM_TESTLEVELS(utils.HasCommandlineFlag(NO_ATTRIBUTES) ? 5 : 4),
+	m_bPopulateAttributes(!utils.HasCommandlineFlag(NO_ATTRIBUTES))
 {
 	CoInitialize(NULL);
 }
@@ -50,6 +53,21 @@ TESTRESULT CTaskFileTest::Run()
 	return GetTotals();
 }
 
+void CTaskFileTest::BeginTest(LPCTSTR szFunction)
+{
+	CString sTest;
+
+	sTest += _T("CTaskFileTest::");
+	sTest += szFunction;
+
+	if (m_bPopulateAttributes)
+		sTest += _T("(WITH attributes)");
+	else
+		sTest += _T("(WITHOUT attributes)");
+
+	CTDLTestBase::BeginTest(sTest);
+}
+
 void CTaskFileTest::TestHierarchyConstructionPerformance()
 {
 	if (!m_utils.HasCommandlineFlag('p'))
@@ -58,25 +76,19 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 		return;
 	}
 
-	BOOL bNoAttrib = m_utils.HasCommandlineFlag('n');
+	BeginTest(_T("HierarchyConstructionPerformance"));
 
-	BeginTest(_T("CTaskFileTest::HierarchyConstructionPerformance"));
-
-	for (int nNumLevels = 2; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
+	for (int nNumLevels = 2; nNumLevels <= NUM_TESTLEVELS; nNumLevels++)
 	{
 		DWORD dwTickStart = GetTickCount();
 
+		// Populate
 		CTaskFile tasks;
-		PopulateHierarchy(tasks, nNumLevels, ((bNoAttrib || (nNumLevels > 4)) ? TDCA_NONE : TDCA_ALL));
 		
-		DWORD dwDuration = (GetTickCount() - dwTickStart);
-		_tprintf(_T("Test took %ld ms to build a tasklist with %d nested tasks (%.1f ms/100)\n"), 
-				 dwDuration, 
-				 tasks.GetTaskCount(),
-				 (dwDuration * 100.0) / tasks.GetTaskCount());
+		PopulateHierarchy(tasks, nNumLevels, (m_bPopulateAttributes ? TDCA_ALL : TDCA_NONE));
+		OutputElapsedTime(tasks, dwTickStart, _T("build"), _T("nested"));
 
-		// -----------------------------------------------------------------
-
+		// Save and reload
 		CString sFilePath = Misc::Format(_T("TestTasklist_Tree_%d.tdl"), tasks.GetTaskCount());
 
 		TestSaveTasklist(tasks, sFilePath, _T("nested"));
@@ -94,28 +106,22 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 		return;
 	}
 
-	BOOL bNoAttrib = m_utils.HasCommandlineFlag('n');
+	BeginTest(_T("TestFlatListConstructionPerformance"));
 
-	BeginTest(_T("CTaskFileTest::FlatListConstructionPerformance"));
-
-	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
+	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= NUM_TESTLEVELS; nNumLevels++)
 	{
 		DWORD dwTickStart = GetTickCount();
 
 		// Numbers to match hierarchical test
 		nNumTasks += (int)pow(10, nNumLevels);
 
+		// Populate
 		CTaskFile tasks;
-		PopulateFlatList(tasks, nNumTasks, ((bNoAttrib || (nNumLevels > 4)) ? TDCA_NONE : TDCA_ALL));
 
-		DWORD dwDuration = (GetTickCount() - dwTickStart);
-		_tprintf(_T("Test took %ld ms to build a tasklist with %d flat tasks (%.1f ms/100)\n"), 
-				 dwDuration, 
-				 tasks.GetTaskCount(),
-				 (dwDuration * 100.0) / tasks.GetTaskCount());
+		PopulateFlatList(tasks, nNumTasks, (m_bPopulateAttributes ? TDCA_ALL : TDCA_NONE));
+		OutputElapsedTime(tasks, dwTickStart, _T("build"), _T("flat"));
 
-		// -----------------------------------------------------------------
-
+		// Save and reload
 		CString sFilePath = Misc::Format(_T("TestTasklist_Flat_%d.tdl"), tasks.GetTaskCount());
 
 		TestSaveTasklist(tasks, sFilePath, _T("flat"));
@@ -125,6 +131,19 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 	EndTest();
 }
 
+void CTaskFileTest::OutputElapsedTime(const CTaskFile& tasks, DWORD dwTickStart, LPCTSTR szOperation, LPCTSTR szType)
+{
+	DWORD dwDuration = (GetTickCount() - dwTickStart);
+
+	_tprintf(_T("Test took %ld ms to %s a tasklist with %d %s tasks (%.1f ms/100)"),
+			 dwDuration,
+			 szOperation,
+			 tasks.GetTaskCount(),
+			 szType,
+			 (dwDuration * 100.0) / tasks.GetTaskCount());
+	_tprintf(_T("\n"));
+}
+
 void CTaskFileTest::TestSaveTasklist(CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szType)
 {
 	DWORD dwTickStart = GetTickCount();
@@ -132,14 +151,7 @@ void CTaskFileTest::TestSaveTasklist(CTaskFile& tasks, LPCTSTR szFilePath, LPCTS
 	tasks.SetXmlHeader(DEFAULT_UNICODE_HEADER);
 	tasks.Save(szFilePath, SFEF_UTF16);
 	
-	DWORD dwDuration = (GetTickCount() - dwTickStart);
-
-	_tprintf(_T("Test took %ld ms to save a tasklist with %d %s tasks (%.1f ms/100)\n"), 
-			dwDuration, 
-			tasks.GetTaskCount(),
-			szType,
-			(dwDuration * 100.0) / tasks.GetTaskCount());
-
+	OutputElapsedTime(tasks, dwTickStart, _T("save"), szType);
 }
 
 void CTaskFileTest::TestLoadTasklist(LPCTSTR szFilePath, LPCTSTR szType)
@@ -149,18 +161,12 @@ void CTaskFileTest::TestLoadTasklist(LPCTSTR szFilePath, LPCTSTR szType)
 	CTaskFile tasks;
 	tasks.Load(szFilePath);
 				
-	DWORD dwDuration = (GetTickCount() - dwTickStart);
-
-	_tprintf(_T("Test took %ld ms to load a tasklist with %d %s tasks (%.1f ms/100)\n"), 
-			dwDuration, 
-			tasks.GetTaskCount(),
-			szType,
-			(dwDuration * 100.0) / tasks.GetTaskCount());
+	OutputElapsedTime(tasks, dwTickStart, _T("load"), szType);
 }
 
 void CTaskFileTest::PopulateHierarchy(CTaskFile& tasks, int nNumLevels, const CTDCAttributeMap& mapAttrib) const
 {
-	ASSERT(nNumLevels > 0 && nNumLevels <= MAX_TESTLEVELS);
+	ASSERT(nNumLevels > 0 && nNumLevels <= NUM_TESTLEVELS);
 
 	tasks.Reset();
 	AddGlobalsToTasklist(tasks, mapAttrib);
