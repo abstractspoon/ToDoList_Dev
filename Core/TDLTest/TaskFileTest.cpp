@@ -317,6 +317,9 @@ void CTaskFileTest::PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hT
 
 void CTaskFileTest::PopulateStringTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, int nNumMultiAttrib, const CTDCAttributeMap& mapAttrib)
 {
+	if (mapAttrib.Has(TDCA_NONE))
+		return;
+	
 	if (HasAttribute(mapAttrib, TDCA_ALLOCTO))
 	{
 		CStringArray aValues;
