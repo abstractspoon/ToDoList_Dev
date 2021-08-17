@@ -267,3 +267,4 @@ paket-files/
 *.vcxproj.user
 *.tlog
 *.lastbuildstate
+*.tdl
