@@ -161,7 +161,7 @@ void CConvertRTFToHTMLDlg::OnOK()
 		return;
 	}
 
-	POSITION pos = data.GetFirstTaskPosition();
+	POSITION pos = data.GetStart();
 	CRtfHtmlConverter rtfHtml;
 	CWaitCursor cursor;
 
@@ -173,8 +173,11 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 	while (pos)
 	{
-		const TODOITEM* pTDI = NULL;
-		DWORD dwTaskID = data.GetNextTask(pos, pTDI);
+		DWORD dwTaskID = data.GetNextTaskID(pos);
+		const TODOITEM* pTDI = data.GetTask(dwTaskID);
+
+		if (pTDI->IsReference())
+			continue;
 
 		m_sCurrentTask.Format(L"\"%s\"", pTDI->sTitle);
 		UpdateData(FALSE);

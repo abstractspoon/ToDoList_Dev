@@ -55,6 +55,9 @@ public:
 	
 	inline int GetTaskCount() const { return m_items.GetCount(); }
 	inline int GetTaskIDs(CDWordArray& aTaskIDs) const { return m_struct.GetTaskIDs(aTaskIDs); }
+
+	inline POSITION GetStart() const { return m_items.GetStart(); }
+	inline DWORD GetNextTaskID(POSITION& pos) const { return m_items.GetNextTaskID(pos); }
 	
 	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID = 0) const;
 	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef = NULL) const;

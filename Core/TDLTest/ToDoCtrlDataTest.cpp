@@ -17,6 +17,8 @@
 
 #include "..\interfaces\contentmgr.h"
 
+#include <math.h>
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
