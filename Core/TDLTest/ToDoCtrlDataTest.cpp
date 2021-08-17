@@ -26,10 +26,6 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-
-int NUM_TESTLEVELS = CTaskFileTest::NUM_TESTLEVELS;
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -78,10 +74,12 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 
 	BeginTest(_T("CToDoCtrlDataTest::HierarchyDataModelCreationPerformance"));
 
-	for (int nNumLevels = 2; nNumLevels <= NUM_TESTLEVELS; nNumLevels++)
+	CTaskFileTest tasksTest(m_utils);
+
+	for (int nNumLevels = 2; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
 	{
 		CTaskFile tasks;
-		CTaskFileTest(m_utils).PopulateHierarchy(tasks, nNumLevels);
+		tasksTest.PopulateHierarchy(tasks, nNumLevels);
 
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
@@ -108,13 +106,15 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 
 	BeginTest(_T("CToDoCtrlDataTest::FlatListDataModelPerformance"));
 
-	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= NUM_TESTLEVELS; nNumLevels++)
+	CTaskFileTest tasksTest(m_utils);
+	
+	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
 	{
 		// Numbers to match hierarchical test
 		nNumTasks += (int)pow(10, nNumLevels);
 
 		CTaskFile tasks;
-		CTaskFileTest(m_utils).PopulateFlatList(tasks, nNumTasks);
+		tasksTest.PopulateFlatList(tasks, nNumTasks);
 
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 

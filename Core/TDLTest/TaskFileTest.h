@@ -32,12 +32,16 @@ public:
 	void PopulateHierarchy(CTaskFile& tasks, int nNumLevels, const CTDCAttributeMap& mapAttrib = TDCA_ALL) const;
 	void PopulateFlatList(CTaskFile& tasks, int nNumTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL) const;
 	
-	static int NUM_TESTLEVELS;
-	static int MAX_TESTLEVELS;
+	const int NUM_TESTLEVELS;
+
+protected:
+	BOOL m_bPopulateAttributes;
 
 protected:
 	void TestHierarchyConstructionPerformance();
 	void TestFlatListConstructionPerformance();
+
+	void BeginTest(LPCTSTR szFunction);
 
 	static void TestSaveTasklist(CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szType);
 	static void TestLoadTasklist(LPCTSTR szFilePath, LPCTSTR szType);
@@ -48,6 +52,8 @@ protected:
 	static void PopulateArrayWithRandomStrings(CStringArray& aValues, int nCount, LPCTSTR szFormat);
 	static void AddGlobalsToTasklist(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib);
 	static BOOL HasAttribute(const CTDCAttributeMap& mapAttrib, TDC_ATTRIBUTE nAttribID);
+	static void OutputElapsedTime(const CTaskFile& tasks, DWORD dwTickStart, LPCTSTR szOperation, LPCTSTR szType);
+
 };
 
 #endif // !defined(AFX_TASKFILETEST_H__21479206_861C_4C47_9837_75F9B9171F90__INCLUDED_)
