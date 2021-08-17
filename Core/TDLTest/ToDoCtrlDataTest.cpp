@@ -63,6 +63,21 @@ TESTRESULT CToDoCtrlDataTest::Run()
 	return GetTotals();
 }
 
+void CToDoCtrlDataTest::BeginTest(LPCTSTR szFunction, BOOL bWithAttributes)
+{
+	CString sTest;
+	
+	sTest += _T("CToDoCtrlDataTest::");
+	sTest += szFunction;
+	
+	if (bWithAttributes)
+		sTest += _T("(WITH attributes)");
+	else
+		sTest += _T("(WITHOUT attributes)");
+	
+	CTDLTestBase::BeginTest(sTest);
+}
+
 void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 {
 	if (!m_utils.HasCommandlineFlag('p'))
@@ -71,9 +86,9 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 		return;
 	}
 
-	BeginTest(_T("CToDoCtrlDataTest::HierarchyDataModelCreationPerformance"));
-
 	CTaskFileTest tasksTest(m_utils);
+
+	BeginTest(_T("HierarchyDataModelCreationPerformance"), tasksTest.WantPopulateAttributes());
 
 	for (int nNumLevels = 2; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
 	{
@@ -103,10 +118,10 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 		return;
 	}
 
-	BeginTest(_T("CToDoCtrlDataTest::FlatListDataModelPerformance"));
-
 	CTaskFileTest tasksTest(m_utils);
 	
+	BeginTest(_T("FlatListDataModelPerformance"), tasksTest.WantPopulateAttributes());
+
 	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
 	{
 		// Numbers to match hierarchical test
