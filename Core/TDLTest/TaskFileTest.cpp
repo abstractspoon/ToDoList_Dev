@@ -23,8 +23,8 @@ int CTaskFileTest::MAX_TESTLEVELS = 5;
 
 //////////////////////////////////////////////////////////////////////
 
-const int NUM_GLOBAL_STRINGS = 100;
-const int NUM_TASK_STRINGS = 10;
+const int MAX_GLOBAL_STRINGS = 100;
+const int MAX_TASK_STRINGS = 10;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -58,6 +58,8 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 		return;
 	}
 
+	BOOL bNoAttrib = m_utils.HasCommandlineFlag('n');
+
 	BeginTest(_T("CTaskFileTest::HierarchyConstructionPerformance"));
 
 	for (int nNumLevels = 2; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
@@ -65,7 +67,7 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 		DWORD dwTickStart = GetTickCount();
 
 		CTaskFile tasks;
-		PopulateHierarchy(tasks, nNumLevels);
+		PopulateHierarchy(tasks, nNumLevels, ((bNoAttrib || (nNumLevels > 4)) ? TDCA_NONE : TDCA_ALL));
 		
 		DWORD dwDuration = (GetTickCount() - dwTickStart);
 		_tprintf(_T("Test took %ld ms to build a tasklist with %d nested tasks (%.1f ms/100)\n"), 
@@ -92,6 +94,8 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 		return;
 	}
 
+	BOOL bNoAttrib = m_utils.HasCommandlineFlag('n');
+
 	BeginTest(_T("CTaskFileTest::FlatListConstructionPerformance"));
 
 	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
@@ -102,7 +106,7 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 		nNumTasks += (int)pow(10, nNumLevels);
 
 		CTaskFile tasks;
-		PopulateFlatList(tasks, nNumTasks);
+		PopulateFlatList(tasks, nNumTasks, ((bNoAttrib || (nNumLevels > 4)) ? TDCA_NONE : TDCA_ALL));
 
 		DWORD dwDuration = (GetTickCount() - dwTickStart);
 		_tprintf(_T("Test took %ld ms to build a tasklist with %d flat tasks (%.1f ms/100)\n"), 
@@ -169,13 +173,12 @@ void CTaskFileTest::Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTas
 	if (nLevel > nNumLevels)
 		return;
 
-	// Note: there's no benefit to using 'NewSiblingTask' for so few tasks
 	for (int i = 0; i < 10; i++)
 	{
 		HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), hParentTask, 0, 0, TRUE);
 
 		PopulateNumericTaskAttributes(tasks, hTask, mapAttrib);
-		PopulateStringTaskAttributes(tasks, hTask, NUM_TASK_STRINGS, mapAttrib);
+		PopulateStringTaskAttributes(tasks, hTask, MAX_TASK_STRINGS, mapAttrib);
 
 		// Add next level of tasks
 		Add10TasksToHierarchy(tasks, hTask, nLevel + 1, nNumLevels, mapAttrib);
@@ -193,59 +196,67 @@ void CTaskFileTest::PopulateFlatList(CTaskFile& tasks, int nNumTasks, const CTDC
 		HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
 
 		PopulateNumericTaskAttributes(tasks, hTask, mapAttrib);
-		PopulateStringTaskAttributes(tasks, hTask, NUM_TASK_STRINGS, mapAttrib);
+		PopulateStringTaskAttributes(tasks, hTask, MAX_TASK_STRINGS, mapAttrib);
 	}
+}
+
+BOOL CTaskFileTest::HasAttribute(const CTDCAttributeMap& mapAttrib, TDC_ATTRIBUTE nAttribID)
+{
+	return (mapAttrib.Has(TDCA_ALL) || mapAttrib.Has(nAttribID));
 }
 
 void CTaskFileTest::AddGlobalsToTasklist(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib)
 {
+	if (mapAttrib.Has(TDCA_NONE))
+		return;
+
 	TDCAUTOLISTDATA tld;
 
-	if (mapAttrib.Has(TDCA_ALLOCBY))
+	if (HasAttribute(mapAttrib, TDCA_ALLOCBY))
 	{
-		tld.aAllocBy.SetSize(NUM_GLOBAL_STRINGS);
+		tld.aAllocBy.SetSize(MAX_GLOBAL_STRINGS);
 
-		for (int i = 0; i < NUM_GLOBAL_STRINGS; i++)
+		for (int i = 0; i < MAX_GLOBAL_STRINGS; i++)
 			tld.aAllocBy[i] = Misc::Format(_T("AllocBy_%d"), i + 1);
 	}
 
-	if (mapAttrib.Has(TDCA_ALLOCTO))
+	if (HasAttribute(mapAttrib, TDCA_ALLOCTO))
 	{
-		tld.aAllocTo.SetSize(NUM_GLOBAL_STRINGS);
+		tld.aAllocTo.SetSize(MAX_GLOBAL_STRINGS);
 
-		for (int i = 0; i < NUM_GLOBAL_STRINGS; i++)
+		for (int i = 0; i < MAX_GLOBAL_STRINGS; i++)
 			tld.aAllocTo[i] = Misc::Format(_T("AllocTo_%d"), i + 1);
 	}
 
-	if (mapAttrib.Has(TDCA_CATEGORY))
+	if (HasAttribute(mapAttrib, TDCA_CATEGORY))
 	{
-		tld.aCategory.SetSize(NUM_GLOBAL_STRINGS);
+		tld.aCategory.SetSize(MAX_GLOBAL_STRINGS);
 
-		for (int i = 0; i < NUM_GLOBAL_STRINGS; i++)
+		for (int i = 0; i < MAX_GLOBAL_STRINGS; i++)
 			tld.aCategory[i] = Misc::Format(_T("Category_%d"), i + 1);
 	}
 
-	if (mapAttrib.Has(TDCA_STATUS))
+	if (HasAttribute(mapAttrib, TDCA_STATUS))
 	{
-		tld.aStatus.SetSize(NUM_GLOBAL_STRINGS);
+		tld.aStatus.SetSize(MAX_GLOBAL_STRINGS);
 
-		for (int i = 0; i < NUM_GLOBAL_STRINGS; i++)
+		for (int i = 0; i < MAX_GLOBAL_STRINGS; i++)
 			tld.aStatus[i] = Misc::Format(_T("Status_%d"), i + 1);
 	}
 
-	if (mapAttrib.Has(TDCA_TAGS))
+	if (HasAttribute(mapAttrib, TDCA_TAGS))
 	{
-		tld.aTags.SetSize(NUM_GLOBAL_STRINGS);
+		tld.aTags.SetSize(MAX_GLOBAL_STRINGS);
 
-		for (int i = 0; i < NUM_GLOBAL_STRINGS; i++)
+		for (int i = 0; i < MAX_GLOBAL_STRINGS; i++)
 			tld.aTags[i] = Misc::Format(_T("Tag_%d"), i + 1);
 	}
 
-	if (mapAttrib.Has(TDCA_VERSION))
+	if (HasAttribute(mapAttrib, TDCA_VERSION))
 	{
-		tld.aVersion.SetSize(NUM_GLOBAL_STRINGS);
+		tld.aVersion.SetSize(MAX_GLOBAL_STRINGS);
 
-		for (int i = 0; i < NUM_GLOBAL_STRINGS; i++)
+		for (int i = 0; i < MAX_GLOBAL_STRINGS; i++)
 			tld.aVersion[i] = Misc::Format(_T("Version_%d"), i + 1);
 	}
 
@@ -254,74 +265,80 @@ void CTaskFileTest::AddGlobalsToTasklist(CTaskFile& tasks, const CTDCAttributeMa
 
 void CTaskFileTest::PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttrib)
 {
+	if (mapAttrib.Has(TDCA_NONE))
+		return;
+	
 	COleDateTime dtNow = COleDateTime::GetCurrentTime();
 
-	if (mapAttrib.Has(TDCA_PERCENT))
+	if (HasAttribute(mapAttrib, TDCA_PERCENT))
 		tasks.SetTaskPercentDone(hTask, rand() % 100);
 		
-	if (mapAttrib.Has(TDCA_PRIORITY))
+	if (HasAttribute(mapAttrib, TDCA_PRIORITY))
 		tasks.SetTaskPriority(hTask, rand() % 10);
 	
-	if (mapAttrib.Has(TDCA_RISK))
+	if (HasAttribute(mapAttrib, TDCA_RISK))
 		tasks.SetTaskRisk(hTask, rand() % 10);
 	
-	if (mapAttrib.Has(TDCA_COST))
+	if (HasAttribute(mapAttrib, TDCA_COST))
 		tasks.SetTaskCost(hTask, rand() / 1000.0);
 	
-	if (mapAttrib.Has(TDCA_DUEDATE))
+	if (HasAttribute(mapAttrib, TDCA_DUEDATE))
 		tasks.SetTaskDueDate(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)));
 	
-	if (mapAttrib.Has(TDCA_STARTDATE))
+	if (HasAttribute(mapAttrib, TDCA_STARTDATE))
 		tasks.SetTaskStartDate(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)));
 	
-	if (mapAttrib.Has(TDCA_LASTMODDATE))
+	if (HasAttribute(mapAttrib, TDCA_LASTMODDATE))
 		tasks.SetTaskLastModified(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)), _T(""));
 	
-	if (mapAttrib.Has(TDCA_TIMEESTIMATE))
+	if (HasAttribute(mapAttrib, TDCA_TIMEESTIMATE))
 		tasks.SetTaskTimeEstimate(hTask, rand() % 20, TDCU_DAYS);
 	
-	if (mapAttrib.Has(TDCA_TIMESPENT))
+	if (HasAttribute(mapAttrib, TDCA_TIMESPENT))
 		tasks.SetTaskTimeSpent(hTask, rand() % 20, TDCU_DAYS);
 
-	if (mapAttrib.Has(TDCA_DONEDATE) && ((rand() % 10) == 0))
+	if (HasAttribute(mapAttrib, TDCA_DONEDATE) && ((rand() % 10) == 0))
 		tasks.SetTaskDoneDate(hTask, COleDateTime(dtNow.m_dt + (rand() % 100)));
 }
 
 void CTaskFileTest::PopulateStringTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, int nNumMultiAttrib, const CTDCAttributeMap& mapAttrib)
 {
-	if (mapAttrib.Has(TDCA_ALLOCTO))
+	if (mapAttrib.Has(TDCA_NONE))
+		return;
+	
+	if (HasAttribute(mapAttrib, TDCA_ALLOCTO))
 	{
 		CStringArray aValues;
 		PopulateArrayWithRandomStrings(aValues, nNumMultiAttrib, _T("AllocTo_%d"));
 		tasks.SetTaskAllocatedTo(hTask, aValues);
 	}
 
-	if (mapAttrib.Has(TDCA_CATEGORY))
+	if (HasAttribute(mapAttrib, TDCA_CATEGORY))
 	{
 		CStringArray aValues;
 		PopulateArrayWithRandomStrings(aValues, nNumMultiAttrib, _T("Category_%d"));
 		tasks.SetTaskCategories(hTask, aValues);
 	}
 
-	if (mapAttrib.Has(TDCA_TAGS))
+	if (HasAttribute(mapAttrib, TDCA_TAGS))
 	{
 		CStringArray aValues;
 		PopulateArrayWithRandomStrings(aValues, nNumMultiAttrib, _T("Tags_%d"));
 		tasks.SetTaskTags(hTask, aValues);
 	}
 
-	int i = (rand() % NUM_GLOBAL_STRINGS);
+	int i = (rand() % MAX_GLOBAL_STRINGS);
 
-	if (mapAttrib.Has(TDCA_ALLOCBY))
+	if (HasAttribute(mapAttrib, TDCA_ALLOCBY))
 		tasks.SetTaskAllocatedBy(hTask, Misc::Format(_T("AllocBy_%d"), i + 1));
 	
-	if (mapAttrib.Has(TDCA_STATUS))
+	if (HasAttribute(mapAttrib, TDCA_STATUS))
 		tasks.SetTaskStatus(hTask, Misc::Format(_T("Status_%d"), i + 1));
 
-	if (mapAttrib.Has(TDCA_VERSION))
+	if (HasAttribute(mapAttrib, TDCA_VERSION))
 		tasks.SetTaskVersion(hTask, Misc::Format(_T("Version_%d"), i + 1));
 
-	if (mapAttrib.Has(TDCA_LASTMODBY))
+	if (HasAttribute(mapAttrib, TDCA_LASTMODBY))
 		tasks.SetTaskLastModifiedBy(hTask, Misc::Format(_T("LastModBy_%d"), i + 1));
 }
 
@@ -331,7 +348,7 @@ void CTaskFileTest::PopulateArrayWithRandomStrings(CStringArray& aValues, int nC
 
 	while (nCount--)
 	{
-		int i = (rand() % NUM_GLOBAL_STRINGS);
+		int i = (rand() % MAX_GLOBAL_STRINGS);
 		aValues[nCount] = Misc::Format(szFormat, i + 1);
 	}
 }
