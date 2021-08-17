@@ -58,6 +58,8 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 		return;
 	}
 
+	BOOL bNoAttrib = m_utils.HasCommandlineFlag('n');
+
 	BeginTest(_T("CTaskFileTest::HierarchyConstructionPerformance"));
 
 	for (int nNumLevels = 2; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
@@ -65,7 +67,7 @@ void CTaskFileTest::TestHierarchyConstructionPerformance()
 		DWORD dwTickStart = GetTickCount();
 
 		CTaskFile tasks;
-		PopulateHierarchy(tasks, nNumLevels, (nNumLevels > 4 ? TDCA_NONE : TDCA_ALL));
+		PopulateHierarchy(tasks, nNumLevels, ((bNoAttrib || (nNumLevels > 4)) ? TDCA_NONE : TDCA_ALL));
 		
 		DWORD dwDuration = (GetTickCount() - dwTickStart);
 		_tprintf(_T("Test took %ld ms to build a tasklist with %d nested tasks (%.1f ms/100)\n"), 
@@ -92,6 +94,8 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 		return;
 	}
 
+	BOOL bNoAttrib = m_utils.HasCommandlineFlag('n');
+
 	BeginTest(_T("CTaskFileTest::FlatListConstructionPerformance"));
 
 	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= max(NUM_TESTLEVELS, MAX_TESTLEVELS); nNumLevels++)
@@ -102,7 +106,7 @@ void CTaskFileTest::TestFlatListConstructionPerformance()
 		nNumTasks += (int)pow(10, nNumLevels);
 
 		CTaskFile tasks;
-		PopulateFlatList(tasks, nNumTasks, (nNumLevels > 4 ? TDCA_NONE : TDCA_ALL));
+		PopulateFlatList(tasks, nNumTasks, ((bNoAttrib || (nNumLevels > 4)) ? TDCA_NONE : TDCA_ALL));
 
 		DWORD dwDuration = (GetTickCount() - dwTickStart);
 		_tprintf(_T("Test took %ld ms to build a tasklist with %d flat tasks (%.1f ms/100)\n"), 
