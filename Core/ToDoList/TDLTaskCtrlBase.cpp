@@ -1636,7 +1636,7 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 		{
 			CRect rIcon;
 			
-			if (!CalcFileIconRect(rSubItem, rIcon, nFile, nNumFiles))
+			if (!CalcFileIconRect(rSubItem, rIcon, nFile))
 				break;
 
 			if (rIcon.PtInRect(ptList))
@@ -3095,7 +3095,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 	{
 		CRect rIcon;
 
-		if (!CalcFileIconRect(rect, rIcon, nFile, nNumFiles))
+		if (!CalcFileIconRect(rect, rIcon, nFile))
 			break; // out of bounds
 
 		// first check for a tdl://
@@ -3173,11 +3173,14 @@ CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImage
 	return rImage.TopLeft();
 }
 
-BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage, int nCount) const
+BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage) const
 {
+	// Note: Always pass a 'Count' value > 1 so that 
+	// the images are left-aligned for consistency
 	int nImageSize = CFileIcons::GetImageSize();
+	CPoint ptTopLeft = CalcColumnIconTopLeft(rSubItem, nImageSize, nImage, 2);
 
-	rIcon = CRect(CalcColumnIconTopLeft(rSubItem, nImageSize, nImage, nCount), CSize(nImageSize, nImageSize));
+	rIcon = CRect(ptTopLeft, CSize(nImageSize, nImageSize));
 
 	// we always draw the first icon
 	if ((nImage == 0) || (rIcon.right <= rSubItem.right))
@@ -4390,7 +4393,7 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 			{
 				CRect rIcon;
 				
-				if (!CalcFileIconRect(rSubItem, rIcon, nFile, nNumFiles))
+				if (!CalcFileIconRect(rSubItem, rIcon, nFile))
 					break; // outside the subitem
 				
 				if (rIcon.PtInRect(pt))
