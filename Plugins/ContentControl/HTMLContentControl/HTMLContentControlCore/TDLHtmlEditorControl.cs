@@ -335,44 +335,22 @@ namespace HTMLContentControl
 					{
 						// Can't handle this with WM_KEYDOWN because different
 						// keyboard layouts place '@' in different locations
-						var values = new List<string>();
-
-						var allocTo = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedTo);
-						NeedAttributeValues(this, allocTo);
-
-						if (allocTo.values != null)
-							values.AddRange(allocTo.values);
-
-						var allocBy = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedBy);
-						NeedAttributeValues(this, allocBy);
-
-						if (allocBy.values != null)
-							values.AddRange(allocBy.values);
+						var items = GetPopupListBoxItems();
 						
-						if (values.Count > 0)
+						if (items.Count() > 0)
 						{
 							// Insert the '@' first and select it
 							SelectedHtml = "@";
 							SelectCharacterAtCaret(false);
 
-							// show popup below the caret
-							Point pos = new Point();
-							GetCaretPos(ref pos);
-							pos = WebBrowser.PointToScreen(pos);
-
-							var fontAttrib = GetFontAttributes();
-							var font = new Font(fontAttrib.Name, fontAttrib.SizeInPoints);
-
-							var size = TextRenderer.MeasureText("@", font);
-							pos.X += (int)(size.Width * 0.6);
-							pos.Y += size.Height;
-
 							var popup = new PopupListBox();
 
-							popup.ListBox.Items.AddRange(values.ToArray());
+							popup.ListBox.Items.AddRange(items);
 							popup.ListBox.Font = m_ControlsFont;
 
 							popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
+
+							var pos = GetPopupListBoxLocation();
 							popup.Show(pos.X, pos.Y);
 
 							return true; // we already added the '@'
@@ -383,6 +361,41 @@ namespace HTMLContentControl
 			}
 
 			return false;
+		}
+
+		protected string[] GetPopupListBoxItems()
+		{
+			var values = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+
+			var allocTo = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedTo);
+			NeedAttributeValues(this, allocTo);
+
+			if (allocTo.values != null)
+				values.UnionWith(allocTo.values);
+
+			var allocBy = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedBy);
+			NeedAttributeValues(this, allocBy);
+
+			if (allocBy.values != null)
+				values.UnionWith(allocBy.values);
+
+			return values.ToArray();
+		}
+
+		protected Point GetPopupListBoxLocation()
+		{
+			Point pos = new Point();
+			GetCaretPos(ref pos);
+			pos = WebBrowser.PointToScreen(pos);
+
+			var fontAttrib = GetFontAttributes();
+			var font = new Font(fontAttrib.Name, fontAttrib.SizeInPoints);
+
+			var size = TextRenderer.MeasureText("@", font);
+			pos.X += (int)(size.Width * 0.6);
+			pos.Y += size.Height;
+
+			return pos;
 		}
 
 		protected override bool OnDocumentKeyPress(Keys keyPress)
