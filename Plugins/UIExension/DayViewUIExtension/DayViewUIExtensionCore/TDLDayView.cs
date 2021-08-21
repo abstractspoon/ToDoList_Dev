@@ -638,6 +638,14 @@ namespace DayViewUIExtension
 
 		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type)
 		{
+			// Make sure the selected task remains visible
+			// after any changes if it was visible to start with
+			var selItem = (SelectedAppointment as CalendarItem);
+
+			bool selTaskWasVisible = (selItem != null) &&
+									 IsItemDisplayable(selItem) &&
+									 IsItemWithinRange(selItem, StartDate, EndDate);
+
             switch (type)
 			{
 				case UIExtension.UpdateType.Delete:
@@ -660,8 +668,8 @@ namespace DayViewUIExtension
 			while (task.IsValid() && ProcessTaskUpdate(task, type))
 				task = task.GetNextTask();
 
-			// Scroll to the selected item if it was modified and is 'visible'
-			if (tasks.HasTask(m_SelectedTaskID) && IsTaskDisplayable(m_SelectedTaskID))
+			// Scroll to the selected item if it was modified and was 'visible'
+			if (selTaskWasVisible && tasks.HasTask(m_SelectedTaskID))
                 EnsureVisible(SelectedAppointment, true);
 
 			SelectionStart = SelectionEnd;

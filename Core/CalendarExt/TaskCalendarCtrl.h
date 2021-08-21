@@ -205,7 +205,8 @@ protected:
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
-	bool SelectGridCell(int nRow, int nCol);
+	BOOL SelectGridCell(int nRow, int nCol);
+	BOOL IsTaskVisible(DWORD dwTaskID) const;
 
 	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();
