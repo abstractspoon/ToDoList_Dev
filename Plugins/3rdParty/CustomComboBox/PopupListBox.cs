@@ -71,7 +71,9 @@ namespace CustomComboBox
 		{
 			if (m_ListBox.Items.Count > 0)
 			{
-				m_ListBox.Height = Math.Min(200, (m_ListBox.Items.Count * m_ListBox.ItemHeight));
+				if (height == -1)
+					m_ListBox.Height = Math.Min(200, (m_ListBox.Items.Count * m_ListBox.GetItemRectangle(0).Height));
+
 				m_ListBox.SelectedIndex = 0;
 			}
 
