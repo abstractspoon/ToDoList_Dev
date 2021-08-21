@@ -646,6 +646,9 @@ namespace CustomComboBox
 
 		private void m_dropDown_Closed(object sender, ToolStripDropDownClosedEventArgs e)
 		{
+			if (Closed != null)
+				Closed(this, e);
+
 			if (AutoResetWhenClosed)
                 DisposeHost();
             
@@ -666,15 +669,11 @@ namespace CustomComboBox
 
 		public event ToolStripDropDownClosingEventHandler Closing
         {
-            add
-            {
-                m_dropDown.Closing += value;
-            }
-            remove
-            {
-                m_dropDown.Closing -= value;
-            }
+            add    { m_dropDown.Closing += value; }
+            remove { m_dropDown.Closing -= value; }
         }
+
+		public event ToolStripDropDownClosedEventHandler Closed;
 
         #endregion
 
@@ -713,7 +712,16 @@ namespace CustomComboBox
             }
         }
 
-        public void Reset()
+		public void Close(ToolStripDropDownCloseReason reason)
+		{
+			if (m_dropDown != null && m_dropDown.Visible)
+			{
+				m_dropDown.Close(reason);
+				DisposeHost();
+			}
+		}
+
+		public void Reset()
         {
             DisposeHost();
         }

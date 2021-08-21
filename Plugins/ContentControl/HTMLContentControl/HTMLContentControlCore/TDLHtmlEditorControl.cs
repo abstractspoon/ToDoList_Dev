@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Command.Handling;
-using Luminous.Windows.Forms;
+using CustomComboBox;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -358,18 +358,22 @@ namespace HTMLContentControl
 							// show popup below the caret
 							Point pos = new Point();
 							GetCaretPos(ref pos);
+							pos = WebBrowser.PointToScreen(pos);
 
 							var fontAttrib = GetFontAttributes();
 							var font = new Font(fontAttrib.Name, fontAttrib.SizeInPoints);
 
-							var logFont = new unvell.Common.Win32Lib.Win32.LOGFONT();
-							font.ToLogFont(logFont);
+							var size = TextRenderer.MeasureText("@", font);
+							pos.X += (int)(size.Width * 0.6);
+							pos.Y += size.Height;
 
-							var popup = new PopupListBox(values.ToArray());
+							var popup = new PopupListBox();
+
+							popup.ListBox.Items.AddRange(values.ToArray());
+							popup.ListBox.Font = m_ControlsFont;
+
 							popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
-
-							pos.Y += Math.Abs(logFont.lfHeight);
-							popup.Show(BrowserPanel, pos, ToolStripDropDownDirection.BelowRight);
+							popup.Show(pos.X, pos.Y);
 
 							return true; // we already added the '@'
 						}
@@ -388,10 +392,14 @@ namespace HTMLContentControl
 
 		protected void OnAttributeListBoxClosed(object sender, ToolStripDropDownClosedEventArgs e)
 		{
-			if ((sender is PopupListBox) && (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked))
+			if (sender is PopupListBox)
 			{
 				var popup = (sender as PopupListBox);
-				SelectedHtml = (popup.ListBox.SelectedItem as string);
+
+				if (popup.Cancelled || (e.CloseReason != ToolStripDropDownCloseReason.ItemClicked))
+					CollapseSelection(false);
+				else
+					SelectedHtml = popup.ListBox.SelectedItem.ToString();
 			}
 			else
 			{
