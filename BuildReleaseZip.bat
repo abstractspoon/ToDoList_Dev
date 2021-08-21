@@ -102,7 +102,6 @@ REM - All other components
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\LuminousControls.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
