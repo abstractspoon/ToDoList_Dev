@@ -47,6 +47,7 @@ namespace CustomComboBox
 		{
 			m_ListBox = new TrackingListBox();
 			m_ListBox.BorderStyle = BorderStyle.None;
+			m_ListBox.Sorted = true;
 
 			m_ListBox.MouseDown += new MouseEventHandler(OnListMouseDown);
 			m_ListBox.KeyDown += new KeyEventHandler(OnListKeyDown);
