@@ -43,6 +43,7 @@ protected:
 
 protected:
 	virtual void DrawRectBkgnd(CDC* pDC, const CRect& rect);
+	virtual BOOL DrawPaneText(CDC* pDC, int nPane);
 
 };
 

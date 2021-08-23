@@ -59,32 +59,24 @@ void CStatusBarACTEx::OnPaint()
 
 		while (nPane--)
 		{
+			BOOL bTextDrawn = DrawPaneText(&dc, nPane);
+
+			// prevent overwriting of next pane
 			CRect rect;
 			GetItemRect(nPane, &rect);
 
-			const CString& sText = GetPaneText(nPane);
-
-			if (sText.GetLength())
-			{
-				dc.TextOut(rect.left+2, rect.top, sText);
-				dc.ExcludeClipRect(rect); // so adjacent item cannot overwrite
-			}
+			dc.ExcludeClipRect(rect);
 
 			// draw divider if the pane has any text or it's not autofit
 			BOOL bAutoFit = (GetPaneFlagsIndex(nPane) & SBACTF_AUTOFIT);
 
-			if (nPane && (!sText.IsEmpty() || !bAutoFit)) // ignore first
+			if (nPane && (bTextDrawn || !bAutoFit)) // ignore first pane
 			{
-				rect.left -= 2;
-				rect.right = rect.left + 1;
-				rect.bottom -= 2;
+				// pick appropriate color
+				int nLum = RGBX(m_crFrom).Luminance();
+				COLORREF color = (nLum < 128) ? GraphicsMisc::Lighter(m_crTo, 0.25) : GraphicsMisc::Darker(m_crTo, 0.4);
 
-				// pick color
-				COLORREF color = m_crFrom;
-
-				int nLum = RGBX(color).Luminance();
-				color = (nLum < 128) ? GraphicsMisc::Lighter(m_crTo, 0.25) : GraphicsMisc::Darker(m_crTo, 0.4);
-				dc.FillSolidRect(rect, color);
+				GraphicsMisc::DrawVertLine(&dc, rect.top, rect.bottom, rect.left - 2, color);
 			}
 		}
 
@@ -102,6 +94,20 @@ void CStatusBarACTEx::OnPaint()
 			th.DrawBackground(&dc, SBP_SIZEBOX, SZB_RIGHTALIGN, rGrip);
 		}
 	}
+}
+
+BOOL CStatusBarACTEx::DrawPaneText(CDC* pDC, int nPane)
+{
+	const CString& sText = GetPaneText(nPane);
+
+	if (sText.IsEmpty())
+		return FALSE;
+
+	CRect rect;
+	GetItemRect(nPane, &rect);
+
+	pDC->TextOut(rect.left + 2, rect.top, sText);
+	return TRUE;
 }
 
 BOOL CStatusBarACTEx::OnEraseBkgnd(CDC* pDC)
