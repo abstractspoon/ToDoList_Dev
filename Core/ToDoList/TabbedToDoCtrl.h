@@ -109,7 +109,9 @@ public:
 	virtual void GetSortBy(TDSORTCOLUMNS& sort) const;
 	virtual BOOL IsMultiSorting() const;
 	virtual BOOL CanMultiSort() const;
+
 	virtual HTREEITEM GetUpdateControlsItem() const;
+	virtual CString FormatSelectedTaskTitles(BOOL bFullPath) const;
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }

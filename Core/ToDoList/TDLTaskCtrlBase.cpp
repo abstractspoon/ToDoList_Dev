@@ -5860,13 +5860,25 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CONTENTFORMAT
 	return content;
 }
 
-CString CTDLTaskCtrlBase::GetSelectedTaskTitle() const
+CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath) const
 {
-	if (GetSelectedCount() == 1)
-		return m_data.GetTaskTitle(GetSelectedTaskID());
-	
-	// else
-	return EMPTY_STR;
+	CString sSelTasks;
+	POSITION pos = GetFirstSelectedTaskPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (bFullPath)
+			sSelTasks += m_formatter.GetTaskPath(dwTaskID);
+
+		sSelTasks += m_data.GetTaskTitle(dwTaskID);
+		sSelTasks += Misc::GetListSeparator();
+	}
+
+	Misc::RemoveSuffix(sSelTasks, Misc::GetListSeparator());
+
+	return sSelTasks;
 }
 
 int CTDLTaskCtrlBase::GetSelectedTaskPriority() const

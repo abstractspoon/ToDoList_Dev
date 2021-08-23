@@ -113,7 +113,7 @@ public:
 	CString GetSelectedTaskIcon() const;
 	CString GetSelectedTaskComments() const;
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
-	CString GetSelectedTaskTitle() const;
+	CString FormatSelectedTaskTitles(BOOL bFullPath) const;
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;

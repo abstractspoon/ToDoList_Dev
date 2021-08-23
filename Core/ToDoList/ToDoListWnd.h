@@ -408,6 +408,7 @@ protected:
 	afx_msg LRESULT OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyTimeTrack(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnToDoCtrlNotifySelChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyViewChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifySourceControlSave(WPARAM wParam, LPARAM lParam);

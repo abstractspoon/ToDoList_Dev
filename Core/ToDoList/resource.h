@@ -1234,7 +1234,7 @@
 #define ID_SB_SELCOST                   34271
 #define ID_SB_FILEVERSION               34276
 #define ID_SB_TASKCOUNT                 34278
-#define ID_SB_FILEPATH                  34280
+#define ID_SB_SELTASKTITLE              34280
 #define ID_SB_SPACER                    34282
 #define ID_SB_FOCUS                     34283
 #define ID_EDIT_INSERTTIME              34284
@@ -2060,7 +2060,7 @@
 #define IDS_SB_SELCOST_TIP              51216
 #define IDS_SB_FILEVERSION_TIP          51217
 #define IDS_SB_TASKCOUNT_TIP            51218
-#define IDS_SB_FILEPATH_TIP             51219
+#define IDS_SB_SELTASKTITLE_TIP         51219
 #define IDS_IMPORTFILE_CANTOPEN         51220
 #define IDS_TDLBC_TASKPARENTIDS         51221
 #define IDS_FILTER_STARTENDTHISMONTH    51222

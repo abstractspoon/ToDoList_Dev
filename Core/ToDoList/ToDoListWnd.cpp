@@ -500,6 +500,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
 	ON_REGISTERED_MESSAGE(WM_TDCN_RECREATERECURRINGTASK, OnToDoCtrlNotifyRecreateRecurringTask)
 	ON_REGISTERED_MESSAGE(WM_TDCN_TIMETRACK, OnToDoCtrlNotifyTimeTrack)
+	ON_REGISTERED_MESSAGE(WM_TDCN_SELECTIONCHANGE, OnToDoCtrlNotifySelChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_VIEWPOSTCHANGE, OnToDoCtrlNotifyViewChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_TIMETRACKREMINDER, OnToDoCtrlNotifyTimeTrackReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCN_SOURCECONTROLSAVE, OnToDoCtrlNotifySourceControlSave)
@@ -1237,7 +1238,7 @@ BOOL CToDoListWnd::InitStatusbar()
 {
 	static SBACTPANEINFO SB_PANES[] = 
 	{
-	  { ID_SB_FILEPATH,		MAKEINTRESOURCE(IDS_SB_FILEPATH_TIP), SBACTF_STRETCHY | SBACTF_RESOURCETIP }, 
+	  { ID_SB_SELTASKTITLE,	MAKEINTRESOURCE(IDS_SB_SELTASKTITLE_TIP), SBACTF_STRETCHY | SBACTF_RESOURCETIP },
 	  { ID_SB_FILEVERSION,	MAKEINTRESOURCE(IDS_SB_FILEVERSION_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP }, 
 	  { ID_SB_TASKCOUNT,	MAKEINTRESOURCE(IDS_SB_TASKCOUNT_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP }, 
 	  //{ ID_SB_SPACER }, 
@@ -2121,20 +2122,17 @@ void CToDoListWnd::UpdateStatusbar()
 {
 	if (!m_sbProgress.IsActive() && GetTDCCount())
 	{
-		// get display path
-		int nTasklist = GetSelToDoCtrl();
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl(nTasklist);
+		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+		CEnString sSelTasks = tdc.FormatSelectedTaskTitles(TRUE);
 
-		CEnString sText = m_mgrToDoCtrls.GetDisplayPath(nTasklist);
-
-		if (sText.IsEmpty())
-			sText.LoadString(ID_SB_FILEPATH);
+		if (sSelTasks.IsEmpty())
+			sSelTasks.LoadString(ID_SB_SELTASKTITLE);
 		
-		m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_FILEPATH), sText);
+		m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_SELTASKTITLE), sSelTasks);
 
 		// get file version
-		sText.Format(ID_SB_FILEVERSION, tdc.GetFileVersion());
-		m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_FILEVERSION), sText);
+		m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_FILEVERSION), 
+								CEnString(ID_SB_FILEVERSION, tdc.GetFileVersion()));
 	}
 }
 
@@ -3376,6 +3374,13 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyListChange(WPARAM /*wp*/, LPARAM lp)
 	return 0L;
 }
 
+LRESULT CToDoListWnd::OnToDoCtrlNotifySelChange(WPARAM /*wp*/, LPARAM /*lp*/)
+{
+	UpdateStatusbar();
+
+	return 0L;
+}
+
 LRESULT CToDoListWnd::OnToDoCtrlNotifyViewChange(WPARAM wp, LPARAM lp)
 {
 	if (GetTDCCount())
@@ -3384,6 +3389,8 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyViewChange(WPARAM wp, LPARAM lp)
 		{
 			CFocusWatcher::UpdateFocus();
 			RefreshFilterBarControls(TDCA_ALL);
+
+			UpdateStatusbar();
 		}
 		else
 		{
@@ -3902,7 +3909,7 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 		if (m_statusBar.HitTest(point) == 0)
 		{
 			m_statusBar.ClientToScreen(&point);
-			nMenuID = MM_TABCTRLCONTEXT;
+			nMenuID = MM_TASKCONTEXT;
 		}
 	}
 	else if (pWnd == (CWnd*)&tdc) // try active todoctrl
@@ -9362,7 +9369,7 @@ void CToDoListWnd::PopulateToolArgs(USERTOOLARGS& args) const
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 		
 	args.sTasklist = tdc.GetFilePath();
-	args.sTaskTitle = tdc.GetSelectedTaskTitle();
+	args.sTaskTitle = tdc.FormatSelectedTaskTitles(FALSE);
 	args.sTaskExtID = tdc.GetSelectedTaskExtID();
 	args.sTaskComments = tdc.GetSelectedTaskComments();
 	args.sTaskFileLink = tdc.GetSelectedTaskFileLink(0);
@@ -10836,7 +10843,7 @@ void CToDoListWnd::OnSpellchecktitle()
 
 void CToDoListWnd::OnUpdateSpellchecktitle(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(!GetToDoCtrl().GetSelectedTaskTitle().IsEmpty());
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount());
 }
 
 void CToDoListWnd::OnFileEncrypt() 
@@ -12696,7 +12703,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		// prefix with task name if necessary
 		if (taskSel.GetWantSelectedTasks() && (tdc.GetSelectedCount() == 1))
 		{
-			sSubject = tdc.GetSelectedTaskTitle() + _T(" - ") + sSubject;
+			sSubject = tdc.FormatSelectedTaskTitles(FALSE) + _T(" - ") + sSubject;
 		}
 
 		VERIFY(CSendFileToEx::SendMail(*this, sTo, sSubject, sBody, sAttachment));

@@ -5049,7 +5049,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_SB_FILEVERSION       "%d"
     ID_SB_TASKCOUNT         "Task Count"
-    ID_SB_FILEPATH          "(untitled)"
+    ID_SB_SELTASKTITLE       "(No task selected)"
     ID_SB_SPACER            "                     "
     ID_SB_FOCUS             "                     "
     ID_EDIT_INSERTTIME      "\nInsert Time"
@@ -5081,7 +5081,7 @@ BEGIN
     IDS_SB_SELCOST_TIP      "Aggregate cost for the selected tasks"
     IDS_SB_FILEVERSION_TIP  "Tasklist file version"
     IDS_SB_TASKCOUNT_TIP    "Filtered task count / Total task count"
-    IDS_SB_FILEPATH_TIP     "Active tasklist"
+    IDS_SB_SELTASKTITLE_TIP "Selected tasks"
     IDS_IMPORTFILE_CANTOPEN "'%s' could not be opened for importing.\n\nCheck that you have the necessary permissions and that the file is not open in another application."
     IDS_TDLBC_TASKPARENTIDS "Task ID / Parent ID"
     IDS_RESTARTTOCHANGELANGUAGE 

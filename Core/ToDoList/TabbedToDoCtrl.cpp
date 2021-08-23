@@ -1334,7 +1334,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 	}
 
 	VIEWDATA* pVData = GetActiveViewData();
-	BOOL bHadSelectedTask = pVData->bHasSelectedTask;
+	BOOL bHadSelectedTask = pVData->bHasSelectedTask, bUpdateCtrls = FALSE;
 
 	if (aTaskIDs.GetSize() == 1)
 	{
@@ -1352,15 +1352,13 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 			else
 			{
 				// Update if the extension previously did NOT have a selection
-				if (!bHadSelectedTask)
-					UpdateControls();
+				bUpdateCtrls = !bHadSelectedTask;
 			}
 		}
 		else
 		{
 			// Update if the extension previously had a selection
-			if (bHadSelectedTask)
-				UpdateControls();
+			bUpdateCtrls = bHadSelectedTask;
 		}
 	}
 	else
@@ -1370,6 +1368,12 @@ LRESULT CTabbedToDoCtrl::OnUIExtSelectTask(WPARAM wParam, LPARAM lParam)
 		// Call base class directly so that we don't end
 		// up calling back into extension this came from
 		VERIFY(CToDoCtrl::SelectTasks(aTaskIDs, FALSE));
+	}
+
+	if (bUpdateCtrls)
+	{
+		UpdateControls();
+		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
 	}
 
 	return pVData->bHasSelectedTask;
@@ -5831,6 +5835,49 @@ HTREEITEM CTabbedToDoCtrl::GetUpdateControlsItem() const
 	return hti;
 }
 
+CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath) const
+{
+	CString sSelTasks;
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_TASKTREE:
+	case FTCV_UNSET:
+		sSelTasks = CToDoCtrl::FormatSelectedTaskTitles(bFullPath);
+		break;
+
+	case FTCV_TASKLIST:
+		sSelTasks = m_taskList.FormatSelectedTaskTitles(bFullPath);
+		break;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		if (GetViewData(nView)->bHasSelectedTask)
+			sSelTasks = CToDoCtrl::FormatSelectedTaskTitles(bFullPath);
+		break;
+
+	default:
+		ASSERT(0);
+	}
+
+	return sSelTasks;
+}
+
 void CTabbedToDoCtrl::SetFocusToTasks()
 {
 	FTC_VIEW nView = GetTaskView();
@@ -6283,7 +6330,6 @@ void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)
 	{
 		// extension has same selection as tree so no need to update controls
 		pVData->bHasSelectedTask = TRUE;
-		bUpdateCtrls = FALSE;
 	}
 	else
 	{

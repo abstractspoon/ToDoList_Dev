@@ -5203,7 +5203,7 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 		m_eTaskName.SetFont(pFontTree);
 	
 	// set text
-	m_eTaskName.SetWindowText(GetSelectedTaskTitle());
+	m_eTaskName.SetWindowText(GetTaskTitle(dwSelTaskID));
 	
 	// zero the left margin so that the text position remains the same
 	m_eTaskName.SetMargins(0, HIWORD(m_eTaskName.GetMargins()));
@@ -10854,7 +10854,7 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 	switch (nAttrib)
 	{
 	case TDCA_TASKNAME:
-		sSelAttrib = GetSelectedTaskTitle();
+		sSelAttrib = GetTaskTitle(m_taskTree.GetSelectedTaskID());
 		break;
 
 	case TDCA_COMMENTS:
@@ -11982,6 +11982,11 @@ BOOL CToDoCtrl::SelectedTaskIsUnlocked(DWORD dwTaskID) const
 		return (m_taskTree.IsTaskSelected(dwTaskID) && !m_calculator.IsTaskLocked(dwTaskID));
 
 	return !m_taskTree.SelectionHasLocked(FALSE);
+}
+
+CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath) const 
+{ 
+	return m_taskTree.FormatSelectedTaskTitles(bFullPath); 
 }
 
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 

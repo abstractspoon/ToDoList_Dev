@@ -234,7 +234,6 @@ public:
 	CString GetSelectedTaskIcon() const { return m_taskTree.GetSelectedTaskIcon(); }
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const { return m_taskTree.GetSelectedTaskCustomComments(cfComments); }
-	CString GetSelectedTaskTitle() const { return m_taskTree.GetSelectedTaskTitle(); }
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_taskTree.GetSelectedTaskTimeEstimate(timeEst); }
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_taskTree.GetSelectedTaskTimeSpent(timeSpent); }
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const { return m_taskTree.GetSelectedTaskAllocTo(aAllocTo); }
@@ -396,6 +395,7 @@ public:
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+	virtual CString FormatSelectedTaskTitles(BOOL bFullPath) const;
 
 	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
 	BOOL SelectedTasksHaveIcons() const { return m_taskTree.SelectionHasIcons(); }
