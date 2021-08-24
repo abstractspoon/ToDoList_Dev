@@ -62,5 +62,11 @@
     <Image Include="res\bitmap1.bmp">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="RES\app_toolbar_std.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\app_toolbar.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

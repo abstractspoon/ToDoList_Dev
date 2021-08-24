@@ -95,6 +95,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>..\3rdparty\Unicode_debug\3rdparty.lib;..\shared\Unicode_debug\shared.lib</AdditionalLibraryDirectories>
+      <FullProgramDatabaseFile>true</FullProgramDatabaseFile>
     </Link>
     <Midl>
       <MkTypLibCompatible>false</MkTypLibCompatible>
@@ -205,6 +206,8 @@
     <None Include="res\ImageResizing.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="res\app_toolbar.bmp" />
+    <Image Include="RES\app_toolbar_std.bmp" />
     <Image Include="res\bitmap1.bmp" />
     <Image Include="res\ImageResizing.ico" />
   </ItemGroup>

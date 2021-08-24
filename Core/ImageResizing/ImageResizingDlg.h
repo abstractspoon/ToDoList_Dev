@@ -5,7 +5,8 @@
 #pragma once
 #include "afxwin.h"
 
-#include "..\shared\EnBitmap.h"
+#include "..\shared\EnBitmapEx.h"
+#include "..\shared\EnToolbar.h"
 
 // CImageResizingDlg dialog
 class CImageResizingDlg : public CDialogEx
@@ -37,5 +38,7 @@ public:
 	CStatic m_SrcImage;
 
 	CBitmap m_bmpSrc;
-	CEnBitmap m_bmpDest;
+	CEnBitmapEx m_bmpDest;
+
+	CEnToolBar m_toolbar;
 };

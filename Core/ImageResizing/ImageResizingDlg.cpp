@@ -7,6 +7,8 @@
 #include "ImageResizingDlg.h"
 #include "afxdialogex.h"
 
+#include "resource.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #endif
@@ -43,11 +45,28 @@ BOOL CImageResizingDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	m_bmpSrc.LoadBitmap(IDB_BITMAP1);
+	UINT nStyle = (WS_CHILD | CBRS_ALIGN_TOP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | CBRS_TOOLTIPS | WS_VISIBLE);
+
+	if (!m_toolbar.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), nStyle))
+		return FALSE;
+
+	if (!m_toolbar.LoadToolBar(IDR_APP_TOOLBAR))
+		return FALSE;
+
+	m_toolbar.SetBorders(4, 2, 0, 0);
+
+	// colors
+	m_toolbar.SetBackgroundColor(RGB(0, 0, 100));
+	m_toolbar.SetImage(IDB_APP_TOOLBAR_STD, RGB(255, 0, 255));
+	m_toolbar.Resize(1000, CPoint(0, 2));
+
+	// ----------------------------------------------------------
+
+	m_bmpSrc.LoadBitmap(IDB_APP_TOOLBAR_STD);
 	m_SrcImage.SetBitmap(m_bmpSrc);
 
-	m_bmpDest.LoadBitmap(IDB_BITMAP1);
-	m_bmpDest.Resize(57, 57);
+	m_bmpDest.LoadBitmap(IDB_APP_TOOLBAR_STD);
+	m_bmpDest.ResizeImage(2.3);
 
 	m_DestImage.SetBitmap(m_bmpDest);
 
