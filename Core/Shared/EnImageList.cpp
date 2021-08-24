@@ -134,9 +134,11 @@ int CEnImageList::Replace(int nImage, HICON hIcon, COLORREF crBkgnd)
 
 int CEnImageList::AddReplace(HICON hIcon, COLORREF crBkgnd, int nImage)
 {
+	CSize sizeImg = GraphicsMisc::GetIconSize(hIcon);
+
 	BOOL bDoDefault = ((crBkgnd == CLR_NONE) ||
 					   !GraphicsMisc::WantDPIScaling() ||
-					   (GraphicsMisc::GetIconSize(hIcon).cx >= GetImageSize()));
+					   (sizeImg.cx >= GetImageSize()));
 
 	// Our custom scaling below produces nicer images than 
 	// the default imagelist scaling but introduces some
@@ -152,15 +154,15 @@ int CEnImageList::AddReplace(HICON hIcon, COLORREF crBkgnd, int nImage)
 		return CImageList::Replace(nImage, hIcon);
 	}
 	
-	CEnBitmapEx bmp;
-	
-	bmp.CopyImage(hIcon, crBkgnd);
-	bmp.ResizeImage(GraphicsMisc::GetDPIScaleFactor());
-	bmp.ReplaceColor(crBkgnd, MAGENTA);
+
+	GraphicsMisc::ScaleByDPIFactor(&sizeImg);
+
+	CEnBitmap bmp;
+	VERIFY(bmp.Attach(CEnBitmap::ResizeImage(hIcon, sizeImg.cx, sizeImg.cy, crBkgnd)));
 
 	if (nImage == -1)
-		return Add(&bmp, MAGENTA);
+		return Add(&bmp, crBkgnd);
 
 	// else
-	return CImageList::Replace(nImage, CIcon(bmp.ExtractIcon(MAGENTA)));
+	return CImageList::Replace(nImage, CIcon(bmp.ExtractIcon(crBkgnd)));
 }

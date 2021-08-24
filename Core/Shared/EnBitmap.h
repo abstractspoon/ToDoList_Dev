@@ -83,7 +83,8 @@ public:
 	static BOOL IsSupportedImageFile(LPCTSTR szImagePath);
 	static HICON LoadImageFileAsIcon(LPCTSTR szImagePath, COLORREF crBack = CLR_NONE, int cx = 0, int cy = 0);
 	static CSize GetImageSize(HBITMAP hbm);
-	static HBITMAP ResizeImage(HBITMAP hbm, int cx, int cy);
+	static HBITMAP ResizeImage(HBITMAP hbm, int cx, int cy, COLORREF crBack = CLR_NONE);
+	static HBITMAP ResizeImage(HICON hIcon, int cx, int cy, COLORREF crBack = CLR_NONE);
 	static HICON ExtractIcon(HBITMAP hbm, COLORREF crMask = CLR_NONE, int cx = 0, int cy = 0);
 
 protected:

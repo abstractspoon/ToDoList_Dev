@@ -246,17 +246,19 @@ BOOL CEnBitmap::Resize(int cx, int cy)
 	return FALSE;
 }
 
-HBITMAP CEnBitmap::ResizeImage(HBITMAP hbm, int cx, int cy)
+HBITMAP CEnBitmap::ResizeImage(HBITMAP hbm, int cx, int cy, COLORREF crBack)
 {
-	ASSERT(hbm != NULL);
-	
 	if (hbm == NULL)
+	{
+		ASSERT(0);
 		return NULL;
-
-	ASSERT((cx > 0) && (cy > 0));
+	}
 
 	if ((cx <= 0) || (cy <= 0))
+	{
+		ASSERT(0);
 		return NULL;
+	}
 	
 	CSize bmpSize = GetImageSize(hbm);
 
@@ -275,7 +277,41 @@ HBITMAP CEnBitmap::ResizeImage(HBITMAP hbm, int cx, int cy)
 	
 	if (SUCCEEDED(hr) && pPicture)
 	{
-		HBITMAP hbmResized = ExtractBitmap(pPicture, CLR_NONE, cx, cy);
+		HBITMAP hbmResized = ExtractBitmap(pPicture, crBack, cx, cy);
+		pPicture->Release();
+
+		return hbmResized;
+	}
+
+	return NULL;
+}
+
+HBITMAP CEnBitmap::ResizeImage(HICON hIcon, int cx, int cy, COLORREF crBack)
+{
+	if (hIcon == NULL)
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	if ((cx <= 0) || (cy <= 0))
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	PICTDESC desc = { 0 };
+
+	desc.cbSizeofstruct = sizeof(desc);
+	desc.picType = PICTYPE_ICON;
+	desc.icon.hicon = hIcon;
+
+	IPicture* pPicture = NULL;
+	HRESULT hr = ::OleCreatePictureIndirect(&desc, IID_IPicture, FALSE, (LPVOID*)&pPicture);
+
+	if (SUCCEEDED(hr) && pPicture)
+	{
+		HBITMAP hbmResized = ExtractBitmap(pPicture, crBack, cx, cy);
 		pPicture->Release();
 
 		return hbmResized;
@@ -507,7 +543,7 @@ HBITMAP CEnBitmap::ExtractBitmap(IPicture* pPicture, COLORREF crBack, int cx, in
 		pPicture->get_Width(&hmWidth);
 		pPicture->get_Height(&hmHeight);
 		
-		int nWidth	= cx;
+		int nWidth = cx;
 
 		if (nWidth == 0)
 			nWidth = MulDiv(hmWidth, dcDesktop.GetDeviceCaps(LOGPIXELSX), HIMETRIC_INCH);
