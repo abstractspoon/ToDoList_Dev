@@ -25,8 +25,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoListLib", "ToDoListLib\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TDLUpdate", "TDLUpdate\TDLUpdate.vcxproj", "{378A4533-2901-469B-84CB-10EA55D8F18E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ImageResizing", "ImageResizing\ImageResizing.vcxproj", "{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -137,22 +135,6 @@ Global
 		{378A4533-2901-469B-84CB-10EA55D8F18E}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{378A4533-2901-469B-84CB-10EA55D8F18E}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 		{378A4533-2901-469B-84CB-10EA55D8F18E}.Unicode Release|x64.ActiveCfg = Unicode Release|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Debug|Win32.Build.0 = Debug|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Debug|x64.ActiveCfg = Debug|x64
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Debug|x64.Build.0 = Debug|x64
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Release|Win32.ActiveCfg = Release|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Release|Win32.Build.0 = Release|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Release|x64.ActiveCfg = Release|x64
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Release|x64.Build.0 = Release|x64
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Unicode Debug|Win32.ActiveCfg = Debug|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Unicode Debug|Win32.Build.0 = Debug|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Unicode Debug|x64.ActiveCfg = Debug|x64
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Unicode Debug|x64.Build.0 = Debug|x64
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Unicode Release|Win32.ActiveCfg = Release|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Unicode Release|Win32.Build.0 = Release|Win32
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Unicode Release|x64.ActiveCfg = Release|x64
-		{8E8AC4FD-4F1E-49D1-8A1A-A3AC17AD360C}.Unicode Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
