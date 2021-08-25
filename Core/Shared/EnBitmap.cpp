@@ -228,24 +228,6 @@ HBITMAP CEnBitmap::LoadImageFile(LPCTSTR szImagePath, COLORREF crBack, int cx, i
 	return hbm;
 }
 
-BOOL CEnBitmap::Resize(int cx, int cy)
-{
-	HBITMAP hbm = ResizeImage((HBITMAP)m_hObject, cx, cy);
-
-	if (hbm)
-	{
-		if (m_hObject != hbm)
-		{
-			DeleteObject();
-			return Attach(hbm);
-		}
-
-		return TRUE; // no change
-	}
-
-	return FALSE;
-}
-
 HBITMAP CEnBitmap::ResizeImage(HBITMAP hbm, int cx, int cy, COLORREF crBack)
 {
 	if (hbm == NULL)

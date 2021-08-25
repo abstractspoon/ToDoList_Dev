@@ -71,7 +71,6 @@ public:
 	BOOL ProcessImage(C32BIPArray& aProcessors, COLORREF crMask = CLR_NONE); // ordered list of processors
 
 	CSize GetSize() const;
-	BOOL Resize(int cx, int cy);
 	HICON ExtractIcon(COLORREF crMask = CLR_NONE, int cx = 0, int cy = 0);
 
 	// helpers
