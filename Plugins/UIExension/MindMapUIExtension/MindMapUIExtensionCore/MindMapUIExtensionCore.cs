@@ -144,12 +144,15 @@ namespace MindMapUIExtension
         private System.Drawing.Font m_ControlsFont;
 
         private TdlMindMapControl m_MindMap;
+
+		private Label m_AlignmentLabel;
+		private Label m_OptionsLabel;
 		private MindMapAlignmentComboBox m_AlignmentCombo;
 		private MindMapOptionsComboBox m_OptionsCombo;
 
-        // ----------------------------------------------------------------------------
+		// ----------------------------------------------------------------------------
 
-        public MindMapUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
+		public MindMapUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
         {
             m_TypeId = typeId;
 			m_UiName = uiName;
@@ -238,8 +241,11 @@ namespace MindMapUIExtension
         {
 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 
+			m_OptionsLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_AlignmentLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+
 			// Connection colour
-            var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
+			var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 
             // Make sure it's dark enough
             m_MindMap.ConnectionColor = DrawingColor.SetLuminance(color, 0.6f);
@@ -368,24 +374,24 @@ namespace MindMapUIExtension
             this.Controls.Add(m_MindMap);
 
 			// Alignment combo and label
- 			var alignLabel = CreateLabel("Alignment", null);
-			this.Controls.Add(alignLabel);
+ 			m_AlignmentLabel = CreateLabel("Alignment", null);
+			this.Controls.Add(m_AlignmentLabel);
 
 			m_AlignmentCombo = new MindMapAlignmentComboBox(m_Trans);
 			m_AlignmentCombo.DropDownClosed += new EventHandler(OnAlignmentComboClosed);
 
-			InitialiseCombo(m_AlignmentCombo, alignLabel, 100);
+			InitialiseCombo(m_AlignmentCombo, m_AlignmentLabel, 100);
 			this.Controls.Add(m_AlignmentCombo);
 
 			// Options combo and label
- 			var optionsLabel = CreateLabel("Options", m_AlignmentCombo);
-			this.Controls.Add(optionsLabel);
+ 			m_OptionsLabel = CreateLabel("Options", m_AlignmentCombo);
+			this.Controls.Add(m_OptionsLabel);
 
 			m_OptionsCombo = new MindMapOptionsComboBox(m_Trans);
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 			
-			InitialiseCombo(m_OptionsCombo as ComboBox, optionsLabel, 150);
+			InitialiseCombo(m_OptionsCombo as ComboBox, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
 		}
 

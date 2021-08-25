@@ -332,6 +332,7 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 		m_stSelectedTaskDates.SetBkColor(m_theme.crAppBackLight);
+		m_stSelectedTaskDates.SetTextColor(m_theme.crAppText);
 	}
 }
 
