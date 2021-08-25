@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,0,998,3
+ FILEVERSION 8,0,998,4
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 0, 998, 3\0"
+            VALUE "FileVersion", "8, 0, 998, 4\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-21 \0"
             VALUE "LegalTrademarks", "\0"
@@ -5049,7 +5049,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_SB_FILEVERSION       "%d"
     ID_SB_TASKCOUNT         "Task Count"
-    ID_SB_SELTASKTITLE       "(No task selected)"
+    ID_SB_SELTASKTITLE      "(No task selected)"
     ID_SB_SPACER            "                     "
     ID_SB_FOCUS             "                     "
     ID_EDIT_INSERTTIME      "\nInsert Time"
