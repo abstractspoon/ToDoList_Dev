@@ -39,14 +39,14 @@ CSize C32BitImageProcessor::CalcDestSize(CSize sizeSrc)
 	return sizeSrc; // default
 }
 
-BOOL C32BitImageProcessor::ProcessPixels(RGBX* pSrcPixels, CSize /*sizeSrc*/, RGBX* pDestPixels, 
+BOOL C32BitImageProcessor::ProcessPixels(const RGBX* pSrcPixels, CSize /*sizeSrc*/, RGBX* pDestPixels, 
 										CSize sizeDest, COLORREF /*crMask*/)
 { 
 	CopyMemory(pDestPixels, pSrcPixels, sizeDest.cx * 4 * sizeDest.cy); // default
 	return TRUE;
 }
  
-void C32BitImageProcessor::CalcWeightedColor(RGBX* pPixels, CSize size, double dX, double dY, RGBX& rgbResult)
+void C32BitImageProcessor::CalcWeightedColor(const RGBX* pPixels, CSize size, double dX, double dY, RGBX& rgbResult)
 {
 	ASSERT (m_bWeightingEnabled);
 
@@ -69,25 +69,25 @@ void C32BitImageProcessor::CalcWeightedColor(RGBX* pPixels, CSize size, double d
 	int nXP1 = min(nX + 1, size.cx - 1);
 	int nYP1 = min(nY + 1, size.cy - 1);
 	
-	RGBX* pRGB = &pPixels[nY * size.cx + nX]; // x, y
-	RGBX* pRGBXP = &pPixels[nY * size.cx + nXP1]; // x + 1, y
-	RGBX* pRGBYP = &pPixels[nYP1 * size.cx + nX]; // x, y + 1
-	RGBX* pRGBXYP = &pPixels[nYP1 * size.cx + nXP1]; // x + 1, y + 1
+	const RGBX& rgb		= pPixels[nY * size.cx + nX];		// x, y
+	const RGBX& rgbXP	= pPixels[nY * size.cx + nXP1];		// x + 1, y
+	const RGBX& rgbYP	= pPixels[nYP1 * size.cx + nX];		// x, y + 1
+	const RGBX& rgbXYP	= pPixels[nYP1 * size.cx + nXP1];	// x + 1, y + 1
 	
-	int nRed = (int)(dX1MinusFraction * dY1MinusFraction * pRGB->btRed +
-					dXFraction * dY1MinusFraction * pRGBXP->btRed +
-					dX1MinusFraction * dYFraction * pRGBYP->btRed +
-					dXFraction * dYFraction * pRGBXYP->btRed);
+	int nRed = (int)(dX1MinusFraction * dY1MinusFraction * rgb.btRed +
+					dXFraction * dY1MinusFraction * rgbXP.btRed +
+					dX1MinusFraction * dYFraction * rgbYP.btRed +
+					dXFraction * dYFraction * rgbXYP.btRed);
 	
-	int nGreen = (int)(dX1MinusFraction * dY1MinusFraction * pRGB->btGreen +
-					dXFraction * dY1MinusFraction * pRGBXP->btGreen +
-					dX1MinusFraction * dYFraction * pRGBYP->btGreen +
-					dXFraction * dYFraction * pRGBXYP->btGreen);
+	int nGreen = (int)(dX1MinusFraction * dY1MinusFraction * rgb.btGreen +
+					dXFraction * dY1MinusFraction * rgbXP.btGreen +
+					dX1MinusFraction * dYFraction * rgbYP.btGreen +
+					dXFraction * dYFraction * rgbXYP.btGreen);
 	
-	int nBlue = (int)(dX1MinusFraction * dY1MinusFraction * pRGB->btBlue +
-					dXFraction * dY1MinusFraction * pRGBXP->btBlue +
-					dX1MinusFraction * dYFraction * pRGBYP->btBlue +
-					dXFraction * dYFraction * pRGBXYP->btBlue);
+	int nBlue = (int)(dX1MinusFraction * dY1MinusFraction * rgb.btBlue +
+					dXFraction * dY1MinusFraction * rgbXP.btBlue +
+					dX1MinusFraction * dYFraction * rgbYP.btBlue +
+					dXFraction * dYFraction * rgbXYP.btBlue);
 
 	rgbResult.btRed = (BYTE)max(0, min(255, nRed));
 	rgbResult.btGreen = (BYTE)max(0, min(255, nGreen));

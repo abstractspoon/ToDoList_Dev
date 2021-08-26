@@ -23,10 +23,10 @@ public:
 	virtual ~C32BitImageProcessor();
 
 	virtual CSize CalcDestSize(CSize sizeSrc);
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = CLR_NONE);
 
-	void CalcWeightedColor(RGBX* pPixels, CSize size, double dX, double dY, RGBX& rgbResult);
+	void CalcWeightedColor(const RGBX* pPixels, CSize size, double dX, double dY, RGBX& rgbResult);
 
 protected:
 	BOOL m_bWeightingEnabled;

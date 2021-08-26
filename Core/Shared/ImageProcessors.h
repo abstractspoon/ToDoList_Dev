@@ -18,7 +18,7 @@ public:
 	virtual ~CImageRotator();
 
 	virtual CSize CalcDestSize(CSize sizeSrc);
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -32,7 +32,7 @@ public:
 	virtual ~CImageShearer();
 
 	virtual CSize CalcDestSize(CSize sizeSrc);
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -46,7 +46,7 @@ public:
 	CImageGrayer(double dRedFactor, double dGreenFactor, double dBlueFactor);
 	virtual ~CImageGrayer();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -60,7 +60,7 @@ public:
 	CImageLightener(double dAmount, BOOL bRGB); 
 	virtual ~CImageLightener();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -74,7 +74,7 @@ public:
 	CImageBlurrer(int nAmount = 50); // 1 - 100 (100 is very blurred)
 	virtual ~CImageBlurrer();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -87,7 +87,7 @@ public:
 	CImageSharpener(int nAmount = 50); // 1 - 100 (100 is very sharp)
 	virtual ~CImageSharpener();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -101,15 +101,15 @@ public:
 	virtual ~CImageResizer();
 
 	virtual CSize CalcDestSize(CSize sizeSrc);
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
 	double m_dFactor;
 
 protected:
-	BOOL Enlarge(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest);
-	BOOL Shrink(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest);
+	BOOL Enlarge(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest);
+	BOOL Shrink(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest);
 };
 
 class CImageNegator : public C32BitImageProcessor
@@ -118,7 +118,7 @@ public:
 	CImageNegator();
 	virtual ~CImageNegator();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 };
 
@@ -128,7 +128,7 @@ public:
 	CImageFlipper(BOOL bHorz, BOOL bVert = 0); 
 	virtual ~CImageFlipper();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -141,7 +141,7 @@ public:
 	CColorReplacer(COLORREF crFrom, COLORREF crTo);
 	virtual ~CColorReplacer();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -154,7 +154,7 @@ public:
 	CImageColorizer(COLORREF color);
 	virtual ~CImageColorizer();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -167,7 +167,7 @@ public:
 	CImageTinter(COLORREF color, int nAmount = 40); // amount: -100 -> 100
 	virtual ~CImageTinter();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -181,7 +181,7 @@ public:
 	CImageContraster(int nAmount = 40); // -100 -> 200
 	virtual ~CImageContraster();
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 
 protected:
@@ -198,7 +198,7 @@ public:
 	// 0x808080 (dark gray)		-> COLOR_BTNSHADOW      
 	// 0xC0C0C0 (bright gray)	-> COLOR_BTNFACE        
 	// 0xFFFFFF (white)			-> COLOR_BTNHIGHLIGHT   
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 };
 
@@ -208,7 +208,7 @@ public:
 	CImageEmbosser() {}
 	virtual ~CImageEmbosser() {}
 
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 };
 

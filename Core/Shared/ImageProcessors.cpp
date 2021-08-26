@@ -86,7 +86,7 @@ CSize CImageRotator::CalcDestSize(CSize sizeSrc)
 	return CSize((nMaxX + 1) * 2, (nMaxY + 1) * 2);
 }
 
-BOOL CImageRotator::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageRotator::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	BOOL bRes = TRUE;
@@ -130,9 +130,9 @@ BOOL CImageRotator::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPi
 					if (!m_bWeightingEnabled)
 					{
 						ptSrc.Offset(sizeSrcOffset);
-						RGBX* pRGBSrc = &pSrcPixels[ptSrc.y * sizeSrc.cx + ptSrc.x];
+						const RGBX& rgbSrc = pSrcPixels[ptSrc.y * sizeSrc.cx + ptSrc.x];
 						
-						pDestPixels[nPixel] = *pRGBSrc;
+						pDestPixels[nPixel] = rgbSrc;
 					}
 					else
 						CalcWeightedColor(pSrcPixels, sizeSrc, 
@@ -162,7 +162,7 @@ CSize CImageShearer::CalcDestSize(CSize sizeSrc)
 	return CSize(sizeSrc.cx + abs(m_nHorz), sizeSrc.cy + abs(m_nVert));
 }
 
-BOOL CImageShearer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageShearer::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	BOOL bRes = TRUE;
@@ -202,8 +202,10 @@ BOOL CImageShearer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPi
 				{
 					if (!m_bWeightingEnabled)
 					{
-						RGBX* pRGBSrc = &pSrcPixels[(int)dSrcY * sizeSrc.cx + (int)dSrcX];
-						pDestPixels[nY * sizeDest.cx + nX] = *pRGBSrc;
+						const RGBX& rgbSrc = pSrcPixels[(int)dSrcY * sizeSrc.cx + (int)dSrcX];
+						RGBX* pRGBDest = &pDestPixels[nY * sizeSrc.cx + nX];
+
+						*pRGBDest = rgbSrc;
 					}
 					else
 						CalcWeightedColor(pSrcPixels, sizeSrc, dSrcX, dSrcY, 
@@ -232,7 +234,7 @@ CImageGrayer::~CImageGrayer()
 {
 }
 
-BOOL CImageGrayer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageGrayer::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask)
 {
 	UNREFERENCED_PARAMETER(sizeDest);
@@ -242,18 +244,18 @@ BOOL CImageGrayer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPix
 	{
 		for (int nY = 0; nY < sizeSrc.cy; nY++)
 		{
-			RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
+			const RGBX& rgbSrc = pSrcPixels[nY * sizeSrc.cx + nX];
 			RGBX* pRGBDest = &pDestPixels[nY * sizeSrc.cx + nX];
 
-			if (crMask == -1 || !(crMask == *pRGBSrc))
+			if (crMask == -1 || !(crMask == rgbSrc))
 			{
 				if (m_bDefault)
-					pRGBDest->MakeGray(*pRGBSrc);
+					pRGBDest->MakeGray(rgbSrc);
 				else
-					pRGBDest->MakeGray(*pRGBSrc, m_dRedFactor, m_dGreenFactor, m_dBlueFactor);
+					pRGBDest->MakeGray(rgbSrc, m_dRedFactor, m_dGreenFactor, m_dBlueFactor);
 			}
 			else
-				*pRGBDest = *pRGBSrc;
+				*pRGBDest = rgbSrc;
 		}
 	}
 
@@ -270,7 +272,7 @@ CImageLightener::~CImageLightener()
 {
 }
 
-BOOL CImageLightener::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageLightener::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask)
 {
 	ASSERT (sizeSrc == sizeDest);
@@ -284,12 +286,12 @@ BOOL CImageLightener::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDest
 		{
 			for (int nY = 0; nY < sizeSrc.cy; nY++)
 			{
-				RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
+				const RGBX& rgbSrc = pSrcPixels[nY * sizeSrc.cx + nX];
 				RGBX* pRGBDest = &pDestPixels[nY * sizeSrc.cx + nX];
 
-				*pRGBDest = *pRGBSrc;
+				*pRGBDest = rgbSrc;
 
-				if (crMask == -1 || !(crMask == *pRGBSrc))
+				if (crMask == -1 || !(crMask == rgbSrc))
 					pRGBDest->AdjustLighting(m_dAmount, (m_bRGB != FALSE));
 			}
 		}
@@ -309,7 +311,7 @@ CImageBlurrer::~CImageBlurrer()
 {
 }
 
-BOOL CImageBlurrer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageBlurrer::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	BOOL bRes = TRUE;
@@ -337,13 +339,13 @@ BOOL CImageBlurrer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPi
 					{
 						if (nSubX >= 0 && nSubX < sizeSrc.cx && nSubY >= 0 && nSubY < sizeSrc.cy)
 						{
-							RGBX* pRGBSub = &pSrcPixels[nSubY * sizeSrc.cx + nSubX];
+							const RGBX& rgbSub = pSrcPixels[nSubY * sizeSrc.cx + nSubX];
 
 							int nMask = cMask[nSubCount];
 
-							nRed += pRGBSub->btRed * nMask;
-							nGreen += pRGBSub->btGreen * nMask;
-							nBlue += pRGBSub->btBlue * nMask;
+							nRed += rgbSub.btRed * nMask;
+							nGreen += rgbSub.btGreen * nMask;
+							nBlue += rgbSub.btBlue * nMask;
 
 							nDivisor += nMask;
 						}
@@ -375,7 +377,7 @@ CImageSharpener::~CImageSharpener()
 {
 }
 
-BOOL CImageSharpener::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageSharpener::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	BOOL bRes = TRUE;
@@ -412,13 +414,13 @@ BOOL CImageSharpener::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDest
 					{
 						for (int nSubY = nY - 1; nSubY <= nY + 1; nSubY++)
 						{
-							RGBX* pRGBSub = &pSrcPixels[nSubY * sizeSrc.cx + nSubX];
+							const RGBX& rgbSub = pSrcPixels[nSubY * sizeSrc.cx + nSubX];
 
 							double dVMask = dMask[nSubCount];
 							
-							dRed += pRGBSub->btRed * dVMask;
-							dGreen += pRGBSub->btGreen * dVMask;
-							dBlue += pRGBSub->btBlue * dVMask;
+							dRed += rgbSub.btRed * dVMask;
+							dGreen += rgbSub.btGreen * dVMask;
+							dBlue += rgbSub.btBlue * dVMask;
 							
 							nSubCount++;
 						}
@@ -446,7 +448,7 @@ BOOL CImageSharpener::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDest
 
 ////////
 
-BOOL CImageEmbosser::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageEmbosser::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask)
 {
 	ASSERT (sizeSrc == sizeDest);
@@ -466,9 +468,9 @@ BOOL CImageEmbosser::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestP
 			else
 			{
 				RGBX* pRGBDest = &pDestPixels[nY * sizeDest.cx + nX];
-				RGBX* pRGBSrc = &pSrcPixels[nY * sizeDest.cx + nX];
+				const RGBX& rgbSrc = pSrcPixels[nY * sizeDest.cx + nX];
 
-				if (crMask == -1 || !(crMask == *pRGBSrc))
+				if (crMask == -1 || !(crMask == rgbSrc))
 				{
 					double dRed = 0, dGreen = 0, dBlue = 0;
 					int nSubCount = 0;
@@ -477,15 +479,15 @@ BOOL CImageEmbosser::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestP
 					{
 						for (int nSubY = nY - 1; nSubY <= nY + 1; nSubY++)
 						{
-							RGBX* pRGBSub = &pSrcPixels[nSubY * sizeSrc.cx + nSubX];
+							const RGBX& rgbSub = pSrcPixels[nSubY * sizeSrc.cx + nSubX];
 						
 							double dVMask = dMask[nSubCount];
 
 							if (dVMask != 0)
 							{
-								dRed += pRGBSub->btRed * dVMask;
-								dGreen += pRGBSub->btGreen * dVMask;
-								dBlue += pRGBSub->btBlue * dVMask;
+								dRed += rgbSub.btRed * dVMask;
+								dGreen += rgbSub.btGreen * dVMask;
+								dBlue += rgbSub.btBlue * dVMask;
 							}
 							
 							nSubCount++;
@@ -505,7 +507,7 @@ BOOL CImageEmbosser::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestP
 				}
 				else
 				{
-					*pRGBDest = *pRGBSrc;
+					*pRGBDest = rgbSrc;
 				}
 			}
 		}
@@ -533,7 +535,7 @@ CSize CImageResizer::CalcDestSize(CSize sizeSrc)
 	return CSize(Misc::Round(sizeSrc.cx * m_dFactor), Misc::Round(sizeSrc.cy * m_dFactor));
 }
 
-BOOL CImageResizer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageResizer::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	BOOL bRes = TRUE;
@@ -542,18 +544,22 @@ BOOL CImageResizer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPi
 		return FALSE;
 
 	if (m_dFactor == 1)
+	{
 		bRes = C32BitImageProcessor::ProcessPixels(pSrcPixels, sizeSrc, pDestPixels, sizeDest);
-
+	}
 	else if (m_dFactor > 1)
+	{
 		bRes = Enlarge(pSrcPixels, sizeSrc, pDestPixels, sizeDest);
-
+	}
 	else
+	{
 		bRes = Shrink(pSrcPixels, sizeSrc, pDestPixels, sizeDest);
+	}
 
 	return TRUE;
 }
 
-BOOL CImageResizer::Enlarge(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest)
+BOOL CImageResizer::Enlarge(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest)
 {
 	ASSERT (m_dFactor > 1);
 
@@ -580,7 +586,7 @@ BOOL CImageResizer::Enlarge(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, 
 	return TRUE;
 }
 
-BOOL CImageResizer::Shrink(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest)
+BOOL CImageResizer::Shrink(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest)
 {
 	ASSERT (m_dFactor < 1 && m_dFactor > 0);
 
@@ -619,11 +625,11 @@ BOOL CImageResizer::Shrink(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, C
 			{
 				for (int nYSub = nYStart; nYSub <= nYEnd; nYSub++)
 				{
-					RGBX* pRGBSrc = &pSrcPixels[nYSub * sizeSrc.cx + nXSub];
+					const RGBX& rgbSub = pSrcPixels[nYSub * sizeSrc.cx + nXSub];
 
-					nRed += pRGBSrc->btRed;
-					nGreen += pRGBSrc->btGreen;
-					nBlue += pRGBSrc->btBlue;
+					nRed += rgbSub.btRed;
+					nGreen += rgbSub.btGreen;
+					nBlue += rgbSub.btBlue;
 					nCount++;
 				}
 			}
@@ -649,19 +655,19 @@ CImageNegator::~CImageNegator()
 {
 }
 
-BOOL CImageNegator::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize /*sizeDest*/, 
+BOOL CImageNegator::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize /*sizeDest*/, 
 								COLORREF /*crMask*/)
 {
 	for (int nX = 0; nX < sizeSrc.cx; nX++)
 	{
 		for (int nY = 0; nY < sizeSrc.cy; nY++)
 		{
-			RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
+			const RGBX& rgbSrc = pSrcPixels[nY * sizeSrc.cx + nX];
 			RGBX* pRGBDest = &pDestPixels[nY * sizeSrc.cx + nX];
 
-			pRGBDest->btRed = (BYTE)(255 - pRGBSrc->btRed);
-			pRGBDest->btGreen = (BYTE)(255 - pRGBSrc->btGreen);
-			pRGBDest->btBlue = (BYTE)(255 - pRGBSrc->btBlue);
+			pRGBDest->btRed = (BYTE)(255 - rgbSrc.btRed);
+			pRGBDest->btGreen = (BYTE)(255 - rgbSrc.btGreen);
+			pRGBDest->btBlue = (BYTE)(255 - rgbSrc.btBlue);
 		}
 	}
 
@@ -678,7 +684,7 @@ CImageFlipper::~CImageFlipper()
 {
 }
 
-BOOL CImageFlipper::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageFlipper::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	for (int nX = 0; nX < sizeSrc.cx; nX++)
@@ -687,12 +693,12 @@ BOOL CImageFlipper::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPi
 
 		for (int nY = 0; nY < sizeSrc.cy; nY++)
 		{
-			RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
+			const RGBX& rgbSrc = pSrcPixels[nY * sizeSrc.cx + nX];
 
 			int nDestY = m_bVert ? sizeDest.cy - nY - 1 : nY;
 			RGBX* pRGBDest = &pDestPixels[nDestY * sizeDest.cx + nDestX];
 
-			*pRGBDest = *pRGBSrc;
+			*pRGBDest = rgbSrc;
 		}
 	}
 
@@ -709,7 +715,7 @@ CColorReplacer::~CColorReplacer()
 {
 }
 
-BOOL CColorReplacer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CColorReplacer::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	BOOL bRes = TRUE;
@@ -724,13 +730,13 @@ BOOL CColorReplacer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestP
 		{
 			for (int nY = 0; nY < sizeSrc.cy; nY++)
 			{
-				RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
+				const RGBX& rgbSrc = pSrcPixels[nY * sizeSrc.cx + nX];
 				RGBX* pRGBDest = &pDestPixels[nY * sizeDest.cx + nX];
 
-				if (*pRGBSrc == rgbFrom)
+				if (rgbSrc == rgbFrom)
 					*pRGBDest = rgbTo;
 				else
-					*pRGBDest = *pRGBSrc;
+					*pRGBDest = rgbSrc;
 			}
 		}
 	}
@@ -748,7 +754,7 @@ CImageColorizer::~CImageColorizer()
 {
 }
 
-BOOL CImageColorizer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageColorizer::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	BOOL bRes = TRUE;
@@ -772,10 +778,10 @@ BOOL CImageColorizer::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDest
 			{
 				for (int nY = 0; nY < sizeSrc.cy; nY++)
 				{
-					RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
+					const RGBX& rgbSrc = pSrcPixels[nY * sizeSrc.cx + nX];
 					RGBX* pRGBDest = &pDestPixels[nY * sizeDest.cx + nX];
 
-					pRGBDest->MakeGray(*pRGBSrc);
+					pRGBDest->MakeGray(rgbSrc);
 
 					int nPixelLum = pRGBDest->Luminance();
 					
@@ -801,7 +807,7 @@ CImageTinter::~CImageTinter()
 {
 }
 
-BOOL CImageTinter::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageTinter::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask)
 {
 	BOOL bRes = TRUE;
@@ -817,17 +823,17 @@ BOOL CImageTinter::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPix
 		{
 			for (int nY = 0; nY < sizeSrc.cy; nY++)
 			{
-				RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
+				const RGBX& rgbSrc = pSrcPixels[nY * sizeSrc.cx + nX];
 				RGBX* pRGBDest = &pDestPixels[nY * sizeDest.cx + nX];
 				
-				if (crMask == -1 || !(crMask == *pRGBSrc))
+				if (crMask == -1 || !(crMask == rgbSrc))
 				{
-					pRGBDest->btRed = (BYTE)min(255, max(0, (int)(pRGBSrc->btRed + (int)(rgb.btRed * fFactor))));
-					pRGBDest->btGreen = (BYTE)min(255, max(0, (int)(pRGBSrc->btGreen + (int)(rgb.btGreen * fFactor))));
-					pRGBDest->btBlue = (BYTE)min(255, max(0, (int)(pRGBSrc->btBlue + (int)(rgb.btBlue * fFactor))));
+					pRGBDest->btRed = (BYTE)min(255, max(0, (int)(rgbSrc.btRed + (int)(rgb.btRed * fFactor))));
+					pRGBDest->btGreen = (BYTE)min(255, max(0, (int)(rgbSrc.btGreen + (int)(rgb.btGreen * fFactor))));
+					pRGBDest->btBlue = (BYTE)min(255, max(0, (int)(rgbSrc.btBlue + (int)(rgb.btBlue * fFactor))));
 				}
 				else
-					*pRGBDest = *pRGBSrc;
+					*pRGBDest = rgbSrc;
 			}
 		}
 	}
@@ -846,7 +852,7 @@ CImageContraster::~CImageContraster()
 {
 }
 
-BOOL CImageContraster::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageContraster::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask)
 {
 	BOOL bRes = TRUE;
@@ -861,17 +867,17 @@ BOOL CImageContraster::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDes
 		{
 			for (int nY = 0; nY < sizeSrc.cy; nY++)
 			{
-				RGBX* pRGBSrc = &pSrcPixels[nY * sizeSrc.cx + nX];
+				const RGBX& rgbSrc = pSrcPixels[nY * sizeSrc.cx + nX];
 				RGBX* pRGBDest = &pDestPixels[nY * sizeDest.cx + nX];
 
-				if (crMask == -1 || !(crMask == *pRGBSrc))
+				if (crMask == -1 || !(crMask == rgbSrc))
 				{
-					pRGBDest->btRed = (BYTE)max(0, min(255, (int)((pRGBSrc->btRed - 128) * fFactor) + 128));
-					pRGBDest->btGreen = (BYTE)max(0, min(255, (int)((pRGBSrc->btGreen - 128) * fFactor) + 128));
-					pRGBDest->btBlue = (BYTE)max(0, min(255, (int)((pRGBSrc->btBlue - 128) * fFactor) + 128));
+					pRGBDest->btRed = (BYTE)max(0, min(255, (int)((rgbSrc.btRed - 128) * fFactor) + 128));
+					pRGBDest->btGreen = (BYTE)max(0, min(255, (int)((rgbSrc.btGreen - 128) * fFactor) + 128));
+					pRGBDest->btBlue = (BYTE)max(0, min(255, (int)((rgbSrc.btBlue - 128) * fFactor) + 128));
 				}
 				else
-					*pRGBDest = *pRGBSrc;
+					*pRGBDest = rgbSrc;
 			}
 		}
 	}
@@ -896,7 +902,7 @@ static COLORMAPPING COLORMAPPINGS[] =
    { 0xFFFFFF, COLOR_BTNHIGHLIGHT }   // white
 };
 
-BOOL CImageSysColorMapper::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
+BOOL CImageSysColorMapper::ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF /*crMask*/)
 {
 	static int NUMCOLORMAPS = sizeof(COLORMAPPINGS) / sizeof(COLORMAPPING);
@@ -910,7 +916,7 @@ BOOL CImageSysColorMapper::ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* 
 		// switch source and dest for next iteration provided its not the last
 		if (nMap < NUMCOLORMAPS - 1)
 		{
-			RGBX* pTemp = pSrcPixels;
+			RGBX* pTemp = const_cast<RGBX*>(pSrcPixels);
 			pSrcPixels = pDestPixels;
 			pDestPixels = pTemp;
 		}
