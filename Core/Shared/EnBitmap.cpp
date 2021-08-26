@@ -73,6 +73,14 @@ void C32BitImageProcessor::CalcWeightedColor(const RGBX* pPixels, CSize size, do
 	const RGBX& rgbXP	= pPixels[nY * size.cx + nXP1];		// x + 1, y
 	const RGBX& rgbYP	= pPixels[nYP1 * size.cx + nX];		// x, y + 1
 	const RGBX& rgbXYP	= pPixels[nYP1 * size.cx + nXP1];	// x + 1, y + 1
+
+	// Avoid calculations and rounding errors when
+	// all 4 pixels have the same colour
+	if ((rgb == rgbXP) && (rgb == rgbYP) && (rgb == rgbXYP))
+	{
+		rgbResult = rgb;
+		return;
+	}
 	
 	int nRed = (int)(dX1MinusFraction * dY1MinusFraction * rgb.btRed +
 					dXFraction * dY1MinusFraction * rgbXP.btRed +
