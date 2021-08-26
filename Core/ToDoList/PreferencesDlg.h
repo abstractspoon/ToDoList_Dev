@@ -234,7 +234,7 @@ public:
 	BOOL GetRestoreTasklistFilters() const { return m_pageUI.GetRestoreTasklistFilters(); }
 	BOOL GetReFilterOnModify() const { return m_pageUI.GetReFilterOnModify(); }
 	BOOL GetReSortOnModify() const { return m_pageUI.GetReSortOnModify(); }
-	CString GetUITheme() const { return m_pageUI.GetUITheme(); }
+	CString GetUIThemeFile() const { return m_pageUI.GetUITheme(); }
 	FILTER_TITLE GetTitleFilterOption() const;
 	BOOL GetShowDefaultTaskIcons() const { return m_pageUI.GetShowDefaultTaskIcons(); }
 	BOOL GetShowDefaultFiltersInFilterBar() const { return m_pageUI.GetShowDefaultFiltersInFilterBar(); }

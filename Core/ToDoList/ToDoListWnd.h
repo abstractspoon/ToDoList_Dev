@@ -138,7 +138,6 @@ protected:
 	CUIExtensionMgr m_mgrUIExtensions;
 
 	CString m_sQuickFind;
-	CString m_sThemeFile;
 	CString m_sTaskViewImageExt;
 	CString m_sTitlePrefix;
 	CEnString m_sCurrentFocus;
@@ -663,7 +662,8 @@ protected:
 	BOOL WantTasklistTabbarVisible() const;
 	void UpdateAeroFeatures();
 	void CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat);
-	void SetUITheme(const CString& sThemeFile);
+	void InitUITheme();
+	void UpdateUITheme();
 	void ProcessQuickFindTextChange(BOOL bComboSelChange);
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl& tdc, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;

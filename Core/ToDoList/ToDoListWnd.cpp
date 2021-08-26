@@ -227,6 +227,7 @@ CToDoListWnd::CToDoListWnd()
 	
 	// init preferences
 	ResetPrefs();
+	InitUITheme();
 
 	// RTL keyboard input
 	if (Prefs().GetEnableRTLInput())
@@ -729,26 +730,37 @@ BOOL CToDoListWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 	return FALSE;
 }
 
-void CToDoListWnd::SetUITheme(const CString& sThemeFile)
+void CToDoListWnd::InitUITheme()
 {
-	// XP and above only
+	// XP and above only ie. Not Linux
 	if (COSVersion() < OSV_XP)
 		return;
 
-	// cache existing theme
-	CUIThemeFile themeCur = m_theme;
+	if (!m_pPrefs)
+	{
+		ASSERT(0);
+		return;
+	}
 
-	if (CThemed::IsAppThemed() && m_theme.LoadThemeFile(sThemeFile)) 
-	{
-		m_sThemeFile = sThemeFile;
-	}
-	else
-	{
-		m_sThemeFile.Empty();
+	CString sThemeFile = m_pPrefs->GetUIThemeFile();
+
+	if (!CThemed::IsAppThemed() || !m_theme.LoadThemeFile(sThemeFile)) 
 		m_theme.Reset();
-	}
+
+	m_pPrefs->SetUITheme(m_theme);
+}
 	
-	// update the UI
+void CToDoListWnd::UpdateUITheme()
+{
+	// XP and above only ie. Not Linux
+	if (COSVersion() < OSV_XP)
+		return;
+
+	// cache existing theme and update
+	CUIThemeFile themeCur = m_theme;
+	InitUITheme();
+
+	// update the UI if the theme has changed
 	if (themeCur != m_theme)
 	{
 		m_cbQuickFind.DestroyWindow();
@@ -766,50 +778,31 @@ void CToDoListWnd::SetUITheme(const CString& sThemeFile)
 
 		// Repopulate the menu icon manager
 		m_mgrMenuIcons.ClearImages();
-	}
-	else
-	{
-		m_toolbarMain.SetBackgroundColors(m_theme.crToolbarLight, 
-										m_theme.crToolbarDark, 
-										m_theme.HasGradient(), 
-										m_theme.HasGlass());
-		m_toolbarMain.SetHotColor(m_theme.crToolbarHot);
 
-		if (m_toolbarCustom.GetSafeHwnd())
+		// Rest of UI
+		m_statusBar.SetUIColors(m_theme.crStatusBarLight, 
+								m_theme.crStatusBarDark, 
+								m_theme.crStatusBarText, 
+								m_theme.HasGradient(), 
+								m_theme.HasGlass());
+
+		m_filterBar.SetUITheme(m_theme);
+		m_dlgTimeTracker.SetUITheme(m_theme);
+		m_tabCtrl.SetBackgroundColor(m_theme.crAppBackDark);
+
+		for (int nCtl = 0; nCtl < GetTDCCount(); nCtl++)
 		{
-			m_toolbarCustom.SetBackgroundColors(m_theme.crToolbarLight, 
-											m_theme.crToolbarDark, 
-											m_theme.HasGradient(), 
-											m_theme.HasGlass());
-			m_toolbarCustom.SetHotColor(m_theme.crToolbarHot);
+			CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtl);
+			tdc.SetUITheme(m_theme);
 		}
+
+		if (m_dlgFindTasks.GetSafeHwnd())
+			m_dlgFindTasks.SetUITheme(m_theme);
+
+		m_menubar.SetUITheme(m_theme);
+
+		Invalidate();
 	}
-
-	m_statusBar.SetUIColors(m_theme.crStatusBarLight, 
-							m_theme.crStatusBarDark, 
-							m_theme.crStatusBarText, 
-							m_theme.HasGradient(), 
-							m_theme.HasGlass());
-
-	m_filterBar.SetUITheme(m_theme);
-	m_dlgTimeTracker.SetUITheme(m_theme);
-	m_tabCtrl.SetBackgroundColor(m_theme.crAppBackDark);
-
-	if (m_pPrefs)
-		m_pPrefs->SetUITheme(m_theme);
-
-	for (int nCtl = 0; nCtl < GetTDCCount(); nCtl++)
-	{
-		CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtl);
-		tdc.SetUITheme(m_theme);
-	}
-
-	if (m_dlgFindTasks.GetSafeHwnd())
-		m_dlgFindTasks.SetUITheme(m_theme);
-
-	m_menubar.SetUITheme(m_theme);
-
-	Invalidate();
 }
 
 BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
@@ -894,9 +887,6 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 			return -1;
 	}
 
-	// theme
-	SetUITheme(Prefs().GetUITheme());
-				
 	// late initialization
 	PostMessage(WM_POSTONCREATE);
 	
@@ -911,17 +901,16 @@ BOOL CToDoListWnd::InitTabCtrl()
 	if (Prefs().GetStackTabbarItems())
 		nFlags |= TCS_MULTILINE;
 
-	if (m_tabCtrl.Create(nFlags, CRect(0, 0, 10, 10), this, IDC_TABCONTROL))
-	{
-		m_tabCtrl.GetToolTips()->ModifyStyle(0, TTS_ALWAYSTIP);
-		CLocalizer::EnableTranslation(m_tabCtrl, FALSE);
+	if (!m_tabCtrl.Create(nFlags, CRect(0, 0, 10, 10), this, IDC_TABCONTROL))
+		return FALSE;
+
+	m_tabCtrl.SetBackgroundColor(m_theme.crAppBackDark);
+	m_tabCtrl.GetToolTips()->ModifyStyle(0, TTS_ALWAYSTIP);
+
+	CLocalizer::EnableTranslation(m_tabCtrl, FALSE);
 		
-		// Delay image list creation to avoid resource leaks
-		return TRUE;
-	}
-	
-	// else
-	return FALSE;
+	// Delay image list creation to avoid resource leaks
+	return TRUE;
 }
 
 void CToDoListWnd::InitUIFont()
@@ -1270,6 +1259,12 @@ BOOL CToDoListWnd::InitStatusbar()
 			m_statusBar.SetPaneTooltip(SB_PANES[nPane].nID, CEnString((UINT)SB_PANES[nPane].lpszTip));
 	}
 
+	m_statusBar.SetUIColors(m_theme.crStatusBarLight,
+							m_theme.crStatusBarDark,
+							m_theme.crStatusBarText,
+							m_theme.HasGradient(),
+							m_theme.HasGlass());
+
 	return TRUE;
 }
 
@@ -1281,6 +1276,7 @@ BOOL CToDoListWnd::InitFilterbar()
 	m_filterBar.EnableMultiSelection(Prefs().GetMultiSelFilters());
 	m_filterBar.ShowDefaultFilters(Prefs().GetShowDefaultFiltersInFilterBar());
 	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
+	m_filterBar.SetUITheme(m_theme);
 
 	RefreshFilterBarAdvancedFilterNames();
 
@@ -1331,6 +1327,7 @@ void CToDoListWnd::UpdateTimeTrackerPreferences()
 	m_dlgTimeTracker.SetOption(TTDO_FORMATTIMESASHMS, prefs.GetUseHMSTimeFormat());
 	m_dlgTimeTracker.SetOption(TTDO_SHOWONBEGINTRACKING, prefs.GetShowTimeTracker());
 	m_dlgTimeTracker.SetOption(TTDO_SHOWTASKPATH, TRUE/*prefs.GetShowFullTaskPathInTimeTracker()*/);
+	m_dlgTimeTracker.SetUITheme(m_theme);
 }
 
 BOOL CToDoListWnd::InitTrayIcon()
@@ -1369,7 +1366,8 @@ BOOL CToDoListWnd::InitMainToolbar()
 	
 	m_toolbarMain.SetBorders(4, 2, 0, 0);
 
-	// colors
+	// initialise colors before setting image because the
+	// background colour is needed for image scaling
 	if (CThemed::IsAppThemed())
 	{
 		m_toolbarMain.SetBackgroundColors(m_theme.crToolbarLight, 
@@ -1438,7 +1436,8 @@ BOOL CToDoListWnd::InitCustomToolbar()
 
 	m_toolbarCustom.SetBorders(4, 2, 0, 0);
 
-	// colors
+	// initialise colors before initialising buttons because the
+	// background colour is needed for image scaling
 	if (CThemed::IsAppThemed())
 	{
 		m_toolbarCustom.SetBackgroundColors(m_theme.crToolbarLight, 
@@ -4986,7 +4985,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 			return FALSE;
 		}
 
-		SetUITheme(newPrefs.GetUITheme());
+		UpdateUITheme();
 
 		// mark all todoctrls as needing refreshing
 		m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE); 
@@ -5135,7 +5134,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);
 
 		// UDTs in toolbar
-		BOOL bUDTChange = (bCustomToolbarChange || (oldPrefs.GetUITheme() != newPrefs.GetUITheme()));
+		BOOL bUDTChange = (bCustomToolbarChange || (oldPrefs.GetUIThemeFile() != newPrefs.GetUIThemeFile()));
 
 		if (!bUDTChange)
 		{
@@ -12465,9 +12464,7 @@ void CToDoListWnd::OnSysColorChange()
 {
 	CFrameWnd::OnSysColorChange();
 	
-	m_mgrMenuIcons.ClearImages(); // repopulated on demand
-
-	SetUITheme(m_sThemeFile);
+	UpdateUITheme();
 }
 
 void CToDoListWnd::UpdateSBPaneAndTooltip(UINT nIDPane, UINT nIDTextFormat, const CString& sValue, UINT nIDTooltip, TDC_COLUMN nTDCC)
