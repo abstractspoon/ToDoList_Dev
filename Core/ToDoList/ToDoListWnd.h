@@ -25,6 +25,7 @@
 #include "TDLThreadedExporterWnd.h"
 #include "TDLCustomToolbar.h"
 #include "TDCMainMenu.h"
+#include "TDLStatusBar.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -103,7 +104,7 @@ protected:
 	CFont m_fontTree, m_fontComments; // shared by all tasklists
 	CEnImageList m_ilTabCtrl;
 	CPreferencesDlg* m_pPrefs;
-	CStatusBarACTEx	m_statusBar;
+	CTDLStatusBar m_statusBar;
 	CStatusBarProgress m_sbProgress;
 	CTDLFilterBar m_filterBar;
 	CTDLFindTasksDlg m_dlgFindTasks;

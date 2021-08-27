@@ -222,6 +222,7 @@
     <ClCompile Include="..\ToDoList\TDLSetReminderDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLShowReminderDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLSimpleTextContentCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLStatusBar.cpp" />
     <ClCompile Include="..\ToDoList\TDLStylesheetParamConfigDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskDependencyEdit.cpp" />
@@ -374,6 +375,7 @@
     <ClInclude Include="..\ToDoList\TDLSetReminderDlg.h" />
     <ClInclude Include="..\ToDoList\TDLShowReminderDlg.h" />
     <ClInclude Include="..\ToDoList\TDLSimpleTextContentCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLStatusBar.h" />
     <ClInclude Include="..\ToDoList\TDLStylesheetParamConfigDlg.h" />
     <ClInclude Include="..\ToDoList\TDLTaskCtrlBase.h" />
     <ClInclude Include="..\ToDoList\TDLTaskDependencyEdit.h" />
