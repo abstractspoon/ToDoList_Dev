@@ -9,6 +9,7 @@
 #include "stdafx.h"
 #include "EnBitmapex.h"
 #include "imageprocessors.h"
+#include "Icon.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -184,14 +185,13 @@ BOOL CEnBitmapEx::CreateDisabledImageList(const CImageList& ilSrc, CImageList& i
 
 		while (nImage--)
 		{
-			HICON hIcon = pILSrc->ExtractIcon(nImage);
-			HICON hDis = CreateDisabledIcon(hIcon);
+			CIcon icon(pILSrc->ExtractIcon(nImage));
+			CIcon iconDis(CreateDisabledIcon(icon));
 
-			ilDest.Replace(nImage, hDis);
-
-			::DestroyIcon(hIcon);
-			::DestroyIcon(hDis);
+			ilDest.Replace(nImage, iconDis);
 		}
+
+		return TRUE;
 	}
 
 	// else
