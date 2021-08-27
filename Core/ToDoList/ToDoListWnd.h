@@ -531,8 +531,6 @@ protected:
 	afx_msg void OnUpdatePrint(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateRecentFileMenu(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateReload(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateSBSelectionCount(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateSBTaskCount(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSave(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveall(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveas(CCmdUI* pCmdUI);
@@ -739,9 +737,7 @@ protected:
 	
 	void UpdateTooltip();
 	void UpdateCaption();
-	void UpdateStatusbar();
-	void UpdateSBPaneAndTooltip(UINT nIDPane, UINT nIDTextFormat, const CString& sValue, UINT nIDTooltip, TDC_COLUMN nTDCC);
-	void UpdateStatusBarInfo(const CFilteredToDoCtrl& tdc, TDCSTATUSBARINFO& sbi) const;
+	void UpdateStatusBar(DWORD dwFlags = TDCSB_UPDATEALL);
 	void UpdateMenuIconMgrSourceControlStatus();
 	void UpdateTimeTrackerPreferences();
 	void UpdateWindowIcons();

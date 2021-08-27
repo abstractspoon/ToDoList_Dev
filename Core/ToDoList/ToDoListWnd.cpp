@@ -218,7 +218,8 @@ CToDoListWnd::CToDoListWnd()
 	m_bAllowForcedCheckOut(FALSE),
 	m_nContextColumnID(TDCC_NONE),
 	m_nContextMenuID(0),
-	m_bFirstEraseBkgnd(TRUE)
+	m_bFirstEraseBkgnd(TRUE),
+	m_statusBar(m_tdiDefault)
 {
 	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
 	
@@ -596,8 +597,6 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_SAVEALL, OnUpdateSaveall)
 	ON_UPDATE_COMMAND_UI(ID_SAVEAS, OnUpdateSaveas)
 	ON_UPDATE_COMMAND_UI(ID_SAVE_NORMAL, OnUpdateSave)
-	ON_UPDATE_COMMAND_UI(ID_SB_SELCOUNT, OnUpdateSBSelectionCount)
-	ON_UPDATE_COMMAND_UI(ID_SB_TASKCOUNT, OnUpdateSBTaskCount)
 	ON_UPDATE_COMMAND_UI(ID_SENDTASKS, OnUpdateSendTasks)
 	ON_UPDATE_COMMAND_UI(ID_SEND_SELTASKS, OnUpdateSendSelectedTasks)
 	ON_UPDATE_COMMAND_UI(ID_SHOWTIMELOGFILE, OnUpdateShowTimelogfile)
@@ -1225,45 +1224,10 @@ LRESULT CToDoListWnd::OnGetIcon(WPARAM bLargeIcon, LPARAM /*not used*/)
 
 BOOL CToDoListWnd::InitStatusbar()
 {
-	static SBACTPANEINFO SB_PANES[] = 
-	{
-	  { ID_SB_SELTASKTITLE,	MAKEINTRESOURCE(IDS_SB_SELTASKTITLE_TIP), SBACTF_STRETCHY | SBACTF_RESOURCETIP },
-	  { ID_SB_FILEVERSION,	MAKEINTRESOURCE(IDS_SB_FILEVERSION_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP }, 
-	  { ID_SB_TASKCOUNT,	MAKEINTRESOURCE(IDS_SB_TASKCOUNT_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP }, 
-	  //{ ID_SB_SPACER }, 
-	  { ID_SB_SELCOUNT,		_T(""), SBACTF_AUTOFIT }, 
-	  { ID_SB_SELTIMEEST,	MAKEINTRESOURCE(IDS_SB_SELTIMEEST_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP }, 
-	  { ID_SB_SELTIMESPENT,	MAKEINTRESOURCE(IDS_SB_SELTIMESPENT_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP }, 
-	  { ID_SB_SELCOST,		MAKEINTRESOURCE(IDS_SB_SELCOST_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP }, 
-	  //{ ID_SB_SPACER }, 
-	  { ID_SB_FOCUS,		MAKEINTRESOURCE(IDS_SB_FOCUS_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP }, 
-	};
-
-	static int SB_PANECOUNT = sizeof(SB_PANES) / sizeof(SBACTPANEINFO);
-
 	if (!m_statusBar.Create(this, WS_CHILD | WS_VISIBLE | CBRS_BOTTOM, IDC_FILENAME))
 		return FALSE;
 
-	// prevent translation because we handle it manually
-	CLocalizer::EnableTranslation(m_statusBar, FALSE);
-
-	if (!m_statusBar.SetPanes(SB_PANES, SB_PANECOUNT))
-		return FALSE;
-
-	// Translate tooltips
-	if (CLocalizer::IsInitialized())
-	{
-		int nPane = SB_PANECOUNT;
-
-		while (nPane--)
-			m_statusBar.SetPaneTooltip(SB_PANES[nPane].nID, CEnString((UINT)SB_PANES[nPane].lpszTip));
-	}
-
-	m_statusBar.SetUIColors(m_theme.crStatusBarLight,
-							m_theme.crStatusBarDark,
-							m_theme.crStatusBarText,
-							m_theme.HasGradient(),
-							m_theme.HasGlass());
+	m_statusBar.SetUITheme(m_theme);
 
 	return TRUE;
 }
@@ -1805,7 +1769,11 @@ void CToDoListWnd::OnDeleteTask()
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	if (!tdc.IsReadOnly() && tdc.HasSelection())
+	{
 		tdc.DeleteSelectedTask();
+	
+		UpdateStatusBar(TDCSB_UPDATEALL);
+	}
 }
 
 void CToDoListWnd::OnDeleteAllTasks() 
@@ -1813,7 +1781,9 @@ void CToDoListWnd::OnDeleteAllTasks()
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 	if (!tdc.IsReadOnly() && tdc.DeleteAllTasks())
-		UpdateStatusbar();
+	{
+		UpdateStatusBar(TDCSB_UPDATEALL);
+	}
 }
 
 void CToDoListWnd::OnSave() 
@@ -2018,7 +1988,6 @@ TDC_FILE CToDoListWnd::SaveTaskList(int nTDC, LPCTSTR szFilePath, DWORD dwFlags)
 		m_mruList.Add(sFilePath);
 
 	UpdateCaption();
-	UpdateStatusbar();
 
 	// auto-export after saving
 	TDCEXPORTTASKLIST* pExport = PrepareNewExportAfterSave(nTDC, tasks);
@@ -2115,24 +2084,6 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 	}
 	
 	return pExport;
-}
-
-void CToDoListWnd::UpdateStatusbar()
-{
-	if (!m_sbProgress.IsActive() && GetTDCCount())
-	{
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-		CEnString sSelTasks = tdc.FormatSelectedTaskTitles(TRUE);
-
-		if (sSelTasks.IsEmpty())
-			sSelTasks.LoadString(ID_SB_SELTASKTITLE);
-		
-		m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_SELTASKTITLE), sSelTasks);
-
-		// get file version
-		m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_FILEVERSION), 
-								CEnString(ID_SB_FILEVERSION, tdc.GetFileVersion()));
-	}
 }
 
 void CToDoListWnd::OnLoad() 
@@ -2531,9 +2482,10 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	RefreshTabOrder();
 	Invalidate(TRUE);
 
-	// end progress before refreshing statusbar
+	// End progress before updating statusbar
 	m_sbProgress.EndProgress();
-	UpdateStatusbar();
+
+	UpdateStatusBar();
 
 	// find tasks dialog
 	if (prefs.GetProfileInt(SETTINGS_KEY, _T("FindTasksVisible"), 0))
@@ -3375,7 +3327,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyListChange(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CToDoListWnd::OnToDoCtrlNotifySelChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
-	UpdateStatusbar();
+	UpdateStatusBar(TDCSB_UPDATESELECTION);
 
 	return 0L;
 }
@@ -3387,9 +3339,9 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyViewChange(WPARAM wp, LPARAM lp)
 		if (lp != (LPARAM)wp)
 		{
 			CFocusWatcher::UpdateFocus();
-			RefreshFilterBarControls(TDCA_ALL);
 
-			UpdateStatusbar();
+			RefreshFilterBarControls(TDCA_ALL);
+			UpdateStatusBar(TDCSB_UPDATESELECTION);
 		}
 		else
 		{
@@ -3628,6 +3580,8 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 {
 	ASSERT(wp && lp);
 
+	const TDCNOTIFYMOD* pMod = (TDCNOTIFYMOD*)lp;
+
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wp);
 
 	if (nTDC == -1)
@@ -3636,8 +3590,8 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		return 0L;
 	}
 
-	const TDCNOTIFYMOD* pMod = (TDCNOTIFYMOD*)lp;
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
+	int nSelCount = tdc.GetSelectedCount();
 
 	if (pMod->mapAttrib.Has(TDCA_PROJECTNAME))
 	{
@@ -3687,11 +3641,20 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		}
 	}
 
+	if (pMod->mapAttrib.Has(TDCA_TIMEESTIMATE) ||
+		pMod->mapAttrib.Has(TDCA_TIMESPENT) ||
+		pMod->mapAttrib.Has(TDCA_COST) ||
+		pMod->mapAttrib.Has(TDCA_TASKNAME))
+	{
+		UpdateStatusBar(TDCSB_UPDATESELECTION);
+	}
+	else if (pMod->mapAttrib.Has(TDCA_ICON) && (nSelCount == 1))
+	{
+		UpdateStatusBar(TDCSB_UPDATESELECTION);
+	}
+
 	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
 		tdc.RedrawReminders();
-
-	// Update UI
-	UpdateStatusbar();
 
 	if (nTDC == GetSelToDoCtrl())
 		UpdateCaption();
@@ -3731,7 +3694,8 @@ void CToDoListWnd::UpdateCaption()
 	}
 	
 	// Prefix with task pathname if tasklist not visible
-	if (m_nMaxState == TDCMS_MAXCOMMENTS)
+	// and status bar not visible
+	if (!m_bShowStatusBar && (m_nMaxState == TDCMS_MAXCOMMENTS))
 	{
 		// quote the path to help it stand-out
 		CString sTaskPath;
@@ -3846,7 +3810,6 @@ void CToDoListWnd::OnSaveas()
 		else
 		{
 			tdc.SetProjectName(sCurProjName); // revert change
-			UpdateStatusbar();
 		}
 	}
 }
@@ -4482,7 +4445,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(LPCTSTR szFilePath, BOOL bNotifyDueTasks)
 			DoDueTaskNotification(nTDC, userPrefs.GetNotifyDueByOnLoad());
 		
 		UpdateCaption();
-		UpdateStatusbar();
+		UpdateStatusBar(TDCSB_UPDATEALL);
 		OnTimerDueItems(nTDC);
 		
 		// update search
@@ -6059,7 +6022,7 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 			DoDueTaskNotification(nIndex, userPrefs.GetNotifyDueByOnLoad());
 		
 		UpdateCaption();
-		UpdateStatusbar();
+		UpdateStatusBar(TDCSB_UPDATETOTALS);
 	}
 	else if (bNotifyError)
 	{
@@ -7385,7 +7348,7 @@ void CToDoListWnd::OnFileOpenFromUserStorage(UINT nCmdID)
 		
 		// refresh UI
 		UpdateCaption();
-		UpdateStatusbar();
+		UpdateStatusBar(TDCSB_UPDATEALL);
 		Resize();
 		UpdateWindow();
 	}
@@ -7465,7 +7428,6 @@ void CToDoListWnd::OnFileSaveToUserStorage(UINT nCmdID)
 	m_mgrToDoCtrls.SetStorageDetails(nTDC, storageInfo);
 		
 	UpdateCaption();
-	UpdateStatusbar();
 	Resize();
 	UpdateWindow();
 }
@@ -8024,7 +7986,7 @@ void CToDoListWnd::OnTabCtrlSelchange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
  		RefreshFilterBarControls(TDCA_ALL);
  		
 		// update status bar
-		UpdateStatusbar();
+ 		UpdateStatusBar(TDCSB_UPDATEALL);
 		UpdateCaption();
 
 		if (Prefs().GetShareCommentsSize() && (m_nLastSelItem != -1))
@@ -8619,7 +8581,7 @@ BOOL CToDoListWnd::SelectToDoCtrl(int nIndex, BOOL bCheckPassword, int nNotifyDu
 
 		// update various dependencies
 		UpdateCaption();
-		UpdateStatusbar();
+		UpdateStatusBar(TDCSB_UPDATEALL);
 		UpdateMenuIconMgrSourceControlStatus();
 		UpdateCwd();
 		
@@ -10899,7 +10861,6 @@ void CToDoListWnd::OnFileResetversion()
 		tdc.ResetFileVersion();
 		tdc.SetModified();
 		
-		UpdateStatusbar();
 		UpdateCaption();
 	}
 }
@@ -10929,56 +10890,50 @@ TDC_FILE CToDoListWnd::SaveAll(DWORD dwFlags)
 	BOOL bClosingWindows = Misc::HasFlag(dwFlags, TDLS_CLOSINGWINDOWS);
 	BOOL bClosingTasklists = Misc::HasFlag(dwFlags, TDLS_CLOSINGTASKLISTS);
 
-	// scoped to end status bar progress before calling UpdateStatusbar
+	DOPROGRESS(IDS_SAVINGPROGRESS);
+
+	int nCtrl = GetTDCCount();
+
+	while (nCtrl--)
 	{
-		DOPROGRESS(IDS_SAVINGPROGRESS);
+		const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
 
-		int nCtrl = GetTDCCount();
-
-		while (nCtrl--)
+		// bypass unsaved or 'busy' tasklists unless 
+		// closing Windows or tasklists
+		if (!bClosingWindows && !bClosingTasklists)
 		{
-			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
+			BOOL bWantFlush = !Misc::HasFlag(dwFlags, TDLS_NOFLUSH);
 
-			// bypass unsaved or 'busy' tasklists unless 
-			// closing Windows or tasklists
-			if (!bClosingWindows && !bClosingTasklists)
+			if (!bWantFlush && tdc.IsTaskLabelEditing())
 			{
-				BOOL bWantFlush = !Misc::HasFlag(dwFlags, TDLS_NOFLUSH);
-
-				if (!bWantFlush && tdc.IsTaskLabelEditing())
-				{
-					TRACE(_T("Tasklist not auto-saved because it is 'busy'\n"));
-					continue;
-				}
-
-				BOOL bWantUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
-
-				if (!bWantUnsaved && !m_mgrToDoCtrls.UsesStorage(nCtrl) && !tdc.HasFilePath())
-				{
-					TRACE(_T("Tasklist not auto-saved because it is 'unsaved'\n"));
-					continue;
-				}
+				TRACE(_T("Tasklist not auto-saved because it is 'busy'\n"));
+				continue;
 			}
-			
-			TDC_FILE nSave = ConfirmSaveTaskList(nCtrl, dwFlags);
 
-			if (nSave == TDCF_CANCELLED) // user cancelled
-				return TDCF_CANCELLED;
+			BOOL bWantUnsaved = Misc::HasFlag(dwFlags, TDLS_INCLUDEUNSAVED);
 
-			// else cache any failure w/o overwriting previous
-			if (nSaveAll == TDCF_SUCCESS)
-				nSaveAll = nSave;
-
-			if (!bClosingWindows && !bClosingTasklists)
-				m_mgrToDoCtrls.UpdateTabItemText(nCtrl);
+			if (!bWantUnsaved && !m_mgrToDoCtrls.UsesStorage(nCtrl) && !tdc.HasFilePath())
+			{
+				TRACE(_T("Tasklist not auto-saved because it is 'unsaved'\n"));
+				continue;
+			}
 		}
+
+		TDC_FILE nSave = ConfirmSaveTaskList(nCtrl, dwFlags);
+
+		if (nSave == TDCF_CANCELLED) // user cancelled
+			return TDCF_CANCELLED;
+
+		// else cache any failure w/o overwriting previous
+		if (nSaveAll == TDCF_SUCCESS)
+			nSaveAll = nSave;
+
+		if (!bClosingWindows && !bClosingTasklists)
+			m_mgrToDoCtrls.UpdateTabItemText(nCtrl);
 	}
 
 	if (!bClosingWindows)
-	{
 		UpdateCaption();
-		UpdateStatusbar();
-	}
 	
     return nSaveAll;
 }
@@ -11488,7 +11443,7 @@ void CToDoListWnd::OnViewClearfilter()
 		tdc.ClearFilter();
 	
 		RefreshFilterBarControls(TDCA_ALL, TRUE); // clear checkbox history
-		UpdateStatusbar();
+		UpdateStatusBar(TDCSB_UPDATEALL);
 	}
 }
 
@@ -11506,7 +11461,7 @@ void CToDoListWnd::OnViewTogglefilter()
 	tdc.ToggleFilter();
 
 	RefreshFilterBarControls(TDCA_ALL);
-	UpdateStatusbar();
+	UpdateStatusBar(TDCSB_UPDATEALL);
 }
 
 void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
@@ -11556,7 +11511,7 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 	else
 		CheckResizeFilterBar();
 
-	UpdateStatusbar();
+	UpdateStatusBar(TDCSB_UPDATEALL);
 }
 
 void CToDoListWnd::OnViewFilter() 
@@ -11612,7 +11567,7 @@ void CToDoListWnd::OnViewRefreshfilter()
 			tdc.ExpandTasks(TDCEC_ALL);
 	}
 
-	UpdateStatusbar();
+	UpdateStatusBar(TDCSB_UPDATEALL);
 }
 
 void CToDoListWnd::OnUpdateViewRefreshfilter(CCmdUI* pCmdUI) 
@@ -11662,6 +11617,7 @@ void CToDoListWnd::OnTasklistSelectColumns()
 		}
 
 		RefreshFilterBarControls(TDCA_ALL);
+		UpdateStatusBar(TDCSB_UPDATESELECTION);
 
 		// reload the menu if we dynamically alter it
 		if (Prefs().GetShowEditMenuAsColumns())
@@ -12242,7 +12198,7 @@ void CToDoListWnd::OnViewStatusBar()
 	SendMessage(WM_SIZE, SIZE_RESTORED, 0L);
 
 	if (m_bShowStatusBar)
-		UpdateStatusbar();
+		UpdateStatusBar(TDCSB_UPDATEALL);
 	else
 		UpdateCaption();
 }
@@ -12467,119 +12423,15 @@ void CToDoListWnd::OnSysColorChange()
 	UpdateUITheme();
 }
 
-void CToDoListWnd::UpdateSBPaneAndTooltip(UINT nIDPane, UINT nIDTextFormat, const CString& sValue, UINT nIDTooltip, TDC_COLUMN nTDCC)
+void CToDoListWnd::UpdateStatusBar(DWORD dwFlags)
 {
-	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	CEnString sText, sTooltip;
-
-	if (tdc.IsColumnShowing(nTDCC))
+	if (m_bShowStatusBar && !m_sbProgress.IsActive() && GetTDCCount())
 	{
-		sText.Format(nIDTextFormat, sValue);
-		sTooltip.LoadString(nIDTooltip);
-	}
-	else
-	{
-		sText.Empty();
-		sTooltip.Empty();
-	}
+		if (dwFlags & TDCSB_UPDATETOTALS)
+			m_statusBar.UpdateTaskTotals(GetToDoCtrl());
 
-	int nPane = m_statusBar.CommandToIndex(nIDPane);
-
-	m_statusBar.SetPaneText(nPane, sText);
-	m_statusBar.SetPaneTooltipIndex(nPane, sTooltip);
-}
-
-void CToDoListWnd::UpdateStatusBarInfo(const CFilteredToDoCtrl& tdc, TDCSTATUSBARINFO& sbi) const
-{
-	sbi.nSelCount = tdc.GetSelectedCount();
-	sbi.dwSelTaskID = tdc.GetSelectedTaskID();
-	sbi.dCost = tdc.CalcSelectedTaskCost();
-
-	const CPreferencesDlg& userPrefs = Prefs();
-
-	sbi.nTimeEstUnits = m_tdiDefault.timeEstimate.nUnits;
-	sbi.dTimeEst = tdc.CalcSelectedTaskTimeEstimate(sbi.nTimeEstUnits);
-
-	sbi.nTimeSpentUnits = m_tdiDefault.timeSpent.nUnits;
-	sbi.dTimeSpent = tdc.CalcSelectedTaskTimeSpent(sbi.nTimeSpentUnits);
-}
-
-void CToDoListWnd::OnUpdateSBSelectionCount(CCmdUI* /*pCmdUI*/)
-{
-	if (GetTDCCount())
-	{
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-		// keep track of previous information to avoid unnecessary processing
-		static TDCSTATUSBARINFO sbiPrev;
-
-		TDCSTATUSBARINFO sbi;
-		UpdateStatusBarInfo(tdc, sbi);
-
-		if (sbi == sbiPrev)
-			return;
-
-		sbiPrev = sbi;
-
-		// number of selected tasks
-		CEnString sText;
-
-		if (sbi.nSelCount == 1)
-		{
-			ASSERT(sbi.dwSelTaskID);
-			sText.Format(ID_SB_SELCOUNTONE, sbi.dwSelTaskID);
-		}
-		else
-			sText.Format(ID_SB_SELCOUNT, sbi.nSelCount);
-
-		m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_SELCOUNT), sText);
-
-		// times
-		const CPreferencesDlg& userPrefs = Prefs();
-
-		// estimate
-		TH_UNITS nTHUnits = TDC::MapUnitsToTHUnits(sbi.nTimeEstUnits);
-
-		if (userPrefs.GetUseHMSTimeFormat())
-			sText = CTimeHelper().FormatTimeHMS(sbi.dTimeEst, nTHUnits);
-		else
-			sText = CTimeHelper().FormatTime(sbi.dTimeEst, nTHUnits, 2);
-
-		UpdateSBPaneAndTooltip(ID_SB_SELTIMEEST, ID_SB_SELTIMEEST, sText, IDS_SB_SELTIMEEST_TIP, TDCC_TIMEESTIMATE);
-
-		// spent
-		nTHUnits = TDC::MapUnitsToTHUnits(sbi.nTimeSpentUnits);
-
-		if (userPrefs.GetUseHMSTimeFormat())
-			sText = CTimeHelper().FormatTimeHMS(sbi.dTimeSpent, nTHUnits);
-		else
-			sText = CTimeHelper().FormatTime(sbi.dTimeSpent, nTHUnits, 2);
-
-		UpdateSBPaneAndTooltip(ID_SB_SELTIMESPENT, ID_SB_SELTIMESPENT, sText, IDS_SB_SELTIMESPENT_TIP, TDCC_TIMESPENT);
-
-		// cost
-		sText = Misc::Format(sbi.dCost, 2);
-		UpdateSBPaneAndTooltip(ID_SB_SELCOST, ID_SB_SELCOST, sText, IDS_SB_SELCOST_TIP, TDCC_COST);
-
-		// set tray tip too
-		UpdateTooltip();
-	}
-}
-
-void CToDoListWnd::OnUpdateSBTaskCount(CCmdUI* /*pCmdUI*/)
-{
-	if (GetTDCCount())
-	{
-		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-
-		UINT nVisibleTasks;
-		UINT nTotalTasks = tdc.GetTaskCount(&nVisibleTasks);
-
-		CEnString sText;
-		sText.Format(IDS_SB_TASKCOUNT, nVisibleTasks, nTotalTasks);
-		int nIndex = m_statusBar.CommandToIndex(ID_SB_TASKCOUNT);
-
-		m_statusBar.SetPaneText(nIndex, sText);
+		if (dwFlags & TDCSB_UPDATESELECTION)
+			m_statusBar.UpdateTaskSelection(GetToDoCtrl());
 	}
 }
 
@@ -12754,7 +12606,7 @@ void CToDoListWnd::OnEditUndoRedo(BOOL bUndo)
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	tdc.UndoLastAction(bUndo);
 	
-	UpdateStatusbar();
+	UpdateStatusBar(TDCSB_UPDATEALL);
 	UpdateTimeTrackerTasks(tdc, TRUE);
 }
 

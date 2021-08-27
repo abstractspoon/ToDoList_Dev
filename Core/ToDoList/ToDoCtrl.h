@@ -385,17 +385,17 @@ public:
     TDC_FILEFMT CompareFileFormat() const; // older, same, newer
 	
 	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
-	inline int GetSelectedCount() const { return m_taskTree.GetSelectedCount(); }
 	inline BOOL HasSelection() const { return m_taskTree.HasSelection(); }
 	BOOL IsTaskLabelEditing() const;
 
+	virtual int GetSelectedCount() const { return m_taskTree.GetSelectedCount(); }
 	virtual BOOL TasksHaveFocus() const { return m_taskTree.HasFocus(); }
 	virtual void SetFocusToTasks();
 	virtual void SetFocusToComments();
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
-	virtual CString FormatSelectedTaskTitles(BOOL bFullPath) const;
+	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0) const;
 
 	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
 	BOOL SelectedTasksHaveIcons() const { return m_taskTree.SelectionHasIcons(); }

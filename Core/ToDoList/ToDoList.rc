@@ -5039,7 +5039,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SB_SELCOUNT          "%d tasks selected"
     ID_SB_SELTIMEEST        "Est: %s"
     ID_SB_SELTIMESPENT      "Spent: %s"
     ID_SB_SELCOST           "Cost: %s"
@@ -5047,11 +5046,9 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SB_FILEVERSION       "%d"
-    ID_SB_TASKCOUNT         "Task Count"
-    ID_SB_SELTASKTITLE      "(No task selected)"
+    ID_SB_NOSELTASK         "<No task selected>"
+    ID_SB_MULTISELTASK      "<Multiple tasks selected>"
     ID_SB_SPACER            "                     "
-    ID_SB_FOCUS             "                     "
     ID_EDIT_INSERTTIME      "\nInsert Time"
     IDS_FOCUS_FILTERBAR     "Filter"
     IDS_FOCUS_TASKS         "Tasks"
@@ -5115,7 +5112,6 @@ BEGIN
     IDS_PREF_FILESAVE       "File Actions (more)>Saving"
     IDS_PREF_MULTIUSERFILE  "Multiple Users>File Checking"
     IDS_PREF_FILE           "File Actions"
-    ID_SB_SELCOUNTONE       "1 task selected (%d)"
     IDS_OPENSHARINGVIOLATION 
                             "'%s' could not be opened because another user\n(or application) is currently accessing the file.\n\nPlease try again in a moment."
     IDS_SAVESHARINGVIOLATION 

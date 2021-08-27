@@ -5835,7 +5835,7 @@ HTREEITEM CTabbedToDoCtrl::GetUpdateControlsItem() const
 	return hti;
 }
 
-CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath) const
+CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep) const
 {
 	CString sSelTasks;
 	FTC_VIEW nView = GetTaskView();
@@ -5844,11 +5844,11 @@ CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath) const
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		sSelTasks = CToDoCtrl::FormatSelectedTaskTitles(bFullPath);
+		sSelTasks = CToDoCtrl::FormatSelectedTaskTitles(bFullPath, cSep);
 		break;
 
 	case FTCV_TASKLIST:
-		sSelTasks = m_taskList.FormatSelectedTaskTitles(bFullPath);
+		sSelTasks = m_taskList.FormatSelectedTaskTitles(bFullPath, cSep);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -5868,7 +5868,7 @@ CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		if (GetViewData(nView)->bHasSelectedTask)
-			sSelTasks = CToDoCtrl::FormatSelectedTaskTitles(bFullPath);
+			sSelTasks = CToDoCtrl::FormatSelectedTaskTitles(bFullPath, cSep);
 		break;
 
 	default:
@@ -5876,6 +5876,35 @@ CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath) const
 	}
 
 	return sSelTasks;
+}
+
+int CTabbedToDoCtrl::GetSelectedCount() const
+{
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
+		if (!GetViewData(nView)->bHasSelectedTask)
+			return 0;
+	}
+
+	return CToDoCtrl::GetSelectedCount();
 }
 
 void CTabbedToDoCtrl::SetFocusToTasks()

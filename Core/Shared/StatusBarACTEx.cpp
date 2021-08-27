@@ -59,7 +59,7 @@ void CStatusBarACTEx::OnPaint()
 
 		while (nPane--)
 		{
-			BOOL bTextDrawn = DrawPaneText(&dc, nPane);
+			BOOL bTextDrawn = DrawPaneText(&dc, nPane, 2);
 
 			// prevent overwriting of next pane
 			CRect rect;
@@ -96,7 +96,7 @@ void CStatusBarACTEx::OnPaint()
 	}
 }
 
-BOOL CStatusBarACTEx::DrawPaneText(CDC* pDC, int nPane)
+BOOL CStatusBarACTEx::DrawPaneText(CDC* pDC, int nPane, int nOffset)
 {
 	const CString& sText = GetPaneText(nPane);
 
@@ -106,7 +106,7 @@ BOOL CStatusBarACTEx::DrawPaneText(CDC* pDC, int nPane)
 	CRect rect;
 	GetItemRect(nPane, &rect);
 
-	pDC->TextOut(rect.left + 2, rect.top, sText);
+	pDC->TextOut(rect.left + nOffset, rect.top, sText);
 	return TRUE;
 }
 
@@ -158,4 +158,12 @@ BOOL CStatusBarACTEx::SetPaneTooltipIndex(int nIndex, UINT nTipID)
 BOOL CStatusBarACTEx::SetPaneTooltipIndex(int nIndex, LPCTSTR szTip)
 {
 	return CStatusBarACT::SetPaneTooltipIndex(nIndex, szTip);
+}
+
+void CStatusBarACTEx::InvalidatePane(int nPane)
+{
+	CRect rect;
+	GetItemRect(nPane, &rect);
+
+	InvalidateRect(rect);
 }

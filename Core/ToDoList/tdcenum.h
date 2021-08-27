@@ -981,4 +981,14 @@ enum TDLID_IMPORTTO
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum // status bar updates
+{
+	TDCSB_UPDATETOTALS		= 0x1,
+	TDCSB_UPDATESELECTION	= 0x2,
+
+	TDCSB_UPDATEALL			= 0xf,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 #endif // AFX_TDCENUM_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

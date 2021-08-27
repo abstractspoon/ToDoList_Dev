@@ -1235,6 +1235,8 @@
 #define ID_SB_FILEVERSION               34276
 #define ID_SB_TASKCOUNT                 34278
 #define ID_SB_SELTASKTITLE              34280
+#define ID_SB_NOSELTASK                 34280
+#define ID_SB_MULTISELTASK              34281
 #define ID_SB_SPACER                    34282
 #define ID_SB_FOCUS                     34283
 #define ID_EDIT_INSERTTIME              34284
