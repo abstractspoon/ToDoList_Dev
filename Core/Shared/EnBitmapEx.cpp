@@ -10,6 +10,7 @@
 #include "EnBitmapex.h"
 #include "imageprocessors.h"
 #include "Icon.h"
+#include "GraphicsMisc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -197,3 +198,109 @@ BOOL CEnBitmapEx::CreateDisabledImageList(const CImageList& ilSrc, CImageList& i
 	// else
 	return FALSE;
 }
+
+BOOL CEnBitmapEx::ProcessImage(C32BitImageProcessor* pProcessor, COLORREF crMask)
+{
+	C32BIPArray aProcessors;
+
+	aProcessors.Add(pProcessor);
+
+	return ProcessImage(aProcessors, crMask);
+}
+
+BOOL CEnBitmapEx::ProcessImage(C32BIPArray& aProcessors, COLORREF crMask)
+{
+	ASSERT(GetSafeHandle());
+
+	if (!GetSafeHandle())
+		return FALSE;
+
+	if (!aProcessors.GetSize())
+		return TRUE;
+
+	int nProcessor, nCount = aProcessors.GetSize();
+
+	// retrieve src and final dest sizes
+	CSize sizeSrc = GetSize();
+	CSize sizeDest(sizeSrc), sizeMax(sizeSrc);
+
+	for (nProcessor = 0; nProcessor < nCount; nProcessor++)
+	{
+		sizeDest = aProcessors[nProcessor]->CalcDestSize(sizeDest);
+		sizeMax = CSize(max(sizeMax.cx, sizeDest.cx), max(sizeMax.cy, sizeDest.cy));
+	}
+
+	// prepare src and dest bits
+	RGBX* pSrcPixels = GetDIBits32();
+
+	if (!pSrcPixels)
+		return FALSE;
+
+	RGBX* pDestPixels = new RGBX[sizeMax.cx * sizeMax.cy];
+
+	if (!pDestPixels)
+		return FALSE;
+
+	Fill(pDestPixels, sizeMax, m_crBkgnd);
+
+	BOOL bRes = TRUE;
+	sizeDest = sizeSrc;
+
+	// do the processing
+	for (nProcessor = 0; bRes && nProcessor < nCount; nProcessor++)
+	{
+		// if its the second processor or later then we need to copy
+		// the previous dest bits back into source.
+		// we also need to check that sizeSrc is big enough
+		if (nProcessor > 0)
+		{
+			if (sizeSrc.cx < sizeDest.cx || sizeSrc.cy < sizeDest.cy)
+			{
+				delete[] pSrcPixels;
+				pSrcPixels = new RGBX[sizeDest.cx * sizeDest.cy];
+			}
+
+			CopyMemory(pSrcPixels, pDestPixels, sizeDest.cx * 4 * sizeDest.cy); // default
+			Fill(pDestPixels, sizeDest, m_crBkgnd);
+		}
+
+		sizeSrc = sizeDest;
+		sizeDest = aProcessors[nProcessor]->CalcDestSize(sizeSrc);
+
+		bRes = aProcessors[nProcessor]->ProcessPixels(pSrcPixels, sizeSrc, pDestPixels, sizeDest, crMask);
+	}
+
+	// update the bitmap
+	if (bRes)
+	{
+		// set the bits
+		HDC hdc = GetDC(NULL);
+		HBITMAP hbmSrc = ::CreateCompatibleBitmap(hdc, sizeDest.cx, sizeDest.cy);
+
+		if (hbmSrc)
+		{
+			BITMAPINFO bi;
+
+			if (PrepareBitmapInfo32(bi, hbmSrc))
+			{
+				if (SetDIBits(hdc, hbmSrc, 0, sizeDest.cy, pDestPixels, &bi, DIB_RGB_COLORS))
+				{
+					// delete the bitmap and attach new
+					GraphicsMisc::VerifyDeleteObject(*this);
+					bRes = Attach(hbmSrc);
+				}
+			}
+
+			VERIFY(::ReleaseDC(NULL, hdc));
+
+			if (!bRes)
+				GraphicsMisc::VerifyDeleteObject(hbmSrc);
+		}
+	}
+
+	delete[] pSrcPixels;
+	delete[] pDestPixels;
+
+	return bRes;
+}
+

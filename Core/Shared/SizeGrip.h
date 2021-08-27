@@ -8,7 +8,7 @@
 //
 
 #include "subclass.h"
-#include "enbitmap.h"
+#include "enbitmapex.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CSizeGrip window
@@ -24,7 +24,7 @@ public:
 
 // Attributes
 protected:
-	CEnBitmap m_bm;
+	CEnBitmapEx m_bm;
 	CSubclassWnd m_scParent;
 	COLORREF m_crBack;
 

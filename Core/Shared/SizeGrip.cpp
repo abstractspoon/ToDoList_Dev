@@ -104,7 +104,7 @@ BOOL CSizeGrip::Initialize(CWnd* pParent, UINT nCtrlID, UINT nBitmapID)
 	if (nBitmapID)
 	{
 		if (m_bm.LoadBitmap(nBitmapID))
-			m_bm.ProcessImage(&CImageSysColorMapper());
+			m_bm.RemapSysColors();
 	}
 
 	return TRUE;

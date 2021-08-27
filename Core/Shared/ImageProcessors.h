@@ -5,7 +5,29 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include "enbitmap.h"
+/////////////////////////////////////////////////////////////////////////////////////
+
+class RGBX;
+
+/////////////////////////////////////////////////////////////////////////////////////
+// base class for image processing
+
+class C32BitImageProcessor
+{
+public:
+	virtual CSize CalcDestSize(CSize sizeSrc);
+	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest,
+							   COLORREF crMask = CLR_NONE);
+
+protected:
+	C32BitImageProcessor(BOOL bEnableWeighting = FALSE);
+	virtual ~C32BitImageProcessor();
+
+	void CalcWeightedColor(const RGBX* pPixels, CSize size, double dX, double dY, RGBX& rgbResult);
+
+protected:
+	BOOL m_bWeightingEnabled;
+};
 
 //////////////////////////////////////////////////////////////////////////////////////
 // derived image processors
@@ -25,6 +47,8 @@ protected:
 	double m_dRadians;
 };
 
+// -----------------------------------------------------------------------------------
+
 class CImageShearer : public C32BitImageProcessor
 {
 public:
@@ -38,6 +62,8 @@ public:
 protected:
 	int m_nHorz, m_nVert;
 };
+
+// -----------------------------------------------------------------------------------
 
 class CImageGrayer : public C32BitImageProcessor
 {
@@ -54,6 +80,8 @@ protected:
 	BOOL m_bDefault;
 };
 
+// -----------------------------------------------------------------------------------
+
 class CImageLightener : public C32BitImageProcessor
 {
 public:
@@ -68,6 +96,8 @@ protected:
 	BOOL m_bRGB;
 };
 
+// -----------------------------------------------------------------------------------
+
 class CImageBlurrer : public C32BitImageProcessor
 {
 public:
@@ -81,6 +111,8 @@ protected:
 	int m_nAmount;
 };
 
+// -----------------------------------------------------------------------------------
+
 class CImageSharpener : public C32BitImageProcessor
 {
 public:
@@ -93,6 +125,8 @@ public:
 protected:
 	int m_nAmount;
 };
+
+// -----------------------------------------------------------------------------------
 
 class CImageResizer : public C32BitImageProcessor
 {
@@ -112,6 +146,8 @@ protected:
 	BOOL Shrink(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest);
 };
 
+// -----------------------------------------------------------------------------------
+
 class CImageNegator : public C32BitImageProcessor
 {
 public:
@@ -121,6 +157,8 @@ public:
 	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 };
+
+// -----------------------------------------------------------------------------------
 
 class CImageFlipper : public C32BitImageProcessor
 {
@@ -135,6 +173,8 @@ protected:
 	BOOL m_bHorz, m_bVert;
 };
 
+// -----------------------------------------------------------------------------------
+
 class CColorReplacer : public C32BitImageProcessor
 {
 public:
@@ -148,6 +188,8 @@ protected:
 	COLORREF m_crFrom, m_crTo;
 };
 
+// -----------------------------------------------------------------------------------
+
 class CImageColorizer : public CImageGrayer
 {
 public:
@@ -160,6 +202,8 @@ public:
 protected:
 	COLORREF m_color;
 };
+
+// -----------------------------------------------------------------------------------
 
 class CImageTinter : public C32BitImageProcessor
 {
@@ -175,6 +219,8 @@ protected:
 	int m_nAmount;
 };
 
+// -----------------------------------------------------------------------------------
+
 class CImageContraster : public C32BitImageProcessor
 {
 public:
@@ -187,6 +233,8 @@ public:
 protected:
 	int m_nAmount;
 };
+
+// -----------------------------------------------------------------------------------
 
 class CImageSysColorMapper : public C32BitImageProcessor
 {
@@ -201,6 +249,8 @@ public:
 	virtual BOOL ProcessPixels(const RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
 								COLORREF crMask = -1);
 };
+
+// -----------------------------------------------------------------------------------
 
 class CImageEmbosser : public C32BitImageProcessor
 {

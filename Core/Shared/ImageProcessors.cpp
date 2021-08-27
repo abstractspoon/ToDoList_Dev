@@ -8,6 +8,8 @@
 #include "imageprocessors.h"
 #include "misc.h"
 
+#include "..\3rdParty\ColorDef.h"
+
 #include <math.h>
 
 /////////////////////////////////////////////////////////////////////
@@ -17,6 +19,84 @@
 static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
+
+///////////////////////////////////////////////////////////////////////
+
+C32BitImageProcessor::C32BitImageProcessor(BOOL bEnableWeighting) : m_bWeightingEnabled(bEnableWeighting)
+{
+}
+
+C32BitImageProcessor::~C32BitImageProcessor()
+{
+}
+
+CSize C32BitImageProcessor::CalcDestSize(CSize sizeSrc)
+{
+	return sizeSrc; // default
+}
+
+BOOL C32BitImageProcessor::ProcessPixels(const RGBX* pSrcPixels, CSize /*sizeSrc*/, RGBX* pDestPixels,
+										 CSize sizeDest, COLORREF /*crMask*/)
+{
+	CopyMemory(pDestPixels, pSrcPixels, sizeDest.cx * 4 * sizeDest.cy); // default
+	return TRUE;
+}
+
+void C32BitImageProcessor::CalcWeightedColor(const RGBX* pPixels, CSize size, double dX, double dY, RGBX& rgbResult)
+{
+	ASSERT(m_bWeightingEnabled);
+
+	// interpolate between the current pixel and its adjacent pixels to the right and down
+	int nX = (int)dX;
+	int nY = (int)dY;
+
+	if (dX < 0 || dY < 0)
+	{
+		rgbResult = pPixels[max(0, nY) * size.cx + max(0, nX)]; // closest
+		return;
+	}
+
+	double dXFraction = dX - nX;
+	double dX1MinusFraction = 1 - dXFraction;
+
+	double dYFraction = dY - nY;
+	double dY1MinusFraction = 1 - dYFraction;
+
+	int nXP1 = min(nX + 1, size.cx - 1);
+	int nYP1 = min(nY + 1, size.cy - 1);
+
+	const RGBX& rgb = pPixels[nY * size.cx + nX];		// x, y
+	const RGBX& rgbXP = pPixels[nY * size.cx + nXP1];		// x + 1, y
+	const RGBX& rgbYP = pPixels[nYP1 * size.cx + nX];		// x, y + 1
+	const RGBX& rgbXYP = pPixels[nYP1 * size.cx + nXP1];	// x + 1, y + 1
+
+															// Avoid calculations and rounding errors when
+															// all 4 pixels have the same colour
+	if ((rgb == rgbXP) && (rgb == rgbYP) && (rgb == rgbXYP))
+	{
+		rgbResult = rgb;
+		return;
+	}
+
+	int nRed = (int)(dX1MinusFraction * dY1MinusFraction * rgb.btRed +
+					 dXFraction * dY1MinusFraction * rgbXP.btRed +
+					 dX1MinusFraction * dYFraction * rgbYP.btRed +
+					 dXFraction * dYFraction * rgbXYP.btRed);
+
+	int nGreen = (int)(dX1MinusFraction * dY1MinusFraction * rgb.btGreen +
+					   dXFraction * dY1MinusFraction * rgbXP.btGreen +
+					   dX1MinusFraction * dYFraction * rgbYP.btGreen +
+					   dXFraction * dYFraction * rgbXYP.btGreen);
+
+	int nBlue = (int)(dX1MinusFraction * dY1MinusFraction * rgb.btBlue +
+					  dXFraction * dY1MinusFraction * rgbXP.btBlue +
+					  dX1MinusFraction * dYFraction * rgbYP.btBlue +
+					  dXFraction * dYFraction * rgbXYP.btBlue);
+
+	rgbResult.btRed = (BYTE)max(0, min(255, nRed));
+	rgbResult.btGreen = (BYTE)max(0, min(255, nGreen));
+	rgbResult.btBlue = (BYTE)max(0, min(255, nBlue));
+}
 
 /////////////////////////////////////////////////////////////////////
 // C32BitImageProcessor derivations
