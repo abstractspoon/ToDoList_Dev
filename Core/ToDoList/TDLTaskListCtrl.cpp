@@ -840,21 +840,10 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 			if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 			{
 				// user icon
+				pLVDI->item.iImage = -1;
+
 				if (!IsColumnShowing(TDCC_ICON))
-				{
-					int nImage = -1;
-					
-					if (!pTDI->sIcon.IsEmpty())
-					{
-						nImage = m_ilTaskIcons.GetImageIndex(pTDI->sIcon);
-					}
-					else if (HasStyle(TDCS_SHOWPARENTSASFOLDERS) && pTDS->HasSubTasks())
-					{
-						nImage = 0;
-					}
-					
-					pLVDI->item.iImage = nImage;
-				}
+					pLVDI->item.iImage = GetTaskIconIndex(pTDI, pTDS);
 
 				// checkbox icon
 				if (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX))

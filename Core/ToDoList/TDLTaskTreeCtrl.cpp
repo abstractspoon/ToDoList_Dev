@@ -872,25 +872,10 @@ LRESULT CTDLTaskTreeCtrl::OnTreeGetDispInfo(NMTVDISPINFO* pTVDI)
 
 		if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 		{
-			if (IsColumnShowing(TDCC_ICON))
-			{
-				pTVDI->item.iImage = pTVDI->item.iSelectedImage = -1;
-			}
-			else
-			{
-				pTVDI->item.iImage = -1;
-				
-				if (!pTDI->sIcon.IsEmpty())
-				{
-					pTVDI->item.iImage = m_ilTaskIcons.GetImageIndex(pTDI->sIcon);
-				}
-				else if (HasStyle(TDCS_SHOWPARENTSASFOLDERS) && pTDS->HasSubTasks())
-				{
-					pTVDI->item.iImage = 0;
-				}
-				
-				pTVDI->item.iSelectedImage = pTVDI->item.iImage;
-			}
+			pTVDI->item.iImage = pTVDI->item.iSelectedImage = -1;
+
+			if (!IsColumnShowing(TDCC_ICON))
+				pTVDI->item.iImage = pTVDI->item.iSelectedImage = GetTaskIconIndex(pTDI, pTDS);
 
 			// checkbox image
 			pTVDI->item.mask |= TVIF_STATE;

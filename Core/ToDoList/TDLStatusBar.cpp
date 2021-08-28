@@ -158,12 +158,7 @@ void CTDLStatusBar::UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTD
 		int nIcon = -1;
 
 		if (nSelCount == 1)
-		{
-			nIcon = tdc.GetTaskIconImageList().GetImageIndex(tdc.GetSelectedTaskIcon());
-
-			if ((nIcon == -1) && tdc.HasStyle(TDCS_SHOWPARENTSASFOLDERS) && tdc.SelectedTasksHaveChildren())
-				nIcon = 0;
-		}
+			nIcon = tdc.GetTaskIconIndex(tdc.GetSelectedTaskID());
 
 		if (nIcon != m_iSelTaskIcon)
 		{
