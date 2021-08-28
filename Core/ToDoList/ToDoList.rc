@@ -4576,6 +4576,8 @@ BEGIN
     IDS_FOCUS_TIMETRACKER   "Time Tracker"
     IDS_FILTER_ANYSTATUS    "Any status can match"
     IDS_FILTER_ANYVERSION   "Any version can match"
+    ID_SB_TASKCOUNT         "Task count"
+    ID_SB_FOCUS             "Focus"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5049,6 +5051,7 @@ BEGIN
     ID_SB_NOSELTASK         "<No task selected>"
     ID_SB_MULTISELTASK      "<Multiple tasks selected>"
     ID_SB_SPACER            "                     "
+    ID_SB_MULTISELTASKMORE_TIP "+ %d more"
     ID_EDIT_INSERTTIME      "\nInsert Time"
     IDS_FOCUS_FILTERBAR     "Filter"
     IDS_FOCUS_TASKS         "Tasks"
@@ -5076,7 +5079,6 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_SB_SELCOST_TIP      "Aggregate cost for the selected tasks"
-    IDS_SB_FILEVERSION_TIP  "Tasklist file version"
     IDS_SB_TASKCOUNT_TIP    "Filtered task count / Total task count"
     IDS_SB_SELTASKTITLE_TIP "Selected tasks"
     IDS_IMPORTFILE_CANTOPEN "'%s' could not be opened for importing.\n\nCheck that you have the necessary permissions and that the file is not open in another application."
@@ -5782,6 +5784,11 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INSERTDATE      "\nInsert Date"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SB_SELTASKTITLE      "Title"
 END
 
 #endif    // English (Australia) resources

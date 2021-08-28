@@ -111,7 +111,7 @@ public:
 	virtual BOOL CanMultiSort() const;
 
 	virtual HTREEITEM GetUpdateControlsItem() const;
-	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0) const;
+	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	virtual int GetSelectedCount() const;
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;

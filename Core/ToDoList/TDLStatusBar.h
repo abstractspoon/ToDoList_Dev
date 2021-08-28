@@ -8,6 +8,7 @@
 
 class CUIThemeFile;
 class CFilteredToDoCtrl;
+class CTDCAttributeMap;
 
 struct TODOITEM;
 struct TDCTIMEPERIOD;
@@ -23,7 +24,8 @@ public:
 
 	void SetUITheme(const CUIThemeFile& theme);
 	void UpdateTaskTotals(const CFilteredToDoCtrl& tdc);
-	void UpdateTaskSelection(const CFilteredToDoCtrl& tdc);
+	void UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib);
+	void UpdateFocusedControl(const CString& sFocus);
 
 protected:
 	HIMAGELIST m_hilTaskIcons;
@@ -44,5 +46,6 @@ protected:
 	void SetPaneTextAndTooltip(UINT nIDPane, UINT nIDTextFormat, const CString& sTextValue, UINT nIDTipFormat, LPCTSTR szTipValue = NULL);
 	
 	static CString FormatTime(double dAmount, TDC_UNITS nUnits, BOOL bHMS);
+	static BOOL WantUpdateAttribute(TDC_ATTRIBUTE nAttribID, const  CTDCAttributeMap& mapAttrib);
 };
 

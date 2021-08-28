@@ -11984,9 +11984,9 @@ BOOL CToDoCtrl::SelectedTaskIsUnlocked(DWORD dwTaskID) const
 	return !m_taskTree.SelectionHasLocked(FALSE);
 }
 
-CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep) const 
+CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const 
 { 
-	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep); 
+	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
 }
 
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 

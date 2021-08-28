@@ -737,7 +737,7 @@ protected:
 	
 	void UpdateTooltip();
 	void UpdateCaption();
-	void UpdateStatusBar(DWORD dwFlags = TDCSB_UPDATEALL);
+	void UpdateStatusBar(DWORD dwFlags = TDCSB_UPDATEALL, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 	void UpdateMenuIconMgrSourceControlStatus();
 	void UpdateTimeTrackerPreferences();
 	void UpdateWindowIcons();

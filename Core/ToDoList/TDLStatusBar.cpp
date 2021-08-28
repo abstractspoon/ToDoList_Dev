@@ -37,7 +37,9 @@ static int SB_PANECOUNT = sizeof(SB_PANES) / sizeof(SBACTPANEINFO);
 
 CTDLStatusBar::CTDLStatusBar(const TODOITEM& tdiDefault)
 	:
-	m_tdiDefault(tdiDefault)
+	m_tdiDefault(tdiDefault),
+	m_iSelTaskIcon(-1),
+	m_hilTaskIcons(NULL)
 {
 }
 
@@ -66,8 +68,11 @@ int CTDLStatusBar::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	// prevent translation because we handle it manually
 	CLocalizer::EnableTranslation(*this, FALSE);
 
+	for (int nPane = 0; nPane < SB_PANECOUNT; nPane++)
+		VERIFY(CString().LoadString(SB_PANES[nPane].nID));
+
 	if (!SetPanes(SB_PANES, SB_PANECOUNT))
-		return FALSE;
+		return -1;
 
 	// Translate tooltips
 	if (CLocalizer::IsInitialized())
@@ -113,7 +118,7 @@ void CTDLStatusBar::UpdateTaskTotals(const CFilteredToDoCtrl& tdc)
 						  IDS_SB_TASKCOUNT_TIP);
 }
 
-void CTDLStatusBar::UpdateTaskSelection(const CFilteredToDoCtrl& tdc)
+void CTDLStatusBar::UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib)
 {
 	// Task path
 	CString sTextValue, sTipValue;
@@ -121,82 +126,126 @@ void CTDLStatusBar::UpdateTaskSelection(const CFilteredToDoCtrl& tdc)
 
 	int nSelCount = tdc.GetSelectedCount();
 
-	switch (nSelCount)
+	if (WantUpdateAttribute(TDCA_TASKNAME, mapAttrib))
 	{
-	case 0:
-		nIDTextFormat = ID_SB_NOSELTASK;
-		break;
+		switch (nSelCount)
+		{
+		case 0:
+			nIDTextFormat = ID_SB_NOSELTASK;
+			break;
 
-	case 1:
-		sTextValue = Misc::Format(_T("%s (%ld)"), tdc.GetSelectedTaskPath(TRUE), tdc.GetSelectedTaskID());
-		nIDTipFormat = IDS_SB_SELTASKTITLE_TIP;
-		break;
+		case 1:
+			sTextValue = Misc::Format(_T("%s (%ld)"), tdc.GetSelectedTaskPath(TRUE), tdc.GetSelectedTaskID());
+			nIDTipFormat = IDS_SB_SELTASKTITLE_TIP;
+			break;
 
-	default: // > 1
-		nIDTextFormat = ID_SB_MULTISELTASK;
-		sTipValue = tdc.FormatSelectedTaskTitles(TRUE, '\n');
-		break;
-	}
-	SetPaneTextAndTooltip(ID_SB_SELTASKTITLE, nIDTextFormat, sTextValue, nIDTipFormat, sTipValue);
+		default: // > 1
+			nIDTextFormat = ID_SB_MULTISELTASK;
+			sTipValue = tdc.FormatSelectedTaskTitles(TRUE, '\n', 10);
 
-	// Task Icon handled when painting first pane
-	int nIcon = -1; 
-	
-	if (nSelCount == 1)
-	{
-		nIcon = tdc.GetTaskIconImageList().GetImageIndex(tdc.GetSelectedTaskIcon());
-
-		if ((nIcon == -1) && tdc.HasStyle(TDCS_SHOWPARENTSASFOLDERS) && tdc.SelectedTasksHaveChildren())
-			nIcon = 0;
+			if (nSelCount > 10)
+			{
+				sTipValue += '\n';
+				sTipValue += CEnString(ID_SB_MULTISELTASKMORE_TIP, (nSelCount - 10));
+			}
+			break;
+		}
+		SetPaneTextAndTooltip(ID_SB_SELTASKTITLE, nIDTextFormat, sTextValue, nIDTipFormat, sTipValue);
 	}
 
-	if (nIcon != m_iSelTaskIcon)
+	if (WantUpdateAttribute(TDCA_ICON, mapAttrib))
 	{
-		m_iSelTaskIcon = nIcon;
-		InvalidatePane(0);
-	}
+		int nIcon = -1;
 
-	if (m_iSelTaskIcon != -1)
-		m_hilTaskIcons = tdc.GetTaskIconImageList();
-	else
-		m_hilTaskIcons = NULL;
+		if (nSelCount == 1)
+		{
+			nIcon = tdc.GetTaskIconImageList().GetImageIndex(tdc.GetSelectedTaskIcon());
+
+			if ((nIcon == -1) && tdc.HasStyle(TDCS_SHOWPARENTSASFOLDERS) && tdc.SelectedTasksHaveChildren())
+				nIcon = 0;
+		}
+
+		if (nIcon != m_iSelTaskIcon)
+		{
+			m_iSelTaskIcon = nIcon;
+			Invalidate();
+		}
+
+		if (m_iSelTaskIcon != -1)
+			m_hilTaskIcons = tdc.GetTaskIconImageList();
+		else
+			m_hilTaskIcons = NULL;
+	}
 
 	// Cost
-	sTextValue.Empty();
-	nIDTextFormat = 0;
-	UINT nIDTooltip = 0;
-
-	if (tdc.IsColumnShowing(TDCC_COST) && nSelCount)
+	if (WantUpdateAttribute(TDCA_COST, mapAttrib))
 	{
-		double dValue = tdc.CalcSelectedTaskCost();
-		sTextValue = Misc::Format(dValue, 2);
+		if (nSelCount && tdc.IsColumnShowing(TDCC_COST))
+		{
+			double dValue = tdc.CalcSelectedTaskCost();
+			sTextValue = Misc::Format(dValue, 2);
 
-		nIDTextFormat = ID_SB_SELCOST;
-		nIDTooltip = IDS_SB_SELCOST_TIP;
+			nIDTextFormat = ID_SB_SELCOST;
+			nIDTipFormat = IDS_SB_SELCOST_TIP;
+		}
+		else
+		{
+			sTextValue.Empty();
+			nIDTextFormat = nIDTipFormat = 0;
+		}
+
+		SetPaneTextAndTooltip(ID_SB_SELCOST, nIDTextFormat, sTextValue, nIDTipFormat);
 	}
-	SetPaneTextAndTooltip(ID_SB_SELCOST, nIDTextFormat, sTextValue, nIDTooltip);
 
 	// Time estimate
-	if (tdc.IsColumnShowing(TDCC_TIMEESTIMATE) && nSelCount)
+	if (WantUpdateAttribute(TDCA_TIMEESTIMATE, mapAttrib))
 	{
-		double dValue = tdc.CalcSelectedTaskTimeEstimate(m_tdiDefault.timeEstimate.nUnits);
-		sTextValue = FormatTime(dValue, m_tdiDefault.timeEstimate.nUnits, tdc.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT));
+		if (tdc.IsColumnShowing(TDCC_TIMEESTIMATE) && nSelCount)
+		{
+			double dValue = tdc.CalcSelectedTaskTimeEstimate(m_tdiDefault.timeEstimate.nUnits);
+			sTextValue = FormatTime(dValue, m_tdiDefault.timeEstimate.nUnits, tdc.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT));
 
-		nIDTextFormat = ID_SB_SELTIMEEST;
-		nIDTooltip = IDS_SB_SELTIMEEST_TIP;
+			nIDTextFormat = ID_SB_SELTIMEEST;
+			nIDTipFormat = IDS_SB_SELTIMEEST_TIP;
+		}
+		else
+		{
+			sTextValue.Empty();
+			nIDTextFormat = nIDTipFormat = 0;
+		}
+
+		SetPaneTextAndTooltip(ID_SB_SELTIMEEST, nIDTextFormat, sTextValue, nIDTipFormat);
 	}
-	SetPaneTextAndTooltip(ID_SB_SELTIMEEST, nIDTextFormat, sTextValue, nIDTooltip);
 
 	// Time spent
-	if (tdc.IsColumnShowing(TDCC_TIMESPENT) && nSelCount)
+	if (WantUpdateAttribute(TDCA_TIMESPENT, mapAttrib))
 	{
-		double dValue = tdc.CalcSelectedTaskTimeSpent(m_tdiDefault.timeSpent.nUnits);
-		sTextValue = FormatTime(dValue, m_tdiDefault.timeSpent.nUnits, tdc.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT));
+		if (tdc.IsColumnShowing(TDCC_TIMESPENT) && nSelCount)
+		{
+			double dValue = tdc.CalcSelectedTaskTimeSpent(m_tdiDefault.timeSpent.nUnits);
+			sTextValue = FormatTime(dValue, m_tdiDefault.timeSpent.nUnits, tdc.HasStyle(TDCS_DISPLAYHMSTIMEFORMAT));
 
-		nIDTextFormat = ID_SB_SELTIMESPENT;
-		nIDTooltip = IDS_SB_SELTIMESPENT_TIP;
+			nIDTextFormat = ID_SB_SELTIMESPENT;
+			nIDTipFormat = IDS_SB_SELTIMESPENT_TIP;
+		}
+		else
+		{
+			sTextValue.Empty();
+			nIDTextFormat = nIDTipFormat = 0;
+		}
+
+		SetPaneTextAndTooltip(ID_SB_SELTIMESPENT, nIDTextFormat, sTextValue, nIDTipFormat);
 	}
-	SetPaneTextAndTooltip(ID_SB_SELTIMESPENT, nIDTextFormat, sTextValue, nIDTooltip);
+}
+
+BOOL CTDLStatusBar::WantUpdateAttribute(TDC_ATTRIBUTE nAttribID, const CTDCAttributeMap& mapAttrib)
+{
+	return (mapAttrib.Has(TDCA_ALL) || mapAttrib.Has(nAttribID));
+}
+
+void CTDLStatusBar::UpdateFocusedControl(const CString& sFocus)
+{
+	SetPaneTextAndTooltip(ID_SB_FOCUS, 0, sFocus, IDS_SB_FOCUS_TIP);
 }
 
 CString CTDLStatusBar::FormatTime(double dAmount, TDC_UNITS nUnits, BOOL bHMS)
@@ -232,6 +281,7 @@ void CTDLStatusBar::SetPaneTextAndTooltip(UINT nIDPane, UINT nIDTextFormat, cons
 	}
 
 	int nPane = CommandToIndex(nIDPane);
+	ASSERT(nPane != -1);
 
 	SetPaneText(nPane, sText);
 	SetPaneTooltipIndex(nPane, sTooltip);

@@ -1228,17 +1228,13 @@
 #define ID_VIEW_TOGGLETASKEXPANDED      34264
 #define ID_VIEW_SHOWTASKLISTTABBAR      34265
 #define ID_VIEW_SHOWTREELISTTABBAR      34266
-#define ID_SB_SELCOUNT                  34268
 #define ID_SB_SELTIMEEST                34269
 #define ID_SB_SELTIMESPENT              34270
 #define ID_SB_SELCOST                   34271
-#define ID_SB_FILEVERSION               34276
-#define ID_SB_TASKCOUNT                 34278
-#define ID_SB_SELTASKTITLE              34280
 #define ID_SB_NOSELTASK                 34280
 #define ID_SB_MULTISELTASK              34281
 #define ID_SB_SPACER                    34282
-#define ID_SB_FOCUS                     34283
+#define ID_SB_MULTISELTASKMORE_TIP      34283
 #define ID_EDIT_INSERTTIME              34284
 #define IDS_FOCUS_FILTERBAR             34285
 #define ID_FILE_CHANGEPASSWORD          34285
@@ -2418,6 +2414,9 @@
 #define IDS_FOCUS_TIMETRACKER           51595
 #define IDS_FILTER_ANYSTATUS            51596
 #define IDS_FILTER_ANYVERSION           51597
+#define ID_SB_TASKCOUNT                 51598
+#define ID_SB_FOCUS                     51599
+#define ID_SB_SELTASKTITLE              51600
 
 // Next default values for new objects
 // 

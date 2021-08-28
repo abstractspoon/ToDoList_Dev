@@ -5860,13 +5860,17 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CONTENTFORMAT
 	return content;
 }
 
-CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep) const
+CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const
 {
 	CString sSelTasks;
 	POSITION pos = GetFirstSelectedTaskPos();
+	int nCount = 0;
 
 	while (pos)
 	{
+		if ((nMaxTasks != -1) && (nCount >= nMaxTasks))
+			break;
+
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
 		if (bFullPath)
@@ -5874,6 +5878,8 @@ CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep) c
 
 		sSelTasks += m_data.GetTaskTitle(dwTaskID);
 		sSelTasks += (cSep == 0 ? Misc::GetListSeparator() : cSep);
+
+		nCount++;
 	}
 
 	Misc::RemoveSuffix(sSelTasks, Misc::GetListSeparator());

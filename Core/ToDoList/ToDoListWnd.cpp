@@ -1206,7 +1206,7 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 			if (m_sCurrentFocus.GetLength() > 22)
 				m_sCurrentFocus = m_sCurrentFocus.Left(20) + _T("...");
 
-			m_statusBar.SetPaneText(m_statusBar.CommandToIndex(ID_SB_FOCUS), m_sCurrentFocus);
+			m_statusBar.UpdateFocusedControl(m_sCurrentFocus);
 		
 			// if the status bar is hidden then add text to title bar
 			if (!m_bShowStatusBar)
@@ -3644,13 +3644,10 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	if (pMod->mapAttrib.Has(TDCA_TIMEESTIMATE) ||
 		pMod->mapAttrib.Has(TDCA_TIMESPENT) ||
 		pMod->mapAttrib.Has(TDCA_COST) ||
+		pMod->mapAttrib.Has(TDCA_ICON) ||
 		pMod->mapAttrib.Has(TDCA_TASKNAME))
 	{
-		UpdateStatusBar(TDCSB_UPDATESELECTION);
-	}
-	else if (pMod->mapAttrib.Has(TDCA_ICON) && (nSelCount == 1))
-	{
-		UpdateStatusBar(TDCSB_UPDATESELECTION);
+		UpdateStatusBar(TDCSB_UPDATESELECTION, pMod->mapAttrib);
 	}
 
 	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
@@ -12423,15 +12420,19 @@ void CToDoListWnd::OnSysColorChange()
 	UpdateUITheme();
 }
 
-void CToDoListWnd::UpdateStatusBar(DWORD dwFlags)
+void CToDoListWnd::UpdateStatusBar(DWORD dwFlags, const CTDCAttributeMap& mapAttrib)
 {
-	if (m_bShowStatusBar && !m_sbProgress.IsActive() && GetTDCCount())
+	ASSERT(dwFlags);
+
+	if (m_bShowStatusBar && m_statusBar.GetSafeHwnd() && GetTDCCount() && !m_sbProgress.IsActive())
 	{
+		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
 		if (dwFlags & TDCSB_UPDATETOTALS)
-			m_statusBar.UpdateTaskTotals(GetToDoCtrl());
+			m_statusBar.UpdateTaskTotals(tdc);
 
 		if (dwFlags & TDCSB_UPDATESELECTION)
-			m_statusBar.UpdateTaskSelection(GetToDoCtrl());
+			m_statusBar.UpdateTaskSelection(tdc, mapAttrib);
 	}
 }
 
