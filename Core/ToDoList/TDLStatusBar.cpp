@@ -145,7 +145,7 @@ void CTDLStatusBar::UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTD
 
 			if (nSelCount > 10)
 			{
-				sTipValue += '\n';
+				sTipValue += _T("\n+ ");
 				sTipValue += CEnString(ID_SB_MULTISELTASKMORE_TIP, (nSelCount - 10));
 			}
 			break;

@@ -4721,6 +4721,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_FOCUS_TASKS         "Tasks"
+    IDS_UNNAMEDFILTER       "- unnamed -"
     IDS_XSLFILEFILTER       "Stylesheet (*.xsl)|*.xsl||"
     IDS_TRANSFORMFILEFILTER "Web Page (*.htm, *.html)|*.htm;*.html|Text File (*.txt)|*.txt|All Files (*.*)|*.*||"
     IDS_ALLFILEFILTER       "All Files (*.*)|*.*||"
@@ -4752,6 +4754,15 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_NODUETHISMONTH      "'%s' has no tasks due by the end of this month"
     IDS_NODUENEXTMONTH      "'%s' has no tasks due by the end of next month"
+    IDS_SAMPLETASK          "Sample Task"
+    IDS_BACKUPFILEFOUND     "ToDoList has detected a backup version of file '%s', \nwhich suggests that there was previously a problem saving the tasklist.\n\nWould you like to restore the backup?"
+    IDS_COLOR_SAMPLETEXT    "Sample Text"
+    IDS_COLOR_AUTOMATIC     "Automatic"
+    IDS_COLOR_MORECOLORS    "More Colours..."
+    IDS_OUTLOOK_FOLDERNOITEMS "The selected folder contains no items"
+    IDS_OUTLOOK_UNABLETOCONNECT "ToDoList was unable to connect to Outlook."
+    IDS_OUTLOOK_BUILDINGLIST "Building item list..."
+    IDS_FOCUS_FILTERBAR     "Filter"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5018,11 +5029,6 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDR_MAINFRAME           "ToDoList (c) AbstractSpoon"
-    IDS_SAMPLETASK          "Sample Task"
-    IDS_BACKUPFILEFOUND     "ToDoList has detected a backup version of file '%s', \nwhich suggests that there was previously a problem saving the tasklist.\n\nWould you like to restore the backup?"
-    IDS_COLOR_SAMPLETEXT    "Sample Text"
-    IDS_COLOR_AUTOMATIC     "Automatic"
-    IDS_COLOR_MORECOLORS    "More Colours..."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5051,11 +5057,8 @@ BEGIN
     ID_SB_NOSELTASK         "<No task selected>"
     ID_SB_MULTISELTASK      "<Multiple tasks selected>"
     ID_SB_SPACER            "                     "
-    ID_SB_MULTISELTASKMORE_TIP "+ %d more"
+    ID_SB_MULTISELTASKMORE_TIP "%d more"
     ID_EDIT_INSERTTIME      "\nInsert Time"
-    IDS_FOCUS_FILTERBAR     "Filter"
-    IDS_FOCUS_TASKS         "Tasks"
-    IDS_UNNAMEDFILTER       "- unnamed -"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5080,7 +5083,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_SB_SELCOST_TIP      "Aggregate cost for the selected tasks"
     IDS_SB_TASKCOUNT_TIP    "Filtered task count / Total task count"
-    IDS_SB_SELTASKTITLE_TIP "Selected tasks"
+    IDS_SB_SELTASKTITLE_TIP "Selected task"
     IDS_IMPORTFILE_CANTOPEN "'%s' could not be opened for importing.\n\nCheck that you have the necessary permissions and that the file is not open in another application."
     IDS_TDLBC_TASKPARENTIDS "Task ID / Parent ID"
     IDS_RESTARTTOCHANGELANGUAGE 
@@ -5628,17 +5631,6 @@ BEGIN
     IDS_OA_TOTALWORK        "Total Work"
     IDS_GEN_RELEASE         "Stable Release"
     IDS_DEV_RELEASE         "Development Preview"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_OUTLOOK_FOLDERNOITEMS "The selected folder contains no items"
-    IDS_OUTLOOK_UNABLETOCONNECT "ToDoList was unable to connect to Outlook."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_OUTLOOK_BUILDINGLIST "Building item list..."
 END
 
 STRINGTABLE DISCARDABLE 
