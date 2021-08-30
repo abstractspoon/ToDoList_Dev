@@ -109,11 +109,27 @@ void CTDLStatusBar::SetUITheme(const CUIThemeFile& theme)
 
 BOOL CTDLStatusBar::DrawPaneText(CDC* pDC, int nPane, int nOffset)
 {
-	if ((nPane == 0) && m_hilTaskIcons && (m_iSelTaskIcon != -1) && !m_progress.IsActive())
+	if ((nPane == 0)  && !m_progress.IsActive())
 	{
-		ImageList_Draw(m_hilTaskIcons, m_iSelTaskIcon, *pDC, nOffset, 1, ILD_TRANSPARENT);
-	
-		nOffset += GraphicsMisc::ScaleByDPIFactor(16 + 4);
+		int nOrgOffset = nOffset;
+
+		if (m_hilTaskIcons && (m_iSelTaskIcon != -1))
+		{
+			ImageList_Draw(m_hilTaskIcons, m_iSelTaskIcon, *pDC, nOffset, 1, ILD_TRANSPARENT);
+			nOffset += GraphicsMisc::ScaleByDPIFactor(16 + 4);
+		}
+
+		CEnString sText = GetPaneText(0);
+		CRect rText;
+		GetItemRect(0, rText);
+
+		rText.left += nOffset;
+		rText.right -= nOrgOffset;
+
+		sText.FormatDC(pDC, rText.Width(), ES_PATH);
+		pDC->TextOut(rText.left, rText.top, sText);
+
+		return TRUE;
 	}
 
 	return CStatusBarACTEx::DrawPaneText(pDC, nPane, nOffset);
