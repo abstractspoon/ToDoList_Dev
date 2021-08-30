@@ -138,7 +138,7 @@ const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"),
 
 #define DOPROGRESS(stringID) \
 	CWaitCursor cursor; \
-	CStatusBarProgressProxy prog(&m_sbProgress, m_statusBar, CEnString(stringID))
+	CTDLStatusBarProgressProxy prog(m_statusBar, CEnString(stringID))
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -2346,7 +2346,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	RestoreVisibility();
 	
 	// initialize Progress first time
-	m_sbProgress.BeginProgress(m_statusBar, CEnString(IDS_STARTUPPROGRESS));
+	m_statusBar.BeginProgress(CEnString(IDS_STARTUPPROGRESS));
 
 	// open cmdline tasklist
 	CPreferences prefs;
@@ -2483,7 +2483,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	Invalidate(TRUE);
 
 	// End progress before updating statusbar
-	m_sbProgress.EndProgress();
+	m_statusBar.EndProgress();
 
 	UpdateStatusBar();
 
@@ -11873,14 +11873,12 @@ void CToDoListWnd::OnUpdateToolsAnalyseLoggedTime(CCmdUI* pCmdUI)
 
 LRESULT CToDoListWnd::OnToDoCtrlDoLengthyOperation(WPARAM wParam, LPARAM lParam)
 {
-	if (wParam) // start op
-	{
-		m_sbProgress.BeginProgress(m_statusBar, (LPCTSTR)lParam);
-	}
-	else // end op
-	{
-		m_sbProgress.EndProgress();
-	}
+	ASSERT(!wParam || lParam);
+
+	if (wParam)
+		m_statusBar.BeginProgress((LPCTSTR)lParam);
+	else
+		m_statusBar.EndProgress();
 	
 	return 0L;
 }
@@ -12424,7 +12422,7 @@ void CToDoListWnd::UpdateStatusBar(DWORD dwFlags, const CTDCAttributeMap& mapAtt
 {
 	ASSERT(dwFlags);
 
-	if (m_bShowStatusBar && m_statusBar.GetSafeHwnd() && GetTDCCount() && !m_sbProgress.IsActive())
+	if (m_bShowStatusBar && m_statusBar.GetSafeHwnd() && GetTDCCount())
 	{
 		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 

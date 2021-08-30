@@ -42,11 +42,9 @@
 #include "..\shared\enBrowserctrl.h"
 #include "..\shared\menuiconmgr.h"
 #include "..\shared\toolbarhelper.h"
-#include "..\shared\StatusbarProgress.h"
 #include "..\shared\stickieswnd.h"
 #include "..\shared\windowicons.h"
 #include "..\shared\sessionstatuswnd.h"
-#include "..\shared\statusbarACTEx.h"
 
 #include "..\Interfaces\UIExtensionMgr.h"
 #include "..\Interfaces\uithemefile.h"
@@ -105,7 +103,6 @@ protected:
 	CEnImageList m_ilTabCtrl;
 	CPreferencesDlg* m_pPrefs;
 	CTDLStatusBar m_statusBar;
-	CStatusBarProgress m_sbProgress;
 	CTDLFilterBar m_filterBar;
 	CTDLFindTasksDlg m_dlgFindTasks;
 	CTabCtrlEx m_tabCtrl;

@@ -2,7 +2,9 @@
 
 #include "TDCEnum.h"
 
+#include "..\shared\EnString.h"
 #include "..\shared\StatusBarACTEx.h"
+#include "..\shared\StatusBarProgress.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -14,10 +16,23 @@ struct TODOITEM;
 struct TDCTIMEPERIOD;
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CTDLStatusBar;
+
+class CTDLStatusBarProgressProxy : protected CStatusBarProgressProxy
+{
+public:
+	CTDLStatusBarProgressProxy(CTDLStatusBar& pStatusBar, const CString& sPrompt);
+	virtual ~CTDLStatusBarProgressProxy();
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLStatusBar window
 
 class CTDLStatusBar : public CStatusBarACTEx
 {
+	friend class CTDLStatusBarProgressProxy; // for access to progress bar
+
 public:
 	CTDLStatusBar(const TODOITEM& tdiDefault);
 	virtual ~CTDLStatusBar();
@@ -27,9 +42,13 @@ public:
 	void UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib);
 	void UpdateFocusedControl(const CString& sFocus);
 
+	BOOL BeginProgress(const CString& sPrompt) { return m_progress.BeginProgress(*this, sPrompt); }
+	void EndProgress() { m_progress.EndProgress(); }
+
 protected:
 	HIMAGELIST m_hilTaskIcons;
 	int m_iSelTaskIcon;
+	CStatusBarProgress m_progress;
 
 	const TODOITEM& m_tdiDefault;
 

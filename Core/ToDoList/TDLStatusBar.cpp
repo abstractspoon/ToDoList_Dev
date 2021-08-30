@@ -18,6 +18,18 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
+CTDLStatusBarProgressProxy::CTDLStatusBarProgressProxy(CTDLStatusBar& statusBar, const CString& sPrompt)
+	:
+	CStatusBarProgressProxy(&statusBar.m_progress, statusBar.GetSafeHwnd(), sPrompt, 0, TRUE)
+{
+}
+
+CTDLStatusBarProgressProxy::~CTDLStatusBarProgressProxy()
+{
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
 static SBACTPANEINFO SB_PANES[] =
 {
 	{ ID_SB_SELTASKTITLE,	MAKEINTRESOURCE(IDS_SB_SELTASKTITLE_TIP), SBACTF_STRETCHY | SBACTF_RESOURCETIP },
@@ -97,7 +109,7 @@ void CTDLStatusBar::SetUITheme(const CUIThemeFile& theme)
 
 BOOL CTDLStatusBar::DrawPaneText(CDC* pDC, int nPane, int nOffset)
 {
-	if ((nPane == 0) && m_hilTaskIcons && (m_iSelTaskIcon != -1))
+	if ((nPane == 0) && m_hilTaskIcons && (m_iSelTaskIcon != -1) && !m_progress.IsActive())
 	{
 		ImageList_Draw(m_hilTaskIcons, m_iSelTaskIcon, *pDC, nOffset, 1, ILD_TRANSPARENT);
 	
@@ -109,6 +121,9 @@ BOOL CTDLStatusBar::DrawPaneText(CDC* pDC, int nPane, int nOffset)
 
 void CTDLStatusBar::UpdateTaskTotals(const CFilteredToDoCtrl& tdc)
 {
+	if (m_progress.IsActive())
+		return;
+
 	UINT nVisibleCount = 0;
 	UINT nTotalCount = tdc.GetTaskCount(&nVisibleCount);
 
@@ -120,6 +135,9 @@ void CTDLStatusBar::UpdateTaskTotals(const CFilteredToDoCtrl& tdc)
 
 void CTDLStatusBar::UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib)
 {
+	if (m_progress.IsActive())
+		return;
+
 	// Task path
 	CString sTextValue, sTipValue;
 	UINT nIDTextFormat = 0, nIDTipFormat = 0;
@@ -240,6 +258,9 @@ BOOL CTDLStatusBar::WantUpdateAttribute(TDC_ATTRIBUTE nAttribID, const CTDCAttri
 
 void CTDLStatusBar::UpdateFocusedControl(const CString& sFocus)
 {
+	if (m_progress.IsActive())
+		return;
+
 	SetPaneTextAndTooltip(ID_SB_FOCUS, 0, sFocus, IDS_SB_FOCUS_TIP);
 }
 
