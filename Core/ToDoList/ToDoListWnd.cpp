@@ -3710,10 +3710,10 @@ void CToDoListWnd::UpdateCaption()
 	SetWindowText(sCaption);
 
 	// set tray tip too
-	UpdateTooltip();
+	UpdateTrayTooltip();
 }
 
-void CToDoListWnd::UpdateTooltip()
+void CToDoListWnd::UpdateTrayTooltip()
 {
     // base the tooltip on our current caption
     CString sTooltip;

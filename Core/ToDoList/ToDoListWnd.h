@@ -732,7 +732,7 @@ protected:
 	TDC_FILE SaveTaskList(int nIndex, LPCTSTR szFilePath = NULL, DWORD dwFlags = 0); // returns FALSE only if the user was prompted to save and cancelled
 	TDC_FILE SaveAll(DWORD dwFlags); // returns FALSE only if the user was prompted to save and cancelled
 	
-	void UpdateTooltip();
+	void UpdateTrayTooltip();
 	void UpdateCaption();
 	void UpdateStatusBar(DWORD dwFlags = TDCSB_UPDATEALL, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 	void UpdateMenuIconMgrSourceControlStatus();
