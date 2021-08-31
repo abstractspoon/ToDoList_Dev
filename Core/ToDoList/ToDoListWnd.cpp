@@ -1260,27 +1260,14 @@ BOOL CToDoListWnd::InitTimeTrackDlg()
 	return TRUE;
 }
 
-void CToDoListWnd::UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks)
+void CToDoListWnd::UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib)
 {
-	if (m_dlgTimeTracker.IsSelectedTasklist(&tdc))
-	{
-		CTaskFile tasks;
-		TDCGETTASKS filter(TDCGT_NOTDONE);
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-		filter.mapAttribs.Add(TDCA_TASKNAME);
-
-		if (bAllTasks)
-		{
-			tdc.GetFilteredTasks(tasks, filter);
-		}
-		else
-		{
-			filter.dwFlags |= TDCGSTF_ALLPARENTS;
-			tdc.GetSelectedTasks(tasks, filter);
-		}
-	
-		m_dlgTimeTracker.UpdateTasks(&tdc, tasks);
-	}
+	if (bAllTasks)
+		m_dlgTimeTracker.UpdateAllTasks(&tdc);
+	else
+		m_dlgTimeTracker.UpdateSelectedTasks(&tdc, mapAttrib);
 }
 
 void CToDoListWnd::UpdateTimeTrackerPreferences()
@@ -2825,7 +2812,7 @@ BOOL CToDoListWnd::CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser)
 	
 	if (pNew)
 	{
-		m_dlgTimeTracker.AddTasklist(pNew);
+		m_dlgTimeTracker.AddTasklist(pNew, CTaskFile());
 
 		// insert a default task
 		if (bAddDefTask)
@@ -3605,29 +3592,6 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		OnTimerDueItems(nTDC);
 	}
 
-	if (pMod->mapAttrib.Has(TDCA_DONEDATE) || 
-		pMod->mapAttrib.Has(TDCA_TASKNAME) || 
-		(pMod->mapAttrib.Has(TDCA_NEWTASK) && !tdc.IsTaskLabelEditing()))
-	{
-		UpdateTimeTrackerTasks(tdc, FALSE);
-	}
-
-	if (pMod->mapAttrib.Has(TDCA_TIMEESTIMATE) ||
-		pMod->mapAttrib.Has(TDCA_TIMESPENT))
-	{
-		m_dlgTimeTracker.UpdateTaskTime(&tdc);
-	}
-
-	if (pMod->mapAttrib.Has(TDCA_DONEDATE))
-	{
-		m_dlgTimeTracker.RemoveCompletedTasks(&tdc);
-	}
-
-	if (pMod->mapAttrib.Has(TDCA_DELETE))
-	{
-		m_dlgTimeTracker.RemoveDeletedTasks(&tdc);
-	}
-
 	if (pMod->mapAttrib.Has(TDCA_CUSTOMATTRIBDEFS))
 	{
 		// Ignore modification callback if it came from us
@@ -3641,14 +3605,8 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		}
 	}
 
-	if (pMod->mapAttrib.Has(TDCA_TIMEESTIMATE) ||
-		pMod->mapAttrib.Has(TDCA_TIMESPENT) ||
-		pMod->mapAttrib.Has(TDCA_COST) ||
-		pMod->mapAttrib.Has(TDCA_ICON) ||
-		pMod->mapAttrib.Has(TDCA_TASKNAME))
-	{
-		UpdateStatusBar(TDCSB_UPDATESELECTION, pMod->mapAttrib);
-	}
+	UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);
+	UpdateStatusBar(TDCSB_UPDATESELECTION, pMod->mapAttrib);
 
 	if (m_dlgReminders.UpdateModifiedTasks(&tdc, pMod->aTaskIDs, pMod->mapAttrib))
 		tdc.RedrawReminders();
@@ -4310,7 +4268,7 @@ TDC_FILE CToDoListWnd::DelayOpenTaskList(LPCTSTR szFilePath)
 	int nCtrl = AddToDoCtrl(pTDC, &storageInfo);
 	
 	// Update time tracking widget
-	m_dlgTimeTracker.AddTasklist(pTDC);
+	m_dlgTimeTracker.AddTasklist(pTDC, CTaskFile());
 
 	// update due item status
 	if (CDateHelper::IsDateSet(dtEarliest))
@@ -4577,7 +4535,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 
 		// Update time tracking widget
 		if (bWasDelayed)
-			m_dlgTimeTracker.UpdateTasks(pTDC, tasks);
+			m_dlgTimeTracker.SetTasks(pTDC, tasks);
 		else
 			m_dlgTimeTracker.AddTasklist(pTDC, tasks);
 	}
@@ -5779,7 +5737,7 @@ void CToDoListWnd::OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWher
 	}
 
 	RefreshFilterBarControls(TDCA_ALL, FALSE);
-	UpdateTimeTrackerTasks(tdc, FALSE);
+	UpdateTimeTrackerTasks(FALSE, TDCA_PASTE);
 }
 
 void CToDoListWnd::OnEditPasteAsRef() 
@@ -12606,7 +12564,7 @@ void CToDoListWnd::OnEditUndoRedo(BOOL bUndo)
 	tdc.UndoLastAction(bUndo);
 	
 	UpdateStatusBar(TDCSB_UPDATEALL);
-	UpdateTimeTrackerTasks(tdc, TRUE);
+	UpdateTimeTrackerTasks(TRUE);
 }
 
 void CToDoListWnd::OnUpdateEditUndoRedo(CCmdUI* pCmdUI, BOOL bUndo)

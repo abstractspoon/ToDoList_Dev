@@ -290,12 +290,6 @@ BOOL CTDLTimeTrackerDlg::HasTasklist(const CFilteredToDoCtrl* pTDC) const
 	return (m_aTasklists.FindTasklist(pTDC) != -1);
 }
 
-BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC)
-{
-	CTaskFile tasks; // empty
-	return AddTasklist(pTDC, tasks);
-}
-
 BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks)
 {
 	if (m_aTasklists.AddTasklist(pTDC, tasks) == -1)
@@ -334,7 +328,7 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskF
 	return TRUE;
 }
 
-BOOL CTDLTimeTrackerDlg::UpdateTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks)
+BOOL CTDLTimeTrackerDlg::SetTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks)
 {
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 
@@ -388,14 +382,64 @@ void CTDLTimeTrackerDlg::UpdateTasklistName(const CFilteredToDoCtrl* pTDC)
 	}
 }
 
-void CTDLTimeTrackerDlg::RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC)
+BOOL CTDLTimeTrackerDlg::UpdateAllTasks(const CFilteredToDoCtrl* pTDC)
 {
-	RemoveTasks(pTDC, TTL_REMOVEDELETED);
+	if (m_aTasklists.FindTasklist(pTDC) == -1)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	TDCGETTASKS filter(TDCGT_NOTDONE);
+	filter.mapAttribs.Add(TDCA_TASKNAME); // names only
+
+	CTaskFile tasks;
+	pTDC->GetFilteredTasks(tasks, filter);
+
+	return SetTasks(pTDC, tasks);
 }
 
-void CTDLTimeTrackerDlg::RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC)
+BOOL CTDLTimeTrackerDlg::UpdateSelectedTasks(const CFilteredToDoCtrl* pTDC, const CTDCAttributeMap& mapAttrib)
 {
-	RemoveTasks(pTDC, TTL_REMOVEDONE);
+	if (mapAttrib.Has(TDCA_TASKNAME) ||
+		mapAttrib.Has(TDCA_PASTE) ||
+		(mapAttrib.Has(TDCA_NEWTASK) && !pTDC->IsTaskLabelEditing()))
+	{
+		TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
+
+		if (!pTTL)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		CTaskFile tasks;
+		TDCGETTASKS filter(TDCGT_NOTDONE);
+
+		filter.mapAttribs.Add(TDCA_TASKNAME);
+		filter.dwFlags |= TDCGSTF_ALLPARENTS;
+
+		pTDC->GetSelectedTasks(tasks, filter);
+		pTTL->UpdateTasks(tasks);
+	}
+
+	if (mapAttrib.Has(TDCA_TIMEESTIMATE) ||
+		mapAttrib.Has(TDCA_TIMESPENT))
+	{
+		UpdateTaskTime(pTDC);
+	}
+
+	if (mapAttrib.Has(TDCA_DONEDATE))
+	{
+		RemoveTasks(pTDC, TTL_REMOVEDONE);
+	}
+
+	if (mapAttrib.Has(TDCA_DELETE))
+	{
+		RemoveTasks(pTDC, TTL_REMOVEDELETED);
+	}
+
+	return TRUE;
 }
 
 void CTDLTimeTrackerDlg::RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRemove)
