@@ -353,13 +353,7 @@ BOOL CTDLFindTasksDlg::Create(CWnd* pParent, BOOL bDockable)
 	
 	m_bDockable = bDockable;
 
-	DPI_AWARENESS_CONTEXT nPrev = GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
-
-	BOOL bResult = CDialog::Create(CTDLFindTasksDlg::IDD, pParent);
-
-	GraphicsMisc::SetThreadDpiAwarenessContext(nPrev);
-
-	return bResult;
+	return CDialog::Create(CTDLFindTasksDlg::IDD, pParent);
 }
 
 void CTDLFindTasksDlg::LoadSettings()

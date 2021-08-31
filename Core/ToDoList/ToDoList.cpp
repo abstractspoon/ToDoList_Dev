@@ -116,7 +116,9 @@ END_MESSAGE_MAP()
 
 CToDoListApp::CToDoListApp() : CWinApp()
 {
-	// Place all significant initialization in InitInstance
+	// Perhaps because we are a Win32 app, using a manifest limits our options
+	// so we set our DPI awareness programmatically
+	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 }
 
 CToDoListApp::~CToDoListApp()

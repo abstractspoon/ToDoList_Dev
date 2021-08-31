@@ -258,7 +258,7 @@ namespace GraphicsMisc
 	BOOL GetPrimaryMonitorScreenSpace(CRect& rScreen);
 	int GetScreenBitDepth();
 
-	DPI_AWARENESS_CONTEXT SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT nContext);
+	DPI_AWARENESS_CONTEXT SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT nContext);
 	
 	void DrawGradient(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder = -1);
 	void DrawGlass(CDC* pDC, LPCRECT pRect, COLORREF crFrom, COLORREF crTo, BOOL bHorz, int nBorder = -1);
