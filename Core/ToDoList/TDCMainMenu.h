@@ -55,6 +55,10 @@ public:
 								const CFilteredToDoCtrl& tdc, 
 								const CPreferencesDlg& prefs) const;
 
+	void PrepareTabCtrlContextMenu(CMenu* pMenu, 
+									const CFilteredToDoCtrl& tdc, 
+									const CPreferencesDlg& prefs) const;
+	
 	CString GetDynamicItemTooltip(UINT nMenuID,
 								  const CRecentFileList& mru,
 								  const CToDoCtrlMgr& mgrToDoCtrl,

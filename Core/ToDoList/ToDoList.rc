@@ -3957,9 +3957,7 @@ BEGIN
 
         END
         MENUITEM SEPARATOR
-        MENUITEM "E&xport...",                  ID_TOOLS_EXPORT
-        MENUITEM SEPARATOR
-        MENUITEM "Pre&ferences...",             ID_TABCTRL_PREFERENCES
+        MENUITEM "E&xport Tasks...",            ID_TOOLS_EXPORT
         MENUITEM SEPARATOR
         MENUITEM "Email &Tasks...",             ID_SENDTASKS
         MENUITEM SEPARATOR

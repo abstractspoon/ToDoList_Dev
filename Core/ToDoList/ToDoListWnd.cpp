@@ -3885,6 +3885,10 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 				case MM_TASKCONTEXT:
 					m_menubar.PrepareTaskContextMenu(pPopup, tdc, Prefs());
 					break;
+
+				case MM_TABCTRLCONTEXT:
+					m_menubar.PrepareTabCtrlContextMenu(pPopup, tdc, Prefs());
+					break;
 				}
 				
 				// prevent re-entrancy
