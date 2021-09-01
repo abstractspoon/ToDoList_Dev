@@ -753,7 +753,7 @@ protected:
 					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
 	
 	void DoSendTasks(BOOL bSelected);
-	BOOL DoPreferences(int nInitPage = -1);
+	BOOL DoPreferences(int nInitPage = -1, UINT nInitCtrlID = 0);
 	void DoPrint(BOOL bPreview = FALSE);
 	BOOL DoDueTaskNotification(int nTDC, int nDueBy);
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);

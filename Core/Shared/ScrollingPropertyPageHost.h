@@ -23,6 +23,7 @@ public:
 
 protected:
 	CScrollBar m_scroll;
+	BOOL m_bScrollVisible;
 
 	// Generated message map functions
 protected:

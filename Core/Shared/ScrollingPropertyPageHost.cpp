@@ -18,7 +18,10 @@ const UINT IDC_SCROLLBAR = 1001;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CScrollingPropertyPageHost::CScrollingPropertyPageHost() : CPropertyPageHost()
+CScrollingPropertyPageHost::CScrollingPropertyPageHost() 
+	: 
+	CPropertyPageHost(),
+	m_bScrollVisible(FALSE)
 {
 
 }
@@ -116,6 +119,7 @@ void CScrollingPropertyPageHost::UpdatePageSize(int nPage, BOOL bPageChange)
 
 		m_scroll.SetScrollInfo(&si, TRUE);
 		m_scroll.ShowWindow(SW_SHOW);
+		m_bScrollVisible = TRUE;
 
 		// resize page width to accommodate scrollbar
 		rPage = rHost;
@@ -130,6 +134,8 @@ void CScrollingPropertyPageHost::UpdatePageSize(int nPage, BOOL bPageChange)
 	}
 	
 	// hide the scroll bar
+	m_bScrollVisible = FALSE;
+
 	if (m_scroll.GetSafeHwnd())
 		m_scroll.ShowWindow(SW_HIDE);
 
@@ -141,7 +147,7 @@ void CScrollingPropertyPageHost::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* 
 {
 	CPropertyPageHost::OnVScroll(nSBCode, nPos, pScrollBar);
 
-	if (m_scroll.IsWindowVisible())
+	if (m_bScrollVisible)
 	{
 		SCROLLINFO si;
 		m_scroll.GetScrollInfo(&si, SIF_PAGE | SIF_POS);
@@ -178,7 +184,7 @@ BOOL CScrollingPropertyPageHost::OnMouseWheel(UINT nFlags, short zDelta, CPoint 
 {
 	// convert mouse wheel to equivalent WM_VSCROLL provided the 
 	// scrollbar is visible
-	if (m_scroll.IsWindowVisible())
+	if (m_bScrollVisible)
 	{
 		UINT nSBCode = (zDelta < 0) ? SB_LINEDOWN : SB_LINEUP;
 		int nNotches = abs(zDelta / 120);
@@ -204,7 +210,7 @@ void CScrollingPropertyPageHost::OnSize(UINT nType, int cx, int cy)
 
 int CScrollingPropertyPageHost::GetScrollPos() const
 {
-	if (m_scroll.IsWindowVisible())
+	if (m_bScrollVisible)
 		return m_scroll.GetScrollPos();
 
 	// else
@@ -213,7 +219,7 @@ int CScrollingPropertyPageHost::GetScrollPos() const
 
 BOOL CScrollingPropertyPageHost::ScrollTo(CWnd* pCtrl)
 {
-	if (m_scroll.IsWindowVisible())
+	if (m_bScrollVisible)
 	{
 		CPropertyPage* pPage = GetActivePage();
 		ASSERT(pPage);
@@ -246,7 +252,7 @@ BOOL CScrollingPropertyPageHost::ScrollToTop()
 
 BOOL CScrollingPropertyPageHost::ScrollTo(LONG nPos)
 {
-	if (m_scroll.IsWindowVisible())
+	if (m_bScrollVisible)
 	{
 		SCROLLINFO si = { 0 };
 		m_scroll.GetScrollInfo(&si, SIF_PAGE | SIF_POS | SIF_RANGE);

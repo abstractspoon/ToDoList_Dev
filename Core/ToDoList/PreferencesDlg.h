@@ -77,7 +77,7 @@ public:
 	virtual ~CPreferencesDlg();
 
 	void InitializePreferences(); // one time only
-	int DoModal(int nInitPage = -1);
+	int DoModal(int nInitPage = -1, UINT nInitCtrlID = 0);
 	
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetAutoListData(const TDCAUTOLISTDATA& autoListData);

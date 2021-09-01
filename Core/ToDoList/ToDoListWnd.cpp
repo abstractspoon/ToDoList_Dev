@@ -4869,7 +4869,7 @@ void CToDoListWnd::OnPreferences()
 	DoPreferences();
 }
 
-BOOL CToDoListWnd::DoPreferences(int nInitPage) 
+BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID) 
 {
 	// take a copy of current userPrefs to check changes against
 	const CPreferencesDlg oldPrefs; 
@@ -4889,7 +4889,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage)
 	m_mgrToDoCtrls.GetAllCustomAttributeDefinitions(aAttribDefs);
 	m_pPrefs->SetCustomAttributeDefs(aAttribDefs);
 
-	UINT nRet = m_pPrefs->DoModal(nInitPage);
+	UINT nRet = m_pPrefs->DoModal(nInitPage, nInitCtrlID);
 	
 	// updates userPrefs
 	RedrawWindow();
@@ -11536,7 +11536,7 @@ void CToDoListWnd::OnUpdateViewRefreshfilter(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnTabctrlPreferences() 
 {
-	DoPreferences(PREFPAGE_UI);
+	DoPreferences(PREFPAGE_UI, IDC_TABBARGROUP);
 }
 
 void CToDoListWnd::OnTasklistSelectColumns() 
