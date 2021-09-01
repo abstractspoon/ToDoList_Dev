@@ -18,10 +18,7 @@ const UINT IDC_SCROLLBAR = 1001;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CScrollingPropertyPageHost::CScrollingPropertyPageHost() 
-	: 
-	CPropertyPageHost(),
-	m_bScrollVisible(FALSE)
+CScrollingPropertyPageHost::CScrollingPropertyPageHost() : CPropertyPageHost()
 {
 
 }
@@ -39,20 +36,6 @@ BEGIN_MESSAGE_MAP(CScrollingPropertyPageHost, CPropertyPageHost)
 	ON_WM_MOUSEWHEEL()
 	ON_WM_SIZE()
 END_MESSAGE_MAP()
-
-int CScrollingPropertyPageHost::OnCreate(LPCREATESTRUCT lpCreateStruct) 
-{
-	if (CPropertyPageHost::OnCreate(lpCreateStruct) == -1)
-		return -1;
-
-// #ifndef WS_EX_COMPOSITED
-// #	define WS_EX_COMPOSITED 0x02000000L
-// #endif
-// 
-// 	ModifyStyleEx(0, WS_EX_COMPOSITED);
-	
-	return 0;
-}
 
 BOOL CScrollingPropertyPageHost::ConstructScrollbar()
 {
@@ -119,7 +102,6 @@ void CScrollingPropertyPageHost::UpdatePageSize(int nPage, BOOL bPageChange)
 
 		m_scroll.SetScrollInfo(&si, TRUE);
 		m_scroll.ShowWindow(SW_SHOW);
-		m_bScrollVisible = TRUE;
 
 		// resize page width to accommodate scrollbar
 		rPage = rHost;
@@ -133,11 +115,8 @@ void CScrollingPropertyPageHost::UpdatePageSize(int nPage, BOOL bPageChange)
 		return;
 	}
 	
-	// hide the scroll bar
-	m_bScrollVisible = FALSE;
-
-	if (m_scroll.GetSafeHwnd())
-		m_scroll.ShowWindow(SW_HIDE);
+	// Delete the scroll bar
+	m_scroll.DestroyWindow();
 
 	// default resizing
 	CPropertyPageHost::UpdatePageSize(nPage, bPageChange);
@@ -147,7 +126,7 @@ void CScrollingPropertyPageHost::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* 
 {
 	CPropertyPageHost::OnVScroll(nSBCode, nPos, pScrollBar);
 
-	if (m_bScrollVisible)
+	if (m_scroll.GetSafeHwnd())
 	{
 		SCROLLINFO si;
 		m_scroll.GetScrollInfo(&si, SIF_PAGE | SIF_POS);
@@ -184,7 +163,7 @@ BOOL CScrollingPropertyPageHost::OnMouseWheel(UINT nFlags, short zDelta, CPoint 
 {
 	// convert mouse wheel to equivalent WM_VSCROLL provided the 
 	// scrollbar is visible
-	if (m_bScrollVisible)
+	if (m_scroll.GetSafeHwnd())
 	{
 		UINT nSBCode = (zDelta < 0) ? SB_LINEDOWN : SB_LINEUP;
 		int nNotches = abs(zDelta / 120);
@@ -210,7 +189,7 @@ void CScrollingPropertyPageHost::OnSize(UINT nType, int cx, int cy)
 
 int CScrollingPropertyPageHost::GetScrollPos() const
 {
-	if (m_bScrollVisible)
+	if (m_scroll.GetSafeHwnd())
 		return m_scroll.GetScrollPos();
 
 	// else
@@ -219,7 +198,7 @@ int CScrollingPropertyPageHost::GetScrollPos() const
 
 BOOL CScrollingPropertyPageHost::ScrollTo(CWnd* pCtrl)
 {
-	if (m_bScrollVisible)
+	if (m_scroll.GetSafeHwnd())
 	{
 		CPropertyPage* pPage = GetActivePage();
 		ASSERT(pPage);
@@ -252,7 +231,7 @@ BOOL CScrollingPropertyPageHost::ScrollToTop()
 
 BOOL CScrollingPropertyPageHost::ScrollTo(LONG nPos)
 {
-	if (m_bScrollVisible)
+	if (m_scroll.GetSafeHwnd())
 	{
 		SCROLLINFO si = { 0 };
 		m_scroll.GetScrollInfo(&si, SIF_PAGE | SIF_POS | SIF_RANGE);
