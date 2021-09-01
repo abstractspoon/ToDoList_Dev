@@ -3961,6 +3961,8 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Email &Tasks...",             ID_SENDTASKS
         MENUITEM SEPARATOR
+        MENUITEM "Pre&ferences...",             ID_TABCTRL_PREFERENCES
+        MENUITEM SEPARATOR
         MENUITEM "Show Tasklist in E&xplorer",  ID_TOOLS_SELECTINEXPLORER
         MENUITEM "Copy Tasklist Path",          ID_TOOLS_COPYTASKLISTPATH
         MENUITEM SEPARATOR
