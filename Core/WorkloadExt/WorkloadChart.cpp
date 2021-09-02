@@ -101,7 +101,11 @@ void CWorkloadChart::RebuildChart()
 	for (int nAllocTo = 0; nAllocTo < m_aAllocTo.GetSize(); nAllocTo++)
 	{
 		AddData(0, m_mapPercentLoad.Get(m_aAllocTo[nAllocTo]));
-		SetXScaleLabel(nAllocTo, m_aAllocTo[nAllocTo]);
+
+		if (m_aAllocTo[nAllocTo].IsEmpty())
+			SetXScaleLabel(nAllocTo, CEnString(IDS_UNALLOCATEDTO));
+		else
+			SetXScaleLabel(nAllocTo, m_aAllocTo[nAllocTo]);
 	}
 
 	// Set the maximum Y value to be something 'nice'

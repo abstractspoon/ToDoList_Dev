@@ -2575,7 +2575,11 @@ void CWorkloadCtrl::UpdateListColumns()
 		else
 		{
 			m_listHeader.SetItemData(nCol, WLCT_VALUE);
-			m_listHeader.SetItemText(nCol, m_aAllocTo[nCol - 1]);
+
+			if (m_aAllocTo[nCol - 1].IsEmpty())
+				m_listHeader.SetItemText(nCol, CEnString(IDS_UNALLOCATEDTO));
+			else
+				m_listHeader.SetItemText(nCol, m_aAllocTo[nCol - 1]);
 		}
 	}
 
