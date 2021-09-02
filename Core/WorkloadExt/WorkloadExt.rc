@@ -422,6 +422,7 @@ BEGIN
     IDS_ACTIVEDATERANGE     "Cu&rrent Period (%s)"
     IDS_ATTRIB_TIMEEST      "Time Estimate"
     IDS_COL_WEEKDAYS        "Weekdays"
+    IDS_UNALLOCATEDTO       "Unallocated"
 END
 
 STRINGTABLE DISCARDABLE 

@@ -78,6 +78,7 @@
 #define IDS_ACTIVEDATERANGE             57692
 #define IDS_ATTRIB_TIMEEST              57693
 #define IDS_COL_WEEKDAYS                57694
+#define IDS_UNALLOCATEDTO               57695
 
 // Next default values for new objects
 // 
