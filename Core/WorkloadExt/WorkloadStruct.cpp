@@ -18,8 +18,16 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
+CString UNALLOCATED;
+CStringArray UNALLOCATEDARRAY;
+
+//////////////////////////////////////////////////////////////////////
+
 CMapDayAllocations::CMapDayAllocations() : bAutoCalculated(FALSE)
 {
+	// Once only initialisation
+	if (UNALLOCATEDARRAY.GetSize() == 0)
+		UNALLOCATEDARRAY.Add(UNALLOCATED);
 }
 
 CMapDayAllocations::~CMapDayAllocations() 
@@ -309,10 +317,7 @@ double CMapDayAllocations::GetTotalDays() const
 	while (pos)
 	{
 		GetNextAssoc(pos, sAllocTo, wa);
-		ASSERT(!sAllocTo.IsEmpty());
-
-		if (!sAllocTo.IsEmpty())
-			dTotalDays += wa.dDays;
+		dTotalDays += wa.dDays;
 	}
 
 	return dTotalDays;
@@ -403,10 +408,7 @@ double CMapAllocationTotals::GetTotal() const
 	while (pos)
 	{
 		GetNextAssoc(pos, sAllocTo, dValue);
-		ASSERT(!sAllocTo.IsEmpty());
-
-		if (!sAllocTo.IsEmpty())
-			dTotalDays += dValue;
+		dTotalDays += dValue;
 	}
 
 	if (m_bReturnAverageForTotal && GetCount())
@@ -571,7 +573,10 @@ void WORKLOADITEM::UpdateAllocationCalculations(BOOL bAutoCalculatedOnly, BOOL b
 		if (dDuration == 0.0)
 			dDuration = (bPreferTimeEstimate ? dtRange.GetWeekdayCount() : dTimeEst);
 
-		mapAllocatedDays.Recalculate(aAllocTo, dDuration, bProportionally);
+		if (aAllocTo.GetSize())
+			mapAllocatedDays.Recalculate(aAllocTo, dDuration, bProportionally);
+		else
+			mapAllocatedDays.Recalculate(UNALLOCATEDARRAY, dDuration, bProportionally);
 	}
 }
 
@@ -664,13 +669,21 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		double dTaskDays = dtIntersect.GetWeekdayCount();
 		double dProportion = (dTaskDays / dTaskDuration);
 
-		for (int nAllocTo = 0; nAllocTo < pWI->aAllocTo.GetSize(); nAllocTo++)
+		if (pWI->aAllocTo.GetSize())
 		{
-			CString sAllocTo(pWI->aAllocTo[nAllocTo]);
-			double dDays = (pWI->mapAllocatedDays.GetDays(sAllocTo) * dProportion);
+			for (int nAllocTo = 0; nAllocTo < pWI->aAllocTo.GetSize(); nAllocTo++)
+			{
+				CString sAllocTo(pWI->aAllocTo[nAllocTo]);
+				double dDays = (pWI->mapAllocatedDays.GetDays(sAllocTo) * dProportion);
 
-			if (mapTotalDays.Add(sAllocTo, dDays))
-				mapTotalTasks.Increment(sAllocTo);
+				if (mapTotalDays.Add(sAllocTo, dDays))
+					mapTotalTasks.Increment(sAllocTo);
+			}
+		}
+		else
+		{
+			if (mapTotalDays.Add(UNALLOCATED, dTaskDays))
+				mapTotalTasks.Increment(UNALLOCATED);
 		}
 	}
 }

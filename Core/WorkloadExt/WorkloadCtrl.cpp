@@ -840,6 +840,8 @@ void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 
 	ExpandList();
 	RefreshItemBoldState();
+
+	m_aAllocTo.Add(_T("")); // unallocated column
 }
 
 void CWorkloadCtrl::RecalcDataDateRange()
