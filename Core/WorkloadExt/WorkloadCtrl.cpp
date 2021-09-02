@@ -68,7 +68,6 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 	if (wi == NULL)	return;	\
 }
 
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -82,7 +81,8 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_mapTotalTasks(FALSE),
 	m_mapPercentLoad(TRUE), // average
 	m_barChart(m_aAllocTo, m_mapPercentLoad),
-	m_dtPeriod(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH, TRUE)
+	m_dtPeriod(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH, TRUE),
+	m_crBkgndText(GetSysColor(COLOR_WINDOWTEXT))
 {
 }
 
@@ -1316,6 +1316,7 @@ LRESULT CWorkloadCtrl::OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	case CDDS_ITEMPREPAINT:
 		{
 			pLVCD->clrTextBk = (m_bSavingToImage ? GetSysColor(COLOR_WINDOW) : m_crBkgnd);
+			pLVCD->clrText = (m_bSavingToImage ? GetSysColor(COLOR_WINDOWTEXT) : m_crBkgndText);
 
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
@@ -1968,7 +1969,7 @@ void CWorkloadCtrl::EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORR
 	m_lcColumnTotals.Invalidate();
 }
 
-BOOL CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
+BOOL CWorkloadCtrl::SetBackgroundColors(COLORREF crBkgnd, COLORREF crText)
 {
 	if (!CTreeListCtrl::SetBackgroundColor(crBkgnd))
 		return FALSE;
@@ -1977,6 +1978,9 @@ BOOL CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
 	{
 		m_lcTotalsLabels.SetBkColor(m_crBkgnd);
 		m_lcTotalsLabels.SetTextBkColor(m_crBkgnd);
+
+		m_crBkgndText = crText;
+		m_lcTotalsLabels.SetTextColor(m_crBkgndText);
 	}
 
 	return TRUE;

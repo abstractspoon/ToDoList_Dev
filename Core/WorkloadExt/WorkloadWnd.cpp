@@ -346,7 +346,7 @@ void CWorkloadWnd::SetUITheme(const UITHEME* pTheme)
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 		m_ctrlWorkload.SetSplitBarColor(m_theme.crAppBackDark);
-		m_ctrlWorkload.SetBackgroundColor(m_theme.crAppBackLight);
+		m_ctrlWorkload.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppText);
 
 		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
 	}

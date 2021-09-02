@@ -70,7 +70,7 @@ public:
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
-	BOOL SetBackgroundColor(COLORREF crBkgnd);
+	BOOL SetBackgroundColors(COLORREF crBkgnd, COLORREF crText);
 	void SetOverlapColor(COLORREF crOverlap);
 
 	void EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload);
@@ -90,7 +90,7 @@ protected:
 	CString m_sSortByAllocTo;
 	int m_nSortByAllocToCol;
 	COleDateTimeRange m_dtPeriod, m_dtDataRange;
-	COLORREF m_crOverlap;
+	COLORREF m_crOverlap, m_crBkgndText;
 	BOOL m_bReadOnly;
 
 	WORKLOADSORT m_sort;
