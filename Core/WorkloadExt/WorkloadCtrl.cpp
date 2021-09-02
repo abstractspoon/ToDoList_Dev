@@ -1465,23 +1465,13 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		{
 		case CDDS_PREPAINT:
 			// only need handle drawing for coloumn sorting or double row height
-			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO) || (m_listHeader.GetRowCount() > 1))
+			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO))
 			{
 				return CDRF_NOTIFYITEMDRAW;
 			}
 			break;
 							
 		case CDDS_ITEMPREPAINT:
-			// only need handle drawing for double row height
-			if (m_listHeader.GetRowCount() > 1)
-			{
-				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
-				int nCol = (int)pNMCD->dwItemSpec;
-
-				DrawListHeaderItem(pDC, nCol);
-				return CDRF_SKIPDEFAULT;
-			}
-			// else alloc to selection
 			return CDRF_NOTIFYPOSTPAINT;
 
 		case CDDS_ITEMPOSTPAINT:
