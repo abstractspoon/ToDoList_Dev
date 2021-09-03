@@ -245,8 +245,12 @@ int CPreferencesDlgBase::DoModal(IPreferences* pPrefs, LPCTSTR szKey, int nInitP
 {
 	ASSERT((pPrefs && szKey && szKey[0]) || !(pPrefs || szKey));
 
-	m_nInitPage = nInitPage;
-	m_nInitCtrlID = nInitCtrlID;
+	// Only overwrite the last active page if caller has set it
+	if (nInitPage != -1)
+	{
+		m_nInitPage = nInitPage;
+		m_nInitCtrlID = nInitCtrlID;
+	}
 
 	// Temporary only
 	m_pDoModalPrefs = pPrefs;
