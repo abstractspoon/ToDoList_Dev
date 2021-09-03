@@ -57,6 +57,7 @@
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\gdiplus.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\interfaces\spellcheckdlg.h"
@@ -101,12 +102,6 @@ const int MINNONCOMMENTWIDTH	= GraphicsMisc::ScaleByDPIFactor(350); // what's to
 const int COMBODROPHEIGHT		= GraphicsMisc::ScaleByDPIFactor(200);
 const int MINSTACKEDCOMMENTSIZE = GraphicsMisc::ScaleByDPIFactor(60);
 const int INFOTIPOFFSET			= GraphicsMisc::ScaleByDPIFactor(16);
-
-/////////////////////////////////////////////////////////////////////////////
-
-const COLORREF BLACK	= RGB(0, 0, 0);
-const COLORREF WHITE	= RGB(240, 240, 240);
-const COLORREF MAGENTA	= RGB(255, 0, 255);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -641,7 +636,7 @@ BOOL CToDoCtrl::OnInitDialog()
 
 void CToDoCtrl::LoadTaskIcons()
 {
-	VERIFY(m_ilTaskIcons.LoadImages(m_sLastSavePath, MAGENTA, HasStyle(TDCS_SHOWDEFAULTTASKICONS)));
+	VERIFY(m_ilTaskIcons.LoadImages(m_sLastSavePath, colorMagenta, HasStyle(TDCS_SHOWDEFAULTTASKICONS)));
 
 	OnTaskIconsChanged();
 }
@@ -2637,7 +2632,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 
 LRESULT CToDoCtrl::OnTaskIconDlgReloadIcons(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	if (m_ilTaskIcons.LoadImages(m_sLastSavePath, MAGENTA, HasStyle(TDCS_SHOWDEFAULTTASKICONS)))
+	if (m_ilTaskIcons.LoadImages(m_sLastSavePath, colorMagenta, HasStyle(TDCS_SHOWDEFAULTTASKICONS)))
 	{
 		OnTaskIconsChanged();
 		return TRUE;

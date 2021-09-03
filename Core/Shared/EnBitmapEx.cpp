@@ -12,6 +12,8 @@
 #include "Icon.h"
 #include "GraphicsMisc.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 #ifdef _DEBUG
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
@@ -161,7 +163,7 @@ BOOL CEnBitmapEx::Disable(CBitmap& bitmap, COLORREF crMask)
 HICON CEnBitmapEx::CreateDisabledIcon(HICON hIcon)
 {
 	CEnBitmapEx hbmDisabled;
-	const COLORREF crMask = RGB(255, 0, 255);
+	const COLORREF crMask = colorMagenta;
 	
 	hbmDisabled.CopyImage(hIcon, crMask, 16, 16);
 	hbmDisabled.Disable(crMask);

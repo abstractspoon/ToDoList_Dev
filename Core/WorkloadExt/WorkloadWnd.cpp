@@ -23,6 +23,7 @@
 
 #include "..\3rdparty\T64Utils.h"
 #include "..\3rdparty\dibdata.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -344,6 +345,10 @@ void CWorkloadWnd::SetUITheme(const UITHEME* pTheme)
 		// intentionally set background colours to be same as ours
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+		// Rescale images because background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
 
 		m_ctrlWorkload.SetSplitBarColor(m_theme.crAppBackDark);
 		m_ctrlWorkload.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppText);
@@ -675,9 +680,7 @@ BOOL CWorkloadWnd::OnInitDialog()
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
 	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
 		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);

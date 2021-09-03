@@ -12,6 +12,7 @@
 #include "..\shared\richedithelper.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\graphicsmisc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\binarydata.h"
@@ -25,6 +26,7 @@
 #include "..\3rdparty\compression.h"
 #include "..\3rdparty\zlib\zlib.h"
 #include "..\3rdparty\clipboardbackup.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\uitheme.h"
@@ -336,6 +338,22 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
 	
 	m_toolbar.SetBackgroundColors(pTheme->crToolbarLight, pTheme->crToolbarDark, pTheme->nRenderStyle != UIRS_GLASS, pTheme->nRenderStyle != UIRS_GRADIENT);
 	m_toolbar.SetHotColor(pTheme->crToolbarHot);
+
+	// Rescale images because background colour has changed
+	if (GraphicsMisc::WantDPIScaling())
+	{
+		m_toolbar.DestroyWindow();
+		CreateToolbar();
+
+		m_tbHelper.Release();
+		m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts);
+
+		CRect rClient;
+		GetClientRect(rClient);
+
+		LayoutControls(rClient.Width(), rClient.Height());
+	}
+
 	m_ruler.SetBackgroundColor(pTheme->crToolbarLight);
 }
 
@@ -505,7 +523,7 @@ void CRTFContentControl::InitMenuIconManager()
 	aCmdIDs.Add(ID_PREFERENCES);
 	aCmdIDs.Add(ID_HELP);
 		
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_TOOLBAR, RGB(255, 0, 255));
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_TOOLBAR, colorMagenta);
 }
 
 BOOL CRTFContentControl::IsTDLClipboardEmpty() const 
@@ -558,7 +576,7 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// helper for toolbar tooltips
 	// initialize after hiding table button
-	m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts);
+	VERIFY(m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts));
 
 	return 0;
 }

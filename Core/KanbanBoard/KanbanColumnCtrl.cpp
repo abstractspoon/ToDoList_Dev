@@ -20,6 +20,8 @@
 #include "..\Shared\osversion.h"
 #include "..\Shared\themed.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 #include <math.h>
 
 #ifdef _DEBUG
@@ -156,7 +158,7 @@ int CKanbanColumnCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS))
 		VERIFY(InitTooltip());
 
-	m_ilIcons.Create(IDB_ICONS, 16, 1, RGB(255, 0, 255));
+	m_ilIcons.Create(IDB_ICONS, 16, 1, colorMagenta);
 	CEnImageList::ScaleByDPIFactor(m_ilIcons);
 
 	CFont* pFont = m_fonts.GetFont();

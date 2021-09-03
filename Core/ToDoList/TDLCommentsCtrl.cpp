@@ -18,6 +18,8 @@
 #include "..\interfaces\icontentcontrol.h"
 #include "..\Interfaces\Preferences.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 enum
@@ -120,22 +122,19 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 
 		if (m_toolbar.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), nStyle))
 		{
-			VERIFY(m_toolbar.LoadToolBar(IDR_DATETIME_TOOLBAR));
-
-			const COLORREF MAGENTA = RGB(255, 0, 255);
-			VERIFY(m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, MAGENTA));
-
 			m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
 			m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+			VERIFY(m_toolbar.LoadToolBar(IDR_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
+
+			if (m_pMgrShortcuts)
+				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
 
 			// Need care to ensure toolbar does not encroach on content window 
 			CRect rToolbar = GetChildRect(&m_cbCommentsFmt);
 			int nMaxHeight = (rToolbar.bottom + CDlgUnits(this).ToPixelsY(2));
 
 			m_toolbar.Resize(m_toolbar.GetMinReqLength(), CPoint((rToolbar.right + 10), 0), nMaxHeight);
-
-			if (m_pMgrShortcuts)
-				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
 		}
 	}
 
@@ -461,6 +460,10 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 
 	m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
 	m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+	// Rescale images because background colour has changed
+	if (GraphicsMisc::WantDPIScaling())
+		m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, colorMagenta);
 
 	Invalidate();
 }

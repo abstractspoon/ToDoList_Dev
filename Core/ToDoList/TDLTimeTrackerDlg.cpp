@@ -13,6 +13,8 @@
 #include "..\shared\localizer.h"
 #include "..\shared\mapex.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 /////////////////////////////////////////////////////////////////////////
 
 enum // btns
@@ -22,6 +24,8 @@ enum // btns
 	BTN_STARTDISABLED,
 	BTN_STOPDISABLED,
 };
+
+/////////////////////////////////////////////////////////////////////////
 
 const int ID_RESET_ELAPSED = 1;
 
@@ -176,19 +180,20 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 		CBitmap bmp;
 		
 		if (bmp.LoadBitmap(IDB_TIMETRACK_BTNS))
-			m_ilBtns.Add(&bmp, RGB(255, 0, 255));
+			m_ilBtns.Add(&bmp, colorMagenta);
 	}
 
-	if (m_toolbar.CreateEx(this) && m_toolbar.LoadToolBar(IDR_TIMETRACKER_TOOLBAR))
+	m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, CLR_NONE, FALSE, FALSE);
+	m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+	if (m_toolbar.CreateEx(this))
 	{
-		m_toolbar.SetImage(IDB_TIMETRACK_TOOLBAR_STD, RGB(255, 0, 255));
+		VERIFY(m_toolbar.LoadToolBar(IDR_TIMETRACKER_TOOLBAR, IDB_TIMETRACK_TOOLBAR_STD, colorMagenta));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+
 		m_toolbar.SetDlgCtrlID(IDC_TOOLBAR);
 		m_toolbar.MoveWindow(GetCtrlRect(this, IDC_TOOLBAR));
 		m_toolbar.GetToolBarCtrl().CheckButton(ID_TIMETRACKER_ONTOP, m_bAlwaysOnTop);
-		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, CLR_NONE, FALSE, FALSE);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-
-		m_tbHelper.Initialize(&m_toolbar, this);
 	}
 
 	m_mgrPrompts.SetEditPrompt(IDC_QUICKFIND, *this, IDS_QUICKTASKFIND);
@@ -260,7 +265,11 @@ void CTDLTimeTrackerDlg::SetUITheme(const CUIThemeFile& theme)
 		// Use crAppBackLight so the toolbar merges with the bkgnd
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, m_theme.HasGradient(), m_theme.HasGlass());
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-		
+
+		// Rescale images because background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_TIMETRACK_TOOLBAR_STD, colorMagenta);
+
 		Invalidate(TRUE);
 		SendMessage(WM_NCPAINT);
 	}

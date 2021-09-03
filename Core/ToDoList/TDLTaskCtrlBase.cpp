@@ -26,6 +26,7 @@
 #include "..\shared\FileIcons.h"
 
 #include "..\3rdparty\colordef.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -1176,10 +1177,10 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 
 	CBitmap bmp;
 
-	if (!bmp.LoadBitmap(IDB_COLUMN_SYMBOLS) || (m_ilColSymbols.Add(&bmp, RGB(255, 0, 255)) == -1))
+	if (!bmp.LoadBitmap(IDB_COLUMN_SYMBOLS) || (m_ilColSymbols.Add(&bmp, colorMagenta) == -1))
 		return FALSE;
 	
-	m_ilColSymbols.ScaleByDPIFactor(RGB(253, 253, 253));
+	m_ilColSymbols.ScaleByDPIFactor(RGB(253, 253, 253)); // near white
 
 	// primary header
 	const TDCCOLUMN* pClient = GetColumn(TDCC_CLIENT);

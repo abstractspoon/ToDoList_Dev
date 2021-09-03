@@ -78,6 +78,7 @@
 
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\ShellIcons.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\spellcheckdlg.h"
 #include "..\Interfaces\uiextensionhelper.h"
@@ -110,13 +111,13 @@ const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
 const int QUICKFIND_VOFFSET = GraphicsMisc::ScaleByDPIFactor(1);
 const int QUICKFIND_HOFFSET = -GraphicsMisc::ScaleByDPIFactor(2);
 
+/////////////////////////////////////////////////////////////////////////////
+
 #ifdef _DEBUG
 const UINT ONE_MINUTE = 10000;
 #else
 const UINT ONE_MINUTE = 60000;
 #endif
-
-const COLORREF MAGENTA = RGB(255, 0, 255);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -762,6 +763,9 @@ void CToDoListWnd::UpdateUITheme()
 	// update the UI if the theme has changed
 	if (themeCur != m_theme)
 	{
+		// TODO
+		// We only need to recreate the toolbar in a high DPI mode
+		// so that the images get rescaled with the new background colour
 		m_cbQuickFind.DestroyWindow();
 		m_tbHelperMain.Release();
 		m_toolbarMain.DestroyWindow();
@@ -1059,7 +1063,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_PREFERENCES);
 	aCmdIDs.Add(ID_HELP_WIKI);
 
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_TOOLBAR_STD, MAGENTA);
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_TOOLBAR_STD, colorMagenta);
 
 	// extra
 	aCmdIDs.RemoveAll();
@@ -1073,7 +1077,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_EXIT);
 	aCmdIDs.Add(ID_FILE_ENCRYPT);
 
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_EXTRA_STD, MAGENTA);
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_APP_EXTRA_STD, colorMagenta);
 
 	// social images
 	aCmdIDs.RemoveAll();
@@ -1081,7 +1085,7 @@ void CToDoListWnd::PopulateMenuIconManager()
 	aCmdIDs.Add(ID_HELP_WIKI);
 	aCmdIDs.Add(ID_HELP_FORUM);
 
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, MAGENTA);
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_SOCIAL_TOOLBAR, colorMagenta);
 
 	// Tray icon
 	m_mgrMenuIcons.AddImage(ID_TRAYICON_CREATETASK, GetNewTaskCmdID());
@@ -1328,7 +1332,7 @@ BOOL CToDoListWnd::InitMainToolbar()
 		m_toolbarMain.SetHotColor(m_theme.crToolbarHot);
 	}
 	
-	m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, MAGENTA);
+	m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, colorMagenta);
 	
 	// resize the toolbar in one row so that our subsequent calculations work
 	m_toolbarMain.Resize(1000, CPoint(0, 2)); 
@@ -6022,7 +6026,7 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 			CBitmap bm;
 			bm.LoadBitmap(IDB_SOURCECONTROL_STD);
 
-			m_ilTabCtrl.Add(&bm, RGB(255, 0, 255));
+			m_ilTabCtrl.Add(&bm, colorMagenta);
 			m_ilTabCtrl.ScaleByDPIFactor();
 
 			m_tabCtrl.SetImageList(&m_ilTabCtrl);

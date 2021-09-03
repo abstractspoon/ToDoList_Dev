@@ -21,6 +21,8 @@
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\uithemefile.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
 #ifdef _DEBUG
@@ -237,8 +239,15 @@ void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
 		GraphicsMisc::VerifyDeleteObject(m_brBkgnd);
 		m_brBkgnd.CreateSolidBrush(theme.crAppBackLight);
 
-		// do we have recreate the toolbar?
-		if (m_theme != themeCur)
+		// Set colours first for the rescaling to work
+		m_toolbar.SetBackgroundColors(theme.crToolbarLight,
+									  theme.crToolbarDark,
+									  theme.nRenderStyle != UIRS_GLASS,
+									  theme.nRenderStyle != UIRS_GRADIENT);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+		// We have recreate the toolbar if rescaling is required
+		if ((m_theme != themeCur) && GraphicsMisc::WantDPIScaling())
 		{
 			// change parent of combo so it doesn't get destroyed
 			// will get reset in InitializeToolbar
@@ -247,14 +256,9 @@ void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
 			m_toolbar.DestroyWindow();
 			m_tbHelper.Release();
 
-			VERIFY (InitializeToolbar());
+			VERIFY(InitializeToolbar());
 		}
 
-		m_toolbar.SetBackgroundColors(theme.crToolbarLight, 
-									theme.crToolbarDark, 
-									theme.nRenderStyle != UIRS_GLASS, 
-									theme.nRenderStyle != UIRS_GRADIENT);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 		m_toolbar.RefreshButtonStates(TRUE);
 
 		ResizeDlg(FALSE);
@@ -270,22 +274,20 @@ BOOL CTDLFindTasksDlg::InitializeToolbar()
 	if (!m_toolbar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
 		return FALSE;
 
-	if (!m_toolbar.LoadToolBar(IDR_FIND_TOOLBAR))
+	if (CThemed::IsAppThemed())
+	{
+		m_toolbar.SetBackgroundColors(m_theme.crToolbarLight,
+									  m_theme.crToolbarDark,
+									  m_theme.nRenderStyle != UIRS_GLASS,
+									  m_theme.nRenderStyle != UIRS_GRADIENT);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+	}
+
+	if (!m_toolbar.LoadToolBar(IDR_FIND_TOOLBAR, IDB_FIND_TOOLBAR_STD, colorMagenta))
 		return FALSE;
 	
 	m_toolbar.SetBorders(4, 4, 0, 0);
 
-	if (CThemed::IsAppThemed())
-	{
-		m_toolbar.SetBackgroundColors(m_theme.crToolbarLight, 
-									m_theme.crToolbarDark, 
-									m_theme.nRenderStyle != UIRS_GLASS, 
-									m_theme.nRenderStyle != UIRS_GRADIENT);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-	}
-
-	m_toolbar.SetImage(IDB_FIND_TOOLBAR_STD, RGB(255, 0, 255));
-	
 	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 	
 	// very important - turn OFF all the auto positioning and sizing
