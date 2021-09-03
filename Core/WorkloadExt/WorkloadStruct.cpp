@@ -52,6 +52,11 @@ void CMapDayAllocations::RemoveAll()
 	bAutoCalculated = FALSE;
 }
 
+void CMapDayAllocations::RemoveKey(const CString& sAllocTo)
+{
+	CMap<CString, LPCTSTR, WORKLOADALLOCATION, WORKLOADALLOCATION&>::RemoveKey(sAllocTo);
+}
+
 BOOL CMapDayAllocations::Get(const CString& sAllocTo, WORKLOADALLOCATION& wa) const
 {
 	wa.Reset();
@@ -515,7 +520,7 @@ int WORKLOADITEM::GetNames(const CStringArray& aAllNames, CStringArray& aNames) 
 
 	while (nKey--)
 	{
-		if (!Misc::Contains(aKeys[nKey], aNames))
+		if (!aKeys[nKey].IsEmpty() && !Misc::Contains(aKeys[nKey], aNames))
 		{
 			int nName = Misc::Find(aKeys[nKey], aAllNames);
 			ASSERT(nName != -1);

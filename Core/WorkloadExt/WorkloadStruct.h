@@ -92,6 +92,7 @@ public:
 	BOOL MatchAll(const CMapDayAllocations& other) const;
 	void Copy(const CMapDayAllocations& other);
 	void RemoveAll();
+	void RemoveKey(const CString& sAllocTo);
 
 protected:
 	BOOL bAutoCalculated;

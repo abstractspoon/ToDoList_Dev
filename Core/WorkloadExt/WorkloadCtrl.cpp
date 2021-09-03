@@ -197,14 +197,20 @@ DWORD CWorkloadCtrl::GetSelectedTaskID() const
 	return GetSelectedItemData();
 }
 
-BOOL CWorkloadCtrl::GetSelectedTask(WORKLOADITEM& wi) const
+BOOL CWorkloadCtrl::GetSelectedTask(WORKLOADITEM& wi, BOOL bIncUnallocated) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	const WORKLOADITEM* pWI = NULL;
 
 	GET_WI_RET(dwTaskID, pWI, FALSE);
-	
 	wi = *pWI;
+
+	if (!bIncUnallocated)
+	{
+		Misc::RemoveEmptyItems(wi.aAllocTo);
+		wi.mapAllocatedDays.RemoveKey(_T(""));
+	}
+
 	return TRUE;
 }
 
@@ -1936,10 +1942,10 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 	// else
 	int nCol = -1, nHit = ListHitTestItem(point, FALSE, nCol);
 
-	if (m_bReadOnly || (GetListColumnType(nCol) != WLCT_VALUE))
+	if (m_bReadOnly || (nHit == -1) || (GetListColumnType(nCol) != WLCT_VALUE))
 		return FALSE;
 
-	CString sAllocTo(m_listHeader.GetItemText(nCol));
+	CString sAllocTo(m_aAllocTo[nCol - 1]); // Account for hidden first column
 
 	return CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, (WPARAM)(LPCTSTR)sAllocTo, GetTaskID(nHit));
 }

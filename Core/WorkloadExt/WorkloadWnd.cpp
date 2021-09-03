@@ -874,9 +874,13 @@ void CWorkloadWnd::EditSelectedWorkloadAllocations(LPCTSTR szAllocTo)
 	ASSERT(CanEditSelectedTaskAllocations());
 
 	WORKLOADITEM wi;
-	VERIFY(m_ctrlWorkload.GetSelectedTask(wi));
+	VERIFY(m_ctrlWorkload.GetSelectedTask(wi, FALSE));
 
-	CEditAllocationsDlg dialog(wi, m_ctrlWorkload.GetAllocatedToList(), szAllocTo);
+	CStringArray aAllocTo;
+	aAllocTo.Copy(m_ctrlWorkload.GetAllocatedToList());
+	Misc::RemoveEmptyItems(aAllocTo);
+	
+	CEditAllocationsDlg dialog(wi, aAllocTo, szAllocTo);
 	
 	if (dialog.DoModal() == IDOK)
 	{

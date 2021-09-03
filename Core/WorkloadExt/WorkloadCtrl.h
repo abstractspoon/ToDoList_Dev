@@ -49,7 +49,7 @@ public:
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	int GetTaskCount() const { return (int)m_tree.GetCount(); }
 
-	BOOL GetSelectedTask(WORKLOADITEM& wi) const;
+	BOOL GetSelectedTask(WORKLOADITEM& wi, BOOL bIncUnallocated = TRUE) const;
 	BOOL SetSelectedTaskAllocations(const WORKLOADITEM& wi);
 	const CStringArray& GetAllocatedToList() const { return m_aAllocTo; }
 
