@@ -24,6 +24,8 @@
 
 #include "..\3rdparty\shellicons.h"
 
+#include "..\Interfaces\TasklistSchemaDef.h"
+
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()
 
@@ -833,21 +835,30 @@ WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID) const
 
 void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
+	m_dwMaxTaskID = 0;
+
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
 	m_data.RemoveAll();
 
 	m_aAllocTo.RemoveAll();
-	m_dwMaxTaskID = 0;
+	m_aAllocTo.Add(_T("")); // unallocated column
+	UpdateAllocTo(pTasks);
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
-
 	m_data.RecalculateOverlaps();
 
 	ExpandList();
 	RefreshItemBoldState();
+}
 
-	m_aAllocTo.Add(_T("")); // unallocated column
+void CWorkloadCtrl::UpdateAllocTo(const ITASKLISTBASE* pTasks)
+{
+	int nItem = pTasks->GetAttributeCount(TDL_TASKALLOCTO);
+
+	while (nItem--)
+		Misc::AddUniqueItem(pTasks->GetAttributeItem(TDL_TASKALLOCTO, nItem), m_aAllocTo);
+
 }
 
 void CWorkloadCtrl::RecalcDataDateRange()
