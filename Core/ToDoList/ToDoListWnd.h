@@ -784,6 +784,7 @@ protected:
 	static void HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist);
 	static BOOL HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist); // Note the 'reference'
 
+	static void UpdateToolbarColors(CEnToolBar& toolbar, const CUIThemeFile& theme);
 	static void EnableTDLExtension(BOOL bEnable, BOOL bStartup);
 	static void EnableTDLProtocol(BOOL bEnable, BOOL bStartup);
 	static void SetupUIStrings();

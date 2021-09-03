@@ -763,24 +763,32 @@ void CToDoListWnd::UpdateUITheme()
 	// update the UI if the theme has changed
 	if (themeCur != m_theme)
 	{
-		// TODO
-		// We only need to recreate the toolbar in a high DPI mode
+		// We only need to recreate the toolbar if we are in high-DPI mode
 		// so that the images get rescaled with the new background colour
-		m_cbQuickFind.DestroyWindow();
-		m_tbHelperMain.Release();
-		m_toolbarMain.DestroyWindow();
-
-		InitMainToolbar();
-
-		// Only reload if already initialised
-		if (m_toolbarCustom.GetSafeHwnd())
+		// Likewise for the menu icons.
+		if (GraphicsMisc::WantDPIScaling())
 		{
-			m_toolbarCustom.DestroyWindow();
-			InitCustomToolbar();
-		}
+			m_cbQuickFind.DestroyWindow();
+			m_tbHelperMain.Release();
+			m_toolbarMain.DestroyWindow();
 
-		// Repopulate the menu icon manager
-		m_mgrMenuIcons.ClearImages();
+			InitMainToolbar();
+
+			// Only reload if already initialised
+			if (m_toolbarCustom.GetSafeHwnd())
+			{
+				m_toolbarCustom.DestroyWindow();
+				InitCustomToolbar();
+			}
+
+			// Repopulate the menu icon manager
+			m_mgrMenuIcons.ClearImages();
+		}
+		else
+		{
+			UpdateToolbarColors(m_toolbarMain, m_theme);
+			UpdateToolbarColors(m_toolbarCustom, m_theme);
+		}
 
 		// Rest of UI
 		m_statusBar.SetUIColors(m_theme.crStatusBarLight, 
@@ -805,6 +813,19 @@ void CToDoListWnd::UpdateUITheme()
 		m_menubar.SetUITheme(m_theme);
 
 		Invalidate();
+	}
+}
+
+void CToDoListWnd::UpdateToolbarColors(CEnToolBar& toolbar, const CUIThemeFile& theme)
+{
+	if (CThemed::IsAppThemed() && toolbar.GetSafeHwnd())
+	{
+		toolbar.SetBackgroundColors(theme.crToolbarLight,
+									theme.crToolbarDark,
+									theme.HasGradient(),
+									theme.HasGlass());
+
+		toolbar.SetHotColor(theme.crToolbarHot);
 	}
 }
 
@@ -1322,15 +1343,8 @@ BOOL CToDoListWnd::InitMainToolbar()
 	m_toolbarMain.SetBorders(4, 2, 0, 0);
 
 	// initialise colors before setting image because the
-	// background colour is needed for image scaling
-	if (CThemed::IsAppThemed())
-	{
-		m_toolbarMain.SetBackgroundColors(m_theme.crToolbarLight, 
-										m_theme.crToolbarDark, 
-										m_theme.HasGradient(), 
-										m_theme.HasGlass());
-		m_toolbarMain.SetHotColor(m_theme.crToolbarHot);
-	}
+	// background colour may be needed for image scaling
+	UpdateToolbarColors(m_toolbarMain, m_theme);
 	
 	m_toolbarMain.SetImage(IDB_APP_TOOLBAR_STD, colorMagenta);
 	
@@ -1392,15 +1406,8 @@ BOOL CToDoListWnd::InitCustomToolbar()
 	m_toolbarCustom.SetBorders(4, 2, 0, 0);
 
 	// initialise colors before initialising buttons because the
-	// background colour is needed for image scaling
-	if (CThemed::IsAppThemed())
-	{
-		m_toolbarCustom.SetBackgroundColors(m_theme.crToolbarLight, 
-											m_theme.crToolbarDark, 
-											m_theme.HasGradient(), 
-											m_theme.HasGlass());
-		m_toolbarCustom.SetHotColor(m_theme.crToolbarHot);
-	}
+	// background colour may be needed for image scaling
+	UpdateToolbarColors(m_toolbarCustom, m_theme);
 
 	if (!m_toolbarCustom.InitialiseButtons(aTBButtons, m_menubar, m_mgrShortcuts))
 	{
