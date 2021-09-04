@@ -214,15 +214,16 @@ void CMapDayAllocations::Recalculate(const CStringArray& aAllocTo, double dTotal
 	}
 
 	double dPrevTotal = GetTotalDays();
-
-	if (dTotal == dPrevTotal)
-		return;
-
 	BOOL bAutoCalced = IsAutoCalculated();
 
 	if (!bAutoCalced && bProportionally && (dPrevTotal > 0.0))
 	{
 		double dLeftover = dTotal;
+
+		CMapDayAllocations prevAlloc;
+		prevAlloc.Copy(*this);
+
+		RemoveAll();
 
 		while (nAllocTo--)
 		{
@@ -232,7 +233,7 @@ void CMapDayAllocations::Recalculate(const CStringArray& aAllocTo, double dTotal
 			}
 			else
 			{
-				double dWeighting = (GetDays(aAllocTo[nAllocTo]) / dPrevTotal);
+				double dWeighting = (prevAlloc.GetDays(aAllocTo[nAllocTo]) / dPrevTotal);
 				double dAllocation = Misc::Round((dTotal * dWeighting), 2);
 
 				SetDays(aAllocTo[nAllocTo], dAllocation);
@@ -243,6 +244,7 @@ void CMapDayAllocations::Recalculate(const CStringArray& aAllocTo, double dTotal
 	else // equal split
 	{
 		double dAllocation = Misc::Round((dTotal / nAllocTo), 2), dLeftover = dTotal;
+		RemoveAll();
 
 		while (nAllocTo--)
 		{
