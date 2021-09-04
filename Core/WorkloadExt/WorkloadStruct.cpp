@@ -213,13 +213,11 @@ void CMapDayAllocations::Recalculate(const CStringArray& aAllocTo, double dTotal
 		return;
 	}
 
-	double dPrevTotal = GetTotalDays();
+	double dPrevTotal = GetTotalDays(), dLeftover = dTotal;
 	BOOL bAutoCalced = IsAutoCalculated();
 
 	if (!bAutoCalced && bProportionally && (dPrevTotal > 0.0))
 	{
-		double dLeftover = dTotal;
-
 		CMapDayAllocations prevAlloc;
 		prevAlloc.Copy(*this);
 
@@ -243,7 +241,7 @@ void CMapDayAllocations::Recalculate(const CStringArray& aAllocTo, double dTotal
 	}
 	else // equal split
 	{
-		double dAllocation = Misc::Round((dTotal / nAllocTo), 2), dLeftover = dTotal;
+		double dAllocation = Misc::Round((dTotal / nAllocTo), 2);
 		RemoveAll();
 
 		while (nAllocTo--)
