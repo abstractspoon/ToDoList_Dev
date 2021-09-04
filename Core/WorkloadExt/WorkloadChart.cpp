@@ -297,6 +297,9 @@ CString CWorkloadChart::GetTooltip(int nHit) const
 	CString sAllocTo = m_aAllocTo[nHit];
 	double dPercent = m_mapPercentLoad.Get(sAllocTo);
 
+	if (sAllocTo.IsEmpty())
+		sAllocTo = CEnString(IDS_UNALLOCATEDTO);
+
 	CString sTooltip;
 	sTooltip.Format(_T("%s: %.2f%%"), sAllocTo, dPercent);
 
