@@ -476,7 +476,7 @@ int CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
-	double dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nUnits, true);
+	double dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nUnits, false); // uncalculated
 
 	TH_UNITS nTHUnits = THU_NULL;
 
@@ -717,7 +717,10 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 	}
 
 	if (bAllocationChange)
+	{
+		ASSERT(bChange);
 		UpdateAllocationCalculations(*pWI);
+	}
 	
 	return bChange;
 }
@@ -2144,17 +2147,13 @@ BOOL CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 
 double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, int nItem, int nCol, COLORREF& crBack) const
 {
-	if (!wi.bParent)
-		return GetAllocationListItemColumnDays(wi, nCol, crBack);
-
 	return CalcAllocationListItemColumnDays(wi, GetTreeItem(nItem), nCol, crBack);
 }
 
 double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, HTREEITEM hti, int nCol, COLORREF& crBack) const
 {
-	double dDays = GetAllocationListItemColumnDays(wi, nCol, crBack);
-
-	// Add child totals if this is a parent
+	// Begin by accumulating any child values
+	double dDays = 0.0;
 	HTREEITEM htiChild = m_tree.GetChildItem(hti);
 
 	while (htiChild)
@@ -2166,7 +2165,7 @@ double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, H
 		if (pWIChild && !pWIChild->dwOrgRefID)
 		{
 			COLORREF crChild = CLR_NONE;
-			dDays += CalcAllocationListItemColumnDays(*pWIChild, htiChild, nCol, crChild);
+			dDays += CalcAllocationListItemColumnDays(*pWIChild, htiChild, nCol, crChild); // RECURSIVE CALL
 
 			// Highlight overlapping children on parent if parent is not expanded
 			if ((crChild != CLR_NONE) && !m_tree.TCH().IsItemExpanded(hti))
@@ -2174,6 +2173,28 @@ double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, H
 		}
 
 		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
+	}
+
+	// We need to be very careful to avoid double-counting
+	//
+	// 1. If it's not a parent
+	BOOL bAddThis = !wi.bParent;
+
+	if (!bAddThis && HasOption(WLCF_ALLOWPARENTALLOCATIONS))
+	{
+		// 2. If it's a parent with a time estimate
+		bAddThis = ((wi.dTimeEst != 0.0) && (HasOption(WLCF_PREFERTIMEESTFORCALCS) || !wi.dtRange.IsValid()));
+
+		if (!bAddThis)
+		{
+			// 3. If its children yielded no result
+			bAddThis = (dDays == 0.0);
+		}
+	}
+
+	if (bAddThis)
+	{
+		dDays += GetAllocationListItemColumnDays(wi, nCol, crBack);
 	}
 
 	return dDays;
