@@ -814,6 +814,7 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	m_ctrlWorkload.SetOption(WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
 	m_ctrlWorkload.SetOption(WLCF_RECALCALLOCATIONS, m_dlgPrefs.GetRecalculateAllocations());
 	m_ctrlWorkload.SetOption(WLCF_RECALCPROPORTIONALLY, m_dlgPrefs.GetRecalculateAllocationsProportionally());
+	m_ctrlWorkload.SetOption(WLCF_INCLUDEDATELESSTASKSINPERIOD, m_dlgPrefs.GetIncludeDatelessTasksInPeriod());
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 

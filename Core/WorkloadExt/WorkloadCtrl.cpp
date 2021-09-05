@@ -442,7 +442,11 @@ void CWorkloadCtrl::PreFixVScrollSyncBug()
 
 void CWorkloadCtrl::RecalcAllocationTotals()
 {
-	m_data.CalculateTotals(m_dtPeriod, m_mapTotalDays, m_mapTotalTasks, HasOption(WLCF_ALLOWPARENTALLOCATIONS));
+	m_data.CalculateTotals(m_dtPeriod, 
+						   m_mapTotalDays, 
+						   m_mapTotalTasks, 
+						   HasOption(WLCF_ALLOWPARENTALLOCATIONS),
+						   HasOption(WLCF_INCLUDEDATELESSTASKSINPERIOD));
 
 	// Individual loading
 	m_mapPercentLoad.RemoveAll();
@@ -1050,6 +1054,7 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				break;
 
 			case WLCF_ALLOWPARENTALLOCATIONS:
+			case WLCF_INCLUDEDATELESSTASKSINPERIOD:
 				RecalcAllocationTotals();
 				break;
 			}

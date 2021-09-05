@@ -638,7 +638,8 @@ void CWorkloadItemMap::RemoveAll()
 void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 									   CMapAllocationTotals& mapTotalDays, 
 									   CMapAllocationTotals& mapTotalTasks, 
-									   BOOL bAllowParentAllocations) const
+									   BOOL bAllowParentAllocations,
+									   BOOL bIncludeTasksWithoutDates) const
 {
 	mapTotalDays.RemoveAll();
 	mapTotalTasks.RemoveAll();
@@ -657,23 +658,39 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		if (pWI->bParent && !bAllowParentAllocations)
 			continue;
 
-		if (!pWI->HasValidDates() || pWI->IsDone(TRUE))
+		if (pWI->IsDone(TRUE))
 			continue;
 
-		double dTaskDuration = pWI->dtRange.GetWeekdayCount();
+		// Determine what proportion of this task's days fall within the specified period
+		COleDateTimeRange dtTaskRange;
+		double dTaskDays = 0.0, dIntersectingDays = 0.0;
 
-		if (dTaskDuration == 0.0)
+		if (GetValidatedDateRange(pWI, dtTaskRange))
+		{
+			COleDateTimeRange dtIntersect;
+
+			if (dtIntersect.GetIntersection(dtPeriod, dtTaskRange))
+			{
+				dIntersectingDays = dtIntersect.GetWeekdayCount();
+				dTaskDays = dtTaskRange.GetWeekdayCount();
+			}
+		}
+		else if (bIncludeTasksWithoutDates)
+		{
+			// Include entirety of task
+			dTaskDays = dIntersectingDays = pWI->dTimeEst;
+		}
+
+		if ((dTaskDays == 0.0) || (dIntersectingDays == 0.0))
+		{
+			// Sanity check
+			ASSERT((dTaskDays != 0.0) || (dIntersectingDays == 0.0));
 			continue;
+		}
 
-		// Determine how many the days of the task fall within the specified period
-		COleDateTimeRange dtIntersect;
-		
-		if (!dtIntersect.GetIntersection(dtPeriod, pWI->dtRange))
-			continue;
+		double dProportion = (dIntersectingDays / dTaskDays);
 
-		double dTaskDays = dtIntersect.GetWeekdayCount();
-		double dProportion = (dTaskDays / dTaskDuration);
-
+		// Append this proportion of each person's days to the total
 		if (pWI->aAllocTo.GetSize())
 		{
 			for (int nAllocTo = 0; nAllocTo < pWI->aAllocTo.GetSize(); nAllocTo++)
@@ -687,10 +704,35 @@ void CWorkloadItemMap::CalculateTotals(const COleDateTimeRange& dtPeriod,
 		}
 		else
 		{
-			if (mapTotalDays.Add(UNALLOCATED, dTaskDays))
+			if (mapTotalDays.Add(UNALLOCATED, dIntersectingDays))
 				mapTotalTasks.Increment(UNALLOCATED);
 		}
 	}
+}
+
+BOOL CWorkloadItemMap::GetValidatedDateRange(const WORKLOADITEM* pWI, COleDateTimeRange& dtRange)
+{
+	dtRange = pWI->dtRange;
+
+	if (!dtRange.IsValid() && (pWI->dTimeEst > 0.0))
+	{
+		if (dtRange.HasStart())
+		{
+			ASSERT(!dtRange.HasEnd());
+
+			dtRange.Set(dtRange.GetStart(), dtRange.GetStart());
+			dtRange.OffsetEnd((int)pWI->dTimeEst, DHU_WEEKDAYS);
+		}
+		else if (dtRange.HasEnd())
+		{
+			ASSERT(!dtRange.HasStart());
+
+			dtRange.Set(dtRange.GetEnd(), dtRange.GetEnd());
+			dtRange.OffsetStart((int)-pWI->dTimeEst, DHU_WEEKDAYS);
+		}
+	}
+
+	return dtRange.IsValid();
 }
 
 BOOL CWorkloadItemMap::ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
@@ -838,7 +880,8 @@ BOOL CWorkloadItemMap::CalcDateRange(COleDateTimeRange& dtRange) const
 		GetNextAssoc(pos, dwTaskID, pWI);
 		ASSERT(pWI);
 
-		dtRange.Add(pWI->dtRange);
+		dtRange.Add(pWI->dtRange.GetStart());
+		dtRange.Add(pWI->dtRange.GetEnd());
 	}
 
 	return dtRange.IsValid();
