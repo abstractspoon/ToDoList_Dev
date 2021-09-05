@@ -409,7 +409,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tree);
-			UpdateColumnWidths(UTWA_ANY);
 		}
 		break;
 
@@ -424,6 +423,8 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		ASSERT(0);
 		return;
 	}
+
+	UpdateColumnWidths(UTWA_ANY);
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()
@@ -2488,11 +2489,16 @@ int CWorkloadCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
 		break;
 
 	case WLCC_DURATION:
-		return pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleDuration(NULL), 0)).cx;
+		{
+			int nMaxDuration = GetLargestVisibleDuration(NULL);
+			return pDC->GetTextExtent(FormatTimeSpan(nMaxDuration, 0)).cx;
+		}
 
 	case WLCC_TIMEEST:
 		{
-			int nWidthLargest = pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleTimeEstimate(NULL), 1)).cx;
+			double dMaxTimeEst = GetLargestVisibleTimeEstimate(NULL);
+
+			int nWidthLargest = pDC->GetTextExtent(FormatTimeSpan(dMaxTimeEst, 1)).cx;
 			int nWidthSmallest = pDC->GetTextExtent(FormatTimeSpan(0.1, 1)).cx;
 
 			return max(nWidthLargest, nWidthSmallest);
@@ -2501,7 +2507,6 @@ int CWorkloadCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
 		
 	case WLCC_PERCENT: 
 		return GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
-		break;
 	}
 
 	ASSERT(0);
