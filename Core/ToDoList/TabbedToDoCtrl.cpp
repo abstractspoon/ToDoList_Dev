@@ -2221,14 +2221,17 @@ void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 	// Tab control takes care of active view including tree/list
 	m_tabViews.Resize(rPos, pDWM);
 
-	// Reposition list-specific controls whether they are showing or not
+	// List-specific combos
+	CRect rLabel = GetCtrlRect(IDC_LISTVIEWGROUPBYLABEL);
+	int nXOffset = (rPos.left - rLabel.left);
+
 	CRect rCombo = GetCtrlRect(IDC_LISTVIEWGROUPBYATTRIB);
 	int nYOffset = (rPos.top - rCombo.top);
 
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL, 0, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB, 0, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL, 0, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL, nXOffset, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB, nXOffset, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL, nXOffset, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS, nXOffset, nYOffset);
 }
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()
