@@ -2469,6 +2469,10 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		{
 			ASSERT(IsList(hRealWnd));
 
+			// do default handling
+			lr = ScDefault(hRealWnd);
+			bDoneDefault = TRUE;
+
 			// delete exact same item in 'OtherWnd'
 			HWND hwndOther = OtherWnd(hRealWnd);
 			VERIFY(::SendMessage(hwndOther, LVM_DELETEITEM, wp, lp));
