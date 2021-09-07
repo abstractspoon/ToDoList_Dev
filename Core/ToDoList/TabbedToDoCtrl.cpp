@@ -4985,6 +4985,8 @@ void CTabbedToDoCtrl::Sort(TDC_COLUMN nBy, BOOL bAllowToggle)
 					pVData->sort.single.nBy = nBy;
 					pVData->sort.single.bAscending = bSortAscending;
 				}
+
+				pVData->bNeedResort = FALSE;
 			}
 		}
 		break;

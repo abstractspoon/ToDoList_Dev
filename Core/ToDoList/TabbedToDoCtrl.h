@@ -339,8 +339,8 @@ protected:
 	void EndExtensionProgress();
 	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType);
 	void SetExtensionsReadOnly(BOOL bReadOnly);
-	void SetExtensionsNeedTaskUpdate(BOOL bUpdate = TRUE, FTC_VIEW nIgnore = FTCV_UNSET);
-	void SetExtensionsNeedFontUpdate(BOOL bUpdate = TRUE, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetListViewNeedFontUpdate(BOOL bUpdate);
 	DWORD ProcessUIExtensionMod(const IUITASKMOD& mod);
 	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttribIDs) const;
