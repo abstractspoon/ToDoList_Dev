@@ -355,6 +355,8 @@ protected:
 	virtual GM_ITEMSTATE GetItemTitleState(const NMCUSTOMDRAW& nmcd) const = 0;
 	virtual BOOL IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const = 0;
 	virtual LPCTSTR GetDebugName() const = 0;
+	virtual POSITION GetFirstSelectedTaskPos() const;
+	virtual DWORD GetNextSelectedTaskID(POSITION& pos) const;
 
 	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
 	BOOL IsAlternateColumnLine(int nItem) const;
@@ -393,8 +395,6 @@ protected:
 	void SetTrackedColumns(const CDWordArray& aTracked);
 	void GetTrackedColumns(CDWordArray& aTracked) const;
 
-	POSITION GetFirstSelectedTaskPos() const;
-	DWORD GetNextSelectedTaskID(POSITION& pos) const;
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
 

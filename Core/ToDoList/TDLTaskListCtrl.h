@@ -85,6 +85,7 @@ public:
 	int GetFocusedListItem() const;
 	int FindTaskItem(DWORD dwTaskID) const;
 	int InsertItem(DWORD dwTaskID, int nPos = -1);
+	DWORD GetNextSelectedTaskID(POSITION& pos) const;
 
 	BOOL GetLabelEditRect(CRect& rLabel) const;
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }

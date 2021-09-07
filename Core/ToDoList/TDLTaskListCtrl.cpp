@@ -1354,6 +1354,19 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
+DWORD CTDLTaskListCtrl::GetNextSelectedTaskID(POSITION& pos) const
+{
+	if (pos == NULL)
+		return 0;
+
+	DWORD dwTaskID = CTDLTaskCtrlBase::GetNextSelectedTaskID(pos);
+
+	while (IsGroupHeaderTask(dwTaskID))
+		dwTaskID = CTDLTaskCtrlBase::GetNextSelectedTaskID(pos);
+
+	return dwTaskID;
+}
+
 BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 {
 	// only called for the list that currently has the focus
