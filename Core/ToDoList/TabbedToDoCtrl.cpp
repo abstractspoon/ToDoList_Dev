@@ -213,7 +213,9 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	// Build the list-specific comboboxes
 	BuildListGroupByCombo();
+
 	m_cbListOptions.BuildCombo();
+	m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
 
 	return FALSE;
 }
