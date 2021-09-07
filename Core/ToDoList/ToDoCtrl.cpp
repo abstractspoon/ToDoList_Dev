@@ -11187,12 +11187,17 @@ LRESULT CToDoCtrl::OnCustomUrl(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void CToDoCtrl::SelectTasksInHistory(BOOL bForward) 
+BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward) 
 { 
+	if (!CanSelectTasksInHistory(bForward))
+		return FALSE;
+
 	HandleUnsavedComments();
 
-	if (m_taskTree.SelectTasksInHistory(bForward))
-		UpdateControls();
+	m_taskTree.SelectTasksInHistory(bForward);
+	UpdateControls();
+
+	return TRUE;
 }
 
 LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)

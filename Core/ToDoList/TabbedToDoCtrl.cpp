@@ -6396,16 +6396,14 @@ void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)
 		UpdateControls();
 }
 
-void CTabbedToDoCtrl::SelectTasksInHistory(BOOL bForward)
+BOOL CTabbedToDoCtrl::SelectTasksInHistory(BOOL bForward)
 {
-	if (CanSelectTasksInHistory(bForward))
-	{
-		// let CToDoCtrl do it's thing
-		CToDoCtrl::SelectTasksInHistory(bForward);
+	if (!CToDoCtrl::SelectTasksInHistory(bForward))
+		return FALSE;
 
-		// then update our own selection
-		SyncActiveViewSelectionToTree();
-	}
+	SyncActiveViewSelectionToTree();
+
+	return TRUE;
 }
 
 void CTabbedToDoCtrl::InvalidateItem(HTREEITEM hti, BOOL bUpdate)

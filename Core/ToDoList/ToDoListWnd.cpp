@@ -10926,7 +10926,8 @@ void CToDoListWnd::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemSt
 
 void CToDoListWnd::OnViewNextSelectedTask() 
 {
-	GetToDoCtrl().SelectTasksInHistory(TRUE);
+	if (GetToDoCtrl().SelectTasksInHistory(TRUE))
+		UpdateStatusBar();
 }
 
 void CToDoListWnd::OnUpdateViewNextSel(CCmdUI* pCmdUI) 
@@ -10936,7 +10937,8 @@ void CToDoListWnd::OnUpdateViewNextSel(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnViewPrevSelectedTask() 
 {
-	GetToDoCtrl().SelectTasksInHistory(FALSE);
+	if (GetToDoCtrl().SelectTasksInHistory(FALSE))
+		UpdateStatusBar();
 }
 
 void CToDoListWnd::OnUpdateViewPrevSel(CCmdUI* pCmdUI) 

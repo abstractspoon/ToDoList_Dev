@@ -138,7 +138,7 @@ public:
 	void SetFocusToTasks();
 	BOOL TasksHaveFocus() const;
 
-	void SelectTasksInHistory(BOOL bForward);
+	BOOL SelectTasksInHistory(BOOL bForward);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 

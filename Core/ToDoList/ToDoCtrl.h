@@ -405,7 +405,7 @@ public:
 	BOOL SelectedTasksHaveDependents() { return m_taskTree.SelectionHasDependents(); }
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
-	void SelectTasksInHistory(BOOL bForward);
+	BOOL SelectTasksInHistory(BOOL bForward);
 
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
