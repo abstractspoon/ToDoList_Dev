@@ -239,6 +239,7 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 	if ((nItem < 0) || (nItem >= m_lcTasks.GetItemCount()))
 		return 0;
 
+	// Columns item data is index into tasks list
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
 }
 
@@ -773,6 +774,11 @@ BOOL CTDLTaskListCtrl::IsGroupHeaderTask(DWORD dwTaskID) const
 	return m_mapGroupHeaders.Lookup(dwTaskID, CString());
 }
 
+BOOL CTDLTaskListCtrl::IsGroupHeaderItem(int nItem) const
+{
+	return IsGroupHeaderTask(GetTaskID(nItem));
+}
+
 int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 								   LPARAM lParam2,
 								   const TDSORTCOLUMN& sort,
@@ -1076,18 +1082,12 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			// Make group header tasks 'disappear' 
 			int nItem = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
 
-			if (nItem != -1)
+			if ((nItem != -1) && IsGroupHeaderItem(nItem))
 			{
-				BOOL bTasks = (hRealWnd == m_lcTasks);
-				DWORD dwTaskID = (bTasks ? GetTaskID(nItem) : GetColumnItemTaskID(nItem));
+				ASSERT(lp);
+				LPLVHITTESTINFO pLVHit = (LPLVHITTESTINFO)lp;
 
-				if (IsGroupHeaderTask(dwTaskID))
-				{
-					ASSERT(lp);
-					LPLVHITTESTINFO pLVHit = (LPLVHITTESTINFO)lp;
-
-					nItem = pLVHit->iItem = pLVHit->iSubItem = -1;
-				}
+				nItem = pLVHit->iItem = pLVHit->iSubItem = -1;
 			}
 
 			return nItem;
@@ -1273,12 +1273,66 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 				for (int nItem = nFrom; nItem <= nTo; nItem++)
 				{
-					m_lcTasks.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
-					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+					if (!IsGroupHeaderItem(nItem))
+					{
+						m_lcTasks.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
+						m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
+					}
 				}
 
 				NotifyParentSelChange(SC_BYKEYBOARD);
 			}
+		}
+		else if (IsGrouped())
+		{
+			switch (wp)
+			{
+				case VK_UP:
+				case VK_PRIOR:
+				case VK_HOME:
+					// If we are already on item 1 and moving 'up'
+					// then we eat the message because we are guaranteed
+					// to hit the first group header which causes a flicker
+					// when we subsequently fix it up.
+					if (GetSelectedItem() == 1)
+						return 0L;
+			}
+
+			// else do default and then fix it up as necessary
+			LRESULT lr = ScDefault(hRealWnd);
+
+			int nSel = GetSelectedItem();
+
+			if (IsGroupHeaderItem(nSel))
+			{
+				switch (wp)
+				{
+				case VK_DOWN:
+				case VK_NEXT:
+					// group header can never be last item so we can always go down
+					nSel++;
+					break;
+
+				case VK_END:
+					// This should be impossible because group header can never be last item
+					ASSERT(0);
+					break;
+
+				case VK_UP:
+				case VK_PRIOR:
+				case VK_HOME:
+					if (nSel == 0)
+						nSel++;
+					else 
+						nSel--;
+					break;
+				}
+
+				SelectItem(nSel);
+				NotifyParentSelChange(SC_BYKEYBOARD);
+			}
+			
+			return lr;
 		}
 		break;
 
@@ -1391,6 +1445,11 @@ BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 
 	// Or we are bounds selecting
 	if (IsBoundSelecting())
+		return FALSE;
+
+	// Or a group header is selected
+	// Note: don't use GetSelectedTaskID here because it filters out group headers
+	if (IsGroupHeaderItem(GetSelectedItem()))
 		return FALSE;
 
 	NotifyParentSelChange();
@@ -1731,20 +1790,14 @@ int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 
 	if (m_lcTasks.GetSelectedCount())
 	{
-		POSITION pos = m_lcTasks.GetFirstSelectedItemPosition();
+		POSITION pos = GetFirstSelectedTaskPos();
 	
 		while (pos)
-		{
-			int nItem = m_lcTasks.GetNextSelectedItem(pos);
-			DWORD dwTaskID = m_lcTasks.GetItemData(nItem);
-		
-			if (!IsGroupHeaderTask(dwTaskID))
-				aTaskIDs.Add(dwTaskID);
-		}
+			aTaskIDs.Add(GetNextSelectedTaskID(pos));
 	
 		dwFocusedTaskID = GetFocusedListTaskID();
 	}
-	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(dwFocusedTaskID, aTaskIDs));
+	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(dwFocusedTaskID, aTaskIDs) || IsGrouped());
 	
 	return aTaskIDs.GetSize();
 }

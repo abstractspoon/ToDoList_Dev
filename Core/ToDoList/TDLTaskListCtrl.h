@@ -99,6 +99,7 @@ public:
 	void SetSortGroupsAscending(BOOL bAscending = TRUE);
 	BOOL TaskHasGroupValue(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
+	BOOL IsGroupHeaderItem(int nItem) const;
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBuildComplete();
