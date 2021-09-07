@@ -416,10 +416,10 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_VIEW_FILTER, OnViewFilter)
 	ON_COMMAND(ID_VIEW_MOVETASKLISTLEFT, OnViewMovetasklistleft)
 	ON_COMMAND(ID_VIEW_MOVETASKLISTRIGHT, OnViewMovetasklistright)
-	ON_COMMAND(ID_VIEW_NEXT, OnViewNext)
-	ON_COMMAND(ID_VIEW_NEXT_SEL, OnViewNextSel)
-	ON_COMMAND(ID_VIEW_PREV, OnViewPrev)
-	ON_COMMAND(ID_VIEW_PREV_SEL, OnViewPrevSel)
+	ON_COMMAND(ID_VIEW_NEXT, OnViewNextTasklist)
+	ON_COMMAND(ID_VIEW_NEXT_SEL, OnViewNextSelectedTask)
+	ON_COMMAND(ID_VIEW_PREV, OnViewPrevTasklist)
+	ON_COMMAND(ID_VIEW_PREV_SEL, OnViewPrevSelectedTask)
 	ON_COMMAND(ID_VIEW_PROJECTNAME, OnViewProjectname)
 	ON_COMMAND(ID_VIEW_REFRESHFILTER, OnViewRefreshfilter)
 	ON_COMMAND(ID_VIEW_SAVETOIMAGE, OnViewSaveToImage)
@@ -9357,7 +9357,7 @@ LRESULT CToDoListWnd::OnPreferencesEditLanguageFile(WPARAM /*wp*/, LPARAM /*lp*/
 	return FileMisc::Run(*this, _T("TDLTransEdit.exe"), sLangFilePath, SW_SHOWNORMAL, FileMisc::GetModuleFolder());
 }
 
-void CToDoListWnd::OnViewNext() 
+void CToDoListWnd::OnViewNextTasklist() 
 {
 	if (GetTDCCount() < 2)
 		return;
@@ -9375,7 +9375,7 @@ void CToDoListWnd::OnUpdateViewNext(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetTDCCount() > 1);
 }
 
-void CToDoListWnd::OnViewPrev() 
+void CToDoListWnd::OnViewPrevTasklist() 
 {
 	if (GetTDCCount() < 2)
 		return;
@@ -10924,7 +10924,7 @@ void CToDoListWnd::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemSt
 	CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
 }
 
-void CToDoListWnd::OnViewNextSel() 
+void CToDoListWnd::OnViewNextSelectedTask() 
 {
 	GetToDoCtrl().SelectTasksInHistory(TRUE);
 }
@@ -10934,7 +10934,7 @@ void CToDoListWnd::OnUpdateViewNextSel(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetToDoCtrl().CanSelectTasksInHistory(TRUE));
 }
 
-void CToDoListWnd::OnViewPrevSel() 
+void CToDoListWnd::OnViewPrevSelectedTask() 
 {
 	GetToDoCtrl().SelectTasksInHistory(FALSE);
 }

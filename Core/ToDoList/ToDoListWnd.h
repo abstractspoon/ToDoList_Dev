@@ -559,10 +559,10 @@ protected:
 	afx_msg void OnUserTool(UINT nCmdID);
 	afx_msg void OnViewMovetasklistleft();
 	afx_msg void OnViewMovetasklistright();
-	afx_msg void OnViewNext();
-	afx_msg void OnViewNextSel();
-	afx_msg void OnViewPrev();
-	afx_msg void OnViewPrevSel();
+	afx_msg void OnViewNextTasklist();
+	afx_msg void OnViewNextSelectedTask();
+	afx_msg void OnViewPrevTasklist();
+	afx_msg void OnViewPrevSelectedTask();
 	afx_msg void OnViewRefreshfilter();
 	afx_msg void OnViewSaveToImage();
 	afx_msg void OnViewMainToolbar();
