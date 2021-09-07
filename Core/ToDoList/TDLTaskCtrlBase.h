@@ -100,7 +100,7 @@ public:
 	virtual void DeleteAll() = 0;
 	virtual BOOL InvalidateSelection(BOOL bUpdate) = 0;
 	virtual BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE) = 0;
-	virtual BOOL EnsureSelectionVisible(BOOL bPartialOK) = 0;
+	virtual BOOL EnsureSelectionVisible(BOOL bHorzPartialOK) = 0;
 	
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
