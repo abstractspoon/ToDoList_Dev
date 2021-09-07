@@ -6300,7 +6300,13 @@ void CTabbedToDoCtrl::SyncListSelectionToTree()
 		if (!cacheList.SelectionMatches(cacheTree))
 		{
 			// save list scroll pos before restoring
-			cacheTree.dwFirstVisibleTaskID = GetTaskID(m_taskList.List().GetTopIndex());
+			////////////////////////////////////////////////////////////////
+			// I'm not clear what case this handles and since it interferes
+			// with selection history I'm disabling it to see what happens
+			//
+			// cacheTree.dwFirstVisibleTaskID = GetTaskID(m_taskList.List().GetTopIndex());
+			////////////////////////////////////////////////////////////////
+			cacheTree.dwFirstVisibleTaskID = 0;
 
 			if (m_taskList.RestoreSelection(cacheTree, FALSE))
 			{
