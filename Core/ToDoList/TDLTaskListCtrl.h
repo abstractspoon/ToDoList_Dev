@@ -100,6 +100,7 @@ public:
 	BOOL TaskHasGroupValue(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderItem(int nItem) const;
+	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBuildComplete();
@@ -110,6 +111,7 @@ protected:
 	CListCtrl m_lcTasks;
 	TDC_COLUMN m_nGroupBy;
 	BOOL m_bSortGroupsAscending;
+	COLORREF m_crGroupHeaderBkgnd;
 
 	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
 	CGroupHeaderMap m_mapGroupHeaders;
@@ -179,6 +181,7 @@ protected:
 	CString GetGroupByColumnName() const;
 	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
 	int CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& mapOldHeaders, CIntArray& aOldHeaderItems) const;
+	void GetGroupHeaderColors(COLORREF& crBack, COLORREF& crText);
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 

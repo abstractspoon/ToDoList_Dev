@@ -371,6 +371,7 @@
 #define IDC_SETREFERENCECOLOR           1074
 #define IDC_SHOWONSTARTUP               1075
 #define IDC_ICONPATH                    1075
+#define IDC_SETGROUPHEADERBKCOLOR       1075
 #define IDC_USEPERCENTDONEINTIMEEST     1076
 #define IDC_SHOWCTRLSASCOLUMNS          1078
 #define IDC_SHOWCOMMENTSALWAYS          1079
@@ -432,6 +433,7 @@
 #define IDC_ALLOCBYLIST                 1108
 #define IDC_SPECIFYREFERENCECOLOR       1108
 #define IDC_VERSIONLIST                 1109
+#define IDC_SPECIFYGROUPHEADERBKCOLOR   1109
 #define IDC_TAGLIST                     1110
 #define IDC_TASKLISTOPTIONS             1114
 #define IDC_FORMATOPTIONS               1115

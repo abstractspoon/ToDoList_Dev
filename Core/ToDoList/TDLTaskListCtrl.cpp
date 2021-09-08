@@ -42,6 +42,7 @@ const UINT TIMER_EDITLABEL		= 42; // List ctrl's internal timer ID for label edi
 
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
+const COLORREF GROUPHEADERCOLOR = RGB(63, 118, 179);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -88,7 +89,8 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 	: 
 	CTDLTaskCtrlBase(ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs),
 	m_nGroupBy(TDCC_NONE),
-	m_bSortGroupsAscending(TRUE)
+	m_bSortGroupsAscending(TRUE),
+	m_crGroupHeaderBkgnd(CLR_NONE)
 {
 }
 
@@ -243,16 +245,26 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
 }
 
+void CTDLTaskListCtrl::GetGroupHeaderColors(COLORREF& crBack, COLORREF& crText)
+{
+	crBack = GetSysColor(COLOR_WINDOW);
+	crText = GROUPHEADERCOLOR;
+
+	if (m_crGroupHeaderBkgnd != CLR_NONE)
+	{
+		crBack = m_crGroupHeaderBkgnd;
+		crText = GraphicsMisc::GetBestTextColor(crBack);
+	}
+}
+
 LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
-	BOOL bColumns = (hwndList == m_lcColumns);
 
-	DWORD dwTaskID = (bColumns ? GetColumnItemTaskID(nItem) : pLVCD->nmcd.lItemlParam);
 	DWORD dwRes = CDRF_DODEFAULT;
 
-	if (IsGroupHeaderTask(dwTaskID))
+	if (IsGroupHeaderItem(nItem))
 	{
 		switch (pLVCD->nmcd.dwDrawStage)
 		{
@@ -274,20 +286,22 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				{
 					rRow.right += GetSystemMetrics(SM_CXVSCROLL);
 
-					pDC->FillSolidRect(rRow, GetSysColor(COLOR_WINDOW));
+					COLORREF crBack, crText;
+					GetGroupHeaderColors(crBack, crText);
+
+					pDC->FillSolidRect(rRow, crBack);
 					DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 
-					const COLORREF HEADER_COLOR = RGB(63, 118, 179);
-					GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, HEADER_COLOR);
+					GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, crText);
 
-					if (!bColumns)
+					if (hwndList == m_lcTasks)
 					{
 						rRow.left = 20; // Always ensure the text is visible
 
-						CString sHeader = FormatTaskGroupHeaderText(dwTaskID);
+						CString sHeader = FormatTaskGroupHeaderText(pLVCD->nmcd.lItemlParam);
 
-						pDC->SetTextColor(HEADER_COLOR);
-						pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
+						pDC->SetTextColor(crText);
+						pDC->SetBkColor(crBack);
 						pDC->SetBkMode(OPAQUE);
 						pDC->DrawText(sHeader, rRow, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
 					}
@@ -300,7 +314,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	}
 	else
 	{
-		if (bColumns)
+		if (hwndList == m_lcColumns)
 		{
 			// columns handled by base class
 			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD);
@@ -777,6 +791,17 @@ BOOL CTDLTaskListCtrl::IsGroupHeaderTask(DWORD dwTaskID) const
 BOOL CTDLTaskListCtrl::IsGroupHeaderItem(int nItem) const
 {
 	return IsGroupHeaderTask(GetTaskID(nItem));
+}
+
+void CTDLTaskListCtrl::SetGroupHeaderBackgroundColor(COLORREF color)
+{
+	if (color != m_crGroupHeaderBkgnd)
+	{
+		m_crGroupHeaderBkgnd = color;
+
+		if (IsGrouped())
+			CWnd::Invalidate();
+	}
 }
 
 int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,

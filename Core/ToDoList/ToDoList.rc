@@ -736,7 +736,7 @@ BEGIN
                     WS_TABSTOP,7,480,379,10
 END
 
-IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 608
+IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 619
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -787,54 +787,59 @@ BEGIN
     CONTROL         "&Alternate line colour",IDC_ALTERNATELINECOLOR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,295,139,10
     PUSHBUTTON      "S&et...   ",IDC_SETALTLINECOLOR,149,293,52,13,BS_RIGHT
-    LTEXT           "Task Colouring",IDC_TASKCOLOURGROUP,7,314,387,8
+    CONTROL         "&Group header background colour",
+                    IDC_SPECIFYGROUPHEADERBKCOLOR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,310,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETGROUPHEADERBKCOLOR,149,308,52,13,
+                    BS_RIGHT
+    LTEXT           "Task Colouring",IDC_TASKCOLOURGROUP,7,330,387,8
     CONTROL         "&Use a task's colour for its title background",
                     IDC_COLORTASKBKGND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,330,387,10
+                    7,346,387,10
     CONTROL         "&Colour task titles by:",IDC_COLORTEXTBYATTRIBUTE,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,7,345,387,10
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,7,361,387,10
     CONTROL         "Colour task titles by &Priority",
                     IDC_COLORTEXTBYPRIORITY,"Button",BS_AUTORADIOBUTTON,7,
-                    448,387,10
+                    464,387,10
     CONTROL         "Colour task titles by &assigned colours",
-                    IDC_COLORTASKSBYCOLOR,"Button",BS_AUTORADIOBUTTON,7,463,
+                    IDC_COLORTASKSBYCOLOR,"Button",BS_AUTORADIOBUTTON,7,479,
                     387,10
     CONTROL         "&No task title colouring (except for due tasks)",
-                    IDC_NOCOLORTASKS,"Button",BS_AUTORADIOBUTTON,7,478,387,
+                    IDC_NOCOLORTASKS,"Button",BS_AUTORADIOBUTTON,7,494,387,
                     10
-    COMBOBOX        IDC_ATTRIBUTETOCOLORBY,18,357,123,99,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ATTRIBUTETOCOLORBY,18,373,123,99,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_ATTRIBUTECOLORS,18,373,123,70,CBS_SIMPLE | 
+    COMBOBOX        IDC_ATTRIBUTECOLORS,18,389,123,70,CBS_SIMPLE | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_GROUP | 
                     WS_TABSTOP
-    PUSHBUTTON      "S&et...   ",IDC_SETATTRIBUTECOLOR,149,373,52,13,
+    PUSHBUTTON      "S&et...   ",IDC_SETATTRIBUTECOLOR,149,389,52,13,
                     BS_RIGHT
-    PUSHBUTTON      "&Populate",IDC_POPULATEATTRIBLIST,149,388,52,14
+    PUSHBUTTON      "&Populate",IDC_POPULATEATTRIBLIST,149,404,52,14
     CONTROL         "'&Started' task colour",IDC_STARTTASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,495,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTASKCOLOR,149,494,52,13,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,511,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTASKCOLOR,149,510,52,13,
                     BS_RIGHT
     CONTROL         "'Starts &Today' task colour",IDC_STARTTODAYTASKCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,510,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTODAYTASKCOLOR,149,509,52,13,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,526,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTODAYTASKCOLOR,149,525,52,13,
                     BS_RIGHT
     CONTROL         "'&Due' task colour",IDC_DUETASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,525,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDUETASKCOLOR,149,524,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,541,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDUETASKCOLOR,149,540,52,13,BS_RIGHT
     CONTROL         "'Due T&oday' task colour",IDC_DUETODAYTASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,540,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDUETODAYTASKCOLOR,149,539,52,13,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,556,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDUETODAYTASKCOLOR,149,555,52,13,
                     BS_RIGHT
     CONTROL         "Completed t&ask colour",IDC_SPECIFYDONECOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,555,138,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDONECOLOR,149,554,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,571,138,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDONECOLOR,149,570,52,13,BS_RIGHT
     CONTROL         "&Flagged task colour",IDC_SPECIFYFLAGGEDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,570,140,10
-    PUSHBUTTON      "S&et...   ",IDC_SETFLAGGEDCOLOR,149,570,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,586,140,10
+    PUSHBUTTON      "S&et...   ",IDC_SETFLAGGEDCOLOR,149,586,52,13,BS_RIGHT
     CONTROL         "&Reference task colour",IDC_SPECIFYREFERENCECOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,585,140,10
-    PUSHBUTTON      "S&et...   ",IDC_SETREFERENCECOLOR,149,585,52,13,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,601,140,10
+    PUSHBUTTON      "S&et...   ",IDC_SETREFERENCECOLOR,149,601,52,13,
                     BS_RIGHT
 END
 
@@ -4199,6 +4204,11 @@ BEGIN
         RIGHTMARGIN, 394
         TOPMARGIN, 10
         BOTTOMMARGIN, 691
+    END
+
+    IDD_PREFUITASKLISTCOLORS_PAGE, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 608
     END
 
     IDD_OFFSETDATES_DIALOG, DIALOG

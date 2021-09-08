@@ -164,6 +164,7 @@ public:
 	void SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
     void SetGridlineColor(COLORREF color);
 	void SetAlternateLineColor(COLORREF color);
+	void SetGroupHeaderBackgroundColor(COLORREF color) { m_taskList.SetGroupHeaderBackgroundColor(color); }
 
 protected:
 	CTDLTaskListCtrl m_taskList;

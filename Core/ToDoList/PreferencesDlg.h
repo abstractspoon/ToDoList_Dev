@@ -300,6 +300,7 @@ public:
 	COLORREF GetReferenceTaskColor() const { return m_pageUITasklistColors.GetReferenceTaskColor(); }
 	COLORREF GetHidePriorityNumber() const { return m_pageUITasklistColors.GetHidePriorityNumber(); }
 	COLORREF GetAlternateLineColor() const { return m_pageUITasklistColors.GetAlternateLineColor(); }
+	COLORREF GetGroupHeaderBackgroundColor() const { return m_pageUITasklistColors.GetGroupHeaderBackgroundColor(); }
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const { return m_pageUITasklistColors.GetAttributeColors(colors); }
 
 	// CPreferencesToolPage

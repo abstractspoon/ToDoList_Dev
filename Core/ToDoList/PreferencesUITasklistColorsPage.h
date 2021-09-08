@@ -59,15 +59,16 @@ public:
 	BOOL CanIncrementTreeFontSize(BOOL bLarger, HFONT hFontFallback) const;
 	BOOL RestoreTreeFontSize(HFONT hFontDefault);
 	BOOL GetCommentsFont(CString& sFaceName, int& nPointSize) const;
-	COLORREF GetGridlineColor() const { return m_bSpecifyGridColor ? m_crGridlines : -1; }
-	COLORREF GetDoneTaskColor() const { return m_bSpecifyDoneColor ? m_crDone : -1; }
-	COLORREF GetAlternateLineColor() const { return m_bAlternateLineColor ? m_crAltLine : -1; }
+	COLORREF GetGridlineColor() const { return m_bSpecifyGridColor ? m_crGridlines : CLR_NONE; }
+	COLORREF GetDoneTaskColor() const { return m_bSpecifyDoneColor ? m_crDone : CLR_NONE; }
+	COLORREF GetAlternateLineColor() const { return m_bSpecifyAlternateLineColor ? m_crAltLine : CLR_NONE; }
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const;
 	void GetStartedTaskColors(COLORREF& crStarted, COLORREF& crStartedToday) const;
 	BOOL GetColorTaskBackground() const { return m_bColorTaskBackground; }
 	BOOL GetCommentsUseTreeFont() const { return m_bSpecifyTreeFont && m_bCommentsUseTreeFont; }
-	COLORREF GetFlaggedTaskColor() const { return m_bSpecifyFlaggedColor ? m_crFlagged : -1; }
-	COLORREF GetReferenceTaskColor() const { return m_bSpecifyReferenceColor ? m_crReference : -1; }
+	COLORREF GetFlaggedTaskColor() const { return m_bSpecifyFlaggedColor ? m_crFlagged : CLR_NONE; }
+	COLORREF GetReferenceTaskColor() const { return m_bSpecifyReferenceColor ? m_crReference : CLR_NONE; }
+	COLORREF GetGroupHeaderBackgroundColor() const { return m_bSpecifyGroupHeaderBkgndColor ? m_crGroupHeaderBkgnd : CLR_NONE; }
 
 protected:
 // Dialog Data
@@ -78,7 +79,7 @@ protected:
 	BOOL	m_bCommentsUseTreeFont;
 	BOOL	m_bHLSColorGradient;
 	BOOL	m_bHidePriorityNumber;
-	BOOL	m_bAlternateLineColor;
+	BOOL	m_bSpecifyAlternateLineColor;
 	int		m_nTextColorOption;
 	//}}AFX_DATA
 	CColorComboBox m_cbAttributes;
@@ -93,6 +94,7 @@ protected:
 	BOOL	m_bSpecifyDoneColor;
 	BOOL	m_bSpecifyFlaggedColor; 
 	BOOL	m_bSpecifyReferenceColor;
+	BOOL	m_bSpecifyGroupHeaderBkgndColor;
 	CColourButton	m_btFilteredColor;
 	CColourButton	m_btAttribColor;
 	CColourButton	m_btDoneColor;
@@ -103,6 +105,7 @@ protected:
 	CColourButton	m_btStartTodayColor;
 	CColourButton	m_btFlaggedColor;
 	CColourButton	m_btReferenceColor;
+	CColourButton	m_btGroupHeaderBkgndColor;
 	CComboBox	m_cbTreeFontSize, m_cbCommentsFontSize;
 	CFontNameComboBox	m_cbTreeFonts, m_cbCommentsFonts;
 	BOOL	m_bSpecifyTreeFont;
@@ -129,6 +132,7 @@ protected:
 	COLORREF m_crStart, m_crStartToday;
 	COLORREF m_crFlagged;
 	COLORREF m_crReference;
+	COLORREF m_crGroupHeaderBkgnd;
 	TDC_ATTRIBUTE m_nColorAttribute;
 
 	TDCAUTOLISTDATA m_defaultListData;
@@ -185,6 +189,8 @@ protected:
 	afx_msg void OnSetflaggedcolor();
 	afx_msg void OnSpecifyReferencecolor();
 	afx_msg void OnSetReferencecolor();
+	afx_msg void OnSpecifyGroupHeaderBkgndcolor();
+	afx_msg void OnSetGroupHeaderBkgndcolor();
 
 	DECLARE_MESSAGE_MAP()
 
