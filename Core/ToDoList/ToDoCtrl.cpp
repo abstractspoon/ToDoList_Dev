@@ -5312,7 +5312,9 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
 
 		// set selection to previous task and if that fails then next task
-		if (!GotoNextTask(TDCG_PREV) && !GotoNextTask(TDCG_NEXT))
+		if (!TSH().PrevSelection() &&
+			!GotoNextTask(TDCG_PREV) && 
+			!GotoNextTask(TDCG_NEXT))
 		{
 			TSH().RemoveAll();
 		}
