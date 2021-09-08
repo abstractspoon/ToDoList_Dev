@@ -1771,6 +1771,74 @@ BOOL CTDLTaskListCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const
 	return FALSE;
 }
 
+DWORD CTDLTaskListCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const
+{
+	int nSel = FindTaskItem(dwTaskID);
+
+	if (nSel == -1)
+	{
+		ASSERT(0);
+		return 0;
+	}
+	
+	switch (nNext)
+	{
+	case TTCNT_NEXT:
+	case TTCNT_NEXTVISIBLE:
+	case TTCNT_NEXTTOPLEVEL: // Look forwards
+		{
+			BOOL bTopLevelOnly = (nNext == TTCNT_NEXTTOPLEVEL);
+			int nNumItems = GetItemCount();
+
+			for (int nItem = (nSel + 1); nItem < nNumItems; nItem++)
+			{
+				DWORD dwNextID = GetTaskID(nItem);
+
+				if (bTopLevelOnly && m_data.GetTaskParentID(dwNextID))
+					continue;
+
+				if (bExcludeSelected && IsItemSelected(nItem))
+					continue;
+
+				if (IsGroupHeaderTask(dwNextID))
+					continue;
+
+				// else
+				return dwNextID;
+			}
+		}
+		break;
+
+	case TTCNT_PREV:
+	case TTCNT_PREVVISIBLE:
+	case TTCNT_PREVTOPLEVEL: // look backwards
+		{
+			BOOL bTopLevelOnly = (nNext == TTCNT_PREVTOPLEVEL);
+			int nItem = nSel;
+
+			while (nItem--)
+			{
+				DWORD dwPrevID = GetTaskID(nItem);
+
+				if (bTopLevelOnly && m_data.GetTaskParentID(dwPrevID))
+					continue;
+				
+				if (bExcludeSelected && IsItemSelected(nItem))
+					continue;
+				
+				if (IsGroupHeaderTask(dwPrevID))
+					continue;
+
+				// else
+				return dwPrevID;
+			}
+		}
+		break;
+	}
+
+	return 0;
+}
+
 DWORD CTDLTaskListCtrl::GetTaskID(int nItem) const 
 { 
 	if ((nItem < 0) || (nItem >= m_lcTasks.GetItemCount()))

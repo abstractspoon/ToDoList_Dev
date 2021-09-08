@@ -300,15 +300,6 @@ protected:
 	DWORD GetTaskID(HTREEITEM hti) const { return CToDoCtrl::GetTaskID(hti); }
 	TODOITEM* CreateNewTask(HTREEITEM htiParent);
 
-	enum TTC_NEXTTASK
-	{
-		TTCNT_NEXT,
-		TTCNT_PREV,
-		TTCNT_NEXTVISIBLE,
-		TTCNT_PREVVISIBLE,
-		TTCNT_NEXTTOPLEVEL,
-		TTCNT_PREVTOPLEVEL,
-	};
 	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
 
 	BOOL InListView() const;

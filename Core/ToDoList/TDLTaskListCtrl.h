@@ -33,6 +33,18 @@ class CToDoCtrlData;
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum TTC_NEXTTASK
+{
+	TTCNT_NEXT,
+	TTCNT_PREV,
+	TTCNT_NEXTVISIBLE,
+	TTCNT_PREVVISIBLE,
+	TTCNT_NEXTTOPLEVEL,
+	TTCNT_PREVTOPLEVEL,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTDLTaskListCtrl : public CTDLTaskCtrlBase  
 {
 	DECLARE_DYNAMIC(CTDLTaskListCtrl);
@@ -73,6 +85,8 @@ public:
 	BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const;
 	BOOL EnsureSelectionVisible(BOOL bPartialOK);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
+
+	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
 
 	// list related
 	int GetSelectedItem() const;

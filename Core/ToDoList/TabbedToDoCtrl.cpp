@@ -1073,10 +1073,13 @@ int CTabbedToDoCtrl::GetTasks(CTaskFile& tasks, FTC_VIEW nView, const TDCGETTASK
 			// so we make sure we don't include subtasks
 			for (int nItem = 0; nItem < m_taskList.GetItemCount(); nItem++)
 			{
-				DWORD dwTaskID = GetTaskID(nItem);
-				DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
+				if (!m_taskList.IsGroupHeaderItem(nItem))
+				{
+					DWORD dwTaskID = GetTaskID(nItem);
+					DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
 
-				CToDoCtrl::AddTreeItemToTaskFile(NULL, dwTaskID, tasks, NULL, filter, FALSE, dwParentID);
+					CToDoCtrl::AddTreeItemToTaskFile(NULL, dwTaskID, tasks, NULL, filter, FALSE, dwParentID);
+				}
 			}
 
 			return tasks.GetTaskCount();
@@ -1120,6 +1123,7 @@ BOOL CTabbedToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks,
 BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const
 {
 	DWORD dwTaskID = GetTaskID(hti);
+	ASSERT(!m_taskList.IsGroupHeaderTask(dwTaskID));
 
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
@@ -3046,71 +3050,7 @@ DWORD CTabbedToDoCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bE
 		return 0;
 
 	case FTCV_TASKLIST:
-		{
-			int nSel = m_taskList.FindTaskItem(dwTaskID);
-			
-			if (nSel == -1)
-			{
-				ASSERT(0);
-				return 0;
-			}
-
-			switch (nNext)
-			{
-			case TTCNT_NEXT:
-			case TTCNT_NEXTVISIBLE:
-			case TTCNT_NEXTTOPLEVEL: // Look forwards
-				{
-					BOOL bTopLevelOnly = (nNext == TTCNT_NEXTTOPLEVEL);
-					int nNumItems = m_taskList.GetItemCount();
-					
-					for (int nItem = (nSel + 1); nItem < nNumItems; nItem++)
-					{
-						DWORD dwNextID = m_taskList.GetTaskID(nItem);
-
-						if (bTopLevelOnly && m_data.GetTaskParentID(dwNextID))
-						{
-							continue;
-						}
-						else if (bExcludeSelected && m_taskList.IsItemSelected(nItem))
-						{
-							continue;
-						}
-						
-						// else
-						return dwNextID;
-					}
-				}
-				break;
-				
-			case TTCNT_PREV:
-			case TTCNT_PREVVISIBLE:
-			case TTCNT_PREVTOPLEVEL: // look backwards
-				{
-					BOOL bTopLevelOnly = (nNext == TTCNT_PREVTOPLEVEL);
-					int nItem = nSel;
-					
-					while (nItem--)
-					{
-						DWORD dwPrevID = m_taskList.GetTaskID(nItem);
-
-						if (bTopLevelOnly && m_data.GetTaskParentID(dwPrevID))
-						{
-							continue;
-						}
-						else if (bExcludeSelected && m_taskList.IsItemSelected(nItem))
-						{
-							continue;
-						}
-
-						// else
-						return dwPrevID;
-					}
-				}
-				break;
-			}
-		}
-		break;
+		return m_taskList.GetNextTaskID(dwTaskID, nNext, bExcludeSelected);
 
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
@@ -3536,20 +3476,22 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 	if (!bInListView && pVData->bNeedFullTaskUpdate)
 		return;
 
-	m_taskList.SetModified(mapAttribIDs, (bInListView && bAllowResort));
-
-	if (mapAttribIDs.Has(TDCA_DELETE))
+	if (mapAttribIDs.Has(TDCA_DELETE) ||
+		mapAttribIDs.Has(TDCA_ARCHIVE))
 	{
 		// Deletion operations are fairly quick so we do those 
 		// even if the List View is not active
 		if (m_taskTree.GetItemCount())
+		{
 			m_taskList.RemoveDeletedItems();
+
+			if (bInListView)
+				SyncListSelectionToTree();
+		}
 		else
+		{
 			m_taskList.DeleteAll();
-	}
-	else if (mapAttribIDs.Has(TDCA_ARCHIVE))
-	{
-		m_taskList.RemoveDeletedItems();
+		}
 	}
 	else if (mapAttribIDs.Has(TDCA_NEWTASK) && aModTaskIDs.GetSize())
 	{
@@ -3591,6 +3533,8 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 		if (bInListView)
 			m_taskList.InvalidateSelection();
 	}
+
+	m_taskList.SetModified(mapAttribIDs, (bInListView && bAllowResort));
 }
 
 int CTabbedToDoCtrl::PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData)
@@ -5344,7 +5288,7 @@ BOOL CTabbedToDoCtrl::GotoNextTask(TDC_GOTO nDirection)
 	return FALSE;
 }
 
-CTabbedToDoCtrl::TTC_NEXTTASK CTabbedToDoCtrl::MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel)
+TTC_NEXTTASK CTabbedToDoCtrl::MapGotoToGetNext(TDC_GOTO nDirection, BOOL bTopLevel)
 {
 	switch (nDirection)
 	{
