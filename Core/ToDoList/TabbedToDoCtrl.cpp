@@ -2302,7 +2302,7 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 
 	CToDoCtrl::SetMaximizeState(nState);
 
-	if ((nState != nPrevState) && (nState != TDCMS_MAXCOMMENTS))
+	if (nState != nPrevState)
 	{
 		FTC_VIEW nView = GetTaskView();
 		
@@ -2310,8 +2310,22 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 		{
 		case FTCV_TASKTREE:
 		case FTCV_UNSET:
-		case FTCV_TASKLIST:
 			// handled above
+			break;
+
+		case FTCV_TASKLIST:
+			{
+				// Show/Hide list-specific controls
+				int nShow = (nState != TDCMS_MAXCOMMENTS) ? SW_SHOW : SW_HIDE;
+
+				for (int nCtrl = 0; nCtrl < NUM_TTDCCTRLS; nCtrl++)
+				{
+					const TDCCONTROL& ctrl = TTDCCONTROLS[nCtrl];
+
+					if (ctrl.nID != IDC_TASKLISTTABCTRL)
+						GetDlgItem(ctrl.nID)->ShowWindow(nShow);
+				}
+			}
 			break;
 
 		case FTCV_UIEXTENSION1:
@@ -2330,6 +2344,7 @@ void CTabbedToDoCtrl::SetMaximizeState(TDC_MAXSTATE nState)
 		case FTCV_UIEXTENSION14:
 		case FTCV_UIEXTENSION15:
 		case FTCV_UIEXTENSION16:
+			if (nState != TDCMS_MAXCOMMENTS)
 			{
 				IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 				ASSERT(pExtWnd && pExtWnd->GetHwnd());
