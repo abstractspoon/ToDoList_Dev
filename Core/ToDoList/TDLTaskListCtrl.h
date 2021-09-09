@@ -188,6 +188,7 @@ protected:
 	BOOL GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
 	int CalcRequiredTitleColumnWidthForImage();
 	GM_ITEMSTATE GetListItemState(int nItem) const;
+	BOOL WantNextItem(int nItem, BOOL bTopLevelOnly, BOOL bExcludeSelected) const;
 
 	BOOL UpdateGroupHeaders();
 	CString GetTaskGroupValue(DWORD dwTaskID) const;

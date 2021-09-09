@@ -1771,6 +1771,37 @@ BOOL CTDLTaskListCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const
 	return FALSE;
 }
 
+BOOL CTDLTaskListCtrl::WantNextItem(int nItem, BOOL bTopLevelOnly, BOOL bExcludeSelected) const
+{
+	DWORD dwNextID = GetTaskID(nItem);
+
+	if (IsGroupHeaderTask(dwNextID))
+		return FALSE;
+
+	DWORD dwParentID = m_data.GetTaskParentID(dwNextID);
+
+	if (bTopLevelOnly && dwParentID)
+		return FALSE;
+
+	if (bExcludeSelected)
+	{
+		if (IsItemSelected(nItem))
+			return FALSE;
+
+		while (dwParentID)
+		{
+			int nParent = FindTaskItem(dwParentID);
+
+			if (IsItemSelected(nParent))
+				return FALSE;
+
+			dwParentID = m_data.GetTaskParentID(dwParentID);
+		}
+	}
+
+	return TRUE;
+}
+
 DWORD CTDLTaskListCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const
 {
 	int nSel = FindTaskItem(dwTaskID);
@@ -1792,19 +1823,8 @@ DWORD CTDLTaskListCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL b
 
 			for (int nItem = (nSel + 1); nItem < nNumItems; nItem++)
 			{
-				DWORD dwNextID = GetTaskID(nItem);
-
-				if (IsGroupHeaderTask(dwNextID))
-					continue;
-
-				if (bTopLevelOnly && m_data.GetTaskParentID(dwNextID))
-					continue;
-
-				if (bExcludeSelected && IsItemSelected(nItem))
-					continue;
-
-				// else
-				return dwNextID;
+				if (WantNextItem(nItem, bTopLevelOnly, bExcludeSelected))
+					return GetTaskID(nItem);
 			}
 		}
 		break;
@@ -1818,19 +1838,8 @@ DWORD CTDLTaskListCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL b
 
 			while (nItem--)
 			{
-				DWORD dwPrevID = GetTaskID(nItem);
-
-				if (IsGroupHeaderTask(dwPrevID))
-					continue;
-
-				if (bTopLevelOnly && m_data.GetTaskParentID(dwPrevID))
-					continue;
-				
-				if (bExcludeSelected && IsItemSelected(nItem))
-					continue;
-				
-				// else
-				return dwPrevID;
+				if (WantNextItem(nItem, bTopLevelOnly, bExcludeSelected))
+					return GetTaskID(nItem);
 			}
 		}
 		break;
