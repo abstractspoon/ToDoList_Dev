@@ -110,6 +110,7 @@ public:
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 	CTreeCtrlHelper& TCH() { return m_tch; }
 
+	static CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis);
 	static CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
 
@@ -118,7 +119,6 @@ protected:
 	BOOL m_bSavingToImage;
 	BOOL m_bDropTarget;
 	BOOL m_bDrawTaskFlags;
-	BOOL m_bDrawTaskParents;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;

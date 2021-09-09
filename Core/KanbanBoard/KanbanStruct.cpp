@@ -481,8 +481,8 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_PERCENT:		return (nPercent > 0);
 	case TDCA_TIMEESTIMATE:	return (dTimeEst > 0);
 	case TDCA_TIMESPENT:	return (dTimeSpent > 0);
+	case TDCA_PARENT:		return (dwParentID != 0);
 
-	case TDCA_PARENT:		break; // handled separately
 	case TDCA_FLAG:			break; // handled separately
 	}
 
