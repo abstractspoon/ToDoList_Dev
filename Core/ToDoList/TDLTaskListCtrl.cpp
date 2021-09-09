@@ -1794,13 +1794,13 @@ DWORD CTDLTaskListCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL b
 			{
 				DWORD dwNextID = GetTaskID(nItem);
 
+				if (IsGroupHeaderTask(dwNextID))
+					continue;
+
 				if (bTopLevelOnly && m_data.GetTaskParentID(dwNextID))
 					continue;
 
 				if (bExcludeSelected && IsItemSelected(nItem))
-					continue;
-
-				if (IsGroupHeaderTask(dwNextID))
 					continue;
 
 				// else
@@ -1820,15 +1820,15 @@ DWORD CTDLTaskListCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL b
 			{
 				DWORD dwPrevID = GetTaskID(nItem);
 
+				if (IsGroupHeaderTask(dwPrevID))
+					continue;
+
 				if (bTopLevelOnly && m_data.GetTaskParentID(dwPrevID))
 					continue;
 				
 				if (bExcludeSelected && IsItemSelected(nItem))
 					continue;
 				
-				if (IsGroupHeaderTask(dwPrevID))
-					continue;
-
 				// else
 				return dwPrevID;
 			}
