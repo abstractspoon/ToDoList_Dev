@@ -2281,12 +2281,14 @@ BOOL CTDLTaskTreeCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 	{
 		TSH().FixupTreeSelection();
 
-		SyncColumnSelectionToTasks();
-		UpdateSelectedTaskPath();
-		NotifyParentSelChange();
-		
+		// Expand all the relevant tree nodes before 
+		// updating and syncing the list
 		EnsureSelectionVisible(TRUE);
 		ExpandList();
+		SyncColumnSelectionToTasks();
+
+		UpdateSelectedTaskPath();
+		NotifyParentSelChange();
 	}
 	
 	return bSel;
