@@ -42,8 +42,6 @@ class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer
 {
 	DECLARE_DYNAMIC(CTDLTaskCtrlBase);
 	
-	friend class CTCBHoldResync;
-	
 protected: // base class only
 	CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
