@@ -681,11 +681,11 @@ BOOL CCheckComboBox::SetChecked(const CStringArray& aChecked, const CStringArray
 		SetCheck(nItem, CCBC_UNCHECKED, FALSE);
 	
 	// now set the check states
-	if (!ModifyChecked(aChecked, CCBC_CHECKED, FALSE) && 
-		!ModifyChecked(aMixed, CCBC_MIXED, FALSE))
-	{
+	BOOL bModified = ModifyChecked(aChecked, CCBC_CHECKED, FALSE);
+	bModified |= ModifyChecked(aMixed, CCBC_MIXED, FALSE);
+
+	if (!bModified)
 		return FALSE;
-	}
 
 	RecalcText(TRUE, FALSE);
 
