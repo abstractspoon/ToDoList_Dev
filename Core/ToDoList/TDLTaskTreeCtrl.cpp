@@ -1512,6 +1512,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
 				}
 
+				NotifyParentSelChange(SC_BYKEYBOARD);
+
 				return 0; // eat it
 			}
 			break;
