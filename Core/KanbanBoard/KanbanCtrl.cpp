@@ -183,7 +183,6 @@ void CKanbanCtrl::OnDestroy()
 void CKanbanCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
 	m_aColumns.FilterToolTipMessage(pMsg);
-	m_aColumns.UpdateHotItem(pMsg->pt);
 }
 
 bool CKanbanCtrl::ProcessMessage(MSG* pMsg) 
