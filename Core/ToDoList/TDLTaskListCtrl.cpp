@@ -1895,11 +1895,20 @@ int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 		POSITION pos = GetFirstSelectedTaskPos();
 	
 		while (pos)
-			aTaskIDs.Add(GetNextSelectedTaskID(pos));
+		{
+			DWORD dwTaskID = GetNextSelectedTaskID(pos);
+			ASSERT(dwTaskID || (pos == NULL));
+
+			if (dwTaskID)
+				aTaskIDs.Add(dwTaskID);
+		}
 	
 		dwFocusedTaskID = GetFocusedListTaskID();
+
+		if (!dwFocusedTaskID && aTaskIDs.GetSize())
+			dwFocusedTaskID = aTaskIDs[0];
 	}
-	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(dwFocusedTaskID, aTaskIDs) || IsGrouped());
+	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(dwFocusedTaskID, aTaskIDs));
 	
 	return aTaskIDs.GetSize();
 }
@@ -2027,6 +2036,7 @@ int CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache, BOOL bEns
 
 		if (bEnsureSelection)
 		{
+			// Fallback on breadcrumbs
 			int nID = cache.aBreadcrumbs.GetSize();
 		
 			while (nID--)
@@ -2058,7 +2068,7 @@ int CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache, BOOL bEns
 	}
 	else if (bEnsureSelection)
 	{
-		SelectItem(0);
+		SelectItem(IsGroupHeaderItem(0) ? 1 : 0);
 	}
 	else
 	{

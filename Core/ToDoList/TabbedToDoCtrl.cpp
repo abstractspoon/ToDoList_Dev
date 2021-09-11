@@ -1,4 +1,4 @@
-// Fi M_BlISlteredToDoCtrl.cpp: implementation of the CTabbedToDoCtrl class.
+// TabbedToDoCtrl.cpp: implementation of the CTabbedToDoCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -969,7 +969,7 @@ LRESULT CTabbedToDoCtrl::OnPostTabViewChange(WPARAM nOldView, LPARAM nNewView)
 		break;
 
 	case FTCV_TASKLIST:
-		SyncListSelectionToTree();
+		SyncListSelectionToTree(FALSE);
 		m_taskList.EnsureSelectionVisible(FALSE);
 		break;
 		
@@ -3261,12 +3261,7 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy)
 		return;
 	}
 
-	// cache current selection
 	BOOL bInList = InListView();
-	TDCSELECTIONCACHE cache;
-
-	if (bInList)
-		CacheListSelection(cache);
 
 	// note: the call to m_taskList.RestoreSelection at the bottom fails if the 
 	// list has redraw disabled so it must happen outside the scope of hr2
@@ -3305,25 +3300,9 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy)
 		ResortList();
 	}
 	
-	// restore selection
+	// Make sure something is selected
 	if (bInList)
-	{
-		// Make sure something is selected
-		m_taskList.RestoreSelection(cache, TRUE);
-		OnListSelChanged();
-	}
-	else
-	{
-		// don't update controls if only one item is selected and it did not
-		// change as a result of the filter and we haven't already done
-		// and update in OnListSelChanged() above
-		if (!((GetSelectedCount() == 1) && 
-			(cache.aSelTaskIDs.GetSize() == 1) &&
-			(GetTaskID(GetSelectedItem()) == cache.aSelTaskIDs[0])))
-		{
-			UpdateControls();
-		}
-	}
+		SyncListSelectionToTree(TRUE);
 	
 	BuildListGroupByCombo();
 }
@@ -3501,7 +3480,7 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 			m_taskList.RemoveDeletedItems();
 
 			if (bInListView)
-				SyncListSelectionToTree();
+				SyncListSelectionToTree(FALSE);
 		}
 		else
 		{
@@ -3524,13 +3503,8 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 	{
 		if (bInListView)
 		{
-			// The tree will have selected the undone items
-			// so that's what the list also needs to show
-			TDCSELECTIONCACHE cache;
-			CacheTreeSelection(cache);
-
 			RebuildList();
-			m_taskList.RestoreSelection(cache, TRUE);
+			SyncListSelectionToTree(TRUE);
 		}
 		else
 		{
@@ -3549,7 +3523,8 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 			m_taskList.InvalidateSelection();
 	}
 
-	m_taskList.SetModified(mapAttribIDs, (bInListView && bAllowResort));
+	if (bInListView || !pVData->bNeedFullTaskUpdate)
+		m_taskList.SetModified(mapAttribIDs, (bInListView && bAllowResort));
 }
 
 int CTabbedToDoCtrl::PopulateExtensionViewAttributes(const IUIExtensionWindow* pExtWnd, VIEWDATA* pData)
@@ -4263,19 +4238,23 @@ void CTabbedToDoCtrl::GetSortBy(TDSORTCOLUMNS& sort) const
 
 BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 {	
-	BOOL bRes = CToDoCtrl::SelectTask(dwTaskID, bTrue);
-
+	// Note: We update the other views first else the call to 
+	// UpdateControls will not be properly synchronised
 	FTC_VIEW nView = GetTaskView();
-
+	VIEWDATA* pVData = GetViewData(nView);
+	
 	switch (nView)
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		// handled above
+		// Handled below
 		break;
 
 	case FTCV_TASKLIST:
-		m_taskList.SelectTask(dwTaskID, bTrue);
+		{
+			ASSERT(pVData);
+			pVData->bHasSelectedTask = m_taskList.SelectTask(dwTaskID, bTrue);
+		}
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -4299,7 +4278,10 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 			ASSERT(pExtWnd);
 
 			if (pExtWnd)
-				pExtWnd->SelectTask(dwTaskID);
+			{
+				ASSERT(pVData);
+				pVData->bHasSelectedTask = pExtWnd->SelectTask(dwTaskID);
+			}
 		}
 		break;
 
@@ -4307,7 +4289,7 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 		ASSERT(0);
 	}
 
-	return bRes;
+	return CToDoCtrl::SelectTask(dwTaskID, bTrue);
 }
 
 int CTabbedToDoCtrl::CacheListSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs) const
@@ -5779,7 +5761,7 @@ BOOL CTabbedToDoCtrl::ViewHasTaskSelection(FTC_VIEW nView) const
 	case FTCV_UIEXTENSION16:
 		if (ViewSupportsTaskSelection(nView))
 		{
-			return (GetViewData(nView)->bHasSelectedTask ? TRUE : FALSE);
+			return GetViewData(nView)->bHasSelectedTask;
 		}
 		break;
 
@@ -5850,6 +5832,7 @@ int CTabbedToDoCtrl::GetSelectedCount() const
 
 	switch (nView)
 	{
+	case FTCV_TASKLIST:
 	case FTCV_UIEXTENSION1:
 	case FTCV_UIEXTENSION2:
 	case FTCV_UIEXTENSION3:
@@ -6213,7 +6196,7 @@ void CTabbedToDoCtrl::SyncActiveViewSelectionToTree()
 		break;
 
 	case FTCV_TASKLIST:
-		SyncListSelectionToTree();
+		SyncListSelectionToTree(FALSE);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -6240,7 +6223,7 @@ void CTabbedToDoCtrl::SyncActiveViewSelectionToTree()
 	}
 }
 
-void CTabbedToDoCtrl::SyncListSelectionToTree()
+void CTabbedToDoCtrl::SyncListSelectionToTree(BOOL bEnsureSelection)
 {
 	ASSERT(InListView());
 
@@ -6256,7 +6239,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree()
 	{
 		// save current states
 		TDCSELECTIONCACHE cacheList, cacheTree;
-		CacheListSelection(cacheList, FALSE);
+		CacheListSelection(cacheList, bEnsureSelection);
 		CacheTreeSelection(cacheTree, FALSE);
 
 		if (!cacheList.SelectionMatches(cacheTree))
@@ -6270,7 +6253,7 @@ void CTabbedToDoCtrl::SyncListSelectionToTree()
 			////////////////////////////////////////////////////////////////
 			cacheTree.dwFirstVisibleTaskID = 0;
 
-			if (m_taskList.RestoreSelection(cacheTree, FALSE))
+			if (m_taskList.RestoreSelection(cacheTree, bEnsureSelection))
 			{
 				// now check that the tree is correctly synced with us
 				// but only if we have something selected
@@ -6281,6 +6264,10 @@ void CTabbedToDoCtrl::SyncListSelectionToTree()
 					RestoreTreeSelection(cacheList);
 					bUpdateCtrls = TRUE;
 				}
+			}
+			else
+			{
+				bUpdateCtrls = TRUE;
 			}
 		}
 	}
@@ -6293,7 +6280,10 @@ void CTabbedToDoCtrl::SyncListSelectionToTree()
 	m_taskList.UpdateSelectedTaskPath();
 
 	if (bUpdateCtrls)
+	{
 		UpdateControls(FALSE);
+		GetParent()->PostMessage(WM_TDCN_SELECTIONCHANGE);
+	}
 }
 
 void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)

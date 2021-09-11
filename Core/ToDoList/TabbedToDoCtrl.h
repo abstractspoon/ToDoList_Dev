@@ -282,7 +282,7 @@ protected:
 	BOOL HasListOption(DWORD dwOption) const { return ((m_dwListOptions & dwOption) == dwOption); }
 
 	void SyncActiveViewSelectionToTree();
-	void SyncListSelectionToTree();
+	void SyncListSelectionToTree(BOOL bEnsureSelection);
 	void SyncExtensionSelectionToTree(FTC_VIEW nView);
 	BOOL HasSingleSelectionChanged(DWORD dwSelID) const;
 	DWORD GetSingleSelectedTaskID() const;
