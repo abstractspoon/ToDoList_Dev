@@ -174,13 +174,38 @@ void CTDLStatusBar::UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTD
 			break;
 
 		default: // > 1
-			nIDTextFormat = ID_SB_MULTISELTASK;
-			sTipValue = tdc.FormatSelectedTaskTitles(TRUE, '\n', 10);
-
-			if (nSelCount > 10)
 			{
-				sTipValue += _T("\n+ ");
-				sTipValue += CEnString(ID_SB_MULTISELTASKMORE_TIP, (nSelCount - 10));
+				nIDTextFormat = ID_SB_MULTISELTASK;
+
+				const int MAXTIPLEN = 255; // CToolInfo
+				int nMaxTasks = max(nSelCount, 10), nNumTasks = nMaxTasks;
+
+				CEnString sFmtMore;
+
+				while (nNumTasks--)
+				{
+					sTipValue = tdc.FormatSelectedTaskTitles(TRUE, '\n', nNumTasks);
+
+					if (nNumTasks == (nMaxTasks - 1))
+					{
+						if (sTipValue.GetLength() <= MAXTIPLEN)
+							break;
+					}
+					else
+					{
+						if (sFmtMore.IsEmpty())
+						{
+							sFmtMore.LoadString(ID_SB_MULTISELTASKMORE_TIP);
+							sFmtMore = _T("\n+ ") + sFmtMore;
+						}
+
+						if (sTipValue.GetLength() <= (MAXTIPLEN - sFmtMore.GetLength()))
+							break;
+					}
+				}
+
+				if (nNumTasks < nSelCount)
+					sTipValue += Misc::Format(sFmtMore, (nSelCount - nNumTasks));
 			}
 			break;
 		}

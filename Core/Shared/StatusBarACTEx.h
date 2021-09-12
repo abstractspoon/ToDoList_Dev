@@ -19,7 +19,7 @@ public:
 	CStatusBarACTEx();
 
 	BOOL SetPaneTooltipIndex(int nIndex, UINT nTipID);
-	BOOL SetPaneTooltipIndex(int nIndex, LPCTSTR szTip);
+	BOOL SetPaneTooltipIndex(int nIndex, const CString& sTip);
 	void SetUIColors(COLORREF crBackFrom, COLORREF crBackTo, COLORREF crText, BOOL bGradient, BOOL bGlass);
 
 // Overrides

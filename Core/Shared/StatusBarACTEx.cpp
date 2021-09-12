@@ -155,9 +155,12 @@ BOOL CStatusBarACTEx::SetPaneTooltipIndex(int nIndex, UINT nTipID)
 	return SetPaneTooltipIndex(nIndex, CEnString(nTipID));
 }
 
-BOOL CStatusBarACTEx::SetPaneTooltipIndex(int nIndex, LPCTSTR szTip)
+BOOL CStatusBarACTEx::SetPaneTooltipIndex(int nIndex, const CString& sTip)
 {
-	return CStatusBarACT::SetPaneTooltipIndex(nIndex, szTip);
+	if (sTip.GetLength() > 255)
+		return CStatusBarACT::SetPaneTooltipIndex(nIndex, sTip.Left(255));
+
+	return CStatusBarACT::SetPaneTooltipIndex(nIndex, sTip);
 }
 
 void CStatusBarACTEx::InvalidatePane(int nPane)
