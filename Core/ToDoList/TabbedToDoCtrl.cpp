@@ -3477,6 +3477,8 @@ void CTabbedToDoCtrl::UpdateListView(const CTDCAttributeMap& mapAttribIDs, const
 		// even if the List View is not active
 		if (m_taskTree.GetItemCount())
 		{
+			CHoldRedraw hr(m_taskList);
+
 			m_taskList.RemoveDeletedItems();
 
 			if (bInListView)
