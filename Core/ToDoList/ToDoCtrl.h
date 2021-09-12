@@ -441,7 +441,7 @@ public:
 	CString GetPreferencesKey(const CString& sSubKey = _T("")) const;
 
 	virtual void NotifyBeginPreferencesUpdate() { /* do nothing */ }
-	virtual void NotifyEndPreferencesUpdate() { /* do nothing */ }
+	virtual void NotifyEndPreferencesUpdate() { Invalidate(); }
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
