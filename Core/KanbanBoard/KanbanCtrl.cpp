@@ -1979,7 +1979,7 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	CheckAddBacklogColumn();
 
 	// Resort
-	Sort(m_nSortBy, m_bSortAscending);
+	m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
@@ -2626,14 +2626,15 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nC
 	return KBCAL_NONE;
 }
 
+// Called externally only
 void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 {
-	// if the sort attribute equals the track attribute then
-	// tasks are already sorted into separate columns so we sort
-	// by position instead but without changing the underlying 
-	// sort state unless it's currently not set
 	if (nBy == m_nTrackAttribute)
 	{
+		// if the sort attribute equals the track attribute then
+		// tasks are already sorted into separate columns so we sort
+		// by position instead but without changing the underlying 
+		// sort state unless it's currently not set
 		if (nBy != TDCA_NONE)
 		{
 			if (m_nSortBy == TDCA_NONE)
@@ -2645,13 +2646,15 @@ void CKanbanCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 			m_aColumns.Sort(TDCA_POSITION, bAscending);
 		}
 	}
-	else if ((m_nSortBy != nBy) || (bAscending != m_bSortAscending) || (nBy == TDCA_NONE))
+	else 
 	{
 		m_nSortBy = nBy;
 		m_bSortAscending = bAscending;
 
 		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 	}
+
+	m_header.Invalidate(FALSE);
 }
 
 void CKanbanCtrl::SetReadOnly(bool bReadOnly) 
