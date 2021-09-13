@@ -163,7 +163,7 @@ protected:
 	int RemoveOldDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
 	int AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
 	BOOL CheckAddBacklogColumn();
-	void RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray);
+	void RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, BOOL bResort);
 	void RebuildColumnHeader();
 
 	KBC_ATTRIBLABELS GetColumnAttributeLabelVisibility(int nCol, int nColWidth);

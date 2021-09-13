@@ -56,6 +56,7 @@ enum // RebuildColumns
 {
 	KCRC_REBUILDCONTENTS	= 0x01,
 	KCRC_RESTORESELECTION	= 0x02,
+	KCRC_TASKUPDATE			= 0x04,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -715,7 +716,7 @@ void CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 	m_aPrevPinnedTasks.RemoveAll();
 
 	// App will take care of restoring selection
-	RebuildColumns(KCRC_REBUILDCONTENTS);
+	RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_TASKUPDATE);
 }
 
 BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings)
@@ -832,7 +833,7 @@ void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks)
 	if (bChange)
 	{
 		// App will take care of restoring selection
-		RebuildColumns(KCRC_REBUILDCONTENTS);
+		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_TASKUPDATE);
 	}
 	else if (UpdateNeedsItemHeightRefresh(pTasks))
 	{
@@ -1842,7 +1843,9 @@ void CKanbanCtrl::RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs)
 	// Rebuild column contents
 	if (dwFlags & KCRC_REBUILDCONTENTS)
 	{
-		RebuildColumnsContents(mapKIArray);
+		// Resort unless it's a task update because
+		// app will resort as necessary
+		RebuildColumnsContents(mapKIArray, !(dwFlags & KCRC_TASKUPDATE));
 	}
 	else if (UsingDynamicColumns())
 	{
@@ -1949,7 +1952,7 @@ void CKanbanCtrl::RebuildColumnHeader()
 	}
 }
 
-void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
+void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, BOOL bResort)
 {
 	int nCol = m_aColumns.GetSize();
 	
@@ -1979,7 +1982,8 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 	CheckAddBacklogColumn();
 
 	// Resort
-	m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+	if (bResort)
+		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
