@@ -1694,5 +1694,5 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 	}
 	
 	CFileBackup backup;
-	return backup.MakeBackup(sPath, FBS_APPVERSION | FBS_TIMESTAMP, sBackupFolder, _T(""));
+	return backup.MakeBackup(sPath, FBS_APPVERSION | FBS_DATETIMESTAMP, sBackupFolder, _T(""));
 }
