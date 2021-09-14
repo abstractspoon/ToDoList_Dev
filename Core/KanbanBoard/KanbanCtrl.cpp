@@ -142,6 +142,7 @@ BEGIN_MESSAGE_MAP(CKanbanCtrl, CWnd)
 	ON_MESSAGE(WM_KLCN_GETTASKICON, OnColumnGetTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKICON, OnColumnEditTaskIcon)
 	ON_MESSAGE(WM_KLCN_EDITTASKLABEL, OnColumnEditLabel)
+	ON_MESSAGE(WM_KLCN_SHOWFILELINK, OnColumnShowFileLink)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
 
 END_MESSAGE_MAP()
@@ -1074,13 +1075,13 @@ void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBA
 	if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
 		pKI->sRecurrence = ((ITaskList*)pTasks)->GetTaskAttribute(hTask, TDL_TASKRECURRENCE);
 
-	if (pTasks->IsAttributeAvailable(TDCA_FILELINK) && pTasks->GetTaskFileLinkCount(hTask))
+	if (pTasks->IsAttributeAvailable(TDCA_FILELINK))
 	{
-		pKI->sFileLink = pTasks->GetTaskFileLink(hTask, 0);
+		int nLink = pTasks->GetTaskFileLinkCount(hTask);
+		pKI->aFileLinks.SetSize(nLink);
 
-		// Get the shortest meaningful bit because of space constraints
-		if (FileMisc::IsPath(pKI->sFileLink))
-			pKI->sFileLink = FileMisc::GetFileNameFromPath(pKI->sFileLink);
+		while (nLink--)
+			pKI->aFileLinks[nLink] = pTasks->GetTaskFileLink(hTask, nLink);
 	}
 }
 
@@ -2958,6 +2959,16 @@ LRESULT CKanbanCtrl::OnColumnEditLabel(WPARAM wp, LPARAM lp)
 	{
 		GetParent()->SendMessage(WM_KBC_EDITTASKTITLE, lp);
 	}
+
+	return 0L;
+}
+
+LRESULT CKanbanCtrl::OnColumnShowFileLink(WPARAM wp, LPARAM lp)
+{
+	ASSERT(lp);
+	ASSERT(m_aColumns.Find((HWND)wp) != -1);
+
+	GetParent()->SendMessage(WM_KBC_SHOWFILELINK, wp, lp);
 
 	return 0L;
 }

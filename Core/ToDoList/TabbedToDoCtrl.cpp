@@ -156,6 +156,7 @@ BEGIN_MESSAGE_MAP(CTabbedToDoCtrl, CToDoCtrl)
 	ON_REGISTERED_MESSAGE(WM_IUI_DOHELP, OnUIExtDoHelp)
 	ON_REGISTERED_MESSAGE(WM_IUI_GETTASKICON, OnUIExtGetTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_IUI_GETNEXTTASKOCCURRENCES, OnUIExtGetNextTaskOcurrences)
+	ON_REGISTERED_MESSAGE(WM_IUI_SHOWFILELINK, OnUIExtShowFileLink)
 
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropObject)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropObject)
@@ -1482,6 +1483,20 @@ LRESULT CTabbedToDoCtrl::OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam)
 		if (*pImageIndex != -1)
 			return (LRESULT)m_ilTaskIcons.GetSafeHandle();
 	}
+
+	return 0L;
+}
+
+LRESULT CTabbedToDoCtrl::OnUIExtShowFileLink(WPARAM wParam, LPARAM lParam)
+{
+	// Note: Queries from extensions are processed even if
+	// an extension view is not active
+	LPCTSTR szFileLink = (LPCTSTR)lParam;
+
+	if (szFileLink)
+		GotoFile(szFileLink);
+	else
+		ASSERT(0);
 
 	return 0L;
 }

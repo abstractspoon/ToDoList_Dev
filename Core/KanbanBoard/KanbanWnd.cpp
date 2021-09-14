@@ -90,6 +90,7 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKTITLE, OnKanbanNotifyEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKICON, OnKanbanNotifyEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_KBC_SORTCHANGE, OnKanbanNotifySortChange)
+	ON_REGISTERED_MESSAGE(WM_KBC_SHOWFILELINK, OnKanbanNotifyShowFileLink)
 	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
@@ -146,6 +147,11 @@ LRESULT CKanbanWnd::OnKanbanNotifyEditTaskIcon(WPARAM wp, LPARAM lp)
 LRESULT CKanbanWnd::OnKanbanNotifySortChange(WPARAM wp, LPARAM lp)
 {
 	return GetParent()->SendMessage(WM_IUI_SORTCHANGE, wp, lp);
+}
+
+LRESULT CKanbanWnd::OnKanbanNotifyShowFileLink(WPARAM /*wp*/, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_SHOWFILELINK, 0, lp);
 }
 
 BOOL CKanbanWnd::OnInitDialog() 

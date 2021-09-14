@@ -28,6 +28,7 @@ const UINT WM_KLCN_EDITTASKICON		= (WM_APP+3); // WPARAM = HWND, LPARAM =
 const UINT WM_KLCN_EDITTASKFLAG		= (WM_APP+4); // WPARAM = HWND, LPARAM = TRUE/FALSE
 const UINT WM_KLCN_EDITTASKPIN		= (WM_APP+5); // WPARAM = HWND, LPARAM = TRUE/FALSE
 const UINT WM_KLCN_EDITTASKLABEL	= (WM_APP+6); // WPARAM = HWND, LPARAM = TaskID
+const UINT WM_KLCN_SHOWFILELINK		= (WM_APP+7); // WPARAM = HWND, LPARAM = LPCTSTR
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -117,7 +118,7 @@ protected:
 	BOOL m_bSelected;
 	BOOL m_bSavingToImage;
 	BOOL m_bDropTarget;
-	BOOL m_bDrawTaskFlags;
+	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;
@@ -196,6 +197,7 @@ protected:
 	BOOL IsOnlySelectedTask(DWORD dwTaskID);
 	int BuildSortedSelection(CHTIList& lstHTI) const;
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
+	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
@@ -205,10 +207,12 @@ protected:
 
 	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
+	CString HitTestFileLink(HTREEITEM hti, CPoint point) const;
 
 	void DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem);
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
+	void DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
 	void DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const;

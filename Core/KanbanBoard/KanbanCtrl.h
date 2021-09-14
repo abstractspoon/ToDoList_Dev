@@ -149,6 +149,7 @@ protected:
 	afx_msg LRESULT OnColumnEditTaskFlag(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColumnEditTaskPin(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnColumnGetTaskIcon(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnColumnShowFileLink(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 
