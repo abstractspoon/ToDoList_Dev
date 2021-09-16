@@ -750,6 +750,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 		// Draw in reverse order
 		int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
 		int nParent = aParents.GetSize();
+		BOOL bFirstParent = TRUE;
 
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->SetTextColor(crText);
@@ -762,16 +763,32 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 			int iImageIndex = -1;
 			HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKIParent->dwTaskID, (LPARAM)&iImageIndex);
 
-			if (hilTask && (iImageIndex != -1))
+			BOOL bHasIcon = (hilTask && (iImageIndex != -1));
+
+			if (bHasIcon)
 			{
 				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, WHITE, ILD_TRANSPARENT | ILD_BLEND50);
-				rParent.left += (DEF_IMAGE_SIZE + IMAGE_PADDING);
+			}
+			else if (bFirstParent)
+			{
+				// don't indent the first parent's text if it doesn't have an icon
+				// Note: We modify the parent rect because we want this to also
+				// impact all the following parents
+				rParent.OffsetRect(-DEF_IMAGE_SIZE, 0);
 			}
 
-			pDC->DrawText(pKIParent->sTitle, rParent, nFlags);
+			CRect rText(rParent);
+			rText.left += DEF_IMAGE_SIZE; // always set aside space for an icon
+
+			if (bHasIcon)
+				rText.left += IMAGE_PADDING;
+
+			pDC->DrawText(pKIParent->sTitle, rText, nFlags);
 
 			rParent.top += (m_nItemTextHeight + m_nItemTextBorder);
-			rParent.left += 6; // indent at each level
+			rParent.left += DEF_IMAGE_SIZE; // indent at each level
+
+			bFirstParent = FALSE;
 		}
 	}
 	else if (!sLabel.IsEmpty())
