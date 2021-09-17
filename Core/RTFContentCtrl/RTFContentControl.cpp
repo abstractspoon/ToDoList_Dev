@@ -137,16 +137,15 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_FAILEDURL, OnFailedUrl)
 	ON_REGISTERED_MESSAGE(WM_RTF_PREFSHELP, OnPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_REB_NOTIFYSELECTPOPUPLISTITEM, OnSelectPopupListItem)
-	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl message handlers
 
-void CRTFContentControl::OnNcDestroy()
+void CRTFContentControl::Release()
 {
-	CRulerRichEditCtrl::OnNcDestroy();
-	
+	DestroyWindow();
+
 	delete this;
 }
 

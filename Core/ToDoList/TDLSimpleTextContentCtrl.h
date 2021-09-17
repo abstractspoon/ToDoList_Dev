@@ -33,6 +33,7 @@ public:
 	void SetReadOnly(bool bReadOnly);
 	void Enable(bool bEnable);
 	HWND GetHwnd() const;
+	void Release();
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	ISpellCheck* GetSpellCheckInterface();

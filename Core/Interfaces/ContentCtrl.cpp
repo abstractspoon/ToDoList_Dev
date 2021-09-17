@@ -33,14 +33,18 @@ BOOL CONTENTFORMAT::FormatIsText() const
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CContentCtrl::CContentCtrl(IContentControl* pContentCtrl) : 
-	m_pContentCtrl(pContentCtrl), m_bSettingContent(FALSE)
+CContentCtrl::CContentCtrl(IContentControl* pContentCtrl) 
+	: 
+	m_pContentCtrl(pContentCtrl), 
+	m_bSettingContent(FALSE)
 {
 
 }
 
 CContentCtrl::~CContentCtrl()
 {
+	if (m_pContentCtrl)
+		m_pContentCtrl->Release();
 }
 
 CContentCtrl::operator HWND() const
@@ -80,17 +84,23 @@ BOOL CContentCtrl::ProcessMessage(MSG* pMsg)
 
 BOOL CContentCtrl::Attach(IContentControl* pContentCtrl)
 {
-	ASSERT (pContentCtrl && pContentCtrl->GetHwnd());
+	ASSERT(pContentCtrl && pContentCtrl->GetHwnd());
 
 	if (pContentCtrl && pContentCtrl->GetHwnd())
 	{
-		// release existing control
-		if (m_pContentCtrl)
-			::DestroyWindow(m_pContentCtrl->GetHwnd());
+		IContentControl* pExistCtrl = m_pContentCtrl;
 
 		m_pContentCtrl = pContentCtrl;
 		m_sTypeID = m_pContentCtrl->GetTypeID();
+		TRACE(_T("CContentCtrl::Attaching(%s)\n"), m_pContentCtrl->GetTypeID());
 		
+		// release existing control
+		if (pExistCtrl)
+		{
+			TRACE(_T("CContentCtrl::Releasing(%s)\n"), pExistCtrl->GetTypeID());
+			pExistCtrl->Release();
+		}
+
 		return TRUE;
 	}
 

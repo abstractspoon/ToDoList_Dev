@@ -39,6 +39,7 @@ public:
 	void SetReadOnly(bool bReadOnly);
 	void Enable(bool bEnable);
 	HWND GetHwnd() const;
+	void Release();
 	LPCTSTR GetTypeID() const { return RTF_TYPEID; }
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);

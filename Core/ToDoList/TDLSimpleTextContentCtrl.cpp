@@ -89,8 +89,6 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
 	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
 	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
-	ON_WM_NCDESTROY()
-
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -397,9 +395,9 @@ BOOL CTDLSimpleTextContentCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 	return TRUE;
 }
 
-void CTDLSimpleTextContentCtrl::OnNcDestroy()
-{
-	CUrlRichEditCtrl::OnNcDestroy();
+void CTDLSimpleTextContentCtrl::Release() 
+{ 
+	DestroyWindow(); 
 
 	delete this;
 }
