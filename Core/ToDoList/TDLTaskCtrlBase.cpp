@@ -4117,7 +4117,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 		case WM_GETDLGCODE:
-			return DLGC_WANTTAB;
+			return (DLGC_WANTTAB | ScDefault(hRealWnd));
 
 		case WM_KEYDOWN:
 			if (wp == VK_TAB)
@@ -4168,7 +4168,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 		case WM_GETDLGCODE:
-			return DLGC_WANTTAB;
+			return (DLGC_WANTTAB | ScDefault(hRealWnd));
 
 		case WM_KEYDOWN:
 			if (wp == VK_TAB)
