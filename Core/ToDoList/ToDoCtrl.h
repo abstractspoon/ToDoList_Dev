@@ -571,6 +571,7 @@ protected:
 	BOOL m_bDelayLoaded;
 	BOOL m_bDeletingTasks;
 	BOOL m_bInSelectedTaskEdit;
+	BOOL m_bPendingUpdateControls;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

@@ -221,7 +221,8 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
-	m_matcher(m_data, m_reminders)
+	m_matcher(m_data, m_reminders),
+	m_bPendingUpdateControls(FALSE)
 {
 	SetBordersDLU(0);
 	
@@ -1730,6 +1731,23 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	if (m_bDeletingTasks)
 		return;
 
+	// Something about the creation of the HTML comments plugin allows
+	// subsequent selection changes from the task tree to be processed
+	// before a previous call to this function has completed. 
+	// And this re-entrancy causes mayhem because the HTML plugin can't
+	// be terminated whilst it's in the process of initialising the web
+	// browser within it.
+	// So. We detect that the comments control has not yet completed and
+	// set a flag so that when the comments control does complete we can
+	// immediately re-call this function to get us up to date.
+	// Fortunately, everything happens inside this function.
+	if (m_bPendingUpdateControls || (bIncComments && m_ctrlComments.IsUpdatingFormat()))
+	{
+		m_bPendingUpdateControls = TRUE;
+		return;
+	}
+	ASSERT(!m_bPendingUpdateControls);
+
 	CScopedLogTimer log(_T("CToDoCtrl::UpdateControls()"));
 	
 	if (!hti)
@@ -1873,6 +1891,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 	if (bIncComments)
 	{
+		ASSERT(!m_ctrlComments.IsUpdatingFormat());
+
 		// if more than one comments type is selected then sCommentsType
 		// will be empty which will put the comments type combo in an
 		// indeterminate state which is the desired effect since this requires
@@ -1881,6 +1901,15 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 			m_cfComments = cfComments;
 		else
 			m_cfComments.Empty();
+
+		// See re-entrancy comment at start of function for explanation
+		if (m_bPendingUpdateControls)
+		{
+			ASSERT(!m_ctrlComments.IsUpdatingFormat());
+
+			m_bPendingUpdateControls = FALSE;
+			UpdateControls(TRUE);
+		}
 		
 		UpdateComments(FALSE);
 	}

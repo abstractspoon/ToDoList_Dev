@@ -9,6 +9,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dlgunits.h"
 #include "..\shared\misc.h"
+#include "..\shared\autoflag.h"
 #include "..\shared\themed.h"
 #include "..\shared\enstring.h"
 #include "..\shared\winclasses.h"
@@ -43,7 +44,8 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComb
 	m_hContentFont(NULL),
 	m_bReadOnly(FALSE),
 	m_bShowLabel(bShowLabel),
-	m_bShowToolbar(bShowToolbar)
+	m_bShowToolbar(bShowToolbar),
+	m_bUpdatingFormat(FALSE)
 {
 	int nComboOffsetDLU = 0;
 
@@ -322,6 +324,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 
 BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cfNew)
 {
+	CAutoFlag af(m_bUpdatingFormat, TRUE);
+
 	ASSERT(m_pMgrContent && (m_pMgrContent->FindContent(cfNew) != -1));
 	ASSERT(GetSafeHwnd());
 
@@ -530,7 +534,7 @@ BOOL CTDLCommentsCtrl::SetSelectedFormat(const CONTENTFORMAT& cf)
 	}
 
 	// else
-	UpdateControlFormat();
+	UpdateControlFormat(cf);
 	return TRUE;
 }
 
