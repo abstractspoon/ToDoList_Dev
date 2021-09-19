@@ -605,7 +605,7 @@ BEGIN
                     WS_TABSTOP,7,335,381,10
     CONTROL         "A&utomatically resort after editing",IDC_AUTORESORT,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,350,381,10
-    CONTROL         "E&nable sorting by clicking on column headers",
+    CONTROL         "All&ow sorting by clicking on column headers",
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,365,387,10
     LTEXT           "Main Toolbar",IDC_TOOLBARGROUP,7,385,381,8
