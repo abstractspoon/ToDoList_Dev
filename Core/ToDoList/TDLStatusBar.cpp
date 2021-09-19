@@ -135,11 +135,12 @@ BOOL CTDLStatusBar::DrawPaneText(CDC* pDC, int nPane, int nOffset)
 	return CStatusBarACTEx::DrawPaneText(pDC, nPane, nOffset);
 }
 
-void CTDLStatusBar::UpdateTaskTotals(const CFilteredToDoCtrl& tdc)
+void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib)
 {
 	if (m_progress.IsActive())
 		return;
 
+	// Totals
 	UINT nVisibleCount = 0;
 	UINT nTotalCount = tdc.GetTaskCount(&nVisibleCount);
 
@@ -147,13 +148,9 @@ void CTDLStatusBar::UpdateTaskTotals(const CFilteredToDoCtrl& tdc)
 						  0, 
 						  Misc::Format(_T("%ld / %ld"), nVisibleCount, nTotalCount), 
 						  IDS_SB_TASKCOUNT_TIP);
-}
 
-void CTDLStatusBar::UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib)
-{
-	if (m_progress.IsActive())
-		return;
-
+	// Selected tasks attributes
+	//
 	// Task path
 	CString sTextValue, sTipValue;
 	UINT nIDTextFormat = 0, nIDTipFormat = 0;

@@ -38,8 +38,7 @@ public:
 	virtual ~CTDLStatusBar();
 
 	void SetUITheme(const CUIThemeFile& theme);
-	void UpdateTaskTotals(const CFilteredToDoCtrl& tdc);
-	void UpdateTaskSelection(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib);
+	void UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttributeMap& mapAttrib);
 	void UpdateFocusedControl(const CString& sFocus);
 
 	BOOL BeginProgress(const CString& sPrompt) { return m_progress.BeginProgress(*this, sPrompt); }
