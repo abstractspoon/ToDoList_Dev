@@ -12430,7 +12430,7 @@ void CToDoListWnd::OnCloseallbutthis()
 		if (nCtrl != nThis)
 		{
 			if (ConfirmSaveTaskList(nCtrl, TDLS_CLOSINGTASKLISTS) != TDCF_SUCCESS)
-				continue; // user cancelled
+				break; // user cancelled
 
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
 
