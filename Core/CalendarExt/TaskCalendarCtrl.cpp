@@ -750,6 +750,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 		DWORD dwRealTaskID = GetRealTaskID(dwTaskID);
 		ASSERT(dwRealTaskID);
+
+		BOOL bFutureOccurrence = (dwRealTaskID != dwTaskID);
 		
 		// draw selection
 		BOOL bSelTask = (!m_bSavingToImage && (dwRealTaskID == m_dwSelectedTaskID));
@@ -782,7 +784,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				nState = GMIS_SELECTEDNOTFOCUSED;
 			}
-			else if (dwTaskID != dwRealTaskID)
+			else if (bFutureOccurrence)
 			{
 				nState = GMIS_DROPHILITED;
 			}
@@ -884,7 +886,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				nLeft -= cdi.nTextOffset;
 			}
 
-			pDC->SelectObject(GetTaskFont(pTCI));
+			pDC->SelectObject(GetTaskFont(pTCI, bFutureOccurrence));
 			pDC->SetTextColor(crText);
 
 			CString sTitle = pTCI->GetName();
@@ -922,18 +924,21 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	}
 }
 
-CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
+CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI, BOOL bFutureOccurrence)
 {
 	if (m_fontAltText.GetSafeHandle())
 		return &m_fontAltText;
 
 	DWORD dwFlags = 0;
 		
-	if (pTCI->IsDone(FALSE) && m_bStrikeThruDone)
-		dwFlags |= GMFS_STRIKETHRU;
-		
-	if (pTCI->bTopLevel)
-		dwFlags |= GMFS_BOLD;
+	if (!bFutureOccurrence)
+	{
+		if (pTCI->IsDone(FALSE) && m_bStrikeThruDone)
+			dwFlags |= GMFS_STRIKETHRU;
+
+		if (pTCI->bTopLevel)
+			dwFlags |= GMFS_BOLD;
+	}
 		
 	return m_fonts.GetFont(dwFlags);
 }
