@@ -79,6 +79,7 @@
       <ProgramDataBaseFileName>.\Unicode_Release/</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -119,7 +120,7 @@ copy unicode_release\KanbanBoard.dll ..\todolist\unicode_release /y
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_MBCS;_USRDLL;_EXPORTING;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -131,6 +132,7 @@ copy unicode_release\KanbanBoard.dll ..\todolist\unicode_release /y
       <WarningLevel>Level4</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -200,9 +202,7 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
   <ItemGroup>
     <None Include="res\column_toolbar.bmp" />
     <None Include="res\column_toolbar_std.bmp" />
-    <None Include="res\flag.bmp" />
     <None Include="res\help_button.ico" />
-    <None Include="res\icon1.ico" />
     <None Include="res\KanbanBoard.rc2" />
     <None Include="res\toolbar.bmp" />
     <None Include="RES\toolbar_std.bmp" />
@@ -239,6 +239,10 @@ copy unicode_debug\KanbanBoard.dll ..\todolist\unicode_debug /y
       <Project>{95605899-9c90-40d8-8774-d1da1fce7464}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\icons.bmp" />
+    <Image Include="res\kanban.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -61,9 +61,6 @@
     <None Include="res\TDLUpdate.rc2">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\wiz_header.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <CustomBuildStep Include="res\tdlupdate.exe.manifest">
@@ -74,5 +71,10 @@
     <Library Include="..\3rdParty\Zlib\ZLIBSTAT.LIB">
       <Filter>Libs</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\TDLUpdate_wiz_header.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>
