@@ -538,14 +538,12 @@ int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nColWidth) const
 	return nAvailWidth;
 }
 
-void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText) const
+void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const
 {
 	if (IsTaskSelected(pKI->dwTaskID))
 	{
 		BOOL bFocused = (::GetFocus() == *this);
-
 		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 
 		GraphicsMisc::DrawExplorerItemSelection(pDC, GetSafeHwnd(), nState, rItem, GMIB_THEMECLASSIC);
 	}
@@ -615,7 +613,7 @@ void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
 	COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
 
 	// Background
-	FillItemBackground(pDC, pKI, rBody, crText);
+	DrawItemBackground(pDC, pKI, rBody);
 
 	// Parents
 	COLORREF crOtherText = crText;
