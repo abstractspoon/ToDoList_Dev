@@ -609,29 +609,32 @@ void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
 	CRect rBody(rItem);
 	DrawItemCheckbox(pDC, pKI, rBody);
 
-	BOOL bSelected = IsTaskSelected(dwTaskID);
-	COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
-
 	// Background
 	DrawItemBackground(pDC, pKI, rBody);
-
-	// Parents
-	COLORREF crOtherText = crText;
-
-	if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
-		crOtherText = GraphicsMisc::Lighter(crText, 0.3);
 
 	// Bar affects everything else
 	DrawItemBar(pDC, pKI, rBody);
 
-	// Icons don't affect attributes
+	// Snapshot attribute rect which is not affected by the images
 	CRect rAttributes(rBody);
 
+	// Draw task icon, pin and flag icons
 	DrawItemImages(pDC, pKI, rBody);
+
+	// Item title
+	BOOL bSelected = IsTaskSelected(dwTaskID);
+	COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
+
 	DrawItemTitle(pDC, pKI, rBody, crText);
 
+	// Rest of attributes
 	rAttributes.top += CalcItemTitleTextHeight();
 	rAttributes.top += IMAGE_PADDING;
+
+	COLORREF crOtherText = crText;
+
+	if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
+		crOtherText = GraphicsMisc::Lighter(crText, 0.3);
 
 	DrawItemAttributes(pDC, pKI, rAttributes, crOtherText);
 }
