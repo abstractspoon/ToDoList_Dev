@@ -297,7 +297,9 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 
 BOOL CTDLStatusBar::WantUpdateAttribute(TDC_ATTRIBUTE nAttribID, const CTDCAttributeMap& mapAttrib)
 {
-	return (mapAttrib.Has(TDCA_ALL) || mapAttrib.Has(nAttribID));
+	return (mapAttrib.Has(nAttribID) ||
+			mapAttrib.Has(TDCA_ALL) ||
+			mapAttrib.Has(TDCA_POSITION_DIFFERENTPARENT));
 }
 
 void CTDLStatusBar::UpdateFocusedControl(const CString& sFocus)
