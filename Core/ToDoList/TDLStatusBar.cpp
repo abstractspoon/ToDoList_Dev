@@ -166,8 +166,14 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 			break;
 
 		case 1:
-			sTextValue = Misc::Format(_T("%s (%ld)"), tdc.GetSelectedTaskPath(TRUE), tdc.GetSelectedTaskID());
-			nIDTipFormat = IDS_SB_SELTASKTITLE_TIP;
+			{
+				// Space out delimiters for easier reading
+				CString sPath = tdc.GetSelectedTaskPath(TRUE);
+				sPath.Replace(_T("\\"), _T(" \\ "));
+
+				sTextValue = Misc::Format(_T("%s (%ld)"), sPath, tdc.GetSelectedTaskID());
+				nIDTipFormat = IDS_SB_SELTASKTITLE_TIP;
+			}
 			break;
 
 		default: // > 1
