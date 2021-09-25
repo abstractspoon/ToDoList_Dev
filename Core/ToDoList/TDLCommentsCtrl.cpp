@@ -568,9 +568,11 @@ CString CTDLCommentsCtrl::GetPreferencesKey() const
 
 void CTDLCommentsCtrl::OnDestroy()
 {
-	CRuntimeDlg::OnDestroy();
-
 	SavePreferences();
+
+	m_ctrlComments.Release();
+
+	CRuntimeDlg::OnDestroy();
 }
 
 void CTDLCommentsCtrl::OnEnable(BOOL bEnable)

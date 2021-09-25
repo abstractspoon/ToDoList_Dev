@@ -84,28 +84,32 @@ BOOL CContentCtrl::ProcessMessage(MSG* pMsg)
 
 BOOL CContentCtrl::Attach(IContentControl* pContentCtrl)
 {
-	ASSERT(pContentCtrl && pContentCtrl->GetHwnd());
+	ASSERT(pContentCtrl != m_pContentCtrl);
 
 	if (pContentCtrl && pContentCtrl->GetHwnd())
 	{
-		IContentControl* pExistCtrl = m_pContentCtrl;
+		Release();
 
 		m_pContentCtrl = pContentCtrl;
 		m_sTypeID = m_pContentCtrl->GetTypeID();
-		TRACE(_T("CContentCtrl::Attaching(%s)\n"), m_pContentCtrl->GetTypeID());
-		
-		// release existing control
-		if (pExistCtrl)
-		{
-			TRACE(_T("CContentCtrl::Releasing(%s)\n"), pExistCtrl->GetTypeID());
-			pExistCtrl->Release();
-		}
 
 		return TRUE;
 	}
 
 	// else
+	ASSERT(0);
 	return FALSE;
+}
+
+void CContentCtrl::Release()
+{
+	if (m_pContentCtrl)
+	{
+		m_pContentCtrl->Release();
+		m_pContentCtrl = NULL;
+
+		m_sTypeID.Empty();
+	}
 }
 
 void CContentCtrl::SetUITheme(const UITHEME& theme)

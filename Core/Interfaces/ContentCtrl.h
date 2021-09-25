@@ -31,6 +31,7 @@ public:
 	virtual ~CContentCtrl();
 
 	BOOL Attach(IContentControl* pContentCtrl);
+	void Release();
 
 	int GetContent(unsigned char* pContent) const;
 	int GetContent(CBinaryData& sContent) const;

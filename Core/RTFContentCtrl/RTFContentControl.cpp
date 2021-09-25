@@ -133,6 +133,7 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_EN_KILLFOCUS(RTF_CONTROL, OnKillFocus)
 	ON_NOTIFY(TTN_NEEDTEXT, RTF_CONTROL, OnGetTooltip)
 	ON_WM_STYLECHANGING()
+	ON_WM_NCDESTROY()
 	ON_REGISTERED_MESSAGE(WM_UREN_CUSTOMURL, OnCustomUrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_FAILEDURL, OnFailedUrl)
 	ON_REGISTERED_MESSAGE(WM_RTF_PREFSHELP, OnPrefsHelp)
@@ -144,8 +145,20 @@ END_MESSAGE_MAP()
 
 void CRTFContentControl::Release()
 {
-	DestroyWindow();
+	if (m_hWnd)
+	{
+		// Avoid CWnd::DestroyWindow it will assert once we 
+		// have released the memory in OnNcDestroy()
+		::DestroyWindow(m_hWnd);
+	}
+	else
+	{
+		delete this;
+	}
+}
 
+void CRTFContentControl::OnNcDestroy()
+{
 	delete this;
 }
 
