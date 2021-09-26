@@ -145,20 +145,15 @@ END_MESSAGE_MAP()
 
 void CRTFContentControl::Release()
 {
-	if (m_hWnd)
-	{
-		// Avoid CWnd::DestroyWindow it will assert once we 
-		// have released the memory in OnNcDestroy()
-		::DestroyWindow(m_hWnd);
-	}
-	else
-	{
-		delete this;
-	}
+	// Avoid CWnd::DestroyWindow because we get an unexpected assert 
+	// once we have released the memory in OnNcDestroy()
+	::DestroyWindow(m_hWnd);
 }
 
 void CRTFContentControl::OnNcDestroy()
 {
+	CRulerRichEditCtrl::OnNcDestroy();
+
 	delete this;
 }
 
