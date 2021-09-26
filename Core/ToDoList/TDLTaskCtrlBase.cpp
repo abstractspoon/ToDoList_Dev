@@ -2684,8 +2684,11 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 			}
 
+			if (pOldFont)
+				pDC->SelectObject(pOldFont);
+
 			// render comment text
-			PrepareDCFont(pDC, pTDI, pTDS, FALSE);
+			pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
 
 			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
 			

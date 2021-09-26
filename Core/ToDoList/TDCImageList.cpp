@@ -307,28 +307,28 @@ BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent,
 	{
 	case FT_ICO:
 		{
-			HICON hIcon = CEnBitmapEx::LoadImageFileAsIcon(sImageFile, CLR_NONE, 16, 16);
+			CIcon icon(CEnBitmapEx::LoadImageFileAsIcon(sImageFile, CLR_NONE, 16, 16));
 
-			if (hIcon)
+			if (icon.IsValid())
 			{
 				if (pImages == NULL)
 					return TRUE;
 
-				return AddImage(sImageFile, hIcon, pImages, nNextNameIndex);
+				return AddImage(sImageFile, icon, pImages, nNextNameIndex);
 			}
 		}
 		break;
 
 	case FT_PNG:
 		{
-			HICON hIcon = CEnBitmapEx::LoadImageFileAsIcon(sImageFile);	// Let the image list do the resizing
+			CIcon icon(CEnBitmapEx::LoadImageFileAsIcon(sImageFile));	// Let the image list do the resizing
 			
-			if (hIcon)
+			if (icon.IsValid())
 			{
 				if (pImages == NULL)
 					return TRUE;
 
-				return AddImage(sImageFile, hIcon, pImages, nNextNameIndex);
+				return AddImage(sImageFile, icon, pImages, nNextNameIndex);
 			}
 		}
 		break;
