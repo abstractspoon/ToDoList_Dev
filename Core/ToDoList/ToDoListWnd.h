@@ -362,6 +362,7 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg BOOL OnOpenRecentFile(UINT nID);
 	afx_msg void OnEndSession(BOOL bEnding);
+	afx_msg void OnDestroy();
 	afx_msg LRESULT OnUpdateUDTsInToolbar(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);

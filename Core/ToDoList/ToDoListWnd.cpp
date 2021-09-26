@@ -657,6 +657,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_COPYDATA()
 	ON_WM_CREATE()
 	ON_WM_DRAWITEM()
+	ON_WM_DESTROY()
 	ON_WM_ENABLE()
 	ON_WM_ENDSESSION()
 	ON_WM_ERASEBKGND()
@@ -915,6 +916,13 @@ int CToDoListWnd::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	PostMessage(WM_POSTONCREATE);
 	
 	return 0; // success
+}
+
+void CToDoListWnd::OnDestroy()
+{
+	m_wndSessionStatus.DestroyWindow();
+
+	CFrameWnd::OnDestroy();
 }
 
 BOOL CToDoListWnd::InitTabCtrl()
