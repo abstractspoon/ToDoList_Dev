@@ -538,10 +538,24 @@ int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nColWidth) const
 	return nAvailWidth;
 }
 
+void CKanbanColumnCtrl::DrawItemShadow(CDC* pDC, CRect& rItem) const
+{
+	int nSave = pDC->SaveDC();
+
+	rItem.DeflateRect(0, 0, 1, 1);
+	pDC->ExcludeClipRect(rItem);
+
+	CRect rShadow(rItem);
+	rShadow.DeflateRect(3, 3, -1, -1);
+
+	GraphicsMisc::DrawRect(pDC, rShadow, GetSysColor(COLOR_3DDKSHADOW));
+
+	pDC->RestoreDC(nSave);
+}
+
 void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
-	// Adjust for shadow which we will draw at the end
-	rItem.DeflateRect(0, 0, 1, 1);
+	DrawItemShadow(pDC, rItem);
 
 	if (IsTaskSelected(pKI->dwTaskID))
 	{
@@ -564,17 +578,6 @@ void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRec
 
 		GraphicsMisc::DrawRect(pDC, rItem, crFill, crBorder);
 	}
-
-	// Draw shadow
-	int nSave = pDC->SaveDC();
-	pDC->ExcludeClipRect(rItem);
-
-	CRect rShadow(rItem);
-	rShadow.DeflateRect(3, 3, -1, -1);
-
-	GraphicsMisc::DrawRect(pDC, rShadow, GetSysColor(COLOR_3DDKSHADOW));
-
-	pDC->RestoreDC(nSave);
 }
 
 void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
