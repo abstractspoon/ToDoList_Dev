@@ -96,6 +96,7 @@ namespace MindMapUIExtension
 		
 		public MindMapOptionsComboBox(Translator trans)
 		{
+			None = trans.Translate("<none>");
 			Items.Add(new MindMapOptionItem(trans.Translate("Show dependencies"), MindMapOption.ShowDependencies));
 		}
 
