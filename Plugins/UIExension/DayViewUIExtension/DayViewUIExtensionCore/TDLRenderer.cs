@@ -557,7 +557,7 @@ namespace DayViewUIExtension
                     if (!hasIcon)
                     {
                         rect.X = gripRect.Right;
-                        rect.Width -= (gripRect.Width + (TextPadding * 2));
+                        rect.Width -= gripRect.Width;
                     }
                 }
 
@@ -566,6 +566,9 @@ namespace DayViewUIExtension
                 {
                     format.Alignment = StringAlignment.Near;
                     format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
+
+					if (isLong)
+						format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
 
                     rect.Y += 3;
 
