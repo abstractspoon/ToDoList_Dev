@@ -84,7 +84,7 @@ const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
 const int MAX_DRAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(200);
 const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
 
-const CRect TEXT_BORDER			= CRect(2, 1, 3, 1);
+const CRect TEXT_BORDER			= CRect(2, 0, 3, 1);
 const COLORREF WHITE			= RGB(255, 255, 255);
 const CString NOFILELINK;
 
@@ -538,8 +538,11 @@ int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nColWidth) const
 	return nAvailWidth;
 }
 
-void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem) const
+void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
+	// Adjust for shadow which we will draw at the end
+	rItem.DeflateRect(0, 0, 1, 1);
+
 	if (IsTaskSelected(pKI->dwTaskID))
 	{
 		BOOL bFocused = (::GetFocus() == *this);
@@ -561,6 +564,17 @@ void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, cons
 
 		GraphicsMisc::DrawRect(pDC, rItem, crFill, crBorder);
 	}
+
+	// Draw shadow
+	int nSave = pDC->SaveDC();
+	pDC->ExcludeClipRect(rItem);
+
+	CRect rShadow(rItem);
+	rShadow.DeflateRect(3, 3, -1, -1);
+
+	GraphicsMisc::DrawRect(pDC, rShadow, GetSysColor(COLOR_3DDKSHADOW));
+
+	pDC->RestoreDC(nSave);
 }
 
 void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -731,6 +745,9 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisiability);
 	CString sLabel = GetAttributeLabel(TDCA_PARENT, nLabelVis);
 
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
+
 	if (!sLabel.IsEmpty())
 	{
 		pDC->DrawText(sLabel, rItem, DT_LEFT | DT_NOPREFIX);
@@ -752,9 +769,6 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 		int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
 		int nParent = aParents.GetSize();
 		BOOL bFirstParent = TRUE;
-
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(crText);
 
 		while (nParent--)
 		{
