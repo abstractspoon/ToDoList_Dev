@@ -214,7 +214,7 @@ protected:
 	BOOL HandleKeyDown(WPARAM wp, LPARAM lp);
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs);
 
-	void UpdateData(const ITASKLISTBASE* pTasks);
+	void UpdateData(const ITASKLISTBASE* pTasks, BOOL bNewTask);
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void RebuildData(const ITASKLISTBASE* pTasks);
 	BOOL AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings);

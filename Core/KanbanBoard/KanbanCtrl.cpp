@@ -57,6 +57,7 @@ enum // RebuildColumns
 	KCRC_REBUILDCONTENTS	= 0x01,
 	KCRC_RESTORESELECTION	= 0x02,
 	KCRC_TASKUPDATE			= 0x04,
+	KCRC_NEWTASK			= 0x08 | KCRC_TASKUPDATE,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -553,7 +554,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 		
 	case IUI_NEW:
 	case IUI_EDIT:
-		UpdateData(pTasks);
+		UpdateData(pTasks, (nUpdate == IUI_NEW));
 		break;
 		
 	case IUI_DELETE:
@@ -825,7 +826,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	return TRUE;
 }
 
-void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks)
+void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, BOOL bNewTask)
 {
 	// update the task(s)
 	BOOL bChange = UpdateGlobalAttributeValues(pTasks);
@@ -834,7 +835,7 @@ void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks)
 	if (bChange)
 	{
 		// App will take care of restoring selection
-		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_TASKUPDATE);
+		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_TASKUPDATE | (bNewTask ? KCRC_NEWTASK : 0));
 	}
 	else if (UpdateNeedsItemHeightRefresh(pTasks))
 	{
@@ -1844,9 +1845,14 @@ void CKanbanCtrl::RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs)
 	// Rebuild column contents
 	if (dwFlags & KCRC_REBUILDCONTENTS)
 	{
-		// Resort unless it's a task update because
-		// app will resort as necessary
-		RebuildColumnsContents(mapKIArray, !(dwFlags & KCRC_TASKUPDATE));
+		// If it's a task update we generally don't resort because
+		// the app will tell us if we need to, except in the case 
+		// of a new task because the app waits until after the title
+		// naming is complete
+		BOOL bResort = (Misc::HasFlag(dwFlags, KCRC_NEWTASK) || 
+						!Misc::HasFlag(dwFlags, KCRC_TASKUPDATE));
+
+		RebuildColumnsContents(mapKIArray, bResort);
 	}
 	else if (UsingDynamicColumns())
 	{
