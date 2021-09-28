@@ -532,15 +532,12 @@ COLORREF TASKCALFUTUREITEM::GetFillColor(BOOL /*bTextIsBack*/) const
 
 COLORREF TASKCALFUTUREITEM::GetBorderColor(BOOL /*bTextIsBack*/) const
 {
-	return GetTextColor(FALSE, FALSE);
+	return 0; // Black
 }
 
 COLORREF TASKCALFUTUREITEM::GetTextColor(BOOL /*bSelected*/, BOOL /*bTextIsBack*/) const
 {
-	HLSX crText(TASKCALITEM::GetTextColor(FALSE, FALSE));
-	crText.fLuminosity = min(crText.fLuminosity + 0.2f, 0.7f);
-
-	return crText;
+	return GetSysColor(COLOR_3DDKSHADOW);
 }
 
 /////////////////////////////////////////////////////////////////////////////
