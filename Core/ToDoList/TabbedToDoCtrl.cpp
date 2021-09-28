@@ -2004,6 +2004,15 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 			dwResults |= UIEXTMOD_INHERITATTRIB;
 
 		dwResults |= UIEXTMOD_SUCCESS;
+
+		// If processing an individual task we need to call SetModified manually
+		if (dwTaskID)
+		{
+			CDWordArray aTaskIDs;
+			aTaskIDs.Add(dwTaskID);
+
+			SetModified(mod.nAttrib, aTaskIDs, FALSE);
+		}
 	}
 	else
 	{
