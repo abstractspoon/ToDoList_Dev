@@ -103,7 +103,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_nItemTextHeight(-1),
 	m_nItemTextBorder(-1),
 	m_nNumTitleLines(2),
-	m_nAttribLabelVisiability(KBCAL_LONG),
+	m_nAttribLabelVisibility(KBCAL_LONG),
 	m_bSavingToImage(FALSE),
 	m_bDropTarget(FALSE),
 	m_bDrawTaskFlags(FALSE),
@@ -410,7 +410,7 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 
 void CKanbanColumnCtrl::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
 {
-	m_nAttribLabelVisiability = nLabelVis;
+	m_nAttribLabelVisibility = nLabelVis;
 
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
@@ -744,7 +744,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 	CRect rParent(rItem);
 
 	// Draw label
-	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisiability);
+	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
 	CString sLabel = GetAttributeLabel(TDCA_PARENT, nLabelVis);
 
 	pDC->SetBkMode(TRANSPARENT);
@@ -822,7 +822,7 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 	CRect rLink(rItem);
 
 	// Draw label
-	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisiability);
+	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
 	CString sLabel = GetAttributeLabel(TDCA_FILELINK, nLabelVis);
 
 	if (!sLabel.IsEmpty())
@@ -1176,7 +1176,7 @@ UINT CKanbanColumnCtrl::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 
 void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
 {
-	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisiability);
+	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
 	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis);
 
 	if (!sAttrib.IsEmpty())
@@ -2107,9 +2107,9 @@ CString CKanbanColumnCtrl::HitTestFileLink(HTREEITEM hti, CPoint point) const
 
 			if (point.y < rLinks.bottom) // within the right vertical zone
 			{
-				if (m_nAttribLabelVisiability != KBCAL_NONE)
+				if (m_nAttribLabelVisibility != KBCAL_NONE)
 				{
-					CString sLabel = GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisiability);
+					CString sLabel = GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility);
 
 					if (!sLabel.IsEmpty())
 						rLinks.left += GraphicsMisc::GetTextWidth(sLabel, *this, m_fonts.GetHFont());

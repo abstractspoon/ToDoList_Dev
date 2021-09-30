@@ -136,7 +136,7 @@ protected:
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
-	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
+	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
