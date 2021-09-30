@@ -17,6 +17,7 @@
 #include "..\shared\fileicons.h"
 
 #include "..\3rdparty\ini.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -1006,21 +1007,10 @@ BOOL CPreferencesToolPage::InitializeToolbar()
 	
 	if (!m_toolbar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
 		return FALSE;
+
+	m_toolbar.SetBackgroundColor(m_crback);
 	
-	if (!m_toolbar.LoadToolBar(IDR_UDTPREFS_TOOLBAR))
-		return FALSE;
-	
-	// toolbar images
-// 	if (m_theme.HasToolbarImageFile(_T("CUSTOM_ATTRIB")))
-// 	{
-// 		COLORREF crMask = CLR_NONE;
-// 		CString sImagePath = m_theme.GetToolbarImageFile(_T("CUSTOM_ATTRIB"), crMask);
-// 		
-// 		VERIFY(m_toolbar.SetImage(sImagePath, crMask));
-// 	}
-// 	else 
-		m_toolbar.SetImage(IDB_UDTPREFS_TOOLBAR_STD, RGB(255, 0, 255));
-	
+	VERIFY(m_toolbar.LoadToolBar(IDR_UDTPREFS_TOOLBAR, IDB_UDTPREFS_TOOLBAR_STD, colorMagenta));
 	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 	
 	// very important - turn OFF all the auto positioning and sizing
@@ -1034,8 +1024,6 @@ BOOL CPreferencesToolPage::InitializeToolbar()
 	GetDlgItem(IDC_TOOLBAR)->GetWindowRect(rToolbar);
 	ScreenToClient(rToolbar);
 	m_toolbar.MoveWindow(rToolbar);
-
-	m_toolbar.SetBackgroundColor(m_crback);
 	
 	return TRUE;
 }

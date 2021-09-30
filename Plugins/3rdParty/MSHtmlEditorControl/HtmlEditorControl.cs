@@ -569,22 +569,19 @@ namespace MSDN.Html.Editor
 
 		protected void SelectCharacterAtCaret(bool forward)
 		{
-			if (document.selection != null)
+			var rng = GetTextRange();
+
+			if ((rng != null) && String.IsNullOrEmpty(rng.text))
 			{
-				var rng = (document.selection.createRange() as mshtmlTextRange);
+				if (forward)
+					rng.moveEnd("character", 1);
+				else
+					rng.moveStart("character", -1);
 
-				if ((rng != null) && String.IsNullOrEmpty(rng.text))
-				{
-					if (forward)
-						rng.moveEnd("character", 1);
-					else
-						rng.moveStart("character", -1);
+				rng.select();
 
-					rng.select();
-
-					// Must reset focus else over-typing fails
-					document.focus();
-				}
+				// Must reset focus else over-typing fails
+				document.focus();
 			}
 		}
 
@@ -614,6 +611,7 @@ namespace MSDN.Html.Editor
 			{
 				var htmlTxtRange = document.selection.createRange() as mshtmlTextRange;
 				var iHtml = element.DomElement as mshtmlElement;
+
 				htmlTxtRange.moveToElementText(iHtml);
 				htmlTxtRange.select();
 			}
@@ -705,50 +703,110 @@ namespace MSDN.Html.Editor
 
 			switch (keyPress)
 			{
-				case Keys.F5: // Refresh (116)
-					return true; // ignore
+			case Keys.F5:
+				return true; // ignore
 
-				case Keys.F | Keys.Control: // Ctrl+F (70)
-					FindReplacePrompt();
-					return true;
+			case Keys.F | Keys.Control:
+				FindReplacePrompt();
+				return true;
 
-				case Keys.Tab:
-					SelectedHtml = "&emsp;";
-					return true;
+			case Keys.Tab: // Indent
+				{
+					// Behaviour to match core app
+					var range = GetTextRange();
 
-				case Keys.Left | Keys.Control:
+					if (range != null)
 					{
-						var range = GetTextRange();
-
-						if (range != null)
+						if ((range.text == null) || (range.text.IndexOf('\n') == -1))
 						{
-							range.move("word", -1);
+							int nLenSel = ((range.text == null) ? 0 : range.text.Length);
+
+							// Insert single tab at start of selection
 							range.collapse();
 							range.select();
+
+							SelectedHtml = "&emsp;&emsp;";
+
+							// Reselect
+							if (nLenSel > 0)
+							{
+								range.moveStart("character", 2);
+								range.moveEnd("character", nLenSel);
+								range.select();
+							}
 						}
-					}
-					return true;
-
-				case Keys.Right | Keys.Control:
-					{
-						var range = GetTextRange();
-
-						if (range != null)
+						else
 						{
-							range.move("word", 1);
-							range.collapse();
-							range.select();
+							FormatTabRight(); // block indent
 						}
 					}
-					return true;
+				}
+				return true;
 
-				case Keys.Oemcomma | Keys.Control:
-					FormatFontDecrease();
-					return true;
+			case Keys.Tab | Keys.Shift: // Outdent
+				{
+					// Behaviour to match core app
+					var range = GetTextRange();
 
-				case Keys.OemPeriod | Keys.Control:
-					FormatFontIncrease();
-					return true;
+					if ((range.text == null) || (range.text.IndexOf('\n') == -1))
+					{
+						int nLenSel = ((range.text == null) ? 0 : range.text.Length);
+						string TAB = Encoding.Unicode.GetString(new byte[] { 0x03, 0x20, 0x03, 0x20 }); // &emsp;&emsp;
+
+						range.collapse();
+						range.moveStart("character", -2);
+						range.select();
+
+						if (SelectedText == TAB)
+						{
+							SelectedText = "";
+						}
+
+						// restore previous selection
+						range.collapse(false);
+						range.moveEnd("character", nLenSel);
+						range.select();
+					}
+					else
+					{
+						FormatTabLeft(); // block outdent
+					}
+				}
+				return true;
+
+			case Keys.Left | Keys.Control:
+				{
+					var range = GetTextRange();
+
+					if (range != null)
+					{
+						range.move("word", -1);
+						range.collapse();
+						range.select();
+					}
+				}
+				return true;
+
+			case Keys.Right | Keys.Control:
+				{
+					var range = GetTextRange();
+
+					if (range != null)
+					{
+						range.move("word", 1);
+						range.collapse();
+						range.select();
+					}
+				}
+				return true;
+
+			case Keys.Oemcomma | Keys.Control:
+				FormatFontDecrease();
+				return true;
+
+			case Keys.OemPeriod | Keys.Control:
+				FormatFontIncrease();
+				return true;
 			}
 
 			return false;
@@ -4139,19 +4197,19 @@ namespace MSDN.Html.Editor
         /// </summary>
         protected mshtmlTextRange GetTextRange()
         {
-            // define the selected range object
-            mshtmlSelection selection;
             mshtmlTextRange range = null;
 
             try
             {
-                // calculate the text range based on user selection
-                selection = document.selection;
-                if (IsStringEqual(selection.type, SELECT_TYPE_TEXT) || IsStringEqual(selection.type, SELECT_TYPE_NONE))
-                {
-                    range = (mshtmlTextRange)selection.createRange();
-                }
-            }
+				if (document.selection != null)
+				{
+					if (IsStringEqual(document.selection.type, SELECT_TYPE_TEXT) || 
+						IsStringEqual(document.selection.type, SELECT_TYPE_NONE))
+					{
+						range = (mshtmlTextRange)document.selection.createRange();
+					}
+				}
+			}
             catch (Exception)
             {
                 // have unknown error so set return to null

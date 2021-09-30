@@ -57,7 +57,7 @@
       <Optimization>Disabled</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PreprocessorDefinitions>_DEBUG;WIN32;_WINDOWS;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\Unicode_Debug\</AssemblerListingLocation>
@@ -65,6 +65,7 @@
       <ObjectFileName>.\Unicode_Debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\Unicode_Debug\</ProgramDataBaseFileName>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0c09</Culture>
@@ -94,6 +95,7 @@
       <PrecompiledHeaderOutputFile>.\Unicode_Release\ToDoListLib.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\Unicode_Release\</ObjectFileName>
       <ProgramDataBaseFileName>.\Unicode_Release\</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0c09</Culture>
@@ -222,6 +224,7 @@
     <ClCompile Include="..\ToDoList\TDLSetReminderDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLShowReminderDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLSimpleTextContentCtrl.cpp" />
+    <ClCompile Include="..\ToDoList\TDLStatusBar.cpp" />
     <ClCompile Include="..\ToDoList\TDLStylesheetParamConfigDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskCtrlBase.cpp" />
     <ClCompile Include="..\ToDoList\TDLTaskDependencyEdit.cpp" />
@@ -374,6 +377,7 @@
     <ClInclude Include="..\ToDoList\TDLSetReminderDlg.h" />
     <ClInclude Include="..\ToDoList\TDLShowReminderDlg.h" />
     <ClInclude Include="..\ToDoList\TDLSimpleTextContentCtrl.h" />
+    <ClInclude Include="..\ToDoList\TDLStatusBar.h" />
     <ClInclude Include="..\ToDoList\TDLStylesheetParamConfigDlg.h" />
     <ClInclude Include="..\ToDoList\TDLTaskCtrlBase.h" />
     <ClInclude Include="..\ToDoList\TDLTaskDependencyEdit.h" />

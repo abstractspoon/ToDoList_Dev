@@ -19,11 +19,13 @@ const UINT SE_ERR_SUCCESS = 33;
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-enum 
+enum // Backup
 {
-	FBS_TIMESTAMP	= 0x01,
-	FBS_APPVERSION	= 0x02,
-	FBS_OVERWRITE	= 0x04,
+	FBS_DATESTAMP		= 0x01, 
+	FBS_DATETIMESTAMP	= 0x02 | FBS_DATESTAMP,
+	FBS_APPVERSION		= 0x04,
+	FBS_OVERWRITE		= 0x08,
+	FBS_ALLOWEMPTY		= 0x10,
 };
 
 enum FB_MODULE_SORT

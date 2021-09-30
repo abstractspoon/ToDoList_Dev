@@ -91,7 +91,7 @@ public:
 						CWnd* pParent);
 	virtual ~CPreferencesDlgBase();
 	
-	int DoModal(IPreferences* prefs = NULL, LPCTSTR szKey = NULL, int nInitPage = -1);
+	int DoModal(IPreferences* prefs = NULL, LPCTSTR szKey = NULL, int nInitPage = -1, UINT nInitCtrlID = 0);
 	void SetPageBackgroundColor(COLORREF color);
 
 	virtual void LoadPreferences(const IPreferences* prefs, LPCTSTR szKey);
@@ -107,6 +107,7 @@ protected:
 	UINT m_nPPHostFrameCtrlID;
 	UINT m_nHelpBtnIconID;
 	UINT m_nDlgIconID;
+	UINT m_nInitCtrlID;
 
 	int m_nInitPage;
 	CSize m_sizeOrgWindow, m_sizeCurWindow;

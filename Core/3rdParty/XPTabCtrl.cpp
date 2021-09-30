@@ -378,14 +378,20 @@ void CXPTabCtrl::DrawTabItem(CDC* pDC, int ixItem, const CRect& rcItemC, UINT ui
 	else rcItem.OffsetRect(-2,0);
 
 	if(sText.GetLength())
-	{	CFont* pOldFont=pDC->SelectObject(GetTabFont(ixItem));		// prepare dc
-		rcItem.right-=3;						// text
-		rcItem.OffsetRect((bBottom?-1:0),(bSel?1:-1));
+	{	
+		CFont* pOldFont=pDC->SelectObject(GetTabFont(ixItem));		// prepare dc
+
+		rcItem.right-=3;
+
+		if (bBottom)
+			rcItem.OffsetRect(-1, (bSel ? 1 : 0));
+		else
+			rcItem.OffsetRect(0, (bSel ? 2 : -1));
 
 		// let derived classes override
 		rcItem = GetTabTextRect(ixItem, rcItem);
 
-		pDC->DrawText(sText, rcItem, (DT_NOPREFIX | DT_CENTER/* | DT_RTLREADING*/));
+		pDC->DrawText(sText, rcItem, (DT_NOPREFIX | DT_CENTER | DT_BOTTOM/* | DT_RTLREADING*/));
 		pDC->SelectObject(pOldFont);
 	}
 	pDC->SetBkMode(nOldMode);

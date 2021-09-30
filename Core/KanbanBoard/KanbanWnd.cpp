@@ -20,6 +20,7 @@
 #include "..\3rdparty\T64Utils.h"
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\IUIExtension.h"
@@ -89,6 +90,7 @@ BEGIN_MESSAGE_MAP(CKanbanWnd, CDialog)
 	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKTITLE, OnKanbanNotifyEditTaskTitle)
 	ON_REGISTERED_MESSAGE(WM_KBC_EDITTASKICON, OnKanbanNotifyEditTaskIcon)
 	ON_REGISTERED_MESSAGE(WM_KBC_SORTCHANGE, OnKanbanNotifySortChange)
+	ON_REGISTERED_MESSAGE(WM_KBC_SHOWFILELINK, OnKanbanNotifyShowFileLink)
 	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
@@ -147,6 +149,11 @@ LRESULT CKanbanWnd::OnKanbanNotifySortChange(WPARAM wp, LPARAM lp)
 	return GetParent()->SendMessage(WM_IUI_SORTCHANGE, wp, lp);
 }
 
+LRESULT CKanbanWnd::OnKanbanNotifyShowFileLink(WPARAM /*wp*/, LPARAM lp)
+{
+	return GetParent()->SendMessage(WM_IUI_SHOWFILELINK, 0, lp);
+}
+
 BOOL CKanbanWnd::OnInitDialog() 
 {
 	CDialog::OnInitDialog();
@@ -157,9 +164,7 @@ BOOL CKanbanWnd::OnInitDialog()
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
 	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-		
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
 		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 		
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
@@ -327,6 +332,7 @@ void CKanbanWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool
 	Misc::SetFlag(dwOptions, KBCF_DUEHAVEHIGHESTPRIORITYRISK, pPrefs->GetProfileInt(_T("Preferences"), _T("DueTasksHaveHighestPriority"), FALSE));
 	Misc::SetFlag(dwOptions, KBCF_DONEHAVELOWESTPRIORITYRISK, pPrefs->GetProfileInt(_T("Preferences"), _T("DoneTasksHaveLowestPriority"), FALSE));
 	Misc::SetFlag(dwOptions, KBCF_PARENTSSHOWHIGHESTPRIORITYRISK, pPrefs->GetProfileInt(_T("Preferences"), _T("UseHighestPriority"), FALSE));
+	Misc::SetFlag(dwOptions, KBCF_COLUMNHEADERSORTING, pPrefs->GetProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), TRUE));
 
 	m_ctrlKanban.SetOptions(dwOptions);
 	
@@ -406,6 +412,10 @@ void CKanbanWnd::SetUITheme(const UITHEME* pTheme)
 		// intentionally set background colours to be same as ours
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+		// Rescale images because background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
 	}
 }
 

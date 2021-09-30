@@ -2175,6 +2175,12 @@ void CTreeListCtrl::EnableDragAndDrop(BOOL bEnable)
 	m_treeDragDrop.EnableDragDrop(bEnable);
 }
 
+void CTreeListCtrl::EnableColumnHeaderSorting(BOOL bEnable)
+{
+	CDialogHelper::SetStyle(&m_treeHeader, HDS_BUTTONS, bEnable);
+	CDialogHelper::SetStyle(&m_listHeader, HDS_BUTTONS, bEnable);
+}
+
 BOOL CTreeListCtrl::CancelOperation()
 {
 	if (m_treeDragDrop.IsDragging())

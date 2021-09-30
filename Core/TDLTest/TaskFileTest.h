@@ -31,6 +31,8 @@ public:
 	// Helpers accessible to other tests
 	void PopulateHierarchy(CTaskFile& tasks, int nNumLevels, const CTDCAttributeMap& mapAttrib = TDCA_ALL) const;
 	void PopulateFlatList(CTaskFile& tasks, int nNumTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL) const;
+
+	BOOL WantPopulateAttributes() const { return m_bPopulateAttributes; }
 	
 	const int NUM_TESTLEVELS;
 

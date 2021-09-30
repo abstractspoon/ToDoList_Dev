@@ -13,27 +13,6 @@
 
 #include <afxtempl.h>
 
-/////////////////////////////////////////////////////////////////////////////////////
-// base class for image processing
-
-class C32BitImageProcessor
-{
-public:
-	C32BitImageProcessor(BOOL bEnableWeighting = FALSE);
-	virtual ~C32BitImageProcessor();
-
-	virtual CSize CalcDestSize(CSize sizeSrc);
-	virtual BOOL ProcessPixels(RGBX* pSrcPixels, CSize sizeSrc, RGBX* pDestPixels, CSize sizeDest, 
-								COLORREF crMask = CLR_NONE);
-
-	void CalcWeightedColor(RGBX* pPixels, CSize size, double dX, double dY, RGBX& rgbResult);
-
-protected:
-	BOOL m_bWeightingEnabled;
-};
-
-typedef CArray<C32BitImageProcessor*, C32BitImageProcessor*> C32BIPArray;
-
 //////////////////////////////////////////////////////////////////////////////////////////
 
 enum EB_IMAGETYPE
@@ -67,11 +46,7 @@ public:
 	static BOOL CopyToClipboard(HWND hWnd, const CBitmap& bm, WORD nBpp = 0);
 	BOOL CopyToClipboard(HWND hWnd, WORD nBpp = 0) const;
 
-	BOOL ProcessImage(C32BitImageProcessor* pProcessor, COLORREF crMask = CLR_NONE);
-	BOOL ProcessImage(C32BIPArray& aProcessors, COLORREF crMask = CLR_NONE); // ordered list of processors
-
 	CSize GetSize() const;
-	BOOL Resize(int cx, int cy);
 	HICON ExtractIcon(COLORREF crMask = CLR_NONE, int cx = 0, int cy = 0);
 
 	// helpers
@@ -83,7 +58,8 @@ public:
 	static BOOL IsSupportedImageFile(LPCTSTR szImagePath);
 	static HICON LoadImageFileAsIcon(LPCTSTR szImagePath, COLORREF crBack = CLR_NONE, int cx = 0, int cy = 0);
 	static CSize GetImageSize(HBITMAP hbm);
-	static HBITMAP ResizeImage(HBITMAP hbm, int cx, int cy);
+	static HBITMAP ResizeImage(HBITMAP hbm, int cx, int cy, COLORREF crBack = CLR_NONE);
+	static HBITMAP ResizeImage(HICON hIcon, int cx, int cy, COLORREF crBack = CLR_NONE);
 	static HICON ExtractIcon(HBITMAP hbm, COLORREF crMask = CLR_NONE, int cx = 0, int cy = 0);
 
 protected:

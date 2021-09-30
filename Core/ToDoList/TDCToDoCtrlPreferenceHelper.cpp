@@ -121,6 +121,7 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	tdc.SetAlternateLineColor(prefs.GetAlternateLineColor());
 	tdc.SetFlaggedTaskColor(prefs.GetFlaggedTaskColor());
 	tdc.SetReferenceTaskColor(prefs.GetReferenceTaskColor());
+	tdc.SetGroupHeaderBackgroundColor(prefs.GetGroupHeaderBackgroundColor());
 
 	CDWordArray aPriorityColors;
 	prefs.GetPriorityColors(aPriorityColors);

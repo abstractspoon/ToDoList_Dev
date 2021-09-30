@@ -134,6 +134,8 @@ BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti)
 // internal version) 
 BOOL CTDLTaskTreeCtrl::SelectItem(HTREEITEM hti, BOOL bSyncAndNotify, SELCHANGE_ACTION nBy)
 { 
+	CScopedLogTimer log(_T("CTDLTaskTreeCtrl::SelectItem()"));
+	
 	// Avoid unnecessary selections
 	if (GetSelectedCount() == 1)
 	{
@@ -870,25 +872,10 @@ LRESULT CTDLTaskTreeCtrl::OnTreeGetDispInfo(NMTVDISPINFO* pTVDI)
 
 		if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 		{
-			if (IsColumnShowing(TDCC_ICON))
-			{
-				pTVDI->item.iImage = pTVDI->item.iSelectedImage = -1;
-			}
-			else
-			{
-				pTVDI->item.iImage = -1;
-				
-				if (!pTDI->sIcon.IsEmpty())
-				{
-					pTVDI->item.iImage = m_ilTaskIcons.GetImageIndex(pTDI->sIcon);
-				}
-				else if (HasStyle(TDCS_SHOWPARENTSASFOLDERS) && pTDS->HasSubTasks())
-				{
-					pTVDI->item.iImage = 0;
-				}
-				
-				pTVDI->item.iSelectedImage = pTVDI->item.iImage;
-			}
+			pTVDI->item.iImage = pTVDI->item.iSelectedImage = -1;
+
+			if (!IsColumnShowing(TDCC_ICON))
+				pTVDI->item.iImage = pTVDI->item.iSelectedImage = GetTaskIconIndex(pTDI, pTDS);
 
 			// checkbox image
 			pTVDI->item.mask |= TVIF_STATE;
@@ -1524,6 +1511,8 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 					TSH().AddItem(hti, FALSE);
 					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
 				}
+
+				NotifyParentSelChange(SC_BYKEYBOARD);
 
 				return 0; // eat it
 			}
@@ -2294,12 +2283,14 @@ BOOL CTDLTaskTreeCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 	{
 		TSH().FixupTreeSelection();
 
-		SyncColumnSelectionToTasks();
-		UpdateSelectedTaskPath();
-		NotifyParentSelChange();
-		
+		// Expand all the relevant tree nodes before 
+		// updating and syncing the list
 		EnsureSelectionVisible(TRUE);
 		ExpandList();
+		SyncColumnSelectionToTasks();
+
+		UpdateSelectedTaskPath();
+		NotifyParentSelChange();
 	}
 	
 	return bSel;

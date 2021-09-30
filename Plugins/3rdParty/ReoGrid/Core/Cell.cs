@@ -17,6 +17,7 @@
  ****************************************************************************/
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Text;
 
@@ -1363,6 +1364,11 @@ namespace unvell.ReoGrid.Utility
 			return data is double || data is int || data is float || data is long || data is byte || data is decimal;
 		}
 
+		public static bool TryParseDoubleLocalized(string str, out double value, NumberStyles numStyles = NumberStyles.Any)
+		{
+			return double.TryParse(str, numStyles, CultureInfo.CurrentCulture, out value);
+		}
+
 		/// <summary>
 		/// Try get double value from specified cell.
 		/// </summary>
@@ -1394,7 +1400,7 @@ namespace unvell.ReoGrid.Utility
 			}
 			else if (data is string)
 			{
-				return double.TryParse((string)data, out value);
+				return CellUtility.TryParseDoubleLocalized((string)data, out value);
 			}
 			else
 			{
@@ -1442,7 +1448,7 @@ namespace unvell.ReoGrid.Utility
 				}
 
 				double tmpVal;
-				if (!double.TryParse((string)data, out tmpVal))
+				if (!CellUtility.TryParseDoubleLocalized((string)data, out tmpVal))
 				{
 					value = default(T);
 					return false;
@@ -1458,7 +1464,7 @@ namespace unvell.ReoGrid.Utility
 				}
 
 				double tmpVal;
-				if (!double.TryParse(((StringBuilder)data).ToString(), out tmpVal))
+				if (!CellUtility.TryParseDoubleLocalized(((StringBuilder)data).ToString(), out tmpVal))
 				{
 					value = default(T);
 					return false;

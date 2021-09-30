@@ -20,7 +20,7 @@ class CRRECToolBar : public CEnToolBar
 // Construction
 public:
 	CRRECToolBar();
-	BOOL Create(CWnd* parent, LPCTSTR szImageFile = NULL, COLORREF crMask = -1);
+	BOOL Create(CWnd* parent);
 
 	BOOL SetButtonState(int nID, UINT nState);
 	BOOL IsButtonChecked(int nID) const;

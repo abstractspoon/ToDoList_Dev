@@ -28,7 +28,6 @@ protected:
 protected:
 	//{{AFX_MSG(CScrollingPropertyPageHost)
 	//}}AFX_MSG
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);

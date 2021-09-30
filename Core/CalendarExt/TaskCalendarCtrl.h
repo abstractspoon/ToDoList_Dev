@@ -182,7 +182,7 @@ protected:
 	BOOL IsCellScrollBarActive() const;
 	int GetTaskHeight() const;
 	int CalcRequiredTaskFontPointSize() const;
-	CFont* GetTaskFont(const TASKCALITEM* pTCI);
+	CFont* GetTaskFont(const TASKCALITEM* pTCI, BOOL bFutureOccurrence);
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
@@ -205,7 +205,8 @@ protected:
 	void GetAllowableDragLimits(CRect& rLimits) const;
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
-	bool SelectGridCell(int nRow, int nCol);
+	BOOL SelectGridCell(int nRow, int nCol);
+	BOOL IsTaskVisible(DWORD dwTaskID) const;
 
 	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
 	void NotifyParentDragChange();

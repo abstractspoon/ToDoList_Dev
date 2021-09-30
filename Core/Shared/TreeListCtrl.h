@@ -137,6 +137,7 @@ public:
 	void EnableTreeCheckboxes(UINT nUnthemedBitmapID, BOOL bEnable = TRUE) { m_tree.EnableCheckboxes(nUnthemedBitmapID, bEnable); }
 	void EnableTreeImagePlaceholder(BOOL bEnable = TRUE) { m_tree.EnableImagePlaceholder(bEnable); }
 	void EnableTreeLabelTips(BOOL bEnable = TRUE) { m_tree.EnableLabelTips(bEnable); }
+	void EnableColumnHeaderSorting(BOOL bEnable = TRUE);
 
 	BOOL CanMoveItem(const TLCITEMMOVE& move) const;
 	BOOL MoveItem(const TLCITEMMOVE& move);

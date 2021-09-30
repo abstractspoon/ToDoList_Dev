@@ -14,6 +14,8 @@ namespace CustomComboBox
 
         public CheckedComboBox()
         {
+			None = "<none>";
+
             InitializeComponent();
         }
 
@@ -39,6 +41,11 @@ namespace CustomComboBox
 			DrawItem += new DrawItemEventHandler(OnDrawComboItem);
 			DropDown += new System.EventHandler(OnListDropDown);
 			DropDownClosed += new System.EventHandler(OnListCloseUp);
+		}
+
+		public String None
+		{
+			get; set;
 		}
 
 		public new Control DropDownControl
@@ -172,7 +179,16 @@ namespace CustomComboBox
 		{
 			if (e.Index == -1)
 			{
-				TextRenderer.DrawText(e.Graphics, FormatItems(", "), e.Font, new Point(e.Bounds.Top, e.Bounds.Left), SystemColors.WindowText);
+				String text = FormatItems(", ");
+				Color color = SystemColors.WindowText;
+
+				if (text == "")
+				{
+					text = None;
+					color = SystemColors.ControlDarkDark;
+				}
+
+				TextRenderer.DrawText(e.Graphics, text, e.Font, new Point(e.Bounds.Top, e.Bounds.Left), color);
 			}
 		}
 	}

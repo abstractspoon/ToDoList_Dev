@@ -428,7 +428,6 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 			return dtLastMod.Format(VAR_DATEVALUEONLY);
 		break;
 
-	case TDCA_FILELINK:		return sFileLink;
 	case TDCA_ID:			return Misc::Format(dwTaskID);
 	case TDCA_PERCENT:		return Misc::Format(nPercent, _T("%"));
 	case TDCA_CREATEDBY:	return sCreatedBy;
@@ -440,6 +439,7 @@ CString KANBANITEM::GetAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 
 	case TDCA_FLAG:			// drawn separately
 	case TDCA_PARENT:		// drawn separately
+	case TDCA_FILELINK:		// drawn separately
 	default:
 		ASSERT(0);
 		break;
@@ -472,7 +472,7 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_CREATIONDATE:	return CDateHelper::IsDateSet(dtCreate);
 	case TDCA_LASTMODDATE:	return CDateHelper::IsDateSet(dtLastMod);
 
-	case TDCA_FILELINK:		return !sFileLink.IsEmpty();
+	case TDCA_FILELINK:		return (aFileLinks.GetSize() > 0);
 	case TDCA_CREATEDBY:	return !sCreatedBy.IsEmpty();
 	case TDCA_EXTERNALID:	return !sExternalID.IsEmpty();
 	case TDCA_RECURRENCE:	return !sRecurrence.IsEmpty();
@@ -481,9 +481,9 @@ BOOL KANBANITEM::HasAttributeDisplayValue(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_PERCENT:		return (nPercent > 0);
 	case TDCA_TIMEESTIMATE:	return (dTimeEst > 0);
 	case TDCA_TIMESPENT:	return (dTimeSpent > 0);
+	case TDCA_PARENT:		return (dwParentID != 0);
 
-	case TDCA_PARENT:		break; // handled separately
-	case TDCA_FLAG:			break; // handled separately
+	case TDCA_FLAG:			return FALSE; // handled separately
 	}
 
 	ASSERT(0);

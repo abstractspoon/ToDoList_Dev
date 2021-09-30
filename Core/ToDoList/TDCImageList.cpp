@@ -32,11 +32,12 @@ enum
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCImageList::CTDCImageList()
+CTDCImageList::CTDCImageList(COLORREF crBkgnd)
 	:
 	m_bWantToolbars(FALSE), 
 	m_bWantDefaultIcons(FALSE),
-	m_crTransparent(CLR_NONE)
+	m_crTransparent(CLR_NONE),
+	m_crBackground(crBkgnd)
 {
 
 }
@@ -156,7 +157,7 @@ BOOL CTDCImageList::LoadImages(const CString& sTaskList, COLORREF crTransparent,
 		if (!dwResult)
 			dwResult = LoadImagesFromFolder(sAppResPath, crTransparent, this, nNextNameIndex);
 		
-		ScaleByDPIFactor();
+		ScaleByDPIFactor(m_crBackground);
 		
 		// Replace the first image with the actual folder icon
 		VERIFY(Replace(0, ShellIcons::GetIcon(ShellIcons::SI_FOLDER_CLOSED)) == 0);
@@ -306,28 +307,28 @@ BOOL CTDCImageList::LoadImage(const CString& sImageFile, COLORREF crTransparent,
 	{
 	case FT_ICO:
 		{
-			HICON hIcon = CEnBitmapEx::LoadImageFileAsIcon(sImageFile, CLR_NONE, 16, 16);
+			CIcon icon(CEnBitmapEx::LoadImageFileAsIcon(sImageFile, CLR_NONE, 16, 16));
 
-			if (hIcon)
+			if (icon.IsValid())
 			{
 				if (pImages == NULL)
 					return TRUE;
 
-				return AddImage(sImageFile, hIcon, pImages, nNextNameIndex);
+				return AddImage(sImageFile, icon, pImages, nNextNameIndex);
 			}
 		}
 		break;
 
 	case FT_PNG:
 		{
-			HICON hIcon = CEnBitmapEx::LoadImageFileAsIcon(sImageFile);	// Let the image list do the resizing
+			CIcon icon(CEnBitmapEx::LoadImageFileAsIcon(sImageFile));	// Let the image list do the resizing
 			
-			if (hIcon)
+			if (icon.IsValid())
 			{
 				if (pImages == NULL)
 					return TRUE;
 
-				return AddImage(sImageFile, hIcon, pImages, nNextNameIndex);
+				return AddImage(sImageFile, icon, pImages, nNextNameIndex);
 			}
 		}
 		break;

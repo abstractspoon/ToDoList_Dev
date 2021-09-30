@@ -114,8 +114,8 @@ namespace Misc
 	int Split(const CString& sText, CDWordArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE);
 	int Split(const CString& sText, CStringArray& aValues, LPCTSTR szSep = _T(""), BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
  	int Split(const CString& sText, CStringArray& aValues, TCHAR cDelim, BOOL bAllowEmpty = FALSE, BOOL bPreserveQuotes = FALSE);
- 	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim = TRUE);
-	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim = TRUE);
+ 	BOOL Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrimResults = TRUE);
+	BOOL Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrimResults = TRUE);
 
 	int SplitLines(const CString& sText, CStringArray& aValues, int nMaxLineLength = -1);
 	CString Left(const CString& sText, int nLength, BOOL bNearestWord);
@@ -165,8 +165,8 @@ namespace Misc
 	CString& Trim(CString& sText, LPCTSTR lpszTargets = NULL);
 	CString& TrimAlpha(CString& sText);
 	BOOL RemoveAt(CString& sText, int nPos);
-	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE, BOOL bTrim = TRUE);
-	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE, BOOL bTrim = TRUE);
+	BOOL RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
+	BOOL RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE, BOOL bTrimResult = TRUE);
 	BOOL HasPrefix(LPCTSTR szText, LPCTSTR szPrefix, BOOL bCaseSensitive = FALSE);
 	BOOL HasSuffix(LPCTSTR szText, LPCTSTR szSuffix, BOOL bCaseSensitive = FALSE);
 	BOOL IsEmpty(LPCTSTR szText);

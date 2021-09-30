@@ -241,12 +241,16 @@ void CPreferencesDlgBase::OnApply()
 		SavePreferences(m_pDoModalPrefs, m_sDoModalKey);
 }
 
-int CPreferencesDlgBase::DoModal(IPreferences* pPrefs, LPCTSTR szKey, int nInitPage)
+int CPreferencesDlgBase::DoModal(IPreferences* pPrefs, LPCTSTR szKey, int nInitPage, UINT nInitCtrlID)
 {
 	ASSERT((pPrefs && szKey && szKey[0]) || !(pPrefs || szKey));
 
+	// Only overwrite the last active page if caller has set it
 	if (nInitPage != -1)
+	{
 		m_nInitPage = nInitPage;
+		m_nInitCtrlID = nInitCtrlID;
+	}
 
 	// Temporary only
 	m_pDoModalPrefs = pPrefs;
@@ -336,8 +340,20 @@ BOOL CPreferencesDlgBase::CreatePPHost(LPRECT pRect)
 {
 	if (m_ppHost.Create(pRect, this))
 	{
-		if (m_nInitPage > 0 && m_nInitPage < m_ppHost.GetPageCount())
-			return SetActivePage(m_nInitPage);
+		if ((m_nInitPage > 0) && (m_nInitPage < m_ppHost.GetPageCount()))
+		{
+			if (!SetActivePage(m_nInitPage))
+				return FALSE;
+
+			if ((m_nInitPage != -1) && (m_nInitCtrlID != 0))
+			{
+				CPropertyPage* pPage = m_ppHost.GetActivePage();
+				ASSERT(pPage);
+
+				if (pPage)
+					m_ppHost.ScrollTo(pPage->GetDlgItem(m_nInitCtrlID));
+			}
+		}
 		
 		// else
 		return TRUE;

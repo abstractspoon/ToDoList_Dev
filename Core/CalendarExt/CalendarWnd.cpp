@@ -15,6 +15,7 @@
 #include "..\shared\WorkingWeek.h"
 
 #include "..\3rdparty\GdiPlus.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\UITheme.h"
 #include "..\Interfaces\IPreferences.h"
@@ -155,9 +156,7 @@ BOOL CCalendarWnd::OnInitDialog()
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
 	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-		
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
 		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 		
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
@@ -331,7 +330,12 @@ void CCalendarWnd::SetUITheme(const UITHEME* pTheme)
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
+		// Rescale images because background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
+
 		m_stSelectedTaskDates.SetBkColor(m_theme.crAppBackLight);
+		m_stSelectedTaskDates.SetTextColor(m_theme.crAppText);
 	}
 }
 

@@ -234,7 +234,6 @@ public:
 	CString GetSelectedTaskIcon() const { return m_taskTree.GetSelectedTaskIcon(); }
 	CString GetSelectedTaskComments() const { return m_taskTree.GetSelectedTaskComments(); }
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const { return m_taskTree.GetSelectedTaskCustomComments(cfComments); }
-	CString GetSelectedTaskTitle() const { return m_taskTree.GetSelectedTaskTitle(); }
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const { return m_taskTree.GetSelectedTaskTimeEstimate(timeEst); }
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const { return m_taskTree.GetSelectedTaskTimeSpent(timeSpent); }
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const { return m_taskTree.GetSelectedTaskAllocTo(aAllocTo); }
@@ -270,6 +269,7 @@ public:
 	CString GetTaskComments(DWORD dwTaskID) const { return m_data.GetTaskComments(dwTaskID); }
 	COleDateTime GetTaskDate(DWORD dwID, TDC_DATE nDate) const;
 	BOOL GetTaskTimes(DWORD dwTaskID, TDCTIMEPERIOD& timeEst, TDCTIMEPERIOD& timeSpent) const;
+	int GetTaskIconIndex(DWORD dwTaskID) const { return m_taskTree.GetTaskIconIndex(dwTaskID); }
 
 	double CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeEstimate(nUnits); }
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const { return m_taskTree.CalcSelectedTaskTimeSpent(nUnits); }
@@ -386,16 +386,17 @@ public:
     TDC_FILEFMT CompareFileFormat() const; // older, same, newer
 	
 	inline UINT GetTaskCount() const { return m_data.GetTaskCount(); }
-	inline int GetSelectedCount() const { return m_taskTree.GetSelectedCount(); }
 	inline BOOL HasSelection() const { return m_taskTree.HasSelection(); }
 	BOOL IsTaskLabelEditing() const;
 
+	virtual int GetSelectedCount() const { return m_taskTree.GetSelectedCount(); }
 	virtual BOOL TasksHaveFocus() const { return m_taskTree.HasFocus(); }
 	virtual void SetFocusToTasks();
 	virtual void SetFocusToComments();
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;
 	virtual BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 	virtual BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
+	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 
 	BOOL SelectedTasksHaveChildren() const { return m_taskTree.SelectionHasSubtasks(); }
 	BOOL SelectedTasksHaveIcons() const { return m_taskTree.SelectionHasIcons(); }
@@ -404,7 +405,7 @@ public:
 	BOOL SelectedTasksHaveDependents() { return m_taskTree.SelectionHasDependents(); }
 
 	BOOL CanSelectTasksInHistory(BOOL bForward) const { return m_taskTree.CanSelectTasksInHistory(bForward); }
-	void SelectTasksInHistory(BOOL bForward);
+	BOOL SelectTasksInHistory(BOOL bForward);
 
 	BOOL SetTreeFont(HFONT hFont); // setter responsible for deleting
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
@@ -440,7 +441,7 @@ public:
 	CString GetPreferencesKey(const CString& sSubKey = _T("")) const;
 
 	virtual void NotifyBeginPreferencesUpdate() { /* do nothing */ }
-	virtual void NotifyEndPreferencesUpdate() { /* do nothing */ }
+	virtual void NotifyEndPreferencesUpdate() { Invalidate(); }
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual TDC_HITTEST HitTest(const CPoint& ptScreen) const;
 	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
@@ -570,6 +571,7 @@ protected:
 	BOOL m_bDelayLoaded;
 	BOOL m_bDeletingTasks;
 	BOOL m_bInSelectedTaskEdit;
+	BOOL m_bPendingUpdateControls;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

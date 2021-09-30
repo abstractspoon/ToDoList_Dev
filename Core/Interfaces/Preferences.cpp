@@ -338,7 +338,7 @@ BOOL CPreferences::SaveInternal()
 	}
 	
 	// backup file first
-	CTempFileBackup backup(s_sPrefsPath);
+	CFileBackup backup(s_sPrefsPath, FBS_OVERWRITE | FBS_DATESTAMP, _T("ini.Backup"));
 	
 	// write prefs
 	{

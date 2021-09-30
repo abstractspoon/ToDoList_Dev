@@ -1117,12 +1117,12 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 	if (!GetAttributeVisibility((TDCCOLEDITVISIBILITY&)vis))
 		return FALSE;
 
-	const CXmlItem *pXIVis = GetItem(TDL_ATTRIBVIS);
-	ASSERT(pXIVis);
-
 	// filter fields
 	if (vis.GetShowFields() == TDLSA_ANY)
 	{
+		const CXmlItem *pXIVis = GetItem(TDL_ATTRIBVIS);
+		ASSERT(pXIVis);
+
 		const CXmlItem* pXIFilter = pXIVis->GetItem(TDL_ATTRIBVISFILTER);
 		CTDCAttributeMap mapFilter;
 

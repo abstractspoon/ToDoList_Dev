@@ -38,9 +38,6 @@
     <None Include="res\app_toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\bitmap1.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\clock.ico">
       <Filter>Resource Files</Filter>
     </None>
@@ -197,9 +194,6 @@
     <None Include="res\outlooktypes.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\reset_elapsed.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\search_prefs.ico">
       <Filter>Resource Files</Filter>
     </None>
@@ -257,5 +251,10 @@
     <Manifest Include="RES\todolist.exe.manifest">
       <Filter>Resource Files</Filter>
     </Manifest>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\reset.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

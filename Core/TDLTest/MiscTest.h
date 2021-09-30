@@ -22,6 +22,8 @@ public:
 protected:
 	void TestGetFormattedLength();
 	void TestFormatArray();
+	void TestHasPrefix();
+	void TestHasSuffix();
 
 protected:
 	static BOOL ActualLengthMatchesCalculation(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncEmpty = FALSE);

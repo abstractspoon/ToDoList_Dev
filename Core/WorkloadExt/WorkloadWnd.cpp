@@ -23,6 +23,7 @@
 
 #include "..\3rdparty\T64Utils.h"
 #include "..\3rdparty\dibdata.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -265,6 +266,7 @@ void CWorkloadWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 	m_ctrlWorkload.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 	m_ctrlWorkload.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
+	m_ctrlWorkload.EnableColumnHeaderSorting(pPrefs->GetProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), TRUE));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
@@ -345,8 +347,12 @@ void CWorkloadWnd::SetUITheme(const UITHEME* pTheme)
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
+		// Rescale images because background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
+
 		m_ctrlWorkload.SetSplitBarColor(m_theme.crAppBackDark);
-		m_ctrlWorkload.SetBackgroundColor(m_theme.crAppBackLight);
+		m_ctrlWorkload.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppText);
 
 		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
 	}
@@ -540,12 +546,7 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 			CBitmap bmImage;
 
 			if (m_ctrlWorkload.SaveToImage(bmImage))
-			{
-				CDibData dib;
-
-				if (dib.CreateDIB(bmImage) && dib.SaveDIB(pData->szFilePath))
-					return true;
-			}
+				return (CGdiPlusBitmap(bmImage).SaveAsFile(pData->szFilePath) != FALSE);
 		}
 		break;
 
@@ -557,8 +558,6 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		if (pData)
 			return (m_ctrlWorkload.SelectTask(nCmd, pData->select) != FALSE);
 		break;
-
-		return true;
 
 	case IUI_MOVETASK:
 		if (pData)
@@ -682,9 +681,7 @@ BOOL CWorkloadWnd::OnInitDialog()
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
 	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
 		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);
@@ -818,6 +815,7 @@ void CWorkloadWnd::UpdateWorkloadCtrlPreferences()
 	m_ctrlWorkload.SetOption(WLCF_PREFERTIMEESTFORCALCS, m_dlgPrefs.GetPreferTimeEstimateForCalcs());
 	m_ctrlWorkload.SetOption(WLCF_RECALCALLOCATIONS, m_dlgPrefs.GetRecalculateAllocations());
 	m_ctrlWorkload.SetOption(WLCF_RECALCPROPORTIONALLY, m_dlgPrefs.GetRecalculateAllocationsProportionally());
+	m_ctrlWorkload.SetOption(WLCF_INCLUDEDATELESSTASKSINPERIOD, m_dlgPrefs.GetIncludeDatelessTasksInPeriod());
 }
 
 void CWorkloadWnd::OnWorkloadPreferences() 
@@ -881,9 +879,13 @@ void CWorkloadWnd::EditSelectedWorkloadAllocations(LPCTSTR szAllocTo)
 	ASSERT(CanEditSelectedTaskAllocations());
 
 	WORKLOADITEM wi;
-	VERIFY(m_ctrlWorkload.GetSelectedTask(wi));
+	VERIFY(m_ctrlWorkload.GetSelectedTask(wi, FALSE));
 
-	CEditAllocationsDlg dialog(wi, m_ctrlWorkload.GetAllocatedToList(), szAllocTo);
+	CStringArray aAllocTo;
+	aAllocTo.Copy(m_ctrlWorkload.GetAllocatedToList());
+	Misc::RemoveEmptyItems(aAllocTo);
+	
+	CEditAllocationsDlg dialog(wi, aAllocTo, szAllocTo);
 	
 	if (dialog.DoModal() == IDOK)
 	{

@@ -35,6 +35,7 @@ const COLORREF TASKSTARTCOLOR		= RGB(0, 255, 0);
 const COLORREF FILTEREDCOLOR		= RGB(200, 200, 200);
 const COLORREF FLAGGEDCOLOR			= RGB(128, 64, 0);
 const COLORREF REFERENCECOLOR		= RGB(128, 0, 64);
+const COLORREF GROUPHEADERBKCOLOR	= RGB(63, 118, 179);
 
 const int DEFFONTSIZE = 8;
 const TDC_ATTRIBUTE DEFCOLORATTRIB = TDCA_CATEGORY;
@@ -79,10 +80,12 @@ void CPreferencesUITasklistColorsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_COMMENTSUSETREEFONT, m_bCommentsUseTreeFont);
 	DDX_Check(pDX, IDC_USEHLSGRADIENT, m_bHLSColorGradient);
 	DDX_Check(pDX, IDC_HIDEPRIORITYNUMBER, m_bHidePriorityNumber);
-	DDX_Check(pDX, IDC_ALTERNATELINECOLOR, m_bAlternateLineColor);
+	DDX_Check(pDX, IDC_ALTERNATELINECOLOR, m_bSpecifyAlternateLineColor);
+	DDX_Check(pDX, IDC_SPECIFYGROUPHEADERBKCOLOR, m_bSpecifyGroupHeaderBkgndColor);
 	//}}AFX_DATA_MAP
 	DDX_CBString(pDX, IDC_ATTRIBUTECOLORS, m_sSelAttribValue);
 	DDX_Control(pDX, IDC_SETATTRIBUTECOLOR, m_btAttribColor);
+	DDX_Control(pDX, IDC_SETGROUPHEADERBKCOLOR, m_btGroupHeaderBkgndColor);
 	DDX_Control(pDX, IDC_ATTRIBUTECOLORS, m_cbAttributes);
 	DDX_Radio(pDX, IDC_COLORTEXTBYATTRIBUTE, m_nTextColorOption);
 	DDX_Check(pDX, IDC_DUETASKCOLOR, m_bSpecifyDueColor);
@@ -167,6 +170,8 @@ BEGIN_MESSAGE_MAP(CPreferencesUITasklistColorsPage, CPreferencesPageBase)
 	ON_BN_CLICKED(IDC_SETREFERENCECOLOR, OnSetReferencecolor)
 	ON_BN_CLICKED(IDC_SPECIFYFLAGGEDCOLOR, OnSpecifyflaggedcolor)
 	ON_BN_CLICKED(IDC_SPECIFYREFERENCECOLOR, OnSpecifyReferencecolor)
+	ON_BN_CLICKED(IDC_SPECIFYGROUPHEADERBKCOLOR, OnSpecifyGroupHeaderBkgndcolor)
+	ON_BN_CLICKED(IDC_SETGROUPHEADERBKCOLOR, OnSetGroupHeaderBkgndcolor)
 	ON_CBN_SELCHANGE(IDC_PRIORITYCOLORS, OnSelchangePrioritycolors)
 	ON_BN_CLICKED(IDC_GRADIENTPRIORITYCOLORS, OnChangePriorityColorOption)
 	ON_BN_CLICKED(IDC_INDIVIDUALPRIORITYCOLORS, OnChangePriorityColorOption)
@@ -227,7 +232,7 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	m_btHighColor.EnableWindow(m_bColorPriority && (m_nPriorityColorOption == COLORPRIORITYBY_GRADIENT));
 	m_btGridlineColor.EnableWindow(m_bSpecifyGridColor);
 	m_btDoneColor.EnableWindow(m_bSpecifyDoneColor);
-	m_btAltLineColor.EnableWindow(m_bAlternateLineColor);
+	m_btAltLineColor.EnableWindow(m_bSpecifyAlternateLineColor);
 	m_btStartColor.EnableWindow(m_bSpecifyStartColor);
 	m_btStartTodayColor.EnableWindow(m_bSpecifyStartTodayColor);
 	m_btDueColor.EnableWindow(m_bSpecifyDueColor);
@@ -235,7 +240,8 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	m_btAttribColor.EnableWindow(bColorByAttrib && bHasAttrib && !m_sSelAttribValue.IsEmpty());
 	m_btFlaggedColor.EnableWindow(m_bSpecifyFlaggedColor);
 	m_btReferenceColor.EnableWindow(m_bSpecifyReferenceColor);
-	
+	m_btGroupHeaderBkgndColor.EnableWindow(m_bSpecifyGroupHeaderBkgndColor);
+
 	m_btGridlineColor.SetColor(m_crGridlines);
 	m_btLowColor.SetColor(m_crLow);
 	m_btHighColor.SetColor(m_crHigh);
@@ -248,6 +254,7 @@ void CPreferencesUITasklistColorsPage::OnFirstShow()
 	m_btDueTodayColor.SetColor(m_crDueToday);
 	m_btFlaggedColor.SetColor(m_crFlagged);
 	m_btReferenceColor.SetColor(m_crReference);
+	m_btGroupHeaderBkgndColor.SetColor(m_crGroupHeaderBkgnd);
 
 	// priority colors
 	for (int nPriority = 0; nPriority < m_aPriorityColors.GetSize(); nPriority++)
@@ -639,7 +646,23 @@ void CPreferencesUITasklistColorsPage::OnSpecifyAlternatelinecolor()
 {
 	UpdateData();	
 	
-	m_btAltLineColor.EnableWindow(m_bAlternateLineColor);
+	m_btAltLineColor.EnableWindow(m_bSpecifyAlternateLineColor);
+
+	CPreferencesPageBase::OnControlChange();
+}
+
+void CPreferencesUITasklistColorsPage::OnSpecifyGroupHeaderBkgndcolor()
+{
+	UpdateData();	
+	
+	m_btGroupHeaderBkgndColor.EnableWindow(m_bSpecifyGroupHeaderBkgndColor);
+
+	CPreferencesPageBase::OnControlChange();
+}
+
+void CPreferencesUITasklistColorsPage::OnSetGroupHeaderBkgndcolor()
+{
+	m_crGroupHeaderBkgnd = m_btGroupHeaderBkgndColor.GetColor();
 
 	CPreferencesPageBase::OnControlChange();
 }
@@ -908,9 +931,10 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_bCommentsUseTreeFont = pPrefs->GetProfileInt(szKey, _T("CommentsUseTreeFont"), FALSE);
 	m_bHLSColorGradient = pPrefs->GetProfileInt(szKey, _T("HLSColorGradient"), TRUE);
 	m_bHidePriorityNumber = pPrefs->GetProfileInt(szKey, _T("HidePriorityNumber"), FALSE);
-	m_bAlternateLineColor = pPrefs->GetProfileInt(szKey, _T("AlternateLineColor"), TRUE);
+	m_bSpecifyAlternateLineColor = pPrefs->GetProfileInt(szKey, _T("AlternateLineColor"), TRUE);
 	m_bSpecifyFlaggedColor = pPrefs->GetProfileInt(szKey, _T("FlaggedColor"), FALSE);
 	m_bSpecifyReferenceColor = pPrefs->GetProfileInt(szKey, _T("ReferenceColor"), FALSE);
+	m_bSpecifyGroupHeaderBkgndColor = pPrefs->GetProfileInt(szKey, _T("SpecifyGroupHeaderBkgndColor"), FALSE);
 
 	CColourButton::LoadPreferences(pPrefs);
 
@@ -953,6 +977,7 @@ void CPreferencesUITasklistColorsPage::LoadPreferences(const IPreferences* pPref
 	m_crAltLine = pPrefs->GetProfileInt(sColorKey, _T("AlternateLines"), ALTERNATELINECOLOR);
 	m_crFlagged = pPrefs->GetProfileInt(sColorKey, _T("Flagged"), FLAGGEDCOLOR);
 	m_crReference = pPrefs->GetProfileInt(sColorKey, _T("Reference"), REFERENCECOLOR);
+	m_crGroupHeaderBkgnd = pPrefs->GetProfileInt(sColorKey, _T("GroupHeaderBkgnd"), GROUPHEADERBKCOLOR);
 
 	// bkwds compatibility
 	if (pPrefs->GetProfileInt(szKey, _T("ColorByPriority"), FALSE))
@@ -1094,9 +1119,10 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(szKey, _T("CommentsUseTreeFont"), m_bCommentsUseTreeFont);
 	pPrefs->WriteProfileInt(szKey, _T("HLSColorGradient"), m_bHLSColorGradient);
 	pPrefs->WriteProfileInt(szKey, _T("HidePriorityNumber"), m_bHidePriorityNumber);
-	pPrefs->WriteProfileInt(szKey, _T("AlternateLineColor"), m_bAlternateLineColor);
+	pPrefs->WriteProfileInt(szKey, _T("AlternateLineColor"), m_bSpecifyAlternateLineColor);
 	pPrefs->WriteProfileInt(szKey, _T("FlaggedColor"), m_bSpecifyFlaggedColor);
 	pPrefs->WriteProfileInt(szKey, _T("ReferenceColor"), m_bSpecifyReferenceColor);
+	pPrefs->WriteProfileInt(szKey, _T("SpecifyGroupHeaderBkgndColor"), m_bSpecifyGroupHeaderBkgndColor);
 
 	CColourButton::SavePreferences(pPrefs);
 
@@ -1109,6 +1135,7 @@ void CPreferencesUITasklistColorsPage::SavePreferences(IPreferences* pPrefs, LPC
 	pPrefs->WriteProfileInt(sColorKey, _T("AlternateLines"), m_crAltLine);
 	pPrefs->WriteProfileInt(sColorKey, _T("Flagged"), m_crFlagged);
 	pPrefs->WriteProfileInt(sColorKey, _T("Reference"), m_crReference);
+	pPrefs->WriteProfileInt(sColorKey, _T("GroupHeaderBkgnd"), m_crGroupHeaderBkgnd);
 }
 
 void CPreferencesUITasklistColorsPage::OnPopulateattriblist() 

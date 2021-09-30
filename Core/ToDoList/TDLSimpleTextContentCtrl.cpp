@@ -20,6 +20,7 @@
 #include "..\shared\localizer.h"
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\dialoghelper.h"
+#include "..\shared\holdredraw.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
@@ -88,8 +89,6 @@ BEGIN_MESSAGE_MAP(CTDLSimpleTextContentCtrl, CUrlRichEditCtrl)
 	ON_CONTROL_REFLECT_EX(EN_KILLFOCUS, OnKillFocus)
 	ON_MESSAGE(WM_SETWORDWRAP, OnSetWordWrap)
 	ON_NOTIFY_REFLECT_EX(TTN_NEEDTEXT, OnGetTooltip)
-	ON_WM_NCDESTROY()
-
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -234,33 +233,77 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 					CHARRANGE cr;
 					GetSel(cr);
 
-					// if nothing is selected then just insert tabs
-					CString sSel = _T("\t");
+					const LPCTSTR TAB = _T("\t");
+					const LPCTSTR CR = _T("\r");
+					const LPCTSTR CRTAB = _T("\r\t");
 
-					if (cr.cpMax > cr.cpMin)
+					if (bShift) // removed leading tabs
 					{
-						sSel += GetTextRange(cr);
+						if (GetCharacterAtCaret(FALSE) == TAB)
+						{
+							// prevent selections being seen
+							CHoldRedraw hr(*this);
 
-						// and insert a tab character after every subsequent carriage return
-						int nNumReplace = sSel.Replace(_T("\r"), _T("\r\t"));
+							// Selected text without leading tab
+							CString sSel = GetTextRange(cr);
 
-						// bump selection by 'nNumReplace' to account for the tabs
-						cr.cpMax += nNumReplace;
+							// Reselect text WITHOUT leading tab
+							cr.cpMin--;
+							SetSel(cr);
+							
+							// Remove a tab after every subsequent new line
+							int nNumReplaced = sSel.Replace(CRTAB, CR);
+
+							// Update selected text
+							ReplaceSel(sSel, TRUE);
+
+							// Restore selection
+							cr.cpMax -= (1 + nNumReplaced);
+
+							SetSel(cr);
+						}
 					}
+					else // insert leading tabs
+					{
+						CString sSel = (TAB + GetTextRange(cr));
 
-					// bump selection by 1 to account for the tab
-					cr.cpMin++;
-					cr.cpMax++;
+						// Don't include first tab in resulting selection
+						cr.cpMin++;
+						cr.cpMax++;
 
-					ReplaceSel(sSel, TRUE);
-					SetSel(cr);
+						// Insert a tab after every subsequent new line
+						cr.cpMax += sSel.Replace(CR, CRTAB);
+
+						// Trim trailing newline/tab pair else next line gets indented
+						// but without trimming the result because that would remove
+						// any remaining tabs
+						if (Misc::RemoveSuffix(sSel, CRTAB, FALSE, FALSE))
+						{
+							sSel += CR; // restore carriage return
+							cr.cpMax--;
+						}
+
+						ReplaceSel(sSel, TRUE);
+						SetSel(cr);
+					}
 
 					return true;
 				}
 				break;
+			}
+		}
+	}
+	else if (pMsg->message == WM_CHAR)
+	{
+		BOOL bEnabled = !(GetStyle() & ES_READONLY);
 
-			case '2':
-				if (bShift) // '@'
+		if (bEnabled)
+		{
+			switch (pMsg->wParam)
+			{
+			case '@':
+				// Can't handle this with WM_KEYDOWN because different
+				// keyboard layouts place '@' in different locations
 				{
 					// Get both allocated by and allocated to
 					CString sAllocTo = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, TDCA_ALLOCTO, '\n');
@@ -285,7 +328,7 @@ bool CTDLSimpleTextContentCtrl::ProcessMessage(MSG* pMsg)
 			}
 		}
 	}
-
+	
 	return false;
 }
 
@@ -295,9 +338,9 @@ void CTDLSimpleTextContentCtrl::OnSelectPopupListItem(const CString& sSelItem)
 		ReplaceSel(sSelItem, TRUE);
 }
 
-void CTDLSimpleTextContentCtrl::FilterToolTipMessage(MSG* /*pMsg*/) 
+void CTDLSimpleTextContentCtrl::FilterToolTipMessage(MSG* pMsg) 
 {
-	// Not supported
+	CUrlRichEditCtrl::FilterToolTipMessage(pMsg);
 }
 
 ISpellCheck* CTDLSimpleTextContentCtrl::GetSpellCheckInterface() 
@@ -352,9 +395,9 @@ BOOL CTDLSimpleTextContentCtrl::OnHelpInfo(HELPINFO* /*lpHelpInfo*/)
 	return TRUE;
 }
 
-void CTDLSimpleTextContentCtrl::OnNcDestroy()
-{
-	CUrlRichEditCtrl::OnNcDestroy();
+void CTDLSimpleTextContentCtrl::Release() 
+{ 
+	DestroyWindow(); 
 
 	delete this;
 }

@@ -115,9 +115,9 @@
       <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
       <Name>CommandHandling</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\3rdParty\LuminousControls\LuminousControls.csproj">
-      <Project>{ecae34bb-d9cc-487f-9922-fa32291181ae}</Project>
-      <Name>LuminousControls</Name>
+    <ProjectReference Include="..\..\..\3rdParty\CustomComboBox\CustomComboBox.csproj">
+      <Project>{5563f985-67ac-4b91-a2c4-1fc9bafe7d49}</Project>
+      <Name>CustomComboBox</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\ReoGrid\ReoGrid.csproj">
       <Project>{8b62357a-abbc-4db0-8633-f1d6a6c1ea53}</Project>

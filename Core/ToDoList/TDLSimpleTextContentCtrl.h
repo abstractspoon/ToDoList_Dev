@@ -7,7 +7,6 @@
 // tdlcommentsctrl.h : header file
 //
 
-#include "..\shared\icon.h"
 #include "..\shared\urlricheditctrl.h"
 
 #include "..\Interfaces\richeditspellcheck.h"
@@ -34,6 +33,7 @@ public:
 	void SetReadOnly(bool bReadOnly);
 	void Enable(bool bEnable);
 	HWND GetHwnd() const;
+	void Release();
 	bool ProcessMessage(MSG* pMsg);
 	void FilterToolTipMessage(MSG* pMsg);
 	ISpellCheck* GetSpellCheckInterface();

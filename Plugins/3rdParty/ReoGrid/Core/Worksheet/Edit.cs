@@ -16,6 +16,7 @@ using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.DataFormat;
 using unvell.ReoGrid.Views;
 using unvell.ReoGrid.Graphics;
+using unvell.ReoGrid.Utility;
 
 namespace unvell.ReoGrid
 {
@@ -176,7 +177,7 @@ namespace unvell.ReoGrid
 			{
 				double val;
 
-				if (double.TryParse(editText, out val))
+				if (CellUtility.TryParseDoubleLocalized(editText, out val))
 				{
 					editText = (newText == null ? (val * 100) : val) + "%";
 				}
@@ -429,7 +430,7 @@ namespace unvell.ReoGrid
 							{
 								case CellDataFormatFlag.Number:
 								case CellDataFormatFlag.Currency:
-									if (double.TryParse(datastr, out numericValue))
+									if (CellUtility.TryParseDoubleLocalized(datastr, out numericValue))
 									{
 										data = numericValue;
 									}
@@ -439,7 +440,7 @@ namespace unvell.ReoGrid
 									if (datastr.EndsWith("%"))
 									{
 										double val;
-										if (double.TryParse(datastr.Substring(0, datastr.Length - 1), out val))
+										if (CellUtility.TryParseDoubleLocalized(datastr.Substring(0, datastr.Length - 1), out val))
 										{
 											data = val / 100;
 										}

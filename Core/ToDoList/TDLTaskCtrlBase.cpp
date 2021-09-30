@@ -26,6 +26,7 @@
 #include "..\shared\FileIcons.h"
 
 #include "..\3rdparty\colordef.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\Preferences.h"
 
@@ -1176,10 +1177,10 @@ BOOL CTDLTaskCtrlBase::BuildColumns()
 
 	CBitmap bmp;
 
-	if (!bmp.LoadBitmap(IDB_COLUMN_SYMBOLS) || (m_ilColSymbols.Add(&bmp, RGB(255, 0, 255)) == -1))
+	if (!bmp.LoadBitmap(IDB_COLUMN_SYMBOLS) || (m_ilColSymbols.Add(&bmp, colorMagenta) == -1))
 		return FALSE;
 	
-	m_ilColSymbols.ScaleByDPIFactor(RGB(253, 253, 253));
+	m_ilColSymbols.ScaleByDPIFactor(RGB(253, 253, 253)); // near white
 
 	// primary header
 	const TDCCOLUMN* pClient = GetColumn(TDCC_CLIENT);
@@ -1273,8 +1274,7 @@ void CTDLTaskCtrlBase::RecalcAllColumnWidths()
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths()
 {
-	if (m_bEnableRecalcColumns)
-		RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
+	RecalcUntrackedColumnWidths(FALSE); // Standard and Custom cols
 }
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
@@ -1292,9 +1292,17 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(BOOL bCustomOnly)
 
 void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColIDs, BOOL bZeroOthers, BOOL bCustomOnly)
 {
+	if (!m_bEnableRecalcColumns)
+		return;
+
 	if (!bZeroOthers && !aColIDs.GetCount())
 		return;
 
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(start)"));
+	log.LogStart();
+	///////////////////////////////////////////////////////////////////
+	
 	// Weed out all the tracked columns
 	CTDCColumnIDMap mapCols(aColIDs);
 	int nNumCols = m_hdrColumns.GetItemCount();
@@ -1307,6 +1315,10 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 			mapCols.RemoveKey(GetColumnID(nItem));
 		}
 	}
+
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(Weed out tracked columns)"));
+	///////////////////////////////////////////////////////////////////
 
 	if (!bZeroOthers && !mapCols.GetCount())
 		return;
@@ -1334,6 +1346,11 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 		CTDCLongestItemMap mapLongest;
 		m_find.GetLongestValues(mapCols, m_aCustomAttribDefs, mapLongest, bVisibleTasksOnly);
 
+		// PERMANENT LOGGING //////////////////////////////////////////////
+		log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(GetLongestValues)"));
+		///////////////////////////////////////////////////////////////////
+
+		CHoldRedraw hr(m_hdrColumns);
 		m_hdrColumns.SetItemWidth(0, 0); // always
 
 		for (int nItem = 1; nItem < nNumCols; nItem++)
@@ -1346,6 +1363,15 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 				if (mapLongest.HasColumn(nColID))
 				{
 					CString sLongest = mapLongest.GetLongestValue(nColID);
+
+					// Special handling
+					switch (nColID)
+					{
+					case TDCC_FILELINK:
+						nColWidth = CalcRequiredIconColumnWidth(_ttoi(sLongest), FALSE, CFileIcons::GetImageSize());
+						sLongest.Empty();
+						break;
+					}
 
 					if (sLongest.GetLength())
 						nColWidth = GraphicsMisc::GetAverageMaxStringWidth(sLongest, &dc);
@@ -1376,6 +1402,10 @@ void CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(const CTDCColumnIDMap& aColID
 
 			m_hdrColumns.SetItemWidth(nItem, nColWidth);
 		}
+
+		// PERMANENT LOGGING //////////////////////////////////////////////
+		log.LogTimeElapsed(_T("CTDLTaskCtrlBase::RecalcUntrackedColumnWidths(SetItemWidths)"));
+		///////////////////////////////////////////////////////////////////
 	}
 
 	// cleanup
@@ -1607,7 +1637,7 @@ int CTDLTaskCtrlBase::HitTestFileLinkColumn(const CPoint& ptScreen) const
 		{
 			CRect rIcon;
 			
-			if (!CalcFileIconRect(rSubItem, rIcon, nFile, nNumFiles))
+			if (!CalcFileIconRect(rSubItem, rIcon, nFile))
 				break;
 
 			if (rIcon.PtInRect(ptList))
@@ -2654,8 +2684,11 @@ DWORD CTDLTaskCtrlBase::OnPostPaintTaskTitle(const NMCUSTOMDRAW& nmcd, const CRe
 				GraphicsMisc::DrawShortcutOverlay(pDC, rIcon);
 			}
 
+			if (pOldFont)
+				pDC->SelectObject(pOldFont);
+
 			// render comment text
-			PrepareDCFont(pDC, pTDI, pTDS, FALSE);
+			pOldFont = PrepareDCFont(pDC, pTDI, pTDS, FALSE);
 
 			DrawCommentsText(pDC, rRow, rText, pTDI, pTDS);
 			
@@ -3066,7 +3099,7 @@ void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLi
 	{
 		CRect rIcon;
 
-		if (!CalcFileIconRect(rect, rIcon, nFile, nNumFiles))
+		if (!CalcFileIconRect(rect, rIcon, nFile))
 			break; // out of bounds
 
 		// first check for a tdl://
@@ -3133,19 +3166,25 @@ void CTDLTaskCtrlBase::DrawColumnCheckBox(CDC* pDC, const CRect& rSubItem, TTCB_
 CPoint CTDLTaskCtrlBase::CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize, int nImage, int nCount) const
 {
 	CRect rImage(rSubItem.TopLeft(), CSize(nImageSize, nImageSize));
+	
+	rImage.OffsetRect(LV_COLPADDING, 0);
+
 	GraphicsMisc::CentreRect(rImage, rSubItem, (nCount == 1), TRUE);
 	
 	if (nCount > 1)
-		rImage.OffsetRect((nImage * (nImageSize + 1)), 0);
+		rImage.OffsetRect((nImage * (nImageSize + COL_ICON_SPACING)), 0);
 
 	return rImage.TopLeft();
 }
 
-BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage, int nCount) const
+BOOL CTDLTaskCtrlBase::CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage) const
 {
+	// Note: Always pass a 'Count' value > 1 so that 
+	// the images are left-aligned for consistency
 	int nImageSize = CFileIcons::GetImageSize();
+	CPoint ptTopLeft = CalcColumnIconTopLeft(rSubItem, nImageSize, nImage, 2);
 
-	rIcon = CRect(CalcColumnIconTopLeft(rSubItem, nImageSize, nImage, nCount), CSize(nImageSize, nImageSize));
+	rIcon = CRect(ptTopLeft, CSize(nImageSize, nImageSize));
 
 	// we always draw the first icon
 	if ((nImage == 0) || (rIcon.right <= rSubItem.right))
@@ -3292,9 +3331,17 @@ BOOL CTDLTaskCtrlBase::DrawItemCustomColumn(const TODOITEM* pTDI, const TODOSTRU
 	return TRUE; // we handled it
 }
 
-int CTDLTaskCtrlBase::CalcRequiredIconColumnWidth(int nNumImage)
+int CTDLTaskCtrlBase::CalcRequiredIconColumnWidth(int nNumImage, BOOL bWithPadding, int nImageWidth)
 {
-	return ((nNumImage * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING + (LV_COLPADDING * 2));
+	if (nImageWidth == -1)
+		nImageWidth = COL_ICON_SIZE;
+
+	int nColWidth = ((nNumImage * (nImageWidth + COL_ICON_SPACING)) - COL_ICON_SPACING);
+
+	if (bWithPadding)
+		nColWidth += (LV_COLPADDING * 2);
+
+	return nColWidth;
 }
 
 BOOL CTDLTaskCtrlBase::FormatDate(const COleDateTime& date, TDC_DATE nDate, CString& sDate, CString& sTime, CString& sDow, BOOL bCustomWantsTime) const
@@ -4073,7 +4120,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 		case WM_GETDLGCODE:
-			return DLGC_WANTTAB;
+			return (DLGC_WANTTAB | ScDefault(hRealWnd));
 
 		case WM_KEYDOWN:
 			if (wp == VK_TAB)
@@ -4124,7 +4171,7 @@ LRESULT CTDLTaskCtrlBase::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 		switch (msg)
 		{
 		case WM_GETDLGCODE:
-			return DLGC_WANTTAB;
+			return (DLGC_WANTTAB | ScDefault(hRealWnd));
 
 		case WM_KEYDOWN:
 			if (wp == VK_TAB)
@@ -4350,7 +4397,7 @@ void CTDLTaskCtrlBase::HandleFileLinkColumnClick(int nItem, DWORD dwTaskID, CPoi
 			{
 				CRect rIcon;
 				
-				if (!CalcFileIconRect(rSubItem, rIcon, nFile, nNumFiles))
+				if (!CalcFileIconRect(rSubItem, rIcon, nFile))
 					break; // outside the subitem
 				
 				if (rIcon.PtInRect(pt))
@@ -5123,6 +5170,10 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 	if (!IsColumnShowing(nColID))
  		return 0;
 	
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CTDLTaskCtrlBase::CalcColumnWidth(%s)"), GetColumnName(nColID));
+	///////////////////////////////////////////////////////////////////
+	
 	int nColWidth = 0; // equivalent to MINCOLWIDTH
 	
 	switch (nColID)
@@ -5232,12 +5283,8 @@ int CTDLTaskCtrlBase::CalcColumnWidth(int nCol, CDC* pDC, BOOL bVisibleTasksOnly
 			int nMaxCount = m_find.GetLargestFileLinkCount(bVisibleTasksOnly);
 
 			if (nMaxCount >= 1)
-			{
-				nColWidth = ((nMaxCount * (CFileIcons::GetImageSize() + COL_ICON_SPACING)) - COL_ICON_SPACING);
+				nColWidth = CalcRequiredIconColumnWidth(nMaxCount, FALSE, CFileIcons::GetImageSize());
 
-				// compensate for extra padding we don't want 
-				nColWidth -= (2 * LV_COLPADDING);
-			}
 			// else use MINCOLWIDTH
 		}
 		break; 
@@ -5327,7 +5374,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 					case TDCCA_FIXEDMULTILIST:
 						{
 							int nNumIcons = m_find.GetLargestCustomAttributeArraySize(attribDef, bVisibleTasksOnly);
-							return ((nNumIcons * (COL_ICON_SIZE + COL_ICON_SPACING)) - COL_ICON_SPACING);
+							return CalcRequiredIconColumnWidth(nNumIcons, FALSE);
 						}
 					}
 				}
@@ -5817,13 +5864,31 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CONTENTFORMAT
 	return content;
 }
 
-CString CTDLTaskCtrlBase::GetSelectedTaskTitle() const
+CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const
 {
-	if (GetSelectedCount() == 1)
-		return m_data.GetTaskTitle(GetSelectedTaskID());
-	
-	// else
-	return EMPTY_STR;
+	CString sSelTasks;
+	POSITION pos = GetFirstSelectedTaskPos();
+	int nCount = 0;
+
+	while (pos)
+	{
+		if ((nMaxTasks != -1) && (nCount >= nMaxTasks))
+			break;
+
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (bFullPath)
+			sSelTasks += m_formatter.GetTaskPath(dwTaskID);
+
+		sSelTasks += m_data.GetTaskTitle(dwTaskID);
+		sSelTasks += (cSep == 0 ? Misc::GetListSeparator() : cSep);
+
+		nCount++;
+	}
+
+	Misc::RemoveSuffix(sSelTasks, Misc::GetListSeparator());
+
+	return sSelTasks;
 }
 
 int CTDLTaskCtrlBase::GetSelectedTaskPriority() const

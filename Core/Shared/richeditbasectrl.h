@@ -141,6 +141,7 @@ public:
 	int GetSelEnd() const;
 	void CollapseSelection(BOOL bStart);
 	void SelectCharacterAtCaret(BOOL bForwards);
+	CString GetCharacterAtCaret(BOOL bForwards) const;
 
 	void EnableSelectOnFocus(BOOL bEnable) { m_bEnableSelectOnFocus = bEnable; }
 	BOOL CanEdit() const;
@@ -320,6 +321,7 @@ protected:
 	BOOL SameAsSelected(LPCTSTR lpszCompare, BOOL bCase, BOOL bWord);
 	BOOL IsFindDialog(HWND hwnd) const;
 	BOOL InsertSoftReturn();
+	void GetCharacterAtCaret(CHARRANGE& cr, BOOL bForwards) const;
 
 	BOOL EnableLanguageOptions(DWORD dwOption, BOOL bEnable);
 	BOOL EnableEditStyles(DWORD dwStyles, BOOL bEnable);

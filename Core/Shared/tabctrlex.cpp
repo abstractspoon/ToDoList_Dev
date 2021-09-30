@@ -489,7 +489,7 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 	if (m_fontClose.GetSafeHandle() == NULL)
 		GraphicsMisc::CreateFont(m_fontClose, _T("Marlett"), 6);
 
-	dc.SelectObject(&m_fontClose);
+	CFont* pOldFont = dc.SelectObject(&m_fontClose);
 	
 	// calc button size first time
 	if (!m_sizeClose.cx || !m_sizeClose.cy)
@@ -522,6 +522,7 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 	dc.SetTextAlign(TA_TOP | TA_LEFT);
 	dc.SetBkMode(TRANSPARENT);
 	dc.TextOut(rBtn.left + 1, rBtn.top + 1, STR_CLOSEBTN);
+	dc.SelectObject(pOldFont);
 }
 
 void CTabCtrlEx::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)

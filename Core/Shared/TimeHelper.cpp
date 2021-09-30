@@ -272,14 +272,18 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 
 BOOL CTimeHelper::RemovePM(CString& sTime)
 {
-	CString sPM(Misc::GetPM());
-	return (Misc::RemovePrefix(sTime, sPM) || Misc::RemoveSuffix(sTime, sPM));
+	Misc::Trim(sTime); // remove whitespace
+
+	return (Misc::RemovePrefix(sTime, Misc::GetPM()) || 
+			Misc::RemoveSuffix(sTime, Misc::GetPM()));
 }
 
 BOOL CTimeHelper::RemoveAM(CString& sTime)
 {
-	CString sAM(Misc::GetAM());
-	return (Misc::RemovePrefix(sTime, sAM) || Misc::RemoveSuffix(sTime, sAM));
+	Misc::Trim(sTime); // remove whitespace
+	
+	return (Misc::RemovePrefix(sTime, Misc::GetAM()) || 
+			Misc::RemoveSuffix(sTime, Misc::GetAM()));
 }
 
 CString CTimeHelper::FormatTime(double dTime, int nDecPlaces) const

@@ -102,7 +102,6 @@ REM - All other components
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\LuminousControls.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
@@ -110,6 +109,7 @@ REM - All other components
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\UIComponents.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGrid.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGridEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\LinkLabelEx.dll
 
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest

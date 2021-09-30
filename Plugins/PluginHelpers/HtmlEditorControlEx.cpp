@@ -42,7 +42,7 @@ void HtmlEditorControlEx::SetControlFont(Drawing::Font^ font)
 	{
 		FormsUtil::SetFont(this, font);
 
-		ToolBar->Items["fontToolStripComboBox"]->Font = m_ControlsFont;
+		ToolBar->Items["toolstripFontComboBox"]->Font = m_ControlsFont;
 		Toolbars::FixupButtonSizes(ToolBar);
 	}
 }
