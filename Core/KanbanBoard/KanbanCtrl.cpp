@@ -2632,15 +2632,14 @@ KBC_ATTRIBLABELS CKanbanCtrl::GetColumnAttributeLabelVisibility(int nCol, int nC
 	// Calculate the fixed attribute label lengths and check if any
 	// of them exceed the list width
 	float fAveCharWidth = GetAverageColumnCharWidth();
-	KBC_ATTRIBLABELS nLabelVis[2] = { KBCAL_LONG, KBCAL_SHORT };
 
-	for (int nPass = 0; nPass < 2; nPass++)
-	{
-		if (CanFitAttributeLabels(nAvailWidth, fAveCharWidth, nLabelVis[nPass]))
-			return nLabelVis[nPass];
-	}
+	if (CanFitAttributeLabels(nAvailWidth, fAveCharWidth, KBCAL_LONG))
+		return KBCAL_LONG;
 
-	return KBCAL_NONE;
+//	if (CanFitAttributeLabels(nAvailWidth, fAveCharWidth, KBCAL_SHORT))
+		return KBCAL_SHORT;
+
+//	return KBCAL_NONE;
 }
 
 // Called externally only
