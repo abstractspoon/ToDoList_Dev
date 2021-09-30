@@ -44,10 +44,12 @@ public:
 	BOOL CheckUpdateValue(TDC_COLUMN nColID, const CString& sValue);
 	BOOL CheckUpdateValue(TDC_COLUMN nColID, const CStringArray& aValues);
 	BOOL UpdateValue(TDC_COLUMN nColID, const CString& sValue);
+	BOOL UpdateValue(TDC_COLUMN nColID, int nValue);
 	BOOL HasColumn(TDC_COLUMN nColID) const;
 	CString GetLongestValue(TDC_COLUMN nColID) const;
 
 protected:
+	// Used by CToDoCtrlFind
 	static BOOL IsSupportedColumn(TDC_COLUMN nColID);
 	static BOOL IsSupportedColumn(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef);
 };
@@ -99,8 +101,10 @@ public:
 	HTREEITEM FindFirstTask(const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards, BOOL bCheckDueToday) const;
 	HTREEITEM FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& params, SEARCHRESULT& result, BOOL bForwards, BOOL bCheckDueToday) const;
 
-	// For debugging
-	//void WalkTree(BOOL bVisibleOnly) const;
+	// For debugging only
+#ifdef _DEBUG
+	void WalkTree(BOOL bVisibleOnly) const;
+#endif
 
 protected:
 	const CTreeCtrlHelper& m_tch; 
@@ -147,7 +151,9 @@ protected:
 	BOOL CheckGetTask(HTREEITEM hti, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;
 
 	// For debugging
-	//CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
+#ifdef _DEBUG
+	CString WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const;
+#endif
 
 	static CString GetLongerString(const CString& str1, const CString& str2);
 	static BOOL EqualsLongestPossible(const CString& sValue, const CString& sLongestPossible);

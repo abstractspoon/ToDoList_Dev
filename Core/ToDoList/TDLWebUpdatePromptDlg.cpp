@@ -12,6 +12,8 @@
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\GraphicsMisc.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 #include <WININET.H>
 
 #ifdef _DEBUG
@@ -135,12 +137,8 @@ BOOL CTDLWebUpdatePromptDlg::OnInitDialog()
 	// setup social media toolbar
 	if (m_toolbar.CreateEx(this, (TBSTYLE_FLAT, WS_CHILD | CBRS_TOOLTIPS | WS_VISIBLE)))
 	{
-		VERIFY(m_toolbar.LoadToolBar(IDR_SOCIAL_TOOLBAR));
-
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-		m_toolbar.SetImage(IDB_SOCIAL_TOOLBAR, MAGENTA);
-
-		m_tbHelper.Initialize(&m_toolbar, this, NULL);
+		VERIFY(m_toolbar.LoadToolBar(IDR_SOCIAL_TOOLBAR, IDB_SOCIAL_TOOLBAR, colorMagenta));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar, this, NULL));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDCANCEL);
 

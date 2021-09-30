@@ -198,9 +198,9 @@ void CPreferencesDlg::InitializePreferences()
 	SavePreferences(m_prefs, PREFSKEY); // this writes it back to the prefs
 }
 
-int CPreferencesDlg::DoModal(int nInitPage) 
+int CPreferencesDlg::DoModal(int nInitPage, UINT nInitCtrlID) 
 { 
-	return CPreferencesDlgBase::DoModal(m_prefs, PREFSKEY, nInitPage); 
+	return CPreferencesDlgBase::DoModal(m_prefs, PREFSKEY, nInitPage, nInitCtrlID); 
 }
 
 void CPreferencesDlg::LoadPreferences(const IPreferences* prefs, LPCTSTR szKey)

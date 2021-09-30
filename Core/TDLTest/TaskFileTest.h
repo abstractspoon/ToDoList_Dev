@@ -12,6 +12,11 @@
 #include "TDLTestBase.h"
 
 #include "..\todolist\taskfile.h"
+#include "..\todolist\tdcenum.h"
+
+//////////////////////////////////////////////////////////////////////
+
+struct TDCAUTOLISTDATA;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -23,18 +28,33 @@ public:
 
 	TESTRESULT Run();
 
-	void PopulateHierarchy(CTaskFile& tasks, int nNumLevels);
-	void PopulateFlatList(CTaskFile& tasks, int nNumTasks);
+	// Helpers accessible to other tests
+	void PopulateHierarchy(CTaskFile& tasks, int nNumLevels, const CTDCAttributeMap& mapAttrib = TDCA_ALL) const;
+	void PopulateFlatList(CTaskFile& tasks, int nNumTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL) const;
+
+	BOOL WantPopulateAttributes() const { return m_bPopulateAttributes; }
 	
+	const int NUM_TESTLEVELS;
+
+protected:
+	BOOL m_bPopulateAttributes;
+
+protected:
 	void TestHierarchyConstructionPerformance();
 	void TestFlatListConstructionPerformance();
 
-	static int NUM_TESTLEVELS;
-	static int MAX_TESTLEVELS;
+	void BeginTest(LPCTSTR szFunction);
 
-protected:
-	static void PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask);
-	static void Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTask, int nLevel, int nNumLevels);
+	static void TestSaveTasklist(CTaskFile& tasks, LPCTSTR szFilePath, LPCTSTR szType);
+	static void TestLoadTasklist(LPCTSTR szFilePath, LPCTSTR szType);
+
+	static void Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTask, int nLevel, int nNumLevels, const CTDCAttributeMap& mapAttrib);
+	static void PopulateNumericTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, const CTDCAttributeMap& mapAttrib);
+	static void PopulateStringTaskAttributes(CTaskFile& tasks, HTASKITEM hTask, int nNumMultiAttrib, const CTDCAttributeMap& mapAttrib);
+	static void PopulateArrayWithRandomStrings(CStringArray& aValues, int nCount, LPCTSTR szFormat);
+	static void AddGlobalsToTasklist(CTaskFile& tasks, const CTDCAttributeMap& mapAttrib);
+	static BOOL HasAttribute(const CTDCAttributeMap& mapAttrib, TDC_ATTRIBUTE nAttribID);
+	static void OutputElapsedTime(const CTaskFile& tasks, DWORD dwTickStart, LPCTSTR szOperation, LPCTSTR szType);
 
 };
 

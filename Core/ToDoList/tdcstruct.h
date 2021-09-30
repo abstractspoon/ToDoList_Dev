@@ -489,42 +489,6 @@ struct TDCEXPORTTASKLIST
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
-struct TDCSTATUSBARINFO
-{
-	TDCSTATUSBARINFO() 
-		: 
-		nSelCount(0), 
-		dwSelTaskID(0), 
-		nTimeEstUnits(TDCU_NULL), 
-		dTimeEst(0.0), 
-		nTimeSpentUnits(TDCU_NULL), 
-		dTimeSpent(0.0), 
-		dCost(0.0)
-	{
-	}
-
-	BOOL operator==(const TDCSTATUSBARINFO& sbi) const
-	{
-		return (nSelCount == sbi.nSelCount &&
-				dwSelTaskID == sbi.dwSelTaskID &&
-				nTimeEstUnits == sbi.nTimeEstUnits &&
-				dTimeEst == sbi.dTimeEst &&
-				nTimeSpentUnits == sbi.nTimeSpentUnits &&
-				dTimeSpent == sbi.dTimeSpent &&
-				dCost == sbi.dCost);
-	}
-
-	int nSelCount;
-	DWORD dwSelTaskID;
-	TDC_UNITS nTimeEstUnits;
-	double dTimeEst;
-	TDC_UNITS nTimeSpentUnits;
-	double dTimeSpent;
-	double dCost;
-};
-
-/////////////////////////////////////////////////////////////////////////////////////////////
-
 struct TDCGETTASKS
 {
 	TDCGETTASKS(TDC_GETTASKS filter = TDCGT_ALL, DWORD flags = 0) 
@@ -2290,7 +2254,7 @@ struct TDCCOLEDITVISIBILITY
 		return nShowFields;
 	}
 	
-	void SetShowFields(TDL_SHOWATTRIB nShow)
+	virtual void SetShowFields(TDL_SHOWATTRIB nShow)
 	{
 		nShowFields = nShow;
 

@@ -299,12 +299,20 @@ CSize CEnString::Draw(CDC* pDC, LPRECT lpRect, int nStyle)
 
 CSize CEnString::FormatDCEx(CDC* pDC, int nWidth, int nStyle)
 {
-	CString sFinalText = *this;
+	CString& sThis = *this;
 
-	CSize sizeText = pDC->GetTextExtent(sFinalText);
-	CSize sizeEllipsis = pDC->GetTextExtent("...");
+	const CString ELLIPSIS(_T("..."));
+
+	CSize sizeText = pDC->GetTextExtent(sThis);
+	CSize sizeEllipsis = pDC->GetTextExtent(ELLIPSIS);
 
 	bool bEndEllipsis = (nStyle == ES_END || nStyle == ES_WORD);
+
+	// Remove any existing ellipsis
+	if (bEndEllipsis)
+		Misc::RemoveSuffix(sThis, ELLIPSIS);
+	else
+		Misc::RemovePrefix(sThis, ELLIPSIS);
 	
 	// truncate string if too long adding ellipsis (...)
 	if ((sizeText.cx + sizeEllipsis.cx) > nWidth)
@@ -313,29 +321,25 @@ CSize CEnString::FormatDCEx(CDC* pDC, int nWidth, int nStyle)
 	    {
 			// truncate another char
 			if (bEndEllipsis)
-			{
-				Misc::TrimLast(sFinalText);
-				sizeText = pDC->GetTextExtent(CString("..." + sFinalText));
-			}
+				Misc::TrimLast(sThis);
 			else
-			{
-				Misc::TrimFirst(sFinalText);
-		        sizeText = pDC->GetTextExtent(CString(sFinalText + "..."));
-			}
+				Misc::TrimFirst(sThis);
 
-			if (sFinalText.IsEmpty())
+			sizeText = pDC->GetTextExtent(sThis);
+
+			if (sThis.IsEmpty())
 				break;
 		}
+
+		sizeText.cx += sizeEllipsis.cx;
 			
 		if (bEndEllipsis)
-			sFinalText += "...";
+			sThis += ELLIPSIS;
 		else
-			sFinalText = "..." + sFinalText;
+			sThis = ELLIPSIS + sThis;
 	}
 
-	*this = CEnString(sFinalText);
-
-	return pDC->GetTextExtent(*this);
+	return sizeText;
 }
 
 void CEnString::SetLocalizer(ITransText* pTT)

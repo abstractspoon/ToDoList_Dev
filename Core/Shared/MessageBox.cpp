@@ -108,6 +108,7 @@ enum
 //////////////////////////////////////////////////////////////////////
 
 CString CMessageBox::s_sAppName;
+BOOL CMessageBox::s_bDisableSimpleErrorMessages = FALSE;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -189,6 +190,15 @@ int CMessageBox::Show(const CWnd* pWnd, const CString& sCaption, const CString& 
 
 int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags)
 {
+	int nIcon = (nFlags & MB_ICONMASK);
+	int nButtons = (nFlags & MB_TYPEMASK);
+
+	if (s_bDisableSimpleErrorMessages)
+	{
+		if ((nIcon == MB_ICONERROR) && (nButtons == MB_OK))
+			return IDOK;
+	}
+
 	HMODULE hMod = ::LoadLibrary(_T("Comctl32.dll"));
 	
 	if (hMod)
@@ -237,9 +247,6 @@ int CMessageBox::Show(HWND hwndParent, const CString& sCaption, const CString& s
 			
 			// icon
 			LPCWSTR wszIcon = NULL;
-			int nIcon = (nFlags & MB_ICONMASK);
-			int nButtons = (nFlags & MB_TYPEMASK);
-			
 			switch (nIcon)
 			{
 			case MB_ICONQUESTION:

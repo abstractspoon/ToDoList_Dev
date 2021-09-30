@@ -215,6 +215,7 @@ void CTDCAnonymizeTasklist::AnonymizeTask(CTaskFile& tasks, HTASKITEM hTask)
 		VERIFY(tasks.SetTaskVersion(hTask, tdi.sVersion));
 		VERIFY(tasks.SetTaskExternalID(hTask, tdi.sExternalID));
 		VERIFY(tasks.SetTaskCreatedBy(hTask, tdi.sCreatedBy));
+		VERIFY(tasks.SetTaskLastModifiedBy(hTask, tdi.sLastModifiedBy));
 
 		if (tdi.HasCustomAttributeValues())
 		{

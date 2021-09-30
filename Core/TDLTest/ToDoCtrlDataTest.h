@@ -30,6 +30,8 @@ protected:
 	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
 
 protected:
+	void BeginTest(LPCTSTR szFunction, BOOL bWithAttributes);
+
 	void TestHierarchyDataModelPerformance();
 	void TestFlatListDataModelPerformance();
 	void TestDataModelCreationPerformance(const CTaskFile& tasks, CToDoCtrlData& data, LPCTSTR szTaskType);

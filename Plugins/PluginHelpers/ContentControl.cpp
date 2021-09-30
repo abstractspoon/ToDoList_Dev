@@ -76,7 +76,8 @@ List<String^>^ ContentControlWnd::ParentNotify::GetAttributeValues(Task::Attribu
 
 		String^ attribs = gcnew String(szList);
 
-		return gcnew List<String^>(attribs->Split('\n'));
+		if (!String::IsNullOrWhiteSpace(attribs))
+			return gcnew List<String^>(attribs->Split('\n'));
 	}
 
 	// all else

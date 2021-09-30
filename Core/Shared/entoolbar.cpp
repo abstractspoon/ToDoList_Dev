@@ -10,6 +10,9 @@
 #include "themed.h"
 #include "icon.h"
 #include "misc.h"
+#include "holdredraw.h"
+
+#include "..\3rdparty\XNamedColors.h"
 
 #include <afxpriv.h>
 
@@ -166,6 +169,8 @@ void CEnToolBar::SetImageSize(int cx, int cy)
 
 BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 {
+	CHoldRedraw hr(*this);
+
 	CEnBitmapEx bmDis;
 	bmDis.CopyImage(pBitmap); // for later
 	
@@ -185,7 +190,7 @@ BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 	if (m_ilNormal.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1)) 
 	{
 		m_ilNormal.Add(pBitmap, crMask);
-		m_ilNormal.ScaleByDPIFactor();
+		m_ilNormal.ScaleByDPIFactor((m_crFrom == CLR_NONE) ? GetSysColor(COLOR_3DFACE) : m_crFrom);
 
 		CImageList* pILPrev = GetToolBarCtrl().SetImageList(&m_ilNormal);
 
@@ -270,7 +275,7 @@ void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask)
 		m_ilDisabled.DeleteImageList();
 		m_ilDisabled.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1);
 		m_ilDisabled.Add(pBitmap, crMask);
-		m_ilDisabled.ScaleByDPIFactor();
+		m_ilDisabled.ScaleByDPIFactor((m_crFrom == CLR_NONE) ? GetSysColor(COLOR_3DFACE) : m_crFrom);
 		
 		CImageList* pILPrev = GetToolBarCtrl().SetDisabledImageList(&m_ilDisabled);
 		
@@ -289,7 +294,7 @@ void CEnToolBar::RefreshDisabledImageList()
 	m_ilDisabled.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1);
 
 	// Work directly off the icons
-	COLORREF crMask = RGB(255, 0, 255);
+	const COLORREF crMask = colorMagenta;
 	int nImageCount = m_ilNormal.GetImageCount();
 
 	for (int nImage = 0; nImage < nImageCount; nImage++)

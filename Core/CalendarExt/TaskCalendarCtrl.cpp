@@ -283,6 +283,9 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		return FALSE;
 	}
 
+	// Make sure the selected task remains visible
+	// after any changes if it was visible to start with
+	BOOL bSelTaskWasVisible = IsTaskVisible(m_dwSelectedTaskID);
 	BOOL bChange = FALSE;
 
 	switch (nUpdate)
@@ -316,7 +319,10 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		RecalcDataRange();
 		RebuildCellTasks();
 
-		Invalidate(FALSE);
+		if (bSelTaskWasVisible && !IsTaskVisible(m_dwSelectedTaskID))
+			EnsureSelectionVisible();
+		else
+			Invalidate(FALSE);
 	}
 
 	return bChange;
@@ -744,6 +750,8 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 		DWORD dwRealTaskID = GetRealTaskID(dwTaskID);
 		ASSERT(dwRealTaskID);
+
+		BOOL bFutureOccurrence = (dwRealTaskID != dwTaskID);
 		
 		// draw selection
 		BOOL bSelTask = (!m_bSavingToImage && (dwRealTaskID == m_dwSelectedTaskID));
@@ -776,7 +784,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			{
 				nState = GMIS_SELECTEDNOTFOCUSED;
 			}
-			else if (dwTaskID != dwRealTaskID)
+			else if (bFutureOccurrence)
 			{
 				nState = GMIS_DROPHILITED;
 			}
@@ -878,7 +886,7 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 				nLeft -= cdi.nTextOffset;
 			}
 
-			pDC->SelectObject(GetTaskFont(pTCI));
+			pDC->SelectObject(GetTaskFont(pTCI, bFutureOccurrence));
 			pDC->SetTextColor(crText);
 
 			CString sTitle = pTCI->GetName();
@@ -916,18 +924,21 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 	}
 }
 
-CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI)
+CFont* CTaskCalendarCtrl::GetTaskFont(const TASKCALITEM* pTCI, BOOL bFutureOccurrence)
 {
 	if (m_fontAltText.GetSafeHandle())
 		return &m_fontAltText;
 
 	DWORD dwFlags = 0;
 		
-	if (pTCI->IsDone(FALSE) && m_bStrikeThruDone)
-		dwFlags |= GMFS_STRIKETHRU;
-		
-	if (pTCI->bTopLevel)
-		dwFlags |= GMFS_BOLD;
+	if (!bFutureOccurrence)
+	{
+		if (pTCI->IsDone(FALSE) && m_bStrikeThruDone)
+			dwFlags |= GMFS_STRIKETHRU;
+
+		if (pTCI->bTopLevel)
+			dwFlags |= GMFS_BOLD;
+	}
 		
 	return m_fonts.GetFont(dwFlags);
 }
@@ -1719,7 +1730,7 @@ void CTaskCalendarCtrl::OnVisibleDateRangeChanged()
 	UpdateCellScrollBarVisibility(TRUE);// scroll to selected task
 }
 
-bool CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
+BOOL CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
 {
 	int nPrevRow, nPrevCol;
 
@@ -1727,13 +1738,19 @@ bool CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
 		(nRow != nPrevRow) || (nCol != nPrevCol))
 	{
 		if (!CCalendarCtrl::SelectGridCell(nRow, nCol))
-			return false;
+			return FALSE;
 
 		// Notify our parent of the grid cell change
 		NotifyParentClick();
 	}
 
 	return true;
+}
+
+BOOL CTaskCalendarCtrl::IsTaskVisible(DWORD dwTaskID) const
+{
+	int nUnused;
+	return GetGridCell(dwTaskID, nUnused, nUnused, nUnused);
 }
 
 BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const
@@ -1745,6 +1762,9 @@ BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const
 BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const
 {
 	nRow = nCol = nTask = -1;
+
+	if (!dwTaskID)
+		return FALSE;
 
 	// iterate the visible cells for the specified task
 	for(int i=0; i < GetVisibleWeeks() ; i++)
@@ -1770,7 +1790,7 @@ BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& n
 		}
 	}
 
-	return false;
+	return FALSE;
 }
 
 BOOL CTaskCalendarCtrl::GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const

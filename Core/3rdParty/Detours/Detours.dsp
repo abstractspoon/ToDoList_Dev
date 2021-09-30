@@ -77,6 +77,18 @@ CFG=Detours - Win32 Debug
 
 !ENDIF 
 
+# Begin Group "Lib.x86"
+
+# PROP Default_Filter ".lib;.pdb"
+# Begin Source File
+
+SOURCE=.\lib.X86\detours.pdb
+# End Source File
+# Begin Source File
+
+SOURCE=.\lib.X86\detours.lib
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=.\creatwth.cpp

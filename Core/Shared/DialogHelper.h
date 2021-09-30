@@ -111,6 +111,7 @@ public:
 										DWORD dwAdd, UINT nFlags = 0, LPCTSTR szClass = NULL);
 	static void ModifyEditCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DWORD dwRemove, 
 										DWORD dwAdd, UINT nFlags = 0);
+	static void SetStyle(CWnd* pWnd, DWORD dwStyle, BOOL bSet = TRUE);
 	
 	// CEdit and CRichEditCtrl
 	static BOOL SelectText(const CWnd* pEdit, LPCTSTR szText, int nSearchStart, int nSearchLen);

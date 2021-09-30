@@ -351,6 +351,14 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 	PrepareEditMenu(pMenu, tdc, prefs);
 }
 
+void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
+											const CFilteredToDoCtrl& tdc,
+											const CPreferencesDlg& prefs) const
+{
+	PrepareFileMenu(pMenu, prefs);
+	PrepareEditMenu(pMenu, tdc, prefs);
+}
+
 void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
 {
 	ASSERT(pMenu);

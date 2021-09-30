@@ -52,6 +52,9 @@
     <ClCompile Include="XmlFileTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="TDLTaskCtrlBaseTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ImportExportMgrTest.h">
@@ -109,6 +112,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="XmlFileTest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TDLTaskCtrlBaseTest.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

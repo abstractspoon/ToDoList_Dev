@@ -391,53 +391,38 @@ namespace unvell.ReoGrid.Views
 		{
 			get
 			{
-				return new Rectangle(this.ScrollViewLeft, this.ScrollViewTop, this.bounds.Width / this.scaleFactor, this.bounds.Height / this.scaleFactor);
+				return new Rectangle(this.viewStart.X, this.viewStart.Y, this.bounds.Width / this.scaleFactor, this.bounds.Height / this.scaleFactor);
 			}
 		}
 
-		public virtual ScrollDirection ScrollableDirections { get; set; } = ScrollDirection.None;
-
-		public RGFloat ScrollX { get; set; }
-		public RGFloat ScrollY { get; set; }
-
-		public RGFloat ScrollViewLeft { get { return this.viewStart.X + ScrollX; } }
-		public RGFloat ScrollViewTop { get { return this.viewStart.Y + ScrollY; } }
+		private ScrollDirection scrollableDirections = ScrollDirection.None;
+		public virtual ScrollDirection ScrollableDirections { get { return scrollableDirections; } set { scrollableDirections = value; } }
 
 		public virtual void Scroll(RGFloat offX, RGFloat offY)
 		{
-			ScrollX += offX;
-			ScrollY += offY;
+			ViewTop += offY;
+			ViewLeft += offX;
 
-			if (ScrollX < 0) ScrollX = 0;
-			if (ScrollY < 0) ScrollY = 0;
+			if (ViewTop < 0) ViewTop = 0;
+			if (ViewLeft < 0) ViewLeft = 0;
 		}
 
-		public virtual void ScrollTo(RGFloat x, RGFloat y)
-		{
-			if (x >= 0 && (this.ScrollableDirections & ScrollDirection.Horizontal) == ScrollDirection.Horizontal) ScrollX = x;
-			if (y >= 0 && (this.ScrollableDirections & ScrollDirection.Vertical) == ScrollDirection.Vertical) ScrollY = y;
-
-			if (ScrollX < 0) ScrollX = 0;
-			if (ScrollY < 0) ScrollY = 0;
-		}
-
-
-		#endregion // View window
+		#endregion
 
 		#region Point transform
 
 		public override Point PointToView(Point p)
 		{
 			return new Point(
-				(p.X - bounds.Left + ScrollViewLeft * this.scaleFactor) / this.scaleFactor,
-				(p.Y - bounds.Top + ScrollViewTop * this.scaleFactor) / this.scaleFactor);
+				(p.X - bounds.Left + viewStart.X * this.scaleFactor) / this.scaleFactor,
+				(p.Y - bounds.Top + viewStart.Y * this.scaleFactor) / this.scaleFactor);
 		}
 
 		public override Point PointToController(Point p)
 		{
 			return new Point(
-				(p.X - ScrollViewLeft) * this.scaleFactor + bounds.Left,
-				(p.Y - ScrollViewTop) * this.scaleFactor + bounds.Top);
+				(p.X - viewStart.X) * this.scaleFactor + bounds.Left,
+				(p.Y - viewStart.Y) * this.scaleFactor + bounds.Top);
 		}
 
 		#endregion // Point transform
@@ -465,7 +450,7 @@ namespace unvell.ReoGrid.Views
 			{
 				g.PushClip(this.bounds);
 				g.PushTransform();
-				g.TranslateTransform(bounds.Left - ScrollViewLeft * this.scaleFactor, bounds.Top - ScrollViewTop * this.scaleFactor);
+				g.TranslateTransform(bounds.Left - viewStart.X * this.scaleFactor, bounds.Top - viewStart.Y * this.scaleFactor);
 			}
 
 			DrawView(dc);
@@ -477,24 +462,11 @@ namespace unvell.ReoGrid.Views
 			}
 			
 #if VP_DEBUG
-			if (this is SheetViewport
-				|| this is ColumnHeaderView
-				//|| this is RowHeaderView
-				|| this is RowOutlineView)
-			{
-				//var rect = this.bounds;
-				//rect.Width--;
-				//rect.Height--;
-				//dc.Graphics.DrawRectangle(this.bounds, this is SheetViewport ? SolidColor.Blue : SolidColor.Purple);
-
-				var msg = $"{ this.GetType().Name }\n" +
-					$"{visibleRegion.ToRange()}\n" +
-					$"{this.ViewLeft}, {this.ViewTop}, ({ScrollX}, {ScrollY}), {this.Width}, {this.Height}\n" +
-					$"{this.ScrollableDirections}";
-
-				dc.Graphics.PlatformGraphics.DrawString(msg,
-						System.Drawing.SystemFonts.DefaultFont, System.Drawing.Brushes.Blue, this.Left + Width / 2, Top + Height / 2);
-			}
+				dc.Graphics.PlatformGraphics.DrawString(string.Format("VR {0},{1}-{2},{3} VS X{4},Y{5}\nSD {6}", this.visibleRegion.startRow,
+					this.visibleRegion.startCol, this.visibleRegion.endRow, this.visibleRegion.endCol, this.ViewLeft, this.ViewTop,
+					this.ScrollableDirections.ToString()),
+					System.Drawing.SystemFonts.DialogFont, System.Drawing.Brushes.Blue, this.Left + 1, this.Top + 
+					((this is CellsViewport) ? 30 : this.Height / 2));
 #endif // VP_DEBUG
 
 #if DEBUG

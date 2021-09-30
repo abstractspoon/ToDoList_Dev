@@ -537,6 +537,10 @@ SOURCE=..\ToDoList\TDLSimpleTextContentCtrl.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLStatusBar.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.cpp
 # End Source File
 # Begin Source File
@@ -1138,6 +1142,10 @@ SOURCE=..\ToDoList\TDLShowReminderDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLSimpleTextContentCtrl.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLStatusBar.h
 # End Source File
 # Begin Source File
 

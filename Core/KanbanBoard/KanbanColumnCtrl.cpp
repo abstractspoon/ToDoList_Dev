@@ -10,6 +10,7 @@
 #include "..\shared\graphicsMisc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\misc.h"
+#include "..\shared\filemisc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\timehelper.h"
@@ -19,6 +20,8 @@
 #include "..\Shared\enimagelist.h"
 #include "..\Shared\osversion.h"
 #include "..\Shared\themed.h"
+
+#include "..\3rdparty\XNamedColors.h"
 
 #include <math.h>
 
@@ -61,10 +64,10 @@ enum // checkbox images
 enum // Icon images
 {
 	FLAG_SET,
-	FLAG_HOVER,
+	FLAG_UNSET,
 	PIN_SET,
-	PIN_HOVER,
-	ICON_HOVER,
+	PIN_UNSET,
+	ICON_UNSET,
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -75,13 +78,14 @@ const int LV_PADDING			= GraphicsMisc::ScaleByDPIFactor(3);
 const int CHECKBOX_PADDING		= GraphicsMisc::ScaleByDPIFactor(1);
 const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
 const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
-const int IMAGE_SIZE			= GraphicsMisc::ScaleByDPIFactor(16);
+const int DEF_IMAGE_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
 const int IMAGE_PADDING			= 2/*GraphicsMisc::ScaleByDPIFactor(2)*/;
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
 const int MAX_DRAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(200);
+const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
 
-const CRect TEXT_BORDER			= CRect(2, 1, 3, 1);
-const COLORREF WHITE			= RGB(255, 255, 255);
+const CRect TEXT_BORDER			= CRect(2, 0, 3, 1);
+const CString NOFILELINK;
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx
@@ -99,14 +103,13 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_nItemTextHeight(-1),
 	m_nItemTextBorder(-1),
 	m_nNumTitleLines(2),
-	m_nAttribLabelVisiability(KBCAL_LONG),
+	m_nAttribLabelVisibility(KBCAL_LONG),
 	m_bSavingToImage(FALSE),
 	m_bDropTarget(FALSE),
 	m_bDrawTaskFlags(FALSE),
-	m_bDrawTaskParents(FALSE),
+	m_bDrawTaskFileLinks(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
-	m_dwHotItem(0),
 	m_tch(*this)
 {
 }
@@ -156,7 +159,7 @@ int CKanbanColumnCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	if (Misc::HasFlag(m_dwOptions, KBCF_SHOWLABELTIPS))
 		VERIFY(InitTooltip());
 
-	m_ilIcons.Create(IDB_ICONS, 16, 1, RGB(255, 0, 255));
+	m_ilIcons.Create(IDB_ICONS, 16, 1, colorMagenta);
 	CEnImageList::ScaleByDPIFactor(m_ilIcons);
 
 	CFont* pFont = m_fonts.GetFont();
@@ -299,7 +302,7 @@ void CKanbanColumnCtrl::SetMaximumTaskCount(int /*nMaxTasks*/)
 void CKanbanColumnCtrl::OnDisplayAttributeChanged()
 {
 	m_bDrawTaskFlags = (Misc::FindT(TDCA_FLAG, m_aDisplayAttrib) != -1);
-	m_bDrawTaskParents = (Misc::FindT(TDCA_PARENT, m_aDisplayAttrib) != -1);
+	m_bDrawTaskFileLinks = (Misc::FindT(TDCA_FILELINK, m_aDisplayAttrib) != -1);
 
 	RecalcItemLineHeight();
 	RefreshItemLineHeights();
@@ -328,9 +331,6 @@ void CKanbanColumnCtrl::RefreshItemLineHeights(HTREEITEM hti)
 		int nNumLines = m_nNumTitleLines;
 		nNumLines += GetItemDisplayAttributeCount(*pKI);
 
-		if (m_bDrawTaskParents)
-			nNumLines += pKI->nLevel;
-
 		TCH().SetItemIntegral(hti, nNumLines);
 	}
 }
@@ -343,16 +343,25 @@ int CKanbanColumnCtrl::GetItemDisplayAttributeCount(const KANBANITEM& ki) const
 	{
 		TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
 
-		switch (nAttribID)
+		if (WantDisplayAttribute(nAttribID, &ki))
 		{
-		case TDCA_FLAG:
-		case TDCA_PARENT:
-			break;
+			switch (nAttribID)
+			{
+			case TDCA_PARENT:
+				nCount += max(1, ki.nLevel);
+				break;
 
-		default:
-			if (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || ki.HasAttributeDisplayValue(nAttribID))
+			case TDCA_FILELINK:
+				nCount += max(1, ki.aFileLinks.GetSize());
+				break;
+
+			case TDCA_FLAG:
+				break; // handled separately
+
+			default:
 				nCount++;
-			break;
+				break;
+			}
 		}
 	}
 
@@ -401,7 +410,7 @@ void CKanbanColumnCtrl::SetOptions(DWORD dwOptions)
 
 void CKanbanColumnCtrl::SetAttributeLabelVisibility(KBC_ATTRIBLABELS nLabelVis)
 {
-	m_nAttribLabelVisiability = nLabelVis;
+	m_nAttribLabelVisibility = nLabelVis;
 
 	if (GetSafeHwnd())
 		Invalidate(TRUE);
@@ -528,14 +537,29 @@ int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nColWidth) const
 	return nAvailWidth;
 }
 
-void CKanbanColumnCtrl::FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText) const
+void CKanbanColumnCtrl::DrawItemShadow(CDC* pDC, CRect& rItem) const
 {
+	int nSave = pDC->SaveDC();
+
+	rItem.DeflateRect(0, 0, 1, 1);
+	pDC->ExcludeClipRect(rItem);
+
+	CRect rShadow(rItem);
+	rShadow.DeflateRect(3, 3, -1, -1);
+
+	GraphicsMisc::DrawRect(pDC, rShadow, GetSysColor(COLOR_3DDKSHADOW));
+
+	pDC->RestoreDC(nSave);
+}
+
+void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
+{
+	DrawItemShadow(pDC, rItem);
+
 	if (IsTaskSelected(pKI->dwTaskID))
 	{
 		BOOL bFocused = (::GetFocus() == *this);
-
 		GM_ITEMSTATE nState = (bFocused ? GMIS_SELECTED : GMIS_SELECTEDNOTFOCUSED);
-		crText = GraphicsMisc::GetExplorerItemSelectionTextColor(crText, nState, GMIB_THEMECLASSIC);
 
 		GraphicsMisc::DrawExplorerItemSelection(pDC, GetSafeHwnd(), nState, rItem, GMIB_THEMECLASSIC);
 	}
@@ -601,31 +625,32 @@ void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
 	CRect rBody(rItem);
 	DrawItemCheckbox(pDC, pKI, rBody);
 
-	BOOL bSelected = IsTaskSelected(dwTaskID);
-	COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
-
 	// Background
-	FillItemBackground(pDC, pKI, rBody, crText);
-
-	// Parents
-	COLORREF crOtherText = crText;
-
-	if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
-		crOtherText = GraphicsMisc::Lighter(crText, 0.3);
-
-	DrawItemParents(pDC, pKI, rBody, crOtherText);
+	DrawItemBackground(pDC, pKI, rBody);
 
 	// Bar affects everything else
 	DrawItemBar(pDC, pKI, rBody);
 
-	// Icons don't affect attributes
+	// Snapshot attribute rect which is not affected by the images
 	CRect rAttributes(rBody);
 
+	// Draw task icon, pin and flag icons
 	DrawItemImages(pDC, pKI, rBody);
+
+	// Item title
+	BOOL bSelected = IsTaskSelected(dwTaskID);
+	COLORREF crText = pKI->GetTextColor(bSelected, (HasOption(KBCF_TASKTEXTCOLORISBKGND) && !HasOption(KBCF_SHOWTASKCOLORASBAR)));
+
 	DrawItemTitle(pDC, pKI, rBody, crText);
 
+	// Rest of attributes
 	rAttributes.top += CalcItemTitleTextHeight();
 	rAttributes.top += IMAGE_PADDING;
+
+	COLORREF crOtherText = crText;
+
+	if (!bSelected && !Misc::IsHighContrastActive() && !pKI->IsDone(TRUE))
+		crOtherText = GraphicsMisc::Lighter(crText, 0.3);
 
 	DrawItemAttributes(pDC, pKI, rAttributes, crOtherText);
 }
@@ -662,6 +687,13 @@ void CKanbanColumnCtrl::DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRe
 		pDC->SelectObject(pOldFont);
 }
 
+BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const
+{
+	ASSERT(Misc::FindT(nAttrib, m_aDisplayAttrib) != -1);
+
+	return (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || pKI->HasAttributeDisplayValue(nAttrib));
+}
+
 void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText)
 {
 	pDC->SetBkMode(TRANSPARENT);
@@ -681,16 +713,25 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 	{
 		TDC_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 
-		switch (nAttrib)
+		if (WantDisplayAttribute(nAttrib, pKI))
 		{
-		case TDCA_FLAG:
-		case TDCA_PARENT:
-			break;
+			switch (nAttrib)
+			{
+			case TDCA_PARENT:
+				DrawItemParents(pDC, pKI, rAttrib, crText);
+				break;
 
-		default:
-			if (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || pKI->HasAttributeDisplayValue(nAttrib))
+			case TDCA_FILELINK:
+				DrawItemFileLinks(pDC, pKI, rAttrib, crText);
+				break;
+
+			case TDCA_FLAG:
+				break; // handled elsewhere
+
+			default:
 				DrawAttribute(pDC, rAttrib, nAttrib, pKI->GetAttributeDisplayValue(nAttrib), nFlags, crText);
-			break;
+				break;
+			}
 		}
 	}
 
@@ -700,7 +741,22 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 
 void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const
 {
-	if (m_bDrawTaskParents && pKI->dwParentID)
+	CRect rParent(rItem);
+
+	// Draw label
+	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
+	CString sLabel = GetAttributeLabel(TDCA_PARENT, nLabelVis);
+
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->SetTextColor(crText);
+
+	if (!sLabel.IsEmpty())
+	{
+		pDC->DrawText(sLabel, rItem, DT_LEFT | DT_NOPREFIX);
+		rParent.left += pDC->GetTextExtent(sLabel).cx;
+	}
+
+	if (pKI->dwParentID)
 	{
 		CKanbanItemArray aParents;
 		const KANBANITEM* pKIParent = m_data.GetItem(pKI->dwParentID);
@@ -714,35 +770,97 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 		// Draw in reverse order
 		int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
 		int nParent = aParents.GetSize();
-		
-		CRect rParent(rItem);
-		rParent.DeflateRect(TEXT_BORDER);
-	
-		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(crText);
+		BOOL bFirstParent = TRUE;
 
 		while (nParent--)
 		{
 			pKIParent = aParents[nParent];
 			ASSERT(pKIParent);
-			
+
 			int iImageIndex = -1;
 			HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKIParent->dwTaskID, (LPARAM)&iImageIndex);
 
-			if (hilTask && (iImageIndex != -1))
+			BOOL bHasIcon = (hilTask && (iImageIndex != -1));
+
+			if (bHasIcon)
 			{
-				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, WHITE, ILD_TRANSPARENT | ILD_BLEND50);
-				rParent.left += (IMAGE_SIZE + IMAGE_PADDING);
+				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, colorWhite, ILD_TRANSPARENT | ILD_BLEND50);
+			}
+			else if (bFirstParent)
+			{
+				// don't indent the first parent's text if it doesn't have an icon
+				// Note: We modify the parent rect because we want this to also
+				// impact all the following parents
+				rParent.OffsetRect(-DEF_IMAGE_SIZE, 0);
 			}
 
-			pDC->DrawText(pKIParent->sTitle, rParent, nFlags);
+			CRect rText(rParent);
+			rText.left += DEF_IMAGE_SIZE; // always set aside space for an icon
+
+			if (bHasIcon)
+				rText.left += IMAGE_PADDING;
+
+			pDC->DrawText(pKIParent->sTitle, rText, nFlags);
 
 			rParent.top += (m_nItemTextHeight + m_nItemTextBorder);
-			rParent.left = (rItem.left + 6);
+			rParent.left += DEF_IMAGE_SIZE; // indent at each level
+
+			bFirstParent = FALSE;
+		}
+	}
+	else if (!sLabel.IsEmpty())
+	{
+		rParent.top += (m_nItemTextHeight + m_nItemTextBorder);
+	}
+
+	rItem.top = rParent.top;
+}
+
+
+void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const
+{
+	CRect rLink(rItem);
+
+	// Draw label
+	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
+	CString sLabel = GetAttributeLabel(TDCA_FILELINK, nLabelVis);
+
+	if (!sLabel.IsEmpty())
+	{
+		pDC->DrawText(sLabel, rItem, DT_LEFT | DT_NOPREFIX);
+		rLink.left += pDC->GetTextExtent(sLabel).cx;
+	}
+
+	if (pKI->aFileLinks.GetSize())
+	{
+		int nFlags = (DT_LEFT | DT_PATH_ELLIPSIS | DT_NOPREFIX);
+
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(RGB(0, 0, 255)); // Default link colour
+
+		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_UNDERLINED));
+
+		for (int nLink = 0; nLink < pKI->aFileLinks.GetSize(); nLink++)
+		{
+			CString sLink(pKI->aFileLinks[nLink]);
+
+			// Get the shortest meaningful bit because of space constraints
+			if (FileMisc::IsPath(sLink))
+				sLink = FileMisc::GetFileNameFromPath(sLink);
+
+			pDC->DrawText(sLink, rLink, nFlags);
+			rLink.top += (m_nItemTextHeight + m_nItemTextBorder);
 		}
 
-		rItem.top = rParent.top;
+		pDC->SelectObject(pOldFont);
+		pDC->SetTextColor(crText);
 	}
+	else if (!sLabel.IsEmpty())
+	{
+		rLink.top += (m_nItemTextHeight + m_nItemTextBorder);
+	}
+
+	rItem.top = rLink.top;
 }
 
 void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
@@ -753,12 +871,11 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 	rClip.DeflateRect(1, 1);
 	pDC->IntersectClipRect(rClip);
 
+	// Task icon
 	rIcon.left += IMAGE_PADDING;
 	rIcon.top += IMAGE_PADDING;
-	rIcon.bottom = (rIcon.top + IMAGE_SIZE);
 
 	BOOL bLocked = pKI->bLocked;
-	BOOL bHot = (!m_bSavingToImage && (pKI->dwTaskID == m_dwHotItem));
 	BOOL bIconDrawn = FALSE;
 
 	if (pKI->bHasIcon || pKI->bParent)
@@ -768,57 +885,60 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 
 		if (hilTask && (iImageIndex != -1))
 		{
-			DrawItemImage(pDC, rIcon, KBCI_ICON, FALSE, hilTask, iImageIndex);
+			DrawItemImage(pDC, rIcon, KBCI_ICON, TRUE, hilTask, iImageIndex);
 			bIconDrawn = TRUE;
 		}
 	}
 
-	if (!bLocked && bHot && !bIconDrawn)
+	// Draw placeholder image if con not drawn
+	if (!bLocked && !bIconDrawn)
 	{
-		DrawItemImage(pDC, rIcon, KBCI_ICON, TRUE);
+		// Allow for placeholder being smaller than default image size
+		rIcon.top -= IMAGE_PADDING;
+		DrawItemImage(pDC, rIcon, KBCI_ICON, FALSE);
+	}
+	
+	// Draw pin icon always
+	rIcon.left = (rItem.right - DEF_IMAGE_SIZE - IMAGE_PADDING);
+
+	DrawItemImage(pDC, rIcon, KBCI_PIN, pKI->bPinned);
+	rIcon.OffsetRect(0, PIN_FLAG_IMAGE_HEIGHT);
+
+	// Draw flag icon if set or 
+	if (m_bDrawTaskFlags && (pKI->bFlagged || !pKI->bLocked))
+	{
+		DrawItemImage(pDC, rIcon, KBCI_FLAG, pKI->bFlagged);
 	}
 
-	// Always leave space for icon
-	rIcon.OffsetRect(0, IMAGE_SIZE);
-
-	if (m_bDrawTaskFlags)
-	{
-		if (pKI->bFlagged || (!bLocked && bHot))
-			DrawItemImage(pDC, rIcon, KBCI_FLAG, (!bLocked && bHot && !pKI->bFlagged));
-
-		rIcon.OffsetRect(0, IMAGE_SIZE);
-	}
-
-	if (pKI->bPinned || bHot)
-		DrawItemImage(pDC, rIcon, KBCI_PIN, (bHot && !pKI->bPinned));
-
-	rItem.left = (rIcon.left + IMAGE_SIZE);
+	// Update available rect
+	rItem.left += (IMAGE_PADDING + DEF_IMAGE_SIZE);
+	rItem.right -= (IMAGE_PADDING + DEF_IMAGE_SIZE);
 }
 
-void CKanbanColumnCtrl::DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL, int nIndex) const
+void CKanbanColumnCtrl::DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bSet, HIMAGELIST hIL, int nIndex) const
 {
 	switch (nType)
 	{
 	case KBCI_ICON:
-		if (bHover)
+		if (bSet)
 		{
-			hIL = m_ilIcons;
-			nIndex = ICON_HOVER;
+			ASSERT(hIL && (nIndex != -1));
 		}
 		else
 		{
-			ASSERT(hIL && (nIndex != -1));
+			hIL = m_ilIcons;
+			nIndex = ICON_UNSET;
 		}
 		break;
 
 	case KBCI_FLAG:
 		hIL = m_ilIcons;
-		nIndex = (bHover ? FLAG_HOVER : FLAG_SET);
+		nIndex = (bSet ? FLAG_SET : FLAG_UNSET);
 		break;
 
 	case KBCI_PIN:
 		hIL = m_ilIcons;
-		nIndex = (bHover ? PIN_HOVER : PIN_SET);
+		nIndex = (bSet ? PIN_SET : PIN_UNSET);
 		break;
 
 	default:
@@ -946,20 +1066,15 @@ BOOL CKanbanColumnCtrl::GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL b
 	if (!GetItemRect(hti, rItem, pKI))
 		return FALSE;
 
-	rItem.DeflateRect(1, 1);
+	rItem.DeflateRect(1, 1); // border
 
-	CRect rCheckbox(rItem);
-	
-	if (GetItemCheckboxRect(rCheckbox))
-		rItem.left = (rCheckbox.right + CHECKBOX_PADDING);
+	if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
+	{
+		rItem.left += CEnImageList::GetImageSize(m_ilCheckboxes);
+		rItem.left += CHECKBOX_PADDING;
+	}
 
-	rItem.left += (IMAGE_SIZE + IMAGE_PADDING);
-
-	if (!pKI)
-		pKI = m_data.GetItem(GetTaskID(hti));
-	
-	if (m_bDrawTaskParents)
-		rItem.top += (pKI->nLevel * (m_nItemTextHeight + m_nItemTextBorder));
+	rItem.DeflateRect((DEF_IMAGE_SIZE + IMAGE_PADDING), 0);
 
 	if (HasOption(KBCF_SHOWTASKCOLORASBAR))
 		rItem.left += (BAR_WIDTH + IMAGE_PADDING);
@@ -1061,36 +1176,38 @@ UINT CKanbanColumnCtrl::GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong)
 
 void CKanbanColumnCtrl::DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const
 {
-	KBC_ATTRIBLABELS nLabelVis = m_nAttribLabelVisiability;
-	
-	if (m_bSavingToImage)
-		nLabelVis = KBCAL_LONG;
-
+	KBC_ATTRIBLABELS nLabelVis = (m_bSavingToImage ? KBCAL_LONG : m_nAttribLabelVisibility);
 	CString sAttrib = FormatAttribute(nAttrib, sValue, nLabelVis);
 
-	pDC->SetBkMode(TRANSPARENT);
-	pDC->SetTextColor(crText);
-	pDC->DrawText(sAttrib, rLine, nFlags);
+	if (!sAttrib.IsEmpty())
+	{
+		pDC->SetBkMode(TRANSPARENT);
+		pDC->SetTextColor(crText);
+		pDC->DrawText(sAttrib, rLine, nFlags);
 
-	rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
+		rLine.top += (m_nItemTextHeight + m_nItemTextBorder);
+	}
 }
 
 CString CKanbanColumnCtrl::FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis)
 {
+	return GetAttributeLabel(nAttrib, nLabelVis) + sValue;
+}
+
+CString CKanbanColumnCtrl::GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis)
+{
 	UINT nFormatID = 0;
-	
+
 	if (nLabelVis != KBCAL_NONE)
 		nFormatID = GetDisplayFormat(nAttrib, (nLabelVis == KBCAL_LONG));
 
 	if (nFormatID == 0)
-		return sValue;
+		return _T("");
 
-	CEnString sAttrib(nFormatID);
+	CEnString sLabel(nFormatID);
+	sLabel += _T(": ");
 
-	sAttrib += _T(": ");
-	sAttrib += sValue;
-
-	return sAttrib;
+	return sLabel;
 }
 
 BOOL CKanbanColumnCtrl::GetLabelEditRect(LPRECT pEdit)
@@ -1305,20 +1422,6 @@ DWORD CKanbanColumnCtrl::GetOnlySelectedTask() const
 	return m_aSelTaskIDs[0];
 }
 
-void CKanbanColumnCtrl::SetHotItem(DWORD dwTaskID)
-{
-	if (m_dwHotItem == dwTaskID)
-		return;
-
-	if (m_dwHotItem)
-		TCH().InvalidateItem(FindItem(m_dwHotItem));
-
-	if (dwTaskID)
-		TCH().InvalidateItem(FindItem(dwTaskID));
-
-	m_dwHotItem = dwTaskID;
-}
-
 HTREEITEM CKanbanColumnCtrl::FindItem(DWORD dwTaskID) const
 {
 	return m_mapHTItems.GetItem(dwTaskID);
@@ -1339,7 +1442,7 @@ HTREEITEM CKanbanColumnCtrl::HitTestItemSidebar(const CPoint& ptScreen) const
 		CRect rLabel;
 		GetItemLabelTextRect(htiHit, rLabel, TRUE);
 
-		rSidebar.left = (rLabel.left - (IMAGE_SIZE + IMAGE_PADDING));
+		rSidebar.left = (rLabel.left - (DEF_IMAGE_SIZE + IMAGE_PADDING));
 		rSidebar.right = rLabel.left;
 
 		if (HasOption(KBCF_SHOWTASKCOLORASBAR))
@@ -1384,10 +1487,6 @@ BOOL CKanbanColumnCtrl::DeleteTask(DWORD dwTaskID)
 	if (hti && CTreeCtrl::DeleteItem(hti))
 	{
 		m_mapHTItems.RemoveKey(dwTaskID);
-
-		if (m_dwHotItem == dwTaskID)
-			m_dwHotItem = 0;
-
 		return TRUE;
 	}
 
@@ -1652,42 +1751,57 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 		const KANBANITEM* pKI = m_data.GetItem(dwHitTaskID);
 		ASSERT(pKI);
 
-		UINT nMsgID = 0;
+		UINT nSetMsgID = 0;
 		BOOL bSet = FALSE;
 
 		if (HitTestCheckbox(htiHit, point))
 		{
-			nMsgID = WM_KLCN_EDITTASKDONE;
+			nSetMsgID = WM_KLCN_EDITTASKDONE;
 			bSet = !pKI->bDone;
 		}
 		else
 		{
-			switch (HitTestImage(htiHit, point))
+			KBC_IMAGETYPE nImage = HitTestImage(htiHit, point);
+
+			if (nImage != KBCI_NONE)
 			{
-			case KBCI_ICON:
-				if (!pKI->bLocked)
-					nMsgID = WM_KLCN_EDITTASKICON;
-				break;
-
-			case KBCI_FLAG:
-				if (!pKI->bLocked)
+				switch (nImage)
 				{
-					nMsgID = WM_KLCN_EDITTASKFLAG;
-					bSet = !pKI->bFlagged;
-				}
-				break;
+				case KBCI_ICON:
+					if (!pKI->bLocked)
+						nSetMsgID = WM_KLCN_EDITTASKICON;
+					break;
 
-			case KBCI_PIN:
-				nMsgID = WM_KLCN_EDITTASKPIN;
-				bSet = !pKI->bPinned;
-				break;
+				case KBCI_FLAG:
+					if (!pKI->bLocked)
+					{
+						nSetMsgID = WM_KLCN_EDITTASKFLAG;
+						bSet = !pKI->bFlagged;
+					}
+					break;
+
+				case KBCI_PIN:
+					nSetMsgID = WM_KLCN_EDITTASKPIN;
+					bSet = !pKI->bPinned;
+					break;
+				}
+			}
+			else if (m_bDrawTaskFileLinks)
+			{
+				CString sFileLink = HitTestFileLink(htiHit, point);
+
+				if (!sFileLink.IsEmpty())
+				{
+					GetParent()->PostMessage(WM_KLCN_SHOWFILELINK, (WPARAM)GetSafeHwnd(), (LPARAM)(LPCTSTR)sFileLink);
+					return;
+				}
 			}
 		}
 
-		if (nMsgID)
+		if (nSetMsgID)
 		{
 			// Post message to give mouse-click time to complete
-			GetParent()->PostMessage(nMsgID, (WPARAM)GetSafeHwnd(), bSet);
+			GetParent()->PostMessage(nSetMsgID, (WPARAM)GetSafeHwnd(), bSet);
 			Invalidate(FALSE);
 
 			bHandled = TRUE;
@@ -1915,34 +2029,107 @@ void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
 
 KBC_IMAGETYPE CKanbanColumnCtrl::HitTestImage(HTREEITEM hti, CPoint point) const
 {
-	CRect rImage;
-	GetItemLabelTextRect(hti, rImage);
+	CRect rText;
+	GetItemLabelTextRect(hti, rText);
 
-	// Icon
-	rImage.right = (rImage.left - IMAGE_PADDING);
-	rImage.left = (rImage.right - IMAGE_SIZE);
-	rImage.bottom = (rImage.top + IMAGE_SIZE);
+	// Task Icon
+	CRect rIcon(rText);
+	rIcon.right = (rIcon.left - IMAGE_PADDING);
+	rIcon.left = (rIcon.right - DEF_IMAGE_SIZE);
+	rIcon.bottom = (rIcon.top + DEF_IMAGE_SIZE);
 
-	if (rImage.PtInRect(point))
+	if (rIcon.PtInRect(point))
 		return KBCI_ICON;
+
+	// Pin
+	rIcon = rText;
+	rIcon.left = (rIcon.right + IMAGE_PADDING);
+	rIcon.right = (rIcon.left + DEF_IMAGE_SIZE);
+	rIcon.bottom = (rIcon.top + PIN_FLAG_IMAGE_HEIGHT);
+
+	if (rIcon.PtInRect(point))
+		return KBCI_PIN;
 
 	// Flag
 	if (m_bDrawTaskFlags)
 	{
-		rImage.OffsetRect(0, IMAGE_SIZE);
+		rIcon.OffsetRect(0, DEF_IMAGE_SIZE);
 
-		if (rImage.PtInRect(point))
+		if (rIcon.PtInRect(point))
 			return KBCI_FLAG;
 	}
 
-	// Pin
-	rImage.OffsetRect(0, IMAGE_SIZE);
-
-	if (rImage.PtInRect(point))
-		return KBCI_PIN;
-
 	// all else
 	return KBCI_NONE;
+}
+
+CString CKanbanColumnCtrl::HitTestFileLink(HTREEITEM hti, CPoint point) const
+{
+	if (m_bDrawTaskFileLinks)
+	{
+		const KANBANITEM* pKI = m_data.GetItem(GetTaskID(hti));
+		ASSERT(pKI);
+
+		int nNumLinks = pKI->aFileLinks.GetSize();
+
+		if (nNumLinks)
+		{
+			CRect rLinks;
+			GetItemLabelTextRect(hti, rLinks, FALSE, pKI);
+
+			// Undo the indent for the icon
+			rLinks.left -= (DEF_IMAGE_SIZE + IMAGE_PADDING);
+
+			// Work down from the top until either we pass the 
+			// point in question or we reach the file link field,
+			// doing as little work as possible
+			int nItemHeight = GetItemHeight();
+			rLinks.top = rLinks.bottom;
+
+			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
+			{
+				// We can stop as soon as pass below the specified point
+				if (point.y < rLinks.top)
+					return NOFILELINK;
+
+				TDC_ATTRIBUTE nAttribID = m_aDisplayAttrib[nDisp];
+
+				if (nAttribID == TDCA_FILELINK)
+				{
+					rLinks.bottom = (rLinks.top + (nNumLinks * nItemHeight));
+					break;
+				}
+
+				// else next attrib
+				if (WantDisplayAttribute(nAttribID, pKI))
+					rLinks.top += nItemHeight;
+			}
+
+			if (point.y < rLinks.bottom) // within the right vertical zone
+			{
+				if (m_nAttribLabelVisibility != KBCAL_NONE)
+				{
+					CString sLabel = GetAttributeLabel(TDCA_FILELINK, m_nAttribLabelVisibility);
+
+					if (!sLabel.IsEmpty())
+						rLinks.left += GraphicsMisc::GetTextWidth(sLabel, *this, m_fonts.GetHFont());
+				}
+
+				if (point.x > rLinks.left)
+				{
+					int nLink = ((point.y - rLinks.top) / nItemHeight);
+					ASSERT(nLink < nNumLinks);
+
+					rLinks.right = (rLinks.left + GraphicsMisc::GetTextWidth(pKI->aFileLinks[nLink], *this, m_fonts.GetHFont(GMFS_UNDERLINED)));
+
+					if (point.x < rLinks.right)
+						return pKI->aFileLinks[nLink];
+				}
+			}
+		}
+	}
+	
+	return NOFILELINK;
 }
 
 BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
@@ -1954,16 +2141,30 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	if (hti)
 	{
-		switch (HitTestImage(hti, point))
-		{
-		case KBCI_FLAG:
-		case KBCI_ICON:
-			if (!m_data.IsLocked(GetTaskID(hti)))
-				return GraphicsMisc::SetHandCursor();
-			break;
+		KBC_IMAGETYPE nImage = HitTestImage(hti, point);
 
-		case  KBCI_PIN:
-			return GraphicsMisc::SetHandCursor();
+		if (nImage != KBCI_NONE)
+		{
+			switch (nImage)
+			{
+			case KBCI_FLAG:
+			case KBCI_ICON:
+				if (!m_data.IsLocked(GetTaskID(hti)))
+					return GraphicsMisc::SetHandCursor();
+				break;
+
+			case KBCI_PIN:
+				return GraphicsMisc::SetHandCursor();
+
+			default:
+				ASSERT(0);
+				break;
+			}
+		}
+		else if (m_bDrawTaskFileLinks)
+		{
+			if (!HitTestFileLink(hti, point).IsEmpty())
+				return GraphicsMisc::SetHandCursor();
 		}
 	}
 
@@ -2016,7 +2217,7 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 		{
 			int nItemWidth = (int)(pKI->sTitle.GetLength() * fAveCharWidth / 2); // title is on two lines
 			nItemWidth += (pKI->nLevel * LEVEL_INDENT);
-			nItemWidth += (IMAGE_SIZE + IMAGE_PADDING);
+			nItemWidth += (DEF_IMAGE_SIZE + IMAGE_PADDING);
 			
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
@@ -2076,16 +2277,7 @@ void CKanbanColumnCtrl::RecalcItemLineHeight()
 
 	int nItemHeight = (m_nItemTextHeight + m_nItemTextBorder);
 		
-	if (m_bDrawTaskFlags && (m_aDisplayAttrib.GetSize() == 1))
-		nItemHeight = max(nItemHeight, (IMAGE_SIZE + IMAGE_PADDING));
-
 	SetItemHeight((short)nItemHeight);
-
-	// Recalc the required number of title lines
-	int nNumIcons = (2 + (m_bDrawTaskFlags ? 1 : 0));
-	double dTotalIconHeight = (nNumIcons * IMAGE_SIZE);
-
-	m_nNumTitleLines = max(2, (int)ceil(dTotalIconHeight / m_nItemTextHeight));
 }
 
 BOOL CKanbanColumnCtrl::SelectItem(HTREEITEM hItem, BOOL bByMouse)
@@ -2151,16 +2343,16 @@ int CKanbanColumnCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 
 	if (hti)
 	{
-		CRect rTip;
+		CRect rText, rUnused;
 
-		if (GetItemTooltipRect(hti, rTip, NULL))
+		if (GetItemLabelTextRect(hti, rText, FALSE, NULL) && rText.PtInRect(point))
 		{
-			GetItemRect(hti, rTip, NULL);
+			if (GetItemTooltipRect(hti, rUnused, NULL))
+			{
+				DWORD dwTaskID = GetTaskID(hti);
 
-			DWORD dwTaskID = GetTaskID(hti);
-
-
-			return CToolTipCtrlEx::SetToolInfo(*pTI, this, m_data.GetItemTitle(dwTaskID), dwTaskID, rTip);
+				return CToolTipCtrlEx::SetToolInfo(*pTI, this, m_data.GetItemTitle(dwTaskID), dwTaskID, rText);
+			}
 		}
 	}
 

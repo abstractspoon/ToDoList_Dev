@@ -26,16 +26,11 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-
-int NUM_TESTLEVELS = CTaskFileTest::NUM_TESTLEVELS;
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
 CToDoCtrlDataTest::CToDoCtrlDataTest(const CTestUtils& utils) : CTDLTestBase(utils)
 {
-	// Initialise styles and custom attributes
 	m_aStyles[TDCS_TREATSUBCOMPLETEDASDONE] = TRUE;
 //	m_aStyles[TDCS_USEEARLIESTDUEDATE] = TRUE;
 	m_aStyles[TDCS_USELATESTDUEDATE] = TRUE;
@@ -68,6 +63,21 @@ TESTRESULT CToDoCtrlDataTest::Run()
 	return GetTotals();
 }
 
+void CToDoCtrlDataTest::BeginTest(LPCTSTR szFunction, BOOL bWithAttributes)
+{
+	CString sTest;
+	
+	sTest += _T("CToDoCtrlDataTest::");
+	sTest += szFunction;
+	
+	if (bWithAttributes)
+		sTest += _T("(WITH attributes)");
+	else
+		sTest += _T("(WITHOUT attributes)");
+	
+	CTDLTestBase::BeginTest(sTest);
+}
+
 void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 {
 	if (!m_utils.HasCommandlineFlag('p'))
@@ -76,12 +86,14 @@ void CToDoCtrlDataTest::TestHierarchyDataModelPerformance()
 		return;
 	}
 
-	BeginTest(_T("CToDoCtrlDataTest::HierarchyDataModelCreationPerformance"));
+	CTaskFileTest tasksTest(m_utils);
 
-	for (int nNumLevels = 2; nNumLevels <= NUM_TESTLEVELS; nNumLevels++)
+	BeginTest(_T("HierarchyDataModelCreationPerformance"), tasksTest.WantPopulateAttributes());
+
+	for (int nNumLevels = 2; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
 	{
 		CTaskFile tasks;
-		CTaskFileTest(m_utils).PopulateHierarchy(tasks, nNumLevels);
+		tasksTest.PopulateHierarchy(tasks, nNumLevels);
 
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
@@ -106,15 +118,17 @@ void CToDoCtrlDataTest::TestFlatListDataModelPerformance()
 		return;
 	}
 
-	BeginTest(_T("CToDoCtrlDataTest::FlatListDataModelPerformance"));
+	CTaskFileTest tasksTest(m_utils);
+	
+	BeginTest(_T("FlatListDataModelPerformance"), tasksTest.WantPopulateAttributes());
 
-	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= NUM_TESTLEVELS; nNumLevels++)
+	for (int nNumLevels = 2, nNumTasks = 10; nNumLevels <= tasksTest.NUM_TESTLEVELS; nNumLevels++)
 	{
 		// Numbers to match hierarchical test
 		nNumTasks += (int)pow(10, nNumLevels);
 
 		CTaskFile tasks;
-		CTaskFileTest(m_utils).PopulateFlatList(tasks, nNumTasks);
+		tasksTest.PopulateFlatList(tasks, nNumTasks);
 
 		CToDoCtrlData data(m_aStyles, m_aCustomAttribDefs);
 
@@ -154,9 +168,9 @@ void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData&
 	DWORD dwTickStart = GetTickCount();
 
 	CTDCTaskCalculator calc(data);
-	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+	DWORD dwMaxTaskID = data.GetTaskCount();
 
-	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
 		calc.GetTaskSubtaskCompletion(dwTaskID);
 		calc.GetTaskTimeEstimate(dwTaskID, TDCU_DAYS);
@@ -196,9 +210,9 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 	DWORD dwTickStart = GetTickCount();
 
 	CTDCTaskFormatter formatter(data);
-	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+	DWORD dwMaxTaskID = data.GetTaskCount();
 
-	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
 		formatter.GetTaskSubtaskCompletion(dwTaskID);
 		formatter.GetTaskPath(dwTaskID);
@@ -241,9 +255,9 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlD
 	DWORD dwTickStart = GetTickCount();
 
 	CTDCTaskFormatter formatter(data);
-	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
+	DWORD dwMaxTaskID = data.GetTaskCount();
 
-	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
 		formatter.GetTaskPosition(dwTaskID);
 	}
@@ -296,10 +310,9 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPerformance(const CToDoCtrlData& dat
 	ASSERT(m_utils.HasCommandlineFlag('p'));
 
 	DWORD dwTickStart = GetTickCount();
+	DWORD dwMaxTaskID = data.GetTaskCount();
 
-	DWORD dwMaxTaskID = (data.GetTaskCount() + 1);
-
-	for (DWORD dwTaskID = 1; dwTaskID < dwMaxTaskID; dwTaskID++)
+	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
 		const TODOITEM* pTDI = NULL;
 		const TODOSTRUCTURE* pTDS = NULL;

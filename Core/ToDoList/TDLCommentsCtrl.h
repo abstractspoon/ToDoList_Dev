@@ -44,6 +44,7 @@ public:
 	BOOL GetSelectedFormat(CONTENTFORMAT& cf) const;
 	BOOL SetSelectedFormat(const CONTENTFORMAT& cf);
 	BOOL IsFormat(const CONTENTFORMAT& cf) const { return m_ctrlComments.IsFormat(cf); }
+	BOOL IsUpdatingFormat() const { return m_bUpdatingFormat; }
 
 	BOOL GetContent(CString& sTextContent, CBinaryData& customContent) const;
 	BOOL SetContent(const CString& sTextContent, const CBinaryData& customContent, BOOL bResetSelection);
@@ -82,6 +83,7 @@ protected:
 
 	CONTENTFORMAT m_cfLastCustom;
 	CBinaryData m_LastCustomComments;
+	BOOL m_bUpdatingFormat;
 
 protected:
 	int DoModal() { ASSERT(0); return IDCANCEL; }

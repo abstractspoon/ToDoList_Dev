@@ -13,6 +13,12 @@
 
 /////////////////////////////////////////////////////////////////////////////////////
 
+class C32BitImageProcessor;
+
+typedef CArray<C32BitImageProcessor*, C32BitImageProcessor*> C32BIPArray;
+
+/////////////////////////////////////////////////////////////////////////////////////
+
 class CEnBitmapEx : public CEnBitmap  
 {
 public:
@@ -36,7 +42,10 @@ public:
 	BOOL TintImage(COLORREF color, int nAmount, COLORREF crMask = -1);
 	BOOL RemapSysColors(); // just like AfxLoadSysColorBitmap does
 	BOOL Disable(COLORREF crMask = GetSysColor(COLOR_3DFACE));
-	
+
+	BOOL ProcessImage(C32BitImageProcessor* pProcessor, COLORREF crMask = CLR_NONE);
+	BOOL ProcessImage(C32BIPArray& aProcessors, COLORREF crMask = CLR_NONE); // ordered list of processors
+
 	static BOOL Disable(CBitmap& bitmap, COLORREF crMask = GetSysColor(COLOR_3DFACE));
 	static HICON CreateDisabledIcon(HICON hIcon);
 	static BOOL CreateDisabledImageList(const CImageList& ilSrc, CImageList& ilDest);

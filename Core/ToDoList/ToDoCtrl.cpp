@@ -57,6 +57,7 @@
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\gdiplus.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\interfaces\spellcheckdlg.h"
@@ -101,12 +102,6 @@ const int MINNONCOMMENTWIDTH	= GraphicsMisc::ScaleByDPIFactor(350); // what's to
 const int COMBODROPHEIGHT		= GraphicsMisc::ScaleByDPIFactor(200);
 const int MINSTACKEDCOMMENTSIZE = GraphicsMisc::ScaleByDPIFactor(60);
 const int INFOTIPOFFSET			= GraphicsMisc::ScaleByDPIFactor(16);
-
-/////////////////////////////////////////////////////////////////////////////
-
-const COLORREF BLACK	= RGB(0, 0, 0);
-const COLORREF WHITE	= RGB(240, 240, 240);
-const COLORREF MAGENTA	= RGB(255, 0, 255);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -226,7 +221,8 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_sourceControl(*this),
 	m_findReplace(*this),
 	m_reminders(*this),
-	m_matcher(m_data, m_reminders)
+	m_matcher(m_data, m_reminders),
+	m_bPendingUpdateControls(FALSE)
 {
 	SetBordersDLU(0);
 	
@@ -641,7 +637,7 @@ BOOL CToDoCtrl::OnInitDialog()
 
 void CToDoCtrl::LoadTaskIcons()
 {
-	VERIFY(m_ilTaskIcons.LoadImages(m_sLastSavePath, MAGENTA, HasStyle(TDCS_SHOWDEFAULTTASKICONS)));
+	VERIFY(m_ilTaskIcons.LoadImages(m_sLastSavePath, colorMagenta, HasStyle(TDCS_SHOWDEFAULTTASKICONS)));
 
 	OnTaskIconsChanged();
 }
@@ -1743,10 +1739,25 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	if (m_bDeletingTasks)
 		return;
 
-#ifdef _DEBUG
-	//DWORD dwTick = GetTickCount();
-#endif
+	// Something about the creation of the HTML comments plugin allows
+	// subsequent selection changes from the task tree to be processed
+	// before a previous call to this function has completed. 
+	// And this re-entrancy causes mayhem because the HTML plugin can't
+	// be terminated whilst it's in the process of initialising the web
+	// browser within it.
+	// So. We detect that the comments control has not yet completed and
+	// set a flag so that when the comments control does complete we can
+	// immediately re-call this function to get us up to date.
+	// Fortunately, everything happens inside this function.
+	if (m_bPendingUpdateControls || (bIncComments && m_ctrlComments.IsUpdatingFormat()))
+	{
+		m_bPendingUpdateControls = TRUE;
+		return;
+	}
+	ASSERT(!m_bPendingUpdateControls);
 
+	CScopedLogTimer log(_T("CToDoCtrl::UpdateControls()"));
+	
 	if (!hti)
 		hti = GetUpdateControlsItem();
 	
@@ -1888,6 +1899,8 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 	if (bIncComments)
 	{
+		ASSERT(!m_ctrlComments.IsUpdatingFormat());
+
 		// if more than one comments type is selected then sCommentsType
 		// will be empty which will put the comments type combo in an
 		// indeterminate state which is the desired effect since this requires
@@ -1896,6 +1909,15 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 			m_cfComments = cfComments;
 		else
 			m_cfComments.Empty();
+
+		// See re-entrancy comment at start of function for explanation
+		if (m_bPendingUpdateControls)
+		{
+			ASSERT(!m_ctrlComments.IsUpdatingFormat());
+
+			m_bPendingUpdateControls = FALSE;
+			UpdateControls(TRUE);
+		}
 		
 		UpdateComments(FALSE);
 	}
@@ -1904,10 +1926,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 	UpdateSelectedTaskPath();
 	
 	EnableDisableControls(hti);
-
-#ifdef _DEBUG
-//	TRACE(_T("CToDoCtrl::UpdateControls(took %d ms)\n"), (GetTickCount() - dwTick));
-#endif
 }
 
 void CToDoCtrl::UpdateDateTimeControls(BOOL bHasSelection)
@@ -2651,7 +2669,7 @@ BOOL CToDoCtrl::EditSelectedTaskIcon()
 
 LRESULT CToDoCtrl::OnTaskIconDlgReloadIcons(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	if (m_ilTaskIcons.LoadImages(m_sLastSavePath, MAGENTA, HasStyle(TDCS_SHOWDEFAULTTASKICONS)))
+	if (m_ilTaskIcons.LoadImages(m_sLastSavePath, colorMagenta, HasStyle(TDCS_SHOWDEFAULTTASKICONS)))
 	{
 		OnTaskIconsChanged();
 		return TRUE;
@@ -5217,7 +5235,7 @@ BOOL CToDoCtrl::EditSelectedTaskTitle(BOOL bTaskIsNew)
 		m_eTaskName.SetFont(pFontTree);
 	
 	// set text
-	m_eTaskName.SetWindowText(GetSelectedTaskTitle());
+	m_eTaskName.SetWindowText(GetTaskTitle(dwSelTaskID));
 	
 	// zero the left margin so that the text position remains the same
 	m_eTaskName.SetMargins(0, HIWORD(m_eTaskName.GetMargins()));
@@ -5331,7 +5349,9 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
 
 		// set selection to previous task and if that fails then next task
-		if (!GotoNextTask(TDCG_PREV) && !GotoNextTask(TDCG_NEXT))
+		if (!TSH().PrevSelection(FALSE) &&
+			!GotoNextTask(TDCG_PREV) && 
+			!GotoNextTask(TDCG_NEXT))
 		{
 			TSH().RemoveAll();
 		}
@@ -6054,9 +6074,10 @@ void CToDoCtrl::RebuildCustomAttributeUI()
 
 	CTDCCustomAttributeUIHelper::AddWindowPrompts(m_aCustomControls, this, m_mgrPrompts);
 
-	Resize();
-
+	// Must remove any deleted attribute columns before resizing/redrawing
 	m_taskTree.OnCustomAttributeChange();
+
+	Resize();
 }
 
 BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
@@ -6877,7 +6898,14 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	
 	SetModified(TRUE);
 	
-	m_taskTree.SetModified(mapAttribIDs, bAllowResort);
+	// Avoid notifying the tree ctrl when the user is in 
+	// the process of creating a new task because this will
+	// recalculate the column widths which could have a
+	// significant impact on the responsiveness of the UI
+	BOOL bNewTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
+
+	if (!bNewTask)
+		m_taskTree.SetModified(mapAttribIDs, bAllowResort);
 
 	TDCNOTIFYMOD mod(mapAttribIDs, aModTaskIDs);
 	GetParent()->SendMessage(WM_TDCN_MODIFY, (WPARAM)GetSafeHwnd(), (LPARAM)&mod);
@@ -8924,6 +8952,8 @@ void CToDoCtrl::OnTreeSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 BOOL CToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue) 
 { 
+	ASSERT(m_data.HasTask(dwTaskID));
+
 	if (bTrue)
 		dwTaskID = m_data.GetTrueTaskID(dwTaskID);
 
@@ -8948,13 +8978,17 @@ BOOL CToDoCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 
 void CToDoCtrl::SelectItem(HTREEITEM hti) 
 { 
+	// PERMANENT LOGGING //////////////////////////////////////////////
+	CScopedLogTimer log(_T("CToDoCtrl::SelectItem()"));
+	///////////////////////////////////////////////////////////////////
+
 	Flush();
 
 	if (m_taskTree.GetSafeHwnd()) 
 	{
 		if (!m_taskTree.SelectItem(hti))
 			UpdateControls(); // disable controls
-		
+
 		UpdateSelectedTaskPath();
 
 		// notify parent
@@ -10857,7 +10891,7 @@ BOOL CToDoCtrl::FindReplaceSelectedTaskAttribute()
 	switch (nAttrib)
 	{
 	case TDCA_TASKNAME:
-		sSelAttrib = GetSelectedTaskTitle();
+		sSelAttrib = GetTaskTitle(m_taskTree.GetSelectedTaskID());
 		break;
 
 	case TDCA_COMMENTS:
@@ -11195,12 +11229,17 @@ LRESULT CToDoCtrl::OnCustomUrl(WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-void CToDoCtrl::SelectTasksInHistory(BOOL bForward) 
+BOOL CToDoCtrl::SelectTasksInHistory(BOOL bForward) 
 { 
+	if (!CanSelectTasksInHistory(bForward))
+		return FALSE;
+
 	HandleUnsavedComments();
 
-	if (m_taskTree.SelectTasksInHistory(bForward))
-		UpdateControls();
+	m_taskTree.SelectTasksInHistory(bForward);
+	UpdateControls();
+
+	return TRUE;
 }
 
 LRESULT CToDoCtrl::OnFileEditWantIcon(WPARAM wParam, LPARAM lParam)
@@ -11985,6 +12024,11 @@ BOOL CToDoCtrl::SelectedTaskIsUnlocked(DWORD dwTaskID) const
 		return (m_taskTree.IsTaskSelected(dwTaskID) && !m_calculator.IsTaskLocked(dwTaskID));
 
 	return !m_taskTree.SelectionHasLocked(FALSE);
+}
+
+CString CToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const 
+{ 
+	return m_taskTree.FormatSelectedTaskTitles(bFullPath, cSep, nMaxTasks); 
 }
 
 BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const 

@@ -29,8 +29,6 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 
 	if (dwReason == DLL_PROCESS_ATTACH)
 	{
-		TRACE0("TRANSTEXT.DLL Initializing!\n");
-		
 		// Extension DLL one-time initialization
 		if (!AfxInitExtensionModule(TransTextDLL, hInstance))
 			return 0;
@@ -51,7 +49,6 @@ DllMain(HINSTANCE hInstance, DWORD dwReason, LPVOID lpReserved)
 	}
 	else if (dwReason == DLL_PROCESS_DETACH)
 	{
-		TRACE0("TRANSTEXT.DLL Terminating!\n");
 		// Terminate the library before destructors are called
 		AfxTermExtensionModule(TransTextDLL);
 	}

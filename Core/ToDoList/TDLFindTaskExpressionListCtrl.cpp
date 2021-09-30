@@ -496,6 +496,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 
 						if (pDef->IsList())
 							return ILCT_DROPLIST;
+
 					}
 					break;
 				}

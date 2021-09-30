@@ -15,6 +15,7 @@ class CMessageBox
 {
 public:
 	static void SetAppName(const CString& sAppName);
+	static void DisableSimpleErrorMessages(BOOL bDisable = TRUE) { s_bDisableSimpleErrorMessages = bDisable; }
 
 	static int Show(HWND hwndParent, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags = MB_OK);
 	static int Show(const CWnd* pWnd, const CString& sCaption, const CString& sInstruction, const CString& sText, UINT nFlags = MB_OK);
@@ -31,6 +32,7 @@ public:
 
 protected:
 	static CString s_sAppName;
+	static BOOL s_bDisableSimpleErrorMessages;
 };
 
 #endif // !defined(AFX_MESSAGEBOX_H__8543A453_171B_11D4_AE08_0000E8425C3E__INCLUDED_)

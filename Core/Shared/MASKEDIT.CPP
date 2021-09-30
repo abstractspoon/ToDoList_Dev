@@ -75,6 +75,18 @@ void CMaskEdit::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 				bSkipMaskCheck = TRUE;
 		}
 		break;
+
+	case ',':
+		if (m_dwFlags & ME_LOCALIZESEPARATOR)
+		{
+			CString sSep = Misc::GetListSeparator();
+
+			if (!sSep.IsEmpty())
+				nChar = sSep[0];
+			else
+				bSkipMaskCheck = TRUE;
+		}
+		break;
 		
 	case 'c':
 	case 'C':
@@ -110,8 +122,16 @@ void CMaskEdit::SetMask(LPCTSTR szMask, DWORD dwFlags)
 	{
 		CString sDecimal = Misc::GetDecimalSeparator();
 
-		if (!sDecimal.IsEmpty() && sDecimal != _T(".") && m_sMask.Find('.') != -1)
+		if (!sDecimal.IsEmpty() && (sDecimal != _T(".")) && m_sMask.Find('.') != -1)
 			m_sMask += sDecimal[0];
+	}
+
+	if (dwFlags & ME_LOCALIZESEPARATOR)
+	{
+		CString sSep = Misc::GetListSeparator();
+
+		if (!sSep.IsEmpty() && (sSep != _T(",")) && m_sMask.Find(',') != -1)
+			m_sMask += sSep[0];
 	}
 }
 

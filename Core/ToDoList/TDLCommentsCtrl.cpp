@@ -9,6 +9,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dlgunits.h"
 #include "..\shared\misc.h"
+#include "..\shared\autoflag.h"
 #include "..\shared\themed.h"
 #include "..\shared\enstring.h"
 #include "..\shared\winclasses.h"
@@ -17,6 +18,8 @@
 #include "..\Interfaces\contentMgr.h"
 #include "..\interfaces\icontentcontrol.h"
 #include "..\Interfaces\Preferences.h"
+
+#include "..\3rdparty\XNamedColors.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -41,7 +44,8 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComb
 	m_hContentFont(NULL),
 	m_bReadOnly(FALSE),
 	m_bShowLabel(bShowLabel),
-	m_bShowToolbar(bShowToolbar)
+	m_bShowToolbar(bShowToolbar),
+	m_bUpdatingFormat(FALSE)
 {
 	int nComboOffsetDLU = 0;
 
@@ -120,22 +124,19 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 
 		if (m_toolbar.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), nStyle))
 		{
-			VERIFY(m_toolbar.LoadToolBar(IDR_DATETIME_TOOLBAR));
-
-			const COLORREF MAGENTA = RGB(255, 0, 255);
-			VERIFY(m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, MAGENTA));
-
 			m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
 			m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+			VERIFY(m_toolbar.LoadToolBar(IDR_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
+
+			if (m_pMgrShortcuts)
+				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
 
 			// Need care to ensure toolbar does not encroach on content window 
 			CRect rToolbar = GetChildRect(&m_cbCommentsFmt);
 			int nMaxHeight = (rToolbar.bottom + CDlgUnits(this).ToPixelsY(2));
 
 			m_toolbar.Resize(m_toolbar.GetMinReqLength(), CPoint((rToolbar.right + 10), 0), nMaxHeight);
-
-			if (m_pMgrShortcuts)
-				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
 		}
 	}
 
@@ -323,6 +324,8 @@ BOOL CTDLCommentsCtrl::UpdateControlFormat()
 
 BOOL CTDLCommentsCtrl::UpdateControlFormat(const CONTENTFORMAT& cfNew)
 {
+	CAutoFlag af(m_bUpdatingFormat, TRUE);
+
 	ASSERT(m_pMgrContent && (m_pMgrContent->FindContent(cfNew) != -1));
 	ASSERT(GetSafeHwnd());
 
@@ -462,6 +465,10 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 	m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
 	m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
+	// Rescale images because background colour has changed
+	if (GraphicsMisc::WantDPIScaling())
+		m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, colorMagenta);
+
 	Invalidate();
 }
 
@@ -527,7 +534,7 @@ BOOL CTDLCommentsCtrl::SetSelectedFormat(const CONTENTFORMAT& cf)
 	}
 
 	// else
-	UpdateControlFormat();
+	UpdateControlFormat(cf);
 	return TRUE;
 }
 
@@ -561,9 +568,11 @@ CString CTDLCommentsCtrl::GetPreferencesKey() const
 
 void CTDLCommentsCtrl::OnDestroy()
 {
-	CRuntimeDlg::OnDestroy();
-
 	SavePreferences();
+
+	m_ctrlComments.Release();
+
+	CRuntimeDlg::OnDestroy();
 }
 
 void CTDLCommentsCtrl::OnEnable(BOOL bEnable)

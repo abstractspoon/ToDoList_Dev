@@ -47,6 +47,7 @@ public:
 	{
 		COLORREF oldrgb = m_crBackGround;
 		m_crBackGround = rgb;
+		m_bRefresh = TRUE;
 		return oldrgb;
 	}
 	virtual COLORREF SetBkColor(LPCTSTR lpszColor) 
@@ -55,6 +56,7 @@ public:
 		CXNamedColors nc(lpszColor);
 		COLORREF oldrgb = m_crBackGround;
 		m_crBackGround = nc.GetRGB();
+		m_bRefresh = TRUE;
 		return oldrgb;
 	}
 	COLORREF GetBkColor() const { return m_crBackGround; }
@@ -63,6 +65,7 @@ public:
 	{
 		COLORREF oldrgb = m_crText;
 		m_crText = rgb;
+		m_bRefresh = TRUE;
 		return oldrgb;
 	}
 	virtual COLORREF SetTextColor(LPCTSTR lpszColor) 
@@ -71,6 +74,7 @@ public:
 		CXNamedColors nc(lpszColor);
 		COLORREF oldrgb = m_crText;
 		m_crText = nc.GetRGB();
+		m_bRefresh = TRUE;
 		return oldrgb;
 	}
 	COLORREF GetTextColor() const { return m_crText; }

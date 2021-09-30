@@ -77,7 +77,7 @@ public:
 	virtual ~CPreferencesDlg();
 
 	void InitializePreferences(); // one time only
-	int DoModal(int nInitPage = -1);
+	int DoModal(int nInitPage = -1, UINT nInitCtrlID = 0);
 	
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetAutoListData(const TDCAUTOLISTDATA& autoListData);
@@ -234,7 +234,7 @@ public:
 	BOOL GetRestoreTasklistFilters() const { return m_pageUI.GetRestoreTasklistFilters(); }
 	BOOL GetReFilterOnModify() const { return m_pageUI.GetReFilterOnModify(); }
 	BOOL GetReSortOnModify() const { return m_pageUI.GetReSortOnModify(); }
-	CString GetUITheme() const { return m_pageUI.GetUITheme(); }
+	CString GetUIThemeFile() const { return m_pageUI.GetUITheme(); }
 	FILTER_TITLE GetTitleFilterOption() const;
 	BOOL GetShowDefaultTaskIcons() const { return m_pageUI.GetShowDefaultTaskIcons(); }
 	BOOL GetShowDefaultFiltersInFilterBar() const { return m_pageUI.GetShowDefaultFiltersInFilterBar(); }
@@ -300,6 +300,7 @@ public:
 	COLORREF GetReferenceTaskColor() const { return m_pageUITasklistColors.GetReferenceTaskColor(); }
 	COLORREF GetHidePriorityNumber() const { return m_pageUITasklistColors.GetHidePriorityNumber(); }
 	COLORREF GetAlternateLineColor() const { return m_pageUITasklistColors.GetAlternateLineColor(); }
+	COLORREF GetGroupHeaderBackgroundColor() const { return m_pageUITasklistColors.GetGroupHeaderBackgroundColor(); }
 	TDC_ATTRIBUTE GetAttributeColors(CTDCColorMap& colors) const { return m_pageUITasklistColors.GetAttributeColors(colors); }
 
 	// CPreferencesToolPage
