@@ -85,7 +85,6 @@ const int MAX_DRAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(200);
 const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
 
 const CRect TEXT_BORDER			= CRect(2, 0, 3, 1);
-const COLORREF WHITE			= RGB(255, 255, 255);
 const CString NOFILELINK;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -785,7 +784,7 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 			if (bHasIcon)
 			{
-				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, WHITE, ILD_TRANSPARENT | ILD_BLEND50);
+				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, colorWhite, ILD_TRANSPARENT | ILD_BLEND50);
 			}
 			else if (bFirstParent)
 			{
