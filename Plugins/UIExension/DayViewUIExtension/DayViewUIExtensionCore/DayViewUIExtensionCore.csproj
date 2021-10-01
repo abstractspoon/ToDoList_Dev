@@ -83,6 +83,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\3rdParty\LinkLabelEx\LinkLabelEx.csproj">
+      <Project>{6b24236c-6b0c-4ba4-9778-6d8a9388b419}</Project>
+      <Name>LinkLabelEx</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\ToolStripEx\ToolStripEx.csproj">
       <Project>{8193b99d-4913-4574-ba3c-a7ef4e2b8627}</Project>
       <Name>ToolStripEx</Name>

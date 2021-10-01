@@ -506,20 +506,6 @@ void CKanbanColumnCtrlArray::FilterToolTipMessage(MSG* pMsg)
 		pCol->FilterToolTipMessage(pMsg);
 }
 
-void CKanbanColumnCtrlArray::UpdateHotItem(const CPoint& ptScreen)
-{
-	int nCol = GetSize();
-
-	while (nCol--)
-	{
-		CKanbanColumnCtrl* pCol = GetAt(nCol);
-		ASSERT(pCol);
-
-		HTREEITEM htiHit = pCol->HitTestItemSidebar(ptScreen);
-		pCol->SetHotItem(htiHit ? pCol->GetTaskID(htiHit) : 0);
-	}
-}
-
 void CKanbanColumnCtrlArray::SetSelectedColumn(const CKanbanColumnCtrl* pSelCol)
 {
 	int nCol = GetSize();

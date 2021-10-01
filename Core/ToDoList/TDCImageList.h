@@ -17,11 +17,12 @@ typedef CMap<CString, LPCTSTR, int, int> CMapStringToInt;
 typedef CMap<int, int, CString, CString&> CMapIntToString;
 
 #define TDCIL_MAGENTA RGB(255, 0, 255)
+#define TDCIL_WHITE   RGB(255, 255, 255)
 
 class CTDCImageList : public CEnImageList  
 {
 public:
-	CTDCImageList();
+	CTDCImageList(COLORREF crBkgnd = TDCIL_WHITE);
 	virtual ~CTDCImageList();
 
 	BOOL LoadDefaultImages(BOOL bWantToolbars = FALSE);
@@ -40,7 +41,7 @@ protected:
 
 	BOOL m_bWantToolbars, m_bWantDefaultIcons;
 	CString m_sTasklistPath;
-	COLORREF m_crTransparent;
+	COLORREF m_crTransparent, m_crBackground;
 
 protected:
 	// Images must be loaded

@@ -12,6 +12,7 @@
 #include "..\shared\richedithelper.h"
 #include "..\shared\webmisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\graphicsmisc.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\enstring.h"
 #include "..\shared\binarydata.h"
@@ -20,10 +21,12 @@
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\clipboard.h"
 #include "..\shared\localizer.h"
+#include "..\shared\holdredraw.h"
 
 #include "..\3rdparty\compression.h"
 #include "..\3rdparty\zlib\zlib.h"
 #include "..\3rdparty\clipboardbackup.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\Preferences.h"
 #include "..\Interfaces\uitheme.h"
@@ -130,20 +133,27 @@ BEGIN_MESSAGE_MAP(CRTFContentControl, CRulerRichEditCtrl)
 	ON_EN_KILLFOCUS(RTF_CONTROL, OnKillFocus)
 	ON_NOTIFY(TTN_NEEDTEXT, RTF_CONTROL, OnGetTooltip)
 	ON_WM_STYLECHANGING()
+	ON_WM_NCDESTROY()
 	ON_REGISTERED_MESSAGE(WM_UREN_CUSTOMURL, OnCustomUrl)
 	ON_REGISTERED_MESSAGE(WM_UREN_FAILEDURL, OnFailedUrl)
 	ON_REGISTERED_MESSAGE(WM_RTF_PREFSHELP, OnPrefsHelp)
 	ON_REGISTERED_MESSAGE(WM_REB_NOTIFYSELECTPOPUPLISTITEM, OnSelectPopupListItem)
-	ON_WM_NCDESTROY()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
 // CRTFContentControl message handlers
 
+void CRTFContentControl::Release()
+{
+	// Avoid CWnd::DestroyWindow because we get an unexpected assert 
+	// once we have released the memory in OnNcDestroy()
+	::DestroyWindow(m_hWnd);
+}
+
 void CRTFContentControl::OnNcDestroy()
 {
 	CRulerRichEditCtrl::OnNcDestroy();
-	
+
 	delete this;
 }
 
@@ -335,6 +345,22 @@ void CRTFContentControl::SetUITheme(const UITHEME* pTheme)
 	
 	m_toolbar.SetBackgroundColors(pTheme->crToolbarLight, pTheme->crToolbarDark, pTheme->nRenderStyle != UIRS_GLASS, pTheme->nRenderStyle != UIRS_GRADIENT);
 	m_toolbar.SetHotColor(pTheme->crToolbarHot);
+
+	// Rescale images because background colour has changed
+	if (GraphicsMisc::WantDPIScaling())
+	{
+		m_toolbar.DestroyWindow();
+		CreateToolbar();
+
+		m_tbHelper.Release();
+		m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts);
+
+		CRect rClient;
+		GetClientRect(rClient);
+
+		LayoutControls(rClient.Width(), rClient.Height());
+	}
+
 	m_ruler.SetBackgroundColor(pTheme->crToolbarLight);
 }
 
@@ -504,7 +530,7 @@ void CRTFContentControl::InitMenuIconManager()
 	aCmdIDs.Add(ID_PREFERENCES);
 	aCmdIDs.Add(ID_HELP);
 		
-	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_TOOLBAR, RGB(255, 0, 255));
+	m_mgrMenuIcons.AddImages(aCmdIDs, IDB_TOOLBAR, colorMagenta);
 }
 
 BOOL CRTFContentControl::IsTDLClipboardEmpty() const 
@@ -557,7 +583,7 @@ int CRTFContentControl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	// helper for toolbar tooltips
 	// initialize after hiding table button
-	m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts);
+	VERIFY(m_tbHelper.Initialize(&m_toolbar, this, &m_mgrShortcuts));
 
 	return 0;
 }
@@ -607,27 +633,60 @@ bool CRTFContentControl::ProcessMessage(MSG* pMsg)
 				switch (pMsg->wParam)
 				{
 				case VK_TAB:
-				{
-					CHARRANGE cr;
-					m_rtf.GetSel(cr);
+					{
+						CHARRANGE cr;
+						m_rtf.GetSel(cr);
 
-					// if nothing is selected then just insert tabs
-					if (cr.cpMin == cr.cpMax)
-					{
-						m_rtf.ReplaceSel(_T("\t"), TRUE);
+						BOOL bHasSel = (cr.cpMax > cr.cpMin), bOutdent = bShift;
+
+						if (bHasSel)
+						{
+							// Block shifting
+							if (bOutdent)
+								DoOutdent();
+							else
+								DoIndent();
+						}
+						else // Remove/insert leading tab
+						{
+							if (bOutdent) // Remove
+							{
+								cr.cpMin--;
+
+								if (m_rtf.GetTextRange(cr) == _T("\t"))
+								{
+									// prevent char selection being seen
+									CHoldRedraw hr(m_rtf);
+
+									m_rtf.SetSel(cr);
+									m_rtf.ReplaceSel(_T(""), TRUE);
+								}
+							}
+							else // Insert
+							{
+								m_rtf.ReplaceSel(_T("\t"), TRUE);
+							}
+						}
 					}
-					else
-					{
-						if (!bShift)
-							DoIndent();
-						else
-							DoOutdent();
-					}
+					return true;
 				}
-				return true;
+			}
+		}
+		break;
 
-				case '2':
-					if (bShift) // '@'
+	case WM_CHAR:
+		{
+			AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+			BOOL bEnabled = !GetReadOnly();
+
+			if (bEnabled)
+			{
+				switch (pMsg->wParam)
+				{
+				case '@':
+					// Can't handle this with WM_KEYDOWN because different
+					// keyboard layouts place '@' in different locations
 					{
 						// Get both allocated by and allocated to
 						CString sAllocTo = (LPCTSTR)GetParent()->SendMessage(WM_ICC_GETATTRIBUTELIST, TDCA_ALLOCTO, '\n');

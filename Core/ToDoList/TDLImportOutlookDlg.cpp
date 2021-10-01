@@ -21,6 +21,7 @@
 #include "..\Interfaces\ITaskList.h"
 
 #include "..\3rdparty\msoutl.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include <afxtempl.h>
 
@@ -163,7 +164,7 @@ BOOL CTDLImportOutlookDlg::BuildItemImageList()
 	CBitmap bmp;
 	bmp.LoadBitmap(IDB_OUTLOOKTYPES);
 
-	m_ilItemTypes.Add(&bmp, RGB(255, 0, 255));
+	m_ilItemTypes.Add(&bmp, colorMagenta);
 
 	for (int nIcon = 0; nIcon < NUM_ICONS; nIcon++)
 		m_mapItemTypes[ICONS[nIcon]] = nIcon;

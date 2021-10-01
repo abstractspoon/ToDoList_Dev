@@ -253,7 +253,7 @@ CTDLWelcomePage3::CTDLWelcomePage3()
 	//}}AFX_DATA_INIT
 	m_psp.dwFlags &= ~(PSP_HASHELP);		
 
-	m_eSampleTasklist.SetFilter(CEnString(IDS_TDLFILEOPENFILTER));
+ 	m_eSampleTasklist.SetFilter(CEnString(IDS_TDLFILEFILTER));
 	m_eSampleTasklist.SetCurrentFolder(FileMisc::GetAppFolder());
 	m_sSampleTaskList = _T(".\\Resources\\Examples\\Introduction.tdl");
 	

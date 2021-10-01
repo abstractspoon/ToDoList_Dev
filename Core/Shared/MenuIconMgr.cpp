@@ -276,7 +276,7 @@ int CMenuIconMgr::AddImages(const CUIntArray& aCmdIDs, CBitmap& bm, CImageList& 
 				il.Add(&bm, crMask);
 		}
 
-		CEnImageList::ScaleByDPIFactor(il);
+		CEnImageList::ScaleByDPIFactor(il, GetSysColor(COLOR_MENU));
 	}
 	
 	return il.GetImageCount();

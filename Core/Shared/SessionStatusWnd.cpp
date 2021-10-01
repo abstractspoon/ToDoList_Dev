@@ -67,6 +67,13 @@ BOOL CSessionStatusWnd::Initialize(HWND hwndNotify)
 	return FALSE;
 }
 
+BOOL CSessionStatusWnd::DestroyWindow()
+{
+	m_hwndNotify = NULL;
+
+	return CFrameWnd::DestroyWindow();
+}
+
 LRESULT CSessionStatusWnd::OnPowerBroadcast(WPARAM wp, LPARAM /*lp*/)
 {
 	switch (wp)

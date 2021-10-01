@@ -49,7 +49,7 @@ public:
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	int GetTaskCount() const { return (int)m_tree.GetCount(); }
 
-	BOOL GetSelectedTask(WORKLOADITEM& wi) const;
+	BOOL GetSelectedTask(WORKLOADITEM& wi, BOOL bIncUnallocated = TRUE) const;
 	BOOL SetSelectedTaskAllocations(const WORKLOADITEM& wi);
 	const CStringArray& GetAllocatedToList() const { return m_aAllocTo; }
 
@@ -70,7 +70,7 @@ public:
 	void SetOption(DWORD dwOption, BOOL bSet = TRUE);
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 
-	BOOL SetBackgroundColor(COLORREF crBkgnd);
+	BOOL SetBackgroundColors(COLORREF crBkgnd, COLORREF crText);
 	void SetOverlapColor(COLORREF crOverlap);
 
 	void EnableOverload(BOOL bEnable, double dOverloadValue, COLORREF crOverload);
@@ -90,7 +90,7 @@ protected:
 	CString m_sSortByAllocTo;
 	int m_nSortByAllocToCol;
 	COleDateTimeRange m_dtPeriod, m_dtDataRange;
-	COLORREF m_crOverlap;
+	COLORREF m_crOverlap, m_crBkgndText;
 	BOOL m_bReadOnly;
 
 	WORKLOADSORT m_sort;
@@ -193,6 +193,7 @@ protected:
 	void RebuildTree(const ITASKLISTBASE* pTasks);
 	void BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask, HTREEITEM htiParent, BOOL bAndSiblings, BOOL bInsertAtEnd = TRUE);
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
+	void UpdateAllocTo(const ITASKLISTBASE* pTasks);
 
 	void Sort(WLC_COLUMNID nBy, BOOL bAllowToggle, BOOL bAscending, BOOL bNotifyParent);
 	int CompareTasks(DWORD dwTaskID1, DWORD dwTaskID2, const WORKLOADSORTCOLUMN& col) const;

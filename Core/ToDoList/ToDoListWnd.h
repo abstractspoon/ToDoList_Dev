@@ -25,6 +25,7 @@
 #include "TDLThreadedExporterWnd.h"
 #include "TDLCustomToolbar.h"
 #include "TDCMainMenu.h"
+#include "TDLStatusBar.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -41,11 +42,9 @@
 #include "..\shared\enBrowserctrl.h"
 #include "..\shared\menuiconmgr.h"
 #include "..\shared\toolbarhelper.h"
-#include "..\shared\StatusbarProgress.h"
 #include "..\shared\stickieswnd.h"
 #include "..\shared\windowicons.h"
 #include "..\shared\sessionstatuswnd.h"
-#include "..\shared\statusbarACTEx.h"
 
 #include "..\Interfaces\UIExtensionMgr.h"
 #include "..\Interfaces\uithemefile.h"
@@ -103,8 +102,7 @@ protected:
 	CFont m_fontTree, m_fontComments; // shared by all tasklists
 	CEnImageList m_ilTabCtrl;
 	CPreferencesDlg* m_pPrefs;
-	CStatusBarACTEx	m_statusBar;
-	CStatusBarProgress m_sbProgress;
+	CTDLStatusBar m_statusBar;
 	CTDLFilterBar m_filterBar;
 	CTDLFindTasksDlg m_dlgFindTasks;
 	CTabCtrlEx m_tabCtrl;
@@ -138,7 +136,6 @@ protected:
 	CUIExtensionMgr m_mgrUIExtensions;
 
 	CString m_sQuickFind;
-	CString m_sThemeFile;
 	CString m_sTaskViewImageExt;
 	CString m_sTitlePrefix;
 	CEnString m_sCurrentFocus;
@@ -166,7 +163,7 @@ protected:
 	BOOL m_bReshowTimeTrackerOnEnable;
 	BOOL m_bSettingAttribDefs;
 	BOOL m_bAllowForcedCheckOut;
-	BOOL m_bIgnoreNextResize;
+	BOOL m_bIgnoreResize;
 	BOOL m_bFirstEraseBkgnd;
 	
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
@@ -203,6 +200,10 @@ protected:
 	afx_msg void OnUpdateEditSetPercentToToday(CCmdUI* pCmdUI);
 	afx_msg void OnToolsAnonymizeTasklist();
 	afx_msg void OnUpdateToolsAnonymizeTasklist(CCmdUI* pCmdUI);
+	afx_msg void OnViewHideAllBars();
+	afx_msg void OnUpdateViewHideAllBars(CCmdUI* pCmdUI);
+	afx_msg void OnViewShowAllBars();
+	afx_msg void OnUpdateViewShowAllBars(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	afx_msg void OnViewShowTimeTracker();
 	afx_msg BOOL OnQueryOpen();
@@ -361,6 +362,7 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg BOOL OnOpenRecentFile(UINT nID);
 	afx_msg void OnEndSession(BOOL bEnding);
+	afx_msg void OnDestroy();
 	afx_msg LRESULT OnUpdateUDTsInToolbar(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnAppRestoreFocus(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnDoInitialDueTaskNotify(WPARAM wp, LPARAM lp);
@@ -404,6 +406,7 @@ protected:
 	afx_msg LRESULT OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyTimeTrack(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnToDoCtrlNotifySelChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyViewChange(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyTimeTrackReminder(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifySourceControlSave(WPARAM wParam, LPARAM lParam);
@@ -526,8 +529,6 @@ protected:
 	afx_msg void OnUpdatePrint(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateRecentFileMenu(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateReload(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateSBSelectionCount(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateSBTaskCount(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSave(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveall(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveas(CCmdUI* pCmdUI);
@@ -559,10 +560,10 @@ protected:
 	afx_msg void OnUserTool(UINT nCmdID);
 	afx_msg void OnViewMovetasklistleft();
 	afx_msg void OnViewMovetasklistright();
-	afx_msg void OnViewNext();
-	afx_msg void OnViewNextSel();
-	afx_msg void OnViewPrev();
-	afx_msg void OnViewPrevSel();
+	afx_msg void OnViewNextTasklist();
+	afx_msg void OnViewNextSelectedTask();
+	afx_msg void OnViewPrevTasklist();
+	afx_msg void OnViewPrevSelectedTask();
 	afx_msg void OnViewRefreshfilter();
 	afx_msg void OnViewSaveToImage();
 	afx_msg void OnViewMainToolbar();
@@ -602,6 +603,10 @@ protected:
 	void OnUpdateViewIncrementTaskViewFontSize(CCmdUI* pCmdUI, BOOL bLarger);
 	void OnTasklistCopyColumnValues(BOOL bSelectedTasks);
 	void OnUpdateTasklistCopyColumnValues(CCmdUI* pCmdUI, BOOL bSelectedTasks);
+
+	void OnViewShowHideAllBars(BOOL bShow);
+
+	// -------------------------------------
 
 	void KillTimers();
 	void RestoreTimers();
@@ -654,7 +659,8 @@ protected:
 	BOOL WantTasklistTabbarVisible() const;
 	void UpdateAeroFeatures();
 	void CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat);
-	void SetUITheme(const CString& sThemeFile);
+	void InitUITheme();
+	void UpdateUITheme();
 	void ProcessQuickFindTextChange(BOOL bComboSelChange);
 	void CheckCreateDefaultReminder(const CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 	BOOL GetFirstTaskReminder(const CFilteredToDoCtrl& tdc, const CDWordArray& aTaskIDs, TDCREMINDER& rem) const;
@@ -727,11 +733,9 @@ protected:
 	TDC_FILE SaveTaskList(int nIndex, LPCTSTR szFilePath = NULL, DWORD dwFlags = 0); // returns FALSE only if the user was prompted to save and cancelled
 	TDC_FILE SaveAll(DWORD dwFlags); // returns FALSE only if the user was prompted to save and cancelled
 	
-	void UpdateTooltip();
+	void UpdateTrayTooltip();
 	void UpdateCaption();
-	void UpdateStatusbar();
-	void UpdateSBPaneAndTooltip(UINT nIDPane, UINT nIDTextFormat, const CString& sValue, UINT nIDTooltip, TDC_COLUMN nTDCC);
-	void UpdateStatusBarInfo(const CFilteredToDoCtrl& tdc, TDCSTATUSBARINFO& sbi) const;
+	void UpdateStatusBar(const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 	void UpdateMenuIconMgrSourceControlStatus();
 	void UpdateTimeTrackerPreferences();
 	void UpdateWindowIcons();
@@ -750,7 +754,7 @@ protected:
 					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
 	
 	void DoSendTasks(BOOL bSelected);
-	BOOL DoPreferences(int nInitPage = -1);
+	BOOL DoPreferences(int nInitPage = -1, UINT nInitCtrlID = 0);
 	void DoPrint(BOOL bPreview = FALSE);
 	BOOL DoDueTaskNotification(int nTDC, int nDueBy);
 	BOOL DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartup);
@@ -764,7 +768,7 @@ protected:
 	TDCEXPORTTASKLIST* PrepareNewDueTaskNotification(int nTDC, int nDueBy);
 	TDCEXPORTTASKLIST* PrepareNewExportAfterSave(int nTDC, const CTaskFile& tasks);
 
-	void UpdateTimeTrackerTasks(const CFilteredToDoCtrl& tdc, BOOL bAllTasks);
+	void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 	BOOL ImportTasks(BOOL bFromText, const CString& sImportFrom,
 					int nImporter, TDLID_IMPORTTO nImportTo);
 	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
@@ -773,6 +777,7 @@ protected:
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
 	void SaveCurrentFocus(HWND hwndFocus = NULL);
 	void PostAppRestoreFocus(HWND hwndFocus = NULL);
+	void UpdateTreeAndCommentsFonts();
 
 	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
@@ -780,6 +785,7 @@ protected:
 	static void HandleLoadTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist);
 	static BOOL HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist); // Note the 'reference'
 
+	static void UpdateToolbarColors(CEnToolBar& toolbar, const CUIThemeFile& theme);
 	static void EnableTDLExtension(BOOL bEnable, BOOL bStartup);
 	static void EnableTDLProtocol(BOOL bEnable, BOOL bStartup);
 	static void SetupUIStrings();

@@ -53,8 +53,8 @@ public:
 	double GetTaskStartDate(DWORD dwTaskID) const;
 	double GetTaskLastModifiedDate(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
-	int GetTaskHighestPriority(DWORD dwTaskID, BOOL bIncludeDue = TRUE) const;
-	int GetTaskHighestRisk(DWORD dwTaskID) const;
+	int GetTaskPriority(DWORD dwTaskID, BOOL bIncludeDue = TRUE) const;
+	int GetTaskRisk(DWORD dwTaskID) const;
 	int GetTaskPercentDone(DWORD dwTaskID) const;
 	double GetTaskCost(DWORD dwTaskID) const;
 	double GetTaskTimeEstimate(DWORD dwTaskID, TDC_UNITS nUnits) const;
@@ -77,8 +77,8 @@ public:
 	double GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskLastModifiedBy(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	int GetTaskHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue = TRUE) const;
-	int GetTaskHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	int GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue = TRUE) const;
+	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
 	double GetTaskRemainingTime(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS& nUnits) const;
@@ -91,8 +91,8 @@ public:
 	double GetTaskSubtaskCompletion(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	BOOL GetTaskCustomAttributeData(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits = TDCU_NULL) const;
 
-	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
-	BOOL HasCalculatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
+	BOOL IsAggregatedAttribute(TDC_ATTRIBUTE nAttrib) const;
+	BOOL HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs) const;
 
 protected:
 	const CToDoCtrlData& m_data;
@@ -276,9 +276,9 @@ protected:
 class CTDCTaskExporter
 {
 public:
-	CTDCTaskExporter(const CToDoCtrlData& data, 
-		const CTDLTaskCtrlBase& colors,
-		const CContentMgr& comments);
+	CTDCTaskExporter(const CToDoCtrlData& data,
+					 const CTDLTaskCtrlBase& colors,
+					 const CContentMgr& comments);
 
 	int ExportAllTasks(CTaskFile& tasks, BOOL bIncDuplicateCompletedRecurringSubtasks = TRUE) const;
 	int ExportCompletedTasks(CTaskFile& tasks) const;

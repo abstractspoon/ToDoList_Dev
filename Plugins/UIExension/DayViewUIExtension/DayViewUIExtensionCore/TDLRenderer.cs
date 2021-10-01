@@ -423,12 +423,11 @@ namespace DayViewUIExtension
 				Color fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
 
 				bool isFutureItem = (appt is FutureOccurrence);
+
 				if (isFutureItem)
 				{
 					fillColor = SystemColors.Window;
-
-					float textLum = DrawingColor.GetLuminance(textColor);
-					textColor = DrawingColor.SetLuminance(textColor, Math.Min(textLum + 0.2f, 0.7f));
+					textColor = appt.TextColor;
 				}
 
 				Color borderColor = textColor;
@@ -567,48 +566,47 @@ namespace DayViewUIExtension
                     if (!hasIcon)
                     {
                         rect.X = gripRect.Right;
-                        rect.Width -= (gripRect.Width + (TextPadding * 2));
+                        rect.Width -= gripRect.Width;
                     }
                 }
 
-				// draw appointment text
-				rect.Y += 3;
+                // draw appointment text
+                using (StringFormat format = new StringFormat())
+                {
+                    format.Alignment = StringAlignment.Near;
+                    format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
 
-				if (isLong)
-					rect.Height = m_BaseFont.Height;
-				else
-					rect.Height -= 3;
+					if (isLong)
+						format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
 
-				if (rect.Width > 2)
-				{
-					using (StringFormat format = new StringFormat())
-					{
-						format.Alignment = StringAlignment.Near;
-						format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
+                    rect.Y += 3;
 
-						g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+					if (isLong)
+						rect.Height = m_BaseFont.Height;
+					else
+						rect.Height -= 3;
 
-						using (SolidBrush brush = new SolidBrush(textColor))
-						{
-							if (taskItem.IsDone && StrikeThruDoneTasks)
-							{
-								using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
-								{
-									g.DrawString(appt.Title, font, brush, rect, format);
-								}
-							}
-							else
-							{
-								g.DrawString(appt.Title, this.BaseFont, brush, rect, format);
-							}
-						}
+					tdlView.TextRect = rect;
+                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-						g.TextRenderingHint = TextRenderingHint.SystemDefault;
-					}
-				}
+                    using (SolidBrush brush = new SolidBrush(textColor))
+                    {
+                        if (taskItem.IsDone && StrikeThruDoneTasks)
+                        {
+                            using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
+                            {
+                                g.DrawString(appt.Title, font, brush, rect, format);
+                            }
+                        }
+                        else
+                        {
+                            g.DrawString(appt.Title, this.BaseFont, brush, rect, format);
+                        }
+                    }
 
-				tdlView.TextRect = rect;
-			}
-		}
+                    g.TextRenderingHint = TextRenderingHint.SystemDefault;
+                }
+            }
+        }
     }
 }

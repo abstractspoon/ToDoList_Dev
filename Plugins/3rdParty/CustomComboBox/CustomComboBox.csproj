@@ -52,6 +52,9 @@
     </Compile>
     <Compile Include="OldNewEvent.cs" />
     <Compile Include="PopupControl.cs" />
+    <Compile Include="PopupListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -284,6 +284,9 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		return FALSE;
 	}
 
+	// Make sure the selected task remains visible
+	// after any changes if it was visible to start with
+	BOOL bSelTaskWasVisible = IsTaskVisible(m_dwSelectedTaskID);
 	BOOL bChange = FALSE;
 
 	switch (nUpdate)
@@ -307,16 +310,12 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		break;
 		
 	case IUI_EDIT:
-		{
-			bChange = UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE);
-			bChange |= (pTasks->IsAttributeAvailable(TDCA_RECURRENCE) ? TRUE : FALSE);
-		}
+		bChange = (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) ||
+					pTasks->IsAttributeAvailable(TDCA_RECURRENCE));
 		break;
 		
 	case IUI_DELETE:
-		{
-			bChange = RemoveDeletedTasks(pTasks);
-		}
+		bChange = RemoveDeletedTasks(pTasks);
 		break;
 		
 	default:
@@ -328,7 +327,10 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		RecalcDataRange();
 		RebuildCellTasks();
 
-		Invalidate(FALSE);
+		if (bSelTaskWasVisible && !IsTaskVisible(m_dwSelectedTaskID))
+			EnsureSelectionVisible();
+		else
+			Invalidate(FALSE);
 	}
 
 	return bChange;
@@ -1845,7 +1847,7 @@ void CTaskCalendarCtrl::OnVisibleDateRangeChanged()
 	UpdateCellScrollBarVisibility(TRUE);// scroll to selected task
 }
 
-bool CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
+BOOL CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
 {
 	int nPrevRow, nPrevCol;
 
@@ -1853,13 +1855,19 @@ bool CTaskCalendarCtrl::SelectGridCell(int nRow, int nCol)
 		(nRow != nPrevRow) || (nCol != nPrevCol))
 	{
 		if (!CCalendarCtrl::SelectGridCell(nRow, nCol))
-			return false;
+			return FALSE;
 
 		// Notify our parent of the grid cell change
 		NotifyParentClick();
 	}
 
-	return true;
+	return TRUE;
+}
+
+BOOL CTaskCalendarCtrl::IsTaskVisible(DWORD dwTaskID) const
+{
+	int nUnused;
+	return GetGridCell(dwTaskID, nUnused, nUnused, nUnused);
 }
 
 BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const
@@ -1871,6 +1879,9 @@ BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const
 BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const
 {
 	nRow = nCol = nTask = -1;
+
+	if (!dwTaskID)
+		return FALSE;
 
 	// iterate the visible cells for the specified task
 	for(int i=0; i < GetVisibleWeeks() ; i++)
@@ -1896,7 +1907,7 @@ BOOL CTaskCalendarCtrl::GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& n
 		}
 	}
 
-	return false;
+	return FALSE;
 }
 
 BOOL CTaskCalendarCtrl::GetSelectedTaskLabelRect(CRect& rLabel) const

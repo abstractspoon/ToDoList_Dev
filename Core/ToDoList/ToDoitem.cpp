@@ -486,7 +486,7 @@ int CTDCDependencyArray::FindDependency(const TDCDEPENDENCY& other) const
 		}
 		else if (!bLocal && !bOtherLocal)
 		{
-			if (FileMisc::IsSamePath(depend.sTasklist, other.sTasklist))
+			if (depend == other)
 				return nDepend;
 		}
 	}
@@ -1296,7 +1296,7 @@ BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 
 CToDoCtrlDataItems::CToDoCtrlDataItems() 
 {
-	InitHashTable(1991); // prime number closest to 2000
+	InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
 }
 
 CToDoCtrlDataItems::~CToDoCtrlDataItems() 
@@ -1313,11 +1313,11 @@ void CToDoCtrlDataItems::CleanUp()
 {
 	DWORD dwID = 0;
 	TODOITEM* pTDI = NULL;
-	POSITION pos = GetStartPosition();
+	POSITION pos = GetStart();
 
 	while (pos)
 	{
-		GetNextAssoc(pos, dwID, pTDI);
+		GetNext(pos, dwID, pTDI);
 		delete pTDI;
 	}
 
@@ -1378,14 +1378,31 @@ BOOL CToDoCtrlDataItems::HasTask(DWORD dwTaskID) const
 	return (GetTask(dwTaskID) != NULL);
 }
 
-POSITION CToDoCtrlDataItems::GetStartPosition() const
+POSITION CToDoCtrlDataItems::GetStart() const
 {
 	return CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&>::GetStartPosition();
 }
 
-void CToDoCtrlDataItems::GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const
+void CToDoCtrlDataItems::GetNext(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const
 {
 	CMap<DWORD, DWORD, TODOITEM*, TODOITEM*&>::GetNextAssoc(rNextPosition, dwTaskID, pTDI);
+}
+
+DWORD CToDoCtrlDataItems::GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const
+{
+	DWORD dwTaskID = 0;
+	TODOITEM* pTemp = NULL;
+
+	GetNext(pos, dwTaskID, pTemp);
+
+	pTDI = pTemp;
+	return dwTaskID;
+}
+
+DWORD CToDoCtrlDataItems::GetNextTaskID(POSITION& pos) const
+{
+	const TODOITEM* pUnused;
+	return GetNextTask(pos, pUnused);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -1438,7 +1455,7 @@ int TODOSTRUCTURE::GetLeafCount() const
 
 	for (int nSubTask = 0; nSubTask < GetSubTaskCount(); nSubTask++)
 	{
-		nLeafCount += GetSubTask(nSubTask)->GetLeafCount();
+		nLeafCount += GetSubTask(nSubTask)->GetLeafCount(); // RECURSIVE CALL
 	}
 
 	return (nLeafCount == 0) ? 1 : nLeafCount;
@@ -1560,13 +1577,12 @@ BOOL TODOSTRUCTURE::InsertSubTask(TODOSTRUCTURE* pTDS, int nPos)
 	if (nPos < 0 || nPos > GetSubTaskCount())
 		return FALSE;
 	
-	// check task with this ID does not already exist
-	if (GetSubTaskPosition(pTDS->GetTaskID()) != -1)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-	
+	// This is an expensive operation if we have many
+	// siblings so we only ASSERT on it and assume
+	// that CToDoCtrlDataStructure has ensured that
+	// this element is unique
+	ASSERT(GetSubTaskPosition(pTDS->GetTaskID()) == -1);
+
 	if (nPos == GetSubTaskCount())
 		m_aSubTasks.Add(pTDS);
 	else
@@ -1587,7 +1603,10 @@ BOOL TODOSTRUCTURE::AddSubTask(TODOSTRUCTURE* pTDS)
 	if (!pTDS || pTDS->GetTaskID() == 0)
 		return FALSE;
 	
-	// check task with this ID does not already exist
+	// This is an expensive operation if we have many
+	// siblings so we only ASSERT on it and assume
+	// that CToDoCtrlDataStructure has ensured that
+	// this element is unique
 	ASSERT(GetSubTaskPosition(pTDS->GetTaskID()) == -1);
 	
 	m_aSubTasks.Add(pTDS);
@@ -1634,26 +1653,36 @@ void TODOSTRUCTURE::CleanUp()
 	m_aSubTasks.RemoveAll();
 }
 
+BOOL TODOSTRUCTURE::CanMoveSubTask(int nPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const
+{
+	if ((nPos < 0) ||
+		(nPos >= GetSubTaskCount()) ||
+		(pTDSDestParent == NULL) ||
+		(nDestPos < 0) ||
+		(nDestPos > pTDSDestParent->GetSubTaskCount()))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return ((pTDSDestParent != this) || (nPos != nDestPos));
+}
+
+// private helper for CToDoCtrlDataStructure
 int TODOSTRUCTURE::MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos)
 {
-	// check destination is okay
-	ASSERT (pTDSDestParent && nDestPos >= 0 && nDestPos <= pTDSDestParent->GetSubTaskCount());
-	
-	if (!pTDSDestParent || nDestPos < 0 || nDestPos > pTDSDestParent->GetSubTaskCount())
+	if (!CanMoveSubTask(nPos, pTDSDestParent, nDestPos))
 		return -1;
 	
 	TODOSTRUCTURE* pTDS = GetSubTask(nPos);
 	ASSERT(pTDS);
-	
-	if (!pTDS)
-		return -1;
 	
 	m_aSubTasks.RemoveAt(nPos); // remove from 'this' TODOSTRUCTURE
 	
 	// special case: the the source and destination are the same and the source
 	// pos precedes the destination then we need to decrement the destination
 	// to allow for having just deleted the source
-	if (this == pTDSDestParent && nPos < nDestPos)
+	if ((this == pTDSDestParent) && (nPos < nDestPos))
 		nDestPos--;
 	
 	// add to destination
@@ -1683,8 +1712,15 @@ void TODOSTRUCTURE::Trace(const CString& sIndent) const
 
 /////////////////////////////////////////////////////////////////////////////////////////////////
 
+CToDoCtrlDataStructure::CToDoCtrlDataStructure()
+{
+	m_mapStructure.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
+}
+
 CToDoCtrlDataStructure::CToDoCtrlDataStructure(const CToDoCtrlDataStructure& tds)
 {
+	m_mapStructure.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
+
    *this = tds;
 }
 
@@ -1697,7 +1733,7 @@ const CToDoCtrlDataStructure& CToDoCtrlDataStructure::operator=(const CToDoCtrlD
 {
    TODOSTRUCTURE::operator=(tds);
 
-   BuildMap();
+   BuildStructureMap();
 
    return *this;
 }
@@ -1740,7 +1776,7 @@ TODOSTRUCTURE* CToDoCtrlDataStructure::AddTask(DWORD dwID, TODOSTRUCTURE* pTDSPa
 	TODOSTRUCTURE* pTDSChild = pTDSParent->AddSubTask(dwID);
 	
 	if (pTDSChild)
-		AddToMap(pTDSChild);
+		AddToStructureMap(pTDSChild);
 	else
 		ASSERT(0);
 
@@ -1752,14 +1788,16 @@ BOOL CToDoCtrlDataStructure::DeleteTask(DWORD dwID)
 	TODOSTRUCTURE* pTDSParent = NULL;
 	int nPos = -1;
 
-	if (FindTask(dwID, pTDSParent, nPos))
+	if (!FindTask(dwID, pTDSParent, nPos))
 	{
-		return (m_mapStructure.RemoveKey(dwID) &&
-				pTDSParent->DeleteSubTask(nPos));
+		ASSERT(0);
+		return FALSE;
 	}
 
-	// else
-	return FALSE;
+	RemoveFromStructureMap(pTDSParent->GetSubTask(nPos));
+	VERIFY(pTDSParent->DeleteSubTask(nPos));
+
+	return TRUE;
 }
 
 void CToDoCtrlDataStructure::DeleteAll()
@@ -1802,6 +1840,25 @@ BOOL CToDoCtrlDataStructure::FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, in
 	return (nPos != -1);
 }
 
+int CToDoCtrlDataStructure::MoveSubTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos)
+{
+	if (!CanMoveSubTask(pTDSSrcParent, nSrcPos, pTDSDestParent, nDestPos))
+		return -1;
+
+	return pTDSSrcParent->MoveSubTask(nSrcPos, pTDSDestParent, nDestPos);
+}
+
+BOOL CToDoCtrlDataStructure::CanMoveSubTask(const TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const
+{
+	if (pTDSSrcParent == NULL)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return pTDSSrcParent->CanMoveSubTask(nSrcPos, pTDSDestParent, nDestPos);
+}
+
 BOOL CToDoCtrlDataStructure::InsertTask(DWORD dwID, TODOSTRUCTURE* pTDSParent, int nPos)
 {
 	TODOSTRUCTURE* pTDSChild = new TODOSTRUCTURE(dwID);
@@ -1819,7 +1876,7 @@ BOOL CToDoCtrlDataStructure::InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDS
 {
 	if (pTDSParent->InsertSubTask(pTDS, nPos))
 	{
-		AddToMap(pTDS);
+		AddToStructureMap(pTDS);
 		return TRUE;
 	}
 	
@@ -1827,25 +1884,25 @@ BOOL CToDoCtrlDataStructure::InsertTask(TODOSTRUCTURE* pTDS, TODOSTRUCTURE* pTDS
 	return FALSE;
 }
 
-void CToDoCtrlDataStructure::BuildMap()
+void CToDoCtrlDataStructure::BuildStructureMap()
 {
 	for (int nSubTask = 0; nSubTask < GetSubTaskCount(); nSubTask++)
 	{
 		TODOSTRUCTURE* pTDSChild = GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 
-      AddToMap(pTDSChild);
+		AddToStructureMap(pTDSChild);
 	}
 }
 
-void CToDoCtrlDataStructure::AddToMap(const TODOSTRUCTURE* pTDS)
+void CToDoCtrlDataStructure::AddToStructureMap(TODOSTRUCTURE* pTDS)
 {
 	ASSERT(!pTDS->IsRoot());
 	
 	if (pTDS->IsRoot())
 		return;
 	
-	m_mapStructure[pTDS->GetTaskID()] = const_cast<TODOSTRUCTURE*>(pTDS);
+	m_mapStructure[pTDS->GetTaskID()] = pTDS;
 	
 	// children
 	for (int nSubTask = 0; nSubTask < pTDS->GetSubTaskCount(); nSubTask++)
@@ -1853,11 +1910,11 @@ void CToDoCtrlDataStructure::AddToMap(const TODOSTRUCTURE* pTDS)
 		TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 		
-		AddToMap(pTDSChild);
+		AddToStructureMap(pTDSChild); // RESURSIVE CALL
 	}
 }
 
-void CToDoCtrlDataStructure::RemoveFromMap(const TODOSTRUCTURE* pTDS)
+void CToDoCtrlDataStructure::RemoveFromStructureMap(TODOSTRUCTURE* pTDS)
 {
 	ASSERT(!pTDS->IsRoot());
 	
@@ -1872,7 +1929,8 @@ void CToDoCtrlDataStructure::RemoveFromMap(const TODOSTRUCTURE* pTDS)
 		TODOSTRUCTURE* pTDSChild = pTDS->GetSubTask(nSubTask);
 		ASSERT(pTDSChild);
 		
-		RemoveFromMap(pTDSChild);
+		RemoveFromStructureMap(pTDSChild); // RESURSIVE CALL
+
 	}
 }
 

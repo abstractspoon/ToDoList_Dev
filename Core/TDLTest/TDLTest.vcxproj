@@ -75,6 +75,7 @@
       <ProgramDataBaseFileName>.\Unicode_Release/</ProgramDataBaseFileName>
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -112,7 +113,7 @@ copy unicode_release\TDLTest.exe ..\todolist\unicode_release /y
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;UNICODE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -124,6 +125,7 @@ copy unicode_release\TDLTest.exe ..\todolist\unicode_release /y
       <WarningLevel>Level3</WarningLevel>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -175,6 +177,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     </ClCompile>
     <ClCompile Include="TDCDEPENDENCYTest.cpp" />
     <ClCompile Include="TDCRECURRENCETest.cpp" />
+    <ClCompile Include="TDLTaskCtrlBaseTest.cpp" />
     <ClCompile Include="TDLTest.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -190,6 +193,7 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     </ClCompile>
     <ClCompile Include="ToDoCtrlTaskLinkTest.cpp" />
     <ClCompile Include="WorkingWeekTest.cpp" />
+    <ClCompile Include="XmlFileTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TDLTest.rc">
@@ -210,12 +214,14 @@ copy unicode_debug\TDLTest.exe ..\todolist\unicode_debug /y
     <ClInclude Include="TaskFileTest.h" />
     <ClInclude Include="TDCDEPENDENCYTest.h" />
     <ClInclude Include="TDCRECURRENCETest.h" />
+    <ClInclude Include="TDLTaskCtrlBaseTest.h" />
     <ClInclude Include="TDLTest.h" />
     <ClInclude Include="TDLTestBase.h" />
     <ClInclude Include="TimeHelperTest.h" />
     <ClInclude Include="ToDoCtrlDataTest.h" />
     <ClInclude Include="ToDoCtrlTaskLinkTest.h" />
     <ClInclude Include="WorkingWeekTest.h" />
+    <ClInclude Include="XmlFileTest.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\3rdParty\3rdParty.vcxproj">

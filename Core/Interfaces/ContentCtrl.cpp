@@ -33,14 +33,18 @@ BOOL CONTENTFORMAT::FormatIsText() const
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CContentCtrl::CContentCtrl(IContentControl* pContentCtrl) : 
-	m_pContentCtrl(pContentCtrl), m_bSettingContent(FALSE)
+CContentCtrl::CContentCtrl(IContentControl* pContentCtrl) 
+	: 
+	m_pContentCtrl(pContentCtrl), 
+	m_bSettingContent(FALSE)
 {
 
 }
 
 CContentCtrl::~CContentCtrl()
 {
+	if (m_pContentCtrl)
+		m_pContentCtrl->Release();
 }
 
 CContentCtrl::operator HWND() const
@@ -80,22 +84,32 @@ BOOL CContentCtrl::ProcessMessage(MSG* pMsg)
 
 BOOL CContentCtrl::Attach(IContentControl* pContentCtrl)
 {
-	ASSERT (pContentCtrl && pContentCtrl->GetHwnd());
+	ASSERT(pContentCtrl != m_pContentCtrl);
 
 	if (pContentCtrl && pContentCtrl->GetHwnd())
 	{
-		// release existing control
-		if (m_pContentCtrl)
-			::DestroyWindow(m_pContentCtrl->GetHwnd());
+		Release();
 
 		m_pContentCtrl = pContentCtrl;
 		m_sTypeID = m_pContentCtrl->GetTypeID();
-		
+
 		return TRUE;
 	}
 
 	// else
+	ASSERT(0);
 	return FALSE;
+}
+
+void CContentCtrl::Release()
+{
+	if (m_pContentCtrl)
+	{
+		m_pContentCtrl->Release();
+		m_pContentCtrl = NULL;
+
+		m_sTypeID.Empty();
+	}
 }
 
 void CContentCtrl::SetUITheme(const UITHEME& theme)

@@ -442,7 +442,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			
 		case TDCA_RISK:
 			{
-				int nRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+				int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
 				bMatch = ValueMatches(nRisk, rule, resTask);
 
 				// Replace '-2' with 'not set'
@@ -1628,7 +1628,7 @@ int CTDCTaskComparer::CalcTaskPriority(BOOL bCheckDueToday, BOOL bDone, const TO
 		return (pTDI->nPriority + 11);
 
 	if (bUseHighestPriority)
-		return m_calculator.GetTaskHighestPriority(pTDI, pTDS);
+		return m_calculator.GetTaskPriority(pTDI, pTDS);
 
 	// else 
 	return pTDI->nPriority;
@@ -1647,7 +1647,7 @@ int CTDCTaskComparer::CalcTaskRisk(BOOL bDone, const TODOITEM* pTDI, const TODOS
 		return -1;
 
 	if (bUseHighestRisk)
-		return m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+		return m_calculator.GetTaskRisk(pTDI, pTDS);
 
 	return pTDI->nRisk;
 }
@@ -1851,20 +1851,20 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeData(const TODOITEM* pTDI, const 
 	return TRUE;
 }
 
-BOOL CTDCTaskCalculator::HasCalculatedAttribute(const CTDCAttributeMap& mapAttribIDs, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+BOOL CTDCTaskCalculator::HasAggregatedAttribute(const CTDCAttributeMap& mapAttribIDs) const
 {
 	POSITION pos = mapAttribIDs.GetStartPosition();
 
 	while (pos)
 	{
-		if (IsCalculatedAttribute(mapAttribIDs.GetNext(pos), aAttribDefs))
+		if (IsAggregatedAttribute(mapAttribIDs.GetNext(pos)))
 			return TRUE;
 	}
 
 	return FALSE;
 }
 
-BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs) const
+BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID) const
 {
 	switch (nAttribID)
 	{
@@ -1874,11 +1874,18 @@ BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 
 	case TDCA_DUETIME:
 	case TDCA_DUEDATE:		
-		return (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || m_data.HasStyle(TDCS_USELATESTDUEDATE));
+		return (m_data.HasStyle(TDCS_USEEARLIESTDUEDATE) || 
+				m_data.HasStyle(TDCS_USELATESTDUEDATE));
 
 	case TDCA_STARTTIME:
 	case TDCA_STARTDATE:	
-		return (m_data.HasStyle(TDCS_USEEARLIESTSTARTDATE) || m_data.HasStyle(TDCS_USELATESTSTARTDATE));
+		return (m_data.HasStyle(TDCS_USEEARLIESTSTARTDATE) || 
+				m_data.HasStyle(TDCS_USELATESTSTARTDATE));
+
+	case TDCA_LASTMODDATE:
+	case TDCA_LASTMODBY:
+	case TDCA_RECENTMODIFIED:
+		return m_data.HasStyle(TDCS_USELATESTLASTMODIFIED);
 
 	case TDCA_PRIORITY:		
 		return m_data.HasStyle(TDCS_USEHIGHESTPRIORITY);
@@ -1893,9 +1900,6 @@ BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 		return m_data.HasStyle(TDCS_TASKINHERITSSUBTASKFLAGS);
 
 	case TDCA_COST:
-	case TDCA_LASTMODDATE:
-	case TDCA_RECENTMODIFIED:
-	case TDCA_LASTMODBY:
 	case TDCA_SUBTASKDONE:
 	case TDCA_TIMESPENT:
 	case TDCA_TIMEESTIMATE:		
@@ -1906,10 +1910,10 @@ BOOL CTDCTaskCalculator::IsCalculatedAttribute(TDC_ATTRIBUTE nAttribID, const CT
 		// check custom attributes
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nAttrib = aAttribDefs.Find(nAttribID);
+			int nAttrib = m_data.m_aCustomAttribDefs.Find(nAttribID);
 
 			if (nAttrib != -1)
-				return aAttribDefs[nAttrib].IsCalculated();
+				return m_data.m_aCustomAttribDefs[nAttrib].IsAggregated();
 		}
 	}
 
@@ -2737,22 +2741,22 @@ double CTDCTaskCalculator::GetEarliestDueDate() const
 	return ((dEarliest == DBL_MAX) ? 0.0 : dEarliest);
 }
 
-int CTDCTaskCalculator::GetTaskHighestPriority(DWORD dwTaskID, BOOL bIncludeDue) const
+int CTDCTaskCalculator::GetTaskPriority(DWORD dwTaskID, BOOL bIncludeDue) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITY);
 
-	return GetTaskHighestPriority(pTDI, pTDS, bIncludeDue);
+	return GetTaskPriority(pTDI, pTDS, bIncludeDue);
 }
 
-int CTDCTaskCalculator::GetTaskHighestRisk(DWORD dwTaskID) const
+int CTDCTaskCalculator::GetTaskRisk(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NORISK);
 
-	return GetTaskHighestRisk(pTDI, pTDS);
+	return GetTaskRisk(pTDI, pTDS);
 }
 
 double CTDCTaskCalculator::GetTaskDueDate(DWORD dwTaskID) const
@@ -3041,7 +3045,7 @@ double CTDCTaskCalculator::GetEarliestDate(double dDate1, double dDate2, BOOL bN
 	return dtMin.m_dt;
 }
 
-int CTDCTaskCalculator::GetTaskHighestPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue) const
+int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -3075,7 +3079,7 @@ int CTDCTaskCalculator::GetTaskHighestPriority(const TODOITEM* pTDI, const TODOS
 				{
 					if (m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
 					{
-						int nChildHighest = GetTaskHighestPriority(pTDIChild, pTDSChild, bIncludeDue);
+						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bIncludeDue);
 
 						// optimization
 						if (nChildHighest == MAX_TDPRIORITY)
@@ -3095,7 +3099,7 @@ int CTDCTaskCalculator::GetTaskHighestPriority(const TODOITEM* pTDI, const TODOS
 	return nHighest;
 }
 
-int CTDCTaskCalculator::GetTaskHighestRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+int CTDCTaskCalculator::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -3128,7 +3132,7 @@ int CTDCTaskCalculator::GetTaskHighestRisk(const TODOITEM* pTDI, const TODOSTRUC
 				{
 					if (m_data.HasStyle(TDCS_INCLUDEDONEINRISKCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
 					{
-						int nChildHighest = GetTaskHighestRisk(pTDIChild, pTDSChild);
+						int nChildHighest = GetTaskRisk(pTDIChild, pTDSChild);
 
 						// optimization
 						if (nChildHighest == MAX_TDRISK)
@@ -3588,7 +3592,7 @@ CString CTDCTaskFormatter::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUC
 
 	if (pTDI && pTDS)
 	{
-		int nPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+		int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
 
 		if (nPriority != FM_NOPRIORITY)
 			return Misc::Format(nPriority);
@@ -3604,7 +3608,7 @@ CString CTDCTaskFormatter::GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE
 
 	if (pTDI && pTDS)
 	{
-		int nRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+		int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
 
 		if (nRisk != FM_NOPRIORITY)
 			return Misc::Format(nRisk);
@@ -3953,6 +3957,10 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
+		if (attribDef.IsList())
+			return data.FormatAsArray();
+		// else fall thru
+
 	case TDCCA_FRACTION:
 		{
 			double dValue = 0.0;
@@ -3975,10 +3983,10 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 /////////////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskExporter::CTDCTaskExporter(const CToDoCtrlData& data, 
-	const CTDLTaskCtrlBase& colors,
-	const CContentMgr& comments) 
+								   const CTDLTaskCtrlBase& colors,
+								   const CContentMgr& comments)
 	: 
-m_data(data),
+	m_data(data),
 	m_colors(colors),
 	m_comments(comments),
 	m_calculator(m_data),
@@ -3994,7 +4002,10 @@ int CTDCTaskExporter::ExportAllTasks(CTaskFile& tasks, BOOL bIncDuplicateComplet
 	tasks.SetCustomAttributeDefs(m_data.m_aCustomAttribDefs);
 	tasks.EnableISODates(m_data.HasStyle(TDCS_SHOWDATESINISO));
 
-	if (ExportSubTasks(m_data.GetStructure(), tasks, NULL, bIncDuplicateCompletedRecurringSubtasks))
+	if (ExportSubTasks(m_data.GetStructure(), 
+					   tasks, 
+					   NULL, 
+					   bIncDuplicateCompletedRecurringSubtasks))
 	{
 		return tasks.GetTaskCount();
 	}
@@ -4017,16 +4028,8 @@ BOOL CTDCTaskExporter::ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile
 			return FALSE;
 
 		DWORD dwTaskID = pTDS->GetTaskID();
-		ASSERT(dwTaskID);
-
-		if (!dwTaskID)
-			return FALSE;
-
-		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
-		ASSERT(pTDI);
-
-		if (!pTDI)
-			return FALSE;
+		const TODOITEM* pTDI = NULL;
+		GET_TDI(dwTaskID, pTDI, FALSE);
 
 		// Ignore duplicate 
 		if (!bIncDuplicateCompletedRecurringSubtasks)
@@ -4062,11 +4065,7 @@ BOOL CTDCTaskExporter::ExportTask(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hP
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, NULL);
 
 	return ExportTask(pTDI, pTDS, tasks, hParentTask, bIncDuplicateCompletedRecurringSubtasks);
 }
@@ -4083,10 +4082,12 @@ BOOL CTDCTaskExporter::ExportTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	DWORD dwTaskID = pTDS->GetTaskID();
 
 	HTASKITEM hTask = tasks.NewTask(sTitle, hParentTask, dwTaskID, 0);
-	ASSERT(hTask);
 
 	if (!hTask)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// copy all other attributes
 	ExportAllTaskAttributes(pTDI, pTDS, tasks, hTask);
@@ -4121,12 +4122,12 @@ BOOL CTDCTaskExporter::ExportAllTaskAttributes(const TODOITEM* pTDI, const TODOS
 	tasks.SetTaskPosition(hTask, m_formatter.GetTaskPosition(pTDS));
 
 	// dynamically calculated attributes
-	int nHighestPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE); 
+	int nHighestPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE); 
 
 	if (nHighestPriority > pTDI->nPriority)
 		tasks.SetTaskHighestPriority(hTask, nHighestPriority);
 
-	int nHighestRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+	int nHighestRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
 
 	if (nHighestRisk > pTDI->nRisk)
 		tasks.SetTaskHighestRisk(hTask, nHighestRisk);
@@ -4282,7 +4283,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 	}
 
 	// highest priority, because we need it further down
-	int nHighestPriority = m_calculator.GetTaskHighestPriority(pTDI, pTDS, FALSE);
+	int nHighestPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
 
 	if (!(bTitleOnly || bTitleCommentsOnly))
 	{
@@ -4361,7 +4362,7 @@ BOOL CTDCTaskExporter::ExportTaskAttributes(const TODOITEM* pTDI, const TODOSTRU
 		{
 			tasks.SetTaskRisk(hTask, pTDI->nRisk);
 
-			int nHighestRisk = m_calculator.GetTaskHighestRisk(pTDI, pTDS);
+			int nHighestRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
 
 			if (nHighestRisk > pTDI->nRisk)
 				tasks.SetTaskHighestRisk(hTask, nHighestRisk);

@@ -16,6 +16,7 @@
 #include "..\shared\AutoFlag.h"
 
 #include "..\3rdparty\GdiPlus.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -152,9 +153,7 @@ BOOL CBurndownWnd::OnInitDialog()
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
 	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
 		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);

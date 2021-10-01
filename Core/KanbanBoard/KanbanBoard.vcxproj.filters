@@ -95,9 +95,6 @@
     <None Include="res\column_toolbar_std.bmp">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\icon1.ico">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="res\toolbar.bmp">
       <Filter>Resource Files</Filter>
     </None>
@@ -105,9 +102,6 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="res\XPcheckboxes.bmp">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="res\flag.bmp">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
@@ -129,5 +123,13 @@
     <ResourceCompile Include="KanbanBoard.rc">
       <Filter>Source Files</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\icons.bmp">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="res\kanban.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

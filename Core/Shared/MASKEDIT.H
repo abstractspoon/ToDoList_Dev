@@ -12,8 +12,9 @@
 
 enum
 {
-	ME_EXCLUDE			= 0x01,
-	ME_LOCALIZEDECIMAL	= 0x02,
+	ME_EXCLUDE				= 0x01,
+	ME_LOCALIZEDECIMAL		= 0x02,
+	ME_LOCALIZESEPARATOR	= 0x04,
 };
 
 /////////////////////////////////////////////////////////////////////////////

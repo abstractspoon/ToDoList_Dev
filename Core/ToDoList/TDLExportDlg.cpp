@@ -593,7 +593,7 @@ void CTDLExportToPage::UpdateExtension(CString& sPathName, LPCTSTR szFromTypeID,
 		if (m_mgrImportExport.ExporterHasFileExtension(nFromFormat))
 		{
 			CString sExt = m_mgrImportExport.GetExporterFileExtension(nFromFormat, TRUE);
-			bExtRemoved = Misc::RemoveSuffix(sPathName, sExt);
+			bExtRemoved = Misc::RemoveSuffix(Misc::Trim(sPathName), sExt);
 		}
 
 		// Add new extension

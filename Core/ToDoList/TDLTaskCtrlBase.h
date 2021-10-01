@@ -42,8 +42,6 @@ class CTDLTaskCtrlBase : public CWnd, protected CTreeListSyncer
 {
 	DECLARE_DYNAMIC(CTDLTaskCtrlBase);
 	
-	friend class CTCBHoldResync;
-	
 protected: // base class only
 	CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 					 const CToDoCtrlData& data, 
@@ -100,7 +98,7 @@ public:
 	virtual void DeleteAll() = 0;
 	virtual BOOL InvalidateSelection(BOOL bUpdate) = 0;
 	virtual BOOL InvalidateTask(DWORD dwTaskID, BOOL bUpdate = FALSE) = 0;
-	virtual BOOL EnsureSelectionVisible(BOOL bPartialOK) = 0;
+	virtual BOOL EnsureSelectionVisible(BOOL bHorzPartialOK) = 0;
 	
 	BOOL SaveToImage(CBitmap& bmImage);
 	BOOL CanSaveToImage() const;
@@ -113,7 +111,7 @@ public:
 	CString GetSelectedTaskIcon() const;
 	CString GetSelectedTaskComments() const;
 	const CBinaryData& GetSelectedTaskCustomComments(CONTENTFORMAT& cfComments) const;
-	CString GetSelectedTaskTitle() const;
+	CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
 	BOOL GetSelectedTaskTimeEstimate(TDCTIMEPERIOD& timeEst) const;
 	BOOL GetSelectedTaskTimeSpent(TDCTIMEPERIOD& timeSpent) const;
 	int GetSelectedTaskAllocTo(CStringArray& aAllocTo) const;
@@ -355,6 +353,8 @@ protected:
 	virtual GM_ITEMSTATE GetItemTitleState(const NMCUSTOMDRAW& nmcd) const = 0;
 	virtual BOOL IsAlternateTitleLine(const NMCUSTOMDRAW& nmcd) const = 0;
 	virtual LPCTSTR GetDebugName() const = 0;
+	virtual POSITION GetFirstSelectedTaskPos() const;
+	virtual DWORD GetNextSelectedTaskID(POSITION& pos) const;
 
 	DWORD HitTestColumnsTask(const CPoint& ptScreen) const;
 	BOOL IsAlternateColumnLine(int nItem) const;
@@ -374,7 +374,7 @@ protected:
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;
-	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0, int nCount = 1) const;
+	BOOL CalcFileIconRect(const CRect& rSubItem, CRect& rIcon, int nImage = 0) const;
  	void SetTasksWndStyle(DWORD dwStyles, BOOL bSet, BOOL bExStyle);
 
 	CString GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_COLUMN nColID, BOOL bDrawing) const;
@@ -393,8 +393,6 @@ protected:
 	void SetTrackedColumns(const CDWordArray& aTracked);
 	void GetTrackedColumns(CDWordArray& aTracked) const;
 
-	POSITION GetFirstSelectedTaskPos() const;
-	DWORD GetNextSelectedTaskID(POSITION& pos) const;
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aItems) const;
 	int GetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, CStringArray& aMatched, CStringArray& aMixed) const;
 
@@ -490,7 +488,7 @@ protected:
 	static BOOL IsDateWithin7DaysOfToday(const COleDateTime& date, TDC_DATE nDate);
 	static BOOL PtInClientRect(POINT point, HWND hWnd, BOOL bScreenCoords);
 	static int GetUniqueToolTipID(DWORD dwTaskID, TDC_COLUMN nColID, int nIndex = 0);
-	static int CalcRequiredIconColumnWidth(int nNumImage);
+	static int CalcRequiredIconColumnWidth(int nNumImage, BOOL bWithPadding = TRUE, int nImageWidth = -1);
 	static int SplitSelectedTaskArrayMatchCounts(const CMap<CString, LPCTSTR, int, int&>& mapCounts, int nNumTasks, 
 												CStringArray& aMatched, CStringArray& aMixed);
 	static BOOL CheckUpdateDueBrushColor(COLORREF crNew, COLORREF& crCur, CBrush& brCur);

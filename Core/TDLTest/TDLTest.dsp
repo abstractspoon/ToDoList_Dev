@@ -108,6 +108,10 @@ SOURCE=.\ImportExportMgrTest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\MiscTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\PreferencesTest.cpp
 # End Source File
 # Begin Source File
@@ -131,6 +135,10 @@ SOURCE=.\TDCDEPENDENCYTest.cpp
 # Begin Source File
 
 SOURCE=.\TDCRECURRENCETest.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\TDLTaskCtrlBaseTest.cpp
 # End Source File
 # Begin Source File
 
@@ -160,6 +168,10 @@ SOURCE=.\ToDoCtrlTaskLinkTest.cpp
 
 SOURCE=.\WorkingWeekTest.cpp
 # End Source File
+# Begin Source File
+
+SOURCE=.\XmlFileTest.cpp
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
@@ -175,6 +187,10 @@ SOURCE=.\FileMiscTest.h
 # Begin Source File
 
 SOURCE=.\ImportExportMgrTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\MiscTest.h
 # End Source File
 # Begin Source File
 
@@ -206,6 +222,10 @@ SOURCE=.\TDCRECURRENCETest.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLTaskCtrlBaseTest.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTest.h
 # End Source File
 # Begin Source File
@@ -227,6 +247,10 @@ SOURCE=.\ToDoCtrlTaskLinkTest.h
 # Begin Source File
 
 SOURCE=.\WorkingWeekTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\XmlFileTest.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

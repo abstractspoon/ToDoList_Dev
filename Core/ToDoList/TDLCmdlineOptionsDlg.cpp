@@ -121,7 +121,7 @@ BOOL CTDLCmdlineOptionsDlg::OnInitDialog()
 	{
 		CString sOption(aOptions[nOpt]), sText;
 
-		if (Misc::Split(sOption, sText, '\t', TRUE) && !sText.IsEmpty())
+		if (Misc::Split(sOption, sText, '\t') && !sText.IsEmpty())
 		{
 			int nIndex = m_lcOptions.InsertItem(nOpt, sOption);
 			m_lcOptions.SetItemText(nIndex, 1, sText);

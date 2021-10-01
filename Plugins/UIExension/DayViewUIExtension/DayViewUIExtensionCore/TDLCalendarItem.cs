@@ -327,6 +327,7 @@ namespace DayViewUIExtension
 		{
 			m_RealItem = item;
 			Id = id;
+			TextColor = SystemColors.ControlDarkDark; // GetSysColor(COLOR_3DDKSHADOW);
 		}
 
 		public UInt32 RealTaskId { get { return m_RealItem.Id; } }

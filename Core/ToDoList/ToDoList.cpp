@@ -116,7 +116,9 @@ END_MESSAGE_MAP()
 
 CToDoListApp::CToDoListApp() : CWinApp()
 {
-	// Place all significant initialization in InitInstance
+	// Perhaps because we are a Win32 app, using a manifest limits our options
+	// so we set our DPI awareness programmatically
+	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 }
 
 CToDoListApp::~CToDoListApp()
@@ -1471,9 +1473,6 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	// pass our app id to app 
 	params.SetOption(SWITCH_APPID, TDLAPPID);
 
-	// to handle UAC on Vista and above we use the "RunAs" verb
-	LPCTSTR szVerb = ((COSVersion() >= OSV_VISTA) ? _T("runas") : NULL);
-
 	// Pass the centroid of the main wnd so that the
 	// updater appears in that same location
 	if (m_pMainWnd && (GetSystemMetrics(SM_CMONITORS) > 1))
@@ -1532,6 +1531,9 @@ DWORD CToDoListApp::RunHelperApp(const CString& sAppName, UINT nIDGenErrorMsg, U
 	// And whether we want to be restarted with admin rights
 	if (FileMisc::IsAdminProcess())
 		params.SetOption(SWITCH_RESTARTELEVATED);
+
+	// Use the "RunAs" verb if the install folder is readonly
+	LPCTSTR szVerb = (FileMisc::IsFolderWritable(sAppFolder) ? NULL : _T("runas"));
 
 	return RunHelperApp(sAppPath, params, nIDGenErrorMsg, nIDSmartScreenErrorMsg, szVerb);
 }
@@ -2078,6 +2080,12 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		// Intentionally use raw API call so it will fail if any files remain in the folder
 		RemoveDirectory(sReadmes);
 	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("8.1")) < 0)
+	{
+		// remove old components
+		FileMisc::DeleteFile(sAppFolder + _T("\\LuminousControls.dll"), TRUE);
+	}
 }
 
 void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
@@ -2089,7 +2097,8 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 	{
 		CScopedLogTimer log(_T("FixupExampleTasklistsTaskDates"));
 
-		CString sFolder = FileMisc::TerminatePath(FileMisc::GetAppResourceFolder(_T("Resources\\Examples\\")));
+		CString sFolder = FileMisc::GetAppResourceFolder(_T("Resources\\Examples"));
+		FileMisc::TerminatePath(sFolder);
 
 		LPCTSTR aFiles[] = 
 		{
@@ -2097,24 +2106,22 @@ void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
 			_T("Gantt Chart.tdl"),
 			_T("Workload.tdl"),
 		};
+
 		int nNumExamples = (sizeof(aFiles) / sizeof(aFiles[0]));
+		COleDateTime dtNow = COleDateTime::GetCurrentTime(), dtEarliest;
 
 		for (int nFile = 0; nFile < nNumExamples; nFile++)
 		{
 			CTaskFile tasks;
 			CString sExample = (sFolder + aFiles[nFile]);
 
-			if (tasks.Load(sExample))
+			if (tasks.Load(sExample) && 
+				tasks.GetEarliestTaskStartDate(dtEarliest))
 			{
-				COleDateTime dtNow = COleDateTime::GetCurrentTime(), dtEarliest;
-
-				if (tasks.GetEarliestTaskStartDate(dtEarliest))
-				{
-					int nOffset = (int)(dtNow.m_dt - dtEarliest.m_dt); // whole days
+				int nOffset = (int)(dtNow.m_dt - dtEarliest.m_dt); // whole days
 				
-					if (tasks.OffsetDates(nOffset))
-						tasks.Save(sExample, SFEF_UTF16);
-				}
+				if (tasks.OffsetDates(nOffset))
+					tasks.Save(sExample, SFEF_UTF16);
 			}
 		}
 	}

@@ -13,8 +13,6 @@ class CProgressThread;
 
 class CStatusBarProgress  
 {
-	friend class CStatusBarProgressProxy;
-
 public:
 	CStatusBarProgress(HWND hwndStatusBar = NULL, const CString& sPrompt = _T(""), int nPane = 0);
 	virtual ~CStatusBarProgress();

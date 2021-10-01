@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CheckBoxComboBox")]
+[assembly: AssemblyTitle("LinkLabelEx")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("IT")]
-[assembly: AssemblyProduct("CheckBoxComboBox")]
-[assembly: AssemblyCopyright("Copyright © IT 2007")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("LinkLabelEx")]
+[assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("0b11e2be-4211-4d2a-9102-6847a56d6fd8")]
+[assembly: Guid("6b24236c-6b0c-4ba4-9778-6d8a9388b419")]
 
 // Version information for an assembly consists of the following four values:
 //

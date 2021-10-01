@@ -86,6 +86,12 @@ BOOL CFileBackup::MakeBackup(const CString& sFile, DWORD dwFlags, const CString&
 	if (!FileMisc::FileExists(sFile))
 		return FALSE;
 
+	if (!Misc::HasFlag(dwFlags, FBS_ALLOWEMPTY))
+	{
+		if (FileMisc::GetFileSize(sFile) == 0)
+			return FALSE;
+	}
+
 	m_sFile = sFile;
 	m_sBackup = BuildBackupPath(sFile, dwFlags, sFolder, sExt);
 
@@ -144,16 +150,22 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 	// add timestamp before existing file extension
 	FileMisc::SplitPath(sBackup, NULL, NULL, NULL, &sFExt);
 
-	if (dwFlags & FBS_TIMESTAMP)
+	if (Misc::HasFlag(dwFlags, FBS_DATESTAMP))
 	{
 		// use ISO date and 24 hour time so that backups can be sorted 
 		// by name in date order
-		CString sDate = COleDateTime::GetCurrentTime().Format(_T("%Y-%m-%d_%H-%M-%S"));
+		COleDateTime dtNow(COleDateTime::GetCurrentTime());
+		CString sDate = dtNow.Format(_T("%Y-%m-%d"));
+
+		// Optional time component
+		if (Misc::HasFlag(dwFlags, FBS_DATETIMESTAMP))
+			sDate += dtNow.Format(_T("_%H-%M-%S"));
+
 		sFExt = ('.' + sDate + sFExt);
 	}
 
 	// and app version
-	if (dwFlags & FBS_APPVERSION)
+	if (Misc::HasFlag(dwFlags, FBS_APPVERSION))
 	{
 		CString sVersion = FileMisc::GetAppVersion('_');
 		sFExt = ('.' + sVersion + sFExt);
@@ -179,7 +191,7 @@ CString CFileBackup::BuildBackupPath(const CString& sFile, DWORD dwFlags, const 
 	FileMisc::ReplaceExtension(sBackup, (sBackupExt + sFExt));
 
 	// Make sure we're not overwriting an existing backup
-	if (!(dwFlags & FBS_OVERWRITE) && FileMisc::FileExists(sBackup))
+	if (!Misc::HasFlag(dwFlags, FBS_OVERWRITE) && FileMisc::FileExists(sBackup))
 	{
 		int nTry = 2;
 
@@ -518,7 +530,7 @@ int FileMisc::DeleteFolderContents(LPCTSTR szFolder, DWORD dwFlags, LPCTSTR szFi
 						{
 							nResult = 1; // succeeded
 						}
-						else if (dwFlags & FMDF_ALLOWDELETEONREBOOT)
+						else if (Misc::HasFlag(dwFlags, FMDF_ALLOWDELETEONREBOOT))
 						{
 							if (::MoveFileEx(sItem, NULL, MOVEFILE_DELAY_UNTIL_REBOOT))
 							{
@@ -592,7 +604,7 @@ int FileMisc::DeleteFolder(LPCTSTR szFolder, DWORD dwFlags, HANDLE hTerminate)
 				HRESULT hrErr = HRESULT_FROM_WIN32(dwErr);
 				LogText(_T("FileMisc::DeleteFolder(%s) failed! (dw = %08x, hr = %08x"), szFolder, dwErr, hrErr);
 
-				if (dwFlags & FMDF_ALLOWDELETEONREBOOT)
+				if (Misc::HasFlag(dwFlags, FMDF_ALLOWDELETEONREBOOT))
 				{
 					if (::MoveFileEx(szFolder, NULL, MOVEFILE_DELAY_UNTIL_REBOOT))
 					{
@@ -701,7 +713,7 @@ BOOL FileMisc::FolderExists(LPCTSTR szFolder, BOOL bEmptyIsCwd)
 	// else
 	DWORD dwAttrib = GetFileAttributes(szFolder);
 
-	if ((dwAttrib != 0xffffffff) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY))
+	if ((dwAttrib != 0xffffffff) && Misc::HasFlag(dwAttrib, FILE_ATTRIBUTE_DIRECTORY))
 		return TRUE;
 
 #ifdef _DEBUG
@@ -719,7 +731,7 @@ BOOL FileMisc::FileExists(LPCTSTR szFile)
 	// else
 	DWORD dwAttrib = GetFileAttributes(szFile);
 
-	if ((dwAttrib != 0xffffffff) && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY) == 0)
+	if ((dwAttrib != 0xffffffff) && !Misc::HasFlag(dwAttrib, FILE_ATTRIBUTE_DIRECTORY))
 		return TRUE;
 
 #ifdef _DEBUG
@@ -1126,11 +1138,11 @@ BOOL FileMisc::ModifyAttributes(LPCTSTR szPath, DWORD dwRemove, DWORD dwAdd, DWO
 	// verify there is anything to change
 	BOOL bChange = FALSE;
 
-	if (dwRemove && ((dwExistAttrib & dwRemove) != 0))
+	if (dwRemove && Misc::HasFlag(dwExistAttrib, dwRemove))
 	{
 		bChange = TRUE;
 	}
-	else if (dwAdd && ((dwExistAttrib & dwAdd) == 0))
+	else if (dwAdd && !Misc::HasFlag(dwExistAttrib, dwAdd))
 	{
 		bChange = TRUE;
 	}

@@ -109,7 +109,10 @@ public:
 	virtual void GetSortBy(TDSORTCOLUMNS& sort) const;
 	virtual BOOL IsMultiSorting() const;
 	virtual BOOL CanMultiSort() const;
+
 	virtual HTREEITEM GetUpdateControlsItem() const;
+	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
+	virtual int GetSelectedCount() const;
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
@@ -135,7 +138,7 @@ public:
 	void SetFocusToTasks();
 	BOOL TasksHaveFocus() const;
 
-	void SelectTasksInHistory(BOOL bForward);
+	BOOL SelectTasksInHistory(BOOL bForward);
 	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 
@@ -161,6 +164,7 @@ public:
 	void SetDueTaskColors(COLORREF crDue, COLORREF crDueToday);
     void SetGridlineColor(COLORREF color);
 	void SetAlternateLineColor(COLORREF color);
+	void SetGroupHeaderBackgroundColor(COLORREF color) { m_taskList.SetGroupHeaderBackgroundColor(color); }
 
 protected:
 	CTDLTaskListCtrl m_taskList;
@@ -229,6 +233,7 @@ protected:
 	afx_msg LRESULT OnUIExtDoHelp(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtGetTaskIcon(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnUIExtGetNextTaskOcurrences(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnUIExtShowFileLink(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -268,8 +273,8 @@ protected:
 	void SetEditTitleTaskID(DWORD dwTaskID);
 	void LoadPrefs();
 	void SavePrefs();
-	BOOL IsCalculatedAttribute(TDC_ATTRIBUTE nAttrib) const;
-	BOOL HasCalculatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
+	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttrib) const;
+	BOOL ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;
 	void UpdateListView(const CTDCAttributeMap& mapAttribIDs, const CDWordArray& aModTaskIDs, BOOL bAllowResort);
 	void UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
@@ -278,7 +283,7 @@ protected:
 	BOOL HasListOption(DWORD dwOption) const { return ((m_dwListOptions & dwOption) == dwOption); }
 
 	void SyncActiveViewSelectionToTree();
-	void SyncListSelectionToTree();
+	void SyncListSelectionToTree(BOOL bEnsureSelection);
 	void SyncExtensionSelectionToTree(FTC_VIEW nView);
 	BOOL HasSingleSelectionChanged(DWORD dwSelID) const;
 	DWORD GetSingleSelectedTaskID() const;
@@ -296,15 +301,6 @@ protected:
 	DWORD GetTaskID(HTREEITEM hti) const { return CToDoCtrl::GetTaskID(hti); }
 	TODOITEM* CreateNewTask(HTREEITEM htiParent);
 
-	enum TTC_NEXTTASK
-	{
-		TTCNT_NEXT,
-		TTCNT_PREV,
-		TTCNT_NEXTVISIBLE,
-		TTCNT_PREVVISIBLE,
-		TTCNT_NEXTTOPLEVEL,
-		TTCNT_PREVTOPLEVEL,
-	};
 	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
 
 	BOOL InListView() const;
@@ -336,8 +332,8 @@ protected:
 	void EndExtensionProgress();
 	void UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTaskFile& tasks, IUI_UPDATETYPE nType);
 	void SetExtensionsReadOnly(BOOL bReadOnly);
-	void SetExtensionsNeedTaskUpdate(BOOL bUpdate = TRUE, FTC_VIEW nIgnore = FTCV_UNSET);
-	void SetExtensionsNeedFontUpdate(BOOL bUpdate = TRUE, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetExtensionsNeedTaskUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
+	void SetExtensionsNeedFontUpdate(BOOL bUpdate, FTC_VIEW nIgnore = FTCV_UNSET);
 	void SetListViewNeedFontUpdate(BOOL bUpdate);
 	DWORD ProcessUIExtensionMod(const IUITASKMOD& mod);
 	int GetAllExtensionViewsWantedAttributes(CTDCAttributeMap& mapAttribIDs) const;

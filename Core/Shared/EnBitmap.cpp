@@ -24,77 +24,6 @@ static char THIS_FILE[]=__FILE__;
 
 const int HIMETRIC_INCH	= 2540;
 
-///////////////////////////////////////////////////////////////////////
-
-C32BitImageProcessor::C32BitImageProcessor(BOOL bEnableWeighting) : m_bWeightingEnabled(bEnableWeighting)
-{
-}
-
-C32BitImageProcessor::~C32BitImageProcessor()
-{
-}
-
-CSize C32BitImageProcessor::CalcDestSize(CSize sizeSrc) 
-{ 
-	return sizeSrc; // default
-}
-
-BOOL C32BitImageProcessor::ProcessPixels(RGBX* pSrcPixels, CSize /*sizeSrc*/, RGBX* pDestPixels, 
-										CSize sizeDest, COLORREF /*crMask*/)
-{ 
-	CopyMemory(pDestPixels, pSrcPixels, sizeDest.cx * 4 * sizeDest.cy); // default
-	return TRUE;
-}
- 
-void C32BitImageProcessor::CalcWeightedColor(RGBX* pPixels, CSize size, double dX, double dY, RGBX& rgbResult)
-{
-	ASSERT (m_bWeightingEnabled);
-
-	// interpolate between the current pixel and its adjacent pixels to the right and down
-	int nX = (int)dX;
-	int nY = (int)dY;
-
-	if (dX < 0 || dY < 0)
-	{
-		rgbResult = pPixels[max(0, nY) * size.cx + max(0, nX)]; // closest
-		return;
-	}
-
-	double dXFraction = dX - nX;
-	double dX1MinusFraction = 1 - dXFraction;
-	
-	double dYFraction = dY - nY;
-	double dY1MinusFraction = 1 - dYFraction;
-
-	int nXP1 = min(nX + 1, size.cx - 1);
-	int nYP1 = min(nY + 1, size.cy - 1);
-	
-	RGBX* pRGB = &pPixels[nY * size.cx + nX]; // x, y
-	RGBX* pRGBXP = &pPixels[nY * size.cx + nXP1]; // x + 1, y
-	RGBX* pRGBYP = &pPixels[nYP1 * size.cx + nX]; // x, y + 1
-	RGBX* pRGBXYP = &pPixels[nYP1 * size.cx + nXP1]; // x + 1, y + 1
-	
-	int nRed = (int)(dX1MinusFraction * dY1MinusFraction * pRGB->btRed +
-					dXFraction * dY1MinusFraction * pRGBXP->btRed +
-					dX1MinusFraction * dYFraction * pRGBYP->btRed +
-					dXFraction * dYFraction * pRGBXYP->btRed);
-	
-	int nGreen = (int)(dX1MinusFraction * dY1MinusFraction * pRGB->btGreen +
-					dXFraction * dY1MinusFraction * pRGBXP->btGreen +
-					dX1MinusFraction * dYFraction * pRGBYP->btGreen +
-					dXFraction * dYFraction * pRGBXYP->btGreen);
-	
-	int nBlue = (int)(dX1MinusFraction * dY1MinusFraction * pRGB->btBlue +
-					dXFraction * dY1MinusFraction * pRGBXP->btBlue +
-					dX1MinusFraction * dYFraction * pRGBYP->btBlue +
-					dXFraction * dYFraction * pRGBXYP->btBlue);
-
-	rgbResult.btRed = (BYTE)max(0, min(255, nRed));
-	rgbResult.btGreen = (BYTE)max(0, min(255, nGreen));
-	rgbResult.btBlue =(BYTE) max(0, min(255, nBlue));
-}
-
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -228,35 +157,19 @@ HBITMAP CEnBitmap::LoadImageFile(LPCTSTR szImagePath, COLORREF crBack, int cx, i
 	return hbm;
 }
 
-BOOL CEnBitmap::Resize(int cx, int cy)
+HBITMAP CEnBitmap::ResizeImage(HBITMAP hbm, int cx, int cy, COLORREF crBack)
 {
-	HBITMAP hbm = ResizeImage((HBITMAP)m_hObject, cx, cy);
-
-	if (hbm)
+	if (hbm == NULL)
 	{
-		if (m_hObject != hbm)
-		{
-			DeleteObject();
-			return Attach(hbm);
-		}
-
-		return TRUE; // no change
+		ASSERT(0);
+		return NULL;
 	}
 
-	return FALSE;
-}
-
-HBITMAP CEnBitmap::ResizeImage(HBITMAP hbm, int cx, int cy)
-{
-	ASSERT(hbm != NULL);
-	
-	if (hbm == NULL)
-		return NULL;
-
-	ASSERT((cx > 0) && (cy > 0));
-
 	if ((cx <= 0) || (cy <= 0))
+	{
+		ASSERT(0);
 		return NULL;
+	}
 	
 	CSize bmpSize = GetImageSize(hbm);
 
@@ -275,7 +188,41 @@ HBITMAP CEnBitmap::ResizeImage(HBITMAP hbm, int cx, int cy)
 	
 	if (SUCCEEDED(hr) && pPicture)
 	{
-		HBITMAP hbmResized = ExtractBitmap(pPicture, CLR_NONE, cx, cy);
+		HBITMAP hbmResized = ExtractBitmap(pPicture, crBack, cx, cy);
+		pPicture->Release();
+
+		return hbmResized;
+	}
+
+	return NULL;
+}
+
+HBITMAP CEnBitmap::ResizeImage(HICON hIcon, int cx, int cy, COLORREF crBack)
+{
+	if (hIcon == NULL)
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	if ((cx <= 0) || (cy <= 0))
+	{
+		ASSERT(0);
+		return NULL;
+	}
+
+	PICTDESC desc = { 0 };
+
+	desc.cbSizeofstruct = sizeof(desc);
+	desc.picType = PICTYPE_ICON;
+	desc.icon.hicon = hIcon;
+
+	IPicture* pPicture = NULL;
+	HRESULT hr = ::OleCreatePictureIndirect(&desc, IID_IPicture, FALSE, (LPVOID*)&pPicture);
+
+	if (SUCCEEDED(hr) && pPicture)
+	{
+		HBITMAP hbmResized = ExtractBitmap(pPicture, crBack, cx, cy);
 		pPicture->Release();
 
 		return hbmResized;
@@ -507,7 +454,7 @@ HBITMAP CEnBitmap::ExtractBitmap(IPicture* pPicture, COLORREF crBack, int cx, in
 		pPicture->get_Width(&hmWidth);
 		pPicture->get_Height(&hmHeight);
 		
-		int nWidth	= cx;
+		int nWidth = cx;
 
 		if (nWidth == 0)
 			nWidth = MulDiv(hmWidth, dcDesktop.GetDeviceCaps(LOGPIXELSX), HIMETRIC_INCH);
@@ -678,111 +625,6 @@ EB_IMAGETYPE CEnBitmap::GetFileType(LPCTSTR szImagePath)
 BOOL CEnBitmap::IsSupportedImageFile(LPCTSTR szImagePath)
 {
 	return (GetFileType(szImagePath) != FT_UNKNOWN);
-}
-
-BOOL CEnBitmap::ProcessImage(C32BitImageProcessor* pProcessor, COLORREF crMask)
-{
-	C32BIPArray aProcessors;
-
-	aProcessors.Add(pProcessor);
-
-	return ProcessImage(aProcessors, crMask);
-}
-
-BOOL CEnBitmap::ProcessImage(C32BIPArray& aProcessors, COLORREF crMask)
-{
-	ASSERT (GetSafeHandle());
-
-	if (!GetSafeHandle())
-		return FALSE;
-
-	if (!aProcessors.GetSize())
-		return TRUE;
-
-	int nProcessor, nCount = aProcessors.GetSize();
-
-	// retrieve src and final dest sizes
-	CSize sizeSrc = GetSize();
-	CSize sizeDest(sizeSrc), sizeMax(sizeSrc);
-
-	for (nProcessor = 0; nProcessor < nCount; nProcessor++)
-	{
-		sizeDest = aProcessors[nProcessor]->CalcDestSize(sizeDest);
-		sizeMax = CSize(max(sizeMax.cx, sizeDest.cx), max(sizeMax.cy, sizeDest.cy));
-	}
-
-	// prepare src and dest bits
-	RGBX* pSrcPixels = GetDIBits32();
-
-	if (!pSrcPixels)
-		return FALSE;
-
-	RGBX* pDestPixels = new RGBX[sizeMax.cx * sizeMax.cy];
-
-	if (!pDestPixels)
-		return FALSE;
-
-	Fill(pDestPixels, sizeMax, m_crBkgnd);
-
-	BOOL bRes = TRUE;
-	sizeDest = sizeSrc;
-
-	// do the processing
-	for (nProcessor = 0; bRes && nProcessor < nCount; nProcessor++)
-	{
-		// if its the second processor or later then we need to copy
-		// the previous dest bits back into source.
-		// we also need to check that sizeSrc is big enough
-		if (nProcessor > 0)
-		{
-			if (sizeSrc.cx < sizeDest.cx || sizeSrc.cy < sizeDest.cy)
-			{
-				delete [] pSrcPixels;
-				pSrcPixels = new RGBX[sizeDest.cx * sizeDest.cy];
-			}
-
-			CopyMemory(pSrcPixels, pDestPixels, sizeDest.cx * 4 * sizeDest.cy); // default
-			Fill(pDestPixels, sizeDest, m_crBkgnd);
-		}
-
-		sizeSrc = sizeDest;
-		sizeDest = aProcessors[nProcessor]->CalcDestSize(sizeSrc);
-		
-		bRes = aProcessors[nProcessor]->ProcessPixels(pSrcPixels, sizeSrc, pDestPixels, sizeDest, crMask);
-	}
-
-	// update the bitmap
-	if (bRes)
-	{
-		// set the bits
-		HDC hdc = GetDC(NULL);
-		HBITMAP hbmSrc = ::CreateCompatibleBitmap(hdc, sizeDest.cx, sizeDest.cy);
-
-		if (hbmSrc)
-		{
-			BITMAPINFO bi;
-
-			if (PrepareBitmapInfo32(bi, hbmSrc))
-			{
-				if (SetDIBits(hdc, hbmSrc, 0, sizeDest.cy, pDestPixels, &bi, DIB_RGB_COLORS))
-				{
-					// delete the bitmap and attach new
-					GraphicsMisc::VerifyDeleteObject(*this);
-					bRes = Attach(hbmSrc);
-				}
-			}
-
-			VERIFY(::ReleaseDC(NULL, hdc));
-
-			if (!bRes)
-				GraphicsMisc::VerifyDeleteObject(hbmSrc);
-		}
-	}
-
-	delete [] pSrcPixels;
-	delete [] pDestPixels;
-
-	return bRes;
 }
 
 RGBX* CEnBitmap::GetDIBits32()

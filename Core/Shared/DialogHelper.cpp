@@ -1853,6 +1853,16 @@ void CDialogHelper::ModifyEditCtrlsStyle(BOOL bExStyle, const CWnd* pParent, DWO
 	}
 }
 
+void CDialogHelper::SetStyle(CWnd* pWnd, DWORD dwStyle, BOOL bSet)
+{
+	ASSERT(pWnd && pWnd->GetSafeHwnd());
+
+	if (bSet)
+		pWnd->ModifyStyle(0, dwStyle);
+	else
+		pWnd->ModifyStyle(dwStyle, 0);
+}
+
 void CDialogHelper::ResizeButtonStaticTextFieldsToFit(CWnd* pParent)
 {
 	ASSERT (pParent);

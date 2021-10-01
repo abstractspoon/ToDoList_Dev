@@ -37,9 +37,9 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	UINT GetColumnHeaderAlignment() const;
 	BOOL HasDefaultTextAlignment() const;
 
-	void SetAttributeType(DWORD dwType);
-	void SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
-	void SetListType(DWORD dwListType);
+	BOOL SetAttributeType(DWORD dwType);
+	BOOL SetDataType(DWORD dwDataType, BOOL bUpdateDefaultAlignment = TRUE);
+	BOOL SetListType(DWORD dwListType);
 
 	inline DWORD GetDataType() const { return (dwAttribType & TDCCA_DATAMASK); }
 	inline DWORD GetListType() const { return (dwAttribType & TDCCA_LISTMASK); }
@@ -56,8 +56,8 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	BOOL DecodeListData(const CString& sListData);
 
 	BOOL SupportsFeature(DWORD dwFeature) const;
-	BOOL SupportsCalculation() const;
-	BOOL IsCalculated() const;
+	BOOL IsAggregated() const;
+
 
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const;
 	CString GetImageName(const CString& sImage) const;
@@ -91,7 +91,7 @@ private:
 	TDC_ATTRIBUTE nAttribID;
 	// ----------------------------------------------------------------
 
-	void SetTypes(DWORD dwDataType, DWORD dwListType);
+	BOOL SetTypes(DWORD dwDataType, DWORD dwListType);
 	static DWORD ValidateListType(DWORD dwDataType, DWORD dwListType);
 };
 
@@ -110,30 +110,31 @@ public:
 	void RemoveAt(int nIndex, int nCount = 1);
 
 	int Find(const CString& sAttribID, int nIgnore = -1) const;
-	int Find(TDC_ATTRIBUTE nAttribID, int nIgnore = -1) const;
-	int Find(TDC_COLUMN nColID, int nIgnore = -1) const;
+	int Find(TDC_ATTRIBUTE nCustAttribID, int nIgnore = -1) const;
+	int Find(TDC_COLUMN nCustColID, int nIgnore = -1) const;
 
 	BOOL AnyHasFeature(DWORD dwFeature) const;
 	BOOL MatchAny(const CTDCCustomAttribDefinitionArray& aAttribDefs) const;
 	
-	TDC_ATTRIBUTE GetAttributeID(TDC_COLUMN nColID) const;
-	TDC_ATTRIBUTE GetAttributeID(const CString& sUniqueID) const;
+	TDC_ATTRIBUTE GetAttributeID(TDC_COLUMN nCustColID) const;
+	TDC_ATTRIBUTE GetAttributeID(const CString& sCustAttribID) const;
 
-	CString GetAttributeTypeID(TDC_COLUMN nColID) const;
-	CString GetAttributeTypeID(TDC_ATTRIBUTE nAttribID) const;
+	CString GetAttributeTypeID(TDC_COLUMN nCustColID) const;
+	CString GetAttributeTypeID(TDC_ATTRIBUTE nCustAttribID) const;
 
 	int GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const;
 
-	BOOL GetAttributeDef(TDC_ATTRIBUTE nAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-	BOOL GetAttributeDef(const CString& sUniqueID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-	BOOL GetAttributeDef(TDC_COLUMN nColID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	BOOL GetAttributeDef(TDC_ATTRIBUTE nCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	BOOL GetAttributeDef(const CString& sCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
+	BOOL GetAttributeDef(TDC_COLUMN nCustColID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
 
-	DWORD GetAttributeDataType(TDC_ATTRIBUTE nAttribID) const;
-	DWORD GetAttributeDataType(const CString& sUniqueID) const;
+	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const;
+	DWORD GetAttributeDataType(const CString& sCustAttribID) const;
 
-	BOOL IsColumnSortable(TDC_COLUMN nColID) const;
-	BOOL IsColumnEnabled(TDC_COLUMN nColID) const;
-	BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nAttribID) const;
+	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
+	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
+	BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nCustAttribID) const;
+
 
 protected:
 	void RebuildIDs();

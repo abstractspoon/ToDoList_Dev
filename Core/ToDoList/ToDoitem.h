@@ -306,8 +306,11 @@ public:
 	int GetCount() const;
 	TODOITEM* GetTask(DWORD dwTaskID) const;
 	BOOL HasTask(DWORD dwTaskID) const;
-	POSITION GetStartPosition() const;
-	void GetNextAssoc(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const;
+
+	POSITION GetStart() const;
+	void GetNext(POSITION& rNextPosition, DWORD& dwTaskID, TODOITEM*& pTDI) const;
+	DWORD GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const;
+	DWORD GetNextTaskID(POSITION& pos) const;
 
 	void DeleteAll() { CleanUp(); }
 	BOOL DeleteTask(DWORD dwTaskID);
@@ -345,17 +348,14 @@ public:
 	BOOL ParentIsRoot() const { return (GetParentTaskID() == 0); }
 	BOOL IsRoot() const { return (GetTaskID() == 0); }
 	
+	TODOSTRUCTURE* GetSubTask(int nPos) const;
+	BOOL CanMoveSubTask(int nPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const;
+
+	int GetSubTaskPosition(const TODOSTRUCTURE* pTDS) const;
 	int GetSubTaskCount() const { return m_aSubTasks.GetSize(); }
 	BOOL HasSubTasks() const { return GetSubTaskCount() > 0; }
 	int GetLeafCount() const;
 	
-	TODOSTRUCTURE* GetSubTask(int nPos) const;
-	int GetSubTaskPosition(const TODOSTRUCTURE* pTDS) const;
-	
-	void DeleteAll() { CleanUp(); }
-	
-	int MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
-
 #ifdef _DEBUG
 	void Trace(const CString& sIndent) const;
 #endif
@@ -371,6 +371,8 @@ protected:
 	const TODOSTRUCTURE& operator=(const TODOSTRUCTURE& tds); 
 	
 private:
+	int MoveSubTask(int nPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
+	void DeleteAll() { CleanUp(); }
 	void CleanUp();
 	BOOL DeleteSubTask(int nPos);
 	BOOL InsertSubTask(TODOSTRUCTURE* pTDS, int nPos);
@@ -383,7 +385,7 @@ private:
 class CToDoCtrlDataStructure : public TODOSTRUCTURE
 {
 public:
-	CToDoCtrlDataStructure() : TODOSTRUCTURE() {}
+	CToDoCtrlDataStructure();
 	CToDoCtrlDataStructure(const CToDoCtrlDataStructure& tds); 
 	~CToDoCtrlDataStructure();
 	
@@ -396,6 +398,9 @@ public:
 	
 	TODOSTRUCTURE* FindTask(DWORD dwID) const;
 	BOOL FindTask(DWORD dwID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
+	
+	int MoveSubTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
+	BOOL CanMoveSubTask(const TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, const TODOSTRUCTURE* pTDSDestParent, int nDestPos) const;
 
 	BOOL DeleteTask(DWORD dwID);
 	void DeleteAll();
@@ -406,9 +411,10 @@ protected:
 	CMap<DWORD, DWORD, TODOSTRUCTURE*, TODOSTRUCTURE*&> m_mapStructure;
 	
 protected:
-	void BuildMap();
-	void AddToMap(const TODOSTRUCTURE* pTDS);
-	void RemoveFromMap(const TODOSTRUCTURE* pTDS);
+	void BuildStructureMap();
+	void AddToStructureMap(TODOSTRUCTURE* pTDS);
+	void RemoveFromStructureMap(TODOSTRUCTURE* pTDS);
+
 
 	const CToDoCtrlDataStructure& operator=(const CToDoCtrlDataStructure& tds); 
 	

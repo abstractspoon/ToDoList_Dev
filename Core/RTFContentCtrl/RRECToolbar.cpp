@@ -36,6 +36,7 @@
 #include "..\shared\Localizer.h"
 #include "..\shared\DialogHelper.h"
 
+#include "..\3rdparty\XNamedColors.h"
 
 #include <tchar.h>
 #include <afxpriv.h>
@@ -88,15 +89,12 @@ BEGIN_MESSAGE_MAP(CRRECToolBar, CEnToolBar)
 END_MESSAGE_MAP()
 
 
-BOOL CRRECToolBar::Create(CWnd* parent, LPCTSTR szImageFile, COLORREF crMask)
+BOOL CRRECToolBar::Create(CWnd* parent)
 {
 	if (CreateEx(parent, TBSTYLE_FLAT | TBSTYLE_WRAPABLE, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP | CBRS_SIZE_DYNAMIC/* | WS_CLIPCHILDREN*/, 
 				CRect(0, 0, 0, 0), TOOLBAR_CONTROL) && LoadToolBar(TOOLBAR_CONTROL))
 	{
-		if (szImageFile)
-			SetImage(szImageFile, crMask);
-		else 
-			SetImage(IDB_TOOLBAR, RGB(255, 0, 255));
+		SetImage(IDB_TOOLBAR, colorMagenta);
 
 		UINT nStyle = GetBarStyle();
 		nStyle |= (CBRS_TOOLTIPS | CBRS_FLYBY);

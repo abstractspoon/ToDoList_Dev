@@ -980,14 +980,36 @@ namespace MindMapUIExtension
 			// when we ask to recalculate the items heights
 			RefreshNodeFont(RootNode, true);
 
+			// We'll need these to fixup the item height below
+			int prevItemHeight = m_TreeView.ItemHeight;
+			int prevFontHeight = m_TreeView.Font.Height;
+
+			// Change the font and get the tree to recalc the default item height
 			m_TreeView.Font = ScaledFont(this.Font);
 			SendMessage(m_TreeView.Handle, TVM_SETITEMHEIGHT, -1);
 
 			int itemHeight = SendMessage(m_TreeView.Handle, TVM_GETITEMHEIGHT);
-			itemHeight = Math.Max(itemHeight, (int)(GetMinItemHeight() * m_ZoomFactor));
 
-			m_TreeView.ItemHeight = (itemHeight + (int)(ItemVertSeparation * m_ZoomFactor));
-			
+			// Adjust for zoom and item separation
+			itemHeight = Math.Max(itemHeight, (int)(GetMinItemHeight() * m_ZoomFactor));
+			itemHeight = (itemHeight + (int)(ItemVertSeparation * m_ZoomFactor));
+
+			// If the font height changes, the item height also has to
+			// change else the tree view gets its calculations wrong
+			int fontHeight = this.Font.Height;
+
+			if ((prevFontHeight < fontHeight) && (itemHeight == prevItemHeight))
+			{
+				itemHeight++;
+			}
+			else if ((prevFontHeight > fontHeight) && (itemHeight == prevItemHeight))
+			{
+				itemHeight--;
+			}
+
+			// Update the item height
+			m_TreeView.ItemHeight = itemHeight;
+
 			if (recalcPositions)
 				RecalculatePositions();
 		}

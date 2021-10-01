@@ -1302,6 +1302,12 @@ int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 
 COLORREF CToDoCtrlMgr::GetTabColor(int nIndex) const
 {
+	if (!m_tabCtrl.IsSupportedFlag(TCE_TABCOLORS))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
 	CHECKVALIDINDEXRET(nIndex, CLR_NONE);
 	
 	return GetTDCItem(nIndex).crTab;
@@ -1309,6 +1315,12 @@ COLORREF CToDoCtrlMgr::GetTabColor(int nIndex) const
 
 BOOL CToDoCtrlMgr::SetTabColor(int nIndex, COLORREF crTab)
 {
+	if (!m_tabCtrl.IsSupportedFlag(TCE_TABCOLORS))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 	
 	GetTDCItem(nIndex).crTab = crTab;
@@ -1682,5 +1694,5 @@ BOOL CToDoCtrlMgr::CreateBackup(const CString& sPath, const CString& sBackupFold
 	}
 	
 	CFileBackup backup;
-	return backup.MakeBackup(sPath, FBS_APPVERSION | FBS_TIMESTAMP, sBackupFolder, _T(""));
+	return backup.MakeBackup(sPath, FBS_APPVERSION | FBS_DATETIMESTAMP, sBackupFolder, _T(""));
 }

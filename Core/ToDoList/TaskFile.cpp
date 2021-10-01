@@ -91,6 +91,7 @@ CTaskFile::CTaskFile(LPCTSTR szPassword)
 	m_dwNextUniqueID(1), 
 	m_bISODates(FALSE)
 {
+	m_mapHandles.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
 }
 
 CTaskFile::CTaskFile(const CTaskFile& tasks, LPCTSTR szPassword)
@@ -99,6 +100,8 @@ CTaskFile::CTaskFile(const CTaskFile& tasks, LPCTSTR szPassword)
 	m_dwNextUniqueID(1), 
 	m_bISODates(FALSE)
 {
+	m_mapHandles.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
+
 	CopyFrom(tasks);
 }
 
@@ -108,6 +111,8 @@ CTaskFile::CTaskFile(const ITaskList* pTasks, LPCTSTR szPassword)
 	m_dwNextUniqueID(1), 
 	m_bISODates(FALSE)
 {
+	m_mapHandles.InitHashTable(ITASK_HASHTABLE_SIZE, FALSE);
+
 	CopyFrom(pTasks);
 }
 
@@ -1112,12 +1117,12 @@ BOOL CTaskFile::GetAttributeVisibility(TDCCOLEDITFILTERVISIBILITY& vis) const
 	if (!GetAttributeVisibility((TDCCOLEDITVISIBILITY&)vis))
 		return FALSE;
 
-	const CXmlItem *pXIVis = GetItem(TDL_ATTRIBVIS);
-	ASSERT(pXIVis);
-
 	// filter fields
 	if (vis.GetShowFields() == TDLSA_ANY)
 	{
+		const CXmlItem *pXIVis = GetItem(TDL_ATTRIBVIS);
+		ASSERT(pXIVis);
+
 		const CXmlItem* pXIFilter = pXIVis->GetItem(TDL_ATTRIBVISFILTER);
 		CTDCAttributeMap mapFilter;
 
@@ -1189,6 +1194,7 @@ int CTaskFile::GetCustomAttributeDefs(const ITaskList* pTasks, CTDCCustomAttribD
 			attribDef.sLabel = pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBLABEL);
 			attribDef.sColumnTitle = pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBCOLTITLE);
 			attribDef.nTextAlignment = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBCOLALIGN));
+			attribDef.bEnabled = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBENABLED));
 			attribDef.dwFeatures = _ttoi(pTasks10->GetCustomAttributeValue(nCustom, TDL_CUSTOMATTRIBFEATURES));
 
 			// list data can contain default-data and/or auto-data
@@ -2279,11 +2285,6 @@ int CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, CStringArray& aAllocTo) const
 	return GetTaskArray(hTask, TDL_TASKALLOCTO, aAllocTo, FALSE);
 }
 
-CXmlItem* CTaskFile::NewItem(const CString& sName)
-{
-	return new CXmlItem(NULL, sName);
-}
-
 ///////////////////////////////////////////////////////////////////////
 
 HTASKITEM CTaskFile::NewTask(LPCTSTR szTitle, HTASKITEM hParent)
@@ -2313,7 +2314,7 @@ HTASKITEM CTaskFile::NewTask(const CString& sTitle, HTASKITEM hParent, DWORD dwI
 			return NULL;
 	}
 
-	CXmlItem* pXINew = NewItem(TDL_TASK);
+	CXmlItem* pXINew = pXIParent->AddItem(TDL_TASK, NULL, XIT_ELEMENT);
 
 	if (pXINew)
 	{
@@ -2326,7 +2327,6 @@ HTASKITEM CTaskFile::NewTask(const CString& sTitle, HTASKITEM hParent, DWORD dwI
 		VERIFY(pXINew->SetItemValue(TDL_TASKID, (int)dwID));
 		
 		// Add to map
-		pXIParent->AddItem(pXINew);
 		AddTaskToMap(pXINew, FALSE, FALSE);
 
 		// Set name, parent ID and creation date

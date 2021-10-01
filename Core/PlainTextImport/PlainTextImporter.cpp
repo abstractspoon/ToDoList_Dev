@@ -191,7 +191,7 @@ BOOL CPlainTextImporter::GetTitleComments(const CString& sLine,
 										  CString& sTitle, CString& sComments)
 {
 	sTitle = sLine;
-	Misc::Split(sTitle, sComments, '|');
+	Misc::Split(Misc::Trim(sTitle), sComments, '|');
 	
 	if (!sComments.IsEmpty())
 	{

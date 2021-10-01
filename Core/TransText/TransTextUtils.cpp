@@ -185,7 +185,7 @@ BOOL TransText::CleanupDictionary(LPCTSTR szMasterDictPath, LPCTSTR szDictPath)
 		// save any removed items
 		if (!dtRemoved.IsEmpty())
 		{
-			CString sRemovedPath = CFileBackup::BuildBackupPath(szDictPath, FBS_TIMESTAMP, _T("backup"), _T(".removed"));
+			CString sRemovedPath = CFileBackup::BuildBackupPath(szDictPath, FBS_DATETIMESTAMP, _T("backup"), _T(".removed"));
 		
 			VERIFY(FileMisc::CreateFolderFromFilePath(sRemovedPath));
 			VERIFY(dtRemoved.SaveDictionary(sRemovedPath, TRUE));
