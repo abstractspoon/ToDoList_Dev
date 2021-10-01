@@ -116,7 +116,9 @@ END_MESSAGE_MAP()
 
 CToDoListApp::CToDoListApp() : CWinApp()
 {
-	// Place all significant initialization in InitInstance
+	// Perhaps because we are a Win32 app, using a manifest limits our options
+	// so we set our DPI awareness programmatically
+	GraphicsMisc::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
 }
 
 CToDoListApp::~CToDoListApp()
@@ -2077,6 +2079,12 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 
 		// Intentionally use raw API call so it will fail if any files remain in the folder
 		RemoveDirectory(sReadmes);
+	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("8.1")) < 0)
+	{
+		// remove old components
+		FileMisc::DeleteFile(sAppFolder + _T("\\LuminousControls.dll"), TRUE);
 	}
 }
 

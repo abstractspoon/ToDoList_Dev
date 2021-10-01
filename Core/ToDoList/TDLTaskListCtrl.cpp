@@ -42,6 +42,7 @@ const UINT TIMER_EDITLABEL		= 42; // List ctrl's internal timer ID for label edi
 
 const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
+const COLORREF GROUPHEADERCOLOR = RGB(63, 118, 179);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -88,7 +89,8 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 	: 
 	CTDLTaskCtrlBase(ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs),
 	m_nGroupBy(TDCC_NONE),
-	m_bSortGroupsAscending(TRUE)
+	m_bSortGroupsAscending(TRUE),
+	m_crGroupHeaderBkgnd(CLR_NONE)
 {
 }
 
@@ -239,19 +241,30 @@ DWORD CTDLTaskListCtrl::GetColumnItemTaskID(int nItem) const
 	if ((nItem < 0) || (nItem >= m_lcTasks.GetItemCount()))
 		return 0;
 
+	// Columns item data is index into tasks list
 	return GetTaskID((int)m_lcColumns.GetItemData(nItem));
+}
+
+void CTDLTaskListCtrl::GetGroupHeaderColors(COLORREF& crBack, COLORREF& crText)
+{
+	crBack = GetSysColor(COLOR_WINDOW);
+	crText = GROUPHEADERCOLOR;
+
+	if (m_crGroupHeaderBkgnd != CLR_NONE)
+	{
+		crBack = m_crGroupHeaderBkgnd;
+		crText = GraphicsMisc::GetBestTextColor(crBack);
+	}
 }
 
 LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 {
 	HWND hwndList = pLVCD->nmcd.hdr.hwndFrom;
 	int nItem = (int)pLVCD->nmcd.dwItemSpec;
-	BOOL bColumns = (hwndList == m_lcColumns);
 
-	DWORD dwTaskID = (bColumns ? GetColumnItemTaskID(nItem) : pLVCD->nmcd.lItemlParam);
 	DWORD dwRes = CDRF_DODEFAULT;
 
-	if (IsGroupHeaderTask(dwTaskID))
+	if (IsGroupHeaderItem(nItem))
 	{
 		switch (pLVCD->nmcd.dwDrawStage)
 		{
@@ -273,20 +286,22 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 				{
 					rRow.right += GetSystemMetrics(SM_CXVSCROLL);
 
-					pDC->FillSolidRect(rRow, GetSysColor(COLOR_WINDOW));
+					COLORREF crBack, crText;
+					GetGroupHeaderColors(crBack, crText);
+
+					pDC->FillSolidRect(rRow, crBack);
 					DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
 
-					const COLORREF HEADER_COLOR = RGB(63, 118, 179);
-					GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, HEADER_COLOR);
+					GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, crText);
 
-					if (!bColumns)
+					if (hwndList == m_lcTasks)
 					{
 						rRow.left = 20; // Always ensure the text is visible
 
-						CString sHeader = FormatTaskGroupHeaderText(dwTaskID);
+						CString sHeader = FormatTaskGroupHeaderText(pLVCD->nmcd.lItemlParam);
 
-						pDC->SetTextColor(HEADER_COLOR);
-						pDC->SetBkColor(GetSysColor(COLOR_WINDOW));
+						pDC->SetTextColor(crText);
+						pDC->SetBkColor(crBack);
 						pDC->SetBkMode(OPAQUE);
 						pDC->DrawText(sHeader, rRow, DT_LEFT | DT_SINGLELINE | DT_VCENTER);
 					}
@@ -299,7 +314,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	}
 	else
 	{
-		if (bColumns)
+		if (hwndList == m_lcColumns)
 		{
 			// columns handled by base class
 			return CTDLTaskCtrlBase::OnListCustomDraw(pLVCD);
@@ -773,6 +788,22 @@ BOOL CTDLTaskListCtrl::IsGroupHeaderTask(DWORD dwTaskID) const
 	return m_mapGroupHeaders.Lookup(dwTaskID, CString());
 }
 
+BOOL CTDLTaskListCtrl::IsGroupHeaderItem(int nItem) const
+{
+	return IsGroupHeaderTask(GetTaskID(nItem));
+}
+
+void CTDLTaskListCtrl::SetGroupHeaderBackgroundColor(COLORREF color)
+{
+	if (color != m_crGroupHeaderBkgnd)
+	{
+		m_crGroupHeaderBkgnd = color;
+
+		if (IsGrouped())
+			CWnd::Invalidate();
+	}
+}
+
 int CTDLTaskListCtrl::CompareTasks(LPARAM lParam1,
 								   LPARAM lParam2,
 								   const TDSORTCOLUMN& sort,
@@ -840,21 +871,10 @@ LRESULT CTDLTaskListCtrl::OnListGetDispInfo(NMLVDISPINFO* pLVDI)
 			if (m_data.GetTrueTask(dwTaskID, pTDI, pTDS))
 			{
 				// user icon
+				pLVDI->item.iImage = -1;
+
 				if (!IsColumnShowing(TDCC_ICON))
-				{
-					int nImage = -1;
-					
-					if (!pTDI->sIcon.IsEmpty())
-					{
-						nImage = m_ilTaskIcons.GetImageIndex(pTDI->sIcon);
-					}
-					else if (HasStyle(TDCS_SHOWPARENTSASFOLDERS) && pTDS->HasSubTasks())
-					{
-						nImage = 0;
-					}
-					
-					pLVDI->item.iImage = nImage;
-				}
+					pLVDI->item.iImage = GetTaskIconIndex(pTDI, pTDS);
 
 				// checkbox icon
 				if (!IsColumnShowing(TDCC_DONE) && HasStyle(TDCS_ALLOWTREEITEMCHECKBOX))
@@ -1087,18 +1107,12 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 			// Make group header tasks 'disappear' 
 			int nItem = CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
 
-			if (nItem != -1)
+			if ((nItem != -1) && IsGroupHeaderItem(nItem))
 			{
-				BOOL bTasks = (hRealWnd == m_lcTasks);
-				DWORD dwTaskID = (bTasks ? GetTaskID(nItem) : GetColumnItemTaskID(nItem));
+				ASSERT(lp);
+				LPLVHITTESTINFO pLVHit = (LPLVHITTESTINFO)lp;
 
-				if (IsGroupHeaderTask(dwTaskID))
-				{
-					ASSERT(lp);
-					LPLVHITTESTINFO pLVHit = (LPLVHITTESTINFO)lp;
-
-					nItem = pLVHit->iItem = pLVHit->iSubItem = -1;
-				}
+				nItem = pLVHit->iItem = pLVHit->iSubItem = -1;
 			}
 
 			return nItem;
@@ -1284,12 +1298,66 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 
 				for (int nItem = nFrom; nItem <= nTo; nItem++)
 				{
-					m_lcTasks.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
-					m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);				
+					if (!IsGroupHeaderItem(nItem))
+					{
+						m_lcTasks.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
+						m_lcColumns.SetItemState(nItem, LVIS_SELECTED, LVIS_SELECTED);
+					}
 				}
 
 				NotifyParentSelChange(SC_BYKEYBOARD);
 			}
+		}
+		else if (IsGrouped())
+		{
+			switch (wp)
+			{
+				case VK_UP:
+				case VK_PRIOR:
+				case VK_HOME:
+					// If we are already on item 1 and moving 'up'
+					// then we eat the message because we are guaranteed
+					// to hit the first group header which causes a flicker
+					// when we subsequently fix it up.
+					if (GetSelectedItem() == 1)
+						return 0L;
+			}
+
+			// else do default and then fix it up as necessary
+			LRESULT lr = ScDefault(hRealWnd);
+
+			int nSel = GetSelectedItem();
+
+			if (IsGroupHeaderItem(nSel))
+			{
+				switch (wp)
+				{
+				case VK_DOWN:
+				case VK_NEXT:
+					// group header can never be last item so we can always go down
+					nSel++;
+					break;
+
+				case VK_END:
+					// This should be impossible because group header can never be last item
+					ASSERT(0);
+					break;
+
+				case VK_UP:
+				case VK_PRIOR:
+				case VK_HOME:
+					if (nSel == 0)
+						nSel++;
+					else 
+						nSel--;
+					break;
+				}
+
+				SelectItem(nSel);
+				NotifyParentSelChange(SC_BYKEYBOARD);
+			}
+			
+			return lr;
 		}
 		break;
 
@@ -1365,6 +1433,19 @@ LRESULT CTDLTaskListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 	return CTDLTaskCtrlBase::ScWindowProc(hRealWnd, msg, wp, lp);
 }
 
+DWORD CTDLTaskListCtrl::GetNextSelectedTaskID(POSITION& pos) const
+{
+	if (pos == NULL)
+		return 0;
+
+	DWORD dwTaskID = CTDLTaskCtrlBase::GetNextSelectedTaskID(pos);
+
+	while (IsGroupHeaderTask(dwTaskID))
+		dwTaskID = CTDLTaskCtrlBase::GetNextSelectedTaskID(pos);
+
+	return dwTaskID;
+}
+
 BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 {
 	// only called for the list that currently has the focus
@@ -1389,6 +1470,11 @@ BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 
 	// Or we are bounds selecting
 	if (IsBoundSelecting())
+		return FALSE;
+
+	// Or a group header is selected
+	// Note: don't use GetSelectedTaskID here because it filters out group headers
+	if (IsGroupHeaderItem(GetSelectedItem()))
 		return FALSE;
 
 	NotifyParentSelChange();
@@ -1685,6 +1771,83 @@ BOOL CTDLTaskListCtrl::IsTaskSelected(DWORD dwTaskID, BOOL bSingly) const
 	return FALSE;
 }
 
+BOOL CTDLTaskListCtrl::WantNextItem(int nItem, BOOL bTopLevelOnly, BOOL bExcludeSelected) const
+{
+	DWORD dwNextID = GetTaskID(nItem);
+
+	if (IsGroupHeaderTask(dwNextID))
+		return FALSE;
+
+	DWORD dwParentID = m_data.GetTaskParentID(dwNextID);
+
+	if (bTopLevelOnly && dwParentID)
+		return FALSE;
+
+	if (bExcludeSelected)
+	{
+		if (IsItemSelected(nItem))
+			return FALSE;
+
+		while (dwParentID)
+		{
+			int nParent = FindTaskItem(dwParentID);
+
+			if (IsItemSelected(nParent))
+				return FALSE;
+
+			dwParentID = m_data.GetTaskParentID(dwParentID);
+		}
+	}
+
+	return TRUE;
+}
+
+DWORD CTDLTaskListCtrl::GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const
+{
+	int nSel = FindTaskItem(dwTaskID);
+
+	if (nSel == -1)
+	{
+		ASSERT(0);
+		return 0;
+	}
+	
+	switch (nNext)
+	{
+	case TTCNT_NEXT:
+	case TTCNT_NEXTVISIBLE:
+	case TTCNT_NEXTTOPLEVEL: // Look forwards
+		{
+			BOOL bTopLevelOnly = (nNext == TTCNT_NEXTTOPLEVEL);
+			int nNumItems = GetItemCount();
+
+			for (int nItem = (nSel + 1); nItem < nNumItems; nItem++)
+			{
+				if (WantNextItem(nItem, bTopLevelOnly, bExcludeSelected))
+					return GetTaskID(nItem);
+			}
+		}
+		break;
+
+	case TTCNT_PREV:
+	case TTCNT_PREVVISIBLE:
+	case TTCNT_PREVTOPLEVEL: // look backwards
+		{
+			BOOL bTopLevelOnly = (nNext == TTCNT_PREVTOPLEVEL);
+			int nItem = nSel;
+
+			while (nItem--)
+			{
+				if (WantNextItem(nItem, bTopLevelOnly, bExcludeSelected))
+					return GetTaskID(nItem);
+			}
+		}
+		break;
+	}
+
+	return 0;
+}
+
 DWORD CTDLTaskListCtrl::GetTaskID(int nItem) const 
 { 
 	if ((nItem < 0) || (nItem >= m_lcTasks.GetItemCount()))
@@ -1729,18 +1892,21 @@ int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 
 	if (m_lcTasks.GetSelectedCount())
 	{
-		POSITION pos = m_lcTasks.GetFirstSelectedItemPosition();
+		POSITION pos = GetFirstSelectedTaskPos();
 	
 		while (pos)
 		{
-			int nItem = m_lcTasks.GetNextSelectedItem(pos);
-			DWORD dwTaskID = m_lcTasks.GetItemData(nItem);
-		
-			if (!IsGroupHeaderTask(dwTaskID))
+			DWORD dwTaskID = GetNextSelectedTaskID(pos);
+			ASSERT(dwTaskID || (pos == NULL));
+
+			if (dwTaskID)
 				aTaskIDs.Add(dwTaskID);
 		}
 	
 		dwFocusedTaskID = GetFocusedListTaskID();
+
+		if (!dwFocusedTaskID && aTaskIDs.GetSize())
+			dwFocusedTaskID = aTaskIDs[0];
 	}
 	ASSERT((!aTaskIDs.GetSize() && (dwFocusedTaskID == 0)) || Misc::HasT(dwFocusedTaskID, aTaskIDs));
 	
@@ -1870,6 +2036,7 @@ int CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache, BOOL bEns
 
 		if (bEnsureSelection)
 		{
+			// Fallback on breadcrumbs
 			int nID = cache.aBreadcrumbs.GetSize();
 		
 			while (nID--)
@@ -1901,7 +2068,7 @@ int CTDLTaskListCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache, BOOL bEns
 	}
 	else if (bEnsureSelection)
 	{
-		SelectItem(0);
+		SelectItem(IsGroupHeaderItem(0) ? 1 : 0);
 	}
 	else
 	{

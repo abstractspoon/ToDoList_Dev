@@ -76,7 +76,7 @@ namespace unvell.ReoGrid.DataFormat
 				string strdata = (data is string ? (string)data : Convert.ToString(data));
 
 				double days = 0;
-				if (double.TryParse(strdata, out days))
+				if (CellUtility.TryParseDoubleLocalized(strdata, out days))
 				{
 					try
 					{

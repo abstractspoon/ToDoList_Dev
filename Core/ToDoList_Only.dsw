@@ -1,0 +1,119 @@
+Microsoft Developer Studio Workspace File, Format Version 6.00
+# WARNING: DO NOT EDIT OR DELETE THIS WORKSPACE FILE!
+
+###############################################################################
+
+Project: "3rdParty"=.\3rdParty\3rdParty.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "Interfaces"=.\Interfaces\Interfaces.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "Shared"=.\Shared\Shared.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "TDLTest"=.\TDLTest\TDLTest.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Interfaces
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ToDoListLib
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ToDoList"=.\ToDoList\ToDoList.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name StatisticsExt
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Shared
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name 3rdParty
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name Interfaces
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name TDLTest
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name ToDoListLib
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "ToDoListLib"=.\ToDoListLib\ToDoListLib.dsp - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Global:
+
+Package=<5>
+{{{
+}}}
+
+Package=<3>
+{{{
+}}}
+
+###############################################################################
+

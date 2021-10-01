@@ -13,13 +13,7 @@
 #define IDC_FILENAME                    107
 #define IDR_MAINFRAME                   128
 #define IDR_MAINFRAME_STD               128
-#define IDS_SAMPLETASK                  129
 #define IDD_RECURRING_TASK_DIALOG_OLD   129
-#define IDS_BACKUPFILEFOUND             130
-#define IDS_SAMPLETEXT                  131
-#define IDS_COLOR_SAMPLETEXT            131
-#define IDS_COLOR_AUTOMATIC             132
-#define IDS_COLOR_MORECOLORS            133
 #define IDR_MISC                        135
 #define IDD_PREFTASK_PAGE               138
 #define IDD_PREFGEN_PAGE                139
@@ -379,6 +373,7 @@
 #define IDC_SETREFERENCECOLOR           1074
 #define IDC_SHOWONSTARTUP               1075
 #define IDC_ICONPATH                    1075
+#define IDC_SETGROUPHEADERBKCOLOR       1075
 #define IDC_USEPERCENTDONEINTIMEEST     1076
 #define IDC_SHOWCTRLSASCOLUMNS          1078
 #define IDC_SHOWCOMMENTSALWAYS          1079
@@ -440,6 +435,7 @@
 #define IDC_ALLOCBYLIST                 1108
 #define IDC_SPECIFYREFERENCECOLOR       1108
 #define IDC_VERSIONLIST                 1109
+#define IDC_SPECIFYGROUPHEADERBKCOLOR   1109
 #define IDC_TAGLIST                     1110
 #define IDC_TASKLISTOPTIONS             1114
 #define IDC_FORMATOPTIONS               1115
@@ -867,9 +863,6 @@
 #define IDI_MAIL                        2008
 #define IDI_APPOINTMENT                 2009
 #define IDI_FLAGGEDMAIL                 2010
-#define IDS_OUTLOOK_FOLDERNOITEMS       3006
-#define IDS_OUTLOOK_UNABLETOCONNECT     3007
-#define IDS_OUTLOOK_BUILDINGLIST        3008
 #define ID_DELETETASK                   32772
 #define ID_NEWTASK                      32773
 #define ID_NEWSUBTASK                   32775
@@ -1239,20 +1232,15 @@
 #define ID_VIEW_TOGGLETASKEXPANDED      34264
 #define ID_VIEW_SHOWTASKLISTTABBAR      34265
 #define ID_VIEW_SHOWTREELISTTABBAR      34266
-#define ID_SB_SELCOUNT                  34268
 #define ID_SB_SELTIMEEST                34269
 #define ID_SB_SELTIMESPENT              34270
 #define ID_SB_SELCOST                   34271
-#define ID_SB_FILEVERSION               34276
-#define ID_SB_TASKCOUNT                 34278
-#define ID_SB_FILEPATH                  34280
+#define ID_SB_NOSELTASK                 34280
+#define ID_SB_MULTISELTASK              34281
 #define ID_SB_SPACER                    34282
-#define ID_SB_FOCUS                     34283
+#define ID_SB_MULTISELTASKMORE_TIP      34283
 #define ID_EDIT_INSERTTIME              34284
-#define IDS_FOCUS_FILTERBAR             34285
 #define ID_FILE_CHANGEPASSWORD          34285
-#define IDS_FOCUS_TASKS                 34286
-#define IDS_UNNAMEDFILTER               34287
 #define ID_VIEW_EXPANDDUE               34287
 #define ID_VIEW_COLLAPSEDUE             34288
 #define ID_VIEW_EXPANDSTARTED           34289
@@ -1715,6 +1703,18 @@
 #define IDS_NODUETHISMONTH              50784
 #define IDS_NODUENEXTMONTH              50785
 #define IDS_OPENTASKLIST_TIP            50790
+#define IDS_SAMPLETASK                  50790
+#define IDS_BACKUPFILEFOUND             50791
+#define IDS_SAMPLETEXT                  50792
+#define IDS_COLOR_SAMPLETEXT            50793
+#define IDS_COLOR_AUTOMATIC             50794
+#define IDS_COLOR_MORECOLORS            50795
+#define IDS_OUTLOOK_FOLDERNOITEMS       50796
+#define IDS_OUTLOOK_UNABLETOCONNECT     50797
+#define IDS_OUTLOOK_BUILDINGLIST        50798
+#define IDS_FOCUS_FILTERBAR             50799
+#define IDS_FOCUS_TASKS                 50800
+#define IDS_UNNAMEDFILTER               50801
 #define IDS_XSLFILEFILTER               50805
 #define IDS_TRANSFORMFILEFILTER         50806
 #define IDS_ALLFILEFILTER               50807
@@ -2071,7 +2071,7 @@
 #define IDS_SB_SELCOST_TIP              51216
 #define IDS_SB_FILEVERSION_TIP          51217
 #define IDS_SB_TASKCOUNT_TIP            51218
-#define IDS_SB_FILEPATH_TIP             51219
+#define IDS_SB_SELTASKTITLE_TIP         51219
 #define IDS_IMPORTFILE_CANTOPEN         51220
 #define IDS_TDLBC_TASKPARENTIDS         51221
 #define IDS_FILTER_STARTENDTHISMONTH    51222
@@ -2427,11 +2427,14 @@
 #define IDS_FOCUS_TIMETRACKER           51595
 #define IDS_FILTER_ANYSTATUS            51596
 #define IDS_FILTER_ANYVERSION           51597
-#define IDS_CAD_CALCULATION             51598
-#define IDS_CAD_CALC_ADD                51599
-#define IDS_CAD_CALC_SUBTRACT           51600
-#define IDS_CAD_CALC_MULTIPLY           51601
-#define IDS_CAD_CALC_DIVIDE             51602
+#define ID_SB_TASKCOUNT                 51598
+#define ID_SB_FOCUS                     51599
+#define ID_SB_SELTASKTITLE              51600
+#define IDS_CAD_CALCULATION             51601
+#define IDS_CAD_CALC_ADD                51602
+#define IDS_CAD_CALC_SUBTRACT           51603
+#define IDS_CAD_CALC_MULTIPLY           51604
+#define IDS_CAD_CALC_DIVIDE             51605
 
 // Next default values for new objects
 // 

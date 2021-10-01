@@ -4210,6 +4210,10 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 
 	case TDCCA_DOUBLE:
 	case TDCCA_INTEGER:
+		if (attribDef.IsList())
+			return data.FormatAsArray();
+		// else fall thru
+
 	case TDCCA_FRACTION:
 		{
 			double dValue = 0.0;
@@ -4232,10 +4236,10 @@ CString CTDCTaskFormatter::GetTaskCustomAttributeData(const TODOITEM* pTDI, cons
 /////////////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskExporter::CTDCTaskExporter(const CToDoCtrlData& data, 
-	const CTDLTaskCtrlBase& colors,
-	const CContentMgr& comments) 
+								   const CTDLTaskCtrlBase& colors,
+								   const CContentMgr& comments)
 	: 
-m_data(data),
+	m_data(data),
 	m_colors(colors),
 	m_comments(comments),
 	m_calculator(m_data),
@@ -4277,16 +4281,8 @@ BOOL CTDCTaskExporter::ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile
 			return FALSE;
 
 		DWORD dwTaskID = pTDS->GetTaskID();
-		ASSERT(dwTaskID);
-
-		if (!dwTaskID)
-			return FALSE;
-
-		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
-		ASSERT(pTDI);
-
-		if (!pTDI)
-			return FALSE;
+		const TODOITEM* pTDI = NULL;
+		GET_TDI(dwTaskID, pTDI, FALSE);
 
 		// Ignore duplicate 
 		if (!bIncDuplicateCompletedRecurringSubtasks)
@@ -4322,11 +4318,7 @@ BOOL CTDCTaskExporter::ExportTask(DWORD dwTaskID, CTaskFile& tasks, HTASKITEM hP
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
-	{
-		ASSERT(0);
-		return FALSE;
-	}
+	GET_TDI_TDS(dwTaskID, pTDI, pTDS, NULL);
 
 	return ExportTask(pTDI, pTDS, tasks, hParentTask, bIncDuplicateCompletedRecurringSubtasks);
 }
@@ -4343,10 +4335,12 @@ BOOL CTDCTaskExporter::ExportTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	DWORD dwTaskID = pTDS->GetTaskID();
 
 	HTASKITEM hTask = tasks.NewTask(sTitle, hParentTask, dwTaskID, 0);
-	ASSERT(hTask);
 
 	if (!hTask)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// copy all other attributes
 	ExportAllTaskAttributes(pTDI, pTDS, tasks, hTask);

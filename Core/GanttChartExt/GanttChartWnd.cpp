@@ -19,6 +19,7 @@
 
 #include "..\3rdparty\T64Utils.h"
 #include "..\3rdparty\GdiPlus.h"
+#include "..\3rdparty\XNamedColors.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -294,6 +295,7 @@ void CGanttChartWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, 
 
 	m_ctrlGantt.EnableTreeCheckboxes(IDB_CHECKBOXES, pPrefs->GetProfileInt(_T("Preferences"), _T("AllowCheckboxAgainstTreeItem"), TRUE));
 	m_ctrlGantt.EnableTreeLabelTips(!pPrefs->GetProfileInt(_T("Preferences"), _T("ShowInfoTips"), FALSE));
+	m_ctrlGantt.EnableColumnHeaderSorting(pPrefs->GetProfileInt(_T("Preferences"), _T("EnableColumnHeaderSorting"), TRUE));
 
 	// get alternate line color from app prefs
 	COLORREF crAlt = CLR_NONE;
@@ -415,6 +417,10 @@ void CGanttChartWnd::SetUITheme(const UITHEME* pTheme)
 		// intentionally set background colours to be same as ours
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, FALSE, FALSE);
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+		// Rescale images because background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_TOOLBAR_STD, colorMagenta);
 
 		m_ctrlGantt.SetUITheme(m_theme);
 		m_sliderDateRange.SetParentBackgroundColor(m_theme.crAppBackLight);
@@ -758,9 +764,7 @@ BOOL CGanttChartWnd::OnInitDialog()
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
 	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-
-		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, MAGENTA));
+		VERIFY(m_toolbar.LoadToolBar(IDR_TOOLBAR, IDB_TOOLBAR_STD, colorMagenta));
 		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 
 		CRect rToolbar = CDialogHelper::GetCtrlRect(this, IDC_TB_PLACEHOLDER);

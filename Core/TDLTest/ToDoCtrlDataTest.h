@@ -11,6 +11,12 @@
 
 #include "TDLTestBase.h"
 
+#include "..\todolist\taskfile.h"
+#include "..\todolist\tdcstruct.h"
+
+class CToDoCtrlData;
+class CTaskFile;
+
 class CToDoCtrlDataTest : public CTDLTestBase  
 {
 public:
@@ -18,6 +24,22 @@ public:
 	virtual ~CToDoCtrlDataTest();
 	
 	TESTRESULT Run();
+
+protected:
+	CTDCStyleMap m_aStyles;
+	CTDCCustomAttribDefinitionArray m_aCustomAttribDefs;
+
+protected:
+	void BeginTest(LPCTSTR szFunction, BOOL bWithAttributes);
+
+	void TestHierarchyDataModelPerformance();
+	void TestFlatListDataModelPerformance();
+	void TestDataModelCreationPerformance(const CTaskFile& tasks, CToDoCtrlData& data, LPCTSTR szTaskType);
+	void TestDataModelCalculationPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
+	void TestDataModelFormattingPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
+	void TestDataModelExporterPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
+	void TestDataModelGetTaskPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
+	void TestDataModelGetTaskPositionPerformance(const CToDoCtrlData& data, LPCTSTR szTaskType);
 
 };
 

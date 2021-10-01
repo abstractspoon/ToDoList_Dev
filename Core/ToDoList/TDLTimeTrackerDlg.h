@@ -30,13 +30,12 @@ public:
 	void SetOption(DWORD dwOption, BOOL bEnable = TRUE);
 	void SetWindowIcons(HICON hIconBig, HICON hIconSmall);
 	
-	BOOL AddTasklist(const CFilteredToDoCtrl* pTDC);
 	BOOL AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
+	BOOL SetTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
 	BOOL RemoveTasklist(const CFilteredToDoCtrl* pTDC);
 	void RemoveAllTasklists();
-	BOOL UpdateTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
-	void RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC);
-	void RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC);
+	BOOL UpdateAllTasks(const CFilteredToDoCtrl* pTDC);
+	BOOL UpdateSelectedTasks(const CFilteredToDoCtrl* pTDC, const CTDCAttributeMap& mapAttrib);
 	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
 	void UpdateTaskTime(const CFilteredToDoCtrl* pTDC);
 	void UpdateTasklistName(const CFilteredToDoCtrl* pTDC);

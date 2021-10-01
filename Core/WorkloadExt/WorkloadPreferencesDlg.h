@@ -32,6 +32,7 @@ public:
 	BOOL GetAutoCalculateMissingAllocations() const { return m_bAutoCalcAllocations || m_bRecalcAllocations; }
 	BOOL GetRecalculateAllocations() const { return m_bRecalcAllocations; }
 	BOOL GetRecalculateAllocationsProportionally() const { return m_bRecalcProportionally; }
+	BOOL GetIncludeDatelessTasksInPeriod() const { return m_bIncludeDatelessTasksInPeriod; }
 	
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
@@ -46,6 +47,7 @@ protected:
 	BOOL	m_bRecalcAllocations;
 	int		m_bRecalcProportionally;
 	BOOL	m_bEnableOverlapColor;
+	BOOL	m_bIncludeDatelessTasksInPeriod;
 	//}}AFX_DATA
 	int		m_nOverloadFromPercent;
 	int		m_nUnderloadToPercent;
@@ -100,6 +102,7 @@ public:
 	BOOL GetPreferTimeEstimateForCalcs() const { return m_page.GetPreferTimeEstimateForCalcs(); }
 	BOOL GetRecalculateAllocations() const { return m_page.GetRecalculateAllocations(); }
 	BOOL GetRecalculateAllocationsProportionally() const { return m_page.GetRecalculateAllocationsProportionally(); }
+	BOOL GetIncludeDatelessTasksInPeriod() const { return m_page.GetIncludeDatelessTasksInPeriod(); }
 
 protected:
 // Dialog Data

@@ -181,7 +181,7 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 			break;
 		}
 	}
-	else
+	else // it's a list
 	{
 		switch (dwListType)
 		{
@@ -236,15 +236,17 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 				szClass = WC_COMBOBOX;
 				dwStyle |= (CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | CBS_AUTOHSCROLL);
 
-				// add number mask as required
+				// Add number mask as required
+				// Note: These need to include a space because CCheckComboBox 
+				// includes a space when it formats multiple items
 				switch (dwDataType)
 				{
 				case TDCCA_INTEGER:
-					((CAutoComboBox*)pControl)->SetEditMask(_T("-0123456789"));
+					((CAutoComboBox*)pControl)->SetEditMask(_T("-0123456789, "), ME_LOCALIZESEPARATOR);
 					break;
 				
 				case TDCCA_DOUBLE:
-					((CAutoComboBox*)pControl)->SetEditMask(_T("-.0123456789"), ME_LOCALIZEDECIMAL);
+					((CAutoComboBox*)pControl)->SetEditMask(_T("-.0123456789,"), ME_LOCALIZEDECIMAL | ME_LOCALIZESEPARATOR);
 					break;
 				}
 			}
@@ -266,6 +268,10 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 					break;
 				}
 			}
+			break;
+
+		default:
+			ASSERT(0); // Sanity check
 			break;
 		}
 	}
@@ -1109,7 +1115,7 @@ TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pPa
 		((CEnCheckComboBox*)pCtrl)->GetChecked(aItems);
 		data.Set(aItems, bFilter);
 	}
-	else 
+	else // it's a list
 	{
 		switch (dwListType)
 		{

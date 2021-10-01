@@ -24,6 +24,7 @@ using System.Text;
 using unvell.ReoGrid.Core;
 using unvell.ReoGrid.DataFormat;
 using unvell.ReoGrid.Graphics;
+using unvell.ReoGrid.Utility;
 
 namespace unvell.ReoGrid.DataFormat
 {
@@ -76,9 +77,7 @@ namespace unvell.ReoGrid.DataFormat
 			{
 				string strdata = (data as string).Trim();
 
-				isNumeric = double.TryParse(strdata, out value);
-
-				if (!isNumeric) isNumeric = double.TryParse(strdata.Replace(",", ""), out value);
+				isNumeric = CellUtility.TryParseDoubleLocalized(strdata, out value);
 
 				if (isNumeric) cell.InnerData = value;
 			}

@@ -24,6 +24,8 @@
 
 #include "..\3rdparty\shellicons.h"
 
+#include "..\Interfaces\TasklistSchemaDef.h"
+
 #include <float.h> // for DBL_MAX
 #include <math.h>  // for fabs()
 
@@ -68,7 +70,6 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 	if (wi == NULL)	return;	\
 }
 
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -82,7 +83,8 @@ CWorkloadCtrl::CWorkloadCtrl()
 	m_mapTotalTasks(FALSE),
 	m_mapPercentLoad(TRUE), // average
 	m_barChart(m_aAllocTo, m_mapPercentLoad),
-	m_dtPeriod(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH, TRUE)
+	m_dtPeriod(DHD_BEGINTHISMONTH, DHD_ENDTHISMONTH, TRUE),
+	m_crBkgndText(GetSysColor(COLOR_WINDOWTEXT))
 {
 }
 
@@ -197,14 +199,20 @@ DWORD CWorkloadCtrl::GetSelectedTaskID() const
 	return GetSelectedItemData();
 }
 
-BOOL CWorkloadCtrl::GetSelectedTask(WORKLOADITEM& wi) const
+BOOL CWorkloadCtrl::GetSelectedTask(WORKLOADITEM& wi, BOOL bIncUnallocated) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
 	const WORKLOADITEM* pWI = NULL;
 
 	GET_WI_RET(dwTaskID, pWI, FALSE);
-	
 	wi = *pWI;
+
+	if (!bIncUnallocated)
+	{
+		Misc::RemoveEmptyItems(wi.aAllocTo);
+		wi.mapAllocatedDays.RemoveKey(_T(""));
+	}
+
 	return TRUE;
 }
 
@@ -401,7 +409,6 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 
 			UnlockWindowUpdate();
 			EnableResync(TRUE, m_tree);
-			UpdateColumnWidths(UTWA_ANY);
 		}
 		break;
 
@@ -416,6 +423,8 @@ void CWorkloadCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpda
 		ASSERT(0);
 		return;
 	}
+
+	UpdateColumnWidths(UTWA_ANY);
 }
 
 void CWorkloadCtrl::PreFixVScrollSyncBug()
@@ -433,7 +442,11 @@ void CWorkloadCtrl::PreFixVScrollSyncBug()
 
 void CWorkloadCtrl::RecalcAllocationTotals()
 {
-	m_data.CalculateTotals(m_dtPeriod, m_mapTotalDays, m_mapTotalTasks, HasOption(WLCF_ALLOWPARENTALLOCATIONS));
+	m_data.CalculateTotals(m_dtPeriod, 
+						   m_mapTotalDays, 
+						   m_mapTotalTasks, 
+						   HasOption(WLCF_ALLOWPARENTALLOCATIONS),
+						   HasOption(WLCF_INCLUDEDATELESSTASKSINPERIOD));
 
 	// Individual loading
 	m_mapPercentLoad.RemoveAll();
@@ -467,7 +480,7 @@ int CWorkloadCtrl::GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 double CWorkloadCtrl::GetTaskTimeEstimate(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
-	double dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nUnits, true);
+	double dTimeEst = pTasks->GetTaskTimeEstimate(hTask, nUnits, false); // uncalculated
 
 	TH_UNITS nTHUnits = THU_NULL;
 
@@ -708,7 +721,10 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 	}
 
 	if (bAllocationChange)
+	{
+		ASSERT(bChange);
 		UpdateAllocationCalculations(*pWI);
+	}
 	
 	return bChange;
 }
@@ -827,19 +843,30 @@ WORKLOADITEM* CWorkloadCtrl::GetWorkloadItem(DWORD dwTaskID) const
 
 void CWorkloadCtrl::RebuildTree(const ITASKLISTBASE* pTasks)
 {
+	m_dwMaxTaskID = 0;
+
 	m_tree.DeleteAllItems();
 	m_list.DeleteAllItems();
 	m_data.RemoveAll();
 
 	m_aAllocTo.RemoveAll();
-	m_dwMaxTaskID = 0;
+	m_aAllocTo.Add(_T("")); // unallocated column
+	UpdateAllocTo(pTasks);
 
 	BuildTreeItem(pTasks, pTasks->GetFirstTask(), NULL, TRUE);
-
 	m_data.RecalculateOverlaps();
 
 	ExpandList();
 	RefreshItemBoldState();
+}
+
+void CWorkloadCtrl::UpdateAllocTo(const ITASKLISTBASE* pTasks)
+{
+	int nItem = pTasks->GetAttributeCount(TDL_TASKALLOCTO);
+
+	while (nItem--)
+		Misc::AddUniqueItem(pTasks->GetAttributeItem(TDL_TASKALLOCTO, nItem), m_aAllocTo);
+
 }
 
 void CWorkloadCtrl::RecalcDataDateRange()
@@ -1027,6 +1054,7 @@ void CWorkloadCtrl::SetOption(DWORD dwOption, BOOL bSet)
 				break;
 
 			case WLCF_ALLOWPARENTALLOCATIONS:
+			case WLCF_INCLUDEDATELESSTASKSINPERIOD:
 				RecalcAllocationTotals();
 				break;
 			}
@@ -1316,6 +1344,7 @@ LRESULT CWorkloadCtrl::OnTotalsLabelsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 	case CDDS_ITEMPREPAINT:
 		{
 			pLVCD->clrTextBk = (m_bSavingToImage ? GetSysColor(COLOR_WINDOW) : m_crBkgnd);
+			pLVCD->clrText = (m_bSavingToImage ? GetSysColor(COLOR_WINDOWTEXT) : m_crBkgndText);
 
 			CDC* pDC = CDC::FromHandle(pLVCD->nmcd.hdc);
 
@@ -1462,23 +1491,13 @@ LRESULT CWorkloadCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 		{
 		case CDDS_PREPAINT:
 			// only need handle drawing for coloumn sorting or double row height
-			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO) || (m_listHeader.GetRowCount() > 1))
+			if (m_sort.IsSingleSortingBy(WLCC_ALLOCTO))
 			{
 				return CDRF_NOTIFYITEMDRAW;
 			}
 			break;
 							
 		case CDDS_ITEMPREPAINT:
-			// only need handle drawing for double row height
-			if (m_listHeader.GetRowCount() > 1)
-			{
-				CDC* pDC = CDC::FromHandle(pNMCD->hdc);
-				int nCol = (int)pNMCD->dwItemSpec;
-
-				DrawListHeaderItem(pDC, nCol);
-				return CDRF_SKIPDEFAULT;
-			}
-			// else alloc to selection
 			return CDRF_NOTIFYPOSTPAINT;
 
 		case CDDS_ITEMPOSTPAINT:
@@ -1943,10 +1962,10 @@ BOOL CWorkloadCtrl::OnListLButtonDblClk(UINT nFlags, CPoint point)
 	// else
 	int nCol = -1, nHit = ListHitTestItem(point, FALSE, nCol);
 
-	if (m_bReadOnly || (GetListColumnType(nCol) != WLCT_VALUE))
+	if (m_bReadOnly || (nHit == -1) || (GetListColumnType(nCol) != WLCT_VALUE))
 		return FALSE;
 
-	CString sAllocTo(m_listHeader.GetItemText(nCol));
+	CString sAllocTo(m_aAllocTo[nCol - 1]); // Account for hidden first column
 
 	return CWnd::GetParent()->SendMessage(WM_WLC_EDITTASKALLOCATIONS, (WPARAM)(LPCTSTR)sAllocTo, GetTaskID(nHit));
 }
@@ -1968,7 +1987,7 @@ void CWorkloadCtrl::EnableUnderload(BOOL bEnable, double dUnderloadValue, COLORR
 	m_lcColumnTotals.Invalidate();
 }
 
-BOOL CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
+BOOL CWorkloadCtrl::SetBackgroundColors(COLORREF crBkgnd, COLORREF crText)
 {
 	if (!CTreeListCtrl::SetBackgroundColor(crBkgnd))
 		return FALSE;
@@ -1977,6 +1996,9 @@ BOOL CWorkloadCtrl::SetBackgroundColor(COLORREF crBkgnd)
 	{
 		m_lcTotalsLabels.SetBkColor(m_crBkgnd);
 		m_lcTotalsLabels.SetTextBkColor(m_crBkgnd);
+
+		m_crBkgndText = crText;
+		m_lcTotalsLabels.SetTextColor(m_crBkgndText);
 	}
 
 	return TRUE;
@@ -2130,17 +2152,13 @@ BOOL CWorkloadCtrl::GetTreeItemRect(HTREEITEM hti, int nCol, CRect& rItem, BOOL 
 
 double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, int nItem, int nCol, COLORREF& crBack) const
 {
-	if (!wi.bParent)
-		return GetAllocationListItemColumnDays(wi, nCol, crBack);
-
 	return CalcAllocationListItemColumnDays(wi, GetTreeItem(nItem), nCol, crBack);
 }
 
 double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, HTREEITEM hti, int nCol, COLORREF& crBack) const
 {
-	double dDays = GetAllocationListItemColumnDays(wi, nCol, crBack);
-
-	// Add child totals if this is a parent
+	// Begin by accumulating any child values
+	double dDays = 0.0;
 	HTREEITEM htiChild = m_tree.GetChildItem(hti);
 
 	while (htiChild)
@@ -2152,7 +2170,7 @@ double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, H
 		if (pWIChild && !pWIChild->dwOrgRefID)
 		{
 			COLORREF crChild = CLR_NONE;
-			dDays += CalcAllocationListItemColumnDays(*pWIChild, htiChild, nCol, crChild);
+			dDays += CalcAllocationListItemColumnDays(*pWIChild, htiChild, nCol, crChild); // RECURSIVE CALL
 
 			// Highlight overlapping children on parent if parent is not expanded
 			if ((crChild != CLR_NONE) && !m_tree.TCH().IsItemExpanded(hti))
@@ -2160,6 +2178,28 @@ double CWorkloadCtrl::CalcAllocationListItemColumnDays(const WORKLOADITEM& wi, H
 		}
 
 		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
+	}
+
+	// We need to be very careful to avoid double-counting
+	//
+	// 1. If it's not a parent
+	BOOL bAddThis = !wi.bParent;
+
+	if (!bAddThis && HasOption(WLCF_ALLOWPARENTALLOCATIONS))
+	{
+		// 2. If it's a parent with a time estimate
+		bAddThis = ((wi.dTimeEst != 0.0) && (HasOption(WLCF_PREFERTIMEESTFORCALCS) || !wi.dtRange.IsValid()));
+
+		if (!bAddThis)
+		{
+			// 3. If its children yielded no result
+			bAddThis = (dDays == 0.0);
+		}
+	}
+
+	if (bAddThis)
+	{
+		dDays += GetAllocationListItemColumnDays(wi, nCol, crBack);
 	}
 
 	return dDays;
@@ -2475,11 +2515,16 @@ int CWorkloadCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
 		break;
 
 	case WLCC_DURATION:
-		return pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleDuration(NULL), 0)).cx;
+		{
+			int nMaxDuration = GetLargestVisibleDuration(NULL);
+			return pDC->GetTextExtent(FormatTimeSpan(nMaxDuration, 0)).cx;
+		}
 
 	case WLCC_TIMEEST:
 		{
-			int nWidthLargest = pDC->GetTextExtent(FormatTimeSpan(GetLargestVisibleTimeEstimate(NULL), 1)).cx;
+			double dMaxTimeEst = GetLargestVisibleTimeEstimate(NULL);
+
+			int nWidthLargest = pDC->GetTextExtent(FormatTimeSpan(dMaxTimeEst, 1)).cx;
 			int nWidthSmallest = pDC->GetTextExtent(FormatTimeSpan(0.1, 1)).cx;
 
 			return max(nWidthLargest, nWidthSmallest);
@@ -2488,7 +2533,6 @@ int CWorkloadCtrl::CalcTreeColumnTextWidth(int nCol, CDC* pDC) const
 		
 	case WLCC_PERCENT: 
 		return GraphicsMisc::GetAverageMaxStringWidth(_T("100%"), pDC);
-		break;
 	}
 
 	ASSERT(0);
@@ -2569,7 +2613,11 @@ void CWorkloadCtrl::UpdateListColumns()
 		else
 		{
 			m_listHeader.SetItemData(nCol, WLCT_VALUE);
-			m_listHeader.SetItemText(nCol, m_aAllocTo[nCol - 1]);
+
+			if (m_aAllocTo[nCol - 1].IsEmpty())
+				m_listHeader.SetItemText(nCol, CEnString(IDS_UNALLOCATEDTO));
+			else
+				m_listHeader.SetItemText(nCol, m_aAllocTo[nCol - 1]);
 		}
 	}
 

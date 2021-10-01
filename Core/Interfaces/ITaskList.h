@@ -41,6 +41,11 @@ static const GUID IID_TASKLIST17 = { 0xd44e1030, 0x3c18, 0x41df, { 0xb7, 0x5e, 0
 
 /////////////////////////////////////////////////////////////////////////////////
 
+// Most optimal hash table size for up to 100,000 tasks
+const int ITASK_HASHTABLE_SIZE = 5000;
+
+//////////////////////////////////////////////////////////////////////
+
 typedef void* HTASKITEM;
 typedef __int64 time64_t;
 

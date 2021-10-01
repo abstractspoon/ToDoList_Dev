@@ -532,14 +532,14 @@ int Misc::GetFormattedLength(const CStringArray& aValues, LPCTSTR szSep, BOOL bI
 	return nTotalLen;
 }
 
-BOOL Misc::Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrim)
+BOOL Misc::Split(CString& sText, CString& sRest, TCHAR cDelim, BOOL bTrimResults)
 {
 	TCHAR szDelim[] = { cDelim, 0 };
 
-	return Split(sText, sRest, szDelim, bTrim);
+	return Split(sText, sRest, szDelim, bTrimResults);
 }
 
-BOOL Misc::Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim)
+BOOL Misc::Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrimResults)
 {
 	if (sText.IsEmpty())
 		return FALSE;
@@ -553,7 +553,7 @@ BOOL Misc::Split(CString& sText, CString& sRest, LPCTSTR szDelim, BOOL bTrim)
 	sRest = sText.Mid(nDelim + lstrlen(szDelim));
 	sText = sText.Left(nDelim);
 
-	if (bTrim)
+	if (bTrimResults)
 	{
 		Trim(sText);
 		Trim(sRest);
@@ -736,8 +736,16 @@ BOOL Misc::HasPrefix(LPCTSTR szText, LPCTSTR szPrefix, BOOL bCaseSensitive)
 {
 	if (IsEmpty(szText) || IsEmpty(szPrefix))
 		return FALSE;
-	
-	return (Find(szPrefix, szText, bCaseSensitive) == 0);
+
+	int nLenPrefix = lstrlen(szPrefix);
+
+	if (lstrlen(szText) < nLenPrefix)
+		return FALSE;
+
+	if (bCaseSensitive)
+		return (_tcsncmp(szText, szPrefix, nLenPrefix) == 0);
+		
+	return (_tcsnicmp(szText, szPrefix, nLenPrefix) == 0);
 }
 
 BOOL Misc::HasSuffix(LPCTSTR szText, LPCTSTR szSuffix, BOOL bCaseSensitive)
@@ -745,57 +753,42 @@ BOOL Misc::HasSuffix(LPCTSTR szText, LPCTSTR szSuffix, BOOL bCaseSensitive)
 	if (IsEmpty(szText) || IsEmpty(szSuffix))
 		return FALSE;
 
-	int nFind = Find(szSuffix, szText, bCaseSensitive);
+	int nLenText = lstrlen(szText);
+	int nLenSuffix = lstrlen(szSuffix);
 
-	return (nFind == (lstrlen(szText) - lstrlen(szSuffix)));
-}
-
-BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive, BOOL bTrim)
-{
-	if (IsEmpty(szPrefix))
+	if (nLenText < nLenSuffix)
 		return FALSE;
 
-	CString sTemp(sText);
-	sTemp.TrimLeft();
+	if (bCaseSensitive)
+		return (_tcscmp(szText + (nLenText - nLenSuffix), szSuffix) == 0);
 
-	int nPos = Find(szPrefix, sTemp, bCaseSensitive);
-
-	if (nPos == 0)
-	{
-		sText = sTemp.Mid(lstrlen(szPrefix));
-
-		if (bTrim)
-			sText.TrimLeft();
-
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
+	return (_tcsicmp(szText + (nLenText - nLenSuffix), szSuffix) == 0);
 }
 
-BOOL Misc::RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive, BOOL bTrim)
+BOOL Misc::RemovePrefix(CString& sText, LPCTSTR szPrefix, BOOL bCaseSensitive, BOOL bTrimResult)
 {
-	if (IsEmpty(szSuffix))
+	if (!HasPrefix(sText, szPrefix, bCaseSensitive))
 		return FALSE;
 
-	CString sTemp(sText);
-	sTemp.TrimRight();
+	sText = sText.Mid(lstrlen(szPrefix));
 
-	int nPos = Find(szSuffix, sTemp, bCaseSensitive);
+	if (bTrimResult)
+		sText.TrimLeft();
 
-	if ((nPos != -1) && (nPos == (sTemp.GetLength() - lstrlen(szSuffix))))
-	{
-		sText = sTemp.Left(nPos);
+	return TRUE;
+}
 
-		if (bTrim)
-			sText.TrimRight();
+BOOL Misc::RemoveSuffix(CString& sText, LPCTSTR szSuffix, BOOL bCaseSensitive, BOOL bTrimResult)
+{
+	if (!HasSuffix(sText, szSuffix, bCaseSensitive))
+		return FALSE;
 
-		return TRUE;
-	}
+	sText = sText.Left(sText.GetLength() - lstrlen(szSuffix));
 
-	// else
-	return FALSE;
+	if (bTrimResult)
+		sText.TrimRight();
+
+	return TRUE;
 }
 
 BOOL Misc::RemoveAt(CString& sText, int nPos)

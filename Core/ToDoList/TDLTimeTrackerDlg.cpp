@@ -13,6 +13,8 @@
 #include "..\shared\localizer.h"
 #include "..\shared\mapex.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 /////////////////////////////////////////////////////////////////////////
 
 enum // btns
@@ -22,6 +24,8 @@ enum // btns
 	BTN_STARTDISABLED,
 	BTN_STOPDISABLED,
 };
+
+/////////////////////////////////////////////////////////////////////////
 
 const int ID_RESET_ELAPSED = 1;
 
@@ -111,13 +115,9 @@ BOOL CTDLTimeTrackerDlg::Create(CWnd* pNotify, DWORD dwOptions)
 
 BOOL CTDLTimeTrackerDlg::Create(BOOL bVisible)
 {
-	DPI_AWARENESS_CONTEXT nPrev = GraphicsMisc::SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+	CWnd* pParent = (m_bAlwaysOnTop ? GetDesktopWindow() : AfxGetMainWnd());
 
-	BOOL bResult = CDialog::Create(IDD_TIMETRACK_DIALOG, m_bAlwaysOnTop ? GetDesktopWindow() : AfxGetMainWnd());
-
-	GraphicsMisc::SetThreadDpiAwarenessContext(nPrev);
-
-	if (!bResult)
+	if (!CDialog::Create(IDD_TIMETRACK_DIALOG, pParent))
 	{
 		ASSERT(0);
 		m_pWndNotify = NULL;
@@ -180,19 +180,20 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 		CBitmap bmp;
 		
 		if (bmp.LoadBitmap(IDB_TIMETRACK_BTNS))
-			m_ilBtns.Add(&bmp, RGB(255, 0, 255));
+			m_ilBtns.Add(&bmp, colorMagenta);
 	}
 
-	if (m_toolbar.CreateEx(this) && m_toolbar.LoadToolBar(IDR_TIMETRACKER_TOOLBAR))
+	m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, CLR_NONE, FALSE, FALSE);
+	m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+	if (m_toolbar.CreateEx(this))
 	{
-		m_toolbar.SetImage(IDB_TIMETRACK_TOOLBAR_STD, RGB(255, 0, 255));
+		VERIFY(m_toolbar.LoadToolBar(IDR_TIMETRACKER_TOOLBAR, IDB_TIMETRACK_TOOLBAR_STD, colorMagenta));
+		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
+
 		m_toolbar.SetDlgCtrlID(IDC_TOOLBAR);
 		m_toolbar.MoveWindow(GetCtrlRect(this, IDC_TOOLBAR));
 		m_toolbar.GetToolBarCtrl().CheckButton(ID_TIMETRACKER_ONTOP, m_bAlwaysOnTop);
-		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, CLR_NONE, FALSE, FALSE);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-
-		m_tbHelper.Initialize(&m_toolbar, this);
 	}
 
 	m_mgrPrompts.SetEditPrompt(IDC_QUICKFIND, *this, IDS_QUICKTASKFIND);
@@ -264,7 +265,11 @@ void CTDLTimeTrackerDlg::SetUITheme(const CUIThemeFile& theme)
 		// Use crAppBackLight so the toolbar merges with the bkgnd
 		m_toolbar.SetBackgroundColors(m_theme.crAppBackLight, m_theme.crAppBackLight, m_theme.HasGradient(), m_theme.HasGlass());
 		m_toolbar.SetHotColor(m_theme.crToolbarHot);
-		
+
+		// Rescale images because background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_TIMETRACK_TOOLBAR_STD, colorMagenta);
+
 		Invalidate(TRUE);
 		SendMessage(WM_NCPAINT);
 	}
@@ -288,12 +293,6 @@ int CTDLTimeTrackerDlg::GetTasklistCBIndex(const CFilteredToDoCtrl* pTDC) const
 BOOL CTDLTimeTrackerDlg::HasTasklist(const CFilteredToDoCtrl* pTDC) const
 {
 	return (m_aTasklists.FindTasklist(pTDC) != -1);
-}
-
-BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC)
-{
-	CTaskFile tasks; // empty
-	return AddTasklist(pTDC, tasks);
 }
 
 BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks)
@@ -334,7 +333,7 @@ BOOL CTDLTimeTrackerDlg::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskF
 	return TRUE;
 }
 
-BOOL CTDLTimeTrackerDlg::UpdateTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks)
+BOOL CTDLTimeTrackerDlg::SetTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks)
 {
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 
@@ -388,14 +387,64 @@ void CTDLTimeTrackerDlg::UpdateTasklistName(const CFilteredToDoCtrl* pTDC)
 	}
 }
 
-void CTDLTimeTrackerDlg::RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC)
+BOOL CTDLTimeTrackerDlg::UpdateAllTasks(const CFilteredToDoCtrl* pTDC)
 {
-	RemoveTasks(pTDC, TTL_REMOVEDELETED);
+	if (m_aTasklists.FindTasklist(pTDC) == -1)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	TDCGETTASKS filter(TDCGT_NOTDONE);
+	filter.mapAttribs.Add(TDCA_TASKNAME); // names only
+
+	CTaskFile tasks;
+	pTDC->GetFilteredTasks(tasks, filter);
+
+	return SetTasks(pTDC, tasks);
 }
 
-void CTDLTimeTrackerDlg::RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC)
+BOOL CTDLTimeTrackerDlg::UpdateSelectedTasks(const CFilteredToDoCtrl* pTDC, const CTDCAttributeMap& mapAttrib)
 {
-	RemoveTasks(pTDC, TTL_REMOVEDONE);
+	if (mapAttrib.Has(TDCA_TASKNAME) ||
+		mapAttrib.Has(TDCA_PASTE) ||
+		(mapAttrib.Has(TDCA_NEWTASK) && !pTDC->IsTaskLabelEditing()))
+	{
+		TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
+
+		if (!pTTL)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		CTaskFile tasks;
+		TDCGETTASKS filter(TDCGT_NOTDONE);
+
+		filter.mapAttribs.Add(TDCA_TASKNAME);
+		filter.dwFlags |= TDCGSTF_ALLPARENTS;
+
+		pTDC->GetSelectedTasks(tasks, filter);
+		pTTL->UpdateTasks(tasks);
+	}
+
+	if (mapAttrib.Has(TDCA_TIMEESTIMATE) ||
+		mapAttrib.Has(TDCA_TIMESPENT))
+	{
+		UpdateTaskTime(pTDC);
+	}
+
+	if (mapAttrib.Has(TDCA_DONEDATE))
+	{
+		RemoveTasks(pTDC, TTL_REMOVEDONE);
+	}
+
+	if (mapAttrib.Has(TDCA_DELETE))
+	{
+		RemoveTasks(pTDC, TTL_REMOVEDELETED);
+	}
+
+	return TRUE;
 }
 
 void CTDLTimeTrackerDlg::RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRemove)

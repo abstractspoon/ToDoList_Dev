@@ -17,7 +17,9 @@
  ****************************************************************************/
 
 using System;
+
 using unvell.ReoGrid.Core;
+using unvell.ReoGrid.Utility;
 
 namespace unvell.ReoGrid.DataFormat
 {
@@ -74,7 +76,7 @@ namespace unvell.ReoGrid.DataFormat
 					str = str.Trim();
 				}
 
-				isNumeric = double.TryParse(str, out value);
+				isNumeric = CellUtility.TryParseDoubleLocalized(str, out value);
 
 				if (isNumeric) cell.InnerData = value;
 			}

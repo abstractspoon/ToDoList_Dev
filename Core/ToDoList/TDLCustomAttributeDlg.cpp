@@ -14,6 +14,8 @@
 #include "..\shared\localizer.h"
 #include "..\shared\themed.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -1051,11 +1053,7 @@ BOOL CTDLCustomAttributeDlg::InitializeToolbar()
 	if (!m_toolbar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
 		return FALSE;
 
-	if (!m_toolbar.LoadToolBar(IDR_CUSTATTRIB_TOOLBAR))
-		return FALSE;
-
-	m_toolbar.SetImage(IDB_CUSTATTRIB_TOOLBAR_STD, RGB(255, 0, 255));
-	
+	VERIFY(m_toolbar.LoadToolBar(IDR_CUSTATTRIB_TOOLBAR, IDB_CUSTATTRIB_TOOLBAR_STD, colorMagenta));
 	VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 	
 	// very important - turn OFF all the auto positioning and sizing

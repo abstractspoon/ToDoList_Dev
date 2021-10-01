@@ -316,6 +316,7 @@ namespace DayViewUIExtension
 			m_RealTaskId = item.Id;
 			Id = futureId;
 			Locked = true; // always (for now)
+			TaskTextColor = SystemColors.ControlDarkDark; // GetSysColor(COLOR_3DDKSHADOW);
 
 			StartDate = futureDates.Item1;
 			EndDate = CheckGetEndOfDay(futureDates.Item2);

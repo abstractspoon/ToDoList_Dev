@@ -334,6 +334,7 @@ private:
 	void SortTreeItem(HWND hwndTree, HTREEITEM hti, PFNTLSCOMPARE pfnCompare, LPARAM lParamSort, BOOL bRecursive);
 	void BuildListListSortMap(HWND hwndPrimary, HWND hwndList, CSortMap& map);
 	BOOL HandleMouseWheel(HWND hWnd, WPARAM wp, LPARAM lp);
+	void FixupListListItemIsDataLinkage(int nFrom = 0);
 
 	static int CALLBACK SortListProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static BOOL ConvertNonClientToClientMouseMsg(HWND hWnd, UINT& nMsg, WPARAM& wParam, LPARAM& lParam);

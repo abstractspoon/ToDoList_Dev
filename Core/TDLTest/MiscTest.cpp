@@ -40,6 +40,8 @@ TESTRESULT CMiscTest::Run()
 
 	TestGetFormattedLength();
 	TestFormatArray();
+	TestHasPrefix();
+	TestHasSuffix();
 
 	return GetTotals();
 }
@@ -244,4 +246,108 @@ BOOL CMiscTest::ActualLengthMatchesCalculation(const CStringArray& aValues, LPCT
 {
 	return (Misc::FormatArray(aValues, szSep, bIncEmpty).GetLength() == 
 			Misc::GetFormattedLength(aValues, szSep, bIncEmpty));
+}
+
+void CMiscTest::TestHasPrefix()
+{
+	BeginTest(_T("Misc::HasPrefix"));
+
+	// Note: FALSE for last argument is more permissive
+	{
+		// Empty arguments
+		ExpectFalse(Misc::HasPrefix(_T(""), _T(""), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T(""), _T(""), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("abc"), _T(""), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T("abc"), _T(""), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T(""), _T("abc"), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T(""), _T("abc"), FALSE));
+	}
+
+	{
+		// Variable case
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("a"), TRUE));
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("ab"), TRUE));
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("abc"), TRUE));
+
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("a"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("ab"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("abc"), FALSE));
+
+		ExpectFalse(Misc::HasPrefix(_T("abc"), _T("A"), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T("abc"), _T("AB"), TRUE));
+		ExpectFalse(Misc::HasPrefix(_T("abc"), _T("ABC"), TRUE));
+
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("A"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("AB"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("ABC"), FALSE));
+
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("A"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("Ab"), FALSE));
+		ExpectTrue(Misc::HasPrefix(_T("abc"), _T("AbC"), FALSE));
+	}
+
+	{
+		// Leading whitespace
+		ExpectFalse(Misc::HasPrefix(_T(" abc"), _T("c"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("\tabc"), _T("bc"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("\nabc"), _T("abc"), FALSE));
+
+		ExpectFalse(Misc::HasPrefix(_T(" abc"), _T("C"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("\tabc"), _T("BC"), FALSE));
+		ExpectFalse(Misc::HasPrefix(_T("\nabc"), _T("ABC"), FALSE));
+	}
+
+	EndTest();
+}
+
+void CMiscTest::TestHasSuffix()
+{
+	BeginTest(_T("Misc::HasSuffix"));
+
+	// Note: FALSE for last argument is more permissive
+	{
+		// Empty arguments
+		ExpectFalse(Misc::HasSuffix(_T(""), _T(""), TRUE));
+		ExpectFalse(Misc::HasSuffix(_T(""), _T(""), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("abc"), _T(""), TRUE));
+		ExpectFalse(Misc::HasSuffix(_T("abc"), _T(""), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T(""), _T("abc"), TRUE));
+		ExpectFalse(Misc::HasSuffix(_T(""), _T("abc"), FALSE));
+	}
+
+	{
+		// Variable case
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("c"), TRUE));
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("bc"), TRUE));
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("abc"), TRUE));
+
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("c"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("bc"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("abc"), FALSE));
+
+		ExpectFalse(Misc::HasSuffix(_T("abc"), _T("C"), TRUE));
+		ExpectFalse(Misc::HasSuffix(_T("abc"), _T("BC"), TRUE));
+		ExpectFalse(Misc::HasSuffix(_T("abc"), _T("ABC"), TRUE));
+
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("C"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("BC"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("ABC"), FALSE));
+
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("C"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("bC"), FALSE));
+		ExpectTrue(Misc::HasSuffix(_T("abc"), _T("AbC"), FALSE));
+	}
+
+	{
+		// Trailing whitespace
+		ExpectFalse(Misc::HasSuffix(_T("abc "), _T("c"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("abc\t"), _T("bc"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("abc\n"), _T("abc"), FALSE));
+
+		ExpectFalse(Misc::HasSuffix(_T("abc "), _T("C"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("abc\t"), _T("BC"), FALSE));
+		ExpectFalse(Misc::HasSuffix(_T("abc\n"), _T("ABC"), FALSE));
+	}
+
+	EndTest();
 }

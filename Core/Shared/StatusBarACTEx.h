@@ -19,7 +19,7 @@ public:
 	CStatusBarACTEx();
 
 	BOOL SetPaneTooltipIndex(int nIndex, UINT nTipID);
-	BOOL SetPaneTooltipIndex(int nIndex, LPCTSTR szTip);
+	BOOL SetPaneTooltipIndex(int nIndex, const CString& sTip);
 	void SetUIColors(COLORREF crBackFrom, COLORREF crBackTo, COLORREF crText, BOOL bGradient, BOOL bGlass);
 
 // Overrides
@@ -43,7 +43,9 @@ protected:
 
 protected:
 	virtual void DrawRectBkgnd(CDC* pDC, const CRect& rect);
+	virtual BOOL DrawPaneText(CDC* pDC, int nPane, int nOffset);
 
+	void InvalidatePane(int nPane);
 };
 
 /////////////////////////////////////////////////////////////////////////////

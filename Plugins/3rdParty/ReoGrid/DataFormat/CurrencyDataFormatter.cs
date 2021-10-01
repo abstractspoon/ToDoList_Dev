@@ -23,6 +23,7 @@ using System.Text;
 using unvell.ReoGrid.Core;
 using unvell.ReoGrid.DataFormat;
 using unvell.ReoGrid.Graphics;
+using unvell.ReoGrid.Utility;
 
 namespace unvell.ReoGrid.DataFormat
 {
@@ -61,7 +62,7 @@ namespace unvell.ReoGrid.DataFormat
 				if (str.StartsWith("$"))
 				{
 					number = str.Substring(1);
-					if (double.TryParse(number, out currency))
+					if (CellUtility.TryParseDoubleLocalized(number, out currency))
 					{
 						isFormat = true;
 						cell.InnerData = currency;
@@ -69,18 +70,10 @@ namespace unvell.ReoGrid.DataFormat
 				}
 				else
 				{
-					// Stop trying to convert datetime value to currency, #170
-					//
-					//DateTime date = new DateTime(1900, 1, 1);
-					//if (DateTime.TryParse(str, out date))
-					//{
-					//	currency = (date - new DateTime(1900, 1, 1)).TotalDays;
-					//	isFormat = true;
-					//}
-					//else
-					//{
-					isFormat = double.TryParse(str, out currency);
-					//}
+					isFormat = CellUtility.TryParseDoubleLocalized(str, out currency, System.Globalization.NumberStyles.Currency);
+
+					if (!isFormat)
+						isFormat = CellUtility.TryParseDoubleLocalized(str, out currency);
 				}
 			}
 

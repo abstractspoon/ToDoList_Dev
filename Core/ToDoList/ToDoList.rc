@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,0,998,1
+ FILEVERSION 8,0,998,6
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 0, 998, 1\0"
+            VALUE "FileVersion", "8, 0, 998, 6\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-21 \0"
             VALUE "LegalTrademarks", "\0"
@@ -55,7 +55,7 @@ BEGIN
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "Development Preview of ToDoList 8.1\0"
+            VALUE "SpecialBuild", "Alpha Release of ToDoList 8.1\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -605,7 +605,7 @@ BEGIN
                     WS_TABSTOP,7,335,381,10
     CONTROL         "A&utomatically resort after editing",IDC_AUTORESORT,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,350,381,10
-    CONTROL         "E&nable sorting by clicking on column headers",
+    CONTROL         "All&ow sorting by clicking on column headers",
                     IDC_ENABLECOLUMNHEADERSORTING,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,365,387,10
     LTEXT           "Main Toolbar",IDC_TOOLBARGROUP,7,385,381,8
@@ -736,7 +736,7 @@ BEGIN
                     WS_TABSTOP,7,480,379,10
 END
 
-IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 608
+IDD_PREFUITASKLISTCOLORS_PAGE DIALOG DISCARDABLE  0, 0, 401, 619
 STYLE WS_CHILD
 FONT 8, "Tahoma"
 BEGIN
@@ -787,54 +787,59 @@ BEGIN
     CONTROL         "&Alternate line colour",IDC_ALTERNATELINECOLOR,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,295,139,10
     PUSHBUTTON      "S&et...   ",IDC_SETALTLINECOLOR,149,293,52,13,BS_RIGHT
-    LTEXT           "Task Colouring",IDC_TASKCOLOURGROUP,7,314,387,8
+    CONTROL         "&Group header background colour",
+                    IDC_SPECIFYGROUPHEADERBKCOLOR,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,310,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETGROUPHEADERBKCOLOR,149,308,52,13,
+                    BS_RIGHT
+    LTEXT           "Task Colouring",IDC_TASKCOLOURGROUP,7,330,387,8
     CONTROL         "&Use a task's colour for its title background",
                     IDC_COLORTASKBKGND,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    7,330,387,10
+                    7,346,387,10
     CONTROL         "&Colour task titles by:",IDC_COLORTEXTBYATTRIBUTE,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,7,345,387,10
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,7,361,387,10
     CONTROL         "Colour task titles by &Priority",
                     IDC_COLORTEXTBYPRIORITY,"Button",BS_AUTORADIOBUTTON,7,
-                    448,387,10
+                    464,387,10
     CONTROL         "Colour task titles by &assigned colours",
-                    IDC_COLORTASKSBYCOLOR,"Button",BS_AUTORADIOBUTTON,7,463,
+                    IDC_COLORTASKSBYCOLOR,"Button",BS_AUTORADIOBUTTON,7,479,
                     387,10
     CONTROL         "&No task title colouring (except for due tasks)",
-                    IDC_NOCOLORTASKS,"Button",BS_AUTORADIOBUTTON,7,478,387,
+                    IDC_NOCOLORTASKS,"Button",BS_AUTORADIOBUTTON,7,494,387,
                     10
-    COMBOBOX        IDC_ATTRIBUTETOCOLORBY,18,357,123,99,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_ATTRIBUTETOCOLORBY,18,373,123,99,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
-    COMBOBOX        IDC_ATTRIBUTECOLORS,18,373,123,70,CBS_SIMPLE | 
+    COMBOBOX        IDC_ATTRIBUTECOLORS,18,389,123,70,CBS_SIMPLE | 
                     CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | 
                     CBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_GROUP | 
                     WS_TABSTOP
-    PUSHBUTTON      "S&et...   ",IDC_SETATTRIBUTECOLOR,149,373,52,13,
+    PUSHBUTTON      "S&et...   ",IDC_SETATTRIBUTECOLOR,149,389,52,13,
                     BS_RIGHT
-    PUSHBUTTON      "&Populate",IDC_POPULATEATTRIBLIST,149,388,52,14
+    PUSHBUTTON      "&Populate",IDC_POPULATEATTRIBLIST,149,404,52,14
     CONTROL         "'&Started' task colour",IDC_STARTTASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,495,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTASKCOLOR,149,494,52,13,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,511,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTASKCOLOR,149,510,52,13,
                     BS_RIGHT
     CONTROL         "'Starts &Today' task colour",IDC_STARTTODAYTASKCOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,510,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTODAYTASKCOLOR,149,509,52,13,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,526,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETSTARTTODAYTASKCOLOR,149,525,52,13,
                     BS_RIGHT
     CONTROL         "'&Due' task colour",IDC_DUETASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,525,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDUETASKCOLOR,149,524,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,541,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDUETASKCOLOR,149,540,52,13,BS_RIGHT
     CONTROL         "'Due T&oday' task colour",IDC_DUETODAYTASKCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,540,139,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDUETODAYTASKCOLOR,149,539,52,13,
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,556,139,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDUETODAYTASKCOLOR,149,555,52,13,
                     BS_RIGHT
     CONTROL         "Completed t&ask colour",IDC_SPECIFYDONECOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,555,138,10
-    PUSHBUTTON      "S&et...   ",IDC_SETDONECOLOR,149,554,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,571,138,10
+    PUSHBUTTON      "S&et...   ",IDC_SETDONECOLOR,149,570,52,13,BS_RIGHT
     CONTROL         "&Flagged task colour",IDC_SPECIFYFLAGGEDCOLOR,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,570,140,10
-    PUSHBUTTON      "S&et...   ",IDC_SETFLAGGEDCOLOR,149,570,52,13,BS_RIGHT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,586,140,10
+    PUSHBUTTON      "S&et...   ",IDC_SETFLAGGEDCOLOR,149,586,52,13,BS_RIGHT
     CONTROL         "&Reference task colour",IDC_SPECIFYREFERENCECOLOR,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,585,140,10
-    PUSHBUTTON      "S&et...   ",IDC_SETREFERENCECOLOR,149,585,52,13,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,601,140,10
+    PUSHBUTTON      "S&et...   ",IDC_SETREFERENCECOLOR,149,601,52,13,
                     BS_RIGHT
 END
 
@@ -4001,11 +4006,11 @@ BEGIN
 
         END
         MENUITEM SEPARATOR
-        MENUITEM "E&xport...",                  ID_TOOLS_EXPORT
-        MENUITEM SEPARATOR
-        MENUITEM "Pre&ferences...",             ID_TABCTRL_PREFERENCES
+        MENUITEM "E&xport Tasks...",            ID_TOOLS_EXPORT
         MENUITEM SEPARATOR
         MENUITEM "Email &Tasks...",             ID_SENDTASKS
+        MENUITEM SEPARATOR
+        MENUITEM "Pre&ferences...",             ID_TABCTRL_PREFERENCES
         MENUITEM SEPARATOR
         MENUITEM "Show Tasklist in E&xplorer",  ID_TOOLS_SELECTINEXPLORER
         MENUITEM "Copy Tasklist Path",          ID_TOOLS_COPYTASKLISTPATH
@@ -4243,6 +4248,11 @@ BEGIN
         RIGHTMARGIN, 394
         TOPMARGIN, 10
         BOTTOMMARGIN, 691
+    END
+
+    IDD_PREFUITASKLISTCOLORS_PAGE, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 608
     END
 
     IDD_OFFSETDATES_DIALOG, DIALOG
@@ -4620,6 +4630,8 @@ BEGIN
     IDS_FOCUS_TIMETRACKER   "Time Tracker"
     IDS_FILTER_ANYSTATUS    "Any status can match"
     IDS_FILTER_ANYVERSION   "Any version can match"
+    ID_SB_TASKCOUNT         "Task count"
+    ID_SB_FOCUS             "Focus"
     IDS_CAD_CALCULATION     "Calculation"
     IDS_CAD_CALC_ADD        "Add (+)"
 END
@@ -4765,6 +4777,8 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    IDS_FOCUS_TASKS         "Tasks"
+    IDS_UNNAMEDFILTER       "- unnamed -"
     IDS_XSLFILEFILTER       "Stylesheet (*.xsl)|*.xsl||"
     IDS_TRANSFORMFILEFILTER "Web Page (*.htm, *.html)|*.htm;*.html|Text File (*.txt)|*.txt|All Files (*.*)|*.*||"
     IDS_ALLFILEFILTER       "All Files (*.*)|*.*||"
@@ -4796,6 +4810,15 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_NODUETHISMONTH      "'%s' has no tasks due by the end of this month"
     IDS_NODUENEXTMONTH      "'%s' has no tasks due by the end of next month"
+    IDS_SAMPLETASK          "Sample Task"
+    IDS_BACKUPFILEFOUND     "ToDoList has detected a backup version of file '%s', \nwhich suggests that there was previously a problem saving the tasklist.\n\nWould you like to restore the backup?"
+    IDS_COLOR_SAMPLETEXT    "Sample Text"
+    IDS_COLOR_AUTOMATIC     "Automatic"
+    IDS_COLOR_MORECOLORS    "More Colours..."
+    IDS_OUTLOOK_FOLDERNOITEMS "The selected folder contains no items"
+    IDS_OUTLOOK_UNABLETOCONNECT "ToDoList was unable to connect to Outlook."
+    IDS_OUTLOOK_BUILDINGLIST "Building item list..."
+    IDS_FOCUS_FILTERBAR     "Filter"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5062,11 +5085,6 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDR_MAINFRAME           "ToDoList (c) AbstractSpoon"
-    IDS_SAMPLETASK          "Sample Task"
-    IDS_BACKUPFILEFOUND     "ToDoList has detected a backup version of file '%s', \nwhich suggests that there was previously a problem saving the tasklist.\n\nWould you like to restore the backup?"
-    IDS_COLOR_SAMPLETEXT    "Sample Text"
-    IDS_COLOR_AUTOMATIC     "Automatic"
-    IDS_COLOR_MORECOLORS    "More Colours..."
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5085,7 +5103,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SB_SELCOUNT          "%d tasks selected"
     ID_SB_SELTIMEEST        "Est: %s"
     ID_SB_SELTIMESPENT      "Spent: %s"
     ID_SB_SELCOST           "Cost: %s"
@@ -5093,15 +5110,11 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_SB_FILEVERSION       "%d"
-    ID_SB_TASKCOUNT         "Task Count"
-    ID_SB_FILEPATH          "(untitled)"
+    ID_SB_NOSELTASK         "<No task selected>"
+    ID_SB_MULTISELTASK      "<Multiple tasks selected>"
     ID_SB_SPACER            "                     "
-    ID_SB_FOCUS             "                     "
+    ID_SB_MULTISELTASKMORE_TIP "%d more tasks"
     ID_EDIT_INSERTTIME      "\nInsert Time"
-    IDS_FOCUS_FILTERBAR     "Filter"
-    IDS_FOCUS_TASKS         "Tasks"
-    IDS_UNNAMEDFILTER       "- unnamed -"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5125,9 +5138,8 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     IDS_SB_SELCOST_TIP      "Aggregate cost for the selected tasks"
-    IDS_SB_FILEVERSION_TIP  "Tasklist file version"
     IDS_SB_TASKCOUNT_TIP    "Filtered task count / Total task count"
-    IDS_SB_FILEPATH_TIP     "Active tasklist"
+    IDS_SB_SELTASKTITLE_TIP "Selected task"
     IDS_IMPORTFILE_CANTOPEN "'%s' could not be opened for importing.\n\nCheck that you have the necessary permissions and that the file is not open in another application."
     IDS_TDLBC_TASKPARENTIDS "Task ID / Parent ID"
     IDS_RESTARTTOCHANGELANGUAGE 
@@ -5161,7 +5173,6 @@ BEGIN
     IDS_PREF_FILESAVE       "File Actions (more)>Saving"
     IDS_PREF_MULTIUSERFILE  "Multiple Users>File Checking"
     IDS_PREF_FILE           "File Actions"
-    ID_SB_SELCOUNTONE       "1 task selected (%d)"
     IDS_OPENSHARINGVIOLATION 
                             "'%s' could not be opened because another user\n(or application) is currently accessing the file.\n\nPlease try again in a moment."
     IDS_SAVESHARINGVIOLATION 
@@ -5680,17 +5691,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_OUTLOOK_FOLDERNOITEMS "The selected folder contains no items"
-    IDS_OUTLOOK_UNABLETOCONNECT "ToDoList was unable to connect to Outlook."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    IDS_OUTLOOK_BUILDINGLIST "Building item list..."
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
     IDS_ALPHA_RELEASE       "Alpha Release"
     IDS_BETA_RELEASE        "Beta Release"
     IDS_RC_RELEASE          "Release Candidate"
@@ -5836,6 +5836,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    ID_SB_SELTASKTITLE      "Title"
     IDS_CAD_CALC_SUBTRACT   "Subtract (-)"
     IDS_CAD_CALC_MULTIPLY   "Multiply (*)"
     IDS_CAD_CALC_DIVIDE     "Divide (/)"

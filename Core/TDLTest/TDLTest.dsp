@@ -138,6 +138,10 @@ SOURCE=.\TDCRECURRENCETest.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLTaskCtrlBaseTest.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTest.cpp
 # End Source File
 # Begin Source File
@@ -163,6 +167,10 @@ SOURCE=.\ToDoCtrlTaskLinkTest.cpp
 # Begin Source File
 
 SOURCE=.\WorkingWeekTest.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=.\XmlFileTest.cpp
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -214,6 +222,10 @@ SOURCE=.\TDCRECURRENCETest.h
 # End Source File
 # Begin Source File
 
+SOURCE=.\TDLTaskCtrlBaseTest.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\TDLTest.h
 # End Source File
 # Begin Source File
@@ -235,6 +247,10 @@ SOURCE=.\ToDoCtrlTaskLinkTest.h
 # Begin Source File
 
 SOURCE=.\WorkingWeekTest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\XmlFileTest.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

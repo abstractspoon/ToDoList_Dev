@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+
 using unvell.ReoGrid.DataFormat;
+using unvell.ReoGrid.Utility;
 
 namespace unvell.ReoGrid.DataFormat
 {
@@ -42,7 +44,7 @@ namespace unvell.ReoGrid.DataFormat
 					// string ends with "%"
 					str = str.Substring(0, str.Length - 1);
 
-					isFormat = double.TryParse(str, out percent);
+					isFormat = CellUtility.TryParseDoubleLocalized(str, out percent);
 
 					if (isFormat)
 					{
@@ -58,7 +60,7 @@ namespace unvell.ReoGrid.DataFormat
 				else
 				{
 					// string ends without "%"
-					isFormat = double.TryParse(str, out percent);
+					isFormat = CellUtility.TryParseDoubleLocalized(str, out percent);
 
 					if (isFormat)
 					{

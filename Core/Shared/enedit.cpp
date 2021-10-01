@@ -202,7 +202,7 @@ BOOL CEnEdit::InitializeImageLists()
 {
 	if (!m_ilBtns.GetSafeHandle() && !m_ilDisabledBtns.GetSafeHandle())
 	{
-		int nImageSize = GraphicsMisc::ScaleByDPIFactor(16);
+		int nImageSize = 16;//GraphicsMisc::ScaleByDPIFactor(16);
 
 		for (int nBtn = 0; nBtn < m_aButtons.GetSize(); nBtn++)
 		{
@@ -214,22 +214,21 @@ BOOL CEnEdit::InitializeImageLists()
 				{
 					ASSERT(!m_ilDisabledBtns.GetSafeHandle());
 
-					if (!m_ilBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1) ||
-						!m_ilDisabledBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1))
-					{
+					if (!m_ilBtns.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1))
 						return FALSE;
-					}
 				}
 
 				eb.iImage = m_ilBtns.Add(eb.hIcon);
-
-				CIcon iconDisabled(CEnBitmapEx::CreateDisabledIcon(eb.hIcon));
-
-				VERIFY(m_ilDisabledBtns.Add(iconDisabled) == eb.iImage);
-				ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
-
-				// Note: We cleanup icons in the destructor
 			}
+		}
+
+		if (m_ilBtns.GetSafeHandle())
+		{
+			VERIFY(CEnBitmapEx::CreateDisabledImageList(m_ilBtns, m_ilDisabledBtns));
+			ASSERT(m_ilBtns.GetImageCount() == m_ilDisabledBtns.GetImageCount());
+
+			m_ilBtns.ScaleByDPIFactor(GetSysColor(COLOR_BTNFACE));
+			m_ilDisabledBtns.ScaleByDPIFactor(GetSysColor(COLOR_BTNFACE));
 		}
 	}
 

@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Command.Handling;
-using Luminous.Windows.Forms;
+using CustomComboBox;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -301,83 +301,118 @@ namespace HTMLContentControl
 
 		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
-			switch (message)
+			if (!ReadOnly)
 			{
-				case WM_KEYDOWN:
-				case WM_SYSKEYDOWN:
+				switch (message)
 				{
-					Keys keyPress = CommandHandling.GetMenuShortcutFromVirtualKey(wParam);
-
-					if (keyPress == Keys.Return)
+					case WM_KEYDOWN:
+					case WM_SYSKEYDOWN:
 					{
-						// Handle <enter> manually because the default handling
-						// appears to fail when we are hosted in a win32 modal dialog
-						IntPtr hwndFind = FindWindowEx(WebBrowser.Handle, IntPtr.Zero, "Shell Embedding", "");
-						hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
-						hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
+						Keys keyPress = CommandHandling.GetMenuShortcutFromVirtualKey(wParam);
 
-						if (hwndFind != null)
-							SendMessage(hwndFind, WM_CHAR, VK_RETURN, 0);
+						if (keyPress == Keys.Return)
+						{
+							// Handle <enter> manually because the default handling
+							// appears to fail when we are hosted in a win32 modal dialog
+							IntPtr hwndFind = FindWindowEx(WebBrowser.Handle, IntPtr.Zero, "Shell Embedding", "");
+							hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
+							hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
 
-						return true;
+							if (hwndFind != null)
+								SendMessage(hwndFind, WM_CHAR, VK_RETURN, 0);
+
+							return true;
+						}
+						else if (keyPress != Keys.None)
+						{
+							return OnDocumentKeyPress(keyPress);
+						}
 					}
+					break;
 
-					if (keyPress != Keys.None)
-						return OnDocumentKeyPress(keyPress);
+				case WM_CHAR:
+					if ((wParam == '@') && (NeedAttributeValues != null))
+					{
+						// Can't handle this with WM_KEYDOWN because different
+						// keyboard layouts place '@' in different locations
+						var items = GetPopupListBoxItems();
+						
+						if (items.Count() > 0)
+						{
+							// Insert the '@' first and select it
+							SelectedHtml = "@";
+							SelectCharacterAtCaret(false);
+
+							var popup = new PopupListBox();
+
+							popup.ListBox.Items.AddRange(items);
+							popup.ListBox.Font = m_ControlsFont;
+
+							popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
+
+							var pos = GetPopupListBoxLocation();
+							popup.Show(pos.X, pos.Y);
+
+							return true; // we already added the '@'
+						}
+					}
+					break;
 				}
-				break;
 			}
 
 			return false;
 		}
 
+		protected string[] GetPopupListBoxItems()
+		{
+			var values = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+
+			var allocTo = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedTo);
+			NeedAttributeValues(this, allocTo);
+
+			if (allocTo.values != null)
+				values.UnionWith(allocTo.values);
+
+			var allocBy = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedBy);
+			NeedAttributeValues(this, allocBy);
+
+			if (allocBy.values != null)
+				values.UnionWith(allocBy.values);
+
+			return values.ToArray();
+		}
+
+		protected Point GetPopupListBoxLocation()
+		{
+			Point pos = new Point();
+			GetCaretPos(ref pos);
+			pos = WebBrowser.PointToScreen(pos);
+
+			var fontAttrib = GetFontAttributes();
+			var font = new Font(fontAttrib.Name, fontAttrib.SizeInPoints);
+
+			var size = TextRenderer.MeasureText("@", font);
+			pos.X += (int)(size.Width * 0.6);
+			pos.Y += size.Height;
+
+			return pos;
+		}
+
 		protected override bool OnDocumentKeyPress(Keys keyPress)
 		{
-			switch (keyPress)
-			{
-			case Keys.Shift | Keys.D2: // @
-				if (NeedAttributeValues != null)
-				{
-					var args = new NeedAttributeValuesEventArgs(Task.Attribute.AllocatedTo);
-					NeedAttributeValues(this, args);
-
-					if ((args.values != null) && (args.values.Count > 0))
-					{
-						// Insert the '@' first and select it
-						SelectedHtml = "@";
-						SelectCharacterAtCaret(false);
-
-						// show popup below the caret
-						Point pos = new Point();
-						GetCaretPos(ref pos);
-
-						var fontAttrib = GetFontAttributes();
-						var font = new Font(fontAttrib.Name, fontAttrib.SizeInPoints);
-
-						var logFont = new unvell.Common.Win32Lib.Win32.LOGFONT();
-						font.ToLogFont(logFont);
-
-						var popup = new PopupListBox(args.values.ToArray());
-						popup.Closed += new ToolStripDropDownClosedEventHandler(OnAttributeListBoxClosed);
-
-						pos.Y += Math.Abs(logFont.lfHeight);
-						popup.Show(BrowserPanel, pos, ToolStripDropDownDirection.BelowRight);
-
-						return true; // we already added the '@'
-					}
-				}
-				break;
-			}
-
 			return base.OnDocumentKeyPress(keyPress);
 		}
 
 		protected void OnAttributeListBoxClosed(object sender, ToolStripDropDownClosedEventArgs e)
 		{
-			if ((sender is PopupListBox) && (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked))
+			if (sender is PopupListBox)
 			{
 				var popup = (sender as PopupListBox);
-				SelectedHtml = (popup.ListBox.SelectedItem as string);
+
+				if (popup.Cancelled || (e.CloseReason != ToolStripDropDownCloseReason.ItemClicked))
+					CollapseSelection(false);
+				else
+					SelectedHtml = popup.ListBox.SelectedItem.ToString();
 			}
 			else
 			{

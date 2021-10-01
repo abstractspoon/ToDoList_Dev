@@ -11,6 +11,8 @@
 #include "..\shared\misc.h"
 #include "..\shared\localizer.h"
 
+#include "..\3rdparty\XNamedColors.h"
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -79,14 +81,14 @@ BOOL CKanbanPreferencesPage::OnInitDialog()
 	// create toolbar
 	if (m_toolbar.CreateEx(this))
 	{
-		const COLORREF MAGENTA = RGB(255, 0, 255);
-		
-		VERIFY(m_toolbar.LoadToolBar(IDR_COLUMN_TOOLBAR, IDB_COLUMN_TOOLBAR_STD, MAGENTA));
+		// Set colours first because these affect image scaling
+		m_toolbar.SetBackgroundColors(GetSysColor(COLOR_WINDOW),GetSysColor(COLOR_WINDOW), FALSE, FALSE);
+
+		VERIFY(m_toolbar.LoadToolBar(IDR_COLUMN_TOOLBAR, IDB_COLUMN_TOOLBAR_STD, colorMagenta));
 		VERIFY(m_tbHelper.Initialize(&m_toolbar, this));
 		
 		CRect rToolbar = GetCtrlRect(this, IDC_TB_PLACEHOLDER);
 		m_toolbar.Resize(rToolbar.Width(), rToolbar.TopLeft());
-		m_toolbar.SetBackgroundColors(GetSysColor(COLOR_WINDOW),GetSysColor(COLOR_WINDOW), FALSE, FALSE);
 	}
 	
 	m_mgrGroupLines.AddGroupLine(IDC_COLUMNGROUP, *this);

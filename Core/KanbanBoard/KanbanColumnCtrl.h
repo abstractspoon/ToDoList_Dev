@@ -28,6 +28,7 @@ const UINT WM_KLCN_EDITTASKICON		= (WM_APP+3); // WPARAM = HWND, LPARAM =
 const UINT WM_KLCN_EDITTASKFLAG		= (WM_APP+4); // WPARAM = HWND, LPARAM = TRUE/FALSE
 const UINT WM_KLCN_EDITTASKPIN		= (WM_APP+5); // WPARAM = HWND, LPARAM = TRUE/FALSE
 const UINT WM_KLCN_EDITTASKLABEL	= (WM_APP+6); // WPARAM = HWND, LPARAM = TaskID
+const UINT WM_KLCN_SHOWFILELINK		= (WM_APP+7); // WPARAM = HWND, LPARAM = LPCTSTR
 
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx window
@@ -83,7 +84,6 @@ public:
 	int GetSelectedCount() const;
 	HTREEITEM GetFirstSelectedItem() const;
 	HTREEITEM GetLastSelectedItem() const;
-	void SetHotItem(DWORD dwTaskID);
 
 	BOOL GetLabelEditRect(LPRECT pEdit);
 	BOOL GetItemBounds(HTREEITEM hti, LPRECT lpRect) const;
@@ -110,6 +110,7 @@ public:
 	const CTreeCtrlHelper& TCH() const { return m_tch; }
 	CTreeCtrlHelper& TCH() { return m_tch; }
 
+	static CString GetAttributeLabel(TDC_ATTRIBUTE nAttrib, KBC_ATTRIBLABELS nLabelVis);
 	static CString FormatAttribute(TDC_ATTRIBUTE nAttrib, const CString& sValue, KBC_ATTRIBLABELS nLabelVis);
 	static BOOL CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanColumnCtrl* pDestCol);
 
@@ -117,8 +118,7 @@ protected:
 	BOOL m_bSelected;
 	BOOL m_bSavingToImage;
 	BOOL m_bDropTarget;
-	BOOL m_bDrawTaskFlags;
-	BOOL m_bDrawTaskParents;
+	BOOL m_bDrawTaskFlags, m_bDrawTaskFileLinks;
 
 	const CKanbanItemMap& m_data;
 	CFontCache& m_fonts;
@@ -136,8 +136,7 @@ protected:
 	KANBANCOLUMN m_columnDef;
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
-	KBC_ATTRIBLABELS m_nAttribLabelVisiability;
-	DWORD m_dwHotItem;
+	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -198,6 +197,7 @@ protected:
 	BOOL IsOnlySelectedTask(DWORD dwTaskID);
 	int BuildSortedSelection(CHTIList& lstHTI) const;
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
+	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
@@ -207,17 +207,20 @@ protected:
 
 	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
 	BOOL HitTestCheckbox(HTREEITEM hti, CPoint point) const;
+	CString HitTestFileLink(HTREEITEM hti, CPoint point) const;
 
 	void DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem);
 	void DrawItemCheckbox(CDC* pDC, const KANBANITEM* pKI, CRect& rItem);
 	void DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
+	void DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const;
 	void DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawAttribute(CDC* pDC, CRect& rLine, TDC_ATTRIBUTE nAttrib, const CString& sValue, int nFlags, COLORREF crText) const;
-	void FillItemBackground(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText) const;
+	void DrawItemShadow(CDC* pDC, CRect& rItem) const;
+	void DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const;
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
-	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bHover, HIMAGELIST hIL = NULL, int nIndex = -1) const;
+	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bSet, HIMAGELIST hIL = NULL, int nIndex = -1) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static UINT GetDisplayFormat(TDC_ATTRIBUTE nAttrib, BOOL bLong);

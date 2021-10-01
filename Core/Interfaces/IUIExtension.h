@@ -319,6 +319,9 @@ const UINT WM_IUI_SORTCHANGE				= ::RegisterWindowMessageW(L"WM_IUI_SORTCHANGE")
 // wParam = 0, lParam = identifying string (LPCTSTR)
 const UINT WM_IUI_DOHELP					= ::RegisterWindowMessageW(L"WM_IUI_DOHELP"); 
 
+// wParam = 0, lParam = file link (LPCTSTR)
+const UINT WM_IUI_SHOWFILELINK				= ::RegisterWindowMessageW(L"WM_IUI_SHOWFILELINK"); 
+
 // WPARAM = Task ID, LPARAM = int* (imageIndex), return HIMAGELIST
 const UINT WM_IUI_GETTASKICON				= ::RegisterWindowMessageW(L"WM_IUI_GETTASKICON"); 
 

@@ -38,6 +38,9 @@ const UINT WM_KBC_EDITTASKFLAG		= ::RegisterWindowMessage(_T("WM_KBC_EDITTASKFLA
 // WPARAM = Sort ascending, LPARAM = TDC_ATTRIBUTE
 const UINT WM_KBC_SORTCHANGE		= ::RegisterWindowMessageW(L"WM_KBC_SORTCHANGE");
 
+// WPARAM = , LPARAM = LPCTSTR
+const UINT WM_KBC_SHOWFILELINK		= ::RegisterWindowMessage(_T("WM_KBC_SHOWFILELINK"));
+
 /////////////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_KANBANMSG_H__016B94F3_1D28_4532_97EF_95F1D9D5CE55__INCLUDED_)

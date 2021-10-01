@@ -104,19 +104,30 @@ BOOL CTDCLongestItemMap::UpdateValue(TDC_COLUMN nColID, const CString& sValue)
 	{
 		CString sCurVal;
 
-		if (Lookup(nColID, sCurVal))
-		{
-			if (sValue.GetLength() > sCurVal.GetLength())
-			{
-				SetAt(nColID, sValue);
-				return TRUE;
-			}
-		}
-		else
-		{
-			SetAt(nColID, sValue);
-			return TRUE;
-		}
+		if (Lookup(nColID, sCurVal) && (sValue.GetLength() <= sCurVal.GetLength()))
+			return FALSE;
+
+		SetAt(nColID, sValue);
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
+}
+
+BOOL CTDCLongestItemMap::UpdateValue(TDC_COLUMN nColID, int nValue)
+{
+	ASSERT(HasColumn(nColID));
+
+	if (nValue != 0)
+	{
+		CString sCurVal;
+
+		if (Lookup(nColID, sCurVal) && (nValue <= _ttoi(sCurVal)))
+			return FALSE;
+
+		SetAt(nColID, Misc::Format(nValue));
+		return TRUE;
 	}
 
 	// else
@@ -144,6 +155,9 @@ BOOL CTDCLongestItemMap::IsSupportedColumn(TDC_COLUMN nColID)
 	case TDCC_TIMEESTIMATE:
 	case TDCC_TIMESPENT:
 	case TDCC_TIMEREMAINING:
+	case TDCC_ID:
+	case TDCC_FILELINK:
+	case TDCC_COMMENTSSIZE:
 		return TRUE;
 	}
 
@@ -228,7 +242,7 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, BOOL bVisibleOnly) con
 	switch (nColID)
 	{
 	case TDCC_POSITION:
-		return GetLongestPosition(NULL, NULL, NULL, bVisibleOnly);
+		return GetLongestPosition(NULL, NULL, bVisibleOnly);
 
 	case TDCC_RECURRENCE:
 		return GetLongestValue(nColID, NULL, NULL, GetLongestRecurrenceOption(), bVisibleOnly);
@@ -411,29 +425,19 @@ CString CToDoCtrlFind::GetLongestSubtaskDone(HTREEITEM hti, const TODOITEM* pTDI
 	return sLongest;
 }
 
-CString CToDoCtrlFind::GetLongestPosition(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
+CString CToDoCtrlFind::GetLongestPosition(HTREEITEM hti, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
 {
-	if (!CheckGetTask(hti, pTDI, pTDS))
-		return EMPTY_STR;
+	if (hti && !pTDS)
+		pTDS = m_data.LocateTask(GetTaskID(hti));
 
-	CString sPos = (pTDS ? Misc::Format(pTDS->GetPosition() + 1) : EMPTY_STR);
-	CString sLongestChild;
+	CString sLongest = (pTDS ? m_formatter.GetTaskPosition(pTDS) : EMPTY_STR);
 
 	if (WantSearchChildren(hti, bVisibleOnly))
 	{
 		// Find the longest child
-		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongestChild, GetLongestPosition(htiChild, NULL, NULL, bVisibleOnly));
+		SEARCH_SUBTASKS_LONGEST_STR(hti, sLongest, GetLongestPosition(htiChild, NULL, bVisibleOnly));
 	}
 
-	if (sPos.IsEmpty())
-		return sLongestChild;
-
-	if (sLongestChild.IsEmpty())
-		return sPos;
-	
-	CString sLongest;
-	sLongest.Format(_T("%s.%s"), sPos, sLongestChild);
-	
 	return sLongest;
 }
 
@@ -1125,7 +1129,8 @@ HTREEITEM CToDoCtrlFind::FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& pa
 	return NULL; // not found
 }
 
-/*
+#ifdef _DEBUG // ----------------------------------------------------------------
+// For debugging only
 void CToDoCtrlFind::WalkTree(BOOL bVisibleOnly) const
 {
 	CString sLongest = WalkTree(NULL, bVisibleOnly);
@@ -1153,7 +1158,7 @@ CString CToDoCtrlFind::WalkTree(HTREEITEM hti, BOOL bVisibleOnly) const
 
 	return sLongest;
 }
-*/
+#endif // ----------------------------------------------------------------------
 
 CString CToDoCtrlFind::GetLongestCost(HTREEITEM hti, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bVisibleOnly) const
 {
@@ -1242,7 +1247,7 @@ void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCus
 		// Attributes dependent on subtask values
 		// Note: Cost handled elsewhere
 		// Note: Don't use CheckUpdateValue() because all the work
-		//       has to be done up front and it might be wasted effort
+		//       gets done up front and it might be wasted effort
 		if (mapLongest.HasColumn(TDCC_PATH))
 		{
 			// The longest path string will always be a leaf/collapsed task
@@ -1258,6 +1263,15 @@ void CToDoCtrlFind::GetLongestValues(const CTDCCustomAttribDefinitionArray& aCus
 			if (!bSearchSubtasks)
 				mapLongest.UpdateValue(TDCC_POSITION, m_formatter.GetTaskPosition(pTDS));
 		}
+
+		if (mapLongest.HasColumn(TDCC_FILELINK))
+			mapLongest.UpdateValue(TDCC_FILELINK, pTDI->aFileLinks.GetSize());
+
+		if (mapLongest.HasColumn(TDCC_COMMENTSSIZE))
+			mapLongest.UpdateValue(TDCC_COMMENTSSIZE, m_formatter.GetCommentSize(pTDI->GetCommentsSizeInKB()));
+
+		if (mapLongest.HasColumn(TDCC_ID))
+			mapLongest.UpdateValue(TDCC_ID, m_formatter.GetID(pTDS->GetTaskID(), pTDI->dwTaskRefID));
 
 		if (mapLongest.HasColumn(TDCC_SUBTASKDONE))
 			mapLongest.UpdateValue(TDCC_SUBTASKDONE, m_formatter.GetTaskSubtaskCompletion(pTDI, pTDS));

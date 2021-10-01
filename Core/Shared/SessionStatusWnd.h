@@ -23,6 +23,7 @@ public:
 	virtual ~CSessionStatusWnd();
 	
 	BOOL Initialize(HWND hwndNotify);
+	BOOL DestroyWindow();
 
 	BOOL IsLocked() const { return m_bLocked; }
 	BOOL IsHibernated() const { return m_bHibernated; }
@@ -34,6 +35,9 @@ protected:
 	BOOL m_bLocked;
 	BOOL m_bScreenSaver;
 	BOOL m_bLockRegistered;
+
+protected:
+	void PostNcDestroy() {} // don't auto-delete
 
 protected:
 	afx_msg LRESULT OnPowerBroadcast(WPARAM wp, LPARAM lp);

@@ -401,7 +401,7 @@ void CFilteredToDoCtrl::SetFilter(const TDCFILTER& filter)
 		SetViewNeedsTaskUpdate(FTCV_TASKTREE);
 		SetViewNeedsTaskUpdate(FTCV_TASKLIST);
 		
-		SetExtensionsNeedTaskUpdate();
+		SetExtensionsNeedTaskUpdate(TRUE);
 	}
 	else
 	{
@@ -487,7 +487,7 @@ BOOL CFilteredToDoCtrl::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 			SetViewNeedsTaskUpdate(FTCV_TASKTREE);
 			SetViewNeedsTaskUpdate(FTCV_TASKLIST);
 
-			SetExtensionsNeedTaskUpdate();
+			SetExtensionsNeedTaskUpdate(TRUE);
 		}
 		else
 		{
@@ -519,12 +519,12 @@ void CFilteredToDoCtrl::RefreshFilter()
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
 		SetViewNeedsTaskUpdate(FTCV_TASKLIST);
-		SetExtensionsNeedTaskUpdate();
+		SetExtensionsNeedTaskUpdate(TRUE);
 		break;
 
 	case FTCV_TASKLIST:
 		RebuildList();
-		SetExtensionsNeedTaskUpdate();
+		SetExtensionsNeedTaskUpdate(TRUE);
 		break;
 
 	case FTCV_UIEXTENSION1:
@@ -547,6 +547,7 @@ void CFilteredToDoCtrl::RefreshFilter()
 		SetExtensionsNeedTaskUpdate(TRUE);
 		RefreshExtensionFilter(nView, TRUE);
 		SyncExtensionSelectionToTree(nView);
+		UpdateSortStates(TDCA_ALL, TRUE);
 		break;
 	}
 }

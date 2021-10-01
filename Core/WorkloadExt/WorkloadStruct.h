@@ -92,6 +92,7 @@ public:
 	BOOL MatchAll(const CMapDayAllocations& other) const;
 	void Copy(const CMapDayAllocations& other);
 	void RemoveAll();
+	void RemoveKey(const CString& sAllocTo);
 
 protected:
 	BOOL bAutoCalculated;
@@ -189,8 +190,10 @@ public:
 	BOOL ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 
 	void CalculateTotals(const COleDateTimeRange& dtPeriod,
-						CMapAllocationTotals& mapTotalDays, 
-						CMapAllocationTotals& mapTotalTasks, BOOL bAllowParentAllocations) const;
+						 CMapAllocationTotals& mapTotalDays,
+						 CMapAllocationTotals& mapTotalTasks,
+						 BOOL bAllowParentAllocations,
+						 BOOL bIncludeTasksWithoutDates) const;
 
 	void RecalculateOverlaps();
 	BOOL CalcDateRange(COleDateTimeRange& dtRange) const;
@@ -199,6 +202,7 @@ protected:
 	int BuildDateSortedList(CArray<WORKLOADITEM*, WORKLOADITEM*&>& aItems) const;
 	
 	static int CompareItems(const void* pV1, const void* pV2);
+	static BOOL GetValidatedDateRange(const WORKLOADITEM* pWI, COleDateTimeRange& dtRange);
 
 };
 

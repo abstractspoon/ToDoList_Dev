@@ -75,10 +75,6 @@ public:
 	BOOL GetTask(DWORD dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;
 	BOOL GetTrueTask(DWORD& dwTaskID, const TODOITEM*& pTDI, const TODOSTRUCTURE*& pTDS) const;
 
-	POSITION GetFirstTaskPosition() const;
-	DWORD GetNextTask(POSITION& pos, const TODOITEM*& pTDI) const;
-	DWORD GetNextTaskID(POSITION& pos) const;
-
 	BOOL CanMoveTask(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL MoveTask(DWORD dwTaskID, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);
 	BOOL MoveTasks(const CDWordArray& aTaskIDs, DWORD dwDestParentID, DWORD dwDestPrevSiblingID);

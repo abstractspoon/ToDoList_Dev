@@ -33,6 +33,18 @@ class CToDoCtrlData;
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum TTC_NEXTTASK
+{
+	TTCNT_NEXT,
+	TTCNT_PREV,
+	TTCNT_NEXTVISIBLE,
+	TTCNT_PREVVISIBLE,
+	TTCNT_NEXTTOPLEVEL,
+	TTCNT_PREVTOPLEVEL,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CTDLTaskListCtrl : public CTDLTaskCtrlBase  
 {
 	DECLARE_DYNAMIC(CTDLTaskListCtrl);
@@ -74,6 +86,8 @@ public:
 	BOOL EnsureSelectionVisible(BOOL bPartialOK);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 
+	DWORD GetNextTaskID(DWORD dwTaskID, TTC_NEXTTASK nNext, BOOL bExcludeSelected) const;
+
 	// list related
 	int GetSelectedItem() const;
 	BOOL SelectItem(int nItem);
@@ -85,6 +99,7 @@ public:
 	int GetFocusedListItem() const;
 	int FindTaskItem(DWORD dwTaskID) const;
 	int InsertItem(DWORD dwTaskID, int nPos = -1);
+	DWORD GetNextSelectedTaskID(POSITION& pos) const;
 
 	BOOL GetLabelEditRect(CRect& rLabel) const;
 	void GetWindowRect(CRect& rWindow) const { CWnd::GetWindowRect(rWindow); }
@@ -98,6 +113,8 @@ public:
 	void SetSortGroupsAscending(BOOL bAscending = TRUE);
 	BOOL TaskHasGroupValue(DWORD dwTaskID) const;
 	BOOL IsGroupHeaderTask(DWORD dwTaskID) const;
+	BOOL IsGroupHeaderItem(int nItem) const;
+	void SetGroupHeaderBackgroundColor(COLORREF color);
 
 	void OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowResort);
 	void OnBuildComplete();
@@ -108,6 +125,7 @@ protected:
 	CListCtrl m_lcTasks;
 	TDC_COLUMN m_nGroupBy;
 	BOOL m_bSortGroupsAscending;
+	COLORREF m_crGroupHeaderBkgnd;
 
 	typedef CMap<DWORD, DWORD, CString, CString&> CGroupHeaderMap;
 	CGroupHeaderMap m_mapGroupHeaders;
@@ -170,6 +188,7 @@ protected:
 	BOOL GetItemTitleRect(int nItem, TDC_LABELRECT nArea, CRect& rect, CDC* pDC = NULL, LPCTSTR szTitle = NULL) const;
 	int CalcRequiredTitleColumnWidthForImage();
 	GM_ITEMSTATE GetListItemState(int nItem) const;
+	BOOL WantNextItem(int nItem, BOOL bTopLevelOnly, BOOL bExcludeSelected) const;
 
 	BOOL UpdateGroupHeaders();
 	CString GetTaskGroupValue(DWORD dwTaskID) const;
@@ -177,6 +196,7 @@ protected:
 	CString GetGroupByColumnName() const;
 	BOOL IsGrouped() const { return (m_nGroupBy != TDCC_NONE); }
 	int CalcGroupHeaders(CStringSet& mapNewHeaders, CStringSet& mapOldHeaders, CIntArray& aOldHeaderItems) const;
+	void GetGroupHeaderColors(COLORREF& crBack, COLORREF& crText);
 
 	static BOOL HasHitTestFlag(UINT nFlags, UINT nFlag);
 

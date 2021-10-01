@@ -146,6 +146,14 @@ SOURCE=.\res\ConvertRTFToHTML.ico
 
 SOURCE=.\res\ConvertRTFToHTML.rc2
 # End Source File
+# Begin Source File
+
+SOURCE=.\res\fileedit_browse.ico
+# End Source File
+# Begin Source File
+
+SOURCE=.\res\todolist.exe.manifest
+# End Source File
 # End Group
 # Begin Source File
 
