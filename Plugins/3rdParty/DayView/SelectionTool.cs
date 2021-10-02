@@ -365,34 +365,22 @@ namespace Calendar
 			return GetMode(mousePos, m_dayView.SelectedAppointment);
 		}
 
-		public Mode GetMode(System.Drawing.Point mousePos, Appointment appointment)
+		public Mode GetMode(System.Drawing.Point mousePos, Appointment appt)
 		{
 			if (m_mode != Mode.None)
 				return m_mode;
 
-			if ((appointment == null) || appointment.Locked)
+			if ((appt == null) || appt.Locked)
 				return Mode.None;
 
-			DayView.AppointmentView view = null;
-			Boolean gotview = false;
+			Rectangle apptRect = Rectangle.Empty;
 
-			if (m_dayView.appointmentViews.ContainsKey(appointment))
+			if (m_dayView.GetAppointmentRect(appt, ref apptRect))
 			{
-				view = m_dayView.appointmentViews[appointment];
-				gotview = true;
-			}
-			else if (m_dayView.longAppointmentViews.ContainsKey(appointment))
-			{
-				view = m_dayView.longAppointmentViews[appointment];
-				gotview = true;
-			}
-
-			if (gotview)
-			{
-				Rectangle topRect = view.Rectangle;
-				Rectangle bottomRect = view.Rectangle;
-				Rectangle leftRect = view.Rectangle;
-				Rectangle rightRect = view.Rectangle;
+				Rectangle topRect = apptRect;
+				Rectangle bottomRect = apptRect;
+				Rectangle leftRect = apptRect;
+				Rectangle rightRect = apptRect;
 
 				bottomRect.Y = bottomRect.Bottom - 5;
 				bottomRect.Height = 5;
@@ -425,7 +413,7 @@ namespace Calendar
 				}
 
 				// Must fall within appt rect
-				if (view.Rectangle.Contains(mousePos))
+				if (apptRect.Contains(mousePos))
 				{
 					return Mode.Move;
 				}

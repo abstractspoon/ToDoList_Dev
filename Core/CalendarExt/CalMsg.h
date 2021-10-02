@@ -6,10 +6,18 @@
 #endif // _MSC_VER > 1000
 //
 
+#include "CalEnum.h"
+
 /////////////////////////////////////////////////////////////////////////////
 
-// WPARAM = Hit test, LPARAM = Task ID
-const UINT WM_CALENDAR_DATECHANGE			= ::RegisterWindowMessage(_T("WM_CALENDAR_DATECHANGE"));
+// WPARAM = TCINOTIFYDATECHANGE*, LPARAM = Task ID
+const UINT WM_CALENDAR_DATECHANGE = ::RegisterWindowMessage(_T("WM_CALENDAR_DATECHANGE"));
+
+struct TCINOTIFYDATECHANGE
+{
+	TCC_HITTEST nHit;
+	CString sCustAttribID;
+};
 
 // WPARAM = 0, LPARAM = Task ID
 const UINT WM_CALENDAR_SELCHANGE			= ::RegisterWindowMessage(_T("WM_CALENDAR_SELCHANGE"));

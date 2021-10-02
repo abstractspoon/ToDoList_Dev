@@ -97,6 +97,9 @@ public:
 	CXmlItem* AddItem(const CXmlItem& xi, BOOL bCopySiblings); // item and all attributes are copied
 	CXmlItem* AddItem(CXmlItem* pXI); 
 
+	// Use AddSibling for efficiency >10000 siblings
+	CXmlItem* AddSibling(const CString& sValue = EMPTY_STR);
+
     // returns the new or existing item
 	CXmlItem* SetItemValue(const CString& sName, const CString& sValue, XI_TYPE nType = XIT_ATTRIB);
 	CXmlItem* SetItemValue(const CString& sName, int nValue, XI_TYPE nType = XIT_ATTRIB);

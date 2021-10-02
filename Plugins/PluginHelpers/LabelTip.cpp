@@ -106,6 +106,11 @@ int LabelTip::CalcTipHeight(String^ tipText, int availWidth)
 	return (textHeight + BORDERS);
 }
 
+Size LabelTip::CalcTipSize(String^ tipText, int availWidth)
+{
+	return TextRenderer::MeasureText(tipText, m_Handler->GetFont(), Size(availWidth, 0), TextFormatFlags::WordBreak);
+}
+
 TextFormatFlags LabelTip::TipFormatFlags()
 {
 	auto flags = (TextFormatFlags::Left | TextFormatFlags::VerticalCenter);

@@ -202,32 +202,36 @@ FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(const CString& sUniq
 FIND_ATTRIBTYPE CTDCSearchParamHelper::GetAttributeFindType(TDC_ATTRIBUTE nAttribID, BOOL bRelativeDate,
 																const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	if (!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
-		return SEARCHPARAM::GetAttribType(nAttribID, bRelativeDate);
-
-	TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-	VERIFY(aAttribDefs.GetAttributeDef(nAttribID, attribDef));
-
-	// treat lists as strings, except for icon lists
-	if (attribDef.IsList() && (attribDef.GetDataType() != TDCCA_ICON))
-		return FT_STRING;
-
-	// else
-	DWORD dwDataType = attribDef.GetDataType();
-
-	switch (dwDataType)
+	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 	{
-	case TDCCA_STRING:		return FT_STRING;
-	case TDCCA_INTEGER:		return FT_INTEGER;
-	case TDCCA_DOUBLE:		return FT_DOUBLE;
-	case TDCCA_FRACTION:	return FT_DOUBLE; // TODO
-	case TDCCA_DATE:		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
-	case TDCCA_BOOL:		return FT_BOOL;
-	case TDCCA_ICON:		return FT_ICON;
-	case TDCCA_TIMEPERIOD:	return FT_TIMEPERIOD;
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(aAttribDefs, nAttribID, pDef, FT_NONE);
+
+		// treat lists as strings, except for icon lists
+		if (pDef->IsList() && !pDef->IsDataType(TDCCA_ICON))
+			return FT_STRING;
+
+		// else
+		switch (pDef->GetDataType())
+		{
+		case TDCCA_STRING:		return FT_STRING;
+		case TDCCA_INTEGER:		return FT_INTEGER;
+		case TDCCA_DOUBLE:		return FT_DOUBLE;
+		case TDCCA_FRACTION:	return FT_DOUBLE; // TODO
+		case TDCCA_DATE:		return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
+		case TDCCA_BOOL:		return FT_BOOL;
+		case TDCCA_ICON:		return FT_ICON;
+		case TDCCA_TIMEPERIOD:	return FT_TIMEPERIOD;
+			
+		default:
+			ASSERT(0);
+			return FT_NONE;
+		}
+
 	}
 
-	return FT_NONE;
+	// else
+	return SEARCHPARAM::GetAttribType(nAttribID, bRelativeDate);
 }
 
 BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAttributeDataMap& mapData,
@@ -243,12 +247,12 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAtt
 		TDCCADATA data;
 		mapData.GetNextAssoc(pos, sAttribID, data);
 
-		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		VERIFY(aAttribDefs.GetAttributeDef(sAttribID, attribDef));
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_ALT(aAttribDefs, sAttribID, pDef, continue);
 
-		if (attribDef.GetListType() == TDCCA_NOTALIST)
+		if (!pDef->IsList())
 		{
-			switch (attribDef.GetDataType())
+			switch (pDef->GetDataType())
 			{
 			case TDCCA_STRING:
 			case TDCCA_INTEGER:
@@ -263,7 +267,7 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAtt
 				break;
 
 			case TDCCA_DATE:
-				if (AppendCustomAttributeDateFilter(data, attribDef, aRules))
+				if (AppendCustomAttributeDateFilter(data, *pDef, aRules))
 					bRulesAdded = TRUE;
 				break;
 			}
@@ -276,7 +280,7 @@ BOOL CTDCSearchParamHelper::AppendCustomAttributeFilterRules(const CTDCCustomAtt
 			{
 				SEARCHPARAM rule;
 
-				rule.SetCustomAttribute(attribDef.GetAttributeID(), sAttribID, FT_STRING);
+				rule.SetCustomAttribute(pDef->GetAttributeID(), sAttribID, FT_STRING);
 				rule.SetMatchWholeWord(TRUE); // because lists are read-only
 
 				CString sMatchBy = Misc::FormatArray(aValues, NULLSTRING, TRUE);
@@ -326,7 +330,7 @@ BOOL CTDCSearchParamHelper::AppendDateFilter(FILTER_DATE nFilter, const COleDate
 	return TRUE;
 }
 
-BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& data, TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules)
+BOOL CTDCSearchParamHelper::AppendCustomAttributeDateFilter(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, CSearchParamArray& aRules)
 {
 	COleDateTime date, dtUser(CDateHelper::NullDate());
 	int nNextNDays = 0;

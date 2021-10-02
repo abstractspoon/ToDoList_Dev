@@ -228,25 +228,17 @@ DWORD CTDLAttributeComboBox::EncodeItemData(TDC_ATTRIBUTE nAttrib, BOOL bRelativ
 	return MAKELONG(nAttrib, bRelative);
 }
 
-BOOL CTDLAttributeComboBox::AttributeIsTimePeriod(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDLAttributeComboBox::AttributeIsTimePeriod(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_TIMEESTIMATE:
 	case TDCA_TIMESPENT:
 		return TRUE;
 
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
-		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-
-			// check for user date attributes
-			if (m_aAttribDefs.GetAttributeDef(nAttrib, attribDef))
-			{
-				return (attribDef.GetDataType() == TDCCA_TIMEPERIOD);
-			}
-		}
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			return (m_aAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_TIMEPERIOD);
 		break;
 	}
 
@@ -259,9 +251,9 @@ BOOL CTDLAttributeComboBox::WantAttribute(TDC_ATTRIBUTE nAttrib) const
 	return (m_mapWantedAttrib.IsEmpty() || m_mapWantedAttrib.Has(nAttrib));
 }
 
-BOOL CTDLAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE nAttrib) const
+BOOL CTDLAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE nAttribID) const
 {
-	switch (nAttrib)
+	switch (nAttribID)
 	{
 	case TDCA_DONEDATE:
 	case TDCA_DUEDATE:
@@ -271,16 +263,8 @@ BOOL CTDLAttributeComboBox::AttributeIsDate(TDC_ATTRIBUTE nAttrib) const
 		return TRUE;
 		
 	default:
-		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
-		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			
-			// check for user date attributes
-			if (m_aAttribDefs.GetAttributeDef(nAttrib, attribDef))
-			{
-				return (attribDef.GetDataType() == TDCCA_DATE);
-			}
-		}
+		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+			return (m_aAttribDefs.GetAttributeDataType(nAttribID) == TDCCA_DATE);
 		break;
 	}
 

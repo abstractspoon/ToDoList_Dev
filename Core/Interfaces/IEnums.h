@@ -207,6 +207,50 @@ enum TDC_RECURFROMOPTION
 	TDIRO_STARTDATE,
 };
 
+/////////////////////////////////////////////////////////////////////////////
+
+enum // custom attribute data types
+{
+	TDCCA_STRING				= 0x0000,
+	TDCCA_DATE					= 0x0001,
+	TDCCA_INTEGER				= 0x0002,
+	TDCCA_DOUBLE				= 0x0003,
+	TDCCA_BOOL					= 0x0004,
+	TDCCA_ICON					= 0x0005,
+	TDCCA_FILELINK				= 0x0006,
+	TDCCA_TIMEPERIOD			= 0x0007,
+	TDCCA_FRACTION				= 0x0008,
+	TDCCA_CALCULATION			= 0x0009,
+
+	TDCCA_DATAMASK				= 0x00ff,
+};
+
+enum // custom attribute list types
+{
+	TDCCA_NOTALIST				= 0x0000,
+	TDCCA_AUTOLIST				= 0x0100,
+	TDCCA_FIXEDLIST				= 0x0200,
+	TDCCA_AUTOMULTILIST			= 0x0300,
+	TDCCA_FIXEDMULTILIST		= 0x0400,
+
+	TDCCA_LISTMASK				= 0xff00,
+};
+
+enum // custom attribute features
+{
+	TDCCAF_SORT					= 0x0001,
+	TDCCAF_ACCUMULATE			= 0x0002, // Numbers only
+	TDCCAF_MINIMIZE				= 0x0004, // Numbers/Dates only
+	TDCCAF_MAXIMIZE				= 0x0008, // Numbers/Dates only
+	TDCCAF_HIDEZERO				= 0x0010, // Numbers only
+	TDCCAF_SHOWTIME				= 0x0020, // Dates only
+	TDCCAF_FILTER				= 0x0040, 
+	TDCCAF_INHERITPARENTCHANGES	= 0x0080, 
+	TDCCAF_DISPLAYASPERCENT		= 0x0100, // Numbers only
+	TDCCAF_EXCLUDEBLANKITEM		= 0x0200, // Non-multi lists only
+	TDCCAF_ONEDECIMAL			= 0x0400, // Decimals/Fractions only
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #endif // !defined(AFX_IENUMS_H__7741547B_BA15_4851_A41B_2B4EC1DC12D5__INCLUDED_)

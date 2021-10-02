@@ -6256,23 +6256,32 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	int nInset = (CThemed().IsNonClientThemed() ? BORDER : BEVEL);
 	int nFilterWidth = cx - 2 * nInset;
 	int nFilterHeight = m_bShowFilterBar ? m_filterBar.CalcHeight(nFilterWidth) : 0;
-	BOOL bFilterMoved = (m_bShowFilterBar && (CDialogHelper::GetChildRect(&m_filterBar).top != rTaskList.top));
 	
 	dwm.MoveWindow(&m_filterBar, nInset, rTaskList.top, nFilterWidth, nFilterHeight);
+	
+	if (nFilterHeight)
+		rTaskList.top += nFilterHeight;// + 4;
 	
 	// statusbar has already been automatically resized unless it's invisible
 	CRect rStatus(0, cy, cx, cy);
 
 	if (m_bShowStatusBar)
-		rStatus = CDialogHelper::GetChildRect(&m_statusBar);
+	{
+		m_statusBar.GetWindowRect(rStatus);
+		ScreenToClient(rStatus);
+	}
 	else
+	{
 		dwm.MoveWindow(&m_statusBar, rStatus, FALSE);
+	}
 	
 	// finally the active todoctrl
 	if (GetTDCCount())
 	{
-		rTaskList.top += nFilterHeight;
-		rTaskList.bottom = (rStatus.top - BORDER);
+		if (m_bShowStatusBar)
+			rTaskList.bottom = rStatus.top - BORDER;
+		else
+			rTaskList.bottom = rStatus.bottom - BORDER;
 		
 		// shrink slightly so that edit controls do not merge with window border
 		rTaskList.DeflateRect(nInset, nInset, nInset, nInset);
@@ -6288,10 +6297,10 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			Invalidate();
 
 			tdc.Invalidate();
-		}
 
-		if (bHeightChange || bFilterMoved)
-			m_filterBar.Invalidate();
+			if (nFilterHeight)
+				m_filterBar.Invalidate();
+		}
 
 #ifdef _DEBUG
 		CRect rect;
@@ -8643,11 +8652,13 @@ void CToDoListWnd::OnCloseall()
 	while (nCtrl--)
 		m_mgrToDoCtrls.DeleteToDoCtrl(nCtrl);
 
-	// if empty then create a new dummy tasklist		
+	// if empty then create a new dummy item		
 	if (!GetTDCCount())
 		CreateNewTaskList(FALSE, FALSE);
+	else
+		Resize();
 
-	Resize();
+	m_filterBar.Invalidate();
 }
 
 void CToDoListWnd::OnUpdateCloseall(CCmdUI* pCmdUI) 
@@ -9419,8 +9430,8 @@ void CToDoListWnd::OnSysCommand(UINT nID, LPARAM lParam)
 				// button it ends up sending us a close message!
 				ShowWindow(SW_MINIMIZE);
 			}
+			return; // eat it
 		}
-		return;
 
 	case SC_HOTKEY:
 		Show(FALSE);

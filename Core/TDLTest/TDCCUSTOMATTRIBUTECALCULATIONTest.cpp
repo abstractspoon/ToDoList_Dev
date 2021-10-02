@@ -464,71 +464,84 @@ void CTDCCUSTOMATTRIBUTECALCULATIONTest::TestTDCCUSTOMATTRIBUTECALCULATIONSimple
 	CTDCTaskCalculator calc(data);
 
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		double dValue = 0.0;
+		int nAttrib = aAttribDefs.Find(ID_PRORITYMULTRISK);
+		ExpectTrue(nAttrib != -1);
 
-		ExpectTrue(aAttribDefs.GetAttributeDef(ID_PRORITYMULTRISK, attribDef));
+		if (nAttrib != -1)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+			double dValue = 0.0;
 
-		data.SetTaskPriority(ID_PARENT, 3);
-		data.SetTaskPriority(ID_CHILD1, 5);
-		data.SetTaskPriority(ID_CHILD2, 7);
+			data.SetTaskPriority(ID_PARENT, 3);
+			data.SetTaskPriority(ID_CHILD1, 5);
+			data.SetTaskPriority(ID_CHILD2, 7);
 
-		data.SetTaskRisk(ID_PARENT, 4);
-		data.SetTaskRisk(ID_CHILD1, 6);
-		data.SetTaskRisk(ID_CHILD2, 8);
+			data.SetTaskRisk(ID_PARENT, 4);
+			data.SetTaskRisk(ID_CHILD1, 6);
+			data.SetTaskRisk(ID_CHILD2, 8);
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
-		ExpectEQ(dValue, 12.0);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
+			ExpectEQ(dValue, 12.0);
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
-		ExpectEQ(dValue, 30.0);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
+			ExpectEQ(dValue, 30.0);
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
-		ExpectEQ(dValue, 56.0);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
+			ExpectEQ(dValue, 56.0);
+		}
+
 	}
 
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		double dValue = 0.0;
+		int nAttrib = aAttribDefs.Find(ID_TIMEESTMINUSVALUE);
+		ExpectTrue(nAttrib != -1);
 
-		ExpectTrue(aAttribDefs.GetAttributeDef(ID_TIMEESTMINUSVALUE, attribDef));
+		if (nAttrib != -1)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+			double dValue = 0.0;
 
-		data.SetTaskTimeEstimate(ID_PARENT, TDCTIMEPERIOD(8, TDCU_DAYS));
-		data.SetTaskTimeEstimate(ID_CHILD1, TDCTIMEPERIOD(6, TDCU_DAYS));
-		data.SetTaskTimeEstimate(ID_CHILD2, TDCTIMEPERIOD(4, TDCU_DAYS));
+			data.SetTaskTimeEstimate(ID_PARENT, TDCTIMEPERIOD(8, TDCU_DAYS));
+			data.SetTaskTimeEstimate(ID_CHILD1, TDCTIMEPERIOD(6, TDCU_DAYS));
+			data.SetTaskTimeEstimate(ID_CHILD2, TDCTIMEPERIOD(4, TDCU_DAYS));
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue, TDCU_DAYS));
-		ExpectEQ(dValue, 6.25);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue, TDCU_DAYS));
+			ExpectEQ(dValue, 6.25);
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue, TDCU_DAYS));
-		ExpectEQ(dValue, 4.25);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue, TDCU_DAYS));
+			ExpectEQ(dValue, 4.25);
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue, TDCU_DAYS));
-		ExpectEQ(dValue, 2.25);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue, TDCU_DAYS));
+			ExpectEQ(dValue, 2.25);
+		}
 	}
 
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		double dValue = 0.0;
+		int nAttrib = aAttribDefs.Find(ID_DATEPLUSDOUBLE);
+		ExpectTrue(nAttrib != -1);
 
-		ExpectTrue(aAttribDefs.GetAttributeDef(ID_DATEPLUSDOUBLE, attribDef));
+		if (nAttrib != -1)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nAttrib];
+			double dValue = 0.0;
 
-		data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T("41254.0"));
-		data.SetTaskCustomAttributeData(ID_CHILD1, ID_DATE, _T("41258.0"));
-		data.SetTaskCustomAttributeData(ID_CHILD2, ID_DATE, _T("41262.0"));
+			data.SetTaskCustomAttributeData(ID_PARENT, ID_DATE, _T("41254.0"));
+			data.SetTaskCustomAttributeData(ID_CHILD1, ID_DATE, _T("41258.0"));
+			data.SetTaskCustomAttributeData(ID_CHILD2, ID_DATE, _T("41262.0"));
 
-		data.SetTaskCustomAttributeData(ID_PARENT, ID_DOUBLE, _T("4.0"));
-		data.SetTaskCustomAttributeData(ID_CHILD1, ID_DOUBLE, _T("8.0"));
-		data.SetTaskCustomAttributeData(ID_CHILD2, ID_DOUBLE, _T("2.0"));
+			data.SetTaskCustomAttributeData(ID_PARENT, ID_DOUBLE, _T("4.0"));
+			data.SetTaskCustomAttributeData(ID_CHILD1, ID_DOUBLE, _T("8.0"));
+			data.SetTaskCustomAttributeData(ID_CHILD2, ID_DOUBLE, _T("2.0"));
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
-		ExpectEQ(dValue, 41258.0);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_PARENT, attribDef, dValue));
+			ExpectEQ(dValue, 41258.0);
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
-		ExpectEQ(dValue, 41266.0);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD1, attribDef, dValue));
+			ExpectEQ(dValue, 41266.0);
 
-		ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
-		ExpectEQ(dValue, 41264.0);
+			ExpectTrue(calc.GetTaskCustomAttributeData(ID_CHILD2, attribDef, dValue));
+			ExpectEQ(dValue, 41264.0);
+		}
 	}
 }
 

@@ -210,7 +210,7 @@ namespace IIControls
 		[DllImport("gdi32.dll", SetLastError = true)]
 		private static extern bool DeleteObject(IntPtr hObject);
 
-		private int GetActualCursorHeight(Cursor cursor)
+		public static int GetActualCursorHeight(Cursor cursor)
 		{
 			ICONINFO ii;
 

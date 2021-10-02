@@ -1101,14 +1101,17 @@ BOOL CTabbedToDoCtrl::GetAllTasksForExtensionViewUpdate(const CTDCAttributeMap& 
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const
+BOOL CTabbedToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const
 {
 	HTREEITEM htiChild = m_taskTree.GetChildItem(hti);
+	HTASKITEM hPrevSiblingTask = NULL;
 	int nChildren = 0;
 
 	while (htiChild)
 	{
-		if (!AddTreeItemToTaskFile(htiChild, tasks, hTask, filter))
+		HTASKITEM hTask = AddTreeItemToTaskFile(htiChild, tasks, hParentTask, hPrevSiblingTask, filter);
+
+		if (hTask == NULL)
 		{
 			ASSERT(0);
 			return FALSE;
@@ -1116,12 +1119,13 @@ BOOL CTabbedToDoCtrl::AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks,
 
 		// next
 		htiChild = m_taskTree.GetNextItem(htiChild);
+		hPrevSiblingTask = hTask;
 	}
 
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const
+HTASKITEM CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, HTASKITEM hPrevSiblingTask, const TDCGETTASKS& filter) const
 {
 	DWORD dwTaskID = GetTaskID(hti);
 	ASSERT(!m_taskList.IsGroupHeaderTask(dwTaskID));
@@ -1132,7 +1136,12 @@ BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTA
 	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
 		return FALSE;
 
-	HTASKITEM hTask = tasks.NewTask(pTDI->sTitle, hParentTask, dwTaskID, 0);
+	HTASKITEM hTask = NULL;
+	
+	if (hPrevSiblingTask == NULL)
+		hTask = tasks.NewTask(pTDI->sTitle, hParentTask, dwTaskID, 0);
+	else
+		hTask = tasks.NewSiblingTask(pTDI->sTitle, hPrevSiblingTask, dwTaskID);
 
 	if (!hTask)
 	{
@@ -1146,7 +1155,7 @@ BOOL CTabbedToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTA
 	// Subtasks
 	AddTreeChildrenToTaskFile(hti, tasks, hTask, filter);
 
-	return TRUE;
+	return hTask;
 }
 
 

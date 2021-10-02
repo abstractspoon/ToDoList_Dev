@@ -169,6 +169,31 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////
 
+#define GET_DEF_RET(defs, key, def, ret) \
+{                                        \
+	int nAttrib = (defs).Find(key);      \
+	if (nAttrib == -1)                   \
+	{                                    \
+		ASSERT(0);                       \
+        return ret;                      \
+	}                                    \
+	def = &((defs)[nAttrib]);            \
+}
+
+// alt = break. continue, return
+#define GET_DEF_ALT(defs, key, def, alt) \
+{                                        \
+	int nAttrib = defs.Find(key);        \
+	if (nAttrib == -1)                   \
+	{                                    \
+		ASSERT(0);                       \
+        alt;                             \
+	}                                    \
+	def = &((defs)[nAttrib]);            \
+}
+
+// ----------------------------------------------------------------
+
 class CTDCCustomAttribDefinitionArray : public CArray<TDCCUSTOMATTRIBUTEDEFINITION, TDCCUSTOMATTRIBUTEDEFINITION&>
 {
 public:
@@ -196,11 +221,8 @@ public:
 
 	int GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const;
 
-	BOOL GetAttributeDef(TDC_ATTRIBUTE nCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-	BOOL GetAttributeDef(const CString& sCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-	BOOL GetAttributeDef(TDC_COLUMN nCustColID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-
 	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const;
+	DWORD GetAttributeDataType(TDC_COLUMN nCustColID) const;
 	DWORD GetAttributeDataType(const CString& sCustAttribID) const;
 
 	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
@@ -212,8 +234,15 @@ public:
 	DWORD GetCalculationOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
 	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 
+	// VC6 fixes
+	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return GetData()[nIndex]; }
+	TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) { return GetData()[nIndex]; }
+
 protected:
 	void RebuildIDs();
+
+	const TDCCUSTOMATTRIBUTEDEFINITION& ElementAt(int nIndex) const { return GetData()[nIndex]; }
+	TDCCUSTOMATTRIBUTEDEFINITION& ElementAt(int nIndex) { return GetData()[nIndex]; }
 };
 
 /////////////////////////////////////////////////////////////////////////////

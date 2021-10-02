@@ -88,6 +88,7 @@ CTDLAnalyseLoggedTimeDlg::CTDLAnalyseLoggedTimeDlg(const CString& sTaskFile, con
 
 		if (nCust == -1)
 		{
+			// Fallback
 			m_nGroupByAttrib = TDCA_STATUS;
 		}
 		else

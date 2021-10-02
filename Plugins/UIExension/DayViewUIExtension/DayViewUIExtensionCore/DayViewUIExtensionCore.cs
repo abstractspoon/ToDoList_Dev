@@ -98,6 +98,7 @@ namespace DayViewUIExtension
                 case Task.Attribute.TimeEstimate:
 				case Task.Attribute.Dependency:
 				case Task.Attribute.Recurrence:
+				case Task.Attribute.CustomAttribute:
 					return true;
 			}
 
@@ -119,7 +120,7 @@ namespace DayViewUIExtension
 
                 DateTime endDate = m_DayView.SelectionEnd;
 
-                if (CalendarItem.IsStartOfDay(endDate))
+                if (TaskItem.IsStartOfDay(endDate))
                     endDate = endDate.AddSeconds(-1);
 
                 task.SetDueDate(endDate);
@@ -297,13 +298,14 @@ namespace DayViewUIExtension
 
 		private void CreateDayView()
 		{
-			m_DayView = new TDLDayView(new UIExtension.TaskIcon(m_HwndParent),
+			m_DayView = new TDLDayView(m_Trans,
+										new UIExtension.TaskIcon(m_HwndParent),
 										new UIExtension.TaskRecurrences(m_HwndParent),
 										DPIScaling.Scale(5));
 
 			m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(OnDayViewNewAppointment);
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
-			m_DayView.AppointmentMove += new Calendar.AppointmentEventHandler(OnDayViewAppointmentChanged);
+			m_DayView.AppointmentMove += new TDLAppointmentEventHandler(OnDayViewAppointmentChanged);
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
 			m_DayView.MouseWheel += new MouseEventHandler(OnDayViewMouseWheel);
 			m_DayView.MouseDoubleClick += new MouseEventHandler(OnDayViewMouseDoubleClick);
@@ -607,17 +609,12 @@ namespace DayViewUIExtension
 			if (m_DayView.ReadOnly)
 				return;
 
-			var appointment = m_DayView.GetRealAppointmentAt(e.Location.X, e.Location.Y);
+			var appt = m_DayView.GetRealAppointmentAt(e.Location.X, e.Location.Y);
 
-			if (appointment == null)
+			if (appt == null || appt.Locked)
 				return;
 
-			var taskItem = (appointment as CalendarItem);
-
-			if ((taskItem == null) || taskItem.Locked)
-				return;
-
-			if (taskItem.IconRect.Contains(e.Location))
+			if (m_DayView.IconHitTest(m_DayView.PointToScreen(e.Location)) > 0)
 			{
 				var notify = new UIExtension.ParentNotify(m_HwndParent);
 				notify.NotifyEditIcon();
@@ -723,30 +720,25 @@ namespace DayViewUIExtension
 			}
 		}
 
-        private void OnDayViewAppointmentChanged(object sender, Calendar.AppointmentEventArgs args)
+        private void OnDayViewAppointmentChanged(object sender, TDLMoveAppointmentEventArgs args)
 		{
-			var move = args as Calendar.MoveAppointmentEventArgs;
-
-			if (move == null)
-				return;
-
             // Whilst move is in progress only update selected task dates 
-            if (!move.Finished)
+            if (!args.Finished)
             {
                 UpdatedSelectedTaskDatesText();
                 return;
             }
 
-			var item = args.Appointment as CalendarItem;
+			var item = args.Appointment as TaskItem;
 
 			if (item == null)
 				return;
 
-			ProcessTaskAppointmentChange(item, move.Mode);
+			ProcessTaskAppointmentChange(item, args.CustomAttributeId, args.Mode);
 			UpdatedSelectedTaskDatesText();
         }
 
-		private bool PrepareTaskNotify(CalendarItem item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
+		private bool PrepareTaskNotify(TaskItem item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
 		{
 			switch (mode)
 			{
@@ -817,10 +809,19 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		private void ProcessTaskAppointmentChange(CalendarItem item, Calendar.SelectionTool.Mode mode)
+		private void ProcessTaskAppointmentChange(TaskItem item, string customAttribId, Calendar.SelectionTool.Mode mode)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
+			if (!string.IsNullOrEmpty(customAttribId))
+			{
+				notify.AddMod(customAttribId, item.CustomDates[customAttribId].ToString());
+				notify.NotifyMod();
+
+				return;
+			}
+
+			// Start/Due change
 			if (PrepareTaskNotify(item, mode, notify))
 			{
 				bool modifyTimeEst = WantModifyTimeEstimate(item);
@@ -840,7 +841,7 @@ namespace DayViewUIExtension
 			m_DayView.Invalidate();
 		}
 
-        private bool WantModifyTimeEstimate(CalendarItem item)
+        private bool WantModifyTimeEstimate(TaskItem item)
         {
 			if (!m_AllowModifyTimeEstimate)
 				return false;

@@ -184,6 +184,7 @@ namespace Abstractspoon
 				Boolean HasAttribute(Attribute attrib);
 
 				String^ GetCustomAttributeValue(String^ sID, bool display);
+				Dictionary<String^, String^>^ GetCustomAttributeValues(bool display);
 				String^ GetMetaDataValue(String^ sKey);
 
 				// TODO
@@ -252,6 +253,49 @@ namespace Abstractspoon
 
 			////////////////////////////////////////////////////////////////////////////////////////////////
 
+			public ref class CustomAttributeDefinition
+			{
+			public:
+				enum class Attribute
+				{
+					Unknown = -1,
+					All = -1,
+
+					String,
+					Date,
+					Integer,
+					Decimal,
+					Boolean,
+					Icon,
+					FileLink,
+					TimePeriod,
+					Fraction,
+				};
+
+				enum class List
+				{
+					None = -1,
+
+					AutoSingle,
+					FixedSingle,
+					AutoMulti,
+					FixedMulti,
+				};
+
+			public:
+				CustomAttributeDefinition();
+
+			public:
+				Attribute AttributeType;
+				List ListType;
+
+				String^ Id;
+				String^ Label;
+				String^ ListData; // \n delimited
+			};
+
+			////////////////////////////////////////////////////////////////////////////////////////////////
+
 			public ref class TaskList
 			{
 			public:
@@ -268,13 +312,8 @@ namespace Abstractspoon
 				String^ GetMetaData(String^ sKey);
 
 				Boolean HasCustomAttributes();
-				UInt32  GetCustomAttributeCount();
-				String^ GetCustomAttributeLabel(int nIndex);
-				String^ GetCustomAttributeID(int nIndex);
-				String^ GetCustomAttributeValue(int nIndex, String^ sItem);
-				UInt32  GetCustomAttributeType(int nIndex);
-				String^ GetCustomAttributeListData(int nIndex);
-				Boolean IsCustomAttributeEnabled(int nIndex);
+				List<CustomAttributeDefinition^>^ GetCustomAttributes();
+				List<CustomAttributeDefinition^>^ GetCustomAttributes(CustomAttributeDefinition::Attribute attribType);
 
 				UInt32 GetTaskCount();
 				Boolean HasTask(UInt32 dwTaskID);
@@ -296,6 +335,15 @@ namespace Abstractspoon
 			private: // -------------------------------------------------------
 				TaskList();
 
+				UInt32  GetCustomAttributeCount();
+				String^ GetCustomAttributeLabel(int nIndex);
+				String^ GetCustomAttributeID(int nIndex);
+				String^ GetCustomAttributeListData(int nIndex);
+				Boolean IsCustomAttributeEnabled(int nIndex);
+				String^ GetCustomAttributeValue(int nIndex, String^ sItem);
+
+				CustomAttributeDefinition::Attribute GetCustomAttributeType(int nIndex);
+				CustomAttributeDefinition::List GetCustomAttributeListType(int nIndex);
 			};
 		}
 	}
