@@ -405,20 +405,15 @@ int CTDLToolsUserInputDlg::GetArgumentListData(const CMDLINEARG& arg, CStringArr
 	
 	if (Misc::Split(sSwitch, sValue, ' ') && (sSwitch == SWITCH_TASKCUSTOMATTRIB))
 	{
-		// It's a custom attribute
-		int nCustAttrib = m_aCustAttribDefs.Find(sValue);
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(m_aCustAttribDefs, sValue, pDef, 0);
 
-		if (nCustAttrib == -1)
-			return 0;
-
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustAttribDefs[nCustAttrib];
-
-		if (!attribDef.IsList())
+		if (!pDef->IsList())
 			return 0;
 
 		// else
-		aItems.Copy(attribDef.aAutoListData);
-		Misc::AddUniqueItems(attribDef.aDefaultListData, aItems);
+		aItems.Copy(pDef->aAutoListData);
+		Misc::AddUniqueItems(pDef->aDefaultListData, aItems);
 	}
 	else // built-in attribute
 	{

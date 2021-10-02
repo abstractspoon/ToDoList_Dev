@@ -1188,14 +1188,14 @@ CWnd* CTDCCustomAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pPar
 
 	if (!pBuddy)
 	{
-		TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-		VERIFY(aAttribDefs.GetAttributeDef(ctrl.sAttribID, attribDef));
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(aAttribDefs, ctrl.sAttribID, pDef, NULL);
 
-		pBuddy = CreateAttributeCtrl(const_cast<CWnd*>(pParent), 
-									 attribDef,
+		pBuddy = CreateAttributeCtrl(const_cast<CWnd*>(pParent),
+									 *pDef,
 									 TDCCADATA(nFilter),	// new type
 									 CTDCImageList(),		// not required
-									 ctrl.nBuddyCtrlID, 
+									 ctrl.nBuddyCtrlID,
 									 TRUE,					// buddy
 									 FALSE);				// multi-selection droplist
 
@@ -1541,19 +1541,13 @@ BOOL CTDCCustomAttributeUIHelper::GetControlAttributeTypes(const CUSTOMATTRIBCTR
 		return FALSE;
 
 	// search attribute defs for unique ID
-	int nAttribDef = aAttribDefs.Find(ctrl.sAttribID);
-
-	if (nAttribDef != -1)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttribDef];
+	const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+	GET_DEF_RET(aAttribDefs, ctrl.sAttribID, pDef, FALSE);
 	
-		dwDataType = attribDef.GetDataType();
-		dwListType = attribDef.GetListType();
-		return TRUE;
-	}
+	dwDataType = pDef->GetDataType();
+	dwListType = pDef->GetListType();
 
-	// not found
-	return FALSE;
+	return TRUE;
 }
 
 int CTDCCustomAttributeUIHelper::EnableMultiSelectionFilter(const CTDCCustomControlArray& aControls, 

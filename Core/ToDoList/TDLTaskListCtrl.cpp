@@ -451,15 +451,10 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy) const
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nGroupBy))
 		{
-			int nAttribDef = m_aCustomAttribDefs.Find(nGroupBy);
-			ASSERT(nAttribDef != -1);
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_DEF_RET(m_aCustomAttribDefs, nGroupBy, pDef, FALSE);
 
-			if (nAttribDef != -1)
-			{
-				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttribDef];
-
-				return (attribDef.bEnabled && attribDef.IsDataType(TDCCA_STRING));
-			}
+			return (pDef->bEnabled && pDef->IsDataType(TDCCA_STRING));
 		}
 		break;
 	}
@@ -589,10 +584,13 @@ BOOL CTDLTaskListCtrl::TaskHasGroupValue(DWORD dwTaskID) const
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 		{
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, FALSE);
+			
 			const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-			int nAttribDef = m_aCustomAttribDefs.Find(m_nGroupBy);
+			CString sData = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
 
-			return !m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, m_aCustomAttribDefs[nAttribDef]).IsEmpty();
+			return !sData.IsEmpty();
 		}
 		else
 		{
@@ -633,10 +631,11 @@ CString CTDLTaskListCtrl::GetTaskGroupValue(DWORD dwTaskID) const
 		default:
 			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 			{
-				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-				int nAttribDef = m_aCustomAttribDefs.Find(m_nGroupBy);
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, sGroupBy);
 
-				sGroupBy = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, m_aCustomAttribDefs[nAttribDef]);
+				const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
+				sGroupBy = m_formatter.GetTaskCustomAttributeData(pTDI, pTDS, *pDef);
 			}
 			else
 			{
@@ -688,20 +687,19 @@ CString CTDLTaskListCtrl::GetGroupByColumnName() const
 {
 	if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(m_nGroupBy))
 	{
-		int nAttribDef = m_aCustomAttribDefs.Find(m_nGroupBy);
-
-		if (nAttribDef != -1)
-			return m_aCustomAttribDefs[nAttribDef].sLabel;
+		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+		GET_DEF_RET(m_aCustomAttribDefs, m_nGroupBy, pDef, _T(""));
+		
+		return pDef->sLabel;
 	}
-	else
-	{
-		int nCol = NUM_COLUMNS;
 
-		while (nCol--)
-		{
-			if (COLUMNS[nCol].nColID == m_nGroupBy)
-				return CEnString(COLUMNS[nCol].nIDLongName);
-		}
+	// else
+	int nCol = NUM_COLUMNS;
+
+	while (nCol--)
+	{
+		if (COLUMNS[nCol].nColID == m_nGroupBy)
+			return CEnString(COLUMNS[nCol].nIDLongName);
 	}
 
 	ASSERT(0);

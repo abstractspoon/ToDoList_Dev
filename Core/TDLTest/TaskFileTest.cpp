@@ -179,15 +179,22 @@ void CTaskFileTest::Add10TasksToHierarchy(CTaskFile& tasks, HTASKITEM hParentTas
 	if (nLevel > nNumLevels)
 		return;
 
+	HTASKITEM hPrevSiblingTask = NULL, hTask = NULL;
+
 	for (int i = 0; i < 10; i++)
 	{
-		HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), hParentTask, 0, 0, TRUE);
+		if (hPrevSiblingTask == NULL)
+			hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), hParentTask, 0, 0, TRUE);
+		else
+			hTask = tasks.NewSiblingTask(Misc::Format(_T("Task_%d"), i), hPrevSiblingTask, 0, TRUE);
 
 		PopulateNumericTaskAttributes(tasks, hTask, mapAttrib);
 		PopulateStringTaskAttributes(tasks, hTask, MAX_TASK_STRINGS, mapAttrib);
 
 		// Add next level of tasks
 		Add10TasksToHierarchy(tasks, hTask, nLevel + 1, nNumLevels, mapAttrib);
+
+		hPrevSiblingTask = hTask;
 	}
 }
 
@@ -197,12 +204,19 @@ void CTaskFileTest::PopulateFlatList(CTaskFile& tasks, int nNumTasks, const CTDC
 	AddGlobalsToTasklist(tasks, mapAttrib);
 	
 	// Create tasks
+	HTASKITEM hPrevSiblingTask = NULL, hTask = NULL;
+
 	for (int i = 0; i < nNumTasks; i++)
 	{
-		HTASKITEM hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
+		if (hPrevSiblingTask == NULL)
+			hTask = tasks.NewTask(Misc::Format(_T("Task_%d"), i), NULL, 0, 0, TRUE);
+		else
+			hTask = tasks.NewSiblingTask(Misc::Format(_T("Task_%d"), i), hPrevSiblingTask, 0, TRUE);
 
 		PopulateNumericTaskAttributes(tasks, hTask, mapAttrib);
 		PopulateStringTaskAttributes(tasks, hTask, MAX_TASK_STRINGS, mapAttrib);
+
+		hPrevSiblingTask = hTask;
 	}
 }
 

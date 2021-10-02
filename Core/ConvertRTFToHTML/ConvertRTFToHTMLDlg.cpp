@@ -161,9 +161,7 @@ void CConvertRTFToHTMLDlg::OnOK()
 		return;
 	}
 
-	CDWordArray aTaskIDs;
-	int nNumTaskIDs = data.GetTaskIDs(aTaskIDs);
-
+	POSITION pos = data.GetStart();
 	CRtfHtmlConverter rtfHtml;
 	CWaitCursor cursor;
 
@@ -173,10 +171,13 @@ void CConvertRTFToHTMLDlg::OnOK()
 
 	CTaskFile tasksOut(tasksIn);
 
-	for (int nID = 0; nID < nNumTaskIDs; nID++)
+	while (pos)
 	{
-		DWORD dwTaskID = aTaskIDs[nID];
+		DWORD dwTaskID = data.GetNextTaskID(pos);
 		const TODOITEM* pTDI = data.GetTask(dwTaskID);
+
+		if (pTDI->IsReference())
+			continue;
 
 		m_sCurrentTask.Format(L"\"%s\"", pTDI->sTitle);
 		UpdateData(FALSE);

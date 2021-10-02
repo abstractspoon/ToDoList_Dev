@@ -2349,6 +2349,41 @@ HTASKITEM CTaskFile::NewTask(const CString& sTitle, HTASKITEM hParent, DWORD dwI
 	return (HTASKITEM)pXINew;
 }
 
+HTASKITEM CTaskFile::NewSiblingTask(const CString& sTitle, HTASKITEM hPrevSiblingTask, DWORD dwID, BOOL bInitCreationDate)
+{
+	if (hPrevSiblingTask == NULL)
+	{
+		ASSERT(0);
+		return NULL;
+	}
+	
+	CXmlItem* pXIPrevSibling = TaskFromHandle(hPrevSiblingTask);
+	CXmlItem* pXINew = pXIPrevSibling->AddSibling();
+
+	if (pXINew)
+	{
+		// Must set ID before adding to handle map
+		if (dwID <= 0)
+			dwID = m_dwNextUniqueID++;
+		else
+			m_dwNextUniqueID = max(m_dwNextUniqueID, dwID + 1);
+
+		VERIFY(pXINew->SetItemValue(TDL_TASKID, (int)dwID));
+		
+		// Add to map
+		AddTaskToMap(pXINew, FALSE, FALSE);
+
+		// Set name, parent ID and creation date
+		HTASKITEM hTask = (HTASKITEM)pXINew;
+		SetTaskString(hTask, TDL_TASKTITLE, sTitle);
+
+		if (bInitCreationDate)
+			SetTaskCreationDate(hTask, COleDateTime::GetCurrentTime());
+	}
+
+	return (HTASKITEM)pXINew;
+}
+
 ///////////////////////////////////////////////////////////////////////
 
 int CTaskFile::GetTaskCount() const 

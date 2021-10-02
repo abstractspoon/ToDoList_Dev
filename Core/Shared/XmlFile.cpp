@@ -509,6 +509,14 @@ BOOL CXmlItem::DeleteItem(const CString& sItemName, const CString& sSubItemName)
 	return (pXI != NULL);
 }
 
+CXmlItem* CXmlItem::AddSibling(const CString& sValue)
+{
+	CXmlItem* pXI = new CXmlItem(GetParent(), GetName(), sValue, XIT_ELEMENT);
+	VERIFY(AddSibling(pXI));
+
+	return pXI;
+}
+
 BOOL CXmlItem::AddSibling(CXmlItem* pXI)
 {
 	if (!pXI)
@@ -1254,6 +1262,7 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 	
 	CXmlNodeWrapper nodeChild(pNode->GetFirstChildNode());
 	CString sItemVal;
+	CXmlItem* pXIPrevSibling = NULL;
 	
 	while (nodeChild.IsValid())
 	{
@@ -1281,7 +1290,15 @@ BOOL CXmlFile::ParseItem(CXmlItem& xi, CXmlNodeWrapper* pNode)
 
 		if (!sChildName.IsEmpty())
 		{
-			CXmlItem* pXI = xi.AddItem(sChildName, sChildVal, nType);
+			CXmlItem* pXI = NULL;
+
+			// Optimisation: Add directly to prev sibling if it has the same name
+			if ((pXIPrevSibling == NULL) || !pXIPrevSibling->NameIs(sChildName))
+				pXI = xi.AddItem(sChildName, sChildVal, nType);
+			else
+				pXI = pXIPrevSibling->AddSibling(sChildVal);
+
+			pXIPrevSibling = pXI;
 			
 			if (!ContinueParsing(sChildName, sChildVal))
 				return TRUE;
@@ -1431,29 +1448,34 @@ BOOL CXmlFile::Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode) const
 			ASSERT (!pXIChild->GetSibling());
 			pNode->SetValue(pXIChild->GetName(), pXIChild->GetValue());
 		}
-		else
+		else if (pXIChild->IsCDATA())
 		{
-			if (pXIChild->IsCDATA())
+			// create a named node to wrap the CDATA
+			CXmlNodeWrapper nodeChild(InsertNode(pNode, nNode++, pXIChild));
+			ASSERT (nodeChild.IsValid());
+			
+			MSXML2::IXMLDOMCDATASectionPtr pCData = nodeChild.ParentDocument()->createCDATASection((LPCTSTR)pXIChild->GetValue());
+			nodeChild.AppendChild(pCData);
+		}
+		else // Element
+		{
+			MSXML2::IXMLDOMNodePtr pPrevChildNode = NULL, pChildNode = NULL;
+
+			while (pXIChild)
 			{
-				// create a named node to wrap the CDATA
-				CXmlNodeWrapper nodeChild(InsertNode(pNode, nNode++, pXIChild));
+				if (pPrevChildNode)
+					pChildNode = pNode->InsertAfter(pPrevChildNode, pXIChild->GetName());
+				else
+					pChildNode = InsertNode(pNode, nNode++, pXIChild);
+
+				CXmlNodeWrapper nodeChild(pChildNode);
 				ASSERT (nodeChild.IsValid());
-
-				MSXML2::IXMLDOMCDATASectionPtr pCData = nodeChild.ParentDocument()->createCDATASection((LPCTSTR)pXIChild->GetValue());
-				nodeChild.AppendChild(pCData);
-			}
-			else // Element
-			{
-				while (pXIChild)
-				{
-					CXmlNodeWrapper nodeChild(InsertNode(pNode, nNode++, pXIChild));
-					ASSERT (nodeChild.IsValid());
-
-					Export(pXIChild, &nodeChild);
 				
-					// siblings
-					pXIChild = pXIChild->GetSibling();
-				}
+				Export(pXIChild, &nodeChild);
+				
+				// next sibling
+				pXIChild = pXIChild->GetSibling();
+				pPrevChildNode = pChildNode;
 			}
 		}
 	}
