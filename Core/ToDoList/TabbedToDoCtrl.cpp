@@ -3957,6 +3957,7 @@ BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttrib) cons
 		{
 			return TRUE;
 		}
+		break;
 
 	case TDCA_DUEDATE:
 		return (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && 

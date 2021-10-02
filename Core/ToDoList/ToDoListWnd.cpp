@@ -12918,7 +12918,10 @@ void CToDoListWnd::OnTasklistCustomColumns()
 
 	if (!tdc.IsReadOnly())
 	{
-		CTDLCustomAttributeDlg dialog(tdc, m_theme);
+		CTDLCustomAttributeDlg dialog(tdc.GetFilePath(),
+									  tdc.GetCustomAttributeDefs(),
+									  tdc.GetTaskIconImageList(),
+									  tdc.GetCheckImageList());
 
 		if (dialog.DoModal() == IDOK)
 		{
@@ -12926,7 +12929,7 @@ void CToDoListWnd::OnTasklistCustomColumns()
 			CAutoFlag af(m_bSettingAttribDefs, TRUE);
 
 			CTDCCustomAttribDefinitionArray aAttrib;
-			dialog.GetAttributes(aAttrib);
+			dialog.GetAttributeDefinitions(aAttrib);
 
 			if (tdc.SetCustomAttributeDefs(aAttrib))
 			{

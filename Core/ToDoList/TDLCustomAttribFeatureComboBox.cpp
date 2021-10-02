@@ -60,17 +60,22 @@ END_MESSAGE_MAP()
 
 BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
 {
+	return SetAttributeDefinition(attribDef.GetDataType(), attribDef.GetListType(), attribDef.dwFeatures);
+}
+
+BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures)
+{
 	ASSERT_VALID(this);
 
 	if (!GetSafeHwnd())
 		return FALSE;
 
-	BuildCombo(attribDef);
+	BuildCombo(dwDataType, dwListType, dwSelectedFeatures);
 
 	return (GetCount() > 0);
 }
 
-void CTDLCustomAttribFeatureComboBox::BuildCombo(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
+void CTDLCustomAttribFeatureComboBox::BuildCombo(DWORD dwDataType, DWORD dwListType, DWORD dwSelectedFeatures)
 {
 	ResetContent();
 
@@ -78,11 +83,11 @@ void CTDLCustomAttribFeatureComboBox::BuildCombo(const TDCCUSTOMATTRIBUTEDEFINIT
 	{
 		const TDCFEATURE& feature = FEATURES[nFeature];
 
-		if (attribDef.SupportsFeature(feature.dwFeature))
+		if (TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(dwDataType, dwListType, feature.dwFeature))
 			CDialogHelper::AddString(*this, feature.nStringID, feature.dwFeature);
 	}
 
-	SetCheckedByItemData(attribDef.dwFeatures);
+	SetCheckedByItemData(dwSelectedFeatures);
 	EnableTooltip();
 }
 

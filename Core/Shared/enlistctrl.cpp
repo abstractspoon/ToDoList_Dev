@@ -803,6 +803,16 @@ BOOL CEnListCtrl::SetTooltipCtrlText(CString sText)
 void CEnListCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 {
 	int nSel = HitTest(point);
+
+	if (!WantSelChange(nSel))
+	{
+		// Make sure we finish editing
+		if (GetEditControl() != NULL)
+			SetFocus();
+
+		return;
+	}
+
 	BOOL bChangedEditLabels = FALSE;
 
 	// if the list is in report mode AND supports label editing then
@@ -1286,14 +1296,20 @@ void CEnListCtrl::DeleteAllColumns()
 		DeleteColumn(nNumCols);
 }
 
+BOOL CEnListCtrl::WantSelChange(int nSel) const
+{
+	return (m_bAllowOffItemClickDeslection || !(GetStyle() & LVS_SINGLESEL) || (nSel != -1));
+}
+
 void CEnListCtrl::OnLButtonDblClk(UINT nFlags, CPoint point) 
 {
-	int nSel;
+	int nSel = HitTest(point);
+
+	if (!WantSelChange(nSel))
+		return;
 
 	CListCtrl::OnLButtonDblClk(nFlags, point);
 
-	nSel = GetCurSel();
-	
 	if (nSel != -1) // user clicked on an item
 	{
 		// determine whether a sel change has occured

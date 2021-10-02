@@ -1167,7 +1167,43 @@ BOOL CTaskFile::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 		
 		// format auto list data to follow default list data
 		if (attribDef.IsList())
+		{
+			ASSERT(!attribDef.Calculation().IsValid(FALSE));
+
 			pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBLISTDATA, attribDef.EncodeListData());
+		}
+		else if (attribDef.IsDataType(TDCCA_CALCULATION))
+		{
+			ASSERT(attribDef.Calculation().IsValid());
+
+			const TDCCUSTOMATTRIBUTECALCULATION& calc = attribDef.Calculation();
+
+			if (calc.IsFirstOperandCustom())
+			{
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCFIRSTOPERAND, calc.opFirst.sCustAttribID);
+			}
+			else
+			{
+				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opFirst.nAttribID));
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCFIRSTOPERAND, calc.opFirst.nAttribID);
+			}
+
+			pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCOPERATOR, calc.nOperator);
+
+			if (calc.IsSecondOperandCustom())
+			{
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB, calc.opSecond.sCustAttribID);
+			}
+			else if (calc.opSecond.nAttribID != TDCA_NONE)
+			{
+				ASSERT(!TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(calc.opSecond.nAttribID));
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB, calc.opSecond.nAttribID);
+			}
+			else
+			{
+				pXIAttribDef->SetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDVALUE, calc.dSecondOperandValue);
+			}
+		}
 	}
 
 	return TRUE;
@@ -1264,6 +1300,51 @@ int CTaskFile::GetCustomAttributeDefs(CTDCCustomAttribDefinitionArray& aAttribs)
 			// Add 'Filterable' feature first time only
 			if (GetFileFormat() < TDL_FILEFORMAT_LOCKING)
 				attribDef.dwFeatures |= TDCCAF_FILTER;
+		}
+		else if (attribDef.IsDataType(TDCCA_CALCULATION))
+		{
+			CString sFirstOp = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBCALCFIRSTOPERAND);
+			CString sOperator = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBCALCOPERATOR);
+			CString sSecondOpAttrib = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDATTRIB);
+			CString sSecondOpValue = pXIAttribDef->GetItemValue(TDL_CUSTOMATTRIBCALCSECONDOPERANDVALUE);
+
+			TDCCUSTOMATTRIBUTECALCULATION calc;
+
+			if (Misc::IsNumber(sFirstOp))
+			{
+				calc.opFirst.nAttribID = (TDC_ATTRIBUTE)_ttoi(sFirstOp);
+			}
+			else if (!sFirstOp.IsEmpty())
+			{
+				calc.opFirst.nAttribID = TDCA_CUSTOMATTRIB;
+				calc.opFirst.sCustAttribID = sFirstOp;
+			}
+
+			if (sOperator.IsEmpty())
+				calc.nOperator = TDCCAC_ADD;
+			else
+				calc.nOperator = (TDCCA_CALC_OPERATOR)_ttoi(sOperator);
+
+			if (Misc::IsNumber(sSecondOpAttrib))
+			{
+				calc.opSecond.nAttribID = (TDC_ATTRIBUTE)_ttoi(sSecondOpAttrib);
+			}
+			else if (!sSecondOpAttrib.IsEmpty())
+			{
+				ASSERT(sSecondOpValue.IsEmpty());
+
+				calc.opSecond.nAttribID = TDCA_CUSTOMATTRIB;
+				calc.opSecond.sCustAttribID = sSecondOpAttrib;
+				calc.dSecondOperandValue = 0.0;
+			}
+			else
+			{
+				calc.opSecond.nAttribID = TDCA_NONE;
+				calc.opSecond.sCustAttribID.Empty();
+				calc.dSecondOperandValue = _ttof(sSecondOpValue); // defaults to 0.0
+			}
+
+			VERIFY(attribDef.SetCalculation(calc));
 		}
 
 		// good to go

@@ -99,6 +99,7 @@ public:
 	void SetItemIndent(int nItem, int nIndent);
 	int GetItemIndent(int nItem) const;
 	void EnableAlternateRowColoring(BOOL bEnable = TRUE);
+	void AllowOffItemClickDeselection(BOOL bAllow = TRUE) { m_bAllowOffItemClickDeslection = bAllow; }
 	
 	// column methods
 	int GetColumnCount() const;
@@ -135,6 +136,7 @@ protected:
 	BOOL m_bSortAscending;
 	BOOL m_bInitColumns; // up to derived class to set: gets cleared in OnDestroy
 	BOOL m_bAlternateRowColoring;
+	BOOL m_bAllowOffItemClickDeslection;
 
 private:
 	CMap<int, int, CColumnData*, CColumnData*> m_mapColumnData; 
@@ -207,6 +209,7 @@ protected:
 	CString GetSortString(DWORD dwItemData) const;
 	void BuildSortMap(int nCol, CMap<DWORD, DWORD, CString, CString&>& mapSortStrings) const;
 	BOOL IsSelectionThemed(BOOL bClassic) const;
+	BOOL WantSelChange(int nSel) const;
 
 private:
 	void BuildSortMap(int nCol);

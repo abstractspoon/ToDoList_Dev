@@ -443,6 +443,9 @@
     <ClCompile Include="..\ToDoList\tdcsort.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDLAttributeComboBox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="..\ToDoList\TDLStatusBar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -902,6 +905,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLTaskListCtrlOptionsComboBox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDLAttributeComboBox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLStatusBar.h">

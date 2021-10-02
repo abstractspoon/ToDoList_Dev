@@ -103,18 +103,24 @@ protected:
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, double& dWeightedEstimate) const;
 	double GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest) const;
 	int GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone) const;
-	BOOL IsTaskReference(DWORD dwTaskID) const;
 	BOOL HasDueTodayTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL HasLockedTasks(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsParentTaskDone(const TODOSTRUCTURE* pTDS) const;
 	BOOL IsTaskDue(DWORD dwTaskID, BOOL bToday) const;
 	BOOL IsTaskDue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bToday) const;
+
+	// Custom attribute calculation helpers ------------------
+	BOOL DoCustomAttributeCalculation(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dResult, TDC_UNITS nUnits, BOOL bAggregated) const;
+	BOOL GetFirstCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
+	BOOL GetSecondCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTECALCULATION& calc, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
+	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_ATTRIBUTE nAttribID, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
+	BOOL GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits, BOOL bAggregated) const;
+	// -------------------------------------------------------
 	
 	const TODOITEM* GetLastModifiedTask(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 
 	static double GetLatestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
 	static double GetEarliestDate(double dDate1, double dDate2, BOOL bNoTimeIsEndOfDay);
-	static BOOL GetCalculationValue(const TDCCADATA& data, const TDCCUSTOMATTRIBUTEDEFINITION& attribDef, double& dValue, TDC_UNITS nUnits);
 
 };
 

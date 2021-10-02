@@ -15,6 +15,72 @@ struct TDCCADATA;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
+struct TDCCUSTOMATTRIBUTECALCULATIONOPERAND
+{
+	TDCCUSTOMATTRIBUTECALCULATIONOPERAND();
+
+	BOOL operator==(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
+
+	void Clear();
+	BOOL Set(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op);
+	BOOL Set( TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID);
+
+	BOOL IsValid(BOOL bAllowNone = TRUE) const;
+	BOOL IsCustom() const;
+
+	TDC_ATTRIBUTE nAttribID; // TDCA_CUSTOMATTRIBUTE for all custom attributes
+	CString sCustAttribID;
+
+	static BOOL IsValid(TDC_ATTRIBUTE nAttribID, const CString& sCustAttribID, BOOL bAllowNone = TRUE);
+	static DWORD GetDataType(TDC_ATTRIBUTE nAttribID);
+
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
+const DWORD TDCCA_INVALID = TDCCA_STRING;
+
+struct TDCCUSTOMATTRIBUTECALCULATION
+{
+	TDCCUSTOMATTRIBUTECALCULATION();
+
+	BOOL operator==(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
+
+	void Clear();
+	BOOL IsValid(BOOL bAllowNone = TRUE) const;
+
+	BOOL Set(const TDCCUSTOMATTRIBUTECALCULATION& calc);
+
+	BOOL Set(TDC_ATTRIBUTE nFirstOpAttribID,
+			 const CString& sFirstOpCustAttribID,
+			 TDCCA_CALC_OPERATOR nOp,
+			 TDC_ATTRIBUTE nSecondOpAttribID,
+			 const CString& sSecondOpCustAttribID);
+
+	BOOL Set(TDC_ATTRIBUTE nFirstOpAttribID,
+			 const CString& sFirstOpCustAttribID,
+			 TDCCA_CALC_OPERATOR nOp,
+			 double dSecondOpValue);
+
+	BOOL IsFirstOperandCustom() const;
+	BOOL IsSecondOperandCustom() const;
+	BOOL IsSecondOperandValue() const;
+	
+	static BOOL IsValidOperator(TDCCA_CALC_OPERATOR nOperator);
+	static BOOL IsValidOperator(TDCCA_CALC_OPERATOR nOperator, DWORD dwFirstOpDataType, DWORD dwSecondOpDataType);
+
+	static DWORD GetResultDataType(DWORD dwFirstOpDataType, TDCCA_CALC_OPERATOR nOperator, DWORD dwSecondOpDataType);
+
+public:
+	TDCCUSTOMATTRIBUTECALCULATIONOPERAND opFirst;
+	TDCCA_CALC_OPERATOR nOperator;
+
+	TDCCUSTOMATTRIBUTECALCULATIONOPERAND opSecond;
+	double dSecondOperandValue;
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+
 struct TDCCUSTOMATTRIBUTEDEFINITION
 {
 	friend class CTDCCustomAttribDefinitionArray;
@@ -58,13 +124,16 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	BOOL SupportsFeature(DWORD dwFeature) const;
 	BOOL IsAggregated() const;
 
+	BOOL SetCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc);
+	const TDCCUSTOMATTRIBUTECALCULATION& Calculation() const { return calculation; }
 
 	CString GetNextListItem(const CString& sItem, BOOL bNext) const;
 	CString GetImageName(const CString& sImage) const;
 
 	CString FormatData(const TDCCADATA& data, BOOL bISODates, TCHAR cListSep = 0) const;
 	CString FormatNumber(double dValue) const;
-	
+	BOOL GetDataAsDouble(const TDCCADATA& data, double& dValue, TDC_UNITS nUnits) const;
+
 	int CalcLongestListItem(CDC* pDC) const;
 
 	static BOOL IsCustomAttribute(TDC_ATTRIBUTE nAttribID);
@@ -73,7 +142,9 @@ struct TDCCUSTOMATTRIBUTEDEFINITION
 	static BOOL IsEncodedImageTag(const CString& sImage);
 	static CString EncodeImageTag(const CString& sImage, const CString& sName);
 	static BOOL DecodeImageTag(const CString& sTag, CString& sImage, CString& sName);
-	
+	static BOOL AttributeSupportsFeature(DWORD dwDataType, DWORD dwListType, DWORD dwFeature);
+	static CString FormatNumber(double dValue, DWORD dwDataType, DWORD dwFeatures);
+
 	// ----------------------------------------------------------------
 	CString sUniqueID;
 	CString sColumnTitle;
@@ -89,6 +160,7 @@ private:
 	DWORD dwAttribType;
 	TDC_COLUMN nColID;
 	TDC_ATTRIBUTE nAttribID;
+	TDCCUSTOMATTRIBUTECALCULATION calculation;
 	// ----------------------------------------------------------------
 
 	BOOL SetTypes(DWORD dwDataType, DWORD dwListType);
@@ -149,10 +221,6 @@ public:
 
 	int GetVisibleColumnIDs(CTDCColumnIDMap& mapCols, BOOL bAppend) const;
 
-// 	BOOL GetAttributeDef(TDC_ATTRIBUTE nCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-// 	BOOL GetAttributeDef(const CString& sCustAttribID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-// 	BOOL GetAttributeDef(TDC_COLUMN nCustColID, TDCCUSTOMATTRIBUTEDEFINITION& attribDef) const;
-
 	DWORD GetAttributeDataType(TDC_ATTRIBUTE nCustAttribID) const;
 	DWORD GetAttributeDataType(TDC_COLUMN nCustColID) const;
 	DWORD GetAttributeDataType(const CString& sCustAttribID) const;
@@ -160,6 +228,11 @@ public:
 	BOOL IsColumnSortable(TDC_COLUMN nCustColID) const;
 	BOOL IsColumnEnabled(TDC_COLUMN nCustColID) const;
 	BOOL IsCustomAttributeEnabled(TDC_ATTRIBUTE nCustAttribID) const;
+
+	// Calculation helpers requiring access to all attribute definitions
+	BOOL IsValidCalculation(const TDCCUSTOMATTRIBUTECALCULATION& calc, BOOL bAllowNone = TRUE) const;
+	DWORD GetCalculationOperandDataType(const TDCCUSTOMATTRIBUTECALCULATIONOPERAND& op) const;
+	DWORD GetCalculationResultDataType(const TDCCUSTOMATTRIBUTECALCULATION& calc) const;
 
 	// VC6 fixes
 	const TDCCUSTOMATTRIBUTEDEFINITION& operator[](int nIndex) const { return GetData()[nIndex]; }
