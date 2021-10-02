@@ -967,6 +967,9 @@ BOOL CTaskCalendarCtrl::WantDrawTaskSelected(const TASKCALITEM* pTCI) const
 	if (m_bSavingToImage)
 		return FALSE;
 
+	if (m_dwSelectedTaskID == 0)
+		return FALSE;
+
 	DWORD dwTaskID = pTCI->GetTaskID();
 
 	if (dwTaskID == m_dwSelectedTaskID)
