@@ -306,10 +306,9 @@ BOOL CTDCFilter::HasFilterAttribute(TDC_ATTRIBUTE nAttrib, const CTDCCustomAttri
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		{
-			TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-			VERIFY(aCustomAttribDefs.GetAttributeDef(nAttrib, attribDef));
+			CString sAttribID = aCustomAttribDefs.GetAttributeTypeID(nAttrib);
 
-			return m_filter.mapCustomAttrib.HasKey(attribDef.sUniqueID);
+			return m_filter.mapCustomAttrib.HasKey(sAttribID);
 		}
 		break;
 	}
@@ -816,13 +815,9 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 {
 	// we only need to refilter if the modified attribute
 	// actually affects the filter
-	BOOL bNeedRefilter = FALSE;
-
 	if (m_nState == TDCFS_ADVANCED) // 'Find' filter
 	{
-		bNeedRefilter = HasAdvancedFilterAttribute(nModType); 
-
-		if (bNeedRefilter)
+		if (HasAdvancedFilterAttribute(nModType))
 		{
 			// don't refilter on Time Estimate/Spent, Cost or Comments, or 
 			// similar custom attributes because the user typically hasn't 
@@ -833,36 +828,37 @@ BOOL CTDCFilter::ModNeedsRefilter(TDC_ATTRIBUTE nModType, const CTDCCustomAttrib
 			case TDCA_TIMEESTIMATE:
 			case TDCA_COST:
 			case TDCA_COMMENTS:
-				bNeedRefilter = FALSE;
-				break;
+				return FALSE;
 
 			default:
 				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nModType))
 				{
-					TDCCUSTOMATTRIBUTEDEFINITION attribDef;
-					VERIFY(aCustomAttribDefs.GetAttributeDef(nModType, attribDef));
+					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+					GET_DEF_RET(aCustomAttribDefs, nModType, pDef, FALSE);
 
-					if (!attribDef.IsList())
+					if (!pDef->IsList())
 					{
-						switch (attribDef.GetDataType())
+						switch (pDef->GetDataType())
 						{
 						case TDCCA_DOUBLE:
 						case TDCCA_INTEGER:
 						case TDCCA_STRING:
-							bNeedRefilter = FALSE;
-							break;
+							return FALSE;
 						}
 					}
 				}
 			}
+
+			// all else
+			return TRUE;
 		}
 	}
 	else if (m_nState == TDCFS_FILTER) // 'Filter Bar' filter
 	{
-		bNeedRefilter = HasFilterAttribute(nModType, aCustomAttribDefs);
+		return HasFilterAttribute(nModType, aCustomAttribDefs);
 	}
 
-	return bNeedRefilter;
+	return FALSE;
 }
 
 const CStringArray& CTDCFilter::GetDefaultFilterNames()
