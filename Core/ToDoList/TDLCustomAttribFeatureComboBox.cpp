@@ -8,7 +8,6 @@
 
 #include "..\shared\misc.h"
 #include "..\shared\dialoghelper.h"
-#include "..\shared\localizer.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -73,9 +72,6 @@ BOOL CTDLCustomAttribFeatureComboBox::SetAttributeDefinition(const TDCCUSTOMATTR
 
 void CTDLCustomAttribFeatureComboBox::BuildCombo(const TDCCUSTOMATTRIBUTEDEFINITION& attribDef)
 {
-	// translation done via CEnString
-	CLocalizer::EnableTranslation(*this, FALSE);
-
 	ResetContent();
 
 	for (int nFeature = 0; nFeature < NUM_FEATURES; nFeature++)

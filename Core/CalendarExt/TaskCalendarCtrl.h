@@ -48,10 +48,10 @@ public:
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);
 	BOOL EnsureSelectionVisible();
-	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 
+	BOOL GetSelectedTaskLabelRect(CRect& rLabel) const;
 	BOOL GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const;
-	DWORD GetSelectedTaskID() const;
+	BOOL GetSelectedTaskCustomDate(const CString& sCustAttribID, COleDateTime& date) const;
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending);
 
@@ -76,9 +76,10 @@ public:
 
 protected:
 	CTaskCalItemMap m_mapData;
-	CTaskCalFutureItemMap m_mapFutureOccurrences;
+	CTaskCalExtensionItemMap m_mapExtensionItems;
+	CMapStringToString m_mapCustomDateAttrib;
 	CDWordSet m_mapRecurringTaskIDs;
-	TASKCALITEM m_tciPreDrag;
+	TASKCALITEMDATES m_tcidPreDrag;
 
 	BOOL m_bDraggingStart, m_bDraggingEnd, m_bDragging;
 	BOOL m_bReadOnly;
@@ -93,6 +94,7 @@ protected:
 	DWORD m_dwSelectedTaskID;
 	DWORD m_dwOptions;
 	DWORD m_dwMaximumTaskID;
+
 	CPoint m_ptDragOrigin;
 	COleDateTime m_dtDragOrigin;
 	int m_nCellVScrollPos;
@@ -164,12 +166,10 @@ protected:
 
 	BOOL CalcTaskCellRect(int nTask, const CCalendarCell* pCell, const CRect& rCell, CRect& rTask) const;
 	int GetTaskVertPos(DWORD dwTaskID, int nTask, const CCalendarCell* pCell, BOOL bScrolled) const;
+	BOOL WantDrawTaskSelected(const TASKCALITEM* pTCI) const;
 
 	CONTINUOUSDRAWINFO& GetTaskContinuousDrawInfo(DWORD dwTaskID) const;
-	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID, BOOL bIncFutureItems = FALSE) const;
-	BOOL IsTaskLocked(DWORD dwTaskID) const;
-	BOOL IsTaskDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
-	BOOL TaskHasDependencies(DWORD dwTaskID) const;
+	TASKCALITEM* GetTaskCalItem(DWORD dwTaskID) const;
 	BOOL CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
@@ -182,15 +182,15 @@ protected:
 	BOOL IsCellScrollBarActive() const;
 	int GetTaskHeight() const;
 	int CalcRequiredTaskFontPointSize() const;
-	CFont* GetTaskFont(const TASKCALITEM* pTCI, BOOL bFutureOccurrence);
+	CFont* GetTaskFont(const TASKCALITEM* pTCI);
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
 
+	DWORD GetSelectedTaskID() const;
 	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect = NULL) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient) const;
 	BOOL HitTestCellOverflowBtn(const CPoint& ptClient, CRect& rBtn) const;
-	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);
@@ -206,10 +206,17 @@ protected:
 	double GetSnapIncrement() const;
 	void FixupSelection(BOOL bScrollToTask);
 	BOOL SelectGridCell(int nRow, int nCol);
+	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
 
-	BOOL NotifyParentDateChange(TCC_HITTEST nHit);
+	DWORD GetRealTaskID(DWORD dwTaskID) const;
+	BOOL IsExtensionItem(DWORD dwTaskID) const;
+	BOOL IsFutureOccurrence(DWORD dwTaskID) const;
+	BOOL IsCustomDate(DWORD dwTaskID) const;
+
+	BOOL NotifyParentDateChange(TCC_HITTEST nHit, const CString& sCustAttribID);
 	void NotifyParentDragChange();
+	void NotifyParentSelChange();
 
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 	BOOL RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
@@ -217,17 +224,22 @@ protected:
 	void DeleteData();
 	void RecalcDataRange();
 	void RecalcTaskDates();
+	BOOL UpdateCustomDateAttributes(const ITASKLISTBASE* pTasks);
 
-	int RebuildCellTasks(BOOL bIncFutureItems = TRUE);
+	int RebuildCellTasks(BOOL bIncExtItems = TRUE);
 	int RebuildCellTasks(CCalendarCell* pCell);
 	void RebuildCellTaskDrawInfo();
-	void RebuildFutureOccurrences();
+	void RebuildFutureOccurrences(DWORD& dwNextExtID);
+	void RebuildCustomDates(DWORD& dwNextExtID);
 	void AddTasksToCell(const CTaskCalItemMap& mapTasks, const COleDateTime& dtCell, CTaskCalItemArray* pTasks);
 
 	// helpers
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CSet<DWORD>& mapIDs, BOOL bAndSiblings);
 	static BOOL HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew);
 	static BOOL HasColor(COLORREF color) { return (color != CLR_NONE); }
+	static BOOL IsExtensionItem(const TASKCALITEM* pTCI);
+	static BOOL IsFutureOccurrence(const TASKCALITEM* pTCI);
+	static BOOL IsCustomDate(const TASKCALITEM* pTCI);
 
 };
 

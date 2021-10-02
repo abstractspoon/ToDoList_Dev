@@ -11,7 +11,22 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace DayViewUIExtension
 {
-	public class CalendarItem : Calendar.Appointment
+	public class TDLAppointmentView : Calendar.AppointmentView
+	{
+		public TDLAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect) 
+			: 
+			base(appt, rect, gripRect)
+		{
+			IconRect = TextRect = Rectangle.Empty;
+		}
+
+		public Rectangle IconRect;
+		public Rectangle TextRect;
+	}
+
+	// ---------------------------------------------------------------
+
+	public class TaskItem : Calendar.Appointment
 	{
 		private DateTime m_OrgStartDate = NullDate;
 		private DateTime m_OrgEndDate = NullDate;
@@ -21,29 +36,13 @@ namespace DayViewUIExtension
 
 		// --------------------
 
-		protected CalendarItem(CalendarItem item) : base(item)
+		public TaskItem()
 		{
-            if (item == null)
-                return;
-
-			AllocTo = item.AllocTo;
-			HasIcon = item.HasIcon;
-			IsParent = item.IsParent;
-			TaskTextColor = item.TaskTextColor;
-			HasDependencies = item.HasDependencies;
-			IsDone = item.IsDone;
-			IsGoodAsDone = item.IsGoodAsDone;
-			TimeEstimate = item.TimeEstimate;
-			TimeEstUnits = item.TimeEstUnits;
-			IsRecurring = item.IsRecurring;
-
-            UpdateOriginalDates();
 		}
 
-		// --------------------
-
-		public CalendarItem()
+		public Dictionary<string, DateTime> CustomDates
 		{
+			get; private set;
 		}
 
 		public Boolean HasTaskTextColor
@@ -95,11 +94,6 @@ namespace DayViewUIExtension
 		public Boolean IsRecurring { get; set; }
 		public double TimeEstimate { get; set; }
         public Task.TimeUnits TimeEstUnits { get; set; }
-
-        // This is a hack because the underlying DayView does
-        // not allow overriding the AppointmentView class
-        public Rectangle IconRect { get; set; }
-		public Rectangle TextRect { get; set; }
 
 		public override TimeSpan Length
         {
@@ -197,7 +191,20 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		public bool UpdateTaskAttributes(Task task, UIExtension.UpdateType type, bool newTask)
+		private void UpdateCustomDateAttributes(Task task, List<CustomAttributeDefinition> dateAttribs)
+		{
+			CustomDates = new Dictionary<string, DateTime>();
+
+			foreach (var attrib in dateAttribs)
+			{
+				DateTime date;
+
+				if (DateTime.TryParse(task.GetCustomAttributeValue(attrib.Id, true), out date))
+					CustomDates.Add(attrib.Id, date);
+			}
+		}
+
+		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask)
 		{
 			if (!task.IsValid())
 				return false;
@@ -227,6 +234,8 @@ namespace DayViewUIExtension
 
 				m_PrevDueDate = CheckGetEndOfDay(task.GetDueDate(false));
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
+
+				UpdateCustomDateAttributes(task, dateAttribs);
 			}
 			else
 			{
@@ -288,14 +297,17 @@ namespace DayViewUIExtension
 						EndDate = CheckGetEndOfDay(m_PrevDueDate);
 					}
 				}
-            }
 
-            UpdateOriginalDates();
+				if (task.IsAttributeAvailable(Task.Attribute.CustomAttribute))
+					UpdateCustomDateAttributes(task, dateAttribs);
+			}
+
+			UpdateOriginalDates();
 
 			return true;
 		}
 
-		static protected DateTime CheckGetEndOfDay(DateTime date)
+		static public DateTime CheckGetEndOfDay(DateTime date)
 		{
 			if ((date != NullDate) && (date == date.Date))
 				return date.AddDays(1).AddSeconds(-1);
@@ -307,22 +319,60 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
-	public class CalendarFutureItem : CalendarItem
+	public class TaskExtensionItem : Calendar.Appointment
 	{
-		private UInt32 m_RealTaskId;
+		protected TaskItem m_RealItem;
 
-		public CalendarFutureItem(CalendarItem item, UInt32 futureId, Tuple<DateTime, DateTime> futureDates) : base(item)
+		protected TaskExtensionItem(TaskItem item, UInt32 id) : base(item)
 		{
-			m_RealTaskId = item.Id;
-			Id = futureId;
-			Locked = true; // always (for now)
-			TaskTextColor = SystemColors.ControlDarkDark; // GetSysColor(COLOR_3DDKSHADOW);
-
-			StartDate = futureDates.Item1;
-			EndDate = CheckGetEndOfDay(futureDates.Item2);
+			m_RealItem = item;
+			Id = id;
+			TextColor = SystemColors.ControlDarkDark; // GetSysColor(COLOR_3DDKSHADOW);
 		}
 
-		public UInt32 RealTaskId { get { return m_RealTaskId; } }
+		public UInt32 RealTaskId { get { return m_RealItem.Id; } }
+		public TaskItem RealTask { get { return m_RealItem; } }
+	}
+
+	// ---------------------------------------------------------------
+
+	public class FutureOccurrence : TaskExtensionItem
+	{
+		public FutureOccurrence(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
+		{
+			Locked = true; // always (for now)
+
+			StartDate = start;
+			EndDate = TaskItem.CheckGetEndOfDay(end);
+		}
+
+		public override bool IsLongAppt(DateTime start, DateTime end)
+		{
+			return RealTask.IsLongAppt(start, end);
+		}
+	}
+
+	// ---------------------------------------------------------------
+
+	public class CustomDateAttribute : TaskExtensionItem
+	{
+		public CustomDateAttribute(TaskItem item, UInt32 id, string attribId, DateTime date) : base(item, id)
+		{
+			AttributeId = attribId;
+			StartDate = OriginalDate = date;
+			EndDate = StartDate.AddDays(1);
+
+			if (EndDate == EndDate.Date)
+				EndDate = EndDate.AddSeconds(-1);
+		}
+
+		public override bool IsLongAppt(DateTime start, DateTime end)
+		{
+			return true; // always 24 hours
+		}
+
+		public string AttributeId { get; private set; }
+		public DateTime OriginalDate { get; private set; }
 	}
 
 }

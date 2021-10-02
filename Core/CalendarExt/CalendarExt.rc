@@ -59,6 +59,8 @@ BEGIN
     IDS_HEATMAP_NUMSTARTED  "Start Date"
     IDS_SELTASKDATES_LABEL  "Selected Task Date Range"
     IDS_OVERFLOWBTN_TIP     "More tasks..."
+    IDS_CUSTOMDATE_TOOLTIP  "%s (Custom)"
+    IDS_FUTUREOCCURRENCE_TOOLTIP "Future Occurrence"
 END
 
 #endif    // English (U.S.) resources

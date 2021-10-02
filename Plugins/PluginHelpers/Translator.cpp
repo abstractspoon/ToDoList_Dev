@@ -65,21 +65,21 @@ void Translator::Translate(Form^ window)
 	Translate(window->Controls);
 }
 
-void Translator::Translate(Form^ window, ToolTip^ tooltip)
+void Translator::Translate(Form^ window, ToolTip^ tooltips)
 {
 	Translate(window);
 
-	if (tooltip != nullptr)
+	if (tooltips != nullptr)
 	{
 		int nItem = window->Controls->Count;
 
 		while (nItem--)
 		{
 			auto ctrl = window->Controls[nItem];
-			auto toolText = tooltip->GetToolTip(ctrl);
+			auto toolText = tooltips->GetToolTip(ctrl);
 
 			if (!String::IsNullOrEmpty(toolText))
-				tooltip->SetToolTip(ctrl, Translate(toolText));
+				tooltips->SetToolTip(ctrl, Translate(toolText));
 		}
 	}
 }

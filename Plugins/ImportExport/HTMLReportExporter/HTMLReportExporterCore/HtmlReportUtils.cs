@@ -222,17 +222,10 @@ namespace HTMLReportExporter
 		public static CustomAttributes GetCustomAttributes(TaskList tasks)
 		{
 			var attribs = new CustomAttributes();
+			var custAttrib = tasks.GetCustomAttributes();
 
-			if (tasks.HasCustomAttributes())
-			{
-				var numAttrib = tasks.GetCustomAttributeCount();
-
-				for (var attrib = 0; attrib < numAttrib; attrib++)
-				{
-					attribs.Add(tasks.GetCustomAttributeID(attrib).ToLower(),
-								tasks.GetCustomAttributeLabel(attrib));
-				}
-			}
+			foreach (var attrib in custAttrib)
+				attribs.Add(attrib.Id.ToLower(), attrib.Label);
 
 			return attribs;
 		}

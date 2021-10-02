@@ -253,4 +253,31 @@ namespace Calendar
 		}
 
     }
+
+	public class AppointmentView
+	{
+		public AppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect)
+		{
+			Appointment = appt;
+			Rectangle = rect;
+			GripRect = gripRect;
+		}
+
+		public Appointment Appointment;
+		public Rectangle Rectangle;
+		public Rectangle GripRect;
+	}
+
+	class AppointmentList : List<Appointment>
+	{
+		public AppointmentList() : base() { }
+		public AppointmentList(IEnumerable<Appointment> appts) : base(appts) { }
+
+		public void SortByStartDate()
+		{
+			// If two tasks sort the same, attempt to keep things stable 
+			// by retaining their existing layer order
+			Sort((x, y) => ((x.StartDate < y.StartDate) ? -1 : ((x.StartDate > y.StartDate) ? 1 : (x.Layer - y.Layer))));
+		}
+	}
 }

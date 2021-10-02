@@ -49,9 +49,23 @@ namespace DayViewUIExtension
 			// Default implementation handles move WITHIN the respective
 			// 'long/short appointments' regions 
 			if (base.MoveAppointment(e))
+			{
+				// Copy date back to real task because custom dates are temporary
+				if (DayView.SelectedAppointment is CustomDateAttribute)
+				{
+					var custDate = (DayView.SelectedAppointment as CustomDateAttribute);
+
+					custDate.RealTask.CustomDates[custDate.AttributeId] = custDate.StartDate;
+				}
+
 				return true;
+			}
 
 			// whilst we handle transitions BETWEEN the regions
+			TaskItem selection = (DayView.SelectedAppointment as TaskItem);
+
+			if (selection == null) // extension item
+				return false;
 
 			// Note: we need to duplicate some of the base checks
 			// because we don't know what failed
@@ -91,8 +105,6 @@ namespace DayViewUIExtension
 			//                |                            |_____|      |
 			//                |                                         |
 			//              _ |_________________________________________|
-
-			CalendarItem selection = (DayView.SelectedAppointment as CalendarItem);
 
 			bool longAppt = selection.IsLongAppt();
 			bool shortAppt = !longAppt;

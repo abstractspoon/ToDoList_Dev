@@ -23,89 +23,63 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-TASKCALITEM::TASKCALITEM()
+TASKCALITEMDATES::TASKCALITEMDATES()
 	: 
-	color(CLR_NONE), 
-	bGoodAsDone(FALSE),
-	dwTaskID(0),
-	bTopLevel(FALSE),
-	bLocked(FALSE),
-	bIsParent(FALSE),
-	bRecurring(FALSE),
 	bTreatOverdueAsDueToday(FALSE)
 {
 
 }
 	
-TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates) 
+TASKCALITEMDATES::TASKCALITEMDATES(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates) 
 	: 
-	color(CLR_NONE), 
-	bGoodAsDone(FALSE),
-	dwTaskID(0),
-	bTopLevel(FALSE),
-	bLocked(FALSE),
-	bIsParent(FALSE),
-	bRecurring(FALSE),
 	bTreatOverdueAsDueToday(FALSE)
 {
-	UpdateTask(pTasks, hTask, dwCalcDates);
-
-	// Handle TopLevel only on creation
-	bTopLevel = (pTasks->GetTaskParentID(hTask) == 0);
+	Update(pTasks, hTask, mapCustDateAttribIDs, dwCalcDates);
 }
 
-	
-TASKCALITEM::TASKCALITEM(const TASKCALITEM& tci)
+TASKCALITEMDATES::TASKCALITEMDATES(const TASKCALITEMDATES& tcid)
 {
-	*this = tci;
+	*this = tcid;
 }
 
-TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
+TASKCALITEMDATES& TASKCALITEMDATES::operator=(const TASKCALITEMDATES& tcid)
 {
-	sName = tci.sName;
-	sFormattedName = tci.sFormattedName;
-	color = tci.color;
-	dwTaskID = tci.dwTaskID;
-	bGoodAsDone = tci.bGoodAsDone;
-	bLocked = tci.bLocked;
-	dtCreation = tci.dtCreation;
-	dtStart = tci.dtStart;
-	dtDue = tci.dtDue;
-	dtDone = tci.dtDone;
-	dtStartCalc = tci.dtStartCalc;
-	dtEndCalc = tci.dtEndCalc;
-	bHasIcon = tci.bHasIcon;
-	bIsParent = tci.bIsParent;
-	bRecurring = tci.bRecurring;
-	bTreatOverdueAsDueToday = tci.bTreatOverdueAsDueToday;
+	dtCreation = tcid.dtCreation;
+	dtStart = tcid.dtStart;
+	dtDue = tcid.dtDue;
+	dtDone = tcid.dtDone;
+	dtStartCalc = tcid.dtStartCalc;
+	dtEndCalc = tcid.dtEndCalc;
+	bTreatOverdueAsDueToday = tcid.bTreatOverdueAsDueToday;
+
+	Misc::CopyStrT(tcid.mapCustomDates, mapCustomDates);
 	
 	return (*this);
 }
 
-BOOL TASKCALITEM::operator==(const TASKCALITEM& tci)
+BOOL TASKCALITEMDATES::operator==(const TASKCALITEMDATES& tcid) const
 {
-	return ((sName == tci.sName) &&
-			(color == tci.color) &&
-			(dwTaskID == tci.dwTaskID) &&
-			(bGoodAsDone == tci.bGoodAsDone) &&
-			(bLocked == tci.bLocked) &&
-			(dtCreation == tci.dtCreation) &&
-			(dtStart == tci.dtStart) &&
-			(dtDue == tci.dtDue) &&
-			(dtDone == tci.dtDone) &&
-			(dtStartCalc == tci.dtStartCalc) &&
-			(dtEndCalc == tci.dtEndCalc) &&
-			(bHasIcon == tci.bHasIcon) &&
-			(bIsParent == tci.bIsParent) &&
-			(bRecurring == tci.bRecurring));
+	return ((dtCreation == tcid.dtCreation) &&
+			(dtStart == tcid.dtStart) &&
+			(dtDue == tcid.dtDue) &&
+			(dtDone == tcid.dtDone) &&
+			(dtStartCalc == tcid.dtStartCalc) &&
+			(dtEndCalc == tcid.dtEndCalc) &&
+			Misc::MatchAllStrT(mapCustomDates, tcid.mapCustomDates));
 }
 
-void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates)
+BOOL TASKCALITEMDATES::IsValid() const
+{
+	return (IsStartSet() || IsEndSet());
+}
+
+void TASKCALITEMDATES::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates)
 {
 	// check for quick exit
 	if (!pTasks->IsAttributeAvailable(TDCA_STARTDATE) &&
 		!pTasks->IsAttributeAvailable(TDCA_DUEDATE) &&
-		!pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+		!pTasks->IsAttributeAvailable(TDCA_DONEDATE) &&
+		!pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
 	{
 		return;
 	}
@@ -124,7 +98,7 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 		else
 			CDateHelper::ClearDate(dtStart);
 	}
-	
+
 	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
@@ -141,10 +115,30 @@ void TASKCALITEM::UpdateTaskDates(const ITASKLISTBASE* pTasks, HTASKITEM hTask, 
 			CDateHelper::ClearDate(dtDone);
 	}
 
-	RecalcDates(dwCalcDates);
+	// Custom dates
+	if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
+	{
+		mapCustomDates.RemoveAll();
+
+		POSITION pos = mapCustDateAttribIDs.GetStartPosition();
+
+		while (pos)
+		{
+			CString sAttribID, sAttribLabel;
+			mapCustDateAttribIDs.GetNextAssoc(pos, sAttribID, sAttribLabel);
+
+			CString sDate = pTasks->GetTaskCustomDateString(hTask, sAttribID);
+			COleDateTime date;
+
+			if (CDateHelper::DecodeDate(sDate, date, TRUE))
+				mapCustomDates[sAttribID] = date;
+		}
+	}
+
+	Recalc(dwCalcDates);
 }
 
-void TASKCALITEM::ClearCalculatedDates()
+void TASKCALITEMDATES::ClearCalculatedDates()
 {
 	CDateHelper::ClearDate(dtStartCalc);
 	CDateHelper::ClearDate(dtEndCalc);
@@ -152,7 +146,7 @@ void TASKCALITEM::ClearCalculatedDates()
 	bTreatOverdueAsDueToday = FALSE;
 }
 
-void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
+void TASKCALITEMDATES::Recalc(DWORD dwCalcDates)
 {
 	ClearCalculatedDates();
 
@@ -182,7 +176,7 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 		{
 			if (bHasDueDate)
 				dtStartCalc = min(dtDue, dtNow);
-			else 
+			else
 				dtStartCalc = dtNow;
 		}
 
@@ -235,7 +229,232 @@ void TASKCALITEM::RecalcDates(DWORD dwCalcDates)
 	}
 }
 
-BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwCalcDates)
+COleDateTime TASKCALITEMDATES::GetDate(time64_t tDate)
+{
+	COleDateTime date;
+
+	if (tDate > 0)
+		date = CDateHelper::GetDate(tDate);
+	else
+		CDateHelper::ClearDate(date);
+
+	// else
+	return date;
+}
+
+BOOL TASKCALITEMDATES::IsStartSet() const
+{
+	if (CDateHelper::IsDateSet(dtStart))
+	{
+		// sanity check
+		ASSERT(!CDateHelper::IsDateSet(dtStartCalc) || (IsEndSet() && (dtStart > GetAnyEnd())));
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL TASKCALITEMDATES::IsEndSet() const
+{
+	if (CDateHelper::IsDateSet(dtDone))
+	{
+		ASSERT(!CDateHelper::IsDateSet(dtEndCalc));
+		return TRUE;
+	}
+
+	if (CDateHelper::IsDateSet(dtDue))
+	{
+		ASSERT(!CDateHelper::IsDateSet(dtEndCalc) || bTreatOverdueAsDueToday);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+BOOL TASKCALITEMDATES::HasAnyStart() const
+{
+	return CDateHelper::IsDateSet(GetAnyStart());
+}
+
+BOOL TASKCALITEMDATES::HasAnyEnd() const
+{
+	return CDateHelper::IsDateSet(GetAnyEnd());
+}
+
+COleDateTime TASKCALITEMDATES::GetAnyStart() const
+{
+	// take calculated value in preference
+	if (CDateHelper::IsDateSet(dtStartCalc))
+		return dtStartCalc;
+
+	// else
+	return dtStart;
+}
+
+COleDateTime TASKCALITEMDATES::GetAnyEnd() const
+{
+	// take calculated value in preference
+	if (CDateHelper::IsDateSet(dtEndCalc))
+	{
+		return dtEndCalc;
+	}
+	else if (CDateHelper::IsDateSet(dtDone))
+	{
+		return dtDone;
+	}
+
+	// else
+	return dtDue;
+}
+
+BOOL TASKCALITEMDATES::IsDone() const
+{
+	return CDateHelper::IsDateSet(dtDone);
+}
+
+COleDateTime TASKCALITEMDATES::GetDone() const
+{
+	ASSERT(CDateHelper::IsDateSet(dtDone));
+
+	return dtDone;
+}
+
+void TASKCALITEMDATES::MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const
+{
+	MinMax(GetAnyStart(), dtMin, dtMax);
+	MinMax(GetAnyEnd(), dtMin, dtMax);
+}
+
+void TASKCALITEMDATES::MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax)
+{
+	if (CDateHelper::IsDateSet(date))
+	{
+		if (CDateHelper::IsDateSet(dtMin))
+			dtMin.m_dt = min(dtMin.m_dt, date.m_dt);
+		else
+			dtMin = date;
+
+		if (CDateHelper::IsDateSet(dtMax))
+			dtMax.m_dt = max(dtMax.m_dt, date.m_dt);
+		else
+			dtMax = date;
+	}
+}
+
+void TASKCALITEMDATES::SetStart(const COleDateTime& date)
+{
+	ASSERT(CDateHelper::IsDateSet(date));
+
+	dtStart = date;
+	CDateHelper::ClearDate(dtStartCalc);
+}
+
+void TASKCALITEMDATES::SetDue(const COleDateTime& date)
+{
+	ASSERT(CDateHelper::IsDateSet(date));
+
+	dtDue = date;
+	CDateHelper::ClearDate(dtEndCalc);
+}
+
+COleDateTime TASKCALITEMDATES::GetCustomDate(const CString& sCustAttribID) const
+{
+	COleDateTime date;
+	mapCustomDates.Lookup(Misc::ToUpper(sCustAttribID), date);
+
+	return date;
+}
+
+void TASKCALITEMDATES::SetCustomDate(const CString& sCustAttribID, const COleDateTime& date)
+{
+	if (CDateHelper::IsDateSet(date))
+		mapCustomDates[Misc::ToUpper(sCustAttribID)] = date;
+	else
+		mapCustomDates.RemoveKey(Misc::ToUpper(sCustAttribID));
+}
+
+void TASKCALITEMDATES::SetCustomDates(const CMapCustomDates& dates)
+{
+	Misc::CopyStrT(dates, mapCustomDates);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+TASKCALITEM::TASKCALITEM()
+	: 
+	color(CLR_NONE), 
+	bGoodAsDone(FALSE),
+	dwTaskID(0),
+	bTopLevel(FALSE),
+	bLocked(FALSE),
+	bIsParent(FALSE),
+	bRecurring(FALSE)
+{
+
+}
+	
+TASKCALITEM::TASKCALITEM(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates) 
+	: 
+	color(CLR_NONE), 
+	bGoodAsDone(FALSE),
+	dwTaskID(0),
+	bTopLevel(FALSE),
+	bLocked(FALSE),
+	bIsParent(FALSE),
+	bRecurring(FALSE)
+{
+	UpdateTask(pTasks, hTask, mapCustDateAttribIDs, dwCalcDates);
+
+	// Handle TopLevel only on creation
+	bTopLevel = (pTasks->GetTaskParentID(hTask) == 0);
+}
+
+	
+TASKCALITEM::TASKCALITEM(const TASKCALITEM& tci)
+{
+	*this = tci;
+}
+
+TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEMDATES& tcid)
+{
+	dates = tcid;
+
+	return *this;
+}
+
+TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
+{
+	sName = tci.sName;
+	sFormattedName = tci.sFormattedName;
+	color = tci.color;
+	dwTaskID = tci.dwTaskID;
+	bGoodAsDone = tci.bGoodAsDone;
+	bLocked = tci.bLocked;
+	bHasIcon = tci.bHasIcon;
+	bHasDepends = tci.bHasDepends;
+	bTopLevel = tci.bTopLevel;
+	bIsParent = tci.bIsParent;
+	bRecurring = tci.bRecurring;
+
+	dates = tci.dates;
+	
+	return (*this);
+}
+
+BOOL TASKCALITEM::operator==(const TASKCALITEM& tci) const
+{
+	return ((sName == tci.sName) &&
+			(color == tci.color) &&
+			(dwTaskID == tci.dwTaskID) &&
+			(bGoodAsDone == tci.bGoodAsDone) &&
+			(bLocked == tci.bLocked) &&
+			(bHasIcon == tci.bHasIcon) &&
+			(bIsParent == tci.bIsParent) &&
+			(bRecurring == tci.bRecurring) &&
+			(dates == tci.dates));
+}
+
+BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates)
 {
 	ASSERT(dwTaskID == 0 || pTasks->GetTaskID(hTask) == dwTaskID);
 
@@ -257,7 +476,7 @@ BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD
 	if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
 		bRecurring = pTasks->IsTaskRecurring(hTask);
 
-	UpdateTaskDates(pTasks, hTask, dwCalcDates);
+	dates.Update(pTasks, hTask, mapCustDateAttribIDs, dwCalcDates);
 
 	// always update colour
 	color = pTasks->GetTaskTextColor(hTask);
@@ -280,11 +499,6 @@ BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD
 	return !(*this == tciOrg);
 }
 
-BOOL TASKCALITEM::IsValid() const
-{
-	return (IsStartDateSet() || IsEndDateSet());
-}
-
 BOOL TASKCALITEM::IsParent() const
 {
 	return bIsParent;
@@ -297,136 +511,18 @@ BOOL TASKCALITEM::HasIcon(BOOL bShowParentsAsFolder) const
 
 BOOL TASKCALITEM::IsDone(BOOL bIncGoodAs) const
 {
-	if (CDateHelper::IsDateSet(dtDone))
+	if (dates.IsDone())
 		return TRUE;
-	
+
 	// else
 	return (bIncGoodAs && bGoodAsDone);
 }
 
-COleDateTime TASKCALITEM::GetDate(time64_t tDate)
-{
-	COleDateTime date;
-
-	if (tDate > 0)
-		date = CDateHelper::GetDate(tDate);
-	else
-		CDateHelper::ClearDate(date);
-
-	// else
-	return date;
-}
-
-BOOL TASKCALITEM::IsStartDateSet() const
-{
-	if (CDateHelper::IsDateSet(dtStart))
-	{
-		// sanity check
-		ASSERT(!CDateHelper::IsDateSet(dtStartCalc) || (IsEndDateSet() && (dtStart > GetAnyEndDate())));
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL TASKCALITEM::IsEndDateSet() const
-{
-	if (CDateHelper::IsDateSet(dtDone))
-	{
-		ASSERT(!CDateHelper::IsDateSet(dtEndCalc));
-		return TRUE;
-	}
-
-	if (CDateHelper::IsDateSet(dtDue))
-	{
-		ASSERT(!CDateHelper::IsDateSet(dtEndCalc) || bTreatOverdueAsDueToday);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-BOOL TASKCALITEM::HasAnyStartDate() const
-{
-	return CDateHelper::IsDateSet(GetAnyStartDate());
-}
-
-BOOL TASKCALITEM::HasAnyEndDate() const
-{
-	return CDateHelper::IsDateSet(GetAnyEndDate());
-}
-
-COleDateTime TASKCALITEM::GetAnyStartDate() const
-{
-	// take calculated value in preference
-	if (CDateHelper::IsDateSet(dtStartCalc))
-		return dtStartCalc;
-	
-	// else
-	return dtStart;
-}
-
-COleDateTime TASKCALITEM::GetAnyEndDate() const
-{
-	// take calculated value in preference
-	if (CDateHelper::IsDateSet(dtEndCalc))
-	{
-		return dtEndCalc;
-	}
-	else if (CDateHelper::IsDateSet(dtDone))
-	{
-		return dtDone;
-	}
-	
-	// else
-	return dtDue;
-}
-
-COleDateTime TASKCALITEM::GetDoneDate() const
-{
-	ASSERT(CDateHelper::IsDateSet(dtDone));
-
-	return dtDone;
-}
-
-void TASKCALITEM::MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const
-{
-	MinMax(GetAnyStartDate(), dtMin, dtMax);
-	MinMax(GetAnyEndDate(), dtMin, dtMax);
-}
-
-void TASKCALITEM::MinMax(const COleDateTime& date, COleDateTime& dtMin, COleDateTime& dtMax)
-{
-	if (CDateHelper::IsDateSet(date))
-	{
-		if (CDateHelper::IsDateSet(dtMin))
-			dtMin.m_dt = min(dtMin.m_dt, date.m_dt);
-		else
-			dtMin = date;
-
-		if (CDateHelper::IsDateSet(dtMax))
-			dtMax.m_dt = max(dtMax.m_dt, date.m_dt);
-		else
-			dtMax = date;
-	}
-}
-
 void TASKCALITEM::SetStartDate(const COleDateTime& date)
 {
-	ASSERT(CDateHelper::IsDateSet(date));
-
-	dtStart = date;
-	CDateHelper::ClearDate(dtStartCalc);
+	dates.SetStart(date);
 
 	ReformatName();
-}
-
-void TASKCALITEM::SetDueDate(const COleDateTime& date)
-{
-	ASSERT(CDateHelper::IsDateSet(date));
-
-	dtDue = date;
-	CDateHelper::ClearDate(dtEndCalc);
 }
 
 COLORREF TASKCALITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
@@ -500,9 +596,9 @@ CString TASKCALITEM::GetName(BOOL bFormatted) const
 void TASKCALITEM::ReformatName()
 {
 	// Prefix time if specified
-	if (CDateHelper::DateHasTime(dtStart))
+	if (dates.IsStartSet() && CDateHelper::DateHasTime(dates.GetAnyStart()))
 	{
-		sFormattedName.Format(_T("%s - %s"), CTimeHelper::FormatClockTime(dtStart), sName);
+		sFormattedName.Format(_T("%s - %s"), CTimeHelper::FormatClockTime(dates.GetAnyStart()), sName);
 	}
 	else
 	{
@@ -512,32 +608,87 @@ void TASKCALITEM::ReformatName()
 
 /////////////////////////////////////////////////////////////////////////////
 
-TASKCALFUTUREITEM::TASKCALFUTUREITEM(const TASKCALITEM& tciOrg, DWORD dwFutureID, const COleDateTimeRange& dtRange)
+TASKCALEXTENSIONITEM::TASKCALEXTENSIONITEM(const TASKCALITEM& tciOrg, DWORD dwExtID)
 	: 
 	TASKCALITEM(tciOrg), 
 	dwRealTaskID(tciOrg.GetTaskID())
 {
 	ASSERT(!tciOrg.IsDone(FALSE));
-	ASSERT(dwFutureID && dtRange.IsValid());
+	ASSERT(dwExtID);
 
-	dwTaskID = dwFutureID;
-	dtStart = dtRange.GetStart();
-	dtDue = dtRange.GetEndInclusive();
+	dwTaskID = dwExtID;
 }
 
-COLORREF TASKCALFUTUREITEM::GetFillColor(BOOL /*bTextIsBack*/) const
+/////////////////////////////////////////////////////////////////////////////
+
+TASKCALFUTUREOCURRENCE::TASKCALFUTUREOCURRENCE(const TASKCALITEM& tciOrg, DWORD dwExtID, const COleDateTimeRange& dtRange)
+	:
+	TASKCALEXTENSIONITEM(tciOrg, dwExtID)
+{
+	ASSERT(dtRange.IsValid());
+
+	SetStartDate(dtRange.GetStart());
+	SetDueDate(dtRange.GetEndInclusive());
+}
+
+COLORREF TASKCALFUTUREOCURRENCE::GetFillColor(BOOL /*bTextIsBack*/) const
 {
 	return CLR_NONE;
 }
 
-COLORREF TASKCALFUTUREITEM::GetBorderColor(BOOL /*bTextIsBack*/) const
+COLORREF TASKCALFUTUREOCURRENCE::GetBorderColor(BOOL /*bTextIsBack*/) const
 {
 	return 0; // Black
 }
 
-COLORREF TASKCALFUTUREITEM::GetTextColor(BOOL /*bSelected*/, BOOL /*bTextIsBack*/) const
+COLORREF TASKCALFUTUREOCURRENCE::GetTextColor(BOOL /*bSelected*/, BOOL /*bTextIsBack*/) const
 {
 	return GetSysColor(COLOR_3DDKSHADOW);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+TASKCALCUSTOMDATE::TASKCALCUSTOMDATE(const TASKCALITEM& tciOrg, DWORD dwExtID, const CString& sCustAttribID, const COleDateTime& date)
+	:
+	TASKCALEXTENSIONITEM(tciOrg, dwExtID),
+	sCustomAttribID(sCustAttribID)
+{
+	SetDate(date);
+}
+
+void TASKCALCUSTOMDATE::SetDate(const COleDateTime& date)
+{
+	if (CDateHelper::IsDateSet(date))
+	{
+		COleDateTime dtDue = (date.m_dt + 1.0);
+
+		if (CDateHelper::GetDateOnly(dtDue) == dtDue)
+			dtDue = CDateHelper::GetEndOfPreviousDay(dtDue);
+
+		SetStartDate(date);
+		SetDueDate(dtDue);
+
+		ReformatName();
+	}
+	else
+	{
+		ASSERT(0);
+	}
+}
+
+COLORREF TASKCALCUSTOMDATE::GetFillColor(BOOL /*bTextIsBack*/) const
+{
+	return TASKCALEXTENSIONITEM::GetFillColor(FALSE);
+}
+
+COLORREF TASKCALCUSTOMDATE::GetBorderColor(BOOL /*bTextIsBack*/) const
+{
+	return TASKCALEXTENSIONITEM::GetBorderColor(FALSE);
+}
+
+COLORREF TASKCALCUSTOMDATE::GetTextColor(BOOL bSelected, BOOL /*bTextIsBack*/) const
+{
+	return TASKCALEXTENSIONITEM::GetTextColor(bSelected, FALSE);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -618,7 +769,7 @@ BOOL CTaskCalItemMap::HasTask(DWORD dwTaskID) const
 
 /////////////////////////////////////////////////////////////////////////////
 
-DWORD CTaskCalFutureItemMap::GetRealTaskID(DWORD dwTaskID) const
+DWORD CTaskCalExtensionItemMap::GetRealTaskID(DWORD dwTaskID) const
 {
 	const TASKCALITEM* pTCI = GetTaskItem(dwTaskID);
 
@@ -628,10 +779,10 @@ DWORD CTaskCalFutureItemMap::GetRealTaskID(DWORD dwTaskID) const
 		return 0;
 	}
 
-	const TASKCALFUTUREITEM* pTCIFuture = dynamic_cast<const TASKCALFUTUREITEM*>(pTCI);
+	const TASKCALEXTENSIONITEM* pTCIExt = dynamic_cast<const TASKCALEXTENSIONITEM*>(pTCI);
 
-	if (pTCIFuture)
-		return pTCIFuture->dwRealTaskID;
+	if (pTCIExt)
+		return pTCIExt->dwRealTaskID;
 
 	// else
 	return dwTaskID;

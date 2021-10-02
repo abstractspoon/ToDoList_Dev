@@ -81,17 +81,10 @@ namespace HTMLReportExporter
 			DoHighDPIFixups();
 
 			// Build list custom attribute IDs for later use
-			if (tasks.HasCustomAttributes())
-			{
-				var numAttrib = tasks.GetCustomAttributeCount();
-				var custAttribs = new HtmlReportUtils.CustomAttributes();
+			var custAttrib = tasks.GetCustomAttributes();
 
-				for (var attrib = 0; attrib < numAttrib; attrib++)
-				{
-					m_CustomAttributes.Add(tasks.GetCustomAttributeID(attrib).ToLower(),
-											tasks.GetCustomAttributeLabel(attrib));
-				}
-			}
+			foreach (var attrib in custAttrib)
+				m_CustomAttributes.Add(attrib.Id.ToLower(), attrib.Label);
 
 			this.htmlReportTasksControl.SetCustomAttributes(m_CustomAttributes);
 
