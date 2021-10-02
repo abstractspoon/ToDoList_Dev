@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,0,998,6
+ FILEVERSION 8,1,997,1
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 0, 998, 6\0"
+            VALUE "FileVersion", "8, 1, 997, 1\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-21 \0"
             VALUE "LegalTrademarks", "\0"
@@ -55,7 +55,7 @@ BEGIN
             VALUE "PrivateBuild", "\0"
             VALUE "ProductName", "ToDoList\0"
             VALUE "ProductVersion", "1, 0, 0, 0\0"
-            VALUE "SpecialBuild", "Alpha Release of ToDoList 8.1\0"
+            VALUE "SpecialBuild", "Development Preview of ToDoList 8.2\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -4632,8 +4632,16 @@ BEGIN
     IDS_FILTER_ANYVERSION   "Any version can match"
     ID_SB_TASKCOUNT         "Task count"
     ID_SB_FOCUS             "Focus"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SB_SELTASKTITLE      "Title"
     IDS_CAD_CALCULATION     "Calculation"
     IDS_CAD_CALC_ADD        "Add (+)"
+    IDS_CAD_CALC_SUBTRACT   "Subtract (-)"
+    IDS_CAD_CALC_MULTIPLY   "Multiply (*)"
+    IDS_CAD_CALC_DIVIDE     "Divide (/)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5832,14 +5840,6 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INSERTDATE      "\nInsert Date"
-END
-
-STRINGTABLE DISCARDABLE 
-BEGIN
-    ID_SB_SELTASKTITLE      "Title"
-    IDS_CAD_CALC_SUBTRACT   "Subtract (-)"
-    IDS_CAD_CALC_MULTIPLY   "Multiply (*)"
-    IDS_CAD_CALC_DIVIDE     "Divide (/)"
 END
 
 #endif    // English (Australia) resources
