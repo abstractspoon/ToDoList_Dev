@@ -604,19 +604,14 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				CString sUniqueID = rule.GetCustomAttributeID();
 				ASSERT (!sUniqueID.IsEmpty());
 
-				TDCCUSTOMATTRIBUTEDEFINITION attribDef;
+				const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+				GET_DEF_ALT(query.aAttribDefs, sUniqueID, pDef, break);
+				
+				TDCCADATA data;
+				pTDI->GetCustomAttributeValue(sUniqueID, data);
 
-				if (query.aAttribDefs.GetAttributeDef(sUniqueID, attribDef))
-				{
-					TDCCADATA data;
-					pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+				bMatch = ValueMatches(data, pDef->GetAttributeType(), rule, resTask, bCaseSensitive);
 
-					bMatch = ValueMatches(data, attribDef.GetAttributeType(), rule, resTask, bCaseSensitive);
-				}
-				else
-				{
-					ASSERT (0);
-				}
 			}
 			else
 			{
@@ -1910,10 +1905,10 @@ BOOL CTDCTaskCalculator::IsAggregatedAttribute(TDC_ATTRIBUTE nAttribID) const
 		// check custom attributes
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 		{
-			int nAttrib = m_data.m_aCustomAttribDefs.Find(nAttribID);
+			const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
+			GET_DEF_RET(m_data.m_aCustomAttribDefs, nAttribID, pDef, FALSE);
 
-			if (nAttrib != -1)
-				return m_data.m_aCustomAttribDefs[nAttrib].IsAggregated();
+			return pDef->IsAggregated();
 		}
 	}
 
