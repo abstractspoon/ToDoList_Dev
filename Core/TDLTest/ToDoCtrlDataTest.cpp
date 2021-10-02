@@ -259,6 +259,9 @@ void CToDoCtrlDataTest::TestDataModelGetTaskPositionPerformance(const CToDoCtrlD
 
 	for (DWORD dwTaskID = 1; dwTaskID <= dwMaxTaskID; dwTaskID++)
 	{
+		CArray<int, int> aPositions;
+		data.GetTaskPositions(dwTaskID, aPositions);
+
 		formatter.GetTaskPosition(dwTaskID);
 	}
 

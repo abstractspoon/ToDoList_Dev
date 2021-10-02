@@ -357,7 +357,7 @@ protected:
 	BOOL ValidatePreviousSiblingTaskID(DWORD dwTaskID, DWORD& dwPrevSiblingID) const;
 
 	BOOL AddTreeChildrenToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hTask, const TDCGETTASKS& filter) const;
-	BOOL AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, const TDCGETTASKS& filter) const;
+	HTASKITEM AddTreeItemToTaskFile(HTREEITEM hti, CTaskFile& tasks, HTASKITEM hParentTask, HTASKITEM hPrevSiblingTask, const TDCGETTASKS& filter) const;
 	void AddGlobalsToTaskFile(CTaskFile& tasks, const CTDCAttributeMap& mapAttribIDs) const;
 	void ShowListViewSpecificCtrls(BOOL bShow);
 

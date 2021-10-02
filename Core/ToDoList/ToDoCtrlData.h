@@ -54,7 +54,8 @@ public:
 	int BuildDataModel(const CTaskFile& tasks);
 	
 	inline int GetTaskCount() const { return m_items.GetCount(); }
-	inline int GetTaskIDs(CDWordArray& aTaskIDs) const { return m_struct.GetTaskIDs(aTaskIDs); }
+	inline POSITION GetStart() const { return m_items.GetStart(); }
+	inline DWORD GetNextTaskID(POSITION& pos) const { return m_items.GetNextTaskID(pos); }
 	
 	TODOITEM* NewTask(const TODOITEM& tdiRef, DWORD dwParentTaskID = 0) const;
 	TODOITEM* NewTask(const CTaskFile& tasks, HTASKITEM hTask, const TODOITEM* pTDIRef = NULL) const;
@@ -113,6 +114,7 @@ public:
 	CString GetTaskFileLink(DWORD dwTaskID, int nFileLink) const;
 	CString GetTaskExtID(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
+	int GetTaskPositions(DWORD dwTaskID, CArray<int, int>& aPositions, BOOL bZeroBased = TRUE) const;
 
 	int GetTaskPriority(DWORD dwTaskID) const;
 	int GetTaskRisk(DWORD dwTaskID) const;
@@ -329,6 +331,7 @@ protected:
 	BOOL IsValidMoveDestination(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const;
 	BOOL SetTaskModified(DWORD dwTaskID);
+	int GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased = TRUE) const;
 
 	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
 	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);

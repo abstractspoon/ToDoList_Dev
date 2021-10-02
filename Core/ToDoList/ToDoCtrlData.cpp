@@ -279,10 +279,22 @@ BOOL CToDoCtrlData::TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImme
 		return TRUE;
 
 	// Check they have adjacent positions
-	int nPos = pTDSParent->GetSubTaskPosition(dwTaskID);
+	int nPos = GetTaskPosition(pTDS);
+	ASSERT((nPos != -1) && (pTDSParent->GetSubTaskID(nPos) == dwTaskID));
 
 	return ((pTDSParent->GetPreviousSubTaskID(nPos) == dwSiblingID) ||
 			(pTDSParent->GetNextSubTaskID(nPos) == dwSiblingID));
+}
+
+// for friend classes
+int CToDoCtrlData::GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased) const
+{
+	return m_struct.GetTaskPosition(pTDS->GetTaskID(), bZeroBased);
+}
+
+int CToDoCtrlData::GetTaskPositions(DWORD dwTaskID, CArray<int, int>& aPositions, BOOL bZeroBased) const
+{
+	return m_struct.GetTaskPositions(dwTaskID, aPositions, bZeroBased);
 }
 
 // external version returning const
@@ -1563,8 +1575,8 @@ BOOL CToDoCtrlData::ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRI
 				return FALSE;
 			}
 
-			int nPos = pTDSParent->GetSubTaskPosition(dwTaskID);
-			ASSERT(nPos != -1);
+			int nPos = GetTaskPosition(pTDS);
+			ASSERT((nPos != -1) && (pTDSParent->GetSubTaskID(nPos) == dwTaskID));
 
 			if (!ApplyLastChangeToSubtask(pTDIParent, pTDSParent, nPos, nAttrib, FALSE))
 				return FALSE;
