@@ -825,24 +825,39 @@ void CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(const CWnd* pParent,
 														const CTDCCustomControlArray& aControls, 
 														const CTDCCustomAttribDefinitionArray& aAttribDefs)
 {
-	int nDef = aAttribDefs.GetSize();
+	int nCtrl = aControls.GetSize();
 	
-	while (nDef--)
+	while (nCtrl--)
 	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& def = aAttribDefs.GetData()[nDef];
+		SaveAutoListDataToDef(pParent, aControls.GetData()[nCtrl], aAttribDefs);
+	}
+}
 
-		if (def.bEnabled && def.IsAutoList() && !def.IsDataType(TDCCA_FILELINK))
+void CTDCCustomAttributeUIHelper::SaveAutoListDataToDef(const CWnd* pParent, 
+														const CUSTOMATTRIBCTRLITEM& ctrl,
+														const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	int nDef = aAttribDefs.Find(ctrl.nAttrib);
+	
+	if (nDef == -1)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	const TDCCUSTOMATTRIBUTEDEFINITION& def = aAttribDefs.GetData()[nDef];
+
+	if (def.bEnabled && def.IsAutoList() && !def.IsDataType(TDCCA_FILELINK))
+	{
+		const CComboBox* pCombo = (const CComboBox*)ctrl.GetCtrl(pParent);
+		ASSERT(pCombo && pCombo->IsKindOf(RUNTIME_CLASS(CComboBox)));
+
+		if (pCombo && pCombo->IsKindOf(RUNTIME_CLASS(CComboBox)))
 		{
-			const CComboBox* pCombo = (const CComboBox*)GetControlFromAttributeDef(pParent, def, aControls);
-			ASSERT(pCombo && pCombo->IsKindOf(RUNTIME_CLASS(CComboBox)));
+			CDialogHelper::GetComboBoxItems(*pCombo, def.aAutoListData);
 
-			if (pCombo && pCombo->IsKindOf(RUNTIME_CLASS(CComboBox)))
-			{
-				CDialogHelper::GetComboBoxItems(*pCombo, def.aAutoListData);
-
-				// remove any default data
-				Misc::RemoveItems(def.aDefaultListData, def.aAutoListData);
-			}
+			// remove any default data
+			Misc::RemoveItems(def.aDefaultListData, def.aAutoListData);
 		}
 	}
 }
@@ -1193,11 +1208,11 @@ CWnd* CTDCCustomAttributeUIHelper::CheckRecreateDateFilterBuddy(const CWnd* pPar
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 		GET_DEF_RET(aAttribDefs, ctrl.sAttribID, pDef, NULL);
 
-		pBuddy = CreateAttributeCtrl(const_cast<CWnd*>(pParent),
+		pBuddy = CreateAttributeCtrl(const_cast<CWnd*>(pParent), 
 									 *pDef,
 									 TDCCADATA(nFilter),	// new type
 									 CTDCImageList(),		// not required
-									 ctrl.nBuddyCtrlID,
+									 ctrl.nBuddyCtrlID, 
 									 TRUE,					// buddy
 									 FALSE);				// multi-selection droplist
 
@@ -1530,6 +1545,37 @@ void CTDCCustomAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRI
 			}
 			break;
 		}
+	}
+}
+
+void CTDCCustomAttributeUIHelper::UpdateControlAutoListData(const CWnd* pParent, 
+															const CUSTOMATTRIBCTRLITEM& ctrl,
+															const CTDCCustomAttribDefinitionArray& aAttribDefs)
+{
+	int nAttribDef = aAttribDefs.Find(ctrl.sAttribID);
+
+	if (nAttribDef == -1)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs.GetData()[nAttribDef];
+
+	if (!attribDef.IsList() || attribDef.IsDataType(TDCCA_FILELINK))
+	{
+		return;
+	}
+	
+	CWnd* pCtrl = ctrl.GetCtrl(pParent);
+	ASSERT_VALID(pCtrl);
+
+	if (pCtrl && pCtrl->IsKindOf(RUNTIME_CLASS(CAutoComboBox)))
+	{
+		CStringArray aItems;
+		attribDef.GetUniqueListData(aItems);
+
+		((CAutoComboBox*)pCtrl)->SetStrings(aItems);
 	}
 }
 

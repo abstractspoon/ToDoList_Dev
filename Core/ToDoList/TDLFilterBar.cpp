@@ -571,7 +571,7 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 		}
 	
 		// auto droplist filters
-		UpdateAutoDropListData(tdc, nAttribID);
+		UpdateDropListData(tdc, nAttribID);
 
 		// Custom attributes
 		UpdateCustomControls(tdc, nAttribID);
@@ -588,12 +588,12 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 	}
 	else
 	{
-		UpdateAutoDropListData(tdc, nAttribID);
+		UpdateDropListData(tdc, nAttribID);
 		UpdateCustomControls(tdc, nAttribID);
 	}
 }
 
-void CTDLFilterBar::UpdateAutoDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
+void CTDLFilterBar::UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID)
 {
 	TDCAUTOLISTDATA tld;
 	tdc.GetAutoListData(tld, nAttribID);
@@ -617,6 +617,29 @@ void CTDLFilterBar::UpdateAutoDropListData(const CFilteredToDoCtrl& tdc, TDC_ATT
 
 	if (bAllAttrib || (nAttribID == TDCA_TAGS))
 		m_cbTagFilter.SetStrings(tld.aTags);
+
+	if (bAllAttrib)
+	{
+		int nCtrl = m_aCustomControls.GetSize();
+
+		while (nCtrl--)
+		{
+			const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
+			CTDCCustomAttributeUIHelper::UpdateControlAutoListData(this, ctrl, tdc.GetCustomAttributeDefs());
+		}
+
+	}
+	else if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+	{
+		int nCtrl = m_aCustomControls.Find(nAttribID);
+		ASSERT(nCtrl != -1);
+
+		if (nCtrl != -1)
+		{
+			const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls[nCtrl];
+			CTDCCustomAttributeUIHelper::UpdateControlAutoListData(this, ctrl, tdc.GetCustomAttributeDefs());
+		}
+	}
 }
 
 BOOL CTDLFilterBar::SetTitleFilterOption(FILTER_TITLE nOption) 

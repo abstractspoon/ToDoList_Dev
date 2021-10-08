@@ -686,6 +686,7 @@ protected:
 	void StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC nFrom);
 	void StopTimeTrackingTask(int nTDC, TIMETRACKSRC nFrom);
 
+	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID);
 	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
 	void RefreshFilterBarAdvancedFilterNames();
@@ -699,6 +700,7 @@ protected:
 
 	void ShowFindDialog(BOOL bShow = TRUE);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
+	void UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pCtrl);
 	
 	enum UDTCHANGETYPE
 	{

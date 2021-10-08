@@ -3325,7 +3325,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyListChange(WPARAM /*wp*/, LPARAM lp)
 		break;
 	}
 
-	RefreshFilterBarControls(nAttribID);
+	UpdateFilterBarListData(nAttribID);
 	RefreshFindTasksListData(nAttribID);
 	
 	return 0L;
@@ -4570,24 +4570,32 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 	return nOpen;
 }
 
+void CToDoListWnd::UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pTDC)
+{
+	ASSERT(pTDC);
+
+	CTDCCustomAttribDefinitionArray aAllAttribDefs;
+	m_mgrToDoCtrls.GetAllCustomAttributeDefinitions(aAllAttribDefs);
+	
+	CTDCCustomAttribDefinitionArray aTDCAttribDefs;
+	pTDC->GetCustomAttributeDefs(aTDCAttribDefs);
+
+	m_dlgFindTasks.SetCustomAttributes(aTDCAttribDefs, aAllAttribDefs);
+}
+
 void CToDoListWnd::UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pTDC)
 {
 	if ((pTDC == NULL) && (GetTDCCount() == 0))
 		return; // nothing to do
 
-	CTDCCustomAttribDefinitionArray aTDCAttribDefs, aAllAttribDefs;
-	m_mgrToDoCtrls.GetAllCustomAttributeDefinitions(aAllAttribDefs);
-	
 	// active tasklist
 	if (pTDC == NULL)
 		pTDC = &GetToDoCtrl();
 
 	ASSERT (pTDC);
-	pTDC->GetCustomAttributeDefs(aTDCAttribDefs);
-
-	// do the update
-	m_dlgFindTasks.SetCustomAttributes(aTDCAttribDefs, aAllAttribDefs);
 	m_dlgFindTasks.SetActiveTasklist(pTDC->GetFilePath(), Prefs().GetShowDefaultTaskIcons());
+
+	UpdateFindDialogCustomAttributes(pTDC);
 }
 
 LRESULT CToDoListWnd::OnDoInitialDueTaskNotify(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -6001,6 +6009,7 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 		
 		UpdateCaption();
 		UpdateStatusBar();
+		RefreshFilterBarControls(TDCA_ALL);
 	}
 	else if (bNotifyError)
 	{
@@ -8119,6 +8128,12 @@ void CToDoListWnd::UpdateMenuIconMgrSourceControlStatus()
 	}
 }
 
+void CToDoListWnd::UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID)
+{
+	if (m_bShowFilterBar)
+		m_filterBar.UpdateDropListData(GetToDoCtrl(), nAttribID);
+}
+
 void CToDoListWnd::RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory)
 {
 	if (m_bShowFilterBar)
@@ -8163,10 +8178,21 @@ void CToDoListWnd::CheckResizeFilterBar()
 
 void CToDoListWnd::RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID)
 {
-	TDCAUTOLISTDATA tldActive, tldAll;
+	BOOL bRefreshAll = (nAttribID == TDCA_ALL);
+	BOOL bCustAttrib = TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID);
 
-	m_mgrToDoCtrls.GetAutoListData(tldActive, tldAll, nAttribID);
-	m_dlgFindTasks.SetAttributeListData(tldActive, tldAll, nAttribID);
+	if (bRefreshAll || bCustAttrib)
+	{
+		UpdateFindDialogCustomAttributes(&GetToDoCtrl());
+	}
+
+	if (bRefreshAll || !bCustAttrib)
+	{
+		TDCAUTOLISTDATA tldActive, tldAll;
+
+		m_mgrToDoCtrls.GetAutoListData(tldActive, tldAll, nAttribID);
+		m_dlgFindTasks.SetAttributeListData(tldActive, tldAll, nAttribID);
+	}
 }
 
 void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilters, const CStringArray& aNewFilters)

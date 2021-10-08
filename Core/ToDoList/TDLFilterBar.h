@@ -52,6 +52,7 @@ public:
 
 	void ShowDefaultFilters(BOOL bShow);
 	void RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID = TDCA_ALL);
+	void UpdateDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 	void SetFilterLabelAlignment(BOOL bLeft);
 	void SetPriorityColors(const CDWordArray& aColors);
 	int CalcHeight(int nWidth);
@@ -153,7 +154,6 @@ protected:
 	void RefreshUIBkgndBrush();
 	int GetControls(CTDCControlArray& aControls) const;
 	void UpdateCustomControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
-	void UpdateAutoDropListData(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID);
 	void NotifyParentFilterChange();
 	void RebuildOptionsCombo();
 };

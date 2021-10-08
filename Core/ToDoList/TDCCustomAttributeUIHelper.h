@@ -74,12 +74,18 @@ public:
 	static void SaveAutoListDataToDefs(const CWnd* pParent, const CTDCCustomControlArray& aControls,
 									   const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
+	static void SaveAutoListDataToDef(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
+									   const CTDCCustomAttribDefinitionArray& aAttribDefs);
+
 	static BOOL GetControl(UINT nCtrlID, const CTDCCustomControlArray& aControls, CUSTOMATTRIBCTRLITEM& ctrl);
 	static BOOL GetControl(const CString& sUniqueID, const CTDCCustomControlArray& aControls, CUSTOMATTRIBCTRLITEM& ctrl);
 
 	static void UpdateControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 							  const CTDCCustomAttribDefinitionArray& aAttribDefs,
 							  const TDCCADATA& data);
+
+	static void UpdateControlAutoListData(const CWnd* pParent, const CUSTOMATTRIBCTRLITEM& ctrl,
+										  const CTDCCustomAttribDefinitionArray& aAttribDefs);
 
 	static void ClearControl(const CWnd* pParent, CUSTOMATTRIBCTRLITEM& ctrl,
 							 const CTDCCustomAttribDefinitionArray& aAttribDefs);

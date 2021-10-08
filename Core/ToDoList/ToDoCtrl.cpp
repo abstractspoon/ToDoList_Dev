@@ -7932,7 +7932,11 @@ LRESULT CToDoCtrl::OnAutoComboAddDelete(WPARAM wp, LPARAM /*lp*/)
 
 			if (nCtrl != -1)
 			{
-				GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, m_aCustomControls[nCtrl].nAttrib);
+				// Update stored auto-list data before notifying parent
+				const CUSTOMATTRIBCTRLITEM& ctrl = m_aCustomControls.GetData()[nCtrl];
+				CTDCCustomAttributeUIHelper::SaveAutoListDataToDef(this, ctrl, m_aCustomAttribDefs);
+
+				GetParent()->SendMessage(WM_TDCN_LISTCHANGE, 0, ctrl.nAttrib);
 				break;
 			}
 		}
@@ -9085,6 +9089,10 @@ void CToDoCtrl::AppendTaskFileHeader(CTaskFile& tasks) const
 
 int CToDoCtrl::GetAllTasks(CTaskFile& tasks) const
 {
+	// save auto combobox contents to definition first
+	// just like we do with standard combos
+	CTDCCustomAttributeUIHelper::SaveAutoListDataToDefs(this, m_aCustomControls, m_aCustomAttribDefs);
+
 	return m_exporter.ExportAllTasks(tasks);
 }
 
