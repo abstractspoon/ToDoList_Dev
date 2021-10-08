@@ -324,6 +324,9 @@ CWnd* CTDLFindTaskExpressionListCtrl::GetEditControl(int nItem, int nCol)
 
 void CTDLFindTaskExpressionListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 {
+	if (!CanEditCell(nItem, nCol))
+		return;
+
 	// handle new rules
 	if (nItem == GetRuleCount() && nCol == ATTRIB_COL)
 		AddRule();
@@ -1514,18 +1517,8 @@ BOOL CTDLFindTaskExpressionListCtrl::PreTranslateMessage(MSG* pMsg)
 		
 		if (nSel != -1)
 		{
-			// if the focus is on the attrib list and the user hits the spacebar
-			// then toggle the enabled state
 			switch (pMsg->wParam)
 			{
-			case VK_F2:
-				EditSelectedCell();
-				break;
-
-			case VK_DELETE:
-				DeleteSelectedRule();
-				break;
-
 			case VK_UP:
 				if (Misc::ModKeysArePressed(MKS_CTRL))
 				{

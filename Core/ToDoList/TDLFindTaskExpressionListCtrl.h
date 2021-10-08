@@ -112,7 +112,8 @@ protected:
 	afx_msg void OnTimeChange();
 	afx_msg LRESULT OnTimeUnitsChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnEEBtnClick(WPARAM wp, LPARAM lp);
-	
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+
 	DECLARE_MESSAGE_MAP()
 
 	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
