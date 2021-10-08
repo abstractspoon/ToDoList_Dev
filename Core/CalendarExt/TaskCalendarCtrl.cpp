@@ -654,6 +654,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 		CRect rText(rCol);
 		rText.DeflateRect(0, (m_nHeaderHeight - sizeDOW.cy) / 2, 0, 0);
 		
+		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(csTitle, rText, DT_CENTER|DT_TOP);
 		
 		// next column
@@ -729,7 +730,7 @@ void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, cons
 		GraphicsMisc::DrawRect(pDC, rCell, m_crWeekend, CLR_NONE, 0, GMDR_NONE, 128);
 	}
 
-	if (bSelected)
+	if (bSelected && !m_bSavingToImage)
 	{
 		GraphicsMisc::DrawRect(pDC, rCell, m_crTheme, CLR_NONE, 0, GMDR_NONE, (BYTE)(bToday ? 48 : 128));
 	}
