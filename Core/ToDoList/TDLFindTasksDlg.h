@@ -171,6 +171,8 @@ protected:
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 
 protected:
+	void OnSaveSearch(BOOL bNotifyParent); // pseudo-handler
+
 	void SaveSettings();
 	void ResizeDlg(BOOL bOrientationChange, int cx = 0, int cy = 0);
 	void LoadSettings();

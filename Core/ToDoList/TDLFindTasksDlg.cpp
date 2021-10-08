@@ -1183,7 +1183,14 @@ int CTDLFindTasksDlg::GetSavedSearches(CStringArray& aNames)
 	return aNames.GetSize();
 }
 
+// Real handler
 void CTDLFindTasksDlg::OnSaveSearch() 
+{
+	OnSaveSearch(TRUE); // Notify parent
+}
+
+// Pseudo-handler
+void CTDLFindTasksDlg::OnSaveSearch(BOOL bNotifyParent)
 {
 	m_lcFindSetup.EndEdit();
 	
@@ -1565,8 +1572,8 @@ void CTDLFindTasksDlg::OnApplyasfilter()
 	if (sSearch.IsEmpty())
 		m_cbSearches.SetWindowText(CEnString(IDS_UNNAMEDFILTER));
 
-	OnSaveSearch();
-
+	OnSaveSearch(FALSE);	// Don't notify parent 
+	
 	GetParent()->SendMessage(WM_FTD_APPLYASFILTER, 0, (LPARAM)(LPCTSTR)m_sActiveSearch);
 }
 
