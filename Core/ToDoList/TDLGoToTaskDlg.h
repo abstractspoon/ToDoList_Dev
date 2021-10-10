@@ -58,7 +58,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	DWORD FindTask(const CString& sText, CString& sTitle) const;
+	DWORD FindTask(const CString& sText) const;
 	void UpdateTaskID();
 	void UpdateTaskTitle();
 	void UpdateEditPrompts();

@@ -153,7 +153,7 @@ void CTDLGoToTaskDlg::EnableDisableControls()
 	GetDlgItem(IDOK)->EnableWindow(m_dwTaskID);
 }
 
-DWORD CTDLGoToTaskDlg::FindTask(const CString& sText, CString& sTitle) const
+DWORD CTDLGoToTaskDlg::FindTask(const CString& sText) const
 {
 	CResultArray aResults;
 	SEARCHPARAMS params;
@@ -162,10 +162,7 @@ DWORD CTDLGoToTaskDlg::FindTask(const CString& sText, CString& sTitle) const
 	params.bIgnoreFilteredOut = FALSE;
 
 	if (m_tdc.FindTasks(params, aResults))
-	{
-		sTitle = aResults[0].aMatched[0];
 		return aResults[0].dwTaskID;
-	}
 
 	// else
 	return 0;
@@ -199,8 +196,7 @@ void CTDLGoToTaskDlg::UpdateTaskID()
 {
 	UpdateData(TRUE);
 
-	CString sTitle;
-	m_dwTaskID = FindTask(m_sTaskTitle, sTitle);
+	m_dwTaskID = FindTask(m_sTaskTitle);
 
 	ReformatTaskID();
 }
