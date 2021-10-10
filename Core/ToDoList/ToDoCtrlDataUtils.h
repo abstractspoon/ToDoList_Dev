@@ -207,16 +207,16 @@ class CTDCTaskMatcher
 public:
 	CTDCTaskMatcher(const CToDoCtrlData& data, const CTDCReminderHelper& reminders);
 
-	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CResultArray& aResults, BOOL bCheckDueToday) const;
-	int FindTasks(const SEARCHPARAMS& query, CResultArray& aResults, BOOL bCheckDueToday) const;
-	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CResultArray& aResults, BOOL bCheckDueToday) const;
+	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CResultArray& aResults) const;
+	int FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, CResultArray& aResults) const;
+	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, CResultArray& aResults) const;
 
-	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, CDWordArray& aTaskIDs, BOOL bCheckDueToday) const;
-	int FindTasks(const SEARCHPARAMS& query, CDWordArray& aTaskIDs, BOOL bCheckDueToday) const;
-	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, CDWordArray& aTaskIDs, BOOL bCheckDueToday) const;
+	int FindTasks(TDC_ATTRIBUTE nAttrib, FIND_OPERATOR nOp, CString sValue, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const;
+	int FindTasks(const SEARCHPARAMS& query, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const;
+	int FindTasks(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, CDWordArray& aTaskIDs) const;
 
-	BOOL TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& query, SEARCHRESULT& result, BOOL bCheckDueToday) const;
-	BOOL TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, SEARCHRESULT& result, BOOL bCheckDueToday) const;
+	BOOL TaskMatches(DWORD dwTaskID, const SEARCHPARAMS& query, BOOL bCheckDueToday, SEARCHRESULT& result) const;
+	BOOL TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, SEARCHRESULT& result) const;
 
 	static int Convert(const CResultArray& aResults, CDWordArray& aTaskIDs);
 
@@ -228,19 +228,19 @@ protected:
 	CTDCTaskFormatter m_formatter;
 
 protected:
-	BOOL AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, SEARCHRESULT& result, BOOL bCheckDueToday) const;
+	BOOL AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, SEARCHRESULT& result) const;
 
-	BOOL ValueMatches(const COleDateTime& date, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bIncludeTime, TDC_DATE nDate) const;
-	BOOL ValueMatches(double dValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
-	BOOL ValueMatches(int nValue, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
-	BOOL ValueMatches(const CString& sComments, const CBinaryData& customComments, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
-	BOOL ValueMatches(const TDCRECURRENCE& trRecurrence, const SEARCHPARAM& rule, SEARCHRESULT& result) const;
+	BOOL ValueMatches(const COleDateTime& date, const SEARCHPARAM& rule, BOOL bIncludeTime, TDC_DATE nDate, CString& sWhatMatched) const;
+	BOOL ValueMatches(double dValue, const SEARCHPARAM& rule, CString& sWhatMatched) const;
+	BOOL ValueMatches(int nValue, const SEARCHPARAM& rule, CString& sWhatMatched) const;
+	BOOL ValueMatches(const CString& sComments, const CBinaryData& customComments, const SEARCHPARAM& rule, CString& sWhatMatched) const;
+	BOOL ValueMatches(const TDCRECURRENCE& trRecurrence, const SEARCHPARAM& rule, CString& sWhatMatched) const;
 
-	BOOL ValueMatches(const CString& sText, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bCaseSensitive) const;
-	BOOL ValueMatches(const TDCCADATA& data, DWORD dwAttribType, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bCaseSensitive) const;
+	BOOL ValueMatches(const CString& sText, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched) const;
+	BOOL ValueMatches(const TDCCADATA& data, DWORD dwAttribType, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched) const;
 
-	BOOL ArrayMatches(const CStringArray& aItems, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bCaseSensitive) const;
-	BOOL ValueMatchesAsArray(const CString& sText, const SEARCHPARAM& rule, SEARCHRESULT& result, BOOL bCaseSensitive) const;
+	BOOL ArrayMatches(const CStringArray& aItems, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched) const;
+	BOOL ValueMatchesAsArray(const CString& sText, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched) const;
 
 	CString FormatResultDate(const COleDateTime& date) const;
 

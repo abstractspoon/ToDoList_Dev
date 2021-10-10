@@ -4642,6 +4642,8 @@ BEGIN
     IDS_CAD_CALC_SUBTRACT   "Subtract (-)"
     IDS_CAD_CALC_MULTIPLY   "Multiply (*)"
     IDS_CAD_CALC_DIVIDE     "Divide (/)"
+    IDS_ATTRIBNOTSET        "not set"
+    IDS_ATTRIBSET           "set"
 END
 
 STRINGTABLE DISCARDABLE 

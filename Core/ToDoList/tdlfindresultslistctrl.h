@@ -72,6 +72,8 @@ protected:
   	COLORREF GetResultTextColor(const FTDRESULT* pRes, BOOL bSelected, BOOL bHot) const;
 	CFont* GetResultFont(const FTDRESULT* pRes, int nCol, BOOL bHot);
 	BOOL IsResultHot(const RECT& rResult) const;
+	CString FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC) const;
+	CString GetAttributeName(TDC_ATTRIBUTE nAttrib, const CFilteredToDoCtrl* pTDC) const;
 
 	static BOOL OsIsXP();
 };

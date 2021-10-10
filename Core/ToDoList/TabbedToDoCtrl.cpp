@@ -5999,7 +5999,7 @@ int CTabbedToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResult
 
 				SEARCHRESULT result;
 
-				if (m_matcher.TaskMatches(dwTaskID, params, result, HasDueTodayColor()))
+				if (m_matcher.TaskMatches(dwTaskID, params, HasDueTodayColor(), result))
 					aResults.Add(result);
 			}
 		}
@@ -6182,7 +6182,7 @@ int CTabbedToDoCtrl::FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, i
 		if (m_taskList.IsGroupHeaderTask(dwTaskID))
 			continue;
 
-		if (m_matcher.TaskMatches(dwTaskID, params, result, HasDueTodayColor()))
+		if (m_matcher.TaskMatches(dwTaskID, params, HasDueTodayColor(), result))
 			return nItem;
 	}
 

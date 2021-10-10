@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "tdlfindresultslistctrl.h"
 #include "FilteredToDoCtrl.h"
+#include "tdcstatic.h"
 
 #include "..\shared\misc.h"
 #include "..\shared\graphicsmisc.h"
@@ -100,7 +101,6 @@ BOOL CTDLFindResultsListCtrl::SetColumnWidths(const CIntArray& aWidths)
 
 	// else
 	return FALSE;
-
 }
 
 int CTDLFindResultsListCtrl::GetResultCount() const
@@ -384,7 +384,8 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 		
 	// add result
 	int nIndex = InsertItem(nPos, sTitle);
-	SetItemText(nIndex, COL_WHATMATCHED, Misc::FormatArray(result.aMatched));
+	
+	SetItemText(nIndex, COL_WHATMATCHED, FormatWhatMatched(result, pTDC));
 	SetItemText(nIndex, COL_TASKPATH, sPath);
 
 	if (m_nCurGroupID != -1)
@@ -411,4 +412,62 @@ BOOL CTDLFindResultsListCtrl::OsIsXP()
 {
 	static BOOL bXP(COSVersion() < OSV_VISTA);
 	return bXP;
+}
+
+CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC) const
+{
+	ASSERT(result.mapMatched.GetCount());
+
+	DWORD dwTaskID = result.dwTaskID;
+	POSITION pos = result.mapMatched.GetStartPosition();
+
+	CStringArray aWhatMatched;
+
+	while (pos)
+	{
+		TDC_ATTRIBUTE nAttribID;
+		CString sWhatMatched;
+
+		result.mapMatched.GetNextAssoc(pos, nAttribID, sWhatMatched);
+
+		CString sFormatted = GetAttributeName(nAttribID, pTDC);
+		
+		if ((nAttribID != TDCA_TASKNAME) && (nAttribID != TDCA_COMMENTS))
+			sFormatted += Misc::Format(_T(" (%s)"), (sWhatMatched.IsEmpty() ? CEnString(IDS_ATTRIBNOTSET) : sWhatMatched));
+
+		// Leave early if only one item matched
+		if (result.mapMatched.GetCount() == 1)
+			return sFormatted;
+
+		// Place attributes with values at the front
+		if (sWhatMatched.IsEmpty())
+			aWhatMatched.Add(sFormatted);
+		else
+			aWhatMatched.InsertAt(0, sFormatted);
+	}
+
+	return Misc::FormatArray(aWhatMatched);
+}
+
+CString CTDLFindResultsListCtrl::GetAttributeName(TDC_ATTRIBUTE nAttribID, const CFilteredToDoCtrl* pTDC) const
+{
+	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
+	{
+		const TDCATTRIBUTE& ap = ATTRIBUTES[nAtt];
+
+		if (ap.nAttribID == nAttribID)
+			return CEnString(ap.nAttribResID);
+	}
+
+	// custom attributes
+	for (int nCust = 0; nCust < pTDC->GetCustomAttributeDefs().GetSize(); nCust++)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = pTDC->GetCustomAttributeDefs()[nCust];
+
+		if (attribDef.GetAttributeID() == nAttribID)
+			return attribDef.sLabel;
+	}
+
+	ASSERT(0);
+	return _T("");
 }

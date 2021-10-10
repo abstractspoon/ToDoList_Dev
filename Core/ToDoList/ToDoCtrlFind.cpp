@@ -1081,7 +1081,7 @@ void CToDoCtrlFind::FindTasks(HTREEITEM hti, const SEARCHPARAMS& params, CResult
 
 	// also we can ignore parent tasks if required but we still need 
 	// to process it's children
-	if (m_matcher.TaskMatches(dwID, params, result, bCheckDueToday))
+	if (m_matcher.TaskMatches(dwID, params, bCheckDueToday, result))
 	{
 		// check for overdue tasks
 		if (!params.bIgnoreOverDue || !m_calculator.IsTaskOverDue(dwID))
@@ -1118,7 +1118,7 @@ HTREEITEM CToDoCtrlFind::FindNextTask(HTREEITEM htiStart, const SEARCHPARAMS& pa
 	{
 		DWORD dwNextID = GetTaskID(hti);
 
-		if (m_matcher.TaskMatches(dwNextID, params, result, bCheckDueToday))
+		if (m_matcher.TaskMatches(dwNextID, params, bCheckDueToday, result))
 			return hti;
 
 		// next item

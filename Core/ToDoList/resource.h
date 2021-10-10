@@ -2435,6 +2435,8 @@
 #define IDS_CAD_CALC_SUBTRACT           51603
 #define IDS_CAD_CALC_MULTIPLY           51604
 #define IDS_CAD_CALC_DIVIDE             51605
+#define IDS_ATTRIBNOTSET                51606
+#define IDS_ATTRIBSET                   51607
 
 // Next default values for new objects
 // 

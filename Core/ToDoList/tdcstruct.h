@@ -1710,7 +1710,7 @@ struct SEARCHRESULT
 	SEARCHRESULT& operator=(const SEARCHRESULT& res)
 	{
 		dwTaskID = res.dwTaskID;
-		aMatched.Copy(res.aMatched);
+		Misc::CopyT(res.mapMatched, mapMatched);
 		dwFlags = res.dwFlags;
 
 		return *this;
@@ -1723,7 +1723,7 @@ struct SEARCHRESULT
 
 	DWORD dwTaskID;
 	DWORD dwFlags;
-	CStringArray aMatched;
+	CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, CString&> mapMatched;
 };
 
 typedef CArray<SEARCHRESULT, SEARCHRESULT&> CResultArray;
