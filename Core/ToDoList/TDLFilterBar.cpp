@@ -569,12 +569,12 @@ void CTDLFilterBar::RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTR
 
 			m_sAdvancedFilter.Empty();
 		}
-	
-		// auto droplist filters
-		UpdateDropListData(tdc, nAttribID);
 
 		// Custom attributes
 		UpdateCustomControls(tdc, nAttribID);
+	
+		// auto droplist filters
+		UpdateDropListData(tdc, nAttribID);
 		
 		// update UI
 		RefreshUIBkgndBrush();
