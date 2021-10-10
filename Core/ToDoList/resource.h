@@ -2049,8 +2049,6 @@
 #define IDS_TDC_UPDATEFILTER_TIP        51192
 #define IDS_ADVANCEDFILTER              51193
 #define IDS_LOGFILELOCKED               51194
-#define IDS_FLAGGED                     51195
-#define IDS_UNFLAGGED                   51196
 #define IDS_DUEWHENREMINDERNOW          51197
 #define IDS_BEGINWHENREMINDERNOW        51198
 #define IDS_MISCSHORTCUTS               51200
@@ -2363,8 +2361,6 @@
 #define IDS_TASKLIST_COPYCOLUMNVALUES   51499
 #define IDS_LASTSTRING                  51500
 #define IDS_TASKLIST_COPYSELECTEDCOLUMNVALUES 51500
-#define IDS_HASREMINDER                 51501
-#define IDS_NOREMINDER                  51502
 #define IDS_TDLBC_TASK                  51503
 #define IDS_CUSTOM_FEATURE_NOBLANK      51504
 #define IDS_CUSTOM_TIMEATTRIB           51505
@@ -2395,8 +2391,6 @@
 #define IDS_TASKVIEWIMAGEFILTER         51562
 #define IDS_FILTER_LOCKED               51563
 #define IDS_TDLBC_LOCK                  51564
-#define IDS_UNLOCKED                    51566
-#define IDS_LOCKED                      51567
 #define IDS_CAD_TIMEPERIOD              51568
 #define IDS_CUSTOM_FEATURE_FILTER       51569
 #define IDS_SETREMINDER                 51570
