@@ -337,6 +337,10 @@ SOURCE=..\ToDoList\TDLAttribListBox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLAttributeComboBox.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLCleanupIniPreferencesDlg.cpp
 # End Source File
 # Begin Source File
@@ -942,6 +946,10 @@ SOURCE=..\ToDoList\TDLAnalyseLoggedTimeDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLAttribListBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLAttributeComboBox.h
 # End Source File
 # Begin Source File
 

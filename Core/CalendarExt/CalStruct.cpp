@@ -52,7 +52,7 @@ TASKCALITEMDATES& TASKCALITEMDATES::operator=(const TASKCALITEMDATES& tcid)
 	dtEndCalc = tcid.dtEndCalc;
 	bTreatOverdueAsDueToday = tcid.bTreatOverdueAsDueToday;
 
-	Misc::CopyStrT(tcid.mapCustomDates, mapCustomDates);
+	Misc::CopyStrT<COleDateTime>(tcid.mapCustomDates, mapCustomDates);
 	
 	return (*this);
 }
@@ -65,7 +65,7 @@ BOOL TASKCALITEMDATES::operator==(const TASKCALITEMDATES& tcid) const
 			(dtDone == tcid.dtDone) &&
 			(dtStartCalc == tcid.dtStartCalc) &&
 			(dtEndCalc == tcid.dtEndCalc) &&
-			Misc::MatchAllStrT(mapCustomDates, tcid.mapCustomDates));
+			Misc::MatchAllStrT<COleDateTime>(mapCustomDates, tcid.mapCustomDates));
 }
 
 BOOL TASKCALITEMDATES::IsValid() const
@@ -375,7 +375,7 @@ void TASKCALITEMDATES::SetCustomDate(const CString& sCustAttribID, const COleDat
 
 void TASKCALITEMDATES::SetCustomDates(const CMapCustomDates& dates)
 {
-	Misc::CopyStrT(dates, mapCustomDates);
+	Misc::CopyStrT<COleDateTime>(dates, mapCustomDates);
 }
 
 /////////////////////////////////////////////////////////////////////////////

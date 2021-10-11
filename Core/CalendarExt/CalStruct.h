@@ -110,13 +110,13 @@ public:
 	BOOL HasAnyStartDate() const { return dates.HasAnyStart(); }
 
 	BOOL IsEndDateSet() const { return dates.IsEndSet(); }
-	void SetDueDate(const COleDateTime& date) { return dates.SetDue(date); }
+	void SetDueDate(const COleDateTime& date) { dates.SetDue(date); }
 
 	COleDateTime GetAnyEndDate() const { return dates.GetAnyEnd(); }
 	COleDateTime GetDoneDate() const { return dates.GetDone(); }
 	BOOL HasAnyEndDate() const { return dates.HasAnyEnd(); }
 
-	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const { return dates.MinMax(dtMin, dtMax); }
+	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const { dates.MinMax(dtMin, dtMax); }
 
 	const TASKCALITEMDATES& Dates() const { return dates; }
 

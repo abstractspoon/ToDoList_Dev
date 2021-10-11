@@ -2228,17 +2228,17 @@ BOOL CTaskCalendarCtrl::IsCustomDate(DWORD dwTaskID) const
 
 BOOL CTaskCalendarCtrl::IsExtensionItem(const TASKCALITEM* pTCI)
 {
-	return (dynamic_cast<const TASKCALEXTENSIONITEM*>(pTCI) != nullptr);
+	return (dynamic_cast<const TASKCALEXTENSIONITEM*>(pTCI) != NULL);
 }
 
 BOOL CTaskCalendarCtrl::IsFutureOccurrence(const TASKCALITEM* pTCI)
 {
-	return (dynamic_cast<const TASKCALFUTUREOCURRENCE*>(pTCI) != nullptr);
+	return (dynamic_cast<const TASKCALFUTUREOCURRENCE*>(pTCI) != NULL);
 }
 
 BOOL CTaskCalendarCtrl::IsCustomDate(const TASKCALITEM* pTCI)
 {
-	return (dynamic_cast<const TASKCALCUSTOMDATE*>(pTCI) != nullptr);
+	return (dynamic_cast<const TASKCALCUSTOMDATE*>(pTCI) != NULL);
 }
 
 BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
