@@ -165,9 +165,7 @@ protected:
 	BOOL m_bAllowForcedCheckOut;
 	BOOL m_bIgnoreResize;
 	BOOL m_bFirstEraseBkgnd;
-	
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
-	BOOL m_bPromptRegionalSettingsRestartOnActivate;
 	
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)

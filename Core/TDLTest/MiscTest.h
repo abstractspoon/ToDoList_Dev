@@ -25,6 +25,8 @@ protected:
 	void TestHasPrefix();
 	void TestHasSuffix();
 
+	void TestRegionalSettingsRetrievalPerformance();
+
 protected:
 	static BOOL ActualLengthMatchesCalculation(const CStringArray& aValues, LPCTSTR szSep, BOOL bIncEmpty = FALSE);
 };

@@ -214,7 +214,6 @@ CToDoListWnd::CToDoListWnd()
 	m_bSettingAttribDefs(FALSE),
 	m_bReshowTimeTrackerOnEnable(FALSE),
 	m_bPromptLanguageChangeRestartOnActivate(FALSE),
-	m_bPromptRegionalSettingsRestartOnActivate(-1),
 	m_bIgnoreResize(FALSE),
 	m_bAllowForcedCheckOut(FALSE),
 	m_nContextColumnID(TDCC_NONE),
@@ -11192,18 +11191,6 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 				return;
 			}
 		}
-
-		if (m_bPromptRegionalSettingsRestartOnActivate > 0)
-		{
-			// Once per session
-			m_bPromptRegionalSettingsRestartOnActivate = FALSE;
-
-			if (CMessageBox::AfxShow(IDS_RESTARTTOUPDATESETTINGS, MB_YESNO) == IDYES)
-			{
-				DoExit(TRUE);
-				return;
-			}
-		}
 		
 		if (GetTDCCount() && (!m_hwndLastFocus || Prefs().GetAutoFocusTasklist()))
 			PostAppRestoreFocus(GetToDoCtrl());
@@ -13105,9 +13092,7 @@ void CToDoListWnd::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 	// Prompt to restart app whenever Regional settings change
 	if ((uFlags == 0) && (StrCmp(lpszSection, _T("intl")) == 0))
 	{
-		// Once per session only
-		if (m_bPromptRegionalSettingsRestartOnActivate == -1)
-			m_bPromptRegionalSettingsRestartOnActivate = TRUE;
+		Invalidate();
 	}
 	else if (StrCmp(lpszSection, _T("TraySettings")) == 0)
 	{

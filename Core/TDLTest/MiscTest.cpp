@@ -38,6 +38,7 @@ TESTRESULT CMiscTest::Run()
 {
 	ClearTotals();
 
+	TestRegionalSettingsRetrievalPerformance();
 	TestGetFormattedLength();
 	TestFormatArray();
 	TestHasPrefix();
@@ -348,6 +349,38 @@ void CMiscTest::TestHasSuffix()
 		ExpectFalse(Misc::HasSuffix(_T("abc\t"), _T("BC"), FALSE));
 		ExpectFalse(Misc::HasSuffix(_T("abc\n"), _T("ABC"), FALSE));
 	}
+
+	EndTest();
+}
+
+void CMiscTest::TestRegionalSettingsRetrievalPerformance()
+{
+	if (!m_utils.HasCommandlineFlag('p'))
+	{
+		_tprintf(_T("Add '-p' to run CMiscTest::TestRegionalSettingsPerformance\n"));
+		return;
+	}
+
+	BeginTest(_T("RegionalSettingsRetrievalPerformance"));
+
+	CString sSetting;
+	const int NUM_LOOPS = 100000;
+	DWORD dwTickStart = GetTickCount();
+
+	for (int nLoop = 0; nLoop <= NUM_LOOPS; nLoop++)
+	{
+		sSetting = Misc::GetListSeparator();
+		sSetting = Misc::GetDecimalSeparator();
+		sSetting = Misc::GetDefCharset();
+		sSetting = Misc::GetAM();
+		sSetting = Misc::GetPM();
+		sSetting = Misc::GetTimeSeparator();
+		sSetting = Misc::GetTimeFormat();
+		sSetting = Misc::GetShortDateFormat();
+		sSetting = Misc::GetDateSeparator();
+	}
+
+	_tprintf(_T("Test took %ld ms to retrieve 9 settings %d times\n"), (GetTickCount() - dwTickStart), NUM_LOOPS);
 
 	EndTest();
 }

@@ -304,62 +304,48 @@ DWORD Misc::GetTicksSinceLastUserInput()
 
 CString Misc::FormatComputerNameAndUser(char cSeparator)
 {
-	static CString sMachineAndUser;
-	
-	if (sMachineAndUser.IsEmpty())
-		sMachineAndUser.Format(_T("%s%c%s"), GetComputerName(), cSeparator, GetUserName());
+	CString sMachineAndUser;
+	sMachineAndUser.Format(_T("%s%c%s"), GetComputerName(), cSeparator, GetUserName());
 
 	return sMachineAndUser;
 }
 
 CString Misc::GetComputerName()
 {
-	static CString sMachine;
-
-	if (sMachine.IsEmpty()) // init first time only
-	{
-		DWORD LEN = MAX_COMPUTERNAME_LENGTH + 1;
-		
-		::GetComputerName(sMachine.GetBuffer(LEN), &LEN);
-		sMachine.ReleaseBuffer();
-	}
+	DWORD LEN = MAX_COMPUTERNAME_LENGTH + 1;
+	
+	CString sMachine;
+	::GetComputerName(sMachine.GetBuffer(LEN), &LEN);
+	sMachine.ReleaseBuffer();
 
 	return sMachine;
 }
 
 CString Misc::GetUserName()
 {
-	static CString sUser;
-
-	if (sUser.IsEmpty()) // init first time only
-	{
-		DWORD LEN = UNLEN + 1;
+	DWORD LEN = UNLEN + 1;
 		
-		::GetUserName(sUser.GetBuffer(LEN), &LEN);
-		sUser.ReleaseBuffer();
-	}
+	CString sUser;
+	::GetUserName(sUser.GetBuffer(LEN), &LEN);
+	sUser.ReleaseBuffer();
 
 	return sUser;
 }
 
 CString Misc::GetListSeparator()
 {
-	static CString sSep;
-	
-	if (sSep.IsEmpty()) // init first time only
-	{
-		const int BUFLEN = 10;
+	const int BUFLEN = 10;
 
-		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SLIST, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-		sSep.ReleaseBuffer();
+	CString sSep;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SLIST, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
+	sSep.ReleaseBuffer();
 		
-		// Trim extra spaces
-		Trim(sSep);
+	// Trim extra spaces
+	Trim(sSep);
 		
-		// If none found, use a comma
-		if (!sSep.GetLength())
-			sSep = ',';
-	} 
+	// If none found, use a comma
+	if (!sSep.GetLength())
+		sSep = ',';
 
 	return sSep;
 }
@@ -1453,42 +1439,33 @@ BOOL Misc::AddUniqueItem(const CString& sItem, CStringArray& aTo, BOOL bCaseSens
 
 CString Misc::GetAM()
 {
-	static CString sAM;
 	const int BUFLEN = 10;
 
-	if (sAM.IsEmpty()) // init first time only
-	{
-		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_S1159, sAM.GetBuffer(BUFLEN), BUFLEN - 1);
-		sAM.ReleaseBuffer();
-	}
+	CString sAM;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_S1159, sAM.GetBuffer(BUFLEN), BUFLEN - 1);
+	sAM.ReleaseBuffer();
 
 	return sAM;
 }
 
 CString Misc::GetPM()
 {
-	static CString sPM;
 	const int BUFLEN = 10;
 
-	if (sPM.IsEmpty()) // init first time only
-	{
-		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_S2359, sPM.GetBuffer(BUFLEN), BUFLEN - 1);
-		sPM.ReleaseBuffer();
-	}
+	CString sPM;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_S2359, sPM.GetBuffer(BUFLEN), BUFLEN - 1);
+	sPM.ReleaseBuffer();
 
 	return sPM;
 }
 
 CString Misc::GetTimeFormat(BOOL bIncSeconds)
 {
-	static CString sFormat;
 	const int BUFLEN = 100;
 
-	if (sFormat.IsEmpty()) // init first time only
-	{
-		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STIMEFORMAT, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
-		sFormat.ReleaseBuffer();
-	}
+	CString sFormat;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STIMEFORMAT, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
+	sFormat.ReleaseBuffer();
 
 	if (!bIncSeconds)
 	{
@@ -1505,57 +1482,47 @@ CString Misc::GetTimeFormat(BOOL bIncSeconds)
 
 CString Misc::GetTimeSeparator()
 {
-	static CString sSep;
 	const int BUFLEN = 10;
 
-	if (sSep.IsEmpty()) // init first time only
-	{
-		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STIME , sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-		sSep.ReleaseBuffer();
+	CString sSep;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_STIME , sSep.GetBuffer(BUFLEN), BUFLEN - 1);
+	sSep.ReleaseBuffer();
 
-		// Trim extra spaces
-		Trim(sSep);
+	// Trim extra spaces
+	Trim(sSep);
 		
-		// If none found, use a dot
-		if (!sSep.GetLength())
-			sSep = ':';
-	}
+	// If none found, use a colon
+	if (!sSep.GetLength())
+		sSep = ':';
 
 	return sSep;
 }
 
 CString Misc::GetDateSeparator()
 {
-	static CString sSep;
 	const int BUFLEN = 10;
 
-	if (sSep.IsEmpty()) // init first time only
-	{
-		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDATE , sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-		sSep.ReleaseBuffer();
+	CString sSep;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDATE , sSep.GetBuffer(BUFLEN), BUFLEN - 1);
+	sSep.ReleaseBuffer();
 
-		// Trim extra spaces
-		Trim(sSep);
+	// Trim extra spaces
+	Trim(sSep);
 		
-		// If none found, use a slash
-		if (!sSep.GetLength())
-			sSep = '/';
-	}
+	// If none found, use a slash
+	if (!sSep.GetLength())
+		sSep = '/';
 
 	return sSep;
 }
 
 CString Misc::GetShortDateFormat(BOOL bIncDOW)
 {
-	static CString sFormat;
-
-	if (sFormat.IsEmpty()) // init first time only
-	{
-		const int BUFLEN = 100;
-
-		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SSHORTDATE, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
-		sFormat.ReleaseBuffer();
-	}
+	const int BUFLEN = 100;
+	
+	CString sFormat;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SSHORTDATE, sFormat.GetBuffer(BUFLEN), BUFLEN - 1);
+	sFormat.ReleaseBuffer();
 
 	if (bIncDOW)
 	{
@@ -1568,21 +1535,18 @@ CString Misc::GetShortDateFormat(BOOL bIncDOW)
 
 CString Misc::GetDecimalSeparator()
 {
-	static CString sSep;
 	const int BUFLEN = 10;
 
-	if (sSep.IsEmpty()) // init first time only
-	{
-		GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
-		sSep.ReleaseBuffer();
+	CString sSep;
+	GetLocaleInfo(LOCALE_USER_DEFAULT, LOCALE_SDECIMAL, sSep.GetBuffer(BUFLEN), BUFLEN - 1);
+	sSep.ReleaseBuffer();
 
-		// Trim extra spaces
-		Trim(sSep);
+	// Trim extra spaces
+	Trim(sSep);
 		
-		// If none found, use a dot
-		if (!sSep.GetLength())
-			sSep = '.';
-	}
+	// If none found, use a dot
+	if (!sSep.GetLength())
+		sSep = '.';
 
 	return sSep;
 }
