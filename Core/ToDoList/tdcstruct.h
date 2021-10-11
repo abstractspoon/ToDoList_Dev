@@ -1710,7 +1710,7 @@ struct SEARCHRESULT
 	SEARCHRESULT& operator=(const SEARCHRESULT& res)
 	{
 		dwTaskID = res.dwTaskID;
-		Misc::CopyT(res.mapMatched, mapMatched);
+		Misc::CopyT<TDC_ATTRIBUTE, CString>(res.mapMatched, mapMatched);
 		dwFlags = res.dwFlags;
 
 		return *this;
