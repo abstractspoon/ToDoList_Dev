@@ -362,6 +362,7 @@ void CTDLImportOutlookDlg::AddTreeItemsToTasks(HTREEITEM htiParent, HTASKITEM hT
 			else // folder -> new parent
 			{
 				HTASKITEM hNewParent = m_pDestTaskFile->NewTask(m_tcTasks.GetItemText(hti), hTaskParent, 0);
+				ASSERT(hNewParent);
 
 				AddTreeItemsToTasks(hti, hNewParent, pFolder);
 			}

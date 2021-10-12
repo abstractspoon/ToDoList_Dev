@@ -102,7 +102,8 @@ bool CFMindImporter::ImportTask(const CXmlItem* pFMTask, ITASKLISTBASE* pDestTas
 	DWORD dwID = GetAttribValueI(pFMTask, FM_CUSTOMTASKID);
 
 	HTASKITEM hTask = pDestTaskFile->NewTask(sTask, hParent, dwID);
-		
+	ASSERT(hTask);
+
 	if (!hTask)
 		return false;
 

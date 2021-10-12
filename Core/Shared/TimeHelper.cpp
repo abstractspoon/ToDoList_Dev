@@ -575,18 +575,18 @@ int CTimeHelper::Compare(TH_UNITS nFromUnits, TH_UNITS nToUnits)
 }
 
 // static
-TH_UNITS CTimeHelper::DecodeUnits(LPCTSTR szValueWithUnits)
+TH_UNITS CTimeHelper::DecodeUnits(LPCTSTR szValueWithUnits, TH_UNITS nDefault)
 {
 	if (Misc::IsEmpty(szValueWithUnits))
 	{
 		ASSERT(0);
-		return THU_NULL;
+		return nDefault;
 	}
 
-	return DecodeUnits(Misc::Last(szValueWithUnits));
+	return DecodeUnits(Misc::Last(szValueWithUnits), nDefault);
 }
 
-TH_UNITS CTimeHelper::DecodeUnits(TCHAR cUnits)
+TH_UNITS CTimeHelper::DecodeUnits(TCHAR cUnits, TH_UNITS nDefault)
 {
 	POSITION pos = MAPUNIT2CH.GetStartPosition();
 
@@ -602,11 +602,11 @@ TH_UNITS CTimeHelper::DecodeUnits(TCHAR cUnits)
 			return nTHUnits;
 	}
 
-	ASSERT(0);
-	return THU_NULL;
+	ASSERT(nDefault != THU_NULL);
+	return nDefault;
 }
 
-BOOL CTimeHelper::DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits, BOOL bMustHaveSign)
+BOOL CTimeHelper::DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits, BOOL bMustHaveSign, TH_UNITS nDefaultUnits)
 {
 	// sanity checks
 	CString sTime(szTime);
@@ -638,7 +638,7 @@ BOOL CTimeHelper::DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits
 	}
 
 	// Trailing units
-	nUnits = CTimeHelper::DecodeUnits(sTime);
+	nUnits = CTimeHelper::DecodeUnits(sTime, nDefaultUnits);
 	
 	if (!IsValidUnit(nUnits))
 		nUnits = THU_HOURS;

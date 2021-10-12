@@ -131,6 +131,10 @@ IIMPORTEXPORT_RESULT CPlainTextImporter::Import(LPCTSTR szSrcFilePath, ITaskList
 		}
 		
 		HTASKITEM hTask = pTasks->NewTask(sTitle, hParent, 0);
+		ASSERT(hTask);
+
+		if (!hTask)
+			return IIER_BADFORMAT;
 
 		if (!sComments.IsEmpty())
 			pTasks->SetTaskComments(hTask, sComments);

@@ -3619,8 +3619,14 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 		}
 		else if (m_dlgFindTasks.GetSafeHwnd())
 		{
-			UpdateFindDialogActiveTasklist(&tdc);
+			UpdateFindDialogCustomAttributes(&tdc);
 		}
+	}
+
+	if (pMod->mapAttrib.Has(TDCA_PASTE))
+	{
+		UpdateFilterBarListData(TDCA_ALL);
+		RefreshFindTasksListData(TDCA_ALL);
 	}
 
 	UpdateTimeTrackerTasks(FALSE, pMod->mapAttrib);

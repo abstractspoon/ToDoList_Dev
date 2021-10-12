@@ -487,7 +487,10 @@ BOOL CTaskFile::CopyTask(const ITaskList* pTasksSrc, HTASKITEM hTaskSrc,
 	}
 
 	if (!hTaskDest)
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	// simple attributes
 	pTasksDest->SetTaskColor(hTaskDest, pTasksSrc->GetTaskColor(hTaskSrc));

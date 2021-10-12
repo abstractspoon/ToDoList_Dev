@@ -6897,6 +6897,9 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 		return;
 	
 	SetModified(TRUE);
+
+	if (mapAttribIDs.Has(TDCA_PASTE))
+		UpdateAutoListData();
 	
 	// Avoid notifying the tree ctrl when the user is in 
 	// the process of creating a new task because this will

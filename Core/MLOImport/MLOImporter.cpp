@@ -83,6 +83,7 @@ bool CMLOImporter::ImportTask(const CXmlItem* pXIMLOTask, ITASKLISTBASE* pDestTa
 	ASSERT (pXIMLOTask);
 
 	HTASKITEM hTask = pDestTaskFile->NewTask(pXIMLOTask->GetItemValue(_T("Caption")), hParent, 0);
+	ASSERT(hTask);
 
 	if (!hTask)
 		return false;

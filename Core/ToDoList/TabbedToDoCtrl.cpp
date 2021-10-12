@@ -781,7 +781,7 @@ IUIExtensionWindow* CTabbedToDoCtrl::GetCreateExtensionWnd(FTC_VIEW nView)
 	if (pVData->bCanPrepareNewTask == -1)
 	{
 		CTaskFile task;
-		task.NewTask(_T("Test Task"), NULL, 0, 0);
+		VERIFY(task.NewTask(_T("Test Task"), NULL, 0, 0));
 
 		pVData->bCanPrepareNewTask = pExtWnd->PrepareNewTask(&task);
 	}

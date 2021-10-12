@@ -342,6 +342,9 @@ bool CiCalImporter::ImportTasks(const CiCalEventArray& aTasks, ITASKLISTBASE* pT
 		HTASKITEM hTask = pTasks->NewTask(pEvent->sSummary, hParent, 0);
 		ASSERT(hTask);
 
+		if (!hTask)
+			return false;
+
 		mapTasks[pEvent->sUID] = hTask;
 
 		// set task dates

@@ -62,9 +62,9 @@ public:
 	static void SetUnits(TH_UNITS nUnits, LPCTSTR szUnits);
 	static void SetUnits(TH_UNITS nUnits, TCHAR cUnits);
 	static TCHAR GetUnits(TH_UNITS nUnits);
-	static BOOL DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits, BOOL bMustHaveSign = TRUE);
-	static TH_UNITS DecodeUnits(TCHAR cUnits);
-	static TH_UNITS DecodeUnits(LPCTSTR szValueWithUnits);
+	static BOOL DecodeOffset(LPCTSTR szTime, double& dAmount, TH_UNITS& nUnits, BOOL bMustHaveSign = TRUE, TH_UNITS nDefaultUnits = THU_HOURS);
+	static TH_UNITS DecodeUnits(TCHAR cUnits, TH_UNITS nDefault = THU_HOURS);
+	static TH_UNITS DecodeUnits(LPCTSTR szValueWithUnits, TH_UNITS nDefault = THU_HOURS);
 
 	static CString FormatClockTime(const COleDateTime& dtTime, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static CString FormatClockTime(int nHour, int nMin, int nSec = 0, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);

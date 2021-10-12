@@ -72,6 +72,7 @@ IIMPORTEXPORT_RESULT CTaskListTdlExporter::Export(const IMultiTaskList* pSrcTask
 				sProjectName = FileMisc::GetFileNameFromPath(sFilePath, FALSE);
 
 			HTASKITEM hFileTask = tasks.NewTask(sProjectName, NULL, 0, 0);
+			ASSERT(hFileTask);
 
 			// copy tasklist into that top-level task resetting IDs
 			// and keeping track of the ID mapping as we go

@@ -187,6 +187,11 @@ BOOL CTaskListCsvImporter::ImportTask(ITASKLISTBASE* pTasks, const CString& sLin
 	DWORD dwTaskID, dwParentID;
 	GetTaskAndParentIDs(aValues, dwTaskID, dwParentID);
 
+	// Duplicate task IDs are a real possibility if any of the columns 
+	// has been mapped to 'Task ID' so we ignore them if found
+	if (dwTaskID && pTasks->FindTask(dwTaskID))
+		return FALSE;
+
 	// find the parent task
 	HTASKITEM hParent = pTasks->FindTask(dwParentID);
 
@@ -428,7 +433,7 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 			TH_UNITS nUnits = THU_NULL;
 			double dAmount = 0.0;
 
-			if (CTimeHelper::DecodeOffset(sValue, dAmount, nUnits, FALSE))
+			if (CTimeHelper::DecodeOffset(sValue, dAmount, nUnits, FALSE, THU_HOURS))
 				pTasks->SetTaskTimeEstimate(hTask, dAmount, TDC::MapTHUnitsToUnits(nUnits));
 		}
 		break;
@@ -438,7 +443,7 @@ void CTaskListCsvImporter::AddAttributeToTask(ITASKLISTBASE* pTasks, HTASKITEM h
 			TH_UNITS nUnits = THU_NULL;
 			double dAmount = 0.0;
 
-			if (CTimeHelper::DecodeOffset(sValue, dAmount, nUnits, FALSE))
+			if (CTimeHelper::DecodeOffset(sValue, dAmount, nUnits, FALSE, THU_HOURS))
 				pTasks->SetTaskTimeSpent(hTask, dAmount, TDC::MapTHUnitsToUnits(nUnits));
 		}
 		break;
