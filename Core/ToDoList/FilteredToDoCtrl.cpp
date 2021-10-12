@@ -289,23 +289,7 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 			hTask = m_exporter.ExportTask(dwTaskID, tasks, NULL);
 		else
 			hTask = m_exporter.ExportSiblingTask(dwTaskID, tasks, hPrevSiblingTask);
-// 		const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-// 		const TODOITEM* pTDI = m_data.GetTask(dwTaskID);
-// 
-// 		if (!pTDS || !pTDI)
-// 			return FALSE;
-// 
-// 		// add task
-// 		HTASKITEM hTask = tasks.NewTask(pTDI->sTitle, NULL, dwTaskID, 0);
-// 		ASSERT(hTask);
-// 		
-// 		if (!hTask)
-// 			return FALSE;
-// 
-// 		m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, TDCGT_ALL);
-// 
-// 		// and subtasks
-// 		m_exporter.ExportSubTasks(pTDS, tasks, hTask, TRUE);
+
 	}
 	
 	// extra processing to identify the originally selected tasks
@@ -658,72 +642,80 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 
 		if (bWantTask && pTDS->HasSubTasks())
 		{
-			// NOTE: the only condition under which this method is called for
-			// a parent is if none of its subtasks matched the filter.
+			// To arrive here means we are a parent task with no matching subtasks.
 			//
-			// So if we're a parent and match the filter we need to do an extra check
-			// to see if what actually matched was the absence of attributes
+			// And because parent tasks are often seen purely as containers
+			// (without having explicitly set attributes), certain types of 
+			// queries can produce lots of 'orphan' parent tasks which get in
+			// the way of the more interesting tasks.
 			//
-			// eg. if the parent category is "" and the filter rule is 
-			// TDCA_CATEGORY is (FOP_NOT_SET or FOP_NOT_INCLUDES or FOP_NOT_EQUAL) 
-			// then we don't treat this as a match.
+			// So we attempt to filter them out by looking for rules that are
+			// targeting specific attribute values and then we exclude the parent
+			// if it has no value set for the attribute attached to the rule.
 			//
-			// The attributes to check are:
-			//  Category
-			//  Status
-			//  Alloc To
-			//  Alloc By
-			//  Version
-			//  Priority
-			//  Risk
-			//  Tags
-			
+			// NOTE: I'm deliberately not condensing this code because the last
+			//       time I did that I could no longer remember the precise 
+			//       reasoning behind it when I later came back.
+			bWantTask = FALSE;
+
 			int nNumRules = pFilter->aRules.GetSize();
 			
-			for (int nRule = 0; nRule < nNumRules && bWantTask; nRule++)
+			for (int nRule = 0; (nRule < nNumRules) && !bWantTask; nRule++)
 			{
-				const SEARCHPARAM& sp = pFilter->aRules[nRule];
+				const SEARCHPARAM& rule = pFilter->aRules[nRule];
+								
+				CString sWhatMatched;
+				result.mapMatched.Lookup(rule.GetAttribute(), sWhatMatched);
 
-				if (!sp.OperatorIs(FOP_NOT_EQUALS) && 
-					!sp.OperatorIs(FOP_NOT_INCLUDES) && 
-					!sp.OperatorIs(FOP_NOT_SET))
+				switch (rule.GetOperator())
 				{
-					continue;
-				}
-				
-				// else check for empty parent attributes
-				switch (sp.GetAttribute())
-				{
-				case TDCA_ALLOCTO:
-					bWantTask = (pTDI->aAllocTo.GetSize() > 0);
+				case FOP_SET:
+					// eg. "Give me all tasks where the category is not empty"
+					// User is explicitly interested in tasks WITH attribute values
+					// so we always want these tasks
+					ASSERT(!sWhatMatched.IsEmpty());
+					bWantTask = TRUE;
 					break;
-					
-				case TDCA_ALLOCBY:
-					bWantTask = !pTDI->sAllocBy.IsEmpty();
+
+				case FOP_NOT_SET:
+					// eg. "Give me all tasks where the category is empty"
+					// User is explicitly interested in tasks WITHOUT attribute values
+					// so we always want these tasks
+					ASSERT(sWhatMatched.IsEmpty());
+					bWantTask = TRUE;
 					break;
-					
-				case TDCA_VERSION:
-					bWantTask = !pTDI->sVersion.IsEmpty();
+
+				case FOP_EQUALS:
+					// eg. "Give me all tasks where the category equals 'bug'"
+					// User most likely interested in tasks WITH attribute values
+					// so we only want these tasks if they have an attribute value
+					bWantTask = !sWhatMatched.IsEmpty();
 					break;
-					
-				case TDCA_STATUS:
-					bWantTask = !pTDI->sStatus.IsEmpty();
+
+				case FOP_NOT_EQUALS:
+					// eg. "Give me all tasks where the category does not equal 'bug'"
+					// User most likely interested in tasks WITH attribute values
+					// so we only want these tasks if they have an attribute value
+					bWantTask = !sWhatMatched.IsEmpty();
 					break;
-					
-				case TDCA_CATEGORY:
-					bWantTask = (pTDI->aCategories.GetSize() > 0);
+
+				case FOP_INCLUDES:
+					// User most likely interested in tasks WITH attribute values
+					// eg. "Give me all tasks where the category includes 'bug'"
+					// so we only want these tasks if they have an attribute value
+					bWantTask = !sWhatMatched.IsEmpty();
 					break;
-					
-				case TDCA_TAGS:
-					bWantTask = (pTDI->aTags.GetSize() > 0);
+
+				case FOP_NOT_INCLUDES:
+					// User most likely interested in tasks WITH attribute values
+					// eg. "Give me all tasks where the category does not include 'bug'"
+					// so we only want these tasks if they have an attribute value
+					bWantTask = !sWhatMatched.IsEmpty();
 					break;
-					
-				case TDCA_PRIORITY:
-					bWantTask = (pTDI->nPriority != FM_NOPRIORITY);
-					break;
-					
-				case TDCA_RISK:
-					bWantTask = (pTDI->nRisk != FM_NORISK);
+
+				default:
+					ASSERT(0);
+					bWantTask = TRUE;
 					break;
 				}
 			}
