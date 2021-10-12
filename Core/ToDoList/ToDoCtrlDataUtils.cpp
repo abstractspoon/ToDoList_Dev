@@ -431,22 +431,14 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 						nPriority = 11; 
 				}
 
-				bMatch = ValueMatches(nPriority, rule, sWhatMatched);
-
-				// Replace '-2' with 'not set'
-				if (bMatch && (nPriority == FM_NOPRIORITY))
-					sWhatMatched.Empty();
+				bMatch = PriorityRiskValueMatches(nPriority, rule, sWhatMatched);
 			}
 			break;
 			
 		case TDCA_RISK:
 			{
 				int nRisk = m_calculator.GetTaskRisk(pTDI, pTDS);
-				bMatch = ValueMatches(nRisk, rule, sWhatMatched);
-
-				// Replace '-2' with 'not set'
-				if (bMatch && (nRisk == FM_NORISK))
-					sWhatMatched.Empty();
+				bMatch = PriorityRiskValueMatches(nRisk, rule, sWhatMatched);
 			}
 			break;
 			
@@ -491,17 +483,21 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 			
 		case TDCA_FLAG:
-			bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bFlagged : !pTDI->bFlagged);
-				
-			if (bMatch && rule.OperatorIs(FOP_SET))
-				sWhatMatched = CEnString(IDS_ATTRIBSET);
+			{
+				bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bFlagged : !pTDI->bFlagged);
+
+				if (bMatch && pTDI->bFlagged)
+					sWhatMatched = CEnString(IDS_ATTRIBSET);
+			}
 			break;
 
 		case TDCA_LOCK:
-			bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bLocked : !pTDI->bLocked);
+			{
+				bMatch = (rule.OperatorIs(FOP_SET) ? pTDI->bLocked : !pTDI->bLocked);
 
-			if (bMatch && rule.OperatorIs(FOP_SET))
-				sWhatMatched = CEnString(IDS_ATTRIBSET);
+				if (bMatch && pTDI->bLocked)
+					sWhatMatched = CEnString(IDS_ATTRIBSET);
+			}
 			break;
 			
 		case TDCA_VERSION:
@@ -552,10 +548,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			bMatch = ValueMatches(m_data.GetTaskPosition(pTDS, FALSE), rule, sWhatMatched);
 
 			if (bMatch)
-			{
-				// replace the default 'int' with full position path
 				sWhatMatched = m_formatter.GetTaskPosition(pTDS);
-			}
 			break;
 			
 		case TDCA_ANYTEXTATTRIBUTE:
@@ -1118,39 +1111,45 @@ BOOL CTDCTaskMatcher::ValueMatches(int nValue, const SEARCHPARAM& rule, CString&
 		break;
 		
 	case FOP_SET:
-		if (rule.AttributeIs(TDCA_PRIORITY))
-		{
-			bMatch = (nValue != FM_NOPRIORITY);
-		}
-		else if (rule.AttributeIs(TDCA_RISK))
-		{
-			bMatch = (nValue != FM_NORISK);
-		}
-		else
-		{
-			bMatch = (nValue != 0);
-		}
+		bMatch = (nValue != 0);
 		break;
 		
 	case FOP_NOT_SET:
-		if (rule.AttributeIs(TDCA_PRIORITY))
-		{
-			bMatch = (nValue == FM_NOPRIORITY);
-		}
-		else if (rule.AttributeIs(TDCA_RISK))
-		{
-			bMatch = (nValue == FM_NORISK);
-		}
-		else
-		{
-			bMatch = (nValue == 0);
-		}
+		bMatch = (nValue == 0);
 		break;
 	}
 	
-	if (bMatch)
+	if (bMatch && (nValue != 0))
 		sWhatMatched = Misc::Format(nValue);
 	
+	return bMatch;
+}
+
+BOOL CTDCTaskMatcher::PriorityRiskValueMatches(int nValue, const SEARCHPARAM& rule, CString& sWhatMatched) const
+{
+	// Handle Priority/Risk specifics first
+	BOOL bMatch = FALSE;
+
+	switch (rule.GetOperator())
+	{
+	case FOP_SET:
+		bMatch = (nValue != FM_NOPRIORITY); // FM_NORISK == FM_NOPRIORITY
+		break;
+
+	case FOP_NOT_SET:
+		bMatch = (nValue == FM_NOPRIORITY); // FM_NORISK == FM_NOPRIORITY
+		break;
+
+	default:
+		bMatch = ValueMatches(nValue, rule, sWhatMatched);
+		break;
+	}
+
+	if (bMatch && (nValue != FM_NOPRIORITY))
+		sWhatMatched = Misc::Format(nValue);
+	else
+		sWhatMatched.Empty();
+
 	return bMatch;
 }
 

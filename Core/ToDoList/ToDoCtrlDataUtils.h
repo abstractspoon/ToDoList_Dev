@@ -235,6 +235,7 @@ protected:
 	BOOL ValueMatches(int nValue, const SEARCHPARAM& rule, CString& sWhatMatched) const;
 	BOOL ValueMatches(const CString& sComments, const CBinaryData& customComments, const SEARCHPARAM& rule, CString& sWhatMatched) const;
 	BOOL ValueMatches(const TDCRECURRENCE& trRecurrence, const SEARCHPARAM& rule, CString& sWhatMatched) const;
+	BOOL PriorityRiskValueMatches(int nValue, const SEARCHPARAM& rule, CString& sWhatMatched) const;
 
 	BOOL ValueMatches(const CString& sText, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched) const;
 	BOOL ValueMatches(const TDCCADATA& data, DWORD dwAttribType, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched) const;
