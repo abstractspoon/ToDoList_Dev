@@ -292,21 +292,14 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	switch (nUpdate)
 	{
 	case IUI_ALL:
-		{
-			DeleteData();
-			UpdateCustomDateAttributes(pTasks);
-			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-
-			bChange = TRUE;
-		}
+		DeleteData();
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+		bChange = TRUE;
 		break;
 
 	case IUI_NEW:
-		{
-			BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
-
-			bChange = TRUE;
-		}
+		BuildData(pTasks, pTasks->GetFirstTask(), TRUE);
+		bChange = TRUE;
 		break;
 		
 	case IUI_EDIT:
@@ -870,9 +863,9 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 
 			if ((cdi.nIconOffset >= 0) && (cdi.nIconOffset < nReqWidth))
 			{
-				int iImageIndex = -1;
 				DWORD dwRealTaskID = GetRealTaskID(dwTaskID);
 
+				int iImageIndex = -1;
 				HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_CALENDAR_GETTASKICON, dwRealTaskID, (LPARAM)&iImageIndex);
 
 				if (hilTask && (iImageIndex != -1))
@@ -905,6 +898,14 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 						cdi.nIconOffset = -1;
 						rTask.left = (rIcon.left + nReqWidth);
 					}
+				}
+				else
+				{
+					TASKCALITEM* pTCIReal = GetTaskCalItem(dwRealTaskID);
+					ASSERT(pTCIReal);
+
+					if (pTCIReal)
+						pTCIReal->DisableIcon();
 				}
 			}
 		}
@@ -1765,10 +1766,7 @@ double CTaskCalendarCtrl::CalcDateDragTolerance() const
 BOOL CTaskCalendarCtrl::EnsureSelectionVisible()
 {
 	if (!HasTask(m_dwSelectedTaskID, TRUE)) // exclude hidden tasks
-	{
-		ASSERT(0);
 		return FALSE;
-	}
 
 	// Does the selected cell already have this task?
 	int nRow, nCol;
@@ -2246,8 +2244,6 @@ BOOL CTaskCalendarCtrl::StartDragging(const CPoint& ptCursor)
 	ASSERT(!m_bReadOnly);
 
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
-	//m_dwSelectedTaskID = 0;
-
 	DWORD dwTaskID = HitTestTask(ptCursor, nHit);
 	
 	if (!CanDragTask(dwTaskID, nHit))

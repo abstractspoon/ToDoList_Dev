@@ -97,6 +97,7 @@ public:
 
 	BOOL IsParent() const;
 	BOOL HasIcon(BOOL bShowParentsAsFolder) const;
+	void DisableIcon() { bHasIcon = FALSE; }
 
 	// Date wrappers
 	void RecalcDates(DWORD dwCalcDates) { dates.Recalc(dwCalcDates); }
