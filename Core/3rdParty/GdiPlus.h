@@ -283,6 +283,7 @@ public:
 	static BOOL CreateHICONFromBitmap(gdix_Bitmap* bitmap, HICON* hicoReturn);
 	static BOOL DeleteBitmap(gdix_Bitmap* bitmap);
 	static BOOL SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename);
+	static BOOL SaveBitmapToStream(gdix_Bitmap* bitmap, IStream* pStream, const CLSID& clsidEncoder);
 
 	static BOOL CreatePen(gdix_ARGB color, gdix_Real width, gdix_Pen** pen);
 	static BOOL DeletePen(gdix_Pen* pen);

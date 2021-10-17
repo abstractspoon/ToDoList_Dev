@@ -311,7 +311,8 @@ typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE2)(const WCHAR*, gdi
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP2)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
 
 // Image methods
-typedef gdix_Status (STDAPICALLTYPE *PFNSAVEIMAGETOFILE)(gdix_Image*, const WCHAR*, const CLSID*, const void*);
+typedef gdix_Status(STDAPICALLTYPE *PFNSAVEIMAGETOFILE)(gdix_Image*, const WCHAR*, const CLSID*, const void*);
+typedef gdix_Status(STDAPICALLTYPE *PFNSAVEIMAGETOSTREAM)(gdix_Image*, IStream* pStream, const CLSID*, const void*);
 
 // Misc
 typedef gdix_Status (STDAPICALLTYPE *PFNGETIMAGEENCODERS)(UINT, UINT, IMAGECODECINFO*);
@@ -496,6 +497,16 @@ BOOL CGdiPlus::SaveBitmapToFile(gdix_Bitmap* bitmap, const WCHAR* filename)
 	GETPROCADDRESS(PFNSAVEIMAGETOFILE, "GdipSaveImageToFile");
 	
 	return (pFN((gdix_Image*)bitmap, filename, &clsidEncoder, NULL) == gdix_Ok);
+}
+
+BOOL CGdiPlus::SaveBitmapToStream(gdix_Bitmap* bitmap, IStream* pStream, const CLSID& clsidEncoder)
+{
+	if (!bitmap)
+		return FALSE;
+
+	GETPROCADDRESS(PFNSAVEIMAGETOSTREAM, "GdipSaveImageToStream");
+	
+	return (pFN((gdix_Image*)bitmap, pStream, &clsidEncoder, NULL) == gdix_Ok);
 }
 
 BOOL CGdiPlus::DeleteBitmap(gdix_Bitmap* bitmap)

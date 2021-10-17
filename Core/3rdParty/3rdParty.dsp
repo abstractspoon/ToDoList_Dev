@@ -373,14 +373,6 @@ SOURCE=.\msword.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Msxml\msxml3.tlh
-# End Source File
-# Begin Source File
-
-SOURCE=.\Msxml\msxml3.tli
-# End Source File
-# Begin Source File
-
 SOURCE=.\NewRandom.h
 # End Source File
 # Begin Source File
@@ -503,6 +495,14 @@ SOURCE=.\3rdParty.vcxproj
 # Begin Source File
 
 SOURCE=.\3rdParty.vcxproj.filters
+# End Source File
+# Begin Source File
+
+SOURCE=.\Msxml\msxml3.tlh
+# End Source File
+# Begin Source File
+
+SOURCE=.\Msxml\msxml3.tli
 # End Source File
 # End Target
 # End Project
