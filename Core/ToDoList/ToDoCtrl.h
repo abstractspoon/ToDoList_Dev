@@ -389,7 +389,7 @@ public:
 	inline BOOL HasSelection() const { return m_taskTree.HasSelection(); }
 	BOOL IsTaskLabelEditing() const;
 
-	virtual int GetSelectedCount() const { return m_taskTree.GetSelectedCount(); }
+	virtual int GetSelectedTaskCount() const { return m_taskTree.GetSelectedCount(); }
 	virtual BOOL TasksHaveFocus() const { return m_taskTree.HasFocus(); }
 	virtual void SetFocusToTasks();
 	virtual void SetFocusToComments();

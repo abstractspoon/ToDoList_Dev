@@ -2868,7 +2868,7 @@ void CToDoListWnd::OnUpdateDeletetask(CCmdUI* pCmdUI)
 void CToDoListWnd::OnUpdateEditTasktext(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedCount();
+	int nSelCount = tdc.GetSelectedTaskCount();
 	
 	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_TASKNAME) && (nSelCount == 1));	
 }
@@ -2881,7 +2881,7 @@ void CToDoListWnd::OnUpdateTaskcolor(CCmdUI* pCmdUI)
 void CToDoListWnd::OnUpdateEditTaskdone(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
-	int nSelCount = tdc.GetSelectedCount();
+	int nSelCount = tdc.GetSelectedTaskCount();
 	
 	if (nSelCount == 1)
 		pCmdUI->SetCheck(tdc.IsSelectedTaskDone() ? 1 : 0);
@@ -3596,7 +3596,7 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 	}
 
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nTDC);
-	int nSelCount = tdc.GetSelectedCount();
+	int nSelCount = tdc.GetSelectedTaskCount();
 
 	if (pMod->mapAttrib.Has(TDCA_PROJECTNAME))
 	{
@@ -3718,7 +3718,7 @@ void CToDoListWnd::UpdateTrayTooltip()
             sSelItem = sSelItem.Left(128 - sTooltip.GetLength() - 6);
             sSelItem += _T("...");
         }
-        else if (tdc.GetSelectedCount() > 1)
+        else if (tdc.GetSelectedTaskCount() > 1)
             sSelItem += _T(", ...");
 
         sTooltip = (sSelItem + ENDL + sTooltip);
@@ -5388,7 +5388,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	else if (!startup.IsEmpty(TRUE))
 	{
 		// work on the currently selected item(s)
-		if (tdc.GetSelectedCount() == 0)
+		if (tdc.GetSelectedTaskCount() == 0)
 			return FALSE;
 	}
 		
@@ -5736,7 +5736,7 @@ void CToDoListWnd::OnUpdateEditPasteSub(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditPasteAfter() 
 {
-	int nSelCount = GetToDoCtrl().GetSelectedCount();
+	int nSelCount = GetToDoCtrl().GetSelectedTaskCount();
 	
 	TDC_PASTE nPasteWhere = ((nSelCount == 0) ? TDCP_ATBOTTOM : TDCP_BELOWSELTASK);
 	TDLID_IMPORTTO nImportWhere = TDIT_ADDBELOWSELECTEDTASK;
@@ -5749,7 +5749,7 @@ void CToDoListWnd::OnUpdateEditPasteAfter(CCmdUI* pCmdUI)
 	TDC_PASTE nWhere = TDCP_BELOWSELTASK;
 	
 	// modify the text appropriately if the selection is empty
-	if (GetToDoCtrl().GetSelectedCount() == 0)
+	if (GetToDoCtrl().GetSelectedTaskCount() == 0)
 	{
 		pCmdUI->SetText(CEnString(IDS_PASTETOPLEVELTASK));
 		nWhere = TDCP_ATBOTTOM;
@@ -5893,7 +5893,7 @@ void CToDoListWnd::CopySelectedTasksToClipboard(TDC_TASKS2CLIPBOARD nAsFormat)
 
 void CToDoListWnd::OnUpdateEditCopy(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() > 0);
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount() > 0);
 }
 
 void CToDoListWnd::OnMaximizeTasklist() 
@@ -9286,7 +9286,7 @@ void CToDoListWnd::OnUpdateEditAddFileLink(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_FILELINK) && (tdc.GetSelectedCount() == 1));
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_FILELINK) && (tdc.GetSelectedTaskCount() == 1));
 }
 
 void CToDoListWnd::OnEditOpenFileLink(UINT nCmdID) 
@@ -10823,7 +10823,7 @@ void CToDoListWnd::OnSpellchecktitle()
 
 void CToDoListWnd::OnUpdateSpellchecktitle(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount());
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount());
 }
 
 void CToDoListWnd::OnFileEncrypt() 
@@ -11768,7 +11768,7 @@ void CToDoListWnd::OnShowTimelogfile()
 void CToDoListWnd::OnUpdateShowTimelogfile(CCmdUI* pCmdUI) 
 {
 	const CPreferencesDlg& userPrefs = Prefs();
-	int nTasks = GetToDoCtrl().GetSelectedCount();
+	int nTasks = GetToDoCtrl().GetSelectedTaskCount();
 	BOOL bEnable = FALSE;
 
 	if (userPrefs.GetLogTimeTracking() && 
@@ -11788,7 +11788,7 @@ void CToDoListWnd::OnAddtimetologfile()
 
 void CToDoListWnd::OnUpdateAddtimetologfile(CCmdUI* pCmdUI) 
 {
-	BOOL bEnable = (Prefs().GetLogTimeTracking() && (GetToDoCtrl().GetSelectedCount() == 1));
+	BOOL bEnable = (Prefs().GetLogTimeTracking() && (GetToDoCtrl().GetSelectedTaskCount() == 1));
 	pCmdUI->Enable(bEnable);	
 }
 
@@ -12257,7 +12257,7 @@ void CToDoListWnd::OnCopyTaskasLink()
 
 void CToDoListWnd::OnUpdateCopyTaskasLink(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() == 1);
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount() == 1);
 }
 
 void CToDoListWnd::OnCopyTaskasDependency() 
@@ -12267,7 +12267,7 @@ void CToDoListWnd::OnCopyTaskasDependency()
 
 void CToDoListWnd::OnUpdateCopyTaskasDependency(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() == 1);
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount() == 1);
 }
 
 void CToDoListWnd::OnCopyTaskasLinkFull() 
@@ -12277,7 +12277,7 @@ void CToDoListWnd::OnCopyTaskasLinkFull()
 
 void CToDoListWnd::OnUpdateCopyTaskasLinkFull(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() == 1);
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount() == 1);
 }
 
 void CToDoListWnd::OnCopyTaskasDependencyFull() 
@@ -12287,7 +12287,7 @@ void CToDoListWnd::OnCopyTaskasDependencyFull()
 
 void CToDoListWnd::OnUpdateCopyTaskasDependencyFull(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() == 1);
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount() == 1);
 }
 
 void CToDoListWnd::OnCopyTaskasPath() 
@@ -12297,7 +12297,7 @@ void CToDoListWnd::OnCopyTaskasPath()
 
 void CToDoListWnd::OnUpdateCopyTaskasPath(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() == 1);
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount() == 1);
 }
 
 BOOL CToDoListWnd::PreCreateWindow(CREATESTRUCT& cs) 
@@ -12553,7 +12553,7 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		CString sTo = Misc::FormatArray(aTo, _T(";"));
 
 		// prefix with task name if necessary
-		if (taskSel.GetWantSelectedTasks() && (tdc.GetSelectedCount() == 1))
+		if (taskSel.GetWantSelectedTasks() && (tdc.GetSelectedTaskCount() == 1))
 		{
 			sSubject = tdc.FormatSelectedTaskTitles(FALSE) + _T(" - ") + sSubject;
 		}
@@ -12794,7 +12794,7 @@ void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	BOOL bEnable = (tdc.GetSelectedCount() > 0) && !tdc.SelectedTasksAreAllDone();
+	BOOL bEnable = (tdc.GetSelectedTaskCount() > 0) && !tdc.SelectedTasksAreAllDone();
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable && pCmdUI->m_pMenu)
@@ -12998,7 +12998,7 @@ void CToDoListWnd::OnEditSelectReferenceTarget()
 
 void CToDoListWnd::OnUpdateEditSelectReferenceTarget(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() > 0);
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount() > 0);
 }
 
 void CToDoListWnd::OnEditSelectTaskReferences() 
@@ -13009,7 +13009,7 @@ void CToDoListWnd::OnEditSelectTaskReferences()
 
 void CToDoListWnd::OnUpdateEditSelectTaskReferences(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetSelectedCount() > 0);
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount() > 0);
 }
 
 void CToDoListWnd::OnToolsSelectinExplorer() 

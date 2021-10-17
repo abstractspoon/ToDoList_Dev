@@ -155,7 +155,7 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 	CString sTextValue, sTipValue;
 	UINT nIDTextFormat = 0, nIDTipFormat = 0;
 
-	int nSelCount = tdc.GetSelectedCount();
+	int nSelCount = tdc.GetSelectedTaskCount();
 
 	if (WantUpdateAttribute(TDCA_TASKNAME, mapAttrib))
 	{

@@ -264,7 +264,7 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 
 	// NOTE: We DON'T override GetSelectedTasks because
 	// most often that only wants visible tasks
-	if (!GetSelectedCount())
+	if (!GetSelectedTaskCount())
 		return FALSE;
 	
 	ClearCopiedItem();

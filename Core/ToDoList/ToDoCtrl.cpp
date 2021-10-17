@@ -330,7 +330,7 @@ void CToDoCtrl::UpdateComments(BOOL bSaveAndValidate)
 	}
 	else
 	{
-		int nSelCount = GetSelectedCount();
+		int nSelCount = GetSelectedTaskCount();
 
 		if (m_sTextComments.IsEmpty() && (nSelCount > 1))
 		{
@@ -1762,7 +1762,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		hti = GetUpdateControlsItem();
 	
 	BOOL bReadOnly = (IsReadOnly() || !m_taskTree.SelectionHasUnlocked());
-	int nSelCount = GetSelectedCount();
+	int nSelCount = GetSelectedTaskCount();
 	CONTENTFORMAT cfComments;
 	
 	if (hti)
@@ -2177,7 +2177,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	case TDCA_FILELINK:
 		if (!m_cbFileLink.GetDroppedState())
 		{
-			BOOL bAppend = (GetSelectedCount() > 1);
+			BOOL bAppend = (GetSelectedTaskCount() > 1);
 			SetSelectedTaskFileLinks(m_aFileLinks, bAppend, TRUE);
 		}
 		break;
@@ -2841,7 +2841,7 @@ BOOL CToDoCtrl::SetSelectedTaskTitle(const CString& sTitle, BOOL bAllowMultiple)
 	if (!CanEditSelectedTask(TDCA_TASKNAME))
 		return FALSE;
 
-	if (!bAllowMultiple && (GetSelectedCount() > 1))
+	if (!bAllowMultiple && (GetSelectedTaskCount() > 1))
 		return FALSE;
 
 	Flush();
@@ -3052,7 +3052,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 
 void CToDoCtrl::ShowTaskHasIncompleteDependenciesError(const CString& sIncomplete)
 {
-	if (GetSelectedCount() == 1)
+	if (GetSelectedTaskCount() == 1)
 	{
 		int nRet = AfxMessageBox(CEnString(IDS_TDC_SELTASKHASDEPENDENCY), MB_YESNO | MB_ICONEXCLAMATION);
 		
@@ -3067,7 +3067,7 @@ void CToDoCtrl::ShowTaskHasIncompleteDependenciesError(const CString& sIncomplet
 
 void CToDoCtrl::ShowTaskHasCircularDependenciesError(const CDWordArray& aTaskIDs) const
 {
-	if (GetSelectedCount() == 1)
+	if (GetSelectedTaskCount() == 1)
 	{
 		AfxMessageBox(CEnString(IDS_TDC_SELTASKHASCIRCULARDEPENDENCY), MB_OK | MB_ICONEXCLAMATION);
 	}
@@ -3405,7 +3405,7 @@ int CToDoCtrl::CheckWantSubtasksCompleted()
 		return 0;
 
 	// Do the asking
-	UINT nIDMessage = (GetSelectedCount() == 1) ? 
+	UINT nIDMessage = (GetSelectedTaskCount() == 1) ? 
 						IDS_TDC_SELTASKHASINCOMPLETE : IDS_TDC_TASKHASINCOMPLETE;
 		
 	int nRet = AfxMessageBox(CEnString(nIDMessage), MB_YESNOCANCEL | MB_ICONQUESTION);
@@ -4017,7 +4017,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 		}
 
 		// Recalc other attributes if only one item selected
-		if (GetSelectedCount() == 1)
+		if (GetSelectedTaskCount() == 1)
 		{
 			// update % complete?
 			if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
@@ -4103,7 +4103,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpent(const TDCTIMEPERIOD& timeSpent, BOOL bO
 		}
 		
 		// update % complete?
-		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && (GetSelectedCount() == 1))
+		if (HasStyle(TDCS_AUTOCALCPERCENTDONE) && (GetSelectedTaskCount() == 1))
 		{
 			m_nPercentDone = m_calculator.GetTaskPercentDone(GetSelectedTaskID());		
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
@@ -4154,7 +4154,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcT
 		}
 
 		// update other controls if only one item selected
-		if (GetSelectedCount() == 1)
+		if (GetSelectedTaskCount() == 1)
 		{
 			if (bRecalcTime)
 			{
@@ -4222,7 +4222,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime
 		}
 
 		// update controls if only one item selected
-		if (GetSelectedCount() == 1)
+		if (GetSelectedTaskCount() == 1)
 		{
 			if (bRecalcTime)
 			{
@@ -4601,7 +4601,7 @@ BOOL CToDoCtrl::TimeTrackSelectedTask()
 
 BOOL CToDoCtrl::CanTimeTrackSelectedTask() const
 {
-	if (!CanEditSelectedTask(TDCA_TIMESPENT) || (GetSelectedCount() != 1))
+	if (!CanEditSelectedTask(TDCA_TIMESPENT) || (GetSelectedTaskCount() != 1))
 		return FALSE;
 
 	DWORD dwTaskID = GetSelectedTaskID();
@@ -4745,7 +4745,7 @@ BOOL CToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 		{
 			HTREEITEM htiParent = NULL, htiAfter = NULL;
 
-			switch (GetSelectedCount())
+			switch (GetSelectedTaskCount())
 			{
 			case 0:
 				break; // handled below
@@ -5055,7 +5055,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 		return FALSE;
 	
 	// check there's something to delete
-	int nSelCount = GetSelectedCount();
+	int nSelCount = GetSelectedTaskCount();
 	
 	if (!nSelCount)
 		return FALSE;
@@ -5268,7 +5268,7 @@ LRESULT CToDoCtrl::OnLabelEditEnd(WPARAM /*wParam*/, LPARAM lParam)
 	{
 		CLockUpdates lu(m_taskTree);
 
-		if (GetSelectedCount() == 0) // user clicked into space
+		if (GetSelectedTaskCount() == 0) // user clicked into space
 			SelectTask(m_dwEditTitleTaskID);
 
 		// end can occurs either when the user selected return
@@ -5334,7 +5334,7 @@ void CToDoCtrl::SetEditTitleTaskID(DWORD dwTaskID)
 
 LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 {
-	if (GetSelectedCount() == 0) // user clicked into space
+	if (GetSelectedTaskCount() == 0) // user clicked into space
 	{
 		SelectTask(m_dwEditTitleTaskID);
 	}
@@ -5396,7 +5396,7 @@ BOOL CToDoCtrl::ConfirmDeleteAllTasks(BOOL bSelected) const
 
 		if (bSelected && m_taskTree.SelectionHasSubtasks())
 		{
-			if (GetSelectedCount() == 1)
+			if (GetSelectedTaskCount() == 1)
 				sMessage += CEnString(IDS_TDC_CONFIRMDELETEONEWARNSUBTASKS);
 			else
 				sMessage += CEnString(IDS_TDC_CONFIRMDELETEMOREWARNSUBTASKS);
@@ -8058,7 +8058,7 @@ void CToDoCtrl::OnChangeTimeSpent()
 	if (IsSelectedTaskBeingTimeTracked())
 	{
 		ASSERT(m_eTimeSpent.GetStyle() & ES_READONLY);
-		ASSERT(GetSelectedCount() == 1);
+		ASSERT(GetSelectedTaskCount() == 1);
 		
 		return;
 	}
@@ -8131,7 +8131,7 @@ int CToDoCtrl::CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, 
 
 BOOL CToDoCtrl::CopySelectedTasks() const
 {
-	if (!GetSelectedCount())
+	if (!GetSelectedTaskCount())
 		return FALSE;
 	
 	ClearCopiedItem();
@@ -8184,7 +8184,7 @@ BOOL CToDoCtrl::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 	{
 	case TDCP_ONSELTASK:
 		// there must be exactly one task selected
-		if (GetSelectedCount() != 1)
+		if (GetSelectedTaskCount() != 1)
 		{
 			return FALSE;
 		}
@@ -8196,7 +8196,7 @@ BOOL CToDoCtrl::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 		break;
 		
 	case TDCP_BELOWSELTASK:
-		if (!GetSelectedCount())
+		if (!GetSelectedTaskCount())
 		{
 			return FALSE;
 		}
@@ -8205,7 +8205,7 @@ BOOL CToDoCtrl::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 			// parent must be acceptable
 			DWORD dwParentID = GetSelectedTaskParentID();
 
-			if (GetSelectedCount() == 1)
+			if (GetSelectedTaskCount() == 1)
 			{
 				if (dwParentID) // non-root
 				{
@@ -8441,7 +8441,7 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		{
 			HTREEITEM hti = m_taskTree.GetTreeSelectedItem();
 
-			ASSERT ((GetSelectedCount() == 1) && 
+			ASSERT ((GetSelectedTaskCount() == 1) && 
 					IsItemSelected(hti) && 
 					m_timeTracking.CanTrackTask(dwTaskID));
 			
@@ -8672,7 +8672,7 @@ BOOL CToDoCtrl::HandleCustomColumnClick(TDC_COLUMN nColID)
 
 void CToDoCtrl::ToggleTimeTracking(HTREEITEM hti)
 {
-	ASSERT (GetSelectedCount() == 1); // sanity check
+	ASSERT (GetSelectedTaskCount() == 1); // sanity check
 	
 	DWORD dwTaskID = GetTrueTaskID(hti);
 
@@ -8902,7 +8902,7 @@ BOOL CToDoCtrl::AdjustTaskTimeSpent(DWORD dwTaskID, double dHours)
 
  	TDCTIMEPERIOD time(dHours, TDCU_HOURS);
 
-	if ((GetSelectedCount() == 1) && (GetSelectedTaskID() == dwTaskID))
+	if ((GetSelectedTaskCount() == 1) && (GetSelectedTaskID() == dwTaskID))
 		return SetSelectedTaskTimeSpent(time, TRUE); // offset
 
 	// else
@@ -9267,7 +9267,7 @@ BOOL CToDoCtrl::WantAddTaskToTree(const TODOITEM* /*pTDI*/, const TODOSTRUCTURE*
 
 int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
-	if (!GetSelectedCount())
+	if (!GetSelectedTaskCount())
 		return 0;
 	
 	PrepareTaskfileForTasks(tasks, filter);
@@ -9446,7 +9446,7 @@ BOOL CToDoCtrl::RestoreTreeSelection(const TDCSELECTIONCACHE& cache)
 	{
 		// don't update controls if only one item is selected 
 		// and it did not change as a result of the operation
-		BOOL bSelChange = !((GetSelectedCount() == 1) && 
+		BOOL bSelChange = !((GetSelectedTaskCount() == 1) && 
 							(cache.aSelTaskIDs.GetSize() == 1) &&
 							(GetSelectedTaskID() == cache.aSelTaskIDs[0]));
 		
@@ -10587,7 +10587,7 @@ void CToDoCtrl::OnShowWindow(BOOL bShow, UINT nStatus)
 LRESULT CToDoCtrl::OnTimeUnitsChange(WPARAM wParam, LPARAM /*lParam*/)
 {
 	int nRecalcTime = IDNO;
-	BOOL bWantQueryRecalc = (GetSelectedCount() > 1);
+	BOOL bWantQueryRecalc = (GetSelectedTaskCount() > 1);
 	
 	if (!bWantQueryRecalc) // one item selected
 	{
@@ -10831,7 +10831,7 @@ LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	{
 		do 
 		{
-			ASSERT(GetSelectedCount() == 1);
+			ASSERT(GetSelectedTaskCount() == 1);
 
 			if (!FindReplaceSelectedTaskAttribute())
 				break;
@@ -11009,7 +11009,7 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 	switch (wParam)
 	{
 	case IDC_TIMESPENT:
-		if (GetSelectedCount() == 1)
+		if (GetSelectedTaskCount() == 1)
 		{
 			HandleUnsavedComments();
 
@@ -11203,7 +11203,7 @@ void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 
 		TDCTIMEPERIOD time(dIncrement, TDCU_HOURS);
 		
-		if ((dwTaskID == GetSelectedTaskID()) && (GetSelectedCount() == 1))
+		if ((dwTaskID == GetSelectedTaskID()) && (GetSelectedTaskCount() == 1))
 		{
 			// this will also update the Time Spent field
 			SetSelectedTaskTimeSpent(time, TRUE); // offset
@@ -12157,7 +12157,7 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 		return TRUE;
 
 	case TDCA_LOCK:
-		return GetSelectedCount();
+		return GetSelectedTaskCount();
 
 	default:
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))

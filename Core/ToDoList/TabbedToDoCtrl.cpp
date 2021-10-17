@@ -813,7 +813,7 @@ LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab)
 	GetParent()->SendMessage(WM_TDCN_VIEWPRECHANGE, nOldTab, nNewTab);
 
 	// make sure something is selected
-	if (GetSelectedCount() == 0)
+	if (GetSelectedTaskCount() == 0)
 	{
 		HTREEITEM hti = m_taskTree.GetSelectedItem();
 		
@@ -1211,7 +1211,7 @@ void CTabbedToDoCtrl::UpdateExtensionView(IUIExtensionWindow* pExtWnd, const CTa
 
 DWORD CTabbedToDoCtrl::GetSingleSelectedTaskID() const
 {
-	if (GetSelectedCount() == 1) 
+	if (GetSelectedTaskCount() == 1) 
 		return GetTaskID(GetSelectedItem());
 
 	// else
@@ -1221,7 +1221,7 @@ DWORD CTabbedToDoCtrl::GetSingleSelectedTaskID() const
 BOOL CTabbedToDoCtrl::HasSingleSelectionChanged(DWORD dwSelID) const
 {
 	// multi-selection
-	if (GetSelectedCount() != 1)
+	if (GetSelectedTaskCount() != 1)
 		return TRUE;
 
 	// different selection
@@ -1616,7 +1616,7 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(const IUITASKMOD& mod, DWORD& dwTaskID
 	if (!CanEditSelectedTask(mod.nAttrib, dwTaskID))
 		return FALSE;
 
-	if (dwTaskID && (GetSelectedCount() == 1))
+	if (dwTaskID && (GetSelectedTaskCount() == 1))
 	{
 		ASSERT(GetSelectedTaskID() == dwTaskID);
 		dwTaskID = 0; // same as 'selected'
@@ -1648,7 +1648,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 
 	if (dwTaskID)
 	{
-		if (GetSelectedCount() == 1)
+		if (GetSelectedTaskCount() == 1)
 		{
 			ASSERT(GetSelectedTaskID() == dwTaskID);
 			dwTaskID = 0; // same as 'selected'
@@ -1911,7 +1911,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		break;
 		
 	case TDCA_DEPENDENCY: 
-		if (GetSelectedCount() != 1)
+		if (GetSelectedTaskCount() != 1)
 		{
 			ASSERT(0);
 		}
@@ -1952,7 +1952,7 @@ DWORD CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod)
 		break;
 		
 	case TDCA_OFFSETTASK:
-		if (GetSelectedCount() == 1)
+		if (GetSelectedTaskCount() == 1)
 		{
 			ASSERT(dwTaskID == 0);
 
@@ -5862,7 +5862,7 @@ CString CTabbedToDoCtrl::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, in
 	return sSelTasks;
 }
 
-int CTabbedToDoCtrl::GetSelectedCount() const
+int CTabbedToDoCtrl::GetSelectedTaskCount() const
 {
 	FTC_VIEW nView = GetTaskView();
 
@@ -5889,7 +5889,7 @@ int CTabbedToDoCtrl::GetSelectedCount() const
 			return 0;
 	}
 
-	return CToDoCtrl::GetSelectedCount();
+	return CToDoCtrl::GetSelectedTaskCount();
 }
 
 void CTabbedToDoCtrl::SetFocusToTasks()
