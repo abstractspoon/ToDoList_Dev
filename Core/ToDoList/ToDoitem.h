@@ -230,7 +230,10 @@ public:
 	int GetLocalDependencies(CDWordArray& aDependIDs) const;
 
 	float GetCommentsSizeInKB() const;
-	
+
+	BOOL GetAttributeValues(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const;
+	BOOL HasAttributeValue(TDC_ATTRIBUTE nAttribID) const;
+		
 	static COleDateTimeSpan GetRemainingTime(const COleDateTime& date); // in days
 	static BOOL HasTime(const COleDateTime& date);
 	static void SetRecentlyModifiedPeriod(double dDays);

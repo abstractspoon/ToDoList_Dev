@@ -2033,9 +2033,9 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 	if (bDateIsSet && CDateHelper::IsEndOfDay(dtDate, FALSE))
 		dtDate = CDateHelper::GetDateOnly(dtDate);
 	
-	const COleDateTime dtCur = pTDI->GetDate(nDate);
+	BOOL bWasDone = pTDI->IsDone();
 	
-	if (dtCur != dtDate)
+	if (pTDI->GetDate(nDate) != dtDate)
 	{
 		// save undo data
 		SaveEditUndo(dwTaskID, pTDI, TDC::MapDateToAttribute(nDate));
@@ -2061,8 +2061,7 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 
 			// If the task does NOT have a due date but does have a time estimate
 			// then calculate an appropriate due date
-			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) && 
-				CalcMissingDueDateFromStart(pTDI))
+			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) && CalcMissingDueDateFromStart(pTDI))
 			{
 				nDate = TDCD_DUE; // to update dependencies
 				bRecalcTimeEstimate = FALSE;
@@ -2088,8 +2087,7 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 
 			// If the task does NOT have a start date but does have a time estimate
 			// then back-calculate an appropriate start date
-			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) &&
-				CalcMissingStartDateFromDue(pTDI))
+			if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES) &&	CalcMissingStartDateFromDue(pTDI))
 			{
 				bRecalcTimeEstimate = FALSE;
 			}
@@ -2102,25 +2100,17 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 			break;
 			
 		case TDCD_DONE:		
-			{
-				BOOL bWasDone = pTDI->IsDone();
-				pTDI->dateDone = dtDate;
-				
-				// reset % completion if going from done to not-done
-				if (bWasDone && !pTDI->IsDone() && pTDI->nPercentDone == 100)
-					pTDI->nPercentDone = 0;
-	
-				bRecalcTimeEstimate = FALSE;
-			}
+			pTDI->dateDone = dtDate;
+			bRecalcTimeEstimate = FALSE;
 			break;
 			
 		case TDCD_DONEDATE:		
 			// add date to existing time component unless date is 0.0
-			if (!bDateIsSet || !pTDI->IsDone())
+			if (!bDateIsSet || !bWasDone)
 				pTDI->dateDone = CDateHelper::GetDateOnly(dtDate);
 			else
-				pTDI->dateDone = CDateHelper::MakeDate(dtDate, pTDI->dateDone);		
-			
+				pTDI->dateDone = CDateHelper::MakeDate(dtDate, pTDI->dateDone);
+
 			bRecalcTimeEstimate = FALSE;
 			break;
 			
@@ -2146,6 +2136,21 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 
 			if (bRecalcTimeEstimate)
 				RecalcTaskTimeEstimate(dwTaskID, pTDI, nDate);
+		}
+
+		// Handle a change in completion state
+		if ((bWasDone && !pTDI->IsDone()) || (!bWasDone && pTDI->IsDone()))
+		{
+			if (bWasDone && (pTDI->nPercentDone == 100))
+				pTDI->nPercentDone = 0;
+
+			if (!m_sCompletionStatus.IsEmpty())
+			{
+				if (bWasDone)
+					pTDI->sStatus = m_sDefaultStatus;
+				else
+					pTDI->sStatus = m_sCompletionStatus;
+			}
 		}
 
 		// And subtasks
@@ -2633,8 +2638,27 @@ TDC_SET CToDoCtrlData::SetTaskStatus(DWORD dwTaskID, const CString& sStatus)
 {
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
+
+	CString sPrevStatus = pTDI->sStatus;
 	
-	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_STATUS, pTDI->sStatus, sStatus);
+	TDC_SET nChange = EditTaskAttributeT(dwTaskID, pTDI, TDCA_STATUS, pTDI->sStatus, sStatus);
+
+	if ((nChange == SET_CHANGE) && !m_sCompletionStatus.IsEmpty() && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
+	{
+		BOOL bDone = (sStatus == m_sCompletionStatus);
+		BOOL bWasDone = (sPrevStatus == m_sCompletionStatus);
+
+		if (bDone && !bWasDone)
+		{
+			SetTaskDone(dwTaskID, COleDateTime::GetCurrentTime(), FALSE, FALSE);
+		}
+		else if (!bDone && bWasDone)
+		{
+			SetTaskDone(dwTaskID, CDateHelper::NullDate(), FALSE, FALSE);
+		}
+	}
+
+	return nChange;
 }
 
 TDC_SET CToDoCtrlData::SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend)
@@ -3846,88 +3870,10 @@ TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nFr
 
 BOOL CToDoCtrlData::GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const
 {
-	data.Clear();
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, FALSE);
 
-	switch (nAttrib)
-	{
-	case TDCA_VERSION:		data.Set(GetTaskVersion(dwTaskID));			break;
-	case TDCA_ALLOCBY:		data.Set(GetTaskAllocBy(dwTaskID));			break;	
-	case TDCA_CREATEDBY:	data.Set(GetTaskCreatedBy(dwTaskID));		break;
-	case TDCA_EXTERNALID:	data.Set(GetTaskExtID(dwTaskID));			break;	
-	case TDCA_STATUS:		data.Set(GetTaskStatus(dwTaskID));			break;	
-	case TDCA_TASKNAME:		data.Set(GetTaskTitle(dwTaskID));			break;
-	case TDCA_COMMENTS:		data.Set(GetTaskComments(dwTaskID));		break;
-	case TDCA_LASTMODBY:	data.Set(GetTaskLastModifiedBy(dwTaskID));	break;
-
-	case TDCA_COLOR:		data.Set((int)GetTaskColor(dwTaskID));		break;	
-	case TDCA_PRIORITY:		data.Set(GetTaskPriority(dwTaskID));		break;	
-	case TDCA_RISK:			data.Set(GetTaskRisk(dwTaskID));			break;	
-	case TDCA_PERCENT:		data.Set(GetTaskPercent(dwTaskID, FALSE));	break;	
-	case TDCA_FLAG:			data.Set(IsTaskFlagged(dwTaskID));			break;	
-	case TDCA_ICON:			data.Set(GetTaskIcon(dwTaskID));			break;	
-	case TDCA_LOCK:			data.Set(IsTaskLocked(dwTaskID));			break;	
-
-	case TDCA_FILELINK:	
-	case TDCA_ALLOCTO:			
-	case TDCA_CATEGORY:			
-	case TDCA_TAGS:	
-		{
-			CStringArray aValues;
-			GetTaskArray(dwTaskID, nAttrib, aValues);
-
-			data.Set(aValues);
-		}
-		break;
-
-	case TDCA_CREATIONDATE:		
-	case TDCA_DONEDATE:			
-	case TDCA_DUEDATE:			
-	case TDCA_LASTMODDATE:			
-	case TDCA_STARTDATE:		
-	case TDCA_DONETIME:			
-	case TDCA_DUETIME:			
-	case TDCA_STARTTIME:
-		{
-			TDC_DATE nDate = TDC::MapAttributeToDate(nAttrib);
-			COleDateTime date = GetTaskDate(dwTaskID, nDate);
-
-			data.Set(date);
-		}
-		break;
-
-	case TDCA_TIMEESTIMATE:			
-		{
-			TDCTIMEPERIOD time;
-			GetTaskTimeEstimate(dwTaskID, time);
-
-			data.Set(time);
-		}
-		break;
-
-	case TDCA_TIMESPENT:	
-		{
-			TDCTIMEPERIOD time;
-			GetTaskTimeSpent(dwTaskID, time);
-
-			data.Set(time);
-		}
-		break;
-
-	case TDCA_COST:	
-		{
-			TDCCOST cost;
-			GetTaskCost(dwTaskID, cost);
-
-			data.Set(cost);
-		}
-		break;
-
-	case TDCA_DEPENDENCY:
-		ASSERT(0);
-		break;
-	}
-
-	return !data.IsEmpty();
+	return pTDI->GetAttributeValues(nAttrib, data);
 }
 
 TDC_SET CToDoCtrlData::CopyTaskAttributeValues(DWORD dwTaskID, const CString& sFromCustomAttribID, TDC_ATTRIBUTE nToAttrib)
@@ -4315,22 +4261,7 @@ TDC_SET CToDoCtrlData::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
 	if (bDateChange && (!bIsSubtask || bUpdateAllSubtaskDates || bStateChange))
 	{
 		if (SetTaskDate(dwTaskID, TDCD_DONE, date) == SET_CHANGE)
-		{
 			nRes = SET_CHANGE;
-
-			// update 'status' if done status has switched
-			if (bStateChange && !m_sCompletionStatus.IsEmpty())
-			{
-				if (bDone)
-				{
-					SetTaskStatus(dwTaskID, m_sCompletionStatus);
-				}
-				else if (GetTaskStatus(dwTaskID) == m_sCompletionStatus)
-				{
-					SetTaskStatus(dwTaskID, _T(""));
-				}
-			}
-		}
 	}
 
 	if (bAndSubtasks && TaskHasSubtasks(dwTaskID))

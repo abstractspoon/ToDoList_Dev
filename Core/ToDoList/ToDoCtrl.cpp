@@ -4352,13 +4352,7 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 			return FALSE;
 	}
 
-	if (!SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus))
-		return FALSE;
-
-	if (!m_sCompletionStatus.IsEmpty() && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
-		SetSelectedTaskDone(sStatus == m_sCompletionStatus);
-
-	return TRUE;
+	return SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, 
@@ -5719,6 +5713,12 @@ void CToDoCtrl::SetCompletionStatus(const CString& sStatus)
 
 		m_taskTree.SetCompletionStatus(sStatus);
 		m_data.SetCompletionStatus(sStatus);
+
+		if (m_sCompletionStatus)
+		{
+			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
+			UpdateAutoListData(TDCA_STATUS);
+		}
 	}
 }
 
@@ -6926,24 +6926,35 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 {
 	mapAttribIDs.Add(nAttrib);
 
-	// Check for attribute dependencies
+	// Check for attribute interdependencies
+	BOOL bWantUpdateDependentDates = (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && 
+									  m_taskTree.SelectionHasDependents());
+
 	switch (nAttrib)
 	{
-	case TDCA_DEPENDENCY:
-		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+	case TDCA_DEPENDENCY: // --------------------------------------------------------
+		if (bWantUpdateDependentDates)
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
 			mapAttribIDs.Add(TDCA_STARTDATE);
 		}
 		break;
 
-	case TDCA_DUEDATE:
-		// If this extension view wants due or start dates and dependents may
-		// have changed then we send all tasks with dates
-		if (m_taskTree.SelectionHasDependents() &&
-			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+	case TDCA_OFFSETTASK: // --------------------------------------------------------
+		if (bWantUpdateDependentDates)
+		{
+			mapAttribIDs.Add(TDCA_DEPENDENCY);
+		}
+
+		mapAttribIDs.Add(TDCA_DUEDATE);
+		mapAttribIDs.Add(TDCA_STARTDATE);
+		break;
+
+	case TDCA_DUEDATE: // -----------------------------------------------------------
+		if (bWantUpdateDependentDates)
 		{
 			mapAttribIDs.Add(TDCA_STARTDATE);
+			mapAttribIDs.Add(TDCA_DEPENDENCY);
 		}
 
 		if (HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) &&
@@ -6959,7 +6970,7 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		}
 		break;
 
-	case TDCA_STARTDATE:
+	case TDCA_STARTDATE: // ----------------------------------------------------------
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
@@ -6967,11 +6978,10 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		}
 		break;
 
-	case TDCA_DONEDATE:
+	case TDCA_DONEDATE: // -----------------------------------------------------------
 		mapAttribIDs.Add(TDCA_SUBTASKDONE);
 
-		if (m_taskTree.SelectionHasDependents() &&
-			HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
+		if (bWantUpdateDependentDates)
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
 			mapAttribIDs.Add(TDCA_STARTDATE);
@@ -7007,14 +7017,14 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 		}
 		break;
 
-	case TDCA_CUSTOMATTRIBDEFS:
+	case TDCA_CUSTOMATTRIBDEFS: // ------------------------------------------------
 		// Special case: We replace the definition 
 		// attribute with the value attribute
 		mapAttribIDs.Remove(TDCA_CUSTOMATTRIBDEFS);
 		mapAttribIDs.Add(TDCA_CUSTOMATTRIB);
 		break;
 
-	case TDCA_TIMEESTIMATE:
+	case TDCA_TIMEESTIMATE: // ----------------------------------------------------
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
 			mapAttribIDs.Add(TDCA_PERCENT);
@@ -7025,11 +7035,20 @@ void CToDoCtrl::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeM
 			mapAttribIDs.Add(TDCA_DUEDATE);
 		}
 		break;
-	}
+
+	case TDCA_STATUS: // ---------------------------------------------------------
+		if (!m_sCompletionStatus.IsEmpty() && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
+		{
+			mapAttribIDs.Add(TDCA_DONEDATE);
+		}
+		break;
+	} // -------------------------------------------------------------------------
 
 	// Finally check for colour change
 	if (m_taskTree.ModsCauseTaskTextColorChange(mapAttribIDs) && !mapAttribIDs.Has(TDCA_ALL))
+	{
 		mapAttribIDs.Add(TDCA_COLOR);
+	}
 }
 
 LRESULT CToDoCtrl::OnCommentsChange(WPARAM /*wParam*/, LPARAM /*lParam*/)

@@ -1291,6 +1291,101 @@ BOOL TODOITEM::IsValidPriorityOrRisk(int nValue)
 	return TRUE;
 }
 
+BOOL TODOITEM::GetAttributeValues(TDC_ATTRIBUTE nAttribID, TDCCADATA& data) const
+{
+	data.Clear();
+
+	switch (nAttribID)
+	{
+	case TDCA_VERSION:		data.Set(sVersion);			break;
+	case TDCA_ALLOCBY:		data.Set(sAllocBy);			break;
+	case TDCA_CREATEDBY:	data.Set(sCreatedBy);		break;
+	case TDCA_EXTERNALID:	data.Set(sExternalID);		break;
+	case TDCA_STATUS:		data.Set(sStatus);			break;
+	case TDCA_TASKNAME:		data.Set(sTitle);			break;
+	case TDCA_COMMENTS:		data.Set(sComments);		break;
+	case TDCA_LASTMODBY:	data.Set(sLastModifiedBy);	break;
+
+	case TDCA_COLOR:		data.Set((int)color);		break;
+	case TDCA_PRIORITY:		data.Set(nPriority);		break;
+	case TDCA_RISK:			data.Set(nRisk);			break;
+	case TDCA_PERCENT:		data.Set(nPercentDone);		break;
+	case TDCA_FLAG:			data.Set(bFlagged);			break;
+	case TDCA_ICON:			data.Set(sIcon);			break;
+	case TDCA_LOCK:			data.Set(bLocked);			break;
+
+	case TDCA_FILELINK:		data.Set(aFileLinks);		break;
+	case TDCA_ALLOCTO:		data.Set(aAllocTo);			break;
+	case TDCA_CATEGORY:		data.Set(aCategories);		break;
+	case TDCA_TAGS:			data.Set(aTags);			break;
+
+	case TDCA_TIMEESTIMATE:	data.Set(timeEstimate);		break;
+	case TDCA_TIMESPENT:	data.Set(timeSpent);		break;
+	case TDCA_COST:			data.Set(cost);				break;
+
+	case TDCA_CREATIONDATE: 
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_STARTDATE:
+	case TDCA_DONETIME:
+	case TDCA_DUETIME:
+	case TDCA_STARTTIME:	data.Set(GetDate(TDC::MapAttributeToDate(nAttribID)));	break;
+
+	case TDCA_DEPENDENCY:
+	case TDCA_RECURRENCE:
+		ASSERT(0);
+		break;
+	}
+
+	return !data.IsEmpty();
+}
+
+BOOL TODOITEM::HasAttributeValue(TDC_ATTRIBUTE nAttribID) const
+{
+	switch (nAttribID)
+	{
+	case TDCA_VERSION:		return sVersion.IsEmpty();		
+	case TDCA_ALLOCBY:		return sAllocBy.IsEmpty();		
+	case TDCA_CREATEDBY:	return sCreatedBy.IsEmpty();		
+	case TDCA_EXTERNALID:	return sExternalID.IsEmpty();	
+	case TDCA_STATUS:		return sStatus.IsEmpty();		
+	case TDCA_TASKNAME:		return sTitle.IsEmpty();			
+	case TDCA_COMMENTS:		return sComments.IsEmpty();		
+	case TDCA_LASTMODBY:	return sLastModifiedBy.IsEmpty();
+	case TDCA_ICON:			return sIcon.IsEmpty();			
+							 
+	case TDCA_COLOR:		return (color != 0);		
+	case TDCA_PRIORITY:		return (nPriority != FM_NOPRIORITY);		
+	case TDCA_RISK:			return (nRisk != FM_NORISK);			
+	case TDCA_PERCENT:		return (nPercentDone > 0);	
+	case TDCA_FLAG:			return bFlagged;		
+	case TDCA_LOCK:			return bLocked;		
+	case TDCA_RECURRENCE:	return trRecurrence.IsRecurring();
+
+	case TDCA_FILELINK:		return aFileLinks.GetSize();		
+	case TDCA_ALLOCTO:		return aAllocTo.GetSize();
+	case TDCA_CATEGORY:		return aCategories.GetSize();
+	case TDCA_TAGS:			return aTags.GetSize();
+	case TDCA_DEPENDENCY:	return aDependencies.GetSize();
+
+	case TDCA_TIMEESTIMATE:	return (timeEstimate.dAmount != 0);	
+	case TDCA_TIMESPENT:	return (timeSpent.dAmount != 0);		
+	case TDCA_COST:			return (cost.dAmount != 0);			
+
+	case TDCA_CREATIONDATE: 
+	case TDCA_DONEDATE:
+	case TDCA_DUEDATE:
+	case TDCA_LASTMODDATE:
+	case TDCA_STARTDATE:
+	case TDCA_DONETIME:
+	case TDCA_DUETIME:
+	case TDCA_STARTTIME:	return CDateHelper::IsDateSet(GetDate(TDC::MapAttributeToDate(nAttribID)));
+	}
+
+	return FALSE;
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 
 CToDoCtrlDataItems::CToDoCtrlDataItems() 
