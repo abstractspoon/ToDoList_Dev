@@ -299,6 +299,7 @@ BOOL CTDLStatusBar::WantUpdateAttribute(TDC_ATTRIBUTE nAttribID, const CTDCAttri
 {
 	return (mapAttrib.Has(nAttribID) ||
 			mapAttrib.Has(TDCA_ALL) ||
+			mapAttrib.Has(TDCA_PASTE) ||
 			mapAttrib.Has(TDCA_POSITION_DIFFERENTPARENT));
 }
 

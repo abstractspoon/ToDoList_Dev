@@ -8689,7 +8689,7 @@ void CToDoListWnd::OnCloseall()
 	while (nCtrl--)
 		m_mgrToDoCtrls.DeleteToDoCtrl(nCtrl);
 
-	// if empty then create a new dummy item		
+	// if empty then create a new dummy tasklist		
 	if (!GetTDCCount())
 		CreateNewTaskList(FALSE, FALSE);
 	else
@@ -9022,100 +9022,104 @@ BOOL CToDoListWnd::ImportTasks(BOOL bFromText, const CString& sImportFrom,
 	if (nImportTo != TDIT_CREATENEWTASKLIST)
 		tasks.SetCustomAttributeDefs(GetToDoCtrl().GetCustomAttributeDefs());
 	
-	// do the import
-	DOPROGRESS(IDS_IMPORTPROGRESS);
-
-	IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ImportTaskList(sImportPath, tasks, nImporter, FALSE);
+	// do the import (scoped else updating the status bar afterwards won't work)
 	BOOL bSomeSuceeded = FALSE;
-
-	if (tasks.GetTaskCount())
 	{
-		switch (nRes)
+		DOPROGRESS(IDS_IMPORTPROGRESS);
+
+		IIMPORTEXPORT_RESULT nRes = m_mgrImportExport.ImportTaskList(sImportPath, tasks, nImporter, FALSE);
+
+		if (tasks.GetTaskCount())
 		{
-		case IIER_SOMEFAILED:
-		case IIER_SUCCESS:
+			switch (nRes)
 			{
-				bSomeSuceeded = TRUE;
-
-				if (nImportTo == TDIT_CREATENEWTASKLIST)
+			case IIER_SOMEFAILED:
+			case IIER_SUCCESS:
 				{
-					// If the imported tasks contain any custom attributes
-					// and those custom attributes match those of any open 
-					// tasklist then overwrite the imported custom attributes 
-					// with those from the matching tasklist
-					CTDCCustomAttribDefinitionArray aImportedDefs, aTDCAttribDefs;
+					bSomeSuceeded = TRUE;
 
-					if (tasks.GetCustomAttributeDefs(aImportedDefs))
+					if (nImportTo == TDIT_CREATENEWTASKLIST)
 					{
-						int nTDC = GetTDCCount();
+						// If the imported tasks contain any custom attributes
+						// and those custom attributes match those of any open 
+						// tasklist then overwrite the imported custom attributes 
+						// with those from the matching tasklist
+						CTDCCustomAttribDefinitionArray aImportedDefs, aTDCAttribDefs;
 
-						while (nTDC--)
+						if (tasks.GetCustomAttributeDefs(aImportedDefs))
 						{
-							if (GetToDoCtrl(nTDC).GetCustomAttributeDefs(aTDCAttribDefs) &&
-								aImportedDefs.MatchAny(aTDCAttribDefs))
-							{
-								aTDCAttribDefs.Append(aImportedDefs);
+							int nTDC = GetTDCCount();
 
-								tasks.SetCustomAttributeDefs(aTDCAttribDefs);
-								break;
+							while (nTDC--)
+							{
+								if (GetToDoCtrl(nTDC).GetCustomAttributeDefs(aTDCAttribDefs) &&
+									aImportedDefs.MatchAny(aTDCAttribDefs))
+								{
+									aTDCAttribDefs.Append(aImportedDefs);
+
+									tasks.SetCustomAttributeDefs(aTDCAttribDefs);
+									break;
+								}
 							}
 						}
+
+						VERIFY(CreateNewTaskList(FALSE, TRUE));
 					}
 
-					VERIFY(CreateNewTaskList(FALSE, TRUE));
-				}
+					CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
+					TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
+					BOOL bSelectAll = TRUE;
 
-				CFilteredToDoCtrl& tdc = GetToDoCtrl(); // newly created tasklist
-				TDC_INSERTWHERE nWhere = TDC_INSERTATTOP;
-				BOOL bSelectAll = TRUE;
-
-				if (nImportTo == TDIT_MERGETOTASKLISTBYID)
-				{
-					VERIFY(tdc.MergeTasks(tasks, TRUE));
-				}
-				else if (nImportTo == TDIT_MERGETOTASKLISTBYTITLE)
-				{
-					VERIFY(tdc.MergeTasks(tasks, FALSE));
-				}
-				else // Paste
-				{
-					switch (nImportTo)
+					if (nImportTo == TDIT_MERGETOTASKLISTBYID)
 					{
-					case TDIT_ADDTOSELECTEDTASK:
+						VERIFY(tdc.MergeTasks(tasks, TRUE));
+					}
+					else if (nImportTo == TDIT_MERGETOTASKLISTBYTITLE)
+					{
+						VERIFY(tdc.MergeTasks(tasks, FALSE));
+					}
+					else // Paste
+					{
+						switch (nImportTo)
 						{
-							if (Prefs().GetNewSubtaskPos() == PUIP_TOP)
-								nWhere = TDC_INSERTATTOPOFSELTASK;
-							else
-								nWhere = TDC_INSERTATBOTTOMOFSELTASK;
+						case TDIT_ADDTOSELECTEDTASK:
+							{
+								if (Prefs().GetNewSubtaskPos() == PUIP_TOP)
+									nWhere = TDC_INSERTATTOPOFSELTASK;
+								else
+									nWhere = TDC_INSERTATBOTTOMOFSELTASK;
+							}
+							break;
+
+						case TDIT_ADDBELOWSELECTEDTASK:
+							nWhere = TDC_INSERTAFTERSELTASK;
+							break;
+
+						case TDIT_ADDTOBOTTOMOFTASKLIST:
+							nWhere = TDC_INSERTATBOTTOM;
+							break;
+
+						case TDIT_CREATENEWTASKLIST:
+							bSelectAll = FALSE;
+							tdc.SetProjectName(tasks.GetProjectName());
+							break;
+
+						case TDIT_ADDTOTOPOFTASKLIST:
+							break;
 						}
-						break;
 
-					case TDIT_ADDBELOWSELECTEDTASK:
-						nWhere = TDC_INSERTAFTERSELTASK;
-						break;
-
-					case TDIT_ADDTOBOTTOMOFTASKLIST:
-						nWhere = TDC_INSERTATBOTTOM;
-						break;
-
-					case TDIT_CREATENEWTASKLIST:
-						bSelectAll = FALSE;
-						tdc.SetProjectName(tasks.GetProjectName());
-						break;
-
-					case TDIT_ADDTOTOPOFTASKLIST:
-						break;
+						VERIFY(tdc.PasteTasks(tasks, nWhere, bSelectAll));
 					}
 
-					VERIFY(tdc.PasteTasks(tasks, nWhere, bSelectAll));
+					UpdateCaption();
 				}
-
-				UpdateCaption();
 			}
 		}
+	
+		HandleImportTasklistError(nRes, sImportPath, bFromText, bSomeSuceeded);
 	}
 
-	HandleImportTasklistError(nRes, sImportPath, bFromText, bSomeSuceeded);
+	UpdateStatusBar(TDCA_PASTE);
 
 	return bSomeSuceeded;
 }
