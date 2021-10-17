@@ -9267,7 +9267,7 @@ BOOL CToDoCtrl::WantAddTaskToTree(const TODOITEM* /*pTDI*/, const TODOSTRUCTURE*
 
 int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) const
 {
-	if (!GetSelectedTaskCount())
+	if (!HasSelection())
 		return 0;
 	
 	PrepareTaskfileForTasks(tasks, filter);

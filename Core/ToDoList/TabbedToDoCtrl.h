@@ -73,6 +73,7 @@ public:
 						BOOL bEditText = TRUE, DWORD dwDependency = 0);
 
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
+	int GetSelectedTaskCount() const;
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
@@ -112,7 +113,6 @@ public:
 
 	virtual HTREEITEM GetUpdateControlsItem() const;
 	virtual CString FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep = 0, int nMaxTasks = -1) const;
-	virtual int GetSelectedTaskCount() const;
 
 	int GetSortableColumns(CTDCColumnIDMap& mapColIDs) const;
 	BOOL DeleteSelectedTask() { return CToDoCtrl::DeleteSelectedTask(); }
