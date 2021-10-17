@@ -72,7 +72,9 @@ const int HEADER_HEIGHT = GraphicsMisc::ScaleByDPIFactor(24);
 
 //////////////////////////////////////////////////////////////////////
 
-static CString EMPTY_STR;
+const CString EMPTY_STR;
+
+const CPoint DRAG_NOT_SET(-10000, -10000);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -3148,7 +3150,7 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 {
 	ReleaseCapture();
 
-	if (!m_bReadOnly && !IsDragging() && Misc::ModKeysArePressed(0))
+	if (!m_bReadOnly && !IsDragging() && (Misc::ModKeysArePressed(0) || Misc::ModKeysArePressed(MKS_CTRL)))
 	{
 		ASSERT(pNMHDR->idFrom == IDC_COLUMNCTRL);
 
@@ -3168,19 +3170,9 @@ void CKanbanCtrl::OnBeginDragColumnItem(NMHDR* pNMHDR, LRESULT* pResult)
 
 				SetCapture();
 
-				CSize sizeImage;
-
-				if (pCol->CreateDragImage(m_ilDrag, sizeImage))
-				{
-					CPoint ptHotSpot((sizeImage.cx / 2), min(100, (sizeImage.cy / 2)));
-
-					m_ilDrag.BeginDrag(0, ptHotSpot);
-					m_ilDrag.DragEnter(NULL, ::GetMessagePos());
-				}
-				else
-				{
-					ASSERT(0);
-				}
+				// NOTE: We leave the creation of the drag image to the
+				// OnMouseMove handler once some distance has been moved
+				m_ptDragStart = ::GetMessagePos();
 			}
 		}
 		else
@@ -3456,7 +3448,42 @@ void CKanbanCtrl::OnMouseMove(UINT nFlags, CPoint point)
 		}
 		else
 		{
-			GraphicsMisc::SetDragDropCursor(GMOC_NO);
+			// Only show the 'No' cursor when we've actually moved
+			BOOL bSetNoCursor = TRUE;
+
+			if (m_ptDragStart != DRAG_NOT_SET)
+			{
+				CRect rPos(point.x - 4, point.y - 4, point.x + 4, point.y + 4);
+
+				if (rPos.PtInRect(m_ptDragStart))
+				{
+					bSetNoCursor = FALSE;
+				}
+				else
+				{
+					// We've really started moving
+					ASSERT(m_pSelectedColumn);
+
+					m_ptDragStart = DRAG_NOT_SET;
+
+					CSize sizeImage;
+
+					if (m_pSelectedColumn->CreateDragImage(m_ilDrag, sizeImage))
+					{
+						CPoint ptHotSpot((sizeImage.cx / 2), min(100, (sizeImage.cy / 2)));
+
+						m_ilDrag.BeginDrag(0, ptHotSpot);
+						m_ilDrag.DragEnter(NULL, m_ptDragStart);
+					}
+					else
+					{
+						ASSERT(0);
+					}
+				}
+			}
+
+			if (bSetNoCursor)
+				GraphicsMisc::SetDragDropCursor(GMOC_NO);
 		}
 
 		m_aColumns.SetDropTarget(bValidDest ? pDestCol : NULL);
@@ -3567,8 +3594,7 @@ LRESULT CKanbanCtrl::OnColumnEditTaskDone(WPARAM /*wp*/, LPARAM lp)
 		return lr;
 	}
 
-	// else
-	ASSERT(0);
+	// Don't assert because this can legitimately fail/be cancelled
 	return 0L;
 }
 

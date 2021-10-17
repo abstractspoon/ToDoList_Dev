@@ -1815,10 +1815,7 @@ void CKanbanColumnCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 
 			if (point.x > rIndentedItem.left)
 			{
-				CPoint ptScreen(point);
-				ClientToScreen(&ptScreen);
-
-				if (::DragDetect(*this, ptScreen))
+				if (::DragDetect(*this, point))
 				{
 					TRACE(_T("CKanbanColumnCtrl::OnLButtonDown(Faking drag start)\n"));
 
@@ -1843,7 +1840,7 @@ void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 	HTREEITEM htiHit = NULL;
 	BOOL bHandled = HandleButtonClick(point, TRUE, htiHit);
 
-	if (htiHit)
+	if (htiHit && (m_aSelTaskIDs.GetSize() == 1))
 	{
 		CRect rIndentedItem;
 		GetItemLabelTextRect(htiHit, rIndentedItem, FALSE);
@@ -1902,6 +1899,7 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 		return TRUE;
 	}
 	
+	// Note: This could be the start of a multiple item drag
 	if (Misc::IsKeyPressed(VK_CONTROL))
 	{
 		if (Misc::FindT(dwTaskID, m_aSelTaskIDs) == -1)
@@ -1910,7 +1908,11 @@ BOOL CKanbanColumnCtrl::HandleExtendedSelection(HTREEITEM htiSelected)
 		}
 		else
 		{
-			Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
+			CPoint point = ::GetMessagePos();
+			ScreenToClient(&point);
+			
+			if (!::DragDetect(*this, point))
+				Misc::RemoveItemT(dwTaskID, m_aSelTaskIDs);
 		}
 
 		return TRUE;

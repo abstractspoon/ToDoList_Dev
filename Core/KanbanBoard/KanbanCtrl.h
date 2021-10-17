@@ -107,6 +107,7 @@ protected:
 	CString m_sTrackAttribID;
 	CDWordArray m_aPriorityColors;
 	CDWordArray m_aPrevPinnedTasks;
+	CPoint m_ptDragStart;
 
 	CKanbanColumnCtrl* m_pSelectedColumn;
 	CKanbanColumnCtrlArray m_aColumns;
