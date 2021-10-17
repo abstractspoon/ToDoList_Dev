@@ -1272,9 +1272,14 @@ int CToDoCtrlMgr::UpdateTabItemImage(int nIndex) const
 	else if (!tdci.bLoaded)
 	{
 		if (!FileMisc::FileExists(tdci.pTDC->GetFilePath()))
+		{
 			nImage = IM_NOTFOUND;
+		}
 		else
+		{
+			ASSERT(tdci.pTDC->IsDelayLoaded());
 			nImage = IM_NOTLOADED;
+		}
 	}
 	else if (tdci.bLastStatusReadOnly > 0)
 	{
