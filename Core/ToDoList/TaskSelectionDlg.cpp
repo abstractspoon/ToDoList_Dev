@@ -24,11 +24,13 @@ static char THIS_FILE[] = __FILE__;
 
 
 CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-									LPCTSTR szRegKey, FTC_VIEW nView, BOOL bVisibleColumnsOnly) 
+									 LPCTSTR szRegKey, 
+									 BOOL bEnableSubtaskSelection,
+									 BOOL bVisibleColumnsOnly) 
 	: 
 	m_lbAttribList(aAttribDefs),
 	m_sRegKey(szRegKey), 
-	m_nView(nView)
+	m_bEnableSubtaskSelection(bEnableSubtaskSelection)
 {
 	//{{AFX_DATA_INIT(CTaskSelectionDlg)
 	//}}AFX_DATA_INIT
@@ -37,13 +39,9 @@ CTaskSelectionDlg::CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAtt
 	m_bCompletedTasks = prefs.GetProfileInt(m_sRegKey, _T("CompletedTasks"), TRUE);
 	m_bIncompleteTasks = prefs.GetProfileInt(m_sRegKey, _T("IncompleteTasks"), TRUE);
 	m_nWhatTasks = prefs.GetProfileInt(m_sRegKey, _T("WhatTasks"), TSDT_FILTERED);
-	m_bSelectedSubtasks = prefs.GetProfileInt(m_sRegKey, _T("SelectedSubtasks"), TRUE);
+	m_bSelectedSubtasks = (prefs.GetProfileInt(m_sRegKey, _T("SelectedSubtasks"), TRUE) && m_bEnableSubtaskSelection);
 	m_bSelectedParentTask = prefs.GetProfileInt(m_sRegKey, _T("SelectedParentTask"), FALSE);
 	m_bIncludeComments = prefs.GetProfileInt(m_sRegKey, _T("IncludeCommentsWithVisible"), FALSE);
-
-	// disable 'subtasks' for listview
-	if (nView == FTCV_TASKLIST)
-		m_bSelectedSubtasks = FALSE;
 
 	if (bVisibleColumnsOnly)
 		m_nAttribOption = TSDA_VISIBLE;
@@ -267,16 +265,8 @@ void CTaskSelectionDlg::UpdateEnableStates()
 	GetDlgItem(IDC_INCLUDENOTDONE)->EnableWindow(!bWantSelTasks);
 	GetDlgItem(IDC_INCLUDEPARENTTASK)->EnableWindow(bWantSelTasks);
 
-	// list view does not support subtask option
-	if (m_nView == FTCV_TASKLIST)
-	{
-		GetDlgItem(IDC_INCLUDESUBTASKS)->EnableWindow(FALSE);
-		GetDlgItem(IDC_INCLUDESUBTASKS)->ShowWindow(SW_HIDE);
-	}
-	else
-	{
-		GetDlgItem(IDC_INCLUDESUBTASKS)->EnableWindow(bWantSelTasks);
-	}
+	GetDlgItem(IDC_INCLUDESUBTASKS)->EnableWindow(bWantSelTasks && m_bEnableSubtaskSelection);
+	GetDlgItem(IDC_INCLUDESUBTASKS)->ShowWindow(m_bEnableSubtaskSelection ? SW_SHOW : SW_HIDE);
 }
 
 void CTaskSelectionDlg::SetWantWhatTasks(TSD_TASKS nWhat)
@@ -292,9 +282,7 @@ void CTaskSelectionDlg::SetWantWhatTasks(TSD_TASKS nWhat)
 		GetDlgItem(IDC_INCLUDEDONE)->EnableWindow(!bWantSelTasks);
 		GetDlgItem(IDC_INCLUDENOTDONE)->EnableWindow(!bWantSelTasks);
 		GetDlgItem(IDC_INCLUDEPARENTTASK)->EnableWindow(bWantSelTasks);
-
-		// disable 'subtasks' for listview
-		GetDlgItem(IDC_INCLUDESUBTASKS)->EnableWindow(bWantSelTasks && (m_nView != FTCV_TASKLIST));
+		GetDlgItem(IDC_INCLUDESUBTASKS)->EnableWindow(bWantSelTasks && m_bEnableSubtaskSelection);
 	}
 }
 

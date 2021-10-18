@@ -22,8 +22,11 @@ class CTDLTransformDialog : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, 
-						const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);   // standard constructor
+	CTDLTransformDialog(LPCTSTR szTitle, 
+						BOOL bEnableSubtaskSelection,
+						LPCTSTR szStylesheet,
+						const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+						CWnd* pParent = NULL);   // standard constructor
 
 	CString GetStylesheet() const;
 	CString GetTitle() const { return m_sTitle; }

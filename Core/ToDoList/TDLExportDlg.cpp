@@ -28,7 +28,7 @@ static char THIS_FILE[] = __FILE__;
 CTDLExportDlg::CTDLExportDlg(LPCTSTR szTitle,
 							 const CTDCImportExportMgr& mgr,
 							 BOOL bSingleTaskList,
-							 FTC_VIEW nView,
+							 BOOL bEnableSubtaskSelection,
 							 BOOL bVisibleColumnsOnly,
 							 LPCTSTR szFilePath,
 							 LPCTSTR szFolderPath,
@@ -37,7 +37,7 @@ CTDLExportDlg::CTDLExportDlg(LPCTSTR szTitle,
 	: 
 	CTDLDialog(IDD_EXPORT_DIALOG, _T("Exporting"), pParent), 
 	m_pageTo(mgr, bSingleTaskList, szFilePath, szFolderPath, _T("Exporting")),
-	m_pageTaskSel(aAttribDefs, _T("Exporting"), nView, bVisibleColumnsOnly),
+	m_pageTaskSel(aAttribDefs, _T("Exporting"), bEnableSubtaskSelection, bVisibleColumnsOnly),
 	m_mgrImportExport(mgr),
 	m_sExportTitle(szTitle),
 	m_nPrevActiveTab(0)
@@ -249,10 +249,12 @@ COleDateTime CTDLExportDlg::GetExportDate() const
 // CTDLExportTaskSelectionPage dialog
 
 CTDLExportTaskSelectionPage::CTDLExportTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-													   LPCTSTR szRegKey, FTC_VIEW nView, BOOL bVisibleColumnsOnly)
+														 LPCTSTR szRegKey, 
+														 BOOL bEnableSubtaskSelection,
+														 BOOL bVisibleColumnsOnly)
 	:
 	CCmdNotifyPropertyPage(CTDLExportTaskSelectionPage::IDD),
-	m_dlgTaskSel(aAttribDefs, szRegKey, nView, bVisibleColumnsOnly)
+	m_dlgTaskSel(aAttribDefs, szRegKey, bEnableSubtaskSelection, bVisibleColumnsOnly)
 {
 	//{{AFX_DATA_INIT(CTDLExportTaskSelectionPage)
 	// NOTE: the ClassWizard will add member initialization here

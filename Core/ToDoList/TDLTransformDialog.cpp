@@ -23,11 +23,14 @@ static char THIS_FILE[] = __FILE__;
 // CTDLTransformDialog dialog
 
 
-CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, FTC_VIEW nView, LPCTSTR szStylesheet, 
-										const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
+CTDLTransformDialog::CTDLTransformDialog(LPCTSTR szTitle, 
+										 BOOL bEnableSubtaskSelection,
+										 LPCTSTR szStylesheet,
+										 const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+										 CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TRANSFORM_DIALOG, _T("Transform"), pParent), 
-	m_dlgTaskSel(aAttribDefs, _T("Transform"), nView),
+	m_dlgTaskSel(aAttribDefs, _T("Transform"), bEnableSubtaskSelection),
 	m_sTitle(szTitle), 
 	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER))
 {

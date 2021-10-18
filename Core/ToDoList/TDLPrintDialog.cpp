@@ -99,7 +99,7 @@ enum
 CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle, 
 								   BOOL bPreview, 
 								   const CTDCImportExportMgr& mgrImpExp,
-								   FTC_VIEW nView, 
+								   BOOL bEnableSubtaskSelection, 
 								   LPCTSTR szStylesheet, 
 								   const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 								   BOOL bSupportsExportToImage, 
@@ -108,7 +108,7 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle,
 	CTDLDialog(IDD_PRINT_DIALOG, _T("Print"), pParent), 
 	m_bPrintPreview(bPreview), 
 	m_pageStyle(szStylesheet, mgrImpExp, m_sPrefsKey, bSupportsExportToImage),
-	m_pageTaskSel(aAttribDefs, m_sPrefsKey, nView),
+	m_pageTaskSel(aAttribDefs, m_sPrefsKey, bEnableSubtaskSelection),
 	m_sTitle(szTitle),
 	m_nPrevActiveTab(0)
 {
@@ -482,10 +482,10 @@ void CTDLPrintStylePage::OnSelchangeSimplePageOption()
 // CTDLPrintTaskSelectionPage dialog
 
 CTDLPrintTaskSelectionPage::CTDLPrintTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs,
-													   LPCTSTR szRegKey, FTC_VIEW nView)
+													   LPCTSTR szRegKey, BOOL bEnableSubtaskSelection)
 	: 
 	CPropertyPage(CTDLPrintTaskSelectionPage::IDD),
-	m_dlgTaskSel(aAttribDefs, szRegKey, nView)
+	m_dlgTaskSel(aAttribDefs, szRegKey, bEnableSubtaskSelection)
 {
 	//{{AFX_DATA_INIT(CTDLPrintTaskSelectionPage)
 		// NOTE: the ClassWizard will add member initialization here

@@ -41,7 +41,9 @@ class CTaskSelectionDlg : public CDialog
 // Construction
 public:
 	CTaskSelectionDlg(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-						LPCTSTR szRegKey = NULL, FTC_VIEW nView = FTCV_TASKTREE, BOOL bVisibleColumnsOnly = FALSE); 
+					  LPCTSTR szRegKey = NULL, 
+					  BOOL bEnableSubtaskSelection = TRUE, 
+					  BOOL bVisibleColumnsOnly = FALSE); 
 
 	BOOL Create(UINT nIDRefFrame, CWnd* pParent, UINT nID = IDC_STATIC);
 	int DoModal() { ASSERT (0); return IDCANCEL; }
@@ -76,7 +78,7 @@ protected:
 	BOOL	m_bIncompleteTasks;
 	int		m_nWhatTasks;
     CString m_sRegKey;
-	FTC_VIEW m_nView;
+	BOOL	m_bEnableSubtaskSelection;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

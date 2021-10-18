@@ -21,13 +21,16 @@ static char THIS_FILE[] = __FILE__;
 // CTDLSendTasksDlg dialog
 
 
-CTDLSendTasksDlg::CTDLSendTasksDlg(const CTDCImportExportMgr& mgr, BOOL bSelectedTasks, FTC_VIEW nView, 
-									const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent /*=NULL*/)
+CTDLSendTasksDlg::CTDLSendTasksDlg(const CTDCImportExportMgr& mgr, 
+								   BOOL bSelectedTasks, 
+								   BOOL bEnableSubtaskSelection,
+								   const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+								   CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLSendTasksDlg::IDD, _T("SendTasks"), pParent), 
 	m_mgrImportExport(mgr),
 	m_cbFormat(mgr, FALSE, TRUE),
-	m_dlgTaskSel(aAttribDefs, m_sPrefsKey, nView),
+	m_dlgTaskSel(aAttribDefs, m_sPrefsKey, bEnableSubtaskSelection),
 	m_nHtmlStyle(TDLPDS_WRAP)
 {
 	//{{AFX_DATA_INIT(CTDLSendTasksDlg)

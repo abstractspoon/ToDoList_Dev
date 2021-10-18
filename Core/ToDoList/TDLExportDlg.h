@@ -96,7 +96,7 @@ class CTDLExportTaskSelectionPage : public CCmdNotifyPropertyPage
 public:
 	CTDLExportTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
 							    LPCTSTR szRegKey, 
-								FTC_VIEW nView, 
+								BOOL bEnableSubtaskSelection,
 								BOOL bVisibleColumnsOnly);
 	~CTDLExportTaskSelectionPage();
 
@@ -140,7 +140,7 @@ public:
 	CTDLExportDlg(LPCTSTR szTitle, 
 				  const CTDCImportExportMgr& mgr, 
 				  BOOL bSingleTaskList, 
-				  FTC_VIEW nView,
+				  BOOL bEnableSubtaskSelection,
 				  BOOL bVisibleColumnsOnly, 
 				  LPCTSTR szFilePath, 
 				  LPCTSTR szFolderPath, 

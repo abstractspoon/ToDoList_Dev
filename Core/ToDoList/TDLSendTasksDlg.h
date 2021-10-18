@@ -28,8 +28,11 @@ class CTDLSendTasksDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLSendTasksDlg(const CTDCImportExportMgr& mgr, BOOL bSelectedTasks, FTC_VIEW nView, 
-					const CTDCCustomAttribDefinitionArray& aAttribDefs, CWnd* pParent = NULL);   // standard constructor
+	CTDLSendTasksDlg(const CTDCImportExportMgr& mgr, 
+					 BOOL bSelectedTasks, 
+					 BOOL bEnableSubtaskSelection,
+					 const CTDCCustomAttribDefinitionArray& aAttribDefs, 
+					 CWnd* pParent = NULL);   // standard constructor
 
 	TD_SENDAS GetSendAs() const { return (TD_SENDAS)m_nSendTasksAsOption; }
 	CString GetFormatTypeID() const { return m_sFormatTypeID; }

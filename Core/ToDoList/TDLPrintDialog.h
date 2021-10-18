@@ -124,11 +124,10 @@ class CTDLPrintTaskSelectionPage : public CPropertyPage
 // Construction
 public:
 	CTDLPrintTaskSelectionPage(const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-							   LPCTSTR szRegKey, FTC_VIEW nView);
+							   LPCTSTR szRegKey, BOOL bEnableSubtaskSelection);
 	~CTDLPrintTaskSelectionPage();
 
 	const CTaskSelectionDlg& GetTaskSelection() const { return m_dlgTaskSel; }
-
 	void SetOutputStyle(TDLPD_STYLE nStyle);
 
 protected:
@@ -137,7 +136,6 @@ protected:
 	enum { IDD = IDD_PRINT_TASKSEL_PAGE };
 		// NOTE: the ClassWizard will add data members here
 	//}}AFX_DATA
-
 	CTaskSelectionDlg m_dlgTaskSel;
 	TDLPD_STYLE	m_nExportStyle;
 
@@ -166,14 +164,14 @@ class CTDLPrintDialog : public CTDLDialog
 {
 // Construction
 public:
-	CTDLPrintDialog(LPCTSTR szTitle, 
-					 BOOL bPreview, 
-					 const CTDCImportExportMgr& mgrImpExp,
-					 FTC_VIEW nView, 
-					 LPCTSTR szStylesheet,	
-					 const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-					 BOOL bSupportsExportToImage, 
-					 CWnd* pParent = NULL);
+	CTDLPrintDialog(LPCTSTR szTitle,
+					BOOL bPreview,
+					const CTDCImportExportMgr& mgrImpExp,
+					BOOL bEnableSubtaskSelection,
+					LPCTSTR szStylesheet,
+					const CTDCCustomAttribDefinitionArray& aAttribDefs,
+					BOOL bSupportsExportToImage,
+					CWnd* pParent = NULL);
 
 	CString GetTitle() const { return m_sTitle; }
 	COleDateTime GetDate() const;
