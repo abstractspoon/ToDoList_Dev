@@ -845,7 +845,14 @@ void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, co
 			COLORREF crFill = pTCI->GetFillColor(bTextColorIsBkgnd);
 			COLORREF crBorder = pTCI->GetBorderColor(bTextColorIsBkgnd);
 						
-			int nBorderStyle = (IsFutureOccurrence(pTCI) ? PS_DOT : PS_SOLID);
+			int nBorderStyle = PS_SOLID;
+			
+			if (IsFutureOccurrence(pTCI))
+			{
+				// For some unknown reason PS_DOT style draws 1 pixel wider
+				nBorderStyle = PS_DOT;
+				rTask.right--;
+			}
 
 			GraphicsMisc::DrawRect(pDC, rTask, crFill, crBorder, 0, dwBorders, 255, nBorderStyle);
 		}
@@ -3132,74 +3139,52 @@ BOOL CTaskCalendarCtrl::SaveToImage(CBitmap& bmImage)
 
 	CAutoFlag af(m_bSavingToImage, TRUE);
 	CLockUpdates lock(GetSafeHwnd());
-	CClientDC dc(this);
-	CDC dcImage, dcClient;
 
-	if (dcImage.CreateCompatibleDC(&dc) && dcClient.CreateCompatibleDC(&dc))
+	// Resize the client rect to fully 'unroll' any cell scrollbars
+	CRect rCell, rWindowOrg(0, 0, 0, 0);
+	GetGridCellRect(0, 0, rCell);
+
+	int nReqCellHeight = (m_nHeaderHeight + (m_nMaxDayTaskCount * m_nTaskHeight));
+
+	if (rCell.Height() < nReqCellHeight)
 	{
-		CBitmap bmClient;
+		CRect rWindow;
+		GetWindowRect(rWindow);
+
+		GetParent()->ScreenToClient(rWindow);
+		rWindowOrg = rWindow;
+
+		rWindow.bottom = rWindow.top;
+		rWindow.bottom += m_nDayHeaderHeight;
+		rWindow.bottom += (m_nVisibleWeeks * nReqCellHeight);
+
+		MoveWindow(rWindow);
+		GetGridCellRect(0, 0, rCell); // update cell rect
+	}
+	
+	CClientDC dc(this);
+	CDC dcImage;
+
+	if (dcImage.CreateCompatibleDC(&dc))
+	{
 		CRect rClient;
 		GetClientRect(rClient);
 
-		CRect rData(rClient), rCell;
-		GetGridCellRect(0, 0, rCell);
-
-		Goto(m_dtMin);
-		COleDateTime dtStart(CDateHelper::GetStartOfWeek(GetMinDate()));
-
-		int nDataWeeks = ((int)((m_dtMax.m_dt - dtStart.m_dt) / 7)) + 1;
-		rData.bottom = (nDataWeeks * rCell.Height());
-
-		if (bmImage.CreateCompatibleBitmap(&dc, rData.Width(), rData.Height()) &&
-			bmClient.CreateCompatibleBitmap(&dc, rClient.Width(), rClient.Height()))
+		if (bmImage.CreateCompatibleBitmap(&dc, rClient.Width(), rClient.Height()))
 		{
 			CBitmap* pOldImage = dcImage.SelectObject(&bmImage);
-			CBitmap* pOldClient = dcClient.SelectObject(&bmClient);
+			dcImage.FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
 
-			dcImage.FillSolidRect(rData, GetSysColor(COLOR_WINDOW));
+			DrawHeader(&dcImage);
+			DrawCells(&dcImage);
+			DrawGrid(&dcImage);
 
-			BOOL bFirst = TRUE;
-			int nVImageOffset = 0;
-			int nClientWidth = rClient.Width(), nClientHeight = rClient.Height();
-			int nHeaderOffset = 0;
-
-			do 
-			{
-				dcClient.FillSolidRect(rClient, GetSysColor(COLOR_WINDOW));
-
-				// Draw days of week header once only
-				if (bFirst)
-					DrawHeader(&dcClient);
-
-				DrawCells(&dcClient);	
-				DrawGrid(&dcClient);
-
-				// Draw gridline at top of cells for subsequent
-				if (!bFirst)
-					dcClient.FillSolidRect(0, m_nHeaderHeight, nClientWidth, 1, m_crGrid);
-
-				dcImage.BitBlt(0, nVImageOffset, nClientWidth, nClientHeight, &dcClient, 0, nHeaderOffset, SRCCOPY);
-
-				nVImageOffset += rClient.Height();
-
-				if (bFirst)
-				{
-					nHeaderOffset = m_nHeaderHeight;
-					nClientHeight -= nHeaderOffset;
-				
-					bFirst = FALSE;
-				}
-				else
-				{
-					nVImageOffset -= nHeaderOffset;
-				}
-
-				dtStart.m_dt += (m_nVisibleWeeks * 7.0);
-				Goto(dtStart);
-			}
-			while (dtStart < m_dtMax);
+			dcImage.SelectObject(pOldImage);
 		}
 	}
+
+	if (!rWindowOrg.IsRectNull())
+		MoveWindow(rWindowOrg);
 
 	return (bmImage.GetSafeHandle() != NULL);
 }
