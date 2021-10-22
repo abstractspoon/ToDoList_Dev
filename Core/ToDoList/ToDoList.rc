@@ -2054,8 +2054,9 @@ BEGIN
                     BS_AUTORADIOBUTTON | WS_GROUP,7,7,220,10
     CONTROL         "Simple web page",IDC_STYLE_SIMPLE,"Button",
                     BS_AUTORADIOBUTTON,7,42,356,10
-    CONTROL         "Screenshot of active task &view",IDC_STYLE_TASKVIEW,
-                    "Button",BS_AUTORADIOBUTTON,7,77,356,10
+    CONTROL         "Screenshot of active task &view (%s)",
+                    IDC_STYLE_TASKVIEW,"Button",BS_AUTORADIOBUTTON,7,77,356,
+                    10
     CONTROL         "Other HTML exporter",IDC_STYLE_OTHER,"Button",
                     BS_AUTORADIOBUTTON,7,112,356,10
     PUSHBUTTON      "Configure...",IDC_CONFIGURESTYLESHEET,232,7,63,14,NOT 
@@ -2920,7 +2921,8 @@ BEGIN
         MENUITEM "Save Tasklist &As...",        ID_SAVEAS
         MENUITEM "Save A&ll",                   ID_SAVEALL
         MENUITEM SEPARATOR
-        MENUITEM "Save Task View to &Image...", ID_VIEW_SAVETOIMAGE
+        MENUITEM "Save &Screenshot of Active Task View...", 
+                                                ID_VIEW_SAVETOIMAGE
         MENUITEM SEPARATOR
         POPUP "Open &From"
         BEGIN
@@ -5729,6 +5731,7 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
+    ID_VIEW_SAVETOIMAGE     "Save &Screenshot of Active Task View (%s)..."
     ID_UDTPREFS_COPY        "\nDuplicate Tool"
     ID_UDTPREFS_DELETE      "\nDelete Tool"
 END

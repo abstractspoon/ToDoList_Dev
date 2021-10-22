@@ -79,6 +79,7 @@ public:
 	void InitializePreferences(); // one time only
 	int DoModal(int nInitPage = -1, UINT nInitCtrlID = 0);
 	
+	// Globals
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetAutoListData(const TDCAUTOLISTDATA& autoListData);
 	void SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aAttribDefs);
@@ -169,6 +170,7 @@ public:
 	int GetInheritParentAttributes(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const { return m_pageTaskDef2.GetInheritParentAttributes(mapAttribs, bUpdateAttrib); }
 	int GetDefaultListItems(TDCAUTOLISTDATA& tld) const;
 	BOOL GetDefaultListIsReadonly(TDC_ATTRIBUTE nList) const { return m_pageTaskDef2.GetListIsReadonly(nList); }
+	BOOL EnableCustomAttributeInheritance();
 
 	// CPreferencesTaskPage
 	BOOL GetTrackNonActiveTasklists() const { return m_pageTask.GetTrackNonActiveTasklists(); }

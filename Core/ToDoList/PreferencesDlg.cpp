@@ -604,6 +604,17 @@ void CPreferencesDlg::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArr
 	m_aCustomAttribDefs.Copy(aAttribDefs);
 }
 
+BOOL CPreferencesDlg::EnableCustomAttributeInheritance()
+{
+	if (!m_pageTaskDef2.EnableCustomAttributeInheritance())
+		return FALSE;
+
+	CPreferencesPageBase* pPage = &m_pageTaskDef2;
+	pPage->SavePreferences(m_prefs, PREFSKEY);
+
+	return TRUE;
+}
+
 DWORD CPreferencesDlg::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& mapMenuIDs)
 {
 	DWORD dwRes = 0;

@@ -79,10 +79,13 @@ const int CHECKBOX_PADDING		= GraphicsMisc::ScaleByDPIFactor(1);
 const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
 const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int DEF_IMAGE_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
-const int IMAGE_PADDING			= 2/*GraphicsMisc::ScaleByDPIFactor(2)*/;
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
 const int MAX_DRAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(200);
 const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
+
+const int IMAGE_PADDING			= 2;
+const int BAR_PADDING			= 2;
+const int ITEM_BORDER			= 1;
 
 const CRect TEXT_BORDER			= CRect(2, 0, 3, 1);
 const CString NOFILELINK;
@@ -601,7 +604,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		
 				CRect rItem;
 				GetItemRect(hti, rItem, NULL);
-				rItem.DeflateRect(1, 1);
+				rItem.DeflateRect(ITEM_BORDER, ITEM_BORDER);
 
 				DrawItem(pDC, dwTaskID, rItem);
 			}
@@ -945,7 +948,8 @@ void CKanbanColumnCtrl::DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETY
 		ASSERT(0);
 	}
 
-	ImageList_Draw(hIL, nIndex, *pDC, rImage.left, rImage.top, ILD_TRANSPARENT);
+	if (!m_bSavingToImage || bSet)
+		ImageList_Draw(hIL, nIndex, *pDC, rImage.left, rImage.top, ILD_TRANSPARENT);
 }
 
 void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
@@ -955,7 +959,7 @@ void CKanbanColumnCtrl::DrawItemBar(CDC* pDC, const KANBANITEM* pKI, CRect& rIte
 		// Don't draw for completed items but ensure same indentation
 		CRect rBar(rItem);
 
-		rBar.DeflateRect(2, 2);
+		rBar.DeflateRect(BAR_PADDING, BAR_PADDING);
 		rBar.right = (rBar.left + BAR_WIDTH);
 
 		if (!pKI->IsDone(TRUE))
@@ -2203,10 +2207,17 @@ BOOL CKanbanColumnCtrl::SaveToImage(CBitmap& bmImage, const CSize& reqColSize)
 CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 {
 	CClientDC dc(const_cast<CKanbanColumnCtrl*>(this));
-	float fAveCharWidth = GraphicsMisc::GetAverageCharWidth(&dc);
 
-	int nMinHeaderWidth = ((int)(m_columnDef.sTitle.GetLength() * fAveCharWidth) + (2 * LV_PADDING));
+	int nMinHeaderWidth = (GraphicsMisc::GetTextWidth(&dc, m_columnDef.sTitle) + (2 * LV_PADDING));
 	CSize reqSize(nMinHeaderWidth, 0);
+
+	int nDefItemIndent = ((2 * ITEM_BORDER) + TEXT_BORDER.left + TEXT_BORDER.right) + 1; // +1 for shadow
+
+	if (HasOption(KBCF_SHOWTASKCOLORASBAR))
+		nDefItemIndent += (BAR_WIDTH + (2 * BAR_PADDING));
+
+	if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
+		nDefItemIndent += (DEF_IMAGE_SIZE + CHECKBOX_PADDING);
 	
 	HTREEITEM hti = GetChildItem(NULL);
 	
@@ -2217,22 +2228,77 @@ CSize CKanbanColumnCtrl::CalcRequiredSizeForImage() const
 
 		if (pKI)
 		{
-			int nItemWidth = (int)(pKI->sTitle.GetLength() * fAveCharWidth / 2); // title is on two lines
-			nItemWidth += (pKI->nLevel * LEVEL_INDENT);
-			nItemWidth += (DEF_IMAGE_SIZE + IMAGE_PADDING);
-			
+			int nItemIndent = nDefItemIndent;
+
+			if (HasOption(KBCF_INDENTSUBTASKS))
+				nItemIndent += (pKI->nLevel * LEVEL_INDENT);
+
+			// Start with attributes
+			CFont* pOldFont = dc.SelectObject(m_fonts.GetFont(0));
+			int nMaxAttribWidth = 0;
+
 			for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 			{
 				TDC_ATTRIBUTE nAttrib = m_aDisplayAttrib[nDisp];
 
-				if (nAttrib != TDCA_FLAG)
+				switch (nAttrib)
 				{
-					CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
-					nItemWidth = max(nItemWidth, ((int)(sAttrib.GetLength() * fAveCharWidth) + ATTRIB_INDENT));
+				case TDCA_FLAG: 
+					// vertically below Pin icon
+					break;
+
+				case TDCA_PARENT:
+					// TODO
+					break;
+
+				case TDCA_FILELINK:
+					// TODO
+					break;
+
+				default: // Rest
+					{
+						CString sAttrib = FormatAttribute(nAttrib, pKI->GetAttributeDisplayValue(nAttrib), KBCAL_LONG);
+						int nAttribWidth = (nItemIndent + GraphicsMisc::GetTextWidth(&dc, sAttrib));
+
+						nMaxAttribWidth = max(nMaxAttribWidth, nAttribWidth);
+					}
+					break;
 				}
 			}
 
-			reqSize.cx = max(reqSize.cx, nItemWidth);
+			// title
+			int nTitleWidth = nItemIndent;
+
+			// Task and Pin icons
+			nTitleWidth += (2 * (DEF_IMAGE_SIZE + IMAGE_PADDING));
+
+			// Text
+			if (pKI->nLevel == 0)
+			{
+				dc.SelectObject(pOldFont);
+				pOldFont = dc.SelectObject(m_fonts.GetFont(GMFS_BOLD));
+			}
+
+			// Title can be spread over two lines so we need to figure out
+			// where a sensible halfway mark is and measure that, but only 
+			// if the title doesn't already fit on one line
+			int nTextWidth = GraphicsMisc::GetTextWidth(&dc, pKI->sTitle);
+
+			if ((nTextWidth + nTitleWidth) > nMaxAttribWidth)
+			{
+				int nEndPos = Misc::FindNextOneOf(_T(" "), pKI->sTitle, TRUE, (pKI->sTitle.GetLength() / 2));
+
+				if (nEndPos != -1)
+					nTextWidth = GraphicsMisc::GetTextWidth(&dc, pKI->sTitle.Left(nEndPos));
+			}
+
+			nTitleWidth += nTextWidth;
+
+			// Accumulate
+			reqSize.cx = max(reqSize.cx, max(nTitleWidth, nMaxAttribWidth));
+
+			// cleanup
+			dc.SelectObject(pOldFont);
 		}
 
 		hti = GetNextSiblingItem(hti);

@@ -102,12 +102,12 @@ CTDLPrintDialog::CTDLPrintDialog(LPCTSTR szTitle,
 								   BOOL bEnableSubtaskSelection, 
 								   LPCTSTR szStylesheet, 
 								   const CTDCCustomAttribDefinitionArray& aAttribDefs, 
-								   BOOL bSupportsExportToImage, 
+								   LPCTSTR szExportToImageView, 
 								   CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_PRINT_DIALOG, _T("Print"), pParent), 
 	m_bPrintPreview(bPreview), 
-	m_pageStyle(szStylesheet, mgrImpExp, m_sPrefsKey, bSupportsExportToImage),
+	m_pageStyle(szStylesheet, mgrImpExp, m_sPrefsKey, szExportToImageView),
 	m_pageTaskSel(aAttribDefs, m_sPrefsKey, bEnableSubtaskSelection),
 	m_sTitle(szTitle),
 	m_nPrevActiveTab(0)
@@ -188,11 +188,11 @@ COleDateTime CTDLPrintDialog::GetDate() const
 CTDLPrintStylePage::CTDLPrintStylePage(LPCTSTR szStylesheet, 
 									   const CTDCImportExportMgr& mgrImpExp,
 									   LPCTSTR szPrefsKey,
-									   BOOL bSupportsExportToImage)
+									   LPCTSTR szExportToImageView)
 	: 
 	CPropertyPage(CTDLPrintStylePage::IDD),
 	m_mgrImpExp(mgrImpExp),
-	m_bSupportsExportToImage(bSupportsExportToImage),
+	m_sExportToImageView(szExportToImageView),
 	m_sPrefsKey(szPrefsKey),
 	m_cbOtherExporters(mgrImpExp, FALSE, TRUE, _T("html;htm")),
 	m_eStylesheet(FES_COMBOSTYLEBTN | FES_RELATIVEPATHS, CEnString(IDS_XSLFILEFILTER)),
@@ -300,16 +300,26 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 		break;
 		
 	case TDLPDS_IMAGE:
-		if (m_bSupportsExportToImage)
-			m_nStyleOption = OPT_SCREENSHOT;
-		else
+		if (m_sExportToImageView.IsEmpty())
 			m_nStyleOption = OPT_SIMPLE;
+		else
+			m_nStyleOption = OPT_SCREENSHOT;
 		break;
 
 	case TDLPDS_OTHERHTMLEXPORTER:
 		m_nStyleOption = OPT_OTHEREXPORTER;
 		break;
 	}
+
+	CString sCtrlText;
+	GetDlgItemText(IDC_STYLE_TASKVIEW, sCtrlText);
+
+	if (m_sExportToImageView.IsEmpty())
+		sCtrlText.Replace(_T("(%s)"), _T(""));
+	else
+		sCtrlText.Replace(_T("%s"), m_sExportToImageView);
+
+	SetDlgItemText(IDC_STYLE_TASKVIEW, sCtrlText);
 
 	UpdateData(FALSE);
 	EnableDisableControls();

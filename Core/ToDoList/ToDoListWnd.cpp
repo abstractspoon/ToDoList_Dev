@@ -6383,7 +6383,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 						   (tdc.GetTaskView() != FTCV_TASKLIST),
 						   tdc.GetStylesheetPath(),
 						   tdc.GetCustomAttributeDefs(),
-						   tdc.CanSaveTaskViewToImage());
+						   (tdc.CanSaveTaskViewToImage() ? tdc.GetTaskViewName() : _T("")));
 	
 	if (dialog.DoModal() != IDOK)
 		return;
@@ -12967,6 +12967,22 @@ void CToDoListWnd::OnTasklistCustomColumns()
 			{
 				RefreshFilterBarControls(TDCA_ALL);
 				UpdateFindDialogActiveTasklist();
+
+				// Auto-enable attribute inheritance first time only
+				if (!bAnyHasInheritance && aAttrib.AnyHasFeature(TDCCAF_INHERITPARENTCHANGES))
+				{
+					if (m_pPrefs->EnableCustomAttributeInheritance())
+					{
+						// update inherited attributes
+						CTDCAttributeMap mapParentAttrib;
+						BOOL bUpdateAttrib;
+
+						Prefs().GetInheritParentAttributes(mapParentAttrib, bUpdateAttrib);
+						tdc.SetInheritedParentAttributes(mapParentAttrib, bUpdateAttrib);
+
+						m_mgrToDoCtrls.SetAllNeedPreferenceUpdate(TRUE, GetSelToDoCtrl());
+					}
+				}
 			}
 		}
 	}
@@ -13184,7 +13200,21 @@ void CToDoListWnd::OnViewSaveToImage()
 
 void CToDoListWnd::OnUpdateViewSaveToImage(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().CanSaveTaskViewToImage());
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CEnString sMenuItem(ID_VIEW_SAVETOIMAGE);
+
+	if (tdc.CanSaveTaskViewToImage())
+	{
+		pCmdUI->Enable(TRUE);
+		sMenuItem.Replace(_T("%s"), tdc.GetTaskViewName());
+	}
+	else
+	{
+		pCmdUI->Enable(FALSE);
+		sMenuItem.Replace(_T("(%s)"), _T(""));
+	}
+
+	pCmdUI->SetText(sMenuItem);
 }
 
 void CToDoListWnd::OnToolsCopyTasklistPath()

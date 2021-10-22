@@ -148,6 +148,40 @@ void CPreferencesTaskDef2Page::OnUseparentattrib()
 	CPreferencesPageBase::OnControlChange();
 }
 
+BOOL CPreferencesTaskDef2Page::EnableCustomAttributeInheritance()
+{
+	// Find the custom attribute item
+	int nCustItem = m_aAttribPrefs.GetSize();
+
+	while (nCustItem--)
+	{
+		if (m_aAttribPrefs[nCustItem].nAttrib == TDCA_CUSTOMATTRIB)
+			break;
+	}
+	ASSERT(nCustItem != -1);
+
+	if (m_bInheritParentAttributes && (m_aAttribPrefs[nCustItem].bUse > 0))
+		return FALSE;
+	
+	if (!m_bInheritParentAttributes)
+	{
+		// If inheritance was not previously set, then clear any currently selected
+		// attributes to avoid unexpected consequences of suddenly turning it on
+		int nItem = m_aAttribPrefs.GetSize();
+
+		while (nItem--)
+			m_aAttribPrefs[nItem].bUse = FALSE;
+
+		m_bInheritParentAttributes = TRUE;
+		m_bUpdateInheritAttributes = TRUE;
+	}
+
+	// Turn on the custom attribute item
+	m_aAttribPrefs[nCustItem].bUse = TRUE;
+
+	return TRUE;
+}
+
 int CPreferencesTaskDef2Page::GetListItems(TDC_ATTRIBUTE nList, CStringArray& aItems) const
 {
 	aItems.RemoveAll();

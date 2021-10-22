@@ -60,7 +60,7 @@ public:
 	CTDLPrintStylePage(LPCTSTR szStylesheet, 
 					   const CTDCImportExportMgr& mgrImpExp,
 					   LPCTSTR szPrefsKey,
-					   BOOL bSupportsExportToImage);
+					   LPCTSTR szExportToImageView);
 	~CTDLPrintStylePage();
 	
 	TDLPD_STYLE GetExportStyle() const;
@@ -80,7 +80,7 @@ protected:
 
 	CString	m_sStylesheet;
 	int m_nStyleOption;
-	BOOL m_bSupportsExportToImage;
+	CString m_sExportToImageView;
 	CString m_sPrefsKey;
 	CString m_sOtherExporterTypeID;
 	TDLPD_STYLE m_nSimpleStyle;
@@ -170,7 +170,7 @@ public:
 					BOOL bEnableSubtaskSelection,
 					LPCTSTR szStylesheet,
 					const CTDCCustomAttribDefinitionArray& aAttribDefs,
-					BOOL bSupportsExportToImage,
+					LPCTSTR szExportToImageView,
 					CWnd* pParent = NULL);
 
 	CString GetTitle() const { return m_sTitle; }

@@ -36,6 +36,8 @@ public:
 	CPreferencesTaskDef2Page();
 	~CPreferencesTaskDef2Page();
 
+	BOOL EnableCustomAttributeInheritance();
+
 	int GetInheritParentAttributes(CTDCAttributeMap& mapAttribs, BOOL& bUpdateAttrib) const;
 
 	int GetListItems(TDC_ATTRIBUTE nList, CStringArray& aItems) const;
