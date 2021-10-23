@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Globalization;
 using System.Linq;
 
@@ -179,6 +180,8 @@ namespace Calendar
 				return (minHourLabelWidth + leftover);
 			}
 		}
+
+		protected bool SavingToImage { get; set; }
 
 		private AppHeightDrawMode appHeightMode = AppHeightDrawMode.TrueHeightAll;
 
@@ -1393,20 +1396,26 @@ namespace Calendar
                 FinishEditing(false);
             }
 
+            // Calculate visible rectangle
+            Rectangle rect = new Rectangle(0, 0, this.Width - vscroll.Width, this.Height);
+			DoPaint(e, rect);
+
+			AdjustVScrollbar();
+        }
+
+		protected void DoPaint(PaintEventArgs e, Rectangle rect)
+        {
             // resolve appointments on visible date range.
             ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(this.StartDate, this.EndDate);
             OnResolveAppointments(args);
 
             using (SolidBrush backBrush = new SolidBrush(renderer.BackColor))
-                e.Graphics.FillRectangle(backBrush, this.ClientRectangle);
+                e.Graphics.FillRectangle(backBrush, rect);
 
             e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 			e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
-            // Calculate visible rectangle
-            Rectangle rectangle = new Rectangle(0, 0, this.Width - vscroll.Width, this.Height);
-
-            Rectangle headerRectangle = rectangle;
+            Rectangle headerRectangle = rect;
             headerRectangle.X += HourLabelWidth + hourLabelIndent;
             headerRectangle.Width -= (HourLabelWidth + hourLabelIndent);
             headerRectangle.Height = dayHeadersHeight;
@@ -1414,7 +1423,7 @@ namespace Calendar
             if (e.ClipRectangle.IntersectsWith(headerRectangle))
                 DrawDayHeaders(e, headerRectangle);
 
-            Rectangle daysRectangle = rectangle;
+            Rectangle daysRectangle = rect;
             daysRectangle.X += HourLabelWidth + hourLabelIndent;
             daysRectangle.Y += this.HeaderHeight;
             daysRectangle.Width -= (HourLabelWidth + hourLabelIndent);
@@ -1424,23 +1433,21 @@ namespace Calendar
                 DrawDays(e, daysRectangle);
             }
 
-            Rectangle hourLabelRectangle = rectangle;
+            Rectangle hourLabelRectangle = rect;
 
             hourLabelRectangle.Y += this.HeaderHeight;
 
             DrawHourLabels(e, hourLabelRectangle);
 
-            Rectangle scrollrect = rectangle;
-
             if (!this.AllowScroll)
             {
-                scrollrect.X = headerRectangle.Width + HourLabelWidth + hourLabelIndent;
+				Rectangle scrollrect = rect;
+
+				scrollrect.X = headerRectangle.Width + HourLabelWidth + hourLabelIndent;
                 scrollrect.Width = vscroll.Width;
                 using (SolidBrush backBrush = new SolidBrush(renderer.BackColor))
                     e.Graphics.FillRectangle(backBrush, scrollrect);
             }
-
-			AdjustVScrollbar();
         }
 
 		protected void DrawHourLabels(PaintEventArgs e, Rectangle rect)
@@ -1744,8 +1751,7 @@ namespace Calendar
                     if (this.DrawAllAppBorder)
                         appt.DrawBorder = true;
 
-                    bool isSelected = ((activeTool != drawTool) && (appt == selectedAppointment));
-                    DrawAppointment(e.Graphics, apptView, isSelected);
+                    DrawAppointment(e.Graphics, apptView, WantDrawAppointmentSelected(appt));
                 }
             }
         }
@@ -1949,8 +1955,7 @@ namespace Calendar
 				var apptView = NewAppointmentView(appt, apptRect, gripRect);
 				longAppointmentViews[appt] = apptView;
 
-                bool isSelected = ((activeTool != drawTool) && (appt == selectedAppointment));
-                DrawAppointment(g, apptView, isSelected);
+                DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
             }
 
             // Draw a vertical line to close off the long appointments on the left
@@ -1960,7 +1965,12 @@ namespace Calendar
             g.SetClip(rect);
         }
 
-        protected virtual void DrawAppointment(Graphics g, AppointmentView apptView, bool isSelected)
+		protected virtual bool WantDrawAppointmentSelected(Calendar.Appointment appt)
+		{
+			return (!SavingToImage && (activeTool != drawTool) && (appt == selectedAppointment));
+		}
+
+		protected virtual void DrawAppointment(Graphics g, AppointmentView apptView, bool isSelected)
 		{
 			renderer.DrawAppointment(g, apptView, IsLongAppt(apptView.Appointment), isSelected);
 		}
@@ -1985,6 +1995,57 @@ namespace Calendar
         public event AppointmentEventHandler AppointmentMove;
 		public event WeekChangeEventHandler WeekChange;
 
-        #endregion
-    }
+		#endregion
+
+
+		public bool CanSaveToImage()
+		{
+			ResolveAppointmentsEventArgs args = new ResolveAppointmentsEventArgs(this.StartDate, this.EndDate);
+			OnResolveAppointments(args);
+
+			return ((args.Appointments != null) && (args.Appointments.Count > 0));
+		}
+
+		public Bitmap SaveToImage()
+		{
+			// Work out how big the image needs to be to show all 24 hours
+			var imageRect = new Rectangle(0, 0, 0, 0);
+
+			AppointmentList temp = (AppointmentList)cachedAppointments[-1];
+			int numLayers = RecalcAppointmentLayers(temp);
+
+			imageRect.Height += dayHeadersHeight;
+			imageRect.Height += ((numLayers * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
+			imageRect.Height += (24 * slotsPerHour * slotHeight);
+
+			imageRect.Width = this.Width;
+
+			// Cache and reset vertical scrollbar as this influences drawing
+			int prevVScrollValue = vscroll.Value;
+			int prevVScrollWidth = vscroll.Width;
+
+			vscroll.Value = 0;
+			vscroll.Width = 0;
+
+			// The output image
+			Bitmap image = new Bitmap(imageRect.Width, imageRect.Height, PixelFormat.Format32bppRgb);
+
+			using (Graphics graphics = Graphics.FromImage(image))
+			{
+				var paintArgs = new PaintEventArgs(graphics, imageRect);
+
+				SavingToImage = true;
+
+				DoPaint(paintArgs, imageRect);
+
+				SavingToImage = false;
+			}
+
+			vscroll.Value = prevVScrollValue;
+			vscroll.Width = prevVScrollWidth;
+
+			return image;
+		}
+
+	}
 }

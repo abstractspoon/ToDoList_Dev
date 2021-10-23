@@ -1028,8 +1028,11 @@ namespace DayViewUIExtension
 			return base.EnsureVisible(appt, partialOK);
 		}
 
-		bool WantDrawAppointmentSelected(Calendar.Appointment appt)
+		protected override bool WantDrawAppointmentSelected(Calendar.Appointment appt)
 		{
+			if (base.SavingToImage)
+				return false;
+
 			if (m_SelectedTaskID == appt.Id)
 				return true;
 
@@ -1415,5 +1418,6 @@ namespace DayViewUIExtension
 					SlotHeight = minSlotHeight;
 			}
 		}
+
 	}
 }

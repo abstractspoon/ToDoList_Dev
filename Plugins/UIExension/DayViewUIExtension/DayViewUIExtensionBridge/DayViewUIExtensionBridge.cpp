@@ -20,10 +20,12 @@
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-using namespace DayViewUIExtension;
 using namespace System;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
+using namespace System::Drawing;
+
+using namespace DayViewUIExtension;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,6 +223,19 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
+
+	case IUI_SAVETOIMAGE:
+		if (pData)
+		{
+			Bitmap^ image = m_wnd->SaveToImage();
+
+			if (image != nullptr)
+			{
+				msclr::auto_gcroot<String^> sImagePath = gcnew String(pData->szFilePath);
+
+				return UIExtension::SaveImageToFile(image, sImagePath.get());
+			}
+		}
 	}
 
 	// all else
@@ -254,6 +269,9 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 			return ((dwTaskID != 0) && (dwTaskID != pData->dwTaskID));
 		}
 		break;
+
+	case IUI_SAVETOIMAGE:
+		return m_wnd->CanSaveToImage();
 	}
 
 	// all else
