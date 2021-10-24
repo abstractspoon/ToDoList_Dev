@@ -71,37 +71,21 @@ namespace DayViewUIExtension
             }
         }
 
-		public override void SetColumnWidth(Graphics g, int colWidth)
+		private void UpdateDOWStyle(Graphics g)
 		{
-			if (m_ColWidth == colWidth)
-				return;
-
-			m_ColWidth = colWidth;
-
-			// Update the visibility of the day of week component
 			DOWStyle = DOWNameStyle.Long;
 
 			// Subtract the width of the widest numerical component
+			int colWidth = m_ColWidth;
+
 			using (Font font = new Font(m_BaseFont, FontStyle.Bold))
 			{
 				colWidth -= (int)g.MeasureString("31", font).Width;
 			}
 
 			// Calculate the longest long and short day-of-week names
-			int maxLong = 0, maxShort = 0;
-
-			for (int dow = 0; dow < 6; dow++)
-			{
-				string dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetDayName((DayOfWeek)dow);
-				int nameWidth = (int)g.MeasureString(dayName, m_BaseFont).Width;
-
-				maxLong = Math.Max(maxLong, nameWidth);
-
-				dayName = System.Globalization.CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedDayName((DayOfWeek)dow);
-				nameWidth = (int)g.MeasureString(dayName, m_BaseFont).Width;
-
-				maxShort = Math.Max(maxShort, nameWidth);
-			}
+			int maxLong = DateUtil.GetMaxDayOfWeekNameWidth(g, m_BaseFont, false);
+			int maxShort = DateUtil.GetMaxDayOfWeekNameWidth(g, m_BaseFont, true);
 
 			if (maxLong > colWidth)
 			{
@@ -112,15 +96,32 @@ namespace DayViewUIExtension
 			}
 		}
 
+		public override void SetColumnWidth(Graphics g, int colWidth)
+		{
+			if (m_ColWidth == colWidth)
+				return;
+
+			m_ColWidth = colWidth;
+
+			// Update the visibility of the day of week component
+			UpdateDOWStyle(g);
+		}
+
 		public void SetFont(String fontName, int fontSize)
         {
             if ((m_BaseFont.Name == fontName) && (m_BaseFont.Size == fontSize))
                 return;
 
             m_BaseFont = new Font(fontName, fontSize, FontStyle.Regular);
-        }
-        
-        public int GetFontHeight()
+ 
+			// Update the visibility of the day of week component
+			using (Graphics g = Graphics.FromHwnd(m_hWnd))
+			{
+				UpdateDOWStyle(g);
+			}
+		}
+
+		public int GetFontHeight()
         {
             return BaseFont.Height;
         }

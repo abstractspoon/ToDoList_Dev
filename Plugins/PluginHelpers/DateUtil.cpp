@@ -4,13 +4,16 @@
 #include "stdafx.h"
 #include "DateUtil.h"
 #include "Preferences.h"
+#include "Win32.h"
 
 #include <Shared\DateHelper.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
+
 using namespace System::Collections::Generic;
+using namespace System::Drawing;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -253,4 +256,21 @@ bool WorkingWeek::IsWeekend(DateTime^ date)
 int DateUtil::WeekOfYear(DateTime^ date)
 {
 	return CDateHelper::GetWeekofYear(date->ToOADate());
+}
+
+int DateUtil::GetMaxDayOfWeekNameWidth(Graphics^ graphics, Font^ font, bool shortName)
+{
+	HDC hDC = Win32::GetHdc(graphics->GetHdc());
+
+	HFONT hFont = Win32::GetHfont(font->ToHfont());
+	HFONT hOldFont = (HFONT)::SelectObject(hDC, hFont);
+
+	int width = CDateHelper::GetMaxDayOfWeekNameWidth(CDC::FromHandle(hDC), (shortName ? TRUE : FALSE));
+
+	// cleanup
+	::SelectObject(hDC, hOldFont);
+	::DeleteObject(hFont);
+	graphics->ReleaseHdc();
+
+	return width;
 }

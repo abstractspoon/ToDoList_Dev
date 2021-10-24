@@ -74,6 +74,7 @@ namespace Abstractspoon
 			{
 			public:
 				static int WeekOfYear(DateTime^ date);
+				static int GetMaxDayOfWeekNameWidth(System::Drawing::Graphics^ graphics, System::Drawing::Font^ font, bool shortName);
 			};
 		}
 	}

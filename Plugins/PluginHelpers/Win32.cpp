@@ -26,6 +26,11 @@ HFONT Win32::GetHfont(IntPtr hFont)
 	return static_cast<HFONT>(hFont.ToPointer());
 }
 
+HDC Win32::GetHdc(IntPtr hDC)
+{
+	return static_cast<HDC>(hDC.ToPointer());
+}
+
 void Win32::RemoveClientEdge(IntPtr hWnd)
 {
 	// remove client edge
