@@ -3139,14 +3139,20 @@ BOOL CTaskCalendarCtrl::SaveToImage(CBitmap& bmImage)
 
 	CAutoFlag af(m_bSavingToImage, TRUE);
 	CLockUpdates lock(GetSafeHwnd());
+	CClientDC dc(this);
 
 	// Resize the client rect to fully 'unroll' any cell scrollbars
+	CFont* pOldFont = dc.SelectObject(m_fonts.GetFont());
+
 	CRect rCell, rWindowOrg(0, 0, 0, 0);
 	GetGridCellRect(0, 0, rCell);
 
 	int nReqCellHeight = (m_nHeaderHeight + (m_nMaxDayTaskCount * m_nTaskHeight));
+	int nReqCellWidth = (CDateHelper::GetMaxDayOfWeekNameWidth(&dc) + GraphicsMisc::ScaleByDPIFactor(10 + 10));
 
-	if (rCell.Height() < nReqCellHeight)
+	dc.SelectObject(pOldFont);
+	
+	if ((rCell.Height() < nReqCellHeight) || (rCell.Width() < nReqCellWidth))
 	{
 		CRect rWindow;
 		GetWindowRect(rWindow);
@@ -3154,15 +3160,22 @@ BOOL CTaskCalendarCtrl::SaveToImage(CBitmap& bmImage)
 		GetParent()->ScreenToClient(rWindow);
 		rWindowOrg = rWindow;
 
-		rWindow.bottom = rWindow.top;
-		rWindow.bottom += m_nDayHeaderHeight;
-		rWindow.bottom += (m_nVisibleWeeks * nReqCellHeight);
+		if (rCell.Height() < nReqCellHeight)
+		{
+			rWindow.bottom = rWindow.top;
+			rWindow.bottom += m_nDayHeaderHeight;
+			rWindow.bottom += (m_nVisibleWeeks * nReqCellHeight);
+		}
+
+		if (rCell.Width() < nReqCellWidth)
+		{
+			rWindow.left = rWindow.right;
+			rWindow.right += (7 * nReqCellWidth);
+		}
 
 		MoveWindow(rWindow);
-		GetGridCellRect(0, 0, rCell); // update cell rect
 	}
 	
-	CClientDC dc(this);
 	CDC dcImage;
 
 	if (dcImage.CreateCompatibleDC(&dc))
