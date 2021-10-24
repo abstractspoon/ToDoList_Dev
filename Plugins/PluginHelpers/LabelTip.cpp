@@ -74,25 +74,29 @@ Drawing::Size LabelTip::CalcFinalTipSize(Drawing::Size defaultSize)
 	auto tipText = GetToolTip(m_Handler->GetOwner());
 	auto tipFont = m_Handler->GetFont();
 
-	auto textSize = m_HitRect.Size;
-
-	if (m_Multiline)
+	auto singleLineTextSize = TextRenderer::MeasureText(tipText, tipFont);
+	Size textSize(0, 0);
+	
+	if (m_Multiline && (m_HitRect.Height > singleLineTextSize.Height))
 	{
-		textSize = TextRenderer::MeasureText(tipText, tipFont, textSize, TextFormatFlags::WordBreak);
+		textSize = TextRenderer::MeasureText(tipText, tipFont, m_HitRect.Size, TextFormatFlags::WordBreak);
 
-		int nWidth = m_HitRect.Width;
-		int nIncrement = (nWidth / 2);
+		// if the measured text height exceeds the height
+		// of the available rectangle, then we keep widening the
+		// available rectangle until the height fits
+		Size availSize = m_HitRect.Size;
+		int nIncrement = (availSize.Width / 2);
 
 		while ((textSize.Height + BORDERS) > m_HitRect.Height)
 		{
-			textSize.Width += nIncrement;
-			textSize = TextRenderer::MeasureText(tipText, tipFont, textSize, TextFormatFlags::WordBreak);
+			availSize.Width += nIncrement;
+			textSize = TextRenderer::MeasureText(tipText, tipFont, availSize, TextFormatFlags::WordBreak);
 		}
 	}
 	else 
 	{
 		// single line
-		textSize = TextRenderer::MeasureText(tipText, tipFont);
+		textSize = singleLineTextSize;
 	}
 
 	return (textSize + Size(BORDERS, BORDERS));
