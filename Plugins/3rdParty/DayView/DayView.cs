@@ -2008,9 +2008,9 @@ namespace Calendar
 
 		public Bitmap SaveToImage()
 		{
-			// Work out how big the image needs to be to show all 24 hours
 			var imageRect = new Rectangle(0, 0, 0, 0);
 
+			// Work out how high the image needs to be to show all 24 hours
 			AppointmentList temp = (AppointmentList)cachedAppointments[-1];
 			int numLayers = RecalcAppointmentLayers(temp);
 
@@ -2018,6 +2018,8 @@ namespace Calendar
 			imageRect.Height += ((numLayers * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
 			imageRect.Height += (24 * slotsPerHour * slotHeight);
 
+			// Work out how wide the image needs to be to show each day at a reasonable scale
+			// TODO
 			imageRect.Width = this.Width;
 
 			// Cache and reset vertical scrollbar as this influences drawing

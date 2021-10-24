@@ -325,7 +325,7 @@ namespace DayViewUIExtension
 
 				if (DOWStyle == DOWNameStyle.Long)
 				{
-					int strWidth = TextRenderer.MeasureText(g, dayNum, font).Width;
+					int strWidth = (int)g.MeasureString(dayNum, font).Width;
 
 					rect.Width -= strWidth;
 					rect.X += strWidth;
