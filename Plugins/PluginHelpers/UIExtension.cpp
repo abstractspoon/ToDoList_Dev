@@ -516,7 +516,7 @@ bool UIExtension::TaskIcon::Draw(Graphics^ g, Int32 x, Int32 y)
 
 	// Must retrieve clip rect before getting HDC
 	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
-	HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
+	HDC hDC = Win32::GetHdc(g->GetHdc());
 
 	if (hDC == NULL)
 		return false;
@@ -538,7 +538,7 @@ bool UIExtension::TaskIcon::Draw(Graphics^ g, Int32 x, Int32 y)
 
 bool UIExtension::ShortcutOverlay::Draw(Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy)
 {
-	HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
+	HDC hDC = Win32::GetHdc(g->GetHdc());
 
 	if (hDC == NULL)
 		return false;
@@ -553,7 +553,7 @@ bool UIExtension::ShortcutOverlay::Draw(Graphics^ g, Int32 x, Int32 y, Int32 cx,
 
 bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y, Int32 cx, Int32 cy, bool transparent)
 {
-	HWND hWndRef = static_cast<HWND>(hwnd.ToPointer());
+	HWND hWndRef = Win32::GetHwnd(hwnd);
 	bool focused = (::GetFocus() == hWndRef);
 	Style style = (focused ? Style::Selected : Style::SelectedNotFocused);
 
@@ -564,7 +564,7 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 {
 	// Must retrieve clip rect before getting HDC
 	Drawing::Rectangle rClip = Rectangle::Truncate(g->ClipBounds);
-	HDC hDC = static_cast<HDC>(g->GetHdc().ToPointer());
+	HDC hDC = Win32::GetHdc(g->GetHdc());
 
 	if (hDC == NULL)
 		return false;
