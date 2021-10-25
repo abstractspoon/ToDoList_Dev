@@ -174,7 +174,7 @@ namespace Calendar
 			{
 				// We use the hour label width to absorb any
 				// leftover from dividing up the width into days
-				int daysWidth = (Width - vscroll.Width - minHourLabelWidth - hourLabelIndent);
+				int daysWidth = (ClientRectangle.Width - vscroll.Width - minHourLabelWidth - hourLabelIndent);
 				int leftover = (daysWidth % DaysShowing);
 
 				return (minHourLabelWidth + leftover);
@@ -1321,7 +1321,7 @@ namespace Calendar
         public virtual DateTime GetDateAt(int x, bool longAppt)
         {
             DateTime date = startDate.Date;
-            int dayWidth = (this.Width - (vscroll.Width + HourLabelWidth + hourLabelIndent)) / daysToShow;
+            int dayWidth = (ClientRectangle.Width - (vscroll.Width + HourLabelWidth + hourLabelIndent)) / daysToShow;
 
 			if (longAppt)
 			{
@@ -1409,7 +1409,7 @@ namespace Calendar
             }
 
             // Calculate visible rectangle
-            Rectangle rect = new Rectangle(0, 0, this.Width - vscroll.Width, this.Height);
+            Rectangle rect = new Rectangle(0, 0, ClientRectangle.Width - vscroll.Width, ClientRectangle.Height);
 			DoPaint(e, rect);
 
 			AdjustVScrollbar();
@@ -1953,7 +1953,7 @@ namespace Calendar
                 int endPos = (rect.X + (int)(endDay * dayWidth));
 
                 if ((endPos >= rect.Right) || (appt.EndDate >= endOfLastDay))
-                    endPos = (rect.Right - 1);
+                    endPos = (rect.Right - 2);
 
                 apptRect.X = startPos;
                 apptRect.Width = (endPos - startPos);
