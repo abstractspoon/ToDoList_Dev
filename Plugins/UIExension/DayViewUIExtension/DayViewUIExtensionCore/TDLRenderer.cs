@@ -83,6 +83,9 @@ namespace DayViewUIExtension
 				colWidth -= (int)g.MeasureString("31", font).Width;
 			}
 
+			// padding
+			colWidth -= DPIScaling.Scale(10); // matches Calendar view
+
 			// Calculate the longest long and short day-of-week names
 			int maxLong = DateUtil.GetMaxDayOfWeekNameWidth(g, m_BaseFont, false);
 			int maxShort = DateUtil.GetMaxDayOfWeekNameWidth(g, m_BaseFont, true);
@@ -95,6 +98,8 @@ namespace DayViewUIExtension
 					DOWStyle = DOWNameStyle.Short;
 			}
 		}
+
+		public int ColumnWidth { get { return m_ColWidth; } }
 
 		public override void SetColumnWidth(Graphics g, int colWidth)
 		{
@@ -312,13 +317,14 @@ namespace DayViewUIExtension
 
 			fmt.LineAlignment = StringAlignment.Center;
 			fmt.Alignment = StringAlignment.Near;
+			fmt.FormatFlags |= StringFormatFlags.NoWrap;
 
 			using (Font font = new Font(m_BaseFont, FontStyle.Bold))
 			{
 				if (DOWStyle == DOWNameStyle.None)
 					fmt.Alignment = StringAlignment.Center;
 
-				string dayNum = date.ToString(" d");
+				string dayNum = date.Day.ToString();
 				g.DrawString(dayNum, font, SystemBrushes.WindowText, rect, fmt);
 
 				if (DOWStyle == DOWNameStyle.Long)
