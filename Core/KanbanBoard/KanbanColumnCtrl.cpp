@@ -87,7 +87,7 @@ const int IMAGE_PADDING			= 2;
 const int BAR_PADDING			= 2;
 const int ITEM_BORDER			= 1;
 
-const CRect TEXT_BORDER			= CRect(2, 0, 3, 1);
+const CRect TEXT_BORDER			= CRect(2, 1, 3, 0);
 const CString NOFILELINK;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -550,7 +550,7 @@ void CKanbanColumnCtrl::DrawItemShadow(CDC* pDC, CRect& rItem) const
 	CRect rShadow(rItem);
 	rShadow.DeflateRect(3, 3, -1, -1);
 
-	GraphicsMisc::DrawRect(pDC, rShadow, GetSysColor(COLOR_3DDKSHADOW));
+	GraphicsMisc::DrawRect(pDC, rShadow, GetSysColor(COLOR_3DSHADOW));
 
 	pDC->RestoreDC(nSave);
 }
@@ -648,7 +648,6 @@ void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
 
 	// Rest of attributes
 	rAttributes.top += CalcItemTitleTextHeight();
-	rAttributes.top += IMAGE_PADDING;
 
 	COLORREF crOtherText = crText;
 
@@ -660,8 +659,6 @@ void CKanbanColumnCtrl::DrawItem(CDC* pDC, DWORD dwTaskID, const CRect& rItem)
 
 void CKanbanColumnCtrl::DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText)
 {
-	CRect rTitle(rItem);
-
 	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crText);
 
@@ -678,11 +675,13 @@ void CKanbanColumnCtrl::DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRe
 		pOldFont = pDC->SelectObject(m_fonts.GetFont(dwFontFlags));
 
 	// first 'n' lines is the task title
-	rTitle.DeflateRect(TEXT_BORDER);
+	CRect rTitle(rItem);
+
 	rTitle.bottom = (rTitle.top + CalcItemTitleTextHeight());
 	rTitle.bottom = min(rTitle.bottom, rItem.bottom);
+	rTitle.DeflateRect(TEXT_BORDER);
 
-	int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX | DT_WORDBREAK); // multi-line for titles only
+	int nFlags = (DT_LEFT | DT_BOTTOM | DT_END_ELLIPSIS | DT_NOPREFIX | DT_WORDBREAK); // multi-line for titles only
 
 	pDC->DrawText(pKI->sTitle, rTitle, nFlags);
 
@@ -710,7 +709,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 	CRect rAttrib(rItem);
 	rAttrib.DeflateRect(TEXT_BORDER);
 
-	int nFlags = (DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+	int nFlags = (DT_LEFT | DT_BOTTOM | DT_END_ELLIPSIS | DT_NOPREFIX);
 
 	for (int nDisp = 0; nDisp < m_aDisplayAttrib.GetSize(); nDisp++)
 	{
@@ -787,7 +786,12 @@ void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& 
 
 			if (bHasIcon)
 			{
-				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, rParent.top, 0, 0, 0, colorWhite, ILD_TRANSPARENT | ILD_BLEND50);
+				int nImageTop = rParent.top;
+
+				if (DEF_IMAGE_SIZE < m_nItemTextHeight)
+					nImageTop += ((m_nItemTextHeight - DEF_IMAGE_SIZE) / 2);
+
+				ImageList_DrawEx(hilTask, iImageIndex, *pDC, rParent.left, nImageTop, 0, 0, 0, colorWhite, ILD_TRANSPARENT | ILD_BLEND50);
 			}
 			else if (bFirstParent)
 			{
