@@ -85,9 +85,10 @@ const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
 
 const int IMAGE_PADDING			= 2;
 const int BAR_PADDING			= 2;
+const int ITEM_PADDING			= 1;
 const int ITEM_BORDER			= 1;
 
-const CRect TEXT_BORDER			= CRect(2, 1, 3, 0);
+const CRect TEXT_BORDER			= CRect(1, 1, 2, 0);
 const CString NOFILELINK;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -580,6 +581,8 @@ void CKanbanColumnCtrl::DrawItemBackground(CDC* pDC, const KANBANITEM* pKI, CRec
 
 		GraphicsMisc::DrawRect(pDC, rItem, crFill, crBorder);
 	}
+
+	rItem.DeflateRect(ITEM_BORDER, ITEM_BORDER);
 }
 
 void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult) 
@@ -604,7 +607,7 @@ void CKanbanColumnCtrl::OnCustomDraw(NMHDR* pNMHDR, LRESULT* pResult)
 		
 				CRect rItem;
 				GetItemRect(hti, rItem, NULL);
-				rItem.DeflateRect(ITEM_BORDER, ITEM_BORDER);
+				rItem.DeflateRect(ITEM_PADDING, ITEM_PADDING);
 
 				DrawItem(pDC, dwTaskID, rItem);
 			}
@@ -698,13 +701,15 @@ BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBAN
 
 void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText)
 {
-	pDC->SetBkMode(TRANSPARENT);
+	int nSave = pDC->SaveDC();
 
-	CFont* pOldFont = NULL;
+	pDC->SetBkMode(TRANSPARENT);
+	pDC->IntersectClipRect(rItem);
+
 	DWORD dwFontFlags = 0;
 
 	if (HasOption(KBCF_STRIKETHRUDONETASKS) && pKI->IsDone(FALSE))
-		pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_STRIKETHRU));
+		pDC->SelectObject(m_fonts.GetFont(GMFS_STRIKETHRU));
 
 	CRect rAttrib(rItem);
 	rAttrib.DeflateRect(TEXT_BORDER);
@@ -737,8 +742,7 @@ void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, cons
 		}
 	}
 
-	if (pOldFont)
-		pDC->SelectObject(pOldFont);
+	pDC->RestoreDC(nSave);
 }
 
 void CKanbanColumnCtrl::DrawItemParents(CDC* pDC, const KANBANITEM* pKI, CRect& rItem, COLORREF crText) const
