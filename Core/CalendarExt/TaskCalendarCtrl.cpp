@@ -72,7 +72,8 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_nSortBy(TDCA_NONE),
 	m_bSortAscending(-1),
 	m_crWeekend(RGB(224, 224, 224)),
-	m_crToday(255) 
+	m_crToday(255),
+	m_crAltWeek(CLR_NONE)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
@@ -693,6 +694,17 @@ void CTaskCalendarCtrl::SetGridLineColor(COLORREF crGrid)
 	}
 }
 
+void CTaskCalendarCtrl::SetAlternateWeekColor(COLORREF crAltWeek)
+{
+	if (crAltWeek != m_crAltWeek)
+	{
+		m_crAltWeek = crAltWeek;
+
+		if (GetSafeHwnd())
+			Invalidate();
+	}
+}
+
 void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 {
 	m_crWeekend = theme.crWeekend;
@@ -704,9 +716,22 @@ void CTaskCalendarCtrl::SetUITheme(const UITHEME& theme)
 
 void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday)
 {
-	bToday &= HasColor(m_crToday);
+	if (HasColor(m_crAltWeek) && (CDateHelper::GetWeekofYear(pCell->date) % 2))
+	{
+		CRect rWeek(rCell);
+
+		// Don't overdraw gridlines
+		rWeek.top++;
+		
+		if (rWeek.left > 0)
+			rWeek.left++;
+
+		pDC->FillSolidRect(rWeek, m_crAltWeek);
+	}
 
 	BOOL bWeekend = (HasColor(m_crWeekend) && CWeekend().IsWeekend(pCell->date));
+
+	bToday &= HasColor(m_crToday);
 
 	if (bToday)
 	{

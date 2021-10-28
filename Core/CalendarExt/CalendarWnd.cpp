@@ -35,6 +35,7 @@ const UINT IDC_MINI_CALENDAR = 102;
 
 const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 const COLORREF DEF_GRIDLINECOLOR	= RGB(192, 192, 192);
+const COLORREF DEF_ALTLINECOLOR		= RGB(230, 230, 255);
 
 /////////////////////////////////////////////////////////////////////////////
 // CCalendarWnd
@@ -244,6 +245,14 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 
 	m_BigCalendar.SetGridLineColor(crGrid);
 	m_MiniCalendar.SetBorderColor(crGrid);
+
+	// And alternate day colour which we will use for alternate weeks
+	COLORREF crAlt = CLR_NONE;
+
+	if (pPrefs->GetProfileInt(_T("Preferences"), _T("AlternateLineColor"), TRUE))
+		crAlt = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTLINECOLOR);
+
+	m_BigCalendar.SetAlternateWeekColor(crAlt);
 
 	// calendar specific preferences
 	if (!bAppOnly)

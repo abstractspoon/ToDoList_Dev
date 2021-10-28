@@ -62,6 +62,7 @@ public:
 	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
 
+	void SetAlternateWeekColor(COLORREF crAltWeek);
 	void SetGridLineColor(COLORREF crGrid);
 	void SetUITheme(const UITHEME& theme);
 
@@ -103,7 +104,7 @@ protected:
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
-	COLORREF m_crWeekend, m_crToday; // Grid color handled by base class
+	COLORREF m_crWeekend, m_crToday, m_crAltWeek; // Grid color handled by base class
 
 	struct CONTINUOUSDRAWINFO
 	{
