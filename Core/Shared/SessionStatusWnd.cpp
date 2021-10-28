@@ -192,29 +192,24 @@ void CSessionStatusWnd::OnTimer(UINT_PTR nIDEvent)
 			BOOL bWasActive = m_bScreenSaver;
 			BOOL bIsActive = Misc::IsScreenSaverActive();
 
-			if (!bWasActive && bIsActive)
+			if (bWasActive ^ bIsActive)
 			{
-				m_bScreenSaver = TRUE;
-				Notify(SESSIONSTATUS_SCREENSAVER, TRUE);
-			}
-			else if (bWasActive && !bIsActive)
-			{
-				m_bScreenSaver = FALSE;
-				Notify(SESSIONSTATUS_SCREENSAVER, FALSE);
+				m_bScreenSaver = bIsActive;
+				Notify(SESSIONSTATUS_SCREENSAVER, bIsActive);
 			}
 		}
 		break;
 
 	case TIMER_LOCK:
-		if (!m_bLocked && Misc::IsWorkStationLocked())
 		{
-			m_bLocked = TRUE;
-			Notify(SESSIONSTATUS_LOCK, TRUE);
-		}
-		else if (m_bLocked && !Misc::IsWorkStationLocked())
-		{
-			m_bLocked = FALSE;
-			Notify(SESSIONSTATUS_LOCK, FALSE);
+			BOOL bWasLocked = m_bLocked;
+			BOOL bIsLocked = Misc::IsWorkStationLocked();
+
+			if (bWasLocked ^ bIsLocked)
+			{
+				m_bLocked = bIsLocked;
+				Notify(SESSIONSTATUS_LOCK, bIsLocked);
+			}
 		}
 		break;
 	}

@@ -1346,7 +1346,7 @@ LRESULT CTDLCustomAttributeDlg::OnChangeListAttributes(WPARAM wp, LPARAM lp)
 
 		attrib.SetListType(dwListType);
 
-		// If we've switched from non-left to list
+		// If we've switched from non-list to list
 		// then automatically add 'filterable'
 		if (!bWasList && attrib.IsList())
 			attrib.dwFeatures |= TDCCAF_FILTER;

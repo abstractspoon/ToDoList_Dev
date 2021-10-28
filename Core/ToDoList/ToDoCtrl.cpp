@@ -2150,13 +2150,13 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 			// we maintain the task percent at its pre-done state even
 			// if the UI says its '100%'
 			BOOL bWasDone = IsSelectedTaskDone();
+			BOOL bIsDone = (m_nPercentDone >= 100);
+
 			SetSelectedTaskPercentDone(m_nPercentDone);
 			
 			// check if we need to update 'done' state
-			BOOL bDoneChange = (bWasDone && m_nPercentDone < 100) || (!bWasDone && m_nPercentDone == 100);
-			
-			if (bDoneChange)
-				SetSelectedTaskDone(m_nPercentDone == 100);
+			if (bWasDone ^ bIsDone)
+				SetSelectedTaskDone(bIsDone);
 		}
 		break;
 		
@@ -2558,7 +2558,7 @@ BOOL CToDoCtrl::SetAutoComboReadOnly(CAutoComboBox& combo, BOOL bReadOnly, const
 {
 	BOOL bWasReadOnly = !CDialogHelper::ComboHasEdit(combo);
 
-	if ((bReadOnly && !bWasReadOnly) || (!bReadOnly && bWasReadOnly))
+	if (bReadOnly ^ bWasReadOnly)
 	{
 		// cache the current state
 		CString sWndPrompt = m_mgrPrompts.GetPrompt(combo);
@@ -3839,7 +3839,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 		if (bOffset)
 			mapProcessed.Add(dwTaskID);
 
-		bDoneChange |= (bWasDone != m_data.IsTaskDone(dwTaskID));
+		bDoneChange |= (bWasDone ^ m_data.IsTaskDone(dwTaskID));
 	}
 
 	if (aModTaskIDs.GetSize())

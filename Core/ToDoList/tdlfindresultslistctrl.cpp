@@ -369,7 +369,7 @@ void CTDLFindResultsListCtrl::RefreshUserPreferences()
 	m_bStrikeThruDone = prefs.GetProfileInt(_T("Preferences"), _T("StrikethroughDone"), FALSE);
 
 	// clear the font cache if 'strike thru' has changed
-	if (m_bStrikeThruDone != bWasStrikeThru)
+	if (m_bStrikeThruDone ^ bWasStrikeThru)
 		m_fonts.Clear();
 
 	if (IsWindowVisible())

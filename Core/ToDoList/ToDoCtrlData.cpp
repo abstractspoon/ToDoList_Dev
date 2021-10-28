@@ -2139,7 +2139,7 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 		}
 
 		// Handle a change in completion state
-		if ((bWasDone && !pTDI->IsDone()) || (!bWasDone && pTDI->IsDone()))
+		if (bWasDone ^ pTDI->IsDone())
 		{
 			if (bWasDone && (pTDI->nPercentDone == 100))
 				pTDI->nPercentDone = 0;
@@ -4252,7 +4252,7 @@ TDC_SET CToDoCtrlData::SetTaskDone(DWORD dwTaskID, const COleDateTime& date,
 	// completion date if its completion state has also changed
 	BOOL bDone = CDateHelper::IsDateSet(date);
 	BOOL bWasDone = IsTaskDone(dwTaskID);
-	BOOL bStateChange = ((bDone && !bWasDone) || (!bDone && bWasDone));
+	BOOL bStateChange = (bDone ^ bWasDone);
 	BOOL bDateChange = bStateChange;
 
 	if (!bDateChange && bDone && bWasDone)
