@@ -1518,9 +1518,7 @@ CString CDateHelper::GetDayOfWeekName(OLE_DAYOFWEEK nWeekday, BOOL bShort)
 
 int CDateHelper::GetMaxDayOfWeekNameWidth(CDC* pDC, BOOL bShort)
 {
-	CSize sizeMax = GetMaxDayOfWeekNameExtent(pDC, bShort);
-	
-	return sizeMax.cx;
+	return GetMaxDayOfWeekNameExtent(pDC, bShort).cx;
 }
 
 CSize CDateHelper::GetMaxDayOfWeekNameExtent(CDC* pDC, BOOL bShort)
@@ -1535,6 +1533,28 @@ CSize CDateHelper::GetMaxDayOfWeekNameExtent(CDC* pDC, BOOL bShort)
 
 		sizeMax.cx = max(sizeMax.cx, sizeDOW.cx);
 		sizeMax.cy = max(sizeMax.cy, sizeDOW.cy);
+	}
+	
+	return sizeMax;
+}
+
+int CDateHelper::GetMaxMonthNameWidth(CDC* pDC, BOOL bShort)
+{
+	return GetMaxMonthNameExtent(pDC, bShort).cx;
+}
+
+CSize CDateHelper::GetMaxMonthNameExtent(CDC* pDC, BOOL bShort)
+{
+	CSize sizeMax(0, 0);
+		
+	// figure out the longest day in pixels
+	for (int nMonth = 1; nMonth <= 12; nMonth++)
+	{
+		CString sMonth = GetMonthName(nMonth, bShort);
+		CSize sizeMonth = pDC->GetTextExtent(sMonth);
+
+		sizeMax.cx = max(sizeMax.cx, sizeMonth.cx);
+		sizeMax.cy = max(sizeMax.cy, sizeMonth.cy);
 	}
 	
 	return sizeMax;

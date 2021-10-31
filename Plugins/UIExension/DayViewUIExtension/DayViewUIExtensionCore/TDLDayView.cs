@@ -1419,5 +1419,21 @@ namespace DayViewUIExtension
 			}
 		}
 
+		override protected Size CalculateImageSize()
+		{
+			Size image = base.CalculateImageSize();
+
+			// Make sure image is wide enough to properly render day numbers
+			int dayWidth = ((ClientRectangle.Width - (minHourLabelWidth + hourLabelIndent)) / DaysShowing);
+			int minDayWidth = 0;
+
+			using (Graphics g = Graphics.FromHwnd(Handle))
+				minDayWidth = m_Renderer.CalculateMinimumDayWidthForImage(g);
+
+			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * Math.Max(dayWidth, minDayWidth)));
+
+			return image;
+		}
+
 	}
 }

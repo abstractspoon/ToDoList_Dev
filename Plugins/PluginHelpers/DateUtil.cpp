@@ -274,3 +274,20 @@ int DateUtil::GetMaxDayOfWeekNameWidth(Graphics^ graphics, Font^ font, bool shor
 
 	return width;
 }
+
+int DateUtil::GetMaxMonthNameWidth(Graphics^ graphics, Font^ font, bool shortName)
+{
+	HDC hDC = Win32::GetHdc(graphics->GetHdc());
+
+	HFONT hFont = Win32::GetHfont(font->ToHfont());
+	HFONT hOldFont = (HFONT)::SelectObject(hDC, hFont);
+
+	int width = CDateHelper::GetMaxMonthNameWidth(CDC::FromHandle(hDC), (shortName ? TRUE : FALSE));
+
+	// cleanup
+	::SelectObject(hDC, hOldFont);
+	::DeleteObject(hFont);
+	graphics->ReleaseHdc();
+
+	return width;
+}

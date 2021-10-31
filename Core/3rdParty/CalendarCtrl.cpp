@@ -366,7 +366,7 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 	for(i=0 ; i<CALENDAR_NUM_COLUMNS; i++)
 	{
 		CString csTitle(GetDayOfWeekName(m_dayCells[0][i].date, bShort));
-		CRect txtRect(i*nWidth, 2, (i+1)*nWidth, m_nHeaderHeight);
+		CRect txtRect(i*nWidth + 2, 2, (i+1)*nWidth, m_nHeaderHeight);
 		pDC->DrawText(csTitle, txtRect, DT_CENTER|DT_VCENTER);
 	}
 	pDC->SelectObject(pOldFont);
@@ -547,14 +547,28 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	// draw day/month numbers
 	CString csDay;
 	int nDay = pCell->date.GetDay();
+
+	// Draw the first of any month in bold
+	CFont fontBold, *pOldFont = NULL;
+
+	if (nDay == 1)
+	{
+		LOGFONT lf;
+		m_DefaultFont.GetLogFont(&lf);
+
+		lf.lfWeight = FW_BOLD;
+		fontBold.CreateFontIndirect(&lf);
+
+		pOldFont = pDC->SelectObject(&fontBold);
+	}
 	
 	if (bShowMonth)
 	{
-		csDay.Format(_T("%s %d"), GetMonthName(pCell->date, FALSE), nDay);
+		csDay.Format(_T("%d %s"), nDay, GetMonthName(pCell->date, FALSE));
 		CSize dtSize(pDC->GetTextExtent(csDay));
 
 		if (dtSize.cx>rCell.Width())
-			csDay.Format(_T("%s %d"), GetMonthName(pCell->date, TRUE), nDay);
+			csDay.Format(_T("%d %s"), nDay, GetMonthName(pCell->date, TRUE));
 	}
 	else
 	{
@@ -563,11 +577,18 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 	
 	CRect rText(rCell);
 	rText.bottom = rText.top + m_nDayHeaderHeight;
-	rText.DeflateRect(0, 3, 3, 0); // padding
+	rText.DeflateRect(2, 3, 3, 0); // padding
 	
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rText, DT_RIGHT|DT_VCENTER);
+	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rText, DT_LEFT|DT_VCENTER);
+
+	// cleanup
+	if (fontBold.GetSafeHandle())
+	{
+		pDC->SelectObject(pOldFont);
+		fontBold.DeleteObject();
+	}
 
 	// Draw contents
 	CRect rContent(rCell);

@@ -126,12 +126,12 @@ namespace Calendar
 		{
 			// To allow derived classes to cache calculations
 		}
-		
+
 		public abstract void DrawHourLabel(Graphics g, Rectangle rect, int hour, bool ampm);
 
-        public abstract void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
+		public abstract void DrawMinuteLine(Graphics g, Rectangle rect, int minute);
 
-        public abstract void DrawDayHeader(Graphics g, Rectangle rect, DateTime date);
+        public abstract void DrawDayHeader(Graphics g, Rectangle rect, DateTime date, bool firstDay);
 
         public abstract void DrawDayBackground(Graphics g, Rectangle rect);
 

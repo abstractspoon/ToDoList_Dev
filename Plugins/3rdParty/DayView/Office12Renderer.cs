@@ -126,7 +126,7 @@ namespace Calendar
                 g.DrawLine(pen, rect.Left, rect.Y, rect.Width, rect.Y);
         }
 
-        public override void DrawDayHeader(System.Drawing.Graphics g, System.Drawing.Rectangle rect, DateTime date)
+        public override void DrawDayHeader(System.Drawing.Graphics g, System.Drawing.Rectangle rect, DateTime date, bool firstDay)
         {
             if (g == null)
                 throw new ArgumentNullException("g");

@@ -168,6 +168,8 @@ public:
 	static void GetMonthNames(BOOL bShort, CStringArray& aMonths); // jan-dec
 	static int GetMaxDayOfWeekNameWidth(CDC* pDC, BOOL bShort = FALSE);
 	static CSize GetMaxDayOfWeekNameExtent(CDC* pDC, BOOL bShort = FALSE);
+	static int GetMaxMonthNameWidth(CDC* pDC, BOOL bShort = FALSE);
+	static CSize GetMaxMonthNameExtent(CDC* pDC, BOOL bShort = FALSE);
 
 	static BOOL IsLeapYear(const COleDateTime& date = COleDateTime::GetCurrentTime());
 	static BOOL IsLeapYear(int nYear);

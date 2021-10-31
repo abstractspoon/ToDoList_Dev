@@ -172,6 +172,9 @@ namespace Calendar
 		{
 			get
 			{
+				if (SavingToImage)
+					return minHourLabelWidth;
+
 				// We use the hour label width to absorb any
 				// leftover from dividing up the width into days
 				int daysWidth = (ClientRectangle.Width - vscroll.Width - minHourLabelWidth - hourLabelIndent);
@@ -1506,7 +1509,7 @@ namespace Calendar
 
             for (int day = 0; day < daysToShow; day++)
             {
-                renderer.DrawDayHeader(e.Graphics, dayHeaderRectangle, headerDate);
+                renderer.DrawDayHeader(e.Graphics, dayHeaderRectangle, headerDate, (day == 0));
 
                 dayHeaderRectangle.X += dayWidth;
                 headerDate = headerDate.AddDays(1);
@@ -2018,21 +2021,26 @@ namespace Calendar
 			return ((args.Appointments != null) && (args.Appointments.Count > 0));
 		}
 
-		public Bitmap SaveToImage()
+		virtual protected Size CalculateImageSize()
 		{
-			var imageRect = new Rectangle(0, 0, 0, 0);
-
-			// Work out how high the image needs to be to show all 24 hours
 			AppointmentList temp = (AppointmentList)cachedAppointments[-1];
 			int numLayers = RecalcAppointmentLayers(temp);
 
-			imageRect.Height += DayHeaderHeight;
-			imageRect.Height += ((numLayers * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
-			imageRect.Height += (24 * slotsPerHour * slotHeight);
+			Size image = new Size(0, 0);
 
-			// Work out how wide the image needs to be to show each day at a reasonable scale
-			// TODO
-			imageRect.Width = this.Width;
+			image.Height += DayHeaderHeight;
+			image.Height += ((numLayers * (longAppointmentHeight + longAppointmentSpacing)) + longAppointmentSpacing);
+			image.Height += (24 * slotsPerHour * slotHeight);
+
+			int dayWidth = ((ClientRectangle.Width - (minHourLabelWidth + hourLabelIndent)) / DaysShowing);
+			image.Width = (minHourLabelWidth + hourLabelIndent + (DaysShowing * dayWidth));
+
+			return image;
+		}
+
+		public Bitmap SaveToImage()
+		{
+			var imageRect = new Rectangle(new Point(0, 0), CalculateImageSize());
 
 			// Cache and reset vertical scrollbar as this influences drawing
 			int prevVScrollValue = vscroll.Value;
@@ -2046,11 +2054,9 @@ namespace Calendar
 
 			using (Graphics graphics = Graphics.FromImage(image))
 			{
-				var paintArgs = new PaintEventArgs(graphics, imageRect);
-
 				SavingToImage = true;
 
-				DoPaint(paintArgs, imageRect);
+				DoPaint(new PaintEventArgs(graphics, imageRect), imageRect);
 
 				SavingToImage = false;
 			}

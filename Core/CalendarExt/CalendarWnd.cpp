@@ -246,6 +246,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 	m_BigCalendar.SetGridLineColor(crGrid);
 	m_MiniCalendar.SetBorderColor(crGrid);
 
+/*
 	// And alternate day colour which we will use for alternate weeks
 	COLORREF crAlt = CLR_NONE;
 
@@ -253,6 +254,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 		crAlt = pPrefs->GetProfileInt(_T("Preferences\\Colors"), _T("AlternateLines"), DEF_ALTLINECOLOR);
 
 	m_BigCalendar.SetAlternateWeekColor(crAlt);
+*/
 
 	// calendar specific preferences
 	if (!bAppOnly)
@@ -790,7 +792,6 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 			return TRUE;
 		}
 	}
-
 
 	return 0L;
 }
