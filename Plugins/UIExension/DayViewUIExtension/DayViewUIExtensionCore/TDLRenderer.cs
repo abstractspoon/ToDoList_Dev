@@ -19,6 +19,7 @@ namespace DayViewUIExtension
 		private IntPtr m_hWnd;
 		private Font m_BaseFont, m_BoldFont;
 		private int m_ColWidth = -1;
+		private int m_HeaderPadding = DPIScaling.Scale(3);
 
 		enum DowNameStyle
 		{
@@ -133,6 +134,9 @@ namespace DayViewUIExtension
 				format += "d ";
 			}
 
+			if (format == "")
+				return date.Day.ToString();
+
 			return date.ToString(format);
 		}
 
@@ -143,9 +147,11 @@ namespace DayViewUIExtension
 
 		private void UpdateHeaderStyles(Graphics g)
 		{
+			int availWidth = (m_ColWidth - (m_HeaderPadding * 2));
+
 			// Basic header string format is '<Day of week> <Day of month> <Month>'
-			int maxDayNum = (int)(g.MeasureString("31", BaseFont, m_ColWidth).Width);
-			int maxDayAndMonthNum = (int)(g.MeasureString("31/12", BaseFont, m_ColWidth).Width);
+			int maxDayNum = (int)(g.MeasureString("31", BaseFont).Width);
+			int maxDayAndMonthNum = (int)(g.MeasureString("31/12", BaseFont).Width);
 
 			int maxLongDow = DateUtil.GetMaxDayOfWeekNameWidth(g, BoldFont, false);
 			int maxShortDow = DateUtil.GetMaxDayOfWeekNameWidth(g, BoldFont, true);
@@ -155,8 +161,6 @@ namespace DayViewUIExtension
 
 			DowStyle = DowNameStyle.Long;
 			MonthStyle = MonthNameStyle.Long;
-
-			int availWidth = (m_ColWidth - 2); // deduct a bit for .NET padding
 
 			if (availWidth < (maxLongDow + maxDayNum + maxLongMonth))
 			{
@@ -417,7 +421,11 @@ namespace DayViewUIExtension
 			string text = FormatHeaderText(date, DowStyle, MonthStyle, firstDay);
 			Font font = ((date.Day == 1) ? BoldFont : BaseFont);
 
-			g.DrawString(text, font, SystemBrushes.WindowText, rect, fmt);
+			Rectangle rText = rect;
+			rText.X += m_HeaderPadding;
+			rText.Width -= m_HeaderPadding;
+
+			g.DrawString(text, font, SystemBrushes.WindowText, rText, fmt);
 		}
 
 		public override void DrawDayBackground(Graphics g, Rectangle rect)
@@ -640,42 +648,45 @@ namespace DayViewUIExtension
                 }
 
                 // draw appointment text
-                using (StringFormat format = new StringFormat())
-                {
-                    format.Alignment = StringAlignment.Near;
-                    format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
+				if (rect.Width > 0)
+				{
+					using (StringFormat format = new StringFormat())
+					{
+						format.Alignment = StringAlignment.Near;
+						format.LineAlignment = (isLong ? StringAlignment.Center : StringAlignment.Near);
 
-					if (isLong)
-						format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
+						if (isLong)
+							format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
 
-                    rect.Y += 3;
+						rect.Y += 3;
 
-					if (isLong)
-						rect.Height = m_BaseFont.Height;
-					else
-						rect.Height -= 3;
+						if (isLong)
+							rect.Height = BaseFont.Height;
+						else
+							rect.Height -= 3;
 
-					tdlView.TextRect = rect;
-                    g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
+						tdlView.TextRect = rect;
+						g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
-                    using (SolidBrush brush = new SolidBrush(textColor))
-                    {
-                        if (taskItem.IsDone && StrikeThruDoneTasks)
-                        {
-                            using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
-                            {
-                                g.DrawString(appt.Title, font, brush, rect, format);
-                            }
-                        }
-                        else
-                        {
-                            g.DrawString(appt.Title, this.BaseFont, brush, rect, format);
-                        }
-                    }
+						using (SolidBrush brush = new SolidBrush(textColor))
+						{
+							if (taskItem.IsDone && StrikeThruDoneTasks)
+							{
+								using (Font font = new Font(this.BaseFont, FontStyle.Strikeout))
+								{
+									g.DrawString(appt.Title, font, brush, rect, format);
+								}
+							}
+							else
+							{
+								g.DrawString(appt.Title, this.BaseFont, brush, rect, format);
+							}
+						}
 
-                    g.TextRenderingHint = TextRenderingHint.SystemDefault;
-                }
-            }
-        }
+						g.TextRenderingHint = TextRenderingHint.SystemDefault;
+					}
+				}
+			}
+		}
     }
 }
