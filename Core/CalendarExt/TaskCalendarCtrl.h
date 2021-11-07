@@ -232,6 +232,7 @@ protected:
 
 	int RebuildCellTasks(BOOL bIncExtItems = TRUE);
 	int RebuildCellTasks(CCalendarCell* pCell);
+	void ResortCellTasks();
 	void RebuildCellTaskDrawInfo();
 	void RebuildFutureOccurrences(DWORD& dwNextExtID);
 	void RebuildCustomDates(DWORD& dwNextExtID);
