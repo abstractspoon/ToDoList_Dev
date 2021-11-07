@@ -266,6 +266,8 @@ void CCalendarCtrl::OnPaint()
 	MemDC.FillSolidRect(&rc, GetSysColor(COLOR_WINDOW));
 	MemDC.SetBkMode(TRANSPARENT);
 	
+	CFont* pOldFont = MemDC.SelectObject(&m_DefaultFont);
+
 	// Draw calendar elements
 	DrawHeader(&MemDC);			
 
@@ -279,6 +281,8 @@ void CCalendarCtrl::OnPaint()
 		DrawGrid(&MemDC);
 		DrawCells(&MemDC);
 	}
+
+	MemDC.SelectObject(pOldFont);
 
 	// Render
 	dc.BitBlt(rc.left, rc.top, rc.Width(), rc.Height(), &MemDC, 0, 0, SRCCOPY);
@@ -348,7 +352,6 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 		rcLine.top = rcLine.bottom-1;
 	}
 
-	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
 	int nWidth = rc.Width()/CALENDAR_NUM_COLUMNS;
 	bool bShort = false;
 	for(i=0; i<CALENDAR_NUM_COLUMNS; i++)
@@ -369,7 +372,6 @@ void CCalendarCtrl::DrawHeader(CDC* pDC)
 		CRect txtRect(i*nWidth + 2, 2, (i+1)*nWidth, m_nHeaderHeight);
 		pDC->DrawText(csTitle, txtRect, DT_CENTER|DT_VCENTER);
 	}
-	pDC->SelectObject(pOldFont);
 }
 
 void CCalendarCtrl::DrawGrid(CDC* pDC)
@@ -402,8 +404,6 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 {
 	CRect rc;
 	GetClientRect(&rc);
-
-	CFont* pOldFont = pDC->SelectObject(&m_DefaultFont);
 
 	for(int i=0; i<GetVisibleWeeks() ; i++)
 	{
@@ -460,8 +460,6 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 			}
 		}
 	}
-
-	pDC->SelectObject(pOldFont);
 }
 
 void CCalendarCtrl::DrawCellFocus(CDC* pDC, const CCalendarCell* /*pCell*/, const CRect& rCell)
@@ -543,7 +541,26 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 
 		pDC->FillSolidRect(rcMark, RGB(255,104,4));
 	}
+
+	CRect rHeader(rCell);
+	rHeader.bottom = rHeader.top + m_nDayHeaderHeight;
+
+	DrawCellHeader(pDC, pCell, rHeader, bShowMonth);
+
+	// Draw contents
+	CRect rContent(rCell);
+
+	// Don't overdraw grid
+	if (!m_bDrawGridOverCells && (m_crGrid != CLR_NONE) && (rContent.left > 0))
+		rContent.left++;
+
+	rContent.top += m_nDayHeaderHeight;		
 	
+	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
+}
+
+void CCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, const CRect& rHeader, BOOL bShowMonth)
+{
 	// draw day/month numbers
 	CString csDay;
 	int nDay = pCell->date.GetDay();
@@ -567,7 +584,7 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 		csDay.Format(_T("%d %s"), nDay, GetMonthName(pCell->date, FALSE));
 		CSize dtSize(pDC->GetTextExtent(csDay));
 
-		if (dtSize.cx>rCell.Width())
+		if (dtSize.cx>rHeader.Width())
 			csDay.Format(_T("%d %s"), nDay, GetMonthName(pCell->date, TRUE));
 	}
 	else
@@ -575,8 +592,7 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 		csDay.Format(_T("%d"), nDay);
 	}
 	
-	CRect rText(rCell);
-	rText.bottom = rText.top + m_nDayHeaderHeight;
+	CRect rText(rHeader);
 	rText.DeflateRect(2, 3, 3, 0); // padding
 	
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
@@ -585,21 +601,7 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 
 	// cleanup
 	if (fontBold.GetSafeHandle())
-	{
 		pDC->SelectObject(pOldFont);
-		fontBold.DeleteObject();
-	}
-
-	// Draw contents
-	CRect rContent(rCell);
-
-	// Don't overdraw grid
-	if (!m_bDrawGridOverCells && (m_crGrid != CLR_NONE) && (rContent.left > 0))
-		rContent.left++;
-
-	rContent.top += m_nDayHeaderHeight;		
-	
-	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
 }
 
 void CCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 

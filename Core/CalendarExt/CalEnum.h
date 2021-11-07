@@ -62,6 +62,16 @@ enum TCC_SNAPMODE
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum TCC_MONTHSTYLE
+{
+	TCCMS_NONE,
+	TCCMS_NUMBER,
+	TCCMS_SHORT,
+	TCCMS_LONG
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 const double	ONE_MINUTE		= (1.0 / (24.0 * 60));
 const double	ONE_HOUR		= (1.0 / 24.0);
 const double	TWELVE_HOURS	= (12.0 / 24.0);

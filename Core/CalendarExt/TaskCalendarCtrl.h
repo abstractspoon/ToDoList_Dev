@@ -104,6 +104,7 @@ protected:
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
+	TCC_MONTHSTYLE m_nCellHeaderMonthStyle;
 	COLORREF m_crWeekend, m_crToday, m_crAltWeek; // Grid color handled by base class
 
 	struct CONTINUOUSDRAWINFO
@@ -156,6 +157,7 @@ protected:
 	virtual void DrawHeader(CDC* pDC);
 	virtual void DrawCells(CDC* pDC);
 	virtual void DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
+	virtual void DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, const CRect& rHeader, BOOL bShowMonth);
 	virtual void DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, BOOL bSelected, BOOL bToday);
 	virtual void DrawCellFocus(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell);
 	virtual void OnVisibleDateRangeChanged();
@@ -187,6 +189,7 @@ protected:
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
+	TCC_MONTHSTYLE CalcCellHeaderMonthStyle(CDC* pDC, CFont* pBoldFont) const;
 
 	DWORD GetSelectedTaskID() const;
 	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect = NULL) const;
