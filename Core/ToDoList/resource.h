@@ -1397,7 +1397,6 @@
 #define ID_DEBUG_CLEANDICTIONARIES      34573
 #define ID_UDTPREFS_COPY                34574
 #define ID_UDTPREFS_DELETE              34575
-#define ID_CUUDTPREFS_MOVEUP            34576
 #define ID_UDTPREFS_MOVEDOWN            34577
 #define ID_UDTPREFS_EDIT                34578
 #define ID_UDTPREFS_NEW                 34579
