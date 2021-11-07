@@ -450,6 +450,12 @@ void CCalendarCtrl::DrawCells(CDC* pDC)
 				int nSaveDC = pDC->SaveDC();
 				pDC->IntersectClipRect(rCell);
 
+				DrawCellBkgnd(pDC, pCell, rCell, bSelected, bToday);
+
+				// Don't overdraw grid
+				if (!m_bDrawGridOverCells && (m_crGrid != CLR_NONE) && (u > 0))
+					rCell.left++;
+
 				DrawCell(pDC, pCell, rCell, bSelected, bToday, bShowMonth);
 
 				// focus rect
@@ -530,8 +536,6 @@ void CCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, const CR
 void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
 							 BOOL bSelected, BOOL bToday, BOOL bShowMonth)
 {
-	DrawCellBkgnd(pDC, pCell, rCell, bSelected, bToday);
-
 	if (pCell->bMark)
 	{
 		CRect rcMark(rCell);
@@ -549,11 +553,6 @@ void CCalendarCtrl::DrawCell(CDC* pDC, const CCalendarCell* pCell, const CRect& 
 
 	// Draw contents
 	CRect rContent(rCell);
-
-	// Don't overdraw grid
-	if (!m_bDrawGridOverCells && (m_crGrid != CLR_NONE) && (rContent.left > 0))
-		rContent.left++;
-
 	rContent.top += m_nDayHeaderHeight;		
 	
 	DrawCellContent(pDC, pCell, rContent, bSelected, bToday);
