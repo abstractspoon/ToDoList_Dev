@@ -648,7 +648,7 @@ void CTaskCalendarCtrl::DrawHeader(CDC* pDC)
 		
 		CString csTitle = CDateHelper::GetDayOfWeekName((OLE_DAYOFWEEK)nDOW, bShort);
 		CRect rText(rCol);
-		rText.DeflateRect(TEXT_PADDING, (m_nHeaderHeight - sizeDOW.cy) / 2, 0, 0);
+		rText.DeflateRect(HEADER_PADDING, (m_nHeaderHeight - sizeDOW.cy) / 2, 0, 0);
 		
 		pDC->SetBkMode(TRANSPARENT);
 		pDC->DrawText(csTitle, rText, DT_LEFT|DT_TOP);
