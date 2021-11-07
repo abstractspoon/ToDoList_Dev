@@ -228,8 +228,8 @@ public:
 	int GetLastFileError() const;
 
 	BOOL Export(CString& sOutput) const;
-	BOOL Transform(const CString& sTransformPath, CString& sOutput) const;
-	BOOL TransformToFile(const CString& sTransformPath, const CString& sOutputPath, SFE_FORMAT nFormat) const;
+	BOOL Transform(const CString& sStylesheet, CString& sOutput) const;
+	BOOL TransformToFile(const CString& sStylesheet, const CString& sOutputPath, SFE_FORMAT nFormat) const;
 
 	const CXmlItem* Root() const;
 	CXmlItem* Root();
@@ -305,6 +305,7 @@ protected:
 	BOOL BuildDOM() const;
 	int Export(const CXmlItem* pItem, CXmlNodeWrapper* pNode) const;
 	BOOL CheckInitialiseXMLDoc(const CString& sRootItemName, BOOL bSetHeaders) const;
+	BOOL CheckInitialiseXSLDoc(const CString& sStylesheet) const;
 
 	virtual MSXML2::IXMLDOMNodePtr InsertNode(CXmlNodeWrapper* pNode, int nNode, const CXmlItem* pXItem) const;
 	

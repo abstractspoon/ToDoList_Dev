@@ -932,6 +932,16 @@ BOOL CXmlFile::CheckInitialiseXMLDoc(const CString& sRootItemName, BOOL bSetHead
 	return TRUE;
 }
 
+BOOL CXmlFile::CheckInitialiseXSLDoc(const CString& sStylesheet) const
+{
+	if (!m_xslDoc.IsValid())
+	{
+		m_xslDoc.Initialise();
+	}
+
+	return m_xslDoc.Load(sStylesheet);
+}
+
 BOOL CXmlFile::LoadContent(const CString& sContent, const CString& sRootItemName)
 {
 	Reset();
@@ -1397,9 +1407,9 @@ BOOL CXmlFile::BuildDOM() const
 	return bRes;
 }
 
-BOOL CXmlFile::Transform(const CString& sTransformPath, CString& sOutput) const
+BOOL CXmlFile::Transform(const CString& sStylesheet, CString& sOutput) const
 {
-	if (BuildDOM() && m_xslDoc.Load(sTransformPath))
+	if (BuildDOM() && CheckInitialiseXSLDoc(sStylesheet))
 	{
 		return m_xmlDoc.Transform(m_xslDoc, sOutput);
 	}
@@ -1408,11 +1418,11 @@ BOOL CXmlFile::Transform(const CString& sTransformPath, CString& sOutput) const
 	return FALSE;
 }
 
-BOOL CXmlFile::TransformToFile(const CString& sTransformPath, const CString& sOutputPath, SFE_FORMAT nFormat) const
+BOOL CXmlFile::TransformToFile(const CString& sStylesheet, const CString& sOutputPath, SFE_FORMAT nFormat) const
 {
 	CString sOutput;
 	
-	if (Transform(sTransformPath, sOutput))
+	if (Transform(sStylesheet, sOutput))
 	{
 		if ((nFormat == SFEF_UTF8) || (nFormat == SFEF_UTF8WITHOUTBOM))
 			sOutput.Replace(_T("UTF-16"), _T("UTF-8"));
