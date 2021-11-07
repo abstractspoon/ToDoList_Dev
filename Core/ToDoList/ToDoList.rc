@@ -4647,6 +4647,7 @@ BEGIN
     IDS_ATTRIBNOTSET        "not set"
     IDS_ATTRIBSET           "set"
     IDS_SAVETOIMAGEERROR    "The requested image could not be saved.\n\nTry using the filter options to reduce the visible task date range."
+    IDS_SB_SELTASKTITLEPATHID_TIP "Selected task (Path) (Task ID)"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5152,7 +5153,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_SB_SELCOST_TIP      "Aggregate cost for the selected tasks"
     IDS_SB_TASKCOUNT_TIP    "Filtered task count / Total task count"
-    IDS_SB_SELTASKTITLE_TIP "Selected task"
+    IDS_SB_SELTASKTITLEID_TIP "Selected task (Task ID)"
     IDS_IMPORTFILE_CANTOPEN "'%s' could not be opened for importing.\n\nCheck that you have the necessary permissions and that the file is not open in another application."
     IDS_TDLBC_TASKPARENTIDS "Task ID / Parent ID"
     IDS_RESTARTTOCHANGELANGUAGE 
@@ -5722,7 +5723,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_CUUDTPREFS_MOVEUP    "\nMove Tool Up"
     ID_UDTPREFS_MOVEDOWN    "\nMove Tool Down"
     ID_UDTPREFS_EDIT        "\nEdit Tool Name"
     ID_UDTPREFS_NEW         "\nNew Tool"

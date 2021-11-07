@@ -2069,7 +2069,7 @@
 #define IDS_SB_SELCOST_TIP              51216
 #define IDS_SB_FILEVERSION_TIP          51217
 #define IDS_SB_TASKCOUNT_TIP            51218
-#define IDS_SB_SELTASKTITLE_TIP         51219
+#define IDS_SB_SELTASKTITLEID_TIP       51219
 #define IDS_IMPORTFILE_CANTOPEN         51220
 #define IDS_TDLBC_TASKPARENTIDS         51221
 #define IDS_FILTER_STARTENDTHISMONTH    51222
@@ -2432,6 +2432,7 @@
 #define IDS_ATTRIBNOTSET                51606
 #define IDS_ATTRIBSET                   51607
 #define IDS_SAVETOIMAGEERROR            51608
+#define IDS_SB_SELTASKTITLEPATHID_TIP   51609
 
 // Next default values for new objects
 // 

@@ -32,7 +32,7 @@ CTDLStatusBarProgressProxy::~CTDLStatusBarProgressProxy()
 
 static SBACTPANEINFO SB_PANES[] =
 {
-	{ ID_SB_SELTASKTITLE,	MAKEINTRESOURCE(IDS_SB_SELTASKTITLE_TIP), SBACTF_STRETCHY | SBACTF_RESOURCETIP },
+	{ ID_SB_SELTASKTITLE,	MAKEINTRESOURCE(IDS_SB_SELTASKTITLEID_TIP), SBACTF_STRETCHY | SBACTF_RESOURCETIP },
 	{ ID_SB_TASKCOUNT,		MAKEINTRESOURCE(IDS_SB_TASKCOUNT_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP },
 	//{ ID_SB_SPACER }, 
 	{ ID_SB_SELTIMEEST,		MAKEINTRESOURCE(IDS_SB_SELTIMEEST_TIP), SBACTF_AUTOFIT | SBACTF_RESOURCETIP },
@@ -167,12 +167,26 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 
 		case 1:
 			{
-				// Space out delimiters for easier reading
-				CString sPath = tdc.GetSelectedTaskPath(TRUE);
-				sPath.Replace(_T("\\"), _T(" \\ "));
+				DWORD dwTaskID = tdc.GetSelectedTaskID();
+				CString sTitle = tdc.GetTaskTitle(dwTaskID);
+				CString sPath = tdc.GetTaskPath(dwTaskID);
 
-				sTextValue = Misc::Format(_T("%s (%ld)"), sPath, tdc.GetSelectedTaskID());
-				nIDTipFormat = IDS_SB_SELTASKTITLE_TIP;
+				if (!sPath.IsEmpty())
+				{
+					// Strip last delimiter
+					Misc::RemoveSuffix(sPath, _T("\\"));
+
+					// Space out delimiters for easier reading
+					sPath.Replace(_T("\\"), _T(" \\ "));
+
+					sTextValue = Misc::Format(_T("%s (%s) (%ld)"), sTitle, sPath, dwTaskID);
+					nIDTipFormat = IDS_SB_SELTASKTITLEPATHID_TIP;
+				}
+				else
+				{
+					sTextValue = Misc::Format(_T("%s (%ld)"), sTitle, dwTaskID);
+					nIDTipFormat = IDS_SB_SELTASKTITLEID_TIP;
+				}
 			}
 			break;
 
