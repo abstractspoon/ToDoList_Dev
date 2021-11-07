@@ -12957,6 +12957,8 @@ void CToDoListWnd::OnTasklistCustomColumns()
 
 		if (dialog.DoModal() == IDOK)
 		{
+			BOOL bAnyHasInheritance = tdc.GetCustomAttributeDefs().AnyHasFeature(TDCCAF_INHERITPARENTCHANGES);
+
 			// Ignore modification callback if it came from us
 			CAutoFlag af(m_bSettingAttribDefs, TRUE);
 
