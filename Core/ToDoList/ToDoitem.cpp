@@ -1216,7 +1216,7 @@ void TODOITEM::SetCustomAttributeValue(const CString& sAttribID, const TDCCADATA
 BOOL TODOITEM::HasCustomAttributeValue(const CString& sAttribID) const
 {
  	TDCCADATA unused;
-	return !GetCustomAttributeValue(sAttribID, unused);
+	return GetCustomAttributeValue(sAttribID, unused);
 }
 
 COleDateTimeSpan TODOITEM::GetRemainingTime(const COleDateTime& date)
