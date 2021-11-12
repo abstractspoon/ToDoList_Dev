@@ -5777,7 +5777,7 @@ void CToDoCtrl::SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis)
 	TDCCOLEDITVISIBILITY visPrev = m_visColEdit;
 	m_visColEdit = vis;
 
-	if (!IsDelayLoaded())
+	if (GetSafeHwnd() && !IsDelayLoaded())
 	{
 		if (bColumnChange)
 		{
@@ -9765,7 +9765,7 @@ BOOL CToDoCtrl::AddTreeItemToTaskFile(HTREEITEM hti, DWORD dwTaskID, CTaskFile& 
 			const TODOSTRUCTURE* pTDS;
 			GET_DATA_TDS(m_data, dwTaskID, pTDS, FALSE);
 
-			m_exporter.ExportTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
+			m_exporter.ExportMatchingTaskAttributes(pTDI, pTDS, tasks, hTask, filter);
 		}
 		else
 		{

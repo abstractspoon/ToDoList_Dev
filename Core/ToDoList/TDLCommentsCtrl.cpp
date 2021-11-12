@@ -155,7 +155,7 @@ void CTDLCommentsCtrl::SetWindowPrompts(LPCTSTR szComboPrompt, LPCTSTR szComment
 		m_mgrPrompts.SetComboPrompt(m_cbCommentsFmt, szComboPrompt);
 
 	if (m_ctrlComments.GetSafeHwnd() && CWinClasses::IsEditControl(m_ctrlComments))
-		m_mgrPrompts.SetEditPrompt(m_ctrlComments, szCommentsPrompt);
+		m_mgrPrompts.SetEditPrompt(m_ctrlComments, szCommentsPrompt, TRUE);
 }
 
 void CTDLCommentsCtrl::SetContentFont(HFONT hFont)
@@ -185,8 +185,8 @@ void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCom
 	switch (nCommentsState)
 	{
 		case RTCS_ENABLED:
-			m_ctrlComments.SetReadOnly(FALSE);
 			m_ctrlComments.EnableWindow(TRUE);
+			m_ctrlComments.SetReadOnly(FALSE);
 			break;
 
 		case RTCS_DISABLED:
@@ -194,8 +194,8 @@ void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCom
 			break;
 
 		case RTCS_READONLY:
-			m_ctrlComments.SetReadOnly(TRUE);
 			m_ctrlComments.EnableWindow(TRUE);
+			m_ctrlComments.SetReadOnly(TRUE);
 			break;
 	}
 }

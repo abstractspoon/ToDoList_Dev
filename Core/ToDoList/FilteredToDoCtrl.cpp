@@ -289,7 +289,6 @@ BOOL CFilteredToDoCtrl::CopySelectedTasks() const
 			hTask = m_exporter.ExportTask(dwTaskID, tasks, NULL);
 		else
 			hTask = m_exporter.ExportSiblingTask(dwTaskID, tasks, hPrevSiblingTask);
-
 	}
 	
 	// extra processing to identify the originally selected tasks

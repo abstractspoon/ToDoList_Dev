@@ -838,12 +838,16 @@ void CEnHeaderCtrl::ClearAllTracked()
 int CEnHeaderCtrl::GetItemOrder(CIntArray& aOrder) const
 {
 	int nNumItems = GetItemCount();
-	aOrder.SetSize(nNumItems);
+
+	if (nNumItems)
+	{
+		aOrder.SetSize(nNumItems);
 	
-	CEnHeaderCtrl* pThis = const_cast<CEnHeaderCtrl*>(this);
-	
-	if (pThis->GetOrderArray(aOrder.GetData(), nNumItems))
-		return nNumItems;
+		CEnHeaderCtrl* pThis = const_cast<CEnHeaderCtrl*>(this);
+
+		if (pThis->GetOrderArray(aOrder.GetData(), nNumItems))
+			return nNumItems;
+	}
 
 	// else
 	aOrder.RemoveAll();

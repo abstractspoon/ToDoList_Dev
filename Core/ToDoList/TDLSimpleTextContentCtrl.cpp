@@ -21,6 +21,7 @@
 #include "..\shared\msoutlookhelper.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\holdredraw.h"
+#include "..\shared\osversion.h"
 
 #include "..\Interfaces\ipreferences.h"
 #include "..\Interfaces\ITaskList.h"
@@ -142,7 +143,13 @@ void CTDLSimpleTextContentCtrl::SetReadOnly(bool bReadOnly)
 
 void CTDLSimpleTextContentCtrl::Enable(bool bEnable)
 {
-	EnableWindow(bEnable ? TRUE : FALSE);
+	// Below Windows 8 there is an issue where moving from 
+	// a disabled state causes the vertical scrollbar to not
+	// update properly so we use the read-only state instead
+	if (COSVersion() < OSV_WIN8)
+		SetReadOnly(bEnable ? FALSE : TRUE);
+	else
+		EnableWindow(bEnable ? TRUE : FALSE);
 }
 
 HWND CTDLSimpleTextContentCtrl::GetHwnd() const 
