@@ -10,7 +10,6 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\localizer.h"
-#include "..\shared\webmisc.h"
 
 #include "..\3rdparty\stdiofileex.h"
 
@@ -107,7 +106,7 @@ bool CTaskListHtmlExporter::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR szDe
 	STRIKETHRUDONE = pPrefs->GetProfileInt(szKey, _T("StrikethroughDone"), TRUE);
 	EXPORTSTYLE = GetExportStyle(dwFlags);
 
-	if (WebMisc::IsProtocolRegistered(_T("tdl"), _T("ToDoList")))
+	if (!PRINTING)
 	{
 		TASKLISTLINK.Format(_T("tdl://%s?"), pTasks->GetFileName(true));
 		TASKLISTLINK.Replace('\\', '/');
@@ -430,7 +429,7 @@ CString CTaskListHtmlExporter::FormatAttribute(const ITASKLISTBASE* pTasks, HTAS
 			}
 		}
 
-		if (!PRINTING && !TASKLISTLINK.IsEmpty())
+		if (!PRINTING)
 		{
 			CString sTaskLink;
 			sTaskLink.Format(_T(" (<a href=\"%s%ld\">%s</a>)"), TASKLISTLINK, pTasks->GetTaskID(hTask), CLocalizer::TranslateText(_T("link")));
