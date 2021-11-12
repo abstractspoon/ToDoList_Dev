@@ -78,6 +78,7 @@ CTaskListExporterBase::CTaskListExporterBase()
 	PARENTTITLECOMMENTSNLY(FALSE),
 	ENDL(_T("\r\n")),
 	MULTIFILE(FALSE),
+	PRINTING(FALSE),
 	LISTSEPARATOR(_T("+"))
 {
 	BuildLabelMap();
@@ -99,11 +100,12 @@ IIMPORTEXPORT_RESULT CTaskListExporterBase::ExportOutput(LPCTSTR szDestFilePath,
 	return IIER_SUCCESS;
 }
 
-bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, DWORD /*dwFlags*/, 
+bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*szDestFilePath*/, DWORD dwFlags, 
 									   IPreferences* pPrefs, LPCTSTR /*szKey*/)
 {
 	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
 	PARENTTITLECOMMENTSNLY = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), FALSE);
+	PRINTING = Misc::HasFlag(dwFlags, IIEF_PRINTING);
 
 	BuildAttribList(pTasks);
 
