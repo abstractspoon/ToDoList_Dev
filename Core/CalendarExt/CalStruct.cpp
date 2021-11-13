@@ -98,7 +98,7 @@ void TASKCALITEMDATES::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 		else
 			CDateHelper::ClearDate(dtStart);
 	}
-
+	
 	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
 	{
 		if (pTasks->GetTaskDueDate64(hTask, FALSE, tDate))
@@ -176,7 +176,7 @@ void TASKCALITEMDATES::Recalc(DWORD dwCalcDates)
 		{
 			if (bHasDueDate)
 				dtStartCalc = min(dtDue, dtNow);
-			else
+			else 
 				dtStartCalc = dtNow;
 		}
 
@@ -200,6 +200,12 @@ void TASKCALITEMDATES::Recalc(DWORD dwCalcDates)
 		}
 
 		dtEndCalc = CDateHelper::GetEndOfDay(dtEndCalc);
+	}
+	else if (bHasDoneDate)
+	{
+		// adjust done date to point to end of day if it has no time component
+		if (!CDateHelper::DateHasTime(dtDone))
+			dtDone = CDateHelper::GetEndOfDay(dtDone);
 	}
 	else if (bHasDueDate)
 	{
@@ -286,7 +292,7 @@ COleDateTime TASKCALITEMDATES::GetAnyStart() const
 	// take calculated value in preference
 	if (CDateHelper::IsDateSet(dtStartCalc))
 		return dtStartCalc;
-
+	
 	// else
 	return dtStart;
 }
@@ -302,7 +308,7 @@ COleDateTime TASKCALITEMDATES::GetAnyEnd() const
 	{
 		return dtDone;
 	}
-
+	
 	// else
 	return dtDue;
 }

@@ -9,7 +9,7 @@
 #include "..\Shared\DialogHelper.h"
 #include "..\Shared\Misc.h"
 #include "..\Shared\GraphicsMisc.h"
-//#include "..\Shared\EnString.h"
+#include "..\Shared\EnString.h"
 
 #include "..\Interfaces\ipreferences.h"
 
@@ -57,6 +57,9 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 	m_bAdjustTaskHeights = FALSE;
 	m_bShowDoneDates = FALSE;
 	m_bTreatOverdueAsDueToday = FALSE;
+	m_bShowDueDates = TRUE;
+	m_bShowStartDates = TRUE;
+
 	//}}AFX_DATA_INIT
 	m_bHideParentTasks = TRUE;
 	m_nCalcMissingStartDates = CALCSTART_ASCREATION;
@@ -116,47 +119,47 @@ BOOL CCalendarPreferencesPage::OnInitDialog()
 	CDialogHelper::AddString(m_cbHeatMapAttribute, IDS_HEATMAP_NUMSTARTED, TDCA_STARTDATE);
 
 	UpdateData(FALSE);
+	EnableDisableControls();
+		
+	return TRUE;  // return TRUE unless you set the focus to a control
+	              // EXCEPTION: OCX Property Pages should return FALSE
+}
 
+void CCalendarPreferencesPage::EnableDisableControls()
+{
 	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
 	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowStartDates);
 	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowDueDates);
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetSize());
-		
-	return TRUE;  // return TRUE unless you set the focus to a control
-	              // EXCEPTION: OCX Property Pages should return FALSE
+
+	CEnString sLabel(m_bShowTasksContinuous ? IDS_DISPLAYDONETASKS : IDS_DISPLAYTASKDONEDATES);
+	GetDlgItem(IDC_SHOWDONEDATES)->SetWindowText(sLabel);
 }
 
 void CCalendarPreferencesPage::OnShowTasksContinuous() 
 {
 	UpdateData();
-
-	GetDlgItem(IDC_SHOWSTARTDATES)->EnableWindow(!m_bShowTasksContinuous);
-	GetDlgItem(IDC_SHOWDUEDATES)->EnableWindow(!m_bShowTasksContinuous);
-	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowStartDates);
-	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(!m_bShowTasksContinuous && m_bShowDueDates);
+	EnableDisableControls();
 }
 
 void CCalendarPreferencesPage::OnSelChangeHeatMapPalette()
 {
 	UpdateData();
-
-	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetSize());
+	EnableDisableControls();
 }
 
 void CCalendarPreferencesPage::OnShowStartDates() 
 {
 	UpdateData();
-
-	GetDlgItem(IDC_SHOWCALCSTARTDATES)->EnableWindow(m_bShowStartDates);
+	EnableDisableControls();
 }
 
 void CCalendarPreferencesPage::OnShowDueDates() 
 {
 	UpdateData();
-
-	GetDlgItem(IDC_SHOWCALCDUEDATES)->EnableWindow(m_bShowDueDates);
+	EnableDisableControls();
 }
 
 void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
@@ -191,8 +194,8 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bHideParentTasks = pPrefs->GetProfileInt(szKey, _T("HideParentTasks"), TRUE);
 
 	m_bShowTasksContinuous = pPrefs->GetProfileInt(szKey, _T("ShowTasksContinuous"), TRUE);
-	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), FALSE);
-	m_bShowDueDates = pPrefs->GetProfileInt(szKey, _T("ShowDueDates"), FALSE);
+	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), TRUE);
+	m_bShowDueDates = pPrefs->GetProfileInt(szKey, _T("ShowDueDates"), TRUE);
 	m_bShowDoneDates = pPrefs->GetProfileInt(szKey, _T("ShowDoneDates"), FALSE);
 	m_bShowCalcStartDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcStartDates"), TRUE);
 	m_bShowCalcDueDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcDueDates"), TRUE);
@@ -266,9 +269,7 @@ BOOL CCalendarPreferencesPage::GetCalcMissingDueAsLatestStartAndToday() const
 void CCalendarPreferencesPage::OnShowMiniCalendar() 
 {
 	UpdateData();
-
-	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
-	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetSize());
+	EnableDisableControls();
 }
 
 void CCalendarPreferencesPage::SetThemeBkgndColors(COLORREF crLight, COLORREF crDark) 

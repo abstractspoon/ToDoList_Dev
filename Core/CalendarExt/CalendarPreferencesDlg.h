@@ -97,6 +97,9 @@ protected:
 	//}}AFX_MSG
 	afx_msg void OnSelChangeHeatMapPalette();
 	DECLARE_MESSAGE_MAP()
+
+protected:
+	void EnableDisableControls();
 };
 
 /////////////////////////////////////////////////////////////////////////////

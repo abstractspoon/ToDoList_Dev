@@ -57,8 +57,10 @@
 #define IDS_HEATMAP_NUMSTARTED          57675
 #define IDS_SELTASKDATES_LABEL          57676
 #define IDS_OVERFLOWBTN_TIP             57677
-#define IDS_CUSTOMDATE_TOOLTIP          57678
-#define IDS_FUTUREOCCURRENCE_TOOLTIP    57679
+#define IDS_DISPLAYDONETASKS            57678
+#define IDS_DISPLAYTASKDONEDATES        57679
+#define IDS_CUSTOMDATE_TOOLTIP          57680
+#define IDS_FUTUREOCCURRENCE_TOOLTIP    57681
 
 // Next default values for new objects
 // 

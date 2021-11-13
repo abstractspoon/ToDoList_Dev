@@ -61,6 +61,8 @@ BEGIN
     IDS_OVERFLOWBTN_TIP     "More tasks..."
     IDS_CUSTOMDATE_TOOLTIP  "%s (Custom)"
     IDS_FUTUREOCCURRENCE_TOOLTIP "Future Occurrence"
+    IDS_DISPLAYDONETASKS    "Display completed tasks"
+    IDS_DISPLAYTASKDONEDATES "Display task 'Completion' dates"
 END
 
 #endif    // English (U.S.) resources
@@ -232,7 +234,7 @@ BEGIN
                     IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
                     244,316,10
     GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,268,
-                    334,46
+                    334,46,WS_GROUP
     CONTROL         "The task's 'Start' date",IDC_USESTARTFORDUE,"Button",
                     BS_AUTORADIOBUTTON | WS_GROUP,16,282,316,10
     CONTROL         "The later of the task's 'Start' date and 'Today'",
