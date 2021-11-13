@@ -3485,6 +3485,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 		
 	CDWordArray aModTaskIDs;
 	BOOL bSomeRecurred = FALSE, bSomeDone = FALSE;
+	BOOL bStateChange = FALSE;
 
 	POSITION pos = selection.GetHeadPosition();
 
@@ -3494,6 +3495,8 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 
 		DWORD dwTaskID = GetTaskID(hti);
 		BOOL bWasDone = m_data.IsTaskDone(dwTaskID);
+
+		bStateChange |= (bDone ^ bWasDone);
 
 		// Handle recurring tasks, but only if changing state to completed
 		COleDateTime dtNext;
@@ -3579,8 +3582,11 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 	if (aModTaskIDs.GetSize())
 	{
 		// only update controls if the date was changed implicitly
-		if (!bDateEdited)
+		// or if the completion state changed for a single task
+		if (!bDateEdited || (bStateChange && (aModTaskIDs.GetSize() == 1)))
+		{
 			UpdateControls(FALSE); // don't update comments
+		}
 
 		m_taskTree.Tree().UpdateWindow();
 

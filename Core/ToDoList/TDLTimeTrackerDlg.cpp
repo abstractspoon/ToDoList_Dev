@@ -820,7 +820,7 @@ void CTDLTimeTrackerDlg::OnSelchangeTasklist()
 	const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
 	ASSERT(pTDC);
 
-	BOOL bTasklistChange = (pTDC != m_cbTasks.GetToDoCtrl());
+	BOOL bTasklistChange = ((pTDC != m_cbTasks.GetToDoCtrl()) || !m_cbTasks.GetCount());
 	
 	if (bTasklistChange && pTDC->IsDelayLoaded())
 	{
