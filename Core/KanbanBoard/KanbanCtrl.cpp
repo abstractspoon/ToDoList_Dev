@@ -694,9 +694,8 @@ BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_NONE:
 		return HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
 	}
-
-	// all else
-	return WantEditUpdate(nAttrib);
+	
+	return (WantEditUpdate(nAttrib) && (Misc::FindT(nAttrib, m_aDisplayAttrib) != -1));
 }
 
 void CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
