@@ -228,9 +228,10 @@ BEGIN
                     334,62
     CONTROL         "The task's 'Creation' date",IDC_USECREATIONFORSTART,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,16,214,316,10
-    CONTROL         "The task's 'Due' date",IDC_USEDUEFORSTART,"Button",
-                    BS_AUTORADIOBUTTON,16,229,316,10
-    CONTROL         "The earlier of the task's 'Due' date and 'Today'",
+    CONTROL         "The task's 'Due' (or 'Completion') date",
+                    IDC_USEDUEFORSTART,"Button",BS_AUTORADIOBUTTON,16,229,
+                    316,10
+    CONTROL         "The earlier of the task's 'Due'  (or 'Completion') date and 'Today'",
                     IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
                     244,316,10
     GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,268,
