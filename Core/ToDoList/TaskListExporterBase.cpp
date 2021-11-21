@@ -105,7 +105,9 @@ bool CTaskListExporterBase::InitConsts(const ITASKLISTBASE* pTasks, LPCTSTR /*sz
 {
 	ROUNDTIMEFRACTIONS = pPrefs->GetProfileInt(_T("Preferences"), _T("RoundTimeFractions"), FALSE);
 	PARENTTITLECOMMENTSNLY = pPrefs->GetProfileInt(_T("Preferences"), _T("ExportParentTitleCommentsOnly"), FALSE);
+
 	PRINTING = Misc::HasFlag(dwFlags, IIEF_PRINTING);
+	TASKLISTPATH = pTasks->GetFileName(true);
 
 	BuildAttribList(pTasks);
 
