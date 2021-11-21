@@ -134,8 +134,16 @@ void CCalendarPreferencesPage::EnableDisableControls()
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetSize());
 
-	CEnString sLabel(m_bShowTasksContinuous ? IDS_DISPLAYDONETASKS : IDS_DISPLAYTASKDONEDATES);
-	GetDlgItem(IDC_SHOWDONEDATES)->SetWindowText(sLabel);
+	CString sCurLabel;
+	GetDlgItem(IDC_SHOWDONEDATES)->GetWindowText(sCurLabel);
+
+	CEnString sNewLabel(m_bShowTasksContinuous ? IDS_DISPLAYDONETASKS : IDS_DISPLAYTASKDONEDATES);
+
+	if (sNewLabel != sCurLabel)
+	{
+		GetDlgItem(IDC_SHOWDONEDATES)->SetWindowText(sNewLabel);
+		CDialogHelper::ResizeButtonStaticTextToFit(this, GetDlgItem(IDC_SHOWDONEDATES));
+	}
 }
 
 void CCalendarPreferencesPage::OnShowTasksContinuous() 
