@@ -2432,6 +2432,7 @@
 #define IDS_ATTRIBSET                   51607
 #define IDS_SAVETOIMAGEERROR            51608
 #define IDS_SB_SELTASKTITLEPATHID_TIP   51609
+#define IDS_REQUIRESADMINTOMODIFY       51610
 
 // Next default values for new objects
 // 

@@ -786,14 +786,13 @@ protected:
 	static BOOL HandleSaveTasklistError(TDC_FILE& nErr, LPCTSTR szTasklist); // Note the 'reference'
 
 	static void UpdateToolbarColors(CEnToolBar& toolbar, const CUIThemeFile& theme);
-	static void EnableTDLExtension(BOOL bEnable, BOOL bStartup);
-	static void EnableTDLProtocol(BOOL bEnable, BOOL bStartup);
+	static void EnableTDLExtension(BOOL bEnable);
+	static void EnableTDLProtocol(BOOL bEnable);
 	static void SetupUIStrings();
 	static CString GetEndSessionFilePath();
 	static BOOL IsEndSessionFilePath(const CString& sFilePath);
 	static BOOL LogIntermediateTaskList(CTaskFile& tasks);
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
-	static void ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);
 

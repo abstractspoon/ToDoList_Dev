@@ -69,7 +69,6 @@ public:
 	enum { IDD = IDD_PREFGEN_PAGE };
 	CComboBox	m_cbNoEditTime;
 	CTDLLanguageComboBox	m_cbLanguages;
-	CStatic	m_stVistaShield;
 	CHotKeyCtrlEx	m_hkGlobal;
 	BOOL	m_bAlwaysOnTop;
 	BOOL	m_bUseSysTray;

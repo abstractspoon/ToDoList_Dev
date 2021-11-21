@@ -2563,49 +2563,18 @@ void CToDoListWnd::LoadSettings()
 	UpdateGlobalHotkey();
 	UpdateTimeTrackerPreferences();
 	
-	// support for .tdl extension and tdl:// protocol
-	EnableTDLExtension(userPrefs.GetEnableTDLExtension(), TRUE);
-	EnableTDLProtocol(userPrefs.GetEnableTDLProtocol(), TRUE);
-
 	// Recently modified period
 	CFilteredToDoCtrl::SetRecentlyModifiedPeriod(userPrefs.GetRecentlyModifiedPeriod());
 
 	RestoreTimers();
 }
 
-void CToDoListWnd::ProcessProtocolRegistrationFailure(BOOL bStartup, BOOL bExistingReg, UINT nMsgID, LPCTSTR szCheckPrefKey)
-{
-	// Don't display a message at startup
-	if (bStartup)
-		return;
-
-	// Don't display a message if we've already told
-	// them and we are non-admin
-	CPreferences prefs;
-
-	if (prefs.GetProfileInt(SETTINGS_KEY, szCheckPrefKey, FALSE) &&	!FileMisc::IsAdminProcess())
-		return;
-
-#ifdef _DEBUG
-	// Also don't display an error message under debug
-	// if another instance of TDL is installed
-	if (bExistingReg)
-		return;
-#else
-	UNREFERENCED_PARAMETER(bExistingReg);
-#endif
-
-	CMessageBox::AfxShow(nMsgID);
-
-	// Record that we've told them so that we don't
-	// tell them again unless they've switched to admin
-	prefs.WriteProfileInt(SETTINGS_KEY, szCheckPrefKey, TRUE);
-}
-
-void CToDoListWnd::EnableTDLExtension(BOOL bEnable, BOOL bStartup)
+void CToDoListWnd::EnableTDLExtension(BOOL bEnable)
 {
 	if (COSVersion() == OSV_LINUX)
 		return;
+
+	ASSERT((COSVersion() < OSV_VISTA) || FileMisc::IsAdminProcess());
 
 	CFileRegister filereg(_T("tdl"), _T("tdl_Tasklist"));
 	BOOL bExistingReg = filereg.IsRegisteredApp(_T("tdl"), FileMisc::GetAppFilePath(), TRUE);
@@ -2615,6 +2584,7 @@ void CToDoListWnd::EnableTDLExtension(BOOL bEnable, BOOL bStartup)
 		// If we are a pre-release version then don't overwrite
 		// an existing registration unless it's also pre-release
 		BOOL bPreRelease = CTDCWebUpdateScript::IsPreRelease(FileMisc::GetAppVersion());
+
 		if (bPreRelease && bExistingReg)
 		{
 			CString sRegPath = filereg.GetRegisteredAppPath(_T("tdl"));
@@ -2623,31 +2593,21 @@ void CToDoListWnd::EnableTDLExtension(BOOL bEnable, BOOL bStartup)
 				return;
 		}
 
-		// Try to register app
-		if (!filereg.RegisterFileType(_T("Tasklist"), 0))
-		{
-			ProcessProtocolRegistrationFailure(bStartup, bExistingReg, 
-											   IDS_ERRORINSTALLTDLEXTENSION, 
-											   _T("NotifiedTDLExtensionError"));
-		}
+		VERIFY(filereg.RegisterFileType(_T("Tasklist"), 0));
 	}
 	else if (bExistingReg)
 	{
-		if (!filereg.UnRegisterFileType())
-		{
-			// TODO
-		}
-
-		// Reset the error notification
-		CPreferences().DeleteProfileEntry(SETTINGS_KEY, _T("NotifiedTDLExtensionError"));
+		VERIFY(filereg.UnRegisterFileType());
 	}
 }
 
-void CToDoListWnd::EnableTDLProtocol(BOOL bEnable, BOOL bStartup)
+void CToDoListWnd::EnableTDLProtocol(BOOL bEnable)
 {
 	if (COSVersion() == OSV_LINUX)
 		return;
 	
+	ASSERT((COSVersion() < OSV_VISTA) || FileMisc::IsAdminProcess());
+
 	if (bEnable)
 	{
 		// If we are a pre-release version then don't overwrite
@@ -2661,21 +2621,11 @@ void CToDoListWnd::EnableTDLProtocol(BOOL bEnable, BOOL bStartup)
 		CString sCommand = FileMisc::GetAppFilePath();
 		sCommand += _T(" -l \"%1\"");
 		
-		if (!WebMisc::RegisterProtocol(_T("tdl"), _T("ToDoList"), sCommand))
-		{
-			ProcessProtocolRegistrationFailure(bStartup, bExistingReg, 
-				IDS_ERRORINSTALLTDLPROTOCOL, _T("NotifiedTDLProtocolError"));
-		}
+		VERIFY(WebMisc::RegisterProtocol(_T("tdl"), _T("ToDoList"), sCommand));
 	}
 	else
 	{
-		if (!WebMisc::UnregisterProtocol(_T("tdl")))
-		{
-			// TODO
-		}
-
-		// Reset the error notification
-		CPreferences().DeleteProfileEntry(SETTINGS_KEY, _T("NotifiedTDLProtocolError"));
+		VERIFY(WebMisc::UnregisterProtocol(_T("tdl")));
 	}
 }
 
@@ -4965,11 +4915,12 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		// tray icon
 		m_trayIcon.ShowTrayIcon(newPrefs.GetUseSysTray());
 		
-		// support for .tdl extension
-		EnableTDLExtension(newPrefs.GetEnableTDLExtension(), FALSE);
-
-		// support for tdl:// protocol
-		EnableTDLProtocol(newPrefs.GetEnableTDLProtocol(), FALSE);
+		// support for .tdl extension/protocol
+		if ((COSVersion() < OSV_VISTA) || FileMisc::IsAdminProcess())
+		{
+			EnableTDLExtension(newPrefs.GetEnableTDLExtension());
+			EnableTDLProtocol(newPrefs.GetEnableTDLProtocol());
+		}
 
 		// default task attributes
 		newPrefs.GetDefaultTaskAttributes(m_tdiDefault);

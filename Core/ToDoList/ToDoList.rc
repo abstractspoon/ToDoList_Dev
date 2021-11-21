@@ -197,9 +197,9 @@ BEGIN
     EDITTEXT        IDC_DUETASKPERSON,18,352,182,13,ES_AUTOHSCROLL
 END
 
-IDD_PREFGEN_PAGE DIALOGEX 0, 0, 400, 457
+IDD_PREFGEN_PAGE DIALOG DISCARDABLE  0, 0, 400, 457
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     LTEXT           "&Display Language:",IDC_STATIC,7,10,376,10
     CONTROL         "",IDC_LANGUAGE,"ComboBoxEx32",CBS_DROPDOWNLIST | 
@@ -242,15 +242,11 @@ BEGIN
                     WS_TABSTOP,18,217,183,13
     CONTROL         "E&nable '.tdl' as a file extension for tasklists",
                     IDC_ENABLETDLEXTENSION,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,235,355,10
-    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD2,372,235,20,20,
-                    SS_RIGHTJUST | SS_REALSIZEIMAGE
+                    WS_TABSTOP,7,235,387,10
     LTEXT           "",IDC_TDLEXTENSIONHANDLER,19,247,375,8,WS_DISABLED
     CONTROL         "&Enable 'tdl://' as a url protocol",
                     IDC_ENABLETDLPROTOCOL,"Button",BS_AUTOCHECKBOX | BS_TOP | 
-                    WS_TABSTOP,7,260,353,10
-    ICON            IDI_VISTASHIELD,IDC_VISTASHIELD,372,260,20,20,
-                    SS_RIGHTJUST | SS_REALSIZEIMAGE,WS_EX_TRANSPARENT
+                    WS_TABSTOP,7,260,387,10
     LTEXT           "",IDC_TDLPROTOCOLHANDLER,19,272,375,8,WS_DISABLED
     CONTROL         "En&able delayed loading of tasklists",
                     IDC_ENABLEDELAYEDLOADING,"Button",BS_AUTOCHECKBOX | 
@@ -4648,6 +4644,7 @@ BEGIN
     IDS_ATTRIBSET           "set"
     IDS_SAVETOIMAGEERROR    "The requested image could not be saved.\n\nTry using the filter options to reduce the visible task date range."
     IDS_SB_SELTASKTITLEPATHID_TIP "Selected task (Path) (Task ID)"
+    IDS_REQUIRESADMINTOMODIFY "Requires Admin Privileges to modify"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5596,10 +5593,6 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDS_ERRORINSTALLTDLPROTOCOL 
-                            "ToDoList was unable to install the 'tdl://' protocol handler.\n\nYou may need to run ToDoList with administrator privileges to install the handler.\n\nOnce installed you can then revert to your original security settings."
-    IDS_ERRORINSTALLTDLEXTENSION 
-                            "ToDoList was unable to install the '.tdl' extension handler.\n\nYou may need to run ToDoList with administrator privileges to install the handler.\n\nOnce installed you can then revert to your original security settings."
     IDS_CUSTOM_FEATURE_SHOWTIME "Show Time"
     IDS_CONFIRM_UNINSTALL   "Are you sure you want to delete the application folder and its entire contents?"
     IDS_FINDTASKS           "Find Tasks"
@@ -5752,7 +5745,7 @@ BEGIN
     IDS_TDC_COLUMN_COMMENTSSIZE "KB"
     IDS_SAVETASKVIEWTOIMAGE_TITLE "Save Task View to Image"
     IDS_TDLBC_CUSTOMATTRIBS "Custom Attributes"
-    IDS_HANDLERNOTINSTALLED "(handler not installed)"
+    IDS_HANDLERNOTINSTALLED "<handler not installed>"
     IDS_CUSTOM_FEATURE_FILTERABLE "Filterable"
 END
 

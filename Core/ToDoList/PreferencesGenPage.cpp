@@ -54,7 +54,6 @@ void CPreferencesGenPage::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CPreferencesGenPage)
 	DDX_Control(pDX, IDC_NOCHANGETIME, m_cbNoEditTime);
 	DDX_Control(pDX, IDC_LANGUAGE, m_cbLanguages);
-	DDX_Control(pDX, IDC_VISTASHIELD, m_stVistaShield);
 	DDX_Control(pDX, IDC_GLOBALHOTKEY, m_hkGlobal);
 	DDX_Check(pDX, IDC_MULTIINSTANCE, m_bMultiInstance);
 	DDX_Check(pDX, IDC_SHOWONSTARTUP, m_bShowOnStartup);
@@ -149,11 +148,24 @@ void CPreferencesGenPage::OnFirstShow()
 	GetDlgItem(IDC_PATHTOSTICKIESEXE)->EnableWindow(m_bUseStickies);
 	GetDlgItem(IDC_SHOWFULLPATHINSTICKY)->EnableWindow(m_bUseStickies);
 
-	// Hide admin indicators for OSes below vista
-	if (COSVersion() < OSV_VISTA)
+	// Add admin comment as required
+	if (COSVersion() >= OSV_VISTA && !FileMisc::IsAdminProcess())
 	{
-		GetDlgItem(IDC_VISTASHIELD)->ShowWindow(SW_HIDE);
-		GetDlgItem(IDC_VISTASHIELD2)->ShowWindow(SW_HIDE);
+		CString sCtrlText;
+		UINT nID[2] = {IDC_ENABLETDLEXTENSION, IDC_ENABLETDLPROTOCOL};
+
+		for (int nItem = 0; nItem < 2; nItem++)
+		{
+			CWnd* pCtrl = GetDlgItem(nID[nItem]);
+			pCtrl->GetWindowText(sCtrlText);
+
+			sCtrlText.Format(_T("%s (%s)"), sCtrlText, CEnString(IDS_REQUIRESADMINTOMODIFY));
+			pCtrl->SetWindowText(sCtrlText);
+
+			ResizeButtonStaticTextToFit(this, pCtrl);
+
+			pCtrl->EnableWindow(FALSE);
+		}
 	}
 
 	EnableDisableLanguageOptions();
