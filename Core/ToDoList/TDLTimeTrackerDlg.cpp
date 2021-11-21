@@ -106,14 +106,14 @@ BOOL CTDLTimeTrackerDlg::Create(CWnd* pNotify, DWORD dwOptions)
 	m_bAlwaysOnTop = CPreferences().GetProfileInt(_T("TimeTracker"), _T("AlwaysOnTop"), TRUE);
 	m_dwOptions = dwOptions;
 
-	if (!Create(FALSE))
+	if (!Create())
 		return FALSE;
 
 	m_pWndNotify = pNotify;
 	return TRUE;
 }
 
-BOOL CTDLTimeTrackerDlg::Create(BOOL bVisible)
+BOOL CTDLTimeTrackerDlg::Create()
 {
 	CWnd* pParent = (m_bAlwaysOnTop ? GetDesktopWindow() : AfxGetMainWnd());
 
@@ -128,9 +128,6 @@ BOOL CTDLTimeTrackerDlg::Create(BOOL bVisible)
 	if (m_bAlwaysOnTop)
 		SetWindowPos(&CWnd::wndTopMost, 0, 0, 0, 0, (SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOSIZE));
 
-	if (bVisible)
-		ShowWindow(SW_SHOW);
-	
 	return TRUE;
 }
 
@@ -147,7 +144,7 @@ BOOL CTDLTimeTrackerDlg::Recreate()
 	
 	DestroyWindow();
 	
-	if (!Create(TRUE)) // visible
+	if (!Create()) // invisible
 		return FALSE;
 	
 	if (!RebuildTasklistCombo())
@@ -161,6 +158,8 @@ BOOL CTDLTimeTrackerDlg::Recreate()
 	
 	// restore position
 	MoveWindow(rPrev);
+	ShowWindow(SW_SHOW);
+
 	return TRUE;
 }
 

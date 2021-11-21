@@ -116,7 +116,7 @@ protected:
 	BOOL HasTasklist(const CFilteredToDoCtrl* pTDC) const;
 	void RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRemove);
 	
-	BOOL Create(BOOL bVisible);
+	BOOL Create();
 	BOOL Recreate();
 	void UpdatePlayButton(BOOL bCheckVisibility = TRUE);
 	void RebuildTaskCombo();
