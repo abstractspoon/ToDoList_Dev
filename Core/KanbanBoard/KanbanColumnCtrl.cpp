@@ -91,6 +91,8 @@ const int ITEM_BORDER			= 1;
 const CRect TEXT_BORDER			= CRect(1, 1, 2, 0);
 const CString NOFILELINK;
 
+const COLORREF SHADOW_COLOR		= RGB(0xD8, 0xD8, 0xD8);
+
 /////////////////////////////////////////////////////////////////////////////
 // CKanbanListCtrlEx
 
@@ -551,7 +553,7 @@ void CKanbanColumnCtrl::DrawItemShadow(CDC* pDC, CRect& rItem) const
 	CRect rShadow(rItem);
 	rShadow.DeflateRect(3, 3, -1, -1);
 
-	GraphicsMisc::DrawRect(pDC, rShadow, GetSysColor(COLOR_3DSHADOW));
+	GraphicsMisc::DrawRect(pDC, rShadow, SHADOW_COLOR);
 
 	pDC->RestoreDC(nSave);
 }
