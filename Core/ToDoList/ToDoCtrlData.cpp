@@ -2146,10 +2146,14 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 
 			if (!m_sCompletionStatus.IsEmpty())
 			{
-				if (bWasDone)
+				if (bWasDone && (pTDI->sStatus.CompareNoCase(m_sCompletionStatus) == 0))
+				{
 					pTDI->sStatus = m_sDefaultStatus;
-				else
+				}
+				else if (!bWasDone)
+				{
 					pTDI->sStatus = m_sCompletionStatus;
+				}
 			}
 		}
 
