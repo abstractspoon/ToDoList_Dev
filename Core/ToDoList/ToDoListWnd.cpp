@@ -5002,16 +5002,15 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		// then refresh filter bar for any new default cats, statuses, etc
 		RefreshFilterBarControls(TDCA_ALL);
 
-		// Custom toolbar
+		// Recreate custom toolbar as required before any resize
 		CToolbarButtonArray aOldButtons, aNewButtons;
 
 		oldPrefs.GetCustomToolbarButtons(aOldButtons);
 		newPrefs.GetCustomToolbarButtons(aNewButtons);
 		
-		BOOL bCustomToolbarChange = ((oldPrefs.GetDisplayUDTsInToolbar() != newPrefs.GetDisplayUDTsInToolbar()) || 
-									!Misc::MatchAllT(aOldButtons, aNewButtons, TRUE));
+		BOOL bRebuildCustomTB = !Misc::MatchAllT(aOldButtons, aNewButtons, TRUE);
 
-		if (bCustomToolbarChange)
+		if (bRebuildCustomTB)
 		{
 			if (m_mgrMenuIcons.HasImages())
 				m_mgrMenuIcons.RemoveImages(m_toolbarCustom);
@@ -5040,19 +5039,22 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);
 
 		// UDTs in toolbar
-		BOOL bUDTChange = (bCustomToolbarChange || (oldPrefs.GetUIThemeFile() != newPrefs.GetUIThemeFile()));
+		BOOL bUpdateUDTs = (bRebuildCustomTB || (oldPrefs.GetUIThemeFile() != newPrefs.GetUIThemeFile()));
 
-		if (!bUDTChange)
+		if (!bUpdateUDTs)
 		{
 			CUserToolArray aOldTools, aNewTools;
 
-			oldPrefs.GetUserTools(aOldTools);
-			newPrefs.GetUserTools(aNewTools);
+			if (oldPrefs.GetDisplayUDTsInToolbar())
+				oldPrefs.GetUserTools(aOldTools);
 
-			bUDTChange = !Misc::MatchAllT(aOldTools, aNewTools, TRUE);
+			if (newPrefs.GetDisplayUDTsInToolbar())
+				newPrefs.GetUserTools(aNewTools);
+
+			bUpdateUDTs = !Misc::MatchAllT(aOldTools, aNewTools, TRUE);
 		}
 
-		if (bUDTChange)
+		if (bUpdateUDTs)
 			UpdateUDTsInToolbar(UDT_PREFERENCES);
 	}
 	
@@ -7459,7 +7461,6 @@ void CToDoListWnd::OnUpdateViewCustomToolbar(CCmdUI* pCmdUI)
 void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 {
 	const CPreferencesDlg& prefs = Prefs();
-	CTDCToolsHelper th(FALSE, FALSE);
 
 	BOOL bRemoveFromMainToolbar = FALSE, bRemoveFromCustomToolbar = FALSE;
 	BOOL bAddToMainToolbar = FALSE, bAddToCustomToolbar = FALSE;
@@ -7532,12 +7533,13 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 	}
 
 	BOOL bWantInToolbar = prefs.GetDisplayUDTsInToolbar();
+	CTDCToolsHelper th(FALSE, FALSE);
 
 	if (!bWantInToolbar || bRemoveFromMainToolbar)
 		th.RemoveToolsFromToolbar(m_toolbarMain, ID_PREFERENCES);
 
 	if (!bWantInToolbar || bRemoveFromCustomToolbar)
-		th.RemoveToolsFromToolbar(m_toolbarCustom, prefs.GetLastCustomToolbarButtonID());
+		m_toolbarCustom.RemoveTools();
 
 	if (bWantInToolbar && (bAddToMainToolbar || bAddToCustomToolbar))
 	{
@@ -7546,7 +7548,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 
 		if (bAddToMainToolbar)
 		{
-			th.AddToolsToToolbar(aTools, m_toolbarMain, ID_PREFERENCES, TRUE);
+			th.AddToolsToToolbar(aTools, m_toolbarMain, ID_PREFERENCES);
 
 			// refresh tooltips
 			m_tbHelperMain.Release();
@@ -7554,7 +7556,7 @@ void CToDoListWnd::UpdateUDTsInToolbar(UDTCHANGETYPE nChange)
 		}
 		else
 		{
-			th.AddToolsToToolbar(aTools, m_toolbarCustom, prefs.GetLastCustomToolbarButtonID(), TRUE);
+			m_toolbarCustom.AppendTools(aTools);
 		}
 	}
 

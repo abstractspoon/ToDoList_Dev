@@ -407,10 +407,6 @@ void CTDCToolsHelper::AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar
 {
 	ASSERT(toolbar.GetSafeHwnd());
 
-	// remove tools first
-	RemoveToolsFromToolbar(toolbar, nCmdAfter);
-	
-	// then re-add
 	CToolIndexArray aIndices;
 	int nNumItems = BuildToolIndexArray(aTools, aIndices, bGrouped);
 

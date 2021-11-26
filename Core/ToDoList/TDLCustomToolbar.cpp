@@ -19,7 +19,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomToolbar
 
-CTDLCustomToolbar::CTDLCustomToolbar()
+CTDLCustomToolbar::CTDLCustomToolbar() : m_nInitBtnCount(0)
 {
 }
 
@@ -37,11 +37,11 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLCustomToolbar message handlers
 
-BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons, 
-								   const CTDCMainMenu& mainMenu,
-								   const CShortcutManager& mgrShortcuts)
+BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
+										  const CTDCMainMenu& mainMenu,
+										  const CShortcutManager& mgrShortcuts)
 {
-	// Must be created BUT NOT initialsed
+	// Must be created BUT NOT initialised
 	if (!GetSafeHwnd() || 
 		GetButtonCount() || 
 		m_tbHelper.IsInitialized() ||
@@ -50,6 +50,8 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 		ASSERT(0);
 		return FALSE;
 	}
+
+	m_nInitBtnCount = 0;
 
 	CTDCImageList ilButtons(m_crFrom);
 
@@ -75,6 +77,7 @@ BOOL CTDLCustomToolbar::InitialiseButtons(const CToolbarButtonArray& aButtons,
 		if (!GetToolBarCtrl().InsertButton(nBtn, &tbb))
 			return FALSE;
 	}
+	m_nInitBtnCount = aButtons.GetSize();
 
 	m_ilNormal.Attach(ilButtons.Detach());
 	GetToolBarCtrl().SetImageList(&m_ilNormal);
@@ -131,11 +134,9 @@ BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CToolbarButtonArray& aButto
 												const CTDCMainMenu& mainMenu)
 {
 	// Must be created AND initialised
-	int nNumBtns = GetButtonCount();
-
 	if (!GetSafeHwnd() ||
-		!nNumBtns || 
-		(aButtons.GetSize() != nNumBtns) ||
+		!m_nInitBtnCount ||
+		(aButtons.GetSize() != m_nInitBtnCount) ||
 		!m_tbHelper.IsInitialized() ||
 		!m_ilNormal.GetSafeHandle())
 	{
@@ -145,10 +146,10 @@ BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CToolbarButtonArray& aButto
 
 	// Cache the old tooltips and remove them because
 	// we will be updating in-situ
-	int nBtn = nNumBtns;
+	int nBtn = m_nInitBtnCount;
 
 	CStringArray aOldTips;
-	aOldTips.SetSize(nNumBtns);
+	aOldTips.SetSize(m_nInitBtnCount); // ignore trailing tools
 
 	while (nBtn--)
 	{
@@ -166,7 +167,7 @@ BOOL CTDLCustomToolbar::ModifyButtonAttributes(const CToolbarButtonArray& aButto
 
 	BOOL bRemapped = FALSE;
 
-	for (nBtn = 0; nBtn < nNumBtns; nBtn++)
+	for (nBtn = 0; nBtn < m_nInitBtnCount; nBtn++)
 	{
 		// Skip over existing separators
 		// but allow buttons to be given a menu ID of 0
@@ -240,4 +241,36 @@ BOOL CTDLCustomToolbar::RemapMenuItemIDs(const CMap<UINT, UINT, UINT, UINT&>& ma
 	}
 
 	return bRemapped;
+}
+
+BOOL CTDLCustomToolbar::AppendTools(const CUserToolArray& aTools, BOOL bGrouped)
+{
+	if (m_nInitBtnCount == 0)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	RemoveTools();
+
+	UINT nLastID = GetItemID(m_nInitBtnCount - 1);
+	CTDCToolsHelper(FALSE, FALSE).AddToolsToToolbar(aTools, *this, nLastID, bGrouped);
+
+	return TRUE;
+}
+
+int CTDLCustomToolbar::RemoveTools()
+{
+	// Remove all buttons greater than the buttons we were initialised with
+	int nBtn = GetButtonCount(), nNumRemoved = 0;
+
+	while (nBtn > m_nInitBtnCount)
+	{
+		nBtn--;
+		nNumRemoved++;
+
+		GetToolBarCtrl().DeleteButton(nBtn);
+	}
+
+	return nNumRemoved;
 }

@@ -8,6 +8,7 @@
 //
 
 #include "TDCImageList.h"
+#include "TDCToolsHelper.h"
 
 #include "..\Shared\entoolbar.h"
 #include "..\Shared\toolbarhelper.h"
@@ -58,8 +59,12 @@ public:
 	BOOL InitialiseButtons(const CToolbarButtonArray& aButtons,
 						   const CTDCMainMenu& mainMenu,
 						   const CShortcutManager& mgrShortcuts);
-	
-	// Must have arrangement of buttons and separators
+
+	BOOL AppendTools(const CUserToolArray& aTools, BOOL bGrouped = TRUE);
+	int RemoveTools();
+		
+	// Must have exact same arrangement of 
+	// buttons and separators as original initialisation
 	BOOL ModifyButtonAttributes(const CToolbarButtonArray& aButtons,
 								const CTDCMainMenu& mainMenu);
 
@@ -68,6 +73,7 @@ public:
 
 protected:
 	CToolbarHelper m_tbHelper;
+	int m_nInitBtnCount;
 
 protected:
 // Overrides

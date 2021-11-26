@@ -67,8 +67,8 @@ public:
 	
 	BOOL RunTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
 	BOOL TestTool(const USERTOOL& tool, const USERTOOLARGS& args, const CTDCCustomAttribDefinitionArray& aCustAttribDefs);
-	void AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped);
-	void AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped);
+	void AddToolsToToolbar(const CUserToolArray& aTools, CEnToolBar& toolbar, UINT nCmdAfter, BOOL bGrouped = TRUE);
+	void AddToolsToMenu(const CUserToolArray& aTools, CMenu& menu, CMenuIconMgr& mgrMenuIcons, BOOL bGrouped = TRUE);
 	int RemoveToolsFromToolbar(CEnToolBar& toolbar, UINT nCmdAfter);
 
 	BOOL PrepareCmdline(const USERTOOL& tool, const USERTOOLARGS& args, 
