@@ -70,6 +70,7 @@ protected:
 	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
+	virtual BOOL DeleteSelectedCell() { return DeleteSelectedButton(); }
 
 	BOOL MoveButton(int nBtn, int nRows);
 	BOOL CanMoveButton(int nBtn, int nRows) const;
