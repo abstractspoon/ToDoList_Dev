@@ -614,29 +614,32 @@ LRESULT CDockManager::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp
 	case WM_WINDOWPOSCHANGED:
 		// if the dock window is being shown/hidden and the main window is maximized 
 		// then adjust the main window rect
-		if (IsDocked() && IsMaximized())
+		if (IsDocked())
 		{
 			LPWINDOWPOS lpwp = (LPWINDOWPOS)lp;
 
-			BOOL bVisible = ::IsWindowVisible(hRealWnd);
-			BOOL bWantHide = (lpwp->flags & SWP_HIDEWINDOW);
-
-			if (bVisible && bWantHide) // special case
+			if (IsMaximized())
 			{
-				CAutoFlag af(m_bResizeUpdate, FALSE);
-				LRESULT lr = ScDefault(m_scDockWnd);
+				if (lpwp->flags & SWP_HIDEWINDOW)
+				{
+					CAutoFlag af(m_bResizeUpdate, FALSE);
+					LRESULT lr = ScDefault(m_scDockWnd);
 
-				CRect rMain = GetWorkArea(TRUE);
-				MoveWindow(GetCWnd(), rMain);
+					MoveWindow(GetCWnd(), GetWorkArea(TRUE));
 				
-				return lr;
+					return lr;
+				}
+				else if (lpwp->flags & SWP_SHOWWINDOW)
+				{
+					LRESULT lr = ScDefault(m_scDockWnd);
+					OnMaximize();
+				
+					return lr;
+				}
 			}
-			else
+			else if (lpwp->flags & SWP_SHOWWINDOW)
 			{
-				LRESULT lr = ScDefault(m_scDockWnd);
-				OnMaximize();
-				
-				return lr;
+				UpdateDockWindowPos();
 			}
 		}
 		break;
