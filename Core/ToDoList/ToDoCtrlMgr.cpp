@@ -1071,9 +1071,10 @@ int CToDoCtrlMgr::SortToDoCtrlsByName()
 
 		nSel = -1;
 
-		// redo the tab text
+		// redo the tab text and image
 		for (int nTDC = 0; nTDC < GetCount(); nTDC++)
 		{
+			UpdateTabItemImage(nTDC);
 			UpdateTabItemText(nTDC);
 
 			// check if this was the selected item

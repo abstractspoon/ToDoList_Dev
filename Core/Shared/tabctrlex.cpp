@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "tabctrlex.h"
 
+#include "Misc.h"
 #include "GraphicsMisc.h"
 #include "autoflag.h"
 #include "osversion.h"
@@ -61,12 +62,10 @@ BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 	ON_WM_SIZE()
 	ON_MESSAGE(WM_MOUSELEAVE, OnMouseLeave)
 	ON_WM_ERASEBKGND()
-	ON_NOTIFY_REFLECT_EX(TCN_SELCHANGING, OnTabSelChange)
 	ON_NOTIFY_REFLECT_EX(TCN_SELCHANGE, OnTabSelChange)
 	ON_MESSAGE(TCM_INSERTITEM, OnChangeTabItem)
 	ON_MESSAGE(TCM_SETITEM, OnChangeTabItem)
 	ON_MESSAGE(TCM_DELETEITEM, OnChangeTabItem)
-	ON_NOTIFY_REFLECT_EX(TCN_SELCHANGE, OnTabSelChange)
 	ON_MESSAGE(WM_TCMUPDATETABWIDTH, OnUpdateTabItemWidth)
 END_MESSAGE_MAP()
 
@@ -95,24 +94,13 @@ BOOL CTabCtrlEx::ModifyFlags(DWORD dwRemove, DWORD dwAdd)
 {
 	DWORD dwPrevFlags = m_dwFlags;
 
-	m_dwFlags &= ~dwRemove;
-	m_dwFlags |= dwAdd;
-
+	Misc::ModifyFlags(m_dwFlags, dwRemove, dwAdd);
 	RemoveUnsupportedFlags(m_dwFlags);
 
-	if (m_dwFlags != dwPrevFlags)
-	{
-		if ((dwPrevFlags & (TCE_CLOSEBUTTON | TCE_BOLDSELTEXT)) !=
-			(m_dwFlags & (TCE_CLOSEBUTTON | TCE_BOLDSELTEXT)))
-		{
-			UpdateTabItemWidths(FALSE); // All
-		}
+	if (Misc::FlagHasChanged(TCE_CLOSEBUTTON | TCE_BOLDSELTEXT, dwPrevFlags, m_dwFlags))
+		UpdateTabItemWidths();
 
-		return TRUE;
-	}
-
-	//no change
-	return FALSE;
+	return (m_dwFlags == dwPrevFlags);
 }
 
 BOOL CTabCtrlEx::NeedCustomPaint() const
@@ -123,58 +111,56 @@ BOOL CTabCtrlEx::NeedCustomPaint() const
 	return (bPreDraw || bPostDraw || IsExtendedTabThemedXP());
 }
 
-BOOL CTabCtrlEx::OnTabSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+BOOL CTabCtrlEx::OnTabSelChange(NMHDR* pNMHDR, LRESULT* pResult)
 {
-	if (m_dwFlags & (TCE_BOLDSELTEXT | TCE_CLOSEBUTTON))
-		UpdateTabItemWidths(TRUE); // selected tab
+	UpdateTabItemWidths();
 
 	*pResult = 0;
 	return FALSE; // continue routing
 }
 
-LRESULT CTabCtrlEx::OnChangeTabItem(WPARAM /*wp*/, LPARAM /*lp*/)
+LRESULT CTabCtrlEx::OnChangeTabItem(WPARAM wp, LPARAM lp)
 {
-	LRESULT lr = Default();
+	TC_ITEM* pItem = (TC_ITEM*)lp;
+	CString sReqText;
 
-	if (!m_bUpdatingTabWidth)
-		UpdateTabItemWidths(FALSE); // all tabs
+	if (pItem && (pItem->mask & TCIF_TEXT))
+	{
+		sReqText = GetRequiredTabText((int)wp, pItem->pszText);
+		pItem->pszText = (LPTSTR)(LPCTSTR)sReqText;
+	}
 
-	return lr;
+	return Default();
 }
 
-void CTabCtrlEx::UpdateTabItemWidths(BOOL bSel)
+void CTabCtrlEx::UpdateTabItemWidths()
 {
-	PostMessage(WM_TCMUPDATETABWIDTH, bSel);
+	if (m_dwFlags & (TCE_BOLDSELTEXT | TCE_CLOSEBUTTON))
+		PostMessage(WM_TCMUPDATETABWIDTH);
 }
 
-LRESULT CTabCtrlEx::OnUpdateTabItemWidth(WPARAM wp, LPARAM /*lp*/)
+LRESULT CTabCtrlEx::OnUpdateTabItemWidth(WPARAM /*wp*/, LPARAM /*lp*/)
 {
+	ASSERT(m_dwFlags & (TCE_BOLDSELTEXT | TCE_CLOSEBUTTON));
+
 	CAutoFlag af(m_bUpdatingTabWidth, TRUE);
 
-	if (wp) // selected tab
-	{
-		int nSel = GetCurSel();
-		CString sTab = GetRequiredTabText(nSel);
-
-		SetItemText(nSel, sTab);
-	}
-	else // all tabs
-	{
-		for (int nTab = 0; nTab < GetItemCount(); nTab++)
-		{
-			CString sTab = GetRequiredTabText(nTab);
-			SetItemText(nTab, sTab);
-		}
-	}
+	for (int nTab = 0; nTab < GetItemCount(); nTab++)
+		SetItemText(nTab, GetItemText(nTab));
 
 	return 0L;
 }
 
-CString CTabCtrlEx::GetRequiredTabText(int nTab) 
+CString CTabCtrlEx::GetRequiredTabText(int nTab)
 {
-	CString sTab(GetItemText(nTab));
-	sTab.TrimRight();
-	sTab.TrimLeft();
+	return GetRequiredTabText(nTab, GetItemText(nTab));
+}
+
+CString CTabCtrlEx::GetRequiredTabText(int nTab, const CString& sCurText) 
+{
+	CString sReqText(sCurText);
+	sReqText.TrimRight();
+	sReqText.TrimLeft();
 
 	int nExtra = 0;
 
@@ -186,22 +172,22 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab)
 	if ((nTab == GetCurSel()) && HasFlag(TCE_BOLDSELTEXT))
 	{
 		// handle '&'
-		int nNumAmpersand = sTab.Replace(_T("&"), _T("&&"));
+		int nNumAmpersand = sReqText.Replace(_T("&"), _T("&&"));
 
-		int nWidth = GraphicsMisc::GetTextWidth(sTab, *this);
-		int nBoldWidth = GraphicsMisc::GetTextWidth(sTab, *this, GetTabFont(nTab));
+		int nWidth = GraphicsMisc::GetTextWidth(sReqText, *this);
+		int nBoldWidth = GraphicsMisc::GetTextWidth(sReqText, *this, GetTabFont(nTab));
 
 		nExtra += (nBoldWidth - nWidth);
 
 		// restore '&'
 		if (nNumAmpersand)
-			sTab.Replace(_T("&&"), _T("&"));
+			sReqText.Replace(_T("&&"), _T("&"));
 	}
 	else 
 	{
 		// Add space for embedded '&' which the tab control 
 		// does not handle well
-		int nNumAmpersand = sTab.Replace(_T("&"), _T("&&"));
+		int nNumAmpersand = sReqText.Replace(_T("&"), _T("&&"));
 
 		if (nNumAmpersand)
 		{
@@ -209,7 +195,7 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab)
 			nExtra += (nWidth * nNumAmpersand);
 
 			// restore '&'
-			sTab.Replace(_T("&&"), _T("&"));
+			sReqText.Replace(_T("&&"), _T("&"));
 		}
 	}
 
@@ -226,10 +212,10 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab)
 		if (nExtra % nSpaceWidth)
 			nNumSpace++;
 
-		sTab += CString(' ', nNumSpace);
+		sReqText += CString(' ', nNumSpace);
 	}
 
-	return sTab;
+	return sReqText;
 }
 
 BOOL CTabCtrlEx::OnEraseBkgnd(CDC* pDC)

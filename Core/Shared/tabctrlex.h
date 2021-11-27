@@ -151,8 +151,9 @@ protected:
 	void DrawTabCloseButton(CDC& dc, int nTab);
 	int HitTestCloseButton(const CPoint& point) const;
 	BOOL NeedCustomPaint() const;
-	void UpdateTabItemWidths(BOOL bSel = FALSE);
+	void UpdateTabItemWidths();
 	CString GetRequiredTabText(int nTab);
+	CString GetRequiredTabText(int nTab, const CString& sCurText);
 	BOOL GetTabRect(int nTab, BOOL bSelected, CRect& rTab);
 	COLORREF GetItemBkColor(int nTab);
 

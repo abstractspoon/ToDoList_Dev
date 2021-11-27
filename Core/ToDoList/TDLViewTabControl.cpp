@@ -178,7 +178,7 @@ BOOL CTDLViewTabControl::SwitchToTab(int nTab)
 		
 	m_nSelTab = nTab;
 	SetCurSel(nTab);
-	UpdateTabItemWidths(FALSE);
+	UpdateTabItemWidths();
 
 	return TRUE;
 }
