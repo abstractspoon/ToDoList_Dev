@@ -11473,9 +11473,13 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 
 		tdc.SetAdvancedFilter(filter);
 	}
-	else
+	else if (filter.IsSet())
 	{
 		tdc.SetFilter(filter);
+	}
+	else
+	{
+		tdc.ClearFilter();
 	}
 
 	if (bUpdateFilterCtrls)
