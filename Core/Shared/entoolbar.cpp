@@ -185,6 +185,9 @@ BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 	CSize sizeBM = pBitmap->GetSize();
 	SetImageSize((sizeBM.cx / nCount), sizeBM.cy);
 
+	BOOL bCleanupNormalImageList = (GetToolBarCtrl().GetImageList() != &m_ilNormal);
+	BOOL bCleanupHotImageList = (GetToolBarCtrl().GetHotImageList() != &m_ilNormal);
+
 	m_ilNormal.DeleteImageList();
 	
 	if (m_ilNormal.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1)) 
@@ -194,13 +197,13 @@ BOOL CEnToolBar::SetImage(CEnBitmapEx* pBitmap, COLORREF crMask)
 
 		CImageList* pILPrev = GetToolBarCtrl().SetImageList(&m_ilNormal);
 
-		if (pILPrev)
-			pILPrev->DeleteImageList(); // cleanup
+		if (pILPrev && bCleanupNormalImageList)
+			pILPrev->DeleteImageList();
 
 		pILPrev = GetToolBarCtrl().SetHotImageList(&m_ilNormal);
 
-		if (pILPrev)
-			pILPrev->DeleteImageList(); // cleanup
+		if (pILPrev && bCleanupHotImageList)
+			pILPrev->DeleteImageList();
 		
 		RefreshDisabledImageList(&bmDis, crMask);
 		return TRUE;
@@ -268,29 +271,31 @@ void CEnToolBar::RefreshDisabledImageList(CEnBitmapEx* pBitmap, COLORREF crMask)
 	// create 'nice' disabled imagelist 
 	if (pBitmap->Disable(crMask))
 	{
-		if (crMask == CLR_NONE) // map 3d colors
+		if (crMask == CLR_NONE)
 			pBitmap->RemapSysColors();
-		
-		// button size
+
+		BOOL bCleanupImageList = (GetToolBarCtrl().GetDisabledImageList() != &m_ilDisabled);
 		m_ilDisabled.DeleteImageList();
+				
 		m_ilDisabled.Create(m_sizeImage.cx, m_sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1);
 		m_ilDisabled.Add(pBitmap, crMask);
 		m_ilDisabled.ScaleByDPIFactor((m_crFrom == CLR_NONE) ? GetSysColor(COLOR_3DFACE) : m_crFrom);
 		
 		CImageList* pILPrev = GetToolBarCtrl().SetDisabledImageList(&m_ilDisabled);
 		
-		if (pILPrev)
-			pILPrev->DeleteImageList(); // cleanup
-		
+		if (pILPrev && bCleanupImageList)
+			pILPrev->DeleteImageList();
+
 		Invalidate();
 	}
 }
 
 void CEnToolBar::RefreshDisabledImageList() 
 {
-	int nImageSize = m_ilNormal.GetImageSize();
-
+	BOOL bCleanupImageList = (GetToolBarCtrl().GetDisabledImageList() != &m_ilDisabled);
 	m_ilDisabled.DeleteImageList();
+
+	int nImageSize = m_ilNormal.GetImageSize();
 	m_ilDisabled.Create(nImageSize, nImageSize, ILC_COLOR32 | ILC_MASK, 0, 1);
 
 	// Work directly off the icons
@@ -308,9 +313,9 @@ void CEnToolBar::RefreshDisabledImageList()
 
 	CImageList* pILPrev = GetToolBarCtrl().SetDisabledImageList(&m_ilDisabled);
 		
-	if (pILPrev)
-		pILPrev->DeleteImageList(); // cleanup
-		
+	if (pILPrev && bCleanupImageList)
+		pILPrev->DeleteImageList();
+
 	Invalidate();
 }
 
