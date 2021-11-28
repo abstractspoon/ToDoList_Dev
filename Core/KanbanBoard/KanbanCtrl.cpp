@@ -469,14 +469,14 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		pCol = m_pSelectedColumn;
 
 		if (pCol)
-			htiStart = pCol->GetNextSiblingItem(pCol->GetLastSelectedItem());
+			htiStart = pCol->GetLastSelectedItem();
 		break;
 
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 		pCol = m_pSelectedColumn;
 
 		if (pCol)
-			htiStart = pCol->GetFirstSelectedItem();
+			htiStart = pCol->GetPrevSiblingItem(pCol->GetFirstSelectedItem());
 		break;
 
 	case IUI_SELECTPREVTASK:
@@ -484,7 +484,7 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		bForwards = FALSE;
 
 		if (pCol)
-			htiStart = pCol->GetPrevSiblingItem(pCol->GetFirstSelectedItem());
+			htiStart = pCol->GetFirstSelectedItem();
 		break;
 
 	case IUI_SELECTLASTTASK:

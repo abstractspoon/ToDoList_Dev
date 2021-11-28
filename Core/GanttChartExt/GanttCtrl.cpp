@@ -296,6 +296,8 @@ BOOL CGanttCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 		return FALSE;
 	}
 
+	CHoldRedraw hr(m_tree);
+
 	return SelectTask(htiStart, select, bForwards);
 }
 
