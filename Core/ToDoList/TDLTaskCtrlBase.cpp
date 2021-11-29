@@ -683,6 +683,7 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 
 		case TDCS_SHOWWEEKDAYINDATES:
 			if (IsColumnShowing(TDCC_STARTDATE) ||
+				IsColumnShowing(TDCC_CREATIONDATE) ||
 				IsColumnShowing(TDCC_LASTMODDATE) ||
 				IsColumnShowing(TDCC_DUEDATE) ||
 				IsColumnShowing(TDCC_DONEDATE))
@@ -3378,8 +3379,9 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 
 	int nSpace = pDC->GetTextExtent(_T(" ")).cx;
 
-	int nMaxDateWidth = (m_dateTimeWidths.nMaxDateWidth + nSpace);
-	int nMinDateWidth = (m_dateTimeWidths.nMinDateWidth + nSpace);
+	int nMaxDateWidth = m_dateTimeWidths.nMaxDateWidth;
+	int nMinDateWidth = m_dateTimeWidths.nMinDateWidth;
+
 	int nMaxTimeWidth = (bHasTime ? (m_dateTimeWidths.nMaxTimeWidth + nSpace) : 0);
 	int nMaxDayWidth = (bHasDow ? (m_dateTimeWidths.nMaxDowNameWidth + nSpace) : 0);
 
@@ -3438,7 +3440,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 		// Sacrifice the date if it falls within 7 days
 		BOOL bWithin7Days = IsDateWithin7DaysOfToday(date, nDate);
 
-		nReqWidth = (nMaxDayWidth + nMaxTimeWidth);
+		nReqWidth = (nMaxDayWidth + nMaxTimeWidth - nSpace);
 
 		if (bHasDow && bWithin7Days && (nAvailWidth >= nReqWidth))
 		{
@@ -3471,7 +3473,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 			bDrawTime = TRUE;
 			bDrawDate = FALSE;
 
-			nReqWidth = nMaxTimeWidth;
+			nReqWidth = nMaxTimeWidth - nSpace;
 			break;
 		}
 
@@ -3482,7 +3484,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 			bDrawTime = FALSE;
 			bDrawDate = FALSE;
 
-			nReqWidth = nMaxDayWidth;
+			nReqWidth = nMaxDayWidth - nSpace;
 			break;
 		}
 
@@ -3553,7 +3555,7 @@ void CTDLTaskCtrlBase::DrawColumnDate(CDC* pDC, const COleDateTime& date, TDC_DA
 	if (bDrawDate)
 	{
 		DrawColumnText(pDC, sDate, rDraw, DT_RIGHT, crText);
-		rDraw.right -= nMaxDateWidth;
+		rDraw.right -= (nMaxDateWidth + nSpace);
 	}
 	
 	// Finally day of week
