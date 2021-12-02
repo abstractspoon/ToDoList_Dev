@@ -1025,8 +1025,8 @@ BOOL CXmlFile::Save(const CString& sFilePath, SFE_FORMAT nFormat)
 	// error handling
 	if (!bSuccess)
 	{
-		FileMisc::LogText(_T("CXmlFile::SaveEx(%s) failed(%s)"), sFilePath, Misc::FormatGetLastError());
 		m_nFileError = GetLastError();
+		FileMisc::LogText(_T("CXmlFile::SaveEx(%s) failed (%ld: %s)"), sFilePath, m_nFileError, Misc::FormatGetLastError(m_nFileError));
 	}
 
 	ASSERT(GetFileHandle() == (HANDLE)CStdioFileEx::hFileNull);
@@ -1103,16 +1103,27 @@ BOOL CXmlFile::SaveEx()
 			DWORD dwFileSizeInBytes = ::GetFileSize(GetFileHandle(), NULL);
 			DWORD dwXmlSizeInBytes = GetBytesWritten();
 			
-			if (dwFileSizeInBytes == dwXmlSizeInBytes)
-				bRes = TRUE;
+			bRes = (dwFileSizeInBytes == dwXmlSizeInBytes);
 
 			///////////////////////////////////////////////////////////////////
 			// PERMANENT LOGGING
 			FileMisc::LogTimeElapsed(dwTick, _T("CStdioFileEx::WriteString(%s)"), sFileName);
 			///////////////////////////////////////////////////////////////////
 		}
+		catch (CException& e)
+		{
+			TCHAR szMessage[1024] = { 0 };
+
+			if (e.GetErrorMessage(szMessage, 1024))
+				FileMisc::LogText(_T("CXmlFile::SaveEx threw an exception(%s)"), szMessage);
+			else
+				FileMisc::LogText(_T("CXmlFile::SaveEx threw an exception"));
+
+			m_nFileError = GetLastError();
+		}
 		catch (...)
 		{
+			FileMisc::LogText(_T("CXmlFile::SaveEx threw an exception"));
 			m_nFileError = GetLastError();
 		}
 	}
