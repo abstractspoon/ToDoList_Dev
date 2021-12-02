@@ -920,19 +920,19 @@ BOOL CTDLFindTasksDlg::PreTranslateMessage(MSG* pMsg)
 		{
 		case VK_RETURN:
 			if (pMsg->hwnd == m_lcResults)
-	{
-		int nSel = m_lcResults.GetCurSel();
-		
-		if (nSel != -1)
-		{
-			FTDRESULT* pRes = m_lcResults.GetResult(nSel);
-			
-			if (pRes)
-				GetParent()->SendMessage(WM_FTD_SELECTRESULT, 0, (LPARAM)pRes);
-			
-			return TRUE;
-		}
-	}
+			{
+				int nSel = m_lcResults.GetCurSel();
+
+				if (nSel != -1)
+				{
+					FTDRESULT* pRes = m_lcResults.GetResult(nSel);
+
+					if (pRes)
+						GetParent()->SendMessage(WM_FTD_SELECTRESULT, 0, (LPARAM)pRes);
+
+					return TRUE;
+				}
+			}
 			break;
 
 		case VK_TAB:
