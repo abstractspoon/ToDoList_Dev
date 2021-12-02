@@ -102,6 +102,7 @@ void CPreferencesUIVisibilityPage::LoadPreferences(const IPreferences* pPrefs, L
 		mapColumns.Add(TDCC_TAGS);
 		mapColumns.Add(TDCC_LOCK);
 		mapColumns.Add(TDCC_FLAG);
+		mapColumns.Add(TDCC_DEPENDENCY);
 	
 		vis.SetVisibleColumns(mapColumns);
 
