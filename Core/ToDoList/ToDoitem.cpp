@@ -1038,18 +1038,28 @@ BOOL TODOITEM::GetNextOccurence(COleDateTime& dtNext, BOOL& bDue)
 
 	BOOL bHasDue = HasDue();
 	BOOL bHasStart = HasStart();
-	bDue = (bHasDue || !bHasStart);
 
 	switch (trRecurrence.nRecalcFrom)
 	{
-	case TDIRO_DUEDATE:
-		if (bHasDue)
-			return trRecurrence.GetNextOccurence(dateDue, dtNext);
-		break;
-
 	case TDIRO_STARTDATE:
 		if (bHasStart)
+		{
+			bDue = FALSE;
 			return trRecurrence.GetNextOccurence(dateStart, dtNext);
+		}
+		// fall thru
+
+	case TDIRO_DUEDATE:
+		if (bHasDue)
+		{
+			bDue = TRUE;
+			return trRecurrence.GetNextOccurence(dateDue, dtNext);
+		}
+		// fall thru
+
+	case TDIRO_DONEDATE:
+	default:
+		bDue = (bHasDue || !bHasStart);
 		break;
 	}
 

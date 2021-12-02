@@ -522,7 +522,8 @@ CTDLRecurringTaskWeeklyOptionPage::CTDLRecurringTaskWeeklyOptionPage(const TDCRE
 		SYSTEMTIME stDefault;
 		dtDefault.GetAsSystemTime(stDefault);
 
-		m_dwWeekdays = 2 << (stDefault.wDayOfWeek - 1);
+		OLE_DAYOFWEEK nDOW = CDateHelper::GetDayOfWeek(stDefault);
+		m_dwWeekdays = CDateHelper::Map(nDOW);
 	}
 	
 	// overwrite specific values
