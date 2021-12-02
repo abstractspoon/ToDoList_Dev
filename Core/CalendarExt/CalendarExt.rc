@@ -207,9 +207,9 @@ BEGIN
     CONTROL         "Dynamically reduce items heights to display more tasks",
                     IDC_DYNAMICTASKHEIGHT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,80,334,10
-    CONTROL         "Display tasks as continuous between their 'Start' and 'Due' dates",
+    CONTROL         "Display tasks as continuous between their 'Start' and 'Due' (or 'Completion') dates",
                     IDC_SHOWTASKSCONTINUOUS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,95,219,10
+                    WS_TABSTOP,7,95,334,10
     CONTROL         "Display task 'Start' dates",IDC_SHOWSTARTDATES,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,7,110,334,10
     CONTROL         "I&ncluding 'Calculated Start' dates",
@@ -231,7 +231,7 @@ BEGIN
     CONTROL         "The task's 'Due' (or 'Completion') date",
                     IDC_USEDUEFORSTART,"Button",BS_AUTORADIOBUTTON,16,229,
                     316,10
-    CONTROL         "The earlier of the task's 'Due'  (or 'Completion') date and 'Today'",
+    CONTROL         "The earlier of the task's 'Due' (or 'Completion') date and 'Today'",
                     IDC_USEDUEORTODAYFORSTART,"Button",BS_AUTORADIOBUTTON,16,
                     244,316,10
     GROUPBOX        "Calculate missing 'Due' dates as: ",IDC_STATIC,7,268,
