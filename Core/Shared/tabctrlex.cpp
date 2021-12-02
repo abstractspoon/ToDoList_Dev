@@ -124,7 +124,7 @@ LRESULT CTabCtrlEx::OnChangeTabItem(WPARAM wp, LPARAM lp)
 	TC_ITEM* pItem = (TC_ITEM*)lp;
 	CString sReqText;
 
-	if (pItem && (pItem->mask & TCIF_TEXT))
+	if (!m_bUpdatingTabWidth && pItem && (pItem->mask & TCIF_TEXT))
 	{
 		sReqText = GetRequiredTabText((int)wp, pItem->pszText);
 		pItem->pszText = (LPTSTR)(LPCTSTR)sReqText;
@@ -146,7 +146,7 @@ LRESULT CTabCtrlEx::OnUpdateTabItemWidth(WPARAM /*wp*/, LPARAM /*lp*/)
 	CAutoFlag af(m_bUpdatingTabWidth, TRUE);
 
 	for (int nTab = 0; nTab < GetItemCount(); nTab++)
-		SetItemText(nTab, GetItemText(nTab));
+		SetItemText(nTab, GetRequiredTabText(nTab, GetItemText(nTab)));
 
 	return 0L;
 }
