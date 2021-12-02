@@ -2102,8 +2102,11 @@ BOOL CKanbanCtrl::TrackAttribute(TDC_ATTRIBUTE nAttrib, const CString& sCustomAt
 						pCol->SetBackgroundColor(colDef.crBackground);
 						//pCol->SetExcessColor(colDef.crExcess);
 						//pCol->SetMaximumTaskCount(colDef.nMaxTaskCount);
+
+						m_aColumnDefs[nCol] = colDef;
 					}
 				}
+	
 				return TRUE;
 			}
 		}
