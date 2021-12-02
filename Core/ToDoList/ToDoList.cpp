@@ -15,6 +15,7 @@
 #include "tdlwebupdatepromptdlg.h"
 #include "tdcstartupoptions.h"
 #include "tdcanonymizetasklist.h"
+#include "TDLDebugFormatGetLastErrorDlg.h"
 
 #include "..\shared\encommandlineinfo.h"
 #include "..\shared\driveinfo.h"
@@ -102,6 +103,7 @@ BEGIN_MESSAGE_MAP(CToDoListApp, CWinApp)
 	ON_COMMAND(ID_DEBUG_TESTSTABLEDOWNLOAD, OnDebugTestStableReleaseDownload)
 	ON_COMMAND(ID_DEBUG_TESTPREDOWNLOAD, OnDebugTestPreReleaseDownload)
 	ON_COMMAND(ID_DEBUG_SHOWEMBEDDEDURL, OnDebugShowEmbeddedUrl)
+	ON_COMMAND(ID_DEBUG_FORMATGETLASTERROR, OnDebugFormatGetLastError)
 #endif
 
 	ON_COMMAND(ID_TOOLS_CHECKFORUPDATES, OnHelpCheckForUpdates)
@@ -1840,6 +1842,11 @@ void CToDoListApp::OnDebugShowEmbeddedUrl()
 	{
 		CBrowserDlg().DoModal(NULL, dialog.GetPathName());
 	}
+}
+
+void CToDoListApp::OnDebugFormatGetLastError() 
+{
+	CTDLDebugFormatGetLastErrorDlg().DoModal();
 }
 
 #endif // DEBUG FUNCTIONS

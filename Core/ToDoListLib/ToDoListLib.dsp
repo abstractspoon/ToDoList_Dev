@@ -385,6 +385,10 @@ SOURCE=..\ToDoList\TDLCustomToolbar.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLDebugFormatGetLastErrorDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLDialog.cpp
 # End Source File
 # Begin Source File
@@ -994,6 +998,10 @@ SOURCE=..\ToDoList\TDLCustomAttributeDlg.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLCustomToolbar.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLDebugFormatGetLastErrorDlg.h
 # End Source File
 # Begin Source File
 

@@ -69,6 +69,7 @@ protected:
 	afx_msg void OnDebugTestStableReleaseDownload();
 	afx_msg void OnDebugTestPreReleaseDownload();
 	afx_msg void OnDebugShowEmbeddedUrl();
+	afx_msg void OnDebugFormatGetLastError();
 #endif
 	afx_msg void OnHelpCheckForUpdates();
 	afx_msg void OnHelpRecordBugReport();

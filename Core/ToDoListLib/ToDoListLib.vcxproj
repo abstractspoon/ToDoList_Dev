@@ -186,6 +186,7 @@
     <ClCompile Include="..\ToDoList\TDLCustomAttribFeatureComboBox.cpp" />
     <ClCompile Include="..\ToDoList\TDLCustomAttributeDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLCustomToolbar.cpp" />
+    <ClCompile Include="..\ToDoList\TDLDebugFormatGetLastErrorDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLDialog.cpp" />
     <ClCompile Include="..\ToDoList\TDLExportDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLFileEncodingComboBox.cpp" />
@@ -340,6 +341,7 @@
     <ClInclude Include="..\ToDoList\TDLCustomAttribFeatureComboBox.h" />
     <ClInclude Include="..\ToDoList\TDLCustomAttributeDlg.h" />
     <ClInclude Include="..\ToDoList\TDLCustomToolbar.h" />
+    <ClInclude Include="..\ToDoList\TDLDebugFormatGetLastErrorDlg.h" />
     <ClInclude Include="..\ToDoList\TDLDialog.h" />
     <ClInclude Include="..\ToDoList\TDLExportDlg.h" />
     <ClInclude Include="..\ToDoList\TDLFileEncodingComboBox.h" />

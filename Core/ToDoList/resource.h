@@ -144,6 +144,7 @@
 #define IDI_QUICKFIND_PREV              323
 #define IDD_CUSTOMATTRIBLIST_PAGE       324
 #define IDD_CUSTOMATTRIBCALC_PAGE       325
+#define IDD_DEBUG_FORMATGETLASTERROR_DIALOG 326
 #define IDC_TB_FRAME                    1001
 #define IDC_DAYS                        1003
 #define IDC_WEEKS                       1004
@@ -831,6 +832,8 @@
 #define IDC_HTMLOPTIONS_LABEL           1546
 #define IDC_TIMEPERIODS                 1547
 #define IDC_AUTODISPLAYREPORT           1548
+#define IDC_ERRORCODE                   1549
+#define IDC_ERRORTEXT                   1550
 #define IDC_LISTTYPE_LABEL              1549
 #define IDC_DEFLISTDATA_LABEL           1550
 #define IDC_FIRSTOPERAND                1551
@@ -1558,6 +1561,7 @@
 #define ID_DEBUG_RESTARTAPPFROMEXPLORER 34743
 #define ID_VIEW_SHOWALLBARS             34744
 #define ID_VIEW_HIDEALLBARS             34745
+#define ID_DEBUG_FORMATGETLASTERROR     34746
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -2439,7 +2443,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        327
-#define _APS_NEXT_COMMAND_VALUE         34746
+#define _APS_NEXT_COMMAND_VALUE         34747
 #define _APS_NEXT_CONTROL_VALUE         1561
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
