@@ -1576,8 +1576,8 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				
 				if (pCurCol)
 					pCurCol->AddTask(*pKI);
-				else
-					bChange = TRUE; // needs new list ctrl
+
+				bChange = ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
 			}
 		}
 	
@@ -2419,7 +2419,6 @@ int CKanbanCtrl::GetVisibleColumnCount() const
 		return m_aColumns.GetSize();
 
 	// Fixed columns
-	BOOL bAlwaysShowBacklog = HasOption(KBCF_ALWAYSSHOWBACKLOG);
 	int nCol = m_aColumns.GetSize(), nNumVis = 0;
 
 	while (nCol--)
@@ -2427,13 +2426,8 @@ int CKanbanCtrl::GetVisibleColumnCount() const
 		const CKanbanColumnCtrl* pCol = m_aColumns[nCol];
 		ASSERT(pCol);
 
-		if (!pCol->GetCount())
-		{
-			if (!bAlwaysShowBacklog || !pCol->IsBacklog())
-				continue;
-		}
-
-		nNumVis++;
+		if (WantShowColumn(pCol))
+			nNumVis++;
 	}
 
 	return nNumVis;
@@ -3232,22 +3226,35 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 				// Remove the source column if it is now empty 
 				// and should not be shown
-				if (bChange && UsingDynamicColumns() && !WantShowColumn(pSrcCol))
+				if (bChange && !WantShowColumn(pSrcCol))
 				{
 					m_pSelectedColumn = NULL;
 
-					int nCol = Misc::FindT(pSrcCol, m_aColumns);
-					ASSERT(nCol != -1);
+					if (UsingDynamicColumns())
+					{
+						int nCol = Misc::FindT(pSrcCol, m_aColumns);
+						ASSERT(nCol != -1);
 
-					m_header.DeleteItem(nCol);
-					m_aColumns.RemoveAt(nCol);
+						m_header.DeleteItem(nCol);
+						m_aColumns.RemoveAt(nCol);
+					}
+					else // fixed
+					{
+						int nCol = m_header.FindItem((DWORD)pSrcCol);
+						ASSERT(nCol != -1);
+
+						m_header.DeleteItem(nCol);
+						
+						pSrcCol->EnableWindow(FALSE);
+						pSrcCol->ShowWindow(SW_HIDE);
+					}
 				}
 
 				Resize();
 
 				if (bChange)
 				{
-					RebuildColumnHeader();
+					//RebuildColumnHeader();
 
 					// Resort before fixing up selection
 					if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
