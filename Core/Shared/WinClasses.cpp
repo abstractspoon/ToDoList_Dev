@@ -250,7 +250,10 @@ BOOL CWinClasses::IsEditControl(LPCTSTR szClass, BOOL bOrRichEdit)
 	if (IsClass(szClass, WC_EDIT))
 		return TRUE;
 
-	return (bOrRichEdit && IsRichEditControl(szClass));
+	if (bOrRichEdit)
+		return IsRichEditControl(szClass);
+
+	return FALSE;
 }
 
 BOOL CWinClasses::IsRichEditControl(HWND hWnd)

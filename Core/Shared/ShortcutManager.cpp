@@ -273,7 +273,9 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 				}
 				// 3. else must have <ctrl> or <alt>
 				else if (!(wModifiers & (HOTKEYF_ALT | HOTKEYF_CONTROL)))
+				{
 					return FALSE;
+				}
 			}
 			
 			// return command ID
