@@ -454,21 +454,25 @@ CKanbanColumnCtrl* CKanbanColumnCtrlArray::HitTest(const CPoint& ptScreen, HTREE
 	while (nCol--)
 	{
 		CKanbanColumnCtrl* pCol = GetAt(nCol);
-		pCol->GetWindowRect(rWindow);
 
-		rWindow.right++; // to allow for the 1 pixel gap
-
-		if (rWindow.PtInRect(ptScreen))
+		if (pCol->IsWindowEnabled() && pCol->IsWindowVisible())
 		{
-			if (pHit)
+			pCol->GetWindowRect(rWindow);
+
+			rWindow.right++; // to allow for the 1 pixel gap
+
+			if (rWindow.PtInRect(ptScreen))
 			{
-				CPoint ptClient(ptScreen);
-				pCol->ScreenToClient(&ptClient);
+				if (pHit)
+				{
+					CPoint ptClient(ptScreen);
+					pCol->ScreenToClient(&ptClient);
 
-				*pHit = pCol->HitTest(ptClient, pHitFlags);
+					*pHit = pCol->HitTest(ptClient, pHitFlags);
+				}
+
+				return pCol;
 			}
-
-			return pCol;
 		}
 	}
 
