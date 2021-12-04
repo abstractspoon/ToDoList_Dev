@@ -195,5 +195,16 @@ namespace Command.Handling
 
 			return null;
 		}
+
+		public static bool SetMenuItemShortcut(String commandId, ToolStripItemCollection items, Keys shortcut)
+		{
+			ToolStripMenuItem item = CommandHandling.GetMenuItem(commandId, items);
+
+			if (item == null)
+				return false;
+
+			item.ShortcutKeys = shortcut;
+			return true;
+		}
 	}
 }

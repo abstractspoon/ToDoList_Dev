@@ -31,7 +31,7 @@ namespace SpreadsheetContentControl
 			InitializeComponent();
 
 			m_EditorControl.ContentChanged += new System.EventHandler(OnContentChanged);
-//             inputTextBox.LostFocus += new System.EventHandler(OnInputTextLostFocus);
+            m_EditorControl.LostFocus += new System.EventHandler(OnGridControlLostFocus);
         }
 
         // ITDLContentControl -------------------------------------------------
@@ -149,7 +149,7 @@ namespace SpreadsheetContentControl
             notify.NotifyChange();
         }
 
-        private void OnInputTextLostFocus(object sender, EventArgs e)
+        private void OnGridControlLostFocus(object sender, EventArgs e)
         {
 			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent);
 
@@ -169,10 +169,6 @@ namespace SpreadsheetContentControl
 		protected override void OnGotFocus(EventArgs e)
 		{
 			m_EditorControl.Focus();
-		}
-
-		protected override void OnLostFocus(EventArgs e)
-		{
 		}
 
 	}

@@ -65,6 +65,9 @@ namespace unvell.ReoGrid
 		#region Constructor, Init & Dispose
 		private WinFormControlAdapter adapter;
 
+		public EventHandler EditTextChanged;
+		public EventHandler EditTextLostFocus;
+
 		//private Graphics canvasGraphics;
 		/// <summary>
 		/// Create component instance.
@@ -275,6 +278,13 @@ namespace unvell.ReoGrid
 			this.adapter = new WinFormControlAdapter(this);
 
 			this.editTextbox = new InputTextBox(this) { Visible = false, BorderStyle = System.Windows.Forms.BorderStyle.None, Multiline = true };
+			this.editTextbox.TextChanged += (s, e) => EditTextChanged?.Invoke(this, e);
+			this.editTextbox.LostFocus += (s, e) =>
+			{
+				if (CurrentWorksheet.IsEditing)
+					CurrentWorksheet.EndEdit(EndEditReason.NormalFinish);
+			};
+
 			this.Controls.Add(this.editTextbox);
 			this.adapter.editTextbox = this.editTextbox;
 

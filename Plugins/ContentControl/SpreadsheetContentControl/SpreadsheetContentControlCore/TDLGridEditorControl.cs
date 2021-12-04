@@ -31,6 +31,7 @@ namespace SpreadsheetContentControl
 		// --------------------------------------------
 
 		public event EventHandler ContentChanged;
+		public new EventHandler LostFocus;
 
 		// --------------------------------------------
 
@@ -104,6 +105,9 @@ namespace SpreadsheetContentControl
 		// text content if supported. return false if not supported
 		public String GetTextContent()
 		{
+			if (GridControl.CurrentWorksheet.IsEditing)
+				GridControl.CurrentWorksheet.EndEdit(EndEditReason.NormalFinish);
+
 			var text = GridControl.CurrentWorksheet.StringifyRange(ContentRange()).Trim();
 
 			text = text.Replace("\t\t", ""); // leaves single tabs as spacers
@@ -188,15 +192,29 @@ namespace SpreadsheetContentControl
 			{
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
-				if (CurrentWorksheet.IsEditing && (wParam == (UInt32)Keys.Escape))
+				if (CurrentWorksheet.IsEditing)
 				{
-					CurrentWorksheet.EndEdit(EndEditReason.Cancel);
-					return true;
+					switch (wParam)
+					{
+					case (UInt32)Keys.Escape:
+						CurrentWorksheet.EndEdit(EndEditReason.Cancel);
+						return true;
+
+					default:
+						break;
+					}
 				}
-				else if (!CurrentWorksheet.IsEditing && (wParam == (UInt32)Keys.F2))
+				else
 				{
-					CurrentWorksheet.StartEdit();
-					return true;
+					switch (wParam)
+					{
+					case (UInt32)Keys.F2:
+						CurrentWorksheet.StartEdit();
+						return true;
+
+					default:
+						break;
+					}
 				}
 				// else
 				return CommandHandling.ProcessMenuShortcut(wParam, MenuBar.Items);
@@ -315,7 +333,10 @@ namespace SpreadsheetContentControl
 			CommandHandling.RemoveCommand("focusCellStyleToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("selectionToolStripMenuItem", this.MenuBar.Items);
 
-			//CommandHandling.RemoveCommand("", this.MenuBar.Items);
+			// Remove keyboard shortcuts which conflict with the main app
+			CommandHandling.SetMenuItemShortcut("mergeCellsToolStripMenuItem", this.MenuBar.Items, Keys.None);
+			CommandHandling.SetMenuItemShortcut("unmergeCellsToolStripMenuItem", this.MenuBar.Items, Keys.None);
+			CommandHandling.SetMenuItemShortcut("filterToolStripMenuItem", this.MenuBar.Items, Keys.None);
 
 			// Hide unwanted toolbar options
 			CommandHandling.RemoveCommand("printPreviewToolStripButton", this.ToolBar.Items);
@@ -325,7 +346,8 @@ namespace SpreadsheetContentControl
 			CommandHandling.RemoveCommand("slashRightSolidToolStripButton", this.ToolBar.Items);
 
 			CommandHandling.RemoveCommand("zoomToolStripDropDownButton", this.FontBar.Items);
-			//CommandHandling.RemoveCommand("", this.ToolBar.Items);
+
+
 		}
 
 		public void SetUITheme(UITheme theme)
@@ -370,6 +392,17 @@ namespace SpreadsheetContentControl
 			{
 				if (e.Action is unvell.Common.IUndoableAction)
 					NotifyParentContentChange();
+			};
+
+			GridControl.EditTextChanged += (s, e) =>
+			{
+				NotifyParentContentChange();
+			};
+
+			GridControl.LostFocus += (s, e) =>
+			{
+				if (!GridControl.CurrentWorksheet.IsEditing)
+					LostFocus?.Invoke(this, e);
 			};
 
 			GridControl.WorksheetCreated += (s, e) =>
