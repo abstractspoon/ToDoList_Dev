@@ -282,7 +282,10 @@ namespace unvell.ReoGrid
 			this.editTextbox.LostFocus += (s, e) =>
 			{
 				if (CurrentWorksheet.IsEditing)
+				{
 					CurrentWorksheet.EndEdit(EndEditReason.NormalFinish);
+					EditTextLostFocus?.Invoke(this, e);
+				}
 			};
 
 			this.Controls.Add(this.editTextbox);
