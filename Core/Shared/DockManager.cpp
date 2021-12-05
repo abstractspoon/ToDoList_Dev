@@ -210,8 +210,14 @@ LRESULT CDockManager::WindowProc(HWND /*hRealWnd*/, UINT msg, WPARAM wp, LPARAM 
 		{
 			LRESULT lr = Default();
 
-			if (m_bResizeUpdate)
+			if (IsDocked() && IsMaximized())
+			{
+				OnMaximize();
+			}
+			else if (m_bResizeUpdate)
+			{
 				UpdateDockWindowPos();
+			}
 
 			return lr;
 		}
