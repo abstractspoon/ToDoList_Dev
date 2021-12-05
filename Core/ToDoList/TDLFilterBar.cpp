@@ -32,7 +32,7 @@ static char THIS_FILE[] = __FILE__;
 const int CTRLHSPACING	= 6;
 const int CTRLVSPACING	= 4;
 const int CTRLLEN		= 75;
-const int LABELHEIGHT	= 8;
+const int LABELHEIGHT	= 9;
 
 static CTRLITEM FILTERCTRLS[] = 
 {
