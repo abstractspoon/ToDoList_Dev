@@ -515,9 +515,9 @@ BOOL CKanbanCtrl::SelectTask(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 				return pCol->SelectItem(hti, FALSE);
 			}
 
-			// else
+			// else next/prev column
 			pCol = GetNextColumn(pCol, bForwards, TRUE);
-			hti = (bForwards ? pCol->TCH().GetFirstItem() : pCol->TCH().GetLastItem());
+			hti = NULL;
 		}
 		while (pCol != pStartCol);
 	}

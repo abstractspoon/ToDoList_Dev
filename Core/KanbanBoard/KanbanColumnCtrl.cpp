@@ -428,6 +428,8 @@ void CKanbanColumnCtrl::SetSelected(BOOL bSelected)
 
 	if (!bSelected)
 		ClearSelection();
+	else
+		Invalidate();
 }
 
 int CKanbanColumnCtrl::CalcItemTitleTextHeight() const
