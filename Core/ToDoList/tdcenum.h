@@ -39,8 +39,9 @@ enum
 	TLD_UPGRADED			= 0x0080,
 	TLD_SAVEUIVISINTASKLIST	= 0x0100,
 	TLD_SAVEINTERMEDIATE	= 0x0200,
-    TLD_LOG_MODULES			= 0x0400,
-	TLD_ALLOWFORCEDCHECKOUT	= 0x0800,
+    TLD_LOGMODULES			= 0x0400,
+    TLD_LOGCOMMANDS			= 0x0800,
+	TLD_ALLOWFORCEDCHECKOUT	= 0x1000,
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -44,6 +44,7 @@ public:
 
 	int GetMenuString(UINT nIDItem,	CString& sItem, UINT nFlags) const;
 	CString GetMenuString(UINT nIDItem,	UINT nFlags) const;
+	CString GetFullItemPath(UINT nIDItem, LPCTSTR szDelim = _T("\\")) const; // MF_BYCOMMAND
 	BOOL SetMenuString(UINT nIDItem, const CString& sItem, UINT nFlags);
 	int GetMenuStrings(CStringArray& aItems) const;
 

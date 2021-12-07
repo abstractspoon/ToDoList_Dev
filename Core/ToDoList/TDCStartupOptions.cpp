@@ -421,8 +421,16 @@ void CTDCStartupOptions::SetCmdInfo(const CEnCommandLineInfo& cmdInfo)
 	{
 		m_dwFlags |= TLD_LOGGING;
 
-		if (cmdInfo.GetOption(SWITCH_LOGGING) != _T("x"))
-			m_dwFlags |= TLD_LOG_MODULES;
+		CStringArray aOptions;
+
+		if (cmdInfo.GetOptions(SWITCH_LOGGING, aOptions))
+		{
+			if (Misc::Find(_T("m"), aOptions) != -1)
+				m_dwFlags |= TLD_LOGMODULES;
+			
+			if (Misc::Find(_T("c"), aOptions) != -1)
+				m_dwFlags |= TLD_LOGCOMMANDS;
+		}
 	}
 
 	if (cmdInfo.HasOption(SWITCH_STARTEMPTY))

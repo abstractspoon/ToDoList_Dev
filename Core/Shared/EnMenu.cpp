@@ -284,6 +284,31 @@ CString CEnMenu::GetMenuString(UINT nIDItem, UINT nFlags) const
 	return sItem;
 }
 
+CString CEnMenu::GetFullItemPath(UINT nIDItem, LPCTSTR szDelim) const
+{
+	ASSERT(nIDItem && szDelim);
+
+	HMENU hParentMenu = NULL;
+	int nItem = CEnMenu::FindMenuItem(*this, nIDItem, hParentMenu);
+
+	CString sMenuItem;
+
+	if (nItem != -1)
+	{
+		sMenuItem = GetMenuString(nIDItem, MF_BYCOMMAND);
+
+		while (hParentMenu != *this)
+		{
+			sMenuItem = szDelim + sMenuItem;
+
+			int nMenu = CEnMenu::FindMenuItem(*this, hParentMenu, hParentMenu);
+			sMenuItem = CEnMenu::GetMenuString(hParentMenu, nMenu, MF_BYPOSITION) + sMenuItem;
+		}
+	}
+
+	return sMenuItem;
+}
+
 BOOL CEnMenu::SetMenuString(UINT nIDItem, const CString& sItem, UINT nFlags)
 {
 	return SetMenuString(GetSafeHmenu(), nIDItem, sItem, nFlags);

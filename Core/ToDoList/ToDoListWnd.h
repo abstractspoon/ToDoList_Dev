@@ -89,6 +89,7 @@ protected:
 	virtual void OnCancel();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	// Implementation
 protected:
@@ -158,7 +159,7 @@ protected:
 	BOOL m_bPasswordPrompting;
 	BOOL m_bReloading; // on startup
 	BOOL m_bStartHidden;
-	BOOL m_bLogging;
+	BOOL m_bLogCommands;
 	BOOL m_bSaveUIVisInTaskList;
 	BOOL m_bReshowTimeTrackerOnEnable;
 	BOOL m_bSettingAttribDefs;

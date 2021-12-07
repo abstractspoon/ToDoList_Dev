@@ -75,6 +75,7 @@
 #include "..\shared\ScopedTimer.h"
 #include "..\shared\WorkingWeek.h"
 #include "..\shared\FileIcons.h"
+#include "..\shared\AcceleratorString.h"
 
 #include "..\3rdparty\gui.h"
 #include "..\3rdparty\ShellIcons.h"
@@ -219,6 +220,7 @@ CToDoListWnd::CToDoListWnd()
 	m_nContextColumnID(TDCC_NONE),
 	m_nContextMenuID(0),
 	m_bFirstEraseBkgnd(TRUE),
+	m_bLogCommands(FALSE),
 	m_statusBar(m_tdiDefault)
 {
 	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
@@ -730,6 +732,24 @@ BOOL CToDoListWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 	return FALSE;
 }
 
+BOOL CToDoListWnd::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	if (FileMisc::IsLoggingEnabled() && m_bLogCommands)
+	{
+		CString sMenuItem = m_menubar.GetFullItemPath(wParam, _T(" > "));
+
+		if (sMenuItem.IsEmpty())
+			sMenuItem = Misc::Format(_T("%ld"), wParam);
+		else
+			while(CAcceleratorString::RemoveAccelerator(sMenuItem));
+
+		FileMisc::LogText(_T("CToDoListWnd::OnCommand(%s)"), sMenuItem);
+	}
+	
+	return CFrameWnd::OnCommand(wParam, lParam);
+}
+
+
 void CToDoListWnd::InitUITheme()
 {
 	// XP and above only ie. Not Linux
@@ -838,17 +858,16 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 	m_bAllowForcedCheckOut = startup.HasFlag(TLD_ALLOWFORCEDCHECKOUT);
 	m_bPasswordPrompting = startup.HasFlag(TLD_PASSWORDPROMPTING);
 
-	if (startup.HasFlag(TLD_LOGGING))
-		EnableLogging();
-	
+	if (startup.HasFlag(TLD_LOGGING) && EnableLogging())
+		m_bLogCommands = startup.HasFlag(TLD_LOGCOMMANDS);
+
 	return CFrameWnd::LoadFrame(IDR_MAINFRAME, WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, NULL, NULL);
 }
 
 BOOL CToDoListWnd::EnableLogging(BOOL bEnable)
 {
-	BOOL bIsEnabled = FileMisc::IsLoggingEnabled();
-
-	if ((bIsEnabled && bEnable) || (!bIsEnabled && !bEnable))
+	// Quick exit if state hasn't changed
+	if (!(bEnable ^ FileMisc::IsLoggingEnabled()))
 		return TRUE;
 
 	BOOL bRes = FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));
@@ -2367,7 +2386,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 	// cache flags for later
 	BOOL bStartupEmpty = m_startupOptions.HasFlag(TLD_STARTEMPTY);
-	BOOL bLogModules = m_startupOptions.HasFlag(TLD_LOG_MODULES);
+	BOOL bLogModules = m_startupOptions.HasFlag(TLD_LOGMODULES);
 
 	// what to (re)load?
 	BOOL bReloadTasklists = (!bStartupEmpty && userPrefs.GetReloadTasklists());
