@@ -26,6 +26,7 @@ enum // Backup
 	FBS_APPVERSION		= 0x04,
 	FBS_OVERWRITE		= 0x08,
 	FBS_ALLOWEMPTY		= 0x10,
+	FBS_RENAME			= 0x20, // CTempFileBackup only - else uses copy/delete
 };
 
 enum FB_MODULE_SORT
@@ -118,6 +119,11 @@ public:
 protected:
 	CString m_sFile, m_sBackup;
 
+protected:
+	BOOL InitialisePaths(const CString& sFile,
+						 DWORD dwFlags,
+						 const CString& sFolder,
+						 const CString& sExt);
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -130,6 +136,15 @@ public:
 					const CString& sFolder = _T(""), 
 					const CString& sExt = _T(".bak"));	
 	~CTempFileBackup(); // auto deletes backup file
+
+	BOOL MakeBackup(const CString& sFile,
+					DWORD dwFlags = 0,
+					const CString& sFolder = _T(""),
+					const CString& sExt = _T(".bak"));
+	BOOL RestoreBackup();
+
+protected:
+	BOOL m_bRename;
 
 };
 

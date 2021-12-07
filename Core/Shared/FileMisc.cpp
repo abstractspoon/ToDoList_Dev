@@ -52,8 +52,11 @@ static BOOL IsAllFileMask(LPCTSTR szFileMask)
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 CTempFileBackup::CTempFileBackup(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
-	: CFileBackup(sFile, dwFlags, sFolder, sExt)
+	: 
+	CFileBackup(), // avoid default handling
+	m_bRename(dwFlags & FBS_RENAME)
 {
+	MakeBackup(sFile, dwFlags, sFolder, sExt);
 }
 
 CTempFileBackup::~CTempFileBackup()
@@ -63,6 +66,38 @@ CTempFileBackup::~CTempFileBackup()
 		if (!::DeleteFile(m_sBackup))
 			MoveFileEx(m_sBackup, NULL, MOVEFILE_DELAY_UNTIL_REBOOT);
 	}
+}
+
+BOOL CTempFileBackup::MakeBackup(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
+{
+	if (!m_bRename)
+		return CFileBackup::MakeBackup(sFile, dwFlags, sFolder, sExt);
+
+	if (!InitialisePaths(sFile, dwFlags, sFolder, sExt))
+		return FALSE;
+
+	if (!FileMisc::MoveFile(m_sFile, m_sBackup, TRUE))
+	{
+		TRACE(Misc::FormatGetLastError() + '\n');
+
+		// try again in temp folder
+		m_sBackup = BuildBackupPath(sFile, dwFlags, FileMisc::GetTempFolder(), sExt);
+		FileMisc::CreateFolderFromFilePath(m_sBackup);
+
+		if (!FileMisc::MoveFile(m_sFile, m_sBackup, TRUE))
+			return FALSE;
+	}
+
+	ASSERT (FileMisc::FileExists(m_sBackup));
+	return TRUE;
+}
+
+BOOL CTempFileBackup::RestoreBackup()
+{
+	if (!m_bRename)
+		return CFileBackup::RestoreBackup();
+
+	return FileMisc::MoveFile(m_sBackup, m_sFile, TRUE);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,12 +111,13 @@ CFileBackup::~CFileBackup()
 {
 }
 
-BOOL CFileBackup::MakeBackup(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
+BOOL CFileBackup::InitialisePaths(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
 {
-	ASSERT (m_sFile.IsEmpty() && m_sBackup.IsEmpty());
-
 	if (!m_sFile.IsEmpty() || !m_sBackup.IsEmpty())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	if (!FileMisc::FileExists(sFile))
 		return FALSE;
@@ -92,10 +128,21 @@ BOOL CFileBackup::MakeBackup(const CString& sFile, DWORD dwFlags, const CString&
 			return FALSE;
 	}
 
-	m_sFile = sFile;
-	m_sBackup = BuildBackupPath(sFile, dwFlags, sFolder, sExt);
+	CString sBackup = BuildBackupPath(sFile, dwFlags, sFolder, sExt);
 
-	FileMisc::CreateFolderFromFilePath(m_sBackup);
+	if (!FileMisc::CreateFolderFromFilePath(m_sBackup))
+		return FALSE;
+
+	m_sFile = sFile;
+	m_sBackup = sBackup;
+
+	return TRUE;
+}
+
+BOOL CFileBackup::MakeBackup(const CString& sFile, DWORD dwFlags, const CString& sFolder, const CString& sExt)
+{
+	if (!InitialisePaths(sFile, dwFlags, sFolder, sExt))
+		return FALSE;
 
 	if (!FileMisc::CopyFile(m_sFile, m_sBackup, TRUE))
 	{
@@ -115,10 +162,11 @@ BOOL CFileBackup::MakeBackup(const CString& sFile, DWORD dwFlags, const CString&
 
 BOOL CFileBackup::RestoreBackup()
 {
-	ASSERT (!m_sFile.IsEmpty() && !m_sBackup.IsEmpty());
-
 	if (m_sFile.IsEmpty() || m_sBackup.IsEmpty())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	return FileMisc::CopyFile(m_sBackup, m_sFile, TRUE);
 }

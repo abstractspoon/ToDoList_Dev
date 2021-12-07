@@ -5955,7 +5955,7 @@ TDC_FILE CToDoCtrl::SaveTaskfile(CTaskFile& tasks, const CString& sSavePath)
 	CWaitCursor cursor;
 
 	// Always backup before overwriting
-	CTempFileBackup backup(sSavePath);
+	CTempFileBackup backup(sSavePath, FBS_RENAME);
 	
 	// do the save
 	if (tasks.Save(sSavePath, SFEF_UTF16))

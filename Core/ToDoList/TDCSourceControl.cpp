@@ -137,7 +137,7 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 	}
 
 	// Always backup before overwriting
-	CTempFileBackup backup(sTaskfilePath);
+	CTempFileBackup backup(sTaskfilePath, FBS_RENAME);
 
 	// snap shot mod time so we can restore it
 	FILETIME ftMod = { 0 };
@@ -177,7 +177,7 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 		tasks.Close();
 	}
 
-	// Error
+	// Error handling
 	if (nResult == TDCF_SUCCESS)
 	{
 		FileMisc::SetFileLastModified(sTaskfilePath, ftMod);
