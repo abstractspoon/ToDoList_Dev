@@ -3222,39 +3222,14 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 				CDWordArray aTaskIDs;
 				VERIFY(pSrcCol->GetSelectedTaskIDs(aTaskIDs));
 
+				int nPrevNumCols = GetVisibleColumnCount();
+
 				BOOL bChange = EndDragItems(pSrcCol, aTaskIDs, pDestCol, sDestAttribValue);
-
-				// Remove the source column if it is now empty 
-				// and should not be shown
-				if (bChange && !WantShowColumn(pSrcCol))
-				{
-					m_pSelectedColumn = NULL;
-
-					if (UsingDynamicColumns())
-					{
-						int nCol = Misc::FindT(pSrcCol, m_aColumns);
-						ASSERT(nCol != -1);
-
-						m_header.DeleteItem(nCol);
-						m_aColumns.RemoveAt(nCol);
-					}
-					else // fixed
-					{
-						int nCol = m_header.FindItem((DWORD)pSrcCol);
-						ASSERT(nCol != -1);
-
-						m_header.DeleteItem(nCol);
-						
-						pSrcCol->EnableWindow(FALSE);
-						pSrcCol->ShowWindow(SW_HIDE);
-					}
-				}
-
-				Resize();
 
 				if (bChange)
 				{
-					//RebuildColumnHeader();
+					HideEmptyColumns(nPrevNumCols);
+					Resize();
 
 					// Resort before fixing up selection
 					if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
@@ -3274,6 +3249,40 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 	}
 
 	CWnd::OnLButtonUp(nFlags, point);
+}
+
+void CKanbanCtrl::HideEmptyColumns(int nPrevColCount)
+{
+	if (HasOption(KBCF_HIDEEMPTYCOLUMNS))
+	{
+		int nCol = m_aColumns.GetSize(), nVisColCount = nCol;
+
+		while (nCol--)
+		{
+			CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+
+			if (!WantShowColumn(pCol))
+			{
+				if (pCol == m_pSelectedColumn)
+					m_pSelectedColumn = NULL;
+
+				if (UsingDynamicColumns())
+				{
+					m_aColumns.RemoveAt(nCol);
+				}
+				else // fixed
+				{
+					pCol->EnableWindow(FALSE);
+					pCol->ShowWindow(SW_HIDE);
+				}
+
+				nVisColCount--;
+			}
+		}
+
+		if (nVisColCount != nPrevColCount)
+			RebuildColumnHeader();
+	}
 }
 
 void CKanbanCtrl::OnCaptureChanged(CWnd* pWnd)

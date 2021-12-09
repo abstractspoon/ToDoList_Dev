@@ -167,6 +167,7 @@ protected:
 	BOOL CheckAddBacklogColumn();
 	void RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, BOOL bResort);
 	void RebuildColumnHeader();
+	void HideEmptyColumns(int nPrevColCount);
 
 	KBC_ATTRIBLABELS GetColumnAttributeLabelVisibility(int nCol, int nColWidth);
 	float GetAverageColumnCharWidth();
