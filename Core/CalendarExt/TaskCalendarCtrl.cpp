@@ -1299,24 +1299,31 @@ BOOL CTaskCalendarCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 	if (m_tooltip.GetSafeHwnd())
 		m_tooltip.Pop();
 
-	// if the mouse is over the cell with the scrollbar
-	// then pass to the scrollbar instead
-	int nRow, nCol;
-	
-	// pt is in screen coords
-	ScreenToClient(&pt);
-	
-	if (HitTestGridCell(pt, nRow, nCol) &&
-		IsGridCellSelected(nRow, nCol) &&
-		IsCellScrollBarActive() &&
-		!Misc::IsKeyPressed(VK_CONTROL))
+	if (zDelta != 0)
 	{
-		int nLine = (abs(zDelta) / 120);
+		int nLine = max(1, (abs(zDelta) / 120));
 		UINT nDir = ((zDelta < 0) ? SB_LINEDOWN : SB_LINEUP);
 
-		while (nLine--)
-			SendMessage(WM_VSCROLL, nDir, (LPARAM)m_sbCellVScroll.GetSafeHwnd());
+		// if the mouse is over the cell with the scrollbar
+		// then pass to the scrollbar instead
+		ScreenToClient(&pt);
 
+		int nRow, nCol;
+
+		if (HitTestGridCell(pt, nRow, nCol) &&
+			IsGridCellSelected(nRow, nCol) &&
+			IsCellScrollBarActive() &&
+			!Misc::IsKeyPressed(VK_CONTROL))
+		{
+			while (nLine--)
+				SendMessage(WM_VSCROLL, nDir, (LPARAM)m_sbCellVScroll.GetSafeHwnd());
+		}
+		else
+		{
+			while (nLine--)
+				SendMessage(WM_VSCROLL, nDir);
+		}
+		
 		return TRUE; // eat
 	}
 

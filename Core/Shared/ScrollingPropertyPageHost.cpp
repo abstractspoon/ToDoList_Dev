@@ -163,10 +163,10 @@ BOOL CScrollingPropertyPageHost::OnMouseWheel(UINT nFlags, short zDelta, CPoint 
 {
 	// convert mouse wheel to equivalent WM_VSCROLL provided the 
 	// scrollbar is visible
-	if (m_scroll.GetSafeHwnd())
+	if (m_scroll.GetSafeHwnd() && (zDelta != 0))
 	{
 		UINT nSBCode = (zDelta < 0) ? SB_LINEDOWN : SB_LINEUP;
-		int nNotches = abs(zDelta / 120);
+		int nNotches = max(1, abs(zDelta / 120));
 
 		while (nNotches--)
 			SendMessage(WM_VSCROLL, nSBCode, (LPARAM)m_scroll.GetSafeHwnd());
