@@ -7837,17 +7837,18 @@ void CToDoListWnd::OnTabCtrlPostDrawTab(NMHDR* pNMHDR, LRESULT* pResult)
 	{
 		// determine appropriate due colour
 		COLORREF crDue, crDueToday;
-
 		GetToDoCtrl(pDIS->itemID).GetDueTaskColors(crDue, crDueToday);
 
 		COLORREF crTag = (nStatus == TDCM_PAST) ? crDue : crDueToday;
 
 		if (crTag != CLR_NONE)
 		{
-			CDC* pDC = CDC::FromHandle(pDIS->hDC);
-			const CRect& rect = pDIS->rcItem;
-
 			// draw a little tag in the top left corner
+			CRect rect;
+			m_tabCtrl.GetTabContentRect(&pDIS->rcItem, pNMTCE->iTab, rect);
+
+			CDC* pDC = CDC::FromHandle(pDIS->hDC);
+
 			for (int nHPos = 0; nHPos < 6; nHPos++)
 			{
 				for (int nVPos = 0; nVPos < 6 - nHPos; nVPos++)

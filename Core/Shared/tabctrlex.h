@@ -80,8 +80,8 @@ public:
 	BOOL SetScrollPos(int nPos);
 
 	void EnsureSelVisible();
-
 	BOOL ModifyFlags(DWORD dwRemove, DWORD dwAdd);
+	void GetTabContentRect(const CRect& rTab, int nTab, CRect& rContent) const;
 	
 	static BOOL IsSupportedFlag(DWORD dwFlag);
 		
@@ -135,7 +135,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual void PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip);
+	virtual void PostDrawTab(CDC& dc, int nTab, const CRect& rClip);
 	virtual CFont* GetTabFont(int nTab);
 	virtual CRect GetTabTextRect(int nTab, LPCRECT pRect);
 	virtual void DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFlags);
@@ -154,7 +154,6 @@ protected:
 	void UpdateTabItemWidths();
 	CString GetRequiredTabText(int nTab);
 	CString GetRequiredTabText(int nTab, const CString& sCurText);
-	BOOL GetTabRect(int nTab, BOOL bSelected, CRect& rTab);
 	COLORREF GetItemBkColor(int nTab);
 
 	// pseudo message handler

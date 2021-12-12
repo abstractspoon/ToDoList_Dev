@@ -386,7 +386,7 @@ void CXPTabCtrl::DrawTabItem(CDC* pDC, int ixItem, const CRect& rcItemC, UINT ui
 		if (bBottom)
 			rcItem.OffsetRect(-1, (bSel ? 1 : 0));
 		else
-			rcItem.OffsetRect(0, (bSel ? 2 : -1));
+			rcItem.OffsetRect(0, (bSel ? 1 : -1));
 
 		// let derived classes override
 		rcItem = GetTabTextRect(ixItem, rcItem);

@@ -18,8 +18,12 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const LPCTSTR  STR_CLOSEBTN	= _T("r");
+
 const COLORREF RED			= RGB(200, 90, 90);
 const COLORREF WHITE		= RGB(255, 255, 255);
+
+const int COLORBAR_WIDTH	= GraphicsMisc::ScaleByDPIFactor(3);
+const int PADDING			= GraphicsMisc::ScaleByDPIFactor(2);
 
 const UINT WM_TCMUPDATETABWIDTH = (WM_USER + 1);
 
@@ -262,12 +266,12 @@ void CTabCtrlEx::OnPaint()
 		while (nTab--)
 		{
 			if (nTab != nSel)
-				PostDrawTab(dc, nTab, FALSE, rClip);
+				PostDrawTab(dc, nTab, rClip);
 		}
 		
 		// now selected tab
 		if (nSel != -1)
-			PostDrawTab(dc, nSel, TRUE, rClip);
+			PostDrawTab(dc, nSel, rClip);
 
 		// kludge because until the first paint, it doesn't
 		// seem possible to resize the tabs correctly
@@ -330,8 +334,69 @@ COLORREF CTabCtrlEx::GetItemBkColor(int nTab)
 	return CLR_NONE;
 }
 
+void CTabCtrlEx::GetTabContentRect(const CRect& rTab, int nTab, CRect& rContent) const
+{
+	rContent = rTab;
+
+	// Default adjustment
+	rContent.DeflateRect(2, 2, 1, -1);
+
+	// Further horizontal adjustments influenced by OS
+	OSVERSION nOsVer = COSVersion();
+	int nOffset = (nTab - GetCurSel());
+
+	switch (nOffset)
+	{
+	case -1: // == immediately before selected tab
+		if (nOsVer < OSV_WIN10)
+		{
+			rContent.DeflateRect(0, 0, 1, 0);
+		}
+		else
+		{
+			rContent.DeflateRect(-1, 0, 1, 0);
+		}
+		break;
+
+	case 0: // == selected tab
+		if (nOsVer <= OSV_XPP)
+		{
+			rContent.DeflateRect(0, 0, -1, -1);
+		}
+		else if (nOsVer <= OSV_WIN7)
+		{
+			rContent.DeflateRect(0, 0, 0, -1);
+		}
+		break;
+
+	case 1: // == immediately after selected tab
+		if (nOsVer <= OSV_XPP)
+		{
+			rContent.DeflateRect(1, 0, 1, 0);
+		}
+		else // Win 7, 8, 8.1, 10
+		{
+			rContent.DeflateRect(1, 0, 0, 0);
+		}
+		break;
+
+	default:
+		if (nOsVer <= OSV_XPP)
+		{
+			rContent.DeflateRect(0, 0, 1, 0);
+		}
+		else if (nOsVer >= OSV_WIN10)
+		{
+			rContent.DeflateRect(-1, 0, 0, 0);
+		}
+		break;
+	}
+}
+
 void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFlags)
 {
+	CRect rTab(rcItem);
+
 	if (HasFlag(TCE_TABCOLORS))
 	{
 		COLORREF crBack = GetItemBkColor(nTab);
@@ -342,71 +407,64 @@ void CTabCtrlEx::DrawTabItem(CDC* pDC, int nTab, const CRect& rcItem, UINT uiFla
 		}
 		else
 		{
-			CRect rTab(rcItem);
+			CRect rColor;
+			GetTabContentRect(rcItem, nTab, rColor);
 
-			// Default adjustment
-			rTab.DeflateRect(2, 2, 1, -1);
-
-			// Further horizontal adjustments influenced by OS
-			OSVERSION nOsVer = COSVersion();
-			int nOffset = (nTab - GetCurSel());
-
-			switch (nOffset)
+			// Show the selected tab as a thin bar only
+			// and adjust tab height to make space
+			if (nTab == GetCurSel())
 			{
-			case -1: // == immediately before selected tab
-				if (nOsVer < OSV_WIN10)
-				{
-					rTab.DeflateRect(0, 0, 1, 0);
-				}
-				else
-				{
-					rTab.DeflateRect(-1, 0, 1, 0);
-				}
-				break;
+				pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-			case 0: // == selected tab
-				if (nOsVer <= OSV_XPP)
+				switch (m_eTabOrientation)
 				{
-					rTab.DeflateRect(0, 0, -1, -1);
-				}
-				else if (nOsVer <= OSV_WIN7)
-				{
-					rTab.DeflateRect(0, 0, 0, -1);
-				}
-				break;
+				case e_tabTop:
+					rColor.bottom = (rColor.top + COLORBAR_WIDTH);
+					rColor.right -= (m_sizeClose.cx + PADDING);
+					rColor.left += PADDING;
+					rTab.top += (COLORBAR_WIDTH - 1);
+					break;
 
-			case 1: // == immediately after selected tab
-				if (nOsVer <= OSV_XPP)
-				{
-					rTab.DeflateRect(1, 0, 1, 0);
-				}
-				else // Win 7, 8, 8.1, 10
-				{
-					rTab.DeflateRect(1, 0, 0, 0);
-				}
-				break;
+				case e_tabBottom:
+					rColor.top = (rColor.bottom - COLORBAR_WIDTH);
+					rColor.right -= (m_sizeClose.cx + PADDING);
+					rColor.left += PADDING;
+					rTab.bottom -= (COLORBAR_WIDTH - 1);
+					break;
 
-			default:
-				if (nOsVer <= OSV_XPP)
-				{
-					rTab.DeflateRect(0, 0, 1, 0);
+				case e_tabLeft:
+					rColor.right = (rColor.left + COLORBAR_WIDTH);
+					rColor.top += (m_sizeClose.cx + PADDING);
+					rColor.bottom += PADDING;
+					rTab.left += (COLORBAR_WIDTH - 1);
+					break;
+
+				case e_tabRight:
+					rColor.left = (rColor.right - COLORBAR_WIDTH);
+					rColor.top += (m_sizeClose.cx + PADDING);
+					rColor.bottom -= PADDING;
+					rTab.right -= (COLORBAR_WIDTH - 1);
+					break;
 				}
-				else if (nOsVer >= OSV_WIN10)
-				{
-					rTab.DeflateRect(-1, 0, 0, 0);
-				}
-				break;
+				
+				GraphicsMisc::DrawRect(pDC, rColor, crBack);
 			}
-			GraphicsMisc::DrawRect(pDC, rTab, crBack, CLR_NONE, 2);
-			
-			pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
+			else
+			{
+				pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
+
+				if (uiFlags & 4) // hot
+					crBack = GraphicsMisc::Lighter(crBack, 0.3, TRUE);
+				
+				GraphicsMisc::DrawRect(pDC, rColor, crBack, CLR_NONE, 2);
+			}
 		}
 	}
 
-	CXPTabCtrl::DrawTabItem(pDC, nTab, rcItem, uiFlags);
+	CXPTabCtrl::DrawTabItem(pDC, nTab, rTab, uiFlags);
 }
 
-void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rClip)
+void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, const CRect& rClip)
 {
 	BOOL bPostDraw = HasFlag(TCE_POSTDRAW);
 	BOOL bCloseBtn = (HasFlag(TCE_CLOSEBUTTON) && WantTabCloseButton(nTab));
@@ -416,8 +474,8 @@ void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rCl
 	
 	// check for anything to draw
 	CRect rTab;
-	VERIFY(GetTabRect(nTab, bSelected, rTab));
-				
+	VERIFY(GetItemRect(nTab, rTab));
+
 	if (!CRect().IntersectRect(rClip, rTab))
 		return;
 
@@ -432,7 +490,7 @@ void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rCl
 		dis.hDC = dc;
 		dis.itemAction = ODA_DRAWENTIRE;
 		dis.itemID = nTab;
-		dis.itemState = (bSelected ? ODS_SELECTED : 0);
+		dis.itemState = ((nTab == GetCurSel()) ? ODS_SELECTED : 0);
 		dis.rcItem = rTab;
 
 		// notify parent
@@ -450,19 +508,6 @@ void CTabCtrlEx::PostDrawTab(CDC& dc, int nTab, BOOL bSelected, const CRect& rCl
 	// then close button
 	if (bCloseBtn)
 		DrawTabCloseButton(dc, nTab);
-}
-
-BOOL CTabCtrlEx::GetTabRect(int nTab, BOOL bSelected, CRect& rTab)
-{
-	if (!GetItemRect(nTab, rTab))
-		return FALSE;
-
-	if (bSelected)
-		rTab.bottom += 2;
-	else
-		rTab.DeflateRect(2, 2);
-
-	return TRUE;
 }
 
 void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
@@ -499,7 +544,7 @@ void CTabCtrlEx::DrawTabCloseButton(CDC& dc, int nTab)
 	{
 		COLORREF crTab = GetItemBkColor(nTab);
 
-		if (crTab != CLR_NONE)
+		if ((crTab != CLR_NONE) && (nTab != GetCurSel()))
 			dc.SetTextColor(GraphicsMisc::GetBestTextColor(crTab));
 		else
 			dc.SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
