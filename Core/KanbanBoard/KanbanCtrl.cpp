@@ -1577,7 +1577,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				if (pCurCol)
 					pCurCol->AddTask(*pKI);
 
-				bChange = ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
+				bChange |= ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
 			}
 		}
 	
