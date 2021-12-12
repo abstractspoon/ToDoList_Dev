@@ -106,9 +106,6 @@
     <ClCompile Include="EnString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EnTabCtrl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="entoolbar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -601,9 +598,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EnString.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EnTabCtrl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="entoolbar.h">
