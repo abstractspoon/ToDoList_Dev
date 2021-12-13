@@ -13,7 +13,7 @@
 #include "..\shared\dockmanager.h"
 #include "..\shared\entoolbar.h"
 #include "..\shared\toolbarhelper.h"
-#include "..\shared\dialoghelper.h"
+#include "..\shared\runtimedlg.h"
 #include "..\shared\wndprompt.h"
 #include "..\shared\icon.h"
 #include "..\shared\SizeGrip.h"
@@ -27,7 +27,7 @@ class CPreferences;
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
 
-class CTDLFindTasksDlg : public CDialog, protected CDialogHelper
+class CTDLFindTasksDlg : public CRuntimeDlg
 {
 // Construction
 public:
@@ -72,7 +72,6 @@ public:
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLFindTasksDlg)
-	enum { IDD = IDD_FINDTASKS_DIALOG };
 	//}}AFX_DATA
 	CCheckComboBox m_cbInclude;
 	CComboBox m_cbSearches;

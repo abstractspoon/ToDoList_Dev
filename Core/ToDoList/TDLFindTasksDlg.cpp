@@ -49,7 +49,7 @@ const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 
 CTDLFindTasksDlg::CTDLFindTasksDlg(CWnd* pParent /*=NULL*/)
 	: 
-	CDialog(CTDLFindTasksDlg::IDD, pParent), 
+	CRuntimeDlg(pParent), 
 	m_bDockable(FALSE),
 	m_bSplitting(FALSE),
 	m_bInitializing(FALSE),
@@ -57,8 +57,19 @@ CTDLFindTasksDlg::CTDLFindTasksDlg(CWnd* pParent /*=NULL*/)
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
-	//{{AFX_DATA_INIT(CTDLFindTasksDlg)
-	//}}AFX_DATA_INIT
+	AddRCControl(_T("LTEXT"), _T("F&or tasks matching the following rules:"), _T(""), 0, 0, 3, 56, 287, 8, IDC_STATIC);
+	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_BORDER | WS_TABSTOP, 0, 3, 68, 370, 96, IDC_FINDLIST);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Apply as &Filter"), 0, 0, 3, 172, 71, 14, IDC_APPLYASFILTER);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Select &All"), 0, 0, 78, 172, 50, 14, IDC_SELECTALL);
+	AddRCControl(_T("LTEXT"), _T(""), _T("&Results:"), 0, 0, 133, 175, 240, 8, IDC_RESULTSLABEL);
+	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_LIST | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 3, 191, 370, 94, IDC_RESULTS);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 85, 3, 71, 121, IDC_SEARCHLIST);
+	AddRCControl(_T("LTEXT"), _T(""), _T("&Search:"), 0, 0, 3, 24, 128, 8, IDC_SEARCHLABEL);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 3, 36, 127, 125, IDC_TASKLISTOPTIONS);
+	AddRCControl(_T("LTEXT"), _T(""), _T("I&ncluding:"), 0, 0, 136, 24, 134, 8, IDC_STATIC);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP, 0, 136, 36, 127, 30, IDC_INCLUDE);
+	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), _T("OK"), WS_TABSTOP, 0, 230, 143, 50, 14, IDOK);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 230, 162, 50, 14, IDCANCEL);
 }
 
 CTDLFindTasksDlg::~CTDLFindTasksDlg()
@@ -67,7 +78,7 @@ CTDLFindTasksDlg::~CTDLFindTasksDlg()
 
 void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
+	CRuntimeDlg::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CTDLFindTasksDlg)
 	DDX_Control(pDX, IDC_INCLUDE, m_cbInclude);
 	DDX_Control(pDX, IDC_SEARCHLIST, m_cbSearches);
@@ -79,7 +90,7 @@ void CTDLFindTasksDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CDialog)
+BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CRuntimeDlg)
 	//{{AFX_MSG_MAP(CTDLFindTasksDlg)
 	ON_COMMAND(ID_FIND_HELP, OnFindHelp)
 	//}}AFX_MSG_MAP
@@ -138,7 +149,7 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 {
 	CAutoFlag af(m_bInitializing, TRUE);
 
-	CDialog::OnInitDialog();
+	CRuntimeDlg::OnInitDialog();
 
 	VERIFY(m_sbGrip.Initialize(this));
 
@@ -355,7 +366,7 @@ BOOL CTDLFindTasksDlg::Create(CWnd* pParent, BOOL bDockable)
 	
 	m_bDockable = bDockable;
 
-	return CDialog::Create(CTDLFindTasksDlg::IDD, pParent);
+	return CRuntimeDlg::Create(_T("Find Tasks"), RTD_DEFSTYLE, RTD_DEFEXSTYLE, rectAuto, pParent/*, nID*/);
 }
 
 void CTDLFindTasksDlg::LoadSettings()
@@ -442,7 +453,7 @@ CSize CTDLFindTasksDlg::GetMinDockedSize(DM_POS nPos)
 	{
 		// we need enough height to show a few results and enough width
 		// to display the results list
-		rCtrl = GetCtrlRect(this, IDC_TASKLISTOPTIONS);
+		rCtrl = GetCtrlRect(IDC_TASKLISTOPTIONS);
 		rMin.bottom = rCtrl.bottom + CDlgUnits(this).ToPixelsY(60);
 
 		rCtrl = GetChildRect(&m_lcFindSetup);
@@ -704,7 +715,7 @@ void CTDLFindTasksDlg::OnFind()
 
 void CTDLFindTasksDlg::OnClose() 
 {
-	CDialog::OnClose();
+	CRuntimeDlg::OnClose();
 
 	// end any current edit
 	m_lcFindSetup.EndEdit();
@@ -718,7 +729,7 @@ void CTDLFindTasksDlg::OnClose()
 
 void CTDLFindTasksDlg::OnSize(UINT nType, int cx, int cy) 
 {
-	CDialog::OnSize(nType, cx, cy);
+	CRuntimeDlg::OnSize(nType, cx, cy);
 
 	// end any current edit
 	if (m_lcFindSetup.GetSafeHwnd())
@@ -757,9 +768,9 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 		BOOL bVertSplitter = IsSplitterVertical();
 		CRect rSplitter = GetSplitterRect();
 
-		CRect rRules = GetCtrlRect(this, IDC_FINDLIST);
-		CRect rResults = GetCtrlRect(this, IDC_RESULTS);
-		CRect rApply = GetCtrlRect(this, IDC_APPLYASFILTER);
+		CRect rRules = GetCtrlRect(IDC_FINDLIST);
+		CRect rResults = GetCtrlRect(IDC_RESULTS);
+		CRect rApply = GetCtrlRect(IDC_APPLYASFILTER);
 
 		if (bOrientationChange)
 		{
@@ -854,7 +865,7 @@ void CTDLFindTasksDlg::OnDestroy()
 	SaveSettings();
 	DeleteAllResults();
 	
-	CDialog::OnDestroy();
+	CRuntimeDlg::OnDestroy();
 }
 
 void CTDLFindTasksDlg::SaveSettings()
@@ -900,7 +911,7 @@ void CTDLFindTasksDlg::SaveSettings()
 
 void CTDLFindTasksDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI) 
 {
-	CDialog::OnGetMinMaxInfo(lpMMI);
+	CRuntimeDlg::OnGetMinMaxInfo(lpMMI);
 	
 	if (m_dockMgr.Initialized())
 	{
@@ -974,7 +985,7 @@ BOOL CTDLFindTasksDlg::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 	
-	return CDialog::PreTranslateMessage(pMsg);
+	return CRuntimeDlg::PreTranslateMessage(pMsg);
 }
 
 void CTDLFindTasksDlg::OnSelectall() 
@@ -1517,12 +1528,10 @@ void CTDLFindTasksDlg::OnUpdateMoveRuleDown(CCmdUI* pCmdUI)
 
 HBRUSH CTDLFindTasksDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
-	HBRUSH hbr = CDialog::OnCtlColor(pDC, pWnd, nCtlColor);
+	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	if ((nCtlColor == CTLCOLOR_STATIC) && CThemed::IsAppThemed())
+	if ((nCtlColor == CTLCOLOR_STATIC) && CThemed::IsAppThemed() && m_brBkgnd.GetSafeHandle())
 	{
-		ASSERT (m_brBkgnd.GetSafeHandle());
-
 		pDC->SetTextColor(m_theme.crAppText);
 		pDC->SetBkMode(TRANSPARENT);
 		hbr = m_brBkgnd;
@@ -1556,7 +1565,7 @@ BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC)
 	}
 	else
 	{
-		bRes = CDialog::OnEraseBkgnd(pDC);
+		bRes = CRuntimeDlg::OnEraseBkgnd(pDC);
 	}
 	
 	GraphicsMisc::DrawSplitBar(pDC, GetSplitterRect(), m_theme.crAppBackDark, FALSE);
@@ -1676,21 +1685,21 @@ void CTDLFindTasksDlg::OnLButtonDown(UINT nFlags, CPoint point)
 		SetCapture();
 	}
 
-	CDialog::OnLButtonDown(nFlags, point);
+	CRuntimeDlg::OnLButtonDown(nFlags, point);
 }
 
 void CTDLFindTasksDlg::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
 	ResizeDlg(TRUE);
 
-	CDialog::OnLButtonDown(nFlags, point);
+	CRuntimeDlg::OnLButtonDown(nFlags, point);
 }
 
 void CTDLFindTasksDlg::OnLButtonUp(UINT nFlags, CPoint point)
 {
 	ReleaseCapture();
 
-	CDialog::OnLButtonUp(nFlags, point);
+	CRuntimeDlg::OnLButtonUp(nFlags, point);
 }
 
 void CTDLFindTasksDlg::OnMouseMove(UINT nFlags, CPoint point)
@@ -1698,7 +1707,7 @@ void CTDLFindTasksDlg::OnMouseMove(UINT nFlags, CPoint point)
 	if (m_bSplitting)
 		SetSplitterPos(IsSplitterVertical() ? point.x : point.y);
 	
-	CDialog::OnMouseMove(nFlags, point);
+	CRuntimeDlg::OnMouseMove(nFlags, point);
 }
 
 BOOL CTDLFindTasksDlg::SetSplitterPos(int nSplitPos)
@@ -1738,12 +1747,12 @@ BOOL CTDLFindTasksDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	}
 	
 	// else
-	return CDialog::OnSetCursor(pWnd, nHitTest, message);
+	return CRuntimeDlg::OnSetCursor(pWnd, nHitTest, message);
 }
 
 void CTDLFindTasksDlg::OnCaptureChanged(CWnd* pWnd)
 {
 	m_bSplitting = FALSE;
 
-	CDialog::OnCaptureChanged(pWnd);
+	CRuntimeDlg::OnCaptureChanged(pWnd);
 }

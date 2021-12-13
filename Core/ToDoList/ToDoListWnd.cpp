@@ -10390,7 +10390,7 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 	{
 		UpdateFindDialogActiveTasklist();
 		
-		if (!m_dlgFindTasks.Create(this))
+		if (!m_dlgFindTasks.Create(this, FALSE))
 			return FALSE;
 
 		if (CThemed::IsAppThemed())
