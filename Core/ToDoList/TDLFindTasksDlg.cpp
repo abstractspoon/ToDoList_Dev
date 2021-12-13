@@ -430,8 +430,8 @@ void CTDLFindTasksDlg::LoadSettings()
 		int nHeightDocked = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeight"), rDef.cy);
 		int nHeightDockedMax = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeightMax"), -1);
 		
-		m_dockMgr.Initialize(GetParent(), this, nPos, nLastPos,
-							nWidthDocked, nWidthDockedMax, nHeightDocked, nHeightDockedMax);
+// 		m_dockMgr.Initialize(GetParent(), this, nPos, nLastPos,
+// 							nWidthDocked, nWidthDockedMax, nHeightDocked, nHeightDockedMax);
 
 		// Splitter
 		int nSplitPos = prefs.GetProfileInt(_T("FindTasks"), _T("SplitterPos"), -1);
@@ -882,16 +882,16 @@ void CTDLFindTasksDlg::SaveSettings()
 	prefs.WriteProfileInt(_T("FindTasks"), _T("IncludeFilteredOutTasks"), IncludeOptionIsChecked(FI_FILTEREDOUT));
 
 	// pos
-	CRect rDialog = m_dockMgr.GetUnDockedRect();
+	CRect rDialog;// = m_dockMgr.GetUnDockedRect();
 	
 	prefs.WriteProfileInt(_T("FindTasks"), _T("TopLeft"), MAKELPARAM(rDialog.left, rDialog.top));
 	prefs.WriteProfileInt(_T("FindTasks"), _T("BottomRight"), MAKELPARAM(rDialog.right, rDialog.bottom));
-	prefs.WriteProfileInt(_T("FindTasks"), _T("DockPos"), m_dockMgr.GetDockPos());
-	prefs.WriteProfileInt(_T("FindTasks"), _T("LastDockPos"), m_dockMgr.GetLastDockPos());
-	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidth"), m_dockMgr.GetDockedWidth(FALSE));
-	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidthMax"), m_dockMgr.GetDockedWidth(TRUE));
-	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeight"), m_dockMgr.GetDockedHeight(FALSE));
-	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeightMax"), m_dockMgr.GetDockedHeight(TRUE));
+// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockPos"), m_dockMgr.GetDockPos());
+// 	prefs.WriteProfileInt(_T("FindTasks"), _T("LastDockPos"), m_dockMgr.GetLastDockPos());
+// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidth"), m_dockMgr.GetDockedWidth(FALSE));
+// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidthMax"), m_dockMgr.GetDockedWidth(TRUE));
+// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeight"), m_dockMgr.GetDockedHeight(FALSE));
+// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeightMax"), m_dockMgr.GetDockedHeight(TRUE));
 
 	// Splitter
 	CPoint ptSplitter = GetSplitterRect().CenterPoint();
@@ -913,13 +913,13 @@ void CTDLFindTasksDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 {
 	CRuntimeDlg::OnGetMinMaxInfo(lpMMI);
 	
-	if (m_dockMgr.Initialized())
-	{
-		CSize rDef = GetMinDockedSize(m_dockMgr.GetDockPos());
-
-		lpMMI->ptMinTrackSize.y = rDef.cy;
-		lpMMI->ptMinTrackSize.x = rDef.cx;
-	}
+// 	if (m_dockMgr.Initialized())
+// 	{
+// 		CSize rDef = GetMinDockedSize(m_dockMgr.GetDockPos());
+// 
+// 		lpMMI->ptMinTrackSize.y = rDef.cy;
+// 		lpMMI->ptMinTrackSize.x = rDef.cx;
+// 	}
 }
 
 BOOL CTDLFindTasksDlg::PreTranslateMessage(MSG* pMsg) 
@@ -996,60 +996,60 @@ void CTDLFindTasksDlg::OnSelectall()
 void CTDLFindTasksDlg::OnDockright() 
 {
 	// toggle docked state
-	if (m_dockMgr.GetDockPos() == DMP_RIGHT)
-		m_dockMgr.UnDock();
-	else
-		m_dockMgr.Dock(DMP_RIGHT);
+// 	if (m_dockMgr.GetDockPos() == DMP_RIGHT)
+// 		m_dockMgr.UnDock();
+// 	else
+// 		m_dockMgr.Dock(DMP_RIGHT);
 
     m_toolbar.RefreshButtonStates();
 }
 
 void CTDLFindTasksDlg::OnUpdateDockright(CCmdUI* pCmdUI) 
 {
-	pCmdUI->SetRadio(m_dockMgr.GetDockPos() == DMP_RIGHT);
+//	pCmdUI->SetRadio(m_dockMgr.GetDockPos() == DMP_RIGHT);
 }
 
 void CTDLFindTasksDlg::OnDockleft() 
 {
 	// toggle docked state
-	if (m_dockMgr.GetDockPos() == DMP_LEFT)
-		m_dockMgr.UnDock();
-	else
-		m_dockMgr.Dock(DMP_LEFT);
+// 	if (m_dockMgr.GetDockPos() == DMP_LEFT)
+// 		m_dockMgr.UnDock();
+// 	else
+// 		m_dockMgr.Dock(DMP_LEFT);
 
     m_toolbar.RefreshButtonStates();
 }
 
 void CTDLFindTasksDlg::OnUpdateDockleft(CCmdUI* pCmdUI) 
 {
-	pCmdUI->SetRadio(m_dockMgr.GetDockPos() == DMP_LEFT);
+// 	pCmdUI->SetRadio(m_dockMgr.GetDockPos() == DMP_LEFT);
 }
 
 void CTDLFindTasksDlg::OnUndock() 
 {
-	m_dockMgr.UnDock();
+// 	m_dockMgr.UnDock();
     m_toolbar.RefreshButtonStates();
 }
 
 void CTDLFindTasksDlg::OnUpdateUndock(CCmdUI* pCmdUI) 
 {
-	pCmdUI->SetRadio(m_dockMgr.GetDockPos() == DMP_UNDOCKED);
+//	pCmdUI->SetRadio(m_dockMgr.GetDockPos() == DMP_UNDOCKED);
 }
 
 void CTDLFindTasksDlg::OnDockbelow() 
 {
 	// toggle docked state
-	if (m_dockMgr.GetDockPos() == DMP_BELOW)
-		m_dockMgr.UnDock();
-	else
-		m_dockMgr.Dock(DMP_BELOW);
+// 	if (m_dockMgr.GetDockPos() == DMP_BELOW)
+// 		m_dockMgr.UnDock();
+// 	else
+// 		m_dockMgr.Dock(DMP_BELOW);
 
     m_toolbar.RefreshButtonStates();
 }
 
 void CTDLFindTasksDlg::OnUpdateDockbelow(CCmdUI* pCmdUI) 
 {
-	pCmdUI->SetRadio(m_dockMgr.GetDockPos() == DMP_BELOW);
+//	pCmdUI->SetRadio(m_dockMgr.GetDockPos() == DMP_BELOW);
 }
 
 void CTDLFindTasksDlg::DeleteResults(const CFilteredToDoCtrl* pTDC)
@@ -1544,7 +1544,7 @@ BOOL CTDLFindTasksDlg::OnEraseBkgnd(CDC* pDC)
 {
 	BOOL bRes = FALSE;
 
-	if (CThemed::IsAppThemed())
+	if (CThemed::IsAppThemed() && m_brBkgnd.GetSafeHandle())
 	{
 		if (COSVersion() >= OSV_VISTA)
 			ExcludeCtrls(this, pDC);
@@ -1674,7 +1674,7 @@ BOOL CTDLFindTasksDlg::GetSplitterRect(CRect& rSplitter, int nSplitPos) const
 
 BOOL CTDLFindTasksDlg::IsSplitterVertical() const
 {
-	return (m_dockMgr.GetDockPos() == DMP_BELOW);
+	return FALSE;//(m_dockMgr.GetDockPos() == DMP_BELOW);
 }
 
 void CTDLFindTasksDlg::OnLButtonDown(UINT nFlags, CPoint point)
@@ -1738,13 +1738,13 @@ BOOL CTDLFindTasksDlg::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	CPoint ptCursor(GetCurrentMessage()->pt);
 	ScreenToClient(&ptCursor);
 
-	if (GetSplitterRect().PtInRect(ptCursor))
-	{ 
-		UINT nIDCursor = ((m_dockMgr.GetDockPos() == DMP_BELOW) ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
-		::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
-
-		return TRUE;
-	}
+// 	if (GetSplitterRect().PtInRect(ptCursor))
+// 	{ 
+// 		UINT nIDCursor = ((m_dockMgr.GetDockPos() == DMP_BELOW) ? AFX_IDC_HSPLITBAR : AFX_IDC_VSPLITBAR);
+// 		::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+// 
+// 		return TRUE;
+// 	}
 	
 	// else
 	return CRuntimeDlg::OnSetCursor(pWnd, nHitTest, message);

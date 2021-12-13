@@ -10,7 +10,6 @@
 #include "tdlfindresultslistctrl.h"
 #include "tdlfilteroptioncombobox.h"
 
-#include "..\shared\dockmanager.h"
 #include "..\shared\entoolbar.h"
 #include "..\shared\toolbarhelper.h"
 #include "..\shared\runtimedlg.h"
@@ -23,6 +22,21 @@
 /////////////////////////////////////////////////////////////////////////////
 
 class CPreferences;
+
+//////////////////////////////////////////////////////////////////////
+
+enum DM_POS
+{
+	DMP_UNDOCKED = -1,
+	DMP_LEFT,
+	DMP_RIGHT,
+	DMP_BELOW,
+};
+
+//////////////////////////////////////////////////////////////////////
+
+// wparam = Old 'DM_POS', lParam = New 'DM_POS'
+const UINT WM_DM_DOCKCHANGE	= ::RegisterWindowMessage(_T("WM_DM_DOCKCHANGE"));
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
@@ -67,7 +81,7 @@ public:
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 	
 	void SetUITheme(const CUIThemeFile& theme);
-	BOOL IsDocked() const { return m_dockMgr.IsDocked(); }
+	BOOL IsDocked() const { return FALSE/*m_dockMgr.IsDocked()*/; }
 
 protected:
 // Dialog Data
@@ -81,7 +95,6 @@ protected:
 	CSizeGrip m_sbGrip;
 
 	CWndPromptManager m_mgrPrompts;
-	CDockManager m_dockMgr;
 	CToolbarHelper m_tbHelper;
 
 	BOOL m_bDockable;

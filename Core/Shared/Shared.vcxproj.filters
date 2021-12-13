@@ -55,9 +55,6 @@
     <ClCompile Include="DlgUnits.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="DockManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="driveinfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -547,9 +544,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="DlgUnits.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="DockManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="driveinfo.h">
