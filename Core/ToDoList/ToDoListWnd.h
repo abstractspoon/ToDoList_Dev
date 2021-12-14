@@ -416,6 +416,7 @@ protected:
 	afx_msg LRESULT OnToDoListRestore(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListShowWindow(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnNotifyReminderModified(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnClose(WPARAM /*wp*/, LPARAM bForUpdate);
 	afx_msg void OnAbout();
 	afx_msg void OnArchiveCompletedtasks();

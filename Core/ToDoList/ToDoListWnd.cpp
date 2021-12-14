@@ -521,6 +521,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_RESETELAPSEDTIME, OnTimeTrackerResetElapsedTime)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_LOADDELAYEDTASKLIST, OnTimeTrackerLoadDelayedTasklist)
 	ON_REGISTERED_MESSAGE(WM_SESSIONSTATUS_CHANGE, OnSessionStatusChange)
+	ON_REGISTERED_MESSAGE(WM_FTD_DOCKCHANGE, OnNotifyFindTasksDockChange)
 	ON_UPDATE_COMMAND_UI(ID_ADDTIMETOLOGFILE, OnUpdateAddtimetologfile)
 	ON_UPDATE_COMMAND_UI(ID_ADDTIMETOLOGFILE, OnUpdateAddtimetologfile)
 	ON_UPDATE_COMMAND_UI(ID_ARCHIVE_COMPLETEDTASKS, OnUpdateArchiveCompletedtasks)
@@ -10390,7 +10391,7 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 	{
 		UpdateFindDialogActiveTasklist();
 		
-		if (!m_dlgFindTasks.Create(this, FALSE))
+		if (!m_dlgFindTasks.Create(DMP_UNDOCKED))
 			return FALSE;
 
 		if (CThemed::IsAppThemed())
@@ -10401,6 +10402,16 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 	}
 
 	return TRUE;
+}
+
+LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
+{
+	DM_POS nOldPos = (DM_POS)wp;
+	DM_POS nNewPos = (DM_POS)lp;
+
+	// TODO
+
+	return 0L;
 }
 
 void CToDoListWnd::OnFindTasks() 
