@@ -359,17 +359,20 @@ void CTDLFindTasksDlg::OnUpdateDeleteRule(CCmdUI* pCmdUI)
 
 BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 {
-	if (GetSafeHwnd() && (nPos == m_nDockPos))
-		return TRUE;
-
-	if (IsDocked() ^ IsDocked(nPos))
-		DestroyWindow();
+	BOOL bWasDocked = IsDocked();
+	BOOL bIsDocked = IsDocked(nPos);
 
 	m_nDockPos = nPos;
 
+	if (GetSafeHwnd() && !(bWasDocked ^ bIsDocked))
+		return TRUE;
+
+	if (bWasDocked ^ bIsDocked)
+		DestroyWindow();
+
 	CWnd* pParent = AfxGetMainWnd();
 
-	if (IsDocked())
+	if (bIsDocked)
 	{
 		SetBordersDLU(3);
 		return CRuntimeDlg::Create(NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | DS_SETFONT, WS_EX_CONTROLPARENT, rectAuto, pParent, IDC_STATIC);

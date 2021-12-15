@@ -10466,45 +10466,39 @@ LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
 		DM_POS nOldPos = (DM_POS)wp;
 		DM_POS nNewPos = (DM_POS)lp;
 
-		CRect rOldWindow;
-		GetWindowRect(rOldWindow);
-
-		CRect rNewWindow(rOldWindow);
-
-		// Release old space
-		switch (nOldPos)
+		// Switching from left to right and vice versa is a
+		// special case because it requires no size change
+		if (((nOldPos == DMP_LEFT) && (nNewPos == DMP_RIGHT)) ||
+			((nOldPos == DMP_RIGHT) && (nNewPos == DMP_LEFT)))
 		{
-		case DMP_LEFT:
-			rNewWindow.left += 300;
-			break;
-
-		case DMP_RIGHT:
-			rNewWindow.right -= 300;
-			break;
-
-		case DMP_BELOW:
-			rNewWindow.bottom -= 200;
-			break;
+			// No change
 		}
-
-		// Add new space
-		switch (nNewPos)
+		else
 		{
-		case DMP_LEFT:
-			rNewWindow.left -= 300;
-			break;
+			CRect rOldWindow;
+			GetWindowRect(rOldWindow);
 
-		case DMP_RIGHT:
-			rNewWindow.right += 300;
-			break;
+			CRect rNewWindow(rOldWindow);
 
-		case DMP_BELOW:
-			rNewWindow.bottom += 200;
-			break;
+			// Release old space
+			switch (nOldPos)
+			{
+			case DMP_LEFT:	rNewWindow.left += 300;		break;
+			case DMP_RIGHT:	rNewWindow.right -= 300;	break;
+			case DMP_BELOW:	rNewWindow.bottom -= 200;	break;
+			}
+
+			// Add new space
+			switch (nNewPos)
+			{
+			case DMP_LEFT:	rNewWindow.left -= 300;		break;
+			case DMP_RIGHT:	rNewWindow.right += 300;	break;
+			case DMP_BELOW:	rNewWindow.bottom += 200;	break;
+			}
+
+			if (rNewWindow != rOldWindow)
+				MoveWindow(rNewWindow);
 		}
-
-		if (rNewWindow != rOldWindow)
-			MoveWindow(rNewWindow);
 	}
 
 	Resize(); // Always

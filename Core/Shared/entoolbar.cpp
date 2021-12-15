@@ -252,6 +252,11 @@ void CEnToolBar::SetBackgroundColors(COLORREF crFrom, COLORREF crTo, BOOL bGradi
 		Invalidate();
 }
 
+void CEnToolBar::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler)
+{
+	CToolBar::OnUpdateCmdUI(pTarget, FALSE);
+}
+
 void CEnToolBar::RefreshButtonStates(BOOL bImmediate)
 {
 	if (bImmediate)

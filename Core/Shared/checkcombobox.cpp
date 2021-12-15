@@ -87,6 +87,8 @@ void CCheckComboBox::OnDestroy()
 {
 	// cleanup check state memory
 	DeleteAllCheckData();
+
+	CAutoComboBox::OnDestroy();
 }
 
 void CCheckComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
