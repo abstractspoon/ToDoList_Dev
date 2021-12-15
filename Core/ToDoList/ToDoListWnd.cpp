@@ -6094,40 +6094,13 @@ BOOL CToDoListWnd::CalcToDoCtrlRect(CRect& rect, int cx, int cy, BOOL bMaximized
 	if (rTaskList.top > 0)
 		rTaskList.top += BEVEL;
 	
-	// resize tabctrl
-	CDeferWndMove dwm(0); // dummy
-	
-	CPoint ptOrg(0, rTaskList.top);
-	int nTabHeight = ReposTabBar(dwm, ptOrg, cx, TRUE);
-	
-	if (nTabHeight)
-		rTaskList.top += nTabHeight + 1; // hide the bottom of the tab ctrl
-	
-	// filter controls
-	int nInset = (CThemed().IsNonClientThemed() ? BORDER : BEVEL);
-	int nFilterWidth = cx - 2 * nInset;
-	int nFilterHeight = m_bShowFilterBar ? m_filterBar.CalcHeight(nFilterWidth) : 0;
-	
-	if (nFilterHeight)
-		rTaskList.top += nFilterHeight;// + 4;
-	
-	// statusbar
-	if (m_bShowStatusBar)
-	{
-		CRect rStatus;
-		m_statusBar.GetWindowRect(rStatus);
-		ScreenToClient(rStatus);
-		rTaskList.bottom = rStatus.top - BORDER;
-	}
-	else
-	{
-		rTaskList.bottom = cy - BORDER;
-	}
-	
-	// shrink slightly so that edit controls do not merge with window border
-	rTaskList.DeflateRect(nInset, nInset, nInset, nInset);
+	ReposStatusBar(NULL, rTaskList);
+	ReposFindTasksDialog(NULL, rTaskList);
+	ReposTabBar(NULL, rTaskList);
+	ReposFilterBar(NULL, rTaskList);
+	ReposTaskList(NULL, rTaskList);
+
 	rect = rTaskList;
-	
 	return TRUE;
 }
 
@@ -6165,32 +6138,50 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	
 	// resize in one go
 	CDlgUnits dlu(this);
-	CDeferWndMove dwm(6);
+	CDeferWndMove dwm(10);
 	CRect rTaskList(0, 0, cx - BEVEL, cy);
 	
+	ReposToolbars(&dwm, rTaskList);
+	ReposStatusBar(&dwm, rTaskList);	
+	ReposFindTasksDialog(&dwm, rTaskList);
+	ReposTabBar(&dwm, rTaskList);
+	ReposFilterBar(&dwm, rTaskList);
+	ReposTaskList(&dwm, rTaskList);
+	
+#ifdef _DEBUG
+	CRect rect;
+	CalcToDoCtrlRect(rect, cx, cy, IsZoomed());
+
+	if (rect != rTaskList)
+		ASSERT(0);
+#endif
+}
+
+void CToDoListWnd::ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable)
+{
 	// toolbar
 	if (m_bShowingMainToolbar) // showing toolbar
-		rTaskList.top += m_toolbarMain.Resize(cx, rTaskList.TopLeft());
+		rAvailable.top += m_toolbarMain.Resize(rAvailable.Width(), rAvailable.TopLeft());
 
 	// ensure m_cbQuickFind is positioned correctly
 	int nPos = m_toolbarMain.CommandToIndex(ID_EDIT_FINDTASKS) + 2;
-	
+
 	CRect rNewPos;
 	m_toolbarMain.GetItemRect(nPos, rNewPos);
 	m_toolbarMain.ClientToScreen(rNewPos);
-	
+
 	// check if it needs to be moved
 	CRect rPrevPos;
 	m_cbQuickFind.CWnd::GetWindowRect(rPrevPos);
-	
+
 	if (rNewPos.TopLeft() != rPrevPos.TopLeft())
 	{
 		m_toolbarMain.ScreenToClient(rNewPos);
-		
+
 		rNewPos.top += QUICKFIND_VOFFSET;
 		rNewPos.bottom = rNewPos.top + QUICKFIND_HEIGHT;
 		rNewPos.OffsetRect(QUICKFIND_HOFFSET, 0);
-		
+
 		m_cbQuickFind.MoveWindow(rNewPos);
 	}
 
@@ -6207,7 +6198,7 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			if (!m_toolbarMain.LastItemIsSeparator())
 				nMainLen += m_nToolbarEndSepWidth;
 
-			bSeparateLine = ((nMainLen + nCustLen) > cx);
+			bSeparateLine = ((nMainLen + nCustLen) > rAvailable.Width());
 		}
 
 		if (bSeparateLine)
@@ -6215,7 +6206,7 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			if (m_toolbarMain.LastItemIsSeparator())
 				m_toolbarMain.DeleteLastItem();
 
-			rTaskList.top += m_toolbarCustom.Resize(cx, CPoint(0, rTaskList.top));
+			rAvailable.top += m_toolbarCustom.Resize(rAvailable.Width(), CPoint(rAvailable.left, rAvailable.top));
 		}
 		else
 		{
@@ -6225,78 +6216,138 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			int nMainLen = m_toolbarMain.GetMinReqLength();
 
 			m_toolbarMain.Resize(nMainLen);
-			m_toolbarCustom.Resize(cx - nMainLen, CPoint(nMainLen, 0));
+			m_toolbarCustom.Resize(rAvailable.Width() - nMainLen, CPoint(nMainLen, 0));
 		}
 	}
 
 	// Bevel below toolbars
-	if (rTaskList.top > 0)
-		rTaskList.top += BEVEL;
+	if (rAvailable.top > 0)
+		rAvailable.top += BEVEL;
+}
 
-	// resize tabctrl
-	CPoint ptOrg(0, rTaskList.top);
-	int nTabHeight = ReposTabBar(dwm, ptOrg, cx);
-	
-	if (nTabHeight)
-		rTaskList.top += nTabHeight + 1; // hide the bottom of the tab ctrl
-	
-	// filter controls
-	int nInset = (CThemed().IsNonClientThemed() ? BORDER : BEVEL);
-	int nFilterWidth = cx - 2 * nInset;
+void CToDoListWnd::ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable)
+{
+	if (m_dlgFindTasks.IsDocked())
+	{
+		CRect rFindTasks(rAvailable);
+
+		switch (m_dlgFindTasks.GetDockPosition())
+		{
+		case DMP_LEFT:
+			rFindTasks.right = rFindTasks.left + 300;
+			rAvailable.left += 300;
+			break;
+
+		case DMP_RIGHT:
+			rFindTasks.left = rFindTasks.right - 300;
+			rAvailable.right -= 300;
+			break;
+
+		case DMP_BELOW:
+			rFindTasks.top = rFindTasks.bottom - 200;
+			rAvailable.bottom -= 200;
+			break;
+		}
+
+		if (pDwm)
+			pDwm->MoveWindow(&m_dlgFindTasks, rFindTasks);
+	}
+}
+
+void CToDoListWnd::ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable)
+{
+	CRect rFilter(rAvailable);
+
+	int nInset = CalcEditFieldInset();
+	int nFilterWidth = rAvailable.Width() - 2 * nInset;
 	int nFilterHeight = m_bShowFilterBar ? m_filterBar.CalcHeight(nFilterWidth) : 0;
-	
-	dwm.MoveWindow(&m_filterBar, nInset, rTaskList.top, nFilterWidth, nFilterHeight);
-	
-	if (nFilterHeight)
-		rTaskList.top += nFilterHeight;// + 4;
-	
-	// statusbar has already been automatically resized unless it's invisible
-	CRect rStatus(0, cy, cx, cy);
+
+	rAvailable.top += nFilterHeight;
+	rFilter.bottom = rAvailable.top;
+	rFilter.left += nInset;
+
+	if (pDwm)
+		pDwm->MoveWindow(&m_filterBar, rFilter);
+}
+
+int CToDoListWnd::CalcEditFieldInset()
+{
+	return (CThemed::IsNonClientThemed() ? BORDER : BEVEL);
+}
+
+void CToDoListWnd::ReposStatusBar(CDeferWndMove* pDwm, CRect& rAvailable)
+{
+	// If visible, the statusbar has already been automatically resized
+	CRect rStatus(rAvailable);
 
 	if (m_bShowStatusBar)
 	{
 		m_statusBar.GetWindowRect(rStatus);
 		ScreenToClient(rStatus);
+
+		rAvailable.bottom = rStatus.top - BORDER;
 	}
 	else
 	{
-		dwm.MoveWindow(&m_statusBar, rStatus, FALSE);
+		if (pDwm)
+			pDwm->MoveWindow(&m_statusBar, rStatus, FALSE);
+
+		rAvailable.bottom = rStatus.bottom - BORDER;
 	}
-	
+}
+
+void CToDoListWnd::ReposTabBar(CDeferWndMove* pDwm, CRect& rAvailable)
+{
+	CRect rTabs(rAvailable.left, 0, rAvailable.Width(), 0);
+	m_tabCtrl.AdjustRect(TRUE, rTabs);
+
+	int nTabHeight = rTabs.Height() - 4;
+
+	rTabs = rAvailable;
+//	rTabs.right = nWidth + 1;
+	rTabs.bottom = rTabs.top + nTabHeight;
+//	rTabs.OffsetRect(0, rAvailable.y - rTabs.top); // add a pixel between tabbar and toolbar
+
+	BOOL bNeedTabCtrl = WantTasklistTabbarVisible();
+
+	if (bNeedTabCtrl)
+		rAvailable.top += rTabs.Height();
+
+	if (pDwm)
+	{
+		pDwm->MoveWindow(&m_tabCtrl, rTabs);
+
+		// hide and disable tabctrl if not needed
+		m_tabCtrl.ShowWindow(bNeedTabCtrl ? SW_SHOW : SW_HIDE);
+		m_tabCtrl.EnableWindow(bNeedTabCtrl);
+	}
+}
+
+void CToDoListWnd::ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable)
+{
 	// finally the active todoctrl
 	if (GetTDCCount())
 	{
-		if (m_bShowStatusBar)
-			rTaskList.bottom = rStatus.top - BORDER;
-		else
-			rTaskList.bottom = rStatus.bottom - BORDER;
-		
 		// shrink slightly so that edit controls do not merge with window border
-		rTaskList.DeflateRect(nInset, nInset, nInset, nInset);
+		int nInset = CalcEditFieldInset();
+		rAvailable.DeflateRect(nInset, nInset, nInset, nInset);
 
 		// Redraw the tasklist manually if its height has changed
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-		BOOL bHeightChange = (rTaskList.Height() != CDialogHelper::GetChildHeight(&tdc));
-
-		dwm.MoveWindow(&tdc, rTaskList, !bHeightChange);
-
-		if (bHeightChange)
+		if (pDwm)
 		{
-			Invalidate();
+			CFilteredToDoCtrl& tdc = GetToDoCtrl();
+			BOOL bHeightChange = (rAvailable.Height() != CDialogHelper::GetChildHeight(&tdc));
 
-			tdc.Invalidate();
+			pDwm->MoveWindow(&tdc, rAvailable, !bHeightChange);
 
-			if (nFilterHeight)
+			if (bHeightChange)
+			{
+				Invalidate();
+
+				tdc.Invalidate();
 				m_filterBar.Invalidate();
+			}
 		}
-
-#ifdef _DEBUG
-		CRect rect;
-		CalcToDoCtrlRect(rect, cx, cy, IsZoomed());
-
-		if (rect != rTaskList)
-			ASSERT(0);
-#endif
 	}
 }
 
@@ -6311,6 +6362,7 @@ BOOL CToDoListWnd::WantTasklistTabbarVisible() const
 	return ((GetTDCCount() > 1) || !Prefs().GetAutoHideTabbar()); 
 }
 
+/*
 int CToDoListWnd::ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly)
 {
 	CRect rTabs(0, 0, nWidth, 0);
@@ -6335,6 +6387,7 @@ int CToDoListWnd::ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidt
 	
 	return bNeedTabCtrl ? rTabs.Height() : 0;
 }
+*/
 
 void CToDoListWnd::OnPrint() 
 {
@@ -10406,10 +10459,55 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 
 LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
 {
-	DM_POS nOldPos = (DM_POS)wp;
-	DM_POS nNewPos = (DM_POS)lp;
+	// Modify our size to accept or release the 
+	// space needed to dock the find tasks dialog
+	if (!IsMaximized())
+	{
+		DM_POS nOldPos = (DM_POS)wp;
+		DM_POS nNewPos = (DM_POS)lp;
 
-	// TODO
+		CRect rOldWindow;
+		GetWindowRect(rOldWindow);
+
+		CRect rNewWindow(rOldWindow);
+
+		// Release old space
+		switch (nOldPos)
+		{
+		case DMP_LEFT:
+			rNewWindow.left += 300;
+			break;
+
+		case DMP_RIGHT:
+			rNewWindow.right -= 300;
+			break;
+
+		case DMP_BELOW:
+			rNewWindow.bottom -= 200;
+			break;
+		}
+
+		// Add new space
+		switch (nNewPos)
+		{
+		case DMP_LEFT:
+			rNewWindow.left -= 300;
+			break;
+
+		case DMP_RIGHT:
+			rNewWindow.right += 300;
+			break;
+
+		case DMP_BELOW:
+			rNewWindow.bottom += 200;
+			break;
+		}
+
+		if (rNewWindow != rOldWindow)
+			MoveWindow(rNewWindow);
+	}
+
+	Resize(); // Always
 
 	return 0L;
 }

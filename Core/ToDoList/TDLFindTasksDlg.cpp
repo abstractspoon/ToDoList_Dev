@@ -39,7 +39,8 @@ static SEARCHPARAM DEFAULTSEARCH(TDCA_TASKNAMEORCOMMENTS, FOP_INCLUDES);
 
 const int TABSTOPS			= GraphicsMisc::ScaleByDPIFactor(20);
 const int SPLITTER_WIDTH	= GraphicsMisc::ScaleByDPIFactor(6);
-const int DIALOG_BORDER		= GraphicsMisc::ScaleByDPIFactor(6);
+const int UNDOCKED_BORDER	= GraphicsMisc::ScaleByDPIFactor(6);
+const int DOCKED_BORDER		= GraphicsMisc::ScaleByDPIFactor(3);
 const int MIN_LIST_SIZE		= GraphicsMisc::ScaleByDPIFactor(100);
 
 const UINT WM_FTD_SELECTITEM = (WM_APP+1);
@@ -58,18 +59,16 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
 	AddRCControl(_T("LTEXT"), _T(""), _T("F&or tasks matching the following rules:"), 0, 0, 0, 50, 287, 8, IDC_STATIC);
-	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_TABSTOP, WS_EX_CLIENTEDGE, 3, 60, 370, 96, IDC_FINDLIST);
+	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 60, 370, 96, IDC_FINDLIST);
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Apply as &Filter"), 0, 0, 0, 172, 65, 14, IDC_APPLYASFILTER);
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Select &All"), 0, 0, 78, 172, 50, 14, IDC_SELECTALL);
 	AddRCControl(_T("LTEXT"), _T(""), _T("&Results:"), 0, 0, 133, 175, 240, 8, IDC_RESULTSLABEL);
-	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 3, 191, 370, 94, IDC_RESULTS);
+	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 191, 370, 94, IDC_RESULTS);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 85, 3, 71, 121, IDC_SEARCHLIST);
 	AddRCControl(_T("LTEXT"), _T(""), _T("&Search:"), 0, 0, 0, 22, 120, 8, IDC_SEARCHLABEL);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 0, 32, 120, 125, IDC_TASKLISTOPTIONS);
 	AddRCControl(_T("LTEXT"), _T(""), _T("I&ncluding:"), 0, 0, 136, 22, 134, 8, IDC_STATIC);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP, 0, 136, 32, 127, 30, IDC_INCLUDE);
-// 	AddRCControl(_T("DEFPUSHBUTTON"), _T(""), _T("OK"), WS_TABSTOP, 0, 230, 143, 50, 14, IDOK);
-// 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Cancel"), WS_TABSTOP, 0, 230, 162, 50, 14, IDCANCEL);
 }
 
 CTDLFindTasksDlg::~CTDLFindTasksDlg()
@@ -151,7 +150,8 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 	CRuntimeDlg::OnInitDialog();
 
-	VERIFY(m_sbGrip.Initialize(this));
+	if (GetStyle() & WS_POPUP)
+		VERIFY(m_sbGrip.Initialize(this));
 
 	// build 'Include' combo
 	CLocalizer::EnableTranslation(m_cbInclude, FALSE);
@@ -370,9 +370,13 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 	CWnd* pParent = AfxGetMainWnd();
 
 	if (IsDocked())
+	{
+		SetBordersDLU(3);
 		return CRuntimeDlg::Create(NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | DS_SETFONT, WS_EX_CONTROLPARENT, rectAuto, pParent, IDC_STATIC);
+	}
 
 	// else popup
+	SetBordersDLU(7);
 	return CRuntimeDlg::Create(_T("Find Tasks"), RTD_DEFSTYLE | WS_THICKFRAME, RTD_DEFEXSTYLE, rectAuto, pParent);
 }
 
@@ -774,6 +778,8 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 		CRect rResults = GetCtrlRect(IDC_RESULTS);
 		CRect rApply = GetCtrlRect(IDC_APPLYASFILTER);
 
+		int nBorder = (IsDocked() ? DOCKED_BORDER : UNDOCKED_BORDER);
+
 		if (bOrientationChange)
 		{
 			// Place the splitter so that the two lists have equal height/width
@@ -782,7 +788,7 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			if (bVertSplitter)
 				nSplitPos = (cx / 2);
 			else
-				nSplitPos = ((cy - DIALOG_BORDER + rRules.top - (rResults.top - rApply.top)) / 2);
+				nSplitPos = ((cy - nBorder + rRules.top - (rResults.top - rApply.top)) / 2);
 
 			VERIFY(GetSplitterRect(rSplitter, nSplitPos));
 		}
@@ -794,11 +800,11 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			if (bVertSplitter)
 			{
 				rRules.right = rSplitter.left;	
-				rRules.bottom = (cy - DIALOG_BORDER);	
+				rRules.bottom = (cy - nBorder);
 			}
 			else
 			{
-				rRules.right = (cx - DIALOG_BORDER);	
+				rRules.right = (cx - nBorder);
 				rRules.bottom = rSplitter.top;	
 			}
 			
@@ -823,8 +829,8 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			dwm.OffsetCtrl(this, IDC_RESULTSLABEL, nXOffset, nYOffset);
 			
 			rResults = dwm.OffsetCtrl(this, IDC_RESULTS, nXOffset, nYOffset);
-			rResults.right = (cx - DIALOG_BORDER);	
-			rResults.bottom = (cy - DIALOG_BORDER);	
+			rResults.right = (cx - nBorder);
+			rResults.bottom = (cy - nBorder);
 
 			dwm.MoveWindow(&m_lcResults, rResults);
 		}
@@ -1023,6 +1029,7 @@ void CTDLFindTasksDlg::OnDockleft()
 
 void CTDLFindTasksDlg::OnUpdateDockleft(CCmdUI* pCmdUI) 
 {
+	pCmdUI->Enable(TRUE);
  	pCmdUI->SetRadio(m_nDockPos == DMP_LEFT);
 }
 
@@ -1033,6 +1040,7 @@ void CTDLFindTasksDlg::OnUndock()
 
 void CTDLFindTasksDlg::OnUpdateUndock(CCmdUI* pCmdUI) 
 {
+	pCmdUI->Enable(TRUE);
 	pCmdUI->SetRadio(m_nDockPos == DMP_UNDOCKED);
 }
 
@@ -1043,6 +1051,7 @@ void CTDLFindTasksDlg::OnDockbelow()
 
 void CTDLFindTasksDlg::OnUpdateDockbelow(CCmdUI* pCmdUI) 
 {
+	pCmdUI->Enable(TRUE);
 	pCmdUI->SetRadio(m_nDockPos == DMP_BELOW);
 }
 

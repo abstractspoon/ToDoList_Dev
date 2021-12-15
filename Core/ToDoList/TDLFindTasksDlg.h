@@ -82,6 +82,7 @@ public:
 	
 	void SetUITheme(const CUIThemeFile& theme);
 	BOOL IsDocked() const { return IsDocked(m_nDockPos); }
+	DM_POS GetDockPosition() const { return m_nDockPos; }
 
 protected:
 // Dialog Data

@@ -694,9 +694,16 @@ protected:
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
-	int ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly = FALSE);
 	BOOL GetFilterBarRect(CRect& rect) const;
 	void CheckResizeFilterBar();
+
+//	int ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly = FALSE);
+	void ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposStatusBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposTabBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable);
 
 	void ShowFindDialog(BOOL bShow = TRUE);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
@@ -797,6 +804,7 @@ protected:
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);
+	static int CalcEditFieldInset();
 
 };
 
