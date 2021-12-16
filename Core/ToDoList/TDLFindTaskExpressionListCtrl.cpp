@@ -458,7 +458,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 				return ILCT_POPUPMENU;
 
 			case FT_ICON:
-				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+				if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aAttribDefs.GetSize())
 				{
 					const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 					GET_DEF_RET(m_aAttribDefs, nAttribID, pDef, ILCT_BROWSE);
@@ -492,7 +492,7 @@ IL_COLUMNTYPE CTDLFindTaskExpressionListCtrl::GetCellType(int nRow, int nCol) co
 					return ILCT_DROPLIST;
 
 				default:
-					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
+					if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID) && m_aAttribDefs.GetSize())
 					{
 						const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 						GET_DEF_ALT(m_aAttribDefs, nAttribID, pDef, break);

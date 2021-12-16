@@ -48,7 +48,7 @@ public:
 	CTDLFindTasksDlg();   // standard constructor
 	~CTDLFindTasksDlg();
 
-	BOOL Create(DM_POS nPos);
+	BOOL Create();
 	BOOL Show(BOOL bShow = TRUE);
 	void RefreshSearch();
 
@@ -102,7 +102,7 @@ protected:
 	BOOL m_bSplitting;
 	int m_nCurSel;
 	int	m_bAllTasklists;
-	DM_POS m_nDockPos;
+	DM_POS m_nDockPos, m_nLastDockedPos;
 
 	CEnString m_sResultsLabel;
 	CString m_sActiveSearch;
@@ -114,6 +114,8 @@ protected:
 	CUIThemeFile m_theme;
 	CBrush m_brBkgnd;
 	CIcon m_icon;
+	CSize m_sizeDocked, m_sizeDockedMax;
+	CRect m_rUndocked;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -187,6 +189,7 @@ protected:
 	void OnSaveSearch(BOOL bNotifyParent); 
 	void OnChangeDock(DM_POS nNewPos);
 
+	BOOL Create(DM_POS nPos);
 	void SaveSettings();
 	void ResizeDlg(BOOL bOrientationChange, int cx = 0, int cy = 0);
 	void LoadSettings();

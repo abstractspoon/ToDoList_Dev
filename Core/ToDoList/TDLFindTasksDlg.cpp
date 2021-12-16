@@ -54,7 +54,12 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 	m_bSplitting(FALSE),
 	m_bInitializing(FALSE),
 	m_bAllTasklists(FALSE),
-	m_nDockPos(DMP_UNDOCKED)
+	m_nDockPos(DMP_UNDOCKED),
+	m_nLastDockedPos(DMP_LEFT),
+	m_sizeDocked(0, 0), 
+	m_sizeDockedMax(0, 0),
+	m_rUndocked(0, 0, 0, 0)
+
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
@@ -69,6 +74,8 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 0, 32, 120, 125, IDC_TASKLISTOPTIONS);
 	AddRCControl(_T("LTEXT"), _T(""), _T("I&ncluding:"), 0, 0, 136, 22, 134, 8, IDC_STATIC);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP, 0, 136, 32, 127, 30, IDC_INCLUDE);
+
+	SetBordersDLU(3);
 }
 
 CTDLFindTasksDlg::~CTDLFindTasksDlg()
@@ -254,11 +261,11 @@ void CTDLFindTasksDlg::SetUITheme(const CUIThemeFile& theme)
 		m_brBkgnd.CreateSolidBrush(theme.crAppBackLight);
 
 		// Set colours first for the rescaling to work
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 		m_toolbar.SetBackgroundColors(theme.crToolbarLight,
 									  theme.crToolbarDark,
 									  theme.nRenderStyle != UIRS_GLASS,
 									  theme.nRenderStyle != UIRS_GRADIENT);
-		m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
 		// We have recreate the toolbar if rescaling is required
 		if ((m_theme != themeCur) && GraphicsMisc::WantDPIScaling())
@@ -364,6 +371,9 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 
 	m_nDockPos = nPos;
 
+	if (bIsDocked)
+		m_nLastDockedPos = nPos;
+
 	if (GetSafeHwnd() && !(bWasDocked ^ bIsDocked))
 		return TRUE;
 
@@ -373,14 +383,17 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 	CWnd* pParent = AfxGetMainWnd();
 
 	if (bIsDocked)
-	{
-		SetBordersDLU(3);
 		return CRuntimeDlg::Create(NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | DS_SETFONT, WS_EX_CONTROLPARENT, rectAuto, pParent, IDC_STATIC);
-	}
 
 	// else popup
-	SetBordersDLU(7);
 	return CRuntimeDlg::Create(_T("Find Tasks"), RTD_DEFSTYLE | WS_THICKFRAME, RTD_DEFEXSTYLE, rectAuto, pParent);
+}
+
+BOOL CTDLFindTasksDlg::Create()
+{
+	DM_POS nLastPos = CPreferences().GetProfileEnum(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
+
+	return Create(nLastPos);
 }
 
 void CTDLFindTasksDlg::LoadSettings()
@@ -409,52 +422,44 @@ void CTDLFindTasksDlg::LoadSettings()
 	CheckIncludeOption(FI_PARENT, prefs.GetProfileInt(_T("FindTasks"), _T("IncludeParentTasks"), TRUE));
 	CheckIncludeOption(FI_FILTEREDOUT, prefs.GetProfileInt(_T("FindTasks"), _T("IncludeFilteredOutTasks"), TRUE));
 
-/*
-	if (m_bDockable)
+	DM_POS nPos = DMP_UNDOCKED, nLastPos = DMP_RIGHT;
+	DWORD dwTopLeft = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("TopLeft"), -1);
+	DWORD dwBottomRight = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("BottomRight"), -1);
+
+	if ((dwBottomRight != -1) && (dwTopLeft != -1))
 	{
-		DM_POS nPos = DMP_UNDOCKED, nLastPos = DMP_RIGHT;
-		DWORD dwTopLeft = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("TopLeft"), -1);
-		DWORD dwBottomRight = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("BottomRight"), -1);
-		
-		if (dwBottomRight != -1 && dwTopLeft != -1)
+		nPos = prefs.GetProfileEnum(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
+		nLastPos = prefs.GetProfileEnum(_T("FindTasks"), _T("LastDockPos"), DMP_RIGHT);
+
+		CRect rect(GET_X_LPARAM(dwTopLeft), GET_Y_LPARAM(dwTopLeft),
+				   GET_X_LPARAM(dwBottomRight), GET_Y_LPARAM(dwBottomRight));
+
+		// ensure this intersects with the desktop by a decent amount
+		int BORDER = 200;
+		rect.DeflateRect(BORDER, BORDER);
+
+		if (NULL != MonitorFromRect(rect, MONITOR_DEFAULTTONULL))
 		{
-			nPos = prefs.GetProfileEnum(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
-			nLastPos = prefs.GetProfileEnum(_T("FindTasks"), _T("LastDockPos"), DMP_RIGHT);
-
-			CRect rect(GET_X_LPARAM(dwTopLeft), GET_Y_LPARAM(dwTopLeft), 
-					GET_X_LPARAM(dwBottomRight), GET_Y_LPARAM(dwBottomRight));
-
-			// ensure this intersects with the desktop by a decent amount
-			int BORDER = 200;
-			rect.DeflateRect(BORDER, BORDER);
-
-			if (NULL != MonitorFromRect(rect, MONITOR_DEFAULTTONULL))
-			{
-				rect.InflateRect(BORDER, BORDER);
-				MoveWindow(rect);
-			}
+			rect.InflateRect(BORDER, BORDER);
+			MoveWindow(rect);
 		}
-		
-		// use the default size of the page host to initialize the 
-		// docked width/height
-		CSize rDef = GetMinDockedSize(nPos);
-		
-		int nWidthDocked = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidth"), rDef.cx);
-		int nWidthDockedMax = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidthMax"), -1);
-		
-		int nHeightDocked = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeight"), rDef.cy);
-		int nHeightDockedMax = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeightMax"), -1);
-		
-		m_dockMgr.Initialize(GetParent(), this, nPos, nLastPos,
-							nWidthDocked, nWidthDockedMax, nHeightDocked, nHeightDockedMax);
-
-		// Splitter
-		int nSplitPos = prefs.GetProfileInt(_T("FindTasks"), _T("SplitterPos"), -1);
-
-		if (nSplitPos != -1)
-			SetSplitterPos(nSplitPos);
 	}
-*/
+
+	// use the default size of the page host to initialize the 
+	// docked width/height
+	CSize rDef = GetMinDockedSize(nPos);
+
+	m_sizeDocked.cx = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidth"), rDef.cx);
+	m_sizeDockedMax.cx = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidthMax"), -1);
+
+	m_sizeDocked.cy = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeight"), rDef.cy);
+	m_sizeDockedMax.cy = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeightMax"), -1);
+
+	// Splitter
+	int nSplitPos = prefs.GetProfileInt(_T("FindTasks"), _T("SplitterPos"), -1);
+
+	if (nSplitPos != -1)
+		SetSplitterPos(nSplitPos);
 
 	LoadSearches();
 
@@ -524,7 +529,9 @@ BOOL CTDLFindTasksDlg::Show(BOOL bShow)
 		SetForegroundWindow(); // give it the focus
 	}
 	else
+	{
 		ShowWindow(SW_HIDE);
+	}
 	
 	return TRUE;
 }
@@ -755,6 +762,24 @@ void CTDLFindTasksDlg::OnSize(UINT nType, int cx, int cy)
 
 	if (m_toolbar.GetSafeHwnd())
 		m_toolbar.RefreshButtonStates();
+
+	if (IsDocked())
+	{
+		if (IsZoomed())
+		{
+			m_sizeDockedMax.cx = cx;
+			m_sizeDockedMax.cy = cy;
+		}
+		else
+		{
+			m_sizeDocked.cx = cx;
+			m_sizeDocked.cy = cy;
+		}
+	}
+	else
+	{
+		GetWindowRect(m_rUndocked);
+	}
 }
 
 void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
@@ -893,16 +918,14 @@ void CTDLFindTasksDlg::SaveSettings()
 	prefs.WriteProfileInt(_T("FindTasks"), _T("IncludeFilteredOutTasks"), IncludeOptionIsChecked(FI_FILTEREDOUT));
 
 	// pos
-	CRect rDialog;// = m_dockMgr.GetUnDockedRect();
-	
-	prefs.WriteProfileInt(_T("FindTasks"), _T("TopLeft"), MAKELPARAM(rDialog.left, rDialog.top));
-	prefs.WriteProfileInt(_T("FindTasks"), _T("BottomRight"), MAKELPARAM(rDialog.right, rDialog.bottom));
-// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockPos"), m_dockMgr.GetDockPos());
-// 	prefs.WriteProfileInt(_T("FindTasks"), _T("LastDockPos"), m_dockMgr.GetLastDockPos());
-// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidth"), m_dockMgr.GetDockedWidth(FALSE));
-// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidthMax"), m_dockMgr.GetDockedWidth(TRUE));
-// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeight"), m_dockMgr.GetDockedHeight(FALSE));
-// 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeightMax"), m_dockMgr.GetDockedHeight(TRUE));
+	prefs.WriteProfileInt(_T("FindTasks"), _T("TopLeft"), MAKELPARAM(m_rUndocked.left, m_rUndocked.top));
+	prefs.WriteProfileInt(_T("FindTasks"), _T("BottomRight"), MAKELPARAM(m_rUndocked.right, m_rUndocked.bottom));
+ 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockPos"), m_nDockPos);
+	prefs.WriteProfileInt(_T("FindTasks"), _T("LastDockPos"), m_nLastDockedPos);
+	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidth"), m_sizeDocked.cx);
+	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidthMax"), m_sizeDockedMax.cx);
+	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeight"), m_sizeDocked.cy);
+	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeightMax"), m_sizeDockedMax.cy);
 
 	// Splitter
 	CPoint ptSplitter = GetSplitterRect().CenterPoint();
