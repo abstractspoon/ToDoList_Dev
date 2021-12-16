@@ -658,6 +658,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnUpdateViewExpandTasks)
 	ON_WM_ACTIVATE()
 	ON_WM_ACTIVATEAPP()
+	ON_WM_CAPTURECHANGED()
 	ON_WM_CONTEXTMENU()
 	ON_WM_COPYDATA()
 	ON_WM_CREATE()
@@ -675,6 +676,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_MOVE()
 	ON_WM_QUERYENDSESSION()
 	ON_WM_QUERYOPEN()
+	ON_WM_SETCURSOR()
 	ON_WM_SIZE()
 	ON_WM_SETTINGCHANGE()
 	ON_WM_SYSCOLORCHANGE()
@@ -6200,6 +6202,8 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	if (rect != rTaskList)
 		ASSERT(0);
 #endif
+
+	Invalidate(TRUE);
 }
 
 void CToDoListWnd::ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable)
@@ -6276,23 +6280,26 @@ void CToDoListWnd::ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable)
 	{
 		CRect rFindTasks(rAvailable);
 
-		switch (m_dlgFindTasks.GetDockPosition())
+		DM_POS nPos = m_dlgFindTasks.GetDockPosition();
+		int nDim = m_dlgFindTasks.GetDockedDimension(nPos, IsZoomed());
+
+		switch (nPos)
 		{
 		case DMP_LEFT:
-			rFindTasks.right = rFindTasks.left + 300;
-			rAvailable.left += 300;
+			rFindTasks.right = rFindTasks.left + nDim;
+			rAvailable.left += nDim;
 			rAvailable.left += SPLITTER_WIDTH;
 			break;
 
 		case DMP_RIGHT:
-			rFindTasks.left = rFindTasks.right - 300;
-			rAvailable.right -= 300;
+			rFindTasks.left = rFindTasks.right - nDim;
+			rAvailable.right -= nDim;
 			rAvailable.right -= SPLITTER_WIDTH;
 			break;
 
 		case DMP_BELOW:
-			rFindTasks.top = rFindTasks.bottom - 200;
-			rAvailable.bottom -= 200;
+			rFindTasks.top = rFindTasks.bottom - nDim;
+			rAvailable.bottom -= nDim;
 			rAvailable.bottom -= SPLITTER_WIDTH;
 			break;
 		}
@@ -6315,7 +6322,10 @@ void CToDoListWnd::ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable)
 	rFilter.left += nInset;
 
 	if (pDwm)
+	{
 		pDwm->MoveWindow(&m_filterBar, rFilter);
+		m_filterBar.Invalidate();
+	}
 }
 
 int CToDoListWnd::CalcEditFieldInset() const
@@ -6401,21 +6411,12 @@ void CToDoListWnd::ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable)
 			break;
 		}
 
-		// Redraw the tasklist manually if its height has changed
 		if (pDwm)
 		{
 			CFilteredToDoCtrl& tdc = GetToDoCtrl();
-			BOOL bHeightChange = (rAvailable.Height() != CDialogHelper::GetChildHeight(&tdc));
 
-			pDwm->MoveWindow(&tdc, rAvailable, !bHeightChange);
-
-			if (bHeightChange)
-			{
-				Invalidate();
-
-				tdc.Invalidate();
-				m_filterBar.Invalidate();
-			}
+			pDwm->MoveWindow(&tdc, rAvailable, FALSE);
+			tdc.Invalidate();
 		}
 	}
 }
@@ -6430,33 +6431,6 @@ BOOL CToDoListWnd::WantTasklistTabbarVisible() const
 
 	return ((GetTDCCount() > 1) || !Prefs().GetAutoHideTabbar()); 
 }
-
-/*
-int CToDoListWnd::ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly)
-{
-	CRect rTabs(0, 0, nWidth, 0);
-	m_tabCtrl.AdjustRect(TRUE, rTabs);
-	int nTabHeight = rTabs.Height() - 4;
-	
-	rTabs = dwm.OffsetCtrl(this, IDC_TABCONTROL); // not actually a move
-	rTabs.right = nWidth + 1;
-	rTabs.bottom = rTabs.top + nTabHeight;
-	rTabs.OffsetRect(0, ptOrg.y - rTabs.top); // add a pixel between tabbar and toolbar
-	
-	BOOL bNeedTabCtrl = WantTasklistTabbarVisible();
-	
-	if (!bCalcOnly)
-	{
-		dwm.MoveWindow(&m_tabCtrl, rTabs);
-		
-		// hide and disable tabctrl if not needed
-		m_tabCtrl.ShowWindow(bNeedTabCtrl ? SW_SHOW : SW_HIDE);
-		m_tabCtrl.EnableWindow(bNeedTabCtrl);
-	}
-	
-	return bNeedTabCtrl ? rTabs.Height() : 0;
-}
-*/
 
 void CToDoListWnd::OnPrint() 
 {
@@ -10550,19 +10524,29 @@ LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
 			CRect rNewWindow(rOldWindow);
 
 			// Release old space
-			switch (nOldPos)
+			if (nOldPos != DMP_UNDOCKED)
 			{
-			case DMP_LEFT:	rNewWindow.left += 300;		break;
-			case DMP_RIGHT:	rNewWindow.right -= 300;	break;
-			case DMP_BELOW:	rNewWindow.bottom -= 200;	break;
+				int nOldDim = m_dlgFindTasks.GetDockedDimension(nOldPos, FALSE);
+
+				switch (nOldPos)
+				{
+				case DMP_LEFT:	rNewWindow.left += nOldDim;	break;
+				case DMP_RIGHT:	rNewWindow.right -= nOldDim;	break;
+				case DMP_BELOW:	rNewWindow.bottom -= nOldDim;	break;
+				}
 			}
 
 			// Add new space
-			switch (nNewPos)
+			if (nNewPos != DMP_UNDOCKED)
 			{
-			case DMP_LEFT:	rNewWindow.left -= 300;		break;
-			case DMP_RIGHT:	rNewWindow.right += 300;	break;
-			case DMP_BELOW:	rNewWindow.bottom += 200;	break;
+				int nNewDim = m_dlgFindTasks.GetDockedDimension(nNewPos, FALSE);
+
+				switch (nNewPos)
+				{
+				case DMP_LEFT:	rNewWindow.left		-= nNewDim;	break;
+				case DMP_RIGHT:	rNewWindow.right	+= nNewDim;	break;
+				case DMP_BELOW:	rNewWindow.bottom	+= nNewDim;	break;
+				}
 			}
 
 			if (rNewWindow != rOldWindow)
@@ -11148,12 +11132,68 @@ void CToDoListWnd::OnLButtonUp(UINT nFlags, CPoint point)
 	CFrameWnd::OnLButtonUp(nFlags, point);
 }
 
+void CToDoListWnd::OnCaptureChanged(CWnd* pWnd)
+{
+	m_bSplitting = FALSE;
+
+	CFrameWnd::OnCaptureChanged(pWnd);
+}
+
 void CToDoListWnd::OnMouseMove(UINT nFlags, CPoint point)
 {
-// 	if (m_bSplitting)
-// 		SetSplitterPos(IsSplitterVertical() ? point.x : point.y);
+	if (m_bSplitting)
+	{
+		ASSERT(m_dlgFindTasks.IsDocked());
+
+		CRect rOld = GetChildRect(&m_dlgFindTasks), rNew(rOld);
+
+		switch (m_dlgFindTasks.GetDockPosition())
+		{
+		case DMP_LEFT:
+			rNew.right = (point.x - (SPLITTER_WIDTH / 2));
+			break;
+
+		case DMP_RIGHT:
+			rNew.left = (point.x + (SPLITTER_WIDTH / 2));
+			break;
+
+		case DMP_BELOW:
+			rNew.top = (point.y + (SPLITTER_WIDTH / 2));
+			break;
+		}
+
+		if (rNew != rOld)
+		{
+			m_dlgFindTasks.MoveWindow(rNew);
+			m_dlgFindTasks.UpdateWindow();
+
+			Resize();
+		}
+	}
 
 	CFrameWnd::OnMouseMove(nFlags, point);
+}
+
+BOOL CToDoListWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	CRect rSplitter;
+
+	if (GetFindTasksDialogSplitterRect(rSplitter))
+	{
+		CPoint ptCursor(GetCurrentMessage()->pt);
+		ScreenToClient(&ptCursor);
+
+		if (rSplitter.PtInRect(ptCursor))
+		{
+			UINT nIDCursor = ((m_dlgFindTasks.GetDockPosition() == DMP_BELOW) ? AFX_IDC_VSPLITBAR : AFX_IDC_HSPLITBAR);
+			::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+
+			return TRUE;
+		}
+	}
+
+	// else
+	return CFrameWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
 void CToDoListWnd::OnViewNextSelectedTask() 

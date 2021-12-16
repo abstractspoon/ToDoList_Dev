@@ -81,8 +81,11 @@ public:
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 	
 	void SetUITheme(const CUIThemeFile& theme);
+
 	BOOL IsDocked() const { return IsDocked(m_nDockPos); }
 	DM_POS GetDockPosition() const { return m_nDockPos; }
+	int GetDockedDimension(BOOL bMaximized) const;
+	int GetDockedDimension(DM_POS nPos, BOOL bMaximized) const;
 
 protected:
 // Dialog Data
@@ -118,21 +121,21 @@ protected:
 	CRect m_rUndocked;
 
 // Overrides
+protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLFindTasksDlg)
-	public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnCancel();
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
+
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
 	int DoModal() { return -1; } // not for public use
-	virtual BOOL OnInitDialog();
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLFindTasksDlg)
@@ -167,6 +170,7 @@ protected:
 	afx_msg void OnSelchangeInclude();
 	afx_msg void OnSelectall();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnMove(int x, int y);
 	afx_msg void OnUndock();
 	afx_msg void OnUpdateDeleteRule(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateDeleteSearch(CCmdUI* pCmdUI);
@@ -193,7 +197,7 @@ protected:
 	void SaveSettings();
 	void ResizeDlg(BOOL bOrientationChange, int cx = 0, int cy = 0);
 	void LoadSettings();
-	CSize GetMinDockedSize(DM_POS nPos);
+	CSize GetMinSize(DM_POS nPos);
 	int GetNextResult(int nItem, BOOL bDown);
 	void SelectItem(int nItem);
 	int GetSelectedItem();

@@ -382,6 +382,7 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 		m_nLastDockedPos = nPos;
 
 	CWnd* pParent = AfxGetMainWnd();
+	DWORD dwStyle = 0, dwExStyle = 0;
 
 	if (bIsDocked)
 	{
@@ -402,13 +403,18 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 			break;
 		}
 
-		return CRuntimeDlg::Create(NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | DS_SETFONT, WS_EX_CONTROLPARENT, rectAuto, pParent, IDC_STATIC);
+		dwStyle = WS_CHILD | WS_VISIBLE | WS_TABSTOP | DS_SETFONT;
+		dwExStyle = WS_EX_CONTROLPARENT;
+	}
+	else
+	{
+		SetBordersDLU(3);
+
+		dwStyle = RTD_DEFSTYLE | WS_THICKFRAME;
+		dwExStyle = RTD_DEFEXSTYLE;
 	}
 
-	// else popup
-	SetBordersDLU(3);
-
-	return CRuntimeDlg::Create(_T("Find Tasks"), RTD_DEFSTYLE | WS_THICKFRAME, RTD_DEFEXSTYLE, rectAuto, pParent);
+	return CRuntimeDlg::Create(_T("Find Tasks"), dwStyle, dwExStyle, rectAuto, pParent, IDC_STATIC);
 }
 
 BOOL CTDLFindTasksDlg::Create()
@@ -471,13 +477,24 @@ void CTDLFindTasksDlg::LoadSettings()
 		AutoFit();
 	}
 	
-	CSize rDef = GetMinDockedSize(nPos);
+	int nMinWidth = GetMinSize(DMP_LEFT).cx;
+	int nMinHeight = GetMinSize(DMP_BELOW).cy;
 
-	m_sizeDocked.cx = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidth"), rDef.cx);
-	m_sizeDockedMax.cx = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidthMax"), -1);
+	m_sizeDocked.cx = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidth"), nMinWidth);
+	m_sizeDockedMax.cx = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidthMax"), nMinWidth);
 
-	m_sizeDocked.cy = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeight"), rDef.cy);
-	m_sizeDockedMax.cy = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeightMax"), -1);
+	m_sizeDocked.cy = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeight"), nMinHeight);
+	m_sizeDockedMax.cy = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeightMax"), nMinHeight);
+
+	// Backward compatibility
+	if ((m_sizeDocked.cx <= 0) || 
+		(m_sizeDockedMax.cx <= 0) || 
+		(m_sizeDocked.cy <= 0) || 
+		(m_sizeDockedMax.cy <= 0))
+	{
+		m_sizeDocked.cx = m_sizeDockedMax.cx = nMinWidth;
+		m_sizeDocked.cy = m_sizeDockedMax.cy = nMinHeight;
+	}
 
 	// Splitter
 	int nSplitPos = prefs.GetProfileInt(_T("FindTasks"), _T("SplitterPos"), -1);
@@ -490,7 +507,7 @@ void CTDLFindTasksDlg::LoadSettings()
 	UpdateData(FALSE);
 }
 
-CSize CTDLFindTasksDlg::GetMinDockedSize(DM_POS nPos)
+CSize CTDLFindTasksDlg::GetMinSize(DM_POS nPos)
 {
 	CRect rMin(0, 0, 0, 0), rCtrl;
 
@@ -789,21 +806,61 @@ void CTDLFindTasksDlg::OnSize(UINT nType, int cx, int cy)
 
 	if (IsDocked())
 	{
-		if (IsZoomed())
+		if (AfxGetMainWnd()->IsZoomed())
 		{
-			m_sizeDockedMax.cx = cx;
-			m_sizeDockedMax.cy = cy;
+			if (m_nDockPos == DMP_BELOW)
+				m_sizeDockedMax.cy = cy;
+			else
+				m_sizeDockedMax.cx = cx;
 		}
 		else
 		{
-			m_sizeDocked.cx = cx;
-			m_sizeDocked.cy = cy;
+			if (m_nDockPos == DMP_BELOW)
+				m_sizeDocked.cy = cy;
+			else
+				m_sizeDocked.cx = cx;
 		}
 	}
 	else
 	{
-		GetWindowRect(m_rUndocked);
+		m_rUndocked.right = (m_rUndocked.left + cx);
+		m_rUndocked.bottom = (m_rUndocked.top + cy);
 	}
+}
+
+void CTDLFindTasksDlg::OnMove(int x, int y)
+{
+	if (!IsDocked())
+	{
+		m_rUndocked.right = (x + m_rUndocked.Width());
+		m_rUndocked.bottom = (y + m_rUndocked.Height());
+
+		m_rUndocked.left = x;
+		m_rUndocked.top = y;
+	}
+
+	CRuntimeDlg::OnMove(x, y);
+}
+
+int CTDLFindTasksDlg::GetDockedDimension(BOOL bMaximized) const
+{
+	return GetDockedDimension(m_nDockPos, bMaximized);
+}
+
+int CTDLFindTasksDlg::GetDockedDimension(DM_POS nPos, BOOL bMaximized) const
+{
+	switch (nPos)
+	{
+	case DMP_LEFT:
+	case DMP_RIGHT:
+		return (bMaximized ? m_sizeDockedMax.cx : m_sizeDocked.cx);
+
+	case DMP_BELOW:
+		return (bMaximized ? m_sizeDockedMax.cy : m_sizeDocked.cy);
+	}
+
+	ASSERT(0);
+	return 0;
 }
 
 void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
@@ -985,9 +1042,9 @@ void CTDLFindTasksDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 {
 	CRuntimeDlg::OnGetMinMaxInfo(lpMMI);
 	
-	if (m_lcFindSetup.GetSafeHwnd())
+	if (m_lcFindSetup.GetSafeHwnd() && !IsDocked())
 	{
-		CSize rDef = GetMinDockedSize(m_nDockPos);
+		CSize rDef = GetMinSize(m_nDockPos);
 
 		lpMMI->ptMinTrackSize.y = rDef.cy;
 		lpMMI->ptMinTrackSize.x = rDef.cx;
