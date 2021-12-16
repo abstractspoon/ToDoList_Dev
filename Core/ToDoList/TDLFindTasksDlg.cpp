@@ -466,7 +466,11 @@ void CTDLFindTasksDlg::LoadSettings()
 			MoveWindow(rect);
 		}
 	}
-
+	else if (!IsDocked())
+	{
+		AutoFit();
+	}
+	
 	// use the default size of the page host to initialize the 
 	// docked width/height
 	CSize rDef = GetMinDockedSize(nPos);
