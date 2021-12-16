@@ -471,8 +471,6 @@ void CTDLFindTasksDlg::LoadSettings()
 		AutoFit();
 	}
 	
-	// use the default size of the page host to initialize the 
-	// docked width/height
 	CSize rDef = GetMinDockedSize(nPos);
 
 	m_sizeDocked.cx = prefs.GetProfileInt(_T("FindTasks"), _T("DockedWidth"), rDef.cx);
@@ -987,13 +985,13 @@ void CTDLFindTasksDlg::OnGetMinMaxInfo(MINMAXINFO FAR* lpMMI)
 {
 	CRuntimeDlg::OnGetMinMaxInfo(lpMMI);
 	
-// 	if (m_dockMgr.Initialized())
-// 	{
-// 		CSize rDef = GetMinDockedSize(m_dockMgr.GetDockPos());
-// 
-// 		lpMMI->ptMinTrackSize.y = rDef.cy;
-// 		lpMMI->ptMinTrackSize.x = rDef.cx;
-// 	}
+	if (m_lcFindSetup.GetSafeHwnd())
+	{
+		CSize rDef = GetMinDockedSize(m_nDockPos);
+
+		lpMMI->ptMinTrackSize.y = rDef.cy;
+		lpMMI->ptMinTrackSize.x = rDef.cx;
+	}
 }
 
 BOOL CTDLFindTasksDlg::PreTranslateMessage(MSG* pMsg) 
