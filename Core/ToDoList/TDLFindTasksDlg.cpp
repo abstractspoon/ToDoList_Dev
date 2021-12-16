@@ -74,8 +74,6 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 0, 32, 120, 125, IDC_TASKLISTOPTIONS);
 	AddRCControl(_T("LTEXT"), _T(""), _T("I&ncluding:"), 0, 0, 136, 22, 134, 8, IDC_STATIC);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP, 0, 136, 32, 127, 30, IDC_INCLUDE);
-
-	SetBordersDLU(3);
 }
 
 CTDLFindTasksDlg::~CTDLFindTasksDlg()
@@ -369,23 +367,47 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 	BOOL bWasDocked = IsDocked();
 	BOOL bIsDocked = IsDocked(nPos);
 
+	if (GetSafeHwnd())
+	{
+		if (nPos == m_nDockPos)
+			return TRUE;
+
+		// else
+		DestroyWindow();
+	}
+
 	m_nDockPos = nPos;
 
 	if (bIsDocked)
 		m_nLastDockedPos = nPos;
 
-	if (GetSafeHwnd() && !(bWasDocked ^ bIsDocked))
-		return TRUE;
-
-	if (bWasDocked ^ bIsDocked)
-		DestroyWindow();
-
 	CWnd* pParent = AfxGetMainWnd();
 
 	if (bIsDocked)
+	{
+		// Parent will manage and draw a splitter rect
+		// so collapse the border along the docked edge
+		switch (m_nDockPos)
+		{
+		case DMP_LEFT:
+			SetBordersDLU(3, 3, 3, 0);
+			break;
+
+		case DMP_RIGHT:
+			SetBordersDLU(0, 3, 3, 3);
+			break;
+
+		case DMP_BELOW:
+			SetBordersDLU(3, 0, 3, 3);
+			break;
+		}
+
 		return CRuntimeDlg::Create(NULL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | DS_SETFONT, WS_EX_CONTROLPARENT, rectAuto, pParent, IDC_STATIC);
+	}
 
 	// else popup
+	SetBordersDLU(3);
+
 	return CRuntimeDlg::Create(_T("Find Tasks"), RTD_DEFSTYLE | WS_THICKFRAME, RTD_DEFEXSTYLE, rectAuto, pParent);
 }
 
@@ -806,7 +828,21 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 		CRect rResults = GetCtrlRect(IDC_RESULTS);
 		CRect rApply = GetCtrlRect(IDC_APPLYASFILTER);
 
-		int nBorder = (IsDocked() ? DOCKED_BORDER : UNDOCKED_BORDER);
+		int nLeftTopBorder = UNDOCKED_BORDER, nRightBotBorder = UNDOCKED_BORDER;
+
+		switch (m_nDockPos)
+		{
+		case DMP_LEFT:
+			nLeftTopBorder = DOCKED_BORDER;
+			nRightBotBorder = 0;
+			break;
+
+		case DMP_RIGHT:
+		case DMP_BELOW:
+			nLeftTopBorder = 0;
+			nRightBotBorder = DOCKED_BORDER;
+			break;
+		}
 
 		if (bOrientationChange)
 		{
@@ -816,7 +852,7 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			if (bVertSplitter)
 				nSplitPos = (cx / 2);
 			else
-				nSplitPos = ((cy - nBorder + rRules.top - (rResults.top - rApply.top)) / 2);
+				nSplitPos = ((cy - nLeftTopBorder + rRules.top - (rResults.top - rApply.top)) / 2);
 
 			VERIFY(GetSplitterRect(rSplitter, nSplitPos));
 		}
@@ -828,11 +864,11 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			if (bVertSplitter)
 			{
 				rRules.right = rSplitter.left;	
-				rRules.bottom = (cy - nBorder);
+				rRules.bottom = (cy - nRightBotBorder);
 			}
 			else
 			{
-				rRules.right = (cx - nBorder);
+				rRules.right = (cx - nRightBotBorder);
 				rRules.bottom = rSplitter.top;	
 			}
 			
@@ -857,8 +893,8 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			dwm.OffsetCtrl(this, IDC_RESULTSLABEL, nXOffset, nYOffset);
 			
 			rResults = dwm.OffsetCtrl(this, IDC_RESULTS, nXOffset, nYOffset);
-			rResults.right = (cx - nBorder);
-			rResults.bottom = (cy - nBorder);
+			rResults.right = (cx - nRightBotBorder);
+			rResults.bottom = (cy - nRightBotBorder);
 
 			dwm.MoveWindow(&m_lcResults, rResults);
 		}

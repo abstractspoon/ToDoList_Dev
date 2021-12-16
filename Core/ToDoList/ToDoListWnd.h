@@ -696,6 +696,7 @@ protected:
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL GetFilterBarRect(CRect& rect) const;
 	void CheckResizeFilterBar();
+	BOOL GetFindTasksDialogSplitterRect(CRect& rSplitter) const;
 
 //	int ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly = FALSE);
 	void ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable);
@@ -787,6 +788,7 @@ protected:
 	void SaveCurrentFocus(HWND hwndFocus = NULL);
 	void PostAppRestoreFocus(HWND hwndFocus = NULL);
 	void UpdateTreeAndCommentsFonts();
+	int CalcEditFieldInset() const;
 
 	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);
@@ -804,7 +806,6 @@ protected:
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
 	static BOOL GetStylesheetPath(const CFilteredToDoCtrl& tdc, CString& sDlgStylesheet);
 	static BOOL CALLBACK FindOtherInstance(HWND hwnd, LPARAM lParam);
-	static int CalcEditFieldInset();
 
 };
 

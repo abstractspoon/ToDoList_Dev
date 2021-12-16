@@ -105,8 +105,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int BEVEL = 3; // DON'T SCALE
-const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MRU_MAX_ITEM_LEN = 128;
+
+const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
+const int SPLITTER_WIDTH = GraphicsMisc::ScaleByDPIFactor(6);
 
 const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
 const int QUICKFIND_VOFFSET = GraphicsMisc::ScaleByDPIFactor(1);
@@ -2891,6 +2893,9 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeChild(&m_filterBar, pDC);
 	CDialogHelper::ExcludeChild(&GetToDoCtrl(), pDC);
 
+	if (m_dlgFindTasks.IsDocked())
+		CDialogHelper::ExcludeChild(&m_dlgFindTasks, pDC);
+
 	// Fill client background
 	COLORREF crBkgnd(CThemed::IsAppThemed() ? m_theme.crAppBackLight : GetSysColor(COLOR_3DFACE));
 	
@@ -2953,6 +2958,14 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 		}
 	}
 
+	// Find Tasks dialog splitter if docked
+	CRect rSplitter;
+
+	if (GetFindTasksDialogSplitterRect(rSplitter))
+	{
+		GraphicsMisc::DrawSplitBar(pDC, rSplitter, m_theme.crAppBackDark, FALSE);
+	}
+
 	// The CSysImageList class seems to not initialize properly unless the 
 	// main window is visible. so in the case of starting hidden
 	// or starting minimized we must wait until we become visible before
@@ -2961,6 +2974,34 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	{
 		m_bFirstEraseBkgnd = FALSE;
 		PostMessage(WM_UPDATEUDTSINTOOLBAR);
+	}
+
+	return TRUE;
+}
+
+BOOL CToDoListWnd::GetFindTasksDialogSplitterRect(CRect& rSplitter) const
+{
+	if (!m_dlgFindTasks.IsDocked())
+		return FALSE;
+
+	rSplitter = GetChildRect(&m_dlgFindTasks);
+
+	switch (m_dlgFindTasks.GetDockPosition())
+	{
+	case DMP_LEFT:
+		rSplitter.left = rSplitter.right;
+		rSplitter.right += SPLITTER_WIDTH;
+		break;
+
+	case DMP_RIGHT:
+		rSplitter.right = rSplitter.left;
+		rSplitter.left -= SPLITTER_WIDTH;
+		break;
+
+	case DMP_BELOW:
+		rSplitter.bottom = rSplitter.top;
+		rSplitter.top -= SPLITTER_WIDTH;
+		break;
 	}
 
 	return TRUE;
@@ -6236,16 +6277,19 @@ void CToDoListWnd::ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable)
 		case DMP_LEFT:
 			rFindTasks.right = rFindTasks.left + 300;
 			rAvailable.left += 300;
+			rAvailable.left += SPLITTER_WIDTH;
 			break;
 
 		case DMP_RIGHT:
 			rFindTasks.left = rFindTasks.right - 300;
 			rAvailable.right -= 300;
+			rAvailable.right -= SPLITTER_WIDTH;
 			break;
 
 		case DMP_BELOW:
 			rFindTasks.top = rFindTasks.bottom - 200;
 			rAvailable.bottom -= 200;
+			rAvailable.bottom -= SPLITTER_WIDTH;
 			break;
 		}
 
@@ -6270,8 +6314,11 @@ void CToDoListWnd::ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable)
 		pDwm->MoveWindow(&m_filterBar, rFilter);
 }
 
-int CToDoListWnd::CalcEditFieldInset()
+int CToDoListWnd::CalcEditFieldInset() const
 {
+	if (m_dlgFindTasks.GetDockPosition() == DMP_LEFT)
+		return 0;
+
 	return (CThemed::IsNonClientThemed() ? BORDER : BEVEL);
 }
 
@@ -6330,7 +6377,25 @@ void CToDoListWnd::ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable)
 	{
 		// shrink slightly so that edit controls do not merge with window border
 		int nInset = CalcEditFieldInset();
-		rAvailable.DeflateRect(nInset, nInset, nInset, nInset);
+
+		switch (m_dlgFindTasks.GetDockPosition())
+		{
+		case DMP_LEFT:
+			rAvailable.DeflateRect(0, nInset, nInset, nInset);
+			break;
+
+		case DMP_RIGHT:
+			rAvailable.DeflateRect(nInset, nInset, 0, nInset);
+			break;
+
+		case DMP_BELOW:
+			rAvailable.DeflateRect(nInset, nInset, nInset, 0);
+			break;
+
+		case DMP_UNDOCKED:
+			rAvailable.DeflateRect(nInset, nInset, nInset, nInset);
+			break;
+		}
 
 		// Redraw the tasklist manually if its height has changed
 		if (pDwm)
@@ -10461,7 +10526,7 @@ LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
 {
 	// Modify our size to accept or release the 
 	// space needed to dock the find tasks dialog
-	if (!IsMaximized())
+	if (!IsZoomed())
 	{
 		DM_POS nOldPos = (DM_POS)wp;
 		DM_POS nNewPos = (DM_POS)lp;
