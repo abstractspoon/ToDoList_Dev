@@ -223,6 +223,7 @@ CToDoListWnd::CToDoListWnd()
 	m_nContextMenuID(0),
 	m_bFirstEraseBkgnd(TRUE),
 	m_bLogCommands(FALSE),
+	m_bSplitting(FALSE),
 	m_statusBar(m_tdiDefault)
 {
 	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
@@ -667,6 +668,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_ERASEBKGND()
 	ON_WM_HELPINFO()
 	ON_WM_INITMENUPOPUP()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
 	ON_WM_MEASUREITEM()
 	ON_WM_MOVE()
 	ON_WM_QUERYENDSESSION()
@@ -11122,6 +11126,34 @@ void CToDoListWnd::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemSt
 		return;
 	
 	CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
+}
+
+void CToDoListWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	CRect rSplitter;
+
+	if (GetFindTasksDialogSplitterRect(rSplitter) && rSplitter.PtInRect(point))
+	{
+		m_bSplitting = TRUE;
+		SetCapture();
+	}
+
+	CFrameWnd::OnLButtonDown(nFlags, point);
+}
+
+void CToDoListWnd::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	ReleaseCapture();
+
+	CFrameWnd::OnLButtonUp(nFlags, point);
+}
+
+void CToDoListWnd::OnMouseMove(UINT nFlags, CPoint point)
+{
+// 	if (m_bSplitting)
+// 		SetSplitterPos(IsSplitterVertical() ? point.x : point.y);
+
+	CFrameWnd::OnMouseMove(nFlags, point);
 }
 
 void CToDoListWnd::OnViewNextSelectedTask() 
