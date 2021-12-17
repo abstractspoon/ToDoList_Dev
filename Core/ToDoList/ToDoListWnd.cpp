@@ -10481,7 +10481,7 @@ void CToDoListWnd::OnUpdateGotoNexttask(CCmdUI* pCmdUI)
 }
 //------------------------------------------------------------------------
 
-BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
+BOOL CToDoListWnd::InitFindDialog()
 {
 	if (!m_dlgFindTasks.GetSafeHwnd())
 	{
@@ -10492,9 +10492,6 @@ BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
 
 		if (CThemed::IsAppThemed())
 			m_dlgFindTasks.SetUITheme(m_theme);
-
-		if (bShow)
-			m_dlgFindTasks.Show(bShow);
 	}
 
 	return TRUE;
@@ -10580,7 +10577,11 @@ void CToDoListWnd::OnFindTasks()
 					m_dlgFindTasks.DeleteResults(&tdc);
 			}
 		}
+
 		m_dlgFindTasks.Show();
+
+		if (m_dlgFindTasks.IsDocked())
+			Resize();
 	}
 	
 	m_bFindShowing = TRUE;

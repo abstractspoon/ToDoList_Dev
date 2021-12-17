@@ -643,7 +643,7 @@ protected:
 	BOOL InitFilterbar();
 	BOOL InitTimeTrackDlg();
 	BOOL InitTabCtrl();
-	BOOL InitFindDialog(BOOL bShow = FALSE);
+	BOOL InitFindDialog();
 	void InitGlobalStyles(CFilteredToDoCtrl& tdc);
 
 	BOOL CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertWhere, BOOL bEdit = TRUE, DWORD dwDependency = 0);
