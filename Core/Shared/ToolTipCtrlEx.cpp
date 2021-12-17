@@ -279,7 +279,7 @@ CPoint CToolTipCtrlEx::FitTooltipRectToScreen(const CRect& rTooltip) const
 	}
 	else if (rTooltip.left < rMonitor.left)
 	{
-		// It shouldn't be possible for the tooltip to off the left side
+		// It shouldn't be possible for the tooltip to be off the left side
 		// of the screen because we always place it to the right of the cursor
 		// but with a multi-monitor setup with different screen resolutions
 		// and the app window spanning two screens, Windows can tell us that
