@@ -161,6 +161,7 @@ protected:
 	afx_msg void OnItemActivated(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangedRulelist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangingResults(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnMove(int x, int y);
 	afx_msg void OnMoveRuleDown();
 	afx_msg void OnMoveRuleUp();
 	afx_msg void OnNewSearch();
@@ -170,7 +171,6 @@ protected:
 	afx_msg void OnSelchangeInclude();
 	afx_msg void OnSelectall();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnMove(int x, int y);
 	afx_msg void OnUndock();
 	afx_msg void OnUpdateDeleteRule(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateDeleteSearch(CCmdUI* pCmdUI);

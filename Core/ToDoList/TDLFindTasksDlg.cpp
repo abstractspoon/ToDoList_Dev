@@ -141,6 +141,7 @@ BEGIN_MESSAGE_MAP(CTDLFindTasksDlg, CRuntimeDlg)
 	ON_WM_LBUTTONDOWN()
 	ON_WM_LBUTTONDBLCLK()
 	ON_WM_LBUTTONUP()
+	ON_WM_MOVE()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SETCURSOR()
 	ON_WM_CAPTURECHANGED()
@@ -381,7 +382,7 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 	if (bIsDocked)
 		m_nLastDockedPos = nPos;
 
-	CWnd* pParent = AfxGetMainWnd();
+	CRect rect(rectAuto);
 	DWORD dwStyle = 0, dwExStyle = 0;
 
 	if (bIsDocked)
@@ -411,15 +412,44 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 		SetBordersDLU(3);
 
 		dwStyle = RTD_DEFSTYLE | WS_THICKFRAME;
+
+		if (!m_rUndocked.IsRectEmpty())
+		{
+			rect = m_rUndocked;
+			dwStyle &= ~DS_CENTER;
+		}
+
 		dwExStyle = RTD_DEFEXSTYLE;
 	}
 
-	return CRuntimeDlg::Create(_T("Find Tasks"), dwStyle, dwExStyle, rectAuto, pParent, IDC_STATIC);
+	return CRuntimeDlg::Create(_T("Find Tasks"), dwStyle, dwExStyle, rect, AfxGetMainWnd(), IDC_STATIC);
 }
 
 BOOL CTDLFindTasksDlg::Create()
 {
-	DM_POS nLastPos = CPreferences().GetProfileEnum(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
+	CPreferences prefs;
+	DM_POS nLastPos = prefs.GetProfileEnum(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
+
+	DWORD dwTopLeft = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("TopLeft"), -1);
+	DWORD dwBottomRight = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("BottomRight"), -1);
+
+	m_rUndocked.SetRectEmpty();
+
+	if ((dwBottomRight != -1) && (dwTopLeft != -1))
+	{
+		CRect rect;
+		rect.SetRect(CPoint(dwTopLeft), CPoint(dwBottomRight));
+
+		// ensure this intersects with the desktop by a decent amount
+		const int BORDER = 200;
+		rect.DeflateRect(BORDER, BORDER);
+
+		if (NULL != MonitorFromRect(rect, MONITOR_DEFAULTTONULL))
+		{
+			rect.InflateRect(BORDER, BORDER);
+			m_rUndocked = rect;
+		}
+	}
 
 	return Create(nLastPos);
 }
@@ -450,33 +480,6 @@ void CTDLFindTasksDlg::LoadSettings()
 	CheckIncludeOption(FI_PARENT, prefs.GetProfileInt(_T("FindTasks"), _T("IncludeParentTasks"), TRUE));
 	CheckIncludeOption(FI_FILTEREDOUT, prefs.GetProfileInt(_T("FindTasks"), _T("IncludeFilteredOutTasks"), TRUE));
 
-	DM_POS nPos = DMP_UNDOCKED, nLastPos = DMP_RIGHT;
-	DWORD dwTopLeft = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("TopLeft"), -1);
-	DWORD dwBottomRight = (DWORD)prefs.GetProfileInt(_T("FindTasks"), _T("BottomRight"), -1);
-
-	if ((dwBottomRight != -1) && (dwTopLeft != -1))
-	{
-		nPos = prefs.GetProfileEnum(_T("FindTasks"), _T("DockPos"), DMP_UNDOCKED);
-		nLastPos = prefs.GetProfileEnum(_T("FindTasks"), _T("LastDockPos"), DMP_RIGHT);
-
-		CRect rect(GET_X_LPARAM(dwTopLeft), GET_Y_LPARAM(dwTopLeft),
-				   GET_X_LPARAM(dwBottomRight), GET_Y_LPARAM(dwBottomRight));
-
-		// ensure this intersects with the desktop by a decent amount
-		int BORDER = 200;
-		rect.DeflateRect(BORDER, BORDER);
-
-		if (NULL != MonitorFromRect(rect, MONITOR_DEFAULTTONULL))
-		{
-			rect.InflateRect(BORDER, BORDER);
-			MoveWindow(rect);
-		}
-	}
-	else if (!IsDocked())
-	{
-		AutoFit();
-	}
-	
 	int nMinWidth = GetMinSize(DMP_LEFT).cx;
 	int nMinHeight = GetMinSize(DMP_BELOW).cy;
 
@@ -487,9 +490,9 @@ void CTDLFindTasksDlg::LoadSettings()
 	m_sizeDockedMax.cy = prefs.GetProfileInt(_T("FindTasks"), _T("DockedHeightMax"), nMinHeight);
 
 	// Backward compatibility
-	if ((m_sizeDocked.cx <= 0) || 
-		(m_sizeDockedMax.cx <= 0) || 
-		(m_sizeDocked.cy <= 0) || 
+	if ((m_sizeDocked.cx <= 0) ||
+		(m_sizeDockedMax.cx <= 0) ||
+		(m_sizeDocked.cy <= 0) ||
 		(m_sizeDockedMax.cy <= 0))
 	{
 		m_sizeDocked.cx = m_sizeDockedMax.cx = nMinWidth;
@@ -831,13 +834,7 @@ void CTDLFindTasksDlg::OnSize(UINT nType, int cx, int cy)
 void CTDLFindTasksDlg::OnMove(int x, int y)
 {
 	if (!IsDocked())
-	{
-		m_rUndocked.right = (x + m_rUndocked.Width());
-		m_rUndocked.bottom = (y + m_rUndocked.Height());
-
-		m_rUndocked.left = x;
-		m_rUndocked.top = y;
-	}
+		GetWindowRect(m_rUndocked);
 
 	CRuntimeDlg::OnMove(x, y);
 }
