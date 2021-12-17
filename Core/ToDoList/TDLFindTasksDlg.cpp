@@ -55,7 +55,6 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 	m_bInitializing(FALSE),
 	m_bAllTasklists(FALSE),
 	m_nDockPos(DMP_UNDOCKED),
-	m_nLastDockedPos(DMP_LEFT),
 	m_sizeDocked(0, 0), 
 	m_sizeDockedMax(0, 0),
 	m_rUndocked(0, 0, 0, 0)
@@ -65,9 +64,9 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 	
 	AddRCControl(_T("LTEXT"), _T(""), _T("F&or tasks matching the following rules:"), 0, 0, 0, 50, 287, 8, IDC_STATIC);
 	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 60, 370, 96, IDC_FINDLIST);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Apply as &Filter"), 0, 0, 0, 172, 65, 14, IDC_APPLYASFILTER);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Select &All"), 0, 0, 78, 172, 50, 14, IDC_SELECTALL);
-	AddRCControl(_T("LTEXT"), _T(""), _T("&Results:"), 0, 0, 133, 175, 240, 8, IDC_RESULTSLABEL);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Apply as &Filter"), 0, 0, 0, 176, 65, 14, IDC_APPLYASFILTER);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Select &All"), 0, 0, 78, 176, 50, 14, IDC_SELECTALL);
+	AddRCControl(_T("LTEXT"), _T(""), _T("&Results:"), 0, 0, 133, 179, 240, 8, IDC_RESULTSLABEL);
 	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 191, 370, 94, IDC_RESULTS);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 85, 3, 71, 121, IDC_SEARCHLIST);
 	AddRCControl(_T("LTEXT"), _T(""), _T("&Search:"), 0, 0, 0, 22, 120, 8, IDC_SEARCHLABEL);
@@ -378,9 +377,6 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 	}
 
 	m_nDockPos = nPos;
-
-	if (bIsDocked)
-		m_nLastDockedPos = nPos;
 
 	CRect rect(rectAuto);
 	DWORD dwStyle = 0, dwExStyle = 0;
@@ -1015,7 +1011,6 @@ void CTDLFindTasksDlg::SaveSettings()
 	prefs.WriteProfileInt(_T("FindTasks"), _T("TopLeft"), MAKELPARAM(m_rUndocked.left, m_rUndocked.top));
 	prefs.WriteProfileInt(_T("FindTasks"), _T("BottomRight"), MAKELPARAM(m_rUndocked.right, m_rUndocked.bottom));
  	prefs.WriteProfileInt(_T("FindTasks"), _T("DockPos"), m_nDockPos);
-	prefs.WriteProfileInt(_T("FindTasks"), _T("LastDockPos"), m_nLastDockedPos);
 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidth"), m_sizeDocked.cx);
 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedWidthMax"), m_sizeDockedMax.cx);
 	prefs.WriteProfileInt(_T("FindTasks"), _T("DockedHeight"), m_sizeDocked.cy);

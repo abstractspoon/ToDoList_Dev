@@ -105,7 +105,7 @@ protected:
 	BOOL m_bSplitting;
 	int m_nCurSel;
 	int	m_bAllTasklists;
-	DM_POS m_nDockPos, m_nLastDockedPos;
+	DM_POS m_nDockPos;
 
 	CEnString m_sResultsLabel;
 	CString m_sActiveSearch;
