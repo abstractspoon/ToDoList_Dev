@@ -88,6 +88,8 @@ void CCheckComboBox::OnDestroy()
 	// cleanup check state memory
 	DeleteAllCheckData();
 
+	m_tooltip.DestroyWindow();
+
 	CAutoComboBox::OnDestroy();
 }
 
@@ -781,7 +783,7 @@ void CCheckComboBox::EnableTooltip(BOOL bEnable)
 	}
 	else if (m_tooltip.GetSafeHwnd())
 	{
-		m_tooltip.DestroyToolTipCtrl();
+		m_tooltip.DestroyWindow();
 	}
 }
 

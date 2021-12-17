@@ -1431,7 +1431,7 @@ BOOL CRichEditBaseCtrl::EnableToolTips(BOOL bEnable)
 	
 	// else
 	if (!bEnable && m_tooltip.GetSafeHwnd())
-		return m_tooltip.DestroyToolTipCtrl();
+		return m_tooltip.DestroyWindow();
 	
 	return TRUE;
 }

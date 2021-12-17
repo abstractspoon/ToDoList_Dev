@@ -992,6 +992,8 @@ void CTDLFindTasksDlg::OnDestroy()
 {
 	SaveSettings();
 	DeleteAllResults();
+
+	m_tbHelper.Release();
 	
 	CRuntimeDlg::OnDestroy();
 }
