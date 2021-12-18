@@ -1082,7 +1082,7 @@ TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pPa
 
 				ctrl.ShowBuddy(pParent, bShowBuddy);
 
-				if (bWasShowingBuddy ^ bShowBuddy)
+				if (Misc::StateChanged(bWasShowingBuddy, bShowBuddy))
 					nRes = TDCCAUIRES_REPOSCTRLS;
 			}
 			else
