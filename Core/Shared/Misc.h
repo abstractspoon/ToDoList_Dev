@@ -190,7 +190,7 @@ namespace Misc
 	double Atof(const CString& sValue);
 	BOOL IsNumber(const CString& sValue);
 	BOOL IsSymbol(const CString& sValue);
-	BOOL StateChanged(BOOL b1, BOOL b2) { return ((b1 && !b2) || (!b1 && b2)); }
+	BOOL StateChanged(BOOL b1, BOOL b2);
 
 	CString FormatCost(double dCost, LPCTSTR szTrail = NULL);
 	CString Format(double dVal, int nDecPlaces = -1, LPCTSTR szTrail = NULL);
