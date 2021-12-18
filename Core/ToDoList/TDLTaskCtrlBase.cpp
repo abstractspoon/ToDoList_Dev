@@ -2887,6 +2887,7 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 						
 						// draw fill
 						int nPercent = m_calculator.GetTaskPercentDone(pTDI, pTDS);
+						nPercent = min(nPercent, 100);
 
 						rProgress.DeflateRect(1, 1);
 						rProgress.right = rProgress.left + MulDiv(rProgress.Width(), nPercent, 100);

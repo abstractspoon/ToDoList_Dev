@@ -98,8 +98,8 @@ protected:
 	const CToDoCtrlData& m_data;
 
 protected:
-	double GetPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	double GetWeightedPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	double GetAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	double GetWeightedAveragePercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits, double& dWeightedEstimate) const;
 	double GetStartDueDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckChildren, BOOL bDue, BOOL bEarliest) const;
 	int GetTaskLeafCount(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDone) const;

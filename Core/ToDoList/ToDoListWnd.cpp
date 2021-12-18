@@ -876,7 +876,7 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 BOOL CToDoListWnd::EnableLogging(BOOL bEnable)
 {
 	// Quick exit if state hasn't changed
-	if (!(bEnable ^ FileMisc::IsLoggingEnabled()))
+	if (!Misc::StateChanged(bEnable, FileMisc::IsLoggingEnabled()))
 		return TRUE;
 
 	BOOL bRes = FileMisc::EnableLogging(bEnable, _T("Abstractspoon"));

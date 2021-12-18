@@ -590,7 +590,7 @@ BOOL CTDLTimeTrackerDlg::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 	BOOL bIsTracking = pTTL->IsTracking();
 	DWORD dwIsTrackingTaskID = (bIsTracking ? pTTL->GetTrackedTaskID() : 0);
 
-	ASSERT((bWasTracking ^ bIsTracking) ||
+	ASSERT(Misc::StateChanged(bWasTracking, bIsTracking) ||
 			(bWasTracking && bIsTracking && (dwIsTrackingTaskID != dwWasTrackingTaskID)));
 
 	// If we've just started tracking, switch to that tasklist
