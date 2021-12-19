@@ -105,8 +105,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 
 const int BEVEL = 3; // DON'T SCALE
-const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
 const int MRU_MAX_ITEM_LEN = 128;
+
+const int BORDER = GraphicsMisc::ScaleByDPIFactor(3);
+const int SPLITTER_WIDTH = GraphicsMisc::ScaleByDPIFactor(6);
 
 const int QUICKFIND_HEIGHT = GraphicsMisc::ScaleByDPIFactor(200);
 const int QUICKFIND_VOFFSET = GraphicsMisc::ScaleByDPIFactor(1);
@@ -221,6 +223,7 @@ CToDoListWnd::CToDoListWnd()
 	m_nContextMenuID(0),
 	m_bFirstEraseBkgnd(TRUE),
 	m_bLogCommands(FALSE),
+	m_bSplitting(FALSE),
 	m_statusBar(m_tdiDefault)
 {
 	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
@@ -521,6 +524,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_RESETELAPSEDTIME, OnTimeTrackerResetElapsedTime)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_LOADDELAYEDTASKLIST, OnTimeTrackerLoadDelayedTasklist)
 	ON_REGISTERED_MESSAGE(WM_SESSIONSTATUS_CHANGE, OnSessionStatusChange)
+	ON_REGISTERED_MESSAGE(WM_FTD_DOCKCHANGE, OnNotifyFindTasksDockChange)
 	ON_UPDATE_COMMAND_UI(ID_ADDTIMETOLOGFILE, OnUpdateAddtimetologfile)
 	ON_UPDATE_COMMAND_UI(ID_ADDTIMETOLOGFILE, OnUpdateAddtimetologfile)
 	ON_UPDATE_COMMAND_UI(ID_ARCHIVE_COMPLETEDTASKS, OnUpdateArchiveCompletedtasks)
@@ -654,6 +658,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI_RANGE(ID_VIEW_EXPANDDUE, ID_VIEW_COLLAPSESTARTED, OnUpdateViewExpandTasks)
 	ON_WM_ACTIVATE()
 	ON_WM_ACTIVATEAPP()
+	ON_WM_CAPTURECHANGED()
 	ON_WM_CONTEXTMENU()
 	ON_WM_COPYDATA()
 	ON_WM_CREATE()
@@ -664,10 +669,14 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_ERASEBKGND()
 	ON_WM_HELPINFO()
 	ON_WM_INITMENUPOPUP()
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
 	ON_WM_MEASUREITEM()
 	ON_WM_MOVE()
 	ON_WM_QUERYENDSESSION()
 	ON_WM_QUERYOPEN()
+	ON_WM_SETCURSOR()
 	ON_WM_SIZE()
 	ON_WM_SETTINGCHANGE()
 	ON_WM_SYSCOLORCHANGE()
@@ -2282,11 +2291,9 @@ void CToDoListWnd::SaveSettings()
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowStatusBar"), m_bShowStatusBar);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowTasklistBar"), m_bShowTasklistBar);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowTreeListBar"), m_bShowTreeListBar);
-	
-	prefs.WriteProfileString(SETTINGS_KEY, _T("TaskViewImageExt"), m_sTaskViewImageExt);
+	prefs.WriteProfileInt(SETTINGS_KEY, _T("FindTasksVisible"), m_bFindShowing && m_dlgFindTasks.GetSafeHwnd() && m_dlgFindTasks.IsWindowVisible());
 
-	if (m_dlgFindTasks.GetSafeHwnd())
-		prefs.WriteProfileInt(SETTINGS_KEY, _T("FindTasksVisible"), m_bFindShowing && m_dlgFindTasks.IsWindowVisible());
+	prefs.WriteProfileString(SETTINGS_KEY, _T("TaskViewImageExt"), m_sTaskViewImageExt);
 	
 	if (Prefs().GetAddFilesToMRU())
 		m_mruList.WriteList(prefs, TRUE);
@@ -2890,6 +2897,9 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	CDialogHelper::ExcludeChild(&m_filterBar, pDC);
 	CDialogHelper::ExcludeChild(&GetToDoCtrl(), pDC);
 
+	if (m_dlgFindTasks.IsDocked())
+		CDialogHelper::ExcludeChild(&m_dlgFindTasks, pDC);
+
 	// Fill client background
 	COLORREF crBkgnd(CThemed::IsAppThemed() ? m_theme.crAppBackLight : GetSysColor(COLOR_3DFACE));
 	
@@ -2952,6 +2962,14 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 		}
 	}
 
+	// Find Tasks dialog splitter if docked
+	CRect rSplitter;
+
+	if (GetFindTasksDialogSplitterRect(rSplitter))
+	{
+		GraphicsMisc::DrawSplitBar(pDC, rSplitter, m_theme.crAppBackDark, FALSE);
+	}
+
 	// The CSysImageList class seems to not initialize properly unless the 
 	// main window is visible. so in the case of starting hidden
 	// or starting minimized we must wait until we become visible before
@@ -2960,6 +2978,34 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 	{
 		m_bFirstEraseBkgnd = FALSE;
 		PostMessage(WM_UPDATEUDTSINTOOLBAR);
+	}
+
+	return TRUE;
+}
+
+BOOL CToDoListWnd::GetFindTasksDialogSplitterRect(CRect& rSplitter) const
+{
+	if (!m_dlgFindTasks.IsDocked())
+		return FALSE;
+
+	rSplitter = GetChildRect(&m_dlgFindTasks);
+
+	switch (m_dlgFindTasks.GetDockPosition())
+	{
+	case DMP_LEFT:
+		rSplitter.left = rSplitter.right;
+		rSplitter.right += SPLITTER_WIDTH;
+		break;
+
+	case DMP_RIGHT:
+		rSplitter.right = rSplitter.left;
+		rSplitter.left -= SPLITTER_WIDTH;
+		break;
+
+	case DMP_BELOW:
+		rSplitter.bottom = rSplitter.top;
+		rSplitter.top -= SPLITTER_WIDTH;
+		break;
 	}
 
 	return TRUE;
@@ -3238,30 +3284,6 @@ void CToDoListWnd::MinimizeToTray()
 	// hide main window
 	Gui::MinToTray(*this); // courtesy of floyd
 	m_bVisible = FALSE;
-	
-	// hide find dialog
-	ShowFindDialog(FALSE);
-}
-
-void CToDoListWnd::ShowFindDialog(BOOL bShow)
-{
-	if (bShow)
-	{
-		if (m_bVisible && m_dlgFindTasks.GetSafeHwnd() && IsWindowVisible())
-			m_dlgFindTasks.Show(TRUE);
-	}
-	else // hide
-	{
-		if (m_dlgFindTasks.GetSafeHwnd())
-		{
-			m_bFindShowing = m_dlgFindTasks.IsWindowVisible();
-			m_dlgFindTasks.Show(FALSE);
-		}
-		else
-		{
-			m_bFindShowing = FALSE;
-		}
-	}
 }
 
 void CToDoListWnd::OnTrayiconClose() 
@@ -6093,40 +6115,13 @@ BOOL CToDoListWnd::CalcToDoCtrlRect(CRect& rect, int cx, int cy, BOOL bMaximized
 	if (rTaskList.top > 0)
 		rTaskList.top += BEVEL;
 	
-	// resize tabctrl
-	CDeferWndMove dwm(0); // dummy
-	
-	CPoint ptOrg(0, rTaskList.top);
-	int nTabHeight = ReposTabBar(dwm, ptOrg, cx, TRUE);
-	
-	if (nTabHeight)
-		rTaskList.top += nTabHeight + 1; // hide the bottom of the tab ctrl
-	
-	// filter controls
-	int nInset = (CThemed().IsNonClientThemed() ? BORDER : BEVEL);
-	int nFilterWidth = cx - 2 * nInset;
-	int nFilterHeight = m_bShowFilterBar ? m_filterBar.CalcHeight(nFilterWidth) : 0;
-	
-	if (nFilterHeight)
-		rTaskList.top += nFilterHeight;// + 4;
-	
-	// statusbar
-	if (m_bShowStatusBar)
-	{
-		CRect rStatus;
-		m_statusBar.GetWindowRect(rStatus);
-		ScreenToClient(rStatus);
-		rTaskList.bottom = rStatus.top - BORDER;
-	}
-	else
-	{
-		rTaskList.bottom = cy - BORDER;
-	}
-	
-	// shrink slightly so that edit controls do not merge with window border
-	rTaskList.DeflateRect(nInset, nInset, nInset, nInset);
+	ReposStatusBar(NULL, rTaskList);
+	ReposFindTasksDialog(NULL, rTaskList);
+	ReposTabBar(NULL, rTaskList);
+	ReposFilterBar(NULL, rTaskList);
+	ReposTaskList(NULL, rTaskList);
+
 	rect = rTaskList;
-	
 	return TRUE;
 }
 
@@ -6164,32 +6159,52 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 	
 	// resize in one go
 	CDlgUnits dlu(this);
-	CDeferWndMove dwm(6);
+	CDeferWndMove dwm(10);
 	CRect rTaskList(0, 0, cx - BEVEL, cy);
 	
+	ReposToolbars(&dwm, rTaskList);
+	ReposStatusBar(&dwm, rTaskList);	
+	ReposFindTasksDialog(&dwm, rTaskList);
+	ReposTabBar(&dwm, rTaskList);
+	ReposFilterBar(&dwm, rTaskList);
+	ReposTaskList(&dwm, rTaskList);
+	
+#ifdef _DEBUG
+	CRect rect;
+	CalcToDoCtrlRect(rect, cx, cy, IsZoomed());
+
+	if (rect != rTaskList)
+		ASSERT(0);
+#endif
+
+	Invalidate(TRUE);
+}
+
+void CToDoListWnd::ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable)
+{
 	// toolbar
 	if (m_bShowingMainToolbar) // showing toolbar
-		rTaskList.top += m_toolbarMain.Resize(cx, rTaskList.TopLeft());
+		rAvailable.top += m_toolbarMain.Resize(rAvailable.Width(), rAvailable.TopLeft());
 
 	// ensure m_cbQuickFind is positioned correctly
 	int nPos = m_toolbarMain.CommandToIndex(ID_EDIT_FINDTASKS) + 2;
-	
+
 	CRect rNewPos;
 	m_toolbarMain.GetItemRect(nPos, rNewPos);
 	m_toolbarMain.ClientToScreen(rNewPos);
-	
+
 	// check if it needs to be moved
 	CRect rPrevPos;
 	m_cbQuickFind.CWnd::GetWindowRect(rPrevPos);
-	
+
 	if (rNewPos.TopLeft() != rPrevPos.TopLeft())
 	{
 		m_toolbarMain.ScreenToClient(rNewPos);
-		
+
 		rNewPos.top += QUICKFIND_VOFFSET;
 		rNewPos.bottom = rNewPos.top + QUICKFIND_HEIGHT;
 		rNewPos.OffsetRect(QUICKFIND_HOFFSET, 0);
-		
+
 		m_cbQuickFind.MoveWindow(rNewPos);
 	}
 
@@ -6206,7 +6221,7 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			if (!m_toolbarMain.LastItemIsSeparator())
 				nMainLen += m_nToolbarEndSepWidth;
 
-			bSeparateLine = ((nMainLen + nCustLen) > cx);
+			bSeparateLine = ((nMainLen + nCustLen) > rAvailable.Width());
 		}
 
 		if (bSeparateLine)
@@ -6214,7 +6229,7 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			if (m_toolbarMain.LastItemIsSeparator())
 				m_toolbarMain.DeleteLastItem();
 
-			rTaskList.top += m_toolbarCustom.Resize(cx, CPoint(0, rTaskList.top));
+			rAvailable.top += m_toolbarCustom.Resize(rAvailable.Width(), CPoint(rAvailable.left, rAvailable.top));
 		}
 		else
 		{
@@ -6224,78 +6239,159 @@ void CToDoListWnd::Resize(int cx, int cy, BOOL bMaximized)
 			int nMainLen = m_toolbarMain.GetMinReqLength();
 
 			m_toolbarMain.Resize(nMainLen);
-			m_toolbarCustom.Resize(cx - nMainLen, CPoint(nMainLen, 0));
+			m_toolbarCustom.Resize(rAvailable.Width() - nMainLen, CPoint(nMainLen, 0));
 		}
 	}
 
 	// Bevel below toolbars
-	if (rTaskList.top > 0)
-		rTaskList.top += BEVEL;
+	if (rAvailable.top > 0)
+		rAvailable.top += BEVEL;
+}
 
-	// resize tabctrl
-	CPoint ptOrg(0, rTaskList.top);
-	int nTabHeight = ReposTabBar(dwm, ptOrg, cx);
-	
-	if (nTabHeight)
-		rTaskList.top += nTabHeight + 1; // hide the bottom of the tab ctrl
-	
-	// filter controls
-	int nInset = (CThemed().IsNonClientThemed() ? BORDER : BEVEL);
-	int nFilterWidth = cx - 2 * nInset;
+void CToDoListWnd::ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable)
+{
+	if (m_dlgFindTasks.IsDocked())
+	{
+		CRect rFindTasks(rAvailable);
+
+		DM_POS nPos = m_dlgFindTasks.GetDockPosition();
+		int nDim = m_dlgFindTasks.GetDockedDimension(nPos, IsZoomed());
+
+		switch (nPos)
+		{
+		case DMP_LEFT:
+			rFindTasks.right = rFindTasks.left + nDim;
+			rAvailable.left += nDim;
+			rAvailable.left += SPLITTER_WIDTH;
+			break;
+
+		case DMP_RIGHT:
+			rFindTasks.left = rFindTasks.right - nDim;
+			rAvailable.right -= nDim;
+			rAvailable.right -= SPLITTER_WIDTH;
+			break;
+
+		case DMP_BELOW:
+			rFindTasks.top = rFindTasks.bottom - nDim;
+			rAvailable.bottom -= nDim;
+			rAvailable.bottom -= SPLITTER_WIDTH;
+			break;
+		}
+
+		if (pDwm)
+			pDwm->MoveWindow(&m_dlgFindTasks, rFindTasks);
+	}
+}
+
+void CToDoListWnd::ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable)
+{
+	CRect rFilter(rAvailable);
+
+	int nInset = CalcEditFieldInset();
+	int nFilterWidth = rAvailable.Width() - 2 * nInset;
 	int nFilterHeight = m_bShowFilterBar ? m_filterBar.CalcHeight(nFilterWidth) : 0;
-	
-	dwm.MoveWindow(&m_filterBar, nInset, rTaskList.top, nFilterWidth, nFilterHeight);
-	
-	if (nFilterHeight)
-		rTaskList.top += nFilterHeight;// + 4;
-	
-	// statusbar has already been automatically resized unless it's invisible
-	CRect rStatus(0, cy, cx, cy);
+
+	rAvailable.top += nFilterHeight;
+	rFilter.bottom = rAvailable.top;
+	rFilter.left += nInset;
+
+	if (pDwm)
+	{
+		pDwm->MoveWindow(&m_filterBar, rFilter);
+		m_filterBar.Invalidate();
+	}
+}
+
+int CToDoListWnd::CalcEditFieldInset() const
+{
+	if (m_dlgFindTasks.GetDockPosition() == DMP_LEFT)
+		return 0;
+
+	return (CThemed::IsNonClientThemed() ? BORDER : BEVEL);
+}
+
+void CToDoListWnd::ReposStatusBar(CDeferWndMove* pDwm, CRect& rAvailable)
+{
+	// If visible, the statusbar has already been automatically resized
+	CRect rStatus(rAvailable);
 
 	if (m_bShowStatusBar)
 	{
 		m_statusBar.GetWindowRect(rStatus);
 		ScreenToClient(rStatus);
+
+		rAvailable.bottom = rStatus.top - BORDER;
 	}
 	else
 	{
-		dwm.MoveWindow(&m_statusBar, rStatus, FALSE);
+		if (pDwm)
+			pDwm->MoveWindow(&m_statusBar, rStatus, FALSE);
+
+		rAvailable.bottom = rStatus.bottom - BORDER;
 	}
-	
+}
+
+void CToDoListWnd::ReposTabBar(CDeferWndMove* pDwm, CRect& rAvailable)
+{
+	CRect rTabs(rAvailable.left, 0, rAvailable.Width(), 0);
+	m_tabCtrl.AdjustRect(TRUE, rTabs);
+
+	int nTabHeight = rTabs.Height() - 4;
+
+	rTabs = rAvailable;
+//	rTabs.right = nWidth + 1;
+	rTabs.bottom = rTabs.top + nTabHeight;
+//	rTabs.OffsetRect(0, rAvailable.y - rTabs.top); // add a pixel between tabbar and toolbar
+
+	BOOL bNeedTabCtrl = WantTasklistTabbarVisible();
+
+	if (bNeedTabCtrl)
+		rAvailable.top += rTabs.Height();
+
+	if (pDwm)
+	{
+		pDwm->MoveWindow(&m_tabCtrl, rTabs);
+
+		// hide and disable tabctrl if not needed
+		m_tabCtrl.ShowWindow(bNeedTabCtrl ? SW_SHOW : SW_HIDE);
+		m_tabCtrl.EnableWindow(bNeedTabCtrl);
+	}
+}
+
+void CToDoListWnd::ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable)
+{
 	// finally the active todoctrl
 	if (GetTDCCount())
 	{
-		if (m_bShowStatusBar)
-			rTaskList.bottom = rStatus.top - BORDER;
-		else
-			rTaskList.bottom = rStatus.bottom - BORDER;
-		
 		// shrink slightly so that edit controls do not merge with window border
-		rTaskList.DeflateRect(nInset, nInset, nInset, nInset);
+		int nIndent = (CThemed::IsNonClientThemed() ? BORDER : BEVEL);
 
-		// Redraw the tasklist manually if its height has changed
-		CFilteredToDoCtrl& tdc = GetToDoCtrl();
-		BOOL bHeightChange = (rTaskList.Height() != CDialogHelper::GetChildHeight(&tdc));
-
-		dwm.MoveWindow(&tdc, rTaskList, !bHeightChange);
-
-		if (bHeightChange)
+		switch (m_dlgFindTasks.GetDockPosition())
 		{
-			Invalidate();
+		case DMP_LEFT:
+			rAvailable.DeflateRect(0, nIndent, nIndent, nIndent);
+			break;
 
-			tdc.Invalidate();
+		case DMP_RIGHT:
+			rAvailable.DeflateRect(nIndent, nIndent, 0, nIndent);
+			break;
 
-			if (nFilterHeight)
-				m_filterBar.Invalidate();
+		case DMP_BELOW:
+			rAvailable.DeflateRect(nIndent, nIndent, nIndent, 0);
+			break;
+
+		case DMP_UNDOCKED:
+			rAvailable.DeflateRect(nIndent, nIndent, nIndent, nIndent);
+			break;
 		}
 
-#ifdef _DEBUG
-		CRect rect;
-		CalcToDoCtrlRect(rect, cx, cy, IsZoomed());
+		if (pDwm)
+		{
+			CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-		if (rect != rTaskList)
-			ASSERT(0);
-#endif
+			pDwm->MoveWindow(&tdc, rAvailable, FALSE);
+			tdc.Invalidate();
+		}
 	}
 }
 
@@ -6308,31 +6404,6 @@ BOOL CToDoListWnd::WantTasklistTabbarVisible() const
 		return FALSE;
 
 	return ((GetTDCCount() > 1) || !Prefs().GetAutoHideTabbar()); 
-}
-
-int CToDoListWnd::ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly)
-{
-	CRect rTabs(0, 0, nWidth, 0);
-	m_tabCtrl.AdjustRect(TRUE, rTabs);
-	int nTabHeight = rTabs.Height() - 4;
-	
-	rTabs = dwm.OffsetCtrl(this, IDC_TABCONTROL); // not actually a move
-	rTabs.right = nWidth + 1;
-	rTabs.bottom = rTabs.top + nTabHeight;
-	rTabs.OffsetRect(0, ptOrg.y - rTabs.top); // add a pixel between tabbar and toolbar
-	
-	BOOL bNeedTabCtrl = WantTasklistTabbarVisible();
-	
-	if (!bCalcOnly)
-	{
-		dwm.MoveWindow(&m_tabCtrl, rTabs);
-		
-		// hide and disable tabctrl if not needed
-		m_tabCtrl.ShowWindow(bNeedTabCtrl ? SW_SHOW : SW_HIDE);
-		m_tabCtrl.EnableWindow(bNeedTabCtrl);
-	}
-	
-	return bNeedTabCtrl ? rTabs.Height() : 0;
 }
 
 void CToDoListWnd::OnPrint() 
@@ -8753,7 +8824,7 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	
 	if (bWasVisible)
 	{
-		if (m_dlgFindTasks.GetSafeHwnd())
+		if (m_dlgFindTasks.GetSafeHwnd() && !m_dlgFindTasks.IsDocked())
 			m_dlgFindTasks.ShowWindow(SW_HIDE);
 
 		ShowWindow(SW_HIDE);
@@ -10384,23 +10455,79 @@ void CToDoListWnd::OnUpdateGotoNexttask(CCmdUI* pCmdUI)
 }
 //------------------------------------------------------------------------
 
-BOOL CToDoListWnd::InitFindDialog(BOOL bShow)
+BOOL CToDoListWnd::InitFindDialog()
 {
 	if (!m_dlgFindTasks.GetSafeHwnd())
 	{
 		UpdateFindDialogActiveTasklist();
 		
-		if (!m_dlgFindTasks.Create(this))
+		if (!m_dlgFindTasks.Create())
 			return FALSE;
 
 		if (CThemed::IsAppThemed())
 			m_dlgFindTasks.SetUITheme(m_theme);
-
-		if (bShow)
-			m_dlgFindTasks.Show(bShow);
 	}
 
 	return TRUE;
+}
+
+LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
+{
+	// Modify our size to accept or release the 
+	// space needed to dock the find tasks dialog
+	if (!IsZoomed())
+	{
+		DM_POS nOldPos = (DM_POS)wp;
+		DM_POS nNewPos = (DM_POS)lp;
+
+		// Switching from left to right and vice versa is a
+		// special case because it requires no size change
+		if (((nOldPos == DMP_LEFT) && (nNewPos == DMP_RIGHT)) ||
+			((nOldPos == DMP_RIGHT) && (nNewPos == DMP_LEFT)))
+		{
+			// No change
+		}
+		else
+		{
+			CRect rOldWindow;
+			GetWindowRect(rOldWindow);
+
+			CRect rNewWindow(rOldWindow);
+
+			// Release old space
+			if (nOldPos != DMP_UNDOCKED)
+			{
+				int nOldDim = m_dlgFindTasks.GetDockedDimension(nOldPos, FALSE);
+
+				switch (nOldPos)
+				{
+				case DMP_LEFT:	rNewWindow.left		+= nOldDim;	break;
+				case DMP_RIGHT:	rNewWindow.right	-= nOldDim;	break;
+				case DMP_BELOW:	rNewWindow.bottom	-= nOldDim;	break;
+				}
+			}
+
+			// Add new space
+			if (nNewPos != DMP_UNDOCKED)
+			{
+				int nNewDim = m_dlgFindTasks.GetDockedDimension(nNewPos, FALSE);
+
+				switch (nNewPos)
+				{
+				case DMP_LEFT:	rNewWindow.left		-= nNewDim;	break;
+				case DMP_RIGHT:	rNewWindow.right	+= nNewDim;	break;
+				case DMP_BELOW:	rNewWindow.bottom	+= nNewDim;	break;
+				}
+			}
+
+			if (rNewWindow != rOldWindow)
+				MoveWindow(rNewWindow);
+		}
+	}
+
+	Resize(); // Always
+
+	return 0L;
 }
 
 void CToDoListWnd::OnFindTasks() 
@@ -10424,7 +10551,11 @@ void CToDoListWnd::OnFindTasks()
 					m_dlgFindTasks.DeleteResults(&tdc);
 			}
 		}
+
 		m_dlgFindTasks.Show();
+
+		if (m_dlgFindTasks.IsDocked())
+			Resize();
 	}
 	
 	m_bFindShowing = TRUE;
@@ -10471,13 +10602,19 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 					continue;
 			}
 			
-			CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
-			CHoldRedraw hr(m_bFindShowing ? m_dlgFindTasks.GetSafeHwnd() : NULL);
-
+			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
 			CResultArray aResults;
 			
 			if (tdc.FindTasks(params, aResults))
 			{
+				// Eliminate flicker
+				HWND hwndHold = NULL;
+
+				if (IsWindowVisible() && !IsIconic() && m_dlgFindTasks.IsWindowVisible())
+					hwndHold = m_dlgFindTasks.GetSafeHwnd();
+
+				CHoldRedraw hr(hwndHold);
+
 				// use tasklist title from tabctrl
 				CString sTitle = m_mgrToDoCtrls.GetTabItemText(nCtrl);
 				
@@ -10954,6 +11091,90 @@ void CToDoListWnd::OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemSt
 		return;
 	
 	CFrameWnd::OnMeasureItem(nIDCtl, lpMeasureItemStruct);
+}
+
+void CToDoListWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	CRect rSplitter;
+
+	if (GetFindTasksDialogSplitterRect(rSplitter) && rSplitter.PtInRect(point))
+	{
+		m_bSplitting = TRUE;
+		SetCapture();
+	}
+
+	CFrameWnd::OnLButtonDown(nFlags, point);
+}
+
+void CToDoListWnd::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	ReleaseCapture();
+
+	CFrameWnd::OnLButtonUp(nFlags, point);
+}
+
+void CToDoListWnd::OnCaptureChanged(CWnd* pWnd)
+{
+	m_bSplitting = FALSE;
+
+	CFrameWnd::OnCaptureChanged(pWnd);
+}
+
+void CToDoListWnd::OnMouseMove(UINT nFlags, CPoint point)
+{
+	if (m_bSplitting)
+	{
+		ASSERT(m_dlgFindTasks.IsDocked());
+
+		CRect rOld = GetChildRect(&m_dlgFindTasks), rNew(rOld);
+
+		switch (m_dlgFindTasks.GetDockPosition())
+		{
+		case DMP_LEFT:
+			rNew.right = (point.x - (SPLITTER_WIDTH / 2));
+			break;
+
+		case DMP_RIGHT:
+			rNew.left = (point.x + (SPLITTER_WIDTH / 2));
+			break;
+
+		case DMP_BELOW:
+			rNew.top = (point.y + (SPLITTER_WIDTH / 2));
+			break;
+		}
+
+		if (rNew != rOld)
+		{
+			m_dlgFindTasks.MoveWindow(rNew);
+			m_dlgFindTasks.UpdateWindow();
+
+			Resize();
+		}
+	}
+
+	CFrameWnd::OnMouseMove(nFlags, point);
+}
+
+BOOL CToDoListWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
+	CRect rSplitter;
+
+	if (GetFindTasksDialogSplitterRect(rSplitter))
+	{
+		CPoint ptCursor(GetCurrentMessage()->pt);
+		ScreenToClient(&ptCursor);
+
+		if (rSplitter.PtInRect(ptCursor))
+		{
+			UINT nIDCursor = ((m_dlgFindTasks.GetDockPosition() == DMP_BELOW) ? AFX_IDC_VSPLITBAR : AFX_IDC_HSPLITBAR);
+			::SetCursor(AfxGetApp()->LoadCursor(nIDCursor));
+
+			return TRUE;
+		}
+	}
+
+	// else
+	return CFrameWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
 void CToDoListWnd::OnViewNextSelectedTask() 

@@ -66,14 +66,13 @@ protected:
 	BOOL m_bGradient, m_bGlass;
 	CUIntArray m_aRowHeights;
 	
-	// Operations
-public:
-	
+protected:
 	// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CEnToolBar)
 	//}}AFX_VIRTUAL
-	
+	virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
+
 	// Generated message map functions
 protected:
 	//{{AFX_MSG(CEnToolBar)

@@ -167,6 +167,7 @@ protected:
 	BOOL m_bIgnoreResize;
 	BOOL m_bFirstEraseBkgnd;
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
+	BOOL m_bSplitting;
 	
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
@@ -240,6 +241,10 @@ protected:
 	afx_msg void OnFileOpenarchive();
 	afx_msg void OnGotoNexttask();
 	afx_msg void OnGotoPrevtask();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg void OnMoveSelectTaskDependencies();
 	afx_msg void OnMoveSelectTaskDependents();
@@ -357,6 +362,7 @@ protected:
 #endif
 	afx_msg void OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized);
 	afx_msg BOOL OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct);
+	afx_msg void OnCaptureChanged(CWnd* pWnd);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg BOOL OnOpenRecentFile(UINT nID);
@@ -416,6 +422,7 @@ protected:
 	afx_msg LRESULT OnToDoListRestore(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListShowWindow(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnNotifyReminderModified(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnClose(WPARAM /*wp*/, LPARAM bForUpdate);
 	afx_msg void OnAbout();
 	afx_msg void OnArchiveCompletedtasks();
@@ -636,7 +643,7 @@ protected:
 	BOOL InitFilterbar();
 	BOOL InitTimeTrackDlg();
 	BOOL InitTabCtrl();
-	BOOL InitFindDialog(BOOL bShow = FALSE);
+	BOOL InitFindDialog();
 	void InitGlobalStyles(CFilteredToDoCtrl& tdc);
 
 	BOOL CreateNewTask(const CString& sTitle, TDC_INSERTWHERE nInsertWhere, BOOL bEdit = TRUE, DWORD dwDependency = 0);
@@ -693,11 +700,18 @@ protected:
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
 	BOOL CalcToDoCtrlRect(CRect& rect, int cx = 0, int cy = 0, BOOL bMaximized = FALSE);
-	int ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly = FALSE);
 	BOOL GetFilterBarRect(CRect& rect) const;
 	void CheckResizeFilterBar();
+	BOOL GetFindTasksDialogSplitterRect(CRect& rSplitter) const;
 
-	void ShowFindDialog(BOOL bShow = TRUE);
+//	int ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly = FALSE);
+	void ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposStatusBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposTabBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable);
+	void ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable);
+
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
 	void UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pCtrl);
 	
@@ -779,6 +793,7 @@ protected:
 	void SaveCurrentFocus(HWND hwndFocus = NULL);
 	void PostAppRestoreFocus(HWND hwndFocus = NULL);
 	void UpdateTreeAndCommentsFonts();
+	int CalcEditFieldInset() const;
 
 	static UINT MapNewTaskPos(PUIP_NEWTASKPOS nPos, BOOL bSubtask);
 	static void HandleImportTasklistError(IIMPORTEXPORT_RESULT nErr, const CString& sImportPath, BOOL bFromClipboard, BOOL bAnyTasksSucceeded);

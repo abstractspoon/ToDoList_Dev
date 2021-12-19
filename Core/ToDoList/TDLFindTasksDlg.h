@@ -10,10 +10,9 @@
 #include "tdlfindresultslistctrl.h"
 #include "tdlfilteroptioncombobox.h"
 
-#include "..\shared\dockmanager.h"
 #include "..\shared\entoolbar.h"
 #include "..\shared\toolbarhelper.h"
-#include "..\shared\dialoghelper.h"
+#include "..\shared\runtimedlg.h"
 #include "..\shared\wndprompt.h"
 #include "..\shared\icon.h"
 #include "..\shared\SizeGrip.h"
@@ -24,17 +23,32 @@
 
 class CPreferences;
 
+//////////////////////////////////////////////////////////////////////
+
+enum DM_POS
+{
+	DMP_UNDOCKED = -1,
+	DMP_LEFT,
+	DMP_RIGHT,
+	DMP_BELOW,
+};
+
+//////////////////////////////////////////////////////////////////////
+
+// wparam = Old 'DM_POS', lParam = New 'DM_POS'
+const UINT WM_FTD_DOCKCHANGE	= ::RegisterWindowMessage(_T("WM_FTD_DOCKCHANGE"));
+
 /////////////////////////////////////////////////////////////////////////////
 // CTDLFindTasksDlg dialog
 
-class CTDLFindTasksDlg : public CDialog, protected CDialogHelper
+class CTDLFindTasksDlg : public CRuntimeDlg
 {
 // Construction
 public:
-	CTDLFindTasksDlg(CWnd* pParent = NULL);   // standard constructor
+	CTDLFindTasksDlg();   // standard constructor
 	~CTDLFindTasksDlg();
 
-	BOOL Create(CWnd* pParent, BOOL bDockable = TRUE);
+	BOOL Create();
 	BOOL Show(BOOL bShow = TRUE);
 	void RefreshSearch();
 
@@ -67,29 +81,31 @@ public:
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 	
 	void SetUITheme(const CUIThemeFile& theme);
-	BOOL IsDocked() const { return m_dockMgr.IsDocked(); }
+
+	BOOL IsDocked() const { return IsDocked(m_nDockPos); }
+	DM_POS GetDockPosition() const { return m_nDockPos; }
+	int GetDockedDimension(BOOL bMaximized) const;
+	int GetDockedDimension(DM_POS nPos, BOOL bMaximized) const;
 
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLFindTasksDlg)
-	enum { IDD = IDD_FINDTASKS_DIALOG };
 	//}}AFX_DATA
 	CCheckComboBox m_cbInclude;
-	CComboBox m_cbSearches;
+	CComboBox m_cbSearches, m_cbTasklists;
 	CTDLFindTaskExpressionListCtrl m_lcFindSetup;
 	CTDLFindResultsListCtrl m_lcResults;
 	CEnToolBar m_toolbar;
 	CSizeGrip m_sbGrip;
 
 	CWndPromptManager m_mgrPrompts;
-	CDockManager m_dockMgr;
 	CToolbarHelper m_tbHelper;
 
-	BOOL m_bDockable;
 	BOOL m_bInitializing;
 	BOOL m_bSplitting;
 	int m_nCurSel;
 	int	m_bAllTasklists;
+	DM_POS m_nDockPos;
 
 	CEnString m_sResultsLabel;
 	CString m_sActiveSearch;
@@ -101,23 +117,25 @@ protected:
 	CUIThemeFile m_theme;
 	CBrush m_brBkgnd;
 	CIcon m_icon;
+	CSize m_sizeDocked, m_sizeDockedMax;
+	CRect m_rUndocked;
 
 // Overrides
+protected:
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLFindTasksDlg)
-	public:
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 	virtual void OnCancel();
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
+
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
 	int DoModal() { return -1; } // not for public use
-	virtual BOOL OnInitDialog();
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLFindTasksDlg)
@@ -143,6 +161,7 @@ protected:
 	afx_msg void OnItemActivated(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangedRulelist(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnItemchangingResults(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnMove(int x, int y);
 	afx_msg void OnMoveRuleDown();
 	afx_msg void OnMoveRuleUp();
 	afx_msg void OnNewSearch();
@@ -162,7 +181,6 @@ protected:
 	afx_msg void OnUpdateMoveRuleUp(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSaveSearch(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateUndock(CCmdUI* pCmdUI);
-	afx_msg LRESULT OnNotifyDockChange(WPARAM wp, LPARAM lp);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
@@ -171,19 +189,22 @@ protected:
 	afx_msg void OnCaptureChanged(CWnd* pWnd);
 
 protected:
-	void OnSaveSearch(BOOL bNotifyParent); // pseudo-handler
+	// pseudo-handler
+	void OnSaveSearch(BOOL bNotifyParent); 
+	void OnChangeDock(DM_POS nNewPos);
 
+	BOOL Create(DM_POS nPos);
 	void SaveSettings();
 	void ResizeDlg(BOOL bOrientationChange, int cx = 0, int cy = 0);
 	void LoadSettings();
-	CSize GetMinDockedSize(DM_POS nPos);
+	CSize GetMinSize(DM_POS nPos);
 	int GetNextResult(int nItem, BOOL bDown);
 	void SelectItem(int nItem);
 	int GetSelectedItem();
 	CString GetCurrentSearch();
 	BOOL InitializeToolbar();
 	void EnableApplyAsFilterButton();
-	void BuildOptionCombo();
+	void BuildOptionCombos();
 
 	enum FIND_INCLUDE
 	{ 
@@ -205,6 +226,9 @@ protected:
 	BOOL GetSplitterRect(CRect& rSplitter, int nSplitPos) const;
 	BOOL IsSplitterVertical() const;
 	BOOL SetSplitterPos(int nSplitPos);
+
+	static BOOL IsDocked(DM_POS nPos) { return (nPos != DMP_UNDOCKED); }
+
 };
 
 //{{AFX_INSERT_LOCATION}}
