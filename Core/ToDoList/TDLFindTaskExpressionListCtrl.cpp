@@ -116,7 +116,7 @@ void CTDLFindTaskExpressionListCtrl::PreSubclassWindow()
 
 	AddCol(CEnString(IDS_FT_ATTRIB), 120);
 	AddCol(CEnString(IDS_FT_MATCHES), 160, ILCT_DROPLIST);
-	AddCol(CEnString(IDS_FT_VALUE), 130, ILCT_DROPLIST);
+	AddCol(CEnString(IDS_FT_VALUE), 130, ILCT_TEXT); // overridden in GetCellType()
 	AddCol(CEnString(IDS_FT_ANDOR), 60, ILCT_DROPLIST);
 	SetView(LVS_REPORT);
 
