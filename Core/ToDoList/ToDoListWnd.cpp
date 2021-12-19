@@ -6390,24 +6390,24 @@ void CToDoListWnd::ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable)
 	if (GetTDCCount())
 	{
 		// shrink slightly so that edit controls do not merge with window border
-		int nInset = CalcEditFieldInset();
+		int nIndent = (CThemed::IsNonClientThemed() ? BORDER : BEVEL);
 
 		switch (m_dlgFindTasks.GetDockPosition())
 		{
 		case DMP_LEFT:
-			rAvailable.DeflateRect(0, nInset, nInset, nInset);
+			rAvailable.DeflateRect(0, nIndent, nIndent, nIndent);
 			break;
 
 		case DMP_RIGHT:
-			rAvailable.DeflateRect(nInset, nInset, 0, nInset);
+			rAvailable.DeflateRect(nIndent, nIndent, 0, nIndent);
 			break;
 
 		case DMP_BELOW:
-			rAvailable.DeflateRect(nInset, nInset, nInset, 0);
+			rAvailable.DeflateRect(nIndent, nIndent, nIndent, 0);
 			break;
 
 		case DMP_UNDOCKED:
-			rAvailable.DeflateRect(nInset, nInset, nInset, nInset);
+			rAvailable.DeflateRect(nIndent, nIndent, nIndent, nIndent);
 			break;
 		}
 
@@ -10527,9 +10527,9 @@ LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
 
 				switch (nOldPos)
 				{
-				case DMP_LEFT:	rNewWindow.left += nOldDim;	break;
-				case DMP_RIGHT:	rNewWindow.right -= nOldDim;	break;
-				case DMP_BELOW:	rNewWindow.bottom -= nOldDim;	break;
+				case DMP_LEFT:	rNewWindow.left		+= nOldDim;	break;
+				case DMP_RIGHT:	rNewWindow.right	-= nOldDim;	break;
+				case DMP_BELOW:	rNewWindow.bottom	-= nOldDim;	break;
 				}
 			}
 
