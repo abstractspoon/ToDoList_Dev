@@ -704,7 +704,6 @@ protected:
 	void CheckResizeFilterBar();
 	BOOL GetFindTasksDialogSplitterRect(CRect& rSplitter) const;
 
-//	int ReposTabBar(CDeferWndMove& dwm, const CPoint& ptOrg, int nWidth, BOOL bCalcOnly = FALSE);
 	void ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable);
 	void ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable);
 	void ReposStatusBar(CDeferWndMove* pDwm, CRect& rAvailable);
