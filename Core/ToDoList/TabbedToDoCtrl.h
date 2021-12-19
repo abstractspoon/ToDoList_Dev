@@ -271,8 +271,8 @@ protected:
 	void InvalidateItem(HTREEITEM hti, BOOL bUpdate);
 	int FindListTask(const CString& sPart, TDC_ATTRIBUTE nAttrib, int nStart, BOOL bNext, BOOL bCaseSensitive, BOOL bWholeWord) const;
 	void SetEditTitleTaskID(DWORD dwTaskID);
-	void LoadPrefs();
-	void SavePrefs();
+	void LoadState();
+	void SaveState();
 	BOOL ModAffectsAggregatedAttributes(TDC_ATTRIBUTE nAttrib) const;
 	BOOL ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const;
 	BOOL WantUpdateInheritedAttibutes(const CTDCAttributeMap& mapAttribIDs) const;

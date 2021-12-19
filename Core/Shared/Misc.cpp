@@ -1738,6 +1738,11 @@ BOOL Misc::IsSymbol(const CString& sValue)
 	return TRUE;
 }
 
+BOOL Misc::StateChanged(BOOL b1, BOOL b2) 
+{ 
+	return ((b1 && !b2) || (!b1 && b2)); 
+}
+
 // From: http://www.geeksforgeeks.org/shuffle-a-given-array/
 void Misc::Shuffle(LPTSTR szText)
 {

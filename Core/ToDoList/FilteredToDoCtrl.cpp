@@ -127,9 +127,9 @@ BOOL CFilteredToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 {
 	// handle reloading of tasklist with a filter present
-	if (GetTaskCount() && m_filter.HasAnyFilter())
+	if (!m_bDelayLoaded && m_filter.HasAnyFilter())
 	{
-		SaveSettings();
+		SaveState();
 	}
 
 	BOOL bViewWasSet = IsViewSet();
@@ -145,7 +145,7 @@ BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	// reload last view
 	if (!bViewWasSet)
 	{
-		LoadSettings();
+		LoadState();
 
 		// always refresh the tree filter because all other
 		// views depend on it
@@ -203,25 +203,13 @@ BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	return TRUE;
 }
 
-BOOL CFilteredToDoCtrl::DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue)
-{
-	if (CTabbedToDoCtrl::DelayLoad(sFilePath, dtEarliestDue))
-	{
-		LoadSettings();
-		return TRUE;
-	}
-	
-	// else
-	return FALSE;
-}
-
-void CFilteredToDoCtrl::SaveSettings() const
+void CFilteredToDoCtrl::SaveState() const
 {
 	CPreferences prefs;
 	m_filter.SaveFilter(prefs, GetPreferencesKey(_T("Filter")));
 }
 
-void CFilteredToDoCtrl::LoadSettings()
+void CFilteredToDoCtrl::LoadState()
 {
 	if (HasStyle(TDCS_RESTOREFILTERS))
 	{
@@ -232,7 +220,8 @@ void CFilteredToDoCtrl::LoadSettings()
 
 void CFilteredToDoCtrl::OnDestroy() 
 {
-	SaveSettings();
+	if (!m_bDelayLoaded)
+		SaveState();
 
 	CTabbedToDoCtrl::OnDestroy();
 }
