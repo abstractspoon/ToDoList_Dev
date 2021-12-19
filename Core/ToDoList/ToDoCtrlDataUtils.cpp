@@ -2109,13 +2109,13 @@ double CTDCTaskCalculator::GetWeightedAveragePercentDone(const TODOITEM* pTDI, c
 
 	if (!pTDS->HasSubTasks() || pTDI->IsDone())
 	{
-		if (pTDI->IsDone())
-		{
-			return 100;
-		}
-		else if(m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
+		if (m_data.HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
 			return GetPercentFromTime(pTDI, pTDS);
+		}
+		else if (pTDI->IsDone())
+		{
+			return 100;
 		}
 		else
 		{
