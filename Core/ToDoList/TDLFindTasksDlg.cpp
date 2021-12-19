@@ -43,6 +43,8 @@ const int UNDOCKED_BORDER	= GraphicsMisc::ScaleByDPIFactor(6);
 const int DOCKED_BORDER		= GraphicsMisc::ScaleByDPIFactor(3);
 const int MIN_LIST_SIZE		= GraphicsMisc::ScaleByDPIFactor(100);
 
+const int DEF_BORDER_DLU	= 2;
+
 const UINT WM_FTD_SELECTITEM = (WM_APP+1);
 
 /////////////////////////////////////////////////////////////////////////////
@@ -388,15 +390,15 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 		switch (m_nDockPos)
 		{
 		case DMP_LEFT:
-			SetBordersDLU(3, 3, 3, 0);
+			SetBordersDLU(DEF_BORDER_DLU, DEF_BORDER_DLU, 0, DEF_BORDER_DLU);
 			break;
 
 		case DMP_RIGHT:
-			SetBordersDLU(0, 3, 3, 3);
+			SetBordersDLU(0, DEF_BORDER_DLU, DEF_BORDER_DLU, DEF_BORDER_DLU);
 			break;
 
 		case DMP_BELOW:
-			SetBordersDLU(3, 0, 3, 3);
+			SetBordersDLU(DEF_BORDER_DLU, 0, DEF_BORDER_DLU, DEF_BORDER_DLU);
 			break;
 		}
 
@@ -405,7 +407,7 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 	}
 	else
 	{
-		SetBordersDLU(3);
+		SetBordersDLU(DEF_BORDER_DLU);
 
 		dwStyle = RTD_DEFSTYLE | WS_THICKFRAME;
 
@@ -552,13 +554,17 @@ BOOL CTDLFindTasksDlg::Show(BOOL bShow)
 		if (!IsWindowVisible())
 		{
 			if (m_lcFindSetup.GetItemText(0, 0).IsEmpty())
+			{
 				m_lcFindSetup.SetCurSel(0, 0);
-
+			}
 			else if (m_lcFindSetup.GetItemText(0, 1).IsEmpty())
+			{
 				m_lcFindSetup.SetCurSel(0, 1);
-
+			}
 			else 
+			{
 				m_lcFindSetup.SetCurSel(0, 2);
+			}
 
 			m_lcFindSetup.SetFocus();
 		}
@@ -880,22 +886,6 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 		CRect rResults = GetCtrlRect(IDC_RESULTS);
 		CRect rApply = GetCtrlRect(IDC_APPLYASFILTER);
 
-		int nLeftTopBorder = UNDOCKED_BORDER, nRightBotBorder = UNDOCKED_BORDER;
-
-		switch (m_nDockPos)
-		{
-		case DMP_LEFT:
-			nLeftTopBorder = DOCKED_BORDER;
-			nRightBotBorder = 0;
-			break;
-
-		case DMP_RIGHT:
-		case DMP_BELOW:
-			nLeftTopBorder = 0;
-			nRightBotBorder = DOCKED_BORDER;
-			break;
-		}
-
 		if (bOrientationChange)
 		{
 			// Place the splitter so that the two lists have equal height/width
@@ -904,7 +894,7 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			if (bVertSplitter)
 				nSplitPos = (cx / 2);
 			else
-				nSplitPos = ((cy - nLeftTopBorder + rRules.top - (rResults.top - rApply.top)) / 2);
+				nSplitPos = ((cy - rRules.top - (rResults.top - rApply.top)) / 2);
 
 			VERIFY(GetSplitterRect(rSplitter, nSplitPos));
 		}
@@ -916,11 +906,11 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			if (bVertSplitter)
 			{
 				rRules.right = rSplitter.left;	
-				rRules.bottom = (cy - nRightBotBorder);
+				rRules.bottom = (cy - m_rBorders.bottom);
 			}
 			else
 			{
-				rRules.right = (cx - nRightBotBorder);
+				rRules.right = (cx - m_rBorders.right);
 				rRules.bottom = rSplitter.top;	
 			}
 			
@@ -945,8 +935,8 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			dwm.OffsetCtrl(this, IDC_RESULTSLABEL, nXOffset, nYOffset);
 			
 			rResults = dwm.OffsetCtrl(this, IDC_RESULTS, nXOffset, nYOffset);
-			rResults.right = (cx - nRightBotBorder);
-			rResults.bottom = (cy - nRightBotBorder);
+			rResults.right = (cx - m_rBorders.right);
+			rResults.bottom = (cy - m_rBorders.bottom);
 
 			dwm.MoveWindow(&m_lcResults, rResults);
 		}

@@ -712,7 +712,6 @@ protected:
 	void ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable);
 	void ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable);
 
-	void ShowFindDialog(BOOL bShow = TRUE);
 	void UpdateFindDialogActiveTasklist(const CFilteredToDoCtrl* pCtrl = NULL);
 	void UpdateFindDialogCustomAttributes(const CFilteredToDoCtrl* pCtrl);
 	

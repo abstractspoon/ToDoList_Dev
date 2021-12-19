@@ -2291,11 +2291,9 @@ void CToDoListWnd::SaveSettings()
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowStatusBar"), m_bShowStatusBar);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowTasklistBar"), m_bShowTasklistBar);
 	prefs.WriteProfileInt(SETTINGS_KEY, _T("ShowTreeListBar"), m_bShowTreeListBar);
-	
-	prefs.WriteProfileString(SETTINGS_KEY, _T("TaskViewImageExt"), m_sTaskViewImageExt);
+	prefs.WriteProfileInt(SETTINGS_KEY, _T("FindTasksVisible"), m_bFindShowing && m_dlgFindTasks.GetSafeHwnd() && m_dlgFindTasks.IsWindowVisible());
 
-	if (m_dlgFindTasks.GetSafeHwnd())
-		prefs.WriteProfileInt(SETTINGS_KEY, _T("FindTasksVisible"), m_bFindShowing && m_dlgFindTasks.IsWindowVisible());
+	prefs.WriteProfileString(SETTINGS_KEY, _T("TaskViewImageExt"), m_sTaskViewImageExt);
 	
 	if (Prefs().GetAddFilesToMRU())
 		m_mruList.WriteList(prefs, TRUE);
@@ -3286,30 +3284,6 @@ void CToDoListWnd::MinimizeToTray()
 	// hide main window
 	Gui::MinToTray(*this); // courtesy of floyd
 	m_bVisible = FALSE;
-	
-	// hide find dialog
-	ShowFindDialog(FALSE);
-}
-
-void CToDoListWnd::ShowFindDialog(BOOL bShow)
-{
-	if (bShow)
-	{
-		if (m_bVisible && m_dlgFindTasks.GetSafeHwnd() && IsWindowVisible())
-			m_dlgFindTasks.Show(TRUE);
-	}
-	else // hide
-	{
-		if (m_dlgFindTasks.GetSafeHwnd())
-		{
-			m_bFindShowing = m_dlgFindTasks.IsWindowVisible();
-			m_dlgFindTasks.Show(FALSE);
-		}
-		else
-		{
-			m_bFindShowing = FALSE;
-		}
-	}
 }
 
 void CToDoListWnd::OnTrayiconClose() 
@@ -8850,7 +8824,7 @@ BOOL CToDoListWnd::DoExit(BOOL bRestart, BOOL bClosingWindows)
 	
 	if (bWasVisible)
 	{
-		if (m_dlgFindTasks.GetSafeHwnd())
+		if (m_dlgFindTasks.GetSafeHwnd() && !m_dlgFindTasks.IsDocked())
 			m_dlgFindTasks.ShowWindow(SW_HIDE);
 
 		ShowWindow(SW_HIDE);
@@ -10628,13 +10602,19 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 					continue;
 			}
 			
-			CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
-			CHoldRedraw hr(m_bFindShowing ? m_dlgFindTasks.GetSafeHwnd() : NULL);
-
+			const CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
 			CResultArray aResults;
 			
 			if (tdc.FindTasks(params, aResults))
 			{
+				// Eliminate flicker
+				HWND hwndHold = NULL;
+
+				if (IsWindowVisible() && !IsIconic() && m_dlgFindTasks.IsWindowVisible())
+					hwndHold = m_dlgFindTasks.GetSafeHwnd();
+
+				CHoldRedraw hr(hwndHold);
+
 				// use tasklist title from tabctrl
 				CString sTitle = m_mgrToDoCtrls.GetTabItemText(nCtrl);
 				
