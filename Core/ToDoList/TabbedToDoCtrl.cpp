@@ -453,7 +453,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	
 	if (!IsViewSet())
 	{
-		LoadPrefs();
+		LoadState();
 	}
 	else
 	{
@@ -507,7 +507,7 @@ BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	return TRUE;
 }
 
-void CTabbedToDoCtrl::LoadPrefs()
+void CTabbedToDoCtrl::LoadState()
 {
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey(); // no subkey
@@ -562,7 +562,7 @@ void CTabbedToDoCtrl::LoadPrefs()
 	prefs.WriteProfileInt(sKey, _T("View"), FTCV_UNSET);
 }
 
-void CTabbedToDoCtrl::SavePrefs()
+void CTabbedToDoCtrl::SaveState()
 {
 	CPreferences prefs;
 	CString sKey = GetPreferencesKey(); // no subkey
@@ -631,7 +631,8 @@ void CTabbedToDoCtrl::SaveAllTaskViewPreferences()
 
 void CTabbedToDoCtrl::OnDestroy() 
 {
-	SavePrefs();
+	if (!m_bDelayLoaded)
+		SaveState();
 
 	// Destroy the extensions
 	int nExt = m_aExtViews.GetSize();

@@ -25,8 +25,6 @@ public:
 	
 	virtual ~CFilteredToDoCtrl();
 
-	BOOL DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue);
-
 	BOOL CreateNewTask(LPCTSTR szText, TDC_INSERTWHERE nWhere = TDC_INSERTATTOPOFSELTASKPARENT, 
 						BOOL bEditText = TRUE, DWORD dwDependency = 0); 
 	BOOL CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const;
@@ -119,8 +117,8 @@ protected:
 	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
 
-	void SaveSettings() const;
-	void LoadSettings();
+	void SaveState() const;
+	void LoadState();
 
 	void RefreshTreeFilter();
 	void RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgress = FALSE);
