@@ -566,7 +566,7 @@ BOOL CToDoCtrlReminders::InitialiseRTFFormatter()
 	return FALSE;
 }
 
-BOOL CToDoCtrlReminders::BuildRTFContent(const TDCREMINDER& rem, CString& sContent)
+BOOL CToDoCtrlReminders::BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent)
 {
 	if (!InitialiseRTFFormatter())
 		return FALSE;
@@ -620,7 +620,7 @@ BOOL CToDoCtrlReminders::ShowReminder(const TDCREMINDER& rem)
 		if (m_stickies.IsValid() || m_stickies.Initialize(m_pWndNotify, m_sStickiesPath))
 		{
 			CString sContent;
-			BOOL bUseRTF = BuildRTFContent(rem, sContent);
+			BOOL bUseRTF = BuildStickiesRTFContent(rem, sContent);
 
 			if (!bUseRTF)
 			{

@@ -104,7 +104,7 @@ protected:
 	};
 
 	BOOL InitialiseRTFFormatter();
-	BOOL BuildRTFContent(const TDCREMINDER& rem, CString& sContent);
+	BOOL BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent);
 	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 };
