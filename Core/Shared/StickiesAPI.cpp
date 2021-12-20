@@ -36,6 +36,8 @@ BOOL CStickiesAPI::Initialize(CWnd* pCallback, int nCommandID, LPCTSTR szStickie
 
 	if (!FileMisc::FileExists(m_sStickiesPath))
 	{
+		FileMisc::LogText(_T("CStickiesAPI::Initialize(%s) not found"), m_sStickiesPath);
+
 		ASSERT(0);
 		return FALSE;
 	}
@@ -51,6 +53,8 @@ BOOL CStickiesAPI::Initialize(CWnd* pCallback, int nCommandID, LPCTSTR szStickie
 	
 	if (hwndStickies == NULL)
 	{
+		FileMisc::LogTextRaw(_T("CStickiesAPI::Initialize(GetStickiesWindow) failed"));
+
 		m_sStickiesPath.Empty();
 		return FALSE;
 	}
@@ -68,6 +72,8 @@ BOOL CStickiesAPI::Initialize(CWnd* pCallback, int nCommandID, LPCTSTR szStickie
 						
 		if (lr != STICKY_SUCCESS)
 		{
+			FileMisc::LogTextRaw(_T("CStickiesAPI::Initialize(Register callback) failed"));
+
 			m_sStickiesPath.Empty();
 			m_hwndCallback = NULL;
 			m_sAppVer.Empty();

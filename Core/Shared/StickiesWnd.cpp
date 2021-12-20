@@ -5,6 +5,7 @@
 #include "stickieswnd.h"
 
 #include "misc.h"
+#include "Filemisc.h"
 #include "Graphicsmisc.h"
 
 #ifdef _DEBUG
@@ -48,7 +49,10 @@ BOOL CStickiesWnd::Initialize(CWnd* pOwner, const CString& sStickiesPath)
 		return FALSE;
 
 	if (!Create(NULL, NULL, WS_CHILD, CRect(0, 0, 0, 0), pOwner, (UINT)IDC_STATIC))
+	{
+		FileMisc::LogTextRaw(_T("CStickiesWnd::Create() failed"));
 		return FALSE;
+	}
 
 	return InitStickiesAPI(sStickiesPath);
 }
@@ -138,6 +142,8 @@ BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const
 	}
 
 	// all else
+	FileMisc::LogTextRaw(_T("CStickiesWnd::CreateSticky() failed"));
+
 	return FALSE;
 }
 
@@ -182,7 +188,11 @@ LRESULT CStickiesWnd::SendMessage(const CString& sCommand, CString& sReply, cons
 
 		// no response?
 		if (nTry == -1)
+		{
+			FileMisc::LogTextRaw(_T("CStickiesWnd::SendMessage() timed out"));
+
 			lResult = STICKY_TIMEOUT;
+		}
 	}
 
 	return lResult;
