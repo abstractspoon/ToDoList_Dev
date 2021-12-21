@@ -68,6 +68,8 @@ void CNetworkDiagramWnd::DoDataExchange(CDataExchange* pDX)
 	CDialog::DoDataExchange(pDX);
 	//{{AFX_DATA_MAP(CGanttChartWnd)
 	//}}AFX_DATA_MAP
+
+	DDX_Control(pDX, IDC_LIST1, m_ctrlNetwork);
 }
 
 BEGIN_MESSAGE_MAP(CNetworkDiagramWnd, CDialog)

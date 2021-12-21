@@ -148,6 +148,20 @@ END
 //
 
 IDB_CHECKBOXES          BITMAP  MOVEABLE PURE   "res\\XPcheckboxes.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_NETWORKDIAGRAM_DIALOG DIALOG DISCARDABLE  0, 0, 321, 174
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,0,0,321,174
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 

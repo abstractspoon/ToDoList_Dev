@@ -92,7 +92,6 @@ protected:
 	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
 	//}}AFX_MSG
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	afx_msg void OnSelchangeSnapMode();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* lpHelpInfo);
 	afx_msg void OnNcDestroy();
