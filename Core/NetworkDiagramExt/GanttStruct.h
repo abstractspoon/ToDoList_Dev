@@ -153,6 +153,10 @@ public:
 	COleDateTime CalcMaxDependencyDate(const GANTTITEM& gi) const;
 	void CalcDateRange(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, GANTTDATERANGE& dtRange);
 
+	int BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& mapLengths) const;
+	int CalcMaxDependencyChainLength(DWORD dwTaskID) const;
+
+protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////

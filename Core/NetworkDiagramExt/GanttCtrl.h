@@ -133,6 +133,8 @@ protected:
 	GTLC_DRAG m_nDragging;
 
 	CGanttItemMap m_data;
+	CMap<DWORD, DWORD, int, int> m_mapDependencyChainLengths;
+
 
 private:
 	mutable GTLC_SNAPMODE m_nSnapMode;

@@ -175,7 +175,7 @@ void GANTTDEPENDENCY::CalcDependencyPath(CPoint pts[3]) const
 	pts[0] = ptTemp;
 
 	// mid point
-	ptTemp.y = ptTo.y;
+//	ptTemp.y = ptTo.y;
 	pts[1] = ptTemp;
 
 	// last point
@@ -720,6 +720,48 @@ void CGanttItemMap::CalcDateRange(BOOL bCalcParentDates, BOOL bCalcMissingStart,
 			dtRange.Add(dtStart, dtEnd);
 		}
 	}
+}
+
+int CGanttItemMap::BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& mapLengths) const
+{
+	mapLengths.RemoveAll();
+
+	POSITION pos = GetStartPosition();
+	GANTTITEM* pGIUnused = NULL;
+	DWORD dwTaskID = 0;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pGIUnused);
+		ASSERT(pGIUnused);
+
+		mapLengths[dwTaskID] = CalcMaxDependencyChainLength(dwTaskID);
+	}
+
+	return mapLengths.GetCount();
+}
+
+int CGanttItemMap::CalcMaxDependencyChainLength(DWORD dwTaskID) const
+{
+	const GANTTITEM* pGI = GetItem(dwTaskID, FALSE);
+	ASSERT(pGI);
+
+	if (!pGI || !pGI->aDependIDs.GetSize())
+		return 0;
+
+	int nDepend = pGI->aDependIDs.GetSize();
+	int nMaxDependLen = 0;
+
+	while (nDepend--)
+	{
+		DWORD dwDependID = pGI->aDependIDs[nDepend];
+		ASSERT(dwDependID);
+
+		int nDependLen = CalcMaxDependencyChainLength(dwDependID);
+		nMaxDependLen = max(nMaxDependLen, nDependLen);
+	}
+
+	return nMaxDependLen + 1; // the dependency itself
 }
 
 //////////////////////////////////////////////////////////////////////

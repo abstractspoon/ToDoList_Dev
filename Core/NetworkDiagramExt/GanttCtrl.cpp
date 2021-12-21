@@ -470,6 +470,7 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 	}
 
 	InitItemHeights();
+	m_data.BuildDependencyChainLengths(m_mapDependencyChainLengths);
 }
 
 void CGanttCtrl::PreFixVScrollSyncBug()
@@ -1276,7 +1277,7 @@ double CGanttCtrl::GetMonthWidth(GTLC_MONTH_DISPLAY nDisplay, int nColWidth)
 
 int CGanttCtrl::GetRequiredListColumnCount() const
 {
-	return GetRequiredListColumnCount(ActiveDateRange(), m_nMonthDisplay);
+	return 50;//GetRequiredListColumnCount(ActiveDateRange(), m_nMonthDisplay);
 }
 
 int CGanttCtrl::GetRequiredListColumnCount(const GANTTDATERANGE& dtRange, GTLC_MONTH_DISPLAY nDisplay) const
@@ -1544,6 +1545,7 @@ LRESULT CGanttCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 {
 	if (pNMCD->hdr.hwndFrom == m_listHeader)
 	{
+/*
 		switch (pNMCD->dwDrawStage)
 		{
 		case CDDS_PREPAINT:
@@ -1565,6 +1567,7 @@ LRESULT CGanttCtrl::OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD)
 			}
 			break;
 		}
+*/
 	}
 	else if (pNMCD->hdr.hwndFrom == m_treeHeader)
 	{
@@ -2927,6 +2930,19 @@ void CGanttCtrl::DrawNonWorkingHours(CDC* pDC, const CRect &rMonth, int nDay, BO
 
 void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSelected)
 {
+	int nPos = 0;
+	m_mapDependencyChainLengths.Lookup(gi.dwTaskID, nPos);
+
+	int nCol = 1 + (nPos * 2); // alternate columns
+
+	CRect rColumn;
+	VERIFY(m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn));
+
+	COLORREF crBorder, crFill;
+	GetGanttBarColors(gi, crBorder, crFill);
+
+	GraphicsMisc::DrawRect(pDC, rColumn, crFill, crBorder);
+
 /*
 	ASSERT(nItem != -1);
 	int nNumCol = GetRequiredListColumnCount();
@@ -3699,22 +3715,38 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY
 	if (nItem == -1)
 		return FALSE;
 
+	int nPos = -1;
+	m_mapDependencyChainLengths.Lookup(dwTaskID, nPos);
+
+	if (nPos == 0)
+		return FALSE;
+
+	int nCol = 1 + (nPos * 2); // alternate columns
+	CRect rCol;
+	
+	m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rCol);
+
+	if (bFrom)
+		nPos = rCol.left;
+	else
+		nPos = rCol.right;
+
+/*
 	const GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 
 	CRect rItem, rMilestone;
 	VERIFY(GetListItemRect(nItem, rItem));
 
-	int nPos = -1;
 
-// 	if (CalcMilestoneRect(*pGI, rItem, rMilestone))
-// 	{
-// 		if (bFrom)
-// 			nPos = rMilestone.CenterPoint().x;
-// 		else
-// 			nPos = rMilestone.right;
-// 	}
-// 	else
+	if (CalcMilestoneRect(*pGI, rItem, rMilestone))
+	{
+		if (bFrom)
+			nPos = rMilestone.CenterPoint().x;
+		else
+			nPos = rMilestone.right;
+	}
+	else
 	{
 		COleDateTime dtStart, dtDue;
 
@@ -3727,8 +3759,9 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY
 		if (pGI->bParent && HasOption(GTLCF_CALCPARENTDATES))
 			rItem.bottom -= PARENT_ARROW_SIZE;
 	}
+*/
 
-	CPoint pt(nPos, ((rItem.top + rItem.bottom) / 2));
+	CPoint pt(nPos, ((rCol.top + rCol.bottom) / 2));
 
 	if (bFrom)
 	{
@@ -4520,7 +4553,7 @@ void CGanttCtrl::UpdateListColumnsWidthAndText(int nWidth)
 	{
 		if (nMonth && nYear)
 		{
-			CString sTitle = FormatListColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
+			CString sTitle;// = FormatListColumnHeaderText(m_nMonthDisplay, nMonth, nYear);
 			DWORD dwData = MAKELONG(nMonth, nYear);
 
 			int nColWidth = nWidth;
