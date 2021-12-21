@@ -1,9 +1,8 @@
-// GanttTreeList.cpp: implementation of the CGanttTreeList class.
+// NetworkDiagramCtrl.cpp: implementation of the CNetworkDiagramCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-//#include "resource.h"
 #include "NetworkDiagramCtrl.h"
 #include "NetworkDiagramMsg.h"
 #include "NetworkDiagramStatic.h"
@@ -31,7 +30,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-using namespace GanttStatic;
+using namespace NetworkDiagramStatic;
 
 //////////////////////////////////////////////////////////////////////
 
@@ -70,20 +69,20 @@ const int MAX_HEADER_WIDTH			= 32000; // (SHRT_MAX - tolerance)
 
 //////////////////////////////////////////////////////////////////////
 
-#define GET_GI_RET(id, gi, ret)	\
+#define GET_NI_RET(id, ni, ret)	\
 {								\
 	if (id == 0) return ret;	\
-	gi = GetGanttItem(id);		\
-	ASSERT(gi);					\
-	if (gi == NULL) return ret;	\
+	ni = GetNetworkItem(id);	\
+	ASSERT(ni);					\
+	if (ni == NULL) return ret;	\
 }
 
-#define GET_GI(id, gi)		\
-{							\
-	if (id == 0) return;	\
-	gi = GetGanttItem(id);	\
-	ASSERT(gi);				\
-	if (gi == NULL)	return;	\
+#define GET_NI(id, ni)			\
+{								\
+	if (id == 0) return;		\
+	ni = GetNetworkItem(id);	\
+	ASSERT(ni);					\
+	if (ni == NULL)	return;		\
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -131,11 +130,11 @@ DWORD CNetworkDiagramCtrl::GetSelectedTaskID() const
 BOOL CNetworkDiagramCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
-	const GANTTITEM* pGI = NULL;
+	const NETWORKITEM* pNI = NULL;
 	
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	GET_NI_RET(dwTaskID, pNI, FALSE);
 	
-	aDepends.Copy(pGI->aDependIDs);
+	aDepends.Copy(pNI->aDependIDs);
 	return TRUE;
 }
 
@@ -146,11 +145,11 @@ BOOL CNetworkDiagramCtrl::AddSelectedTaskDependency(DWORD dwDependID)
 		return FALSE;
 
 	DWORD dwTaskID = GetSelectedTaskID();
-	GANTTITEM* pGI = NULL;
+	NETWORKITEM* pNI = NULL;
 	
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	GET_NI_RET(dwTaskID, pNI, FALSE);
 
-	return Misc::AddUniqueItemT(dwDependID, pGI->aDependIDs);
+	return Misc::AddUniqueItemT(dwDependID, pNI->aDependIDs);
 }
 
 BOOL CNetworkDiagramCtrl::EditSelectedTaskDependency(DWORD dwFromDependID, DWORD dwToDependID)
@@ -160,42 +159,42 @@ BOOL CNetworkDiagramCtrl::EditSelectedTaskDependency(DWORD dwFromDependID, DWORD
 		return FALSE;
 
 	DWORD dwTaskID = GetSelectedTaskID();
-	GANTTITEM* pGI = NULL;
+	NETWORKITEM* pNI = NULL;
 
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	GET_NI_RET(dwTaskID, pNI, FALSE);
 
 	// Target task must not already be a dependency
-	if (Misc::FindT(dwToDependID, pGI->aDependIDs) != -1)
+	if (Misc::FindT(dwToDependID, pNI->aDependIDs) != -1)
 		return FALSE;
 
-	int nFind = Misc::FindT(dwFromDependID, pGI->aDependIDs);
+	int nFind = Misc::FindT(dwFromDependID, pNI->aDependIDs);
 
 	if (nFind == -1)
 		return FALSE;
 
-	pGI->aDependIDs[nFind] = dwToDependID;
+	pNI->aDependIDs[nFind] = dwToDependID;
 	return TRUE;
 }
 
 BOOL CNetworkDiagramCtrl::DeleteSelectedTaskDependency(DWORD dwDependID)
 {
 	DWORD dwTaskID = GetSelectedTaskID();
-	GANTTITEM* pGI = NULL;
+	NETWORKITEM* pNI = NULL;
 
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	GET_NI_RET(dwTaskID, pNI, FALSE);
 
-	return Misc::RemoveItemT(dwDependID, pGI->aDependIDs);
+	return Misc::RemoveItemT(dwDependID, pNI->aDependIDs);
 }
 
 BOOL CNetworkDiagramCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	DWORD dwTaskID = GetSelectedTaskID();
-	const GANTTITEM* pGI = NULL;
+	const NETWORKITEM* pNI = NULL;
 
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	GET_NI_RET(dwTaskID, pNI, FALSE);
 	
 /*
-	if (GetTaskStartEndDates(*pGI, dtStart, dtDue))
+	if (GetTaskStartEndDates(*pNI, dtStart, dtDue))
 	{
 		// handle durations of whole days
 		COleDateTime dtDuration(dtDue - dtStart);
@@ -433,52 +432,52 @@ BOOL CNetworkDiagramCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 	}
 	
 	// Don't resolve references here
-	GANTTITEM* pGI = m_data.GetItem(dwTaskID, FALSE);
+	NETWORKITEM* pNI = m_data.GetItem(dwTaskID, FALSE);
 
-	if (!pGI)
+	if (!pNI)
 	{
 		ASSERT(0);
 		return FALSE;
 	}
 
 	// Take a snapshot we can check changes against
-	GANTTITEM giOrg = *pGI;
+	NETWORKITEM niOrg = *pNI;
 
 	// Update colour for all tasks
-	pGI->color = pTasks->GetTaskTextColor(hTask);
+	pNI->color = pTasks->GetTaskTextColor(hTask);
 
 	// Existing tasks should not change reference ID 
 	DWORD dwRefID = pTasks->GetTaskReferenceID(hTask);
-	ASSERT(pGI->dwRefID == dwRefID);
+	ASSERT(pNI->dwRefID == dwRefID);
 
-	pGI->dwOrgRefID = 0;
+	pNI->dwOrgRefID = 0;
 	
 	// Update rest of attributes if not a reference task
-	if (pGI->dwRefID == 0)
+	if (pNI->dwRefID == 0)
 	{
 /*
 		// can't use a switch here because we also need to check for IUI_ALL
 		if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
-			pGI->sTitle = pTasks->GetTaskTitle(hTask);
+			pNI->sTitle = pTasks->GetTaskTitle(hTask);
 	
 		if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
-			pGI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
+			pNI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
 	
 		if (pTasks->IsAttributeAvailable(TDCA_ICON))
-			pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+			pNI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 		if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
-			pGI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
+			pNI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
 		
 		if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
 		{ 
 			time64_t tDate = 0;
 	
 			// update min/max too
-			if (pTasks->GetTaskStartDate64(hTask, (pGI->bParent != FALSE), tDate))
-				pGI->SetStartDate(tDate, TRUE);
+			if (pTasks->GetTaskStartDate64(hTask, (pNI->bParent != FALSE), tDate))
+				pNI->SetStartDate(tDate, TRUE);
 			else
-				pGI->ClearStartDate(TRUE);
+				pNI->ClearStartDate(TRUE);
 		}
 	
 		if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
@@ -486,10 +485,10 @@ BOOL CNetworkDiagramCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 			time64_t tDate = 0;
 
 			// update min/max too
-			if (pTasks->GetTaskDueDate64(hTask, (pGI->bParent != FALSE), tDate))
-				pGI->SetDueDate(tDate, TRUE);
+			if (pTasks->GetTaskDueDate64(hTask, (pNI->bParent != FALSE), tDate))
+				pNI->SetDueDate(tDate, TRUE);
 			else
-				pGI->ClearDueDate(TRUE);
+				pNI->ClearDueDate(TRUE);
 		}
 	
 		if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
@@ -497,30 +496,30 @@ BOOL CNetworkDiagramCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 			time64_t tDate = 0;
 
 			if (pTasks->GetTaskDoneDate64(hTask, tDate))
-				pGI->SetDoneDate(tDate);
+				pNI->SetDoneDate(tDate);
 			else
-				pGI->ClearDoneDate();
+				pNI->ClearDoneDate();
 		}
 	
 		if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
 		{
 			LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-			pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+			pNI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 		}
 
 		if (pTasks->IsAttributeAvailable(TDCA_TAGS))
 		{
 			int nTag = pTasks->GetTaskTagCount(hTask);
-			pGI->aTags.RemoveAll();
+			pNI->aTags.RemoveAll();
 		
 			while (nTag--)
-				pGI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
+				pNI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
 		}
 	
 		if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
 		{
 			int nDepend = pTasks->GetTaskDependencyCount(hTask);
-			pGI->aDependIDs.RemoveAll();
+			pNI->aDependIDs.RemoveAll();
 		
 			while (nDepend--)
 			{
@@ -528,18 +527,18 @@ BOOL CNetworkDiagramCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 				DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
 
 				if (dwDependID)
-					pGI->aDependIDs.Add(dwDependID);
+					pNI->aDependIDs.Add(dwDependID);
 			}
 		}
 
 		// Always update these
-		pGI->bLocked = pTasks->IsTaskLocked(hTask, true);
-		pGI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+		pNI->bLocked = pTasks->IsTaskLocked(hTask, true);
+		pNI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
 */
 	}
 
 	// detect update
-	BOOL bChange = (*pGI != giOrg);
+	BOOL bChange = (*pNI != niOrg);
 
 	// children
 	if (UpdateTask(pTasks, pTasks->GetFirstTask(hTask), nUpdate, TRUE))
@@ -613,14 +612,14 @@ void CNetworkDiagramCtrl::RemoveDeletedTasks(HTREEITEM hti, const ITASKLISTBASE*
 }
 */
 
-GANTTITEM* CNetworkDiagramCtrl::GetGanttItem(DWORD dwTaskID) const
+NETWORKITEM* CNetworkDiagramCtrl::GetNetworkItem(DWORD dwTaskID) const
 {
 	return m_data.GetItem(dwTaskID, TRUE);
 }
 
-BOOL CNetworkDiagramCtrl::RestoreGanttItem(const GANTTITEM& giPrev)
+BOOL CNetworkDiagramCtrl::RestoreNetworkItem(const NETWORKITEM& niPrev)
 {
-	if (m_data.RestoreItem(giPrev))
+	if (m_data.RestoreItem(niPrev))
 	{
 // 		RecalcParentDates();
 // 		RedrawList();
@@ -737,7 +736,7 @@ BOOL CNetworkDiagramCtrl::OnDragDropItem(const TLCITEMMOVE& move)
 
 	// If copying a task, app will send us a full update 
 	// so we do not need to perform the move ourselves
-	if (CWnd::GetParent()->SendMessage(WM_GTLC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
+	if (CWnd::GetParent()->SendMessage(WM_NDC_MOVETASK, 0, (LPARAM)&taskMove) && !taskMove.bCopy)
 	{
 		VERIFY(MoveItem(move));
 	}
@@ -792,7 +791,7 @@ void CNetworkDiagramCtrl::ClearDependencyPickLine(CDC* pDC)
 		
 		// calc 'from' point
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
-		GANTTDEPENDENCY depend;
+		NETWORKDEPENDENCY depend;
 		
 		if (CalcDependencyEndPos(dwFromTaskID, depend, TRUE))
 		{
@@ -834,7 +833,7 @@ BOOL CNetworkDiagramCtrl::DrawDependencyPickLine(const CPoint& ptClient)
 		// calc 'from ' point
 /*
 		DWORD dwFromTaskID = m_pDependEdit->GetFromTask();
-		GANTTDEPENDENCY depend;
+		NETWORKDEPENDENCY depend;
 
 		if (!CalcDependencyEndPos(dwFromTaskID, depend, TRUE))
 			return FALSE;
@@ -1052,15 +1051,15 @@ void CNetworkDiagramCtrl::SetDefaultBarColor(COLORREF crDefault)
 
 
 /*
-void CNetworkDiagramCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const
+void CNetworkDiagramCtrl::GetItemColors(const NETWORKITEM& ni, COLORREF& crBorder, COLORREF& crFill) const
 {
 	// darker shade of the item crText/crBack
-	COLORREF crDefFill = gi.GetFillColor();
-	COLORREF crDefBorder = gi.GetBorderColor();
+	COLORREF crDefFill = ni.GetFillColor();
+	COLORREF crDefBorder = ni.GetBorderColor();
 
 	if (crDefFill == CLR_NONE)
 	{
-		if (HasColor(m_crBarDefault) && (!gi.bParent || m_nParentColoring == GTLPC_DEFAULTCOLORING))
+		if (HasColor(m_crBarDefault) && (!ni.bParent || m_nParentColoring == GTLPC_DEFAULTCOLORING))
 		{
 			crDefFill = m_crBarDefault;
 			crDefBorder = GraphicsMisc::Darker(crDefFill, 0.4);
@@ -1072,7 +1071,7 @@ void CNetworkDiagramCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBor
 		}
 	}
 
-	if (gi.bParent)
+	if (ni.bParent)
 	{
 		switch (m_nParentColoring)
 		{
@@ -1092,7 +1091,7 @@ void CNetworkDiagramCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBor
 			crFill = crDefFill;
 
 			if (HasOption(GTLCF_DISPLAYPARENTROLLUPS) && 
-				!TCH().IsItemExpanded(GetTreeItem(gi.dwTaskID)))
+				!TCH().IsItemExpanded(GetTreeItem(ni.dwTaskID)))
 			{
 				crFill = GraphicsMisc::Lighter(crFill, 0.75);
 			}
@@ -1109,13 +1108,13 @@ void CNetworkDiagramCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBor
 
 DWORD CNetworkDiagramCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID)
 {
-	CGanttDependArray aDepends;
+	CNetworkDependArray aDepends;
 	
 	int nDepend = BuildVisibleDependencyList(aDepends);
 
 	while (nDepend--)
 	{
-		const GANTTDEPENDENCY& depend = aDepends[nDepend];
+		const NETWORKDEPENDENCY& depend = aDepends[nDepend];
 
 		if (depend.HitTest(ptClient))
 		{
@@ -1127,76 +1126,16 @@ DWORD CNetworkDiagramCtrl::ListDependsHitTest(const CPoint& ptClient, DWORD& dwT
 	return 0;
 }
 
-int CNetworkDiagramCtrl::BuildVisibleDependencyList(CGanttDependArray& aDepends) const
+int CNetworkDiagramCtrl::BuildVisibleDependencyList(CNetworkDependArray& aDepends) const
 {
 	aDepends.RemoveAll();
 
-/*
-	CRect rClient;
-	GetClientRect(rClient);
-
-	// iterate all list items checking for dependencies
-	HTREEITEM htiFirstVis = m_tree.GetFirstVisibleItem();
-	HTREEITEM htiLastVis = TCH().GetLastVisibleItem();
-
-	HTREEITEM htiFrom = htiFirstVis;
-
-	while (htiFrom)
-	{
-		BuildVisibleDependencyList(htiFrom, aDepends);
-
-		if (htiFrom == htiLastVis)
-			break;
-
-		htiFrom = m_tree.GetNextVisibleItem(htiFrom);
-	}
-*/
+	// TODO
 	
 	return aDepends.GetSize();
 }
 
-int CNetworkDiagramCtrl::BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const
-{
-/*
-	DWORD dwFromTaskID = GetTaskID(htiFrom);
-
-	const GANTTITEM* pGIFrom = GetGanttItem(dwFromTaskID);
-	ASSERT(pGIFrom);
-
-	if (pGIFrom)
-	{
-		int nDepend = pGIFrom->aDependIDs.GetSize();
-
-		while (nDepend--)
-		{
-			DWORD dwToTaskID = pGIFrom->aDependIDs[nDepend];
-
-			if (!m_data.HasItem(dwToTaskID))
-				continue;
-
-			GANTTDEPENDENCY depend;
-
-			if (BuildDependency(dwFromTaskID, dwToTaskID, depend))
-				aDepends.Add(depend);
-		}
-
-		if (pGIFrom->bParent && HasOption(GTLCF_DISPLAYPARENTROLLUPS) && !TCH().IsItemExpanded(htiFrom))
-		{
-			HTREEITEM htiFromChild = m_tree.GetChildItem(htiFrom);
-
-			while (htiFromChild)
-			{
-				BuildVisibleDependencyList(htiFromChild, aDepends); // RECURSIVE CALL
-				htiFromChild = m_tree.GetNextItem(htiFromChild, TVGN_NEXT);
-			}
-		}
-	}
-*/
-
-	return aDepends.GetSize();
-}
-
-BOOL CNetworkDiagramCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, GANTTDEPENDENCY& depend) const
+BOOL CNetworkDiagramCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, NETWORKDEPENDENCY& depend) const
 {
 	if (!m_data.HasItem(dwFromTaskID) || !m_data.HasItem(dwToTaskID))
 	{
@@ -1214,7 +1153,7 @@ BOOL CNetworkDiagramCtrl::BuildDependency(DWORD dwFromTaskID, DWORD dwToTaskID, 
 	return FALSE;
 }
 
-BOOL CNetworkDiagramCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+BOOL CNetworkDiagramCtrl::CalcDependencyEndPos(DWORD dwTaskID, NETWORKDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
 	ASSERT(m_data.HasItem(dwTaskID));
 
@@ -1242,7 +1181,7 @@ BOOL CNetworkDiagramCtrl::CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& 
 	return FALSE;//CalcDependencyEndPos(dwTaskID, nItem, depend, bFrom, lpp);
 }
 
-BOOL CNetworkDiagramCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
+BOOL CNetworkDiagramCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, NETWORKDEPENDENCY& depend, BOOL bFrom, LPPOINT lpp) const
 {
 /*
 	if (nItem == -1)
@@ -1263,14 +1202,14 @@ BOOL CNetworkDiagramCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTD
 */
 
 /*
-	const GANTTITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	const NETWORKITEM* pNI = NULL;
+	GET_NI_RET(dwTaskID, pNI, FALSE);
 
 	CRect rItem, rMilestone;
 	VERIFY(GetListItemRect(nItem, rItem));
 
 
-	if (CalcMilestoneRect(*pGI, rItem, rMilestone))
+	if (CalcMilestoneRect(*pNI, rItem, rMilestone))
 	{
 		if (bFrom)
 			nPos = rMilestone.CenterPoint().x;
@@ -1281,13 +1220,13 @@ BOOL CNetworkDiagramCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTD
 	{
 		COleDateTime dtStart, dtDue;
 
-		if (!GetTaskStartEndDates(*pGI, dtStart, dtDue))
+		if (!GetTaskStartEndDates(*pNI, dtStart, dtDue))
 			return FALSE;
 
 		if (!GetDrawPosFromDate((bFrom ? dtStart : dtDue), nPos))
 			return FALSE;
 
-		if (pGI->bParent && HasOption(GTLCF_CALCPARENTDATES))
+		if (pNI->bParent && HasOption(GTLCF_CALCPARENTDATES))
 			rItem.bottom -= PARENT_ARROW_SIZE;
 	}
 */
@@ -1312,7 +1251,7 @@ BOOL CNetworkDiagramCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTD
 	return TRUE;
 }
 
-BOOL CNetworkDiagramCtrl::BeginDependencyEdit(IGanttDependencyEditor* pDependEdit)
+BOOL CNetworkDiagramCtrl::BeginDependencyEdit(INetworkDependencyEditor* pDependEdit)
 {
 	ASSERT(!m_bReadOnly);
 	ASSERT(m_pDependEdit == NULL);
@@ -1477,27 +1416,10 @@ void CNetworkDiagramCtrl::ScrollToSelectedTask()
 
 void CNetworkDiagramCtrl::ScrollToTask(DWORD dwTaskID)
 {
-	GANTTITEM* pGI = NULL;
-	GET_GI(dwTaskID, pGI);
-	
-/*
-	// Don't scroll if any part of the task is already visible
-	GANTTDATERANGE dtVis;
-	VERIFY(GetVisibleDateRange(dtVis));
+	NETWORKITEM* pNI = NULL;
+	GET_NI(dwTaskID, pNI);
 
-	COleDateTime dtStart, dtDue;
-	
-	if (GetTaskStartEndDates(*pGI, dtStart, dtDue))
-	{
-		if (!dtVis.HasIntersection(COleDateTimeRange(dtStart, dtDue)))
-			ScrollTo(pGI->IsMilestone(m_sMilestoneTag) ? dtDue : dtStart);
-	}
-	else if (pGI->HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)))
-	{
-		if (!dtVis.Contains(pGI->dtDone))
-			ScrollTo(pGI->dtDone);
-	}
-*/
+	// TODO
 }
 
 bool CNetworkDiagramCtrl::PrepareNewTask(ITaskList* pTaskList) const
@@ -1642,38 +1564,38 @@ BOOL CNetworkDiagramCtrl::StartDragging(const CPoint& ptCursor)
 	if (!::DragDetect(m_list, ptScreen))
 		return FALSE;
 
-	GANTTITEM* pGI = NULL;
-	GET_GI_RET(dwTaskID, pGI, FALSE);
+	NETWORKITEM* pNI = NULL;
+	GET_NI_RET(dwTaskID, pNI, FALSE);
 	
 	// cache the original task and the start point
-	m_giPreDrag = *pGI;
+	m_niPreDrag = *pNI;
 	m_ptDragStart = ptCursor;
 
-	// Ensure the gantt item has valid dates
+	// Ensure the item has valid dates
 	COleDateTime dtStart, dtDue;
-	GetTaskStartEndDates(*pGI, dtStart, dtDue);
+	GetTaskStartEndDates(*pNI, dtStart, dtDue);
 	
-	if (!pGI->HasDueDate())
+	if (!pNI->HasDueDate())
 	{
 		if (!CDateHelper::IsDateSet(dtDue))
 			return FALSE;
 
 		// else
-		pGI->SetDueDate(dtDue, TRUE);
+		pNI->SetDueDate(dtDue, TRUE);
 	}
 	
-	if (!pGI->HasStartDate())
+	if (!pNI->HasStartDate())
 	{
 		if (!CDateHelper::IsDateSet(dtStart))
 			return FALSE;
 
 		// else
-		pGI->SetStartDate(dtStart, TRUE);
+		pNI->SetStartDate(dtStart, TRUE);
 	}
 	
 	// Start dragging
 	m_nDragging = nDrag;
-	m_dtDragMin = m_data.CalcMaxDependencyDate(m_giPreDrag);
+	m_dtDragMin = m_data.CalcMaxDependencyDate(m_niPreDrag);
 
 	m_list.SetCapture();
 	
@@ -1693,14 +1615,14 @@ BOOL CNetworkDiagramCtrl::EndDragging(const CPoint& ptCursor)
 	{
 		DWORD dwTaskID = GetSelectedTaskID();
 
-		GANTTITEM* pGI = NULL;
-		GET_GI_RET(dwTaskID, pGI, FALSE);
+		NETWORKITEM* pNI = NULL;
+		GET_NI_RET(dwTaskID, pNI, FALSE);
 
 		// Restore original refID because that's what we've been really dragging
-		if (pGI->dwOrgRefID)
+		if (pNI->dwOrgRefID)
 		{
-			dwTaskID = pGI->dwOrgRefID;
-			pGI->dwOrgRefID = 0;
+			dwTaskID = pNI->dwOrgRefID;
+			pNI->dwOrgRefID = 0;
 		}
 
 		// dropping outside the list is a cancel
@@ -1717,10 +1639,10 @@ BOOL CNetworkDiagramCtrl::EndDragging(const CPoint& ptCursor)
 		::ReleaseCapture();
 
 		// keep parent informed
-		if (DragDatesDiffer(*pGI, m_giPreDrag))
+		if (DragDatesDiffer(*pNI, m_niPreDrag))
 		{
 			if (!NotifyParentDateChange(nDrag))
-				RestoreGanttItem(m_giPreDrag);
+				RestoreNetworkItem(m_niPreDrag);
 			else
 				RecalcDateRange();
 
@@ -1742,100 +1664,12 @@ BOOL CNetworkDiagramCtrl::UpdateDragging(const CPoint& ptCursor)
 	
 	if (IsDragging())
 	{
-/*
 		DWORD dwTaskID = GetSelectedTaskID();
-		GANTTITEM* pGI = NULL;
+		NETWORKITEM* pNI = NULL;
 
-		GET_GI_RET(dwTaskID, pGI, FALSE);
+		GET_NI_RET(dwTaskID, pNI, FALSE);
 
-		COleDateTime dtStart, dtDue;
-		GetTaskStartEndDates(*pGI, dtStart, dtDue);
-
-		// update taskID to refID because we're really dragging the refID
-		if (pGI->dwOrgRefID)
-		{
-			dwTaskID = pGI->dwOrgRefID;
-			pGI->dwOrgRefID = 0;
-		}
-		
-		COleDateTime dtDrag;
-
-		if (GetValidDragDate(ptCursor, dtDrag))
-		{
-			// if the drag date precedes the min date, constrain
-			// date appropriately and show the 'no drag' cursor
-			BOOL bNoDrag = (CDateHelper::IsDateSet(m_dtDragMin) && (dtDrag < m_dtDragMin));
-			LPCTSTR szCursor = NULL;
-
-			CDateHelper::Max(dtDrag, m_dtDragMin);
-
-			switch (m_nDragging)
-			{
-			case GTLCD_START:
-				{
-					// prevent the start and end dates from overlapping
-					double dMinDuration = CalcMinDragDuration();
-					COleDateTime dtNewStart(min(dtDrag.m_dt, (dtDue.m_dt - dMinDuration)));
-
-					pGI->SetStartDate(dtNewStart);
-					szCursor = IDC_SIZEWE;
-				}
-				break;
-
-			case GTLCD_END:
-				{
-					// prevent the start and end dates from overlapping
-					double dMinDuration = CalcMinDragDuration();
-					COleDateTime dtNewDue(max(dtDrag.m_dt, (dtStart.m_dt + dMinDuration)));
-
-					pGI->SetDueDate(dtNewDue);
-					szCursor = IDC_SIZEWE;
-				}
-				break;
-
-			case GTLCD_WHOLE:
-				{
-					// Note: If the end date of the dragged task
-					// falls on a day-end GANTTDATERANGE will add
-					// a day because that's all it knows how to do.
-					// We however don't always want it to so we must
-					// detect those times and subtract a day as required
-					COleDateTime dtOrgStart, dtOrgDue;
-					GetTaskStartEndDates(m_giPreDrag, dtOrgStart, dtOrgDue);
-					
-					COleDateTime dtDuration(dtOrgDue - dtOrgStart);
-					COleDateTime dtEnd = (dtDrag + dtDuration);
-					
-					if (!CDateHelper::DateHasTime(dtEnd))
-						dtEnd.m_dt--;
-
-					pGI->dtRange.SetStart(dtDrag);
-					pGI->dtRange.SetEnd(dtEnd);
-
-					szCursor = IDC_SIZEALL;
-				}
-				break;
-			}
-			ASSERT(szCursor);
-
-			if (bNoDrag)
-				GraphicsMisc::SetDragDropCursor(GMOC_NO);
-			else
-				GraphicsMisc::SetStandardCursor(szCursor);
-
-			RecalcParentDates();
-			RedrawList();
-			RedrawTree();
-
-			// keep parent informed
-			NotifyParentDragChange();
-		}
-		else
-		{
-			// We've dragged outside the client rect
-			GraphicsMisc::SetDragDropCursor(GMOC_NO);
-		}
-*/
+		// TODO
 
 		return TRUE; // always
 	}
@@ -1885,8 +1719,7 @@ void CNetworkDiagramCtrl::CancelDrag(BOOL bReleaseCapture)
 	
 /*
 	// cancel drag, restoring original task dates
-	RestoreGanttItem(m_giPreDrag);
-	m_nDragging = GTLCD_NONE;
+	RestoreNetworkItem(m_niPreDrag);
 
 	// keep parent informed
 	NotifyParentDragChange();

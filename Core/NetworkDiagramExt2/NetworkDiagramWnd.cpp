@@ -1,4 +1,4 @@
-// GanttChartWnd.cpp : implementation file
+// NetworkDiagramWnd.cpp : implementation file
 //
 
 #include "stdafx.h"
@@ -45,10 +45,9 @@ const COLORREF DEF_DONECOLOR		= RGB(128, 128, 128);
 /////////////////////////////////////////////////////////////////////////////
 
 const int PADDING = 3;
-const UINT IDC_GANTTCTRL = 1001;
 
 /////////////////////////////////////////////////////////////////////////////
-// CGanttChartWnd
+// CNetworkDiagramWnd
 
 CNetworkDiagramWnd::CNetworkDiagramWnd(CWnd* pParent /*=NULL*/)
 	: 
@@ -66,14 +65,14 @@ CNetworkDiagramWnd::~CNetworkDiagramWnd()
 void CNetworkDiagramWnd::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CGanttChartWnd)
+	//{{AFX_DATA_MAP(CNetworkDiagramWnd)
 	//}}AFX_DATA_MAP
 
-	DDX_Control(pDX, IDC_LIST1, m_ctrlNetwork);
+	DDX_Control(pDX, IDC_NETWORK_CTRL, m_ctrlNetwork);
 }
 
 BEGIN_MESSAGE_MAP(CNetworkDiagramWnd, CDialog)
-	//{{AFX_MSG_MAP(CGanttChartWnd)
+	//{{AFX_MSG_MAP(CNetworkDiagramWnd)
 	ON_WM_SIZE()
 	ON_WM_CTLCOLOR()
 	ON_WM_SHOWWINDOW()
@@ -88,7 +87,7 @@ BEGIN_MESSAGE_MAP(CNetworkDiagramWnd, CDialog)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
-// CGanttChartWnd message handlers
+// CNetworkDiagramWnd message handlers
 
 void CNetworkDiagramWnd::OnNcDestroy()
 {

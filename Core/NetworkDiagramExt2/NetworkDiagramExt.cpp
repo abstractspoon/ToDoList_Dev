@@ -1,4 +1,4 @@
-// GanttChartExt.cpp : Defines the initialization routines for the DLL.
+// NetworkDiagramExt.cpp : Defines the initialization routines for the DLL.
 //
 
 #include "stdafx.h"
@@ -17,7 +17,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-// CGanttChartExtApp Class
+// CNetworkDiagramExtApp Class
 //////////////////////////////////////////////////////////////////////
 
 static CNetworkDiagramExtApp theApp;
@@ -91,7 +91,7 @@ BOOL CNetworkDiagramExtApp::InitInstance()
 	// Set this before anything else
 //	CWinHelpButton::SetDefaultIcon(LoadIcon(IDI_HELP_BUTTON));
 	
-	m_icon.Load(IDR_GANTTCHART);
+	m_icon.Load(IDR_NETWORKDIAGRAM);
 
 	return CWinApp::InitInstance();
 }

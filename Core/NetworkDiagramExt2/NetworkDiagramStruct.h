@@ -1,4 +1,4 @@
-// GanttStruct.h: interface for the CGanttStruct class.
+// NetworkDiagramStruct.h: interface for the NetworkDiagramStruct classes.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -17,15 +17,15 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct GANTTITEM 
+struct NETWORKITEM 
 { 
-	GANTTITEM();
-	GANTTITEM(const GANTTITEM& gi);
-	virtual ~GANTTITEM();
+	NETWORKITEM();
+	NETWORKITEM(const NETWORKITEM& gi);
+	virtual ~NETWORKITEM();
 	
-	GANTTITEM& operator=(const GANTTITEM& gi);
-	BOOL operator==(const GANTTITEM& gi) const;
-	BOOL operator!=(const GANTTITEM& gi) const;
+	NETWORKITEM& operator=(const NETWORKITEM& gi);
+	BOOL operator==(const NETWORKITEM& gi) const;
+	BOOL operator!=(const NETWORKITEM& gi) const;
 	
 	CString sTitle;
 	COleDateTime dtDone; 
@@ -59,7 +59,7 @@ struct GANTTITEM
 // 	void ClearDoneDate();
 // 
 // 	BOOL GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, COleDateTime& dtStart, COleDateTime& dtDue) const;
-// 	void MinMaxDates(const GANTTITEM& giOther, BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue);
+// 	void MinMaxDates(const NETWORKITEM& giOther, BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue);
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -72,22 +72,22 @@ struct GANTTITEM
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CGanttItemMap : public CMap<DWORD, DWORD, GANTTITEM*, GANTTITEM*&>
+class CNetworkItemMap : public CMap<DWORD, DWORD, NETWORKITEM*, NETWORKITEM*&>
 {
 public:
-	virtual ~CGanttItemMap();
+	virtual ~CNetworkItemMap();
 
 	void RemoveAll();
 	BOOL DeleteItem(DWORD dwTaskID);
 	BOOL HasItem(DWORD dwTaskID) const;
-	GANTTITEM* GetItem(DWORD dwTaskID, BOOL bResolveReferences) const;
-	BOOL RestoreItem(const GANTTITEM& giPrev);
+	NETWORKITEM* GetItem(DWORD dwTaskID, BOOL bResolveReferences) const;
+	BOOL RestoreItem(const NETWORKITEM& giPrev);
 
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;
 	BOOL ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL ItemHasDependecies(DWORD dwTaskID) const;
-	BOOL IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const;
+	BOOL IsItemDependentOn(const NETWORKITEM& gi, DWORD dwOtherID) const;
 
 	int BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& mapLengths) const;
 	int CalcMaxDependencyChainLength(DWORD dwTaskID) const;
@@ -97,9 +97,9 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct GANTTDEPENDENCY
+struct NETWORKDEPENDENCY
 {
-	GANTTDEPENDENCY();
+	NETWORKDEPENDENCY();
 
 	void SetFrom(const CPoint& pt, DWORD dwTaskID = 0);
 	void SetTo(const CPoint& pt, DWORD dwTaskID = 0);
@@ -132,11 +132,11 @@ protected:
 	BOOL IsFromAboveTo() const;
 };
 
-typedef CArray<GANTTDEPENDENCY, GANTTDEPENDENCY&> CGanttDependArray;
+typedef CArray<NETWORKDEPENDENCY, NETWORKDEPENDENCY&> CNetworkDependArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class IGanttDependencyEditor
+class INetworkDependencyEditor
 {
 public:
 	virtual BOOL SetFromTask(DWORD dwFromTaskID) = 0;

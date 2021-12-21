@@ -1,4 +1,4 @@
-// GanttTreeList.h: interface for the CGanttTreeList class.
+// NetworkDiagramCtrl.h: interface for the CNetworkDiagramCtrl class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -75,7 +75,7 @@ public:
 //	void SetMilestoneTag(const CString& sTag);
 	void SetReadOnly(bool bReadOnly);
 
-	BOOL BeginDependencyEdit(IGanttDependencyEditor* pDependEdit);
+	BOOL BeginDependencyEdit(INetworkDependencyEditor* pDependEdit);
 	void OnEndDepedencyEdit();
 
 	static BOOL WantEditUpdate(TDC_ATTRIBUTE nAttrib);
@@ -84,8 +84,8 @@ public:
 protected:
 	BOOL m_bReadOnly;
 
-	GANTTITEM m_giPreDrag;
-	IGanttDependencyEditor* m_pDependEdit;
+	NETWORKITEM m_giPreDrag;
+	INetworkDependencyEditor* m_pDependEdit;
 
 	COLORREF m_crParent, m_crBarDefault;
 	CPoint m_ptDragStart, m_ptLastDependPick;
@@ -93,7 +93,7 @@ protected:
 	DWORD m_dwMaxTaskID;
 //	CString m_sMilestoneTag;
 
-	CGanttItemMap m_data;
+	CNetworkItemMap m_data;
 	CMap<DWORD, DWORD, int, int> m_mapDependencyChainLengths;
 
 protected:
@@ -117,8 +117,8 @@ protected:
 	void BuildListColumns();
 	void UpdateListColumns();
 
-	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
-	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
+	NETWORKITEM* GetNetworkItem(DWORD dwTaskID) const;
+	BOOL RestoreNetworkItem(const NETWORKITEM& niPrev);
 
 	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen/*, GTLC_HITTEST& nHit, BOOL bDragging*/) const;
 	DWORD ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
@@ -136,10 +136,9 @@ protected:
 
 	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
 
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
-	BOOL BuildDependency(DWORD dwFromTaskID, DWORD, GANTTDEPENDENCY& depend) const;
-	int BuildVisibleDependencyList(CGanttDependArray& aDepends) const;
-	int BuildVisibleDependencyList(HTREEITEM htiFrom, CGanttDependArray& aDepends) const;
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, NETWORKDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
+	BOOL BuildDependency(DWORD dwFromTaskID, DWORD, NETWORKDEPENDENCY& depend) const;
+	int BuildVisibleDependencyList(CNetworkDependArray& aDepends) const;
 	BOOL IsDependencyPickLinePosValid() const;
 	void ResetDependencyPickLinePos();
 
@@ -151,7 +150,7 @@ protected:
 	BOOL IsDependencyEditingComplete() const;
 
 private:
-	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
+	BOOL CalcDependencyEndPos(DWORD dwTaskID, int nItem, NETWORKDEPENDENCY& depend, BOOL bTo, LPPOINT lpp) const;
 
 };
 

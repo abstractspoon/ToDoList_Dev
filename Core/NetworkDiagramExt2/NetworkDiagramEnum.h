@@ -1,4 +1,4 @@
-// GanttEnum.h: interface for the GanttEnum class.
+// NetworkDiagramEnum.h: interface for the NetworkDiagramEnum class.
 //
 //////////////////////////////////////////////////////////////////////
 

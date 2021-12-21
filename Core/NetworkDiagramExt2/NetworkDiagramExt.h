@@ -1,4 +1,4 @@
-// GanttChartExt.h: interface for the CGanttChartExtApp class.
+// NetworkDiagramExt.h: interface for the CNetworkDiagramExtApp class.
 //
 //////////////////////////////////////////////////////////////////////
 

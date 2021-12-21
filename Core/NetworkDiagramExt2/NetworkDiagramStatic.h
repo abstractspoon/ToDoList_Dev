@@ -1,4 +1,4 @@
-// GanttStruct.h: interface for the CGanttStruct class.
+// NetworkDiagramStatic.h: interface for the NetworkDiagramStatic classes.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -10,7 +10,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-namespace GanttStatic
+namespace NetworkDiagramStatic
 {
 
 }

@@ -4,7 +4,7 @@
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
-// GanttChartWnd.h : header file
+// NetworkDiagramWnd.h : header file
 //
 
 #include "NetworkDiagramCtrl.h"
@@ -16,7 +16,7 @@
 #include "..\Interfaces\IUIExtension.h"
 
 /////////////////////////////////////////////////////////////////////////////
-// CGanttChartWnd window
+// CNetworkDiagramWnd window
 
 class CNetworkDiagramWnd : public CDialog, public IUIExtensionWindow
 {
@@ -60,7 +60,7 @@ public:
 
 protected:
 // Dialog Data
-	//{{AFX_DATA(CGanttChartWnd)
+	//{{AFX_DATA(CNetworkDiagramWnd)
 	//}}AFX_DATA
 	CNetworkDiagramCtrl m_ctrlNetwork;
 
@@ -73,7 +73,7 @@ protected:
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CGanttChartWnd)
+	//{{AFX_VIRTUAL(CNetworkDiagramWnd)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
@@ -84,7 +84,7 @@ protected:
 // Implementation
 protected:
 	// Generated message map functions
-	//{{AFX_MSG(CGanttChartWnd)
+	//{{AFX_MSG(CNetworkDiagramWnd)
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnClickNetworkList(NMHDR* pNMHDR, LRESULT* pResult);

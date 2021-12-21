@@ -1,4 +1,4 @@
-// GanttStruct.cpp: implementation of the CGanttStruct class.
+// NetworkDiagramStruct.cpp: implementation of the NetworkDiagramStruct classes.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -26,9 +26,9 @@ const int MAX_YEAR = 2200;
 
 //////////////////////////////////////////////////////////////////////
 
-int GANTTDEPENDENCY::STUB = 0;
+int NETWORKDEPENDENCY::STUB = 0;
 
-GANTTDEPENDENCY::GANTTDEPENDENCY() 
+NETWORKDEPENDENCY::NETWORKDEPENDENCY() 
 	: 
 	ptFrom(0), 
 	ptTo(0), 
@@ -37,37 +37,37 @@ GANTTDEPENDENCY::GANTTDEPENDENCY()
 {
 }
 
-void GANTTDEPENDENCY::SetFrom(const CPoint& pt, DWORD dwTaskID)
+void NETWORKDEPENDENCY::SetFrom(const CPoint& pt, DWORD dwTaskID)
 {
 	dwFromID = dwTaskID;
 	ptFrom = pt;
 }
 
-void GANTTDEPENDENCY::SetTo(const CPoint& pt, DWORD dwTaskID)
+void NETWORKDEPENDENCY::SetTo(const CPoint& pt, DWORD dwTaskID)
 {
 	dwToID = dwTaskID;
 	ptTo = pt;
 }
 
-DWORD GANTTDEPENDENCY::GetFromID() const
+DWORD NETWORKDEPENDENCY::GetFromID() const
 {
 	ASSERT(dwFromID);
 	return dwFromID;
 }
 
-DWORD GANTTDEPENDENCY::GetToID() const
+DWORD NETWORKDEPENDENCY::GetToID() const
 {
 	ASSERT(dwToID);
 	return dwToID;
 }
 
-BOOL GANTTDEPENDENCY::Matches(DWORD dwFrom, DWORD dwTo) const
+BOOL NETWORKDEPENDENCY::Matches(DWORD dwFrom, DWORD dwTo) const
 {
 	ASSERT(dwFromID && dwToID);
 	return ((dwFromID == dwFrom) && (dwToID == dwTo));
 }
 
-BOOL GANTTDEPENDENCY::Draw(CDC* pDC, const CRect& rClient, BOOL bDragging)
+BOOL NETWORKDEPENDENCY::Draw(CDC* pDC, const CRect& rClient, BOOL bDragging)
 {
 	if (!HitTest(rClient))
 		return FALSE;
@@ -92,13 +92,13 @@ BOOL GANTTDEPENDENCY::Draw(CDC* pDC, const CRect& rClient, BOOL bDragging)
 }
 
 #ifdef _DEBUG
-void GANTTDEPENDENCY::Trace() const
+void NETWORKDEPENDENCY::Trace() const
 {
-	TRACE(_T("GANTTDEPENDENCY(from %d (pos = %d) to %d (pos = %d))\n"), dwFromID, ptFrom.x, dwToID, ptTo.x);
+	TRACE(_T("NETWORKDEPENDENCY(from %d (pos = %d) to %d (pos = %d))\n"), dwFromID, ptFrom.x, dwToID, ptTo.x);
 }
 #endif
 
-void GANTTDEPENDENCY::DrawDependencyArrow(CDC* pDC, const CPoint& pt) const
+void NETWORKDEPENDENCY::DrawDependencyArrow(CDC* pDC, const CPoint& pt) const
 {
 	CPoint pts[3], ptArrow(pt);
 
@@ -115,13 +115,13 @@ void GANTTDEPENDENCY::DrawDependencyArrow(CDC* pDC, const CPoint& pt) const
 	pDC->Polyline(pts, 3);
 }
 
-BOOL GANTTDEPENDENCY::HitTest(const CRect& rect) const
+BOOL NETWORKDEPENDENCY::HitTest(const CRect& rect) const
 {
 	CRect rThis;
 	return (CalcBoundingRect(rThis) && CRect().IntersectRect(rect, rThis));
 }
 
-BOOL GANTTDEPENDENCY::HitTest(const CPoint& point, int nTol) const
+BOOL NETWORKDEPENDENCY::HitTest(const CPoint& point, int nTol) const
 {
 	CRect rThis;
 	
@@ -157,12 +157,12 @@ BOOL GANTTDEPENDENCY::HitTest(const CPoint& point, int nTol) const
 	return FALSE;
 }
 
-BOOL GANTTDEPENDENCY::IsFromAboveTo() const
+BOOL NETWORKDEPENDENCY::IsFromAboveTo() const
 {
 	return (ptFrom.y < ptTo.y);
 }
 
-void GANTTDEPENDENCY::CalcDependencyPath(CPoint pts[3]) const
+void NETWORKDEPENDENCY::CalcDependencyPath(CPoint pts[3]) const
 {
 	CPoint ptTemp(ptFrom);
 
@@ -182,7 +182,7 @@ void GANTTDEPENDENCY::CalcDependencyPath(CPoint pts[3]) const
 	pts[2] = ptTo;
 }
 
-void GANTTDEPENDENCY::CalcDependencyArrow(const CPoint& pt, CPoint pts[3]) const
+void NETWORKDEPENDENCY::CalcDependencyArrow(const CPoint& pt, CPoint pts[3]) const
 {
 	pts[0] = pts[1] = pts[2] = pt;
 
@@ -200,7 +200,7 @@ void GANTTDEPENDENCY::CalcDependencyArrow(const CPoint& pt, CPoint pts[3]) const
 	}
 }
 
-BOOL GANTTDEPENDENCY::CalcBoundingRect(CRect& rect) const
+BOOL NETWORKDEPENDENCY::CalcBoundingRect(CRect& rect) const
 {
 	if (ptFrom == ptTo)
 		return FALSE;
@@ -216,7 +216,7 @@ BOOL GANTTDEPENDENCY::CalcBoundingRect(CRect& rect) const
 
 //////////////////////////////////////////////////////////////////////
 
-GANTTITEM::GANTTITEM() 
+NETWORKITEM::NETWORKITEM() 
 	: 
 	color(CLR_NONE), 
 	bParent(FALSE), 
@@ -231,12 +231,12 @@ GANTTITEM::GANTTITEM()
 {
 }
 
-GANTTITEM::GANTTITEM(const GANTTITEM& gi)
+NETWORKITEM::NETWORKITEM(const NETWORKITEM& gi)
 {
 	*this = gi;
 }
 
-GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
+NETWORKITEM& NETWORKITEM::operator=(const NETWORKITEM& gi)
 {
 	sTitle = gi.sTitle;
 	dtDone = gi.dtDone;
@@ -258,12 +258,12 @@ GANTTITEM& GANTTITEM::operator=(const GANTTITEM& gi)
 	return (*this);
 }
 
-GANTTITEM::~GANTTITEM()
+NETWORKITEM::~NETWORKITEM()
 {
 	
 }
 
-BOOL GANTTITEM::operator==(const GANTTITEM& gi) const
+BOOL NETWORKITEM::operator==(const NETWORKITEM& gi) const
 {
 	return ((sTitle == gi.sTitle) &&
 			(dtDone == gi.dtDone) &&
@@ -282,12 +282,12 @@ BOOL GANTTITEM::operator==(const GANTTITEM& gi) const
 			Misc::MatchAll(aDependIDs, gi.aDependIDs));
 }
 
-BOOL GANTTITEM::operator!=(const GANTTITEM& gi) const
+BOOL NETWORKITEM::operator!=(const NETWORKITEM& gi) const
 {
 	return !(*this == gi);
 }
 
-BOOL GANTTITEM::IsDone(BOOL bIncGoodAs) const
+BOOL NETWORKITEM::IsDone(BOOL bIncGoodAs) const
 {
 	if (CDateHelper::IsDateSet(dtDone))
 		return TRUE;
@@ -297,17 +297,17 @@ BOOL GANTTITEM::IsDone(BOOL bIncGoodAs) const
 }
 
 /*
-BOOL GANTTITEM::HasStartDate() const
+BOOL NETWORKITEM::HasStartDate() const
 {
 	return dtRange.HasStart();
 }
 
-BOOL GANTTITEM::HasDueDate() const
+BOOL NETWORKITEM::HasDueDate() const
 {
 	return dtRange.HasEnd();
 }
 
-BOOL GANTTITEM::HasDoneDate(BOOL bCalcParentDates) const
+BOOL NETWORKITEM::HasDoneDate(BOOL bCalcParentDates) const
 {
 	if (bParent && bCalcParentDates)
 		return FALSE;
@@ -317,7 +317,7 @@ BOOL GANTTITEM::HasDoneDate(BOOL bCalcParentDates) const
 }
 */
 
-COLORREF GANTTITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
+COLORREF NETWORKITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
@@ -331,7 +331,7 @@ COLORREF GANTTITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 	return GetSysColor(COLOR_WINDOWTEXT);
 }
 
-COLORREF GANTTITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
+COLORREF NETWORKITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (!bSelected && HasColor())
 	{
@@ -343,7 +343,7 @@ COLORREF GANTTITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 	return CLR_NONE;
 }
 
-COLORREF GANTTITEM::GetFillColor() const
+COLORREF NETWORKITEM::GetFillColor() const
 {
 	if (IsDone(TRUE))
 	{
@@ -359,7 +359,7 @@ COLORREF GANTTITEM::GetFillColor() const
 	return CLR_NONE;
 }
 
-COLORREF GANTTITEM::GetBorderColor() const
+COLORREF NETWORKITEM::GetBorderColor() const
 {
 	if (IsDone(TRUE))
 	{
@@ -375,12 +375,12 @@ COLORREF GANTTITEM::GetBorderColor() const
 	return CLR_NONE;
 }
 
-BOOL GANTTITEM::HasColor() const
+BOOL NETWORKITEM::HasColor() const
 {
 	return ((color != CLR_NONE) && (color != GetSysColor(COLOR_WINDOWTEXT)));
 }
 
-COleDateTime GANTTITEM::GetDate(time64_t tDate, BOOL bEndOfDay)
+COleDateTime NETWORKITEM::GetDate(time64_t tDate, BOOL bEndOfDay)
 {
 	COleDateTime date = CDateHelper::GetDate(tDate);
 
@@ -392,17 +392,17 @@ COleDateTime GANTTITEM::GetDate(time64_t tDate, BOOL bEndOfDay)
 }
 
 /*
-void GANTTITEM::SetStartDate(time64_t tDate, BOOL bAndMinMax)
+void NETWORKITEM::SetStartDate(time64_t tDate, BOOL bAndMinMax)
 {
 	SetStartDate(GetDate(tDate, FALSE), bAndMinMax);
 }
 
-void GANTTITEM::SetDueDate(time64_t tDate, BOOL bAndMinMax)
+void NETWORKITEM::SetDueDate(time64_t tDate, BOOL bAndMinMax)
 {
 	SetDueDate(GetDate(tDate, TRUE), bAndMinMax);
 }
 
-void GANTTITEM::SetStartDate(const COleDateTime& date, BOOL bAndMinMax)
+void NETWORKITEM::SetStartDate(const COleDateTime& date, BOOL bAndMinMax)
 {
 	dtRange.SetStart(date);
 
@@ -410,7 +410,7 @@ void GANTTITEM::SetStartDate(const COleDateTime& date, BOOL bAndMinMax)
 		dtMinMaxRange.SetStart(date);
 }
 
-void GANTTITEM::SetDueDate(const COleDateTime& date, BOOL bAndMinMax)
+void NETWORKITEM::SetDueDate(const COleDateTime& date, BOOL bAndMinMax)
 {
 	dtRange.SetEnd(date);
 
@@ -418,12 +418,12 @@ void GANTTITEM::SetDueDate(const COleDateTime& date, BOOL bAndMinMax)
 		dtMinMaxRange.SetEnd(date);
 }
 
-void GANTTITEM::SetDoneDate(time64_t tDate)
+void NETWORKITEM::SetDoneDate(time64_t tDate)
 {
 	dtDone = GetDate(tDate, TRUE);
 }
 
-void GANTTITEM::ClearStartDate(BOOL bAndMinMax)
+void NETWORKITEM::ClearStartDate(BOOL bAndMinMax)
 {
 	dtRange.ClearStart();
 
@@ -431,7 +431,7 @@ void GANTTITEM::ClearStartDate(BOOL bAndMinMax)
 		dtMinMaxRange.ClearStart();
 }
 
-void GANTTITEM::ClearDueDate(BOOL bAndMinMax)
+void NETWORKITEM::ClearDueDate(BOOL bAndMinMax)
 {
 	dtRange.ClearEnd();
 
@@ -439,12 +439,12 @@ void GANTTITEM::ClearDueDate(BOOL bAndMinMax)
 		dtMinMaxRange.ClearStart();
 }
 
-void GANTTITEM::ClearDoneDate()
+void NETWORKITEM::ClearDoneDate()
 {
 	CDateHelper::ClearDate(dtDone);
 }
 
-BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, COleDateTime& dtStart, COleDateTime& dtDue) const
+BOOL NETWORKITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, COleDateTime& dtStart, COleDateTime& dtDue) const
 {
 	BOOL bDoneSet = FALSE;
 
@@ -499,7 +499,7 @@ BOOL GANTTITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, 
 			(dtDue >= dtStart));
 }
 
-BOOL GANTTITEM::IsMilestone(const CString& sMilestoneTag) const
+BOOL NETWORKITEM::IsMilestone(const CString& sMilestoneTag) const
 {
 	if (sMilestoneTag.IsEmpty() || (aTags.GetSize() == 0))
 		return FALSE;
@@ -517,124 +517,124 @@ BOOL GANTTITEM::IsMilestone(const CString& sMilestoneTag) const
 
 //////////////////////////////////////////////////////////////////////
 
-CGanttItemMap::~CGanttItemMap()
+CNetworkItemMap::~CNetworkItemMap()
 {
 	RemoveAll();
 }
 
-BOOL CGanttItemMap::ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
+BOOL CNetworkItemMap::ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
+	const NETWORKITEM* pNI = GetItem(dwTaskID, TRUE);
 
-	return (pGI && pGI->bLocked && (!bTreatRefsAsUnlocked || !pGI->dwOrgRefID));
+	return (pNI && pNI->bLocked && (!bTreatRefsAsUnlocked || !pNI->dwOrgRefID));
 }
 
-BOOL CGanttItemMap::ItemIsReference(DWORD dwTaskID) const
+BOOL CNetworkItemMap::ItemIsReference(DWORD dwTaskID) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE); 
+	const NETWORKITEM* pNI = GetItem(dwTaskID, TRUE); 
 
-	return (pGI && pGI->dwOrgRefID);
+	return (pNI && pNI->dwOrgRefID);
 }
 
-BOOL CGanttItemMap::ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const
+BOOL CNetworkItemMap::ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
+	const NETWORKITEM* pNI = GetItem(dwTaskID, TRUE);
 
-	return (pGI && pGI->IsDone(bIncGoodAs));
+	return (pNI && pNI->IsDone(bIncGoodAs));
 }
 
-BOOL CGanttItemMap::ItemHasDependecies(DWORD dwTaskID) const
+BOOL CNetworkItemMap::ItemHasDependecies(DWORD dwTaskID) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID, TRUE);
+	const NETWORKITEM* pNI = GetItem(dwTaskID, TRUE);
 
-	return (pGI && pGI->aDependIDs.GetSize());
+	return (pNI && pNI->aDependIDs.GetSize());
 }
 
-void CGanttItemMap::RemoveAll()
+void CNetworkItemMap::RemoveAll()
 {
 	DWORD dwTaskID = 0;
-	GANTTITEM* pGI = NULL;
+	NETWORKITEM* pNI = NULL;
 	
 	POSITION pos = GetStartPosition();
 	
 	while (pos)
 	{
-		GetNextAssoc(pos, dwTaskID, pGI);
-		ASSERT(pGI);
+		GetNextAssoc(pos, dwTaskID, pNI);
+		ASSERT(pNI);
 		
-		delete pGI;
+		delete pNI;
 	}
 	
-	CMap<DWORD, DWORD, GANTTITEM*, GANTTITEM*&>::RemoveAll();
+	CMap<DWORD, DWORD, NETWORKITEM*, NETWORKITEM*&>::RemoveAll();
 }
 
-BOOL CGanttItemMap::DeleteItem(DWORD dwTaskID)
+BOOL CNetworkItemMap::DeleteItem(DWORD dwTaskID)
 {
-	GANTTITEM* pGI = NULL;
+	NETWORKITEM* pNI = NULL;
 	
-	if (Lookup(dwTaskID, pGI))
+	if (Lookup(dwTaskID, pNI))
 	{
-		delete pGI;
-		return CMap<DWORD, DWORD, GANTTITEM*, GANTTITEM*&>::RemoveKey(dwTaskID);
+		delete pNI;
+		return CMap<DWORD, DWORD, NETWORKITEM*, NETWORKITEM*&>::RemoveKey(dwTaskID);
 	}
 	
 	// else
 	return FALSE;
 }
 
-BOOL CGanttItemMap::HasItem(DWORD dwTaskID) const
+BOOL CNetworkItemMap::HasItem(DWORD dwTaskID) const
 {
 	if (dwTaskID == 0)
 		return FALSE;
 
-	GANTTITEM* pGIUnused = NULL;
+	NETWORKITEM* pNIUnused = NULL;
 	
-	return Lookup(dwTaskID, pGIUnused);
+	return Lookup(dwTaskID, pNIUnused);
 }
 
-GANTTITEM* CGanttItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) const
+NETWORKITEM* CNetworkItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) const
 {
 	if (dwTaskID == 0)
 		return NULL;
 
-	GANTTITEM* pGI = NULL;
+	NETWORKITEM* pNI = NULL;
 
-	if (!Lookup(dwTaskID, pGI) || !pGI)
+	if (!Lookup(dwTaskID, pNI) || !pNI)
 	{
-		ASSERT(pGI);
+		ASSERT(pNI);
 		return NULL;
 	}
 
 	// Resolves references
-	pGI->dwOrgRefID = 0;
+	pNI->dwOrgRefID = 0;
 
-	if (pGI && pGI->dwRefID && bResolveReferences)
+	if (pNI && pNI->dwRefID && bResolveReferences)
 	{
-		ASSERT(pGI->dwOrgRefID == 0);
-		ASSERT(pGI->dwRefID != dwTaskID);
+		ASSERT(pNI->dwOrgRefID == 0);
+		ASSERT(pNI->dwRefID != dwTaskID);
 
-		DWORD dwRefID = pGI->dwRefID;
+		DWORD dwRefID = pNI->dwRefID;
 
-		if ((dwRefID != dwTaskID) && Lookup(dwRefID, pGI))
+		if ((dwRefID != dwTaskID) && Lookup(dwRefID, pNI))
 		{
 			// copy over the reference id so that the caller can still detect it
-			ASSERT(pGI->dwRefID == 0);
+			ASSERT(pNI->dwRefID == 0);
 
-			pGI->dwOrgRefID = dwTaskID;
-			pGI->dwRefID = 0;
+			pNI->dwOrgRefID = dwTaskID;
+			pNI->dwRefID = 0;
 		}
 	}
 
-	return pGI;
+	return pNI;
 }
 
-BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
+BOOL CNetworkItemMap::RestoreItem(const NETWORKITEM& giPrev)
 {
-	GANTTITEM* pGI = NULL;
+	NETWORKITEM* pNI = NULL;
 
-	if (Lookup(giPrev.dwTaskID, pGI) && pGI)
+	if (Lookup(giPrev.dwTaskID, pNI) && pNI)
 	{
-		*pGI = giPrev;
+		*pNI = giPrev;
 		return TRUE;
 	}
 
@@ -642,7 +642,7 @@ BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
 	return FALSE;
 }
 
-BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const
+BOOL CNetworkItemMap::IsItemDependentOn(const NETWORKITEM& gi, DWORD dwOtherID) const
 {
 	int nDepend = gi.aDependIDs.GetSize();
 
@@ -655,10 +655,10 @@ BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) cons
 			return TRUE;
 
 		// else check dependents of dwDependID
-		const GANTTITEM* pGIDepends = GetItem(dwDependID, FALSE);
-		ASSERT(pGIDepends);
+		const NETWORKITEM* pNIDepends = GetItem(dwDependID, FALSE);
+		ASSERT(pNIDepends);
 
-		if (pGIDepends && IsItemDependentOn(*pGIDepends, dwOtherID)) // RECURSIVE CALL
+		if (pNIDepends && IsItemDependentOn(*pNIDepends, dwOtherID)) // RECURSIVE CALL
 			return TRUE;
 	}
 	
@@ -666,18 +666,18 @@ BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) cons
 	return FALSE;
 }
 
-int CGanttItemMap::BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& mapLengths) const
+int CNetworkItemMap::BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& mapLengths) const
 {
 	mapLengths.RemoveAll();
 
 	POSITION pos = GetStartPosition();
-	GANTTITEM* pGIUnused = NULL;
+	NETWORKITEM* pNIUnused = NULL;
 	DWORD dwTaskID = 0;
 
 	while (pos)
 	{
-		GetNextAssoc(pos, dwTaskID, pGIUnused);
-		ASSERT(pGIUnused);
+		GetNextAssoc(pos, dwTaskID, pNIUnused);
+		ASSERT(pNIUnused);
 
 		mapLengths[dwTaskID] = CalcMaxDependencyChainLength(dwTaskID);
 	}
@@ -685,20 +685,20 @@ int CGanttItemMap::BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& map
 	return mapLengths.GetCount();
 }
 
-int CGanttItemMap::CalcMaxDependencyChainLength(DWORD dwTaskID) const
+int CNetworkItemMap::CalcMaxDependencyChainLength(DWORD dwTaskID) const
 {
-	const GANTTITEM* pGI = GetItem(dwTaskID, FALSE);
-	ASSERT(pGI);
+	const NETWORKITEM* pNI = GetItem(dwTaskID, FALSE);
+	ASSERT(pNI);
 
-	if (!pGI || !pGI->aDependIDs.GetSize())
+	if (!pNI || !pNI->aDependIDs.GetSize())
 		return 0;
 
-	int nDepend = pGI->aDependIDs.GetSize();
+	int nDepend = pNI->aDependIDs.GetSize();
 	int nMaxDependLen = 0;
 
 	while (nDepend--)
 	{
-		DWORD dwDependID = pGI->aDependIDs[nDepend];
+		DWORD dwDependID = pNI->aDependIDs[nDepend];
 		ASSERT(dwDependID);
 
 		int nDependLen = CalcMaxDependencyChainLength(dwDependID);

@@ -44,12 +44,12 @@ BEGIN
     BEGIN
         BLOCK "040904B0"
         BEGIN
-            VALUE "FileDescription", "GanttChartExt DLL\0"
+            VALUE "FileDescription", "NetworkDiagramExt DLL\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
-            VALUE "InternalName", "GanttChartExt\0"
+            VALUE "InternalName", "NetworkDiagramExt\0"
             VALUE "LegalCopyright", "Copyright (C) 2012\0"
-            VALUE "OriginalFilename", "GanttChartExt.DLL\0"
-            VALUE "ProductName", "GanttChartExt Dynamic Link Library\0"
+            VALUE "OriginalFilename", "NetworkDiagramExt.DLL\0"
+            VALUE "ProductName", "NetworkDiagramExt Dynamic Link Library\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
         END
     END
@@ -158,7 +158,7 @@ IDD_NETWORKDIAGRAM_DIALOG DIALOG DISCARDABLE  0, 0, 321, 174
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "List1",IDC_LIST1,"SysListView32",LVS_REPORT | 
+    CONTROL         "List1",IDC_NETWORK_CTRL,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,0,0,321,174
 END
 
