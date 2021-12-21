@@ -2938,6 +2938,9 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 	CRect rColumn;
 	VERIFY(m_list.GetSubItemRect(nItem, nCol, LVIR_BOUNDS, rColumn));
 
+	rColumn.top += GraphicsMisc::ScaleByDPIFactor(2);
+	rColumn.bottom -= GraphicsMisc::ScaleByDPIFactor(3);
+
 	COLORREF crBorder, crFill;
 	GetGanttBarColors(gi, crBorder, crFill);
 
@@ -3717,9 +3720,6 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY
 
 	int nPos = -1;
 	m_mapDependencyChainLengths.Lookup(dwTaskID, nPos);
-
-	if (nPos == 0)
-		return FALSE;
 
 	int nCol = 1 + (nPos * 2); // alternate columns
 	CRect rCol;
