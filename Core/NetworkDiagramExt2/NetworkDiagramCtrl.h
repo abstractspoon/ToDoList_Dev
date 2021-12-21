@@ -59,10 +59,6 @@ public:
 	BOOL DeleteSelectedTaskDependency(DWORD dwDependID);
 
 	DWORD HitTestTask(const CPoint& ptScreen, bool bTitleColumnOnly) const;
-	void ExpandItem(HTREEITEM hti, BOOL bExpand = TRUE, BOOL bAndChildren = FALSE);
-
-	BOOL ZoomIn(BOOL bIn = TRUE);
-	BOOL ZoomBy(int nAmount);
 
 	void ScrollToSelectedTask();
 	void ScrollToTask(DWORD dwTaskID);
@@ -82,9 +78,7 @@ public:
 	static BOOL WantSortUpdate(TDC_ATTRIBUTE nAttrib);
 
 protected:
-	BOOL m_bReadOnly;
-
-	NETWORKITEM m_giPreDrag;
+	NETWORKITEM m_niPreDrag;
 	INetworkDependencyEditor* m_pDependEdit;
 
 	COLORREF m_crParent, m_crBarDefault;
@@ -97,8 +91,10 @@ protected:
 	CMap<DWORD, DWORD, int, int> m_mapDependencyChainLengths;
 
 protected:
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	virtual void PreSubclassWindow();
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
+protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -106,9 +102,6 @@ protected:
 	BOOL OnListLButtonUp(UINT nFlags, CPoint point);
 	BOOL OnListLButtonDblClk(UINT nFlags, CPoint point);
 	BOOL OnListMouseMove(UINT nFlags, CPoint point);
-
-	GM_ITEMSTATE GetItemState(int nItem) const;
-	GM_ITEMSTATE GetItemState(HTREEITEM hti) const;
 
 	void ClearDependencyPickLine(CDC* pDC = NULL);
 	BOOL DrawDependencyPickLine(const CPoint& ptClient);
@@ -120,11 +113,11 @@ protected:
 	NETWORKITEM* GetNetworkItem(DWORD dwTaskID) const;
 	BOOL RestoreNetworkItem(const NETWORKITEM& niPrev);
 
-	DWORD ListHitTestTask(const CPoint& point, BOOL bScreen/*, GTLC_HITTEST& nHit, BOOL bDragging*/) const;
-	DWORD ListDependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
-	BOOL SelectTask(HTREEITEM hti, const IUISELECTTASK& select, BOOL bForwards);
+//	DWORD HitTestTask(const CPoint& point, BOOL bScreen/*, GTLC_HITTEST& nHit, BOOL bDragging*/) const;
+	DWORD DependsHitTest(const CPoint& ptClient, DWORD& dwToTaskID);
 	DWORD GetTaskID(int nItem) const;
 
+	BOOL CanDragTask(DWORD dwTaskID) const;
 	BOOL StartDragging(const CPoint& ptCursor);
 	BOOL EndDragging(const CPoint& ptCursor);
 	BOOL UpdateDragging(const CPoint& ptCursor);
@@ -134,7 +127,10 @@ protected:
 	BOOL IsDragging() const;
 	void GetDragLimits(CRect& rLimits) const;
 
-	BOOL UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
+	void BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
+	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings);
+	int RemoveDeletedTasks(const ITASKLISTBASE* pTasks);
+	void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 
 	BOOL CalcDependencyEndPos(DWORD dwTaskID, NETWORKDEPENDENCY& depend, BOOL bTo, LPPOINT lpp = NULL) const;
 	BOOL BuildDependency(DWORD dwFromTaskID, DWORD, NETWORKDEPENDENCY& depend) const;

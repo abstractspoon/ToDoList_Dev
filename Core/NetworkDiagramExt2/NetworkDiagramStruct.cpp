@@ -628,6 +628,16 @@ NETWORKITEM* CNetworkItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) c
 	return pNI;
 }
 
+DWORD CNetworkItemMap::GetNextTaskID(POSITION& pos) const
+{
+	DWORD dwTaskID = 0;
+	NETWORKITEM* pNI = NULL;
+
+	GetNextAssoc(pos, dwTaskID, pNI);
+
+	return dwTaskID;
+}
+
 BOOL CNetworkItemMap::RestoreItem(const NETWORKITEM& giPrev)
 {
 	NETWORKITEM* pNI = NULL;

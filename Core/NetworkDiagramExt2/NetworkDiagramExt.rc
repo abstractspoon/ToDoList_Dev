@@ -159,7 +159,8 @@ STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "List1",IDC_NETWORK_CTRL,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | WS_BORDER | WS_TABSTOP,0,0,321,174
+                    LVS_SINGLESEL | LVS_OWNERDRAWFIXED | WS_BORDER | 
+                    WS_TABSTOP,0,0,321,174
 END
 
 #endif    // English (Australia) resources

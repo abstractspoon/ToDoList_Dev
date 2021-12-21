@@ -28,7 +28,7 @@ struct NETWORKITEM
 	BOOL operator!=(const NETWORKITEM& gi) const;
 	
 	CString sTitle;
-	COleDateTime dtDone; 
+	COleDateTime dtDone, dtStart, dtDue; 
 	COLORREF color;
 	CString sAllocTo;
 	BOOL bParent;
@@ -80,8 +80,10 @@ public:
 	void RemoveAll();
 	BOOL DeleteItem(DWORD dwTaskID);
 	BOOL HasItem(DWORD dwTaskID) const;
-	NETWORKITEM* GetItem(DWORD dwTaskID, BOOL bResolveReferences) const;
 	BOOL RestoreItem(const NETWORKITEM& giPrev);
+
+	NETWORKITEM* GetItem(DWORD dwTaskID, BOOL bResolveReferences) const;
+	DWORD GetNextTaskID(POSITION& pos) const;
 
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;
