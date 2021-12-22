@@ -369,6 +369,10 @@ void CNetworkDiagramCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	if (hTask == NULL)
 		return;
 
+	// Only interested in non-references
+	if (pTasks->GetTaskReferenceID(hTask))
+		return;
+
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
 	ASSERT(!m_data.HasItem(dwTaskID));
 
@@ -378,52 +382,7 @@ void CNetworkDiagramCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 	NETWORKITEM* pNI = new NETWORKITEM;
 	m_data[dwTaskID] = pNI;
 
-	pNI->dwTaskID = dwTaskID;
-	pNI->dwRefID = pTasks->GetTaskReferenceID(hTask);
-	pNI->nPosition = pTasks->GetTaskPosition(hTask);
-	pNI->color = pTasks->GetTaskTextColor(hTask);
-
-	// Only save data for non-references
-	if (pNI->dwRefID == 0)
-	{
-		pNI->sTitle = pTasks->GetTaskTitle(hTask);
-		pNI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
-//		pNI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
-		pNI->bParent = pTasks->IsTaskParent(hTask);
-		pNI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
-		pNI->bLocked = pTasks->IsTaskLocked(hTask, true);
-		pNI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
-
-		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pNI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
-
-		time64_t tDate = 0;
-
-		if (pTasks->GetTaskStartDate64(hTask, (pNI->bParent != FALSE), tDate))
-			pNI->dtStart = CDateHelper::GetDate(tDate);
-
-		if (pTasks->GetTaskDueDate64(hTask, (pNI->bParent != FALSE), tDate))
-			pNI->dtDue = CDateHelper::GetDate(tDate);
-
-		if (pTasks->GetTaskDoneDate64(hTask, tDate))
-			pNI->dtDone = CDateHelper::GetDate(tDate);
-
-		int nTag = pTasks->GetTaskTagCount(hTask);
-
-		while (nTag--)
-			pNI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
-
-		// Local dependencies only
-		int nDepend = pTasks->GetTaskDependencyCount(hTask);
-
-		while (nDepend--)
-		{
-			DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
-
-			if (dwDependID)
-				pNI->aDependIDs.Add(dwDependID);
-		}
-	}
+	VERIFY(pNI->Set(pTasks, hTask));
 
 	// add first child which will add all the rest
 	BuildData(pTasks, pTasks->GetFirstTask(hTask), TRUE);
@@ -445,11 +404,15 @@ void CNetworkDiagramCtrl::BuildData(const ITASKLISTBASE* pTasks, HTASKITEM hTask
 
 BOOL CNetworkDiagramCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UPDATETYPE nUpdate, BOOL bAndSiblings)
 {
+	ASSERT((nUpdate == IUI_EDIT) || (nUpdate == IUI_NEW));
+
 	if (hTask == NULL)
 		return FALSE;
 
-	ASSERT((nUpdate == IUI_EDIT) || (nUpdate == IUI_NEW));
-
+	// Only interested in non-references
+	if (pTasks->GetTaskReferenceID(hTask))
+		return FALSE;
+	
 	// handle task if not NULL (== root)
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
 	m_dwMaxTaskID = max(m_dwMaxTaskID, dwTaskID);
@@ -458,130 +421,30 @@ BOOL CNetworkDiagramCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTas
 	if (!m_data.HasItem(dwTaskID))
 	{
 		ASSERT(nUpdate == IUI_NEW);
-
 		return TRUE;
 	}
 	
-	// Don't resolve references here
-	NETWORKITEM* pNI = m_data.GetItem(dwTaskID, FALSE);
+	NETWORKITEM* pNI = m_data.GetItem(dwTaskID);
+	ASSERT(pNI);
 
-	if (!pNI)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	// Take a snapshot we can check changes against
-	NETWORKITEM niOrg = *pNI;
-
-	// Update colour for all tasks
-	pNI->color = pTasks->GetTaskTextColor(hTask);
-
-	// Existing tasks should not change reference ID 
-	DWORD dwRefID = pTasks->GetTaskReferenceID(hTask);
-	ASSERT(pNI->dwRefID == dwRefID);
-
-	pNI->dwOrgRefID = 0;
-	
-	// Update rest of attributes if not a reference task
-	if (pNI->dwRefID == 0)
-	{
-		// can't use a switch here because we also need to check for IUI_ALL
-		if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
-			pNI->sTitle = pTasks->GetTaskTitle(hTask);
-	
-// 		if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
-// 			pNI->sAllocTo = GetTaskAllocTo(pTasks, hTask);
-	
-		if (pTasks->IsAttributeAvailable(TDCA_ICON))
-			pNI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
-
-		if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
-			pNI->nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
-		
-		if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
-		{ 
-			time64_t tDate = 0;
-	
-			// update min/max too
-			if (pTasks->GetTaskStartDate64(hTask, (pNI->bParent != FALSE), tDate))
-				pNI->dtStart = CDateHelper::GetDate(tDate);
-			else
-				CDateHelper::ClearDate(pNI->dtStart);
-		}
-	
-		if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
-		{
-			time64_t tDate = 0;
-
-			// update min/max too
-			if (pTasks->GetTaskDueDate64(hTask, (pNI->bParent != FALSE), tDate))
-				pNI->dtDue = CDateHelper::GetDate(tDate);
-			else
-				CDateHelper::ClearDate(pNI->dtDue);
-		}
-	
-		if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
-		{
-			time64_t tDate = 0;
-
-			if (pTasks->GetTaskDoneDate64(hTask, tDate))
-				pNI->dtDone = CDateHelper::GetDate(tDate);
-			else
-				CDateHelper::ClearDate(pNI->dtDone);
-		}
-	
-// 		if (pTasks->IsAttributeAvailable(TDCA_TAGS))
-// 		{
-// 			int nTag = pTasks->GetTaskTagCount(hTask);
-// 			pNI->aTags.RemoveAll();
-// 		
-// 			while (nTag--)
-// 				pNI->aTags.Add(pTasks->GetTaskTag(hTask, nTag));
-// 		}
-	
-		if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
-		{
-			int nDepend = pTasks->GetTaskDependencyCount(hTask);
-			pNI->aDependIDs.RemoveAll();
-		
-			while (nDepend--)
-			{
-				// Local dependencies only
-				DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
-
-				if (dwDependID)
-					pNI->aDependIDs.Add(dwDependID);
-			}
-		}
-
-		// Always update these
-		pNI->bLocked = pTasks->IsTaskLocked(hTask, true);
-		pNI->bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
-	}
-
-	// detect update
-	BOOL bChange = (*pNI != niOrg);
+	BOOL bChange = pNI->Update(pTasks, hTask);
 
 	// children
-	if (UpdateData(pTasks, pTasks->GetFirstTask(hTask), nUpdate, TRUE))
-		bChange = TRUE;
+	bChange |= UpdateData(pTasks, pTasks->GetFirstTask(hTask), nUpdate, TRUE);
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
 	{
 		HTASKITEM hSibling = pTasks->GetNextTask(hTask);
-		
+
 		while (hSibling)
 		{
-			// FALSE == not siblings
-			if (UpdateData(pTasks, hSibling, nUpdate, FALSE))
-				bChange = TRUE;
-			
+			bChange |= UpdateData(pTasks, hSibling, nUpdate, FALSE); // FALSE == not siblings
+
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
-	
+
 	return bChange;
 }
 
@@ -631,7 +494,7 @@ int CNetworkDiagramCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 
 NETWORKITEM* CNetworkDiagramCtrl::GetNetworkItem(DWORD dwTaskID) const
 {
-	return m_data.GetItem(dwTaskID, TRUE);
+	return m_data.GetItem(dwTaskID);
 }
 
 BOOL CNetworkDiagramCtrl::RestoreNetworkItem(const NETWORKITEM& niPrev)
@@ -1536,7 +1399,7 @@ BOOL CNetworkDiagramCtrl::ValidateDragPoint(CPoint& ptDrag) const
 
 BOOL CNetworkDiagramCtrl::CanDragTask(DWORD dwTaskID) const
 {
-	if (m_data.ItemIsLocked(dwTaskID, FALSE))
+	if (m_data.ItemIsLocked(dwTaskID))
 		return FALSE;
 
 	// else
@@ -1590,18 +1453,6 @@ BOOL CNetworkDiagramCtrl::EndDragging(const CPoint& ptCursor)
 
 	if (IsDragging())
 	{
-		DWORD dwTaskID = GetSelectedTaskID();
-
-		NETWORKITEM* pNI = NULL;
-		GET_NI_RET(dwTaskID, pNI, FALSE);
-
-		// Restore original refID because that's what we've been really dragging
-		if (pNI->dwOrgRefID)
-		{
-			dwTaskID = pNI->dwOrgRefID;
-			pNI->dwOrgRefID = 0;
-		}
-
 		// dropping outside the list is a cancel
 		if (!IsValidDragPoint(ptCursor))
 		{

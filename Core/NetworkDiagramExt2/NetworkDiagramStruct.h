@@ -12,8 +12,9 @@
 #include "NetworkDiagramenum.h"
 
 #include "..\Shared\DateHelper.h"
+#include "..\Shared\mapex.h"
 
-#include <afxtempl.h>
+#include "..\Interfaces\ITaskList.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -31,35 +32,27 @@ struct NETWORKITEM
 	COleDateTime dtDone, dtStart, dtDue; 
 	COLORREF color;
 	CString sAllocTo;
-	BOOL bParent;
-	DWORD dwTaskID, dwRefID, dwOrgRefID;
+	DWORD dwTaskID;
 	CDWordArray aDependIDs;
 	CStringArray aTags;
 	int nPercent;
 	BOOL bGoodAsDone, bSomeSubtaskDone;
-	int nPosition;
 	BOOL bLocked, bHasIcon;
+
+	BOOL Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
+	BOOL Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
 	
  	BOOL IsDone(BOOL bIncGoodAs) const;
-// 	BOOL IsMilestone(const CString& sMilestoneTag) const;
-// 
-// 	BOOL HasStartDate() const;
-// 	BOOL HasDueDate() const;
-// 	BOOL HasDoneDate(BOOL bCalcParentDates) const;
+ 	BOOL IsMilestone(const CString& sMilestoneTag) const;
 	BOOL HasColor() const;
-// 
-// 	void SetStartDate(time64_t tDate, BOOL bAndMinMax = FALSE);
-// 	void SetDueDate(time64_t tDate, BOOL bAndMinMax = FALSE);
-// 	void SetStartDate(const COleDateTime& date, BOOL bAndMinMax = FALSE);
-// 	void SetDueDate(const COleDateTime& date, BOOL bAndMinMax = FALSE);
-// 	void SetDoneDate(time64_t tDate);
-// 	
-// 	void ClearStartDate(BOOL bAndMinMax = FALSE);
-// 	void ClearDueDate(BOOL bAndMinMax = FALSE);
-// 	void ClearDoneDate();
-// 
-// 	BOOL GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, COleDateTime& dtStart, COleDateTime& dtDue) const;
-// 	void MinMaxDates(const NETWORKITEM& giOther, BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue);
+
+	void SetStartDate(time64_t tDate);
+	void SetDueDate(time64_t tDate);
+	void SetDoneDate(time64_t tDate);
+	
+	void ClearStartDate();
+	void ClearDueDate();
+	void ClearDoneDate();
 	
 	COLORREF GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
 	COLORREF GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const;
@@ -82,11 +75,10 @@ public:
 	BOOL HasItem(DWORD dwTaskID) const;
 	BOOL RestoreItem(const NETWORKITEM& giPrev);
 
-	NETWORKITEM* GetItem(DWORD dwTaskID, BOOL bResolveReferences) const;
+	NETWORKITEM* GetItem(DWORD dwTaskID) const;
 	DWORD GetNextTaskID(POSITION& pos) const;
 
-	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
-	BOOL ItemIsReference(DWORD dwTaskID) const;
+	BOOL ItemIsLocked(DWORD dwTaskID) const;
 	BOOL ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL ItemHasDependecies(DWORD dwTaskID) const;
 	BOOL IsItemDependentOn(const NETWORKITEM& gi, DWORD dwOtherID) const;

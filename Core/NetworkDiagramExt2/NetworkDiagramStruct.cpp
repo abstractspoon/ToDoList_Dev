@@ -219,41 +219,34 @@ BOOL NETWORKDEPENDENCY::CalcBoundingRect(CRect& rect) const
 NETWORKITEM::NETWORKITEM() 
 	: 
 	color(CLR_NONE), 
-	bParent(FALSE), 
 	dwTaskID(0), 
-	dwRefID(0), 
-	dwOrgRefID(0), 
 	bGoodAsDone(FALSE),
-	nPosition(-1),
 	bLocked(FALSE),
 	bSomeSubtaskDone(FALSE),
 	nPercent(0)
 {
 }
 
-NETWORKITEM::NETWORKITEM(const NETWORKITEM& gi)
+NETWORKITEM::NETWORKITEM(const NETWORKITEM& ni)
 {
-	*this = gi;
+	*this = ni;
 }
 
-NETWORKITEM& NETWORKITEM::operator=(const NETWORKITEM& gi)
+NETWORKITEM& NETWORKITEM::operator=(const NETWORKITEM& ni)
 {
-	sTitle = gi.sTitle;
-	dtDone = gi.dtDone;
-	color = gi.color;
-	sAllocTo = gi.sAllocTo;
-	bParent = gi.bParent;
-	dwTaskID = gi.dwTaskID;
-	dwRefID = gi.dwRefID;
-	nPercent = gi.nPercent;
-	bGoodAsDone = gi.bGoodAsDone;
-	nPosition = gi.nPosition;
-	bLocked = gi.bLocked;
-	bHasIcon = gi.bHasIcon;
-	bSomeSubtaskDone = gi.bSomeSubtaskDone;
+	sTitle = ni.sTitle;
+	dtDone = ni.dtDone;
+	color = ni.color;
+	dwTaskID = ni.dwTaskID;
+	nPercent = ni.nPercent;
+	bGoodAsDone = ni.bGoodAsDone;
+	bLocked = ni.bLocked;
+	bHasIcon = ni.bHasIcon;
+	bSomeSubtaskDone = ni.bSomeSubtaskDone;
+	sAllocTo = ni.sAllocTo;
 	
-	aTags.Copy(gi.aTags);
-	aDependIDs.Copy(gi.aDependIDs);
+	aTags.Copy(ni.aTags);
+	aDependIDs.Copy(ni.aDependIDs);
 	
 	return (*this);
 }
@@ -263,28 +256,188 @@ NETWORKITEM::~NETWORKITEM()
 	
 }
 
-BOOL NETWORKITEM::operator==(const NETWORKITEM& gi) const
+BOOL NETWORKITEM::operator==(const NETWORKITEM& ni) const
 {
-	return ((sTitle == gi.sTitle) &&
-			(dtDone == gi.dtDone) &&
-			(color == gi.color) &&
-			(sAllocTo == gi.sAllocTo) &&
-			(bParent == gi.bParent) &&
-			(dwTaskID == gi.dwTaskID) &&
-			(dwRefID == gi.dwRefID) &&
-			(nPercent == gi.nPercent) &&	
-			(nPosition == gi.nPosition) &&
-			(bGoodAsDone == gi.bGoodAsDone) &&
-			(bLocked == gi.bLocked) &&
-			(bHasIcon == gi.bHasIcon) &&
-			(bSomeSubtaskDone == gi.bSomeSubtaskDone) &&
-			Misc::MatchAll(aTags, gi.aTags) &&
-			Misc::MatchAll(aDependIDs, gi.aDependIDs));
+	return ((sTitle == ni.sTitle) &&
+			(dtDone == ni.dtDone) &&
+			(color == ni.color) &&
+			(sAllocTo == ni.sAllocTo) &&
+			(dwTaskID == ni.dwTaskID) &&
+			(nPercent == ni.nPercent) &&	
+			(bGoodAsDone == ni.bGoodAsDone) &&
+			(bLocked == ni.bLocked) &&
+			(bHasIcon == ni.bHasIcon) &&
+			(bSomeSubtaskDone == ni.bSomeSubtaskDone) &&
+			Misc::MatchAll(aTags, ni.aTags) &&
+			Misc::MatchAll(aDependIDs, ni.aDependIDs));
 }
 
-BOOL NETWORKITEM::operator!=(const NETWORKITEM& gi) const
+BOOL NETWORKITEM::operator!=(const NETWORKITEM& ni) const
 {
-	return !(*this == gi);
+	return !(*this == ni);
+}
+
+BOOL NETWORKITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+{
+	if (hTask == NULL)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Only interested in non-references
+	if (pTasks->GetTaskReferenceID(hTask))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	dwTaskID = pTasks->GetTaskID(hTask);
+	color = pTasks->GetTaskTextColor(hTask);
+	sTitle = pTasks->GetTaskTitle(hTask);
+	bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+	nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
+	bLocked = pTasks->IsTaskLocked(hTask, true);
+	bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+
+	LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
+	bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+
+	time64_t tDate = 0;
+
+	if (pTasks->GetTaskStartDate64(hTask, false, tDate))
+		dtStart = CDateHelper::GetDate(tDate);
+
+	if (pTasks->GetTaskDueDate64(hTask, false, tDate))
+		dtDue = CDateHelper::GetDate(tDate);
+
+	if (pTasks->GetTaskDoneDate64(hTask, tDate))
+		dtDone = CDateHelper::GetDate(tDate);
+
+	int nTag = pTasks->GetTaskTagCount(hTask);
+
+	while (nTag--)
+		aTags.Add(pTasks->GetTaskTag(hTask, nTag));
+
+	CStringArray aAllocTo;
+	int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
+
+	while (nAllocTo--)
+		aAllocTo.Add(pTasks->GetTaskAllocatedTo(hTask, nAllocTo));
+
+	sAllocTo = Misc::FormatArray(aAllocTo);
+
+	// Local dependencies only
+	int nDepend = pTasks->GetTaskDependencyCount(hTask);
+
+	while (nDepend--)
+	{
+		DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+
+		if (dwDependID)
+			aDependIDs.Add(dwDependID);
+	}
+}
+
+BOOL NETWORKITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
+{
+	if (hTask == NULL)
+		return FALSE;
+
+	// Only interested in non-references
+	if (pTasks->GetTaskReferenceID(hTask))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Take a snapshot we can check changes against
+	NETWORKITEM niOrg = *this;
+
+	// Update colour for all tasks
+	color = pTasks->GetTaskTextColor(hTask);
+
+	// can't use a switch here because we also need to check for IUI_ALL
+	if (pTasks->IsAttributeAvailable(TDCA_TASKNAME))
+		sTitle = pTasks->GetTaskTitle(hTask);
+
+	if (pTasks->IsAttributeAvailable(TDCA_ICON))
+		bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
+
+	if (pTasks->IsAttributeAvailable(TDCA_PERCENT))
+		nPercent = pTasks->GetTaskPercentDone(hTask, TRUE);
+
+	if (pTasks->IsAttributeAvailable(TDCA_STARTDATE))
+	{
+		time64_t tDate = 0;
+
+		if (pTasks->GetTaskStartDate64(hTask, false, tDate))
+			SetStartDate(tDate);
+		else
+			ClearStartDate();
+	}
+
+	if (pTasks->IsAttributeAvailable(TDCA_DUEDATE))
+	{
+		time64_t tDate = 0;
+
+		if (pTasks->GetTaskDueDate64(hTask, false, tDate))
+			SetDueDate(tDate);
+		else
+			ClearDueDate();
+	}
+
+	if (pTasks->IsAttributeAvailable(TDCA_DONEDATE))
+	{
+		time64_t tDate = 0;
+
+		if (pTasks->GetTaskDoneDate64(hTask, tDate))
+			SetDoneDate(tDate);
+		else
+			ClearDoneDate();
+	}
+
+	if (pTasks->IsAttributeAvailable(TDCA_TAGS))
+	{
+		int nTag = pTasks->GetTaskTagCount(hTask);
+		aTags.RemoveAll();
+
+		while (nTag--)
+			aTags.Add(pTasks->GetTaskTag(hTask, nTag));
+	}
+
+	if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
+	{
+		CStringArray aAllocTo;
+		int nAllocTo = pTasks->GetTaskAllocatedToCount(hTask);
+
+		while (nAllocTo--)
+			aAllocTo.Add(pTasks->GetTaskAllocatedTo(hTask, nAllocTo));
+
+		sAllocTo = Misc::FormatArray(aAllocTo);
+	}
+
+	if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
+	{
+		int nDepend = pTasks->GetTaskDependencyCount(hTask);
+		aDependIDs.RemoveAll();
+
+		while (nDepend--)
+		{
+			// Local dependencies only
+			DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
+
+			if (dwDependID)
+				aDependIDs.Add(dwDependID);
+		}
+	}
+
+	// Always update these
+	bLocked = pTasks->IsTaskLocked(hTask, true);
+	bGoodAsDone = pTasks->IsTaskGoodAsDone(hTask);
+
+	// detect update
+	return (*this != niOrg);
 }
 
 BOOL NETWORKITEM::IsDone(BOOL bIncGoodAs) const
@@ -295,27 +448,6 @@ BOOL NETWORKITEM::IsDone(BOOL bIncGoodAs) const
 	// else
 	return (bIncGoodAs && bGoodAsDone);
 }
-
-/*
-BOOL NETWORKITEM::HasStartDate() const
-{
-	return dtRange.HasStart();
-}
-
-BOOL NETWORKITEM::HasDueDate() const
-{
-	return dtRange.HasEnd();
-}
-
-BOOL NETWORKITEM::HasDoneDate(BOOL bCalcParentDates) const
-{
-	if (bParent && bCalcParentDates)
-		return FALSE;
-
-	// else
-	return CDateHelper::IsDateSet(dtDone);
-}
-*/
 
 COLORREF NETWORKITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
@@ -391,52 +523,29 @@ COleDateTime NETWORKITEM::GetDate(time64_t tDate, BOOL bEndOfDay)
 	return date;
 }
 
-/*
-void NETWORKITEM::SetStartDate(time64_t tDate, BOOL bAndMinMax)
+void NETWORKITEM::SetStartDate(time64_t tDate)
 {
-	SetStartDate(GetDate(tDate, FALSE), bAndMinMax);
+	dtStart = CDateHelper::GetDate(tDate);
 }
 
-void NETWORKITEM::SetDueDate(time64_t tDate, BOOL bAndMinMax)
+void NETWORKITEM::SetDueDate(time64_t tDate)
 {
-	SetDueDate(GetDate(tDate, TRUE), bAndMinMax);
-}
-
-void NETWORKITEM::SetStartDate(const COleDateTime& date, BOOL bAndMinMax)
-{
-	dtRange.SetStart(date);
-
-	if (bAndMinMax)
-		dtMinMaxRange.SetStart(date);
-}
-
-void NETWORKITEM::SetDueDate(const COleDateTime& date, BOOL bAndMinMax)
-{
-	dtRange.SetEnd(date);
-
-	if (bAndMinMax)
-		dtMinMaxRange.SetEnd(date);
+	dtDue = CDateHelper::GetDate(tDate);
 }
 
 void NETWORKITEM::SetDoneDate(time64_t tDate)
 {
-	dtDone = GetDate(tDate, TRUE);
+	dtDone = CDateHelper::GetDate(tDate);
 }
 
-void NETWORKITEM::ClearStartDate(BOOL bAndMinMax)
+void NETWORKITEM::ClearStartDate()
 {
-	dtRange.ClearStart();
-
-	if (bAndMinMax)
-		dtMinMaxRange.ClearStart();
+	CDateHelper::ClearDate(dtDone);
 }
 
-void NETWORKITEM::ClearDueDate(BOOL bAndMinMax)
+void NETWORKITEM::ClearDueDate()
 {
-	dtRange.ClearEnd();
-
-	if (bAndMinMax)
-		dtMinMaxRange.ClearStart();
+	CDateHelper::ClearDate(dtDue);
 }
 
 void NETWORKITEM::ClearDoneDate()
@@ -444,76 +553,10 @@ void NETWORKITEM::ClearDoneDate()
 	CDateHelper::ClearDate(dtDone);
 }
 
-BOOL NETWORKITEM::GetStartEndDates(BOOL bCalcParentDates, BOOL bCalcMissingStart, BOOL bCalcMissingDue, COleDateTime& dtStart, COleDateTime& dtDue) const
-{
-	BOOL bDoneSet = FALSE;
-
-	if (bParent && bCalcParentDates)
-	{
-		dtStart = dtMinMaxRange.GetStart();
-		dtDue = dtMinMaxRange.GetEnd();
-	}
-	else
-	{
-		dtStart = dtRange.GetStart();
-		dtDue = dtRange.GetEnd();
-
-		bDoneSet = CDateHelper::IsDateSet(dtDone);
-
-		// do we need to calculate due date?
-		if (!CDateHelper::IsDateSet(dtDue) && bCalcMissingDue)
-		{
-			// always take completed date if that is set
-			if (bDoneSet)
-			{
-				dtDue = dtDone;
-			}
-			else // take later of start date and today
-			{
-				dtDue = CDateHelper::GetDateOnly(dtStart);
-				CDateHelper::Max(dtDue, CDateHelper::GetDate(DHD_TODAY));
-	
-				// and move to end of the day
-				dtDue = CDateHelper::GetEndOfDay(dtDue);
-			}
-	
-			ASSERT(CDateHelper::IsDateSet(dtDue));
-		}
-	
-		// do we need to calculate start date?
-		if (!CDateHelper::IsDateSet(dtStart) && bCalcMissingStart)
-		{
-			// take earlier of due or completed date
-			dtStart = CDateHelper::GetDateOnly(dtDue);
-			CDateHelper::Min(dtStart, CDateHelper::GetDateOnly(dtDone));
-	
-			// take the earlier of that and 'today'
-			CDateHelper::Min(dtStart, CDateHelper::GetDate(DHD_TODAY));
-	
-			ASSERT(CDateHelper::IsDateSet(dtStart));
-		}
-	}
-
-	return (CDateHelper::IsDateSet(dtStart) && 
-			CDateHelper::IsDateSet(dtDue) &&
-			(dtDue >= dtStart));
-}
-
 BOOL NETWORKITEM::IsMilestone(const CString& sMilestoneTag) const
 {
-	if (sMilestoneTag.IsEmpty() || (aTags.GetSize() == 0))
-		return FALSE;
-
-	if (!bParent && !dtRange.HasEnd())
-		return FALSE;
-
-	if (bParent && !dtMinMaxRange.HasEnd())
-		return FALSE;
-
-	// else
 	return Misc::Contains(sMilestoneTag, aTags, FALSE, TRUE);
 }
-*/
 
 //////////////////////////////////////////////////////////////////////
 
@@ -522,30 +565,23 @@ CNetworkItemMap::~CNetworkItemMap()
 	RemoveAll();
 }
 
-BOOL CNetworkItemMap::ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const
+BOOL CNetworkItemMap::ItemIsLocked(DWORD dwTaskID) const
 {
-	const NETWORKITEM* pNI = GetItem(dwTaskID, TRUE);
+	const NETWORKITEM* pNI = GetItem(dwTaskID);
 
-	return (pNI && pNI->bLocked && (!bTreatRefsAsUnlocked || !pNI->dwOrgRefID));
-}
-
-BOOL CNetworkItemMap::ItemIsReference(DWORD dwTaskID) const
-{
-	const NETWORKITEM* pNI = GetItem(dwTaskID, TRUE); 
-
-	return (pNI && pNI->dwOrgRefID);
+	return (pNI && pNI->bLocked);
 }
 
 BOOL CNetworkItemMap::ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const
 {
-	const NETWORKITEM* pNI = GetItem(dwTaskID, TRUE);
+	const NETWORKITEM* pNI = GetItem(dwTaskID);
 
 	return (pNI && pNI->IsDone(bIncGoodAs));
 }
 
 BOOL CNetworkItemMap::ItemHasDependecies(DWORD dwTaskID) const
 {
-	const NETWORKITEM* pNI = GetItem(dwTaskID, TRUE);
+	const NETWORKITEM* pNI = GetItem(dwTaskID);
 
 	return (pNI && pNI->aDependIDs.GetSize());
 }
@@ -592,7 +628,7 @@ BOOL CNetworkItemMap::HasItem(DWORD dwTaskID) const
 	return Lookup(dwTaskID, pNIUnused);
 }
 
-NETWORKITEM* CNetworkItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) const
+NETWORKITEM* CNetworkItemMap::GetItem(DWORD dwTaskID) const
 {
 	if (dwTaskID == 0)
 		return NULL;
@@ -603,26 +639,6 @@ NETWORKITEM* CNetworkItemMap::GetItem(DWORD dwTaskID, BOOL bResolveReferences) c
 	{
 		ASSERT(pNI);
 		return NULL;
-	}
-
-	// Resolves references
-	pNI->dwOrgRefID = 0;
-
-	if (pNI && pNI->dwRefID && bResolveReferences)
-	{
-		ASSERT(pNI->dwOrgRefID == 0);
-		ASSERT(pNI->dwRefID != dwTaskID);
-
-		DWORD dwRefID = pNI->dwRefID;
-
-		if ((dwRefID != dwTaskID) && Lookup(dwRefID, pNI))
-		{
-			// copy over the reference id so that the caller can still detect it
-			ASSERT(pNI->dwRefID == 0);
-
-			pNI->dwOrgRefID = dwTaskID;
-			pNI->dwRefID = 0;
-		}
 	}
 
 	return pNI;
@@ -665,7 +681,7 @@ BOOL CNetworkItemMap::IsItemDependentOn(const NETWORKITEM& gi, DWORD dwOtherID) 
 			return TRUE;
 
 		// else check dependents of dwDependID
-		const NETWORKITEM* pNIDepends = GetItem(dwDependID, FALSE);
+		const NETWORKITEM* pNIDepends = GetItem(dwDependID);
 		ASSERT(pNIDepends);
 
 		if (pNIDepends && IsItemDependentOn(*pNIDepends, dwOtherID)) // RECURSIVE CALL
@@ -697,7 +713,7 @@ int CNetworkItemMap::BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& m
 
 int CNetworkItemMap::CalcMaxDependencyChainLength(DWORD dwTaskID) const
 {
-	const NETWORKITEM* pNI = GetItem(dwTaskID, FALSE);
+	const NETWORKITEM* pNI = GetItem(dwTaskID);
 	ASSERT(pNI);
 
 	if (!pNI || !pNI->aDependIDs.GetSize())
