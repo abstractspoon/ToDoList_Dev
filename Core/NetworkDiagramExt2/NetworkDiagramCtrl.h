@@ -88,7 +88,7 @@ protected:
 //	CString m_sMilestoneTag;
 
 	CNetworkItemMap m_data;
-	CMap<DWORD, DWORD, int, int> m_mapDependencyChainLengths;
+	CNetworkGroupsMap m_mapGroups;
 
 protected:
 	virtual void PreSubclassWindow();

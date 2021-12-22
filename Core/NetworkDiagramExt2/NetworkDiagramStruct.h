@@ -65,6 +65,20 @@ struct NETWORKITEM
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct NETWORKGROUPITEM
+{
+	DWORD dwTaskID;
+	POINT ptLocation;
+};
+
+typedef CMap<DWORD, DWORD, NETWORKGROUPITEM, NETWORKGROUPITEM&> CNetworkGroup;
+
+class CNetworkGroupsMap : public CContainerMap<int, int, CNetworkGroup>
+{
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 class CNetworkItemMap : public CMap<DWORD, DWORD, NETWORKITEM*, NETWORKITEM*&>
 {
 public:
@@ -86,7 +100,12 @@ public:
 	int BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& mapLengths) const;
 	int CalcMaxDependencyChainLength(DWORD dwTaskID) const;
 
+	int BuildDependencyGroups(CNetworkGroupsMap& aGroups) const;
+
 protected:
+	int GetAllDependents(CDWordSet& aDependentIDs) const;
+	int GetAllEndTasks(const CDWordSet& aDependentIDs, CDWordArray& aEndTaskIDs) const;
+	void AddTaskToGroup(DWORD dwTaskID, CNetworkGroup* pGroup) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

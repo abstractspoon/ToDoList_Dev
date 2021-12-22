@@ -734,3 +734,101 @@ int CNetworkItemMap::CalcMaxDependencyChainLength(DWORD dwTaskID) const
 	return nMaxDependLen + 1; // the dependency itself
 }
 
+int CNetworkItemMap::BuildDependencyGroups(CNetworkGroupsMap& aGroups) const
+{
+	aGroups.RemoveAll();
+
+	// Get the set of all tasks on whom other tasks are dependent
+	CDWordSet aDependentIDs;
+
+	if (GetAllDependents(aDependentIDs))
+	{
+		// Get the set of all tasks which have dependencies but 
+		// on whom NO other tasks are dependent
+		CDWordArray aEndTaskIDs;
+
+		if (GetAllEndTasks(aDependentIDs, aEndTaskIDs))
+		{
+			// Build the groups by working backwards from each end task
+			int nEndTask = aEndTaskIDs.GetSize();
+
+			while (nEndTask--)
+			{
+				DWORD dwTaskID = aEndTaskIDs[nEndTask];
+				CNetworkGroup* pGroup = aGroups.GetAddMapping(nEndTask);
+
+				AddTaskToGroup(dwTaskID, pGroup);
+			}
+		}
+	}
+	
+	return aGroups.GetCount();
+}
+
+int CNetworkItemMap::GetAllDependents(CDWordSet& aDependentIDs) const
+{
+	aDependentIDs.RemoveAll();
+
+	POSITION pos = GetStartPosition();
+	NETWORKITEM* pNI = NULL;
+	DWORD dwTaskID = 0;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pNI);
+		ASSERT(pNI);
+
+		int nDepend = pNI->aDependIDs.GetSize();
+
+		while (nDepend--)
+			aDependentIDs.Add(pNI->aDependIDs[nDepend]);
+	}
+
+	return aDependentIDs.GetCount();
+}
+
+int CNetworkItemMap::GetAllEndTasks(const CDWordSet& aDependentIDs, CDWordArray& aEndTaskIDs) const
+{
+	aEndTaskIDs.RemoveAll();
+
+	POSITION pos = GetStartPosition();
+	NETWORKITEM* pNI = NULL;
+	DWORD dwTaskID = 0;
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pNI);
+		ASSERT(pNI);
+
+		if (pNI->aDependIDs.GetSize() && !aDependentIDs.Has(dwTaskID))
+			aEndTaskIDs.Add(dwTaskID);
+	}
+
+	return aEndTaskIDs.GetCount();
+}
+
+void CNetworkItemMap::AddTaskToGroup(DWORD dwTaskID, CNetworkGroup* pGroup) const
+{
+	ASSERT(pGroup);
+	ASSERT(dwTaskID);
+
+	NETWORKGROUPITEM ngi;
+
+	if (pGroup->Lookup(dwTaskID, ngi))
+	{
+		ASSERT(ngi.dwTaskID == dwTaskID);
+		return; // already added
+	}
+
+	const NETWORKITEM* pNI = GetItem(dwTaskID);
+	ASSERT(pNI);
+
+	ngi.dwTaskID = dwTaskID;
+	pGroup->SetAt(dwTaskID, ngi);
+
+	// This item's dependencies (can be zero)
+	int nDepend = pNI->aDependIDs.GetSize();
+
+	while (nDepend--)
+		AddTaskToGroup(pNI->aDependIDs[nDepend], pGroup);
+}

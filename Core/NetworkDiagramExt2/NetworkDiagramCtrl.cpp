@@ -332,7 +332,7 @@ void CNetworkDiagramCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE
 		ASSERT(0);
 	}
 
-	m_data.BuildDependencyChainLengths(m_mapDependencyChainLengths);
+	m_data.BuildDependencyGroups(m_mapGroups);
 }
 
 BOOL CNetworkDiagramCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)

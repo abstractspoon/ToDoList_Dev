@@ -393,9 +393,7 @@ public:
 		while (pos)
 		{
 			GetNextAssoc(pos, rKey, pMapping);
-
 			ASSERT(pMapping);
-			ASSERT(!rKey.IsEmpty());
 
 			delete pMapping;
 		}
