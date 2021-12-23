@@ -127,9 +127,6 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <None Include="res\PertNetwork.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
-      <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\PertNetworkUIExtensionCore\PertNetworkUIExtensionCore.csproj">
       <Project>{d03aa054-9987-44dc-b03f-691d79506da9}</Project>
     </ProjectReference>

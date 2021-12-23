@@ -86,7 +86,6 @@ protected:
 	DWORD GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwTaskID) const;
 	bool DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);
 	
-	static bool Map(IUI_APPCOMMAND nCmd, PertNetworkControl::ExpandNode% expand);
 };
 
 DLL_DECLSPEC int GetInterfaceVersion()
