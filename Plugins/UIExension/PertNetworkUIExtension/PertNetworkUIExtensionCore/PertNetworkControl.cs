@@ -274,11 +274,6 @@ namespace PertNetworkUIExtension
 			// For derived classes
 		}
 
-		protected override void OnPaintBackground(PaintEventArgs e)
-		{
-			//base.OnPaintBackground(e);
-		}
-
         protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
 			// TODO
