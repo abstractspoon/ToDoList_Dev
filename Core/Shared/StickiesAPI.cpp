@@ -143,7 +143,12 @@ HWND CStickiesAPI::GetStickiesWindow(BOOL bAutoStart) const
 	if (hwndStickies == NULL && !m_sStickiesPath.IsEmpty() && bAutoStart)
 	{
 		// try (re)starting stickies
-		LRESULT lr = (LRESULT)ShellExecute(NULL, NULL, m_sStickiesPath, NULL, NULL, SW_SHOWMINIMIZED);
+		LRESULT lr = (LRESULT)ShellExecute(NULL, 
+										   NULL, 
+										   m_sStickiesPath, 
+										   NULL, 
+										   FileMisc::GetFolderFromFilePath(m_sStickiesPath), 
+										   SW_SHOWMINIMIZED);
 
 		if (lr >= SE_ERR_SUCCESS)
 		{
