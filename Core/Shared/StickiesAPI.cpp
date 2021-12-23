@@ -68,9 +68,7 @@ BOOL CStickiesAPI::Initialize(CWnd* pCallback, int nCommandID, LPCTSTR szStickie
 
 	if (m_hwndCallback != NULL)
 	{
-		LRESULT lr = SendCommand(m_nInitialCmdID, _T("do register"));
-						
-		if (lr != STICKY_SUCCESS)
+		if (!SendCommand(m_nInitialCmdID, _T("do register")))
 		{
 			FileMisc::LogTextRaw(_T("CStickiesAPI::Initialize(Register callback) failed"));
 
@@ -103,7 +101,7 @@ void CStickiesAPI::Release()
 /////////////////////////////////////////////////////////////////////////////
 // CStickiesAPI message handlers
 
-LRESULT CStickiesAPI::SendCommand(int nCommandID, LPCTSTR szCommand, LPCTSTR szStickyID, LPCTSTR szExtra) const
+BOOL CStickiesAPI::SendCommand(int nCommandID, LPCTSTR szCommand, LPCTSTR szStickyID, LPCTSTR szExtra) const
 {
 	HWND hwndStickies = GetStickiesWindow();
 
@@ -132,7 +130,11 @@ LRESULT CStickiesAPI::SendCommand(int nCommandID, LPCTSTR szCommand, LPCTSTR szS
 	delete [] szMBCommand;
 #endif
 
-	return lr;
+	if (GetMajorVersion() >= 10)
+		return (lr == TRUE);
+
+	// else
+	return (lr == 0L);
 }
 
 HWND CStickiesAPI::GetStickiesWindow(BOOL bAutoStart) const

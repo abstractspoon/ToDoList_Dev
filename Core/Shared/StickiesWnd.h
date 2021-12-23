@@ -31,8 +31,8 @@ public:
 	BOOL SetStickyContent(const CString& sStickyID, const CString& sContent, BOOL bRTF = FALSE);
 	BOOL SetStickyAttribute(const CString& sStickyID, const CString& sAttribute, const CString& sValue);
 
-	LRESULT SendMessage(const CString& sCommand, CString& sReply, const CString& sStickyID = _T(""), const CString& sExtra = _T(""));
-	LRESULT SendMessage(const CString& sCommand);
+	BOOL SendMessage(const CString& sCommand, CString& sReply, const CString& sStickyID = _T(""), const CString& sExtra = _T(""));
+	BOOL SendMessage(const CString& sCommand);
 
 // Attributes
 protected:

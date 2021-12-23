@@ -10,9 +10,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // CStickiesAPI 
 
-const LRESULT STICKY_TIMEOUT = 0xffffffff;
-const LRESULT STICKY_SUCCESS = 0;
-
 class CStickiesAPI 
 {
 // Construction
@@ -26,7 +23,7 @@ public:
 	int GetMajorVersion() const { return _ttoi(m_sAppVer); }
 
 	BOOL IsValid() const { return (m_hwndCallback != NULL); }
-	LRESULT SendCommand(int nCommandID, LPCTSTR szCommand, LPCTSTR szStickyID = NULL, LPCTSTR szExtra = NULL) const;
+	BOOL SendCommand(int nCommandID, LPCTSTR szCommand, LPCTSTR szStickyID = NULL, LPCTSTR szExtra = NULL) const;
 
 // Attributes
 protected:

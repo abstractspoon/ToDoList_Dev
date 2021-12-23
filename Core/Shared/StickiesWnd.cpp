@@ -115,7 +115,7 @@ BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const
 		sExtra = FormatStickyCreationString(sTitle, tAlarm, color);
 	}
 
-	if (SendMessage(sCommand, sReply, _T(""), sExtra) == STICKY_SUCCESS)
+	if (SendMessage(sCommand, sReply, _T(""), sExtra))
 	{
 		CStringArray aParts;
 		
@@ -149,53 +149,52 @@ BOOL CStickiesWnd::CreateSticky(const CString& sTitle, CString& sStickyID, const
 
 BOOL CStickiesWnd::DeleteSticky(const CString& sStickyID)
 {
-	return (SendMessage(_T("do desktop"), CString(), sStickyID, _T("delete")) == STICKY_SUCCESS);
+	return SendMessage(_T("do desktop"), CString(), sStickyID, _T("delete"));
 }
 
 BOOL CStickiesWnd::HasSticky(const CString& sStickyID)
 {
-	return (SendMessage(_T("get desktop"), CString(), sStickyID, _T("title")) == STICKY_SUCCESS);
+	return SendMessage(_T("get desktop"), CString(), sStickyID, _T("title"));
 }
 
-LRESULT CStickiesWnd::SendMessage(const CString& sCommand)
+BOOL CStickiesWnd::SendMessage(const CString& sCommand)
 {
 	return SendMessage(sCommand, CString());
 }
 
-LRESULT CStickiesWnd::SendMessage(const CString& sCommand, CString& sReply, const CString& sStickyID, const CString& sExtra)
+BOOL CStickiesWnd::SendMessage(const CString& sCommand, CString& sReply, const CString& sStickyID, const CString& sExtra)
 {
 	sReply.Empty();
 
 	int nCommandID = m_nCommandID++;
-	LRESULT lResult = m_stickies.SendCommand(nCommandID, sCommand, sStickyID, sExtra);
+	
+	if (!m_stickies.SendCommand(nCommandID, sCommand, sStickyID, sExtra))
+		return FALSE;
 
-	if (lResult == STICKY_SUCCESS)
+	// else poll for response
+	int nTry = 10;
+
+	while (nTry--)
 	{
-		int nTry = 10;
+		Sleep(50);
 
-		while (nTry--)
+		if (m_mapReplies.Lookup(nCommandID, sReply))
 		{
-			Sleep(50);
+			TRACE(_T("CStickiesWnd::SendMessage(%s, %s, %s) = %s\n"), sCommand, sStickyID, sExtra.Left(300), sReply);
 
-			if (m_mapReplies.Lookup(nCommandID, sReply))
-			{
-				TRACE(_T("CStickiesWnd::SendMessage(%s, %s, %s) = %s\n"), sCommand, sStickyID, sExtra.Left(300), sReply);
-
-				m_mapReplies.RemoveKey(nCommandID);
-				break; // success
-			}
-		}
-
-		// no response?
-		if (nTry == -1)
-		{
-			FileMisc::LogTextRaw(_T("CStickiesWnd::SendMessage() timed out"));
-
-			lResult = STICKY_TIMEOUT;
+			m_mapReplies.RemoveKey(nCommandID);
+			break; // success
 		}
 	}
 
-	return lResult;
+	// no response?
+	if (nTry == -1)
+	{
+		FileMisc::LogTextRaw(_T("CStickiesWnd::SendMessage() timed out"));
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 BOOL CStickiesWnd::OnCopyData(CWnd* pWnd, COPYDATASTRUCT* pCopyDataStruct) 
@@ -262,7 +261,7 @@ BOOL CStickiesWnd::SetStickyAttribute(const CString& sStickyID, const CString& s
 	if (sStickyID.IsEmpty() || sAttribute.IsEmpty() || sValue.IsEmpty())
 		return FALSE;
 
-	return (SendMessage(_T("set desktop"), CString(), sStickyID, sAttribute + ' ' + sValue) == STICKY_SUCCESS);
+	return SendMessage(_T("set desktop"), CString(), sStickyID, sAttribute + ' ' + sValue);
 }
 
 CString CStickiesWnd::EncodeString(const CString& sText)
