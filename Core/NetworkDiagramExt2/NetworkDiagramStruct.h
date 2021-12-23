@@ -96,16 +96,15 @@ public:
 	BOOL ItemIsDone(DWORD dwTaskID, BOOL bIncGoodAs) const;
 	BOOL ItemHasDependecies(DWORD dwTaskID) const;
 	BOOL IsItemDependentOn(const NETWORKITEM& gi, DWORD dwOtherID) const;
-
-	int BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& mapLengths) const;
-	int CalcMaxDependencyChainLength(DWORD dwTaskID) const;
-
-	int BuildDependencyGroups(CNetworkGroupsMap& aGroups) const;
+	
+	int BuildDependencyGroups(CNetworkGroupsMap& aGroups, int& nMaxVPos) const;
 
 protected:
 	int GetAllDependents(CDWordSet& aDependentIDs) const;
 	int GetAllEndTasks(const CDWordSet& aDependentIDs, CDWordArray& aEndTaskIDs) const;
-	void AddTaskToGroup(DWORD dwTaskID, CNetworkGroup* pGroup) const;
+	void AddTaskToGroup(DWORD dwTaskID, CNetworkGroup* pGroup, int& nVPos) const;
+	void CalcGroupPositions(CNetworkGroup* pGroup) const;
+	int CalcItemHorizontalPosition(DWORD dwTaskID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

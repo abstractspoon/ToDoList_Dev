@@ -121,7 +121,38 @@ void CNetworkDiagramCtrl::PreSubclassWindow()
 
 void CNetworkDiagramCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 {
-	CEnListCtrl::DrawItem(lpDrawItemStruct);
+	CDC* pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
+	int nRow = (int)lpDrawItemStruct->itemID;
+
+	// Draw all group items having a vertical pos equal to the item row
+	int nGroup = m_mapGroups.GetCount();
+
+	while (nGroup--)
+	{
+		const CNetworkGroup* pGroup = m_mapGroups.GetMapping(nGroup);
+		ASSERT(pGroup);
+
+		POSITION pos = pGroup->GetStartPosition();
+
+		while (pos)
+		{
+			DWORD dwTaskID;
+			NETWORKGROUPITEM ngi;
+
+			pGroup->GetNextAssoc(pos, dwTaskID, ngi);
+
+			if (ngi.ptLocation.y == nRow)
+			{
+				CRect rItem;
+				GetSubItemRect(nRow, ngi.ptLocation.x + 1, LVIR_BOUNDS, rItem);
+
+				rItem.DeflateRect(0, 2, 10, 2);
+				GraphicsMisc::DrawRect(pDC, rItem, CLR_NONE, 0, 2);
+
+				pDC->DrawText(Misc::Format(dwTaskID), rItem, DT_SINGLELINE);
+			}
+		}
+	}
 }
 
 DWORD CNetworkDiagramCtrl::GetSelectedTaskID() const
@@ -332,7 +363,23 @@ void CNetworkDiagramCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE
 		ASSERT(0);
 	}
 
-	m_data.BuildDependencyGroups(m_mapGroups);
+	int nMaxVPos = 0;
+	m_data.BuildDependencyGroups(m_mapGroups, nMaxVPos);
+
+	int nListSize = GetItemCount();
+
+	if (nMaxVPos <= nListSize)
+	{
+		while (--nListSize > nMaxVPos)
+			DeleteItem(nListSize);
+	}
+	else if (nMaxVPos > nListSize)
+	{
+		for (int nVPos = nListSize; nVPos <= nMaxVPos; nVPos++)
+			InsertItem(nVPos, _T(""));
+	}
+
+	Invalidate();
 }
 
 BOOL CNetworkDiagramCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib)
@@ -1221,16 +1268,6 @@ void CNetworkDiagramCtrl::BuildListColumns()
 
 		InsertColumn(i, &lvc);
 	}
-
-	// Add some dummy items
-	for (int j = 0; j <= 10; j++)
-	{
-		int nItem = InsertItem(j, _T(""));
-		
-		SetItemText(nItem, 1, Misc::Format(_T("Item %d"), j));
-	}
-
-
 }
 
 void CNetworkDiagramCtrl::UpdateListColumns()

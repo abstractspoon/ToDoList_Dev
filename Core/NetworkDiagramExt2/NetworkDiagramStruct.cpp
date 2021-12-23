@@ -328,9 +328,9 @@ BOOL NETWORKITEM::Set(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 	sAllocTo = Misc::FormatArray(aAllocTo);
 
 	// Local dependencies only
-	int nDepend = pTasks->GetTaskDependencyCount(hTask);
+	int nNumDepends = pTasks->GetTaskDependencyCount(hTask);
 
-	while (nDepend--)
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
 	{
 		DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
 
@@ -419,12 +419,12 @@ BOOL NETWORKITEM::Update(const ITASKLISTBASE* pTasks, HTASKITEM hTask)
 
 	if (pTasks->IsAttributeAvailable(TDCA_DEPENDENCY))
 	{
-		int nDepend = pTasks->GetTaskDependencyCount(hTask);
 		aDependIDs.RemoveAll();
+	
+		int nNumDepends = pTasks->GetTaskDependencyCount(hTask);
 
-		while (nDepend--)
+		for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
 		{
-			// Local dependencies only
 			DWORD dwDependID = _ttoi(pTasks->GetTaskDependency(hTask, nDepend));
 
 			if (dwDependID)
@@ -692,26 +692,27 @@ BOOL CNetworkItemMap::IsItemDependentOn(const NETWORKITEM& gi, DWORD dwOtherID) 
 	return FALSE;
 }
 
-int CNetworkItemMap::BuildDependencyChainLengths(CMap<DWORD, DWORD, int, int>& mapLengths) const
+void CNetworkItemMap::CalcGroupPositions(CNetworkGroup* pGroup) const
 {
-	mapLengths.RemoveAll();
+	ASSERT(pGroup);
 
-	POSITION pos = GetStartPosition();
-	NETWORKITEM* pNIUnused = NULL;
+	// Calculate horizontal positions first
+	POSITION pos = pGroup->GetStartPosition();
+	NETWORKGROUPITEM ngi;
 	DWORD dwTaskID = 0;
 
 	while (pos)
 	{
-		GetNextAssoc(pos, dwTaskID, pNIUnused);
-		ASSERT(pNIUnused);
+		pGroup->GetNextAssoc(pos, dwTaskID, ngi);
+		ASSERT(dwTaskID == ngi.dwTaskID);
 
-		mapLengths[dwTaskID] = CalcMaxDependencyChainLength(dwTaskID);
+		ngi.ptLocation.x = CalcItemHorizontalPosition(dwTaskID);
 	}
 
-	return mapLengths.GetCount();
+	// Calculate vertical positions
 }
 
-int CNetworkItemMap::CalcMaxDependencyChainLength(DWORD dwTaskID) const
+int CNetworkItemMap::CalcItemHorizontalPosition(DWORD dwTaskID) const
 {
 	const NETWORKITEM* pNI = GetItem(dwTaskID);
 	ASSERT(pNI);
@@ -727,14 +728,14 @@ int CNetworkItemMap::CalcMaxDependencyChainLength(DWORD dwTaskID) const
 		DWORD dwDependID = pNI->aDependIDs[nDepend];
 		ASSERT(dwDependID);
 
-		int nDependLen = CalcMaxDependencyChainLength(dwDependID);
+		int nDependLen = CalcItemHorizontalPosition(dwDependID); // RECURSIVE call
 		nMaxDependLen = max(nMaxDependLen, nDependLen);
 	}
 
 	return nMaxDependLen + 1; // the dependency itself
 }
 
-int CNetworkItemMap::BuildDependencyGroups(CNetworkGroupsMap& aGroups) const
+int CNetworkItemMap::BuildDependencyGroups(CNetworkGroupsMap& aGroups, int& nMaxVPos) const
 {
 	aGroups.RemoveAll();
 
@@ -750,14 +751,17 @@ int CNetworkItemMap::BuildDependencyGroups(CNetworkGroupsMap& aGroups) const
 		if (GetAllEndTasks(aDependentIDs, aEndTaskIDs))
 		{
 			// Build the groups by working backwards from each end task
-			int nEndTask = aEndTaskIDs.GetSize();
+			int nNumGroups = aEndTaskIDs.GetSize();
+			nMaxVPos = 0;
 
-			while (nEndTask--)
+			for (int nGroup = 0; nGroup < nNumGroups; nGroup++)
 			{
-				DWORD dwTaskID = aEndTaskIDs[nEndTask];
-				CNetworkGroup* pGroup = aGroups.GetAddMapping(nEndTask);
+				// add a space between groups
+				if (nGroup)
+					nMaxVPos += 2;
 
-				AddTaskToGroup(dwTaskID, pGroup);
+				CNetworkGroup* pGroup = aGroups.GetAddMapping(nGroup);
+				AddTaskToGroup(aEndTaskIDs[nGroup], pGroup, nMaxVPos);
 			}
 		}
 	}
@@ -807,7 +811,7 @@ int CNetworkItemMap::GetAllEndTasks(const CDWordSet& aDependentIDs, CDWordArray&
 	return aEndTaskIDs.GetCount();
 }
 
-void CNetworkItemMap::AddTaskToGroup(DWORD dwTaskID, CNetworkGroup* pGroup) const
+void CNetworkItemMap::AddTaskToGroup(DWORD dwTaskID, CNetworkGroup* pGroup, int& nVPos) const
 {
 	ASSERT(pGroup);
 	ASSERT(dwTaskID);
@@ -824,11 +828,19 @@ void CNetworkItemMap::AddTaskToGroup(DWORD dwTaskID, CNetworkGroup* pGroup) cons
 	ASSERT(pNI);
 
 	ngi.dwTaskID = dwTaskID;
+	ngi.ptLocation.x = CalcItemHorizontalPosition(dwTaskID);
+	ngi.ptLocation.y = nVPos;
+
 	pGroup->SetAt(dwTaskID, ngi);
 
 	// This item's dependencies (can be zero)
-	int nDepend = pNI->aDependIDs.GetSize();
+	int nNumDepends = pNI->aDependIDs.GetSize();
 
-	while (nDepend--)
-		AddTaskToGroup(pNI->aDependIDs[nDepend], pGroup);
+	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
+	{
+		if (nDepend > 0)
+			nVPos++;
+
+		AddTaskToGroup(pNI->aDependIDs[nDepend], pGroup, nVPos); // RECURSIVE call
+	}
 }
