@@ -4,85 +4,171 @@ using System.Drawing;
 
 namespace PertNetworkUIExtension
 {
-
 	public class PertNetworkItem
 	{
-		private Object m_ItemData;
-		private Rectangle m_ItemBounds, m_ChildBounds;
-		private bool m_Flipped;
-
-		// -------------------------------------------------------------
-
-		public PertNetworkItem(Object itemData)
+		public PertNetworkItem(string title, uint uniqueId)
 		{
-			m_ItemData = itemData;
+			Title = title;
+			UniqueId = uniqueId;
 
-			ResetPositions();
+			Position = new Point(0, 0);
+			DependencyUniqueIds = new List<uint>();
 		}
 
-		public void ResetPositions()
+		public uint UniqueId
 		{
-			m_ItemBounds = Rectangle.Empty;
-			m_ChildBounds = Rectangle.Empty;
-			m_Flipped = false;
+			get;
+			private set;
 		}
 
-		public bool IsFlipped { get { return m_Flipped; } }
+		public string Title;
+		public Point Position;
+		public List<uint> DependencyUniqueIds;
 
-		public Object ItemData
-		{
-			get { return m_ItemData; }
-			set { m_ItemData = value; }
-		}
-
-		public Rectangle ItemBounds
-		{
-			get { return m_ItemBounds; }
-			set { m_ItemBounds = value; }
-		}
-
-		public Rectangle ChildBounds
-		{
-			get { return m_ChildBounds; }
-			set { m_ChildBounds = value; }
-		}
-
-		public Rectangle TotalBounds
-		{
-			get { return Union(m_ChildBounds, m_ItemBounds); }
-		}
-
-		public void OffsetPositions(int horzOffset, int vertOffset)
-		{
-			m_ItemBounds.Offset(horzOffset, vertOffset);
-
-			if (!m_ChildBounds.IsEmpty)
-				m_ChildBounds.Offset(horzOffset, vertOffset);
-		}
-
-		public void FlipPositionsHorizontally()
-		{
-			m_Flipped = !m_Flipped;
-
-			m_ItemBounds = FlipHorizontally(m_ItemBounds);
-			m_ChildBounds = FlipHorizontally(m_ChildBounds);
-		}
-
-		public static Rectangle Union(Rectangle rect1, Rectangle rect2)
-		{
-			if (rect1.IsEmpty)
-				return rect2;
-
-			if (rect2.IsEmpty)
-				return rect1;
-
-			return Rectangle.Union(rect1, rect2);
-		}
-
-		private Rectangle FlipHorizontally(Rectangle rect)
-		{
-			return Rectangle.FromLTRB(-rect.Right, rect.Top, -rect.Left, rect.Bottom);
-		}
 	}
+	// ------------------------------------------------------------
+
+	public class PertNetworkItems : Dictionary<uint, PertNetworkItem>
+	{
+		public PertNetworkItems()
+		{
+		}
+
+		void CalcGroupPositions(PertNetworkGroup Group)
+		{
+
+			// Calculate horizontal positions first
+			foreach (var item in Group.Items)
+			{
+				item.Position.X = CalcItemHorizontalPosition(item);
+			}
+
+			// Calculate vertical positions
+		}
+
+		int CalcItemHorizontalPosition(PertNetworkItem item) 
+		{
+			if (item.DependencyUniqueIds.Count == 0)
+				return 0;
+
+			int maxDependLen = 0;
+
+			foreach (var dependId in item.DependencyUniqueIds)
+			{
+				PertNetworkItem dependItem = null;
+
+				if (TryGetValue(dependId, out dependItem))
+				{
+					int dependLen = CalcItemHorizontalPosition(dependItem); // RECURSIVE call
+					maxDependLen = Math.Max(maxDependLen, dependLen);
+				}
+			}
+
+			return maxDependLen + 1; // the dependency itself
+		}
+
+		List<PertNetworkGroup> BuildGroups(ref int maxVPos)
+		{
+			var groups = new List<PertNetworkGroup>();
+
+			// Get the set of all tasks on whom other tasks are dependent
+			HashSet<uint> dependentIDs = GetAllDependents();
+
+			// Get the set of all tasks which have dependencies but 
+			// on whom NO other tasks are dependent
+			HashSet<uint> terminatorIDs = GetAllTerminators(dependentIDs);
+
+			// Build the groups by working backwards from each end task
+			maxVPos = 0;
+
+			foreach (var termId in terminatorIDs)
+			{
+				PertNetworkItem termItem = null;
+
+				if (TryGetValue(termId, out termItem))
+				{
+					if (groups.Count > 0)
+						maxVPos += 2;
+
+					var group = new PertNetworkGroup();
+
+					AddTaskToGroup(termItem, group, ref maxVPos);
+				}
+			}
+
+			return groups;
+		}
+
+		HashSet<uint> GetAllDependents()
+		{
+			var dependentIDs = new HashSet<uint>();
+			
+			foreach (var item in Values)
+			{
+				foreach (var depend in item.DependencyUniqueIds)
+					dependentIDs.Add(depend);
+			}
+
+			return dependentIDs;
+		}
+
+		HashSet<uint> GetAllTerminators(HashSet<uint> dependentIDs)
+		{
+			HashSet<uint> terminatorIds = new HashSet<uint>();
+
+			foreach (var item in Values)
+			{
+				if ((item.DependencyUniqueIds.Count > 0) && !dependentIDs.Contains(item.UniqueId))
+					terminatorIds.Add(item.UniqueId);
+			}
+
+			return terminatorIds;
+		}
+
+		void AddTaskToGroup(PertNetworkItem item, PertNetworkGroup group, ref int maxVPos)
+		{
+			if (group.Items.Contains(item))
+				return;
+
+			item.Position.X = CalcItemHorizontalPosition(item);
+			item.Position.Y = maxVPos;
+
+			group.Items.Add(item);
+
+			// This item's dependencies (can be zero)
+			bool firstDepend = true;
+
+			foreach (var dependId in item.DependencyUniqueIds)
+			{
+				PertNetworkItem dependItem = null;
+
+				if (TryGetValue(dependId, out dependItem))
+				{
+					if (!firstDepend)
+						maxVPos++;
+					else
+						firstDepend = false;
+
+					AddTaskToGroup(dependItem, group, ref maxVPos); // RECURSIVE call
+				}
+			}
+		}
+
+	}
+
+	// ------------------------------------------------------------
+
+	public class PertNetworkGroup
+	{
+		public PertNetworkGroup()
+		{
+			Items = new HashSet<PertNetworkItem>();
+			TerminatingItem = null;
+		}
+
+		public HashSet<PertNetworkItem> Items;
+		public PertNetworkItem TerminatingItem; 
+	}
+
 }
 

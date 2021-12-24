@@ -258,10 +258,10 @@ namespace PertNetworkUIExtension
 
 		void OnPertNetworkSelectionChange(object sender, object itemData)
 		{
-			var taskItem = (itemData as PertNetworkTaskItem);
-			var notify = new UIExtension.ParentNotify(m_HwndParent);
-
-			notify.NotifySelChange(taskItem.ID);
+// 			var taskItem = (itemData as PertNetworkTaskItem);
+// 			var notify = new UIExtension.ParentNotify(m_HwndParent);
+// 
+// 			notify.NotifySelChange(taskItem.UniqueId);
 		}
 
 		bool OnPertNetworkDragDrop(object sender, PertNetworkDragEventArgs e)

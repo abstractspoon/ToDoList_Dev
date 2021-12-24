@@ -69,8 +69,8 @@ namespace PertNetworkUIExtension
 		virtual protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
         virtual protected int GraphPadding { get { return ScaleByDPIFactor(6); } }
 
-		protected float ZoomFactor { get { return m_ZoomFactor; } }
-		protected bool IsZoomed { get { return (m_ZoomFactor < 1.0f); } }
+		protected float ZoomFactor { get; private set; }
+		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
 
 		protected enum NodeDrawState
 		{
@@ -83,27 +83,32 @@ namespace PertNetworkUIExtension
         {
             None,
             On,
-            Above,
-            Below,
+            Left,
+            Right,
         }
 
 		// Data --------------------------------------------------------------------------
 
-        private Point m_DrawOffset;
-        private DropPos m_DropPos;
-		private Timer m_DragTimer;
-		private Color m_ConnectionColor;
-		private int m_LastDragTick = 0;
-        private int m_ThemedGlyphSize = 0;
-		private float m_ZoomFactor = 1f;
+        private DropPos DropSite;
+		private Timer DragTimer;
+		private int LastDragTick = 0;
+        private int ThemedGlyphSize = 0;
 
-		private bool m_FirstPaint = true;
-        private bool m_HoldRedraw = false;
-        private bool m_IsSavingToImage = false;
+		private bool FirstPaint = true;
+        private bool HoldRedraw = false;
+        private bool IsSavingToImage = false;
 
 #if DEBUG
-		private int m_RecalcDuration;
+		private int RecalcDuration;
 #endif
+
+		public PertNetworkItems Items
+		{
+			get; private set;
+		}
+
+		private List<PertNetworkGroup> Groups;
+
 
 		// Public ------------------------------------------------------------------------
 
@@ -112,9 +117,10 @@ namespace PertNetworkUIExtension
 
         public PertNetworkControl()
         {
-            m_DrawOffset = new Point(0, 0);
-            m_DropPos = DropPos.None;
-			m_ConnectionColor = Color.Magenta;
+			DropSite = DropPos.None;
+			ConnectionColor = Color.Magenta;
+
+			Items = new PertNetworkItems();
 
 			InitializeComponent();
 		}
@@ -129,12 +135,12 @@ namespace PertNetworkUIExtension
 
 		public Color ConnectionColor
 		{
-			get { return m_ConnectionColor; }
+			get { return ConnectionColor; }
 			set 
 			{
 				if (value != SystemColors.Window)
 				{
-					m_ConnectionColor = value;
+					ConnectionColor = value;
 					Invalidate();
 				}
 			}
@@ -159,21 +165,6 @@ namespace PertNetworkUIExtension
             return true;
         }
 
-        public bool RefreshNodeLabel(uint uniqueID, bool invalidate)
-        {
-//             TreeNode node = FindNode(uniqueID);
-// 
-// 			if (node == null)
-// 				return false;
-// 
-//             node.Text = ItemData(node).ToString();
-
-			if (invalidate)
-				Invalidate();
-
-            return true;
-        }
-
 		public Rectangle GetSelectedItemLabelRect()
 		{
 			return new Rectangle(0, 0, 10, 10);// GetItemLabelRect(SelectedNode);
@@ -184,11 +175,11 @@ namespace PertNetworkUIExtension
 			// Cache state
 			/*
 						Point scrollPos = new Point(HorizontalScroll.Value, VerticalScroll.Value);
-						Point drawOffset = new Point(m_DrawOffset.X, m_DrawOffset.Y);
+						Point drawOffset = new Point(DrawOffset.X, DrawOffset.Y);
 
 						// And reset
-						m_IsSavingToImage = true;
-						m_DrawOffset = new Point(0, 0);
+						IsSavingToImage = true;
+						DrawOffset = new Point(0, 0);
 
 						HorizontalScroll.Value = 0;
 						VerticalScroll.Value = 0;
@@ -237,8 +228,8 @@ namespace PertNetworkUIExtension
 						}
 
 						// Restore state
-						m_IsSavingToImage = false;
-						m_DrawOffset = drawOffset;
+						IsSavingToImage = false;
+						DrawOffset = drawOffset;
 
 						HorizontalScroll.Value = scrollPos.X;
 						VerticalScroll.Value = scrollPos.Y;
@@ -291,7 +282,7 @@ namespace PertNetworkUIExtension
 			if ((ModifierKeys & Keys.Control) == Keys.Control)
 			{
 /*
-				float newFactor = m_ZoomFactor;
+				float newFactor = ZoomFactor;
 
 				if (e.Delta > 0)
 				{
@@ -304,7 +295,7 @@ namespace PertNetworkUIExtension
 					newFactor = Math.Max(newFactor, 0.4f);
 				}
 
-				if (newFactor != m_ZoomFactor)
+				if (newFactor != ZoomFactor)
 				{
 					Cursor = Cursors.WaitCursor;
 
@@ -321,7 +312,7 @@ namespace PertNetworkUIExtension
 					// and restore it afterwards
 					var expandedNodes = GetExpandedNodes(RootNode);
 
-					m_ZoomFactor = newFactor;
+					ZoomFactor = newFactor;
 					UpdateTreeFont(false);
 
 					// 'Cleanup'
@@ -364,18 +355,18 @@ namespace PertNetworkUIExtension
 		{
 			base.OnMouseMove(e);
 
-			if ((e.Button == MouseButtons.Left) && m_DragTimer.Enabled)
+			if ((e.Button == MouseButtons.Left) && DragTimer.Enabled)
 			{
                 Debug.Assert(!ReadOnly);
 
 				if (CheckStartDragging(e.Location))
-					m_DragTimer.Stop();
+					DragTimer.Stop();
 			}
 		}
 
 		protected override void OnMouseUp(MouseEventArgs e)
 		{
-			m_DragTimer.Stop();
+			DragTimer.Stop();
 
 			base.OnMouseUp(e);
 
@@ -389,7 +380,7 @@ namespace PertNetworkUIExtension
 		{
             Debug.Assert(!ReadOnly);
 
-			m_DragTimer.Stop();
+			DragTimer.Stop();
 
 			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
 
@@ -460,7 +451,7 @@ namespace PertNetworkUIExtension
 			
 			// Always reset the logical zoom else we've no way of 
 			// accurately calculating the actual zoom
-			m_ZoomFactor = 1f;
+			ZoomFactor = 1f;
 
 			//UpdateTreeFont(true);
 		}
@@ -486,6 +477,7 @@ namespace PertNetworkUIExtension
 
         // Internals -----------------------------------------------------------
 
+/*
         private int BorderWidth
         {
             get
@@ -502,21 +494,7 @@ namespace PertNetworkUIExtension
                 return 0;
             }
         }
-
-		protected bool HoldRedraw
-		{
-			get { return m_HoldRedraw; }
-			set 
-			{
-				if (m_HoldRedraw != value)
-				{
-					if (!value) // release redraw
-						Invalidate();
-				}
-
-				m_HoldRedraw = value; 
-			}
-		}
+*/
 
 		private bool CheckStartDragging(Point cursor)
 		{
@@ -582,12 +560,12 @@ namespace PertNetworkUIExtension
             if (item == null)
                 return;
 
+/*
             Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
 
             if (ClientRectangle.Contains(itemRect))
                 return;
 
-/*
             if (HorizontalScroll.Visible)
             {
                 int xOffset = 0;
@@ -672,8 +650,8 @@ namespace PertNetworkUIExtension
 
 		protected Font ScaledFont(Font font)
 		{
-			if ((font != null) && (m_ZoomFactor < 1.0))
-				return new Font(font.FontFamily, font.Size * m_ZoomFactor, font.Style);
+			if ((font != null) && (ZoomFactor < 1.0))
+				return new Font(font.FontFamily, font.Size * ZoomFactor, font.Style);
 
 			// else
 			return font;
@@ -691,7 +669,7 @@ namespace PertNetworkUIExtension
 		{
 			Rectangle drawPos = itemRect;
 
-// 			drawPos.Offset(m_DrawOffset);
+// 			drawPos.Offset(DrawOffset);
 //             drawPos.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
 //             drawPos.Offset(GraphPadding, GraphPadding);
 			
@@ -717,6 +695,13 @@ namespace PertNetworkUIExtension
             return null;
         }
 
+		public void RebuildGroups()
+		{
+			Groups.Clear();
+
+
+
+		}
     }
 
 }
