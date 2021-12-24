@@ -581,11 +581,11 @@ namespace PertNetworkUIExtension
 			PertNetworkItem item = null;
             uint taskId = task.GetID();
 
-			bool newItem = (Data.TryGetValue(taskId, out item) == false);
+			bool newItem = (Data.Items.TryGetValue(taskId, out item) == false);
 
 			if (newItem)
 			{
-				Data.Add(taskId, new PertNetworkTaskItem(task));
+				Data.Items.Add(taskId, new PertNetworkTaskItem(task));
 			}
 			else
 			{
@@ -1070,13 +1070,6 @@ namespace PertNetworkUIExtension
 			int top = labelRect.Top;// (CentrePoint(labelRect).Y - (height / 2));
 
             return new Rectangle(left, top, width, height);
-		}
-
-		private new void Clear()
-		{
-			Items.Clear();
-
-			base.Clear();
 		}
 
 		private bool AddTaskToTree(Task task, TreeNode parent, bool select = false)

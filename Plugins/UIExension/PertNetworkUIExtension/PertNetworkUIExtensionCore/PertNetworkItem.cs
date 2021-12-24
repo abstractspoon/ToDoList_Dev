@@ -12,7 +12,6 @@ namespace PertNetworkUIExtension
 			UniqueId = uniqueId;
 
 			Position = new Point(0, 0);
-			LastDrawRect = new Rectangle(0, 0, 0, 0);
 			DependencyUniqueIds = new List<uint>();
 		}
 
@@ -30,15 +29,33 @@ namespace PertNetworkUIExtension
 	}
 	// ------------------------------------------------------------
 
-	public class PertNetworkItems : Dictionary<uint, PertNetworkItem>
+	public class PertNetworkData
 	{
-		public PertNetworkItems()
+		public PertNetworkData()
 		{
+			Items = new Dictionary<uint, PertNetworkItem>();
+			Groups = new HashSet<PertNetworkGroup>();
 		}
 
-		public void RefreshItemPositions(out Point maxPos)
+		public Dictionary<uint, PertNetworkItem> Items
 		{
-			var groups = new List<PertNetworkGroup>();
+			get; private set;
+		}
+
+		public HashSet<PertNetworkGroup> Groups
+		{
+			get; private set;
+		}
+
+		public void Clear()
+		{
+			Items.Clear();
+			Groups.Clear();
+		}
+		
+		public void RebuildGroups(out Point maxPos)
+		{
+			Groups.Clear();
 
 			// Get the set of all tasks on whom other tasks are dependent
 			HashSet<uint> dependentIDs = GetAllDependents();
@@ -54,15 +71,15 @@ namespace PertNetworkUIExtension
 			{
 				PertNetworkItem termItem = null;
 
-				if (TryGetValue(termId, out termItem))
+				if (Items.TryGetValue(termId, out termItem))
 				{
 					Point groupMaxPos = new Point(0, maxPos.Y);
 
-					if (groups.Count > 0)
+					if (Groups.Count > 0)
 						groupMaxPos.Y += 2;
 
 					var group = new PertNetworkGroup();
-					groups.Add(group);
+					Groups.Add(group);
 
 					AddTaskToGroup(termItem, group, ref groupMaxPos);
 
@@ -76,7 +93,7 @@ namespace PertNetworkUIExtension
 		{
 			var dependentIDs = new HashSet<uint>();
 			
-			foreach (var item in Values)
+			foreach (var item in Items.Values)
 			{
 				foreach (var depend in item.DependencyUniqueIds)
 					dependentIDs.Add(depend);
@@ -89,7 +106,7 @@ namespace PertNetworkUIExtension
 		{
 			HashSet<uint> terminatorIds = new HashSet<uint>();
 
-			foreach (var item in Values)
+			foreach (var item in Items.Values)
 			{
 				if ((item.DependencyUniqueIds.Count > 0) && !dependentIDs.Contains(item.UniqueId))
 					terminatorIds.Add(item.UniqueId);
@@ -116,7 +133,7 @@ namespace PertNetworkUIExtension
 				{
 					PertNetworkItem dependItem = null;
 
-					if (TryGetValue(dependId, out dependItem))
+					if (Items.TryGetValue(dependId, out dependItem))
 					{
 						// First dependency shares same VPos as prior item
 						if (!firstDepend)

@@ -34,8 +34,8 @@ namespace PertNetworkUIExtension
 
 	}
 
-	public partial class PertNetworkControl : ListView
-    {
+	public partial class PertNetworkControl : UserControl
+	{
 		// Win32 Imports -----------------------------------------------------------------
 
 		[DllImport("User32.dll")]
@@ -104,12 +104,13 @@ namespace PertNetworkUIExtension
 		private int RecalcDuration;
 #endif
 
-		public PertNetworkItems Data
+		const int RowHeight = 60;
+		const int ColWidth = 150;
+
+		public PertNetworkData Data
 		{
 			get; private set;
 		}
-
-		private Dictionary<int, List<PertNetworkItem>> RowItems;
 
 		// Public ------------------------------------------------------------------------
 
@@ -121,7 +122,7 @@ namespace PertNetworkUIExtension
 			DropSite = DropPos.None;
 			ConnectionColor = Color.Magenta;
 
-			Data = new PertNetworkItems();
+			Data = new PertNetworkData();
 
 			InitializeComponent();
 		}
@@ -129,93 +130,51 @@ namespace PertNetworkUIExtension
 		public void RebuildGroups()
 		{
 			Point maxPos;
-			Data.RefreshItemPositions(out maxPos);
+			Data.RebuildGroups(out maxPos);
 
-			RefreshRowAndColumnCounts(maxPos); 
-
-			RowItems = new Dictionary<int, List<PertNetworkItem>>();
-
-			foreach (var item in Data)
-			{
-				List<PertNetworkItem> row = null;
-
-				if (!RowItems.TryGetValue(item.Value.Position.Y, out row))
-				{
-					row = new List<PertNetworkItem>();
-					RowItems.Add(item.Value.Position.Y, row);
-				}
-
-				row.Add(item.Value);
-			}
+			// TODO
 			
 			Invalidate();
 		}
 
-		void RefreshRowAndColumnCounts(Point maxPos)
+		protected override void OnPaint(PaintEventArgs e)
 		{
-			while (Columns.Count > maxPos.X + 1)
-				Columns.RemoveAt(0);
-
-			while (Columns.Count < maxPos.X + 1)
-				Columns.Add("", 100);
-
-			while (Items.Count > maxPos.Y + 1)
-				Items.RemoveAt(0);
-
-			while (Items.Count < maxPos.Y + 1)
-				Items.Add("");
-		}
-
-		protected override void OnNotifyMessage(Message m)
-		{
-			base.OnNotifyMessage(m);
-
-			if (m.Msg == WM_PAINT)
+			foreach (var group in Data.Groups)
 			{
-				// Draw dependency arrows
-				using (var g = Graphics.FromHwnd(Handle))
+				foreach (var item in group.Items)
 				{
-					foreach (var item in Data)
+					var itemRect = CalcItemRectangle(item);
+
+					e.Graphics.DrawRectangle(Pens.Red, itemRect);
+					e.Graphics.DrawString(item.Title, this.Font, Brushes.Blue, itemRect);
+
+					foreach (uint id in item.DependencyUniqueIds)
 					{
-						foreach (uint id in item.Value.DependencyUniqueIds)
+						PertNetworkItem dependItem = null;
+
+						if (Data.Items.TryGetValue(id, out dependItem))
 						{
-							PertNetworkItem dependItem = null;
+							Rectangle from = CalcItemRectangle(dependItem);
+							Rectangle to = itemRect;
 
-							if (Data.TryGetValue(id, out dependItem))
-							{
-								Rectangle from = dependItem.LastDrawRect;
-								Rectangle to = item.Value.LastDrawRect;
-
-								g.DrawLine(Pens.Black, from.Right, from.Top + from.Height / 2, to.Left, to.Top + to.Height / 2);
-							}
+							e.Graphics.DrawLine(Pens.Black, from.Right, from.Top + from.Height / 2, to.Left, to.Top + to.Height / 2);
 						}
 					}
 				}
 			}
 		}
 
-		protected override void OnDrawItem(DrawListViewItemEventArgs e)
+		Rectangle CalcItemRectangle(PertNetworkItem item)
 		{
-			List<PertNetworkItem> items = null;
+			Rectangle itemRect = new Rectangle(0, 0, 0, 0);
 
-			if (RowItems.TryGetValue(e.ItemIndex, out items))
-			{
-				foreach (var item in items)
-				{
-					Rectangle itemRect = e.Item.Bounds;
+			itemRect.X = (ColWidth * item.Position.X);
+			itemRect.Y = (RowHeight * item.Position.Y);
 
-					itemRect.X += (Columns[0].Width * item.Position.X);
-					itemRect.Width = ((Columns[0].Width * 2) / 3);
-					itemRect.Height -= (itemRect.Height / 5);
+			itemRect.Width = ((ColWidth * 2) / 3);
+			itemRect.Height = ((RowHeight * 4) / 5);
 
-					e.Graphics.DrawRectangle(Pens.Red, itemRect);
-					e.Graphics.DrawString(item.Title, this.Font, Brushes.Blue, itemRect);
-
-					item.LastDrawRect = itemRect;
-				}
-			}
-			
-			e.DrawDefault = false;
+			return itemRect;
 		}
 
 		public void SetFont(String fontName, int fontSize)

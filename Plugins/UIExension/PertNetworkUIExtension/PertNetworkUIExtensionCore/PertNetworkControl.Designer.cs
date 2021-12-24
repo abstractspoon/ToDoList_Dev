@@ -38,10 +38,6 @@ namespace PertNetworkUIExtension
             this.Name = "PertNetworkControl";
             this.Size = new System.Drawing.Size(708, 398);
             this.BackColor = System.Drawing.SystemColors.Window;
-			this.View = View.Details;
-			this.HideSelection = true;
-			this.HeaderStyle = ColumnHeaderStyle.None;
-			this.OwnerDraw = true;
 
 			this.ResumeLayout(false);
             this.PerformLayout();
@@ -55,7 +51,7 @@ namespace PertNetworkUIExtension
 			this.ReadOnly = false;
 
 			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
- 			SetStyle(ControlStyles.EnableNotifyMessage, true);
+ 			SetStyle(ControlStyles.UserPaint, true);
 			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 			SetStyle(ControlStyles.ResizeRedraw, true);
 

@@ -138,7 +138,7 @@ namespace PertNetworkUIExtension
 
         public void SavePreferences(Preferences prefs, String key)
         {
-			prefs.WriteProfileInt(key, "RootAlignment", (int)m_PertNetwork.Alignment);
+//			prefs.WriteProfileInt(key, "RootAlignment", (int)m_PertNetwork.Alignment);
 			prefs.WriteProfileInt(key, "Options", (int)m_PertNetwork.Options);
 		}
 
