@@ -56,9 +56,11 @@ namespace PertNetworkUIExtension
 		const int SM_CXDRAG = 68;
 		const int SM_CYDRAG = 69;
 
+		const int WM_PAINT = 0x000F;
+
 		// Constants ---------------------------------------------------------------------
 
-        virtual protected int ScaleByDPIFactor(int value)
+		virtual protected int ScaleByDPIFactor(int value)
         {
             return value;
         }
@@ -155,13 +157,41 @@ namespace PertNetworkUIExtension
 				Columns.RemoveAt(0);
 
 			while (Columns.Count < maxPos.X + 1)
-				Columns.Add("", 200);
+				Columns.Add("", 100);
 
 			while (Items.Count > maxPos.Y + 1)
 				Items.RemoveAt(0);
 
 			while (Items.Count < maxPos.Y + 1)
 				Items.Add("");
+		}
+
+		protected override void OnNotifyMessage(Message m)
+		{
+			base.OnNotifyMessage(m);
+
+			if (m.Msg == WM_PAINT)
+			{
+				// Draw dependency arrows
+				using (var g = Graphics.FromHwnd(Handle))
+				{
+					foreach (var item in Data)
+					{
+						foreach (uint id in item.Value.DependencyUniqueIds)
+						{
+							PertNetworkItem dependItem = null;
+
+							if (Data.TryGetValue(id, out dependItem))
+							{
+								Rectangle from = dependItem.LastDrawRect;
+								Rectangle to = item.Value.LastDrawRect;
+
+								g.DrawLine(Pens.Black, from.Right, from.Top + from.Height / 2, to.Left, to.Top + to.Height / 2);
+							}
+						}
+					}
+				}
+			}
 		}
 
 		protected override void OnDrawItem(DrawListViewItemEventArgs e)
@@ -174,12 +204,14 @@ namespace PertNetworkUIExtension
 				{
 					Rectangle itemRect = e.Item.Bounds;
 
-					itemRect.X += Columns[0].Width * item.Position.X;
-					itemRect.Width = Columns[0].Width / 2;
+					itemRect.X += (Columns[0].Width * item.Position.X);
+					itemRect.Width = ((Columns[0].Width * 2) / 3);
+					itemRect.Height -= (itemRect.Height / 5);
 
 					e.Graphics.DrawRectangle(Pens.Red, itemRect);
-
 					e.Graphics.DrawString(item.Title, this.Font, Brushes.Blue, itemRect);
+
+					item.LastDrawRect = itemRect;
 				}
 			}
 			

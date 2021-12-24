@@ -12,6 +12,7 @@ namespace PertNetworkUIExtension
 			UniqueId = uniqueId;
 
 			Position = new Point(0, 0);
+			LastDrawRect = new Rectangle(0, 0, 0, 0);
 			DependencyUniqueIds = new List<uint>();
 		}
 
@@ -23,6 +24,7 @@ namespace PertNetworkUIExtension
 
 		public string Title;
 		public Point Position;
+		public Rectangle LastDrawRect;
 		public List<uint> DependencyUniqueIds;
 
 	}
@@ -54,13 +56,18 @@ namespace PertNetworkUIExtension
 
 				if (TryGetValue(termId, out termItem))
 				{
+					Point groupMaxPos = new Point(0, maxPos.Y);
+
 					if (groups.Count > 0)
-						maxPos.Y += 2;
+						groupMaxPos.Y += 2;
 
 					var group = new PertNetworkGroup();
 					groups.Add(group);
 
-					AddTaskToGroup(termItem, group, ref maxPos);
+					AddTaskToGroup(termItem, group, ref groupMaxPos);
+
+					maxPos.Y = groupMaxPos.Y;
+					maxPos.X = Math.Max(maxPos.X, groupMaxPos.X);
 				}
 			}
 		}
@@ -96,56 +103,63 @@ namespace PertNetworkUIExtension
 			if (group.Items.Contains(item))
 				return;
 
-			item.Position.X = CalcItemHorizontalPosition(item);
 			item.Position.Y = maxPos.Y;
 
 			group.Items.Add(item);
 
-			// First item in group is terminating item
-			if (group.Items.Count == 1)
-				group.TerminatingItem = item;
-
 			// This item's dependencies (can be zero)
-			bool firstDepend = true;
-
-			foreach (var dependId in item.DependencyUniqueIds)
+			if (item.DependencyUniqueIds.Count > 0)
 			{
-				PertNetworkItem dependItem = null;
+				bool firstDepend = true;
 
-				if (TryGetValue(dependId, out dependItem))
+				foreach (var dependId in item.DependencyUniqueIds)
 				{
-					if (!firstDepend)
-						maxPos.Y++;
-					else
-						firstDepend = false;
+					PertNetworkItem dependItem = null;
 
-					AddTaskToGroup(dependItem, group, ref maxPos); // RECURSIVE call
+					if (TryGetValue(dependId, out dependItem))
+					{
+						// First dependency shares same VPos as prior item
+						if (!firstDepend)
+							maxPos.Y++;
+						else
+							firstDepend = false;
+
+						AddTaskToGroup(dependItem, group, ref maxPos); // RECURSIVE call
+
+						item.Position.X = Math.Max(dependItem.Position.X + 1, item.Position.X);
+					}
 				}
-			}
 
-			maxPos.X = Math.Max(maxPos.X, group.TerminatingItem.Position.X);
+				maxPos.X = Math.Max(maxPos.X, item.Position.X);
+			}
+			else // First item in group
+			{
+				item.Position.X = maxPos.X = 0;
+			}
 		}
 
-		int CalcItemHorizontalPosition(PertNetworkItem item) 
-		{
-			if (item.DependencyUniqueIds.Count == 0)
-				return 0;
-
-			int maxDependLen = 0;
-
-			foreach (var dependId in item.DependencyUniqueIds)
-			{
-				PertNetworkItem dependItem = null;
-
-				if (TryGetValue(dependId, out dependItem))
+		/*
+				int CalcItemHorizontalPosition(PertNetworkItem item) 
 				{
-					int dependLen = CalcItemHorizontalPosition(dependItem); // RECURSIVE call
-					maxDependLen = Math.Max(maxDependLen, dependLen);
-				}
-			}
+					if (item.DependencyUniqueIds.Count == 0)
+						return 0;
 
-			return maxDependLen + 1; // the dependency itself
-		}
+					int maxDependLen = 0;
+
+					foreach (var dependId in item.DependencyUniqueIds)
+					{
+						PertNetworkItem dependItem = null;
+
+						if (TryGetValue(dependId, out dependItem))
+						{
+							int dependLen = CalcItemHorizontalPosition(dependItem); // RECURSIVE call
+							maxDependLen = Math.Max(maxDependLen, dependLen);
+						}
+					}
+
+					return maxDependLen + 1; // the dependency itself
+				}
+		*/
 	}
 
 	// ------------------------------------------------------------
@@ -155,11 +169,9 @@ namespace PertNetworkUIExtension
 		public PertNetworkGroup()
 		{
 			Items = new HashSet<PertNetworkItem>();
-			TerminatingItem = null;
 		}
 
 		public HashSet<PertNetworkItem> Items;
-		public PertNetworkItem TerminatingItem; 
 	}
 
 	// ------------------------------------------------------------

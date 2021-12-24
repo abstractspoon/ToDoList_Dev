@@ -54,10 +54,10 @@ namespace PertNetworkUIExtension
 			this.AllowDrop = true;
 			this.ReadOnly = false;
 
-// 			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-// 			SetStyle(ControlStyles.UserPaint, true);
-// 			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-// 			SetStyle(ControlStyles.ResizeRedraw, true);
+			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+ 			SetStyle(ControlStyles.EnableNotifyMessage, true);
+			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+			SetStyle(ControlStyles.ResizeRedraw, true);
 
 			base.BorderStyle = BorderStyle.None;
 		}
