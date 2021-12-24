@@ -63,24 +63,6 @@ namespace PertNetworkUIExtension
 			// TODO
 		}
 
-		public String Title 
-		{ 
-			get 
-			{ 
-#if DEBUG
-				return String.Format("{0} ({1})", Title, UniqueId); 
-#else
-				return Title;
-#endif
-			} 
-
-			set // only works for the root
-			{
-				if (!String.IsNullOrWhiteSpace(value))
-					Title = value;
-			}
-		}
-		
 		public bool HasLocalDependencies {  get { return (DependencyUniqueIds != null) && (DependencyUniqueIds.Count > 0); } }
 
 /*
@@ -240,77 +222,81 @@ namespace PertNetworkUIExtension
 		{
 			switch (type)
 			{
-				case UIExtension.UpdateType.Edit:
-				case UIExtension.UpdateType.New:
+			case UIExtension.UpdateType.Edit:
+			case UIExtension.UpdateType.New:
 				// TODO
 				break;
 
-				case UIExtension.UpdateType.Delete:
-				case UIExtension.UpdateType.All:
-				// TODO
+			case UIExtension.UpdateType.Delete:
 				break;
 
-				case UIExtension.UpdateType.Unknown:
-					return;
+			case UIExtension.UpdateType.All:
+				Data.Clear();
+				break;
+
+			case UIExtension.UpdateType.Unknown:
+				return;
 			}
+
+			UpdateTaskAttributes(tasks);
 		}
 
-		public PertNetworkOption Options
-		{
-			get { return Options; }
-
-			set
-			{
-				if (value != Options)
-				{
-					Options = value;
-					Invalidate();
-				}
-			}
-		}
-
-// 		public bool SelectNodeWasPreviouslySelected
+		public PertNetworkOption Options;
 // 		{
-// 			get { return (SelectedNode == PreviouslySelectedNode); }
+// 			get { return Options; }
+// 
+// 			set
+// 			{
+// 				if (value != Options)
+// 				{
+// 					Options = value;
+// 					Invalidate();
+// 				}
+// 			}
 // 		}
 
-		public bool TaskColorIsBackground
-		{
-			get { return TaskColorIsBkgnd; }
-			set
-			{
-				if (TaskColorIsBkgnd != value)
-				{
-					TaskColorIsBkgnd = value;
-					Invalidate();
-				}
-			}
-		}
+		// 		public bool SelectNodeWasPreviouslySelected
+		// 		{
+		// 			get { return (SelectedNode == PreviouslySelectedNode); }
+		// 		}
 
-		public bool ShowParentsAsFolders
-		{
-			get { return ShowParentAsFolder; }
-			set
-			{
-				if (ShowParentAsFolder != value)
-				{
-					ShowParentAsFolder = value;
-					Invalidate();
-				}
-			}
-		}
+		public bool TaskColorIsBackground;
+// 		{
+// 			get { return TaskColorIsBkgnd; }
+// 			set
+// 			{
+// 				if (TaskColorIsBkgnd != value)
+// 				{
+// 					TaskColorIsBkgnd = value;
+// 					Invalidate();
+// 				}
+// 			}
+// 		}
 
-        public bool ShowCompletionCheckboxes
-        {
-            get { return ShowCompletionCheckboxes; }
-            set
-            {
-                if (ShowCompletionCheckboxes != value)
-                {
-                    ShowCompletionCheckboxes = value;
-                }
-            }
-        }
+		public bool ShowParentsAsFolders;
+// 		{
+// 			get { return ShowParentAsFolder; }
+// 			set
+// 			{
+// 				if (ShowParentAsFolder != value)
+// 				{
+// 					ShowParentAsFolder = value;
+// 					Invalidate();
+// 				}
+// 			}
+// 		}
+
+		public bool ShowCompletionCheckboxes;
+//         {
+//             get { return ShowCompletionCheckboxes; }
+//             set
+//             {
+//                 if (ShowCompletionCheckboxes != value)
+//                 {
+//                     ShowCompletionCheckboxes = value;
+//                 }
+//             }
+//         }
 
 		protected float ImageZoomFactor
 		{
@@ -587,11 +573,6 @@ namespace PertNetworkUIExtension
 				Invalidate();
 		}
 
-		private void RebuildGroups()
-		{
-			// TODO
-		}
-
 		private bool ProcessTaskUpdate(Task task)
 		{
 			if (!task.IsValid())
@@ -600,11 +581,11 @@ namespace PertNetworkUIExtension
 			PertNetworkItem item = null;
             uint taskId = task.GetID();
 
-			bool newItem = (Items.TryGetValue(taskId, out item) == false);
+			bool newItem = (Data.TryGetValue(taskId, out item) == false);
 
 			if (newItem)
 			{
-				Items.Add(taskId, new PertNetworkTaskItem(task));
+				Data.Add(taskId, new PertNetworkTaskItem(task));
 			}
 			else
 			{

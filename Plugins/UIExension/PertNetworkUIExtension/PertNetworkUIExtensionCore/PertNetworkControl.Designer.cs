@@ -38,7 +38,12 @@ namespace PertNetworkUIExtension
             this.Name = "PertNetworkControl";
             this.Size = new System.Drawing.Size(708, 398);
             this.BackColor = System.Drawing.SystemColors.Window;
-            this.ResumeLayout(false);
+			this.View = View.Details;
+			this.HideSelection = true;
+			this.HeaderStyle = ColumnHeaderStyle.None;
+			this.OwnerDraw = true;
+
+			this.ResumeLayout(false);
             this.PerformLayout();
 
 			DragTimer = new Timer();
@@ -49,10 +54,10 @@ namespace PertNetworkUIExtension
 			this.AllowDrop = true;
 			this.ReadOnly = false;
 
-			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-			SetStyle(ControlStyles.UserPaint, true);
-			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
-			SetStyle(ControlStyles.ResizeRedraw, true);
+// 			SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+// 			SetStyle(ControlStyles.UserPaint, true);
+// 			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+// 			SetStyle(ControlStyles.ResizeRedraw, true);
 
 			base.BorderStyle = BorderStyle.None;
 		}

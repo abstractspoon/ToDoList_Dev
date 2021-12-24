@@ -102,13 +102,12 @@ namespace PertNetworkUIExtension
 		private int RecalcDuration;
 #endif
 
-		public PertNetworkItems Items
+		public PertNetworkItems Data
 		{
 			get; private set;
 		}
 
-		private List<PertNetworkGroup> Groups;
-
+		private Dictionary<int, List<PertNetworkItem>> RowItems;
 
 		// Public ------------------------------------------------------------------------
 
@@ -120,9 +119,71 @@ namespace PertNetworkUIExtension
 			DropSite = DropPos.None;
 			ConnectionColor = Color.Magenta;
 
-			Items = new PertNetworkItems();
+			Data = new PertNetworkItems();
 
 			InitializeComponent();
+		}
+
+		public void RebuildGroups()
+		{
+			Point maxPos;
+			Data.RefreshItemPositions(out maxPos);
+
+			RefreshRowAndColumnCounts(maxPos); 
+
+			RowItems = new Dictionary<int, List<PertNetworkItem>>();
+
+			foreach (var item in Data)
+			{
+				List<PertNetworkItem> row = null;
+
+				if (!RowItems.TryGetValue(item.Value.Position.Y, out row))
+				{
+					row = new List<PertNetworkItem>();
+					RowItems.Add(item.Value.Position.Y, row);
+				}
+
+				row.Add(item.Value);
+			}
+			
+			Invalidate();
+		}
+
+		void RefreshRowAndColumnCounts(Point maxPos)
+		{
+			while (Columns.Count > maxPos.X + 1)
+				Columns.RemoveAt(0);
+
+			while (Columns.Count < maxPos.X + 1)
+				Columns.Add("", 200);
+
+			while (Items.Count > maxPos.Y + 1)
+				Items.RemoveAt(0);
+
+			while (Items.Count < maxPos.Y + 1)
+				Items.Add("");
+		}
+
+		protected override void OnDrawItem(DrawListViewItemEventArgs e)
+		{
+			List<PertNetworkItem> items = null;
+
+			if (RowItems.TryGetValue(e.ItemIndex, out items))
+			{
+				foreach (var item in items)
+				{
+					Rectangle itemRect = e.Item.Bounds;
+
+					itemRect.X += Columns[0].Width * item.Position.X;
+					itemRect.Width = Columns[0].Width / 2;
+
+					e.Graphics.DrawRectangle(Pens.Red, itemRect);
+
+					e.Graphics.DrawString(item.Title, this.Font, Brushes.Blue, itemRect);
+				}
+			}
+			
+			e.DrawDefault = false;
 		}
 
 		public void SetFont(String fontName, int fontSize)
@@ -133,24 +194,24 @@ namespace PertNetworkUIExtension
             this.Font = new Font(fontName, fontSize, FontStyle.Regular);
         }
 
-		public Color ConnectionColor
-		{
-			get { return ConnectionColor; }
-			set 
-			{
-				if (value != SystemColors.Window)
-				{
-					ConnectionColor = value;
-					Invalidate();
-				}
-			}
-		}
+		public Color ConnectionColor;
+		// 		{
+		// 			get { return ConnectionColor; }
+		// 			set 
+		// 			{
+		// 				if (value != SystemColors.Window)
+		// 				{
+		// 					ConnectionColor = value;
+		// 					Invalidate();
+		// 				}
+		// 			}
+		// 		}
 
-        public bool ReadOnly
-        {
-            set;
-            get;
-        }
+		public bool ReadOnly;
+//         {
+//             set;
+//             get;
+//         }
 
         public bool SetSelectedNode(uint uniqueID)
         {
@@ -695,13 +756,6 @@ namespace PertNetworkUIExtension
             return null;
         }
 
-		public void RebuildGroups()
-		{
-			Groups.Clear();
-
-
-
-		}
     }
 
 }
