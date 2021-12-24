@@ -104,8 +104,8 @@ namespace PertNetworkUIExtension
 		private int RecalcDuration;
 #endif
 
-		const int RowHeight = 60;
-		const int ColWidth = 150;
+		protected virtual int RowHeight { get { return 30; } }
+		protected virtual int ColWidth { get { return 150; } }
 
 		public PertNetworkData Data
 		{
@@ -132,8 +132,10 @@ namespace PertNetworkUIExtension
 			Point maxPos;
 			Data.RebuildGroups(out maxPos);
 
-			// TODO
-			
+			this.AutoScrollMinSize = new Size((maxPos.X + 1) * ColWidth, (maxPos.Y + 1) * RowHeight);
+//			this.VerticalScroll.SmallChange = graphRect.Height / 100;
+
+
 			Invalidate();
 		}
 
@@ -143,10 +145,7 @@ namespace PertNetworkUIExtension
 			{
 				foreach (var item in group.Items)
 				{
-					var itemRect = CalcItemRectangle(item);
-
-					e.Graphics.DrawRectangle(Pens.Red, itemRect);
-					e.Graphics.DrawString(item.Title, this.Font, Brushes.Blue, itemRect);
+					OnPaintItem(e.Graphics, item);
 
 					foreach (uint id in item.DependencyUniqueIds)
 					{
@@ -154,14 +153,31 @@ namespace PertNetworkUIExtension
 
 						if (Data.Items.TryGetValue(id, out dependItem))
 						{
-							Rectangle from = CalcItemRectangle(dependItem);
-							Rectangle to = itemRect;
-
-							e.Graphics.DrawLine(Pens.Black, from.Right, from.Top + from.Height / 2, to.Left, to.Top + to.Height / 2);
+							OnPaintArrow(e.Graphics, dependItem, item);
 						}
 					}
 				}
 			}
+		}
+
+		virtual protected void OnPaintItem(Graphics graphics, PertNetworkItem item)
+		{
+			var itemRect = CalcItemRectangle(item);
+
+			graphics.DrawRectangle(Pens.Red, itemRect);
+			graphics.DrawString(item.Title, this.Font, Brushes.Blue, itemRect);
+		}
+
+		virtual protected void OnPaintArrow(Graphics graphics, PertNetworkItem fromItem, PertNetworkItem toItem)
+		{
+			var fromRect = CalcItemRectangle(fromItem);
+			var toRect = CalcItemRectangle(toItem);
+
+			graphics.DrawLine(Pens.Black, 
+								fromRect.Right, 
+								(fromRect.Top + (fromRect.Height / 2)), 
+								toRect.Left, 
+								(toRect.Top + (toRect.Height / 2)));
 		}
 
 		Rectangle CalcItemRectangle(PertNetworkItem item)
@@ -173,6 +189,9 @@ namespace PertNetworkUIExtension
 
 			itemRect.Width = ((ColWidth * 2) / 3);
 			itemRect.Height = ((RowHeight * 4) / 5);
+
+			// Offset rect by scroll pos
+			itemRect.Offset(-this.HorizontalScroll.Value, -this.VerticalScroll.Value);
 
 			return itemRect;
 		}
@@ -186,23 +205,7 @@ namespace PertNetworkUIExtension
         }
 
 		public Color ConnectionColor;
-		// 		{
-		// 			get { return ConnectionColor; }
-		// 			set 
-		// 			{
-		// 				if (value != SystemColors.Window)
-		// 				{
-		// 					ConnectionColor = value;
-		// 					Invalidate();
-		// 				}
-		// 			}
-		// 		}
-
 		public bool ReadOnly;
-//         {
-//             set;
-//             get;
-//         }
 
         public bool SetSelectedNode(uint uniqueID)
         {
@@ -295,27 +298,6 @@ namespace PertNetworkUIExtension
         }
 
 		// Message Handlers -----------------------------------------------------------
-
-/*
-		protected void BeginUpdate()
-		{
-			HoldRedraw = true;
-
-			EnableSelectionNotifications(false);
-		}
-
-		protected void EndUpdate()
-		{
-			HoldRedraw = false;
-
-			EnableSelectionNotifications(true);
-		}
-*/
-
-		protected virtual void PostDraw(Graphics graphics, TreeNodeCollection nodes)
-		{
-			// For derived classes
-		}
 
         protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
