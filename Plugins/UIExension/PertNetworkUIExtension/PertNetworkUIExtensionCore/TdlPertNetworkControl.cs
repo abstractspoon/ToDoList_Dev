@@ -578,32 +578,23 @@ namespace PertNetworkUIExtension
 			if (!task.IsValid())
 				return false;
 
-			PertNetworkItem item = null;
-            uint taskId = task.GetID();
+			PertNetworkItem item = Data.GetItem(task.GetID());
 
-			bool newItem = (Data.Items.TryGetValue(taskId, out item) == false);
-
-			if (newItem)
+			if (item == null)
 			{
-				Data.Items.Add(taskId, new PertNetworkTaskItem(task));
+				Data.AddItem(new PertNetworkTaskItem(task));
 			}
 			else
 			{
 				PertNetworkTaskItem taskItem = (item as PertNetworkTaskItem);
-
-				if (taskItem.Update(task))
-				{
-					// Process children
-					Task subtask = task.GetFirstSubtask();
-
-					while (subtask.IsValid() && ProcessTaskUpdate(subtask))
-						subtask = subtask.GetNextTask();
-				}
-				else
-				{
-					return false;
-				}
+				taskItem.Update(task);
 			}
+
+			// Process children
+			Task subtask = task.GetFirstSubtask();
+
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask))
+				subtask = subtask.GetNextTask();
 
 			return true;
 		}

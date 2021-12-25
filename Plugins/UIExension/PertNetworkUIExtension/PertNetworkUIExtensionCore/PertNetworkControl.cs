@@ -152,15 +152,10 @@ namespace PertNetworkUIExtension
 				{
 					OnPaintItem(e.Graphics, item);
 
-					foreach (uint id in item.DependencyUniqueIds)
-					{
-						PertNetworkItem dependItem = null;
+					var dependencies = group.GetItemDependencies(item);
 
-						if (Data.Items.TryGetValue(id, out dependItem))
-						{
-							OnPaintArrow(e.Graphics, dependItem, item);
-						}
-					}
+					foreach (var dependItem in dependencies)
+						OnPaintArrow(e.Graphics, dependItem, item);
 				}
 			}
 		}
@@ -170,7 +165,7 @@ namespace PertNetworkUIExtension
 			var itemRect = CalcItemRectangle(item);
 
 			graphics.DrawRectangle(Pens.Red, itemRect);
-			graphics.DrawString(item.Title, this.Font, Brushes.Blue, itemRect);
+			graphics.DrawString(String.Format("{0} ({1})", item.Title, item.UniqueId), this.Font, Brushes.Blue, itemRect);
 		}
 
 		virtual protected void OnPaintArrow(Graphics graphics, PertNetworkItem fromItem, PertNetworkItem toItem)
