@@ -65,11 +65,11 @@ namespace PertNetworkUIExtension
             return value;
         }
 
-		virtual protected int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
-		virtual protected int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
-        virtual protected int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
-		virtual protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
-        virtual protected int GraphPadding { get { return ScaleByDPIFactor(6); } }
+// 		virtual protected int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
+// 		virtual protected int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
+//         virtual protected int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
+// 		virtual protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
+//         virtual protected int GraphPadding { get { return ScaleByDPIFactor(6); } }
 
 		protected float ZoomFactor { get; private set; }
 		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
@@ -104,8 +104,11 @@ namespace PertNetworkUIExtension
 		private int RecalcDuration;
 #endif
 
-		protected virtual int RowHeight { get { return 30; } }
-		protected virtual int ColWidth { get { return 150; } }
+		protected virtual int ItemHeight { get { return 30; } }
+		protected virtual int ItemWidth { get { return 150; } }
+		protected virtual int ItemVertSpacing { get { return 10; } }
+		protected virtual int ItemHorzSpacing { get { return 30; } }
+		protected virtual int Padding { get { return 20; } }
 
 		public PertNetworkData Data
 		{
@@ -132,7 +135,9 @@ namespace PertNetworkUIExtension
 			Point maxPos;
 			Data.RebuildGroups(out maxPos);
 
-			this.AutoScrollMinSize = new Size((maxPos.X + 1) * ColWidth, (maxPos.Y + 1) * RowHeight);
+			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y);
+
+			this.AutoScrollMinSize = new Size(maxItemRect.Right + Padding, maxItemRect.Bottom + Padding);
 //			this.VerticalScroll.SmallChange = graphRect.Height / 100;
 
 
@@ -180,22 +185,27 @@ namespace PertNetworkUIExtension
 								(toRect.Top + (toRect.Height / 2)));
 		}
 
-		Rectangle CalcItemRectangle(PertNetworkItem item)
+		virtual protected Rectangle CalcItemRectangle(PertNetworkItem item)
 		{
-			Rectangle itemRect = new Rectangle(0, 0, 0, 0);
+			return CalcItemRectangle(item.Position.X, item.Position.Y);
+		}
 
-			itemRect.X = (ColWidth * item.Position.X);
-			itemRect.Y = (RowHeight * item.Position.Y);
+		virtual protected Rectangle CalcItemRectangle(int x, int y)
+		{
+			Rectangle itemRect = new Rectangle(Padding, Padding, 0, 0);
 
-			itemRect.Width = ((ColWidth * 2) / 3);
-			itemRect.Height = ((RowHeight * 4) / 5);
+			itemRect.X += ((ItemWidth + ItemHorzSpacing) * x);
+			itemRect.Y += ((ItemHeight + ItemVertSpacing) * y);
+
+			itemRect.Width = ItemWidth;
+			itemRect.Height = ItemHeight;
 
 			// Offset rect by scroll pos
 			itemRect.Offset(-this.HorizontalScroll.Value, -this.VerticalScroll.Value);
 
 			return itemRect;
 		}
-
+		
 		public void SetFont(String fontName, int fontSize)
         {
             if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
