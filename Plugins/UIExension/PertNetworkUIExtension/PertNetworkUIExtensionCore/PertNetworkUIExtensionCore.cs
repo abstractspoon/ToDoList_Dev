@@ -44,7 +44,7 @@ namespace PertNetworkUIExtension
 
         public bool SelectTask(UInt32 dwTaskID)
         {
-			return m_PertNetwork.SetSelectedNode(dwTaskID);
+			return m_PertNetwork.SetSelectedTask(dwTaskID);
         }
 
         public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -256,12 +256,11 @@ namespace PertNetworkUIExtension
             return notify.NotifyEditIcon();
         }
 
-		void OnPertNetworkSelectionChange(object sender, object itemData)
+		void OnPertNetworkSelectionChange(object sender, PertNetworkItem item)
 		{
-// 			var taskItem = (itemData as PertNetworkTaskItem);
-// 			var notify = new UIExtension.ParentNotify(m_HwndParent);
-// 
-// 			notify.NotifySelChange(taskItem.UniqueId);
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+			notify.NotifySelChange(item.UniqueId);
 		}
 
 		bool OnPertNetworkDragDrop(object sender, PertNetworkDragEventArgs e)

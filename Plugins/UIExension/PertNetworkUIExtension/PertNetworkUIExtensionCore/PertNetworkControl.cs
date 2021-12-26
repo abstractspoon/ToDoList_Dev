@@ -14,7 +14,7 @@ using System.Windows.Forms.VisualStyles;
 
 namespace PertNetworkUIExtension
 {
-	public delegate void SelectionChangeEventHandler(object sender, object itemData);
+	public delegate void SelectionChangeEventHandler(object sender, PertNetworkItem item);
 	public delegate bool DragDropChangeEventHandler(object sender, PertNetworkDragEventArgs e);
 
 	[System.ComponentModel.DesignerCategory("")]
@@ -65,16 +65,10 @@ namespace PertNetworkUIExtension
             return value;
         }
 
-// 		virtual protected int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
-// 		virtual protected int ItemVertSeparation { get { return ScaleByDPIFactor(4); } }
-//         virtual protected int InsertionMarkerHeight { get { return ScaleByDPIFactor(6); } }
-// 		virtual protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
-//         virtual protected int GraphPadding { get { return ScaleByDPIFactor(6); } }
-
 		protected float ZoomFactor { get; private set; }
 		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
 
-		protected enum NodeDrawState
+		protected enum ItemDrawState
 		{
 			None,
 			Selected,
@@ -99,6 +93,7 @@ namespace PertNetworkUIExtension
 		private bool FirstPaint = true;
         private bool HoldRedraw = false;
         private bool IsSavingToImage = false;
+		private uint SelectedItemId = 0;
 
 #if DEBUG
 		private int RecalcDuration;
@@ -108,7 +103,7 @@ namespace PertNetworkUIExtension
 		protected virtual int ItemWidth { get { return 150; } }
 		protected virtual int ItemVertSpacing { get { return 10; } }
 		protected virtual int ItemHorzSpacing { get { return 30; } }
-		protected virtual int Padding { get { return 20; } }
+		protected virtual new int Padding { get { return 20; } }
 
 		public PertNetworkData Data
 		{
@@ -140,10 +135,27 @@ namespace PertNetworkUIExtension
 			this.AutoScrollMinSize = new Size(maxItemRect.Right + Padding, maxItemRect.Bottom + Padding);
 //			this.VerticalScroll.SmallChange = graphRect.Height / 100;
 
-
 			Invalidate();
 		}
 
+		public PertNetworkItem HitTestItem(Point pos)
+		{
+			// Brute force for now
+			foreach (var group in Data.Groups)
+			{
+				foreach (var item in group.Items)
+				{
+					var itemRect = CalcItemRectangle(item);
+
+					if (itemRect.Contains(pos))
+						return item;
+				}
+			}
+
+			// else
+			return null;
+		}
+		
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			int iGroup = 0;
@@ -155,12 +167,16 @@ namespace PertNetworkUIExtension
 				{
 					if (!drawnItems.Contains(item))
 					{
-						OnPaintItem(e.Graphics, item, iGroup);
+						OnPaintItem(e.Graphics, item, iGroup, (item.UniqueId == SelectedItemId));
 
 						var dependencies = group.GetItemDependencies(item);
+						var smoothing = e.Graphics.SmoothingMode;
+						e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
 						foreach (var dependItem in dependencies)
 							OnPaintConnection(e.Graphics, dependItem, item);
+
+						e.Graphics.SmoothingMode = smoothing;
 
 						drawnItems.Add(item);
 					}
@@ -170,12 +186,22 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-		virtual protected void OnPaintItem(Graphics graphics, PertNetworkItem item, int iGroup)
+		virtual protected void OnPaintItem(Graphics graphics, PertNetworkItem item, int iGroup, bool selected)
 		{
 			var itemRect = CalcItemRectangle(item);
+			var itemText = String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup);
 
-			graphics.DrawRectangle(Pens.Red, itemRect);
-			graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), this.Font, Brushes.Blue, itemRect);
+			graphics.DrawRectangle(Pens.Black, itemRect);
+
+			if (selected)
+			{
+				graphics.FillRectangle(SystemBrushes.Highlight, itemRect);
+				graphics.DrawString(itemText, this.Font, SystemBrushes.HighlightText, itemRect);
+			}
+			else
+			{
+				graphics.DrawString(itemText, this.Font, Brushes.Blue, itemRect);
+			}
 		}
 
 		virtual protected void OnPaintConnection(Graphics graphics, PertNetworkItem fromItem, PertNetworkItem toItem)
@@ -183,7 +209,7 @@ namespace PertNetworkUIExtension
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
 
-			graphics.DrawLine(Pens.Black, 
+			graphics.DrawLine(Pens.Blue, 
 								fromRect.Right, 
 								(fromRect.Top + (fromRect.Height / 2)), 
 								toRect.Left, 
@@ -222,22 +248,22 @@ namespace PertNetworkUIExtension
 		public Color ConnectionColor;
 		public bool ReadOnly;
 
-        public bool SetSelectedNode(uint uniqueID)
+        public bool SetSelectedTask(uint uniqueID)
         {
-//             var node = FindNode(uniqueID);
-// 
-// 			if (node == null)
-// 				return false;
-// 
-//             SelectedNode = node;
-//			EnsureItemVisible(Item(node));
+            var item = Data.GetItem(uniqueID);
+
+			if (item == null)
+				return false;
+
+            SelectedItemId = uniqueID;
+			EnsureItemVisible(item);
 
             return true;
         }
 
 		public Rectangle GetSelectedItemLabelRect()
 		{
-			return new Rectangle(0, 0, 10, 10);// GetItemLabelRect(SelectedNode);
+			return new Rectangle(0, 0, 10, 10);// GetItemLabelRect(SelectedItem);
 		}
 
         public Bitmap SaveToImage()
@@ -323,7 +349,21 @@ namespace PertNetworkUIExtension
         {
 			base.OnMouseDown(e);
 
-			// TODO
+			if (e.Button != MouseButtons.Left)
+				return;
+
+			var item = HitTestItem(e.Location);
+
+			if (item == null)
+				return;
+
+			if (item.UniqueId != SelectedItemId)
+			{
+				SelectedItemId = item.UniqueId;
+				Invalidate();
+
+				SelectionChange?.Invoke(this, SelectedItem);
+			}
 		}
 
 		protected override void OnMouseWheel(MouseEventArgs e)
@@ -357,15 +397,15 @@ namespace PertNetworkUIExtension
 
 					// The process of changing the fonts and recalculating the 
 					// item height can cause the tree-view to spontaneously 
-					// collapse tree nodes so we save the expansion state
+					// collapse tree items so we save the expansion state
 					// and restore it afterwards
-					var expandedNodes = GetExpandedNodes(RootNode);
+					var expandedItems = GetExpandedItems(RootItem);
 
 					ZoomFactor = newFactor;
 					UpdateTreeFont(false);
 
 					// 'Cleanup'
-					SetExpandedNodes(expandedNodes);
+					SetExpandedItems(expandedItems);
  					EndUpdate();
 
 					// Scroll the view to keep the mouse located in the 
@@ -503,12 +543,6 @@ namespace PertNetworkUIExtension
 			ZoomFactor = 1f;
 
 			//UpdateTreeFont(true);
-		}
-
-		// Hook for derived classes
-		virtual protected bool RefreshNodeFont(TreeNode node, bool andChildren)
-		{
-			return false;
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -674,11 +708,6 @@ namespace PertNetworkUIExtension
 			return false;
 		}
 
-// 		protected virtual int GetExtraWidth(TreeNode node)
-// 		{
-// 			return (2 * LabelPadding);
-// 		}
-
 		protected virtual int GetMinItemHeight()
 		{
 			return 10;
@@ -693,7 +722,7 @@ namespace PertNetworkUIExtension
 		{
 			get
 			{
-				return null; // TODO
+				return Data.GetItem(SelectedItemId);
 			}
 		}
 
@@ -704,37 +733,6 @@ namespace PertNetworkUIExtension
 
 			// else
 			return font;
-		}
-
-		protected Rectangle RectFromPoints(Point pt1, Point pt2)
-		{
-			return Rectangle.FromLTRB(Math.Min(pt1.X, pt2.X),
-										Math.Min(pt1.Y, pt2.Y),
-										Math.Max(pt1.X, pt2.X),
-										Math.Max(pt1.Y, pt2.Y));
-		}
-
-		protected Rectangle GetItemDrawRect(Rectangle itemRect)
-		{
-			Rectangle drawPos = itemRect;
-
-// 			drawPos.Offset(DrawOffset);
-//             drawPos.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
-//             drawPos.Offset(GraphPadding, GraphPadding);
-			
-			return drawPos;
-		}
-
-		protected Rectangle GetItemHitRect(Rectangle itemRect)
-		{
-			Rectangle drawPos = GetItemDrawRect(itemRect);
-
-			return Rectangle.Inflate(drawPos, 2, 0);
-		}
-
-		virtual protected Color GetNodeBackgroundColor(Object itemData)
-		{
-			return Color.Empty;
 		}
 
         protected PertNetworkItem HitTestPositions(Point point)
