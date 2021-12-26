@@ -24,7 +24,6 @@ namespace PertNetworkUIExtension
 		public string Title;
 		public Point Position;
 		public bool HasPosition { get { return (Position != NullPoint); } }
-		public Rectangle LastDrawRect;
 		public List<uint> DependencyUniqueIds;
 
 		public static Point NullPoint { get { return new Point(-1, -1); } }
@@ -107,14 +106,14 @@ namespace PertNetworkUIExtension
 
 			foreach (var termId in terminatorIDs)
 			{
-				PertNetworkItem termItem = null;
+				PertNetworkItem termItem = GetItem(termId);
 
-				if (m_Items.TryGetValue(termId, out termItem))
+				if (termItem != null)
 				{
 					Point groupMaxPos = new Point(0, maxPos.Y);
 
 					if (m_Groups.Count > 0)
-						groupMaxPos.Y += 2;
+						groupMaxPos.Y++;
 
 					var group = NewGroup(termItem, ref groupMaxPos);
 					m_Groups.Add(group);
@@ -167,7 +166,9 @@ namespace PertNetworkUIExtension
 			if (!group.AddItem(item))
 				return;
 
-			item.Position.Y = maxPos.Y;
+			// Don't modify the vertical position of an item already processed in another group
+			if (!item.HasPosition)
+				item.Position.Y = maxPos.Y;
 			
 			// This item's dependencies (can be zero)
 			if (item.DependencyUniqueIds.Count > 0)
@@ -176,9 +177,9 @@ namespace PertNetworkUIExtension
 
 				foreach (var dependId in item.DependencyUniqueIds)
 				{
-					PertNetworkItem dependItem = null;
+					PertNetworkItem dependItem = GetItem(dependId);
 
-					if (m_Items.TryGetValue(dependId, out dependItem))
+					if (dependItem != null)
 					{
 						// First dependency shares same VPos as prior item
 						if (!firstDepend)
@@ -219,6 +220,7 @@ namespace PertNetworkUIExtension
 
 		public bool AddItem(PertNetworkItem item)
 		{
+			// Must be unique
 			if (m_Items.ContainsKey(item.UniqueId))
 				return false;
 

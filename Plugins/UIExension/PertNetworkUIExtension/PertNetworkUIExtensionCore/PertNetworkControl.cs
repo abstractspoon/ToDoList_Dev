@@ -146,26 +146,36 @@ namespace PertNetworkUIExtension
 
 		protected override void OnPaint(PaintEventArgs e)
 		{
+			int iGroup = 0;
+			var drawnItems = new HashSet<PertNetworkItem>();
+
 			foreach (var group in Data.Groups)
 			{
 				foreach (var item in group.Items)
 				{
-					OnPaintItem(e.Graphics, item);
+					if (!drawnItems.Contains(item))
+					{
+						OnPaintItem(e.Graphics, item, iGroup);
 
-					var dependencies = group.GetItemDependencies(item);
+						var dependencies = group.GetItemDependencies(item);
 
-					foreach (var dependItem in dependencies)
-						OnPaintArrow(e.Graphics, dependItem, item);
+						foreach (var dependItem in dependencies)
+							OnPaintArrow(e.Graphics, dependItem, item);
+
+						drawnItems.Add(item);
+					}
 				}
+
+				iGroup++;
 			}
 		}
 
-		virtual protected void OnPaintItem(Graphics graphics, PertNetworkItem item)
+		virtual protected void OnPaintItem(Graphics graphics, PertNetworkItem item, int iGroup)
 		{
 			var itemRect = CalcItemRectangle(item);
 
 			graphics.DrawRectangle(Pens.Red, itemRect);
-			graphics.DrawString(String.Format("{0} ({1})", item.Title, item.UniqueId), this.Font, Brushes.Blue, itemRect);
+			graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), this.Font, Brushes.Blue, itemRect);
 		}
 
 		virtual protected void OnPaintArrow(Graphics graphics, PertNetworkItem fromItem, PertNetworkItem toItem)
