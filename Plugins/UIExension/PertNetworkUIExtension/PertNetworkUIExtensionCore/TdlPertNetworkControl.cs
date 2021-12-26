@@ -129,7 +129,6 @@ namespace PertNetworkUIExtension
 	enum PertNetworkOption
 	{
 		None = 0x00,
-		ShowDependencies = 0x01,
 	}
 
 	// ------------------------------------------------------------
@@ -161,6 +160,8 @@ namespace PertNetworkUIExtension
 		protected override int ItemVertSpacing { get { return ScaleByDPIFactor(10); } }
 		protected override int ItemHorzSpacing { get { return ScaleByDPIFactor(50); } }
 		protected override int Padding { get { return ScaleByDPIFactor(20); } }
+
+		private int LabelPadding { get { return ScaleByDPIFactor(2); } }
 
 		// -------------------------------------------------------------------------
 
@@ -343,17 +344,17 @@ namespace PertNetworkUIExtension
 			return 0;
 		}
 
-		public new Rectangle GetSelectedItemLabelRect()
+		public Rectangle GetSelectedItemLabelRect()
 		{
 			EnsureItemVisible(SelectedItem);
 
-			var labelRect = base.GetSelectedItemLabelRect();
+			var labelRect = GetSelectedItemRect();
 
 			// 			labelRect.X -= LabelPadding;
 			// 			labelRect.X += GetExtraWidth(SelectedNode);
 			// 
-			// 			// Make sure the rect is big enough for the unscaled font
-			// 			labelRect.Height = Math.Max(labelRect.Height, (this.Font.Height + (2 * LabelPadding))); 
+			// Make sure the rect is big enough for the unscaled font
+			labelRect.Height = (this.Font.Height + (2 * LabelPadding)); 
 
 			return labelRect;
 		}
@@ -921,20 +922,6 @@ namespace PertNetworkUIExtension
 		protected override int GetMinItemHeight()
 		{
             return (ScaleByDPIFactor(16) + 1);
-		}
-
-		protected override void OnGotFocus(EventArgs e)
-		{
-			base.OnGotFocus(e);
-
-			Invalidate();
-		}
-
-		protected override void OnLostFocus(EventArgs e)
-		{
-			base.OnLostFocus(e);
-
-			Invalidate();
 		}
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)

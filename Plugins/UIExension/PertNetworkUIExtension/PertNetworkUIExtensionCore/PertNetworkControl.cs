@@ -68,13 +68,6 @@ namespace PertNetworkUIExtension
 		protected float ZoomFactor { get; private set; }
 		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
 
-		protected enum ItemDrawState
-		{
-			None,
-			Selected,
-			DropTarget,
-		}
-
 		protected enum DropPos
         {
             None,
@@ -88,10 +81,7 @@ namespace PertNetworkUIExtension
         private DropPos DropSite;
 		private Timer DragTimer;
 		private int LastDragTick = 0;
-        private int ThemedGlyphSize = 0;
 
-		private bool FirstPaint = true;
-        private bool HoldRedraw = false;
         private bool IsSavingToImage = false;
 		private uint SelectedItemId = 0;
 
@@ -261,9 +251,11 @@ namespace PertNetworkUIExtension
             return true;
         }
 
-		public Rectangle GetSelectedItemLabelRect()
+		public Rectangle GetSelectedItemRect()
 		{
-			return new Rectangle(0, 0, 10, 10);// GetItemLabelRect(SelectedItem);
+			var selItem = SelectedItem;
+
+			return ((selItem == null) ? new Rectangle(0, 0, 0, 0) : CalcItemRectangle(selItem));
 		}
 
         public Bitmap SaveToImage()
@@ -519,19 +511,18 @@ namespace PertNetworkUIExtension
 			base.OnSizeChanged(e);
 		}
 
-
 		protected override void OnGotFocus(EventArgs e)
 		{
 			base.OnGotFocus(e);
 
-			Invalidate(GetSelectedItemLabelRect());
+			Invalidate(GetSelectedItemRect());
 		}
 
 		protected override void OnLostFocus(EventArgs e)
 		{
 			base.OnLostFocus(e);
 
-			Invalidate(GetSelectedItemLabelRect());
+			Invalidate(GetSelectedItemRect());
 		}
 
 		protected override void OnFontChanged(EventArgs e)
