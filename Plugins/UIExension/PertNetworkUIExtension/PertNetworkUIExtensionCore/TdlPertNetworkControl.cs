@@ -802,9 +802,12 @@ namespace PertNetworkUIExtension
 
 			// Draw Arrow head and box without smoothing to better match core app
 			var smoothing = graphics.SmoothingMode;
-			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+			graphics.SmoothingMode = SmoothingMode.None;
 
-			DrawHorzDependencyArrowHead(graphics, points[2], (int)Font.GetHeight(), false);
+			Point arrow = points[2];
+			arrow.X--;
+
+			DrawHorzDependencyArrowHead(graphics, arrow, (int)Font.GetHeight(), false);
 
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(points[0].X - 1, points[0].Y - 1, 3, 3);
