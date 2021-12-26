@@ -267,18 +267,18 @@ namespace PertNetworkUIExtension
 		// 			get { return (SelectedNode == PreviouslySelectedNode); }
 		// 		}
 
-		public bool TaskColorIsBackground;
-		// 		{
-		// 			get { return TaskColorIsBkgnd; }
-		// 			set
-		// 			{
-		// 				if (TaskColorIsBkgnd != value)
-		// 				{
-		// 					TaskColorIsBkgnd = value;
-		// 					Invalidate();
-		// 				}
-		// 			}
-		// 		}
+		public bool TaskColorIsBackground
+		{
+			get { return TaskColorIsBkgnd; }
+			set
+			{
+				if (TaskColorIsBkgnd != value)
+				{
+					TaskColorIsBkgnd = value;
+					Invalidate();
+				}
+			}
+		}
 
 		public bool ShowParentsAsFolders;
 		// 		{
@@ -670,25 +670,23 @@ namespace PertNetworkUIExtension
 			}
 			else
 			{
-				Color backColor = SystemColors.Window;
+				Color backColor = GetItemBackgroundColor(item);
 				Color borderColor = SystemColors.WindowText;
 
 				itemRect.Width--;
 				itemRect.Height--;
 
-				if (TaskColorIsBkgnd && !selected && !(taskItem.IsDone || taskItem.IsGoodAsDone))
+				if (backColor != Color.Empty)
 				{
 					using (var brush = new SolidBrush(taskItem.TextColor))
 						graphics.FillRectangle(brush, itemRect);
 				}
-				else
-				{
-					if (taskItem.TextColor != Color.Empty)
-						borderColor = taskItem.TextColor;
 
-					using (var pen = new Pen(borderColor))
-						graphics.DrawRectangle(pen, itemRect);
-				}
+				if (taskItem.TextColor != Color.Empty)
+					borderColor = taskItem.TextColor;
+
+				using (var pen = new Pen(borderColor))
+					graphics.DrawRectangle(pen, itemRect);
 			}
 
 			// Text
@@ -819,7 +817,6 @@ namespace PertNetworkUIExtension
 
 			graphics.SmoothingMode = smoothing;
 		}
-
 
 		private bool TaskHasIcon(PertNetworkTaskItem taskItem)
 		{
