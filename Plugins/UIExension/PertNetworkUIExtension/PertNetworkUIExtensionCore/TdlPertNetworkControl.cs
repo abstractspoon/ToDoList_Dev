@@ -370,7 +370,7 @@ namespace PertNetworkUIExtension
 			// 			if ((destPrevSiblingId != 0) && (FindNode(destPrevSiblingId) == null))
 			// 				return false;
 
-			return true;
+			return false;
 		}
 
 		public bool MoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
@@ -410,7 +410,7 @@ namespace PertNetworkUIExtension
 						EnsureItemVisible(Item(node));
 			*/
 
-			return true;
+			return false;
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
