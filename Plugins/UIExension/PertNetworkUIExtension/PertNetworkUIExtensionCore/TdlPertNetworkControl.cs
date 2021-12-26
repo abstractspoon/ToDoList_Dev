@@ -673,6 +673,9 @@ namespace PertNetworkUIExtension
 				Color backColor = SystemColors.Window;
 				Color borderColor = SystemColors.WindowText;
 
+				itemRect.Width--;
+				itemRect.Height--;
+
 				if (TaskColorIsBkgnd && !selected && !(taskItem.IsDone || taskItem.IsGoodAsDone))
 				{
 					using (var brush = new SolidBrush(taskItem.TextColor))

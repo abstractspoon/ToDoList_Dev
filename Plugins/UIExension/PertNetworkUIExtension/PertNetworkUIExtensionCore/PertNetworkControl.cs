@@ -157,16 +157,33 @@ namespace PertNetworkUIExtension
 				{
 					if (!drawnItems.Contains(item))
 					{
-						OnPaintItem(e.Graphics, item, iGroup, (item.UniqueId == SelectedItemId));
+						if (WantDrawItem(e, item))
+						{
+							OnPaintItem(e.Graphics, item, iGroup, (item.UniqueId == SelectedItemId));
+						}
+						else
+						{
+							int breakpoint = 0;
+						}
 
 						var dependencies = group.GetItemDependencies(item);
-						var smoothing = e.Graphics.SmoothingMode;
-						e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
 						foreach (var dependItem in dependencies)
-							OnPaintConnection(e.Graphics, dependItem, item);
+						{
+							if (WantDrawConnection(e, dependItem, item))
+							{
+								var smoothing = e.Graphics.SmoothingMode;
+								e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-						e.Graphics.SmoothingMode = smoothing;
+								OnPaintConnection(e.Graphics, dependItem, item);
+
+								e.Graphics.SmoothingMode = smoothing;
+							}
+							else
+							{
+								int breakpoint = 0;
+							}
+						}
 
 						drawnItems.Add(item);
 					}
@@ -174,6 +191,21 @@ namespace PertNetworkUIExtension
 
 				iGroup++;
 			}
+		}
+
+		bool WantDrawItem(PaintEventArgs e, PertNetworkItem item)
+		{
+			var itemRect = CalcItemRectangle(item);
+
+			return e.ClipRectangle.IntersectsWith(itemRect);
+		}
+
+		bool WantDrawConnection(PaintEventArgs e, PertNetworkItem fromItem, PertNetworkItem toItem)
+		{
+			var fromRect = CalcItemRectangle(fromItem);
+			var toRect = CalcItemRectangle(toItem);
+
+			return e.ClipRectangle.IntersectsWith(Rectangle.Union(fromRect, toRect));
 		}
 
 		virtual protected void OnPaintItem(Graphics graphics, PertNetworkItem item, int iGroup, bool selected)
