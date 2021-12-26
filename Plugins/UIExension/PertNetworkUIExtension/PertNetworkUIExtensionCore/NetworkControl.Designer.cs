@@ -3,7 +3,7 @@ using System.Windows.Forms;
 
 namespace PertNetworkUIExtension
 {
-    partial class PertNetworkControl
+    partial class NetworkControl
     {
         /// <summary> 
         /// Required designer variable.

@@ -1,770 +1,1043 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Drawing2D;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
-using System.Runtime.InteropServices;
+using System;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Windows.Forms;
+using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
+
+using Abstractspoon.Tdl.PluginHelpers;
+using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
 namespace PertNetworkUIExtension
 {
-	public delegate void SelectionChangeEventHandler(object sender, PertNetworkItem item);
-	public delegate bool DragDropChangeEventHandler(object sender, PertNetworkDragEventArgs e);
+    public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
+    public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
+	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
+
+	// -----------------------------------------------------------------
+
+	class PertNetworkItem : NetworkItem
+	{
+		// Data
+		public Color TextColor { get; private set; }
+		public bool HasIcon { get; private set; }
+		public bool IsFlagged { get; private set; }
+		public bool IsParent { get; private set; }
+		public bool IsDone { get; private set; }
+		public bool IsGoodAsDone { get; private set; }
+		public bool SomeSubtasksDone { get; private set; }
+		public bool IsLocked { get; private set; }
+
+		// -----------------------------------------------------------------
+
+		public PertNetworkItem(String label, uint taskId) : base(label, taskId)
+		{
+			TextColor = new Color();
+			HasIcon = false;
+			IsFlagged = false;
+			IsDone = false;
+            IsGoodAsDone = false;
+            SomeSubtasksDone = false;
+			IsLocked = false;
+		}
+
+		public PertNetworkItem(Task task) : base(task.GetTitle(), task.GetID())
+		{
+			TextColor = task.GetTextDrawingColor();
+			HasIcon = (task.GetIcon().Length > 0);
+			IsFlagged = task.IsFlagged(false);
+            IsDone = task.IsDone();
+            IsGoodAsDone = task.IsGoodAsDone();
+            SomeSubtasksDone = task.HasSomeSubtasksDone();
+			IsLocked = task.IsLocked(true);
+			DependencyUniqueIds = task.GetLocalDependency();
+		}
+
+		public override string ToString() 
+		{
+			return Title;
+		}
+
+		public void Update(Task task, HashSet<Task.Attribute> attribs)
+		{
+			// TODO
+		}
+
+		public bool HasLocalDependencies {  get { return (DependencyUniqueIds != null) && (DependencyUniqueIds.Count > 0); } }
+
+/*
+		public bool IsDone(bool includeGoodAsDone) 
+        { 
+            if (includeGoodAsDone && IsGoodAsDone)
+                return true;
+
+            return IsDone; 
+        }
+
+		public bool SetDone(bool done = true)
+		{
+			if (IsDone == done)
+				return false;
+
+			IsDone = done;
+			return true;
+		}
+*/
+
+		public bool Update(Task task)
+		{
+			if (task.GetID() != UniqueId)
+				return false;
+
+			if (task.GetReferenceID() != 0)
+				return false;
+
+			if (task.IsAttributeAvailable(Task.Attribute.Title))
+				Title = task.GetTitle();
+
+			if (task.IsAttributeAvailable(Task.Attribute.Icon))
+				HasIcon = (task.GetIcon().Length > 0);
+
+			if (task.IsAttributeAvailable(Task.Attribute.Flag))
+				IsFlagged = task.IsFlagged(false);
+
+			if (task.IsAttributeAvailable(Task.Attribute.Color))
+				TextColor = task.GetTextDrawingColor();
+
+            if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
+                SomeSubtasksDone = task.HasSomeSubtasksDone();
+
+            if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
+                IsDone = task.IsDone();
+
+			if (task.IsAttributeAvailable(Task.Attribute.Dependency))
+				DependencyUniqueIds = task.GetLocalDependency();
+
+			IsParent = task.IsParent();
+			IsLocked = task.IsLocked(true);
+            IsGoodAsDone = task.IsGoodAsDone();
+
+			return true;
+		}
+	}
+
+	// ------------------------------------------------------------
+
+	[Flags]
+	enum PertNetworkOption
+	{
+		None = 0x00,
+	}
+
+	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-
-	public class PertNetworkDragEventItem
+	class PertNetworkControl : NetworkControl
 	{
-		public PertNetworkDragEventItem( /* TODO*/ )
+		public event EditTaskLabelEventHandler      EditTaskLabel;
+        public event EditTaskIconEventHandler       EditTaskIcon;
+        public event EditTaskCompletionEventHandler EditTaskDone;
+
+		// From Parent
+		private Translator Trans;
+		private UIExtension.TaskIcon TaskIcons;
+
+		private bool ShowParentAsFolder;
+		private bool TaskColorIsBkgnd;
+		private bool IgnoreMouseClick;
+		private bool StrikeThruDone;
+
+		private Timer EditTimer;
+		private Font BoldLabelFont, DoneLabelFont, BoldDoneLabelFont;
+		private Size CheckboxSize;
+
+		// -------------------------------------------------------------------------
+
+		protected override int ItemHeight { get { return ScaleByDPIFactor(30); } }
+		protected override int ItemWidth { get { return ScaleByDPIFactor(150); } }
+		protected override int ItemVertSpacing { get { return ScaleByDPIFactor(10); } }
+		protected override int ItemHorzSpacing { get { return ScaleByDPIFactor(50); } }
+		protected override int Padding { get { return ScaleByDPIFactor(20); } }
+
+		private int LabelPadding { get { return ScaleByDPIFactor(2); } }
+
+		// -------------------------------------------------------------------------
+
+		public PertNetworkControl(Translator trans, UIExtension.TaskIcon icons)
 		{
-		}
-	}
+			Trans = trans;
+			TaskIcons = icons;
 
-	public class PertNetworkDragEventArgs : EventArgs
-	{
-		public PertNetworkDragEventArgs( /* TODO*/ )
-		{
-		}
+			TaskColorIsBkgnd = false;
+			IgnoreMouseClick = false;
+			ShowParentAsFolder = false;
+			ShowCompletionCheckboxes = true;
+			StrikeThruDone = true;
 
-	}
+			EditTimer = new Timer();
+			EditTimer.Interval = 500;
+			EditTimer.Tick += new EventHandler(OnEditLabelTimer);
 
-	public partial class PertNetworkControl : UserControl
-	{
-		// Win32 Imports -----------------------------------------------------------------
-
-		[DllImport("User32.dll")]
-		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
-
-		// --------------------------
-
-		[DllImport("User32.dll")]
-		static extern uint GetDoubleClickTime();
-		
-		// --------------------------
-
-		[DllImport("User32.dll")]
-		static extern int GetSystemMetrics(int index);
-		
-		const int SM_CXDOUBLECLK = 36;
-		const int SM_CYDOUBLECLK = 37;
-		const int SM_CXDRAG = 68;
-		const int SM_CYDRAG = 69;
-
-		const int WM_PAINT = 0x000F;
-
-		// Constants ---------------------------------------------------------------------
-
-		virtual protected int ScaleByDPIFactor(int value)
-        {
-            return value;
-        }
-
-		protected float ZoomFactor { get; private set; }
-		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
-
-		protected enum DropPos
-        {
-            None,
-            On,
-            Left,
-            Right,
-        }
-
-		// Data --------------------------------------------------------------------------
-
-        private DropPos DropSite;
-		private Timer DragTimer;
-		private int LastDragTick = 0;
-
-        private bool IsSavingToImage = false;
-		private uint SelectedItemId = 0;
-
-#if DEBUG
-		private int RecalcDuration;
-#endif
-
-		protected virtual int ItemHeight { get { return 30; } }
-		protected virtual int ItemWidth { get { return 150; } }
-		protected virtual int ItemVertSpacing { get { return 10; } }
-		protected virtual int ItemHorzSpacing { get { return 30; } }
-		protected virtual new int Padding { get { return 20; } }
-
-		public PertNetworkData Data
-		{
-			get; private set;
+			using (Graphics graphics = Graphics.FromHwnd(Handle))
+				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 		}
 
-		// Public ------------------------------------------------------------------------
+		public void SetStrikeThruDone(bool strikeThruDone)
+		{
+			StrikeThruDone = strikeThruDone;
 
-		public event SelectionChangeEventHandler SelectionChange;
-		public event DragDropChangeEventHandler DragDropChange;
-
-        public PertNetworkControl()
-        {
-			DropSite = DropPos.None;
-			ConnectionColor = Color.Magenta;
-
-			Data = new PertNetworkData();
-
-			InitializeComponent();
+			if (BoldLabelFont != null)
+				SetFont(BoldLabelFont.Name, (int)BoldLabelFont.Size, StrikeThruDone);
 		}
 
-		public void RebuildGroups()
+		public new void SetFont(String fontName, int fontSize)
 		{
-			Point maxPos;
-			Data.RebuildGroups(out maxPos);
-
-			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y);
-
-			this.AutoScrollMinSize = new Size(maxItemRect.Right + Padding, maxItemRect.Bottom + Padding);
-//			this.VerticalScroll.SmallChange = graphRect.Height / 100;
-
-			Invalidate();
+			SetFont(fontName, fontSize, StrikeThruDone);
 		}
 
-		public PertNetworkItem HitTestItem(Point pos)
+		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
 		{
-			// Brute force for now
-			foreach (var group in Data.Groups)
+			bool baseFontChange = ((BoldLabelFont == null) || (BoldLabelFont.Name != fontName) || (BoldLabelFont.Size != fontSize));
+			bool doneFontChange = (baseFontChange || (BoldDoneLabelFont.Strikeout != strikeThruDone));
+
+			if (baseFontChange)
+				BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
+
+			if (doneFontChange)
 			{
-				foreach (var item in group.Items)
+				if (strikeThruDone)
 				{
-					var itemRect = CalcItemRectangle(item);
-
-					if (itemRect.Contains(pos))
-						return item;
+					BoldDoneLabelFont = new Font(fontName, fontSize, FontStyle.Bold | FontStyle.Strikeout);
+					DoneLabelFont = new Font(fontName, fontSize, FontStyle.Strikeout);
+				}
+				else
+				{
+					BoldDoneLabelFont = BoldLabelFont;
+					DoneLabelFont = null;
 				}
 			}
+
+			if (baseFontChange || doneFontChange)
+				RebuildGroups();
+
+			base.SetFont(fontName, fontSize);
+		}
+
+		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
+		{
+			switch (type)
+			{
+			case UIExtension.UpdateType.Edit:
+			case UIExtension.UpdateType.New:
+				// TODO
+				break;
+
+			case UIExtension.UpdateType.Delete:
+				break;
+
+			case UIExtension.UpdateType.All:
+				Data.Clear();
+				break;
+
+			case UIExtension.UpdateType.Unknown:
+				return;
+			}
+
+			UpdateTaskAttributes(tasks);
+		}
+
+		public PertNetworkOption Options;
+		// 		{
+		// 			get { return Options; }
+		// 
+		// 			set
+		// 			{
+		// 				if (value != Options)
+		// 				{
+		// 					Options = value;
+		// 					Invalidate();
+		// 				}
+		// 			}
+		// 		}
+
+		// 		public bool SelectNodeWasPreviouslySelected
+		// 		{
+		// 			get { return (SelectedNode == PreviouslySelectedNode); }
+		// 		}
+
+		public bool TaskColorIsBackground
+		{
+			get { return TaskColorIsBkgnd; }
+			set
+			{
+				if (TaskColorIsBkgnd != value)
+				{
+					TaskColorIsBkgnd = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool ShowParentsAsFolders;
+		// 		{
+		// 			get { return ShowParentAsFolder; }
+		// 			set
+		// 			{
+		// 				if (ShowParentAsFolder != value)
+		// 				{
+		// 					ShowParentAsFolder = value;
+		// 					Invalidate();
+		// 				}
+		// 			}
+		// 		}
+
+		public bool ShowCompletionCheckboxes;
+		//         {
+		//             get { return ShowCompletionCheckboxes; }
+		//             set
+		//             {
+		//                 if (ShowCompletionCheckboxes != value)
+		//                 {
+		//                     ShowCompletionCheckboxes = value;
+		//                 }
+		//             }
+		//         }
+
+		protected float ImageZoomFactor
+		{
+			// Zoom images only half as much as text
+			get { return (ZoomFactor + ((1.0f - ZoomFactor) / 2)); }
+		}
+
+		public bool WantTaskUpdate(Task.Attribute attrib)
+		{
+			switch (attrib)
+			{
+			// Note: lock state is always provided
+			case Task.Attribute.Title:
+			case Task.Attribute.Icon:
+			case Task.Attribute.Flag:
+			case Task.Attribute.Color:
+			case Task.Attribute.DoneDate:
+			case Task.Attribute.Position:
+			case Task.Attribute.SubtaskDone:
+			case Task.Attribute.ProjectName:
+			case Task.Attribute.Dependency:
+				return true;
+			}
+
+			// all else
+			return false;
+		}
+
+		public uint HitTest(Point screenPos)
+		{
+			var clientPos = PointToClient(screenPos);
+			var item = HitTestItem(clientPos);
+
+			if (item != null)
+				return item.UniqueId;
 
 			// else
-			return null;
+			return 0;
 		}
-		
-		protected override void OnPaint(PaintEventArgs e)
+
+		public Rectangle GetSelectedItemLabelRect()
 		{
-			int iGroup = 0;
-			var drawnItems = new HashSet<PertNetworkItem>();
+			EnsureItemVisible(SelectedItem);
 
-			foreach (var group in Data.Groups)
-			{
-				foreach (var item in group.Items)
-				{
-					if (!drawnItems.Contains(item))
-					{
-						if (WantDrawItem(e, item))
+			var labelRect = GetSelectedItemRect();
+
+			// 			labelRect.X -= LabelPadding;
+			// 			labelRect.X += GetExtraWidth(SelectedNode);
+			// 
+			// Make sure the rect is big enough for the unscaled font
+			labelRect.Height = (this.Font.Height + (2 * LabelPadding)); 
+
+			return labelRect;
+		}
+
+		public bool CanMoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
+		{
+			// 			if (FindNode(taskId) == null)
+			// 				return false;
+			// 
+			// 			if (FindNode(destParentId) == null)
+			// 				return false;
+			// 
+			// 			if ((destPrevSiblingId != 0) && (FindNode(destPrevSiblingId) == null))
+			// 				return false;
+
+			return false;
+		}
+
+		public bool MoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
+		{
+			/*
+						BeginUpdate();
+
+						var node = FindNode(taskId);
+						var prevParentNode = node.Parent;
+
+						var destParentNode = FindNode(destParentId);
+						var destPrevSiblingNode = FindNode(destPrevSiblingId);
+
+						if ((node == null) || (destParentNode == null))
+							return false;
+
+						var srcParentNode = node.Parent;
+						int srcPos = srcParentNode.Nodes.IndexOf(node);
+
+						srcParentNode.Nodes.RemoveAt(srcPos);
+
+						int destPos = 0; // insert at top
+
+						if (destPrevSiblingNode != null)
+							destPos = (destParentNode.Nodes.IndexOf(destPrevSiblingNode) + 1);
+
+						destParentNode.Nodes.Insert(destPos, node);
+
+						FixupParentalStatus(destParentNode, 1);
+						FixupParentalStatus(prevParentNode, -1);
+
+						FixupParentID(node, destParentNode);
+
+						SelectedNode = node;
+
+						EndUpdate();
+						EnsureItemVisible(Item(node));
+			*/
+
+			return false;
+		}
+
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+		{
+			if ((text == String.Empty) || IsEmpty())
+				return false;
+
+			/*
+						TreeNode node = null; // start node
+						bool forward = true;
+
+						switch (selectTask)
 						{
-							OnPaintItem(e.Graphics, item, iGroup, (item.UniqueId == SelectedItemId));
+						case UIExtension.SelectTask.SelectFirstTask:
+							node = RootNode.Nodes[0];
+							break;
+
+						case UIExtension.SelectTask.SelectNextTask:
+							node = TreeCtrl.GetNextItem(SelectedNode);
+							break;
+
+						case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+							node = SelectedNode;
+							break;
+
+						case UIExtension.SelectTask.SelectPrevTask:
+							node = TreeCtrl.GetPrevItem(SelectedNode);
+
+							if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
+								node = LastNode;
+
+							forward = false;
+							break;
+
+						case UIExtension.SelectTask.SelectLastTask:
+							node = LastNode;
+							forward = false;
+							break;
 						}
-						else
-						{
-							int breakpoint = 0;
-						}
 
-						var dependencies = group.GetItemDependencies(item);
-
-						foreach (var dependItem in dependencies)
-						{
-							if (WantDrawConnection(e, dependItem, item))
+						// Avoid recursion
+						while (node != null)
+						{ 
+							if (StringUtil.Find(node.Text, text, caseSensitive, wholeWord))
 							{
-								var smoothing = e.Graphics.SmoothingMode;
-								e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-								OnPaintConnection(e.Graphics, dependItem, item);
-
-								e.Graphics.SmoothingMode = smoothing;
+								SelectedNode = node;
+								return true;
 							}
+
+							if (forward)
+								node = TreeCtrl.GetNextItem(node);
 							else
-							{
-								int breakpoint = 0;
-							}
+								node = TreeCtrl.GetPrevItem(node);
 						}
+			*/
 
-						drawnItems.Add(item);
-					}
-				}
-
-				iGroup++;
-			}
+			return false;
 		}
 
-		bool WantDrawItem(PaintEventArgs e, PertNetworkItem item)
+		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
 		{
-			var itemRect = CalcItemRectangle(item);
+			/*
+						TreeNode node = FindNode(taskID);
 
-			return e.ClipRectangle.IntersectsWith(itemRect);
+						if (node == null)
+							return false;
+
+						switch (getTask)
+						{
+							case UIExtension.GetTask.GetNextTask:
+								if (node.NextNode != null)
+								{
+									taskID = UniqueID(node.NextNode);
+									return true;
+								}
+								break;
+
+							case UIExtension.GetTask.GetPrevTask:
+								if (node.PrevVisibleNode != null)
+								{
+									taskID = UniqueID(node.PrevNode);
+									return true;
+								}
+								break;
+
+							case UIExtension.GetTask.GetNextVisibleTask:
+								if (node.NextVisibleNode != null)
+								{
+									taskID = UniqueID(node.NextVisibleNode);
+									return true;
+								}
+								break;
+
+							case UIExtension.GetTask.GetPrevVisibleTask:
+								if (node.PrevVisibleNode != null)
+								{
+									taskID = UniqueID(node.PrevVisibleNode);
+									return true;
+								}
+								break;
+
+							case UIExtension.GetTask.GetNextTopLevelTask:
+								{
+									var topLevelParent = TopLevelParent(node);
+
+									if ((topLevelParent != null) && (topLevelParent.NextNode != null))
+									{
+										taskID = UniqueID(topLevelParent.NextNode);
+										return true;
+									}
+								}
+								break;
+
+							case UIExtension.GetTask.GetPrevTopLevelTask:
+								{
+									var topLevelParent = TopLevelParent(node);
+
+									if ((topLevelParent != null) && (topLevelParent.PrevNode != null))
+									{
+										taskID = UniqueID(topLevelParent.PrevNode);
+										return true;
+									}
+								}
+								break;
+						}
+			*/
+
+			// all else
+			return false;
 		}
 
-		bool WantDrawConnection(PaintEventArgs e, PertNetworkItem fromItem, PertNetworkItem toItem)
+		public bool CanSaveToImage()
 		{
-			var fromRect = CalcItemRectangle(fromItem);
-			var toRect = CalcItemRectangle(toItem);
-
-			return e.ClipRectangle.IntersectsWith(Rectangle.Union(fromRect, toRect));
+			return !IsEmpty();
 		}
 
-		virtual protected void OnPaintItem(Graphics graphics, PertNetworkItem item, int iGroup, bool selected)
+		// Internal ------------------------------------------------------------
+
+		override protected int ScaleByDPIFactor(int value)
 		{
-			var itemRect = CalcItemRectangle(item);
-			var itemText = String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup);
+			return DPIScaling.Scale(value);
+		}
 
-			graphics.DrawRectangle(Pens.Black, itemRect);
+		private void UpdateTaskAttributes(TaskList tasks)
+		{
+			Task task = tasks.GetFirstTask();
 
-			if (selected)
+			bool dependencyChanges = false;
+
+			while (task.IsValid())
 			{
-				graphics.FillRectangle(SystemBrushes.Highlight, itemRect);
-				graphics.DrawString(itemText, this.Font, SystemBrushes.HighlightText, itemRect);
+				dependencyChanges |= ProcessTaskUpdate(task);
+				task = task.GetNextTask();
+			}
+
+			if (dependencyChanges)
+				RebuildGroups();
+			else
+				Invalidate();
+		}
+
+		private bool ProcessTaskUpdate(Task task)
+		{
+			if (!task.IsValid())
+				return false;
+
+			NetworkItem item = Data.GetItem(task.GetID());
+
+			if (item == null)
+			{
+				Data.AddItem(new PertNetworkItem(task));
 			}
 			else
 			{
-				graphics.DrawString(itemText, this.Font, Brushes.Blue, itemRect);
+				PertNetworkItem taskItem = (item as PertNetworkItem);
+				taskItem.Update(task);
 			}
+
+			// Process children
+			Task subtask = task.GetFirstSubtask();
+
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask))
+				subtask = subtask.GetNextTask();
+
+			return true;
 		}
 
-		virtual protected void OnPaintConnection(Graphics graphics, PertNetworkItem fromItem, PertNetworkItem toItem)
+		protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
+		{
+			// 			if (dropPos == PertNetworkControl.DropPos.On)
+			// 				return !TaskItem(dropTargetItemData).IsLocked;
+
+			// else
+			return true;
+		}
+
+		protected override bool IsAcceptableDragSource(Object itemData)
+		{
+			return false; //!TaskItem(itemData).IsLocked;
+		}
+
+		protected override bool DoDrop(NetworkDragEventArgs e)
+		{
+			// TODO
+
+			return true;
+		}
+
+		protected Color GetItemBackgroundColor(NetworkItem item)
+		{
+			if (TaskColorIsBkgnd)
+			{
+				var taskItem = (item as PertNetworkItem);
+
+				if (!taskItem.TextColor.IsEmpty && !taskItem.IsDone && !taskItem.IsGoodAsDone)
+					return taskItem.TextColor;
+			}
+
+			// all else
+			return Color.Empty;
+		}
+
+		protected void DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect)
+		{
+			Debug.Assert(IsZoomed);
+
+			var gSave = graphics.Save();
+
+			graphics.CompositingMode = CompositingMode.SourceCopy;
+			graphics.CompositingQuality = CompositingQuality.HighQuality;
+			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+			graphics.SmoothingMode = SmoothingMode.HighQuality;
+			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
+			graphics.Restore(gSave);
+		}
+
+		override protected void OnPaintItem(Graphics graphics, NetworkItem item, int iGroup, bool selected)
+		{
+			var itemRect = CalcItemRectangle(item);
+			var taskItem = (item as PertNetworkItem);
+
+			// Background
+			if (selected)
+			{
+				UIExtension.SelectionRect.Style style = (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
+
+				UIExtension.SelectionRect.Draw(this.Handle,
+												graphics,
+												itemRect.X,
+												itemRect.Y,
+												itemRect.Width,
+												itemRect.Height,
+												style,
+												false); // opaque
+			}
+			else
+			{
+				Color backColor = GetItemBackgroundColor(item);
+				Color borderColor = SystemColors.WindowText;
+
+				itemRect.Width--;
+				itemRect.Height--;
+
+				if (backColor != Color.Empty)
+				{
+					using (var brush = new SolidBrush(taskItem.TextColor))
+						graphics.FillRectangle(brush, itemRect);
+				}
+
+				if (taskItem.TextColor != Color.Empty)
+					borderColor = taskItem.TextColor;
+
+				using (var pen = new Pen(borderColor))
+					graphics.DrawRectangle(pen, itemRect);
+			}
+
+			// Text
+			Color textColor = SystemColors.WindowText;
+
+			if (!taskItem.TextColor.IsEmpty)
+			{
+				if (TaskColorIsBkgnd && !selected && !(taskItem.IsDone || taskItem.IsGoodAsDone))
+				{
+					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
+					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
+				}
+				else if (selected)
+				{
+					textColor = DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
+				}
+				else
+				{
+					textColor = taskItem.TextColor;
+				}
+			}
+
+			using (var brush = new SolidBrush(textColor))
+				graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), this.Font, brush, itemRect);
+
+		/*
+				// Checkbox
+								Rectangle checkRect = CalcCheckboxRect(rect);
+
+								if (ShowCompletionCheckboxes)
+								{
+									if (!IsZoomed)
+									{
+										CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
+									}
+									else
+									{
+										var tempImage = new Bitmap(CheckboxSize.Width, CheckboxSize.Height); // original size
+
+										using (var gTemp = Graphics.FromImage(tempImage))
+										{
+											CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
+
+											DrawZoomedImage(tempImage, graphics, checkRect);
+										}
+									}
+								}
+
+								// Task icon
+								if (TaskHasIcon(realItem))
+								{
+									iconRect = CalcIconRect(rect);
+
+									if (TaskIcons.Get(realItem.ID))
+									{
+										if (!IsZoomed)
+										{
+											TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+										}
+										else
+										{
+											int imageSize = ScaleByDPIFactor(16);
+											var tempImage = new Bitmap(imageSize, imageSize); // original size
+
+											using (var gTemp = Graphics.FromImage(tempImage))
+											{
+												gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
+												TaskIcons.Draw(gTemp, 0, 0);
+
+												DrawZoomedImage(tempImage, graphics, iconRect);
+											}
+										}
+									}
+
+									rect.Width = (rect.Right - iconRect.Right - 2);
+									rect.X = iconRect.Right + 2;
+								}
+								else if (ShowCompletionCheckboxes)
+								{
+									rect.Width = (rect.Right - checkRect.Right - 2);
+									rect.X = checkRect.Right + 2;
+								}
+							}
+		*/
+		}
+
+		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem)
 		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
 
-			graphics.DrawLine(Pens.Blue, 
-								fromRect.Right, 
-								(fromRect.Top + (fromRect.Height / 2)), 
-								toRect.Left, 
-								(toRect.Top + (toRect.Height / 2)));
+			Point[] points = new Point[3];
+			
+			points[0].X = fromRect.Right;
+			points[0].Y = ((fromRect.Top + fromRect.Bottom) / 2);
+
+			points[2].X = toRect.Left;
+			points[2].Y = ((toRect.Top + toRect.Bottom) / 2);
+
+			if (points[0].Y > points[2].Y) // below
+			{
+				points[0].Y = fromRect.Top;
+				points[2].Y = toRect.Bottom;
+			}
+			else if (points[0].Y < points[2].Y) // above
+			{
+				points[0].Y = fromRect.Bottom;
+				points[2].Y = toRect.Top;
+			}
+			
+			points[1].X = ((fromRect.Right + toRect.Left) / 2);
+			points[1].Y = points[2].Y;
+
+			graphics.DrawLines(Pens.Black, points);
+
+			// Draw Arrow head and box without smoothing to better match core app
+			var smoothing = graphics.SmoothingMode;
+			graphics.SmoothingMode = SmoothingMode.None;
+
+			Point arrow = points[2];
+			arrow.X--;
+
+			DrawHorzDependencyArrowHead(graphics, arrow, (int)Font.GetHeight(), false);
+
+			// Draw 3x3 box at 'to' end
+			Rectangle box = new Rectangle(points[0].X - 1, points[0].Y - 1, 3, 3);
+			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
+
+			graphics.SmoothingMode = smoothing;
 		}
 
-		virtual protected Rectangle CalcItemRectangle(PertNetworkItem item)
+		private bool TaskHasIcon(PertNetworkItem taskItem)
 		{
-			return CalcItemRectangle(item.Position.X, item.Position.Y);
-		}
-
-		virtual protected Rectangle CalcItemRectangle(int x, int y)
-		{
-			Rectangle itemRect = new Rectangle(Padding, Padding, 0, 0);
-
-			itemRect.X += ((ItemWidth + ItemHorzSpacing) * x);
-			itemRect.Y += ((ItemHeight + ItemVertSpacing) * y);
-
-			itemRect.Width = ItemWidth;
-			itemRect.Height = ItemHeight;
-
-			// Offset rect by scroll pos
-			itemRect.Offset(-this.HorizontalScroll.Value, -this.VerticalScroll.Value);
-
-			return itemRect;
-		}
-		
-		public void SetFont(String fontName, int fontSize)
-        {
-            if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
-                return;
-
-            this.Font = new Font(fontName, fontSize, FontStyle.Regular);
-        }
-
-		public Color ConnectionColor;
-		public bool ReadOnly;
-
-        public bool SetSelectedTask(uint uniqueID)
-        {
-            var item = Data.GetItem(uniqueID);
-
-			if (item == null)
+			if ((TaskIcons == null) || (taskItem == null))
 				return false;
 
-            SelectedItemId = uniqueID;
-			EnsureItemVisible(item);
-
-            return true;
-        }
-
-		public Rectangle GetSelectedItemRect()
-		{
-			var selItem = SelectedItem;
-
-			return ((selItem == null) ? new Rectangle(0, 0, 0, 0) : CalcItemRectangle(selItem));
+			return (taskItem.HasIcon || (ShowParentAsFolder && taskItem.IsParent));
 		}
 
-        public Bitmap SaveToImage()
-        {
-			// Cache state
-			/*
-						Point scrollPos = new Point(HorizontalScroll.Value, VerticalScroll.Value);
-						Point drawOffset = new Point(DrawOffset.X, DrawOffset.Y);
+		private Point[] CalcHorzDependencyArrow(Point point, int itemHeight, bool left)
+		{
+			Point[] arrow = new Point[] { point, point, point };
 
-						// And reset
-						IsSavingToImage = true;
-						DrawOffset = new Point(0, 0);
+			// Size to match Gantt Chart
+			int ARROW = (itemHeight / 4);
 
-						HorizontalScroll.Value = 0;
-						VerticalScroll.Value = 0;
+			if (left)
+			{
+				// <----
+				//
+				arrow[0].Offset(ARROW, -ARROW);
+				arrow[2].Offset(ARROW, ARROW);
+			}
+			else // right
+			{
+				// --->
+				//
+				arrow[0].Offset(-ARROW, -ARROW);
+				arrow[2].Offset(-ARROW, ARROW);
+			}
 
-						if (!scrollPos.IsEmpty)
-							PerformLayout();
+			return arrow;
+		}
 
-						int border = BorderWidth;
+// 		private Point[] CalcVertDependencyArrow(Point point, int itemHeight, bool up)
+// 		{
+// 			Point[] arrow = new Point[] { point, point, point };
+// 
+// 			// Size to match Gantt Chart
+// 			int ARROW = (itemHeight / 4);
+// 
+// 			if (up)
+// 			{
+// 				//  ^
+// 				//  |
+// 				//
+// 				arrow[0].Offset(-ARROW, ARROW);
+// 				arrow[2].Offset(ARROW, ARROW);
+// 			}
+// 			else // down
+// 			{
+// 				//  |
+// 				//  V
+// 				//
+// 				arrow[0].Offset(-ARROW, -ARROW);
+// 				arrow[2].Offset(ARROW, -ARROW);
+// 			}
+// 
+// 			return arrow;
+// 		}
 
-						// Total size of the graph
-						Rectangle graphRect = Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding);
+		private void DrawHorzDependencyArrowHead(Graphics graphics, Point point, int itemHeight, bool left)
+		{
+			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
 
-						// The portion of the client rect we are interested in 
-						// (excluding the top and left borders)
-						Rectangle srcRect = Rectangle.FromLTRB(border, 
-															   border, 
-															   ClientRectangle.Width - border, 
-															   ClientRectangle.Height - border);
+			// Offset and draw again
+			if (left)
+				point.X++;
+			else
+				point.X--;
 
-						// The output image
-						Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
+			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
+		}
 
-						// The temporary image allowing us to clip out the top and left borders
-						Bitmap srcImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
+// 		private void DrawVertDependencyArrowHead(Graphics graphics, Point point, int itemHeight, bool up)
+// 		{
+// 			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcVertDependencyArrow(point, itemHeight, up));
+// 
+// 			// Offset and draw again
+// 			if (up)
+// 				point.Y++;
+// 			else
+// 				point.Y--;
+// 
+// 			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcVertDependencyArrow(point, itemHeight, up));
+// 		}
 
-						// The current position in the output image for rendering the temporary image
-						Rectangle drawRect = srcRect;
-						drawRect.Offset(-border, -border);
+        private Rectangle CalcIconRect(Rectangle labelRect)
+		{
+            int left = (labelRect.X + 2);
+            
+            if (ShowCompletionCheckboxes)
+                left += (int)(CheckboxSize.Width * ImageZoomFactor);
 
-						// Note: If the last horz or vert page is empty because of an 
-						// exact division then it will get handled within the loop
-						int numHorzPages = ((graphRect.Width / drawRect.Width) + 1);
-						int numVertPages = ((graphRect.Height / drawRect.Height) + 1);
+			int width = (int)(ScaleByDPIFactor(16) * ImageZoomFactor);
+			int height = width;
 
-						using (Graphics graphics = Graphics.FromImage(finalImage))
-						{
-							for (int vertPage = 0; vertPage < numVertPages; vertPage++)
-							{
-								for (int horzPage = 0; horzPage < numHorzPages; horzPage++)
-								{
-									// TODO
-								}
+			int top = labelRect.Top;// (CentrePoint(labelRect).Y - (height / 2));
 
-								// TODO
-							}
-						}
+            return new Rectangle(left, top, width, height);
+		}
 
-						// Restore state
-						IsSavingToImage = false;
-						DrawOffset = drawOffset;
+		protected override int GetMinItemHeight()
+		{
+            return (ScaleByDPIFactor(16) + 1);
+		}
 
-						HorizontalScroll.Value = scrollPos.X;
-						VerticalScroll.Value = scrollPos.Y;
+		protected override void OnMouseDoubleClick(MouseEventArgs e)
+		{
+			if (HitTestItem(e.Location) != null)
+				EditTaskLabel(this, SelectedItem.UniqueId);
+		}
 
-						if (!scrollPos.IsEmpty)
-							PerformLayout();
-
-						return finalImage;
-			*/
-			return null;
-        }
-
-		// Message Handlers -----------------------------------------------------------
-
-        protected override void OnMouseDoubleClick(MouseEventArgs e)
-        {
-			// TODO
-        }
-
-        protected override void OnMouseDown(MouseEventArgs e)
-        {
-			base.OnMouseDown(e);
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
+			base.OnMouseClick(e);
 
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			var item = HitTestItem(e.Location);
+			if (IgnoreMouseClick)
+			{
+				IgnoreMouseClick = false;
+				return;
+			}
 
-			if (item == null)
+			var taskItem = (HitTestItem(e.Location) as PertNetworkItem);
+
+			if (taskItem == null)
 				return;
 
-			if (item.UniqueId != SelectedItemId)
-			{
-				SelectedItemId = item.UniqueId;
-				Invalidate();
-
-				SelectionChange?.Invoke(this, SelectedItem);
-			}
-		}
-
-		protected override void OnMouseWheel(MouseEventArgs e)
-		{
-			if ((ModifierKeys & Keys.Control) == Keys.Control)
+			if (!ReadOnly && !taskItem.IsLocked)
 			{
 /*
-				float newFactor = ZoomFactor;
-
-				if (e.Delta > 0)
+				if (HitTestCheckbox(node, e.Location))
 				{
-					newFactor += 0.1f;
-					newFactor = Math.Min(newFactor, 1.0f);
+					if (EditTaskDone != null)
+						EditTaskDone(this, taskItem.ID, !taskItem.IsDone(false));
 				}
-				else
+				else if (HitTestIcon(node, e.Location))
 				{
-					newFactor -= 0.1f;
-					newFactor = Math.Max(newFactor, 0.4f);
+					// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
+					// causes the edit icon dialog to fail to correctly get focus but
+					// counter-intuitively it works from 'MouseDown'
+					//if (EditTaskIcon != null)
+					//    EditTaskIcon(this, UniqueID(SelectedNode));
 				}
-
-				if (newFactor != ZoomFactor)
+				else if (SelectNodeWasPreviouslySelected)
 				{
-					Cursor = Cursors.WaitCursor;
-
-					// Convert mouse pos to relative coordinates
-					float relX = ((e.Location.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
-					float relY = ((e.Location.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
-
-					// Prevent all selection and expansion changes for the duration
- 					BeginUpdate();
-
-					// The process of changing the fonts and recalculating the 
-					// item height can cause the tree-view to spontaneously 
-					// collapse tree items so we save the expansion state
-					// and restore it afterwards
-					var expandedItems = GetExpandedItems(RootItem);
-
-					ZoomFactor = newFactor;
-					UpdateTreeFont(false);
-
-					// 'Cleanup'
-					SetExpandedItems(expandedItems);
- 					EndUpdate();
-
-					// Scroll the view to keep the mouse located in the 
-					// same relative position as before
-					if (HorizontalScroll.Visible)
-					{
-						int newX = (int)(relX * HorizontalScroll.Maximum) - e.Location.X;
-
-						HorizontalScroll.Value = Validate(newX, HorizontalScroll);
-					}
-
-					if (VerticalScroll.Visible)
-					{
-						int newY = (int)(relY * VerticalScroll.Maximum) - e.Location.Y;
-
-						VerticalScroll.Value = Validate(newY, VerticalScroll);
-					}
-
-					PerformLayout();
+					if (EditTaskLabel != null)
+						EditTimer.Start();
 				}
 */
 			}
-			else
-			{
-				// Default scroll
-				base.OnMouseWheel(e);
-			}
 		}
 
-		static int Validate(int pos, ScrollProperties scroll)
+		private bool HitTestIcon(TreeNode node, Point point)
+        {
+			/*
+						var taskItem = RealTaskItem(node);
+
+						if (taskItem.IsLocked || !TaskHasIcon(taskItem))
+							return false;
+
+						// else
+						return CalcIconRect(GetItemLabelRect(node)).Contains(point);
+			*/
+			return false;
+        }
+
+		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
+			EditTimer.Stop();
+
+			base.OnMouseDown(e);
+		}
+
+		private void OnEditLabelTimer(object sender, EventArgs e)
+		{
+			EditTimer.Stop();
+
+// 			if (EditTaskLabel != null)
+// 				EditTaskLabel(this, UniqueID(SelectedNode));
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
-			base.OnMouseMove(e);
-
-			if ((e.Button == MouseButtons.Left) && DragTimer.Enabled)
-			{
-                Debug.Assert(!ReadOnly);
-
-				if (CheckStartDragging(e.Location))
-					DragTimer.Stop();
-			}
-		}
-
-		protected override void OnMouseUp(MouseEventArgs e)
-		{
-			DragTimer.Stop();
-
-			base.OnMouseUp(e);
-
-			if (e.Button == MouseButtons.Left)
-			{
-				// TODO
-			}
-		}
-
-		protected void OnDragTimer(object sender, EventArgs e)
-		{
-            Debug.Assert(!ReadOnly);
-
-			DragTimer.Stop();
-
-			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
-
-			if (mouseDown)
-				CheckStartDragging(MousePosition);
-		}
-	
-		protected override void OnDragOver(DragEventArgs e)
-		{
-            Debug.Assert(!ReadOnly);
-
-			// TODO
-		}
-
-		protected override void OnDragDrop(DragEventArgs e)
-		{
-            Debug.Assert(!ReadOnly);
-
-			// TODO
-		}
-
-		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
-		{
-            Debug.Assert(!ReadOnly);
-
-            base.OnQueryContinueDrag(e);
-
-			if (e.EscapePressed)
-			{
-				// TODO
-			}
-		}
-
-		protected override void OnDragLeave(EventArgs e)
-		{
-            Debug.Assert(!ReadOnly);
-
-            base.OnDragLeave(e);
-
-			// TODO
-
-			Invalidate();
-		}
-		
-		protected override void OnSizeChanged(EventArgs e)
-		{
-			base.OnSizeChanged(e);
-		}
-
-		protected override void OnGotFocus(EventArgs e)
-		{
-			base.OnGotFocus(e);
-
-			Invalidate(GetSelectedItemRect());
-		}
-
-		protected override void OnLostFocus(EventArgs e)
-		{
-			base.OnLostFocus(e);
-
-			Invalidate(GetSelectedItemRect());
-		}
-
-		protected override void OnFontChanged(EventArgs e)
-		{
-			base.OnFontChanged(e);
-			
-			// Always reset the logical zoom else we've no way of 
-			// accurately calculating the actual zoom
-			ZoomFactor = 1f;
-
-			//UpdateTreeFont(true);
-		}
-
-		protected override void OnKeyDown(KeyEventArgs e)
-		{
-			if (HandleCursorKey(e.KeyCode))
-				return;
-
-// 			switch (e.KeyCode)
-// 			{
-// 			}
-
-			// else
-			base.OnKeyDown(e);
-		}
-
-        // Internals -----------------------------------------------------------
+ 			base.OnMouseMove(e);
 
 /*
-        private int BorderWidth
-        {
-            get
-            {
-                switch (BorderStyle)
-                {
-                    case BorderStyle.FixedSingle:
-                        return 1;
+			var node = HitTestPositions(e.Location);
 
-                    case BorderStyle.Fixed3D:
-                        return 2;
-                }
-
-                return 0;
-            }
-        }
-*/
-
-		private bool CheckStartDragging(Point cursor)
-		{
-            Debug.Assert(!ReadOnly);
-
-			// TODO
-
-			return false;
-		}
-		
-		virtual protected bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
-		{
-            Debug.Assert(!ReadOnly);
-
-            return true;
-		}
-
-		virtual protected bool IsAcceptableDragSource(Object itemData)
-		{
-            Debug.Assert(!ReadOnly);
-
-            return (itemData != null);
-		}
-
-		private Rectangle GetDoubleClickRect(Point cursor)
-		{
-			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
-			rect.Inflate(GetSystemMetrics(SM_CXDOUBLECLK) / 2, GetSystemMetrics(SM_CYDOUBLECLK) / 2);
-
-			return rect;
-		}
-
-		private Rectangle GetDragRect(Point cursor)
-		{
-            Debug.Assert(!ReadOnly);
-
-            var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
-			rect.Inflate(GetSystemMetrics(SM_CXDRAG) / 2, GetSystemMetrics(SM_CYDRAG) / 2);
-
-			return rect;
-		}
-
-		private void DoDrop(/* TODO */)
-		{
-            Debug.Assert(!ReadOnly);
-
-			// TODO
-		}
-
-		virtual protected bool DoDrop(PertNetworkDragEventArgs e)
-		{
-            Debug.Assert(!ReadOnly);
-
-            if (DragDropChange != null)
-				return DragDropChange(this, e);
-
-			// else
-			return true;
-		}
-
-		protected void EnsureItemVisible(PertNetworkItem item)
-        {
-            if (item == null)
-                return;
-
-/*
-            Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
-
-            if (ClientRectangle.Contains(itemRect))
-                return;
-
-            if (HorizontalScroll.Visible)
-            {
-                int xOffset = 0;
-
-                if (itemRect.Left < ClientRectangle.Left)
-                {
-                    xOffset = (itemRect.Left - ClientRectangle.Left);
-                }
-                else if (itemRect.Right > ClientRectangle.Right)
-                {
-                    xOffset = (itemRect.Right - ClientRectangle.Right);
-                }
-
-                if (xOffset != 0)
-                {
-                    int scrollX = (HorizontalScroll.Value + xOffset);
-  
-                    HorizontalScroll.Value = Validate(scrollX, HorizontalScroll);
-                }
-            }
-
-            if (VerticalScroll.Visible)
-            {
-                int yOffset = 0;
-
-                if (itemRect.Top < ClientRectangle.Top)
-                {
-                    yOffset = (itemRect.Top - ClientRectangle.Top);
-                }
-                else if (itemRect.Bottom > ClientRectangle.Bottom)
-                {
-                    yOffset = (itemRect.Bottom - ClientRectangle.Bottom);
-                }
-
-                if (yOffset != 0)
-                {
-                    int scrollY = (VerticalScroll.Value + yOffset);
-  
-                    VerticalScroll.Value = Validate(scrollY, VerticalScroll);
-                }
-            }
-*/
-
-            PerformLayout();
-            Invalidate();
-        }
-
-		protected void EnableSelectionNotifications(bool enable)
-		{
-			// TODO
-		}
-
-		protected bool HandleCursorKey(Keys key)
-		{
-			// TODO
-
-			return false;
-		}
-
-		protected virtual int GetMinItemHeight()
-		{
-			return 10;
-		}
-
-		protected bool IsEmpty()
-		{
-			return true;
-		}
-
-		protected PertNetworkItem SelectedItem
-		{
-			get
+			if (!ReadOnly && (node != null) && !HitTestExpansionButton(node, e.Location))
 			{
-				return Data.GetItem(SelectedItemId);
+				var taskItem = RealTaskItem(node);
+
+				if (taskItem != null)
+                {
+                    Cursor cursor = null;
+
+                    if (taskItem.IsLocked)
+                    {
+                        cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+                    }
+                    else if (TaskHasIcon(taskItem) && HitTestIcon(node, e.Location))
+                    {
+                        cursor = UIExtension.HandCursor();
+                    }
+                    
+                    if (cursor != null)
+                    {
+                        Cursor = cursor;
+                        return;
+                    }
+				}
 			}
+*/
+
+			// all else
+			Cursor = Cursors.Arrow;
 		}
-
-		protected Font ScaledFont(Font font)
-		{
-			if ((font != null) && (ZoomFactor < 1.0))
-				return new Font(font.FontFamily, font.Size * ZoomFactor, font.Style);
-
-			// else
-			return font;
-		}
-
-        protected PertNetworkItem HitTestPositions(Point point)
-        {
-            // TODO
-
-            return null;
-        }
-
-    }
-
+	}
 }
+

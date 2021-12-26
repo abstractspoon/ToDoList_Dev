@@ -4,9 +4,9 @@ using System.Drawing;
 
 namespace PertNetworkUIExtension
 {
-	public class PertNetworkItem
+	public class NetworkItem
 	{
-		public PertNetworkItem(string title, uint uniqueId)
+		public NetworkItem(string title, uint uniqueId)
 		{
 			Title = title;
 			UniqueId = uniqueId;
@@ -30,23 +30,23 @@ namespace PertNetworkUIExtension
 	}
 	// ------------------------------------------------------------
 
-	public class PertNetworkData
+	public class NetworkData
 	{
-		private Dictionary<uint, PertNetworkItem> m_Items;
-		private HashSet<PertNetworkGroup> m_Groups;
+		private Dictionary<uint, NetworkItem> m_Items;
+		private HashSet<NetworkGroup> m_Groups;
 
-		public PertNetworkData()
+		public NetworkData()
 		{
-			m_Items = new Dictionary<uint, PertNetworkItem>();
-			m_Groups = new HashSet<PertNetworkGroup>();
+			m_Items = new Dictionary<uint, NetworkItem>();
+			m_Groups = new HashSet<NetworkGroup>();
 		}
 
-		public IEnumerable<PertNetworkItem> Items
+		public IEnumerable<NetworkItem> Items
 		{
 			get { return m_Items.Values; }
 		}
 
-		public IEnumerable<PertNetworkGroup> Groups
+		public IEnumerable<NetworkGroup> Groups
 		{
 			get { return m_Groups; }
 		}
@@ -60,12 +60,12 @@ namespace PertNetworkUIExtension
 		void ResetPositions()
 		{
 			foreach (var item in Items)
-				item.Position = PertNetworkItem.NullPoint;
+				item.Position = NetworkItem.NullPoint;
 		}
 
-		public PertNetworkItem GetItem(uint uniqueId)
+		public NetworkItem GetItem(uint uniqueId)
 		{
-			PertNetworkItem item = null;
+			NetworkItem item = null;
 			m_Items.TryGetValue(uniqueId, out item);
 
 			return item;
@@ -80,7 +80,7 @@ namespace PertNetworkUIExtension
 			return true;
 		}
 
-		public bool AddItem(PertNetworkItem item)
+		public bool AddItem(NetworkItem item)
 		{
 			if (m_Items.ContainsKey(item.UniqueId))
 				return false;
@@ -106,7 +106,7 @@ namespace PertNetworkUIExtension
 
 			foreach (var termId in terminatorIDs)
 			{
-				PertNetworkItem termItem = GetItem(termId);
+				NetworkItem termItem = GetItem(termId);
 
 				if (termItem != null)
 				{
@@ -150,9 +150,9 @@ namespace PertNetworkUIExtension
 			return terminatorIds;
 		}
 
-		PertNetworkGroup NewGroup(PertNetworkItem termItem, ref Point maxPos)
+		NetworkGroup NewGroup(NetworkItem termItem, ref Point maxPos)
 		{
-			var group = new PertNetworkGroup();
+			var group = new NetworkGroup();
 
 			AddTaskToGroup(termItem, group, ref maxPos);
 
@@ -161,7 +161,7 @@ namespace PertNetworkUIExtension
 			return group;
 		}
 		
-		void AddTaskToGroup(PertNetworkItem item, PertNetworkGroup group, ref Point maxPos)
+		void AddTaskToGroup(NetworkItem item, NetworkGroup group, ref Point maxPos)
 		{
 			if (!group.AddItem(item))
 				return;
@@ -177,7 +177,7 @@ namespace PertNetworkUIExtension
 
 				foreach (var dependId in item.DependencyUniqueIds)
 				{
-					PertNetworkItem dependItem = GetItem(dependId);
+					NetworkItem dependItem = GetItem(dependId);
 
 					if (dependItem != null)
 					{
@@ -204,21 +204,21 @@ namespace PertNetworkUIExtension
 
 	// ------------------------------------------------------------
 
-	public class PertNetworkGroup
+	public class NetworkGroup
 	{
-		private Dictionary<uint, PertNetworkItem> m_Items;
+		private Dictionary<uint, NetworkItem> m_Items;
 
-		public PertNetworkGroup()
+		public NetworkGroup()
 		{
-			m_Items = new Dictionary<uint, PertNetworkItem>();
+			m_Items = new Dictionary<uint, NetworkItem>();
 		}
 
-		public IEnumerable<PertNetworkItem> Items
+		public IEnumerable<NetworkItem> Items
 		{
 			get { return m_Items.Values; }
 		}
 
-		public bool AddItem(PertNetworkItem item)
+		public bool AddItem(NetworkItem item)
 		{
 			// Must be unique
 			if (m_Items.ContainsKey(item.UniqueId))
@@ -228,17 +228,17 @@ namespace PertNetworkUIExtension
 			return true;
 		}
 
-		Dictionary<int, List<PertNetworkItem>> BuildHorizontalSubGroups()
+		Dictionary<int, List<NetworkItem>> BuildHorizontalSubGroups()
 		{
-			var subGroups = new Dictionary<int, List<PertNetworkItem>>();
+			var subGroups = new Dictionary<int, List<NetworkItem>>();
 
 			foreach (var item in Items)
 			{
-				List<PertNetworkItem> subGroup = null;
+				List<NetworkItem> subGroup = null;
 
 				if (!subGroups.TryGetValue(item.Position.X, out subGroup))
 				{
-					subGroup = new List<PertNetworkItem>();
+					subGroup = new List<NetworkItem>();
 					subGroups.Add(item.Position.X, subGroup);
 				}
 
@@ -254,7 +254,7 @@ namespace PertNetworkUIExtension
 			return subGroups;
 		}
 
-		void GetVerticalRange(IEnumerable<PertNetworkItem> items, out int minY, out int maxY)
+		void GetVerticalRange(IEnumerable<NetworkItem> items, out int minY, out int maxY)
 		{
 			minY = -1;
 			maxY = -1;
@@ -282,7 +282,7 @@ namespace PertNetworkUIExtension
 			GetVerticalRange(Items, out groupMinY, out groupMaxY);
 
 			var subGroups = BuildHorizontalSubGroups();
-			List<PertNetworkItem> subGroup = null;
+			List<NetworkItem> subGroup = null;
 
 			for (int iHPos = 1; iHPos < subGroups.Count; iHPos++)
 			{
@@ -325,17 +325,17 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-		PertNetworkItem GetItem(uint uniqueId)
+		NetworkItem GetItem(uint uniqueId)
 		{
-			PertNetworkItem item = null;
+			NetworkItem item = null;
 			m_Items.TryGetValue(uniqueId, out item);
 
 			return item;
 		}
 
-		List<PertNetworkItem> GetItemDependents(uint uniqueId)
+		List<NetworkItem> GetItemDependents(uint uniqueId)
 		{
-			var dependents = new List<PertNetworkItem>();
+			var dependents = new List<NetworkItem>();
 
 			foreach (var item in Items)
 			{
@@ -349,9 +349,9 @@ namespace PertNetworkUIExtension
 			return dependents;
 		}
 
-		public List<PertNetworkItem> GetItemDependencies(PertNetworkItem item)
+		public List<NetworkItem> GetItemDependencies(NetworkItem item)
 		{
-			var dependencies = new List<PertNetworkItem>();
+			var dependencies = new List<NetworkItem>();
 
 			foreach (uint dependID in item.DependencyUniqueIds)
 				dependencies.Add(GetItem(dependID));
@@ -359,7 +359,7 @@ namespace PertNetworkUIExtension
 			return dependencies;
 		}
 
-		bool IsPositionTaken(IEnumerable<PertNetworkItem> items, int x, int y)
+		bool IsPositionTaken(IEnumerable<NetworkItem> items, int x, int y)
 		{
 			foreach (var item in items)
 			{
