@@ -185,10 +185,10 @@ protected:
 	DWORD dwFromID, dwToID;
 	
 protected:
-	void CalcDependencyPath(CArray<CPoint, CPoint>& aPts) const;
+	void CalcDependencyPath(CArray<CPoint, CPoint>& aPts, BOOL& bHorz) const;
 	BOOL CalcBoundingRect(CRect& rect) const;
-	void CalcDependencyArrow(const CPoint& pt, CPoint pts[3]) const;
-	void DrawDependencyArrow(CDC* pDC, const CPoint& pt) const;
+	void CalcDependencyArrow(const CPoint& pt, CPoint pts[3], BOOL bHorz) const;
+	void DrawDependencyArrow(CDC* pDC, const CPoint& pt, BOOL bHorz) const;
 	BOOL IsFromAboveTo() const;
 };
 

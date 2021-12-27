@@ -82,25 +82,27 @@ BOOL GANTTDEPENDENCY::Draw(CDC* pDC, const CRect& rClient, BOOL bDragging)
 	}
 		
 	CArray<CPoint, CPoint> aPts;
-	CalcDependencyPath(aPts);
+	BOOL bHorzArrow = FALSE;
+
+	CalcDependencyPath(aPts, bHorzArrow);
 	
-	if (bDragging)
+//	if (bDragging)
 	{
-		int nOldROP2 = pDC->SetROP2(R2_NOT);
+		int nOldROP2 = pDC->SetROP2(bDragging ? R2_NOT : R2_BLACK);
 		pDC->Polyline(aPts.GetData(), aPts.GetSize());
 
-		DrawDependencyArrow(pDC, aPts[0]);
+		DrawDependencyArrow(pDC, aPts[0], bHorzArrow);
 		pDC->SetROP2(nOldROP2);
 	}
-	else
-	{
-		CGdiPlusGraphics graphics(*pDC, gdix_SmoothingModeNone);
-		CGdiPlusPen pen(0, 1, gdix_PenStyleDot);
+// 	else
+// 	{
+// 		CGdiPlusGraphics graphics(*pDC, gdix_SmoothingModeNone);
+// 		CGdiPlusPen pen(0, 1, gdix_PenStyleDot);
+// 
+// 		CGdiPlus::DrawLines(graphics, pen, aPts.GetData(), aPts.GetSize());
+// 	}
 
-		CGdiPlus::DrawLines(graphics, pen, aPts.GetData(), aPts.GetSize());
-	}
-
-	DrawDependencyArrow(pDC, ptFrom);
+//	DrawDependencyArrow(pDC, ptFrom);
 	
 	return TRUE;
 }
@@ -112,16 +114,21 @@ void GANTTDEPENDENCY::Trace() const
 }
 #endif
 
-void GANTTDEPENDENCY::DrawDependencyArrow(CDC* pDC, const CPoint& pt) const
+void GANTTDEPENDENCY::DrawDependencyArrow(CDC* pDC, const CPoint& pt, BOOL bHorz) const
 {
 	CPoint pts[3];
-	CalcDependencyArrow(pt, pts);
+	CalcDependencyArrow(pt, pts, bHorz);
 
 	pDC->Polyline(pts, 3);
 	
 	// offset and draw again
 	for (int i = 0; i < 3; i++)
-		pts[i].Offset(-1, 0/*0, IsFromAboveTo() ? 1 : -1*/);
+	{
+		if (bHorz)
+			pts[i].Offset(-1, 0);
+		else
+			pts[i].Offset(0, IsFromAboveTo() ? 1 : -1);
+	}
 	
 	pDC->Polyline(pts, 3);
 }
@@ -147,7 +154,8 @@ BOOL GANTTDEPENDENCY::HitTest(const CPoint& point, int nTol) const
 
 	// check each line segment
 	CArray<CPoint, CPoint> aPts;
-	CalcDependencyPath(aPts);
+	BOOL bUnused;
+	CalcDependencyPath(aPts, bUnused);
 
 	nTol = max(nTol, 1);
 	
@@ -173,11 +181,11 @@ BOOL GANTTDEPENDENCY::IsFromAboveTo() const
 	return (ptFrom.y < ptTo.y);
 }
 
-void GANTTDEPENDENCY::CalcDependencyPath(CArray<CPoint, CPoint>& aPts) const
+void GANTTDEPENDENCY::CalcDependencyPath(CArray<CPoint, CPoint>& aPts, BOOL& bHorz) const
 {
-	aPts.Add(ptFrom);
+	CPoint ptTemp(ptFrom);
 
-	if (ptTo.x > (ptFrom.x - (STUB * 2)))
+	if (ptTo.x > (ptFrom.x - 2))
 	{
 		// ----------
 		// |   to   |---+ [4]
@@ -188,7 +196,7 @@ void GANTTDEPENDENCY::CalcDependencyPath(CArray<CPoint, CPoint>& aPts) const
 		//        |     ----------
 		//    [1] +---->|  from  |
 		//              ----------
-		CPoint ptTemp(ptFrom);
+		aPts.Add(ptTemp);
 		
 		// [1]
 		ptTemp.x -= STUB;
@@ -205,41 +213,83 @@ void GANTTDEPENDENCY::CalcDependencyPath(CArray<CPoint, CPoint>& aPts) const
 		// [4]
 		ptTemp.y = ptTo.y;
 		aPts.Add(ptTemp);
+
+		bHorz = TRUE;
 	}
+// 	else
+// 	{
+// 		// ----------
+// 		// |   to   |---+ [2]
+// 		// ----------   |
+// 		//              |
+// 		//              |
+// 		//              |
+// 		//              |     ----------
+// 		//          [1] +---->|  from  |
+// 		//                    ----------
+// 		CPoint ptTemp(ptFrom);
+// 		
+// 		// [1]
+// 		ptTemp.x = ((ptFrom.x + ptTo.x) / 2);
+// 		aPts.Add(ptTemp);
+// 
+// 		// [2]
+// 		ptTemp.y = ptTo.y;
+// 		aPts.Add(ptTemp);
+// 	}
 	else
 	{
 		// ----------
-		// |   to   |---+ [2]
+		// |   to   |---+ [1]
 		// ----------   |
 		//              |
 		//              |
-		//              |
-		//              |     ----------
-		//          [1] +---->|  from  |
-		//                    ----------
-		CPoint ptTemp(ptFrom);
-		
-		// [1]
-		ptTemp.x = ((ptFrom.x + ptTo.x) / 2);
+		//              V
+		//              ----------
+		//              |  from  |
+		//              ----------
+		if (IsFromAboveTo())
+			ptTemp.y -= (2 - STUB);
+		else
+			ptTemp.y += (1 - STUB);
+
 		aPts.Add(ptTemp);
 
-		// [2]
+		// [1]
 		ptTemp.y = ptTo.y;
 		aPts.Add(ptTemp);
+
+		bHorz = FALSE;
 	}
 
 	// last point
 	aPts.Add(ptTo);
 }
 
-void GANTTDEPENDENCY::CalcDependencyArrow(const CPoint& pt, CPoint pts[3]) const
+void GANTTDEPENDENCY::CalcDependencyArrow(const CPoint& pt, CPoint pts[3], BOOL bHorz) const
 {
 	pts[0] = pts[1] = pts[2] = pt;
 
 	const int ARROW = (STUB / 2);
 	
-	pts[0].Offset(-ARROW, -ARROW);
-	pts[2].Offset(-ARROW - 1, ARROW + 1);
+	if (bHorz)
+	{
+		pts[0].Offset(-ARROW, -ARROW);
+		pts[2].Offset(-ARROW - 1, ARROW + 1);
+	}
+	else
+	{
+		if (IsFromAboveTo())
+		{
+			pts[0].Offset(-ARROW, ARROW);
+			pts[2].Offset(ARROW + 1, ARROW + 1);
+		}
+		else
+		{
+			pts[0].Offset(-ARROW, -ARROW);
+			pts[2].Offset(ARROW + 1, -(ARROW + 1));
+		}
+	}
 }
 
 BOOL GANTTDEPENDENCY::CalcBoundingRect(CRect& rect) const
