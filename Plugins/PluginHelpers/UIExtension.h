@@ -265,6 +265,19 @@ namespace Abstractspoon
 				};
 
 				// -----------------------------------------------
+
+				ref class TaskDependency
+				{
+				public:
+					static void DrawHorizontalArrowHead(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, bool left);
+					static void DrawVerticalArrowHead(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, bool up);
+
+				private:
+					static cli::array<Drawing::Point>^ CalcHorizontalArrowHead(int x, int y, Drawing::Font^ font, bool left);
+					static cli::array<Drawing::Point>^ CalcVerticalArrowHead(int x, int y, Drawing::Font^ font, bool up);
+				};
+
+				// -----------------------------------------------
 			};
 
 			public interface class IUIExtension

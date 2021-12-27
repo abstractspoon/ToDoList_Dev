@@ -809,7 +809,7 @@ namespace PertNetworkUIExtension
 			Point arrow = points[2];
 			arrow.X--;
 
-			DrawHorzDependencyArrowHead(graphics, arrow, (int)Font.GetHeight(), false);
+			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
 
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(points[0].X - 1, points[0].Y - 1, 3, 3);
@@ -825,84 +825,6 @@ namespace PertNetworkUIExtension
 
 			return (taskItem.HasIcon || (ShowParentAsFolder && taskItem.IsParent));
 		}
-
-		private Point[] CalcHorzDependencyArrow(Point point, int itemHeight, bool left)
-		{
-			Point[] arrow = new Point[] { point, point, point };
-
-			// Size to match Gantt Chart
-			int ARROW = (itemHeight / 4);
-
-			if (left)
-			{
-				// <----
-				//
-				arrow[0].Offset(ARROW, -ARROW);
-				arrow[2].Offset(ARROW, ARROW);
-			}
-			else // right
-			{
-				// --->
-				//
-				arrow[0].Offset(-ARROW, -ARROW);
-				arrow[2].Offset(-ARROW, ARROW);
-			}
-
-			return arrow;
-		}
-
-// 		private Point[] CalcVertDependencyArrow(Point point, int itemHeight, bool up)
-// 		{
-// 			Point[] arrow = new Point[] { point, point, point };
-// 
-// 			// Size to match Gantt Chart
-// 			int ARROW = (itemHeight / 4);
-// 
-// 			if (up)
-// 			{
-// 				//  ^
-// 				//  |
-// 				//
-// 				arrow[0].Offset(-ARROW, ARROW);
-// 				arrow[2].Offset(ARROW, ARROW);
-// 			}
-// 			else // down
-// 			{
-// 				//  |
-// 				//  V
-// 				//
-// 				arrow[0].Offset(-ARROW, -ARROW);
-// 				arrow[2].Offset(ARROW, -ARROW);
-// 			}
-// 
-// 			return arrow;
-// 		}
-
-		private void DrawHorzDependencyArrowHead(Graphics graphics, Point point, int itemHeight, bool left)
-		{
-			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
-
-			// Offset and draw again
-			if (left)
-				point.X++;
-			else
-				point.X--;
-
-			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
-		}
-
-// 		private void DrawVertDependencyArrowHead(Graphics graphics, Point point, int itemHeight, bool up)
-// 		{
-// 			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcVertDependencyArrow(point, itemHeight, up));
-// 
-// 			// Offset and draw again
-// 			if (up)
-// 				point.Y++;
-// 			else
-// 				point.Y--;
-// 
-// 			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcVertDependencyArrow(point, itemHeight, up));
-// 		}
 
         private Rectangle CalcIconRect(Rectangle labelRect)
 		{

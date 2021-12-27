@@ -731,3 +731,92 @@ List<Tuple<DateTime, DateTime>^>^ UIExtension::TaskRecurrences::Get(UInt32 dwTas
 	return dates;
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+cli::array<Point>^ UIExtension::TaskDependency::CalcHorizontalArrowHead(int x, int y, Font^ font, bool left)
+{
+	auto arrow = gcnew cli::array<Point>(3);
+
+	for (int i = 0; i < 3; i++)
+	{
+		arrow[i].X = x;
+		arrow[i].Y = y;
+	}
+
+	// Size to match Gantt Chart
+	int ARROW = ((font->Height / 4) + 1);
+
+	if (left)
+	{
+		// <----
+		//
+		arrow[0].Offset(ARROW, -ARROW);
+		arrow[2].Offset(ARROW, ARROW);
+	}
+	else // right
+	{
+		// --->
+		//
+		arrow[0].Offset(-ARROW, -ARROW);
+		arrow[2].Offset(-ARROW, ARROW);
+	}
+
+	return arrow;
+}
+
+cli::array<Point>^ UIExtension::TaskDependency::CalcVerticalArrowHead(int x, int y, Font^ font, bool up)
+{
+	auto arrow = gcnew cli::array<Point>(3);
+
+	for (int i = 0; i < 3; i++)
+	{
+		arrow[i].X = x;
+		arrow[i].Y = y;
+	}
+
+	// Size to match Gantt Chart
+	int ARROW = (font->Height / 4);
+
+	if (up)
+	{
+		//  ^
+		//  |
+		//
+		arrow[0].Offset(-ARROW, ARROW);
+		arrow[2].Offset(ARROW, ARROW);
+	}
+	else // down
+	{
+		//  |
+		//  V
+		//
+		arrow[0].Offset(-ARROW, -ARROW);
+		arrow[2].Offset(ARROW, -ARROW);
+	}
+
+	return arrow;
+}
+
+void UIExtension::TaskDependency::DrawHorizontalArrowHead(Graphics^ graphics, int x, int y, Font^ font, bool left)
+{
+	auto arrow = CalcHorizontalArrowHead(x, y, font, left);
+	graphics->DrawLines(Pens::Black, arrow);
+
+	// Offset and draw again
+	for (int i = 0; i < 3; i++)
+		arrow[i].Offset(left ? 1 : -1, 0);
+
+	graphics->DrawLines(Pens::Black, arrow);
+}
+
+void UIExtension::TaskDependency::DrawVerticalArrowHead(Graphics^ graphics, int x, int y, Font^ font, bool up)
+{
+	auto arrow = CalcHorizontalArrowHead(x, y, font, up);
+	graphics->DrawLines(Pens::Black, arrow);
+
+	// Offset and draw again
+	for (int i = 0; i < 3; i++)
+		arrow[i].Offset(0, up ? 1 : -1);
+
+	graphics->DrawLines(Pens::Black, arrow);
+}

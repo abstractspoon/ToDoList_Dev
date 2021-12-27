@@ -1209,84 +1209,6 @@ namespace MindMapUIExtension
 
 		protected override int GraphPadding { get { return DependencyOffset; } }
 
-		private Point[] CalcHorzDependencyArrow(Point point, int itemHeight, bool left)
-		{
-			Point[] arrow = new Point[] { point, point, point };
-
-			// Size to match Gantt Chart
-			int ARROW = (itemHeight / 4);
-
-			if (left)
-			{
-				// <----
-				//
-				arrow[0].Offset(ARROW, -ARROW);
-				arrow[2].Offset(ARROW, ARROW);
-			}
-			else // right
-			{
-				// --->
-				//
-				arrow[0].Offset(-ARROW, -ARROW);
-				arrow[2].Offset(-ARROW, ARROW);
-			}
-
-			return arrow;
-		}
-
-		private Point[] CalcVertDependencyArrow(Point point, int itemHeight, bool up)
-		{
-			Point[] arrow = new Point[] { point, point, point };
-
-			// Size to match Gantt Chart
-			int ARROW = (itemHeight / 4);
-
-			if (up)
-			{
-				//  ^
-				//  |
-				//
-				arrow[0].Offset(-ARROW, ARROW);
-				arrow[2].Offset(ARROW, ARROW);
-			}
-			else // down
-			{
-				//  |
-				//  V
-				//
-				arrow[0].Offset(-ARROW, -ARROW);
-				arrow[2].Offset(ARROW, -ARROW);
-			}
-
-			return arrow;
-		}
-
-		private void DrawHorzDependencyArrowHead(Graphics graphics, Point point, int itemHeight, bool left)
-		{
-			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
-
-			// Offset and draw again
-			if (left)
-				point.X++;
-			else
-				point.X--;
-
-			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcHorzDependencyArrow(point, itemHeight, left));
-		}
-
-		private void DrawVertDependencyArrowHead(Graphics graphics, Point point, int itemHeight, bool up)
-		{
-			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcVertDependencyArrow(point, itemHeight, up));
-
-			// Offset and draw again
-			if (up)
-				point.Y++;
-			else
-				point.Y--;
-
-			graphics.DrawLines(/*Pens.Red*/Pens.Black, CalcVertDependencyArrow(point, itemHeight, up));
-		}
-
 		protected void DrawTaskDependency(Graphics graphics, TreeNode nodeFrom, TreeNode nodeTo)
 		{
 			if ((nodeFrom == null) || (nodeTo == null))
@@ -1308,6 +1230,8 @@ namespace MindMapUIExtension
 
 			int itemHeight = (rectFrom.Height - ItemVertSeparation);
 			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
+
+			Font arrowFont = GetNodeFont(nodeFrom);
 
 			// Leaf tasks on the same side of the root
 			// are a special case
@@ -1336,7 +1260,7 @@ namespace MindMapUIExtension
 				ptControlFrom = new Point(controlX, ptFrom.Y);
 				ptControlTo = new Point(controlX, ptTo.Y);
 
-				DrawHorzDependencyArrowHead(graphics, ptFrom, itemHeight, !itemFrom.IsFlipped);
+				UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, !itemFrom.IsFlipped);
 			}
 			else // All other arrangements are just variations on a theme
 			{
@@ -1376,7 +1300,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X - diff / 3, ptTo.Y); ;
 					}
 
-					DrawHorzDependencyArrowHead(graphics, ptFrom, itemHeight, true);
+					UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, true);
 				}
 				else if (fromIsRightOfTo)
 				{
@@ -1407,7 +1331,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X + diff / 3, ptTo.Y); ;
 					}
 
-					DrawHorzDependencyArrowHead(graphics, ptFrom, itemHeight, false);
+					UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, false);
 				}
 				else if (fromIsAboveTo)
 				{
@@ -1419,7 +1343,7 @@ namespace MindMapUIExtension
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y + diff / 3);
 					ptControlTo = new Point(ptTo.X, ptTo.Y - diff / 3);
 
-					DrawVertDependencyArrowHead(graphics, ptFrom, itemHeight, true);
+					UIExtension.TaskDependency.DrawVerticalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, true);
 				}
 				else if (fromIsBelowTo)
 				{
@@ -1431,7 +1355,7 @@ namespace MindMapUIExtension
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y - diff / 3);
 					ptControlTo = new Point(ptTo.X, ptTo.Y + diff / 3); ;
 
-					DrawVertDependencyArrowHead(graphics, ptFrom, itemHeight, false);
+					UIExtension.TaskDependency.DrawVerticalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, false);
 				}
 				else
 				{
