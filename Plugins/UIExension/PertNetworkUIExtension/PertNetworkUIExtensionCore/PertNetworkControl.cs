@@ -800,7 +800,7 @@ namespace PertNetworkUIExtension
 			points[1].X = ((fromRect.Right + toRect.Left) / 2);
 			points[1].Y = points[2].Y;
 
-			graphics.DrawLines(Pens.Black, points);
+			graphics.DrawLines(Pens.DarkGray, points);
 
 			// Draw Arrow head and box without smoothing to better match core app
 			var smoothing = graphics.SmoothingMode;

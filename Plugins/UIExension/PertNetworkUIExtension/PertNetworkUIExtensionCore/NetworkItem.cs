@@ -65,10 +65,7 @@ namespace PertNetworkUIExtension
 
 		public NetworkItem GetItem(uint uniqueId)
 		{
-			NetworkItem item = null;
-			m_Items.TryGetValue(uniqueId, out item);
-
-			return item;
+			return Helper.GetItem(m_Items, uniqueId);
 		}
 
 		public bool DeleteItem(uint uniqueId)
@@ -204,6 +201,45 @@ namespace PertNetworkUIExtension
 
 	// ------------------------------------------------------------
 
+	class Helper
+	{
+		public static List<NetworkItem> GetItemDependents(IEnumerable<NetworkItem> items, NetworkItem item)
+		{
+			var dependents = new List<NetworkItem>();
+
+			foreach (var dependItem in items)
+			{
+				foreach (uint dependID in dependItem.DependencyUniqueIds)
+				{
+					if (dependID == item.UniqueId)
+						dependents.Add(dependItem);
+				}
+			}
+
+			return dependents;
+		}
+
+		public static List<NetworkItem> GetItemDependencies(IDictionary<uint, NetworkItem> items, NetworkItem item)
+		{
+			var dependencies = new List<NetworkItem>();
+
+			foreach (uint dependID in item.DependencyUniqueIds)
+				dependencies.Add(GetItem(items, dependID));
+
+			return dependencies;
+		}
+		
+		public static NetworkItem GetItem(IDictionary<uint, NetworkItem> items, uint uniqueId)
+		{
+			NetworkItem item = null;
+			items.TryGetValue(uniqueId, out item);
+
+			return item;
+		}
+	}
+
+	// ------------------------------------------------------------
+
 	public class NetworkGroup
 	{
 		private Dictionary<uint, NetworkItem> m_Items;
@@ -313,7 +349,7 @@ namespace PertNetworkUIExtension
 			if (subGroups.TryGetValue(0, out subGroup))
 			{
 				var item = subGroup[0];
-				var dependents = GetItemDependents(item.UniqueId);
+				var dependents = GetItemDependents(item);
 
 				int minY, maxY;
 				GetVerticalRange(dependents, out minY, out maxY);
@@ -327,30 +363,17 @@ namespace PertNetworkUIExtension
 
 		NetworkItem GetItem(uint uniqueId)
 		{
-			NetworkItem item = null;
-			m_Items.TryGetValue(uniqueId, out item);
-
-			return item;
+			return Helper.GetItem(m_Items, uniqueId);
 		}
 
-		List<NetworkItem> GetItemDependents(uint uniqueId)
+		List<NetworkItem> GetItemDependents(NetworkItem item)
 		{
-			var dependents = new List<NetworkItem>();
-
-			foreach (var item in Items)
-			{
-				foreach (uint dependID in item.DependencyUniqueIds)
-				{
-					if (dependID == uniqueId)
-						dependents.Add(item);
-				}
-			}
-
-			return dependents;
+			return Helper.GetItemDependents(m_Items.Values, item);
 		}
 
 		public List<NetworkItem> GetItemDependencies(NetworkItem item)
 		{
+			return Helper.GetItemDependencies(m_Items, item);
 			var dependencies = new List<NetworkItem>();
 
 			foreach (uint dependID in item.DependencyUniqueIds)

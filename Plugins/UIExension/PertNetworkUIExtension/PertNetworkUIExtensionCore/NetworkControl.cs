@@ -726,7 +726,50 @@ namespace PertNetworkUIExtension
 
 		protected bool HandleCursorKey(Keys key)
 		{
-			// TODO
+			NetworkItem selItem = SelectedItem;
+
+			if (selItem == null)
+				return false;
+
+			switch (key)
+			{
+			case Keys.Left:
+				// Move to the first of this items dependencies
+				if (selItem.DependencyUniqueIds.Count > 0)
+				{
+					SelectedItemId = selItem.DependencyUniqueIds[0];
+
+					EnsureItemVisible(SelectedItem);
+					Invalidate();
+
+					return true;
+				}
+				break;
+
+			case Keys.Right:
+				// Move to the topmost of this items dependents
+				{
+					var dependents = Helper.GetItemDependents(Data.Items, selItem);
+
+					if (dependents.Count > 0)
+					{
+						dependents.Sort((a, b) => (a.Position.Y - b.Position.Y));
+						SelectedItemId = dependents[0].UniqueId;
+
+						EnsureItemVisible(SelectedItem);
+						Invalidate();
+
+						return true;
+					}
+				}
+				break;
+
+			case Keys.Up:
+				break;
+
+			case Keys.Down:
+				break;
+			}
 
 			return false;
 		}
