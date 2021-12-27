@@ -744,21 +744,21 @@ cli::array<Point>^ UIExtension::TaskDependency::CalcHorizontalArrowHead(int x, i
 	}
 
 	// Size to match Gantt Chart
-	int ARROW = ((font->Height / 4) + 1);
+	const int nSize = ((font->Height / 4) + 1);
 
 	if (left)
 	{
 		// <----
 		//
-		arrow[0].Offset(ARROW, -ARROW);
-		arrow[2].Offset(ARROW, ARROW);
+		arrow[0].Offset(nSize, -nSize);
+		arrow[2].Offset(nSize, nSize);
 	}
 	else // right
 	{
 		// --->
 		//
-		arrow[0].Offset(-ARROW, -ARROW);
-		arrow[2].Offset(-ARROW, ARROW);
+		arrow[0].Offset(-nSize, -nSize);
+		arrow[2].Offset(-nSize, nSize);
 	}
 
 	return arrow;
@@ -775,23 +775,23 @@ cli::array<Point>^ UIExtension::TaskDependency::CalcVerticalArrowHead(int x, int
 	}
 
 	// Size to match Gantt Chart
-	int ARROW = (font->Height / 4);
+	const int nSize = ((font->Height / 4) + 1);
 
 	if (up)
 	{
 		//  ^
 		//  |
 		//
-		arrow[0].Offset(-ARROW, ARROW);
-		arrow[2].Offset(ARROW, ARROW);
+		arrow[0].Offset(-nSize, nSize);
+		arrow[2].Offset(nSize, nSize);
 	}
 	else // down
 	{
 		//  |
 		//  V
 		//
-		arrow[0].Offset(-ARROW, -ARROW);
-		arrow[2].Offset(ARROW, -ARROW);
+		arrow[0].Offset(-nSize, -nSize);
+		arrow[2].Offset(nSize, -nSize);
 	}
 
 	return arrow;
