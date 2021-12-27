@@ -185,7 +185,7 @@ protected:
 	DWORD dwFromID, dwToID;
 	
 protected:
-	void CalcDependencyPath(CPoint pts[3]) const;
+	void CalcDependencyPath(CArray<CPoint, CPoint>& aPts) const;
 	BOOL CalcBoundingRect(CRect& rect) const;
 	void CalcDependencyArrow(const CPoint& pt, CPoint pts[3]) const;
 	void DrawDependencyArrow(CDC* pDC, const CPoint& pt) const;
