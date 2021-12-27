@@ -85,9 +85,9 @@ namespace PertNetworkUIExtension
         private bool IsSavingToImage = false;
 		private uint SelectedItemId = 0;
 
-#if DEBUG
-		private int RecalcDuration;
-#endif
+// #if DEBUG
+// 		private int RecalcDuration;
+// #endif
 
 		protected virtual int ItemHeight { get { return 30; } }
 		protected virtual int ItemWidth { get { return 150; } }
@@ -123,7 +123,9 @@ namespace PertNetworkUIExtension
 			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y);
 
 			this.AutoScrollMinSize = new Size(maxItemRect.Right + Padding, maxItemRect.Bottom + Padding);
-//			this.VerticalScroll.SmallChange = graphRect.Height / 100;
+
+			this.HorizontalScroll.SmallChange = this.AutoScrollMinSize.Width / 100;
+			this.VerticalScroll.SmallChange = this.AutoScrollMinSize.Height / 100;
 
 			Invalidate();
 		}
@@ -270,7 +272,7 @@ namespace PertNetworkUIExtension
 		public Color ConnectionColor;
 		public bool ReadOnly;
 
-        public bool SetSelectedTask(uint uniqueID)
+        public bool SetSelectedItem(uint uniqueID)
         {
             var item = Data.GetItem(uniqueID);
 
@@ -383,8 +385,7 @@ namespace PertNetworkUIExtension
 
 			if (item.UniqueId != SelectedItemId)
 			{
-				SelectedItemId = item.UniqueId;
-				Invalidate();
+				SetSelectedItem(item.UniqueId);
 
 				SelectionChange?.Invoke(this, SelectedItem);
 			}
@@ -666,8 +667,7 @@ namespace PertNetworkUIExtension
             if (item == null)
                 return;
 
-/*
-            Rectangle itemRect = GetItemDrawRect(item.ItemBounds);
+            Rectangle itemRect = CalcItemRectangle(item);
 
             if (ClientRectangle.Contains(itemRect))
                 return;
@@ -678,18 +678,17 @@ namespace PertNetworkUIExtension
 
                 if (itemRect.Left < ClientRectangle.Left)
                 {
-                    xOffset = (itemRect.Left - ClientRectangle.Left);
+                    xOffset = (itemRect.Left - ClientRectangle.Left - (ItemHorzSpacing / 2));
                 }
                 else if (itemRect.Right > ClientRectangle.Right)
                 {
-                    xOffset = (itemRect.Right - ClientRectangle.Right);
+                    xOffset = (itemRect.Right - ClientRectangle.Right + (ItemHorzSpacing / 2));
                 }
 
                 if (xOffset != 0)
                 {
                     int scrollX = (HorizontalScroll.Value + xOffset);
-  
-                    HorizontalScroll.Value = Validate(scrollX, HorizontalScroll);
+					HorizontalScroll.Value = Validate(scrollX, HorizontalScroll);
                 }
             }
 
@@ -699,23 +698,21 @@ namespace PertNetworkUIExtension
 
                 if (itemRect.Top < ClientRectangle.Top)
                 {
-                    yOffset = (itemRect.Top - ClientRectangle.Top);
+                    yOffset = (itemRect.Top - ClientRectangle.Top - (ItemVertSpacing / 2));
                 }
                 else if (itemRect.Bottom > ClientRectangle.Bottom)
                 {
-                    yOffset = (itemRect.Bottom - ClientRectangle.Bottom);
+                    yOffset = (itemRect.Bottom - ClientRectangle.Bottom + (ItemVertSpacing / 2));
                 }
 
                 if (yOffset != 0)
                 {
                     int scrollY = (VerticalScroll.Value + yOffset);
-  
                     VerticalScroll.Value = Validate(scrollY, VerticalScroll);
                 }
             }
-*/
 
-            PerformLayout();
+			PerformLayout();
             Invalidate();
         }
 

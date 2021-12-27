@@ -44,7 +44,7 @@ namespace PertNetworkUIExtension
 
         public bool SelectTask(UInt32 dwTaskID)
         {
-			return m_PertNetwork.SetSelectedTask(dwTaskID);
+			return m_PertNetwork.SetSelectedItem(dwTaskID);
         }
 
         public bool SelectTasks(UInt32[] pdwTaskIDs)
