@@ -123,8 +123,8 @@ namespace PertNetworkUIExtension
 
 			this.AutoScrollMinSize = new Size(maxItemRect.Right + Padding, maxItemRect.Bottom + Padding);
 
-			this.HorizontalScroll.SmallChange = this.AutoScrollMinSize.Width / 100;
-			this.VerticalScroll.SmallChange = this.AutoScrollMinSize.Height / 100;
+			this.HorizontalScroll.SmallChange = ItemHeight;
+			this.VerticalScroll.SmallChange = ItemWidth;
 
 			Invalidate();
 		}
