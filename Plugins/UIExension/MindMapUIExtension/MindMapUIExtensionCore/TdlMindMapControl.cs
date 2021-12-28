@@ -217,7 +217,6 @@ namespace MindMapUIExtension
 		private Timer m_EditTimer;
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
-		private Pen m_DependencyPen;
 		private MindMapOption m_Options;
 
 		// -------------------------------------------------------------------------
@@ -228,9 +227,6 @@ namespace MindMapUIExtension
 			m_TaskIcons = icons;
 
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
-
-			m_DependencyPen = new Pen(Color.Black);
-			m_DependencyPen.DashStyle = DashStyle.Dot;
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
@@ -1214,11 +1210,6 @@ namespace MindMapUIExtension
 			if ((nodeFrom == null) || (nodeTo == null))
 				return;
 
-			// Disable anti-aliasing for drawing arrow heads
-			// to better match the core app
-			var prevSmoothing = graphics.SmoothingMode;
-			graphics.SmoothingMode = SmoothingMode.None;
-
 			MindMapItem itemFrom = Item(nodeFrom);
 			MindMapItem itemTo = Item(nodeTo);
 
@@ -1231,7 +1222,7 @@ namespace MindMapUIExtension
 			int itemHeight = (rectFrom.Height - ItemVertSeparation);
 			Point ptFrom, ptTo, ptControlFrom, ptControlTo;
 
-			Font arrowFont = GetNodeFont(nodeFrom);
+			bool horizontalArrow = false;
 
 			// Leaf tasks on the same side of the root
 			// are a special case
@@ -1260,7 +1251,7 @@ namespace MindMapUIExtension
 				ptControlFrom = new Point(controlX, ptFrom.Y);
 				ptControlTo = new Point(controlX, ptTo.Y);
 
-				UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, !itemFrom.IsFlipped);
+				horizontalArrow = true;
 			}
 			else // All other arrangements are just variations on a theme
 			{
@@ -1300,7 +1291,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X - diff / 3, ptTo.Y); ;
 					}
 
-					UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, true);
+					horizontalArrow = true;
 				}
 				else if (fromIsRightOfTo)
 				{
@@ -1331,7 +1322,7 @@ namespace MindMapUIExtension
 						ptControlTo = new Point(ptTo.X + diff / 3, ptTo.Y); ;
 					}
 
-					UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, false);
+					horizontalArrow = true;
 				}
 				else if (fromIsAboveTo)
 				{
@@ -1343,7 +1334,7 @@ namespace MindMapUIExtension
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y + diff / 3);
 					ptControlTo = new Point(ptTo.X, ptTo.Y - diff / 3);
 
-					UIExtension.TaskDependency.DrawVerticalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, true);
+					horizontalArrow = false;
 				}
 				else if (fromIsBelowTo)
 				{
@@ -1355,7 +1346,7 @@ namespace MindMapUIExtension
 					ptControlFrom = new Point(ptFrom.X, ptFrom.Y - diff / 3);
 					ptControlTo = new Point(ptTo.X, ptTo.Y + diff / 3); ;
 
-					UIExtension.TaskDependency.DrawVerticalArrowHead(graphics, ptFrom.X, ptFrom.Y, arrowFont, false);
+					horizontalArrow = false;
 				}
 				else
 				{
@@ -1364,15 +1355,25 @@ namespace MindMapUIExtension
 				}
 			}
 
+			// Draw curve first
+			graphics.DrawBezier(Pens.DarkGray, ptFrom, ptControlFrom, ptControlTo, ptTo);
+
+			// Disable anti-aliasing for drawing arrow heads
+			// to better match the core app
+			var prevSmoothing = graphics.SmoothingMode;
+			graphics.SmoothingMode = SmoothingMode.None;
+			
+			if (horizontalArrow)
+				UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), !itemFrom.IsFlipped);
+			else
+				UIExtension.TaskDependency.DrawVerticalArrowHead(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), false);
+
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(ptTo.X - 1, ptTo.Y - 1, 3, 3);
-			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
+			graphics.FillRectangle(Brushes.Black, box);
 
-			// Re-enable anti-aliasing for dependency lines
+			// Re-enable anti-aliasing
 			graphics.SmoothingMode = prevSmoothing;
-			
-			graphics.DrawBezier(/*Pens.Red*/m_DependencyPen, ptFrom, ptControlFrom, ptControlTo, ptTo);
-
 		}
 
 		private Rectangle CalcCheckboxRect(Rectangle labelRect)
