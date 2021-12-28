@@ -155,12 +155,6 @@ namespace PertNetworkUIExtension
 
 		// -------------------------------------------------------------------------
 
-		protected override int ItemHeight { get { return ScaleByDPIFactor(30); } }
-		protected override int ItemWidth { get { return ScaleByDPIFactor(150); } }
-		protected override int ItemVertSpacing { get { return ScaleByDPIFactor(10); } }
-		protected override int ItemHorzSpacing { get { return ScaleByDPIFactor(50); } }
-		protected override int Padding { get { return ScaleByDPIFactor(20); } }
-
 		private int LabelPadding { get { return ScaleByDPIFactor(2); } }
 
 		// -------------------------------------------------------------------------
@@ -175,6 +169,12 @@ namespace PertNetworkUIExtension
 			ShowParentAsFolder = false;
 			ShowCompletionCheckboxes = true;
 			StrikeThruDone = true;
+
+			ItemHeight = ScaleByDPIFactor(ItemHeight);
+			ItemWidth = ScaleByDPIFactor(ItemWidth);
+			ItemVertSpacing = ScaleByDPIFactor(ItemVertSpacing);
+			ItemHorzSpacing = ScaleByDPIFactor(ItemHorzSpacing);
+			GraphBorder = ScaleByDPIFactor(GraphBorder);
 
 			EditTimer = new Timer();
 			EditTimer.Interval = 500;

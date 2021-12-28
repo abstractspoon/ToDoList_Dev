@@ -89,11 +89,11 @@ namespace PertNetworkUIExtension
 // 		private int RecalcDuration;
 // #endif
 
-		protected virtual int ItemHeight { get { return 30; } }
-		protected virtual int ItemWidth { get { return 150; } }
-		protected virtual int ItemVertSpacing { get { return 10; } }
-		protected virtual int ItemHorzSpacing { get { return 30; } }
-		protected virtual new int Padding { get { return 20; } }
+		protected int ItemHeight = 30;
+		protected int ItemWidth  = 150;
+		protected int ItemVertSpacing = 10;
+		protected int ItemHorzSpacing = 30;
+		protected int GraphBorder = 20;
 
 		public NetworkData Data
 		{
@@ -121,7 +121,7 @@ namespace PertNetworkUIExtension
 
 			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y);
 
-			this.AutoScrollMinSize = new Size(maxItemRect.Right + Padding, maxItemRect.Bottom + Padding);
+			this.AutoScrollMinSize = new Size(maxItemRect.Right + GraphBorder, maxItemRect.Bottom + GraphBorder);
 
 			this.HorizontalScroll.SmallChange = ItemHeight;
 			this.VerticalScroll.SmallChange = ItemWidth;
@@ -246,7 +246,7 @@ namespace PertNetworkUIExtension
 
 		virtual protected Rectangle CalcItemRectangle(int x, int y)
 		{
-			Rectangle itemRect = new Rectangle(Padding, Padding, 0, 0);
+			Rectangle itemRect = new Rectangle(GraphBorder, GraphBorder, 0, 0);
 
 			itemRect.X += ((ItemWidth + ItemHorzSpacing) * x);
 			itemRect.Y += ((ItemHeight + ItemVertSpacing) * y);
