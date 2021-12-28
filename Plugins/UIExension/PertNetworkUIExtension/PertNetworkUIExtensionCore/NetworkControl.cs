@@ -164,7 +164,7 @@ namespace PertNetworkUIExtension
 						}
 						else
 						{
-							int breakpoint = 0;
+							//int breakpoint = 0;
 						}
 
 						var dependencies = group.GetItemDependencies(item);
@@ -182,7 +182,7 @@ namespace PertNetworkUIExtension
 							}
 							else
 							{
-								int breakpoint = 0;
+								//int breakpoint = 0;
 							}
 						}
 

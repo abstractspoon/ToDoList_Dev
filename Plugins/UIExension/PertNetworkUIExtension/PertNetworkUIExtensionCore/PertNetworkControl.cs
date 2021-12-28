@@ -132,6 +132,7 @@ namespace PertNetworkUIExtension
 		private bool m_TaskColorIsBkgnd;
 		private bool m_StrikeThruDone;
 		private bool m_ShowCompletionCheckboxes;
+		private PertNetworkOption m_Options;
 
 		private Timer EditTimer;
 		private Font BoldLabelFont, DoneLabelFont, BoldDoneLabelFont;
@@ -232,19 +233,19 @@ namespace PertNetworkUIExtension
 			UpdateTaskAttributes(tasks);
 		}
 
-		public PertNetworkOption Options;
-		// 		{
-		// 			get { return Options; }
-		// 
-		// 			set
-		// 			{
-		// 				if (value != Options)
-		// 				{
-		// 					Options = value;
-		// 					Invalidate();
-		// 				}
-		// 			}
-		// 		}
+		public PertNetworkOption Options
+		{
+			get { return m_Options; }
+		
+			set
+			{
+				if (value != m_Options)
+				{
+					m_Options = value;
+					Invalidate();
+				}
+			}
+		}
 
 		public bool SelectedItemWasPreviouslySelected
 		{
@@ -877,12 +878,6 @@ namespace PertNetworkUIExtension
 
 			if (e.Button != MouseButtons.Left)
 				return;
-
-// 			if (IgnoreMouseClick)
-// 			{
-// 				IgnoreMouseClick = false;
-// 				return;
-// 			}
 
 			var taskItem = (HitTestItem(e.Location) as PertNetworkItem);
 
