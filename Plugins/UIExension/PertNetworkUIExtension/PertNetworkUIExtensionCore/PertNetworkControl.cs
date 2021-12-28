@@ -22,9 +22,11 @@ namespace PertNetworkUIExtension
 	{
 		// Data
 		public Color TextColor { get; private set; }
+
 		public bool HasIcon { get; private set; }
 		public bool Flagged { get; private set; }
 		public bool Parent { get; private set; }
+		public bool TopLevel { get; private set; }
 		public bool Done { get; private set; }
 		public bool GoodAsDone { get; private set; }
 		public bool SomeSubtasksDone { get; private set; }
@@ -39,7 +41,9 @@ namespace PertNetworkUIExtension
 			TextColor = task.GetTextDrawingColor();
 			HasIcon = (task.GetIcon().Length > 0);
 			Flagged = task.IsFlagged(false);
-            Done = task.IsDone();
+			Parent = task.IsParent();
+			TopLevel = (task.GetParentID() == 0);
+			Done = task.IsDone();
             GoodAsDone = task.IsGoodAsDone();
             SomeSubtasksDone = task.HasSomeSubtasksDone();
 			Locked = task.IsLocked(true);
@@ -97,6 +101,7 @@ namespace PertNetworkUIExtension
 			Parent = task.IsParent();
 			Locked = task.IsLocked(true);
             GoodAsDone = task.IsGoodAsDone();
+			TopLevel = (task.GetParentID() == 0);
 
 			return true;
 		}
@@ -612,6 +617,26 @@ namespace PertNetworkUIExtension
 			return Color.Empty;
 		}
 
+		protected Font GetItemFont(NetworkItem item)
+		{
+			var taskItem = (item as PertNetworkItem);
+			Font font = null;
+
+			if (taskItem.TopLevel)
+			{
+				if (taskItem.Done)
+					font = BoldDoneLabelFont;
+				else
+					font = BoldLabelFont;
+			}
+			else if (taskItem.Done)
+			{
+				font = DoneLabelFont;
+			}
+			
+			return (font == null) ? this.Font : font;
+		}
+
 		protected void DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect)
 		{
 			Debug.Assert(IsZoomed);
@@ -689,7 +714,7 @@ namespace PertNetworkUIExtension
 			}
 
 			using (var brush = new SolidBrush(textColor))
-				graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), this.Font, brush, itemRect);
+				graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), GetItemFont(item), brush, itemRect);
 
 		/*
 				// Checkbox
