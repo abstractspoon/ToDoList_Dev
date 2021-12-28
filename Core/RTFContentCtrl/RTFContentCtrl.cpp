@@ -168,7 +168,7 @@ void CRTFContentCtrlApp::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szK
 	if (!bAppOnly)
 	{
 		if (CMSWordHelper::IsWordInstalled(12))
-			CRTFContentControl::SetConvertWithMSWord(pPrefs->GetProfileInt(szKey, _T("ConvertWithMSWord"), TRUE));
+			CRTFContentControl::SetConvertWithMSWord(pPrefs->GetProfileInt(szKey, _T("ConvertWithMSWord"), FALSE));
 		else
 			CRTFContentControl::SetConvertWithMSWord(FALSE);
 		
