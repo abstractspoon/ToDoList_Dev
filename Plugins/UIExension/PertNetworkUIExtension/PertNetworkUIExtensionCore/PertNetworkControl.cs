@@ -128,14 +128,15 @@ namespace PertNetworkUIExtension
 		private Translator Trans;
 		private UIExtension.TaskIcon TaskIcons;
 
-		private bool ShowParentAsFolder;
-		private bool TaskColorIsBkgnd;
-		private bool IgnoreMouseClick;
-		private bool StrikeThruDone;
+		private bool m_ShowParentAsFolder;
+		private bool m_TaskColorIsBkgnd;
+		private bool m_StrikeThruDone;
+		private bool m_ShowCompletionCheckboxes;
 
 		private Timer EditTimer;
 		private Font BoldLabelFont, DoneLabelFont, BoldDoneLabelFont;
 		private Size CheckboxSize;
+		private NetworkItem PreviouslySelectedItem;
 
 		// -------------------------------------------------------------------------
 
@@ -148,11 +149,10 @@ namespace PertNetworkUIExtension
 			Trans = trans;
 			TaskIcons = icons;
 
-			TaskColorIsBkgnd = false;
-			IgnoreMouseClick = false;
-			ShowParentAsFolder = false;
-			ShowCompletionCheckboxes = true;
-			StrikeThruDone = true;
+			m_TaskColorIsBkgnd = false;
+			m_ShowParentAsFolder = false;
+			m_ShowCompletionCheckboxes = true;
+			m_StrikeThruDone = true;
 
 			ItemHeight = ScaleByDPIFactor(ItemHeight);
 			ItemWidth = ScaleByDPIFactor(ItemWidth);
@@ -170,15 +170,15 @@ namespace PertNetworkUIExtension
 
 		public void SetStrikeThruDone(bool strikeThruDone)
 		{
-			StrikeThruDone = strikeThruDone;
+			m_StrikeThruDone = strikeThruDone;
 
 			if (BoldLabelFont != null)
-				SetFont(BoldLabelFont.Name, (int)BoldLabelFont.Size, StrikeThruDone);
+				SetFont(BoldLabelFont.Name, (int)BoldLabelFont.Size, m_StrikeThruDone);
 		}
 
 		public new void SetFont(String fontName, int fontSize)
 		{
-			SetFont(fontName, fontSize, StrikeThruDone);
+			SetFont(fontName, fontSize, m_StrikeThruDone);
 		}
 
 		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
@@ -246,48 +246,62 @@ namespace PertNetworkUIExtension
 		// 			}
 		// 		}
 
-		// 		public bool SelectNodeWasPreviouslySelected
-		// 		{
-		// 			get { return (SelectedNode == PreviouslySelectedNode); }
-		// 		}
+		public bool SelectedItemWasPreviouslySelected
+		{
+			get { return (SelectedItem == PreviouslySelectedItem); }
+		}
 
 		public bool TaskColorIsBackground
 		{
-			get { return TaskColorIsBkgnd; }
+			get { return m_TaskColorIsBkgnd; }
 			set
 			{
-				if (TaskColorIsBkgnd != value)
+				if (m_TaskColorIsBkgnd != value)
 				{
-					TaskColorIsBkgnd = value;
+					m_TaskColorIsBkgnd = value;
 					Invalidate();
 				}
 			}
 		}
 
-		public bool ShowParentsAsFolders;
-		// 		{
-		// 			get { return ShowParentAsFolder; }
-		// 			set
-		// 			{
-		// 				if (ShowParentAsFolder != value)
-		// 				{
-		// 					ShowParentAsFolder = value;
-		// 					Invalidate();
-		// 				}
-		// 			}
-		// 		}
+		public bool ShowParentsAsFolders
+		{
+			get { return m_ShowParentAsFolder; }
+			set
+			{
+				if (m_ShowParentAsFolder != value)
+				{
+					m_ShowParentAsFolder = value;
+					Invalidate();
+				}
+			}
+		}
 
-		public bool ShowCompletionCheckboxes;
-		//         {
-		//             get { return ShowCompletionCheckboxes; }
-		//             set
-		//             {
-		//                 if (ShowCompletionCheckboxes != value)
-		//                 {
-		//                     ShowCompletionCheckboxes = value;
-		//                 }
-		//             }
-		//         }
+		public bool ShowCompletionCheckboxes
+		{
+		    get { return m_ShowCompletionCheckboxes; }
+		    set
+		    {
+		        if (m_ShowCompletionCheckboxes != value)
+		        {
+		            m_ShowCompletionCheckboxes = value;
+					Invalidate();
+				}
+			}
+		}
+
+		public bool StrikeThruDone
+		{
+			get { return m_StrikeThruDone; }
+			set
+			{
+				if (m_StrikeThruDone != value)
+				{
+					m_StrikeThruDone = value;
+					Invalidate();
+				}
+			}
+		}
 
 		protected float ImageZoomFactor
 		{
@@ -321,11 +335,7 @@ namespace PertNetworkUIExtension
 			var clientPos = PointToClient(screenPos);
 			var item = HitTestItem(clientPos);
 
-			if (item != null)
-				return item.UniqueId;
-
-			// else
-			return 0;
+			return item?.UniqueId ?? 0;
 		}
 
 		public Rectangle GetSelectedItemLabelRect()
@@ -605,7 +615,7 @@ namespace PertNetworkUIExtension
 
 		protected Color GetItemBackgroundColor(NetworkItem item)
 		{
-			if (TaskColorIsBkgnd)
+			if (m_TaskColorIsBkgnd)
 			{
 				var taskItem = (item as PertNetworkItem);
 
@@ -656,6 +666,9 @@ namespace PertNetworkUIExtension
 		override protected void OnPaintItem(Graphics graphics, NetworkItem item, int iGroup, bool selected)
 		{
 			var itemRect = CalcItemRectangle(item);
+			var titleRect = itemRect;
+			titleRect.Inflate(-LabelPadding, 0);
+
 			var taskItem = (item as PertNetworkItem);
 
 			// Background
@@ -693,12 +706,42 @@ namespace PertNetworkUIExtension
 					graphics.DrawRectangle(pen, itemRect);
 			}
 
+			// Icon
+			if (TaskHasIcon(taskItem))
+			{
+				var iconRect = CalcIconRect(itemRect);
+
+				if (TaskIcons.Get(item.UniqueId))
+				{
+					if (!IsZoomed)
+					{
+						TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+					}
+					else
+					{
+						int imageSize = ScaleByDPIFactor(16);
+						var tempImage = new Bitmap(imageSize, imageSize); // original size
+
+						using (var gTemp = Graphics.FromImage(tempImage))
+						{
+							gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
+							TaskIcons.Draw(gTemp, 0, 0);
+
+							DrawZoomedImage(tempImage, graphics, iconRect);
+						}
+					}
+				}
+
+				titleRect.Width = (titleRect.Right - iconRect.Right);
+				titleRect.X = iconRect.Right;
+			}
+			
 			// Text
 			Color textColor = SystemColors.WindowText;
 
 			if (!taskItem.TextColor.IsEmpty)
 			{
-				if (TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
+				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
 				{
 					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
 					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
@@ -714,67 +757,40 @@ namespace PertNetworkUIExtension
 			}
 
 			using (var brush = new SolidBrush(textColor))
-				graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), GetItemFont(item), brush, itemRect);
+			{
+				graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), GetItemFont(item), brush, titleRect);
+			}
 
-		/*
-				// Checkbox
-								Rectangle checkRect = CalcCheckboxRect(rect);
+			/*
+					// Checkbox
+									Rectangle checkRect = CalcCheckboxRect(rect);
 
-								if (ShowCompletionCheckboxes)
-								{
-									if (!IsZoomed)
-									{
-										CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
-									}
-									else
-									{
-										var tempImage = new Bitmap(CheckboxSize.Width, CheckboxSize.Height); // original size
-
-										using (var gTemp = Graphics.FromImage(tempImage))
-										{
-											CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
-
-											DrawZoomedImage(tempImage, graphics, checkRect);
-										}
-									}
-								}
-
-								// Task icon
-								if (TaskHasIcon(realItem))
-								{
-									iconRect = CalcIconRect(rect);
-
-									if (TaskIcons.Get(realItem.ID))
+									if (ShowCompletionCheckboxes)
 									{
 										if (!IsZoomed)
 										{
-											TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+											CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
 										}
 										else
 										{
-											int imageSize = ScaleByDPIFactor(16);
-											var tempImage = new Bitmap(imageSize, imageSize); // original size
+											var tempImage = new Bitmap(CheckboxSize.Width, CheckboxSize.Height); // original size
 
 											using (var gTemp = Graphics.FromImage(tempImage))
 											{
-												gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
-												TaskIcons.Draw(gTemp, 0, 0);
+												CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
 
-												DrawZoomedImage(tempImage, graphics, iconRect);
+												DrawZoomedImage(tempImage, graphics, checkRect);
 											}
 										}
 									}
 
-									rect.Width = (rect.Right - iconRect.Right - 2);
-									rect.X = iconRect.Right + 2;
+									else if (ShowCompletionCheckboxes)
+									{
+										rect.Width = (rect.Right - checkRect.Right - 2);
+										rect.X = checkRect.Right + 2;
+									}
 								}
-								else if (ShowCompletionCheckboxes)
-								{
-									rect.Width = (rect.Right - checkRect.Right - 2);
-									rect.X = checkRect.Right + 2;
-								}
-							}
-		*/
+			*/
 		}
 
 		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem)
@@ -827,22 +843,21 @@ namespace PertNetworkUIExtension
 			if ((TaskIcons == null) || (taskItem == null))
 				return false;
 
-			return (taskItem.HasIcon || (ShowParentAsFolder && taskItem.Parent));
+			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.Parent));
 		}
 
         private Rectangle CalcIconRect(Rectangle labelRect)
 		{
-            int left = (labelRect.X + 2);
+            Point topLeft = labelRect.Location;
+			topLeft.Offset(1, 1);
             
-            if (ShowCompletionCheckboxes)
-                left += (int)(CheckboxSize.Width * ImageZoomFactor);
+//             if (ShowCompletionCheckboxes)
+//                 left += (int)(CheckboxSize.Width * ImageZoomFactor);
 
 			int width = (int)(ScaleByDPIFactor(16) * ImageZoomFactor);
 			int height = width;
 
-			int top = labelRect.Top;// (CentrePoint(labelRect).Y - (height / 2));
-
-            return new Rectangle(left, top, width, height);
+            return new Rectangle(topLeft.X, topLeft.Y, width, height);
 		}
 
 		protected override int GetMinItemHeight()
@@ -863,11 +878,11 @@ namespace PertNetworkUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			if (IgnoreMouseClick)
-			{
-				IgnoreMouseClick = false;
-				return;
-			}
+// 			if (IgnoreMouseClick)
+// 			{
+// 				IgnoreMouseClick = false;
+// 				return;
+// 			}
 
 			var taskItem = (HitTestItem(e.Location) as PertNetworkItem);
 
@@ -882,40 +897,40 @@ namespace PertNetworkUIExtension
 					if (EditTaskDone != null)
 						EditTaskDone(this, taskItem.ID, !taskItem.IsDone(false));
 				}
-				else if (HitTestIcon(node, e.Location))
+				else*/ if (HitTestIcon(taskItem, e.Location))
 				{
-					// Performing icon editing from a 'MouseUp' or 'MouseClick' event 
-					// causes the edit icon dialog to fail to correctly get focus but
-					// counter-intuitively it works from 'MouseDown'
-					//if (EditTaskIcon != null)
-					//    EditTaskIcon(this, UniqueID(SelectedNode));
+					if (EditTaskIcon != null)
+					    EditTaskIcon(this, taskItem.UniqueId);
 				}
-				else if (SelectNodeWasPreviouslySelected)
+				else if (SelectedNodeWasPreviouslySelected)
 				{
 					if (EditTaskLabel != null)
 						EditTimer.Start();
 				}
-*/
 			}
 		}
 
-		private bool HitTestIcon(TreeNode node, Point point)
+		private bool SelectedNodeWasPreviouslySelected
+		{
+			get { return ((SelectedItem != null) && (SelectedItem == PreviouslySelectedItem)); }
+		}
+
+		private bool HitTestIcon(NetworkItem item, Point point)
         {
-			/*
-						var taskItem = RealTaskItem(node);
-
-						if (taskItem.IsLocked || !TaskHasIcon(taskItem))
-							return false;
-
-						// else
-						return CalcIconRect(GetItemLabelRect(node)).Contains(point);
-			*/
-			return false;
+			var taskItem = (item as PertNetworkItem);
+			
+			if (taskItem.Locked || !TaskHasIcon(taskItem))
+				return false;
+			
+			// else
+			return CalcIconRect(CalcItemRectangle(item)).Contains(point);
         }
+
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			EditTimer.Stop();
+			PreviouslySelectedItem = SelectedItem;
 
 			base.OnMouseDown(e);
 		}
@@ -924,42 +939,35 @@ namespace PertNetworkUIExtension
 		{
 			EditTimer.Stop();
 
-// 			if (EditTaskLabel != null)
-// 				EditTaskLabel(this, UniqueID(SelectedNode));
+			if (EditTaskLabel != null)
+				EditTaskLabel(this, SelectedItem?.UniqueId ?? 0);
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
  			base.OnMouseMove(e);
 
-/*
-			var node = HitTestPositions(e.Location);
+			var taskItem = (HitTestItem(e.Location) as PertNetworkItem);
 
-			if (!ReadOnly && (node != null) && !HitTestExpansionButton(node, e.Location))
+			if (!ReadOnly && (taskItem != null))
 			{
-				var taskItem = RealTaskItem(node);
+				Cursor cursor = null;
 
-				if (taskItem != null)
-                {
-                    Cursor cursor = null;
+				if (taskItem.Locked)
+				{
+					cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+				}
+				else if (TaskHasIcon(taskItem) && HitTestIcon(taskItem, e.Location))
+				{
+					cursor = UIExtension.HandCursor();
+				}
 
-                    if (taskItem.IsLocked)
-                    {
-                        cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-                    }
-                    else if (TaskHasIcon(taskItem) && HitTestIcon(node, e.Location))
-                    {
-                        cursor = UIExtension.HandCursor();
-                    }
-                    
-                    if (cursor != null)
-                    {
-                        Cursor = cursor;
-                        return;
-                    }
+				if (cursor != null)
+				{
+					Cursor = cursor;
+					return;
 				}
 			}
-*/
 
 			// all else
 			Cursor = Cursors.Arrow;

@@ -167,19 +167,15 @@ namespace PertNetworkUIExtension
 			foreach (var termId in terminatorIds)
 			{
 				NetworkItem termItem = allItems.GetItem(termId);
+				Point groupMaxPos = new Point(0, maxPos.Y);
 
-				if (termItem != null)
+				if (Count > 0)
+					groupMaxPos.Y++;
+
+				if (AddGroup(termItem, allItems, ref groupMaxPos))
 				{
-					Point groupMaxPos = new Point(0, maxPos.Y);
-
-					if (Count > 0)
-						groupMaxPos.Y++;
-
-					if (AddGroup(termItem, allItems, ref groupMaxPos))
-					{
-						maxPos.Y = groupMaxPos.Y;
-						maxPos.X = Math.Max(maxPos.X, groupMaxPos.X);
-					}
+					maxPos.Y = groupMaxPos.Y;
+					maxPos.X = Math.Max(maxPos.X, groupMaxPos.X);
 				}
 			}
 

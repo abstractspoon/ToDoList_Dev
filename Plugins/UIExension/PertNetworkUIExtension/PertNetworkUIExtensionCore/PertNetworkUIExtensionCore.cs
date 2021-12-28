@@ -138,7 +138,6 @@ namespace PertNetworkUIExtension
 
         public void SavePreferences(Preferences prefs, String key)
         {
-//			prefs.WriteProfileInt(key, "RootAlignment", (int)m_PertNetwork.Alignment);
 			prefs.WriteProfileInt(key, "Options", (int)m_PertNetwork.Options);
 		}
 
@@ -149,15 +148,9 @@ namespace PertNetworkUIExtension
 				// private settings
 			}
 
-			bool taskColorIsBkgnd = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
-			m_PertNetwork.TaskColorIsBackground = taskColorIsBkgnd;
-
-			bool showParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
-			m_PertNetwork.ShowParentsAsFolders = showParentsAsFolders;
-
-            bool showDoneCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
-            m_PertNetwork.ShowCompletionCheckboxes = showDoneCheckboxes;
-			
+			m_PertNetwork.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+			m_PertNetwork.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
+            m_PertNetwork.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
 			m_PertNetwork.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
         }
 
