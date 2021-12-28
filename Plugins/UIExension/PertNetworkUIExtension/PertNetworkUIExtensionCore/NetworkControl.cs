@@ -722,6 +722,11 @@ namespace PertNetworkUIExtension
 			// TODO
 		}
 
+		protected int PageSize
+		{
+			get { return Math.Max(1, (VerticalScroll.LargeChange / (ItemHeight + ItemVertSpacing))); }
+		}
+
 		protected bool HandleCursorKey(Keys key)
 		{
 			NetworkItem selItem = SelectedItem;
@@ -744,7 +749,7 @@ namespace PertNetworkUIExtension
 						leftItems = Data.Items.GetItemDependencies(selItem);
 
 					if (leftItems.Count > 0)
-						nextItemId = leftItems[leftItems.Count - 1].UniqueId;
+						nextItemId = leftItems.Last().UniqueId;
 				}
 				break;
 
@@ -769,7 +774,7 @@ namespace PertNetworkUIExtension
 					var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
 
 					if (upperItems.Count > 0)
-						nextItemId = upperItems[upperItems.Count - 1].UniqueId;
+						nextItemId = upperItems.Last().UniqueId;
 				}
 				break;
 
@@ -780,6 +785,60 @@ namespace PertNetworkUIExtension
 
 					if (lowerItems.Count > 0)
 						nextItemId = lowerItems[0].UniqueId;
+				}
+				break;
+
+			case Keys.PageUp:
+				if (selItem.Position.Y > 0)
+				{
+					// Try for an item at the same horizontal position
+					var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
+
+					if (upperItems.Count > PageSize)
+					{
+						nextItemId = upperItems[selItem.Position.Y - PageSize].UniqueId;
+					}
+					else if (upperItems.Count > 0)
+					{
+						nextItemId = upperItems[0].UniqueId;
+					}
+				}
+				break;
+
+			case Keys.PageDown:
+				{
+					// Try for an item at the same horizontal position
+					var lowerItems = Data.Items.GetVerticalItems(selItem.Position.X, selItem.Position.Y + 1);
+
+					if (lowerItems.Count > PageSize)
+					{
+						nextItemId = lowerItems[PageSize].UniqueId;
+					}
+					else if (lowerItems.Count > 0)
+					{
+						nextItemId = lowerItems.Last().UniqueId;
+					}
+				}
+				break;
+
+			case Keys.Home:
+				if (selItem.Position.Y > 0)
+				{
+					// Try for an item at the same horizontal position
+					var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
+
+					if (upperItems.Count > 0)
+						nextItemId = upperItems[0].UniqueId;
+				}
+				break;
+
+			case Keys.End:
+				{
+					// Try for an item at the same horizontal position
+					var lowerItems = Data.Items.GetVerticalItems(selItem.Position.X, selItem.Position.Y + 1);
+
+					if (lowerItems.Count > 0)
+						nextItemId = lowerItems.Last().UniqueId;
 				}
 				break;
 			}
