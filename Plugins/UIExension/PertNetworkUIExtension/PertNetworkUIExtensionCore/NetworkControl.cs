@@ -280,7 +280,9 @@ namespace PertNetworkUIExtension
 				return false;
 
             SelectedItemId = uniqueID;
+
 			EnsureItemVisible(item);
+			Invalidate();
 
             return true;
         }
