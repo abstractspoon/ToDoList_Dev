@@ -23,36 +23,26 @@ namespace PertNetworkUIExtension
 		// Data
 		public Color TextColor { get; private set; }
 		public bool HasIcon { get; private set; }
-		public bool IsFlagged { get; private set; }
-		public bool IsParent { get; private set; }
-		public bool IsDone { get; private set; }
-		public bool IsGoodAsDone { get; private set; }
+		public bool Flagged { get; private set; }
+		public bool Parent { get; private set; }
+		public bool Done { get; private set; }
+		public bool GoodAsDone { get; private set; }
 		public bool SomeSubtasksDone { get; private set; }
-		public bool IsLocked { get; private set; }
+		public bool Locked { get; private set; }
 
 		// -----------------------------------------------------------------
 
-		public PertNetworkItem(String label, uint taskId) : base(label, taskId)
-		{
-			TextColor = new Color();
-			HasIcon = false;
-			IsFlagged = false;
-			IsDone = false;
-            IsGoodAsDone = false;
-            SomeSubtasksDone = false;
-			IsLocked = false;
-		}
-
-		public PertNetworkItem(Task task) : base(task.GetTitle(), task.GetID())
+		public PertNetworkItem(Task task) 
+			: 
+			base(task.GetTitle(), task.GetID(), task.GetLocalDependency())
 		{
 			TextColor = task.GetTextDrawingColor();
 			HasIcon = (task.GetIcon().Length > 0);
-			IsFlagged = task.IsFlagged(false);
-            IsDone = task.IsDone();
-            IsGoodAsDone = task.IsGoodAsDone();
+			Flagged = task.IsFlagged(false);
+            Done = task.IsDone();
+            GoodAsDone = task.IsGoodAsDone();
             SomeSubtasksDone = task.HasSomeSubtasksDone();
-			IsLocked = task.IsLocked(true);
-			DependencyUniqueIds = task.GetLocalDependency();
+			Locked = task.IsLocked(true);
 		}
 
 		public override string ToString() 
@@ -67,24 +57,13 @@ namespace PertNetworkUIExtension
 
 		public bool HasLocalDependencies {  get { return (DependencyUniqueIds != null) && (DependencyUniqueIds.Count > 0); } }
 
-/*
 		public bool IsDone(bool includeGoodAsDone) 
         { 
-            if (includeGoodAsDone && IsGoodAsDone)
+            if (includeGoodAsDone && GoodAsDone)
                 return true;
 
-            return IsDone; 
+            return Done; 
         }
-
-		public bool SetDone(bool done = true)
-		{
-			if (IsDone == done)
-				return false;
-
-			IsDone = done;
-			return true;
-		}
-*/
 
 		public bool Update(Task task)
 		{
@@ -101,7 +80,7 @@ namespace PertNetworkUIExtension
 				HasIcon = (task.GetIcon().Length > 0);
 
 			if (task.IsAttributeAvailable(Task.Attribute.Flag))
-				IsFlagged = task.IsFlagged(false);
+				Flagged = task.IsFlagged(false);
 
 			if (task.IsAttributeAvailable(Task.Attribute.Color))
 				TextColor = task.GetTextDrawingColor();
@@ -110,14 +89,14 @@ namespace PertNetworkUIExtension
                 SomeSubtasksDone = task.HasSomeSubtasksDone();
 
             if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
-                IsDone = task.IsDone();
+                Done = task.IsDone();
 
 			if (task.IsAttributeAvailable(Task.Attribute.Dependency))
 				DependencyUniqueIds = task.GetLocalDependency();
 
-			IsParent = task.IsParent();
-			IsLocked = task.IsLocked(true);
-            IsGoodAsDone = task.IsGoodAsDone();
+			Parent = task.IsParent();
+			Locked = task.IsLocked(true);
+            GoodAsDone = task.IsGoodAsDone();
 
 			return true;
 		}
@@ -625,7 +604,7 @@ namespace PertNetworkUIExtension
 			{
 				var taskItem = (item as PertNetworkItem);
 
-				if (!taskItem.TextColor.IsEmpty && !taskItem.IsDone && !taskItem.IsGoodAsDone)
+				if (!taskItem.TextColor.IsEmpty && !taskItem.IsDone(true))
 					return taskItem.TextColor;
 			}
 
@@ -694,7 +673,7 @@ namespace PertNetworkUIExtension
 
 			if (!taskItem.TextColor.IsEmpty)
 			{
-				if (TaskColorIsBkgnd && !selected && !(taskItem.IsDone || taskItem.IsGoodAsDone))
+				if (TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
 				{
 					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
 					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
@@ -823,7 +802,7 @@ namespace PertNetworkUIExtension
 			if ((TaskIcons == null) || (taskItem == null))
 				return false;
 
-			return (taskItem.HasIcon || (ShowParentAsFolder && taskItem.IsParent));
+			return (taskItem.HasIcon || (ShowParentAsFolder && taskItem.Parent));
 		}
 
         private Rectangle CalcIconRect(Rectangle labelRect)
@@ -870,7 +849,7 @@ namespace PertNetworkUIExtension
 			if (taskItem == null)
 				return;
 
-			if (!ReadOnly && !taskItem.IsLocked)
+			if (!ReadOnly && !taskItem.Locked)
 			{
 /*
 				if (HitTestCheckbox(node, e.Location))
