@@ -1,18 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 
 namespace PertNetworkUIExtension
 {
 	public class NetworkItem
 	{
-		public NetworkItem(string title, uint uniqueId)
+		public NetworkItem(string title, uint uniqueId, List<uint> dependencyIds)
 		{
 			Title = title;
 			UniqueId = uniqueId;
 
 			Position = NullPoint;
-			DependencyUniqueIds = new List<uint>();
+			DependencyUniqueIds = dependencyIds;
 		}
 
 		public uint UniqueId
@@ -93,21 +94,7 @@ namespace PertNetworkUIExtension
 
 		public List<NetworkItem> GetItemDependents(NetworkItem item)
 		{
-			var dependents = new List<NetworkItem>();
-
-			foreach (var depend in Values)
-			{
-				foreach (var dependId in depend.DependencyUniqueIds)
-				{
-					if (dependId == item.UniqueId)
-					{
-						dependents.Add(depend);
-						break;
-					}
-				}
-			}
-
-			return dependents;
+			return Values.Where(a => a.DependencyUniqueIds.Contains(item.UniqueId)).ToList();
 		}
 
 		public List<NetworkItem> GetItemDependencies(NetworkItem item)
@@ -120,76 +107,20 @@ namespace PertNetworkUIExtension
 			return dependencies;
 		}
 
-		public List<NetworkItem> GetHorizontalItems(int yPos)
+		public List<NetworkItem> GetHorizontalItems(int yPos, int fromXPos = 0, int toXPos = -1)
 		{
-			var items = new List<NetworkItem>();
-
-			foreach (var item in Values)
-			{
-				if (item.Position.Y == yPos)
-					items.Add(item);
-			}
-
-			// Sort left to right
-			items.Sort((a, b) => (a.Position.X - b.Position.X));
-			
-			return items;
+			return Values.Where(a => ((a.Position.Y == yPos) &&
+										(a.Position.X >= fromXPos) &&
+										((toXPos == -1) || (a.Position.X <= toXPos))))
+						.OrderBy(a => a.Position.X).ToList();
 		}
 
-		public List<NetworkItem> GetVerticalItems(int xPos)
+		public List<NetworkItem> GetVerticalItems(int xPos, int fromYPos = 0, int toYPos = -1)
 		{
-			var items = new List<NetworkItem>();
-
-			foreach (var item in Values)
-			{
-				if (item.Position.X == xPos)
-					items.Add(item);
-			}
-
-			// Sort top to bottom
-			items.Sort((a, b) => (a.Position.Y - b.Position.Y));
-
-			return items;
-		}
-
-		public List<NetworkItem> GetHorizontalItems(int yPos, int fromXPos, int toXPos = -1)
-		{
-			var items = new List<NetworkItem>();
-
-			foreach (var item in Values)
-			{
-				if ((item.Position.Y == yPos) && 
-					(item.Position.X >= fromXPos) &&
-					((toXPos == -1) || (item.Position.X <= toXPos)))
-				{
-					items.Add(item);
-				}
-			}
-
-			// Sort left to right
-			items.Sort((a, b) => (a.Position.X - b.Position.X));
-			
-			return items;
-		}
-
-		public List<NetworkItem> GetVerticalItems(int xPos, int fromYPos, int toYPos = -1)
-		{
-			var items = new List<NetworkItem>();
-
-			foreach (var item in Values)
-			{
-				if ((item.Position.X == xPos) && 
-					(item.Position.Y >= fromYPos) &&
-					((toYPos == -1) || (item.Position.Y <= toYPos)))
-				{
-					items.Add(item);
-				}
-			}
-
-			// Sort top to bottom
-			items.Sort((a, b) => (a.Position.Y - b.Position.Y));
-
-			return items;
+			return Values.Where(a => ((a.Position.X == xPos) &&
+										(a.Position.Y >= fromYPos) &&
+										((toYPos == -1) || (a.Position.Y <= toYPos))))
+						.OrderBy(a => a.Position.Y).ToList();
 		}
 
 		public Point CalcMaximumPosition()
@@ -207,13 +138,7 @@ namespace PertNetworkUIExtension
 
 		public NetworkItem GetItemAtPosition(int x, int y)
 		{
-			foreach (var item in Values)
-			{
-				if ((item.Position.X == x) && (item.Position.Y == y))
-					return item;
-			}
-
-			return null;
+			return Values.Where(a => ((a.Position.X == x) && (a.Position.Y >= y))).FirstOrDefault();
 		}
 	}
 
@@ -433,10 +358,9 @@ namespace PertNetworkUIExtension
 			return subGroups;
 		}
 
-		private void GetVerticalRange(IEnumerable<NetworkItem> items, out int minY, out int maxY)
+		private int GetMidVPos(IEnumerable<NetworkItem> items)
 		{
-			minY = -1;
-			maxY = -1;
+			int minY = -1, maxY = -1;
 
 			foreach (var item in items)
 			{
@@ -450,35 +374,29 @@ namespace PertNetworkUIExtension
 				else
 					maxY = Math.Max(maxY, item.Position.Y);
 			}
+
+			return ((minY + maxY) / 2);
 		}
 
 		public Point BalanceVerticalPositions()
 		{
 			// Try moving an item towards the centre of its dependencies
 			// and stop when we hit a position already taken.
-			// Don't allow items to move outside the maximum range
-			int groupMinY, groupMaxY;
-			GetVerticalRange(ItemValues, out groupMinY, out groupMaxY);
-
 			var subGroups = BuildHorizontalSubGroups();
 			List<NetworkItem> subGroup = null;
 
-			for (int iHPos = 1; iHPos < subGroups.Count; iHPos++)
+			for (int hPos = 1; hPos < subGroups.Count; hPos++)
 			{
-				if (subGroups.TryGetValue(iHPos, out subGroup))
+				if (subGroups.TryGetValue(hPos, out subGroup))
 				{
 					foreach (var item in subGroup)
 					{
 						var dependencies = GetItemDependencies(item);
+						var midY = GetMidVPos(dependencies);
 
-						int minY, maxY;
-						GetVerticalRange(dependencies, out minY, out maxY);
-
-						int iVPos = ((maxY + minY) / 2);
-
-						for (int vPos = item.Position.Y; vPos <= iVPos; vPos++)
+						for (int vPos = item.Position.Y; vPos <= midY; vPos++)
 						{
-							if (IsPositionTaken(subGroup, iHPos, vPos))
+							if (IsPositionTaken(subGroup, hPos, vPos))
 								break;
 
 							// else
@@ -493,14 +411,10 @@ namespace PertNetworkUIExtension
 			{
 				var item = subGroup[0];
 				var dependents = GetItemDependents(item);
+				var midY = GetMidVPos(dependents);
 
-				int minY, maxY;
-				GetVerticalRange(dependents, out minY, out maxY);
-
-				int newPos = ((maxY + minY) / 2);
-
-				if (!IsPositionTaken(subGroup, 0, newPos))
-					item.Position.Y = newPos;
+				if (!IsPositionTaken(subGroup, 0, midY))
+					item.Position.Y = midY;
 			}
 
 			// Recalculate maximum extent
