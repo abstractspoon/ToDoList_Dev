@@ -117,8 +117,7 @@ namespace PertNetworkUIExtension
 
 		public void RebuildGroups()
 		{
-			Point maxPos;
-			Data.RebuildGroups(out maxPos);
+			Point maxPos = Data.RebuildGroups();
 
 			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y);
 
@@ -135,7 +134,7 @@ namespace PertNetworkUIExtension
 			// Brute force for now
 			foreach (var group in Data.Groups)
 			{
-				foreach (var item in group.Items)
+				foreach (var item in group.ItemValues)
 				{
 					var itemRect = CalcItemRectangle(item);
 
@@ -155,7 +154,7 @@ namespace PertNetworkUIExtension
 
 			foreach (var group in Data.Groups)
 			{
-				foreach (var item in group.Items)
+				foreach (var item in group.ItemValues)
 				{
 					if (!drawnItems.Contains(item))
 					{
@@ -748,7 +747,7 @@ namespace PertNetworkUIExtension
 			case Keys.Right:
 				// Move to the topmost of this items dependents
 				{
-					var dependents = Helper.GetItemDependents(Data.Items, selItem);
+					var dependents = Data.Items.GetItemDependents(selItem);
 
 					if (dependents.Count > 0)
 					{

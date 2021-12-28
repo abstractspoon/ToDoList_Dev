@@ -28,25 +28,215 @@ namespace PertNetworkUIExtension
 
 		public static Point NullPoint { get { return new Point(-1, -1); } }
 	}
+
+	// ------------------------------------------------------------
+
+	public class NetworkItems : Dictionary<uint, NetworkItem>
+	{
+		public NetworkItem GetItem(uint uniqueId)
+		{
+			NetworkItem item = null;
+			TryGetValue(uniqueId, out item);
+
+			return item;
+		}
+
+		public bool DeleteItem(uint uniqueId)
+		{
+			if (!ContainsKey(uniqueId))
+				return false;
+
+			Remove(uniqueId);
+			return true;
+		}
+
+		public bool AddItem(NetworkItem item)
+		{
+			if (ContainsKey(item.UniqueId))
+				return false;
+
+			Add(item.UniqueId, item);
+			return true;
+		}
+
+		public HashSet<uint> GetAllDependents()
+		{
+			var dependentIds = new HashSet<uint>();
+			
+			foreach (var item in Values)
+			{
+				foreach (var depend in item.DependencyUniqueIds)
+					dependentIds.Add(depend);
+			}
+
+			return dependentIds;
+		}
+
+		public HashSet<uint> GetAllTerminators(HashSet<uint> dependentIds)
+		{
+			HashSet<uint> terminatorIds = new HashSet<uint>();
+
+			foreach (var item in Values)
+			{
+				if ((item.DependencyUniqueIds.Count > 0) && !dependentIds.Contains(item.UniqueId))
+					terminatorIds.Add(item.UniqueId);
+			}
+
+			return terminatorIds;
+		}
+
+		public List<NetworkItem> GetItemDependents(NetworkItem item)
+		{
+			var dependents = new List<NetworkItem>();
+
+			foreach (var depend in Values)
+			{
+				foreach (var dependId in depend.DependencyUniqueIds)
+				{
+					if (dependId == item.UniqueId)
+					{
+						dependents.Add(depend);
+						break;
+					}
+				}
+			}
+
+			return dependents;
+		}
+
+		public List<NetworkItem> GetItemDependencies(NetworkItem item)
+		{
+			var dependencies = new List<NetworkItem>();
+
+			foreach (uint dependId in item.DependencyUniqueIds)
+				dependencies.Add(GetItem(dependId));
+
+			return dependencies;
+		}
+
+		public List<NetworkItem> GetHorizontalItems(int yPos)
+		{
+			var items = new List<NetworkItem>();
+
+			foreach (var item in Values)
+			{
+				if (item.Position.Y == yPos)
+					items.Add(item);
+			}
+
+			// Sort left to right
+			items.Sort((a, b) => (a.Position.X - b.Position.X));
+			
+			return items;
+		}
+
+		public List<NetworkItem> GetVerticalItems(int xPos)
+		{
+			var items = new List<NetworkItem>();
+
+			foreach (var item in Values)
+			{
+				if (item.Position.X == xPos)
+					items.Add(item);
+			}
+
+			// Sort top to bottom
+			items.Sort((a, b) => (a.Position.Y - b.Position.Y));
+
+			return items;
+		}
+
+		public Point CalcMaximumPosition()
+		{
+			var maxPos = new Point(0, 0);
+
+			foreach (var item in Values)
+			{
+				maxPos.X = Math.Max(maxPos.X, item.Position.X);
+				maxPos.Y = Math.Max(maxPos.Y, item.Position.Y);
+			}
+
+			return maxPos;
+		}
+	}
+
+	// ------------------------------------------------------------
+
+	public class NetworkGroups : HashSet<NetworkGroup>
+	{
+		public int RebuildGroups(NetworkItems allItems, out Point maxPos)
+		{
+			Clear();
+
+			// Get the set of all tasks on whom other tasks are dependent
+			HashSet<uint> dependentIds = allItems.GetAllDependents();
+
+			// Get the set of all tasks which have dependencies but 
+			// on whom NO other tasks are dependent
+			HashSet<uint> terminatorIds = allItems.GetAllTerminators(dependentIds);
+
+			// Build the groups by working backwards from each end task
+			maxPos = new Point(0, 0);
+
+			foreach (var termId in terminatorIds)
+			{
+				NetworkItem termItem = allItems.GetItem(termId);
+
+				if (termItem != null)
+				{
+					Point groupMaxPos = new Point(0, maxPos.Y);
+
+					if (Count > 0)
+						groupMaxPos.Y++;
+
+					if (AddGroup(termItem, allItems, ref groupMaxPos))
+					{
+						maxPos.Y = groupMaxPos.Y;
+						maxPos.X = Math.Max(maxPos.X, groupMaxPos.X);
+					}
+				}
+			}
+
+			return Count;
+		}
+
+		public bool AddGroup(NetworkItem termItem, NetworkItems allItems, ref Point maxPos)
+		{
+			var group = new NetworkGroup();
+
+			if (!group.Build(termItem, allItems, ref maxPos))
+				return false;
+
+			Add(group);
+			return true;
+		}
+
+	}
+
 	// ------------------------------------------------------------
 
 	public class NetworkData
 	{
-		private Dictionary<uint, NetworkItem> m_Items;
-		private HashSet<NetworkGroup> m_Groups;
+		private NetworkItems m_Items;
+		private NetworkGroups m_Groups;
 
 		public NetworkData()
 		{
-			m_Items = new Dictionary<uint, NetworkItem>();
-			m_Groups = new HashSet<NetworkGroup>();
+			m_Items = new NetworkItems();
+			m_Groups = new NetworkGroups();
 		}
 
-		public IEnumerable<NetworkItem> Items
+		public NetworkItems Items
+		{
+			get { return m_Items; }
+		}
+
+		public IEnumerable<NetworkItem> ItemValues
 		{
 			get { return m_Items.Values; }
 		}
 
-		public IEnumerable<NetworkGroup> Groups
+		public NetworkGroups Groups
 		{
 			get { return m_Groups; }
 		}
@@ -59,114 +249,78 @@ namespace PertNetworkUIExtension
 
 		void ResetPositions()
 		{
-			foreach (var item in Items)
+			foreach (var item in ItemValues)
 				item.Position = NetworkItem.NullPoint;
 		}
 
 		public NetworkItem GetItem(uint uniqueId)
 		{
-			return Helper.GetItem(m_Items, uniqueId);
+			return m_Items.GetItem(uniqueId);
 		}
 
 		public bool DeleteItem(uint uniqueId)
 		{
-			if (!m_Items.ContainsKey(uniqueId))
-				return false;
-
-			m_Items.Remove(uniqueId);
-			return true;
+			return m_Items.DeleteItem(uniqueId);
 		}
 
 		public bool AddItem(NetworkItem item)
 		{
+			return m_Items.AddItem(item);
+		}
+
+		public Point RebuildGroups()
+		{
+			ResetPositions();
+
+			Point maxPos;
+			m_Groups.RebuildGroups(Items, out maxPos);
+
+			return maxPos;
+		}
+	}
+
+	// ------------------------------------------------------------
+	
+	public class NetworkGroup
+	{
+		private NetworkItems m_Items;
+
+		public NetworkGroup()
+		{
+			m_Items = new NetworkItems();
+		}
+
+		public NetworkItems Items
+		{
+			get { return m_Items; }
+		}
+
+		public IEnumerable<NetworkItem> ItemValues
+		{
+			get { return m_Items.Values; }
+		}
+
+		public bool Build(NetworkItem termItem, NetworkItems allItems, ref Point maxPos)
+		{
+			if (!AddTask(termItem, allItems, ref maxPos))
+				return false;
+
+			maxPos = BalanceVerticalPositions();
+			return true;
+		}
+
+		private bool AddTask(NetworkItem item, NetworkItems allItems, ref Point maxPos)
+		{
+			// Must be unique
 			if (m_Items.ContainsKey(item.UniqueId))
 				return false;
 
 			m_Items.Add(item.UniqueId, item);
-			return true;
-		}
-
-		public void RebuildGroups(out Point maxPos)
-		{
-			ResetPositions();
-			m_Groups.Clear();
-
-			// Get the set of all tasks on whom other tasks are dependent
-			HashSet<uint> dependentIDs = GetAllDependents();
-
-			// Get the set of all tasks which have dependencies but 
-			// on whom NO other tasks are dependent
-			HashSet<uint> terminatorIDs = GetAllTerminators(dependentIDs);
-
-			// Build the groups by working backwards from each end task
-			maxPos = new Point(0, 0);
-
-			foreach (var termId in terminatorIDs)
-			{
-				NetworkItem termItem = GetItem(termId);
-
-				if (termItem != null)
-				{
-					Point groupMaxPos = new Point(0, maxPos.Y);
-
-					if (m_Groups.Count > 0)
-						groupMaxPos.Y++;
-
-					var group = NewGroup(termItem, ref groupMaxPos);
-					m_Groups.Add(group);
-
-					maxPos.Y = groupMaxPos.Y;
-					maxPos.X = Math.Max(maxPos.X, groupMaxPos.X);
-				}
-			}
-		}
-
-		HashSet<uint> GetAllDependents()
-		{
-			var dependentIDs = new HashSet<uint>();
-			
-			foreach (var item in Items)
-			{
-				foreach (var depend in item.DependencyUniqueIds)
-					dependentIDs.Add(depend);
-			}
-
-			return dependentIDs;
-		}
-
-		HashSet<uint> GetAllTerminators(HashSet<uint> dependentIDs)
-		{
-			HashSet<uint> terminatorIds = new HashSet<uint>();
-
-			foreach (var item in Items)
-			{
-				if ((item.DependencyUniqueIds.Count > 0) && !dependentIDs.Contains(item.UniqueId))
-					terminatorIds.Add(item.UniqueId);
-			}
-
-			return terminatorIds;
-		}
-
-		NetworkGroup NewGroup(NetworkItem termItem, ref Point maxPos)
-		{
-			var group = new NetworkGroup();
-
-			AddTaskToGroup(termItem, group, ref maxPos);
-
-			group.BalanceVerticalPositions();
-
-			return group;
-		}
-		
-		void AddTaskToGroup(NetworkItem item, NetworkGroup group, ref Point maxPos)
-		{
-			if (!group.AddItem(item))
-				return;
 
 			// Don't modify the vertical position of an item already processed in another group
 			if (!item.HasPosition)
 				item.Position.Y = maxPos.Y;
-			
+
 			// This item's dependencies (can be zero)
 			if (item.DependencyUniqueIds.Count > 0)
 			{
@@ -174,7 +328,7 @@ namespace PertNetworkUIExtension
 
 				foreach (var dependId in item.DependencyUniqueIds)
 				{
-					NetworkItem dependItem = GetItem(dependId);
+					NetworkItem dependItem = allItems.GetItem(dependId);
 
 					if (dependItem != null)
 					{
@@ -184,7 +338,7 @@ namespace PertNetworkUIExtension
 						else
 							firstDepend = false;
 
-						AddTaskToGroup(dependItem, group, ref maxPos); // RECURSIVE call
+						AddTask(dependItem, allItems, ref maxPos); // RECURSIVE call
 
 						item.Position.X = Math.Max(dependItem.Position.X + 1, item.Position.X);
 					}
@@ -196,71 +350,7 @@ namespace PertNetworkUIExtension
 			{
 				item.Position.X = maxPos.X = 0;
 			}
-		}
-	}
 
-	// ------------------------------------------------------------
-
-	class Helper
-	{
-		public static List<NetworkItem> GetItemDependents(IEnumerable<NetworkItem> items, NetworkItem item)
-		{
-			var dependents = new List<NetworkItem>();
-
-			foreach (var dependItem in items)
-			{
-				foreach (uint dependID in dependItem.DependencyUniqueIds)
-				{
-					if (dependID == item.UniqueId)
-						dependents.Add(dependItem);
-				}
-			}
-
-			return dependents;
-		}
-
-		public static List<NetworkItem> GetItemDependencies(IDictionary<uint, NetworkItem> items, NetworkItem item)
-		{
-			var dependencies = new List<NetworkItem>();
-
-			foreach (uint dependID in item.DependencyUniqueIds)
-				dependencies.Add(GetItem(items, dependID));
-
-			return dependencies;
-		}
-		
-		public static NetworkItem GetItem(IDictionary<uint, NetworkItem> items, uint uniqueId)
-		{
-			NetworkItem item = null;
-			items.TryGetValue(uniqueId, out item);
-
-			return item;
-		}
-	}
-
-	// ------------------------------------------------------------
-
-	public class NetworkGroup
-	{
-		private Dictionary<uint, NetworkItem> m_Items;
-
-		public NetworkGroup()
-		{
-			m_Items = new Dictionary<uint, NetworkItem>();
-		}
-
-		public IEnumerable<NetworkItem> Items
-		{
-			get { return m_Items.Values; }
-		}
-
-		public bool AddItem(NetworkItem item)
-		{
-			// Must be unique
-			if (m_Items.ContainsKey(item.UniqueId))
-				return false;
-
-			m_Items.Add(item.UniqueId, item);
 			return true;
 		}
 
@@ -268,7 +358,7 @@ namespace PertNetworkUIExtension
 		{
 			var subGroups = new Dictionary<int, List<NetworkItem>>();
 
-			foreach (var item in Items)
+			foreach (var item in ItemValues)
 			{
 				List<NetworkItem> subGroup = null;
 
@@ -309,13 +399,13 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-		public void BalanceVerticalPositions()
+		public Point BalanceVerticalPositions()
 		{
 			// Try moving an item towards the centre of its dependencies
 			// and stop when we hit a position already taken.
 			// Don't allow items to move outside the maximum range
 			int groupMinY, groupMaxY;
-			GetVerticalRange(Items, out groupMinY, out groupMaxY);
+			GetVerticalRange(ItemValues, out groupMinY, out groupMaxY);
 
 			var subGroups = BuildHorizontalSubGroups();
 			List<NetworkItem> subGroup = null;
@@ -359,27 +449,24 @@ namespace PertNetworkUIExtension
 				if (!IsPositionTaken(subGroup, 0, newPos))
 					item.Position.Y = newPos;
 			}
+
+			// Recalculate maximum extent
+			return m_Items.CalcMaximumPosition();
 		}
 
 		NetworkItem GetItem(uint uniqueId)
 		{
-			return Helper.GetItem(m_Items, uniqueId);
+			return m_Items.GetItem(uniqueId);
 		}
 
 		List<NetworkItem> GetItemDependents(NetworkItem item)
 		{
-			return Helper.GetItemDependents(m_Items.Values, item);
+			return m_Items.GetItemDependents(item);
 		}
 
 		public List<NetworkItem> GetItemDependencies(NetworkItem item)
 		{
-			return Helper.GetItemDependencies(m_Items, item);
-			var dependencies = new List<NetworkItem>();
-
-			foreach (uint dependID in item.DependencyUniqueIds)
-				dependencies.Add(GetItem(dependID));
-
-			return dependencies;
+			return m_Items.GetItemDependencies(item);
 		}
 
 		bool IsPositionTaken(IEnumerable<NetworkItem> items, int x, int y)
