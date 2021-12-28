@@ -21,6 +21,12 @@ namespace PertNetworkUIExtension
 			private set;
 		}
 
+
+		public void ClearPosition()
+		{
+			Position = NullPoint;
+		}
+
 		public string Title;
 		public Point Position;
 		public bool HasPosition { get { return (Position != NullPoint); } }
@@ -166,6 +172,10 @@ namespace PertNetworkUIExtension
 	{
 		public int RebuildGroups(NetworkItems allItems, out Point maxPos)
 		{
+			// Clear all item positions
+			foreach (var item in allItems.Values)
+				item.ClearPosition();
+
 			Clear();
 
 			// Get the set of all tasks on whom other tasks are dependent
@@ -200,7 +210,7 @@ namespace PertNetworkUIExtension
 			return Count;
 		}
 
-		public bool AddGroup(NetworkItem termItem, NetworkItems allItems, ref Point maxPos)
+		private bool AddGroup(NetworkItem termItem, NetworkItems allItems, ref Point maxPos)
 		{
 			var group = new NetworkGroup();
 
@@ -247,12 +257,6 @@ namespace PertNetworkUIExtension
 			m_Groups.Clear();
 		}
 
-		void ResetPositions()
-		{
-			foreach (var item in ItemValues)
-				item.Position = NetworkItem.NullPoint;
-		}
-
 		public NetworkItem GetItem(uint uniqueId)
 		{
 			return m_Items.GetItem(uniqueId);
@@ -270,8 +274,6 @@ namespace PertNetworkUIExtension
 
 		public Point RebuildGroups()
 		{
-			ResetPositions();
-
 			Point maxPos;
 			m_Groups.RebuildGroups(Items, out maxPos);
 
@@ -354,7 +356,7 @@ namespace PertNetworkUIExtension
 			return true;
 		}
 
-		Dictionary<int, List<NetworkItem>> BuildHorizontalSubGroups()
+		private Dictionary<int, List<NetworkItem>> BuildHorizontalSubGroups()
 		{
 			var subGroups = new Dictionary<int, List<NetworkItem>>();
 
@@ -380,7 +382,7 @@ namespace PertNetworkUIExtension
 			return subGroups;
 		}
 
-		void GetVerticalRange(IEnumerable<NetworkItem> items, out int minY, out int maxY)
+		private void GetVerticalRange(IEnumerable<NetworkItem> items, out int minY, out int maxY)
 		{
 			minY = -1;
 			maxY = -1;
@@ -454,12 +456,12 @@ namespace PertNetworkUIExtension
 			return m_Items.CalcMaximumPosition();
 		}
 
-		NetworkItem GetItem(uint uniqueId)
+		private NetworkItem GetItem(uint uniqueId)
 		{
 			return m_Items.GetItem(uniqueId);
 		}
 
-		List<NetworkItem> GetItemDependents(NetworkItem item)
+		private List<NetworkItem> GetItemDependents(NetworkItem item)
 		{
 			return m_Items.GetItemDependents(item);
 		}
@@ -469,7 +471,7 @@ namespace PertNetworkUIExtension
 			return m_Items.GetItemDependencies(item);
 		}
 
-		bool IsPositionTaken(IEnumerable<NetworkItem> items, int x, int y)
+		private bool IsPositionTaken(IEnumerable<NetworkItem> items, int x, int y)
 		{
 			foreach (var item in items)
 			{
