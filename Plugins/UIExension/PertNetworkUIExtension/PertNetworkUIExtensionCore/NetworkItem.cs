@@ -152,6 +152,46 @@ namespace PertNetworkUIExtension
 			return items;
 		}
 
+		public List<NetworkItem> GetHorizontalItems(int yPos, int fromXPos, int toXPos = -1)
+		{
+			var items = new List<NetworkItem>();
+
+			foreach (var item in Values)
+			{
+				if ((item.Position.Y == yPos) && 
+					(item.Position.X >= fromXPos) &&
+					((toXPos == -1) || (item.Position.X <= toXPos)))
+				{
+					items.Add(item);
+				}
+			}
+
+			// Sort left to right
+			items.Sort((a, b) => (a.Position.X - b.Position.X));
+			
+			return items;
+		}
+
+		public List<NetworkItem> GetVerticalItems(int xPos, int fromYPos, int toYPos = -1)
+		{
+			var items = new List<NetworkItem>();
+
+			foreach (var item in Values)
+			{
+				if ((item.Position.X == xPos) && 
+					(item.Position.Y >= fromYPos) &&
+					((toYPos == -1) || (item.Position.Y <= toYPos)))
+				{
+					items.Add(item);
+				}
+			}
+
+			// Sort top to bottom
+			items.Sort((a, b) => (a.Position.Y - b.Position.Y));
+
+			return items;
+		}
+
 		public Point CalcMaximumPosition()
 		{
 			var maxPos = new Point(0, 0);
@@ -163,6 +203,17 @@ namespace PertNetworkUIExtension
 			}
 
 			return maxPos;
+		}
+
+		public NetworkItem GetItemAtPosition(int x, int y)
+		{
+			foreach (var item in Values)
+			{
+				if ((item.Position.X == x) && (item.Position.Y == y))
+					return item;
+			}
+
+			return null;
 		}
 	}
 

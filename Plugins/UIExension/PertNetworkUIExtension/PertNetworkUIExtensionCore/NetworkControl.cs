@@ -729,44 +729,69 @@ namespace PertNetworkUIExtension
 			if (selItem == null)
 				return false;
 
+			uint nextItemId = 0;
+
 			switch (key)
 			{
 			case Keys.Left:
-				// Move to the first of this items dependencies
-				if (selItem.DependencyUniqueIds.Count > 0)
+				if (selItem.Position.X > 0)
 				{
-					SelectedItemId = selItem.DependencyUniqueIds[0];
+					// Try for an item at the same vertical position
+					var leftItems = Data.Items.GetHorizontalItems(selItem.Position.Y, 0, selItem.Position.X - 1);
 
-					EnsureItemVisible(SelectedItem);
-					Invalidate();
+					// else try for the first of this item's dependencies
+					if (leftItems.Count == 0)
+						leftItems = Data.Items.GetItemDependencies(selItem);
 
-					return true;
+					if (leftItems.Count > 0)
+						nextItemId = leftItems[leftItems.Count - 1].UniqueId;
 				}
 				break;
 
 			case Keys.Right:
-				// Move to the topmost of this items dependents
 				{
-					var dependents = Data.Items.GetItemDependents(selItem);
+					// Try for an item at the same vertical position
+					var rightItems = Data.Items.GetHorizontalItems(selItem.Position.Y, selItem.Position.X + 1);
 
-					if (dependents.Count > 0)
-					{
-						dependents.Sort((a, b) => (a.Position.Y - b.Position.Y));
-						SelectedItemId = dependents[0].UniqueId;
+					// else try for the first of this item's dependents
+					if (rightItems.Count == 0)
+						rightItems = Data.Items.GetItemDependents(selItem);
 
-						EnsureItemVisible(SelectedItem);
-						Invalidate();
-
-						return true;
-					}
+					if (rightItems.Count > 0)
+						nextItemId = rightItems[0].UniqueId;
 				}
 				break;
 
 			case Keys.Up:
+				if (selItem.Position.Y > 0)
+				{
+					// Try for an item at the same horizontal position
+					var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
+
+					if (upperItems.Count > 0)
+						nextItemId = upperItems[upperItems.Count - 1].UniqueId;
+				}
 				break;
 
 			case Keys.Down:
+				{
+					// Try for an item at the same horizontal position
+					var lowerItems = Data.Items.GetVerticalItems(selItem.Position.X, selItem.Position.Y + 1);
+
+					if (lowerItems.Count > 0)
+						nextItemId = lowerItems[0].UniqueId;
+				}
 				break;
+			}
+
+			if (nextItemId != 0)
+			{
+				SelectedItemId = nextItemId;
+
+				EnsureItemVisible(SelectedItem);
+				Invalidate();
+
+				return true;
 			}
 
 			return false;
