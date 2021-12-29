@@ -155,18 +155,14 @@ namespace PertNetworkUIExtension
 			m_ShowCompletionCheckboxes = true;
 			m_StrikeThruDone = true;
 
-			ItemHeight = ScaleByDPIFactor(ItemHeight);
-			ItemWidth = ScaleByDPIFactor(ItemWidth);
-			ItemVertSpacing = ScaleByDPIFactor(ItemVertSpacing);
-			ItemHorzSpacing = ScaleByDPIFactor(ItemHorzSpacing);
-			GraphBorder = ScaleByDPIFactor(GraphBorder);
-
 			EditTimer = new Timer();
 			EditTimer.Interval = 500;
 			EditTimer.Tick += new EventHandler(OnEditLabelTimer);
 
 			using (Graphics graphics = Graphics.FromHwnd(Handle))
 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
+
+			RecalculateItemSize();
 		}
 
 		public void SetStrikeThruDone(bool strikeThruDone)
@@ -208,6 +204,17 @@ namespace PertNetworkUIExtension
 				RebuildGroups();
 
 			base.SetFont(fontName, fontSize);
+		}
+
+		void RecalculateItemSize()
+		{
+			ItemHeight = ((Font.Height + LabelPadding) * 4);
+			ItemWidth = (ItemHeight * 3);
+			ItemVertSpacing = ScaleByDPIFactor(ItemVertSpacing);
+			ItemHorzSpacing = ScaleByDPIFactor(ItemHorzSpacing);
+			GraphBorder = ScaleByDPIFactor(GraphBorder);
+
+			base.RecalculateItemSize(Data.Items.CalcMaximumPosition());
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -614,23 +621,77 @@ namespace PertNetworkUIExtension
 			return true;
 		}
 
-		protected Color GetItemBackgroundColor(NetworkItem item)
+		protected Color GetItemBackgroundColor(PertNetworkItem taskItem, bool selected)
 		{
-			if (m_TaskColorIsBkgnd)
-			{
-				var taskItem = (item as PertNetworkItem);
+			if (selected)
+				return Color.Empty;
 
-				if (!taskItem.TextColor.IsEmpty && !taskItem.IsDone(true))
+			if (taskItem.TextColor != Color.Empty)
+			{
+				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
 					return taskItem.TextColor;
+
+				// else
+				return DrawingColor.SetLuminance(taskItem.TextColor, 0.95f);
 			}
 
 			// all else
 			return Color.Empty;
 		}
 
-		protected Font GetItemFont(NetworkItem item)
+		protected Color GetItemTextColor(PertNetworkItem taskItem, bool selected)
 		{
-			var taskItem = (item as PertNetworkItem);
+			if (taskItem.TextColor != Color.Empty)
+			{
+				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
+					return DrawingColor.GetBestTextColor(taskItem.TextColor);
+
+				if (selected)
+					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
+
+				// else
+				return taskItem.TextColor;
+			}
+
+			// All else
+			return SystemColors.WindowText;
+		}
+
+		protected Color GetItemBorderColor(PertNetworkItem taskItem, bool selected)
+		{
+			if (selected)
+				return Color.Empty;
+
+			if (taskItem.TextColor != Color.Empty)
+			{
+				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
+					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
+
+				// else
+				return taskItem.TextColor;
+			}
+
+			// All else
+			return SystemColors.ControlDarkDark;
+		}
+
+		protected Color GetItemLineColor(PertNetworkItem taskItem, bool selected)
+		{
+			if (taskItem.TextColor != Color.Empty)
+			{
+				if (selected || (m_TaskColorIsBkgnd && !taskItem.IsDone(true)))
+					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
+
+				// else
+				return taskItem.TextColor;
+			}
+
+			// All else
+			return SystemColors.ControlDarkDark;
+		}
+
+		protected Font GetItemFont(PertNetworkItem taskItem)
+		{
 			Font font = null;
 
 			if (taskItem.TopLevel)
@@ -667,12 +728,16 @@ namespace PertNetworkUIExtension
 		override protected void OnPaintItem(Graphics graphics, NetworkItem item, int iGroup, bool selected)
 		{
 			var itemRect = CalcItemRectangle(item);
-			var titleRect = itemRect;
-			titleRect.Inflate(-LabelPadding, 0);
 
 			var taskItem = (item as PertNetworkItem);
 
-			// Background
+			// Figure out the required colours
+			Color backColor = GetItemBackgroundColor(taskItem, selected);
+			Color borderColor = GetItemBorderColor(taskItem, selected);
+			Color lineColor = GetItemLineColor(taskItem, selected);
+			Color textColor = GetItemTextColor(taskItem, selected);
+
+			// Draw background
 			if (selected)
 			{
 				UIExtension.SelectionRect.Style style = (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
@@ -686,28 +751,43 @@ namespace PertNetworkUIExtension
 												style,
 												false); // opaque
 			}
-			else
+			else if (backColor != Color.Empty)
 			{
-				Color backColor = GetItemBackgroundColor(item);
-				Color borderColor = SystemColors.WindowText;
+				using (var brush = new SolidBrush(backColor))
+					graphics.FillRectangle(brush, itemRect);
+			}
 
+			// Optional border
+			if (borderColor != Color.Empty)
+			{
+				// Pens behave weirdly
 				itemRect.Width--;
 				itemRect.Height--;
-
-				if (backColor != Color.Empty)
-				{
-					using (var brush = new SolidBrush(taskItem.TextColor))
-						graphics.FillRectangle(brush, itemRect);
-				}
-
-				if (taskItem.TextColor != Color.Empty)
-					borderColor = taskItem.TextColor;
 
 				using (var pen = new Pen(borderColor))
 					graphics.DrawRectangle(pen, itemRect);
 			}
 
+			// PERT Lines
+			using (var pen = new Pen(lineColor))
+			{
+				if (borderColor == Color.Empty)
+				{
+					// Pens behave weirdly
+					itemRect.Width--;
+					itemRect.Height--;
+				}
+
+				int midY = ((itemRect.Top + itemRect.Bottom) / 2);
+				int midX = ((itemRect.Left + itemRect.Right) / 2);
+
+				graphics.DrawLine(pen, itemRect.Left, midY, itemRect.Right, midY);
+				graphics.DrawLine(pen, midX, midY, midX, itemRect.Bottom);
+			}
+
 			// Icon
+			var titleRect = itemRect;
+
 			if (TaskHasIcon(taskItem))
 			{
 				var iconRect = CalcIconRect(itemRect);
@@ -736,31 +816,20 @@ namespace PertNetworkUIExtension
 				titleRect.Width = (titleRect.Right - iconRect.Right);
 				titleRect.X = iconRect.Right;
 			}
-			
-			// Text
-			Color textColor = SystemColors.WindowText;
 
-			if (!taskItem.TextColor.IsEmpty)
-			{
-				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
-				{
-					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
-					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
-				}
-				else if (selected)
-				{
-					textColor = DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
-				}
-				else
-				{
-					textColor = taskItem.TextColor;
-				}
-			}
+			// Title
+			titleRect.Inflate(-LabelPadding, -LabelPadding);
+			titleRect.Height /= 2;
 
 			using (var brush = new SolidBrush(textColor))
 			{
-				graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), GetItemFont(item), brush, titleRect);
+				graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), GetItemFont(taskItem), brush, titleRect);
 			}
+
+			// PERT specific info
+
+
+			//itemRect.Y += titleRect.Height 
 
 			/*
 					// Checkbox

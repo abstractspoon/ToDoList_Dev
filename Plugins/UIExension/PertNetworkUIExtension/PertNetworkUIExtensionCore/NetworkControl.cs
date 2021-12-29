@@ -117,8 +117,11 @@ namespace PertNetworkUIExtension
 
 		public void RebuildGroups()
 		{
-			Point maxPos = Data.RebuildGroups();
+			RecalculateItemSize(Data.RebuildGroups());
+		}
 
+		public void RecalculateItemSize(Point maxPos)
+		{
 			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y);
 
 			this.AutoScrollMinSize = new Size(maxItemRect.Right + GraphBorder, maxItemRect.Bottom + GraphBorder);
