@@ -124,8 +124,7 @@ int CRTFContentCtrlApp::ConvertToHtml(const unsigned char* pContent, int nLength
 
 	if (nLength)
 	{
-		// Because using Word can cause problems for some people
-		// we allow them to explictly avoid it
+		// Always set this to make sure it is current
 		m_rtfHtml.SetAllowUseOfMSWord(CRTFContentControl::GetConvertWithMSWord());
 
 		CString sHtml;

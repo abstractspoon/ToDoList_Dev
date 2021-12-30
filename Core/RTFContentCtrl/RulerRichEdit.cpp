@@ -603,7 +603,9 @@ BOOL CRulerRichEdit::CanPaste() const
 
 BOOL CRulerRichEdit::CopyRtfToClipboardAsHtml(const CString& sRTF, BOOL bAppend)
 {
-	// convert RTF to HTML and copy to clipboard
+	// Always set this to make sure it is current
+	m_rtfHtml.SetAllowUseOfMSWord(s_bConvertWithMSWord);
+
 	CString sHtml;
 	
 	if (m_rtfHtml.ConvertRtfToHtml((LPCSTR)(LPCTSTR)sRTF, NULL, sHtml, NULL))

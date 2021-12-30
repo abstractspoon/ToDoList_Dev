@@ -20,8 +20,8 @@ public:
 	void SetAllowUseOfMSWord(BOOL bAllow);
 	void Release();
 
-	BOOL ConvertRtfToHtml(const char* szRtf, LPCTSTR szCharSet, CString& sHtml, LPCTSTR szImageDir);
-	BOOL ConvertHtmlToRtf(const char* szHtml, LPCTSTR szCharSet, CString& sRtf, LPCTSTR szImageDir);
+	BOOL ConvertRtfToHtml(LPCSTR szRtf, LPCTSTR szCharSet, CString& sHtml, LPCTSTR szImageDir);
+	BOOL ConvertHtmlToRtf(LPCSTR szHtml, LPCTSTR szCharSet, CString& sRtf, LPCTSTR szImageDir);
 
 	static BOOL IsRTF(const char* szRTF);
 	

@@ -364,8 +364,7 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtml(LPCSTR szRTF, LPCTSTR szCharSet, CStrin
 	{
 		// TODO
 	}
-
-
+	
 	// cleanup temp rtf file
 	// NOTE: we clean up temporary image folders when we close
 	DeleteFile(sTempRtf);
@@ -586,7 +585,7 @@ BOOL CRtfHtmlConverter::ProcessMSWordHtml(const CString& sUniqueDir, CString& sH
 	return !sHtml.IsEmpty();
 }
 
-BOOL CRtfHtmlConverter::ConvertHtmlToRtf(const char* szHtml, LPCTSTR szCharSet, CString& sRtf, LPCTSTR szImageDir)
+BOOL CRtfHtmlConverter::ConvertHtmlToRtf(LPCSTR szHtml, LPCTSTR szCharSet, CString& sRtf, LPCTSTR szImageDir)
 {
 	CString sImageDir(szImageDir), sUniqueDir;
 	BOOL bTempImageDir = sImageDir.IsEmpty();
