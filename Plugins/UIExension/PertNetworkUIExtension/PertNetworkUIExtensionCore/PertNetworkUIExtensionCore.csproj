@@ -72,8 +72,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="NetworkControl.resx">
-      <DependentUpon>NetworkControl.cs</DependentUpon>
+    <EmbeddedResource Include="PertNetworkControl.resx">
+      <DependentUpon>PertNetworkControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

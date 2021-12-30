@@ -223,12 +223,9 @@ namespace PertNetworkUIExtension
 			{
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
-				// TODO
 				break;
 
 			case UIExtension.UpdateType.Delete:
-				break;
-
 			case UIExtension.UpdateType.All:
 				Data.Clear();
 				break;
