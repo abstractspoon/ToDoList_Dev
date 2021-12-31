@@ -252,9 +252,15 @@ void CEnToolBar::SetBackgroundColors(COLORREF crFrom, COLORREF crTo, BOOL bGradi
 		Invalidate();
 }
 
-void CEnToolBar::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL /*bDisableIfNoHndler*/)
+void CEnToolBar::OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler)
 {
-	CToolBar::OnUpdateCmdUI(pTarget, FALSE);
+	// This is a hack to get toolbar enabled states to work
+	// for child windows with toolbars where the command handlers
+	// are in the child window
+	if (!GetParent()->IsFrameWnd())
+		bDisableIfNoHndler = FALSE;
+
+	CToolBar::OnUpdateCmdUI(pTarget, bDisableIfNoHndler);
 }
 
 void CEnToolBar::RefreshButtonStates(BOOL bImmediate)
