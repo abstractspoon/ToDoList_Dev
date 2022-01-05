@@ -16,6 +16,7 @@ namespace PertNetworkUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, NetworkItem item);
 	public delegate bool DragDropChangeEventHandler(object sender, NetworkDragEventArgs e);
+	public delegate void ZoomChangeEventHandler(object sender);
 
 	[System.ComponentModel.DesignerCategory("")]
 
@@ -45,12 +46,12 @@ namespace PertNetworkUIExtension
 
 		[DllImport("User32.dll")]
 		static extern uint GetDoubleClickTime();
-		
+
 		// --------------------------
 
 		[DllImport("User32.dll")]
 		static extern int GetSystemMetrics(int index);
-		
+
 		const int SM_CXDOUBLECLK = 36;
 		const int SM_CYDOUBLECLK = 37;
 		const int SM_CXDRAG = 68;
@@ -60,40 +61,38 @@ namespace PertNetworkUIExtension
 
 		// Constants ---------------------------------------------------------------------
 
-		virtual protected int ScaleByDPIFactor(int value)
-        {
-            return value;
-        }
-
 		protected float ZoomFactor { get; private set; }
 		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
 
 		protected enum DropPos
-        {
-            None,
-            On,
-            Left,
-            Right,
-        }
+		{
+			None,
+			On,
+			Left,
+			Right,
+		}
 
 		// Data --------------------------------------------------------------------------
 
-        private DropPos DropSite;
+		private DropPos DropSite;
 		private Timer DragTimer;
 		private int LastDragTick = 0;
 
-        private bool IsSavingToImage = false;
+		private bool IsSavingToImage = false;
 		private uint SelectedItemId = 0;
 
-// #if DEBUG
-// 		private int RecalcDuration;
-// #endif
+		// #if DEBUG
+		// 		private int RecalcDuration;
+		// #endif
 
-		protected int ItemHeight = 30;
-		protected int ItemWidth  = 150;
-		protected int ItemVertSpacing = 10;
-		protected int ItemHorzSpacing = 30;
-		protected int GraphBorder = 20;
+		virtual protected int ItemHeight { get { return ((ZoomedFont.Height + LabelPadding) * 4); } }
+		virtual protected int LabelPadding { get { return 2; } }
+
+		protected int ItemWidth { get { return (ItemHeight* 3); } }
+		protected int ItemVertSpacing { get { return (ItemHeight / 4); } }
+		protected int ItemHorzSpacing { get { return (ItemWidth / 4); } }
+		protected int GraphBorder { get { return ItemVertSpacing; } }
+		protected Font ZoomedFont { get; private set; }
 
 		public NetworkData Data
 		{
@@ -104,13 +103,15 @@ namespace PertNetworkUIExtension
 
 		public event SelectionChangeEventHandler SelectionChange;
 		public event DragDropChangeEventHandler DragDropChange;
+		public event ZoomChangeEventHandler ZoomChange;
 
-        public NetworkControl()
+		public NetworkControl()
         {
 			DropSite = DropPos.None;
 			ConnectionColor = Color.Magenta;
 
 			Data = new NetworkData();
+			ZoomedFont = this.Font;
 
 			InitializeComponent();
 		}
@@ -222,11 +223,11 @@ namespace PertNetworkUIExtension
 			if (selected)
 			{
 				graphics.FillRectangle(SystemBrushes.Highlight, itemRect);
-				graphics.DrawString(itemText, this.Font, SystemBrushes.HighlightText, itemRect);
+				graphics.DrawString(itemText, this.ZoomedFont, SystemBrushes.HighlightText, itemRect);
 			}
 			else
 			{
-				graphics.DrawString(itemText, this.Font, Brushes.Blue, itemRect);
+				graphics.DrawString(itemText, this.ZoomedFont, Brushes.Blue, itemRect);
 			}
 		}
 
@@ -263,12 +264,17 @@ namespace PertNetworkUIExtension
 			return itemRect;
 		}
 		
-		public void SetFont(String fontName, int fontSize)
+		public bool SetFont(String fontName, int fontSize)
         {
             if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
-                return;
+                return false;
 
             this.Font = new Font(fontName, fontSize, FontStyle.Regular);
+
+			ZoomFactor = 1.0f;
+			ZoomedFont = this.Font;
+
+			return true;
         }
 
 		public Color ConnectionColor;
@@ -399,7 +405,6 @@ namespace PertNetworkUIExtension
 		{
 			if ((ModifierKeys & Keys.Control) == Keys.Control)
 			{
-/*
 				float newFactor = ZoomFactor;
 
 				if (e.Delta > 0)
@@ -415,27 +420,14 @@ namespace PertNetworkUIExtension
 
 				if (newFactor != ZoomFactor)
 				{
-					Cursor = Cursors.WaitCursor;
-
 					// Convert mouse pos to relative coordinates
 					float relX = ((e.Location.X + HorizontalScroll.Value) / (float)HorizontalScroll.Maximum);
 					float relY = ((e.Location.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
 
-					// Prevent all selection and expansion changes for the duration
- 					BeginUpdate();
-
-					// The process of changing the fonts and recalculating the 
-					// item height can cause the tree-view to spontaneously 
-					// collapse tree items so we save the expansion state
-					// and restore it afterwards
-					var expandedItems = GetExpandedItems(RootItem);
-
 					ZoomFactor = newFactor;
-					UpdateTreeFont(false);
+					ZoomedFont = ScaledFont(this.Font);
 
-					// 'Cleanup'
-					SetExpandedItems(expandedItems);
- 					EndUpdate();
+					RecalculateItemSize(Data.Items.CalcMaximumPosition());
 
 					// Scroll the view to keep the mouse located in the 
 					// same relative position as before
@@ -454,8 +446,9 @@ namespace PertNetworkUIExtension
 					}
 
 					PerformLayout();
+
+					ZoomChange?.Invoke(this);
 				}
-*/
 			}
 			else
 			{
@@ -587,25 +580,6 @@ namespace PertNetworkUIExtension
 		}
 
         // Internals -----------------------------------------------------------
-
-/*
-        private int BorderWidth
-        {
-            get
-            {
-                switch (BorderStyle)
-                {
-                    case BorderStyle.FixedSingle:
-                        return 1;
-
-                    case BorderStyle.Fixed3D:
-                        return 2;
-                }
-
-                return 0;
-            }
-        }
-*/
 
 		private bool CheckStartDragging(Point cursor)
 		{

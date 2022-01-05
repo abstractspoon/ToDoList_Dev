@@ -1563,6 +1563,29 @@ BOOL GraphicsMisc::DrawExplorerItemSelection(CDC* pDC, HWND hwnd, GM_ITEMSTATE n
 	return bDrawn;
 }
 
+COLORREF GraphicsMisc::GetExplorerItemSelectionBackColor(GM_ITEMSTATE nState, DWORD dwFlags)
+{
+	ASSERT(nState != GMIS_NONE);
+
+	if (Misc::IsHighContrastActive())
+		return GetSysColor(COLOR_HIGHLIGHT);
+
+	BOOL bThemed = (CThemed::AreControlsThemed() && (COSVersion() >= OSV_VISTA));
+	bThemed |= (dwFlags & GMIB_THEMECLASSIC);
+
+	switch (nState)
+	{
+	case GMIS_SELECTED:
+		return (bThemed ? RGB(160, 215, 255) : GetSysColor(COLOR_HIGHLIGHT));
+
+	case GMIS_SELECTEDNOTFOCUSED:
+	case GMIS_DROPHILITED:
+		return (bThemed ? RGB(192, 192, 192) : GetSysColor(COLOR_3DFACE));
+	}
+
+	return GetSysColor(COLOR_WINDOW);
+}
+
 BOOL GraphicsMisc::GetMonitorAvailableScreenSpace(HMONITOR hMon, CRect& rScreen, UINT nFallback)
 {
 	if (hMon && GetMonitorAvailableScreenSpace(hMon, rScreen))

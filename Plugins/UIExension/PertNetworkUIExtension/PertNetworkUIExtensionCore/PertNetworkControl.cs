@@ -136,12 +136,12 @@ namespace PertNetworkUIExtension
 
 		private Timer EditTimer;
 		private Font BoldLabelFont, DoneLabelFont, BoldDoneLabelFont;
-		private Size CheckboxSize;
+//		private Size CheckboxSize;
 		private NetworkItem PreviouslySelectedItem;
 
 		// -------------------------------------------------------------------------
 
-		private int LabelPadding { get { return ScaleByDPIFactor(2); } }
+		protected override int LabelPadding { get { return ScaleByDPIFactor(2); } }
 
 		// -------------------------------------------------------------------------
 
@@ -159,10 +159,26 @@ namespace PertNetworkUIExtension
 			EditTimer.Interval = 500;
 			EditTimer.Tick += new EventHandler(OnEditLabelTimer);
 
-			using (Graphics graphics = Graphics.FromHwnd(Handle))
-				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
+			// 			using (Graphics graphics = Graphics.FromHwnd(Handle))
+			// 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 
-			RecalculateItemSize();
+			ZoomChange += new ZoomChangeEventHandler(OnZoomChanged);
+		}
+
+		protected void OnZoomChanged(object sender)
+		{
+			BoldLabelFont = new Font(ZoomedFont.Name, ZoomedFont.Size, FontStyle.Bold);
+
+			if (m_StrikeThruDone)
+			{
+				BoldDoneLabelFont = new Font(ZoomedFont.Name, ZoomedFont.Size, FontStyle.Bold | FontStyle.Strikeout);
+				DoneLabelFont = new Font(ZoomedFont.Name, ZoomedFont.Size, FontStyle.Strikeout);
+			}
+			else
+			{
+				BoldDoneLabelFont = BoldLabelFont;
+				DoneLabelFont = null;
+			}
 		}
 
 		public void SetStrikeThruDone(bool strikeThruDone)
@@ -180,41 +196,8 @@ namespace PertNetworkUIExtension
 
 		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
 		{
-			bool baseFontChange = ((BoldLabelFont == null) || (BoldLabelFont.Name != fontName) || (BoldLabelFont.Size != fontSize));
-			bool doneFontChange = (baseFontChange || (BoldDoneLabelFont.Strikeout != strikeThruDone));
-
-			if (baseFontChange)
-				BoldLabelFont = new Font(fontName, fontSize, FontStyle.Bold);
-
-			if (doneFontChange)
-			{
-				if (strikeThruDone)
-				{
-					BoldDoneLabelFont = new Font(fontName, fontSize, FontStyle.Bold | FontStyle.Strikeout);
-					DoneLabelFont = new Font(fontName, fontSize, FontStyle.Strikeout);
-				}
-				else
-				{
-					BoldDoneLabelFont = BoldLabelFont;
-					DoneLabelFont = null;
-				}
-			}
-
-			if (baseFontChange || doneFontChange)
-				RebuildGroups();
-
-			base.SetFont(fontName, fontSize);
-		}
-
-		void RecalculateItemSize()
-		{
-			ItemHeight = ((Font.Height + LabelPadding) * 4);
-			ItemWidth = (ItemHeight * 3);
-			ItemVertSpacing = ScaleByDPIFactor(ItemVertSpacing);
-			ItemHorzSpacing = ScaleByDPIFactor(ItemHorzSpacing);
-			GraphBorder = ScaleByDPIFactor(GraphBorder);
-
-			base.RecalculateItemSize(Data.Items.CalcMaximumPosition());
+			if (base.SetFont(fontName, fontSize))
+				OnZoomChanged(this);
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -548,7 +531,7 @@ namespace PertNetworkUIExtension
 
 		// Internal ------------------------------------------------------------
 
-		override protected int ScaleByDPIFactor(int value)
+		protected int ScaleByDPIFactor(int value)
 		{
 			return DPIScaling.Scale(value);
 		}
@@ -703,7 +686,7 @@ namespace PertNetworkUIExtension
 				font = DoneLabelFont;
 			}
 			
-			return (font == null) ? this.Font : font;
+			return (font == null) ? this.ZoomedFont : font;
 		}
 
 		protected void DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect)
@@ -712,20 +695,19 @@ namespace PertNetworkUIExtension
 
 			var gSave = graphics.Save();
 
-			graphics.CompositingMode = CompositingMode.SourceCopy;
-			graphics.CompositingQuality = CompositingQuality.HighQuality;
+			var attrib = new ImageAttributes();
+			attrib.SetWrapMode(WrapMode.TileFlipXY);
+
 			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 			graphics.SmoothingMode = SmoothingMode.HighQuality;
-			graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
 
-			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
+			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attrib);
 			graphics.Restore(gSave);
 		}
 
 		override protected void OnPaintItem(Graphics graphics, NetworkItem item, int iGroup, bool selected)
 		{
 			var itemRect = CalcItemRectangle(item);
-
 			var taskItem = (item as PertNetworkItem);
 
 			// Figure out the required colours
@@ -747,11 +729,17 @@ namespace PertNetworkUIExtension
 												itemRect.Height,
 												style,
 												false); // opaque
+
+				backColor = UIExtension.SelectionRect.GetColor(style);
 			}
 			else if (backColor != Color.Empty)
 			{
 				using (var brush = new SolidBrush(backColor))
 					graphics.FillRectangle(brush, itemRect);
+			}
+			else
+			{
+				backColor = SystemColors.Window;
 			}
 
 			// Optional border
@@ -798,14 +786,17 @@ namespace PertNetworkUIExtension
 					else
 					{
 						int imageSize = ScaleByDPIFactor(16);
-						var tempImage = new Bitmap(imageSize, imageSize); // original size
 
-						using (var gTemp = Graphics.FromImage(tempImage))
+						using (var tempImage = new Bitmap(imageSize, imageSize, PixelFormat.Format32bppRgb)) // original size
 						{
-							gTemp.FillRectangle(SystemBrushes.Window, 0, 0, imageSize, imageSize);
-							TaskIcons.Draw(gTemp, 0, 0);
+							tempImage.MakeTransparent();
+							using (var gTemp = Graphics.FromImage(tempImage))
+							{
+								gTemp.Clear(backColor);
+								TaskIcons.Draw(gTemp, 0, 0);
 
-							DrawZoomedImage(tempImage, graphics, iconRect);
+								DrawZoomedImage(tempImage, graphics, iconRect);
+							}
 						}
 					}
 				}
@@ -883,7 +874,12 @@ namespace PertNetworkUIExtension
 				points[0].Y = fromRect.Bottom;
 				points[2].Y = toRect.Top;
 			}
-			
+			else // same level
+			{
+				points[0].Y--;
+				points[2].Y--;
+			}
+
 			points[1].X = ((fromRect.Right + toRect.Left) / 2);
 			points[1].Y = points[2].Y;
 
@@ -896,10 +892,10 @@ namespace PertNetworkUIExtension
 			Point arrow = points[2];
 			arrow.X--;
 
-			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
+			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, ZoomedFont, false);
 
 			// Draw 3x3 box at 'to' end
-			Rectangle box = new Rectangle(points[0].X - 1, points[0].Y - 1, 3, 3);
+			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
 
 			graphics.SmoothingMode = smoothing;

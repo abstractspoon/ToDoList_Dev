@@ -6,6 +6,7 @@
 #include "UIExtension.h"
 #include "Win32.h"
 #include "DPIScaling.h"
+#include "ColorUtil.h"
 
 #include <Interfaces\UITheme.h>
 #include <Interfaces\IUIExtension.h>
@@ -569,26 +570,9 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 	if (hDC == NULL)
 		return false;
 
-	GM_ITEMSTATE state = GMIS_SELECTED;
-	
-	switch (style)
-	{
-	case Style::Selected:
-		break;
-
-	case Style::SelectedNotFocused:
-		state = GMIS_SELECTEDNOTFOCUSED;
-		break;
-
-	case Style::DropHighlighted:
-		state = GMIS_DROPHILITED;
-		break;
-
-	default:
-		return false;
-	}
-		
+	GM_ITEMSTATE state = Map(style);
 	int nSaveDC = ::SaveDC(hDC);
+		
 	::IntersectClipRect(hDC, rClip.Left, rClip.Top, rClip.Right, rClip.Bottom);
 
 	DWORD flags = (GMIB_THEMECLASSIC | (transparent ? GMIB_PREDRAW | GMIB_POSTDRAW : 0));
@@ -603,6 +587,31 @@ bool UIExtension::SelectionRect::Draw(IntPtr hwnd, Graphics^ g, Int32 x, Int32 y
 	g->SetClip(rClip); // restore clip rect
 
 	return (bRes != FALSE);
+}
+
+GM_ITEMSTATE UIExtension::SelectionRect::Map(Style style)
+{
+	switch (style)
+	{
+	case Style::Selected:
+		return GMIS_SELECTED;
+
+	case Style::SelectedNotFocused:
+		return GMIS_SELECTEDNOTFOCUSED;
+
+	case Style::DropHighlighted:
+		return GMIS_DROPHILITED;
+	}
+
+	return GMIS_NONE;
+}
+
+Drawing::Color UIExtension::SelectionRect::GetColor(Style style)
+{
+	GM_ITEMSTATE state = Map(style);
+	COLORREF color = GraphicsMisc::GetExplorerItemSelectionBackColor(state, GMIB_THEMECLASSIC);
+
+	return ColorUtil::DrawingColor::ToColor(color);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
