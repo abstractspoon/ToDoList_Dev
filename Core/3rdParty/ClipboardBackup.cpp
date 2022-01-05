@@ -19,13 +19,12 @@ static char THIS_FILE[] = __FILE__;
 CClipboardBackup::CClipboardBackup(HWND hWnd) : m_hWnd(hWnd)
 {
 	ASSERT(hWnd && IsWindow(hWnd));
-
-	m_bFilled = FALSE;
 }
 
 CClipboardBackup::~CClipboardBackup()
 {
 	Restore();
+	Cleanup();
 }
 
 BOOL CClipboardBackup::AddData(LPCTSTR szData, UINT nFormat)
@@ -51,7 +50,7 @@ BOOL CClipboardBackup::AddData(LPCTSTR szData, UINT nFormat)
 			
 			// Place the handle on the clipboard.
 			m_lstData.AddTail(data);
-			bResult = m_bFilled = TRUE;
+			bResult = TRUE;
 		}
 	}
 	catch(...)
@@ -67,7 +66,7 @@ BOOL CClipboardBackup::AddData(LPCTSTR szData, UINT nFormat)
 
 BOOL CClipboardBackup::Backup()
 {
-	if (m_bFilled)
+	if (m_lstData.GetCount())
 		return FALSE;
 
 	if (!::OpenClipboard(NULL))
@@ -76,7 +75,7 @@ BOOL CClipboardBackup::Backup()
 	try
 	{
 		UINT format = 0;
-		while( (format = ::EnumClipboardFormats(format)) != 0)
+		while((format = ::EnumClipboardFormats(format)) != 0)
 		{
 			ClipboardData data;
 			data.m_nFormat = format;
@@ -84,7 +83,7 @@ BOOL CClipboardBackup::Backup()
 			// skip some formats
 			if (format == CF_BITMAP || format == CF_METAFILEPICT || format == CF_PALETTE || format == CF_OWNERDISPLAY ||
 				format == CF_DSPMETAFILEPICT || format == CF_DSPBITMAP ||
-				( format >= CF_PRIVATEFIRST && format <= CF_PRIVATELAST))
+				(format >= CF_PRIVATEFIRST && format <= CF_PRIVATELAST))
 			{
 				continue;
 			}
@@ -100,12 +99,12 @@ BOOL CClipboardBackup::Backup()
 			}
 
 			// get handle
-			HANDLE hMem = ::GetClipboardData( format);
+			HANDLE hMem = ::GetClipboardData(format);
 			if (hMem == NULL)
 				continue;
 
 			// copy handle
-			switch( format)
+			switch(format)
 			{
 			case CF_ENHMETAFILE:
 			case CF_DSPENHMETAFILE:
@@ -115,10 +114,10 @@ BOOL CClipboardBackup::Backup()
 			default:
 				{
 					int    size = ::GlobalSize(hMem);
-					LPVOID pMem = ::GlobalLock( hMem);
+					LPVOID pMem = ::GlobalLock(hMem);
 
-					data.m_hData   = ::GlobalAlloc( GMEM_MOVEABLE | GMEM_DDESHARE, size);
-					LPVOID pNewMem = ::GlobalLock( data.m_hData);
+					data.m_hData   = ::GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, size);
+					LPVOID pNewMem = ::GlobalLock(data.m_hData);
 
 					memcpy(pNewMem, pMem, size);
 
@@ -137,51 +136,63 @@ BOOL CClipboardBackup::Backup()
 
 	::CloseClipboard(); // always
 
-	m_bFilled = (m_lstData.GetCount() > 0);
-
 	return TRUE;
 }
 
 BOOL CClipboardBackup::Restore()
 {
-	if (!m_bFilled)
+	if (!m_lstData.GetCount())
 		return FALSE;
 
-	if (!::OpenClipboard(m_hWnd))
+	if (::OpenClipboard(m_hWnd))
 	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	try
-	{
-		VERIFY(::EmptyClipboard());
-
-		POSITION pos = m_lstData.GetHeadPosition();
-		while( pos != NULL)
+		try
 		{
-			ClipboardData & data = m_lstData.GetNext( pos);
+			VERIFY(::EmptyClipboard());
 
-			UINT format = data.m_nFormat;
+			POSITION pos = m_lstData.GetHeadPosition();
 
-			if (data.m_szFormatName[0] != 0)
+			while (pos != NULL)
 			{
-				UINT u = RegisterClipboardFormat( data.m_szFormatName);
-				if (u > 0) format = u;
+				ClipboardData & data = m_lstData.GetNext(pos);
+				UINT format = data.m_nFormat;
+
+				if (data.m_szFormatName[0] != 0)
+				{
+					UINT u = RegisterClipboardFormat(data.m_szFormatName);
+					if (u > 0) 
+						format = u;
+				}
+
+				if (::SetClipboardData(format, data.m_hData))
+				{
+					data.m_hData = NULL; // clipboard owns it now
+				}
 			}
 
-			VERIFY(::SetClipboardData( format, data.m_hData));
+			m_lstData.RemoveAll();
 		}
-	}
-	catch (...)
-	{
-		// do nothing
-	}
+		catch (...)
+		{
+		}
 
-	VERIFY(::CloseClipboard()); // always
+		VERIFY(::CloseClipboard()); // always
+	}
+	
+	return !m_lstData.GetCount();
+}
+
+void CClipboardBackup::Cleanup()
+{
+	POSITION pos = m_lstData.GetHeadPosition();
+
+	while (pos != NULL)
+	{
+		ClipboardData & data = m_lstData.GetNext(pos);
+
+		if (data.m_hData)
+			::GlobalFree(data.m_hData);
+	}
 
 	m_lstData.RemoveAll();
-	m_bFilled = FALSE;
-
-	return TRUE;
 }

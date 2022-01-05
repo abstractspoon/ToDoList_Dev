@@ -57,7 +57,6 @@ public:
 	~CClipboardBackup();
 
 private:
-	BOOL m_bFilled;
 	HWND m_hWnd;
 	
 	struct ClipboardData
@@ -68,6 +67,9 @@ private:
 	};
 
 	CList <ClipboardData, ClipboardData&> m_lstData;
+
+private:
+	void Cleanup();
 };
 
 #endif // !defined(AFX_CLIPBOARDBACKUP_H__B2363083_E96C_4F7E_8D2D_39A0C3A7046C__INCLUDED_)
