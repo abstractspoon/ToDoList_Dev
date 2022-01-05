@@ -1626,7 +1626,7 @@ namespace unvell.ReoGrid.Editor
 			this.fontToolStripComboBox.FlatStyle = System.Windows.Forms.FlatStyle.System;
 			this.fontToolStripComboBox.IntegralHeight = false;
 			this.fontToolStripComboBox.Name = "fontToolStripComboBox";
-			this.fontToolStripComboBox.Size = new System.Drawing.Size(160, 23);
+			this.fontToolStripComboBox.Size = new System.Drawing.Size(160, 25);
 			this.fontToolStripComboBox.Text = "Segoe UI";
 			this.fontToolStripComboBox.ToolTipText = "Change font";
 			this.fontToolStripComboBox.SelectedIndexChanged += new System.EventHandler(this.fontToolStripComboBox_SelectedIndexChanged);

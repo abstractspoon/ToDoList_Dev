@@ -111,7 +111,8 @@ namespace SpreadsheetContentControl
 
 		public bool SetTextContent(String content, bool resetSelection)
 		{
-			// Insert content into 'A:1'
+			// Clear and then Insert content into 'A:1'
+			GridControl.CurrentWorksheet.Reset();
 			GridControl.CurrentWorksheet.PasteFromString(new CellPosition(0, 0), content);
 
 			return true;
@@ -309,6 +310,34 @@ namespace SpreadsheetContentControl
 
 		private void InitialiseFeatures()
 		{
+			// Add Import/Export commands to File menu
+			var fileMenu = (this.MenuBar.Items[0] as ToolStripMenuItem);
+
+			if (fileMenu != null)
+			{
+				int insertAt = fileMenu.DropDownItems.IndexOfKey("openToolStripMenuItem");
+
+				fileMenu.DropDownItems.Insert(insertAt, new ToolStripSeparator());
+				
+				// Import
+				var menuItem = new ToolStripMenuItem();
+
+				menuItem.Name = "importToolStripMenuItem";
+				menuItem.Text = "&Import...";
+				menuItem.Click += (s, e) => OpenDocument();
+
+				fileMenu.DropDownItems.Insert(++insertAt, menuItem);
+
+				// Export
+				menuItem = new ToolStripMenuItem();
+
+				menuItem.Name = "exportToolStripMenuItem";
+				menuItem.Text = "&Export...";
+				menuItem.Click += (s, e) => SaveAsDocument();
+
+				fileMenu.DropDownItems.Insert(++insertAt, menuItem);
+			}
+
 			// Hide unwanted menubar options
 			CommandHandling.RemoveCommand("scriptToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("toolsToolStripMenuItem", this.MenuBar.Items);
@@ -324,11 +353,14 @@ namespace SpreadsheetContentControl
 			CommandHandling.RemoveCommand("exportAsHtmlToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("editXMLToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("exportAsCSVToolStripMenuItem", this.MenuBar.Items);
+
+			CommandHandling.RemoveCommand("openToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("saveToolStripMenuItem", this.MenuBar.Items);
+			CommandHandling.RemoveCommand("saveAsToolStripMenuItem", this.MenuBar.Items);
 
 			CommandHandling.RemoveCommand("focusCellStyleToolStripMenuItem", this.MenuBar.Items);
 			CommandHandling.RemoveCommand("selectionToolStripMenuItem", this.MenuBar.Items);
-
+			
 			// Remove keyboard shortcuts which conflict with the main app
 			CommandHandling.SetMenuItemShortcut("mergeCellsToolStripMenuItem", this.MenuBar.Items, Keys.None);
 			CommandHandling.SetMenuItemShortcut("unmergeCellsToolStripMenuItem", this.MenuBar.Items, Keys.None);
@@ -336,14 +368,14 @@ namespace SpreadsheetContentControl
 
 			// Hide unwanted toolbar options
 			CommandHandling.RemoveCommand("printPreviewToolStripButton", this.ToolBar.Items);
+			CommandHandling.RemoveCommand("loadToolStripButton", this.ToolBar.Items);
+			CommandHandling.RemoveCommand("newToolStripButton", this.ToolBar.Items);
 			CommandHandling.RemoveCommand("saveToolStripButton", this.ToolBar.Items);
 			CommandHandling.RemoveCommand("showDebugFormToolStripButton", this.ToolBar.Items);
 			CommandHandling.RemoveCommand("slashLeftSolidToolStripButton", this.ToolBar.Items);
 			CommandHandling.RemoveCommand("slashRightSolidToolStripButton", this.ToolBar.Items);
 
 			CommandHandling.RemoveCommand("zoomToolStripDropDownButton", this.FontBar.Items);
-
-
 		}
 
 		public void SetUITheme(UITheme theme)

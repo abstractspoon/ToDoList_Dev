@@ -1718,7 +1718,7 @@ namespace unvell.ReoGrid.Editor
 			NewFile();
 		}
 
-		private void loadToolStripButton_Click(object sender, EventArgs e)
+		public void OpenDocument()
 		{
 			using (OpenFileDialog ofd = new OpenFileDialog())
 			{
@@ -1730,6 +1730,11 @@ namespace unvell.ReoGrid.Editor
 					this.SetCurrentDocumentFile(ofd.FileName);
 				}
 			}
+		}
+
+		private void loadToolStripButton_Click(object sender, EventArgs e)
+		{
+			OpenDocument();
 		}
 
 		/// <summary>
