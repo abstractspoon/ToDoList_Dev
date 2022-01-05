@@ -566,6 +566,8 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 	default:
 		ASSERT(0);
 	}
+
+	RefreshColumnHeaderText();
 }
 
 BOOL CKanbanCtrl::UpdateNeedsItemHeightRefresh(const ITASKLISTBASE* pTasks) const
@@ -1933,9 +1935,14 @@ void CKanbanCtrl::RebuildColumnHeader()
 		}
 	}
 
-	int nNumColumns = m_aColumns.GetSize();
+	RefreshColumnHeaderText();
+}
 
-	for (int nCol = 0, nVis = 0; nCol < nNumColumns; nCol++)
+void CKanbanCtrl::RefreshColumnHeaderText()
+{
+	int nNumColumns = m_aColumns.GetSize(), nVis = 0;
+
+	for (int nCol = 0; nCol < nNumColumns; nCol++)
 	{
 		const CKanbanColumnCtrl* pCol = m_aColumns[nCol];
 
@@ -1952,12 +1959,14 @@ void CKanbanCtrl::RebuildColumnHeader()
 
 		m_header.SetItemText(nVis, sFormat);
 		m_header.SetItemData(nVis, (DWORD)pCol);
-
-		// Allow tracking on all but the last column
-		m_header.EnableItemTracking(nVis, (nVis < (nNumVisColumns - 1)));
+		m_header.EnableItemTracking(nVis, TRUE);
 
 		nVis++;
 	}
+	ASSERT(nVis == m_header.GetItemCount());
+
+	// Prevent tracking on the last visible column
+	m_header.EnableItemTracking(nVis - 1, FALSE);
 }
 
 void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, BOOL bResort)
@@ -3229,6 +3238,7 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 				if (bChange)
 				{
 					HideEmptyColumns(nPrevNumCols);
+					RefreshColumnHeaderText();
 					Resize();
 
 					// Resort before fixing up selection
