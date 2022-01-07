@@ -128,10 +128,10 @@ namespace PertNetworkUIExtension
 		private Translator Trans;
 		private UIExtension.TaskIcon TaskIcons;
 
-		private bool m_ShowParentAsFolder;
-		private bool m_TaskColorIsBkgnd;
-		private bool m_StrikeThruDone;
-		private bool m_ShowCompletionCheckboxes;
+		private bool m_ShowParentAsFolder = false;
+		private bool m_TaskColorIsBkgnd = false;
+		private bool m_StrikeThruDone = true;
+		private bool m_ShowCompletionCheckboxes = true;
 		private PertNetworkOption m_Options;
 
 		private Timer EditTimer;
@@ -141,19 +141,11 @@ namespace PertNetworkUIExtension
 
 		// -------------------------------------------------------------------------
 
-		protected override int LabelPadding { get { return ScaleByDPIFactor(2); } }
-
-		// -------------------------------------------------------------------------
-
 		public PertNetworkControl(Translator trans, UIExtension.TaskIcon icons)
 		{
 			Trans = trans;
 			TaskIcons = icons;
-
-			m_TaskColorIsBkgnd = false;
-			m_ShowParentAsFolder = false;
-			m_ShowCompletionCheckboxes = true;
-			m_StrikeThruDone = true;
+			LabelPadding = ScaleByDPIFactor(2);
 
 			EditTimer = new Timer();
 			EditTimer.Interval = 500;
@@ -162,17 +154,22 @@ namespace PertNetworkUIExtension
 			// 			using (Graphics graphics = Graphics.FromHwnd(Handle))
 			// 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 
-			ZoomChange += new ZoomChangeEventHandler(OnZoomChanged);
+			FontChanged += new EventHandler(OnFontChanged);
+
+			// Initialise our fonts
+			OnFontChanged(this, EventArgs.Empty);
 		}
 
-		protected void OnZoomChanged(object sender)
+		protected void OnFontChanged(object sender, EventArgs e)
 		{
-			BoldLabelFont = new Font(ZoomedFont.Name, ZoomedFont.Size, FontStyle.Bold);
+			var newFont = Font;
+
+			BoldLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Bold);
 
 			if (m_StrikeThruDone)
 			{
-				BoldDoneLabelFont = new Font(ZoomedFont.Name, ZoomedFont.Size, FontStyle.Bold | FontStyle.Strikeout);
-				DoneLabelFont = new Font(ZoomedFont.Name, ZoomedFont.Size, FontStyle.Strikeout);
+				BoldDoneLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Bold | FontStyle.Strikeout);
+				DoneLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Strikeout);
 			}
 			else
 			{
@@ -183,21 +180,11 @@ namespace PertNetworkUIExtension
 
 		public void SetStrikeThruDone(bool strikeThruDone)
 		{
-			m_StrikeThruDone = strikeThruDone;
-
-			if (BoldLabelFont != null)
-				SetFont(BoldLabelFont.Name, (int)BoldLabelFont.Size, m_StrikeThruDone);
-		}
-
-		public new void SetFont(String fontName, int fontSize)
-		{
-			SetFont(fontName, fontSize, m_StrikeThruDone);
-		}
-
-		protected void SetFont(String fontName, int fontSize, bool strikeThruDone)
-		{
-			if (base.SetFont(fontName, fontSize))
-				OnZoomChanged(this);
+			if (m_StrikeThruDone != strikeThruDone)
+			{
+				m_StrikeThruDone = strikeThruDone;
+				OnFontChanged(EventArgs.Empty);
+			}
 		}
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -336,7 +323,7 @@ namespace PertNetworkUIExtension
 			// 			labelRect.X += GetExtraWidth(SelectedNode);
 			// 
 			// Make sure the rect is big enough for the unscaled font
-			labelRect.Height = (this.Font.Height + (2 * LabelPadding)); 
+			labelRect.Height = (Font.Height + (2 * LabelPadding)); 
 
 			return labelRect;
 		}
@@ -606,9 +593,9 @@ namespace PertNetworkUIExtension
 			if (selected)
 				return Color.Empty;
 
-			if (taskItem.TextColor != Color.Empty)
+			if ((taskItem.TextColor != Color.Empty) && !taskItem.IsDone(true))
 			{
-				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
+				if (m_TaskColorIsBkgnd && !selected)
 					return taskItem.TextColor;
 
 				// else
@@ -686,7 +673,7 @@ namespace PertNetworkUIExtension
 				font = DoneLabelFont;
 			}
 			
-			return (font == null) ? this.ZoomedFont : font;
+			return (font == null) ? Font : font;
 		}
 
 		protected void DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect)
@@ -721,7 +708,7 @@ namespace PertNetworkUIExtension
 			{
 				UIExtension.SelectionRect.Style style = (Focused ? UIExtension.SelectionRect.Style.Selected : UIExtension.SelectionRect.Style.SelectedNotFocused);
 
-				UIExtension.SelectionRect.Draw(this.Handle,
+				UIExtension.SelectionRect.Draw(Handle,
 												graphics,
 												itemRect.X,
 												itemRect.Y,
@@ -892,7 +879,7 @@ namespace PertNetworkUIExtension
 			Point arrow = points[2];
 			arrow.X--;
 
-			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, ZoomedFont, false);
+			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
 
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);

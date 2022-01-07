@@ -24,7 +24,7 @@ namespace PertNetworkUIExtension
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
-        private System.Drawing.Font m_ControlsFont;
+        //private System.Drawing.Font m_ControlsFont;
 
         private PertNetworkControl m_PertNetwork;
 
@@ -207,11 +207,11 @@ namespace PertNetworkUIExtension
         private void InitializeComponent()
         {
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
-            m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
+            //m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
 			m_PertNetwork = new PertNetworkControl(m_Trans, m_TaskIcons);
 			m_PertNetwork.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            m_PertNetwork.Font = m_ControlsFont;
+            m_PertNetwork.SetFont(FontName, 8);
 
             if (VisualStyleRenderer.IsSupported)
                 m_PertNetwork.BorderStyle = BorderStyle.FixedSingle;

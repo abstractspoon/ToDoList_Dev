@@ -16,7 +16,6 @@ namespace PertNetworkUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, NetworkItem item);
 	public delegate bool DragDropChangeEventHandler(object sender, NetworkDragEventArgs e);
-	public delegate void ZoomChangeEventHandler(object sender);
 
 	[System.ComponentModel.DesignerCategory("")]
 
@@ -78,40 +77,38 @@ namespace PertNetworkUIExtension
 		private Timer DragTimer;
 		private int LastDragTick = 0;
 
+		// Font setting must go thru SetFont
+		public new Font Font
+		{
+			get { return base.Font; }
+			private set { base.Font = value; }
+		}
+		private Font BaseFont;
+
 		private bool IsSavingToImage = false;
 		private uint SelectedItemId = 0;
 
-		// #if DEBUG
-		// 		private int RecalcDuration;
-		// #endif
+		protected int LabelPadding = 2;
 
-		virtual protected int ItemHeight { get { return ((ZoomedFont.Height + LabelPadding) * 4); } }
-		virtual protected int LabelPadding { get { return 2; } }
-
+		protected int ItemHeight { get { return ((Font.Height + LabelPadding) * 4); } }
 		protected int ItemWidth { get { return (ItemHeight* 3); } }
 		protected int ItemVertSpacing { get { return (ItemHeight / 4); } }
 		protected int ItemHorzSpacing { get { return (ItemWidth / 4); } }
 		protected int GraphBorder { get { return ItemVertSpacing; } }
-		protected Font ZoomedFont { get; private set; }
 
-		public NetworkData Data
-		{
-			get; private set;
-		}
+		public NetworkData Data { get; private set; }
 
 		// Public ------------------------------------------------------------------------
 
 		public event SelectionChangeEventHandler SelectionChange;
 		public event DragDropChangeEventHandler DragDropChange;
-		public event ZoomChangeEventHandler ZoomChange;
 
 		public NetworkControl()
         {
 			DropSite = DropPos.None;
 			ConnectionColor = Color.Magenta;
-
 			Data = new NetworkData();
-			ZoomedFont = this.Font;
+			BaseFont = Font;
 
 			InitializeComponent();
 		}
@@ -121,14 +118,19 @@ namespace PertNetworkUIExtension
 			RecalculateItemSize(Data.RebuildGroups());
 		}
 
+		public void RecalculateItemSize()
+		{
+			RecalculateItemSize(Data.Items.CalcMaximumPosition());
+		}
+
 		public void RecalculateItemSize(Point maxPos)
 		{
-			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y);
+			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y, false);
 
-			this.AutoScrollMinSize = new Size(maxItemRect.Right + GraphBorder, maxItemRect.Bottom + GraphBorder);
+			AutoScrollMinSize = new Size(maxItemRect.Right + GraphBorder, maxItemRect.Bottom + GraphBorder);
 
-			this.HorizontalScroll.SmallChange = ItemHeight;
-			this.VerticalScroll.SmallChange = ItemWidth;
+			HorizontalScroll.SmallChange = ItemHeight;
+			VerticalScroll.SmallChange = ItemWidth;
 
 			Invalidate();
 		}
@@ -223,11 +225,11 @@ namespace PertNetworkUIExtension
 			if (selected)
 			{
 				graphics.FillRectangle(SystemBrushes.Highlight, itemRect);
-				graphics.DrawString(itemText, this.ZoomedFont, SystemBrushes.HighlightText, itemRect);
+				graphics.DrawString(itemText, Font, SystemBrushes.HighlightText, itemRect);
 			}
 			else
 			{
-				graphics.DrawString(itemText, this.ZoomedFont, Brushes.Blue, itemRect);
+				graphics.DrawString(itemText, Font, Brushes.Blue, itemRect);
 			}
 		}
 
@@ -243,12 +245,12 @@ namespace PertNetworkUIExtension
 								(toRect.Top + (toRect.Height / 2)));
 		}
 
-		virtual protected Rectangle CalcItemRectangle(NetworkItem item)
+		protected Rectangle CalcItemRectangle(NetworkItem item)
 		{
-			return CalcItemRectangle(item.Position.X, item.Position.Y);
+			return CalcItemRectangle(item.Position.X, item.Position.Y, true);
 		}
 
-		virtual protected Rectangle CalcItemRectangle(int x, int y)
+		private Rectangle CalcItemRectangle(int x, int y, bool scrolled)
 		{
 			Rectangle itemRect = new Rectangle(GraphBorder, GraphBorder, 0, 0);
 
@@ -259,21 +261,24 @@ namespace PertNetworkUIExtension
 			itemRect.Height = ItemHeight;
 
 			// Offset rect by scroll pos
-			itemRect.Offset(-this.HorizontalScroll.Value, -this.VerticalScroll.Value);
+			if (scrolled)
+				itemRect.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
 
 			return itemRect;
 		}
+
+
 		
 		public bool SetFont(String fontName, int fontSize)
         {
-            if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
+            if ((BaseFont.Name == fontName) && (BaseFont.Size == fontSize))
                 return false;
 
-            this.Font = new Font(fontName, fontSize, FontStyle.Regular);
-
 			ZoomFactor = 1.0f;
-			ZoomedFont = this.Font;
+			BaseFont = new Font(fontName, fontSize, FontStyle.Regular);
+			Font = BaseFont;
 
+			RecalculateItemSize();
 			return true;
         }
 
@@ -425,9 +430,13 @@ namespace PertNetworkUIExtension
 					float relY = ((e.Location.Y + VerticalScroll.Value) / (float)VerticalScroll.Maximum);
 
 					ZoomFactor = newFactor;
-					ZoomedFont = ScaledFont(this.Font);
 
-					RecalculateItemSize(Data.Items.CalcMaximumPosition());
+					if (ZoomFactor == 1.0)
+						Font = BaseFont;
+					else
+						Font = new Font(BaseFont.FontFamily, BaseFont.Size * ZoomFactor, BaseFont.Style);
+
+					RecalculateItemSize();
 
 					// Scroll the view to keep the mouse located in the 
 					// same relative position as before
@@ -446,8 +455,6 @@ namespace PertNetworkUIExtension
 					}
 
 					PerformLayout();
-
-					ZoomChange?.Invoke(this);
 				}
 			}
 			else
@@ -553,17 +560,6 @@ namespace PertNetworkUIExtension
 			base.OnLostFocus(e);
 
 			Invalidate(GetSelectedItemRect());
-		}
-
-		protected override void OnFontChanged(EventArgs e)
-		{
-			base.OnFontChanged(e);
-			
-			// Always reset the logical zoom else we've no way of 
-			// accurately calculating the actual zoom
-			ZoomFactor = 1f;
-
-			//UpdateTreeFont(true);
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -849,15 +845,6 @@ namespace PertNetworkUIExtension
 			{
 				return Data.GetItem(SelectedItemId);
 			}
-		}
-
-		protected Font ScaledFont(Font font)
-		{
-			if ((font != null) && (ZoomFactor < 1.0))
-				return new Font(font.FontFamily, font.Size * ZoomFactor, font.Style);
-
-			// else
-			return font;
 		}
 
         protected NetworkItem HitTestPositions(Point point)
