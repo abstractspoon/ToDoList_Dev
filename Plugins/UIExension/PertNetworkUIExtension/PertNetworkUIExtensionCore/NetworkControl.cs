@@ -310,73 +310,57 @@ namespace PertNetworkUIExtension
         public Bitmap SaveToImage()
         {
 			// Cache state
-			/*
-						Point scrollPos = new Point(HorizontalScroll.Value, VerticalScroll.Value);
-						Point drawOffset = new Point(DrawOffset.X, DrawOffset.Y);
+			Point scrollPos = new Point(HorizontalScroll.Value, VerticalScroll.Value);
 
-						// And reset
-						IsSavingToImage = true;
-						DrawOffset = new Point(0, 0);
+			// And reset
+			IsSavingToImage = true;
 
-						HorizontalScroll.Value = 0;
-						VerticalScroll.Value = 0;
+			HorizontalScroll.Value = 0;
+			VerticalScroll.Value = 0;
 
-						if (!scrollPos.IsEmpty)
-							PerformLayout();
+			if (!scrollPos.IsEmpty)
+				PerformLayout();
 
-						int border = BorderWidth;
+			// Total size of the graph
+			Rectangle graphRect = new Rectangle(new Point(0, 0), AutoScrollMinSize);
+			Rectangle drawRect = ClientRectangle; ;
 
-						// Total size of the graph
-						Rectangle graphRect = Rectangle.Inflate(RootItem.TotalBounds, GraphPadding, GraphPadding);
+			// The output image
+			Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
 
-						// The portion of the client rect we are interested in 
-						// (excluding the top and left borders)
-						Rectangle srcRect = Rectangle.FromLTRB(border, 
-															   border, 
-															   ClientRectangle.Width - border, 
-															   ClientRectangle.Height - border);
+			// The temporary image allowing us to clip out the top and left borders
+			Bitmap srcImage = new Bitmap(drawRect.Width, drawRect.Height, PixelFormat.Format32bppRgb);
 
-						// The output image
-						Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
+			// The current position in the output image for rendering the temporary image
 
-						// The temporary image allowing us to clip out the top and left borders
-						Bitmap srcImage = new Bitmap(ClientRectangle.Width, ClientRectangle.Height, PixelFormat.Format32bppRgb);
+			// Note: If the last horz or vert page is empty because of an 
+			// exact division then it will get handled within the loop
+			int numHorzPages = ((graphRect.Width / drawRect.Width) + 1);
+			int numVertPages = ((graphRect.Height / drawRect.Height) + 1);
 
-						// The current position in the output image for rendering the temporary image
-						Rectangle drawRect = srcRect;
-						drawRect.Offset(-border, -border);
+			using (Graphics graphics = Graphics.FromImage(finalImage))
+			{
+				for (int vertPage = 0; vertPage < numVertPages; vertPage++)
+				{
+					for (int horzPage = 0; horzPage < numHorzPages; horzPage++)
+					{
+						// TODO
+					}
 
-						// Note: If the last horz or vert page is empty because of an 
-						// exact division then it will get handled within the loop
-						int numHorzPages = ((graphRect.Width / drawRect.Width) + 1);
-						int numVertPages = ((graphRect.Height / drawRect.Height) + 1);
+					// TODO
+				}
+			}
 
-						using (Graphics graphics = Graphics.FromImage(finalImage))
-						{
-							for (int vertPage = 0; vertPage < numVertPages; vertPage++)
-							{
-								for (int horzPage = 0; horzPage < numHorzPages; horzPage++)
-								{
-									// TODO
-								}
+			// Restore state
+			IsSavingToImage = false;
 
-								// TODO
-							}
-						}
+			HorizontalScroll.Value = scrollPos.X;
+			VerticalScroll.Value = scrollPos.Y;
 
-						// Restore state
-						IsSavingToImage = false;
-						DrawOffset = drawOffset;
+			if (!scrollPos.IsEmpty)
+				PerformLayout();
 
-						HorizontalScroll.Value = scrollPos.X;
-						VerticalScroll.Value = scrollPos.Y;
-
-						if (!scrollPos.IsEmpty)
-							PerformLayout();
-
-						return finalImage;
-			*/
-			return null;
+			return finalImage;
         }
 
 		// Message Handlers -----------------------------------------------------------
@@ -836,7 +820,7 @@ namespace PertNetworkUIExtension
 
 		protected bool IsEmpty()
 		{
-			return true;
+			return (Data.Items.Count == 0);
 		}
 
 		protected NetworkItem SelectedItem
