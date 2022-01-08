@@ -104,7 +104,7 @@ namespace PertNetworkUIExtension
 		public event DragDropChangeEventHandler DragDropChange;
 
 		public NetworkControl()
-        {
+		{
 			DropSite = DropPos.None;
 			ConnectionColor = Color.Magenta;
 			Data = new NetworkData();
@@ -278,9 +278,9 @@ namespace PertNetworkUIExtension
 		}
 				
 		public bool SetFont(String fontName, int fontSize)
-        {
-            if ((BaseFont.Name == fontName) && (BaseFont.Size == fontSize))
-                return false;
+		{
+			if ((BaseFont.Name == fontName) && (BaseFont.Size == fontSize))
+				return false;
 
 			ZoomFactor = 1.0f;
 			BaseFont = new Font(fontName, fontSize, FontStyle.Regular);
@@ -288,25 +288,25 @@ namespace PertNetworkUIExtension
 
 			RecalculateItemSize();
 			return true;
-        }
+		}
 
 		public Color ConnectionColor;
 		public bool ReadOnly;
 
-        public bool SetSelectedItem(uint uniqueID)
-        {
-            var item = Data.GetItem(uniqueID);
+		public bool SetSelectedItem(uint uniqueID)
+		{
+			var item = Data.GetItem(uniqueID);
 
 			if (item == null)
 				return false;
 
-            SelectedItemId = uniqueID;
+			SelectedItemId = uniqueID;
 
 			EnsureItemVisible(item);
 			Invalidate();
 
-            return true;
-        }
+			return true;
+		}
 
 		public Rectangle GetSelectedItemRect()
 		{
@@ -315,8 +315,8 @@ namespace PertNetworkUIExtension
 			return ((selItem == null) ? new Rectangle(0, 0, 0, 0) : CalcItemRectangle(selItem));
 		}
 
-        public Bitmap SaveToImage()
-        {
+		public Bitmap SaveToImage()
+		{
 			IsSavingToImage = true;
 
 			// Total size of the graph
@@ -338,12 +338,12 @@ namespace PertNetworkUIExtension
 		// Message Handlers -----------------------------------------------------------
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
-        {
+		{
 			// TODO
-        }
+		}
 
-        protected override void OnMouseDown(MouseEventArgs e)
-        {
+		protected override void OnMouseDown(MouseEventArgs e)
+		{
 			base.OnMouseDown(e);
 
 			if (e.Button != MouseButtons.Left)
@@ -431,7 +431,7 @@ namespace PertNetworkUIExtension
 
 			if ((e.Button == MouseButtons.Left) && DragTimer.Enabled)
 			{
-                Debug.Assert(!ReadOnly);
+				Debug.Assert(!ReadOnly);
 
 				if (CheckStartDragging(e.Location))
 					DragTimer.Stop();
@@ -452,7 +452,7 @@ namespace PertNetworkUIExtension
 
 		protected void OnDragTimer(object sender, EventArgs e)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
 			DragTimer.Stop();
 
@@ -464,23 +464,23 @@ namespace PertNetworkUIExtension
 	
 		protected override void OnDragOver(DragEventArgs e)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
 			// TODO
 		}
 
 		protected override void OnDragDrop(DragEventArgs e)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
 			// TODO
 		}
 
 		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
-            base.OnQueryContinueDrag(e);
+			base.OnQueryContinueDrag(e);
 
 			if (e.EscapePressed)
 			{
@@ -490,9 +490,9 @@ namespace PertNetworkUIExtension
 
 		protected override void OnDragLeave(EventArgs e)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
-            base.OnDragLeave(e);
+			base.OnDragLeave(e);
 
 			// TODO
 
@@ -535,7 +535,7 @@ namespace PertNetworkUIExtension
 
 		private bool CheckStartDragging(Point cursor)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
 			// TODO
 
@@ -544,16 +544,16 @@ namespace PertNetworkUIExtension
 		
 		virtual protected bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
-            return true;
+			return true;
 		}
 
 		virtual protected bool IsAcceptableDragSource(Object itemData)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
-            return (itemData != null);
+			return (itemData != null);
 		}
 
 		private Rectangle GetDoubleClickRect(Point cursor)
@@ -566,9 +566,9 @@ namespace PertNetworkUIExtension
 
 		private Rectangle GetDragRect(Point cursor)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
-            var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
+			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
 			rect.Inflate(GetSystemMetrics(SM_CXDRAG) / 2, GetSystemMetrics(SM_CYDRAG) / 2);
 
 			return rect;
@@ -576,16 +576,16 @@ namespace PertNetworkUIExtension
 
 		private void DoDrop(/* TODO */)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
 			// TODO
 		}
 
 		virtual protected bool DoDrop(NetworkDragEventArgs e)
 		{
-            Debug.Assert(!ReadOnly);
+			Debug.Assert(!ReadOnly);
 
-            if (DragDropChange != null)
+			if (DragDropChange != null)
 				return DragDropChange(this, e);
 
 			// else
@@ -593,58 +593,58 @@ namespace PertNetworkUIExtension
 		}
 
 		protected void EnsureItemVisible(NetworkItem item)
-        {
-            if (item == null)
-                return;
+		{
+			if (item == null)
+				return;
 
-            Rectangle itemRect = CalcItemRectangle(item);
+			Rectangle itemRect = CalcItemRectangle(item);
 
-            if (ClientRectangle.Contains(itemRect))
-                return;
+			if (ClientRectangle.Contains(itemRect))
+				return;
 
-            if (HorizontalScroll.Visible)
-            {
-                int xOffset = 0;
+			if (HorizontalScroll.Visible)
+			{
+				int xOffset = 0;
 
-                if (itemRect.Left < ClientRectangle.Left)
-                {
-                    xOffset = (itemRect.Left - ClientRectangle.Left - (ItemHorzSpacing / 2));
-                }
-                else if (itemRect.Right > ClientRectangle.Right)
-                {
-                    xOffset = (itemRect.Right - ClientRectangle.Right + (ItemHorzSpacing / 2));
-                }
+				if (itemRect.Left < ClientRectangle.Left)
+				{
+					xOffset = (itemRect.Left - ClientRectangle.Left - (ItemHorzSpacing / 2));
+				}
+				else if (itemRect.Right > ClientRectangle.Right)
+				{
+					xOffset = (itemRect.Right - ClientRectangle.Right + (ItemHorzSpacing / 2));
+				}
 
-                if (xOffset != 0)
-                {
-                    int scrollX = (HorizontalScroll.Value + xOffset);
+				if (xOffset != 0)
+				{
+					int scrollX = (HorizontalScroll.Value + xOffset);
 					HorizontalScroll.Value = Validate(scrollX, HorizontalScroll);
-                }
-            }
+				}
+			}
 
-            if (VerticalScroll.Visible)
-            {
-                int yOffset = 0;
+			if (VerticalScroll.Visible)
+			{
+				int yOffset = 0;
 
-                if (itemRect.Top < ClientRectangle.Top)
-                {
-                    yOffset = (itemRect.Top - ClientRectangle.Top - (ItemVertSpacing / 2));
-                }
-                else if (itemRect.Bottom > ClientRectangle.Bottom)
-                {
-                    yOffset = (itemRect.Bottom - ClientRectangle.Bottom + (ItemVertSpacing / 2));
-                }
+				if (itemRect.Top < ClientRectangle.Top)
+				{
+					yOffset = (itemRect.Top - ClientRectangle.Top - (ItemVertSpacing / 2));
+				}
+				else if (itemRect.Bottom > ClientRectangle.Bottom)
+				{
+					yOffset = (itemRect.Bottom - ClientRectangle.Bottom + (ItemVertSpacing / 2));
+				}
 
-                if (yOffset != 0)
-                {
-                    int scrollY = (VerticalScroll.Value + yOffset);
-                    VerticalScroll.Value = Validate(scrollY, VerticalScroll);
-                }
-            }
+				if (yOffset != 0)
+				{
+					int scrollY = (VerticalScroll.Value + yOffset);
+					VerticalScroll.Value = Validate(scrollY, VerticalScroll);
+				}
+			}
 
 			PerformLayout();
-            Invalidate();
-        }
+			Invalidate();
+		}
 
 		protected void EnableSelectionNotifications(bool enable)
 		{
@@ -803,13 +803,13 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-        protected NetworkItem HitTestPositions(Point point)
-        {
-            // TODO
+		protected NetworkItem HitTestPositions(Point point)
+		{
+			// TODO
 
-            return null;
-        }
+			return null;
+		}
 
-    }
+	}
 
 }
