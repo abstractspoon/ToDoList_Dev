@@ -323,7 +323,7 @@ namespace PertNetworkUIExtension
 			// 			labelRect.X += GetExtraWidth(SelectedNode);
 			// 
 			// Make sure the rect is big enough for the unscaled font
-			labelRect.Height = (Font.Height + (2 * LabelPadding)); 
+			labelRect.Height = (BaseFont.Height + (2 * LabelPadding)); 
 
 			return labelRect;
 		}
@@ -908,11 +908,6 @@ namespace PertNetworkUIExtension
 			int height = width;
 
             return new Rectangle(topLeft.X, topLeft.Y, width, height);
-		}
-
-		protected override int GetMinItemHeight()
-		{
-            return (ScaleByDPIFactor(16) + 1);
 		}
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)

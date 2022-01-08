@@ -83,7 +83,7 @@ namespace PertNetworkUIExtension
 			get { return base.Font; }
 			private set { base.Font = value; }
 		}
-		private Font BaseFont;
+		protected Font BaseFont { get; private set; }
 
 		private bool IsSavingToImage = false;
 		private uint SelectedItemId = 0;
@@ -783,11 +783,6 @@ namespace PertNetworkUIExtension
 			}
 
 			return false;
-		}
-
-		protected virtual int GetMinItemHeight()
-		{
-			return 10;
 		}
 
 		protected bool IsEmpty()
