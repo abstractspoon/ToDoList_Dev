@@ -152,8 +152,13 @@ namespace PertNetworkUIExtension
 			// else
 			return null;
 		}
-		
+
 		protected override void OnPaint(PaintEventArgs e)
+		{
+			DoPaint(e.Graphics, e.ClipRectangle);
+		}
+
+		void DoPaint(Graphics graphics, Rectangle clipRect)
 		{
 			int iGroup = 0;
 			var drawnItems = new HashSet<NetworkItem>();
@@ -164,9 +169,9 @@ namespace PertNetworkUIExtension
 				{
 					if (!drawnItems.Contains(item))
 					{
-						if (WantDrawItem(e, item))
+						if (WantDrawItem(item, clipRect))
 						{
-							OnPaintItem(e.Graphics, item, iGroup, (item.UniqueId == SelectedItemId));
+							OnPaintItem(graphics, item, iGroup, (!IsSavingToImage && (item.UniqueId == SelectedItemId)));
 						}
 						else
 						{
@@ -177,14 +182,14 @@ namespace PertNetworkUIExtension
 
 						foreach (var dependItem in dependencies)
 						{
-							if (WantDrawConnection(e, dependItem, item))
+							if (WantDrawConnection(dependItem, item, clipRect))
 							{
-								var smoothing = e.Graphics.SmoothingMode;
-								e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+								var smoothing = graphics.SmoothingMode;
+								graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-								OnPaintConnection(e.Graphics, dependItem, item);
+								OnPaintConnection(graphics, dependItem, item);
 
-								e.Graphics.SmoothingMode = smoothing;
+								graphics.SmoothingMode = smoothing;
 							}
 							else
 							{
@@ -198,21 +203,26 @@ namespace PertNetworkUIExtension
 
 				iGroup++;
 			}
+
 		}
 
-		bool WantDrawItem(PaintEventArgs e, NetworkItem item)
+		bool WantDrawItem(NetworkItem item, Rectangle clipRect)
 		{
-			var itemRect = CalcItemRectangle(item);
+			if (IsSavingToImage)
+				return true;
 
-			return e.ClipRectangle.IntersectsWith(itemRect);
+			return clipRect.IntersectsWith(CalcItemRectangle(item));
 		}
 
-		bool WantDrawConnection(PaintEventArgs e, NetworkItem fromItem, NetworkItem toItem)
+		bool WantDrawConnection(NetworkItem fromItem, NetworkItem toItem, Rectangle clipRect)
 		{
+			if (IsSavingToImage)
+				return true;
+
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
 
-			return e.ClipRectangle.IntersectsWith(Rectangle.Union(fromRect, toRect));
+			return clipRect.IntersectsWith(Rectangle.Union(fromRect, toRect));
 		}
 
 		virtual protected void OnPaintItem(Graphics graphics, NetworkItem item, int iGroup, bool selected)
@@ -247,7 +257,7 @@ namespace PertNetworkUIExtension
 
 		protected Rectangle CalcItemRectangle(NetworkItem item)
 		{
-			return CalcItemRectangle(item.Position.X, item.Position.Y, true);
+			return CalcItemRectangle(item.Position.X, item.Position.Y, !IsSavingToImage);
 		}
 
 		private Rectangle CalcItemRectangle(int x, int y, bool scrolled)
@@ -266,9 +276,7 @@ namespace PertNetworkUIExtension
 
 			return itemRect;
 		}
-
-
-		
+				
 		public bool SetFont(String fontName, int fontSize)
         {
             if ((BaseFont.Name == fontName) && (BaseFont.Size == fontSize))
@@ -309,63 +317,27 @@ namespace PertNetworkUIExtension
 
         public Bitmap SaveToImage()
         {
-			// Cache state
-			Point scrollPos = new Point(HorizontalScroll.Value, VerticalScroll.Value);
-
-			// And reset
 			IsSavingToImage = true;
 
-			HorizontalScroll.Value = 0;
-			VerticalScroll.Value = 0;
-
-			if (!scrollPos.IsEmpty)
-				PerformLayout();
-
 			// Total size of the graph
-			Rectangle graphRect = new Rectangle(new Point(0, 0), AutoScrollMinSize);
-			Rectangle drawRect = ClientRectangle; ;
+			Rectangle graphRect = new Rectangle(Point.Empty, AutoScrollMinSize);
 
-			// The output image
-			Bitmap finalImage = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
+			var image = new Bitmap(graphRect.Width, graphRect.Height, PixelFormat.Format32bppRgb);
 
-			// The temporary image allowing us to clip out the top and left borders
-			Bitmap srcImage = new Bitmap(drawRect.Width, drawRect.Height, PixelFormat.Format32bppRgb);
-
-			// The current position in the output image for rendering the temporary image
-
-			// Note: If the last horz or vert page is empty because of an 
-			// exact division then it will get handled within the loop
-			int numHorzPages = ((graphRect.Width / drawRect.Width) + 1);
-			int numVertPages = ((graphRect.Height / drawRect.Height) + 1);
-
-			using (Graphics graphics = Graphics.FromImage(finalImage))
+			using (Graphics graphics = Graphics.FromImage(image))
 			{
-				for (int vertPage = 0; vertPage < numVertPages; vertPage++)
-				{
-					for (int horzPage = 0; horzPage < numHorzPages; horzPage++)
-					{
-						// TODO
-					}
-
-					// TODO
-				}
+				graphics.Clear(SystemColors.Window);
+				DoPaint(graphics, Rectangle.Empty);
 			}
 
-			// Restore state
 			IsSavingToImage = false;
 
-			HorizontalScroll.Value = scrollPos.X;
-			VerticalScroll.Value = scrollPos.Y;
-
-			if (!scrollPos.IsEmpty)
-				PerformLayout();
-
-			return finalImage;
-        }
+			return image;
+		}
 
 		// Message Handlers -----------------------------------------------------------
 
-        protected override void OnMouseDoubleClick(MouseEventArgs e)
+		protected override void OnMouseDoubleClick(MouseEventArgs e)
         {
 			// TODO
         }
@@ -559,7 +531,7 @@ namespace PertNetworkUIExtension
 			base.OnKeyDown(e);
 		}
 
-        // Internals -----------------------------------------------------------
+		// Internals -----------------------------------------------------------
 
 		private bool CheckStartDragging(Point cursor)
 		{
