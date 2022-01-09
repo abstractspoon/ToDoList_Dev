@@ -115,15 +115,15 @@ namespace PertNetworkUIExtension
 
 		public void RebuildGroups()
 		{
-			RecalculateItemSize(Data.RebuildGroups());
+			RecalculateGraphSize(Data.RebuildGroups());
 		}
 
-		public void RecalculateItemSize()
+		public void RecalculateGraphSize()
 		{
-			RecalculateItemSize(Data.Items.CalcMaximumPosition());
+			RecalculateGraphSize(Data.Items.CalcMaximumPosition());
 		}
 
-		public void RecalculateItemSize(Point maxPos)
+		private void RecalculateGraphSize(Point maxPos)
 		{
 			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y, false);
 
@@ -286,7 +286,7 @@ namespace PertNetworkUIExtension
 			BaseFont = new Font(fontName, fontSize, FontStyle.Regular);
 			Font = BaseFont;
 
-			RecalculateItemSize();
+			RecalculateGraphSize();
 			return true;
 		}
 
@@ -392,7 +392,7 @@ namespace PertNetworkUIExtension
 					else
 						Font = new Font(BaseFont.FontFamily, BaseFont.Size * ZoomFactor, BaseFont.Style);
 
-					RecalculateItemSize();
+					RecalculateGraphSize();
 
 					// Scroll the view to keep the mouse located in the 
 					// same relative position as before
