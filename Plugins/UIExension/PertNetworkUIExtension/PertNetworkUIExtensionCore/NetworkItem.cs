@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Diagnostics;
 
 namespace PertNetworkUIExtension
 {
@@ -259,6 +260,8 @@ namespace PertNetworkUIExtension
 	{
 		private NetworkItems m_Items;
 
+		// ----------------
+
 		public NetworkGroup()
 		{
 			m_Items = new NetworkItems();
@@ -276,15 +279,26 @@ namespace PertNetworkUIExtension
 
 		public bool Build(NetworkItem termItem, NetworkItems allItems, ref Point maxPos)
 		{
+			m_Items.Clear();
+
 			if (!AddTask(termItem, allItems, ref maxPos))
 				return false;
 
-			maxPos = BalanceVerticalPositions();
 			return true;
 		}
 
+		public List<NetworkItem> GetItemDependencies(NetworkItem item)
+		{
+			return m_Items.GetItemDependencies(item);
+		}
+
+		// -----------------------
+		// Internals
+
 		private bool AddTask(NetworkItem item, NetworkItems allItems, ref Point maxPos)
 		{
+			bool doBalance = (m_Items.Count == 0);
+
 			// Must be unique
 			if (m_Items.ContainsKey(item.UniqueId))
 				return false;
@@ -325,7 +339,53 @@ namespace PertNetworkUIExtension
 				item.Position.X = maxPos.X = 0;
 			}
 
+			if (doBalance)
+				maxPos = BalanceVerticalPositions();
+
 			return true;
+		}
+
+		private Point BalanceVerticalPositions()
+		{
+			// Try moving an item towards the centre of its dependencies
+			// and stop when we hit a position already taken.
+			var subGroups = BuildHorizontalSubGroups();
+			List<NetworkItem> subGroup = null;
+
+			for (int hPos = 1; hPos < subGroups.Count; hPos++)
+			{
+				if (subGroups.TryGetValue(hPos, out subGroup))
+				{
+					foreach (var item in subGroup)
+					{
+						var dependencies = GetItemDependencies(item);
+						var midY = GetMidVPos(dependencies);
+
+						for (int vPos = item.Position.Y; vPos <= midY; vPos++)
+						{
+							if (IsPositionTaken(subGroup, hPos, vPos))
+								break;
+
+							// else
+							item.Position.Y = vPos;
+						}
+					}
+				}
+			}
+
+			// For the first group do the same but with its dependents
+			if (subGroups.TryGetValue(0, out subGroup))
+			{
+				var item = subGroup[0];
+				var dependents = m_Items.GetItemDependents(item);
+				var midY = GetMidVPos(dependents);
+
+				if (!IsPositionTaken(subGroup, 0, midY))
+					item.Position.Y = midY;
+			}
+
+			// Recalculate maximum extent
+			return m_Items.CalcMaximumPosition();
 		}
 
 		private Dictionary<int, List<NetworkItem>> BuildHorizontalSubGroups()
@@ -372,64 +432,6 @@ namespace PertNetworkUIExtension
 			}
 
 			return ((minY + maxY) / 2);
-		}
-
-		public Point BalanceVerticalPositions()
-		{
-			// Try moving an item towards the centre of its dependencies
-			// and stop when we hit a position already taken.
-			var subGroups = BuildHorizontalSubGroups();
-			List<NetworkItem> subGroup = null;
-
-			for (int hPos = 1; hPos < subGroups.Count; hPos++)
-			{
-				if (subGroups.TryGetValue(hPos, out subGroup))
-				{
-					foreach (var item in subGroup)
-					{
-						var dependencies = GetItemDependencies(item);
-						var midY = GetMidVPos(dependencies);
-
-						for (int vPos = item.Position.Y; vPos <= midY; vPos++)
-						{
-							if (IsPositionTaken(subGroup, hPos, vPos))
-								break;
-
-							// else
-							item.Position.Y = vPos;
-						}
-					}
-				}
-			}
-
-			// For the first group do the same but with its dependents
-			if (subGroups.TryGetValue(0, out subGroup))
-			{
-				var item = subGroup[0];
-				var dependents = GetItemDependents(item);
-				var midY = GetMidVPos(dependents);
-
-				if (!IsPositionTaken(subGroup, 0, midY))
-					item.Position.Y = midY;
-			}
-
-			// Recalculate maximum extent
-			return m_Items.CalcMaximumPosition();
-		}
-
-		private NetworkItem GetItem(uint uniqueId)
-		{
-			return m_Items.GetItem(uniqueId);
-		}
-
-		private List<NetworkItem> GetItemDependents(NetworkItem item)
-		{
-			return m_Items.GetItemDependents(item);
-		}
-
-		public List<NetworkItem> GetItemDependencies(NetworkItem item)
-		{
-			return m_Items.GetItemDependencies(item);
 		}
 
 		private bool IsPositionTaken(IEnumerable<NetworkItem> items, int x, int y)
