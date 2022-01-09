@@ -107,7 +107,7 @@ namespace PertNetworkUIExtension
 
 			return dependencies;
 		}
-
+		/*
 		public List<NetworkItem> GetHorizontalItems(int yPos, int fromXPos = 0, int toXPos = -1)
 		{
 			return Values.Where(a => ((a.Position.Y == yPos) &&
@@ -128,7 +128,7 @@ namespace PertNetworkUIExtension
 		{
 			return Values.Where(a => ((a.Position.X == x) && (a.Position.Y >= y))).FirstOrDefault();
 		}
-
+		*/
 	}
 
 	// ------------------------------------------------------------
@@ -316,6 +316,8 @@ namespace PertNetworkUIExtension
 
 			MaxPos = maxPos;
 
+			BalanceVerticalPositions();
+			
 			return true;
 		}
 
@@ -335,8 +337,6 @@ namespace PertNetworkUIExtension
 
 		private bool AddTask(NetworkItem item, NetworkItems allItems, ref Point maxPos)
 		{
-			bool doBalance = (m_Items.Count == 0);
-
 			// Must be unique
 			if (m_Items.ContainsKey(item.UniqueId))
 				return false;
@@ -377,13 +377,10 @@ namespace PertNetworkUIExtension
 				item.Position.X = maxPos.X = 0;
 			}
 
-			if (doBalance)
-				maxPos = BalanceVerticalPositions();
-
 			return true;
 		}
 
-		private Point BalanceVerticalPositions()
+		private void BalanceVerticalPositions()
 		{
 			// Try moving an item towards the centre of its dependencies
 			// and stop when we hit a position already taken.
@@ -423,12 +420,12 @@ namespace PertNetworkUIExtension
 			}
 
 			// Recalculate maximum vertical extent because it might have REDUCED
-			var maxPos = new Point(MaxPos.X, 0);
+			int maxY = 0;
 
 			foreach (var item in ItemValues)
-				maxPos.Y = Math.Max(maxPos.Y, item.Position.Y);
+				maxY = Math.Max(maxY, item.Position.Y);
 
-			return maxPos;
+			MaxPos = new Point(MaxPos.X, maxY);
 		}
 
 		private Dictionary<int, List<NetworkItem>> BuildHorizontalSubGroups()
@@ -527,10 +524,10 @@ namespace PertNetworkUIExtension
 
 		public NetworkItem GetItemAt(Point pos)
 		{
-			if ((pos.X < 0) || (pos.X >= m_MaxPos.X))
+			if ((pos.X < 0) || (pos.X > m_MaxPos.X))
 				return null;
 
-			if ((pos.Y < 0) || (pos.Y >= m_MaxPos.Y))
+			if ((pos.Y < 0) || (pos.Y > m_MaxPos.Y))
 				return null;
 
 			return m_Items[pos.X, pos.Y];
@@ -549,9 +546,31 @@ namespace PertNetworkUIExtension
 			var nextPos = Increment(startPos, dir, increment);
 			var nextItem = GetItemAt(nextPos);
 
-			// TODO
+			return nextItem;
+		}
 
-			return null;
+		public NetworkItem GetNextNearestItem(Point startPos, Direction dir, int increment = 1)
+		{
+			NetworkItem nextItem = null;
+
+			// 1. Look along the same row or column until we find an item
+			var nextPos = startPos;
+
+			while (CanIncrement(nextPos, dir, increment))
+			{
+				nextPos = Increment(nextPos, dir, increment);
+				nextItem = GetItemAt(nextPos);
+
+				if (nextItem != null)
+					return nextItem;
+			}
+
+			// 2. Progressively search parallel rows or columns until we find an item
+			int offset = 1;
+
+			// TODO
+			
+			return nextItem;
 		}
 
 		// ---------------------------------------
@@ -579,6 +598,26 @@ namespace PertNetworkUIExtension
 			}
 
 			return pos;
+		}
+
+		private bool CanIncrement(Point pos, Direction dir, int increment)
+		{
+			switch (dir)
+			{
+			case Direction.Left:
+				return (pos.X > 0);
+
+			case Direction.Up:
+				return (pos.Y > 0);
+
+			case Direction.Right:
+				return (pos.X < m_MaxPos.X);
+
+			case Direction.Down:
+				return (pos.Y < m_MaxPos.Y);
+			}
+
+			return false;
 		}
 	}
 

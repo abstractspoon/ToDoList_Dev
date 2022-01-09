@@ -663,123 +663,76 @@ namespace PertNetworkUIExtension
 			if (selItem == null)
 				return false;
 
-			uint nextItemId = 0;
+			var direction = NetworkMatrix.Direction.Left;
+			int increment = 0;
 
 			switch (key)
 			{
 			case Keys.Left:
-				if (selItem.Position.X > 0)
-				{
-					// Try for an item at the same vertical position
-					var leftItems = Data.Items.GetHorizontalItems(selItem.Position.Y, 0, selItem.Position.X - 1);
-
-					// else try for the first of this item's dependencies
-					if (leftItems.Count == 0)
-						leftItems = Data.Items.GetItemDependencies(selItem);
-
-					if (leftItems.Count > 0)
-						nextItemId = leftItems.Last().UniqueId;
-				}
+				direction = NetworkMatrix.Direction.Left;
+				increment = 1;
 				break;
 
 			case Keys.Right:
-				{
-					// Try for an item at the same vertical position
-					var rightItems = Data.Items.GetHorizontalItems(selItem.Position.Y, selItem.Position.X + 1);
-
-					// else try for the first of this item's dependents
-					if (rightItems.Count == 0)
-						rightItems = Data.Items.GetItemDependents(selItem);
-
-					if (rightItems.Count > 0)
-						nextItemId = rightItems[0].UniqueId;
-				}
+				direction = NetworkMatrix.Direction.Right;
+				increment = 1;
 				break;
 
 			case Keys.Up:
-				if (selItem.Position.Y > 0)
-				{
-					// Try for an item at the same horizontal position
-					var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
-
-					if (upperItems.Count > 0)
-						nextItemId = upperItems.Last().UniqueId;
-				}
+				direction = NetworkMatrix.Direction.Up;
+				increment = 1;
 				break;
 
 			case Keys.Down:
-				{
-					// Try for an item at the same horizontal position
-					var lowerItems = Data.Items.GetVerticalItems(selItem.Position.X, selItem.Position.Y + 1);
-
-					if (lowerItems.Count > 0)
-						nextItemId = lowerItems[0].UniqueId;
-				}
+				direction = NetworkMatrix.Direction.Down;
+				increment = 1;
 				break;
 
 			case Keys.PageUp:
-				if (selItem.Position.Y > 0)
-				{
-					// Try for an item at the same horizontal position
-					var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
-
-					if (upperItems.Count > PageSize)
-					{
-						nextItemId = upperItems[selItem.Position.Y - PageSize].UniqueId;
-					}
-					else if (upperItems.Count > 0)
-					{
-						nextItemId = upperItems[0].UniqueId;
-					}
-				}
+				direction = NetworkMatrix.Direction.Up;
+				increment = PageSize;
 				break;
 
 			case Keys.PageDown:
-				{
-					// Try for an item at the same horizontal position
-					var lowerItems = Data.Items.GetVerticalItems(selItem.Position.X, selItem.Position.Y + 1);
-
-					if (lowerItems.Count > PageSize)
-					{
-						nextItemId = lowerItems[PageSize].UniqueId;
-					}
-					else if (lowerItems.Count > 0)
-					{
-						nextItemId = lowerItems.Last().UniqueId;
-					}
-				}
+				direction = NetworkMatrix.Direction.Down;
+				increment = PageSize;
 				break;
 
 			case Keys.Home:
-				if (selItem.Position.Y > 0)
-				{
-					// Try for an item at the same horizontal position
-					var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
-
-					if (upperItems.Count > 0)
-						nextItemId = upperItems[0].UniqueId;
-				}
+				//if (selItem.Position.Y > 0)
+				//{
+				//	// Try for an item at the same horizontal position
+				//	var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
+				//
+				//	if (upperItems.Count > 0)
+				//		nextItem = upperItems[0];
+				//}
 				break;
 
 			case Keys.End:
-				{
-					// Try for an item at the same horizontal position
-					var lowerItems = Data.Items.GetVerticalItems(selItem.Position.X, selItem.Position.Y + 1);
-
-					if (lowerItems.Count > 0)
-						nextItemId = lowerItems.Last().UniqueId;
-				}
+				//{
+				//	// Try for an item at the same horizontal position
+				//	var lowerItems = Data.Items.GetVerticalItems(selItem.Position.X, selItem.Position.Y + 1);
+				//
+				//	if (lowerItems.Count > 0)
+				//		nextItem = lowerItems.Last();
+				//}
 				break;
 			}
 
-			if (nextItemId != 0)
+			if (increment != 0) // sanity check
 			{
-				SelectedItemId = nextItemId;
+				NetworkItem nextItem = Data.Matrix.GetNextNearestItem(selItem.Position, direction, increment);
 
-				EnsureItemVisible(SelectedItem);
-				Invalidate();
+				if ((nextItem != null) && (nextItem != selItem))
+				{
+					SelectedItemId = nextItem.UniqueId;
 
-				return true;
+					EnsureItemVisible(SelectedItem);
+					Invalidate();
+
+					return true;
+				}
 			}
 
 			return false;
