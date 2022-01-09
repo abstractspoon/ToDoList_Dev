@@ -216,6 +216,13 @@ CString CTabCtrlEx::GetRequiredTabText(int nTab, const CString& sCurText)
 		if (nExtra % nSpaceWidth)
 			nNumSpace++;
 
+		// If the tab has no icon move one of the extra spaces to the front
+		if (GetItemImage(nTab) == -1)
+		{
+			sReqText = ' ' + sReqText;
+			nNumSpace--;
+		}
+
 		sReqText += CString(' ', nNumSpace);
 	}
 
