@@ -124,19 +124,6 @@ namespace PertNetworkUIExtension
 						.OrderBy(a => a.Position.Y).ToList();
 		}
 
-		public Point CalcMaximumPosition()
-		{
-			var maxPos = new Point(0, 0);
-
-			foreach (var item in Values)
-			{
-				maxPos.X = Math.Max(maxPos.X, item.Position.X);
-				maxPos.Y = Math.Max(maxPos.Y, item.Position.Y);
-			}
-
-			return maxPos;
-		}
-
 		public NetworkItem GetItemAtPosition(int x, int y)
 		{
 			return Values.Where(a => ((a.Position.X == x) && (a.Position.Y >= y))).FirstOrDefault();
@@ -147,7 +134,27 @@ namespace PertNetworkUIExtension
 
 	public class NetworkGroups : HashSet<NetworkGroup>
 	{
-		public int RebuildGroups(NetworkItems allItems, out Point maxPos)
+		public Point MaxPos { get; private set; }
+
+		public int RebuildGroups(NetworkItems allItems)
+		{
+			Point maxPos;
+			int numGroups = RebuildGroups(allItems, out maxPos);
+
+			MaxPos = maxPos;
+			return numGroups;
+		}
+
+		// -------------------------------------------
+		// internals
+
+		private new void Clear()
+		{
+			MaxPos = Point.Empty;
+			base.Clear();
+		}
+
+		private int RebuildGroups(NetworkItems allItems, out Point maxPos)
 		{
 			// Clear all item positions
 			foreach (var item in allItems.Values)
@@ -187,10 +194,12 @@ namespace PertNetworkUIExtension
 		{
 			var group = new NetworkGroup();
 
-			if (!group.Build(termItem, allItems, ref maxPos))
+			if (!group.Build(termItem, allItems, maxPos))
 				return false;
 
 			Add(group);
+			maxPos = group.MaxPos;
+
 			return true;
 		}
 
@@ -247,10 +256,9 @@ namespace PertNetworkUIExtension
 
 		public Point RebuildGroups()
 		{
-			Point maxPos;
-			m_Groups.RebuildGroups(Items, out maxPos);
+			m_Groups.RebuildGroups(Items);
 
-			return maxPos;
+			return m_Groups.MaxPos;
 		}
 	}
 
@@ -267,6 +275,8 @@ namespace PertNetworkUIExtension
 			m_Items = new NetworkItems();
 		}
 
+		public Point MaxPos { get; private set; }
+
 		public NetworkItems Items
 		{
 			get { return m_Items; }
@@ -277,12 +287,16 @@ namespace PertNetworkUIExtension
 			get { return m_Items.Values; }
 		}
 
-		public bool Build(NetworkItem termItem, NetworkItems allItems, ref Point maxPos)
+		public bool Build(NetworkItem termItem, NetworkItems allItems, Point startPos)
 		{
-			m_Items.Clear();
+			Clear();
+
+			Point maxPos = startPos;
 
 			if (!AddTask(termItem, allItems, ref maxPos))
 				return false;
+
+			MaxPos = maxPos;
 
 			return true;
 		}
@@ -294,6 +308,12 @@ namespace PertNetworkUIExtension
 
 		// -----------------------
 		// Internals
+
+		private void Clear()
+		{
+			m_Items.Clear();
+			MaxPos = Point.Empty;
+		}
 
 		private bool AddTask(NetworkItem item, NetworkItems allItems, ref Point maxPos)
 		{
@@ -340,7 +360,7 @@ namespace PertNetworkUIExtension
 			}
 
 			if (doBalance)
-				maxPos = BalanceVerticalPositions();
+				/*maxPos = */BalanceVerticalPositions();
 
 			return true;
 		}
@@ -385,7 +405,7 @@ namespace PertNetworkUIExtension
 			}
 
 			// Recalculate maximum extent
-			return m_Items.CalcMaximumPosition();
+			return MaxPos;// m_Items.CalcMaximumPosition();
 		}
 
 		private Dictionary<int, List<NetworkItem>> BuildHorizontalSubGroups()

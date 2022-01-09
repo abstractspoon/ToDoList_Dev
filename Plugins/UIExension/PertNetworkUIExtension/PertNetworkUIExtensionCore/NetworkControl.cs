@@ -120,7 +120,7 @@ namespace PertNetworkUIExtension
 
 		public void RecalculateGraphSize()
 		{
-			RecalculateGraphSize(Data.Items.CalcMaximumPosition());
+			RecalculateGraphSize(Data.Groups.MaxPos);
 		}
 
 		private void RecalculateGraphSize(Point maxPos)
