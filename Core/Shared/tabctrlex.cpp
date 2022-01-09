@@ -70,6 +70,7 @@ BEGIN_MESSAGE_MAP(CTabCtrlEx, CXPTabCtrl)
 	ON_MESSAGE(TCM_INSERTITEM, OnChangeTabItem)
 	ON_MESSAGE(TCM_SETITEM, OnChangeTabItem)
 	ON_MESSAGE(TCM_DELETEITEM, OnChangeTabItem)
+	ON_MESSAGE(TCM_SETCURSEL, OnSetCurSel)
 	ON_MESSAGE(WM_TCMUPDATETABWIDTH, OnUpdateTabItemWidth)
 END_MESSAGE_MAP()
 
@@ -135,6 +136,15 @@ LRESULT CTabCtrlEx::OnChangeTabItem(WPARAM wp, LPARAM lp)
 	}
 
 	return Default();
+}
+
+LRESULT CTabCtrlEx::OnSetCurSel(WPARAM wp, LPARAM lp)
+{
+	LRESULT lr = Default();
+
+	UpdateTabItemWidths();
+
+	return lr;
 }
 
 void CTabCtrlEx::UpdateTabItemWidths()

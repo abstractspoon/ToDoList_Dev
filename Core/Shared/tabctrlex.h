@@ -126,6 +126,7 @@ protected:
 	afx_msg LRESULT OnMouseLeave(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnTabSelChange(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg LRESULT OnChangeTabItem(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnSetCurSel(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg LRESULT OnUpdateTabItemWidth(WPARAM wp, LPARAM lp);
 	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
