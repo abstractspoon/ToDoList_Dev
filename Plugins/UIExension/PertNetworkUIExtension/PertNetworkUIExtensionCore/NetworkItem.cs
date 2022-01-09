@@ -170,7 +170,7 @@ namespace PertNetworkUIExtension
 			HashSet<uint> terminatorIds = allItems.GetAllTerminators(dependentIds);
 
 			// Build the groups by working backwards from each end task
-			maxPos = new Point(0, 0);
+			maxPos = Point.Empty;
 
 			foreach (var termId in terminatorIds)
 			{
@@ -360,7 +360,7 @@ namespace PertNetworkUIExtension
 			}
 
 			if (doBalance)
-				/*maxPos = */BalanceVerticalPositions();
+				maxPos = BalanceVerticalPositions();
 
 			return true;
 		}
@@ -404,8 +404,13 @@ namespace PertNetworkUIExtension
 					item.Position.Y = midY;
 			}
 
-			// Recalculate maximum extent
-			return MaxPos;// m_Items.CalcMaximumPosition();
+			// Recalculate maximum vertical extent because it might have REDUCED
+			var maxPos = new Point(MaxPos.X, 0);
+
+			foreach (var item in ItemValues)
+				maxPos.Y = Math.Max(maxPos.Y, item.Position.Y);
+
+			return maxPos;
 		}
 
 		private Dictionary<int, List<NetworkItem>> BuildHorizontalSubGroups()
