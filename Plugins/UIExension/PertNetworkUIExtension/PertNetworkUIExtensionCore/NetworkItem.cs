@@ -128,6 +128,7 @@ namespace PertNetworkUIExtension
 		{
 			return Values.Where(a => ((a.Position.X == x) && (a.Position.Y >= y))).FirstOrDefault();
 		}
+
 	}
 
 	// ------------------------------------------------------------
@@ -211,11 +212,15 @@ namespace PertNetworkUIExtension
 	{
 		private NetworkItems m_Items;
 		private NetworkGroups m_Groups;
+		private NetworkMatrix m_Matrix;
+
+		// -------------------------------
 
 		public NetworkData()
 		{
 			m_Items = new NetworkItems();
 			m_Groups = new NetworkGroups();
+			m_Matrix = new NetworkMatrix();
 		}
 
 		public NetworkItems Items
@@ -233,10 +238,22 @@ namespace PertNetworkUIExtension
 			get { return m_Groups; }
 		}
 
+		public NetworkMatrix Matrix
+		{
+			get
+			{
+				if (m_Matrix.IsEmpty)
+					m_Matrix.Populate(m_Groups);
+
+				return m_Matrix;
+			}
+		}
+
 		public void Clear()
 		{
 			m_Items.Clear();
 			m_Groups.Clear();
+			m_Matrix.Clear();
 		}
 
 		public NetworkItem GetItem(uint uniqueId)
@@ -257,6 +274,7 @@ namespace PertNetworkUIExtension
 		public Point RebuildGroups()
 		{
 			m_Groups.RebuildGroups(Items);
+			m_Matrix.Clear(); // populated on demand
 
 			return m_Groups.MaxPos;
 		}
@@ -306,7 +324,7 @@ namespace PertNetworkUIExtension
 			return m_Items.GetItemDependencies(item);
 		}
 
-		// -----------------------
+		// ----------------------------------
 		// Internals
 
 		private void Clear()
@@ -468,6 +486,99 @@ namespace PertNetworkUIExtension
 			}
 
 			return false;
+		}
+	}
+
+	// ------------------------------------------------------------
+
+	public class NetworkMatrix
+	{
+		private NetworkItem[,] m_Items;
+		private Point m_MaxPos;
+
+		// -------------
+
+		public NetworkItem[,] Items { get; private set; }
+
+		public void Clear() { m_Items = null; }
+		public bool IsEmpty { get { return (m_Items == null); } }
+
+		public bool Populate(NetworkGroups groups)
+		{
+			if (groups.MaxPos == Point.Empty)
+				return false;
+
+			m_MaxPos = groups.MaxPos;
+			m_Items = new NetworkItem[m_MaxPos.X + 1, m_MaxPos.Y + 1];
+
+			foreach (var group in groups)
+			{
+				foreach (var item in group.ItemValues)
+				{
+					if (item.HasPosition)
+					{
+						m_Items[item.Position.X, item.Position.Y] = item;
+					}
+				}
+			}
+
+			return true;
+		}
+
+		public NetworkItem GetItemAt(Point pos)
+		{
+			if ((pos.X < 0) || (pos.X >= m_MaxPos.X))
+				return null;
+
+			if ((pos.Y < 0) || (pos.Y >= m_MaxPos.Y))
+				return null;
+
+			return m_Items[pos.X, pos.Y];
+		}
+
+		public enum Direction
+		{
+			Left,
+			Up,
+			Right,
+			Down,
+		}
+
+		public NetworkItem GetNextItem(Point startPos, Direction dir, int increment = 1)
+		{
+			var nextPos = Increment(startPos, dir, increment);
+			var nextItem = GetItemAt(nextPos);
+
+			// TODO
+
+			return null;
+		}
+
+		// ---------------------------------------
+		// Internals
+
+		private Point Increment(Point pos, Direction dir, int increment)
+		{
+			switch (dir)
+			{
+			case Direction.Left:
+				pos.X = Math.Max(pos.X - increment, 0);
+				break;
+
+			case Direction.Up:
+				pos.Y = Math.Max(pos.Y - increment, 0);
+				break;
+
+			case Direction.Right:
+				pos.X = Math.Min(pos.X + increment, m_MaxPos.X);
+				break;
+
+			case Direction.Down:
+				pos.Y = Math.Max(pos.Y + increment, m_MaxPos.Y);
+				break;
+			}
+
+			return pos;
 		}
 	}
 
