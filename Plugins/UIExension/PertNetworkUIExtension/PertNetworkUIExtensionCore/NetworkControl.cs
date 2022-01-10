@@ -699,24 +699,13 @@ namespace PertNetworkUIExtension
 				break;
 
 			case Keys.Home:
-				//if (selItem.Position.Y > 0)
-				//{
-				//	// Try for an item at the same horizontal position
-				//	var upperItems = Data.Items.GetVerticalItems(selItem.Position.X, 0, selItem.Position.Y - 1);
-				//
-				//	if (upperItems.Count > 0)
-				//		nextItem = upperItems[0];
-				//}
+				direction = NetworkMatrix.Direction.Up;
+				increment = Data.Matrix.Size.Height;
 				break;
 
 			case Keys.End:
-				//{
-				//	// Try for an item at the same horizontal position
-				//	var lowerItems = Data.Items.GetVerticalItems(selItem.Position.X, selItem.Position.Y + 1);
-				//
-				//	if (lowerItems.Count > 0)
-				//		nextItem = lowerItems.Last();
-				//}
+				direction = NetworkMatrix.Direction.Down;
+				increment = Data.Matrix.Size.Height;
 				break;
 			}
 

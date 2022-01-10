@@ -107,28 +107,6 @@ namespace PertNetworkUIExtension
 
 			return dependencies;
 		}
-		/*
-		public List<NetworkItem> GetHorizontalItems(int yPos, int fromXPos = 0, int toXPos = -1)
-		{
-			return Values.Where(a => ((a.Position.Y == yPos) &&
-										(a.Position.X >= fromXPos) &&
-										((toXPos == -1) || (a.Position.X <= toXPos))))
-						.OrderBy(a => a.Position.X).ToList();
-		}
-
-		public List<NetworkItem> GetVerticalItems(int xPos, int fromYPos = 0, int toYPos = -1)
-		{
-			return Values.Where(a => ((a.Position.X == xPos) &&
-										(a.Position.Y >= fromYPos) &&
-										((toYPos == -1) || (a.Position.Y <= toYPos))))
-						.OrderBy(a => a.Position.Y).ToList();
-		}
-
-		public NetworkItem GetItemAtPosition(int x, int y)
-		{
-			return Values.Where(a => ((a.Position.X == x) && (a.Position.Y >= y))).FirstOrDefault();
-		}
-		*/
 	}
 
 	// ------------------------------------------------------------
@@ -499,6 +477,7 @@ namespace PertNetworkUIExtension
 
 		public void Clear() { m_Items = null; }
 		public bool IsEmpty { get { return (m_Items == null); } }
+		public Size Size { get { return new Size(m_MaxPos); } }
 
 		public bool Populate(NetworkGroups groups)
 		{
@@ -541,7 +520,61 @@ namespace PertNetworkUIExtension
 			Down,
 		}
 
-		public NetworkItem GetNextItem(Point startPos, Direction dir, int increment = 1)
+		public NetworkItem GetNextNearestItem(Point startPos, Direction dir, int increment = 1)
+		{
+			// 1. Look along the same row or column until we find an item
+			NetworkItem nextItem = GetNextNearestItemOnSameRowOrCol(startPos, dir, increment);
+
+			if (nextItem != null)
+				return nextItem;
+
+			// 2. Progressively search parallel rows or columns until we find an item
+			Point nextPos = startPos;
+
+			while (Increment(ref nextPos, dir, increment))
+			{
+				NetworkItem parallelItem1 = null, parallelItem2 = null;
+
+				switch (dir)
+				{
+				case Direction.Left:
+				case Direction.Right:
+					parallelItem1 = GetNextNearestItemOnSameRowOrCol(nextPos, Direction.Up, 1);
+					parallelItem2 = GetNextNearestItemOnSameRowOrCol(nextPos, Direction.Down, 1);
+					break;
+
+				case Direction.Up:
+				case Direction.Down:
+					parallelItem1 = GetNextNearestItemOnSameRowOrCol(nextPos, Direction.Left, 1);
+					parallelItem2 = GetNextNearestItemOnSameRowOrCol(nextPos, Direction.Right, 1);
+					break;
+				}
+
+				if ((parallelItem1 != null) && (parallelItem2 != null))
+				{
+					if (Distance(startPos, parallelItem1.Position) <= Distance(startPos, parallelItem2.Position))
+						return parallelItem1;
+
+					// else
+					return parallelItem2;
+				}
+
+				if (parallelItem1 != null)
+					return parallelItem1;
+
+				if (parallelItem2 != null)
+					return parallelItem2;
+
+				// keep going
+			}
+
+			return null;
+		}
+
+		// ---------------------------------------
+		// Internals
+
+		private NetworkItem GetNextItem(Point startPos, Direction dir, int increment)
 		{
 			var nextPos = startPos;
 			Increment(ref nextPos, dir, increment);
@@ -549,34 +582,18 @@ namespace PertNetworkUIExtension
 			return GetItemAt(nextPos);
 		}
 
-		public NetworkItem GetNextNearestItem(Point startPos, Direction dir, int increment = 1)
+		private NetworkItem GetNextNearestItemOnSameRowOrCol(Point startPos, Direction dir, int increment = 1)
 		{
 			NetworkItem nextItem = null;
-
-			// 1. Look along the same row or column until we find an item
 			var nextPos = startPos;
 
-			while (Increment(ref nextPos, dir, increment))
+			while ((nextItem == null) && Increment(ref nextPos, dir, increment))
 			{
 				nextItem = GetItemAt(nextPos);
-
-				if (nextItem != null)
-					return nextItem;
 			}
 
-			// 2. Progressively search parallel rows or columns until we find an item
-			int offset = 1;
-
-			while (true)
-			{
-
-			}
-			
 			return nextItem;
 		}
-
-		// ---------------------------------------
-		// Internals
 
 		private bool Increment(ref Point pos, Direction dir, int increment)
 		{
@@ -598,7 +615,7 @@ namespace PertNetworkUIExtension
 				break;
 
 			case Direction.Down:
-				pos.Y = Math.Max(pos.Y + increment, m_MaxPos.Y);
+				pos.Y = Math.Min(pos.Y + increment, m_MaxPos.Y);
 				break;
 			}
 
@@ -627,6 +644,14 @@ namespace PertNetworkUIExtension
 
 			// all else
 			return false;
+		}
+
+		private double Distance(Point pos1, Point pos2)
+		{
+			int diffX = (pos1.X - pos2.X);
+			int diffY = (pos1.Y - pos2.Y);
+
+			return Math.Sqrt((diffX * diffX) + (diffY * diffY));
 		}
 	}
 
