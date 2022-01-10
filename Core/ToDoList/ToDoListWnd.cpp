@@ -13126,12 +13126,13 @@ void CToDoListWnd::OnUpdateViewShowTreeListTabbar(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnFileChangePassword() 
 {
-	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	int nSelTDC = GetSelToDoCtrl();
+	CFilteredToDoCtrl& tdc = GetToDoCtrl(nSelTDC);
 
-	if (!tdc.IsReadOnly() && tdc.IsEncrypted() && VerifyToDoCtrlPassword())
+	// Force the user to re-enter the current password
+	if (!tdc.IsReadOnly() && tdc.IsEncrypted() && m_mgrToDoCtrls.VerifyPassword(nSelTDC, TRUE))
 	{
-		tdc.EnableEncryption(FALSE); // clears the password
-		tdc.EnableEncryption(TRUE); // forces it to be re-got
+		tdc.ModifyPassword();
 	}
 }
 

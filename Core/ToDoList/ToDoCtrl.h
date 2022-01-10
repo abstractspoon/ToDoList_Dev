@@ -100,6 +100,7 @@ public:
 	static BOOL CanEncrypt(); // returns true only if the required encryption capabilities are present
 	CString GetPassword() const { return m_sPassword; }
 	BOOL VerifyPassword(const CString& sExplanation = _T("")) const;
+	BOOL ModifyPassword();
 	BOOL WantPasswordReprompting() const;
 
 	void SetMaximizeState(TDC_MAXSTATE nState);

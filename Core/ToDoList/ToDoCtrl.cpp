@@ -554,6 +554,24 @@ BOOL CToDoCtrl::VerifyPassword(const CString& sExplanation) const
 	return CPasswordDialog::VerifyPassword(m_sPassword, sExplanation);
 }
 
+BOOL CToDoCtrl::ModifyPassword()
+{
+	// Sanity checks
+	if (!IsEncrypted() || IsReadOnly())
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	CEnString sExplanation(IDS_ENABLEENCRYPTION);
+
+	if (!CPasswordDialog::RetrievePassword(TRUE, m_sPassword, sExplanation))
+		return FALSE;
+
+	SetModified(TDCA_ENCRYPT);
+	return TRUE;
+}
+
 BOOL CToDoCtrl::CanEncrypt()
 {
 	return CTaskFile::CanEncrypt();
