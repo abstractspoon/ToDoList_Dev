@@ -543,10 +543,10 @@ namespace PertNetworkUIExtension
 
 		public NetworkItem GetNextItem(Point startPos, Direction dir, int increment = 1)
 		{
-			var nextPos = Increment(startPos, dir, increment);
-			var nextItem = GetItemAt(nextPos);
+			var nextPos = startPos;
+			Increment(ref nextPos, dir, increment);
 
-			return nextItem;
+			return GetItemAt(nextPos);
 		}
 
 		public NetworkItem GetNextNearestItem(Point startPos, Direction dir, int increment = 1)
@@ -556,9 +556,8 @@ namespace PertNetworkUIExtension
 			// 1. Look along the same row or column until we find an item
 			var nextPos = startPos;
 
-			while (CanIncrement(nextPos, dir, increment))
+			while (Increment(ref nextPos, dir, increment))
 			{
-				nextPos = Increment(nextPos, dir, increment);
 				nextItem = GetItemAt(nextPos);
 
 				if (nextItem != null)
@@ -568,7 +567,10 @@ namespace PertNetworkUIExtension
 			// 2. Progressively search parallel rows or columns until we find an item
 			int offset = 1;
 
-			// TODO
+			while (true)
+			{
+
+			}
 			
 			return nextItem;
 		}
@@ -576,8 +578,11 @@ namespace PertNetworkUIExtension
 		// ---------------------------------------
 		// Internals
 
-		private Point Increment(Point pos, Direction dir, int increment)
+		private bool Increment(ref Point pos, Direction dir, int increment)
 		{
+			if (!CanIncrement(pos, dir, increment))
+				return false;
+
 			switch (dir)
 			{
 			case Direction.Left:
@@ -597,26 +602,30 @@ namespace PertNetworkUIExtension
 				break;
 			}
 
-			return pos;
+			return true;
 		}
 
 		private bool CanIncrement(Point pos, Direction dir, int increment)
 		{
-			switch (dir)
+			if (increment > 0)
 			{
-			case Direction.Left:
-				return (pos.X > 0);
+				switch (dir)
+				{
+				case Direction.Left:
+					return (pos.X > 0);
 
-			case Direction.Up:
-				return (pos.Y > 0);
+				case Direction.Up:
+					return (pos.Y > 0);
 
-			case Direction.Right:
-				return (pos.X < m_MaxPos.X);
+				case Direction.Right:
+					return (pos.X < m_MaxPos.X);
 
-			case Direction.Down:
-				return (pos.Y < m_MaxPos.Y);
+				case Direction.Down:
+					return (pos.Y < m_MaxPos.Y);
+				}
 			}
 
+			// all else
 			return false;
 		}
 	}
