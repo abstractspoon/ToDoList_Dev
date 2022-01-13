@@ -36,7 +36,7 @@ protected:
 
 protected:
 	virtual LRESULT WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
-	BOOL WantPrompt(BOOL bCheckFocus = TRUE);
+	BOOL WantPrompt(BOOL bCheckEditFocus = TRUE);
 	void DrawPrompt(HDC hdc);
 };
 

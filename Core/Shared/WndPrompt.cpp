@@ -106,29 +106,24 @@ LRESULT CWndPrompt::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 	return CSubclassWnd::Default();
 }
 
-BOOL CWndPrompt::WantPrompt(BOOL bCheckFocus) 
+BOOL CWndPrompt::WantPrompt(BOOL bCheckEditFocus)
 { 
 	BOOL bWantPrompt = (SendMessage(m_nCheckMsg) == m_lCheckResult); 
-	HWND hWnd = GetHwnd();
 
 	if (bWantPrompt)
 	{
+		// Extra processing
 		if (CWinClasses::IsEditControl(m_sClass))
 		{
-			if (bCheckFocus)
-				bWantPrompt = (GetFocus() != hWnd);
+			bWantPrompt = (IsWindowEnabled() && (m_bIncReadonlyEdit || !HasStyle(ES_READONLY)));
 
-			if (bWantPrompt)
-				bWantPrompt = (IsWindowEnabled() && (m_bIncReadonlyEdit || !(GetStyle() & ES_READONLY)));
+			if (bWantPrompt && bCheckEditFocus)
+				bWantPrompt = !IsWindowFocused();
 		}
 		else if (CWinClasses::IsComboBox(m_sClass))
 		{
-			// Allow combos without edit fields to display prompts even when focused
-// 			if (bCheckFocus)
-// 				bWantPrompt = (GetFocus() != hWnd);
-			
-			if (bWantPrompt)
-				bWantPrompt = IsWindowEnabled();
+			// Note: Focused combos will display prompt
+			bWantPrompt = IsWindowEnabled();
 		}
 	}
 

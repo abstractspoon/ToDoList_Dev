@@ -77,6 +77,7 @@ public:
 	inline void Invalidate(BOOL bErase = TRUE) const { ::InvalidateRect(m_hWndHooked, NULL, bErase); }
 	inline BOOL IsWindowEnabled() const { return ::IsWindowEnabled(m_hWndHooked); }
 	inline BOOL IsWindowVisible() const { return ::IsWindowVisible(m_hWndHooked); }
+	inline BOOL IsWindowFocused() const { return (::GetFocus() == m_hWndHooked); }
 
 	void ClientToWindow(LPRECT pRect) const;
 	void ScreenToClient(LPRECT pRect) const;
