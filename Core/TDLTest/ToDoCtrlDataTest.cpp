@@ -177,7 +177,7 @@ void CToDoCtrlDataTest::TestDataModelCalculationPerformance(const CToDoCtrlData&
 		calc.GetTaskTimeSpent(dwTaskID, TDCU_DAYS);
 		calc.GetTaskPercentDone(dwTaskID);
 		calc.GetTaskCost(dwTaskID);
-		calc.GetTaskPriority(dwTaskID);
+		calc.GetTaskPriority(dwTaskID, TRUE);
 		calc.GetTaskRisk(dwTaskID);
 		calc.GetTaskDueDate(dwTaskID);
 		calc.GetTaskStartDate(dwTaskID);
@@ -222,7 +222,7 @@ void CToDoCtrlDataTest::TestDataModelFormattingPerformance(const CToDoCtrlData& 
 		formatter.GetTaskTimeRemaining(dwTaskID);
 		formatter.GetTaskPercentDone(dwTaskID);
 		formatter.GetTaskCost(dwTaskID);
-		formatter.GetTaskPriority(dwTaskID);
+		formatter.GetTaskPriority(dwTaskID, FALSE);
 		formatter.GetTaskRisk(dwTaskID);
 		formatter.GetTaskRecentlyModified(dwTaskID);
 		formatter.GetTaskDoneDate(dwTaskID);

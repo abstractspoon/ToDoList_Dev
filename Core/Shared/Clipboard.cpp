@@ -238,7 +238,7 @@ CString& CClipboard::UnpackageHTMLFragment(CString& sContent, CString& sSourceUr
 			nSrcUrl += SRCURL.GetLength();
 
 			int nEOL = sContent.Find('\n', nSrcUrl);
-			ASSERT(nEOL > nSrcUrl);
+			ASSERT(nEOL >= nSrcUrl);
 
 			if (nEOL > nSrcUrl)
 			{

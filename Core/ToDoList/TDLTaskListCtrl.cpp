@@ -90,6 +90,7 @@ CTDLTaskListCtrl::CTDLTaskListCtrl(const CTDCImageList& ilIcons,
 	CTDLTaskCtrlBase(ilIcons, data, find, styles, tld, mapVisibleCols, aCustAttribDefs),
 	m_nGroupBy(TDCC_NONE),
 	m_bSortGroupsAscending(TRUE),
+	m_bDeletingGroupHeaders(FALSE),
 	m_crGroupHeaderBkgnd(CLR_NONE)
 {
 }
@@ -164,6 +165,45 @@ void CTDLTaskListCtrl::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 		DWORD dwLabelTips = (styles.IsStyleEnabled(TDCS_SHOWINFOTIPS) ? 0 : LVS_EX_LABELTIP);
 		ListView_SetExtendedListViewStyleEx(Tasks(), LVS_EX_LABELTIP, dwLabelTips);
 	}
+
+	if (IsGrouped())
+	{
+		BOOL bRebuildHeaders = FALSE;
+
+		POSITION pos = styles.GetStartPosition();
+		TDC_STYLE nStyle;
+		BOOL bEnabled;
+
+		while (pos && !bRebuildHeaders)
+		{
+			styles.GetNextAssoc(pos, nStyle, bEnabled);
+
+			switch (nStyle)
+			{
+			case TDCS_DUEHAVEHIGHESTPRIORITY:
+			case TDCS_DONEHAVELOWESTPRIORITY:
+			case TDCS_USEHIGHESTPRIORITY:
+			case TDCS_INCLUDEDONEINPRIORITYCALC:
+				bRebuildHeaders = (m_nGroupBy == TDCC_PRIORITY);
+				break;
+
+			case TDCS_DONEHAVELOWESTRISK:
+			case TDCS_USEHIGHESTRISK:
+			case TDCS_INCLUDEDONEINRISKCALC:
+				bRebuildHeaders = (m_nGroupBy == TDCC_RISK);
+				break;
+			}
+		}
+
+		if (bRebuildHeaders)
+		{
+			UpdateGroupHeaders();
+
+			if (bAllowResort)
+				DoSort();
+		}
+	}
+
 }
 
 BOOL CTDLTaskListCtrl::BuildColumns()
@@ -409,7 +449,7 @@ UINT CTDLTaskListCtrl::GetGroupCount() const
 	return (IsGrouped() ? m_mapGroupHeaders.GetCount() : 0);
 }
 
-BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy)
+BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending)
 {
 	if (!CanGroupBy(nGroupBy))
 		return FALSE;
@@ -418,6 +458,9 @@ BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy)
 		return TRUE;
 
 	m_nGroupBy = nGroupBy;
+
+	if (bSortGroupsAscending != -1)
+		m_bSortGroupsAscending = bSortGroupsAscending;
 
 	if (GetSafeHwnd())
 	{
@@ -491,16 +534,24 @@ BOOL CTDLTaskListCtrl::UpdateGroupHeaders()
 	if (mapNewHeaders.MatchAll(mapOldHeaders))
 		return FALSE;
 
-	// Update headers
+	// Delete existing headers
 	CHoldRedraw hr(*this);
-	m_mapGroupHeaders.RemoveAll();
 
-	// Remove old headers
-	// Note: column items will be automatically removed
-	int nItem = aOldHeaderItems.GetSize();
+	TDCSELECTIONCACHE cache;
+	CacheSelection(cache, FALSE);
 
-	while (nItem--)
-		m_lcTasks.DeleteItem(aOldHeaderItems[nItem]); 
+	{
+		// Prevent us forwarding spurious selections changes to
+		// our parent while we remove the existing group headers
+		CAutoFlag af(m_bDeletingGroupHeaders, TRUE);
+		int nItem = aOldHeaderItems.GetSize();
+
+		// Note: column items will be automatically removed
+		while (nItem--)
+			m_lcTasks.DeleteItem(aOldHeaderItems[nItem]); 
+
+		m_mapGroupHeaders.RemoveAll();
+	}
 
 	// Add new headers
 	DWORD dwNewHeaderID = 0xffffffff;
@@ -520,6 +571,8 @@ BOOL CTDLTaskListCtrl::UpdateGroupHeaders()
 
 	if (mapNewHeaders.GetCount() != mapOldHeaders.GetCount())
 		PostResize();
+
+	RestoreSelection(cache, TRUE);
 
 	return TRUE;
 }
@@ -572,7 +625,7 @@ BOOL CTDLTaskListCtrl::TaskHasGroupValue(DWORD dwTaskID) const
 	case TDCC_ALLOCTO:		return pTDI->aAllocTo.GetSize();
 	case TDCC_TAGS:			return pTDI->aTags.GetSize();
 
-	case TDCC_PRIORITY:		return (m_calculator.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID)) != FM_NOPRIORITY);
+	case TDCC_PRIORITY:		return (m_calculator.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID), TRUE) != FM_NOPRIORITY);
 	case TDCC_RISK:			return (m_calculator.GetTaskRisk(pTDI, m_data.LocateTask(dwTaskID)) != FM_NORISK);
 
 	case TDCC_ALLOCBY:		return !pTDI->sAllocBy.IsEmpty();
@@ -619,8 +672,8 @@ CString CTDLTaskListCtrl::GetTaskGroupValue(DWORD dwTaskID) const
 		case TDCC_ALLOCTO:		sGroupBy = m_formatter.GetTaskAllocTo(pTDI);	break;
 		case TDCC_TAGS:			sGroupBy = m_formatter.GetTaskTags(pTDI);		break;
 
-		case TDCC_PRIORITY:		sGroupBy = m_formatter.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID));	break;
-		case TDCC_RISK:			sGroupBy = m_formatter.GetTaskRisk(pTDI, m_data.LocateTask(dwTaskID));		break;
+		case TDCC_PRIORITY:		sGroupBy = m_formatter.GetTaskPriority(pTDI, m_data.LocateTask(dwTaskID), TRUE); break;
+		case TDCC_RISK:			sGroupBy = m_formatter.GetTaskRisk(pTDI, m_data.LocateTask(dwTaskID)); break;
 
 		case TDCC_ALLOCBY:		sGroupBy = pTDI->sAllocBy;	break;
 		case TDCC_VERSION:		sGroupBy = pTDI->sVersion;	break;
@@ -710,13 +763,13 @@ void CTDLTaskListCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 {
 	if (IsGrouped())
 	{
-		BOOL bUpdateGroups = (mapAttribIDs.Has(TDC::MapColumnToAttribute(m_nGroupBy)) ||
-							  mapAttribIDs.Has(TDCA_UNDO) ||
+		BOOL bUpdateGroups = (mapAttribIDs.Has(TDCA_UNDO) ||
 							  mapAttribIDs.Has(TDCA_ALL) ||
 							  mapAttribIDs.Has(TDCA_PASTE) ||
 							  mapAttribIDs.Has(TDCA_DELETE) ||
 							  mapAttribIDs.Has(TDCA_ARCHIVE) ||
-							  mapAttribIDs.Has(TDCA_MERGE));
+							  mapAttribIDs.Has(TDCA_MERGE) ||
+							  TDSORTCOLUMN(m_nGroupBy).Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs));
 
 		if (bUpdateGroups)
 		{
@@ -1447,6 +1500,8 @@ DWORD CTDLTaskListCtrl::GetNextSelectedTaskID(POSITION& pos) const
 BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 {
 	// only called for the list that currently has the focus
+	if (m_bDeletingGroupHeaders)
+		return TRUE; // eat
 	
 	// Don't notify if the up/down cursor key is still pressed
 	if (Misc::IsCursorKeyPressed(MKC_UPDOWN))

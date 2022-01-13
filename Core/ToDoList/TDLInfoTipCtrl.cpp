@@ -241,7 +241,7 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	ADDINFOITEM(TDCA_PATH, IDS_TDC_COLUMN_PATH, m_formatter.GetTaskPath(pTDI, pTDS));
 	ADDINFOITEM(TDCA_PERCENT, IDS_TDLBC_PERCENT, m_formatter.GetTaskPercentDone(pTDI, pTDS));
 	ADDINFOITEM(TDCA_POSITION, IDS_TDLBC_POS, m_formatter.GetTaskPosition(pTDS));
-	ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, m_formatter.GetTaskPriority(pTDI, pTDS));
+	ADDINFOITEM(TDCA_PRIORITY, IDS_TDLBC_PRIORITY, m_formatter.GetTaskPriority(pTDI, pTDS, FALSE));
 	ADDINFOITEM(TDCA_RECURRENCE, IDS_TDLBC_RECURRENCE, m_formatter.GetTaskRecurrence(pTDI));
 	ADDINFOITEM(TDCA_RISK, IDS_TDLBC_RISK, m_formatter.GetTaskRisk(pTDI, pTDS));
 	ADDINFOITEM(TDCA_STATUS, IDS_TDLBC_STATUS, m_formatter.GetTaskStatus(pTDI, pTDS, sCompletionStatus));

@@ -221,8 +221,10 @@ public:
 	void GetDueTaskColors(COLORREF& crDue, COLORREF& crDueToday) const { crDue = m_crDue; crDueToday = m_crDueToday; }
 	BOOL HasDueTodayColor() const { return HasColor(m_crDueToday); }
 	BOOL HasReferenceTaskColor() const { return HasColor(m_crReference); }
+
 	BOOL ModCausesTaskTextColorChange(TDC_ATTRIBUTE nModType) const;
 	BOOL ModsCauseTaskTextColorChange(const CTDCAttributeMap& mapAttribIDs) const;
+	void GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAttributeMap& mapAttribIDs) const;
 
 	void SetReadOnly(bool bReadOnly) { m_bReadOnly = bReadOnly; }
 	void Resize(const CRect& rect);

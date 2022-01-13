@@ -53,7 +53,7 @@ public:
 	double GetTaskStartDate(DWORD dwTaskID) const;
 	double GetTaskLastModifiedDate(DWORD dwTaskID) const;
 	CString GetTaskLastModifiedBy(DWORD dwTaskID) const;
-	int GetTaskPriority(DWORD dwTaskID, BOOL bIncludeDue = TRUE) const;
+	int GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
 	int GetTaskRisk(DWORD dwTaskID) const;
 	int GetTaskPercentDone(DWORD dwTaskID) const;
 	double GetTaskCost(DWORD dwTaskID) const;
@@ -77,7 +77,7 @@ public:
 	double GetTaskStartDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskLastModifiedDate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskLastModifiedBy(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	int GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue = TRUE) const;
+	int GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
 	int GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	double GetTaskTimeEstimate(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, TDC_UNITS nUnits) const;
@@ -146,7 +146,7 @@ public:
 	CString GetTaskPercentDone(DWORD dwTaskID) const;
 	CString GetTaskCommentSize(DWORD dwTaskID) const;
 	CString GetTaskCost(DWORD dwTaskID) const;
-	CString GetTaskPriority(DWORD dwTaskID) const;
+	CString GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const;
 	CString GetTaskRisk(DWORD dwTaskID) const;
 	CString GetTaskStatus(DWORD dwTaskID, const CString& sCompletionStatus) const;
 	CString GetTaskRecentlyModified(DWORD dwTaskID) const;
@@ -170,7 +170,7 @@ public:
 	CString GetTaskPercentDone(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskCommentSize(const TODOITEM* pTDI) const;
 	CString GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
-	CString GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
+	CString GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const;
 	CString GetTaskRisk(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;
 	CString GetTaskStatus(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const CString& sCompletionStatus) const;
 	CString GetTaskRecentlyModified(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const;

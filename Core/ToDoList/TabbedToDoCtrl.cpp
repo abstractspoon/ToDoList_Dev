@@ -202,11 +202,23 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	// Build the list-specific comboboxes
 	BuildListGroupByCombo();
-
-	m_cbListOptions.BuildCombo();
-	m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
+	BuildListOptionsCombo();
 
 	return FALSE;
+}
+
+void CTabbedToDoCtrl::BuildListOptionsCombo()
+{
+	// once only
+	if (!m_cbListOptions.GetCount())
+	{
+		m_cbListOptions.BuildCombo();
+
+		m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(CPreferences(), GetPreferencesKey());
+		m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
+
+		m_mgrPrompts.SetComboPrompt(m_cbListOptions, IDS_TDC_NONE);
+	}
 }
 
 void CTabbedToDoCtrl::BuildListGroupByCombo()
@@ -541,10 +553,11 @@ void CTabbedToDoCtrl::LoadState()
 	}
 
 	// Lisview options
-	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
-	m_taskList.SetGroupBy(m_nListViewGroupBy);
+	m_dwListOptions = CTDLTaskListCtrlOptionsComboBox::LoadOptions(prefs, sKey);
+	m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 
-	m_dwListOptions = m_cbListOptions.LoadOptions(prefs, sKey);
+	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
+	m_taskList.SetGroupBy(m_nListViewGroupBy, Misc::HasFlag(m_dwListOptions, LVO_SORTGROUPSASCENDING));
 
 	// Last active view
 	FTC_VIEW nCurView = GetTaskView();
@@ -575,7 +588,7 @@ void CTabbedToDoCtrl::SaveState()
 	prefs.WriteProfileInt(sKey, _T("ListViewVisible"), IsListViewTabShowing());
 	prefs.WriteProfileInt(sKey, _T("ListViewGroupBy"), m_nListViewGroupBy);
 	
-	m_cbListOptions.SaveOptions(m_dwListOptions, prefs, sKey);
+	CTDLTaskListCtrlOptionsComboBox::SaveOptions(m_dwListOptions, prefs, sKey);
 
 	// save hidden extensions
 	CStringArray aVisTypeIDs, aTypeIDs;
@@ -1954,7 +1967,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 
 		// Note: We only save off the attribute if (dwTaskID != 0)
 		// because 'SetSelectedTask*' will already have handled it
-		GetAttributesAffectedByMod(mod.nAttrib, mapModAttribs);
+		m_taskTree.GetAttributesAffectedByMod(mod.nAttrib, mapModAttribs);
 	}
 
 	return bChange;

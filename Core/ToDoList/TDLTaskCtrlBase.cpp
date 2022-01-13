@@ -552,14 +552,13 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 	BOOL bResort = FALSE;
 	BOOL bSwapSides = FALSE;
 
-	for (int nItem = TDCS_FIRST; nItem < TDCS_LAST; nItem++)
+	POSITION pos = styles.GetStartPosition();
+	TDC_STYLE nStyle;
+	BOOL bEnabled;
+
+	while (pos)
 	{
-		TDC_STYLE nStyle = (TDC_STYLE)nItem;
-
-		if (!styles.HasStyle(nStyle))
-			continue;
-
-		BOOL bEnable = styles.IsStyleEnabled(nStyle);
+		styles.GetNextAssoc(pos, nStyle, bEnabled);
 
 		switch (nStyle)
 		{
@@ -580,7 +579,7 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 			break;
 
 		case TDCS_SHOWDATESINISO:
-			m_dateTimeWidths.SetIsoFormat(bEnable);
+			m_dateTimeWidths.SetIsoFormat(bEnabled);
 			bInvalidateAll = TRUE;
 			break;
 
@@ -600,7 +599,7 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 			break;
 
 		case TDCS_RIGHTSIDECOLUMNS:
-			bSwapSides = (bEnable != IsShowingColumnsOnRight());
+			bSwapSides = (bEnabled != IsShowingColumnsOnRight());
 			break;
 
 		case TDCS_DISPLAYHMSTIMEFORMAT:
@@ -697,16 +696,16 @@ void CTDLTaskCtrlBase::OnStylesUpdated(const CTDCStyleMap& styles, BOOL bAllowRe
 			break;
 
 		case TDCS_HIDEPANESPLITBAR:
-			CTreeListSyncer::SetSplitBarWidth(bEnable ? 0 : 10);
+			CTreeListSyncer::SetSplitBarWidth(bEnabled ? 0 : 10);
 			break;
 
 		case TDCS_ALLOWTREEITEMCHECKBOX:
-			SetTasksImageList(m_ilCheckboxes, TRUE, (bEnable && !IsColumnShowing(TDCC_DONE)));
+			SetTasksImageList(m_ilCheckboxes, TRUE, (bEnabled && !IsColumnShowing(TDCC_DONE)));
 			break;
 
 		case TDCS_COLUMNHEADERSORTING:
 			{
-				DWORD dwAdd(bEnable ? HDS_BUTTONS : 0), dwRemove(bEnable ? 0 : HDS_BUTTONS);
+				DWORD dwAdd(bEnabled ? HDS_BUTTONS : 0), dwRemove(bEnabled ? 0 : HDS_BUTTONS);
 
 				if (m_hdrTasks.GetSafeHwnd())
 					m_hdrTasks.ModifyStyle(dwRemove, dwAdd);
@@ -2113,7 +2112,7 @@ BOOL CTDLTaskCtrlBase::GetTaskTextColors(const TODOITEM* pTDI, const TODOSTRUCTU
 				}
 				else
 				{
-					nPriority = m_calculator.GetTaskPriority(pTDI, pTDS);
+					nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, TRUE);
 				}
 
 				if (nPriority != FM_NOPRIORITY)
@@ -3874,7 +3873,7 @@ CString CTDLTaskCtrlBase::GetTaskColumnText(DWORD dwTaskID, const TODOITEM* pTDI
 
 	case TDCC_PRIORITY:
 		if (!bDrawing || !HasStyle(TDCS_HIDEPRIORITYNUMBER))
-			return m_formatter.GetTaskPriority(pTDI, pTDS);
+			return m_formatter.GetTaskPriority(pTDI, pTDS, FALSE);
 		break;
 
 	default:
@@ -5388,7 +5387,7 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 BOOL CTDLTaskCtrlBase::SelectionHasIncompleteDependencies(CString& sIncomplete) const
 {
 	POSITION pos = GetFirstSelectedTaskPos();
-
+	
 	while (pos)
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);

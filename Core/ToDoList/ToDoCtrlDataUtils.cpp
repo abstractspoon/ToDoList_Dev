@@ -1607,7 +1607,7 @@ int CTDCTaskComparer::CalcTaskPriority(BOOL bCheckDueToday, BOOL bDone, const TO
 		return (pTDI->nPriority + 11);
 
 	if (bUseHighestPriority)
-		return m_calculator.GetTaskPriority(pTDI, pTDS);
+		return m_calculator.GetTaskPriority(pTDI, pTDS, TRUE);
 
 	// else 
 	return pTDI->nPriority;
@@ -2582,13 +2582,13 @@ double CTDCTaskCalculator::GetEarliestDueDate() const
 	return ((dEarliest == DBL_MAX) ? 0.0 : dEarliest);
 }
 
-int CTDCTaskCalculator::GetTaskPriority(DWORD dwTaskID, BOOL bIncludeDue) const
+int CTDCTaskCalculator::GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, FM_NOPRIORITY);
 
-	return GetTaskPriority(pTDI, pTDS, bIncludeDue);
+	return GetTaskPriority(pTDI, pTDS, bCheckOverdue);
 }
 
 int CTDCTaskCalculator::GetTaskRisk(DWORD dwTaskID) const
@@ -2886,7 +2886,7 @@ double CTDCTaskCalculator::GetEarliestDate(double dDate1, double dDate2, BOOL bN
 	return dtMin.m_dt;
 }
 
-int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bIncludeDue) const
+int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const
 {
 	// sanity check
 	ASSERT (pTDS && pTDI);
@@ -2902,7 +2902,7 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 	}
 	else if (nHighest < MAX_TDPRIORITY)
 	{
-		if (bIncludeDue && m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && IsTaskOverDue(pTDI, pTDS))
+		if (bCheckOverdue && m_data.HasStyle(TDCS_DUEHAVEHIGHESTPRIORITY) && IsTaskOverDue(pTDI, pTDS))
 		{
 			nHighest = MAX_TDPRIORITY;
 		}
@@ -2920,7 +2920,7 @@ int CTDCTaskCalculator::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTUR
 				{
 					if (m_data.HasStyle(TDCS_INCLUDEDONEINPRIORITYCALC) || !IsTaskDone(pTDIChild, pTDSChild, TDCCHECKALL))
 					{
-						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bIncludeDue);
+						int nChildHighest = GetTaskPriority(pTDIChild, pTDSChild, bCheckOverdue);
 
 						// optimization
 						if (nChildHighest == MAX_TDPRIORITY)
@@ -3298,7 +3298,7 @@ BOOL CTDCTaskCalculator::GetTaskCustomAttributeOperandValue(const TODOITEM* pTDI
 	case TDCA_PRIORITY:
 		{
 			if (bAggregated)
-				dValue = GetTaskPriority(pTDI, pTDS);
+				dValue = GetTaskPriority(pTDI, pTDS, TRUE);
 			else
 				dValue = pTDI->nPriority;
 		}
@@ -3702,13 +3702,13 @@ CString CTDCTaskFormatter::GetTaskCost(const TODOITEM* pTDI, const TODOSTRUCTURE
 	return EMPTY_STR;
 }
 
-CString CTDCTaskFormatter::GetTaskPriority(DWORD dwTaskID) const
+CString CTDCTaskFormatter::GetTaskPriority(DWORD dwTaskID, BOOL bCheckOverdue) const
 {
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 	GET_TDI_TDS(dwTaskID, pTDI, pTDS, EMPTY_STR);
 
-	return GetTaskPriority(pTDI, pTDS);
+	return GetTaskPriority(pTDI, pTDS, bCheckOverdue);
 }
 
 CString CTDCTaskFormatter::GetTaskRisk(DWORD dwTaskID) const
@@ -3765,13 +3765,13 @@ CString CTDCTaskFormatter::GetTaskStatus(const TODOITEM* pTDI, const TODOSTRUCTU
 	return pTDI->sStatus;
 }
 
-CString CTDCTaskFormatter::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS) const
+CString CTDCTaskFormatter::GetTaskPriority(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bCheckOverdue) const
 {
 	ASSERT(pTDI && pTDS);
 
 	if (pTDI && pTDS)
 	{
-		int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, FALSE);
+		int nPriority = m_calculator.GetTaskPriority(pTDI, pTDS, bCheckOverdue);
 
 		if (nPriority != FM_NOPRIORITY)
 			return Misc::Format(nPriority);
