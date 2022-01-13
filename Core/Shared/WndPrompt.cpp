@@ -123,8 +123,9 @@ BOOL CWndPrompt::WantPrompt(BOOL bCheckFocus)
 		}
 		else if (CWinClasses::IsComboBox(m_sClass))
 		{
-			if (bCheckFocus)
-				bWantPrompt = (GetFocus() != hWnd);
+			// Allow combos without edit fields to display prompts even when focused
+// 			if (bCheckFocus)
+// 				bWantPrompt = (GetFocus() != hWnd);
 			
 			if (bWantPrompt)
 				bWantPrompt = IsWindowEnabled();
@@ -167,11 +168,15 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	rClient.DeflateRect(2, 1, 2, 0);
 
 	UINT nFlags = (DT_TOP | DT_NOPREFIX | (bCentred ? DT_CENTER : DT_LEFT));
+	COLORREF crText = GetTextColor(hWnd);
 
 	if (CWinClasses::IsComboBox(szClass))
 	{
 		nFlags |= (DT_VCENTER | DT_SINGLELINE);
 		rClient.DeflateRect(2, 0);
+
+		if (::GetFocus() == hWnd)
+			crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
 	}
 	else if (CWinClasses::IsEditControl(hWnd))
 	{
@@ -194,7 +199,7 @@ void CWndPrompt::DrawPrompt(HWND hWnd, LPCTSTR szPrompt, HDC hdc, BOOL bCentred,
 	}
 
 	::SetBkMode(hdc, TRANSPARENT);
-	::SetTextColor(hdc, GetTextColor(hWnd));
+	::SetTextColor(hdc, crText);
 	
 	// draw prompt
 	::DrawText(hdc, szPrompt, -1, rClient, nFlags);

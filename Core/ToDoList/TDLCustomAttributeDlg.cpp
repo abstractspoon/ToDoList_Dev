@@ -1041,6 +1041,8 @@ BOOL CTDLCustomAttributeDlg::OnInitDialog()
 	ListView_SetImageList(m_lcAttributes, m_ilCheckBoxes, LVSIL_SMALL);
 	CThemed::SetWindowTheme(&m_lcAttributes, _T("Explorer"));
 
+	m_mgrPrompts.SetComboPrompt(m_cbFeatures, IDS_TDC_NONE);
+
 	return TRUE;  // return TRUE unless you set the focus to a control
 	              // EXCEPTION: OCX Property Pages should return FALSE
 }

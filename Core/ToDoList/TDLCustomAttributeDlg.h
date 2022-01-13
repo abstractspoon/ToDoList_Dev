@@ -21,6 +21,7 @@
 #include "..\shared\iconbutton.h"
 #include "..\shared\checklistboxex.h"
 #include "..\shared\enlistctrl.h"
+#include "..\shared\wndprompt.h"
 
 #include "..\Interfaces\uithemefile.h"
 
@@ -202,6 +203,7 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CFileEdit	m_eTaskfile;
 	CEnEdit		m_eColumnTitle;
+	CWndPromptManager m_mgrPrompts;
 
 	CCustomAttributeListPage m_pageList;
 	CCustomAttributeCalcPage m_pageCalc;
