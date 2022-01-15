@@ -67,7 +67,7 @@ namespace PertNetworkUIExtension
 			return true;
 		}
 
-		public HashSet<uint> GetAllDependents()
+		public HashSet<uint> GetAllDependentIds()
 		{
 			var dependentIds = new HashSet<uint>();
 			
@@ -80,17 +80,17 @@ namespace PertNetworkUIExtension
 			return dependentIds;
 		}
 
-		public HashSet<uint> GetAllTerminators(HashSet<uint> dependentIds)
+		public HashSet<uint> GetAllEndIds(HashSet<uint> dependentIds)
 		{
-			HashSet<uint> terminatorIds = new HashSet<uint>();
+			HashSet<uint> endIds = new HashSet<uint>();
 
 			foreach (var item in Values)
 			{
 				if ((item.DependencyUniqueIds.Count > 0) && !dependentIds.Contains(item.UniqueId))
-					terminatorIds.Add(item.UniqueId);
+					endIds.Add(item.UniqueId);
 			}
 
-			return terminatorIds;
+			return endIds;
 		}
 
 		public List<NetworkItem> GetItemDependents(NetworkItem item)
@@ -141,25 +141,25 @@ namespace PertNetworkUIExtension
 
 			Clear();
 
-			// Get the set of all tasks on whom other tasks are dependent
-			HashSet<uint> dependentIds = allItems.GetAllDependents();
+			// Get the set of all items on whom other items are dependent
+			HashSet<uint> dependentIds = allItems.GetAllDependentIds();
 
-			// Get the set of all tasks which have dependencies but 
-			// on whom NO other tasks are dependent
-			HashSet<uint> terminatorIds = allItems.GetAllTerminators(dependentIds);
+			// Get the set of all items which have dependencies but 
+			// on whom NO other items are dependent
+			HashSet<uint> endIds = allItems.GetAllEndIds(dependentIds);
 
-			// Build the groups by working backwards from each end task
+			// Build the groups by working backwards from each end item
 			maxPos = Point.Empty;
 
-			foreach (var termId in terminatorIds)
+			foreach (var endId in endIds)
 			{
-				NetworkItem termItem = allItems.GetItem(termId);
+				NetworkItem endItem = allItems.GetItem(endId);
 				Point groupMaxPos = new Point(0, maxPos.Y);
 
 				if (Count > 0)
 					groupMaxPos.Y++;
 
-				if (AddGroup(termItem, allItems, ref groupMaxPos))
+				if (AddGroup(endItem, allItems, ref groupMaxPos))
 				{
 					maxPos.Y = groupMaxPos.Y;
 					maxPos.X = Math.Max(maxPos.X, groupMaxPos.X);
@@ -169,11 +169,11 @@ namespace PertNetworkUIExtension
 			return Count;
 		}
 
-		private bool AddGroup(NetworkItem termItem, NetworkItems allItems, ref Point maxPos)
+		private bool AddGroup(NetworkItem endItem, NetworkItems allItems, ref Point maxPos)
 		{
 			var group = new NetworkGroup();
 
-			if (!group.Build(termItem, allItems, maxPos))
+			if (!group.Build(endItem, allItems, maxPos))
 				return false;
 
 			Add(group);
@@ -283,13 +283,13 @@ namespace PertNetworkUIExtension
 			get { return m_Items.Values; }
 		}
 
-		public bool Build(NetworkItem termItem, NetworkItems allItems, Point startPos)
+		public bool Build(NetworkItem endItem, NetworkItems allItems, Point startPos)
 		{
 			Clear();
 
 			Point maxPos = startPos;
 
-			if (!AddTask(termItem, allItems, ref maxPos))
+			if (!AddItem(endItem, allItems, ref maxPos))
 				return false;
 
 			MaxPos = maxPos;
@@ -313,7 +313,7 @@ namespace PertNetworkUIExtension
 			MaxPos = Point.Empty;
 		}
 
-		private bool AddTask(NetworkItem item, NetworkItems allItems, ref Point maxPos)
+		private bool AddItem(NetworkItem item, NetworkItems allItems, ref Point maxPos)
 		{
 			// Must be unique
 			if (m_Items.ContainsKey(item.UniqueId))
@@ -342,7 +342,7 @@ namespace PertNetworkUIExtension
 						else
 							firstDepend = false;
 
-						AddTask(dependItem, allItems, ref maxPos); // RECURSIVE call
+						AddItem(dependItem, allItems, ref maxPos); // RECURSIVE call
 
 						item.Position.X = Math.Max(dependItem.Position.X + 1, item.Position.X);
 					}
