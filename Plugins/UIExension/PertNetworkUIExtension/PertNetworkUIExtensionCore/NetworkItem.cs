@@ -39,6 +39,78 @@ namespace PertNetworkUIExtension
 
 	// ------------------------------------------------------------
 
+	public class NetworkItems : Dictionary<uint, NetworkItem>
+	{
+		public NetworkItem GetItem(uint uniqueId)
+		{
+			NetworkItem item = null;
+			TryGetValue(uniqueId, out item);
+
+			return item;
+		}
+
+		public bool DeleteItem(uint uniqueId)
+		{
+			if (!ContainsKey(uniqueId))
+				return false;
+
+			Remove(uniqueId);
+			return true;
+		}
+
+		public bool AddItem(NetworkItem item)
+		{
+			if (ContainsKey(item.UniqueId))
+				return false;
+
+			Add(item.UniqueId, item);
+			return true;
+		}
+
+		public HashSet<uint> GetAllDependentIds()
+		{
+			var dependentIds = new HashSet<uint>();
+			
+			foreach (var item in Values)
+			{
+				foreach (var depend in item.DependencyUniqueIds)
+					dependentIds.Add(depend);
+			}
+
+			return dependentIds;
+		}
+
+		public HashSet<uint> GetAllEndIds(HashSet<uint> dependentIds)
+		{
+			HashSet<uint> endIds = new HashSet<uint>();
+
+			foreach (var item in Values)
+			{
+				if ((item.DependencyUniqueIds.Count > 0) && !dependentIds.Contains(item.UniqueId))
+					endIds.Add(item.UniqueId);
+			}
+
+			return endIds;
+		}
+
+		public List<NetworkItem> GetItemDependents(NetworkItem item)
+		{
+			return Values.Where(a => a.DependencyUniqueIds.Contains(item.UniqueId)).ToList();
+		}
+
+		public List<NetworkItem> GetItemDependencies(NetworkItem item)
+		{
+			var dependencies = new List<NetworkItem>();
+
+			foreach (uint dependId in item.DependencyUniqueIds)
+				dependencies.Add(GetItem(dependId));
+
+			return dependencies;
+		}
+	}
+
+	// ------------------------------------------------------------
+
 	public class NetworkGroup
 	{
 		private NetworkItems m_Items;
@@ -240,78 +312,6 @@ namespace PertNetworkUIExtension
 			}
 
 			return false;
-		}
-	}
-
-	// ------------------------------------------------------------
-
-	public class NetworkItems : Dictionary<uint, NetworkItem>
-	{
-		public NetworkItem GetItem(uint uniqueId)
-		{
-			NetworkItem item = null;
-			TryGetValue(uniqueId, out item);
-
-			return item;
-		}
-
-		public bool DeleteItem(uint uniqueId)
-		{
-			if (!ContainsKey(uniqueId))
-				return false;
-
-			Remove(uniqueId);
-			return true;
-		}
-
-		public bool AddItem(NetworkItem item)
-		{
-			if (ContainsKey(item.UniqueId))
-				return false;
-
-			Add(item.UniqueId, item);
-			return true;
-		}
-
-		public HashSet<uint> GetAllDependentIds()
-		{
-			var dependentIds = new HashSet<uint>();
-			
-			foreach (var item in Values)
-			{
-				foreach (var depend in item.DependencyUniqueIds)
-					dependentIds.Add(depend);
-			}
-
-			return dependentIds;
-		}
-
-		public HashSet<uint> GetAllEndIds(HashSet<uint> dependentIds)
-		{
-			HashSet<uint> endIds = new HashSet<uint>();
-
-			foreach (var item in Values)
-			{
-				if ((item.DependencyUniqueIds.Count > 0) && !dependentIds.Contains(item.UniqueId))
-					endIds.Add(item.UniqueId);
-			}
-
-			return endIds;
-		}
-
-		public List<NetworkItem> GetItemDependents(NetworkItem item)
-		{
-			return Values.Where(a => a.DependencyUniqueIds.Contains(item.UniqueId)).ToList();
-		}
-
-		public List<NetworkItem> GetItemDependencies(NetworkItem item)
-		{
-			var dependencies = new List<NetworkItem>();
-
-			foreach (uint dependId in item.DependencyUniqueIds)
-				dependencies.Add(GetItem(dependId));
-
-			return dependencies;
 		}
 	}
 
