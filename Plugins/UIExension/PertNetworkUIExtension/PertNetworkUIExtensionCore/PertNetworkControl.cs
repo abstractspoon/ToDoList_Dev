@@ -139,6 +139,8 @@ namespace PertNetworkUIExtension
 //		private Size CheckboxSize;
 		private NetworkItem PreviouslySelectedItem;
 
+		private List<NetworkPath> CriticalPaths;
+
 		// -------------------------------------------------------------------------
 
 		public PertNetworkControl(Translator trans, UIExtension.TaskIcon icons)
@@ -205,6 +207,8 @@ namespace PertNetworkUIExtension
 			}
 
 			UpdateTaskAttributes(tasks);
+
+			CriticalPaths = UpdateCriticalPaths();
 		}
 
 		public PertNetworkOption Options
@@ -692,7 +696,32 @@ namespace PertNetworkUIExtension
 			graphics.Restore(gSave);
 		}
 
-		override protected void OnPaintItem(Graphics graphics, NetworkItem item, int iGroup, bool selected)
+		override protected void DoPaint(Graphics graphics, Rectangle clipRect)
+		{
+			base.DoPaint(graphics, clipRect);
+
+			foreach (var path in CriticalPaths)
+			{
+				// TODO
+			}
+		}
+
+		override protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, NetworkGroup group, bool selected)
+		{
+			// Don't paint critical paths until the end
+			if ((CriticalPaths.Contains(path)))
+				return;
+
+			foreach (var critPath in CriticalPaths)
+			{
+				if (critPath.Contains(item))
+					return;
+			}
+
+			DoPaintItem(graphics, item, path, group, selected);
+		}
+
+		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, NetworkGroup group, bool selected)
 		{
 			var itemRect = CalcItemRectangle(item);
 			var taskItem = (item as PertNetworkItem);
@@ -798,47 +827,66 @@ namespace PertNetworkUIExtension
 
 			using (var brush = new SolidBrush(textColor))
 			{
-				graphics.DrawString(String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup), GetItemFont(taskItem), brush, titleRect);
+				int iPath = group.Paths.IndexOf(path) + 1;
+				int iGroup = Data.Groups.IndexOf(group) + 1;
+
+				graphics.DrawString(String.Format("{0} (id:{1}, g:{2}, p:{3})", item.Title, item.UniqueId, iGroup, iPath), GetItemFont(taskItem), brush, titleRect);
 			}
+
+			/*
+			// Checkbox
+			Rectangle checkRect = CalcCheckboxRect(rect);
+
+			if (ShowCompletionCheckboxes)
+			{
+				if (!IsZoomed)
+				{
+					CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
+				}
+				else
+				{
+					var tempImage = new Bitmap(CheckboxSize.Width, CheckboxSize.Height); // original size
+
+					using (var gTemp = Graphics.FromImage(tempImage))
+					{
+						CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
+
+						DrawZoomedImage(tempImage, graphics, checkRect);
+					}
+				}
+			}
+
+			else if (ShowCompletionCheckboxes)
+			{
+				rect.Width = (rect.Right - checkRect.Right - 2);
+				rect.X = checkRect.Right + 2;
+			}
+			*/
 
 			// PERT specific info
 
-
-			//itemRect.Y += titleRect.Height 
-
-			/*
-					// Checkbox
-									Rectangle checkRect = CalcCheckboxRect(rect);
-
-									if (ShowCompletionCheckboxes)
-									{
-										if (!IsZoomed)
-										{
-											CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
-										}
-										else
-										{
-											var tempImage = new Bitmap(CheckboxSize.Width, CheckboxSize.Height); // original size
-
-											using (var gTemp = Graphics.FromImage(tempImage))
-											{
-												CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
-
-												DrawZoomedImage(tempImage, graphics, checkRect);
-											}
-										}
-									}
-
-									else if (ShowCompletionCheckboxes)
-									{
-										rect.Width = (rect.Right - checkRect.Right - 2);
-										rect.X = checkRect.Right + 2;
-									}
-								}
-			*/
 		}
 
-		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem)
+		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, NetworkGroup group)
+		{
+			// Don't paint critical paths until the end
+			if ((CriticalPaths.Contains(path)))
+				return;
+
+			foreach (var critPath in CriticalPaths)
+			{
+				if (critPath.Contains(fromItem) &&
+					critPath.Contains(toItem) &&
+					toItem.IsDependency(fromItem))
+				{
+					return;
+				}
+			}
+			
+			DoPaintConnection(graphics, fromItem, toItem, path, group);
+		}
+
+		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, NetworkGroup group)
 		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
@@ -1011,6 +1059,16 @@ namespace PertNetworkUIExtension
 			// all else
 			Cursor = Cursors.Arrow;
 		}
+
+		List<NetworkPath> UpdateCriticalPaths()
+		{
+			var criticalPaths = new List<NetworkPath>();
+
+			// TODO
+
+			return criticalPaths;
+		}
+
 	}
 }
 

@@ -35,6 +35,11 @@ namespace PertNetworkUIExtension
 		public List<uint> DependencyUniqueIds;
 
 		public static Point NullPoint { get { return new Point(-1, -1); } }
+
+		public bool IsDependency(NetworkItem item)
+		{
+			return DependencyUniqueIds.Contains(item.UniqueId);
+		}
 	}
 
 	// ------------------------------------------------------------
@@ -111,15 +116,106 @@ namespace PertNetworkUIExtension
 
 	// ------------------------------------------------------------
 
+	public class NetworkPath
+	{
+		private List<NetworkItem> m_Items { get; set; }
+
+		// ----------------------------
+
+		public NetworkPath(NetworkPath existPath = null)
+		{
+			m_Items = new List<NetworkItem>();
+
+			// copy references from other paths
+			if (existPath != null)
+			{
+				foreach (var item in existPath.m_Items)
+					AddItem(item);
+			}
+		}
+
+		public IEnumerable<NetworkItem> Items
+		{
+			get
+			{
+				return m_Items;
+			}
+		}
+
+		public bool Contains(NetworkItem item)
+		{
+			return m_Items.Contains(item);
+		}
+
+		public void AddItem(NetworkItem item)
+		{
+			m_Items.Add(item);
+		}
+
+	}
+
+	// ------------------------------------------------------------
+
+	public class NetworkPaths : List<NetworkPath>
+	{
+		public int BuildPaths(NetworkGroup group)
+		{
+			Clear();
+
+			return CreatePath(group.EndItem, group.Items, null);
+		}
+
+		// ----------------------------------
+		// Internals
+
+		private int CreatePath(NetworkItem item, NetworkItems groupItems, NetworkPath existPath)
+		{
+			var path = new NetworkPath(existPath);
+			Add(path);
+
+			do
+			{
+				// Add this item
+				path.AddItem(item);
+
+				// Process this item's dependencies
+				var dependItems = groupItems.GetItemDependencies(item);
+
+				for (int i = 0; i < dependItems.Count; i++)
+				{
+					if (i == 0)
+					{
+						// First dependency gets added to the current path
+						item = dependItems[i];
+						path.AddItem(item);
+					}
+					else
+					{
+						// else build a new path recursively
+						CreatePath(dependItems[i], groupItems, path); // RECURSIVE CALL
+					}
+				}
+			}
+			while (item.DependencyUniqueIds.Count > 0);
+
+			return Count;
+		}
+	}
+
+	// ------------------------------------------------------------
+
 	public class NetworkGroup
 	{
 		public NetworkGroup()
 		{
 			Items = new NetworkItems();
+			Paths = new NetworkPaths();
 		}
 
 		public Point MaxPos { get; private set; }
 		public NetworkItems Items { get; private set; }
+		public NetworkPaths Paths { get; private set; }
+		public NetworkItem EndItem { get; private set; }
 
 		public IEnumerable<NetworkItem> ItemValues
 		{
@@ -136,8 +232,10 @@ namespace PertNetworkUIExtension
 				return false;
 
 			MaxPos = maxPos;
+			EndItem = endItem;
 
 			BalanceVerticalPositions();
+			Paths.BuildPaths(this);
 
 			return true;
 		}
@@ -153,14 +251,24 @@ namespace PertNetworkUIExtension
 		private void Clear()
 		{
 			Items.Clear();
+			Paths.Clear();
+
 			MaxPos = Point.Empty;
 		}
 
 		private bool AddItem(NetworkItem item, NetworkItems allItems, ref Point maxPos)
 		{
+			if (item == null)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
 			// Must be unique
 			if (Items.ContainsKey(item.UniqueId))
+			{
 				return false;
+			}
 
 			Items.Add(item.UniqueId, item);
 
@@ -309,7 +417,7 @@ namespace PertNetworkUIExtension
 
 	// ------------------------------------------------------------
 
-	public class NetworkGroups : HashSet<NetworkGroup>
+	public class NetworkGroups : List<NetworkGroup>
 	{
 		public Point MaxPos { get; private set; }
 

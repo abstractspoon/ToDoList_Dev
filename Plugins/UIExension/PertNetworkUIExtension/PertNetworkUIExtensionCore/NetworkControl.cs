@@ -158,50 +158,50 @@ namespace PertNetworkUIExtension
 			DoPaint(e.Graphics, e.ClipRectangle);
 		}
 
-		void DoPaint(Graphics graphics, Rectangle clipRect)
+		protected virtual void DoPaint(Graphics graphics, Rectangle clipRect)
 		{
-			int iGroup = 0;
 			var drawnItems = new HashSet<NetworkItem>();
 
 			foreach (var group in Data.Groups)
 			{
-				foreach (var item in group.ItemValues)
+				foreach (var path in group.Paths)
 				{
-					if (!drawnItems.Contains(item))
+					foreach (var item in path.Items)
 					{
-						if (WantDrawItem(item, clipRect))
+						if (!drawnItems.Contains(item))
 						{
-							OnPaintItem(graphics, item, iGroup, (!IsSavingToImage && (item.UniqueId == SelectedItemId)));
-						}
-						else
-						{
-							//int breakpoint = 0;
-						}
-
-						var dependencies = group.GetItemDependencies(item);
-
-						foreach (var dependItem in dependencies)
-						{
-							if (WantDrawConnection(dependItem, item, clipRect))
+							if (WantDrawItem(item, clipRect))
 							{
-								var smoothing = graphics.SmoothingMode;
-								graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-								OnPaintConnection(graphics, dependItem, item);
-
-								graphics.SmoothingMode = smoothing;
+								OnPaintItem(graphics, item, path, group, (!IsSavingToImage && (item.UniqueId == SelectedItemId)));
 							}
 							else
 							{
 								//int breakpoint = 0;
 							}
-						}
 
-						drawnItems.Add(item);
+							var dependencies = group.GetItemDependencies(item);
+
+							foreach (var dependItem in dependencies)
+							{
+								if (WantDrawConnection(dependItem, item, clipRect))
+								{
+									var smoothing = graphics.SmoothingMode;
+									graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+									OnPaintConnection(graphics, dependItem, item, path, group);
+
+									graphics.SmoothingMode = smoothing;
+								}
+								else
+								{
+									//int breakpoint = 0;
+								}
+							}
+
+							drawnItems.Add(item);
+						}
 					}
 				}
-
-				iGroup++;
 			}
 
 		}
@@ -225,12 +225,15 @@ namespace PertNetworkUIExtension
 			return clipRect.IntersectsWith(Rectangle.Union(fromRect, toRect));
 		}
 
-		virtual protected void OnPaintItem(Graphics graphics, NetworkItem item, int iGroup, bool selected)
+		virtual protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, NetworkGroup group, bool selected)
 		{
 			var itemRect = CalcItemRectangle(item);
-			var itemText = String.Format("{0} (id: {1}, grp: {2})", item.Title, item.UniqueId, iGroup);
-
 			graphics.DrawRectangle(Pens.Black, itemRect);
+
+			int iPath = group.Paths.IndexOf(path) + 1;
+			int iGroup = Data.Groups.IndexOf(group) + 1;
+
+			var itemText = String.Format("{0} (id: {1}, grp: {2}, pth: {3})", item.Title, item.UniqueId, iGroup, iPath);
 
 			if (selected)
 			{
@@ -243,7 +246,7 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-		virtual protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem)
+		virtual protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, NetworkGroup group)
 		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
