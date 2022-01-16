@@ -342,14 +342,14 @@ namespace PertNetworkUIExtension
 		{
 			// Try moving an item towards the centre of its dependencies
 			// and stop when we hit a position already taken.
-			var subGroups = BuildHorizontalSubGroups();
-			List<NetworkItem> subGroup = null;
+			var columns = BuildItemColumns();
+			List<NetworkItem> column = null;
 
-			for (int hPos = 1; hPos < subGroups.Count; hPos++)
+			for (int hPos = 1; hPos < columns.Count; hPos++)
 			{
-				if (subGroups.TryGetValue(hPos, out subGroup))
+				if (columns.TryGetValue(hPos, out column))
 				{
-					foreach (var item in subGroup)
+					foreach (var item in column)
 					{
 						var dependencies = GetItemDependencies(item);
 						var midY = GetMidVPos(dependencies);
@@ -358,7 +358,7 @@ namespace PertNetworkUIExtension
 						{
 							for (int vPos = midY; vPos < item.Position.Y; vPos++)
 							{
-								if (!IsPositionTaken(subGroup, hPos, vPos))
+								if (!IsPositionTaken(column, hPos, vPos))
 								{
 									item.Position.Y = vPos;
 									break;
@@ -369,7 +369,7 @@ namespace PertNetworkUIExtension
 						{
 							for (int vPos = midY; vPos > item.Position.Y; vPos--)
 							{
-								if (!IsPositionTaken(subGroup, hPos, vPos))
+								if (!IsPositionTaken(column, hPos, vPos))
 								{
 									item.Position.Y = vPos;
 									break;
@@ -385,17 +385,21 @@ namespace PertNetworkUIExtension
 			}
 
 			// For the first group do the same but with its dependents
-			if (subGroups.TryGetValue(0, out subGroup))
+			if (columns.TryGetValue(0, out column))
 			{
-				var item = subGroup[0];
+				var item = column[0];
 				var dependents = Items.GetItemDependents(item);
 				var midY = GetMidVPos(dependents);
 
-				if (!IsPositionTaken(subGroup, 0, midY))
+				if (!IsPositionTaken(column, 0, midY))
 					item.Position.Y = midY;
 			}
+			else
+			{
+				Debug.Assert(false);
+			}
 
-			// Recalculate maximum vertical extent because it might have REDUCED
+			// Recalculate maximum vertical extent
 			int maxY = 0;
 
 			foreach (var item in ItemValues)
@@ -404,30 +408,30 @@ namespace PertNetworkUIExtension
 			MaxPos = new Point(MaxPos.X, maxY);
 		}
 
-		private Dictionary<int, List<NetworkItem>> BuildHorizontalSubGroups()
+		private Dictionary<int, List<NetworkItem>> BuildItemColumns()
 		{
-			var subGroups = new Dictionary<int, List<NetworkItem>>();
+			var columns = new Dictionary<int, List<NetworkItem>>();
 
 			foreach (var item in ItemValues)
 			{
-				List<NetworkItem> subGroup = null;
+				List<NetworkItem> column = null;
 
-				if (!subGroups.TryGetValue(item.Position.X, out subGroup))
+				if (!columns.TryGetValue(item.Position.X, out column))
 				{
-					subGroup = new List<NetworkItem>();
-					subGroups.Add(item.Position.X, subGroup);
+					column = new List<NetworkItem>();
+					columns.Add(item.Position.X, column);
 				}
 
-				subGroup.Add(item);
+				column.Add(item);
 			}
 
-			// Sort the subgroups top-down
-			foreach (var subGroup in subGroups.Values)
+			// Sort the columns top-down
+			foreach (var column in columns.Values)
 			{
-				subGroup.Sort((a, b) => (a.Position.Y - b.Position.Y));
+				column.Sort((a, b) => (a.Position.Y - b.Position.Y));
 			}
 
-			return subGroups;
+			return columns;
 		}
 
 		private int GetMidVPos(IEnumerable<NetworkItem> items)
