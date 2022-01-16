@@ -34,11 +34,25 @@ namespace PertNetworkUIExtension
 		public bool HasPosition { get { return (Position != NullPoint); } }
 		public List<uint> DependencyUniqueIds;
 
-		public static Point NullPoint { get { return new Point(-1, -1); } }
-
 		public bool IsDependency(NetworkItem item)
 		{
 			return DependencyUniqueIds.Contains(item.UniqueId);
+		}
+
+		public double Distance(NetworkItem item)
+		{
+			return Distance(Position, item.Position);
+		}
+
+		// Statics 
+		public static Point NullPoint { get { return new Point(-1, -1); } }
+
+		public static double Distance(Point pos1, Point pos2)
+		{
+			int diffX = (pos1.X - pos2.X);
+			int diffY = (pos1.Y - pos2.Y);
+
+			return Math.Sqrt((diffX * diffX) + (diffY * diffY));
 		}
 	}
 
@@ -152,6 +166,18 @@ namespace PertNetworkUIExtension
 			m_Items.Add(item);
 		}
 
+		public double Length
+		{
+			get
+			{
+				double length = 0;
+
+				for (int i = 1; i < m_Items.Count; i++)
+					length += m_Items[i - 1].Distance(m_Items[i]);
+
+				return length;
+			}
+		}
 	}
 
 	// ------------------------------------------------------------
@@ -179,24 +205,27 @@ namespace PertNetworkUIExtension
 				path.AddItem(item);
 
 				// Process this item's dependencies
-				var dependItems = groupItems.GetItemDependencies(item);
-
-				for (int i = 0; i < dependItems.Count; i++)
+				if (item.DependencyUniqueIds.Count > 0)
 				{
-					if (i == 0)
-					{
-						// First dependency gets added to the current path
-						item = dependItems[i];
-						path.AddItem(item);
-					}
-					else
+					var dependItems = groupItems.GetItemDependencies(item);
+
+					// Process first dependency last so that if we need to copy
+					// the current path we do so before it gets added to
+					for (int i = 1; i < dependItems.Count; i++)
 					{
 						// else build a new path recursively
 						CreatePath(dependItems[i], groupItems, path); // RECURSIVE CALL
 					}
+
+					// Add first dependency to the current path
+					item = dependItems[0];
+					path.AddItem(item);
 				}
 			}
 			while (item.DependencyUniqueIds.Count > 0);
+
+			// Reverse the path so it's forward-facing
+			path.Items.Reverse();
 
 			return Count;
 		}
@@ -573,7 +602,10 @@ namespace PertNetworkUIExtension
 
 				if ((parallelItem1 != null) && (parallelItem2 != null))
 				{
-					if (Distance(startPos, parallelItem1.Position) <= Distance(startPos, parallelItem2.Position))
+					double dist1 = NetworkItem.Distance(startPos, parallelItem1.Position);
+					double dist2 = NetworkItem.Distance(startPos, parallelItem2.Position);
+
+					if (dist1 <= dist2)
 						return parallelItem1;
 
 					// else
@@ -665,14 +697,6 @@ namespace PertNetworkUIExtension
 
 			// all else
 			return false;
-		}
-
-		private double Distance(Point pos1, Point pos2)
-		{
-			int diffX = (pos1.X - pos2.X);
-			int diffY = (pos1.Y - pos2.Y);
-
-			return Math.Sqrt((diffX * diffX) + (diffY * diffY));
 		}
 	}
 

@@ -680,7 +680,7 @@ namespace PertNetworkUIExtension
 			return (font == null) ? Font : font;
 		}
 
-		protected void DrawZoomedImage(Image image, Graphics graphics, Rectangle destRect)
+		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect)
 		{
 			Debug.Assert(IsZoomed);
 
@@ -702,7 +702,18 @@ namespace PertNetworkUIExtension
 
 			foreach (var path in CriticalPaths)
 			{
-				// TODO
+				NetworkItem prevItem = null;
+
+				foreach (var item in path.Items)
+				{
+					if (WantDrawItem(item, clipRect))
+						DoPaintItem(graphics, item, path, null, WantDrawItemSelected(item), true);
+
+					if ((prevItem != null) && WantDrawConnection(item, prevItem, clipRect))
+						DoPaintConnection(graphics, item, prevItem, path, null, true);
+
+					prevItem = item;
+				}
 			}
 		}
 
@@ -718,11 +729,13 @@ namespace PertNetworkUIExtension
 					return;
 			}
 
-			DoPaintItem(graphics, item, path, group, selected);
+			DoPaintItem(graphics, item, path, group, selected, false);
 		}
 
-		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, NetworkGroup group, bool selected)
+		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, NetworkGroup group, bool selected, bool critical)
 		{
+			graphics.SmoothingMode = SmoothingMode.None;
+
 			var itemRect = CalcItemRectangle(item);
 			var taskItem = (item as PertNetworkItem);
 
@@ -765,7 +778,7 @@ namespace PertNetworkUIExtension
 				itemRect.Width--;
 				itemRect.Height--;
 
-				using (var pen = new Pen(borderColor))
+				using (var pen = new Pen(borderColor, critical ? 2.5f : 0f))
 					graphics.DrawRectangle(pen, itemRect);
 			}
 
@@ -811,7 +824,7 @@ namespace PertNetworkUIExtension
 								gTemp.Clear(backColor);
 								TaskIcons.Draw(gTemp, 0, 0);
 
-								DrawZoomedImage(tempImage, graphics, iconRect);
+								DrawZoomedIcon(tempImage, graphics, iconRect);
 							}
 						}
 					}
@@ -827,8 +840,8 @@ namespace PertNetworkUIExtension
 
 			using (var brush = new SolidBrush(textColor))
 			{
-				int iPath = group.Paths.IndexOf(path) + 1;
-				int iGroup = Data.Groups.IndexOf(group) + 1;
+				int iPath = ((group == null) ? 0 : (group.Paths.IndexOf(path) + 1));
+				int iGroup = ((group == null) ? 0 : (Data.Groups.IndexOf(group) + 1));
 
 				graphics.DrawString(String.Format("{0} (id:{1}, g:{2}, p:{3})", item.Title, item.UniqueId, iGroup, iPath), GetItemFont(taskItem), brush, titleRect);
 			}
@@ -883,10 +896,10 @@ namespace PertNetworkUIExtension
 				}
 			}
 			
-			DoPaintConnection(graphics, fromItem, toItem, path, group);
+			DoPaintConnection(graphics, fromItem, toItem, path, group, false);
 		}
 
-		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, NetworkGroup group)
+		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, NetworkGroup group, bool critical)
 		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
@@ -918,10 +931,12 @@ namespace PertNetworkUIExtension
 			points[1].X = ((fromRect.Right + toRect.Left) / 2);
 			points[1].Y = points[2].Y;
 
-			graphics.DrawLines(Pens.DarkGray, points);
+			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+			using (var pen = new Pen(Color.DarkGray, critical ? 2.5f : 0f))
+				graphics.DrawLines(pen, points);
 
 			// Draw Arrow head and box without smoothing to better match core app
-			var smoothing = graphics.SmoothingMode;
 			graphics.SmoothingMode = SmoothingMode.None;
 
 			Point arrow = points[2];
@@ -932,8 +947,6 @@ namespace PertNetworkUIExtension
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
-
-			graphics.SmoothingMode = smoothing;
 		}
 
 		private bool TaskHasIcon(PertNetworkItem taskItem)
@@ -1013,7 +1026,6 @@ namespace PertNetworkUIExtension
 			return CalcIconRect(CalcItemRectangle(item)).Contains(point);
         }
 
-
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			EditTimer.Stop();
@@ -1065,6 +1077,25 @@ namespace PertNetworkUIExtension
 			var criticalPaths = new List<NetworkPath>();
 
 			// TODO
+			// Test by picking the greatest aggregated segment length
+			double maxLength = 0;
+			NetworkPath criticalPath = null;
+
+			foreach (var group in Data.Groups)
+			{
+				foreach (var path in group.Paths)
+				{
+					double pathLen = path.Length;
+
+					if (pathLen > maxLength)
+					{
+						maxLength = pathLen;
+						criticalPath = path;
+					}
+				}
+			}
+
+			criticalPaths.Add(criticalPath);
 
 			return criticalPaths;
 		}

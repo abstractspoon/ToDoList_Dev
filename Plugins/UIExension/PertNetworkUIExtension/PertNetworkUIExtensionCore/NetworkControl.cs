@@ -158,6 +158,11 @@ namespace PertNetworkUIExtension
 			DoPaint(e.Graphics, e.ClipRectangle);
 		}
 
+		protected bool WantDrawItemSelected(NetworkItem item)
+		{
+			return (!IsSavingToImage && (item.UniqueId == SelectedItemId));
+		}
+
 		protected virtual void DoPaint(Graphics graphics, Rectangle clipRect)
 		{
 			var drawnItems = new HashSet<NetworkItem>();
@@ -172,7 +177,7 @@ namespace PertNetworkUIExtension
 						{
 							if (WantDrawItem(item, clipRect))
 							{
-								OnPaintItem(graphics, item, path, group, (!IsSavingToImage && (item.UniqueId == SelectedItemId)));
+								OnPaintItem(graphics, item, path, group, WantDrawItemSelected(item));
 							}
 							else
 							{
@@ -206,7 +211,7 @@ namespace PertNetworkUIExtension
 
 		}
 
-		bool WantDrawItem(NetworkItem item, Rectangle clipRect)
+		protected bool WantDrawItem(NetworkItem item, Rectangle clipRect)
 		{
 			if (IsSavingToImage)
 				return true;
@@ -214,7 +219,7 @@ namespace PertNetworkUIExtension
 			return clipRect.IntersectsWith(CalcItemRectangle(item));
 		}
 
-		bool WantDrawConnection(NetworkItem fromItem, NetworkItem toItem, Rectangle clipRect)
+		protected bool WantDrawConnection(NetworkItem fromItem, NetworkItem toItem, Rectangle clipRect)
 		{
 			if (IsSavingToImage)
 				return true;
