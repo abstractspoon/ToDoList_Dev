@@ -354,13 +354,31 @@ namespace PertNetworkUIExtension
 						var dependencies = GetItemDependencies(item);
 						var midY = GetMidVPos(dependencies);
 
-						for (int vPos = item.Position.Y; vPos <= midY; vPos++)
+						if (midY < item.Position.Y) // midY is above
 						{
-							if (IsPositionTaken(subGroup, hPos, vPos))
-								break;
-
-							// else
-							item.Position.Y = vPos;
+							for (int vPos = midY; vPos < item.Position.Y; vPos++)
+							{
+								if (!IsPositionTaken(subGroup, hPos, vPos))
+								{
+									item.Position.Y = vPos;
+									break;
+								}
+							}
+						}
+						else if (midY > item.Position.Y) // midY is below
+						{
+							for (int vPos = midY; vPos > item.Position.Y; vPos--)
+							{
+								if (!IsPositionTaken(subGroup, hPos, vPos))
+								{
+									item.Position.Y = vPos;
+									break;
+								}
+							}
+						}
+						else
+						{
+							// already where we want
 						}
 					}
 				}
@@ -496,7 +514,7 @@ namespace PertNetworkUIExtension
 
 				if (AddGroup(endItem, allItems, ref groupMaxPos))
 				{
-					maxPos.Y = groupMaxPos.Y;
+					maxPos.Y = Math.Max(maxPos.Y, groupMaxPos.Y);
 					maxPos.X = Math.Max(maxPos.X, groupMaxPos.X);
 				}
 			}
