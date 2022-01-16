@@ -190,12 +190,9 @@ namespace PertNetworkUIExtension
 							{
 								if (WantDrawConnection(dependItem, item, clipRect))
 								{
-									var smoothing = graphics.SmoothingMode;
 									graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
 									OnPaintConnection(graphics, dependItem, item, path, group);
-
-									graphics.SmoothingMode = smoothing;
 								}
 								else
 								{
