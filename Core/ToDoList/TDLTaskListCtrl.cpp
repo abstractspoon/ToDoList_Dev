@@ -329,10 +329,13 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 					COLORREF crBack, crText;
 					GetGroupHeaderColors(crBack, crText);
 
-					pDC->FillSolidRect(rRow, crBack);
-					DrawGridlines(pDC, rRow, FALSE, TRUE, FALSE);
+					// this call will update rFullWidth to full client width
+					CRect rFullWidth(rRow);
+					GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_lcColumns);
 
-					GraphicsMisc::DrawHorzLine(pDC, rRow.left, rRow.right, rRow.CenterPoint().y, crText);
+					DrawGridlines(pDC, rFullWidth, FALSE, TRUE, FALSE);
+
+					GraphicsMisc::DrawHorzLine(pDC, rFullWidth.left, rFullWidth.right, rFullWidth.CenterPoint().y, crText);
 
 					if (hwndList == m_lcTasks)
 					{
