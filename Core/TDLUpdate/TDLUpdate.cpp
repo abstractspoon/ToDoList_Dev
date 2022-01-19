@@ -85,7 +85,7 @@ BOOL CTDLUpdateApp::InitInstance()
 		if (cmdInfo.HasOption(SWITCH_TESTDOWNLOAD))
 		{
 			CTDLWebUpdater wu(ptPos, bPreRelease);
-			wu.DoUpdate(_T(""), _T(""), TRUE);
+			wu.DoUpdate(_T(""), _T(""), FALSE, TRUE);
 			
 			return FALSE;
 		}

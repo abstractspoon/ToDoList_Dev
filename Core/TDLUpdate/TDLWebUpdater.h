@@ -13,8 +13,8 @@
 
 //////////////////////////////////////////////////////////////////////
 
-const LPCTSTR DOWNLOAD_URI				= _T("http://abstractspoon.pbworks.com/f/todolist_exe.zip");
-const LPCTSTR DOWNLOAD_URI_PRERELEASE	= _T("http://abstractspoon.pbworks.com/f/todolist_exe_pre.zip");
+const LPCTSTR DOWNLOAD_URI				= _T("https://github.com/abstractspoon/ToDoList_Downloads/raw/master/Latest/todolist_exe.zip");
+const LPCTSTR DOWNLOAD_URI_PRERELEASE	= _T("https://github.com/abstractspoon/ToDoList_Downloads/raw/master/Latest/todolist_exe_pre.zip");
 
 //////////////////////////////////////////////////////////////////////
 
