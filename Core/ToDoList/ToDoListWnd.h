@@ -166,6 +166,8 @@ protected:
 	BOOL m_bAllowForcedCheckOut;
 	BOOL m_bIgnoreResize;
 	BOOL m_bFirstEraseBkgnd;
+	BOOL m_bSplitting;
+	
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
 	BOOL m_bSplitting;
 	
