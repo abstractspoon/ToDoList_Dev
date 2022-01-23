@@ -225,11 +225,11 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 {
 	m_cbListGroupBy.ResetContent();
 
-	AddString(m_cbListGroupBy, IDS_TDC_NONE, TDCC_NONE);
+	AddString(m_cbListGroupBy, IDS_TDC_NONE, TDCC_NONE); // always
 
 	for (int nCol = 0; nCol < NUM_COLUMNS; nCol++)
 	{
-		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColID))
+		if (m_taskList.CanGroupBy(COLUMNS[nCol].nColID, TRUE))
 			AddString(m_cbListGroupBy, COLUMNS[nCol].nIDLongName, COLUMNS[nCol].nColID);
 	}
 	
@@ -237,14 +237,20 @@ void CTabbedToDoCtrl::BuildListGroupByCombo()
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aCustomAttribDefs[nAttrib];
 
-		if (m_taskList.CanGroupBy(attribDef.GetColumnID()))
+		if (m_taskList.CanGroupBy(attribDef.GetColumnID(), TRUE))
 		{
 			CEnString sAttrib(IDS_CUSTOMCOLUMN, attribDef.sLabel);
 			AddString(m_cbListGroupBy, sAttrib, attribDef.GetColumnID());
 		}
 	}
 	
-	SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy);
+	if (SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy) == CB_ERR)
+	{
+		m_nListViewGroupBy = TDCC_NONE;
+
+		VERIFY(SelectItemByData(m_cbListGroupBy, m_nListViewGroupBy) != CB_ERR);
+		m_taskList.SetGroupBy(m_nListViewGroupBy);
+	}
 }
 
 void CTabbedToDoCtrl::OnListGroupBySelChanged()
@@ -667,6 +673,18 @@ void CTabbedToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
 	CToDoCtrl::UpdateVisibleColumns(mapChanges);
 
 	m_taskList.OnColumnVisibilityChange(mapChanges);
+
+	// See if we need to rebuild the group-by combo
+	POSITION pos = mapChanges.GetStartPosition();
+
+	while (pos)
+	{
+		if (m_taskList.CanGroupBy(mapChanges.GetNext(pos), FALSE))
+		{
+			BuildListGroupByCombo();
+			break;
+		}
+	}
 }
 
 IUIExtensionWindow* CTabbedToDoCtrl::GetExtensionWnd(FTC_VIEW nView) const

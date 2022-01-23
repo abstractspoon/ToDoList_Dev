@@ -108,7 +108,7 @@ public:
 	void SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bAllowResort);
 
 	BOOL SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending = -1);
-	BOOL CanGroupBy(TDC_COLUMN nGroupBy) const;
+	BOOL CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) const;
 	UINT GetGroupCount() const;
 	void SetSortGroupsAscending(BOOL bAscending = TRUE);
 	BOOL TaskHasGroupValue(DWORD dwTaskID) const;

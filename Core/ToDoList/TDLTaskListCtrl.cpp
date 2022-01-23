@@ -454,7 +454,7 @@ UINT CTDLTaskListCtrl::GetGroupCount() const
 
 BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending)
 {
-	if (!CanGroupBy(nGroupBy))
+	if (!CanGroupBy(nGroupBy, TRUE))
 		return FALSE;
 
 	if (nGroupBy == m_nGroupBy)
@@ -476,8 +476,14 @@ BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending
 	return TRUE;
 }
 
-BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy) const
+BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy, BOOL bCheckVisibility) const
 {
+	if (nGroupBy == TDCC_NONE)
+		return TRUE;
+
+	if (bCheckVisibility && !IsColumnShowing(nGroupBy))
+		return FALSE;
+
 	switch (nGroupBy)
 	{
 	case TDCC_CATEGORY:
@@ -489,9 +495,6 @@ BOOL CTDLTaskListCtrl::CanGroupBy(TDC_COLUMN nGroupBy) const
 	case TDCC_PRIORITY:
 	case TDCC_RISK:
 	case TDCC_RECURRENCE:
-		return TRUE;
-
-	case TDCC_NONE:
 		return TRUE;
 
 	default:
