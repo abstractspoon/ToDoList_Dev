@@ -62,6 +62,8 @@ int CColourPopupEx::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		return -1;
 
 	m_pParent->SetFocus();
+	m_pParent->SetCapture();
+
 	ShowWindow(SW_SHOWNOACTIVATE);
 
 	return 0;
@@ -69,8 +71,11 @@ int CColourPopupEx::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 LRESULT CColourPopupEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 {
-	if (msg == WM_KEYDOWN)
+	AFX_MANAGE_STATE(AfxGetStaticModuleState());
+
+	switch (msg)
 	{
+	case WM_KEYDOWN:
 		switch (wp)
 		{
 			case VK_DOWN:
@@ -83,6 +88,35 @@ LRESULT CColourPopupEx::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 				CColourPopup::OnKeyDown(wp, LOWORD(lp), HIWORD(lp));
 				return 0L; // eat
 		}
+		break;
+
+	case WM_LBUTTONDOWN:
+		{
+			CPoint ptMsg = CPoint(GetMessagePos());
+
+			if (m_WindowRect.PtInRect(ptMsg))
+			{
+				ScreenToClient(&ptMsg);
+				return CWnd::SendMessage(msg, wp, MAKELPARAM(ptMsg.x, ptMsg.y));
+			}
+
+			EndSelection(CPN_SELENDCANCEL);
+			return 0L;
+		}
+		break;
+
+	case WM_LBUTTONUP:
+	case WM_MOUSEMOVE:
+		{
+			CPoint ptMsg = CPoint(GetMessagePos());
+
+			if (m_WindowRect.PtInRect(ptMsg))
+			{
+				ScreenToClient(&ptMsg);
+				return CWnd::SendMessage(msg, wp, MAKELPARAM(ptMsg.x, ptMsg.y));
+			}
+		}
+		break;
 	}
 
 	return CSubclasser::ScDefault(m_scParent);
