@@ -834,6 +834,8 @@
 #define IDC_AUTODISPLAYREPORT           1548
 #define IDC_ERRORCODE                   1549
 #define IDC_ERRORTEXT                   1550
+#define IDC_INCLUDELABEL                1551
+#define IDC_RULESLABEL                  1552
 #define IDC_LISTTYPE_LABEL              1549
 #define IDC_DEFLISTDATA_LABEL           1550
 #define IDC_FIRSTOPERAND                1551

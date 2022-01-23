@@ -575,10 +575,10 @@ int CEnToolBar::EstimateHeightRequired(int cx) const
 	return ((nRows * nRowHeight) + m_cyTopBorder + m_cyBottomBorder);
 }
 
-int CEnToolBar::GetMinReqLength() const
+int CEnToolBar::GetMinReqLength(int nLastBtnPos) const
 {
 	int nLen = (m_cxLeftBorder + m_cxRightBorder);
-	int nBtn = GetButtonCount();
+	int nBtn = ((nLastBtnPos >= 0) ? (nLastBtnPos + 1) : GetButtonCount());
 
 	while (nBtn--)
 	{

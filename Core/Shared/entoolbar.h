@@ -38,7 +38,7 @@ public:
 	CSize GetButtonSize() const { return m_sizeButton; }
 	int GetHeight() const;
 	int Resize(int cx, CPoint ptTopLeft = CPoint(0, 0), int nMaxHeight = -1);
-	int GetMinReqLength() const; // single row
+	int GetMinReqLength(int nLastBtnPos = -1) const; // single row
 
 	BOOL IsItemSeparator(int nPos) const;
 	BOOL LastItemIsSeparator() const;

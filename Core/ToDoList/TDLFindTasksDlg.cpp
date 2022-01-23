@@ -64,17 +64,17 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
-	AddRCControl(_T("LTEXT"), _T(""), _T("F&or tasks matching the following rules:"), 0, 0, 0, 50, 287, 8, IDC_STATIC);
-	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 60, 370, 96, IDC_FINDLIST);
+	AddRCControl(_T("LTEXT"), _T(""), _T("F&or tasks matching the following rules:"), 0, 0, 0, 49, 287, 8, IDC_RULESLABEL);
+	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 58, 370, 96, IDC_FINDLIST);
 	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Apply as &Filter"), 0, 0, 0, 176, 65, 14, IDC_APPLYASFILTER);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Select &All"), 0, 0, 78, 176, 50, 14, IDC_SELECTALL);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Select &All"), 0, 0, 72, 176, 50, 14, IDC_SELECTALL);
 	AddRCControl(_T("LTEXT"), _T(""), _T("&Results:"), 0, 0, 133, 179, 240, 8, IDC_RESULTSLABEL);
 	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 191, 370, 94, IDC_RESULTS);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 85, 3, 71, 121, IDC_SEARCHLIST);
 	AddRCControl(_T("LTEXT"), _T(""), _T("&Search:"), 0, 0, 0, 22, 120, 8, IDC_SEARCHLABEL);
-	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 0, 32, 120, 125, IDC_TASKLISTOPTIONS);
-	AddRCControl(_T("LTEXT"), _T(""), _T("I&ncluding:"), 0, 0, 136, 22, 134, 8, IDC_STATIC);
-	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP, 0, 136, 32, 127, 30, IDC_INCLUDE);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 0, 31, 120, 125, IDC_TASKLISTOPTIONS);
+	AddRCControl(_T("LTEXT"), _T(""), _T("I&ncluding:"), 0, 0, 136, 22, 134, 8, IDC_INCLUDELABEL);
+	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP, 0, 136, 31, 120, 130, IDC_INCLUDE);
 }
 
 CTDLFindTasksDlg::~CTDLFindTasksDlg()
@@ -292,7 +292,7 @@ BOOL CTDLFindTasksDlg::InitializeToolbar()
 	if (m_toolbar.GetSafeHwnd())
 		return TRUE;
 
-	if (!m_toolbar.CreateEx(this, TBSTYLE_FLAT, WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
+	if (!m_toolbar.CreateEx(this, (TBSTYLE_FLAT | TBSTYLE_WRAPABLE), WS_CHILD | WS_VISIBLE | CBRS_ALIGN_TOP))
 		return FALSE;
 
 	if (CThemed::IsAppThemed())
@@ -882,27 +882,71 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 		BOOL bVertSplitter = IsSplitterVertical();
 		CRect rSplitter = GetSplitterRect();
 
+		CRect rSearchCombo = GetCtrlRect(IDC_TASKLISTOPTIONS);
+		CRect rSearchLabel = GetCtrlRect(IDC_SEARCHLABEL);
+		CRect rIncludeCombo = GetCtrlRect(IDC_INCLUDE);
+		CRect rIncludeLabel = GetCtrlRect(IDC_INCLUDELABEL);
+
+		CRect rRulesLabel = GetCtrlRect(IDC_RULESLABEL);
 		CRect rRules = GetCtrlRect(IDC_FINDLIST);
 		CRect rResults = GetCtrlRect(IDC_RESULTS);
 		CRect rApply = GetCtrlRect(IDC_APPLYASFILTER);
-
-		if (bOrientationChange)
-		{
-			// Place the splitter so that the two lists have equal height/width
-			int nSplitPos = 0;
-
-			if (bVertSplitter)
-				nSplitPos = (cx / 2);
-			else
-				nSplitPos = ((cy - rRules.top - (rResults.top - rApply.top)) / 2);
-
-			VERIFY(GetSplitterRect(rSplitter, nSplitPos));
-		}
 		
+		// Toolbar - prevent the group with the combo from being moved
+		int nMinTBLen = m_toolbar.GetMinReqLength(m_toolbar.CommandToIndex(ID_FIND_DELETESEARCH));
+		int nTBHeight = m_toolbar.Resize(max(cx, nMinTBLen)); // never more than two rows
+
+		// Embedded combo
+		CRect rSearches;
+		m_toolbar.GetItemRect(m_toolbar.CommandToIndex(ID_SEARCHLIST), rSearches);
+
+		rSearches.bottom = rSearches.top + 200;
+		m_cbSearches.MoveWindow(rSearches);
+
 		{
 			CDeferWndMove dwm(10);
+			int nXOffset = 0, nYOffset = 0;
 
-			// Rules list
+			// Tasklist combo and label
+			nYOffset = nTBHeight + 10 - rSearchLabel.top;
+
+			rSearchCombo = dwm.OffsetCtrl(this, IDC_TASKLISTOPTIONS, 0, nYOffset);
+			rSearchLabel = dwm.OffsetCtrl(this, IDC_SEARCHLABEL, 0, nYOffset);
+
+			// Options combo and label
+			if ((m_nDockPos == DMP_BELOW) || ((rSearchCombo.Width() + rIncludeCombo.Width()) <= cx))
+			{
+				// Place side by side
+				nXOffset = (rSearchCombo.right + 10 - rIncludeCombo.left);
+				nYOffset = (rSearchLabel.top - rIncludeLabel.top);
+			}
+			else
+			{
+				// Place one combo below the other
+				nXOffset = rSearchCombo.left - rIncludeCombo.left;
+				nYOffset = (rSearchCombo.bottom + 6 - rIncludeLabel.top);
+			}
+
+			rIncludeCombo = dwm.OffsetCtrl(this, IDC_INCLUDE, nXOffset, nYOffset);
+			dwm.OffsetCtrl(this, IDC_INCLUDELABEL, nXOffset, nYOffset);
+
+			// Rules list and label
+			rRulesLabel = dwm.OffsetCtrl(this, IDC_RULESLABEL, 0, rIncludeCombo.bottom + 10 - rRulesLabel.top);
+			rRules.top = rRulesLabel.bottom + 2;
+
+			if (bOrientationChange)
+			{
+				// Place the splitter so that the two lists have equal height/width
+				int nSplitPos = 0;
+
+				if (bVertSplitter)
+					nSplitPos = (cx / 2);
+				else
+					nSplitPos = ((cy - rRules.top - (rResults.top - rApply.top)) / 2);
+
+				VERIFY(GetSplitterRect(rSplitter, nSplitPos));
+			}
+			
 			if (bVertSplitter)
 			{
 				rRules.right = rSplitter.left;	
@@ -917,8 +961,6 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			dwm.MoveWindow(&m_lcFindSetup, rRules);
 
 			// Results controls
-			int nXOffset = 0, nYOffset = 0;
-			
 			if (bVertSplitter)
 			{
 				nXOffset = (rSplitter.right - rResults.left);
@@ -941,7 +983,6 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 			dwm.MoveWindow(&m_lcResults, rResults);
 		}
 		
-		m_toolbar.Resize(cx);
 		Invalidate();
 	}	
 }
