@@ -25,7 +25,9 @@ enum
 	ATTRIB_COL, 
 	OPERATOR_COL, 
 	VALUE_COL, 
-	ANDOR_COL 
+	ANDOR_COL, 
+
+	NUM_COLS
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1459,10 +1461,10 @@ LRESULT CTDLFindTaskExpressionListCtrl::OnEEBtnClick(WPARAM /*wp*/, LPARAM lp)
 void CTDLFindTaskExpressionListCtrl::OnSize(UINT nType, int cx, int cy) 
 {
 	// resize columns by proportion before calling base class
-	SetColumnWidth(ATTRIB_COL, (int)(cx * COL_PROPORTIONS[ATTRIB_COL]));
-	SetColumnWidth(OPERATOR_COL, (int)(cx * COL_PROPORTIONS[OPERATOR_COL]));
-	SetColumnWidth(VALUE_COL, (int)(cx * COL_PROPORTIONS[VALUE_COL]));
-	SetColumnWidth(ANDOR_COL, (int)(cx * COL_PROPORTIONS[ANDOR_COL]));
+	CHoldRedraw hr(*this);
+
+	for (int nCol = 0; nCol < NUM_COLS; nCol++)
+		SetColumnWidth(nCol, (int)(cx * COL_PROPORTIONS[nCol]));
 
 	CInputListCtrl::OnSize(nType, cx, cy);
 }
