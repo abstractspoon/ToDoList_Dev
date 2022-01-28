@@ -130,7 +130,10 @@ del %OUTDIR%\Resources\Install.Linux.txt
 REM - Zip Resources
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Resources\ -x!.git*
 
-REM - Move the zip file to ToDoList_Prev
-move %OUTZIP% %REPO%\..\ToDoList_Prev\8.1\
+REM - Copy the zip file to the download folder
+copy %OUTZIP% %REPO%\..\ToDoList_Downloads\Latest\
+
+REM - And then move it to ToDoList_Prev\8.2
+move %OUTZIP% %REPO%\..\ToDoList_Prev\8.2\ToDoList_exe.8.2._.zip
 
 popd
