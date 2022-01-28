@@ -457,19 +457,23 @@ BOOL CTDLTaskListCtrl::SetGroupBy(TDC_COLUMN nGroupBy, BOOL bSortGroupsAscending
 	if (!CanGroupBy(nGroupBy, TRUE))
 		return FALSE;
 
-	if (nGroupBy == m_nGroupBy)
+	BOOL bGroupChange = (nGroupBy != m_nGroupBy);
+	BOOL bSortChange = ((bSortGroupsAscending != -1) && (bSortGroupsAscending != m_bSortGroupsAscending));
+
+	if (!bGroupChange && !bSortChange)
 		return TRUE;
 
 	m_nGroupBy = nGroupBy;
 
-	if (bSortGroupsAscending != -1)
+	if (bSortChange)
 		m_bSortGroupsAscending = bSortGroupsAscending;
 
 	if (GetSafeHwnd())
 	{
-		UpdateGroupHeaders();
+		if (bGroupChange)
+			UpdateGroupHeaders();
 
-		if (IsGrouped() || IsSorting())
+		if (bGroupChange || (bSortChange && (IsGrouped() || IsSorting())))
 			DoSort();
 	}
 

@@ -563,7 +563,7 @@ void CTabbedToDoCtrl::LoadState()
 	m_cbListOptions.SetCheckedByItemData(m_dwListOptions);
 
 	m_nListViewGroupBy = prefs.GetProfileEnum(sKey, _T("ListViewGroupBy"), TDCC_NONE);
-	m_taskList.SetGroupBy(m_nListViewGroupBy, Misc::HasFlag(m_dwListOptions, LVO_SORTGROUPSASCENDING));
+	m_taskList.SetGroupBy(m_nListViewGroupBy, HasListOption(LVO_SORTGROUPSASCENDING));
 
 	// Last active view
 	FTC_VIEW nCurView = GetTaskView();
