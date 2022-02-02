@@ -68,7 +68,6 @@ if (!VALIDINDEX(i))               \
 CToDoCtrlMgr::TDCITEM::TDCITEM() 
 { 
 	pTDC = NULL; 
-	bModified = FALSE; 
 	bLastStatusReadOnly = -1; 
 	tLastMod = 0; 
 	bLastCheckoutSuccess = -1;
@@ -84,7 +83,6 @@ CToDoCtrlMgr::TDCITEM::TDCITEM(CFilteredToDoCtrl* pCtrl, const TSM_TASKLISTINFO*
 { 
 	pTDC = pCtrl; 
 	bLoaded = (pCtrl->HasFilePath() && !pTDC->IsDelayLoaded());
-	bModified = FALSE; 
 	bLastStatusReadOnly = -1;
 	tLastMod = 0;
 	bLastCheckoutSuccess = -1;
@@ -1207,19 +1205,21 @@ CString CToDoCtrlMgr::UpdateTabItemText(int nIndex)
 	TDCITEM& tdci = GetTDCItem(nIndex);
 	
 	// project name
-	CString sProjectName = tdci.GetFriendlyProjectName();
+	CString sNewTabText = tdci.GetFriendlyProjectName();
 
 	if (tdci.pTDC->IsModified() && !tdci.pTDC->IsReadOnly())
-		sProjectName += "*";
+		sNewTabText += "*";
 
-    // update tab array
-	m_tabCtrl.SetItemText(nIndex, sProjectName);
+    // update tab array if the text has changed
+	CString sCurTabText = Misc::Trim(m_tabCtrl.GetItemText(nIndex));
+
+	if (sNewTabText != sCurTabText)
+		m_tabCtrl.SetItemText(nIndex, sNewTabText);
 
 	// cleanup
-	sProjectName.Replace(_T("&&"), _T("&"));
-	Misc::Trim(sProjectName);
+	sNewTabText.Replace(_T("&&"), _T("&"));
 	
-	return sProjectName;
+	return sNewTabText;
 }
 
 BOOL CToDoCtrlMgr::AddToSourceControl(int nIndex, BOOL bAdd)
@@ -1537,7 +1537,7 @@ BOOL CToDoCtrlMgr::AnyIsModified() const
 	
 	while (nCtrl--)
 	{
-		if (GetToDoCtrl(nCtrl).IsModified())
+		if (IsModified(nCtrl))
 			return TRUE;
 	}
 	

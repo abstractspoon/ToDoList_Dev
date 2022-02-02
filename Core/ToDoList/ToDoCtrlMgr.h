@@ -166,7 +166,6 @@ protected:
 	
 	public:
 		CFilteredToDoCtrl* pTDC;
-		BOOL bModified;
 		BOOL bLastStatusReadOnly;
 		time64_t tLastMod;
 		BOOL bLastCheckoutSuccess;
