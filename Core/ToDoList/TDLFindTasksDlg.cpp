@@ -892,9 +892,9 @@ void CTDLFindTasksDlg::ResizeDlg(BOOL bOrientationChange, int cx, int cy)
 		CRect rResults = GetCtrlRect(IDC_RESULTS);
 		CRect rApply = GetCtrlRect(IDC_APPLYASFILTER);
 		
-		// Toolbar - prevent the group with the combo from being moved
-		int nMinTBLen = m_toolbar.GetMinReqLength(m_toolbar.CommandToIndex(ID_FIND_DELETESEARCH));
-		int nTBHeight = m_toolbar.Resize(max(cx, nMinTBLen)); // never more than two rows
+		// Toolbar - prevent the combo from being moved
+		int nMinTBLen = m_toolbar.GetMinReqLength(m_toolbar.CommandToIndex(ID_FIND_NEWSEARCH) - 1);
+		int nTBHeight = m_toolbar.Resize(max(cx, nMinTBLen));
 
 		// Embedded combo
 		CRect rSearches;
