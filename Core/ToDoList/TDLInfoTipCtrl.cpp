@@ -45,6 +45,7 @@ BEGIN_MESSAGE_MAP(CTDLInfoTipCtrl, CToolTipCtrlEx)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
 	ON_WM_CREATE()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -57,6 +58,18 @@ int CTDLInfoTipCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 	CLocalizer::EnableTranslation(GetSafeHwnd(), FALSE);
 	return 0;
+}
+
+void CTDLInfoTipCtrl::OnTimer(UINT nIDEvent)
+{
+	// CImplicit check for mouse-down
+	if ((m_tiLast.hwnd != NULL) && (::GetCapture() != NULL))
+	{
+		Activate(FALSE);
+		return;
+	}
+
+	CToolTipCtrlEx::OnTimer(nIDEvent);
 }
 
 CString CTDLInfoTipCtrl::FormatTip(DWORD dwTaskID,

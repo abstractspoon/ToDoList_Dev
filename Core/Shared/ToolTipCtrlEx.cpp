@@ -353,9 +353,7 @@ void CToolTipCtrlEx::OnTimer(UINT nIDEvent)
 
 			if (!rTest.PtInRect(GetCurrentMessage()->pt))
 			{
-				KillTimer(ID_TIMERLEAVE);
 				Activate(FALSE);
-
 				return;
 			}
 		}
@@ -462,6 +460,8 @@ void CToolTipCtrlEx::Activate(BOOL bActivate)
 	}
 	else
 	{
+		KillTimer(ID_TIMERLEAVE);
+
 		if (m_scTracking.IsValid())
 			m_scTracking.HookWindow(NULL);
 
