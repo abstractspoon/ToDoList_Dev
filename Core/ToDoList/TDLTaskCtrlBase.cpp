@@ -457,18 +457,23 @@ void CTDLTaskCtrlBase::UpdateSelectedTaskPath()
 	CEnString sHeader(IDS_TDC_COLUMN_TASK);
 	
 	// add the item path to the header
-	if (HasStyle(TDCS_SHOWPATHINHEADER) && m_hdrTasks.GetItemCount())
+	if (HasStyle(TDCS_SHOWPATHINHEADER) && HasSelection() && SelectionHasSameParent())
 	{
-		if (GetSelectedCount() == 1)
+		CRect rHeader;
+		::GetClientRect(m_hdrTasks, rHeader);
+
+		int nColWidthInChars = (int)(rHeader.Width() / m_fAveHeaderCharWidth);
+		CString sPath = m_formatter.GetTaskPath(GetSelectedTaskID(), nColWidthInChars);
+
+		if (!sPath.IsEmpty())
 		{
-			CRect rHeader;
-			::GetClientRect(m_hdrTasks, rHeader);
-			
-			int nColWidthInChars = (int)(rHeader.Width() / m_fAveHeaderCharWidth);
-			CString sPath = m_formatter.GetTaskPath(GetSelectedTaskID(), nColWidthInChars);
-			
-			if (!sPath.IsEmpty())
-				sHeader.Format(_T("%s [%s]"), CEnString(IDS_TDC_COLUMN_TASK), sPath);
+			// Strip last delimiter
+			Misc::RemoveSuffix(sPath, _T("\\"));
+
+			// Space out delimiters for easier reading
+			sPath.Replace(_T("\\"), _T(" \\ "));
+
+			sHeader.Format(_T("%s [%s]"), sHeader, sPath);
 		}
 	}
 	
@@ -4834,6 +4839,8 @@ void CTDLTaskCtrlBase::SetModified(const CTDCAttributeMap& mapAttribIDs, BOOL bA
 					if (attribDef.IsAggregated())
 						AccumulateRecalcColumn(attribDef.GetColumnID(), aColIDs);
 				}
+
+				UpdateSelectedTaskPath();
 			}
 			break;
 
