@@ -1135,15 +1135,22 @@ BOOL TODOITEM::CalcNextOccurences(const COleDateTimeRange& dtRange, CArray<doubl
 	{
 	case TDIRO_DUEDATE:
 	case TDIRO_DONEDATE:
-		if (trRecurrence.CalcNextOccurences(dateDue, dtRange, aDates))
 		{
-			bDue = TRUE;
-			return TRUE;
+			// Extend the range by the duration of the task else 
+			// the start dates will stop short of the original range
+			COleDateTimeRange dtExtended = dtRange;
+			dtExtended.m_dtEnd += (dateDue - dateStart);
+
+			if (trRecurrence.CalcNextOccurences(dateDue, dtExtended, aDates))
+			{
+				bDue = TRUE;
+				return TRUE;
+			}
 		}
 		break;
 
 	case TDIRO_STARTDATE:
-		if (trRecurrence.CalcNextOccurences(dateDue, dtRange, aDates))
+		if (trRecurrence.CalcNextOccurences(dateStart, dtRange, aDates))
 		{
 			bDue = FALSE;
 			return TRUE;
