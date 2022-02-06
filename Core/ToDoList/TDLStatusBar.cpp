@@ -179,12 +179,12 @@ void CTDLStatusBar::UpdateTasks(const CFilteredToDoCtrl& tdc, const  CTDCAttribu
 					// Space out delimiters for easier reading
 					sPath.Replace(_T("\\"), _T(" \\ "));
 
-					sTextValue = Misc::Format(_T("%s     [%s] (%ld)"), sTitle, sPath, dwTaskID);
+					sTextValue = Misc::Format(_T("%s     [%s]   (%ld)"), sTitle, sPath, dwTaskID);
 					nIDTipFormat = IDS_SB_SELTASKTITLEPATHID_TIP;
 				}
 				else
 				{
-					sTextValue = Misc::Format(_T("%s (%ld)"), sTitle, dwTaskID);
+					sTextValue = Misc::Format(_T("%s   (%ld)"), sTitle, dwTaskID);
 					nIDTipFormat = IDS_SB_SELTASKTITLEID_TIP;
 				}
 			}

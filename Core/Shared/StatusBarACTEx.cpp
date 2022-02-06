@@ -59,7 +59,7 @@ void CStatusBarACTEx::OnPaint()
 
 		while (nPane--)
 		{
-			BOOL bTextDrawn = DrawPaneText(&dc, nPane, 2);
+			BOOL bTextDrawn = DrawPaneText(&dc, nPane, nPane ? 2 : 4);
 
 			// prevent overwriting of next pane
 			CRect rect;
