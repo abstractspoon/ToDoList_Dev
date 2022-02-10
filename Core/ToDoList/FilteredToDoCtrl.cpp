@@ -233,7 +233,7 @@ void CFilteredToDoCtrl::OnEditChangeDueTime()
 	CDWordArray aSelTaskIDs;
 	GetSelectedTaskIDs(aSelTaskIDs, FALSE);
 
-	BOOL bNeedFullTaskUpdate = ModNeedsRefilter(TDCA_DUEDATE/*, FTCV_TASKTREE*/, aSelTaskIDs);
+	BOOL bNeedFullTaskUpdate = ModNeedsRefilter(TDCA_DUEDATE, aSelTaskIDs);
 	
 	if (bNeedFullTaskUpdate)
 		m_styles[TDCS_REFILTERONMODIFY] = FALSE;
