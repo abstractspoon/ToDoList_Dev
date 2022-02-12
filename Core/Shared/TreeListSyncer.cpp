@@ -191,7 +191,7 @@ CTreeListSyncer::CTreeListSyncer(DWORD dwFlags)
 	m_hilSize(NULL),
 	m_bSplitting(FALSE),
 	m_nSplitPos(INITIAL_SPLIT_POS),
-	m_nSplitWidth(MAX_SPLITBAR_WIDTH),
+	m_nSplitBarWidth(MAX_SPLITBAR_WIDTH),
 	m_crSplitBar(GetSysColor(COLOR_3DFACE)),
 	m_nHidden(TLSH_NONE),
 	m_bSavingToImage(FALSE),
@@ -2995,7 +2995,7 @@ BOOL CTreeListSyncer::GetSplitterRect(CRect& rSplitter) const
 		GetBoundingRect(Left(), rSplitter);
 
 		rSplitter.left = rSplitter.right;
-		rSplitter.right += m_nSplitWidth;
+		rSplitter.right += m_nSplitBarWidth;
 
 		return TRUE;
 	}
@@ -3072,13 +3072,13 @@ void CTreeListSyncer::Resize(const CRect& rect, int nLeftWidth)
 
 	if (!IsHiding())
 	{
-		if (nLeftWidth >= rect.Width())
-			nLeftWidth = (rect.Width() - MIN_SPLIT_WIDTH);
-
 		if (nLeftWidth < MIN_SPLIT_WIDTH)
 			return;
 
 		m_nSplitPos = nLeftWidth;
+
+		if (nLeftWidth >= rect.Width())
+			nLeftWidth = (rect.Width() - MIN_SPLIT_WIDTH);
 	}
 
     CRect rLeft(rect), rRight(rect);
@@ -3088,7 +3088,7 @@ void CTreeListSyncer::Resize(const CRect& rect, int nLeftWidth)
 
 	if (HasFlag(TLSF_SPLITTER) && !IsHiding())
 	{
-		rRight.left += m_nSplitWidth;
+		rRight.left += m_nSplitBarWidth;
 	}
 
 	// we draw a border around the controls so deflate a bit
@@ -3565,9 +3565,9 @@ void CTreeListSyncer::SetSplitBarWidth(int nWidth)
 {
 	int nNewWidth = max(MIN_SPLITBAR_WIDTH, min(MAX_SPLITBAR_WIDTH, nWidth));
 
-	if (nNewWidth != m_nSplitWidth)
+	if (nNewWidth != m_nSplitBarWidth)
 	{
-		m_nSplitWidth = nNewWidth;
+		m_nSplitBarWidth = nNewWidth;
 		RefreshSize();
 	}
 }

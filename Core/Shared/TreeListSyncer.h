@@ -121,7 +121,7 @@ public:
 
 	int GetSplitPos() const { return m_nSplitPos; }
 	void SetSplitPos(int nPos);
-	int GetSplitBarWidth() const { return m_nSplitWidth; }
+	int GetSplitBarWidth() const { return m_nSplitBarWidth; }
 	void SetSplitBarWidth(int nWidth);
 	void SetSplitBarColor(COLORREF crSplitBar);
 
@@ -164,7 +164,7 @@ protected:
 	BOOL m_bSavingToImage;
 
 private:
-	int m_nSplitPos, m_nSplitWidth;
+	int m_nSplitPos, m_nSplitBarWidth;
 	BOOL m_bNeedInitItemHeight;
 	BOOL m_bResyncing, m_bResyncPending, m_bResizePending;
 	BOOL m_bResyncEnabled;
