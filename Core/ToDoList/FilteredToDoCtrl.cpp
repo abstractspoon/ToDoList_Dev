@@ -193,7 +193,7 @@ BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 	}
 	else if (HasAnyFilter())
 	{
-		RefreshFilter();
+		RefreshFilter(FALSE);
 	}
 
 	// restore previously visibility
@@ -302,7 +302,7 @@ BOOL CFilteredToDoCtrl::ArchiveDoneTasks(TDC_ARCHIVE nFlags, BOOL bRemoveFlagged
 	if (CTabbedToDoCtrl::ArchiveDoneTasks(nFlags, bRemoveFlagged))
 	{
 		if (HasAnyFilter())
-			RefreshFilter();
+			RefreshFilter(FALSE);
 
 		return TRUE;
 	}
@@ -316,7 +316,7 @@ BOOL CFilteredToDoCtrl::ArchiveSelectedTasks(BOOL bRemove)
 	if (CTabbedToDoCtrl::ArchiveSelectedTasks(bRemove))
 	{
 		if (HasAnyFilter())
-			RefreshFilter();
+			RefreshFilter(FALSE);
 
 		return TRUE;
 	}
@@ -387,7 +387,7 @@ void CFilteredToDoCtrl::SetFilter(const TDCFILTER& filter)
 		m_filter.SetFilter(filter);
 
 		if (bNeedFullTaskUpdate)
-			RefreshFilter();
+			RefreshFilter(TRUE);
 	}
 
 	ResetNowFilterTimer();
@@ -396,7 +396,7 @@ void CFilteredToDoCtrl::SetFilter(const TDCFILTER& filter)
 void CFilteredToDoCtrl::ClearFilter()
 {
 	if (m_filter.ClearFilter())
-		RefreshFilter();
+		RefreshFilter(TRUE);
 
 	ResetNowFilterTimer();
 }
@@ -408,7 +408,7 @@ void CFilteredToDoCtrl::ToggleFilter()
 	///////////////////////////////////////////////////////////////////
 
 	if (m_filter.ToggleFilter())
-		RefreshFilter();
+		RefreshFilter(TRUE);
 
 	ResetNowFilterTimer();
 }
@@ -468,7 +468,7 @@ BOOL CFilteredToDoCtrl::SetAdvancedFilter(const TDCADVANCEDFILTER& filter)
 		}
 		else
 		{
-			RefreshFilter();
+			RefreshFilter(TRUE);
 		}
 
 		return TRUE;
@@ -483,9 +483,20 @@ BOOL CFilteredToDoCtrl::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom,
 	return m_filter.FilterMatches(filter, szCustom, dwCustomFlags);
 }
 
+// External version
 void CFilteredToDoCtrl::RefreshFilter() 
 {
+	RefreshFilter(TRUE);
+}
+
+// Internal version
+void CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit) 
+{
 	CSaveFocus sf;
+
+	// grab the selected items for the filtering
+	if (bExplicit && m_filter.HasSelectionFilter())
+		m_taskTree.GetSelectedTaskIDs(m_aSelectedTaskIDsForFiltering, FALSE);
 
 	RefreshTreeFilter(); // always
 
@@ -533,9 +544,6 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 {
 	if (m_data.GetTaskCount())
 	{
-		// grab the selected items for the filtering
-		m_taskTree.GetSelectedTaskIDs(m_aSelectedTaskIDsForFiltering, FALSE);
-		
 		// rebuild the tree
 		RebuildTree();
 		
@@ -661,7 +669,7 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 					// eg. "Give me all tasks where the category is not empty"
 					// User is explicitly interested in tasks WITH attribute values
 					// so we always want these tasks
-					ASSERT(!sWhatMatched.IsEmpty());
+					ASSERT(rule.AttributeIs(TDCA_SELECTION) || !sWhatMatched.IsEmpty());
 					bWantTask = TRUE;
 					break;
 
@@ -757,7 +765,7 @@ void CFilteredToDoCtrl::OnStylesUpdated(const CTDCStyleMap& styles)
 	}
 	
 	if (bNeedRefilter)
-		RefreshFilter();
+		RefreshFilter(FALSE);
 }
 
 void CFilteredToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
@@ -772,7 +780,7 @@ void CFilteredToDoCtrl::SetDueTaskColors(COLORREF crDue, COLORREF crDueToday)
 		// Because the 'Due Today' colour effectively alters 
 		// a task's priority we can treat it as a priority edit
 		if (m_filter.ModNeedsRefilter(TDCA_PRIORITY, m_aCustomAttribDefs))
-			RefreshFilter();
+			RefreshFilter(FALSE);
 	}
 }
 
@@ -802,7 +810,7 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 	if (ModsNeedRefilter(mapAttribIDs, aModTaskIDs))
 	{
 		// This will also refresh the list view if it is active
-		RefreshFilter();
+		RefreshFilter(FALSE);
 
 		// Note: This will also have refreshed the active view
 		bTreeRefiltered = TRUE;
@@ -838,7 +846,7 @@ void CFilteredToDoCtrl::EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify)
 	// do we need to refilter?
 	if (bWasTimeTracking && m_filter.HasAdvancedFilter() && m_filter.HasAdvancedFilterAttribute(TDCA_TIMESPENT))
 	{
-		RefreshFilter();
+		RefreshFilter(FALSE);
 	}
 }
 
@@ -1045,7 +1053,7 @@ LRESULT CFilteredToDoCtrl::OnMidnight(WPARAM wParam, LPARAM lParam)
 		}
 
 		if (bRefilter)
-			RefreshFilter();
+			RefreshFilter(FALSE);
 	}
 
 	return lr;
@@ -1155,7 +1163,7 @@ void CFilteredToDoCtrl::OnTimerNow()
 		
 			if (bRefilter)
 			{
-				RefreshFilter();
+				RefreshFilter(FALSE);
 			}
 			else // make the timer 10 minutes so we don't re-prompt them too soon
 			{
@@ -1331,7 +1339,7 @@ DWORD CFilteredToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, cons
 		DWORD dwNewTaskID = MergeNewTaskIntoTree(task, task.GetFirstTask(), dwParentID, dwTaskID, TRUE);
 
 		InitialiseNewRecurringTask(dwTaskID, dwNewTaskID, dtNext, bDueDate);
-		RefreshFilter();
+		RefreshFilter(FALSE);
 		
 		ASSERT(m_taskTree.GetItem(dwNewTaskID) != NULL);
 		return dwNewTaskID;

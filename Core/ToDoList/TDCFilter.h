@@ -29,6 +29,7 @@ public:
 	BOOL HasFilterFlag(DWORD dwFlag) const;
 	BOOL HasNowFilter() const;
 	BOOL HasNowFilter(TDC_ATTRIBUTE& nAttrib) const;
+	BOOL HasSelectionFilter() const;
 
 	CString GetAdvancedFilterName() const;
 	DWORD GetFilterFlags() const;

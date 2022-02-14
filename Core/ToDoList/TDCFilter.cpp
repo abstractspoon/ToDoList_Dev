@@ -214,6 +214,11 @@ BOOL CTDCFilter::HasNowFilter(TDC_ATTRIBUTE& nAttrib) const
 	return FALSE;
 }
 
+BOOL CTDCFilter::HasSelectionFilter() const
+{
+	return ((m_nState == TDCFS_FILTER) && (m_filter.nShow == FS_SELECTED));
+}
+
 BOOL CTDCFilter::HasAdvancedFilterAttribute(TDC_ATTRIBUTE nAttrib) const
 {
 	if (m_nState == TDCFS_ADVANCED)

@@ -120,6 +120,7 @@ protected:
 	void SaveState() const;
 	void LoadState();
 
+	void RefreshFilter(BOOL bExplicit);
 	void RefreshTreeFilter();
 	void RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgress = FALSE);
 
