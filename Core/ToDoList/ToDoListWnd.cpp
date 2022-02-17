@@ -11699,7 +11699,13 @@ LRESULT CToDoListWnd::OnSelchangeFilter(WPARAM wp, LPARAM lp)
 	DWORD dwCustomFlags;
 
 	m_filterBar.GetFilter(filter, sCustom, dwCustomFlags);
-	OnChangeFilter(filter, sCustom, dwCustomFlags, FALSE);
+
+	// Refresh filter controls if we've switched 
+	// from a custom to default filter or vice versa
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	BOOL bUpdateFilterCtrls = Misc::StateChanged(sCustom.IsEmpty(), !tdc.HasAdvancedFilter());
+
+	OnChangeFilter(filter, sCustom, dwCustomFlags, bUpdateFilterCtrls);
 
 	return 0L;
 }
