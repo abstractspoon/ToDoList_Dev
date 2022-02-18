@@ -300,6 +300,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnTimer(UINT nIDEvent);
 
 	afx_msg LRESULT OnSetFont(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnSetText(WPARAM wParam, LPARAM lParam);
@@ -325,6 +326,8 @@ protected:
 
 	BOOL EnableLanguageOptions(DWORD dwOption, BOOL bEnable);
 	BOOL EnableEditStyles(DWORD dwStyles, BOOL bEnable);
+	BOOL EnableChangeNotifications(BOOL bEnable);
+	BOOL HasChangeNotifications() const;
 
 	static BOOL EnableStateFlags(HWND hWnd, UINT nGetMsg, UINT nSetMsg, DWORD dwFlags, BOOL bEnable);
 

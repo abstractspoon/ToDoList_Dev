@@ -59,9 +59,9 @@ const LPCTSTR RTF_HORZ_LINE				= _T("{\\rtf1{\\pict\\wmetafile8\\picw26\\pich26\
 
 // The use of whitespace within '{ HYPERLINK \" %s \"}' is ABSOLUTELY ESSENTIAL
 // Reference: https://autohotkey.com/boards/viewtopic.php?t=43427
-const LPCTSTR RTF_LINK					= _T("{\\rtf1{\\colortbl;\\red0\\green0\\blue255;}")
-											_T("{\\field{\\*\\fldinst{ HYPERLINK \" %s \"}}")
-											_T("{\\fldrslt{\\ul\\cf1\\cf1\\ul %s}}}}");
+const LPCTSTR RTF_LINK = _T("{\\rtf1{\\colortbl;\\red0\\green0\\blue255;}")
+						_T("{\\field{\\*\\fldinst{ HYPERLINK \" %s \"}}")
+						_T("{\\fldrslt{\\ul\\cf1\\cf1\\ul %s}}}}");
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -185,6 +185,40 @@ void CRichEditBaseCtrl::OnDestroy()
 	m_findState.DestroyDialog();
 
 	CRichEditCtrl::OnDestroy();
+}
+
+BOOL CRichEditBaseCtrl::EnableChangeNotifications(BOOL bEnable)
+{
+	if (bEnable)
+		SetEventMask(GetEventMask() | ENM_CHANGE);
+	else
+		SetEventMask(GetEventMask() & ~ENM_CHANGE);
+
+	return !Misc::StateChanged(HasChangeNotifications(), bEnable);
+}
+
+BOOL CRichEditBaseCtrl::HasChangeNotifications() const
+{
+	return ((GetEventMask() & ENM_CHANGE) == ENM_CHANGE);
+}
+
+void CRichEditBaseCtrl::OnTimer(UINT nIDEvent)
+{
+	// Prevent spell checking or URL detection from sending change notifications
+	// Note: We can't use 'TemporarilyDisableChangeNotifications' here
+	//       because that will also skip any real change notification that 
+	//       may have been the original cause of this timer event
+	const UINT REUPDATE_TIMERID = 438;
+
+	BOOL bDisableNotify = ((nIDEvent == REUPDATE_TIMERID) && HasChangeNotifications());
+
+	if (bDisableNotify)
+		EnableChangeNotifications(FALSE);
+
+	CRichEditCtrl::OnTimer(nIDEvent);
+
+	if (bDisableNotify)
+		EnableChangeNotifications(TRUE);
 }
 
 void CRichEditBaseCtrl::PreSubclassWindow() 
@@ -1301,10 +1335,6 @@ BOOL CRichEditBaseCtrl::EnableInlineSpellChecking(BOOL bEnable)
 	if (!SupportsInlineSpellChecking())
 		return FALSE;
 
-	// Prevent spell-checking from causing a change notification
-	if (bEnable)
-		TemporarilyDisableChangeNotifications();
-
 	ASSERT(GetSafeHwnd());
 
 	EnableLanguageOptions(IMF_SPELLCHECKING, bEnable);
@@ -1564,18 +1594,18 @@ BOOL CRichEditBaseCtrl::IsEndOfLine(int nCharPos) const
 
 void CRichEditBaseCtrl::TemporarilyDisableChangeNotifications()
 {
-	if ((GetEventMask() & ENM_CHANGE) == ENM_CHANGE)
+	if (HasChangeNotifications())
 	{
-		SetEventMask(GetEventMask() & ~ENM_CHANGE);
+		EnableChangeNotifications(FALSE);
 		PostMessage(WM_REBC_REENABLECHANGENOTIFY);
 	}
 }
 
 LRESULT CRichEditBaseCtrl::OnReenableChangeNotifications(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
-	ASSERT((GetEventMask() & ENM_CHANGE) == 0);
+	ASSERT(!HasChangeNotifications());
 
-	SetEventMask(GetEventMask() | ENM_CHANGE);
+	EnableChangeNotifications(TRUE);
 	return 0L;
 }
 
