@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TreeSelectionHelper.h"
+#include "Misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -88,8 +89,8 @@ void CTreeSelectionHelper::RemoveItemFromHistory(HTREEITEM hti)
 
 	while (nHistory--)
 	{
-		CIDArray& aIDs = m_aHistory[nHistory];
-		int nID = aIDs.GetSize();
+		CDWordArray aIDs;
+		int nID = Misc::Split(m_aHistory[nHistory], aIDs);
 
 		while (nID--)
 		{
@@ -105,6 +106,10 @@ void CTreeSelectionHelper::RemoveItemFromHistory(HTREEITEM hti)
 			// make sure m_nCurSelection remains valid
 			if (nHistory <= m_nCurSelection)
 				m_nCurSelection = max(0, m_nCurSelection - 1);
+		}
+		else // update
+		{
+			m_aHistory[nHistory] = Misc::FormatArray(aIDs);
 		}
 	}
 }
@@ -321,10 +326,10 @@ BOOL CTreeSelectionHelper::RemoveAll(BOOL bRemoveFromHistory, BOOL bRedraw)
 			}
 			else // add the current selection to the history
 			{
-				CIDArray aIDs;
-
+				CDWordArray aIDs;
 				Convert(m_lstSelection, aIDs);
-				m_aHistory.Add(aIDs);
+
+				m_aHistory.Add(Misc::FormatArray(aIDs));
 			}
 
 			// update the current selection
@@ -646,6 +651,16 @@ BOOL CTreeSelectionHelper::HasNextSelection() const
 	return (m_nCurSelection < m_aHistory.GetSize() - 1);
 }
 
+int CTreeSelectionHelper::GetNextSelectedIDs(CDWordArray& aIDs) const
+{
+	aIDs.RemoveAll();
+
+	if (HasNextSelection())
+		Misc::Split(m_aHistory[m_nCurSelection + 1], aIDs);
+
+	return aIDs.GetSize();
+}
+
 int CTreeSelectionHelper::FindNextValidSelection() const
 {
 	CHTIList lstNext;
@@ -653,7 +668,10 @@ int CTreeSelectionHelper::FindNextValidSelection() const
 
 	while (nSel < m_aHistory.GetSize())
 	{
-		if (Convert(m_aHistory[nSel], lstNext))
+		CDWordArray aIDs;
+		Misc::Split(m_aHistory[nSel], aIDs);
+
+		if (Convert(aIDs, lstNext))
 			return nSel;
 
 		nSel++;
@@ -681,17 +699,19 @@ BOOL CTreeSelectionHelper::NextSelection(BOOL bRedraw)
 				InvalidateAll(FALSE);
 
 			// save current selection in history
-			CIDArray aIDs;
+			CDWordArray aIDs;
 			Convert(m_lstSelection, aIDs);
 
-			m_aHistory[m_nCurSelection].Copy(aIDs);
+			m_aHistory[m_nCurSelection] = Misc::FormatArray(aIDs);
 
 			// delete invalid selections
 			if (nNext > m_nCurSelection + 1)
 				m_aHistory.RemoveAt(m_nCurSelection + 1, nNext - m_nCurSelection - 1);
 
 			// extract new selection and update current selection
-			Convert(m_aHistory[nNext], m_lstSelection);
+			Misc::Split(m_aHistory[nNext], aIDs);
+			Convert(aIDs, m_lstSelection);
+
 			m_nCurSelection = nNext;
 
 			FixupTreeSelection();
@@ -712,6 +732,16 @@ BOOL CTreeSelectionHelper::HasPrevSelection() const
 	return m_nCurSelection && m_aHistory.GetSize();
 }
 
+int CTreeSelectionHelper::GetPrevSelectedIDs(CDWordArray& aIDs) const
+{
+	aIDs.RemoveAll();
+
+	if (HasPrevSelection())
+		Misc::Split(m_aHistory[m_nCurSelection - 1], aIDs);
+
+	return aIDs.GetSize();
+}
+
 int CTreeSelectionHelper::FindPrevValidSelection() const
 {
 	CHTIList lstNext;
@@ -719,7 +749,10 @@ int CTreeSelectionHelper::FindPrevValidSelection() const
 
 	while (nSel--)
 	{
-		if (Convert(m_aHistory[nSel], lstNext))
+		CDWordArray aIDs;
+		Misc::Split(m_aHistory[nSel], aIDs);
+
+		if (Convert(aIDs, lstNext))
 			return nSel;
 	}
 
@@ -747,20 +780,21 @@ BOOL CTreeSelectionHelper::PrevSelection(BOOL bRedraw)
 
 			// save current selection in history
 			int nSizeHistory = m_aHistory.GetSize();
-			CIDArray aIDs;
+			CDWordArray aIDs;
 			Convert(m_lstSelection, aIDs);
 
 			if (m_nCurSelection < nSizeHistory)
-				m_aHistory[m_nCurSelection].Copy(aIDs);
+				m_aHistory[m_nCurSelection] = Misc::FormatArray(aIDs);
 			else
-				m_aHistory.Add(aIDs);
+				m_aHistory.Add(Misc::FormatArray(aIDs));
 
 			// delete any invalid selections
 			if (nPrev < m_nCurSelection - 1)
 				m_aHistory.RemoveAt(nPrev + 1, m_nCurSelection - nPrev - 1);
 
 			// extract new selection
-			VERIFY (Convert(m_aHistory[nPrev], m_lstSelection));
+			Misc::Split(m_aHistory[nPrev], aIDs);
+			VERIFY (Convert(aIDs, m_lstSelection));
 			m_nCurSelection = nPrev;
 
 			FixupTreeSelection();
@@ -776,7 +810,7 @@ BOOL CTreeSelectionHelper::PrevSelection(BOOL bRedraw)
 	return FALSE;
 }
 
-int CTreeSelectionHelper::Convert(const CHTIList& lstFrom, CIDArray& aTo) const
+int CTreeSelectionHelper::Convert(const CHTIList& lstFrom, CDWordArray& aTo) const
 {
 	aTo.RemoveAll();
 	POSITION pos = lstFrom.GetHeadPosition();
@@ -793,7 +827,7 @@ int CTreeSelectionHelper::Convert(const CHTIList& lstFrom, CIDArray& aTo) const
 	return aTo.GetSize();
 }
 
-int CTreeSelectionHelper::Convert(const CIDArray& aFrom, CHTIList& lstTo) const
+int CTreeSelectionHelper::Convert(const CDWordArray& aFrom, CHTIList& lstTo) const
 {
 	lstTo.RemoveAll();
 

@@ -132,8 +132,10 @@ public:
 	// history
 	BOOL NextSelection(BOOL bRedraw = TRUE);
 	BOOL HasNextSelection() const;
+	int GetNextSelectedIDs(CDWordArray& aIDs) const;
 	BOOL PrevSelection(BOOL bRedraw = TRUE);
 	BOOL HasPrevSelection() const;
+	int GetPrevSelectedIDs(CDWordArray& aIDs) const;
     void ClearHistory();
     void RemoveItemFromHistory(HTREEITEM hti);
 
@@ -161,20 +163,7 @@ protected:
 	int m_nCurSelection;
 	HTREEITEM m_htiAnchor;
 	CTreeCtrlHelper m_tch;
-
-	class CIDArray : public CArray<DWORD, DWORD&>
-	{
-	public:
-		CIDArray() {}
-		CIDArray(const CIDArray& arr) { Copy(arr); }
-
-		const CIDArray& CIDArray::operator=(const CIDArray& arr)
-		{
-			Copy(arr);
-			return *this;
-		}
-	};
-	CArray<CIDArray, CIDArray&> m_aHistory;
+	CStringArray m_aHistory;
 
 protected:
 	void InvalidateItem(HTREEITEM hti);
@@ -192,8 +181,8 @@ protected:
 	int BuildSortArray(const CHTIList& lstSelection, CSortArray& aItems) const;
 	static int SortProc(const void* item1, const void* item2);
 
-	int Convert(const CHTIList& lstFrom, CIDArray& aTo) const;
-	int Convert(const CIDArray& aFrom, CHTIList& lstTo) const;
+	int Convert(const CHTIList& lstFrom, CDWordArray& aTo) const;
+	int Convert(const CDWordArray& aFrom, CHTIList& lstTo) const;
 
 	int FindPrevValidSelection() const;
 	int FindNextValidSelection() const;
