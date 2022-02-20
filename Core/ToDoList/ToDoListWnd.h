@@ -167,9 +167,7 @@ protected:
 	BOOL m_bIgnoreResize;
 	BOOL m_bFirstEraseBkgnd;
 	BOOL m_bSplitting;
-	
 	BOOL m_bPromptLanguageChangeRestartOnActivate;
-	BOOL m_bSplitting;
 	
 	// Generated message map functions
 	//{{AFX_MSG(CToDoListWnd)
