@@ -1971,7 +1971,12 @@ BOOL CTDLTaskTreeCtrl::CanSelectTasksInHistory(BOOL bForward) const
 
 BOOL CTDLTaskTreeCtrl::SelectTasksInHistory(BOOL bForward) 
 { 
-	BOOL bSelected = (bForward ? TSH().NextSelection() : TSH().PrevSelection());
+	BOOL bSelected = FALSE;
+
+	if (bForward)
+		bSelected = TSH().NextSelection(m_mapTaskIDToHTI);
+	else
+		bSelected = TSH().PrevSelection(m_mapTaskIDToHTI);
 
 	if (bSelected)
 		SyncColumnSelectionToTasks();

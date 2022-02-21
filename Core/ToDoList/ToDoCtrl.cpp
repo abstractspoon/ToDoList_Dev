@@ -5367,7 +5367,7 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
 
 		// set selection to previous task and if that fails then next task
-		if (!TSH().PrevSelection(FALSE) &&
+		if (!m_taskTree.SelectTasksInHistory(FALSE) &&
 			!GotoNextTask(TDCG_PREV) && 
 			!GotoNextTask(TDCG_NEXT))
 		{
@@ -11630,7 +11630,7 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 			if (!aTaskIDs.GetSize() || !m_taskTree.SelectTasks(aTaskIDs))
 			{
 				if (!RestoreTreeSelection(cache))
-					TSH().PrevSelection(FALSE);
+					m_taskTree.SelectTasksInHistory(FALSE);
 			}
 			
 			// update current selection

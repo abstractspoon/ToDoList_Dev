@@ -651,7 +651,7 @@ BOOL CTreeSelectionHelper::HasNextSelection() const
 	return (m_nCurSelection < m_aHistory.GetSize() - 1);
 }
 
-int CTreeSelectionHelper::GetNextSelectedIDs(CDWordArray& aIDs) const
+int CTreeSelectionHelper::GetNextSelectionIDs(CDWordArray& aIDs) const
 {
 	aIDs.RemoveAll();
 
@@ -661,7 +661,7 @@ int CTreeSelectionHelper::GetNextSelectedIDs(CDWordArray& aIDs) const
 	return aIDs.GetSize();
 }
 
-int CTreeSelectionHelper::FindNextValidSelection() const
+int CTreeSelectionHelper::FindNextValidSelection(const CHTIMap& mapItems) const
 {
 	CHTIList lstNext;
 	int nSel = m_nCurSelection + 1;
@@ -671,7 +671,7 @@ int CTreeSelectionHelper::FindNextValidSelection() const
 		CDWordArray aIDs;
 		Misc::Split(m_aHistory[nSel], aIDs);
 
-		if (Convert(aIDs, lstNext))
+		if (Convert(aIDs, lstNext, mapItems))
 			return nSel;
 
 		nSel++;
@@ -680,12 +680,12 @@ int CTreeSelectionHelper::FindNextValidSelection() const
 	return -1; // nothing valid beyond m_nCurSelection
 }
 
-BOOL CTreeSelectionHelper::NextSelection(BOOL bRedraw)
+BOOL CTreeSelectionHelper::NextSelection(const CHTIMap& mapItems, BOOL bRedraw)
 {
 	if (HasNextSelection())
 	{
 		// can we find a valid next selection?
-		int nNext = FindNextValidSelection();
+		int nNext = FindNextValidSelection(mapItems);
 
 		if (nNext == -1) // no
 		{
@@ -710,7 +710,7 @@ BOOL CTreeSelectionHelper::NextSelection(BOOL bRedraw)
 
 			// extract new selection and update current selection
 			Misc::Split(m_aHistory[nNext], aIDs);
-			Convert(aIDs, m_lstSelection);
+			Convert(aIDs, m_lstSelection, mapItems);
 
 			m_nCurSelection = nNext;
 
@@ -732,7 +732,7 @@ BOOL CTreeSelectionHelper::HasPrevSelection() const
 	return m_nCurSelection && m_aHistory.GetSize();
 }
 
-int CTreeSelectionHelper::GetPrevSelectedIDs(CDWordArray& aIDs) const
+int CTreeSelectionHelper::GetPrevSelectionIDs(CDWordArray& aIDs) const
 {
 	aIDs.RemoveAll();
 
@@ -742,7 +742,7 @@ int CTreeSelectionHelper::GetPrevSelectedIDs(CDWordArray& aIDs) const
 	return aIDs.GetSize();
 }
 
-int CTreeSelectionHelper::FindPrevValidSelection() const
+int CTreeSelectionHelper::FindPrevValidSelection(const CHTIMap& mapItems) const
 {
 	CHTIList lstNext;
 	int nSel = m_nCurSelection;
@@ -752,19 +752,19 @@ int CTreeSelectionHelper::FindPrevValidSelection() const
 		CDWordArray aIDs;
 		Misc::Split(m_aHistory[nSel], aIDs);
 
-		if (Convert(aIDs, lstNext))
+		if (Convert(aIDs, lstNext, mapItems))
 			return nSel;
 	}
 
 	return -1; // nothing valid before m_nCurSelection
 }
 
-BOOL CTreeSelectionHelper::PrevSelection(BOOL bRedraw)
+BOOL CTreeSelectionHelper::PrevSelection(const CHTIMap& mapItems, BOOL bRedraw)
 {
 	if (HasPrevSelection())
 	{
 		// can we find a valid previous selection?
-		int nPrev = FindPrevValidSelection();
+		int nPrev = FindPrevValidSelection(mapItems);
 
 		if (nPrev == -1) // no
 		{
@@ -794,7 +794,7 @@ BOOL CTreeSelectionHelper::PrevSelection(BOOL bRedraw)
 
 			// extract new selection
 			Misc::Split(m_aHistory[nPrev], aIDs);
-			VERIFY (Convert(aIDs, m_lstSelection));
+			VERIFY (Convert(aIDs, m_lstSelection, mapItems));
 			m_nCurSelection = nPrev;
 
 			FixupTreeSelection();
@@ -827,16 +827,13 @@ int CTreeSelectionHelper::Convert(const CHTIList& lstFrom, CDWordArray& aTo) con
 	return aTo.GetSize();
 }
 
-int CTreeSelectionHelper::Convert(const CDWordArray& aFrom, CHTIList& lstTo) const
+int CTreeSelectionHelper::Convert(const CDWordArray& aFrom, CHTIList& lstTo, const CHTIMap& mapItems) const
 {
 	lstTo.RemoveAll();
 
-	CHTIMap mapHTI;
-	mapHTI.BuildMap(m_tree);
-
 	for (int nID = 0; nID < aFrom.GetSize(); nID++)
 	{
-		HTREEITEM hti = mapHTI.GetItem(aFrom[nID]);
+		HTREEITEM hti = mapItems.GetItem(aFrom[nID]);
 
 		if (hti)
 			lstTo.AddTail(hti);
