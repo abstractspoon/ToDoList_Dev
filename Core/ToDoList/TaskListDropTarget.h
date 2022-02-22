@@ -23,7 +23,7 @@ class CMSOutlookHelper;
 
 struct TLDT_DATA
 {	
-	TLDT_DATA(COleDataObject* pObj = NULL, CPoint pt = 0);
+	TLDT_DATA();
 
 	CString GetFirstFile() const;
 	int GetFileCount() const;
@@ -58,10 +58,9 @@ public:
 protected:
 	CWnd* m_pOwner;
 	DWORD m_dwPrevItem; 
-	CMSOutlookHelper* m_pOutlook;
-
 	DWORD m_dwTVHoverStart;
-	CHTIMap m_mapTVItems;
+
+	CMSOutlookHelper* m_pOutlook;
 
 protected:
 	virtual DROPEFFECT OnDragEnter(CWnd* pWnd, COleDataObject* pObject, DWORD dwKeyState, CPoint point);
@@ -70,7 +69,6 @@ protected:
 	virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT dropEffect, CPoint point);
 
 protected:
-
 	enum TLDT_HITTEST
 	{
 		TLDTHT_NONE = -1,
@@ -79,7 +77,19 @@ protected:
 		TLDTHT_CAPTION,
 	};
 
-	TLDT_HITTEST DoHitTest(CWnd* pWnd, CPoint point, DWORD& dwHitTaskID, BOOL& bImport);
+	struct TLDT_HIT
+	{
+		TLDT_HIT() { Clear(); }
+		void Clear() { htItem = NULL; nItem = -1; dwTaskID = 0; nResult = TLDTHT_NONE; bImport = FALSE; }
+
+		HTREEITEM htItem;
+		int nItem;
+		DWORD dwTaskID;
+		TLDT_HITTEST nResult;
+		BOOL bImport;
+	};
+
+	BOOL DoHitTest(CWnd* pWnd, CPoint point, TLDT_HIT& hitRes) const;
 	BOOL InitializeOutlook();
 	void ResetDrag(CWnd* pWnd);
 
