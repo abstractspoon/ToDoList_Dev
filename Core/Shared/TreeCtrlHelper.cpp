@@ -31,33 +31,6 @@ BOOL CHTIMap::HasItem(DWORD dwItemID) const
 	return (GetItem(dwItemID) != NULL);
 }
 
-int CHTIMap::BuildMap(const CTreeCtrl& tree, BOOL bVisibleChildrenOnly)
-{
-#ifdef _DEBUG
-	DWORD dwTick = GetTickCount();
-#endif
-
-	RemoveAll();
-
-	if (tree.GetCount())
-	{
-		// traverse top-level items
-		HTREEITEM hti = tree.GetChildItem(NULL);
-
-		while (hti)
-		{
-			AddItem(tree, hti, bVisibleChildrenOnly);
-			hti = tree.GetNextItem(hti, TVGN_NEXT);
-		}
-	}
-
-#ifdef _DEBUG
-	TRACE(_T("CHTIMap::BuildMap took %ld ms\n"), GetTickCount() - dwTick);
-#endif
-
-	return GetCount();
-}
-
 void CHTIMap::AddItem(const CTreeCtrl& tree, HTREEITEM hti, BOOL bVisibleChildrenOnly)
 {
 	// update our own mapping
