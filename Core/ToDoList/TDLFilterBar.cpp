@@ -282,7 +282,7 @@ void CTDLFilterBar::OnSelchangeFilter()
 
 void CTDLFilterBar::NotifyParentFilterChange()
 {
-	GetParent()->SendMessage(WM_FBN_FILTERCHNG, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
+	GetParent()->SendMessage(WM_FBN_FILTERCHANGE, GetDlgCtrlID(), (LPARAM)GetSafeHwnd());
 
 	RefreshUIBkgndBrush();
 }
