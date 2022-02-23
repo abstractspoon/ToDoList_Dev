@@ -11182,10 +11182,25 @@ BOOL CToDoListWnd::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	return CFrameWnd::OnSetCursor(pWnd, nHitTest, message);
 }
 
+void CToDoListWnd::OnViewSelectedTask(BOOL bNext)
+{
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	BOOL bWasFiltered = tdc.HasAnyFilter();
+
+	if (tdc.SelectTasksInHistory(bNext))
+	{
+		UpdateStatusBar();
+
+		// Update the filter bar if the filter auto-toggled 
+		// because the required tasks were hidden
+		if (bWasFiltered && !tdc.HasAnyFilter())
+			RefreshFilterBarControls(TDCA_ALL);
+	}
+}
+
 void CToDoListWnd::OnViewNextSelectedTask() 
 {
-	if (GetToDoCtrl().SelectTasksInHistory(TRUE))
-		UpdateStatusBar();
+	OnViewSelectedTask(TRUE);
 }
 
 void CToDoListWnd::OnUpdateViewNextSel(CCmdUI* pCmdUI) 
@@ -11195,8 +11210,7 @@ void CToDoListWnd::OnUpdateViewNextSel(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnViewPrevSelectedTask() 
 {
-	if (GetToDoCtrl().SelectTasksInHistory(FALSE))
-		UpdateStatusBar();
+	OnViewSelectedTask(FALSE);
 }
 
 void CToDoListWnd::OnUpdateViewPrevSel(CCmdUI* pCmdUI) 

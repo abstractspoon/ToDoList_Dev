@@ -68,6 +68,7 @@ public:
 	const TODOSTRUCTURE* GetStructure() const { return &m_struct; }
 	
 	BOOL HasTask(DWORD dwTaskID) const;
+	BOOL HasTasks(const CDWordArray& aTaskIDs) const;
 	BOOL TaskHasSibling(DWORD dwTaskID, DWORD dwSiblingID, BOOL bImmediate = TRUE) const;
 	BOOL TaskHasParent(DWORD dwTaskID, DWORD dwParentID, BOOL bImmediate = TRUE) const;
 

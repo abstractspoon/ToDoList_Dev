@@ -34,6 +34,7 @@ public:
 
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
+	BOOL SelectTasksInHistory(BOOL bForward);
 
 	FILTER_SHOW GetFilter(CTDCFilter& filter) const { filter = m_filter; }
 	void RefreshFilter();

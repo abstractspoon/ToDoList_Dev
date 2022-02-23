@@ -250,6 +250,19 @@ BOOL CToDoCtrlData::HasTask(DWORD dwTaskID) const
 	return m_items.HasTask(dwTaskID);
 }
 
+BOOL CToDoCtrlData::HasTasks(const CDWordArray& aTaskIDs) const
+{
+	int nID = aTaskIDs.GetSize();
+
+	while (nID--)
+	{
+		if (!m_items.HasTask(aTaskIDs[nID]))
+			break;
+	}
+
+	return (nID == -1);
+}
+
 BOOL CToDoCtrlData::TaskHasParent(DWORD dwTaskID, DWORD dwParentID, BOOL bImmediate) const
 {
 	const TODOSTRUCTURE* pTDS = NULL;

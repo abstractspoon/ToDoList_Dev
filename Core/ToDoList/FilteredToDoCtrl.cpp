@@ -124,6 +124,25 @@ BOOL CFilteredToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
 	return CTabbedToDoCtrl::SelectTask(sPart, nSelect); 
 }
 
+BOOL CFilteredToDoCtrl::SelectTasksInHistory(BOOL bForward)
+{
+	// If any of the tasks is filtered out we toggle the filter and try again
+	if (HasAnyFilter() && CanSelectTasksInHistory(bForward))
+	{
+		CDWordArray aTaskIDs;
+		VERIFY(m_taskTree.GetSelectedTasksInHistory(bForward, aTaskIDs));
+		
+		if (!m_taskTree.TreeItemMap().HasItems(aTaskIDs) &&	m_data.HasTasks(aTaskIDs))
+		{
+			ToggleFilter(); // show all tasks
+
+			ASSERT (m_taskTree.TreeItemMap().HasItems(aTaskIDs));
+		}
+	}
+
+	return CTabbedToDoCtrl::SelectTasksInHistory(bForward);
+}
+
 BOOL CFilteredToDoCtrl::LoadTasks(const CTaskFile& tasks)
 {
 	// handle reloading of tasklist with a filter present

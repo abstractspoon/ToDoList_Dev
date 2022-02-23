@@ -85,6 +85,7 @@ public:
 	BOOL MultiSelectTask(DWORD dwTaskID, BOOL bSelected);
 	BOOL EnsureSelectionVisible(BOOL bHorzPartialOK);
 	BOOL SelectTasksInHistory(BOOL bForward);
+	int GetSelectedTasksInHistory(BOOL bForward, CDWordArray& aTaskIDs) const;
 	BOOL CanSelectTasksInHistory(BOOL bForward) const;
 	BOOL SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked = FALSE) const;
 

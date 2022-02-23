@@ -31,6 +31,19 @@ BOOL CHTIMap::HasItem(DWORD dwItemID) const
 	return (GetItem(dwItemID) != NULL);
 }
 
+BOOL CHTIMap::HasItems(const CDWordArray& aItemIDs) const
+{
+	int nID = aItemIDs.GetSize();
+
+	while (nID--)
+	{
+		if (GetItem(aItemIDs[nID]) == NULL)
+			break;
+	}
+
+	return (nID == -1);
+}
+
 void CHTIMap::AddItem(const CTreeCtrl& tree, HTREEITEM hti, BOOL bVisibleChildrenOnly)
 {
 	// update our own mapping

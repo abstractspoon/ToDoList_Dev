@@ -1984,6 +1984,11 @@ BOOL CTDLTaskTreeCtrl::SelectTasksInHistory(BOOL bForward)
 	return bSelected;
 }
 
+int CTDLTaskTreeCtrl::GetSelectedTasksInHistory(BOOL bForward, CDWordArray& aTaskIDs) const
+{
+	return (bForward ? TSH().GetNextSelectionIDs(aTaskIDs) : TSH().GetPrevSelectionIDs(aTaskIDs));
+}
+
 BOOL CTDLTaskTreeCtrl::CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const
 {
 	if (!hti)

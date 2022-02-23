@@ -59,6 +59,7 @@ class CHTIMap : public CMap<DWORD, DWORD, HTREEITEM, HTREEITEM&>
 public:
 	HTREEITEM GetItem(DWORD dwItemID) const;
 	BOOL HasItem(DWORD dwItemID) const;
+	BOOL HasItems(const CDWordArray& aItemIDs) const;
 
 	void AddItem(const CTreeCtrl& tree, HTREEITEM hti, BOOL bVisibleChildrenOnly = FALSE);
 	BOOL RemoveItem(const CTreeCtrl& tree, HTREEITEM hti);
