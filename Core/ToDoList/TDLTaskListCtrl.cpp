@@ -987,21 +987,6 @@ LRESULT CTDLTaskListCtrl::WindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM 
 					
 				case LVN_GETDISPINFO:
 					return OnListGetDispInfo((NMLVDISPINFO*)pNMHDR);
-
-// 				case LVN_GETINFOTIP:
-// 					{
-// 						NMLVGETINFOTIP* pLVGIT = (NMLVGETINFOTIP*)pNMHDR;
-// 						DWORD dwTaskID = GetTaskID(pLVGIT->iItem);
-// 						
-// 						if (dwTaskID)
-// 						{
-// 							CString sInfoTip(FormatInfoTip(dwTaskID, (pLVGIT->cchTextMax - 1)));
-// 							lstrcpyn(pLVGIT->pszText, sInfoTip, (pLVGIT->cchTextMax - 1));
-// 
-// 							return 0L; // eat
-// 						}
-// 					}
-// 					break;
 				}
 			}
 		}
@@ -1507,41 +1492,42 @@ DWORD CTDLTaskListCtrl::GetNextSelectedTaskID(POSITION& pos) const
 	return dwTaskID;
 }
 
-BOOL CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
+void CTDLTaskListCtrl::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 {
-	// only called for the list that currently has the focus
-	if (m_bDeletingGroupHeaders)
-		return TRUE; // eat
+	if (m_bDeletingGroupHeaders ||
+		IsGroupHeaderItem(GetSelectedItem()))
+	{
+		// Group headers are not selectable and have special IDs
+		return;
+	}
 	
-	// Don't notify if the up/down cursor key is still pressed
 	if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
 	{
-		return FALSE;
+		// User is in the middle of scrolling
+		return;
 	}
 
-	// Or if the mouse button is down, over an item, 
-	// the selection is empty, and the CTRL
-	// key is not pressed. ie. the user is in 
-	// the middle of selecting a new item
-	if (Misc::IsKeyPressed(VK_LBUTTON) &&
-			HitTestTask(GetMessagePos(), false) &&
-			!Misc::IsKeyPressed(VK_CONTROL) &&
-			!GetSelectedCount())
-	{
-		return FALSE;
-	}
-
-	// Or we are bounds selecting
 	if (IsBoundSelecting())
-		return FALSE;
+	{
+		// User is in the middle of 'bounds selecting'
+		return;
+	}
 
-	// Or a group header is selected
-	// Note: don't use GetSelectedTaskID here because it filters out group headers
-	if (IsGroupHeaderItem(GetSelectedItem()))
-		return FALSE;
+	// Don't notify de-selections EXCEPT in the very
+	// specific case where the CTRL key is down, we are 
+	// over an item and no mouse button is down
+	// ie. the user has explicitly deselected an item
+	if (!GetSelectedCount())
+	{
+		BOOL bManualDeslection = (Misc::IsKeyPressed(VK_CONTROL) && 
+								  HitTestTask(GetMessagePos(), FALSE) && 
+								  !Misc::IsKeyPressed(VK_LBUTTON));
+
+		if (!bManualDeslection)
+			return;
+	}
 
 	NotifyParentSelChange();
-	return TRUE;
 }
 
 BOOL CTDLTaskListCtrl::HasHitTestFlag(UINT nFlags, UINT nFlag)

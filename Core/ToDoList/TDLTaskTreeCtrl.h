@@ -22,12 +22,6 @@
 #include "..\Shared\EnHeaderCtrl.h"
 #include "..\Shared\TreeListSyncer.h"
 #include "..\Shared\Treeselectionhelper.h"
-#include "..\Shared\runtimedlg.h"
-
-/////////////////////////////////////////////////////////////////////////////
-
-#include <afxtempl.h>
-typedef CArray<int, int> CIntArray;
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -191,8 +185,8 @@ protected:
 	
  	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 
-	BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
-	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	void OnListSelectionChange(NMLISTVIEW* pNMLV);
+	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	BOOL IsTreeItemSelected(HWND hwnd, HTREEITEM hti) const;
 	DWORD GetColumnItemTaskID(int nItem) const;
