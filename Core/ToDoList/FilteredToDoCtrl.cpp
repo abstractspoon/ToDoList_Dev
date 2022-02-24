@@ -137,6 +137,8 @@ BOOL CFilteredToDoCtrl::SelectTasksInHistory(BOOL bForward)
 			ToggleFilter(); // show all tasks
 
 			ASSERT (m_taskTree.TreeItemMap().HasItems(aTaskIDs));
+
+			return SelectTasks(aTaskIDs);
 		}
 	}
 

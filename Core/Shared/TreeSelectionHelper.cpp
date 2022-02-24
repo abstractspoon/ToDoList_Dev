@@ -346,8 +346,6 @@ BOOL CTreeSelectionHelper::RemoveAll(BOOL bRemoveFromHistory, BOOL bRedraw)
 				HTREEITEM hti = GetNextItem(pos);
 				InvalidateItem(hti);
 			}
-
-			//InvalidateAll(FALSE);
 		}
 
 		m_lstSelection.RemoveAll(); 
