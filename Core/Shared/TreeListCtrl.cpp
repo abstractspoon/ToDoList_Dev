@@ -886,23 +886,22 @@ LRESULT CTreeListCtrl::OnTreeDragAbort(WPARAM /*wp*/, LPARAM /*lp*/)
 	return m_treeDragDrop.ProcessMessage(CWnd::GetCurrentMessage());
 }
 
-BOOL CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
+void CTreeListCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	if (m_bMovingItem)
-		return FALSE;
+		return;
 	
 	// Ignore setting selection to 'NULL' unless there are no tasks at all
 	// because we know it's temporary only
 	if ((pNMTV->itemNew.hItem == NULL) && (m_tree.GetCount() != 0))
-		return FALSE;
+		return;
 	
 	// we're NOT interested in keyboard changes
 	// because keyboard gets handled in WM_KEYUP
 	if (pNMTV->action == TVC_BYKEYBOARD)
-		return FALSE;
+		return;
 
 	CWnd::GetParent()->SendMessage(WM_TLC_ITEMSELCHANGE, CWnd::GetDlgCtrlID(), (LPARAM)pNMTV->itemNew.hItem);
-	return TRUE;
 }
 
 LRESULT CTreeListCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)

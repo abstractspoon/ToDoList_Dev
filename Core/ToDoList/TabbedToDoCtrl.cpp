@@ -6387,36 +6387,33 @@ void CTabbedToDoCtrl::OnListSelChanged(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 void CTabbedToDoCtrl::OnListSelChanged()
 {
+	if (m_bDeletingTasks)
+		return;
+
 	if (!InListView())
 	{
 		ASSERT(0);
 		return;
 	}
-	else if (m_bDeletingTasks)
-	{
-		return;
-	}
 
-	TDCSELECTIONCACHE cacheTree, cacheList;
+	TDCSELECTIONCACHE cacheTree;
 	CacheTreeSelection(cacheTree, FALSE);
-	CacheListSelection(cacheList, FALSE);
 	
-	if (!cacheTree.SelectionMatches(cacheList, TRUE))
+	VIEWDATA* pLVData = GetViewData(FTCV_TASKLIST);
+	BOOL bListHadSelection = pLVData->bHasSelectedTask;
+
+	TDCSELECTIONCACHE cacheList;
+	pLVData->bHasSelectedTask = CacheListSelection(cacheList, FALSE);
+
+	if (!cacheTree.SelectionMatches(cacheList, TRUE) && pLVData->bHasSelectedTask)
 	{
-		if (cacheList.aSelTaskIDs.GetSize() == 0)
-		{
-			GetViewData(FTCV_TASKLIST)->bHasSelectedTask = FALSE;
-		}
+		if (cacheList.aSelTaskIDs.GetSize() == m_taskTree.GetItemCount())
+			m_taskTree.SelectAll();
 		else
-		{
-			if (cacheList.aSelTaskIDs.GetSize() == m_taskTree.GetItemCount())
-				m_taskTree.SelectAll();
-			else
-				m_taskTree.RestoreSelection(cacheList);
-
-			GetViewData(FTCV_TASKLIST)->bHasSelectedTask = TRUE;
-		}
-
+			m_taskTree.RestoreSelection(cacheList);
+	}
+	else if (Misc::StateChanged(bListHadSelection, pLVData->bHasSelectedTask))
+	{
 		UpdateControls();
 	}
 }

@@ -226,7 +226,7 @@ protected:
 	// base class callbacks
 	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
 	void OnNotifySplitterChange(int nSplitPos);
-	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	// pseudo-message handlers
 	virtual BOOL OnTreeLButtonDown(UINT nFlags, CPoint point);

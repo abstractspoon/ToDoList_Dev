@@ -587,7 +587,7 @@ GM_ITEMSTATE CTDLTaskTreeCtrl::GetColumnItemState(int nItem) const
 	return GetTreeItemState((HTREEITEM)m_lcColumns.GetItemData(nItem));
 }
 
-BOOL CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
+void CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 {
 	// only called when the focus is actually on the columns
 	// ie. not when Syncing Column Selection)
@@ -627,23 +627,22 @@ BOOL CTDLTaskTreeCtrl::OnListSelectionChange(NMLISTVIEW* pNMLV)
 	if (Misc::IsCursorKeyPressed(MKC_UPDOWN))
 	{
 		// vertical scrolling
-		return FALSE;
+		return;
 	}
 
 	if (bLBtnDown && !bCtrl && TSH().IsEmpty() && (nHit != -1))
 	{
 		// In the middle of a simple click
-		return FALSE;
+		return;
 	}
 
 	if (IsBoundSelecting() && ((nHit == -1) || (m_lcColumns.GetSelectedCount() > 2)))
 	{
 		// bulk selecting
-		return FALSE;
+		return;
 	}
 
 	NotifyParentSelChange();
-	return TRUE;
 }
 
 void CTDLTaskTreeCtrl::SyncColumnSelectionToTasks()
@@ -685,7 +684,7 @@ void CTDLTaskTreeCtrl::NotifyParentSelChange(SELCHANGE_ACTION nAction)
 	RepackageAndSendToParent(WM_NOTIFY, 0, (LPARAM)&nmtv);
 }
 
-BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
+void CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
 	// we don't support nothing having being selected unless there
 	// are no items in the tree
@@ -695,7 +694,7 @@ BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	// cursor handled here
 	// <shift>+cursor handled here
 	if (m_wKeyPress == 0)
-		return FALSE;
+		return;
 
 	HTREEITEM hti = pNMTV->itemNew.hItem;
 
@@ -753,10 +752,9 @@ BOOL CTDLTaskTreeCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 	// notify parent of selection change
 	// unless up/down cursor key still pressed
 	if (TSH().Matches(lstPrevSel) || Misc::IsCursorKeyPressed(MKC_UPDOWN))
-		return FALSE;
+		return;
 
 	NotifyParentSelChange(SC_BYKEYBOARD);
-	return TRUE;
 }
 
 BOOL CTDLTaskTreeCtrl::PreTranslateMessage(MSG* pMsg)

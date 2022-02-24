@@ -36,7 +36,7 @@ const UINT WM_TDCM_IMPORTFROMDROP			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORT
 const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANIMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
 
 // CTDLFilterBar
-const UINT WM_FBN_FILTERCHNG				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHNG")); 
+const UINT WM_FBN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHANGE")); 
 
 // CToDoCtrlReminders
 const UINT WM_TDCN_DISMISSREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_DISMISSREMINDER"));		// wParam = hwnd, lParam = TaskID

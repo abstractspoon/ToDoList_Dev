@@ -54,19 +54,23 @@ BOOL CTDCFilter::operator==(const CTDCFilter& filter) const
 
 BOOL CTDCFilter::FilterMatches(const TDCFILTER& filter, LPCTSTR szCustom, DWORD dwCustomFlags) const
 {
-	BOOL bCustom = HasAdvancedFilter();
-	BOOL bOtherCustom = (szCustom && *szCustom);
+	BOOL bOtherIsCustom = !Misc::IsEmpty(szCustom);
 
-	if (bCustom && bOtherCustom)
+	switch (m_nState)
 	{
-		return m_advFilter.Matches(szCustom, dwCustomFlags);
-	}
-	else if (!bCustom && !bOtherCustom)
-	{
-		return m_filter.Matches(filter);
+	case TDCFS_FILTER:
+		return (!bOtherIsCustom && m_filter.Matches(filter));
+
+	case TDCFS_ADVANCED:
+		return (bOtherIsCustom && m_advFilter.Matches(szCustom, dwCustomFlags));
+
+	case TDCFS_NONE:
+	case TDCFS_FILTER_TOGGLED:
+	case TDCFS_ADVANCED_TOGGLED:
+		return (!bOtherIsCustom && !filter.IsSet());
 	}
 
-	// One is custom but not the other
+	ASSERT(0);
 	return FALSE;
 }
 

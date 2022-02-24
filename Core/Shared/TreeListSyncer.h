@@ -308,8 +308,8 @@ protected:
 	virtual LRESULT OnListGetDispInfo(NMLVDISPINFO* pLVDI);
 	virtual LRESULT OnTreeGetDispInfo(NMTVDISPINFO* pTVDI);
 
-	virtual BOOL OnListSelectionChange(NMLISTVIEW* pNMLV);
-	virtual BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	virtual void OnListSelectionChange(NMLISTVIEW* pNMLV);
+	virtual void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 
 	virtual BOOL OnHeaderItemWidthChanging(NMHEADER* pHDN, int nMinWidth = 0);
 

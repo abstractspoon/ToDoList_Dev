@@ -2016,22 +2016,18 @@ LRESULT CTreeListSyncer::OnTreeGetDispInfo(NMTVDISPINFO* /*pTVDI*/)
 	return 0L; 
 }
 
-BOOL CTreeListSyncer::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/) 
+void CTreeListSyncer::OnListSelectionChange(NMLISTVIEW* /*pNMLV*/)
 { 
 	// derived class must override if we 
 	// are not syncing the selection for them
 	ASSERT(HasFlag(TLSF_SYNCSELECTION)); 
-
-	return TRUE;
 }
 
-BOOL CTreeListSyncer::OnTreeSelectionChange(NMTREEVIEW* /*pNMTV*/) 
+void CTreeListSyncer::OnTreeSelectionChange(NMTREEVIEW* /*pNMTV*/)
 { 
 	// derived class must override if we 
 	// are not syncing the selection for them
 	ASSERT(HasFlag(TLSF_SYNCSELECTION)); 
-
-	return TRUE;
 }
 
 DWORD CTreeListSyncer::GetRequiredLinkData(HWND hwndList, HWND hwndTree, HTREEITEM hti)
