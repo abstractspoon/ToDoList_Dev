@@ -446,8 +446,6 @@ void CTaskFile::Reset()
 	ClearHandleMap();
 
 	m_dwNextUniqueID = 1;
-	m_bISODates = FALSE;
-	m_sHtmlImgFolder.Empty();
 }
 
 BOOL CTaskFile::CopyTaskFrom(const ITaskList* pSrcTasks, HTASKITEM hSrcTask, HTASKITEM hDestParent, 
