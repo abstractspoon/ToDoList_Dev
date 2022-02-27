@@ -785,7 +785,7 @@ protected:
 	void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 	BOOL ImportTasks(BOOL bFromText, const CString& sImportFrom,
 					int nImporter, TDLID_IMPORTTO nImportTo);
-	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
+	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg);
 	UINT GetNewTaskCmdID() const;
 	UINT GetNewSubtaskCmdID() const;
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);

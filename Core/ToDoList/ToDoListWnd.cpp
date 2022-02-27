@@ -138,7 +138,6 @@ static CEnString TDL_FILEFILTER;
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
 const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print"), _T("html"));
 const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("png"));
-const CString TEMP_HTMLIMG_FOLDERPATH	= FileMisc::GetTempFilePath(_T("tdl.html"), _T("images"));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -261,7 +260,9 @@ CToDoListWnd::~CToDoListWnd()
 	FileMisc::DeleteFile(TEMP_CLIPBOARD_FILEPATH, TRUE);
 	FileMisc::DeleteFile(TEMP_PRINT_FILEPATH, TRUE);
 	FileMisc::DeleteFile(TEMP_TASKVIEW_FILEPATH, TRUE);
-	FileMisc::DeleteFolder(TEMP_HTMLIMG_FOLDERPATH, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
+
+	CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, TEMP_PRINT_FILEPATH);
+	FileMisc::DeleteFolder(sHtmlImgFolder, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 }
 
 BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
@@ -6427,9 +6428,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
 	
 	// always use the same file
-	CString sTempFile = TEMP_PRINT_FILEPATH;
-
-	if (!CreateTempPrintFile(dialog, sTempFile))
+	if (!CreateTempPrintFile(dialog))
 	{
 		// Cancelled or error handled
 		return;
@@ -6441,25 +6440,28 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	if (m_IE.GetSafeHwnd() || m_IE.Create(NULL, WS_CHILD | WS_VISIBLE, rHidden, this, (UINT)IDC_STATIC))
 	{
 		if (bPreview)
-			m_IE.PrintPreview(sTempFile, TRUE); // TRUE = Print background colours
+			m_IE.PrintPreview(TEMP_PRINT_FILEPATH, TRUE); // TRUE = Print background colours
 		else
-			m_IE.Print(sTempFile, TRUE); // TRUE = Print background colours
+			m_IE.Print(TEMP_PRINT_FILEPATH, TRUE); // TRUE = Print background colours
 	}
 	else // try sending to browser
 	{
-		DWORD dwRes = FileMisc::Run(*this, sTempFile, NULL, SW_HIDE, NULL, bPreview ? _T("print") : NULL);
+		DWORD dwRes = FileMisc::Run(*this, TEMP_PRINT_FILEPATH, NULL, SW_HIDE, NULL, bPreview ? _T("print") : NULL);
 								
 		if (dwRes < 32)
 			CMessageBox::AfxShow(IDS_PRINTFAILED_TITLE, IDS_PRINTFAILED, MB_OK);
 	}
 }
 
-BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath)
+BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 {
 	CWaitCursor cursor;
 
 	TDLPD_STYLE nStyle = dlg.GetExportStyle();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, TEMP_PRINT_FILEPATH);
+
 
 	switch (nStyle)
 	{
@@ -6497,7 +6499,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 				sHtmlOutput += sImage;
 				sHtmlOutput += _T("</body>\n</html>\n");
 
-				return FileMisc::SaveFile(sFilePath, sHtmlOutput, SFEF_UTF8WITHOUTBOM);
+				return FileMisc::SaveFile(TEMP_PRINT_FILEPATH, sHtmlOutput, SFEF_UTF8WITHOUTBOM);
 			}
 			else
 			{
@@ -6513,7 +6515,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			VERIFY(dlg.GetStylesheet(sStylesheet));
 
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, TEMP_HTMLIMG_FOLDERPATH, TRUE, dlg.GetTaskSelection(), tasks);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, TRUE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -6521,7 +6523,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks);
 
 			// export
-			return tasks.TransformToFile(sStylesheet, sFilePath);
+			return tasks.TransformToFile(sStylesheet, TEMP_PRINT_FILEPATH);
 		}
 		break;
 
@@ -6531,7 +6533,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			VERIFY(dlg.GetOtherExporterTypeID(sExporterTypeID));
 
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, TEMP_HTMLIMG_FOLDERPATH, FALSE, dlg.GetTaskSelection(), tasks);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, FALSE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -6539,7 +6541,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks);
 
 			// export
-			return (m_mgrImportExport.ExportTaskList(tasks, sFilePath, sExporterTypeID, IIEF_PRINTING) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(tasks, TEMP_PRINT_FILEPATH, sExporterTypeID, IIEF_PRINTING) == IIER_SUCCESS);
 		}
 		break;
 
@@ -6549,7 +6551,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		// simple web page
 		{
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, TEMP_HTMLIMG_FOLDERPATH, FALSE, dlg.GetTaskSelection(), tasks);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, FALSE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -6559,7 +6561,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			// export
 			DWORD dwFlags = (IIEF_PRINTING | TDC::MapPrintToExportStyle(nStyle));
 
-			return (m_mgrImportExport.ExportTaskList(tasks, sFilePath, TDCET_HTML, dwFlags) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(tasks, TEMP_PRINT_FILEPATH, TDCET_HTML, dwFlags) == IIER_SUCCESS);
 		}
 		break;
 	}
