@@ -129,6 +129,7 @@ const LPCTSTR PREF_KEY		= _T("Preferences");
 const LPCTSTR ENDL			= _T("\n");
 const LPCTSTR TDL_EXT		= _T("tdl");
 const LPCTSTR XML_EXT		= _T("xml");
+const LPCTSTR HTMLIMG_EXT	= _T("html_images");
 
 static CEnString TDL_FILEFILTER;
 
@@ -137,6 +138,7 @@ static CEnString TDL_FILEFILTER;
 const CString TEMP_CLIPBOARD_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.clipboard"), _T(""));
 const CString TEMP_PRINT_FILEPATH		= FileMisc::GetTempFilePath(_T("tdl.print"), _T("html"));
 const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"), _T("png"));
+const CString TEMP_HTMLIMG_FOLDERPATH	= FileMisc::GetTempFilePath(_T("tdl.html"), _T("images"));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -149,7 +151,6 @@ const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"),
 enum
 {
 	WM_POSTONCREATE				= (WM_APP+1),
-	WM_WEBUPDATEWIZARD,
 	WM_UPDATEUDTSINTOOLBAR,
 	WM_APPRESTOREFOCUS,
 	WM_DOINITIALDUETASKNOTIFY,
@@ -260,6 +261,7 @@ CToDoListWnd::~CToDoListWnd()
 	FileMisc::DeleteFile(TEMP_CLIPBOARD_FILEPATH, TRUE);
 	FileMisc::DeleteFile(TEMP_PRINT_FILEPATH, TRUE);
 	FileMisc::DeleteFile(TEMP_TASKVIEW_FILEPATH, TRUE);
+	FileMisc::DeleteFolder(TEMP_HTMLIMG_FOLDERPATH, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 }
 
 BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
@@ -2100,17 +2102,9 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 
 		// set the html image folder to be the output path with
 		// an different extension
-		CString sImgFolder;
+		CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, pExport->sExportPath);
 
-		if (bHtmlComments)
-		{
-			sImgFolder = pExport->sExportPath;
-		
-			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
-		}
-
-		GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, pExport->tasks, sImgFolder); 
+		GetTasks(tdc, bHtmlComments, sHtmlImgFolder, bTransform, nWhatTasks, filter, pExport->tasks); 
 	}
 	else
 	{
@@ -5597,15 +5591,13 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	if (startup.HasFlag(TLD_SAVEINTERMEDIATE))
 	{
 		CString sOutputFile(GetIntermediateTaskListPath(GetToDoCtrl().GetFilePath()));
-
-		CString sHtmlImgFolder(sOutputFile);
-		FileMisc::ReplaceExtension(sHtmlImgFolder, _T("html_images"));
+		CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, sOutputFile);
 
 		CTaskFile tasks;
 
 		if (startup.GetSaveIntermediateAll())
 		{
-			GetTasks(tdc, TRUE, TRUE, TSDT_ALL, TDCGETTASKS(), tasks, sHtmlImgFolder);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, TRUE, TSDT_ALL, TDCGETTASKS(), tasks);
 		}
 		else // use last state of transform dialog to determine what tasks to output
 		{
@@ -5614,7 +5606,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 									   _T(""),
 									   tdc.GetCustomAttributeDefs());
 
-			GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, TRUE, dialog.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(_T(""), dialog.GetDate());
 		}
@@ -6521,7 +6513,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			VERIFY(dlg.GetStylesheet(sStylesheet));
 
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, TRUE, dlg.GetTaskSelection(), tasks, NULL);
+			GetTasks(tdc, TRUE, TEMP_HTMLIMG_FOLDERPATH, TRUE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -6539,7 +6531,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			VERIFY(dlg.GetOtherExporterTypeID(sExporterTypeID));
 
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, FALSE, dlg.GetTaskSelection(), tasks, NULL);
+			GetTasks(tdc, TRUE, TEMP_HTMLIMG_FOLDERPATH, FALSE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -6557,7 +6549,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		// simple web page
 		{
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, FALSE, dlg.GetTaskSelection(), tasks, NULL);
+			GetTasks(tdc, TRUE, TEMP_HTMLIMG_FOLDERPATH, FALSE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -10004,19 +9996,11 @@ void CToDoListWnd::OnExport()
 		tdc.SaveAllTaskViewPreferences();
 
 		// set the html image folder to be the output path with an different extension
-		CString sImgFolder;
-		
-		if (bHtmlComments)
-		{
-			sImgFolder = sExportPath;
-
-			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
-		}
+		CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sExportPath);
 		
 		// Note: don't need to verify password if encrypted tasklist is active
 		CTaskFile tasks;
-		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
+		GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, dialog.GetTaskSelection(), tasks);
 
 		// add report details
 		tasks.SetReportDetails(dialog.GetExportTitle(), dialog.GetExportDate());
@@ -10050,15 +10034,9 @@ void CToDoListWnd::OnExport()
 				CTaskFile& tasks = taskFiles.GetTaskFile(nCtrl);
 				
 				// set the html image folder to be the output path with an different extension
-				CString sImgFolder;
+				CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sExportPath);
 				
-				if (bHtmlComments)
-				{
-					sImgFolder = sExportPath;
-					FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-				}
-				
-				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
+				GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, dialog.GetTaskSelection(), tasks);
 				
 				// add report details
 				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
@@ -10134,16 +10112,10 @@ void CToDoListWnd::OnExport()
 				}
 				
 				// set the html image folder to be the output path with an different extension
-				CString sImgFolder;
-				
-				if (bHtmlComments)
-				{
-					sImgFolder = sFilePath;
-					FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-				}
+				CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sFilePath);
 				
 				CTaskFile tasks;
-				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
+				GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, dialog.GetTaskSelection(), tasks);
 				
 				// add report details
 				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
@@ -10165,9 +10137,9 @@ void CToDoListWnd::OnExport()
 	}
 }
 
-int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-						  TSD_TASKS nWhatTasks, TDCGETTASKS& filter,  
-						  CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
+int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, 
+						   const CString& sHtmlImageDir, BOOL bTransform, 
+						   TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks) const
 {
 	// preferences
 	const CPreferencesDlg& userPrefs = Prefs();
@@ -10193,11 +10165,11 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 			filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
 		}
 
-		tasks.SetHtmlImageFolder(szHtmlImageDir);
+		ASSERT(!sHtmlImageDir.IsEmpty());
+		tasks.SetHtmlImageFolder(sHtmlImageDir);
 
 		// And delete all existing images in that folder
-		if (!Misc::IsEmpty(szHtmlImageDir))
-			FileMisc::DeleteFolderContents(szHtmlImageDir, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
+		FileMisc::DeleteFolderContents(sHtmlImageDir, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 	}
 
 	// get the tasks
@@ -10239,14 +10211,15 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	
 	// delete the HTML image folder if it is empty
 	// this will fail if it is not empty.
-	if (bHtmlComments && !Misc::IsEmpty(szHtmlImageDir))
-		RemoveDirectory(szHtmlImageDir);
+	if (bHtmlComments && !sHtmlImageDir)
+		::RemoveDirectory(sHtmlImageDir);
 	
 	return tasks.GetTaskCount();
 }
 
-int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-							const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
+int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, 
+						   const CString& sHtmlImageDir, BOOL bTransform,
+						   const CTaskSelectionDlg& taskSel, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter(TDCGT_ALL);
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
@@ -10279,7 +10252,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 		break;
 	}
 	
-	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, tasks, szHtmlImageDir);
+	return GetTasks(tdc, bHtmlComments, sHtmlImageDir, bTransform, nWhatTasks, filter, tasks);
 }
 
 void CToDoListWnd::OnUpdateExport(CCmdUI* pCmdUI) 
@@ -10350,11 +10323,10 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 
 	// set the html image folder to be the same as the 
 	// output path without the extension
-	CString sHtmlImgFolder(sOutputPath);
-	FileMisc::ReplaceExtension(sHtmlImgFolder, _T("html_images"));
+	CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, sOutputPath);
 	
 	CTaskFile tasks;
-	GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
+	GetTasks(tdc, TRUE, sHtmlImgFolder, TRUE, dialog.GetTaskSelection(), tasks);
 
 	// add report details
 	tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC), dialog.GetDate());
@@ -10368,6 +10340,21 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 		if (Prefs().GetPreviewExport())
 			FileMisc::Run(*this, sOutputPath);
 	}
+}
+
+CString CToDoListWnd::GetHtmlImageFolder(BOOL bHtmlComments, const CString& sTasklistPath)
+{
+	CString sHtmlImgFolder;
+
+	if (bHtmlComments)
+	{
+		ASSERT(!sTasklistPath.IsEmpty());
+
+		sHtmlImgFolder = sTasklistPath;
+		FileMisc::ReplaceExtension(sHtmlImgFolder, HTMLIMG_EXT);
+	}
+
+	return sHtmlImgFolder;
 }
 
 BOOL CToDoListWnd::LogIntermediateTaskList(CTaskFile& tasks)
@@ -12714,26 +12701,18 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		CString sExt = Misc::ToLower(m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE));
 		CString sFilePath = FileMisc::GetTempFilePath(_T("tdl.email"), sExt);
 
-		BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nFormat);
-		CString sImgFolder;
-
-		if (bHtmlComments)
-		{
-			sImgFolder = sFilePath;
-	
-			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
-		}
-
 		// get tasks
+		BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nFormat);
+		CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sFilePath);
+
 		const CTaskSelectionDlg& taskSel = dialog.GetTaskSelection();
 
 		CTaskFile tasks;
-		GetTasks(tdc, bHtmlComments, FALSE, taskSel, tasks, sImgFolder);
-
-		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
+		GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, taskSel, tasks);
 
 		// Export them
+		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
+
 		if (m_mgrImportExport.ExportTaskList(tasks, sFilePath, nFormat, dwFlags) != IIER_SUCCESS)
 		{
 			// Display error message

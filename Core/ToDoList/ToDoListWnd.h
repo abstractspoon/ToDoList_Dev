@@ -762,10 +762,10 @@ protected:
 	void ToggleActiveTasklistStyle(TDC_STYLE nStyle, BOOL& bFlag);
 	
 	// helpers
-	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-					const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
-	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
+	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, const CString& sHtmlImageDir, BOOL bTransform, 
+					const CTaskSelectionDlg& taskSel, CTaskFile& tasks) const;
+	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, const CString& sHtmlImageDir, BOOL bTransform, 
+					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks) const;
 	
 	void DoSendTasks(BOOL bSelected);
 	BOOL DoPreferences(int nInitPage = -1, UINT nInitCtrlID = 0);
@@ -805,6 +805,7 @@ protected:
 	static void EnableTDLProtocol(BOOL bEnable);
 	static void SetupUIStrings();
 	static CString GetEndSessionFilePath();
+	static CString GetHtmlImageFolder(BOOL bHtmlComments, const CString& sTasklistPath);
 	static BOOL IsEndSessionFilePath(const CString& sFilePath);
 	static BOOL LogIntermediateTaskList(CTaskFile& tasks);
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);
