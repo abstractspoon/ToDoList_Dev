@@ -198,11 +198,12 @@ protected:
 	int BuildSortedSelection(CHTIList& lstHTI) const;
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
+	int CalculateIndentation(HTREEITEM hti) const;
 
-	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE, const KANBANITEM* pKI = NULL) const;
-	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
-	BOOL GetItemRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
-	BOOL GetItemCheckboxRect(HTREEITEM hti, CRect& rItem, const KANBANITEM* pKI) const;
+	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
+	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;
+	BOOL GetItemRect(HTREEITEM hti, CRect& rItem) const;
+	BOOL GetItemCheckboxRect(HTREEITEM hti, CRect& rItem) const;
 	BOOL GetItemCheckboxRect(CRect& rItem) const;
 
 	KBC_IMAGETYPE HitTestImage(HTREEITEM hti, CPoint point) const;
