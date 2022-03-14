@@ -346,10 +346,10 @@ void CXPTabCtrl::DrawThemesXpTabItem(CDC* pDC, int ixItem, const CRect& rcItem, 
 // draw tab item context: possible icon and text
 void CXPTabCtrl::DrawTabItem(CDC* pDC, int ixItem, const CRect& rcItemC, UINT uiFlags)
 {
-	TC_ITEM tci;   CString sText;
+	TC_ITEM tci = { 0 };   CString sText;
 	tci.mask      =TCIF_TEXT | TCIF_IMAGE;
-	tci.pszText   =sText.GetBuffer(128);
-	tci.cchTextMax=127;
+	tci.pszText   =sText.GetBuffer(256);
+	tci.cchTextMax=256;
 	GetItem(ixItem,&tci);
 	sText.ReleaseBuffer();
 	sText.TrimRight();
