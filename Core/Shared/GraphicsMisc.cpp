@@ -587,17 +587,34 @@ BOOL GraphicsMisc::SetDragDropCursor(GM_OLECURSOR nCursor)
 
 HCURSOR GraphicsMisc::LoadAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
 {
+	static CMap<CString, LPCTSTR, HCURSOR, HCURSOR> mapCursors;
+
 	CString sCursorPath = FileMisc::TerminatePath(FileMisc::GetAppFolder(szSubFolder));
 	sCursorPath += szName;
-	FileMisc::ReplaceExtension(sCursorPath, _T("cur"));
 
-	HCURSOR hCursor = (HCURSOR)::LoadImage(NULL, 
-											sCursorPath, 
-											IMAGE_CURSOR, 
-											GetSystemMetrics(SM_CXCURSOR), 
-											GetSystemMetrics(SM_CYCURSOR), 
-											LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
-	return hCursor;
+	FileMisc::ReplaceExtension(sCursorPath, _T("cur")).MakeUpper();
+
+	if (FileMisc::FileExists(sCursorPath))
+	{
+		HCURSOR hCursor = NULL;
+		mapCursors.Lookup(sCursorPath, hCursor);
+
+		if (!hCursor)
+		{
+			hCursor = (HCURSOR)::LoadImage(NULL,
+										   sCursorPath,
+										   IMAGE_CURSOR,
+										   GetSystemMetrics(SM_CXCURSOR),
+										   GetSystemMetrics(SM_CYCURSOR),
+										   LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
+
+			mapCursors[sCursorPath] = hCursor;
+		}
+
+		return hCursor;
+	}
+
+	return NULL;
 }
 
 BOOL GraphicsMisc::SetAppCursor(LPCTSTR szName, LPCTSTR szSubFolder)
