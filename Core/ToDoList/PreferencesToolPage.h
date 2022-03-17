@@ -126,8 +126,11 @@ protected:
 	BOOL InitializeToolbar();
 	BOOL GetListTool(int nTool, USERTOOL& tool) const;
 	int AddListTool(const USERTOOL& tool, int nPos = -1, BOOL bRebuildImages = FALSE);
+	
+	CString MapCmdIDToPlaceholder(UINT nCmdID) const;
+	CString GetNewUserVariableName(LPCTSTR szVarType) const;
+	CString FormatUserPlaceHolder(LPCTSTR szPlaceHolder, LPCTSTR szVarType, UINT nIDTextPrompt) const;
 
-	static CString MapCmdIDToPlaceholder(UINT nCmdID);
 	static CLA_TYPE MapCmdIDToType(UINT nCmdID);
 	
 };
