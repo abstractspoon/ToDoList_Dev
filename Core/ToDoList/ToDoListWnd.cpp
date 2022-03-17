@@ -346,8 +346,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_INSERTDATETIME, OnEditInsertdatetime)
 	ON_COMMAND(ID_EDIT_INSERTTIME, OnEditInserttime)
 	ON_COMMAND(ID_EDIT_OFFSETDATES, OnEditOffsetDates)
-	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetDatesForwards)
-	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetDatesBackwards)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetStartDueDatesForwards)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetStartDueDatesBackwards)
 	ON_COMMAND(ID_EDIT_PASTEAFTER, OnEditPasteAfter)
 	ON_COMMAND(ID_EDIT_PASTEASREF, OnEditPasteAsRef)
 	ON_COMMAND(ID_EDIT_PASTESUB, OnEditPasteSub)
@@ -11888,11 +11888,24 @@ void CToDoListWnd::OnEditOffsetDates()
 		}
 		
 		if (dwWhat & ODD_DONEDATE)
+		{
 			tdc.OffsetSelectedTaskDate(TDCD_DONE, nAmount, nUnits, bSubtasks);
+		}
+		
+		if (dwWhat & ODD_REMINDER)
+		{
+			CDWordArray aTaskIDs;
+			DWORD dwUnused;
+
+			int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, dwUnused, bSubtasks);
+
+			while (nTask--)
+				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], nAmount, nUnits, &tdc, bSubtasks);
+		}
 	}
 }
 
-void CToDoListWnd::OnEditOffsetDatesForwards(UINT nCmdID)
+void CToDoListWnd::OnEditOffsetStartDueDatesForwards(UINT nCmdID)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
 
@@ -11912,7 +11925,7 @@ void CToDoListWnd::OnEditOffsetDatesForwards(UINT nCmdID)
 	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(1, nUnits, FALSE);
 }
 
-void CToDoListWnd::OnEditOffsetDatesBackwards(UINT nCmdID)
+void CToDoListWnd::OnEditOffsetStartDueDatesBackwards(UINT nCmdID)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
 

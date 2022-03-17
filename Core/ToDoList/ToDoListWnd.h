@@ -229,8 +229,8 @@ protected:
 	afx_msg void OnEditInsertdatetime();
 	afx_msg void OnEditInserttime();
 	afx_msg void OnEditOffsetDates();
-	afx_msg void OnEditOffsetDatesForwards(UINT nCmdID);
-	afx_msg void OnEditOffsetDatesBackwards(UINT nCmdID);
+	afx_msg void OnEditOffsetStartDueDatesForwards(UINT nCmdID);
+	afx_msg void OnEditOffsetStartDueDatesBackwards(UINT nCmdID);
 	afx_msg void OnEditRedo();
 	afx_msg void OnEditSelectall();
 	afx_msg void OnEditSetReminder();

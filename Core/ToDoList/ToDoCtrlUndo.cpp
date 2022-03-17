@@ -270,19 +270,21 @@ BOOL CToDoCtrlUndo::IsValidElementOperation(TDC_UNDOELMOP nOp) const
 int CToDoCtrlUndo::GetLastUndoActionTaskIDs(CDWordArray& aIDs) const
 {
 	if (CanUndo())
-		return LastUndoAction().GetTaskIDs(aIDs);
+		LastUndoAction().GetTaskIDs(aIDs);
+	else
+		aIDs.RemoveAll();
 
-	// else
-	return 0;
+	return aIDs.GetSize();
 }
 
 int CToDoCtrlUndo::GetLastRedoActionTaskIDs(CDWordArray& aIDs) const
 {
 	if (CanRedo())
-		return LastRedoAction().GetTaskIDs(aIDs);
+		LastRedoAction().GetTaskIDs(aIDs);
+	else
+		aIDs.RemoveAll();
 
-	// else
-	return 0;
+	return aIDs.GetSize();
 }
 
 TDCUNDOACTION* CToDoCtrlUndo::UndoLastAction()

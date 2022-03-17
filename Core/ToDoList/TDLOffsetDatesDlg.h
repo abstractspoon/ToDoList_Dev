@@ -20,6 +20,7 @@ enum
 	ODD_STARTDATE	= 0x1,
 	ODD_DUEDATE		= 0x2,
 	ODD_DONEDATE	= 0x4,
+	ODD_REMINDER	= 0x8,
 };
 
 class CTDLOffsetDatesDlg : public CTDLDialog
@@ -39,6 +40,7 @@ protected:
 	BOOL	m_bOffsetStartDate;
 	BOOL	m_bOffsetDueDate;
 	BOOL	m_bOffsetDoneDate;
+	BOOL	m_bOffsetReminder;
 	int		m_bForward;
 	int		m_nOffsetBy;
 	int		m_nOffsetByUnits;

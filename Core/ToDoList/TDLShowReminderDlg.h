@@ -37,13 +37,13 @@ public:
 	void RemoveListReminder(const TDCREMINDER& rem);
 	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
 	void RemoveAllListReminders();
-	int GetVisibleReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
+	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
 
 	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
 	UINT GetSnoozeMinutes() const { return m_nSnoozeMins; }
 	double GetSnoozeDays() const;
 	COleDateTime GetSnoozeUntil() const;
-	int GetListReminderCount() const;
+
 
 protected:
 // Dialog Data
@@ -102,7 +102,7 @@ protected:
 	int FindListReminder(const TDCREMINDER& rem);
 	int GetSelectedReminder(TDCREMINDER& rem) const;
 	int GetSelectedReminders(CTDCReminderArray& aRem) const;
-	int GetVisibleReminders(CTDCReminderArray& aRem) const;
+	int GetListReminders(CTDCReminderArray& aRem) const;
 	void EnableControls();
 	void UpdateControls();
 	void UpdateTitleText();

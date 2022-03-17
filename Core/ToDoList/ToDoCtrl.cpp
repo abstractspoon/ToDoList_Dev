@@ -9383,6 +9383,19 @@ int CToDoCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID,
 	return m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwFocusedTaskID, bRemoveChildDupes);
 }
 
+int CToDoCtrl::GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const
+{
+	aSubtaskIDs.RemoveAll();
+
+	const TODOSTRUCTURE* pTDS = NULL;
+	GET_DATA_TDS(m_data, dwTaskID, pTDS, 0);
+
+	for (int nPos = 0; nPos < pTDS->GetSubTaskCount(); nPos++)
+		aSubtaskIDs.Add(pTDS->GetSubTaskID(nPos));
+
+	return aSubtaskIDs.GetSize();
+}
+
 BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll)
 {
 	if (!CanEditSelectedTask(TDCA_PASTE))

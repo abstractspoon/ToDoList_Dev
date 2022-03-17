@@ -221,6 +221,7 @@
 #define IDC_DEFAULTALLOCBY              1028
 #define IDC_USEHIGHESTPRIORITY          1028
 #define IDC_ROUNDTIMEFRACTIONS          1028
+#define IDC_OFFSETREMINDER              1028
 #define IDC_TABWIDTHS                   1029
 #define IDC_TREEFONTSIZE                1029
 #define IDC_DEFAULTSTATUS               1029

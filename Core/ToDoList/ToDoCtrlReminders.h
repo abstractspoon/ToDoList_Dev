@@ -46,11 +46,9 @@ public:
 	BOOL ToDoCtrlHasReminders(const CFilteredToDoCtrl* pTDC);
 	BOOL ToDoCtrlHasReminders(const CString& sFilePath);
 	BOOL UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib);
-
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
-	BOOL IsEmpty() const { return (GetListReminderCount() == 0); }
-
 	void CheckReminders();
+	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bIncludeSubtasks);
 
 // Attributes
 protected:
@@ -107,6 +105,8 @@ protected:
 	BOOL BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent);
 	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
+
+	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits);
 };
 
 /////////////////////////////////////////////////////////////////////////////
