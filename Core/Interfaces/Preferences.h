@@ -113,7 +113,7 @@ protected:
 
 protected:
 	// internal helpers that require pre-locking
-	static BOOL SaveInternal();
+	static BOOL SaveInternal(BOOL bExternal);
 	static void Release(CIniSectionMap& mapSections);
 
 	static int GetSortedSections(CIniSectionArray& aSections);
