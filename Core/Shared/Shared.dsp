@@ -201,10 +201,6 @@ SOURCE=.\DlgUnits.cpp
 # End Source File
 # Begin Source File
 
-SOURCE=.\DockManager.cpp
-# End Source File
-# Begin Source File
-
 SOURCE=.\driveinfo.cpp
 # End Source File
 # Begin Source File
@@ -870,10 +866,6 @@ SOURCE=.\DialogHelper.h
 # Begin Source File
 
 SOURCE=.\DlgUnits.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\DockManager.h
 # End Source File
 # Begin Source File
 
