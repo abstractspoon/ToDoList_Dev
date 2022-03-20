@@ -983,11 +983,11 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			// other display-only attributes
 			UpdateItemDisplayAttributes(pKI, pTasks, hTask);
 			
-			// always update colour because it can change for so many reasons
+			// always update colour, lock state and parent-ness
 			pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
-			// Always update lock state
 			pKI->bLocked = pTasks->IsTaskLocked(hTask, true); // calculated
+			pKI->bParent = pTasks->IsTaskParent(hTask);
 		}
 	}
 		
