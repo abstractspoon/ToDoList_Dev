@@ -1782,7 +1782,9 @@ void CKanbanCtrl::RebuildFixedColumns(const CKanbanItemArrayMap& mapKIArray)
 		return;
 	}
 
-	if (m_aColumns.GetSize() == 0) // first time only
+	// We only need to build this once because we don't remove empty
+	// columns like with dynamic columns, we just hide them
+	if (m_aColumns.GetSize() == 0)
 	{
 		for (int nDef = 0; nDef < m_aColumnDefs.GetSize(); nDef++)
 		{
@@ -3007,6 +3009,34 @@ void CKanbanCtrl::OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* /*pResult*/
 	}
 }
 
+int CKanbanCtrl::MapHeaderItemToColumn(int nItem) const
+{
+	// When using dynamic columns the header items
+	// exactly match the columns
+	if (UsingDynamicColumns() || !HasOption(KBCF_HIDEEMPTYCOLUMNS))
+		return nItem;
+
+	// When using fixed columns however, hidden columns 
+	// are not removed just set to zero width whilst
+	// their corresponding header items are removed
+	int nCol = 0, nColItem = 0;
+
+	for (; nCol < m_aColumns.GetSize(); nCol++)
+	{
+		const CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+
+		if (WantShowColumn(pCol))
+		{
+			if (nColItem == nItem)
+				break;
+			else 
+				nColItem++;
+		}
+	}
+
+	return nCol;
+}
+
 void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	if (m_bResizingHeader || m_bSavingToImage)
@@ -3032,13 +3062,16 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		m_header.SetItemWidth(pHDN->iItem + 1, nNextWidth);
 		
 		// Resize corresponding listctrls
-		CKanbanColumnCtrl* pThisCol = m_aColumns[pHDN->iItem];
-		CKanbanColumnCtrl* pNextCol = m_aColumns[pHDN->iItem + 1];
+		int nThisCol = MapHeaderItemToColumn(pHDN->iItem);
+		int nNextCol = MapHeaderItemToColumn(pHDN->iItem + 1);
+
+		CKanbanColumnCtrl* pThisCol = m_aColumns[nThisCol];
+		CKanbanColumnCtrl* pNextCol = m_aColumns[nNextCol];
 
 		CRect rThisCol = CDialogHelper::GetChildRect(pThisCol);
 		rThisCol.right = (rThisCol.left + pHDN->pitem->cxy - 1);
 
-		CRect rNextCol = CDialogHelper::GetChildRect(m_aColumns[pHDN->iItem + 1]);
+		CRect rNextCol = CDialogHelper::GetChildRect(pNextCol);
 		rNextCol.left = (rThisCol.right + 1);
 
 		pThisCol->MoveWindow(rThisCol, TRUE);
@@ -3050,6 +3083,7 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		rDivider.right++;
 
 		Invalidate(TRUE);
+		UpdateWindow();
 	}
 }
 

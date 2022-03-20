@@ -193,6 +193,7 @@ protected:
 	BOOL DeleteColumn(int nCol);
 	BOOL HasFocus() const;
 	BOOL SelectClosestAdjacentItemToSelection(int nAdjacentCol);
+	int MapHeaderItemToColumn(int nItem) const;
 
 	inline BOOL UsingFixedColumns() const { return m_aColumnDefs.GetSize(); }
 	inline BOOL UsingDynamicColumns() const { return !UsingFixedColumns(); }

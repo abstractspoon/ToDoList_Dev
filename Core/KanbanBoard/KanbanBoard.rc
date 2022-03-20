@@ -153,7 +153,7 @@ END
 
 IDD_PREFERENCES_PAGE DIALOGEX 0, 0, 344, 390
 STYLE WS_CHILD
-FONT 8, "Tahoma", 0, 0, 0x1
+FONT 8, "Tahoma"
 BEGIN
     CONTROL         "S&ort subtasks below their respective parent task",
                     IDC_SORTSUBTASKSBELOWPARENT,"Button",BS_AUTOCHECKBOX | 
