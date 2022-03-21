@@ -93,6 +93,7 @@ void CPreferencesTaskCalcPage::OnFirstShow()
 	GetDlgItem(IDC_INCLUDEDONEINAVERAGECALC)->EnableWindow(m_bAveragePercentSubCompletion);
 	GetDlgItem(IDC_WEIGHTPERCENTCALCBYNUMSUB)->EnableWindow(m_bAveragePercentSubCompletion);
 	GetDlgItem(IDC_INCLUDEDONEINPRIORITYCALC)->EnableWindow(m_bUseHighestPriority);
+	GetDlgItem(IDC_DONESTATUS)->EnableWindow(m_bSetCompletionStatus);
 
 	OnChangeCompletionStatus();
 }
