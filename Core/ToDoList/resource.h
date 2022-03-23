@@ -2440,6 +2440,7 @@
 #define IDS_SAVETOIMAGEERROR            51608
 #define IDS_SB_SELTASKTITLEPATHID_TIP   51609
 #define IDS_REQUIRESADMINTOMODIFY       51610
+#define IDS_REMINDER_DBLCLK_TIP         51611
 
 // Next default values for new objects
 // 

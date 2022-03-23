@@ -4624,6 +4624,7 @@ BEGIN
     IDS_SAVETOIMAGEERROR    "The requested image could not be saved.\n\nTry using the filter options to reduce the visible task date range."
     IDS_SB_SELTASKTITLEPATHID_TIP "Selected task [Path] (Task ID)"
     IDS_REQUIRESADMINTOMODIFY "Requires Admin Privileges to modify"
+    IDS_REMINDER_DBLCLK_TIP "Double-click to go to task"
 END
 
 STRINGTABLE DISCARDABLE 
