@@ -3095,7 +3095,7 @@ BEGIN
             MENUITEM "&Add Time to Task Log File",  ID_ADDTIMETOLOGFILE
             MENUITEM SEPARATOR
             MENUITEM "&Offset Task Dates...",       ID_EDIT_OFFSETDATES
-            POPUP "O&ffset Task Dates Forwards By"
+            POPUP "O&ffset Task Start/Due Dates Forwards By"
             BEGIN
                 MENUITEM "One Day",                     ID_OFFSETDATES_FORWARDSBY_ONEDAY
 
@@ -3108,7 +3108,7 @@ BEGIN
                 MENUITEM "One Year",                    ID_OFFSETDATES_FORWARDSBY_ONEYEAR
 
             END
-            POPUP "O&ffset Task Dates Backwards By"
+            POPUP "O&ffset Task Start/Due Dates Backwards By"
             BEGIN
                 MENUITEM "One Day",                     ID_OFFSETDATES_BACKWARDSBY_ONEDAY
 
@@ -4235,7 +4235,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 301
         TOPMARGIN, 7
-        BOTTOMMARGIN, 128
+        BOTTOMMARGIN, 145
     END
 
     IDD_TRANSFORM_DIALOG, DIALOG
