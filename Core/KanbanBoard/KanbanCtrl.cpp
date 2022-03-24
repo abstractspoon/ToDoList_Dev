@@ -691,12 +691,10 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 // External interface
 BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
 {
-	switch (nAttrib)
-	{
-	case TDCA_NONE:
-		return HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
-	}
+	if (nAttrib == TDCA_NONE)
+		return TRUE;
 	
+	// else
 	return (WantEditUpdate(nAttrib) && (Misc::FindT(nAttrib, m_aDisplayAttrib) != -1));
 }
 
@@ -1855,7 +1853,8 @@ void CKanbanCtrl::RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs)
 		// of a new task because the app waits until after the title
 		// naming is complete
 		BOOL bResort = (Misc::HasFlag(dwFlags, KCRC_NEWTASK) || 
-						!Misc::HasFlag(dwFlags, KCRC_TASKUPDATE));
+						!Misc::HasFlag(dwFlags, KCRC_TASKUPDATE) ||
+						(m_nSortBy == TDCA_NONE));
 
 		RebuildColumnsContents(mapKIArray, bResort);
 	}

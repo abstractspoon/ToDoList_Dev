@@ -4097,7 +4097,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 	case FTCV_UNSET:
 		{
 			if (bAllowResort)
-				m_bTreeNeedResort = FALSE;
+				m_bTreeNeedResort = FALSE; // already done
 			else
 				m_bTreeNeedResort |= bTreeNeedsResort;
 
@@ -4110,7 +4110,7 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 			m_bTreeNeedResort |= bTreeNeedsResort;
 
 			if (bAllowResort)
-				pLVData->bNeedResort = FALSE;
+				pLVData->bNeedResort = FALSE; // already done
 			else
 				pLVData->bNeedResort |= bListNeedsResort;
 		}
@@ -4135,31 +4135,33 @@ void CTabbedToDoCtrl::UpdateSortStates(const CTDCAttributeMap& mapAttribIDs, BOO
 		{
 			m_bTreeNeedResort |= bTreeNeedsResort;
 			pLVData->bNeedResort |= bListNeedsResort;
-
-			// resort active extension and mark other extensions 
-			// as needing resorting as required
-			int nExt = m_aExtViews.GetSize();
-
-			while (nExt--)
-			{
-				FTC_VIEW nExtView = GetExtensionView(nExt);
-
-				VIEWDATA* pVData = GetViewData(nExtView);
-				ASSERT(pVData);
-
-				if (pVData && pVData->sort.Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs))
-				{
-					if ((nExtView == nView) && HasStyle(TDCS_RESORTONMODIFY))
-						Resort(FALSE);
-					else
-						pVData->bNeedResort = TRUE;
-				}
-			}
 		}
 		break;
 
 	default:
 		ASSERT(0);
+		return;
+	}
+	
+	// resort active extension and mark other extensions 
+	// as needing resorting as required
+	BOOL bNewTask = mapAttribIDs.Has(TDCA_NEWTASK);
+	int nExt = m_aExtViews.GetSize();
+
+	while (nExt--)
+	{
+		FTC_VIEW nExtView = GetExtensionView(nExt);
+
+		VIEWDATA* pVData = GetViewData(nExtView);
+		ASSERT(pVData);
+
+		if (bNewTask || (pVData && pVData->sort.Matches(mapAttribIDs, m_styles, m_aCustomAttribDefs)))
+		{
+			if ((nExtView == nView) && HasStyle(TDCS_RESORTONMODIFY))
+				Resort(FALSE);
+			else
+				pVData->bNeedResort = TRUE;
+		}
 	}
 }
 
@@ -4813,6 +4815,8 @@ void CTabbedToDoCtrl::RefreshExtensionViewSort(FTC_VIEW nView)
 		CUIExtensionAppCmdData data(TDCA_NONE, TRUE);
 		ExtensionDoAppCommand(nView, IUI_SORT, data);
 	}
+
+	pVData->bNeedResort = FALSE;
 }
 
 BOOL CTabbedToDoCtrl::CanMultiSort() const
