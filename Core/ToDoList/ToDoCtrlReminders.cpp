@@ -221,7 +221,7 @@ BOOL CToDoCtrlReminders::DismissReminder(int nRem)
 	}
 
 	// Notify
-	NotifyReminder(rem, WM_TDCN_DISMISSREMINDER);
+	NotifyReminder(rem, WM_TDCN_REMINDERDISMISS);
 
 	return TRUE;
 }
@@ -734,35 +734,34 @@ void CToDoCtrlReminders::DoSnoozeReminder(const TDCREMINDER& rem)
 	}
 
 	RemoveListReminder(rem);
-	NotifyReminder(rem, WM_TDCN_SNOOZEREMINDER);
+	NotifyReminder(rem, WM_TDCN_REMINDERSNOOZE);
 
 	// hide dialog if this is the last
 	if (m_lcReminders.GetItemCount() == 0)
 		HideWindow();
 }
 
-void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTask)
+void CToDoCtrlReminders::DoDismissReminder(const TDCREMINDER& rem)
 {
 	int nRem = FindReminder(rem);
 	ASSERT(nRem != -1);
 	
 	if (nRem != -1)
-	{
-		if (bGotoTask)
-			DoGotoTask(rem);
-
 		DismissReminder(nRem);
-	}
 }
 
 void CToDoCtrlReminders::DoGotoTask(const TDCREMINDER& rem)
 {
-#ifdef _DEBUG
-	int nRem = FindReminder(rem);
-	ASSERT(nRem != -1);
-#endif
-	
+	ASSERT(FindReminder(rem) != -1);
+
 	m_pWndNotify->SendMessage(WM_TDCM_SELECTTASK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
+}
+
+void CToDoCtrlReminders::DoCompleteTask(const TDCREMINDER& rem)
+{
+	ASSERT(FindReminder(rem) != -1);
+
+	m_pWndNotify->SendMessage(WM_TDCM_COMPLETETASK, (WPARAM)rem.dwTaskID, (LPARAM)(LPCTSTR)rem.pTDC->GetFilePath());
 }
 
 void CToDoCtrlReminders::HideWindow()

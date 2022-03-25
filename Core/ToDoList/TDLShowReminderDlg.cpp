@@ -108,11 +108,12 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLShowReminderDlg)
 	ON_BN_CLICKED(IDC_SNOOZE, OnSnooze)
 	ON_BN_CLICKED(IDC_DISMISS, OnDismiss)
-	ON_BN_CLICKED(IDC_DISMISSANDGOTOTASK, OnDismissAndGototask)
+	ON_BN_CLICKED(IDC_GOTOTASK, OnGotoTask)
+	ON_BN_CLICKED(IDC_COMPLETETASK, OnCompleteTask)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONFOR, OnSnoozeFor)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONUNTIL, OnSnoozeUntil)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_REMINDERS, OnItemchangedReminders)
-	ON_BN_CLICKED(IDC_SNOOZEALL, OnSnoozeAll)
+//	ON_BN_CLICKED(IDC_SNOOZEALL, OnSnoozeAll)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
@@ -340,12 +341,14 @@ void CTDLShowReminderDlg::RestoreFocusToList()
 	}
 }
 
+/*
 void CTDLShowReminderDlg::OnSnoozeAll() 
 {
 	ASSERT(m_lcReminders.GetItemCount());
 	
 	SnoozeReminders(TRUE);
 }
+*/
 
 int CTDLShowReminderDlg::GetListReminders(CTDCReminderArray& aRem) const
 {
@@ -435,14 +438,27 @@ COleDateTime CTDLShowReminderDlg::GetSnoozeUntil() const
 	return m_dtSnoozeUntil; 
 }
 
-void CTDLShowReminderDlg::OnDismissAndGototask() 
+void CTDLShowReminderDlg::OnGotoTask() 
 {
 	ASSERT(m_lcReminders.GetSelectedCount() == 1);
 
 	TDCREMINDER rem;
 
 	if (GetSelectedReminder(rem) != -1)
-		DoDismissReminder(rem, TRUE);	
+		DoGotoTask(rem);	
+
+	UpdateControls();
+	RestoreFocusToList();
+}
+
+void CTDLShowReminderDlg::OnCompleteTask()
+{
+	ASSERT(m_lcReminders.GetSelectedCount() == 1);
+
+	TDCREMINDER rem;
+
+	if (GetSelectedReminder(rem) != -1)
+		DoCompleteTask(rem);
 
 	UpdateControls();
 	RestoreFocusToList();
@@ -459,7 +475,7 @@ void CTDLShowReminderDlg::OnDismiss()
 		CAutoFlag af(m_bChangingReminders, TRUE);
 
 		for (int nRem = 0; nRem < aRem.GetSize(); nRem++)
-			DoDismissReminder(aRem[nRem], FALSE);	
+			DoDismissReminder(aRem[nRem]);	
 	}
 
 	UpdateControls();
@@ -504,11 +520,12 @@ void CTDLShowReminderDlg::EnableControls()
 
 	GetDlgItem(IDC_SNOOZEOPTIONFOR)->EnableWindow(nNumRem);
 	GetDlgItem(IDC_SNOOZEOPTIONUNTIL)->EnableWindow(nNumRem);
-	GetDlgItem(IDC_SNOOZEALL)->EnableWindow(nNumRem);
+	//GetDlgItem(IDC_SNOOZEALL)->EnableWindow(nNumRem);
 
 	GetDlgItem(IDC_SNOOZE)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISS)->EnableWindow(nNumSel);
-	GetDlgItem(IDC_DISMISSANDGOTOTASK)->EnableWindow(nNumSel == 1);
+	GetDlgItem(IDC_GOTOTASK)->EnableWindow(nNumSel == 1);
+	GetDlgItem(IDC_COMPLETETASK)->EnableWindow(nNumSel == 1);
 }
 
 void CTDLShowReminderDlg::UpdateControls()
@@ -564,10 +581,11 @@ void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
 	CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, dx, 0);
 	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
 
-	CDialogHelper::OffsetCtrl(this, IDC_SNOOZE, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEALL, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_SNOOZE, 0, dy);
+	//CDialogHelper::OffsetCtrl(this, IDC_SNOOZEALL, dx, dy);
 	CDialogHelper::OffsetCtrl(this, IDC_DISMISS, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_DISMISSANDGOTOTASK, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_GOTOTASK, dx, dy);
+	CDialogHelper::OffsetCtrl(this, IDC_COMPLETETASK, dx, dy);
 
 	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEOPTIONFOR, 0, dy);
 	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEOPTIONUNTIL, 0, dy);

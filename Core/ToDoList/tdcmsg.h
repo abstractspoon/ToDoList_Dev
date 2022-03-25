@@ -30,6 +30,7 @@ const UINT WM_TDCM_ISTASKDONE				= ::RegisterWindowMessage(_T("WM_TDCM_ISTASKDON
 const UINT WM_TDCM_GETTASKREMINDER			= ::RegisterWindowMessage(_T("WM_TDCM_GETTASKREMINDER"));		// wParam = hwnd, lParam = TaskID
 const UINT WM_TDCM_GETLINKTOOLTIP			= ::RegisterWindowMessage(_T("WM_TDCM_GETLINKTOOLTIP"));		// wParam = hwnd, lParam = url
 const UINT WM_TDCM_SELECTTASK				= ::RegisterWindowMessage(_T("WM_TDCM_SELECTTASK"));			// wParam = taskID, lParam = taskfile path
+const UINT WM_TDCM_COMPLETETASK				= ::RegisterWindowMessage(_T("WM_TDCM_COMPLETETASK"));			// wParam = taskID, lParam = taskfile path
 const UINT WM_TDCM_FAILEDLINK				= ::RegisterWindowMessage(_T("WM_TDCM_FAILEDLINK"));			// wParam = hwnd, lParam = url
 const UINT WM_TDCM_LENGTHYOPERATION			= ::RegisterWindowMessage(_T("WM_TDCM_LENGTHYOPERATION"));		// wParam = start/stop, lParam = text to display
 const UINT WM_TDCM_IMPORTFROMDROP			= ::RegisterWindowMessage(_T("WM_TDCM_IMPORTFROMDROP"));		// wParam = hwnd, lParam = TDCDROPIMPORT*
@@ -39,8 +40,8 @@ const UINT WM_TDCM_CANIMPORTFROMDROP		= ::RegisterWindowMessage(_T("WM_TDCM_CANI
 const UINT WM_FBN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_FBN_FILTERCHANGE")); 
 
 // CToDoCtrlReminders
-const UINT WM_TDCN_DISMISSREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_DISMISSREMINDER"));		// wParam = hwnd, lParam = TaskID
-const UINT WM_TDCN_SNOOZEREMINDER			= ::RegisterWindowMessage(_T("WM_TDCN_SNOOZEREMINDER"));		// wParam = hwnd, lParam = TaskID
+const UINT WM_TDCN_REMINDERDISMISS			= ::RegisterWindowMessage(_T("WM_TDCN_REMINDERDISMISS"));		// wParam = hwnd, lParam = TaskID
+const UINT WM_TDCN_REMINDERSNOOZE			= ::RegisterWindowMessage(_T("WM_TDCN_REMINDERSNOOZE"));		// wParam = hwnd, lParam = TaskID
 
 // CTDLFindTasksDlg
 const UINT WM_FTD_FIND						= ::RegisterWindowMessage(_T("WM_FTD_FIND"));

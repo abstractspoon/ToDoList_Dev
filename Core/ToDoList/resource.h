@@ -745,7 +745,8 @@
 #define IDC_LICENSE                     1460
 #define IDC_SNOOZEFOR                   1461
 #define IDC_DISMISS                     1462
-#define IDC_DISMISSANDGOTOTASK          1463
+#define IDC_GOTOTASK                    1463
+#define IDC_COMPLETETASK                1464
 #define IDC_SHOWREMINDERSASDATES        1466
 #define IDC_NOTIFYTIMETRACKING          1467
 #define IDC_NOTIFYTIMETRACKINGFREQUENCY 1468

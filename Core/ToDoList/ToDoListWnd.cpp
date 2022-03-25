@@ -502,6 +502,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
+	ON_REGISTERED_MESSAGE(WM_TDCM_COMPLETETASK, OnReminderCompleteTask)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnToDoCtrlGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTFROMDROP, OnToDoCtrlImportFromDrop)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTFROMDROP, OnToDoCtrlCanImportFromDrop)
@@ -518,8 +519,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDL_REFRESHPREFS, OnToDoListRefreshPrefs)
 	ON_REGISTERED_MESSAGE(WM_TDL_RESTORE, OnToDoListRestore)
 	ON_REGISTERED_MESSAGE(WM_TDL_SHOWWINDOW, OnToDoListShowWindow)
-	ON_REGISTERED_MESSAGE(WM_TDCN_DISMISSREMINDER, OnNotifyReminderModified)
-	ON_REGISTERED_MESSAGE(WM_TDCN_SNOOZEREMINDER, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERDISMISS, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERSNOOZE, OnNotifyReminderModified)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropFile)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropFile)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STARTTRACKING, OnTimeTrackerStartTracking)
@@ -12237,6 +12238,22 @@ LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 						dwTaskID);
 
 	return FileMisc::Run(*this, sCommandline);
+}
+
+LRESULT CToDoListWnd::OnReminderCompleteTask(WPARAM wParam, LPARAM lParam)
+{
+	DWORD dwTaskID = wParam;
+	CString sPath((LPCTSTR)lParam);
+
+	// We should only receive this from CToDoCtrlReminders so there should be a path 
+	ASSERT(!sPath.IsEmpty());
+
+	if (ValidateTaskLinkFilePath(sPath) && DoTaskLink(sPath, dwTaskID, FALSE))
+	{
+		GetToDoCtrl().SetSelectedTaskDone();
+	}
+
+	return 0L;
 }
 
 LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)

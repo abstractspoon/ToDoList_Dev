@@ -76,9 +76,10 @@ protected:
 	virtual void OnOK();
 	virtual void OnCancel();
 
-	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) {}
-	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/, BOOL /*bGotoTask*/) {}
-	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) {}
+	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
+	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
+	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
+	virtual void DoCompleteTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void HideWindow();
 	virtual void OnRepositionControls(int dx, int dy);
 
@@ -88,11 +89,12 @@ protected:
 	//{{AFX_MSG(CTDLShowReminderDlg)
 	afx_msg void OnSnooze();
 	afx_msg void OnDismiss();
-	afx_msg void OnDismissAndGototask();
+	afx_msg void OnGotoTask();
+	afx_msg void OnCompleteTask();
 	afx_msg void OnSnoozeFor();
 	afx_msg void OnSnoozeUntil();
 	afx_msg void OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnSnoozeAll();
+	//afx_msg void OnSnoozeAll();
 	//}}AFX_MSG
 	afx_msg void OnDblClkReminders(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnClose();

@@ -72,8 +72,9 @@ public:
 	virtual ~CToDoCtrlReminders();
 
 	virtual void DoSnoozeReminder(const TDCREMINDER& rem);
-	virtual void DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTask);
+	virtual void DoDismissReminder(const TDCREMINDER& rem);
 	virtual void DoGotoTask(const TDCREMINDER& rem);
+	virtual void DoCompleteTask(const TDCREMINDER& rem);
 	virtual void HideWindow();
 
 	// Generated message map functions
