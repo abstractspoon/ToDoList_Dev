@@ -61,7 +61,8 @@ CTDLShowReminderDlg::CTDLShowReminderDlg(CWnd* pParent /*=NULL*/)
 	CTDLDialog(CTDLShowReminderDlg::IDD, _T("ShowReminders"), pParent),
 	m_dwNextReminderID(1),
 	m_dtSnoozeUntil(COleDateTime::GetCurrentTime()),
-	m_bChangingReminders(FALSE)
+	m_bChangingReminders(FALSE),
+	m_cbSnoozeTime(TCB_HOURSINDAY)
 {
 	//{{AFX_DATA_INIT(CTDLShowReminderDlg)
 	m_bSnoozeUntil = FALSE;
@@ -143,8 +144,8 @@ BOOL CTDLShowReminderDlg::OnInitDialog()
 	if (m_icon.Load(IDR_MAINFRAME_STD))
 		SetIcon(m_icon, FALSE);
 
-	CDlgUnits dlu(this);
-	m_cbSnoozeTime.SetItemHeight(-1, dlu.ToPixelsY(10));
+	m_cbSnoozeTime.SetItemHeight(-1, CDlgUnits(this).ToPixelsY(9));
+	ResizeChild(&m_dtcSnoozeDate, 0, GetChildHeight(&m_cbSnoozeFor) - GetChildHeight(&m_dtcSnoozeDate));
 
 	// create list columns
 	m_lcReminders.InsertColumn(TASK_COL, CEnString(IDS_REMINDER_TASKCOL), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(200));
@@ -576,22 +577,22 @@ void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
 {
 	CTDLDialog::OnRepositionControls(dx, dy);
 
-	CDialogHelper::ResizeChild(&m_lcReminders, dx, dy);
+	ResizeChild(&m_lcReminders, dx, dy);
 
-	CDialogHelper::ResizeCtrl(this, IDC_DIVIDER, dx, 0);
-	CDialogHelper::OffsetCtrl(this, IDC_DIVIDER, 0, dy);
+	ResizeCtrl(this, IDC_DIVIDER, dx, 0);
+	OffsetCtrl(this, IDC_DIVIDER, 0, dy);
 
-	CDialogHelper::OffsetCtrl(this, IDC_SNOOZE, 0, dy);
-	//CDialogHelper::OffsetCtrl(this, IDC_SNOOZEALL, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_DISMISS, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_GOTOTASK, dx, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_COMPLETETASK, dx, dy);
+	OffsetCtrl(this, IDC_SNOOZE, 0, dy);
+	OffsetCtrl(this, IDC_SNOOZEALL, dx, dy);
+	OffsetCtrl(this, IDC_DISMISS, dx, dy);
+	OffsetCtrl(this, IDC_GOTOTASK, dx, dy);
+	OffsetCtrl(this, IDC_COMPLETETASK, dx, dy);
 
-	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEOPTIONFOR, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEOPTIONUNTIL, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEFOR, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEUNTILDATE, 0, dy);
-	CDialogHelper::OffsetCtrl(this, IDC_SNOOZEUNTILTIME, 0, dy);
+	OffsetCtrl(this, IDC_SNOOZEOPTIONFOR, 0, dy);
+	OffsetCtrl(this, IDC_SNOOZEOPTIONUNTIL, 0, dy);
+	OffsetCtrl(this, IDC_SNOOZEFOR, 0, dy);
+	OffsetCtrl(this, IDC_SNOOZEUNTILDATE, 0, dy);
+	OffsetCtrl(this, IDC_SNOOZEUNTILTIME, 0, dy);
 
 	UpdateColumnWidths();
 }
