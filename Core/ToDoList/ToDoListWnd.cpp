@@ -2369,7 +2369,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	BOOL bShowFullTaskPathInSticky = FALSE;
 	
 	if (userPrefs.GetUseStickies(sStickiesPath, bShowFullTaskPathInSticky))
-		VERIFY(m_dlgReminders.UseStickies(TRUE, sStickiesPath, bShowFullTaskPathInSticky));
+		VERIFY(m_dlgReminders.UseStickies(TRUE, sStickiesPath, bShowFullTaskPathInSticky, TRUE));
 	
 	RestoreVisibility();
 	
@@ -5073,7 +5073,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		BOOL bShowFullTaskPathInSticky = FALSE;
 		BOOL bUseStickies = newPrefs.GetUseStickies(sStickiesPath, bShowFullTaskPathInSticky);
 
-		VERIFY(m_dlgReminders.UseStickies(bUseStickies, sStickiesPath, bShowFullTaskPathInSticky));
+		VERIFY(m_dlgReminders.UseStickies(bUseStickies, sStickiesPath, bShowFullTaskPathInSticky, FALSE));
 
 		// Content controls
 		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);

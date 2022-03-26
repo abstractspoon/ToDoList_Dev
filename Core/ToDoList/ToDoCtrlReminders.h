@@ -30,7 +30,7 @@ public:
 	CToDoCtrlReminders();
 
 	BOOL Initialize(CWnd* pNotify);
-	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath);
+	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart);
 
 	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }

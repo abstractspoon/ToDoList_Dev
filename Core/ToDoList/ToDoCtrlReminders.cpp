@@ -71,13 +71,16 @@ BOOL CToDoCtrlReminders::Initialize(CWnd* pNotify)
 	return TRUE;
 }
 
-BOOL CToDoCtrlReminders::UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath)
+BOOL CToDoCtrlReminders::UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart)
 {
 	if (!bEnable || FileMisc::FileExists(szStickiesPath))
 	{
 		m_bUseStickies = bEnable;
 		m_sStickiesPath = szStickiesPath;
 		m_bShowFullTaskPathInSticky = bShowFullTaskPath;
+
+		if (bEnable && bAutoStart && !m_stickies.IsValid())
+			VERIFY(m_stickies.Initialize(m_pWndNotify, m_sStickiesPath));
 
 		return TRUE;
 	}
