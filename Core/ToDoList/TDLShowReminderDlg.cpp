@@ -114,7 +114,7 @@ BEGIN_MESSAGE_MAP(CTDLShowReminderDlg, CTDLDialog)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONFOR, OnSnoozeFor)
 	ON_BN_CLICKED(IDC_SNOOZEOPTIONUNTIL, OnSnoozeUntil)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_REMINDERS, OnItemchangedReminders)
-//	ON_BN_CLICKED(IDC_SNOOZEALL, OnSnoozeAll)
+	ON_BN_CLICKED(IDC_SNOOZEALL, OnSnoozeAll)
 	//}}AFX_MSG_MAP
 	ON_NOTIFY(NM_DBLCLK, IDC_REMINDERS, OnDblClkReminders)
 	ON_WM_CLOSE()
@@ -342,14 +342,12 @@ void CTDLShowReminderDlg::RestoreFocusToList()
 	}
 }
 
-/*
 void CTDLShowReminderDlg::OnSnoozeAll() 
 {
 	ASSERT(m_lcReminders.GetItemCount());
 	
 	SnoozeReminders(TRUE);
 }
-*/
 
 int CTDLShowReminderDlg::GetListReminders(CTDCReminderArray& aRem) const
 {
@@ -521,7 +519,7 @@ void CTDLShowReminderDlg::EnableControls()
 
 	GetDlgItem(IDC_SNOOZEOPTIONFOR)->EnableWindow(nNumRem);
 	GetDlgItem(IDC_SNOOZEOPTIONUNTIL)->EnableWindow(nNumRem);
-	//GetDlgItem(IDC_SNOOZEALL)->EnableWindow(nNumRem);
+	GetDlgItem(IDC_SNOOZEALL)->EnableWindow(nNumRem);
 
 	GetDlgItem(IDC_SNOOZE)->EnableWindow(nNumSel);
 	GetDlgItem(IDC_DISMISS)->EnableWindow(nNumSel);
@@ -582,7 +580,7 @@ void CTDLShowReminderDlg::OnRepositionControls(int dx, int dy)
 	ResizeCtrl(this, IDC_DIVIDER, dx, 0);
 	OffsetCtrl(this, IDC_DIVIDER, 0, dy);
 
-	OffsetCtrl(this, IDC_SNOOZE, 0, dy);
+	OffsetCtrl(this, IDC_SNOOZE, dx, dy);
 	OffsetCtrl(this, IDC_SNOOZEALL, dx, dy);
 	OffsetCtrl(this, IDC_DISMISS, dx, dy);
 	OffsetCtrl(this, IDC_GOTOTASK, dx, dy);
