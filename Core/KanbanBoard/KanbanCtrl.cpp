@@ -691,10 +691,13 @@ BOOL CKanbanCtrl::WantEditUpdate(TDC_ATTRIBUTE nAttrib) const
 // External interface
 BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
 {
-	if (nAttrib == TDCA_NONE)
-		return TRUE;
+	switch (nAttrib)
+	{
+	case TDCA_NONE:
+	case TDCA_TASKNAME:
+		return TRUE; // always
+	}
 	
-	// else
 	return (WantEditUpdate(nAttrib) && (Misc::FindT(nAttrib, m_aDisplayAttrib) != -1));
 }
 
