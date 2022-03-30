@@ -1871,7 +1871,9 @@ void CKanbanColumnCtrl::OnLButtonDblClk(UINT nFlags, CPoint point)
 	HTREEITEM htiHit = NULL;
 	BOOL bHandled = HandleButtonClick(point, TRUE, htiHit);
 
-	if (htiHit && (m_aSelTaskIDs.GetSize() == 1))
+	if (htiHit && 
+		(m_aSelTaskIDs.GetSize() == 1) && 
+		(HitTestImage(htiHit, point) == KBCI_NONE))
 	{
 		CRect rIndentedItem;
 		GetItemLabelTextRect(htiHit, rIndentedItem, FALSE);
