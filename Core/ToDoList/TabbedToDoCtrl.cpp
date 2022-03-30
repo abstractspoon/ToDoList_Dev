@@ -3976,14 +3976,15 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 	{
 		// if this update has come about as a consequence
 		// of this extension window modifying the specified
-		// attribute, then we assume that it won't want the update
-		// We exclude task completion because that can end
-		// up also completing children and in the case of reusable
-		// recurring tasks it can result in uncompleted tasks
-		if (m_nExtModifyingAttrib != TDCA_DONEDATE)
+		// attribute, then we assume that it won't want the update.
+		//
+		// Unless the modification may also have auto-modified
+		// the task's subtasks.
+		if (AttributeMatchesExtensionMod(nAttrib) &&
+			(nAttrib != TDCA_DONEDATE) &&
+			!m_data.WantUpdateInheritedAttibute(nAttrib))
 		{
-			if (AttributeMatchesExtensionMod(nAttrib))
-				return FALSE;
+			return FALSE;
 		}
 	}
 
@@ -3996,9 +3997,7 @@ BOOL CTabbedToDoCtrl::ExtensionViewWantsChange(int nExt, TDC_ATTRIBUTE nAttrib) 
 
 BOOL CTabbedToDoCtrl::AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const
 {
-	ASSERT(m_nExtModifyingAttrib != TDCA_NONE);
-
-	if (nAttrib == TDCA_NONE)
+	if ((m_nExtModifyingAttrib == TDCA_NONE) || (nAttrib == TDCA_NONE))
 	{
 		ASSERT(0);
 		return FALSE;
@@ -4007,7 +4006,7 @@ BOOL CTabbedToDoCtrl::AttributeMatchesExtensionMod(TDC_ATTRIBUTE nAttrib) const
 	if (nAttrib == m_nExtModifyingAttrib)
 		return TRUE;
 
-	// else
+	// extra handling
 	switch (m_nExtModifyingAttrib)
 	{
 	case TDCA_OFFSETTASK:
