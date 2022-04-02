@@ -159,13 +159,13 @@ protected:
 	void ResizeHeader(CDeferWndMove& dwm, CRect& rAvail);
 
 	void RebuildColumns(DWORD dwFlags);
-	void RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs);
+	void RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelTaskIDs);
 	void RebuildDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
 	void RebuildFixedColumns(const CKanbanItemArrayMap& mapKIArray);
 	int RemoveOldDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
 	int AddMissingDynamicColumns(const CKanbanItemArrayMap& mapKIArray);
 	BOOL CheckAddBacklogColumn();
-	void RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, BOOL bResort);
+	void RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray);
 	void RebuildColumnHeader();
 	void RefreshColumnHeaderText();
 	void HideEmptyColumns(int nPrevColCount);
@@ -218,7 +218,7 @@ protected:
 	BOOL HandleKeyDown(WPARAM wp, LPARAM lp);
 	void LoadDefaultAttributeListValues(const IPreferences* pPrefs);
 
-	void UpdateData(const ITASKLISTBASE* pTasks, BOOL bNewTask);
+	void UpdateData(const ITASKLISTBASE* pTasks);
 	BOOL UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL bAndSiblings);
 	void RebuildData(const ITASKLISTBASE* pTasks);
 	BOOL AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings);

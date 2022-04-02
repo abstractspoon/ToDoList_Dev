@@ -56,8 +56,6 @@ enum // RebuildColumns
 {
 	KCRC_REBUILDCONTENTS	= 0x01,
 	KCRC_RESTORESELECTION	= 0x02,
-	KCRC_TASKUPDATE			= 0x04,
-	KCRC_NEWTASK			= 0x08 | KCRC_TASKUPDATE,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -340,7 +338,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM /*lp*/)
 
 			// No need to rebuild column contents as
 			// we've already done a manual adjustment
-			RebuildColumns(KCRC_RESTORESELECTION, aTaskIDs);
+			RebuildColumns(FALSE, aTaskIDs);
 
 			return TRUE;
 		}
@@ -556,7 +554,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 		
 	case IUI_NEW:
 	case IUI_EDIT:
-		UpdateData(pTasks, (nUpdate == IUI_NEW));
+		UpdateData(pTasks);
 		break;
 		
 	case IUI_DELETE:
@@ -722,7 +720,7 @@ void CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 	m_aPrevPinnedTasks.RemoveAll();
 
 	// App will take care of restoring selection
-	RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_TASKUPDATE);
+	RebuildColumns(KCRC_REBUILDCONTENTS);
 }
 
 BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings)
@@ -830,7 +828,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	return TRUE;
 }
 
-void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, BOOL bNewTask)
+void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks)
 {
 	// update the task(s)
 	BOOL bChange = UpdateGlobalAttributeValues(pTasks);
@@ -839,7 +837,7 @@ void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, BOOL bNewTask)
 	if (bChange)
 	{
 		// App will take care of restoring selection
-		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_TASKUPDATE | (bNewTask ? KCRC_NEWTASK : 0));
+		RebuildColumns(KCRC_REBUILDCONTENTS);
 	}
 	else if (UpdateNeedsItemHeightRefresh(pTasks))
 	{
@@ -1824,13 +1822,11 @@ void CKanbanCtrl::RebuildColumns(DWORD dwFlags)
 	if (dwFlags & KCRC_RESTORESELECTION)
 		GetSelectedTaskIDs(aTaskIDs);
 
-	RebuildColumns(dwFlags, aTaskIDs);
+	RebuildColumns((dwFlags & KCRC_REBUILDCONTENTS), aTaskIDs);
 }
 
-void CKanbanCtrl::RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs)
+void CKanbanCtrl::RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelTaskIDs)
 {
-	ASSERT((aSelTaskIDs.GetSize() == 0) || (dwFlags & KCRC_RESTORESELECTION));
-
 	if (m_sTrackAttribID.IsEmpty())
 	{
 		ASSERT(m_nTrackAttribute == TDCA_NONE);
@@ -1849,17 +1845,9 @@ void CKanbanCtrl::RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs)
 		RebuildFixedColumns(mapKIArray);
 
 	// Rebuild column contents
-	if (dwFlags & KCRC_REBUILDCONTENTS)
+	if (bRebuildContents)
 	{
-		// If it's a task update we generally don't resort because
-		// the app will tell us if we need to, except in the case 
-		// of a new task because the app waits until after the title
-		// naming is complete
-		BOOL bResort = (Misc::HasFlag(dwFlags, KCRC_NEWTASK) || 
-						!Misc::HasFlag(dwFlags, KCRC_TASKUPDATE) ||
-						(m_nSortBy == TDCA_NONE));
-
-		RebuildColumnsContents(mapKIArray, bResort);
+		RebuildColumnsContents(mapKIArray);
 	}
 	else if (UsingDynamicColumns())
 	{
@@ -1973,7 +1961,7 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 	m_header.EnableItemTracking(nVis - 1, FALSE);
 }
 
-void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, BOOL bResort)
+void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 {
 	int nCol = m_aColumns.GetSize();
 	
@@ -2002,9 +1990,11 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, 
 	// only unwanted parents
 	CheckAddBacklogColumn();
 
-	// Resort
-	if (bResort)
-		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+	// Always resort because the app will only tell us to resort 
+	// if the modification that caused this update matches the
+	// current sort, whereas we always need to be maintain some
+	// kind of sorted state even if we are technically 'unsorted'
+	m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
