@@ -1628,7 +1628,7 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 					{
 						bHandle = !ComboBox_GetDroppedState(::GetParent(pMsg->hwnd));
 					}
-					else if (GetTDCCount() && GetToDoCtrl().IsTaskLabelEditing())
+					else if (GetTDCCount() && GetToDoCtrl().PreTranslateMessage(pMsg))
 					{
 						bHandle = FALSE;
 					}
