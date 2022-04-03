@@ -74,7 +74,8 @@ protected:
 	CToolbarHelper m_tbHelper;
 	CString m_sCaption, m_sOrgCaption;
 	DWORD m_dwOptions;
-	CSize m_sizeMin, m_sizeMax, m_sizeLast;
+	CSize m_sizeMin, m_sizeMax;
+	int m_nUncollapsedHeight;
 	
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -128,6 +129,7 @@ protected:
 	void LoadSettings();
 	void SaveSettings() const;
 	void SetAlwaysOnTop(BOOL bTopMost);
+	void CollapseWindow(BOOL bCollapse);
 
 	void Resize(int cx = 0, int cy = 0);
 	int CalcAvailableRows(int nHeight) const;

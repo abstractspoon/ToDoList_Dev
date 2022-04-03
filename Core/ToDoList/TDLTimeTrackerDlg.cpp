@@ -38,7 +38,7 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_btnStart(32),
 	m_sizeMin(0, 0),
 	m_sizeMax(32000, 32000),
-	m_sizeLast(-1, -1),
+	m_nUncollapsedHeight(-1),
 	m_bCollapsed(FALSE),
 	m_bRecreating(FALSE),
 	m_bCentreOnShow(FALSE),
@@ -1001,12 +1001,11 @@ void CTDLTimeTrackerDlg::OnDestroy()
 
 void CTDLTimeTrackerDlg::LoadSettings()
 {
-	if (!m_bRecreating)
+	if (!m_bRecreating) // ie. first time only
 	{
 		CPreferences prefs;
 		
-		m_bCollapsed = FALSE; // always
-		m_bCentreOnShow = TRUE; // fallback
+		m_bCentreOnShow = TRUE; // default
 
 		int nWidth = prefs.GetProfileInt(_T("TimeTracker"), _T("Width"), 0);
 		int nHeight = prefs.GetProfileInt(_T("TimeTracker"), _T("Height"), 0);
@@ -1037,30 +1036,29 @@ void CTDLTimeTrackerDlg::LoadSettings()
 
 			MoveWindow(rWindow);
 			Resize();
+
+			ASSERT(m_bCollapsed == FALSE);
+
+			if (prefs.GetProfileInt(_T("TimeTracker"), _T("Collapsed"), FALSE))
+				CollapseWindow(TRUE);
 		}
 	}
 }
 
 void CTDLTimeTrackerDlg::SaveSettings() const
 {
-	// Note: we don't save the collapsed state itself
-	// so that the tracker always starts uncollapsed
 	CPreferences prefs;
 	
 	CRect rWindow;
 	GetWindowRect(rWindow);
-
+	
 	if (m_bCollapsed)
-	{
-		prefs.WriteProfileInt(_T("TimeTracker"), _T("Width"), m_sizeLast.cx);
-		prefs.WriteProfileInt(_T("TimeTracker"), _T("Height"), m_sizeLast.cy);
-	}
+		prefs.WriteProfileInt(_T("TimeTracker"), _T("Height"), m_nUncollapsedHeight);
 	else
-	{
-		prefs.WriteProfileInt(_T("TimeTracker"), _T("Width"), rWindow.Width());
 		prefs.WriteProfileInt(_T("TimeTracker"), _T("Height"), rWindow.Height());
-	}
 
+	prefs.WriteProfileInt(_T("TimeTracker"), _T("Width"), rWindow.Width());
+	prefs.WriteProfileInt(_T("TimeTracker"), _T("Collapsed"), m_bCollapsed);
 	prefs.WriteProfileInt(_T("TimeTracker"), _T("Position"), MAKELPARAM(rWindow.left, rWindow.top));
 	prefs.WriteProfileInt(_T("TimeTracker"), _T("AlwaysOnTop"), m_bAlwaysOnTop);
 }
@@ -1186,27 +1184,30 @@ void CTDLTimeTrackerDlg::OnNcLButtonDblClk(UINT nHitTest, CPoint point)
 	CDialog::OnNcLButtonDblClk(nHitTest, point);
 
 	if (nHitTest == HTCAPTION)
+		CollapseWindow(!m_bCollapsed);
+}
+
+void CTDLTimeTrackerDlg::CollapseWindow(BOOL bCollapse)
+{
+	if (Misc::StateChanged(m_bCollapsed, bCollapse))
 	{
-		m_bCollapsed = !m_bCollapsed;
+		m_bCollapsed = bCollapse;
 
 		CRect rWindow;
 		GetWindowRect(rWindow);
 		
 		if (m_bCollapsed)
 		{
-			m_sizeLast.cx = rWindow.Width();
-			m_sizeLast.cy = rWindow.Height();
+			m_nUncollapsedHeight = rWindow.Height();
 			
 			CRect rClient;
 			GetClientRect(rClient);
 			
 			rWindow.bottom -= rClient.Height();
-			rWindow.right = (rWindow.left + m_sizeMin.cx);
 		}
 		else
 		{
-			rWindow.right = (rWindow.left + m_sizeLast.cx);
-			rWindow.bottom = (rWindow.top + m_sizeLast.cy);
+			rWindow.bottom = (rWindow.top + m_nUncollapsedHeight);
 		}
 		
 		MoveWindow(rWindow);
