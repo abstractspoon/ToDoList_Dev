@@ -45,7 +45,6 @@ public:
 	double GetSnoozeDays() const;
 	COleDateTime GetSnoozeUntil() const;
 
-
 protected:
 // Dialog Data
 	//{{AFX_DATA(CTDLShowReminderDlg)
@@ -70,11 +69,12 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLShowReminderDlg)
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual int OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
 	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }

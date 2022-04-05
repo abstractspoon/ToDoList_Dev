@@ -481,6 +481,26 @@ void CTDLShowReminderDlg::OnDismiss()
 	RestoreFocusToList();
 }
 
+BOOL CTDLShowReminderDlg::PreTranslateMessage(MSG* pMsg)
+{
+	if (pMsg->message == WM_KEYDOWN)
+	{
+		switch (pMsg->wParam)
+		{
+		case 'A':
+		case 'a':
+			if (Misc::IsKeyPressed(VK_CONTROL))
+			{
+				m_lcReminders.SelectAll();
+				return TRUE;
+			}
+			break;
+		}
+	}
+
+	return CTDLDialog::PreTranslateMessage(pMsg);
+}
+
 void CTDLShowReminderDlg::OnOK()
 {
 	// do nothing
