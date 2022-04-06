@@ -53,6 +53,7 @@ public:
 	BOOL HasMultipleValues() const;
 	BOOL HasAnyValues() const;
 	BOOL IsBacklog() const;
+	BOOL IsEmpty() const { return (GetCount() == 0); }
 	BOOL AttributeValuesMatch(const CKanbanColumnCtrl& other) const;
 
 	const KANBANCOLUMN& ColumnDefinition() const { return m_columnDef; }
