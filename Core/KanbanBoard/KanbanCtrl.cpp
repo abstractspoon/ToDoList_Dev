@@ -831,21 +831,26 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks)
 {
 	// update the task(s)
-	BOOL bChange = UpdateGlobalAttributeValues(pTasks);
-	bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), TRUE);
+	BOOL bRebuild = UpdateGlobalAttributeValues(pTasks);
+	bRebuild |= UpdateData(pTasks, pTasks->GetFirstTask(), TRUE);
 
-	if (bChange)
+	if (bRebuild)
 	{
 		// App will take care of restoring selection
 		RebuildColumns(KCRC_REBUILDCONTENTS);
 	}
-	else if (UpdateNeedsItemHeightRefresh(pTasks))
-	{
-		m_aColumns.RefreshItemLineHeights();
-	}
 	else
 	{
-		m_aColumns.Redraw(FALSE);
+		if (UpdateNeedsItemHeightRefresh(pTasks))
+			m_aColumns.RefreshItemLineHeights();
+		else
+			m_aColumns.Redraw(FALSE);
+
+		// If the update contains the tracked attribute
+		// then assume some 'inline' changes were made to
+		// one/some of the columns necessitating a resort
+		if (pTasks->IsAttributeAvailable(m_nTrackAttribute))
+			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 	}
 }
 
@@ -859,7 +864,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		return FALSE; 
 
 	// handle task if not NULL (== root)
-	BOOL bChange = FALSE;
+	BOOL bRebuild = FALSE;
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
 
 	if (dwTaskID)
@@ -867,7 +872,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		// Can be a new task
 		if (!HasKanbanItem(dwTaskID))
 		{
-			bChange = AddTaskToData(pTasks, hTask, pTasks->GetTaskParentID(hTask), FALSE);
+			bRebuild = AddTaskToData(pTasks, hTask, pTasks->GetTaskParentID(hTask), FALSE);
 		}
 		else
 		{
@@ -889,7 +894,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 					pKI->bGoodAsDone = bGoodAsDone;
 
 					if (HasOption(KBCF_DONEHAVELOWESTPRIORITYRISK) || HasOption(KBCF_DUEHAVEHIGHESTPRIORITYRISK))
-						bChange = TRUE;
+						bRebuild = TRUE;
 				}
 			}
 
@@ -899,7 +904,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 				BOOL bDue = pTasks->IsTaskDue(hTask);
 
 				if (pKI->IsDue() != bDue)
-					bChange = TRUE;
+					bRebuild = TRUE;
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
@@ -920,35 +925,35 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
 			{
 				GetTaskAllocTo(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCTO, aValues);
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCTO, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_CATEGORY))
 			{
 				GetTaskCategories(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_CATEGORY, aValues);
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_CATEGORY, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_TAGS))
 			{
 				GetTaskTags(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_TAGS, aValues);
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_TAGS, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_ALLOCBY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_STATUS))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_STATUS, pTasks->GetTaskStatus(hTask));
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_STATUS, pTasks->GetTaskStatus(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_VERSION))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_VERSION, pTasks->GetTaskVersion(hTask));
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_VERSION, pTasks->GetTaskVersion(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_PRIORITY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, true)); // calculated
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, true)); // calculated
 
 			if (pTasks->IsAttributeAvailable(TDCA_RISK))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_RISK, pTasks->GetTaskRisk(hTask, true)); // calculated
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_RISK, pTasks->GetTaskRisk(hTask, true)); // calculated
 
 			if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
 			{
@@ -974,7 +979,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 						ASSERT(pValues);
 						
 						pValues->AddValues(aCustValues);
-						bChange = TRUE;
+						bRebuild = TRUE;
 					}
 				}
 			}
@@ -992,7 +997,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		
 	// children
 	if (UpdateData(pTasks, pTasks->GetFirstTask(hTask), TRUE))
-		bChange = TRUE;
+		bRebuild = TRUE;
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -1003,13 +1008,13 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		{
 			// FALSE == not siblings
 			if (UpdateData(pTasks, hSibling, FALSE))
-				bChange = TRUE;
+				bRebuild = TRUE;
 			
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
 	
-	return bChange;
+	return bRebuild;
 }
 
 void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask)
@@ -1531,7 +1536,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 	}
 
 	// else
-	BOOL bChange = FALSE;
+	BOOL bRebuild = FALSE;
 	
 	if (!pKI->AttributeValuesMatch(sAttribID, aNewValues))
 	{
@@ -1558,7 +1563,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				if (pCurCol)
 				{
 					VERIFY(pCurCol->DeleteTask(pKI->dwTaskID));
-					bChange |= (pCurCol->GetCount() == 0);
+					bRebuild |= (pCurCol->IsEmpty() && HasOption(KBCF_HIDEEMPTYCOLUMNS));
 				}
 
 				// Remove from list to speed up later searching
@@ -1578,7 +1583,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				if (pCurCol)
 					pCurCol->AddTask(*pKI);
 
-				bChange |= ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
+				bRebuild |= ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
 			}
 		}
 	
@@ -1586,7 +1591,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		pKI->SetTrackedAttributeValues(sAttribID, aNewValues);
 	}
 	
-	return bChange;
+	return bRebuild;
 }
 
 BOOL CKanbanCtrl::IsTracking(const CString& sAttribID) const
