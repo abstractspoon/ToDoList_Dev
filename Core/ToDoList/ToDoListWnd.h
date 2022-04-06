@@ -578,6 +578,7 @@ protected:
 	afx_msg void OnViewActivateFilter(UINT nCmdID);
 	afx_msg void OnViewActivateAdvancedFilter(UINT nCmdID);
 	afx_msg void OnWindow(UINT nCmdID);
+	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);
 #ifdef _DEBUG
 	afx_msg void OnDebugEndSession();
 	afx_msg void OnDebugShowSetupDlg();

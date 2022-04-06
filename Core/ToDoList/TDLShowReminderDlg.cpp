@@ -338,7 +338,9 @@ void CTDLShowReminderDlg::RestoreFocusToList()
 	if (m_lcReminders.GetItemCount())
 	{
 		m_lcReminders.SetFocus();
-		m_lcReminders.SetItemState(0, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
+
+		if (m_lcReminders.GetSelectedCount() == 0)
+			m_lcReminders.SetItemState(0, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
 	}
 }
 
@@ -447,7 +449,7 @@ void CTDLShowReminderDlg::OnGotoTask()
 		DoGotoTask(rem);	
 
 	UpdateControls();
-	RestoreFocusToList();
+	// Note: We DON'T set the focus back to ourselves like elsewhere
 }
 
 void CTDLShowReminderDlg::OnCompleteTask()
@@ -575,13 +577,8 @@ void CTDLShowReminderDlg::OnItemchangedReminders(NMHDR* /*pNMHDR*/, LRESULT* pRe
 
 void CTDLShowReminderDlg::OnDblClkReminders(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	ASSERT(m_lcReminders.GetSelectedCount() == 1);
-
-	TDCREMINDER rem;
-	int nSel = GetSelectedReminder(rem);
-
-	if (nSel != -1)
-		DoGotoTask(rem);
+	if (m_lcReminders.GetSelectedCount() == 1)
+		OnGotoTask();
 
 	*pResult = 0;
 }
