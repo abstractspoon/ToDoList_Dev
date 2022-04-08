@@ -1211,10 +1211,10 @@ void CToDoListWnd::PostAppRestoreFocus(HWND hwndFocus)
 	if (!hwndFocus || (hwndFocus == *this))
 		return;
 	
-	if (!CDialogHelper::IsChildOrSame(m_dlgReminders, hwndFocus))
+	if (CDialogHelper::IsChildOrSame(m_dlgReminders, hwndFocus))
 		return;
 
-	if (!CDialogHelper::IsChildOrSame(m_dlgTimeTracker, hwndFocus))
+	if (CDialogHelper::IsChildOrSame(m_dlgTimeTracker, hwndFocus))
 		return;
 
 	PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)hwndFocus);
