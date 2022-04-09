@@ -391,6 +391,7 @@ namespace MSDN.Html.Editor
 
 			this.toolstripEditor.RemapSysColors();
 
+			// This creates a delayed-redraw of the toolbar
 			m_ToolbarRedrawTimer = new System.Windows.Forms.Timer();
 			m_ToolbarRedrawTimer.Interval = 100;
 			m_ToolbarRedrawTimer.Tick += delegate
@@ -695,6 +696,27 @@ namespace MSDN.Html.Editor
 			}
 
 		} //DocumentKeyPress
+
+
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			base.OnHandleDestroyed(e);
+
+			WebBrowser.Document.ContextMenuShowing -= new HtmlElementEventHandler(DocumentContextMenu);
+			WebBrowser.Document.Body.DoubleClick -= new HtmlElementEventHandler(DocumentDoubleClick);
+
+			WebBrowser.DocumentCompleted -= new WebBrowserDocumentCompletedEventHandler(this.BrowserDocumentComplete);
+			WebBrowser.Navigating -= new WebBrowserNavigatingEventHandler(this.BrowserBeforeNavigate);
+
+			WebBrowser.Document.DetachEventHandler("onselectionchange", DocumentSelectionChange);
+			WebBrowser.Document.DetachEventHandler("onkeydown", DocumentKeyPress);
+			WebBrowser.Document.DetachEventHandler("onfocusout", DocumentLoseFocus);
+
+			browserPanel.Controls.Remove(WebBrowser);
+
+			WebBrowser.Dispose();
+			WebBrowser = null;
+		}
 
 		virtual protected bool OnDocumentKeyPress(Keys keyPress)
 		{
@@ -4418,6 +4440,7 @@ namespace MSDN.Html.Editor
 		public WebBrowserEx.WebBrowserEx WebBrowser
 		{
 			get { return editorWebBrowser; }
+			private set { editorWebBrowser = value; }
 		}
 
 		/// <summary>

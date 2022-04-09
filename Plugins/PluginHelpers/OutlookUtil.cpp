@@ -53,3 +53,8 @@ bool OutlookUtil::IsOutlookUrl(String^ url)
 	return (CMSOutlookHelper::IsOutlookUrl(MS(url)) != FALSE);
 }
 
+bool OutlookUtil::IsOutlookInstalled()
+{
+	return (CMSOutlookHelper::IsOutlookInstalled() != FALSE);
+}
+
