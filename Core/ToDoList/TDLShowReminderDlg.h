@@ -111,7 +111,7 @@ protected:
 	void UpdateTitleText();
 	void UpdateColumnWidths();
 	void SnoozeReminders(BOOL bAll);
-	void RestoreFocusToList();
+	void RestoreFocusToList(int nPrevSel);
 };
 
 //{{AFX_INSERT_LOCATION}}

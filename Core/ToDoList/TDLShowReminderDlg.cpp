@@ -319,6 +319,7 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 		CPreferences().WriteProfileInt(m_sPrefsKey, _T("Snooze"), GetSnoozeMinutes());
 
 	CTDCReminderArray aRem;
+	int nPrevSel = m_lcReminders.GetLastSel();
 
 	if ((bAll && GetListReminders(aRem)) || 
 		(!bAll && GetSelectedReminders(aRem)))
@@ -330,17 +331,24 @@ void CTDLShowReminderDlg::SnoozeReminders(BOOL bAll)
 	}
 
 	UpdateControls();
-	RestoreFocusToList();
+	RestoreFocusToList(nPrevSel);
 }
 
-void CTDLShowReminderDlg::RestoreFocusToList()
+void CTDLShowReminderDlg::RestoreFocusToList(int nPrevSel)
 {
-	if (m_lcReminders.GetItemCount())
+	int nNumItems = m_lcReminders.GetItemCount();
+
+	if (nNumItems)
 	{
 		m_lcReminders.SetFocus();
 
 		if (m_lcReminders.GetSelectedCount() == 0)
-			m_lcReminders.SetItemState(0, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
+		{
+			if (nPrevSel >= nNumItems)
+				nPrevSel = (nNumItems - 1);
+
+			m_lcReminders.SetItemState(nPrevSel, (LVIS_SELECTED | LVIS_FOCUSED), (LVIS_SELECTED | LVIS_FOCUSED));
+		}
 	}
 }
 
@@ -459,10 +467,13 @@ void CTDLShowReminderDlg::OnCompleteTask()
 	TDCREMINDER rem;
 
 	if (GetSelectedReminder(rem) != -1)
+	{
+		int nPrevSel = m_lcReminders.GetCurSel();
 		DoCompleteTask(rem);
 
-	UpdateControls();
-	RestoreFocusToList();
+		UpdateControls();
+		RestoreFocusToList(nPrevSel);
+	}
 }
 
 void CTDLShowReminderDlg::OnDismiss() 
@@ -473,14 +484,15 @@ void CTDLShowReminderDlg::OnDismiss()
 
 	if (GetSelectedReminders(aRem))
 	{
+		int nPrevSel = m_lcReminders.GetLastSel();
 		CAutoFlag af(m_bChangingReminders, TRUE);
 
 		for (int nRem = 0; nRem < aRem.GetSize(); nRem++)
 			DoDismissReminder(aRem[nRem]);	
-	}
 
-	UpdateControls();
-	RestoreFocusToList();
+		UpdateControls();
+		RestoreFocusToList(nPrevSel);
+	}
 }
 
 BOOL CTDLShowReminderDlg::PreTranslateMessage(MSG* pMsg)
