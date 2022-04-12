@@ -181,7 +181,16 @@ int CKanbanPreferencesPage::GetFixedColumnDefinitions(CKanbanColumnArray& aColum
 	aColumnDefs.RemoveAll();
 
 	if (HasFixedColumns())
+	{
 		aColumnDefs.Copy(m_aFixedColumnDefs);
+
+		// Fill in the attribute ID which is not known by the listctrl
+		CString sAttribID = GetFixedAttributeID();
+		int nCol = aColumnDefs.GetSize();
+
+		while (nCol--)
+			aColumnDefs[nCol].sAttribID = sAttribID;
+	}
 
 	return aColumnDefs.GetSize();
 }
