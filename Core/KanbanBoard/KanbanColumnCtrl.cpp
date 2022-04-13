@@ -700,7 +700,20 @@ BOOL CKanbanColumnCtrl::WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBAN
 {
 	ASSERT(Misc::FindT(nAttrib, m_aDisplayAttrib) != -1);
 
-	return (!HasOption(KBCF_HIDEEMPTYATTRIBUTES) || pKI->HasAttributeDisplayValue(nAttrib));
+	if (HasOption(KBCF_HIDEEMPTYATTRIBUTES) && !pKI->HasAttributeDisplayValue(nAttrib))
+		return FALSE;
+
+	// If this attribute matches the tracked attribute then we are
+	// necessarily part of a fixed-column setup, and we need to do 
+	// some extra checks to see if we really do want to display it
+	if (KANBANITEM::IsTrackableAttribute(nAttrib) &&
+		(KANBANITEM::GetAttributeID(nAttrib) == GetAttributeID()) &&
+		(m_columnDef.aAttribValues.GetSize() == 1))
+	{
+		return FALSE;
+	}
+
+	return TRUE;
 }
 
 void CKanbanColumnCtrl::DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText)
