@@ -5,6 +5,8 @@
 #include "resource.h"
 #include "TDLOffsetDatesDlg.h"
 
+#include "..\Shared\Misc.h"
+
 #include "..\Interfaces\Preferences.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -41,6 +43,7 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
 	m_bOffsetStartDate = prefs.GetProfileInt(m_sPrefsKey, _T("StartDate"), FALSE);
 	m_bOffsetDueDate = prefs.GetProfileInt(m_sPrefsKey, _T("DueDate"), FALSE);
 	m_bOffsetDoneDate = prefs.GetProfileInt(m_sPrefsKey, _T("DoneDate"), FALSE);
+	m_bOffsetReminder = prefs.GetProfileInt(m_sPrefsKey, _T("Reminder"), FALSE);
 	m_bForward = prefs.GetProfileInt(m_sPrefsKey, _T("Forward"), 1);
 	m_nOffsetBy = prefs.GetProfileInt(m_sPrefsKey, _T("Amount"), 1);
 	m_bOffsetSubtasks = prefs.GetProfileInt(m_sPrefsKey, _T("Subtasks"), TRUE);
@@ -55,6 +58,7 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_OFFSETSTARTDATE, m_bOffsetStartDate);
 	DDX_Check(pDX, IDC_OFFSETDUEDATE, m_bOffsetDueDate);
 	DDX_Check(pDX, IDC_OFFSETDONEDATE, m_bOffsetDoneDate);
+	DDX_Check(pDX, IDC_OFFSETREMINDER, m_bOffsetReminder);
 	DDX_CBIndex(pDX, IDC_DIRECTION, m_bForward);
 	DDX_Text(pDX, IDC_BY, m_nOffsetBy);
 	DDX_CBIndex(pDX, IDC_BYUNITS, m_nOffsetByUnits);
@@ -76,14 +80,10 @@ DWORD CTDLOffsetDatesDlg::GetOffsetWhat() const
 {
 	DWORD dwWhat = 0;
 
-	if (m_bOffsetStartDate)
-		dwWhat |= ODD_STARTDATE;
-
-	if (m_bOffsetDueDate)
-		dwWhat |= ODD_DUEDATE;
-
-	if (m_bOffsetDoneDate)
-		dwWhat |= ODD_DONEDATE;
+	Misc::SetFlag(dwWhat, ODD_STARTDATE, m_bOffsetStartDate);
+	Misc::SetFlag(dwWhat, ODD_DUEDATE, m_bOffsetDueDate);
+	Misc::SetFlag(dwWhat, ODD_DONEDATE, m_bOffsetDoneDate);
+	Misc::SetFlag(dwWhat, ODD_REMINDER, m_bOffsetReminder);
 
 	return dwWhat;
 }
@@ -130,6 +130,7 @@ void CTDLOffsetDatesDlg::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("StartDate"), m_bOffsetStartDate);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("DueDate"), m_bOffsetDueDate);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("DoneDate"), m_bOffsetDoneDate);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("Reminder"), m_bOffsetReminder);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Forward"), m_bForward);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Amount"), m_nOffsetBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("AmountPeriod"), m_nOffsetByUnits);

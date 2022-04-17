@@ -221,6 +221,7 @@
 #define IDC_DEFAULTALLOCBY              1028
 #define IDC_USEHIGHESTPRIORITY          1028
 #define IDC_ROUNDTIMEFRACTIONS          1028
+#define IDC_OFFSETREMINDER              1028
 #define IDC_TABWIDTHS                   1029
 #define IDC_TREEFONTSIZE                1029
 #define IDC_DEFAULTSTATUS               1029
@@ -744,7 +745,8 @@
 #define IDC_LICENSE                     1460
 #define IDC_SNOOZEFOR                   1461
 #define IDC_DISMISS                     1462
-#define IDC_DISMISSANDGOTOTASK          1463
+#define IDC_GOTOTASK                    1463
+#define IDC_COMPLETETASK                1464
 #define IDC_SHOWREMINDERSASDATES        1466
 #define IDC_NOTIFYTIMETRACKING          1467
 #define IDC_NOTIFYTIMETRACKINGFREQUENCY 1468
@@ -2439,6 +2441,7 @@
 #define IDS_SAVETOIMAGEERROR            51608
 #define IDS_SB_SELTASKTITLEPATHID_TIP   51609
 #define IDS_REQUIRESADMINTOMODIFY       51610
+#define IDS_REMINDER_DBLCLK_TIP         51611
 
 // Next default values for new objects
 // 

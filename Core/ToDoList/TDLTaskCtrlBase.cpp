@@ -2951,25 +2951,18 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 				// Reminder must be set and start/due date must be set
 				if (tRem != 0)
 				{
-					if (tRem != -1)
-					{
-						if (HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME))
-						{
-							COleDateTime dtRem(tRem);
+					BOOL bDateSet = (tRem != -1);
 
-							if (CDateHelper::IsDateSet(dtRem))
-							{
-								DrawColumnDate(pDC, dtRem, TDCD_REMINDER, rSubItem, crText);
-							}
-						}
+					if (HasStyle(TDCS_SHOWREMINDERSASDATEANDTIME))
+					{
+						if (bDateSet)
+							DrawColumnDate(pDC, COleDateTime(tRem), TDCD_REMINDER, rSubItem, crText);
 						else
-						{
-							DrawColumnImage(pDC, nColID, rSubItem);
-						}
+							DrawColumnText(pDC, CEnString(IDS_REMINDER_DATENOTSET), rSubItem, DT_LEFT, COMMENTSCOLOR);
 					}
 					else
 					{
-						DrawColumnImage(pDC, nColID, rSubItem, TRUE);
+						DrawColumnImage(pDC, nColID, rSubItem, !bDateSet);
 					}
 				}
 			}

@@ -66,9 +66,11 @@ BEGIN_MESSAGE_MAP(CKanbanPreferencesPage, CPreferencesPageBase)
 	ON_NOTIFY(LVN_ITEMCHANGED, IDC_COLUMNDEFS, OnItemchangedColumndefs)
 	ON_BN_CLICKED(IDC_FIXEDCOLUMNS, OnChangeColumnType)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_FIXEDCOLUMNS, OnSortSubtasksBelowParents)
 	ON_BN_CLICKED(IDC_SHOWTASKCOLORASBAR, OnShowColorAsBar)
 	ON_COMMAND(ID_POPULATECOLUMNS, OnPopulateFixedColumns)
 	ON_UPDATE_COMMAND_UI(ID_POPULATECOLUMNS, OnUpdatePopulateColumns)
+	ON_COMMAND(IDC_SORTSUBTASKSBELOWPARENT, OnSortSubtasksBelowParents)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -179,7 +181,16 @@ int CKanbanPreferencesPage::GetFixedColumnDefinitions(CKanbanColumnArray& aColum
 	aColumnDefs.RemoveAll();
 
 	if (HasFixedColumns())
+	{
 		aColumnDefs.Copy(m_aFixedColumnDefs);
+
+		// Fill in the attribute ID which is not known by the listctrl
+		CString sAttribID = GetFixedAttributeID();
+		int nCol = aColumnDefs.GetSize();
+
+		while (nCol--)
+			aColumnDefs[nCol].sAttribID = sAttribID;
+	}
 
 	return aColumnDefs.GetSize();
 }
@@ -300,6 +311,7 @@ void CKanbanPreferencesPage::OnShowColorAsBar()
 
 void CKanbanPreferencesPage::EnableDisableControls()
 {
+	GetDlgItem(IDC_INDENTSUBTASKS)->EnableWindow(m_bSortSubtaskBelowParent);
 	GetDlgItem(IDC_COLORBARBYPRIORITY)->EnableWindow(m_bShowTaskColorAsBar);
 
 	if (m_toolbar.GetSafeHwnd())
@@ -320,20 +332,11 @@ void CKanbanPreferencesPage::OnSelchangeAttribute()
 	UpdateAttributeValueCombo();
 }
 
-void CKanbanPreferencesPage::OnSelchangeCustomAttribute() 
+void CKanbanPreferencesPage::OnSortSubtasksBelowParents()
 {
-	ASSERT(m_nFixedAttrib == TDCA_CUSTOMATTRIB);
-
 	UpdateData();
 
-	if ((m_lcFixedColumnDefs.GetItemCount() > 1) && 
-		(AfxMessageBox(CEnString(IDS_DELETEALLROWS), (MB_YESNO | MB_ICONQUESTION)) == IDYES))
-	{
-		m_lcFixedColumnDefs.DeleteAllItems(FALSE);
-	}
-
-	//EnableDisableControls();
-	UpdateAttributeValueCombo();
+	EnableDisableControls();
 }
 
 void CKanbanPreferencesPage::OnMoveFixedColDown() 

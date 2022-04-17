@@ -152,7 +152,7 @@ CPreferences::~CPreferences()
 	{
 		// Note: We no longer release the current data
 		// until the next load
-		if (!SaveInternal())
+		if (!SaveInternal(FALSE))
 			s_nRef++;
 	}
 }
@@ -275,11 +275,11 @@ BOOL CPreferences::Save()
 	// for the duration of this function
 	LOCKPREFSRET(FALSE);
 
-	return SaveInternal();
+	return SaveInternal(FALSE);
 }
 
 // THIS IS AN INTERNAL METHOD THAT ASSUMES CALLERS HAVE INITIALISED A LOCK ALREADY
-BOOL CPreferences::SaveInternal()
+BOOL CPreferences::SaveInternal(BOOL bExternal)
 {
 	ASSERT(s_bLocked);
 	ASSERT(s_bIni);
@@ -290,6 +290,11 @@ BOOL CPreferences::SaveInternal()
 	if (!s_bDirty)
 		return TRUE; // nothing to do
 
+	if (bExternal)
+		FileMisc::LogTextRaw(_T("External call to CPreferences::Save()"));
+	else
+		FileMisc::LogTextRaw(_T("Saving preferences in ~CPreferences()"));
+	
 	// insert application version
 	WriteIniString(_T("AppVer"), _T("Version"), FileMisc::GetAppVersion(), FALSE);
 

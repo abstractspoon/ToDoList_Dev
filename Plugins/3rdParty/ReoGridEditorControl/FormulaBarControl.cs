@@ -110,6 +110,52 @@ namespace unvell.ReoGrid.Editor
 
 		}
 
+		private TextBox FocusedTextBox
+		{
+			get
+			{
+				if (txtFormula.Focused)
+					return txtFormula;
+
+				if (addressField.AddressBox.Focused)
+					return addressField.AddressBox;
+
+				return null;
+			}
+		}
+
+		public bool EditControlCut()
+		{
+			var textBox = FocusedTextBox;
+
+			textBox?.Cut();
+			return (textBox != null);
+		}
+
+		public bool EditControlCopy()
+		{
+			var textBox = FocusedTextBox;
+
+			textBox?.Copy();
+			return (textBox != null);
+		}
+
+		public bool EditControlPaste()
+		{
+			var textBox = FocusedTextBox;
+
+			textBox?.Paste();
+			return (textBox != null);
+		}
+
+		public bool EditControlSelectAll()
+		{
+			var textBox = FocusedTextBox;
+
+			textBox?.SelectAll();
+			return (textBox != null);
+		}
+
 		public new Color BackColor
 		{
 			get { return base.BackColor; }

@@ -466,22 +466,27 @@ CTransTabCtrl::CTransTabCtrl(const CString& sClass)
 {
 	ASSERT(CWinClasses::IsClass(sClass, WC_TABCONTROL));
 }
+
 void CTransTabCtrl::Initialize() 
 {
 	if (m_bAllowTranslate)
 	{
-		TCHAR szText[255];
 		HWND hThis = GetHwnd();
+		TCHAR szText[255] = { 0 };
 		
-		TCITEM tci;
-		tci.mask = TCIF_TEXT;
-		tci.pszText = szText;
+		TCITEM tci = { TCIF_TEXT, 0 };
 		tci.cchTextMax = 255;
 
 		int nItem = TabCtrl_GetItemCount(hThis);
 
 		while (nItem--)
-		{
+		{			
+			// Note: We have to re-assign the buffer each time around
+			// the loop because, for reasons I don't understand,
+			// TabCtrl_SetItem changes the pointer location from under 
+			// us which causes the text to become corrupted
+			tci.pszText = szText;
+
 			if (TabCtrl_GetItem(hThis, nItem, &tci))
 				TabCtrl_SetItem(hThis, nItem, &tci); // will get handled in WindowProc
 		}

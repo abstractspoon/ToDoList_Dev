@@ -378,6 +378,11 @@ namespace unvell.ReoGrid.Editor
 				pasteToolStripMenuItem.Enabled =
 				copyToolStripButton.Enabled =
 				copyToolStripMenuItem.Enabled =
+					CurrentWorksheet.IsEditing || FormulaBar.ContainsFocus;
+			};
+
+			grid.LostFocus += (s, e) =>
+			{
 				undoToolStripButton.Enabled =
 				undoToolStripMenuItem.Enabled =
 				redoToolStripButton.Enabled =
@@ -1379,8 +1384,6 @@ namespace unvell.ReoGrid.Editor
 			if (isUIUpdating)
 				return;
 
-			isUIUpdating = true;
-
 			var worksheet = this.CurrentWorksheet;
 
 			WorksheetRangeStyle style = worksheet.GetCellStyles(worksheet.SelectionRange.StartPos);
@@ -1389,6 +1392,8 @@ namespace unvell.ReoGrid.Editor
 				// cross-thread exception
 				Action set = () =>
 				{
+					isUIUpdating = true;
+
 					fontToolStripComboBox.Text = style.FontName;
 					fontSizeToolStripComboBox.Text = style.FontSize.ToString();
 					boldToolStripButton.Checked = style.Bold;
@@ -2640,7 +2645,8 @@ namespace unvell.ReoGrid.Editor
 			// Cut method will always perform action to do cut
 			try
 			{
-				this.CurrentWorksheet.Cut();
+				if (!FormulaBar.EditControlCut())
+					this.CurrentWorksheet.Cut();
 			}
 			catch (RangeIntersectionException)
 			{
@@ -2656,7 +2662,8 @@ namespace unvell.ReoGrid.Editor
 		{
 			try
 			{
-				this.CurrentWorksheet.Copy();
+				if (!FormulaBar.EditControlCopy())
+					this.CurrentWorksheet.Copy();
 			}
 			catch (RangeIntersectionException)
 			{
@@ -2672,7 +2679,8 @@ namespace unvell.ReoGrid.Editor
 		{
 			try
 			{
-				this.CurrentWorksheet.Paste();
+				if (!FormulaBar.EditControlPaste())
+					this.CurrentWorksheet.Paste();
 			}
 			catch (Exception ex)
 			{
@@ -2702,7 +2710,8 @@ namespace unvell.ReoGrid.Editor
 
 		private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			this.CurrentWorksheet.SelectAll();
+			if (!FormulaBar.EditControlSelectAll())
+				this.CurrentWorksheet.SelectAll();
 		}
 
 		#endregion // Editing

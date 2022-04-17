@@ -152,7 +152,7 @@ protected:
 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
 			
-	BOOL OnTreeSelectionChange(NMTREEVIEW* pNMTV);
+	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);
 	BOOL OnDragDropItem(const TLCITEMMOVE& move);
 	BOOL OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag);
 	UINT OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor);

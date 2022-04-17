@@ -1702,15 +1702,12 @@ void CGanttCtrl::OnTreeGetDispInfo(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 	}
 }
 
-BOOL CGanttCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
+void CGanttCtrl::OnTreeSelectionChange(NMTREEVIEW* pNMTV)
 {
-	if (!CTreeListCtrl::OnTreeSelectionChange(pNMTV))
-		return FALSE;
+	CTreeListCtrl::OnTreeSelectionChange(pNMTV);
 
 	if (!m_bMovingItem && HasOption(GTLCF_AUTOSCROLLTOTASK))
 		ScrollToSelectedTask();
-
-	return TRUE;
 }
 
 UINT CGanttCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)

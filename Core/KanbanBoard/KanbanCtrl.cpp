@@ -56,8 +56,6 @@ enum // RebuildColumns
 {
 	KCRC_REBUILDCONTENTS	= 0x01,
 	KCRC_RESTORESELECTION	= 0x02,
-	KCRC_TASKUPDATE			= 0x04,
-	KCRC_NEWTASK			= 0x08 | KCRC_TASKUPDATE,
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -340,7 +338,7 @@ BOOL CKanbanCtrl::HandleKeyDown(WPARAM wp, LPARAM /*lp*/)
 
 			// No need to rebuild column contents as
 			// we've already done a manual adjustment
-			RebuildColumns(KCRC_RESTORESELECTION, aTaskIDs);
+			RebuildColumns(FALSE, aTaskIDs);
 
 			return TRUE;
 		}
@@ -556,7 +554,7 @@ void CKanbanCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate
 		
 	case IUI_NEW:
 	case IUI_EDIT:
-		UpdateData(pTasks, (nUpdate == IUI_NEW));
+		UpdateData(pTasks);
 		break;
 		
 	case IUI_DELETE:
@@ -694,7 +692,8 @@ BOOL CKanbanCtrl::WantSortUpdate(TDC_ATTRIBUTE nAttrib) const
 	switch (nAttrib)
 	{
 	case TDCA_NONE:
-		return HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS);
+	case TDCA_TASKNAME:
+		return TRUE; // always
 	}
 	
 	return (WantEditUpdate(nAttrib) && (Misc::FindT(nAttrib, m_aDisplayAttrib) != -1));
@@ -721,7 +720,7 @@ void CKanbanCtrl::RebuildData(const ITASKLISTBASE* pTasks)
 	m_aPrevPinnedTasks.RemoveAll();
 
 	// App will take care of restoring selection
-	RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_TASKUPDATE);
+	RebuildColumns(KCRC_REBUILDCONTENTS);
 }
 
 BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DWORD dwParentID, BOOL bAndSiblings)
@@ -829,24 +828,29 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 	return TRUE;
 }
 
-void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, BOOL bNewTask)
+void CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks)
 {
 	// update the task(s)
-	BOOL bChange = UpdateGlobalAttributeValues(pTasks);
-	bChange |= UpdateData(pTasks, pTasks->GetFirstTask(), TRUE);
+	BOOL bRebuild = UpdateGlobalAttributeValues(pTasks);
+	bRebuild |= UpdateData(pTasks, pTasks->GetFirstTask(), TRUE);
 
-	if (bChange)
+	if (bRebuild)
 	{
 		// App will take care of restoring selection
-		RebuildColumns(KCRC_REBUILDCONTENTS | KCRC_TASKUPDATE | (bNewTask ? KCRC_NEWTASK : 0));
-	}
-	else if (UpdateNeedsItemHeightRefresh(pTasks))
-	{
-		m_aColumns.RefreshItemLineHeights();
+		RebuildColumns(KCRC_REBUILDCONTENTS);
 	}
 	else
 	{
-		m_aColumns.Redraw(FALSE);
+		if (UpdateNeedsItemHeightRefresh(pTasks))
+			m_aColumns.RefreshItemLineHeights();
+		else
+			m_aColumns.Redraw(FALSE);
+
+		// If the update contains the tracked attribute
+		// then assume some 'inline' changes were made to
+		// one/some of the columns necessitating a resort
+		if (pTasks->IsAttributeAvailable(m_nTrackAttribute))
+			m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 	}
 }
 
@@ -860,7 +864,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		return FALSE; 
 
 	// handle task if not NULL (== root)
-	BOOL bChange = FALSE;
+	BOOL bRebuild = FALSE;
 	DWORD dwTaskID = pTasks->GetTaskID(hTask);
 
 	if (dwTaskID)
@@ -868,7 +872,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		// Can be a new task
 		if (!HasKanbanItem(dwTaskID))
 		{
-			bChange = AddTaskToData(pTasks, hTask, pTasks->GetTaskParentID(hTask), FALSE);
+			bRebuild = AddTaskToData(pTasks, hTask, pTasks->GetTaskParentID(hTask), FALSE);
 		}
 		else
 		{
@@ -890,7 +894,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 					pKI->bGoodAsDone = bGoodAsDone;
 
 					if (HasOption(KBCF_DONEHAVELOWESTPRIORITYRISK) || HasOption(KBCF_DUEHAVEHIGHESTPRIORITYRISK))
-						bChange = TRUE;
+						bRebuild = TRUE;
 				}
 			}
 
@@ -900,7 +904,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 				BOOL bDue = pTasks->IsTaskDue(hTask);
 
 				if (pKI->IsDue() != bDue)
-					bChange = TRUE;
+					bRebuild = TRUE;
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
@@ -921,35 +925,35 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
 			{
 				GetTaskAllocTo(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCTO, aValues);
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCTO, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_CATEGORY))
 			{
 				GetTaskCategories(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_CATEGORY, aValues);
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_CATEGORY, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_TAGS))
 			{
 				GetTaskTags(pTasks, hTask, aValues);
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_TAGS, aValues);
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_TAGS, aValues);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_ALLOCBY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_ALLOCBY, pTasks->GetTaskAllocatedBy(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_STATUS))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_STATUS, pTasks->GetTaskStatus(hTask));
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_STATUS, pTasks->GetTaskStatus(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_VERSION))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_VERSION, pTasks->GetTaskVersion(hTask));
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_VERSION, pTasks->GetTaskVersion(hTask));
 
 			if (pTasks->IsAttributeAvailable(TDCA_PRIORITY))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, true)); // calculated
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_PRIORITY, pTasks->GetTaskPriority(hTask, true)); // calculated
 
 			if (pTasks->IsAttributeAvailable(TDCA_RISK))
-				bChange |= UpdateTrackableTaskAttribute(pKI, TDCA_RISK, pTasks->GetTaskRisk(hTask, true)); // calculated
+				bRebuild |= UpdateTrackableTaskAttribute(pKI, TDCA_RISK, pTasks->GetTaskRisk(hTask, true)); // calculated
 
 			if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
 			{
@@ -975,7 +979,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 						ASSERT(pValues);
 						
 						pValues->AddValues(aCustValues);
-						bChange = TRUE;
+						bRebuild = TRUE;
 					}
 				}
 			}
@@ -983,17 +987,17 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			// other display-only attributes
 			UpdateItemDisplayAttributes(pKI, pTasks, hTask);
 			
-			// always update colour because it can change for so many reasons
+			// always update colour, lock state and parent-ness
 			pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
-			// Always update lock state
 			pKI->bLocked = pTasks->IsTaskLocked(hTask, true); // calculated
+			pKI->bParent = pTasks->IsTaskParent(hTask);
 		}
 	}
 		
 	// children
 	if (UpdateData(pTasks, pTasks->GetFirstTask(hTask), TRUE))
-		bChange = TRUE;
+		bRebuild = TRUE;
 
 	// handle siblings WITHOUT RECURSION
 	if (bAndSiblings)
@@ -1004,13 +1008,13 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 		{
 			// FALSE == not siblings
 			if (UpdateData(pTasks, hSibling, FALSE))
-				bChange = TRUE;
+				bRebuild = TRUE;
 			
 			hSibling = pTasks->GetNextTask(hSibling);
 		}
 	}
 	
-	return bChange;
+	return bRebuild;
 }
 
 void CKanbanCtrl::UpdateItemDisplayAttributes(KANBANITEM* pKI, const ITASKLISTBASE* pTasks, HTASKITEM hTask)
@@ -1532,7 +1536,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 	}
 
 	// else
-	BOOL bChange = FALSE;
+	BOOL bRebuild = FALSE;
 	
 	if (!pKI->AttributeValuesMatch(sAttribID, aNewValues))
 	{
@@ -1559,7 +1563,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				if (pCurCol)
 				{
 					VERIFY(pCurCol->DeleteTask(pKI->dwTaskID));
-					bChange |= (pCurCol->GetCount() == 0);
+					bRebuild |= (pCurCol->IsEmpty() && HasOption(KBCF_HIDEEMPTYCOLUMNS));
 				}
 
 				// Remove from list to speed up later searching
@@ -1579,7 +1583,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				if (pCurCol)
 					pCurCol->AddTask(*pKI);
 
-				bChange |= ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
+				bRebuild |= ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
 			}
 		}
 	
@@ -1587,7 +1591,7 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		pKI->SetTrackedAttributeValues(sAttribID, aNewValues);
 	}
 	
-	return bChange;
+	return bRebuild;
 }
 
 BOOL CKanbanCtrl::IsTracking(const CString& sAttribID) const
@@ -1782,7 +1786,9 @@ void CKanbanCtrl::RebuildFixedColumns(const CKanbanItemArrayMap& mapKIArray)
 		return;
 	}
 
-	if (m_aColumns.GetSize() == 0) // first time only
+	// We only need to build this once because we don't remove empty
+	// columns like with dynamic columns, we just hide them
+	if (m_aColumns.GetSize() == 0)
 	{
 		for (int nDef = 0; nDef < m_aColumnDefs.GetSize(); nDef++)
 		{
@@ -1821,13 +1827,11 @@ void CKanbanCtrl::RebuildColumns(DWORD dwFlags)
 	if (dwFlags & KCRC_RESTORESELECTION)
 		GetSelectedTaskIDs(aTaskIDs);
 
-	RebuildColumns(dwFlags, aTaskIDs);
+	RebuildColumns((dwFlags & KCRC_REBUILDCONTENTS), aTaskIDs);
 }
 
-void CKanbanCtrl::RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs)
+void CKanbanCtrl::RebuildColumns(BOOL bRebuildContents, const CDWordArray& aSelTaskIDs)
 {
-	ASSERT((aSelTaskIDs.GetSize() == 0) || (dwFlags & KCRC_RESTORESELECTION));
-
 	if (m_sTrackAttribID.IsEmpty())
 	{
 		ASSERT(m_nTrackAttribute == TDCA_NONE);
@@ -1846,16 +1850,9 @@ void CKanbanCtrl::RebuildColumns(DWORD dwFlags, const CDWordArray& aSelTaskIDs)
 		RebuildFixedColumns(mapKIArray);
 
 	// Rebuild column contents
-	if (dwFlags & KCRC_REBUILDCONTENTS)
+	if (bRebuildContents)
 	{
-		// If it's a task update we generally don't resort because
-		// the app will tell us if we need to, except in the case 
-		// of a new task because the app waits until after the title
-		// naming is complete
-		BOOL bResort = (Misc::HasFlag(dwFlags, KCRC_NEWTASK) || 
-						!Misc::HasFlag(dwFlags, KCRC_TASKUPDATE));
-
-		RebuildColumnsContents(mapKIArray, bResort);
+		RebuildColumnsContents(mapKIArray);
 	}
 	else if (UsingDynamicColumns())
 	{
@@ -1969,7 +1966,7 @@ void CKanbanCtrl::RefreshColumnHeaderText()
 	m_header.EnableItemTracking(nVis - 1, FALSE);
 }
 
-void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, BOOL bResort)
+void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray)
 {
 	int nCol = m_aColumns.GetSize();
 	
@@ -1998,9 +1995,11 @@ void CKanbanCtrl::RebuildColumnsContents(const CKanbanItemArrayMap& mapKIArray, 
 	// only unwanted parents
 	CheckAddBacklogColumn();
 
-	// Resort
-	if (bResort)
-		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
+	// Always resort because the app will only tell us to resort 
+	// if the modification that caused this update matches the
+	// current sort, whereas we always need to be maintain some
+	// kind of sorted state even if we are technically 'unsorted'
+	m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 }
 
 void CKanbanCtrl::FixupSelectedColumn()
@@ -3007,6 +3006,34 @@ void CKanbanCtrl::OnHeaderDividerDoubleClick(NMHDR* pNMHDR, LRESULT* /*pResult*/
 	}
 }
 
+int CKanbanCtrl::MapHeaderItemToColumn(int nItem) const
+{
+	// When using dynamic columns the header items
+	// exactly match the columns
+	if (UsingDynamicColumns() || !HasOption(KBCF_HIDEEMPTYCOLUMNS))
+		return nItem;
+
+	// When using fixed columns however, hidden columns 
+	// are not removed just set to zero width whilst
+	// their corresponding header items are removed
+	int nCol = 0, nColItem = 0;
+
+	for (; nCol < m_aColumns.GetSize(); nCol++)
+	{
+		const CKanbanColumnCtrl* pCol = m_aColumns[nCol];
+
+		if (WantShowColumn(pCol))
+		{
+			if (nColItem == nItem)
+				break;
+			else 
+				nColItem++;
+		}
+	}
+
+	return nCol;
+}
+
 void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	if (m_bResizingHeader || m_bSavingToImage)
@@ -3032,13 +3059,16 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		m_header.SetItemWidth(pHDN->iItem + 1, nNextWidth);
 		
 		// Resize corresponding listctrls
-		CKanbanColumnCtrl* pThisCol = m_aColumns[pHDN->iItem];
-		CKanbanColumnCtrl* pNextCol = m_aColumns[pHDN->iItem + 1];
+		int nThisCol = MapHeaderItemToColumn(pHDN->iItem);
+		int nNextCol = MapHeaderItemToColumn(pHDN->iItem + 1);
+
+		CKanbanColumnCtrl* pThisCol = m_aColumns[nThisCol];
+		CKanbanColumnCtrl* pNextCol = m_aColumns[nNextCol];
 
 		CRect rThisCol = CDialogHelper::GetChildRect(pThisCol);
 		rThisCol.right = (rThisCol.left + pHDN->pitem->cxy - 1);
 
-		CRect rNextCol = CDialogHelper::GetChildRect(m_aColumns[pHDN->iItem + 1]);
+		CRect rNextCol = CDialogHelper::GetChildRect(pNextCol);
 		rNextCol.left = (rThisCol.right + 1);
 
 		pThisCol->MoveWindow(rThisCol, TRUE);
@@ -3050,6 +3080,7 @@ void CKanbanCtrl::OnHeaderItemChanging(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 		rDivider.right++;
 
 		Invalidate(TRUE);
+		UpdateWindow();
 	}
 }
 

@@ -229,8 +229,8 @@ protected:
 	afx_msg void OnEditInsertdatetime();
 	afx_msg void OnEditInserttime();
 	afx_msg void OnEditOffsetDates();
-	afx_msg void OnEditOffsetDatesForwards(UINT nCmdID);
-	afx_msg void OnEditOffsetDatesBackwards(UINT nCmdID);
+	afx_msg void OnEditOffsetStartDueDatesForwards(UINT nCmdID);
+	afx_msg void OnEditOffsetStartDueDatesBackwards(UINT nCmdID);
 	afx_msg void OnEditRedo();
 	afx_msg void OnEditSelectall();
 	afx_msg void OnEditSetReminder();
@@ -403,6 +403,7 @@ protected:
 	afx_msg LRESULT OnTimeTrackerLoadDelayedTasklist(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlDoLengthyOperation(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnReminderCompleteTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlImportFromDrop(WPARAM wParam, LPARAM lParam);
@@ -577,6 +578,7 @@ protected:
 	afx_msg void OnViewActivateFilter(UINT nCmdID);
 	afx_msg void OnViewActivateAdvancedFilter(UINT nCmdID);
 	afx_msg void OnWindow(UINT nCmdID);
+	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);
 #ifdef _DEBUG
 	afx_msg void OnDebugEndSession();
 	afx_msg void OnDebugShowSetupDlg();
@@ -763,10 +765,10 @@ protected:
 	void ToggleActiveTasklistStyle(TDC_STYLE nStyle, BOOL& bFlag);
 	
 	// helpers
-	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-					const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
-	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const;
+	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, const CString& sHtmlImageDir, BOOL bTransform, 
+					const CTaskSelectionDlg& taskSel, CTaskFile& tasks) const;
+	int GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, const CString& sHtmlImageDir, BOOL bTransform, 
+					TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks) const;
 	
 	void DoSendTasks(BOOL bSelected);
 	BOOL DoPreferences(int nInitPage = -1, UINT nInitCtrlID = 0);
@@ -786,7 +788,7 @@ protected:
 	void UpdateTimeTrackerTasks(BOOL bAllTasks, const CTDCAttributeMap& mapAttrib = TDCA_ALL);
 	BOOL ImportTasks(BOOL bFromText, const CString& sImportFrom,
 					int nImporter, TDLID_IMPORTTO nImportTo);
-	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath);
+	BOOL CreateTempPrintFile(const CTDLPrintDialog& dlg);
 	UINT GetNewTaskCmdID() const;
 	UINT GetNewSubtaskCmdID() const;
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
@@ -806,6 +808,7 @@ protected:
 	static void EnableTDLProtocol(BOOL bEnable);
 	static void SetupUIStrings();
 	static CString GetEndSessionFilePath();
+	static CString GetHtmlImageFolder(BOOL bHtmlComments, const CString& sTasklistPath);
 	static BOOL IsEndSessionFilePath(const CString& sFilePath);
 	static BOOL LogIntermediateTaskList(CTaskFile& tasks);
 	static CString GetIntermediateTaskListPath(LPCTSTR szRefPath);

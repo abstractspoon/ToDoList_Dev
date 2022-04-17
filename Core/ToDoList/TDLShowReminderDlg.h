@@ -16,6 +16,7 @@
 #include "..\Shared\DateTimeCtrlEx.h"
 #include "..\Shared\timecombobox.h"
 #include "..\Shared\Icon.h"
+#include "..\Shared\EnListCtrl.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -37,13 +38,12 @@ public:
 	void RemoveListReminder(const TDCREMINDER& rem);
 	void RemoveListReminders(const CFilteredToDoCtrl& tdc);
 	void RemoveAllListReminders();
-	int GetVisibleReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
+	int GetListReminders(const CFilteredToDoCtrl& tdc, CTDCReminderArray& aRem) const;
 
 	BOOL GetWantSnoozeUntil() const { return m_bSnoozeUntil; }
 	UINT GetSnoozeMinutes() const { return m_nSnoozeMins; }
 	double GetSnoozeDays() const;
 	COleDateTime GetSnoozeUntil() const;
-	int GetListReminderCount() const;
 
 protected:
 // Dialog Data
@@ -60,7 +60,7 @@ protected:
 	CDateTimeCtrlEx m_dtcSnoozeDate;
 	CTimeComboBox m_cbSnoozeTime;
 	COleDateTime m_dtSnoozeUntil;
-	CListCtrl m_lcReminders;
+	CEnListCtrl m_lcReminders;
 	CIcon m_icon;
 
 	CTDCReminderMap m_mapReminders;
@@ -69,15 +69,17 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLShowReminderDlg)
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual int OnInitDialog();
 	virtual void OnOK();
 	virtual void OnCancel();
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
 
-	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) {}
-	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/, BOOL /*bGotoTask*/) {}
-	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) {}
+	virtual void DoSnoozeReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
+	virtual void DoDismissReminder(const TDCREMINDER& /*rem*/) { ASSERT(0); }
+	virtual void DoGotoTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
+	virtual void DoCompleteTask(const TDCREMINDER& /*rem*/) { ASSERT(0); }
 	virtual void HideWindow();
 	virtual void OnRepositionControls(int dx, int dy);
 
@@ -87,7 +89,8 @@ protected:
 	//{{AFX_MSG(CTDLShowReminderDlg)
 	afx_msg void OnSnooze();
 	afx_msg void OnDismiss();
-	afx_msg void OnDismissAndGototask();
+	afx_msg void OnGotoTask();
+	afx_msg void OnCompleteTask();
 	afx_msg void OnSnoozeFor();
 	afx_msg void OnSnoozeUntil();
 	afx_msg void OnItemchangedReminders(NMHDR* pNMHDR, LRESULT* pResult);
@@ -102,13 +105,13 @@ protected:
 	int FindListReminder(const TDCREMINDER& rem);
 	int GetSelectedReminder(TDCREMINDER& rem) const;
 	int GetSelectedReminders(CTDCReminderArray& aRem) const;
-	int GetVisibleReminders(CTDCReminderArray& aRem) const;
+	int GetListReminders(CTDCReminderArray& aRem) const;
 	void EnableControls();
 	void UpdateControls();
 	void UpdateTitleText();
 	void UpdateColumnWidths();
 	void SnoozeReminders(BOOL bAll);
-	void RestoreFocusToList();
+	void RestoreFocusToList(int nPrevSel);
 };
 
 //{{AFX_INSERT_LOCATION}}

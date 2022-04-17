@@ -190,6 +190,7 @@ public:
 	inline DWORD GetSelectedTaskID() const { return m_taskTree.GetSelectedTaskID(); }
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
+	int GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const;
 
 	BOOL SelectTask(DWORD dwTaskID) { return SelectTask(dwTaskID, TRUE); }
 	BOOL SelectTasks(const CDWordArray& aTaskIDs) { return SelectTasks(aTaskIDs, TRUE); }
@@ -423,6 +424,7 @@ public:
 	// undo/redo
 	BOOL UndoLastAction(BOOL bUndo);
 	BOOL CanUndoLastAction(BOOL bUndo) const;
+	int GetLastModifiedTaskIDs(CDWordArray& aTaskIDs) const { return m_data.GetLastUndoActionTaskIDs(TRUE, aTaskIDs); }
 
 	// misc
 	void Spellcheck();

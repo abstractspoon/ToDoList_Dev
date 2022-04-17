@@ -704,6 +704,8 @@ void CPreferencesToolPage::OnInsertCustomAttribute(UINT nCmdID)
 
 void CPreferencesToolPage::OnInsertPlaceholder(UINT nCmdID) 
 {
+	UpdateData();
+
 	CString sPlaceholder(MapCmdIDToPlaceholder(nCmdID));
 	ASSERT(!sPlaceholder.IsEmpty());
 
@@ -783,7 +785,7 @@ void CPreferencesToolPage::OnTestTool()
 	}
 }
 
-CString CPreferencesToolPage::MapCmdIDToPlaceholder(UINT nCmdID) 
+CString CPreferencesToolPage::MapCmdIDToPlaceholder(UINT nCmdID) const
 {
 	CLA_TYPE nType = MapCmdIDToType(nCmdID);
 	CString sPlaceHolder = CTDCToolsCmdlineParser::GetPlaceHolder(nType), sText;
@@ -811,23 +813,42 @@ CString CPreferencesToolPage::MapCmdIDToPlaceholder(UINT nCmdID)
 		break;
 		
 	case ID_TOOLARG_USERDATE:		
-		sText.Format(_T("$(%s, var_date1, \"%s\", default_date)"), sPlaceHolder, CEnString(IDS_USERTOOL_DATEPROMPT));       
+		sText = FormatUserPlaceHolder(sPlaceHolder, _T("date"), IDS_USERTOOL_DATEPROMPT);
 		break;
 		
 	case ID_TOOLARG_USERFILEPATH:	
-		sText.Format(_T("\"$(%s, var_file1, \"%s\", default_path)\""), sPlaceHolder, CEnString(IDS_USERTOOL_FILEPROMPT));   
+		sText = FormatUserPlaceHolder(sPlaceHolder, _T("file"), IDS_USERTOOL_FILEPROMPT);
 		break;
 		
 	case ID_TOOLARG_USERFOLDER:		
-		sText.Format(_T("$(%s, var_folder1, \"%s\", default_folder)"), sPlaceHolder, CEnString(IDS_USERTOOL_FOLDERPROMPT));     
+		sText = FormatUserPlaceHolder(sPlaceHolder, _T("folder"), IDS_USERTOOL_FOLDERPROMPT);
 		break;
 		
 	case ID_TOOLARG_USERTEXT:		
-		sText.Format(_T("$(%s, var_text1, \"%s\", default_text)"), sPlaceHolder, CEnString(IDS_USERTOOL_TEXTPROMPT));       
+		sText = FormatUserPlaceHolder(sPlaceHolder, _T("text"), IDS_USERTOOL_TEXTPROMPT);
 		break;
 	}
 	
 	return sText;
+}
+
+CString CPreferencesToolPage::FormatUserPlaceHolder(LPCTSTR szPlaceHolder, LPCTSTR szVarType, UINT nIDTextPrompt) const
+{
+	return Misc::Format(_T("$(%s, %s, \"%s\", default_%s)"), szPlaceHolder, GetNewUserVariableName(szVarType), CEnString(nIDTextPrompt), szVarType);
+}
+
+CString CPreferencesToolPage::GetNewUserVariableName(LPCTSTR szVarType) const
+{
+	int nIndex = 1;
+	CString sVarName;
+
+	do 
+	{
+		sVarName.Format(_T("var_%s%d"), szVarType, nIndex++);
+	} 
+	while (m_sCommandLine.Find(sVarName) != -1);
+
+	return sVarName;
 }
 
 CLA_TYPE CPreferencesToolPage::MapCmdIDToType(UINT nCmdID)

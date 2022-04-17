@@ -100,10 +100,6 @@ namespace HTMLContentControl
 			this.BrowserPanel.Anchor = AnchorStyles.None; // we handle positioning ourselves
 
 			InitialiseFeatures();
-
-            m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
-            m_TextChangeTimer.Interval = 200;
-            m_TextChangeTimer.Start();
 		}
 
 		protected void OnOutlookDrop(object sender, String title, String url)
@@ -111,8 +107,34 @@ namespace HTMLContentControl
 			DoDrop(title, url);
 		}
 
+		protected override void OnHandleCreated(EventArgs e)
+		{
+			base.OnHandleCreated(e);
+
+			m_TextChangeTimer.Tick += new EventHandler(OnTextChangeTimer);
+			m_TextChangeTimer.Interval = 200;
+			m_TextChangeTimer.Start();
+		}
+
+		protected override void OnHandleDestroyed(EventArgs e)
+		{
+			m_TextChangeTimer.Tick -= new EventHandler(OnTextChangeTimer);
+			m_TextChangeTimer.Stop();
+
+			WebBrowser.GetDropTarget -= new WebBrowserEx.GetDropTargetEventHandler(GetBrowserDropTarget);
+			WebBrowser.Document.MouseOver -= new HtmlElementEventHandler(OnDocumentMouseOver);
+			WebBrowser.Document.MouseDown -= new HtmlElementEventHandler(OnDocumentMouseDown);
+			WebBrowser.Document.MouseUp -= new HtmlElementEventHandler(OnDocumentMouseUp);
+			WebBrowser.Document.MouseMove -= new HtmlElementEventHandler(OnDocumentMouseMove);
+
+			base.OnHandleDestroyed(e);
+		}
+
 		protected IntPtr GetBrowserDropTarget(object sender, IntPtr defDropTarget)
 		{
+			if (!OutlookUtil.IsOutlookInstalled())
+				return IntPtr.Zero;
+
 			if (m_DragDrop == null)
 			{
 				m_DragDrop = new TDLDropTarget(defDropTarget);
@@ -156,7 +178,7 @@ namespace HTMLContentControl
 
 		private void OnTextChangeTimer(object sender, EventArgs e)
         {
-            if (!IsDisposed)
+            if (!IsDisposed && ContainsFocus)
             {
                 var s = InnerHtml ?? string.Empty;
                 var p = m_PrevTextChange ?? string.Empty;
@@ -191,9 +213,6 @@ namespace HTMLContentControl
                 InnerHtml = html;
                 m_PrevTextChange = InnerHtml;
             }
-            // catch (Exception exception)
-            // {
-            // }
             finally
             {
                 m_SettingContent = false;

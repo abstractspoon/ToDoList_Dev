@@ -129,6 +129,7 @@ const LPCTSTR PREF_KEY		= _T("Preferences");
 const LPCTSTR ENDL			= _T("\n");
 const LPCTSTR TDL_EXT		= _T("tdl");
 const LPCTSTR XML_EXT		= _T("xml");
+const LPCTSTR HTMLIMG_EXT	= _T("html_images");
 
 static CEnString TDL_FILEFILTER;
 
@@ -149,7 +150,6 @@ const CString TEMP_TASKVIEW_FILEPATH	= FileMisc::GetTempFilePath(_T("tdl.view"),
 enum
 {
 	WM_POSTONCREATE				= (WM_APP+1),
-	WM_WEBUPDATEWIZARD,
 	WM_UPDATEUDTSINTOOLBAR,
 	WM_APPRESTOREFOCUS,
 	WM_DOINITIALDUETASKNOTIFY,
@@ -260,6 +260,9 @@ CToDoListWnd::~CToDoListWnd()
 	FileMisc::DeleteFile(TEMP_CLIPBOARD_FILEPATH, TRUE);
 	FileMisc::DeleteFile(TEMP_PRINT_FILEPATH, TRUE);
 	FileMisc::DeleteFile(TEMP_TASKVIEW_FILEPATH, TRUE);
+
+	CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, TEMP_PRINT_FILEPATH);
+	FileMisc::DeleteFolder(sHtmlImgFolder, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 }
 
 BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
@@ -343,8 +346,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_INSERTDATETIME, OnEditInsertdatetime)
 	ON_COMMAND(ID_EDIT_INSERTTIME, OnEditInserttime)
 	ON_COMMAND(ID_EDIT_OFFSETDATES, OnEditOffsetDates)
-	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetDatesForwards)
-	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetDatesBackwards)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_FORWARDSBY_ONEDAY, ID_OFFSETDATES_FORWARDSBY_ONEYEAR, OnEditOffsetStartDueDatesForwards)
+	ON_COMMAND_RANGE(ID_OFFSETDATES_BACKWARDSBY_ONEDAY, ID_OFFSETDATES_BACKWARDSBY_ONEYEAR, OnEditOffsetStartDueDatesBackwards)
 	ON_COMMAND(ID_EDIT_PASTEAFTER, OnEditPasteAfter)
 	ON_COMMAND(ID_EDIT_PASTEASREF, OnEditPasteAsRef)
 	ON_COMMAND(ID_EDIT_PASTESUB, OnEditPasteSub)
@@ -499,6 +502,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnToDoCtrlGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnToDoCtrlIsTaskDone)
 	ON_REGISTERED_MESSAGE(WM_TDCM_SELECTTASK, OnToDoCtrlSelectTask)
+	ON_REGISTERED_MESSAGE(WM_TDCM_COMPLETETASK, OnReminderCompleteTask)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnToDoCtrlGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_IMPORTFROMDROP, OnToDoCtrlImportFromDrop)
 	ON_REGISTERED_MESSAGE(WM_TDCM_CANIMPORTFROMDROP, OnToDoCtrlCanImportFromDrop)
@@ -515,8 +519,8 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDL_REFRESHPREFS, OnToDoListRefreshPrefs)
 	ON_REGISTERED_MESSAGE(WM_TDL_RESTORE, OnToDoListRestore)
 	ON_REGISTERED_MESSAGE(WM_TDL_SHOWWINDOW, OnToDoListShowWindow)
-	ON_REGISTERED_MESSAGE(WM_TDCN_DISMISSREMINDER, OnNotifyReminderModified)
-	ON_REGISTERED_MESSAGE(WM_TDCN_SNOOZEREMINDER, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERDISMISS, OnNotifyReminderModified)
+	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERSNOOZE, OnNotifyReminderModified)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropFile)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropFile)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STARTTRACKING, OnTimeTrackerStartTracking)
@@ -682,6 +686,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_WM_SYSCOLORCHANGE()
 	ON_WM_SYSCOMMAND()
 	ON_WM_TIMER()
+	ON_WM_WINDOWPOSCHANGING()
 
 	ON_COMMAND(ID_TOOLS_ADDTOSOURCECONTROL, OnToolsAddtoSourceControl)
 	ON_UPDATE_COMMAND_UI(ID_TOOLS_ADDTOSOURCECONTROL, OnUpdateToolsAddtoSourceControl)
@@ -1203,8 +1208,16 @@ void CToDoListWnd::PostAppRestoreFocus(HWND hwndFocus)
 	if (!hwndFocus)
 		hwndFocus = m_hwndLastFocus;
 
-	if (hwndFocus && (hwndFocus != *this))
-		PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)hwndFocus);
+	if (!hwndFocus || (hwndFocus == *this))
+		return;
+	
+	if (CDialogHelper::IsChildOrSame(m_dlgReminders, hwndFocus))
+		return;
+
+	if (CDialogHelper::IsChildOrSame(m_dlgTimeTracker, hwndFocus))
+		return;
+
+	PostMessage(WM_APPRESTOREFOCUS, 0L, (LPARAM)hwndFocus);
 }
 
 LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
@@ -1624,7 +1637,7 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 					{
 						bHandle = !ComboBox_GetDroppedState(::GetParent(pMsg->hwnd));
 					}
-					else if (GetTDCCount() && GetToDoCtrl().IsTaskLabelEditing())
+					else if (GetTDCCount() && GetToDoCtrl().PreTranslateMessage(pMsg))
 					{
 						bHandle = FALSE;
 					}
@@ -2100,17 +2113,9 @@ TDCEXPORTTASKLIST* CToDoListWnd::PrepareNewExportAfterSave(int nTDC, const CTask
 
 		// set the html image folder to be the output path with
 		// an different extension
-		CString sImgFolder;
+		CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, pExport->sExportPath);
 
-		if (bHtmlComments)
-		{
-			sImgFolder = pExport->sExportPath;
-		
-			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
-		}
-
-		GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, pExport->tasks, sImgFolder); 
+		GetTasks(tdc, bHtmlComments, sHtmlImgFolder, bTransform, nWhatTasks, filter, pExport->tasks); 
 	}
 	else
 	{
@@ -2373,7 +2378,7 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	BOOL bShowFullTaskPathInSticky = FALSE;
 	
 	if (userPrefs.GetUseStickies(sStickiesPath, bShowFullTaskPathInSticky))
-		VERIFY(m_dlgReminders.UseStickies(TRUE, sStickiesPath, bShowFullTaskPathInSticky));
+		VERIFY(m_dlgReminders.UseStickies(TRUE, sStickiesPath, bShowFullTaskPathInSticky, TRUE));
 	
 	RestoreVisibility();
 	
@@ -3974,6 +3979,20 @@ BOOL CToDoListWnd::VerifyToDoCtrlPassword(int nIndex) const
 	return m_mgrToDoCtrls.VerifyPassword(nIndex);
 }
 
+void CToDoListWnd::OnWindowPosChanging(WINDOWPOS* lpwndpos)
+{
+	// Keep the reminder window in from of the app
+	if (m_dlgReminders.GetSafeHwnd() && 
+		m_dlgReminders.IsWindowVisible() &&
+		!m_dlgReminders.IsIconic() &&
+		!Gui::IsObscured(m_dlgReminders))
+	{
+		lpwndpos->hwndInsertAfter = m_dlgReminders;
+	}
+
+	CFrameWnd::OnWindowPosChanging(lpwndpos);
+}
+
 void CToDoListWnd::Show(BOOL bAllowToggle)
 {
 	if (GetSelToDoCtrl() == -1)
@@ -5077,7 +5096,7 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 		BOOL bShowFullTaskPathInSticky = FALSE;
 		BOOL bUseStickies = newPrefs.GetUseStickies(sStickiesPath, bShowFullTaskPathInSticky);
 
-		VERIFY(m_dlgReminders.UseStickies(bUseStickies, sStickiesPath, bShowFullTaskPathInSticky));
+		VERIFY(m_dlgReminders.UseStickies(bUseStickies, sStickiesPath, bShowFullTaskPathInSticky, FALSE));
 
 		// Content controls
 		m_mgrContent.LoadPreferences(CPreferences(), _T("ContentControls"), TRUE);
@@ -5597,15 +5616,13 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	if (startup.HasFlag(TLD_SAVEINTERMEDIATE))
 	{
 		CString sOutputFile(GetIntermediateTaskListPath(GetToDoCtrl().GetFilePath()));
-
-		CString sHtmlImgFolder(sOutputFile);
-		FileMisc::ReplaceExtension(sHtmlImgFolder, _T("html_images"));
+		CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, sOutputFile);
 
 		CTaskFile tasks;
 
 		if (startup.GetSaveIntermediateAll())
 		{
-			GetTasks(tdc, TRUE, TRUE, TSDT_ALL, TDCGETTASKS(), tasks, sHtmlImgFolder);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, TRUE, TSDT_ALL, TDCGETTASKS(), tasks);
 		}
 		else // use last state of transform dialog to determine what tasks to output
 		{
@@ -5614,7 +5631,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 									   _T(""),
 									   tdc.GetCustomAttributeDefs());
 
-			GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, TRUE, dialog.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(_T(""), dialog.GetDate());
 		}
@@ -6435,9 +6452,7 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	DOPROGRESS(bPreview ? IDS_PPREVIEWPROGRESS : IDS_PRINTPROGRESS);
 	
 	// always use the same file
-	CString sTempFile = TEMP_PRINT_FILEPATH;
-
-	if (!CreateTempPrintFile(dialog, sTempFile))
+	if (!CreateTempPrintFile(dialog))
 	{
 		// Cancelled or error handled
 		return;
@@ -6449,25 +6464,28 @@ void CToDoListWnd::DoPrint(BOOL bPreview)
 	if (m_IE.GetSafeHwnd() || m_IE.Create(NULL, WS_CHILD | WS_VISIBLE, rHidden, this, (UINT)IDC_STATIC))
 	{
 		if (bPreview)
-			m_IE.PrintPreview(sTempFile, TRUE); // TRUE = Print background colours
+			m_IE.PrintPreview(TEMP_PRINT_FILEPATH, TRUE); // TRUE = Print background colours
 		else
-			m_IE.Print(sTempFile, TRUE); // TRUE = Print background colours
+			m_IE.Print(TEMP_PRINT_FILEPATH, TRUE); // TRUE = Print background colours
 	}
 	else // try sending to browser
 	{
-		DWORD dwRes = FileMisc::Run(*this, sTempFile, NULL, SW_HIDE, NULL, bPreview ? _T("print") : NULL);
+		DWORD dwRes = FileMisc::Run(*this, TEMP_PRINT_FILEPATH, NULL, SW_HIDE, NULL, bPreview ? _T("print") : NULL);
 								
 		if (dwRes < 32)
 			CMessageBox::AfxShow(IDS_PRINTFAILED_TITLE, IDS_PRINTFAILED, MB_OK);
 	}
 }
 
-BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString& sFilePath)
+BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg)
 {
 	CWaitCursor cursor;
 
 	TDLPD_STYLE nStyle = dlg.GetExportStyle();
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, TEMP_PRINT_FILEPATH);
+
 
 	switch (nStyle)
 	{
@@ -6505,7 +6523,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 				sHtmlOutput += sImage;
 				sHtmlOutput += _T("</body>\n</html>\n");
 
-				return FileMisc::SaveFile(sFilePath, sHtmlOutput, SFEF_UTF8WITHOUTBOM);
+				return FileMisc::SaveFile(TEMP_PRINT_FILEPATH, sHtmlOutput, SFEF_UTF8WITHOUTBOM);
 			}
 			else
 			{
@@ -6521,7 +6539,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			VERIFY(dlg.GetStylesheet(sStylesheet));
 
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, TRUE, dlg.GetTaskSelection(), tasks, NULL);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, TRUE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -6529,7 +6547,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks);
 
 			// export
-			return tasks.TransformToFile(sStylesheet, sFilePath);
+			return tasks.TransformToFile(sStylesheet, TEMP_PRINT_FILEPATH);
 		}
 		break;
 
@@ -6539,7 +6557,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			VERIFY(dlg.GetOtherExporterTypeID(sExporterTypeID));
 
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, FALSE, dlg.GetTaskSelection(), tasks, NULL);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, FALSE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -6547,7 +6565,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			LogIntermediateTaskList(tasks);
 
 			// export
-			return (m_mgrImportExport.ExportTaskList(tasks, sFilePath, sExporterTypeID, IIEF_PRINTING) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(tasks, TEMP_PRINT_FILEPATH, sExporterTypeID, IIEF_PRINTING) == IIER_SUCCESS);
 		}
 		break;
 
@@ -6557,7 +6575,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 		// simple web page
 		{
 			CTaskFile tasks;
-			GetTasks(tdc, TRUE, FALSE, dlg.GetTaskSelection(), tasks, NULL);
+			GetTasks(tdc, TRUE, sHtmlImgFolder, FALSE, dlg.GetTaskSelection(), tasks);
 
 			tasks.SetReportDetails(dlg.GetTitle(), dlg.GetDate());
 
@@ -6567,7 +6585,7 @@ BOOL CToDoListWnd::CreateTempPrintFile(const CTDLPrintDialog& dlg, const CString
 			// export
 			DWORD dwFlags = (IIEF_PRINTING | TDC::MapPrintToExportStyle(nStyle));
 
-			return (m_mgrImportExport.ExportTaskList(tasks, sFilePath, TDCET_HTML, dwFlags) == IIER_SUCCESS);
+			return (m_mgrImportExport.ExportTaskList(tasks, TEMP_PRINT_FILEPATH, TDCET_HTML, dwFlags) == IIER_SUCCESS);
 		}
 		break;
 	}
@@ -10004,19 +10022,11 @@ void CToDoListWnd::OnExport()
 		tdc.SaveAllTaskViewPreferences();
 
 		// set the html image folder to be the output path with an different extension
-		CString sImgFolder;
-		
-		if (bHtmlComments)
-		{
-			sImgFolder = sExportPath;
-
-			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
-		}
+		CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sExportPath);
 		
 		// Note: don't need to verify password if encrypted tasklist is active
 		CTaskFile tasks;
-		GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
+		GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, dialog.GetTaskSelection(), tasks);
 
 		// add report details
 		tasks.SetReportDetails(dialog.GetExportTitle(), dialog.GetExportDate());
@@ -10050,15 +10060,9 @@ void CToDoListWnd::OnExport()
 				CTaskFile& tasks = taskFiles.GetTaskFile(nCtrl);
 				
 				// set the html image folder to be the output path with an different extension
-				CString sImgFolder;
+				CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sExportPath);
 				
-				if (bHtmlComments)
-				{
-					sImgFolder = sExportPath;
-					FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-				}
-				
-				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
+				GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, dialog.GetTaskSelection(), tasks);
 				
 				// add report details
 				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
@@ -10134,16 +10138,10 @@ void CToDoListWnd::OnExport()
 				}
 				
 				// set the html image folder to be the output path with an different extension
-				CString sImgFolder;
-				
-				if (bHtmlComments)
-				{
-					sImgFolder = sFilePath;
-					FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-				}
+				CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sFilePath);
 				
 				CTaskFile tasks;
-				GetTasks(tdc, bHtmlComments, FALSE, dialog.GetTaskSelection(), tasks, sImgFolder);
+				GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, dialog.GetTaskSelection(), tasks);
 				
 				// add report details
 				tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nCtrl), dialog.GetExportDate());
@@ -10165,9 +10163,9 @@ void CToDoListWnd::OnExport()
 	}
 }
 
-int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-						  TSD_TASKS nWhatTasks, TDCGETTASKS& filter,  
-						  CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
+int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, 
+						   const CString& sHtmlImageDir, BOOL bTransform, 
+						   TSD_TASKS nWhatTasks, TDCGETTASKS& filter, CTaskFile& tasks) const
 {
 	// preferences
 	const CPreferencesDlg& userPrefs = Prefs();
@@ -10193,11 +10191,11 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 			filter.mapAttribs.Add(TDCA_HTMLCOMMENTS);
 		}
 
-		tasks.SetHtmlImageFolder(szHtmlImageDir);
+		ASSERT(!sHtmlImageDir.IsEmpty());
+		tasks.SetHtmlImageFolder(sHtmlImageDir);
 
 		// And delete all existing images in that folder
-		if (!Misc::IsEmpty(szHtmlImageDir))
-			FileMisc::DeleteFolderContents(szHtmlImageDir, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
+		FileMisc::DeleteFolderContents(sHtmlImageDir, FMDF_SUBFOLDERS | FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
 	}
 
 	// get the tasks
@@ -10239,14 +10237,15 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 	
 	// delete the HTML image folder if it is empty
 	// this will fail if it is not empty.
-	if (bHtmlComments && !Misc::IsEmpty(szHtmlImageDir))
-		RemoveDirectory(szHtmlImageDir);
+	if (bHtmlComments && !sHtmlImageDir)
+		::RemoveDirectory(sHtmlImageDir);
 	
 	return tasks.GetTaskCount();
 }
 
-int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTransform, 
-							const CTaskSelectionDlg& taskSel, CTaskFile& tasks, LPCTSTR szHtmlImageDir) const
+int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, 
+						   const CString& sHtmlImageDir, BOOL bTransform,
+						   const CTaskSelectionDlg& taskSel, CTaskFile& tasks) const
 {
 	TDCGETTASKS filter(TDCGT_ALL);
 	taskSel.GetSelectedAttributes(tdc, filter.mapAttribs);
@@ -10279,7 +10278,7 @@ int CToDoListWnd::GetTasks(CFilteredToDoCtrl& tdc, BOOL bHtmlComments, BOOL bTra
 		break;
 	}
 	
-	return GetTasks(tdc, bHtmlComments, bTransform, nWhatTasks, filter, tasks, szHtmlImageDir);
+	return GetTasks(tdc, bHtmlComments, sHtmlImageDir, bTransform, nWhatTasks, filter, tasks);
 }
 
 void CToDoListWnd::OnUpdateExport(CCmdUI* pCmdUI) 
@@ -10350,11 +10349,10 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 
 	// set the html image folder to be the same as the 
 	// output path without the extension
-	CString sHtmlImgFolder(sOutputPath);
-	FileMisc::ReplaceExtension(sHtmlImgFolder, _T("html_images"));
+	CString sHtmlImgFolder = GetHtmlImageFolder(TRUE, sOutputPath);
 	
 	CTaskFile tasks;
-	GetTasks(tdc, TRUE, TRUE, dialog.GetTaskSelection(), tasks, sHtmlImgFolder);
+	GetTasks(tdc, TRUE, sHtmlImgFolder, TRUE, dialog.GetTaskSelection(), tasks);
 
 	// add report details
 	tasks.SetReportDetails(m_mgrToDoCtrls.GetFriendlyProjectName(nSelTDC), dialog.GetDate());
@@ -10368,6 +10366,21 @@ void CToDoListWnd::OnToolsTransformactivetasklist()
 		if (Prefs().GetPreviewExport())
 			FileMisc::Run(*this, sOutputPath);
 	}
+}
+
+CString CToDoListWnd::GetHtmlImageFolder(BOOL bHtmlComments, const CString& sTasklistPath)
+{
+	CString sHtmlImgFolder;
+
+	if (bHtmlComments)
+	{
+		ASSERT(!sTasklistPath.IsEmpty());
+
+		sHtmlImgFolder = sTasklistPath;
+		FileMisc::ReplaceExtension(sHtmlImgFolder, HTMLIMG_EXT);
+	}
+
+	return sHtmlImgFolder;
 }
 
 BOOL CToDoListWnd::LogIntermediateTaskList(CTaskFile& tasks)
@@ -11434,13 +11447,20 @@ void CToDoListWnd::OnActivate(UINT nState, CWnd* pWndOther, BOOL bMinimized)
 {
 	CFrameWnd::OnActivate(nState, pWndOther, bMinimized);
 
-	// If we are being activated as a consequence of closing
-	// the time tracker or the reminder window then we set the 
-	// focus back to the active tasklist
-	if ((nState == WA_ACTIVE) && (GetTDCCount() > 0) &&
-		((pWndOther == &m_dlgReminders) || (pWndOther == &m_dlgTimeTracker)))
+	if (GetTDCCount() == 0)
+		return;
+
+	switch (nState)
 	{
-		GetToDoCtrl().SetFocusToTasks();
+	case WA_ACTIVE:
+		// If we are being activated as a consequence of closing
+		// the time tracker or the reminder window then we set the 
+		// focus back to the active tasklist
+		if ((pWndOther == &m_dlgReminders) || (pWndOther == &m_dlgTimeTracker))
+		{
+			GetToDoCtrl().SetFocusToTasks();
+		}
+		break;
 	}
 }
 
@@ -11913,11 +11933,24 @@ void CToDoListWnd::OnEditOffsetDates()
 		}
 		
 		if (dwWhat & ODD_DONEDATE)
+		{
 			tdc.OffsetSelectedTaskDate(TDCD_DONE, nAmount, nUnits, bSubtasks);
+		}
+		
+		if (dwWhat & ODD_REMINDER)
+		{
+			CDWordArray aTaskIDs;
+			DWORD dwUnused;
+
+			int nTask = tdc.GetSelectedTaskIDs(aTaskIDs, dwUnused, bSubtasks);
+
+			while (nTask--)
+				m_dlgReminders.OffsetReminder(aTaskIDs[nTask], nAmount, nUnits, &tdc, bSubtasks);
+		}
 	}
 }
 
-void CToDoListWnd::OnEditOffsetDatesForwards(UINT nCmdID)
+void CToDoListWnd::OnEditOffsetStartDueDatesForwards(UINT nCmdID)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
 
@@ -11937,7 +11970,7 @@ void CToDoListWnd::OnEditOffsetDatesForwards(UINT nCmdID)
 	GetToDoCtrl().OffsetSelectedTaskStartAndDueDates(1, nUnits, FALSE);
 }
 
-void CToDoListWnd::OnEditOffsetDatesBackwards(UINT nCmdID)
+void CToDoListWnd::OnEditOffsetStartDueDatesBackwards(UINT nCmdID)
 {
 	TDC_UNITS nUnits = TDCU_NULL;
 
@@ -12249,6 +12282,22 @@ LRESULT CToDoListWnd::OnToDoCtrlSelectTask(WPARAM wParam, LPARAM lParam)
 						dwTaskID);
 
 	return FileMisc::Run(*this, sCommandline);
+}
+
+LRESULT CToDoListWnd::OnReminderCompleteTask(WPARAM wParam, LPARAM lParam)
+{
+	DWORD dwTaskID = wParam;
+	CString sPath((LPCTSTR)lParam);
+
+	// We should only receive this from CToDoCtrlReminders so there should be a path 
+	ASSERT(!sPath.IsEmpty());
+
+	if (ValidateTaskLinkFilePath(sPath) && DoTaskLink(sPath, dwTaskID, FALSE))
+	{
+		GetToDoCtrl().SetSelectedTaskDone();
+	}
+
+	return 0L;
 }
 
 LRESULT CToDoListWnd::OnToDoCtrlGetLinkTooltip(WPARAM wParam, LPARAM lParam)
@@ -12728,26 +12777,18 @@ void CToDoListWnd::DoSendTasks(BOOL bSelected)
 		CString sExt = Misc::ToLower(m_mgrImportExport.GetExporterFileExtension(nFormat, TRUE));
 		CString sFilePath = FileMisc::GetTempFilePath(_T("tdl.email"), sExt);
 
-		BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nFormat);
-		CString sImgFolder;
-
-		if (bHtmlComments)
-		{
-			sImgFolder = sFilePath;
-	
-			FileMisc::ReplaceExtension(sImgFolder, _T("html_images"));
-			FileMisc::DeleteFolderContents(sImgFolder, FMDF_ALLOWDELETEONREBOOT | FMDF_HIDDENREADONLY);
-		}
-
 		// get tasks
+		BOOL bHtmlComments = m_mgrImportExport.ExporterSupportsHtmlComments(nFormat);
+		CString sHtmlImgFolder = GetHtmlImageFolder(bHtmlComments, sFilePath);
+
 		const CTaskSelectionDlg& taskSel = dialog.GetTaskSelection();
 
 		CTaskFile tasks;
-		GetTasks(tdc, bHtmlComments, FALSE, taskSel, tasks, sImgFolder);
-
-		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
+		GetTasks(tdc, bHtmlComments, sHtmlImgFolder, FALSE, taskSel, tasks);
 
 		// Export them
+		DWORD dwFlags = TDC::MapPrintToExportStyle(dialog.GetHtmlStyle());
+
 		if (m_mgrImportExport.ExportTaskList(tasks, sFilePath, nFormat, dwFlags) != IIER_SUCCESS)
 		{
 			// Display error message

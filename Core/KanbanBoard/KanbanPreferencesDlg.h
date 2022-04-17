@@ -40,7 +40,7 @@ public:
 	BOOL GetAlwaysShowBacklog() const { return m_bAlwaysShowBacklog; }
 	BOOL GetShowTaskColorAsBar() const { return m_bShowTaskColorAsBar; }
 	BOOL GetColorBarByPriority() const { return m_bColorBarByPriority; }
-	BOOL GetIndentSubtasks() const { return m_bIndentSubtasks; }
+	BOOL GetIndentSubtasks() const { return m_bSortSubtaskBelowParent && m_bIndentSubtasks; }
 	BOOL GetHideEmptyAttributes() const { return m_bHideEmptyAttributeValues; }
 	TDC_ATTRIBUTE GetFixedAttributeToTrack(CString& sCustomID) const;
 	int GetDisplayAttributes(CKanbanAttributeArray& aAttrib) const;
@@ -101,7 +101,7 @@ protected:
 	afx_msg void OnShowColorAsBar();
 	afx_msg void OnPopulateFixedColumns();
 	afx_msg void OnUpdatePopulateColumns(CCmdUI* pCmdUI);
-	afx_msg void OnSelchangeCustomAttribute();
+	afx_msg void OnSortSubtasksBelowParents();
 
 	DECLARE_MESSAGE_MAP()
 

@@ -618,33 +618,28 @@ Drawing::Color UIExtension::SelectionRect::GetColor(Style style)
 
 Windows::Forms::Cursor^ UIExtension::AppCursor(UIExtension::AppCursorType cursorType)
 {
-	String^ appFolder = Path::GetDirectoryName(Assembly::GetExecutingAssembly()->Location);
-	String^ cursorFolder = Path::Combine(appFolder, "Resources\\Cursors");
-	String^ cursorFile = nullptr;
+	String^ cursorName = nullptr;
 
 	switch (cursorType)
 	{
 	case UIExtension::AppCursorType::LockedTask:
-		cursorFile = Path::Combine(cursorFolder, "Locked.cur");
+		cursorName = gcnew String("locked");
 		break;
 
 	case UIExtension::AppCursorType::NoDrag:
-		cursorFile = Path::Combine(cursorFolder, "NoDrag.cur");
+		cursorName = gcnew String("nodrag");
 		break;
 	}
 
-	if ((cursorFile != nullptr) && File::Exists(cursorFile))
+	if (cursorName != nullptr)
 	{
-		HCURSOR hCursor = (HCURSOR)::LoadImage(NULL, 
-											MS(cursorFile), 
-											IMAGE_CURSOR, 
-											GetSystemMetrics(SM_CXCURSOR), 
-											GetSystemMetrics(SM_CYCURSOR), 
-											LR_LOADFROMFILE | LR_MONOCHROME | LR_SHARED);
+		String^ subFolder = gcnew String("Resources\\Cursors");
+		HCURSOR hCursor = GraphicsMisc::LoadAppCursor(MS(cursorName), MS(subFolder));
 		
-		return gcnew Cursor(static_cast<IntPtr>(hCursor));
+		if (hCursor != NULL)
+	 		return gcnew Cursor(static_cast<IntPtr>(hCursor));
 	}
-	
+
 	return nullptr;
 }
 

@@ -331,7 +331,7 @@ LRESULT CTDLTaskListCtrl::OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 
 					// this call will update rFullWidth to full client width
 					CRect rFullWidth(rRow);
-					GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, m_lcColumns);
+					GraphicsMisc::FillItemRect(pDC, rFullWidth, crBack, hwndList);
 
 					DrawGridlines(pDC, rFullWidth, FALSE, TRUE, FALSE);
 

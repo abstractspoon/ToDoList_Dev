@@ -952,8 +952,8 @@ CString CTabCtrlEx::GetItemText(int nTab) const
 	TCITEM tci = { TCIF_TEXT, 0 };
 
 	CString sText;
-	tci.pszText = sText.GetBuffer(128);
-	tci.cchTextMax = 128;
+	tci.pszText = sText.GetBuffer(256);
+	tci.cchTextMax = 256;
 
 	GetItem(nTab, &tci);
 	sText.ReleaseBuffer();
@@ -963,8 +963,7 @@ CString CTabCtrlEx::GetItemText(int nTab) const
 
 BOOL CTabCtrlEx::SetItemImage(int nTab, int nImage)
 {
-	TCITEM tci;
-	tci.mask = TCIF_IMAGE;
+	TCITEM tci = { TCIF_IMAGE, 0 };
 	tci.iImage = nImage;
 	
 	return SetItem(nTab, &tci);

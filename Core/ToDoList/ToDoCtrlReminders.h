@@ -30,7 +30,7 @@ public:
 	CToDoCtrlReminders();
 
 	BOOL Initialize(CWnd* pNotify);
-	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath);
+	BOOL UseStickies(BOOL bEnable, LPCTSTR szStickiesPath, BOOL bShowFullTaskPath, BOOL bAutoStart);
 
 	void ShowWindow() { CTDLShowReminderDlg::ShowWindow(IsIconic() ? SW_RESTORE : SW_SHOW); }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
@@ -46,11 +46,9 @@ public:
 	BOOL ToDoCtrlHasReminders(const CFilteredToDoCtrl* pTDC);
 	BOOL ToDoCtrlHasReminders(const CString& sFilePath);
 	BOOL UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib);
-
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
-	BOOL IsEmpty() const { return (GetListReminderCount() == 0); }
-
 	void CheckReminders();
+	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bIncludeSubtasks);
 
 // Attributes
 protected:
@@ -74,8 +72,9 @@ public:
 	virtual ~CToDoCtrlReminders();
 
 	virtual void DoSnoozeReminder(const TDCREMINDER& rem);
-	virtual void DoDismissReminder(const TDCREMINDER& rem, BOOL bGotoTask);
+	virtual void DoDismissReminder(const TDCREMINDER& rem);
 	virtual void DoGotoTask(const TDCREMINDER& rem);
+	virtual void DoCompleteTask(const TDCREMINDER& rem);
 	virtual void HideWindow();
 
 	// Generated message map functions
@@ -107,6 +106,8 @@ protected:
 	BOOL BuildStickiesRTFContent(const TDCREMINDER& rem, CString& sContent);
 	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
+
+	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits);
 };
 
 /////////////////////////////////////////////////////////////////////////////
