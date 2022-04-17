@@ -31,31 +31,17 @@ BOOL CHTIMap::HasItem(DWORD dwItemID) const
 	return (GetItem(dwItemID) != NULL);
 }
 
-int CHTIMap::BuildMap(const CTreeCtrl& tree, BOOL bVisibleChildrenOnly)
+BOOL CHTIMap::HasItems(const CDWordArray& aItemIDs) const
 {
-#ifdef _DEBUG
-	DWORD dwTick = GetTickCount();
-#endif
+	int nID = aItemIDs.GetSize();
 
-	RemoveAll();
-
-	if (tree.GetCount())
+	while (nID--)
 	{
-		// traverse top-level items
-		HTREEITEM hti = tree.GetChildItem(NULL);
-
-		while (hti)
-		{
-			AddItem(tree, hti, bVisibleChildrenOnly);
-			hti = tree.GetNextItem(hti, TVGN_NEXT);
-		}
+		if (GetItem(aItemIDs[nID]) == NULL)
+			break;
 	}
 
-#ifdef _DEBUG
-	TRACE(_T("CHTIMap::BuildMap took %ld ms\n"), GetTickCount() - dwTick);
-#endif
-
-	return GetCount();
+	return (nID == -1);
 }
 
 void CHTIMap::AddItem(const CTreeCtrl& tree, HTREEITEM hti, BOOL bVisibleChildrenOnly)

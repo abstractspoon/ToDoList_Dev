@@ -130,12 +130,12 @@ public:
 	int GetUniqueParents(CHTIList& lstParents) const;
 
 	// history
-	BOOL NextSelection(BOOL bRedraw = TRUE);
+	BOOL NextSelection(const CHTIMap& mapItems, BOOL bRedraw = TRUE);
 	BOOL HasNextSelection() const;
-	int GetNextSelectedIDs(CDWordArray& aIDs) const;
-	BOOL PrevSelection(BOOL bRedraw = TRUE);
+	int GetNextSelectionIDs(CDWordArray& aIDs) const;
+	BOOL PrevSelection(const CHTIMap& mapItems, BOOL bRedraw = TRUE);
 	BOOL HasPrevSelection() const;
-	int GetPrevSelectedIDs(CDWordArray& aIDs) const;
+	int GetPrevSelectionIDs(CDWordArray& aIDs) const;
     void ClearHistory();
     void RemoveItemFromHistory(HTREEITEM hti);
 
@@ -182,10 +182,10 @@ protected:
 	static int SortProc(const void* item1, const void* item2);
 
 	int Convert(const CHTIList& lstFrom, CDWordArray& aTo) const;
-	int Convert(const CDWordArray& aFrom, CHTIList& lstTo) const;
+	int Convert(const CDWordArray& aFrom, CHTIList& lstTo, const CHTIMap& mapItems) const;
 
-	int FindPrevValidSelection() const;
-	int FindNextValidSelection() const;
+	int FindPrevValidSelection(const CHTIMap& mapItems) const;
+	int FindNextValidSelection(const CHTIMap& mapItems) const;
 };
 
 #endif // !defined(AFX_TREESELECTIONHELPER_H__098294B4_8B41_4369_8522_FE1637BA7EA1__INCLUDED_)

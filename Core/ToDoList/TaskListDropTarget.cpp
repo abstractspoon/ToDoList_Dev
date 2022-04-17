@@ -33,13 +33,13 @@ static const CPoint NULL_POINT(-1000, -1000);
 
 //////////////////////////////////////////////////////////////////////
 
-TLDT_DATA::TLDT_DATA(COleDataObject* pObj, CPoint pt) 
+TLDT_DATA::TLDT_DATA() 
 	: 
 	dwTaskID(0), 
-	pObject(pObj), 
+	pObject(NULL), 
 	pFilePaths(NULL), 
 	pOutlookSelection(NULL),
-	ptClient(pt),
+	ptClient(NULL_POINT),
 	bImportTasks(FALSE)
 {
 }
@@ -122,9 +122,6 @@ DROPEFFECT CTaskListDropTarget::OnDragEnter(CWnd* pWnd, COleDataObject* pObject,
 {
 	ResetDrag(pWnd);
 
-	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
-		m_mapTVItems.BuildMap((CTreeCtrl&)*pWnd);
-
 	return OnDragOver(pWnd, pObject, dwKeyState, point);
 }
 
@@ -146,76 +143,73 @@ void CTaskListDropTarget::ResetDrag(CWnd* pWnd)
 	
 	m_dwTVHoverStart = 0;
 	m_dwPrevItem = 0;
-	m_mapTVItems.RemoveAll();
 }
 
-CTaskListDropTarget::TLDT_HITTEST CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, DWORD& dwHitTaskID, BOOL& bImport)
+BOOL CTaskListDropTarget::DoHitTest(CWnd* pWnd, CPoint point, TLDT_HIT& hitRes) const
 {
-	dwHitTaskID = 0;
-	bImport = FALSE;
+	hitRes.Clear();
 	
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
-		TVHITTESTINFO tvhti = { { point.x, point.y }, 0, 0 };
-		HTREEITEM htiHit = TreeView_HitTest(pWnd->GetSafeHwnd(), &tvhti);
+		hitRes.nResult = TLDTHT_TASKVIEW;
 
-		if (htiHit != NULL)
+		TVHITTESTINFO tvhti = { { point.x, point.y }, 0, 0 };
+		hitRes.htItem = TreeView_HitTest(pWnd->GetSafeHwnd(), &tvhti);
+
+		if (hitRes.htItem != NULL)
 		{
 			TVITEM item = { 0 };
-			item.hItem = htiHit;
+			item.hItem = hitRes.htItem;
 			item.mask = TVIF_PARAM;
 			VERIFY(::SendMessage(m_hWnd, TVM_GETITEM, 0, (LPARAM)&item));
 
-			dwHitTaskID = item.lParam;
-			bImport = Misc::ModKeysArePressed(MKS_ALT);
+			hitRes.dwTaskID = item.lParam;
+			hitRes.bImport = Misc::ModKeysArePressed(MKS_ALT);
 		}
 		else
 		{
-			bImport = TRUE;
+			hitRes.bImport = TRUE;
 		}
-
-		return TLDTHT_TASKVIEW;
 	}
-
-	// else
-	if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
+	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
 	{
-		LVHITTESTINFO lvhti = { { point.x, point.y }, 0 };
-		int nHit = ListView_HitTest(pWnd->GetSafeHwnd(), &lvhti);
+		hitRes.nResult = TLDTHT_TASKVIEW;
 
-		if (nHit != -1)
+		LVHITTESTINFO lvhti = { { point.x, point.y }, 0 };
+		hitRes.nItem = ListView_HitTest(pWnd->GetSafeHwnd(), &lvhti);
+
+		if (hitRes.nItem != -1)
 		{
 			LVITEM lvi = { 0 };
-			lvi.iItem = nHit;
+			lvi.iItem = hitRes.nItem;
 			lvi.mask = LVIF_PARAM;
 			VERIFY(::SendMessage(m_hWnd, LVM_GETITEM, 0, (LPARAM)&lvi));
 
-			dwHitTaskID = lvi.lParam;
-			bImport = Misc::ModKeysArePressed(MKS_ALT);
+			hitRes.dwTaskID = lvi.lParam;
+			hitRes.bImport = Misc::ModKeysArePressed(MKS_ALT);
 		}
 		else
 		{
-			bImport = TRUE;
+			hitRes.bImport = TRUE;
 		}
-
-		return TLDTHT_TASKVIEW;
 	}
-
-	// else 
-	if (IS_WND_TYPE(pWnd, CFileEdit, WC_COMBOBOX))
+	else if (IS_WND_TYPE(pWnd, CFileEdit, WC_COMBOBOX))
 	{
 		if (pWnd->GetStyle() & CBS_DROPDOWN) // must be editable
-			return TLDTHT_FILEEDIT;
+		{
+			hitRes.nResult = TLDTHT_FILEEDIT;
+		}
 	}
 	else if (pWnd->IsKindOf(RUNTIME_CLASS(CDialog)) || pWnd->IsKindOf(RUNTIME_CLASS(CFrameWnd)))
 	{
 		// allow dropping only on titlebar
 		if ((pWnd->GetStyle() & WS_CAPTION) && (point.y < 0))
-			return TLDTHT_CAPTION;
+		{
+			hitRes.nResult = TLDTHT_CAPTION;
+		}
 	}
 
-	// all else
-	return TLDTHT_NONE;
+	return (hitRes.nResult != TLDTHT_NONE);
 }
 
 DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, DWORD /*dwKeyState*/, CPoint point)
@@ -223,38 +217,34 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 	if (!pWnd->IsWindowEnabled())
 		return DROPEFFECT_NONE;
 
-	DWORD dwHitTaskID = 0;
-	BOOL bImport = FALSE;
-	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, dwHitTaskID, bImport);
-
-	if (nHitTest == TLDTHT_NONE)
+	TLDT_HIT hitRes;
+	
+	if (!DoHitTest(pWnd, point, hitRes))
 		return DROPEFFECT_NONE;
 
 	// update drop hilite
 	if (IS_WND_TYPE(pWnd, CTreeCtrl, WC_TREEVIEW))
 	{
-		HTREEITEM htiHit = m_mapTVItems.GetItem(dwHitTaskID);
-
 		// check hover time and expand parent tasks appropriately
-		if (dwHitTaskID && (m_dwPrevItem == dwHitTaskID))
+		if (hitRes.dwTaskID && (m_dwPrevItem == hitRes.dwTaskID))
 		{
 			ASSERT(m_dwTVHoverStart);
 
 			if ((GetTickCount() - m_dwTVHoverStart) >= 1000)
 			{
-				if (TreeView_GetChild(*pWnd, htiHit))
+				if (TreeView_GetChild(*pWnd, hitRes.htItem))
 				{	
 					CHoldRedraw hr(*pWnd);
-					TreeView_Expand(*pWnd, htiHit, TVE_EXPAND);
+					TreeView_Expand(*pWnd, hitRes.htItem, TVE_EXPAND);
 				}
 			}
 		}
 		else 
 		{
-			TreeView_SelectDropTarget(*pWnd, htiHit);
-			m_dwPrevItem = dwHitTaskID;
+			TreeView_SelectDropTarget(*pWnd, hitRes.htItem);
+			m_dwPrevItem = hitRes.dwTaskID;
 
-			if (dwHitTaskID)
+			if (hitRes.dwTaskID)
 				m_dwTVHoverStart = GetTickCount();
 			else
 				m_dwTVHoverStart = 0;
@@ -262,10 +252,8 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 	}
 	else if (IS_WND_TYPE(pWnd, CListCtrl, WC_LISTVIEW))
 	{
-		int nHit = -1;
-
 		// remove previous highlighting
-		if ((m_dwPrevItem != 0) && (m_dwPrevItem != dwHitTaskID))
+		if ((m_dwPrevItem != 0) && (m_dwPrevItem != hitRes.dwTaskID))
 		{
 			LVFINDINFO lvfi = { 0 };
 			lvfi.flags = LVFI_PARAM;
@@ -276,25 +264,27 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 			ListView_SetItemState(pWnd->GetSafeHwnd(), nPrev, 0, LVIS_DROPHILITED); 
 		}
 
-		if (dwHitTaskID != 0)
+		if (hitRes.dwTaskID != 0)
 		{
 			LVFINDINFO lvfi = { 0 };
 			lvfi.flags = LVFI_PARAM;
-			lvfi.lParam = dwHitTaskID;
+			lvfi.lParam = hitRes.dwTaskID;
 			lvfi.vkDirection = VK_DOWN;
 
 			int nHit = ListView_FindItem(*pWnd, -1, &lvfi);
 			ListView_SetItemState(pWnd->GetSafeHwnd(), nHit, LVIS_DROPHILITED, LVIS_DROPHILITED);
 		}
 
-		m_dwPrevItem = dwHitTaskID;
+		m_dwPrevItem = hitRes.dwTaskID;
 	}
 
 	// Allow parent to veto the drop
-	TLDT_DATA drop(pObject, point);
-
-	drop.dwTaskID = dwHitTaskID;
-	drop.bImportTasks = bImport;
+	TLDT_DATA drop;
+	
+	drop.pObject = pObject;
+	drop.ptClient = point;
+	drop.dwTaskID = hitRes.dwTaskID;
+	drop.bImportTasks = hitRes.bImport;
 
 	CStringArray aFilePaths;
 	BOOL bFromText = FALSE;
@@ -305,7 +295,7 @@ DROPEFFECT CTaskListDropTarget::OnDragOver(CWnd* pWnd, COleDataObject* pObject, 
 	BOOL bCanDrop = m_pOwner->SendMessage(WM_TLDT_CANDROP, (WPARAM)&drop, (LPARAM)pWnd);
 
 	if (bCanDrop)
-		return GetDropEffect(nHitTest, drop, bFromText);
+		return GetDropEffect(hitRes.nResult, drop, bFromText);
 	
 	// else
 	return DROPEFFECT_NONE;
@@ -380,36 +370,45 @@ BOOL CTaskListDropTarget::OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT
 	CString sClass = CWinClasses::GetClass(*pWnd);
 	m_pOwner->SetForegroundWindow();
 
-	TLDT_DATA data(pObject, point);
-	TLDT_HITTEST nHitTest = DoHitTest(pWnd, point, data.dwTaskID, data.bImportTasks);
-
-	if (CMSOutlookHelper::IsOutlookObject(pObject) && InitializeOutlook())
+	TLDT_HIT hitRes;
+	
+	if (DoHitTest(pWnd, point, hitRes))
 	{
-		data.pOutlookSelection = m_pOutlook->GetSelection();
-		data.pObject = NULL;
+		TLDT_DATA data;
 
-		m_pOwner->SendMessage(WM_TLDT_DROP, (WPARAM)&data, (LPARAM)pWnd);
+		data.pObject = pObject;
+		data.ptClient = point;
+		data.dwTaskID = hitRes.dwTaskID;
+		data.bImportTasks = hitRes.bImport;
 
-		// cleanup
-		delete data.pOutlookSelection;
-		delete m_pOutlook;
-		m_pOutlook = NULL;
-	}
-	else if (nHitTest != TLDTHT_NONE)
-	{
-		CStringArray aFilePaths;
-		BOOL bFromText = FALSE;
-		
-		if (GetDropFilePaths(pObject, aFilePaths, bFromText))
+		if (CMSOutlookHelper::IsOutlookObject(pObject) && InitializeOutlook())
 		{
-			data.pFilePaths = &aFilePaths;
+			data.pOutlookSelection = m_pOutlook->GetSelection();
+			data.pObject = NULL;
+
 			m_pOwner->SendMessage(WM_TLDT_DROP, (WPARAM)&data, (LPARAM)pWnd);
 
-			data.pFilePaths = NULL;
+			// cleanup
+			delete data.pOutlookSelection;
+			delete m_pOutlook;
+			m_pOutlook = NULL;
 		}
-		else if (CClipboard::HasText(pObject))
+		else
 		{
-			m_pOwner->SendMessage(WM_TLDT_DROP, (WPARAM)&data, (LPARAM)pWnd);
+			CStringArray aFilePaths;
+			BOOL bFromText = FALSE;
+
+			if (GetDropFilePaths(pObject, aFilePaths, bFromText))
+			{
+				data.pFilePaths = &aFilePaths;
+				m_pOwner->SendMessage(WM_TLDT_DROP, (WPARAM)&data, (LPARAM)pWnd);
+
+				data.pFilePaths = NULL;
+			}
+			else if (CClipboard::HasText(pObject))
+			{
+				m_pOwner->SendMessage(WM_TLDT_DROP, (WPARAM)&data, (LPARAM)pWnd);
+			}
 		}
 	}
 	
