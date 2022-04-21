@@ -5254,6 +5254,9 @@ BOOL CToDoListWnd::HasTaskFile(const CTDCStartupOptions& startup) const
 
 BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup)
 {
+	// Miscellaneous
+	m_sTitlePrefix = startup.GetTitlePrefix();
+
 	// 1. Select the tasklist ------------------------------------
 	if (startup.HasFilePath())
 	{

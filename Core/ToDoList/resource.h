@@ -2442,6 +2442,8 @@
 #define IDS_SB_SELTASKTITLEPATHID_TIP   51609
 #define IDS_REQUIRESADMINTOMODIFY       51610
 #define IDS_REMINDER_DBLCLK_TIP         51611
+#define IDS_CMDLINE_TASKICON            51612
+#define IDS_CMDLINE_TITLEPREFIX         51613
 
 // Next default values for new objects
 // 

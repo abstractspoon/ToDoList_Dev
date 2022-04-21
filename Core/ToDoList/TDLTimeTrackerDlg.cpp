@@ -44,6 +44,7 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_bCentreOnShow(FALSE),
 	m_dwOptions(0)
 {
+	m_sOrgCaption = CEnString(IDS_FOCUS_TIMETRACKER);
 }
 
 CTDLTimeTrackerDlg::~CTDLTimeTrackerDlg()
@@ -169,8 +170,6 @@ BOOL CTDLTimeTrackerDlg::OnInitDialog()
 
 	CLocalizer::EnableTranslation(m_cbTasks, FALSE);
 	CLocalizer::EnableTranslation(m_cbTasklists, FALSE);
-
-	GetWindowText(m_sOrgCaption);
 
 	// Note: Titlebar tooltip is created on demand in OnEraseBkgnd
 	
