@@ -29,6 +29,7 @@ public:
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetOption(DWORD dwOption, BOOL bEnable = TRUE);
 	void SetWindowIcons(HICON hIconBig, HICON hIconSmall);
+	void SetStartStopShortcut(DWORD dwShortcut) { m_dwStartStopShortcut = dwShortcut; }
 	
 	BOOL AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
 	BOOL SetTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
@@ -73,7 +74,7 @@ protected:
 	CString m_sQuickFind;
 	CToolbarHelper m_tbHelper;
 	CString m_sCaption, m_sOrgCaption;
-	DWORD m_dwOptions;
+	DWORD m_dwOptions, m_dwStartStopShortcut;
 	CSize m_sizeMin, m_sizeMax;
 	int m_nUncollapsedHeight;
 	

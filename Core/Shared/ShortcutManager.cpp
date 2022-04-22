@@ -176,21 +176,6 @@ WORD CShortcutManager::ValidateModifiers(WORD wModifiers, WORD wVirtKeyCode) con
 	return wModifiers;
 }
 
-DWORD CShortcutManager::GetShortcut(WORD wVirtKeyCode, BOOL bExtended) const
-{
-	BOOL bCtrl = Misc::IsKeyPressed(VK_CONTROL);
-	BOOL bShift = Misc::IsKeyPressed(VK_SHIFT);
-	BOOL bAlt = Misc::IsKeyPressed(VK_MENU);
-
-	WORD wModifiers = (WORD)((bCtrl ? HOTKEYF_CONTROL : 0) |
-						(bShift ? HOTKEYF_SHIFT : 0) |
-						(bAlt ? HOTKEYF_ALT : 0) |
-						(bExtended ? HOTKEYF_EXT : 0));
-
-	return MAKELONG(wVirtKeyCode, wModifiers);
-}
-
-
 UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 {
 	// only process accelerators if we are enabled and visible
@@ -247,7 +232,7 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 			
 			// get DWORD shortcut
 			BOOL bExtKey = (pMsg->lParam & 0x01000000);
-			DWORD dwShortcut = GetShortcut((WORD)pMsg->wParam, bExtKey);
+			DWORD dwShortcut = Misc::GetShortcut((WORD)pMsg->wParam, bExtKey);
 			
 			// look it up
 			UINT nCmdID = 0;

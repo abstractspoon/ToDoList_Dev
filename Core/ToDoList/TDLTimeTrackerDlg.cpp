@@ -12,6 +12,7 @@
 #include "..\shared\autoflag.h"
 #include "..\shared\localizer.h"
 #include "..\shared\mapex.h"
+#include "..\shared\Misc.h"
 
 #include "..\3rdparty\XNamedColors.h"
 
@@ -42,7 +43,8 @@ CTDLTimeTrackerDlg::CTDLTimeTrackerDlg()
 	m_bCollapsed(FALSE),
 	m_bRecreating(FALSE),
 	m_bCentreOnShow(FALSE),
-	m_dwOptions(0)
+	m_dwOptions(0),
+	m_dwStartStopShortcut(0)
 {
 	m_sOrgCaption = CEnString(IDS_FOCUS_TIMETRACKER);
 }
@@ -217,33 +219,46 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 	}
 
 	// we need to check for <return> in quick find
-	if ((pMsg->message == WM_KEYDOWN) && 
-		(::GetDlgCtrlID(pMsg->hwnd) == IDC_QUICKFIND) &&
-		(::GetFocus() == pMsg->hwnd))
+	if (pMsg->message == WM_KEYDOWN)
 	{
-		switch (pMsg->wParam)
+		if ((::GetDlgCtrlID(pMsg->hwnd) == IDC_QUICKFIND) &&
+			(::GetFocus() == pMsg->hwnd))
 		{
-		case VK_RETURN:
-		case VK_F3:
+			switch (pMsg->wParam)
 			{
-				BOOL bForward = !Misc::ModKeysArePressed(MKS_SHIFT);
-				
-				int nSel = m_cbTasks.GetCurSel();
-				int nFrom = (bForward ? (nSel + 1) : (nSel - 1));
-				
-				int nNext = m_cbTasks.FindNextItem(m_sQuickFind, nFrom, bForward);
-				
-				if ((nNext != CB_ERR) && (nNext != nSel))
+			case VK_RETURN:
+			case VK_F3:
 				{
-					m_cbTasks.SetCurSel(nNext);
+					BOOL bForward = !Misc::ModKeysArePressed(MKS_SHIFT);
+				
+					int nSel = m_cbTasks.GetCurSel();
+					int nFrom = (bForward ? (nSel + 1) : (nSel - 1));
+				
+					int nNext = m_cbTasks.FindNextItem(m_sQuickFind, nFrom, bForward);
+				
+					if ((nNext != CB_ERR) && (nNext != nSel))
+					{
+						m_cbTasks.SetCurSel(nNext);
 					
-					UpdatePlayButton();
-					UpdateTaskTime(GetSelectedTasklist());
+						UpdatePlayButton();
+						UpdateTaskTime(GetSelectedTasklist());
 					
-					return TRUE;
+						return TRUE;
+					}
 				}
+				break;
 			}
-			break;
+		}
+		else 
+		{
+			BOOL bExtKey = (pMsg->lParam & 0x01000000);
+			DWORD dwShortcut = Misc::GetShortcut((WORD)pMsg->wParam, bExtKey);
+
+			if (dwShortcut == m_dwStartStopShortcut)
+			{
+				OnStartStopTracking();
+				return TRUE;
+			}
 		}
 	}
 	

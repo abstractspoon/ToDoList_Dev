@@ -2285,6 +2285,20 @@ BOOL Misc::ModKeysArePressed(DWORD dwKeys)
 	return TRUE;
 }
 
+DWORD Misc::GetShortcut(WORD wVirtKeyCode, BOOL bExtended)
+{
+	BOOL bCtrl = IsKeyPressed(VK_CONTROL);
+	BOOL bShift = IsKeyPressed(VK_SHIFT);
+	BOOL bAlt = IsKeyPressed(VK_MENU);
+
+	WORD wModifiers = (WORD)((bCtrl ? HOTKEYF_CONTROL : 0) |
+							(bShift ? HOTKEYF_SHIFT : 0) |
+							(bAlt ? HOTKEYF_ALT : 0) |
+							(bExtended ? HOTKEYF_EXT : 0));
+
+	return MAKELONG(wVirtKeyCode, wModifiers);
+}
+
 BOOL Misc::HasFlag(DWORD dwFlags, DWORD dwFlag)
 {
 	return (((dwFlags & dwFlag) == dwFlag) ? TRUE : FALSE);

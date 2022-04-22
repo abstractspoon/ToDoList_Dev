@@ -228,7 +228,8 @@ namespace Misc
 	BOOL IsCursorKey(DWORD dwVirtKey, DWORD dwKeys = MKC_ANY);
 	BOOL IsCursorKeyPressed(DWORD dwKeys = MKC_ANY);
 	CString GetKeyName(WORD wVirtKey, BOOL bExtended = FALSE); 
-
+	DWORD GetShortcut(WORD wVirtKeyCode, BOOL bExtended);
+	
 	BOOL HasFlag(DWORD dwFlags, DWORD dwFlag);
 	BOOL FlagHasChanged(DWORD dwFlag, DWORD dwOldFlags, DWORD dwNewFlags);
 	BOOL ModifyFlags(DWORD& dwFlags, DWORD dwRemove, DWORD dwAdd = 0);

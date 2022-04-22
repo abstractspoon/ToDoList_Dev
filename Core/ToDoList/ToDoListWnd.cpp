@@ -1091,6 +1091,8 @@ void CToDoListWnd::InitShortcutManager()
 				m_mgrShortcuts.AddShortcut(ID_EDIT_PASTESUB, 'V', HOTKEYF_CONTROL);
 		}
 	}
+
+	m_dlgTimeTracker.SetStartStopShortcut(m_mgrShortcuts.GetShortcut(ID_EDIT_CLOCK_TASK));
 }
 
 void CToDoListWnd::PopulateMenuIconManager()
@@ -1360,7 +1362,9 @@ void CToDoListWnd::UpdateTimeTrackerPreferences()
 	m_dlgTimeTracker.SetOption(TTDO_FORMATTIMESASHMS, prefs.GetUseHMSTimeFormat());
 	m_dlgTimeTracker.SetOption(TTDO_SHOWONBEGINTRACKING, prefs.GetShowTimeTracker());
 	m_dlgTimeTracker.SetOption(TTDO_SHOWTASKPATH, TRUE/*prefs.GetShowFullTaskPathInTimeTracker()*/);
+
 	m_dlgTimeTracker.SetUITheme(m_theme);
+	m_dlgTimeTracker.SetStartStopShortcut(m_mgrShortcuts.GetShortcut(ID_EDIT_CLOCK_TASK));
 }
 
 BOOL CToDoListWnd::InitTrayIcon()
