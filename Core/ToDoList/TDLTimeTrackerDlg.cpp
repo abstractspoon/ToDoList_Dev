@@ -249,7 +249,7 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 				break;
 			}
 		}
-		else 
+		else if (m_dwStartStopShortcut != 0)
 		{
 			BOOL bExtKey = (pMsg->lParam & 0x01000000);
 			DWORD dwShortcut = Misc::GetShortcut((WORD)pMsg->wParam, bExtKey);
