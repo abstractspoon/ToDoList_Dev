@@ -98,11 +98,7 @@ BOOL TDCCADATA::operator!=(const TDCCADATA& data) const
 
 BOOL TDCCADATA::HasExtra() const
 {
-	if (!sData.IsEmpty())
-		return !sExtra.IsEmpty();
-
-	ASSERT(sExtra.IsEmpty());
-	return FALSE;
+	return !sExtra.IsEmpty();
 }
 
 BOOL TDCCADATA::IsEmpty() const 
