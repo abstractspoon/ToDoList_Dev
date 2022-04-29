@@ -90,11 +90,11 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg message handlers
 
-int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
+int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, DWORD dwFlags)
 {
 	CPreferences prefs;
 
-	if (bNewReminder)
+	if (dwFlags & TDCREM_NEWREMINDER)
 	{
 		m_bRelative = prefs.GetProfileInt(m_sPrefsKey, _T("Relative"), TRUE);
 		m_dRelativeLeadInHours = prefs.GetProfileDouble(m_sPrefsKey, _T("LeadIn"), 0.25); // 15 mins
@@ -136,8 +136,15 @@ int CTDLSetReminderDlg::DoModal(TDCREMINDER& rem, BOOL bNewReminder)
 		m_sModifyDlgTitle.LoadString(IDS_MODIFYTASKREMINDER_TITLE);
 	}
 
-	m_sTaskTitle = rem.GetTaskTitle();
-	m_sTaskTitle.Replace(_T("&"), _T("&&"));
+	if (dwFlags & TDCREM_MULTIPLETASKS)
+	{
+		m_sTaskTitle = CEnString(IDS_TDC_EDITPROMPT_MULTIPLETASKS);
+	}
+	else
+	{
+		m_sTaskTitle = rem.GetTaskTitle();
+		m_sTaskTitle.Replace(_T("&"), _T("&&"));
+	}
 		
 	int nRes = CTDLDialog::DoModal();
 

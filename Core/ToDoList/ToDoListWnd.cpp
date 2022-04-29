@@ -13036,43 +13036,53 @@ BOOL CToDoListWnd::GetFirstTaskReminder(const CFilteredToDoCtrl& tdc, const CDWo
 void CToDoListWnd::OnEditSetReminder() 
 {
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (!tdc.HasSelection())
+	{
+		ASSERT(0);
+		return;
+	}
 	
 	CDWordArray aTaskIDs;
 	int nNumSel = tdc.GetSelectedTaskIDs(aTaskIDs, TRUE);
-	
-	if (nNumSel == 0)
-		return;
+
+	DWORD dwFlags = (nNumSel == 1) ? 0 : TDCREM_MULTIPLETASKS;
 	
 	// get the first reminder as a reference
 	TDCREMINDER rem;
-	BOOL bNewReminder = !GetFirstTaskReminder(tdc, aTaskIDs, rem);
 	
-	// handle new task
-	if (bNewReminder)
+	if (!GetFirstTaskReminder(tdc, aTaskIDs, rem))
 	{
+		// handle new reminder
 		rem.dwTaskID = aTaskIDs[0];
 		rem.pTDC = &tdc;
+
+		dwFlags |= TDCREM_NEWREMINDER;
 	}
 
-	int nRet = CTDLSetReminderDlg().DoModal(rem, bNewReminder), nTask;
+	int nRet = CTDLSetReminderDlg().DoModal(rem, dwFlags);
 
 	switch (nRet)
 	{
 	case IDOK:
-		// apply reminder to selected tasks
-		for (nTask = 0; nTask < nNumSel; nTask++)
 		{
-			rem.dwTaskID = aTaskIDs[nTask];
-			m_dlgReminders.SetReminder(rem);
+			// apply reminder to selected tasks
+			for (int nTask = 0; nTask < nNumSel; nTask++)
+			{
+				rem.dwTaskID = aTaskIDs[nTask];
+				m_dlgReminders.SetReminder(rem);
+			}
+			m_dlgReminders.CheckReminders();
 		}
-		m_dlgReminders.CheckReminders();
 		break;
 		
 	case IDDISMISS:
-		// clear reminder for selected tasks
-		for (nTask = 0; nTask < nNumSel; nTask++)
 		{
-			m_dlgReminders.ClearReminder(aTaskIDs[nTask], &tdc);
+			// clear reminder for selected tasks
+			for (int nTask = 0; nTask < nNumSel; nTask++)
+			{
+				m_dlgReminders.ClearReminder(aTaskIDs[nTask], &tdc);
+			}
 		}
 		break;
 
@@ -13087,7 +13097,7 @@ void CToDoListWnd::OnUpdateEditSetReminder(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	BOOL bEnable = (tdc.GetSelectedTaskCount() > 0) && !tdc.SelectedTasksAreAllDone();
+	BOOL bEnable = (tdc.HasSelection() && !tdc.SelectedTasksAreAllDone());
 	pCmdUI->Enable(bEnable);
 
 	if (bEnable && pCmdUI->m_pMenu)

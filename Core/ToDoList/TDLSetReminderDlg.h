@@ -25,6 +25,14 @@ struct TDCREMINDER;
 #define IDDISMISS 0xff
 
 /////////////////////////////////////////////////////////////////////////////
+
+enum // DoModal flags
+{
+	TDCREM_NEWREMINDER		= 0x1,
+	TDCREM_MULTIPLETASKS	= 0x2,
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CTDLSetReminderDlg dialog
 
 class CTDLSetReminderDlg : public CTDLDialog
@@ -33,7 +41,7 @@ class CTDLSetReminderDlg : public CTDLDialog
 public:
 	CTDLSetReminderDlg(CWnd* pParent = NULL);   // standard constructor
 
-	int DoModal(TDCREMINDER& rem, BOOL bNewReminder = FALSE);
+	int DoModal(TDCREMINDER& rem, DWORD dwFlags = 0);
 
 protected:
 // Dialog Data
