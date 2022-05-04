@@ -978,7 +978,7 @@ BOOL CToDoListWnd::InitTabCtrl()
 		return FALSE;
 
 	m_tabCtrl.SetBackgroundColor(m_theme.crAppBackDark);
-	m_tabCtrl.GetToolTips()->ModifyStyle(0, TTS_ALWAYSTIP);
+	m_tabCtrl.GetToolTips()->ModifyStyle(0, (TTS_ALWAYSTIP | TTS_NOPREFIX));
 
 	CLocalizer::EnableTranslation(m_tabCtrl, FALSE);
 		

@@ -202,7 +202,7 @@ void CTaskMiniCalendarCtrl::EnableHeatMap(const CDWordArray& aPalette, TDC_ATTRI
 	}
 
 	if (!m_tooltip.GetSafeHwnd())
-		m_tooltip.Create(this, TTS_ALWAYSTIP);
+		m_tooltip.Create(this, TTS_ALWAYSTIP | TTS_NOPREFIX);
 }
 
 void CTaskMiniCalendarCtrl::DisableHeatMap()

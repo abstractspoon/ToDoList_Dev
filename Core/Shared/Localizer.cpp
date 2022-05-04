@@ -294,7 +294,7 @@ void CLocalizer::ForceTranslateAllUIElements(UINT nIDFirstStr, UINT nIDLastStr)
 				{
 					// create tooltip ctrl first time we need it
 					if (tt.GetSafeHwnd() == NULL)
-						tt.Create(pAppWnd, TTS_ALWAYSTIP);
+						tt.Create(pAppWnd, (TTS_ALWAYSTIP | TTS_NOPREFIX));
 					
 					CLocalizer::TranslateText(sTip, tt);
 

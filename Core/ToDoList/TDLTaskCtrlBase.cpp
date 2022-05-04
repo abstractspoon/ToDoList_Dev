@@ -285,7 +285,7 @@ int CTDLTaskCtrlBase::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	PostResize();
 
 	// Tooltips for columns
-	if (m_tooltipColumns.Create(this))
+	if (m_tooltipColumns.Create(this, (TTS_ALWAYSTIP | TTS_NOPREFIX)))
 	{
 		m_tooltipColumns.ModifyStyleEx(0, WS_EX_TRANSPARENT);
 		m_tooltipColumns.SetDelayTime(TTDT_INITIAL, 50);
