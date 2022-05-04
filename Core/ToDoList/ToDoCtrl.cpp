@@ -6698,7 +6698,6 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 	{
 		tfh.bArchive = TRUE;
 		tfh.sProjectName.Format(_T("%s (%s)"), m_sProjectName, CEnString(IDS_TDC_ARCHIVEPROJECT));
-		tfh.nFileVersion = 1;
 		tfh.sXmlHeader = m_sXmlHeader;
 		tfh.sXslHeader = m_sXslHeader;
 	}
@@ -6706,7 +6705,7 @@ BOOL CToDoCtrl::ArchiveTasks(const CString& sArchivePath, const CTaskFile& tasks
 	SaveCustomAttributeDefinitions(file);
 	
 	file.Merge(tasks, TRUE, TRUE);
-	file.Encrypt();
+	file.Encrypt(m_sPassword, SFEF_UTF16);
 	file.SetHeader(tfh);
 
 	if (SaveTaskfile(file, sArchivePath) != TDCF_SUCCESS)

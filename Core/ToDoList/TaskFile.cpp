@@ -76,8 +76,8 @@ TASKFILE_HEADER::TASKFILE_HEADER()
 	bArchive(-1), 
 	bUnicode(-1), 
 	dwNextID(0), 
-	nFileFormat(-1), 
-	nFileVersion(TDL_FILEFORMAT_CURRENT) 
+	nFileFormat(TDL_FILEFORMAT_CURRENT), 
+	nFileVersion(1) 
 {
 }
 

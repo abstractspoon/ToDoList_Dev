@@ -61,6 +61,17 @@ BOOL CXmlFileEx::Encrypt(LPCWSTR szPassword, SFE_FORMAT nFormat)
 	if (!(*szPassword) || !InitEncryptor())
 		return FALSE;
 	
+	if (nFormat == SFEF_AUTODETECT)
+	{
+		if (m_nFormat == SFEF_AUTODETECT)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		nFormat = m_nFormat;
+	}
+
 	// 1. export everything below the root to a string
 	CXmlDocumentWrapper doc;
 	doc.LoadXML(_T("<a></a>"));
@@ -90,9 +101,6 @@ BOOL CXmlFileEx::Encrypt(LPCWSTR szPassword, SFE_FORMAT nFormat)
 	}
 	
 	// 2. encrypt it
-	if (nFormat == SFEF_AUTODETECT)
-		nFormat = m_nFormat;
-
 	// password must be ANSI to match non-unicode build
 	int nLen = lstrlen(szPassword);
 	LPSTR szMultiPassword = Misc::WideToMultiByte(szPassword, nLen);
