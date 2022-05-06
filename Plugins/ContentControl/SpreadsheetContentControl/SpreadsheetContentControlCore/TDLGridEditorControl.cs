@@ -197,6 +197,18 @@ namespace SpreadsheetContentControl
 						CurrentWorksheet.EndEdit(EndEditReason.Cancel);
 						return true;
 
+					case (UInt32)Keys.Decimal:
+						{
+							string decSep = System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+
+							if (decSep != ".")
+							{
+								SendKeys.SendWait(decSep);
+								return true;
+							}
+						}
+						break;
+
 					default:
 						break;
 					}
