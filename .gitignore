@@ -268,3 +268,4 @@ paket-files/
 *.tlog
 *.lastbuildstate
 *.tdl
+*.resources
