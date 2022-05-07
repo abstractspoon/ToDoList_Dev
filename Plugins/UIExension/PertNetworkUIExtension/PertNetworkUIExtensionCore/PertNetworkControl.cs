@@ -1095,7 +1095,8 @@ namespace PertNetworkUIExtension
 				}
 			}
 
-			criticalPaths.Add(criticalPath);
+			if (criticalPath != null)
+				criticalPaths.Add(criticalPath);
 
 			return criticalPaths;
 		}
