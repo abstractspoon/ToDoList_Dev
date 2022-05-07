@@ -228,6 +228,10 @@ protected:
 	CTDCTaskFormatter m_formatter;
 
 protected:
+	BOOL TitleOrCommentsMatches(const TODOITEM* pTDI, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched, TDC_ATTRIBUTE &nWhatMatched) const;
+	BOOL AnyTextAttributeMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAM& rule,
+								 const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bCaseSensitive,
+								 CString& sWhatMatched, TDC_ATTRIBUTE& nWhatMatched) const;
 	BOOL AnyTaskParentMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAMS& query, BOOL bCheckDueToday, SEARCHRESULT& result) const;
 
 	BOOL ValueMatches(const COleDateTime& date, const SEARCHPARAM& rule, BOOL bIncludeTime, TDC_DATE nDate, CString& sWhatMatched) const;

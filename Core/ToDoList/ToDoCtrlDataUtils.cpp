@@ -255,7 +255,9 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	for (int nRule = 0; nRule < nNumRules && bMatches; nRule++)
 	{
 		const SEARCHPARAM& rule = query.aRules[nRule];
+
 		CString sWhatMatched;
+		TDC_ATTRIBUTE nWhatMatched = rule.GetAttribute(); // default
 
 		BOOL bMatch = TRUE, bLastRule = (nRule == nNumRules - 1);
 		
@@ -266,8 +268,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 			
 		case TDCA_TASKNAMEORCOMMENTS:
-			bMatch = ValueMatches(pTDI->sTitle, rule, bCaseSensitive, sWhatMatched) ||
-						ValueMatches(pTDI->sComments, pTDI->customComments, rule, sWhatMatched);
+			bMatch = TitleOrCommentsMatches(pTDI, rule, bCaseSensitive, sWhatMatched, nWhatMatched);
 			break;
 
 		case TDCA_COMMENTS:
@@ -552,38 +553,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 			break;
 			
 		case TDCA_ANYTEXTATTRIBUTE:
-			bMatch = (ValueMatches(pTDI->sTitle, rule, bCaseSensitive, sWhatMatched) ||
-					  ValueMatches(pTDI->sComments, rule, bCaseSensitive, sWhatMatched) ||
-					  ArrayMatches(pTDI->aAllocTo, rule, bCaseSensitive, sWhatMatched) ||
-					  ArrayMatches(pTDI->aCategories, rule, bCaseSensitive, sWhatMatched) ||
-					  ArrayMatches(pTDI->aFileLinks, rule, bCaseSensitive, sWhatMatched) ||
-					  ArrayMatches(pTDI->aTags, rule, bCaseSensitive, sWhatMatched) ||
-					  ValueMatchesAsArray(pTDI->sAllocBy, rule, bCaseSensitive, sWhatMatched) ||
-					  ValueMatchesAsArray(pTDI->sStatus, rule, bCaseSensitive, sWhatMatched) ||
-					  ValueMatchesAsArray(pTDI->sVersion, rule, bCaseSensitive, sWhatMatched) ||
-					  ValueMatchesAsArray(pTDI->sExternalID, rule, bCaseSensitive, sWhatMatched) ||
-					  ValueMatchesAsArray(m_calculator.GetTaskLastModifiedBy(pTDI, pTDS), rule, bCaseSensitive, sWhatMatched) ||
-					  ValueMatchesAsArray(pTDI->sCreatedBy, rule, bCaseSensitive, sWhatMatched));
-
-			if (!bMatch)
-			{
-				int nDef = query.aAttribDefs.GetSize();
-
-				while (nDef-- && !bMatch)
-				{
-					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = query.aAttribDefs[nDef];
-					
-					if (attribDef.GetDataType() == TDCCA_STRING)
-					{
-						DWORD dwAttribType = (attribDef.GetListType() | TDCCA_STRING);
-
-						TDCCADATA data;
-						pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
-
-						bMatch = ValueMatches(data, dwAttribType, rule, bCaseSensitive, sWhatMatched);
-					}
-				}
-			}
+			bMatch = AnyTextAttributeMatches(pTDI, pTDS, rule, query.aAttribDefs, bCaseSensitive, sWhatMatched, nWhatMatched);
 			break;
 
 		case TDCA_SELECTION:
@@ -602,7 +572,11 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				TDCCADATA data;
 				pTDI->GetCustomAttributeValue(sUniqueID, data);
 
-				bMatch = ValueMatches(data, pDef->GetAttributeType(), rule, bCaseSensitive, sWhatMatched);
+				if (ValueMatches(data, pDef->GetAttributeType(), rule, bCaseSensitive, sWhatMatched))
+				{
+					bMatch = TRUE;
+					nWhatMatched = pDef->GetAttributeID();
+				}			
 			}
 			else
 			{
@@ -679,6 +653,116 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 	}
 	
 	return bMatches;
+}
+
+BOOL CTDCTaskMatcher::TitleOrCommentsMatches(const TODOITEM* pTDI, const SEARCHPARAM& rule, BOOL bCaseSensitive, CString& sWhatMatched, TDC_ATTRIBUTE &nWhatMatched) const
+{
+	if (ValueMatches(pTDI->sTitle, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_TASKNAME;
+		return TRUE;
+	}
+
+	// else
+	if (ValueMatches(pTDI->sComments, pTDI->customComments, rule, sWhatMatched))
+	{
+		nWhatMatched = TDCA_COMMENTS;
+		return TRUE;
+	}
+
+	// all else
+	return FALSE;
+}
+
+BOOL CTDCTaskMatcher::AnyTextAttributeMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const SEARCHPARAM& rule, 
+											  const CTDCCustomAttribDefinitionArray& aAttribDefs, BOOL bCaseSensitive, 
+											  CString& sWhatMatched, TDC_ATTRIBUTE& nWhatMatched) const
+{
+	if (TitleOrCommentsMatches(pTDI, rule, bCaseSensitive, sWhatMatched, nWhatMatched))
+		return TRUE;
+
+	if (ArrayMatches(pTDI->aAllocTo, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_ALLOCTO;
+		return TRUE;
+	}
+
+	if (ArrayMatches(pTDI->aCategories, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_CATEGORY;
+		return TRUE;
+	}
+
+	if (ArrayMatches(pTDI->aFileLinks, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_FILELINK;
+		return TRUE;
+	}
+
+	if (ArrayMatches(pTDI->aTags, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_TAGS;
+		return TRUE;
+	}
+
+	if (ValueMatchesAsArray(pTDI->sAllocBy, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_ALLOCBY;
+		return TRUE;
+	}
+
+	if (ValueMatchesAsArray(pTDI->sStatus, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_STATUS;
+		return TRUE;
+	}
+
+	if (ValueMatchesAsArray(pTDI->sVersion, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_VERSION;
+		return TRUE;
+	}
+
+	if (ValueMatchesAsArray(pTDI->sExternalID, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_EXTERNALID;
+		return TRUE;
+	}
+
+	if (ValueMatchesAsArray(m_calculator.GetTaskLastModifiedBy(pTDI, pTDS), rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_LASTMODBY;
+		return TRUE;
+	}
+
+	if (ValueMatchesAsArray(pTDI->sCreatedBy, rule, bCaseSensitive, sWhatMatched))
+	{
+		nWhatMatched = TDCA_CREATEDBY;
+		return TRUE;
+	}
+
+	int nDef = aAttribDefs.GetSize();
+
+	while (nDef--)
+	{
+		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nDef];
+
+		if (attribDef.GetDataType() == TDCCA_STRING)
+		{
+			DWORD dwAttribType = (attribDef.GetListType() | TDCCA_STRING);
+
+			TDCCADATA data;
+			pTDI->GetCustomAttributeValue(attribDef.sUniqueID, data);
+
+			if (ValueMatches(data, dwAttribType, rule, bCaseSensitive, sWhatMatched))
+			{
+				nWhatMatched = attribDef.GetAttributeID();
+				return TRUE;
+			}
+		}
+	}
+
+	return FALSE;
 }
 
 BOOL CTDCTaskMatcher::ValueMatches(const TDCRECURRENCE& trRecurrence, const SEARCHPARAM& rule, CString& sWhatMatched) const
