@@ -68,7 +68,11 @@ protected:
 	virtual DROPEFFECT OnDragOver(CWnd* pWnd, COleDataObject* pObject, DWORD dwKeyState, CPoint point);
 	virtual BOOL OnDrop(CWnd* pWnd, COleDataObject* pObject, DROPEFFECT dropEffect, CPoint point);
 
+#if _MSC_VER >= 1400
 protected:
+#else
+public:
+#endif
 	enum TLDT_HITTEST
 	{
 		TLDTHT_NONE = -1,
@@ -77,6 +81,7 @@ protected:
 		TLDTHT_CAPTION,
 	};
 
+protected:
 	struct TLDT_HIT
 	{
 		TLDT_HIT() { Clear(); }
