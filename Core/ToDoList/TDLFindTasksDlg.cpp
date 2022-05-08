@@ -64,16 +64,16 @@ CTDLFindTasksDlg::CTDLFindTasksDlg()
 {
 	m_sResultsLabel.LoadString(IDS_FTD_RESULTS);
 	
-	AddRCControl(_T("LTEXT"), _T(""), _T("F&or tasks matching the following rules:"), 0, 0, 0, 49, 287, 8, IDC_RULESLABEL);
+	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_RULES), 0, 0, 0, 49, 287, 8, IDC_RULESLABEL);
 	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_OWNERDRAWFIXED | LVS_NOCOLUMNHEADER | LVS_NOSORTHEADER | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 58, 370, 96, IDC_FINDLIST);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Apply as &Filter"), 0, 0, 0, 176, 65, 14, IDC_APPLYASFILTER);
-	AddRCControl(_T("PUSHBUTTON"), _T(""), _T("Select &All"), 0, 0, 72, 176, 50, 14, IDC_SELECTALL);
-	AddRCControl(_T("LTEXT"), _T(""), _T("&Results:"), 0, 0, 133, 179, 240, 8, IDC_RESULTSLABEL);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), CEnString(IDS_FIND_APPLYASFILTER), 0, 0, 0, 176, 65, 14, IDC_APPLYASFILTER);
+	AddRCControl(_T("PUSHBUTTON"), _T(""), CEnString(IDS_FIND_SELECTALL), 0, 0, 72, 176, 50, 14, IDC_SELECTALL);
+	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_RESULTS), 0, 0, 133, 179, 240, 8, IDC_RESULTSLABEL);
 	AddRCControl(_T("CONTROL"), _T("SysListView32"), _T(""), LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_REPORT | LVS_SHAREIMAGELISTS | WS_TABSTOP, WS_EX_CLIENTEDGE, 0, 191, 370, 94, IDC_RESULTS);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT | WS_VSCROLL | WS_TABSTOP, 0, 85, 3, 71, 121, IDC_SEARCHLIST);
-	AddRCControl(_T("LTEXT"), _T(""), _T("&Search:"), 0, 0, 0, 22, 120, 8, IDC_SEARCHLABEL);
+	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_SEARCH), 0, 0, 0, 22, 120, 8, IDC_SEARCHLABEL);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP, 0, 0, 31, 120, 125, IDC_TASKLISTOPTIONS);
-	AddRCControl(_T("LTEXT"), _T(""), _T("I&ncluding:"), 0, 0, 136, 22, 134, 8, IDC_INCLUDELABEL);
+	AddRCControl(_T("LTEXT"), _T(""), CEnString(IDS_FIND_INCLUDING), 0, 0, 136, 22, 134, 8, IDC_INCLUDELABEL);
 	AddRCControl(_T("COMBOBOX"), _T(""), _T(""), CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_SORT | CBS_HASSTRINGS | WS_VSCROLL | WS_TABSTOP, 0, 136, 31, 120, 130, IDC_INCLUDE);
 }
 
@@ -191,12 +191,14 @@ BOOL CTDLFindTasksDlg::OnInitDialog()
 
 void CTDLFindTasksDlg::BuildOptionCombos()
 {
-	CDialogHelper::AddString(m_cbTasklists, _T("The active tasklist"), FALSE);
-	CDialogHelper::AddString(m_cbTasklists, _T("All tasklists"), TRUE);
+	CDialogHelper::AddString(m_cbTasklists, IDS_FIND_ACTIVETASKLIST, FALSE);
+	CDialogHelper::AddString(m_cbTasklists, IDS_FIND_ALLTASKLISTS, TRUE);
 	
-	CDialogHelper::AddString(m_cbInclude, IDS_FINDINCLUDE_DONE, FI_COMPLETED);
-	CDialogHelper::AddString(m_cbInclude, IDS_FINDINCLUDE_PARENTS, FI_PARENT);
-	CDialogHelper::AddString(m_cbInclude, IDS_FINDINCLUDE_FILTEREDOUT, FI_FILTEREDOUT);
+	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEDONE, FI_COMPLETED);
+	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEPARENTS, FI_PARENT);
+	CDialogHelper::AddString(m_cbInclude, IDS_FIND_INCLUDEFILTEREDOUT, FI_FILTEREDOUT);
+
+	CLocalizer::EnableTranslation(m_cbInclude, FALSE);
 
 	m_cbInclude.EnableTooltip();
 }
@@ -612,7 +614,7 @@ void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDef
 	m_lcFindSetup.SetActiveTasklist(sTasklist, bWantDefaultIcons);
 }
 
-void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC)
+void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly)
 {
 	if (GetSafeHwnd())
 	{
@@ -632,7 +634,7 @@ void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, const CFilteredToDo
 		}
 
 		// else
-		int nIndex = m_lcResults.AddResult(result, pTDC);
+		int nIndex = m_lcResults.AddResult(result, pTDC, bShowValueOnly);
 
 		if (nIndex != -1)
 		{

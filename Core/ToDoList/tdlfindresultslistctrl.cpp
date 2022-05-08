@@ -376,7 +376,7 @@ void CTDLFindResultsListCtrl::RefreshUserPreferences()
 		Invalidate();
 }
 
-int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC)
+int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly)
 {
 	int nPos = GetItemCount();
 	CString sTitle = pTDC->GetTaskTitle(result.dwTaskID);
@@ -385,7 +385,7 @@ int CTDLFindResultsListCtrl::AddResult(const SEARCHRESULT& result, const CFilter
 	// add result
 	int nIndex = InsertItem(nPos, sTitle);
 	
-	SetItemText(nIndex, COL_WHATMATCHED, FormatWhatMatched(result, pTDC));
+	SetItemText(nIndex, COL_WHATMATCHED, FormatWhatMatched(result, pTDC, bShowValueOnly));
 	SetItemText(nIndex, COL_TASKPATH, sPath);
 
 	if (m_nCurGroupID != -1)
@@ -414,7 +414,7 @@ BOOL CTDLFindResultsListCtrl::OsIsXP()
 	return bXP;
 }
 
-CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC) const
+CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly) const
 {
 	ASSERT(result.mapMatched.GetCount());
 
@@ -426,24 +426,34 @@ CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, c
 	while (pos)
 	{
 		TDC_ATTRIBUTE nAttribID;
-		CString sWhatMatched;
+		CString sWhatMatched, sFormatted;
 
 		result.mapMatched.GetNextAssoc(pos, nAttribID, sWhatMatched);
 
-		CString sFormatted = GetAttributeName(nAttribID, pTDC);
+		// We never show the values of 'Title' or 'Comments'
+		BOOL bTitleOrComments = ((nAttribID == TDCA_TASKNAME) || (nAttribID == TDCA_COMMENTS));
+
+		if (sWhatMatched.IsEmpty() && !bTitleOrComments)
+			sWhatMatched = CEnString(IDS_ATTRIBNOTSET);
 		
-		if ((nAttribID != TDCA_TASKNAME) && (nAttribID != TDCA_COMMENTS))
-			sFormatted += Misc::Format(_T(" (%s)"), (sWhatMatched.IsEmpty() ? CEnString(IDS_ATTRIBNOTSET) : sWhatMatched));
+		if (bTitleOrComments)
+		{
+			sFormatted = GetAttributeName(nAttribID, pTDC);
+		}
+		else if (!bShowValueOnly)
+		{
+			sFormatted.Format(_T("%s (%s)"), GetAttributeName(nAttribID, pTDC), sWhatMatched);
+		}
+		else
+		{
+			sFormatted = sWhatMatched;
+		}
 
 		// Leave early if only one item matched
 		if (result.mapMatched.GetCount() == 1)
 			return sFormatted;
 
-		// Place attributes with values at the front
-		if (sWhatMatched.IsEmpty())
-			aWhatMatched.Add(sFormatted);
-		else
-			aWhatMatched.InsertAt(0, sFormatted);
+		aWhatMatched.Add(sFormatted);
 	}
 
 	return Misc::FormatArray(aWhatMatched);

@@ -1668,6 +1668,28 @@ struct SEARCHPARAMS
 		return mapAttrib.Has(attrib);
 	}
 
+	BOOL HasMultipleAttributes() const
+	{
+		int nNumRules = aRules.GetSize();
+
+		if (nNumRules)
+		{
+			TDC_ATTRIBUTE nFirstAttrib = aRules[0].GetAttribute();
+
+			// quick check for aggregate attributes
+			if (nFirstAttrib == TDCA_ANYTEXTATTRIBUTE || (nFirstAttrib == TDCA_TASKNAMEORCOMMENTS))
+				return TRUE;
+
+			for (int nRule = 1; nRule < nNumRules; nRule++)
+			{
+				if (aRules[nRule].GetAttribute() != nFirstAttrib)
+					return TRUE;
+			}
+		}
+
+		return FALSE;
+	}
+
 	BOOL GetRuleCount() const
 	{
 		return aRules.GetSize();

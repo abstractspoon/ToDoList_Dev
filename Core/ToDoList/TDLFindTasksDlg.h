@@ -61,7 +61,7 @@ public:
 	int GetSavedSearches(CStringArray& aNames);
 
 	void AddHeaderRow(LPCTSTR szText);
-	void AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC);
+	void AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly);
 
 	int GetResultCount() const; // all tasklists
 	int GetResultCount(const CFilteredToDoCtrl* pTDC) const;

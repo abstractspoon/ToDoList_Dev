@@ -10620,6 +10620,7 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 		CWaitCursor cursor;
 
 		int nSel = GetSelToDoCtrl();
+		BOOL bMultiAttribFind = params.HasMultipleAttributes();
 		
 		for (int nCtrl = nFrom; nCtrl <= nTo; nCtrl++)
 		{
@@ -10656,7 +10657,7 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 				
 				for (int nResult = 0; nResult < aResults.GetSize(); nResult++)
 				{
-					m_dlgFindTasks.AddResult(aResults[nResult], &tdc);
+					m_dlgFindTasks.AddResult(aResults[nResult], &tdc, !bMultiAttribFind);
 				}
 			}
 		}

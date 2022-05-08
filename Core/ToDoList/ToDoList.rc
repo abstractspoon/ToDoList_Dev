@@ -4626,6 +4626,7 @@ BEGIN
     IDS_REMINDER_DBLCLK_TIP "Double-click to go to task"
     IDS_CMDLINE_TASKICON    "-ic <icon name/number>\tSets the 'Icon' for the currently selected task"
     IDS_CMDLINE_TITLEPREFIX "-tp <prefix>\tApplies a prefix to the application title"
+    IDS_FIND_SELECTALL      "Select &All"
 END
 
 STRINGTABLE DISCARDABLE 
@@ -5561,9 +5562,9 @@ BEGIN
     IDS_LOG_STARTTIME       "Start Time"
     IDS_LOG_TIMESPENT       "Time Spent (Hrs)"
     IDS_STICKIES_TITLE      "ToDoList Reminder"
-    IDS_FINDINCLUDE_PARENTS "Parent Tasks"
-    IDS_FINDINCLUDE_FILTEREDOUT "Filtered-out tasks"
-    IDS_FINDINCLUDE_DONE    "Completed tasks"
+    IDS_FIND_INCLUDEPARENTS "Parent tasks"
+    IDS_FIND_INCLUDEFILTEREDOUT "Filtered-out tasks"
+    IDS_FIND_INCLUDEDONE    "Completed tasks"
     IDS_CUSTOM_FEATURE_SORTABLE "Sortable"
     IDS_CUSTOM_FEATURE_ACCUMULATED "Accumulated"
     IDS_CUSTOM_FEATURE_MINIMUM "Minimum"
@@ -5814,6 +5815,17 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_EDIT_INSERTDATE      "\nInsert Date"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    IDS_FIND_APPLYASFILTER  "Apply as &Filter"
+    IDS_FIND_RESULTS        "&Results"
+    IDS_FIND_SEARCH         "&Search"
+    IDS_FIND_RULES          "F&or tasks matching the following rules"
+    IDS_FIND_INCLUDING      "I&ncluding"
+    IDS_FIND_ACTIVETASKLIST "The active tasklist"
+    IDS_FIND_ALLTASKLISTS   "All tasklists"
 END
 
 #endif    // English (Australia) resources

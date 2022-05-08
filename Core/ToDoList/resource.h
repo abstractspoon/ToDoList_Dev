@@ -2202,9 +2202,9 @@
 #define IDS_LOG_STARTTIME               51346
 #define IDS_LOG_TIMESPENT               51347
 #define IDS_STICKIES_TITLE              51348
-#define IDS_FINDINCLUDE_PARENTS         51350
-#define IDS_FINDINCLUDE_FILTEREDOUT     51351
-#define IDS_FINDINCLUDE_DONE            51352
+#define IDS_FIND_INCLUDEPARENTS         51350
+#define IDS_FIND_INCLUDEFILTEREDOUT     51351
+#define IDS_FIND_INCLUDEDONE            51352
 #define IDS_CUSTOM_FEATURE_SORTABLE     51353
 #define IDS_CUSTOM_FEATURE_ACCUMULATED  51354
 #define IDS_CUSTOM_FEATURE_MINIMUM      51355
@@ -2444,6 +2444,15 @@
 #define IDS_REMINDER_DBLCLK_TIP         51611
 #define IDS_CMDLINE_TASKICON            51612
 #define IDS_CMDLINE_TITLEPREFIX         51613
+#define IDS_FIND_SHOWATTRIBUTEINRESULTS 51614
+#define IDS_FIND_SELECTALL              51615
+#define IDS_FIND_APPLYASFILTER          51616
+#define IDS_FIND_RESULTS                51617
+#define IDS_FIND_SEARCH                 51618
+#define IDS_FIND_RULES                  51619
+#define IDS_FIND_INCLUDING              51620
+#define IDS_FIND_ACTIVETASKLIST         51621
+#define IDS_FIND_ALLTASKLISTS           51622
 
 // Next default values for new objects
 // 
