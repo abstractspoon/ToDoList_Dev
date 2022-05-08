@@ -587,7 +587,7 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 		
 		// save off result
 		if (bMatch)
-			result.mapMatched[rule.GetAttribute()] = sWhatMatched;
+			result.mapMatched[nWhatMatched] = sWhatMatched;
 		
 		// handle this result
 		bMatches &= bMatch;
