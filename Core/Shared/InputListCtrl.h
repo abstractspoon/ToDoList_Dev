@@ -59,6 +59,7 @@ public:
 	virtual BOOL DeleteSelectedCell();
 	BOOL SetCellText(int nRow, int nCol, const CString& sText);
 	BOOL DeleteAllItems(BOOL bIncludeCols = FALSE);
+	BOOL DeleteItem(int nItem);
 	void SetCurSel(int nRow, int nCol, BOOL bNotifyParent = FALSE);
 	BOOL GetCurSel(int& nRow, int& nCol) const;
 	int SetCurSel(int nIndex, bool bNotifyParent = FALSE); // single selection

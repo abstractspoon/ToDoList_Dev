@@ -1118,6 +1118,17 @@ BOOL CInputListCtrl::DeleteAllItems(BOOL bIncludeCols)
 	return TRUE;
 }
 
+BOOL CInputListCtrl::DeleteItem(int nItem)
+{
+	if (CEnListCtrl::DeleteItem(nItem))
+	{
+		RecalcHotButtonRects();
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
 void CInputListCtrl::SetCurSel(int nRow, int nCol, BOOL bNotifyParent)
 {
 	ASSERT (m_hWnd);
