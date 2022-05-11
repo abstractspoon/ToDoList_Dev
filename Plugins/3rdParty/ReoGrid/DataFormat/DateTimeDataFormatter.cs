@@ -100,7 +100,12 @@ namespace unvell.ReoGrid.DataFormat
 
 				CultureInfo culture = null;
 
-				string pattern = System.Threading.Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortDatePattern;
+				string pattern = Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortDatePattern;
+
+				if (value.TimeOfDay.TotalDays > 0)
+				{
+					pattern = pattern + ' ' + Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortTimePattern;
+				}
 
 				if (cell.DataFormatArgs != null && cell.DataFormatArgs is DateTimeFormatArgs)
 				{
@@ -118,7 +123,7 @@ namespace unvell.ReoGrid.DataFormat
 				}
 				else
 				{
-					culture = System.Threading.Thread.CurrentThread.CurrentCulture;
+					culture = Thread.CurrentThread.CurrentCulture;
 					cell.DataFormatArgs = new DateTimeFormatArgs { Format = pattern, CultureName = culture.Name };
 				}
 

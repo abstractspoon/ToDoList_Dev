@@ -184,9 +184,9 @@ namespace unvell.ReoGrid
 				}
 				else
 				{
-					if (this.currentWorksheet != this.workbook.worksheets[0])
+					if (this.currentWorksheet != this.workbook.worksheets[this.workbook.CurrentWorksheetIndex])
 					{
-						this.currentWorksheet = this.workbook.worksheets[0];
+						this.CurrentWorksheet = this.workbook.worksheets[this.workbook.CurrentWorksheetIndex];
 					}
 					else
 					{
@@ -355,7 +355,10 @@ namespace unvell.ReoGrid
 
 			if (this.workbook.worksheets.Count > 0)
 			{
-				this.CurrentWorksheet = this.workbook.worksheets[0];
+				if (this.workbook.CurrentWorksheetIndex < Worksheets.Count)
+					this.CurrentWorksheet = this.workbook.worksheets[this.workbook.CurrentWorksheetIndex];
+				else
+					this.CurrentWorksheet = this.workbook.worksheets[0];
 			}
 		}
 		#endregion // Save & Load
@@ -385,7 +388,11 @@ namespace unvell.ReoGrid
 			}
 			set
 			{
-				if (value == null) throw new ArgumentNullException("cannot set current worksheet to null");
+				if (value == null)
+					throw new ArgumentNullException("cannot set current worksheet to null");
+
+				if (!Worksheets.Contains(value))
+					throw new ArgumentNullException("cannot set current worksheet outside of worksheet list");
 
 				if (this.currentWorksheet != value)
 				{
@@ -395,6 +402,7 @@ namespace unvell.ReoGrid
 					}
 
 					this.currentWorksheet = value;
+					this.workbook.CurrentWorksheetIndex = Worksheets.IndexOf(value);
 
 					// update bounds for viewport of worksheet
 					this.currentWorksheet.UpdateViewportControllBounds();

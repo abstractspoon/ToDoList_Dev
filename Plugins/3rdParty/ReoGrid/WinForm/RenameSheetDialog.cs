@@ -44,12 +44,12 @@ namespace unvell.ReoGrid.WinForm
 		{
 			InitializeComponent();
 
-			this.Text = LanguageResource.Sheet_RenameDialog_Title;
-			label1.Text = LanguageResource.Sheet_RenameDialog_NameLabel;
-			btnOK.Text = LanguageResource.Button_OK;
-			btnCancel.Text = LanguageResource.Button_Cancel;
+// 			this.Text = LanguageResource.Sheet_RenameDialog_Title;
+// 			label1.Text = LanguageResource.Sheet_RenameDialog_NameLabel;
+// 			btnOK.Text = LanguageResource.Button_OK;
+// 			btnCancel.Text = LanguageResource.Button_Cancel;
 
-			this.txtName.KeyDown += (s, e) =>
+			this.newName.KeyDown += (s, e) =>
 			{
 				if (e.KeyCode == Keys.Enter)
 				{
@@ -66,12 +66,13 @@ namespace unvell.ReoGrid.WinForm
 		{
 			base.OnLoad(e);
 
-			this.txtName.Text = this.SheetName;
+			this.oldName.Text = this.SheetName;
+			this.newName.Text = this.SheetName;
 		}
 
 		private void btnOK_Click(object sender, EventArgs e)
 		{
-			this.SheetName = this.txtName.Text;
+			this.SheetName = this.newName.Text;
 
 			Close();
 		}

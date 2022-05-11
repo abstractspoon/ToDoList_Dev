@@ -42,6 +42,208 @@ using unvell.ReoGrid.Main;
 
 namespace unvell.ReoGrid
 {
+	internal class RGXmlUtils
+	{
+/*
+		public static RGXmlMeta GetMetadata()
+		{
+			var meta = new RGXmlMeta();
+
+			// todo: clear current view controller and viewport position
+			CultureInfo culture = Thread.CurrentThread.CurrentCulture;
+
+			#region Head
+			// head
+			if (xmlSheet.head != null)
+			{
+				var head = xmlSheet.head;
+
+				#region Settings
+				if (head.settings != null)
+				{
+					var settings = head.settings;
+
+					if (settings.showGrid != null && !TextFormatHelper.IsSwitchOn(settings.showGrid))
+					{
+						controlSettings = controlSettings.Remove(WorksheetSettings.View_ShowGridLine);
+					}
+
+					if (TextFormatHelper.IsSwitchOn(settings.showPageBreakes))
+					{
+						controlSettings = controlSettings.Add(WorksheetSettings.View_ShowPageBreaks);
+					}
+					else
+					{
+						controlSettings = controlSettings.Remove(WorksheetSettings.View_ShowPageBreaks);
+					}
+
+					if (settings.showRowHeader != null && !TextFormatHelper.IsSwitchOn(settings.showRowHeader))
+					{
+						controlSettings = controlSettings.Remove(WorksheetSettings.View_ShowRowHeader);
+					}
+
+					if (settings.showColHeader != null && !TextFormatHelper.IsSwitchOn(settings.showColHeader))
+					{
+						controlSettings = controlSettings.Remove(WorksheetSettings.View_ShowColumnHeader);
+					}
+				}
+				#endregion // Settings
+
+				string cultureName = head.meta == null ? null : head.meta.culture;
+
+
+				// apply culture
+				if (!string.IsNullOrEmpty(cultureName))
+				{
+					try
+					{
+						culture = new CultureInfo(cultureName);
+					}
+					catch (Exception)
+					{
+						Logger.Log("load", "warning: unsupported culture: " + cultureName);
+					}
+				}
+
+			}
+
+			return meta;
+		}
+*/
+
+	}
+
+	partial class Workbook
+	{
+		#region Load
+
+		private int currentWorksheetIndex = 0;
+
+		public int CurrentWorksheetIndex
+		{
+			get { return currentWorksheetIndex; }
+			set { currentWorksheetIndex = value; }
+		}
+		
+		/// <summary>
+		/// Load worksheet from specified input stream.
+		/// </summary>
+		/// <param name="path">Path of file to load worksheet.</param>
+		public void LoadRGF(string path)
+		{
+			using (var s = File.OpenRead(path))
+			{
+				this.LoadRGF(s);
+			}
+		}
+
+		/// <summary>
+		/// Load workbook from specified input stream.
+		/// </summary>
+		/// <param name="s">Input stream to read worksheet.</param>
+		/// <returns>True if spreadsheet is loaded successfully.</returns>
+		/// <exception cref="ReoGridLoadException">Exception will be thrown if any errors happen during loading.</exception>
+		public void LoadRGF(Stream s)
+		{
+#if DEBUG
+			Stopwatch stop = Stopwatch.StartNew();
+#endif // DEBUG
+
+			XmlSerializer xmlReader = new XmlSerializer(typeof(RGXmlBook));
+			RGXmlBook xmlBook;
+
+			try
+			{
+				xmlBook = xmlReader.Deserialize(s) as RGXmlBook;
+			}
+			catch (Exception ex)
+			{
+				throw new ReoGridLoadException("Read xml format error: " + ex.Message, ex);
+			}
+
+
+			ClearWorksheets();
+
+			foreach (var xmlSheet in xmlBook.sheets)
+			{
+				Worksheet sheet = CreateWorksheet(xmlSheet.head == null ? "" : xmlSheet.head.name);
+				sheet.LoadRGF(xmlSheet);
+
+				AddWorksheet(sheet);
+			}
+
+			this.currentWorksheetIndex = xmlBook.activeSheet;
+
+			if (Worksheets.Count == 0)
+				NewWorksheet();
+#if DEBUG
+			stop.Stop();
+			Debug.WriteLine("rgf loaded: " + stop.ElapsedMilliseconds + " ms.");
+#endif // DEBUG
+		}
+
+		/// <summary>
+		/// Event raised when grid loaded from file.
+		/// </summary>
+		public event EventHandler<FileLoadedEventArgs> FileLoaded;
+
+		#endregion // Load
+
+		#region Save
+
+		/// <summary>
+		/// Save worksheet into specified file.
+		/// </summary>
+		/// <param name="path">Path of file to save worksheet.</param>
+		/// <returns>True if grid saved successfully.</returns>
+		public bool SaveRGF(string path)
+		{
+			using (FileStream fs = new FileStream(path, FileMode.Create))
+			{
+				bool rs = SaveRGF(fs);
+
+				// raise file saving event
+				if (rs && FileSaved != null)
+				{
+					FileSaved(this, new FileSavedEventArgs(path));
+				}
+
+				return rs;
+			}
+		}
+
+		/// <summary>
+		/// Save worksheet as RGF format into specified output stream.
+		/// </summary>
+		/// <param name="s">Stream to save current worksheet.</param>
+		/// <returns>True if worksheet is saved successfully.</returns>
+		/// <remarks>
+		/// Exceptions thrown if any errors happen during saving.
+		/// </remarks>
+		public bool SaveRGF(Stream s)
+		{
+			RGXmlBook book = new RGXmlBook();
+			
+			book.activeSheet = CurrentWorksheetIndex;
+			
+			foreach (var sheet in Worksheets)
+			{
+				book.sheets.Add(sheet.SaveRGF());
+			}
+
+			XmlSerializer xmlWriter = new XmlSerializer(typeof(RGXmlBook));
+			xmlWriter.Serialize(s, book);
+
+			return true;
+		}
+
+		/// <summary>
+		/// Event raised when worksheet saved into a file.
+		/// </summary>
+		public event EventHandler<FileSavedEventArgs> FileSaved;
+		#endregion // Save
+	}
+
 	partial class Worksheet
 	{
 		#region Load
@@ -136,6 +338,17 @@ namespace unvell.ReoGrid
 				throw new ReoGridLoadException("Read xml format error: " + ex.Message, ex);
 			}
 
+			LoadRGF(xmlSheet);
+
+#if DEBUG
+			stop.Stop();
+			Debug.WriteLine("rgf loaded: " + stop.ElapsedMilliseconds + " ms.");
+#endif // DEBUG
+
+		}
+
+		public void LoadRGF(RGXmlSheet xmlSheet)
+		{
 			Clear();
 
 			WorksheetSettings controlSettings = WorksheetSettings.Default;
@@ -816,11 +1029,6 @@ namespace unvell.ReoGrid
 #endif // EX_SCRIPT
 			#endregion // Script
 
-#if DEBUG
-			stop.Stop();
-			Debug.WriteLine("rgf loaded: " + stop.ElapsedMilliseconds + " ms.");
-#endif // DEBUG
-
 		}
 
 		/// <summary>
@@ -955,11 +1163,34 @@ namespace unvell.ReoGrid
 			System.Reflection.Assembly assembly = this.GetType().Assembly;
 			FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
 
+			RGXmlSheet body = SaveRGF();
+
+			XmlSerializer xmlWriter = new XmlSerializer(typeof(RGXmlSheet));
+			xmlWriter.Serialize(s, body);
+
+			return true;
+		}
+
+		public RGXmlSheet SaveRGF()
+		{
+			string editorProgram = "ReoGrid Core";
+
+			var cas = this.GetType().Assembly.GetCustomAttributes(typeof(System.Reflection.AssemblyVersionAttribute), false);
+
+			if (cas != null && cas.Length > 0)
+			{
+				editorProgram += " " + ((System.Reflection.AssemblyVersionAttribute)cas[0]).Version.ToString();
+			}
+
+			System.Reflection.Assembly assembly = this.GetType().Assembly;
+			FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(assembly.Location);
+
 			#region Head
 			RGXmlSheet body = new RGXmlSheet()
 			{
 				head = new RGXmlHead
 				{
+					name = this.Name,
 					cols = this.cols.Count,
 					rows = this.rows.Count,
 
@@ -1360,10 +1591,7 @@ namespace unvell.ReoGrid
 							 });
 			#endregion // Cells
 
-			XmlSerializer xmlWriter = new XmlSerializer(typeof(RGXmlSheet));
-			xmlWriter.Serialize(s, body);
-
-			return true;
+			return body;
 		}
 
 		/// <summary>

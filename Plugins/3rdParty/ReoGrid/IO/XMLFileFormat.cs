@@ -428,6 +428,16 @@ namespace unvell.ReoGrid
 
 		[Obfuscation(Feature = "renaming", Exclude = true)]
 		[XmlRoot("grid")]
+		public class RGXmlBook
+		{
+			[XmlElement("active-sheet")]
+			public int activeSheet;
+
+			[XmlArray("sheets"), XmlArrayItem("sheet")]
+			public List<RGXmlSheet> sheets = new List<RGXmlSheet>();
+		}
+
+		[Obfuscation(Feature = "renaming", Exclude = true)]
 		public class RGXmlSheet
 		{
 			[XmlElement("head")]
@@ -455,7 +465,10 @@ namespace unvell.ReoGrid
 		{
 			[XmlElement("meta")]
 			public RGXmlMeta meta;
-			
+
+			[XmlElement("name")]
+			public string name;
+
 			[XmlElement("rows")]
 			public int rows;
 			[XmlElement("cols")]
