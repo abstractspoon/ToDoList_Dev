@@ -116,19 +116,7 @@ namespace unvell.ReoGrid.IO
 		/// <param name="arg">Provider custom parameters</param>
 		public void Load(IWorkbook workbook, Stream stream, Encoding encoding, object arg)
 		{
-			Worksheet sheet = null;
-
-			if (workbook.Worksheets.Count == 0)
-			{
-				sheet = workbook.CreateWorksheet("Sheet1");
-				workbook.Worksheets.Add(sheet);
-			}
-			else
-			{
-				sheet = workbook.Worksheets[0];
-			}
-
-			sheet.LoadRGF(stream);
+			(workbook as Workbook).LoadRGF(stream);
 		}
 
 		public void Save(IWorkbook workbook, Stream stream, Encoding encoding, object arg)
@@ -138,7 +126,7 @@ namespace unvell.ReoGrid.IO
 				return;
 			}
 
-			workbook.Worksheets[0].Save(stream);
+			(workbook as Workbook).SaveRGF(stream);
 		}
 	}
 

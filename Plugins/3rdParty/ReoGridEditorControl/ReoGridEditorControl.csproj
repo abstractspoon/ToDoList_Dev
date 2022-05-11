@@ -107,25 +107,10 @@
     <Compile Include="HeaderPropertyDialog.Designer.cs">
       <DependentUpon>HeaderPropertyDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="LangRes\LangResource.zh-CN.Designer.cs">
-      <DependentUpon>LangResource.zh-CN.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="LangRes\LangResource.ja-JP.Designer.cs">
-      <DependentUpon>LangResource.ja-JP.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="LangRes\LangResource.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>LangResource.resx</DependentUpon>
-    </Compile>
-    <Compile Include="LangRes\LangResource.ru-RU.Designer.cs">
-      <DependentUpon>LangResource.ru-RU.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
     </Compile>
     <Compile Include="NamedRangeManageForm.cs">
       <SubType>Form</SubType>
@@ -273,20 +258,11 @@
     <EmbeddedResource Include="HeaderPropertyDialog.resx">
       <DependentUpon>HeaderPropertyDialog.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LangRes\LangResource.zh-CN.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LangResource.zh-CN.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="LangRes\LangResource.ja-JP.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>LangResource.ja-JP.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
     <EmbeddedResource Include="LangRes\LangResource.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>LangResource.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="LangRes\LangResource.ru-RU.resx" />
     <EmbeddedResource Include="NamedRangeManageForm.resx">
       <DependentUpon>NamedRangeManageForm.cs</DependentUpon>
     </EmbeddedResource>

@@ -128,7 +128,7 @@ namespace unvell.ReoGrid
 
 			int len = lines.Length;
 			
-			while (string.IsNullOrEmpty(lines[len - 1]))
+			while ((len > 0) && string.IsNullOrEmpty(lines[len - 1]))
 			{
 				len--;
 			}

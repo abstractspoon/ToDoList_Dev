@@ -30,47 +30,6 @@ namespace unvell.ReoGrid
 		public static CultureInfo Culture;
 
 		#region Public 
-		static LanguageResource()
-		{
-			Culture = Thread.CurrentThread.CurrentUICulture;
-
-			switch (Culture.Name)
-			{
-				case "ja-JP":
-					Filter_SortAtoZ = "昇順(&S)";
-					Filter_SortZtoA = "降順(&O)";
-					Filter_SelectAll = "(すべて選択)";
-					Filter_Blanks = "(空白セル)";
-
-					Menu_InsertSheet = "挿入(&I)";
-					Menu_DeleteSheet = "削除(&D)";
-					Menu_RenameSheet = "名前変更(&R)...";
-
-					//Sheet = "シート";
-					Sheet_RenameDialog_Title = "シートの名前変更";
-					Sheet_RenameDialog_NameLabel = "名前(&N): ";
-
-					Button_Cancel = "キャンセル";
-					break;
-
-				case "ru-RU":
-					Filter_SortAtoZ = "Сортировка от А до Я";
-					Filter_SortZtoA = "Сортировка от Я до А";
-					Filter_SelectAll = "(Выделить все)";
-					Filter_Blanks = "(Пустые)";
-
-					Menu_InsertSheet = "&Вставить";
-					Menu_DeleteSheet = "&Удалить";
-					Menu_RenameSheet = "&Переименовать…";
-
-					Sheet_RenameDialog_Title = "Переименование листа";
-					Sheet_RenameDialog_NameLabel = "&Имя: ";
-
-					Button_Cancel = "Отмена";
-
-					break;
-			}
-		}
 
 		#region Filter
 		/// <summary>
@@ -114,7 +73,7 @@ namespace unvell.ReoGrid
 		/// <summary>
 		/// Label text displayed on sheet renaming dialog (Name: )
 		/// </summary>
-		public static string Sheet_RenameDialog_NameLabel = "&Name: ";
+		public static string Sheet_RenameDialog_NameLabel = "&New Name: ";
 
 		/// <summary>
 		/// Common text displayed as label of OK button (OK)

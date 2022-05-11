@@ -64,7 +64,7 @@ namespace SpreadsheetContentControl
 			try
 			{
 				var memStream = new MemoryStream();
-				GridControl.Save(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
+				GridControl.Save(memStream, unvell.ReoGrid.IO.FileFormat.ReoGridFormat);
 
 				return Compression.Compress(memStream.GetBuffer());
 			}
@@ -77,22 +77,35 @@ namespace SpreadsheetContentControl
 
 		public bool SetContent(Byte[] content, bool resetSelection)
 		{
- 			try
- 			{
- 				var memStream = new MemoryStream(Compression.Decompress(content));
- 				GridControl.Load(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
+			var memStream = new MemoryStream(Compression.Decompress(content));
 
-				// Restore the content font because loading changes it
-				CurrentWorksheet.FontName = Worksheet.DefaultFontName;
-				CurrentWorksheet.FontSize = Worksheet.DefaultFontSize;
+			GridControl.Reset();
 
-				return true;
+			try
+			{
+				GridControl.Load(memStream, unvell.ReoGrid.IO.FileFormat.ReoGridFormat);
  			}
  			catch (Exception)
  			{
- 			}
+				try
+				{
+					// Backwards compatibility
+ 					GridControl.Load(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
+				}
+				catch (Exception)
+				{
+					return false;
+				}
+			}
 
-			return false;
+			if (CurrentWorksheet == null)
+				GridControl.CurrentWorksheet = GridControl.Worksheets[0];
+
+			// Restore the content font because loading changes it
+			CurrentWorksheet.FontName = Worksheet.DefaultFontName;
+			CurrentWorksheet.FontSize = Worksheet.DefaultFontSize;
+
+			return true;
 		}
 
 		private RangePosition ContentRange()
