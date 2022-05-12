@@ -65,7 +65,7 @@ namespace SpreadsheetContentControl
 			{
 				using (var memStream = new MemoryStream())
 				{
-					GridControl.Save(memStream, unvell.ReoGrid.IO.FileFormat.ReoGridFormat);
+					GridControl.Save(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
 
 					return Compression.Compress(memStream.GetBuffer());
 				}
@@ -85,19 +85,11 @@ namespace SpreadsheetContentControl
 			{
 				try
 				{
-					GridControl.Load(memStream, unvell.ReoGrid.IO.FileFormat.ReoGridFormat);
+					GridControl.Load(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
  				}
  				catch (Exception)
  				{
-					try
-					{
-						// Backwards compatibility
- 						GridControl.Load(memStream, unvell.ReoGrid.IO.FileFormat.Excel2007);
-					}
-					catch (Exception)
-					{
-						return false;
-					}
+					return false;
 				}
 			}
 
