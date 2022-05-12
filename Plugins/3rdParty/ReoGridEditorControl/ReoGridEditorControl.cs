@@ -1441,8 +1441,13 @@ namespace unvell.ReoGrid.Editor
 						borderColorPickToolStripItem.SolidColor = Color.Black;
 					}
 
-					undoToolStripButton.Enabled = undoToolStripMenuItem.Enabled = CanUndo();
-					redoToolStripButton.Enabled = redoToolStripMenuItem.Enabled = CanRedo();
+					undoToolStripButton.Enabled =
+						undoToolStripMenuItem.Enabled =
+						CanUndo();
+
+					redoToolStripButton.Enabled = 
+						redoToolStripMenuItem.Enabled = 
+						CanRedo();
 
 					repeatLastActionToolStripMenuItem.Enabled = (CanUndo() || CanRedo());
 
