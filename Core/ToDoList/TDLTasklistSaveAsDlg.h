@@ -24,16 +24,17 @@ public:
 						  LPCTSTR szFileFilter,
 						  CWnd* pParent = NULL);   // standard constructor
 
-	CString GetFilePath() const { return m_sFilePath; }
+	CString GetFilePath() const { return m_sNewFilePath; }
 	CString GetProjectName() const { return m_sProjectName; }
+
+	int DoModal();
 
 // Dialog Data
 	//{{AFX_DATA(CTDLTasklistSaveAsDlg)
-	CString	m_sFilePath;
+	CString	m_sOrgFilePath, m_sNewFilePath;
 	CString	m_sProjectName;
 	//}}AFX_DATA
 	CFileEdit	m_eFilePath;
-
 
 // Overrides
 	// ClassWizard generated virtual function overrides

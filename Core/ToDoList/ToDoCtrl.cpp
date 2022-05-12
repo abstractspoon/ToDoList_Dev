@@ -7707,6 +7707,7 @@ void CToDoCtrl::SetProjectName(const CString& sProjectName)
 	if (m_sProjectName != sProjectName)
 	{
 		m_sProjectName = sProjectName;
+		m_bModified = TRUE;
 
 		if (GetSafeHwnd())
 			UpdateDataEx(this, IDC_PROJECTNAME, m_sProjectName, FALSE);

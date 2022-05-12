@@ -2453,6 +2453,8 @@
 #define IDS_FIND_INCLUDING              51620
 #define IDS_FIND_ACTIVETASKLIST         51621
 #define IDS_FIND_ALLTASKLISTS           51622
+#define IDS_CONFIRMSAVEAS               51623
+#define IDS_CONFIRMSAVEAS_TITLE         51624
 
 // Next default values for new objects
 // 
