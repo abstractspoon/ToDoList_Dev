@@ -210,7 +210,7 @@ namespace unvell.ReoGrid.IO.OpenXML
 					double defRowHeight = 4f;
 
 					if (double.TryParse(sheet.sheetFormatProperty.defaultRowHeight, System.Globalization.NumberStyles.Number,
-						ExcelWriter.EnglishCulture, out defRowHeight))
+						System.Globalization.CultureInfo.InvariantCulture, out defRowHeight))
 					{
 						defaultRowHeight = (ushort)Math.Round(defRowHeight * dpi / 72.0);
 						rgSheet.defaultRowHeight = defaultRowHeight;
@@ -222,7 +222,7 @@ namespace unvell.ReoGrid.IO.OpenXML
 					double defColumnWidth = 0;
 
 					if (double.TryParse(sheet.sheetFormatProperty.defaultColumnWidth, System.Globalization.NumberStyles.Number,
-						ExcelWriter.EnglishCulture, out defColumnWidth))
+						System.Globalization.CultureInfo.InvariantCulture, out defColumnWidth))
 					{
 						ushort pixelWidth = (ushort)Math.Truncate(((256 * defColumnWidth + Math.Truncate(128 / fixedCharWidth)) / 256) * fixedCharWidth);
 
