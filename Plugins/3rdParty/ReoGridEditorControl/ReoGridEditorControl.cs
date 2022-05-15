@@ -2533,12 +2533,15 @@ namespace unvell.ReoGrid.Editor
 						if (string.IsNullOrEmpty(cell.DisplayText))
 						{
 							cell.Formula = string.Format("{0}({1})", funName,
-								RangePosition.FromCellPosition(range.Row, c, range.EndRow - 1, c).ToAddress());
+								RangePosition.FromCellPosition(range.Row, c, range.EndRow, c).ToAddress());
 
+							range.EndRow = Math.Max(range.EndRow, r);
 							break; // inner loop
 						}
 					}
 				}
+
+				CurrentSelectionRange = new RangePosition(range.Row, range.Col, range.Rows, range.Cols);
 			}
 		}
 		#endregion

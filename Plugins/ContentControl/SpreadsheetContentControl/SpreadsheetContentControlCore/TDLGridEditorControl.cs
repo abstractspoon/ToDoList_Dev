@@ -100,6 +100,8 @@ namespace SpreadsheetContentControl
 			CurrentWorksheet.FontName = Worksheet.DefaultFontName;
 			CurrentWorksheet.FontSize = Worksheet.DefaultFontSize;
 
+			m_PrevContent = null;
+
 			return true;
 		}
 
@@ -122,6 +124,8 @@ namespace SpreadsheetContentControl
 			// Clear and then Insert content into 'A:1'
 			GridControl.CurrentWorksheet.Reset();
 			GridControl.CurrentWorksheet.PasteFromString(new CellPosition(0, 0), content);
+
+			m_PrevContent = null;
 
 			return true;
 		}
