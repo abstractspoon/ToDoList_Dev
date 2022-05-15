@@ -1381,7 +1381,7 @@ namespace unvell.ReoGrid.Editor
 		private bool isUIUpdating = false;
 		private void UpdateMenuAndToolStrips()
 		{
-			if (isUIUpdating)
+			if (isUIUpdating || grid.IsDisposing)
 				return;
 
 			var worksheet = this.CurrentWorksheet;
@@ -2484,6 +2484,8 @@ namespace unvell.ReoGrid.Editor
 			var sheet = this.CurrentWorksheet;
 			var range = this.CurrentSelectionRange;
 
+			bool handled = false;
+
 			// fill bottom rows
 			if (range.Rows > 1)
 			{
@@ -2494,8 +2496,9 @@ namespace unvell.ReoGrid.Editor
 					if (string.IsNullOrEmpty(cell.DisplayText))
 					{
 						cell.Formula = string.Format("{0}({1})", funName,
-							RangePosition.FromCellPosition(range.Row, range.Col, range.EndRow - 1, c).ToAddress());
-						break;
+							RangePosition.FromCellPosition(range.Row, c, range.EndRow - 1, c).ToAddress());
+
+						handled = true;
 					}
 				}
 			}
@@ -2510,8 +2513,30 @@ namespace unvell.ReoGrid.Editor
 					if (string.IsNullOrEmpty(cell.DisplayText))
 					{
 						cell.Formula = string.Format("{0}({1})", funName,
-							RangePosition.FromCellPosition(range.Row, range.Col, r, range.EndCol - 1).ToAddress());
-						break;
+							RangePosition.FromCellPosition(r, range.Col, r, range.EndCol - 1).ToAddress());
+
+						handled = true;
+					}
+				}
+			}
+
+			// If there was no free row below the selected rows then do as
+			// Excel does and look ahead for the first free row
+			if (!handled && (range.Rows > 1))
+			{
+				for (int c = range.Col; c <= range.EndCol; c++)
+				{
+					for (int r = range.EndRow + 1; r < sheet.RowCount; r++)
+					{
+						var cell = sheet.Cells[r, c];
+
+						if (string.IsNullOrEmpty(cell.DisplayText))
+						{
+							cell.Formula = string.Format("{0}({1})", funName,
+								RangePosition.FromCellPosition(range.Row, c, range.EndRow - 1, c).ToAddress());
+
+							break; // inner loop
+						}
 					}
 				}
 			}

@@ -89,7 +89,7 @@ namespace unvell.ReoGrid.IO.OpenXML
 			{
 				Logger.Log("file format", "reading excel format takes " + ms + " ms.");
 			}
-#endif // DEBUG
+#endif
 		}
 		#endregion // Read Stream
 

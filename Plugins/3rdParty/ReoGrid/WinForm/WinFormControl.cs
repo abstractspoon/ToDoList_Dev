@@ -320,6 +320,9 @@ namespace unvell.ReoGrid
 		/// </summary>
 		/// <param name="disposing">True to release both managed and unmanaged resources;
 		/// False to release only unmanaged resources.</param>
+		/// 
+		public bool IsDisposing { get; private set; }
+
 		protected override void Dispose(bool disposing)
 		{
 			var gdiRenderer = (GDIRenderer) renderer;
@@ -329,6 +332,7 @@ namespace unvell.ReoGrid
 				gdiRenderer.Dispose();
 			}
 
+			IsDisposing = true;
 			base.Dispose(disposing);
 
 			this.workbook.Dispose();
