@@ -264,7 +264,8 @@ protected:
 	virtual void OnTaskIconsChanged();
 	virtual DWORD HitTestTask(const CPoint& ptScreen, BOOL bTitleColumnOnly) const;
 
-	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE);
+	virtual void RebuildList(BOOL bChangeGroup = FALSE, TDC_COLUMN nNewGroupBy = TDCC_NONE, const void* pContext = NULL);
+	virtual BOOL WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const;
 	virtual BOOL GetLabelEditRect(CRect& rScreen); // screen coords
 
 	void UpdateSelectedTaskPath();

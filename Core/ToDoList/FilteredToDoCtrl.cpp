@@ -587,13 +587,51 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
 }
 
-void CFilteredToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy)
+void CFilteredToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, const void* pContext)
 {
 	if (m_bIgnoreListRebuild)
 		return;
 
 	// else
-	CTabbedToDoCtrl::RebuildList(bChangeGroup, nNewGroupBy);
+	ASSERT(pContext == NULL);
+
+	// build a find query that matches the filter
+	if (HasAnyFilter())
+	{
+		SEARCHPARAMS params;
+		m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
+
+		CTabbedToDoCtrl::RebuildList(bChangeGroup, nNewGroupBy, &params);
+	}
+	else
+	{
+		CTabbedToDoCtrl::RebuildList(bChangeGroup, nNewGroupBy, pContext);
+	}
+}
+
+BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
+{
+	BOOL bWantAdd = CTabbedToDoCtrl::WantAddTreeTaskToList(dwTaskID, pContext);
+
+	if ((pContext == NULL) || !bWantAdd)
+		return bWantAdd;
+
+	// Hide non-matching parents
+	const TODOSTRUCTURE* pTDS = NULL;
+	const TODOITEM* pTDI = NULL;
+
+	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+		return FALSE;
+
+	if (pTDS->HasSubTasks())
+	{
+		const SEARCHPARAMS* pFilter = static_cast<const SEARCHPARAMS*>(pContext);
+		SEARCHRESULT unused;
+
+		bWantAdd = m_matcher.TaskMatches(pTDI, pTDS, *pFilter, HasDueTodayColor(), unused);
+	}
+
+	return bWantAdd;
 }
 
 HTREEITEM CFilteredToDoCtrl::RebuildTree(const void* pContext)
