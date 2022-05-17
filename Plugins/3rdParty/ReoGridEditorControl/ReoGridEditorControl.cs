@@ -2495,9 +2495,10 @@ namespace unvell.ReoGrid.Editor
 
 					if (string.IsNullOrEmpty(cell.DisplayText))
 					{
-						cell.Formula = string.Format("{0}({1})", funName,
+						var formula = string.Format("={0}({1})", funName,
 							RangePosition.FromCellPosition(range.Row, c, range.EndRow - 1, c).ToAddress());
 
+						this.grid.DoAction(new SetCellDataAction(cell.Position, formula));
 						handled = true;
 					}
 				}
@@ -2512,9 +2513,10 @@ namespace unvell.ReoGrid.Editor
 
 					if (string.IsNullOrEmpty(cell.DisplayText))
 					{
-						cell.Formula = string.Format("{0}({1})", funName,
+						var formula = string.Format("={0}({1})", funName,
 							RangePosition.FromCellPosition(r, range.Col, r, range.EndCol - 1).ToAddress());
 
+						this.grid.DoAction(new SetCellDataAction(cell.Position, formula));
 						handled = true;
 					}
 				}
@@ -2532,9 +2534,10 @@ namespace unvell.ReoGrid.Editor
 
 						if (string.IsNullOrEmpty(cell.DisplayText))
 						{
-							cell.Formula = string.Format("{0}({1})", funName,
+							var formula = string.Format("={0}({1})", funName,
 								RangePosition.FromCellPosition(range.Row, c, range.EndRow, c).ToAddress());
 
+							this.grid.DoAction(new SetCellDataAction(cell.Position, formula));
 							range.EndRow = Math.Max(range.EndRow, r);
 							break; // inner loop
 						}

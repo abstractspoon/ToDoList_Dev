@@ -521,9 +521,9 @@ namespace unvell.ReoGrid.Formula
 		public Cell Cell { get; set; }
 
 		private static readonly Regex TokenRegex = new Regex(
-			"\\s*((?<string>\"(?:\"\"|[^\"])*\")|(?<union_ranges>[A-Z]+[0-9]+:[A-Z]+[0-9]+(\\s[A-Z]+[0-9]+:[A-Z]+[0-9]+)+)"
-			+ "|(?<range>\\$?[A-Z]+\\$?[0-9]*:\\$?[A-Z]+\\$?[0-9]*)"
-			+ "|(?<cell>\\$?[A-Z]+\\$?[0-9]+)"
+			"\\s*((?<string>\"(?:\"\"|[^\"])*\")|(?<union_ranges>[A-Za-z]+[0-9]+:[A-Za-z]+[0-9]+(\\s[A-Za-z]+[0-9]+:[A-Za-z]+[0-9]+)+)"
+			+ "|(?<range>\\$?[A-Za-z]+\\$?[0-9]*:\\$?[A-Za-z]+\\$?[0-9]*)"
+			+ "|(?<cell>\\$?[A-Za-z]+\\$?[0-9]+)"
 			+ "|(?<token>-)|(?<number>\\-?\\d*\\" + FormulaExtension.NumberDecimalSeparator + "?\\d+)"
 			+ "|(?<true>(?i)TRUE)|(?<false>(?i)FALSE)|(?<identifier>\\w+)"
 			+ "|(?<token>\\=\\=|\\<\\>|\\<\\=|\\>\\=|\\<\\>|\\=|\\!|[\\=\\.\\"

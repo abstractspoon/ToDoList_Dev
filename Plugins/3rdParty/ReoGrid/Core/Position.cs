@@ -215,6 +215,8 @@ namespace unvell.ReoGrid
 		/// <example>var pos = new CellPosition("A10");</example>
 		public CellPosition(string address)
 		{
+			address = address.ToUpperInvariant();
+
 			Match m = RGUtility.CellReferenceRegex.Match(address);
 
 			if (!m.Success)
@@ -723,6 +725,8 @@ namespace unvell.ReoGrid
 		/// <exception cref="ArgumentException">Throw when specified address is invalid.</exception>
 		public RangePosition(string address)
 		{
+			address = address.ToUpperInvariant();
+
 			this.positionProperties = 0;
 
 			Match m = RGUtility.RangeReferenceRegex.Match(address);
