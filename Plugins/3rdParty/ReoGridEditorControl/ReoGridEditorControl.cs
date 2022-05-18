@@ -2526,6 +2526,8 @@ namespace unvell.ReoGrid.Editor
 			// Excel does and look ahead for the first free row
 			if (!handled && (range.Rows > 1))
 			{
+				int maxEndRow = range.EndRow;
+
 				for (int c = range.Col; c <= range.EndCol; c++)
 				{
 					for (int r = range.EndRow + 1; r < sheet.RowCount; r++)
@@ -2538,13 +2540,18 @@ namespace unvell.ReoGrid.Editor
 								RangePosition.FromCellPosition(range.Row, c, range.EndRow, c).ToAddress());
 
 							this.grid.DoAction(new SetCellDataAction(cell.Position, formula));
-							range.EndRow = Math.Max(range.EndRow, r);
+							maxEndRow = Math.Max(maxEndRow, r);
+
 							break; // inner loop
 						}
 					}
 				}
 
-				CurrentSelectionRange = new RangePosition(range.Row, range.Col, range.Rows, range.Cols);
+				if (maxEndRow > range.EndRow)
+				{
+					range.EndRow = maxEndRow;
+					CurrentSelectionRange = new RangePosition(range.Row, range.Col, range.Rows, range.Cols);
+				}
 			}
 		}
 		#endregion
