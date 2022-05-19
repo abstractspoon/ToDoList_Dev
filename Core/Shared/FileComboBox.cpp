@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "FileComboBox.h"
 #include "FileMisc.h"
+#include "GraphicsMisc.h"
 #include "enbitmap.h"
 #include "enfiledialog.h"
 
@@ -51,7 +52,7 @@ CFileComboBox::CFileComboBox(int nEditStyle)
 	: 
 	CAutoComboBox(ACBS_ALLOWDELETE | ACBS_ADDTOSTART),
 	m_fileEdit(nEditStyle),
-	m_imageIcons(16, 16),
+	m_imageIcons(FALSE), // small icons
 	m_bReadOnly(FALSE)
 {
 
@@ -64,13 +65,13 @@ CFileComboBox::~CFileComboBox()
 IMPLEMENT_DYNAMIC(CFileComboBox, CAutoComboBox)
 
 BEGIN_MESSAGE_MAP(CFileComboBox, CAutoComboBox)
-	ON_WM_SIZE()
 	ON_REGISTERED_MESSAGE(WM_FEN_BROWSECHANGE, OnFileEditBrowseChange)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILEICON, OnFileEditGetFileIcon)
 	ON_REGISTERED_MESSAGE(WM_FE_GETFILETOOLTIP, OnFileEditGetFileTooltip)
 	ON_REGISTERED_MESSAGE(WM_FE_DISPLAYFILE, OnFileEditDisplayFile)
 	ON_CONTROL_REFLECT_EX(CBN_SELCHANGE, OnSelChange)
 	ON_WM_CTLCOLOR()
+	ON_WM_PAINT()
 	END_MESSAGE_MAP()
 	
 // CFileComboBox message handlers
@@ -83,6 +84,45 @@ BOOL CFileComboBox::PreCreateWindow(CREATESTRUCT& cs)
 	cs.style |= (CBS_OWNERDRAWFIXED | CBS_HASSTRINGS);
 	
 	return CAutoComboBox::PreCreateWindow(cs);
+}
+
+void CFileComboBox::OnPaint()
+{
+	CPaintDC dc(this);
+
+	// default painting
+	DefWindowProc(WM_PAINT, (WPARAM)(HDC)dc, 0);
+
+	// If the edit field has an image and its icon rect 
+	// is less than the height of the image, then we draw 
+	// the extra bit that MIGHT have been clipped out
+	if (!m_fileEdit.GetSafeHwnd() || m_fileEdit.GetWindowTextLength() == 0)
+		return;
+
+	CRect rIcon = m_fileEdit.GetIconScreenRect();
+
+	if (rIcon.Height() >= m_imageIcons.GetIconSize())
+		return;
+
+	ScreenToClient(rIcon);
+
+	// Because CFileEdit messes with its non-client rect
+	// we can end up with a negative rectangle during startup
+	if (rIcon.left < 0)
+		return;
+
+	// Check that the bit we need to draw is visible
+	CRect rClip(rIcon);
+
+	rClip.bottom = rClip.top + m_imageIcons.GetIconSize();
+	rClip.top = rIcon.bottom;
+
+	if (!dc.IntersectClipRect(rClip))
+		return;
+
+	CString sIcon;
+	m_fileEdit.GetWindowText(sIcon);
+	m_fileEdit.DrawFileIcon(&dc, sIcon, rIcon);
 }
 
 HBRUSH CFileComboBox::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
@@ -120,28 +160,6 @@ int CFileComboBox::OnToolHitTest(CPoint point, TOOLINFO* pTI) const
 	return CAutoComboBox::OnToolHitTest(point, pTI);
 }
 
-void CFileComboBox::OnSize(UINT nType, int cx, int cy)
-{
-	CAutoComboBox::OnSize(nType, cx, cy);
-
-	ResizeEdit();
-}
-
-void CFileComboBox::ResizeEdit()
-{
-	// resize the edit to better fit the combo
-	if (m_fileEdit.GetSafeHwnd())
-	{
-		CRect rCombo;
-		GetClientRect(rCombo);
-
-		CRect rEdit(rCombo);
-		rEdit.DeflateRect(1, 3, 2, 3);
-		rEdit.right -= GetSystemMetrics(SM_CXVSCROLL);
-		m_fileEdit.MoveWindow(rEdit, FALSE);
-	}
-}
-
 BOOL CFileComboBox::InitFileEdit()
 {
 	if (!m_fileEdit.GetSafeHwnd())
@@ -150,7 +168,6 @@ BOOL CFileComboBox::InitFileEdit()
 			return FALSE;
 
 		m_fileEdit.SendMessage(EM_SETREADONLY, m_bReadOnly);
-		ResizeEdit();
 
 		// CFileEdit disables its tooltips when embedded in a combobox
 		// simply because they don't seem to work
@@ -178,7 +195,6 @@ LRESULT CFileComboBox::OnFileEditBrowseChange(WPARAM wp, LPARAM lp)
 	}
 
 	HandleReturnKey();
-	ResizeEdit();
 
 	return 0L;
 }
@@ -289,7 +305,7 @@ void CFileComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nIt
 		if (!bDrawn)
 			m_fileEdit.DrawFileIcon(&dc, sItem, rText);
 
-		rText.left += 20;
+		rText.left += m_imageIcons.GetIconSize() + 2;
 	}
 
 	CAutoComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);

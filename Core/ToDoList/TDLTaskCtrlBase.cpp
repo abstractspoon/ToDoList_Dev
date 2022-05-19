@@ -174,7 +174,7 @@ CTDLTaskCtrlBase::CTDLTaskCtrlBase(const CTDCImageList& ilIcons,
 	m_calculator(data),
 	m_formatter(data),
 	m_bAutoFitSplitter(TRUE),
-	m_imageIcons(16, 16),
+	m_imageIcons(FALSE),
 	m_bEnableRecalcColumns(TRUE),
 	m_bReadOnly(FALSE)
 {

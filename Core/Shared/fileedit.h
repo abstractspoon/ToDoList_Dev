@@ -119,7 +119,7 @@ protected:
 	virtual void HandleBrowseForFile(CEnFileDialog& dlg);
 
 protected:
-	CRect GetIconRect() const; // screen coords
+	CRect GetIconScreenRect() const; 
 	void DrawFileIcon(CDC* pDC, const CString& sFilePath, const CRect& rIcon);
 	CString GetBrowseTitle(BOOL bFolder) const;
 	void ClearImageIcon();

@@ -25,8 +25,8 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-CIconCache CFileIcons::s_fallbackBig(32, 32);
-CIconCache CFileIcons::s_fallbackSmall(16, 16);
+CIconCache CFileIcons::s_fallbackBig(TRUE);
+CIconCache CFileIcons::s_fallbackSmall(FALSE);
 
 //////////////////////////////////////////////////////////////////////
 

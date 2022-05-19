@@ -256,7 +256,7 @@ void CFileEdit::NcPaint(CDC* pDC, const CRect& rWindow)
 	CEnEdit::NcPaint(pDC, rWindow);
 
 	// Background color
-	CRect rIcon = GetIconRect();
+	CRect rIcon = GetIconScreenRect();
 	rIcon.OffsetRect(-rWindow.TopLeft());
 
 	::FillRect(*pDC, rIcon, GetBackgroundBrush(pDC));
@@ -571,7 +571,7 @@ void CFileEdit::OnKillFocus(CWnd* pNewWnd)
 	Invalidate();
 }
 
-CRect CFileEdit::GetIconRect() const
+CRect CFileEdit::GetIconScreenRect() const
 {
 	CRect rButton;
 	GetClientRect(rButton);
@@ -592,7 +592,7 @@ LRESULT CFileEdit::OnNcHitTest(CPoint point)
 UINT CFileEdit::OnNcHitTest(CPoint point)
 #endif
 {
-	if (GetIconRect().PtInRect(point))
+	if (GetIconScreenRect().PtInRect(point))
 		return HTBORDER;
 	
 	return CEnEdit::OnNcHitTest(point);

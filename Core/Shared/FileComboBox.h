@@ -47,13 +47,13 @@ protected:
 	int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
 
 protected:
-	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnFileEditBrowseChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditGetFileIcon(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditGetFileTooltip(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnFileEditDisplayFile(WPARAM wp, LPARAM lp);
 	afx_msg BOOL OnSelChange();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnPaint();
 	DECLARE_MESSAGE_MAP()
 
 	// pseudo message handler
@@ -61,7 +61,6 @@ protected:
 	LRESULT OnListboxMessage(UINT msg, WPARAM wp, LPARAM lp);
 
 protected:
-	void ResizeEdit();
 	BOOL InitFileEdit();
 	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 						DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);	

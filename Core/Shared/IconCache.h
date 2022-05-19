@@ -16,7 +16,7 @@
 class CIconCache  
 {
 public:
-	CIconCache(int cx, int cy);
+	CIconCache(BOOL bLargeIcons);
 	virtual ~CIconCache();
 
 	BOOL Add(const CString& sName, HBITMAP hbm, COLORREF crMask = CLR_NONE);
@@ -29,10 +29,11 @@ public:
 	
 	void Clear();
 	BOOL Draw(CDC* pDC, const CString& sImageName, POINT pt, UINT nStyle = ILD_TRANSPARENT);
+	int GetIconSize() const { return m_nIconSize; }
 	
 protected:
 	CMap<CString, LPCTSTR, int, int&> m_mapIndices;
-	CSize m_sizeIcon;
+	int m_nIconSize;
 	CImageList m_ilImages;
 
 protected:

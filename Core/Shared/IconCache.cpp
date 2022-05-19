@@ -12,9 +12,9 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CIconCache::CIconCache(int cx, int cy) : m_sizeIcon(max(cx, 16), max(cy, 16))
+CIconCache::CIconCache(BOOL bLargeIcons) : m_nIconSize(0)
 {
-	GraphicsMisc::ScaleByDPIFactor(&m_sizeIcon);
+	m_nIconSize = GraphicsMisc::ScaleByDPIFactor(bLargeIcons ? 32 : 16);
 }
 
 CIconCache::~CIconCache()
@@ -26,7 +26,7 @@ BOOL CIconCache::Add(const CString& sName, HBITMAP hbm, COLORREF crMask)
 {
 	if (IsValidName(sName) && hbm)
 	{
-		CIcon icon(CEnBitmap::ExtractIcon(hbm, crMask, m_sizeIcon.cx, m_sizeIcon.cy));
+		CIcon icon(CEnBitmap::ExtractIcon(hbm, crMask, m_nIconSize, m_nIconSize));
 		ASSERT(icon.IsValid());
 
 		return Add(sName, icon);
@@ -47,7 +47,7 @@ BOOL CIconCache::Add(const CString& sName, HICON hIcon)
 	{
 		// create image list first time only
 		if (m_ilImages.GetSafeHandle() ||
-			m_ilImages.Create(m_sizeIcon.cx, m_sizeIcon.cy, ILC_COLOR32 | ILC_MASK, 0, 1))
+			m_ilImages.Create(m_nIconSize, m_nIconSize, ILC_COLOR32 | ILC_MASK, 0, 1))
 		{
 			int nImage = m_ilImages.Add(hIcon);
 
@@ -67,7 +67,7 @@ BOOL CIconCache::Add(const CString& sName, const CString& sImagePath, COLORREF c
 {
 	if (IsValidName(sName) && !sImagePath.IsEmpty())
 	{
-		CIcon icon(CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_sizeIcon.cx, m_sizeIcon.cy));
+		CIcon icon(CEnBitmap::LoadImageFileAsIcon(sImagePath, crBack, m_nIconSize, m_nIconSize));
 		ASSERT(icon.IsValid());
 
 		return Add(sName, icon);
