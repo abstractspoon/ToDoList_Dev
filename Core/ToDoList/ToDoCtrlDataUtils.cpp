@@ -572,11 +572,10 @@ BOOL CTDCTaskMatcher::TaskMatches(const TODOITEM* pTDI, const TODOSTRUCTURE* pTD
 				TDCCADATA data;
 				pTDI->GetCustomAttributeValue(sUniqueID, data);
 
-				if (ValueMatches(data, pDef->GetAttributeType(), rule, bCaseSensitive, sWhatMatched))
-				{
-					bMatch = TRUE;
+				bMatch = ValueMatches(data, pDef->GetAttributeType(), rule, bCaseSensitive, sWhatMatched);
+				
+				if (bMatch)
 					nWhatMatched = pDef->GetAttributeID();
-				}			
 			}
 			else
 			{
