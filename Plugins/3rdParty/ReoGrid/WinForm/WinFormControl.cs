@@ -351,6 +351,7 @@ namespace unvell.ReoGrid
 		{
 			private readonly ReoGridControl control;
 			internal InputTextBox editTextbox;
+			internal ToolTip cellTooltip;
 
 			public WinFormControlAdapter(ReoGridControl control)
 			{
@@ -481,17 +482,22 @@ namespace unvell.ReoGrid
 
 			public void ChangeSelectionCursor(CursorStyle cursor)
 			{
+				Cursor requestedCursor = null;
+
 				switch (cursor)
 				{
 					default:
 					case CursorStyle.PlatformDefault:
-						this.control.internalCurrentCursor = this.control.CellsSelectionCursor;
+						requestedCursor = this.control.CellsSelectionCursor;
 						break;
 
 					case CursorStyle.Hand:
-						this.control.internalCurrentCursor = Cursors.Hand;
+						requestedCursor = Cursors.Hand;
 						break;
 				}
+
+				if ((requestedCursor != null) && (requestedCursor != this.control.internalCurrentCursor))
+					this.control.internalCurrentCursor = requestedCursor;
 			}
 
 			#endregion // Cursor & Context Menu
@@ -501,6 +507,7 @@ namespace unvell.ReoGrid
 			{
 				var rect = new WFRect((int)Math.Round(bounds.Left), (int)Math.Round(bounds.Top),
 					(int)Math.Round(bounds.Width), (int)Math.Round(bounds.Height));
+				rect.Inflate(-2, -1);
 
 				editTextbox.SuspendLayout();
 				editTextbox.Bounds = rect;
@@ -710,9 +717,40 @@ namespace unvell.ReoGrid
 				return this.control.PointToScreen(Point.Round(p));
 			}
 
+			public Graphics.Point PointToClient(Graphics.Point p)
+			{
+				return this.control.PointToClient(Point.Round(p));
+			}
+
 			public void ShowTooltip(Graphics.Point point, string content)
 			{
+				if (!string.IsNullOrEmpty(content))
+				{
+					if (this.cellTooltip == null)
+					{
+						this.cellTooltip = new ToolTip();
+						this.cellTooltip.InitialDelay = 500;
+						this.cellTooltip.UseFading = true;
+						this.cellTooltip.UseAnimation = true;
+					}
+
+					this.cellTooltip.Show(content, this.control, Point.Round(point));
+				}
+				else
+				{
+					HideTooltip();
+				}
 			}
+
+			public void HideTooltip()
+			{
+				if (this.cellTooltip != null)
+				{
+					this.cellTooltip.Hide(this.control);
+					this.cellTooltip = null;
+				}
+			}
+
 
 			#endregion // IControlAdapter Members
 		}
@@ -1387,6 +1425,7 @@ namespace unvell.ReoGrid
 		{
 			base.OnGotFocus(e);
 
+			this.adapter.HideTooltip();
 			Invalidate();
 			Update();
 		}

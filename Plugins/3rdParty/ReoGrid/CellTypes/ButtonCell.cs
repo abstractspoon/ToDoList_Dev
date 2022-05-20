@@ -199,10 +199,10 @@ namespace unvell.ReoGrid.CellTypes
 		/// Return false to disable edit operation for this cell.
 		/// </summary>
 		/// <returns>False to disable edit operation for this cell.</returns>
-		public override bool OnStartEdit()
-		{
-			return false;
-		}
+// 		public override bool OnStartEdit()
+// 		{
+// 			return false;
+// 		}
 
 		/// <summary>
 		/// Check whether or not button is pressed.

@@ -3176,6 +3176,17 @@ namespace unvell.ReoGrid.Editor
 			this.formulaBar.Size = new System.Drawing.Size(1002, 28);
 			this.formulaBar.TabIndex = 6;
 			// 
+			// toolStripSeparator15
+			// 
+			this.toolStripSeparator15.Name = "toolStripSeparator15";
+			this.toolStripSeparator15.Size = new System.Drawing.Size(277, 6);
+			// 
+			// editCellToolStripMenuItem
+			// 
+			this.editCellToolStripMenuItem.Name = "editCellToolStripMenuItem";
+			this.editCellToolStripMenuItem.Size = new System.Drawing.Size(280, 30);
+			this.editCellToolStripMenuItem.Text = "Edit Cell";
+			// 
 			// ReoGridEditorControl
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);

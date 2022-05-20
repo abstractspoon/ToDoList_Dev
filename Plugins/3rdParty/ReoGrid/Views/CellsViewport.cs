@@ -1177,7 +1177,8 @@ namespace unvell.ReoGrid.Views
 								cell = sheet.GetMergedCellOfRange(cell);
 							}
 
-							if ((cell != null && cell.body != null) || sheet.HasCellMouseDown)
+							// For now only pass on left button handling to cell
+							if ((cell != null && cell.body != null && buttons == MouseButtons.Left) || sheet.HasCellMouseDown)
 							{
 								var cellRect = sheet.GetCellBounds(pos);
 

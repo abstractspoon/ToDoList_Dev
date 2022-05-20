@@ -188,7 +188,9 @@ namespace unvell.ReoGrid.Main
 		void ChangeBackgroundColor(SolidColor color);
 		bool IsVisible { get; }
 		Point PointToScreen(Point point);
+		Point PointToClient(Point point);
 		void ShowTooltip(Point point, string content);
+		void HideTooltip();
 	}
 
 	internal interface IControlAdapter : ICompViewAdapter, 

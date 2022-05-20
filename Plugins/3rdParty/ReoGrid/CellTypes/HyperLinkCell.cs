@@ -132,6 +132,9 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True if event has been handled.</returns>
 		public override bool OnMouseDown(CellMouseEventArgs e)
 		{
+			if ((Control.ModifierKeys & Keys.Control) != Keys.Control)
+				return false;
+
 			this.IsPressed = true;
 
 			e.Cell.Style.TextColor = ActivateColor;
@@ -168,7 +171,19 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True if event has been handled.</returns>
 		public override bool OnMouseEnter(CellMouseEventArgs e)
 		{
-			e.Worksheet.controlAdapter.ChangeSelectionCursor(CursorStyle.Hand);
+			var cursorPos = System.Drawing.Point.Round(e.Worksheet.controlAdapter.PointToClient(Cursor.Position));
+			cursorPos.Offset(16, 16);
+
+			e.Worksheet.controlAdapter.ShowTooltip(cursorPos, "'CTRL + click' to follow link");
+
+			return false;
+		}
+
+		public override bool OnMouseMove(CellMouseEventArgs e)
+		{
+			if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+				e.Worksheet.controlAdapter.ChangeSelectionCursor(CursorStyle.Hand);
+
 			return false;
 		}
 
@@ -179,8 +194,9 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True if this event has been handled; Otherwise return false.</returns>
 		public override bool OnMouseLeave(CellMouseEventArgs e)
 		{
-			// change current cursor to hand
+			e.Worksheet.controlAdapter.HideTooltip();
 			e.Worksheet.ControlAdapter.ChangeSelectionCursor(CursorStyle.PlatformDefault);
+
 			return false;
 		}
 

@@ -920,9 +920,12 @@ namespace unvell.ReoGrid
 		/// </summary>
 		public void StartEdit()
 		{
-			ValidateAssociation();
+			if (this.worksheet.CanEdit())
+			{
+				ValidateAssociation();
 
-			this.worksheet.StartEdit(this);
+				this.worksheet.StartEdit(this);
+			}
 		}
 
 		/// <summary>

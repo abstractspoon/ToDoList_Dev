@@ -546,6 +546,11 @@ namespace unvell.ReoGrid.Editor
 				}
 			};
 
+			editCellToolStripMenuItem.Click += (s, e) =>
+			{
+				CurrentWorksheet.StartEdit();
+			};
+
 			rowCutToolStripMenuItem.Click += this.cutRangeToolStripMenuItem_Click;
 			rowCopyToolStripMenuItem.Click += this.copyRangeToolStripMenuItem_Click;
 			rowPasteToolStripMenuItem.Click += this.pasteRangeToolStripMenuItem_Click;
@@ -1450,6 +1455,8 @@ namespace unvell.ReoGrid.Editor
 						CanRedo();
 
 					repeatLastActionToolStripMenuItem.Enabled = (CanUndo() || CanRedo());
+
+					editCellToolStripMenuItem.Enabled = worksheet.CanEdit();
 
 					cutToolStripButton.Enabled =
 						cutToolStripMenuItem.Enabled =

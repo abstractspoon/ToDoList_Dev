@@ -62,6 +62,11 @@ namespace unvell.ReoGrid.Rendering
 			return dpi;
 		}
 
+		public static double ScaleByDPI(double val, float baseDPI = 96.0f)
+		{
+			return ((val * GetDPI()) / baseDPI);
+		}
+
 		internal static StringFormat sf = new StringFormat(StringFormat.GenericTypographic)
 		{
 			FormatFlags = StringFormatFlags.MeasureTrailingSpaces
