@@ -224,18 +224,21 @@ namespace MindMapUIExtension
 
         public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
         {
-			UInt32 taskId = m_MindMap.HitTest(new Point(xPos, yPos));
+			var ptScreen = new Point(xPos, yPos);
 
-			if (taskId != 0)
+			if (m_MindMap.HitTestTask(ptScreen) != 0)
 				return UIExtension.HitResult.Task;
 
 			// else
-            return UIExtension.HitResult.Tasklist;
+			if (m_MindMap.RectangleToScreen(m_MindMap.ClientRectangle).Contains(ptScreen))
+				return UIExtension.HitResult.Tasklist;
+			
+			return UIExtension.HitResult.Nowhere;
         }
 
         public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
         {
-			return m_MindMap.HitTest(new Point(xPos, yPos));
+			return m_MindMap.HitTestTask(new Point(xPos, yPos));
         }
 
         public void SetUITheme(UITheme theme)

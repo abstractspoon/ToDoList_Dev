@@ -2794,6 +2794,27 @@ DWORD CKanbanCtrl::HitTestTask(const CPoint& ptScreen) const
 	return m_aColumns.HitTestTask(ptScreen);
 }
 
+int CKanbanCtrl::HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const
+{
+	CKanbanColumnCtrl* pCol = m_aColumns.HitTest(ptScreen);
+	int nCol = m_aColumns.Find(pCol);
+
+	if (nCol != -1)
+	{
+		bHeader = FALSE;
+	}
+	else
+	{
+		CPoint ptHeader(ptScreen);
+		m_header.ScreenToClient(&ptHeader);
+
+		nCol = m_header.HitTest(ptHeader);
+		bHeader = (nCol != -1);
+	}
+	
+	return nCol;
+}
+
 DWORD CKanbanCtrl::GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const
 {
 	BOOL bForward = ((nCmd == IUI_GETPREVVISIBLETASK) || (nCmd == IUI_GETPREVTOPLEVELTASK));

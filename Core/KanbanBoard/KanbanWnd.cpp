@@ -471,12 +471,10 @@ IUI_HITTEST CKanbanWnd::HitTest(POINT ptScreen) const
 		return IUI_TASK;
 
 	// else check elsewhere in ctrl client
-	CRect rKanban;
-	
-	m_ctrlKanban.GetClientRect(rKanban);
-	m_ctrlKanban.ClientToScreen(rKanban);
+	BOOL bHeader;
+	int nCol = m_ctrlKanban.HitTestColumn(ptScreen, bHeader);
 
-	if (rKanban.PtInRect(ptScreen))
+	if ((nCol != -1) && !bHeader)
 		return IUI_TASKLIST;
 
 	// else 

@@ -407,7 +407,7 @@ namespace MindMapUIExtension
             return false;
         }
         		
-		public UInt32 HitTest(Point screenPos)
+		public UInt32 HitTestTask(Point screenPos)
 		{
 			var clientPos = PointToClient(screenPos);
 			var node = HitTestPositions(clientPos);

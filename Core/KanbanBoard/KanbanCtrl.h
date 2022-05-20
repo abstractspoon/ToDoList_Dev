@@ -50,6 +50,7 @@ public:
 
 	DWORD GetNextTask(DWORD dwTaskID, IUI_APPCOMMAND nCmd) const;
 	DWORD HitTestTask(const CPoint& ptScreen) const;
+	int HitTestColumn(const CPoint& ptScreen, BOOL& bHeader) const;
 	void ScrollToSelectedTask();
 
 	BOOL IsTaskLocked(DWORD dwTaskID) const { return m_data.IsLocked(dwTaskID); }
