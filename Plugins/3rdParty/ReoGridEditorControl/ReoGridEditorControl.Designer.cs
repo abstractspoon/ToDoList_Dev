@@ -158,6 +158,8 @@ namespace unvell.ReoGrid.Editor
 			this.columnPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.colFormatCellsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+			this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
+			this.editCellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowCutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowCopyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowPasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -1505,8 +1507,10 @@ namespace unvell.ReoGrid.Editor
 			// cellContextMenuStrip
 			// 
 			this.cellContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.cutRangeToolStripMenuItem,
-            this.copyRangeToolStripMenuItem,
+            this.editCellToolStripMenuItem,
+            this.toolStripSeparator15,
+			this.cutRangeToolStripMenuItem,
+			this.copyRangeToolStripMenuItem,
             this.pasteRangeToolStripMenuItem,
             this.toolStripMenuItem3,
             this.mergeRangeToolStripMenuItem,
@@ -3304,6 +3308,8 @@ namespace unvell.ReoGrid.Editor
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem2;
 		private System.Windows.Forms.ToolStripButton printPreviewToolStripButton;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator10;
+		private System.Windows.Forms.ToolStripSeparator toolStripSeparator15;
+		private System.Windows.Forms.ToolStripMenuItem editCellToolStripMenuItem;
 		private System.Windows.Forms.ToolStripButton cutToolStripButton;
 		private System.Windows.Forms.ToolStripButton copyToolStripButton;
 		private System.Windows.Forms.ToolStripButton pasteToolStripButton;
