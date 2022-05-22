@@ -76,15 +76,6 @@ int CKanbanCustomAttributeDefinitionArray::FindDefinition(const CString& sAttrib
 	return -1;
 }
 
-BOOL CKanbanCustomAttributeDefinitionArray::SetMultiValue(int nDef, BOOL bMultiVal)
-{
-	if (nDef < 0 || nDef >= GetSize())
-		return FALSE;
-
-	ElementAt(nDef).bMultiValue = bMultiVal;
-	return TRUE;
-}
-
 //////////////////////////////////////////////////////////////////////
 
 BOOL CKanbanValueMap::HasValue(const CString& sValue) const

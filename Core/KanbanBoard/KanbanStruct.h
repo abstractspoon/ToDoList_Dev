@@ -38,8 +38,6 @@ public:
 	int AddDefinition(const CString& sAttribID, const CString& sAttribName, BOOL bMultiVal = FALSE);
 	BOOL HasDefinition(const CString& sAttribID) const;
 	int FindDefinition(const CString& sAttribID) const;
-
-	BOOL SetMultiValue(int nDef, BOOL bMultiVal = TRUE);
 };
 
 /////////////////////////////////////////////////////////////////////////////

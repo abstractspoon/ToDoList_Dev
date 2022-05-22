@@ -961,16 +961,11 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 
 				while (nID--)
 				{
-					KANBANCUSTOMATTRIBDEF& def = m_aCustomAttribDefs[nID];
-
+					const KANBANCUSTOMATTRIBDEF& def = m_aCustomAttribDefs[nID];
 					CString sValue(pTasks->GetTaskCustomAttributeData(hTask, def.sAttribID, true));
-					CStringArray aCustValues;
 
-					if (!sValue.IsEmpty())
-					{
-						if (Misc::Split(sValue, aCustValues) > 1)
-							def.bMultiValue = TRUE;
-					}
+					CStringArray aCustValues;
+					Misc::Split(sValue, aCustValues);
 
 					if (UpdateTrackableTaskAttribute(pKI, def.sAttribID, aCustValues))
 					{
@@ -1097,38 +1092,24 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks)
 {
 	BOOL bChange = FALSE;
 
-	if (pTasks->IsAttributeAvailable(TDCA_STATUS))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_STATUS);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_ALLOCTO))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_ALLOCTO);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_CATEGORY))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_CATEGORY);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_ALLOCBY))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_ALLOCBY);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_TAGS))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_TAGS);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_VERSION))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_VERSION);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_PRIORITY))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_PRIORITY);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_RISK))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_RISK);
-	
-	if (pTasks->IsAttributeAvailable(TDCA_CUSTOMATTRIB))
-		bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_CUSTOMATTRIB);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_STATUS);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_ALLOCTO);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_CATEGORY);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_ALLOCBY);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_TAGS);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_VERSION);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_PRIORITY);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_RISK);
+	bChange |= UpdateGlobalAttributeValues(pTasks, TDCA_CUSTOMATTRIB);
 	
 	return bChange;
 }
 
 BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_ATTRIBUTE nAttribute)
 {
+	if (!pTasks->IsAttributeAvailable(nAttribute))
+		return FALSE;
+
 	switch (nAttribute)
 	{
 	case TDCA_PRIORITY:
@@ -1192,7 +1173,11 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 					CString sAttribID(pTasks->GetCustomAttributeID(nCustom));
 					CString sAttribName(pTasks->GetCustomAttributeLabel(nCustom));
 
-					int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName);
+					// Hack (values from tdcenum.h)
+					DWORD dwListType = (pTasks->GetCustomAttributeType(nCustom) & 0xff00);
+					BOOL bMultiList = ((dwListType == 0x0300) || (dwListType == 0x0400));
+					
+					int nDef = m_aCustomAttribDefs.AddDefinition(sAttribID, sAttribName, bMultiList);
 
 					// Add 'default' values to the map
 					CKanbanValueMap* pDefValues = m_mapGlobalAttributeValues.GetAddMapping(sAttribID);
@@ -1210,12 +1195,7 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 					CStringArray aDefValues;
 					
 					if (Misc::Split(sDefData, aDefValues, '\n'))
-					{
 						pDefValues->SetValues(aDefValues);
-
-						if (aDefValues.GetSize() > 1)
-							m_aCustomAttribDefs.SetMultiValue(nDef);
-					}
 
 					CStringArray aAutoValues;
 					Misc::Split(sAutoData, aAutoValues, '\n');
@@ -1226,6 +1206,10 @@ BOOL CKanbanCtrl::UpdateGlobalAttributeValues(const ITASKLISTBASE* pTasks, TDC_A
 
 			return bChange;
 		}
+		break;
+
+	default:
+		ASSERT(0);
 		break;
 	}
 
