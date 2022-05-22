@@ -125,44 +125,6 @@ namespace unvell.ReoGrid
 		/// <returns>Range position that indicates the actually filled range.</returns>
 		public RangePosition PasteFromString(CellPosition startPos, string content)
 		{
-			//int rows = 0, cols = 0;
-
-			//string[] lines = content.Split(new string[] { "\r\n" }, StringSplitOptions.None);
-			//for (int r = 0; r < lines.Length; r++)
-			//{
-			//	string line = lines[r];
-			//	if (line.EndsWith("\n")) line = line.Substring(0, line.Length - 1);
-			//	//line = line.Trim();
-
-			//	if (line.Length > 0)
-			//	{
-			//		string[] tabs = line.Split('\t');
-			//		cols = Math.Max(cols, tabs.Length);
-
-			//		for (int c = 0; c < tabs.Length; c++)
-			//		{
-			//			int toRow = startPos.Row + r;
-			//			int toCol = startPos.Col + c;
-
-			//			if (!this.IsValidCell(toRow, toCol))
-			//			{
-			//				throw new RangeIntersectionException(new RangePosition(toRow, toCol, 1, 1));
-			//			}
-
-			//			string text = tabs[c];
-
-			//			if (text.StartsWith("\"") && text.EndsWith("\""))
-			//			{
-			//				text = text.Substring(1, text.Length - 2);
-			//			}
-
-			//			SetCellData(toRow, toCol, text);
-			//		}
-
-			//		rows++;
-			//	}
-			//}
-
 			object[,] parsedData = RGUtility.ParseTabbedString(content);
 
 			int rows = parsedData.GetLength(0);
@@ -171,6 +133,8 @@ namespace unvell.ReoGrid
 			var range = new RangePosition(startPos.Row, startPos.Col, rows, cols);
 
 			this.SetRangeData(range, parsedData);
+
+			AfterPaste?.Invoke(this, new RangeEventArgs(range));
 
 			return range;
 		}
@@ -261,6 +225,29 @@ namespace unvell.ReoGrid
 		/// 
 		/// Todo: Copy border and cell style from Excel.
 		/// </summary>
+		public bool Paste(string text)
+		{
+			if (IsEditing)
+			{
+				this.controlAdapter.EditControlPaste(text);
+			}
+			else
+			{
+				// Paste method will always perform action to do paste
+				if (this.HasSettings(WorksheetSettings.Edit_Readonly)
+					|| this.selectionRange.IsEmpty)
+				{
+					return false;
+				}
+
+				PasteTextInternal(text);
+
+				AfterPaste?.Invoke(this, new RangeEventArgs(this.selectionRange));
+			}
+
+			return true;
+		}
+
 		public bool Paste()
 		{
 			if (IsEditing)
@@ -285,18 +272,16 @@ namespace unvell.ReoGrid
 
 					PartialGrid partialGrid = null;
 					string clipboardText = null;
+					System.Drawing.Image image = null;
 
 					DataObject data = Clipboard.GetDataObject() as DataObject;
+
 					if (data != null)
 					{
 						partialGrid = data.GetData(ClipBoardDataFormatIdentify) as PartialGrid;
-
-						if (data.ContainsText())
-						{
-							clipboardText = data.GetText();
-						}
+						clipboardText = data.GetText();
+						image = data.GetImage();
 					}
-
 
 					if (partialGrid != null)
 					{
@@ -415,30 +400,13 @@ namespace unvell.ReoGrid
 
 						#endregion // Partial Grid Pasting
 					}
+					else if (image != null)
+					{
+						int breakpoint = 0;
+					}
 					else if (!string.IsNullOrEmpty(clipboardText))
 					{
-						#region Plain Text Pasting
-						var arrayData = RGUtility.ParseTabbedString(clipboardText);
-
-						int rows = Math.Max(selectionRange.Rows, arrayData.GetLength(0));
-						int cols = Math.Max(selectionRange.Cols, arrayData.GetLength(1));
-
-						var targetRange = new RangePosition(selectionRange.Row, selectionRange.Col, rows, cols);
-						if (!RaiseBeforePasteEvent(targetRange))
-						{
-							return false;
-						}
-
-						if (this.controlAdapter != null)
-						{
-							var actionSupportedControl = this.controlAdapter.ControlInstance as IActionControl;
-
-							if (actionSupportedControl != null)
-							{
-								actionSupportedControl.DoAction(this, new SetRangeDataAction(targetRange, arrayData));
-							}
-						}
-						#endregion // Plain Text Pasting
+						PasteTextInternal(clipboardText);
 					}
 				}
 				catch (Exception ex)
@@ -457,13 +425,39 @@ namespace unvell.ReoGrid
 					RequestInvalidate();
 				}
 
-				if (AfterPaste != null)
-				{
-					AfterPaste(this, new RangeEventArgs(this.selectionRange));
-				}
+				AfterPaste?.Invoke(this, new RangeEventArgs(this.selectionRange));
 			}
 
 			return true;
+		}
+
+		private bool PasteTextInternal(string text)
+		{
+			#region Plain Text Pasting
+			var arrayData = RGUtility.ParseTabbedString(text);
+
+			int rows = Math.Max(selectionRange.Rows, arrayData.GetLength(0));
+			int cols = Math.Max(selectionRange.Cols, arrayData.GetLength(1));
+
+			var targetRange = new RangePosition(selectionRange.Row, selectionRange.Col, rows, cols);
+			if (!RaiseBeforePasteEvent(targetRange))
+			{
+				return false;
+			}
+
+			if (this.controlAdapter != null)
+			{
+				var actionSupportedControl = this.controlAdapter.ControlInstance as IActionControl;
+
+				if (actionSupportedControl != null)
+				{
+					actionSupportedControl.DoAction(this, new SetRangeDataAction(targetRange, arrayData));
+					return true;
+				}
+			}
+			#endregion // Plain Text Pasting
+
+			return false;
 		}
 
 		private bool RaiseBeforePasteEvent(RangePosition range)

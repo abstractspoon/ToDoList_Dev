@@ -158,8 +158,6 @@ namespace unvell.ReoGrid.Editor
 			this.columnPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.colFormatCellsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
-			this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
-			this.editCellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowCutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowCopyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowPasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -181,6 +179,8 @@ namespace unvell.ReoGrid.Editor
 			this.toolStripMenuItem33 = new System.Windows.Forms.ToolStripSeparator();
 			this.rowPropertiesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.rowFormatCellsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.toolStripSeparator15 = new System.Windows.Forms.ToolStripSeparator();
+			this.editCellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.cellContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.cutRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.copyRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -1504,13 +1504,24 @@ namespace unvell.ReoGrid.Editor
 			this.rowFormatCellsToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
 			this.rowFormatCellsToolStripMenuItem.Text = "Format Cells...";
 			// 
+			// toolStripSeparator15
+			// 
+			this.toolStripSeparator15.Name = "toolStripSeparator15";
+			this.toolStripSeparator15.Size = new System.Drawing.Size(198, 6);
+			// 
+			// editCellToolStripMenuItem
+			// 
+			this.editCellToolStripMenuItem.Name = "editCellToolStripMenuItem";
+			this.editCellToolStripMenuItem.Size = new System.Drawing.Size(201, 22);
+			this.editCellToolStripMenuItem.Text = "Edit Cell";
+			// 
 			// cellContextMenuStrip
 			// 
 			this.cellContextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.editCellToolStripMenuItem,
             this.toolStripSeparator15,
-			this.cutRangeToolStripMenuItem,
-			this.copyRangeToolStripMenuItem,
+            this.cutRangeToolStripMenuItem,
+            this.copyRangeToolStripMenuItem,
             this.pasteRangeToolStripMenuItem,
             this.toolStripMenuItem3,
             this.mergeRangeToolStripMenuItem,
@@ -1520,7 +1531,7 @@ namespace unvell.ReoGrid.Editor
             this.toolStripMenuItem6,
             this.formatCellToolStripMenuItem});
 			this.cellContextMenuStrip.Name = "cellContextMenuStrip";
-			this.cellContextMenuStrip.Size = new System.Drawing.Size(202, 176);
+			this.cellContextMenuStrip.Size = new System.Drawing.Size(202, 226);
 			// 
 			// cutRangeToolStripMenuItem
 			// 
@@ -3179,17 +3190,6 @@ namespace unvell.ReoGrid.Editor
 			this.formulaBar.Padding = new System.Windows.Forms.Padding(0, 0, 0, 1);
 			this.formulaBar.Size = new System.Drawing.Size(1002, 28);
 			this.formulaBar.TabIndex = 6;
-			// 
-			// toolStripSeparator15
-			// 
-			this.toolStripSeparator15.Name = "toolStripSeparator15";
-			this.toolStripSeparator15.Size = new System.Drawing.Size(277, 6);
-			// 
-			// editCellToolStripMenuItem
-			// 
-			this.editCellToolStripMenuItem.Name = "editCellToolStripMenuItem";
-			this.editCellToolStripMenuItem.Size = new System.Drawing.Size(280, 30);
-			this.editCellToolStripMenuItem.Text = "Edit Cell";
 			// 
 			// ReoGridEditorControl
 			// 

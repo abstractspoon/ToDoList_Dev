@@ -409,6 +409,16 @@ namespace unvell.ReoGrid
 			RequestInvalidate();
 		}
 
+		public string GetCellBodyType(int row, int col)
+		{
+			var cell = cells[row, col];
+
+			if (cell == null || cell.body == null)
+				return "";
+
+			return cell.body.GetType().ToString();
+		}
+
 		/// <summary>
 		/// Remove cell body from specified cell
 		/// </summary>

@@ -5,10 +5,14 @@ using System.Drawing;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using System.Windows.Resources;
 using System.IO;
+using System.Net;
 
 using unvell.ReoGrid;
+using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Editor;
+using unvell.ReoGrid.CellTypes;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -57,6 +61,19 @@ namespace SpreadsheetContentControl
 			m_Trans.Translate(CellContextMenu.Items);
 			m_Trans.Translate(HeaderContextMenu.Items);
 			m_Trans.Translate(ColumnContextMenu.Items);
+
+			GridControl.WorksheetInserted += (s, e) =>
+			{
+				e.Worksheet.AfterPaste += new EventHandler<RangeEventArgs>(OnAfterPaste);
+				e.Worksheet.AfterCellEdit += new EventHandler<CellAfterEditEventArgs>(OnAfterCellEdit);
+			};
+
+			GridControl.WorksheetRemoved += (s, e) =>
+			{
+				e.Worksheet.AfterPaste -= new EventHandler<RangeEventArgs>(OnAfterPaste);
+				e.Worksheet.AfterCellEdit -= new EventHandler<CellAfterEditEventArgs>(OnAfterCellEdit);
+			};
+
 		}
 
 		public Byte[] GetContent()
@@ -137,13 +154,10 @@ namespace SpreadsheetContentControl
 			if (selection == null)
 				return false;
 
-			for (int row = selection.StartPos.Row; row <= selection.EndPos.Row; row++)
-			{
-				for (int col = selection.StartPos.Col; col <= selection.EndPos.Col; col++)
-				{
-					GridControl.CurrentWorksheet.PasteFromString(new CellPosition(row, col), content);
-				}
-			}
+			if (GridControl.CurrentWorksheet.IsEditing)
+				GridControl.CurrentWorksheet.Paste(content);
+			else
+				GridControl.CurrentWorksheet.PasteFromString(selection.StartPos, content);
 
 			NotifyParentContentChange();
 			return true;
@@ -400,6 +414,109 @@ namespace SpreadsheetContentControl
 			CommandHandling.RemoveCommand("slashRightSolidToolStripButton", this.ToolBar.Items);
 
 			CommandHandling.RemoveCommand("zoomToolStripDropDownButton", this.FontBar.Items);
+
+		}
+
+		private void OnAfterPaste(object sender, RangeEventArgs e)
+		{
+			for (int row = e.Range.Row; row <= e.Range.EndRow; row++)
+			{
+				for (int col = e.Range.Col; col <= e.Range.EndCol; col++)
+				{
+					string newData = GridControl.CurrentWorksheet.GetCellText(row, col);
+
+					HandleCellTextUpdate(row, col, newData);
+				}
+			}
+		}
+
+		private bool IsValidHref(string href)
+		{
+			if (Uri.IsWellFormedUriString(href, UriKind.Absolute))
+				return true;
+
+			var parser = new UrlParser();
+
+			return (parser.GetUrlCount(href) == 1);
+		}
+
+		private void HandleCellTextUpdate(int row, int col, string newData)
+		{
+			// Start with URL
+			if (IsValidHref(newData))
+			{
+				Image image = null;
+
+				using (var client = new WebClient())
+				{
+					using (var stream = client.OpenRead(newData))
+					{
+						try
+						{
+							image = new Bitmap(stream);
+							GridControl.CurrentWorksheet.SetCellBody(row, col, new ImageCell(image, ImageCellViewMode.Clip));
+						}
+						catch (Exception e)
+						{
+							image = null;
+						}
+					}
+				}
+
+				if (image == null)
+				{
+					GridControl.CurrentWorksheet.SetCellBody(row, col, new HyperlinkCell(newData));
+				}
+
+				return;
+			}
+
+			// Then try file path
+			try
+			{
+				if (File.Exists(newData))
+				{
+					Image image = null;
+
+					try
+					{
+						image = new Bitmap(newData);
+						GridControl.CurrentWorksheet.SetCellBody(row, col, new ImageCell(image, ImageCellViewMode.Clip));
+					}
+					catch (Exception e)
+					{
+						image = null;
+					}
+
+					if (image == null)
+					{
+						var uri = new Uri(newData);
+						GridControl.CurrentWorksheet.SetCellBody(row, col, new HyperlinkCell(uri.AbsoluteUri));
+					}
+
+					return;
+				}
+			}
+			catch (Exception e)
+			{
+			}
+
+			// Then other 'things'
+			// TODO
+		}
+
+		private void OnAfterCellEdit(object sender, CellAfterEditEventArgs e)
+		{
+			if (e.EndReason == EndEditReason.NormalFinish)
+			{
+				string oldData = (e.Cell.Data as string);
+				string newData = (e.NewData as string);
+
+				if ((oldData != null) && (newData != null) && !string.IsNullOrEmpty(newData) && !newData.Equals(oldData))
+				{
+					HandleCellTextUpdate(e.Cell.Row, e.Cell.Column, newData);
+				}
+			}
 		}
 
 		public void SetUITheme(UITheme theme)

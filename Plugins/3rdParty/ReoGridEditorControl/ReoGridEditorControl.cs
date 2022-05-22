@@ -934,6 +934,8 @@ namespace unvell.ReoGrid.Editor
 					cell.Body = System.Activator.CreateInstance((Type)menuItem.Tag) as ICellBody;
 				}
 			}
+
+			UpdateMenuAndToolStrips();
 		}
 
 		void textWrapToolStripButton_Click(object sender, EventArgs e)
@@ -1477,6 +1479,37 @@ namespace unvell.ReoGrid.Editor
 						worksheet.CanPaste();
 
 					unfreezeToolStripMenuItem.Enabled = worksheet.IsFrozen;
+
+					if (worksheet.SelectionRange.IsSingleCell)
+					{
+						string cellType = worksheet.GetCellBodyType(worksheet.SelectionRange.Row, worksheet.SelectionRange.Col);
+
+						foreach (var item in changeCellsTypeToolStripMenuItem.DropDownItems)
+						{
+							var menuItem = (item as ToolStripMenuItem);
+
+							if (menuItem == null)
+								continue;
+
+							if (menuItem.Tag == null)
+								menuItem.Checked = string.IsNullOrEmpty(cellType);
+							else
+								menuItem.Checked = menuItem.Tag.ToString().Equals(cellType);
+						}
+
+						foreach (var item in changeCellsTypeToolStripMenuItem2.DropDownItems)
+						{
+							var menuItem = (item as ToolStripMenuItem);
+
+							if (menuItem == null)
+								continue;
+
+							if (menuItem.Tag == null)
+								menuItem.Checked = string.IsNullOrEmpty(cellType);
+							else
+								menuItem.Checked = menuItem.Tag.ToString().Equals(cellType);
+						}
+					}
 
 					isUIUpdating = false;
 				};

@@ -794,20 +794,32 @@ namespace unvell.ReoGrid
 						}
 					}
 
-					if (type == typeof(CellTypes.ImageCell))
+					if (type == typeof(CellTypes.ImageCell) && xmlCell.data != null)
 					{
-						int leftIndex = xmlCell.data.IndexOf(',');
-						if (leftIndex > 0)
+						int comma = xmlCell.data.IndexOf(',');
+
+						if (comma > 0)
 						{
-							string mimetype = xmlCell.data.Substring(0, leftIndex);
+							string mimetype = xmlCell.data.Substring(0, comma);
+
 							if (mimetype == "image/png")
 							{
-								string imgcode = xmlCell.data.Substring(leftIndex + 1);
+								string rest = xmlCell.data.Substring(comma + 1);
+								comma = rest.IndexOf(',');
 
-								using (var ms = new MemoryStream(Convert.FromBase64String(imgcode)))
+								var mode = CellTypes.ImageCellViewMode.Clip;
+
+								if ((comma > 0) && Enum.TryParse(rest.Substring(0, comma), out mode))
+								{
+									rest = rest.Substring(comma + 1);
+								}
+
+								using (var ms = new MemoryStream(Convert.FromBase64String(rest)))
 								{
 									var img = System.Drawing.Image.FromStream(ms);
+
 									((CellTypes.ImageCell)cell.body).Image = img;
+									((CellTypes.ImageCell)cell.body).ViewMode = mode;
 								}
 
 								cellValue = null;
@@ -1503,11 +1515,15 @@ namespace unvell.ReoGrid
 										 if (cell.body is CellTypes.ImageCell)
 										 {
 											 var imageBody = (CellTypes.ImageCell)cell.body;
-											 using (var ms = new MemoryStream(4096))
-											 {
-												 imageBody.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
 
-												 xmlCell.data = "image/png," + Convert.ToBase64String(ms.ToArray());
+											 if (imageBody.Image != null)
+											 {
+												 using (var ms = new MemoryStream(4096))
+												 {
+													 imageBody.Image.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+
+													 xmlCell.data = "image/png," + imageBody.ViewMode.ToString() + "," + Convert.ToBase64String(ms.ToArray());
+												 }
 											 }
 										 }
 

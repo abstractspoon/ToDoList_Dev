@@ -175,8 +175,10 @@ namespace unvell.ReoGrid.CellTypes
 					g.PopClip();
 				}
 			}
-
-			dc.DrawCellText();
+			else
+			{
+				dc.DrawCellText();
+			}
 		}
 		#endregion // OnPaint
 

@@ -277,7 +277,7 @@ namespace unvell.ReoGrid
 
 			this.adapter = new WinFormControlAdapter(this);
 
-			this.editTextbox = new InputTextBox(this) { Visible = false, BorderStyle = System.Windows.Forms.BorderStyle.None, Multiline = true };
+			this.editTextbox = new InputTextBox(this) { Visible = false, BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle, Multiline = true };
 			this.editTextbox.TextChanged += (s, e) => EditTextChanged?.Invoke(this, e);
 			this.editTextbox.LostFocus += (s, e) =>
 			{
@@ -507,7 +507,6 @@ namespace unvell.ReoGrid
 			{
 				var rect = new WFRect((int)Math.Round(bounds.Left), (int)Math.Round(bounds.Top),
 					(int)Math.Round(bounds.Width), (int)Math.Round(bounds.Height));
-				rect.Inflate(-2, -1);
 
 				editTextbox.SuspendLayout();
 				editTextbox.Bounds = rect;
@@ -546,6 +545,11 @@ namespace unvell.ReoGrid
 			public string GetEditControlText()
 			{
 				return editTextbox.Text;
+			}
+
+			public void EditControlPaste(string text)
+			{
+				this.editTextbox.Paste(text);
 			}
 
 			public void EditControlSelectAll()

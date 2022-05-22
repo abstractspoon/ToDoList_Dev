@@ -130,6 +130,7 @@ namespace unvell.ReoGrid.Main
 
 		void EditControlCopy();
 		void EditControlPaste();
+		void EditControlPaste(string text);
 		void EditControlCut();
 
 		void EditControlUndo();
