@@ -16,6 +16,13 @@
 
 class CStdioFileEx;
 
+enum ICALEXPORTAS
+{
+	ICEA_EVENT,
+	ICEA_TODO,
+	ICEA_APPT,
+};
+
 class CiCalExporter : public IExportTasklist  
 {
 public:
@@ -39,7 +46,8 @@ public:
 
 protected:
 	CIcon m_icon;
-	BOOL EXPORTASTODO, NODUEDATEISTODAYORSTART;
+	BOOL NODUEDATEISTODAYORSTART;
+	ICALEXPORTAS EXPORTFORMAT;
 
 protected:
 	int ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CString& sParentUID, 

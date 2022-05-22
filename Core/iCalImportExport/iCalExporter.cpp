@@ -26,7 +26,7 @@ static char THIS_FILE[]=__FILE__;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CiCalExporter::CiCalExporter() : EXPORTASTODO(TRUE), NODUEDATEISTODAYORSTART(FALSE)
+CiCalExporter::CiCalExporter() : EXPORTFORMAT(ICEA_APPT), NODUEDATEISTODAYORSTART(FALSE)
 {
 	m_icon.Load(IDI_ICALENDAR);
 }
@@ -43,7 +43,7 @@ void CiCalExporter::SetLocalizer(ITransText* /*pTT*/)
 void CiCalExporter::WriteHeader(CStdioFileEx& fileOut)
 {
 	WriteString(fileOut, _T("BEGIN:VCALENDAR"));
-	WriteString(fileOut, _T("PRODID:iCalExporter (c) AbstractSpoon 2009-19"));
+	WriteString(fileOut, _T("PRODID:iCalExporter (c) AbstractSpoon 2009-22"));
 	WriteString(fileOut, _T("VERSION:2.0"));
 }
 
@@ -128,20 +128,20 @@ bool CiCalExporter::InitConsts(DWORD dwFlags, IPreferences* pPrefs, LPCTSTR szKe
 	CString sKey(szKey);
 	sKey += _T("\\iCalExporter");
 
-	EXPORTASTODO = pPrefs->GetProfileInt(szKey, _T("ExportAsTodos"), FALSE);
+	EXPORTFORMAT = (ICALEXPORTAS)pPrefs->GetProfileInt(szKey, _T("ExportFormat"), ICEA_APPT);
 
 	BOOL bSilent = ((dwFlags & IIEF_SILENT) != 0);
 
 	if (!bSilent)
 	{
-		CiCalExporterOptionsDlg dlg(EXPORTASTODO);
+		CiCalExporterOptionsDlg dlg(EXPORTFORMAT);
 
 		if (dlg.DoModal() != IDOK)
 			return false;
 
-		EXPORTASTODO = dlg.GetWantExportTasksAsTodos();
+		EXPORTFORMAT = dlg.GetTaskExportFormat();
 
-		pPrefs->WriteProfileInt(szKey, _T("ExportAsTodos"), EXPORTASTODO);
+		pPrefs->WriteProfileInt(szKey, _T("ExportFormat"), EXPORTFORMAT);
 	}
 
 	return true;
@@ -230,7 +230,7 @@ int CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 	if (GetTaskDates(pTasks, hTask, dtStart, dtEnd, dtDue))
 	{
 		// header
-		if (EXPORTASTODO)
+		if (EXPORTFORMAT == ICEA_TODO)
 			WriteString(fileOut, _T("BEGIN:VTODO"));
 		else
 			WriteString(fileOut, _T("BEGIN:VEVENT"));
@@ -249,27 +249,31 @@ int CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 		WriteString(fileOut, _T("UID:%s"), sUID);
 		WriteString(fileOut, _T("PERCENT:%lu"), pTasks->GetTaskPercentDone(hTask, FALSE));
 
-		if (EXPORTASTODO)
+		if (EXPORTFORMAT == ICEA_TODO)
 		{
 			WriteString(fileOut, _T("DELEGATED-TO:%s"), pTasks->GetTaskAllocatedTo(hTask, 0));
 			WriteString(fileOut, _T("DELEGATED-FROM:%s"), pTasks->GetTaskAllocatedBy(hTask));
 		}
-		else
+		else if (EXPORTFORMAT == ICEA_EVENT)
 		{
 			WriteString(fileOut, _T("ATTENDEE:%s"), pTasks->GetTaskAllocatedTo(hTask, 0));
 		}
+		// else appointment
 
 		// encode file link into ORGANIZER if it is an email address
-		CString sUrl(pTasks->GetTaskFileLinkPath(hTask));
-
-		if (!sUrl.IsEmpty())
+		if (EXPORTFORMAT != ICEA_APPT)
 		{
-			sUrl.MakeLower();
+			CString sUrl(pTasks->GetTaskFileLinkPath(hTask));
 
-			if (!EXPORTASTODO && (sUrl.Find(_T("mailto:")) == 0))
-				WriteString(fileOut, _T("ORGANIZER;CN=%s:%s"), pTasks->GetTaskAllocatedBy(hTask), sUrl);
-			else
-				WriteString(fileOut, _T("URL:%s"), sUrl);
+			if (!sUrl.IsEmpty())
+			{
+				sUrl.MakeLower();
+
+				if (!EXPORTFORMAT && (sUrl.Find(_T("mailto:")) == 0))
+					WriteString(fileOut, _T("ORGANIZER;CN=%s:%s"), pTasks->GetTaskAllocatedBy(hTask), sUrl);
+				else
+					WriteString(fileOut, _T("URL:%s"), sUrl);
+			}
 		}
 
 		// don't export our 'special' priorities
@@ -313,7 +317,7 @@ int CiCalExporter::ExportTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, cons
 		WriteString(fileOut, _T("RELATED-TO;RELTYPE=PARENT:%s"), sParentUID);
 		
 		// footer
-		if (EXPORTASTODO)
+		if (EXPORTFORMAT == ICEA_TODO)
 			WriteString(fileOut, _T("END:VTODO"));
 		else
 			WriteString(fileOut, _T("END:VEVENT"));

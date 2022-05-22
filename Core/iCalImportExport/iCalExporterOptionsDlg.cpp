@@ -10,10 +10,10 @@
 
 IMPLEMENT_DYNAMIC(CiCalExporterOptionsDlg, CDialog)
 
-CiCalExporterOptionsDlg::CiCalExporterOptionsDlg(BOOL bExportAsTasks, CWnd* pParent /*=NULL*/)
+CiCalExporterOptionsDlg::CiCalExporterOptionsDlg(ICALEXPORTAS nExportFormat, CWnd* pParent /*=NULL*/)
 	: CDialog(IDD_EXPORTOPTIONSDIALOG, pParent)
 {
-	m_nExportAs = (bExportAsTasks ? 1 : 0);
+	m_nExportFormat = nExportFormat;
 }
 
 CiCalExporterOptionsDlg::~CiCalExporterOptionsDlg()
@@ -24,7 +24,7 @@ void CiCalExporterOptionsDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CDialog::DoDataExchange(pDX);
 
-	DDX_Radio(pDX, IDC_EXPORTASVEVENT, m_nExportAs);
+	DDX_Radio(pDX, IDC_EXPORTASVEVENT, m_nExportFormat);
 }
 
 
@@ -34,7 +34,7 @@ END_MESSAGE_MAP()
 // CiCalExporterOptionsDlg message handlers
 
 
-BOOL CiCalExporterOptionsDlg::GetWantExportTasksAsTodos() const
+ICALEXPORTAS CiCalExporterOptionsDlg::GetTaskExportFormat() const
 {
-	return (m_nExportAs == 1);
+	return (ICALEXPORTAS)m_nExportFormat;
 }

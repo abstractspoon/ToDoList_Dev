@@ -6,6 +6,7 @@
 #define IDI_ICALENDAR                   15000
 #define IDC_EXPORTASVEVENT              15000
 #define IDC_EXPORTASVTASK               15001
+#define IDC_EXPORTASVAPPOINTMENT        15002
 
 // Next default values for new objects
 // 
