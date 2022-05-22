@@ -2455,6 +2455,7 @@
 #define IDS_FIND_ALLTASKLISTS           51622
 #define IDS_CONFIRMSAVEAS               51623
 #define IDS_CONFIRMSAVEAS_TITLE         51624
+#define IDS_PRINT_TASKVIEW              51625
 
 // Next default values for new objects
 // 

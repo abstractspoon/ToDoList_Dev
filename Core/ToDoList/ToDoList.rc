@@ -1716,7 +1716,7 @@ BEGIN
     GROUPBOX        "Breakdown",IDC_STATIC,155,7,129,74
     COMBOBOX        IDC_BREAKDOWNS,164,23,111,30,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    CONTROL         "&Group By",IDC_GROUPBY,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "&Group by",IDC_GROUPBY,"Button",BS_AUTOCHECKBOX | 
                     WS_GROUP | WS_TABSTOP,164,46,111,10
     COMBOBOX        IDC_GROUPBYATTRIB,174,59,101,30,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
@@ -2153,7 +2153,7 @@ BEGIN
     PUSHBUTTON      "Snooze &All",IDC_SNOOZEALL,281,148,50,14
     CONTROL         "",IDC_DIVIDER,"Static",SS_ETCHEDHORZ,8,169,323,1
     PUSHBUTTON      "&Complete",IDC_COMPLETETASK,167,176,50,14
-    PUSHBUTTON      "&Go to Task",IDC_GOTOTASK,224,176,50,14
+    PUSHBUTTON      "&Go To Task",IDC_GOTOTASK,224,176,50,14
     DEFPUSHBUTTON   "&Dismiss",IDC_DISMISS,281,176,50,14
 END
 
@@ -3129,7 +3129,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Edit Task &Recurrence...",    ID_EDIT_RECURRENCE
             MENUITEM SEPARATOR
-            MENUITEM "&Go to Task Dependency",      ID_EDIT_GOTODEPENDENCY
+            MENUITEM "&Go To Task Dependency",      ID_EDIT_GOTODEPENDENCY
             MENUITEM SEPARATOR
             MENUITEM "&Clear Focused Task Attribute", 
                                                     ID_EDIT_CLEARFOCUSEDFIELD
@@ -3847,7 +3847,7 @@ BEGIN
             MENUITEM "&Add Time to Task Log File",  ID_ADDTIMETOLOGFILE
             MENUITEM SEPARATOR
             MENUITEM "&Offset Task Dates...",       ID_EDIT_OFFSETDATES
-            POPUP "O&ffset Task Dates Forwards By"
+            POPUP "O&ffset Task Start/Due Dates Forwards By"
             BEGIN
                 MENUITEM "One Day",                     ID_OFFSETDATES_FORWARDSBY_ONEDAY
 
@@ -3860,7 +3860,7 @@ BEGIN
                 MENUITEM "One Year",                    ID_OFFSETDATES_FORWARDSBY_ONEYEAR
 
             END
-            POPUP "O&ffset Task Dates Backwards By"
+            POPUP "O&ffset Task Start/Due Dates Backwards By"
             BEGIN
                 MENUITEM "One Day",                     ID_OFFSETDATES_BACKWARDSBY_ONEDAY
 
@@ -3881,7 +3881,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Edit Task &Recurrence...",    ID_EDIT_RECURRENCE
             MENUITEM SEPARATOR
-            MENUITEM "&Go to Task Dependency",      ID_EDIT_GOTODEPENDENCY
+            MENUITEM "&Go To Task Dependency",      ID_EDIT_GOTODEPENDENCY
             MENUITEM SEPARATOR
             MENUITEM "&Clear Focused Task Attribute", 
                                                     ID_EDIT_CLEARFOCUSEDFIELD
@@ -5828,6 +5828,7 @@ BEGIN
     IDS_FIND_ALLTASKLISTS   "All tasklists"
     IDS_CONFIRMSAVEAS       "%s already exists.\nDo you want to replace it?"
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
+    IDS_PRINT_TASKVIEW      "Screenshot of active task view (%s)"
 END
 
 #endif    // English (Australia) resources

@@ -26,6 +26,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(HtmlEditorControl));
 			this.browserPanel = new System.Windows.Forms.Panel();
 			this.editorWebBrowser = new WebBrowserEx.WebBrowserEx();
@@ -75,7 +76,7 @@
 			this.toolstripDocumentPrint = new System.Windows.Forms.ToolStripButton();
 			this.toolStripSeparator = new System.Windows.Forms.ToolStripSeparator();
 			this.toolstripDocumentHelp = new System.Windows.Forms.ToolStripButton();
-			this.contextEditor = new System.Windows.Forms.ContextMenuStrip();
+			this.contextEditor = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.contextTable = new System.Windows.Forms.ToolStripMenuItem();
 			this.contextTableModify = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator22 = new System.Windows.Forms.ToolStripSeparator();

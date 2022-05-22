@@ -306,7 +306,6 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_PREFS                "\nKanban Preferences"
     IDS_BACKLOG             "Backlog"
-    ID_HIDE_EMPTY_COLS      "\nHide Empty Columns"
     ID_POPULATECOLUMNS      "\nPopulate Columns"
 END
 

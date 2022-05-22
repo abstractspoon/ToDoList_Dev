@@ -311,8 +311,8 @@ BOOL CTDLPrintStylePage::OnInitDialog()
 		break;
 	}
 
-	CString sCtrlText;
-	GetDlgItemText(IDC_STYLE_TASKVIEW, sCtrlText);
+	// Dynamically update the 'task view' option
+	CEnString sCtrlText(IDS_PRINT_TASKVIEW);
 
 	if (m_sExportToImageView.IsEmpty())
 		sCtrlText.Replace(_T("(%s)"), _T(""));

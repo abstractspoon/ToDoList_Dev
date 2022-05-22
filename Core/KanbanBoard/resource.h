@@ -92,7 +92,6 @@
 #define ID_KANBAN_DELETEDEPENDS         32780
 #define IDS_PICKINGFROMDEPEND_EDIT      32781
 #define IDS_PICKINGFROMDEPEND_DELETE    32782
-#define ID_HIDE_EMPTY_COLS              32782
 #define IDS_PICKINGTOTASKEDIT           32783
 #define ID_POPULATECOLUMNS              32783
 #define IDS_PICKED                      32786
