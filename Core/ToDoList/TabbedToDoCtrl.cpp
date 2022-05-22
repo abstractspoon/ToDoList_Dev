@@ -189,7 +189,8 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	if (icon.Load(IDI_LISTVIEW_STD))
 	{
-		int nVertOffset = (GetCtrlSize(IDC_LISTVIEWGROUPBYATTRIB).cy + 4);
+		int nVertOffset = (GetCtrlRect(IDC_LISTVIEWGROUPBYATTRIB).bottom - 
+						   GetCtrlRect(IDC_PROJECTNAME).bottom);
 		m_tabViews.AttachView(m_taskList, FTCV_TASKLIST, CEnString(IDS_LISTVIEW), icon, NewViewData(), nVertOffset);
 	}
 
@@ -2204,18 +2205,6 @@ void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 {
 	// Tab control takes care of active view including tree/list
 	m_tabViews.Resize(rPos, pDWM);
-
-	// List-specific combos
-	CRect rLabel = GetCtrlRect(IDC_LISTVIEWGROUPBYLABEL);
-	int nXOffset = (rPos.left - rLabel.left);
-
-	CRect rCombo = GetCtrlRect(IDC_LISTVIEWGROUPBYATTRIB);
-	int nYOffset = (rPos.top - rCombo.top);
-
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL, nXOffset, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB, nXOffset, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL, nXOffset, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS, nXOffset, nYOffset);
 }
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()
