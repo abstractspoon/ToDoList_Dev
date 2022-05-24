@@ -1971,13 +1971,24 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM
 {
 	BOOL bHandled = FALSE;
 
-	// Ignore clicks not hitting an item
 	htiHit = HitTest(point);
 
 	if (!htiHit)
 	{
-		if (m_bSelected)
+		// Select the column if right-clicking
+		if (!bLeftBtn && !m_bSelected)
+		{
+			htiHit = GetChildItem(NULL);
+
+			if (htiHit)
+				SelectItem(htiHit, TRUE);
+			else
+				NotifyParentSelectionChange(htiHit, TRUE);
+		}
+		else if (m_bSelected)
+		{
 			SetFocus();
+		}
 
 		bHandled = TRUE;
 	}
