@@ -16,7 +16,6 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\datehelper.h"
 #include "..\shared\enstring.h"
-#include "..\Interfaces\Preferences.h"
 #include "..\shared\deferwndmove.h"
 #include "..\shared\autoflag.h"
 #include "..\shared\holdredraw.h"
@@ -25,6 +24,7 @@
 #include "..\shared\filemisc.h"
 #include "..\shared\icon.h"
 #include "..\shared\ScopedTimer.h"
+#include "..\shared\DlgUnits.h"
 
 #include "..\3rdparty\dibdata.h"
 #include "..\3rdparty\GdiPlus.h"
@@ -32,6 +32,7 @@
 #include "..\Interfaces\uiextensionhelper.h"
 #include "..\Interfaces\uiextensionmgr.h"
 #include "..\Interfaces\iuiextension.h"
+#include "..\Interfaces\Preferences.h"
 
 #include <math.h>
 
@@ -189,8 +190,7 @@ BOOL CTabbedToDoCtrl::OnInitDialog()
 
 	if (icon.Load(IDI_LISTVIEW_STD))
 	{
-		int nVertOffset = (GetCtrlRect(IDC_LISTVIEWGROUPBYATTRIB).bottom - 
-						   GetCtrlRect(IDC_PROJECTNAME).bottom);
+		int nVertOffset = (GetCtrlRect(IDC_LISTVIEWGROUPBYATTRIB).bottom + CDlgUnits(this).ToPixelsY(5));
 		m_tabViews.AttachView(m_taskList, FTCV_TASKLIST, CEnString(IDS_LISTVIEW), icon, NewViewData(), nVertOffset);
 	}
 
@@ -2205,6 +2205,15 @@ void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 {
 	// Tab control takes care of active view including tree/list
 	m_tabViews.Resize(rPos, pDWM);
+
+	// List-specific combos
+	CRect rCtrl = GetCtrlRect(IDC_LISTVIEWGROUPBYLABEL);
+	int nYOffset = (rPos.top - rCtrl.top) + CDlgUnits(this).ToPixelsY(2);
+
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS, 0, nYOffset);
 }
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()
