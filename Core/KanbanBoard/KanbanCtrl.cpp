@@ -1528,20 +1528,20 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 		pKI->GetTrackedAttributeValues(sAttribID, m_dwOptions, aCurValues);
 		
 		// Remove any list item whose current value is not found in the new values
-		int nVal = aCurValues.GetSize();
+		int nCurVal = aCurValues.GetSize();
 		
 		// Special case: Item needs removing from backlog
-		if (nVal == 0)
+		if (nCurVal == 0)
 		{
 			aCurValues.Add(_T(""));
-			nVal++;
+			nCurVal++;
 		}
 
-		while (nVal--)
+		while (nCurVal--)
 		{
-			if (!Misc::Contains(aCurValues[nVal], aNewValues, FALSE, TRUE))
+			if (!Misc::Contains(aCurValues[nCurVal], aNewValues, FALSE, TRUE))
 			{
-				CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aCurValues[nVal]);
+				CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aCurValues[nCurVal]);
 				ASSERT(pCurCol);
 
 				if (pCurCol)
@@ -1551,23 +1551,38 @@ BOOL CKanbanCtrl::UpdateTrackableTaskAttribute(KANBANITEM* pKI, const CString& s
 				}
 
 				// Remove from list to speed up later searching
-				aCurValues.RemoveAt(nVal);
+				aCurValues.RemoveAt(nCurVal);
 			}
 		}
 		
 		// Add any new items not in the current list
-		nVal = aNewValues.GetSize();
-		
-		while (nVal--)
-		{
-			if (!Misc::Contains(aNewValues[nVal], aCurValues, FALSE, TRUE))
-			{
-				CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aNewValues[nVal]);
-				
-				if (pCurCol)
-					pCurCol->AddTask(*pKI);
+		int nNewVal = aNewValues.GetSize();
 
-				bRebuild |= ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
+		// Special case: Item needs adding to backlog
+		if (nNewVal == 0)
+		{
+			ASSERT(m_aColumns.Find(pKI->dwTaskID) == -1);
+
+			CKanbanColumnCtrl* pBacklog = m_aColumns.GetBacklog();
+
+			if (pBacklog)
+				pBacklog->AddTask(*pKI);
+			else
+				bRebuild = TRUE; // Backlog needs reshowing
+		}
+		else
+		{
+			while (nNewVal--)
+			{
+				if (!Misc::Contains(aNewValues[nNewVal], aCurValues, FALSE, TRUE))
+				{
+					CKanbanColumnCtrl* pCurCol = m_aColumns.Get(aNewValues[nNewVal]);
+				
+					if (pCurCol)
+						pCurCol->AddTask(*pKI);
+
+					bRebuild |= ((pCurCol == NULL) || UsingFixedColumns()); // needs new list ctrl
+				}
 			}
 		}
 	
