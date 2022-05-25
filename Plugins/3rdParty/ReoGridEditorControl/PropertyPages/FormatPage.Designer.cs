@@ -60,11 +60,13 @@ namespace unvell.ReoGrid.PropertyPages
 			this.numberDecimalPlaces = new System.Windows.Forms.NumericUpDown();
 			this.labNegativeNumbersNum = new System.Windows.Forms.Label();
 			this.numberPanel = new System.Windows.Forms.Panel();
+			this.numberNegativeStyleList = new unvell.UIControls.ColoredListBox();
 			this.chkNumberUseSeparator = new System.Windows.Forms.CheckBox();
 			this.currencyPanel = new System.Windows.Forms.Panel();
 			this.currencySymbolList = new System.Windows.Forms.ComboBox();
 			this.labSymbol = new System.Windows.Forms.Label();
 			this.labNegativeNumberCurrency = new System.Windows.Forms.Label();
+			this.currencyNegativeStyleList = new unvell.UIControls.ColoredListBox();
 			this.currencyDecimalPlaces = new System.Windows.Forms.NumericUpDown();
 			this.labDecimalPlacesCurrency = new System.Windows.Forms.Label();
 			this.datetimePanel = new System.Windows.Forms.Panel();
@@ -73,8 +75,6 @@ namespace unvell.ReoGrid.PropertyPages
 			this.percentPanel = new System.Windows.Forms.Panel();
 			this.percentDecimalPlaces = new System.Windows.Forms.NumericUpDown();
 			this.labDecimalPlacesPercent = new System.Windows.Forms.Label();
-			this.currencyNegativeStyleList = new unvell.UIControls.ColoredListBox();
-			this.numberNegativeStyleList = new unvell.UIControls.ColoredListBox();
 			this.grpSample.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.numberDecimalPlaces)).BeginInit();
 			this.numberPanel.SuspendLayout();
@@ -111,7 +111,7 @@ namespace unvell.ReoGrid.PropertyPages
 			this.grpSample.Size = new System.Drawing.Size(377, 50);
 			this.grpSample.TabIndex = 4;
 			this.grpSample.TabStop = false;
-			this.grpSample.Text = "Sample";
+			this.grpSample.Text = "Preview";
 			// 
 			// labSample
 			// 
@@ -203,6 +203,15 @@ namespace unvell.ReoGrid.PropertyPages
 			this.numberPanel.Size = new System.Drawing.Size(393, 199);
 			this.numberPanel.TabIndex = 8;
 			// 
+			// numberNegativeStyleList
+			// 
+			this.numberNegativeStyleList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.numberNegativeStyleList.FormattingEnabled = true;
+			this.numberNegativeStyleList.Location = new System.Drawing.Point(6, 76);
+			this.numberNegativeStyleList.Name = "numberNegativeStyleList";
+			this.numberNegativeStyleList.Size = new System.Drawing.Size(377, 95);
+			this.numberNegativeStyleList.TabIndex = 9;
+			// 
 			// chkNumberUseSeparator
 			// 
 			this.chkNumberUseSeparator.AutoSize = true;
@@ -254,6 +263,15 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labNegativeNumberCurrency.Size = new System.Drawing.Size(96, 13);
 			this.labNegativeNumberCurrency.TabIndex = 6;
 			this.labNegativeNumberCurrency.Text = "&Negative numbers:";
+			// 
+			// currencyNegativeStyleList
+			// 
+			this.currencyNegativeStyleList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
+			this.currencyNegativeStyleList.FormattingEnabled = true;
+			this.currencyNegativeStyleList.Location = new System.Drawing.Point(6, 76);
+			this.currencyNegativeStyleList.Name = "currencyNegativeStyleList";
+			this.currencyNegativeStyleList.Size = new System.Drawing.Size(377, 95);
+			this.currencyNegativeStyleList.TabIndex = 9;
 			// 
 			// currencyDecimalPlaces
 			// 
@@ -339,24 +357,6 @@ namespace unvell.ReoGrid.PropertyPages
 			this.labDecimalPlacesPercent.Size = new System.Drawing.Size(83, 13);
 			this.labDecimalPlacesPercent.TabIndex = 6;
 			this.labDecimalPlacesPercent.Text = "&Decimal Places:";
-			// 
-			// currencyNegativeStyleList
-			// 
-			this.currencyNegativeStyleList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.currencyNegativeStyleList.FormattingEnabled = true;
-			this.currencyNegativeStyleList.Location = new System.Drawing.Point(6, 76);
-			this.currencyNegativeStyleList.Name = "currencyNegativeStyleList";
-			this.currencyNegativeStyleList.Size = new System.Drawing.Size(377, 95);
-			this.currencyNegativeStyleList.TabIndex = 9;
-			// 
-			// numberNegativeStyleList
-			// 
-			this.numberNegativeStyleList.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.numberNegativeStyleList.FormattingEnabled = true;
-			this.numberNegativeStyleList.Location = new System.Drawing.Point(6, 76);
-			this.numberNegativeStyleList.Name = "numberNegativeStyleList";
-			this.numberNegativeStyleList.Size = new System.Drawing.Size(377, 95);
-			this.numberNegativeStyleList.TabIndex = 9;
 			// 
 			// FormatPage
 			// 

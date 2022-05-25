@@ -508,6 +508,9 @@ namespace unvell.ReoGrid
 				var rect = new WFRect((int)Math.Round(bounds.Left), (int)Math.Round(bounds.Top),
 					(int)Math.Round(bounds.Width), (int)Math.Round(bounds.Height));
 
+				// Ensure rectangle is big enough for font
+				rect.Height = Math.Max(rect.Height, editTextbox.Font.Height + 6); // (2 * (1px border + 2px padding))
+				
 				editTextbox.SuspendLayout();
 				editTextbox.Bounds = rect;
 				editTextbox.TextWrap = cell.IsMergedCell || cell.InnerStyle.TextWrapMode != TextWrapMode.NoWrap;

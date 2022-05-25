@@ -360,6 +360,11 @@ namespace unvell.ReoGrid.PropertyPages
 				// force format sample cell
 				labSample.Text = DataFormatterManager.Instance.DataFormatters[sampleCell.DataFormat].FormatCell(sampleCell);
 
+				// If that produced no text and the cell does have content
+				// then assume the content is 'bad' and just display it as-is
+				if (string.IsNullOrEmpty(labSample.Text))
+					labSample.Text = sampleCell.DisplayText;
+
 				var renderColor = sampleCell.RenderColor;
 				labSample.ForeColor = renderColor.IsTransparent ? Color.Black : (Color)renderColor;
 			}
@@ -470,9 +475,12 @@ namespace unvell.ReoGrid.PropertyPages
 						break;
 
 					case CellDataFormatFlag.Percent:
-						var pargs = (NumberDataFormatter.NumberFormatArgs)sampleCell.DataFormatArgs;
-						percentDecimalPlaces.Value = pargs.DecimalPlaces;
-						backupFormatArgs = pargs;
+						if (sampleCell.DataFormatArgs != null)
+						{
+							var pargs = (NumberDataFormatter.NumberFormatArgs)sampleCell.DataFormatArgs;
+							percentDecimalPlaces.Value = pargs.DecimalPlaces;
+							backupFormatArgs = pargs;
+						}
 						break;
 				}
 

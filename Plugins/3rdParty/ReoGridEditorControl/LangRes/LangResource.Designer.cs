@@ -880,7 +880,7 @@ namespace unvell.ReoGrid.Editor.LangRes {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Change Cells &amp;Type.
+        ///   Looks up a localized string similar to Change Cell &amp;Type.
         /// </summary>
         internal static string Menu_Change_Cells_Type {
             get {

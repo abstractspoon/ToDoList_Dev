@@ -378,12 +378,12 @@ namespace unvell.ReoGrid
 			}
 		}
 
-		private SelectionForwardDirection selectionForwardDirection;
+		private SelectionForwardDirection selectionForwardDirection = SelectionForwardDirection.Down;
 
 		/// <summary>
 		/// Get or set focus cell moving direction.
 		/// </summary>
-		[DefaultValue(SelectionForwardDirection.Right)]
+		[DefaultValue(SelectionForwardDirection.Down)]
 		public SelectionForwardDirection SelectionForwardDirection
 		{
 			get

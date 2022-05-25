@@ -2656,7 +2656,7 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.changeCellsTypeToolStripMenuItem.Name = "changeCellsTypeToolStripMenuItem";
 			this.changeCellsTypeToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
-			this.changeCellsTypeToolStripMenuItem.Text = "Change Cells Type";
+			this.changeCellsTypeToolStripMenuItem.Text = "Change Cell Type";
 			// 
 			// toolStripMenuItem19
 			// 
