@@ -87,7 +87,7 @@ namespace unvell.ReoGrid.DataFormat
 				}
 				else
 				{
-					isFormat = (DateTime.TryParse(strdata, out value));
+					isFormat = (DateTime.TryParse(strdata, null, DateTimeStyles.NoCurrentDateDefault, out value));
 				}
 			}
 
@@ -104,7 +104,12 @@ namespace unvell.ReoGrid.DataFormat
 
 				if (value.TimeOfDay.TotalDays > 0)
 				{
-					pattern = pattern + ' ' + Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortTimePattern;
+					if (value.Date == DateTime.MinValue)
+						pattern = string.Empty;	// Time only
+					else
+						pattern = pattern + ' '; // spacer before time
+
+					pattern = pattern + Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortTimePattern;
 				}
 
 				if (cell.DataFormatArgs != null && cell.DataFormatArgs is DateTimeFormatArgs)

@@ -156,6 +156,14 @@ namespace unvell.ReoGrid.Editor
 			return (textBox != null);
 		}
 
+		public bool EditControlPaste(string text)
+		{
+			var textBox = FocusedTextBox;
+
+			textBox?.Paste(text);
+			return (textBox != null);
+		}
+
 		public new Color BackColor
 		{
 			get { return base.BackColor; }
@@ -345,6 +353,11 @@ namespace unvell.ReoGrid.Editor
 				this.addressField.RefreshCurrentAddress();
 			}
 		}
+
+		public void RefreshCurrentFormula()
+		{
+			ReadFormulaFromCell();
+		}
 	}
-	
+
 }

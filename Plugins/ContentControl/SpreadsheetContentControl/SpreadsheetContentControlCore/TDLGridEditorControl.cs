@@ -8,11 +8,14 @@ using System.Windows.Forms;
 using System.Windows.Resources;
 using System.IO;
 using System.Net;
+using System.Threading;
+using System.Diagnostics;
 
 using unvell.ReoGrid;
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Editor;
 using unvell.ReoGrid.CellTypes;
+using unvell.ReoGrid.DataFormat;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -147,6 +150,74 @@ namespace SpreadsheetContentControl
 			return true;
 		}
 
+		private CellDataFormatFlag GetCellFormat(Cell cell, out string dateFormatStr)
+		{
+			var formatType = ((cell == null) ? CellDataFormatFlag.General : cell.DataFormat);
+			dateFormatStr = string.Empty;
+
+			if ((formatType == CellDataFormatFlag.DateTime) && (cell.DataFormatArgs != null))
+			{
+				var dateFormat = (DateTimeDataFormatter.DateTimeFormatArgs)cell.DataFormatArgs;
+				dateFormatStr = dateFormat.Format;
+			}
+
+			return formatType;
+		}
+
+		bool UpdateCellFormat(Cell cell, DateTime date, CellDataFormatFlag prevFormatType, string prevFormatStr)
+		{
+			// Post-processing of dates/times to pragmatically match Excel's rules
+			switch (prevFormatType)
+			{
+			case CellDataFormatFlag.General:
+				{
+					// Should have already been handled by our base class
+					Debug.Assert(cell.DataFormat == CellDataFormatFlag.DateTime);
+				}
+				break;
+
+			case CellDataFormatFlag.Percent:
+			case CellDataFormatFlag.Currency:
+				{
+					Debug.Assert(cell.DataFormat == prevFormatType);
+
+					//   Change the format type to 'DateTime' and set the format
+					//   string to match the content
+					cell.DataFormat = CellDataFormatFlag.DateTime;
+					cell.DataFormatArgs = new DateTimeDataFormatter.DateTimeFormatArgs
+					{
+						CultureName = Thread.CurrentThread.CurrentCulture.Name,
+						Format = GetDateFormat(date, ""),
+					};
+				}
+				return true;
+
+			case CellDataFormatFlag.Number:
+			case CellDataFormatFlag.Text:
+			case CellDataFormatFlag.Custom:
+				{
+					Debug.Assert(cell.DataFormat == prevFormatType);
+
+					// Don't change the format
+				}
+				break;
+
+			case CellDataFormatFlag.DateTime:
+				{
+					Debug.Assert(cell.DataFormat == CellDataFormatFlag.DateTime);
+
+					cell.DataFormatArgs = new DateTimeDataFormatter.DateTimeFormatArgs
+					{
+						CultureName = Thread.CurrentThread.CurrentCulture.Name,
+						Format = GetDateFormat(date, prevFormatStr),
+					};
+				}
+				return true;
+			}
+
+			return false;
+		}
+
 		public bool InsertTextContent(String content, bool bAtEnd)
 		{
 			var selection = GridControl.CurrentWorksheet.SelectionRange;
@@ -154,13 +225,117 @@ namespace SpreadsheetContentControl
 			if (selection == null)
 				return false;
 
+			// Nothing more to do if cell editing because any further
+			// processing only happens when the edit finishes
 			if (GridControl.CurrentWorksheet.IsEditing)
-				GridControl.CurrentWorksheet.Paste(content);
-			else
-				GridControl.CurrentWorksheet.PasteFromString(selection.StartPos, content);
+				return GridControl.CurrentWorksheet.Paste(content);
+
+			if (FormulaBar.ContainsFocus)
+				return FormulaBar.EditControlPaste(content);
+
+			// else insert into spreadsheet
+
+			// Cache current cell properties to help with post-processing of dates/times
+			DateTime contentDate;
+			bool contentIsDateTime = DateTime.TryParse(content, null, System.Globalization.DateTimeStyles.NoCurrentDateDefault, out contentDate);
+
+			var cell = GridControl.CurrentWorksheet.GetCell(selection.StartPos);
+
+			string prevFormatStr;
+			var prevFormatType = GetCellFormat(cell, out prevFormatStr);
+
+			if (GridControl.CurrentWorksheet.Paste(content))
+			{
+				if (contentIsDateTime)
+				{
+					cell = GridControl.CurrentWorksheet.GetCell(selection.StartPos);
+
+					if (UpdateCellFormat(cell, contentDate, prevFormatType, prevFormatStr))
+					{
+						cell.Data = contentDate;
+						cell.Formula = null;
+					}
+				}
+
+				FormulaBar.RefreshCurrentFormula();
+			}
 
 			NotifyParentContentChange();
+
 			return true;
+		}
+
+		private string GetDateFormat(DateTime date, string prevFormat)
+		{
+			bool dateHasDate = (date.Date != DateTime.MinValue);
+			bool dateHasTime = (date.TimeOfDay.TotalDays > 0);
+
+			string dateFormat, timeFormat;
+			ExtractFormatComponents(prevFormat, out dateFormat, out timeFormat);
+			
+			bool formatHasDate = !string.IsNullOrEmpty(dateFormat);
+			bool formatHasTime = !string.IsNullOrEmpty(timeFormat);
+
+			if ((dateHasDate == formatHasDate) && (dateHasTime == formatHasTime))
+			{
+				return prevFormat;
+			}
+
+			// Else if one or other of the required components is missing 
+			// we rebuild the format preserving as much as we can
+			var	newFormat = string.Empty;
+
+			if (dateHasDate)
+			{
+				if (!formatHasDate)
+					dateFormat = Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortDatePattern;
+
+				newFormat = dateFormat;
+			}
+
+			if (dateHasTime)
+			{
+				if (!formatHasTime)
+					timeFormat = Thread.CurrentThread.CurrentCulture.DateTimeFormat.ShortTimePattern;
+
+				if (dateHasDate)
+					newFormat = string.Concat(dateFormat, " ", timeFormat);
+				else
+					newFormat = timeFormat;
+			}
+
+			return newFormat;
+		}
+
+		void ExtractFormatComponents(string format, out string dateFormat, out string timeFormat)
+		{
+			dateFormat = string.Empty;
+			timeFormat = string.Empty;
+
+			int lastDateIndex = format.LastIndexOfAny(new char[] { 'D', 'd', 'M', 'Y', 'y' });
+			int lastTimeIndex = format.LastIndexOfAny(new char[] { 'H', 'h', 'm' });
+
+			if ((lastDateIndex != -1) && (lastTimeIndex != -1))
+			{
+				if (lastTimeIndex > lastDateIndex) // date comes first
+				{
+					dateFormat = format.Substring(0, lastDateIndex + 1);
+					timeFormat = format.Substring(lastDateIndex + 1);
+				}
+				else // time comes first
+				{
+					timeFormat = format.Substring(0, lastDateIndex + 1);
+					dateFormat = format.Substring(lastDateIndex + 1);
+				}
+			}
+			else if (lastDateIndex == -1)
+			{
+				timeFormat = format;
+			}
+			else if (lastTimeIndex == -1)
+			{
+				dateFormat = format;
+			}
 		}
 
 		public int FindReplaceAll(string findText, string replaceText, bool matchWhole, bool matchCase)
@@ -456,7 +631,7 @@ namespace SpreadsheetContentControl
 							image = new Bitmap(stream);
 							GridControl.CurrentWorksheet.SetCellBody(row, col, new ImageCell(image, ImageCellViewMode.Clip));
 						}
-						catch (Exception e)
+						catch (Exception /*e*/)
 						{
 							image = null;
 						}
@@ -483,7 +658,7 @@ namespace SpreadsheetContentControl
 						image = new Bitmap(newData);
 						GridControl.CurrentWorksheet.SetCellBody(row, col, new ImageCell(image, ImageCellViewMode.Clip));
 					}
-					catch (Exception e)
+					catch (Exception /*e*/)
 					{
 						image = null;
 					}
@@ -497,7 +672,7 @@ namespace SpreadsheetContentControl
 					return;
 				}
 			}
-			catch (Exception e)
+			catch (Exception /*e*/)
 			{
 			}
 
