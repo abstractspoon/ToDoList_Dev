@@ -469,7 +469,7 @@ namespace unvell.ReoGrid.Formula
 			string str, str2;
 			int i, i2;
 
-			switch (funNode.Name)
+			switch (funNode.Name.ToUpperInvariant())
 			{
 				#region Stat
 
