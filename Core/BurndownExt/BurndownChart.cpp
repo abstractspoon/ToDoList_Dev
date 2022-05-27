@@ -49,8 +49,6 @@ CBurndownChart::CBurndownChart(const CStatsItemArray& data)
 	m_nActiveGraph(BCT_TIMESERIES_INCOMPLETETASKS),
 	m_calculator(data)
 {
-	//FileMisc::EnableLogging(TRUE);
-
 	EnableFixedLabelFontSize(); // don't scale down as available size decreases
 }
 

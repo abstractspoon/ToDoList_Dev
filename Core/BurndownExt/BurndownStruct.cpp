@@ -421,16 +421,14 @@ void CStatsItemArray::RemoveAt(int nIndex, int nCount)
 	ASSERT((nIndex >= 0) && ((nIndex + nCount) <= GetSize()));
 	ASSERT(nCount > 0);
 
-	nIndex += nCount;
-
-	while (nIndex--)
+	for (int nItem = (nIndex + nCount - 1); nItem >= nIndex; nItem--)
 	{
-		STATSITEM* pSI = GetAt(nIndex);
+		STATSITEM* pSI = GetAt(nItem);
 
 		m_mapTasks.RemoveKey(pSI->dwTaskID);
 		delete pSI;
 
-		CArray<STATSITEM*, STATSITEM*>::RemoveAt(nIndex);
+		CArray<STATSITEM*, STATSITEM*>::RemoveAt(nItem);
 	}
 }
 
