@@ -2417,15 +2417,17 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	BOOL bReloadTasklists = (!bStartupEmpty && userPrefs.GetReloadTasklists());
 	
 	// filepath overrides
-#ifndef _DEBUG
 	if (m_startupOptions.HasFilePath())
-#endif
 	{
 		ProcessStartupOptions(m_startupOptions, TRUE);
 
 		// don't reload previous if a tasklist was actually loaded
 		if (!m_mgrToDoCtrls.IsPristine())
 			bReloadTasklists = FALSE;
+	}
+	else
+	{
+		m_sTitlePrefix = m_startupOptions.GetTitlePrefix();
 	}
 	
 	m_startupOptions.Reset(); // always
