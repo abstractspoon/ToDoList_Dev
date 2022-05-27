@@ -10799,15 +10799,21 @@ LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
 {
+	ASSERT(lp);
+	LPCTSTR szFilter = (LPCTSTR)lp;
+
+	CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	if (tdc.GetAdvancedFilterName().CompareNoCase(szFilter) == 0)
+		OnViewClearfilter();
+
 	RefreshFilterBarAdvancedFilterNames();
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
-	ASSERT(lp);
-
 	CStringArray aPrevFilters;
 	aPrevFilters.Copy(m_filterBar.GetAdvancedFilterNames());
 
-	VERIFY(Misc::AddUniqueItem((LPCTSTR)lp, aPrevFilters));
+	VERIFY(Misc::AddUniqueItem(szFilter, aPrevFilters));
 	Misc::SortArray(aPrevFilters);
 
 	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
