@@ -1625,7 +1625,7 @@ BOOL CTabbedToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID)
 		return FALSE;
 
 	if (GetUpdateControlsItem() == NULL)
-		return !CTDCAttributeMap::IsTaskAttribute(nAttrib);
+		return !(CTDCAttributeMap::IsTaskAttribute(nAttrib) || (nAttrib == TDCA_DELETE));
 
 	return TRUE;
 }
@@ -3180,6 +3180,20 @@ BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 {
 	FTC_VIEW nView = GetTaskView();
 
+	// locations requiring a selected task
+	switch (nInsertWhere)
+	{
+	case TDC_INSERTATTOPOFSELTASKPARENT:
+	case TDC_INSERTATBOTTOMOFSELTASKPARENT:
+	case TDC_INSERTAFTERSELTASK:
+	case TDC_INSERTBEFORESELTASK:
+	case TDC_INSERTATTOPOFSELTASK:
+	case TDC_INSERTATBOTTOMOFSELTASK:
+		if (!HasSelection())
+			return FALSE;
+		break;
+	}
+
 	BOOL bCanCreate = CToDoCtrl::CanCreateNewTask(nInsertWhere);
 
 	switch (nView)
@@ -3220,6 +3234,26 @@ BOOL CTabbedToDoCtrl::CanCreateNewTask(TDC_INSERTWHERE nInsertWhere) const
 	}
 
 	return bCanCreate;
+}
+
+BOOL CTabbedToDoCtrl::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
+{
+	if (!CToDoCtrl::CanPasteTasks(nWhere, bAsRef))
+		return FALSE;
+
+	switch (nWhere)
+	{
+	case TDCP_ONSELTASK:
+	case TDCP_BELOWSELTASK:
+		return HasSelection();
+
+	case TDCP_ATBOTTOM:
+		return TRUE; // always
+	}
+
+	// all else
+	ASSERT(0);
+	return FALSE;
 }
 
 void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, const void* pContext)

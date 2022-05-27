@@ -49,13 +49,14 @@ enum TASKLISTPOS
 /////////////////////////////////////////////////////////////////////////////
 // CTDLImportDialog dialog
 
-CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent /*=NULL*/)
+CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(CTDLImportDialog::IDD, _T("Importing"), pParent),
 	m_mgrImportExport(mgr),
 	m_cbFormat(mgr, TRUE, FALSE),
 	m_nImportMode(TDCIM_ALL),
 	m_bReadonlyTasklist(bReadonlyTasklist),
+	m_bTasklistHasSelection(bTasklistHasSelection),
 	m_sFromText(CClipboard().GetText())
 {
 	//{{AFX_DATA_INIT(CTDLImportDialog)
@@ -86,6 +87,9 @@ CTDLImportDialog::CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonl
 		m_nImportTo = prefs.GetProfileEnum(m_sPrefsKey, _T("ImportToWhere"), ACTIVETASKLIST);
 
 	m_nActiveTasklistPos = prefs.GetProfileInt(m_sPrefsKey, _T("TasklistPos"), SELECTEDTASK);
+
+	if (!m_bTasklistHasSelection && ((m_nActiveTasklistPos == SELECTEDTASK) || (m_nActiveTasklistPos == BELOWSELECTEDTASK)))
+		m_nActiveTasklistPos = BOTTOMOFTASKLIST;
 }
 
 
@@ -103,7 +107,7 @@ void CTDLImportDialog::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_INPUTTEXT, m_sFromText);
 	DDX_Radio(pDX, IDC_MERGEBYTITLE, m_bMatchByTaskID);
 	//}}AFX_DATA_MAP
-	DDX_CBData(pDX, m_cbTasklistPos, m_nActiveTasklistPos, (int)SELECTEDTASK);
+	DDX_CBData(pDX, m_cbTasklistPos, m_nActiveTasklistPos, (int)(m_bTasklistHasSelection ? SELECTEDTASK : BOTTOMOFTASKLIST));
 
 	if (pDX->m_bSaveAndValidate)
 		m_sFormatTypeID = m_cbFormat.GetSelectedTypeID();
@@ -234,10 +238,18 @@ BOOL CTDLImportDialog::OnInitDialog()
 	ASSERT(m_cbFormat.GetCount());
 
 	// Build active tasklist pos
-	AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
-	AddString(m_cbTasklistPos, IDS_IMPORTTOSELTASK, SELECTEDTASK);
-	AddString(m_cbTasklistPos, IDS_IMPORTTOBELOWSELTASK, BELOWSELECTEDTASK);
-	AddString(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
+	if (m_bTasklistHasSelection)
+	{
+		AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
+		AddString(m_cbTasklistPos, IDS_IMPORTTOSELTASK, SELECTEDTASK);
+		AddString(m_cbTasklistPos, IDS_IMPORTTOBELOWSELTASK, BELOWSELECTEDTASK);
+		AddString(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
+	}
+	else
+	{
+		AddString(m_cbTasklistPos, IDS_IMPORTTOTOPOFTASKLIST, TOPOFTASKLIST);
+		AddString(m_cbTasklistPos, IDS_IMPORTTOBOTTOMOFTASKLIST, BOTTOMOFTASKLIST);
+	}
 
 	SelectItemByData(m_cbTasklistPos, m_nActiveTasklistPos);
 

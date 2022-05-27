@@ -25,7 +25,7 @@ class CTDLImportDialog : public CTDLDialog
 {
 // Construction
 public:
-	CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, CWnd* pParent = NULL);   // standard constructor
+	CTDLImportDialog(const CTDCImportExportMgr& mgr, BOOL bReadonlyTasklist, BOOL bTasklistHasSelection, CWnd* pParent = NULL);   // standard constructor
 
 	BOOL SetImportTo(TDLID_IMPORTTO nImportTo);
 	BOOL SetUseFile(LPCTSTR szFilePath);
@@ -53,6 +53,7 @@ protected:
 	int		m_bMatchByTaskID;
 	//}}AFX_DATA
 	int		m_nActiveTasklistPos;
+	BOOL	m_bTasklistHasSelection;
 
 	const CImportExportMgr& m_mgrImportExport;
 	BOOL m_bReadonlyTasklist;

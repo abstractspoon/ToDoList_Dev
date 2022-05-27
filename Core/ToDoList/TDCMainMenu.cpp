@@ -304,7 +304,7 @@ BOOL CTDCMainMenu::HandleInitMenuPopup(CMenu* pPopupMenu,
 	}
 	else if (GetSubMenu(AM_EDIT) == pPopupMenu)
 	{
-		PrepareEditMenu(pPopupMenu, tdc, prefs);
+		PrepareEditMenu(pPopupMenu, tdc, prefs, FALSE);
 		return TRUE;
 	}
 	else if (GetSubMenu(AM_SORT) == pPopupMenu)
@@ -348,7 +348,7 @@ void CTDCMainMenu::PrepareTaskContextMenu(CMenu* pMenu,
 										  const CFilteredToDoCtrl& tdc,
 										  const CPreferencesDlg& prefs) const
 {
-	PrepareEditMenu(pMenu, tdc, prefs);
+	PrepareEditMenu(pMenu, tdc, prefs, TRUE);
 }
 
 void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
@@ -356,7 +356,7 @@ void CTDCMainMenu::PrepareTabCtrlContextMenu(CMenu* pMenu,
 											const CPreferencesDlg& prefs) const
 {
 	PrepareFileMenu(pMenu, prefs);
-	PrepareEditMenu(pMenu, tdc, prefs);
+	PrepareEditMenu(pMenu, tdc, prefs, TRUE);
 }
 
 void CTDCMainMenu::PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs)
@@ -498,7 +498,7 @@ BOOL CTDCMainMenu::HandleMeasureItem(int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureIt
 	return FALSE;
 }
 
-void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs)
+void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, BOOL bContextMenu)
 {
 	ASSERT(pMenu);
 
@@ -509,11 +509,13 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 		return;
 
 	int nCountLastSep = 0;
+	BOOL bHasSelection = tdc.GetSelectedTaskCount();
 
 	for (int nItem = 0; nItem < (int)pMenu->GetMenuItemCount(); nItem++)
 	{
 		BOOL bDelete = FALSE;
 		BOOL bIsSeparator = FALSE;
+		BOOL bNeedsSelection = bContextMenu;
 
 		UINT nMenuID = pMenu->GetMenuItemID(nItem);
 
@@ -525,12 +527,17 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 
 				if (pPopup)
 				{
-					PrepareEditMenu(pPopup, tdc, prefs);
+					PrepareEditMenu(pPopup, tdc, prefs, bContextMenu);
 
 					// if the popup is now empty remove it too
 					bDelete = !pPopup->GetMenuItemCount();
 				}
 			}
+			break;
+
+		case ID_NEWTASK_ATTOP:
+		case ID_NEWTASK_ATBOTTOM:
+			bNeedsSelection = FALSE;
 			break;
 
 		case ID_EDIT_SETTASKLISTCOLOR:
@@ -619,6 +626,9 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 			break;
 		}
 
+		// Delete unwanted context menu items for clarity
+		bDelete |= ((nMenuID != -1) && bContextMenu && bNeedsSelection && !bHasSelection);
+
 		// delete the item else increment the count since the last separator
 		if (bDelete)
 		{
@@ -626,7 +636,9 @@ void CTDCMainMenu::PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, c
 			nItem--;
 		}
 		else if (!bIsSeparator)
+		{
 			nCountLastSep++;
+		}
 	}
 
 	// make sure last item is not a separator

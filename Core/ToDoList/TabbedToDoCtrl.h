@@ -74,11 +74,13 @@ public:
 
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int GetSelectedTaskCount() const;
+	BOOL HasSelection() const { return GetSelectedTaskCount(); }
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
 	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
+	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
 
 	void SetTaskView(FTC_VIEW nView);
 	void SetNextTaskView();

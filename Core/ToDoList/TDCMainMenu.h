@@ -76,7 +76,7 @@ protected:
 	void LoadMenuCommon();
 
 	static void PrepareFileMenu(CMenu* pMenu, const CPreferencesDlg& prefs);
-	static void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);
+	static void PrepareEditMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs, BOOL bContextMenu);
 	static void PrepareSortMenu(CMenu* pMenu, const CFilteredToDoCtrl& tdc, const CPreferencesDlg& prefs);
 	static void PrepareToolsMenu(CMenu* pMenu, const CPreferencesDlg& prefs, CMenuIconMgr& mgrMenuIcons);
 

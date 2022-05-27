@@ -3860,7 +3860,7 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 	{
 		m_statusBar.ScreenToClient(&point);
 
-		if (m_statusBar.HitTest(point) == 0)
+		if (tdc.GetSelectedTaskCount() && (m_statusBar.HitTest(point) == 0))
 		{
 			m_statusBar.ClientToScreen(&point);
 			nMenuID = MM_TASKCONTEXT;
@@ -5830,6 +5830,15 @@ BOOL CToDoListWnd::CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const
 	if (tdc.CanPasteTasks(nWhere, FALSE))
 		return TRUE;
 
+	switch (nWhere)
+	{
+	case TDCP_ONSELTASK:
+	case TDCP_BELOWSELTASK:
+		if (!tdc.GetSelectedTaskCount())
+			return FALSE;
+		break;
+	}
+
 	// else try clipboard
 	return CanImportPasteFromClipboard();
 }
@@ -5852,7 +5861,8 @@ BOOL CToDoListWnd::DoImportPasteFromClipboard(TDLID_IMPORTTO nWhere)
 		return FALSE;
 	}
 
-	CTDLImportDialog dialog(m_mgrImportExport, GetToDoCtrl().IsReadOnly());
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	CTDLImportDialog dialog(m_mgrImportExport, tdc.IsReadOnly(), tdc.HasSelection());
 
 	dialog.SetUseClipboard();
 	dialog.SetImportTo(nWhere);
@@ -7744,7 +7754,7 @@ void CToDoListWnd::OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI)
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	pCmdUI->Enable(!tdc.IsReadOnly() && !tdc.IsArchive() && !tdc.IsArchive());
+	pCmdUI->Enable(!tdc.IsReadOnly() && !tdc.IsArchive() && tdc.GetSelectedTaskCount());
 }
 
 void CToDoListWnd::DoMoveTask(TDC_MOVETASK nDirection)
@@ -8971,12 +8981,15 @@ LRESULT CToDoListWnd::OnToDoCtrlImportFromDrop(WPARAM wp, LPARAM lp)
 		return FALSE;
 	}
 
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	const TDCDROPIMPORT* pData = (const TDCDROPIMPORT*)lp;
+
 	int nNumFiles = pData->aFiles.GetSize();
 
 	if (nNumFiles)
 	{
-		CTDLImportDialog dialog(m_mgrImportExport, FALSE);
+		CTDLImportDialog dialog(m_mgrImportExport, tdc.IsReadOnly(), tdc.HasSelection());
+
 		dialog.SetImportTo(pData->dwTaskID ? TDIT_ADDTOSELECTEDTASK : TDIT_ADDTOBOTTOMOFTASKLIST);
 
 		for (int nFile = 0; nFile < nNumFiles; nFile++)
@@ -8995,7 +9008,7 @@ LRESULT CToDoListWnd::OnToDoCtrlImportFromDrop(WPARAM wp, LPARAM lp)
 	}
 	else if (!pData->sText.IsEmpty())
 	{
-		CTDLImportDialog dialog(m_mgrImportExport, FALSE);
+		CTDLImportDialog dialog(m_mgrImportExport, tdc.IsReadOnly(), tdc.HasSelection());
 
 		dialog.SetUseText(pData->sText);
 		dialog.SetImportTo(pData->dwTaskID ? TDIT_ADDTOSELECTEDTASK : TDIT_ADDTOBOTTOMOFTASKLIST);
@@ -9041,12 +9054,13 @@ LRESULT CToDoListWnd::OnToDoCtrlCanImportFromDrop(WPARAM wp, LPARAM lp)
 void CToDoListWnd::OnImportTasklist() 
 {
 	BOOL bShowDlg = TRUE;
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
 	while (bShowDlg)
 	{
 		// Put the dialog instance inside the loop
 		// to make sure it's reinitialised properly
-		CTDLImportDialog dialog(m_mgrImportExport, GetToDoCtrl().IsReadOnly());
+		CTDLImportDialog dialog(m_mgrImportExport, tdc.IsReadOnly(), tdc.HasSelection());
 
 		if (dialog.DoModal() == IDOK)
 		{
@@ -12875,7 +12889,7 @@ void CToDoListWnd::OnSendSelectedTasks()
 
 void CToDoListWnd::OnUpdateSendSelectedTasks(CCmdUI* pCmdUI) 
 {
-	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount());
 }
 
 void CToDoListWnd::OnEditUndo() 
@@ -13540,7 +13554,7 @@ void CToDoListWnd::OnUpdateMoveSelectTaskDependencies(CCmdUI* pCmdUI)
 void CToDoListWnd::OnUpdateMoveSelectTaskDependents(CCmdUI* pCmdUI)
 {
 	// It can be an expensive call to get dependents so we don't do it
-	pCmdUI->Enable(GetToDoCtrl().GetTaskCount());
+	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskCount());
 }
 
 void CToDoListWnd::OnEditSetTasklistTabColor() 
