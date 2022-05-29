@@ -23,9 +23,12 @@ namespace Abstractspoon
 				void SetUITheme(UITheme^ theme);
 				void SetBodyFont(String^ fontName, int pointSize);
 
+				void TextCut() override;
+				void TextCopy() override;
+				void TextPaste() override;
+
 				property String^ LastBrowsedImageFolder;
 				property String^ LastBrowsedFileFolder;
-
 
 				static property Drawing::Size SizeEditHtmlForm
 				{
@@ -56,6 +59,7 @@ namespace Abstractspoon
 				void PreShowDialog(Windows::Forms::Form^ dialog, Drawing::Icon^ icon);
 				Windows::Forms::DialogResult PostShowDialog(Windows::Forms::Form^ dialog, Windows::Forms::DialogResult res);
 
+				bool IsClipboardEnabled();
 				void Translate();
 			};
 		}

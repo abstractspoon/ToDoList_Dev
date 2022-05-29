@@ -2100,7 +2100,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to cut the currently selected text to the clipboard
         /// </summary>
-        public void TextCut()
+        virtual public void TextCut()
         {
             //this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_CUT, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
             ExecuteCommandDocument(HTML_COMMAND_TEXT_CUT);
@@ -2110,7 +2110,7 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to copy the currently selected text to the clipboard
         /// </summary>
-        public void TextCopy()
+        virtual public void TextCopy()
         {
             //this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_COPY, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
             ExecuteCommandDocument(HTML_COMMAND_TEXT_COPY);
@@ -2120,9 +2120,18 @@ namespace MSDN.Html.Editor
         /// <summary>
         /// Method to paste the currently selected text from the clipboard
         /// </summary>
-        public void TextPaste()
+        virtual public void TextPaste()
         {
-			// Special case: clipboard holds a URL so we trigger the InsertLink dialog
+			if (DoPasteUrlOrFiles())
+				return;
+
+			//this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_PASTE, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
+			ExecuteCommandDocument(HTML_COMMAND_TEXT_PASTE);
+
+        } //TextPaste
+
+		protected bool DoPasteUrlOrFiles()
+		{
 			if (Clipboard.ContainsText())
 			{
 				var text = Clipboard.GetText();
@@ -2133,25 +2142,25 @@ namespace MSDN.Html.Editor
 						text = new System.Uri(text).AbsoluteUri;
 
 					InsertImagePrompt(text);
-					return;
+					return true;
 				}
-				else if (IsValidHref(text))
+
+				if (IsValidHref(text))
 				{
 					InsertLinkPrompt(text, text);
-					return;
+					return true;
 				}
-				else // see if it looks like a file path
+
+				// see if it looks like a file path
+				// Unquote path in case it was produced by Windows Explorer
+				var path = text.Trim('"');
+
+				if (path.StartsWith("\\\\") || (path.IndexOf(":\\") == 1))
 				{
-					// Unquote path in case it was produced by Windows Explorer
-					var path = text.Trim('"');
+					var fileUrl = new System.Uri(path).AbsoluteUri;
 
-					if (path.StartsWith("\\\\") || (path.IndexOf(":\\") == 1))
-					{
-						var fileUrl = new System.Uri(path).AbsoluteUri;
-
-						InsertLinkPrompt(fileUrl, path);
-						return;
-					}
+					InsertLinkPrompt(fileUrl, path);
+					return true;
 				}
 			}
 			else if (Clipboard.ContainsFileDropList())
@@ -2163,20 +2172,16 @@ namespace MSDN.Html.Editor
 					fileUrl = new System.Uri(filePath).AbsoluteUri;
 
 				if (EnterImageForm.IsImagePath(filePath))
-				{
 					InsertImagePrompt(fileUrl);
-				}
 				else
-				{
 					InsertLinkPrompt(fileUrl, Path.GetFileName(filePath));
-				}
-				return;
+
+				return true;
 			}
 
-			//this.editorWebBrowser.ExecWB(SHDocVw.OLECMDID.OLECMDID_PASTE, PROMPT_USER_NO, ref EMPTY_PARAMETER, ref EMPTY_PARAMETER);
-			ExecuteCommandDocument(HTML_COMMAND_TEXT_PASTE);
-
-        } //TextPaste
+			// all else
+			return false;
+		}
 
         /// <summary>
         /// Method to delete the currently selected text from the screen

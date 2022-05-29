@@ -225,3 +225,48 @@ DialogResult HtmlEditorControlEx::PostShowDialog(Form^ dialog, DialogResult res)
 	return res;
 }
 
+void HtmlEditorControlEx::TextCut()
+{
+	if (IsClipboardEnabled())
+	{
+		HtmlEditorControl::TextCut();
+	}
+	else
+	{
+		// TODO
+	}
+}
+
+void HtmlEditorControlEx::TextCopy()
+{
+	if (IsClipboardEnabled())
+	{
+		HtmlEditorControl::TextCopy();
+	}
+	else
+	{
+		// TODO
+	}
+}
+
+void HtmlEditorControlEx::TextPaste()
+{
+	if (IsClipboardEnabled() || DoPasteUrlOrFiles())
+	{
+		HtmlEditorControl::TextPaste();
+	}
+	else if (Clipboard::ContainsText(TextDataFormat::Html))
+	{
+		// TODO
+	}
+	else if (Clipboard::ContainsText())
+	{
+		// TODO
+	}
+}
+
+bool HtmlEditorControlEx::IsClipboardEnabled()
+{
+	return false;
+}
+
