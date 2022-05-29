@@ -617,6 +617,8 @@ namespace SpreadsheetContentControl
 
 		private void HandleCellTextUpdate(int row, int col, string newData)
 		{
+			newData = newData.Trim();
+
 			// Start with URL
 			if (IsValidHref(newData))
 			{
