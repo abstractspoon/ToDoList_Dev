@@ -8,6 +8,9 @@
 #include "PluginHelpers.h"
 #include "HtmlEditorControlEx.h"
 
+#include <shared\Clipboard.h>
+#include <shared\Misc.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System::Drawing;
@@ -233,7 +236,8 @@ void HtmlEditorControlEx::TextCut()
 	}
 	else
 	{
-		// TODO
+		TextCopy();
+		HtmlEditorControl::SelectedText = L"";
 	}
 }
 
@@ -257,11 +261,20 @@ void HtmlEditorControlEx::TextPaste()
 	}
 	else if (Clipboard::ContainsText(TextDataFormat::Html))
 	{
-		// TODO
+		CString sHtml = CClipboard().GetText(CBF_HTML);
+		Misc::EncodeAsUnicode(sHtml, CP_UTF8);
+
+		if (!sHtml.IsEmpty())
+		{
+			CString sURL;
+			CClipboard::UnpackageHTMLFragment(sHtml, sURL);
+
+			SelectedHtml = gcnew String(sHtml);
+		}
 	}
 	else if (Clipboard::ContainsText())
 	{
-		// TODO
+		HtmlEditorControl::SelectedText = Clipboard::GetText();
 	}
 }
 
