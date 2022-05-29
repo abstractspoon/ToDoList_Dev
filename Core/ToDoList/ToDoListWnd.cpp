@@ -1771,37 +1771,42 @@ BOOL CToDoListWnd::ProcessShortcut(MSG* pMsg)
 
 BOOL CToDoListWnd::PreTranslateMessage(MSG* pMsg)
 {
-	// the only way we get a WM_CLOSE here is if it was sent from an external app
-	// so we shut down as gracefully as possible
-	if ((pMsg->message == WM_CLOSE) && IsWindowEnabled())
+	if (IsWindowEnabled())
 	{
-		DoExit();
-		return TRUE;
-	}
+		// the only way we get a WM_CLOSE here is if it was sent from 
+		// an external app so we shut down as gracefully as possible
+		if ((pMsg->message == WM_CLOSE) && 
+			(pMsg->hwnd == GetSafeHwnd()))
+		{
+			DoExit();
+			return TRUE;
+		}
 
-	BOOL bKeyPress = ((pMsg->message == WM_KEYDOWN) || (pMsg->message == WM_SYSKEYDOWN));
+		BOOL bKeyPress = ((pMsg->message == WM_KEYDOWN) || 
+						  (pMsg->message == WM_SYSKEYDOWN));
 	
-	if (bKeyPress && IsWindowEnabled() && !IsDroppedComboBox(pMsg->hwnd))
-	{
-		if (HandleEscapeTabReturn(pMsg))
+		if (bKeyPress && !IsDroppedComboBox(pMsg->hwnd))
 		{
-			TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> HandleEscapeTabReturn)\n"));
-			return TRUE;
-		}
+			if (HandleEscapeTabReturn(pMsg))
+			{
+				TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> HandleEscapeTabReturn)\n"));
+				return TRUE;
+			}
 
-		if (ProcessShortcut(pMsg))
-		{
-			TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> ProcessShortcut)\n"));
-			return TRUE;
-		}
+			if (ProcessShortcut(pMsg))
+			{
+				TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> ProcessShortcut)\n"));
+				return TRUE;
+			}
 
-		if (ProcessDialogCtrlAccelerator(pMsg))
-		{
-			TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> ProcessDialogCtrlShortcut)\n"));
-			return TRUE;
-		}
+			if (ProcessDialogCtrlAccelerator(pMsg))
+			{
+				TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> ProcessDialogCtrlShortcut)\n"));
+				return TRUE;
+			}
 
-		//TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> Default handling)\n"));
+			//TRACE(_T("CToDoListWnd::PreTranslateMessage(Keypress -> Default handling)\n"));
+		}
 	}
 	
 	return CFrameWnd::PreTranslateMessage(pMsg);
