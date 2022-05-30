@@ -269,6 +269,8 @@ void HtmlEditorControlEx::TextPaste()
 			CString sURL;
 			CClipboard::UnpackageHTMLFragment(sHtml, sURL);
 
+			sURL.Replace(L"\n", L"<br>");
+			
 			SelectedHtml = gcnew String(sHtml);
 		}
 	}
