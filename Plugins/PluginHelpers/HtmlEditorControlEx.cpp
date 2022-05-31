@@ -35,6 +35,8 @@ HtmlEditorControlEx::HtmlEditorControlEx(Drawing::Font^ font, Translator^ trans,
 		m_Trans = trans;
 	else
 		m_Trans = gcnew Translator(nullptr); // for pre-translation
+
+	IncludeSourceUrlWhenPasting = true;
 }
 
 void HtmlEditorControlEx::SetControlFont(Drawing::Font^ font)
@@ -255,6 +257,8 @@ void HtmlEditorControlEx::TextCopy()
 
 void HtmlEditorControlEx::TextPaste()
 {
+	CString sSourceUrl;
+
 	if (IsClipboardEnabled() || DoPasteUrlOrFiles())
 	{
 		HtmlEditorControl::TextPaste();
@@ -264,19 +268,24 @@ void HtmlEditorControlEx::TextPaste()
 		CString sHtml = CClipboard().GetText(CBF_HTML);
 		Misc::EncodeAsUnicode(sHtml, CP_UTF8);
 
-		if (!sHtml.IsEmpty())
-		{
-			CString sURL;
-			CClipboard::UnpackageHTMLFragment(sHtml, sURL);
-
-			sURL.Replace(L"\n", L"<br>");
+		CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
 			
-			SelectedHtml = gcnew String(sHtml);
-		}
+		if (sHtml.IsEmpty())
+			return;
+
+		SelectedHtml = gcnew String(sHtml);
 	}
 	else if (Clipboard::ContainsText())
 	{
 		HtmlEditorControl::SelectedText = Clipboard::GetText();
+	}
+
+	if (IncludeSourceUrlWhenPasting && Clipboard::ContainsText(TextDataFormat::Html))
+	{
+		if (sSourceUrl.IsEmpty() && !CClipboard().GetHTMLSourceLink(sSourceUrl))
+			return;
+
+		SelectedHtml = String::Format(L"<a href=\"{0}\">{1}</a>", gcnew String(sSourceUrl), m_Trans->Translate(L"Source"));
 	}
 }
 

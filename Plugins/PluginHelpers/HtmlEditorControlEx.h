@@ -29,6 +29,7 @@ namespace Abstractspoon
 
 				property String^ LastBrowsedImageFolder;
 				property String^ LastBrowsedFileFolder;
+				property bool IncludeSourceUrlWhenPasting;
 
 				static property Drawing::Size SizeEditHtmlForm
 				{

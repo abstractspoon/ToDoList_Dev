@@ -126,6 +126,8 @@ namespace HTMLContentControl
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
+			m_HtmlEditControl.IncludeSourceUrlWhenPasting = prefs.GetProfileBool("Preferences", "IncludeWebLinksInCommentsPaste", true);
+
             if (!appOnly)
             {
 				// private settings
