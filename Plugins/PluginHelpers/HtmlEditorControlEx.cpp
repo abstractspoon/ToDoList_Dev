@@ -289,12 +289,12 @@ void HtmlEditorControlEx::TextPaste()
 
 			if ((InnerHtml->Length != oldHtml->Length) || !InnerHtml->Equals(oldHtml))
 			{
-				s_ClipboardEnabled = FALSE;
+				s_ClipboardEnabled = TRUE;
+				return; // paste is already done
 			}
 			else
 			{
-				s_ClipboardEnabled = TRUE;
-				return; // paste is already done
+				s_ClipboardEnabled = FALSE;
 			}
 		}
 	}
