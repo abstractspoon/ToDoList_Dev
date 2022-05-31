@@ -33,8 +33,8 @@ namespace Abstractspoon
 
 				static property Drawing::Size SizeEditHtmlForm
 				{
-					Drawing::Size get() { return m_SizeEditHtmlForm; }
-					void set(Drawing::Size size) { m_SizeEditHtmlForm = size; }
+					Drawing::Size get() { return s_SizeEditHtmlForm; }
+					void set(Drawing::Size size) { s_SizeEditHtmlForm = size; }
 				}
 
 			protected:
@@ -47,7 +47,8 @@ namespace Abstractspoon
 				Translator^ m_Trans;
 				bool m_AutoFixupToolbarButtonsSize;
 
-				static Drawing::Size m_SizeEditHtmlForm = Drawing::Size(-1, -1);
+				static Drawing::Size s_SizeEditHtmlForm = Drawing::Size(-1, -1);
+				static BOOL s_ClipboardEnabled = -1;
 
 			protected:
 				virtual void OnLoad(EventArgs^ args) override;
@@ -60,8 +61,8 @@ namespace Abstractspoon
 				void PreShowDialog(Windows::Forms::Form^ dialog, Drawing::Icon^ icon);
 				Windows::Forms::DialogResult PostShowDialog(Windows::Forms::Form^ dialog, Windows::Forms::DialogResult res);
 
-				bool IsClipboardEnabled();
 				void Translate();
+				bool InitialiseClipboardSupport();
 			};
 		}
 	}

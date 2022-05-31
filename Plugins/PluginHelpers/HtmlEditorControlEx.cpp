@@ -11,6 +11,8 @@
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
 
+#include <3rdParty\ClipboardBackup.h>
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 using namespace System::Drawing;
@@ -187,8 +189,8 @@ void HtmlEditorControlEx::PreShowDialog(Form^ dialog, Icon^ icon)
 		htmlDialog->FontName = gcnew String("Lucida Console");
 		m_Trans->Translate(dialog);
 
-		if ((m_SizeEditHtmlForm.Width > 0) && (m_SizeEditHtmlForm.Height > 0))
-			htmlDialog->Size = m_SizeEditHtmlForm;
+		if ((s_SizeEditHtmlForm.Width > 0) && (s_SizeEditHtmlForm.Height > 0))
+			htmlDialog->Size = s_SizeEditHtmlForm;
 	}
 	else // all others
 	{
@@ -221,9 +223,9 @@ DialogResult HtmlEditorControlEx::PostShowDialog(Form^ dialog, DialogResult res)
 
 			// Save the unmaximised size
 			if (htmlDialog->WindowState == FormWindowState::Maximized)
-				m_SizeEditHtmlForm = htmlDialog->RestoreBounds.Size;
+				s_SizeEditHtmlForm = htmlDialog->RestoreBounds.Size;
 			else
-				m_SizeEditHtmlForm = htmlDialog->Size;
+				s_SizeEditHtmlForm = htmlDialog->Size;
 		}
 	}
 
@@ -232,7 +234,10 @@ DialogResult HtmlEditorControlEx::PostShowDialog(Form^ dialog, DialogResult res)
 
 void HtmlEditorControlEx::TextCut()
 {
-	if (IsClipboardEnabled())
+	if (!InitialiseClipboardSupport())
+		return;
+
+	if (s_ClipboardEnabled)
 	{
 		HtmlEditorControl::TextCut();
 	}
@@ -245,41 +250,81 @@ void HtmlEditorControlEx::TextCut()
 
 void HtmlEditorControlEx::TextCopy()
 {
-	if (IsClipboardEnabled())
+	if (!InitialiseClipboardSupport())
+		return;
+
+	if (s_ClipboardEnabled)
 	{
 		HtmlEditorControl::TextCopy();
 	}
-	else
+	else if (!String::IsNullOrEmpty(SelectedHtml))
 	{
-		// TODO
+		CClipboard clipboard(Win32::GetHwnd(Handle));
+
+		if (clipboard.IsOpen())
+		{
+			clipboard.SetText((LPCWSTR)MS(SelectedText));
+
+			CString sHtml((LPCWSTR)MS(SelectedHtml));
+			CClipboard::PackageHTMLFragment(sHtml);
+
+			Misc::EncodeAsMultiByte(sHtml, CP_UTF8);
+			clipboard.SetText(sHtml, CBF_HTML);
+		}
 	}
 }
 
 void HtmlEditorControlEx::TextPaste()
 {
+	if (DoPasteUrlOrFiles())
+		return;
+
+	if (!InitialiseClipboardSupport())
+	{
+		if (Clipboard::ContainsText(TextDataFormat::Html) || Clipboard::ContainsText())
+		{
+			String^ oldHtml = InnerHtml;
+
+			HtmlEditorControl::TextPaste();
+
+			if ((InnerHtml->Length != oldHtml->Length) || !InnerHtml->Equals(oldHtml))
+			{
+				s_ClipboardEnabled = FALSE;
+			}
+			else
+			{
+				s_ClipboardEnabled = TRUE;
+				return; // paste is already done
+			}
+		}
+	}
+
 	CString sSourceUrl;
 
-	if (IsClipboardEnabled() || DoPasteUrlOrFiles())
+	if (s_ClipboardEnabled)
 	{
 		HtmlEditorControl::TextPaste();
 	}
-	else if (Clipboard::ContainsText(TextDataFormat::Html))
+	else // Fallback
 	{
-		CString sHtml = CClipboard().GetText(CBF_HTML);
-		Misc::EncodeAsUnicode(sHtml, CP_UTF8);
+		if (Clipboard::ContainsText(TextDataFormat::Html))
+		{
+			CString sHtml = CClipboard().GetText(CBF_HTML);
+			Misc::EncodeAsUnicode(sHtml, CP_UTF8);
 
-		CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
-			
-		if (sHtml.IsEmpty())
-			return;
+			CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
 
-		SelectedHtml = gcnew String(sHtml);
+			if (sHtml.IsEmpty())
+				return;
+
+			SelectedHtml = gcnew String(sHtml);
+		}
+		else if (Clipboard::ContainsText())
+		{
+			HtmlEditorControl::SelectedText = Clipboard::GetText();
+		}
 	}
-	else if (Clipboard::ContainsText())
-	{
-		HtmlEditorControl::SelectedText = Clipboard::GetText();
-	}
-
+	
 	if (IncludeSourceUrlWhenPasting && Clipboard::ContainsText(TextDataFormat::Html))
 	{
 		if (sSourceUrl.IsEmpty() && !CClipboard().GetHTMLSourceLink(sSourceUrl))
@@ -289,8 +334,25 @@ void HtmlEditorControlEx::TextPaste()
 	}
 }
 
-bool HtmlEditorControlEx::IsClipboardEnabled()
+bool HtmlEditorControlEx::InitialiseClipboardSupport()
 {
-	return false;
-}
+	if ((s_ClipboardEnabled == -1) && !String::IsNullOrEmpty(SelectedHtml))
+	{
+		// Backup the clipboard
+		CClipboardBackup clipboard(Win32::GetHwnd(Handle));
+		clipboard.Backup();
 
+		// Do a test copy
+		Clipboard::Clear();
+
+		HtmlEditorControl::TextCopy();
+
+		s_ClipboardEnabled = (Clipboard::ContainsText() ||
+							  Clipboard::ContainsText(TextDataFormat::Html)) ? TRUE : FALSE;
+
+		// Restore clipboard
+		clipboard.Restore();
+	}
+
+	return (s_ClipboardEnabled != -1);
+}

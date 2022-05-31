@@ -183,7 +183,7 @@ namespace HTMLContentControl
                 var s = InnerHtml ?? string.Empty;
                 var p = m_PrevTextChange ?? string.Empty;
 
-                if ((p.Length != s.Length) || (p != s))
+                if ((p.Length != s.Length) || !p.Equals(s))
                 {
                     m_PrevTextChange = s;
 
