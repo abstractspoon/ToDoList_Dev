@@ -283,11 +283,15 @@ void HtmlEditorControlEx::TextPaste()
 	{
 		if (Clipboard::ContainsText(TextDataFormat::Html) || Clipboard::ContainsText())
 		{
-			String^ oldHtml = InnerHtml;
+			auto innerHtml = InnerHtml;
+			auto oldHtml = (innerHtml ? innerHtml : String::Empty);
 
 			HtmlEditorControl::TextPaste();
 
-			if ((InnerHtml->Length != oldHtml->Length) || !InnerHtml->Equals(oldHtml))
+			innerHtml = InnerHtml;
+			auto newHtml = (innerHtml ? innerHtml : String::Empty);
+
+			if ((newHtml->Length != oldHtml->Length) || !newHtml->Equals(oldHtml))
 			{
 				s_ClipboardEnabled = TRUE;
 				return; // paste is already done
