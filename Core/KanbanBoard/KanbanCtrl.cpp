@@ -3747,11 +3747,19 @@ LRESULT CKanbanCtrl::OnColumnEditTaskPin(WPARAM /*wp*/, LPARAM lp)
 			pKI->bPinned = lp;
 	}
 
-	// Resort the selected column
-	ASSERT(m_pSelectedColumn);
-
-	if (m_pSelectedColumn)
+	// Resort the selected column or all columns for a multi-value attribute
+	if (IsTrackedAttributeMultiValue())
+	{
+		m_aColumns.Sort(m_nTrackAttribute, m_bSortAscending);
+	}
+	else if (m_pSelectedColumn)
+	{
 		m_pSelectedColumn->Sort(m_nSortBy, m_bSortAscending);
+	}
+	else
+	{
+		ASSERT(0);
+	}
 
 	return 0L;
 }
