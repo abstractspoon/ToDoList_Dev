@@ -206,6 +206,8 @@ void CKanbanColumnCtrl::OnKillFocus(CWnd* pNewWnd)
 
 BOOL CKanbanColumnCtrl::OnMouseWheel(UINT nFlags, short zDelta, CPoint pt)
 {
+	m_tooltip.Pop();
+
 	// Two bugs in Windows 7
 	if ((COSVersion() < OSV_WIN8) && (GetStyle() & WS_VSCROLL))
 	{
@@ -1071,7 +1073,8 @@ int CKanbanColumnCtrl::CalculateIndentation(HTREEITEM hti) const
 		ASSERT(HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS));
 
 		// Look for the first first parent/grandparent/etc elsewhere in the tree
-		// Any such task will necessarily be above us in the tree due to the sorting
+		// Any such task will necessarily be above us in the tree due to the sorting.
+		// Care is needed to handle pinned parents
 		DWORD dwTaskID = GetTaskID(hti);
 
 		while (dwTaskID)
@@ -1397,29 +1400,31 @@ void CKanbanColumnCtrl::ScrollToSelection()
 		while (nID--)
 		{
 			HTREEITEM hti = FindItem(m_aSelTaskIDs[nID]);
-			ASSERT(hti);
-
-			CRect rItem;
-			CTreeCtrl::GetItemRect(hti, rItem, FALSE);
-
-			if ((rItem.top >= rClient.top) && (rItem.bottom <= rClient.bottom))
-				return;
-
-			// Keep track of any partially visible item
-			if (htiPartial == NULL)
+			
+			if (hti)
 			{
-				BOOL bNotVisible = ((rItem.bottom <= rClient.top) || (rItem.top >= rClient.bottom));
+				CRect rItem;
+				CTreeCtrl::GetItemRect(hti, rItem, FALSE);
 
-				if (!bNotVisible)
-					htiPartial = hti;
+				if ((rItem.top >= rClient.top) && (rItem.bottom <= rClient.bottom))
+					return;
+
+				// Keep track of any partially visible item
+				if (htiPartial == NULL)
+				{
+					BOOL bNotVisible = ((rItem.bottom <= rClient.top) || (rItem.top >= rClient.bottom));
+
+					if (!bNotVisible)
+						htiPartial = hti;
+				}
 			}
 		}
 
 		// else just scroll to the first
 		HTREEITEM hti = (htiPartial ? htiPartial : FindItem(m_aSelTaskIDs[0]));
-		ASSERT(hti);
-
-		TCH().EnsureItemVisible(hti, FALSE);
+		
+		if (hti)
+			TCH().EnsureItemVisible(hti, FALSE);
 	}
 }
 
@@ -1606,19 +1611,29 @@ int CALLBACK CKanbanColumnCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM 
 
 			// We can't sort items that are not in the same 
 			// branch of the tree ie. they need to have the same parent
+			const KANBANITEM* pKIParent1 = pKI1;
+			const KANBANITEM* pKIParent2 = pKI2;
 
 			// First we raise the items to the same level
-			while (pKI1->nLevel > pKI2->nLevel)
-				pKI1 = pSort->GetParent(pKI1);
+			while (pKIParent1->nLevel > pKIParent2->nLevel)
+				pKIParent1 = pSort->data.GetItem(pKIParent1->dwParentID);
 
-			while (pKI2->nLevel > pKI1->nLevel)
-				pKI2 = pSort->GetParent(pKI2);
+			while (pKIParent2->nLevel > pKIParent1->nLevel)
+				pKIParent2 = pSort->data.GetItem(pKIParent2->dwParentID);
 
 			// Then we raise them to have the same parent
-			while (pKI1->dwParentID != pKI2->dwParentID)
+			while (pKIParent1->dwParentID != pKIParent2->dwParentID)
 			{
-				pKI1 = pSort->GetParent(pKI1);
-				pKI2 = pSort->GetParent(pKI2);
+				pKIParent1 = pSort->data.GetItem(pKIParent1->dwParentID);
+				pKIParent2 = pSort->data.GetItem(pKIParent2->dwParentID);
+			}
+
+			// And both parents must exist in this tree
+			if (pSort->ctrl.FindItem(pKIParent1->dwTaskID) &&
+				pSort->ctrl.FindItem(pKIParent2->dwTaskID))
+			{
+				pKI1 = pKIParent1;
+				pKI2 = pKIParent2;
 			}
 		}
 	
@@ -1743,7 +1758,7 @@ void CKanbanColumnCtrl::Sort(TDC_ATTRIBUTE nBy, BOOL bAscending)
 		return;
 
 	CHoldRedraw hr(*this);
-	KANBANSORT ks(m_data);
+	KANBANSORT ks(m_data, *this);
 	
 	ks.nBy = nBy;
 	ks.bAscending = bAscending;

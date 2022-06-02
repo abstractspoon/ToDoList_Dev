@@ -2933,7 +2933,9 @@ BOOL CKanbanCtrl::SelectColumn(CKanbanColumnCtrl* pCol, BOOL bNotifyParent)
 		}
 		else
 		{
-			pPrevSelCol->SetSelected(FALSE);
+			if (pPrevSelCol)
+				pPrevSelCol->SetSelected(FALSE);
+
 			m_pSelectedColumn->SetSelected(TRUE);
 		}
 
@@ -3294,7 +3296,10 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 					// Resort before fixing up selection
 					if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+					{	
 						pDestCol->Sort(m_nSortBy, m_bSortAscending);
+						pSrcCol->Sort(m_nSortBy, m_bSortAscending);
+					}
 
 					SelectColumn(pDestCol, FALSE);
 					SelectTasks(aTaskIDs); 

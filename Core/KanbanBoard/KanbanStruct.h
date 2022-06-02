@@ -142,11 +142,13 @@ public:
 	BOOL HasItem(DWORD dwTaskID) const;
 	BOOL IsLocked(DWORD dwTaskID) const;
 	BOOL IsFlagged(DWORD dwTaskID) const;
+	BOOL IsPinned(DWORD dwTaskID) const;
 	BOOL IsDone(DWORD dwTaskID, BOOL bIncGoodAsDone = FALSE) const;
 
 	CString GetItemTitle(DWORD dwTaskID) const;
 
 	KANBANITEM* GetItem(DWORD dwTaskID) const;
+	KANBANITEM* GetParentItem(DWORD dwTaskID) const;
 	KANBANITEM* NewItem(DWORD dwTaskID, const CString& sTitle);
 
 	void RemoveDeletedItems(const CDWordSet& mapCurIDs);
@@ -199,14 +201,17 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
+class CKanbanColumnCtrl;
+
 struct KANBANSORT
 {
-	KANBANSORT(const CKanbanItemMap& map);
+	KANBANSORT(const CKanbanItemMap& map, const CKanbanColumnCtrl& col);
 
 	BOOL IsParent(DWORD dwTaskID, const KANBANITEM* pKIChild) const;
-	const KANBANITEM* GetParent(const KANBANITEM* pKIChild) const;
 
 	const CKanbanItemMap& data;
+	const CKanbanColumnCtrl& ctrl;
+
 	TDC_ATTRIBUTE nBy;
 	CString sAttribID;
 	BOOL bAscending;
