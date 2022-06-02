@@ -686,10 +686,10 @@ namespace SpreadsheetContentControl
 		{
 			if (e.EndReason == EndEditReason.NormalFinish)
 			{
-				string oldData = (e.Cell.Data as string);
 				string newData = (e.NewData as string);
+				string oldData = (e.Cell.Data as string);
 
-				if ((oldData != null) && (newData != null) && !string.IsNullOrEmpty(newData) && !newData.Equals(oldData))
+				if (!string.IsNullOrEmpty(newData) && !newData.Equals(oldData))
 				{
 					HandleCellTextUpdate(e.Cell.Row, e.Cell.Column, newData);
 				}
