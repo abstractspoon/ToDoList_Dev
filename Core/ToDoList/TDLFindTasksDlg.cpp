@@ -1007,13 +1007,14 @@ void CTDLFindTasksDlg::OnItemActivated(NMHDR* pNMHDR, LRESULT* pResult)
 
 void CTDLFindTasksDlg::OnDblClkResults(NMHDR* /*pNMHDR*/, LRESULT* pResult) 
 {
-	CPoint pt(::GetMessagePos());
-	m_lcResults.ScreenToClient(&pt);
+	if (!IsDocked())
+	{
+		CPoint pt(::GetMessagePos());
+		m_lcResults.ScreenToClient(&pt);
 	
-	// int nHit = m_lcResults.HitTest(pt);
-	// 
-	// if (nHit != -1)
-	ShowWindow(SW_HIDE);
+		if (m_lcResults.HitTest(pt) != -1)
+			ShowWindow(SW_HIDE);
+	}
 	*pResult = 0;
 }
 
