@@ -23,14 +23,18 @@ namespace Abstractspoon
 				void SetUITheme(UITheme^ theme);
 				void SetBodyFont(String^ fontName, int pointSize);
 
+				void TextCut() override;
+				void TextCopy() override;
+				void TextPaste() override;
+
 				property String^ LastBrowsedImageFolder;
 				property String^ LastBrowsedFileFolder;
-
+				property bool IncludeSourceUrlWhenPasting;
 
 				static property Drawing::Size SizeEditHtmlForm
 				{
-					Drawing::Size get() { return m_SizeEditHtmlForm; }
-					void set(Drawing::Size size) { m_SizeEditHtmlForm = size; }
+					Drawing::Size get() { return s_SizeEditHtmlForm; }
+					void set(Drawing::Size size) { s_SizeEditHtmlForm = size; }
 				}
 
 			protected:
@@ -43,7 +47,8 @@ namespace Abstractspoon
 				Translator^ m_Trans;
 				bool m_AutoFixupToolbarButtonsSize;
 
-				static Drawing::Size m_SizeEditHtmlForm = Drawing::Size(-1, -1);
+				static Drawing::Size s_SizeEditHtmlForm = Drawing::Size(-1, -1);
+				static BOOL s_ClipboardEnabled = -1;
 
 			protected:
 				virtual void OnLoad(EventArgs^ args) override;
@@ -57,6 +62,7 @@ namespace Abstractspoon
 				Windows::Forms::DialogResult PostShowDialog(Windows::Forms::Form^ dialog, Windows::Forms::DialogResult res);
 
 				void Translate();
+				bool InitialiseClipboardSupport();
 			};
 		}
 	}
