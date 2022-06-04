@@ -2652,6 +2652,15 @@ LRESULT CTreeListSyncer::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM
 		}
 		break;
 		
+	case WM_CHAR:
+		// If this is a list-list configuration then navigating
+		// using character keypresses causes a synchronisation 
+		// problem because the default resyncing happens too soon
+		// for the lists to be in the right state
+		if ((PrimaryWnd() == hRealWnd) && IsList(hRealWnd))
+			PostResync(hRealWnd, FALSE);
+		break;
+
 	case WM_KEYUP:
 		switch (wp)
 		{
