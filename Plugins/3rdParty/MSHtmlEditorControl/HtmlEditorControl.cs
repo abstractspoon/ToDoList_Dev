@@ -1451,9 +1451,13 @@ namespace MSDN.Html.Editor
                     {
                         // encode the text to encode any html markup
                         string html = HttpUtility.HtmlEncode(value);
-                        // once have a range execute the pasteHtml command
-                        // this will overwrite the current selection
-                        range.pasteHTML(html);
+
+						// Handle remaining line endings
+						html = html.Replace("\r\n", "<br>");
+
+						// once have a range execute the pasteHtml command
+						// this will overwrite the current selection
+						range.pasteHTML(html);
                     }
                 }
                 catch (Exception ex)

@@ -349,7 +349,22 @@ BOOL CRtfHtmlConverter::ConvertRtfToHtml(LPCSTR szRTF, LPCTSTR szCharSet, CStrin
 	
 	// save rtf as temp Ansi file
 	CString sTempRtf = FileMisc::GetTempFilePath(RTF2HTML_FNAME, _T("rtf")), sTempHtml;
-	FileMisc::SaveFile(sTempRtf, szRTF); 
+
+	// Make sure RTF format is at least 'rtf1'
+	if (strncmp(szRTF, "{\\rtf\\", 6) == 0)
+	{
+		CString sRtf(szRTF);
+		//Misc::EncodeAsUnicode(sRtf, CP_UTF8);
+
+		sRtf.Replace(L"{\\rtf\\", L"{\\rtf1\\");
+		Misc::EncodeAsMultiByte(sRtf, CP_UTF8);
+	
+		FileMisc::SaveFile(sTempRtf, (LPCSTR)(LPCWSTR)sRtf); 
+	}
+	else
+	{
+		FileMisc::SaveFile(sTempRtf, szRTF);
+	}
 
 	// do the conversion
  	if (ConvertRtfToHtmlWithSautin(sTempRtf, szCharSet, sHtml, sUniqueDir))

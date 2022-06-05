@@ -10,6 +10,7 @@
 
 #include <shared\Clipboard.h>
 #include <shared\Misc.h>
+#include <shared\Rtf2HtmlConverter.h>
 
 #include <3rdParty\ClipboardBackup.h>
 
@@ -311,6 +312,8 @@ void HtmlEditorControlEx::TextPaste()
 	}
 	else // Fallback
 	{
+		BOOL bHandled = FALSE;
+
 		if (Clipboard::ContainsText(TextDataFormat::Html))
 		{
 			CString sHtml = CClipboard().GetText(CBF_HTML);
@@ -318,14 +321,28 @@ void HtmlEditorControlEx::TextPaste()
 
 			CClipboard::UnpackageHTMLFragment(sHtml, sSourceUrl);
 
-			if (sHtml.IsEmpty())
-				return;
-
-			SelectedHtml = gcnew String(sHtml);
+			if (!sHtml.IsEmpty())
+			{
+				SelectedHtml = gcnew String(sHtml);
+				bHandled = TRUE;
+			}
 		}
-		else if (Clipboard::ContainsText())
+
+		if (!bHandled && Clipboard::ContainsText(TextDataFormat::Rtf))
 		{
-			HtmlEditorControl::SelectedText = Clipboard::GetText();
+			CString sRtf, sHtml;
+			
+			if (CClipboard().GetText(sRtf, CBF_RTF) && 
+				CRtfHtmlConverter(FALSE).ConvertRtfToHtml((LPCSTR)(LPCWSTR)sRtf, NULL, sHtml, L"C:\\Temp"))
+			{
+				SelectedHtml = gcnew String(sHtml);
+				bHandled = TRUE;
+			}
+		}
+
+		if (!bHandled && Clipboard::ContainsText())
+		{
+			SelectedText = Clipboard::GetText();
 		}
 	}
 	
