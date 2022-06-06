@@ -2215,31 +2215,28 @@ BOOL CKanbanColumnCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	if (hti)
 	{
+		BOOL bLocked = m_data.IsLocked(GetTaskID(hti));
 		KBC_IMAGETYPE nImage = HitTestImage(hti, point);
 
-		if (nImage != KBCI_NONE)
+		switch (nImage)
 		{
-			switch (nImage)
-			{
-			case KBCI_FLAG:
-			case KBCI_ICON:
-				if (!m_data.IsLocked(GetTaskID(hti)))
-					return GraphicsMisc::SetHandCursor();
-				break;
-
-			case KBCI_PIN:
+		case KBCI_FLAG:
+		case KBCI_ICON:
+			if (!bLocked)
 				return GraphicsMisc::SetHandCursor();
+			break;
 
-			default:
-				ASSERT(0);
-				break;
-			}
-		}
-		else if (m_bDrawTaskFileLinks)
-		{
-			if (!HitTestFileLink(hti, point).IsEmpty())
+		case KBCI_PIN:
+			return GraphicsMisc::SetHandCursor();
+
+		case KBCI_NONE:
+			if (m_bDrawTaskFileLinks && !HitTestFileLink(hti, point).IsEmpty())
 				return GraphicsMisc::SetHandCursor();
+			break;
 		}
+
+		if (bLocked)
+			return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
 	}
 
 	// else
