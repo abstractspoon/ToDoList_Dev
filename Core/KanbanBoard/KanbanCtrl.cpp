@@ -3750,7 +3750,7 @@ LRESULT CKanbanCtrl::OnColumnEditTaskPin(WPARAM /*wp*/, LPARAM lp)
 	// Resort the selected column or all columns for a multi-value attribute
 	if (IsTrackedAttributeMultiValue())
 	{
-		m_aColumns.Sort(m_nTrackAttribute, m_bSortAscending);
+		m_aColumns.Sort(m_nSortBy, m_bSortAscending);
 	}
 	else if (m_pSelectedColumn)
 	{
