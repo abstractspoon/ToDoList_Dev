@@ -103,6 +103,11 @@ void CPopupEditCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		EndEdit(TRUE, TRUE); // first TRUE means cancel, second means intentional
 		return;
 	}
+	else if (nChar == VK_RETURN)
+	{
+		// so there's no beep
+		return;
+	}
 
 	CEnEdit::OnChar(nChar, nRepCnt, nFlags);
 }
