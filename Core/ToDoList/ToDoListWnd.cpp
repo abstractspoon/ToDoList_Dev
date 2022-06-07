@@ -3900,8 +3900,15 @@ void CToDoListWnd::OnContextMenu(CWnd* pWnd, CPoint point)
 		case TDCHT_TASK:
 			if (tdc.WantTaskContextMenu())
 			{
-				nMenuID = MM_TASKCONTEXT;
-				nColID = tdc.HitTestColumn(point);
+				if (tdc.GetSelectedTaskCount())
+				{
+					nMenuID = MM_TASKCONTEXT;
+					nColID = tdc.HitTestColumn(point);
+				}
+				else
+				{
+					nMenuID = MM_TASKCONTEXTNOSEL;
+				}
 			}
 			break;
 

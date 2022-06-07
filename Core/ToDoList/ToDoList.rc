@@ -3780,7 +3780,6 @@ BEGIN
 
             MENUITEM "&Below Task",                 ID_NEWTASK_AFTERSELECTEDTASK
 
-            MENUITEM SEPARATOR
         END
         POPUP "New Subtask"
         BEGIN
@@ -3940,6 +3939,14 @@ BEGIN
         MENUITEM "Email Selected &Tasks...",    ID_SEND_SELTASKS
         MENUITEM SEPARATOR
         MENUITEM "Cancel\tEsc",                 IDCLOSE
+    END
+    POPUP "TaskContextNoSel"
+    BEGIN
+        POPUP "New Task"
+        BEGIN
+            MENUITEM "At T&op",                     ID_NEWTASK_ATTOP
+            MENUITEM "At Botto&m",                  ID_NEWTASK_ATBOTTOM
+        END
     END
     POPUP "TabCtrl"
     BEGIN
