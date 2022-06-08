@@ -149,6 +149,7 @@ public:
 
 	KANBANITEM* GetItem(DWORD dwTaskID) const;
 	KANBANITEM* GetParentItem(DWORD dwTaskID) const;
+	KANBANITEM* GetParentItem(const KANBANITEM* pKI) const;
 	KANBANITEM* NewItem(DWORD dwTaskID, const CString& sTitle);
 
 	void RemoveDeletedItems(const CDWordSet& mapCurIDs);
@@ -157,6 +158,11 @@ public:
 	int GetPinnedItems(CDWordArray& aTaskIDs) const;
 	void SetPinnedItems(const CDWordArray& aTaskIDs, BOOL bReset = TRUE);
 	void ClearPinnedItems();
+
+	BOOL IsParent(const KANBANITEM* pKIParent, const KANBANITEM* pKIChild) const;
+	BOOL CalcInheritedPinState(const KANBANITEM* pKI) const;
+	BOOL HasSameParent(const KANBANITEM* pKI1, const KANBANITEM* pKI2) const;
+
 		
 #ifdef _DEBUG
 	void TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const;
@@ -201,16 +207,16 @@ public:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CKanbanColumnCtrl;
+class CHTIMap;
 
 struct KANBANSORT
 {
-	KANBANSORT(const CKanbanItemMap& map, const CKanbanColumnCtrl& col);
+	KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2);
 
-	BOOL IsParent(DWORD dwTaskID, const KANBANITEM* pKIChild) const;
+	BOOL HasOption(DWORD dwOption) const { return (dwOptions & dwOption) == dwOption; }
 
 	const CKanbanItemMap& data;
-	const CKanbanColumnCtrl& ctrl;
+	const CHTIMap& items;
 
 	TDC_ATTRIBUTE nBy;
 	CString sAttribID;

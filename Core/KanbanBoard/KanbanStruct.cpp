@@ -736,10 +736,7 @@ KANBANITEM* CKanbanItemMap::GetParentItem(DWORD dwTaskID) const
 {
 	KANBANITEM* pKI = GetItem(dwTaskID);
 
-	if (pKI)
-		pKI = GetItem(pKI->dwParentID);
-
-	return pKI;
+	return GetParentItem(pKI);
 }
 
 CString CKanbanItemMap::GetItemTitle(DWORD dwTaskID) const
@@ -959,6 +956,46 @@ void CKanbanItemMap::TraceSummary(LPCTSTR szAttribID, DWORD dwOptions) const
 }
 #endif
 
+BOOL CKanbanItemMap::IsParent(const KANBANITEM* pKIParent, const KANBANITEM* pKIChild) const
+{
+	ASSERT(pKIParent && pKIChild);
+
+	if (pKIChild->dwParentID == pKIParent->dwTaskID)
+		return TRUE;
+
+	if (pKIChild->dwParentID == 0)
+		return FALSE;
+
+	return IsParent(pKIParent, GetParentItem(pKIChild));
+}
+
+KANBANITEM* CKanbanItemMap::GetParentItem(const KANBANITEM* pKI) const
+{
+	return pKI ? GetItem(pKI->dwParentID) : NULL;
+}
+
+BOOL CKanbanItemMap::CalcInheritedPinState(const KANBANITEM* pKI) const
+{
+	while (pKI)
+	{
+		if (pKI->bPinned)
+			return TRUE;
+
+		pKI = GetParentItem(pKI);
+	}
+
+	return FALSE;
+}
+
+BOOL CKanbanItemMap::HasSameParent(const KANBANITEM* pKI1, const KANBANITEM* pKI2) const
+{
+	if (!pKI1 || !pKI2)
+		return FALSE;
+
+	// else
+	return (pKI1->dwParentID == pKI2->dwParentID);
+}
+
 //////////////////////////////////////////////////////////////////////
 
 CKanbanItemArrayMap::~CKanbanItemArrayMap()
@@ -1072,27 +1109,14 @@ BOOL CKanbanColumnArray::MatchesAll(const CKanbanColumnArray& other, BOOL bIncDi
 
 //////////////////////////////////////////////////////////////////////
 
-KANBANSORT::KANBANSORT(const CKanbanItemMap& map, const CKanbanColumnCtrl& col)
+KANBANSORT::KANBANSORT(const CKanbanItemMap& map1, const CHTIMap& map2)
 	:
-	data(map),
-	ctrl(col),
+	data(map1),
+	items(map2),
 	nBy(TDCA_NONE),
 	bAscending(TRUE),
 	dwOptions(0)
 {
 }
 	
-BOOL KANBANSORT::IsParent(DWORD dwTaskID, const KANBANITEM* pKIChild) const
-{
-	ASSERT(dwTaskID);
-
-	if (pKIChild->dwParentID == dwTaskID)
-		return TRUE;
-
-	if (pKIChild->dwParentID == 0)
-		return FALSE;
-
-	return IsParent(dwTaskID, data.GetItem(pKIChild->dwParentID));
-}
-
 //////////////////////////////////////////////////////////////////////
