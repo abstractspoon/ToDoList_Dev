@@ -5703,7 +5703,15 @@ BOOL CToDoListWnd::OnCopyData(CWnd* /*pWnd*/, COPYDATASTRUCT* pCopyDataStruct)
 		else
 		{
 			const CTDCStartupOptions* pStartup = (CTDCStartupOptions*)(pCopyDataStruct->lpData);
-			return ProcessStartupOptions(*pStartup, FALSE);
+			CString sOldPrefix = m_sTitlePrefix;
+
+			if (ProcessStartupOptions(*pStartup, FALSE))
+			{
+				if (m_sTitlePrefix != sOldPrefix)
+					UpdateCaption();
+
+				return TRUE;
+			}
 		}
 		break;
 
