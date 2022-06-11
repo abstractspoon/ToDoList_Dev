@@ -2434,6 +2434,9 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	{
 		m_sTitlePrefix = m_startupOptions.GetTitlePrefix();
 	}
+
+	if (!m_sTitlePrefix.IsEmpty())
+		UpdateCaption();
 	
 	m_startupOptions.Reset(); // always
 	
@@ -2524,8 +2527,6 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 
 			tdc.CreateNewTask(CEnString(IDS_SAMPLETASK), TDC_INSERTATTOP, FALSE);
 			tdc.SetModified(FALSE);
-			
-			UpdateCaption();
 		}
 	}
 	else // due task notifications
