@@ -308,14 +308,12 @@ namespace HTMLContentControl
 
 		private void OnNeedLinkTooltip(object sender, NeedLinkTooltipEventArgs e)
 		{
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
-			e.tooltip = notify.GetLinkTooltip(e.linkUri);
+			e.tooltip = ContentControlWnd.HandleNeedLinkTooltip(e.linkUri, m_HwndParent, Handle);
 		}
 
 		private void OnNeedAttributeList(object sender, NeedAttributeValuesEventArgs e)
 		{
-			ContentControlWnd.ParentNotify notify = new ContentControlWnd.ParentNotify(m_HwndParent, Handle);
-			e.values = notify.GetAttributeValues(e.attrib);
+			e.values = ContentControlWnd.HandleNeedAttributeList(e.attrib, m_HwndParent, Handle);
 		}
 	}
 }

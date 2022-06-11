@@ -1265,6 +1265,9 @@ namespace unvell.Common.Win32Lib
 		}
 
 		[DllImport("user32.dll")]
+		public static extern IntPtr LoadCursor(IntPtr hModule, int hCursor);
+
+		[DllImport("user32.dll")]
 		public static extern IntPtr SetCursor(int hCursor);
 
 		[DllImport("USER32.DLL")]

@@ -14,29 +14,6 @@ using CustomComboBox;
 
 namespace HTMLContentControl
 {
-	// --------------------------------------------------------------
-
-	delegate void NeedLinkTooltipEventHandler(object sender, NeedLinkTooltipEventArgs args);
-
-	public class NeedLinkTooltipEventArgs : EventArgs
-	{
-		public NeedLinkTooltipEventArgs(String href) { linkUri = href; }
-
-		public String linkUri;
-		public String tooltip;
-	}
-
-	delegate void NeedAttributeValuesEventHandler(object sender, NeedAttributeValuesEventArgs args);
-
-	public class NeedAttributeValuesEventArgs : EventArgs
-	{
-		public NeedAttributeValuesEventArgs(Task.Attribute a) { attrib = a; }
-
-		public Task.Attribute attrib;
-		public List<String> values;
-	}
-
-	// --------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
     class TDLHtmlEditorControl : HtmlEditorControlEx

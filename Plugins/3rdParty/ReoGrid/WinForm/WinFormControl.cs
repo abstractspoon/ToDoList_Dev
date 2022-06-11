@@ -345,6 +345,24 @@ namespace unvell.ReoGrid
 
 		#endregion // Constructor
 
+		public void ShowTooltip(string tooltip)
+		{
+			var cursorPos = Point.Round(adapter.PointToClient(Cursor.Position));
+			cursorPos.Offset(16, 16);
+			
+			adapter.ShowTooltip(cursorPos, tooltip);
+		}
+
+		public void HideTooltip()
+		{
+			adapter.HideTooltip();
+		}
+
+		public void ChangeSelectionCursor(CursorStyle cursor)
+		{
+			adapter.ChangeSelectionCursor(cursor);
+		}
+
 		#region Adapter
 
 		private class WinFormControlAdapter : IControlAdapter//, IPlatformDependencyInterface
@@ -439,6 +457,22 @@ namespace unvell.ReoGrid
 				}
 			}
 
+			// The default 'Cursors.Hand' is the old hand resource embedded inside Winforms
+			// So we have to load the latest one manually
+			internal Cursor handCursor = null;
+			private Cursor HandCursor
+			{
+				get
+				{
+					if (handCursor == null)
+					{
+						var cursor = Win32.LoadCursor(IntPtr.Zero, (int)Win32.Cursors.IDC_HAND);
+						handCursor = new Cursor(cursor);
+					}
+
+					return handCursor;
+				}
+			}
 			private Cursor oldCursor = null;
 			public void ChangeCursor(CursorStyle cursor)
 			{
@@ -450,7 +484,7 @@ namespace unvell.ReoGrid
 					case CursorStyle.PlatformDefault: this.control.Cursor = Cursors.Default; break;
 					case CursorStyle.Selection: this.control.Cursor = this.control.internalCurrentCursor; break;
 					case CursorStyle.Busy: this.control.Cursor = Cursors.WaitCursor; break;
-					case CursorStyle.Hand: this.control.Cursor = Cursors.Hand; break;
+					case CursorStyle.Hand: this.control.Cursor = this.HandCursor; break;
 					case CursorStyle.FullColumnSelect:
 						this.control.Cursor = this.control.FullColumnSelectionCursor!=null ?
 							this.control.FullColumnSelectionCursor : this.control.builtInFullColSelectCursor;
@@ -492,7 +526,7 @@ namespace unvell.ReoGrid
 						break;
 
 					case CursorStyle.Hand:
-						requestedCursor = Cursors.Hand;
+						requestedCursor = this.HandCursor;
 						break;
 				}
 

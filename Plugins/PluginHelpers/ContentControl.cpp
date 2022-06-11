@@ -198,3 +198,17 @@ bool ContentControlWnd::GoToLink(String^ sLink, IntPtr hwndParent, IntPtr hwndFr
 	notify.NotifyFailedLink(sLink);
 	return false;
 }
+
+String^ ContentControlWnd::HandleNeedLinkTooltip(String^ sLink, IntPtr hwndParent, IntPtr hwndFrom)
+{
+	auto notify = gcnew ContentControlWnd::ParentNotify(hwndParent, hwndFrom);
+
+	return notify->GetLinkTooltip(sLink);
+}
+
+List<String^>^ ContentControlWnd::HandleNeedAttributeList(Task::Attribute attrib, IntPtr hwndParent, IntPtr hwndFrom)
+{
+	auto notify = gcnew ContentControlWnd::ParentNotify(hwndParent, hwndFrom);
+	
+	return notify->GetAttributeValues(attrib);
+}

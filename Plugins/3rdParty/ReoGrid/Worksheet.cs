@@ -1598,6 +1598,8 @@ namespace unvell.ReoGrid
 		}
 		#endregion // OnMouseDoubleClick
 
+		public event EventHandler<CellEventArgs> CellBodyChanged;
+
 		#region Mouse Events
 
 		/// <summary>
@@ -1640,6 +1642,11 @@ namespace unvell.ReoGrid
 			{
 				SelectionRangeChanged(this, args);
 			}
+		}
+
+		internal void RaiseCellBodyChanged(Cell cell)
+		{
+			CellBodyChanged?.Invoke(this, new CellEventArgs(cell));
 		}
 
 		#endregion // Mouse Events

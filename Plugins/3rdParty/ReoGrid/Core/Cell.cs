@@ -1210,7 +1210,11 @@ namespace unvell.ReoGrid
 
 					UpdateContentBounds();
 
-					if (this.Worksheet != null) this.Worksheet.RequestInvalidate();
+					if (this.Worksheet != null)
+					{
+						this.Worksheet.RequestInvalidate();
+						this.Worksheet.RaiseCellBodyChanged(this);
+					}
 				}
 			}
 		}

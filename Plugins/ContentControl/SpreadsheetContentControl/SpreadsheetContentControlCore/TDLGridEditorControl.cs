@@ -38,7 +38,19 @@ namespace SpreadsheetContentControl
 		// --------------------------------------------
 
 		public event EventHandler ContentChanged;
-		public new EventHandler LostFocus;
+		public new event EventHandler LostFocus; // replaces base class event
+
+		public event NeedLinkTooltipEventHandler NeedLinkTooltip;
+		public event NeedAttributeValuesEventHandler NeedAttributeValues;
+
+		// --------------------------------------------
+
+		public event EventHandler<LinkEventArgs> LinkNavigation;
+
+		public class LinkEventArgs : EventArgs
+		{
+			public string LinkUrl;
+		}
 
 		// --------------------------------------------
 
@@ -69,12 +81,20 @@ namespace SpreadsheetContentControl
 			{
 				e.Worksheet.AfterPaste += new EventHandler<RangeEventArgs>(OnAfterPaste);
 				e.Worksheet.AfterCellEdit += new EventHandler<CellAfterEditEventArgs>(OnAfterCellEdit);
+				e.Worksheet.CellBodyChanged += new EventHandler<CellEventArgs>(OnCellBodyChanged);
+				e.Worksheet.CellMouseEnter += new EventHandler<CellMouseEventArgs>(OnCellMouseEnter);
+				e.Worksheet.CellMouseLeave += new EventHandler<CellMouseEventArgs>(OnCellMouseLeave);
+				e.Worksheet.CellMouseMove += new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
 			};
 
 			GridControl.WorksheetRemoved += (s, e) =>
 			{
 				e.Worksheet.AfterPaste -= new EventHandler<RangeEventArgs>(OnAfterPaste);
 				e.Worksheet.AfterCellEdit -= new EventHandler<CellAfterEditEventArgs>(OnAfterCellEdit);
+				e.Worksheet.CellBodyChanged -= new EventHandler<CellEventArgs>(OnCellBodyChanged);
+				e.Worksheet.CellMouseEnter -= new EventHandler<CellMouseEventArgs>(OnCellMouseEnter);
+				e.Worksheet.CellMouseLeave -= new EventHandler<CellMouseEventArgs>(OnCellMouseLeave);
+				e.Worksheet.CellMouseMove -= new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
 			};
 
 		}
@@ -119,6 +139,22 @@ namespace SpreadsheetContentControl
 			// Restore the content font because loading changes it
 			CurrentWorksheet.FontName = Worksheet.DefaultFontName;
 			CurrentWorksheet.FontSize = Worksheet.DefaultFontSize;
+
+			// Initialise hyperlink cells
+			for (int row = 0; row <= CurrentWorksheet.MaxContentRow; row++)
+			{
+				for (int col = 0; col <= CurrentWorksheet.MaxContentCol; col++)
+				{
+					var link = AsHyperlinkCell(CurrentWorksheet.GetCell(row, col));
+
+					if (link != null)
+					{
+						link.ActivateColor = link.LinkColor;
+						link.AutoNavigate = false;
+						link.Click += new EventHandler(OnClickHyperlinkCell);
+					}
+				}
+			}
 
 			m_PrevContent = null;
 
@@ -605,14 +641,26 @@ namespace SpreadsheetContentControl
 			}
 		}
 
-		private bool IsValidHref(string href)
+		private bool IsValidHref(ref string href)
 		{
-			if (Uri.IsWellFormedUriString(href, UriKind.Absolute))
-				return true;
-
 			var parser = new UrlParser();
 
-			return (parser.GetUrlCount(href) == 1);
+			if (parser.GetUrlCount(href) == 1)
+			{
+				if (Uri.IsWellFormedUriString(href, UriKind.Absolute))
+					return true;
+
+				// try appending https://
+				string fixedHref = ("https://" + href);
+
+				if (Uri.IsWellFormedUriString(fixedHref, UriKind.Absolute))
+				{
+					href = fixedHref;
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		private void HandleCellTextUpdate(int row, int col, string newData)
@@ -620,10 +668,11 @@ namespace SpreadsheetContentControl
 			newData = newData.Trim();
 
 			// Start with URL
-			if (IsValidHref(newData))
+			if (IsValidHref(ref newData))
 			{
 				Image image = null;
 
+/*
 				using (var client = new WebClient())
 				{
 					using (var stream = client.OpenRead(newData))
@@ -633,16 +682,17 @@ namespace SpreadsheetContentControl
 							image = new Bitmap(stream);
 							GridControl.CurrentWorksheet.SetCellBody(row, col, new ImageCell(image, ImageCellViewMode.Clip));
 						}
-						catch (Exception /*e*/)
+						catch (Exception / *e* /)
 						{
 							image = null;
 						}
 					}
 				}
+*/
 
 				if (image == null)
 				{
-					GridControl.CurrentWorksheet.SetCellBody(row, col, new HyperlinkCell(newData));
+					GridControl.CurrentWorksheet.SetCellBody(row, col, new HyperlinkCell(newData, (LinkNavigation == null)));
 				}
 
 				return;
@@ -655,15 +705,17 @@ namespace SpreadsheetContentControl
 				{
 					Image image = null;
 
+/*
 					try
 					{
 						image = new Bitmap(newData);
 						GridControl.CurrentWorksheet.SetCellBody(row, col, new ImageCell(image, ImageCellViewMode.Clip));
 					}
-					catch (Exception /*e*/)
+					catch (Exception / *e* /)
 					{
 						image = null;
 					}
+*/
 
 					if (image == null)
 					{
@@ -694,6 +746,98 @@ namespace SpreadsheetContentControl
 					HandleCellTextUpdate(e.Cell.Row, e.Cell.Column, newData);
 				}
 			}
+		}
+
+		HyperlinkCell AsHyperlinkCell(CellMouseEventArgs e)
+		{
+			if (e.Cell == null)
+				e.Cell = CurrentWorksheet.GetCell(e.CellPosition);
+
+			return AsHyperlinkCell(e.Cell);
+		}
+
+		HyperlinkCell AsHyperlinkCell(Cell cell)
+		{
+			if (cell == null)
+				return null;
+
+			return (cell.Body as HyperlinkCell);
+		}
+
+		private void OnCellMouseEnter(object sender, CellMouseEventArgs e)
+		{
+			var link = AsHyperlinkCell(e);
+
+			if (link != null)
+			{
+ 				if (!String.IsNullOrWhiteSpace(link.LinkURL))
+ 				{
+					string tooltip = link.LinkURL;
+
+					if (NeedLinkTooltip != null)
+					{
+						var args = new NeedLinkTooltipEventArgs(link.LinkURL);
+						NeedLinkTooltip(this, args);
+
+						if (!String.IsNullOrWhiteSpace(args.tooltip))
+							tooltip = args.tooltip;
+					}
+					
+					if (tooltip.Contains(link.LinkURL))
+						tooltip = String.Empty;
+					else
+						tooltip = tooltip + "\n";
+
+					tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link");
+
+					GridControl.ShowTooltip(tooltip);
+ 				}
+			}
+		}
+
+		private void OnCellMouseLeave(object sender, CellMouseEventArgs e)
+		{
+			var link = AsHyperlinkCell(e);
+
+			if (link != null)
+			{
+				GridControl.HideTooltip();
+				GridControl.ChangeSelectionCursor(unvell.ReoGrid.Interaction.CursorStyle.PlatformDefault);
+			}
+		}
+
+		private void OnCellMouseMove(object sender, CellMouseEventArgs e)
+		{
+			var link = AsHyperlinkCell(e);
+
+			if (link != null)
+			{
+				var cursor = unvell.ReoGrid.Interaction.CursorStyle.PlatformDefault;
+
+				if (link.HasLinkURL && (Control.ModifierKeys == Keys.Control))
+					cursor = unvell.ReoGrid.Interaction.CursorStyle.Hand;
+
+				GridControl.ChangeSelectionCursor(cursor);
+			}
+		}
+
+		private void OnCellBodyChanged(object sender, CellEventArgs e)
+		{
+			var link = AsHyperlinkCell(e.Cell);
+
+			if (link != null)
+			{
+				link.ActivateColor = link.LinkColor;
+				link.AutoNavigate = false;
+				link.Click += new EventHandler(OnClickHyperlinkCell);
+			}
+		}
+
+		private void OnClickHyperlinkCell(object sender, EventArgs e)
+		{
+			var link = (sender as HyperlinkCell);
+
+			LinkNavigation?.Invoke(this, new LinkEventArgs() { LinkUrl = link.LinkURL });
 		}
 
 		public void SetUITheme(UITheme theme)
