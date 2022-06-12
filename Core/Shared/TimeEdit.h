@@ -12,7 +12,6 @@
 #include "enedit.h"
 #include "timehelper.h"
 
-
 //////////////////////////////////////////////////////////////////////
 
 const UINT WM_TEN_UNITSCHANGE = ::RegisterWindowMessage(_T("WM_TEN_UNITSCHANGE")); // wParam == <CtrlID>, lParam = <prev units>
@@ -41,6 +40,7 @@ public:
 	CString FormatTime(BOOL bUnits) const; 
 
 	void EnableNegativeTimes(BOOL bEnable);
+	void EnableUnitsChanges(BOOL bEnable);
 
 	static void SetUnits(TH_UNITS nUnits, LPCTSTR szLongUnits, LPCTSTR szAbbrevUnits);
 	static void SetDefaultButtonTip(LPCTSTR szUnits);

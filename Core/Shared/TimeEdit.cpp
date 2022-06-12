@@ -190,6 +190,11 @@ void CTimeEdit::EnableNegativeTimes(BOOL bEnable)
 		SetMask(_T(".0123456789"), ME_LOCALIZEDECIMAL);
 }
 
+void CTimeEdit::EnableUnitsChanges(BOOL bEnable)
+{
+	EnableButton(TEBTN_UNITS, bEnable);
+}
+
 void CTimeEdit::PreSubclassWindow() 
 {
 	CEnEdit::PreSubclassWindow();

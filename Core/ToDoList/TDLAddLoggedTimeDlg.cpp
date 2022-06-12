@@ -36,12 +36,25 @@ CTDLAddLoggedTimeDlg::CTDLAddLoggedTimeDlg(DWORD dwTaskID, LPCTSTR szTaskTitle, 
 	//}}AFX_DATA_INIT
 	m_dtWhen = COleDateTime::GetCurrentTime();
 
-	// Restore user's previous units choice
-	TH_UNITS nUnits = CPreferences().GetProfileEnum(m_sPrefsKey, _T("AddLoggedTimeUnits"), THU_MINS);
-	m_loggedTime.SetTHUnits(nUnits, TRUE);
+	if (m_bTracked)
+	{
+		// Prevent changes to the time units and ensure positive times
+		m_eLoggedTime.EnableUnitsChanges(FALSE);
+		m_eLoggedTime.EnableNegativeTimes(FALSE);
 
-	// Allow negative values only for untracked times
-	m_eLoggedTime.EnableNegativeTimes(!m_bTracked);
+		// If the time is less than 1 hour convert to minutes
+		if (dHours < 1.0)
+			m_loggedTime.SetTHUnits(THU_MINS, TRUE);
+	}
+	else
+	{
+		// Restore user's previous units choice
+		TH_UNITS nUnits = CPreferences().GetProfileEnum(m_sPrefsKey, _T("AddLoggedTimeUnits"), THU_MINS);
+		m_loggedTime.SetTHUnits(nUnits, TRUE);
+	
+		// Allow negative values only for untracked times
+		m_eLoggedTime.EnableNegativeTimes(TRUE);
+	}
 }
 
 void CTDLAddLoggedTimeDlg::DoDataExchange(CDataExchange* pDX)

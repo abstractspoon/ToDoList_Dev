@@ -926,9 +926,14 @@ void CEnEdit::DrawEnabledText(CDC* pDC, const CPoint& ptTopLeft, const CString& 
 		pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
 		DrawText(pDC, ptTopLeft, sText, rect, bSymbol);
 	}
-	else // disabled
+	else if (CThemed::IsAppThemed())
 	{
-		// draw embossed: dark over pale
+		pDC->SetTextColor(GetSysColor(COLOR_3DDKSHADOW));
+		DrawText(pDC, ptTopLeft, sText, rect, bSymbol);
+	}
+	else // classic mode
+	{
+		// draw embossed: dark over light
 		CPoint ptText(ptTopLeft);
 
 		ptText.Offset(1, 1);
