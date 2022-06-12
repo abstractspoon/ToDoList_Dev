@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "TDLSimpleTextContentCtrl.h"
 #include "tdcstatic.h"
+#include "tdcenum.h"
 #include "resource.h"
 
 #include "..\shared\toolbarhelper.h"
@@ -455,7 +456,7 @@ void CTDLSimpleTextContentCtrl::OnContextMenu(CWnd* pWnd, CPoint point)
 		
 		if (menu.LoadMenu(IDR_MISC, *this, TRUE))
 		{
-			CMenu* pPopup = menu.GetSubMenu(4);
+			CMenu* pPopup = menu.GetSubMenu(MM_COMMENTS);
 
 			if (pPopup)
 			{
