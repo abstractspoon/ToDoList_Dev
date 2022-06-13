@@ -178,7 +178,7 @@ namespace SpreadsheetContentControl
 		private void OnGridControlLinkNavigation(object sender, TDLGridEditorControl.LinkEventArgs e)
 		{
 			// Pass everything back to our parent for consistent handling
-			ContentControlWnd.GoToLink(e.LinkUrl, m_HwndParent, Handle);
+			e.Handled = ContentControlWnd.GoToLink(e.LinkUrl, m_HwndParent, Handle);
 		}
 
 		private void OnNeedLinkTooltip(object sender, NeedLinkTooltipEventArgs e)

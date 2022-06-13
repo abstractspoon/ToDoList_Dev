@@ -49,9 +49,14 @@ namespace SpreadsheetContentControl
 
 		public class LinkEventArgs : EventArgs
 		{
-			public LinkEventArgs(string link) { LinkUrl = link; }
+			public LinkEventArgs(string link)
+			{
+				LinkUrl = link;
+				Handled = false;
+			}
 
 			public string LinkUrl;
+			public bool Handled;
 		}
 
 		// --------------------------------------------
@@ -161,9 +166,8 @@ namespace SpreadsheetContentControl
 
 					if (link != null)
 					{
-						link.ActivateColor = link.LinkColor;
 						link.AutoNavigate = false;
-						link.Click += new EventHandler(OnClickHyperlinkCell);
+						link.Click += new EventHandler<HyperlinkCell.ClickEventArgs>(OnClickHyperlinkCell);
 					}
 				}
 			}
@@ -836,18 +840,27 @@ namespace SpreadsheetContentControl
 
 			if (link != null)
 			{
-				link.ActivateColor = link.LinkColor;
 				link.AutoNavigate = false;
-				link.Click += new EventHandler(OnClickHyperlinkCell);
+				link.Click += new EventHandler<HyperlinkCell.ClickEventArgs>(OnClickHyperlinkCell);
 			}
 		}
 
-		private void OnClickHyperlinkCell(object sender, EventArgs e)
+		private void OnClickHyperlinkCell(object sender, HyperlinkCell.ClickEventArgs e)
 		{
-			var link = (sender as HyperlinkCell);
+			if ((LinkNavigation != null) &&
+				(!e.ByMouse || (Control.ModifierKeys == Keys.Control)))
+			{
+				var args = new LinkEventArgs(e.LinkURL);
+				LinkNavigation(this, args);
 
-			if (link.HasLinkURL && (Control.ModifierKeys == Keys.Control))
-				LinkNavigation?.Invoke(this, new LinkEventArgs(link.LinkURL));
+				if (args.Handled)
+				{
+					var link = (sender as HyperlinkCell);
+
+					if (link != null)
+						link.Cell.Style.TextColor = link.VisitedColor;
+				}
+			}
 		}
 
 		public void SetUITheme(UITheme theme)
