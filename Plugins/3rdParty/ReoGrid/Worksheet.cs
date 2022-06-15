@@ -1509,6 +1509,8 @@ namespace unvell.ReoGrid
 		internal RangePosition draggingSelectionRange = RangePosition.Empty;
 		internal CellPosition focusMovingRangeOffset = CellPosition.Empty;
 
+		public bool HotTracking;
+
 		#region OnMouseWheel
 		internal void OnMouseWheel(Point location, int delta, MouseButtons buttons)
 		{

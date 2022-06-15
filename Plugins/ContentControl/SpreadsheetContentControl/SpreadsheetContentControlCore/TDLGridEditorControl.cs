@@ -85,6 +85,8 @@ namespace SpreadsheetContentControl
 				e.Worksheet.CellMouseEnter += new EventHandler<CellMouseEventArgs>(OnCellMouseEnter);
 				e.Worksheet.CellMouseLeave += new EventHandler<CellMouseEventArgs>(OnCellMouseLeave);
 				e.Worksheet.CellMouseMove += new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
+
+				e.Worksheet.HotTracking = true;
 			};
 
 			GridControl.WorksheetRemoved += (s, e) =>
@@ -97,6 +99,7 @@ namespace SpreadsheetContentControl
 				e.Worksheet.CellMouseMove -= new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
 			};
 
+			
 		}
 
 		public Byte[] GetContent()

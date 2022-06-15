@@ -87,6 +87,14 @@ namespace unvell.ReoGrid.Views
 			DrawContent(dc);
 
 			DrawSelection(dc);
+
+			if (sheet.HotTracking && !sheet.HoverPos.IsEmpty)
+			{
+				CellPosition pos = sheet.HoverPos;
+				Rectangle rect = GetScaledAndClippedRangeRect(this, pos, pos, 1);
+
+				dc.Renderer.DrawRectangle(rect, new SolidColor(255, 0, 0));
+			}
 		}
 		#endregion // DrawView
 
@@ -1412,6 +1420,9 @@ namespace unvell.ReoGrid.Views
 							if (newHoverPos != sheet.hoverPos)
 							{
 								sheet.HoverPos = newHoverPos;
+
+								if (sheet.HotTracking)
+									sheet.RequestInvalidate();
 							}
 
 							if (!sheet.hoverPos.IsEmpty)
