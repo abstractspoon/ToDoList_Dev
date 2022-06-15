@@ -74,9 +74,11 @@ namespace unvell.ReoGrid
 		SelectionNotFocusedBorder = 63,
 		SelectionNotFocusedFill = 64,
 
+		HotTrackingBackground = 71,
+		HotTrackingNotFocusedBackground = 72,
+
 		GridBackground = 81,
 		GridText = 82,
-
 		GridLine = 83,
 
 		OutlinePanelBorder = 91,
@@ -230,6 +232,8 @@ namespace unvell.ReoGrid
 				colors[ControlAppearanceColors.SelectionBorder] = new SolidColor(180, StaticResources.SystemColor_Highlight);
 				colors[ControlAppearanceColors.SelectionNotFocusedFill] = new SolidColor(30, StaticResources.SystemColor_Control);
 				colors[ControlAppearanceColors.SelectionNotFocusedBorder] = new SolidColor(180, StaticResources.SystemColor_Control);
+				colors[ControlAppearanceColors.HotTrackingBackground] = new SolidColor(20, StaticResources.SystemColor_Highlight);
+				colors[ControlAppearanceColors.HotTrackingNotFocusedBackground] = new SolidColor(20, StaticResources.SystemColor_Control);
 			}
 			else
 			{
@@ -237,6 +241,8 @@ namespace unvell.ReoGrid
 				colors[ControlAppearanceColors.SelectionBorder] = ColorUtility.FromAlphaColor(180, lightSalientTheme);
 				colors[ControlAppearanceColors.SelectionNotFocusedFill] = ColorUtility.FromAlphaColor(30, darkSalientTheme);
 				colors[ControlAppearanceColors.SelectionNotFocusedBorder] = ColorUtility.FromAlphaColor(180, lightSalientTheme);
+				colors[ControlAppearanceColors.HotTrackingBackground] = ColorUtility.FromAlphaColor(20, darkSalientTheme);
+				colors[ControlAppearanceColors.HotTrackingNotFocusedBackground] = ColorUtility.FromAlphaColor(20, lightSalientTheme);
 			}
 
 			colors[ControlAppearanceColors.GridBackground] = backgroundColor;
@@ -365,6 +371,8 @@ namespace unvell.ReoGrid
 						{ControlAppearanceColors.SelectionFill, ColorUtility.FromAlphaColor(50, StaticResources.SystemColor_Highlight)},
 						{ControlAppearanceColors.SelectionNotFocusedBorder, ColorUtility.FromAlphaColor(180, StaticResources.SystemColor_ControlDark)},
 						{ControlAppearanceColors.SelectionNotFocusedFill, ColorUtility.FromAlphaColor(50, StaticResources.SystemColor_ControlDark)},
+						{ControlAppearanceColors.HotTrackingBackground, ColorUtility.FromAlphaColor(40, StaticResources.SystemColor_Highlight) },
+						{ControlAppearanceColors.HotTrackingNotFocusedBackground, ColorUtility.FromAlphaColor(40, StaticResources.SystemColor_ControlDark) },
 						{ControlAppearanceColors.OutlineButtonBorder, SolidColor.Black},
 						{ControlAppearanceColors.OutlinePanelBackground, StaticResources.SystemColor_Control},
 						{ControlAppearanceColors.OutlinePanelBorder, SolidColor.Silver},

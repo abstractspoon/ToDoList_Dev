@@ -411,12 +411,12 @@ namespace unvell.ReoGrid
 
 		public string GetCellBodyType(int row, int col)
 		{
-			var cell = cells[row, col];
+			return Cell.GetBodyType(cells[row, col]);
+		}
 
-			if (cell == null || cell.body == null)
-				return "";
-
-			return cell.body.GetType().ToString();
+		public string GetCellBodyType(CellPosition pos)
+		{
+			return GetCellBodyType(pos.Row, pos.Col);
 		}
 
 		/// <summary>
@@ -726,6 +726,25 @@ namespace unvell.ReoGrid
 		/// Get position of this cell.
 		/// </summary>
 		public CellPosition Position { get { return this.InternalPos; } }
+
+		public string BodyType
+		{
+			get
+			{
+				if (Body == null)
+					return "";
+
+				return Body.GetType().ToString();
+			}
+		}
+
+		public static string GetBodyType(Cell cell)
+		{
+			if (cell == null)
+					return "";
+
+			return cell.BodyType;
+		}
 
 		/// <summary>
 		/// Get position as a range position which contains the cell rowspan and colspan.

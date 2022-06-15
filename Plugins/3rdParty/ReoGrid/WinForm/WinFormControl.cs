@@ -813,6 +813,11 @@ namespace unvell.ReoGrid
 			this.Capture = true;
 		}
 
+		public void ForwardMouseMove(MouseEventArgs e)
+		{
+			OnMouseMove(e);
+		}
+
 		/// <summary>
 		/// Overrides mouse-move events
 		/// </summary>

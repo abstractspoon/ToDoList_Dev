@@ -100,8 +100,7 @@ namespace SpreadsheetContentControl
 
         public void SetReadOnly(bool bReadOnly)
         {
-            // TODO
-
+			m_EditorControl.Enabled = !bReadOnly;
         }
 
         public void SavePreferences(Preferences prefs, String key)

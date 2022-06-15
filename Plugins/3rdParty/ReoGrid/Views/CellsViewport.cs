@@ -93,7 +93,12 @@ namespace unvell.ReoGrid.Views
 				CellPosition pos = sheet.HoverPos;
 				Rectangle rect = GetScaledAndClippedRangeRect(this, pos, pos, 1);
 
-				dc.Renderer.DrawRectangle(rect, new SolidColor(255, 0, 0));
+				var controlStyle = sheet.workbook.controlAdapter.ControlStyle;
+				SolidColor hotColor = dc.Focused ?
+										controlStyle.Colors[ControlAppearanceColors.HotTrackingBackground] :
+										controlStyle.Colors[ControlAppearanceColors.HotTrackingNotFocusedBackground];
+
+				dc.Renderer.FillRectangle(rect, hotColor);
 			}
 		}
 		#endregion // DrawView

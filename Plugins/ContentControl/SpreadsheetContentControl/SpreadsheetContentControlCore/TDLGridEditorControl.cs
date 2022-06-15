@@ -85,8 +85,6 @@ namespace SpreadsheetContentControl
 				e.Worksheet.CellMouseEnter += new EventHandler<CellMouseEventArgs>(OnCellMouseEnter);
 				e.Worksheet.CellMouseLeave += new EventHandler<CellMouseEventArgs>(OnCellMouseLeave);
 				e.Worksheet.CellMouseMove += new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
-
-				e.Worksheet.HotTracking = true;
 			};
 
 			GridControl.WorksheetRemoved += (s, e) =>
@@ -99,7 +97,7 @@ namespace SpreadsheetContentControl
 				e.Worksheet.CellMouseMove -= new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
 			};
 
-			
+			AllowDrop = true;
 		}
 
 		public Byte[] GetContent()
@@ -1000,5 +998,76 @@ namespace SpreadsheetContentControl
 			GridControl.Focus();
 		}
 
+		protected override void OnDragDrop(DragEventArgs drgevent)
+		{
+			if (CanDrop(drgevent))
+			{
+				string text = string.Empty;
+
+				if (drgevent.Data.GetDataPresent("FileNameW"))
+				{
+					text = (drgevent.Data.GetData("FileNameW") as string[])[0];
+				}
+				else if (drgevent.Data.GetDataPresent("UnicodeText"))
+				{
+					text = drgevent.Data.GetData("UnicodeText").ToString();
+				}
+
+				if (!string.IsNullOrEmpty(text))
+					CurrentWorksheet.PasteFromString(CurrentWorksheet.HoverPos, text);
+			}
+			CurrentWorksheet.HotTracking = false;
+
+			base.OnDragDrop(drgevent);
+		}
+
+		protected override void OnDragLeave(EventArgs e)
+		{
+			CurrentWorksheet.HotTracking = false;
+
+			base.OnDragLeave(e);
+		}
+
+		protected override void OnDragOver(DragEventArgs drgevent)
+		{
+			bool canDrop = ((Control.MouseButtons == MouseButtons.Left) && CanDrop(drgevent));
+			drgevent.Effect = canDrop ? DragDropEffects.Copy : DragDropEffects.None;
+
+			base.OnDragOver(drgevent);
+		}
+
+		private bool CanDrop(DragEventArgs drgevent)
+		{
+			bool hotTracking = false;
+			bool canDrop = false;
+
+			string[] formats = drgevent.Data.GetFormats();
+
+			if (formats.Contains("FileNameW") || formats.Contains("UnicodeText"))
+			{
+				var pos = GridControl.PointToClient(new Point(drgevent.X, drgevent.Y));
+
+				if (GridControl.ClientRectangle.Contains(pos))
+				{
+					hotTracking = true;
+					GridControl.ForwardMouseMove(new MouseEventArgs(MouseButtons.Left, 1, pos.X, pos.Y, 0));
+
+					if (!CurrentWorksheet.HoverPos.IsEmpty)
+					{
+						var cell = CurrentWorksheet.GetCell(CurrentWorksheet.HoverPos);
+						var cellType = Cell.GetBodyType(cell);
+
+						if ((cellType == "") || (cellType == typeof(HyperlinkCell).ToString()))
+						{
+							canDrop = true;
+						}
+					}
+				}
+			}
+
+			CurrentWorksheet.HotTracking = hotTracking;
+
+			return canDrop;
+		}
 	}
 }

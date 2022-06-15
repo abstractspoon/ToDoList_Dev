@@ -727,6 +727,10 @@ namespace unvell.ReoGrid.Views
 				if (targetView != null)
 				{
 					isProcessed = targetView.OnMouseMove(targetView.PointToView(location), buttons);
+
+					// Hack
+					if (!(targetView is CellsViewport))
+						Worksheet.HoverPos = CellPosition.Empty;
 				}
 			}
 
