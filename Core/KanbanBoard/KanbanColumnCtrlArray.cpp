@@ -492,7 +492,10 @@ DWORD CKanbanColumnCtrlArray::HitTestTask(const CPoint& ptScreen, CKanbanColumnC
 
 	if (pCol)
 	{
-		HTREEITEM hti = pCol->HitTest(ptScreen);
+		CPoint ptClient(ptScreen);
+		pCol->ScreenToClient(&ptClient);
+
+		HTREEITEM hti = pCol->HitTest(ptClient);
 
 		if (hti)
 			return pCol->GetTaskID(hti);

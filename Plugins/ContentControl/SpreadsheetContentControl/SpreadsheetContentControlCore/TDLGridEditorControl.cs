@@ -49,7 +49,14 @@ namespace SpreadsheetContentControl
 
 		public class LinkEventArgs : EventArgs
 		{
+			public LinkEventArgs(string link)
+			{
+				LinkUrl = link;
+				Handled = false;
+			}
+
 			public string LinkUrl;
+			public bool Handled;
 		}
 
 		// --------------------------------------------
@@ -160,9 +167,8 @@ namespace SpreadsheetContentControl
 
 					if (link != null)
 					{
-						link.ActivateColor = link.LinkColor;
 						link.AutoNavigate = false;
-						link.Click += new EventHandler(OnClickHyperlinkCell);
+						link.Click += new EventHandler<HyperlinkCell.ClickEventArgs>(OnClickHyperlinkCell);
 					}
 				}
 			}
@@ -779,30 +785,27 @@ namespace SpreadsheetContentControl
 		{
 			var link = AsHyperlinkCell(e);
 
-			if (link != null)
+			if ((link != null) && (link.HasLinkURL))
 			{
- 				if (!String.IsNullOrWhiteSpace(link.LinkURL))
- 				{
-					string tooltip = link.LinkURL;
+				string tooltip = link.LinkURL;
 
-					if (NeedLinkTooltip != null)
-					{
-						var args = new NeedLinkTooltipEventArgs(link.LinkURL);
-						NeedLinkTooltip(this, args);
+				if (NeedLinkTooltip != null)
+				{
+					var args = new NeedLinkTooltipEventArgs(link.LinkURL);
+					NeedLinkTooltip(this, args);
 
-						if (!String.IsNullOrWhiteSpace(args.tooltip))
-							tooltip = args.tooltip;
-					}
-					
-					if (tooltip.Contains(link.LinkURL))
-						tooltip = String.Empty;
-					else
-						tooltip = tooltip + "\n";
+					if (!String.IsNullOrWhiteSpace(args.tooltip))
+						tooltip = args.tooltip;
+				}
 
-					tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link");
+				if (tooltip.Contains(link.LinkURL))
+					tooltip = String.Empty;
+				else
+					tooltip = tooltip + "\n";
 
-					GridControl.ShowTooltip(tooltip);
- 				}
+				tooltip = tooltip + m_Trans.Translate("'CTRL + click' to follow link");
+
+				GridControl.ShowTooltip(tooltip);
 			}
 		}
 
@@ -838,17 +841,27 @@ namespace SpreadsheetContentControl
 
 			if (link != null)
 			{
-				link.ActivateColor = link.LinkColor;
 				link.AutoNavigate = false;
-				link.Click += new EventHandler(OnClickHyperlinkCell);
+				link.Click += new EventHandler<HyperlinkCell.ClickEventArgs>(OnClickHyperlinkCell);
 			}
 		}
 
-		private void OnClickHyperlinkCell(object sender, EventArgs e)
+		private void OnClickHyperlinkCell(object sender, HyperlinkCell.ClickEventArgs e)
 		{
-			var link = (sender as HyperlinkCell);
+			if ((LinkNavigation != null) &&
+				(!e.ByMouse || (Control.ModifierKeys == Keys.Control)))
+			{
+				var args = new LinkEventArgs(e.LinkURL);
+				LinkNavigation(this, args);
 
-			LinkNavigation?.Invoke(this, new LinkEventArgs() { LinkUrl = link.LinkURL });
+				if (args.Handled)
+				{
+					var link = (sender as HyperlinkCell);
+
+					if (link != null)
+						link.Cell.Style.TextColor = link.VisitedColor;
+				}
+			}
 		}
 
 		public void SetUITheme(UITheme theme)

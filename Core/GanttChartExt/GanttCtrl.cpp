@@ -707,7 +707,7 @@ BOOL CGanttCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI_UP
 		if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
 		{
 			LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-			pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+			pGI->bSomeSubtaskDone = !Misc::IsEmpty(szSubTaskDone);
 		}
 
 		if (pTasks->IsAttributeAvailable(TDCA_TAGS))
@@ -928,7 +928,7 @@ void CGanttCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		pGI->bHasIcon = !Misc::IsEmpty(pTasks->GetTaskIcon(hTask));
 
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pGI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+		pGI->bSomeSubtaskDone = !Misc::IsEmpty(szSubTaskDone);
 
 		time64_t tDate = 0;
 
@@ -1334,7 +1334,7 @@ void CGanttCtrl::BuildTreeColumns()
 	while (m_treeHeader.DeleteItem(0));
 
 	// add columns
-	m_treeHeader.InsertItem(0, 0, _T("Task"), (HDF_LEFT | HDF_STRING), 0, GTLCC_TITLE);
+	m_treeHeader.InsertItem(0, 0, _T("Title"), (HDF_LEFT | HDF_STRING), 0, GTLCC_TITLE);
 	m_treeHeader.EnableItemDragging(0, FALSE);
 
 	for (int nCol = 0; nCol < NUM_TREECOLUMNS; nCol++)

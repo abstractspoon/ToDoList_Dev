@@ -752,7 +752,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+		pKI->bSomeSubtaskDone = !Misc::IsEmpty(szSubTaskDone);
 	
 		if (dwParentID)
 		{
@@ -910,7 +910,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
 			{
 				LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-				pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
+				pKI->bSomeSubtaskDone = !Misc::IsEmpty(szSubTaskDone);
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_ICON))
@@ -3250,10 +3250,7 @@ BOOL CKanbanCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 
 	if (dwTaskID)
 	{
-		if (m_data.IsLocked(dwTaskID))
-			return GraphicsMisc::SetAppCursor(_T("Locked"), _T("Resources\\Cursors"));
-
-		if (!CanDragTask(dwTaskID))
+		if (!m_data.IsLocked(dwTaskID) && !CanDragTask(dwTaskID))
 			return GraphicsMisc::SetAppCursor(_T("NoDrag"), _T("Resources\\Cursors"));
 	}
 

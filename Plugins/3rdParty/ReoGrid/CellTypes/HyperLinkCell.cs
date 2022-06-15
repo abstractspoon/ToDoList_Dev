@@ -101,10 +101,17 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True to allow edit; False to disallow edit.</returns>
 		public override bool OnStartEdit()
 		{
-			return !this.IsPressed;
+			return (!AutoNavigate || !this.IsPressed);
 		}
 
-		public bool HasLinkURL { get { return !string.IsNullOrEmpty(LinkURL); } }
+		public bool HasLinkURL
+		{
+			get
+			{
+				return (!string.IsNullOrEmpty(LinkURL) &&
+						!string.IsNullOrEmpty(Cell.DisplayText));
+			}
+		}
 
 		/// <summary>
 		/// Initialize cell body when set up into a cell.
@@ -134,11 +141,18 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True if event has been handled.</returns>
 		public override bool OnMouseDown(CellMouseEventArgs e)
 		{
-			this.IsPressed = true;
+			if (HasLinkURL)
+			{
+				this.IsPressed = true;
 
-			e.Cell.Style.TextColor = ActivateColor;
+				if (AutoNavigate)
+				{
+					this.Cell.Style.TextColor = ActivateColor;
+					return true;
+				}
+			}
 
-			return true;
+			return false;
 		}
 
 		/// <summary>
@@ -148,19 +162,18 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True if event has been handled.</returns>
 		public override bool OnMouseUp(CellMouseEventArgs e)
 		{
-			if (this.IsPressed)
+			if (HasLinkURL && this.IsPressed)
 			{
-				if (this.Bounds.Contains(e.RelativePosition))
+				this.IsPressed = false;
+
+				if (this.Bounds.Contains(e.RelativePosition) && PerformClick(true))
 				{
-					this.PerformClick();
+					this.Cell.Style.TextColor = VisitedColor;
+					return true;
 				}
 			}
 
-			this.IsPressed = false;
-
-			e.Cell.Style.TextColor = VisitedColor;
-
-			return true;
+			return false;
 		}
 
 		/// <summary>
@@ -170,7 +183,8 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True if event has been handled.</returns>
 		public override bool OnMouseEnter(CellMouseEventArgs e)
 		{
-			e.Worksheet.controlAdapter.ChangeSelectionCursor(CursorStyle.Hand);
+			if (HasLinkURL && AutoNavigate)
+				e.Worksheet.controlAdapter.ChangeSelectionCursor(CursorStyle.Hand);
 
 			return false;
 		}
@@ -194,17 +208,19 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True if event has been handled; Otherwise return false.</returns>
 		public override bool OnKeyDown(KeyCode keyCode)
 		{
-			if (keyCode == KeyCode.Space)
+			if (HasLinkURL && (keyCode == KeyCode.Space))
 			{
 				this.IsPressed = true;
-				this.Cell.Style.TextColor = ActivateColor;
 
-				return true;
+				if (AutoNavigate)
+				{
+					this.Cell.Style.TextColor = ActivateColor;
+					return true;
+				}
 			}
-			else
-			{
-				return false;
-			}
+
+			// else
+			return false;
 		}
 
 		/// <summary>
@@ -214,20 +230,20 @@ namespace unvell.ReoGrid.CellTypes
 		/// <returns>True if event has been handled; Otherwise return false;</returns>
 		public override bool OnKeyUp(KeyCode keyCode)
 		{
-			if (IsPressed)
+			if (HasLinkURL && IsPressed)
 			{
 				this.IsPressed = false;
-
-				this.PerformClick();
-
 				this.Cell.Style.TextColor = VisitedColor;
 
-				return true;
+				if (PerformClick(false))
+				{
+					this.Cell.Style.TextColor = VisitedColor;
+					return true;
+				}
 			}
-			else
-			{
-				return false;
-			}
+
+			// else
+			return false;
 		}
 
 		/// <summary>
@@ -235,29 +251,35 @@ namespace unvell.ReoGrid.CellTypes
 		/// </summary>
 		public override void OnLostFocus()
 		{
-			if (this.IsPressed)
-			{
-				this.IsPressed = false;
-			}
+			this.IsPressed = false;
 		}
 
 		/// <summary>
 		/// Manually fire the hyperlink click event.
 		/// </summary>
-		public void PerformClick()
+		public bool PerformClick(bool byMouse)
 		{
-			if (AutoNavigate && HasLinkURL)
+			bool handled = false;
+
+			if (HasLinkURL)
 			{
-				try
+				if (AutoNavigate)
 				{
-					RGUtility.OpenFileOrLink(LinkURL);
+					try
+					{
+						RGUtility.OpenFileOrLink(LinkURL);
+						handled = true;
+					}
+					catch
+					{
+					}
 				}
-				catch
-				{
-				}
+
+				// Always execute the click handler
+				Click?.Invoke(this, new ClickEventArgs(LinkURL, byMouse));
 			}
 
-			Click?.Invoke(this, null);
+			return handled;
 		}
 
 		/// <summary>
@@ -272,9 +294,22 @@ namespace unvell.ReoGrid.CellTypes
 		}
 
 		/// <summary>
-		/// Event raised when hyperlink was preseed
+		/// Event raised when hyperlink was pressed
 		/// </summary>
-		public event EventHandler Click;
+		/// 
+		public class ClickEventArgs : EventArgs
+		{
+			public ClickEventArgs(string link, bool byMouse)
+			{
+				LinkURL = link;
+				ByMouse = byMouse;
+			}
+
+			public string LinkURL;
+			public bool ByMouse;
+		}
+
+		public event EventHandler<ClickEventArgs> Click;
 
 		/// <summary>
 		/// Determine whether or not redirect to navigation url when hyperlink was pressed
