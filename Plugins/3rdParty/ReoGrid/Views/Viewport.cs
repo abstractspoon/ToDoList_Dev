@@ -507,6 +507,8 @@ namespace unvell.ReoGrid.Views
 		void Reset();
 
 		void SetViewVisible(ViewTypes view, bool visible);
+
+		CellPosition GetPosByPoint(Point pt);
 	}
 
 	/// <summary>
@@ -727,14 +729,20 @@ namespace unvell.ReoGrid.Views
 				if (targetView != null)
 				{
 					isProcessed = targetView.OnMouseMove(targetView.PointToView(location), buttons);
-
-					// Hack
-					if (!(targetView is CellsViewport))
-						Worksheet.HoverPos = CellPosition.Empty;
 				}
 			}
 
 			return isProcessed;
+		}
+
+		public virtual CellPosition GetPosByPoint(Point pt)
+		{
+			var targetView = this.view.GetViewByPoint(pt);
+
+			if ((targetView == null) || !(targetView is CellsViewport))
+				return CellPosition.Empty;
+
+			return CellsViewport.GetPosByPoint(targetView as CellsViewport, targetView.PointToView(pt));
 		}
 
 		public virtual bool OnMouseUp(Point location, MouseButtons buttons)

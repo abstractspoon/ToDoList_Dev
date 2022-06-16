@@ -1529,6 +1529,16 @@ namespace unvell.ReoGrid
 
 		private bool hotTracking = false;
 
+		public bool SetHoverPos(Point location)
+		{
+			if (ViewportController == null)
+				HoverPos = CellPosition.Empty;
+			else
+				HoverPos = ViewportController.GetPosByPoint(location);
+
+			return !HoverPos.IsEmpty;
+		}
+
 		#region OnMouseWheel
 		internal void OnMouseWheel(Point location, int delta, MouseButtons buttons)
 		{

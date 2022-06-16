@@ -1421,18 +1421,9 @@ namespace unvell.ReoGrid.Views
 						// process cells hover
 						if (!isProcessed)
 						{
-							CellPosition newHoverPos = CellsViewport.GetPosByPoint(this, location);
-							if (newHoverPos != sheet.hoverPos)
+							if (sheet.SetHoverPos(PointToController(location)))
 							{
-								sheet.HoverPos = newHoverPos;
-
-								if (sheet.HotTracking)
-									sheet.RequestInvalidate();
-							}
-
-							if (!sheet.hoverPos.IsEmpty)
-							{
-								var cell = sheet.cells[sheet.hoverPos.Row, sheet.hoverPos.Col];
+								var cell = sheet.cells[sheet.HoverPos.Row, sheet.HoverPos.Col];
 
 								if (cell != null || sheet.HasCellMouseMove)
 								{
@@ -1443,9 +1434,9 @@ namespace unvell.ReoGrid.Views
 
 									if ((cell != null && cell.body != null) || sheet.HasCellMouseMove)
 									{
-										var cellRect = sheet.GetCellBounds(sheet.hoverPos);
+										var cellRect = sheet.GetCellBounds(sheet.HoverPos);
 
-										var evtArg = new CellMouseEventArgs(sheet, cell, sheet.hoverPos, new Point(
+										var evtArg = new CellMouseEventArgs(sheet, cell, sheet.HoverPos, new Point(
 												(location.X - cellRect.Left),
 												(location.Y - cellRect.Top)), location, buttons, 1);
 

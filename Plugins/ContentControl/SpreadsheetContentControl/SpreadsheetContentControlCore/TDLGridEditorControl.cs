@@ -1060,20 +1060,16 @@ namespace SpreadsheetContentControl
 			{
 				var pos = GridControl.PointToClient(new Point(drgevent.X, drgevent.Y));
 
-				if (GridControl.ClientRectangle.Contains(pos))
+				if (CurrentWorksheet.SetHoverPos(pos))
 				{
 					hotTracking = true;
-					GridControl.ForwardMouseMove(new MouseEventArgs(MouseButtons.Left, 1, pos.X, pos.Y, 0));
 
-					if (!CurrentWorksheet.HoverPos.IsEmpty)
+					var cell = CurrentWorksheet.GetCell(CurrentWorksheet.HoverPos);
+					var cellType = Cell.GetBodyType(cell);
+
+					if ((cellType == "") || (cellType == typeof(HyperlinkCell).ToString()))
 					{
-						var cell = CurrentWorksheet.GetCell(CurrentWorksheet.HoverPos);
-						var cellType = Cell.GetBodyType(cell);
-
-						if ((cellType == "") || (cellType == typeof(HyperlinkCell).ToString()))
-						{
-							canDrop = true;
-						}
+						canDrop = true;
 					}
 				}
 			}

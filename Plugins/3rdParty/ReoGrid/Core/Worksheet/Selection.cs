@@ -155,7 +155,7 @@ namespace unvell.ReoGrid
 		/// </summary>
 		public event EventHandler<EventArgs> FocusPosStyleChanged;
 
-		internal CellPosition hoverPos;
+		private CellPosition hoverPos;
 
 		/// <summary>
 		/// Cell when mouse moving and hover on
@@ -171,6 +171,9 @@ namespace unvell.ReoGrid
 			{
 				if (hoverPos != value)
 				{
+					if (HotTracking)
+						this.RequestInvalidate();
+
 					// raise cell mouse enter
 					if (!hoverPos.IsEmpty)
 					{
