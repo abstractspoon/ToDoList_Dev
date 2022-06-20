@@ -410,6 +410,7 @@ protected:
 	afx_msg LRESULT OnToDoCtrlCanImportFromDrop(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyListChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnToDoCtrlNotifyFilterChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoCtrlNotifyTimeTrack(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoCtrlNotifySelChange(WPARAM wp, LPARAM lp);
@@ -740,7 +741,6 @@ protected:
 	BOOL CreateNewTaskList(BOOL bAddDefTask, BOOL bByUser);
 	BOOL VerifyToDoCtrlPassword() const;
 	BOOL VerifyToDoCtrlPassword(int nIndex) const;
-	BOOL SelectTask(CFilteredToDoCtrl& tdc, DWORD dwTaskID);
 	void CheckCloseTasklist(int nIndex);
 	void CheckRemovePristineTasklist();
 

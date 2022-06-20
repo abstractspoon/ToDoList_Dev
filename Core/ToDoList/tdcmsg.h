@@ -22,6 +22,7 @@ const UINT WM_TDCN_COLUMNEDITCLICK			= ::RegisterWindowMessage(_T("WM_TDCN_COLUM
 const UINT WM_TDCN_TIMETRACKREMINDER		= ::RegisterWindowMessage(_T("WM_TDCN_TIMETRACKREMINDER"));		// wParam = hwnd, lParam = TaskID
 const UINT WM_TDCN_LISTCHANGE				= ::RegisterWindowMessage(_T("WM_TDCN_LISTCHANGE"));			// lParam == <TDC_ATTRIBUTE>
 const UINT WM_TDCN_SOURCECONTROLSAVE		= ::RegisterWindowMessage(_T("WM_TDCN_SOURCECONTROLSAVE"));	
+const UINT WM_TDCN_FILTERCHANGE				= ::RegisterWindowMessage(_T("WM_TDCN_FILTERCHANGE"));			// wParam = hwnd, 
 
 // request messages
 const UINT WM_TDCM_GETCLIPBOARD				= ::RegisterWindowMessage(_T("WM_TDCM_GETCLIPBOARD"));			// lParam == match hwnd

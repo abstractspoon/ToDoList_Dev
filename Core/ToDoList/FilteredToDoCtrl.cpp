@@ -109,7 +109,10 @@ BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 		ToggleFilter(); // show all tasks
 		
 		if (CTabbedToDoCtrl::SelectTask(dwTaskID, bTrue))
+		{
+			GetParent()->SendMessage(WM_TDCN_FILTERCHANGE, (WPARAM)GetSafeHwnd());
 			return TRUE;
+		}
 
 		// else
 		ASSERT(0);
