@@ -360,7 +360,7 @@ int CFilteredToDoCtrl::GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) 
 
 BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
 {
-	ASSERT(m_data.HasTask(dwTaskID));
+	ASSERT(HasTask(dwTaskID));
 	
 	// note: if the tasks does not exist in the tree then this is not a bug
 	// if a filter is set

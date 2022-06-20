@@ -2904,7 +2904,7 @@ COleDateTime CToDoCtrl::GetTaskDate(DWORD dwTaskID, TDC_DATE nDate) const
 
 BOOL CToDoCtrl::GetTaskTimes(DWORD dwTaskID, TDCTIMEPERIOD& timeEst, TDCTIMEPERIOD& timeSpent) const
 {
-	if (!m_data.HasTask(dwTaskID))
+	if (!HasTask(dwTaskID))
 		return FALSE;
 
 	m_data.GetTaskTimeEstimate(dwTaskID, timeEst);
@@ -6773,7 +6773,7 @@ HTREEITEM CToDoCtrl::PasteTaskToTree(const CTaskFile& tasks, HTASKITEM hTask, HT
 		else if (dwTaskID && nResetID == TDCR_CHECK)
 		{
 			// see if it already exist
-			if (m_data.HasTask(dwTaskID))
+			if (HasTask(dwTaskID))
 			{
 				// provide a new unique ID
 				dwTaskID = m_dwNextUniqueID++; 
@@ -7382,7 +7382,7 @@ void CToDoCtrl::BuildTaskIDMapForPaste(CTaskFile& tasks, HTASKITEM hTask, DWORD&
 	// we map this task only if it needs a new ID
 	DWORD dwTaskID = tasks.GetTaskID(hTask);
 
-	if ((dwTaskID <= 0) || (nResetID == TDCR_YES) || m_data.HasTask(dwTaskID))
+	if ((dwTaskID <= 0) || (nResetID == TDCR_YES) || HasTask(dwTaskID))
 		mapID[dwTaskID] = dwNextID++;
 
 	// children
@@ -8241,6 +8241,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 	
 	BOOL bRebuildCustomUI = (tasks.GetCustomAttributeDefs(aPasteAttribDefs) &&
 								m_aCustomAttribDefs.Append(aPasteAttribDefs));
+	DWORD dwDestTaskID = GetTaskID(htiDest);
 	
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_PASTE);
 	{
@@ -8258,7 +8259,7 @@ BOOL CToDoCtrl::PasteTasks(TDC_PASTE nWhere, BOOL bAsRef)
 		}
 	}
 
-	FixupParentCompletion(GetTaskID(htiDest));
+	FixupParentCompletion(dwDestTaskID);
 	
 	if (bRebuildCustomUI)
 	{
@@ -8885,7 +8886,8 @@ void CToDoCtrl::OnTreeSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 BOOL CToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue) 
 { 
-	ASSERT(m_data.HasTask(dwTaskID));
+	if (!HasTask(dwTaskID))
+		return FALSE;
 
 	if (bTrue)
 		dwTaskID = m_data.GetTrueTaskID(dwTaskID);
@@ -9497,7 +9499,7 @@ BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD
 		dwTaskID = tasks.GetTaskID(hTask);
 
 		// If this task does not exist then treat it as a new task
-		if (!m_data.HasTask(dwTaskID))
+		if (!HasTask(dwTaskID))
 			dwTaskID = 0;
 	}
 	else
@@ -9509,7 +9511,7 @@ BOOL CToDoCtrl::MergeTaskWithTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD
 			dwTaskID = aTaskIDs[0];
 	}
 
-	if (m_data.HasTask(dwTaskID))
+	if (HasTask(dwTaskID))
 	{
 		TODOITEM tdi;
 		VERIFY(m_data.GetTaskAttributes(dwTaskID, tdi));
