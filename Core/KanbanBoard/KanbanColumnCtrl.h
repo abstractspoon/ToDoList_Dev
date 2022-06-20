@@ -138,6 +138,7 @@ protected:
 	DWORD m_dwDisplay, m_dwOptions;
 	int m_nItemTextHeight, m_nItemTextBorder, m_nNumTitleLines;
 	KBC_ATTRIBLABELS m_nAttribLabelVisibility;
+	COLORREF m_crItemShadow;
 	
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -200,6 +201,7 @@ protected:
 	BOOL HasOption(DWORD dwOption) const { return (m_dwOptions & dwOption); }
 	BOOL WantDisplayAttribute(TDC_ATTRIBUTE nAttrib, const KANBANITEM* pKI) const;
 	int CalcIndentation(HTREEITEM hti) const;
+	void RecalcItemShadowColor();
 
 	BOOL GetItemLabelTextRect(HTREEITEM hti, CRect& rItem, BOOL bEdit = FALSE) const;
 	BOOL GetItemTooltipRect(HTREEITEM hti, CRect& rItem) const;
