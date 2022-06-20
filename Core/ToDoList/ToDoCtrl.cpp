@@ -4372,7 +4372,23 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 			return FALSE;
 	}
 
-	return SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus);
+	if (!SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus))
+		return FALSE;
+
+	// update UI dependencies
+	if (aModTaskIDs.GetSize() && !m_sCompletionStatus.IsEmpty() && IsEditFieldShowing(TDCA_DONEDATE))
+	{
+		COleDateTime dateDone = GetSelectedTaskDate(TDCD_DONE);
+		SetCtrlDate(m_dtcDone, dateDone);
+
+		if (IsEditFieldShowing(TDCA_DONETIME))
+		{
+			m_cbTimeDone.SetOleTime(dateDone.m_dt);
+			EnableDisableControls(GetSelectedItem());
+		}
+	}
+
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, 
