@@ -326,11 +326,13 @@ BOOL CToDoListApp::ProcessStartupOptions(CTDCStartupOptions& startup, const CEnC
 		return FALSE;
 
 	// If more than one instance is open (ie. more than one possible target), 
-	// then a non-empty commandline without a file path or task link is treated as an error
+	// then a non-empty commandline without a file path, task link or title 
+	// prefix is treated as an error
 	BOOL bHasFilePath = startup.HasFilePath();
 	BOOL bTaskLink = startup.HasFlag(TLD_TASKLINK);
+	BOOL bHasTitlePrefix = !startup.GetTitlePrefix().IsEmpty();
 
-	if ((nNumWnds > 1) && !bHasFilePath && !bTaskLink && !startup.IsEmpty(TRUE))
+	if ((nNumWnds > 1) && !bHasFilePath && !bTaskLink && !bHasTitlePrefix && !startup.IsEmpty(TRUE))
 	{
 		AfxMessageBox(CEnString(IDS_MULTIINSTANCENOFILEPATH), (MB_OK | MB_ICONERROR));
 		return TRUE; // handled
