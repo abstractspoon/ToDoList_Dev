@@ -2,16 +2,16 @@
  * 
  * ReoGrid - .NET Spreadsheet Control
  * 
- * http://reogrid.net/
+ * https://reogrid.net/
  *
  * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
  * PURPOSE.
  *
- * Author: Jing <lujing at unvell.com>
+ * Author: Jing Lu <jingwood at unvell.com>
  *
- * Copyright (c) 2012-2016 Jing <lujing at unvell.com>
+ * Copyright (c) 2012-2021 Jing Lu <jingwood at unvell.com>
  * Copyright (c) 2012-2016 unvell.com, all rights reserved.
  * 
  ****************************************************************************/
@@ -43,10 +43,6 @@ using unvell.ReoGrid.Interaction;
 
 namespace unvell.ReoGrid.Views
 {
-	interface IRangeSelectableView : IViewport
-	{
-	}
-
 	class CellsViewport : Viewport, IRangeSelectableView
 	{
 		public CellsViewport(IViewportController vc)
@@ -360,8 +356,8 @@ namespace unvell.ReoGrid.Views
 
 						bool isUserPageSplitter = this.sheet.userPageBreakRows != null && this.sheet.userPageBreakRows.Contains(row);
 
-						dc.Graphics.DrawLine(Math.Max(this.viewStart.X * this.scaleFactor, minX), y,
-							Math.Min(this.viewStart.X * this.scaleFactor + bounds.Width, maxX), y,
+						dc.Graphics.DrawLine(Math.Max(this.ScrollViewLeft * this.scaleFactor, minX), y,
+							Math.Min(this.ScrollViewLeft * this.scaleFactor + bounds.Width, maxX), y,
 							SolidColor.Blue, 2f, isUserPageSplitter ? LineStyles.Solid : LineStyles.Dash);
 					}
 
@@ -371,8 +367,8 @@ namespace unvell.ReoGrid.Views
 
 						bool isUserPageSplitter = this.sheet.userPageBreakCols != null && this.sheet.userPageBreakCols.Contains(col);
 
-						dc.Graphics.DrawLine(x, Math.Max(this.viewStart.Y * this.scaleFactor, minY),
-							x, Math.Min(this.viewStart.Y * this.scaleFactor + bounds.Height, maxY),
+						dc.Graphics.DrawLine(x, Math.Max(this.ScrollViewTop * this.scaleFactor, minY),
+							x, Math.Min(this.ScrollViewTop * this.scaleFactor + bounds.Height, maxY),
 							SolidColor.Blue, 2f, isUserPageSplitter ? LineStyles.Solid : LineStyles.Dash);
 					}
 				}
@@ -392,7 +388,7 @@ namespace unvell.ReoGrid.Views
 					x *= this.scaleFactor;
 
 					dc.Graphics.FillRectangle(HatchStyles.Percent50, SolidColor.Gray, SolidColor.Transparent,
-						x - 1, ViewTop * this.scaleFactor, 3, (ViewTop + Height));
+						x - 1, ScrollViewTop * this.scaleFactor, 3, (ScrollViewTop + Height));
 				}
 
 				if (this.sheet.pageBreakAdjustRow > -1 && this.sheet.pageBreakAdjustFocusIndex > -1)
@@ -411,7 +407,7 @@ namespace unvell.ReoGrid.Views
 					y *= this.scaleFactor;
 
 					dc.Graphics.FillRectangle(HatchStyles.Percent50, SolidColor.Gray, SolidColor.Transparent,
-						ViewLeft * this.scaleFactor, y - 1, (ViewLeft + Width), 3);
+						ScrollViewLeft * this.scaleFactor, y - 1, (ScrollViewLeft + Width), 3);
 				}
 				#endregion // Break Lines Adjusting
 
@@ -525,8 +521,8 @@ namespace unvell.ReoGrid.Views
 
 		static Rectangle GetClippedRangeRect(IViewport view, Rectangle scaledRangeRect, float borderWidth)
 		{
-			RGFloat scaledViewTop = view.ViewTop * view.ScaleFactor;
-			RGFloat scaledViewLeft = view.ViewLeft * view.ScaleFactor;
+			RGFloat scaledViewTop = view.ScrollViewTop * view.ScaleFactor;
+			RGFloat scaledViewLeft = view.ScrollViewLeft * view.ScaleFactor;
 
 			RGFloat viewBottom = view.Height + scaledViewTop + borderWidth; // 3: max select range border overflow
 			RGFloat viewRight = view.Width + scaledViewLeft + borderWidth;
@@ -845,7 +841,7 @@ namespace unvell.ReoGrid.Views
 				RGFloat cellScaledWidth = cell.Width * this.scaleFactor;
 				RGFloat cellScaledHeight = (float)Math.Floor(cell.Height * this.scaleFactor) - 1;
 
-				Rectangle clipRect = new Rectangle(this.ViewLeft * this.scaleFactor, cell.Top * this.scaleFactor, this.Width, cellScaledHeight);
+				Rectangle clipRect = new Rectangle(this.ScrollViewLeft * this.scaleFactor, cell.Top * this.scaleFactor, this.Width, cellScaledHeight);
 
 				bool needWidthClip = cell.IsMergedCell || cell.InnerStyle.TextWrapMode == TextWrapMode.WordBreak || dc.AllowCellClip;
 
@@ -2083,8 +2079,8 @@ namespace unvell.ReoGrid.Views
 			}
 			else
 			{
-				p = new Point(sheet.cols[pos.Col].Left * view.ScaleFactor + viewport.Left - viewport.ViewLeft * view.ScaleFactor,
-					sheet.rows[pos.Row].Top * view.ScaleFactor + viewport.Top - viewport.ViewTop * view.ScaleFactor);
+				p = new Point(sheet.cols[pos.Col].Left * view.ScaleFactor + viewport.Left - viewport.ScrollViewLeft * view.ScaleFactor,
+					sheet.rows[pos.Row].Top * view.ScaleFactor + viewport.Top - viewport.ScrollViewTop * view.ScaleFactor);
 			}
 
 			return true;
@@ -2110,86 +2106,5 @@ namespace unvell.ReoGrid.Views
 			return string.Format("CellsViewport[{0}]", this.ViewBounds);
 		}
 		#endregion // Utility
-	}
-
-	class CellsForegroundView : Viewport
-	{
-		public CellsForegroundView(IViewportController vc) : base(vc) { }
-
-		public override IView GetViewByPoint(Point p)
-		{
-			return null;
-		}
-
-		public override void Draw(CellDrawingContext dc)
-		{
-			var sheet = this.ViewportController.Worksheet;
-			if (sheet == null || sheet.controlAdapter == null) return;
-
-			var g = dc.Graphics;
-			var controlStyle = sheet.workbook.controlAdapter.ControlStyle;
-
-			switch (sheet.operationStatus)
-			{
-				case OperationStatus.AdjustColumnWidth:
-					#region Draw Column Header Adjust Line
-					if (sheet.currentColWidthChanging >= 0)
-					{
-						ColumnHeader col = sheet.cols[sheet.currentColWidthChanging];
-
-						RGFloat left = col.Left * this.scaleFactor;// -ViewLeft * this.scaleFactor;
-						RGFloat right = (col.Left + sheet.headerAdjustNewValue) * this.scaleFactor;// -ViewLeft * this.scaleFactor;
-						RGFloat top = ViewTop * this.scaleFactor;
-						RGFloat bottom = ViewTop * this.scaleFactor + this.Height;
-
-						g.DrawLine(left, top, left, bottom, SolidColor.Black, 1, LineStyles.Dot);
-						g.DrawLine(right, top, right, bottom, SolidColor.Black, 1, LineStyles.Dot);
-					}
-					#endregion // Draw Column Header Adjust Line
-					break;
-
-				case OperationStatus.AdjustRowHeight:
-					#region Draw Row Header Adjust Line
-					if (sheet.currentRowHeightChanging >= 0)
-					{
-						RowHeader row = sheet.rows[sheet.currentRowHeightChanging];
-
-						RGFloat top = row.Top * this.scaleFactor;
-						RGFloat bottom = (row.Top + sheet.headerAdjustNewValue) * this.scaleFactor;
-						RGFloat left = ViewLeft * this.scaleFactor;
-						RGFloat right = ViewLeft * this.scaleFactor + this.Width;
-
-						g.DrawLine(left, top, right, top, SolidColor.Black, 1, LineStyles.Dot);
-						g.DrawLine(left, bottom, right, bottom, SolidColor.Black, 1, LineStyles.Dot);
-					}
-					#endregion // Draw Row Header Adjust Line
-					break;
-
-				case OperationStatus.DragSelectionFillSerial:
-				case OperationStatus.SelectionRangeMovePrepare:
-				case OperationStatus.SelectionRangeMove:
-					#region Selection Moving
-					if (sheet.draggingSelectionRange != RangePosition.Empty
-						&& dc.DrawMode == DrawMode.View
-						&& sheet.HasSettings(WorksheetSettings.Edit_DragSelectionToMoveCells))
-					{
-						var scaledSelectionMovingRect = CellsViewport.GetScaledAndClippedRangeRect(this,
-							sheet.draggingSelectionRange.StartPos,
-							sheet.draggingSelectionRange.EndPos,
-							controlStyle.SelectionBorderWidth);
-
-						scaledSelectionMovingRect.Offset(-1, -1);
-
-						SolidColor selectionBorderColor = controlStyle.Colors[ControlAppearanceColors.SelectionBorder];
-
-						dc.Graphics.DrawRectangle(scaledSelectionMovingRect,
-							ColorUtility.FromAlphaColor(255, selectionBorderColor),
-							controlStyle.SelectionBorderWidth, LineStyles.Solid);
-					}
-					#endregion // Selection Moving
-					break;
-			}
-
-		}
 	}
 }

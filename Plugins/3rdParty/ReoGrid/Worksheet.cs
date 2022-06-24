@@ -433,9 +433,6 @@ namespace unvell.ReoGrid
 			this.FreezeToCell(row, col, FreezeArea.LeftTop);
 		}
 
-		private CellPosition lastFrozenPosition;
-		private FreezeArea lastFrozenArea = FreezeArea.None;
-
 		/// <summary>
 		/// Freezes worksheet at specified cell position and specifies the freeze areas.
 		/// </summary>
@@ -444,18 +441,6 @@ namespace unvell.ReoGrid
 		/// <param name="area">Specifies the frozen panes.</param>
 		public void FreezeToCell(int row, int col, FreezeArea area)
 		{
-			/////////////////////////////////////////////////////////////////
-			// fix issue #151, #172, #313
-			if (lastFrozenPosition == new CellPosition(row, col) && lastFrozenArea == area)
-			{
-				// skip to perform freeze if forzen position and area are not changed
-				return;
-			}
-
-			lastFrozenPosition = new CellPosition(row, col);
-			lastFrozenArea = area;
-			/////////////////////////////////////////////////////////////////
-
 			if (this.viewportController != null)
 			{
 				// update viewport bounds - sometimes the viewport may cannot get the correct size for freezing,
@@ -502,7 +487,7 @@ namespace unvell.ReoGrid
 			{
 				// freeze via supported viewportcontroller
 				var freezableViewportController = ((IFreezableViewportController)viewportController);
-				freezableViewportController.Freeze();
+				freezableViewportController.Freeze(this.FreezePos, area);
 				RequestInvalidate();
 
 				// raise events
@@ -1558,11 +1543,11 @@ namespace unvell.ReoGrid
 
 						if (Toolkit.IsKeyDown(Win32.VKey.VK_SHIFT))
 						{
-							svc.ScrollViews(ScrollDirection.Horizontal, -delta, 0);
+							svc.ScrollOffsetViews(ScrollDirection.Horizontal, -delta, 0);
 						}
 						else
 						{
-							svc.ScrollViews(ScrollDirection.Vertical, 0, -delta);
+							svc.ScrollOffsetViews(ScrollDirection.Vertical, 0, -delta);
 						}
 					}
 				}

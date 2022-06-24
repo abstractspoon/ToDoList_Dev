@@ -402,7 +402,7 @@ namespace unvell.ReoGrid
 					}
 					else if (image != null)
 					{
-						int breakpoint = 0;
+						//int breakpoint = 0;
 					}
 					else if (!string.IsNullOrEmpty(clipboardText))
 					{

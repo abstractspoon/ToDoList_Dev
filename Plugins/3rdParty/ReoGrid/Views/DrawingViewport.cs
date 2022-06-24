@@ -2,17 +2,16 @@
  * 
  * ReoGrid - .NET Spreadsheet Control
  * 
- * http://reogrid.net/
+ * https://reogrid.net/
  *
  * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY
  * KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR
  * PURPOSE.
  *
- * Author: Jing <lujing at unvell.com>
+ * Author: Jingwood <jingwood at unvell.com>
  *
- * Copyright (c) 2012-2016 Jing <lujing at unvell.com>
- * Copyright (c) 2012-2016 unvell.com, all rights reserved.
+ * Copyright (c) 2012-2021 Jingwood, unvell.com, all rights reserved.
  * 
  ****************************************************************************/
 
@@ -31,15 +30,12 @@ namespace unvell.ReoGrid.Views
 		{
 		}
 		
-		#region Draw
 		public override void DrawView(CellDrawingContext dc)
 		{
 			this.sheet.drawingCanvas.ClipBounds = this.ViewBounds;
 			this.sheet.drawingCanvas.Draw(dc);
 		}
-		#endregion // Draw
 
-		#region Update
 		public override void UpdateView()
 		{
 			base.UpdateView();
@@ -47,7 +43,6 @@ namespace unvell.ReoGrid.Views
 			this.sheet.drawingCanvas.ScaleX = this.scaleFactor;
 			this.sheet.drawingCanvas.ScaleY = this.scaleFactor;
 		}
-		#endregion // Update
 
 		#region Find View
 		public override IView GetViewByPoint(Point p)
