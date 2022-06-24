@@ -56,6 +56,8 @@ namespace unvell.ReoGrid.Views
 		void Reset();
 
 		void SetViewVisible(ViewTypes view, bool visible);
+
+		CellPosition GetPosByPoint(Point pt);
 	}
 }
 

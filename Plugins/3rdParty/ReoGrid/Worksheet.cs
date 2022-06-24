@@ -1494,6 +1494,36 @@ namespace unvell.ReoGrid
 		internal RangePosition draggingSelectionRange = RangePosition.Empty;
 		internal CellPosition focusMovingRangeOffset = CellPosition.Empty;
 
+		public bool HotTracking
+		{
+			get
+			{
+				return hotTracking;
+			}
+			set
+			{
+				if (hotTracking != value)
+				{
+					hotTracking = value;
+
+					if (!hoverPos.IsEmpty)
+						InvalidateSheet();
+				}
+			}
+		}
+
+		private bool hotTracking = false;
+
+		public bool SetHoverPos(Point location)
+		{
+			if (ViewportController == null)
+				HoverPos = CellPosition.Empty;
+			else
+				HoverPos = ViewportController.GetPosByPoint(location);
+
+			return !HoverPos.IsEmpty;
+		}
+
 		#region OnMouseWheel
 		internal void OnMouseWheel(Point location, int delta, MouseButtons buttons)
 		{

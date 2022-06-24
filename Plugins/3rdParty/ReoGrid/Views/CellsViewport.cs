@@ -83,6 +83,19 @@ namespace unvell.ReoGrid.Views
 			DrawContent(dc);
 
 			DrawSelection(dc);
+
+			if (sheet.HotTracking && !sheet.HoverPos.IsEmpty)
+			{
+				CellPosition pos = sheet.HoverPos;
+				Rectangle rect = GetScaledAndClippedRangeRect(this, pos, pos, 1);
+
+				var controlStyle = sheet.workbook.controlAdapter.ControlStyle;
+				SolidColor hotColor = dc.Focused ?
+										controlStyle.Colors[ControlAppearanceColors.HotTrackingBackground] :
+										controlStyle.Colors[ControlAppearanceColors.HotTrackingNotFocusedBackground];
+
+				dc.Renderer.FillRectangle(rect, hotColor);
+			}
 		}
 		#endregion // DrawView
 
@@ -1404,15 +1417,9 @@ namespace unvell.ReoGrid.Views
 						// process cells hover
 						if (!isProcessed)
 						{
-							CellPosition newHoverPos = CellsViewport.GetPosByPoint(this, location);
-							if (newHoverPos != sheet.hoverPos)
+							if (sheet.SetHoverPos(PointToController(location)))
 							{
-								sheet.HoverPos = newHoverPos;
-							}
-
-							if (!sheet.hoverPos.IsEmpty)
-							{
-								var cell = sheet.cells[sheet.hoverPos.Row, sheet.hoverPos.Col];
+								var cell = sheet.cells[sheet.HoverPos.Row, sheet.HoverPos.Col];
 
 								if (cell != null || sheet.HasCellMouseMove)
 								{
@@ -1423,9 +1430,9 @@ namespace unvell.ReoGrid.Views
 
 									if ((cell != null && cell.body != null) || sheet.HasCellMouseMove)
 									{
-										var cellRect = sheet.GetCellBounds(sheet.hoverPos);
+										var cellRect = sheet.GetCellBounds(sheet.HoverPos);
 
-										var evtArg = new CellMouseEventArgs(sheet, cell, sheet.hoverPos, new Point(
+										var evtArg = new CellMouseEventArgs(sheet, cell, sheet.HoverPos, new Point(
 												(location.X - cellRect.Left),
 												(location.Y - cellRect.Top)), location, buttons, 1);
 

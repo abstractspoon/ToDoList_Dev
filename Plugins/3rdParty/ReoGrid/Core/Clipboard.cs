@@ -279,7 +279,12 @@ namespace unvell.ReoGrid
 					if (data != null)
 					{
 						partialGrid = data.GetData(ClipBoardDataFormatIdentify) as PartialGrid;
-						clipboardText = data.GetText();
+
+						if (data.GetDataPresent("FileNameW"))
+							clipboardText = (data.GetData("FileNameW") as string[])[0];
+						else
+							clipboardText = data.GetText();
+
 						image = data.GetImage();
 					}
 

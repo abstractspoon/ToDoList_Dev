@@ -305,7 +305,7 @@ namespace unvell.ReoGrid
 		#region IsEmpty, Equals, ==, !=
 		internal static readonly CellPosition Empty = new CellPosition(-1, -1);
 
-		internal bool IsEmpty
+		public bool IsEmpty
 		{
 			get { return row == Empty.row && col == Empty.col; }
 		}
