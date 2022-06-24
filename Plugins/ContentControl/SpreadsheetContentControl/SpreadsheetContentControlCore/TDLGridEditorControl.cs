@@ -1027,7 +1027,10 @@ namespace SpreadsheetContentControl
 				}
 
 				if (!string.IsNullOrEmpty(text))
+				{
 					CurrentWorksheet.PasteFromString(CurrentWorksheet.HoverPos, text);
+					NotifyParentContentChange();
+				}
 			}
 			CurrentWorksheet.HotTracking = false;
 

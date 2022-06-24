@@ -59,6 +59,16 @@ namespace unvell.ReoGrid.Views
 
 		#endregion // Constructor
 
+		public virtual CellPosition GetPosByPoint(Point pt)
+		{
+			var targetView = this.view.GetViewByPoint(pt);
+
+			if ((targetView == null) || !(targetView is CellsViewport))
+				return CellPosition.Empty;
+
+			return CellsViewport.GetPosByPoint(targetView as CellsViewport, targetView.PointToView(pt));
+		}
+
 		#region Bounds
 
 		//private RGRect bounds;

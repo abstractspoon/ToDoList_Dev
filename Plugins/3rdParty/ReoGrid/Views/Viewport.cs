@@ -198,6 +198,5 @@ namespace unvell.ReoGrid.Views
 	
 	}
 
-	#endregion // Viewport
 }
 
