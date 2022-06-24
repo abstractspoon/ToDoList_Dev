@@ -218,6 +218,12 @@ namespace unvell.ReoGrid
 
 											rsd.Location = p;
 											rsd.SheetName = sheet.Name;
+											rsd.SheetTextChanged += (sss, eee) =>
+											{
+												var args = (eee as RenameSheetDialog.TextChangeEventArgs);
+
+												args.Valid = this.workbook.CheckWorksheetName(args.SheetName);
+											};
 
 											if (rsd.ShowDialog() == DialogResult.OK)
 											{

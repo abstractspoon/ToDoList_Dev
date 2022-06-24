@@ -32,6 +32,20 @@ namespace unvell.ReoGrid.WinForm
 	/// </summary>
 	public partial class RenameSheetDialog : Form
 	{
+		public event EventHandler<TextChangeEventArgs> SheetTextChanged;
+
+		public class TextChangeEventArgs : EventArgs
+		{
+			public TextChangeEventArgs(string text)
+			{
+				SheetName = text;
+				Valid = false;
+			}
+
+			public string SheetName;
+			public bool Valid;
+		}
+
 		/// <summary>
 		/// Name of sheet
 		/// </summary>
@@ -49,6 +63,21 @@ namespace unvell.ReoGrid.WinForm
 				if (e.KeyCode == Keys.Enter)
 				{
 					btnOK.PerformClick();
+				}
+			};
+
+			this.newName.TextChanged += (s, e) =>
+			{
+				if (SheetTextChanged != null)
+				{
+					var args = new TextChangeEventArgs(newName.Text);
+					SheetTextChanged(this, args);
+
+					btnOK.Enabled = args.Valid;
+				}
+				else
+				{
+					btnOK.Enabled = true;
 				}
 			};
 		}
