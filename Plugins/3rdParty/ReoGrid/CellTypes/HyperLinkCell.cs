@@ -233,7 +233,6 @@ namespace unvell.ReoGrid.CellTypes
 			if (HasLinkURL && IsPressed)
 			{
 				this.IsPressed = false;
-				this.Cell.Style.TextColor = VisitedColor;
 
 				if (PerformClick(false))
 				{

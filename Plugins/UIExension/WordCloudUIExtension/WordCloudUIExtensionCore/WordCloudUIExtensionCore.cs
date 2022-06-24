@@ -164,9 +164,12 @@ namespace WordCloudUIExtension
 			while (task.IsValid() && ProcessTaskUpdate(task, type, changedTaskIds))
 				task = task.GetNextTask();
 
-			UpdateWeightedWords(true);
-			UpdateMatchList(changedTaskIds);
-        }
+			if (((changedTaskIds == null) || (changedTaskIds.Count > 0)) && tasks.IsAttributeAvailable(m_Attrib))
+			{
+				UpdateWeightedWords(true);
+				UpdateMatchList(changedTaskIds);
+			}
+		}
 
 		void UpdateMatchList(HashSet<UInt32> changedTaskIds = null)
 		{

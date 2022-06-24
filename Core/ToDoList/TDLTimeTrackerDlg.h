@@ -116,7 +116,7 @@ protected:
 	DWORD GetTasklistTrackID(const CFilteredToDoCtrl* pTDC) const;
 	int GetTasklistCBIndex(const CFilteredToDoCtrl* pTDC) const;
 	BOOL HasTasklist(const CFilteredToDoCtrl* pTDC) const;
-	void RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRemove);
+	BOOL RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRemove);
 	
 	BOOL Create();
 	BOOL Recreate();

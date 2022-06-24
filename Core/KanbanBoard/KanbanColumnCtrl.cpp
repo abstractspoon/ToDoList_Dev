@@ -22,6 +22,7 @@
 #include "..\Shared\themed.h"
 
 #include "..\3rdparty\XNamedColors.h"
+#include "..\3rdparty\ColorDef.h"
 
 #include <math.h>
 
@@ -119,6 +120,7 @@ CKanbanColumnCtrl::CKanbanColumnCtrl(const CKanbanItemMap& data, const KANBANCOL
 	m_bDrawTaskFileLinks(FALSE),
 	m_dwDisplay(0),
 	m_dwOptions(0),
+	m_crItemShadow(CLR_NONE),
 	m_tch(*this)
 {
 }
@@ -284,6 +286,8 @@ void CKanbanColumnCtrl::RefreshBkgndColor()
 	}
 	
 	TreeView_SetBkColor(*this, crBack);
+
+	RecalcItemShadowColor();
 }
 
 void CKanbanColumnCtrl::SetBackgroundColor(COLORREF color)
@@ -296,6 +300,19 @@ void CKanbanColumnCtrl::SetBackgroundColor(COLORREF color)
 		m_columnDef.crBackground = color;
 		RefreshBkgndColor();
 	}
+}
+
+void CKanbanColumnCtrl::RecalcItemShadowColor()
+{
+	COLORREF crBack = TreeView_GetBkColor(*this);
+	float fLum = (RGBX(crBack).Luminance() / 255.0f);
+
+	const BYTE nDarkestGray = 80, nLightestGray = 216;
+	const BYTE nGrayRange = (nLightestGray - nDarkestGray);
+
+	BYTE btShadow = (BYTE)(nDarkestGray + (fLum * nGrayRange));
+
+	m_crItemShadow = RGB(btShadow, btShadow, btShadow);
 }
 
 void CKanbanColumnCtrl::SetExcessColor(COLORREF /*color*/)
@@ -552,6 +569,8 @@ int CKanbanColumnCtrl::CalcAvailableAttributeWidth(int nColWidth) const
 
 void CKanbanColumnCtrl::DrawItemShadow(CDC* pDC, CRect& rItem) const
 {
+	ASSERT(m_crItemShadow > 0);
+
 	int nSave = pDC->SaveDC();
 
 	rItem.DeflateRect(0, 0, 1, 1);
@@ -560,7 +579,7 @@ void CKanbanColumnCtrl::DrawItemShadow(CDC* pDC, CRect& rItem) const
 	CRect rShadow(rItem);
 	rShadow.DeflateRect(3, 3, -1, -1);
 
-	GraphicsMisc::DrawRect(pDC, rShadow, SHADOW_COLOR);
+	GraphicsMisc::DrawRect(pDC, rShadow, m_crItemShadow);
 
 	pDC->RestoreDC(nSave);
 }

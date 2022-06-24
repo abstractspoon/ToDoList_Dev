@@ -368,6 +368,30 @@
     <Compile Include="Utility\MeasureToolkit.cs" />
     <Compile Include="Utility\PrinterUtility.cs" />
     <Compile Include="Utility\StyleUtility.cs" />
+    <Compile Include="Views\CellsForegroundView.cs" />
+    <Compile Include="Views\Controllers\IFreezableViewportController.cs" />
+    <Compile Include="Views\Controllers\IScalableViewportController.cs" />
+    <Compile Include="Views\Controllers\IScrollableViewportController.cs" />
+    <Compile Include="Views\Controllers\IViewportController.cs" />
+    <Compile Include="Views\Controllers\NormalViewportController.cs" />
+    <Compile Include="Views\Controllers\PageLayoutViewportController.cs" />
+    <Compile Include="Views\Controllers\ViewportController.cs" />
+    <Compile Include="Views\DrawingViewport.cs" />
+    <Compile Include="Views\GridRegion.cs" />
+    <Compile Include="Views\Header\ColumnHeaderView.cs" />
+    <Compile Include="Views\Header\HeaderViews.cs" />
+    <Compile Include="Views\Header\LeadHeaderView.cs" />
+    <Compile Include="Views\Header\RowHeaderView.cs" />
+    <Compile Include="Views\Header\SpaceView.cs" />
+    <Compile Include="Views\Header\XRulerView.cs" />
+    <Compile Include="Views\IRangeSelectableView.cs" />
+    <Compile Include="Views\IView.cs" />
+    <Compile Include="Views\IViewport.cs" />
+    <Compile Include="Views\LayerExtension.cs" />
+    <Compile Include="Views\LayerViewport.cs" />
+    <Compile Include="Views\SheetViewport.cs" />
+    <Compile Include="Views\View.cs" />
+    <Compile Include="Views\ViewTypes.cs" />
     <Compile Include="WinForm\AboutForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -417,8 +441,6 @@
     <Compile Include="IO\ExcelSchame.cs" />
     <Compile Include="Rendering\RenderingInterface.cs" />
     <Compile Include="Views\CommentView.cs" />
-    <Compile Include="Views\DrawingView.cs" />
-    <Compile Include="Views\HeaderViews.cs" />
     <Compile Include="Views\OutlineViews.cs" />
     <Compile Include="IO\OpenXMLUtility.cs" />
     <Compile Include="Graphics\HatchStyles.cs" />
@@ -426,7 +448,6 @@
     <Compile Include="Rendering\PDF.cs" />
     <Compile Include="Utility\ColorUtility.cs" />
     <Compile Include="Control\ISheetTabControl.cs" />
-    <Compile Include="Views\Layer.cs" />
     <Compile Include="Views\CellsViewport.cs" />
     <Compile Include="WinForm\FormulaParserForm.cs">
       <SubType>Form</SubType>
@@ -435,7 +456,6 @@
       <DependentUpon>FormulaParserForm.cs</DependentUpon>
     </Compile>
     <Compile Include="WinForm\Graphics.cs" />
-    <Compile Include="Views\NormalViewportController.cs" />
     <Compile Include="WinForm\Platform.cs" />
     <Compile Include="WinForm\RenameSheetDialog.cs">
       <SubType>Form</SubType>

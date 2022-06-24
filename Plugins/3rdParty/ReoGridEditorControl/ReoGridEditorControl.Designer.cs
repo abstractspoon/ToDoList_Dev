@@ -1531,7 +1531,7 @@ namespace unvell.ReoGrid.Editor
             this.toolStripMenuItem6,
             this.formatCellToolStripMenuItem});
 			this.cellContextMenuStrip.Name = "cellContextMenuStrip";
-			this.cellContextMenuStrip.Size = new System.Drawing.Size(202, 226);
+			this.cellContextMenuStrip.Size = new System.Drawing.Size(202, 204);
 			// 
 			// cutRangeToolStripMenuItem
 			// 
@@ -2667,6 +2667,7 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.formatCellsToolStripMenuItem.Image = global::unvell.ReoGrid.Editor.Properties.Resources.PropertiesHS;
 			this.formatCellsToolStripMenuItem.Name = "formatCellsToolStripMenuItem";
+			this.formatCellsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Alt | System.Windows.Forms.Keys.Return)));
 			this.formatCellsToolStripMenuItem.Size = new System.Drawing.Size(228, 22);
 			this.formatCellsToolStripMenuItem.Text = "Format Cells...";
 			// 

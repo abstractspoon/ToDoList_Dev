@@ -1383,9 +1383,9 @@ namespace unvell.ReoGrid
 		/// <summary>
 		/// Scroll current active worksheet.
 		/// </summary>
-		/// <param name="offsetX">Scroll value on horizontal direction.</param>
-		/// <param name="offsetY">Scroll value on vertical direction.</param>
-		public void ScrollCurrentWorksheet(RGFloat offsetX, RGFloat offsetY)
+		/// <param name="x">Scroll value on horizontal direction.</param>
+		/// <param name="y">Scroll value on vertical direction.</param>
+		public void ScrollCurrentWorksheet(RGFloat x, RGFloat y)
 		{
 			if (this.currentWorksheet != null)
 			{
@@ -1393,7 +1393,7 @@ namespace unvell.ReoGrid
 
 				if (svc != null)
 				{
-					svc.ScrollViews(ScrollDirection.Both, offsetX, offsetY);
+					svc.ScrollViews(ScrollDirection.Both, x, y);
 					svc.SynchronizeScrollBar();
 				}
 			}
@@ -1416,8 +1416,8 @@ namespace unvell.ReoGrid
 			{
 				this.WorksheetScrolled(this, new WorksheetScrolledEventArgs(worksheet)
 				{
-					OffsetX = x,
-					OffsetY = y,
+					X = x,
+					Y = y,
 				});
 			}
 		}

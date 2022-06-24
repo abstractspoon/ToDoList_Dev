@@ -109,7 +109,10 @@ BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 		ToggleFilter(); // show all tasks
 		
 		if (CTabbedToDoCtrl::SelectTask(dwTaskID, bTrue))
+		{
+			GetParent()->SendMessage(WM_TDCN_FILTERCHANGE, (WPARAM)GetSafeHwnd());
 			return TRUE;
+		}
 
 		// else
 		ASSERT(0);
@@ -357,7 +360,7 @@ int CFilteredToDoCtrl::GetArchivableTasks(CTaskFile& tasks, BOOL bSelectedOnly) 
 
 BOOL CFilteredToDoCtrl::RemoveArchivedTask(DWORD dwTaskID)
 {
-	ASSERT(m_data.HasTask(dwTaskID));
+	ASSERT(HasTask(dwTaskID));
 	
 	// note: if the tasks does not exist in the tree then this is not a bug
 	// if a filter is set

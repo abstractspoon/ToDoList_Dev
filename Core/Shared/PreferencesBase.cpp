@@ -22,6 +22,94 @@ const int STATIC_PADDING = GraphicsMisc::ScaleByDPIFactor(1);
 const int OTHER_PADDING = GraphicsMisc::ScaleByDPIFactor(2);
 
 /////////////////////////////////////////////////////////////////////////////
+
+class CTempPreferences : public IPreferences
+{
+public:
+	UINT GetProfileInt(LPCWSTR lpszSection, LPCWSTR lpszEntry, int nDefault = 0) const
+	{
+		CString sValue;
+		
+		if (m_aValues.Lookup(MakeKey(lpszSection, lpszEntry), sValue))
+			return _ttol(sValue);
+
+		// else
+		return nDefault;
+	}
+	
+	bool WriteProfileInt(LPCWSTR lpszSection, LPCWSTR lpszEntry, int nValue)
+	{
+		m_aValues[MakeKey(lpszSection, lpszEntry)] = Misc::Format(nValue);
+		return true;
+	}
+
+	LPCWSTR GetProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszDefault = NULL) const
+	{
+		CString sValue;
+		
+		if (m_aValues.Lookup(MakeKey(lpszSection, lpszEntry), sValue))
+			return sValue;
+
+		// else
+		return lpszDefault;
+	}
+	
+	bool WriteProfileString(LPCWSTR lpszSection, LPCWSTR lpszEntry, LPCWSTR lpszValue)
+	{
+		m_aValues[MakeKey(lpszSection, lpszEntry)] = lpszValue;
+		return true;
+	}
+
+	double GetProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dDefault = 0.0) const
+	{
+		CString sValue;
+		
+		if (m_aValues.Lookup(MakeKey(lpszSection, lpszEntry), sValue))
+			return _ttof(sValue);
+
+		// else
+		return dDefault;
+	}
+	
+	bool WriteProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dValue)
+	{
+		m_aValues[MakeKey(lpszSection, lpszEntry)] = Misc::Format(dValue);
+		return true;
+	}
+
+	bool DeleteProfileEntry(LPCWSTR lpszSection, LPCWSTR lpszEntry)
+	{
+		return (FALSE != m_aValues.RemoveKey(MakeKey(lpszSection, lpszEntry)));
+	}
+	
+	bool DeleteProfileSection(LPCWSTR lpszSection)
+	{
+		ASSERT(0);
+		return false;
+	}
+
+protected:
+	CMapStringToString m_aValues;
+
+protected:
+	CString MakeKey(LPCWSTR lpszSection, LPCWSTR lpszEntry) const
+	{
+		if (Misc::IsEmpty(lpszSection))
+		{
+			return lpszEntry;
+		}
+		else if (Misc::IsEmpty(lpszEntry))
+		{
+			return lpszSection;
+		}
+
+		// else
+		return Misc::Format(_T("%s\\%s"), lpszSection, lpszEntry);
+	}
+
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesPageBase property page
 
 CPreferencesPageBase::CPreferencesPageBase(UINT nDlgTemplateID) 
@@ -252,14 +340,30 @@ int CPreferencesDlgBase::DoModal(IPreferences* pPrefs, LPCTSTR szKey, int nInitP
 		m_nInitCtrlID = nInitCtrlID;
 	}
 
-	// Temporary only
-	m_pDoModalPrefs = pPrefs;
-	m_sDoModalKey = szKey;
-	
-	int nRet = CDialog::DoModal();
+	int nRet = IDCANCEL;
 
-	m_pDoModalPrefs = NULL;
-	m_sDoModalKey.Empty();
+	if (pPrefs == NULL)
+	{
+		// Save initial state for restoration on cancellation
+		CTempPreferences prevPrefs;
+		SavePreferences(&prevPrefs, _T(""));
+
+		nRet = CDialog::DoModal();
+
+		if (nRet != IDOK)
+			LoadPreferences(&prevPrefs, _T(""));
+	}
+	else
+	{
+		// Temporary only
+		m_pDoModalPrefs = pPrefs;
+		m_sDoModalKey = szKey;
+	
+		nRet = CDialog::DoModal();
+
+		m_pDoModalPrefs = NULL;
+		m_sDoModalKey.Empty();
+	}
 
 	return nRet;
 }

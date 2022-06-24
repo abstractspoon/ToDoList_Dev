@@ -499,6 +499,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDCN_CLICKREMINDERCOL, OnToDoCtrlNotifyClickReminderCol)
 	ON_REGISTERED_MESSAGE(WM_TDCN_LISTCHANGE, OnToDoCtrlNotifyListChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_MODIFY, OnToDoCtrlNotifyMod)
+	ON_REGISTERED_MESSAGE(WM_TDCN_FILTERCHANGE, OnToDoCtrlNotifyFilterChange)
 	ON_REGISTERED_MESSAGE(WM_TDCN_RECREATERECURRINGTASK, OnToDoCtrlNotifyRecreateRecurringTask)
 	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERDISMISS, OnNotifyReminderModified)
 	ON_REGISTERED_MESSAGE(WM_TDCN_REMINDERSNOOZE, OnNotifyReminderModified)
@@ -3602,6 +3603,18 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyRecreateRecurringTask(WPARAM wp, LPARAM lp
 	return 0L;
 }
 
+LRESULT CToDoListWnd::OnToDoCtrlNotifyFilterChange(WPARAM wp, LPARAM /*lp*/)
+{
+	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wp);
+
+	if (nTDC == -1)
+		ASSERT(0);
+	else
+		m_filterBar.RefreshFilterControls(GetToDoCtrl(nTDC));
+
+	return 0L;
+}
+
 LRESULT CToDoListWnd::OnToDoCtrlNotifyMod(WPARAM wp, LPARAM lp)
 {
 	ASSERT(wp && lp);
@@ -5396,12 +5409,12 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 		TDC_INSERTWHERE nWhere = TDC::MapInsertIDToInsertWhere(GetNewTaskCmdID()); // default
 
 		// do we have a parent task ?
-		if (SelectTask(tdc, startup.GetParentTaskID()))
+		if (tdc.SelectTask(startup.GetParentTaskID()))
 		{
 			nWhere = TDC_INSERTATBOTTOMOFSELTASK;
 		}
 		// or a sibling task ?
-		else if (SelectTask(tdc, startup.GetSiblingTaskID()))
+		else if (tdc.SelectTask(startup.GetSiblingTaskID()))
 		{
 			nWhere = TDC_INSERTAFTERSELTASK;
 		}
@@ -5430,7 +5443,7 @@ BOOL CToDoListWnd::ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL
 	}
 	else if (startup.GetTaskID())
 	{
-		if (!SelectTask(tdc, startup.GetTaskID()))
+		if (!tdc.SelectTask(startup.GetTaskID()))
 			return FALSE;
 	}
 	else if (!startup.IsEmpty(TRUE))
@@ -10728,7 +10741,7 @@ LRESULT CToDoListWnd::OnFindSelectResult(WPARAM /*wp*/, LPARAM lp)
 	// we can't use pResult->pTDC because it's const
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nCtrl);
 
-	if (SelectTask(tdc, pResult->dwTaskID))
+	if (tdc.SelectTask(pResult->dwTaskID))
 	{
 		tdc.SetFocusToTasks();
 
@@ -10737,22 +10750,6 @@ LRESULT CToDoListWnd::OnFindSelectResult(WPARAM /*wp*/, LPARAM lp)
 	}
 	
 	return 1L;
-}
-
-BOOL CToDoListWnd::SelectTask(CFilteredToDoCtrl& tdc, DWORD dwTaskID)
-{
-	if (tdc.GetSelectedTaskID() == dwTaskID)
-		return TRUE;
-
-	BOOL bWasFiltered = tdc.HasAnyFilter();
-		
-	if (!tdc.SelectTask(dwTaskID))
-		return FALSE;
-
-	if (bWasFiltered && !tdc.HasAnyFilter())
-		RefreshFilterBarControls(TDCA_ALL);
-
-	return TRUE;
 }
 
 LRESULT CToDoListWnd::OnFindSelectAll(WPARAM /*wp*/, LPARAM /*lp*/)
@@ -11778,7 +11775,14 @@ void CToDoListWnd::OnViewTogglefilter()
 
 void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(GetToDoCtrl().CanToggleFilter());
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+	BOOL bCanToggle = tdc.CanToggleFilter();
+
+	pCmdUI->Enable(bCanToggle);
+
+	// Select toolbar button if filter is currently toggled
+	if (pCmdUI->m_pMenu == NULL)
+		pCmdUI->SetCheck((bCanToggle && tdc.HasAnyFilter()) ? 0 : 1);
 }
 
 LRESULT CToDoListWnd::OnSelchangeFilter(WPARAM wp, LPARAM lp) 
@@ -12230,7 +12234,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 	{
 		ASSERT(dwTaskID);
 
-		bSelected = SelectTask(GetToDoCtrl(), dwTaskID);
+		bSelected = GetToDoCtrl().SelectTask(dwTaskID);
 		bHandled = TRUE; // handled regardless of result
 	}
 	else if (!PathIsRelative(sPath) && FileMisc::FileExists(sPath))
@@ -12247,7 +12251,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 				bSelected = TRUE;
 
 				if (dwTaskID)
-					SelectTask(GetToDoCtrl(), dwTaskID);
+					GetToDoCtrl().SelectTask(dwTaskID);
 			}
 			else
 			{
@@ -12265,7 +12269,7 @@ BOOL CToDoListWnd::DoTaskLink(const CString& sPath, DWORD dwTaskID, BOOL bStartu
 				bSelected = TRUE;
 
 				if (dwTaskID)
-					SelectTask(GetToDoCtrl(), dwTaskID);
+					GetToDoCtrl().SelectTask(dwTaskID);
 			}
 			else
 			{
@@ -13678,7 +13682,7 @@ void CToDoListWnd::OnMoveGoToTask()
 	CTDLGoToTaskDlg dialog(tdc);
 
 	if (dialog.DoModal() == IDOK)
-		SelectTask(tdc, dialog.GetTaskID());
+		tdc.SelectTask(dialog.GetTaskID());
 }
 
 void CToDoListWnd::OnUpdateMoveGoToTask(CCmdUI* pCmdUI) 
