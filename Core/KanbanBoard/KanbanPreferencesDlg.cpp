@@ -274,6 +274,7 @@ void CKanbanPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR
 	}
 
 	// Display Attributes
+	m_aDisplayAttrib.RemoveAll();
 	int nNumAttrib = pPrefs->GetProfileInt(szKey, _T("DisplayAttribCount"));
 	
 	for (int nAtt = 0; nAtt < nNumAttrib; nAtt++)
