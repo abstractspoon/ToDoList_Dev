@@ -362,10 +362,6 @@ namespace unvell.ReoGrid.Editor
 			this.runFunctionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.controlStyleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.languageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.englishenUSToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.japanesejpJPToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.simplifiedChinesezhCNToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItem13 = new System.Windows.Forms.ToolStripSeparator();
 			this.debugToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.validateMergedRangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -2993,7 +2989,6 @@ namespace unvell.ReoGrid.Editor
 			// 
 			this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.controlStyleToolStripMenuItem,
-            this.languageToolStripMenuItem,
             this.toolStripMenuItem13,
             this.debugToolStripMenuItem});
 			this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
@@ -3007,37 +3002,6 @@ namespace unvell.ReoGrid.Editor
 			this.controlStyleToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
 			this.controlStyleToolStripMenuItem.Text = "Control &Appearance...";
 			this.controlStyleToolStripMenuItem.Click += new System.EventHandler(this.styleEditorToolStripMenuItem_Click);
-			// 
-			// languageToolStripMenuItem
-			// 
-			this.languageToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.englishenUSToolStripMenuItem,
-            this.japanesejpJPToolStripMenuItem,
-            this.simplifiedChinesezhCNToolStripMenuItem});
-			this.languageToolStripMenuItem.Name = "languageToolStripMenuItem";
-			this.languageToolStripMenuItem.Size = new System.Drawing.Size(189, 22);
-			this.languageToolStripMenuItem.Text = "&Language";
-			// 
-			// englishenUSToolStripMenuItem
-			// 
-			this.englishenUSToolStripMenuItem.Name = "englishenUSToolStripMenuItem";
-			this.englishenUSToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-			this.englishenUSToolStripMenuItem.Text = "English (en-US)";
-			this.englishenUSToolStripMenuItem.Click += new System.EventHandler(this.englishenUSToolStripMenuItem_Click);
-			// 
-			// japanesejpJPToolStripMenuItem
-			// 
-			this.japanesejpJPToolStripMenuItem.Name = "japanesejpJPToolStripMenuItem";
-			this.japanesejpJPToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-			this.japanesejpJPToolStripMenuItem.Text = "&Japanese (jp-JP)";
-			this.japanesejpJPToolStripMenuItem.Click += new System.EventHandler(this.japanesejpJPToolStripMenuItem_Click);
-			// 
-			// simplifiedChinesezhCNToolStripMenuItem
-			// 
-			this.simplifiedChinesezhCNToolStripMenuItem.Name = "simplifiedChinesezhCNToolStripMenuItem";
-			this.simplifiedChinesezhCNToolStripMenuItem.Size = new System.Drawing.Size(217, 22);
-			this.simplifiedChinesezhCNToolStripMenuItem.Text = "Simplified &Chinese (zh-CN)";
-			this.simplifiedChinesezhCNToolStripMenuItem.Click += new System.EventHandler(this.simplifiedChinesezhCNToolStripMenuItem_Click);
 			// 
 			// toolStripMenuItem13
 			// 
@@ -3552,10 +3516,6 @@ namespace unvell.ReoGrid.Editor
 		private System.Windows.Forms.ToolStripSeparator toolStripMenuItem41;
 		private System.Windows.Forms.ToolStripMenuItem rowFormatCellsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem showFrozenLineToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem languageToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem englishenUSToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem japanesejpJPToolStripMenuItem;
-		private System.Windows.Forms.ToolStripMenuItem simplifiedChinesezhCNToolStripMenuItem;
 		private ToolStripEx toolStrip1;
 		private ToolStripEx fontToolStrip;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator14;
