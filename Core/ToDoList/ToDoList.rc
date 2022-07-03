@@ -5113,7 +5113,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_SB_NOSELTASK         "<No task selected>"
-    ID_SB_MULTISELTASK      "<Multiple tasks selected>"
+    ID_SB_MULTISELTASK      "<Multiple (%d) tasks selected>"
     ID_SB_SPACER            "                     "
     ID_SB_MULTISELTASKMORE_TIP "%d more tasks"
     ID_EDIT_INSERTTIME      "\nInsert Time"
