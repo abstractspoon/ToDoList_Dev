@@ -54,6 +54,7 @@
 #include "..\shared\holdredraw.h"
 #include "..\shared\filemisc.h"
 #include "..\shared\misc.h"
+#include "..\shared\encolordialog.h"
 
 #include <afxpriv.h>
 
@@ -1191,7 +1192,7 @@ void CRulerRichEditCtrl::DoColor()
 		clr = cf.crTextColor;
 
 	// Display color selection dialog
-	CColorDialog dlg(clr);
+	CEnColorDialog dlg(clr);
 
 	if (dlg.DoModal() == IDOK)
 	{

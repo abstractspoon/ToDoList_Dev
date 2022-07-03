@@ -3165,7 +3165,7 @@ void CToDoListWnd::OnEditTaskcolor()
 	
 	if (!tdc.IsReadOnly() && tdc.HasSelection())
 	{
-		CEnColorDialog dialog(tdc.GetSelectedTaskColor(), CC_FULLOPEN | CC_RGBINIT);
+		CEnColorDialog dialog(tdc.GetSelectedTaskColor());
 
 		CPreferences prefs;
 		dialog.LoadPreferences(prefs);
@@ -13594,9 +13594,9 @@ void CToDoListWnd::OnEditSetTasklistTabColor()
 {
 	int nSelTDC = GetSelToDoCtrl();
 
-	CColorDialog dialog(m_mgrToDoCtrls.GetTabColor(nSelTDC), CC_FULLOPEN | CC_ANYCOLOR);
+	CEnColorDialog dialog(m_mgrToDoCtrls.GetTabColor(nSelTDC));
 
-	if (dialog.DoModal() == IDOK)
+	if (dialog.DoModal(CPreferences()) == IDOK)
 	{
 		m_mgrToDoCtrls.SetTabColor(nSelTDC, dialog.GetColor());
 

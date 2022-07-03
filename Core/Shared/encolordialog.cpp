@@ -23,6 +23,8 @@ CEnColorDialog::CEnColorDialog(COLORREF clrInit, DWORD dwFlags, CWnd* pParentWnd
 	:
 	CColorDialog(clrInit, dwFlags, pParentWnd), m_bHasPrefs(FALSE)
 {
+	if (clrInit == CLR_NONE)
+		m_cc.Flags &= ~CC_RGBINIT;
 }
 
 CEnColorDialog::~CEnColorDialog()

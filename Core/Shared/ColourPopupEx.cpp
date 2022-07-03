@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include "ColourPopupEx.h"
+#include "EnColorDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -126,4 +127,15 @@ void CColourPopupEx::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
 	// Bypass base-class because we've hooked the parent instead
 	CWnd::OnKeyDown(nChar, nRepCnt, nFlags);
+}
+
+BOOL CColourPopupEx::DoColorDialog(COLORREF crIn, COLORREF& crOut)
+{
+	CEnColorDialog dlg(crIn, CC_FULLOPEN | CC_ANYCOLOR, this);
+
+	if (dlg.DoModal() != IDOK)
+		return FALSE;
+
+	crOut = dlg.GetColor();
+	return TRUE;
 }

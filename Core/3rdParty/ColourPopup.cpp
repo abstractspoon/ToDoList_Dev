@@ -771,15 +771,11 @@ void CColourPopup::EndSelection(int nMessage)
     ReleaseCapture();
 
     // If custom text selected, perform a custom colour selection
-    if (nMessage != CPN_SELENDCANCEL && m_nCurrentSel == CUSTOM_BOX_VALUE)
+    if ((nMessage != CPN_SELENDCANCEL) && (m_nCurrentSel == CUSTOM_BOX_VALUE))
     {
         m_bChildWindowVisible = TRUE;
 
-        CColorDialog dlg(m_crInitialColour, CC_FULLOPEN | CC_ANYCOLOR, this);
-
-        if (dlg.DoModal() == IDOK)
-            m_crColour = dlg.GetColor();
-        else
+		if (!DoColorDialog(m_crInitialColour, m_crColour))
             nMessage = CPN_SELENDCANCEL;
 
         m_bChildWindowVisible = FALSE;
@@ -794,6 +790,17 @@ void CColourPopup::EndSelection(int nMessage)
     // Kill focus bug fixed by Martin Wawrusch
     if (!m_bChildWindowVisible)
         DestroyWindow();
+}
+
+BOOL CColourPopup::DoColorDialog(COLORREF crIn, COLORREF& crOut)
+{
+	CColorDialog dlg(crIn, CC_FULLOPEN | CC_ANYCOLOR, this);
+
+	if (dlg.DoModal() != IDOK)
+		return FALSE;
+
+	crOut = dlg.GetColor();
+	return TRUE;
 }
 
 void CColourPopup::DrawCell(CDC* pDC, int nIndex)

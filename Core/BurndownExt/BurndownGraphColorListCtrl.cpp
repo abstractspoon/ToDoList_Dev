@@ -8,6 +8,7 @@
 #include "BurndownChart.h"
 
 #include "..\Shared\GraphicsMisc.h"
+#include "..\Shared\encolordialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -127,7 +128,7 @@ void CBurndownGraphColorListCtrl::EditCell(int nItem, int nCol, BOOL /*bBtnClick
 
 	BURNDOWN_GRAPH nGraph = (BURNDOWN_GRAPH)dwItemData;
 
-	CColorDialog dialog(m_mapColors.GetColor(nGraph, (nCol - 1)), CC_FULLOPEN | CC_RGBINIT);
+	CEnColorDialog dialog(m_mapColors.GetColor(nGraph, (nCol - 1)));
 
 	if (dialog.DoModal() == IDOK)
 		m_mapColors.SetColor(nGraph, (nCol - 1), dialog.GetColor());

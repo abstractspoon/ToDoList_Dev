@@ -21,7 +21,6 @@ public:
 	CColourPopupEx();
 	CColourPopupEx(CPoint p, COLORREF crColour, CWnd* pParentWnd, UINT nID = 0, 
 				LPCTSTR szDefaultText = NULL, LPCTSTR szCustomText = NULL);
-
 protected:
 	CSubclassWnd   m_scParent;
 
@@ -45,6 +44,7 @@ protected:
 
 protected:
 	virtual LRESULT ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp);
+	virtual BOOL DoColorDialog(COLORREF crIn, COLORREF& crOut);
 };
 
 /////////////////////////////////////////////////////////////////////////////

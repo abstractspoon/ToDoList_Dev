@@ -9,6 +9,7 @@
 #include "..\shared\graphicsmisc.h"
 #include "..\shared\dialoghelper.h"
 #include "..\shared\Localizer.h"
+#include "..\shared\EnColorDialog.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -168,7 +169,7 @@ void CKanbanFixedColumnListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
 	case KFCL_COLORCOL:
 		ASSERT(!Misc::IsHighContrastActive());
 		{
-			CColorDialog dialog(GetItemColor(nItem), CC_FULLOPEN | CC_RGBINIT);
+			CEnColorDialog dialog(GetItemColor(nItem));
 
 			if (dialog.DoModal() == IDOK)
 			{

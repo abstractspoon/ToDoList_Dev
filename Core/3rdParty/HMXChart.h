@@ -106,7 +106,6 @@ public:
 	virtual	CString		GetTitle() const;
 
 	// background functions
-	virtual bool		SetBkGnd();
 	virtual bool		SetBkGnd( COLORREF clr );
 	virtual COLORREF	GetBkGnd() const;
 

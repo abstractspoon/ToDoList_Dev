@@ -2031,28 +2031,6 @@ COLORREF CHMXChart::GetGridColor() const
 }
 
 //
-//	SetBkGnd
-//
-//	arguments
-//
-//		none
-//
-//	return
-//
-//		true if ok, else false
-//
-bool CHMXChart::SetBkGnd()
-{
-	CColorDialog dlg(GetBkGnd());
-
-	if(dlg.DoModal() == IDOK)
-		return SetBkGnd(dlg.GetColor());
-	else
-		return false;
-
-}
-
-//
 //	GetBkGnd
 //
 //	arguments

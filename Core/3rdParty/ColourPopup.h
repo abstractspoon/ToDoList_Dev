@@ -63,7 +63,7 @@ public:
 // Overrides
     // ClassWizard generated virtual function overrides
     //{{AFX_VIRTUAL(CColourPopup)
-    public:
+public:
     virtual BOOL PreTranslateMessage(MSG* pMsg);
     //}}AFX_VIRTUAL
 
@@ -85,6 +85,8 @@ protected:
     int  GetIndex(int row, int col) const;
     int  GetRow(int nIndex) const;
     int  GetColumn(int nIndex) const;
+
+	virtual BOOL DoColorDialog(COLORREF crIn, COLORREF& crOut);
 
 // protected attributes
 protected:
