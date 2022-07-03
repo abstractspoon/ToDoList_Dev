@@ -461,23 +461,23 @@ CString CTDLFindResultsListCtrl::FormatWhatMatched(const SEARCHRESULT& result, c
 
 CString CTDLFindResultsListCtrl::GetAttributeName(TDC_ATTRIBUTE nAttribID, const CFilteredToDoCtrl* pTDC) const
 {
-	for (int nAtt = 0; nAtt < ATTRIB_COUNT; nAtt++)
-	{
-		const TDCATTRIBUTE& ap = ATTRIBUTES[nAtt];
+	CString sAttrib = ::GetAttributeName(nAttribID);
 
-		if (ap.nAttribID == nAttribID)
-			return CEnString(ap.nAttribResID);
+	if (sAttrib.IsEmpty())
+	{
+		// custom attributes
+		for (int nCust = 0; nCust < pTDC->GetCustomAttributeDefs().GetSize(); nCust++)
+		{
+			const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = pTDC->GetCustomAttributeDefs()[nCust];
+
+			if (attribDef.GetAttributeID() == nAttribID)
+			{
+				sAttrib = attribDef.sLabel;
+				break;
+			}
+		}
 	}
 
-	// custom attributes
-	for (int nCust = 0; nCust < pTDC->GetCustomAttributeDefs().GetSize(); nCust++)
-	{
-		const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = pTDC->GetCustomAttributeDefs()[nCust];
-
-		if (attribDef.GetAttributeID() == nAttribID)
-			return attribDef.sLabel;
-	}
-
-	ASSERT(0);
-	return _T("");
+	ASSERT(!sAttrib.IsEmpty());
+	return sAttrib;
 }

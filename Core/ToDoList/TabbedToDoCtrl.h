@@ -25,23 +25,11 @@
 
 struct VIEWDATA
 {
-    VIEWDATA()
-		: 
-		bNeedResort(FALSE), 
-		pExtension(NULL),
-		bNeedFullTaskUpdate(TRUE),
-		bNeedFontUpdate(TRUE),
-		bHasSelectedTask(FALSE),
-		bCanPrepareNewTask(-1)
-	{
-	}
+    VIEWDATA();
+	virtual ~VIEWDATA();
 
-	virtual ~VIEWDATA() {}
-
-	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const
-	{
-		return mapWantedAttrib.Has(nAttribID);
-	}
+	BOOL WantAttribute(TDC_ATTRIBUTE nAttribID) const;
+	BOOL WantAnyAttribute(const CTDCAttributeMap& other) const;
 
 	TDSORT sort;
 	CTaskListDropTarget dropTgt;

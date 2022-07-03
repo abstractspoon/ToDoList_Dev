@@ -279,6 +279,17 @@ static const TDCATTRIBUTE ATTRIBUTES[] =
 };
 static const int ATTRIB_COUNT = sizeof(ATTRIBUTES) / sizeof(TDCATTRIBUTE);
 
+static CString GetAttributeName(TDC_ATTRIBUTE nAtt)
+{
+	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+	{
+		if (nAtt == ATTRIBUTES[nAttrib].nAttribID)
+			return CEnString(ATTRIBUTES[nAttrib].nAttribResID);
+	}
+
+	return _T("");
+}
+
 /////////////////////////////////////////////////////////////////////////////////////
 
 static const TDCOPERATOR OPERATORS[] =

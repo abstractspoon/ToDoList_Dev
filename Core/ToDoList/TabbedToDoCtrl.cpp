@@ -68,6 +68,33 @@ UINT CTabbedToDoCtrl::WM_TDC_RESTORELASTTASKVIEW = (WM_TDC_RECREATERECURRINGTASK
 CStringArray CTabbedToDoCtrl::s_aDefTaskViews;
 
 //////////////////////////////////////////////////////////////////////
+
+VIEWDATA::VIEWDATA()
+	:
+	bNeedResort(FALSE),
+	pExtension(NULL),
+	bNeedFullTaskUpdate(TRUE),
+	bNeedFontUpdate(TRUE),
+	bHasSelectedTask(FALSE),
+	bCanPrepareNewTask(-1)
+{
+}
+
+VIEWDATA::~VIEWDATA() 
+{
+}
+
+BOOL VIEWDATA::WantAttribute(TDC_ATTRIBUTE nAttribID) const
+{
+	return mapWantedAttrib.Has(nAttribID);
+}
+
+BOOL VIEWDATA::WantAnyAttribute(const CTDCAttributeMap& other) const
+{
+	return mapWantedAttrib.MatchAny(other);
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -3862,30 +3889,62 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	
 	// refresh all extensions 
 	int nExt = m_aExtViews.GetSize();
+
+#ifdef _DEBUG
+	int nNumUpdated = 0;
+#endif
 	
 	while (nExt--)
 	{
 		FTC_VIEW nExtView = GetExtensionView(nExt);
 		VIEWDATA* pVData = GetViewData(nExtView);
 		ASSERT(pVData);
-		
-		IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
-		
-		if (pExtWnd)
-		{
-			if (pVData)
-				pVData->bNeedFullTaskUpdate = FALSE;
-			
-			UpdateExtensionView(pExtWnd, tasks, nUpdate);
 
-			if (nExtView == GetTaskView())
-				SyncExtensionSelectionToTree(nExtView);
-		}
-		else if (pVData)
+		if (pVData && pVData->WantAnyAttribute(mapAttribIDs))
 		{
-			pVData->bNeedFullTaskUpdate = TRUE;
+			IUIExtensionWindow* pExtWnd = m_aExtViews[nExt];
+
+			if (pExtWnd)
+			{
+				pVData->bNeedFullTaskUpdate = FALSE;
+
+				UpdateExtensionView(pExtWnd, tasks, nUpdate);
+#ifdef _DEBUG
+				nNumUpdated++;
+#endif
+				if (nExtView == GetTaskView())
+					SyncExtensionSelectionToTree(nExtView);
+			}
+			else
+			{
+				pVData->bNeedFullTaskUpdate = TRUE;
+			}
 		}
 	}
+
+#ifdef _DEBUG
+	CString sAttrib;
+
+	switch (mapAttribIDs.GetCount())
+	{
+	case 0:
+		ASSERT(0);
+		break;
+
+	case 1:
+		{
+			POSITION pos = mapAttribIDs.GetStartPosition();
+			sAttrib = ::GetAttributeName(mapAttribIDs.GetNext(pos));
+		}
+		break;
+
+	default: // > 1
+		sAttrib = _T("multiple attributes");
+	}
+
+	TRACE(_T("UpdateExtensionViewsSelection(%s) => %d plugins updated\n"), sAttrib, nNumUpdated);
+#endif
+	
 }
 
 BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const

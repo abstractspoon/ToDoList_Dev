@@ -177,15 +177,7 @@ CString CTDLImportExportAttributeMappingListCtrl::GetAttributeName(TDC_ATTRIBUTE
 	if (nAtt == TDCA_EXISTING_CUSTOMATTRIBUTE)
 		return CEnString(IDS_CSV_EXISTCUSTOMATTRIB);
 	
-	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
-	{
-		const TDCATTRIBUTE& att = ATTRIBUTES[nAttrib];
-
-		if (nAtt == att.nAttribID)
-			return CEnString(att.nAttribResID);
-	}
-
-	return _T("");
+	return ::GetAttributeName(nAtt);
 }
 
 int CTDLImportExportAttributeMappingListCtrl::FindRow(TDC_ATTRIBUTE nAtt, int nIgnoreRow) const

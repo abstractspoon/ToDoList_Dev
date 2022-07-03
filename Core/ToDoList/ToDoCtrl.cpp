@@ -8917,10 +8917,12 @@ void CToDoCtrl::SelectItem(HTREEITEM hti)
 	CScopedLogTimer log(_T("CToDoCtrl::SelectItem()"));
 	///////////////////////////////////////////////////////////////////
 
-	Flush();
-
 	if (m_taskTree.GetSafeHwnd()) 
 	{
+		// Do a flush if the item is changing
+		if (!m_taskTree.IsItemSelected(hti, TRUE))
+			Flush();
+
 		if (!m_taskTree.SelectItem(hti))
 			UpdateControls(); // disable controls
 
