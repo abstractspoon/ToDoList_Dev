@@ -892,7 +892,9 @@ BOOL GANTTDATERANGE::operator!=(const GANTTDATERANGE& dtOther) const
 
 BOOL GANTTDATERANGE::operator==(const COleDateTimeRange& dtOther) const
 {
-	if (!IsValid() || !dtOther.IsValid())
+	// return false if one or other is not valid,
+	// but allow both being unset
+	if (Misc::StateChanged(IsValid(), dtOther.IsValid()))
 		return FALSE;
 
 	ASSERT(!m_bInclusive && !dtOther.m_bInclusive); // always
