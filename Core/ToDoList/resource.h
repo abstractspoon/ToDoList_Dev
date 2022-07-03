@@ -307,6 +307,7 @@
 #define IDC_COPYALL                     1057
 #define IDC_MATCHANYTEXT                1057
 #define IDC_STYLE_PARA                  1057
+#define IDC_CLEARALL                    1057
 #define IDC_INDIVIDUALPRIORITYCOLORS    1058
 #define IDC_SELTASK                     1058
 #define IDC_ACTIVETASKLIST              1058

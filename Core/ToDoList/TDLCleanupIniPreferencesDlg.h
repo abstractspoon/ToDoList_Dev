@@ -35,18 +35,21 @@ protected:
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CTDLCleanupPreferencesDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
+protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual void OnOK();
+	virtual BOOL OnInitDialog();
 
 // Implementation
 protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CTDLCleanupPreferencesDlg)
-	virtual BOOL OnInitDialog();
 	//}}AFX_MSG
+	afx_msg void OnSelectAll();
+	afx_msg void OnClearAll();
+
 	DECLARE_MESSAGE_MAP()
 };
 

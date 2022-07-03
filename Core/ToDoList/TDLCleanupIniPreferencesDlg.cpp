@@ -57,6 +57,9 @@ void CTDLCleanupIniPreferencesDlg::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CTDLCleanupIniPreferencesDlg, CTDLDialog)
 	//{{AFX_MSG_MAP(CTDLCleanupIniPreferencesDlg)
 	//}}AFX_MSG_MAP
+	ON_BN_CLICKED(IDC_SELECTALL, OnSelectAll)
+	ON_BN_CLICKED(IDC_CLEARALL, OnClearAll)
+
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -242,4 +245,14 @@ void CTDLCleanupIniPreferencesDlg::OnOK()
 		
 		prefs.Save();
 	}
+}
+
+void CTDLCleanupIniPreferencesDlg::OnSelectAll()
+{
+	m_lbTasklists.SetAllChecked(TRUE);
+}
+
+void CTDLCleanupIniPreferencesDlg::OnClearAll()
+{
+	m_lbTasklists.SetAllChecked(FALSE);
 }
