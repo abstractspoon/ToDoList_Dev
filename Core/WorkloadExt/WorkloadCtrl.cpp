@@ -692,7 +692,7 @@ BOOL CWorkloadCtrl::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, IUI
 		if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
 		{
 			LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-			pWI->bSomeSubtaskDone = !Misc::IsEmpty(szSubTaskDone);
+			pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 		}
 
 		// Always update these
@@ -935,7 +935,7 @@ void CWorkloadCtrl::BuildTreeItem(const ITASKLISTBASE* pTasks, HTASKITEM hTask,
 		Misc::AddUniqueItems(pWI->aAllocTo, m_aAllocTo);
 		
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pWI->bSomeSubtaskDone = !Misc::IsEmpty(szSubTaskDone);
+		pWI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 
 		time64_t tDate = 0;
 

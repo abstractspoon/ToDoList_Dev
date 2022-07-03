@@ -752,7 +752,7 @@ BOOL CKanbanCtrl::AddTaskToData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, DW
 		pKI->SetColor(pTasks->GetTaskTextColor(hTask));
 
 		LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-		pKI->bSomeSubtaskDone = !Misc::IsEmpty(szSubTaskDone);
+		pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 	
 		if (dwParentID)
 		{
@@ -910,7 +910,7 @@ BOOL CKanbanCtrl::UpdateData(const ITASKLISTBASE* pTasks, HTASKITEM hTask, BOOL 
 			if (pTasks->IsAttributeAvailable(TDCA_SUBTASKDONE))
 			{
 				LPCWSTR szSubTaskDone = pTasks->GetTaskSubtaskCompletion(hTask);
-				pKI->bSomeSubtaskDone = !Misc::IsEmpty(szSubTaskDone);
+				pKI->bSomeSubtaskDone = (!Misc::IsEmpty(szSubTaskDone) && (szSubTaskDone[0] != '0'));
 			}
 
 			if (pTasks->IsAttributeAvailable(TDCA_ICON))
