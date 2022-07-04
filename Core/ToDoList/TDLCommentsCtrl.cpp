@@ -190,6 +190,9 @@ void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCom
 			break;
 
 		case RTCS_DISABLED:
+			if (m_ctrlComments.HasFocus())
+				GetParent()->SetFocus();
+
 			m_ctrlComments.EnableWindow(FALSE);
 			break;
 
