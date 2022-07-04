@@ -29,12 +29,6 @@ public:
 	void SavePreferences(IPreferences* pPrefs) const;
 
 protected:
-	BOOL m_bHasPrefs;
-
-protected:
-	BOOL OnInitDialog();
-
-protected:
 	//{{AFX_MSG(CEnColorDialog)
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
