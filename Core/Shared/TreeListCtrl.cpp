@@ -1215,6 +1215,8 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 	if (!(nFlags & TVHT_ONITEMBUTTON) && hti && (hti != GetTreeSelItem(m_tree)))
 	{
 		CLockUpdates hr(m_tree);
+
+		m_tree.SetFocus();
 		SelectItem(hti);
 
 		return TRUE;
