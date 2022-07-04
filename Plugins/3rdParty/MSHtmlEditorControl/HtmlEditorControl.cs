@@ -3173,7 +3173,8 @@ namespace MSDN.Html.Editor
             // display the Color dialog and use the selected color to modify text
             using (ColorDialog colorDialog = new ColorDialog())
             {
-                colorDialog.AnyColor = true;
+				colorDialog.FullOpen = true;
+				colorDialog.AnyColor = true;
                 colorDialog.SolidColorOnly = true;
                 colorDialog.AllowFullOpen = true;
                 colorDialog.Color = GetFontColor();

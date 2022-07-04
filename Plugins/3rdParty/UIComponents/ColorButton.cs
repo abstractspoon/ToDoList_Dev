@@ -58,6 +58,7 @@ namespace UIComponents
 
 			using (ColorDialog colorDialog = new ColorDialog())
 			{
+				colorDialog.FullOpen = true;
 				colorDialog.AnyColor = true;
 				colorDialog.SolidColorOnly = true;
 				colorDialog.AllowFullOpen = true;
