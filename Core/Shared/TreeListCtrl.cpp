@@ -1211,7 +1211,7 @@ BOOL CTreeListCtrl::OnTreeLButtonDown(UINT nFlags, CPoint point)
 {
 	HTREEITEM hti = m_tree.HitTest(point, &nFlags);
 	
-	// Don't process if expanding an item
+	// Only process if NOT expanding an item
 	if (!(nFlags & TVHT_ONITEMBUTTON) && hti && (hti != GetTreeSelItem(m_tree)))
 	{
 		CLockUpdates hr(m_tree);
