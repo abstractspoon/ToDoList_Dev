@@ -86,11 +86,17 @@ VIEWDATA::~VIEWDATA()
 
 BOOL VIEWDATA::WantAttribute(TDC_ATTRIBUTE nAttribID) const
 {
+	if ((nAttribID == TDCA_ALL) && !mapWantedAttrib.IsEmpty())
+		return TRUE;
+
 	return mapWantedAttrib.Has(nAttribID);
 }
 
 BOOL VIEWDATA::WantAnyAttribute(const CTDCAttributeMap& other) const
 {
+	if (other.HasOnly(TDCA_ALL) && !mapWantedAttrib.IsEmpty())
+		return TRUE;
+
 	return mapWantedAttrib.MatchAny(other);
 }
 
