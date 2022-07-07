@@ -62,7 +62,7 @@ public:
 	inline const CHTIMap& TreeItemMap() const { return m_mapTaskIDToHTI; }
 
 	inline const TODOITEM* GetSelectedTask() const { return m_find.GetTask(GetSelectedItem(), TRUE); }
-	inline const TODOITEM* GetTask(HTREEITEM hti, BOOL bTrue = TRUE) const { return m_find.GetTask(hti, bTrue); }
+	inline const TODOITEM* GetTask(HTREEITEM hti, BOOL bTrue) const { return m_find.GetTask(hti, bTrue); }
 	inline const TODOITEM* GetTask(DWORD dwTaskID) const { return CTDLTaskCtrlBase::GetTask(dwTaskID); }
 	inline DWORD GetTaskID(HTREEITEM hti) const { return m_find.GetTaskID(hti); }
 	inline DWORD GetTrueTaskID(HTREEITEM hti) const { return m_data.GetTrueTaskID(m_find.GetTaskID(hti)); }
@@ -71,11 +71,11 @@ public:
 
 	BOOL IsItemSelected(HTREEITEM hti, BOOL bSingly = FALSE) const;
 	BOOL IsTaskSelected(DWORD dwTaskID, BOOL bSingly = FALSE) const;
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 	int CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreSelection(const TDCSELECTIONCACHE& cache);
-	BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue = FALSE);
+	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL MultiSelectTask(DWORD dwTaskID, BOOL bSelected);
 	BOOL EnsureSelectionVisible(BOOL bHorzPartialOK);
 	BOOL SelectTasksInHistory(BOOL bForward);

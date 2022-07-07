@@ -2022,7 +2022,7 @@ void CToDoCtrl::UpdateTask(TDC_ATTRIBUTE nAttrib, DWORD dwFlags)
 	if (nAttrib == TDCA_COMMENTS)
 	{
 		CDWordArray aModTaskIDs;
-		GetSelectedTaskIDs(aModTaskIDs);
+		GetSelectedTaskIDs(aModTaskIDs, FALSE);
 
 		m_nCommentsState = CS_PENDING;
 		SetModified(TDCA_COMMENTS, aModTaskIDs);
@@ -5157,7 +5157,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	
 	// set next selection
 	if (dwNextID)
-		SelectTask(dwNextID, FALSE);
+		SelectTask(dwNextID);
 	else
 		UpdateControls(FALSE); // don't update comments
 
@@ -8884,14 +8884,8 @@ void CToDoCtrl::OnTreeSelChange(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	}
 }
 
-BOOL CToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue) 
+BOOL CToDoCtrl::SelectTask(DWORD dwTaskID) 
 { 
-	if (!HasTask(dwTaskID))
-		return FALSE;
-
-	if (bTrue)
-		dwTaskID = m_data.GetTrueTaskID(dwTaskID);
-
 	HTREEITEM hti = m_taskTree.GetItem(dwTaskID);
 
 	if (hti)
@@ -8900,7 +8894,7 @@ BOOL CToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 	return (hti != NULL);
 }
 
-BOOL CToDoCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
+BOOL CToDoCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
 	// sanity check
 	ASSERT(aTaskIDs.GetSize());
@@ -8908,7 +8902,7 @@ BOOL CToDoCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
 	if (!aTaskIDs.GetSize())
 		return FALSE;
 
- 	return m_taskTree.SelectTasks(aTaskIDs, bTrue);
+ 	return m_taskTree.SelectTasks(aTaskIDs);
 }
 
 void CToDoCtrl::SelectItem(HTREEITEM hti) 
@@ -10983,20 +10977,19 @@ BOOL CToDoCtrl::GotoSelectedReferenceTaskTarget()
 	// traverse the selected items adding any
 	// reference task's target to a list
 	CDWordArray aTaskIDs;
-
 	POSITION pos = TSH().GetFirstItemPos();
 			
 	while (pos)
 	{
-		DWORD dwTaskID = TSH().GetNextItemData(pos);
+		DWORD dwTaskID = m_data.GetTaskReferenceID(TSH().GetNextItemData(pos));
 
-		if (m_data.IsTaskReference(dwTaskID))
+		if (dwTaskID)
 			aTaskIDs.Add(dwTaskID);
 	}
 
 	// select any found items
 	if (aTaskIDs.GetSize())
-		return SelectTasks(aTaskIDs, TRUE); 
+		return SelectTasks(aTaskIDs); 
 
 	// else
 	return FALSE;
@@ -11024,7 +11017,7 @@ BOOL CToDoCtrl::GotoSelectedTaskReferences()
 
 	// select any found items
 	if (aTaskRefIDs.GetSize())
-		return SelectTasks(aTaskRefIDs, FALSE);
+		return SelectTasks(aTaskRefIDs);
 
 	// else
 	return FALSE;
@@ -11047,7 +11040,7 @@ BOOL CToDoCtrl::GotoSelectedTaskLocalDependencies()
 
 	// select any found items
 	if (aDependIDs.GetSize())
-		return SelectTasks(aDependIDs, FALSE);
+		return SelectTasks(aDependIDs);
 
 	// else
 	return FALSE;
@@ -11070,7 +11063,7 @@ BOOL CToDoCtrl::GotoSelectedTaskLocalDependents()
 
 	// select any found items
 	if (aDependentIDs.GetSize())
-		return SelectTasks(aDependentIDs, FALSE);
+		return SelectTasks(aDependentIDs);
 
 	// else
 	return FALSE;
@@ -11090,7 +11083,7 @@ BOOL CToDoCtrl::GotoSelectedTaskDependency()
 		}
 		else
 		{
-			return SelectTasks(aLocalDepends, TRUE);
+			return SelectTasks(aLocalDepends);
 		}
 	}
 
@@ -11567,7 +11560,7 @@ LRESULT CToDoCtrl::OnRefreshPercentSpinVisibility(WPARAM /*wp*/, LPARAM /*lp*/)
 LRESULT CToDoCtrl::OnFixupPostDropSelection(WPARAM /*wp*/, LPARAM lp)
 {
 	if (lp)
-		SelectTask(lp, FALSE);
+		SelectTask(lp);
 
     return 0L;
 }

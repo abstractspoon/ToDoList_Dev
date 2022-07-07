@@ -2257,37 +2257,32 @@ BOOL CTDLTaskTreeCtrl::MultiSelectTask(DWORD dwTaskID, BOOL bSelected)
 	return MultiSelectItem(GetItem(dwTaskID), (bSelected ? TSHS_SELECT : TSHS_DESELECT), TRUE);
 }
 
-BOOL CTDLTaskTreeCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
+BOOL CTDLTaskTreeCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
 	// sanity check
-	ASSERT(aTaskIDs.GetSize());
-	
-	if (!aTaskIDs.GetSize())
-		return FALSE;
-	
-	// convert references to true tasks
-	CDWordArray aTrueTaskIDs;
-	aTrueTaskIDs.Copy(aTaskIDs);
-	
-	if (bTrue)
-		m_data.GetTrueTaskIDs(aTrueTaskIDs);
+	int nTask = aTaskIDs.GetSize();
 
+	if (!nTask)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+	
 	// clear existing selection and add to history
 	TSH().RemoveAll();
 
 	// select tasks in one hit
-	int nTask = aTrueTaskIDs.GetSize();
 	BOOL bSel = FALSE;
 	
 	while (nTask--)
 	{
-		HTREEITEM hti = GetItem(aTrueTaskIDs[nTask]);
+		HTREEITEM hti = GetItem(aTaskIDs[nTask]);
 
 		if (hti)
 			bSel |= TSH().SetItem(hti, TSHS_SELECT, TRUE);
 	}
 	
-	if (bSel || !aTrueTaskIDs.GetSize())
+	if (bSel || !aTaskIDs.GetSize())
 	{
 		TSH().FixupTreeSelection();
 

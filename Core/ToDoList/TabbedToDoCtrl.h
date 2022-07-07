@@ -60,12 +60,14 @@ public:
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere = TDC_INSERTATTOPOFSELTASKPARENT, 
 						BOOL bEditText = TRUE, DWORD dwDependency = 0);
 
+	virtual BOOL SelectTask(DWORD dwTaskID);
+	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
+
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
 	int GetSelectedTaskCount() const;
 	BOOL HasSelection() const { return GetSelectedTaskCount(); }
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
-	BOOL SelectTask(DWORD dwTaskID, BOOL bTrue = FALSE);
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
@@ -129,7 +131,6 @@ public:
 	BOOL TasksHaveFocus() const;
 
 	BOOL SelectTasksInHistory(BOOL bForward);
-	BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL GetSelectionBoundingRect(CRect& rSelection) const;
 
 	void SetUITheme(const CUIThemeFile& theme);
@@ -240,7 +241,6 @@ protected:
 	virtual void UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges);
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
-	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
 	virtual DWORD GetNextNonSelectedTaskID() const;
 	virtual BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);

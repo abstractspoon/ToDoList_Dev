@@ -188,12 +188,12 @@ public:
 	BOOL CanSplitSelectedTask() const;
 
 	inline DWORD GetSelectedTaskID() const { return m_taskTree.GetSelectedTaskID(); }
-	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue = FALSE) const;
+	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, BOOL bTrue) const;
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 	int GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const;
 
-	BOOL SelectTask(DWORD dwTaskID) { return SelectTask(dwTaskID, TRUE); }
-	BOOL SelectTasks(const CDWordArray& aTaskIDs) { return SelectTasks(aTaskIDs, TRUE); }
+	virtual BOOL SelectTask(DWORD dwTaskID);
+	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect);
 	
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
@@ -778,8 +778,6 @@ protected:
 	virtual HTREEITEM RebuildTree(const void* pContext = NULL);
 	virtual BOOL WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const;
 
-	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTrue);
-	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue);
 	virtual BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
 
 	// -------------------------------------------------------------------------------

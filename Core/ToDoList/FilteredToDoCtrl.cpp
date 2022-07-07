@@ -98,9 +98,9 @@ BOOL CFilteredToDoCtrl::OnInitDialog()
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
+BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID)
 {	
-	if (CTabbedToDoCtrl::SelectTask(dwTaskID, bTrue))
+	if (CTabbedToDoCtrl::SelectTask(dwTaskID))
 		return TRUE;
 	
 	// If the task is filtered out we toggle the filter and try again
@@ -108,7 +108,7 @@ BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 	{
 		ToggleFilter(); // show all tasks
 		
-		if (CTabbedToDoCtrl::SelectTask(dwTaskID, bTrue))
+		if (CTabbedToDoCtrl::SelectTask(dwTaskID))
 		{
 			GetParent()->SendMessage(WM_TDCN_FILTERCHANGE, (WPARAM)GetSafeHwnd());
 			return TRUE;
@@ -892,7 +892,7 @@ void CFilteredToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const 
 		TDCSELECTIONCACHE cache;
 		CacheTreeSelection(cache);
 		
-		if (!SelectTasks(aModTaskIDs, FALSE))
+		if (!SelectTasks(aModTaskIDs))
 			RestoreTreeSelection(cache);
 
 		SyncActiveViewSelectionToTree();

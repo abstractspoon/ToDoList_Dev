@@ -1962,31 +1962,25 @@ int CTDLTaskListCtrl::GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocused
 	return aTaskIDs.GetSize();
 }
 
-BOOL CTDLTaskListCtrl::SelectTasks(const CDWordArray& aTaskIDs, BOOL bTrue)
+BOOL CTDLTaskListCtrl::SelectTasks(const CDWordArray& aTaskIDs)
 {
-	ASSERT(aTaskIDs.GetSize());
-
 	if (!aTaskIDs.GetSize())
+	{
+		ASSERT(0);
 		return FALSE;
-
-	if (!bTrue)
-	{
-		SetSelectedTasks(aTaskIDs, aTaskIDs[0]);
-	}
-	else
-	{
-		CDWordArray aTrueTaskIDs;
-		
-		aTrueTaskIDs.Copy(aTaskIDs);
-		m_data.GetTrueTaskIDs(aTrueTaskIDs);
-		
-		SetSelectedTasks(aTrueTaskIDs, aTrueTaskIDs[0]);
 	}
 
+	// List-View does not support references
+	CDWordArray aTrueTaskIDs;
+		
+	aTrueTaskIDs.Copy(aTaskIDs);
+	m_data.GetTrueTaskIDs(aTrueTaskIDs);
+		
+	SetSelectedTasks(aTrueTaskIDs, aTrueTaskIDs[0]);
 	return TRUE;
 }
 
-BOOL CTDLTaskListCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
+BOOL CTDLTaskListCtrl::SelectTask(DWORD dwTaskID)
 {
 	if (dwTaskID == 0)
 	{
@@ -1994,17 +1988,18 @@ BOOL CTDLTaskListCtrl::SelectTask(DWORD dwTaskID, BOOL bTrue)
 		return FALSE;
 	}
 
+	// List-View does not support references
 	CDWordArray aTaskIDs;
-	aTaskIDs.Add(dwTaskID);
+	aTaskIDs.Add(m_data.GetTrueTaskID(dwTaskID));
 
-	SetSelectedTasks(aTaskIDs, bTrue);
+	SetSelectedTasks(aTaskIDs, aTaskIDs[0]);
 	return TRUE;
 }
 
 void CTDLTaskListCtrl::SetSelectedTasks(const CDWordArray& aTaskIDs, DWORD dwFocusedTaskID)
 {
+	// Scope hold to end before ensuring task visibility
 	{
-		// Scope hold to end before ensuring task visibility
 		CTLSHoldResync hr(*this);
 
 		DeselectAll();
