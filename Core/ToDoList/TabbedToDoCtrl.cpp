@@ -4327,6 +4327,13 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID)
 {	
 	// Note: We update the other views first else the call to 
 	// UpdateControls will not be properly synchronised
+	//
+	// As a result we need to preemptively process outstanding 
+	// comments in case this task will not be visible in the 
+	// active view, causing SetSelectedTaskComments (called by
+	// CToDoCtrl::SelectedTask) to later fail
+	HandleUnsavedComments();
+
 	FTC_VIEW nView = GetTaskView();
 	VIEWDATA* pVData = GetViewData(nView);
 	
