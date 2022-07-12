@@ -424,6 +424,7 @@ void CGanttCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE nUpdate)
 		}
 		EnableResync(TRUE, m_tree);
 		UpdateColumnWidths(UTWA_ANY);
+		UpdateWindow();
 		break;
 		
 	case IUI_NEW:
@@ -2012,6 +2013,22 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 				return lr;
 			}
 			break;
+
+		case WM_LBUTTONDOWN:
+			{
+				// We can't begin dragging from OnListLButtonDown because we need to
+				// let the default handling occur first to ensure that a newly
+				// selected task is properly initialised
+				if (OnListLButtonDown(wp, lp))
+					return 0L; // eat
+
+				LRESULT lr = CTreeListCtrl::ScWindowProc(hRealWnd, msg, wp, lp);
+
+				StartDragging(lp);
+
+				return lr;
+			}
+			break;
 		}
 	}
 	else if (hRealWnd == m_tree)
@@ -2043,7 +2060,7 @@ LRESULT CGanttCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARAM lp)
 			if (wp == VK_ESCAPE && IsDragging())
 			{
 				CancelDrag(TRUE);
-				return FALSE; // eat
+				return 0L; // eat
 			}
 			break;
 		}
@@ -2316,10 +2333,7 @@ BOOL CGanttCtrl::OnListLButtonDown(UINT nFlags, CPoint point)
 
 			return TRUE; // eat
 		}
-		else if (StartDragging(point))
-		{
-			return TRUE; // eat
-		}
+		// StartDragging handled in ScWindowProc
 	}
 
 	// all else
@@ -5546,15 +5560,6 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	if (nHit == GTLCHT_NOWHERE)
 		return FALSE;
 
-	GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
-	ASSERT(IsDragging(nDrag));
-
-	if (!CanDragTask(dwTaskID, nDrag))
-	{
-		MessageBeep(MB_ICONEXCLAMATION);
-		return FALSE;
-	}
-	
 	if (dwTaskID != GetSelectedTaskID())
 		SelectTask(dwTaskID);
 
@@ -5564,6 +5569,18 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	if (!::DragDetect(m_list, ptScreen))
 		return FALSE;
 
+	// We save the check for drag-ability until
+	// after we detect that a drag has been started
+	// to avoid beeping on a simple click
+	GTLC_DRAG nDrag = MapHitTestToDrag(nHit);
+	ASSERT(IsDragging(nDrag));
+	
+	if (!CanDragTask(dwTaskID, nDrag))
+	{
+		MessageBeep(MB_ICONEXCLAMATION);
+		return FALSE;
+	}
+	
 	GANTTITEM* pGI = NULL;
 	GET_GI_RET(dwTaskID, pGI, FALSE);
 	
