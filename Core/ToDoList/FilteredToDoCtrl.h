@@ -32,7 +32,7 @@ public:
 	BOOL ArchiveDoneTasks(TDC_ARCHIVE nFlags, BOOL bRemoveFlagged); // returns true if any tasks were removed
 	BOOL ArchiveSelectedTasks(BOOL bRemove); // returns true if any tasks were removed
 
-	virtual BOOL SelectTask(DWORD dwTaskID);
+	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTaskLink);
 	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect);
 	BOOL SelectTasksInHistory(BOOL bForward);
 

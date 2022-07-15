@@ -192,7 +192,7 @@ public:
 	int GetSelectedTaskIDs(CDWordArray& aTaskIDs, DWORD& dwFocusedTaskID, BOOL bRemoveChildDupes) const;
 	int GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const;
 
-	virtual BOOL SelectTask(DWORD dwTaskID);
+	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTaskLink);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
 	BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect);
 	

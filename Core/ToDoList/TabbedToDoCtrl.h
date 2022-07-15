@@ -60,7 +60,7 @@ public:
 	BOOL CreateNewTask(const CString& sText, TDC_INSERTWHERE nWhere = TDC_INSERTATTOPOFSELTASKPARENT, 
 						BOOL bEditText = TRUE, DWORD dwDependency = 0);
 
-	virtual BOOL SelectTask(DWORD dwTaskID);
+	virtual BOOL SelectTask(DWORD dwTaskID, BOOL bTaskLink);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
 
 	int GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGT_ALL) const;
