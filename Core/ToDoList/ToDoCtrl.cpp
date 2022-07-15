@@ -9406,6 +9406,11 @@ int CToDoCtrl::GetSubTaskIDs(DWORD dwTaskID, CDWordArray& aSubtaskIDs) const
 	return aSubtaskIDs.GetSize();
 }
 
+int CToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncCollapsedChildren) const
+{
+	return TCH().GetItemData(aTaskIDs, bIncParents, bIncCollapsedChildren);
+}
+
 BOOL CToDoCtrl::PasteTasks(const CTaskFile& tasks, TDC_INSERTWHERE nWhere, BOOL bSelectAll)
 {
 	if (!CanEditSelectedTask(TDCA_PASTE))

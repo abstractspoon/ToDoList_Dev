@@ -605,11 +605,35 @@ void CFilteredToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, c
 		m_filter.BuildFilterQuery(params, m_aCustomAttribDefs);
 
 		CTabbedToDoCtrl::RebuildList(bChangeGroup, nNewGroupBy, &params);
+
+		m_taskList.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
 	}
 	else
 	{
 		CTabbedToDoCtrl::RebuildList(bChangeGroup, nNewGroupBy, pContext);
 	}
+}
+
+int CFilteredToDoCtrl::GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bIncCollapsedChildren) const
+{
+	if (!CTabbedToDoCtrl::GetAllTaskIDs(aTaskIDs, bIncParents, bIncCollapsedChildren))
+		return 0;
+
+	if (!bIncParents)
+	{
+		// Note: We can still end up with parents in the list 
+		// if all their children were filtered out but the 
+		// parent wasn't
+		int nID = aTaskIDs.GetSize();
+
+		while (nID--)
+		{
+			if (m_data.IsTaskParent(aTaskIDs[nID]))
+				aTaskIDs.RemoveAt(nID);
+		}
+	}
+	
+	return aTaskIDs.GetSize();
 }
 
 BOOL CFilteredToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const

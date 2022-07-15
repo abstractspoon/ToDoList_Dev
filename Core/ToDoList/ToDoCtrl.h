@@ -737,6 +737,7 @@ protected:
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 	virtual DWORD GetNextNonSelectedTaskID() const;
+	virtual int GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bInCollapsedChildren) const;
 
 	enum
 	{

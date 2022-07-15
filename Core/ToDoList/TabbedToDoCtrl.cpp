@@ -3299,14 +3299,15 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 {
 	GetViewData(FTCV_TASKLIST)->bNeedFullTaskUpdate = FALSE;
 
+	// Get the task tree's currently visible tasks because 
+	// these will always be the largest set from which we
+	// determine the list's visible tasks
 	CDWordArray aTaskIDs;
 
 	BOOL bWantParents = !(HasListOption(LVO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS));
 	BOOL bWantCollapsed = !HasListOption(LVO_HIDECOLLAPSED);
 
-	TCH().GetItemData(aTaskIDs, bWantParents, bWantCollapsed);
-
-	if (aTaskIDs.GetSize() == 0)
+	if (!GetAllTaskIDs(aTaskIDs, bWantParents, bWantCollapsed))
 	{
 		m_taskList.DeleteAll(); 
 		return;

@@ -428,7 +428,11 @@ void CTDLTaskListCtrl::OnNotifySplitterChange(int nSplitPos)
 
 int CTDLTaskListCtrl::InsertItem(DWORD dwTaskID, int nPos)
 {
-	ASSERT(FindTaskItem(dwTaskID) == -1);
+	if (FindTaskItem(dwTaskID) != -1)
+	{
+		ASSERT(0);
+		return -1;
+	}
 
 	// omit task references from list
 	if (m_data.IsTaskReference(dwTaskID))

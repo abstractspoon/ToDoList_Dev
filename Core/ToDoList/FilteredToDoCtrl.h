@@ -118,6 +118,10 @@ protected:
 	virtual DWORD RecreateRecurringTaskInTree(const CTaskFile& task, const COleDateTime& dtNext, BOOL bDueDate);
 	virtual DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, BOOL bAndSubtasks);
 	virtual void OnStylesUpdated(const CTDCStyleMap& styles);
+	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
+	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
+	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
+	virtual int GetAllTaskIDs(CDWordArray& aTaskIDs, BOOL bIncParents, BOOL bInCollapsedChildren) const;
 
 	void SaveState() const;
 	void LoadState();
@@ -134,10 +138,6 @@ protected:
 	
 	// Helper allowing insert position to be specified
 	DWORD MergeNewTaskIntoTree(const CTaskFile& tasks, HTASKITEM hTask, DWORD dwParentTaskID, DWORD dwPrevSiblingID, BOOL bAndSubtasks);
-
-	virtual void LoadAttributeVisibility(const CTaskFile& tasks, const CPreferences& prefs);
-	virtual void SaveAttributeVisibility(CTaskFile& tasks) const;
-	virtual void SaveAttributeVisibility(CPreferences& prefs) const;
 };
 
 #endif // !defined(AFX_FILTEREDTODOCTRL_H__356A6EB9_C7EC_4395_8716_623AFF4A269B__INCLUDED_)
