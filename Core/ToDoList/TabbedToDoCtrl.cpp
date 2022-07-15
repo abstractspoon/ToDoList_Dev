@@ -3354,6 +3354,8 @@ void CTabbedToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, con
 
 BOOL CTabbedToDoCtrl::WantAddTreeTaskToList(DWORD dwTaskID, const void* pContext) const
 {
+	ASSERT(!m_data.IsTaskParent(dwTaskID) || !(HasListOption(LVO_HIDEPARENTS) || HasStyle(TDCS_ALWAYSHIDELISTPARENTS)));
+	
 	BOOL bHideNoneGroup = ((m_nListViewGroupBy != TDCC_NONE) && HasListOption(LVO_HIDENOGROUPVALUE));
 
 	if (bHideNoneGroup && !m_taskList.TaskHasGroupValue(dwTaskID))
