@@ -10209,13 +10209,13 @@ BOOL CToDoCtrl::HasLockedTasks() const
 }
 
 // External
-BOOL CToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect)
+BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect)
 {
-	return SelectTask(sPart, nSelect, TDCA_ANYTEXTATTRIBUTE, FALSE, FALSE, FALSE);
+	return SelectNextTask(sPart, nSelect, TDCA_ANYTEXTATTRIBUTE, FALSE, FALSE, FALSE);
 }
 
 // Internal
-BOOL CToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
+BOOL CToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL /*bFindReplace*/)
 {
 	if (!SEARCHPARAM::GetAttribType(nAttrib, FALSE) == FT_STRING)
@@ -10746,8 +10746,8 @@ BOOL CToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
 
 LRESULT CToDoCtrl::OnFindReplaceSelectNextTask(WPARAM wParam, LPARAM /*lParam*/)
 {
-	return SelectTask(m_findReplace.GetSearchFor(), 
-						(TDC_SELECTTASK)wParam,
+	return SelectNextTask(m_findReplace.GetSearchFor(), 
+						(TDC_SELECTNEXTTASK)wParam,
 						m_findReplace.GetAttribute(),
 						m_findReplace.WantCaseSensitive(), 
 						m_findReplace.WantWholeWord(), TRUE);
@@ -10764,7 +10764,7 @@ LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
 	// Start at the beginning
-	if (SelectTask(m_findReplace.GetSearchFor(), 
+	if (SelectNextTask(m_findReplace.GetSearchFor(), 
 					TDC_SELECTFIRST, 
 					m_findReplace.GetAttribute(),
 					m_findReplace.WantCaseSensitive(), 
@@ -10778,7 +10778,7 @@ LRESULT CToDoCtrl::OnFindReplaceAllTasks(WPARAM /*wParam*/, LPARAM /*lParam*/)
 			if (!FindReplaceSelectedTaskAttribute())
 				break;
 		} 
-		while (SelectTask(m_findReplace.GetSearchFor(), 
+		while (SelectNextTask(m_findReplace.GetSearchFor(), 
 							TDC_SELECTNEXT, 
 							m_findReplace.GetAttribute(),
 							m_findReplace.WantCaseSensitive(), 

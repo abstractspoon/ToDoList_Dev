@@ -33,7 +33,7 @@ public:
 	BOOL ArchiveSelectedTasks(BOOL bRemove); // returns true if any tasks were removed
 
 	virtual BOOL SelectTask(DWORD dwTaskID);
-	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect);
+	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect);
 	BOOL SelectTasksInHistory(BOOL bForward);
 
 	FILTER_SHOW GetFilter(CTDCFilter& filter) const { filter = m_filter; }

@@ -1498,10 +1498,10 @@ void CToDoListWnd::OnQuickFindNext()
 	{
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();
 		
-		if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTNEXT))
+		if (!tdc.SelectNextTask(m_sQuickFind, TDC_SELECTNEXT))
 		{
 			// return to start
-			if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTFIRST))
+			if (!tdc.SelectNextTask(m_sQuickFind, TDC_SELECTFIRST))
 				CMessageBox::AfxShow(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
@@ -1518,10 +1518,10 @@ void CToDoListWnd::OnQuickFindPrev()
 	{
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();
 		
-		if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTPREV))
+		if (!tdc.SelectNextTask(m_sQuickFind, TDC_SELECTPREV))
 		{
 			// return to end
-			if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTLAST))
+			if (!tdc.SelectNextTask(m_sQuickFind, TDC_SELECTLAST))
 				CMessageBox::AfxShow(CEnString(IDS_QUICKFIND_NOTFOUND, m_sQuickFind));
 		}
 	}
@@ -1561,9 +1561,9 @@ void CToDoListWnd::ProcessQuickFindTextChange(BOOL bComboSelChange)
 	
 	CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	
-	if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTNEXTINCLCURRENT))
+	if (!tdc.SelectNextTask(m_sQuickFind, TDC_SELECTNEXTINCLCURRENT))
 	{
-		if (!tdc.SelectTask(m_sQuickFind, TDC_SELECTFIRST))
+		if (!tdc.SelectNextTask(m_sQuickFind, TDC_SELECTFIRST))
 		{
 			if (bComboSelChange)
 			{

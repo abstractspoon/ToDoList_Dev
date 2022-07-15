@@ -722,7 +722,7 @@ namespace TDC
 		return TDCA_NONE;
 	}
 
-	static IUI_APPCOMMAND MapSelectTaskToIUICommand(TDC_SELECTTASK nSelect)
+	static IUI_APPCOMMAND MapSelectTaskToIUICommand(TDC_SELECTNEXTTASK nSelect)
 	{
 		switch (nSelect)
 		{

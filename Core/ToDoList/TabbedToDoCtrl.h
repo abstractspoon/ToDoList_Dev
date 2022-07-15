@@ -67,7 +67,7 @@ public:
 	int GetSelectedTaskCount() const;
 	BOOL HasSelection() const { return GetSelectedTaskCount(); }
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
-	BOOL SelectTask(CString sPart, TDC_SELECTTASK nSelect); 
+	BOOL SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect); 
 	BOOL CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID = 0) const;
 	BOOL SplitSelectedTask(int nNumSubtasks);
 	BOOL CanPasteTasks(TDC_PASTE nWhere, BOOL bAsRef) const;
@@ -242,7 +242,7 @@ protected:
 	virtual void EndTimeTracking(BOOL bAllowConfirm, BOOL bNotify);
 	virtual BOOL BeginTimeTracking(DWORD dwTaskID, BOOL bNotify);
 	virtual DWORD GetNextNonSelectedTaskID() const;
-	virtual BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
+	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 							BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
 	virtual int CopyTaskColumnValues(TDC_COLUMN nColID, BOOL bSelectedTasksOnly, CStringArray& aValues) const;
 

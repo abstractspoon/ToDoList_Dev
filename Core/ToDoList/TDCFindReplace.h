@@ -65,7 +65,7 @@ protected:
 	virtual void AdjustDialogPosition(BOOL bFirstTime);
 
 	BOOL Initialise(TDC_ATTRIBUTE nAttrib);
-	BOOL SelectNextTask(TDC_SELECTTASK nSelect) const;
+	BOOL SelectNextTask(TDC_SELECTNEXTTASK nSelect) const;
 };
 
 //{{AFX_INSERT_LOCATION}}

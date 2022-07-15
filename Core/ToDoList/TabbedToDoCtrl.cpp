@@ -6104,9 +6104,9 @@ int CTabbedToDoCtrl::FindTasks(const SEARCHPARAMS& params, CResultArray& aResult
 	return aResults.GetSize();
 }
 
-BOOL CTabbedToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
+BOOL CTabbedToDoCtrl::SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect)
 {
-	return CToDoCtrl::SelectTask(sPart, nSelect);
+	return CToDoCtrl::SelectNextTask(sPart, nSelect);
 }
 
 BOOL CTabbedToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
@@ -6148,7 +6148,7 @@ BOOL CTabbedToDoCtrl::CanDoFindReplace(TDC_ATTRIBUTE nAttrib) const
 	return FALSE;
 }
 
-BOOL CTabbedToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
+BOOL CTabbedToDoCtrl::SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, 
 									BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace)
 {
 	FTC_VIEW nView = GetTaskView();
@@ -6157,7 +6157,7 @@ BOOL CTabbedToDoCtrl::SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, T
 	{
 	case FTCV_TASKTREE:
 	case FTCV_UNSET:
-		return CToDoCtrl::SelectTask(sPart, nSelect, nAttrib, bCaseSensitive, bWholeWord, bFindReplace);
+		return CToDoCtrl::SelectNextTask(sPart, nSelect, nAttrib, bCaseSensitive, bWholeWord, bFindReplace);
 
 	case FTCV_TASKLIST:
 		{

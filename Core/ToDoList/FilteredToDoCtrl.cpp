@@ -122,9 +122,9 @@ BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID)
 	return FALSE;
 }
 
-BOOL CFilteredToDoCtrl::SelectTask(CString sPart, TDC_SELECTTASK nSelect)
+BOOL CFilteredToDoCtrl::SelectNextTask(CString sPart, TDC_SELECTNEXTTASK nSelect)
 {
-	return CTabbedToDoCtrl::SelectTask(sPart, nSelect); 
+	return CTabbedToDoCtrl::SelectNextTask(sPart, nSelect); 
 }
 
 BOOL CFilteredToDoCtrl::SelectTasksInHistory(BOOL bForward)

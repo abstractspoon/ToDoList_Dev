@@ -194,7 +194,7 @@ public:
 
 	virtual BOOL SelectTask(DWORD dwTaskID);
 	virtual BOOL SelectTasks(const CDWordArray& aTaskIDs);
-	BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect);
+	BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect);
 	
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreTreeSelection(const TDCSELECTIONCACHE& cache);
@@ -779,7 +779,7 @@ protected:
 	virtual HTREEITEM RebuildTree(const void* pContext = NULL);
 	virtual BOOL WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, const void* pContext) const;
 
-	virtual BOOL SelectTask(const CString& sPart, TDC_SELECTTASK nSelect, TDC_ATTRIBUTE nAttrib, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
+	virtual BOOL SelectNextTask(const CString& sPart, TDC_SELECTNEXTTASK nSelect, TDC_ATTRIBUTE nAttrib, BOOL bCaseSensitive, BOOL bWholeWord, BOOL bFindReplace);
 
 	// -------------------------------------------------------------------------------
 	

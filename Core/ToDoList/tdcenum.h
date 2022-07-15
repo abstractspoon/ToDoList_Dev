@@ -772,7 +772,7 @@ enum TDC_HITTEST
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum TDC_SELECTTASK
+enum TDC_SELECTNEXTTASK
 {
 	TDC_SELECTFIRST,
 	TDC_SELECTNEXT,

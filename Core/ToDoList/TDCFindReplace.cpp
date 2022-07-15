@@ -153,7 +153,7 @@ void CTDCFindReplace::OnFindNext(const CString& sFind, BOOL bNext, BOOL bCase, B
 	AdjustDialogPosition(FALSE);
 }
 
-BOOL CTDCFindReplace::SelectNextTask(TDC_SELECTTASK nSelectWhat) const
+BOOL CTDCFindReplace::SelectNextTask(TDC_SELECTNEXTTASK nSelectWhat) const
 {
 	return ::SendMessage(m_tdc, WM_TDCFR_SELECTNEXTTASK, nSelectWhat, 0);
 }
