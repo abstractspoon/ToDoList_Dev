@@ -2247,12 +2247,14 @@ void CTabbedToDoCtrl::ReposTaskTree(CDeferWndMove* pDWM, const CRect& rPos)
 
 	// List-specific combos
 	CRect rCtrl = GetCtrlRect(IDC_LISTVIEWGROUPBYLABEL);
+
+	int nXOffset = (rPos.left - rCtrl.left);
 	int nYOffset = (rPos.top - rCtrl.top) + CDlgUnits(this).ToPixelsY(2);
 
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL, 0, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB, 0, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL, 0, nYOffset);
-	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS, 0, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYLABEL,	nXOffset, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWGROUPBYATTRIB,	nXOffset, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONSLABEL,	nXOffset, nYOffset);
+	pDWM->OffsetCtrl(this, IDC_LISTVIEWOPTIONS,			nXOffset, nYOffset);
 }
 
 void CTabbedToDoCtrl::UpdateTasklistVisibility()
