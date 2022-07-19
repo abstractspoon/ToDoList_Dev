@@ -134,7 +134,6 @@ BEGIN_MESSAGE_MAP(CPreferencesUITasklistColorsPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CPreferencesUITasklistColorsPage)
 	ON_BN_CLICKED(IDC_SETALTLINECOLOR, OnAltlinecolor)
 	ON_BN_CLICKED(IDC_ALTERNATELINECOLOR, OnSpecifyAlternatelinecolor)
-	ON_BN_CLICKED(IDC_COLORTEXTBYATTRIBUTE, OnChangeTextColorOption)
 	ON_BN_CLICKED(IDC_COMMENTSUSETREEFONT, OnCommentsusetreefont)
 	ON_BN_CLICKED(IDC_SPECIFYCOMMENTSFONT, OnSpecifycommentsfont)
 	ON_BN_CLICKED(IDC_POPULATEATTRIBLIST, OnPopulateattriblist)
@@ -145,8 +144,10 @@ BEGIN_MESSAGE_MAP(CPreferencesUITasklistColorsPage, CPreferencesPageBase)
 	ON_CBN_SELCHANGE(IDC_COMMENTSFONTSIZE, OnSelchangeCommentsFont)
 	ON_CBN_SELCHANGE(IDC_TREEFONTLIST, OnSelchangeTreeFont)
 	ON_CBN_SELCHANGE(IDC_TREEFONTSIZE, OnSelchangeTreeFont)
+	ON_BN_CLICKED(IDC_COLORTEXTBYATTRIBUTE, OnChangeTextColorOption)
 	ON_BN_CLICKED(IDC_COLORTASKSBYCOLOR, OnChangeTextColorOption)
 	ON_BN_CLICKED(IDC_COLORTEXTBYPRIORITY, OnChangeTextColorOption)
+	ON_BN_CLICKED(IDC_NOCOLORTASKS, OnChangeTextColorOption)
 	ON_CBN_SELCHANGE(IDC_ATTRIBUTETOCOLORBY, OnSelchangeAttributetocolorby)
 	//}}AFX_MSG_MAP
 	ON_BN_CLICKED(IDC_STARTTASKCOLOR, OnStarttaskcolor)
@@ -689,6 +690,8 @@ void CPreferencesUITasklistColorsPage::OnChangeTextColorOption()
 	GetDlgItem(IDC_POPULATEATTRIBLIST)->EnableWindow(bColorByAttrib && bHasAttrib);
 
 	m_btAttribColor.EnableWindow(bColorByAttrib && bHasAttrib && !m_sSelAttribValue.IsEmpty());
+
+	GetParent()->SendMessage(WM_PUITCP_TEXTCOLOROPTION);
 
 	CPreferencesPageBase::OnControlChange();
 }

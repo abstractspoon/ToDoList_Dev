@@ -93,6 +93,13 @@ void CTDCToDoCtrlPreferenceHelper::UpdateToDoCtrlPrefs(CFilteredToDoCtrl& tdc, c
 	
 	tdc.ModifyStyles(styles);
 
+	// Colour edit field visibility
+	TDCCOLEDITFILTERVISIBILITY vis;
+	tdc.GetColumnFieldVisibility(vis);
+
+	vis.ShowColorEditIfAsColumns(prefs.GetTextColorOption() == COLOROPT_DEFAULT);
+	tdc.SetColumnFieldVisibility(vis);
+
 	// layout
 	tdc.SetLayoutPositions((TDC_UILOCATION)prefs.GetControlsPos(), 
 							(TDC_UILOCATION)prefs.GetCommentsPos(), 

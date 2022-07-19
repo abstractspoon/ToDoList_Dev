@@ -149,7 +149,7 @@ public:
 	BOOL ModifyStyles(const CTDCStyleMap& styles);
 	BOOL HasStyle(TDC_STYLE nStyle) const;
 	
-	virtual BOOL IsColumnShowing(TDC_COLUMN nColumn) const;
+	BOOL IsColumnShowing(TDC_COLUMN nColumn) const;
 	BOOL IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const;
 	BOOL IsColumnOrEditFieldShowing(TDC_COLUMN nColumn, TDC_ATTRIBUTE nAttrib) const;
 	void SetColumnFieldVisibility(const TDCCOLEDITVISIBILITY& vis);

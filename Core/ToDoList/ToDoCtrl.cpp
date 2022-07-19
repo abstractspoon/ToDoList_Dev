@@ -1725,19 +1725,6 @@ BOOL CToDoCtrl::IsCtrlShowing(const CTRLITEM& ctrl) const
 	// is this a custom control?
 	if (CTDCCustomAttributeUIHelper::IsCustomEditControl(ctrl.nCtrlID))
 		return TRUE;
-
-	// other special cases
-	switch (ctrl.nCtrlID)
-	{
-	case IDC_COLOUR:
-		if (m_visColEdit.GetShowFields() == TDLSA_ASCOLUMN)
-		{
-			return (!HasStyle(TDCS_COLORTEXTBYATTRIBUTE) &&
-					!HasStyle(TDCS_COLORTEXTBYPRIORITY) &&
-					!HasStyle(TDCS_COLORTEXTBYNONE));
-		}
-		break;
-	}
 	
 	// all else
 	return m_visColEdit.IsEditFieldVisible(ctrl.nAttrib);
@@ -5877,7 +5864,7 @@ BOOL CToDoCtrl::IsColumnShowing(TDC_COLUMN nColumn) const
 
 BOOL CToDoCtrl::IsEditFieldShowing(TDC_ATTRIBUTE nAttrib) const
 {
-	if (nAttrib == TDCA_TASKNAME || TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
+	if ((nAttrib == TDCA_TASKNAME) || TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttrib))
 		return TRUE; // always visible
 
 	return m_visColEdit.IsEditFieldVisible(nAttrib);
@@ -10069,13 +10056,15 @@ void CToDoCtrl::LoadAttributeVisibility(const CTaskFile& tasks, const CPreferenc
 
 	if (tasks.GetAttributeVisibility(vis))
 	{
-		// update style to match
 		m_styles[TDCS_SAVEUIVISINTASKLIST] = TRUE;
 	}
 	else if (!vis.Load(prefs, GetPreferencesKey()))
 	{
 		vis = m_visColEdit;
 	}
+
+	// Preserve edit field visibility
+	vis.ShowColorEditIfAsColumns(m_visColEdit.IsEditFieldVisible(TDCA_COLOR));
 
 	SetColumnFieldVisibility(vis);
 }

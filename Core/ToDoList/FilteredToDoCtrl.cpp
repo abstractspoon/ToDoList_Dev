@@ -1370,13 +1370,15 @@ void CFilteredToDoCtrl::LoadAttributeVisibility(const CTaskFile& tasks, const CP
 
 	if (tasks.GetAttributeVisibility(vis))
 	{
-		// update style to match
 		m_styles[TDCS_SAVEUIVISINTASKLIST] = TRUE;
 	}
 	else if (!vis.Load(prefs, GetPreferencesKey()))
 	{
 		vis = m_visColEditFilter;
 	}
+
+	// Preserve edit field visibility
+	vis.ShowColorEditIfAsColumns(m_visColEditFilter.IsEditFieldVisible(TDCA_COLOR));
 
 	SetColumnFieldVisibility(vis);
 }

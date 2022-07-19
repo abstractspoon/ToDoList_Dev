@@ -2225,7 +2225,12 @@ struct TDCATTRIBUTE
 
 struct TDCCOLEDITVISIBILITY
 {
-	TDCCOLEDITVISIBILITY() : nShowFields(TDLSA_ASCOLUMN) {}
+	TDCCOLEDITVISIBILITY() 
+		: 
+		nShowFields(TDLSA_ASCOLUMN),
+		bShowColorEditIfAsColumns(FALSE)
+	{
+	}
 
 	TDCCOLEDITVISIBILITY(const TDCCOLEDITVISIBILITY& vis)
 	{
@@ -2238,6 +2243,7 @@ struct TDCCOLEDITVISIBILITY
 		mapVisibleEdits.Copy(vis.mapVisibleEdits);
 
 		nShowFields = vis.nShowFields;
+		bShowColorEditIfAsColumns = vis.bShowColorEditIfAsColumns;
 		
 		return *this;
 	}
@@ -2251,7 +2257,8 @@ struct TDCCOLEDITVISIBILITY
 	{
 		return (mapVisibleColumns.MatchAll(vis.mapVisibleColumns) && 
 				mapVisibleEdits.MatchAll(vis.mapVisibleEdits) &&
-				(nShowFields == vis.nShowFields));
+				(nShowFields == vis.nShowFields) &&
+				(bShowColorEditIfAsColumns == vis.bShowColorEditIfAsColumns));
 	}
 
 	void Clear()
@@ -2260,6 +2267,7 @@ struct TDCCOLEDITVISIBILITY
 		mapVisibleEdits.RemoveAll();
 
 		nShowFields = TDLSA_ASCOLUMN;
+		bShowColorEditIfAsColumns = FALSE;
 	}
 
 	BOOL HasDifferences(const TDCCOLEDITVISIBILITY& vis, 
@@ -2279,6 +2287,13 @@ struct TDCCOLEDITVISIBILITY
 	virtual void SetShowFields(TDL_SHOWATTRIB nShow)
 	{
 		nShowFields = nShow;
+
+		UpdateEditVisibility();
+	}
+
+	void ShowColorEditIfAsColumns(BOOL bShow)
+	{
+		bShowColorEditIfAsColumns = bShow;
 
 		UpdateEditVisibility();
 	}
@@ -2329,10 +2344,11 @@ struct TDCCOLEDITVISIBILITY
 	BOOL SetVisibleEditFields(const CTDCAttributeMap& mapAttrib)
 	{
 		// only supported for 'any' attribute
-		ASSERT(nShowFields == TDLSA_ANY);
-		
 		if (nShowFields != TDLSA_ANY)
+		{
+			ASSERT(0);
 			return FALSE;
+		}
 
 		// check and add attributes 
 		mapVisibleEdits.RemoveAll();
@@ -2366,7 +2382,10 @@ struct TDCCOLEDITVISIBILITY
 			return TRUE;
 
 		case TDLSA_ASCOLUMN:
-			return IsColumnVisible(TDC::MapAttributeToColumn(nAttrib));
+			if ((nAttrib == TDCA_COLOR) && bShowColorEditIfAsColumns)
+				return TRUE;
+			else
+				return IsColumnVisible(TDC::MapAttributeToColumn(nAttrib));
 
 		case TDLSA_ANY:
 			return mapVisibleEdits.Has(nAttrib);
@@ -2379,13 +2398,8 @@ struct TDCCOLEDITVISIBILITY
 	
 	BOOL IsColumnVisible(TDC_COLUMN nCol) const
 	{
-		// special cases
-		switch (nCol)
-		{
-		case TDCC_NONE:
-		case TDCC_COLOR:
+		if (!IsSupportedColumn(nCol))
 			return FALSE;
-		}
 
 		// else
 		return mapVisibleColumns.Has(nCol);
@@ -2394,16 +2408,16 @@ struct TDCCOLEDITVISIBILITY
 	BOOL SetEditFieldVisible(TDC_ATTRIBUTE nAttrib, BOOL bVisible = TRUE)
 	{
 		// only supported for 'any' attribute
-		ASSERT(nShowFields == TDLSA_ANY);
-
 		if (nShowFields != TDLSA_ANY)
+		{
+			ASSERT(0);
 			return FALSE;
+		}
 
 		// validate attribute
-		ASSERT (IsSupportedEdit(nAttrib));
-
 		if (!IsSupportedEdit(nAttrib))
 		{
+			ASSERT(0);
 			return FALSE;
 		}
 		else if (bVisible)
@@ -2674,6 +2688,7 @@ protected:
 	CTDCColumnIDMap mapVisibleColumns;
 	CTDCAttributeMap mapVisibleEdits;
 	TDL_SHOWATTRIB nShowFields;
+	BOOL bShowColorEditIfAsColumns;
 
 protected:
 	int UpdateEditVisibility()

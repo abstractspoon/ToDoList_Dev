@@ -154,6 +154,7 @@ CPreferencesDlg::CPreferencesDlg(CShortcutManager* pShortcutMgr,
 	m_ppHost.ForwardMessage(WM_PGP_CLEARMRU);
 	m_ppHost.ForwardMessage(WM_PGP_EDITLANGFILE);
 	m_ppHost.ForwardMessage(WM_PPB_CTRLCHANGE);
+	m_ppHost.ForwardMessage(WM_PUITCP_TEXTCOLOROPTION);
 	
 	LoadPreferences(m_prefs, PREFSKEY);
 }
@@ -186,6 +187,7 @@ BEGIN_MESSAGE_MAP(CPreferencesDlg, CPreferencesDlgBase)
 	ON_REGISTERED_MESSAGE(WM_PGP_CLEARMRU, OnGenPageClearMRU)
 	ON_REGISTERED_MESSAGE(WM_PGP_EDITLANGFILE, OnGenPageEditLangFile)
 	ON_REGISTERED_MESSAGE(WM_PPB_CTRLCHANGE, OnControlChange)
+	ON_REGISTERED_MESSAGE(WM_PUITCP_TEXTCOLOROPTION, OnColorPageTextOption)
 	ON_MESSAGE(WM_COPY, OnCopy)
 END_MESSAGE_MAP()
 
@@ -208,7 +210,12 @@ void CPreferencesDlg::LoadPreferences(const IPreferences* prefs, LPCTSTR szKey)
 	// 'Temporary' hack to prevent prefs being reloaded 
 	// by base class in OnInitDialog
 	if (!m_bInitialisingDialog)
+	{
 		CPreferencesDlgBase::LoadPreferences(prefs, szKey);
+
+		OnColorPageTextOption((WPARAM)m_pageUITasklistColors.GetSafeHwnd(), 
+							  m_pageUITasklistColors.GetTextColorOption());
+	}
 }
 
 BOOL CPreferencesDlg::OnInitDialog() 
@@ -814,6 +821,19 @@ FILTER_TITLE CPreferencesDlg::GetTitleFilterOption() const
 
 	ASSERT(0);
 	return FT_FILTERONTITLEONLY;
+}
+
+LRESULT CPreferencesDlg::OnColorPageTextOption(WPARAM wParam, LPARAM lParam)
+{
+	UNREFERENCED_PARAMETER(wParam);
+
+	TDCCOLEDITFILTERVISIBILITY vis;
+	m_pageUIVisibility.GetColumnAttributeVisibility(vis);
+
+	vis.ShowColorEditIfAsColumns(m_pageUITasklistColors.GetTextColorOption() == COLOROPT_DEFAULT);
+	m_pageUIVisibility.SetColumnAttributeVisibility(vis);
+
+	return 0L;
 }
 
 LRESULT CPreferencesDlg::OnUpdateSearch(WPARAM wParam, LPARAM lParam)

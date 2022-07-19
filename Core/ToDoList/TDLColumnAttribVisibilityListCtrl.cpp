@@ -165,15 +165,15 @@ void CTDLColumnAttribVisibilityListCtrl::UpdateVisibility()
 		TDC_ATTRIBUTE nAttrib = GetItemAttrib(nItem);
 		
 		// set column visibility
-		BOOL bVisible = ((nColumn != TDCC_NONE) && m_vis.IsColumnVisible(nColumn));
+		BOOL bVisible = m_vis.IsColumnVisible(nColumn);
 		SetCellText(nItem, COL_COLUMNVIS, (bVisible ? _T("+") : _T("")));
 
 		// set edit visibility
-		bVisible = ((nAttrib != TDCA_NONE) && m_vis.IsEditFieldVisible(nAttrib));
+		bVisible = m_vis.IsEditFieldVisible(nAttrib);
 		SetCellText(nItem, COL_EDITVIS, (bVisible ? _T("+") : _T("")));
 
 		// set filter visibility
-		bVisible = ((nAttrib != TDCA_NONE) && m_vis.IsFilterFieldVisible(nAttrib));
+		bVisible = m_vis.IsFilterFieldVisible(nAttrib);
 		SetCellText(nItem, COL_FILTERVIS, (bVisible ? _T("+") : _T("")));
 	}
 
