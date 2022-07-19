@@ -103,7 +103,7 @@ HWND CInterSpy::GetOutputWnd(BOOL bStartup)
 		m_hwndOutput = NULL;
 
 	if (!m_hwndOutput)
-		m_hwndOutput = ::FindWindow("InterspyWnd", NULL);
+		m_hwndOutput = ::FindWindow(L"InterspyWnd", NULL);
 
 	if (bStartup && !m_hwndOutput && (m_dwFlags & IS_AUTOSTARTOUTPUT))
 	{
@@ -112,12 +112,12 @@ HWND CInterSpy::GetOutputWnd(BOOL bStartup)
 		{
 			CRegKey reg;
 			
-			if (reg.Open(HKEY_LOCAL_MACHINE, "Software\\AbstractSpoon\\InterSpy") == ERROR_SUCCESS)
+			if (reg.Open(HKEY_LOCAL_MACHINE, L"Software\\AbstractSpoon\\InterSpy") == ERROR_SUCCESS)
 			{
-				char szPath[MAX_PATH + 1];
+				TCHAR szPath[MAX_PATH + 1];
 				DWORD dwLen = MAX_PATH;
 				
-				if (reg.QueryValue(szPath, "InterSpyWndPath", &dwLen) == ERROR_SUCCESS)
+				if (reg.QueryValue(szPath, L"InterSpyWndPath", &dwLen) == ERROR_SUCCESS)
 					m_sOutputWndPath = szPath;
 			}
 		}
@@ -128,15 +128,15 @@ HWND CInterSpy::GetOutputWnd(BOOL bStartup)
 		{
 			if (m_sOutputWndPath.IsEmpty())
 			{
-				if (IDCANCEL == MessageBox(NULL, "Interspy could not determine the location of the InterSpy output window.\n\nClick 'OK' to browse to the location of the InterSpy output window, \nor 'Cancel' if you which to start the output window manually", 
-					"InterSpy", MB_OKCANCEL))
+				if (IDCANCEL == MessageBox(NULL, L"Interspy could not determine the location of the InterSpy output window.\n\nClick 'OK' to browse to the location of the InterSpy output window, \nor 'Cancel' if you which to start the output window manually", 
+					L"InterSpy", MB_OKCANCEL))
 				{
 					bCancelled = TRUE;
 				}
 				else
 				{
 					CFileDialog dialog(TRUE, NULL, m_sOutputWndPath, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, 
-						"InterSpy output windows|InterSpyWnd.exe||");
+						L"InterSpy output windows|InterSpyWnd.exe||");
 					
 					if (dialog.DoModal() == IDOK)
 					{
@@ -150,14 +150,14 @@ HWND CInterSpy::GetOutputWnd(BOOL bStartup)
 			if (!bCancelled && !m_sOutputWndPath.IsEmpty())
 			{
 				// try to run the exe
-				TRACE ("running '%s'\n", m_sOutputWndPath);
+				TRACE (L"running '%s'\n", m_sOutputWndPath);
 				if ((int)ShellExecute(NULL, NULL, m_sOutputWndPath, NULL, NULL, SW_SHOW) > 32)
 				{
 					int nCount = 10;
 					
 					while (nCount-- && !m_hwndOutput)
 					{
-						m_hwndOutput = ::FindWindow("InterspyWnd", NULL);
+						m_hwndOutput = ::FindWindow(L"InterspyWnd", NULL);
 						Sleep(100);
 					}
 				}
@@ -172,7 +172,7 @@ HWND CInterSpy::GetOutputWnd(BOOL bStartup)
 			// write to registry
 			CRegKey reg;
 			
-			reg.SetValue(HKEY_LOCAL_MACHINE, "Software\\AbstractSpoon\\InterSpy", m_sOutputWndPath, "InterSpyWndPath");
+			reg.SetValue(HKEY_LOCAL_MACHINE, L"Software\\AbstractSpoon\\InterSpy", m_sOutputWndPath, L"InterSpyWndPath");
 		}
 	}
 

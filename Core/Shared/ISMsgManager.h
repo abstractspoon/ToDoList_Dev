@@ -28,7 +28,7 @@ public:
 
 	inline BOOL HasParams() { return m_bHasParams; }
 
-	static void AddParam(CStringArray* pParams, const char *fmt, ...)
+	static void AddParam(CStringArray* pParams, LPCTSTR fmt, ...)
 	{
 		ASSERT (pParams);
 
@@ -37,10 +37,13 @@ public:
 		
 		va_list marker;
 		va_start(marker, fmt);
-		vsprintf(gBuffer, fmt, marker);
+
+		CString sValue;
+		sValue.FormatV(fmt, marker);
+
 		va_end(marker);
 		
-		pParams->Add(gBuffer);
+		pParams->Add(sValue);
 	}
 	
 protected:

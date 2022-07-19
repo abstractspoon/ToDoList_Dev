@@ -34,7 +34,7 @@ struct IS_COPYDATA
 	UINT uCmd;
 	WPARAM wParam;
 	LPARAM lParam;
-	char sMsg[1024]; // first item is message then params delimetered by '|'
+	TCHAR sMsg[1024]; // first item is message then params delimetered by '|'
 };
 
 /////////////////////////////////////////////////////////////////////////////

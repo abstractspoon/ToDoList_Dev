@@ -29,15 +29,15 @@ BOOL CISMsgManager::HandleMsg(const MSG* pMsg, CString& sMsg, CStringArray* pPar
 
 	if (!pMsgHandler || !pMsgHandler->HandleMsg(pMsg, sMsg, pParams))
 	{
-      sMsg.Format("Unknown (0x%08X)", pMsg->message);
+      sMsg.Format(L"Unknown (0x%08X)", pMsg->message);
 	}
 
 	if (!pMsgHandler || pMsgHandler->HasParams())
 	{
 		if (!pParams || !pParams->GetSize())
 		{
-			CISMsgHandler::AddParam(pParams, "wp = 0x%08X", pMsg->wParam);
-			CISMsgHandler::AddParam(pParams, "lp = 0x%08X", pMsg->lParam);
+			CISMsgHandler::AddParam(pParams, L"wp = 0x%08X", pMsg->wParam);
+			CISMsgHandler::AddParam(pParams, L"lp = 0x%08X", pMsg->lParam);
 		}
 	}
 
@@ -55,13 +55,13 @@ CISMsgManager::~CISMsgManager()
 	DeleteMessageMap();
 }
 
-#define ADDHANDLERMFC(msg) { AddHandler(msg, new CISMsgHandler(msg, #msg" (MFC)")); } 
-#define ADDHANDLERMFCEX(msg, classtype) { AddHandler(msg, new classtype(msg, #msg" (MFC)")); }
-#define ADDHANDLERMFCNOPARAMS(msg) { AddHandler(msg, new CISMsgHandler(msg, #msg" (MFC)", FALSE)); } 
-#define ADDHANDLEROBS(msg) { AddHandler(msg, new CISMsgHandler(msg, #msg)); } // obselete messages
-#define ADDHANDLER(msg) { AddHandler(msg, new CISMsgHandler(msg, #msg)); }
-#define ADDHANDLERNOPARAMS(msg) { AddHandler(msg, new CISMsgHandler(msg, #msg, FALSE)); }
-#define ADDHANDLEREX(msg, classtype) { AddHandler(msg, new classtype(msg, #msg)); }
+#define ADDHANDLERMFC(msg) { AddHandler(msg, new CISMsgHandler(msg, L#msg" (MFC)")); } 
+#define ADDHANDLERMFCEX(msg, classtype) { AddHandler(msg, new classtype(msg, L#msg" (MFC)")); }
+#define ADDHANDLERMFCNOPARAMS(msg) { AddHandler(msg, new CISMsgHandler(msg, L#msg" (MFC)", FALSE)); } 
+#define ADDHANDLEROBS(msg) { AddHandler(msg, new CISMsgHandler(msg, L#msg)); } // obselete messages
+#define ADDHANDLER(msg) { AddHandler(msg, new CISMsgHandler(msg, L#msg)); }
+#define ADDHANDLERNOPARAMS(msg) { AddHandler(msg, new CISMsgHandler(msg, L#msg, FALSE)); }
+#define ADDHANDLEREX(msg, classtype) { AddHandler(msg, new classtype(msg, L#msg)); }
 #define ADDHANDLERUNK(msg, name) { AddHandler(msg, new CISMsgHandler(msg, name)); }
 #define ADDHANDLERUNKNOPARAMS(msg, name) { AddHandler(msg, new CISMsgHandler(msg, name, FALSE)); }
 #define ADDHANDLERUNKEX(msg, name, classtype) { AddHandler(msg, new classtype(msg, name)); }
@@ -72,12 +72,12 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_CREATE, CISMH_Create);            
 	ADDHANDLERNOPARAMS(WM_DESTROY);    
 	ADDHANDLEREX(WM_MOVE, CISMH_Move);              
-	ADDHANDLERUNK(0x0004, "WM_SIZEWAIT"); // *        
+	ADDHANDLERUNK(0x0004, L"WM_SIZEWAIT"); // *        
 	ADDHANDLEREX(WM_SIZE, CISMH_Size);               
 	ADDHANDLEREX(WM_ACTIVATE, CISMH_Activate);         
 	ADDHANDLEREX(WM_SETFOCUS, CISMH_Focus);                 
 	ADDHANDLEREX(WM_KILLFOCUS, CISMH_Focus);             
-	ADDHANDLERUNK(0x0009, "WM_SETVISIBLE"); // *          
+	ADDHANDLERUNK(0x0009, L"WM_SETVISIBLE"); // *          
 	ADDHANDLEREX(WM_ENABLE, CISMH_Enable);                   
 	ADDHANDLEREX(WM_SETREDRAW, CISMH_Redraw);             
 	ADDHANDLEREX(WM_SETTEXT, CISMH_SetText);              
@@ -91,7 +91,7 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_ERASEBKGND, CISMH_EraseBkgnd);           
 	ADDHANDLERNOPARAMS(WM_SYSCOLORCHANGE);   
 	ADDHANDLEREX(WM_ENDSESSION, CISMH_EndSession);           
-	ADDHANDLERUNK(0x0017, "WM_SYSTEMERROR"); // obselete           
+	ADDHANDLERUNK(0x0017, L"WM_SYSTEMERROR"); // obselete           
 	ADDHANDLEREX(WM_SHOWWINDOW, CISMH_Show);          
 	ADDHANDLEREX(WM_CTLCOLOR, CISMH_CtlColor);              
 	ADDHANDLEREX(WM_WININICHANGE, CISMH_WinIniChange);      
@@ -109,7 +109,7 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLERNOPARAMS(WM_PAINTICON);          
 	ADDHANDLEROBS(WM_ICONERASEBKGND); // obselete 
 	ADDHANDLEREX(WM_NEXTDLGCTL, CISMH_NextDlgCtrl);   
-	ADDHANDLERUNK(0x0029, "WM_ALTTABACTIVE"); // *         
+	ADDHANDLERUNK(0x0029, L"WM_ALTTABACTIVE"); // *         
 	ADDHANDLEREX(WM_SPOOLERSTATUS, CISMH_Spooler);          
 	ADDHANDLEREX(WM_DRAWITEM, CISMH_DrawItem);            
 	ADDHANDLEREX(WM_MEASUREITEM, CISMH_MeasureItem);   
@@ -120,18 +120,18 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLERNOPARAMS(WM_GETFONT);                 
 	ADDHANDLEREX(WM_SETHOTKEY, CISMH_SetHotkey);              
 	ADDHANDLERNOPARAMS(WM_GETHOTKEY);             
-	ADDHANDLERUNK(0x0034, "WM_FILESYSCHANGE"); // *       
-	ADDHANDLERUNK(0x0035, "WM_ISACTIVEICON"); // *            
-	ADDHANDLERUNK(0x0036, "WM_QUERYPARKICON"); // *               
+	ADDHANDLERUNK(0x0034, L"WM_FILESYSCHANGE"); // *       
+	ADDHANDLERUNK(0x0035, L"WM_ISACTIVEICON"); // *            
+	ADDHANDLERUNK(0x0036, L"WM_QUERYPARKICON"); // *               
 	ADDHANDLEROBS(WM_QUERYDRAGICON);                
-	ADDHANDLERUNK(0x0038, "WM_QUERYSAVESTATE"); // *           
+	ADDHANDLERUNK(0x0038, L"WM_QUERYSAVESTATE"); // *           
 	ADDHANDLEREX(WM_COMPAREITEM, CISMH_CompareItem);            
-	ADDHANDLERUNK(0x003A, "WM_TESTING"); // *                  
-	ADDHANDLERUNK(0x003D, "WM_GETOBJECT"); // *                
-	ADDHANDLERUNK(0x003E, "WM_ACTIVATESHELLWINDOW"); // *  
+	ADDHANDLERUNK(0x003A, L"WM_TESTING"); // *                  
+	ADDHANDLERUNK(0x003D, L"WM_GETOBJECT"); // *                
+	ADDHANDLERUNK(0x003E, L"WM_ACTIVATESHELLWINDOW"); // *  
 	ADDHANDLEREX(WM_COMPACTING, CISMH_Compacting);                  
-	ADDHANDLERUNK(0x0042, "WM_OTHERWINDOWCREATED"); // * 
-	ADDHANDLERUNK(0x0043, "WM_OTHERWINDOWDESTROYED"); // *    
+	ADDHANDLERUNK(0x0042, L"WM_OTHERWINDOWCREATED"); // * 
+	ADDHANDLERUNK(0x0043, L"WM_OTHERWINDOWDESTROYED"); // *    
 	ADDHANDLEROBS(WM_COMMNOTIFY);         
 	ADDHANDLEREX(WM_WINDOWPOSCHANGING, CISMH_WPosChange); 
 	ADDHANDLEREX(WM_WINDOWPOSCHANGED, CISMH_WPosChange);       
@@ -159,7 +159,7 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_NCACTIVATE, CISMH_NcActivate);
 	ADDHANDLEREX(WM_GETDLGCODE, CISMH_GetDlgCode);            
 	ADDHANDLERNOPARAMS(WM_SYNCPAINT);             
-	ADDHANDLERUNK(0x0089, "WM_SYNCTASK"); // *             
+	ADDHANDLERUNK(0x0089, L"WM_SYNCTASK"); // *             
 	ADDHANDLEREX(WM_NCMOUSEMOVE, CISMH_NcMouse);              
 	ADDHANDLEREX(WM_NCLBUTTONDOWN, CISMH_NcMouse);           
 	ADDHANDLEREX(WM_NCLBUTTONUP, CISMH_NcMouse);      
@@ -170,9 +170,9 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_NCMBUTTONDOWN, CISMH_NcMouse); 
 	ADDHANDLEREX(WM_NCMBUTTONUP, CISMH_NcMouse);    
 	ADDHANDLEREX(WM_NCMBUTTONDBLCLK, CISMH_NcMouse); 
-	ADDHANDLERUNKEX(0x00AB, "WM_NCXBUTTONDOWN", CISMH_NcMouse);           
-	ADDHANDLERUNKEX(0x00AD, "WM_NCXBUTTONUP", CISMH_NcMouse);    
-	ADDHANDLERUNKEX(0x00AE, "WM_NCXBUTTONDBLCLK", CISMH_NcMouse);    
+	ADDHANDLERUNKEX(0x00AB, L"WM_NCXBUTTONDOWN", CISMH_NcMouse);           
+	ADDHANDLERUNKEX(0x00AD, L"WM_NCXBUTTONUP", CISMH_NcMouse);    
+	ADDHANDLERUNKEX(0x00AE, L"WM_NCXBUTTONDBLCLK", CISMH_NcMouse);    
 	ADDHANDLEREX(WM_KEYDOWN, CISMH_Key);                
 	ADDHANDLEREX(WM_KEYUP, CISMH_Key);                      
 	ADDHANDLEREX(WM_CHAR, CISMH_Char);                
@@ -181,10 +181,10 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_SYSKEYUP, CISMH_Key);              
 	ADDHANDLEREX(WM_SYSCHAR, CISMH_Char);                   
 	ADDHANDLEREX(WM_SYSDEADCHAR, CISMH_Char);            
-	ADDHANDLERUNK(0x0109, "WM_WNT_CONVERTREQUESTEX"); // * 
-	ADDHANDLERUNK(0x010A, "WM_CONVERTREQUEST"); // *          
-	ADDHANDLERUNK(0x010B, "WM_CONVERTRESULT"); // *             
-	ADDHANDLERUNK(0x010C, "WM_INTERIM"); // *                   
+	ADDHANDLERUNK(0x0109, L"WM_WNT_CONVERTREQUESTEX"); // * 
+	ADDHANDLERUNK(0x010A, L"WM_CONVERTREQUEST"); // *          
+	ADDHANDLERUNK(0x010B, L"WM_CONVERTRESULT"); // *             
+	ADDHANDLERUNK(0x010C, L"WM_INTERIM"); // *                   
 	ADDHANDLER(WM_IME_STARTCOMPOSITION); // * 
 	ADDHANDLER(WM_IME_ENDCOMPOSITION); // * 
 	ADDHANDLER(WM_IME_COMPOSITION); // * 
@@ -199,15 +199,15 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_MENUSELECT, CISMH_MenuSel);
 	ADDHANDLEREX(WM_MENUCHAR, CISMH_MenuChar);
 	ADDHANDLEREX(WM_ENTERIDLE, CISMH_EnterIdle);
-	ADDHANDLERUNKEX(0x0122, "WM_MENURBUTTONUP", CISMH_MenuDrag);
-	ADDHANDLERUNKEX(0x0123, "WM_MENUDRAG", CISMH_MenuDrag);                   
-	ADDHANDLERUNK(0x0124, "WM_MENUGETOBJECT"); // *            
-	ADDHANDLERUNK(0x0125, "WM_UNINITMENUPOPUP"); // *         
-	ADDHANDLERUNKEX(0x0126, "WM_MENUCOMMAND", CISMH_MenuCmd);                 
-	ADDHANDLERUNKEX(0x0127, "WM_CHANGEUISTATE", CISMH_UiState);                
-	ADDHANDLERUNKEX(0x0128, "WM_UPDATEUISTATE", CISMH_UiState);             
-	ADDHANDLERUNKNOPARAMS(0x0129, "WM_QUERYUISTATE");         
-	ADDHANDLERUNK(0x0131, "WM_LBTRACKPOINT"); // *        
+	ADDHANDLERUNKEX(0x0122, L"WM_MENURBUTTONUP", CISMH_MenuDrag);
+	ADDHANDLERUNKEX(0x0123, L"WM_MENUDRAG", CISMH_MenuDrag);                   
+	ADDHANDLERUNK(0x0124, L"WM_MENUGETOBJECT"); // *            
+	ADDHANDLERUNK(0x0125, L"WM_UNINITMENUPOPUP"); // *         
+	ADDHANDLERUNKEX(0x0126, L"WM_MENUCOMMAND", CISMH_MenuCmd);                 
+	ADDHANDLERUNKEX(0x0127, L"WM_CHANGEUISTATE", CISMH_UiState);                
+	ADDHANDLERUNKEX(0x0128, L"WM_UPDATEUISTATE", CISMH_UiState);             
+	ADDHANDLERUNKNOPARAMS(0x0129, L"WM_QUERYUISTATE");         
+	ADDHANDLERUNK(0x0131, L"WM_LBTRACKPOINT"); // *        
 	ADDHANDLEREX(WM_CTLCOLORMSGBOX, CISMH_CtlColor);              
 	ADDHANDLEREX(WM_CTLCOLOREDIT, CISMH_CtlColor);               
 	ADDHANDLEREX(WM_CTLCOLORLISTBOX, CISMH_CtlColor);        
@@ -226,9 +226,9 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_MBUTTONUP, CISMH_Mouse);                  
 	ADDHANDLEREX(WM_MBUTTONDBLCLK, CISMH_Mouse);          
 	ADDHANDLEREX(WM_MOUSEWHEEL, CISMH_MouseWheel);                
-	ADDHANDLERUNKEX(0x020B, "WM_XBUTTONDOWN", CISMH_Mouse);            
-	ADDHANDLERUNKEX(0x020C, "WM_XBUTTONUP", CISMH_Mouse);                  
-	ADDHANDLERUNKEX(0x020D, "WM_XBUTTONDBLCLK", CISMH_Mouse);            
+	ADDHANDLERUNKEX(0x020B, L"WM_XBUTTONDOWN", CISMH_Mouse);            
+	ADDHANDLERUNKEX(0x020C, L"WM_XBUTTONUP", CISMH_Mouse);                  
+	ADDHANDLERUNKEX(0x020D, L"WM_XBUTTONDBLCLK", CISMH_Mouse);            
 	ADDHANDLEREX(WM_PARENTNOTIFY, CISMH_ParentNotify);
 	ADDHANDLEREX(WM_ENTERMENULOOP, CISMH_EnterMenu);
 	ADDHANDLEREX(WM_EXITMENULOOP, CISMH_ExitMenu); 
@@ -248,12 +248,12 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_MDICASCADE, CISMH_MdiCascade);
 	ADDHANDLERNOPARAMS(WM_MDIICONARRANGE);          
 	ADDHANDLEREX(WM_MDIGETACTIVE, CISMH_MdiGetActive);
-	ADDHANDLERUNK(0x022A, "WM_DROPOBJECT"); // *                 
-	ADDHANDLERUNK(0x022B, "WM_QUERYDROPOBJECT"); // *             
-	ADDHANDLERUNK(0x022C, "WM_BEGINDRAG"); // *                 
-	ADDHANDLERUNK(0x022D, "WM_DRAGLOOP"); // *                  
-	ADDHANDLERUNK(0x022E, "WM_DRAGSELECT"); // *                
-	ADDHANDLERUNK(0x022F, "WM_DRAGMOVE"); // *              
+	ADDHANDLERUNK(0x022A, L"WM_DROPOBJECT"); // *                 
+	ADDHANDLERUNK(0x022B, L"WM_QUERYDROPOBJECT"); // *             
+	ADDHANDLERUNK(0x022C, L"WM_BEGINDRAG"); // *                 
+	ADDHANDLERUNK(0x022D, L"WM_DRAGLOOP"); // *                  
+	ADDHANDLERUNK(0x022E, L"WM_DRAGSELECT"); // *                
+	ADDHANDLERUNK(0x022F, L"WM_DRAGMOVE"); // *              
 	ADDHANDLEREX(WM_MDISETMENU, CISMH_MdiSetMenu);
 	ADDHANDLERNOPARAMS(WM_ENTERSIZEMOVE);          
 	ADDHANDLERNOPARAMS(WM_EXITSIZEMOVE);              
@@ -265,7 +265,7 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLER(WM_IME_COMPOSITIONFULL); // *       
 	ADDHANDLER(WM_IME_SELECT); // *                 
 	ADDHANDLEREX(WM_IME_CHAR, CISMH_Char);                  
-	ADDHANDLERUNK(0x0288, "WM_IME_REQUEST"); // *                
+	ADDHANDLERUNK(0x0288, L"WM_IME_REQUEST"); // *                
 	ADDHANDLEREX(WM_IME_KEYDOWN, CISMH_Key);             
 	ADDHANDLEREX(WM_IME_KEYUP, CISMH_Key);                  
 	ADDHANDLEREX(WM_MOUSEHOVER, CISMH_Mouse);                  
@@ -291,16 +291,16 @@ void CISMsgManager::CreateMessageMap()
 	ADDHANDLEREX(WM_HOTKEY, CISMH_Hotkey);                    
 	ADDHANDLEREX(WM_PRINT, CISMH_Print);                  
 	ADDHANDLEREX(WM_PRINTCLIENT, CISMH_Print);         
-	ADDHANDLERUNK(0x0381, "WM_RCRESULT"); // *                  
-	ADDHANDLERUNK(0x0382, "WM_HOOKRCRESULT"); // *                
+	ADDHANDLERUNK(0x0381, L"WM_RCRESULT"); // *                  
+	ADDHANDLERUNK(0x0382, L"WM_HOOKRCRESULT"); // *                
 //	ADDHANDLER(0x0383, "WM_PENMISCINFO");                
-	ADDHANDLERUNK(0x0383, "WM_GLOBALRCCHANGE"); // *     
-	ADDHANDLERUNK(0x0384, "WM_SKB"); // *                          
-	ADDHANDLERUNK(0x0385, "WM_PENCTL"); // *                    
+	ADDHANDLERUNK(0x0383, L"WM_GLOBALRCCHANGE"); // *     
+	ADDHANDLERUNK(0x0384, L"WM_SKB"); // *                          
+	ADDHANDLERUNK(0x0385, L"WM_PENCTL"); // *                    
 //	ADDHANDLER(0x0, "WM_HEDITCTL");                  
-	ADDHANDLERUNK(0x0386, "WM_PENMISC"); // *                    
-	ADDHANDLERUNK(0x0387, "WM_CTLINIT"); // *                 
-	ADDHANDLERUNK(0x0388, "WM_PENEVENT"); // *                 
+	ADDHANDLERUNK(0x0386, L"WM_PENMISC"); // *                    
+	ADDHANDLERUNK(0x0387, L"WM_CTLINIT"); // *                 
+	ADDHANDLERUNK(0x0388, L"WM_PENEVENT"); // *                 
 	ADDHANDLERMFCNOPARAMS(WM_QUERYAFXWNDPROC);         
 	ADDHANDLERMFC(WM_SIZEPARENT); // *                 
 	ADDHANDLERMFCEX(WM_SETMESSAGESTRING, CISMH_SetMessageStr);         

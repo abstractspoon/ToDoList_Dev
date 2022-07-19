@@ -337,6 +337,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="InterSpy.cpp" />
+    <ClCompile Include="ISMsgManager.cpp" />
     <ClCompile Include="LightBox.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -715,6 +717,9 @@
     <ClInclude Include="IconCache.h" />
     <ClInclude Include="ImageProcessors.h" />
     <ClInclude Include="InputListCtrl.h" />
+    <ClInclude Include="InterSpy.h" />
+    <ClInclude Include="ISMsgHandlers.h" />
+    <ClInclude Include="ISMsgManager.h" />
     <ClInclude Include="LightBox.h" />
     <ClInclude Include="Localizer.h" />
     <ClInclude Include="mapex.h" />
