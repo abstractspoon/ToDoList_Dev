@@ -1102,6 +1102,12 @@ LRESULT CTDLTaskTreeCtrl::ScWindowProc(HWND hRealWnd, UINT msg, WPARAM wp, LPARA
 				return TRUE;
 			break;
 
+		case WM_CHAR:
+			// prevent beep
+			if (wp == VK_ESCAPE)
+				return 0L;
+			break;
+
 		case WM_TIMER:
 			// eat the tree's internal timer for editing labels
 			// because we implement our own

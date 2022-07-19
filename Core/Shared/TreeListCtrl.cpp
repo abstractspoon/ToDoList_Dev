@@ -67,6 +67,7 @@ CTreeListTreeCtrl::~CTreeListTreeCtrl()
 BEGIN_MESSAGE_MAP(CTreeListTreeCtrl, CTreeCtrl)
 	ON_WM_CREATE()
 	ON_WM_DESTROY()
+	ON_WM_CHAR()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
@@ -155,6 +156,18 @@ int CTreeListTreeCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_fonts.Initialise(*this);
 
 	return 0;
+}
+
+void CTreeListTreeCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	switch (nChar)
+	{
+	case VK_ESCAPE:
+		// prevent beep
+		return;
+	}
+
+	return CTreeCtrl::OnChar(nChar, nRepCnt, nFlags);
 }
 
 int CTreeListTreeCtrl::OnToolHitTest(CPoint point, TOOLINFO* pTI) const

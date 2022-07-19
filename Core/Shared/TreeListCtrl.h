@@ -103,6 +103,7 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnShowTooltip(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()

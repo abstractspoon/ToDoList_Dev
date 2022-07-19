@@ -146,6 +146,7 @@ BEGIN_MESSAGE_MAP(CKanbanColumnCtrl, CTreeCtrl)
 	ON_WM_KILLFOCUS()
 	ON_WM_SETFOCUS()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_CHAR()
 	ON_NOTIFY(TTN_SHOW, 0, OnTooltipShow)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 END_MESSAGE_MAP()
@@ -2124,6 +2125,18 @@ BOOL CKanbanColumnCtrl::HandleButtonClick(CPoint point, BOOL bLeftBtn, HTREEITEM
 	}
 
 	return bHandled;
+}
+
+void CKanbanColumnCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+	switch (nChar)
+	{
+	case VK_ESCAPE:
+		// prevent beep
+		return;
+	}
+
+	return CTreeCtrl::OnChar(nChar, nRepCnt, nFlags);
 }
 
 void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)
