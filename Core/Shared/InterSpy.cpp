@@ -39,7 +39,7 @@ BOOL CInterSpy::Initialize(DWORD dwFlags)
 
 void CInterSpy::Release()
 {
-  GetInstance().Release();
+  GetInstance().ReleaseHooks();
 }
 
 void CInterSpy::IncludeMsg(UINT uMsg)
