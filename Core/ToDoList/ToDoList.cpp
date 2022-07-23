@@ -953,6 +953,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 
 	// check existing prefs
 	BOOL bFirstTime = (!bUseIni && !bRegKeyExists);
+	CString sPrevVer = _T("0.0.0.0");
 
 	if (!bFirstTime)
 	{
@@ -971,6 +972,7 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 		}
 
 		CPreferences prefs;
+		sPrevVer = prefs.GetProfileString(_T("AppVer"), _T("Version"));
 
 		// Save language choice 
 		FileMisc::MakeRelativePath(m_sLanguageFile, FileMisc::GetAppFolder(), FALSE);
@@ -990,11 +992,8 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 				return FALSE; // quit app
 			}
 		}
-		
-		CString sPrevVer = prefs.GetProfileString(_T("AppVer"), _T("Version"));
 
 		CleanupAppFolder(sPrevVer);
-		FixupExampleTasklistsTaskDates(sPrevVer);
 		UpgradePreferences(prefs, sPrevVer);
 	}
 	else  // first time so no ini file exists. show wizard
@@ -1072,6 +1071,8 @@ BOOL CToDoListApp::InitPreferences(CEnCommandLineInfo& cmdInfo)
 			}
 		}
 	}
+
+	FixupExampleTasklistsTaskDates(sPrevVer);
 
 	return TRUE;
 }
