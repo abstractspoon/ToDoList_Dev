@@ -1756,15 +1756,17 @@ DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, L
 			}
 		}
 	}
-	
+
+	VERIFY(ExpandPathEnvironmentVariables(sFile));
+
 	DWORD dwRes = (DWORD)ShellExecute(hwnd, lpVerb, sFile, sParams, lpDirectory, nShowCmd);
 	
 	if (dwRes < SE_ERR_SUCCESS)
 	{
 		if (lpVerb)
-			LogText(_T("ShellExecute(%s: %s) failed. Error = %s (%ld)"), lpFile, lpVerb, Misc::FormatGetLastError(dwRes), dwRes);
+			LogText(_T("ShellExecute(%s: %s) failed. Error = %s (%ld)"), sFile, lpVerb, Misc::FormatGetLastError(dwRes), dwRes);
 		else
-			LogText(_T("ShellExecute(%s) failed. Error = %s (%ld)"), lpFile, Misc::FormatGetLastError(dwRes), dwRes);
+			LogText(_T("ShellExecute(%s) failed. Error = %s (%ld)"), sFile, Misc::FormatGetLastError(dwRes), dwRes);
 
 		// try CreateProcess
 		STARTUPINFO si = { 0 };
@@ -1775,16 +1777,16 @@ DWORD FileMisc::Run(HWND hwnd, LPCTSTR lpFile, LPCTSTR lpParams, int nShowCmd, L
 		si.dwFlags = STARTF_USESHOWWINDOW;
 
 		// Start the child process.
-		if (CreateProcess(NULL,				// No module name (use command line).
-							(LPTSTR)lpFile,	// Command line.
-							NULL,			// Process handle not inheritable.
-							NULL,			// Thread handle not inheritable.
-							FALSE,			// Set handle inheritance to FALSE.
-							0,				// No creation flags.
-							NULL,			// Use parent's environment block.
-							lpDirectory,	// starting directory.
-							&si,			// Pointer to STARTUPINFO structure.
-							&pi ))			// Pointer to PROCESS_INFORMATION structure.
+		if (CreateProcess(NULL,						// No module name (use command line).
+						  (LPTSTR)(LPCTSTR)sFile,	// Command line.
+						  NULL,						// Process handle not inheritable.
+						  NULL,						// Thread handle not inheritable.
+						  FALSE,					// Set handle inheritance to FALSE.
+						  0,						// No creation flags.
+						  NULL,						// Use parent's environment block.
+						  lpDirectory,				// starting directory.
+						  &si,						// Pointer to STARTUPINFO structure.
+						  &pi))						// Pointer to PROCESS_INFORMATION structure.
 		{
 			dwRes = SE_ERR_SUCCESS;
 		}
