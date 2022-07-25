@@ -3452,7 +3452,7 @@ void CToDoListWnd::StartTimeTrackingTask(int nTDC, DWORD dwTaskID, TIMETRACKSRC 
 			if (tdc.GetTimeTrackTaskID(FALSE) != 0)
 			{
 				if (bExclusive)
-					tdc.EndTimeTracking(FALSE);
+					tdc.EndTimeTracking(TRUE);
 
 				if (&tdc == m_dlgTimeTracker.GetSelectedTasklist())
 					m_dlgTimeTracker.UpdateTracking(&tdc);
