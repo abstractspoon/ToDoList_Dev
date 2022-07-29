@@ -423,6 +423,7 @@ BOOL CTDLTimeTrackerDlg::UpdateSelectedTasks(const CFilteredToDoCtrl* pTDC, cons
 
 	if (mapAttrib.Has(TDCA_TASKNAME) ||
 		mapAttrib.Has(TDCA_PASTE) ||
+		(mapAttrib.Has(TDCA_DONEDATE) && !pTDC->SelectedTasksAreAllDone()) ||
 		(mapAttrib.Has(TDCA_NEWTASK) && !pTDC->IsTaskLabelEditing()))
 	{
 		TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
@@ -439,7 +440,7 @@ BOOL CTDLTimeTrackerDlg::UpdateSelectedTasks(const CFilteredToDoCtrl* pTDC, cons
 		filter.mapAttribs.Add(TDCA_TASKNAME);
 		filter.dwFlags |= TDCGSTF_ALLPARENTS;
 
-		bChange =  (pTDC->GetSelectedTasks(tasks, filter) && pTTL->UpdateTasks(tasks));
+		bChange = (pTDC->GetSelectedTasks(tasks, filter) && pTTL->UpdateTasks(tasks));
 	}
 
 	if (mapAttrib.Has(TDCA_TIMEESTIMATE) ||
