@@ -225,11 +225,6 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-		public bool SelectedItemWasPreviouslySelected
-		{
-			get { return (SelectedItem == PreviouslySelectedItem); }
-		}
-
 		public bool TaskColorIsBackground
 		{
 			get { return m_TaskColorIsBkgnd; }
@@ -1002,7 +997,7 @@ namespace PertNetworkUIExtension
 					if (EditTaskIcon != null)
 					    EditTaskIcon(this, taskItem.UniqueId);
 				}
-				else if (SelectedNodeWasPreviouslySelected)
+				else if (SelectedItemWasPreviouslySelected)
 				{
 					if (EditTaskLabel != null)
 						EditTimer.Start();
@@ -1010,7 +1005,7 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-		private bool SelectedNodeWasPreviouslySelected
+		private bool SelectedItemWasPreviouslySelected
 		{
 			get { return ((SelectedItem != null) && (SelectedItem == PreviouslySelectedItem)); }
 		}
