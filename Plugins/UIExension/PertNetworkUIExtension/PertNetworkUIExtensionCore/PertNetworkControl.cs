@@ -1084,7 +1084,7 @@ namespace PertNetworkUIExtension
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			EditTimer.Stop();
-			PreviouslySelectedItem = SelectedItem;
+			PreviouslySelectedItem = Focused ? SelectedItem : null;
 
 			base.OnMouseDown(e);
 		}
