@@ -218,8 +218,11 @@ namespace PertNetworkUIExtension
 					}
 
 					// Add first dependency to the current path
+					// unless it'll get added next time round
 					item = dependItems[0];
-					path.AddItem(item);
+
+					if (item.DependencyUniqueIds.Count == 0)
+						path.AddItem(item);
 				}
 			}
 			while (item.DependencyUniqueIds.Count > 0);
@@ -416,12 +419,13 @@ namespace PertNetworkUIExtension
 
 		private void BalanceVerticalPositions(NetworkItems allItems)
 		{
-			// Try moving an item towards the centre of its dependencies
-			// and stop when we hit a position already taken.
 			var allColumns = BuildItemColumns(allItems.Values);
 
 			foreach (var group in this)
 			{
+				// Within each group, move an item towards the centre 
+				// of its dependencies and stop when we hit a position 
+				// already taken.
 				var columns = BuildItemColumns(group.ItemValues);
 				List<NetworkItem> column = null;
 
