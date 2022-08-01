@@ -773,7 +773,7 @@ namespace PertNetworkUIExtension
 				itemRect.Width--;
 				itemRect.Height--;
 
-				using (var pen = new Pen(borderColor, critical ? 2.5f : 0f))
+				using (var pen = new Pen(borderColor, critical ? 2f : 0f))
 					graphics.DrawRectangle(pen, itemRect);
 			}
 
@@ -899,42 +899,102 @@ namespace PertNetworkUIExtension
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
 
-			Point[] points = new Point[3];
-			
-			points[0].X = fromRect.Right;
-			points[0].Y = ((fromRect.Top + fromRect.Bottom) / 2);
+			Point[] points = null;
 
-			points[2].X = toRect.Left;
-			points[2].Y = ((toRect.Top + toRect.Bottom) / 2);
+			if (toItem.Position.Y == fromItem.Position.Y)
+			{
+				// 'To' on same level as 'From'
+				// +------+                    +------+
+				// |      +------------------->|      |
+				// +------+                    +------+
+				//
+				points = new Point[2];
 
-			if (points[0].Y > points[2].Y) // below
-			{
-				points[0].Y = fromRect.Top;
-				points[2].Y = toRect.Bottom;
+				points[0] = new Point(fromRect.Right, ((fromRect.Top + fromRect.Bottom) / 2) - 1);
+				points[1] = new Point(toRect.Left, ((toRect.Top + toRect.Bottom) / 2) - 1);
 			}
-			else if (points[0].Y < points[2].Y) // above
+			else
 			{
-				points[0].Y = fromRect.Bottom;
-				points[2].Y = toRect.Top;
-			}
-			else // same level
-			{
-				points[0].Y--;
-				points[2].Y--;
-			}
+				Point firstPt, lastPt;
 
-			points[1].X = ((fromRect.Right + toRect.Left) / 2);
-			points[1].Y = points[2].Y;
+				if (toItem.Position.Y < fromItem.Position.Y)
+				{
+					firstPt = new Point(fromRect.Right, fromRect.Top);
+					lastPt = new Point(toRect.Left, toRect.Bottom);
+				}
+				else // below
+				{
+					firstPt = new Point(fromRect.Right, fromRect.Bottom);
+					lastPt = new Point(toRect.Left, toRect.Top);
+				}
+
+				if (toItem.Position.X == fromItem.Position.X + 1)
+				{
+					// 'To' one column to the right of 'From'
+					// and anywhere above or below 'From'
+					// +------+             
+					// |      +
+					// +------+             
+					//         \
+					//          ---->+------+
+					//               |      |
+					//               +------+
+					points = new Point[3];
+					points[0] = firstPt;
+					points[2] = lastPt;
+
+					if (toItem.Position.Y < fromItem.Position.Y)
+					{
+						// above
+						points[1] = new Point((fromRect.Right + toRect.Left) / 2, toRect.Bottom);
+					}
+					else
+					{
+						// below
+						points[1] = new Point((fromRect.Right + toRect.Left) / 2, toRect.Top);
+					}
+				}
+				else
+				{
+					// 'To' more than one column to the right of 'From'
+					// and anywhere above or below 'From'
+					// +------+      +------+       
+					// |      +		 |      |
+					// +------+      +------+       
+					//         \---------------\
+					//               +------+   -->+------+
+					//               |      |      |      |
+					//               +------+      +------+
+					points = new Point[5];
+					points[0] = firstPt;
+					points[4] = lastPt;
+
+					if (toItem.Position.Y < fromItem.Position.Y)
+					{
+						// above
+						points[1] = new Point(firstPt.X + ItemHorzSpacing / 2, firstPt.Y - ItemVertSpacing / 2);
+						points[2] = new Point(lastPt.X - ItemHorzSpacing / 2, points[1].Y);
+						points[3] = new Point(points[2].X + ItemVertSpacing / 2, lastPt.Y);
+					}
+					else
+					{
+						// below
+						points[1] = new Point(firstPt.X + ItemHorzSpacing / 2, firstPt.Y + ItemVertSpacing / 2);
+						points[2] = new Point(lastPt.X - ItemHorzSpacing / 2, points[1].Y);
+						points[3] = new Point(points[2].X + ItemVertSpacing / 2, lastPt.Y);
+					}
+				}
+			}
 
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-			using (var pen = new Pen(Color.DarkGray, critical ? 2.5f : 0f))
+			using (var pen = new Pen(Color.DarkGray, critical ? 2f : 0f))
 				graphics.DrawLines(pen, points);
 
 			// Draw Arrow head and box without smoothing to better match core app
 			graphics.SmoothingMode = SmoothingMode.None;
 
-			Point arrow = points[2];
+			Point arrow = points[points.Length - 1];
 			arrow.X--;
 
 			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
