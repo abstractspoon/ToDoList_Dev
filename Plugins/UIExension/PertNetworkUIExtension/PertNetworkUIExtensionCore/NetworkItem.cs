@@ -263,7 +263,6 @@ namespace PertNetworkUIExtension
 			MaxPos = maxPos;
 			EndItem = endItem;
 
-			BalanceVerticalPositions();
 			Paths.BuildPaths(this);
 
 			return true;
@@ -338,132 +337,6 @@ namespace PertNetworkUIExtension
 			return true;
 		}
 
-		private void BalanceVerticalPositions()
-		{
-			// Try moving an item towards the centre of its dependencies
-			// and stop when we hit a position already taken.
-			var columns = BuildItemColumns();
-			List<NetworkItem> column = null;
-
-			for (int hPos = 1; hPos < columns.Count; hPos++)
-			{
-				if (columns.TryGetValue(hPos, out column))
-				{
-					foreach (var item in column)
-					{
-						var dependencies = GetItemDependencies(item);
-						var midY = GetMidVPos(dependencies);
-
-						if (midY < item.Position.Y) // midY is above
-						{
-							for (int vPos = midY; vPos < item.Position.Y; vPos++)
-							{
-								if (!IsPositionTaken(column, hPos, vPos))
-								{
-									item.Position.Y = vPos;
-									break;
-								}
-							}
-						}
-						else if (midY > item.Position.Y) // midY is below
-						{
-							for (int vPos = midY; vPos > item.Position.Y; vPos--)
-							{
-								if (!IsPositionTaken(column, hPos, vPos))
-								{
-									item.Position.Y = vPos;
-									break;
-								}
-							}
-						}
-						else
-						{
-							// already where we want
-						}
-					}
-				}
-			}
-
-			// For the first group do the same but with its dependents
-			if (columns.TryGetValue(0, out column))
-			{
-				var item = column[0];
-				var dependents = Items.GetItemDependents(item);
-				var midY = GetMidVPos(dependents);
-
-				if (!IsPositionTaken(column, 0, midY))
-					item.Position.Y = midY;
-			}
-			else
-			{
-				Debug.Assert(false);
-			}
-
-			// Recalculate maximum vertical extent
-			int maxY = 0;
-
-			foreach (var item in ItemValues)
-				maxY = Math.Max(maxY, item.Position.Y);
-
-			MaxPos = new Point(MaxPos.X, maxY);
-		}
-
-		private Dictionary<int, List<NetworkItem>> BuildItemColumns()
-		{
-			var columns = new Dictionary<int, List<NetworkItem>>();
-
-			foreach (var item in ItemValues)
-			{
-				List<NetworkItem> column = null;
-
-				if (!columns.TryGetValue(item.Position.X, out column))
-				{
-					column = new List<NetworkItem>();
-					columns.Add(item.Position.X, column);
-				}
-
-				column.Add(item);
-			}
-
-			// Sort the columns top-down
-			foreach (var column in columns.Values)
-			{
-				column.Sort((a, b) => (a.Position.Y - b.Position.Y));
-			}
-
-			return columns;
-		}
-
-		private int GetMidVPos(IEnumerable<NetworkItem> items)
-		{
-			int minY = -1, maxY = -1;
-
-			foreach (var item in items)
-			{
-				if (minY == -1)
-					minY = item.Position.Y;
-				else
-					minY = Math.Min(minY, item.Position.Y);
-
-				if (maxY == -1)
-					maxY = item.Position.Y;
-				else
-					maxY = Math.Max(maxY, item.Position.Y);
-			}
-
-			return ((minY + maxY) / 2);
-		}
-
-		private bool IsPositionTaken(IEnumerable<NetworkItem> items, int x, int y)
-		{
-			foreach (var item in items)
-			{
-				if ((item.Position.X == x) && (item.Position.Y == y))
-					return true;
-			}
-
-			return false;
-		}
 	}
 
 	// ------------------------------------------------------------
@@ -523,6 +396,8 @@ namespace PertNetworkUIExtension
 				}
 			}
 
+			BalanceVerticalPositions(allItems);
+
 			return Count;
 		}
 
@@ -539,6 +414,144 @@ namespace PertNetworkUIExtension
 			return true;
 		}
 
+		private void BalanceVerticalPositions(NetworkItems allItems)
+		{
+			// Try moving an item towards the centre of its dependencies
+			// and stop when we hit a position already taken.
+			var allColumns = BuildItemColumns(allItems.Values);
+
+			foreach (var group in this)
+			{
+				var columns = BuildItemColumns(group.ItemValues);
+				List<NetworkItem> column = null;
+
+				for (int hPos = 1; hPos < columns.Count; hPos++)
+				{
+					if (columns.TryGetValue(hPos, out column))
+					{
+						foreach (var item in column)
+						{
+							var dependencies = group.GetItemDependencies(item);
+							var midY = GetMidVPos(dependencies);
+
+							if (midY < item.Position.Y) // midY is above
+							{
+								for (int vPos = midY; vPos < item.Position.Y; vPos++)
+								{
+									if (!IsPositionTaken(allItems.Values, hPos, vPos))
+									{
+										item.Position.Y = vPos;
+										break;
+									}
+								}
+							}
+							else if (midY > item.Position.Y) // midY is below
+							{
+								for (int vPos = midY; vPos > item.Position.Y; vPos--)
+								{
+									if (!IsPositionTaken(allItems.Values, hPos, vPos))
+									{
+										item.Position.Y = vPos;
+										break;
+									}
+								}
+							}
+							else
+							{
+								// already where we want
+							}
+						}
+					}
+				}
+
+				// For the first column do the same but with its dependents
+				if (columns.TryGetValue(0, out column))
+				{
+					var item = column[0];
+					var dependents = allItems.GetItemDependents(item);
+					var midY = GetMidVPos(dependents);
+
+					if (!IsPositionTaken(allItems.Values, 0, midY))
+						item.Position.Y = midY;
+				}
+				else
+				{
+					Debug.Assert(false);
+				}
+			}
+
+
+			// Recalculate maximum vertical extent
+			int maxY = 0;
+
+			foreach (var item in allItems.Values)
+			{
+				if (item.HasPosition)
+					maxY = Math.Max(maxY, item.Position.Y);
+			}
+
+			MaxPos = new Point(MaxPos.X, maxY);
+		}
+
+		private static Dictionary<int, List<NetworkItem>> BuildItemColumns(IEnumerable<NetworkItem> items)
+		{
+			var columns = new Dictionary<int, List<NetworkItem>>();
+
+			foreach (var item in items)
+			{
+				if (item.HasPosition)
+				{
+					List<NetworkItem> column = null;
+
+					if (!columns.TryGetValue(item.Position.X, out column))
+					{
+						column = new List<NetworkItem>();
+						columns.Add(item.Position.X, column);
+					}
+
+					column.Add(item);
+				}
+			}
+
+			// Sort the columns top-down
+			foreach (var column in columns.Values)
+			{
+				column.Sort((a, b) => (a.Position.Y - b.Position.Y));
+			}
+
+			return columns;
+		}
+
+		private static int GetMidVPos(IEnumerable<NetworkItem> items)
+		{
+			int minY = -1, maxY = -1;
+
+			foreach (var item in items)
+			{
+				if (minY == -1)
+					minY = item.Position.Y;
+				else
+					minY = Math.Min(minY, item.Position.Y);
+
+				if (maxY == -1)
+					maxY = item.Position.Y;
+				else
+					maxY = Math.Max(maxY, item.Position.Y);
+			}
+
+			return ((minY + maxY) / 2);
+		}
+
+		private static bool IsPositionTaken(IEnumerable<NetworkItem> items, int x, int y)
+		{
+			foreach (var item in items)
+			{
+				if ((item.Position.X == x) && (item.Position.Y == y))
+					return true;
+			}
+
+			return false;
+		}
 	}
 
 	// ------------------------------------------------------------
