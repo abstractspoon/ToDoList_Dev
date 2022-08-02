@@ -163,9 +163,14 @@ namespace PertNetworkUIExtension
 			return m_Items.Contains(item);
 		}
 
-		public void AddItem(NetworkItem item)
+		public bool AddItem(NetworkItem item)
 		{
+			// prevent duplicates/circular paths
+			if (Contains(item))
+				return false;
+
 			m_Items.Add(item);
+			return true;
 		}
 
 		public double Length
@@ -204,7 +209,8 @@ namespace PertNetworkUIExtension
 			do
 			{
 				// Add this item
-				path.AddItem(item);
+				if (!path.AddItem(item))
+					break;
 
 				// Process this item's dependencies
 				if (item.HasDependencies)
@@ -224,7 +230,10 @@ namespace PertNetworkUIExtension
 					item = dependItems[0];
 
 					if (!item.HasDependencies)
-						path.AddItem(item);
+					{
+						if (!path.AddItem(item))
+							break;
+					}
 				}
 			}
 			while (item.HasDependencies);
