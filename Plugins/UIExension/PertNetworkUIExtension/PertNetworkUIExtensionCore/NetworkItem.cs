@@ -32,7 +32,9 @@ namespace PertNetworkUIExtension
 		public string Title;
 		public Point Position;
 		public bool HasPosition { get { return (Position != NullPoint); } }
+
 		public List<uint> DependencyUniqueIds;
+		public bool HasDependencies {  get { return DependencyUniqueIds.Count > 0; } }
 
 		public bool IsDependency(NetworkItem item)
 		{
@@ -205,7 +207,7 @@ namespace PertNetworkUIExtension
 				path.AddItem(item);
 
 				// Process this item's dependencies
-				if (item.DependencyUniqueIds.Count > 0)
+				if (item.HasDependencies)
 				{
 					var dependItems = groupItems.GetItemDependencies(item);
 
@@ -221,11 +223,11 @@ namespace PertNetworkUIExtension
 					// unless it'll get added next time round
 					item = dependItems[0];
 
-					if (item.DependencyUniqueIds.Count == 0)
+					if (!item.HasDependencies)
 						path.AddItem(item);
 				}
 			}
-			while (item.DependencyUniqueIds.Count > 0);
+			while (item.HasDependencies);
 
 			// Reverse the path so it's forward-facing
 			path.Items.Reverse();
