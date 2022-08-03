@@ -61,8 +61,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ToDoListLib", "ToDoListLib\
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ConvertRTFToHTML", "ConvertRTFToHTML\ConvertRTFToHTML.vcxproj", "{4A39B7E7-1695-4376-B9FE-615777318C5D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NetworkDiagramExt2", "NetworkDiagramExt2\NetworkDiagramExt2.vcxproj", "{68E99F7E-1F49-46C0-A945-BC64C58AB5BB}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Unicode Debug|Win32 = Unicode Debug|Win32
@@ -169,10 +167,6 @@ Global
 		{4A39B7E7-1695-4376-B9FE-615777318C5D}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
 		{4A39B7E7-1695-4376-B9FE-615777318C5D}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
 		{4A39B7E7-1695-4376-B9FE-615777318C5D}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
-		{68E99F7E-1F49-46C0-A945-BC64C58AB5BB}.Unicode Debug|Win32.ActiveCfg = Unicode Debug|Win32
-		{68E99F7E-1F49-46C0-A945-BC64C58AB5BB}.Unicode Debug|Win32.Build.0 = Unicode Debug|Win32
-		{68E99F7E-1F49-46C0-A945-BC64C58AB5BB}.Unicode Release|Win32.ActiveCfg = Unicode Release|Win32
-		{68E99F7E-1F49-46C0-A945-BC64C58AB5BB}.Unicode Release|Win32.Build.0 = Unicode Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
