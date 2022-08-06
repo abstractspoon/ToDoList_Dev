@@ -2051,13 +2051,12 @@ BOOL CTDLTaskTreeCtrl::CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const
 	case TDCM_RIGHT:
 		{
 			// must have a prior sibling (which will become the parent)
-			// which is not locked unless both the task and sibling are references
-			HTREEITEM htiNewParent = m_tcTasks.GetNextItem(hti, TVGN_PREVIOUS);
-
-			if (!htiNewParent)
+			// which is not a reference unless both the task and sibling are references
+			DWORD dwNewParentID = 0, dwUnused = 0;
+			VERIFY(GetInsertLocation(nDirection, dwNewParentID, dwUnused));
+			
+			if (!dwNewParentID)
 				return FALSE;
-
-			DWORD dwNewParentID = GetTaskID(htiNewParent);
 
 			if (m_data.IsTaskReference(dwNewParentID))
 				return bTaskIsRef;
