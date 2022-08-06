@@ -11242,6 +11242,10 @@ void CToDoCtrl::ExpandTasks(TDC_EXPANDCOLLAPSE nWhat, BOOL bExpand)
 	if (!CanExpandTasks(nWhat, bExpand))
 		return;
 
+	// PERMANENT LOGGING ///////////////////////////////////////////////
+	CScopedLogTimer timer(_T("ExpandTasks(%s)"), Misc::Format(bExpand));
+	////////////////////////////////////////////////////////////////////
+
 	switch (nWhat)
 	{
 	case TDCEC_ALL:

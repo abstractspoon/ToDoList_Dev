@@ -244,18 +244,11 @@ BOOL CTreeCtrlHelper::HasFocus(BOOL bIncEditing)
 void CTreeCtrlHelper::ExpandAll(BOOL bExpand)
 {
 	CHoldRedraw hr(m_tree);
-	SetItemStateEx(NULL, bExpand ? TVIS_EXPANDED : 0, TVIS_EXPANDED, TRUE);
+	ExpandItem(NULL, bExpand, TRUE, FALSE);
 }
 
 void CTreeCtrlHelper::ExpandItem(HTREEITEM hti, BOOL bExpand, BOOL bChildren, BOOL bParents)
 {
-	// special case: equiv to ExpandAll
-	if ((hti == NULL) && bChildren)
-	{
-		ExpandAll(bExpand);
-		return;
-	}
-
 	if (hti)
 	{
 		BOOL bIsExpanded = IsItemExpanded(hti);
