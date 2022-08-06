@@ -107,7 +107,7 @@ CGanttCtrl::CGanttCtrl()
 	m_pDependEdit(NULL),
 	m_dwMaxTaskID(0),
 	m_bReadOnly(FALSE),
-	m_nSnapMode(GTLCSM_FREE)
+	m_nDefSnapMode(GTLCSM_FREE)
 {
 
 }
@@ -5614,6 +5614,7 @@ BOOL CGanttCtrl::StartDragging(const CPoint& ptCursor)
 	m_nDragging = nDrag;
 	m_dtDragMin = m_data.CalcMaxDependencyDate(m_giPreDrag);
 
+	SetFocus();
 	m_list.SetCapture();
 	
 	// keep parent informed
@@ -5630,18 +5631,6 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 
 	if (IsDragging())
 	{
-		DWORD dwTaskID = GetSelectedTaskID();
-
-		GANTTITEM* pGI = NULL;
-		GET_GI_RET(dwTaskID, pGI, FALSE);
-
-		// Restore original refID because that's what we've been really dragging
-		if (pGI->dwOrgRefID)
-		{
-			dwTaskID = pGI->dwOrgRefID;
-			pGI->dwOrgRefID = 0;
-		}
-
 		// dropping outside the list is a cancel
 		if (!IsValidDragPoint(ptCursor))
 		{
@@ -5654,6 +5643,9 @@ BOOL CGanttCtrl::EndDragging(const CPoint& ptCursor)
 		// cleanup
 		m_nDragging = GTLCD_NONE;
 		::ReleaseCapture();
+
+		GANTTITEM* pGI = NULL;
+		GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
 
 		// keep parent informed
 		if (DragDatesDiffer(*pGI, m_giPreDrag))
@@ -5706,25 +5698,16 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 	
 	if (IsDragging())
 	{
-		DWORD dwTaskID = GetSelectedTaskID();
-		GANTTITEM* pGI = NULL;
-
-		GET_GI_RET(dwTaskID, pGI, FALSE);
-
-		COleDateTime dtStart, dtDue;
-		GetTaskStartEndDates(*pGI, dtStart, dtDue);
-
-		// update taskID to refID because we're really dragging the refID
-		if (pGI->dwOrgRefID)
-		{
-			dwTaskID = pGI->dwOrgRefID;
-			pGI->dwOrgRefID = 0;
-		}
-		
 		COleDateTime dtDrag;
 
 		if (GetValidDragDate(ptCursor, dtDrag))
 		{
+			GANTTITEM* pGI = NULL;
+			GET_GI_RET(m_giPreDrag.dwTaskID, pGI, FALSE);
+
+			COleDateTime dtCurStart, dtCurDue;
+			GetTaskStartEndDates(*pGI, dtCurStart, dtCurDue);
+
 			// if the drag date precedes the min date, constrain
 			// date appropriately and show the 'no drag' cursor
 			BOOL bNoDrag = (CDateHelper::IsDateSet(m_dtDragMin) && (dtDrag < m_dtDragMin));
@@ -5732,15 +5715,24 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 
 			CDateHelper::Max(dtDrag, m_dtDragMin);
 
+			COleDateTime dtOrgStart, dtOrgDue;
+			GetTaskStartEndDates(m_giPreDrag, dtOrgStart, dtOrgDue);
+
 			switch (m_nDragging)
 			{
 			case GTLCD_START:
 				{
 					// prevent the start and end dates from overlapping
-					double dMinDuration = CalcMinDragDuration();
-					COleDateTime dtNewStart(min(dtDrag.m_dt, (dtDue.m_dt - dMinDuration)));
+					if (dtDrag >= dtCurDue)
+					{
+						bNoDrag = (dtOrgStart >= dtCurStart);
+						pGI->SetStartDate(max(dtCurStart, dtOrgStart));
+					}
+					else
+					{
+						pGI->SetStartDate(dtDrag);
+					}
 
-					pGI->SetStartDate(dtNewStart);
 					szCursor = IDC_SIZEWE;
 				}
 				break;
@@ -5748,10 +5740,16 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 			case GTLCD_END:
 				{
 					// prevent the start and end dates from overlapping
-					double dMinDuration = CalcMinDragDuration();
-					COleDateTime dtNewDue(max(dtDrag.m_dt, (dtStart.m_dt + dMinDuration)));
+					if (dtDrag <= dtCurStart)
+					{
+						bNoDrag = (dtOrgDue <= dtCurDue);
+						pGI->SetDueDate(min(dtCurDue, dtOrgDue));
+					}
+					else
+					{
+						pGI->SetDueDate(dtDrag);
+					}
 
-					pGI->SetDueDate(dtNewDue);
 					szCursor = IDC_SIZEWE;
 				}
 				break;
@@ -5763,9 +5761,6 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 					// a day because that's all it knows how to do.
 					// We however don't always want it to so we must
 					// detect those times and subtract a day as required
-					COleDateTime dtOrgStart, dtOrgDue;
-					GetTaskStartEndDates(m_giPreDrag, dtOrgStart, dtOrgDue);
-					
 					COleDateTime dtDuration(dtOrgDue - dtOrgStart);
 					COleDateTime dtEnd = (dtDrag + dtDuration);
 					
@@ -5804,92 +5799,6 @@ BOOL CGanttCtrl::UpdateDragging(const CPoint& ptCursor)
 
 	// else
 	return FALSE; // not dragging
-}
-
-double CGanttCtrl::CalcMinDragDuration() const
-{
-	ASSERT((m_nDragging == GTLCD_START) || (m_nDragging == GTLCD_END));
-	
-	double dMin;
-
-	if (CalcMinDragDuration(GetSnapMode(), dMin))
-		return dMin;
-
-	// Handle 'Free' (no snapping)
-	switch (m_nMonthDisplay)
-	{
-	case GTLC_DISPLAY_QUARTERCENTURIES:
-	case GTLC_DISPLAY_DECADES:
-	case GTLC_DISPLAY_YEARS:
-	case GTLC_DISPLAY_QUARTERS_SHORT:
-	case GTLC_DISPLAY_QUARTERS_MID:
-	case GTLC_DISPLAY_QUARTERS_LONG:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTMONTH, dMin));
-		break;
-		
-	case GTLC_DISPLAY_MONTHS_SHORT:
-	case GTLC_DISPLAY_MONTHS_MID:
-	case GTLC_DISPLAY_MONTHS_LONG:
-	case GTLC_DISPLAY_WEEKS_SHORT:
-	case GTLC_DISPLAY_WEEKS_MID:
-	case GTLC_DISPLAY_WEEKS_LONG:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTDAY, dMin));
-		break;
-		
-	case GTLC_DISPLAY_DAYS_SHORT:
-	case GTLC_DISPLAY_DAYS_MID:
-	case GTLC_DISPLAY_DAYS_LONG:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTHOUR, dMin));
-		break;
-
-	case GTLC_DISPLAY_HOURS:
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTHALFHOUR, dMin));
-		break;
-
-	default:
-		ASSERT(0);
-		VERIFY(CalcMinDragDuration(GTLCSM_NEARESTHOUR, dMin));
-		break;
-	}
-
-	ASSERT(dMin > 0.0);
-
-	return dMin;
-}
-
-BOOL CGanttCtrl::CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin)
-{
-	dMin = -1;
-
-	switch (nMode)
-	{
-	case GTLCSM_NEARESTQUARTERCENTURY:	dMin = 9125.0;		break;
-	case GTLCSM_NEARESTDECADE:			dMin = 3650.0;		break;
-	case GTLCSM_NEARESTYEAR:			dMin = 365.0;		break;
-	case GTLCSM_NEARESTHALFYEAR:		dMin = 182.0;		break;
-	case GTLCSM_NEARESTQUARTER:			dMin = 91.0;		break;
-	case GTLCSM_NEARESTMONTH:			dMin = 30.0;		break;
-	case GTLCSM_NEARESTWEEK:			dMin = 7.0;			break;
-	case GTLCSM_NEARESTDAY:				dMin = 1.0;			break;
-	case GTLCSM_NEARESTHALFDAY:			dMin = 0.5;			break;
-	case GTLCSM_NEARESTHOUR:			dMin = (1.0 / 24);	break;
-	case GTLCSM_NEARESTHALFHOUR:		dMin = (1.0 / 48);	break;
-
-	case GTLCSM_FREE:
-		return FALSE;
-
-	default:
-		ASSERT(0);
-		return FALSE;
-	}
-
-	ASSERT(dMin > 0.0);
-
-	// Handle whole days
-	if (dMin == (int)dMin)
-		dMin = CDateHelper::GetEndOfPreviousDay(dMin).m_dt;
-
-	return TRUE;
 }
 
 BOOL CGanttCtrl::GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const
@@ -6082,117 +5991,105 @@ GTLC_SNAPMODE CGanttCtrl::GetSnapMode() const
 			{
 			case GTLC_DISPLAY_QUARTERCENTURIES:
 			case GTLC_DISPLAY_DECADES:
-				if (bCtrl && bShift)
 				{
-					m_nSnapMode = GTLCSM_NEARESTHALFYEAR;
-				}
-				else if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTYEAR;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTDECADE;
+					if (bCtrl && bShift)
+						return GTLCSM_NEARESTHALFYEAR;
+
+					if (bCtrl)
+						return GTLCSM_NEARESTYEAR;
+
+					if (bShift)
+						return GTLCSM_NEARESTDECADE;
 				}
 				break;
 
 			case GTLC_DISPLAY_YEARS:
-				if (bCtrl && bShift)
 				{
-					m_nSnapMode = GTLCSM_NEARESTHALFYEAR;
-				}
-				else if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTMONTH;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTYEAR;
+					if (bCtrl && bShift)
+						return GTLCSM_NEARESTHALFYEAR;
+
+					if (bCtrl)
+						return GTLCSM_NEARESTMONTH;
+
+					if (bShift)
+						return GTLCSM_NEARESTYEAR;
 				}
 				break;
 				
 			case GTLC_DISPLAY_QUARTERS_SHORT:
 			case GTLC_DISPLAY_QUARTERS_MID:
 			case GTLC_DISPLAY_QUARTERS_LONG:
-				if (bCtrl)
 				{
-					m_nSnapMode = GTLCSM_NEARESTMONTH;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTQUARTER;
+					if (bCtrl)
+						return GTLCSM_NEARESTMONTH;
+					
+					if (bShift)
+						return GTLCSM_NEARESTQUARTER;
 				}
 				break;
 				
 			case GTLC_DISPLAY_MONTHS_SHORT:
 			case GTLC_DISPLAY_MONTHS_MID:
 			case GTLC_DISPLAY_MONTHS_LONG:
-				if (bCtrl)
 				{
-					m_nSnapMode = GTLCSM_NEARESTDAY;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTMONTH;
+					if (bCtrl)
+						return GTLCSM_NEARESTDAY;
+
+					if (bShift)
+						return GTLCSM_NEARESTMONTH;
 				}
 				break;
 				
 			case GTLC_DISPLAY_WEEKS_SHORT:
 			case GTLC_DISPLAY_WEEKS_MID:
 			case GTLC_DISPLAY_WEEKS_LONG:
-				if (bCtrl)
 				{
-					m_nSnapMode = GTLCSM_NEARESTDAY;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTWEEK;
+					if (bCtrl)
+						return GTLCSM_NEARESTDAY;
+
+					if (bShift)
+						return GTLCSM_NEARESTWEEK;
 				}
 				break;
 				
 			case GTLC_DISPLAY_DAYS_SHORT:
 			case GTLC_DISPLAY_DAYS_MID:
 			case GTLC_DISPLAY_DAYS_LONG:
-				if (bCtrl && bShift)
 				{
-					m_nSnapMode = GTLCSM_NEARESTHALFDAY;
-				}
-				else if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHOUR;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTDAY;
+					if (bCtrl && bShift)
+						return GTLCSM_NEARESTHALFDAY;
+
+					if (bCtrl)
+						return GTLCSM_NEARESTHOUR;
+
+					if (bShift)
+						return GTLCSM_NEARESTDAY;
 				}
 				break;
 
 			case GTLC_DISPLAY_HOURS:
-				if (bCtrl && bShift)
 				{
-					m_nSnapMode = GTLCSM_NEARESTHOUR;
+					if (bCtrl && bShift)
+						return GTLCSM_NEARESTHOUR;
+
+					if (bCtrl)
+						return GTLCSM_NEARESTHALFHOUR;
+
+					if (bShift)
+						return GTLCSM_NEARESTHALFDAY;
 				}
-				else if (bCtrl)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHALFHOUR;
-				}
-				else if (bShift)
-				{
-					m_nSnapMode = GTLCSM_NEARESTHALFDAY;
-				}
-				// TODO
 				break;
 				
 			default:
 				ASSERT(0);
-				// fall thru to whatever's currently set
+				// fall thru to default
 				break;
 			}
 		}
 	}
 
 	// else
-	return m_nSnapMode;
+	return m_nDefSnapMode;
 }
 
 COleDateTime CGanttCtrl::GetNearestDate(const COleDateTime& dtDrag) const

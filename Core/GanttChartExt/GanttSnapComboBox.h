@@ -22,7 +22,7 @@ class CGanttSnapComboBox : public CComboBox
 public:
 	CGanttSnapComboBox();
 
-	void UpdateSnapModes(const CGanttCtrl& ctrl);
+	void Rebuild(GTLC_MONTH_DISPLAY nDisplay, GTLC_SNAPMODE nSnap);
 
 	BOOL SelectMode(GTLC_SNAPMODE nSnap);
 	GTLC_SNAPMODE GetSelectedMode() const;

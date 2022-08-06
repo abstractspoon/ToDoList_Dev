@@ -55,8 +55,8 @@ public:
 	BOOL SelectTask(DWORD dwTaskID, BOOL bEnsureVisible);
 	BOOL SortBy(TDC_ATTRIBUTE nSortBy, BOOL bAscending);
 
-	TCC_SNAPMODE GetSnapMode() const;
-	void SetSnapMode(TCC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
+	TCC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
+	void SetDefaultSnapMode(TCC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
 
 	void SetOptions(DWORD dwOption);
 	DWORD GetOptions() const { return m_dwOptions; }
@@ -177,6 +177,7 @@ protected:
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
 	BOOL HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const;
+	TCC_SNAPMODE GetSnapMode() const;
 
 	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const;
 	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol, int& nTask) const;

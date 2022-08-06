@@ -776,7 +776,7 @@ BOOL CGanttChartWnd::OnInitDialog()
 	VERIFY(m_ctrlGantt.Create(this, rCtrl, IDC_GANTTCTRL));
 
 	m_cbDisplayOptions.UpdateDisplayOptions(m_ctrlGantt);
-	m_cbSnapModes.UpdateSnapModes(m_ctrlGantt);
+	m_cbSnapModes.Rebuild(m_ctrlGantt.GetMonthDisplay(), m_ctrlGantt.GetDefaultSnapMode());
 
 	m_ctrlGantt.ScrollToToday();
 	m_ctrlGantt.SetFocus();
@@ -901,8 +901,8 @@ BOOL CGanttChartWnd::SetMonthDisplay(GTLC_MONTH_DISPLAY nDisplay)
 		GTLC_SNAPMODE nSnap = GTLCSM_FREE;
 		VERIFY(m_mapDisplaySnapModes.Lookup(nDisplay, nSnap));
 
-		m_ctrlGantt.SetSnapMode(nSnap);
-		m_cbSnapModes.UpdateSnapModes(m_ctrlGantt);
+		m_ctrlGantt.SetDefaultSnapMode(nSnap);
+		m_cbSnapModes.Rebuild(nDisplay, nSnap);
 
 		// Resync range slider
 		if (m_ctrlGantt.HasDateRange())
@@ -971,7 +971,7 @@ void CGanttChartWnd::OnSelchangeSnapMode()
 	GTLC_SNAPMODE nSnap = m_cbSnapModes.GetSelectedMode();
 
 	m_mapDisplaySnapModes[nCurDisplay] = nSnap;
-	m_ctrlGantt.SetSnapMode(nSnap);
+	m_ctrlGantt.SetDefaultSnapMode(nSnap);
 }
 
 LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
@@ -987,8 +987,8 @@ LRESULT CGanttChartWnd::OnGanttNotifyZoomChange(WPARAM wp, LPARAM lp)
 	GTLC_SNAPMODE nSnap = GTLCSM_FREE;
 	VERIFY(m_mapDisplaySnapModes.Lookup(nDisplay, nSnap));
 
-	m_ctrlGantt.SetSnapMode(nSnap);
-	m_cbSnapModes.UpdateSnapModes(m_ctrlGantt);
+	m_ctrlGantt.SetDefaultSnapMode(nSnap);
+	m_cbSnapModes.Rebuild(nDisplay, nSnap);
 
 	// Update slider active range
 	GANTTDATERANGE dtActive;
@@ -1150,14 +1150,16 @@ void CGanttChartWnd::UpdateActiveRangeLabel()
 	SetDlgItemText(IDC_ACTIVEDATERANGE_LABEL, CEnString(IDS_ACTIVEDATERANGE, sRange));
 }
 
-LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM wp, LPARAM /*lp*/)
+LRESULT CGanttChartWnd::OnGanttNotifyDragChange(WPARAM /*wp*/, LPARAM /*lp*/)
 {
+/*
 	// save snap changes as we go
 	GTLC_SNAPMODE nSnap = (GTLC_SNAPMODE)wp;
 	GTLC_MONTH_DISPLAY nDisplay = m_ctrlGantt.GetMonthDisplay();
 
 	m_mapDisplaySnapModes[nDisplay] = nSnap;
 	m_cbSnapModes.SelectMode(nSnap);
+*/
 
 	return 0L;
 }

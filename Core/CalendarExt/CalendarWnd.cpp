@@ -192,7 +192,7 @@ void CCalendarWnd::InitSnapCombo()
 	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_NEARESTHALFDAY, TCCSM_NEARESTHALFDAY);
 	CDialogHelper::AddString(m_cbSnapModes, IDS_SNAP_FREE,			TCCSM_FREE);
 
-	CDialogHelper::SelectItemByData(m_cbSnapModes, m_BigCalendar.GetSnapMode());
+	CDialogHelper::SelectItemByData(m_cbSnapModes, m_BigCalendar.GetDefaultSnapMode());
 }
 
 void CCalendarWnd::OnSelChangeNumWeeks()
@@ -206,7 +206,7 @@ void CCalendarWnd::OnSelChangeNumWeeks()
 
 void CCalendarWnd::OnSelChangeSnapMode()
 {
-	m_BigCalendar.SetSnapMode(CDialogHelper::GetSelectedItemData(m_cbSnapModes, TCCSM_FREE));
+	m_BigCalendar.SetDefaultSnapMode(CDialogHelper::GetSelectedItemData(m_cbSnapModes, TCCSM_FREE));
 }
 
 void CCalendarWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const 
@@ -216,7 +216,7 @@ void CCalendarWnd::SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const
 	m_dlgPrefs.SavePreferences(pPrefs, szKey);
 
 	pPrefs->WriteProfileInt(szKey, _T("NumWeeks"), m_BigCalendar.GetVisibleWeeks());
-	pPrefs->WriteProfileInt(szKey, _T("SnapMode"), m_BigCalendar.GetSnapMode());
+	pPrefs->WriteProfileInt(szKey, _T("SnapMode"), m_BigCalendar.GetDefaultSnapMode());
 }
 
 void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bool bAppOnly) 
@@ -271,7 +271,7 @@ void CCalendarWnd::LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey, bo
 			m_cbNumWeeks.SetCurSel(nWeeks-1);
 
 		TCC_SNAPMODE nSnap = (TCC_SNAPMODE)pPrefs->GetProfileInt(szKey, _T("SnapMode"), TCCSM_NEARESTHOUR);
-		m_BigCalendar.SetSnapMode(nSnap);
+		m_BigCalendar.SetDefaultSnapMode(nSnap);
 		CDialogHelper::SelectItemByData(m_cbSnapModes, nSnap);
 	
 		// make sure 'today' is visible
@@ -844,7 +844,7 @@ void CCalendarWnd::OnClickSelectedTaskDates()
 
 LRESULT CCalendarWnd::OnBigCalendarNotifyDragChange(WPARAM wp, LPARAM /*lp*/)
 {
-	CDialogHelper::SelectItemByData(m_cbSnapModes, wp);
+	//CDialogHelper::SelectItemByData(m_cbSnapModes, wp);
 	UpdateSelectedTaskDates();
 
 	return 0L;

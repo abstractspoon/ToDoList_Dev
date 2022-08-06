@@ -63,7 +63,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_bDraggingEnd(FALSE),
 	m_bDragging(FALSE),
 	m_ptDragOrigin(0),
-	m_nSnapMode(TCCSM_NEARESTHOUR),
+	m_nDefSnapMode(TCCSM_NEARESTHOUR),
 	m_dwOptions(TCCO_DISPLAYCONTINUOUS | TCCO_ENABLELABELTIPS),
 	m_bReadOnly(FALSE),
 	m_nCellVScrollPos(0),
@@ -2553,20 +2553,16 @@ TCC_SNAPMODE CTaskCalendarCtrl::GetSnapMode() const
 	{
 		// active keys override
 		if (Misc::ModKeysArePressed(MKS_CTRL))
-		{
-			m_nSnapMode = TCCSM_NEARESTHOUR;
-		}
-		else if (Misc::ModKeysArePressed(MKS_SHIFT))
-		{
-			m_nSnapMode = TCCSM_NEARESTDAY;
-		}
-		else if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT))
-		{
-			m_nSnapMode = TCCSM_NEARESTHALFDAY;
-		}
+			return TCCSM_NEARESTHOUR;
+
+		if (Misc::ModKeysArePressed(MKS_SHIFT))
+			return TCCSM_NEARESTDAY;
+
+		if (Misc::ModKeysArePressed(MKS_CTRL | MKS_SHIFT))
+			return TCCSM_NEARESTHALFDAY;
 	}
 
-	return m_nSnapMode;
+	return m_nDefSnapMode; // default
 }
 
 void CTaskCalendarCtrl::OnMouseMove(UINT nFlags, CPoint point) 

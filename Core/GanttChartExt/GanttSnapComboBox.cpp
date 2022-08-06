@@ -35,11 +35,11 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CGanttSnapComboBox message handlers
 
-void CGanttSnapComboBox::UpdateSnapModes(const CGanttCtrl& ctrl)
+void CGanttSnapComboBox::Rebuild(GTLC_MONTH_DISPLAY nDisplay, GTLC_SNAPMODE nSnap)
 {
 	ResetContent();
 
-	switch (ctrl.GetMonthDisplay())
+	switch (nDisplay)
 	{
 	case GTLC_DISPLAY_QUARTERCENTURIES:
 		CDialogHelper::AddString(*this, IDS_SNAP_NEARESTHALFYEAR, GTLCSM_NEARESTHALFYEAR);
@@ -98,7 +98,7 @@ void CGanttSnapComboBox::UpdateSnapModes(const CGanttCtrl& ctrl)
 	// Add to all
 	CDialogHelper::AddString(*this, IDS_SNAP_FREE, GTLCSM_FREE);
 
-	SelectMode(ctrl.GetSnapMode());
+	SelectMode(nSnap);
 }
 
 BOOL CGanttSnapComboBox::SelectMode(GTLC_SNAPMODE nSnap)

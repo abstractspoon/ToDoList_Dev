@@ -87,8 +87,8 @@ public:
 	void SetMilestoneTag(const CString& sTag);
 	void SetReadOnly(bool bReadOnly);
 	
-	void SetSnapMode(GTLC_SNAPMODE nSnap) { m_nSnapMode = nSnap; }
-	GTLC_SNAPMODE GetSnapMode() const;
+	void SetDefaultSnapMode(GTLC_SNAPMODE nSnap) { m_nDefSnapMode = nSnap; }
+	GTLC_SNAPMODE GetDefaultSnapMode() const { return m_nDefSnapMode; }
 
 	BOOL BeginDependencyEdit(IGanttDependencyEditor* pDependEdit);
 	void OnEndDepedencyEdit();
@@ -131,11 +131,9 @@ protected:
 	int m_nMonthWidth;
 	CString m_sMilestoneTag;
 	GTLC_DRAG m_nDragging;
+	GTLC_SNAPMODE m_nDefSnapMode;
 
 	CGanttItemMap m_data;
-
-private:
-	mutable GTLC_SNAPMODE m_nSnapMode;
 
 protected:
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
@@ -264,6 +262,7 @@ protected:
 	void IncrementItemPositions(HTREEITEM htiParent, int nFromPos);
 	HIMAGELIST GetTaskIcon(DWORD dwTaskID, int& iImageIndex) const;
 	BOOL GetVisibleDateRange(GANTTDATERANGE& dtRange) const;
+	GTLC_SNAPMODE GetSnapMode() const;
 
 	GANTTITEM* GetGanttItem(DWORD dwTaskID) const;
 	BOOL RestoreGanttItem(const GANTTITEM& giPrev);
@@ -288,7 +287,6 @@ protected:
 	BOOL GetValidDragDate(const CPoint& ptCursor, COleDateTime& dtDrag) const;
 	BOOL GetDateFromPoint(const CPoint& ptCursor, COleDateTime& date) const;
 	COleDateTime GetNearestDate(const COleDateTime& date) const;
-	double CalcMinDragDuration() const;
 	BOOL CanDragTask(DWORD dwTaskID, GTLC_DRAG nDrag = GTLCD_ANY) const;
 	BOOL SetListTaskCursor(DWORD dwTaskID, GTLC_HITTEST nHit) const;
 
@@ -340,7 +338,6 @@ protected:
 							const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
 							const COleDateTime& dtFrom, const COleDateTime& dtTo, CRect& rDate);
 	static CString GetTaskAllocTo(const ITASKLISTBASE* pTasks, HTASKITEM hTask);
-	static BOOL CalcMinDragDuration(GTLC_SNAPMODE nMode, double& dMin);
 	static void BuildTaskMap(const ITASKLISTBASE* pTasks, HTASKITEM hTask, CDWordSet& mapIDs, BOOL bAndSiblings);
 	static BOOL DragDatesDiffer(const GANTTITEM& gi1, const GANTTITEM& gi2);
 	static int GetColumnWidth(GTLC_MONTH_DISPLAY nDisplay, int nMonthWidth);
