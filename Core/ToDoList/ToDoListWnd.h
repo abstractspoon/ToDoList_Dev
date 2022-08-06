@@ -793,7 +793,7 @@ protected:
 	UINT GetNewSubtaskCmdID() const;
 	BOOL UpdateLanguageTranslationAndCheckForRestart(const CPreferencesDlg& oldPrefs);
 	void SaveCurrentFocus(HWND hwndFocus = NULL);
-	void PostAppRestoreFocus(HWND hwndFocus = NULL);
+	void PostAppRestoreFocus(BOOL bActivate = FALSE);
 	void UpdateTreeAndCommentsFonts();
 	int CalcEditFieldInset() const;
 
