@@ -471,6 +471,9 @@ int CTDLFilterBar::GetSelectedFilter() const
 
 FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD& dwCustomFlags) const
 {
+	sCustom.Empty();
+	dwCustomFlags = 0;
+
 	if (m_filter.IsAdvanced())
 	{
 		filter.Reset(FS_ADVANCED);
@@ -482,9 +485,6 @@ FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD&
 	{
 		filter = m_filter;
 		filter.nTitleOption = m_nTitleFilter;
-
-		sCustom.Empty();
-		dwCustomFlags = 0;
 	}
 
 	return filter.nShow;
