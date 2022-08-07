@@ -6968,6 +6968,18 @@ LRESULT CToDoCtrl::OnGetLinkTooltip(WPARAM /*wp*/, LPARAM lp)
 
 	if (!Misc::IsEmpty(szTooltip))
 		return (LRESULT)szTooltip;
+	
+	static CString sTooltip;
+	LPCTSTR szURL = (LPCTSTR)lp;
+
+	if (WebMisc::DecodeFileURI(szURL, sTooltip))
+	{
+		FileMisc::ExpandPathEnvironmentVariables(sTooltip);
+		sTooltip = FileMisc::GetFullPath(sTooltip, m_taskTree.GetTasklistFolder());
+
+		if (sTooltip != szURL)
+			return (LRESULT)(LPCTSTR)sTooltip;
+	}
 
 	return 0;
 }
