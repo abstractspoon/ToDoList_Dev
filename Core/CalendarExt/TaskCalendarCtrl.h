@@ -106,6 +106,7 @@ protected:
 	TDC_ATTRIBUTE m_nSortBy;
 	TCC_MONTHSTYLE m_nCellHeaderMonthStyle;
 	COLORREF m_crWeekend, m_crToday, m_crAltWeek; // Grid color handled by base class
+	TCC_SNAPMODE m_nDefSnapMode;
 
 	struct CONTINUOUSDRAWINFO
 	{
@@ -121,7 +122,6 @@ protected:
 	
 	mutable CArray<CONTINUOUSDRAWINFO, CONTINUOUSDRAWINFO&> m_aContinuousDrawInfo;
 	mutable int m_nMaxDayTaskCount;
-	mutable TCC_SNAPMODE m_nSnapMode;
 
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
