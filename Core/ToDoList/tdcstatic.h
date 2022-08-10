@@ -279,15 +279,36 @@ static const TDCATTRIBUTE ATTRIBUTES[] =
 };
 static const int ATTRIB_COUNT = sizeof(ATTRIBUTES) / sizeof(TDCATTRIBUTE);
 
-static CString GetAttributeName(TDC_ATTRIBUTE nAtt)
+namespace TDC
 {
-	for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+	CString GetAttributeName(TDC_ATTRIBUTE nAttribID)
 	{
-		if (nAtt == ATTRIBUTES[nAttrib].nAttribID)
-			return CEnString(ATTRIBUTES[nAttrib].nAttribResID);
+		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
+		{
+			if (nAttribID == ATTRIBUTES[nAttrib].nAttribID)
+				return CEnString(ATTRIBUTES[nAttrib].nAttribResID);
+		}
+
+		return _T("");
 	}
 
-	return _T("");
+	BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID)
+	{
+		switch (nAttribID)
+		{
+		case TDCA_CREATIONDATE:	
+		case TDCA_LASTMODDATE:	
+		case TDCA_STARTDATE:	
+		case TDCA_STARTTIME:	
+		case TDCA_DUEDATE:		
+		case TDCA_DUETIME:		
+		case TDCA_DONEDATE:		
+		case TDCA_DONETIME:		
+			return TRUE;
+		}
+
+		return FALSE;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////////////

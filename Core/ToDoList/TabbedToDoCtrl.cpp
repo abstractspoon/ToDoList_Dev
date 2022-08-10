@@ -3951,7 +3951,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	case 1:
 		{
 			POSITION pos = mapAttribIDs.GetStartPosition();
-			sAttrib = ::GetAttributeName(mapAttribIDs.GetNext(pos));
+			sAttrib = TDC::GetAttributeName(mapAttribIDs.GetNext(pos));
 		}
 		break;
 
