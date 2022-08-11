@@ -516,7 +516,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_TDLTTN_STOPTRACKING, OnTimeTrackerStopTracking)
 	ON_REGISTERED_MESSAGE(WM_TDL_ISCLOSING, OnToDoListIsClosing)
 	ON_REGISTERED_MESSAGE(WM_TDL_REFRESHPREFS, OnToDoListRefreshPrefs)
-	ON_REGISTERED_MESSAGE(WM_TDL_RESTORE, OnToDoListRestore)
+	ON_REGISTERED_MESSAGE(WM_TDL_PASSWORDRESTORE, OnToDoListPasswordRestore)
 	ON_REGISTERED_MESSAGE(WM_TDL_SHOWWINDOW, OnToDoListShowWindow)
 	ON_REGISTERED_MESSAGE(WM_TLDT_CANDROP, OnCanDropFile)
 	ON_REGISTERED_MESSAGE(WM_TLDT_DROP, OnDropFile)
@@ -1254,18 +1254,18 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 
 			CWnd* pFocus = CWnd::FromHandle((HWND)wp);
 
-	#ifdef _DEBUG
-	// 		if (pFocus)
-	// 		{
-	// 			CString sFocus;
-	// 			pFocus->GetWindowText(sFocus);
-	// 			TRACE(_T("OnFocusChange(%s = %s)\n"), CWinClasses::GetClassEx(*pFocus), sFocus.Left(100));
-	// 		}
-	// 		else
-	// 		{
-	// 			TRACE(_T("OnFocusChange(NULL)\n"));
-	// 		}
-	#endif
+// #ifdef _DEBUG
+// 			if (pFocus)
+// 			{
+// 				CString sFocus;
+// 				pFocus->GetWindowText(sFocus);
+// 				TRACE(_T("OnFocusChange(%s = %s)\n"), CWinClasses::GetClassEx(*pFocus), sFocus.Left(100));
+// 			}
+// 			else
+// 			{
+// 				TRACE(_T("OnFocusChange(NULL)\n"));
+// 			}
+// #endif
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
 			if (CDialogHelper::IsChildOrSame(tdc.GetSafeHwnd(), (HWND)wp))
@@ -11448,7 +11448,9 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, DWORD dwThreadID)
 void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask) 
 #endif
 {
- 	//TRACE(_T("OnActivateApp(%s)\n"), bActive ? _T("TRUE") : _T("FALSE"));
+// 	TRACE(_T("OnActivateApp(%s, last focus = %s)\n"),
+// 		  bActive ? _T("TRUE") : _T("FALSE"),
+// 		  CWinClasses::GetClassEx(m_hwndLastFocus));
 
 	// don't activate when in the middle of loading
 	if (m_bReloading && !bActive)
@@ -11475,8 +11477,6 @@ void CToDoListWnd::OnActivateApp(BOOL bActive, HTASK hTask)
 
 	if (!bActive)
 	{
- 		//TRACE(_T("OnActivateApp(FALSE, focus = %s)\n"), CWinClasses::GetClassEx(m_hwndLastFocus));
-
 		// save tasklists if required
 		if (Prefs().GetAutoSaveOnSwitchApp())
 			SaveAll(TDLS_AUTOSAVE);
@@ -12562,9 +12562,11 @@ BOOL CToDoListWnd::OnQueryOpen()
 	{
 		// fail if the active tasklist is encrypted because we have to verify the password
 		// and we're not allowed to display a dialog in this message handler
-		if (!m_bQueryOpenAllow && GetToDoCtrl().IsEncrypted())
+		const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+		if (!m_bQueryOpenAllow && tdc.IsEncrypted() && tdc.WantPasswordReprompting())
 		{
-			PostMessage(WM_TDL_RESTORE); 
+			PostMessage(WM_TDL_PASSWORDRESTORE); 
 			return FALSE;
 		}
 		
@@ -12575,18 +12577,26 @@ BOOL CToDoListWnd::OnQueryOpen()
 	return FALSE;
 }
 
-LRESULT CToDoListWnd::OnToDoListRestore(WPARAM /*wp*/, LPARAM /*lp*/)
-{
-    ASSERT (IsIconic() && GetToDoCtrl().IsEncrypted()); // sanity check
-	
-    if (IsIconic())
-    {
-        if (VerifyToDoCtrlPassword())
+LRESULT CToDoListWnd::OnToDoListPasswordRestore(WPARAM /*wp*/, LPARAM /*lp*/)
+{ 
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+    if (IsIconic() && tdc.IsEncrypted() && tdc.WantPasswordReprompting())
+	{
+		if (VerifyToDoCtrlPassword())
 		{
 			CAutoFlag af(m_bQueryOpenAllow, TRUE);
-            ShowWindow(SW_RESTORE);
+			ShowWindow(SW_RESTORE);
+
+			// Repost 'focus-restore' because the call to ShowWindow
+			// above will have overwritten its previous effect
+			PostAppRestoreFocus();
 		}
-    }
+	}
+	else
+	{
+		ASSERT(0); // sanity check
+	}
 
 	return 0L;
 }
