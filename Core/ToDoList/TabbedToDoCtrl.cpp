@@ -1696,7 +1696,8 @@ BOOL CTabbedToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& aModTaskIDs, CTDCAttributeMap& mapModAttribs)
+BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& aModTaskIDs, 
+											CDWordArray& aTaskIDsForCompletion, CTDCAttributeMap& mapModAttribs)
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
 
@@ -1754,18 +1755,40 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 	case TDCA_STATUS:		
 		{
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskStatus(dwTaskID, mod.szValue));
+			{
+				if (AttributeSetCausesCompletion(dwTaskID, TDCA_STATUS, mod.szValue))
+				{
+					aTaskIDsForCompletion.Add(dwTaskID);
+				}
+				else
+				{
+					bChange = (SET_CHANGE == m_data.SetTaskStatus(dwTaskID, mod.szValue));
+				}
+			}
 			else
+			{
 				bChange = SetSelectedTaskStatus(mod.szValue);
+			}
 		}
 		break;
 
 	case TDCA_PERCENT:		
 		{
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskPercent(dwTaskID, mod.nValue));
+			{
+				if (AttributeSetCausesCompletion(dwTaskID, TDCA_PERCENT, mod.nValue))
+				{
+					aTaskIDsForCompletion.Add(dwTaskID);
+				}
+				else
+				{
+					bChange = (SET_CHANGE == m_data.SetTaskPercent(dwTaskID, mod.nValue));
+				}
+			}
 			else
+			{
 				bChange = SetSelectedTaskPercentDone(mod.nValue);
+			}
 		}
 		break;
 
@@ -2081,7 +2104,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
 	// Keep track of explicitly modified tasks and attributes
-	CDWordArray aModTaskIDs;
+	CDWordArray aModTaskIDs, aTaskIDsForCompletion;
 	CTDCAttributeMap mapModAttribs;
 	BOOL bChange = FALSE;
 
@@ -2096,7 +2119,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 		{
 			const IUITASKMOD& mod = pMods[nMod];
 
-			if (ProcessUIExtensionMod(mod, aModTaskIDs, mapModAttribs))
+			if (ProcessUIExtensionMod(mod, aModTaskIDs, aTaskIDsForCompletion, mapModAttribs))
 			{
 				bChange = TRUE;
 			}
@@ -2124,6 +2147,13 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 	{
 		ASSERT(0);
 		bChange = FALSE;
+	}
+
+	if (aTaskIDsForCompletion.GetSize() &&
+		SetSelectedTaskDone(aTaskIDsForCompletion, COleDateTime::GetCurrentTime(), FALSE))
+	{
+		m_taskTree.GetAttributesAffectedByMod(TDCA_DONEDATE, mapModAttribs);
+		bChange = TRUE;
 	}
 
 	if (bChange)

@@ -188,6 +188,7 @@ namespace Misc
 	int Round(double dValue);
 	double Round(double dValue, int nDecimals);
 	double Atof(const CString& sValue);
+	int GetNextValue(int nValue, int nIncrement);
 	BOOL IsNumber(const CString& sValue);
 	BOOL IsSymbol(const CString& sValue);
 	BOOL StateChanged(BOOL b1, BOOL b2);
