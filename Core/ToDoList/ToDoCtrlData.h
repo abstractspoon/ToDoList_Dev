@@ -105,7 +105,7 @@ public:
 	CString GetTaskComments(DWORD dwTaskID) const;
 	int GetTaskCommentsLength(DWORD dwTaskID) const;
 	const CBinaryData& GetTaskCustomComments(DWORD dwTaskID, CONTENTFORMAT& cfComments) const;
-	int GetTaskPercent(DWORD dwTaskID, BOOL bCheckIfDone) const;
+	int GetTaskPercent(DWORD dwTaskID) const;
 	BOOL GetTaskTimeEstimate(DWORD dwTaskID, TDCTIMEPERIOD& timeEst) const;
 	BOOL GetTaskTimeSpent(DWORD dwTaskID, TDCTIMEPERIOD& timeSpent) const;
 	BOOL GetTaskCost(DWORD dwTaskID, TDCCOST& cost) const;

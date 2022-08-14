@@ -6145,12 +6145,12 @@ int CTDLTaskCtrlBase::GetSelectedTaskPercent() const
 		POSITION pos = GetFirstSelectedTaskPos();
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		nPercent = m_data.GetTaskPercent(dwTaskID, FALSE);
+		nPercent = m_data.GetTaskPercent(dwTaskID);
 		
 		while (pos)
 		{
 			dwTaskID = GetNextSelectedTaskID(pos);
-			int nTaskPercent = m_data.GetTaskPercent(dwTaskID, FALSE);
+			int nTaskPercent = m_data.GetTaskPercent(dwTaskID);
 			
 			if (nPercent != nTaskPercent)
 				return -1;

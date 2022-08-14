@@ -977,15 +977,11 @@ BOOL CToDoCtrlData::TaskHasDate(DWORD dwTaskID, TDC_DATE nDate) const
 	return CDateHelper::IsDateSet(GetTaskDate(dwTaskID, nDate));
 }
 
-int CToDoCtrlData::GetTaskPercent(DWORD dwTaskID, BOOL bCheckIfDone) const
+int CToDoCtrlData::GetTaskPercent(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
 	
-	if (bCheckIfDone)
-		return pTDI->IsDone() ? 100 : pTDI->nPercentDone;
-	
-	// else
 	return pTDI->nPercentDone;
 }
 
