@@ -810,10 +810,10 @@ protected:
 
 	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
 	DWORD SetSelectedTaskDoneEx(DWORD dwTaskID, const COleDateTime& date, BOOL bDateEdited, BOOL bAndSubtasks);
-// 	TDC_SET SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates);
-	int CheckWantSelectedTaskSubtasksCompleted() const;
+	int CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
 	void ProcessTaskDoneResults(DWORD dwResults, const CDWordArray& aModTaskIDs, const COleDateTime& date, BOOL bDateEdited);
-	BOOL CanSetSelectedTaskDone(const COleDateTime& date, BOOL& bAndSubtasks) /*const*/;
+	BOOL CanSetSelectedTasksDone(const CDWordArray& aTaskIDs, const COleDateTime& date, BOOL& bAndSubtasks) /*const*/;
+	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 
 	void LoadGlobals(const CTaskFile& tasks);
 	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;
@@ -894,8 +894,8 @@ protected:
 	void InitEditPrompts();
 	BOOL ConfirmDeleteAllTasks(BOOL bSelected = FALSE) const;
 
-	void ShowSelectedTaskHasIncompleteDependenciesError(const CString& sIncomplete);
-	void ShowSelectedTaskHasCircularDependenciesError(const CDWordArray& aTaskIDs) const;
+// 	void ShowTaskHasIncompleteDependenciesError(const CString& sIncomplete);
+// 	void ShowSelectedTaskHasCircularDependenciesError(const CDWordArray& aTaskIDs) const;
 
 	typedef CMap<DWORD, DWORD, DWORD, DWORD&> CMapID2ID;
 	void PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID, BOOL bResetCreation) const;
