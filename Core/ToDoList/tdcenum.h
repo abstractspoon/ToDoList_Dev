@@ -753,11 +753,15 @@ enum
 
 /////////////////////////////////////////////////////////////////////////////
 
-enum TDC_SETTASKDONE
+enum // TDC_SETTASKDONE
 {
-	TDC_SETDONE,
-	TDC_SETUNDONE,
-	TDC_SETLEAVE,
+	TDCSTD_NOCHANGE		= 0x00,
+	TDCSTD_CHANGE		= 0x01,
+	TDCSTD_STATECHANGE	= 0x02,
+	TDCSTD_UNDONE		= 0x04,
+	TDCSTD_DONE			= 0x08,
+	TDCSTD_REUSED		= 0x10,
+	TDCSTD_RECREATE		= 0x20,
 };
 
 /////////////////////////////////////////////////////////////////////////////

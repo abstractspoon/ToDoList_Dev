@@ -3051,7 +3051,7 @@ BOOL CToDoCtrl::IncrementSelectedTaskPriority(BOOL bUp)
 	return SetSelectedTaskPriority((bUp ? 1 : -1), TRUE); // offset
 }
 
-void CToDoCtrl::ShowTaskHasIncompleteDependenciesError(const CString& sIncomplete)
+void CToDoCtrl::ShowSelectedTaskHasIncompleteDependenciesError(const CString& sIncomplete)
 {
 	if (GetSelectedTaskCount() == 1)
 	{
@@ -3066,7 +3066,7 @@ void CToDoCtrl::ShowTaskHasIncompleteDependenciesError(const CString& sIncomplet
 	}
 }
 
-void CToDoCtrl::ShowTaskHasCircularDependenciesError(const CDWordArray& aTaskIDs) const
+void CToDoCtrl::ShowSelectedTaskHasCircularDependenciesError(const CDWordArray& aTaskIDs) const
 {
 	if (GetSelectedTaskCount() == 1)
 	{
@@ -3381,7 +3381,7 @@ void CToDoCtrl::SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs,
 	m_data.SetInheritedParentAttributes(mapAttribs, bUpdateAttrib);
 }
 
-int CToDoCtrl::CheckWantSubtasksCompleted()
+int CToDoCtrl::CheckWantSelectedTaskSubtasksCompleted() const
 {
 	// Quick exit
 	if (!m_taskTree.SelectionHasIncompleteSubtasks(TRUE))
@@ -3420,6 +3420,55 @@ int CToDoCtrl::CheckWantSubtasksCompleted()
 	return 0; // IDNO
 }
 
+BOOL CToDoCtrl::CanSetSelectedTaskDone(const COleDateTime& date, BOOL& bAndSubtasks) /*const*/
+{
+	if (!CanEditSelectedTask(TDCA_DONEDATE))
+		return FALSE;
+
+	// Check for incomplete or circular dependencies
+	// and if the user also wants to complete any incomplete subtasks
+	bAndSubtasks = FALSE;
+
+	// If clearing the date or all items are already done
+	// then no further restrictions
+	if (!CDateHelper::IsDateSet(date))
+		return TRUE;
+	
+	if (!TSH().HasUncheckedItems())
+		return TRUE;
+
+	// check for circular dependencies
+	CDWordArray aTaskIDs;
+
+	if (m_taskTree.SelectionHasCircularDependencies(aTaskIDs))
+	{
+		// reset ctrl date
+		SetCtrlDate(m_dtcDone, 0.0);
+
+		ShowSelectedTaskHasCircularDependenciesError(aTaskIDs);
+		return FALSE;
+	}
+
+	// check for incomplete dependents
+	CString sIncomplete;
+
+	if (m_taskTree.SelectionHasIncompleteDependencies(sIncomplete))
+	{
+		ShowSelectedTaskHasIncompleteDependenciesError(sIncomplete);
+		return FALSE;
+	}
+
+	int nRet = CheckWantSelectedTaskSubtasksCompleted();
+
+	if (nRet != -1)
+	{
+		bAndSubtasks = (nRet != 0);
+		return TRUE;
+	}
+
+	return FALSE; // cancel
+}
+
 BOOL CToDoCtrl::SetSelectedTaskDone(BOOL bDone)
 {
 	COleDateTime date;
@@ -3432,218 +3481,214 @@ BOOL CToDoCtrl::SetSelectedTaskDone(BOOL bDone)
 
 BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 {
-	ASSERT(m_aRecreateTaskIDs.GetSize() == 0);
+	if (m_aRecreateTaskIDs.GetSize())
+	{
+		// Should have been cleared last time it was used
+		ASSERT(0);
+		m_aRecreateTaskIDs.RemoveAll();
+	}
+	
+	BOOL bAndSubtasks = FALSE;
 
-	if (!CanEditSelectedTask(TDCA_DONEDATE))
+	if (!CanSetSelectedTaskDone(date, bAndSubtasks))
 		return FALSE;
 
 	Flush();
 
-	// Check for incomplete or circular dependencies
-	// and if the user also wants to complete any incomplete subtasks
-	BOOL bDone = CDateHelper::IsDateSet(date);
-	BOOL bAndSubtasks = FALSE;
-
-	if (bDone && TSH().HasUncheckedItems())
-	{
-		// check for circular dependencies
-		CDWordArray aTaskIDs;
-		
-		if (m_taskTree.SelectionHasCircularDependencies(aTaskIDs))
-		{
-			// reset ctrl date
-			SetCtrlDate(m_dtcDone, 0.0);
-			
-			// show error msg
-			ShowTaskHasCircularDependenciesError(aTaskIDs);
-			
-			return FALSE;
-		}
-
-		// check for incomplete dependents
-		CString sIncomplete;
-
-		if (m_taskTree.SelectionHasIncompleteDependencies(sIncomplete))
-		{
-			ShowTaskHasIncompleteDependenciesError(sIncomplete);
-			return FALSE;
-		}
-
-		int nRet = CheckWantSubtasksCompleted();
-
-		if (nRet == -1)
-			return FALSE; // cancel
-
-		bAndSubtasks = (nRet != 0);
-	}
-
 	// copy the selection and remove child duplicates
 	// if setting state to 'done'
 	CHTIList selection;
-	TSH().CopySelection(selection, bDone);
+	TSH().CopySelection(selection, CDateHelper::IsDateSet(date));
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 		
 	CDWordArray aModTaskIDs;
-	BOOL bSomeRecurred = FALSE, bSomeDone = FALSE;
-	BOOL bStateChange = FALSE;
+	DWORD dwResults = TDCSTD_NOCHANGE;
 
 	POSITION pos = selection.GetHeadPosition();
 
 	while (pos)
 	{
 		HTREEITEM hti = selection.GetNext(pos);
-
 		DWORD dwTaskID = GetTaskID(hti);
-		BOOL bWasDone = m_data.IsTaskDone(dwTaskID);
 
-		bStateChange |= Misc::StateChanged(bDone, bWasDone);
+		DWORD dwTaskResult = SetSelectedTaskDoneEx(dwTaskID, date, bDateEdited, bAndSubtasks);
 
-		// Handle recurring tasks, but only if changing state to completed
-		COleDateTime dtNext;
-		BOOL bRecurring = FALSE, bReuseTask = FALSE, bDueDate = TRUE;
-		COleDateTime dtDone(date);
-		
-		if (bDone && !bWasDone)
+		if (dwTaskResult != TDCSTD_NOCHANGE)
 		{
-			TDCRECURRENCE tr;
-			bRecurring = (m_data.CanTaskRecur(dwTaskID) && m_data.GetTaskRecurrence(dwTaskID, tr));
+			dwResults |= dwTaskResult;
+			aModTaskIDs.Add(dwTaskID);
+		}
+	}
+	
+	ProcessTaskDoneResults(dwResults, aModTaskIDs, date, bDateEdited);
+	return TRUE;
+}
 
-			if (bRecurring)
+void CToDoCtrl::ProcessTaskDoneResults(DWORD dwResults, const CDWordArray& aModTaskIDs, const COleDateTime& date, BOOL bDateEdited)
+{
+	ASSERT((dwResults == TDCSTD_NOCHANGE) || (aModTaskIDs.GetSize() > 0));
+
+	if (dwResults == TDCSTD_NOCHANGE)
+		return;
+
+	ASSERT((m_aRecreateTaskIDs.GetSize() == 0) || (dwResults & TDCSTD_RECREATE));
+
+	BOOL bSomeDone = (dwResults & TDCSTD_DONE);
+	BOOL bSomeReused = (dwResults & TDCSTD_REUSED);
+	BOOL bStateChange = (dwResults & TDCSTD_STATECHANGE);
+
+	// only update controls if the date was changed implicitly
+	// or if the completion state changed for a single task
+	if (!bDateEdited || (bStateChange && (aModTaskIDs.GetSize() == 1)))
+	{
+		UpdateControls(FALSE); // don't update comments
+	}
+
+	m_taskTree.Tree().UpdateWindow();
+
+	// clear done date control if reusing
+	if (!CDateHelper::IsDateSet(date) || bSomeReused)
+	{
+		SetCtrlDate(m_dtcDone, 0.0);
+		m_cbTimeDone.SetOleTime(0.0);
+	}
+	else if (bDateEdited)
+	{
+		m_cbTimeDone.SetOleTime(date);
+	}
+
+	// if some tasks have recurred then we also need to report 
+	// that the start/due dates have changed and selectively
+	// update their state
+	CTDCAttributeMap mapAttribIDs;
+
+	// if some tasks have recurred or some tasks were completed
+	// then we also need to report that the done date has changed
+	if (bSomeDone || bSomeReused)
+		m_taskTree.GetAttributesAffectedByMod(TDCA_DONEDATE, mapAttribIDs);
+
+	if (bSomeReused)
+	{
+		COleDateTime dtStart(GetSelectedTaskDate(TDCD_START));
+		COleDateTime dtDue(GetSelectedTaskDate(TDCD_DUE));
+
+		SetCtrlDate(m_dtcStart, dtStart);
+		SetCtrlDate(m_dtcDue, dtDue);
+
+		m_cbTimeStart.SetOleTime(dtStart.m_dt);
+		m_cbTimeDue.SetOleTime(dtDue.m_dt);
+	}
+
+	// if some were completed and the status also changed
+	// we may also need to update the UI
+	if (bSomeDone && !m_sCompletionStatus.IsEmpty())
+	{
+		m_cbStatus.AddUniqueItem(m_sCompletionStatus);
+		UpdateDataEx(this, IDC_STATUS, m_cbStatus, FALSE);
+	}
+
+	// If some of the tasks were recurring and need to be created
+	// we do that after this operation ends
+	if (m_aRecreateTaskIDs.GetSize())
+	{
+		ASSERT(bSomeDone);
+		PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
+	}
+
+	SetModified(mapAttribIDs, aModTaskIDs, TRUE);
+}
+
+DWORD CToDoCtrl::SetSelectedTaskDoneEx(DWORD dwTaskID, const COleDateTime& date, BOOL bDateEdited, BOOL bAndSubtasks)
+{
+	ASSERT(dwTaskID);
+
+	DWORD dwResult = TDCSTD_NOCHANGE;
+
+	BOOL bDone = CDateHelper::IsDateSet(date);
+	BOOL bWasDone = m_data.IsTaskDone(dwTaskID);
+
+	if (Misc::StateChanged(bDone, bWasDone))
+		dwResult |= TDCSTD_STATECHANGE;
+
+	if (bDone && !bWasDone)
+	{
+		dwResult |= TDCSTD_DONE;
+
+		if (m_timeTracking.IsTrackingTaskOrSubtask(dwTaskID, FALSE))
+			EndTimeTracking(TRUE, TRUE);
+
+		// Handle recurring tasks if changing state to completed
+		TDCRECURRENCE tr;
+		BOOL bRecurring = (m_data.CanTaskRecur(dwTaskID) && m_data.GetTaskRecurrence(dwTaskID, tr));
+
+		if (bRecurring)
+		{
+			switch (tr.nReuse)
 			{
-				switch (tr.nReuse)
+			case TDIRO_REUSE:
+				dwResult |= TDCSTD_REUSED;
+				break;
+
+			case TDIRO_CREATE:
+				dwResult |= TDCSTD_RECREATE;
+				break;
+
+			case TDIRO_ASK:
 				{
-				case TDIRO_REUSE:
-					bReuseTask = TRUE;
-					break;
+					CTDLReuseRecurringTaskDlg dialog(tr.bPreserveComments);
 
-				case TDIRO_CREATE:
-					bReuseTask = FALSE;
-					break;
-
-				case TDIRO_ASK:
+					if (dialog.DoModal() == IDOK)
 					{
-						CTDLReuseRecurringTaskDlg dialog(tr.bPreserveComments);
-
-						if (dialog.DoModal() == IDCANCEL)
-							return FALSE;
-
-						bReuseTask = dialog.GetWantReuseTask();
+						dwResult |= (dialog.GetWantReuseTask() ? TDCSTD_REUSED : TDCSTD_RECREATE);
 
 						// Update the task's 'preserve comments' flag
 						// for later initialisation
 						tr.bPreserveComments = dialog.GetWantPreserveComments();
 						m_data.SetTaskRecurrence(dwTaskID, tr);
 					}
-					break;
+					else 
+					{
+						return TDCSTD_NOCHANGE;
+					}
 				}
+				break;
 			}
-			else
-			{
-				bSomeDone = TRUE;
-			}
-		}
-		else
-		{
-			bSomeDone = TRUE;
-		}
-
-		// FALSE == Don't update the dates of any already-completed subtasks
-		TDC_SET nItemRes = SetTaskDone(dwTaskID, dtDone, bAndSubtasks, FALSE);
-
-		if (nItemRes == SET_CHANGE)
-		{
-			// handle recreation of recurring task
-			if (bRecurring)
-			{
-				if (bReuseTask)
-				{
-					bSomeRecurred = TRUE;
-
-					VERIFY (m_data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate));
-
-					InitialiseNewRecurringTask(dwTaskID, dwTaskID, dtNext, bDueDate);
-
-					// notify parent
-					GetParent()->SendMessage(WM_TDCN_RECREATERECURRINGTASK, dwTaskID, dwTaskID);
-				}
-				else // save off task ID for later recreation
-				{
-					bSomeDone = TRUE;
-
-					m_aRecreateTaskIDs.Add(dwTaskID);
-				}
-			}
-
-			aModTaskIDs.Add(dwTaskID);
 		}
 	}
-	
-	// update related UI elements
-	if (aModTaskIDs.GetSize())
+	else if (!bDone && bWasDone)
 	{
-		// only update controls if the date was changed implicitly
-		// or if the completion state changed for a single task
-		if (!bDateEdited || (bStateChange && (aModTaskIDs.GetSize() == 1)))
-		{
-			UpdateControls(FALSE); // don't update comments
-		}
-
-		m_taskTree.Tree().UpdateWindow();
-
-		// clear done date control if reusing
-		if (!bDone || bSomeRecurred)
-		{
-			SetCtrlDate(m_dtcDone, 0.0);
-			m_cbTimeDone.SetOleTime(0.0);
-		}
-		else if (bDateEdited)
-		{
-			m_cbTimeDone.SetOleTime(date);
-		}
-
-		// if some tasks have recurred then we also need to report 
-		// that the start/due dates have changed and selectively
-		// update their state
-		CTDCAttributeMap mapAttribIDs;
-
-		// if some tasks have recurred or some tasks were completed
-		// then we also need to report that the done date has changed
-		if (bSomeDone || bSomeRecurred)
-			m_taskTree.GetAttributesAffectedByMod(TDCA_DONEDATE, mapAttribIDs);
-
-		if (bSomeRecurred)
-		{
-			COleDateTime dtStart(GetSelectedTaskDate(TDCD_START));
-			COleDateTime dtDue(GetSelectedTaskDate(TDCD_DUE));
-
-			SetCtrlDate(m_dtcStart, dtStart);
-			SetCtrlDate(m_dtcDue, dtDue);
-
-			m_cbTimeStart.SetOleTime(dtStart.m_dt);
-			m_cbTimeDue.SetOleTime(dtDue.m_dt);
-		}
-
-		// if some were completed and the status also changed
-		// we may also need to update the UI
-		if (bSomeDone && !m_sCompletionStatus.IsEmpty())
-		{
-			m_cbStatus.AddUniqueItem(m_sCompletionStatus);
-			UpdateDataEx(this, IDC_STATUS, m_cbStatus, FALSE);
-		}
-		
-		// If some of the tasks were recurring and need to be created
-		// we do that after this operation ends
-		if (m_aRecreateTaskIDs.GetSize())
-		{
-			ASSERT(bSomeDone);
-			PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
-		}
-
-		SetModified(mapAttribIDs, aModTaskIDs, TRUE);
+		dwResult |= TDCSTD_UNDONE;
 	}
-	
-	return TRUE;
+
+	// FALSE == Don't update the dates of any already-completed subtasks
+	if (m_data.SetTaskDone(dwTaskID, date, bAndSubtasks, FALSE) == SET_CHANGE)
+	{
+		dwResult |= TDCSTD_CHANGE;
+
+		// Post-processing for recurring tasks
+		if (dwResult & TDCSTD_REUSED)
+		{
+			COleDateTime dtNext;
+			BOOL bDueDate = TRUE;
+
+			VERIFY(m_data.GetNextTaskOccurrence(dwTaskID, dtNext, bDueDate));
+			InitialiseNewRecurringTask(dwTaskID, dwTaskID, dtNext, bDueDate);
+
+			// notify parent
+			GetParent()->SendMessage(WM_TDCN_RECREATERECURRINGTASK, dwTaskID, dwTaskID);
+		}
+		else if (dwResult & TDCSTD_RECREATE)
+		{
+			m_aRecreateTaskIDs.Add(dwTaskID);
+		}
+	}
+	else
+	{
+		dwResult = TDCSTD_NOCHANGE;
+	}
+
+	return dwResult;
 }
 
 LRESULT CToDoCtrl::OnRecreateRecurringTask(WPARAM /*wParam*/, LPARAM lParam)
@@ -3729,7 +3774,7 @@ DWORD CToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDa
 void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate)
 {
 	// reset new task(s) state to 'undone' including all children
-	SetTaskDone(dwNewTaskID, 0.0, TRUE, TRUE);
+	m_data.SetTaskDone(dwNewTaskID, 0.0, TRUE, TRUE);
 
 	VERIFY(m_data.InitialiseNewRecurringTask(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate));
 
@@ -3745,6 +3790,7 @@ void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID
 	}
 }
 
+/*
 TDC_SET CToDoCtrl::SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates)
 {
 	TDC_SET nRes = m_data.SetTaskDone(dwTaskID, date, bAndSubtasks, bUpdateAllSubtaskDates);
@@ -3759,6 +3805,7 @@ TDC_SET CToDoCtrl::SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bA
 
 	return nRes;
 }
+*/
 
 BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset)
 {
