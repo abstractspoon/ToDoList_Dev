@@ -810,10 +810,10 @@ protected:
 
 	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskDone(const CDWordArray& aTaskIDs, const COleDateTime& date, BOOL bDateEdited);
-	DWORD SetSelectedTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bDateEdited, BOOL bAndSubtasks);
+	BOOL SetSelectedTaskDone(const CDWordArray& aTaskIDs, const CArray<COleDateTime, COleDateTime&>& aDates, BOOL bDateEdited);
+	BOOL SetSelectedTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks);
 	int CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
-	void ProcessTaskCompletionResults(DWORD dwResults, const CDWordArray& aModTaskIDs, const COleDateTime& date, BOOL bDateEdited);
-	BOOL CanSetSelectedTasksDone(const CDWordArray& aTaskIDs, const COleDateTime& date, BOOL& bAndSubtasks) /*const*/;
+	BOOL CanSetSelectedTasksDone(const CDWordArray& aTaskIDs, const CArray<COleDateTime, COleDateTime&>& aDates, BOOL& bAndSubtasks) /*const*/;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	BOOL AttributeSetCausesCompletion(DWORD dwTaskID, TDC_ATTRIBUTE nToAttrib, const TDCCADATA& data) const;
 
