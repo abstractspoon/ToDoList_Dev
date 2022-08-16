@@ -3849,7 +3849,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 		if (bOffset && mapProcessed.Has(dwTaskID))
 			continue;
 
-		int nTaskPercent = nPercent;
+		int nTaskPercent = m_data.GetTaskPercent(dwTaskID);
 
 		if (bDateIsvalid)
 		{
