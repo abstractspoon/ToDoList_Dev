@@ -281,7 +281,7 @@ static const int ATTRIB_COUNT = sizeof(ATTRIBUTES) / sizeof(TDCATTRIBUTE);
 
 namespace TDC
 {
-	CString GetAttributeName(TDC_ATTRIBUTE nAttribID)
+	static CString GetAttributeName(TDC_ATTRIBUTE nAttribID)
 	{
 		for (int nAttrib = 0; nAttrib < ATTRIB_COUNT; nAttrib++)
 		{
@@ -292,7 +292,7 @@ namespace TDC
 		return _T("");
 	}
 
-	BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID)
+	static BOOL IsDateAttribute(TDC_ATTRIBUTE nAttribID)
 	{
 		switch (nAttribID)
 		{
