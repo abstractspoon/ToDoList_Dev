@@ -452,6 +452,9 @@
     <ClCompile Include="..\ToDoList\TDLDebugFormatGetLastErrorDlg.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\ToDoList\TDCTaskCompletion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ToDoList\FilteredToDoCtrl.h">
@@ -917,6 +920,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\ToDoList\TDLDebugFormatGetLastErrorDlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ToDoList\TDCTaskCompletion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

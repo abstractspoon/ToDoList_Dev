@@ -56,8 +56,10 @@ class CTaskFile;
 class CDeferWndMove;
 class CSpellCheckDlg;
 class CPreferences;
+class CTDCTaskCompletionArray;
 
 struct CTRLITEM;
+struct TDCTASKCOMPLETION;
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrl dialog
@@ -809,13 +811,11 @@ protected:
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 
 	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
-	BOOL SetSelectedTaskDone(const CDWordArray& aTaskIDs, const COleDateTime& date, BOOL bDateEdited);
-	BOOL SetSelectedTaskDone(const CDWordArray& aTaskIDs, const CArray<COleDateTime, COleDateTime&>& aDates, BOOL bDateEdited);
-	BOOL SetSelectedTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks);
-	int CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
-	BOOL CanSetSelectedTasksDone(const CDWordArray& aTaskIDs, const CArray<COleDateTime, COleDateTime&>& aDates, BOOL& bAndSubtasks) /*const*/;
+	BOOL SetSelectedTaskDone(const CTDCTaskCompletionArray& aTasks);
+	BOOL SetSelectedTaskDone(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks);
+	BOOL CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, BOOL& bAndSubtasks) /*const*/;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
-	BOOL AttributeSetCausesCompletion(DWORD dwTaskID, TDC_ATTRIBUTE nToAttrib, const TDCCADATA& data) const;
+	BOOL CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
 
 	void LoadGlobals(const CTaskFile& tasks);
 	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;

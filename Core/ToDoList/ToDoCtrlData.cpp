@@ -2147,25 +2147,6 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 				RecalcTaskTimeEstimate(dwTaskID, pTDI, nDate);
 		}
 
-		// Handle a change in completion state
-		if (Misc::StateChanged(bWasDone, pTDI->IsDone()))
-		{
-			if (bWasDone && (pTDI->nPercentDone == 100))
-				pTDI->nPercentDone = 0;
-
-			if (!m_sCompletionStatus.IsEmpty())
-			{
-				if (bWasDone && (pTDI->sStatus.CompareNoCase(m_sCompletionStatus) == 0))
-				{
-					pTDI->sStatus = m_sDefaultStatus;
-				}
-				else if (!bWasDone)
-				{
-					pTDI->sStatus = m_sCompletionStatus;
-				}
-			}
-		}
-
 		// And subtasks
 		ApplyLastInheritedChangeToSubtasks(dwTaskID, TDC::MapDateToAttribute(nDate));
 		
@@ -2380,22 +2361,7 @@ TDC_SET CToDoCtrlData::SetTaskPercent(DWORD dwTaskID, int nPercent)
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	TDC_SET nRes = EditTaskAttributeT(dwTaskID, pTDI, TDCA_PERCENT, pTDI->nPercentDone, nPercent);
-
-	if (nRes == SET_CHANGE)
-	{
-		// need to handle transition to/from 100% as special case
-		if (pTDI->IsDone() && (nPercent < 100))
-		{
-			SetTaskDate(dwTaskID, TDCD_DONE, 0.0);
-		}
-		else if (!pTDI->IsDone() && (nPercent == 100))
-		{
-			SetTaskDate(dwTaskID, TDCD_DONE, COleDateTime::GetCurrentTime());
-		}
-	}
-
-	return nRes;
+	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_PERCENT, pTDI->nPercentDone, nPercent);
 }
 
 TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, const TDCCOST& cost, BOOL bOffset)
@@ -2615,24 +2581,7 @@ TDC_SET CToDoCtrlData::SetTaskStatus(DWORD dwTaskID, const CString& sStatus)
 
 	CString sPrevStatus = pTDI->sStatus;
 	
-	TDC_SET nChange = EditTaskAttributeT(dwTaskID, pTDI, TDCA_STATUS, pTDI->sStatus, sStatus);
-
-	if ((nChange == SET_CHANGE) && !m_sCompletionStatus.IsEmpty() && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
-	{
-		BOOL bDone = (sStatus == m_sCompletionStatus);
-		BOOL bWasDone = (sPrevStatus == m_sCompletionStatus);
-
-		if (bDone && !bWasDone)
-		{
-			SetTaskDone(dwTaskID, COleDateTime::GetCurrentTime(), FALSE, FALSE);
-		}
-		else if (!bDone && bWasDone)
-		{
-			SetTaskDone(dwTaskID, CDateHelper::NullDate(), FALSE, FALSE);
-		}
-	}
-
-	return nChange;
+	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_STATUS, pTDI->sStatus, sStatus);
 }
 
 TDC_SET CToDoCtrlData::SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend)

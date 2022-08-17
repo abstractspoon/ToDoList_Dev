@@ -5016,6 +5016,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 
 	case TDCA_DONEDATE: // -----------------------------------------------------------
 		mapAttribIDs.Add(TDCA_SUBTASKDONE);
+		mapAttribIDs.Add(TDCA_PERCENT);
 
 		if (bWantUpdateDependentDates)
 		{
@@ -5027,12 +5028,6 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
 			mapAttribIDs.Add(TDCA_STARTDATE);
-		}
-
-		if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
-			HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
-		{
-			mapAttribIDs.Add(TDCA_PERCENT);
 		}
 
 		if (HasStyle(TDCS_DONEHAVELOWESTRISK) ||

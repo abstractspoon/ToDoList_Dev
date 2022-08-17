@@ -836,12 +836,12 @@
 #define IDC_TIMEPERIODS                 1547
 #define IDC_AUTODISPLAYREPORT           1548
 #define IDC_ERRORCODE                   1549
-#define IDC_ERRORTEXT                   1550
-#define IDC_INCLUDELABEL                1551
-#define IDC_RULESLABEL                  1552
 #define IDC_LISTTYPE_LABEL              1549
+#define IDC_ERRORTEXT                   1550
 #define IDC_DEFLISTDATA_LABEL           1550
+#define IDC_INCLUDELABEL                1551
 #define IDC_FIRSTOPERAND                1551
+#define IDC_RULESLABEL                  1552
 #define IDC_SECONDOPERANDATTRIBUTE      1552
 #define IDC_SECONDOPISATTRIBUTE         1555
 #define IDC_SECONDOPISVALUE             1556
@@ -2457,6 +2457,7 @@
 #define IDS_CONFIRMSAVEAS               51623
 #define IDS_CONFIRMSAVEAS_TITLE         51624
 #define IDS_PRINT_TASKVIEW              51625
+#define IDS_TASKCOMPLETION              51626
 
 // Next default values for new objects
 // 

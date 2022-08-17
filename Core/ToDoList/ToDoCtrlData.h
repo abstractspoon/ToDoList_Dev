@@ -241,8 +241,7 @@ public:
 	TDC_UNITS GetDefaultTimeSpentUnits() const { return m_nDefTimeSpentUnits; }
 	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	BOOL WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const;
-	void SetCompletionStatus(const CString& sStatus) { m_sCompletionStatus = sStatus; }
-	void SetDefaultStatus(const CString& sStatus) { m_sDefaultStatus = sStatus; }
+ 	void SetDefaultStatus(const CString& sStatus) { m_sDefaultStatus = sStatus; }
 
 protected:
 	CToDoCtrlDataItems m_items; // the real data
@@ -253,7 +252,7 @@ protected:
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CString m_cfDefault;
-	CString m_sDefaultStatus, m_sCompletionStatus;
+	CString m_sDefaultStatus;
 
 	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
 	CTDCAttributeMap m_mapParentAttribs; // inheritable attribs
