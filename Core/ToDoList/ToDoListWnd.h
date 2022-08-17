@@ -55,7 +55,7 @@
 const UINT WM_TDL_SHOWWINDOW		= ::RegisterWindowMessage(_T("WM_TDL_SHOWWINDOW"));
 const UINT WM_TDL_ISCLOSING			= ::RegisterWindowMessage(_T("WM_TDL_ISCLOSING"));
 const UINT WM_TDL_REFRESHPREFS		= ::RegisterWindowMessage(_T("WM_TDL_REFRESHPREFS"));
-const UINT WM_TDL_RESTORE			= ::RegisterWindowMessage(_T("WM_TDL_RESTORE"));
+const UINT WM_TDL_PASSWORDRESTORE	= ::RegisterWindowMessage(_T("WM_TDL_PASSWORDRESTORE"));
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -421,7 +421,7 @@ protected:
 	afx_msg LRESULT OnToDoCtrlIsTaskDone(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnToDoListIsClosing(WPARAM /*wp*/, LPARAM /*lp*/) { return m_bClosing; }
 	afx_msg LRESULT OnToDoListRefreshPrefs(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnToDoListRestore(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnToDoListPasswordRestore(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListShowWindow(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnNotifyReminderModified(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp);

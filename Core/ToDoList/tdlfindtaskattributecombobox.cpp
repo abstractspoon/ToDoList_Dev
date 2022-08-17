@@ -118,7 +118,7 @@ CString CTDLFindTaskAttributeComboBox::GetAttributeName(const SEARCHPARAM& rule)
 		}
 		else // default attribute
 		{
-			sName = ::GetAttributeName(nAttribID);
+			sName = TDC::GetAttributeName(nAttribID);
 
 			// handle relative dates
 			if (!sName.IsEmpty() && AttributeIsDate(nAttribID) && rule.IsRelativeDate())
