@@ -3205,7 +3205,7 @@ void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI)
 
 void CToDoListWnd::OnEditTaskdone() 
 {
-	GetToDoCtrl().SetSelectedTaskDone(!GetToDoCtrl().IsSelectedTaskDone());
+	GetToDoCtrl().SetSelectedTaskCompletion(!GetToDoCtrl().IsSelectedTaskDone());
 }
 
 void CToDoListWnd::OnEditTasktext() 
@@ -12353,7 +12353,7 @@ LRESULT CToDoListWnd::OnReminderCompleteTask(WPARAM wParam, LPARAM lParam)
 
 	if (ValidateTaskLinkFilePath(sPath) && DoTaskLink(sPath, dwTaskID, FALSE))
 	{
-		GetToDoCtrl().SetSelectedTaskDone();
+		GetToDoCtrl().SetSelectedTaskCompletion();
 	}
 
 	return 0L;

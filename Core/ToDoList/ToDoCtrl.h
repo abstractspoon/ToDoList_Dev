@@ -226,7 +226,7 @@ public:
 	BOOL EditSelectedTaskIcon(); 
 	BOOL ClearSelectedTaskIcon(); 
 
-	BOOL SetSelectedTaskDone(BOOL bDone = TRUE);
+	BOOL SetSelectedTaskCompletion(BOOL bDone = TRUE);
 	BOOL IsSelectedTaskDone() const { return m_taskTree.IsSelectedTaskDone(); }
 	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
 	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks);
@@ -810,9 +810,9 @@ protected:
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
 
-	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
-	BOOL SetSelectedTaskDone(const CTDCTaskCompletionArray& aTasks);
-	BOOL SetSelectedTaskDone(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks);
+	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
+	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);
+	BOOL SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks);
 	BOOL CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, BOOL& bAndSubtasks) /*const*/;
 	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	BOOL CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;

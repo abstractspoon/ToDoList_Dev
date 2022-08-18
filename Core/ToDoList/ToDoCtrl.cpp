@@ -3057,7 +3057,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 
 	// special case
 	if (nDate == TDCD_DONE)
-		return SetSelectedTaskDone(date, bDateEdited);
+		return SetSelectedTaskCompletion(date, bDateEdited);
 
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
@@ -3496,17 +3496,17 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 	return (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONQUESTION));
 }
 
-BOOL CToDoCtrl::SetSelectedTaskDone(BOOL bDone)
+BOOL CToDoCtrl::SetSelectedTaskCompletion(BOOL bDone)
 {
 	COleDateTime date;
 
 	if (bDone)
 		date = COleDateTime::GetCurrentTime();
 
-	return SetSelectedTaskDone(date, FALSE);
+	return SetSelectedTaskCompletion(date, FALSE);
 }
 
-BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
+BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited)
 {
 	Flush();
 
@@ -3521,7 +3521,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 	if (!aTasksForCompletion.Add(aTaskIDs, date))
 		return FALSE;
 
-	if (!SetSelectedTaskDone(aTasksForCompletion))
+	if (!SetSelectedTaskCompletion(aTasksForCompletion))
 		return FALSE;
 
 	if (!bDateEdited || aTasksForCompletion.HasStateChange())
@@ -3532,7 +3532,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 	return TRUE;
 }
 
-BOOL CToDoCtrl::SetSelectedTaskDone(const CTDCTaskCompletionArray& aTasks)
+BOOL CToDoCtrl::SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks)
 {
 	BOOL bAndSubtasks = FALSE;
 
@@ -3552,7 +3552,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const CTDCTaskCompletionArray& aTasks)
 
 	for (int nSel = 0; nSel < aTasks.GetSize(); nSel++)
 	{
-		if (SetSelectedTaskDone(aTasks[nSel], bAndSubtasks))
+		if (SetSelectedTaskCompletion(aTasks[nSel], bAndSubtasks))
 			aModTaskIDs.Add(aTasks[nSel].dwID);
 	}
 
@@ -3564,7 +3564,7 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const CTDCTaskCompletionArray& aTasks)
 	return aModTaskIDs.GetSize();
 }
 
-BOOL CToDoCtrl::SetSelectedTaskDone(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks)
+BOOL CToDoCtrl::SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks)
 {
 	DWORD dwTaskID = task.dwID;
 	BOOL bReuse = FALSE, bRecreate = FALSE;
@@ -3849,7 +3849,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 			mapProcessed.Add(dwTaskID);
 	}
 
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskDone(aTasksForCompletion))
+	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
 	{
 		UpdateControls(FALSE);
 
@@ -4366,7 +4366,7 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 		}
 	}
 
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskDone(aTasksForCompletion))
+	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
 	{
 		UpdateControls(FALSE);
 
@@ -8360,7 +8360,7 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		
 	case TDCC_DONE:
 		ASSERT(CanEditSelectedTask(TDCA_DONEDATE, dwTaskID));
-		SetSelectedTaskDone(!m_data.IsTaskDone(dwTaskID));
+		SetSelectedTaskCompletion(!m_data.IsTaskDone(dwTaskID));
 		break;
 		
 	case TDCC_TRACKTIME:
@@ -12177,7 +12177,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 
 	UpdateControls(FALSE);
 
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskDone(aTasksForCompletion))
+	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
 	{
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		SetModified(TDCA_DONEDATE, aModTaskIDs);
@@ -12260,7 +12260,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 
 	UpdateControls(FALSE);
 
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskDone(aTasksForCompletion))
+	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
 	{
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		SetModified(TDCA_DONEDATE, aModTaskIDs);

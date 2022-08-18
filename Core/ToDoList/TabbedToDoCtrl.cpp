@@ -2144,7 +2144,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 	}
 
 	if (aTasksForCompletion.GetSize() &&
-		SetSelectedTaskDone(aTasksForCompletion))
+		SetSelectedTaskCompletion(aTasksForCompletion))
 	{
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		m_taskTree.GetAttributesAffectedByMod(TDCA_DONEDATE, mapModAttribs);
