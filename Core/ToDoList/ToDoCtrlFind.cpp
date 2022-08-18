@@ -250,6 +250,9 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, BOOL bVisibleOnly) con
 	case TDCC_COST:
 		return GetLongestCost(NULL, NULL, NULL, bVisibleOnly);
 
+	case TDCC_SUBTASKDONE:
+		return GetLongestSubtaskDone(NULL, NULL, NULL, bVisibleOnly);
+
 	case TDCC_ALLOCTO:
 	case TDCC_CATEGORY:
 	case TDCC_TAGS:
@@ -289,7 +292,6 @@ CString CToDoCtrlFind::GetLongestValue(TDC_COLUMN nColID, const CStringArray& aP
 	case TDCC_ALLOCBY:
 	case TDCC_STATUS:
 	case TDCC_VERSION:
-	case TDCC_RECURRENCE:
 		sLongestPossible = Misc::GetLongestItem(aPossible);
 		break;
 
