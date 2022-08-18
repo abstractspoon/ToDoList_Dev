@@ -3524,8 +3524,9 @@ BOOL CToDoCtrl::SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited)
 	if (!SetSelectedTaskDone(aTasksForCompletion))
 		return FALSE;
 
-	// else
-	UpdateControls(FALSE);
+	if (!bDateEdited || aTasksForCompletion.HasStateChange())
+		UpdateControls(FALSE);
+
 	SetModified(TDCA_DONEDATE, aTaskIDs, TRUE);
 
 	return TRUE;

@@ -113,6 +113,19 @@ int CTDCTaskCompletionArray::GetTaskIDsForCompletion(CDWordArray& aTasksIDs) con
 	return aTasksIDs.GetSize();
 }
 
+BOOL CTDCTaskCompletionArray::HasStateChange() const
+{
+	int nTask = GetSize();
+
+	while (nTask--)
+	{
+		if (GetAt(nTask).bStateChange)
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
 BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data)
 {
 	switch (nAttribID)

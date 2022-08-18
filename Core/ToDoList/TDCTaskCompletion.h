@@ -63,6 +63,7 @@ public:
 
 	int GetTaskIDs(CDWordArray& aTasksIDs, BOOL bAppend) const;
 	int GetTaskIDsForCompletion(CDWordArray& aTasksIDs) const;
+	BOOL HasStateChange() const;
 
 protected:
 	const CToDoCtrlData& m_data;
