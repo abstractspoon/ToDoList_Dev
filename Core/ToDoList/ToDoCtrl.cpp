@@ -3498,8 +3498,6 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 {
-	COleDateTime dtDone(), dtUndone;
-
 	switch (nCompletion)
 	{
 	case TDCTC_DONE:

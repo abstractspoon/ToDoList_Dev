@@ -1773,7 +1773,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 		{
 			if (dwTaskID)
 			{
-				if (aTasksForCompletion.Add(dwTaskID, mod.nValue))
+				if (!aTasksForCompletion.Add(dwTaskID, mod.nValue))
 				{
 					bChange = (SET_CHANGE == m_data.SetTaskPercent(dwTaskID, mod.nValue));
 				}
@@ -1868,7 +1868,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			COleDateTime date(CDateHelper::GetDate(mod.tValue));
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskDate(dwTaskID, TDCD_DONE, date));
+				VERIFY(aTasksForCompletion.Add(dwTaskID, date));
 			else
 				bChange = SetSelectedTaskDate(TDCD_DONE, date);
 		}
