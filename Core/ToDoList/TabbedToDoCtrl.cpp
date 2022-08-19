@@ -2098,7 +2098,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 	// Keep track of explicitly modified tasks and attributes
 	CDWordArray aModTaskIDs;
-	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
+	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
 	CTDCAttributeMap mapModAttribs;
 	BOOL bChange = FALSE;
 

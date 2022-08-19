@@ -43,9 +43,7 @@ struct TDCTASKCOMPLETION
 class CTDCTaskCompletionArray : protected CArray<TDCTASKCOMPLETION, TDCTASKCOMPLETION&>
 {
 public:
-	CTDCTaskCompletionArray(const CToDoCtrlData& data,
-							const CString& sDefaultStatus,
-							const CString& sDoneStatus);
+	CTDCTaskCompletionArray(const CToDoCtrlData& data, const CString& sDoneStatus);
 	virtual ~CTDCTaskCompletionArray();
 
 	BOOL Add(DWORD dwTaskID, const COleDateTime& date);
@@ -60,7 +58,6 @@ public:
 	int Toggle(const CDWordArray& aTaskIDs);
 
 	const TDCTASKCOMPLETION& operator[](INT_PTR nIndex) const {	return GetAt(nIndex); }
-	TDCTASKCOMPLETION& operator[](INT_PTR nIndex) {	return ElementAt(nIndex); }
 	int GetSize() const { return CArray<TDCTASKCOMPLETION, TDCTASKCOMPLETION&>::GetSize(); }
 
 	int GetTaskIDs(CDWordArray& aTasksIDs, BOOL bAppend) const;
@@ -69,7 +66,7 @@ public:
 
 protected:
 	const CToDoCtrlData& m_data;
-	CString m_sDefaultStatus, m_sDoneStatus;
+	CString m_sDoneStatus;
 
 protected:
 

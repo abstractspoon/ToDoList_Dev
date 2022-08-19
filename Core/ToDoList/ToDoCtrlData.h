@@ -242,6 +242,7 @@ public:
 	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	BOOL WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const;
  	void SetDefaultStatus(const CString& sStatus) { m_sDefaultStatus = sStatus; }
+	CString GetDefaultStatus() const { return m_sDefaultStatus; }
 
 protected:
 	CToDoCtrlDataItems m_items; // the real data

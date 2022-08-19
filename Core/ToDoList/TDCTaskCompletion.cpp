@@ -48,7 +48,7 @@ BOOL TDCTASKCOMPLETION::DoneDateCausesStateChange(const COleDateTime& dtNewDone)
 BOOL TDCTASKCOMPLETION::PercentCausesStateChange(int nNewPercent) const
 {
 	if (IsDone())
-		return ((nNewPercent < 100) && (nPercent == 100));
+		return (nNewPercent < 100);
 
 	return ((nNewPercent == 100) && (nPercent < 100));
 }
@@ -72,11 +72,9 @@ BOOL TDCTASKCOMPLETION::StatusCausesStateChange(const CString& sNewStatus, const
 /////////////////////////////////////////////////////////////////////////////
 
 CTDCTaskCompletionArray::CTDCTaskCompletionArray(const CToDoCtrlData& data,
-												 const CString& sDefaultStatus,
 												 const CString& sDoneStatus)
 	:
 	m_data(data),
-	m_sDefaultStatus(sDefaultStatus),
 	m_sDoneStatus(sDoneStatus)
 {
 }
@@ -154,7 +152,7 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, const COleDateTime& date)
 				task.nPercent = 95;
 
 			if (!m_sDoneStatus.IsEmpty() && (task.sStatus == m_sDoneStatus))
-				task.sStatus = m_sDefaultStatus;
+				task.sStatus = m_data.GetDefaultStatus();
 		}
 		else // Change attributes to DONE state
 		{
@@ -174,9 +172,12 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, const COleDateTime& date)
 
 BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, const CString& sStatus)
 {
+	if (!m_data.HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
+		return FALSE;
+
 	TDCTASKCOMPLETION task(m_data, dwTaskID);
 
-	if (!task.StatusCausesStateChange(sStatus, m_sDefaultStatus, m_sDoneStatus))
+	if (!task.StatusCausesStateChange(sStatus, m_data.GetDefaultStatus(), m_sDoneStatus))
 		return FALSE;
 
 	task.bStateChange = TRUE;
@@ -198,7 +199,7 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, const CString& sStatus)
 	}
 
 	CArray<TDCTASKCOMPLETION, TDCTASKCOMPLETION&>::Add(task);
-	return FALSE;
+	return TRUE;
 }
 
 BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, int nPercent)
@@ -217,7 +218,7 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, int nPercent)
 	{
 		// Change attributes to NON-DONE state
 		if (!m_sDoneStatus.IsEmpty() && (task.sStatus == m_sDoneStatus))
-			task.sStatus = m_sDefaultStatus;
+			task.sStatus = m_data.GetDefaultStatus();
 
 		task.ClearDate();
 	}

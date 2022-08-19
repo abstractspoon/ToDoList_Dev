@@ -3514,7 +3514,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 			if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwUnused, FALSE))
 				return FALSE;
 
-			CTDCTaskCompletionArray aTasks(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
+			CTDCTaskCompletionArray aTasks(m_data, m_sCompletionStatus);
 
 			if (!aTasks.Toggle(aTaskIDs))
 				return FALSE;
@@ -3538,7 +3538,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEd
 	if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwUnused, CDateHelper::IsDateSet(date)))
 		return FALSE;
 
-	CTDCTaskCompletionArray aTasks(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
+	CTDCTaskCompletionArray aTasks(m_data, m_sCompletionStatus);
 
 	if (!aTasks.Add(aTaskIDs, date))
 		return FALSE;
@@ -3549,7 +3549,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEd
 	if (!bDateEdited || aTasks.HasStateChange())
 		UpdateControls(FALSE);
 
-	SetModified(TDCA_DONEDATE, aTaskIDs, TRUE);
+	SetModified(TDCA_DONEDATE, aTaskIDs);
 
 	return TRUE;
 }
@@ -3665,8 +3665,15 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bA
 
 	if (task.bStateChange)
 	{
-		bChange |= (m_data.SetTaskPercent(dwTaskID, task.nPercent) == SET_CHANGE);
-		bChange |= (m_data.SetTaskStatus(dwTaskID, task.sStatus) == SET_CHANGE);
+		// Update status and status of subtasks as required
+		if ((m_data.SetTaskStatus(dwTaskID, task.sStatus) == SET_CHANGE) && bAndSubtasks)
+		{
+			m_data.ApplyLastChangeToSubtasks(dwTaskID, TDCA_STATUS);
+		}
+
+		// Don't update subtask percent so that if the task is
+		// later undone, the previous value is preserved
+		m_data.SetTaskPercent(dwTaskID, task.nPercent);
 	}
 
 	return bChange;
@@ -3827,9 +3834,11 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
 
+	// Percent edits can cause completion changes
+	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
+
 	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
-	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
 
 	while (pos)
 	{
@@ -3858,13 +3867,13 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 		nTaskPercent = min(nTaskPercent, 100);
 		nTaskPercent = max(nTaskPercent, 0);
 
-		// Extra logic because % changes can also affect completion
-		if (!aTasksForCompletion.Add(dwTaskID, nTaskPercent))
+		if (aTasksForCompletion.Add(dwTaskID, nTaskPercent))
 		{
-			if (!HandleModResult(dwTaskID, m_data.SetTaskPercent(dwTaskID, nTaskPercent), aModTaskIDs))
-			{
-				return FALSE;
-			}
+			// int breakpoint = 0;
+		}
+		else if (!HandleModResult(dwTaskID, m_data.SetTaskPercent(dwTaskID, nTaskPercent), aModTaskIDs))
+		{
+			return FALSE;
 		}
 
 		if (bOffset)
@@ -3876,7 +3885,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 		UpdateControls(FALSE);
 
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
-		SetModified(TDCA_DONEDATE, aModTaskIDs, TRUE);
+		SetModified(TDCA_DONEDATE, aModTaskIDs);
 	}
 	else if (aModTaskIDs.GetSize())
 	{
@@ -3890,7 +3899,7 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 			UpdateDataEx(this, IDC_PERCENT, m_nPercentDone, FALSE);
 		}
 
-		SetModified(TDCA_PERCENT, aModTaskIDs, TRUE);
+		SetModified(TDCA_PERCENT, aModTaskIDs);
 	}
 
 	return TRUE;
@@ -4068,19 +4077,7 @@ BOOL CToDoCtrl::SetSelectedTaskTimeEstimate(const TDCTIMEPERIOD& timeEst, BOOL b
 			}
 		}
 
-		CTDCAttributeMap mapAttribIDs(TDCA_TIMEESTIMATE);
-
-		// may also need to report percent and/or date changes
-		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
-			mapAttribIDs.Add(TDCA_PERCENT);
-
-		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
-		{
-			mapAttribIDs.Add(TDCA_STARTDATE);
-			mapAttribIDs.Add(TDCA_DUEDATE);
-		}
-
-		SetModified(mapAttribIDs, aModTaskIDs, TRUE);
+		SetModified(TDCA_TIMEESTIMATE, aModTaskIDs);
 	}
 
 	return TRUE;
@@ -4374,17 +4371,21 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 		
 	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
-	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
+	
+	// Status edits can cause completion changes
+	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
 	
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		// Extra logic because status changes can also affect completion
-		if (!aTasksForCompletion.Add(dwTaskID, sStatus))
+		if (aTasksForCompletion.Add(dwTaskID, sStatus))
 		{
-			if (!HandleModResult(dwTaskID, m_data.SetTaskStatus(dwTaskID, sStatus), aModTaskIDs))
-				return FALSE;
+			// int breakpoint = 0;
+		}
+		else if (!HandleModResult(dwTaskID, m_data.SetTaskStatus(dwTaskID, sStatus), aModTaskIDs))
+		{
+			return FALSE;
 		}
 	}
 
@@ -12139,32 +12140,6 @@ BOOL CToDoCtrl::CanEditSelectedTask(TDC_ATTRIBUTE nAttrib, DWORD dwTaskID) const
 	return FALSE;
 }
 
-/*
-BOOL CToDoCtrl::AttributeSetCausesCompletion(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data) const
-{
-	if (IsTaskDone(dwTaskID))
-		return FALSE;
-
-	// Check whether this copy would change the state to 'done'
-	switch (nAttribID)
-	{
-	case TDCA_DONEDATE:
-		return CDateHelper::IsDateSet(data.AsDate());
-
-	case TDCA_STATUS:
-		return (!m_sCompletionStatus.IsEmpty() &&
-				(data.AsString() == m_sCompletionStatus) &&
-				(m_data.GetTaskStatus(dwTaskID) != m_sCompletionStatus));
-
-	case TDCA_PERCENT:
-		return ((data.AsInteger() == 100) &&
-				(m_data.GetTaskPercent(dwTaskID) < 100));
-	}
-
-	return FALSE;
-}
-*/
-
 BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATTRIBUTE nToAttrib)
 {
 	if (!CanCopyAttributeData(nFromAttrib, nToAttrib))
@@ -12174,26 +12149,26 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
+	// Some attribute edits can cause completion changes
+	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
+
 	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
-	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
 
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 
-		// Task Completion is special because we need to handle recurrence
 		TDCCADATA data;
 
-		if (m_data.GetTaskAttributeValues(dwTaskID, nFromAttrib, data) &&
+		if (m_data.GetTaskAttributeValues(dwTaskID, nFromAttrib, data) && 
 			aTasksForCompletion.Add(dwTaskID, nToAttrib, data))
 		{
-			int breakpoint = 0;
+			//int breakpoint = 0;
 		}
-		else
+		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, nFromAttrib, nToAttrib), aModTaskIDs))
 		{
-			if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, nFromAttrib, nToAttrib), aModTaskIDs))
-				return FALSE;
+			return FALSE;
 		}
 	}
 
@@ -12258,21 +12233,21 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 
 	POSITION pos = TSH().GetFirstItemPos();
 	CDWordArray aModTaskIDs;
-	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
+
+	// Some attribute edits can cause completion changes
+	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
 
 	while (pos)
 	{
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
-
-		// Task Completion is special because we need to handle recurrence
 		TDCCADATA data;
 
 		if (m_data.GetTaskCustomAttributeData(dwTaskID, sFromCustomAttribID, data) &&
 			aTasksForCompletion.Add(dwTaskID, nToAttrib, data))
 		{
-			int breakpoint = 0;
+			// int breakpoint = 0;
 		}
 		else if (!HandleModResult(dwTaskID, m_data.CopyTaskAttributeValues(dwTaskID, sFromCustomAttribID, nToAttrib), aModTaskIDs))
 		{

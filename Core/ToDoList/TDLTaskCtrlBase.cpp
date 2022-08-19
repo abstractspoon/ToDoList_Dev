@@ -5064,6 +5064,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
+			mapAttribIDs.Add(TDCA_STARTDATE);
 		}
 		break;
 
