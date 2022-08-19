@@ -331,7 +331,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_SPELLCHECKCOMMENTS, OnSpellcheckcomments)
 	ON_COMMAND(ID_EDIT_SPELLCHECKTITLE, OnSpellchecktitle)
 	ON_COMMAND(ID_EDIT_TASKCOLOR, OnEditTaskcolor)
-	ON_COMMAND(ID_EDIT_TASKDONE, OnEditTaskdone)
+	ON_COMMAND(ID_EDIT_TOGGLETASKDONE, OnEditToggleTaskDone)
 	ON_COMMAND(ID_EDIT_TASKTEXT, OnEditTasktext)
 	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
 	ON_COMMAND(ID_EXIT, OnExit)
@@ -577,7 +577,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SPELLCHECKCOMMENTS, OnUpdateSpellcheckcomments)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_SPELLCHECKTITLE, OnUpdateSpellchecktitle)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_TASKCOLOR, OnUpdateTaskcolor)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_TASKDONE, OnUpdateEditTaskdone)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_TOGGLETASKDONE, OnUpdateEditToggleTaskDone)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_TASKTEXT, OnUpdateEditTasktext)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateEditUndo)
 	ON_UPDATE_COMMAND_UI(ID_FILE_CHANGEPASSWORD, OnUpdateFileChangePassword)
@@ -1022,7 +1022,7 @@ void CToDoListWnd::InitShortcutManager()
 	m_mgrShortcuts.AddShortcut(ID_EDIT_QUICKFINDPREV,				VK_F3,			HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_REDO,						'Y',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_SELECTALL,					'A',			HOTKEYF_CONTROL);
-	m_mgrShortcuts.AddShortcut(ID_EDIT_TASKDONE,					VK_SPACE,		HOTKEYF_CONTROL | HOTKEYF_SHIFT);
+	m_mgrShortcuts.AddShortcut(ID_EDIT_TOGGLETASKDONE,				VK_SPACE,		HOTKEYF_CONTROL | HOTKEYF_SHIFT);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_TASKTEXT,					VK_F2,			0);
 	m_mgrShortcuts.AddShortcut(ID_EDIT_UNDO,						'Z',			HOTKEYF_CONTROL);
 	m_mgrShortcuts.AddShortcut(ID_EXIT,								VK_F4,			HOTKEYF_ALT);
@@ -2893,7 +2893,7 @@ void CToDoListWnd::OnUpdateTaskcolor(CCmdUI* pCmdUI)
 	pCmdUI->Enable(GetToDoCtrl().CanEditSelectedTask(TDCA_COLOR) && (Prefs().GetTextColorOption() == COLOROPT_DEFAULT));	
 }
 
-void CToDoListWnd::OnUpdateEditTaskdone(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateEditToggleTaskDone(CCmdUI* pCmdUI) 
 {
 	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 	int nSelCount = tdc.GetSelectedTaskCount();
@@ -3203,9 +3203,9 @@ void CToDoListWnd::OnUpdateEditCleartaskcolor(CCmdUI* pCmdUI)
 					(tdc.GetSelectedTaskColor() != 0));	
 }
 
-void CToDoListWnd::OnEditTaskdone() 
+void CToDoListWnd::OnEditToggleTaskDone() 
 {
-	GetToDoCtrl().SetSelectedTaskCompletion(!GetToDoCtrl().IsSelectedTaskDone());
+	GetToDoCtrl().SetSelectedTaskCompletion(TDCTC_TOGGLE);
 }
 
 void CToDoListWnd::OnEditTasktext() 
@@ -12353,7 +12353,7 @@ LRESULT CToDoListWnd::OnReminderCompleteTask(WPARAM wParam, LPARAM lParam)
 
 	if (ValidateTaskLinkFilePath(sPath) && DoTaskLink(sPath, dwTaskID, FALSE))
 	{
-		GetToDoCtrl().SetSelectedTaskCompletion();
+		GetToDoCtrl().SetSelectedTaskCompletion(TDCTC_DONE);
 	}
 
 	return 0L;

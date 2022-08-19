@@ -52,10 +52,12 @@ public:
 	BOOL Add(DWORD dwTaskID, const CString& sStatus);
 	BOOL Add(DWORD dwTaskID, int nPercent);
 	BOOL Add(DWORD dwTaskID, TDC_ATTRIBUTE nAttribID, const TDCCADATA& data);
+	BOOL Toggle(DWORD dwTaskID);
 
 	int Add(const CDWordArray& aTaskIDs, const COleDateTime& date);
 	int Add(const CDWordArray& aTaskIDs, const CString& sStatus);
 	int Add(const CDWordArray& aTaskIDs, int nPercent);
+	int Toggle(const CDWordArray& aTaskIDs);
 
 	const TDCTASKCOMPLETION& operator[](INT_PTR nIndex) const {	return GetAt(nIndex); }
 	TDCTASKCOMPLETION& operator[](INT_PTR nIndex) {	return ElementAt(nIndex); }

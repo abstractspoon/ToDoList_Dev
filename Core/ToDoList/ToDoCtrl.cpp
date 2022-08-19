@@ -3496,14 +3496,38 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 	return (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONQUESTION));
 }
 
-BOOL CToDoCtrl::SetSelectedTaskCompletion(BOOL bDone)
+BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 {
-	COleDateTime date;
+	COleDateTime dtDone(), dtUndone;
 
-	if (bDone)
-		date = COleDateTime::GetCurrentTime();
+	switch (nCompletion)
+	{
+	case TDCTC_DONE:
+		return SetSelectedTaskCompletion(COleDateTime::GetCurrentTime(), FALSE);
 
-	return SetSelectedTaskCompletion(date, FALSE);
+	case TDCTC_UNDONE:
+		return SetSelectedTaskCompletion(CDateHelper::NullDate(), FALSE);
+
+	case TDCTC_TOGGLE:
+		{
+			CDWordArray aTaskIDs;
+			DWORD dwUnused;
+
+			if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwUnused, FALSE))
+				return FALSE;
+
+			CTDCTaskCompletionArray aTasks(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
+
+			if (!aTasks.Toggle(aTaskIDs))
+				return FALSE;
+
+			return SetSelectedTaskCompletion(aTasks);
+		}
+		break;
+	}
+
+	ASSERT(0);
+	return FALSE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited)
@@ -3516,15 +3540,15 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEd
 	if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwUnused, CDateHelper::IsDateSet(date)))
 		return FALSE;
 
-	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
+	CTDCTaskCompletionArray aTasks(m_data, m_tdiDefault.sStatus, m_sCompletionStatus);
 
-	if (!aTasksForCompletion.Add(aTaskIDs, date))
+	if (!aTasks.Add(aTaskIDs, date))
 		return FALSE;
 
-	if (!SetSelectedTaskCompletion(aTasksForCompletion))
+	if (!SetSelectedTaskCompletion(aTasks))
 		return FALSE;
 
-	if (!bDateEdited || aTasksForCompletion.HasStateChange())
+	if (!bDateEdited || aTasks.HasStateChange())
 		UpdateControls(FALSE);
 
 	SetModified(TDCA_DONEDATE, aTaskIDs, TRUE);
@@ -8360,7 +8384,7 @@ LRESULT CToDoCtrl::OnTDCColumnEditClick(WPARAM wParam, LPARAM lParam)
 		
 	case TDCC_DONE:
 		ASSERT(CanEditSelectedTask(TDCA_DONEDATE, dwTaskID));
-		SetSelectedTaskCompletion(!m_data.IsTaskDone(dwTaskID));
+		SetSelectedTaskCompletion(m_data.IsTaskDone(dwTaskID) ? TDCTC_UNDONE : TDCTC_DONE);
 		break;
 		
 	case TDCC_TRACKTIME:

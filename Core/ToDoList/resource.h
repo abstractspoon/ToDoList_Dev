@@ -885,7 +885,7 @@
 #define ID_NEWSUBTASK_ATTOP             32801
 #define ID_NEWSUBTASK_ATBOTTOM          32802
 #define ID_EDIT_TASKTEXT                32806
-#define ID_EDIT_TASKDONE                32807
+#define ID_EDIT_TOGGLETASKDONE          32807
 #define ID_EDIT_TASKCOLOR               32808
 #define ID_MOVETASKUP                   32809
 #define ID_MOVETASKDOWN                 32810

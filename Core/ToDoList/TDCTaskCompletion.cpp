@@ -233,6 +233,15 @@ BOOL CTDCTaskCompletionArray::Add(DWORD dwTaskID, int nPercent)
 	return TRUE;
 }
 
+BOOL CTDCTaskCompletionArray::Toggle(DWORD dwTaskID)
+{
+	if (m_data.IsTaskDone(dwTaskID))
+		return Add(dwTaskID, CDateHelper::NullDate());
+
+	// else
+	return Add(dwTaskID, COleDateTime::GetCurrentTime());
+}
+
 int CTDCTaskCompletionArray::Add(const CDWordArray& aTaskIDs, const COleDateTime& date)
 {
 	int nCurSize = GetSize();
@@ -259,6 +268,17 @@ int CTDCTaskCompletionArray::Add(const CDWordArray& aTaskIDs, int nPercent)
 
 	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 		Add(aTaskIDs[nID], nPercent);
+
+	return (GetSize() - nCurSize);
+}
+
+int CTDCTaskCompletionArray::Toggle(const CDWordArray& aTaskIDs)
+{
+	COleDateTime dtDone(COleDateTime::GetCurrentTime()), dtUndone;
+	int nCurSize = GetSize();
+
+	for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
+		Toggle(aTaskIDs[nID]);
 
 	return (GetSize() - nCurSize);
 }

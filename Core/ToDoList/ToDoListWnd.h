@@ -444,7 +444,7 @@ protected:
 	afx_msg void OnEditPasteSub();
 	afx_msg void OnEditAddFileLink();
 	afx_msg void OnEditTaskcolor();
-	afx_msg void OnEditTaskdone();
+	afx_msg void OnEditToggleTaskDone();
 	afx_msg void OnEditTasktext();
 	afx_msg void OnEditTimeTrackTask();
 	afx_msg void OnExit();
@@ -548,7 +548,7 @@ protected:
 	afx_msg void OnUpdateSpellcheckcomments(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateSpellchecktitle(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateTaskcolor(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateEditTaskdone(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditToggleTaskDone(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateToolsCheckin(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateToolsCheckout(CCmdUI* pCmdUI);
  	afx_msg void OnUpdateToolsRemovefromsourcecontrol(CCmdUI* pCmdUI);

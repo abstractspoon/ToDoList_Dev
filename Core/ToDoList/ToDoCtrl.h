@@ -226,7 +226,7 @@ public:
 	BOOL EditSelectedTaskIcon(); 
 	BOOL ClearSelectedTaskIcon(); 
 
-	BOOL SetSelectedTaskCompletion(BOOL bDone = TRUE);
+	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
 	BOOL IsSelectedTaskDone() const { return m_taskTree.IsSelectedTaskDone(); }
 	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
 	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks);

@@ -3062,7 +3062,7 @@ BEGIN
             MENUITEM "Set Task &Icon...",           ID_EDIT_SETTASKICON
             MENUITEM "C&lear Task Icon",            ID_EDIT_CLEARTASKICON
             MENUITEM SEPARATOR
-            MENUITEM "&Toggle Task Completion",     ID_EDIT_TASKDONE
+            MENUITEM "&Toggle Task Completion",     ID_EDIT_TOGGLETASKDONE
             MENUITEM "&Increment Task % Completion", 
                                                     ID_EDIT_INCTASKPERCENTDONE
 
@@ -3813,7 +3813,7 @@ BEGIN
             MENUITEM "Set Task &Icon...",           ID_EDIT_SETTASKICON
             MENUITEM "C&lear Task Icon",            ID_EDIT_CLEARTASKICON
             MENUITEM SEPARATOR
-            MENUITEM "&Toggle Task Completion",     ID_EDIT_TASKDONE
+            MENUITEM "&Toggle Task Completion",     ID_EDIT_TOGGLETASKDONE
             MENUITEM "&Increment Task % Completion", 
                                                     ID_EDIT_INCTASKPERCENTDONE
 
