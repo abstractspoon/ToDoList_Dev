@@ -3498,34 +3498,39 @@ BOOL CToDoCtrl::CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) cons
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 {
-	switch (nCompletion)
-	{
-	case TDCTC_DONE:
-		return SetSelectedTaskCompletion(COleDateTime::GetCurrentTime(), FALSE);
-
-	case TDCTC_UNDONE:
+	if (nCompletion == TDCTC_UNDONE)
 		return SetSelectedTaskCompletion(CDateHelper::NullDate(), FALSE);
 
-	case TDCTC_TOGGLE:
+	CDWordArray aTaskIDs;
+	DWORD dwUnused;
+
+	if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwUnused, FALSE))
+		return FALSE;
+
+	CTDCTaskCompletionArray aTasks(m_data, m_sCompletionStatus);
+
+	if (nCompletion == TDCTC_TOGGLE)
+	{
+		if (!aTasks.Toggle(aTaskIDs))
+			return FALSE;
+	}
+	else
+	{
+		ASSERT(nCompletion == TDCTC_DONE);
+
+		// Weed out already completed tasks else their dates
+		// will get changed which we don't want
+		for (int nID = 0; nID < aTaskIDs.GetSize(); nID++)
 		{
-			CDWordArray aTaskIDs;
-			DWORD dwUnused;
-
-			if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwUnused, FALSE))
-				return FALSE;
-
-			CTDCTaskCompletionArray aTasks(m_data, m_sCompletionStatus);
-
-			if (!aTasks.Toggle(aTaskIDs))
-				return FALSE;
-
-			return SetSelectedTaskCompletion(aTasks);
+			if (!m_data.IsTaskDone(aTaskIDs[nID]))
+				aTasks.Add(aTaskIDs[nID], COleDateTime::GetCurrentTime());
 		}
-		break;
+
+		// There should be at least one undone task
+		ASSERT(aTaskIDs.GetSize());
 	}
 
-	ASSERT(0);
-	return FALSE;
+	return SetSelectedTaskCompletion(aTasks);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited)
