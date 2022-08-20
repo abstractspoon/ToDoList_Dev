@@ -3504,7 +3504,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 	CDWordArray aTaskIDs;
 	DWORD dwUnused;
 
-	if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwUnused, FALSE))
+	if (!GetSelectedTaskIDs(aTaskIDs, dwUnused, FALSE))
 		return FALSE;
 
 	CTDCTaskCompletionArray aTasks(m_data, m_sCompletionStatus);
@@ -3540,7 +3540,7 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEd
 	CDWordArray aTaskIDs;
 	DWORD dwUnused;
 
-	if (!m_taskTree.GetSelectedTaskIDs(aTaskIDs, dwUnused, CDateHelper::IsDateSet(date)))
+	if (!GetSelectedTaskIDs(aTaskIDs, dwUnused, CDateHelper::IsDateSet(date)))
 		return FALSE;
 
 	CTDCTaskCompletionArray aTasks(m_data, m_sCompletionStatus);

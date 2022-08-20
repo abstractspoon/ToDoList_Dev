@@ -104,7 +104,7 @@ int CTDCTaskCompletionArray::GetTaskIDsForCompletion(CDWordArray& aTasksIDs) con
 	{
 		const TDCTASKCOMPLETION& task = GetAt(nTask);
 
-		if (task.bStateChange && CDateHelper::IsDateSet(task.dtDone))
+		if (task.bStateChange && task.IsDone())
 			aTasksIDs.Add(task.dwID);
 	}
 
