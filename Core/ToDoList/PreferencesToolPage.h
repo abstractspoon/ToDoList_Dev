@@ -87,13 +87,15 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnInitMenuPopup(CMenu* pPopupMenu, UINT nIndex, BOOL bSysMenu);
 	//}}AFX_MSG
-	afx_msg void OnNewTool();
+	afx_msg void OnNewExternalTool();
+	afx_msg void OnNewTDLTool();
 	afx_msg void OnDeleteTool();
 	afx_msg void OnEditToolName();
 	afx_msg void OnCopyTool();
 	afx_msg void OnMoveToolUp();
 	afx_msg void OnMoveToolDown();
-	afx_msg void OnUpdateCmdUINewTool(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCmdUINewExternalTool(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCmdUINewTDLTool(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCmdUIDeleteTool(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCmdUIEditToolName(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCmdUICopyTool(CCmdUI* pCmdUI);
@@ -114,11 +116,12 @@ protected:
 	afx_msg void OnImportTools();
 	afx_msg LRESULT OnGetFileIcon(WPARAM wParam, LPARAM lParam);
 	DECLARE_MESSAGE_MAP()
-		
+
 protected:
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 	virtual void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 
+	int AddNewTool(BOOL bEditLabel);
 	void EnableControls();
 	int GetCurSel() const;
 	BOOL SetCurSel(int nTool);

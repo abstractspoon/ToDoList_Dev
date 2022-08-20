@@ -2857,6 +2857,8 @@ END
 IDR_UDTPREFS_TOOLBAR TOOLBAR MOVEABLE PURE  16, 15
 BEGIN
     BUTTON      ID_UDTPREFS_NEW
+    BUTTON      ID_UDTPREFS_NEWTDL
+    SEPARATOR
     BUTTON      ID_UDTPREFS_EDIT
     SEPARATOR
     BUTTON      ID_UDTPREFS_COPY
@@ -5709,7 +5711,7 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_UDTPREFS_MOVEDOWN    "\nMove Tool Down"
     ID_UDTPREFS_EDIT        "\nEdit Tool Name"
-    ID_UDTPREFS_NEW         "\nNew Tool"
+    ID_UDTPREFS_NEW         "\nNew External Tool"
     ID_UDTPREFS_MOVEUP      "\nMove Tool Up"
 END
 
@@ -5838,6 +5840,11 @@ BEGIN
     IDS_CONFIRMSAVEAS       "%s already exists.\nDo you want to replace it?"
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
     IDS_PRINT_TASKVIEW      "Screenshot of active task view (%s)"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_UDTPREFS_NEWTDL      "\nNew ToDoList Tool"
 END
 
 #endif    // English (Australia) resources

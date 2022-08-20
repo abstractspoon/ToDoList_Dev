@@ -41,6 +41,16 @@ static LPCTSTR REALQUOTE = _T("\"");
 static LPCTSTR SAFEQUOTE = _T("{QUOTES}");
 
 /////////////////////////////////////////////////////////////////////////////
+
+enum 
+{
+	COL_NAME,
+	COL_PATH,
+	COL_ARGS,
+	COL_ICON,
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // CPreferencesToolPage property page
 
 IMPLEMENT_DYNCREATE(CPreferencesToolPage, CPreferencesPageBase)
@@ -87,13 +97,15 @@ BEGIN_MESSAGE_MAP(CPreferencesToolPage, CPreferencesPageBase)
 	ON_WM_SIZE()
 	ON_WM_INITMENUPOPUP()
 	//}}AFX_MSG_MAP
-	ON_COMMAND(ID_UDTPREFS_NEW, OnNewTool)
+	ON_COMMAND(ID_UDTPREFS_NEW, OnNewExternalTool)
+	ON_COMMAND(ID_UDTPREFS_NEWTDL, OnNewTDLTool)
 	ON_COMMAND(ID_UDTPREFS_DELETE, OnDeleteTool)
 	ON_COMMAND(ID_UDTPREFS_COPY, OnCopyTool)
 	ON_COMMAND(ID_UDTPREFS_EDIT, OnEditToolName)
 	ON_COMMAND(ID_UDTPREFS_MOVEDOWN, OnMoveToolDown)
 	ON_COMMAND(ID_UDTPREFS_MOVEUP, OnMoveToolUp)
-	ON_UPDATE_COMMAND_UI(ID_UDTPREFS_NEW, OnUpdateCmdUINewTool)
+	ON_UPDATE_COMMAND_UI(ID_UDTPREFS_NEW, OnUpdateCmdUINewExternalTool)
+	ON_UPDATE_COMMAND_UI(ID_UDTPREFS_NEWTDL, OnUpdateCmdUINewTDLTool)
 	ON_UPDATE_COMMAND_UI(ID_UDTPREFS_DELETE, OnUpdateCmdUIDeleteTool)
 	ON_UPDATE_COMMAND_UI(ID_UDTPREFS_COPY, OnUpdateCmdUICopyTool)
 	ON_UPDATE_COMMAND_UI(ID_UDTPREFS_EDIT, OnUpdateCmdUIEditToolName)
@@ -149,10 +161,10 @@ void CPreferencesToolPage::OnFirstShow()
 	CRect rList;
 	m_lcTools.GetClientRect(rList);
 
-	m_lcTools.InsertColumn(0, CEnString(IDS_PTP_TOOLNAME), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(150));
-	m_lcTools.InsertColumn(1, CEnString(IDS_PTP_TOOLPATH), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(250));
-	m_lcTools.InsertColumn(2, CEnString(IDS_PTP_ARGUMENTS), LVCFMT_LEFT, rList.Width() - GraphicsMisc::ScaleByDPIFactor(400));
-	m_lcTools.InsertColumn(3, CEnString(IDS_PTP_ICONPATH), LVCFMT_LEFT, 0);
+	m_lcTools.InsertColumn(COL_NAME, CEnString(IDS_PTP_TOOLNAME), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(150));
+	m_lcTools.InsertColumn(COL_PATH, CEnString(IDS_PTP_TOOLPATH), LVCFMT_LEFT, GraphicsMisc::ScaleByDPIFactor(250));
+	m_lcTools.InsertColumn(COL_ARGS, CEnString(IDS_PTP_ARGUMENTS), LVCFMT_LEFT, rList.Width() - GraphicsMisc::ScaleByDPIFactor(400));
+	m_lcTools.InsertColumn(COL_ICON, CEnString(IDS_PTP_ICONPATH), LVCFMT_LEFT, 0);
 
 	ListView_SetExtendedListViewStyleEx(m_lcTools, LVS_EX_FULLROWSELECT, LVS_EX_FULLROWSELECT);
 	ListView_SetExtendedListViewStyleEx(m_lcTools, LVS_EX_DOUBLEBUFFER, LVS_EX_DOUBLEBUFFER);
@@ -193,9 +205,9 @@ int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebu
 	if (nIndex == -1)
 		return -1;
 	
-	m_lcTools.SetItemText(nIndex, 1, tool.sToolPath);
-	m_lcTools.SetItemText(nIndex, 2, tool.sCmdline);
-	m_lcTools.SetItemText(nIndex, 3, tool.sIconPath);
+	m_lcTools.SetItemText(nIndex, COL_PATH, tool.sToolPath);
+	m_lcTools.SetItemText(nIndex, COL_ARGS, tool.sCmdline);
+	m_lcTools.SetItemText(nIndex, COL_ICON, tool.sIconPath);
 	m_lcTools.SetItemData(nIndex, tool.bRunMinimized);
 
 	if (bRebuildImages)
@@ -204,23 +216,63 @@ int CPreferencesToolPage::AddListTool(const USERTOOL& tool, int nPos, BOOL bRebu
 	return nIndex;
 }
 
-void CPreferencesToolPage::OnNewTool() 
+void CPreferencesToolPage::OnNewExternalTool() 
 {
-	ASSERT(m_lcTools.GetItemCount() < m_nMaxNumTools);
-
-	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), CEnString(IDS_PTP_NEWTOOL), -1);
-	m_lcTools.SetItemText(nIndex, 2, MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME));
-
-	m_lcTools.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
-	m_lcTools.SetFocus();
-	m_lcTools.EditLabel(nIndex);
-
-	m_toolbar.RefreshButtonStates(TRUE);
+	if (AddNewTool(TRUE) == -1)
+	{
+		ASSERT(0);
+		return;
+	}
 
 	CPreferencesPageBase::OnControlChange();
 }
 
-void CPreferencesToolPage::OnUpdateCmdUINewTool(CCmdUI* pCmdUI)
+void CPreferencesToolPage::OnNewTDLTool()
+{
+	int nTool = AddNewTool(FALSE);
+
+	if (nTool == -1)
+	{
+		ASSERT(0);
+		return;
+	}
+
+	m_lcTools.SetItemText(nTool, COL_PATH, _T("todolist.exe"));
+	m_lcTools.SetItemText(nTool, COL_ARGS, MapCmdIDToPlaceholder(ID_TOOLARG_PATHNAME));
+	m_lcTools.EditLabel(nTool);
+
+	RebuildListCtrlImages();
+
+	CPreferencesPageBase::OnControlChange();
+}
+
+int CPreferencesToolPage::AddNewTool(BOOL bEditLabel)
+{
+	if (m_lcTools.GetItemCount() >= m_nMaxNumTools)
+	{
+		ASSERT(0);
+		return -1;
+	}
+
+	int nIndex = m_lcTools.InsertItem(m_lcTools.GetItemCount(), CEnString(IDS_PTP_NEWTOOL), -1);
+
+	m_lcTools.SetItemState(nIndex, LVIS_SELECTED, LVIS_SELECTED);
+	m_lcTools.SetFocus();
+
+	if (bEditLabel)
+		m_lcTools.EditLabel(nIndex);
+
+	m_toolbar.RefreshButtonStates(TRUE);
+
+	return nIndex;
+}
+
+void CPreferencesToolPage::OnUpdateCmdUINewExternalTool(CCmdUI* pCmdUI)
+{
+	pCmdUI->Enable(m_lcTools.GetItemCount() < m_nMaxNumTools);
+}
+
+void CPreferencesToolPage::OnUpdateCmdUINewTDLTool(CCmdUI* pCmdUI)
 {
 	pCmdUI->Enable(m_lcTools.GetItemCount() < m_nMaxNumTools);
 }
@@ -360,7 +412,7 @@ void CPreferencesToolPage::OnEndlabeleditToollist(NMHDR* pNMHDR, LRESULT* pResul
 
 		if (nSel >= 0)
 		{
-			m_lcTools.SetItemText(nSel, 0, pDispInfo->item.pszText);
+			m_lcTools.SetItemText(nSel, COL_NAME, pDispInfo->item.pszText);
 
 			GetDlgItem(IDC_TOOLPATH)->SetFocus();
 		}
@@ -378,9 +430,9 @@ void CPreferencesToolPage::OnItemchangedToollist(NMHDR* /*pNMHDR*/, LRESULT* /*p
 
 	if (nSel >= 0)
 	{
-		m_sToolPath = m_lcTools.GetItemText(nSel, 1);
-		m_sCommandLine = m_lcTools.GetItemText(nSel, 2);
-		m_sIconPath = m_lcTools.GetItemText(nSel, 3);
+		m_sToolPath = m_lcTools.GetItemText(nSel, COL_PATH);
+		m_sCommandLine = m_lcTools.GetItemText(nSel, COL_ARGS);
+		m_sIconPath = m_lcTools.GetItemText(nSel, COL_ICON);
 		m_bRunMinimized = m_lcTools.GetItemData(nSel);
 	}
 	else
@@ -439,7 +491,7 @@ void CPreferencesToolPage::OnChangeToolpath()
 
 	UpdateData();
 
-	m_lcTools.SetItemText(nSel, 1, m_sToolPath);
+	m_lcTools.SetItemText(nSel, COL_PATH, m_sToolPath);
 
 	RebuildListCtrlImages();
 
@@ -448,8 +500,6 @@ void CPreferencesToolPage::OnChangeToolpath()
 
 void CPreferencesToolPage::RebuildListCtrlImages()
 {
-//	m_lcTools.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)m_ilSys.GetHImageList());
-
 	int nTool = m_lcTools.GetItemCount();
 
 	while (nTool--)
@@ -460,11 +510,11 @@ void CPreferencesToolPage::RebuildListCtrlImages()
 		lvi.iItem = nTool;
 		lvi.iImage = -1;
 		
-		CString sIconPath = m_lcTools.GetItemText(nTool, 3);
+		CString sIconPath = m_lcTools.GetItemText(nTool, COL_ICON);
 
 		if (sIconPath.IsEmpty())
 		{
-			CString sToolPath = m_lcTools.GetItemText(nTool, 1);
+			CString sToolPath = m_lcTools.GetItemText(nTool, COL_PATH);
 			CTDCToolsCmdlineParser::PrepareToolPath(sToolPath, FALSE);
 
 			lvi.iImage = CFileIcons::GetIndex(sToolPath);	
@@ -556,10 +606,10 @@ BOOL CPreferencesToolPage::GetListTool(int nTool, USERTOOL& ut) const
 		return FALSE;
 	}
 
-	ut.sToolName = m_lcTools.GetItemText(nTool, 0);
-	ut.sToolPath = m_lcTools.GetItemText(nTool, 1);
-	ut.sCmdline = m_lcTools.GetItemText(nTool, 2);
-	ut.sIconPath = m_lcTools.GetItemText(nTool, 3);
+	ut.sToolName = m_lcTools.GetItemText(nTool, COL_NAME);
+	ut.sToolPath = m_lcTools.GetItemText(nTool, COL_PATH);
+	ut.sCmdline = m_lcTools.GetItemText(nTool, COL_ARGS);
+	ut.sIconPath = m_lcTools.GetItemText(nTool, COL_ICON);
 	ut.bRunMinimized = m_lcTools.GetItemData(nTool);
 
 	return TRUE;
@@ -596,7 +646,7 @@ void CPreferencesToolPage::OnChangeCmdline()
 	{
 		UpdateData();
 
-		m_lcTools.SetItemText(nSel, 2, m_sCommandLine);
+		m_lcTools.SetItemText(nSel, COL_ARGS, m_sCommandLine);
 		m_eCmdLine.SetFocus();
 
 		CPreferencesPageBase::OnControlChange();
