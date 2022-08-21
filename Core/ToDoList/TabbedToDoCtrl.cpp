@@ -3882,24 +3882,23 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		// Include references to selected tasks if a 'Reference-specific' colour is not set
 		if (mapAttribIDs.Has(TDCA_COLOR) && !m_taskTree.HasReferenceTaskColor())
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
+
+		if (mapAttribIDs.Has(TDCA_DEPENDENCY))
+			dwFlags |= TDCGSTF_APPENDDEPENDENTS;
 	}
 
 	// Get the actual tasks for the update
 	CTaskFile tasks;
 
-	if ((mapAttribIDs.Has(TDCA_DEPENDENCY) ||
-		mapAttribIDs.Has(TDCA_DUEDATE) ||
-		mapAttribIDs.Has(TDCA_DONEDATE) ||
-		mapAttribIDs.Has(TDCA_STARTDATE)) &&
-		m_taskTree.SelectionHasDependents())
-	{
-		// Be cautious
-		CTDCAttributeMap mapAllAttribIDs;
-		GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
-		
-		GetAllTasksForExtensionViewUpdate(mapAllAttribIDs, tasks);
-	}
-	else
+// 	if (mapAttribIDs.Has(TDCA_DEPENDENCY))
+// 	{
+// 		// Be cautious
+// 		CTDCAttributeMap mapAllAttribIDs;
+// 		GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
+// 		
+// 		GetAllTasksForExtensionViewUpdate(mapAllAttribIDs, tasks);
+// 	}
+// 	else
 	{
 		GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
 	}

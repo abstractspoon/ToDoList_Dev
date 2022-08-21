@@ -2411,6 +2411,25 @@ BOOL CTDLTaskTreeCtrl::DeleteItem(HTREEITEM hti, BOOL bDeleteReferencesToItem)
 	return m_tcTasks.DeleteItem(hti);
 }
 
+int CTDLTaskTreeCtrl::GetTaskLocalDependents(DWORD dwTaskID, CHTIList& listDeps, BOOL bImmediateOnly, BOOL bAppend) const
+{
+	if (!bAppend)
+		listDeps.RemoveAll();
+
+	CDWordArray aDependentIDs;
+	int nDep = m_data.GetTaskLocalDependents(dwTaskID, aDependentIDs, bImmediateOnly);
+
+	while (nDep--)
+	{
+		HTREEITEM htiRef = m_mapTaskIDToHTI.GetItem(aDependentIDs[nDep]);
+
+		if (htiRef)
+			listDeps.AddTail(htiRef);
+	}
+
+	return listDeps.GetCount();
+}
+
 int CTDLTaskTreeCtrl::GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend) const
 {
 	if (!bAppend)

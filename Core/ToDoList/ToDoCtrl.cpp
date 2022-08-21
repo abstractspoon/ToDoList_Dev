@@ -9210,26 +9210,46 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 	if (AddTasksToTaskFile(selection, filter, tasks, &mapSelTaskIDs)) // Mark tasks as selected
 	{
 		// If required, add all references for the selected tasks
-		BOOL bAppendReferences = filter.HasFlag(TDCGSTF_APPENDREFERENCES);
-
-		if (bAppendReferences && m_taskTree.HasReferenceTasks())
+		if (filter.HasFlag(TDCGSTF_APPENDREFERENCES) && m_taskTree.HasReferenceTasks())
 		{
-			CHTIList selectionRefs;
+			CHTIList selReferences;
 			POSITION pos = mapSelTaskIDs.GetStartPosition();
 
 			while (pos)
 			{
 				DWORD dwSelID = mapSelTaskIDs.GetNext(pos);
-				m_taskTree.GetReferencesToTask(dwSelID, selectionRefs, TRUE); // Append
+				m_taskTree.GetReferencesToTask(dwSelID, selReferences, TRUE); // Append
 			}
 
-			if (selectionRefs.GetCount())
+			if (selReferences.GetCount())
 			{
 				// We want just the references and nothing else
 				TDCGETTASKS filterRefs(filter);
 				filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
 
-				VERIFY(AddTasksToTaskFile(selectionRefs, filterRefs, tasks, NULL)); // Don't mark tasks as selected
+				VERIFY(AddTasksToTaskFile(selReferences, filterRefs, tasks, NULL)); // Don't add to mapSelTaskIDs
+			}
+		}
+
+		// Likewise for task dependents
+		if (filter.HasFlag(TDCGSTF_APPENDDEPENDENTS))
+		{
+			CHTIList selDependents;
+			POSITION pos = mapSelTaskIDs.GetStartPosition();
+
+			while (pos)
+			{
+				DWORD dwSelID = mapSelTaskIDs.GetNext(pos);
+				m_taskTree.GetTaskLocalDependents(dwSelID, selDependents, FALSE, TRUE); // Append
+			}
+
+			if (selDependents.GetCount())
+			{
+				// We want just the dependents and nothing else
+				TDCGETTASKS filterDeps(filter);
+				filterDeps.dwFlags = TDCGSTF_NOTSUBTASKS;
+
+				VERIFY(AddTasksToTaskFile(selDependents, filterDeps, tasks, NULL)); // Don't add to mapSelTaskIDs
 			}
 		}
 	}

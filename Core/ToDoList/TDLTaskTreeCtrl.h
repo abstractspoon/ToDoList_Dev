@@ -98,6 +98,7 @@ public:
 	BOOL SelectDropTarget(HTREEITEM hti) { return m_tcTasks.SelectDropTarget(hti); }
 	void ResortSelectedTaskParents();
 
+	int GetTaskLocalDependents(DWORD dwTaskID, CHTIList& listDeps, BOOL bImmediateOnly, BOOL bAppend = FALSE) const;
 	int GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend = FALSE) const;
 	BOOL TaskHasReferences(DWORD dwTaskID) const;
 	BOOL HasReferenceTasks() const { return (m_mapReferenceTaskIDs.GetCount() > 0); }
