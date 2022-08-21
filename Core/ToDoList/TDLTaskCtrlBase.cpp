@@ -4969,7 +4969,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 	switch (nAttrib)
 	{
 	case TDCA_DEPENDENCY: // --------------------------------------------------------
-		if (bWantUpdateDependentDates)
+		if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES))
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
 			mapAttribIDs.Add(TDCA_STARTDATE);
