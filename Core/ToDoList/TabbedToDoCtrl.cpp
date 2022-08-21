@@ -1249,7 +1249,7 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	}
 	else if (mapAttrib.Has(TDCA_NEWTASK))
 	{
-		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK));
+		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK) || mapAttrib.HasOnly(TDCA_NEWTASK, TDCA_DEPENDENCY));
 		AddGlobalsToTaskFile(tasks, TDCA_ALL);
 	}
 	else
@@ -3444,8 +3444,8 @@ void CTabbedToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CD
 	// title edit notification unless they are the active view
 	DWORD dwModTaskID = (aModTaskIDs.GetSize() ? aModTaskIDs[0] : 0);
 
-	BOOL bNewSingleTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && 
-							(aModTaskIDs.GetSize() == 1));
+	BOOL bNewSingleTask = ((mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1)) ||
+						   (mapAttribIDs.HasOnly(TDCA_NEWTASK, TDCA_DEPENDENCY) && (aModTaskIDs.GetSize() > 1)));
 
 	BOOL bNewTaskTitleEdit = (mapAttribIDs.HasOnly(TDCA_TASKNAME) &&
 								(aModTaskIDs.GetSize() == 1) &&
@@ -3767,6 +3767,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttri
 	ASSERT(HasAnyExtensionViews());
 
 	ASSERT(mapAttribIDs.HasOnly(TDCA_DELETE) ||
+			mapAttribIDs.HasOnly(TDCA_NEWTASK, TDCA_DEPENDENCY) ||
 			mapAttribIDs.HasOnly(TDCA_UNDO) ||
 			mapAttribIDs.HasOnly(TDCA_PASTE) ||
 			mapAttribIDs.HasOnly(TDCA_MERGE) ||

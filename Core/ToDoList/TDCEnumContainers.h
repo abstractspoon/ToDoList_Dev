@@ -102,6 +102,9 @@ public:
 	BOOL Add(TDC_ATTRIBUTE nAttrib);
 	int Append(const CTDCAttributeMap& other);
 
+	BOOL HasOnly(TDC_ATTRIBUTE nAttrib) const;
+	BOOL HasOnly(TDC_ATTRIBUTE nAttrib1, TDC_ATTRIBUTE nAttrib2) const;
+
 	static BOOL IsTaskAttribute(TDC_ATTRIBUTE nAttrib);
 
 protected:

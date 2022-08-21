@@ -31,6 +31,16 @@ CTDCAttributeMap::~CTDCAttributeMap()
 {
 }
 
+BOOL CTDCAttributeMap::HasOnly(TDC_ATTRIBUTE nAttrib) const
+{
+	return CTDCBaseEnumSet<TDC_ATTRIBUTE>::HasOnly(nAttrib);
+}
+
+BOOL CTDCAttributeMap::HasOnly(TDC_ATTRIBUTE nAttrib1, TDC_ATTRIBUTE nAttrib2) const
+{
+	return ((GetCount() == 2) && Has(nAttrib1) && Has(nAttrib2));
+}
+
 BOOL CTDCAttributeMap::Add(TDC_ATTRIBUTE nAttrib)
 {
 	// Special cases
@@ -87,6 +97,14 @@ BOOL CTDCAttributeMap::CanAdd(TDC_ATTRIBUTE nAttrib) const
 	case TDCA_HTMLCOMMENTS:
 		bCanAdd = (HasOnly(TDCA_ALL) || IsTaskAttribute(nAttrib));
 		break;
+
+	case TDCA_DEPENDENCY:
+		if (HasOnly(TDCA_NEWTASK))
+		{
+			bCanAdd = TRUE;
+			break;
+		}
+		// else fall thru for default handling
 
 	default:
 		if (IsTaskAttribute(nAttrib))

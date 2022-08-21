@@ -759,6 +759,52 @@ void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTask
 	}
 }
 
+BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID, CDWordArray& aModTaskIDs)
+{
+	ASSERT(dwTaskID && dwAfterID);
+
+	aModTaskIDs.RemoveAll();
+
+	if (IsTaskLocallyDependentOn(dwTaskID, dwAfterID, FALSE) ||
+		IsTaskLocallyDependentOn(dwAfterID, dwTaskID, FALSE))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Get the current dependents of 'dwDependency' before changing them
+	CDWordArray aDependentIDs;
+	GetTaskLocalDependents(dwAfterID, aDependentIDs);
+
+	// Set the new task to be dependent on 'dwDependency'
+	CTDCDependencyArray aDepends;
+	aDepends.Add(dwAfterID);
+
+	SetTaskDependencies(dwTaskID, aDepends);
+	aModTaskIDs.Add(dwTaskID);
+
+	// Fixup the previous dependents to point to the new task
+	int nID = aDependentIDs.GetSize();
+
+	if (nID > 0)
+	{
+		while (nID--)
+		{
+			DWORD dwDependentID = aDependentIDs[nID];
+
+			CTDCDependencyArray aTaskDepends;
+			GetTaskDependencies(dwDependentID, aTaskDepends);
+
+			VERIFY(aTaskDepends.ReplaceLocalDependency(dwAfterID, dwTaskID));
+			SetTaskDependencies(dwDependentID, aTaskDepends);
+
+			aModTaskIDs.Add(dwDependentID);
+		}
+	}
+
+	return TRUE;
+}
+
 BOOL CToDoCtrlData::TaskHasLocalCircularDependencies(DWORD dwTaskID) const
 {
 	if (!dwTaskID)
@@ -2357,7 +2403,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	}
 	
 	// We need to calculate it 'fully'
-	return AddDuration(dtNewStart, dCurDuration, nUnits, TRUE); // updates dtNewStart
+	return AddDuration(dtNewStart, dNewDuration, nUnits, TRUE); // updates dtNewStart
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -2917,10 +2963,12 @@ TDC_UNDOACTIONTYPE CToDoCtrlData::GetLastUndoActionType(BOOL bUndo) const
 	return (bUndo ? m_undo.GetLastUndoType() : m_undo.GetLastRedoType());
 }
 
+/*
 BOOL CToDoCtrlData::DeleteLastUndoAction()
 {
 	return m_undo.DeleteLastUndoAction();
 }
+*/
 
 BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 {
