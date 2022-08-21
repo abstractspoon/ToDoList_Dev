@@ -162,7 +162,6 @@ public:
 	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
 	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
-	BOOL IsTaskDependent(DWORD dwTaskID) const;
 
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
