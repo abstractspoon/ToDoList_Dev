@@ -705,9 +705,22 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 	return FALSE;
 }
 
-int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents) const
+int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents, BOOL bImmediateOnly) const
 {
-	aDependents.RemoveAll();
+	CDWordSet mapDependents;
+
+	if (GetTaskLocalDependents(dwTaskID, mapDependents, bImmediateOnly))
+		mapDependents.CopyTo(aDependents);
+	else
+		aDependents.RemoveAll();
+
+	return aDependents.GetSize();
+}
+
+int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordSet& mapDependents, BOOL bImmediateOnly) const
+{
+	if (bImmediateOnly)
+		mapDependents.RemoveAll();
 
 	if (dwTaskID)
 	{
@@ -718,38 +731,29 @@ int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependen
 		while (pos)
 		{
 			DWORD dwDependentID = m_items.GetNextTask(pos, pTDI);
-			ASSERT (dwDependentID && pTDI);
-			
-			if (pTDI && (dwDependentID != dwTaskID))
+			ASSERT(dwDependentID && pTDI);
+
+			if (!mapDependents.Has(dwDependentID))
 			{
-				CDWordArray aDependIDs;
-				int nDepend = GetTaskLocalDependencies(dwDependentID, aDependIDs);
-
-				while (nDepend--)
+				if (pTDI && pTDI->HasLocalDependency(dwTaskID))
 				{
-					DWORD dwDependencyID = aDependIDs[nDepend];
+					mapDependents.Add(dwDependentID);
 
-					if (dwDependencyID == dwTaskID)
-					{
-						aDependents.Add(dwDependentID);
-					}
-					else if (GetTrueTaskID(dwDependencyID) == dwTaskID)
-					{
-						aDependents.Add(dwDependentID);
-					}
+					if (!bImmediateOnly)
+						GetTaskLocalDependents(dwDependentID, mapDependents, FALSE); // RECURSIVE CALL
 				}
 			}
 		}
-	}	
-	
-	return aDependents.GetSize();
+	}
+
+	return mapDependents.GetCount();
 }
 
 void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID)
 {
 	CDWordArray aDependents;
 	
-	if (GetTaskLocalDependents(dwPrevTaskID, aDependents))
+	if (GetTaskLocalDependents(dwPrevTaskID, aDependents, FALSE))
 	{
 		int nTask = aDependents.GetSize();
 
@@ -2365,7 +2369,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	}
 	
 	// We need to calculate it 'fully'
-	return AddDuration(dtNewStart, dCurDuration, nUnits, TRUE); // updates dtNewStart
+	return AddDuration(dtNewStart, dNewDuration, nUnits, TRUE); // updates dtNewStart
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -3842,7 +3846,7 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	
 	// who is dependent on us -> GetTaskDependents
 	CDWordArray aDependents;
-	int nDepend = GetTaskLocalDependents(dwTaskID, aDependents);
+	int nDepend = GetTaskLocalDependents(dwTaskID, aDependents, FALSE);
 
 	while (nDepend--)
 	{

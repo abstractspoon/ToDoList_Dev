@@ -156,7 +156,7 @@ public:
 	int GetTaskDependencies(DWORD dwTaskID, CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 	BOOL TaskHasDependencies(DWORD dwTaskID) const;
 	BOOL TaskHasDependents(DWORD dwTaskID) const;
-	int GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents) const;
+	int GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents, BOOL bImmediateOnly) const;
 	int GetTaskLocalDependencies(DWORD dwTaskID, CDWordArray& aDependencies) const;
 	BOOL TaskHasLocalCircularDependencies(DWORD dwTaskID) const;
 	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
@@ -265,6 +265,7 @@ protected:
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
 	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwMatchID = 0);
 	
+	int GetTaskLocalDependents(DWORD dwTaskID, CDWordSet& aDependents, BOOL bImmediateOnly) const;
 	BOOL FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependsID, CDWordSet& mapVisited) const;
 	void FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate);
 	UINT UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDate);

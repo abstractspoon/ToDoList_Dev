@@ -11063,7 +11063,7 @@ BOOL CToDoCtrl::GotoSelectedTaskLocalDependents()
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 		CDWordArray aLocalDependents;
 
-		if (m_data.GetTaskLocalDependents(dwTaskID, aLocalDependents))
+		if (m_data.GetTaskLocalDependents(dwTaskID, aLocalDependents, FALSE))
 			aDependentIDs.Append(aLocalDependents);
 	}
 
