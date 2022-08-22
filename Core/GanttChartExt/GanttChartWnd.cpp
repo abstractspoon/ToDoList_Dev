@@ -1313,6 +1313,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 		{
+/*
 			// update gantt ctrl
 			switch (wp)
 			{
@@ -1332,6 +1333,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 				ASSERT(0);
 				return 0L;
 			}
+*/
 		}
 	}
 
@@ -1341,71 +1343,6 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 	return 0L;
 }
-
-/*
-LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
-{
-	UNREFERENCED_PARAMETER(lp);
-	ASSERT(((HWND)lp) == m_dlgDepends);
-	
-	if (m_dlgDepends.IsPickingCompleted())
-	{
-		// make sure the 'from' task is reselected
-		DWORD dwFromTaskID = m_dlgDepends.GetFromTask();
-
-		if (m_ctrlGantt.GetSelectedTaskID() != dwFromTaskID)
-		{
-			SelectTask(dwFromTaskID);
-
-			// explicitly update parent because SelectTask will not
-			SendParentSelectionUpdate();
-		}
-
-		CDWordArray aDepends;
-		m_ctrlGantt.GetSelectedTaskDependencies(aDepends);
-		
-		switch (wp)
-		{
-		case GCDDM_ADD:
-			aDepends.Add(m_dlgDepends.GetToTask());
-			break;
-			
-		case GCDDM_EDIT:
-			aDepends.Add(m_dlgDepends.GetToTask());
-			 //fall thru to delete prev dependency
-			
-		case GCDDM_DELETE:
-			{
-				DWORD dwPrevToTask;
-				VERIFY(m_dlgDepends.GetFromDependency(dwPrevToTask));
-				VERIFY(Misc::RemoveItemT(dwPrevToTask, aDepends));
-			}
-			break;
-			
-		default:
-			ASSERT(0);
-			return 0L;
-		}
-
-		// notify parent
-		CString sDepends = Misc::FormatArray(aDepends, '\n');
-		IUITASKMOD mod = { TDCA_DEPENDENCY, 0 };
-
-		mod.szValue = sDepends;
-			
-		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
-		{
-			// update gantt ctrl
-			m_ctrlGantt.SetSelectedTaskDependencies(aDepends);
-		}
-	}
-
-	m_toolbar.RefreshButtonStates(FALSE);
-	m_ctrlGantt.OnEndDepedencyEdit();
-	m_ctrlGantt.SetFocus();
-
-	return 0L;
-*/
 
 LRESULT CGanttChartWnd::OnGanttNotifyCompletionChange(WPARAM /*wp*/, LPARAM lp) 
 {
