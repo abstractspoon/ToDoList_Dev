@@ -705,19 +705,69 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 	return FALSE;
 }
 
+int CToDoCtrlData::GetAllTaskDependents(CDWordSet& mapDependents) const
+{
+	mapDependents.RemoveAll();
+
+	POSITION pos = m_items.GetStart();
+
+	while (pos)
+	{
+		TODOITEM* pTDI = NULL;
+		DWORD dwTaskID = 0;
+
+		m_items.GetNext(pos, dwTaskID, pTDI);
+
+		if (pTDI && pTDI->aDependencies.GetSize())
+			mapDependents.Add(dwTaskID);
+	}
+
+	return mapDependents.GetCount();
+}
+
 int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents, BOOL bImmediateOnly) const
 {
-	CDWordSet mapDependents;
+	aDependents.RemoveAll();
 
-	if (GetTaskLocalDependents(dwTaskID, mapDependents, bImmediateOnly))
-		mapDependents.CopyTo(aDependents);
-	else
-		aDependents.RemoveAll();
+	CDWordSet mapAllDependents;
+
+	if (!GetAllTaskDependents(mapAllDependents))
+		return 0;
+
+	CDWordSet mapTaskDependents;
+
+	if (GetTaskLocalDependents(dwTaskID, mapAllDependents, mapTaskDependents, bImmediateOnly))
+		mapTaskDependents.CopyTo(aDependents);
 
 	return aDependents.GetSize();
 }
 
-int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordSet& mapDependents, BOOL bImmediateOnly) const
+int CToDoCtrlData::GetTaskLocalDependents(const CDWordArray& aTaskIDs, CDWordArray& aDependents, BOOL bImmediateOnly) const
+{
+	aDependents.RemoveAll();
+
+	CDWordSet mapAllDependents;
+
+	if (!GetAllTaskDependents(mapAllDependents))
+		return 0;
+
+	int nID = aTaskIDs.GetSize();
+	CDWordSet mapDependents;
+
+	while (nID--)
+	{
+		CDWordSet mapTaskDependents;
+
+		if (GetTaskLocalDependents(aTaskIDs[nID], mapAllDependents, mapTaskDependents, bImmediateOnly))
+			mapDependents.Append(mapTaskDependents);
+	}
+
+	mapDependents.CopyTo(aDependents);
+
+	return aDependents.GetSize();
+}
+
+int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, const CDWordSet& mapAllDependents, CDWordSet& mapDependents, BOOL bImmediateOnly) const
 {
 	if (bImmediateOnly)
 		mapDependents.RemoveAll();
@@ -726,21 +776,22 @@ int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordSet& mapDependen
 	{
 		// Find all tasks dependent on 'dwTaskID' within the same task list
 		const TODOITEM* pTDI = NULL;
-		POSITION pos = m_items.GetStart();
+		POSITION pos = mapAllDependents.GetStartPosition();
 		
 		while (pos)
 		{
-			DWORD dwDependentID = m_items.GetNextTask(pos, pTDI);
-			ASSERT(dwDependentID && pTDI);
+			DWORD dwDependentID = mapAllDependents.GetNext(pos);
 
 			if (!mapDependents.Has(dwDependentID))
 			{
+				TODOITEM* pTDI = m_items.GetTask(dwDependentID);
+
 				if (pTDI && pTDI->HasLocalDependency(dwTaskID))
 				{
 					mapDependents.Add(dwDependentID);
 
 					if (!bImmediateOnly)
-						GetTaskLocalDependents(dwDependentID, mapDependents, FALSE); // RECURSIVE CALL
+						GetTaskLocalDependents(dwDependentID, mapAllDependents, mapDependents, FALSE); // RECURSIVE CALL
 				}
 			}
 		}

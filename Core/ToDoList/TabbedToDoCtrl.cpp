@@ -2131,27 +2131,27 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 		// since we prevented changes being propagated back to the active view
 		// we may need to update more than the selected task as a consequence
 		// of dependency changes, task moves or inherited attributes
-		if (mapModAttribs.Has(TDCA_DEPENDENCY))
-		{
-			VIEWDATA* pVData = NULL;
-			IUIExtensionWindow* pExtWnd = NULL;
-
-			if (!GetExtensionWnd(GetTaskView(), pExtWnd, pVData))
-				return FALSE;
-
-			// Mark all extensions needing an update
-			SetExtensionsNeedTaskUpdate(TRUE);
-
-			// update all tasks on the active view
-			CWaitCursor cursor;
-			CTaskFile tasks;
-
-			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
-				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
-
-			pVData->bNeedFullTaskUpdate = FALSE;
-		}
-		else
+// 		if (mapModAttribs.Has(TDCA_DEPENDENCY))
+// 		{
+// 			VIEWDATA* pVData = NULL;
+// 			IUIExtensionWindow* pExtWnd = NULL;
+// 
+// 			if (!GetExtensionWnd(GetTaskView(), pExtWnd, pVData))
+// 				return FALSE;
+// 
+// 			// Mark all extensions needing an update
+// 			SetExtensionsNeedTaskUpdate(TRUE);
+// 
+// 			// update all tasks on the active view
+// 			CWaitCursor cursor;
+// 			CTaskFile tasks;
+// 
+// 			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
+// 				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
+// 
+// 			pVData->bNeedFullTaskUpdate = FALSE;
+// 		}
+// 		else
 		{
 			// In the case where specified tasks were edited, 
 			// we need to send a modification notification
@@ -2572,13 +2572,12 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 			PrepareTaskfileForTasks(tasks, filter);
 
 			// we return exactly what's selected as a flat list and in the same order
-			POSITION pos = m_taskList.List().GetFirstSelectedItemPosition();
+			CDWordArray aTaskIDs;
+			int nNumSel = m_taskList.GetSelectedTaskIDs(aTaskIDs, FALSE);
 
-			while (pos)
+			for (int nSel = 0; nSel < nNumSel; nSel++)
 			{
-				int nItem = m_taskList.List().GetNextSelectedItem(pos);
-
-				DWORD dwTaskID = GetTaskID(nItem);
+				DWORD dwTaskID = aTaskIDs[nSel];
 				DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
 				
 				// Add immediate parent as required.
@@ -2592,6 +2591,12 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 				}
 
 				VERIFY(CToDoCtrl::AddTreeItemToTaskFile(NULL, dwTaskID, tasks, NULL, filter, FALSE, dwParentID)); // FALSE == no subtasks
+			}
+
+			if (nNumSel)
+			{
+				AddSelectedTaskReferencesToTaskFile(filter, tasks);
+				AddSelectedTaskDependentsToTaskFile(filter, tasks);
 			}
 
 			return tasks.GetTaskCount();
@@ -3884,7 +3889,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
 
 		if (mapAttribIDs.Has(TDCA_DEPENDENCY))
-			dwFlags |= TDCGSTF_APPENDDEPENDENTS;
+			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
 	}
 
 	// Get the actual tasks for the update
