@@ -1313,6 +1313,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 		{
+/*
 			// update gantt ctrl
 			switch (wp)
 			{
@@ -1332,6 +1333,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 				ASSERT(0);
 				return 0L;
 			}
+*/
 		}
 	}
 
