@@ -2287,7 +2287,6 @@ BOOL CTreeListCtrl::ProcessMessage(MSG* pMsg)
 {
 	switch (pMsg->message)
 	{
-		// handle 'escape' during dependency editing
 	case WM_KEYDOWN:
 		{
 			AFX_MANAGE_STATE(AfxGetStaticModuleState());
