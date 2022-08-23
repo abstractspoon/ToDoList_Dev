@@ -827,9 +827,10 @@ BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterI
 		return FALSE;
 	}
 
-	// Get the current dependents of 'dwDependency' before changing them
+	// Get the current immediate dependents of 'dwDependency' 
+	// before changing them
 	CDWordArray aDependentIDs;
-	GetTaskLocalDependents(dwAfterID, aDependentIDs);
+	GetTaskLocalDependents(dwAfterID, aDependentIDs, TRUE);
 
 	// Set the new task to be dependent on 'dwDependency'
 	CTDCDependencyArray aDepends;
