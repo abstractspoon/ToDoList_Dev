@@ -4894,17 +4894,20 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 		// Insert task into dependency chain
 		CTDCAttributeMap mapAttribIDs(TDCA_NEWTASK);
-		CDWordArray aModTaskIDs;
 
-		if (dwDependency && m_data.InsertTaskIntoDependencyChain(dwTaskID, dwDependency, aModTaskIDs))
+		if (dwDependency)
 		{
-			if (aModTaskIDs.GetSize() > 1)
+			CDWordArray aTempIDs;
+
+			if (m_data.InsertTaskIntoDependencyChain(dwTaskID, dwDependency, aTempIDs) &&
+				(aTempIDs.GetSize() > 1))
+			{
 				mapAttribIDs.Add(TDCA_DEPENDENCY);
+			}
 		}
-		else
-		{
-			aModTaskIDs.Add(dwTaskID);
-		}
+
+		CDWordArray aModTaskIDs;
+		aModTaskIDs.Add(dwTaskID);
 
 		SelectItem(htiNew);
 		SetModified(mapAttribIDs, aModTaskIDs, TRUE); 
