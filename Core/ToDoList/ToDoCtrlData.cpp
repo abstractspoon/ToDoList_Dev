@@ -604,14 +604,6 @@ int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CDWordArray& aLocalDepend
 	return pTDI->aDependencies.GetDependencies(aLocalDepends, aOtherDepends);
 }
 
-BOOL CToDoCtrlData::IsTaskDependent(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FALSE);
-	
-	return (pTDI->aDependencies.GetSize() > 0);
-}
-
 BOOL CToDoCtrlData::IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const
 {
 	ASSERT(dwOtherID);
@@ -820,6 +812,52 @@ void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTask
 				VERIFY(pTDIDepends->ReplaceLocalDependency(dwPrevTaskID, dwTaskID));
 		}
 	}
+}
+
+BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID, CDWordArray& aModTaskIDs)
+{
+	ASSERT(dwTaskID && dwAfterID);
+
+	aModTaskIDs.RemoveAll();
+
+	if (IsTaskLocallyDependentOn(dwTaskID, dwAfterID, FALSE) ||
+		IsTaskLocallyDependentOn(dwAfterID, dwTaskID, FALSE))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Get the current dependents of 'dwDependency' before changing them
+	CDWordArray aDependentIDs;
+	GetTaskLocalDependents(dwAfterID, aDependentIDs);
+
+	// Set the new task to be dependent on 'dwDependency'
+	CTDCDependencyArray aDepends;
+	aDepends.Add(dwAfterID);
+
+	SetTaskDependencies(dwTaskID, aDepends);
+	aModTaskIDs.Add(dwTaskID);
+
+	// Fixup the previous dependents to point to the new task
+	int nID = aDependentIDs.GetSize();
+
+	if (nID > 0)
+	{
+		while (nID--)
+		{
+			DWORD dwDependentID = aDependentIDs[nID];
+
+			CTDCDependencyArray aTaskDepends;
+			GetTaskDependencies(dwDependentID, aTaskDepends);
+
+			VERIFY(aTaskDepends.ReplaceLocalDependency(dwAfterID, dwTaskID));
+			SetTaskDependencies(dwDependentID, aTaskDepends);
+
+			aModTaskIDs.Add(dwDependentID);
+		}
+	}
+
+	return TRUE;
 }
 
 BOOL CToDoCtrlData::TaskHasLocalCircularDependencies(DWORD dwTaskID) const
@@ -2980,10 +3018,12 @@ TDC_UNDOACTIONTYPE CToDoCtrlData::GetLastUndoActionType(BOOL bUndo) const
 	return (bUndo ? m_undo.GetLastUndoType() : m_undo.GetLastRedoType());
 }
 
+/*
 BOOL CToDoCtrlData::DeleteLastUndoAction()
 {
 	return m_undo.DeleteLastUndoAction();
 }
+*/
 
 BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 {

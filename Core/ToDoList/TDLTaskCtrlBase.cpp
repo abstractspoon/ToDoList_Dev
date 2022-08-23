@@ -4656,7 +4656,7 @@ BOOL CTDLTaskCtrlBase::ItemColumnSupportsClickHandling(int nItem, TDC_COLUMN nCo
 		return m_data.TaskHasFileLink(dwTaskID);
 			
 	case TDCC_DEPENDENCY:
-		return m_data.IsTaskDependent(dwTaskID);
+		return m_data.TaskHasDependencies(dwTaskID);
 			
 	default: // try custom columns
 		if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomColumn(nColID))
