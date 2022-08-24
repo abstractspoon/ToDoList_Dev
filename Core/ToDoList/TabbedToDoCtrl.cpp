@@ -3659,9 +3659,23 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	{
 		// If only a single task was created then treat it like an edit
 		if (aModTaskIDs.GetSize() == 1)
+		{
 			UpdateExtensionViewsSelection(mapAttribIDs);
+
+			// Make sure any new dependencies and date updates 
+			// get passed on too
+			if (m_data.TaskHasDependents(aModTaskIDs[0]))
+			{
+				CTDCAttributeMap mapDepAttribIDs;
+				m_taskTree.GetAttributesAffectedByMod(TDCA_DEPENDENCY, mapDepAttribIDs);
+
+				UpdateExtensionViewsSelection(mapDepAttribIDs);
+			}
+		}
 		else
+		{
 			UpdateExtensionViewsTasks(mapAttribIDs);
+		}
 	}
 	else if (mapAttribIDs.Has(TDCA_DELETE) ||
 			 mapAttribIDs.Has(TDCA_UNDO) ||
@@ -3883,26 +3897,9 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
 	}
 
-	// Get the actual tasks for the update
+	// Get the tasks for the update
 	CTaskFile tasks;
-/*
-	if ((mapAttribIDs.Has(TDCA_NEWTASK) ||
-		 mapAttribIDs.Has(TDCA_DEPENDENCY) ||
-		 mapAttribIDs.Has(TDCA_DUEDATE) ||
-		 mapAttribIDs.Has(TDCA_DONEDATE) ||
-		 mapAttribIDs.Has(TDCA_STARTDATE)) &&
-		m_taskTree.SelectionHasDependents())
-	{
-		// Be cautious
-		CTDCAttributeMap mapAllAttribIDs;
-		GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
-		
-		GetAllTasksForExtensionViewUpdate(mapAllAttribIDs, tasks);
-	}
-	else
-*/	{
-		GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
-	}
+	GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
 	
 	// refresh all extensions 
 	int nExt = m_aExtViews.GetSize();
