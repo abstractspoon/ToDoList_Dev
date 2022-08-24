@@ -81,7 +81,7 @@ public:
 	int GetLastUndoActionTaskIDs(CDWordArray& aIDs) const;
 	int GetLastRedoActionTaskIDs(CDWordArray& aIDs) const;
 
-	void ClearRedoStack() { m_aRedo.RemoveAll(); }
+	BOOL DeleteLastUndoAction(); // only if no redos exist
 
 	TDC_UNDOACTIONTYPE GetLastUndoType() const;
 	TDC_UNDOACTIONTYPE GetLastRedoType() const;

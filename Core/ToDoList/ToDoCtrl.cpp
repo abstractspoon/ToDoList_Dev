@@ -4877,7 +4877,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		if (dwParentID)
 		{
 			// if the parent was being clocked then stop it now
-			// since having children makes a task unclockable
+			// since having children makes a task un-clockable
 			if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 			{
 				if (m_timeTracking.IsTrackingTask(dwParentID))
@@ -4892,22 +4892,20 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		
 		m_dwNextUniqueID++;
 
-		// Insert task into dependency chain
-		CTDCAttributeMap mapAttribIDs(TDCA_NEWTASK);
-		CDWordArray aModTaskIDs;
+		// Fixup dates for dependent tasks
+		if (dwDependency)
+		{
+			CTDCDependencyArray aDepends;
+			aDepends.Add(dwDependency);
 
-		if (dwDependency && m_data.InsertTaskIntoDependencyChain(dwTaskID, dwDependency, aModTaskIDs))
-		{
-			if (aModTaskIDs.GetSize() > 1)
-				mapAttribIDs.Add(TDCA_DEPENDENCY);
-		}
-		else
-		{
-			aModTaskIDs.Add(dwTaskID);
-		}
+			m_data.SetTaskDependencies(dwTaskID, aDepends, FALSE);
+		}	
+
+		CDWordArray aModTaskIDs;
+		aModTaskIDs.Add(dwTaskID);
 
 		SelectItem(htiNew);
-		SetModified(mapAttribIDs, aModTaskIDs, TRUE); 
+		SetModified(TDCA_NEWTASK, aModTaskIDs); 
 		
 		m_taskTree.InvalidateAll();
 
@@ -5363,8 +5361,32 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT (lParam);
 		UNREFERENCED_PARAMETER(lParam);
 
-		UndoLastAction(TRUE);
-		m_data.ClearRedoStack(); // Not undoable
+		// make sure this item is not selected
+		HTREEITEM hti = GetSelectedItem();
+		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
+
+		// set selection to previous task and if that fails then next task
+		if (!m_taskTree.SelectTasksInHistory(FALSE) &&
+			!GotoNextTask(TDCG_PREV) && 
+			!GotoNextTask(TDCG_NEXT))
+		{
+			TSH().RemoveAll();
+		}
+		
+		// then delete and remove from undo
+		{
+			CHoldRedraw hr(m_taskTree);
+			m_taskTree.DeleteItem(hti);
+
+			m_data.DeleteTask(m_dwLastAddedID, FALSE); // FALSE == no undo
+			m_data.DeleteLastUndoAction();
+		}
+
+		CDWordArray aModTaskIDs;
+		aModTaskIDs.Add(m_dwLastAddedID);
+
+		SetModified(TDCA_DELETE, aModTaskIDs);
+		UpdateControls();
 	}
 
 	SetFocusToTasks();
@@ -6905,8 +6927,7 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	// the process of creating a new task because this will
 	// recalculate the column widths which could have a
 	// significant impact on the responsiveness of the UI
-	BOOL bNewTask = ((mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1)) ||
-					 (mapAttribIDs.HasOnly(TDCA_NEWTASK, TDCA_DEPENDENCY) && (aModTaskIDs.GetSize() > 1)));
+	BOOL bNewTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
 
 	if (!bNewTask)
 		m_taskTree.SetModified(mapAttribIDs, bAllowResort);

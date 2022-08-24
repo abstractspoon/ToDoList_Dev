@@ -193,6 +193,18 @@ BOOL CToDoCtrlUndo::ExtendLastAction(TDC_UNDOACTIONTYPE nType)
 	return TRUE;
 }
 
+BOOL CToDoCtrlUndo::DeleteLastUndoAction()
+{
+	ASSERT (m_aUndo.GetSize() && !m_aRedo.GetSize());
+
+	if (!m_aUndo.GetSize() || m_aRedo.GetSize())
+		return FALSE;
+
+	m_aUndo.RemoveAt(LastUndoIndex());
+
+	return TRUE;
+}
+
 BOOL CToDoCtrlUndo::SaveElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID, DWORD dwPrevSiblingID, 
 								WORD wFlags, const TODOITEM* pTDI)
 {

@@ -91,7 +91,7 @@ public:
 	BOOL CanUndoLastAction(BOOL bUndo) const;
 	int GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const;
 	TDC_UNDOACTIONTYPE GetLastUndoActionType(BOOL bUndo) const;
-	void ClearRedoStack() { m_undo.ClearRedoStack(); }
+	BOOL DeleteLastUndoAction();
 
 	// Gets
 	BOOL GetTaskAttributes(DWORD dwTaskID, TODOITEM& tdi) const;
@@ -159,7 +159,10 @@ public:
 	int GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents) const;
 	int GetTaskLocalDependencies(DWORD dwTaskID, CDWordArray& aDependencies) const;
 	BOOL TaskHasLocalCircularDependencies(DWORD dwTaskID) const;
+	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
+	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
+	BOOL IsTaskDependent(DWORD dwTaskID) const;
 
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
@@ -227,10 +230,7 @@ public:
 	BOOL ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank = TRUE);
 	BOOL ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	BOOL ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
-	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
-	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
-	BOOL InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID, CDWordArray& aModTaskIDs);
-
+	
 	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
 	
 	void SetDefaultCommentsFormat(const CString& format);
