@@ -143,6 +143,7 @@ public:
 	BOOL HasItem(DWORD dwTaskID) const;
 	GANTTITEM* GetItem(DWORD dwTaskID, BOOL bResolveReferences) const;
 	BOOL RestoreItem(const GANTTITEM& giPrev);
+	void RemoveAllDependenciesOn(DWORD dwDependencyID);
 
 	BOOL ItemIsLocked(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	BOOL ItemIsReference(DWORD dwTaskID) const;

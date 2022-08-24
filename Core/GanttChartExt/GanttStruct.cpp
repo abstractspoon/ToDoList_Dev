@@ -582,8 +582,12 @@ BOOL CGanttItemMap::DeleteItem(DWORD dwTaskID)
 	
 	if (Lookup(dwTaskID, pGI))
 	{
+		VERIFY(RemoveKey(dwTaskID));
+
 		delete pGI;
-		return CMap<DWORD, DWORD, GANTTITEM*, GANTTITEM*&>::RemoveKey(dwTaskID);
+		RemoveAllDependenciesOn(dwTaskID);
+
+		return TRUE;
 	}
 	
 	// else
@@ -648,6 +652,22 @@ BOOL CGanttItemMap::RestoreItem(const GANTTITEM& giPrev)
 
 	ASSERT(0);
 	return FALSE;
+}
+
+void CGanttItemMap::RemoveAllDependenciesOn(DWORD dwDependencyID)
+{
+	DWORD dwTaskID = 0;
+	GANTTITEM* pGI = NULL;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pGI);
+		ASSERT(pGI);
+
+		Misc::RemoveItemT(dwDependencyID, pGI->aDependIDs);
+	}
 }
 
 BOOL CGanttItemMap::IsItemDependentOn(const GANTTITEM& gi, DWORD dwOtherID) const
