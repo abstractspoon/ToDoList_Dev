@@ -759,7 +759,7 @@ void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTask
 	}
 }
 
-BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID, CDWordArray& aModTaskIDs)
+BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID)
 {
 	// Sanity checks
 	if ((!dwTaskID || IsTaskReference(dwTaskID)) ||
@@ -776,8 +776,6 @@ BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterI
 		return FALSE;
 	}
 
-	aModTaskIDs.RemoveAll();
-
 	// Get the current dependents of 'dwDependency' before changing them
 	CDWordArray aDependentIDs;
 	GetTaskLocalDependents(dwAfterID, aDependentIDs);
@@ -786,8 +784,11 @@ BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterI
 	CTDCDependencyArray aDepends;
 	aDepends.Add(dwAfterID);
 
-	SetTaskDependencies(dwTaskID, aDepends);
-	aModTaskIDs.Add(dwTaskID);
+	if (SetTaskDependencies(dwTaskID, aDepends) != SET_CHANGE)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	// Fixup the previous dependents to point to the new task
 	int nID = aDependentIDs.GetSize();
@@ -812,8 +813,6 @@ BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterI
 
 			VERIFY(aTaskDepends.ReplaceLocalDependency(dwAfterID, dwTaskID));
 			SetTaskDependencies(dwDependentID, aTaskDepends);
-
-			aModTaskIDs.Add(dwDependentID);
 		}
 	}
 

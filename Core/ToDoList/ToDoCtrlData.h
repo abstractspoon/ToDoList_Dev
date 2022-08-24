@@ -229,7 +229,7 @@ public:
 	BOOL ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
 	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
-	BOOL InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID, CDWordArray& aModTaskIDs);
+	BOOL InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID);
 
 	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
 	

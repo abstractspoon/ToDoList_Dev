@@ -4893,16 +4893,8 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		m_dwNextUniqueID++;
 
 		// Insert task into dependency chain
-		CTDCAttributeMap mapAttribIDs(TDCA_NEWTASK);
-		BOOL bDependentsChanged = FALSE;
-
 		if (dwDependency)
-		{
-			CDWordArray aDepTaskIDs;
-			
-			if (m_data.InsertTaskIntoDependencyChain(dwTaskID, dwDependency, aDepTaskIDs))
-				bDependentsChanged = (aDepTaskIDs.GetSize() > 1);
-		}
+			m_data.InsertTaskIntoDependencyChain(dwTaskID, dwDependency);
 
 		CDWordArray aModTaskIDs;
 		aModTaskIDs.Add(dwTaskID);
@@ -4910,9 +4902,6 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		SelectItem(htiNew);
 		SetModified(TDCA_NEWTASK, aModTaskIDs); 
 
-		if (bDependentsChanged)
-			SetModified(TDCA_DEPENDENCY, aModTaskIDs);
-		
 		m_taskTree.InvalidateAll();
 
 		if (bEdit)

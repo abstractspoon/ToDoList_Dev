@@ -877,8 +877,8 @@ BOOL CFilteredToDoCtrl::CreateNewTask(LPCTSTR szText, TDC_INSERTWHERE nWhere, BO
 {
 	if (CTabbedToDoCtrl::CreateNewTask(szText, nWhere, bEditText, dwDependency))
 	{
-		SetViewNeedsTaskUpdate(FTCV_TASKLIST, !InListView());
-		SetExtensionsNeedTaskUpdate(TRUE, GetTaskView());
+// 		SetViewNeedsTaskUpdate(FTCV_TASKLIST, !InListView());
+// 		SetExtensionsNeedTaskUpdate(TRUE, GetTaskView());
 
 		return TRUE;
 	}
