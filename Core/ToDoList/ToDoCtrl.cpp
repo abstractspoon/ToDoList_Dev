@@ -4894,20 +4894,24 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 
 		// Insert task into dependency chain
 		CTDCAttributeMap mapAttribIDs(TDCA_NEWTASK);
-		CDWordArray aModTaskIDs;
+		BOOL bDependentsChanged = FALSE;
 
-		if (dwDependency && m_data.InsertTaskIntoDependencyChain(dwTaskID, dwDependency, aModTaskIDs))
+		if (dwDependency)
 		{
-			if (aModTaskIDs.GetSize() > 1)
-				mapAttribIDs.Add(TDCA_DEPENDENCY);
+			CDWordArray aDepTaskIDs;
+			
+			if (m_data.InsertTaskIntoDependencyChain(dwTaskID, dwDependency, aDepTaskIDs))
+				bDependentsChanged = (aDepTaskIDs.GetSize() > 1);
 		}
-		else
-		{
-			aModTaskIDs.Add(dwTaskID);
-		}
+
+		CDWordArray aModTaskIDs;
+		aModTaskIDs.Add(dwTaskID);
 
 		SelectItem(htiNew);
-		SetModified(mapAttribIDs, aModTaskIDs, TRUE); 
+		SetModified(TDCA_NEWTASK, aModTaskIDs); 
+
+		if (bDependentsChanged)
+			SetModified(TDCA_DEPENDENCY, aModTaskIDs);
 		
 		m_taskTree.InvalidateAll();
 
@@ -6905,8 +6909,7 @@ void CToDoCtrl::SetModified(const CTDCAttributeMap& mapAttribIDs, const CDWordAr
 	// the process of creating a new task because this will
 	// recalculate the column widths which could have a
 	// significant impact on the responsiveness of the UI
-	BOOL bNewTask = ((mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1)) ||
-					 (mapAttribIDs.HasOnly(TDCA_NEWTASK, TDCA_DEPENDENCY) && (aModTaskIDs.GetSize() > 1)));
+	BOOL bNewTask = (mapAttribIDs.HasOnly(TDCA_NEWTASK) && (aModTaskIDs.GetSize() == 1));
 
 	if (!bNewTask)
 		m_taskTree.SetModified(mapAttribIDs, bAllowResort);
