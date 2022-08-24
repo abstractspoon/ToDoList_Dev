@@ -3894,19 +3894,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 	// Get the actual tasks for the update
 	CTaskFile tasks;
-
-// 	if (mapAttribIDs.Has(TDCA_DEPENDENCY))
-// 	{
-// 		// Be cautious
-// 		CTDCAttributeMap mapAllAttribIDs;
-// 		GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
-// 		
-// 		GetAllTasksForExtensionViewUpdate(mapAllAttribIDs, tasks);
-// 	}
-// 	else
-	{
-		GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
-	}
+	GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
 	
 	// refresh all extensions 
 	int nExt = m_aExtViews.GetSize();
@@ -3961,6 +3949,7 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 	default: // > 1
 		sAttrib = _T("multiple attributes");
+		break;
 	}
 
 	TRACE(_T("UpdateExtensionViewsSelection(%s) => %d plugins updated\n"), sAttrib, nNumUpdated);
