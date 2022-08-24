@@ -814,11 +814,15 @@ void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTask
 	}
 }
 
-BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID, CDWordArray& aModTaskIDs)
+BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID)
 {
-	ASSERT(dwTaskID && dwAfterID);
-
-	aModTaskIDs.RemoveAll();
+	// Sanity checks
+	if ((!dwTaskID || IsTaskReference(dwTaskID)) ||
+		(!dwAfterID || IsTaskReference(dwAfterID)))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	if (IsTaskLocallyDependentOn(dwTaskID, dwAfterID, FALSE) ||
 		IsTaskLocallyDependentOn(dwAfterID, dwTaskID, FALSE))
@@ -836,14 +840,26 @@ BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterI
 	CTDCDependencyArray aDepends;
 	aDepends.Add(dwAfterID);
 
-	SetTaskDependencies(dwTaskID, aDepends);
-	aModTaskIDs.Add(dwTaskID);
+	if (SetTaskDependencies(dwTaskID, aDepends) != SET_CHANGE)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	// Fixup the previous dependents to point to the new task
 	int nID = aDependentIDs.GetSize();
 
 	if (nID > 0)
 	{
+		// Make sure the new task has a due date
+		if (!TaskHasDate(dwTaskID, TDCD_DUE) && TaskHasDate(dwTaskID, TDCD_START))
+		{
+			TODOITEM* pTDI = m_items.GetTask(dwTaskID);
+
+			if (!CalcMissingDueDateFromStart(pTDI))
+				pTDI->dateDue = CDateHelper::GetDateOnly(pTDI->dateStart);
+		}
+
 		while (nID--)
 		{
 			DWORD dwDependentID = aDependentIDs[nID];
@@ -853,8 +869,6 @@ BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterI
 
 			VERIFY(aTaskDepends.ReplaceLocalDependency(dwAfterID, dwTaskID));
 			SetTaskDependencies(dwDependentID, aTaskDepends);
-
-			aModTaskIDs.Add(dwDependentID);
 		}
 	}
 

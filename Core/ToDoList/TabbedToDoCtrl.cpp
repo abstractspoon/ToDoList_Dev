@@ -1243,19 +1243,10 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter));
 
 	// Globals
-	if (mapAttrib.IsEmpty())
-	{
+	if (mapAttrib.IsEmpty() || mapAttrib.Has(TDCA_NEWTASK))
 		AddGlobalsToTaskFile(tasks, TDCA_ALL);
-	}
-	else if (mapAttrib.Has(TDCA_NEWTASK))
-	{
-		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK));
-		AddGlobalsToTaskFile(tasks, TDCA_ALL);
-	}
 	else
-	{
 		AddGlobalsToTaskFile(tasks, mapAttrib);
-	}
 
 	return tasks.GetTaskCount();
 }
@@ -3894,7 +3885,24 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 	// Get the actual tasks for the update
 	CTaskFile tasks;
-	GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
+/*
+	if ((mapAttribIDs.Has(TDCA_NEWTASK) ||
+		 mapAttribIDs.Has(TDCA_DEPENDENCY) ||
+		 mapAttribIDs.Has(TDCA_DUEDATE) ||
+		 mapAttribIDs.Has(TDCA_DONEDATE) ||
+		 mapAttribIDs.Has(TDCA_STARTDATE)) &&
+		m_taskTree.SelectionHasDependents())
+	{
+		// Be cautious
+		CTDCAttributeMap mapAllAttribIDs;
+		GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
+		
+		GetAllTasksForExtensionViewUpdate(mapAllAttribIDs, tasks);
+	}
+	else
+*/	{
+		GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
+	}
 	
 	// refresh all extensions 
 	int nExt = m_aExtViews.GetSize();
