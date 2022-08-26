@@ -604,6 +604,14 @@ int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CDWordArray& aLocalDepend
 	return pTDI->aDependencies.GetDependencies(aLocalDepends, aOtherDepends);
 }
 
+BOOL CToDoCtrlData::IsTaskDependent(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, FALSE);
+	
+	return (pTDI->aDependencies.GetSize() > 0);
+}
+
 BOOL CToDoCtrlData::IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const
 {
 	ASSERT(dwOtherID);
@@ -2473,7 +2481,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	}
 	
 	// We need to calculate it 'fully'
-	return AddDuration(dtNewStart, dNewDuration, nUnits, TRUE); // updates dtNewStart
+	return AddDuration(dtNewStart, dCurDuration, nUnits, TRUE); // updates dtNewStart
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -3033,12 +3041,10 @@ TDC_UNDOACTIONTYPE CToDoCtrlData::GetLastUndoActionType(BOOL bUndo) const
 	return (bUndo ? m_undo.GetLastUndoType() : m_undo.GetLastRedoType());
 }
 
-/*
 BOOL CToDoCtrlData::DeleteLastUndoAction()
 {
 	return m_undo.DeleteLastUndoAction();
 }
-*/
 
 BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
 {

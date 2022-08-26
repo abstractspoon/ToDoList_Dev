@@ -4159,7 +4159,7 @@ void CGanttCtrl::DeleteItem(HTREEITEM hti)
 	ASSERT(dwTaskID);
 
 	VERIFY(m_tree.DeleteItem(hti));
-	VERIFY(m_data.RemoveKey(dwTaskID));
+	VERIFY(m_data.DeleteItem(dwTaskID));
 }
 
 BOOL CGanttCtrl::ZoomIn(BOOL bIn)

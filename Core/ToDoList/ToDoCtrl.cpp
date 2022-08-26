@@ -4877,7 +4877,7 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		if (dwParentID)
 		{
 			// if the parent was being clocked then stop it now
-			// since having children makes a task unclockable
+			// since having children makes a task un-clockable
 			if (!HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 			{
 				if (m_timeTracking.IsTrackingTask(dwParentID))
@@ -5356,8 +5356,32 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT (lParam);
 		UNREFERENCED_PARAMETER(lParam);
 
-		UndoLastAction(TRUE);
-		m_data.ClearRedoStack(); // Not undoable
+		// make sure this item is not selected
+		HTREEITEM hti = GetSelectedItem();
+		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
+
+		// set selection to previous task and if that fails then next task
+		if (!m_taskTree.SelectTasksInHistory(FALSE) &&
+			!GotoNextTask(TDCG_PREV) && 
+			!GotoNextTask(TDCG_NEXT))
+		{
+			TSH().RemoveAll();
+		}
+		
+		// then delete and remove from undo
+		{
+			CHoldRedraw hr(m_taskTree);
+			m_taskTree.DeleteItem(hti);
+
+			m_data.DeleteTask(m_dwLastAddedID, FALSE); // FALSE == no undo
+			m_data.DeleteLastUndoAction();
+		}
+
+		CDWordArray aModTaskIDs;
+		aModTaskIDs.Add(m_dwLastAddedID);
+
+		SetModified(TDCA_DELETE, aModTaskIDs);
+		UpdateControls();
 	}
 
 	SetFocusToTasks();
