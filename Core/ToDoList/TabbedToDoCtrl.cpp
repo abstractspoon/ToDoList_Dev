@@ -2117,9 +2117,9 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 	if (bChange)
 	{
-		// If more than one task was explicitly modified then
-		// we need to send a 'manual' notification else the
-		// 'SetSelectedTask...' methods will already have done so
+		// Note: If 'aModTaskIDs' is NOT empty then it means that the 
+		// 'SetSelectedTask...' methods were NOT used and so we need
+		// to notify everyone that there have been changes
 		if (aModTaskIDs.GetSize())
 		{
 			ASSERT(mapModAttribs.GetCount());
