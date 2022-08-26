@@ -3064,7 +3064,7 @@ BEGIN
             MENUITEM "Set Task &Icon...",           ID_EDIT_SETTASKICON
             MENUITEM "C&lear Task Icon",            ID_EDIT_CLEARTASKICON
             MENUITEM SEPARATOR
-            MENUITEM "&Toggle Task Completion",     ID_EDIT_TASKDONE
+            MENUITEM "&Toggle Task Completion",     ID_EDIT_TOGGLETASKDONE
             MENUITEM "&Increment Task % Completion", 
                                                     ID_EDIT_INCTASKPERCENTDONE
 
@@ -3815,7 +3815,7 @@ BEGIN
             MENUITEM "Set Task &Icon...",           ID_EDIT_SETTASKICON
             MENUITEM "C&lear Task Icon",            ID_EDIT_CLEARTASKICON
             MENUITEM SEPARATOR
-            MENUITEM "&Toggle Task Completion",     ID_EDIT_TASKDONE
+            MENUITEM "&Toggle Task Completion",     ID_EDIT_TOGGLETASKDONE
             MENUITEM "&Increment Task % Completion", 
                                                     ID_EDIT_INCTASKPERCENTDONE
 
@@ -5840,6 +5840,7 @@ BEGIN
     IDS_CONFIRMSAVEAS       "%s already exists.\nDo you want to replace it?"
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
     IDS_PRINT_TASKVIEW      "Screenshot of active task view (%s)"
+    IDS_TASKCOMPLETION      "Task Completion"
 END
 
 STRINGTABLE DISCARDABLE 

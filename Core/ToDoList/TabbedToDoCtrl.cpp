@@ -12,6 +12,7 @@
 #include "tdltaskicondlg.h"
 #include "TDLTaskViewListBox.h"
 #include "ToDoCtrlDataDefines.h"
+#include "TDCTaskCompletion.h"
 
 #include "..\shared\holdredraw.h"
 #include "..\shared\datehelper.h"
@@ -1696,7 +1697,8 @@ BOOL CTabbedToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 	return TRUE;
 }
 
-BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& aModTaskIDs, CTDCAttributeMap& mapModAttribs)
+BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& aModTaskIDs, 
+											CTDCTaskCompletionArray& aTasksForCompletion, CTDCAttributeMap& mapModAttribs)
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
 
@@ -1754,18 +1756,32 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 	case TDCA_STATUS:		
 		{
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskStatus(dwTaskID, mod.szValue));
+			{
+				if (!aTasksForCompletion.Add(dwTaskID, mod.szValue))
+				{
+					bChange = (SET_CHANGE == m_data.SetTaskStatus(dwTaskID, mod.szValue));
+				}
+			}
 			else
+			{
 				bChange = SetSelectedTaskStatus(mod.szValue);
+			}
 		}
 		break;
 
 	case TDCA_PERCENT:		
 		{
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskPercent(dwTaskID, mod.nValue));
+			{
+				if (!aTasksForCompletion.Add(dwTaskID, mod.nValue))
+				{
+					bChange = (SET_CHANGE == m_data.SetTaskPercent(dwTaskID, mod.nValue));
+				}
+			}
 			else
+			{
 				bChange = SetSelectedTaskPercentDone(mod.nValue);
+			}
 		}
 		break;
 
@@ -1852,7 +1868,7 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 			COleDateTime date(CDateHelper::GetDate(mod.tValue));
 
 			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskDate(dwTaskID, TDCD_DONE, date));
+				VERIFY(aTasksForCompletion.Add(dwTaskID, date));
 			else
 				bChange = SetSelectedTaskDate(TDCD_DONE, date);
 		}
@@ -2082,6 +2098,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 	// Keep track of explicitly modified tasks and attributes
 	CDWordArray aModTaskIDs;
+	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
 	CTDCAttributeMap mapModAttribs;
 	BOOL bChange = FALSE;
 
@@ -2096,7 +2113,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 		{
 			const IUITASKMOD& mod = pMods[nMod];
 
-			if (ProcessUIExtensionMod(mod, aModTaskIDs, mapModAttribs))
+			if (ProcessUIExtensionMod(mod, aModTaskIDs, aTasksForCompletion, mapModAttribs))
 			{
 				bChange = TRUE;
 			}
@@ -2124,6 +2141,15 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 	{
 		ASSERT(0);
 		bChange = FALSE;
+	}
+
+	if (aTasksForCompletion.GetSize() &&
+		SetSelectedTaskCompletion(aTasksForCompletion))
+	{
+		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
+		m_taskTree.GetAttributesAffectedByMod(TDCA_DONEDATE, mapModAttribs);
+
+		bChange = TRUE;
 	}
 
 	if (bChange)

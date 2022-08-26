@@ -977,15 +977,11 @@ BOOL CToDoCtrlData::TaskHasDate(DWORD dwTaskID, TDC_DATE nDate) const
 	return CDateHelper::IsDateSet(GetTaskDate(dwTaskID, nDate));
 }
 
-int CToDoCtrlData::GetTaskPercent(DWORD dwTaskID, BOOL bCheckIfDone) const
+int CToDoCtrlData::GetTaskPercent(DWORD dwTaskID) const
 {
 	const TODOITEM* pTDI = NULL;
 	GET_TDI(dwTaskID, pTDI, 0);
 	
-	if (bCheckIfDone)
-		return pTDI->IsDone() ? 100 : pTDI->nPercentDone;
-	
-	// else
 	return pTDI->nPercentDone;
 }
 
@@ -2151,25 +2147,6 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 				RecalcTaskTimeEstimate(dwTaskID, pTDI, nDate);
 		}
 
-		// Handle a change in completion state
-		if (Misc::StateChanged(bWasDone, pTDI->IsDone()))
-		{
-			if (bWasDone && (pTDI->nPercentDone == 100))
-				pTDI->nPercentDone = 0;
-
-			if (!m_sCompletionStatus.IsEmpty())
-			{
-				if (bWasDone && (pTDI->sStatus.CompareNoCase(m_sCompletionStatus) == 0))
-				{
-					pTDI->sStatus = m_sDefaultStatus;
-				}
-				else if (!bWasDone)
-				{
-					pTDI->sStatus = m_sCompletionStatus;
-				}
-			}
-		}
-
 		// And subtasks
 		ApplyLastInheritedChangeToSubtasks(dwTaskID, TDC::MapDateToAttribute(nDate));
 		
@@ -2376,69 +2353,15 @@ TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const
 	return SetTaskDate(dwTaskID, NULL, nDate, date, TRUE); // Recalc time estimate
 }
 
-TDC_SET CToDoCtrlData::SetTaskPercent(DWORD dwTaskID, int nPercent, BOOL bOffset)
+TDC_SET CToDoCtrlData::SetTaskPercent(DWORD dwTaskID, int nPercent)
 {
-	if (!bOffset && (nPercent < 0 || nPercent > 100))
+	if ((nPercent < 0) || (nPercent > 100))
 		return SET_FAILED;
 	
 	TODOITEM* pTDI = NULL;
 	EDIT_GET_TDI(dwTaskID, pTDI);
 
-	BOOL bDone = pTDI->IsDone();
-
-	if (bOffset)
-	{
-		int nAmount = nPercent;
-		nPercent += pTDI->nPercentDone;
-
-		nPercent = GetNextValue(nPercent, nAmount);
-		nPercent = max(0, min(nPercent, 100));
-	}
-
-	TDC_SET nRes = EditTaskAttributeT(dwTaskID, pTDI, TDCA_PERCENT, pTDI->nPercentDone, nPercent);
-
-	if (nRes == SET_CHANGE)
-	{
-		// need to handle transition to/from 100% as special case
-		if (bDone && (nPercent < 100))
-		{
-			SetTaskDate(dwTaskID, TDCD_DONE, 0.0);
-		}
-		else if (!bDone && (nPercent >= 100))
-		{
-			SetTaskDate(dwTaskID, TDCD_DONE, COleDateTime::GetCurrentTime());
-		}
-	}
-
-	return nRes;
-}
-
-int CToDoCtrlData::GetNextValue(int nValue, int nIncrement)
-{
-	ASSERT(nIncrement != 0);
-	ASSERT(nValue >= 0);
-
-	BOOL bUp = (nIncrement > 0);
-	int nAmount = abs(nIncrement);
-
-	// we need to replicate the arithmetic performed by the 
-	// spin button control, so that to the user the result
-	// is the same as clicking the spin buttons
-	if (nAmount > 1)
-	{
-		// bump the % to the next upper (if +ve) or
-		// next lower (if -ve) whole increment
-		// before adding the increment
-		if (nValue % nAmount)
-		{
-			if (bUp)
-				nValue = (((nValue / nAmount) + 1) * nAmount);
-			else
-				nValue = ((nValue / nAmount) * nAmount);
-		}
-	}
-
-	return (nValue + nIncrement);
+	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_PERCENT, pTDI->nPercentDone, nPercent);
 }
 
 TDC_SET CToDoCtrlData::SetTaskCost(DWORD dwTaskID, const TDCCOST& cost, BOOL bOffset)
@@ -2658,24 +2581,7 @@ TDC_SET CToDoCtrlData::SetTaskStatus(DWORD dwTaskID, const CString& sStatus)
 
 	CString sPrevStatus = pTDI->sStatus;
 	
-	TDC_SET nChange = EditTaskAttributeT(dwTaskID, pTDI, TDCA_STATUS, pTDI->sStatus, sStatus);
-
-	if ((nChange == SET_CHANGE) && !m_sCompletionStatus.IsEmpty() && HasStyle(TDCS_SYNCCOMPLETIONTOSTATUS))
-	{
-		BOOL bDone = (sStatus == m_sCompletionStatus);
-		BOOL bWasDone = (sPrevStatus == m_sCompletionStatus);
-
-		if (bDone && !bWasDone)
-		{
-			SetTaskDone(dwTaskID, COleDateTime::GetCurrentTime(), FALSE, FALSE);
-		}
-		else if (!bDone && bWasDone)
-		{
-			SetTaskDone(dwTaskID, CDateHelper::NullDate(), FALSE, FALSE);
-		}
-	}
-
-	return nChange;
+	return EditTaskAttributeT(dwTaskID, pTDI, TDCA_STATUS, pTDI->sStatus, sStatus);
 }
 
 TDC_SET CToDoCtrlData::SetTaskCategories(DWORD dwTaskID, const CStringArray& aCategories, BOOL bAppend)
@@ -3926,7 +3832,7 @@ TDC_SET CToDoCtrlData::SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAtt
 	case TDCA_COLOR:		return SetTaskColor(dwTaskID, data.AsInteger());
 	case TDCA_PRIORITY:		return SetTaskPriority(dwTaskID, data.AsInteger(), FALSE);
 	case TDCA_RISK:			return SetTaskRisk(dwTaskID, data.AsInteger(), FALSE);
-	case TDCA_PERCENT:		return SetTaskPercent(dwTaskID, data.AsInteger(), FALSE);
+	case TDCA_PERCENT:		return SetTaskPercent(dwTaskID, data.AsInteger());
 	case TDCA_FLAG:			return SetTaskFlag(dwTaskID, data.AsBool());
 	case TDCA_LOCK:			return SetTaskLock(dwTaskID, data.AsBool());
 

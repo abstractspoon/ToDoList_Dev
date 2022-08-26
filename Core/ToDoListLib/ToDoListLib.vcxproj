@@ -163,6 +163,7 @@
     <ClCompile Include="..\ToDoList\tdcsort.cpp" />
     <ClCompile Include="..\ToDoList\TDCSourceControl.cpp" />
     <ClCompile Include="..\ToDoList\TDCStartupOptions.cpp" />
+    <ClCompile Include="..\ToDoList\TDCTaskCompletion.cpp" />
     <ClCompile Include="..\ToDoList\TDCTaskTimeLog.cpp" />
     <ClCompile Include="..\ToDoList\TDCTaskTimeLogAnalysis.cpp" />
     <ClCompile Include="..\ToDoList\TDCTimeTracking.cpp" />
@@ -318,6 +319,7 @@
     <ClInclude Include="..\ToDoList\tdcstatic.h" />
     <ClInclude Include="..\ToDoList\tdcstruct.h" />
     <ClInclude Include="..\ToDoList\tdcswitch.h" />
+    <ClInclude Include="..\ToDoList\TDCTaskCompletion.h" />
     <ClInclude Include="..\ToDoList\TDCTaskTimeLog.h" />
     <ClInclude Include="..\ToDoList\TDCTaskTimeLogAnalysis.h" />
     <ClInclude Include="..\ToDoList\TDCTimeTracking.h" />

@@ -1704,6 +1704,32 @@ double Misc::Round(double dValue, int nDecimals)
 	return _ttof(Misc::Format(dValue, 2));
 }
 
+int Misc::GetNextValue(int nValue, int nIncrement)
+{
+	ASSERT(nIncrement != 0);
+	ASSERT(nValue >= 0);
+
+	BOOL bUp = (nIncrement > 0);
+	int nAmount = abs(nIncrement);
+
+	// Note: This mimics the behaviour performed by the spin button control
+	if (nAmount > 1)
+	{
+		// bump the % to the next upper (if +ve) or
+		// next lower (if -ve) whole increment
+		// before adding the increment
+		if (nValue % nAmount)
+		{
+			if (bUp)
+				nValue = (((nValue / nAmount) + 1) * nAmount);
+			else
+				nValue = ((nValue / nAmount) * nAmount);
+		}
+	}
+
+	return (nValue + nIncrement);
+}
+
 BOOL Misc::IsNumber(const CString& sValue)
 {
 	if (sValue.IsEmpty())
