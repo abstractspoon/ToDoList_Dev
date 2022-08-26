@@ -604,14 +604,6 @@ int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CDWordArray& aLocalDepend
 	return pTDI->aDependencies.GetDependencies(aLocalDepends, aOtherDepends);
 }
 
-BOOL CToDoCtrlData::IsTaskDependent(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FALSE);
-	
-	return (pTDI->aDependencies.GetSize() > 0);
-}
-
 BOOL CToDoCtrlData::IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const
 {
 	ASSERT(dwOtherID);

@@ -160,10 +160,7 @@ public:
 	int GetTaskLocalDependents(const CDWordArray& aTaskIDs, CDWordArray& aDependents, BOOL bImmediateOnly) const;
 	int GetTaskLocalDependencies(DWORD dwTaskID, CDWordArray& aDependencies) const;
 	BOOL TaskHasLocalCircularDependencies(DWORD dwTaskID) const;
-	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
-	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
-	BOOL IsTaskDependent(DWORD dwTaskID) const;
 
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
@@ -339,6 +336,8 @@ protected:
 	int GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased = TRUE) const;
 
 	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
+	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
+	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
 	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);
 	BOOL TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
 
