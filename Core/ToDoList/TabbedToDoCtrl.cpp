@@ -1690,13 +1690,14 @@ BOOL CTabbedToDoCtrl::SplitSelectedTask(int nNumSubtasks)
 BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& aModTaskIDs, CTDCAttributeMap& mapModAttribs)
 {
 	DWORD dwTaskID = mod.dwSelectedTaskID;
-	DWORD dwSelTaskID = GetSingleSelectedTaskID();
 
 	if (!CanEditSelectedTask(mod, dwTaskID))
 	{
 		ASSERT(0);
 		return 0;
 	}
+
+	ASSERT((dwTaskID == 0) || (GetSelectedTaskCount() > 1));
 
 	CStringArray aValues;
 	DWORD dwResults = 0; 
@@ -1918,12 +1919,15 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 		break;
 		
 	case TDCA_DEPENDENCY: 
-		if ((GetSelectedTaskCount() != 1) || (dwTaskID != dwSelTaskID))
+		if (dwTaskID != 0)
 		{
+			// Only support singly selected tasks
 			ASSERT(0);
 		}
 		else
 		{
+			ASSERT(GetSingleSelectedTaskID());
+
 			CTDCDependencyArray aDepends;
 			GetSelectedTaskDependencies(aDepends);
 
@@ -1949,12 +1953,14 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 		break;
 		
 	case TDCA_OFFSETTASK:
-		if ((GetSelectedTaskCount() != 1) || (dwTaskID != dwSelTaskID))
+		if (dwTaskID != 0)
 		{
 			ASSERT(0);
 		}
 		else
 		{
+			ASSERT(GetSingleSelectedTaskID());
+
 			bChange = ExtensionMoveSelectedTaskStartAndDueDates(CDateHelper::GetDate(mod.tValue));
 		}
 		break;
@@ -2112,7 +2118,7 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 	if (bChange)
 	{
 		// If more than one task was explicitly modified then
-		// we'll need to send a 'manual' notification else the
+		// we need to send a 'manual' notification else the
 		// 'SetSelectedTask...' methods will already have done so
 		if (aModTaskIDs.GetSize())
 		{
