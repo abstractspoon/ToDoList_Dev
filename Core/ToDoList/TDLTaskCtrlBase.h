@@ -145,9 +145,6 @@ public:
 	BOOL IsSelectedTaskDue() const;
 
 	BOOL SelectionHasDependencies() const;
-	BOOL SelectionHasIncompleteDependencies(CString& sIncomplete) const;
-	BOOL SelectionHasIncompleteSubtasks(BOOL bExcludeRecurring) const;
-	int SelectionHasCircularDependencies(CDWordArray& aTaskIDs) const;
 	BOOL SelectionHasDates(TDC_DATE nDate, BOOL bAll = FALSE) const;
 	BOOL SelectionHasReferences() const;
 	BOOL SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const;
@@ -372,7 +369,6 @@ protected:
 	TDC_COLUMN GetColumnID(int nCol) const; // zero is always 'tasks'
 	int GetColumnIndex(TDC_COLUMN nColID) const;
 	CFont* PrepareDCFont(CDC* pDC, const TODOITEM* pTDI, const TODOSTRUCTURE* pTDS, BOOL bTitleLabel);
-	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
 	const CEnHeaderCtrl& GetColumnHeaderCtrl(TDC_COLUMN nColID) const;
 	BOOL IsVisible() const;
 	CPoint CalcColumnIconTopLeft(const CRect& rSubItem, int nImageSize = 16, int nImage = 0, int nCount = 1) const;

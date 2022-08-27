@@ -56,8 +56,10 @@ class CTaskFile;
 class CDeferWndMove;
 class CSpellCheckDlg;
 class CPreferences;
+class CTDCTaskCompletionArray;
 
 struct CTRLITEM;
+struct TDCTASKCOMPLETION;
 
 /////////////////////////////////////////////////////////////////////////////
 // CToDoCtrl dialog
@@ -224,7 +226,7 @@ public:
 	BOOL EditSelectedTaskIcon(); 
 	BOOL ClearSelectedTaskIcon(); 
 
-	BOOL SetSelectedTaskDone(BOOL bDone = TRUE);
+	BOOL SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion);
 	BOOL IsSelectedTaskDone() const { return m_taskTree.IsSelectedTaskDone(); }
 	BOOL IsSelectedTaskDue() const { return m_taskTree.IsSelectedTaskDue(); }
 	BOOL OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks);
@@ -794,8 +796,6 @@ protected:
 	// internal versions so we can tell how we've been called
 	BOOL SetSelectedTaskComments(const CString& sComments, const CBinaryData& customComments, BOOL bInternal);
 	BOOL SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends, BOOL bAppends, BOOL bEdit);
-	BOOL SetSelectedTaskDone(const COleDateTime& date, BOOL bDateEdited);
-	int CheckWantSubtasksCompleted();
 	BOOL SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BOOL bDateEdited);
 	BOOL SetSelectedTaskCustomAttributeData(const CString& sAttribID, const TDCCADATA& data, BOOL bCtrlEdited);
 	BOOL ClearSelectedTaskCustomAttributeData(const CString& sAttribID, BOOL bCtrlEdited);
@@ -804,12 +804,18 @@ protected:
 	BOOL SetSelectedTaskTimeEstimateUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskTimeSpentUnits(TDC_UNITS nUnits, BOOL bRecalcTime);
 	BOOL SetSelectedTaskFileLinks(const CStringArray& aFilePaths, BOOL bAppend, BOOL bCtrlEdited);
-	TDC_SET SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates);
 	TDC_SET OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, CDWordSet& mapProcessed);
 	HTREEITEM InsertNewTask(const CString& sText, HTREEITEM htiParent, HTREEITEM htiAfter, BOOL bEdit, DWORD dwDependency);
 	int GetAllSelectedTaskDependencies(CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 	BOOL SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COleDateTime& date);
 	BOOL CanSetSelectedTaskPercentDone(BOOL bToToday) const;
+
+	BOOL SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited);
+	BOOL SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks);
+	BOOL SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks);
+	BOOL CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, BOOL& bAndSubtasks) /*const*/;
+	BOOL TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const;
+	BOOL CheckWantTaskSubtasksCompleted(const CDWordArray& aTaskIDs) const;
 
 	void LoadGlobals(const CTaskFile& tasks);
 	void SaveCustomAttributeDefinitions(CTaskFile& tasks, const TDCGETTASKS& filter = TDCGETTASKS()) const;
@@ -891,9 +897,6 @@ protected:
 	void LoadTaskIcons();
 	void InitEditPrompts();
 	BOOL ConfirmDeleteAllTasks(BOOL bSelected = FALSE) const;
-
-	void ShowTaskHasIncompleteDependenciesError(const CString& sIncomplete);
-	void ShowTaskHasCircularDependenciesError(const CDWordArray& aTaskIDs) const;
 
 	typedef CMap<DWORD, DWORD, DWORD, DWORD&> CMapID2ID;
 	void PrepareTasksForPaste(CTaskFile& tasks, TDC_RESETIDS nResetID, BOOL bResetCreation) const;

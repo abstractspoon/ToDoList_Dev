@@ -5016,6 +5016,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 
 	case TDCA_DONEDATE: // -----------------------------------------------------------
 		mapAttribIDs.Add(TDCA_SUBTASKDONE);
+		mapAttribIDs.Add(TDCA_PERCENT);
 
 		if (bWantUpdateDependentDates)
 		{
@@ -5027,12 +5028,6 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
 			mapAttribIDs.Add(TDCA_STARTDATE);
-		}
-
-		if (HasStyle(TDCS_AVERAGEPERCENTSUBCOMPLETION) &&
-			HasStyle(TDCS_INCLUDEDONEINAVERAGECALC))
-		{
-			mapAttribIDs.Add(TDCA_PERCENT);
 		}
 
 		if (HasStyle(TDCS_DONEHAVELOWESTRISK) ||
@@ -5069,6 +5064,7 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 		if (HasStyle(TDCS_SYNCTIMEESTIMATESANDDATES))
 		{
 			mapAttribIDs.Add(TDCA_DUEDATE);
+			mapAttribIDs.Add(TDCA_STARTDATE);
 		}
 		break;
 
@@ -5512,21 +5508,6 @@ int CTDLTaskCtrlBase::CalcMaxCustomAttributeColWidth(TDC_COLUMN nColID, CDC* pDC
 	return 0;
 }
 
-BOOL CTDLTaskCtrlBase::SelectionHasIncompleteDependencies(CString& sIncomplete) const
-{
-	POSITION pos = GetFirstSelectedTaskPos();
-	
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		if (TaskHasIncompleteDependencies(dwTaskID, sIncomplete))
-			return TRUE;
-	}
-
-	return FALSE;
-}
-
 BOOL CTDLTaskCtrlBase::SelectionHasDependencies() const
 {
 	POSITION pos = GetFirstSelectedTaskPos();
@@ -5538,54 +5519,6 @@ BOOL CTDLTaskCtrlBase::SelectionHasDependencies() const
 		
 		if (m_data.TaskHasDependencies(dwTaskID))
 			return TRUE;
-	}
-	
-	return FALSE;
-}
-
-BOOL CTDLTaskCtrlBase::TaskHasIncompleteDependencies(DWORD dwTaskID, CString& sIncomplete) const
-{
-	CTDCDependencyArray aDepends;
-	int nNumDepends = m_data.GetTaskDependencies(dwTaskID, aDepends);
-	
-	for (int nDepend = 0; nDepend < nNumDepends; nDepend++)
-	{
-		const TDCDEPENDENCY& depend = aDepends[nDepend];
-		
-		// see if dependent is one of 'our' tasks
-		if (depend.IsLocal())
-		{
-			if (m_data.HasTask(depend.dwTaskID) && !m_data.IsTaskDone(depend.dwTaskID))
-			{
-				sIncomplete = depend.Format();
-				return TRUE;
-			}
-		}
-		else if (!depend.sTasklist.IsEmpty()) // pass to parent if we can't handle
-		{
-			BOOL bDependentIsDone = CWnd::GetParent()->SendMessage(WM_TDCM_ISTASKDONE, depend.dwTaskID, (LPARAM)(LPCTSTR)depend.sTasklist);
-			
-			if (!bDependentIsDone)
-			{
-				sIncomplete = depend.Format();
-				return TRUE;
-			}
-		}
-	}
-	
-	// check this tasks subtasks
-	const TODOSTRUCTURE* pTDS = m_data.LocateTask(dwTaskID);
-	ASSERT(pTDS);
-	
-	if (pTDS && pTDS->HasSubTasks())
-	{
-		int nPos = pTDS->GetSubTaskCount();
-		
-		while (nPos--)
-		{
-			if (TaskHasIncompleteDependencies(pTDS->GetSubTaskID(nPos), sIncomplete))
-				return TRUE;
-		}
 	}
 	
 	return FALSE;
@@ -5704,26 +5637,6 @@ BOOL CTDLTaskCtrlBase::SelectionAreAllDone() const
 	return TRUE;
 }
 
-int CTDLTaskCtrlBase::SelectionHasCircularDependencies(CDWordArray& aTaskIDs) const
-{
-	aTaskIDs.RemoveAll();
-
-	POSITION pos = GetFirstSelectedTaskPos();
-
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-
-		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
-		{
-			aTaskIDs.Add(dwTaskID);
-			return TRUE;
-		}
-	}
-
-	return aTaskIDs.GetSize();
-}
-
 BOOL CTDLTaskCtrlBase::SelectionHasDependents() const
 {
 	POSITION pos = GetFirstSelectedTaskPos();
@@ -5835,21 +5748,6 @@ BOOL CTDLTaskCtrlBase::SelectionHasNonReferences() const
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 		
 		if (!m_data.IsTaskReference(dwTaskID))
-			return TRUE;
-	}
-	
-	return FALSE;
-}
-
-BOOL CTDLTaskCtrlBase::SelectionHasIncompleteSubtasks(BOOL bExcludeRecurring) const
-{
-	POSITION pos = GetFirstSelectedTaskPos();
-	
-	while (pos)
-	{
-		DWORD dwTaskID = GetNextSelectedTaskID(pos);
-		
-		if (m_data.TaskHasIncompleteSubtasks(dwTaskID, bExcludeRecurring))
 			return TRUE;
 	}
 	
@@ -6243,12 +6141,12 @@ int CTDLTaskCtrlBase::GetSelectedTaskPercent() const
 		POSITION pos = GetFirstSelectedTaskPos();
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		nPercent = m_data.GetTaskPercent(dwTaskID, FALSE);
+		nPercent = m_data.GetTaskPercent(dwTaskID);
 		
 		while (pos)
 		{
 			dwTaskID = GetNextSelectedTaskID(pos);
-			int nTaskPercent = m_data.GetTaskPercent(dwTaskID, FALSE);
+			int nTaskPercent = m_data.GetTaskPercent(dwTaskID);
 			
 			if (nPercent != nTaskPercent)
 				return -1;

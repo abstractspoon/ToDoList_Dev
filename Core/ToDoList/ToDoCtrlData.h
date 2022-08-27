@@ -105,7 +105,7 @@ public:
 	CString GetTaskComments(DWORD dwTaskID) const;
 	int GetTaskCommentsLength(DWORD dwTaskID) const;
 	const CBinaryData& GetTaskCustomComments(DWORD dwTaskID, CONTENTFORMAT& cfComments) const;
-	int GetTaskPercent(DWORD dwTaskID, BOOL bCheckIfDone) const;
+	int GetTaskPercent(DWORD dwTaskID) const;
 	BOOL GetTaskTimeEstimate(DWORD dwTaskID, TDCTIMEPERIOD& timeEst) const;
 	BOOL GetTaskTimeSpent(DWORD dwTaskID, TDCTIMEPERIOD& timeSpent) const;
 	BOOL GetTaskCost(DWORD dwTaskID, TDCCOST& cost) const;
@@ -130,8 +130,10 @@ public:
 	BOOL IsTaskReusableRecurring(DWORD dwTaskID) const;
 	BOOL CanTaskRecur(DWORD dwTaskID) const;
 	CString GetTaskVersion(DWORD dwTaskID) const;
-	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
 	CString GetTaskMetaData(DWORD dwTaskID, const CString& sKey) const;
+
+	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
+	BOOL GetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, TDCCADATA& data) const;
 
 	int GetTaskAllocTo(DWORD dwTaskID, CStringArray& aAllocTo) const;
 	int GetTaskCategories(DWORD dwTaskID, CStringArray& aCategories) const;
@@ -192,7 +194,7 @@ public:
 	TDC_SET SetTaskCustomAttributeData(DWORD dwTaskID, const CString& sAttribID, const TDCCADATA& data);
 	TDC_SET SetTaskMetaData(DWORD dwTaskID, const CString& sKey, const CString& sMetaData);
 	
-	TDC_SET SetTaskPercent(DWORD dwTaskID, int nPercent, BOOL bOffset = FALSE);
+	TDC_SET SetTaskPercent(DWORD dwTaskID, int nPercent);
 	TDC_SET SetTaskPriority(DWORD dwTaskID, int nPriority, BOOL bOffset = FALSE); // 0-10 (10 is highest)
 	TDC_SET SetTaskRisk(DWORD dwTaskID, int nRisk, BOOL bOffset = FALSE); // 0-10 (10 is highest)
 	TDC_SET SetTaskTimeEstimate(DWORD dwTaskID, const TDCTIMEPERIOD& timeEst, BOOL bOffset = FALSE);
@@ -238,8 +240,8 @@ public:
 	TDC_UNITS GetDefaultTimeSpentUnits() const { return m_nDefTimeSpentUnits; }
 	void SetInheritedParentAttributes(const CTDCAttributeMap& mapAttribs, BOOL bUpdateAttrib);
 	BOOL WantUpdateInheritedAttibute(TDC_ATTRIBUTE nAttrib) const;
-	void SetCompletionStatus(const CString& sStatus) { m_sCompletionStatus = sStatus; }
-	void SetDefaultStatus(const CString& sStatus) { m_sDefaultStatus = sStatus; }
+ 	void SetDefaultStatus(const CString& sStatus) { m_sDefaultStatus = sStatus; }
+	CString GetDefaultStatus() const { return m_sDefaultStatus; }
 
 protected:
 	CToDoCtrlDataItems m_items; // the real data
@@ -250,7 +252,7 @@ protected:
 	const CTDCCustomAttribDefinitionArray& m_aCustomAttribDefs;
 
 	CString m_cfDefault;
-	CString m_sDefaultStatus, m_sCompletionStatus;
+	CString m_sDefaultStatus;
 
 	TDC_UNITS m_nDefTimeEstUnits, m_nDefTimeSpentUnits;
 	CTDCAttributeMap m_mapParentAttribs; // inheritable attribs
@@ -278,13 +280,13 @@ protected:
 	TDC_SET SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates, BOOL bIsSubtask);
 	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
 	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;
+	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
+	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
 
 	BOOL AddUndoElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID = 0, 
 						DWORD dwPrevSiblingID = 0, WORD wFlags = 0);
 	BOOL SaveEditUndo(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib);
-
-	BOOL LocateTask(DWORD dwTaskID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
-
+	
 	// internal versions
 	TODOITEM* GetTrueTask(const TODOSTRUCTURE* pTDS) const;
 	TODOITEM* GetTask(const TODOSTRUCTURE* pTDS) const;
@@ -328,23 +330,20 @@ protected:
 		return SET_CHANGE;
 	}
 
+	BOOL LocateTask(DWORD dwTaskID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 	BOOL Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 	int MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
 	BOOL IsValidMoveDestination(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const;
 	BOOL SetTaskModified(DWORD dwTaskID);
 	int GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased = TRUE) const;
-
-	BOOL GetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, TDCCADATA& data) const;
-	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
-	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
+	
 	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);
 	BOOL TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
 
 	static double CalcDuration(const COleDateTime& dateStart, const COleDateTime& dateDue, TDC_UNITS nUnits);
 	static COleDateTime AddDuration(COleDateTime& dateStart, double dDuration, TDC_UNITS nUnits, BOOL bAllowUpdateStart);
 	static COleDateTime CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart);
-	static int GetNextValue(int nValue, int nIncrement);
 	static BOOL CanEditPriorityRisk(int nValue, int nNoValue, BOOL bOffset);
 
 };
