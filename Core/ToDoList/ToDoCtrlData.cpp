@@ -1727,6 +1727,11 @@ BOOL CToDoCtrlData::ApplyLastChangeToSubtask(const TODOITEM* pTDIParent, const T
 			pTDIChild->timeEstimate = pTDIParent->timeEstimate;
 		break;
 
+	case TDCA_TIMESPENT:
+		if (bIncludeBlank || pTDIParent->timeSpent.dAmount > 0)
+			pTDIChild->timeSpent = pTDIParent->timeSpent;
+		break;
+
 	case TDCA_FILELINK:
 		if (bIncludeBlank || pTDIParent->aFileLinks.GetSize())
 			pTDIChild->aFileLinks.Copy(pTDIParent->aFileLinks);
@@ -4117,6 +4122,9 @@ BOOL CToDoCtrlData::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTa
 		return FALSE;
 	}
 
+	// reset new task state to 'undone' including all children
+	SetTaskDone(dwNewTaskID, 0.0, TRUE, TRUE);
+	
 	// we need to move both the due date and the start date forward
 	AdjustNewRecurringTasksDates(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate);
 
@@ -4126,6 +4134,7 @@ BOOL CToDoCtrlData::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTa
 
 	// Set some defaults
 	SetTaskStatus(dwNewTaskID, m_sDefaultStatus);
+	ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STATUS);
 
 	// Reset number of occurrences
 	ResetRecurringSubtaskOccurrences(dwNewTaskID);

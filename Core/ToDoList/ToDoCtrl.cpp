@@ -3593,8 +3593,10 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks)
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks)
 {
+	ASSERT(!bAndSubtasks || task.IsDone());
+
 	DWORD dwTaskID = task.dwID;
-	BOOL bReuse = FALSE, bRecreate = FALSE;
+	BOOL bReuse = FALSE, bRecreate = FALSE, bChange = FALSE;
 
 	if (task.bStateChange && task.IsDone())
 	{
@@ -3644,8 +3646,6 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bA
 	}
 
 	// FALSE == Don't update the dates of any already-completed subtasks
-	BOOL bChange = FALSE;
-
 	if (m_data.SetTaskDone(dwTaskID, task.dtDone, bAndSubtasks, FALSE) == SET_CHANGE)
 	{
 		bChange = TRUE;
@@ -3666,20 +3666,24 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bA
 		{
 			m_aRecreateTaskIDs.Add(dwTaskID);
 		}
-	}
 
-	if (task.bStateChange)
-	{
-		// Update status and status of subtasks as required
-		if ((m_data.SetTaskStatus(dwTaskID, task.sStatus) == SET_CHANGE) && bAndSubtasks)
+		// We only need update the state of the task if not reusing
+		// ie. Recreating or NOT recurring
+		if (task.bStateChange && !bReuse)
 		{
-			m_data.ApplyLastChangeToSubtasks(dwTaskID, TDCA_STATUS);
-		}
+			// Update status and status of subtasks as required
+			if ((m_data.SetTaskStatus(dwTaskID, task.sStatus) == SET_CHANGE) && bAndSubtasks)
+			{
+				m_data.ApplyLastChangeToSubtasks(dwTaskID, TDCA_STATUS);
+			}
 
-		// Don't update subtask percent so that if the task is
-		// later undone, the previous value is preserved
-		m_data.SetTaskPercent(dwTaskID, task.nPercent);
+			// Don't update subtask percent so that if the task is
+			// later undone, the previous value is preserved
+			m_data.SetTaskPercent(dwTaskID, task.nPercent);
+		}
 	}
+
+	ASSERT(bChange || !task.bStateChange);
 
 	return bChange;
 }
@@ -3766,9 +3770,6 @@ DWORD CToDoCtrl::RecreateRecurringTaskInTree(const CTaskFile& task, const COleDa
 
 void CToDoCtrl::InitialiseNewRecurringTask(DWORD dwPrevTaskID, DWORD dwNewTaskID, const COleDateTime& dtNext, BOOL bDueDate)
 {
-	// reset new task(s) state to 'undone' including all children
-	m_data.SetTaskDone(dwNewTaskID, 0.0, TRUE, TRUE);
-
 	VERIFY(m_data.InitialiseNewRecurringTask(dwPrevTaskID, dwNewTaskID, dtNext, bDueDate));
 
 	// optionally clear the comments field

@@ -3882,8 +3882,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 	
 	if (mapAttribIDs.Has(TDCA_NEWTASK))
 	{
-		// Always include parent chain but not subtasks
-		dwFlags |= (TDCGSTF_ALLPARENTS | TDCGSTF_NOTSUBTASKS);
+		// Always include parent chain and subtasks
+		dwFlags |= TDCGSTF_ALLPARENTS;
 
 		// Special update type
 		nUpdate = IUI_NEW;
