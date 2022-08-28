@@ -2399,7 +2399,7 @@ BOOL CTDLTaskTreeCtrl::DeleteItem(HTREEITEM hti, BOOL bDeleteReferencesToItem)
 	if (!bRefTask && bDeleteReferencesToItem)
 	{
 		CHTIList listRefs;
-		GetReferencesToTask(dwTaskID, listRefs);
+		GetReferencesToTask(dwTaskID, listRefs, FALSE);
 
 		POSITION pos = listRefs.GetHeadPosition();
 
@@ -2409,6 +2409,47 @@ BOOL CTDLTaskTreeCtrl::DeleteItem(HTREEITEM hti, BOOL bDeleteReferencesToItem)
 
 	// Finally delete the tree item
 	return m_tcTasks.DeleteItem(hti);
+}
+
+int CTDLTaskTreeCtrl::GetSelectedTaskLocalDependents(BOOL bImmediateOnly, CHTIList& lstDependents) const
+{
+	lstDependents.RemoveAll();
+
+	CDWordArray aSelTaskIDs;
+	
+	if (TSH().GetItemData(aSelTaskIDs))
+	{
+		CDWordArray aTaskDeps;
+		int nDep = m_data.GetTaskLocalDependents(aSelTaskIDs, aTaskDeps, bImmediateOnly);
+
+		while (nDep--)
+		{
+			HTREEITEM hti = GetItem(aTaskDeps[nDep]);
+
+			if (hti)
+				lstDependents.AddTail(hti);
+		}
+	}
+
+	return lstDependents.GetCount();
+}
+
+int CTDLTaskTreeCtrl::GetReferencesToSelectedTask(CHTIList& listRefs) const
+{
+	listRefs.RemoveAll();
+
+	if (HasReferenceTasks())
+	{
+		POSITION pos = TSH().GetFirstItemPos();
+
+		while (pos)
+		{
+			DWORD dwTaskID = TSH().GetNextItemData(pos);
+			GetReferencesToTask(dwTaskID, listRefs, TRUE);
+		}
+	}
+
+	return listRefs.GetCount();
 }
 
 int CTDLTaskTreeCtrl::GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend) const

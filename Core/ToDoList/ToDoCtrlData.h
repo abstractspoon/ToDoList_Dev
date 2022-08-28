@@ -91,7 +91,7 @@ public:
 	BOOL CanUndoLastAction(BOOL bUndo) const;
 	int GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const;
 	TDC_UNDOACTIONTYPE GetLastUndoActionType(BOOL bUndo) const;
-	BOOL DeleteLastUndoAction();
+	void ClearRedoStack() { m_undo.ClearRedoStack(); }
 
 	// Gets
 	BOOL GetTaskAttributes(DWORD dwTaskID, TODOITEM& tdi) const;
@@ -158,13 +158,11 @@ public:
 	int GetTaskDependencies(DWORD dwTaskID, CDWordArray& aLocalDepends, CStringArray& aOtherDepends) const;
 	BOOL TaskHasDependencies(DWORD dwTaskID) const;
 	BOOL TaskHasDependents(DWORD dwTaskID) const;
-	int GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents) const;
+	int GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents, BOOL bImmediateOnly) const;
+	int GetTaskLocalDependents(const CDWordArray& aTaskIDs, CDWordArray& aDependents, BOOL bImmediateOnly) const;
 	int GetTaskLocalDependencies(DWORD dwTaskID, CDWordArray& aDependencies) const;
 	BOOL TaskHasLocalCircularDependencies(DWORD dwTaskID) const;
-	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
-	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
-	BOOL IsTaskDependent(DWORD dwTaskID) const;
 
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;
@@ -232,7 +230,8 @@ public:
 	BOOL ApplyLastChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, BOOL bIncludeBlank = TRUE);
 	BOOL ApplyLastInheritedChangeToSubtasks(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
 	BOOL ApplyLastInheritedChangeFromParent(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib);
-	
+	BOOL InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID);
+
 	inline BOOL HasStyle(TDC_STYLE nStyle) const { return m_styles.IsStyleEnabled(nStyle); }
 	
 	void SetDefaultCommentsFormat(const CString& format);
@@ -267,6 +266,8 @@ protected:
 	int GetReferencesToTask(DWORD dwTaskID, const TODOSTRUCTURE* pTDS, CDWordArray& aRefIDs) const;
 	BOOL RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwMatchID = 0);
 	
+	int GetAllTaskDependents(CDWordSet& aDependents) const;
+	int GetTaskLocalDependents(DWORD dwTaskID, const CDWordSet& allDependents, CDWordSet& aTaskDependents, BOOL bImmediateOnly) const;
 	BOOL FindTaskLocalDependency(DWORD dwTaskID, DWORD dwDependsID, CDWordSet& mapVisited) const;
 	void FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate);
 	UINT UpdateTaskLocalDependencyDates(DWORD dwTaskID, TDC_DATE nDate);
@@ -279,13 +280,13 @@ protected:
 	TDC_SET SetTaskDone(DWORD dwTaskID, const COleDateTime& date, BOOL bAndSubtasks, BOOL bUpdateAllSubtaskDates, BOOL bIsSubtask);
 	BOOL CalcMissingStartDateFromDue(TODOITEM* pTDI) const;
 	BOOL CalcMissingDueDateFromStart(TODOITEM* pTDI) const;
+	void FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID);
+	BOOL RemoveTaskLocalDependency(DWORD dwTaskID, DWORD dwDependID);
 
 	BOOL AddUndoElement(TDC_UNDOELMOP nOp, DWORD dwTaskID, DWORD dwParentID = 0, 
 						DWORD dwPrevSiblingID = 0, WORD wFlags = 0);
 	BOOL SaveEditUndo(DWORD dwTaskID, TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib);
-
-	BOOL LocateTask(DWORD dwTaskID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
-
+	
 	// internal versions
 	TODOITEM* GetTrueTask(const TODOSTRUCTURE* pTDS) const;
 	TODOITEM* GetTask(const TODOSTRUCTURE* pTDS) const;
@@ -329,13 +330,14 @@ protected:
 		return SET_CHANGE;
 	}
 
+	BOOL LocateTask(DWORD dwTaskID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 	BOOL Locate(DWORD dwParentID, DWORD dwPrevSiblingID, TODOSTRUCTURE*& pTDSParent, int& nPos) const;
 	int MoveTask(TODOSTRUCTURE* pTDSSrcParent, int nSrcPos, DWORD dwSrcPrevSiblingID, TODOSTRUCTURE* pTDSDestParent, int nDestPos);
 	BOOL IsValidMoveDestination(DWORD dwTaskID, DWORD dwDestParentID) const;
 	BOOL IsValidMoveDestination(const CDWordArray& aTaskIDs, DWORD dwDestParentID) const;
 	BOOL SetTaskModified(DWORD dwTaskID);
 	int GetTaskPosition(const TODOSTRUCTURE* pTDS, BOOL bZeroBased = TRUE) const;
-
+	
 	TDC_SET SetTaskAttributeValues(DWORD dwTaskID, TDC_ATTRIBUTE nAttrib, const TDCCADATA& data);
 	BOOL TaskHasAttributeValue(TODOITEM* pTDI, TDC_ATTRIBUTE nAttrib, const CString& sText, BOOL bCaseSensitive, BOOL bWholeWord);
 

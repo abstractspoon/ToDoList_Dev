@@ -1244,19 +1244,10 @@ int CTabbedToDoCtrl::GetSelectedTasksForExtensionViewUpdate(const CTDCAttributeM
 	VERIFY(GetSelectedTasks(tasks, FTCV_TASKTREE, filter));
 
 	// Globals
-	if (mapAttrib.IsEmpty())
-	{
+	if (mapAttrib.IsEmpty() || mapAttrib.Has(TDCA_NEWTASK))
 		AddGlobalsToTaskFile(tasks, TDCA_ALL);
-	}
-	else if (mapAttrib.Has(TDCA_NEWTASK))
-	{
-		ASSERT(mapAttrib.HasOnly(TDCA_NEWTASK));
-		AddGlobalsToTaskFile(tasks, TDCA_ALL);
-	}
 	else
-	{
 		AddGlobalsToTaskFile(tasks, mapAttrib);
-	}
 
 	return tasks.GetTaskCount();
 }
@@ -1708,6 +1699,8 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 		return 0;
 	}
 
+	ASSERT((dwTaskID == 0) || (GetSelectedTaskCount() > 1));
+
 	CStringArray aValues;
 	DWORD dwResults = 0; 
 	BOOL bChange = FALSE;
@@ -1942,18 +1935,17 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 		break;
 		
 	case TDCA_DEPENDENCY: 
-		if (GetSelectedTaskCount() != 1)
+		if (dwTaskID != 0)
 		{
+			// Only support singly selected tasks
 			ASSERT(0);
 		}
 		else
 		{
+			ASSERT(GetSingleSelectedTaskID());
+
 			CTDCDependencyArray aDepends;
-			
-			if (dwTaskID)
-				m_data.GetTaskDependencies(dwTaskID, aDepends);
-			else
-				GetSelectedTaskDependencies(aDepends);
+			GetSelectedTaskDependencies(aDepends);
 
 			if (mod.dwDependID && !mod.dwPrevDependID)
 			{
@@ -1972,25 +1964,20 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 				ASSERT(0);
 			}
 
-			if (dwTaskID)
-				bChange = (SET_CHANGE == m_data.SetTaskDependencies(dwTaskID, aDepends));
-			else
-				bChange = SetSelectedTaskDependencies(aDepends);
+			bChange = SetSelectedTaskDependencies(aDepends);
 		}
 		break;
 		
 	case TDCA_OFFSETTASK:
-		if (GetSelectedTaskCount() == 1)
+		if (dwTaskID != 0)
 		{
-			ASSERT(dwTaskID == 0);
+			ASSERT(0);
+		}
+		else
+		{
+			ASSERT(GetSingleSelectedTaskID());
 
-			bChange = ExtensionMoveTaskStartAndDueDates(GetSelectedTaskID(), CDateHelper::GetDate(mod.tValue));
-
-			if (bChange)
-			{
-				if (HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES) && SelectedTasksHaveDependents())
-					mapModAttribs.Add(TDCA_DEPENDENCY);
-			}
+			bChange = ExtensionMoveSelectedTaskStartAndDueDates(CDateHelper::GetDate(mod.tValue));
 		}
 		break;
 
@@ -2047,8 +2034,11 @@ BOOL CTabbedToDoCtrl::ProcessUIExtensionMod(const IUITASKMOD& mod, CDWordArray& 
 	return bChange;
 }
 
-BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart)
+BOOL CTabbedToDoCtrl::ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTime& dtNewStart)
 {
+	if (GetSelectedTaskCount() > 1)
+		return FALSE;
+
 	if (!CanEditSelectedTask(TDCA_STARTDATE))
 		return FALSE;
 
@@ -2056,8 +2046,7 @@ BOOL CTabbedToDoCtrl::ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const CO
 
 	IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-	POSITION pos = TSH().GetFirstItemPos();
-	DWORD dwModTaskID = 0;
+	DWORD dwTaskID = GetSelectedTaskID();
 
 	TDC_SET nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtNewStart);
 
@@ -2086,10 +2075,11 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 	// responding to being updated by posting another change ad infinitum
 	AF_NOREENTRANT_RET(FALSE);
 
-	ASSERT(!IsReadOnly());
-
 	if (IsReadOnly())
+	{
+		ASSERT(0);
 		return FALSE;
+	}
 
 	HandleUnsavedComments();
 
@@ -2122,7 +2112,6 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 #ifdef _DEBUG
 				switch (mod.nAttrib)
 				{
-				case TDCA_DONEDATE:
 				case TDCA_ICON:
 				case TDCA_OFFSETTASK:
 					// Don't assert on edits that can be cancelled
@@ -2154,44 +2143,19 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 	if (bChange)
 	{
-		// since we prevented changes being propagated back to the active view
-		// we may need to update more than the selected task as a consequence
-		// of dependency changes, task moves or inherited attributes
-		if (mapModAttribs.Has(TDCA_DEPENDENCY))
+		// Note: If 'aModTaskIDs' is NOT empty then it means that the 
+		// 'SetSelectedTask...' methods were NOT used and so we need
+		// to notify everyone that there have been changes
+		if (aModTaskIDs.GetSize())
 		{
-			VIEWDATA* pVData = NULL;
-			IUIExtensionWindow* pExtWnd = NULL;
+			ASSERT(mapModAttribs.GetCount());
 
-			if (!GetExtensionWnd(GetTaskView(), pExtWnd, pVData))
-				return FALSE;
-
-			// Mark all extensions needing an update
-			SetExtensionsNeedTaskUpdate(TRUE);
-
-			// update all tasks on the active view
-			CWaitCursor cursor;
-			CTaskFile tasks;
-
-			if (GetAllTasksForExtensionViewUpdate(pVData->mapWantedAttrib, tasks))
-				UpdateExtensionView(pExtWnd, tasks, IUI_EDIT);
-
-			pVData->bNeedFullTaskUpdate = FALSE;
+			SetModified(mapModAttribs, aModTaskIDs, TRUE);
+			UpdateControls(FALSE);
 		}
 		else
 		{
-			// In the case where specified tasks were edited, 
-			// we need to send a modification notification
-			if (aModTaskIDs.GetSize())
-			{
-				SetModified(mapModAttribs, aModTaskIDs, TRUE);
-				UpdateControls(FALSE);
-			}
-			else if (!mapModAttribs.IsEmpty())
-			{
-				// This should only update attributes OTHER than
-				// the attributes directly referenced in IUITASKMOD 
-				UpdateExtensionViewsSelection(mapModAttribs);
-			}
+			ASSERT(mapModAttribs.GetCount() == 0);
 		}
 	}
 	
@@ -2598,13 +2562,12 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 			PrepareTaskfileForTasks(tasks, filter);
 
 			// we return exactly what's selected as a flat list and in the same order
-			POSITION pos = m_taskList.List().GetFirstSelectedItemPosition();
+			CDWordArray aTaskIDs;
+			int nNumSel = m_taskList.GetSelectedTaskIDs(aTaskIDs, FALSE);
 
-			while (pos)
+			for (int nSel = 0; nSel < nNumSel; nSel++)
 			{
-				int nItem = m_taskList.List().GetNextSelectedItem(pos);
-
-				DWORD dwTaskID = GetTaskID(nItem);
+				DWORD dwTaskID = aTaskIDs[nSel];
 				DWORD dwParentID = m_data.GetTaskParentID(dwTaskID);
 				
 				// Add immediate parent as required.
@@ -2618,6 +2581,12 @@ int CTabbedToDoCtrl::GetSelectedTasks(CTaskFile& tasks, FTC_VIEW nView, const TD
 				}
 
 				VERIFY(CToDoCtrl::AddTreeItemToTaskFile(NULL, dwTaskID, tasks, NULL, filter, FALSE, dwParentID)); // FALSE == no subtasks
+			}
+
+			if (nNumSel)
+			{
+				AddSelectedTaskReferencesToTaskFile(filter, tasks);
+				AddSelectedTaskDependentsToTaskFile(filter, tasks);
 			}
 
 			return tasks.GetTaskCount();
@@ -3689,9 +3658,23 @@ void CTabbedToDoCtrl::UpdateExtensionViews(const CTDCAttributeMap& mapAttribIDs,
 	{
 		// If only a single task was created then treat it like an edit
 		if (aModTaskIDs.GetSize() == 1)
+		{
 			UpdateExtensionViewsSelection(mapAttribIDs);
+
+			// Make sure any new dependencies and date updates 
+			// get passed on too
+			if (m_data.TaskHasDependents(aModTaskIDs[0]))
+			{
+				CTDCAttributeMap mapDepAttribIDs;
+				m_taskTree.GetAttributesAffectedByMod(TDCA_DEPENDENCY, mapDepAttribIDs);
+
+				UpdateExtensionViewsSelection(mapDepAttribIDs);
+			}
+		}
 		else
+		{
 			UpdateExtensionViewsTasks(mapAttribIDs);
+		}
 	}
 	else if (mapAttribIDs.Has(TDCA_DELETE) ||
 			 mapAttribIDs.Has(TDCA_UNDO) ||
@@ -3908,34 +3891,17 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		// Include references to selected tasks if a 'Reference-specific' colour is not set
 		if (mapAttribIDs.Has(TDCA_COLOR) && !m_taskTree.HasReferenceTaskColor())
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
+
+		if (mapAttribIDs.Has(TDCA_DEPENDENCY))
+			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
 	}
 
-	// Get the actual tasks for the update
+	// Get the tasks for the update
 	CTaskFile tasks;
-
-	if ((mapAttribIDs.Has(TDCA_DEPENDENCY) ||
-		mapAttribIDs.Has(TDCA_DUEDATE) ||
-		mapAttribIDs.Has(TDCA_DONEDATE) ||
-		mapAttribIDs.Has(TDCA_STARTDATE)) &&
-		m_taskTree.SelectionHasDependents())
-	{
-		// Be cautious
-		CTDCAttributeMap mapAllAttribIDs;
-		GetAllExtensionViewsWantedAttributes(mapAllAttribIDs);
-		
-		GetAllTasksForExtensionViewUpdate(mapAllAttribIDs, tasks);
-	}
-	else
-	{
-		GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
-	}
+	GetSelectedTasksForExtensionViewUpdate(mapAttribIDs, dwFlags, tasks);
 	
 	// refresh all extensions 
-	int nExt = m_aExtViews.GetSize();
-
-#ifdef _DEBUG
-	int nNumUpdated = 0;
-#endif
+	int nExt = m_aExtViews.GetSize(), nNumUpdated = 0;
 	
 	while (nExt--)
 	{
@@ -3952,9 +3918,8 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 				pVData->bNeedFullTaskUpdate = FALSE;
 
 				UpdateExtensionView(pExtWnd, tasks, nUpdate);
-#ifdef _DEBUG
 				nNumUpdated++;
-#endif
+
 				if (nExtView == GetTaskView())
 					SyncExtensionSelectionToTree(nExtView);
 			}
@@ -3983,11 +3948,11 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 
 	default: // > 1
 		sAttrib = _T("multiple attributes");
+		break;
 	}
 
 	TRACE(_T("UpdateExtensionViewsSelection(%s) => %d plugins updated\n"), sAttrib, nNumUpdated);
 #endif
-	
 }
 
 BOOL CTabbedToDoCtrl::ModAffectsAggregatedAttributes(const CTDCAttributeMap& mapAttribIDs) const

@@ -275,7 +275,7 @@ int CTDLInfoTipCtrl::BuildSortedAttributeArray(DWORD dwTaskID,
 	{
 		CDWordArray aDependents;
 
-		if (m_data.GetTaskLocalDependents(dwTaskID, aDependents))
+		if (m_data.GetTaskLocalDependents(dwTaskID, aDependents, FALSE))
 			ADDINFOITEM(TDCA_DEPENDENCY, IDS_TDLBC_DEPENDENTS, Misc::FormatArray(aDependents));
 	}
 

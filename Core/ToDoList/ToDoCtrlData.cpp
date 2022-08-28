@@ -604,14 +604,6 @@ int CToDoCtrlData::GetTaskDependencies(DWORD dwTaskID, CDWordArray& aLocalDepend
 	return pTDI->aDependencies.GetDependencies(aLocalDepends, aOtherDepends);
 }
 
-BOOL CToDoCtrlData::IsTaskDependent(DWORD dwTaskID) const
-{
-	const TODOITEM* pTDI = NULL;
-	GET_TDI(dwTaskID, pTDI, FALSE);
-	
-	return (pTDI->aDependencies.GetSize() > 0);
-}
-
 BOOL CToDoCtrlData::IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const
 {
 	ASSERT(dwOtherID);
@@ -705,51 +697,106 @@ BOOL CToDoCtrlData::TaskHasDependents(DWORD dwTaskID) const
 	return FALSE;
 }
 
-int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents) const
+int CToDoCtrlData::GetAllTaskDependents(CDWordSet& mapDependents) const
+{
+	mapDependents.RemoveAll();
+
+	POSITION pos = m_items.GetStart();
+
+	while (pos)
+	{
+		TODOITEM* pTDI = NULL;
+		DWORD dwTaskID = 0;
+
+		m_items.GetNext(pos, dwTaskID, pTDI);
+
+		if (pTDI && pTDI->aDependencies.GetSize())
+			mapDependents.Add(dwTaskID);
+	}
+
+	return mapDependents.GetCount();
+}
+
+int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents, BOOL bImmediateOnly) const
 {
 	aDependents.RemoveAll();
+
+	CDWordSet mapAllDependents;
+
+	if (!GetAllTaskDependents(mapAllDependents))
+		return 0;
+
+	CDWordSet mapTaskDependents;
+
+	if (GetTaskLocalDependents(dwTaskID, mapAllDependents, mapTaskDependents, bImmediateOnly))
+		mapTaskDependents.CopyTo(aDependents);
+
+	return aDependents.GetSize();
+}
+
+int CToDoCtrlData::GetTaskLocalDependents(const CDWordArray& aTaskIDs, CDWordArray& aDependents, BOOL bImmediateOnly) const
+{
+	aDependents.RemoveAll();
+
+	CDWordSet mapAllDependents;
+
+	if (!GetAllTaskDependents(mapAllDependents))
+		return 0;
+
+	int nID = aTaskIDs.GetSize();
+	CDWordSet mapDependents;
+
+	while (nID--)
+	{
+		CDWordSet mapTaskDependents;
+
+		if (GetTaskLocalDependents(aTaskIDs[nID], mapAllDependents, mapTaskDependents, bImmediateOnly))
+			mapDependents.Append(mapTaskDependents);
+	}
+
+	mapDependents.CopyTo(aDependents);
+
+	return aDependents.GetSize();
+}
+
+int CToDoCtrlData::GetTaskLocalDependents(DWORD dwTaskID, const CDWordSet& mapAllDependents, CDWordSet& mapDependents, BOOL bImmediateOnly) const
+{
+	if (bImmediateOnly)
+		mapDependents.RemoveAll();
 
 	if (dwTaskID)
 	{
 		// Find all tasks dependent on 'dwTaskID' within the same task list
 		const TODOITEM* pTDI = NULL;
-		POSITION pos = m_items.GetStart();
+		POSITION pos = mapAllDependents.GetStartPosition();
 		
 		while (pos)
 		{
-			DWORD dwDependentID = m_items.GetNextTask(pos, pTDI);
-			ASSERT (dwDependentID && pTDI);
-			
-			if (pTDI && (dwDependentID != dwTaskID))
+			DWORD dwDependentID = mapAllDependents.GetNext(pos);
+
+			if (!mapDependents.Has(dwDependentID))
 			{
-				CDWordArray aDependIDs;
-				int nDepend = GetTaskLocalDependencies(dwDependentID, aDependIDs);
+				TODOITEM* pTDI = m_items.GetTask(dwDependentID);
 
-				while (nDepend--)
+				if (pTDI && pTDI->HasLocalDependency(dwTaskID))
 				{
-					DWORD dwDependencyID = aDependIDs[nDepend];
+					mapDependents.Add(dwDependentID);
 
-					if (dwDependencyID == dwTaskID)
-					{
-						aDependents.Add(dwDependentID);
-					}
-					else if (GetTrueTaskID(dwDependencyID) == dwTaskID)
-					{
-						aDependents.Add(dwDependentID);
-					}
+					if (!bImmediateOnly)
+						GetTaskLocalDependents(dwDependentID, mapAllDependents, mapDependents, FALSE); // RECURSIVE CALL
 				}
 			}
 		}
-	}	
-	
-	return aDependents.GetSize();
+	}
+
+	return mapDependents.GetCount();
 }
 
 void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTaskID)
 {
 	CDWordArray aDependents;
 	
-	if (GetTaskLocalDependents(dwPrevTaskID, aDependents))
+	if (GetTaskLocalDependents(dwPrevTaskID, aDependents, FALSE))
 	{
 		int nTask = aDependents.GetSize();
 
@@ -765,6 +812,67 @@ void CToDoCtrlData::FixupTaskLocalDependentsIDs(DWORD dwTaskID, DWORD dwPrevTask
 				VERIFY(pTDIDepends->ReplaceLocalDependency(dwPrevTaskID, dwTaskID));
 		}
 	}
+}
+
+BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterID)
+{
+	// Sanity checks
+	if ((!dwTaskID || IsTaskReference(dwTaskID)) ||
+		(!dwAfterID || IsTaskReference(dwAfterID)))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	if (IsTaskLocallyDependentOn(dwTaskID, dwAfterID, FALSE) ||
+		IsTaskLocallyDependentOn(dwAfterID, dwTaskID, FALSE))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Get the current immediate dependents of 'dwDependency' 
+	// before changing them
+	CDWordArray aDependentIDs;
+	GetTaskLocalDependents(dwAfterID, aDependentIDs, TRUE);
+
+	// Set the new task to be dependent on 'dwDependency'
+	CTDCDependencyArray aDepends;
+	aDepends.Add(dwAfterID);
+
+	if (SetTaskDependencies(dwTaskID, aDepends) != SET_CHANGE)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	// Fixup the previous dependents to point to the new task
+	int nID = aDependentIDs.GetSize();
+
+	if (nID > 0)
+	{
+		// Make sure the new task has a due date
+		if (!TaskHasDate(dwTaskID, TDCD_DUE) && TaskHasDate(dwTaskID, TDCD_START))
+		{
+			TODOITEM* pTDI = m_items.GetTask(dwTaskID);
+
+			if (!CalcMissingDueDateFromStart(pTDI))
+				pTDI->dateDue = CDateHelper::GetDateOnly(pTDI->dateStart);
+		}
+
+		while (nID--)
+		{
+			DWORD dwDependentID = aDependentIDs[nID];
+
+			CTDCDependencyArray aTaskDepends;
+			GetTaskDependencies(dwDependentID, aTaskDepends);
+
+			VERIFY(aTaskDepends.ReplaceLocalDependency(dwAfterID, dwTaskID));
+			SetTaskDependencies(dwDependentID, aTaskDepends);
+		}
+	}
+
+	return TRUE;
 }
 
 BOOL CToDoCtrlData::TaskHasLocalCircularDependencies(DWORD dwTaskID) const
@@ -2347,7 +2455,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	}
 	
 	// We need to calculate it 'fully'
-	return AddDuration(dtNewStart, dCurDuration, nUnits, TRUE); // updates dtNewStart
+	return AddDuration(dtNewStart, dNewDuration, nUnits, TRUE); // updates dtNewStart
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -2834,11 +2942,6 @@ int CToDoCtrlData::GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const
 TDC_UNDOACTIONTYPE CToDoCtrlData::GetLastUndoActionType(BOOL bUndo) const
 {
 	return (bUndo ? m_undo.GetLastUndoType() : m_undo.GetLastRedoType());
-}
-
-BOOL CToDoCtrlData::DeleteLastUndoAction()
-{
-	return m_undo.DeleteLastUndoAction();
 }
 
 BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)
@@ -3753,7 +3856,7 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 	
 	// who is dependent on us -> GetTaskDependents
 	CDWordArray aDependents;
-	int nDepend = GetTaskLocalDependents(dwTaskID, aDependents);
+	int nDepend = GetTaskLocalDependents(dwTaskID, aDependents, FALSE);
 
 	while (nDepend--)
 	{

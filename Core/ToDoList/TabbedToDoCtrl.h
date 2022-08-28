@@ -334,7 +334,7 @@ protected:
 	void UpdateExtensionViewsTasks(const CTDCAttributeMap& mapAttribIDs);
 	void UpdateExtensionViewsProjectName();
 	BOOL IsExtensionView(HWND hWnd) const;
-	BOOL ExtensionMoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTime& dtNewStart);
+	BOOL ExtensionMoveSelectedTaskStartAndDueDates(const COleDateTime& dtNewStart);
 	void RefreshExtensionViewSort(FTC_VIEW nView);
 	BOOL ExtensionCanSortBy(FTC_VIEW nView, TDC_ATTRIBUTE nBy) const;
 	BOOL GetExtensionInsertLocation(FTC_VIEW nView, TDC_MOVETASK nDirection, DWORD& dwDestParentID, DWORD& dwDestPrevSiblingID) const;

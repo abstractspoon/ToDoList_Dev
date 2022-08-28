@@ -383,7 +383,6 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
-	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnTDCTaskIsDone)
 
 	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
@@ -4924,21 +4923,16 @@ HTREEITEM CToDoCtrl::InsertNewTask(const CString& sText, HTREEITEM htiParent, HT
 		
 		m_dwNextUniqueID++;
 
-		// Fixup dates for dependent tasks
+		// Insert task into dependency chain
 		if (dwDependency)
-		{
-			CTDCDependencyArray aDepends;
-			aDepends.Add(dwDependency);
-
-			m_data.SetTaskDependencies(dwTaskID, aDepends, FALSE);
-		}	
+			m_data.InsertTaskIntoDependencyChain(dwTaskID, dwDependency);
 
 		CDWordArray aModTaskIDs;
 		aModTaskIDs.Add(dwTaskID);
 
 		SelectItem(htiNew);
 		SetModified(TDCA_NEWTASK, aModTaskIDs); 
-		
+
 		m_taskTree.InvalidateAll();
 
 		if (bEdit)
@@ -5393,32 +5387,8 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT (lParam);
 		UNREFERENCED_PARAMETER(lParam);
 
-		// make sure this item is not selected
-		HTREEITEM hti = GetSelectedItem();
-		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
-
-		// set selection to previous task and if that fails then next task
-		if (!m_taskTree.SelectTasksInHistory(FALSE) &&
-			!GotoNextTask(TDCG_PREV) && 
-			!GotoNextTask(TDCG_NEXT))
-		{
-			TSH().RemoveAll();
-		}
-		
-		// then delete and remove from undo
-		{
-			CHoldRedraw hr(m_taskTree);
-			m_taskTree.DeleteItem(hti);
-
-			m_data.DeleteTask(m_dwLastAddedID, FALSE); // FALSE == no undo
-			m_data.DeleteLastUndoAction();
-		}
-
-		CDWordArray aModTaskIDs;
-		aModTaskIDs.Add(m_dwLastAddedID);
-
-		SetModified(TDCA_DELETE, aModTaskIDs);
-		UpdateControls();
+		UndoLastAction(TRUE);
+		m_data.ClearRedoStack(); // Not undoable
 	}
 
 	SetFocusToTasks();
@@ -9239,32 +9209,45 @@ int CToDoCtrl::GetSelectedTasks(CTaskFile& tasks, const TDCGETTASKS& filter) con
 	// marked completed
 	if (AddTasksToTaskFile(selection, filter, tasks, &mapSelTaskIDs)) // Mark tasks as selected
 	{
-		// If required, add all references for the selected tasks
-		BOOL bAppendReferences = filter.HasFlag(TDCGSTF_APPENDREFERENCES);
-
-		if (bAppendReferences && m_taskTree.HasReferenceTasks())
-		{
-			CHTIList selectionRefs;
-			POSITION pos = mapSelTaskIDs.GetStartPosition();
-
-			while (pos)
-			{
-				DWORD dwSelID = mapSelTaskIDs.GetNext(pos);
-				m_taskTree.GetReferencesToTask(dwSelID, selectionRefs, TRUE); // Append
-			}
-
-			if (selectionRefs.GetCount())
-			{
-				// We want just the references and nothing else
-				TDCGETTASKS filterRefs(filter);
-				filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
-
-				VERIFY(AddTasksToTaskFile(selectionRefs, filterRefs, tasks, NULL)); // Don't mark tasks as selected
-			}
-		}
+		AddSelectedTaskReferencesToTaskFile(filter, tasks);
+		AddSelectedTaskDependentsToTaskFile(filter, tasks);
 	}
 	
 	return (tasks.GetTaskCount());
+}
+
+void CToDoCtrl::AddSelectedTaskReferencesToTaskFile(const TDCGETTASKS& filter, CTaskFile& tasks) const
+{
+	if (filter.HasFlag(TDCGSTF_APPENDREFERENCES) && m_taskTree.HasReferenceTasks())
+	{
+		CHTIList lstReferences;
+
+		if (m_taskTree.GetReferencesToSelectedTask(lstReferences))
+		{
+			// We want just the references and nothing else
+			TDCGETTASKS filterRefs(filter);
+			filterRefs.dwFlags = TDCGSTF_NOTSUBTASKS;
+
+			VERIFY(AddTasksToTaskFile(lstReferences, filterRefs, tasks, NULL)); // Don't add to mapSelTaskIDs
+		}
+	}
+}
+
+void CToDoCtrl::AddSelectedTaskDependentsToTaskFile(const TDCGETTASKS& filter, CTaskFile& tasks) const
+{
+	if (filter.HasFlag(TDCGSTF_LOCALDEPENDENTS))
+	{
+		CHTIList lstDependents;
+
+		if (m_taskTree.GetSelectedTaskLocalDependents(FALSE, lstDependents))
+		{
+			// We want just the dependents and nothing else
+			TDCGETTASKS filterDeps(filter);
+			filterDeps.dwFlags = TDCGSTF_NOTSUBTASKS;
+
+			VERIFY(AddTasksToTaskFile(lstDependents, filterDeps, tasks, NULL)); // Don't add to mapSelTaskIDs
+		}
+	}
 }
 
 int CToDoCtrl::AddTasksToTaskFile(const CHTIList& listHTI, const TDCGETTASKS& filter, CTaskFile& tasks, CDWordSet* pSelTaskIDs) const
@@ -11093,7 +11076,7 @@ BOOL CToDoCtrl::GotoSelectedTaskLocalDependents()
 		DWORD dwTaskID = TSH().GetNextItemData(pos);
 		CDWordArray aLocalDependents;
 
-		if (m_data.GetTaskLocalDependents(dwTaskID, aLocalDependents))
+		if (m_data.GetTaskLocalDependents(dwTaskID, aLocalDependents, FALSE))
 			aDependentIDs.Append(aLocalDependents);
 	}
 
@@ -11505,12 +11488,6 @@ LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
 	return GetParent()->SendMessage(WM_TDCM_FAILEDLINK, (WPARAM)GetSafeHwnd(), lParam);
 }
 
-LRESULT CToDoCtrl::OnTDCTaskIsDone(WPARAM wParam, LPARAM lParam)
-{
-	// forward on to our parent
-	return GetParent()->SendMessage(WM_TDCM_ISTASKDONE, wParam, lParam);
-}
-
 BOOL CToDoCtrl::ShowTaskLink(const CString& sLink, BOOL bURL)
 {
 	if (sLink.IsEmpty())
@@ -11639,11 +11616,11 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 		return bUndo ? m_ctrlComments.Undo() : m_ctrlComments.Redo();
 
 	// We pass the undo request to the focused edit if:
-	// 1. Tree label editing
+	// 1. There is something to be undone
 	// OR
-	// 2. Project description editing
+	// 2. Tree label editing
 	// OR
-	// 3. There is something to be undone
+	// 3. Project description editing
 	CWnd* pFocus = GetFocus();
 
 	if (pFocus && CWinClasses::IsClass(*pFocus, WC_EDIT))

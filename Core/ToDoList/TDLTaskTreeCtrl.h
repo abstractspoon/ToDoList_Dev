@@ -82,6 +82,8 @@ public:
 	int GetSelectedTasksInHistory(BOOL bForward, CDWordArray& aTaskIDs) const;
 	BOOL CanSelectTasksInHistory(BOOL bForward) const;
 	BOOL SelectionHasLocked(BOOL bCheckChildren, BOOL bTreatRefsAsUnlocked = FALSE) const;
+	int GetSelectedTaskLocalDependents(BOOL bImmediateOnly, CHTIList& lstDependents) const;
+	int GetReferencesToSelectedTask(CHTIList& listRefs) const;
 
 	double CalcSelectedTaskTimeEstimate(TDC_UNITS nUnits = TDCU_HOURS) const;
 	double CalcSelectedTaskTimeSpent(TDC_UNITS nUnits = TDCU_HOURS) const;
@@ -98,7 +100,6 @@ public:
 	BOOL SelectDropTarget(HTREEITEM hti) { return m_tcTasks.SelectDropTarget(hti); }
 	void ResortSelectedTaskParents();
 
-	int GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend = FALSE) const;
 	BOOL TaskHasReferences(DWORD dwTaskID) const;
 	BOOL HasReferenceTasks() const { return (m_mapReferenceTaskIDs.GetCount() > 0); }
 
@@ -234,6 +235,7 @@ protected:
 	BOOL TaskHasLockedSubtasks(DWORD dwTaskID, BOOL bTreatRefsAsUnlocked) const;
 	void ExpandItemRaw(HTREEITEM hti, BOOL bExpand, BOOL bAndChildren, BOOL bUpdateList = TRUE);
 	BOOL ModsRequireFullResort(const CTDCAttributeMap& mapAttribIDs) const;
+	int GetReferencesToTask(DWORD dwTaskID, CHTIList& listRefs, BOOL bAppend) const;
 
 	BOOL CanMoveItem(HTREEITEM hti, TDC_MOVETASK nDirection) const;
 	HTREEITEM MoveItemRaw(HTREEITEM hti, HTREEITEM htiDestParent, HTREEITEM htiDestPrevSibling);
