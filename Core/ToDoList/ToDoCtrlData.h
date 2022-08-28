@@ -91,7 +91,7 @@ public:
 	BOOL CanUndoLastAction(BOOL bUndo) const;
 	int GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const;
 	TDC_UNDOACTIONTYPE GetLastUndoActionType(BOOL bUndo) const;
-	BOOL DeleteLastUndoAction();
+	void ClearRedoStack() { m_undo.ClearRedoStack(); }
 
 	// Gets
 	BOOL GetTaskAttributes(DWORD dwTaskID, TODOITEM& tdi) const;

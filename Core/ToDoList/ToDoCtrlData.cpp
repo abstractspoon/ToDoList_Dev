@@ -2455,7 +2455,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	}
 	
 	// We need to calculate it 'fully'
-	return AddDuration(dtNewStart, dCurDuration, nUnits, TRUE); // updates dtNewStart
+	return AddDuration(dtNewStart, dNewDuration, nUnits, TRUE); // updates dtNewStart
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -2942,11 +2942,6 @@ int CToDoCtrlData::GetLastUndoActionTaskIDs(BOOL bUndo, CDWordArray& aIDs) const
 TDC_UNDOACTIONTYPE CToDoCtrlData::GetLastUndoActionType(BOOL bUndo) const
 {
 	return (bUndo ? m_undo.GetLastUndoType() : m_undo.GetLastRedoType());
-}
-
-BOOL CToDoCtrlData::DeleteLastUndoAction()
-{
-	return m_undo.DeleteLastUndoAction();
 }
 
 BOOL CToDoCtrlData::UndoLastAction(BOOL bUndo, CArrayUndoElements& aElms)

@@ -383,7 +383,6 @@ BEGIN_MESSAGE_MAP(CToDoCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETTASKREMINDER, OnTDCGetTaskReminder)
 	ON_REGISTERED_MESSAGE(WM_TDCM_GETLINKTOOLTIP, OnTDCGetLinkTooltip)
 	ON_REGISTERED_MESSAGE(WM_TDCM_FAILEDLINK, OnTDCFailedLink)
-	ON_REGISTERED_MESSAGE(WM_TDCM_ISTASKDONE, OnTDCTaskIsDone)
 
 	ON_CBN_EDITCHANGE(IDC_DONETIME, OnSelChangeDoneTime)
 	ON_CBN_EDITCHANGE(IDC_DUETIME, OnSelChangeDueTime)
@@ -5388,32 +5387,8 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT (lParam);
 		UNREFERENCED_PARAMETER(lParam);
 
-		// make sure this item is not selected
-		HTREEITEM hti = GetSelectedItem();
-		ASSERT(GetTaskID(hti) == m_dwLastAddedID);
-
-		// set selection to previous task and if that fails then next task
-		if (!m_taskTree.SelectTasksInHistory(FALSE) &&
-			!GotoNextTask(TDCG_PREV) && 
-			!GotoNextTask(TDCG_NEXT))
-		{
-			TSH().RemoveAll();
-		}
-		
-		// then delete and remove from undo
-		{
-			CHoldRedraw hr(m_taskTree);
-			m_taskTree.DeleteItem(hti);
-
-			m_data.DeleteTask(m_dwLastAddedID, FALSE); // FALSE == no undo
-			m_data.DeleteLastUndoAction();
-		}
-
-		CDWordArray aModTaskIDs;
-		aModTaskIDs.Add(m_dwLastAddedID);
-
-		SetModified(TDCA_DELETE, aModTaskIDs);
-		UpdateControls();
+		UndoLastAction(TRUE);
+		m_data.ClearRedoStack(); // Not undoable
 	}
 
 	SetFocusToTasks();
@@ -11513,12 +11488,6 @@ LRESULT CToDoCtrl::OnTDCFailedLink(WPARAM /*wParam*/, LPARAM lParam)
 	return GetParent()->SendMessage(WM_TDCM_FAILEDLINK, (WPARAM)GetSafeHwnd(), lParam);
 }
 
-LRESULT CToDoCtrl::OnTDCTaskIsDone(WPARAM wParam, LPARAM lParam)
-{
-	// forward on to our parent
-	return GetParent()->SendMessage(WM_TDCM_ISTASKDONE, wParam, lParam);
-}
-
 BOOL CToDoCtrl::ShowTaskLink(const CString& sLink, BOOL bURL)
 {
 	if (sLink.IsEmpty())
@@ -11647,11 +11616,11 @@ BOOL CToDoCtrl::UndoLastAction(BOOL bUndo)
 		return bUndo ? m_ctrlComments.Undo() : m_ctrlComments.Redo();
 
 	// We pass the undo request to the focused edit if:
-	// 1. Tree label editing
+	// 1. There is something to be undone
 	// OR
-	// 2. Project description editing
+	// 2. Tree label editing
 	// OR
-	// 3. There is something to be undone
+	// 3. Project description editing
 	CWnd* pFocus = GetFocus();
 
 	if (pFocus && CWinClasses::IsClass(*pFocus, WC_EDIT))

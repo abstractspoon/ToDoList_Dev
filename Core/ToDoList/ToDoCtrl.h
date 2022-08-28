@@ -664,7 +664,6 @@ protected:
 
 	afx_msg LRESULT OnTDCHasClipboard(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetClipboard(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnTDCTaskIsDone(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCDoTaskLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnTDCGetTaskReminder(WPARAM wp, LPARAM lp);
