@@ -14,13 +14,14 @@
 
 #include "..\shared\enedit.h"
 #include "..\shared\inputlistctrl.h"
+#include "..\shared\tabbedcombobox.h"
 
 //////////////////////////////////////////////////////////////////////
 
 class CTDLTaskDependencyEdit : public CEnEdit  
 {
 public:
-	CTDLTaskDependencyEdit();
+	CTDLTaskDependencyEdit(const CToDoCtrlData& data);
 	virtual ~CTDLTaskDependencyEdit();
 
 	void GetDependencies(CTDCDependencyArray& aDepends) const;
@@ -31,6 +32,8 @@ public:
 protected:
 	CTDCDependencyArray m_aDepends;
 	BOOL m_bNotifyingParent;
+
+	const CToDoCtrlData& m_data;
 
 protected:
 	virtual void OnBtnClick(UINT nID);
@@ -58,16 +61,35 @@ protected:
 class CTDLTaskDependencyListCtrl : public CInputListCtrl
 {
 public:
-	CTDLTaskDependencyListCtrl();
+	CTDLTaskDependencyListCtrl(const CToDoCtrlData& data);
 
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 
+protected:
+	CTabbedComboBox m_cbTasks;
+
+	const CToDoCtrlData& m_data;
+
 // Implementation
 protected:
 	virtual BOOL CanEditCell(int nRow, int nCol) const;
+	virtual void EditCell(int nItem, int nCol, BOOL bBtnClick);
 	virtual COLORREF GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const;
 	virtual void PrepareControl(CWnd& ctrl, int nRow, int nCol);
+
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(CTDLTaskDependencyListCtrl)
+	//}}AFX_MSG
+	afx_msg void OnTaskComboCancel();
+	afx_msg void OnTaskComboOK();
+
+	DECLARE_MESSAGE_MAP()
+
+protected:
+	void BuildTaskCombo();
+	void BuildTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel);
 };
 
 // ----------------------------------------------
@@ -76,7 +98,7 @@ class CTDLTaskDependencyEditDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTaskDependencyEditDlg(const CTDCDependencyArray& aDepends, CWnd* pParent = NULL);   // standard constructor
+	CTDLTaskDependencyEditDlg(const CToDoCtrlData& data, const CTDCDependencyArray& aDepends, CWnd* pParent = NULL);   // standard constructor
 
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 

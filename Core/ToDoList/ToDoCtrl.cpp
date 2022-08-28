@@ -219,7 +219,8 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_findReplace(*this),
 	m_reminders(*this),
 	m_matcher(m_data, m_reminders),
-	m_bPendingUpdateControls(FALSE)
+	m_bPendingUpdateControls(FALSE),
+	m_eDependency(m_data)
 {
 	SetBordersDLU(0);
 	
