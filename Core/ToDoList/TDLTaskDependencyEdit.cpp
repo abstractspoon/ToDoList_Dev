@@ -177,7 +177,8 @@ enum
 
 CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CToDoCtrlData& data)
 	:
-	m_data(data)
+	m_data(data),
+	m_cbTasks(16)
 {
 }
 
@@ -315,15 +316,19 @@ void CTDLTaskDependencyListCtrl::BuildTaskCombo(const TODOSTRUCTURE* pTDS, int n
 {
 	if (!pTDS->IsRoot())
 	{
-		CString sTaskName = m_data.GetTaskTitle(pTDS->GetTaskID());
+		DWORD dwTaskID = pTDS->GetTaskID();
 
+		if (m_data.IsTaskDone(dwTaskID))
+			return;
+
+		CString sTaskName;
 		int nTab = nLevel;
 
 		while (nTab--)
-			sTaskName = TAB + sTaskName;
+			sTaskName += TAB;
 
-		int nItem = m_cbTasks.AddString(sTaskName);
-		m_cbTasks.SetItemData(nItem, pTDS->GetTaskID());
+		sTaskName += m_data.GetTaskTitle(dwTaskID);
+		CDialogHelper::AddString(m_cbTasks, sTaskName, dwTaskID);
 
 		nLevel++;
 	}
