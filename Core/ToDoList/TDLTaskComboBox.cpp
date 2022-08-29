@@ -4,10 +4,8 @@
 
 #include "stdafx.h"
 #include "TDLTaskComboBox.h"
-#include "ToDoCtrlData.h"
 
-#include "..\shared\DialogHelper.h"
-#include "..\Shared\Misc.h"
+#include "..\Shared\DialogHelper.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -42,30 +40,7 @@ CString CTDLTaskComboBox::GetSelectedTaskName() const
 	return sTask.TrimLeft();
 }
 
-void CTDLTaskComboBox::BuildCombo(const CToDoCtrlData& data)
+BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, int nLevel)
 {
-	ResetContent();
-
-	BuildCombo(data, data.GetStructure(), 0);
+	return (CB_ERR != CDialogHelper::AddString(*this, (CString(TAB, nLevel) + sTask), dwTaskID));
 }
-
-void CTDLTaskComboBox::BuildCombo(const CToDoCtrlData& data, const TODOSTRUCTURE* pTDS, int nLevel)
-{
-	if (!pTDS->IsRoot())
-	{
-		DWORD dwTaskID = pTDS->GetTaskID();
-
-		if (data.IsTaskDone(dwTaskID))
-			return;
-
-		CString sTaskName(TAB, nLevel);
-		sTaskName += data.GetTaskTitle(dwTaskID);
-
-		CDialogHelper::AddString(*this, sTaskName, dwTaskID);
-		nLevel++;
-	}
-
-	for (int nPos = 0; nPos < pTDS->GetSubTaskCount(); nPos++)
-		BuildCombo(data, pTDS->GetSubTask(nPos), nLevel); // RECURSIVE CALL
-}
-

@@ -86,6 +86,9 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
+protected:
+	void FillTaskCombo();
+	void FillTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel);
 };
 
 // ----------------------------------------------

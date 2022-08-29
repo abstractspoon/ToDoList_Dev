@@ -301,18 +301,20 @@ void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	switch (nCol)
 	{
 	case DEPEND_COL:
-		ASSERT(&ctrl == &m_cbTasks);
+		{
+			ASSERT(&ctrl == &m_cbTasks);
 
-		if (!m_cbTasks.GetCount())
-			m_cbTasks.BuildCombo(m_data);
-
-		m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
+			FillTaskCombo();
+			m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
+		}
 		break;
 
 	case LEADIN_COL:
-		ASSERT(&ctrl == &m_editBox);
+		{
+			ASSERT(&ctrl == &m_editBox);
 
-		m_editBox.SetMask(_T("-0123456789"));
+			m_editBox.SetMask(_T("-0123456789"));
+		}
 		break;
 	}
 }
@@ -335,6 +337,29 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 		SetItemText(nRow, DEPEND_COL, sTask);
 
 	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
+}
+
+void CTDLTaskDependencyListCtrl::FillTaskCombo()
+{
+	// Once only
+	if (m_cbTasks.GetCount() == 0)
+		FillTaskCombo(m_data.GetStructure(), 0);
+}
+
+void CTDLTaskDependencyListCtrl::FillTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel)
+{
+	if (!pTDS->IsRoot())
+	{
+		DWORD dwTaskID = pTDS->GetTaskID();
+
+		if (m_data.IsTaskDone(dwTaskID) || m_data.IsTaskReference(dwTaskID))
+			return;
+
+		m_cbTasks.AddTask(m_data.GetTaskTitle(dwTaskID), dwTaskID, nLevel++);
+	}
+
+	for (int nPos = 0; nPos < pTDS->GetSubTaskCount(); nPos++)
+		FillTaskCombo(pTDS->GetSubTask(nPos), nLevel); // RECURSIVE CALL
 }
 
 /////////////////////////////////////////////////////////////////////////////
