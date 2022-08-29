@@ -58,6 +58,23 @@ protected:
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskDependencyOptionDlg dialog
 
+class CTDLTaskComboBox : public CTabbedComboBox
+{
+public:
+	CTDLTaskComboBox();
+
+	DWORD GetSelectedTaskID() const;
+	CString GetSelectedTaskName() const;
+
+	BOOL SetSelectedTaskID(DWORD dwTaskID);
+	void BuildCombo(const CToDoCtrlData& data);
+
+protected:
+	void BuildCombo(const CToDoCtrlData& data, const TODOSTRUCTURE* pTDS, int nLevel);
+};
+
+// ----------------------------------------------
+
 class CTDLTaskDependencyListCtrl : public CInputListCtrl
 {
 public:
@@ -67,7 +84,7 @@ public:
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 
 protected:
-	CTabbedComboBox m_cbTasks;
+	CTDLTaskComboBox m_cbTasks;
 
 	const CToDoCtrlData& m_data;
 
@@ -87,9 +104,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-protected:
-	void BuildTaskCombo();
-	void BuildTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel);
 };
 
 // ----------------------------------------------

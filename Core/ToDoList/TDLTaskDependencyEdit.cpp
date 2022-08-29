@@ -169,6 +169,62 @@ void CTDLTaskDependencyEdit::DDX(CDataExchange* pDX, CTDCDependencyArray& aValue
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskDependencyOptionDlg dialog
 
+CTDLTaskComboBox::CTDLTaskComboBox() : CTabbedComboBox(16)
+{
+}
+
+DWORD CTDLTaskComboBox::GetSelectedTaskID() const
+{
+	return CDialogHelper::GetSelectedItemData(*this);
+}
+
+BOOL CTDLTaskComboBox::SetSelectedTaskID(DWORD dwTaskID)
+{
+	return (CDialogHelper::SelectItemByData(*this, dwTaskID) != CB_ERR);
+}
+
+CString CTDLTaskComboBox::GetSelectedTaskName() const
+{
+	CString sTask = CDialogHelper::GetSelectedItem(*this);
+
+	while (Misc::RemovePrefix(sTask, TAB));
+
+	return sTask;
+}
+
+void CTDLTaskComboBox::BuildCombo(const CToDoCtrlData& data)
+{
+	BuildCombo(data, data.GetStructure(), 0);
+}
+
+void CTDLTaskComboBox::BuildCombo(const CToDoCtrlData& data, const TODOSTRUCTURE* pTDS, int nLevel)
+{
+	if (!pTDS->IsRoot())
+	{
+		DWORD dwTaskID = pTDS->GetTaskID();
+
+		if (data.IsTaskDone(dwTaskID))
+			return;
+
+		CString sTaskName;
+		int nTab = nLevel;
+
+		while (nTab--)
+			sTaskName += TAB;
+
+		sTaskName += data.GetTaskTitle(dwTaskID);
+		CDialogHelper::AddString(*this, sTaskName, dwTaskID);
+
+		nLevel++;
+	}
+
+	for (int nPos = 0; nPos < pTDS->GetSubTaskCount(); nPos++)
+		BuildCombo(data, pTDS->GetSubTask(nPos), nLevel); // RECURSIVE CALL
+}
+
+/////////////////////////////////////////////////////////////////////////////
+
+
 enum
 {
 	DEPEND_COL,
@@ -177,8 +233,7 @@ enum
 
 CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CToDoCtrlData& data)
 	:
-	m_data(data),
-	m_cbTasks(16)
+	m_data(data)
 {
 }
 
@@ -212,10 +267,17 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	{
 		const TDCDEPENDENCY& depend = aDepends[nDepend];
 
-		int nRow = AddRow(depend.Format(), nDepend);
-
 		if (depend.IsLocal())
+		{
+			int nRow = AddRow(m_data.GetTaskTitle(depend.dwTaskID), nDepend);
+
+			SetItemData(nRow, depend.dwTaskID);
 			SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
+		}
+		else
+		{
+			AddRow(depend.Format(), nDepend);
+		}
 	}
 }
 
@@ -228,15 +290,22 @@ int CTDLTaskDependencyListCtrl::GetDependencies(CTDCDependencyArray& aDepends) c
 
 	for (int nRow = 0; nRow < nNumRows; nRow++)
 	{
-		if (depend.Parse(GetItemText(nRow, DEPEND_COL)))
-		{
-			if (depend.IsLocal())
-				depend.nDaysLeadIn = _ttoi(GetItemText(nRow, LEADIN_COL));
-			else
-				depend.nDaysLeadIn = 0;
+		depend.dwTaskID = GetItemData(nRow);
 
-			aDepends.Add(depend);
+		if (depend.dwTaskID) // local
+		{
+			depend.nDaysLeadIn = _ttoi(GetItemText(nRow, LEADIN_COL));
 		}
+		else if (depend.Parse(GetItemText(nRow, DEPEND_COL)))
+		{
+			depend.nDaysLeadIn = 0;
+		}
+		else
+		{
+			continue;
+		}
+
+		aDepends.Add(depend);
 	}
 
 	return aDepends.GetSize();
@@ -247,7 +316,7 @@ BOOL CTDLTaskDependencyListCtrl::CanEditCell(int nRow, int nCol) const
 	switch (nCol)
 	{
 	case LEADIN_COL:
-		return TDCDEPENDENCY(GetItemText(nRow, DEPEND_COL)).IsLocal();
+		return (GetItemData(nRow) != 0);
 	}
 
 	// else
@@ -293,48 +362,19 @@ void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 	{
 	case DEPEND_COL:
 		ASSERT(&ctrl == &m_cbTasks);
-		BuildTaskCombo();
+
+		if (!m_cbTasks.GetCount())
+			m_cbTasks.BuildCombo(m_data);
+
+		m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
 		break;
 
 	case LEADIN_COL:
 		ASSERT(&ctrl == &m_editBox);
+
 		m_editBox.SetMask(_T("-0123456789"));
 		break;
 	}
-}
-
-void CTDLTaskDependencyListCtrl::BuildTaskCombo()
-{
-	// Once only
-	if (m_cbTasks.GetCount())
-		return;
-
-	BuildTaskCombo(m_data.GetStructure(), 0);
-}
-
-void CTDLTaskDependencyListCtrl::BuildTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel)
-{
-	if (!pTDS->IsRoot())
-	{
-		DWORD dwTaskID = pTDS->GetTaskID();
-
-		if (m_data.IsTaskDone(dwTaskID))
-			return;
-
-		CString sTaskName;
-		int nTab = nLevel;
-
-		while (nTab--)
-			sTaskName += TAB;
-
-		sTaskName += m_data.GetTaskTitle(dwTaskID);
-		CDialogHelper::AddString(m_cbTasks, sTaskName, dwTaskID);
-
-		nLevel++;
-	}
-
-	for (int nPos = 0; nPos < pTDS->GetSubTaskCount(); nPos++)
-		BuildTaskCombo(pTDS->GetSubTask(nPos), nLevel); // RECURSIVE CALL
 }
 
 void CTDLTaskDependencyListCtrl::OnTaskComboCancel()
@@ -346,16 +386,15 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 {
 	m_cbTasks.ShowWindow(SW_HIDE);
 
-	int nTask = m_cbTasks.GetCurSel();
+	int nRow = GetCurSel();
+	CString sTask = m_cbTasks.GetSelectedTaskName();
 
-	if (nTask != CB_ERR)
-	{
-		CString sTask;
-		m_cbTasks.GetLBText(nTask, sTask);
+	if (IsPrompt(nRow))
+		nRow = AddRow(sTask);
+	else
+		SetItemText(nRow, DEPEND_COL, sTask);
 
-		SetItemText(nTask, DEPEND_COL, sTask);
-		//SetItemData(nTask, );
-	}
+	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
 }
 
 /////////////////////////////////////////////////////////////////////////////
