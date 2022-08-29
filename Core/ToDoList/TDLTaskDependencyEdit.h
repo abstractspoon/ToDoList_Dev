@@ -11,6 +11,7 @@
 
 #include "ToDoItem.h"
 #include "TDLDialog.h"
+#include "TDLTaskComboBox.h"
 
 #include "..\shared\enedit.h"
 #include "..\shared\inputlistctrl.h"
@@ -53,27 +54,8 @@ protected:
 	BOOL DoEdit();
 };
 
-#endif 
-
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskDependencyOptionDlg dialog
-
-class CTDLTaskComboBox : public CTabbedComboBox
-{
-public:
-	CTDLTaskComboBox();
-
-	DWORD GetSelectedTaskID() const;
-	CString GetSelectedTaskName() const;
-
-	BOOL SetSelectedTaskID(DWORD dwTaskID);
-	void BuildCombo(const CToDoCtrlData& data);
-
-protected:
-	void BuildCombo(const CToDoCtrlData& data, const TODOSTRUCTURE* pTDS, int nLevel);
-};
-
-// ----------------------------------------------
 
 class CTDLTaskDependencyListCtrl : public CInputListCtrl
 {
@@ -140,3 +122,4 @@ protected:
 	DECLARE_MESSAGE_MAP()
 };
 
+#endif // AFX_DEPENDENCYEDIT_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_

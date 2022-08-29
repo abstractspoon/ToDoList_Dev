@@ -169,75 +169,15 @@ void CTDLTaskDependencyEdit::DDX(CDataExchange* pDX, CTDCDependencyArray& aValue
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTaskDependencyOptionDlg dialog
 
-CTDLTaskComboBox::CTDLTaskComboBox() : CTabbedComboBox(16)
-{
-}
-
-DWORD CTDLTaskComboBox::GetSelectedTaskID() const
-{
-	return CDialogHelper::GetSelectedItemData(*this);
-}
-
-BOOL CTDLTaskComboBox::SetSelectedTaskID(DWORD dwTaskID)
-{
-	return (CDialogHelper::SelectItemByData(*this, dwTaskID) != CB_ERR);
-}
-
-CString CTDLTaskComboBox::GetSelectedTaskName() const
-{
-	CString sTask = CDialogHelper::GetSelectedItem(*this);
-
-	while (Misc::RemovePrefix(sTask, TAB));
-
-	return sTask;
-}
-
-void CTDLTaskComboBox::BuildCombo(const CToDoCtrlData& data)
-{
-	BuildCombo(data, data.GetStructure(), 0);
-}
-
-void CTDLTaskComboBox::BuildCombo(const CToDoCtrlData& data, const TODOSTRUCTURE* pTDS, int nLevel)
-{
-	if (!pTDS->IsRoot())
-	{
-		DWORD dwTaskID = pTDS->GetTaskID();
-
-		if (data.IsTaskDone(dwTaskID))
-			return;
-
-		CString sTaskName;
-		int nTab = nLevel;
-
-		while (nTab--)
-			sTaskName += TAB;
-
-		sTaskName += data.GetTaskTitle(dwTaskID);
-		CDialogHelper::AddString(*this, sTaskName, dwTaskID);
-
-		nLevel++;
-	}
-
-	for (int nPos = 0; nPos < pTDS->GetSubTaskCount(); nPos++)
-		BuildCombo(data, pTDS->GetSubTask(nPos), nLevel); // RECURSIVE CALL
-}
-
-/////////////////////////////////////////////////////////////////////////////
-
-
 enum
 {
 	DEPEND_COL,
 	LEADIN_COL,
 };
 
-CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CToDoCtrlData& data)
-	:
-	m_data(data)
+CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CToDoCtrlData& data) : m_data(data)
 {
 }
-
-/////////////////////////////////////////////////////////////////////////////
 
 BEGIN_MESSAGE_MAP(CTDLTaskDependencyListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CTDLTaskDependencyListCtrl)
