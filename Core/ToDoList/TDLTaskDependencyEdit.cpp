@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "TDLTaskDependencyEdit.h"
+#include "ToDoCtrlData.h"
 #include "resource.h"
 
 #include "..\shared\autoflag.h"
@@ -20,11 +21,16 @@ static char THIS_FILE[]=__FILE__;
 
 const int REBTN_EDIT = 1;
 
+const CString TAB = _T("\\t");
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDLTaskDependencyEdit::CTDLTaskDependencyEdit() : m_bNotifyingParent(FALSE)
+CTDLTaskDependencyEdit::CTDLTaskDependencyEdit(const CToDoCtrlData& data) 
+	: 
+	m_bNotifyingParent(FALSE),
+	m_data(data)
 {
 	AddButton(REBTN_EDIT, _T("..."), CEnString(IDS_OPTIONS));
 }
@@ -113,7 +119,7 @@ BOOL CTDLTaskDependencyEdit::DoEdit()
 {
 	if (IsWindowEnabled())
 	{
-		CTDLTaskDependencyEditDlg dialog(m_aDepends);
+		CTDLTaskDependencyEditDlg dialog(m_data, m_aDepends);
 		
 		if (dialog.DoModal() == IDOK)
 		{
@@ -169,9 +175,18 @@ enum
 	LEADIN_COL,
 };
 
-CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl()
+CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CToDoCtrlData& data) : m_data(data)
 {
 }
+
+BEGIN_MESSAGE_MAP(CTDLTaskDependencyListCtrl, CInputListCtrl)
+	//{{AFX_MSG_MAP(CTDLTaskDependencyListCtrl)
+	//}}AFX_MSG_MAP
+	ON_CBN_SELENDCANCEL(1001, OnTaskComboCancel)
+	ON_CBN_SELENDOK(1001, OnTaskComboOK)
+END_MESSAGE_MAP()
+
+/////////////////////////////////////////////////////////////////////////////
 
 void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDepends)
 {
@@ -180,20 +195,29 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	CRect rList;
 	GetClientRect(rList);
 
-	AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3));
+	AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_DROPLIST);
 	AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (rList.Width() / 3));
 	SetAutoRowPrompt(CEnString(IDS_NEWDEPENDENCY_PROMPT));
 	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
 
+	CreateControl(m_cbTasks, 1001, FALSE); // unsorted
+
 	for (int nDepend = 0; nDepend < aDepends.GetSize(); nDepend++)
 	{
 		const TDCDEPENDENCY& depend = aDepends[nDepend];
 
-		int nRow = AddRow(depend.Format(), nDepend);
-
 		if (depend.IsLocal())
+		{
+			int nRow = AddRow(m_data.GetTaskTitle(depend.dwTaskID), nDepend);
+
+			SetItemData(nRow, depend.dwTaskID);
 			SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
+		}
+		else
+		{
+			AddRow(depend.Format(), nDepend);
+		}
 	}
 }
 
@@ -206,15 +230,22 @@ int CTDLTaskDependencyListCtrl::GetDependencies(CTDCDependencyArray& aDepends) c
 
 	for (int nRow = 0; nRow < nNumRows; nRow++)
 	{
-		if (depend.Parse(GetItemText(nRow, DEPEND_COL)))
-		{
-			if (depend.IsLocal())
-				depend.nDaysLeadIn = _ttoi(GetItemText(nRow, LEADIN_COL));
-			else
-				depend.nDaysLeadIn = 0;
+		depend.dwTaskID = GetItemData(nRow);
 
-			aDepends.Add(depend);
+		if (depend.dwTaskID) // local
+		{
+			depend.nDaysLeadIn = _ttoi(GetItemText(nRow, LEADIN_COL));
 		}
+		else if (depend.Parse(GetItemText(nRow, DEPEND_COL)))
+		{
+			depend.nDaysLeadIn = 0;
+		}
+		else
+		{
+			continue;
+		}
+
+		aDepends.Add(depend);
 	}
 
 	return aDepends.GetSize();
@@ -225,11 +256,28 @@ BOOL CTDLTaskDependencyListCtrl::CanEditCell(int nRow, int nCol) const
 	switch (nCol)
 	{
 	case LEADIN_COL:
-		return TDCDEPENDENCY(GetItemText(nRow, DEPEND_COL)).IsLocal();
+		return (GetItemData(nRow) != 0);
 	}
 
 	// else
 	return CInputListCtrl::CanEditCell(nRow, nCol);
+}
+
+void CTDLTaskDependencyListCtrl::EditCell(int nItem, int nCol, BOOL bBtnClick)
+{
+	if (!CanEditCell(nItem, nCol))
+		return;
+
+	switch (nCol)
+	{
+	case DEPEND_COL:
+		ShowControl(m_cbTasks, nItem, nCol);
+		break;
+
+	default:
+		CInputListCtrl::EditCell(nItem, nCol, bBtnClick);
+		break;
+	}
 }
 
 COLORREF CTDLTaskDependencyListCtrl::GetItemBackColor(int nItem, int nCol, BOOL bSelected, BOOL bDropHighlighted, BOOL bWndFocus) const
@@ -248,26 +296,53 @@ COLORREF CTDLTaskDependencyListCtrl::GetItemBackColor(int nItem, int nCol, BOOL 
 
 void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 {
-	ASSERT(&ctrl == &m_editBox);
 	UNREFERENCED_PARAMETER(ctrl);
 
 	switch (nCol)
 	{
 	case DEPEND_COL:
-		m_editBox.ClearMask();
+		ASSERT(&ctrl == &m_cbTasks);
+
+		if (!m_cbTasks.GetCount())
+			m_cbTasks.BuildCombo(m_data);
+
+		m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
 		break;
 
 	case LEADIN_COL:
+		ASSERT(&ctrl == &m_editBox);
+
 		m_editBox.SetMask(_T("-0123456789"));
 		break;
 	}
 }
 
+void CTDLTaskDependencyListCtrl::OnTaskComboCancel()
+{
+	m_cbTasks.ShowWindow(SW_HIDE);
+}
+
+void CTDLTaskDependencyListCtrl::OnTaskComboOK()
+{
+	m_cbTasks.ShowWindow(SW_HIDE);
+
+	int nRow = GetCurSel();
+	CString sTask = m_cbTasks.GetSelectedTaskName();
+
+	if (IsPrompt(nRow))
+		nRow = AddRow(sTask);
+	else
+		SetItemText(nRow, DEPEND_COL, sTask);
+
+	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
+}
+
 /////////////////////////////////////////////////////////////////////////////
 
-CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CTDCDependencyArray& aDepends, CWnd* pParent /*=NULL*/)
+CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CToDoCtrlData& data, const CTDCDependencyArray& aDepends, CWnd* pParent /*=NULL*/)
 	: 
-	CTDLDialog(IDD_TASKDEPENDENCY_DIALOG, _T("Dependency"), pParent)
+	CTDLDialog(IDD_TASKDEPENDENCY_DIALOG, _T("Dependency"), pParent),
+	m_lcDependencies(data)
 {
 	//{{AFX_DATA_INIT(CRecurringTaskOptionDlg)
 	//}}AFX_DATA_INIT
