@@ -91,7 +91,7 @@ void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
 	{
 		int nSel = GetCurSel();
 	
-		if ((nSel == -1) || COwnerdrawComboBoxBase::ItemIsHeading(nSel))
+		if (COwnerdrawComboBoxBase::ItemIsSelectable(nSel))
 		{
 			ASSERT(0);
 			nGraph = BCT_UNKNOWNGRAPH;

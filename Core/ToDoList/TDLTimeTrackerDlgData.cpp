@@ -11,7 +11,7 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-TRACKITEM::TRACKITEM() : dwTaskID(0), bParent(FALSE) 
+TRACKITEM::TRACKITEM() : dwTaskID(0), bParent(FALSE), nLevel(0) 
 {
 }
 
@@ -19,36 +19,13 @@ BOOL TRACKITEM::operator==(const TRACKITEM& ti) const
 {
 	return (sTaskTitle == ti.sTaskTitle) && 
 			(dwTaskID == ti.dwTaskID) &&
-			(bParent == ti.bParent);
+			(bParent == ti.bParent) &&
+			(nLevel == ti.nLevel);
 }
 
 BOOL TRACKITEM::operator!=(const TRACKITEM& ti) const
 {
 	return !(*this == ti);
-}
-
-CString TRACKITEM::FormatTaskTitle(BOOL bWantPath) const
-{
-	CString sTemp;
-
-	if (bWantPath && !sTaskPath.IsEmpty())
-	{
-#ifdef _DEBUG
-		sTemp.Format(_T("%s (%d) (%s)"), sTaskTitle, dwTaskID, sTaskPath);
-#else
-		sTemp.Format(_T("%s (%s)"), sTaskTitle, sTaskPath);
-#endif
-	}
-	else
-	{
-#ifdef _DEBUG
-		sTemp.Format(_T("%s (%d)"), sTaskTitle, dwTaskID);
-#else
-		sTemp = sTaskTitle;
-#endif
-	}
-
-	return sTemp;
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -89,69 +66,55 @@ int TRACKTASKLIST::SetTasks(const CTaskFile& tasks)
 	return aTasks.GetSize();
 }
 	
-BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const CString& sParentPath, const CMapTaskIndex& mapTasks)
+BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks)
 {
 	BOOL bChange = FALSE;
-	BOOL bDone = FALSE;
-	BOOL bReference = FALSE;
 	CString sTaskPath;
 
 	if (hTask)
 	{
-		bDone = tasks.IsTaskDone(hTask);
-		bReference = tasks.IsTaskReference(hTask);
+		if (tasks.IsTaskDone(hTask) || tasks.IsTaskReference(hTask))
+			return FALSE;
 
-		if (!bDone && !bReference)
+		DWORD dwTaskID = tasks.GetTaskID(hTask);
+		ASSERT(dwTaskID);
+
+		TRACKITEM ti;
+
+		ti.sTaskTitle = tasks.GetTaskTitle(hTask);
+		ti.dwTaskID = dwTaskID;
+		ti.bParent = tasks.IsTaskParent(hTask);
+		ti.nLevel = nLevel;
+
+		int nExist = -1;
+
+		if (mapTasks.Lookup(dwTaskID, nExist))
 		{
-			DWORD dwTaskID = tasks.GetTaskID(hTask);
-			ASSERT(dwTaskID);
+			ASSERT(nExist != -1);
+			TRACKITEM& tiExist = aTasks[nExist];
 
-			TRACKITEM ti;
-
-			ti.sTaskTitle = tasks.GetTaskTitle(hTask);
-			ti.sTaskPath = sParentPath;
-			ti.dwTaskID = dwTaskID;
-			ti.bParent = (tasks.GetFirstTask(hTask) != NULL);
-
-			int nExist = -1;
-
-			if (mapTasks.Lookup(dwTaskID, nExist))
+			if (tiExist != ti)
 			{
-				ASSERT(nExist != -1);
-				TRACKITEM& tiExist = aTasks[nExist];
-
-				if (tiExist != ti)
-				{
-					tiExist = ti;
-					bChange = TRUE;
-				}
-			}
-			else // new
-			{
-				aTasks.Add(ti);
+				tiExist = ti;
 				bChange = TRUE;
 			}
-
-			if (tasks.IsTaskParent(hTask))
-			{
-				if (!sParentPath.IsEmpty())
-					sTaskPath = (sParentPath + '\\');
-
-				sTaskPath += ti.sTaskTitle;
-			}
 		}
+		else // new
+		{
+			aTasks.Add(ti);
+			bChange = TRUE;
+		}
+
+		nLevel++;
 	}
 	
 	// children
-	if (!bDone && !bReference)
-	{
-		HTASKITEM hSubtask = tasks.GetFirstTask(hTask);
+	HTASKITEM hSubtask = tasks.GetFirstTask(hTask);
 	
-		while (hSubtask)
-		{
-			bChange |= UpdateTasks(tasks, hSubtask, sTaskPath, mapTasks); // RECURSIVE CALL
-			hSubtask = tasks.GetNextTask(hSubtask);
-		}
+	while (hSubtask)
+	{
+		bChange |= UpdateTasks(tasks, hSubtask, nLevel, mapTasks); // RECURSIVE CALL
+		hSubtask = tasks.GetNextTask(hSubtask);
 	}
 
 	return bChange;
@@ -162,7 +125,7 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks)
 	CMapTaskIndex mapTasks;
 	aTasks.BuildTaskMap(mapTasks);
 
-	return UpdateTasks(tasks, NULL, _T(""), mapTasks);
+	return UpdateTasks(tasks, NULL, 0, mapTasks);
 }
 
 BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
@@ -204,7 +167,6 @@ BOOL TRACKTASKLIST::IsTracking(DWORD dwTaskID) const
 
 	return !bTrackingPaused;
 }
-
 
 BOOL TRACKTASKLIST::UpdateTracking()
 {

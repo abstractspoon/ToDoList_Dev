@@ -19,6 +19,7 @@ public:
 	COwnerdrawComboBoxBase(int nDefMinVisible = 30);
 
 	void RefreshDropWidth();
+	int GetCurSel() const;
 
     int FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const;
     int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;
@@ -68,16 +69,17 @@ protected:
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual BOOL CanDrawFocusRect(int nItem, DWORD dwItemData) const { return !ItemIsHeading(nItem, dwItemData); }
 	virtual BOOL ItemIsHeading(int /*nItem*/, DWORD /*dwItemData*/) const { return FALSE; }
+	virtual BOOL ItemIsDisabled(int /*nItem*/, DWORD /*dwItemData*/) const { return FALSE; }
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;
 	void RefreshDropWidth(BOOL bRecalc);
 	int GetMinVisible() const;
-	BOOL ItemIsHeading(int nItem) const;
 
 	BOOL WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const;
+	BOOL ValidateSelection(int& nSel, BOOL bForward) const;
+	BOOL ItemIsSelectable(int nItem) const;
 
 };
 

@@ -54,11 +54,21 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase message handlers
 
+int COwnerdrawComboBoxBase::GetCurSel() const
+{
+	int nSel = CComboBox::GetCurSel();
+
+	if (!ItemIsSelectable(nSel))
+		nSel = CB_ERR;
+
+	return nSel;
+}
+
 void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
 											COLORREF& crText, COLORREF& crBack) const
 {
 	BOOL bDisabled = !IsWindowEnabled();
-	BOOL bItemDisabled = (bDisabled || (nItemState & (ODS_GRAYED | ODS_DISABLED)));
+	BOOL bItemDisabled = (bDisabled || (nItemState & (ODS_GRAYED | ODS_DISABLED)) || ItemIsDisabled(nItem, dwItemData));
 	BOOL bItemSelected = ((nItemState & ODS_SELECTED) && !bItemDisabled);
 
 	crBack = GetSysColor(bDisabled ? COLOR_3DFACE : (bItemSelected ? COLOR_HIGHLIGHT : COLOR_WINDOW));
@@ -103,6 +113,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// draw the item
 	rItem.DeflateRect(2, 1);
 
+	// Indent items below their heading
 	if (bListItem && m_bHasHeadings && !ItemIsHeading(nItem, lpDrawItemStruct->itemData))
 	{
 		rItem.left += rItem.Height();
@@ -143,7 +154,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 BOOL COwnerdrawComboBoxBase::WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const
 {
-	if (!CanDrawFocusRect((int)lpDrawItemStruct->itemID, lpDrawItemStruct->itemData))
+	if (!ItemIsSelectable((int)lpDrawItemStruct->itemID))
 		return FALSE;
 	
 	if (lpDrawItemStruct->itemState & (ODS_DISABLED | ODS_GRAYED))
@@ -372,15 +383,15 @@ BOOL COwnerdrawComboBoxBase::OnSelEndOK()
 	// Prevent focus moving to a container item
 	int nSel = GetCurSel();
 
-	if (ItemIsHeading(nSel))
-		SetCurSel(nSel + 1);
+	if (ValidateSelection(nSel, TRUE))
+		SetCurSel(nSel);
 
 	return FALSE;// continue routing
 }
 
 void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 {
-	// Step over container items
+	// Step over container and disabled items
 	int nCurSel = GetCurSel(), nNewSel = CB_ERR;
 
 	switch (nChar)
@@ -414,7 +425,7 @@ void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 		break;
 	}
 
-	if ((nNewSel == CB_ERR) || !ItemIsHeading(nNewSel))
+	if ((nNewSel == CB_ERR) || ItemIsSelectable(nNewSel))
 	{
 		CComboBox::OnKeyDown(nChar, nRepCnt, nFlags);
 		return;
@@ -422,19 +433,14 @@ void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 	if (nNewSel > nCurSel)
 	{
-		// Step over container item unless it's the last
-		if ((nNewSel + 1) < GetCount())
-			nNewSel++;
-		else
-			nNewSel--; // move back one place
+		// Step over container/disabled items
+		if (!ValidateSelection(nNewSel, TRUE))
+			ValidateSelection(nNewSel, FALSE); // move back one place
 	}
 	else
 	{
-		// Step over container item unless it's the first
-		if ((nNewSel - 1) > 0)
-			nNewSel--;
-		else
-			nNewSel++; // move forward one place
+		if (!ValidateSelection(nNewSel, FALSE))
+			ValidateSelection(nNewSel, TRUE); // move back one place
 	}
 
 	if (nNewSel != nCurSel)
@@ -446,10 +452,28 @@ void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	}
 }
 
-BOOL COwnerdrawComboBoxBase::ItemIsHeading(int nItem) const
+BOOL COwnerdrawComboBoxBase::ValidateSelection(int& nSel, BOOL bForward) const
+{
+	int nItem = nSel;
+
+	while (!ItemIsSelectable(nItem))
+	{
+		nItem += (bForward ? 1 : -1);
+
+		if (nItem < 0 || nItem >= GetCount())
+			return FALSE;
+	}
+
+	nSel = nItem;
+	return TRUE;
+}
+
+BOOL COwnerdrawComboBoxBase::ItemIsSelectable(int nItem) const
 {
 	if (nItem < 0 || nItem >= GetCount())
 		return FALSE;
 
-	return ItemIsHeading(nItem, GetItemData(nItem));
+	DWORD dwTaskID = GetItemData(nItem);
+
+	return !(ItemIsHeading(nItem, dwTaskID) || ItemIsDisabled(nItem, dwTaskID));
 }
