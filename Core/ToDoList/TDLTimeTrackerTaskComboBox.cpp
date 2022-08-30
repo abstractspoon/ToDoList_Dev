@@ -88,6 +88,9 @@ BOOL CTDLTimeTrackerTaskComboBox::FindNextItem(const CString& sText, int nFrom, 
 
 	for (int nItem = nFrom; nItem != nTo; nItem += nIncrement)
 	{
+		if (!ItemIsSelectable(nItem))
+			continue;
+
 		CString sItem(CDialogHelper::GetItem(*this, nItem));
 
 		if (Misc::Find(sText, sItem) != -1)
