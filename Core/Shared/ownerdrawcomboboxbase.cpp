@@ -317,7 +317,7 @@ int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, const CString& sIte
 	
 	if (!sItem.IsEmpty())
 	{
-		// because more than one item might exist if were doing a case-sensitive
+		// because more than one item might exist if we're doing a case-sensitive
 		// search we can't just stop if the first find doesn't exactly match
 		// because there still may be further matches
 		BOOL bContinue = TRUE;
