@@ -19,7 +19,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////
 
 const DWORD RECENTLYTRACKED_ITEMDATA = 0xffffffff;
-const DWORD RESTOFTASKS_ITEMDATA = 0xfffffffe;
+const DWORD ALLTASKS_ITEMDATA = 0xfffffffe;
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -176,7 +176,7 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 		if (m_bHasHeadings)
 		{
 			// Insert 'All tasks' header
-			VERIFY(CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_RESTOFITEMS, RESTOFTASKS_ITEMDATA) != CB_ERR);
+			VERIFY(CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_ALLITEMS, ALLTASKS_ITEMDATA) != CB_ERR);
 
 			// Insert new recently tracked tasks at head of combo
 			CMapTaskIndex mapTasks;
@@ -222,7 +222,7 @@ int CTDLTimeTrackerTaskComboBox::GetRecentlyTrackedTasks(CDWordArray& aRecentlyT
 		{
 			DWORD dwTaskID = GetItemData(nItem++);
 
-			if (dwTaskID != RESTOFTASKS_ITEMDATA)
+			if (dwTaskID != ALLTASKS_ITEMDATA)
 				aRecentlyTrackedIDs.Add(dwTaskID);
 			else
 				break;
@@ -264,7 +264,7 @@ BOOL CTDLTimeTrackerTaskComboBox::SelectTask(DWORD dwTaskID)
 	if (!ValidateSelection(nItem, TRUE))
 		nItem = CB_ERR;
 
-	return SetCurSel(nItem);
+	return (SetCurSel(nItem) != CB_ERR);
 }
 
 BOOL CTDLTimeTrackerTaskComboBox::SelectTask(const TRACKTASKLIST* pTTL)
@@ -293,7 +293,7 @@ BOOL CTDLTimeTrackerTaskComboBox::ItemIsHeading(int /*nItem*/, DWORD dwItemData)
 	switch (dwItemData)
 	{
 	case RECENTLYTRACKED_ITEMDATA:
-	case RESTOFTASKS_ITEMDATA:
+	case ALLTASKS_ITEMDATA:
 		return TRUE;
 	}
 

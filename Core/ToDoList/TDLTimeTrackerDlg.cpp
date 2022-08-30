@@ -156,8 +156,7 @@ BOOL CTDLTimeTrackerDlg::Recreate()
 	if (!SelectTaskList(pTDC))
 		return FALSE;
 	
-	if (!m_cbTasks.SelectTask(dwTaskID))
-		return FALSE;
+	m_cbTasks.SelectTask(dwTaskID);
 	
 	// restore position
 	MoveWindow(rPrev);
