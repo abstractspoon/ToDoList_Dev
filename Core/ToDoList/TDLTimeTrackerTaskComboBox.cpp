@@ -264,9 +264,6 @@ BOOL CTDLTimeTrackerTaskComboBox::SelectTask(DWORD dwTaskID)
 {
 	int nItem = CDialogHelper::FindItemByData(*this, dwTaskID);
 	
-	if (!ValidateSelection(nItem, TRUE))
-		nItem = CB_ERR;
-
 	return (SetCurSel(nItem) != CB_ERR);
 }
 

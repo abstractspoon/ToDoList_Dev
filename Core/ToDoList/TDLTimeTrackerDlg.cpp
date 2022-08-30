@@ -237,7 +237,7 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 				
 					if ((nNext != CB_ERR) && (nNext != nSel))
 					{
-						m_cbTasks.SetCurSel(nNext);
+						VERIFY(m_cbTasks.SetCurSel(nNext) != CB_ERR);
 					
 						UpdatePlayButton();
 						UpdateTaskTime(GetSelectedTasklist());
@@ -915,7 +915,7 @@ void CTDLTimeTrackerDlg::OnChangeQuickFind()
 		
 		if ((nNext != CB_ERR) && (nNext != nSel))
 		{
-			m_cbTasks.SetCurSel(nNext);
+			VERIFY(m_cbTasks.SetCurSel(nNext) != CB_ERR);
 
 			UpdatePlayButton();
 			UpdateTaskTime(pTDC);

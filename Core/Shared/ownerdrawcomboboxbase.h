@@ -19,7 +19,7 @@ public:
 	COwnerdrawComboBoxBase(int nDefMinVisible = 30);
 
 	void RefreshDropWidth();
-	int GetCurSel() const;
+	int SetCurSel(int nSel, BOOL bValidate = TRUE);
 
     int FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const;
     int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;

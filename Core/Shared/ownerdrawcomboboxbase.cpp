@@ -54,14 +54,16 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase message handlers
 
-int COwnerdrawComboBoxBase::GetCurSel() const
+int COwnerdrawComboBoxBase::SetCurSel(int nSel, BOOL bValidate)
 {
-	int nSel = CComboBox::GetCurSel();
+	if (bValidate)
+	{
+		// Step over container/disabled items
+		if (!ValidateSelection(nSel, TRUE))
+			ValidateSelection(nSel, FALSE); // move back one place
+	}
 
-	if (!ItemIsSelectable(nSel))
-		nSel = CB_ERR;
-
-	return nSel;
+	return CComboBox::SetCurSel(nSel);
 }
 
 void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwItemData, 
@@ -454,17 +456,21 @@ void COwnerdrawComboBoxBase::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 
 BOOL COwnerdrawComboBoxBase::ValidateSelection(int& nSel, BOOL bForward) const
 {
-	int nItem = nSel;
-
-	while (!ItemIsSelectable(nItem))
+	if (nSel != CB_ERR)
 	{
-		nItem += (bForward ? 1 : -1);
+		int nItem = nSel;
 
-		if (nItem < 0 || nItem >= GetCount())
-			return FALSE;
+		while (!ItemIsSelectable(nItem))
+		{
+			nItem += (bForward ? 1 : -1);
+
+			if (nItem < 0 || nItem >= GetCount())
+				return FALSE;
+		}
+
+		nSel = nItem;
 	}
 
-	nSel = nItem;
 	return TRUE;
 }
 
