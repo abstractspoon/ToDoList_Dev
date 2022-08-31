@@ -19,7 +19,7 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////
 
 const DWORD RECENTLYTRACKED_ITEMDATA = 0xffffffff;
-const DWORD RESTOFTASKS_ITEMDATA = 0xfffffffe;
+const DWORD ALLTASKS_ITEMDATA = 0xfffffffe;
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -35,7 +35,7 @@ CTDLTimeTrackerTaskComboBox::~CTDLTimeTrackerTaskComboBox()
 }
 
 
-BEGIN_MESSAGE_MAP(CTDLTimeTrackerTaskComboBox, COwnerdrawComboBoxBase)
+BEGIN_MESSAGE_MAP(CTDLTimeTrackerTaskComboBox, CTDLTaskComboBox)
 	//{{AFX_MSG_MAP(CTDLTimeTrackerTaskComboBox)
 		// NOTE - the ClassWizard will add and remove mapping macros here.
 	//}}AFX_MSG_MAP
@@ -88,6 +88,9 @@ BOOL CTDLTimeTrackerTaskComboBox::FindNextItem(const CString& sText, int nFrom, 
 
 	for (int nItem = nFrom; nItem != nTo; nItem += nIncrement)
 	{
+		if (!ItemIsSelectable(nItem))
+			continue;
+
 		CString sItem(CDialogHelper::GetItem(*this, nItem));
 
 		if (Misc::Find(sText, sItem) != -1)
@@ -102,7 +105,7 @@ BOOL CTDLTimeTrackerTaskComboBox::FindNextItem(const CString& sText, int nFrom, 
 
 void CTDLTimeTrackerTaskComboBox::ResetContent()
 {
-	COwnerdrawComboBoxBase::ResetContent();
+	CTDLTaskComboBox::ResetContent();
 
 	m_pTDC = NULL;
 	m_bHasHeadings = FALSE;
@@ -110,7 +113,7 @@ void CTDLTimeTrackerTaskComboBox::ResetContent()
 
 int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL, DWORD dwOptions)
 {
-	ASSERT(GetStyle() & CBS_SORT);
+	ASSERT((GetStyle() & CBS_SORT) == 0);
 
 	if (!pTTL)
 	{
@@ -124,21 +127,14 @@ int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL, DWORD dwOpti
 	ResetContent();
 
 	CHoldRedraw hr(*this);
-
-	BOOL bWantParents = Misc::HasFlag(dwOptions, TTDO_ALLOWPARENTTRACKING);
-	BOOL bWantPath = Misc::HasFlag(dwOptions, TTDO_SHOWTASKPATH);
+	m_pTDC = pTTL->pTDC;
 
 	int nNumTasks = pTTL->aTasks.GetSize();
-	m_pTDC = pTTL->pTDC;
 
 	for (int nTask = 0; nTask < nNumTasks; nTask++)
 	{
 		const TRACKITEM& ti = Misc::GetItemT<TRACKITEM>(pTTL->aTasks, nTask);
-
-		if (!bWantParents && ti.bParent)
-			continue;
-
-		VERIFY(CDialogHelper::AddString(*this, ti.FormatTaskTitle(bWantPath), ti.dwTaskID) != CB_ERR);
+		AddTask(ti.sTaskTitle, ti.dwTaskID, ti.nLevel);
 	}
 
 	UpdateRecentlyTrackedTasks(pTTL, dwSelID);
@@ -168,105 +164,53 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 
 	if (!Misc::MatchAll(pTTL->aRecentlyTrackedIDs, aCurRecentlyTrackedIDs, TRUE))
 	{
-		m_bHasHeadings = FALSE; // reset
-
-		// 1. Revert previous recently tracked items
+		// Remove previous recently tracked items and headings
 		if (aCurRecentlyTrackedIDs.GetSize())
 		{
-			// 1.1 Cache the previous items and delete them
-			CMap<DWORD, DWORD, CString, LPCTSTR> mapPrevTracked;
-			int nNumItem = aCurRecentlyTrackedIDs.GetSize(), nItem = nNumItem;
+			int nItem = aCurRecentlyTrackedIDs.GetSize() + 2;
 
 			while (nItem--)
-			{
-				mapPrevTracked[GetItemData(1)] = CDialogHelper::GetItem(*this, 1);
-				DeleteString(1);
-			}
-
-			// 1.2 Delete dividers
-			DeleteString(1);
-			DeleteString(0);
-
-			// 1.3 Add previous items back in their sorted locations
-			POSITION pos = mapPrevTracked.GetStartPosition();
-
-			while (pos)
-			{
-				DWORD dwTaskID;
-				CString sPrevItem;
-
-				mapPrevTracked.GetNextAssoc(pos, dwTaskID, sPrevItem);
-				ASSERT(dwTaskID && !sPrevItem.IsEmpty());
-
-				VERIFY(CDialogHelper::AddString(*this, sPrevItem, dwTaskID) != CB_ERR);
-			}
+				DeleteString(0);
 		}
 
-		// 2. Handle new recently tracked tasks
-		if (pTTL->aRecentlyTrackedIDs.GetSize())
-		{
-			// 2.1 Figure out which items we're going to have to delete
-			//     BEFORE adding any new items
-			CMapTaskIndex mapComboItems;
-			BuildItemMap(pTTL->aRecentlyTrackedIDs, mapComboItems);
+		// Reinsert new recently tracked tasks and headings
+		m_bHasHeadings = pTTL->aRecentlyTrackedIDs.GetSize();
 
-			int nID = pTTL->aRecentlyTrackedIDs.GetSize(), nItem;
-			CArray<int, int&> aComboItemsToDelete;
+		if (m_bHasHeadings)
+		{
+			// Insert 'All tasks' header
+			VERIFY(CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_ALLITEMS, ALLTASKS_ITEMDATA) != CB_ERR);
+
+			// Insert new recently tracked tasks at head of combo
+			CMapTaskIndex mapTasks;
+			BuildItemMap(mapTasks);
+
+			int nID = pTTL->aRecentlyTrackedIDs.GetSize(), nNumAdded = 0;
 
 			while (nID--)
 			{
 				DWORD dwTaskID = pTTL->aRecentlyTrackedIDs[nID];
+				int nItem = CB_ERR;
 
-				if (mapComboItems.Lookup(dwTaskID, nItem))
-					aComboItemsToDelete.Add(nItem);
-				else
-					ASSERT(0);
-			}
+				if (!mapTasks.Lookup(dwTaskID, nItem))
+					continue;
 
-			// 2.2 Insert new recently tracked tasks at start of combo
-			int nNumIDs = pTTL->aRecentlyTrackedIDs.GetSize();
+				nItem += nNumAdded;
+				ASSERT(nItem == CDialogHelper::FindItemByData(*this, dwTaskID));
 
-			for (nID = 0; nID < nNumIDs; nID++)
-			{
-				DWORD dwTaskID = pTTL->aRecentlyTrackedIDs[nID];
-				mapComboItems.Lookup(dwTaskID, nItem);
-
-				CString sItem = CDialogHelper::GetItem(*this, nItem + nID);
+				CString sItem = CDialogHelper::GetItem(*this, nItem);
 				ASSERT(!sItem.IsEmpty());
 
-				VERIFY(CDialogHelper::InsertString(*this, nID, sItem, dwTaskID) != CB_ERR);
+				VERIFY(CDialogHelper::InsertString(*this, 0, sItem.TrimLeft(), dwTaskID) != CB_ERR);
+				nNumAdded++;
 			}
 
-			// 2.3 Delete same items from rest of combo
-			int nNumAdded = aComboItemsToDelete.GetSize();
-
-			if (nNumAdded)
-			{
-				Misc::SortArrayT<int>(aComboItemsToDelete, SortProc);
-				int nItem = aComboItemsToDelete.GetSize();
-
-				while (nItem--)
-					DeleteString(aComboItemsToDelete[nItem] + nNumAdded);
-
-				// Add dividers
-				if (GetCount() > (nNumAdded + 1))
-					VERIFY(CDialogHelper::InsertString(*this, nNumAdded, IDS_TIMETRACKER_RESTOFITEMS, RESTOFTASKS_ITEMDATA) != CB_ERR);
-
-				VERIFY(CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_RECENTITEMS, RECENTLYTRACKED_ITEMDATA) != CB_ERR);
-				m_bHasHeadings = TRUE;
-			}
+			// Insert 'Recently tracked' header
+			VERIFY(CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_RECENTITEMS, RECENTLYTRACKED_ITEMDATA) != CB_ERR);
 		}
 	}
 
 	SelectTask(dwSelTaskID);
-}
-
-int CTDLTimeTrackerTaskComboBox::SortProc(const void* v1, const void* v2)
-{
-	const int* pT1 = (int*)v1;
-	const int* pT2 = (int*)v2;
-
-	return (*pT1 - *pT2);
 }
 
 int CTDLTimeTrackerTaskComboBox::GetRecentlyTrackedTasks(CDWordArray& aRecentlyTrackedIDs) const
@@ -281,7 +225,7 @@ int CTDLTimeTrackerTaskComboBox::GetRecentlyTrackedTasks(CDWordArray& aRecentlyT
 		{
 			DWORD dwTaskID = GetItemData(nItem++);
 
-			if (dwTaskID != RESTOFTASKS_ITEMDATA)
+			if (dwTaskID != ALLTASKS_ITEMDATA)
 				aRecentlyTrackedIDs.Add(dwTaskID);
 			else
 				break;
@@ -306,23 +250,6 @@ int CTDLTimeTrackerTaskComboBox::BuildItemMap(CMapTaskIndex& mapTasks) const
 	return mapTasks.GetCount();
 }
 
-int CTDLTimeTrackerTaskComboBox::BuildItemMap(const CDWordArray& aTaskIDs, CMapTaskIndex& mapComboItems) const
-{
-	mapComboItems.RemoveAll();
-
-	int nItem = GetCount();
-
-	while (nItem--)
-	{
-		DWORD dwTaskID = GetItemData(nItem);
-
-		if (Misc::FindT(dwTaskID, aTaskIDs) != -1)
-			mapComboItems[dwTaskID] = nItem;
-	}
-
-	return mapComboItems.GetCount();
-}
-
 DWORD CTDLTimeTrackerTaskComboBox::GetSelectedTaskID() const
 {
 	DWORD dwTaskID = CDialogHelper::GetSelectedItemData(*this);
@@ -335,16 +262,9 @@ DWORD CTDLTimeTrackerTaskComboBox::GetSelectedTaskID() const
 
 BOOL CTDLTimeTrackerTaskComboBox::SelectTask(DWORD dwTaskID)
 {
-	if (dwTaskID == 0)
-	{
-		dwTaskID = GetItemData(m_bHasHeadings ? 1 : 0);
-	}
-	else if (ItemIsHeading(0, dwTaskID))
-	{
-		dwTaskID = GetItemData(1);
-	}
-
-	return (CB_ERR != CDialogHelper::SelectItemByData(*this, dwTaskID));
+	int nItem = CDialogHelper::FindItemByData(*this, dwTaskID);
+	
+	return (SetCurSel(nItem) != CB_ERR);
 }
 
 BOOL CTDLTimeTrackerTaskComboBox::SelectTask(const TRACKTASKLIST* pTTL)
@@ -373,9 +293,17 @@ BOOL CTDLTimeTrackerTaskComboBox::ItemIsHeading(int /*nItem*/, DWORD dwItemData)
 	switch (dwItemData)
 	{
 	case RECENTLYTRACKED_ITEMDATA:
-	case RESTOFTASKS_ITEMDATA:
+	case ALLTASKS_ITEMDATA:
 		return TRUE;
 	}
 
 	return FALSE;
+}
+
+BOOL CTDLTimeTrackerTaskComboBox::ItemIsDisabled(int nItem, DWORD dwItemData) const
+{
+	return (m_pTDC && 
+			!m_pTDC->HasStyle(TDCS_ALLOWPARENTTIMETRACKING) &&
+			!ItemIsHeading(nItem, dwItemData) &&
+			m_pTDC->IsTaskParent(dwItemData));
 }

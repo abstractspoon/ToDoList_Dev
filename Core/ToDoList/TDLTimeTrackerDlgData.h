@@ -28,12 +28,11 @@ struct TRACKITEM
 
 	BOOL operator==(const TRACKITEM& ti) const;
 	BOOL operator!=(const TRACKITEM& ti) const;
-	CString FormatTaskTitle(BOOL bWantPath) const;
 	
 	CString sTaskTitle;
-	CString sTaskPath;
 	DWORD dwTaskID;
 	BOOL bParent;
+	int nLevel;
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -77,7 +76,7 @@ protected:
 	BOOL bTrackingPaused;
 
 protected:
-	BOOL UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, const CString& sParentPath, const CMapTaskIndex& mapTasks);
+	BOOL UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks);
 };
 
 /////////////////////////////////////////////////////////////////////////

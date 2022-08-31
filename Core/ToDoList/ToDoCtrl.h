@@ -201,6 +201,7 @@ public:
 	int CacheTreeSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcrumbs = TRUE) const;
 	BOOL RestoreTreeSelection(const TDCSELECTIONCACHE& cache);
 
+	BOOL IsTaskParent(DWORD dwTaskID) const { return m_data.IsTaskParent(dwTaskID); }
 	BOOL IsTaskDone(DWORD dwTaskID) const { return m_data.IsTaskDone(dwTaskID); }
 	BOOL IsTaskGoodAsDone(DWORD dwTaskID) const { return m_calculator.IsTaskDone(dwTaskID); }
 	BOOL IsTaskRecurring(DWORD dwTaskID) const { return m_data.IsTaskRecurring(dwTaskID); }

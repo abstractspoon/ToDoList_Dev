@@ -8,13 +8,12 @@
 //
 
 #include "TDLTimeTrackerDlgData.h"
-
-#include "..\shared\ownerdrawcomboboxbase.h"
+#include "TDLTaskComboBox.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTimeTrackerTaskComboBox window
 
-class CTDLTimeTrackerTaskComboBox : public COwnerdrawComboBoxBase
+class CTDLTimeTrackerTaskComboBox : public CTDLTaskComboBox
 {
 // Construction
 public:
@@ -51,15 +50,15 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	BOOL ItemIsHeading(int nItem, DWORD dwItemData) const;
+	virtual BOOL ItemIsHeading(int nItem, DWORD dwItemData) const;
+	virtual BOOL ItemIsDisabled(int nItem, DWORD dwItemData) const;
 
 	BOOL FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const;
 	int GetRecentlyTrackedTasks(CDWordArray& aRecentlyTrackedIDs) const;
 	int BuildItemMap(CMapTaskIndex& mapComboItems) const;
-	int BuildItemMap(const CDWordArray& aTaskIDs, CMapTaskIndex& mapComboItems) const;
 	void UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL, DWORD dwSelTaskID);
 
-	static int SortProc(const void* v1, const void* v2);
+//	static int SortProc(const void* v1, const void* v2);
 };
 
 /////////////////////////////////////////////////////////////////////////////
