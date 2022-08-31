@@ -17,6 +17,7 @@ class COwnerdrawComboBoxBase : public CComboBox
 // Construction
 public:
 	COwnerdrawComboBoxBase(int nDefMinVisible = 30);
+	virtual ~COwnerdrawComboBoxBase();
 
 	void RefreshDropWidth();
 	int SetCurSel(int nSel, BOOL bValidate = TRUE);
@@ -30,22 +31,17 @@ protected:
 	int m_nDefMinVisible;
 	BOOL m_bHasHeadings;
 
-// Operations
-public:
+	mutable BOOL m_bHasExtItemData;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(COwnerdrawComboBoxBase)
-	public:
+protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual void PreSubclassWindow();
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	//}}AFX_VIRTUAL
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct); 
-
-// Implementation
-public:
-	virtual ~COwnerdrawComboBoxBase();
 
 	// Generated message map functions
 protected:
@@ -56,6 +52,13 @@ protected:
 	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
 	afx_msg BOOL OnSelEndOK();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnDestroy();
+
+	// These are for extending the item data
+	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCBSetItemData(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCBDeleteString(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCBResetContent(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -81,6 +84,21 @@ protected:
 	BOOL ValidateSelection(int& nSel, BOOL bForward) const;
 	BOOL ItemIsSelectable(int nItem) const;
 
+protected:
+	void DeleteAllExtItemData();
+
+	struct EXT_ITEMDATA
+	{
+		EXT_ITEMDATA() : dwUserData(0) {}
+
+		DWORD dwUserData;
+	};
+
+	virtual EXT_ITEMDATA* NewExtItemData() const { return new EXT_ITEMDATA; }
+
+	EXT_ITEMDATA* GetAddExtItemData(int nItem);
+	EXT_ITEMDATA* GetExtItemData(int nItem) const;
+	void ConvertExistingItemData() const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
