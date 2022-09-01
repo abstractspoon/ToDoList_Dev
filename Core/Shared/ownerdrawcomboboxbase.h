@@ -17,6 +17,7 @@ class COwnerdrawComboBoxBase : public CComboBox
 // Construction
 public:
 	COwnerdrawComboBoxBase(int nDefMinVisible = 30);
+	virtual ~COwnerdrawComboBoxBase();
 
 	void RefreshDropWidth();
 	int SetCurSel(int nSel, BOOL bValidate = TRUE);
@@ -24,28 +25,30 @@ public:
     int FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const;
     int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;
 
+	int FindNextItem(const CString& sText, int nFrom, BOOL bForward) const;
+
+	int SetDisabledItem(int nItem, BOOL bDisabled = TRUE);
+	int SetHeadingItem(int nItem, BOOL bHeading = TRUE);
+	
+	BOOL IsHeadingItem(int nItem) const;
+	BOOL IsDisabledItem(int nItem) const;
+
 // Attributes
 protected:
 	int m_nMaxTextWidth;
 	int m_nDefMinVisible;
-	BOOL m_bHasHeadings;
-
-// Operations
-public:
+	int m_nNumHeadings;
+	BOOL m_bHasExtItemData;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(COwnerdrawComboBoxBase)
-	public:
+protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	virtual void PreSubclassWindow();
 	virtual BOOL PreCreateWindow(CREATESTRUCT& cs);
 	//}}AFX_VIRTUAL
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct); 
-
-// Implementation
-public:
-	virtual ~COwnerdrawComboBoxBase();
 
 	// Generated message map functions
 protected:
@@ -56,6 +59,13 @@ protected:
 	afx_msg LRESULT OnSetFont(WPARAM , LPARAM);
 	afx_msg BOOL OnSelEndOK();
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnDestroy();
+
+	// These are for extending the item data
+	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCBSetItemData(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCBDeleteString(WPARAM wParam, LPARAM lParam);
+	afx_msg LRESULT OnCBResetContent(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 
@@ -69,8 +79,7 @@ protected:
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual BOOL ItemIsHeading(int /*nItem*/, DWORD /*dwItemData*/) const { return FALSE; }
-	virtual BOOL ItemIsDisabled(int /*nItem*/, DWORD /*dwItemData*/) const { return FALSE; }
+	virtual BOOL IsSelectableItem(int nItem) const;
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;
@@ -79,8 +88,29 @@ protected:
 
 	BOOL WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const;
 	BOOL ValidateSelection(int& nSel, BOOL bForward) const;
-	BOOL ItemIsSelectable(int nItem) const;
+	BOOL IsValidIndex(int nItem) const { return ((nItem >= 0) && (nItem < GetCount())); }
+	BOOL FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const;
 
+protected:
+	void DeleteAllExtItemData();
+
+	struct EXT_ITEMDATA
+	{
+		EXT_ITEMDATA() : dwItemData(0), bHeading(FALSE), bDisabled(FALSE) {}
+
+		DWORD dwItemData;
+		BOOL bHeading;
+		BOOL bDisabled;
+	};
+
+	virtual EXT_ITEMDATA* NewExtItemData() const { return new EXT_ITEMDATA(); }
+
+	EXT_ITEMDATA* GetAddExtItemData(int nItem);
+	EXT_ITEMDATA* GetExtItemData(int nItem) const;
+
+private:
+	LRESULT GetRawItemData(int nItem) const;
+	LRESULT SetRawItemData(int nItem, EXT_ITEMDATA*& pItemData);
 };
 
 /////////////////////////////////////////////////////////////////////////////

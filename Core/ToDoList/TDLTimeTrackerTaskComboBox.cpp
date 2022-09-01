@@ -44,71 +44,11 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTimeTrackerTaskComboBox message handlers
 
-int CTDLTimeTrackerTaskComboBox::FindNextItem(const CString& sText, int nFrom, BOOL bForward) const
-{
-	int nNumItems = GetCount(), nNext = CB_ERR;
-
-	if (bForward)
-	{
-		if ((nFrom < 0) || (nFrom >= nNumItems))
-			nFrom = 0;
-
-		// From nFrom to end of combo
-		if (FindNextItem(sText, nFrom, (nNumItems - 1), 1, nNext))
-			return nNext;
-
-		// From start of combo to nFrom
-		if (FindNextItem(sText, 0, (nFrom - 1), 1, nNext))
-			return nNext;
-	}
-	else // backwards
-	{
-		if ((nFrom < 0) || (nFrom >= nNumItems))
-			nFrom = (nNumItems - 1);
-
-		// From nFrom to start of combo
-		if (FindNextItem(sText, nFrom, 0, -1, nNext))
-			return nNext;
-
-		// From end of combo to nFrom
-		if (FindNextItem(sText, (nNumItems - 1), (nFrom + 1), -1, nNext))
-			return nNext;
-	}
-
-	// else
-	return CB_ERR;
-}
-
-BOOL CTDLTimeTrackerTaskComboBox::FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const
-{
-	ASSERT(((nIncrement == 1) && (nTo >= nFrom)) || ((nIncrement == -1) && (nTo <= nFrom)));
-
-	nNext = CB_ERR;
-	nTo += nIncrement; // so the != will work to stop the loop
-
-	for (int nItem = nFrom; nItem != nTo; nItem += nIncrement)
-	{
-		if (!ItemIsSelectable(nItem))
-			continue;
-
-		CString sItem(CDialogHelper::GetItem(*this, nItem));
-
-		if (Misc::Find(sText, sItem) != -1)
-		{
-			nNext = nItem;
-			break;
-		}
-	}
-
-	return (nNext != CB_ERR);
-}
-
 void CTDLTimeTrackerTaskComboBox::ResetContent()
 {
 	CTDLTaskComboBox::ResetContent();
 
 	m_pTDC = NULL;
-	m_bHasHeadings = FALSE;
 }
 
 int CTDLTimeTrackerTaskComboBox::Rebuild(const TRACKTASKLIST* pTTL, DWORD dwOptions)
@@ -174,12 +114,11 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 		}
 
 		// Reinsert new recently tracked tasks and headings
-		m_bHasHeadings = pTTL->aRecentlyTrackedIDs.GetSize();
-
-		if (m_bHasHeadings)
+		if (pTTL->aRecentlyTrackedIDs.GetSize())
 		{
 			// Insert 'All tasks' header
-			VERIFY(CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_ALLITEMS, ALLTASKS_ITEMDATA) != CB_ERR);
+			int nHeading = CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_ALLITEMS, ALLTASKS_ITEMDATA);
+			SetHeadingItem(nHeading);
 
 			// Insert new recently tracked tasks at head of combo
 			CMapTaskIndex mapTasks;
@@ -206,7 +145,8 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 			}
 
 			// Insert 'Recently tracked' header
-			VERIFY(CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_RECENTITEMS, RECENTLYTRACKED_ITEMDATA) != CB_ERR);
+			nHeading = CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_RECENTITEMS, RECENTLYTRACKED_ITEMDATA);
+			SetHeadingItem(nHeading);
 		}
 	}
 
@@ -252,12 +192,12 @@ int CTDLTimeTrackerTaskComboBox::BuildItemMap(CMapTaskIndex& mapTasks) const
 
 DWORD CTDLTimeTrackerTaskComboBox::GetSelectedTaskID() const
 {
-	DWORD dwTaskID = CDialogHelper::GetSelectedItemData(*this);
+	int nSel = GetCurSel();
 
-	if (ItemIsHeading(0, dwTaskID))
-		dwTaskID = 0;
+	if (IsHeadingItem(nSel))
+		return 0;
 
-	return dwTaskID;
+	return GetItemData(nSel);
 }
 
 BOOL CTDLTimeTrackerTaskComboBox::SelectTask(DWORD dwTaskID)
@@ -288,22 +228,16 @@ BOOL CTDLTimeTrackerTaskComboBox::IsSelectedTask(DWORD dwTaskID) const
 	return (dwTaskID && (GetSelectedTaskID() == dwTaskID));
 }
 
-BOOL CTDLTimeTrackerTaskComboBox::ItemIsHeading(int /*nItem*/, DWORD dwItemData) const
+BOOL CTDLTimeTrackerTaskComboBox::IsSelectableItem(int nItem) const
 {
-	switch (dwItemData)
+	if (!CTDLTaskComboBox::IsSelectableItem(nItem))
+		return FALSE;
+
+	if (m_pTDC && !m_pTDC->HasStyle(TDCS_ALLOWPARENTTIMETRACKING))
 	{
-	case RECENTLYTRACKED_ITEMDATA:
-	case ALLTASKS_ITEMDATA:
-		return TRUE;
+		DWORD dwTaskID = GetItemData(nItem);
+		return !m_pTDC->IsTaskParent(dwTaskID);
 	}
 
-	return FALSE;
-}
-
-BOOL CTDLTimeTrackerTaskComboBox::ItemIsDisabled(int nItem, DWORD dwItemData) const
-{
-	return (m_pTDC && 
-			!m_pTDC->HasStyle(TDCS_ALLOWPARENTTIMETRACKING) &&
-			!ItemIsHeading(nItem, dwItemData) &&
-			m_pTDC->IsTaskParent(dwItemData));
+	return TRUE;
 }

@@ -20,7 +20,6 @@ public:
 	CTDLTimeTrackerTaskComboBox();
 	virtual ~CTDLTimeTrackerTaskComboBox();
 
-	int FindNextItem(const CString& sText, int nFrom, BOOL bForward) const;
 	DWORD GetSelectedTaskID() const;
 	BOOL IsSelectedTask(DWORD dwTaskID) const;
 
@@ -50,10 +49,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual BOOL ItemIsHeading(int nItem, DWORD dwItemData) const;
-	virtual BOOL ItemIsDisabled(int nItem, DWORD dwItemData) const;
+	virtual BOOL IsSelectableItem(int nItem) const;
 
-	BOOL FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const;
 	int GetRecentlyTrackedTasks(CDWordArray& aRecentlyTrackedIDs) const;
 	int BuildItemMap(CMapTaskIndex& mapComboItems) const;
 	void UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL, DWORD dwSelTaskID);

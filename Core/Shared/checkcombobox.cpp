@@ -23,19 +23,6 @@ const int CHECKBOX_WIDTH = GraphicsMisc::ScaleByDPIFactor(16);
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct CCB_CHECK_DATA
-{
-public:
-	CCB_CHECKSTATE nCheck;
-	DWORD dwUserData;
-
-	CCB_CHECK_DATA()
-	{
-		nCheck = CCBC_UNCHECKED;
-		dwUserData = 0;
-	};
-};
-
 /////////////////////////////////////////////////////////////////////////////
 
 void DDX_CheckItemData(CDataExchange* pDX, CCheckComboBox& combo, DWORD& dwItems)
@@ -73,10 +60,6 @@ BEGIN_MESSAGE_MAP(CCheckComboBox, CAutoComboBox)
 	ON_CONTROL_REFLECT_EX(CBN_DROPDOWN, OnDropdown)
 	ON_CONTROL_REFLECT_EX(CBN_CLOSEUP, OnCloseUp)
 	ON_CONTROL(LBN_SELCHANGE, 1000, OnLBSelChange)
-	ON_MESSAGE(CB_GETITEMDATA, OnCBGetItemData)
-	ON_MESSAGE(CB_SETITEMDATA, OnCBSetItemData)
-	ON_MESSAGE(CB_DELETESTRING, OnCBDeleteString)
-	ON_MESSAGE(CB_RESETCONTENT, OnCBResetContent)
 	ON_MESSAGE(WM_GETTEXTLENGTH, OnGetTextLen)
 END_MESSAGE_MAP()
 
@@ -85,9 +68,6 @@ END_MESSAGE_MAP()
 
 void CCheckComboBox::OnDestroy()
 {
-	// cleanup check state memory
-	DeleteAllCheckData();
-
 	m_tooltip.DestroyWindow();
 
 	CAutoComboBox::OnDestroy();
@@ -282,7 +262,7 @@ int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck, BOOL bUpdate)
 	if ((nIndex == -1) || (nIndex >= GetCount()))
 		return CB_ERR;
 
-	CCB_CHECK_DATA* pState = GetAddItemCheckData(nIndex);
+	CCB_CHECK_DATA* pState = (CCB_CHECK_DATA*)GetAddExtItemData(nIndex);
 	ASSERT(pState);
 
 	if (pState == NULL)
@@ -312,7 +292,7 @@ CCB_CHECKSTATE CCheckComboBox::GetCheck(int nIndex) const
 	if ((nIndex == -1) || !GetCount())
 		return CCBC_UNCHECKED;
 
-	CCB_CHECK_DATA* pState = GetItemCheckData(nIndex);
+	CCB_CHECK_DATA* pState = (CCB_CHECK_DATA*)GetExtItemData(nIndex);
 
 	if (pState == NULL)
 		return CCBC_UNCHECKED; // default
@@ -794,89 +774,6 @@ CString CCheckComboBox::GetTooltip() const
 
 	// else
 	return "";
-}
-
-LRESULT CCheckComboBox::OnCBSetItemData(WPARAM wParam, LPARAM lParam)
-{
-	CCB_CHECK_DATA* pState = GetAddItemCheckData(wParam);
-	ASSERT(pState);
-
-	if (pState == NULL)
-		return CB_ERR;
-
-	pState->dwUserData = lParam;
-	return CB_OKAY;
-}
-
-LRESULT CCheckComboBox::OnCBGetItemData(WPARAM wParam, LPARAM /*lParam*/)
-{
-	CCB_CHECK_DATA* pState = GetItemCheckData(wParam);
-
-	if (pState == NULL)
-		return 0; // default
-
-	return pState->dwUserData;
-}
-
-LRESULT CCheckComboBox::OnCBDeleteString(WPARAM wParam, LPARAM lParam)
-{
-	CCB_CHECK_DATA* pState = GetItemCheckData(wParam);
-
-	LRESULT lResult = DefWindowProc(CB_DELETESTRING, wParam, lParam);
-
-	if (lResult != CB_ERR)
-		delete pState;
-
-	return lResult;
-}
-
-void CCheckComboBox::DeleteAllCheckData()
-{
-	int nItem = GetCount();
-
-	while (nItem--)
-		delete GetItemCheckData(nItem);
-}
-
-LRESULT CCheckComboBox::OnCBResetContent(WPARAM wParam, LPARAM lParam)
-{
-	// delete check states first
-	DeleteAllCheckData();
-
-	return DefWindowProc(CB_RESETCONTENT, wParam, lParam);
-}
-
-CCB_CHECK_DATA* CCheckComboBox::GetItemCheckData(int nItem) const
-{
-	CCheckComboBox* pThis = const_cast<CCheckComboBox*>(this);
-
-	LRESULT lResult = pThis->DefWindowProc(CB_GETITEMDATA, nItem, 0);
-	
-	if (lResult == CB_ERR)
-	{
-		ASSERT(0);
-		lResult = 0;
-	}
-
-	return (CCB_CHECK_DATA*)lResult;
-}
-
-CCB_CHECK_DATA* CCheckComboBox::GetAddItemCheckData(int nItem)
-{
-	CCB_CHECK_DATA* pState = GetItemCheckData(nItem);
-
-	if (pState == NULL)
-	{
-		pState = new CCB_CHECK_DATA;
-
-		if (DefWindowProc(CB_SETITEMDATA, nItem, (LPARAM)pState) == CB_ERR)
-		{
-			delete pState;
-			pState = NULL;
-		}
-	}
-
-	return pState;
 }
 
 BOOL CCheckComboBox::ToggleCheck(int nItem)

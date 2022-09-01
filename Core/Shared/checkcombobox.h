@@ -14,10 +14,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-struct CCB_CHECK_DATA;
-
-/////////////////////////////////////////////////////////////////////////////
-
 enum CCB_CHECKSTATE
 { 
 	CCBC_UNCHECKED = 0, 
@@ -78,7 +74,6 @@ protected:
 	//{{AFX_VIRTUAL(CCheckComboBox)
 	//}}AFX_VIRTUAL
 
-
 // Implementation
 public:
 	virtual ~CCheckComboBox();
@@ -94,10 +89,6 @@ protected:
 	afx_msg BOOL OnCloseUp();
 	afx_msg void OnLBSelChange();
 	afx_msg void OnChar(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg LRESULT OnCBGetItemData(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCBSetItemData(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCBDeleteString(WPARAM wParam, LPARAM lParam);
-	afx_msg LRESULT OnCBResetContent(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnGetTextLen(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
@@ -131,11 +122,15 @@ protected:
 	BOOL ToggleCheck(int nItem);
 	BOOL ModifyChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck, BOOL bUpdate);
 
-private:
-	CCB_CHECK_DATA* GetAddItemCheckData(int nItem);
-	CCB_CHECK_DATA* GetItemCheckData(int nItem) const;
-	void DeleteAllCheckData();
+protected:
+	struct CCB_CHECK_DATA : public EXT_ITEMDATA
+	{
+		CCB_CHECK_DATA() : EXT_ITEMDATA(), nCheck(CCBC_UNCHECKED) {}
 
+		CCB_CHECKSTATE nCheck;
+	};
+
+	virtual EXT_ITEMDATA* NewExtItemData() const { return new CCB_CHECK_DATA; }
 };
 
 /////////////////////////////////////////////////////////////////////////////
