@@ -103,7 +103,7 @@ protected:
 		BOOL bDisabled;
 	};
 
-	virtual EXT_ITEMDATA* NewExtItemData() const { return new EXT_ITEMDATA; }
+	virtual EXT_ITEMDATA* NewExtItemData() const { return new EXT_ITEMDATA(); }
 
 	EXT_ITEMDATA* GetAddExtItemData(int nItem);
 	EXT_ITEMDATA* GetExtItemData(int nItem) const;
