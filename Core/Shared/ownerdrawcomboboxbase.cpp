@@ -500,7 +500,7 @@ LRESULT COwnerdrawComboBoxBase::OnCBSetItemData(WPARAM wParam, LPARAM lParam)
 	if (!IsValidIndex((int)wParam))
 	{
 		ASSERT(0);
-		return 0;
+		return CB_ERR;
 	}
 
 	EXT_ITEMDATA* pState = GetAddExtItemData(wParam);
