@@ -118,7 +118,7 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 		{
 			// Insert 'All tasks' header
 			int nHeading = CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_ALLITEMS, ALLTASKS_ITEMDATA);
-			SetItemAsHeading(nHeading);
+			SetHeadingItem(nHeading);
 
 			// Insert new recently tracked tasks at head of combo
 			CMapTaskIndex mapTasks;
@@ -146,7 +146,7 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 
 			// Insert 'Recently tracked' header
 			nHeading = CDialogHelper::InsertString(*this, 0, IDS_TIMETRACKER_RECENTITEMS, RECENTLYTRACKED_ITEMDATA);
-			SetItemAsHeading(nHeading);
+			SetHeadingItem(nHeading);
 		}
 	}
 
@@ -194,7 +194,7 @@ DWORD CTDLTimeTrackerTaskComboBox::GetSelectedTaskID() const
 {
 	int nSel = GetCurSel();
 
-	if (IsItemHeading(nSel))
+	if (IsHeadingItem(nSel))
 		return 0;
 
 	return GetItemData(nSel);
@@ -228,9 +228,9 @@ BOOL CTDLTimeTrackerTaskComboBox::IsSelectedTask(DWORD dwTaskID) const
 	return (dwTaskID && (GetSelectedTaskID() == dwTaskID));
 }
 
-BOOL CTDLTimeTrackerTaskComboBox::IsItemSelectable(int nItem) const
+BOOL CTDLTimeTrackerTaskComboBox::IsSelectableItem(int nItem) const
 {
-	if (!CTDLTaskComboBox::IsItemSelectable(nItem))
+	if (!CTDLTaskComboBox::IsSelectableItem(nItem))
 		return FALSE;
 
 	if (m_pTDC && !m_pTDC->HasStyle(TDCS_ALLOWPARENTTIMETRACKING))

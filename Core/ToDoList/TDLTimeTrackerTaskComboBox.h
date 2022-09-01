@@ -49,7 +49,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual BOOL IsItemSelectable(int nItem) const;
+	virtual BOOL IsSelectableItem(int nItem) const;
 
 	int GetRecentlyTrackedTasks(CDWordArray& aRecentlyTrackedIDs) const;
 	int BuildItemMap(CMapTaskIndex& mapComboItems) const;

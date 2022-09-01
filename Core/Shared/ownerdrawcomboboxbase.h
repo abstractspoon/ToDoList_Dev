@@ -27,11 +27,11 @@ public:
 
 	int FindNextItem(const CString& sText, int nFrom, BOOL bForward) const;
 
-	int SetItemDisabled(int nItem, BOOL bDisabled = TRUE);
-	int SetItemAsHeading(int nItem, BOOL bHeading = TRUE);
+	int SetDisabledItem(int nItem, BOOL bDisabled = TRUE);
+	int SetHeadingItem(int nItem, BOOL bHeading = TRUE);
 	
-	BOOL IsItemHeading(int nItem) const;
-	BOOL IsItemDisabled(int nItem) const;
+	BOOL IsHeadingItem(int nItem) const;
+	BOOL IsDisabledItem(int nItem) const;
 
 // Attributes
 protected:
@@ -79,7 +79,7 @@ protected:
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual BOOL IsItemSelectable(int nItem) const;
+	virtual BOOL IsSelectableItem(int nItem) const;
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;

@@ -65,7 +65,7 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 
 		// Add heading
 		int nHeading = CDialogHelper::AddString(*this, gt.nLabelID, gt.nType);
-		SetItemAsHeading(nHeading);
+		SetHeadingItem(nHeading);
 
 		// For each type, sort all the related graphs by name
 		// before adding to combo
@@ -92,7 +92,7 @@ void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
 	{
 		int nSel = GetCurSel();
 	
-		if (!IsItemSelectable(nSel))
+		if (!IsSelectableItem(nSel))
 		{
 			ASSERT(0);
 			nGraph = BCT_UNKNOWNGRAPH;
