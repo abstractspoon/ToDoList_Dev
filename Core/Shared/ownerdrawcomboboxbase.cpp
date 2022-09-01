@@ -112,12 +112,12 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	int nDC = dc.SaveDC(), nItem = (int)lpDrawItemStruct->itemID;
 
-	// Retrieve real item data
-	DWORD dwItemData = GetItemData(nItem);
+	// Fixup item data because Windows will have passed us the 'raw' item data
+	lpDrawItemStruct->itemData = GetItemData(nItem);
 
 	// Draw item background
 	COLORREF crText, crBack;
-	GetItemColors(nItem, lpDrawItemStruct->itemState, dwItemData, crText, crBack);
+	GetItemColors(nItem, lpDrawItemStruct->itemState, lpDrawItemStruct->itemData, crText, crBack);
 
 	CRect rItem(lpDrawItemStruct->rcItem);
 	dc.FillSolidRect(rItem, crBack);
@@ -126,7 +126,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	rItem.DeflateRect(2, 1);
 
 	// Indent items below their heading
-	if (bListItem && m_bHasHeadings && !ItemIsHeading(nItem, dwItemData))
+	if (bListItem && m_bHasHeadings && !ItemIsHeading(nItem, lpDrawItemStruct->itemData))
 	{
 		rItem.left += rItem.Height();
 	}
@@ -149,7 +149,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	// virtual call
 	DrawItemText(dc, rItem, nItem, 
 				lpDrawItemStruct->itemState,
-				dwItemData,
+				lpDrawItemStruct->itemData,
 				sText, bListItem, crText);
 
 	// Restore the DC state before focus rect
@@ -497,11 +497,19 @@ BOOL COwnerdrawComboBoxBase::ItemIsSelectable(int nItem) const
 
 LRESULT COwnerdrawComboBoxBase::OnCBSetItemData(WPARAM wParam, LPARAM lParam)
 {
+	if (!IsValidIndex((int)wParam))
+	{
+		ASSERT(0);
+		return 0;
+	}
+
 	EXT_ITEMDATA* pState = GetAddExtItemData(wParam);
-	ASSERT(pState);
 
 	if (pState == NULL)
+	{
+		ASSERT(0);
 		return CB_ERR;
+	}
 
 	pState->dwUserData = lParam;
 	return CB_OKAY;
@@ -509,12 +517,14 @@ LRESULT COwnerdrawComboBoxBase::OnCBSetItemData(WPARAM wParam, LPARAM lParam)
 
 LRESULT COwnerdrawComboBoxBase::OnCBGetItemData(WPARAM wParam, LPARAM /*lParam*/)
 {
-	EXT_ITEMDATA* pState = GetExtItemData(wParam);
+	LRESULT lResult = GetRawItemData((int)wParam);
 
-	if (pState == NULL)
-		return 0; // default
+	if (!m_bHasExtItemData || !lResult)
+		return lResult;
 
-	return (LRESULT)pState->dwUserData;
+	EXT_ITEMDATA* pState = (EXT_ITEMDATA*)lResult;
+
+	return pState->dwUserData;
 }
 
 LRESULT COwnerdrawComboBoxBase::OnCBDeleteString(WPARAM wParam, LPARAM lParam)
@@ -538,12 +548,15 @@ void COwnerdrawComboBoxBase::OnDestroy()
 
 void COwnerdrawComboBoxBase::DeleteAllExtItemData()
 {
-	int nItem = GetCount();
+	if (m_bHasExtItemData)
+	{
+		int nItem = GetCount();
 
-	while (nItem--)
-		delete GetExtItemData(nItem);
+		while (nItem--)
+			delete GetExtItemData(nItem);
 
-	m_bHasExtItemData = FALSE;
+		m_bHasExtItemData = FALSE;
+	}
 }
 
 LRESULT COwnerdrawComboBoxBase::OnCBResetContent(WPARAM wParam, LPARAM lParam)
@@ -554,72 +567,77 @@ LRESULT COwnerdrawComboBoxBase::OnCBResetContent(WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(CB_RESETCONTENT, wParam, lParam);
 }
 
-COwnerdrawComboBoxBase::EXT_ITEMDATA* COwnerdrawComboBoxBase::GetExtItemData(int nItem) const
+LRESULT COwnerdrawComboBoxBase::GetRawItemData(int nItem) const
 {
-	if ((nItem < 0) || (nItem >= GetCount()))
-	{
-		ASSERT(0);
-		return NULL;
-	}
-	
-	if (!m_bHasExtItemData)
-	{
-		ConvertExistingItemData();
-		ASSERT(m_bHasExtItemData);
-	}
+	if (!IsValidIndex(nItem))
+		return 0;
 
 	COwnerdrawComboBoxBase* pThis = const_cast<COwnerdrawComboBoxBase*>(this);
 
-	LRESULT lResult = pThis->DefWindowProc(CB_GETITEMDATA, nItem, 0);
-	ASSERT(lResult != CB_ERR);
+	return pThis->DefWindowProc(CB_GETITEMDATA, nItem, 0);
+}
 
-	return (EXT_ITEMDATA*)lResult;
+LRESULT COwnerdrawComboBoxBase::SetRawItemData(int nItem, EXT_ITEMDATA*& pItemData)
+{
+	if (!IsValidIndex(nItem) || !pItemData)
+	{
+		ASSERT(0);
+		return CB_ERR;
+	}
+
+	LRESULT lResult = DefWindowProc(CB_SETITEMDATA, nItem, (LPARAM)pItemData);
+	
+	if (lResult == CB_ERR)
+	{
+		delete pItemData;
+		pItemData = NULL;
+	}
+
+	return lResult;
+}
+
+COwnerdrawComboBoxBase::EXT_ITEMDATA* COwnerdrawComboBoxBase::GetExtItemData(int nItem) const
+{
+	if (!IsValidIndex(nItem) || !m_bHasExtItemData)
+	{
+		return NULL;
+	}
+
+	return (EXT_ITEMDATA*)GetRawItemData(nItem);
 }
 
 COwnerdrawComboBoxBase::EXT_ITEMDATA* COwnerdrawComboBoxBase::GetAddExtItemData(int nItem)
 {
-	if ((nItem < 0) || (nItem >= GetCount()))
+	if (!IsValidIndex(nItem))
 	{
 		ASSERT(0);
 		return NULL;
 	}
 
-	EXT_ITEMDATA* pState = GetExtItemData(nItem);
-
-	if (pState == NULL)
-	{
-		pState = NewExtItemData();
-
-		if (DefWindowProc(CB_SETITEMDATA, nItem, (LPARAM)pState) == CB_ERR)
-		{
-			delete pState;
-			pState = NULL;
-		}
-	}
-
-	return pState;
-}
-
-void COwnerdrawComboBoxBase::ConvertExistingItemData() const
-{
-	ASSERT(!m_bHasExtItemData && GetCount());
-
 	if (!m_bHasExtItemData && GetCount())
 	{
-		COwnerdrawComboBoxBase* pThis = const_cast<COwnerdrawComboBoxBase*>(this);
-		int nItem = GetCount();
+		// Convert existing item data to extended format
+		int nExist = GetCount();
 
-		while (nItem--)
+		while (nExist--)
 		{
-			DWORD dwItemData = pThis->DefWindowProc(CB_GETITEMDATA, nItem, 0);
+			EXT_ITEMDATA* pItemData = NewExtItemData();
+			ASSERT(pItemData);
 
-			EXT_ITEMDATA* pExtData = NewExtItemData();
-			ASSERT(pExtData);
-
-			pExtData->dwUserData = dwItemData;
-			VERIFY(pThis->DefWindowProc(CB_SETITEMDATA, nItem, (LPARAM)pExtData) != CB_ERR);
+			pItemData->dwUserData = GetRawItemData(nExist);
+			SetRawItemData(nExist, pItemData);
 		}
 
 		m_bHasExtItemData = TRUE;
 	}
+
+	EXT_ITEMDATA* pItemData = GetExtItemData(nItem);
+
+	if (pItemData == NULL)
+	{
+		pItemData = NewExtItemData();
+		SetRawItemData(nItem, pItemData);
+	}
+
+	return pItemData;
 }

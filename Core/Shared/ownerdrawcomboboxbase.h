@@ -30,8 +30,7 @@ protected:
 	int m_nMaxTextWidth;
 	int m_nDefMinVisible;
 	BOOL m_bHasHeadings;
-
-	mutable BOOL m_bHasExtItemData;
+	BOOL m_bHasExtItemData;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -83,6 +82,7 @@ protected:
 	BOOL WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const;
 	BOOL ValidateSelection(int& nSel, BOOL bForward) const;
 	BOOL ItemIsSelectable(int nItem) const;
+	BOOL IsValidIndex(int nItem) const { return ((nItem >= 0) && (nItem < GetCount())); }
 
 protected:
 	void DeleteAllExtItemData();
@@ -98,7 +98,10 @@ protected:
 
 	EXT_ITEMDATA* GetAddExtItemData(int nItem);
 	EXT_ITEMDATA* GetExtItemData(int nItem) const;
-	void ConvertExistingItemData() const;
+
+private:
+	LRESULT GetRawItemData(int nItem) const;
+	LRESULT SetRawItemData(int nItem, EXT_ITEMDATA*& pItemData);
 };
 
 /////////////////////////////////////////////////////////////////////////////
