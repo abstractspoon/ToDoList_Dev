@@ -49,8 +49,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual BOOL ItemIsHeading(int nItem, DWORD dwItemData) const;
-	virtual BOOL ItemIsDisabled(int nItem, DWORD dwItemData) const;
+	virtual BOOL IsItemSelectable(int nItem) const;
 
 	int GetRecentlyTrackedTasks(CDWordArray& aRecentlyTrackedIDs) const;
 	int BuildItemMap(CMapTaskIndex& mapComboItems) const;

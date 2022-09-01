@@ -42,8 +42,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 
-protected:
-	BOOL ItemIsHeading(int nItem, DWORD dwItemData) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

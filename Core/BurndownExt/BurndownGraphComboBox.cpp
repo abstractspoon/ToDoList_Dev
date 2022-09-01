@@ -27,7 +27,6 @@ static char THIS_FILE[] = __FILE__;
 
 CBurndownGraphComboBox::CBurndownGraphComboBox()
 {
-	m_bHasHeadings = TRUE; // base class
 }
 
 CBurndownGraphComboBox::~CBurndownGraphComboBox()
@@ -64,7 +63,9 @@ BOOL CBurndownGraphComboBox::Initialise(const CBurndownChart& chart)
 	{
 		const GRAPHTYPE& gt = GRAPHTYPES[nType];
 
-		CDialogHelper::AddString(*this, gt.nLabelID, gt.nType);
+		// Add heading
+		int nHeading = CDialogHelper::AddString(*this, gt.nLabelID, gt.nType);
+		SetItemAsHeading(nHeading);
 
 		// For each type, sort all the related graphs by name
 		// before adding to combo
@@ -91,7 +92,7 @@ void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
 	{
 		int nSel = GetCurSel();
 	
-		if (COwnerdrawComboBoxBase::ItemIsSelectable(nSel))
+		if (!IsItemSelectable(nSel))
 		{
 			ASSERT(0);
 			nGraph = BCT_UNKNOWNGRAPH;
@@ -103,24 +104,7 @@ void CBurndownGraphComboBox::DDX(CDataExchange* pDX, BURNDOWN_GRAPH& nGraph)
 	}
 	else
 	{
-		int nFind = CDialogHelper::FindItemByData(*this, nGraph);
-
-		if (ItemIsHeading(nFind, nGraph))
-			ASSERT(0);
-		else
-			SetCurSel(nFind);
+		SetCurSel(CDialogHelper::FindItemByData(*this, nGraph));
 	}
-}
-
-BOOL CBurndownGraphComboBox::ItemIsHeading(int /*nItem*/, DWORD dwItemData) const
-{
-	switch (dwItemData)
-	{
-	case BCT_TIMESERIES:
-	case BCT_FREQUENCY:
-		return TRUE;
-	}
-	
-	return FALSE;
 }
 

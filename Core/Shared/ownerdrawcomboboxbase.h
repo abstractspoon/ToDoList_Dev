@@ -27,11 +27,17 @@ public:
 
 	int FindNextItem(const CString& sText, int nFrom, BOOL bForward) const;
 
+	int SetItemDisabled(int nItem, BOOL bDisabled = TRUE);
+	int SetItemAsHeading(int nItem, BOOL bHeading = TRUE);
+	
+	BOOL IsItemHeading(int nItem) const;
+	BOOL IsItemDisabled(int nItem) const;
+
 // Attributes
 protected:
 	int m_nMaxTextWidth;
 	int m_nDefMinVisible;
-	BOOL m_bHasHeadings;
+	int m_nNumHeadings;
 	BOOL m_bHasExtItemData;
 
 // Overrides
@@ -73,8 +79,7 @@ protected:
 	virtual int GetMaxDropWidth() const { return -1; } // no limit
 	virtual int GetExtraListboxWidth() const;
 	virtual int CalcMinItemHeight(BOOL bList) const;
-	virtual BOOL ItemIsHeading(int /*nItem*/, DWORD /*dwItemData*/) const { return FALSE; }
-	virtual BOOL ItemIsDisabled(int /*nItem*/, DWORD /*dwItemData*/) const { return FALSE; }
+	virtual BOOL IsItemSelectable(int nItem) const;
 
 	void InitItemHeight();
 	BOOL IsType(UINT nComboType) const;
@@ -83,7 +88,6 @@ protected:
 
 	BOOL WantDrawFocusRect(LPDRAWITEMSTRUCT lpDrawItemStruct) const;
 	BOOL ValidateSelection(int& nSel, BOOL bForward) const;
-	BOOL ItemIsSelectable(int nItem) const;
 	BOOL IsValidIndex(int nItem) const { return ((nItem >= 0) && (nItem < GetCount())); }
 	BOOL FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const;
 
@@ -92,9 +96,11 @@ protected:
 
 	struct EXT_ITEMDATA
 	{
-		EXT_ITEMDATA() : dwUserData(0) {}
+		EXT_ITEMDATA() : dwItemData(0), bHeading(FALSE), bDisabled(FALSE) {}
 
-		DWORD dwUserData;
+		DWORD dwItemData;
+		BOOL bHeading;
+		BOOL bDisabled;
 	};
 
 	virtual EXT_ITEMDATA* NewExtItemData() const { return new EXT_ITEMDATA; }
