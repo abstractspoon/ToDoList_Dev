@@ -44,65 +44,6 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CTDLTimeTrackerTaskComboBox message handlers
 
-int CTDLTimeTrackerTaskComboBox::FindNextItem(const CString& sText, int nFrom, BOOL bForward) const
-{
-	int nNumItems = GetCount(), nNext = CB_ERR;
-
-	if (bForward)
-	{
-		if ((nFrom < 0) || (nFrom >= nNumItems))
-			nFrom = 0;
-
-		// From nFrom to end of combo
-		if (FindNextItem(sText, nFrom, (nNumItems - 1), 1, nNext))
-			return nNext;
-
-		// From start of combo to nFrom
-		if (FindNextItem(sText, 0, (nFrom - 1), 1, nNext))
-			return nNext;
-	}
-	else // backwards
-	{
-		if ((nFrom < 0) || (nFrom >= nNumItems))
-			nFrom = (nNumItems - 1);
-
-		// From nFrom to start of combo
-		if (FindNextItem(sText, nFrom, 0, -1, nNext))
-			return nNext;
-
-		// From end of combo to nFrom
-		if (FindNextItem(sText, (nNumItems - 1), (nFrom + 1), -1, nNext))
-			return nNext;
-	}
-
-	// else
-	return CB_ERR;
-}
-
-BOOL CTDLTimeTrackerTaskComboBox::FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const
-{
-	ASSERT(((nIncrement == 1) && (nTo >= nFrom)) || ((nIncrement == -1) && (nTo <= nFrom)));
-
-	nNext = CB_ERR;
-	nTo += nIncrement; // so the != will work to stop the loop
-
-	for (int nItem = nFrom; nItem != nTo; nItem += nIncrement)
-	{
-		if (!ItemIsSelectable(nItem))
-			continue;
-
-		CString sItem(CDialogHelper::GetItem(*this, nItem));
-
-		if (Misc::Find(sText, sItem) != -1)
-		{
-			nNext = nItem;
-			break;
-		}
-	}
-
-	return (nNext != CB_ERR);
-}
-
 void CTDLTimeTrackerTaskComboBox::ResetContent()
 {
 	CTDLTaskComboBox::ResetContent();

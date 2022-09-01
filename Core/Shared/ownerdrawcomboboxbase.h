@@ -25,6 +25,8 @@ public:
     int FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const;
     int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;
 
+	int FindNextItem(const CString& sText, int nFrom, BOOL bForward) const;
+
 // Attributes
 protected:
 	int m_nMaxTextWidth;
@@ -83,6 +85,7 @@ protected:
 	BOOL ValidateSelection(int& nSel, BOOL bForward) const;
 	BOOL ItemIsSelectable(int nItem) const;
 	BOOL IsValidIndex(int nItem) const { return ((nItem >= 0) && (nItem < GetCount())); }
+	BOOL FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const;
 
 protected:
 	void DeleteAllExtItemData();
