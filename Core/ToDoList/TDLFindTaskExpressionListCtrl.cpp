@@ -882,29 +882,35 @@ void CTDLFindTaskExpressionListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nC
 		{
 			m_cbListValues.ResetContent();
 
-			int nAttrib = m_aAttribDefs.Find(rule.GetAttribute());
+			TDC_ATTRIBUTE nAttribID = rule.GetAttribute();
 
-			if (nAttrib != -1)
+			if (TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(nAttribID))
 			{
-				const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAttrib];
-				ASSERT(attribDef.IsList());
+				int nAttrib = m_aAttribDefs.Find(nAttribID);
+				ASSERT(nAttrib != -1);
 
-				if (attribDef.IsList())
+				if (nAttrib != -1)
 				{
-					int nItem = attribDef.aDefaultListData.GetSize();
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = m_aAttribDefs[nAttrib];
+					ASSERT(attribDef.IsList());
 
-					while (nItem--)
-						m_cbListValues.AddString(attribDef.aDefaultListData[nItem]);
-					
-					nItem = attribDef.aAutoListData.GetSize();
+					if (attribDef.IsList())
+					{
+						int nItem = attribDef.aDefaultListData.GetSize();
 
-					while (nItem--)
-						m_cbListValues.AddString(attribDef.aAutoListData[nItem]);
+						while (nItem--)
+							m_cbListValues.AddString(attribDef.aDefaultListData[nItem]);
+
+						nItem = attribDef.aAutoListData.GetSize();
+
+						while (nItem--)
+							m_cbListValues.AddString(attribDef.aAutoListData[nItem]);
+					}
 				}
 			}
 			else
 			{
-				switch (rule.GetAttribute())
+				switch (nAttribID)
 				{
 				case TDCA_CATEGORY: CDialogHelper::SetComboBoxItems(m_cbListValues, m_tldListContents.aCategory); break;
 				case TDCA_ALLOCTO:	CDialogHelper::SetComboBoxItems(m_cbListValues, m_tldListContents.aAllocTo); break;
