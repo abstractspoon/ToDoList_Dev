@@ -40,7 +40,41 @@ CString CTDLTaskComboBox::GetSelectedTaskName() const
 	return sTask.TrimLeft();
 }
 
-BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, int nLevel)
+BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, int nLevel, int nImage)
 {
-	return (CB_ERR != CDialogHelper::AddString(*this, (CString(TAB, nLevel) + sTask), dwTaskID));
+	int nTask = CDialogHelper::AddString(*this, (CString(TAB, nLevel) + sTask), dwTaskID);
+
+	if (nTask == CB_ERR)
+		return FALSE;
+
+	SetItemImage(nTask, nImage);
+	return TRUE;
+}
+
+BOOL CTDLTaskComboBox::SetTaskImage(DWORD dwTaskID, int nImage)
+{
+	return SetItemImage(CDialogHelper::FindItemByData(*this, dwTaskID), nImage);
+}
+
+BOOL CTDLTaskComboBox::SetItemImage(int nItem, int nImage)
+{
+	if (!IsValidIndex(nItem))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
+
+	if (!pItemData && (nImage != -1))
+	{
+		pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nItem);
+		ASSERT(pItemData);
+
+		if (pItemData == NULL)
+			return FALSE;
+	}
+
+	pItemData->nImage = nImage;
+	return TRUE;
 }
