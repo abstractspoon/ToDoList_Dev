@@ -54,8 +54,6 @@ protected:
 	int GetRecentlyTrackedTasks(CDWordArray& aRecentlyTrackedIDs) const;
 	int BuildItemMap(CMapTaskIndex& mapComboItems) const;
 	void UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL, DWORD dwSelTaskID);
-
-//	static int SortProc(const void* v1, const void* v2);
 };
 
 /////////////////////////////////////////////////////////////////////////////
