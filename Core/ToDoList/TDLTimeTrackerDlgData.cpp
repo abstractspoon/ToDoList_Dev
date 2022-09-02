@@ -11,7 +11,7 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-TRACKITEM::TRACKITEM() : dwTaskID(0), bParent(FALSE), nLevel(0) 
+TRACKITEM::TRACKITEM() : dwTaskID(0), bParent(FALSE), nLevel(0)
 {
 }
 
@@ -20,7 +20,8 @@ BOOL TRACKITEM::operator==(const TRACKITEM& ti) const
 	return (sTaskTitle == ti.sTaskTitle) && 
 			(dwTaskID == ti.dwTaskID) &&
 			(bParent == ti.bParent) &&
-			(nLevel == ti.nLevel);
+			(nLevel == ti.nLevel) &&
+			(sImage == ti.sImage);
 }
 
 BOOL TRACKITEM::operator!=(const TRACKITEM& ti) const
@@ -85,6 +86,7 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 		ti.dwTaskID = dwTaskID;
 		ti.bParent = tasks.IsTaskParent(hTask);
 		ti.nLevel = nLevel;
+		ti.sImage = tasks.GetTaskIcon(hTask);
 
 		int nExist = -1;
 

@@ -26,6 +26,10 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase
 
+const int COwnerdrawComboBoxBase::IMAGESIZE = GraphicsMisc::ScaleByDPIFactor(18);
+
+/////////////////////////////////////////////////////////////////////////////
+
 COwnerdrawComboBoxBase::COwnerdrawComboBoxBase(int nDefMinVisible) 
 	: 
 	m_nMaxTextWidth(-1),
@@ -294,10 +298,7 @@ int COwnerdrawComboBoxBase::CalcMinItemHeight(BOOL bList) const
 		nMinHeight = max((nMinHeight + 4), nMinDLUHeight);
 
 		if (HasIcon())
-		{
-			int nMinDPIHeight = GraphicsMisc::ScaleByDPIFactor(18);
-			nMinHeight = max(nMinHeight, nMinDPIHeight);
-		}
+			nMinHeight = max(nMinHeight, IMAGESIZE);
 	}
 	else
 	{
@@ -376,7 +377,7 @@ BOOL COwnerdrawComboBoxBase::IsType(UINT nComboType) const
 int COwnerdrawComboBoxBase::GetExtraListboxWidth() const
 {
 	// space for icon
-	return (HasIcon() ? GraphicsMisc::ScaleByDPIFactor(18) : 0);
+	return (HasIcon() ? IMAGESIZE : 0);
 }
 
 int COwnerdrawComboBoxBase::FindStringExact(int nIndexStart, LPCTSTR lpszFind) const

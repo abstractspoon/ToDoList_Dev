@@ -33,6 +33,7 @@ struct TRACKITEM
 	DWORD dwTaskID;
 	BOOL bParent;
 	int nLevel;
+	CString sImage;
 };
 
 /////////////////////////////////////////////////////////////////////////

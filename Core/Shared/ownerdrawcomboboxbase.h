@@ -40,6 +40,8 @@ protected:
 	int m_nNumHeadings;
 	BOOL m_bHasExtItemData;
 
+	static const int IMAGESIZE;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(COwnerdrawComboBoxBase)
@@ -97,6 +99,7 @@ protected:
 	struct ODCB_ITEMDATA
 	{
 		ODCB_ITEMDATA() : dwItemData(0), bHeading(FALSE), bDisabled(FALSE) {}
+		virtual ~ODCB_ITEMDATA() {}
 
 		DWORD dwItemData;
 		BOOL bHeading;

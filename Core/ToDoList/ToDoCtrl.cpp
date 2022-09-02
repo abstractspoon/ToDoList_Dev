@@ -657,6 +657,17 @@ void CToDoCtrl::LoadTaskIcons()
 	OnTaskIconsChanged();
 }
 
+const CTDCImageList& CToDoCtrl::GetTaskIconImageList() const 
+{ 
+	if (!m_ilTaskIcons.GetSafeHandle())
+	{
+		CToDoCtrl* pThis = const_cast<CToDoCtrl*>(this);
+		pThis->LoadTaskIcons();
+	}
+
+	return m_ilTaskIcons; 
+}
+
 void CToDoCtrl::InitEditPrompts()
 {
 	// Specific
