@@ -180,11 +180,11 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	int nDC = dc.SaveDC(), nItem = (int)lpDrawItemStruct->itemID;
 
 	// Fixup item data because Windows will have passed us the 'raw' item data
-	lpDrawItemStruct->itemData = GetItemData(nItem);
+	DWORD dwItemData = (m_bHasExtItemData ? GetItemData(nItem) : lpDrawItemStruct->itemData);
 
 	// Draw item background
 	COLORREF crText, crBack;
-	GetItemColors(nItem, lpDrawItemStruct->itemState, lpDrawItemStruct->itemData, crText, crBack);
+	GetItemColors(nItem, lpDrawItemStruct->itemState, dwItemData, crText, crBack);
 
 	CRect rItem(lpDrawItemStruct->rcItem);
 	dc.FillSolidRect(rItem, crBack);
@@ -214,10 +214,7 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	//TRACE(_T("COwnerdrawComboBoxBase::DrawItem(%s, hwnd=%s, list = %d)\n"), sText, CWinClasses::GetClass(hwndDC), bListItem);
 
 	// virtual call
-	DrawItemText(dc, rItem, nItem, 
-				lpDrawItemStruct->itemState,
-				lpDrawItemStruct->itemData,
-				sText, bListItem, crText);
+	DrawItemText(dc, rItem, nItem, lpDrawItemStruct->itemState, dwItemData,	sText, bListItem, crText);
 
 	// Restore the DC state before focus rect
 	dc.RestoreDC(nDC);
