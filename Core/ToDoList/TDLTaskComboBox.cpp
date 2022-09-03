@@ -189,15 +189,23 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
 
-	if (pItemData && (pItemData->nImage >= 0))
+	if (pItemData)
 	{
-		CRect rIcon(rect);
-		rIcon.left += (IMAGESIZE * pItemData->nIndent);
+		int nImage = pItemData->nImage;
 
-		if (m_nNumHeadings)
-			rIcon.left -= IMAGESIZE;
+		if (pItemData->bParent && m_bShowParentsAsFolders)
+			nImage = 0;
+
+		if (nImage >= 0)
+		{
+			CRect rIcon(rect);
+			rIcon.left += (IMAGESIZE * pItemData->nIndent);
+
+			if (m_nNumHeadings)
+				rIcon.left -= IMAGESIZE;
 		
-		ImageList_Draw(m_hilTasks, pItemData->nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+			ImageList_Draw(m_hilTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+		}
 	}
 }
 

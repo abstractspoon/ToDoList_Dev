@@ -28,13 +28,14 @@ public:
 	void SetImageList(HIMAGELIST hil) { m_hilTasks = hil; }
 // 	BOOL SetTaskImage(DWORD dwTaskID, int nImage);
 	void EnableParentTasks(BOOL bEnable = TRUE) { m_bEnableParents = bEnable; }
+	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_bShowParentsAsFolders = bAsFolders; }
 	
 	int GetItemImage(int nItem) const;
 	BOOL ModifyItem(int nItem, const CString& sName, int nImage);
 
 protected:
 	HIMAGELIST m_hilTasks;
-	BOOL m_bEnableParents;
+	BOOL m_bEnableParents, m_bShowParentsAsFolders;
 
 protected:
 	struct TCB_ITEMDATA : public ODCB_ITEMDATA

@@ -1368,6 +1368,7 @@ void CToDoListWnd::UpdateTimeTrackerPreferences()
 	const CPreferencesDlg& prefs = Prefs();
 
 	m_dlgTimeTracker.SetOption(TTDO_ALLOWPARENTTRACKING, prefs.GetAllowParentTimeTracking());
+	m_dlgTimeTracker.SetOption(TTDO_SHOWPARENTSASFOLDERS, prefs.GetShowParentsAsFolders());
 	m_dlgTimeTracker.SetOption(TTDO_FORMATTIMESASHMS, prefs.GetUseHMSTimeFormat());
 	m_dlgTimeTracker.SetOption(TTDO_SHOWONBEGINTRACKING, prefs.GetShowTimeTracker());
 

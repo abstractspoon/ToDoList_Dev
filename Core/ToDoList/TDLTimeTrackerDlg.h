@@ -19,6 +19,16 @@
 
 /////////////////////////////////////////////////////////////////////////
 
+enum
+{
+	TTDO_FORMATTIMESASHMS		= 0X01,
+	TTDO_SHOWONBEGINTRACKING	= 0X02,
+	TTDO_ALLOWPARENTTRACKING	= 0X04,
+	TTDO_SHOWPARENTSASFOLDERS	= 0X08,
+};
+
+/////////////////////////////////////////////////////////////////////////
+
 class CTDLTimeTrackerDlg : public CDialog, protected CDialogHelper
 {
 public:

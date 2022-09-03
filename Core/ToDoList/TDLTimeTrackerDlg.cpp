@@ -1292,16 +1292,14 @@ void CTDLTimeTrackerDlg::SetOption(DWORD dwOption, BOOL bEnable)
 {
 	if (Misc::ModifyFlags(m_dwOptions, (bEnable ? 0 : dwOption), (bEnable ? dwOption : 0)))
 	{
-		const CFilteredToDoCtrl* pTDC = GetSelectedTasklist();
+		if (Misc::HasFlag(dwOption, TTDO_ALLOWPARENTTRACKING))
+			m_cbTasks.EnableParentTasks(bEnable);
 
-		if (pTDC)
-		{
-			if (Misc::HasFlag(dwOption, TTDO_ALLOWPARENTTRACKING))
-				m_cbTasks.EnableParentTasks(bEnable);
+		if (Misc::HasFlag(dwOption, TTDO_SHOWPARENTSASFOLDERS))
+			m_cbTasks.SetShowParentTasksAsFolders(bEnable);
 
-			if (Misc::HasFlag(dwOption, TTDO_FORMATTIMESASHMS))
-				UpdateTaskTime(pTDC);
-		}
+		if (Misc::HasFlag(dwOption, TTDO_FORMATTIMESASHMS))
+			UpdateTaskTime(GetSelectedTasklist());
 	}
 }
 
