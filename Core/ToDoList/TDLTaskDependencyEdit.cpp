@@ -304,7 +304,7 @@ void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		{
 			ASSERT(&ctrl == &m_cbTasks);
 
-			FillTaskCombo();
+			PopulateTaskCombo();
 			m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
 		}
 		break;
@@ -339,14 +339,14 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
 }
 
-void CTDLTaskDependencyListCtrl::FillTaskCombo()
+void CTDLTaskDependencyListCtrl::PopulateTaskCombo()
 {
 	// Once only
 	if (m_cbTasks.GetCount() == 0)
-		FillTaskCombo(m_data.GetStructure(), 0);
+		PopulateTaskCombo(m_data.GetStructure(), 0);
 }
 
-void CTDLTaskDependencyListCtrl::FillTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel)
+void CTDLTaskDependencyListCtrl::PopulateTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel)
 {
 	if (!pTDS->IsRoot())
 	{
@@ -355,11 +355,11 @@ void CTDLTaskDependencyListCtrl::FillTaskCombo(const TODOSTRUCTURE* pTDS, int nL
 		if (m_data.IsTaskDone(dwTaskID) || m_data.IsTaskReference(dwTaskID))
 			return;
 
-		m_cbTasks.AddTask(m_data.GetTaskTitle(dwTaskID), dwTaskID, nLevel++);
+		m_cbTasks.AddTask(m_data.GetTaskTitle(dwTaskID), dwTaskID, pTDS->HasSubTasks(), nLevel++, -1);
 	}
 
 	for (int nPos = 0; nPos < pTDS->GetSubTaskCount(); nPos++)
-		FillTaskCombo(pTDS->GetSubTask(nPos), nLevel); // RECURSIVE CALL
+		PopulateTaskCombo(pTDS->GetSubTask(nPos), nLevel); // RECURSIVE CALL
 }
 
 /////////////////////////////////////////////////////////////////////////////

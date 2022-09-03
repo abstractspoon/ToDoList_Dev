@@ -24,7 +24,8 @@ public:
 	BOOL IsSelectedTask(DWORD dwTaskID) const;
 
 	void ResetContent();
-	int Rebuild(const TRACKTASKLIST* pTTL, DWORD dwOptions);
+	int Rebuild(const TRACKTASKLIST* pTTL);
+	int Update(const TRACKTASKLIST* pTTL, const CDWordArray& aModTaskIDs);
 	void UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL);
 
 	BOOL SelectTask(DWORD dwTaskID);
@@ -49,11 +50,12 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual BOOL IsSelectableItem(int nItem) const;
-
-	int GetRecentlyTrackedTasks(CDWordArray& aRecentlyTrackedIDs) const;
+	int GetRecentlyTrackedTaskIDs(CDWordArray& aRecentlyTrackedIDs) const;
 	int BuildItemMap(CMapTaskIndex& mapComboItems) const;
+	int BuildRecentlyTrackedItemMap(CMapTaskIndex& mapComboItems) const;
 	void UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL, DWORD dwSelTaskID);
+	int Update(const TRACKTASKLIST* pTTL, const CDWordArray& aModTaskIDs, 
+			   const CMapTaskIndex& mapTTItems, const CMapTaskIndex& mapCBItems);
 };
 
 /////////////////////////////////////////////////////////////////////////////

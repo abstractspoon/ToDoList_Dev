@@ -62,14 +62,13 @@ int TRACKTASKLIST::SetTasks(const CTaskFile& tasks)
 {
 	aTasks.RemoveAll();
 
-	UpdateTasks(tasks);
+	UpdateTasks(tasks, CDWordArray());
 
 	return aTasks.GetSize();
 }
 	
-BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks)
+int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks, CDWordArray& aModTaskIDs)
 {
-	BOOL bChange = FALSE;
 	CString sTaskPath;
 
 	if (hTask)
@@ -98,13 +97,13 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 			if (tiExist != ti)
 			{
 				tiExist = ti;
-				bChange = TRUE;
+				aModTaskIDs.Add(dwTaskID);
 			}
 		}
 		else // new
 		{
 			aTasks.Add(ti);
-			bChange = TRUE;
+			aModTaskIDs.Add(dwTaskID);
 		}
 
 		nLevel++;
@@ -115,19 +114,21 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 	
 	while (hSubtask)
 	{
-		bChange |= UpdateTasks(tasks, hSubtask, nLevel, mapTasks); // RECURSIVE CALL
+		UpdateTasks(tasks, hSubtask, nLevel, mapTasks, aModTaskIDs); // RECURSIVE CALL
 		hSubtask = tasks.GetNextTask(hSubtask);
 	}
 
-	return bChange;
+	return aModTaskIDs.GetSize();
 }
 
-BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks)
+int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, CDWordArray& aModTaskIDs)
 {
 	CMapTaskIndex mapTasks;
 	aTasks.BuildTaskMap(mapTasks);
 
-	return UpdateTasks(tasks, NULL, 0, mapTasks);
+	aModTaskIDs.RemoveAll();
+
+	return UpdateTasks(tasks, NULL, 0, mapTasks, aModTaskIDs);
 }
 
 BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)

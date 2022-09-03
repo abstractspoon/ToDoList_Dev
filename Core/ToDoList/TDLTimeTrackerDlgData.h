@@ -17,7 +17,6 @@ enum
 	TTDO_FORMATTIMESASHMS = 0X01,
 	TTDO_SHOWONBEGINTRACKING = 0X02,
 	TTDO_ALLOWPARENTTRACKING = 0X04,
-	TTDO_SHOWTASKPATH = 0X08,
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -61,7 +60,7 @@ struct TRACKTASKLIST
 	virtual ~TRACKTASKLIST();
 
 	int SetTasks(const CTaskFile& tasks);
-	BOOL UpdateTasks(const CTaskFile& tasks);
+	BOOL UpdateTasks(const CTaskFile& tasks, CDWordArray& aModTaskIDs);
 	BOOL RemoveTasks(DWORD dwToRemove);
 
 	BOOL IsTracking(DWORD dwTaskID = 0) const;
@@ -77,7 +76,7 @@ protected:
 	BOOL bTrackingPaused;
 
 protected:
-	BOOL UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks);
+	int UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks, CDWordArray& aModTaskIDs);
 };
 
 /////////////////////////////////////////////////////////////////////////

@@ -1370,7 +1370,6 @@ void CToDoListWnd::UpdateTimeTrackerPreferences()
 	m_dlgTimeTracker.SetOption(TTDO_ALLOWPARENTTRACKING, prefs.GetAllowParentTimeTracking());
 	m_dlgTimeTracker.SetOption(TTDO_FORMATTIMESASHMS, prefs.GetUseHMSTimeFormat());
 	m_dlgTimeTracker.SetOption(TTDO_SHOWONBEGINTRACKING, prefs.GetShowTimeTracker());
-	m_dlgTimeTracker.SetOption(TTDO_SHOWTASKPATH, TRUE/*prefs.GetShowFullTaskPathInTimeTracker()*/);
 
 	m_dlgTimeTracker.SetUITheme(m_theme);
 	m_dlgTimeTracker.SetStartStopShortcut(m_mgrShortcuts.GetShortcut(ID_EDIT_CLOCK_TASK));

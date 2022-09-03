@@ -121,7 +121,6 @@ protected:
 	BOOL Create();
 	BOOL Recreate();
 	void UpdatePlayButton(BOOL bCheckVisibility = TRUE);
-	void RebuildTaskCombo();
 	BOOL RebuildTasklistCombo();
 	COLORREF GetBkgndColor() const;
 	BOOL IsTrackingSelectedTasklistAndTask() const;
