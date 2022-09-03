@@ -31,10 +31,10 @@ public:
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTask(const TRACKTASKLIST* pTTL);
 
-	const CFilteredToDoCtrl* GetToDoCtrl() const { return m_pTDC; }
+	const CToDoCtrl* GetToDoCtrl() const { return m_pTDC; }
 
 protected:
-	const CFilteredToDoCtrl* m_pTDC;
+	const CToDoCtrl* m_pTDC;
 
 // Overrides
 	// ClassWizard generated virtual function overrides

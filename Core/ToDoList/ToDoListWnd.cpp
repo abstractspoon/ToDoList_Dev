@@ -6855,7 +6855,7 @@ void CToDoListWnd::OnTimerTimeTracking()
 		bWasTimeTracking = bNowTimeTracking;
 	}
 
-	const CFilteredToDoCtrl* pTDC = m_dlgTimeTracker.GetSelectedTasklist();
+	const CToDoCtrl* pTDC = m_dlgTimeTracker.GetSelectedTasklist();
 
 	if (pTDC && pTDC->IsActivelyTimeTracking())
 		m_dlgTimeTracker.UpdateTaskTime(pTDC);

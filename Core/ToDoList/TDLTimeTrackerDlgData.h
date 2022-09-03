@@ -5,7 +5,7 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-class CFilteredToDoCtrl;
+class CToDoCtrl;
 class CTaskFile;
 
 typedef void* HTASKITEM;
@@ -34,7 +34,6 @@ class CTrackItemArray : public CArray<TRACKITEM, TRACKITEM&>
 {
 public:
 	void BuildTaskMap(CMapTaskIndex& mapTasks) const;
-
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -58,7 +57,7 @@ struct TRACKTASKLIST
 	DWORD GetTrackedTaskID() const { return dwTrackedTaskID; }
 	BOOL UpdateTracking();
 
-	const CFilteredToDoCtrl* pTDC;
+	const CToDoCtrl* pTDC;
 	CTrackItemArray aTasks;
 	CDWordArray aRecentlyTrackedIDs;
 
@@ -80,19 +79,19 @@ public:
 
 	BOOL IsEmpty() const { return !GetNumTasklists(); }
 	int GetNumTasklists() const;
-	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
+	BOOL UpdateTracking(const CToDoCtrl* pTDC);
 
-	int AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
-	BOOL DeleteTasklist(const CFilteredToDoCtrl* pTDC);
+	int AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tasks);
+	BOOL DeleteTasklist(const CToDoCtrl* pTDC);
 	void DeleteAllTasklists();
-	int FindTasklist(const CFilteredToDoCtrl* pTDC) const;
+	int FindTasklist(const CToDoCtrl* pTDC) const;
 
-	const TRACKTASKLIST* GetTasklist(const CFilteredToDoCtrl* pTDC) const;
-	TRACKTASKLIST* GetTasklist(const CFilteredToDoCtrl* pTDC);
+	const TRACKTASKLIST* GetTasklist(const CToDoCtrl* pTDC) const;
+	TRACKTASKLIST* GetTasklist(const CToDoCtrl* pTDC);
 	const TRACKTASKLIST* GetTasklist(int nTasklist) const;
 
-	const CTrackItemArray* GetTasks(const CFilteredToDoCtrl* pTDC) const;
-	CTrackItemArray* GetTasks(const CFilteredToDoCtrl* pTDC);
+	const CTrackItemArray* GetTasks(const CToDoCtrl* pTDC) const;
+	CTrackItemArray* GetTasks(const CToDoCtrl* pTDC);
 
 };
 
