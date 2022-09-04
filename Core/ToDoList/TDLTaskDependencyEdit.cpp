@@ -341,9 +341,6 @@ void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
 		CDialogHelper::RefreshMaxDropWidth(m_cbTasks);
 	}
 
-	m_cbTasks.SetImageList(m_ilTasks);
-	m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
-
 	// Disable all 'other' dependencies to prevent duplicate selection
 	int nItem = GetItemCount();
 
@@ -361,6 +358,9 @@ void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
 				m_cbTasks.SetDisabledItem(nTask, (nRow != nItem));
 		}
 	}
+
+	m_cbTasks.SetImageList(m_ilTasks);
+	m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
 }
 
 void CTDLTaskDependencyListCtrl::PopulateTaskCombo(const CTaskFile& tasks, HTASKITEM hTask, int nLevel)
