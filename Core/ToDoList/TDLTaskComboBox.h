@@ -26,7 +26,6 @@ public:
 
 	BOOL SetSelectedTaskID(DWORD dwTaskID);
 	void SetImageList(HIMAGELIST hil) { m_hilTasks = hil; }
-// 	BOOL SetTaskImage(DWORD dwTaskID, int nImage);
 	void EnableParentTasks(BOOL bEnable = TRUE) { m_bEnableParents = bEnable; }
 	void SetShowParentTasksAsFolders(BOOL bAsFolders = TRUE) { m_bShowParentsAsFolders = bAsFolders; }
 	

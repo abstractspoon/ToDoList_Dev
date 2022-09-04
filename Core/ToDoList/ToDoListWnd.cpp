@@ -6099,7 +6099,9 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 		
 		UpdateCaption();
 		UpdateStatusBar();
+
 		RefreshFilterBarControls(TDCA_ALL);
+		UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
 	}
 	else if (bNotifyError)
 	{
@@ -10795,6 +10797,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	tdc.SetAdvancedFilter(filter);
 	
 	RefreshFilterBarControls(TDCA_ALL);
+	UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
 
 	tdc.SetFocusToTasks();
 
@@ -11267,7 +11270,10 @@ void CToDoListWnd::OnViewSelectedTask(BOOL bNext)
 		// Update the filter bar if the filter auto-toggled 
 		// because the required tasks were hidden
 		if (bWasFiltered && !tdc.HasAnyFilter())
+		{
 			RefreshFilterBarControls(TDCA_ALL);
+			UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
+		}
 	}
 }
 
@@ -11747,7 +11753,9 @@ void CToDoListWnd::OnViewClearfilter()
 		tdc.ClearFilter();
 	
 		RefreshFilterBarControls(TDCA_ALL, TRUE); // clear checkbox history
+
 		UpdateStatusBar();
+		UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
 	}
 }
 
@@ -11765,7 +11773,9 @@ void CToDoListWnd::OnViewTogglefilter()
 	tdc.ToggleFilter();
 
 	RefreshFilterBarControls(TDCA_ALL);
+
 	UpdateStatusBar();
+	UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
 }
 
 void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
@@ -11833,6 +11843,7 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 		CheckResizeFilterBar();
 
 	UpdateStatusBar();
+	UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
 }
 
 void CToDoListWnd::OnViewFilter() 

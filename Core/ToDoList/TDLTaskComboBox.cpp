@@ -19,7 +19,11 @@ const TCHAR TAB = '\t';
 
 //////////////////////////////////////////////////////////////////////
 
-CTDLTaskComboBox::CTDLTaskComboBox() : CTabbedComboBox(IMAGESIZE)
+CTDLTaskComboBox::CTDLTaskComboBox() 
+	: 
+	CTabbedComboBox(IMAGESIZE),
+	m_bShowParentsAsFolders(FALSE),
+	m_bEnableParents(TRUE)
 {
 }
 
@@ -137,30 +141,6 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 
 	return TRUE;
 }
-
-/*
-BOOL CTDLTaskComboBox::SetTaskImage(DWORD dwTaskID, int nImage)
-{
-	int nItem = CDialogHelper::FindItemByData(*this, dwTaskID);
-
-	if (nItem == CB_ERR)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetAddExtItemData(nItem);
-
-	if (pItemData == NULL)
-	{
-		ASSERT(0);
-		return FALSE;
-	}
-
-	pItemData->nImage = nImage;
-	return TRUE;
-}
-*/
 
 int CTDLTaskComboBox::GetItemImage(int nItem) const
 {

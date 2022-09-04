@@ -171,8 +171,8 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 			SetHeadingItem(nHeading);
 
 			// Insert new recently tracked tasks at head of combo
-			CMapTaskIndex mapTasks;
-			BuildItemMap(mapTasks);
+			CMapTaskIndex mapCBItems;
+			BuildItemMap(mapCBItems);
 
 			int nID = pTTL->aRecentlyTrackedIDs.GetSize(), nNumAdded = 0;
 
@@ -181,7 +181,7 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 				DWORD dwTaskID = pTTL->aRecentlyTrackedIDs[nID];
 				int nItem = CB_ERR;
 
-				if (!mapTasks.Lookup(dwTaskID, nItem))
+				if (!mapCBItems.Lookup(dwTaskID, nItem))
 					continue;
 
 				nItem += nNumAdded;
