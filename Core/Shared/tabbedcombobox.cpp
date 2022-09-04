@@ -41,9 +41,6 @@ void CTabbedComboBox::DrawItemText(CDC& dc, const CRect& rect, int /*nItem*/, UI
 	CString sText(sItem);
 	sText.Replace(_T("\\t"), _T("\t"));
 
-	if (!bList)
-		sText.TrimLeft();
-
 	if (TABSTOPS < 0)
 	{
 		dc.DrawText(sText, (LPRECT)(LPCRECT)rect, DT_EXPANDTABS);
