@@ -52,6 +52,7 @@ protected:
 	virtual BOOL HasIcon() const { return TRUE; }
 	virtual BOOL IsSelectableItem(int nItem) const;
 
+	int GetItemIndent(int nItem) const;
 };
 
 #endif // AFX_TDLTASKCOMBOBOX_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_

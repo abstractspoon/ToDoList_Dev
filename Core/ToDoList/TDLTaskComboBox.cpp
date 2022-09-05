@@ -144,73 +144,69 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 
 int CTDLTaskComboBox::GetItemImage(int nItem) const
 {
+	if (!m_hilTasks)
+		return -1;
+
 	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
 
-	return (pItemData ? pItemData->nImage : -1);
+	if (!pItemData)
+		return -1;
+
+	if (pItemData->bParent && m_bShowParentsAsFolders)
+		return 0;
+
+	return pItemData->nImage;
+}
+
+int CTDLTaskComboBox::GetItemIndent(int nItem) const
+{
+	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
+
+	return pItemData ? pItemData->nIndent : 0;
 }
 
 void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 									DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
+
 	if (IsHeadingItem(nItem))
 	{
 		CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
+		return;
 	}
-	else if (!bList)
+
+	// else
+	CRect rText(rect), rIcon(rect);
+	CString sText(sItem);
+	int nImage = GetItemImage(nItem);
+
+	if (bList)
 	{
-		CRect rText(rect);
-		const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
-
-		if (pItemData)
+		if (nImage != -1)
 		{
-			int nImage = pItemData->nImage;
+			rIcon.left += (IMAGESIZE * GetItemIndent(nItem));
 
-			if (pItemData->bParent && m_bShowParentsAsFolders)
-				nImage = 0;
-
-			if (nImage >= 0)
-			{
-				ImageList_Draw(m_hilTasks, nImage, dc, rect.left, rect.top, ILD_TRANSPARENT);
-				rText.left += IMAGESIZE;
-			}
+			if (m_nNumHeadings)
+				rIcon.left -= IMAGESIZE;
 		}
-		CString sTrimmed(sItem);
-		sTrimmed.TrimLeft(TAB);
 
-		CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sTrimmed, bList, crText);
+		// Indent the text to make room for the image, unless we have
+		// headings in which case the base class will do that for us
+		if (m_nNumHeadings == 0)
+			rText.left += IMAGESIZE;
 	}
 	else
 	{
-		CRect rText(rect);
+		sText.TrimLeft(TAB);
 
-		const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
-
-		if (pItemData)
-		{
-			int nImage = pItemData->nImage;
-
-			if (pItemData->bParent && m_bShowParentsAsFolders)
-				nImage = 0;
-
-			if (nImage >= 0)
-			{
-				CRect rIcon(rect);
-				rIcon.left += (IMAGESIZE * pItemData->nIndent);
-
-				if (m_nNumHeadings)
-					rIcon.left -= IMAGESIZE;
-		
-				ImageList_Draw(m_hilTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-			}
-		}
-
-		// If there are headings then the base class will indent the text otherwise 
-		// we need to do that to make room for the image
-		if (m_nNumHeadings == 0)
+		if (nImage != -1)
 			rText.left += IMAGESIZE;
-	
-		CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 	}
+
+	if (nImage != -1)
+		ImageList_Draw(m_hilTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+
+	CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sText, bList, crText);
 }
 
 BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
