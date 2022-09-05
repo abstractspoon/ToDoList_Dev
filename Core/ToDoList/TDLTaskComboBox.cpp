@@ -152,7 +152,7 @@ int CTDLTaskComboBox::GetItemImage(int nItem) const
 	if (!pItemData)
 		return -1;
 
-	if (pItemData->bParent && m_bShowParentsAsFolders)
+	if ((pItemData->nImage == -1) && pItemData->bParent && m_bShowParentsAsFolders)
 		return 0;
 
 	return pItemData->nImage;
@@ -182,6 +182,12 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 	if (bList)
 	{
+		// Always indent the text to make room for the image, unless we have
+		// headings in which case the base class will do that for us
+		if (m_nNumHeadings == 0)
+			rText.left += IMAGESIZE;
+
+		// Draw the actual image
 		if (nImage != -1)
 		{
 			rIcon.left += (IMAGESIZE * GetItemIndent(nItem));
@@ -189,11 +195,6 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 			if (m_nNumHeadings)
 				rIcon.left -= IMAGESIZE;
 		}
-
-		// Indent the text to make room for the image, unless we have
-		// headings in which case the base class will do that for us
-		if (m_nNumHeadings == 0)
-			rText.left += IMAGESIZE;
 	}
 	else
 	{
