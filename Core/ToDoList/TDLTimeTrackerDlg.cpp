@@ -415,9 +415,18 @@ BOOL CTDLTimeTrackerDlg::UpdateAllTasks(const CToDoCtrl* pTDC)
 
 BOOL CTDLTimeTrackerDlg::UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAttributeMap& mapAttrib)
 {
-	BOOL bUpdateAll = FALSE, bUpdateSel = FALSE;
-	CDWordArray aModTaskIDs;
+	// Operations which introduce new tasks or undelete existing tasks
+	// require a complete refresh
+	if (mapAttrib.Has(TDCA_PASTE) ||
+		mapAttrib.Has(TDCA_POSITION_SAMEPARENT) ||
+		mapAttrib.Has(TDCA_POSITION_DIFFERENTPARENT) ||
+		(mapAttrib.Has(TDCA_DONEDATE) && !pTDC->SelectedTasksAreAllDone()) ||
+		(mapAttrib.Has(TDCA_NEWTASK) && !pTDC->IsTaskLabelEditing()))
+	{
+		return UpdateAllTasks(pTDC);
+	}
 
+	// else
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 
 	if (!pTTL)
@@ -426,11 +435,10 @@ BOOL CTDLTimeTrackerDlg::UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAt
 		return FALSE;
 	}
 
-	if (mapAttrib.Has(TDCA_TASKNAME) ||
-		mapAttrib.Has(TDCA_ICON) ||
-		mapAttrib.Has(TDCA_PASTE) ||
-		(mapAttrib.Has(TDCA_DONEDATE) && !pTDC->SelectedTasksAreAllDone()) ||
-		(mapAttrib.Has(TDCA_NEWTASK) && !pTDC->IsTaskLabelEditing()))
+	BOOL bUpdateSel = FALSE;
+	CDWordArray aModTaskIDs;
+
+	if (mapAttrib.Has(TDCA_TASKNAME) || mapAttrib.Has(TDCA_ICON))
 	{
 		CTaskFile tasks;
 		TDCGETTASKS filter(TDCGT_NOTDONE);
@@ -438,26 +446,18 @@ BOOL CTDLTimeTrackerDlg::UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAt
 		filter.mapAttribs.Add(TDCA_TASKNAME);
 		filter.mapAttribs.Add(TDCA_ICON);
 
-		filter.dwFlags |= TDCGSTF_ALLPARENTS;
-
-		if (pTDC->GetSelectedTasks(tasks, filter) && pTTL->UpdateTasks(tasks, aModTaskIDs))
-		{
-			if (mapAttrib.Has(TDCA_TASKNAME) || mapAttrib.Has(TDCA_ICON))
-				bUpdateSel = TRUE;
-			else
-				bUpdateAll = TRUE;
-		}
+		bUpdateSel = (pTDC->GetSelectedTasks(tasks, filter) && pTTL->UpdateTasks(tasks, aModTaskIDs));
 	}
+
+	DWORD dwRemoveTasks = 0;
 
 	if (mapAttrib.Has(TDCA_DONEDATE))
-	{
-		bUpdateAll |= RemoveTasks(pTDC, TTL_REMOVEDONE);
-	}
+		dwRemoveTasks |= TTL_REMOVEDONE;
 
 	if (mapAttrib.Has(TDCA_DELETE))
-	{
-		bUpdateAll |= RemoveTasks(pTDC, TTL_REMOVEDELETED);
-	}
+		dwRemoveTasks |= TTL_REMOVEDELETED;
+
+	BOOL bUpdateAll = RemoveTasks(pTDC, dwRemoveTasks);
 
 	if (IsSelectedTasklist(pTDC))
 	{
@@ -479,6 +479,9 @@ BOOL CTDLTimeTrackerDlg::UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAt
 
 BOOL CTDLTimeTrackerDlg::RemoveTasks(const CToDoCtrl* pTDC, DWORD dwToRemove)
 {
+	if (dwToRemove == 0)
+		return FALSE;
+
 	TRACKTASKLIST* pTTL = m_aTasklists.GetTasklist(pTDC);
 
 	if (!pTTL)

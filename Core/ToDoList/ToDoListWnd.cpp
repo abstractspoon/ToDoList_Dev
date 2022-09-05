@@ -5845,10 +5845,10 @@ void CToDoListWnd::OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWher
 	else if (CanImportPasteFromClipboard())
 	{
 		DoImportPasteFromClipboard(nImportWhere);
-	}
 
-	RefreshFilterBarControls(TDCA_ALL, FALSE);
-	UpdateTimeTrackerTasks(FALSE, TDCA_PASTE);
+		RefreshFilterBarControls(TDCA_ALL, FALSE);
+		UpdateTimeTrackerTasks(FALSE, TDCA_PASTE);
+	}
 }
 
 void CToDoListWnd::OnEditPasteAsRef() 
@@ -6101,7 +6101,7 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 		UpdateStatusBar();
 
 		RefreshFilterBarControls(TDCA_ALL);
-		UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
+		UpdateTimeTrackerTasks(TRUE);
 	}
 	else if (bNotifyError)
 	{
@@ -10797,7 +10797,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	tdc.SetAdvancedFilter(filter);
 	
 	RefreshFilterBarControls(TDCA_ALL);
-	UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
+	UpdateTimeTrackerTasks(TRUE);
 
 	tdc.SetFocusToTasks();
 
@@ -11272,7 +11272,7 @@ void CToDoListWnd::OnViewSelectedTask(BOOL bNext)
 		if (bWasFiltered && !tdc.HasAnyFilter())
 		{
 			RefreshFilterBarControls(TDCA_ALL);
-			UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
+			UpdateTimeTrackerTasks(TRUE);
 		}
 	}
 }
@@ -11755,7 +11755,7 @@ void CToDoListWnd::OnViewClearfilter()
 		RefreshFilterBarControls(TDCA_ALL, TRUE); // clear checkbox history
 
 		UpdateStatusBar();
-		UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
+		UpdateTimeTrackerTasks(TRUE);
 	}
 }
 
@@ -11775,7 +11775,7 @@ void CToDoListWnd::OnViewTogglefilter()
 	RefreshFilterBarControls(TDCA_ALL);
 
 	UpdateStatusBar();
-	UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
+	UpdateTimeTrackerTasks(TRUE);
 }
 
 void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
@@ -11843,7 +11843,7 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 		CheckResizeFilterBar();
 
 	UpdateStatusBar();
-	UpdateTimeTrackerTasks(TRUE, TDCA_ALL);
+	UpdateTimeTrackerTasks(TRUE);
 }
 
 void CToDoListWnd::OnViewFilter() 
