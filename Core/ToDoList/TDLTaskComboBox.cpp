@@ -203,10 +203,10 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 			rText.left += IMAGESIZE;
 	}
 
+	CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sText, bList, crText);
+
 	if (nImage != -1)
 		ImageList_Draw(m_hilTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
-
-	CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sText, bList, crText);
 }
 
 BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
