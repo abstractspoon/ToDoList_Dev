@@ -152,40 +152,64 @@ int CTDLTaskComboBox::GetItemImage(int nItem) const
 void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
 									DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText)
 {
-	if (IsHeadingItem(nItem) || !m_hilTasks || !bList)
+	if (IsHeadingItem(nItem))
 	{
 		CTabbedComboBox::DrawItemText(dc, rect, nItem, nItemState, dwItemData, sItem, bList, crText);
-		return;
 	}
-
-	// If we have no headings then we need to indent the text to account for the image
-	// Otherwise the base class will indent the text of its own accord
-	CRect rText(rect);
-
-	if (m_nNumHeadings == 0)
-		rText.left += IMAGESIZE;
-	
-	CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
-
-	const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
-
-	if (pItemData)
+	else if (!bList)
 	{
-		int nImage = pItemData->nImage;
+		CRect rText(rect);
+		const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
 
-		if (pItemData->bParent && m_bShowParentsAsFolders)
-			nImage = 0;
-
-		if (nImage >= 0)
+		if (pItemData)
 		{
-			CRect rIcon(rect);
-			rIcon.left += (IMAGESIZE * pItemData->nIndent);
+			int nImage = pItemData->nImage;
 
-			if (m_nNumHeadings)
-				rIcon.left -= IMAGESIZE;
-		
-			ImageList_Draw(m_hilTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+			if (pItemData->bParent && m_bShowParentsAsFolders)
+				nImage = 0;
+
+			if (nImage >= 0)
+			{
+				ImageList_Draw(m_hilTasks, nImage, dc, rect.left, rect.top, ILD_TRANSPARENT);
+				rText.left += IMAGESIZE;
+			}
 		}
+		CString sTrimmed(sItem);
+		sTrimmed.TrimLeft(TAB);
+
+		CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sTrimmed, bList, crText);
+	}
+	else
+	{
+		CRect rText(rect);
+
+		const TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
+
+		if (pItemData)
+		{
+			int nImage = pItemData->nImage;
+
+			if (pItemData->bParent && m_bShowParentsAsFolders)
+				nImage = 0;
+
+			if (nImage >= 0)
+			{
+				CRect rIcon(rect);
+				rIcon.left += (IMAGESIZE * pItemData->nIndent);
+
+				if (m_nNumHeadings)
+					rIcon.left -= IMAGESIZE;
+		
+				ImageList_Draw(m_hilTasks, nImage, dc, rIcon.left, rIcon.top, ILD_TRANSPARENT);
+			}
+		}
+
+		// If there are headings then the base class will indent the text otherwise 
+		// we need to do that to make room for the image
+		if (m_nNumHeadings == 0)
+			rText.left += IMAGESIZE;
+	
+		CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sItem, bList, crText);
 	}
 }
 

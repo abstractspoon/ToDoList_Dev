@@ -168,15 +168,6 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (!dc.Attach(lpDrawItemStruct->hDC))
 		return;
 
-	// Determine whether this is a list item
-	HWND hwndDC = ::WindowFromDC(lpDrawItemStruct->hDC);
-	BOOL bListItem = FALSE;
-	
-	if (hwndDC)
-		bListItem = CWinClasses::IsClass(hwndDC, WC_COMBOLBOX);
-	else
-		bListItem = (dc.GetWindowOrg().y == -1);
-
 	int nDC = dc.SaveDC(), nItem = (int)lpDrawItemStruct->itemID;
 
 	// Fixup item data because Windows will have passed us the 'raw' item data
@@ -193,6 +184,8 @@ void COwnerdrawComboBoxBase::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	rItem.DeflateRect(2, 1);
 
 	// Indent items below their heading
+	BOOL bListItem = !(lpDrawItemStruct->itemState & ODS_COMBOBOXEDIT);
+
 	if (bListItem && m_nNumHeadings && !IsHeadingItem(nItem))
 	{
 		rItem.left += rItem.Height();
