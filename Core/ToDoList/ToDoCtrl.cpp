@@ -3542,7 +3542,13 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(TDC_TASKCOMPLETION nCompletion)
 		ASSERT(aTaskIDs.GetSize());
 	}
 
-	return SetSelectedTaskCompletion(aTasks);
+	if (!SetSelectedTaskCompletion(aTasks))
+		return FALSE;
+
+	if (aTasks.HasStateChange())
+		UpdateControls(FALSE);
+
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEdited)
@@ -3565,8 +3571,6 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const COleDateTime& date, BOOL bDateEd
 
 	if (!bDateEdited || aTasks.HasStateChange())
 		UpdateControls(FALSE);
-
-	SetModified(TDCA_DONEDATE, aTaskIDs);
 
 	return TRUE;
 }
@@ -3600,7 +3604,14 @@ BOOL CToDoCtrl::SetSelectedTaskCompletion(const CTDCTaskCompletionArray& aTasks)
 	if (m_aRecreateTaskIDs.GetSize())
 		PostMessage(WM_TDC_RECREATERECURRINGTASK, 0, m_aRecreateTaskIDs.GetSize());
 
-	return aModTaskIDs.GetSize();
+	if (!aModTaskIDs.GetSize())
+	{
+		ASSERT(!m_aRecreateTaskIDs.GetSize());
+		return FALSE;
+	}
+
+	SetModified(TDCA_DONEDATE, aModTaskIDs);
+	return TRUE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCompletion(const TDCTASKCOMPLETION& task, BOOL bAndSubtasks)
