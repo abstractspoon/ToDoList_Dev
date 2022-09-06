@@ -44,6 +44,11 @@ CString CTDLTaskComboBox::GetSelectedTaskName() const
 	return sTask.TrimLeft();
 }
 
+int CTDLTaskComboBox::GetSelectedTaskImage() const
+{
+	return GetItemImage(GetCurSel());
+}
+
 BOOL CTDLTaskComboBox::AddTask(const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage)
 {
 	return InsertTask(GetCount(), sTask, dwTaskID, bParent, nIndent, nImage);

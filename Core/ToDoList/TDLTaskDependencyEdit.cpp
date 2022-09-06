@@ -96,7 +96,7 @@ BOOL CTDLTaskDependencyEdit::OnChange()
 	return FALSE; 
 }
 
-BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks, CTDCImageList& ilTasks, BOOL bShowParentsAsFolders)
+BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks,const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders)
 {
 	if (IsWindowEnabled())
 	{
@@ -155,11 +155,12 @@ enum
 	LEADIN_COL,
 };
 
-CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CTaskFile& tasks, CTDCImageList& ilTasks, 
+CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
 													   BOOL bShowParentsAsFolders)
 	: 
 	m_tasks(tasks),
-	m_ilTasks(ilTasks)
+	m_ilTasks(ilTasks),
+	m_bShowParentTasksAsFolders(bShowParentsAsFolders)
 {
 	m_cbTasks.SetShowParentTasksAsFolders(bShowParentsAsFolders);
 }
@@ -186,6 +187,9 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
 
+	// This gets around the constness
+	ListView_SetImageList(*this, m_ilTasks, LVSIL_SMALL);
+
 	CreateControl(m_cbTasks, 1001, FALSE); // unsorted
 
 	for (int nDepend = 0; nDepend < aDepends.GetSize(); nDepend++)
@@ -197,7 +201,12 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 			HTASKITEM hTask = m_tasks.FindTask(depend.dwTaskID);
 			CString sName = (hTask ? m_tasks.GetTaskTitle(hTask) : Misc::Format(depend.dwTaskID));
 
-			int nRow = AddRow(sName);
+			int nImage = m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask));
+
+			if ((nImage == -1) && m_bShowParentTasksAsFolders && m_tasks.IsTaskParent(hTask))
+				nImage = 0;
+
+			int nRow = AddRow(sName, nImage);
 
 			SetItemData(nRow, depend.dwTaskID);
 			SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
@@ -330,6 +339,7 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 	}
 
 	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
+	SetItemImage(nRow, m_cbTasks.GetSelectedTaskImage());
 }
 
 void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
@@ -387,7 +397,7 @@ void CTDLTaskDependencyListCtrl::PopulateTaskCombo(const CTaskFile& tasks, HTASK
 
 /////////////////////////////////////////////////////////////////////////////
 
-CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CTaskFile& tasks, CTDCImageList& ilTasks, 
+CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
 													 const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TASKDEPENDENCY_DIALOG, _T("Dependency"), pParent),

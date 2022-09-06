@@ -20,6 +20,7 @@ public:
 
 	DWORD GetSelectedTaskID() const;
 	CString GetSelectedTaskName() const;
+	int GetSelectedTaskImage() const;
 	
 	BOOL AddTask(const CString& sTask, DWORD dwTaskID, int nIndent, BOOL bParent, int nImage);
 	BOOL InsertTask(int nPos, const CString& sTask, DWORD dwTaskID, BOOL bParent, int nIndent, int nImage);

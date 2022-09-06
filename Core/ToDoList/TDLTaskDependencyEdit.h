@@ -33,7 +33,7 @@ public:
 	void GetDependencies(CTDCDependencyArray& aDepends) const;
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	
-	BOOL DoEdit(const CTaskFile& tasks, CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
+	BOOL DoEdit(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
 	void DDX(CDataExchange* pDX, CTDCDependencyArray& aValues);
 
 protected:
@@ -62,13 +62,14 @@ protected:
 class CTDLTaskDependencyListCtrl : public CInputListCtrl
 {
 public:
-	CTDLTaskDependencyListCtrl(const CTaskFile& tasks, CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
+	CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
 
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 
 protected:
 	CTDLTaskComboBox m_cbTasks;
+	BOOL m_bShowParentTasksAsFolders;
 
 	const CTaskFile& m_tasks;
 	const CTDCImageList& m_ilTasks;
@@ -100,7 +101,7 @@ class CTDLTaskDependencyEditDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTaskDependencyEditDlg(const CTaskFile& tasks, CTDCImageList& ilTasks, 
+	CTDLTaskDependencyEditDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
 							  const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, CWnd* pParent = NULL);   // standard constructor
 
 	int GetDependencies(CTDCDependencyArray& aDepends) const;

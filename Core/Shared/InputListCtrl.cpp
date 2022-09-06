@@ -480,10 +480,7 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CDC* pDC;
 	CRect rHeader, rFocus;
 	BOOL bRes;
-	int nWidth;
 	CSize sizeText;
-	BOOL bIsPrompt;
-	CSize sizeState, sizeImage;
 
 	// get and prepare devide context
 	pDC = CDC::FromHandle(lpDrawItemStruct->hDC);
@@ -494,10 +491,9 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	int nItem = lpDrawItemStruct->itemID;
 	UINT uStyle = GetStyle();
 	UINT uState = GetItemState(nItem, LVIS_FOCUSED | LVIS_SELECTED);
-	int nImage = GetImageIndex(nItem, 0); 
 
 	// init helper variables
-	CRect rItem(lpDrawItemStruct->rcItem), rText(rItem), rClient;
+	CRect rItem(lpDrawItemStruct->rcItem), rClient;
 	GetClientRect(&rClient);
 
 	// some problems with drophiliting items during drag and drop
@@ -518,8 +514,11 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	BOOL bWantCellFocus = (bListFocused && !IsSelectionThemed(TRUE) && !CThemed::AreControlsThemed());
 	
 	// images 
+	CSize sizeState, sizeImage;
+
 	// DO NOT SUPPORT INDENTATION
 	CImageList* pImageList = GetImageList(LVSIL_SMALL);
+	int nImage = -1;
 
 	if (pImageList)
 	{
@@ -541,66 +540,34 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		lvc.mask = LVCF_WIDTH | LVCF_FMT;
 		int nCol = 0;
 
-		// draw state image if required
-		int nImageWidth = 0;
 		bRes = GetColumn(nCol, &lvc);
 
-		if (pStateList && bRes)
-		{
-			int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
-			nImage = nState >> 12;
-			pStateList->Draw(pDC, nImage, CPoint(rText.left + 1, rText.top), ILD_TRANSPARENT); 
-
-			if (lvc.cx > sizeState.cx)
-				pStateList->Draw(pDC, nState, CPoint(rText.left + 1, rText.top), ILD_TRANSPARENT); 
-
-			nImageWidth = sizeState.cx + 2; // 1 pixel border either side
-		}
-
-		// draw item image
-		if (pImageList && bRes)
-		{
-			int nImageStyle;
-
-			if (bSelected && (nCol == m_nCurCol/* && nItem == GetCurSel()*/))
-			{
-				if (bListFocused && !IsEditing())
-					nImageStyle = ILD_BLEND50;
-				else
-					nImageStyle = ILD_TRANSPARENT;
-			}
-			else
-			{
-				nImageStyle = ILD_TRANSPARENT;
-			}
-
-			if (lvc.cx > nImageWidth + sizeImage.cx)
-				pImageList->Draw(pDC, nImage, CPoint(rText.left + 1 + nImageWidth, rText.top), nImageStyle); 
-
-			nImageWidth += sizeImage.cx + 2; // 1 pixel border either side
-		}
-		
 		// draw horz grid lines if required
 		if (m_bHorzGrid)
 		{
-			if (!m_bVertGrid)
-				GraphicsMisc::DrawHorzLine(pDC, rClient.left, rClient.right, rItem.bottom - 1, GetSysColor(COLOR_3DSHADOW));
-			else
-				GraphicsMisc::DrawHorzLine(pDC, rClient.left, (rItem.right/* - 2*/), rItem.bottom - 1, GetSysColor(COLOR_3DSHADOW));
+			int nGridEnd = m_bVertGrid ? rItem.right : rClient.right;
+
+			GraphicsMisc::DrawHorzLine(pDC, rClient.left, nGridEnd, rItem.bottom - 1, GetSysColor(COLOR_3DSHADOW));
 		}
 
 		// cycle thru the columns drawing each one
-		rText.left += nImageWidth;
-
 		while (bRes)
 		{
-			bIsPrompt = IsPrompt(nItem, nCol);
+			BOOL bIsPrompt = IsPrompt(nItem, nCol);
 			BOOL bSel = (bSelected && (nCol == m_nCurCol));
 
-			// save width and format because GetItem overwrites
-			// if first column deduct width of image if exists
-			nWidth = (nCol == 0) ? lvc.cx - nImageWidth : lvc.cx;
+			// Calculate the space required for images
+			int nImageWidth = 0;
 
+			if (nCol == 0)
+			{
+				if (pStateList)
+					nImageWidth += sizeState.cx + 2; // 1 pixel border either side
+
+				if (pImageList/* && (nImage != -1)*/)
+					nImageWidth += sizeImage.cx + 2; // 1 pixel border either side
+			}
+			
 			// get next item
 			bRes = GetColumn(nCol + 1, &lvc);
 
@@ -641,21 +608,6 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 			}
 
-			// get item text
-			CEnString sText;
-			
-			if (bIsPrompt && (IsReadOnly() || !IsWindowEnabled()))
-			{
-				sText.Empty(); // hides the prompt if readonly
-			}
-			else
-			{
-				CString sTemp(GetItemText(nItem, nCol));
-				
-				sText = sTemp;
-				sizeText = sText.FormatDC(pDC, nWidth, GetColumnFormat(nCol));
-			}
-
 			// adjust text rect for button
 			CRect rText(rCell);
 
@@ -671,10 +623,51 @@ void CInputListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				}
 				else // button is centred => no text
 				{
+					ASSERT(nImageWidth == 0);
 					rText.right = rText.left = (rText.CenterPoint().x - (BTN_WIDTH / 2));
 				}
 			}
+
+			// Draw images
+			if (nImageWidth > 0)
+			{
+				if (pStateList)
+				{
+					int nState = (GetItemState(nItem, LVIS_STATEIMAGEMASK) & LVIS_STATEIMAGEMASK);
+					nImage = nState >> 12;
+					pStateList->Draw(pDC, nImage, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
+
+					if (lvc.cx > sizeState.cx)
+						pStateList->Draw(pDC, nState, CPoint(rText.left + 1, rText.top + 1), ILD_TRANSPARENT);
+
+					rText.left += sizeState.cx + 2; // 1 pixel border either side
+				}
+
+				// draw item image
+				if (pImageList && (nImage != -1))
+				{
+					if (lvc.cx > nImageWidth + sizeImage.cx)
+						pImageList->Draw(pDC, nImage, CPoint(rText.left + 1, rItem.top + 1), ILD_TRANSPARENT);
+
+					rText.left += sizeImage.cx + 2; // 1 pixel border either side
+				}
+			}
+
+			// get item text
+			CEnString sText;
 			
+			if (bIsPrompt && (IsReadOnly() || !IsWindowEnabled()))
+			{
+				sText.Empty(); // hides the prompt if readonly
+			}
+			else
+			{
+				CString sTemp(GetItemText(nItem, nCol));
+				
+				sText = sTemp;
+				sizeText = sText.FormatDC(pDC, rText.Width(), GetColumnFormat(nCol));
+			}
+
 			// setup focus rect (only for classic)
 			if (bWantCellFocus && bSel)
 			{
@@ -1179,10 +1172,7 @@ int CInputListCtrl::InsertRow(CString sRowText, int nRow, int nImage)
 	if (m_bAutoAddRows && nRow == GetItemCount())
 		nRow--; // add before prompt
 
-	if (nImage != -1)
-		nRow = InsertItem(nRow, sRowText, nImage);
-	else
-		nRow = InsertItem(nRow, sRowText);
+	nRow = InsertItem(nRow, sRowText, nImage);
 
 	RecalcHotButtonRects();
 
