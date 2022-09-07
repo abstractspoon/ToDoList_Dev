@@ -190,7 +190,7 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	// This gets around the constness
 	ListView_SetImageList(*this, m_ilTasks, LVSIL_SMALL);
 
-	CreateControl(m_cbTasks, 1001, FALSE); // unsorted
+	CreateControl(m_cbTasks, 1001, CBS_DROPDOWNLIST); // no sort
 
 	for (int nDepend = 0; nDepend < aDepends.GetSize(); nDepend++)
 	{

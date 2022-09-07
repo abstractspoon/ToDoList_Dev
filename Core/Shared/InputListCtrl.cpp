@@ -1438,34 +1438,40 @@ void CInputListCtrl::EndEdit()
 		SetFocus();
 }
 
-void CInputListCtrl::CreateControl(CWnd& ctrl, UINT nID, BOOL bSort)
+void CInputListCtrl::CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles)
 {
-	DWORD dwStyle = WS_CHILD;
+	dwComboStyles |= (WS_CHILD | WS_VSCROLL);
 
-	if (ctrl.IsKindOf(RUNTIME_CLASS(CComboBox)))
+	if ((dwComboStyles & 0xf) == 0)
+		dwComboStyles != CBS_DROPDOWNLIST;
+
+	if (ctrl.Create(dwComboStyles, CRect(0, 0, 0, 0), this, nID))
+		PostCreateControl(ctrl);
+}
+
+void CInputListCtrl::CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles)
+{
+	dwEditStyles |= WS_CHILD;
+
+	if (ctrl.Create(dwEditStyles, CRect(0, 0, 0, 0), this, nID))
 	{
-		dwStyle |= CBS_DROPDOWNLIST | WS_VSCROLL | CBS_AUTOHSCROLL;
+		ctrl.ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
 
-		if (bSort)
-			dwStyle |= CBS_SORT;
-
-		CComboBox* pCombo = (CComboBox*)&ctrl;
-		VERIFY (pCombo->Create(dwStyle, CRect(0, 0, 0, 0), this, nID));
+		PostCreateControl(ctrl);
 	}
-	else if (ctrl.IsKindOf(RUNTIME_CLASS(CEdit)))
-	{
-		CEdit* pEdit = (CEdit*)&ctrl;
-		VERIFY (pEdit->Create(dwStyle, CRect(0, 0, 0, 0), this, nID));
+}
 
-		pEdit->ModifyStyleEx(0, WS_EX_CLIENTEDGE, 0);
-	}
-	else// if (ctrl.IsKindOf(RUNTIME_CLASS(CDateTimeCtrl)))
-	{
-		CDateTimeCtrl* pDateTime = (CDateTimeCtrl*)&ctrl;
-		VERIFY (pDateTime->Create(dwStyle, CRect(0, 0, 0, 0), this, nID));
-	}
+void CInputListCtrl::CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles)
+{
+	dwDateTimeStyles |= WS_CHILD;
 
-	ctrl.SetFont(GetFont()); // set font to parents
+	if (ctrl.Create(dwDateTimeStyles, CRect(0, 0, 0, 0), this, nID))
+		PostCreateControl(ctrl);
+}
+
+void CInputListCtrl::PostCreateControl(CWnd& ctrl)
+{
+	ctrl.SetFont(GetFont()); // set font to parent's
 	ctrl.ShowWindow(SW_HIDE);
 
 	CRect rWnd;

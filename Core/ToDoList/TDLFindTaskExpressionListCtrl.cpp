@@ -129,15 +129,15 @@ void CTDLFindTaskExpressionListCtrl::PreSubclassWindow()
 	// create child controls last because they will
 	// get used to update the minimum item height
 	CreateControl(m_cbAttributes, ATTRIB_ID);
-	CreateControl(m_cbOperators, OPERATOR_ID, FALSE);
+	CreateControl(m_cbOperators, OPERATOR_ID, CBS_DROPDOWNLIST); // no sort
 	CreateControl(m_cbAndOr, ANDOR_ID, FALSE);
 	CreateControl(m_dtcDate, DATE_ID);
 	CreateControl(m_eTime, TIME_ID);
 	CreateControl(m_cbListValues, LISTVALUES_ID);
-	CreateControl(m_cbPriority, PRIORITY_ID, FALSE);
-	CreateControl(m_cbRisk, RISK_ID, FALSE);
-	CreateControl(m_cbCustomIcons, CUSTOMICON_ID, FALSE);
-	CreateControl(m_cbRecurrence, RECURRENCE_ID, FALSE);
+	CreateControl(m_cbPriority, PRIORITY_ID, CBS_DROPDOWNLIST); // no sort
+	CreateControl(m_cbRisk, RISK_ID, CBS_DROPDOWNLIST); // no sort
+	CreateControl(m_cbCustomIcons, CUSTOMICON_ID, CBS_DROPDOWNLIST); // no sort
+	CreateControl(m_cbRecurrence, RECURRENCE_ID, CBS_DROPDOWNLIST); // no sort
 
 	// build and/or combo too
 	int nItem = m_cbAndOr.AddString(CEnString(IDS_FP_AND));
