@@ -24,16 +24,17 @@ public:
 	BOOL IsSelectedTask(DWORD dwTaskID) const;
 
 	void ResetContent();
-	int Rebuild(const TRACKTASKLIST* pTTL, DWORD dwOptions);
+	int Rebuild(const TRACKTASKLIST* pTTL);
+	int Update(const TRACKTASKLIST* pTTL, const CDWordArray& aModTaskIDs);
 	void UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL);
 
 	BOOL SelectTask(DWORD dwTaskID);
 	BOOL SelectTask(const TRACKTASKLIST* pTTL);
 
-	const CFilteredToDoCtrl* GetToDoCtrl() const { return m_pTDC; }
+	const CToDoCtrl* GetToDoCtrl() const { return m_pTDC; }
 
 protected:
-	const CFilteredToDoCtrl* m_pTDC;
+	const CToDoCtrl* m_pTDC;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -49,13 +50,12 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	virtual BOOL IsSelectableItem(int nItem) const;
-
-	int GetRecentlyTrackedTasks(CDWordArray& aRecentlyTrackedIDs) const;
+	int GetRecentlyTrackedTaskIDs(CDWordArray& aRecentlyTrackedIDs) const;
 	int BuildItemMap(CMapTaskIndex& mapComboItems) const;
+	int BuildRecentlyTrackedItemMap(CMapTaskIndex& mapComboItems) const;
 	void UpdateRecentlyTrackedTasks(const TRACKTASKLIST* pTTL, DWORD dwSelTaskID);
-
-//	static int SortProc(const void* v1, const void* v2);
+	int Update(const TRACKTASKLIST* pTTL, const CDWordArray& aModTaskIDs, 
+			   const CMapTaskIndex& mapTTItems, const CMapTaskIndex& mapCBItems);
 };
 
 /////////////////////////////////////////////////////////////////////////////

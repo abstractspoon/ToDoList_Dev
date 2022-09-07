@@ -19,6 +19,20 @@
 
 /////////////////////////////////////////////////////////////////////////
 
+enum
+{
+	TTDO_FORMATTIMESASHMS		= 0X01,
+	TTDO_SHOWONBEGINTRACKING	= 0X02,
+	TTDO_ALLOWPARENTTRACKING	= 0X04,
+	TTDO_SHOWPARENTSASFOLDERS	= 0X08,
+};
+
+/////////////////////////////////////////////////////////////////////////
+
+class CToDoCtrl;
+
+/////////////////////////////////////////////////////////////////////////
+
 class CTDLTimeTrackerDlg : public CDialog, protected CDialogHelper
 {
 public:
@@ -31,19 +45,19 @@ public:
 	void SetWindowIcons(HICON hIconBig, HICON hIconSmall);
 	void SetStartStopShortcut(DWORD dwShortcut) { m_dwStartStopShortcut = dwShortcut; }
 	
-	BOOL AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
-	BOOL SetTasks(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
-	BOOL RemoveTasklist(const CFilteredToDoCtrl* pTDC);
+	BOOL AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tasks);
+	BOOL SetTasks(const CToDoCtrl* pTDC, const CTaskFile& tasks);
+	BOOL RemoveTasklist(const CToDoCtrl* pTDC);
 	void RemoveAllTasklists();
-	BOOL UpdateAllTasks(const CFilteredToDoCtrl* pTDC);
-	BOOL UpdateSelectedTasks(const CFilteredToDoCtrl* pTDC, const CTDCAttributeMap& mapAttrib);
-	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
-	void UpdateTaskTime(const CFilteredToDoCtrl* pTDC);
-	void UpdateTasklistName(const CFilteredToDoCtrl* pTDC);
-	BOOL IsSelectedTasklist(const CFilteredToDoCtrl* pTDC) const;
+	BOOL UpdateAllTasks(const CToDoCtrl* pTDC);
+	BOOL UpdateSelectedTasks(const CToDoCtrl* pTDC, const CTDCAttributeMap& mapAttrib);
+	BOOL UpdateTracking(const CToDoCtrl* pTDC);
+	void UpdateTaskTime(const CToDoCtrl* pTDC);
+	void UpdateTasklistName(const CToDoCtrl* pTDC);
+	BOOL IsSelectedTasklist(const CToDoCtrl* pTDC) const;
 
-	BOOL SelectTaskList(const CFilteredToDoCtrl* pTDC);
-	const CFilteredToDoCtrl* GetSelectedTasklist() const;
+	BOOL SelectTaskList(const CToDoCtrl* pTDC);
+	const CToDoCtrl* GetSelectedTasklist() const;
 	DWORD GetSelectedTaskID() const { return m_cbTasks.GetSelectedTaskID(); }
 	BOOL IsAlwaysOnTop() const { return m_bAlwaysOnTop; }
 	BOOL IsForegroundWindow() const { return (::GetForegroundWindow() == GetSafeHwnd()); }
@@ -113,15 +127,14 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	
 protected:
-	DWORD GetTasklistTrackID(const CFilteredToDoCtrl* pTDC) const;
-	int GetTasklistCBIndex(const CFilteredToDoCtrl* pTDC) const;
-	BOOL HasTasklist(const CFilteredToDoCtrl* pTDC) const;
-	BOOL RemoveTasks(const CFilteredToDoCtrl* pTDC, DWORD dwToRemove);
+	DWORD GetTasklistTrackID(const CToDoCtrl* pTDC) const;
+	int GetTasklistCBIndex(const CToDoCtrl* pTDC) const;
+	BOOL HasTasklist(const CToDoCtrl* pTDC) const;
+	BOOL RemoveTasks(const CToDoCtrl* pTDC, DWORD dwToRemove);
 	
 	BOOL Create();
 	BOOL Recreate();
 	void UpdatePlayButton(BOOL bCheckVisibility = TRUE);
-	void RebuildTaskCombo();
 	BOOL RebuildTasklistCombo();
 	COLORREF GetBkgndColor() const;
 	BOOL IsTrackingSelectedTasklistAndTask() const;
@@ -137,7 +150,7 @@ protected:
 	void CalcMinMaxSizes();
 	BOOL HasOption(DWORD dwOption) const;
 	void RefreshCaptionText();
-	LRESULT SendNotifyMessage(UINT message, const CFilteredToDoCtrl* pTDC, DWORD dwTaskID) const;
-	void UpdateTaskTime(const CFilteredToDoCtrl* pTDC, BOOL bCheckVisibility);
+	LRESULT SendNotifyMessage(UINT message, const CToDoCtrl* pTDC, DWORD dwTaskID) const;
+	void UpdateTaskTime(const CToDoCtrl* pTDC, BOOL bCheckVisibility);
 
 };

@@ -416,7 +416,7 @@ public:
 	BOOL SetCommentsFont(HFONT hFont); // setter responsible for deleting
 
 	const CImageList& GetCheckImageList() const { return m_taskTree.GetCheckImageList(); }
-	const CTDCImageList& GetTaskIconImageList() const { return m_ilTaskIcons; }
+	const CTDCImageList& GetTaskIconImageList() const;
 
 	int FindTasks(const SEARCHPARAMS& params, CResultArray& aResults) const;
 	BOOL HasTask(DWORD dwTaskID) const { return m_data.HasTask(dwTaskID); }

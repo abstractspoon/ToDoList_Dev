@@ -5,20 +5,10 @@
 
 /////////////////////////////////////////////////////////////////////////
 
-class CFilteredToDoCtrl;
+class CToDoCtrl;
 class CTaskFile;
 
 typedef void* HTASKITEM;
-
-/////////////////////////////////////////////////////////////////////////
-
-enum
-{
-	TTDO_FORMATTIMESASHMS = 0X01,
-	TTDO_SHOWONBEGINTRACKING = 0X02,
-	TTDO_ALLOWPARENTTRACKING = 0X04,
-	TTDO_SHOWTASKPATH = 0X08,
-};
 
 /////////////////////////////////////////////////////////////////////////
 
@@ -33,6 +23,7 @@ struct TRACKITEM
 	DWORD dwTaskID;
 	BOOL bParent;
 	int nLevel;
+	CString sImage;
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -43,7 +34,6 @@ class CTrackItemArray : public CArray<TRACKITEM, TRACKITEM&>
 {
 public:
 	void BuildTaskMap(CMapTaskIndex& mapTasks) const;
-
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -60,14 +50,14 @@ struct TRACKTASKLIST
 	virtual ~TRACKTASKLIST();
 
 	int SetTasks(const CTaskFile& tasks);
-	BOOL UpdateTasks(const CTaskFile& tasks);
+	BOOL UpdateTasks(const CTaskFile& tasks, CDWordArray& aModTaskIDs);
 	BOOL RemoveTasks(DWORD dwToRemove);
 
 	BOOL IsTracking(DWORD dwTaskID = 0) const;
 	DWORD GetTrackedTaskID() const { return dwTrackedTaskID; }
 	BOOL UpdateTracking();
 
-	const CFilteredToDoCtrl* pTDC;
+	const CToDoCtrl* pTDC;
 	CTrackItemArray aTasks;
 	CDWordArray aRecentlyTrackedIDs;
 
@@ -76,7 +66,7 @@ protected:
 	BOOL bTrackingPaused;
 
 protected:
-	BOOL UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks);
+	int UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks, CDWordArray& aModTaskIDs);
 };
 
 /////////////////////////////////////////////////////////////////////////
@@ -89,19 +79,19 @@ public:
 
 	BOOL IsEmpty() const { return !GetNumTasklists(); }
 	int GetNumTasklists() const;
-	BOOL UpdateTracking(const CFilteredToDoCtrl* pTDC);
+	BOOL UpdateTracking(const CToDoCtrl* pTDC);
 
-	int AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks);
-	BOOL DeleteTasklist(const CFilteredToDoCtrl* pTDC);
+	int AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tasks);
+	BOOL DeleteTasklist(const CToDoCtrl* pTDC);
 	void DeleteAllTasklists();
-	int FindTasklist(const CFilteredToDoCtrl* pTDC) const;
+	int FindTasklist(const CToDoCtrl* pTDC) const;
 
-	const TRACKTASKLIST* GetTasklist(const CFilteredToDoCtrl* pTDC) const;
-	TRACKTASKLIST* GetTasklist(const CFilteredToDoCtrl* pTDC);
+	const TRACKTASKLIST* GetTasklist(const CToDoCtrl* pTDC) const;
+	TRACKTASKLIST* GetTasklist(const CToDoCtrl* pTDC);
 	const TRACKTASKLIST* GetTasklist(int nTasklist) const;
 
-	const CTrackItemArray* GetTasks(const CFilteredToDoCtrl* pTDC) const;
-	CTrackItemArray* GetTasks(const CFilteredToDoCtrl* pTDC);
+	const CTrackItemArray* GetTasks(const CToDoCtrl* pTDC) const;
+	CTrackItemArray* GetTasks(const CToDoCtrl* pTDC);
 
 };
 

@@ -40,6 +40,8 @@ protected:
 	int m_nNumHeadings;
 	BOOL m_bHasExtItemData;
 
+	static const int IMAGESIZE;
+
 // Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(COwnerdrawComboBoxBase)
@@ -94,23 +96,24 @@ protected:
 protected:
 	void DeleteAllExtItemData();
 
-	struct EXT_ITEMDATA
+	struct ODCB_ITEMDATA
 	{
-		EXT_ITEMDATA() : dwItemData(0), bHeading(FALSE), bDisabled(FALSE) {}
+		ODCB_ITEMDATA() : dwItemData(0), bHeading(FALSE), bDisabled(FALSE) {}
+		virtual ~ODCB_ITEMDATA() {}
 
 		DWORD dwItemData;
 		BOOL bHeading;
 		BOOL bDisabled;
 	};
 
-	virtual EXT_ITEMDATA* NewExtItemData() const { return new EXT_ITEMDATA(); }
+	virtual ODCB_ITEMDATA* NewExtItemData() const { return new ODCB_ITEMDATA(); }
 
-	EXT_ITEMDATA* GetAddExtItemData(int nItem);
-	EXT_ITEMDATA* GetExtItemData(int nItem) const;
+	ODCB_ITEMDATA* GetAddExtItemData(int nItem);
+	ODCB_ITEMDATA* GetExtItemData(int nItem) const;
 
 private:
 	LRESULT GetRawItemData(int nItem) const;
-	LRESULT SetRawItemData(int nItem, EXT_ITEMDATA*& pItemData);
+	LRESULT SetRawItemData(int nItem, ODCB_ITEMDATA*& pItemData);
 };
 
 /////////////////////////////////////////////////////////////////////////////

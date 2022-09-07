@@ -19,25 +19,28 @@
 
 //////////////////////////////////////////////////////////////////////
 
+class CTaskFile;
+class CTDCImageList;
+
+//////////////////////////////////////////////////////////////////////
+
 class CTDLTaskDependencyEdit : public CEnEdit  
 {
 public:
-	CTDLTaskDependencyEdit(const CToDoCtrlData& data);
+	CTDLTaskDependencyEdit();
 	virtual ~CTDLTaskDependencyEdit();
 
 	void GetDependencies(CTDCDependencyArray& aDepends) const;
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	
+	BOOL DoEdit(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
 	void DDX(CDataExchange* pDX, CTDCDependencyArray& aValues);
 
 protected:
 	CTDCDependencyArray m_aDepends;
 	BOOL m_bNotifyingParent;
 
-	const CToDoCtrlData& m_data;
-
 protected:
-	virtual void OnBtnClick(UINT nID);
 	virtual void PreSubclassWindow();
 
 // Implementation
@@ -51,7 +54,6 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 	int Parse(CTDCDependencyArray& aDepends) const;
-	BOOL DoEdit();
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -60,15 +62,17 @@ protected:
 class CTDLTaskDependencyListCtrl : public CInputListCtrl
 {
 public:
-	CTDLTaskDependencyListCtrl(const CToDoCtrlData& data);
+	CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
 
 	void SetDependencies(const CTDCDependencyArray& aDepends);
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 
 protected:
 	CTDLTaskComboBox m_cbTasks;
+	BOOL m_bShowParentTasksAsFolders;
 
-	const CToDoCtrlData& m_data;
+	const CTaskFile& m_tasks;
+	const CTDCImageList& m_ilTasks;
 
 // Implementation
 protected:
@@ -87,8 +91,8 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void FillTaskCombo();
-	void FillTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel);
+	void PrepareTaskCombo(int nRow);
+	void PopulateTaskCombo(const CTaskFile& tasks, HTASKITEM hTask, int nLevel);
 };
 
 // ----------------------------------------------
@@ -97,7 +101,8 @@ class CTDLTaskDependencyEditDlg : public CTDLDialog
 {
 // Construction
 public:
-	CTDLTaskDependencyEditDlg(const CToDoCtrlData& data, const CTDCDependencyArray& aDepends, CWnd* pParent = NULL);   // standard constructor
+	CTDLTaskDependencyEditDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
+							  const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, CWnd* pParent = NULL);   // standard constructor
 
 	int GetDependencies(CTDCDependencyArray& aDepends) const;
 

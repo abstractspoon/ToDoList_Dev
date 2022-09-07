@@ -123,14 +123,14 @@ protected:
 	BOOL ModifyChecked(const CStringArray& aItems, CCB_CHECKSTATE nCheck, BOOL bUpdate);
 
 protected:
-	struct CCB_CHECK_DATA : public EXT_ITEMDATA
+	struct CCB_ITEMDATA : public ODCB_ITEMDATA
 	{
-		CCB_CHECK_DATA() : EXT_ITEMDATA(), nCheck(CCBC_UNCHECKED) {}
+		CCB_ITEMDATA() : ODCB_ITEMDATA(), nCheck(CCBC_UNCHECKED) {}
 
 		CCB_CHECKSTATE nCheck;
 	};
 
-	virtual EXT_ITEMDATA* NewExtItemData() const { return new CCB_CHECK_DATA; }
+	virtual ODCB_ITEMDATA* NewExtItemData() const { return new CCB_ITEMDATA; }
 };
 
 /////////////////////////////////////////////////////////////////////////////

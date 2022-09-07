@@ -1368,9 +1368,9 @@ void CToDoListWnd::UpdateTimeTrackerPreferences()
 	const CPreferencesDlg& prefs = Prefs();
 
 	m_dlgTimeTracker.SetOption(TTDO_ALLOWPARENTTRACKING, prefs.GetAllowParentTimeTracking());
+	m_dlgTimeTracker.SetOption(TTDO_SHOWPARENTSASFOLDERS, prefs.GetShowParentsAsFolders());
 	m_dlgTimeTracker.SetOption(TTDO_FORMATTIMESASHMS, prefs.GetUseHMSTimeFormat());
 	m_dlgTimeTracker.SetOption(TTDO_SHOWONBEGINTRACKING, prefs.GetShowTimeTracker());
-	m_dlgTimeTracker.SetOption(TTDO_SHOWTASKPATH, TRUE/*prefs.GetShowFullTaskPathInTimeTracker()*/);
 
 	m_dlgTimeTracker.SetUITheme(m_theme);
 	m_dlgTimeTracker.SetStartStopShortcut(m_mgrShortcuts.GetShortcut(ID_EDIT_CLOCK_TASK));
@@ -5845,10 +5845,10 @@ void CToDoListWnd::OnEditPaste(TDC_PASTE nPasteWhere, TDLID_IMPORTTO nImportWher
 	else if (CanImportPasteFromClipboard())
 	{
 		DoImportPasteFromClipboard(nImportWhere);
-	}
 
-	RefreshFilterBarControls(TDCA_ALL, FALSE);
-	UpdateTimeTrackerTasks(FALSE, TDCA_PASTE);
+		RefreshFilterBarControls(TDCA_ALL, FALSE);
+		UpdateTimeTrackerTasks(FALSE, TDCA_PASTE);
+	}
 }
 
 void CToDoListWnd::OnEditPasteAsRef() 
@@ -6099,7 +6099,9 @@ BOOL CToDoListWnd::ReloadTaskList(int nIndex, BOOL bNotifyDueTasks, BOOL bNotify
 		
 		UpdateCaption();
 		UpdateStatusBar();
+
 		RefreshFilterBarControls(TDCA_ALL);
+		UpdateTimeTrackerTasks(TRUE);
 	}
 	else if (bNotifyError)
 	{
@@ -6855,7 +6857,7 @@ void CToDoListWnd::OnTimerTimeTracking()
 		bWasTimeTracking = bNowTimeTracking;
 	}
 
-	const CFilteredToDoCtrl* pTDC = m_dlgTimeTracker.GetSelectedTasklist();
+	const CToDoCtrl* pTDC = m_dlgTimeTracker.GetSelectedTasklist();
 
 	if (pTDC && pTDC->IsActivelyTimeTracking())
 		m_dlgTimeTracker.UpdateTaskTime(pTDC);
@@ -10795,6 +10797,7 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 	tdc.SetAdvancedFilter(filter);
 	
 	RefreshFilterBarControls(TDCA_ALL);
+	UpdateTimeTrackerTasks(TRUE);
 
 	tdc.SetFocusToTasks();
 
@@ -11267,7 +11270,10 @@ void CToDoListWnd::OnViewSelectedTask(BOOL bNext)
 		// Update the filter bar if the filter auto-toggled 
 		// because the required tasks were hidden
 		if (bWasFiltered && !tdc.HasAnyFilter())
+		{
 			RefreshFilterBarControls(TDCA_ALL);
+			UpdateTimeTrackerTasks(TRUE);
+		}
 	}
 }
 
@@ -11747,7 +11753,9 @@ void CToDoListWnd::OnViewClearfilter()
 		tdc.ClearFilter();
 	
 		RefreshFilterBarControls(TDCA_ALL, TRUE); // clear checkbox history
+
 		UpdateStatusBar();
+		UpdateTimeTrackerTasks(TRUE);
 	}
 }
 
@@ -11765,7 +11773,9 @@ void CToDoListWnd::OnViewTogglefilter()
 	tdc.ToggleFilter();
 
 	RefreshFilterBarControls(TDCA_ALL);
+
 	UpdateStatusBar();
+	UpdateTimeTrackerTasks(TRUE);
 }
 
 void CToDoListWnd::OnUpdateViewTogglefilter(CCmdUI* pCmdUI)
@@ -11833,6 +11843,7 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 		CheckResizeFilterBar();
 
 	UpdateStatusBar();
+	UpdateTimeTrackerTasks(TRUE);
 }
 
 void CToDoListWnd::OnViewFilter() 

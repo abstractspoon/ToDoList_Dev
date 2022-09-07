@@ -119,6 +119,20 @@ public:
 
 	// Comboboxes and Listboxes
 	template <class T, class S>
+	static int BuildItemDataMap(const S& ctrl, T& mapItems)
+	{
+		mapItems.RemoveAll();
+		int nNumItem = ctrl.GetCount();
+
+		for (int nItem = 0; nItem < nNumItem; nItem++)
+		{
+			mapItems[ctrl.GetItemData(nItem)] = nItem;
+		}
+
+		return mapItems.GetCount();
+	}
+	
+	template <class T, class S>
 	static int FindItemByData(const S& ctrl, T itemData)
 	{
 		int nNumItem = ctrl.GetCount();
@@ -186,6 +200,8 @@ public:
 	{
 		return InsertString(ctrl, nPos, CEnString(nIDItem), itemData);
 	}
+
+
 	
 	// comboboxes
 	static int SetComboBoxItems(CComboBox& combo, const CStringArray& aItems);

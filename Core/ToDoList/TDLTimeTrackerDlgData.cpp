@@ -5,13 +5,13 @@
 #include "resource.h"
 #include "TDLTimeTrackerDlgData.h"
 #include "taskfile.h"
-#include "FilteredToDoCtrl.h"
+#include "ToDoCtrl.h"
 
 #include "..\shared\DialogHelper.h"
 
 /////////////////////////////////////////////////////////////////////////
 
-TRACKITEM::TRACKITEM() : dwTaskID(0), bParent(FALSE), nLevel(0) 
+TRACKITEM::TRACKITEM() : dwTaskID(0), bParent(FALSE), nLevel(0)
 {
 }
 
@@ -20,7 +20,8 @@ BOOL TRACKITEM::operator==(const TRACKITEM& ti) const
 	return (sTaskTitle == ti.sTaskTitle) && 
 			(dwTaskID == ti.dwTaskID) &&
 			(bParent == ti.bParent) &&
-			(nLevel == ti.nLevel);
+			(nLevel == ti.nLevel) &&
+			(sImage == ti.sImage);
 }
 
 BOOL TRACKITEM::operator!=(const TRACKITEM& ti) const
@@ -61,14 +62,13 @@ int TRACKTASKLIST::SetTasks(const CTaskFile& tasks)
 {
 	aTasks.RemoveAll();
 
-	UpdateTasks(tasks);
+	UpdateTasks(tasks, CDWordArray());
 
 	return aTasks.GetSize();
 }
 	
-BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks)
+int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLevel, const CMapTaskIndex& mapTasks, CDWordArray& aModTaskIDs)
 {
-	BOOL bChange = FALSE;
 	CString sTaskPath;
 
 	if (hTask)
@@ -85,6 +85,7 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 		ti.dwTaskID = dwTaskID;
 		ti.bParent = tasks.IsTaskParent(hTask);
 		ti.nLevel = nLevel;
+		ti.sImage = tasks.GetTaskIcon(hTask);
 
 		int nExist = -1;
 
@@ -96,13 +97,13 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 			if (tiExist != ti)
 			{
 				tiExist = ti;
-				bChange = TRUE;
+				aModTaskIDs.Add(dwTaskID);
 			}
 		}
 		else // new
 		{
 			aTasks.Add(ti);
-			bChange = TRUE;
+			aModTaskIDs.Add(dwTaskID);
 		}
 
 		nLevel++;
@@ -113,19 +114,21 @@ BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, HTASKITEM hTask, int nLe
 	
 	while (hSubtask)
 	{
-		bChange |= UpdateTasks(tasks, hSubtask, nLevel, mapTasks); // RECURSIVE CALL
+		UpdateTasks(tasks, hSubtask, nLevel, mapTasks, aModTaskIDs); // RECURSIVE CALL
 		hSubtask = tasks.GetNextTask(hSubtask);
 	}
 
-	return bChange;
+	return aModTaskIDs.GetSize();
 }
 
-BOOL TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks)
+int TRACKTASKLIST::UpdateTasks(const CTaskFile& tasks, CDWordArray& aModTaskIDs)
 {
 	CMapTaskIndex mapTasks;
 	aTasks.BuildTaskMap(mapTasks);
 
-	return UpdateTasks(tasks, NULL, 0, mapTasks);
+	aModTaskIDs.RemoveAll();
+
+	return UpdateTasks(tasks, NULL, 0, mapTasks, aModTaskIDs);
 }
 
 BOOL TRACKTASKLIST::RemoveTasks(DWORD dwToRemove)
@@ -207,7 +210,7 @@ int CTDCTrackTasklistArray::GetNumTasklists() const
 	return GetSize();
 }
 
-int CTDCTrackTasklistArray::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTaskFile& tasks)
+int CTDCTrackTasklistArray::AddTasklist(const CToDoCtrl* pTDC, const CTaskFile& tasks)
 {
 	if (!pTDC || (FindTasklist(pTDC) != -1))
 	{
@@ -225,7 +228,7 @@ int CTDCTrackTasklistArray::AddTasklist(const CFilteredToDoCtrl* pTDC, const CTa
 	return CArray<TRACKTASKLIST*, TRACKTASKLIST*&>::Add(pTTL);
 }
 
-BOOL CTDCTrackTasklistArray::DeleteTasklist(const CFilteredToDoCtrl* pTDC)
+BOOL CTDCTrackTasklistArray::DeleteTasklist(const CToDoCtrl* pTDC)
 {
 	int nTasklist = FindTasklist(pTDC);
 	ASSERT(nTasklist != -1);
@@ -253,7 +256,7 @@ void CTDCTrackTasklistArray::DeleteAllTasklists()
 	}
 }
 
-BOOL CTDCTrackTasklistArray::UpdateTracking(const CFilteredToDoCtrl* pTDC)
+BOOL CTDCTrackTasklistArray::UpdateTracking(const CToDoCtrl* pTDC)
 {
 	TRACKTASKLIST* pTTL = GetTasklist(pTDC);
 
@@ -266,7 +269,7 @@ BOOL CTDCTrackTasklistArray::UpdateTracking(const CFilteredToDoCtrl* pTDC)
 	return pTTL->UpdateTracking();
 }
 
-int CTDCTrackTasklistArray::FindTasklist(const CFilteredToDoCtrl* pTDC) const
+int CTDCTrackTasklistArray::FindTasklist(const CToDoCtrl* pTDC) const
 {
 	int nTasklist = GetNumTasklists();
 	
@@ -280,7 +283,7 @@ int CTDCTrackTasklistArray::FindTasklist(const CFilteredToDoCtrl* pTDC) const
 	return -1;
 }
 
-const TRACKTASKLIST* CTDCTrackTasklistArray::GetTasklist(const CFilteredToDoCtrl* pTDC) const
+const TRACKTASKLIST* CTDCTrackTasklistArray::GetTasklist(const CToDoCtrl* pTDC) const
 {
 	int nFind = FindTasklist(pTDC);
 	ASSERT(nFind != -1);
@@ -288,7 +291,7 @@ const TRACKTASKLIST* CTDCTrackTasklistArray::GetTasklist(const CFilteredToDoCtrl
 	return ((nFind != -1) ? GetAt(nFind) : NULL);
 }
 
-TRACKTASKLIST* CTDCTrackTasklistArray::GetTasklist(const CFilteredToDoCtrl* pTDC)
+TRACKTASKLIST* CTDCTrackTasklistArray::GetTasklist(const CToDoCtrl* pTDC)
 {
 	int nFind = FindTasklist(pTDC);
 	ASSERT(nFind != -1);
@@ -306,14 +309,14 @@ const TRACKTASKLIST* CTDCTrackTasklistArray::GetTasklist(int nTasklist) const
 	return NULL;
 }
 
-const CTrackItemArray* CTDCTrackTasklistArray::GetTasks(const CFilteredToDoCtrl* pTDC) const
+const CTrackItemArray* CTDCTrackTasklistArray::GetTasks(const CToDoCtrl* pTDC) const
 {
 	const TRACKTASKLIST* pTTL = GetTasklist(pTDC);
 
 	return (pTTL ? &(pTTL->aTasks) : NULL);
 }
 
-CTrackItemArray* CTDCTrackTasklistArray::GetTasks(const CFilteredToDoCtrl* pTDC)
+CTrackItemArray* CTDCTrackTasklistArray::GetTasks(const CToDoCtrl* pTDC)
 {
 	TRACKTASKLIST* pTTL = GetTasklist(pTDC);
 	

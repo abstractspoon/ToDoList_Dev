@@ -262,13 +262,13 @@ int CCheckComboBox::SetCheck(int nIndex, CCB_CHECKSTATE nCheck, BOOL bUpdate)
 	if ((nIndex == -1) || (nIndex >= GetCount()))
 		return CB_ERR;
 
-	CCB_CHECK_DATA* pState = (CCB_CHECK_DATA*)GetAddExtItemData(nIndex);
-	ASSERT(pState);
+	CCB_ITEMDATA* pItemData = (CCB_ITEMDATA*)GetAddExtItemData(nIndex);
+	ASSERT(pItemData);
 
-	if (pState == NULL)
+	if (pItemData == NULL)
 		return CB_ERR;
 
-	pState->nCheck = nCheck;
+	pItemData->nCheck = nCheck;
 
 	if (bUpdate && !m_bChecking) // prevent re-entrancy
 	{
@@ -292,12 +292,12 @@ CCB_CHECKSTATE CCheckComboBox::GetCheck(int nIndex) const
 	if ((nIndex == -1) || !GetCount())
 		return CCBC_UNCHECKED;
 
-	CCB_CHECK_DATA* pState = (CCB_CHECK_DATA*)GetExtItemData(nIndex);
+	CCB_ITEMDATA* pItemData = (CCB_ITEMDATA*)GetExtItemData(nIndex);
 
-	if (pState == NULL)
+	if (pItemData == NULL)
 		return CCBC_UNCHECKED; // default
 
-	return pState->nCheck;
+	return pItemData->nCheck;
 }
 
 CCB_CHECKSTATE CCheckComboBox::GetCheckByData(DWORD dwItemData) const

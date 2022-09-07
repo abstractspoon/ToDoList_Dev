@@ -121,6 +121,7 @@ enum
 	ID_ADD_TIME,
 	ID_EXTERNALID_LINK,
 	ID_DEPENDS_LINK,
+	ID_DEPENDS_EDIT,
 };
 
 enum // flags for UpdateTask
@@ -219,8 +220,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_findReplace(*this),
 	m_reminders(*this),
 	m_matcher(m_data, m_reminders),
-	m_bPendingUpdateControls(FALSE),
-	m_eDependency(m_data)
+	m_bPendingUpdateControls(FALSE)
 {
 	SetBordersDLU(0);
 	
@@ -246,8 +246,9 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_iconAddTime.Load(IDI_ADD_LOGGED_TIME, 16, FALSE);
 	m_eTimeSpent.InsertButton(2, ID_ADD_TIME, m_iconAddTime, CEnString(IDS_TDC_ADDLOGGEDTIME), 15);
 
-	// add 'go to' button to dependency
+	// add buttons to dependency
 	m_iconLink.Load(IDI_DEPENDS_LINK, 16, FALSE);
+	m_eDependency.AddButton(ID_DEPENDS_EDIT, _T("..."), CEnString(IDS_OPTIONS));
 	m_eDependency.AddButton(ID_DEPENDS_LINK, m_iconLink, CEnString(IDS_TDC_DEPENDSLINK_TIP));
 
 	// misc
@@ -655,6 +656,17 @@ void CToDoCtrl::LoadTaskIcons()
 	VERIFY(m_ilTaskIcons.LoadImages(m_sLastSavePath, colorMagenta, HasStyle(TDCS_SHOWDEFAULTTASKICONS)));
 
 	OnTaskIconsChanged();
+}
+
+const CTDCImageList& CToDoCtrl::GetTaskIconImageList() const 
+{ 
+	if (!m_ilTaskIcons.GetSafeHandle())
+	{
+		CToDoCtrl* pThis = const_cast<CToDoCtrl*>(this);
+		pThis->LoadTaskIcons();
+	}
+
+	return m_ilTaskIcons; 
 }
 
 void CToDoCtrl::InitEditPrompts()
@@ -10995,8 +11007,32 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 		break;
 
 	case IDC_DEPENDS:
-		if (lParam == ID_DEPENDS_LINK)
-			GotoSelectedTaskDependency();
+		{
+			switch (lParam)
+			{
+			case ID_DEPENDS_LINK:
+				GotoSelectedTaskDependency();
+				break;
+
+			case ID_DEPENDS_EDIT:
+				{
+					TDCGETTASKS filter(TDCGT_NOTDONE);
+
+					filter.mapAttribs.Add(TDCA_TASKNAME);
+					filter.mapAttribs.Add(TDCA_ICON);
+
+					CTaskFile tasks;
+					GetTasks(tasks, filter);
+
+					if (m_eDependency.DoEdit(tasks, m_ilTaskIcons, HasStyle(TDCS_SHOWPARENTSASFOLDERS)))
+					{
+						// Check for circular dependencies
+						// TODO
+					}
+				}
+				break;
+			}
+		}
 		break;
 	}
 	

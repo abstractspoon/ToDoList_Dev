@@ -4,7 +4,8 @@
 
 #include "stdafx.h"
 #include "TDLTaskDependencyEdit.h"
-#include "ToDoCtrlData.h"
+#include "TaskFile.h"
+#include "TDCImageList.h"
 #include "resource.h"
 
 #include "..\shared\autoflag.h"
@@ -18,21 +19,11 @@ static char THIS_FILE[]=__FILE__;
 #endif
 
 //////////////////////////////////////////////////////////////////////
-
-const int REBTN_EDIT = 1;
-
-const CString TAB = _T("\\t");
-
-//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDLTaskDependencyEdit::CTDLTaskDependencyEdit(const CToDoCtrlData& data) 
-	: 
-	m_bNotifyingParent(FALSE),
-	m_data(data)
+CTDLTaskDependencyEdit::CTDLTaskDependencyEdit() : m_bNotifyingParent(FALSE)
 {
-	AddButton(REBTN_EDIT, _T("..."), CEnString(IDS_OPTIONS));
 }
 
 CTDLTaskDependencyEdit::~CTDLTaskDependencyEdit()
@@ -105,21 +96,11 @@ BOOL CTDLTaskDependencyEdit::OnChange()
 	return FALSE; 
 }
 
-void CTDLTaskDependencyEdit::OnBtnClick(UINT nID)
-{
-	switch (nID)
-	{
-	case REBTN_EDIT:
-		DoEdit();
-		break;
-	}
-}
-
-BOOL CTDLTaskDependencyEdit::DoEdit()
+BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks,const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders)
 {
 	if (IsWindowEnabled())
 	{
-		CTDLTaskDependencyEditDlg dialog(m_data, m_aDepends);
+		CTDLTaskDependencyEditDlg dialog(tasks, ilTasks, m_aDepends, bShowParentsAsFolders);
 		
 		if (dialog.DoModal() == IDOK)
 		{
@@ -133,11 +114,10 @@ BOOL CTDLTaskDependencyEdit::DoEdit()
 				
 				// notify parent
 				CAutoFlag af(m_bNotifyingParent, TRUE);
-
 				GetParent()->SendMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), EN_CHANGE), (LPARAM)GetSafeHwnd());
-			}
 
-			return TRUE;
+				return TRUE;
+			}
 		}
 	}
 
@@ -175,8 +155,14 @@ enum
 	LEADIN_COL,
 };
 
-CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CToDoCtrlData& data) : m_data(data)
+CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
+													   BOOL bShowParentsAsFolders)
+	: 
+	m_tasks(tasks),
+	m_ilTasks(ilTasks),
+	m_bShowParentTasksAsFolders(bShowParentsAsFolders)
 {
+	m_cbTasks.SetShowParentTasksAsFolders(bShowParentsAsFolders);
 }
 
 BEGIN_MESSAGE_MAP(CTDLTaskDependencyListCtrl, CInputListCtrl)
@@ -201,6 +187,9 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
 
+	// This gets around the constness
+	ListView_SetImageList(*this, m_ilTasks, LVSIL_SMALL);
+
 	CreateControl(m_cbTasks, 1001, FALSE); // unsorted
 
 	for (int nDepend = 0; nDepend < aDepends.GetSize(); nDepend++)
@@ -209,14 +198,23 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 
 		if (depend.IsLocal())
 		{
-			int nRow = AddRow(m_data.GetTaskTitle(depend.dwTaskID), nDepend);
+			HTASKITEM hTask = m_tasks.FindTask(depend.dwTaskID);
+			CString sName = (hTask ? m_tasks.GetTaskTitle(hTask) : Misc::Format(depend.dwTaskID));
+
+			int nImage = m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask));
+
+			if ((nImage == -1) && m_bShowParentTasksAsFolders && m_tasks.IsTaskParent(hTask))
+				nImage = 0;
+
+			int nRow = AddRow(sName, nImage);
 
 			SetItemData(nRow, depend.dwTaskID);
 			SetItemText(nRow, LEADIN_COL, Misc::Format(depend.nDaysLeadIn));
 		}
 		else
 		{
-			AddRow(depend.Format(), nDepend);
+			int nRow = AddRow(depend.Format());
+			SetItemText(nRow, LEADIN_COL, _T("0"));
 		}
 	}
 }
@@ -304,8 +302,7 @@ void CTDLTaskDependencyListCtrl::PrepareControl(CWnd& ctrl, int nRow, int nCol)
 		{
 			ASSERT(&ctrl == &m_cbTasks);
 
-			FillTaskCombo();
-			m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
+			PrepareTaskCombo(nRow);
 		}
 		break;
 
@@ -332,42 +329,79 @@ void CTDLTaskDependencyListCtrl::OnTaskComboOK()
 	CString sTask = m_cbTasks.GetSelectedTaskName();
 
 	if (IsPrompt(nRow))
-		nRow = AddRow(sTask);
-	else
-		SetItemText(nRow, DEPEND_COL, sTask);
-
-	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
-}
-
-void CTDLTaskDependencyListCtrl::FillTaskCombo()
-{
-	// Once only
-	if (m_cbTasks.GetCount() == 0)
-		FillTaskCombo(m_data.GetStructure(), 0);
-}
-
-void CTDLTaskDependencyListCtrl::FillTaskCombo(const TODOSTRUCTURE* pTDS, int nLevel)
-{
-	if (!pTDS->IsRoot())
 	{
-		DWORD dwTaskID = pTDS->GetTaskID();
-
-		if (m_data.IsTaskDone(dwTaskID) || m_data.IsTaskReference(dwTaskID))
-			return;
-
-		m_cbTasks.AddTask(m_data.GetTaskTitle(dwTaskID), dwTaskID, nLevel++);
+		nRow = AddRow(sTask);
+		SetItemText(nRow, LEADIN_COL, _T("0"));
+	}
+	else
+	{
+		SetItemText(nRow, DEPEND_COL, sTask);
 	}
 
-	for (int nPos = 0; nPos < pTDS->GetSubTaskCount(); nPos++)
-		FillTaskCombo(pTDS->GetSubTask(nPos), nLevel); // RECURSIVE CALL
+	SetItemData(nRow, m_cbTasks.GetSelectedTaskID());
+	SetItemImage(nRow, m_cbTasks.GetSelectedTaskImage());
+}
+
+void CTDLTaskDependencyListCtrl::PrepareTaskCombo(int nRow)
+{
+	// Populate once only
+	if (m_cbTasks.GetCount() == 0)
+	{
+		PopulateTaskCombo(m_tasks, NULL, 0);
+		CDialogHelper::RefreshMaxDropWidth(m_cbTasks);
+	}
+
+	// Disable all 'other' dependencies to prevent duplicate selection
+	int nItem = GetItemCount();
+
+	if (nItem > 2) // one row and the prompt
+	{
+		CMap<DWORD, DWORD, int, int&> mapCBItems;
+		CDialogHelper::BuildItemDataMap(m_cbTasks, mapCBItems);
+
+		while (nItem--)
+		{
+			int nTask = -1;
+			DWORD dwDependID = GetItemData(nItem);
+
+			if (dwDependID && mapCBItems.Lookup(dwDependID, nTask))
+				m_cbTasks.SetDisabledItem(nTask, (nRow != nItem));
+		}
+	}
+
+	m_cbTasks.SetImageList(m_ilTasks);
+	m_cbTasks.SetSelectedTaskID(GetItemData(nRow));
+}
+
+void CTDLTaskDependencyListCtrl::PopulateTaskCombo(const CTaskFile& tasks, HTASKITEM hTask, int nLevel)
+{
+	if (hTask)
+	{
+		int nImage = m_ilTasks.GetImageIndex(m_tasks.GetTaskIcon(hTask));
+
+		m_cbTasks.AddTask(m_tasks.GetTaskTitle(hTask), 
+						  m_tasks.GetTaskID(hTask), 
+						  m_tasks.IsTaskParent(hTask), 
+						  nLevel++, 
+						  nImage);
+	}
+
+	HTASKITEM hSubtask = m_tasks.GetFirstTask(hTask);
+
+	while (hSubtask)
+	{
+		PopulateTaskCombo(m_tasks, hSubtask, nLevel); // RECURSIVE CALL
+		hSubtask = m_tasks.GetNextTask(hSubtask);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
 
-CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CToDoCtrlData& data, const CTDCDependencyArray& aDepends, CWnd* pParent /*=NULL*/)
+CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
+													 const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TASKDEPENDENCY_DIALOG, _T("Dependency"), pParent),
-	m_lcDependencies(data)
+	m_lcDependencies(tasks, ilTasks, bShowParentsAsFolders)
 {
 	//{{AFX_DATA_INIT(CRecurringTaskOptionDlg)
 	//}}AFX_DATA_INIT
