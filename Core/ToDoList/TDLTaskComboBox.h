@@ -38,6 +38,12 @@ protected:
 	BOOL m_bEnableParents, m_bShowParentsAsFolders;
 
 protected:
+	// Generated message map functions
+	afx_msg void OnEditChange();
+
+	DECLARE_MESSAGE_MAP()
+
+protected:
 	struct TCB_ITEMDATA : public ODCB_ITEMDATA
 	{
 		TCB_ITEMDATA() : nIndent(0), nImage(-1), bParent(FALSE) {}

@@ -725,7 +725,12 @@ int COwnerdrawComboBoxBase::FindNextItem(const CString& sText, int nFrom, BOOL b
 
 BOOL COwnerdrawComboBoxBase::FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const
 {
-	ASSERT(((nIncrement == 1) && (nTo >= nFrom)) || ((nIncrement == -1) && (nTo <= nFrom)));
+	// Sanity checks
+	if (!(((nIncrement == 1) && (nTo >= nFrom)) || ((nIncrement == -1) && (nTo <= nFrom))))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	nNext = CB_ERR;
 	nTo += nIncrement; // so the != will work to stop the loop

@@ -27,6 +27,14 @@ CTDLTaskComboBox::CTDLTaskComboBox()
 {
 }
 
+BEGIN_MESSAGE_MAP(CTDLTaskComboBox, CTabbedComboBox)
+	//{{AFX_MSG_MAP(CTDLTaskComboBox)
+	//}}AFX_MSG_MAP
+	ON_CONTROL_REFLECT(CBN_EDITCHANGE, OnEditChange)
+END_MESSAGE_MAP()
+
+/////////////////////////////////////////////////////////////////////////////
+
 DWORD CTDLTaskComboBox::GetSelectedTaskID() const
 {
 	return CDialogHelper::GetSelectedItemData(*this);
@@ -230,4 +238,28 @@ BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
 
 	// else
 	return TRUE;
+}
+
+void CTDLTaskComboBox::OnEditChange()
+{
+	CString sText;
+	GetWindowText(sText);
+	
+	int nSel = GetCurSel();
+
+	if (nSel == CB_ERR)
+		nSel = 0;
+
+	int nNext = FindNextItem(sText, nSel, TRUE);
+
+	if ((nNext != CB_ERR) && (nNext != nSel))
+	{
+		DWORD dwSel = GetEditSel();
+		VERIFY(SetCurSel(nNext) != CB_ERR);
+
+		// Restore the text and selection because the
+		// selection change will have overwritten it
+		SetWindowText(sText);
+		SetEditSel(LOWORD(dwSel), HIWORD(dwSel));
+	}
 }
