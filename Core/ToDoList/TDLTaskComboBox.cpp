@@ -207,6 +207,8 @@ void CTDLTaskComboBox::DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT 
 
 		if (nImage != -1)
 			rText.left += IMAGESIZE;
+
+		rIcon.top--;
 	}
 
 	CTabbedComboBox::DrawItemText(dc, rText, nItem, nItemState, dwItemData, sText, bList, crText);
