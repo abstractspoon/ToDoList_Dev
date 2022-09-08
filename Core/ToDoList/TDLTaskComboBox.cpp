@@ -249,7 +249,7 @@ void CTDLTaskComboBox::OnEditChange()
 
 void CTDLTaskComboBox::OnDropDown()
 {
-	if ((GetStyle() & 0xf) == CBS_DROPDOWN)
+	if (CDialogHelper::ComboHasEdit(*this))
 	{
 		// Trim leading tabs
 		CString sText;
@@ -265,7 +265,7 @@ void CTDLTaskComboBox::OnDropDown()
 
 BOOL CTDLTaskComboBox::PreTranslateMessage(MSG* pMsg)
 {
-	if (((GetStyle() & 0xf) == CBS_DROPDOWN) && GetDroppedState())
+	if (CDialogHelper::ComboHasEdit(*this) && GetDroppedState())
 	{
 		switch (pMsg->message)
 		{
@@ -281,7 +281,7 @@ BOOL CTDLTaskComboBox::PreTranslateMessage(MSG* pMsg)
 
 void CTDLTaskComboBox::SelectNextFind(BOOL bForward)
 {
-	ASSERT((GetStyle() & 0xf) == CBS_DROPDOWN);
+	ASSERT(CDialogHelper::ComboHasEdit(*this));
 
 	CString sText;
 	GetWindowText(sText);
