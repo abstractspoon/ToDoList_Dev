@@ -229,16 +229,9 @@ BOOL CTDLTimeTrackerDlg::PreTranslateMessage(MSG* pMsg)
 			case VK_F3:
 				{
 					BOOL bForward = !Misc::ModKeysArePressed(MKS_SHIFT);
-				
-					int nSel = m_cbTasks.GetCurSel();
-					int nFrom = (bForward ? (nSel + 1) : (nSel - 1));
-				
-					int nNext = m_cbTasks.FindNextItem(m_sQuickFind, nFrom, bForward);
-				
-					if ((nNext != CB_ERR) && (nNext != nSel))
+
+					if (m_cbTasks.SelectNextItem(m_sQuickFind, bForward))
 					{
-						VERIFY(m_cbTasks.SetCurSel(nNext) != CB_ERR);
-					
 						UpdatePlayButton();
 						UpdateTaskTime(GetSelectedTasklist());
 					
@@ -907,18 +900,10 @@ void CTDLTimeTrackerDlg::OnChangeQuickFind()
 
 	const CToDoCtrl* pTDC = GetSelectedTasklist();
 
-	if (pTDC)
+	if (pTDC && m_cbTasks.SelectNextItem(m_sQuickFind, TRUE))
 	{
-		int nSel = m_cbTasks.GetCurSel();
-		int nNext = m_cbTasks.FindNextItem(m_sQuickFind, nSel, TRUE);
-		
-		if ((nNext != CB_ERR) && (nNext != nSel))
-		{
-			VERIFY(m_cbTasks.SetCurSel(nNext) != CB_ERR);
-
-			UpdatePlayButton();
-			UpdateTaskTime(pTDC);
-		}
+		UpdatePlayButton();
+		UpdateTaskTime(pTDC);
 	}
 }
 

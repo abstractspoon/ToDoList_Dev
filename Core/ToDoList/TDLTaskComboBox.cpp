@@ -6,6 +6,7 @@
 #include "TDLTaskComboBox.h"
 
 #include "..\Shared\DialogHelper.h"
+#include "..\Shared\Misc.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -31,6 +32,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskComboBox, CTabbedComboBox)
 	//{{AFX_MSG_MAP(CTDLTaskComboBox)
 	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT(CBN_EDITCHANGE, OnEditChange)
+	ON_CONTROL_REFLECT(CBN_DROPDOWN, OnDropDown)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -242,21 +244,52 @@ BOOL CTDLTaskComboBox::IsSelectableItem(int nItem) const
 
 void CTDLTaskComboBox::OnEditChange()
 {
+	SelectNextFind(TRUE);
+}
+
+void CTDLTaskComboBox::OnDropDown()
+{
+	if ((GetStyle() & 0xf) == CBS_DROPDOWN)
+	{
+		// Trim leading tabs
+		CString sText;
+		GetWindowText(sText);
+
+		if (!sText.IsEmpty() && (sText[0] == '\t'))
+		{
+			SetWindowText(sText.TrimLeft());
+			SetEditSel(0, -1); // select all
+		}
+	}
+}
+
+BOOL CTDLTaskComboBox::PreTranslateMessage(MSG* pMsg)
+{
+	if (((GetStyle() & 0xf) == CBS_DROPDOWN) && GetDroppedState())
+	{
+		switch (pMsg->message)
+		{
+		case WM_KEYDOWN:
+			if (pMsg->wParam == VK_F3)
+				SelectNextFind(!Misc::ModKeysArePressed(MKS_SHIFT));
+			break;
+		}
+	}
+
+	return CTabbedComboBox::PreTranslateMessage(pMsg);
+}
+
+void CTDLTaskComboBox::SelectNextFind(BOOL bForward)
+{
+	ASSERT((GetStyle() & 0xf) == CBS_DROPDOWN);
+
 	CString sText;
 	GetWindowText(sText);
 	
-	int nSel = GetCurSel();
+	DWORD dwSel = GetEditSel();
 
-	if (nSel == CB_ERR)
-		nSel = 0;
-
-	int nNext = FindNextItem(sText, nSel, TRUE);
-
-	if ((nNext != CB_ERR) && (nNext != nSel))
+	if (SelectNextItem(sText, bForward))
 	{
-		DWORD dwSel = GetEditSel();
-		VERIFY(SetCurSel(nNext) != CB_ERR);
-
 		// Restore the text and selection because the
 		// selection change will have overwritten it
 		SetWindowText(sText);
