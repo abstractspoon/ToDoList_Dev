@@ -7,10 +7,12 @@
 // MenuComboBox.h : header file
 //
 
+#include "tabbedcombobox.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // CMenuComboBox window
 
-class CMenuComboBox : public CComboBox
+class CMenuComboBox : public CTabbedComboBox
 {
 // Construction
 public:
@@ -21,7 +23,8 @@ public:
 	BOOL Initialise(UINT nMenuID, UINT nSeparatorResID = 0);
 	BOOL Initialise(const CMenu& menu, UINT nSeparatorResID = 0);
 
-	CString GetMenuItemText(UINT nMenuID) const;
+	CString GetMenuItemText(UINT nMenuID, BOOL bFullPath) const;
+	CString GetItemText(int nItem, BOOL bFullPath) const;
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -41,8 +44,19 @@ protected:
 	DECLARE_MESSAGE_MAP()
 
 protected:
-	void AddMenuItem(HMENU hMenu, int nPos, const CString& sPath);
+	void AddMenuItem(HMENU hMenu, int nPos, const CString& sPath, int nIndent);
 
+	struct MCB_ITEMDATA : public ODCB_ITEMDATA
+	{
+		CString sFullPath;
+	};
+
+	virtual ODCB_ITEMDATA* NewExtItemData() const { return new MCB_ITEMDATA(); }
+	virtual void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+							  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
+	virtual void GetItemColors(int nItem, UINT nItemState, DWORD dwItemData,
+							   COLORREF& crText, COLORREF& crBack) const;
+	virtual BOOL IsSelectableItem(int nItem) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////
