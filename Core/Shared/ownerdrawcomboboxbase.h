@@ -25,6 +25,7 @@ public:
     int FindStringExact(int nIndexStart, const CString& sItem, BOOL bCaseSensitive) const;
     int FindStringExact(int nIndexStart, LPCTSTR lpszFind) const;
 
+	BOOL SelectNextItem(const CString& sText, BOOL bForward);
 	int FindNextItem(const CString& sText, int nFrom, BOOL bForward) const;
 
 	int SetDisabledItem(int nItem, BOOL bDisabled = TRUE);

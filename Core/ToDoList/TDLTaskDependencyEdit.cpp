@@ -155,6 +155,10 @@ enum
 	LEADIN_COL,
 };
 
+const UINT COMBO_ID = 1001;
+
+/////////////////////////////////////////////////////////////////////////////
+
 CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
 													   BOOL bShowParentsAsFolders)
 	: 
@@ -168,8 +172,8 @@ CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CTaskFile& tasks, c
 BEGIN_MESSAGE_MAP(CTDLTaskDependencyListCtrl, CInputListCtrl)
 	//{{AFX_MSG_MAP(CTDLTaskDependencyListCtrl)
 	//}}AFX_MSG_MAP
-	ON_CBN_SELENDCANCEL(1001, OnTaskComboCancel)
-	ON_CBN_SELENDOK(1001, OnTaskComboOK)
+	ON_CBN_SELENDCANCEL(COMBO_ID, OnTaskComboCancel)
+	ON_CBN_SELENDOK(COMBO_ID, OnTaskComboOK)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -190,7 +194,7 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 	// This gets around the constness
 	ListView_SetImageList(*this, m_ilTasks, LVSIL_SMALL);
 
-	CreateControl(m_cbTasks, 1001, FALSE); // unsorted
+	CreateControl(m_cbTasks, COMBO_ID, CBS_DROPDOWN); // edit field and no sort
 
 	for (int nDepend = 0; nDepend < aDepends.GetSize(); nDepend++)
 	{

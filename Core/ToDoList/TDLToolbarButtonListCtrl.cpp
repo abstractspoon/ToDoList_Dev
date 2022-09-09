@@ -95,7 +95,7 @@ void CTDLToolbarButtonListCtrl::InitState()
 	OverrideSelectionTheming(TRUE, TRUE);
 	ShowGrid(TRUE, TRUE);
 
-	CreateControl(m_cbMenuItems, IDC_MENUID_COMBO, FALSE);
+	CreateControl(m_cbMenuItems, IDC_MENUID_COMBO, CBS_DROPDOWNLIST); // no sort
 
 	CTDCMainMenu menu;
 	VERIFY(menu.LoadMenu());

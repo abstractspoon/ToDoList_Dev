@@ -38,6 +38,16 @@ protected:
 	BOOL m_bEnableParents, m_bShowParentsAsFolders;
 
 protected:
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
+protected:
+	// Generated message map functions
+	afx_msg void OnEditChange();
+	afx_msg void OnDropDown();
+
+	DECLARE_MESSAGE_MAP()
+
+protected:
 	struct TCB_ITEMDATA : public ODCB_ITEMDATA
 	{
 		TCB_ITEMDATA() : nIndent(0), nImage(-1), bParent(FALSE) {}
@@ -54,6 +64,7 @@ protected:
 	virtual BOOL IsSelectableItem(int nItem) const;
 
 	int GetItemIndent(int nItem) const;
+	void SelectNextFind(BOOL bForward);
 };
 
 #endif // AFX_TDLTASKCOMBOBOX_H__4EE655E3_F4B1_44EA_8AAA_39DD459AD8A8__INCLUDED_

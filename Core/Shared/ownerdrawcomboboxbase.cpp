@@ -688,9 +688,35 @@ COwnerdrawComboBoxBase::ODCB_ITEMDATA* COwnerdrawComboBoxBase::GetAddExtItemData
 	return pItemData;
 }
 
+BOOL COwnerdrawComboBoxBase::SelectNextItem(const CString& sText, BOOL bForward)
+{
+	if (sText.IsEmpty())
+	{
+		SetCurSel(-1, FALSE);
+		return CB_ERR;
+	}
+
+	// else
+	int nSel = GetCurSel();
+	int nFrom = (bForward ? (nSel + 1) : (nSel - 1));
+
+	int nNext = FindNextItem(sText, nFrom, bForward);
+
+	if (nNext == nSel)
+		return FALSE;
+
+	SetCurSel(nNext);
+	return TRUE;
+}
+
 int COwnerdrawComboBoxBase::FindNextItem(const CString& sText, int nFrom, BOOL bForward) const
 {
-	int nNumItems = GetCount(), nNext = CB_ERR;
+	int nNumItems = GetCount();
+
+	if (nNumItems == 0)
+		return CB_ERR;
+
+	int nNext = CB_ERR;
 
 	if (bForward)
 	{
@@ -702,7 +728,7 @@ int COwnerdrawComboBoxBase::FindNextItem(const CString& sText, int nFrom, BOOL b
 			return nNext;
 
 		// From start of combo to nFrom
-		if (FindNextItem(sText, 0, (nFrom - 1), 1, nNext))
+		if ((nFrom > 0) && FindNextItem(sText, 0, (nFrom - 1), 1, nNext))
 			return nNext;
 	}
 	else // backwards
@@ -725,7 +751,12 @@ int COwnerdrawComboBoxBase::FindNextItem(const CString& sText, int nFrom, BOOL b
 
 BOOL COwnerdrawComboBoxBase::FindNextItem(const CString& sText, int nFrom, int nTo, int nIncrement, int& nNext) const
 {
-	ASSERT(((nIncrement == 1) && (nTo >= nFrom)) || ((nIncrement == -1) && (nTo <= nFrom)));
+	// Sanity checks
+	if (!(((nIncrement == 1) && (nTo >= nFrom)) || ((nIncrement == -1) && (nTo <= nFrom))))
+	{
+		ASSERT(0);
+		return FALSE;
+	}
 
 	nNext = CB_ERR;
 	nTo += nIncrement; // so the != will work to stop the loop

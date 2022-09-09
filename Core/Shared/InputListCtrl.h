@@ -159,9 +159,13 @@ protected:
 	virtual void InitState();
 	virtual void DrawCellText(CDC* pDC, int nRow, int nCol, const CRect& rText, const CString& sText, COLORREF crText, UINT nDrawTextFlags);
 
+	void CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyles = CBS_DROPDOWNLIST | CBS_SORT);
+	void CreateControl(CEdit& ctrl, UINT nID, DWORD dwEditStyles = ES_AUTOHSCROLL);
+	void CreateControl(CDateTimeCtrl& ctrl, UINT nID, DWORD dwDateTimeStyles = DTS_SHORTDATEFORMAT);
+	void PostCreateControl(CWnd& ctrl);
 	void HideControl(CWnd& ctrl);
 	void ShowControl(CWnd& ctrl, int nRow, int nCol);
-	void CreateControl(CWnd& ctrl, UINT nID, BOOL bSort = TRUE);
+
 	BOOL IsDuplicateRow(CString sRow, int nRowToIgnore) const;
 	BOOL IsDuplicateCol(CString sCol, int nColToIgnore) const;
 	CRect ScrollCellIntoView(int nRow, int nCol); // returns the final position of the cell 
