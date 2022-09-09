@@ -1443,7 +1443,7 @@ void CInputListCtrl::CreateControl(CComboBox& ctrl, UINT nID, DWORD dwComboStyle
 	dwComboStyles |= (WS_CHILD | WS_VSCROLL);
 
 	if ((dwComboStyles & 0xf) == 0)
-		dwComboStyles != CBS_DROPDOWNLIST;
+		dwComboStyles |= CBS_DROPDOWNLIST;
 
 	if (ctrl.Create(dwComboStyles, CRect(0, 0, 0, 0), this, nID))
 		PostCreateControl(ctrl);
