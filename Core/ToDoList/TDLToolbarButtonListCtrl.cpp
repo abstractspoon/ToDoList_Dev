@@ -121,7 +121,7 @@ void CTDLToolbarButtonListCtrl::PopulateList()
 	{
 		const TOOLBARBUTTON& tb = m_aButtons[nBtn];
 
-		int nRow = AddRow(m_cbMenuItems.GetMenuItemText(tb.nMenuID));
+		int nRow = AddRow(m_cbMenuItems.GetMenuItemText(tb.nMenuID, TRUE));
 		SetItemText(nRow, IMAGE_COL, tb.sImageID);
 		SetItemData(nRow, tb.nMenuID);
 	}
@@ -204,10 +204,12 @@ void CTDLToolbarButtonListCtrl::OnMenuItemOK()
 	if (nRow != CB_ERR)
 	{
 		TOOLBARBUTTON& tb = m_aButtons[nRow];
-		tb.nMenuID = CDialogHelper::GetSelectedItemData(m_cbMenuItems);
+
+		int nItem = m_cbMenuItems.GetCurSel();
+		tb.nMenuID = m_cbMenuItems.GetItemData(nItem);
 
 		SetItemData(nRow, tb.nMenuID);
-		SetItemText(nRow, MENUID_COL, CDialogHelper::GetSelectedItem(m_cbMenuItems));
+		SetItemText(nRow, MENUID_COL, m_cbMenuItems.GetItemText(nItem, TRUE));
 	}
 }
 
