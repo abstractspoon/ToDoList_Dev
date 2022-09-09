@@ -255,10 +255,14 @@ void CTDLTaskComboBox::OnDropDown()
 		CString sText;
 		GetWindowText(sText);
 
-		if (!sText.IsEmpty() && (sText[0] == '\t'))
+		if (Misc::First(sText) == TAB)
 		{
-			SetWindowText(sText.TrimLeft());
+			SetWindowText(sText.TrimLeft(TAB));
 			SetEditSel(0, -1); // select all
+
+			// Notify ourselves that the text has changed else
+			// the item won't be correctly selected in the list
+			PostMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_EDITCHANGE), (LPARAM)m_hWnd);
 		}
 	}
 }
