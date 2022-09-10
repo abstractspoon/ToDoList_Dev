@@ -18,6 +18,8 @@ static char THIS_FILE[]=__FILE__;
 
 const TCHAR TAB = '\t';
 
+const UINT WM_RESELECTTASKID = (CB_MSGMAX + 1);
+
 //////////////////////////////////////////////////////////////////////
 
 CTDLTaskComboBox::CTDLTaskComboBox() 
@@ -33,6 +35,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskComboBox, CTabbedComboBox)
 	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT(CBN_EDITCHANGE, OnEditChange)
 	ON_CONTROL_REFLECT(CBN_DROPDOWN, OnDropDown)
+	ON_MESSAGE(WM_RESELECTTASKID, OnReselectTaskID)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -258,13 +261,30 @@ void CTDLTaskComboBox::OnDropDown()
 		if (Misc::First(sText) == TAB)
 		{
 			SetWindowText(sText.TrimLeft(TAB));
-			SetEditSel(0, -1); // select all
 
-			// Notify ourselves that the text has changed else
-			// the item won't be correctly selected in the list
-			PostMessage(WM_COMMAND, MAKEWPARAM(GetDlgCtrlID(), CBN_EDITCHANGE), (LPARAM)m_hWnd);
+			// The consequence of modifying the window
+			// text will cause the selection to be cleared
+			// after this function has returned, so we have 
+			// to post ourselves a message to fix things up
+			PostMessage(WM_RESELECTTASKID, 0, GetSelectedTaskID());
 		}
 	}
+}
+
+LRESULT CTDLTaskComboBox::OnReselectTaskID(WPARAM /*wp*/, LPARAM lp)
+{
+	ASSERT(lp);
+	ASSERT(GetCurSel() == CB_ERR);
+	ASSERT(CDialogHelper::ComboHasEdit(*this));
+	ASSERT(GetDroppedState());
+
+	if (SetSelectedTaskID(lp))
+	{
+		SetWindowText(GetSelectedTaskName());
+		SetEditSel(0, -1); // select all
+	}
+
+	return 0L;
 }
 
 BOOL CTDLTaskComboBox::PreTranslateMessage(MSG* pMsg)
