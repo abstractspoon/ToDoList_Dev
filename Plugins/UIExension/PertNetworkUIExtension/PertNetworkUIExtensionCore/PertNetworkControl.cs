@@ -31,6 +31,7 @@ namespace PertNetworkUIExtension
 		public bool GoodAsDone { get; private set; }
 		public bool SomeSubtasksDone { get; private set; }
 		public bool Locked { get; private set; }
+		public string TaskPosition { get; private set; }
 
 		// -----------------------------------------------------------------
 
@@ -47,6 +48,7 @@ namespace PertNetworkUIExtension
             GoodAsDone = task.IsGoodAsDone();
             SomeSubtasksDone = task.HasSomeSubtasksDone();
 			Locked = task.IsLocked(true);
+			TaskPosition = task.GetPositionString();
 		}
 
 		public override string ToString() 
@@ -102,9 +104,16 @@ namespace PertNetworkUIExtension
 			Locked = task.IsLocked(true);
             GoodAsDone = task.IsGoodAsDone();
 			TopLevel = (task.GetParentID() == 0);
+			TaskPosition = task.GetPositionString();
 
 			return true;
 		}
+
+		public override int CompareTo(object other)
+		{
+			return TaskPosition.CompareTo(((PertNetworkItem)other).TaskPosition);
+		}
+
 	}
 
 	// ------------------------------------------------------------
@@ -535,7 +544,7 @@ namespace PertNetworkUIExtension
 			}
 
 			if (dependencyChanges)
-				RebuildGroups();
+				RebuildPaths();
 			else
 				Invalidate();
 		}
@@ -702,17 +711,17 @@ namespace PertNetworkUIExtension
 				foreach (var item in path.Items)
 				{
 					if (WantDrawItem(item, clipRect))
-						DoPaintItem(graphics, item, path, null, WantDrawItemSelected(item), true);
+						DoPaintItem(graphics, item, path, WantDrawItemSelected(item), true);
 
 					if ((prevItem != null) && WantDrawConnection(item, prevItem, clipRect))
-						DoPaintConnection(graphics, item, prevItem, path, null, true);
+						DoPaintConnection(graphics, item, prevItem, path, true);
 
 					prevItem = item;
 				}
 			}
 		}
 
-		override protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, NetworkGroup group, bool selected)
+		override protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected)
 		{
 			// Don't paint critical paths until the end
 			if ((CriticalPaths.Contains(path)))
@@ -724,10 +733,10 @@ namespace PertNetworkUIExtension
 					return;
 			}
 
-			DoPaintItem(graphics, item, path, group, selected, false);
+			DoPaintItem(graphics, item, path, selected, false);
 		}
 
-		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, NetworkGroup group, bool selected, bool critical)
+		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected, bool critical)
 		{
 			graphics.SmoothingMode = SmoothingMode.None;
 
@@ -835,10 +844,8 @@ namespace PertNetworkUIExtension
 
 			using (var brush = new SolidBrush(textColor))
 			{
-				int iPath = ((group == null) ? 0 : (group.Paths.IndexOf(path) + 1));
-				int iGroup = ((group == null) ? 0 : (Data.Groups.IndexOf(group) + 1));
-
-				graphics.DrawString(String.Format("{0} (id:{1}, g:{2}, p:{3})", item.Title, item.UniqueId, iGroup, iPath), GetItemFont(taskItem), brush, titleRect);
+				int iPath = (Data.Paths.IndexOf(path) + 1);
+				graphics.DrawString(String.Format("{0} (id:{1}, pos:{2}, path:{3})", item.Title, item.UniqueId, taskItem.TaskPosition, iPath), GetItemFont(taskItem), brush, titleRect);
 			}
 
 			/*
@@ -875,7 +882,7 @@ namespace PertNetworkUIExtension
 
 		}
 
-		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, NetworkGroup group)
+		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
 			// Don't paint critical paths until the end
 			if ((CriticalPaths.Contains(path)))
@@ -891,10 +898,10 @@ namespace PertNetworkUIExtension
 				}
 			}
 			
-			DoPaintConnection(graphics, fromItem, toItem, path, group, false);
+			DoPaintConnection(graphics, fromItem, toItem, path, false);
 		}
 
-		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, NetworkGroup group, bool critical)
+		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool critical)
 		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
@@ -1131,6 +1138,7 @@ namespace PertNetworkUIExtension
 		{
 			var criticalPaths = new List<NetworkPath>();
 
+/*
 			// TODO
 			// Test by picking the greatest aggregated segment length
 			double maxLength = 0;
@@ -1152,6 +1160,7 @@ namespace PertNetworkUIExtension
 
 			if (criticalPath != null)
 				criticalPaths.Add(criticalPath);
+*/
 
 			return criticalPaths;
 		}
