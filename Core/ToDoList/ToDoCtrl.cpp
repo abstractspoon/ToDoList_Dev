@@ -11845,18 +11845,21 @@ HBRUSH CToDoCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 {
 	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);
 	
-	if (CThemed::IsAppThemed() && (nCtlColor == CTLCOLOR_STATIC) && CWinClasses::IsClass(*pWnd, WC_STATIC))
+	if (CThemed::IsAppThemed() && (nCtlColor == CTLCOLOR_STATIC))
 	{
-		if (m_theme.crAppText != CLR_NONE)
-			pDC->SetTextColor(m_theme.crAppText);
-		
-		if (m_brUIBack.GetSafeHandle())
+	//	if (CWinClasses::IsClass(*pWnd, WC_STATIC) || CWinClasses::IsClass(*pWnd, WC_BUTTON))
 		{
-			pDC->SetBkMode(TRANSPARENT);
-			hbr = m_brUIBack;
+			if (m_theme.crAppText != CLR_NONE)
+				pDC->SetTextColor(m_theme.crAppText);
+		
+			if (m_brUIBack.GetSafeHandle())
+			{
+				pDC->SetBkMode(TRANSPARENT);
+				hbr = m_brUIBack;
+			}
 		}
 	}
-	
+
 	return hbr;
 }
 

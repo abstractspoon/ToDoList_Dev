@@ -153,10 +153,19 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 			dwStyle |= (ES_LEFT | ES_AUTOHSCROLL);
 			break;
 
-			// these don't have controls
 		case TDCCA_BOOL:
+			if (attribDef.HasFeature(TDCCAF_SHOWEDITFIELD))
+			{
+				pControl = new CButton;
+				szClass = WC_BUTTON;
+				dwStyle |= (BS_LEFT | BS_CHECKBOX);
+				dwExStyle = 0;
+			}
+			break;
+
 		case TDCCA_ICON:
 		case TDCCA_CALCULATION:
+			// these don't have controls
 			break;
 
 		default:
@@ -567,13 +576,8 @@ int CTDCCustomAttributeUIHelper::GetCustomAttributeCtrls(const CTDCCustomAttribD
 		if (!WantControl(attribDef, bFilter))
 			continue;
 
-		// NOTE: flag and image types don't need controls because they are 
-		// handled by clicking the tasklist directly
 		switch (attribDef.GetDataType())
 		{
-		case TDCCA_BOOL:
-			break;
-
 		case TDCCA_ICON:
 			if (!attribDef.IsList())
 				break;
@@ -655,89 +659,91 @@ BOOL CTDCCustomAttributeUIHelper::RebuildControls(CWnd* pParent,
 		if (!WantControl(attribDef, bFilter))
 			continue;
 		
-		// NOTE: flag and image types don't need controls because they are 
-		// handled by clicking the tasklist directly
 		switch (attribDef.GetDataType())
 		{
-		case TDCCA_BOOL:
 		case TDCCA_CALCULATION:
+			// Don't have edit fields
+			continue;
+
+		case TDCCA_BOOL:
+			if (!attribDef.HasFeature(TDCCAF_SHOWEDITFIELD))
+				continue;
+			// else fall thru
 			break;
 
 		case TDCCA_ICON:
 			if (!attribDef.IsList())
-				break;
+				continue;
 			// else fall thru
-
-		default:
-			{
-				CUSTOMATTRIBCTRLITEM ctrl;
-				
-				ctrl.nAttrib = attribDef.GetAttributeID();
-				ctrl.sAttribID = attribDef.sUniqueID;
-
-				TDCCADATA data;
-				mapCtrlData.Lookup(attribDef.sUniqueID, data);
-
-				CWnd* pCtrl = NULL;
-				CWnd* pLabel = NULL;
-				CWnd* pBuddyCtrl = NULL;
-				CWnd* pBuddyLabel = NULL;
-
-				// Main control
-				ctrl.nCtrlID = nID++;
-				ctrl.nLabelID = nID++;
-				
-				pCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nCtrlID, FALSE, bMultiSelectionFilter);
-
-				if (pCtrl)
-					pLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nLabelID, FALSE);
-
-				// Buddy control
-				BOOL bWantsBuddy = (pCtrl && pLabel && AttributeWantsBuddy(attribDef, bFilter));
-
-				if (bWantsBuddy)
-				{
-					ctrl.nBuddyCtrlID = nID++;
-					ctrl.nBuddyLabelID = nID++;
-					
-					pBuddyCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nBuddyCtrlID, TRUE, bMultiSelectionFilter);
-
-					if (pBuddyCtrl)
-						pBuddyLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nBuddyLabelID, TRUE);
-				}					
-				
-				if (!pCtrl || !pLabel || (bWantsBuddy && (!pBuddyCtrl || !pBuddyLabel)))
-				{
-					ASSERT(0);
-
-					// Make resilient to opening newer tasklists 
-					// with data types unknown to us
-					ctrl.DeleteCtrls(pParent);
-					continue;
-				}
-
-				// insert after nCtrlIDPos
-				pLabel->SetWindowPos(pInsertAfter, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
-				pCtrl->SetWindowPos(pLabel, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
-				
-				if (bWantsBuddy)
-				{
-					// insert after nCtrlIDPos
-					pBuddyLabel->SetWindowPos(pCtrl, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
-					pBuddyCtrl->SetWindowPos(pBuddyLabel, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
-					
-					pInsertAfter = pBuddyCtrl; // next insertion point
-				}
-				else
-				{
-					pInsertAfter = pCtrl; // next insertion point
-				}
-
-				SetBuddyVisibility(pParent, ctrl, attribDef, data);
-
-				aControls.Add(ctrl);
-			}
+			break;
 		}
+
+		CUSTOMATTRIBCTRLITEM ctrl;
+
+		ctrl.nAttrib = attribDef.GetAttributeID();
+		ctrl.sAttribID = attribDef.sUniqueID;
+
+		TDCCADATA data;
+		mapCtrlData.Lookup(attribDef.sUniqueID, data);
+
+		CWnd* pCtrl = NULL;
+		CWnd* pLabel = NULL;
+		CWnd* pBuddyCtrl = NULL;
+		CWnd* pBuddyLabel = NULL;
+
+		// Main control
+		ctrl.nCtrlID = nID++;
+		ctrl.nLabelID = nID++;
+
+		pCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nCtrlID, FALSE, bMultiSelectionFilter);
+
+		if (pCtrl)
+			pLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nLabelID, FALSE);
+
+		// Buddy control
+		BOOL bWantsBuddy = (pCtrl && pLabel && AttributeWantsBuddy(attribDef, bFilter));
+
+		if (bWantsBuddy)
+		{
+			ctrl.nBuddyCtrlID = nID++;
+			ctrl.nBuddyLabelID = nID++;
+
+			pBuddyCtrl = CreateAttributeCtrl(pParent, attribDef, data, ilImages, ctrl.nBuddyCtrlID, TRUE, bMultiSelectionFilter);
+
+			if (pBuddyCtrl)
+				pBuddyLabel = CreateAttributeLabelCtrl(pParent, attribDef, data, ctrl.nBuddyLabelID, TRUE);
+		}
+
+		if (!pCtrl || !pLabel || (bWantsBuddy && (!pBuddyCtrl || !pBuddyLabel)))
+		{
+			ASSERT(0);
+
+			// Make resilient to opening newer tasklists 
+			// with data types unknown to us
+			ctrl.DeleteCtrls(pParent);
+			continue;
+		}
+
+		// insert after nCtrlIDPos
+		pLabel->SetWindowPos(pInsertAfter, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
+		pCtrl->SetWindowPos(pLabel, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
+
+		if (bWantsBuddy)
+		{
+			// insert after nCtrlIDPos
+			pBuddyLabel->SetWindowPos(pCtrl, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
+			pBuddyCtrl->SetWindowPos(pBuddyLabel, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOREDRAW);
+
+			pInsertAfter = pBuddyCtrl; // next insertion point
+		}
+		else
+		{
+			pInsertAfter = pCtrl; // next insertion point
+		}
+
+		SetBuddyVisibility(pParent, ctrl, attribDef, data);
+
+		aControls.Add(ctrl);
 	}
 
 	return TRUE;
@@ -1116,9 +1122,12 @@ TDCCAUI_UPDATERESULT CTDCCustomAttributeUIHelper::GetControlData(const CWnd* pPa
 			}
 			break;
 
-			// these don't have controls
-		case TDCCA_ICON:
 		case TDCCA_BOOL:
+			data.Set(((CButton*)pCtrl)->GetCheck() != 0);
+			break;
+
+		case TDCCA_ICON:
+			// these don't have controls
 			ASSERT(0);
 			return TDCCAUIRES_FAIL;
 		}
@@ -1475,9 +1484,12 @@ void CTDCCustomAttributeUIHelper::UpdateControl(const CWnd* pParent, CUSTOMATTRI
 			}
 			break;
 
-			// these don't have controls
-		case TDCCA_ICON:
 		case TDCCA_BOOL:
+			((CButton*)pCtrl)->SetCheck(data.AsBool() ? 1 : 0);
+			break;
+
+		case TDCCA_ICON:
+			// these don't have controls
 			ASSERT(0);
 			break;
 		}

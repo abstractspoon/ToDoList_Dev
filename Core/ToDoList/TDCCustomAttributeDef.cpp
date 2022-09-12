@@ -596,13 +596,13 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 		return ((dwListType == TDCCA_AUTOLIST) || (dwListType == TDCCA_FIXEDLIST));
 
 	default:
-		// Aggregations not supported on multi-list types
+		// Other features not supported on multi-list types
 		if ((dwListType == TDCCA_AUTOMULTILIST) || (dwListType == TDCCA_FIXEDMULTILIST))
 			return FALSE;
 		break;
 	}
 
-	// Aggregations
+	// Attributes
 	switch (dwDataType)
 	{
 	case TDCCA_DOUBLE:
@@ -631,9 +631,11 @@ BOOL TDCCUSTOMATTRIBUTEDEFINITION::AttributeSupportsFeature(DWORD dwDataType, DW
 				(dwFeature == TDCCAF_MINIMIZE) ||
 				(dwFeature == TDCCAF_SHOWTIME));
 
+	case TDCCA_BOOL:
+		return (dwFeature == TDCCAF_SHOWEDITFIELD);
+
 	case TDCCA_STRING:
 	case TDCCA_FILELINK:
-	case TDCCA_BOOL:
 	case TDCCA_ICON:
 		break;
 
