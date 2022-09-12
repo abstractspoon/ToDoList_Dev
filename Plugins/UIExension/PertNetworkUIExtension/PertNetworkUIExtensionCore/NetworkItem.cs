@@ -219,7 +219,12 @@ namespace PertNetworkUIExtension
 
 			foreach (var item in m_Items)
 			{
-				if (!item.HasPosition)
+				if (item.HasPosition)
+				{
+					// Stay ahead of previously positioned dependencies
+					nextAvailXPos = Math.Max(nextAvailXPos, item.Position.X);
+				}
+				else
 				{
 					item.Position = new Point(nextAvailXPos, nextAvailYPos);
 				}
