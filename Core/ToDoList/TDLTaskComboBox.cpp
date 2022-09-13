@@ -260,13 +260,14 @@ void CTDLTaskComboBox::OnDropDown()
 
 		if (Misc::First(sText) == TAB)
 		{
+			// Modifying the window text will cause the selection 
+			// to be cleared/changed after this function has returned, 
+			// so we'll need to post ourselves a message to fix things up
+			DWORD dwSelTaskID = GetSelectedTaskID();
+
 			SetWindowText(sText.TrimLeft(TAB));
 
-			// The consequence of modifying the window
-			// text will cause the selection to be cleared
-			// after this function has returned, so we have 
-			// to post ourselves a message to fix things up
-			PostMessage(WM_RESELECTTASKID, 0, GetSelectedTaskID());
+			PostMessage(WM_RESELECTTASKID, 0, dwSelTaskID);
 		}
 	}
 }
