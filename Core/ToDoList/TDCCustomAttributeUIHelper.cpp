@@ -158,7 +158,7 @@ CWnd* CTDCCustomAttributeUIHelper::CreateAttributeCtrl(CWnd* pParent, const TDCC
 			{
 				pControl = new CButton;
 				szClass = WC_BUTTON;
-				dwStyle |= (BS_LEFT | BS_CHECKBOX);
+				dwStyle |= BS_AUTOCHECKBOX;
 				dwExStyle = 0;
 			}
 			break;
