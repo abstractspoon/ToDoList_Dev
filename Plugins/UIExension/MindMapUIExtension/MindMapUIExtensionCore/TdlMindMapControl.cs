@@ -218,7 +218,7 @@ namespace MindMapUIExtension
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
 		private MindMapOption m_Options;
-		private DragImage m_dragImage;
+		private DragImage m_DragImage;
 
 		// -------------------------------------------------------------------------
 
@@ -228,6 +228,7 @@ namespace MindMapUIExtension
 			m_TaskIcons = icons;
 
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
+			m_DragImage = new DragImage();
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
@@ -1628,51 +1629,36 @@ namespace MindMapUIExtension
 
 		protected override void OnDragOver(DragEventArgs e)
 		{
-			if (m_dragImage != null)
-				m_dragImage.ShowNoLock(false);
+			m_DragImage.ShowNoLock(false);
 
 			base.OnDragOver(e);
 
-			if (m_dragImage != null)
-			{
-				m_dragImage.ShowNoLock(true);
-				m_dragImage.Move(e.X, e.Y);
-			}
+			m_DragImage.ShowNoLock(true);
+			m_DragImage.Move(e.X, e.Y);
 		}
 
 		protected override void OnDragEnter(DragEventArgs e)
 		{
 			base.OnDragEnter(e);
 
-			m_dragImage = new DragImage();
-
 			var textRect = GetItemLabelRect(SelectedNode);
 
 			if (m_ShowCompletionCheckboxes)
 				textRect.Width -= m_CheckboxSize.Width;
 
-			if (!m_dragImage.Begin(Handle, Font, SelectedNode.Text, textRect.Width, textRect.Height))
-				m_dragImage = null;
+			m_DragImage.Begin(Handle, Font, SelectedNode.Text, textRect.Width, textRect.Height);
 		}
 
 		protected override void OnDragDrop(DragEventArgs e)
 		{
-			if (m_dragImage != null)
-			{
-				m_dragImage.End();
-				m_dragImage = null;
-			}
+			m_DragImage.End();
 
 			base.OnDragDrop(e);
 		}
 
 		protected override void OnDragLeave(EventArgs e)
 		{
-			if (m_dragImage != null)
-			{
-				m_dragImage.End();
-				m_dragImage = null;
-			}
+			m_DragImage.End();
 
 			base.OnDragLeave(e);
 		}
