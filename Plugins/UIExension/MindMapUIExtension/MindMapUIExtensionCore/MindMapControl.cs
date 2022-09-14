@@ -1109,6 +1109,9 @@ namespace MindMapUIExtension
 
             var item = Item(dropTarget);
 
+			if (item == null)
+				return DropPos.None;
+
 			if (!GetItemDrawRect(item.TotalBounds).Contains(cursorPos))
 				return DropPos.None;
 
