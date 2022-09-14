@@ -31,6 +31,11 @@ HDC Win32::GetHdc(IntPtr hDC)
 	return static_cast<HDC>(hDC.ToPointer());
 }
 
+HBITMAP Win32::GetHBitmap(IntPtr hBM)
+{
+	return static_cast<HBITMAP>(hBM.ToPointer());
+}
+
 void Win32::RemoveClientEdge(IntPtr hWnd)
 {
 	// remove client edge

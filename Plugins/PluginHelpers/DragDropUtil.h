@@ -32,6 +32,24 @@ namespace Abstractspoon
 				static UInt32 DRAGDROP_XBUTTON2	= 0x40;
 
 			};
+
+			// ----------------------------------------------------------------------------
+
+			public ref class DragImage
+			{
+			public:
+				DragImage() : m_hImageList(NULL) {}
+				~DragImage() { End(); }
+
+				bool Begin(IntPtr wnd, Drawing::Font^ font, String^ text, int width, int height);
+				bool Move(int x, int y);
+				bool End();
+				bool ShowNoLock(bool show);
+
+			protected:
+				HIMAGELIST m_hImageList;
+				HWND m_hwndLock;
+			};
 		}
 	}
 }
