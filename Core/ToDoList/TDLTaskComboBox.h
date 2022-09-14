@@ -44,6 +44,7 @@ protected:
 	// Generated message map functions
 	afx_msg void OnEditChange();
 	afx_msg void OnDropDown();
+	afx_msg LRESULT OnReselectTaskID(WPARAM wp, LPARAM lp);
 
 	DECLARE_MESSAGE_MAP()
 

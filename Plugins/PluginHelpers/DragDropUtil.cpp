@@ -1,9 +1,13 @@
 
 #include "stdafx.h"
+#include "PluginHelpers.h"
 #include "DragDropUtil.h"
+#include "Win32.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
+using namespace Windows::Forms;
+using namespace Drawing;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,4 +28,74 @@ bool DragDropUtil::ObjectHasFormat(Microsoft::VisualStudio::OLE::Interop::IDataO
 	
 	// attempt to get the data
 	return (obj->QueryGetData(formatEtc) == S_OK);
+}
+
+// ----------------------------------------------------------------------------
+
+bool DragImage::Begin(IntPtr wnd, Drawing::Font^ font, String^ text, int width, int height)
+{
+	if (m_hImageList != NULL)
+		return false;
+
+	m_hwndLock = Win32::GetHwnd(wnd);
+
+	Bitmap^ bm = gcnew Bitmap(width, height);
+	Graphics^ g = Graphics::FromImage(bm);
+
+	g->FillRectangle(SystemBrushes::Highlight, 0, 0, width, height);
+	g->DrawString(text, font, SystemBrushes::HighlightText, RectangleF(0, 0, width, height));
+
+	m_hImageList = ImageList_Create(width, height, ILC_COLOR32, 0, 1);
+
+	if (m_hImageList != NULL)
+	{
+		HBITMAP hbm = Win32::GetHBitmap(bm->GetHbitmap());
+
+		ImageList_Add(m_hImageList, hbm, NULL);
+		ImageList_BeginDrag(m_hImageList, 0, width, height);
+
+		CRect rWindow;
+		GetWindowRect(m_hwndLock, rWindow);
+
+		CPoint ptCursor(::GetMessagePos());
+		ImageList_DragEnter(m_hwndLock, ptCursor.x - rWindow.left, ptCursor.y - rWindow.top);
+
+		DeleteObject(hbm);
+	}
+
+	return true;
+}
+
+bool DragImage::Move(int xScreen, int yScreen)
+{
+	if (m_hImageList == NULL)
+		return false;
+
+	CRect rWindow;
+	GetWindowRect(m_hwndLock, rWindow);
+
+	return (ImageList_DragMove(xScreen - rWindow.left, yScreen - rWindow.top) != FALSE);
+}
+
+bool DragImage::End()
+{
+	if (m_hImageList == NULL)
+		return false;
+
+	ImageList_EndDrag();
+	ImageList_DragLeave(m_hwndLock);
+	ImageList_Destroy(m_hImageList);
+
+	m_hImageList = NULL;
+	m_hwndLock = NULL;
+
+	return true;
+}
+
+bool DragImage::ShowNoLock(bool show)
+{
+	if (m_hImageList == NULL)
+		return false;
+
+	ImageList_DragShowNolock(show);
 }

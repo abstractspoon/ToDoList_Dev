@@ -22,6 +22,7 @@ namespace Abstractspoon
 				static HWND GetHwnd(IntPtr hWnd);
 				static HFONT GetHfont(IntPtr hFont);
 				static HDC GetHdc(IntPtr hDC);
+				static HBITMAP GetHBitmap(IntPtr hBM);
 
 				static void RemoveBorder(IntPtr hWnd);
 				static void AddBorder(IntPtr hWnd);
