@@ -1011,6 +1011,88 @@ namespace PertNetworkUIExtension
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
 		}
 
+		protected void DoPaintConnection2(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool critical)
+		{
+			var fromRect = CalcItemRectangle(fromItem);
+			var toRect = CalcItemRectangle(toItem);
+
+			Point[] points = null;
+
+			int midFromHeight = ((fromRect.Top + fromRect.Bottom) / 2);
+			int midToHeight = ((toRect.Top + toRect.Bottom) / 2);
+
+			Point firstPt = new Point(fromRect.Right, midFromHeight);
+			Point lastPt = new Point(toRect.Left, midToHeight);
+
+			if (toItem.Position.Y == fromItem.Position.Y)
+			{
+				// 'To' on same level as 'From'
+				// +------+        +------+
+				// |    0 +------->| 1    |
+				// +------+        +------+
+				//
+				points = new Point[2] { firstPt, lastPt };
+			}
+			else
+			{
+				int halfHorzSpacing = (ItemHorzSpacing / 2);
+
+				if (toItem.Position.X == fromItem.Position.X + 1)
+				{
+					// 'To' one column to the right of 'From'
+					// and anywhere above or below 'From'
+					// +------+             
+					// |    0 +---+ 1
+					// +------+   |            
+					//            |
+					//            |   +------+
+					//          2 +-->+ 3    |
+					//                +------+
+					points = new Point[4];
+					points[0] = firstPt;
+					points[1] = new Point(firstPt.X + halfHorzSpacing, firstPt.Y);
+					points[2] = new Point(lastPt.X - halfHorzSpacing, lastPt.Y);
+					points[3] = lastPt;
+				}
+				else
+				{
+					// 'To' more than one column to the right of 'From'
+					// and anywhere above or below 'From'
+					// +------+      +------+       
+					// |    0 +--+ 1 |      |
+					// +------+  |   +------+       
+					//         2 +-------------+ 3
+					//               +------+  |   +------+
+					//               |      |4 +-->+ 5    |
+					//               +------+      +------+
+					points = new Point[6];
+					points[0] = firstPt;
+					points[1] = new Point(firstPt.X + halfHorzSpacing, firstPt.Y);
+					points[2] = new Point(firstPt.X + halfHorzSpacing, (firstPt.Y + lastPt.Y) / 2);
+					points[3] = new Point(lastPt.X - halfHorzSpacing, (firstPt.Y + lastPt.Y) / 2);
+					points[4] = new Point(lastPt.X - halfHorzSpacing, lastPt.Y);
+					points[5] = lastPt;
+				}
+			}
+
+			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+			using (var pen = new Pen(Color.DarkGray, critical ? 2f : 0f))
+				graphics.DrawLines(pen, points);
+
+			// Draw Arrow head and box without smoothing to better match core app
+			graphics.SmoothingMode = SmoothingMode.None;
+
+			Point arrow = points[points.Length - 1];
+			arrow.X--;
+
+			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
+
+			// Draw 3x3 box at 'to' end
+			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);
+			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
+		}
+
 		private bool TaskHasIcon(PertNetworkItem taskItem)
 		{
 			if ((TaskIcons == null) || (taskItem == null))
