@@ -138,18 +138,27 @@ namespace PertNetworkUIExtension
 			Invalidate();
 		}
 
-		public NetworkItem HitTestItem(Point pos)
+		public NetworkItem HitTestItem(Point pos, bool visibleOnly = true)
 		{
 			// Brute force for now
 			foreach (var path in Data.Paths)
 			{
+				Rectangle pathRect = Rectangle.Empty;
+
 				foreach (var item in path.Items)
 				{
 					var itemRect = CalcItemRectangle(item);
 
 					if (itemRect.Contains(pos))
 						return item;
+
+					if (visibleOnly)
+						pathRect = Rectangle.Union(pathRect, itemRect);
 				}
+
+				// We can stop when we've passed the bottom of the visible items
+				if (visibleOnly && (pathRect.Bottom > ClientRectangle.Bottom))
+					break;
 			}
 
 			// else
