@@ -96,6 +96,9 @@ namespace PertNetworkUIExtension
 		protected int ItemHorzSpacing { get { return (ItemWidth / 4); } }
 		protected int GraphBorder { get { return ItemVertSpacing; } }
 
+		protected int RowHeight { get { return (ItemHeight + ItemVertSpacing); } }
+		protected int ColumnWidth { get { return (ItemWidth + ItemHorzSpacing); } }
+
 		public NetworkData Data { get; private set; }
 
 		// Public ------------------------------------------------------------------------

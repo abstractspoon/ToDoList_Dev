@@ -903,6 +903,28 @@ namespace PertNetworkUIExtension
 
 		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool critical)
 		{
+			Point[] points = CalcConnectionPoints2(fromItem, toItem);
+
+			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+			using (var pen = new Pen(Color.DarkGray, critical ? 2f : 0f))
+				graphics.DrawLines(pen, points);
+
+			// Draw Arrow head and box without smoothing to better match core app
+			graphics.SmoothingMode = SmoothingMode.None;
+
+			Point arrow = points[points.Length - 1];
+			arrow.X--;
+
+			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
+
+			// Draw 3x3 box at 'to' end
+			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);
+			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
+		}
+
+		protected Point[] CalcConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
+		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
 
@@ -993,25 +1015,10 @@ namespace PertNetworkUIExtension
 				}
 			}
 
-			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-			using (var pen = new Pen(Color.DarkGray, critical ? 2f : 0f))
-				graphics.DrawLines(pen, points);
-
-			// Draw Arrow head and box without smoothing to better match core app
-			graphics.SmoothingMode = SmoothingMode.None;
-
-			Point arrow = points[points.Length - 1];
-			arrow.X--;
-
-			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
-
-			// Draw 3x3 box at 'to' end
-			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);
-			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
+			return points;
 		}
 
-		protected void DoPaintConnection2(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool critical)
+		protected Point[] CalcConnectionPoints2(NetworkItem fromItem, NetworkItem toItem)
 		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
@@ -1022,7 +1029,6 @@ namespace PertNetworkUIExtension
 			int midToHeight = ((toRect.Top + toRect.Bottom) / 2);
 
 			Point firstPt = new Point(fromRect.Right, midFromHeight);
-			Point lastPt = new Point(toRect.Left, midToHeight);
 
 			if (toItem.Position.Y == fromItem.Position.Y)
 			{
@@ -1031,10 +1037,15 @@ namespace PertNetworkUIExtension
 				// |    0 +------->| 1    |
 				// +------+        +------+
 				//
+				Point lastPt = new Point(toRect.Left, midToHeight);
+
 				points = new Point[2] { firstPt, lastPt };
 			}
 			else
 			{
+				bool toAboveFrom = (toItem.Position.Y < fromItem.Position.Y);
+				Point lastPt = new Point(toRect.Left, toAboveFrom ? toRect.Bottom : toRect.Top);
+
 				int halfHorzSpacing = (ItemHorzSpacing / 2);
 
 				if (toItem.Position.X == fromItem.Position.X + 1)
@@ -1044,14 +1055,15 @@ namespace PertNetworkUIExtension
 					// +------+             
 					// |    0 +---+ 1
 					// +------+   |            
-					//            |
-					//            |   +------+
-					//          2 +-->+ 3    |
+					//            |    3
+					//          2 +-->+------+
+					//                |      |
 					//                +------+
+
 					points = new Point[4];
 					points[0] = firstPt;
-					points[1] = new Point(firstPt.X + halfHorzSpacing, firstPt.Y);
-					points[2] = new Point(lastPt.X - halfHorzSpacing, lastPt.Y);
+					points[1] = new Point(points[0].X + halfHorzSpacing, firstPt.Y);
+					points[2] = new Point(points[1].X, lastPt.Y);
 					points[3] = lastPt;
 				}
 				else
@@ -1062,35 +1074,26 @@ namespace PertNetworkUIExtension
 					// |    0 +--+ 1 |      |
 					// +------+  |   +------+       
 					//         2 +-------------+ 3
-					//               +------+  |   +------+
-					//               |      |4 +-->+ 5    |
+					//               +------+  |
+					//               |      |  |
+					//               +------+  | 
+					//                         |    5
+					//               +------+  +-->+------+
+					//               |      |  4   |      |
 					//               +------+      +------+
+					int halfRowHeight = (RowHeight / 2);
+
 					points = new Point[6];
 					points[0] = firstPt;
-					points[1] = new Point(firstPt.X + halfHorzSpacing, firstPt.Y);
-					points[2] = new Point(firstPt.X + halfHorzSpacing, (firstPt.Y + lastPt.Y) / 2);
-					points[3] = new Point(lastPt.X - halfHorzSpacing, (firstPt.Y + lastPt.Y) / 2);
-					points[4] = new Point(lastPt.X - halfHorzSpacing, lastPt.Y);
+					points[1] = new Point(points[0].X + halfHorzSpacing, firstPt.Y);
+					points[2] = new Point(points[1].X, (firstPt.Y + (toAboveFrom ? -halfRowHeight : halfRowHeight)));
+					points[3] = new Point(lastPt.X - halfHorzSpacing, points[2].Y);
+					points[4] = new Point(points[3].X, lastPt.Y);
 					points[5] = lastPt;
 				}
 			}
 
-			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-			using (var pen = new Pen(Color.DarkGray, critical ? 2f : 0f))
-				graphics.DrawLines(pen, points);
-
-			// Draw Arrow head and box without smoothing to better match core app
-			graphics.SmoothingMode = SmoothingMode.None;
-
-			Point arrow = points[points.Length - 1];
-			arrow.X--;
-
-			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
-
-			// Draw 3x3 box at 'to' end
-			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);
-			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
+			return points;
 		}
 
 		private bool TaskHasIcon(PertNetworkItem taskItem)
