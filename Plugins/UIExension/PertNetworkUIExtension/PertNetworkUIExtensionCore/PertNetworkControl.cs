@@ -923,7 +923,7 @@ namespace PertNetworkUIExtension
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
 		}
 
-		protected Point[] CalcConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
+		protected override Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);

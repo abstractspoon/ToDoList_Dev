@@ -34,6 +34,34 @@ namespace PertNetworkUIExtension
 
 	}
 
+	class NetworkConnectionHitTest
+	{
+		public double ClosestDistance = 0.0;
+		public Point ClosestPointOnLine = Point.Empty;
+		public int ClosestSegment = -1;
+
+		public NetworkConnectionHitTest(Point[] points, Point point, int tolerance = 2)
+		{
+			HitTest(points, point, tolerance);
+		}
+
+		protected void HitTest(Point[] points, Point point, int tolerance)
+		{
+			// TODO
+
+
+		}
+	}
+
+	public class NetworkPathHitTestResult
+	{
+		public NetworkPath Path;
+		public NetworkItem FromItem, ToItem;
+		public int ConnectionSegment = -1;
+		public Point ClosestPointOnSegment = Point.Empty;
+		public double ClosestDistance = 0;
+	}
+
 	public partial class NetworkControl : UserControl
 	{
 		// Win32 Imports -----------------------------------------------------------------
@@ -138,7 +166,7 @@ namespace PertNetworkUIExtension
 			Invalidate();
 		}
 
-		public NetworkItem HitTestItem(Point pos, bool visibleOnly = true)
+		public NetworkItem HitTestItem(Point pos)
 		{
 			// Brute force for now
 			foreach (var path in Data.Paths)
@@ -149,20 +177,62 @@ namespace PertNetworkUIExtension
 				{
 					var itemRect = CalcItemRectangle(item);
 
+					// We can stop once we are beyond the rightmost visible items
+					if (itemRect.Left > ClientRectangle.Right)
+						break;
+
 					if (itemRect.Contains(pos))
 						return item;
 
-					if (visibleOnly)
-						pathRect = Rectangle.Union(pathRect, itemRect);
+					pathRect = Rectangle.Union(pathRect, itemRect);
 				}
 
 				// We can stop when we've passed the bottom of the visible items
-				if (visibleOnly && (pathRect.Bottom > ClientRectangle.Bottom))
+				if (pathRect.Bottom > ClientRectangle.Bottom)
 					break;
 			}
 
 			// else
 			return null;
+		}
+
+		protected NetworkPathHitTestResult HitTestConnection(Point pos)
+		{
+			// Brute force for now
+			NetworkPathHitTestResult closestHit = new NetworkPathHitTestResult();
+
+			foreach (var path in Data.Paths)
+			{
+				Rectangle pathRect = CalcItemRectangle(path.Items[0]);
+
+				for (int i = 1; i < path.Count; i++)
+				{
+					var points = GetConnectionPoints(path.Items[i - 1], path.Items[0]);
+					var hitTest = new NetworkConnectionHitTest(points, pos);
+
+					if (hitTest.ClosestSegment != -1)
+					{
+						if (closestHit.ClosestDistance > hitTest.ClosestDistance)
+						{
+							closestHit.ClosestDistance = hitTest.ClosestDistance;
+							closestHit.Path = path;
+							closestHit.FromItem = path.Items[i - 1];
+							closestHit.ToItem = path.Items[i];
+
+							// TODO
+							closestHit.ClosestPointOnSegment = Point.Empty;
+						}
+					}
+
+					pathRect = Rectangle.Union(pathRect, CalcItemRectangle(path.Items[i]));
+				}
+
+				// We can stop when we've passed the bottom of the visible items
+				if (pathRect.Bottom > ClientRectangle.Bottom)
+					break;
+			}
+
+			return closestHit;
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
@@ -258,14 +328,30 @@ namespace PertNetworkUIExtension
 
 		virtual protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
+			graphics.DrawLines(Pens.Blue, GetConnectionPoints(fromItem, toItem));
+		}
+
+		virtual protected Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
+		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);
 
-			graphics.DrawLine(Pens.Blue, 
-								fromRect.Right, 
-								(fromRect.Top + (fromRect.Height / 2)), 
-								toRect.Left, 
-								(toRect.Top + (toRect.Height / 2)));
+			Point[] points = new Point[2];
+
+			points[0].X = fromRect.Right;
+			points[0].Y = (fromRect.Top + (fromRect.Height / 2));
+			points[1].X = toRect.Left;
+			points[2].Y = (toRect.Top + (toRect.Height / 2));
+
+			return points;
+		}
+		
+		protected NetworkItem HitTestConnection(NetworkItem fromItem, NetworkItem toItem)
+		{
+			var points = GetConnectionPoints(fromItem, toItem);
+
+			// TODO
+			return null;
 		}
 
 		protected Rectangle CalcItemRectangle(NetworkItem item)
