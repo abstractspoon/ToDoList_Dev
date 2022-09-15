@@ -1047,23 +1047,24 @@ namespace PertNetworkUIExtension
 				Point lastPt = new Point(toRect.Left, toAboveFrom ? toRect.Bottom : toRect.Top);
 
 				int halfHorzSpacing = (ItemHorzSpacing / 2);
+				int quarterHorzSpacing = (ItemHorzSpacing / 4);
 
 				if (toItem.Position.X == fromItem.Position.X + 1)
 				{
 					// 'To' one column to the right of 'From'
 					// and anywhere above or below 'From'
 					// +------+             
-					// |    0 +---+ 1
-					// +------+   |            
-					//            |    3
-					//          2 +-->+------+
-					//                |      |
+					// |    0 +-+ 1
+					// +------+  \            
+					//            \    3
+					//             +->+------+
+					//            2   |      |
 					//                +------+
 
 					points = new Point[4];
 					points[0] = firstPt;
 					points[1] = new Point(points[0].X + halfHorzSpacing, firstPt.Y);
-					points[2] = new Point(points[1].X, lastPt.Y);
+					points[2] = new Point(lastPt.X - quarterHorzSpacing, lastPt.Y);
 					points[3] = lastPt;
 				}
 				else
@@ -1071,14 +1072,11 @@ namespace PertNetworkUIExtension
 					// 'To' more than one column to the right of 'From'
 					// and anywhere above or below 'From'
 					// +------+      +------+       
-					// |    0 +--+ 1 |      |
-					// +------+  |   +------+       
-					//         2 +-------------+ 3
-					//               +------+  |
-					//               |      |  |
-					//               +------+  | 
-					//                         |    5
-					//               +------+  +-->+------+
+					// |    0 +-+  1 |      |
+					// +------+  \   +------+  3      
+					//            +-----------+ 
+					//           2             \    5
+					//               +------+   +->+------+
 					//               |      |  4   |      |
 					//               +------+      +------+
 					int halfRowHeight = (RowHeight / 2);
@@ -1086,9 +1084,9 @@ namespace PertNetworkUIExtension
 					points = new Point[6];
 					points[0] = firstPt;
 					points[1] = new Point(points[0].X + halfHorzSpacing, firstPt.Y);
-					points[2] = new Point(points[1].X, (firstPt.Y + (toAboveFrom ? -halfRowHeight : halfRowHeight)));
-					points[3] = new Point(lastPt.X - halfHorzSpacing, points[2].Y);
-					points[4] = new Point(points[3].X, lastPt.Y);
+					points[2] = new Point(points[1].X + quarterHorzSpacing, (firstPt.Y + (toAboveFrom ? -halfRowHeight : halfRowHeight)));
+					points[3] = new Point(lastPt.X - halfHorzSpacing - quarterHorzSpacing, points[2].Y);
+					points[4] = new Point(points[3].X + halfHorzSpacing, lastPt.Y);
 					points[5] = lastPt;
 				}
 			}
