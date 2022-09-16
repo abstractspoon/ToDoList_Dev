@@ -36,7 +36,7 @@ namespace PertNetworkUIExtension
 
 	class NetworkConnectionHitTest
 	{
-		public double ClosestDistance = 0.0;
+		public double ClosestDistance = -1;
 		public Point ClosestPointOnLine = Point.Empty;
 		public int ClosestSegment = -1;
 
@@ -47,19 +47,94 @@ namespace PertNetworkUIExtension
 
 		protected void HitTest(Point[] points, Point point, int tolerance)
 		{
-			// TODO
+			for (int i = 1; i < points.Count(); i++)
+			{
+				Point ptStart = points[i - 1];
+				Point ptEnd = points[i];
 
+				double distance = 0;
+				Point ptOnLine = Point.Empty;
+				int segment = -1;
 
+				if (DistanceFromPointToSegment(point, 
+											   ptStart, 
+											   ptEnd, 
+											   ref distance,
+											   ref ptOnLine))
+				{
+					segment = (i - 1);
+				}
+				else
+				{
+					double distToStartSqrd = DistanceSquared(point, points[i - 1]);
+					double distToEndSqrd = DistanceSquared(point, points[i]);
+
+					if (distToStartSqrd < distToEndSqrd)
+					{
+						ptOnLine = ptStart;
+						distance = Math.Sqrt(distToStartSqrd);
+						segment = (i - 1);
+					}
+					else
+					{
+						ptOnLine = ptStart;
+						distance = Math.Sqrt(distToStartSqrd);
+						segment = i;
+					}
+				}
+
+				if ((i == 1) || (distance < ClosestDistance))
+				{
+					ClosestDistance = distance;
+					ClosestPointOnLine = ptOnLine;
+					ClosestSegment = segment;
+				}
+			}
 		}
+
+		static double DistanceSquared(Point ptStart, Point ptEnd)
+		{
+			return (((ptStart.X - ptEnd.X) * (ptStart.X - ptEnd.X)) +
+					((ptStart.Y - ptEnd.Y) * (ptStart.Y - ptEnd.Y)));
+		}
+
+		static protected bool DistanceFromPointToSegment(Point pt, Point ptStart, Point ptEnd, ref double distance, ref Point ptIntersection)
+		{
+			double distSqrd = DistanceSquared(ptStart, ptEnd);
+
+			if (distSqrd == 0.0)
+			{
+				return false;
+			}
+
+			double U = ((pt.X - ptStart.X) * (ptEnd.X - ptStart.X)) +
+					   ((pt.Y - ptStart.Y) * (ptEnd.Y - ptStart.Y));
+
+			U /= distSqrd;
+
+			if ((U < 0.0) || (U > 1.0))
+			{
+				// closest point does not fall within the line segment
+				return false;
+			}
+
+			ptIntersection.X = (int)(ptStart.X + (U * (ptEnd.X - ptStart.X)));
+			ptIntersection.Y = (int)(ptStart.Y + (U * (ptEnd.Y - ptStart.Y)));
+
+			distance = Math.Sqrt(DistanceSquared(pt, ptIntersection));
+
+			return true;
+		}
+
 	}
 
-	public class NetworkPathHitTestResult
+	public class NetworkConnectionHitTestResult
 	{
 		public NetworkPath Path;
 		public NetworkItem FromItem, ToItem;
-		public int ConnectionSegment = -1;
+		public int ClosestSegment = -1;
 		public Point ClosestPointOnSegment = Point.Empty;
-		public double ClosestDistance = 0;
+		public double ClosestDistance = double.MaxValue;
 	}
 
 	public partial class NetworkControl : UserControl
@@ -112,6 +187,8 @@ namespace PertNetworkUIExtension
 			private set { base.Font = value; }
 		}
 		protected Font BaseFont { get; private set; }
+
+		private Tuple<NetworkItem, NetworkItem> m_HotConnection;
 
 		private bool IsSavingToImage = false;
 		private uint SelectedItemId = 0;
@@ -196,10 +273,10 @@ namespace PertNetworkUIExtension
 			return null;
 		}
 
-		protected NetworkPathHitTestResult HitTestConnection(Point pos)
+		protected NetworkConnectionHitTestResult HitTestConnection(Point pos)
 		{
-			// Brute force for now
-			NetworkPathHitTestResult closestHit = new NetworkPathHitTestResult();
+			// Do the least amount of work possible
+			NetworkConnectionHitTestResult closestHit = new NetworkConnectionHitTestResult();
 
 			foreach (var path in Data.Paths)
 			{
@@ -207,24 +284,29 @@ namespace PertNetworkUIExtension
 
 				for (int i = 1; i < path.Count; i++)
 				{
-					var points = GetConnectionPoints(path.Items[i - 1], path.Items[0]);
-					var hitTest = new NetworkConnectionHitTest(points, pos);
-
-					if (hitTest.ClosestSegment != -1)
-					{
-						if (closestHit.ClosestDistance > hitTest.ClosestDistance)
-						{
-							closestHit.ClosestDistance = hitTest.ClosestDistance;
-							closestHit.Path = path;
-							closestHit.FromItem = path.Items[i - 1];
-							closestHit.ToItem = path.Items[i];
-
-							// TODO
-							closestHit.ClosestPointOnSegment = Point.Empty;
-						}
-					}
-
 					pathRect = Rectangle.Union(pathRect, CalcItemRectangle(path.Items[i]));
+
+					if (pathRect.Contains(pos))
+					{
+						var points = GetConnectionPoints(path.Items[i - 1], path.Items[i]);
+						var hitTest = new NetworkConnectionHitTest(points, pos);
+
+						if (hitTest.ClosestSegment != -1)
+						{
+							if (closestHit.ClosestDistance > hitTest.ClosestDistance)
+							{
+								closestHit.ClosestDistance = hitTest.ClosestDistance;
+								closestHit.Path = path;
+								closestHit.FromItem = path.Items[i - 1];
+								closestHit.ToItem = path.Items[i];
+
+								// TODO
+								closestHit.ClosestPointOnSegment = Point.Empty;
+							}
+						}
+
+						break;
+					}
 				}
 
 				// We can stop when we've passed the bottom of the visible items
@@ -274,8 +356,11 @@ namespace PertNetworkUIExtension
 						if (WantDrawConnection(item, prevItem, clipRect))
 						{
 							graphics.SmoothingMode = SmoothingMode.AntiAlias;
+							bool hot = (m_HotConnection != null) && 
+										(prevItem == m_HotConnection.Item1) &&
+										(item == m_HotConnection.Item2);
 
-							OnPaintConnection(graphics, prevItem, item, path);
+							OnPaintConnection(graphics, prevItem, item, path, hot);
 						}
 						else
 						{
@@ -326,7 +411,7 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-		virtual protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
+		virtual protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool hot)
 		{
 			graphics.DrawLines(Pens.Blue, GetConnectionPoints(fromItem, toItem));
 		}
@@ -346,14 +431,6 @@ namespace PertNetworkUIExtension
 			return points;
 		}
 		
-		protected NetworkItem HitTestConnection(NetworkItem fromItem, NetworkItem toItem)
-		{
-			var points = GetConnectionPoints(fromItem, toItem);
-
-			// TODO
-			return null;
-		}
-
 		protected Rectangle CalcItemRectangle(NetworkItem item)
 		{
 			return CalcItemRectangle(item.Position.X, item.Position.Y, !IsSavingToImage);
@@ -534,6 +611,17 @@ namespace PertNetworkUIExtension
 
 				if (CheckStartDragging(e.Location))
 					DragTimer.Stop();
+			}
+			else
+			{
+				var hitTest = HitTestConnection(e.Location);
+				var hitConnection = Tuple.Create(hitTest.FromItem, hitTest.ToItem);
+
+				if (m_HotConnection != hitConnection)
+				{
+					m_HotConnection = hitConnection;
+					Invalidate();
+				}
 			}
 		}
 

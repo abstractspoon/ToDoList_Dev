@@ -704,6 +704,7 @@ namespace PertNetworkUIExtension
 		{
 			base.DoPaint(graphics, clipRect);
 
+/*
 			foreach (var path in CriticalPaths)
 			{
 				NetworkItem prevItem = null;
@@ -719,6 +720,7 @@ namespace PertNetworkUIExtension
 					prevItem = item;
 				}
 			}
+*/
 		}
 
 		override protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected)
@@ -882,7 +884,7 @@ namespace PertNetworkUIExtension
 
 		}
 
-		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
+		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool hot)
 		{
 			// Don't paint critical paths until the end
 			if ((CriticalPaths.Contains(path)))
@@ -898,7 +900,7 @@ namespace PertNetworkUIExtension
 				}
 			}
 			
-			DoPaintConnection(graphics, fromItem, toItem, path, false);
+			DoPaintConnection(graphics, fromItem, toItem, path, hot);
 		}
 
 		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool critical)
