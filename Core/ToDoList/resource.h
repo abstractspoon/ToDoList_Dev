@@ -2460,6 +2460,7 @@
 #define IDS_CONFIRMSAVEAS_TITLE         51624
 #define IDS_PRINT_TASKVIEW              51625
 #define IDS_TASKCOMPLETION              51626
+#define IDS_CUSTOM_FEATURE_SHOWEDITFIELD 51627
 
 // Next default values for new objects
 // 
