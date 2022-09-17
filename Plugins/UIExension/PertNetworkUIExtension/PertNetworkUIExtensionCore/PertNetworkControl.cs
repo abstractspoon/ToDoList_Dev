@@ -905,11 +905,11 @@ namespace PertNetworkUIExtension
 
 		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool critical)
 		{
-			Point[] points = CalcConnectionPoints2(fromItem, toItem);
+			Point[] points = GetConnectionPoints(fromItem, toItem);
 
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-			using (var pen = new Pen(Color.DarkGray, critical ? 2f : 0f))
+			using (var pen = new Pen((critical ? Color.Red : Color.DarkGray), (critical ? 2f : 0f)))
 				graphics.DrawLines(pen, points);
 
 			// Draw Arrow head and box without smoothing to better match core app
@@ -926,6 +926,11 @@ namespace PertNetworkUIExtension
 		}
 
 		protected override Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
+		{
+			return CalcConnectionPoints2(fromItem, toItem);
+		}
+
+		protected Point[] CalcConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
 			var fromRect = CalcItemRectangle(fromItem);
 			var toRect = CalcItemRectangle(toItem);

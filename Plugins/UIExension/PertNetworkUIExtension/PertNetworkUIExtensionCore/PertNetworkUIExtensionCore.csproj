@@ -47,6 +47,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Geometry2D.cs" />
     <Compile Include="NetworkControl.cs" />
     <Compile Include="NetworkControl.Designer.cs">
       <DependentUpon>NetworkControl.cs</DependentUpon>
