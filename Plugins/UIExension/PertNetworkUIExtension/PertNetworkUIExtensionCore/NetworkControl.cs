@@ -40,6 +40,14 @@ namespace PertNetworkUIExtension
 		public NetworkItem FromItem, ToItem;
 		public int Segment = -1;
 		public Point PointOnSegment = Point.Empty;
+
+		public bool SegmentMatches(NetworkConnectionHitTestResult other)
+		{
+			return ((Path == other.Path) &&
+					(FromItem == other.FromItem) &&
+					(ToItem == other.ToItem) &&
+					(Segment == other.Segment));
+		}
 	}
 
 	public partial class NetworkControl : UserControl
@@ -93,7 +101,7 @@ namespace PertNetworkUIExtension
 		}
 		protected Font BaseFont { get; private set; }
 
-		private Tuple<NetworkItem, NetworkItem> m_HotConnection;
+		protected NetworkConnectionHitTestResult HotConnection { get; private set; }
 
 		private bool IsSavingToImage = false;
 		private uint SelectedItemId = 0;
@@ -186,13 +194,16 @@ namespace PertNetworkUIExtension
 
 			foreach (var path in Data.Paths)
 			{
-				Rectangle pathRect = CalcItemRectangle(path.Items[0]);
+				if (!ClientRectangle.IntersectsWith(CalcPathBounds(path)))
+					continue;
+
+				var prevItemRect = CalcItemRectangle(path.Items[0]);
 
 				for (int i = 1; i < path.Count; i++)
 				{
-					pathRect = Rectangle.Union(pathRect, CalcItemRectangle(path.Items[i]));
+					var itemRect = CalcItemRectangle(path.Items[i]);
 
-					if (pathRect.Contains(pos))
+					if (Rectangle.Union(prevItemRect, itemRect).Contains(pos))
 					{
 						var points = GetConnectionPoints(path.Items[i - 1], path.Items[i]);
 						int segment = -1;
@@ -213,11 +224,9 @@ namespace PertNetworkUIExtension
 							return closestHit;
 						}
 					}
-				}
 
-				// We can stop when we've passed the bottom of the visible items
-				if (pathRect.Bottom > ClientRectangle.Bottom)
-					break;
+					prevItemRect = itemRect;
+				}
 			}
 
 			return null;
@@ -239,6 +248,9 @@ namespace PertNetworkUIExtension
 
 			foreach (var path in Data.Paths)
 			{
+				if (!clipRect.IntersectsWith(CalcPathBounds(path)))
+					continue;
+
 				NetworkItem prevItem = null;
 
 				foreach (var item in path.Items)
@@ -262,11 +274,8 @@ namespace PertNetworkUIExtension
 						if (WantDrawConnection(item, prevItem, clipRect))
 						{
 							graphics.SmoothingMode = SmoothingMode.AntiAlias;
-							bool hot = (m_HotConnection != null) && 
-										(prevItem == m_HotConnection.Item1) &&
-										(item == m_HotConnection.Item2);
 
-							OnPaintConnection(graphics, prevItem, item, path, hot);
+							OnPaintConnection(graphics, prevItem, item, path);
 						}
 						else
 						{
@@ -277,6 +286,18 @@ namespace PertNetworkUIExtension
 					prevItem = item;
 				}
 			}
+
+			// Draw the hot connection segment
+			if ((HotConnection != null) && (HotConnection.Segment != -1))
+			{
+				graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+				var points = GetConnectionPoints(HotConnection.FromItem, HotConnection.ToItem);
+
+				using (var pen = new Pen(Color.Red, 1.5f))
+					graphics.DrawLine(pen, points[HotConnection.Segment], points[HotConnection.Segment + 1]);
+			}
+
 		}
 
 		protected bool WantDrawItem(NetworkItem item, Rectangle clipRect)
@@ -317,9 +338,16 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-		virtual protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool hot)
+		virtual protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
 			graphics.DrawLines(Pens.Blue, GetConnectionPoints(fromItem, toItem));
+		}
+
+		protected bool IsHotConnection(NetworkItem fromItem, NetworkItem toItem)
+		{
+			return ((HotConnection != null) &&
+					(HotConnection.FromItem == fromItem) &&
+					(HotConnection.ToItem == toItem));
 		}
 
 		virtual protected Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
@@ -340,6 +368,19 @@ namespace PertNetworkUIExtension
 		protected Rectangle CalcItemRectangle(NetworkItem item)
 		{
 			return CalcItemRectangle(item.Position.X, item.Position.Y, !IsSavingToImage);
+		}
+
+		protected Rectangle CalcPathBounds(NetworkPath path)
+		{
+			if (path.Count == 0)
+				return Rectangle.Empty;
+
+			var pathRect = CalcItemRectangle(path.Items[0]);
+
+			for (int i = 1; i < path.Count; i++)
+				pathRect = Rectangle.Union(pathRect, CalcItemRectangle(path.Items[i]));
+
+			return pathRect;
 		}
 
 		private Rectangle CalcItemRectangle(int x, int y, bool scrolled)
@@ -507,12 +548,12 @@ namespace PertNetworkUIExtension
 			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
 		}
 
-		protected void InvalidateConnection(Tuple<NetworkItem, NetworkItem> connection)
+		protected void InvalidateConnection(NetworkConnectionHitTestResult connection)
 		{
 			if (connection != null)
 			{
-				Invalidate(Rectangle.Union(CalcItemRectangle(connection.Item1),
-											CalcItemRectangle(connection.Item2)));
+				Invalidate(Rectangle.Union(CalcItemRectangle(connection.FromItem),
+											CalcItemRectangle(connection.ToItem)));
 			}
 		}
 
@@ -520,10 +561,10 @@ namespace PertNetworkUIExtension
 		{
 			base.OnMouseLeave(e);
 
-			if (m_HotConnection != null)
+			if (HotConnection != null)
 			{
-				InvalidateConnection(m_HotConnection);
-				m_HotConnection = null;
+				InvalidateConnection(HotConnection);
+				HotConnection = null;
 
 				Update();
 			}
@@ -544,26 +585,24 @@ namespace PertNetworkUIExtension
 			{
 				var hitTest = HitTestConnection(e.Location);
 
-				if ((hitTest == null) && (m_HotConnection == null))
+				if ((hitTest == null) && (HotConnection == null))
 					return;
 
 				if (hitTest != null)
 				{
-					var hitConnection = Tuple.Create(hitTest.FromItem, hitTest.ToItem);
-
-					if ((m_HotConnection == null) || (m_HotConnection != hitConnection))
+					if ((HotConnection == null) || !HotConnection.SegmentMatches(hitTest))
 					{
-						InvalidateConnection(m_HotConnection);
-						InvalidateConnection(hitConnection);
+						InvalidateConnection(HotConnection);
+						InvalidateConnection(hitTest);
 
-						m_HotConnection = hitConnection;
+						HotConnection = hitTest;
 					}
 				}
 				else
 				{
-					InvalidateConnection(m_HotConnection);
+					InvalidateConnection(HotConnection);
 
-					m_HotConnection = null;
+					HotConnection = null;
 				}
 
 				Update();

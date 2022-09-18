@@ -703,7 +703,6 @@ namespace PertNetworkUIExtension
 		override protected void DoPaint(Graphics graphics, Rectangle clipRect)
 		{
 			base.DoPaint(graphics, clipRect);
-
 /*
 			foreach (var path in CriticalPaths)
 			{
@@ -884,7 +883,7 @@ namespace PertNetworkUIExtension
 
 		}
 
-		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool hot)
+		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
 			// Don't paint critical paths until the end
 			if ((CriticalPaths.Contains(path)))
@@ -900,16 +899,16 @@ namespace PertNetworkUIExtension
 				}
 			}
 			
-			DoPaintConnection(graphics, fromItem, toItem, path, hot);
+			DoPaintConnection(graphics, fromItem, toItem, path);
 		}
 
-		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path, bool critical)
+		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
-			Point[] points = GetConnectionPoints(fromItem, toItem);
-
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-			using (var pen = new Pen((critical ? Color.Red : Color.DarkGray), (critical ? 2f : 0f)))
+			Point[] points = GetConnectionPoints(fromItem, toItem);
+
+			using (var pen = new Pen(Color.DarkGray, 0f))
 				graphics.DrawLines(pen, points);
 
 			// Draw Arrow head and box without smoothing to better match core app
