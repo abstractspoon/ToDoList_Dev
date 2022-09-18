@@ -50,6 +50,57 @@ namespace PertNetworkUIExtension
 		}
 	}
 
+	public class LayoutCalculator
+	{
+		public Font Font;
+		public int LabelPadding = 2;
+		public double HitTestTolerance = 5;
+		public bool IsSavingToOmage = false;
+
+		public int ItemHeight { get { return ((Font.Height + LabelPadding) * 4); } }
+		public int ItemWidth { get { return (ItemHeight * 3); } }
+		public int ItemVertSpacing { get { return (ItemHeight / 4); } }
+		public int ItemHorzSpacing { get { return (ItemWidth / 4); } }
+		public int GraphBorder { get { return ItemVertSpacing; } }
+
+		public int RowHeight { get { return (ItemHeight + ItemVertSpacing); } }
+		public int ColumnWidth { get { return (ItemWidth + ItemHorzSpacing); } }
+
+		public Rectangle CalcItemRectangle(NetworkItem item, Point scrollPos)
+		{
+			return CalcItemRectangle(item.Position.X, item.Position.Y, scrollPos);
+		}
+
+		public Rectangle CalcPathBounds(NetworkPath path, Point scrollPos)
+		{
+			if (path.Count == 0)
+				return Rectangle.Empty;
+
+			var pathRect = CalcItemRectangle(path.Items[0], scrollPos);
+
+			for (int i = 1; i < path.Count; i++)
+				pathRect = Rectangle.Union(pathRect, CalcItemRectangle(path.Items[i], scrollPos));
+
+			return pathRect;
+		}
+
+		public Rectangle CalcItemRectangle(int x, int y, Point scrollPos)
+		{
+			Rectangle itemRect = new Rectangle(GraphBorder, GraphBorder, 0, 0);
+
+			itemRect.X += ((ColumnWidth) * x);
+			itemRect.Y += ((RowHeight) * y);
+
+			itemRect.Width = ItemWidth;
+			itemRect.Height = ItemHeight;
+
+			itemRect.Offset(-scrollPos.X, -scrollPos.Y);
+
+			return itemRect;
+		}
+
+	}
+
 	public partial class NetworkControl : UserControl
 	{
 		// Win32 Imports -----------------------------------------------------------------
@@ -97,26 +148,19 @@ namespace PertNetworkUIExtension
 		public new Font Font
 		{
 			get { return base.Font; }
-			private set { base.Font = value; }
+			private set
+			{
+				base.Font = value;
+				Layout.Font = value;
+			}
 		}
 		protected Font BaseFont { get; private set; }
 
 		protected NetworkConnectionHitTestResult HotConnection { get; private set; }
+		protected new LayoutCalculator Layout { get; private set; }
 
 		private bool IsSavingToImage = false;
 		private uint SelectedItemId = 0;
-
-		protected int LabelPadding = 2;
-		protected double HitTestTolerance = 5;
-
-		protected int ItemHeight { get { return ((Font.Height + LabelPadding) * 4); } }
-		protected int ItemWidth { get { return (ItemHeight* 3); } }
-		protected int ItemVertSpacing { get { return (ItemHeight / 4); } }
-		protected int ItemHorzSpacing { get { return (ItemWidth / 4); } }
-		protected int GraphBorder { get { return ItemVertSpacing; } }
-
-		protected int RowHeight { get { return (ItemHeight + ItemVertSpacing); } }
-		protected int ColumnWidth { get { return (ItemWidth + ItemHorzSpacing); } }
 
 		public NetworkData Data { get; private set; }
 
@@ -131,6 +175,7 @@ namespace PertNetworkUIExtension
 			ConnectionColor = Color.Magenta;
 			Data = new NetworkData();
 			BaseFont = Font;
+			Layout = new LayoutCalculator();
 
 			InitializeComponent();
 		}
@@ -147,12 +192,12 @@ namespace PertNetworkUIExtension
 
 		private void RecalculateGraphSize(Point maxPos)
 		{
-			Rectangle maxItemRect = CalcItemRectangle(maxPos.X, maxPos.Y, false);
+			Rectangle maxItemRect = Layout.CalcItemRectangle(maxPos.X, maxPos.Y, Point.Empty);
 
-			AutoScrollMinSize = new Size(maxItemRect.Right + GraphBorder, maxItemRect.Bottom + GraphBorder);
+			AutoScrollMinSize = new Size(maxItemRect.Right + Layout.GraphBorder, maxItemRect.Bottom + Layout.GraphBorder);
 
-			HorizontalScroll.SmallChange = ItemHeight;
-			VerticalScroll.SmallChange = ItemWidth;
+			HorizontalScroll.SmallChange = Layout.ItemHeight;
+			VerticalScroll.SmallChange = Layout.ItemWidth;
 
 			Invalidate();
 		}
@@ -166,7 +211,7 @@ namespace PertNetworkUIExtension
 
 				foreach (var item in path.Items)
 				{
-					var itemRect = CalcItemRectangle(item);
+					var itemRect = Layout.CalcItemRectangle(item, ScrollPos);
 
 					// We can stop once we are beyond the rightmost visible items
 					if (itemRect.Left > ClientRectangle.Right)
@@ -194,14 +239,14 @@ namespace PertNetworkUIExtension
 
 			foreach (var path in Data.Paths)
 			{
-				if (!ClientRectangle.IntersectsWith(CalcPathBounds(path)))
+				if (!ClientRectangle.IntersectsWith(Layout.CalcPathBounds(path, ScrollPos)))
 					continue;
 
-				var prevItemRect = CalcItemRectangle(path.Items[0]);
+				var prevItemRect = Layout.CalcItemRectangle(path.Items[0], ScrollPos);
 
 				for (int i = 1; i < path.Count; i++)
 				{
-					var itemRect = CalcItemRectangle(path.Items[i]);
+					var itemRect = Layout.CalcItemRectangle(path.Items[i], ScrollPos);
 
 					if (Rectangle.Union(prevItemRect, itemRect).Contains(pos))
 					{
@@ -211,7 +256,7 @@ namespace PertNetworkUIExtension
 
 						if (Geometry2D.HitTest(points, 
 												pos, 
-												HitTestTolerance, 
+												Layout.HitTestTolerance, 
 												ref segment, 
 												ref ptIntersection))
 						{
@@ -248,7 +293,7 @@ namespace PertNetworkUIExtension
 
 			foreach (var path in Data.Paths)
 			{
-				if (!clipRect.IntersectsWith(CalcPathBounds(path)))
+				if (!clipRect.IntersectsWith(Layout.CalcPathBounds(path, ScrollPos)))
 					continue;
 
 				NetworkItem prevItem = null;
@@ -305,7 +350,7 @@ namespace PertNetworkUIExtension
 			if (IsSavingToImage)
 				return true;
 
-			return clipRect.IntersectsWith(CalcItemRectangle(item));
+			return clipRect.IntersectsWith(Layout.CalcItemRectangle(item, ScrollPos));
 		}
 
 		protected bool WantDrawConnection(NetworkItem fromItem, NetworkItem toItem, Rectangle clipRect)
@@ -313,15 +358,15 @@ namespace PertNetworkUIExtension
 			if (IsSavingToImage)
 				return true;
 
-			var fromRect = CalcItemRectangle(fromItem);
-			var toRect = CalcItemRectangle(toItem);
+			var fromRect = Layout.CalcItemRectangle(fromItem, ScrollPos);
+			var toRect = Layout.CalcItemRectangle(toItem, ScrollPos);
 
 			return clipRect.IntersectsWith(Rectangle.Union(fromRect, toRect));
 		}
 
 		virtual protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected)
 		{
-			var itemRect = CalcItemRectangle(item);
+			var itemRect = Layout.CalcItemRectangle(item, ScrollPos);
 			graphics.DrawRectangle(Pens.Black, itemRect);
 
 			int iPath = Data.Paths.IndexOf(path) + 1;
@@ -352,8 +397,8 @@ namespace PertNetworkUIExtension
 
 		virtual protected Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
-			var fromRect = CalcItemRectangle(fromItem);
-			var toRect = CalcItemRectangle(toItem);
+			var fromRect = Layout.CalcItemRectangle(fromItem, ScrollPos);
+			var toRect = Layout.CalcItemRectangle(toItem, ScrollPos);
 
 			Point[] points = new Point[2];
 
@@ -364,42 +409,18 @@ namespace PertNetworkUIExtension
 
 			return points;
 		}
+
+		protected Point ScrollPos
+		{
+			get
+			{
+				if (IsSavingToImage)
+					return Point.Empty;
+
+				return new Point(HorizontalScroll.Value, VerticalScroll.Value);
+			}
+		}
 		
-		protected Rectangle CalcItemRectangle(NetworkItem item)
-		{
-			return CalcItemRectangle(item.Position.X, item.Position.Y, !IsSavingToImage);
-		}
-
-		protected Rectangle CalcPathBounds(NetworkPath path)
-		{
-			if (path.Count == 0)
-				return Rectangle.Empty;
-
-			var pathRect = CalcItemRectangle(path.Items[0]);
-
-			for (int i = 1; i < path.Count; i++)
-				pathRect = Rectangle.Union(pathRect, CalcItemRectangle(path.Items[i]));
-
-			return pathRect;
-		}
-
-		private Rectangle CalcItemRectangle(int x, int y, bool scrolled)
-		{
-			Rectangle itemRect = new Rectangle(GraphBorder, GraphBorder, 0, 0);
-
-			itemRect.X += ((ItemWidth + ItemHorzSpacing) * x);
-			itemRect.Y += ((ItemHeight + ItemVertSpacing) * y);
-
-			itemRect.Width = ItemWidth;
-			itemRect.Height = ItemHeight;
-
-			// Offset rect by scroll pos
-			if (scrolled)
-				itemRect.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
-
-			return itemRect;
-		}
-				
 		public bool SetFont(String fontName, int fontSize)
 		{
 			if ((BaseFont.Name == fontName) && (BaseFont.Size == fontSize))
@@ -410,6 +431,7 @@ namespace PertNetworkUIExtension
 			Font = BaseFont;
 
 			RecalculateGraphSize();
+
 			return true;
 		}
 
@@ -435,7 +457,9 @@ namespace PertNetworkUIExtension
 		{
 			var selItem = SelectedItem;
 
-			return ((selItem == null) ? new Rectangle(0, 0, 0, 0) : CalcItemRectangle(selItem));
+			return ((selItem == null) ? 
+						new Rectangle(0, 0, 0, 0) : 
+						Layout.CalcItemRectangle(selItem, ScrollPos));
 		}
 
 		public Bitmap SaveToImage()
@@ -450,7 +474,7 @@ namespace PertNetworkUIExtension
 			using (Graphics graphics = Graphics.FromImage(image))
 			{
 				graphics.Clear(SystemColors.Window);
-				DoPaint(graphics, Rectangle.Empty);
+				DoPaint(graphics, graphRect);
 			}
 
 			IsSavingToImage = false;
@@ -515,6 +539,7 @@ namespace PertNetworkUIExtension
 					else
 						Font = new Font(BaseFont.FontFamily, BaseFont.Size * ZoomFactor, BaseFont.Style);
 
+					Layout.Font = Font;
 					RecalculateGraphSize();
 
 					// Scroll the view to keep the mouse located in the 
@@ -552,8 +577,8 @@ namespace PertNetworkUIExtension
 		{
 			if (connection != null)
 			{
-				Invalidate(Rectangle.Union(CalcItemRectangle(connection.FromItem),
-											CalcItemRectangle(connection.ToItem)));
+				Invalidate(Rectangle.Union(Layout.CalcItemRectangle(connection.FromItem, ScrollPos),
+											Layout.CalcItemRectangle(connection.ToItem, ScrollPos)));
 			}
 		}
 
@@ -768,7 +793,7 @@ namespace PertNetworkUIExtension
 			if (item == null)
 				return;
 
-			Rectangle itemRect = CalcItemRectangle(item);
+			Rectangle itemRect = Layout.CalcItemRectangle(item, ScrollPos);
 
 			if (ClientRectangle.Contains(itemRect))
 				return;
@@ -779,11 +804,11 @@ namespace PertNetworkUIExtension
 
 				if (itemRect.Left < ClientRectangle.Left)
 				{
-					xOffset = (itemRect.Left - ClientRectangle.Left - (ItemHorzSpacing / 2));
+					xOffset = (itemRect.Left - ClientRectangle.Left - (Layout.ItemHorzSpacing / 2));
 				}
 				else if (itemRect.Right > ClientRectangle.Right)
 				{
-					xOffset = (itemRect.Right - ClientRectangle.Right + (ItemHorzSpacing / 2));
+					xOffset = (itemRect.Right - ClientRectangle.Right + (Layout.ItemHorzSpacing / 2));
 				}
 
 				if (xOffset != 0)
@@ -799,11 +824,11 @@ namespace PertNetworkUIExtension
 
 				if (itemRect.Top < ClientRectangle.Top)
 				{
-					yOffset = (itemRect.Top - ClientRectangle.Top - (ItemVertSpacing / 2));
+					yOffset = (itemRect.Top - ClientRectangle.Top - (Layout.ItemVertSpacing / 2));
 				}
 				else if (itemRect.Bottom > ClientRectangle.Bottom)
 				{
-					yOffset = (itemRect.Bottom - ClientRectangle.Bottom + (ItemVertSpacing / 2));
+					yOffset = (itemRect.Bottom - ClientRectangle.Bottom + (Layout.ItemVertSpacing / 2));
 				}
 
 				if (yOffset != 0)
@@ -824,7 +849,7 @@ namespace PertNetworkUIExtension
 
 		protected int PageSize
 		{
-			get { return Math.Max(1, (VerticalScroll.LargeChange / (ItemHeight + ItemVertSpacing))); }
+			get { return Math.Max(1, (VerticalScroll.LargeChange / Layout.RowHeight)); }
 		}
 
 		protected bool HandleCursorKey(Keys key)

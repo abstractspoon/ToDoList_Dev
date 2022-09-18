@@ -156,7 +156,7 @@ namespace PertNetworkUIExtension
 		{
 			Trans = trans;
 			TaskIcons = icons;
-			LabelPadding = ScaleByDPIFactor(2);
+			Layout.LabelPadding = ScaleByDPIFactor(2);
 
 			EditTimer = new Timer();
 			EditTimer.Interval = 500;
@@ -331,7 +331,7 @@ namespace PertNetworkUIExtension
 			// 			labelRect.X += GetExtraWidth(SelectedNode);
 			// 
 			// Make sure the rect is big enough for the unscaled font
-			labelRect.Height = (BaseFont.Height + (2 * LabelPadding)); 
+			labelRect.Height = (BaseFont.Height + (2 * Layout.LabelPadding)); 
 
 			return labelRect;
 		}
@@ -741,7 +741,7 @@ namespace PertNetworkUIExtension
 		{
 			graphics.SmoothingMode = SmoothingMode.None;
 
-			var itemRect = CalcItemRectangle(item);
+			var itemRect = Layout.CalcItemRectangle(item, ScrollPos);
 			var taskItem = (item as PertNetworkItem);
 
 			// Figure out the required colours
@@ -840,7 +840,7 @@ namespace PertNetworkUIExtension
 			}
 
 			// Title
-			titleRect.Inflate(-LabelPadding, -LabelPadding);
+			titleRect.Inflate(-Layout.LabelPadding, -Layout.LabelPadding);
 			titleRect.Height /= 2;
 
 			using (var brush = new SolidBrush(textColor))
@@ -931,8 +931,8 @@ namespace PertNetworkUIExtension
 
 		protected Point[] CalcConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
-			var fromRect = CalcItemRectangle(fromItem);
-			var toRect = CalcItemRectangle(toItem);
+			var fromRect = Layout.CalcItemRectangle(fromItem, ScrollPos);
+			var toRect = Layout.CalcItemRectangle(toItem, ScrollPos);
 
 			Point[] points = null;
 
@@ -1007,16 +1007,16 @@ namespace PertNetworkUIExtension
 					if (toItem.Position.Y < fromItem.Position.Y)
 					{
 						// above
-						points[1] = new Point(firstPt.X + ItemHorzSpacing / 2, firstPt.Y - ItemVertSpacing / 2);
-						points[2] = new Point(lastPt.X - ItemHorzSpacing / 2, points[1].Y);
-						points[3] = new Point(points[2].X + ItemVertSpacing / 2, lastPt.Y);
+						points[1] = new Point(firstPt.X + Layout.ItemHorzSpacing / 2, firstPt.Y - Layout.ItemVertSpacing / 2);
+						points[2] = new Point(lastPt.X - Layout.ItemHorzSpacing / 2, points[1].Y);
+						points[3] = new Point(points[2].X + Layout.ItemVertSpacing / 2, lastPt.Y);
 					}
 					else
 					{
 						// below
-						points[1] = new Point(firstPt.X + ItemHorzSpacing / 2, firstPt.Y + ItemVertSpacing / 2);
-						points[2] = new Point(lastPt.X - ItemHorzSpacing / 2, points[1].Y);
-						points[3] = new Point(points[2].X + ItemVertSpacing / 2, lastPt.Y);
+						points[1] = new Point(firstPt.X + Layout.ItemHorzSpacing / 2, firstPt.Y + Layout.ItemVertSpacing / 2);
+						points[2] = new Point(lastPt.X - Layout.ItemHorzSpacing / 2, points[1].Y);
+						points[3] = new Point(points[2].X + Layout.ItemVertSpacing / 2, lastPt.Y);
 					}
 				}
 			}
@@ -1026,8 +1026,8 @@ namespace PertNetworkUIExtension
 
 		protected Point[] CalcConnectionPoints2(NetworkItem fromItem, NetworkItem toItem)
 		{
-			var fromRect = CalcItemRectangle(fromItem);
-			var toRect = CalcItemRectangle(toItem);
+			var fromRect = Layout.CalcItemRectangle(fromItem, ScrollPos);
+			var toRect = Layout.CalcItemRectangle(toItem, ScrollPos);
 
 			Point[] points = null;
 
@@ -1052,8 +1052,8 @@ namespace PertNetworkUIExtension
 				bool toAboveFrom = (toItem.Position.Y < fromItem.Position.Y);
 				Point lastPt = new Point(toRect.Left, toAboveFrom ? toRect.Bottom : toRect.Top);
 
-				int halfHorzSpacing = (ItemHorzSpacing / 2);
-				int quarterHorzSpacing = (ItemHorzSpacing / 4);
+				int halfHorzSpacing = (Layout.ItemHorzSpacing / 2);
+				int quarterHorzSpacing = (Layout.ItemHorzSpacing / 4);
 
 				if (toItem.Position.X == fromItem.Position.X + 1)
 				{
@@ -1085,7 +1085,7 @@ namespace PertNetworkUIExtension
 					//               +------+   +->+------+
 					//               |      |  4   |      |
 					//               +------+      +------+
-					int halfRowHeight = (RowHeight / 2);
+					int halfRowHeight = (Layout.RowHeight / 2);
 
 					points = new Point[6];
 					points[0] = firstPt;
@@ -1174,7 +1174,7 @@ namespace PertNetworkUIExtension
 				return false;
 			
 			// else
-			return CalcIconRect(CalcItemRectangle(item)).Contains(point);
+			return CalcIconRect(Layout.CalcItemRectangle(item, ScrollPos)).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)
