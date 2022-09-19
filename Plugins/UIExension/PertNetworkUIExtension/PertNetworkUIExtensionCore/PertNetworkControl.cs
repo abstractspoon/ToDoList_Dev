@@ -156,7 +156,6 @@ namespace PertNetworkUIExtension
 		{
 			Trans = trans;
 			TaskIcons = icons;
-			//LabelPadding = ScaleByDPIFactor(2);
 
 			EditTimer = new Timer();
 			EditTimer.Interval = 500;

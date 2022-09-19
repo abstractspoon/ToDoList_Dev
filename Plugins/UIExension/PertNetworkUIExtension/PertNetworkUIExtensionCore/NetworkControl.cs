@@ -64,7 +64,6 @@ namespace PertNetworkUIExtension
 		private double m_DpiFactor = 1.0;
 
 		public Font Font;
-		public int LabelPadding = 2;
 		public double HitTestTolerance = 5;
 		public bool IsSavingToImage = false;
 
@@ -72,10 +71,14 @@ namespace PertNetworkUIExtension
 		public int ItemWidth { get { return (ItemHeight * 3); } }
 		public int ItemVertSpacing { get { return (ItemHeight / 4); } }
 		public int ItemHorzSpacing { get { return (ItemWidth / 4); } }
-		public int GraphBorder { get { return ItemVertSpacing; } }
 
 		public int RowHeight { get { return (ItemHeight + ItemVertSpacing); } }
 		public int ColumnWidth { get { return (ItemWidth + ItemHorzSpacing); } }
+
+		public int GraphBorder { get { return ItemVertSpacing; } }
+		public int LabelPadding { get { return (int)(2 * m_DpiFactor); } }
+
+		// ------------------------------
 
 		public Rectangle CalcItemRectangle(NetworkItem item)
 		{
@@ -105,8 +108,11 @@ namespace PertNetworkUIExtension
 			itemRect.Width = ItemWidth;
 			itemRect.Height = ItemHeight;
 
-			var scrollPos = ScrollPos;
-			itemRect.Offset(-scrollPos.X, -scrollPos.Y);
+			if (scrolled)
+			{
+				var scrollPos = ScrollPos;
+				itemRect.Offset(-scrollPos.X, -scrollPos.Y);
+			}
 
 			return itemRect;
 		}

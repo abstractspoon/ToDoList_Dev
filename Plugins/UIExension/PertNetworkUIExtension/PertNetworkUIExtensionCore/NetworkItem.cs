@@ -225,8 +225,10 @@ namespace PertNetworkUIExtension
 		{
 			int nextAvailXPos = 0; // always
 
-			foreach (var item in m_Items)
+			for (int i = 0; i < Count; i++)
 			{
+				var item = m_Items[i];
+
 				if (item.HasPosition)
 				{
 					// Stay ahead of previously positioned dependencies
@@ -237,10 +239,11 @@ namespace PertNetworkUIExtension
 					item.Position = new Point(nextAvailXPos, nextAvailYPos);
 				}
 
-				nextAvailXPos++;
+				if (i < (Count - 1))
+					nextAvailXPos++;
 			}
 
-			MaxPos = new Point(nextAvailXPos - 1, nextAvailYPos);
+			MaxPos = new Point(nextAvailXPos, nextAvailYPos);
 			return MaxPos;
 		}
 
@@ -371,10 +374,15 @@ namespace PertNetworkUIExtension
 			// First pass just sets a basic position
 			int maxXPos = 0, maxYPos = 0;
 
-			foreach (var path in this)
+			for (int p = 0; p < Count; p++)
 			{
-				var maxPathPos = path.LayoutPath(maxYPos++);
+				var path = this[p];
+				var maxPathPos = path.LayoutPath(maxYPos);
+
 				maxXPos = Math.Max(maxXPos, maxPathPos.X);
+
+				if (p < (Count - 1))
+					maxYPos++;
 			}
 
 			// Second pass checks to ensure that tasks in the earlier
@@ -406,9 +414,6 @@ namespace PertNetworkUIExtension
 			}
 
 			MaxPos = new Point(maxXPos, maxYPos);
-
-
-
 
 			return MaxPos;
 		}
