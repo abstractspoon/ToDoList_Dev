@@ -16,6 +16,22 @@ namespace PertNetworkUIExtension
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
 
+	public delegate bool DragDropChangeEventHandler(object sender, NetworkDragEventArgs e);
+	public class NetworkDragEventItem
+	{
+		public NetworkDragEventItem( /* TODO*/ )
+		{
+		}
+	}
+
+	public class NetworkDragEventArgs : EventArgs
+	{
+		public NetworkDragEventArgs( /* TODO*/ )
+		{
+		}
+
+	}
+
 	// -----------------------------------------------------------------
 
 	class PertNetworkItem : NetworkItem
@@ -134,8 +150,8 @@ namespace PertNetworkUIExtension
         public event EditTaskCompletionEventHandler EditTaskDone;
 
 		// From Parent
-		private Translator Trans;
-		private UIExtension.TaskIcon TaskIcons;
+		private Translator m_Trans;
+		private UIExtension.TaskIcon m_TaskIcons;
 
 		private bool m_ShowParentAsFolder = false;
 		private bool m_TaskColorIsBkgnd = false;
@@ -143,23 +159,30 @@ namespace PertNetworkUIExtension
 		private bool m_ShowCompletionCheckboxes = true;
 		private PertNetworkOption m_Options;
 
-		private Timer EditTimer;
-		private Font BoldLabelFont, DoneLabelFont, BoldDoneLabelFont;
+		private Timer m_EditTimer;
+		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 //		private Size CheckboxSize;
-		private NetworkItem PreviouslySelectedItem;
+		private NetworkItem m_PreviouslySelectedItem;
+		private Timer m_DragTimer;
+		private DragImage m_DragImage;
 
-		private List<NetworkPath> CriticalPaths;
+		//private List<NetworkPath> CriticalPaths;
 
 		// -------------------------------------------------------------------------
 
 		public PertNetworkControl(Translator trans, UIExtension.TaskIcon icons)
 		{
-			Trans = trans;
-			TaskIcons = icons;
+			m_Trans = trans;
+			m_TaskIcons = icons;
 
-			EditTimer = new Timer();
-			EditTimer.Interval = 500;
-			EditTimer.Tick += new EventHandler(OnEditLabelTimer);
+			m_EditTimer = new Timer();
+			m_EditTimer.Interval = 500;
+			m_EditTimer.Tick += new EventHandler(OnEditLabelTimer);
+
+			m_DragImage = new DragImage();
+			m_DragTimer = new Timer();
+			m_DragTimer.Interval = Win32.GetDoubleClickTime();
+			m_DragTimer.Tick += new EventHandler(OnDragTimer);
 
 			// 			using (Graphics graphics = Graphics.FromHwnd(Handle))
 			// 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
@@ -174,17 +197,17 @@ namespace PertNetworkUIExtension
 		{
 			var newFont = Font;
 
-			BoldLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Bold);
+			m_BoldLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Bold);
 
 			if (m_StrikeThruDone)
 			{
-				BoldDoneLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Bold | FontStyle.Strikeout);
-				DoneLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Strikeout);
+				m_BoldDoneLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Bold | FontStyle.Strikeout);
+				m_DoneLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Strikeout);
 			}
 			else
 			{
-				BoldDoneLabelFont = BoldLabelFont;
-				DoneLabelFont = null;
+				m_BoldDoneLabelFont = m_BoldLabelFont;
+				m_DoneLabelFont = null;
 			}
 		}
 
@@ -216,7 +239,7 @@ namespace PertNetworkUIExtension
 
 			UpdateTaskAttributes(tasks);
 
-			CriticalPaths = UpdateCriticalPaths();
+			//CriticalPaths = UpdateCriticalPaths();
 		}
 
 		public PertNetworkOption Options
@@ -337,55 +360,11 @@ namespace PertNetworkUIExtension
 
 		public bool CanMoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
 		{
-			// 			if (FindNode(taskId) == null)
-			// 				return false;
-			// 
-			// 			if (FindNode(destParentId) == null)
-			// 				return false;
-			// 
-			// 			if ((destPrevSiblingId != 0) && (FindNode(destPrevSiblingId) == null))
-			// 				return false;
-
 			return false;
 		}
 
 		public bool MoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
 		{
-			/*
-						BeginUpdate();
-
-						var node = FindNode(taskId);
-						var prevParentNode = node.Parent;
-
-						var destParentNode = FindNode(destParentId);
-						var destPrevSiblingNode = FindNode(destPrevSiblingId);
-
-						if ((node == null) || (destParentNode == null))
-							return false;
-
-						var srcParentNode = node.Parent;
-						int srcPos = srcParentNode.Nodes.IndexOf(node);
-
-						srcParentNode.Nodes.RemoveAt(srcPos);
-
-						int destPos = 0; // insert at top
-
-						if (destPrevSiblingNode != null)
-							destPos = (destParentNode.Nodes.IndexOf(destPrevSiblingNode) + 1);
-
-						destParentNode.Nodes.Insert(destPos, node);
-
-						FixupParentalStatus(destParentNode, 1);
-						FixupParentalStatus(prevParentNode, -1);
-
-						FixupParentID(node, destParentNode);
-
-						SelectedNode = node;
-
-						EndUpdate();
-						EnsureItemVisible(Item(node));
-			*/
-
 			return false;
 		}
 
@@ -574,27 +553,6 @@ namespace PertNetworkUIExtension
 			return true;
 		}
 
-		protected override bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
-		{
-			// 			if (dropPos == PertNetworkControl.DropPos.On)
-			// 				return !TaskItem(dropTargetItemData).IsLocked;
-
-			// else
-			return true;
-		}
-
-		protected override bool IsAcceptableDragSource(Object itemData)
-		{
-			return false; //!TaskItem(itemData).IsLocked;
-		}
-
-		protected override bool DoDrop(NetworkDragEventArgs e)
-		{
-			// TODO
-
-			return true;
-		}
-
 		protected Color GetItemBackgroundColor(PertNetworkItem taskItem, bool selected)
 		{
 			if (selected)
@@ -671,13 +629,13 @@ namespace PertNetworkUIExtension
 			if (taskItem.TopLevel)
 			{
 				if (taskItem.Done)
-					font = BoldDoneLabelFont;
+					font = m_BoldDoneLabelFont;
 				else
-					font = BoldLabelFont;
+					font = m_BoldLabelFont;
 			}
 			else if (taskItem.Done)
 			{
-				font = DoneLabelFont;
+				font = m_DoneLabelFont;
 			}
 			
 			return (font == null) ? Font : font;
@@ -724,6 +682,7 @@ namespace PertNetworkUIExtension
 		override protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected)
 		{
 			// Don't paint critical paths until the end
+/*
 			if ((CriticalPaths.Contains(path)))
 				return;
 
@@ -732,6 +691,7 @@ namespace PertNetworkUIExtension
 				if (critPath.Contains(item))
 					return;
 			}
+*/
 
 			DoPaintItem(graphics, item, path, selected, false);
 		}
@@ -810,11 +770,11 @@ namespace PertNetworkUIExtension
 			{
 				var iconRect = CalcIconRect(itemRect);
 
-				if (TaskIcons.Get(item.UniqueId))
+				if (m_TaskIcons.Get(item.UniqueId))
 				{
 					if (!IsZoomed)
 					{
-						TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
+						m_TaskIcons.Draw(graphics, iconRect.X, iconRect.Y);
 					}
 					else
 					{
@@ -826,7 +786,7 @@ namespace PertNetworkUIExtension
 							using (var gTemp = Graphics.FromImage(tempImage))
 							{
 								gTemp.Clear(backColor);
-								TaskIcons.Draw(gTemp, 0, 0);
+								m_TaskIcons.Draw(gTemp, 0, 0);
 
 								DrawZoomedIcon(tempImage, graphics, iconRect);
 							}
@@ -885,6 +845,7 @@ namespace PertNetworkUIExtension
 		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
 			// Don't paint critical paths until the end
+/*
 			if ((CriticalPaths.Contains(path)))
 				return;
 
@@ -897,6 +858,7 @@ namespace PertNetworkUIExtension
 					return;
 				}
 			}
+*/
 			
 			DoPaintConnection(graphics, fromItem, toItem, path);
 		}
@@ -1101,7 +1063,7 @@ namespace PertNetworkUIExtension
 
 		private bool TaskHasIcon(PertNetworkItem taskItem)
 		{
-			if ((TaskIcons == null) || (taskItem == null))
+			if ((m_TaskIcons == null) || (taskItem == null))
 				return false;
 
 			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.Parent));
@@ -1155,14 +1117,14 @@ namespace PertNetworkUIExtension
 				else if (SelectedItemWasPreviouslySelected)
 				{
 					if (EditTaskLabel != null)
-						EditTimer.Start();
+						m_EditTimer.Start();
 				}
 			}
 		}
 
 		private bool SelectedItemWasPreviouslySelected
 		{
-			get { return ((SelectedItem != null) && (SelectedItem == PreviouslySelectedItem)); }
+			get { return ((SelectedItem != null) && (SelectedItem == m_PreviouslySelectedItem)); }
 		}
 
 		private bool HitTestIcon(NetworkItem item, Point point)
@@ -1178,15 +1140,26 @@ namespace PertNetworkUIExtension
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			EditTimer.Stop();
-			PreviouslySelectedItem = Focused ? SelectedItem : null;
+			m_EditTimer.Stop();
+			m_PreviouslySelectedItem = Focused ? SelectedItem : null;
 
 			base.OnMouseDown(e);
+
+			if (!ReadOnly && (e.Button == MouseButtons.Left))
+			{
+				NetworkItem hit = HitTestItem(e.Location);
+
+				if (hit != null)
+				{
+					m_DragTimer.Tag = e;
+					m_DragTimer.Start();
+				}
+			}
 		}
 
 		private void OnEditLabelTimer(object sender, EventArgs e)
 		{
-			EditTimer.Stop();
+			m_EditTimer.Stop();
 
 			if (EditTaskLabel != null)
 				EditTaskLabel(this, SelectedItem?.UniqueId ?? 0);
@@ -1196,30 +1169,172 @@ namespace PertNetworkUIExtension
 		{
  			base.OnMouseMove(e);
 
-			var taskItem = (HitTestItem(e.Location) as PertNetworkItem);
-
-			if (!ReadOnly && (taskItem != null))
+			if ((e.Button == MouseButtons.Left) && m_DragTimer.Enabled)
 			{
-				Cursor cursor = null;
+				Debug.Assert(!ReadOnly);
 
-				if (taskItem.Locked)
+				if (CheckStartDragging(e.Location))
+					m_DragTimer.Stop();
+			}
+			else
+			{
+
+				var taskItem = (HitTestItem(e.Location) as PertNetworkItem);
+
+				if (!ReadOnly && (taskItem != null))
 				{
-					cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-				}
-				else if (TaskHasIcon(taskItem) && HitTestIcon(taskItem, e.Location))
-				{
-					cursor = UIExtension.HandCursor();
+					Cursor cursor = null;
+
+					if (taskItem.Locked)
+					{
+						cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+					}
+					else if (TaskHasIcon(taskItem) && HitTestIcon(taskItem, e.Location))
+					{
+						cursor = UIExtension.HandCursor();
+					}
+
+					if (cursor != null)
+					{
+						Cursor = cursor;
+						return;
+					}
 				}
 
-				if (cursor != null)
-				{
-					Cursor = cursor;
-					return;
-				}
+				// all else
+				Cursor = Cursors.Arrow;
+			}
+		}
+
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			m_DragTimer.Stop();
+		}
+
+		protected void OnDragTimer(object sender, EventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
+
+			m_DragTimer.Stop();
+
+			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
+
+			if (mouseDown)
+				CheckStartDragging(MousePosition);
+		}
+
+		protected override void OnDragOver(DragEventArgs e)
+		{
+			m_DragImage.ShowNoLock(false);
+
+			base.OnDragOver(e);
+
+			m_DragImage.ShowNoLock(true);
+			m_DragImage.Move(e.X, e.Y);
+		}
+
+		protected override void OnDragEnter(DragEventArgs e)
+		{
+			base.OnDragEnter(e);
+
+			var selItem = SelectedItem;
+
+			if (selItem != null)
+			{
+				var textRect = GetSelectedItemLabelRect();
+
+	// 			if (m_ShowCompletionCheckboxes)
+	// 				textRect.Width -= m_CheckboxSize.Width;
+
+				m_DragImage.Begin(Handle, Font, selItem.Title, textRect.Width, textRect.Height);
+			}
+		}
+
+		protected override void OnDragDrop(DragEventArgs e)
+		{
+			m_DragImage.End();
+
+			base.OnDragDrop(e);
+		}
+
+		protected override void OnDragLeave(EventArgs e)
+		{
+			m_DragImage.End();
+
+			base.OnDragLeave(e);
+		}
+
+		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
+
+			base.OnQueryContinueDrag(e);
+
+			if (e.EscapePressed)
+			{
+				// TODO
+			}
+		}
+
+		private bool CheckStartDragging(Point cursor)
+		{
+			Debug.Assert(!ReadOnly);
+
+			// Check for drag movement
+			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
+
+			if (GetDragRect(ptOrg).Contains(cursor))
+				return false;
+
+			NetworkItem hit = HitTestItem(ptOrg);
+
+			if (IsAcceptableDragSource(hit))
+			{
+				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
+				return true;
 			}
 
-			// all else
-			Cursor = Cursors.Arrow;
+			return false;
+		}
+
+		protected bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, /*DropPos dropPos,*/ bool copy)
+		{
+			var item = (dropTargetItemData as PertNetworkItem);
+
+			return ((item != null) && !item.Locked);
+		}
+
+		protected bool IsAcceptableDragSource(Object itemData)
+		{
+			var item = (itemData as PertNetworkItem);
+
+			return ((item != null) && !item.Locked);
+		}
+
+		protected bool DoDrop(NetworkDragEventArgs e)
+		{
+			// TODO
+
+			return true;
+		}
+
+		private Rectangle GetDragRect(Point cursor)
+		{
+			Debug.Assert(!ReadOnly);
+
+			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
+			int size = Win32.GetDragRectSize();
+
+			rect.Inflate(size / 2, size / 2);
+
+			return rect;
+		}
+
+		private void DoDrop(/* TODO */)
+		{
+			Debug.Assert(!ReadOnly);
+
+			// TODO
 		}
 
 		List<NetworkPath> UpdateCriticalPaths()

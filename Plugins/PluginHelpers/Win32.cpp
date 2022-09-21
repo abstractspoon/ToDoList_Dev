@@ -151,6 +151,21 @@ int Win32::GetSystemMetric(int nMetric)
 	return ::GetSystemMetrics(nMetric);
 }
 
+int Win32::GetDoubleClickTime()
+{
+	return ::GetDoubleClickTime();
+}
+
+int Win32::GetDoubleClickRectSize()
+{
+	return GetSystemMetric(SM_CXDOUBLECLK);
+}
+
+int Win32::GetDragRectSize()
+{
+	return GetSystemMetric(SM_CXDRAG);
+}
+
 String^ Win32::GetFaceName(HFONT hFont)
 {
 	if (!hFont)

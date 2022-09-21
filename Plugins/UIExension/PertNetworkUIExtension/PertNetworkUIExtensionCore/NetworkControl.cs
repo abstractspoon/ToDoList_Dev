@@ -15,25 +15,8 @@ using System.Windows.Forms.VisualStyles;
 namespace PertNetworkUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, NetworkItem item);
-	public delegate bool DragDropChangeEventHandler(object sender, NetworkDragEventArgs e);
 
 	[System.ComponentModel.DesignerCategory("")]
-
-	public class NetworkDragEventItem
-	{
-		public NetworkDragEventItem( /* TODO*/ )
-		{
-		}
-	}
-
-	public class NetworkDragEventArgs : EventArgs
-	{
-		public NetworkDragEventArgs( /* TODO*/ )
-		{
-		}
-
-	}
-
 	public class NetworkConnectionHitTestResult
 	{
 		public NetworkPath Path;
@@ -136,41 +119,12 @@ namespace PertNetworkUIExtension
 		[DllImport("User32.dll")]
 		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
 
-		// --------------------------
-
-		[DllImport("User32.dll")]
-		static extern uint GetDoubleClickTime();
-
-		// --------------------------
-
-		[DllImport("User32.dll")]
-		static extern int GetSystemMetrics(int index);
-
-		const int SM_CXDOUBLECLK = 36;
-		const int SM_CYDOUBLECLK = 37;
-		const int SM_CXDRAG = 68;
-		const int SM_CYDRAG = 69;
-
-		const int WM_PAINT = 0x000F;
-
 		// Constants ---------------------------------------------------------------------
 
 		protected float ZoomFactor { get; private set; }
 		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
 
-		protected enum DropPos
-		{
-			None,
-			On,
-			Left,
-			Right,
-		}
-
 		// Data --------------------------------------------------------------------------
-
-		private DropPos DropSite;
-		private Timer DragTimer;
-		private int LastDragTick = 0;
 
 		// Font setting must go thru SetFont
 		public new Font Font
@@ -183,8 +137,9 @@ namespace PertNetworkUIExtension
 			}
 		}
 		protected Font BaseFont { get; private set; }
-
-		protected NetworkConnectionHitTestResult HotConnection { get; private set; }
+#if DEBUG
+		private NetworkConnectionHitTestResult HotConnection;
+#endif
 		protected NetworkData Data { get; private set; }
 
 		protected int ItemHeight { get { return Layout.ItemHeight; } }
@@ -207,7 +162,6 @@ namespace PertNetworkUIExtension
 
 		public NetworkControl()
 		{
-			DropSite = DropPos.None;
 			ConnectionColor = Color.Magenta;
 			Data = new NetworkData();
 			BaseFont = Font;
@@ -373,6 +327,7 @@ namespace PertNetworkUIExtension
 				}
 			}
 
+#if DEBUG
 			// Draw the hot connection segment
 			if ((HotConnection != null) && (HotConnection.Segment != -1))
 			{
@@ -383,7 +338,7 @@ namespace PertNetworkUIExtension
 				using (var pen = new Pen(Color.Red, 1.5f))
 					graphics.DrawLine(pen, points[HotConnection.Segment], points[HotConnection.Segment + 1]);
 			}
-
+#endif
 		}
 
 		protected bool WantDrawItem(NetworkItem item, Rectangle clipRect)
@@ -429,12 +384,14 @@ namespace PertNetworkUIExtension
 			graphics.DrawLines(Pens.Blue, GetConnectionPoints(fromItem, toItem));
 		}
 
+#if DEBUG
 		protected bool IsHotConnection(NetworkItem fromItem, NetworkItem toItem)
 		{
 			return ((HotConnection != null) &&
 					(HotConnection.FromItem == fromItem) &&
 					(HotConnection.ToItem == toItem));
 		}
+#endif
 
 		virtual protected Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
@@ -614,6 +571,7 @@ namespace PertNetworkUIExtension
 			}
 		}
 
+#if DEBUG
 		protected override void OnMouseLeave(EventArgs e)
 		{
 			base.OnMouseLeave(e);
@@ -626,107 +584,39 @@ namespace PertNetworkUIExtension
 				Update();
 			}
 		}
+#endif
 
+#if DEBUG
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
 
-			if ((e.Button == MouseButtons.Left) && DragTimer.Enabled)
-			{
-				Debug.Assert(!ReadOnly);
+			var hitTest = HitTestConnection(e.Location);
 
-				if (CheckStartDragging(e.Location))
-					DragTimer.Stop();
+			if ((hitTest == null) && (HotConnection == null))
+				return;
+
+			if (hitTest != null)
+			{
+				if ((HotConnection == null) || !HotConnection.SegmentMatches(hitTest))
+				{
+					InvalidateConnection(HotConnection);
+					InvalidateConnection(hitTest);
+
+					HotConnection = hitTest;
+				}
 			}
 			else
 			{
-				var hitTest = HitTestConnection(e.Location);
+				InvalidateConnection(HotConnection);
 
-				if ((hitTest == null) && (HotConnection == null))
-					return;
-
-				if (hitTest != null)
-				{
-					if ((HotConnection == null) || !HotConnection.SegmentMatches(hitTest))
-					{
-						InvalidateConnection(HotConnection);
-						InvalidateConnection(hitTest);
-
-						HotConnection = hitTest;
-					}
-				}
-				else
-				{
-					InvalidateConnection(HotConnection);
-
-					HotConnection = null;
-				}
-
-				Update();
+				HotConnection = null;
 			}
+
+			Update();
 		}
+#endif
 
-		protected override void OnMouseUp(MouseEventArgs e)
-		{
-			DragTimer.Stop();
-
-			base.OnMouseUp(e);
-
-			if (e.Button == MouseButtons.Left)
-			{
-				// TODO
-			}
-		}
-
-		protected void OnDragTimer(object sender, EventArgs e)
-		{
-			Debug.Assert(!ReadOnly);
-
-			DragTimer.Stop();
-
-			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
-
-			if (mouseDown)
-				CheckStartDragging(MousePosition);
-		}
-	
-		protected override void OnDragOver(DragEventArgs e)
-		{
-			Debug.Assert(!ReadOnly);
-
-			// TODO
-		}
-
-		protected override void OnDragDrop(DragEventArgs e)
-		{
-			Debug.Assert(!ReadOnly);
-
-			// TODO
-		}
-
-		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
-		{
-			Debug.Assert(!ReadOnly);
-
-			base.OnQueryContinueDrag(e);
-
-			if (e.EscapePressed)
-			{
-				// TODO
-			}
-		}
-
-		protected override void OnDragLeave(EventArgs e)
-		{
-			Debug.Assert(!ReadOnly);
-
-			base.OnDragLeave(e);
-
-			// TODO
-
-			Invalidate();
-		}
-		
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);
@@ -760,65 +650,6 @@ namespace PertNetworkUIExtension
 		}
 
 		// Internals -----------------------------------------------------------
-
-		private bool CheckStartDragging(Point cursor)
-		{
-			Debug.Assert(!ReadOnly);
-
-			// TODO
-
-			return false;
-		}
-		
-		virtual protected bool IsAcceptableDropTarget(Object draggedItemData, Object dropTargetItemData, DropPos dropPos, bool copy)
-		{
-			Debug.Assert(!ReadOnly);
-
-			return true;
-		}
-
-		virtual protected bool IsAcceptableDragSource(Object itemData)
-		{
-			Debug.Assert(!ReadOnly);
-
-			return (itemData != null);
-		}
-
-		private Rectangle GetDoubleClickRect(Point cursor)
-		{
-			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
-			rect.Inflate(GetSystemMetrics(SM_CXDOUBLECLK) / 2, GetSystemMetrics(SM_CYDOUBLECLK) / 2);
-
-			return rect;
-		}
-
-		private Rectangle GetDragRect(Point cursor)
-		{
-			Debug.Assert(!ReadOnly);
-
-			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
-			rect.Inflate(GetSystemMetrics(SM_CXDRAG) / 2, GetSystemMetrics(SM_CYDRAG) / 2);
-
-			return rect;
-		}
-
-		private void DoDrop(/* TODO */)
-		{
-			Debug.Assert(!ReadOnly);
-
-			// TODO
-		}
-
-		virtual protected bool DoDrop(NetworkDragEventArgs e)
-		{
-			Debug.Assert(!ReadOnly);
-
-			if (DragDropChange != null)
-				return DragDropChange(this, e);
-
-			// else
-			return true;
-		}
 
 		protected void EnsureItemVisible(NetworkItem item)
 		{

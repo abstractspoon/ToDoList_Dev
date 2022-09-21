@@ -32,19 +32,48 @@ bool DragDropUtil::ObjectHasFormat(Microsoft::VisualStudio::OLE::Interop::IDataO
 
 // ----------------------------------------------------------------------------
 
-bool DragImage::Begin(IntPtr wnd, Drawing::Font^ font, String^ text, int width, int height)
+DragImage::DragImage()
+	:
+	m_hImageList(NULL),
+	m_hwndLock(NULL)
+{ 
+}
+
+DragImage::~DragImage() 
+{ 
+	End(); 
+}
+
+bool DragImage::Begin(IntPtr wnd, Font^ font, String^ text, int width, int height)
+{
+	Bitmap^ bm = gcnew Bitmap(width, height);
+	Graphics^ g = Graphics::FromImage(bm);
+
+	g->FillRectangle(SystemBrushes::Highlight, 0, 0, width, height);
+	g->DrawString(text, font, SystemBrushes::HighlightText, RectangleF(0, 0, (float)width, (float)height));
+
+	return Begin(wnd, bm, width, height);
+}
+
+bool DragImage::Begin(IntPtr wnd, DragRenderer^ renderer, Object^ object, int width, int height)
+{
+	if (m_hImageList != NULL)
+		return false;
+
+	Bitmap^ bm = gcnew Bitmap(width, height);
+	Graphics^ g = Graphics::FromImage(bm);
+
+	renderer->DrawDragImage(g, object);
+
+	return Begin(wnd, bm, width, height);
+}
+
+bool DragImage::Begin(IntPtr wnd, Bitmap^ bm, int width, int height)
 {
 	if (m_hImageList != NULL)
 		return false;
 
 	m_hwndLock = Win32::GetHwnd(wnd);
-
-	Bitmap^ bm = gcnew Bitmap(width, height);
-	Graphics^ g = Graphics::FromImage(bm);
-
-	g->FillRectangle(SystemBrushes::Highlight, 0, 0, width, height);
-	g->DrawString(text, font, SystemBrushes::HighlightText, RectangleF(0, 0, width, height));
-
 	m_hImageList = ImageList_Create(width, height, ILC_COLOR32, 0, 1);
 
 	if (m_hImageList != NULL)
@@ -98,4 +127,5 @@ bool DragImage::ShowNoLock(bool show)
 		return false;
 
 	ImageList_DragShowNolock(show);
+	return true;
 }

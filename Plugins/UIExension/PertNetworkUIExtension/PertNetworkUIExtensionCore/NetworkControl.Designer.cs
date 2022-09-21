@@ -42,10 +42,6 @@ namespace PertNetworkUIExtension
 			this.ResumeLayout(false);
             this.PerformLayout();
 
-			DragTimer = new Timer();
-			DragTimer.Interval = (int)GetDoubleClickTime();
-			DragTimer.Tick += new EventHandler(OnDragTimer);
-
 // 			this.AutoScroll = true;
 			this.AllowDrop = true;
 			this.ReadOnly = false;
