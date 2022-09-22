@@ -138,22 +138,6 @@ BOOL CTreeDragDropHelper::Initialize(CWnd* pOwner, BOOL bEnabled, BOOL bAllowNcD
 	return FALSE;
 }
 
-/*
-BOOL CTreeDragDropHelper::AddTargetWnd(CWnd* pWnd)
-{
-	ASSERT(pWnd->GetSafeHwnd());
-
-	if (pWnd->GetSafeHwnd())
-	{
-		m_ddMgr.AddWindow(pWnd->GetSafeHwnd(), DDW_TARGET);
-		return TRUE;
-	}
-
-	// else
-	return FALSE;
-}
-*/
-
 BOOL CTreeDragDropHelper::GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter, BOOL bDropSubtasksAtTop) const
 {
 	htiDrop = (m_htiDropTarget ? m_htiDropTarget : TVI_ROOT);
