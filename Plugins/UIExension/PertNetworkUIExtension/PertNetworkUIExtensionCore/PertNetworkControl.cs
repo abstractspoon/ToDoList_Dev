@@ -143,7 +143,7 @@ namespace PertNetworkUIExtension
 	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-	class PertNetworkControl : NetworkControl
+	class PertNetworkControl : NetworkControl, IDragRenderer
 	{
 		public event EditTaskLabelEventHandler      EditTaskLabel;
         public event EditTaskIconEventHandler       EditTaskIcon;
@@ -167,6 +167,17 @@ namespace PertNetworkUIExtension
 		private DragImage m_DragImage;
 
 		//private List<NetworkPath> CriticalPaths;
+
+		// -------------------------------------------------------------------------
+
+		[Flags]
+		protected enum DrawState
+		{
+			None		= 0x00,
+			Selected	= 0x01,
+			Critical	= 0x02,
+			DragImage	= 0x04,
+		}
 
 		// -------------------------------------------------------------------------
 
@@ -682,7 +693,7 @@ namespace PertNetworkUIExtension
 		override protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected)
 		{
 			// Don't paint critical paths until the end
-/*
+			/*
 			if ((CriticalPaths.Contains(path)))
 				return;
 
@@ -691,16 +702,25 @@ namespace PertNetworkUIExtension
 				if (critPath.Contains(item))
 					return;
 			}
-*/
+			*/
+			DrawState state = (selected ? DrawState.Selected : DrawState.None);
 
-			DoPaintItem(graphics, item, path, selected, false);
+			DoPaintItem(graphics, item, path, state);
 		}
 
-		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected, bool critical)
+		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, DrawState state)
 		{
 			graphics.SmoothingMode = SmoothingMode.None;
 
+			bool selected = state.HasFlag(DrawState.Selected);
+			bool critical = state.HasFlag(DrawState.Critical);
+			bool dragImage = state.HasFlag(DrawState.DragImage);
+
 			var itemRect = CalcItemRectangle(item);
+
+			if (dragImage)
+				itemRect.Offset(-itemRect.Left, -itemRect.Top);
+
 			var taskItem = (item as PertNetworkItem);
 
 			// Figure out the required colours
@@ -1237,17 +1257,21 @@ namespace PertNetworkUIExtension
 		{
 			base.OnDragEnter(e);
 
-			var selItem = SelectedItem;
+			m_DragImage.Begin(Handle, 
+								this, 
+								SelectedItem, 
+								ItemWidth, 
+								ItemHeight, 
+								ItemWidth / 2, 
+								ItemHeight / 2);
+		}
 
-			if (selItem != null)
-			{
-				var textRect = GetSelectedItemLabelRect();
-
-	// 			if (m_ShowCompletionCheckboxes)
-	// 				textRect.Width -= m_CheckboxSize.Width;
-
-				m_DragImage.Begin(Handle, Font, selItem.Title, textRect.Width, textRect.Height);
-			}
+		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
+		{
+			DoPaintItem(graphics, 
+						(obj as NetworkItem), 
+						null, 
+						DrawState.Selected | DrawState.DragImage);
 		}
 
 		protected override void OnDragDrop(DragEventArgs e)
