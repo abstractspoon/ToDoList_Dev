@@ -35,13 +35,10 @@ namespace Abstractspoon
 
 			// ----------------------------------------------------------------------------
 
-			ref class DragRenderer abstract
+			public interface class IDragRenderer
 			{
 			public:
-				DragRenderer() {}
-				~DragRenderer() {}
-
-				virtual void DrawDragImage(Drawing::Graphics^ graphics, Object^ object) = 0;
+				virtual void DrawDragImage(Drawing::Graphics^ graphics, Object^ object, int width, int height) = 0;
 			};
 
 			// ----------------------------------------------------------------------------
@@ -52,8 +49,8 @@ namespace Abstractspoon
 				DragImage();
 				~DragImage();
 
-				bool Begin(IntPtr wnd, Drawing::Font^ font, String^ text, int width, int height);
-				bool Begin(IntPtr wnd, DragRenderer^ renderer, Object^ object, int width, int height);
+				bool Begin(IntPtr wnd, Drawing::Font^ font, String^ text, int width, int height, int hotX, int hotY);
+				bool Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object, int width, int height, int hotX, int hotY);
 				bool Move(int x, int y);
 				bool End();
 				bool ShowNoLock(bool show);
@@ -63,7 +60,7 @@ namespace Abstractspoon
 				HWND m_hwndLock;
 
 			protected:
-				bool Begin(IntPtr wnd, Drawing::Bitmap^ bm, int width, int height);
+				bool Begin(IntPtr wnd, Drawing::Bitmap^ bm, int width, int height, int hotX, int hotY);
 			};
 		}
 	}

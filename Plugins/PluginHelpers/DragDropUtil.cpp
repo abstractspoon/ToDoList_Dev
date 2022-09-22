@@ -44,7 +44,7 @@ DragImage::~DragImage()
 	End(); 
 }
 
-bool DragImage::Begin(IntPtr wnd, Font^ font, String^ text, int width, int height)
+bool DragImage::Begin(IntPtr wnd, Font^ font, String^ text, int width, int height, int hotX, int hotY)
 {
 	Bitmap^ bm = gcnew Bitmap(width, height);
 	Graphics^ g = Graphics::FromImage(bm);
@@ -52,10 +52,10 @@ bool DragImage::Begin(IntPtr wnd, Font^ font, String^ text, int width, int heigh
 	g->FillRectangle(SystemBrushes::Highlight, 0, 0, width, height);
 	g->DrawString(text, font, SystemBrushes::HighlightText, RectangleF(0, 0, (float)width, (float)height));
 
-	return Begin(wnd, bm, width, height);
+	return Begin(wnd, bm, width, height, hotX, hotY);
 }
 
-bool DragImage::Begin(IntPtr wnd, DragRenderer^ renderer, Object^ object, int width, int height)
+bool DragImage::Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object, int width, int height, int hotX, int hotY)
 {
 	if (m_hImageList != NULL)
 		return false;
@@ -63,12 +63,12 @@ bool DragImage::Begin(IntPtr wnd, DragRenderer^ renderer, Object^ object, int wi
 	Bitmap^ bm = gcnew Bitmap(width, height);
 	Graphics^ g = Graphics::FromImage(bm);
 
-	renderer->DrawDragImage(g, object);
+	renderer->DrawDragImage(g, object, width, height);
 
-	return Begin(wnd, bm, width, height);
+	return Begin(wnd, bm, width, height, hotX, hotY);
 }
 
-bool DragImage::Begin(IntPtr wnd, Bitmap^ bm, int width, int height)
+bool DragImage::Begin(IntPtr wnd, Bitmap^ bm, int width, int height, int hotX, int hotY)
 {
 	if (m_hImageList != NULL)
 		return false;
@@ -81,7 +81,7 @@ bool DragImage::Begin(IntPtr wnd, Bitmap^ bm, int width, int height)
 		HBITMAP hbm = Win32::GetHBitmap(bm->GetHbitmap());
 
 		ImageList_Add(m_hImageList, hbm, NULL);
-		ImageList_BeginDrag(m_hImageList, 0, width, height);
+		ImageList_BeginDrag(m_hImageList, 0, hotX, hotY);
 
 		CRect rWindow;
 		GetWindowRect(m_hwndLock, rWindow);

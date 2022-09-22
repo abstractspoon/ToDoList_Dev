@@ -6221,8 +6221,7 @@ BOOL CTDLTaskCtrlBase::GetSelectedTaskCustomAttributeData(const CString& sAttrib
 	{
 		const TDCCUSTOMATTRIBUTEDEFINITION* pDef = NULL;
 		GET_DEF_RET(m_aCustomAttribDefs, sAttribID, pDef, FALSE);
-
-
+		
 		// Multi-selection check lists need special handling
 		if (pDef->IsMultiList())
 		{

@@ -3878,20 +3878,35 @@ void CTabbedToDoCtrl::UpdateExtensionViewsSelection(const CTDCAttributeMap& mapA
 		if (!AnyExtensionViewWantsChanges(mapAttribIDs))
 			return;
 
-		// Include parents if there is a colour change 
-		// or a calculated attribute change
-		if (mapAttribIDs.Has(TDCA_COLOR) || ModAffectsAggregatedAttributes(mapAttribIDs))
+		// Include parents if this is an undo 
+		// OR there is a colour change
+		// OR a calculated attribute change
+		BOOL bUndo = mapAttribIDs.Has(TDCA_ALL);
+		ASSERT(!bUndo || mapAttribIDs.HasOnly(TDCA_ALL));
+
+		if (bUndo || 
+			mapAttribIDs.Has(TDCA_COLOR) || 
+			ModAffectsAggregatedAttributes(mapAttribIDs))
+		{
 			dwFlags |= TDCGSTF_ALLPARENTS;
+		}
 
-		// DONT include subtasks UNLESS the completion date has changed
-		// OR this is an inherited attribute
-		if (!mapAttribIDs.Has(TDCA_DONEDATE) && !WantUpdateInheritedAttibutes(mapAttribIDs))
+		// DONT include subtasks UNLESS the completion date
+		// has changed OR this is an inherited attribute
+		if (!mapAttribIDs.Has(TDCA_DONEDATE) && 
+			!WantUpdateInheritedAttibutes(mapAttribIDs))
+		{
 			dwFlags |= TDCGSTF_NOTSUBTASKS;
+		}
 
-		// Include references to selected tasks if a 'Reference-specific' colour is not set
-		if (mapAttribIDs.Has(TDCA_COLOR) && !m_taskTree.HasReferenceTaskColor())
+		// Include references to selected tasks if a 
+		// 'Reference-specific' colour is not set
+		if (mapAttribIDs.Has(TDCA_COLOR) && 
+			!m_taskTree.HasReferenceTaskColor())
+		{
 			dwFlags |= TDCGSTF_APPENDREFERENCES;
-
+		}
+	
 		if (mapAttribIDs.Has(TDCA_DEPENDENCY))
 			dwFlags |= TDCGSTF_LOCALDEPENDENTS;
 	}
