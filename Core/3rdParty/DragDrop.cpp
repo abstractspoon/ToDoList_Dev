@@ -484,7 +484,7 @@ BOOL CDragDropData::CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage
 	dcMem.SelectObject(pOldBitmap);
 
 	// create image list and add bitmap to it
-	if (!il.Create(sizeImage.cx, sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1))
+	if (!il.Create(sizeImage.cx, sizeImage.cy, ILC_COLORDDB | ILC_MASK, 0, 1))
 		return FALSE;
 
 	if (il.Add(&bmp, crMask) != 0)

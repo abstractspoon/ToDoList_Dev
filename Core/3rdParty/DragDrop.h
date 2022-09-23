@@ -52,7 +52,7 @@ public:
 	virtual ~CDragDropData() { }
 
 	CImageList* CreateDragImage(CWnd* pWnd, CSize& sizeImage);
-	virtual BOOL CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage);
+	BOOL CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage);
 
 protected:
 	// derived classes must implement these:
