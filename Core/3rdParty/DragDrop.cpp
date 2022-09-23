@@ -453,7 +453,6 @@ CImageList* CDragDropData::CreateDragImage(CWnd* pWnd, CSize& sizeImage)
 BOOL CDragDropData::CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage)
 {
 	il.DeleteImageList();
-	m_bitmap.DeleteObject();
 
 	// create memory dc compatible w/source window
 	CWindowDC dcWin(pWnd);
@@ -469,9 +468,10 @@ BOOL CDragDropData::CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage
 	CRect rc(CPoint(0, 0), sizeImage);
 
 	// create image list: create bitmap and draw into it
-	m_bitmap.CreateCompatibleBitmap(&dcWin, sizeImage.cx, sizeImage.cy);
+	CBitmap bmp;
+	bmp.CreateCompatibleBitmap(&dcWin, sizeImage.cx, sizeImage.cy);
 
-	CBitmap* pOldBitmap = dcMem.SelectObject(&m_bitmap);
+	CBitmap* pOldBitmap = dcMem.SelectObject(&bmp);
 
 	dcMem.FillSolidRect(rc, GetSysColor(COLOR_HIGHLIGHT));
 	dcMem.SetBkMode(TRANSPARENT);
@@ -487,7 +487,7 @@ BOOL CDragDropData::CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage
 	if (!il.Create(sizeImage.cx, sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1))
 		return FALSE;
 
-	if (il.Add(&m_bitmap, crMask) != 0)
+	if (il.Add(&bmp, crMask) != 0)
 		return FALSE;
 
 	return TRUE;

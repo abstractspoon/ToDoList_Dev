@@ -145,7 +145,8 @@ enum gdix_PenStyle
 
 enum gdix_PixelFormat
 {
-    gdix_PixelFormat32bppRGB  = (9  | (32 << 8) | PixelFormatGDI),
+	gdiX_PixelFormat24bppRGB =  (8 | (24 << 8) | PixelFormatGDI),
+	gdix_PixelFormat32bppRGB =  (9 | (32 << 8) | PixelFormatGDI),
 	gdix_PixelFormat32bppARGB = (10 | (32 << 8) | PixelFormatAlpha | PixelFormatGDI | PixelFormatCanonical),
 };
 

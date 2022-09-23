@@ -123,8 +123,6 @@ protected:
 		// Handled in CreateDragImage
 	}
 	
-	virtual void* OnGetData() { return NULL; }
-
 protected:
 	CHTIList m_selection;
 	const CTreeCtrl& m_tree;
