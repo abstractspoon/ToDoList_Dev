@@ -30,8 +30,6 @@ public:
 	void EnableDragDrop(BOOL bEnable) { m_bEnabled = bEnable; }
 	UINT ProcessMessage(const MSG* pMsg);
 
-	//BOOL AddTargetWnd(CWnd* pWnd);
-	
 	BOOL IsDropOn() const { return (m_dropPos.nWhere == DD_ON); }
 	BOOL GetDropTarget(HTREEITEM& htiDrop, HTREEITEM& htiAfter, BOOL bDropSubtasksAtTop) const;
 	BOOL IsDragging() const { return m_ddMgr.IsDragging(); }
