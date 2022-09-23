@@ -52,7 +52,7 @@ public:
 	virtual ~CDragDropData() { }
 
 	CImageList* CreateDragImage(CWnd* pWnd, CSize& sizeImage);
-	BOOL CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage);
+	virtual BOOL CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage);
 
 protected:
 	CBitmap			m_bitmap; // bitmap used for drawing

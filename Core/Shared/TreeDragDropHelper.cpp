@@ -6,6 +6,9 @@
 #include "TreeDragDropHelper.h"
 #include "holdredraw.h"
 #include "misc.h"
+#include "graphicsmisc.h"
+
+#include "..\3rdParty\GdiPlus.h"
 
 #ifdef _DEBUG
 #undef THIS_FILE
@@ -25,6 +28,71 @@ public:
 	{
 		selection.CopySelection(m_selection);
 	}
+
+	BOOL CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage)
+	{
+		il.DeleteImageList();
+
+		// get size of drag image
+		sizeImage = OnGetDragSize(CWindowDC(pWnd)); // call virtual fn to get size
+		CRect rc(CPoint(0, 0), sizeImage);
+
+		// Need to use GDI+ because I wasn't able to create
+		// the correctly configured device context
+		CGdiPlusBitmap bitmap(sizeImage.cx, sizeImage.cy);
+		CGdiPlusGraphics graphics(bitmap);
+
+		CDC dc;
+		dc.Attach(graphics.GetHDC());
+
+		COLORREF crMask = RGB(255, 0, 255);
+		dc.FillSolidRect(rc, crMask);
+		dc.SetBkMode(TRANSPARENT);
+		dc.SetTextColor(0);
+
+		// use same font as source window
+		CFont* pOldFont = dc.SelectObject(m_tree.GetFont());
+
+		POSITION pos = m_selection.GetHeadPosition();
+
+		while (pos)
+		{
+			HTREEITEM hti = m_selection.GetNext(pos);
+			CRect rItem;
+
+			if (m_tree.GetItemRect(hti, rItem, TRUE))
+			{
+				rItem -= m_ptDrawOffset;
+				rItem += rc.TopLeft();
+				rItem.IntersectRect(rc, rItem);
+
+				GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
+
+				rItem.DeflateRect(2, 1);
+				dc.DrawText(m_tree.GetItemText(hti), rItem, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+			}
+		}
+
+		dc.SelectObject(pOldFont);
+		dc.Detach();
+
+		graphics.ReleaseDC();
+
+		HBITMAP hbm = NULL;
+
+		if (CGdiPlus::CreateHBITMAPFromBitmap(bitmap, &hbm, crMask))
+		{
+			// create image list and add bitmap to it
+			if (!il.Create(sizeImage.cx, sizeImage.cy, ILC_COLOR32 | ILC_MASK, 0, 1))
+				return FALSE;
+
+			VERIFY(ImageList_AddMasked(il, hbm, crMask) == 0);
+			::DeleteObject(hbm);
+		}
+
+		return TRUE;
+	}
+
 
 protected:
 	virtual CSize OnGetDragSize(CDC& /*dc*/)
@@ -50,34 +118,9 @@ protected:
 		return rDrag.Size();
 	}
 	
-	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+	virtual void OnDrawData(CDC& /*dc*/, const CRect& /*rc*/, COLORREF& /*crMask*/)
 	{
-		crMask = 1;
-		dc.FillSolidRect(rc, crMask);
-
-		dc.SetBkMode(OPAQUE);
-		dc.SetBkColor(::GetSysColor(COLOR_HIGHLIGHT));
-		dc.SetTextColor(::GetSysColor(COLOR_HIGHLIGHTTEXT));
-	
-		// iterate the current selection accumulating their rects
-		POSITION pos = m_selection.GetHeadPosition();
-
-		while (pos)
-		{
-			HTREEITEM hti = m_selection.GetNext(pos);
-			CRect rItem;
-
-			if (m_tree.GetItemRect(hti, rItem, TRUE))
-			{
-				rItem -= m_ptDrawOffset;
-				rItem += rc.TopLeft();
-				rItem.IntersectRect(rc, rItem);
-
-				dc.FillSolidRect(rItem, ::GetSysColor(COLOR_HIGHLIGHT));
-				rItem.DeflateRect(2, 1);
-				dc.DrawText(m_tree.GetItemText(hti), rItem, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
-			}
-		}
+		// Handled in CreateDragImage
 	}
 	
 	virtual void* OnGetData() { return NULL; }
