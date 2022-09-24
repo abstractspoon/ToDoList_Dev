@@ -81,7 +81,7 @@ const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
 const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int DEF_IMAGE_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
-const int MAX_DRAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(200);
+const int MAX_DRAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(200) + DEF_IMAGE_SIZE;
 const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
 
 const int IMAGE_PADDING			= 2;
@@ -2642,7 +2642,7 @@ CSize CKanbanColumnCtrl::OnGetDragSize(CDC& /*dc*/)
 		CRect rItem;
 		CTreeCtrl::GetItemRect(htiSel, rItem, FALSE);
 
-		sizeTotal.cx = rItem.Width();
+		sizeTotal.cx = rItem.Width() + DEF_IMAGE_SIZE;
 
 		if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
 			sizeTotal.cx -= CEnImageList::GetImageSize(m_ilCheckboxes);
@@ -2681,8 +2681,21 @@ void CKanbanColumnCtrl::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
 		CRect rBody(rItem);
 		rBody.DeflateRect(1, 1);
 
-		dc.FillSolidRect(rBody, ::GetSysColor(COLOR_HIGHLIGHT));
-		DrawItemTitle(&dc, pKI, rBody, ::GetSysColor(COLOR_HIGHLIGHTTEXT));
+		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rItem);
+
+		if (pKI->bHasIcon || pKI->bParent)
+		{
+			int iImageIndex = -1;
+			HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKI->dwTaskID, (LPARAM)&iImageIndex);
+
+			if (hilTask && (iImageIndex != -1))
+			{
+				DrawItemImage(&dc, rBody, KBCI_ICON, TRUE, hilTask, iImageIndex);
+				rBody.left += DEF_IMAGE_SIZE;
+			}
+		}
+
+		DrawItemTitle(&dc, pKI, rBody, ::GetSysColor(COLOR_WINDOWTEXT));
 
 		rItem.OffsetRect(0, rItem.Height());
 		dc.RestoreDC(nSaveDC);
