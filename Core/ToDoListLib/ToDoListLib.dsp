@@ -317,6 +317,10 @@ SOURCE=..\ToDoList\TDCToolsHelper.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCTreeDragDropHelper.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCWebUpdateScript.cpp
 # End Source File
 # Begin Source File
@@ -930,6 +934,10 @@ SOURCE=..\ToDoList\TDCToolsCmdlineParser.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCToolsHelper.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCTreeDragDropHelper.h
 # End Source File
 # Begin Source File
 

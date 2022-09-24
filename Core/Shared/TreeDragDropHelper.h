@@ -79,6 +79,7 @@ protected:
 	// CDragDropDataForwarder interface
 	virtual CSize OnGetDragSize(CDC& dc);
 	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
+	virtual void OnDrawItem(CDC& dc, const CRect& rc, HTREEITEM hti);
 
 };
 

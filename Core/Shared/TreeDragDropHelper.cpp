@@ -556,14 +556,20 @@ void CTreeDragDropHelper::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
 			rItem.OffsetRect(-m_nXDragOffset, -rItem.top + nYPos);
 			rItem.IntersectRect(rc, rItem);
 
-			GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
-
-			rItem.DeflateRect(2, 1);
-			dc.DrawText(m_tree.GetItemText(hti), rItem, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+			OnDrawItem(dc, rItem, hti);
 
 			nYPos += rItem.Height();
 		}
 	}
 
 	dc.SelectObject(pOldFont);
+}
+
+void CTreeDragDropHelper::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti)
+{
+	GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
+
+	CRect rText(rItem);
+	rText.DeflateRect(2, 1);
+	dc.DrawText(m_tree.GetItemText(hti), rText, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
 }
