@@ -22,7 +22,7 @@ class CDragDropTreeData : public CDragDropData
 {
 public:
 	CDragDropTreeData(const CTreeSelectionHelper& selection) :
-		m_tree(selection.TreeCtrl()), m_ptDrawOffset(0)
+		m_tree(selection.TreeCtrl()), m_nXOffset(0)
 	{
 		selection.CopySelection(m_selection);
 	}
@@ -30,25 +30,34 @@ public:
 protected:
 	virtual CSize OnGetDragSize(CDC& /*dc*/)
 	{
-		CRect rDrag(0, 0, 0, 0), rItem;
+		CRect rDrag(0, 0, 0, 0);
 
-		// iterate the current selection accumulating their rects
+		// iterate the current selection accumulating their sizes
+		// including horizontal offsets but NOT vertical gaps
 		POSITION pos = m_selection.GetHeadPosition();
+		int nHeight = 0;
 
 		while (pos)
 		{
 			HTREEITEM hti = m_selection.GetNext(pos);
+			CRect rItem;
 
 			if (m_tree.GetItemRect(hti, rItem, TRUE))
-				rDrag |= rItem;
+			{
+				rDrag.left = min(rDrag.left, rItem.left);
+				rDrag.right = max(rDrag.right, rItem.right);
+				
+				nHeight += rItem.Height();
+			}
 		}
 
 		// save this for when we draw
-		m_ptDrawOffset = rDrag.TopLeft();
+		m_nXOffset = rDrag.left;
 
-		rDrag.right = min(rDrag.right, rDrag.left + MAXIMAGEWIDTH);
+		CSize sizeDrag(rDrag.Width(), nHeight);
+		sizeDrag.cx = min(sizeDrag.cx, MAXIMAGEWIDTH);
 
-		return rDrag.Size();
+		return sizeDrag;
 	}
 	
 	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
@@ -60,6 +69,7 @@ protected:
 		CFont* pOldFont = dc.SelectObject(m_tree.GetFont());
 
 		POSITION pos = m_selection.GetHeadPosition();
+		int nYPos = 0;
 
 		while (pos)
 		{
@@ -68,14 +78,15 @@ protected:
 
 			if (m_tree.GetItemRect(hti, rItem, TRUE))
 			{
-				rItem -= m_ptDrawOffset;
-				rItem += rc.TopLeft();
+				rItem.OffsetRect(-m_nXOffset, -rItem.top + nYPos);
 				rItem.IntersectRect(rc, rItem);
 
 				GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
 
 				rItem.DeflateRect(2, 1);
 				dc.DrawText(m_tree.GetItemText(hti), rItem, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+
+				nYPos += rItem.Height();
 			}
 		}
 
@@ -85,7 +96,7 @@ protected:
 protected:
 	CHTIList m_selection;
 	const CTreeCtrl& m_tree;
-	CPoint m_ptDrawOffset;
+	int m_nXOffset;
 };
 
 //////////////////////////////////////////////////////////////////////
