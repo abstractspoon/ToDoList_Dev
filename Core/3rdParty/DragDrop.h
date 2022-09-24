@@ -43,6 +43,7 @@ struct DRAGDROPWND
 	UINT type;				// DDW_ flags above
 };
 
+///////////////////////////////////////////////////////////////
 // Abstract drag-drop data knows how to draw itself.
 //
 class CDragDropData 
@@ -60,7 +61,7 @@ protected:
 	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
 };
 
-//////////////////
+///////////////////////////////////////////////////////////////
 // Concrete class for drag-drop text data.
 //
 class CDragDropText : public CDragDropData 
@@ -76,6 +77,23 @@ protected:
 protected:
 	virtual CSize OnGetDragSize(CDC& dc);
 	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
+};
+
+///////////////////////////////////////////////////////////////
+// Template class for forwarding drag-drop callback to another class
+//
+template <class T>
+class CDragDropDataForwarder : public CDragDropData
+{
+public:
+	CDragDropDataForwarder(T& t) : m_T(t) {}
+
+protected:
+	T& m_T;
+
+protected:
+	virtual CSize OnGetDragSize(CDC& dc) { return m_T.OnGetDragSize(dc); }
+	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) { return m_T.OnDrawData(dc, rc, crMask); }
 };
 
 //////////////////

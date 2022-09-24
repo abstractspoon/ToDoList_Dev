@@ -18,87 +18,6 @@ static char THIS_FILE[]=__FILE__;
 
 const int MAXIMAGEWIDTH = 200;
 
-class CDragDropTreeData : public CDragDropData
-{
-public:
-	CDragDropTreeData(const CTreeSelectionHelper& selection) :
-		m_tree(selection.TreeCtrl()), m_nXOffset(0)
-	{
-		selection.CopySelection(m_selection);
-	}
-
-protected:
-	virtual CSize OnGetDragSize(CDC& /*dc*/)
-	{
-		CRect rDrag(0, 0, 0, 0);
-
-		// iterate the current selection accumulating their sizes
-		// including horizontal offsets but NOT vertical gaps
-		POSITION pos = m_selection.GetHeadPosition();
-		int nHeight = 0;
-
-		while (pos)
-		{
-			HTREEITEM hti = m_selection.GetNext(pos);
-			CRect rItem;
-
-			if (m_tree.GetItemRect(hti, rItem, TRUE))
-			{
-				rDrag.left = min(rDrag.left, rItem.left);
-				rDrag.right = max(rDrag.right, rItem.right);
-				
-				nHeight += rItem.Height();
-			}
-		}
-
-		// save this for when we draw
-		m_nXOffset = rDrag.left;
-
-		CSize sizeDrag(rDrag.Width(), nHeight);
-		sizeDrag.cx = min(sizeDrag.cx, MAXIMAGEWIDTH);
-
-		return sizeDrag;
-	}
-	
-	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
-	{
-		crMask = RGB(255, 0, 255);
-		dc.FillSolidRect(rc, crMask);
-
-		// use same font as source window
-		CFont* pOldFont = dc.SelectObject(m_tree.GetFont());
-
-		POSITION pos = m_selection.GetHeadPosition();
-		int nYPos = 0;
-
-		while (pos)
-		{
-			HTREEITEM hti = m_selection.GetNext(pos);
-			CRect rItem;
-
-			if (m_tree.GetItemRect(hti, rItem, TRUE))
-			{
-				rItem.OffsetRect(-m_nXOffset, -rItem.top + nYPos);
-				rItem.IntersectRect(rc, rItem);
-
-				GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
-
-				rItem.DeflateRect(2, 1);
-				dc.DrawText(m_tree.GetItemText(hti), rItem, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
-
-				nYPos += rItem.Height();
-			}
-		}
-
-		dc.SelectObject(pOldFont);
-	}
-	
-protected:
-	CHTIList m_selection;
-	const CTreeCtrl& m_tree;
-	int m_nXOffset;
-};
-
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -123,7 +42,8 @@ CTreeDragDropHelper::CTreeDragDropHelper(const CTreeSelectionHelper& selection, 
 	m_htiDropAfter(NULL), 
 	m_bEnabled(FALSE), 
 	m_nScrollTimer(0), 
-	m_nExpandTimer(0)
+	m_nExpandTimer(0),
+	m_nXDragOffset(0)
 {
 
 }
@@ -239,7 +159,7 @@ BOOL CTreeDragDropHelper::OnDragEnter(DRAGDROPINFO* pDDI)
 	// make sure this has not initiated a label edit
 	m_tree.SendMessage(TVM_ENDEDITLABELNOW, TRUE, 0);
 	
-	pDDI->pData = new CDragDropTreeData(m_selection);
+	pDDI->pData = new CDragDropDataForwarder<CTreeDragDropHelper>(*this);
 	
 	// reset droptarget
 	m_htiDropTarget = m_htiDropAfter = NULL;
@@ -583,3 +503,67 @@ VOID CALLBACK CTreeDragDropHelper::TimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT 
 		s_pTDDH->OnTimer(idEvent); // pseudo message handler
 }
 
+CSize CTreeDragDropHelper::OnGetDragSize(CDC& /*dc*/)
+{
+	CRect rDrag(0, 0, 0, 0);
+
+	// iterate the current selection accumulating their sizes
+	// including horizontal offsets but NOT vertical gaps
+	POSITION pos = m_selection.GetFirstItemPos();
+	int nHeight = 0;
+
+	while (pos)
+	{
+		HTREEITEM hti = m_selection.GetNextItem(pos);
+		CRect rItem;
+
+		if (m_tree.GetItemRect(hti, rItem, TRUE))
+		{
+			rDrag.left = min(rDrag.left, rItem.left);
+			rDrag.right = max(rDrag.right, rItem.right);
+
+			nHeight += rItem.Height();
+		}
+	}
+
+	// save this for when we draw
+	m_nXDragOffset = rDrag.left;
+
+	CSize sizeDrag(rDrag.Width(), nHeight);
+	sizeDrag.cx = min(sizeDrag.cx, MAXIMAGEWIDTH);
+
+	return sizeDrag;
+}
+
+void CTreeDragDropHelper::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+{
+	crMask = RGB(255, 0, 255);
+	dc.FillSolidRect(rc, crMask);
+
+	// use same font as source window
+	CFont* pOldFont = dc.SelectObject(m_tree.GetFont());
+
+	POSITION pos = m_selection.GetFirstItemPos();
+	int nYPos = 0;
+
+	while (pos)
+	{
+		HTREEITEM hti = m_selection.GetNextItem(pos);
+		CRect rItem;
+
+		if (m_tree.GetItemRect(hti, rItem, TRUE))
+		{
+			rItem.OffsetRect(-m_nXDragOffset, -rItem.top + nYPos);
+			rItem.IntersectRect(rc, rItem);
+
+			GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
+
+			rItem.DeflateRect(2, 1);
+			dc.DrawText(m_tree.GetItemText(hti), rItem, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+
+			nYPos += rItem.Height();
+		}
+	}
+
+	dc.SelectObject(pOldFont);
+}

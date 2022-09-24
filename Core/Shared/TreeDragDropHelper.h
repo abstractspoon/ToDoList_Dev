@@ -22,6 +22,8 @@ enum DDWHERE
 
 class CTreeDragDropHelper
 {
+	friend class CDragDropDataForwarder<CTreeDragDropHelper>;
+
 public:
 	CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree);
 	virtual ~CTreeDragDropHelper();
@@ -43,6 +45,7 @@ protected:
 	HTREEITEM m_htiDropTarget, m_htiDropAfter;
 	UINT m_nScrollTimer, m_nExpandTimer;
 	BOOL m_bAllowNcDrag;
+	int m_nXDragOffset;
 
 	static CTreeDragDropHelper* s_pTDDH;
 
@@ -72,6 +75,11 @@ protected:
 	UINT OnDragOver(const DRAGDROPINFO* pDDI);
 	BOOL OnDragDrop(const DRAGDROPINFO* pDDI);
 	BOOL OnDragAbort();
+
+	// CDragDropDataForwarder interface
+	virtual CSize OnGetDragSize(CDC& dc);
+	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
+
 };
 
 #endif // !defined(AFX_TREEDRAGDROPHELPER_H__06381648_F0F3_4791_8204_6A0A8798F29A__INCLUDED_)
