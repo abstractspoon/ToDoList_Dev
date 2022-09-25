@@ -2658,7 +2658,7 @@ CSize CKanbanColumnCtrl::OnGetDragSize(CDC& /*dc*/)
 	return sizeTotal;
 }
 
-void CKanbanColumnCtrl::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask)
 {
 	// Draw item sequentially with no gaps
 	CHTIList lstSelection;

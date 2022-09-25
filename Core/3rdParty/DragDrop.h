@@ -50,7 +50,7 @@ class IDragDropRenderer
 public:
 	// derived classes must implement these:
 	virtual CSize OnGetDragSize(CDC& dc) = 0;
-	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
 };
 
 ///////////////////////////////////////////////////////////////
@@ -81,7 +81,7 @@ protected:
 
 protected:
 	virtual CSize OnGetDragSize(CDC& dc);
-	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
+	virtual void  OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
 };
 
 ///////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ protected:
 
 protected:
 	virtual CSize OnGetDragSize(CDC& dc) { return m_Renderer.OnGetDragSize(dc); }
-	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) { return m_Renderer.OnDrawData(dc, rc, crMask); }
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask) { return m_Renderer.OnDrawDragData(dc, rc, crMask); }
 };
 
 //////////////////

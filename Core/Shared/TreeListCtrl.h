@@ -117,7 +117,7 @@ protected:
 class CTreeListCtrl : public CWnd, protected CTreeListSyncer
 {
 public:
-	CTreeListCtrl(int nMinLabelWidth = 75, int nMinColWidth = 6);
+	CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer = NULL, int nMinLabelWidth = 75, int nMinColWidth = 6);
 	virtual ~CTreeListCtrl();
 
 	operator HWND() const { return GetSafeHwnd(); }

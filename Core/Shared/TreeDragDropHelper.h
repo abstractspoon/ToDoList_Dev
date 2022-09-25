@@ -23,22 +23,23 @@ public:
 	CTreeDragDropRenderer(const CTreeSelectionHelper& selection, const CTreeCtrl& tree);
 
 protected:
-	const CTreeSelectionHelper& m_selection;
-	const CTreeCtrl& m_tree;
+	const CTreeSelectionHelper& m_dragSelection;
+	const CTreeCtrl& m_dragTree;
 
 	int m_nXDragOffset;
 
 public:
-	virtual void OnDrawItem(CDC& dc, const CRect& rc, HTREEITEM hti);
+	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rc);
+	virtual void OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rc);
 
 	// IDragDropRenderer interface
 	virtual CSize OnGetDragSize(CDC& dc);
-	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
 };
 
 //////////////////////////////////////////////////////////////////////
 
-class CTreeDragDropHelper// : IDragDropRenderer
+class CTreeDragDropHelper
 {
 public:
 	CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree, CTreeDragDropRenderer* pAltRenderer = NULL);

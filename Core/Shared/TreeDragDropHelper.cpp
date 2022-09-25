@@ -22,28 +22,30 @@ const int MAXIMAGEWIDTH = 200;
 
 CTreeDragDropRenderer::CTreeDragDropRenderer(const CTreeSelectionHelper& selection, const CTreeCtrl& tree)
 	:
-	m_selection(selection),
-	m_tree(tree),
+	m_dragSelection(selection),
+	m_dragTree(tree),
 	m_nXDragOffset(0)
 {
 
 }
 
-CSize CTreeDragDropRenderer::OnGetDragSize(CDC& /*dc*/)
+CSize CTreeDragDropRenderer::OnGetDragSize(CDC& dc)
 {
 	CRect rDrag(0, 0, 0, 0);
 
 	// iterate the current selection accumulating their sizes
 	// including horizontal offsets but NOT vertical gaps
-	POSITION pos = m_selection.GetFirstItemPos();
+	POSITION pos = m_dragSelection.GetFirstItemPos();
 	int nHeight = 0;
 
 	while (pos)
 	{
-		HTREEITEM hti = m_selection.GetNextItem(pos);
-		CRect rItem;
+		HTREEITEM hti = m_dragSelection.GetNextItem(pos);
 
-		if (m_tree.GetItemRect(hti, rItem, TRUE))
+		CRect rItem(0, 0, 0, 0);
+		OnGetDragItemRect(dc, hti, rItem);
+
+		if (!rItem.IsRectEmpty())
 		{
 			rDrag.left = min(rDrag.left, rItem.left);
 			rDrag.right = max(rDrag.right, rItem.right);
@@ -61,28 +63,30 @@ CSize CTreeDragDropRenderer::OnGetDragSize(CDC& /*dc*/)
 	return sizeDrag;
 }
 
-void CTreeDragDropRenderer::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+void CTreeDragDropRenderer::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask)
 {
 	crMask = RGB(255, 0, 255);
 	dc.FillSolidRect(rc, crMask);
 
 	// use same font as source window
-	CFont* pOldFont = dc.SelectObject(m_tree.GetFont());
+	CFont* pOldFont = dc.SelectObject(m_dragTree.GetFont());
 
-	POSITION pos = m_selection.GetFirstItemPos();
+	POSITION pos = m_dragSelection.GetFirstItemPos();
 	int nYPos = 0;
 
 	while (pos)
 	{
-		HTREEITEM hti = m_selection.GetNextItem(pos);
-		CRect rItem;
-
-		if (m_tree.GetItemRect(hti, rItem, TRUE))
+		HTREEITEM hti = m_dragSelection.GetNextItem(pos);
+		
+		CRect rItem(0, 0, 0, 0);
+		OnGetDragItemRect(dc, hti, rItem);
+		
+		if (!rItem.IsRectEmpty())
 		{
 			rItem.OffsetRect(-m_nXDragOffset, -rItem.top + nYPos);
 			rItem.IntersectRect(rc, rItem);
 
-			OnDrawItem(dc, rItem, hti);
+			OnDrawDragItem(dc, hti, rItem);
 
 			nYPos += rItem.Height();
 		}
@@ -91,13 +95,18 @@ void CTreeDragDropRenderer::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMas
 	dc.SelectObject(pOldFont);
 }
 
-void CTreeDragDropRenderer::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti)
+void CTreeDragDropRenderer::OnGetDragItemRect(CDC& /*dc*/, HTREEITEM hti, CRect& rItem)
 {
-	GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
+	m_dragTree.GetItemRect(hti, rItem, TRUE);
+}
+
+void CTreeDragDropRenderer::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
+{
+	GraphicsMisc::DrawExplorerItemSelection(&dc, m_dragTree, GMIS_SELECTED, rItem);
 
 	CRect rText(rItem);
 	rText.DeflateRect(2, 1);
-	dc.DrawText(m_tree.GetItemText(hti), rText, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+	dc.DrawText(m_dragTree.GetItemText(hti), rText, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
 }
 
 //////////////////////////////////////////////////////////////////////

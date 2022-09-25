@@ -29,9 +29,8 @@ protected:
 	const CTDLTaskCtrlBase& m_Ctrl;
 
 protected:
-	virtual CSize OnGetDragSize(CDC& dc);
-	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
-	virtual void OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti);
+	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
+	virtual void OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem);
 };
 
 //////////////////////////////////////////////////////////////////////

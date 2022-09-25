@@ -478,7 +478,7 @@ BOOL CDragDropData::CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage
 	dcMem.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
 	COLORREF crMask;
-	OnDrawData(dcMem, rc, crMask); // call virtual fn to draw
+	OnDrawDragData(dcMem, rc, crMask); // call virtual fn to draw
 
 	dcMem.SelectObject(pOldFont);
 	dcMem.SelectObject(pOldBitmap);
@@ -510,7 +510,7 @@ CSize CDragDropText::OnGetDragSize(CDC& dc)
 //////////////////
 // Call MFC/Windows to draw text.
 //
-void CDragDropText::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+void CDragDropText::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask)
 {
 	crMask = 1;
 	dc.DrawText(m_text, (LPRECT)&rc, DT_LEFT|DT_END_ELLIPSIS);

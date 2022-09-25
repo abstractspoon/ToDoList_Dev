@@ -183,7 +183,7 @@ protected:
 protected:
 	// CDragDropData interface
 	CSize OnGetDragSize(CDC& dc);
-	void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
+	void  OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
 	
 protected:
 	int CalcItemTitleTextHeight() const;

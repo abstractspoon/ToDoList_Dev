@@ -32,31 +32,25 @@ CTDCTreeDragDropRenderer::~CTDCTreeDragDropRenderer()
 {
 }
 
-CSize CTDCTreeDragDropRenderer::OnGetDragSize(CDC& dc)
+void CTDCTreeDragDropRenderer::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
 {
-	CSize sizeDrag = CTreeDragDropRenderer::OnGetDragSize(dc);
-	sizeDrag.cx += IMAGE_SIZE;
+	CTreeDragDropRenderer::OnGetDragItemRect(dc, hti, rItem);
 
-	return sizeDrag;
+	rItem.left -= IMAGE_SIZE;
 }
 
-void CTDCTreeDragDropRenderer::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+void CTDCTreeDragDropRenderer::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
 {
-	CTreeDragDropRenderer::OnDrawData(dc, rc, crMask);
-}
-
-void CTDCTreeDragDropRenderer::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti)
-{
-	DWORD dwTaskID = m_tree.GetItemData(hti);
+	DWORD dwTaskID = m_dragTree.GetItemData(hti);
 	int nImage = m_Ctrl.GetTaskIconIndex(dwTaskID);
 
 	if (nImage != -1)
 		ImageList_Draw(m_Ctrl.GetTaskImageList(), nImage, dc, rItem.left, rItem.top, ILD_TRANSPARENT);
 
-	CRect rRest(rItem);
-	rRest.OffsetRect(IMAGE_SIZE, 0);
+	CRect rText(rItem);
+	rText.OffsetRect(IMAGE_SIZE, 0);
 
-	CTreeDragDropRenderer::OnDrawItem(dc, rRest, hti);
+	CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rText);
 }
 
 //////////////////////////////////////////////////////////////////////
