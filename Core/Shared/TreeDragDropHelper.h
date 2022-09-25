@@ -9,16 +9,13 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "treeselectionhelper.h"
 
 #include "..\3rdparty\dragdrop.h"
 
-enum DDWHERE
-{
-	DD_ABOVE = -1,
-	DD_ON = 0,
-	DD_BELOW = 1
-};
+//////////////////////////////////////////////////////////////////////
 
 class CTreeDragDropHelper : IDragDropRenderer
 {
@@ -46,6 +43,13 @@ protected:
 	int m_nXDragOffset;
 
 	static CTreeDragDropHelper* s_pTDDH;
+
+	enum DDWHERE
+	{
+		DD_ABOVE = -1,
+		DD_ON = 0,
+		DD_BELOW = 1
+	};
 
 	struct DROPPOSITION
 	{
