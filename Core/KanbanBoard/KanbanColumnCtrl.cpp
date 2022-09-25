@@ -81,7 +81,7 @@ const int ATTRIB_INDENT			= GraphicsMisc::ScaleByDPIFactor(6);
 const int TIP_PADDING			= GraphicsMisc::ScaleByDPIFactor(4);
 const int DEF_IMAGE_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
 const int LEVEL_INDENT			= GraphicsMisc::ScaleByDPIFactor(16);
-const int MAX_DRAG_IMAGE_SIZE	= GraphicsMisc::ScaleByDPIFactor(200) + DEF_IMAGE_SIZE;
+const int MAX_DRAG_ITEM_WIDTH	= GraphicsMisc::ScaleByDPIFactor(200) + DEF_IMAGE_SIZE;
 const int PIN_FLAG_IMAGE_HEIGHT	= GraphicsMisc::ScaleByDPIFactor(12);
 
 const int IMAGE_PADDING			= 2;
@@ -916,6 +916,23 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 	rItem.top = rLink.top;
 }
 
+BOOL CKanbanColumnCtrl::DrawTaskIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rIcon) const
+{
+	if (pKI->bHasIcon || pKI->bParent)
+	{
+		int iImageIndex = -1;
+		HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKI->dwTaskID, (LPARAM)&iImageIndex);
+
+		if (hilTask && (iImageIndex != -1))
+		{
+			DrawItemImage(pDC, rIcon, KBCI_ICON, TRUE, hilTask, iImageIndex);
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
 void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& rItem) const
 {
 	CSaveDC sdc(pDC);
@@ -928,22 +945,11 @@ void CKanbanColumnCtrl::DrawItemImages(CDC* pDC, const KANBANITEM* pKI, CRect& r
 	rIcon.left += IMAGE_PADDING;
 	rIcon.top += IMAGE_PADDING;
 
+	BOOL bIconDrawn = DrawTaskIcon(pDC, pKI, rIcon);
+
+	// Draw placeholder image if icon not drawn
 	BOOL bLocked = pKI->bLocked;
-	BOOL bIconDrawn = FALSE;
 
-	if (pKI->bHasIcon || pKI->bParent)
-	{
-		int iImageIndex = -1;
-		HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKI->dwTaskID, (LPARAM)&iImageIndex);
-
-		if (hilTask && (iImageIndex != -1))
-		{
-			DrawItemImage(pDC, rIcon, KBCI_ICON, TRUE, hilTask, iImageIndex);
-			bIconDrawn = TRUE;
-		}
-	}
-
-	// Draw placeholder image if con not drawn
 	if (!bLocked && !bIconDrawn)
 	{
 		// Allow for placeholder being smaller than default image size
@@ -2626,36 +2632,44 @@ BOOL CKanbanColumnCtrl::CanDrag(const CKanbanColumnCtrl* pSrcCol, const CKanbanC
 	return TRUE;
 }
 
-// ---------------------------------------------------------------
-// CDragDropData interface
+BOOL CKanbanColumnCtrl::CreateDragImage(CImageList& ilDrag, CSize& sizeImage)
+{
+	if (!m_bSelected)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
+	return CDragDropData::CreateDragImage(this, ilDrag, sizeImage);
+}
 
 CSize CKanbanColumnCtrl::OnGetDragSize(CDC& /*dc*/)
 {
-	// Calculate the aggregate height with no gaps
-	CSize sizeTotal(0, 0);
+	ASSERT(m_aSelTaskIDs.GetSize());
 
-	if (m_aSelTaskIDs.GetSize())
+	// Calculate the aggregate height with 
+	// horizontal indents but no vertical gaps
+	CHTIList lstSelection;
+	BuildSortedSelection(lstSelection);
+	
+	POSITION pos = lstSelection.GetHeadPosition();
+	CRect rDrag(0, 0, 0, 0);
+
+	while (pos)
 	{
-		HTREEITEM htiSel = FindItem(m_aSelTaskIDs[0]);
+		HTREEITEM htiSel = lstSelection.GetNext(pos);
 		ASSERT(htiSel);
 
 		CRect rItem;
-		CTreeCtrl::GetItemRect(htiSel, rItem, FALSE);
+		VERIFY(GetItemRect(htiSel, rItem));
 
-		sizeTotal.cx = rItem.Width() + DEF_IMAGE_SIZE;
-
-		if (HasOption(KBCF_SHOWCOMPLETIONCHECKBOXES))
-			sizeTotal.cx -= CEnImageList::GetImageSize(m_ilCheckboxes);
-
-		int nItemHeight = (TEXT_BORDER.Height() + (m_nNumTitleLines * (m_nItemTextBorder + m_nItemTextHeight)));
-
-		sizeTotal.cy = (nItemHeight * m_aSelTaskIDs.GetSize());
+		rDrag.left = min(rDrag.left, rItem.left);
+		rDrag.right = max(rDrag.right, rItem.right);
 	}
 
-	sizeTotal.cx = min(sizeTotal.cx, MAX_DRAG_IMAGE_SIZE);
-	sizeTotal.cy = min(sizeTotal.cy, MAX_DRAG_IMAGE_SIZE);
+	int nItemHeight = (TEXT_BORDER.Height() + (m_nNumTitleLines * (m_nItemTextBorder + m_nItemTextHeight)));
 
-	return sizeTotal;
+	return CSize(rDrag.Width(), (nItemHeight * m_aSelTaskIDs.GetSize()));
 }
 
 void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask)
@@ -2667,48 +2681,47 @@ void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMas
 	crMask = 1;
 	dc.FillSolidRect(rc, crMask);
 
-	CRect rItem(rc);
-	rItem.bottom = (rItem.bottom / m_aSelTaskIDs.GetSize());
-
 	POSITION pos = lstSelection.GetHeadPosition();
+	int nItemHeight = (TEXT_BORDER.Height() + (m_nNumTitleLines * (m_nItemTextBorder + m_nItemTextHeight)));
+	int nVPos = 0;
 
 	while (pos)
 	{
-		int nSaveDC = dc.SaveDC();
-		DWORD dwTaskID = GetTaskID(lstSelection.GetNext(pos));
-		const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
+		HTREEITEM htiSel = lstSelection.GetNext(pos);
+		ASSERT(htiSel);
+
+		CRect rItem;
+		VERIFY(GetDragItemRect(htiSel, rItem));
+
+		rItem.top = nVPos;
+		rItem.bottom = rItem.top + nItemHeight;
+
+		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rItem);
 
 		CRect rBody(rItem);
 		rBody.DeflateRect(1, 1);
 
-		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rItem);
+		DWORD dwTaskID = GetTaskID(htiSel);
+		const KANBANITEM* pKI = m_data.GetItem(dwTaskID);
 
-		if (pKI->bHasIcon || pKI->bParent)
-		{
-			int iImageIndex = -1;
-			HIMAGELIST hilTask = (HIMAGELIST)GetParent()->SendMessage(WM_KLCN_GETTASKICON, pKI->dwTaskID, (LPARAM)&iImageIndex);
+		CRect rIcon(rBody);
+		rIcon.OffsetRect(IMAGE_PADDING, IMAGE_PADDING);
 
-			if (hilTask && (iImageIndex != -1))
-			{
-				DrawItemImage(&dc, rBody, KBCI_ICON, TRUE, hilTask, iImageIndex);
-				rBody.left += DEF_IMAGE_SIZE;
-			}
-		}
+		DrawTaskIcon(&dc, pKI, rIcon);
 
+		rBody.left += DEF_IMAGE_SIZE + IMAGE_PADDING;
 		DrawItemTitle(&dc, pKI, rBody, ::GetSysColor(COLOR_WINDOWTEXT));
 
-		rItem.OffsetRect(0, rItem.Height());
-		dc.RestoreDC(nSaveDC);
+		nVPos += nItemHeight;
 	}
 }
 
-BOOL CKanbanColumnCtrl::CreateDragImage(CImageList& ilDrag, CSize& sizeImage)
+BOOL CKanbanColumnCtrl::GetDragItemRect(HTREEITEM hti, CRect& rItem) const
 {
-	if (!m_bSelected)
-	{
-		ASSERT(0);
+	if (!GetItemRect(hti, rItem))
 		return FALSE;
-	}
 
-	return CDragDropData::CreateDragImage(this, ilDrag, sizeImage);
+	rItem.right = max(rItem.right, rItem.left + MAX_DRAG_ITEM_WIDTH + DEF_IMAGE_SIZE + IMAGE_PADDING);
+	return TRUE;
 }
+
