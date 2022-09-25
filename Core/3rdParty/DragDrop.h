@@ -44,9 +44,19 @@ struct DRAGDROPWND
 };
 
 ///////////////////////////////////////////////////////////////
+//
+class IDragDropRenderer
+{
+public:
+	// derived classes must implement these:
+	virtual CSize OnGetDragSize(CDC& dc) = 0;
+	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
+};
+
+///////////////////////////////////////////////////////////////
 // Abstract drag-drop data knows how to draw itself.
 //
-class CDragDropData 
+class CDragDropData : public IDragDropRenderer
 {
 public:
 	CDragDropData() { }
@@ -54,11 +64,6 @@ public:
 
 	CImageList* CreateDragImage(CWnd* pWnd, CSize& sizeImage);
 	BOOL CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage);
-
-protected:
-	// derived classes must implement these:
-	virtual CSize OnGetDragSize(CDC& dc) = 0;
-	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
 };
 
 ///////////////////////////////////////////////////////////////
@@ -82,18 +87,17 @@ protected:
 ///////////////////////////////////////////////////////////////
 // Template class for forwarding drag-drop callback to another class
 //
-template <class T>
 class CDragDropDataForwarder : public CDragDropData
 {
 public:
-	CDragDropDataForwarder(T& t) : m_T(t) {}
+	CDragDropDataForwarder(IDragDropRenderer& renderer) : m_Renderer(renderer) {}
 
 protected:
-	T& m_T;
+	IDragDropRenderer& m_Renderer;
 
 protected:
-	virtual CSize OnGetDragSize(CDC& dc) { return m_T.OnGetDragSize(dc); }
-	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) { return m_T.OnDrawData(dc, rc, crMask); }
+	virtual CSize OnGetDragSize(CDC& dc) { return m_Renderer.OnGetDragSize(dc); }
+	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) { return m_Renderer.OnDrawData(dc, rc, crMask); }
 };
 
 //////////////////

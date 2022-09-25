@@ -159,9 +159,9 @@ BOOL CTreeDragDropHelper::OnDragEnter(DRAGDROPINFO* pDDI)
 	// make sure this has not initiated a label edit
 	m_tree.SendMessage(TVM_ENDEDITLABELNOW, TRUE, 0);
 	
-	pDDI->pData = new CDragDropDataForwarder<CTreeDragDropHelper>(*this);
+	pDDI->pData = new CDragDropDataForwarder(*this);
 	
-	// reset droptarget
+	// reset drop target
 	m_htiDropTarget = m_htiDropAfter = NULL;
 	
 	m_dropPos.htiDrop = NULL;

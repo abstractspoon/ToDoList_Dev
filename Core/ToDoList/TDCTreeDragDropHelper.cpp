@@ -26,8 +26,7 @@ CTDCTreeDragDropHelper::CTDCTreeDragDropHelper(const CTDLTaskCtrlBase& ctrl, con
 	CTreeDragDropHelper(selection, tree),
 	m_Ctrl(ctrl),
 	m_bShowIcons(FALSE), 
-	m_bShowParentsAsFolders(FALSE),
-	m_bHasIcons(FALSE)
+	m_bShowParentsAsFolders(FALSE)
 {
 }
 
@@ -44,24 +43,7 @@ void CTDCTreeDragDropHelper::ShowIcons(BOOL bShow, BOOL bShowParentsAsFolders)
 CSize CTDCTreeDragDropHelper::OnGetDragSize(CDC& dc)
 {
 	CSize sizeDrag = CTreeDragDropHelper::OnGetDragSize(dc);
-
-	// See if any tasks have icons
-	m_bHasIcons = FALSE;
-	POSITION pos = m_selection.GetFirstItemPos();
-
-	while (pos)
-	{
-		HTREEITEM hti = m_selection.GetNextItem(pos);
-		DWORD dwTaskID = m_tree.GetItemData(hti);
-
-		if (m_Ctrl.GetTaskIconIndex(dwTaskID) != -1)
-		{
-			sizeDrag.cx += IMAGE_SIZE;
-			m_bHasIcons = TRUE;
-
-			break;
-		}
-	}
+	sizeDrag.cx += IMAGE_SIZE;
 
 	return sizeDrag;
 }
@@ -73,13 +55,6 @@ void CTDCTreeDragDropHelper::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMa
 
 void CTDCTreeDragDropHelper::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti)
 {
-	if (!m_bHasIcons)
-	{
-		CTreeDragDropHelper::OnDrawItem(dc, rItem, hti);
-		return;
-	}
-
-	// else
 	DWORD dwTaskID = m_tree.GetItemData(hti);
 	int nImage = m_Ctrl.GetTaskIconIndex(dwTaskID);
 

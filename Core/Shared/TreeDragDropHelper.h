@@ -20,10 +20,8 @@ enum DDWHERE
 	DD_BELOW = 1
 };
 
-class CTreeDragDropHelper
+class CTreeDragDropHelper : IDragDropRenderer
 {
-	friend class CDragDropDataForwarder<CTreeDragDropHelper>;
-
 public:
 	CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree);
 	virtual ~CTreeDragDropHelper();
@@ -76,7 +74,7 @@ protected:
 	BOOL OnDragDrop(const DRAGDROPINFO* pDDI);
 	BOOL OnDragAbort();
 
-	// CDragDropDataForwarder interface
+	// IDragDropRenderer interface
 	virtual CSize OnGetDragSize(CDC& dc);
 	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
 	virtual void OnDrawItem(CDC& dc, const CRect& rc, HTREEITEM hti);

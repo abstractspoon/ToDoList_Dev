@@ -29,7 +29,6 @@ public:
 
 protected:
 	BOOL m_bShowIcons, m_bShowParentsAsFolders;
-	BOOL m_bHasIcons;
 
 	const CTDLTaskCtrlBase& m_Ctrl;
 
