@@ -1,4 +1,4 @@
-// TDCTreeDragDropHelper.cpp: implementation of the CTDCTreeDragDropHelper class.
+// TDCTreeDragDropHelper.cpp: implementation of the CTDCTreeDragDropRenderer class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -21,39 +21,31 @@ const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CTDCTreeDragDropHelper::CTDCTreeDragDropHelper(const CTDLTaskCtrlBase& ctrl, const CTreeSelectionHelper& selection, CTreeCtrl& tree)
+CTDCTreeDragDropRenderer::CTDCTreeDragDropRenderer(const CTDLTaskCtrlBase& ctrl, const CTreeSelectionHelper& selection, CTreeCtrl& tree)
 	:
-	CTreeDragDropHelper(selection, tree),
-	m_Ctrl(ctrl),
-	m_bShowIcons(FALSE), 
-	m_bShowParentsAsFolders(FALSE)
+	CTreeDragDropRenderer(selection, tree),
+	m_Ctrl(ctrl)
 {
 }
 
-CTDCTreeDragDropHelper::~CTDCTreeDragDropHelper()
+CTDCTreeDragDropRenderer::~CTDCTreeDragDropRenderer()
 {
 }
 
-void CTDCTreeDragDropHelper::ShowIcons(BOOL bShow, BOOL bShowParentsAsFolders)
+CSize CTDCTreeDragDropRenderer::OnGetDragSize(CDC& dc)
 {
-	m_bShowIcons = bShow;
-	m_bShowParentsAsFolders = bShowParentsAsFolders;
-}
-
-CSize CTDCTreeDragDropHelper::OnGetDragSize(CDC& dc)
-{
-	CSize sizeDrag = CTreeDragDropHelper::OnGetDragSize(dc);
+	CSize sizeDrag = CTreeDragDropRenderer::OnGetDragSize(dc);
 	sizeDrag.cx += IMAGE_SIZE;
 
 	return sizeDrag;
 }
 
-void CTDCTreeDragDropHelper::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+void CTDCTreeDragDropRenderer::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
 {
-	CTreeDragDropHelper::OnDrawData(dc, rc, crMask);
+	CTreeDragDropRenderer::OnDrawData(dc, rc, crMask);
 }
 
-void CTDCTreeDragDropHelper::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti)
+void CTDCTreeDragDropRenderer::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti)
 {
 	DWORD dwTaskID = m_tree.GetItemData(hti);
 	int nImage = m_Ctrl.GetTaskIconIndex(dwTaskID);
@@ -64,5 +56,17 @@ void CTDCTreeDragDropHelper::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM h
 	CRect rRest(rItem);
 	rRest.OffsetRect(IMAGE_SIZE, 0);
 
-	CTreeDragDropHelper::OnDrawItem(dc, rRest, hti);
+	CTreeDragDropRenderer::OnDrawItem(dc, rRest, hti);
 }
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+CTDCTreeDragDropHelper::CTDCTreeDragDropHelper(const CTDLTaskCtrlBase& ctrl, const CTreeSelectionHelper& selection, CTreeCtrl& tree)
+	:
+	CTreeDragDropHelper(selection, tree, &m_renderer),
+	m_renderer(ctrl, selection, tree)
+{
+}
+

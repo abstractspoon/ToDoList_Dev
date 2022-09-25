@@ -114,7 +114,7 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTreeListCtrl : public CWnd, protected CTreeListSyncer  
+class CTreeListCtrl : public CWnd, protected CTreeListSyncer
 {
 public:
 	CTreeListCtrl(int nMinLabelWidth = 75, int nMinColWidth = 6);

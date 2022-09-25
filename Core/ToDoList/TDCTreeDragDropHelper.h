@@ -19,23 +19,30 @@ class CTDLTaskCtrlBase;
 
 //////////////////////////////////////////////////////////////////////
 
-class CTDCTreeDragDropHelper : public CTreeDragDropHelper  
+class CTDCTreeDragDropRenderer : public CTreeDragDropRenderer  
 {
 public:
-	CTDCTreeDragDropHelper(const CTDLTaskCtrlBase& ctrl, const CTreeSelectionHelper& selection, CTreeCtrl& tree);
-	virtual ~CTDCTreeDragDropHelper();
-
-	void ShowIcons(BOOL bShow, BOOL bShowParentsAsFolders);
+	CTDCTreeDragDropRenderer(const CTDLTaskCtrlBase& ctrl, const CTreeSelectionHelper& selection, CTreeCtrl& tree);
+	virtual ~CTDCTreeDragDropRenderer();
 
 protected:
-	BOOL m_bShowIcons, m_bShowParentsAsFolders;
-
 	const CTDLTaskCtrlBase& m_Ctrl;
 
 protected:
 	virtual CSize OnGetDragSize(CDC& dc);
 	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
 	virtual void OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CTDCTreeDragDropHelper : public CTreeDragDropHelper  
+{
+public:
+	CTDCTreeDragDropHelper(const CTDLTaskCtrlBase& ctrl, const CTreeSelectionHelper& selection, CTreeCtrl& tree);
+
+protected:
+	CTDCTreeDragDropRenderer m_renderer;
 };
 
 #endif // !defined(AFX_TDCTREEDRAGDROPHELPER_H__2961480D_2B17_42F9_A870_F9C3F5F443AC__INCLUDED_)

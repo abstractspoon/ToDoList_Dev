@@ -19,6 +19,88 @@ static char THIS_FILE[]=__FILE__;
 const int MAXIMAGEWIDTH = 200;
 
 //////////////////////////////////////////////////////////////////////
+
+CTreeDragDropRenderer::CTreeDragDropRenderer(const CTreeSelectionHelper& selection, const CTreeCtrl& tree)
+	:
+	m_selection(selection),
+	m_tree(tree),
+	m_nXDragOffset(0)
+{
+
+}
+
+CSize CTreeDragDropRenderer::OnGetDragSize(CDC& /*dc*/)
+{
+	CRect rDrag(0, 0, 0, 0);
+
+	// iterate the current selection accumulating their sizes
+	// including horizontal offsets but NOT vertical gaps
+	POSITION pos = m_selection.GetFirstItemPos();
+	int nHeight = 0;
+
+	while (pos)
+	{
+		HTREEITEM hti = m_selection.GetNextItem(pos);
+		CRect rItem;
+
+		if (m_tree.GetItemRect(hti, rItem, TRUE))
+		{
+			rDrag.left = min(rDrag.left, rItem.left);
+			rDrag.right = max(rDrag.right, rItem.right);
+
+			nHeight += rItem.Height();
+		}
+	}
+
+	// save this for when we draw
+	m_nXDragOffset = rDrag.left;
+
+	CSize sizeDrag(rDrag.Width(), nHeight);
+	sizeDrag.cx = min(sizeDrag.cx, MAXIMAGEWIDTH);
+
+	return sizeDrag;
+}
+
+void CTreeDragDropRenderer::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
+{
+	crMask = RGB(255, 0, 255);
+	dc.FillSolidRect(rc, crMask);
+
+	// use same font as source window
+	CFont* pOldFont = dc.SelectObject(m_tree.GetFont());
+
+	POSITION pos = m_selection.GetFirstItemPos();
+	int nYPos = 0;
+
+	while (pos)
+	{
+		HTREEITEM hti = m_selection.GetNextItem(pos);
+		CRect rItem;
+
+		if (m_tree.GetItemRect(hti, rItem, TRUE))
+		{
+			rItem.OffsetRect(-m_nXDragOffset, -rItem.top + nYPos);
+			rItem.IntersectRect(rc, rItem);
+
+			OnDrawItem(dc, rItem, hti);
+
+			nYPos += rItem.Height();
+		}
+	}
+
+	dc.SelectObject(pOldFont);
+}
+
+void CTreeDragDropRenderer::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti)
+{
+	GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
+
+	CRect rText(rItem);
+	rText.DeflateRect(2, 1);
+	dc.DrawText(m_tree.GetItemText(hti), rText, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+}
+
+//////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
@@ -34,16 +116,17 @@ enum
 
 const CPoint OUTERSPACE(-10000, -10000);
 
-CTreeDragDropHelper::CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree)
+CTreeDragDropHelper::CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree, CTreeDragDropRenderer* pAltRenderer)
 	: 
 	m_selection(selection), 
 	m_tree(tree), 
+	m_defRenderer(selection, tree),
+	m_pRenderer(pAltRenderer ? pAltRenderer : &m_defRenderer),
 	m_htiDropTarget(NULL), 
 	m_htiDropAfter(NULL), 
 	m_bEnabled(FALSE), 
 	m_nScrollTimer(0), 
-	m_nExpandTimer(0),
-	m_nXDragOffset(0)
+	m_nExpandTimer(0)
 {
 
 }
@@ -159,7 +242,7 @@ BOOL CTreeDragDropHelper::OnDragEnter(DRAGDROPINFO* pDDI)
 	// make sure this has not initiated a label edit
 	m_tree.SendMessage(TVM_ENDEDITLABELNOW, TRUE, 0);
 	
-	pDDI->pData = new CDragDropDataForwarder(*this);
+	pDDI->pData = new CDragDropDataForwarder(*m_pRenderer);
 	
 	// reset drop target
 	m_htiDropTarget = m_htiDropAfter = NULL;
@@ -503,73 +586,3 @@ VOID CALLBACK CTreeDragDropHelper::TimerProc(HWND /*hwnd*/, UINT /*uMsg*/, UINT 
 		s_pTDDH->OnTimer(idEvent); // pseudo message handler
 }
 
-CSize CTreeDragDropHelper::OnGetDragSize(CDC& /*dc*/)
-{
-	CRect rDrag(0, 0, 0, 0);
-
-	// iterate the current selection accumulating their sizes
-	// including horizontal offsets but NOT vertical gaps
-	POSITION pos = m_selection.GetFirstItemPos();
-	int nHeight = 0;
-
-	while (pos)
-	{
-		HTREEITEM hti = m_selection.GetNextItem(pos);
-		CRect rItem;
-
-		if (m_tree.GetItemRect(hti, rItem, TRUE))
-		{
-			rDrag.left = min(rDrag.left, rItem.left);
-			rDrag.right = max(rDrag.right, rItem.right);
-
-			nHeight += rItem.Height();
-		}
-	}
-
-	// save this for when we draw
-	m_nXDragOffset = rDrag.left;
-
-	CSize sizeDrag(rDrag.Width(), nHeight);
-	sizeDrag.cx = min(sizeDrag.cx, MAXIMAGEWIDTH);
-
-	return sizeDrag;
-}
-
-void CTreeDragDropHelper::OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask)
-{
-	crMask = RGB(255, 0, 255);
-	dc.FillSolidRect(rc, crMask);
-
-	// use same font as source window
-	CFont* pOldFont = dc.SelectObject(m_tree.GetFont());
-
-	POSITION pos = m_selection.GetFirstItemPos();
-	int nYPos = 0;
-
-	while (pos)
-	{
-		HTREEITEM hti = m_selection.GetNextItem(pos);
-		CRect rItem;
-
-		if (m_tree.GetItemRect(hti, rItem, TRUE))
-		{
-			rItem.OffsetRect(-m_nXDragOffset, -rItem.top + nYPos);
-			rItem.IntersectRect(rc, rItem);
-
-			OnDrawItem(dc, rItem, hti);
-
-			nYPos += rItem.Height();
-		}
-	}
-
-	dc.SelectObject(pOldFont);
-}
-
-void CTreeDragDropHelper::OnDrawItem(CDC& dc, const CRect& rItem, HTREEITEM hti)
-{
-	GraphicsMisc::DrawExplorerItemSelection(&dc, m_tree, GMIS_SELECTED, rItem);
-
-	CRect rText(rItem);
-	rText.DeflateRect(2, 1);
-	dc.DrawText(m_tree.GetItemText(hti), rText, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
-}

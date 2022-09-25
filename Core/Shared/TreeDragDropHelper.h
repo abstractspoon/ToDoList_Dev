@@ -17,10 +17,31 @@
 
 //////////////////////////////////////////////////////////////////////
 
-class CTreeDragDropHelper : IDragDropRenderer
+class CTreeDragDropRenderer : public CDragDropData
 {
 public:
-	CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree);
+	CTreeDragDropRenderer(const CTreeSelectionHelper& selection, const CTreeCtrl& tree);
+
+protected:
+	const CTreeSelectionHelper& m_selection;
+	const CTreeCtrl& m_tree;
+
+	int m_nXDragOffset;
+
+public:
+	virtual void OnDrawItem(CDC& dc, const CRect& rc, HTREEITEM hti);
+
+	// IDragDropRenderer interface
+	virtual CSize OnGetDragSize(CDC& dc);
+	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
+};
+
+//////////////////////////////////////////////////////////////////////
+
+class CTreeDragDropHelper// : IDragDropRenderer
+{
+public:
+	CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree, CTreeDragDropRenderer* pAltRenderer = NULL);
 	virtual ~CTreeDragDropHelper();
 
 	BOOL Initialize(CWnd* pOwner, BOOL bEnabled = TRUE, BOOL bAllowNcDrag = TRUE);
@@ -40,7 +61,9 @@ protected:
 	HTREEITEM m_htiDropTarget, m_htiDropAfter;
 	UINT m_nScrollTimer, m_nExpandTimer;
 	BOOL m_bAllowNcDrag;
-	int m_nXDragOffset;
+
+	CTreeDragDropRenderer m_defRenderer;
+	CTreeDragDropRenderer* m_pRenderer;
 
 	static CTreeDragDropHelper* s_pTDDH;
 
@@ -77,11 +100,6 @@ protected:
 	UINT OnDragOver(const DRAGDROPINFO* pDDI);
 	BOOL OnDragDrop(const DRAGDROPINFO* pDDI);
 	BOOL OnDragAbort();
-
-	// IDragDropRenderer interface
-	virtual CSize OnGetDragSize(CDC& dc);
-	virtual void OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
-	virtual void OnDrawItem(CDC& dc, const CRect& rc, HTREEITEM hti);
 
 };
 
