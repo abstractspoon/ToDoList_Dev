@@ -16,7 +16,7 @@ static char THIS_FILE[]=__FILE__;
 
 //////////////////////////////////////////////////////////////////////
 
-const int MAXIMAGEWIDTH = 200;
+const int MAXITEMWIDTH = GraphicsMisc::ScaleByDPIFactor(400);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -41,11 +41,9 @@ CSize CTreeDragDropRenderer::OnGetDragSize(CDC& dc)
 	while (pos)
 	{
 		HTREEITEM hti = m_dragSelection.GetNextItem(pos);
+		CRect rItem;
 
-		CRect rItem(0, 0, 0, 0);
-		OnGetDragItemRect(dc, hti, rItem);
-
-		if (!rItem.IsRectEmpty())
+		if (GetItemRect(dc, hti, rItem))
 		{
 			rDrag.left = min(rDrag.left, rItem.left);
 			rDrag.right = max(rDrag.right, rItem.right);
@@ -57,10 +55,7 @@ CSize CTreeDragDropRenderer::OnGetDragSize(CDC& dc)
 	// save this for when we draw
 	m_nXDragOffset = rDrag.left;
 
-	CSize sizeDrag(rDrag.Width(), nHeight);
-	sizeDrag.cx = min(sizeDrag.cx, MAXIMAGEWIDTH);
-
-	return sizeDrag;
+	return CSize(rDrag.Width(), nHeight);
 }
 
 void CTreeDragDropRenderer::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask)
@@ -77,11 +72,9 @@ void CTreeDragDropRenderer::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& c
 	while (pos)
 	{
 		HTREEITEM hti = m_dragSelection.GetNextItem(pos);
-		
-		CRect rItem(0, 0, 0, 0);
-		OnGetDragItemRect(dc, hti, rItem);
-		
-		if (!rItem.IsRectEmpty())
+		CRect rItem;
+
+		if (GetItemRect(dc, hti, rItem))
 		{
 			rItem.OffsetRect(-m_nXDragOffset, -rItem.top + nYPos);
 			rItem.IntersectRect(rc, rItem);
@@ -107,6 +100,18 @@ void CTreeDragDropRenderer::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& 
 	CRect rText(rItem);
 	rText.DeflateRect(2, 1);
 	dc.DrawText(m_dragTree.GetItemText(hti), rText, DT_LEFT | DT_END_ELLIPSIS | DT_NOPREFIX);
+}
+
+// helper
+BOOL CTreeDragDropRenderer::GetItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
+{
+	rItem.SetRectEmpty();
+
+	OnGetDragItemRect(dc, hti, rItem);
+
+	rItem.right = min(rItem.right, rItem.left + MAXITEMWIDTH);
+
+	return !rItem.IsRectEmpty();
 }
 
 //////////////////////////////////////////////////////////////////////

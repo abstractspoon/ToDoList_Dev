@@ -3084,11 +3084,6 @@ int CTDLTaskCtrlBase::GetTaskIconIndex(const TODOITEM* pTDI, const TODOSTRUCTURE
 	return nIcon;
 }
 
-const CImageList& CTDLTaskCtrlBase::GetTaskImageList() const 
-{ 
-	return m_ilTaskIcons; 
-}
-
 void CTDLTaskCtrlBase::DrawColumnFileLinks(CDC* pDC, const CStringArray& aFileLinks, const CRect& rect)
 {
 	int nNumFiles = aFileLinks.GetSize();

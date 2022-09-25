@@ -29,12 +29,15 @@ protected:
 	int m_nXDragOffset;
 
 public:
-	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rc);
-	virtual void OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rc);
+	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
+	virtual void OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem);
 
 	// IDragDropRenderer interface
 	virtual CSize OnGetDragSize(CDC& dc);
 	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
+
+protected:
+	BOOL GetItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
 };
 
 //////////////////////////////////////////////////////////////////////

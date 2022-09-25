@@ -170,7 +170,6 @@
     <ClCompile Include="..\ToDoList\TDCToDoCtrlPreferenceHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCToolsCmdlineParser.cpp" />
     <ClCompile Include="..\ToDoList\TDCToolsHelper.cpp" />
-    <ClCompile Include="..\ToDoList\TDCTreeDragDropHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCWebUpdateScript.cpp" />
     <ClCompile Include="..\ToDoList\TDLAboutDlg.cpp" />
     <ClCompile Include="..\ToDoList\TDLAddLoggedTimeDlg.cpp" />
@@ -328,7 +327,6 @@
     <ClInclude Include="..\ToDoList\TDCToDoCtrlPreferenceHelper.h" />
     <ClInclude Include="..\ToDoList\TDCToolsCmdlineParser.h" />
     <ClInclude Include="..\ToDoList\TDCToolsHelper.h" />
-    <ClInclude Include="..\ToDoList\TDCTreeDragDropHelper.h" />
     <ClInclude Include="..\ToDoList\TDCWebUpdateScript.h" />
     <ClInclude Include="..\ToDoList\TDLAboutDlg.h" />
     <ClInclude Include="..\ToDoList\TDLAddLoggedTimeDlg.h" />

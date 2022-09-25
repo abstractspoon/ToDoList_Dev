@@ -25,7 +25,6 @@
 #include "tdcFindReplace.h"
 #include "tdcdialoghelper.h"
 #include "tdlinfotipctrl.h"
-#include "TDCTreeDragDropHelper.h"
 
 #include "..\shared\runtimedlg.h"
 #include "..\shared\orderedtreectrl.h"
@@ -503,7 +502,7 @@ protected:
 	int m_nCommentsSize;
 	CString m_sPassword;
 	CString m_sCompletionStatus;
-	CTDCTreeDragDropHelper m_treeDragDrop;
+	CTreeDragDropHelper m_treeDragDrop;
 	CWndPromptManager m_mgrPrompts;
 	COleDateTime m_dtLastTaskMod;
 	TDCAUTOLISTDATA m_tldDefault, m_tldAll;

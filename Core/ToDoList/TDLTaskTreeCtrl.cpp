@@ -44,6 +44,7 @@ const COLORREF COMMENTSCOLOR	= RGB(98, 98, 98);
 const COLORREF ALTCOMMENTSCOLOR = RGB(164, 164, 164);
 
 const int TITLE_BORDER_OFFSET	= 2;
+const int ICON_SIZE				= GraphicsMisc::ScaleByDPIFactor(16);
 
 //////////////////////////////////////////////////////////////////////
 
@@ -68,6 +69,7 @@ CTDLTaskTreeCtrl::CTDLTaskTreeCtrl(const CTDCImageList& ilIcons,
 								   const CTDCCustomAttribDefinitionArray& aCustAttribDefs) 
 	: 
 	CTDLTaskCtrlBase(ilIcons, data, m_find, styles, tld, mapVisibleCols, aCustAttribDefs),
+	CTreeDragDropRenderer(m_tsh, m_tcTasks),
 	m_tsh(m_tcTasks),
 	m_tch(m_tcTasks),
 	m_htiLastHandledLBtnDown(NULL),
@@ -534,6 +536,44 @@ LRESULT CTDLTaskTreeCtrl::OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD)
 	}
 	
 	return CDRF_DODEFAULT;
+}
+
+void CTDLTaskTreeCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
+{
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	VERIFY(m_data.GetTask(GetTaskID(hti), pTDI, pTDS));
+
+	CFont* pOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
+
+	CTreeDragDropRenderer::OnGetDragItemRect(dc, hti, rItem);
+
+	dc.SelectObject(pOldFont);
+	rItem.left -= ICON_SIZE;
+}
+
+void CTDLTaskTreeCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
+{
+	DWORD dwTaskID = m_dragTree.GetItemData(hti);
+	int nImage = GetTaskIconIndex(dwTaskID);
+
+	if (nImage != -1)
+		m_ilTaskIcons.Draw(&dc, nImage, rItem.TopLeft(), ILD_TRANSPARENT);
+
+	CRect rText(rItem);
+	rText.OffsetRect(ICON_SIZE, 0);
+
+	const TODOITEM* pTDI = NULL;
+	const TODOSTRUCTURE* pTDS = NULL;
+
+	VERIFY(m_data.GetTask(GetTaskID(hti), pTDI, pTDS));
+
+	CFont* pOldFont = PrepareDCFont(&dc, pTDI, pTDS, TRUE);
+
+	CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rText);
+
+	dc.SelectObject(pOldFont);
 }
 
 BOOL CTDLTaskTreeCtrl::GetSelectionBoundingRect(CRect& rSelection) const
