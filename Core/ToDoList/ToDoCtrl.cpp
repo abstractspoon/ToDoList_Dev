@@ -3910,14 +3910,22 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 			mapProcessed.Add(dwTaskID);
 	}
 
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
+	if (aTasksForCompletion.GetSize())
 	{
+		if (!SetSelectedTaskCompletion(aTasksForCompletion))
+			return FALSE;
+
+		// else
 		UpdateControls(FALSE);
 
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		SetModified(TDCA_DONEDATE, aModTaskIDs);
+
+		return TRUE;
 	}
-	else if (aModTaskIDs.GetSize())
+	
+	// else 
+	if (aModTaskIDs.GetSize())
 	{
 		int nPercent = GetSelectedTaskPercent();
 
@@ -3930,9 +3938,10 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 		}
 
 		SetModified(TDCA_PERCENT, aModTaskIDs);
+		return TRUE;
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
@@ -4419,19 +4428,22 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 		}
 	}
 
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
+	if (aTasksForCompletion.GetSize())
 	{
+		if (!SetSelectedTaskCompletion(aTasksForCompletion))
+			return FALSE;
+
+		// else
 		UpdateControls(FALSE);
 
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		SetModified(TDCA_DONEDATE, aModTaskIDs);
-	}
-	else if (!SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus))
-	{
-		return FALSE;
-	}
 
-	return TRUE;
+		return TRUE;
+	}
+	
+	// else
+	return SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, 
