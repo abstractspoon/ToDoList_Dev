@@ -3395,7 +3395,7 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 		else
 			sMessage += CEnString(IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES, Misc::FormatArray(aToDoIDs));
 		
-		AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+		AfxMessageBox(sMessage, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 
@@ -3412,7 +3412,7 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 			sMessage += '|';
 			sMessage += CEnString(IDS_TDC_SELTASKHASDEPENDENCY);
 
-			if (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONEXCLAMATION))
+			if (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONERROR))
 				ShowTaskLink(sIncomplete, FALSE);
 
 			return FALSE;
