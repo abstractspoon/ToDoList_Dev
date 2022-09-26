@@ -2661,7 +2661,7 @@ CSize CKanbanColumnCtrl::OnGetDragSize(CDC& /*dc*/)
 		ASSERT(htiSel);
 
 		CRect rItem;
-		VERIFY(GetItemRect(htiSel, rItem));
+		VERIFY(GetDragItemRect(htiSel, rItem));
 
 		rDrag.left = min(rDrag.left, rItem.left);
 		rDrag.right = max(rDrag.right, rItem.right);
@@ -2721,7 +2721,7 @@ BOOL CKanbanColumnCtrl::GetDragItemRect(HTREEITEM hti, CRect& rItem) const
 	if (!GetItemRect(hti, rItem))
 		return FALSE;
 
-	rItem.right = max(rItem.right, rItem.left + MAX_DRAG_ITEM_WIDTH + DEF_IMAGE_SIZE + IMAGE_PADDING);
+	rItem.right = min(rItem.right, rItem.left + MAX_DRAG_ITEM_WIDTH + DEF_IMAGE_SIZE + IMAGE_PADDING);
 	return TRUE;
 }
 
