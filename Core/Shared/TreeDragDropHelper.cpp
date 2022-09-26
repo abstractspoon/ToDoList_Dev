@@ -31,10 +31,11 @@ CTreeDragDropRenderer::CTreeDragDropRenderer(const CTreeSelectionHelper& selecti
 
 CSize CTreeDragDropRenderer::OnGetDragSize(CDC& dc)
 {
-	CRect rDrag(0, 0, 0, 0);
-
 	// iterate the current selection accumulating their sizes
 	// including horizontal offsets but NOT vertical gaps
+	CRect rDrag(0, 0, 0, 0);
+
+	// Note: No need to sort items here
 	POSITION pos = m_dragSelection.GetFirstItemPos();
 	int nHeight = 0;
 
@@ -66,12 +67,15 @@ void CTreeDragDropRenderer::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& c
 	// use same font as source window
 	CFont* pOldFont = dc.SelectObject(m_dragTree.GetFont());
 
-	POSITION pos = m_dragSelection.GetFirstItemPos();
+	CHTIList lstItems;
+	m_dragSelection.CopySelection(lstItems, FALSE, TRUE);
+
+	POSITION pos = lstItems.GetHeadPosition();
 	int nYPos = 0;
 
 	while (pos)
 	{
-		HTREEITEM hti = m_dragSelection.GetNextItem(pos);
+		HTREEITEM hti = lstItems.GetNext(pos);
 		CRect rItem;
 
 		if (GetItemRect(dc, hti, rItem))
