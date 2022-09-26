@@ -2118,9 +2118,18 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 						// Don't assert on edits that can be cancelled
 						break;
 
+					case TDCA_STATUS:
+					case TDCA_PERCENT:
+					case TDCA_DONEDATE:
+						// These can fail with incomplete dependencies
+						ASSERT(m_taskTree.SelectionHasDependencies() ||
+								TaskHasIncompleteDependencies(mod.dwSelectedTaskID, CString()) ||
+								aTasksForCompletion.GetSize());
+						break;
+
 					default:
 						// all else
-						ASSERT(aTasksForCompletion.GetSize());
+						ASSERT(0);
 						break;
 					}
 #endif
