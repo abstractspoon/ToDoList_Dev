@@ -53,8 +53,9 @@ BOOL CTDLTaskComboBox::SetSelectedTaskID(DWORD dwTaskID)
 CString CTDLTaskComboBox::GetSelectedTaskName() const
 {
 	CString sTask = CDialogHelper::GetSelectedItem(*this);
+	sTask.TrimLeft();
 
-	return sTask.TrimLeft();
+	return sTask;
 }
 
 int CTDLTaskComboBox::GetSelectedTaskImage() const
@@ -100,7 +101,9 @@ BOOL CTDLTaskComboBox::ModifyItem(int nItem, const CString& sName, int nImage)
 		return FALSE;
 	}
 
-	CString sCurName = CDialogHelper::GetItem(*this, nItem).TrimLeft();
+	CString sCurName = CDialogHelper::GetItem(*this, nItem);
+	sCurName.TrimLeft();
+
 	BOOL bNameChange = (sName != sCurName);
 
 	TCB_ITEMDATA* pItemData = (TCB_ITEMDATA*)GetExtItemData(nItem);
@@ -264,8 +267,9 @@ void CTDLTaskComboBox::OnDropDown()
 			// to be cleared/changed after this function has returned, 
 			// so we'll need to post ourselves a message to fix things up
 			DWORD dwSelTaskID = GetSelectedTaskID();
+			sText.TrimLeft(TAB);
 
-			SetWindowText(sText.TrimLeft(TAB));
+			SetWindowText(sText);
 
 			PostMessage(WM_RESELECTTASKID, 0, dwSelTaskID);
 		}

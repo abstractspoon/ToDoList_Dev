@@ -2142,7 +2142,7 @@ void CKanbanColumnCtrl::OnChar(UINT nChar, UINT nRepCnt, UINT nFlags)
 		return;
 	}
 
-	return CTreeCtrl::OnChar(nChar, nRepCnt, nFlags);
+	CTreeCtrl::OnChar(nChar, nRepCnt, nFlags);
 }
 
 void CKanbanColumnCtrl::OnKeyDown(UINT nChar, UINT /*nRepCnt*/, UINT /*nFlags*/)

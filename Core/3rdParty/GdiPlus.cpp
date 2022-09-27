@@ -482,7 +482,7 @@ BOOL CGdiPlus::CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitm
 BOOL CGdiPlus::CreateBitmap(int width, int height, gdix_Bitmap **bitmap, gdix_PixelFormat format)
 {
 	GETPROCADDRESS(PFNCREATEBITMAPFROMSCAN0, "GdipCreateBitmapFromScan0");
-	return (pFN(width, height, 0, (int)format, nullptr, bitmap) == gdix_Ok);
+	return (pFN(width, height, 0, (int)format, NULL, bitmap) == gdix_Ok);
 }
 
 BOOL CGdiPlus::GetImageMimeType(const WCHAR* filename, CString& sMimeType)

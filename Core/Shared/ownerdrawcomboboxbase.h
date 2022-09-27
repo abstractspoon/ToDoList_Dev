@@ -8,6 +8,18 @@
 //
 
 /////////////////////////////////////////////////////////////////////////////
+
+struct ODCB_ITEMDATA
+{
+	ODCB_ITEMDATA() : dwItemData(0), bHeading(FALSE), bDisabled(FALSE) {}
+	virtual ~ODCB_ITEMDATA() {}
+	
+	DWORD dwItemData;
+	BOOL bHeading;
+	BOOL bDisabled;
+};
+
+/////////////////////////////////////////////////////////////////////////////
 // COwnerdrawComboBoxBase window
 
 class COwnerdrawComboBoxBase : public CComboBox
@@ -96,16 +108,6 @@ protected:
 
 protected:
 	void DeleteAllExtItemData();
-
-	struct ODCB_ITEMDATA
-	{
-		ODCB_ITEMDATA() : dwItemData(0), bHeading(FALSE), bDisabled(FALSE) {}
-		virtual ~ODCB_ITEMDATA() {}
-
-		DWORD dwItemData;
-		BOOL bHeading;
-		BOOL bDisabled;
-	};
 
 	virtual ODCB_ITEMDATA* NewExtItemData() const { return new ODCB_ITEMDATA(); }
 

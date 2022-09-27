@@ -97,7 +97,7 @@ protected:
 
 protected:
 	virtual CSize OnGetDragSize(CDC& dc) { return m_Renderer.OnGetDragSize(dc); }
-	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask) { return m_Renderer.OnDrawDragData(dc, rc, crMask); }
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask) { m_Renderer.OnDrawDragData(dc, rc, crMask); }
 };
 
 //////////////////

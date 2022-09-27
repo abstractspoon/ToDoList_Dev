@@ -293,6 +293,10 @@ SOURCE=..\ToDoList\TDCStartupOptions.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCTaskCompletion.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCTaskTimeLog.cpp
 # End Source File
 # Begin Source File
@@ -314,10 +318,6 @@ SOURCE=..\ToDoList\TDCToolsCmdlineParser.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCToolsHelper.cpp
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCTreeDragDropHelper.cpp
 # End Source File
 # Begin Source File
 
@@ -554,6 +554,10 @@ SOURCE=..\ToDoList\TDLStatusBar.cpp
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.cpp
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskComboBox.cpp
 # End Source File
 # Begin Source File
 
@@ -913,6 +917,10 @@ SOURCE=..\ToDoList\tdcswitch.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCTaskCompletion.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCTaskTimeLog.h
 # End Source File
 # Begin Source File
@@ -934,10 +942,6 @@ SOURCE=..\ToDoList\TDCToolsCmdlineParser.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCToolsHelper.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\ToDoList\TDCTreeDragDropHelper.h
 # End Source File
 # Begin Source File
 
@@ -1174,6 +1178,10 @@ SOURCE=..\ToDoList\TDLStatusBar.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLStylesheetParamConfigDlg.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLTaskComboBox.h
 # End Source File
 # Begin Source File
 
