@@ -3279,7 +3279,14 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 			if (GetColumnAttributeValue(pDestCol, point, sDestAttribValue))
 			{
 				CDWordArray aTaskIDs;
-				VERIFY(pSrcCol->GetSelectedTaskIDs(aTaskIDs));
+				int nNumIDs = pSrcCol->GetSelectedTaskIDs(aTaskIDs);
+
+				// Cache current values in case of undo
+				CArray<KANBANITEM, KANBANITEM&> aUndo;
+				aUndo.SetSize(aTaskIDs.GetSize());
+
+				for (int nID = 0; nID < nNumIDs; nID++)
+					aUndo[nID] = *GetKanbanItem(aTaskIDs[nID]);
 
 				int nPrevNumCols = GetVisibleColumnCount();
 
@@ -3287,22 +3294,37 @@ void CKanbanCtrl::OnLButtonUp(UINT nFlags, CPoint point)
 
 				if (bChange)
 				{
-					HideEmptyColumns(nPrevNumCols);
-					RefreshColumnHeaderText();
-					Resize();
+					if (NotifyParentAttibuteChange(aTaskIDs))
+					{
+						HideEmptyColumns(nPrevNumCols);
+						RefreshColumnHeaderText();
+						Resize();
 
-					// Resort before fixing up selection
-					if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
-					{	
-						pDestCol->Sort(m_nSortBy, m_bSortAscending);
-						pSrcCol->Sort(m_nSortBy, m_bSortAscending);
+						// Resort before fixing up selection
+						if ((m_nSortBy != TDCA_NONE) || HasOption(KBCF_SORTSUBTASTASKSBELOWPARENTS))
+						{	
+							pDestCol->Sort(m_nSortBy, m_bSortAscending);
+							pSrcCol->Sort(m_nSortBy, m_bSortAscending);
+						}
+
+						SelectColumn(pDestCol, FALSE);
+					}
+					else
+					{
+						ASSERT(aUndo.GetSize());
+
+						// Application failed the request so we undo the changes
+						for (int nID = 0; nID < nNumIDs; nID++)
+							*GetKanbanItem(aTaskIDs[nID]) = aUndo[nID];
+
+						// App will take care of restoring selection
+						RebuildColumns(KCRC_REBUILDCONTENTS);
+
+						SelectColumn(pSrcCol, FALSE);
 					}
 
-					SelectColumn(pDestCol, FALSE);
-					SelectTasks(aTaskIDs); 
-
+					SelectTasks(aTaskIDs);
 					NotifyParentSelectionChange();
-					NotifyParentAttibuteChange(aTaskIDs);
 				}
 			}
 		}

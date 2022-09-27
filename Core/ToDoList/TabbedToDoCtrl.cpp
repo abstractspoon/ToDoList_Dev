@@ -2083,65 +2083,89 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 
 	HandleUnsavedComments();
 
-	// Aggregate all mods as a single edit
-	IMPLEMENT_DATA_UNDO_EDIT(m_data);
-
 	// Keep track of explicitly modified tasks and attributes
 	CDWordArray aModTaskIDs;
 	CTDCTaskCompletionArray aTasksForCompletion(m_data, m_sCompletionStatus);
 	CTDCAttributeMap mapModAttribs;
-	BOOL bChange = FALSE;
+	BOOL bChange = FALSE, bCompletionFailed = FALSE;
 
-	try
+	// Aggregate all mods as a single edit
 	{
-		const IUITASKMOD* pMods = (const IUITASKMOD*)lParam;
-		int nNumMod = (int)wParam;
+		IMPLEMENT_DATA_UNDO_EDIT(m_data);
 
-		ASSERT(nNumMod > 0);
-
-		for (int nMod = 0; nMod < nNumMod; nMod++)
+		try
 		{
-			const IUITASKMOD& mod = pMods[nMod];
+			const IUITASKMOD* pMods = (const IUITASKMOD*)lParam;
+			int nNumMod = (int)wParam;
 
-			if (ProcessUIExtensionMod(mod, aModTaskIDs, aTasksForCompletion, mapModAttribs))
+			ASSERT(nNumMod > 0);
+
+			for (int nMod = 0; nMod < nNumMod; nMod++)
 			{
+				const IUITASKMOD& mod = pMods[nMod];
+
+				if (ProcessUIExtensionMod(mod, aModTaskIDs, aTasksForCompletion, mapModAttribs))
+				{
+					bChange = TRUE;
+				}
+				else
+				{
+#ifdef _DEBUG
+					switch (mod.nAttrib)
+					{
+					case TDCA_ICON:
+					case TDCA_OFFSETTASK:
+						// Don't assert on edits that can be cancelled
+						break;
+
+					case TDCA_STATUS:
+					case TDCA_PERCENT:
+					case TDCA_DONEDATE:
+						// These can fail with incomplete dependencies
+						ASSERT(m_taskTree.SelectionHasDependencies() ||
+								TaskHasIncompleteDependencies(mod.dwSelectedTaskID, CString()) ||
+								aTasksForCompletion.GetSize());
+						break;
+
+					default:
+						// all else
+						ASSERT(0);
+						break;
+					}
+#endif
+				}
+			}
+		}
+		catch (...)
+		{
+			ASSERT(0);
+			bChange = FALSE;
+		}
+
+		if (aTasksForCompletion.GetSize())
+		{
+			if (SetSelectedTaskCompletion(aTasksForCompletion))
+			{
+				aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
+				m_taskTree.GetAttributesAffectedByMod(TDCA_DONEDATE, mapModAttribs);
+
 				bChange = TRUE;
 			}
 			else
 			{
-#ifdef _DEBUG
-				switch (mod.nAttrib)
-				{
-				case TDCA_ICON:
-				case TDCA_OFFSETTASK:
-					// Don't assert on edits that can be cancelled
-					break;
-
-				default: 
-					// all else
-					ASSERT(0);
-					break;
-				}
-#endif
+				bCompletionFailed = TRUE;
 			}
 		}
 	}
-	catch (...)
+
+	if (bCompletionFailed)
 	{
-		ASSERT(0);
-		bChange = FALSE;
+		// We only undo if there were other valid changes else
+		// we'll undo the edit before this one
+		if (bChange)
+			UndoLastAction(TRUE);
 	}
-
-	if (aTasksForCompletion.GetSize() &&
-		SetSelectedTaskCompletion(aTasksForCompletion))
-	{
-		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
-		m_taskTree.GetAttributesAffectedByMod(TDCA_DONEDATE, mapModAttribs);
-
-		bChange = TRUE;
-	}
-
-	if (bChange)
+	else if (bChange)
 	{
 		// Note: If 'aModTaskIDs' is NOT empty then it means that the 
 		// 'SetSelectedTask...' methods were NOT used and so we need
@@ -2158,8 +2182,8 @@ LRESULT CTabbedToDoCtrl::OnUIExtModifySelectedTask(WPARAM wParam, LPARAM lParam)
 			ASSERT(mapModAttribs.GetCount() == 0);
 		}
 	}
-	
-	return bChange;
+		
+	return (bChange && !bCompletionFailed);
 }
 
 LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lParam)

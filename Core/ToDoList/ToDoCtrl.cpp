@@ -208,7 +208,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_nMaxState(TDCMS_NORMAL),
 	m_nMaxInfotipCommentsLength(-1),
 	m_nPriority(-1),
-	m_treeDragDrop(TSH(), m_taskTree.Tree()),
+	m_treeDragDrop(TSH(), m_taskTree.Tree(), &m_taskTree),
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
@@ -3376,10 +3376,11 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 
 	// check for circular dependencies
 	CDWordArray aCircularIDs;
+	int nID;
 
-	for (int nToDo = 0; nToDo < aToDoIDs.GetSize(); nToDo++)
+	for (nID = 0; nID < aToDoIDs.GetSize(); nID++)
 	{
-		DWORD dwTaskID = aToDoIDs[nToDo];
+		DWORD dwTaskID = aToDoIDs[nID];
 
 		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
 			aCircularIDs.Add(dwTaskID);
@@ -3395,16 +3396,16 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 		else
 			sMessage += CEnString(IDS_TDC_SELTASKSHAVECIRCULARDEPENDENCIES, Misc::FormatArray(aToDoIDs));
 		
-		AfxMessageBox(sMessage, MB_OK | MB_ICONEXCLAMATION);
+		AfxMessageBox(sMessage, MB_OK | MB_ICONERROR);
 		return FALSE;
 	}
 
 	// check for incomplete dependents
 	CString sIncomplete;
 
-	for (int nToDo = 0; nToDo < aToDoIDs.GetSize(); nToDo++)
+	for (nID = 0; nID < aToDoIDs.GetSize(); nID++)
 	{
-		DWORD dwTaskID = aToDoIDs[nToDo];
+		DWORD dwTaskID = aToDoIDs[nID];
 
 		if (TaskHasIncompleteDependencies(dwTaskID, sIncomplete))
 		{
@@ -3412,7 +3413,7 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 			sMessage += '|';
 			sMessage += CEnString(IDS_TDC_SELTASKHASDEPENDENCY);
 
-			if (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONEXCLAMATION))
+			if (IDYES == AfxMessageBox(sMessage, MB_YESNO | MB_ICONERROR))
 				ShowTaskLink(sIncomplete, FALSE);
 
 			return FALSE;
@@ -3910,14 +3911,22 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 			mapProcessed.Add(dwTaskID);
 	}
 
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
+	if (aTasksForCompletion.GetSize())
 	{
+		if (!SetSelectedTaskCompletion(aTasksForCompletion))
+			return FALSE;
+
+		// else
 		UpdateControls(FALSE);
 
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		SetModified(TDCA_DONEDATE, aModTaskIDs);
+
+		return TRUE;
 	}
-	else if (aModTaskIDs.GetSize())
+	
+	// else 
+	if (aModTaskIDs.GetSize())
 	{
 		int nPercent = GetSelectedTaskPercent();
 
@@ -3930,9 +3939,10 @@ BOOL CToDoCtrl::SetSelectedTaskPercentDone(int nPercent, BOOL bOffset, const COl
 		}
 
 		SetModified(TDCA_PERCENT, aModTaskIDs);
+		return TRUE;
 	}
 
-	return TRUE;
+	return FALSE;
 }
 
 BOOL CToDoCtrl::SetSelectedTaskCost(const TDCCOST& cost, BOOL bOffset)
@@ -4419,19 +4429,22 @@ BOOL CToDoCtrl::SetSelectedTaskStatus(const CString& sStatus)
 		}
 	}
 
-	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
+	if (aTasksForCompletion.GetSize())
 	{
+		if (!SetSelectedTaskCompletion(aTasksForCompletion))
+			return FALSE;
+
+		// else
 		UpdateControls(FALSE);
 
 		aTasksForCompletion.GetTaskIDs(aModTaskIDs, TRUE);
 		SetModified(TDCA_DONEDATE, aModTaskIDs);
-	}
-	else if (!SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus))
-	{
-		return FALSE;
-	}
 
-	return TRUE;
+		return TRUE;
+	}
+	
+	// else
+	return SetTextChange(TDCA_STATUS, m_sStatus, sStatus, IDC_STATUS, aModTaskIDs, &m_cbStatus);
 }
 
 BOOL CToDoCtrl::SetSelectedTaskArray(TDC_ATTRIBUTE nAttrib, const CStringArray& aItems, 

@@ -76,6 +76,8 @@ const int HD_COLPADDING			= GraphicsMisc::ScaleByDPIFactor(6);
 
 CWorkloadCtrl::CWorkloadCtrl() 
 	:
+	CTreeListCtrl(this),
+	CTreeDragDropRenderer(m_tshDragDrop, m_tree),
 	m_dwOptions(WLCF_SHOWSPLITTERBAR),
 	m_crOverlap(RGB(255, 0, 0)),
 	m_dwMaxTaskID(0),
@@ -1739,6 +1741,28 @@ BOOL CWorkloadCtrl::OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag)
 		return FALSE;
 
 	return TRUE;
+}
+
+void CWorkloadCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
+{
+	CTreeDragDropRenderer::OnGetDragItemRect(dc, hti, rItem);
+
+	rItem.left -= IMAGE_SIZE;
+}
+
+void CWorkloadCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
+{
+	DWORD dwTaskID = GetTaskID(hti);
+	DrawTreeItemIcon(&dc, hti, dwTaskID, rItem);
+
+	WORKLOADITEM* pWI = NULL;
+	GET_WI(dwTaskID, pWI);
+
+	HGDIOBJ hFontOld = dc.SelectObject(GetTreeItemFont(hti, *pWI, WLCC_TITLE));
+
+	CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rItem);
+
+	dc.SelectObject(hFontOld);
 }
 
 UINT CWorkloadCtrl::OnDragOverItem(const TLCITEMMOVE& move, UINT nCursor)

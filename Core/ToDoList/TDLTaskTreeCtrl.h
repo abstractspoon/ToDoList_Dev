@@ -22,6 +22,7 @@
 #include "..\Shared\EnHeaderCtrl.h"
 #include "..\Shared\TreeListSyncer.h"
 #include "..\Shared\Treeselectionhelper.h"
+#include "..\Shared\TreeDragDropHelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -34,7 +35,7 @@ enum DD_DROPEFFECT;
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CTDLTaskTreeCtrl : public CTDLTaskCtrlBase  
+class CTDLTaskTreeCtrl : public CTDLTaskCtrlBase, public CTreeDragDropRenderer
 {
 	DECLARE_DYNAMIC(CTDLTaskTreeCtrl);
 
@@ -186,6 +187,9 @@ protected:
 	LRESULT ScWindowProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	
  	LRESULT OnTreeCustomDraw(NMTVCUSTOMDRAW* pTVCD);
+
+	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
+	virtual void OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem);
 
 	void OnListSelectionChange(NMLISTVIEW* pNMLV);
 	void OnTreeSelectionChange(NMTREEVIEW* pNMTV);

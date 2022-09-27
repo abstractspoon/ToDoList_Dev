@@ -188,9 +188,10 @@ void CTDLTimeTrackerTaskComboBox::UpdateRecentlyTrackedTasks(const TRACKTASKLIST
 				ASSERT(nItem == CDialogHelper::FindItemByData(*this, dwTaskID));
 
 				CString sItem = CDialogHelper::GetItem(*this, nItem);
+				sItem.TrimLeft();
 				ASSERT(!sItem.IsEmpty());
 
-				VERIFY(InsertTask(0, sItem.TrimLeft(), dwTaskID, FALSE, 0, GetItemImage(nItem)));
+				VERIFY(InsertTask(0, sItem, dwTaskID, FALSE, 0, GetItemImage(nItem)));
 				nNumAdded++;
 			}
 

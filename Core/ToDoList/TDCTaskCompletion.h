@@ -57,7 +57,7 @@ public:
 	int Add(const CDWordArray& aTaskIDs, int nPercent);
 	int Toggle(const CDWordArray& aTaskIDs);
 
-	const TDCTASKCOMPLETION& operator[](INT_PTR nIndex) const {	return GetAt(nIndex); }
+	const TDCTASKCOMPLETION& operator[](INT_PTR nIndex) const {	return m_pData[nIndex]; }
 	int GetSize() const { return CArray<TDCTASKCOMPLETION, TDCTASKCOMPLETION&>::GetSize(); }
 
 	int GetTaskIDs(CDWordArray& aTasksIDs, BOOL bAppend) const;

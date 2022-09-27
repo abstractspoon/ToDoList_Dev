@@ -181,10 +181,9 @@ protected:
 	HTREEITEM GetSelectedItem() const { ASSERT(0); return NULL; }
 
 protected:
-	// CDragDropData interface
+	// IDragDropRenderer interface
 	CSize OnGetDragSize(CDC& dc);
-	void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
-	void* OnGetData() { return NULL; }
+	void  OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
 	
 protected:
 	int CalcItemTitleTextHeight() const;
@@ -226,6 +225,7 @@ protected:
 	void DrawItemTitle(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemAttributes(CDC* pDC, const KANBANITEM* pKI, const CRect& rItem, COLORREF crText);
 	void DrawItemImage(CDC* pDC, const CRect& rImage, KBC_IMAGETYPE nType, BOOL bSet, HIMAGELIST hIL = NULL, int nIndex = -1) const;
+	BOOL DrawTaskIcon(CDC* pDC, const KANBANITEM* pKI, const CRect& rIcon) const;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	static int CompareAttributeValues(const KANBANITEM* pKI1, const KANBANITEM* pKI2, const KANBANSORT& sort);
