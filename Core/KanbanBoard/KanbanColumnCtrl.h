@@ -184,7 +184,6 @@ protected:
 	// IDragDropRenderer interface
 	CSize OnGetDragSize(CDC& dc);
 	void  OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
-	BOOL GetDragItemRect(HTREEITEM hti, CRect& rItem) const;
 	
 protected:
 	int CalcItemTitleTextHeight() const;

@@ -2661,11 +2661,12 @@ CSize CKanbanColumnCtrl::OnGetDragSize(CDC& /*dc*/)
 		ASSERT(htiSel);
 
 		CRect rItem;
-		VERIFY(GetDragItemRect(htiSel, rItem));
+		VERIFY(GetItemRect(htiSel, rItem));
 
 		rDrag.left = min(rDrag.left, rItem.left);
 		rDrag.right = max(rDrag.right, rItem.right);
 	}
+	rDrag.right = min(rDrag.right, rDrag.left + MAX_DRAG_ITEM_WIDTH + DEF_IMAGE_SIZE + IMAGE_PADDING);
 
 	int nItemHeight = (TEXT_BORDER.Height() + (m_nNumTitleLines * (m_nItemTextBorder + m_nItemTextHeight)));
 
@@ -2691,10 +2692,11 @@ void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMas
 		ASSERT(htiSel);
 
 		CRect rItem;
-		VERIFY(GetDragItemRect(htiSel, rItem));
+		VERIFY(GetItemRect(htiSel, rItem));
 
 		rItem.top = nVPos;
 		rItem.bottom = rItem.top + nItemHeight;
+		rItem.right = min(rItem.right, rc.right);
 
 		GraphicsMisc::DrawExplorerItemSelection(&dc, *this, GMIS_SELECTED, rItem);
 
@@ -2715,13 +2717,3 @@ void CKanbanColumnCtrl::OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMas
 		nVPos += nItemHeight;
 	}
 }
-
-BOOL CKanbanColumnCtrl::GetDragItemRect(HTREEITEM hti, CRect& rItem) const
-{
-	if (!GetItemRect(hti, rItem))
-		return FALSE;
-
-	rItem.right = min(rItem.right, rItem.left + MAX_DRAG_ITEM_WIDTH + DEF_IMAGE_SIZE + IMAGE_PADDING);
-	return TRUE;
-}
-
