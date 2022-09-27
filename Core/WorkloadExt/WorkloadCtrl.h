@@ -28,7 +28,7 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-class CWorkloadCtrl : public CTreeListCtrl  
+class CWorkloadCtrl : public CTreeListCtrl, public CTreeDragDropRenderer
 {
 public:
 	CWorkloadCtrl();
@@ -115,6 +115,9 @@ protected:
 
 	LRESULT OnListCustomDraw(NMLVCUSTOMDRAW* pLVCD);
 	LRESULT OnHeaderCustomDraw(NMCUSTOMDRAW* pNMCD);
+
+	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
+	virtual void OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem);
 
 	COLORREF GetTreeItemBackColor(HTREEITEM hti, DWORD dwItemData, BOOL bSelected) const;
 	void DrawTreeSubItemText(CDC* pDC, HTREEITEM hti, DWORD dwItemData, int nCol, const CRect& rSubItem, BOOL bSelected);

@@ -9,21 +9,43 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
+//////////////////////////////////////////////////////////////////////
+
 #include "treeselectionhelper.h"
 
 #include "..\3rdparty\dragdrop.h"
 
-enum DDWHERE
+//////////////////////////////////////////////////////////////////////
+
+class CTreeDragDropRenderer : public CDragDropData
 {
-	DD_ABOVE = -1,
-	DD_ON = 0,
-	DD_BELOW = 1
+public:
+	CTreeDragDropRenderer(const CTreeSelectionHelper& selection, const CTreeCtrl& tree);
+
+protected:
+	const CTreeSelectionHelper& m_dragSelection;
+	const CTreeCtrl& m_dragTree;
+
+	int m_nXDragOffset;
+
+public:
+	virtual void OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
+	virtual void OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem);
+
+	// IDragDropRenderer interface
+	virtual CSize OnGetDragSize(CDC& dc);
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
+
+protected:
+	BOOL GetItemRect(CDC& dc, HTREEITEM hti, CRect& rItem);
 };
+
+//////////////////////////////////////////////////////////////////////
 
 class CTreeDragDropHelper
 {
 public:
-	CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree);
+	CTreeDragDropHelper(const CTreeSelectionHelper& selection, CTreeCtrl& tree, CTreeDragDropRenderer* pAltRenderer = NULL);
 	virtual ~CTreeDragDropHelper();
 
 	BOOL Initialize(CWnd* pOwner, BOOL bEnabled = TRUE, BOOL bAllowNcDrag = TRUE);
@@ -44,7 +66,17 @@ protected:
 	UINT m_nScrollTimer, m_nExpandTimer;
 	BOOL m_bAllowNcDrag;
 
+	CTreeDragDropRenderer m_defRenderer;
+	CTreeDragDropRenderer* m_pRenderer;
+
 	static CTreeDragDropHelper* s_pTDDH;
+
+	enum DDWHERE
+	{
+		DD_ABOVE = -1,
+		DD_ON = 0,
+		DD_BELOW = 1
+	};
 
 	struct DROPPOSITION
 	{
@@ -72,6 +104,7 @@ protected:
 	UINT OnDragOver(const DRAGDROPINFO* pDDI);
 	BOOL OnDragDrop(const DRAGDROPINFO* pDDI);
 	BOOL OnDragAbort();
+
 };
 
 #endif // !defined(AFX_TREEDRAGDROPHELPER_H__06381648_F0F3_4791_8204_6A0A8798F29A__INCLUDED_)

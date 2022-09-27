@@ -196,7 +196,7 @@ namespace MindMapUIExtension
 	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-	class TdlMindMapControl : MindMapControl
+	class TdlMindMapControl : MindMapControl, IDragRenderer
 	{
 		public event EditTaskLabelEventHandler      EditTaskLabel;
         public event EditTaskIconEventHandler       EditTaskIcon;
@@ -218,7 +218,7 @@ namespace MindMapUIExtension
         private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
         private Size m_CheckboxSize;
 		private MindMapOption m_Options;
-		private DragImage m_dragImage;
+		private DragImage m_DragImage;
 
 		// -------------------------------------------------------------------------
 
@@ -228,6 +228,7 @@ namespace MindMapUIExtension
 			m_TaskIcons = icons;
 
 			m_Items = new Dictionary<UInt32, MindMapTaskItem>();
+			m_DragImage = new DragImage();
 
 			m_TaskColorIsBkgnd = false;
 			m_IgnoreMouseClick = false;
@@ -994,9 +995,17 @@ namespace MindMapUIExtension
 
 		protected override void DrawNodeLabel(Graphics graphics, String label, Rectangle rect,
 											  NodeDrawState nodeState, NodeDrawPos nodePos,
-                                              Font nodeFont, Object itemData)
+											  Font nodeFont, Object itemData)
 		{
-            var taskItem = (itemData as MindMapTaskItem);
+			var taskItem = (itemData as MindMapTaskItem);
+
+			DrawItemLabel(graphics, taskItem, rect, nodeState, nodePos, nodeFont, m_ShowCompletionCheckboxes);
+		}
+
+		protected void DrawItemLabel(Graphics graphics, MindMapTaskItem taskItem, Rectangle rect,
+									  NodeDrawState nodeState, NodeDrawPos nodePos,
+                                      Font nodeFont, bool showCheckBoxes)
+		{
 			var realItem = GetRealTaskItem(taskItem);
 
 			bool isSelected = (nodeState != NodeDrawState.None);
@@ -1007,7 +1016,7 @@ namespace MindMapUIExtension
                 // Checkbox
                 Rectangle checkRect = CalcCheckboxRect(rect);
 
-                if (m_ShowCompletionCheckboxes)
+                if (showCheckBoxes)
 				{
 					if (!IsZoomed)
 					{
@@ -1055,7 +1064,7 @@ namespace MindMapUIExtension
 					rect.Width = (rect.Right - iconRect.Right - 2);
                     rect.X = iconRect.Right + 2;
                 }
-                else if (m_ShowCompletionCheckboxes)
+                else if (showCheckBoxes)
                 {
                     rect.Width = (rect.Right - checkRect.Right - 2);
                     rect.X = checkRect.Right + 2;
@@ -1111,7 +1120,7 @@ namespace MindMapUIExtension
 			// Text
 			var format = DefaultLabelFormat(nodePos, isSelected);
 
-            graphics.DrawString(label, nodeFont, new SolidBrush(textColor), rect, format);
+            graphics.DrawString(taskItem.Title, nodeFont, new SolidBrush(textColor), rect, format);
 
 			// Draw Windows shortcut icon if task is a reference
 			if (taskItem.IsReference)
@@ -1628,51 +1637,54 @@ namespace MindMapUIExtension
 
 		protected override void OnDragOver(DragEventArgs e)
 		{
-			if (m_dragImage != null)
-				m_dragImage.ShowNoLock(false);
+			m_DragImage.ShowNoLock(false);
 
 			base.OnDragOver(e);
 
-			if (m_dragImage != null)
-			{
-				m_dragImage.ShowNoLock(true);
-				m_dragImage.Move(e.X, e.Y);
-			}
+			m_DragImage.ShowNoLock(true);
+			m_DragImage.Move(e.X, e.Y);
 		}
 
 		protected override void OnDragEnter(DragEventArgs e)
 		{
 			base.OnDragEnter(e);
 
-			m_dragImage = new DragImage();
+			var rect = GetItemLabelRect(SelectedNode);
+			rect.Offset(-rect.Left, -rect.Top);
 
-			var textRect = GetItemLabelRect(SelectedNode);
+			m_DragImage.Begin(Handle, 
+								this,
+								SelectedNode, 
+								rect.Width, 
+								rect.Height, 
+								rect.Width, 
+								rect.Height);
+		}
 
-			if (m_ShowCompletionCheckboxes)
-				textRect.Width -= m_CheckboxSize.Width;
 
-			if (!m_dragImage.Begin(Handle, Font, SelectedNode.Text, textRect.Width, textRect.Height))
-				m_dragImage = null;
+		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
+		{
+			var node = (obj as TreeNode);
+
+			DrawItemLabel(graphics,
+							TaskItem(node), 
+							new Rectangle(0, 0, width, height),
+							NodeDrawState.Selected,
+							NodeDrawPos.Root,
+							GetNodeFont(node),
+							false); // no checkboxes
 		}
 
 		protected override void OnDragDrop(DragEventArgs e)
 		{
-			if (m_dragImage != null)
-			{
-				m_dragImage.End();
-				m_dragImage = null;
-			}
+			m_DragImage.End();
 
 			base.OnDragDrop(e);
 		}
 
 		protected override void OnDragLeave(EventArgs e)
 		{
-			if (m_dragImage != null)
-			{
-				m_dragImage.End();
-				m_dragImage = null;
-			}
+			m_DragImage.End();
 
 			base.OnDragLeave(e);
 		}

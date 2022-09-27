@@ -52,15 +52,38 @@ const int NUM_IMAGEMIMETYPES = (sizeof(IMAGEMIMETYPES) / sizeof(IMAGEMIMETYPE));
 
 //////////////////////////////////////////////////////////////////////
 
-CGdiPlusGraphics::CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing) : m_graphics(NULL)
+CGdiPlusGraphics::CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing) : m_graphics(NULL), m_hDC(NULL)
 {
 	VERIFY(CGdiPlus::CreateGraphics(hDC, &m_graphics));
 	VERIFY(CGdiPlus::SetSmoothingMode(m_graphics, smoothing));
 }
 
+CGdiPlusGraphics::CGdiPlusGraphics(gdix_Bitmap* bitmap) : m_graphics(NULL), m_hDC(NULL)
+{
+	VERIFY(CGdiPlus::CreateGraphics(bitmap, &m_graphics));
+}
+
 CGdiPlusGraphics::~CGdiPlusGraphics()
 {
+	ReleaseDC();
 	VERIFY(CGdiPlus::DeleteGraphics(m_graphics));
+}
+
+HDC CGdiPlusGraphics::GetHDC()
+{
+	if (!m_hDC)
+		VERIFY(CGdiPlus::GetDC(m_graphics, &m_hDC));
+	
+	return m_hDC;
+}
+
+void CGdiPlusGraphics::ReleaseDC()
+{
+	if (m_hDC)
+	{
+		VERIFY(CGdiPlus::ReleaseDC(m_graphics, m_hDC));
+		m_hDC = NULL;
+	}
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -212,6 +235,11 @@ CGdiPlusBitmap::CGdiPlusBitmap(HBITMAP hbitmap) : m_bitmap(NULL)
 	CGdiPlus::CreateBitmapFromHBITMAP(hbitmap, NULL, &m_bitmap);
 }
 
+CGdiPlusBitmap::CGdiPlusBitmap(int width, int height, gdix_PixelFormat format)
+{
+	CGdiPlus::CreateBitmap(width, height, &m_bitmap, format);
+}
+
 BOOL CGdiPlusBitmap::SaveAsFile(const WCHAR* filename)
 {
 	return CGdiPlus::SaveBitmapToFile(m_bitmap, filename);
@@ -246,6 +274,9 @@ typedef void		(STDAPICALLTYPE* PFNSHUTDOWN)(ULONG_PTR);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEFROMHDC)(HDC,gdix_Graphics**);
 typedef gdix_Status (STDAPICALLTYPE *PFNDELETEGRAPHICS)(gdix_Graphics*);
 typedef gdix_Status (STDAPICALLTYPE *PFNSETSMOOTHINGMODE)(gdix_Graphics*,gdix_SmoothingMode);
+typedef gdix_Status (STDAPICALLTYPE *PFNGETIMAGEGRAPHICSCONTEXT)(gdix_Image*, gdix_Graphics**);
+typedef gdix_Status (STDAPICALLTYPE *PFNGETDC)(gdix_Graphics* graphics, HDC* hdc);
+typedef gdix_Status (STDAPICALLTYPE *PFNRELEASEDC)(gdix_Graphics* graphics, HDC hdc);
 
 // Pen management 
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEPEN1)(gdix_ARGB,gdix_Real,gdix_Unit,gdix_Pen**);
@@ -306,6 +337,7 @@ typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE)(const WCHAR*, gdix
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHICONFROMBITMAP)(gdix_Bitmap*, HICON*);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMHBITMAP)(HBITMAP, HPALETTE, gdix_Bitmap**);
+typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMSCAN0)(int, int, int, int, byte*, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNDELETEBITMAP)(gdix_Bitmap*);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEBITMAPFROMFILE2)(const WCHAR*, gdix_Bitmap**);
 typedef gdix_Status (STDAPICALLTYPE *PFNCREATEHBITMAPFROMBITMAP2)(gdix_Bitmap*, HBITMAP*, gdix_ARGB);
@@ -447,6 +479,12 @@ BOOL CGdiPlus::CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitm
 	return (pFN(hbitmap, hPal, bitmap) == gdix_Ok);
 }
 
+BOOL CGdiPlus::CreateBitmap(int width, int height, gdix_Bitmap **bitmap, gdix_PixelFormat format)
+{
+	GETPROCADDRESS(PFNCREATEBITMAPFROMSCAN0, "GdipCreateBitmapFromScan0");
+	return (pFN(width, height, 0, (int)format, NULL, bitmap) == gdix_Ok);
+}
+
 BOOL CGdiPlus::GetImageMimeType(const WCHAR* filename, CString& sMimeType)
 {
 	CString sExt;
@@ -569,6 +607,13 @@ BOOL CGdiPlus::CreateGraphics(HDC hdc, gdix_Graphics** graphics)
 	return (pFN(hdc, graphics) == gdix_Ok);
 }
 
+BOOL CGdiPlus::CreateGraphics(gdix_Bitmap* bitmap, gdix_Graphics** graphics)
+{
+	GETPROCADDRESS(PFNGETIMAGEGRAPHICSCONTEXT, "GdipGetImageGraphicsContext");
+
+	return (pFN((gdix_Image*)bitmap, graphics) == gdix_Ok);
+}
+
 BOOL CGdiPlus::DeleteGraphics(gdix_Graphics* graphics)
 {
 	if (!graphics)
@@ -577,6 +622,26 @@ BOOL CGdiPlus::DeleteGraphics(gdix_Graphics* graphics)
 	GETPROCADDRESS(PFNDELETEGRAPHICS, "GdipDeleteGraphics");
 
 	return (pFN(graphics) == gdix_Ok);
+}
+
+BOOL CGdiPlus::GetDC(gdix_Graphics* graphics, HDC* hDC)
+{
+	if (!graphics)
+		return FALSE;
+
+	GETPROCADDRESS(PFNGETDC, "GdipGetDC");
+
+	return (pFN(graphics, hDC) == gdix_Ok);
+}
+
+BOOL CGdiPlus::ReleaseDC(gdix_Graphics* graphics, HDC hDC)
+{
+	if (!graphics)
+		return FALSE;
+
+	GETPROCADDRESS(PFNRELEASEDC, "GdipReleaseDC");
+
+	return (pFN(graphics, hDC) == gdix_Ok);
 }
 
 BOOL CGdiPlus::SetSmoothingMode(gdix_Graphics* graphics, gdix_SmoothingMode mode)

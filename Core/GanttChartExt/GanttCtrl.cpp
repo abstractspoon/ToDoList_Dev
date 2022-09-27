@@ -92,6 +92,8 @@ const int MAX_HEADER_WIDTH			= 32000; // (SHRT_MAX - tolerance)
 
 CGanttCtrl::CGanttCtrl() 
 	:
+	CTreeListCtrl(this),
+	CTreeDragDropRenderer(m_tshDragDrop, m_tree),
 	m_nMonthWidth(DEF_MONTH_WIDTH),
 	m_nMonthDisplay(GTLC_DISPLAY_MONTHS_LONG),
 	m_dwOptions(GTLCF_AUTOSCROLLTOTASK | GTLCF_SHOWSPLITTERBAR),
@@ -1799,6 +1801,28 @@ BOOL CGanttCtrl::OnDragBeginItem(const TLCITEMMOVE& move, BOOL bLeftDrag)
 		return FALSE;
 
 	return TRUE;
+}
+
+void CGanttCtrl::OnGetDragItemRect(CDC& dc, HTREEITEM hti, CRect& rItem)
+{
+	CTreeDragDropRenderer::OnGetDragItemRect(dc, hti, rItem);
+
+	rItem.left -= IMAGE_SIZE;
+}
+
+void CGanttCtrl::OnDrawDragItem(CDC& dc, HTREEITEM hti, const CRect& rItem)
+{
+	DWORD dwTaskID = GetTaskID(hti);
+	DrawTreeItemIcon(&dc, hti, dwTaskID, rItem);
+
+	GANTTITEM* pGI = NULL;
+	GET_GI(dwTaskID, pGI);
+
+	HGDIOBJ hFontOld = dc.SelectObject(GetTreeItemFont(hti, *pGI, GTLCC_TITLE));
+
+	CTreeDragDropRenderer::OnDrawDragItem(dc, hti, rItem);
+
+	dc.SelectObject(hFontOld);
 }
 
 void CGanttCtrl::ClearDependencyPickLine(CDC* pDC)

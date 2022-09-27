@@ -139,6 +139,17 @@ enum gdix_PenStyle
 	//gdix_PenStyleCustom
 };
 
+#define PixelFormatGDI          0x00020000 // Is a GDI-supported format
+#define PixelFormatAlpha        0x00040000 // Has an alpha component
+#define PixelFormatCanonical    0x00200000 
+
+enum gdix_PixelFormat
+{
+	gdiX_PixelFormat24bppRGB =  (8 | (24 << 8) | PixelFormatGDI),
+	gdix_PixelFormat32bppRGB =  (9 | (32 << 8) | PixelFormatGDI),
+	gdix_PixelFormat32bppARGB = (10 | (32 << 8) | PixelFormatAlpha | PixelFormatGDI | PixelFormatCanonical),
+};
+
 //////////////////////////////////////////////////////////////////////
 
 #define gdix_StringFormatFlagsNoWrap   0x00001000
@@ -174,13 +185,18 @@ class CGdiPlusGraphics
 {
 public:
 	CGdiPlusGraphics(HDC hDC, gdix_SmoothingMode smoothing = gdix_SmoothingModeMedium);
+	CGdiPlusGraphics(gdix_Bitmap* bitmap);
 	virtual ~CGdiPlusGraphics();
 
 	operator gdix_Graphics*() const { return m_graphics; }
 	BOOL IsValid() const { return (m_graphics != NULL); }
 
+	HDC GetHDC();
+	void ReleaseDC();
+
 protected:
 	gdix_Graphics* m_graphics;
+	HDC m_hDC;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -228,6 +244,8 @@ public:
 	CGdiPlusBitmap(IStream* stream);
 	CGdiPlusBitmap(const WCHAR* filename);
 	CGdiPlusBitmap(HBITMAP hbitmap);
+	CGdiPlusBitmap(int width, int height, gdix_PixelFormat format = gdix_PixelFormat32bppRGB);
+
 	virtual ~CGdiPlusBitmap();
 
 	operator gdix_Bitmap*() const { return m_bitmap; }
@@ -279,6 +297,8 @@ public:
 	static BOOL CreateBitmapFromStream(IStream* stream, gdix_Bitmap **bitmap);
 	static BOOL CreateBitmapFromFile(const WCHAR* filename, gdix_Bitmap **bitmap);
 	static BOOL CreateBitmapFromHBITMAP(HBITMAP hbitmap, HPALETTE hPal, gdix_Bitmap **bitmap);
+	static BOOL CreateBitmap(int width, int height, gdix_Bitmap **bitmap, gdix_PixelFormat format = gdix_PixelFormat32bppRGB);
+
 	static BOOL CreateHBITMAPFromBitmap(gdix_Bitmap* bitmap, HBITMAP* hbmReturn, gdix_ARGB background);
 	static BOOL CreateHICONFromBitmap(gdix_Bitmap* bitmap, HICON* hicoReturn);
 	static BOOL DeleteBitmap(gdix_Bitmap* bitmap);
@@ -293,7 +313,10 @@ public:
 	static BOOL DeleteBrush(gdix_Brush* brush);
 
 	static BOOL CreateGraphics(HDC hdc, gdix_Graphics**);
+	static BOOL CreateGraphics(gdix_Bitmap* bitmap, gdix_Graphics**);
 	static BOOL DeleteGraphics(gdix_Graphics* graphics);
+	static BOOL GetDC(gdix_Graphics* graphics, HDC* hDC);
+	static BOOL ReleaseDC(gdix_Graphics* graphics, HDC hDC);
 
 	static BOOL DrawLine(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* from, const gdix_PointF* to);
 	static BOOL DrawLines(gdix_Graphics* graphics, gdix_Pen* pen, const gdix_PointF* points, int count);

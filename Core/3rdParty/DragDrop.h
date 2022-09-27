@@ -43,9 +43,20 @@ struct DRAGDROPWND
 	UINT type;				// DDW_ flags above
 };
 
+///////////////////////////////////////////////////////////////
+//
+class IDragDropRenderer
+{
+public:
+	// derived classes must implement these:
+	virtual CSize OnGetDragSize(CDC& dc) = 0;
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
+};
+
+///////////////////////////////////////////////////////////////
 // Abstract drag-drop data knows how to draw itself.
 //
-class CDragDropData 
+class CDragDropData : public IDragDropRenderer
 {
 public:
 	CDragDropData() { }
@@ -53,18 +64,9 @@ public:
 
 	CImageList* CreateDragImage(CWnd* pWnd, CSize& sizeImage);
 	BOOL CreateDragImage(CWnd* pWnd, CImageList& il, CSize& sizeImage);
-
-protected:
-	CBitmap			m_bitmap; // bitmap used for drawing
-
-protected:
-	// derived classes must implement these:
-	virtual CSize OnGetDragSize(CDC& dc) = 0;
-	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask) = 0;
-	virtual void* OnGetData() = 0;
 };
 
-//////////////////
+///////////////////////////////////////////////////////////////
 // Concrete class for drag-drop text data.
 //
 class CDragDropText : public CDragDropData 
@@ -79,8 +81,23 @@ protected:
 
 protected:
 	virtual CSize OnGetDragSize(CDC& dc);
-	virtual void  OnDrawData(CDC& dc, const CRect& rc, COLORREF& crMask);
-	virtual void* OnGetData() { return (void*)(LPCTSTR)m_text; }
+	virtual void  OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask);
+};
+
+///////////////////////////////////////////////////////////////
+// Template class for forwarding drag-drop callback to another class
+//
+class CDragDropDataForwarder : public CDragDropData
+{
+public:
+	CDragDropDataForwarder(IDragDropRenderer& renderer) : m_Renderer(renderer) {}
+
+protected:
+	IDragDropRenderer& m_Renderer;
+
+protected:
+	virtual CSize OnGetDragSize(CDC& dc) { return m_Renderer.OnGetDragSize(dc); }
+	virtual void OnDrawDragData(CDC& dc, const CRect& rc, COLORREF& crMask) { m_Renderer.OnDrawDragData(dc, rc, crMask); }
 };
 
 //////////////////

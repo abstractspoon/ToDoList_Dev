@@ -327,7 +327,7 @@ int CTreeListCtrl::IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
 
 //////////////////////////////////////////////////////////////////////
 
-CTreeListCtrl::CTreeListCtrl(int nMinLabelWidth, int nMinColWidth)
+CTreeListCtrl::CTreeListCtrl(CTreeDragDropRenderer* pAltRenderer, int nMinLabelWidth, int nMinColWidth)
 	:
 	CTreeListSyncer(TLSF_SYNCSELECTION | TLSF_SYNCFOCUS | TLSF_BORDER | TLSF_SYNCDATA | TLSF_SPLITTER),
 	m_crAltLine(CLR_NONE),
@@ -337,7 +337,7 @@ CTreeListCtrl::CTreeListCtrl(int nMinLabelWidth, int nMinColWidth)
 	m_nPrevDropHilitedItem(-1),
 	m_nMinTreeTitleColumnWidth(-1),
 	m_tshDragDrop(m_tree),
-	m_treeDragDrop(m_tshDragDrop, m_tree),
+	m_treeDragDrop(m_tshDragDrop, m_tree, pAltRenderer),
 	m_tree(m_treeHeader),
 
 	MIN_LABEL_WIDTH(GraphicsMisc::ScaleByDPIFactor(nMinLabelWidth)),

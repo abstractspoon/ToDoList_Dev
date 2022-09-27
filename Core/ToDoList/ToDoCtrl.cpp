@@ -208,7 +208,7 @@ CToDoCtrl::CToDoCtrl(const CTDLContentMgr& mgrContent,
 	m_nMaxState(TDCMS_NORMAL),
 	m_nMaxInfotipCommentsLength(-1),
 	m_nPriority(-1),
-	m_treeDragDrop(TSH(), m_taskTree.Tree()),
+	m_treeDragDrop(TSH(), m_taskTree.Tree(), &m_taskTree),
 	m_visColEdit(visDefault),
 	m_sXmlHeader(DEFAULT_UNICODE_HEADER),
 	m_timeTracking(m_data, m_taskTree.TSH()),
@@ -3376,10 +3376,11 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 
 	// check for circular dependencies
 	CDWordArray aCircularIDs;
+	int nID;
 
-	for (int nToDo = 0; nToDo < aToDoIDs.GetSize(); nToDo++)
+	for (nID = 0; nID < aToDoIDs.GetSize(); nID++)
 	{
-		DWORD dwTaskID = aToDoIDs[nToDo];
+		DWORD dwTaskID = aToDoIDs[nID];
 
 		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
 			aCircularIDs.Add(dwTaskID);
@@ -3402,9 +3403,9 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 	// check for incomplete dependents
 	CString sIncomplete;
 
-	for (int nToDo = 0; nToDo < aToDoIDs.GetSize(); nToDo++)
+	for (nID = 0; nID < aToDoIDs.GetSize(); nID++)
 	{
-		DWORD dwTaskID = aToDoIDs[nToDo];
+		DWORD dwTaskID = aToDoIDs[nID];
 
 		if (TaskHasIncompleteDependencies(dwTaskID, sIncomplete))
 		{

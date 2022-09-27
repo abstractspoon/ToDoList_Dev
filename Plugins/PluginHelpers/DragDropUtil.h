@@ -35,13 +35,22 @@ namespace Abstractspoon
 
 			// ----------------------------------------------------------------------------
 
+			public interface class IDragRenderer
+			{
+			public:
+				virtual void DrawDragImage(Drawing::Graphics^ graphics, Object^ object, int width, int height) = 0;
+			};
+
+			// ----------------------------------------------------------------------------
+
 			public ref class DragImage
 			{
 			public:
-				DragImage() : m_hImageList(NULL) {}
-				~DragImage() { End(); }
+				DragImage();
+				~DragImage();
 
-				bool Begin(IntPtr wnd, Drawing::Font^ font, String^ text, int width, int height);
+				bool Begin(IntPtr wnd, Drawing::Font^ font, String^ text, int width, int height, int hotX, int hotY);
+				bool Begin(IntPtr wnd, IDragRenderer^ renderer, Object^ object, int width, int height, int hotX, int hotY);
 				bool Move(int x, int y);
 				bool End();
 				bool ShowNoLock(bool show);
@@ -49,6 +58,9 @@ namespace Abstractspoon
 			protected:
 				HIMAGELIST m_hImageList;
 				HWND m_hwndLock;
+
+			protected:
+				bool Begin(IntPtr wnd, Drawing::Bitmap^ bm, int width, int height, int hotX, int hotY);
 			};
 		}
 	}

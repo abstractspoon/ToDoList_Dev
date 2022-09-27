@@ -642,7 +642,7 @@ LRESULT COwnerdrawComboBoxBase::SetRawItemData(int nItem, ODCB_ITEMDATA*& pItemD
 	return lResult;
 }
 
-COwnerdrawComboBoxBase::ODCB_ITEMDATA* COwnerdrawComboBoxBase::GetExtItemData(int nItem) const
+ODCB_ITEMDATA* COwnerdrawComboBoxBase::GetExtItemData(int nItem) const
 {
 	if (!IsValidIndex(nItem) || !m_bHasExtItemData)
 	{
@@ -652,7 +652,7 @@ COwnerdrawComboBoxBase::ODCB_ITEMDATA* COwnerdrawComboBoxBase::GetExtItemData(in
 	return (ODCB_ITEMDATA*)GetRawItemData(nItem);
 }
 
-COwnerdrawComboBoxBase::ODCB_ITEMDATA* COwnerdrawComboBoxBase::GetAddExtItemData(int nItem)
+ODCB_ITEMDATA* COwnerdrawComboBoxBase::GetAddExtItemData(int nItem)
 {
 	if (!IsValidIndex(nItem))
 	{
