@@ -999,16 +999,18 @@ namespace MindMapUIExtension
 		{
 			var taskItem = (itemData as MindMapTaskItem);
 
-			DrawItemLabel(graphics, taskItem, rect, nodeState, nodePos, nodeFont, m_ShowCompletionCheckboxes);
+			DrawItemLabel(graphics, taskItem, rect, nodeState, nodePos, nodeFont, false);
 		}
 
 		protected void DrawItemLabel(Graphics graphics, MindMapTaskItem taskItem, Rectangle rect,
 									  NodeDrawState nodeState, NodeDrawPos nodePos,
-                                      Font nodeFont, bool showCheckBoxes)
+                                      Font nodeFont, bool isDragImage)
 		{
 			var realItem = GetRealTaskItem(taskItem);
 
 			bool isSelected = (nodeState != NodeDrawState.None);
+			bool showCheckBoxes = (m_ShowCompletionCheckboxes && !isDragImage);
+
 			Rectangle iconRect = Rectangle.Empty;
 
             if (taskItem.IsTask) // not root
@@ -1074,7 +1076,7 @@ namespace MindMapUIExtension
 			// Text Colour
 			Color textColor = SystemColors.WindowText;
 
-			if (!taskItem.TextColor.IsEmpty)
+			if (!isDragImage && !taskItem.TextColor.IsEmpty)
 			{
 				if (m_TaskColorIsBkgnd && !isSelected && !realItem.IsDone(true))
 				{
@@ -1672,7 +1674,7 @@ namespace MindMapUIExtension
 							NodeDrawState.Selected,
 							NodeDrawPos.Root,
 							GetNodeFont(node),
-							false); // no checkboxes
+							true); // drag image
 		}
 
 		protected override void OnDragDrop(DragEventArgs e)
