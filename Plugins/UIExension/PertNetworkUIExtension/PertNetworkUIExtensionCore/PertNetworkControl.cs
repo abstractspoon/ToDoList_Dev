@@ -582,10 +582,15 @@ namespace PertNetworkUIExtension
 			return Color.Empty;
 		}
 
-		protected Color GetItemTextColor(PertNetworkItem taskItem, bool selected)
+		protected Color GetItemTextColor(PertNetworkItem taskItem, DrawState state)
 		{
+			if (state.HasFlag(DrawState.DragImage))
+				return SystemColors.WindowText;
+
 			if (taskItem.TextColor != Color.Empty)
 			{
+				bool selected = state.HasFlag(DrawState.Selected);
+
 				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
 					return DrawingColor.GetBestTextColor(taskItem.TextColor);
 
@@ -618,11 +623,14 @@ namespace PertNetworkUIExtension
 			return SystemColors.ControlDarkDark;
 		}
 
-		protected Color GetItemLineColor(PertNetworkItem taskItem, bool selected)
+		protected Color GetItemLineColor(PertNetworkItem taskItem, DrawState state)
 		{
+			if (state.HasFlag(DrawState.DragImage))
+				return SystemColors.WindowText;
+
 			if (taskItem.TextColor != Color.Empty)
 			{
-				if (selected || (m_TaskColorIsBkgnd && !taskItem.IsDone(true)))
+				if (state.HasFlag(DrawState.Selected) || (m_TaskColorIsBkgnd && !taskItem.IsDone(true)))
 					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
 
 				// else
@@ -726,8 +734,8 @@ namespace PertNetworkUIExtension
 			// Figure out the required colours
 			Color backColor = GetItemBackgroundColor(taskItem, selected);
 			Color borderColor = GetItemBorderColor(taskItem, selected);
-			Color lineColor = GetItemLineColor(taskItem, selected);
-			Color textColor = GetItemTextColor(taskItem, selected);
+			Color lineColor = GetItemLineColor(taskItem, state);
+			Color textColor = GetItemTextColor(taskItem, state);
 
 			// Draw background
 			if (selected)
