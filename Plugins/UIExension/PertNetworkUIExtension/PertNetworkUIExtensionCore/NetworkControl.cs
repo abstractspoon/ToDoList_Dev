@@ -15,8 +15,33 @@ using System.Windows.Forms.VisualStyles;
 namespace PertNetworkUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, NetworkItem item);
+	public delegate bool DragDropChangeEventHandler(object sender, NetworkDragEventArgs e);
 
-	[System.ComponentModel.DesignerCategory("")]
+	//////////////////////////////////////////////////////////////////////////////////
+
+	public class NetworkDragEventItem
+	{
+		public NetworkDragEventItem( /* TODO*/ )
+		{
+		}
+	}
+
+	public class NetworkDragEventArgs : EventArgs
+	{
+		public NetworkDragEventArgs(NetworkItem draggedItem, NetworkConnectionHitTestResult dropPos, bool copy)
+		{
+			DraggedItem = draggedItem;
+			DropPos = dropPos;
+			Copy = copy;
+		}
+
+		public NetworkItem DraggedItem;
+		public NetworkConnectionHitTestResult DropPos;
+		public bool Copy;
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////
+
 	public class NetworkConnectionHitTestResult
 	{
 		public NetworkPath Path;
@@ -31,7 +56,20 @@ namespace PertNetworkUIExtension
 					(ToItem == other.ToItem) &&
 					(Segment == other.Segment));
 		}
+
+		public static bool SegmentsMatch(NetworkConnectionHitTestResult pos1, NetworkConnectionHitTestResult pos2)
+		{
+			if ((pos1 == null) && (pos2 == null))
+				return true;
+
+			if ((pos1 == null) || (pos2 == null))
+				return false;
+
+			return pos1.SegmentMatches(pos2);
+		}
 	}
+
+	//////////////////////////////////////////////////////////////////////////////////
 
 	public class LayoutHelper
 	{
@@ -47,7 +85,6 @@ namespace PertNetworkUIExtension
 		private double m_DpiFactor = 1.0;
 
 		public Font Font;
-		public double HitTestTolerance = 5;
 		public bool IsSavingToImage = false;
 
 		public int ItemHeight { get { return ((Font.Height + LabelPadding) * 4); } }
@@ -60,6 +97,7 @@ namespace PertNetworkUIExtension
 
 		public int GraphBorder { get { return ItemVertSpacing; } }
 		public int LabelPadding { get { return (int)(2 * m_DpiFactor); } }
+		public double HitTestTolerance { get { return (10 * m_DpiFactor); } }
 
 		// ------------------------------
 
@@ -112,12 +150,24 @@ namespace PertNetworkUIExtension
 		}
 	}
 
+	//////////////////////////////////////////////////////////////////////////////////
+
 	public partial class NetworkControl : UserControl
 	{
 		// Win32 Imports -----------------------------------------------------------------
 
 		[DllImport("User32.dll")]
-		static extern int SendMessage(IntPtr hWnd, int msg, int wParam = 0, int lParam = 0);
+		static extern uint GetDoubleClickTime();
+
+		// --------------------------
+
+		[DllImport("User32.dll")]
+		static extern int GetSystemMetrics(int index);
+
+		const int SM_CXDOUBLECLK = 36;
+		const int SM_CYDOUBLECLK = 37;
+		const int SM_CXDRAG = 68;
+		const int SM_CYDRAG = 69;
 
 		// Constants ---------------------------------------------------------------------
 
@@ -137,10 +187,8 @@ namespace PertNetworkUIExtension
 			}
 		}
 		protected Font BaseFont { get; private set; }
-#if DEBUG
-		private NetworkConnectionHitTestResult HotConnection;
-#endif
 		protected NetworkData Data { get; private set; }
+		protected NetworkConnectionHitTestResult DropPos { get; private set; }
 
 		protected int ItemHeight { get { return Layout.ItemHeight; } }
 		protected int ItemWidth { get { return Layout.ItemWidth; } }
@@ -150,10 +198,10 @@ namespace PertNetworkUIExtension
 		protected int ColumnWidth { get { return Layout.ColumnWidth; } }
 		protected int GraphBorder { get { return Layout.GraphBorder; } }
 		protected int LabelPadding { get { return Layout.LabelPadding; } }
-
-
+		
 		private uint SelectedItemId = 0;
 		private new LayoutHelper Layout;
+		private Timer DragTimer;
 		
 		// Public ------------------------------------------------------------------------
 
@@ -166,6 +214,10 @@ namespace PertNetworkUIExtension
 			Data = new NetworkData();
 			BaseFont = Font;
 			Layout = new LayoutHelper(this);
+
+			DragTimer = new Timer();
+			DragTimer.Interval = (int)GetDoubleClickTime();
+			DragTimer.Tick += new EventHandler(OnDragTimer);
 
 			InitializeComponent();
 		}
@@ -222,6 +274,11 @@ namespace PertNetworkUIExtension
 			return null;
 		}
 
+		protected NetworkConnectionHitTestResult HitTestConnection(DragEventArgs e)
+		{
+			return HitTestConnection(PointToClient(new Point(e.X, e.Y)));
+		}
+
 		protected NetworkConnectionHitTestResult HitTestConnection(Point pos)
 		{
 			// Do the least amount of work possible
@@ -244,10 +301,10 @@ namespace PertNetworkUIExtension
 						int segment = -1;
 						Point ptIntersection = Point.Empty;
 
-						if (Geometry2D.HitTest(points, 
-												pos, 
-												Layout.HitTestTolerance, 
-												ref segment, 
+						if (Geometry2D.HitTest(points,
+												pos,
+												Layout.HitTestTolerance,
+												ref segment,
 												ref ptIntersection))
 						{
 							closestHit.Path = path;
@@ -327,18 +384,12 @@ namespace PertNetworkUIExtension
 				}
 			}
 
-#if DEBUG
-			// Draw the hot connection segment
-			if ((HotConnection != null) && (HotConnection.Segment != -1))
+			// Draw the current drop pos
+			if ((DropPos != null) && (DropPos.Segment != -1))
 			{
-				graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-				var points = GetConnectionPoints(HotConnection.FromItem, HotConnection.ToItem);
-
-				using (var pen = new Pen(Color.Red, 1.5f))
-					graphics.DrawLine(pen, points[HotConnection.Segment], points[HotConnection.Segment + 1]);
+				var points = GetConnectionPoints(DropPos.FromItem, DropPos.ToItem);
+				DrawDragInsertionPoint(graphics, points, DropPos.Segment);
 			}
-#endif
 		}
 
 		protected bool WantDrawItem(NetworkItem item, Rectangle clipRect)
@@ -384,14 +435,12 @@ namespace PertNetworkUIExtension
 			graphics.DrawLines(Pens.Blue, GetConnectionPoints(fromItem, toItem));
 		}
 
-#if DEBUG
-		protected bool IsHotConnection(NetworkItem fromItem, NetworkItem toItem)
-		{
-			return ((HotConnection != null) &&
-					(HotConnection.FromItem == fromItem) &&
-					(HotConnection.ToItem == toItem));
-		}
-#endif
+// 		protected bool IsHotConnection(NetworkItem fromItem, NetworkItem toItem)
+// 		{
+// 			return ((DropPos != null) &&
+// 					(DropPos.FromItem == fromItem) &&
+// 					(DropPos.ToItem == toItem));
+// 		}
 
 		virtual protected Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
@@ -496,6 +545,32 @@ namespace PertNetworkUIExtension
 
 				SelectionChange?.Invoke(this, SelectedItem);
 			}
+
+			if (!ReadOnly && (e.Button == MouseButtons.Left))
+			{
+				DragTimer.Tag = e;
+				DragTimer.Start();
+			}
+		}
+
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			base.OnMouseUp(e);
+
+			DragTimer.Stop();
+		}
+
+		protected override void OnMouseMove(MouseEventArgs e)
+		{
+			base.OnMouseMove(e);
+
+			if ((e.Button == MouseButtons.Left) && DragTimer.Enabled)
+			{
+				Debug.Assert(!ReadOnly);
+
+				if (CheckStartDragging(e.Location))
+					DragTimer.Stop();
+			}
 		}
 
 		protected override void OnMouseWheel(MouseEventArgs e)
@@ -571,52 +646,160 @@ namespace PertNetworkUIExtension
 			}
 		}
 
-#if DEBUG
-		protected override void OnMouseLeave(EventArgs e)
+		protected void OnDragTimer(object sender, EventArgs e)
 		{
-			base.OnMouseLeave(e);
+			Debug.Assert(!ReadOnly);
 
-			if (HotConnection != null)
+			DragTimer.Stop();
+
+			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
+
+			if (mouseDown)
+				CheckStartDragging(MousePosition);
+		}
+
+		private bool CheckStartDragging(Point cursor)
+		{
+			Debug.Assert(!ReadOnly);
+
+			// Check for drag movement
+			Point ptOrg = (DragTimer.Tag as MouseEventArgs).Location;
+
+			if (GetDragRect(ptOrg).Contains(cursor))
+				return false;
+
+			NetworkItem hit = HitTestItem(ptOrg);
+
+			if (IsAcceptableDragSource(hit))
 			{
-				InvalidateConnection(HotConnection);
-				HotConnection = null;
+				DoDragDrop(hit.UniqueId, DragDropEffects.Copy | DragDropEffects.Move);
+				return true;
+			}
 
-				Update();
+			return false;
+		}
+
+		virtual protected bool IsAcceptableDropTarget(NetworkDragEventArgs e)
+		{
+			return ((e.DraggedItem != null) && (e.DropPos != null));
+		}
+
+		virtual protected bool IsAcceptableDragSource(NetworkItem item)
+		{
+			return (item != null);
+		}
+
+		private Rectangle GetDragRect(Point cursor)
+		{
+			Debug.Assert(!ReadOnly);
+
+			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
+			rect.Inflate(GetSystemMetrics(SM_CXDRAG) / 2, GetSystemMetrics(SM_CYDRAG) / 2);
+
+			return rect;
+		}
+
+		protected override void OnDragLeave(EventArgs e)
+		{
+			base.OnDragLeave(e);
+
+			DoDragCleanUp();
+		}
+
+		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
+
+			base.OnQueryContinueDrag(e);
+
+			if (e.EscapePressed)
+			{
+				// TODO
 			}
 		}
-#endif
 
-#if DEBUG
-		protected override void OnMouseMove(MouseEventArgs e)
+		protected override void OnDragOver(DragEventArgs e)
 		{
-			base.OnMouseMove(e);
+			base.OnDragOver(e);
 
-			var hitTest = HitTestConnection(e.Location);
+			var hitTest = HitTestConnection(e);
 
-			if ((hitTest == null) && (HotConnection == null))
+			if (NetworkConnectionHitTestResult.SegmentsMatch(hitTest, DropPos))
 				return;
 
 			if (hitTest != null)
 			{
-				if ((HotConnection == null) || !HotConnection.SegmentMatches(hitTest))
+				if ((DropPos == null) || !DropPos.SegmentMatches(hitTest))
 				{
-					InvalidateConnection(HotConnection);
+					InvalidateConnection(DropPos);
 					InvalidateConnection(hitTest);
 
-					HotConnection = hitTest;
+					DropPos = hitTest;
 				}
 			}
 			else
 			{
-				InvalidateConnection(HotConnection);
+				InvalidateConnection(DropPos);
 
-				HotConnection = null;
+				DropPos = null;
 			}
+
+			NetworkDragEventArgs args = NetworkDragEventArgs(e);
+
+			if (IsAcceptableDropTarget(args))
+				e.Effect = (args.Copy ? DragDropEffects.Copy : DragDropEffects.Move);
+			else
+				e.Effect = DragDropEffects.None;
 
 			Update();
 		}
-#endif
 
+		NetworkDragEventArgs NetworkDragEventArgs(DragEventArgs e)
+		{
+			uint dragId = (uint)e.Data.GetData(typeof(uint));
+
+			return new NetworkDragEventArgs(Data.GetItem(dragId), 
+											DropPos, 
+											((e.KeyState & 8) == 8));
+		}
+		
+		protected override void OnDragDrop(DragEventArgs e)
+		{
+			base.OnDragDrop(e);
+
+			DoDrop(NetworkDragEventArgs(e));
+			DoDragCleanUp();
+		}
+
+		protected virtual void DoDragCleanUp()
+		{
+			if (DropPos != null)
+			{
+				InvalidateConnection(DropPos);
+				DropPos = null;
+
+				Update();
+			}
+		}
+
+		protected void DrawDragInsertionPoint(Graphics graphics, Point[] points, int segment)
+		{
+			Point ptMid = Geometry2D.SegmentMidPoint(points, DropPos.Segment);
+			Rectangle circle = new Rectangle(ptMid.X - 3, ptMid.Y - 3, 6, 6);
+			var state = graphics.Save();
+
+			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+			graphics.FillEllipse(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), circle);
+			graphics.Restore(state);
+		}
+
+		protected virtual bool DoDrop(NetworkDragEventArgs e)
+		{
+			// TODO
+
+			return true;
+		}
+		
 		protected override void OnSizeChanged(EventArgs e)
 		{
 			base.OnSizeChanged(e);

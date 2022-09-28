@@ -387,31 +387,31 @@ namespace PertNetworkUIExtension
 
 			// Second pass checks to ensure that tasks in the earlier
 			// paths come after the tasks on which they are dependent
-			foreach (var path in this)
-			{
-				for (int i = 0; i < path.Count; i++)
-				{
-					NetworkItem item = path.Items[i];
-
-					foreach (uint dependencyId in item.DependencyUniqueIds)
-					{
-						var dependency = allItems.GetItem(dependencyId);
-
-						if (item.Position.X <= dependency.Position.X)
-						{
-							// Bump item and all items after it in the path
-							int offset = (dependency.Position.X - item.Position.X) + 1;
-
-							for (int j = i; j < path.Count; j++)
-							{
-								path.Items[j].Position.X += offset;
-							}
-						}
-					}
-				}
-
-				maxXPos = Math.Max(maxXPos, path.Items[path.Count - 1].Position.X);
-			}
+// 			foreach (var path in this)
+// 			{
+// 				for (int i = 0; i < path.Count; i++)
+// 				{
+// 					NetworkItem item = path.Items[i];
+// 
+// 					foreach (uint dependencyId in item.DependencyUniqueIds)
+// 					{
+// 						var dependency = allItems.GetItem(dependencyId);
+// 
+// 						if (item.Position.X <= dependency.Position.X)
+// 						{
+// 							// Bump item and all items after it in the path
+// 							int offset = (dependency.Position.X - item.Position.X) + 1;
+// 
+// 							for (int j = i; j < path.Count; j++)
+// 							{
+// 								path.Items[j].Position.X += offset;
+// 							}
+// 						}
+// 					}
+// 				}
+// 
+// 				maxXPos = Math.Max(maxXPos, path.Items[path.Count - 1].Position.X);
+// 			}
 
 			MaxPos = new Point(maxXPos, maxYPos);
 

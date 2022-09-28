@@ -8,6 +8,16 @@ namespace PertNetworkUIExtension
 {
 	public class Geometry2D
 	{
+		public static Point Difference(Point ptStart, Point ptEnd)
+		{
+			return new Point(ptEnd.X - ptStart.X, ptEnd.Y - ptStart.Y);
+		}
+
+		public static Point MidPoint(Point ptStart, Point ptEnd)
+		{
+			return new Point((ptStart.X + ptEnd.X) / 2, (ptStart.Y + ptEnd.Y) / 2);
+		}
+
 		public static double Distance(Point ptStart, Point ptEnd)
 		{
 			return Math.Sqrt(DistanceSquared(ptStart, ptEnd));
@@ -15,8 +25,9 @@ namespace PertNetworkUIExtension
 
 		public static double DistanceSquared(Point ptStart, Point ptEnd)
 		{
-			return (((ptStart.X - ptEnd.X) * (ptStart.X - ptEnd.X)) +
-					((ptStart.Y - ptEnd.Y) * (ptStart.Y - ptEnd.Y)));
+			var ptDiff = Difference(ptEnd, ptStart);
+
+			return ((ptDiff.X * ptDiff.X) + (ptDiff.Y * ptDiff.Y));
 		}
 
 		public static bool DistanceFromPointToSegment(Point pt, Point ptStart, Point ptEnd, ref double distance, ref Point ptIntersection)
@@ -79,6 +90,14 @@ namespace PertNetworkUIExtension
 			}
 
 			return false;
+		}
+
+		public static Point SegmentMidPoint(Point[] points, int segment)
+		{
+			if ((segment < 0) || (segment >= points.Count()))
+				return Point.Empty;
+
+			return MidPoint(points[segment], points[segment + 1]);
 		}
 	}
 
