@@ -19,13 +19,6 @@ namespace PertNetworkUIExtension
 
 	//////////////////////////////////////////////////////////////////////////////////
 
-	public class NetworkDragEventItem
-	{
-		public NetworkDragEventItem( /* TODO*/ )
-		{
-		}
-	}
-
 	public class NetworkDragEventArgs : EventArgs
 	{
 		public NetworkDragEventArgs(NetworkItem draggedItem, NetworkConnectionHitTestResult dropPos, bool copy)
