@@ -1220,8 +1220,8 @@ namespace PertNetworkUIExtension
 								SelectedItem, 
 								ItemWidth, 
 								ItemHeight, 
-								ItemWidth/* / 2*/, 
-								ItemHeight/* / 2*/);
+								ItemWidth / 2,          // Middle of task
+								-DPIScaling.Scale(16)); // below the cursor
 
 			m_LastDragPos = PointToClient(new Point(e.X, e.Y));
 		}
