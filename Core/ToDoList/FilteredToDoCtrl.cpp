@@ -102,16 +102,21 @@ BOOL CFilteredToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTaskLink)
 {	
 	if (CTabbedToDoCtrl::SelectTask(dwTaskID, bTaskLink))
 		return TRUE;
-	
+
 	// If it's a task link AND the task is filtered out 
 	// we toggle the filter and try again
 	if (bTaskLink && HasAnyFilter() && HasTask(dwTaskID))
 	{
+		// Shift the focus away from the comments because toggling
+		// the filter may cause the comments to become disabled
+		if (m_ctrlComments.HasFocus())
+			SetFocusToTasks();
+	
 		ToggleFilter(); // show all tasks
 		
 		if (CTabbedToDoCtrl::SelectTask(dwTaskID, bTaskLink))
 		{
-			GetParent()->SendMessage(WM_TDCN_FILTERCHANGE, (WPARAM)GetSafeHwnd());
+			GetParent()->PostMessage(WM_TDCN_FILTERCHANGE, (WPARAM)GetSafeHwnd());
 			return TRUE;
 		}
 
