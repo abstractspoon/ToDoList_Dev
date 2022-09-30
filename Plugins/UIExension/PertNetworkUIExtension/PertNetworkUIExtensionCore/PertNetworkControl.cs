@@ -853,26 +853,26 @@ namespace PertNetworkUIExtension
 
 		}
 
+/*
 		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
 			// Don't paint critical paths until the end
-/*
-			if ((CriticalPaths.Contains(path)))
-				return;
-
-			foreach (var critPath in CriticalPaths)
-			{
-				if (critPath.Contains(fromItem) &&
-					critPath.Contains(toItem) &&
-					toItem.IsDependency(fromItem))
-				{
-					return;
-				}
-			}
-*/
+// 			if ((CriticalPaths.Contains(path)))
+// 				return;
+// 
+// 			foreach (var critPath in CriticalPaths)
+// 			{
+// 				if (critPath.Contains(fromItem) &&
+// 					critPath.Contains(toItem) &&
+// 					toItem.IsDependency(fromItem))
+// 				{
+// 					return;
+// 				}
+// 			}
 			
 			DoPaintConnection(graphics, fromItem, toItem, path);
 		}
+*/
 
 		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
@@ -896,10 +896,10 @@ namespace PertNetworkUIExtension
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
 		}
 
-		protected override Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
-		{
-			return CalcConnectionPoints2(fromItem, toItem);
-		}
+// 		protected override Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
+// 		{
+// 			return CalcConnectionPoints2(fromItem, toItem);
+// 		}
 
 		protected Point[] CalcConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
