@@ -445,7 +445,7 @@ namespace PertNetworkUIExtension
 			points[0].X = fromRect.Right;
 			points[0].Y = (fromRect.Top + (fromRect.Height / 2));
 			points[1].X = toRect.Left;
-			points[2].Y = (toRect.Top + (toRect.Height / 2));
+			points[1].Y = (toRect.Top + (toRect.Height / 2));
 
 			return points;
 		}
