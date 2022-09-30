@@ -28,6 +28,20 @@ namespace PertNetworkUIExtension
 			Copy = copy;
 		}
 
+		public bool IsValid
+		{
+			get
+			{
+				return ((DraggedItem != null) &&
+						(DropPos != null) &&
+						(DropPos.FromItem != null) &&
+						(DropPos.ToItem != null) &&
+						(DropPos.FromItem != DropPos.ToItem) &&
+						(DropPos.FromItem != DraggedItem) &&
+						(DropPos.ToItem != DraggedItem));
+			}
+		}
+
 		public NetworkItem DraggedItem;
 		public NetworkConnectionHitTestResult DropPos;
 		public bool Copy;
@@ -269,7 +283,12 @@ namespace PertNetworkUIExtension
 
 		protected NetworkConnectionHitTestResult HitTestConnection(DragEventArgs e)
 		{
-			return HitTestConnection(PointToClient(new Point(e.X, e.Y)));
+			var hitTest = HitTestConnection(PointToClient(new Point(e.X, e.Y)));
+
+			if ((hitTest != null) && !GetNetworkDragEventArgs(e, hitTest).IsValid)
+				hitTest.Segment = -1;
+
+			return hitTest;
 		}
 
 		protected NetworkConnectionHitTestResult HitTestConnection(Point pos)
@@ -427,13 +446,6 @@ namespace PertNetworkUIExtension
 		{
 			graphics.DrawLines(Pens.Blue, GetConnectionPoints(fromItem, toItem));
 		}
-
-// 		protected bool IsHotConnection(NetworkItem fromItem, NetworkItem toItem)
-// 		{
-// 			return ((DropPos != null) &&
-// 					(DropPos.FromItem == fromItem) &&
-// 					(DropPos.ToItem == toItem));
-// 		}
 
 		virtual protected Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
@@ -674,7 +686,7 @@ namespace PertNetworkUIExtension
 
 		virtual protected bool IsAcceptableDropTarget(NetworkDragEventArgs e)
 		{
-			return ((e.DraggedItem != null) && (e.DropPos != null));
+			return e.IsValid;
 		}
 
 		virtual protected bool IsAcceptableDragSource(NetworkItem item)
@@ -706,9 +718,7 @@ namespace PertNetworkUIExtension
 			base.OnQueryContinueDrag(e);
 
 			if (e.EscapePressed)
-			{
-				// TODO
-			}
+				e.Action = DragAction.Cancel;
 		}
 
 		protected override void OnDragOver(DragEventArgs e)
@@ -737,7 +747,7 @@ namespace PertNetworkUIExtension
 				DropPos = null;
 			}
 
-			NetworkDragEventArgs args = NetworkDragEventArgs(e);
+			NetworkDragEventArgs args = GetNetworkDragEventArgs(e);
 
 			if (IsAcceptableDropTarget(args))
 				e.Effect = (args.Copy ? DragDropEffects.Copy : DragDropEffects.Move);
@@ -747,12 +757,17 @@ namespace PertNetworkUIExtension
 			Update();
 		}
 
-		NetworkDragEventArgs NetworkDragEventArgs(DragEventArgs e)
+		NetworkDragEventArgs GetNetworkDragEventArgs(DragEventArgs e)
+		{
+			return GetNetworkDragEventArgs(e, DropPos);
+		}
+		
+		NetworkDragEventArgs GetNetworkDragEventArgs(DragEventArgs e, NetworkConnectionHitTestResult hitTest)
 		{
 			uint dragId = (uint)e.Data.GetData(typeof(uint));
 
 			return new NetworkDragEventArgs(Data.GetItem(dragId), 
-											DropPos, 
+											hitTest, 
 											((e.KeyState & 8) == 8));
 		}
 		
@@ -760,7 +775,7 @@ namespace PertNetworkUIExtension
 		{
 			base.OnDragDrop(e);
 
-			DoDrop(NetworkDragEventArgs(e));
+			DoDrop(GetNetworkDragEventArgs(e));
 			DoDragCleanUp();
 		}
 
@@ -788,7 +803,58 @@ namespace PertNetworkUIExtension
 
 		protected virtual bool DoDrop(NetworkDragEventArgs e)
 		{
-			// TODO
+			if (!e.IsValid)
+				return false;
+
+			uint sourceId = e.DraggedItem.UniqueId;
+			uint targetId = e.DropPos.FromItem.UniqueId;
+
+			if (e.Copy)
+			{
+				// Add the target item to the source item's dependency list
+				if (e.DraggedItem.DependencyUniqueIds.IndexOf(targetId) != -1)
+					return false;
+
+				e.DraggedItem.DependencyUniqueIds.Add(targetId);
+			}
+			else // move
+			{
+				// 1. Redirect the dragged item's dependents onto 
+				// the first of the dragged item's own dependencies
+				var allDependents = new NetworkDependents();
+				allDependents.Build(Data.Items);
+
+				var srcDependents = allDependents.GetDependents(sourceId);
+
+				if (srcDependents?.Count > 0)
+				{
+					uint firstDependencyId = (e.DraggedItem.HasDependencies ? e.DraggedItem.DependencyUniqueIds[0] : 0);
+
+					foreach (var id in srcDependents)
+					{
+						var localDependent = Data.GetItem(id);
+
+						if (localDependent != null)
+						{
+							localDependent.DependencyUniqueIds.Remove(sourceId);
+
+							if (firstDependencyId != 0)
+								localDependent.DependencyUniqueIds.Add(firstDependencyId);
+						}
+					}
+				}
+
+				// 2. Replace all the source item's dependencies with the target id
+				e.DraggedItem.DependencyUniqueIds.Clear();
+				e.DraggedItem.DependencyUniqueIds.Add(targetId);
+
+				// 3. Replace e.DropPos.ToItem's dependency on the target id with the source id
+				e.DropPos.ToItem.DependencyUniqueIds.Remove(targetId);
+				e.DropPos.ToItem.DependencyUniqueIds.Add(sourceId);
+			}
+
+			RebuildPaths();
+			Invalidate();
 
 			return true;
 		}

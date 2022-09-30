@@ -1257,14 +1257,13 @@ namespace PertNetworkUIExtension
 			return !(item as PertNetworkItem).Locked;
 		}
 
-/*
 		override protected bool DoDrop(NetworkDragEventArgs e)
 		{
+			m_DragImage.End();
 			// TODO
 
-			return true;
+			return base.DoDrop(e);
 		}
-*/
 
 		List<NetworkPath> UpdateCriticalPaths()
 		{
