@@ -261,7 +261,7 @@ void CTDLTaskComboBox::OnDropDown()
 		CString sText;
 		GetWindowText(sText);
 
-		if (Misc::First(sText) == TAB)
+		if (!sText.IsEmpty() && (Misc::First(sText) == TAB))
 		{
 			// Modifying the window text will cause the selection 
 			// to be cleared/changed after this function has returned, 

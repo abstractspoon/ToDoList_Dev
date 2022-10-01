@@ -3616,9 +3616,18 @@ LRESULT CToDoListWnd::OnToDoCtrlNotifyFilterChange(WPARAM wp, LPARAM /*lp*/)
 	int nTDC = m_mgrToDoCtrls.FindToDoCtrl((HWND)wp);
 
 	if (nTDC == -1)
+	{
 		ASSERT(0);
+	}
 	else
+	{
 		m_filterBar.RefreshFilterControls(GetToDoCtrl(nTDC));
+
+		CRect rFilter;
+		
+		if (GetFilterBarRect(rFilter))
+			InvalidateRect(rFilter);
+	}
 
 	return 0L;
 }
