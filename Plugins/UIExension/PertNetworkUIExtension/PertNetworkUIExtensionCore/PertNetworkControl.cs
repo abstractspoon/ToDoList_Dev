@@ -158,10 +158,11 @@ namespace PertNetworkUIExtension
 		[Flags]
 		protected enum DrawState
 		{
-			None		= 0x00,
-			Selected	= 0x01,
-			Critical	= 0x02,
-			DragImage	= 0x04,
+			None				= 0x00,
+			Selected			= 0x01,
+			DropHighlighted		= 0x02,
+			Critical			= 0x04,
+			DragImage			= 0x08,
 		}
 
 		// -------------------------------------------------------------------------
@@ -681,7 +682,7 @@ namespace PertNetworkUIExtension
 */
 		}
 
-		override protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected)
+		override protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, SelectionState selState)
 		{
 			// Don't paint critical paths until the end
 			/*
@@ -694,18 +695,31 @@ namespace PertNetworkUIExtension
 					return;
 			}
 			*/
-			DrawState state = (selected ? DrawState.Selected : DrawState.None);
 
-			DoPaintItem(graphics, item, path, state);
+			DrawState drawState = DrawState.None;
+
+			switch (selState)
+			{
+			case SelectionState.DropHighlighted:
+				drawState = DrawState.DropHighlighted;
+				break;
+
+			case SelectionState.Selected:
+				drawState = DrawState.Selected;
+				break;
+			}
+
+			DoPaintItem(graphics, item, path, drawState);
 		}
 
-		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, DrawState state)
+		protected void DoPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, DrawState drawState)
 		{
 			graphics.SmoothingMode = SmoothingMode.None;
 
-			bool selected = state.HasFlag(DrawState.Selected);
-			bool critical = state.HasFlag(DrawState.Critical);
-			bool dragImage = state.HasFlag(DrawState.DragImage);
+			bool selected = drawState.HasFlag(DrawState.Selected);
+			bool dropHighlight = drawState.HasFlag(DrawState.DropHighlighted);
+			bool critical = drawState.HasFlag(DrawState.Critical);
+			bool dragImage = drawState.HasFlag(DrawState.DragImage);
 
 			var itemRect = CalcItemRectangle(item);
 
@@ -717,8 +731,8 @@ namespace PertNetworkUIExtension
 			// Figure out the required colours
 			Color backColor = GetItemBackgroundColor(taskItem, selected);
 			Color borderColor = GetItemBorderColor(taskItem, selected);
-			Color lineColor = GetItemLineColor(taskItem, state);
-			Color textColor = GetItemTextColor(taskItem, state);
+			Color lineColor = GetItemLineColor(taskItem, drawState);
+			Color textColor = GetItemTextColor(taskItem, drawState);
 
 			// Draw background
 			if (selected)
@@ -735,6 +749,19 @@ namespace PertNetworkUIExtension
 												false); // opaque
 
 				backColor = UIExtension.SelectionRect.GetColor(style);
+			}
+			else if (dropHighlight)
+			{
+				UIExtension.SelectionRect.Draw(Handle,
+												graphics,
+												itemRect.X,
+												itemRect.Y,
+												itemRect.Width,
+												itemRect.Height,
+												UIExtension.SelectionRect.Style.DropHighlighted,
+												false); // opaque
+
+				backColor = UIExtension.SelectionRect.GetColor(UIExtension.SelectionRect.Style.DropHighlighted);
 			}
 			else if (backColor != Color.Empty)
 			{
@@ -1197,8 +1224,8 @@ namespace PertNetworkUIExtension
 
 		protected override void OnDragOver(DragEventArgs e)
 		{
-			var hitTest = HitTestConnection(e);
-			bool segChange = !NetworkConnectionHitTestResult.SegmentsMatch(hitTest, DropPos);
+			var hitTest = DragHitTest(e);
+			bool segChange = !NetworkItemHitTestResult.Match(hitTest, DropPos);
 
 			if (segChange)
 				m_DragImage.ShowNoLock(false);

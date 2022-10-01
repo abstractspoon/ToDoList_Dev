@@ -92,6 +92,19 @@ namespace PertNetworkUIExtension
 			return false;
 		}
 
+		public static int HitTest(Point[] points, 
+									Point point, 
+									double tolerance)
+		{
+			int segment = -1;
+			Point ptUnused = Point.Empty;
+
+			if (HitTest(points, point, tolerance, ref segment, ref ptUnused))
+				return segment;
+
+			return -1;
+		}
+
 		public static Point SegmentMidPoint(Point[] points, int segment)
 		{
 			if ((segment < 0) || (segment >= points.Count()))

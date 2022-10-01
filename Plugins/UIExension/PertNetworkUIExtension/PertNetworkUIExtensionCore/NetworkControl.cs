@@ -19,9 +19,65 @@ namespace PertNetworkUIExtension
 
 	//////////////////////////////////////////////////////////////////////////////////
 
+	public class NetworkItemHitTestResult
+	{
+		public NetworkPath Path;
+		public NetworkItem FromItem, ToItem;
+		public int Segment = -1;
+
+		public bool IsValid
+		{
+			get
+			{
+				if (FromItem == null)
+					return false;
+
+				if (FromItem == ToItem)
+					return false;
+
+				if (ToItem == null)
+				{
+					if (Segment != -1)
+						return false;
+				}
+				else
+				{
+					if (Segment == -1)
+						return false;
+				}
+
+				return true;
+			}
+		}
+
+		public bool Matches(NetworkItemHitTestResult other)
+		{
+			if (other == null)
+				return false;
+
+			return ((Path == other.Path) &&
+					(FromItem == other.FromItem) &&
+					(ToItem == other.ToItem) &&
+					(Segment == other.Segment));
+		}
+
+		public static bool Match(NetworkItemHitTestResult pos1, NetworkItemHitTestResult pos2)
+		{
+			if ((pos1 == null) && (pos2 == null))
+				return true;
+
+			if (pos1 == null)
+				return false;
+
+			return pos1.Matches(pos2);
+		}
+	}
+
+	//////////////////////////////////////////////////////////////////////////////////
+
 	public class NetworkDragEventArgs : EventArgs
 	{
-		public NetworkDragEventArgs(NetworkItem draggedItem, NetworkConnectionHitTestResult dropPos, bool copy)
+		public NetworkDragEventArgs(NetworkItem draggedItem, NetworkItemHitTestResult dropPos, bool copy)
 		{
 			DraggedItem = draggedItem;
 			DropPos = dropPos;
@@ -32,48 +88,22 @@ namespace PertNetworkUIExtension
 		{
 			get
 			{
-				return ((DraggedItem != null) &&
-						(DropPos != null) &&
-						(DropPos.FromItem != null) &&
-						(DropPos.ToItem != null) &&
-						(DropPos.FromItem != DropPos.ToItem) &&
-						(DropPos.FromItem != DraggedItem) &&
-						(DropPos.ToItem != DraggedItem));
+				if ((DraggedItem == null) || (DropPos == null))
+					return false;
+
+				if (!DropPos.IsValid)
+					return false;
+
+				if ((DropPos.FromItem == DraggedItem) || (DropPos.ToItem == DraggedItem))
+					return false;
+
+				return true;
 			}
 		}
 
 		public NetworkItem DraggedItem;
-		public NetworkConnectionHitTestResult DropPos;
+		public NetworkItemHitTestResult DropPos;
 		public bool Copy;
-	}
-
-	//////////////////////////////////////////////////////////////////////////////////
-
-	public class NetworkConnectionHitTestResult
-	{
-		public NetworkPath Path;
-		public NetworkItem FromItem, ToItem;
-		public int Segment = -1;
-		public Point PointOnSegment = Point.Empty;
-
-		public bool SegmentMatches(NetworkConnectionHitTestResult other)
-		{
-			return ((Path == other.Path) &&
-					(FromItem == other.FromItem) &&
-					(ToItem == other.ToItem) &&
-					(Segment == other.Segment));
-		}
-
-		public static bool SegmentsMatch(NetworkConnectionHitTestResult pos1, NetworkConnectionHitTestResult pos2)
-		{
-			if ((pos1 == null) && (pos2 == null))
-				return true;
-
-			if ((pos1 == null) || (pos2 == null))
-				return false;
-
-			return pos1.SegmentMatches(pos2);
-		}
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////
@@ -181,6 +211,15 @@ namespace PertNetworkUIExtension
 		protected float ZoomFactor { get; private set; }
 		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
 
+		// Constants ---------------------------------------------------------------------
+
+		protected enum SelectionState
+		{
+			None,
+			Selected,
+			DropHighlighted
+		}
+
 		// Data --------------------------------------------------------------------------
 
 		// Font setting must go thru SetFont
@@ -195,7 +234,7 @@ namespace PertNetworkUIExtension
 		}
 		protected Font BaseFont { get; private set; }
 		protected NetworkData Data { get; private set; }
-		protected NetworkConnectionHitTestResult DropPos { get; private set; }
+		protected NetworkItemHitTestResult DropPos { get; private set; }
 
 		protected int ItemHeight { get { return Layout.ItemHeight; } }
 		protected int ItemWidth { get { return Layout.ItemWidth; } }
@@ -281,9 +320,9 @@ namespace PertNetworkUIExtension
 			return null;
 		}
 
-		protected NetworkConnectionHitTestResult HitTestConnection(DragEventArgs e)
+		protected NetworkItemHitTestResult DragHitTest(DragEventArgs e)
 		{
-			var hitTest = HitTestConnection(PointToClient(new Point(e.X, e.Y)));
+			var hitTest = DragHitTest(PointToClient(new Point(e.X, e.Y)));
 
 			if ((hitTest != null) && !GetNetworkDragEventArgs(e, hitTest).IsValid)
 				hitTest.Segment = -1;
@@ -291,10 +330,10 @@ namespace PertNetworkUIExtension
 			return hitTest;
 		}
 
-		protected NetworkConnectionHitTestResult HitTestConnection(Point pos)
+		protected NetworkItemHitTestResult DragHitTest(Point pos)
 		{
 			// Do the least amount of work possible
-			var closestHit = new NetworkConnectionHitTestResult();
+			var closestHit = new NetworkItemHitTestResult();
 
 			foreach (var path in Data.Paths)
 			{
@@ -303,37 +342,50 @@ namespace PertNetworkUIExtension
 
 				var prevItemRect = Layout.CalcItemRectangle(path.Items[0]);
 
+				if (prevItemRect.Contains(pos))
+				{
+					closestHit.Path = path;
+					closestHit.FromItem = path.Items[0];
+
+					break;
+				}
+
 				for (int i = 1; i < path.Count; i++)
 				{
 					var itemRect = Layout.CalcItemRectangle(path.Items[i]);
 
+					if (itemRect.Contains(pos))
+					{
+						closestHit.Path = path;
+						closestHit.FromItem = path.Items[i];
+
+						break;
+					}
+
 					if (Rectangle.Union(prevItemRect, itemRect).Contains(pos))
 					{
 						var points = GetConnectionPoints(path.Items[i - 1], path.Items[i]);
-						int segment = -1;
-						Point ptIntersection = Point.Empty;
+						int segment = Geometry2D.HitTest(points, pos, Layout.HitTestTolerance);
 
-						if (Geometry2D.HitTest(points,
-												pos,
-												Layout.HitTestTolerance,
-												ref segment,
-												ref ptIntersection))
+						if (segment != -1)
 						{
 							closestHit.Path = path;
 							closestHit.FromItem = path.Items[i - 1];
 							closestHit.ToItem = path.Items[i];
 							closestHit.Segment = segment;
-							closestHit.PointOnSegment = ptIntersection;
 
-							return closestHit;
+							break;
 						}
 					}
 
 					prevItemRect = itemRect;
 				}
+
+				if (closestHit.IsValid)
+					break;
 			}
 
-			return null;
+			return (closestHit.IsValid ? closestHit : null);
 		}
 
 		protected Rectangle CalcItemRectangle(NetworkItem item)
@@ -346,9 +398,18 @@ namespace PertNetworkUIExtension
 			DoPaint(e.Graphics, e.ClipRectangle);
 		}
 
-		protected bool WantDrawItemSelected(NetworkItem item)
+		protected SelectionState GetItemSelectionState(NetworkItem item)
 		{
-			return (!Layout.IsSavingToImage && (item.UniqueId == SelectedItemId));
+			if (Layout.IsSavingToImage)
+				return SelectionState.None;
+
+			if (item.UniqueId == SelectedItemId)
+				return SelectionState.Selected;
+
+			if ((DropPos != null) && DropPos.IsValid && (DropPos.Segment == -1) && (DropPos.FromItem == item))
+				return SelectionState.DropHighlighted;
+
+			return SelectionState.None;
 		}
 
 		protected virtual void DoPaint(Graphics graphics, Rectangle clipRect)
@@ -368,7 +429,7 @@ namespace PertNetworkUIExtension
 					{
 						if (WantDrawItem(item, clipRect))
 						{
-							OnPaintItem(graphics, item, path, WantDrawItemSelected(item));
+							OnPaintItem(graphics, item, path, GetItemSelectionState(item));
 						}
 						else
 						{
@@ -423,7 +484,7 @@ namespace PertNetworkUIExtension
 			return clipRect.IntersectsWith(Rectangle.Union(fromRect, toRect));
 		}
 
-		virtual protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, bool selected)
+		virtual protected void OnPaintItem(Graphics graphics, NetworkItem item, NetworkPath path, SelectionState state)
 		{
 			var itemRect = Layout.CalcItemRectangle(item);
 			graphics.DrawRectangle(Pens.Black, itemRect);
@@ -431,14 +492,21 @@ namespace PertNetworkUIExtension
 			int iPath = Data.Paths.IndexOf(path) + 1;
 			var itemText = String.Format("{0} (id: {1}, p: {2})", item.Title, item.UniqueId, iPath);
 
-			if (selected)
+			switch (state)
 			{
+			case SelectionState.DropHighlighted:
+				graphics.DrawRectangle(SystemPens.Highlight, itemRect);
+				graphics.DrawString(itemText, Font, Brushes.Blue, itemRect);
+				break;
+
+			case SelectionState.Selected:
 				graphics.FillRectangle(SystemBrushes.Highlight, itemRect);
 				graphics.DrawString(itemText, Font, SystemBrushes.HighlightText, itemRect);
-			}
-			else
-			{
+				break;
+
+			case SelectionState.None:
 				graphics.DrawString(itemText, Font, Brushes.Blue, itemRect);
+				break;
 			}
 		}
 
@@ -642,12 +710,19 @@ namespace PertNetworkUIExtension
 			return Math.Max(scroll.Minimum, Math.Min(pos, scroll.Maximum));
 		}
 
-		protected void InvalidateConnection(NetworkConnectionHitTestResult connection)
+		protected void Invalidate(NetworkItemHitTestResult hitTest)
 		{
-			if (connection != null)
+			if ((hitTest != null) && hitTest.IsValid)
 			{
-				Invalidate(Rectangle.Union(Layout.CalcItemRectangle(connection.FromItem),
-											Layout.CalcItemRectangle(connection.ToItem)));
+				if (hitTest.Segment == -1)
+				{
+					Invalidate(Layout.CalcItemRectangle(hitTest.FromItem));
+				}
+				else
+				{
+					Invalidate(Rectangle.Union(Layout.CalcItemRectangle(hitTest.FromItem),
+												Layout.CalcItemRectangle(hitTest.ToItem)));
+				}
 			}
 		}
 
@@ -725,24 +800,24 @@ namespace PertNetworkUIExtension
 		{
 			base.OnDragOver(e);
 
-			var hitTest = HitTestConnection(e);
+			var hitTest = DragHitTest(e);
 
-			if (NetworkConnectionHitTestResult.SegmentsMatch(hitTest, DropPos))
+			if (NetworkItemHitTestResult.Match(hitTest, DropPos))
 				return;
 
 			if (hitTest != null)
 			{
-				if ((DropPos == null) || !DropPos.SegmentMatches(hitTest))
+				if ((DropPos == null) || !DropPos.Matches(hitTest))
 				{
-					InvalidateConnection(DropPos);
-					InvalidateConnection(hitTest);
+					Invalidate(DropPos);
+					Invalidate(hitTest);
 
 					DropPos = hitTest;
 				}
 			}
 			else
 			{
-				InvalidateConnection(DropPos);
+				Invalidate(DropPos);
 
 				DropPos = null;
 			}
@@ -762,7 +837,7 @@ namespace PertNetworkUIExtension
 			return GetNetworkDragEventArgs(e, DropPos);
 		}
 		
-		NetworkDragEventArgs GetNetworkDragEventArgs(DragEventArgs e, NetworkConnectionHitTestResult hitTest)
+		NetworkDragEventArgs GetNetworkDragEventArgs(DragEventArgs e, NetworkItemHitTestResult hitTest)
 		{
 			uint dragId = (uint)e.Data.GetData(typeof(uint));
 
@@ -775,7 +850,11 @@ namespace PertNetworkUIExtension
 		{
 			base.OnDragDrop(e);
 
-			DoDrop(GetNetworkDragEventArgs(e));
+			var args = GetNetworkDragEventArgs(e);
+
+			if (args.IsValid)
+				DoDrop(args);
+
 			DoDragCleanUp();
 		}
 
@@ -783,7 +862,7 @@ namespace PertNetworkUIExtension
 		{
 			if (DropPos != null)
 			{
-				InvalidateConnection(DropPos);
+				Invalidate(DropPos);
 				DropPos = null;
 
 				Update();
@@ -819,38 +898,46 @@ namespace PertNetworkUIExtension
 			}
 			else // move
 			{
-				// 1. Redirect the dragged item's dependents onto 
-				// the first of the dragged item's own dependencies
-				var allDependents = new NetworkDependents();
-				allDependents.Build(Data.Items);
-
-				var srcDependents = allDependents.GetDependents(sourceId);
-
-				if (srcDependents?.Count > 0)
+				if (e.DropPos.Segment == -1)
 				{
-					uint firstDependencyId = (e.DraggedItem.HasDependencies ? e.DraggedItem.DependencyUniqueIds[0] : 0);
+					e.DraggedItem.DependencyUniqueIds.Clear();
+					e.DraggedItem.DependencyUniqueIds.Add(targetId);
+				}
+				else
+				{
+					// 1. Redirect the dragged item's dependents onto 
+					// the first of the dragged item's own dependencies
+					var allDependents = new NetworkDependents();
+					allDependents.Build(Data.Items);
 
-					foreach (var id in srcDependents)
+					var srcDependents = allDependents.GetDependents(sourceId);
+
+					if (srcDependents?.Count > 0)
 					{
-						var localDependent = Data.GetItem(id);
+						uint firstDependencyId = (e.DraggedItem.HasDependencies ? e.DraggedItem.DependencyUniqueIds[0] : 0);
 
-						if (localDependent != null)
+						foreach (var id in srcDependents)
 						{
-							localDependent.DependencyUniqueIds.Remove(sourceId);
+							var localDependent = Data.GetItem(id);
 
-							if (firstDependencyId != 0)
-								localDependent.DependencyUniqueIds.Add(firstDependencyId);
+							if (localDependent != null)
+							{
+								localDependent.DependencyUniqueIds.Remove(sourceId);
+
+								if (firstDependencyId != 0)
+									localDependent.DependencyUniqueIds.Add(firstDependencyId);
+							}
 						}
 					}
+
+					// 2. Replace all the source item's dependencies with the target id
+					e.DraggedItem.DependencyUniqueIds.Clear();
+					e.DraggedItem.DependencyUniqueIds.Add(targetId);
+
+					// 3. Replace e.DropPos.ToItem's dependency on the target id with the source id
+					e.DropPos.ToItem.DependencyUniqueIds.Remove(targetId);
+					e.DropPos.ToItem.DependencyUniqueIds.Add(sourceId);
 				}
-
-				// 2. Replace all the source item's dependencies with the target id
-				e.DraggedItem.DependencyUniqueIds.Clear();
-				e.DraggedItem.DependencyUniqueIds.Add(targetId);
-
-				// 3. Replace e.DropPos.ToItem's dependency on the target id with the source id
-				e.DropPos.ToItem.DependencyUniqueIds.Remove(targetId);
-				e.DropPos.ToItem.DependencyUniqueIds.Add(sourceId);
 			}
 
 			RebuildPaths();
