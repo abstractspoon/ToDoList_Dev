@@ -35,16 +35,11 @@ namespace PertNetworkUIExtension
 				if (FromItem == ToItem)
 					return false;
 
-				if (ToItem == null)
-				{
-					if (Segment != -1)
-						return false;
-				}
-				else
-				{
-					if (Segment == -1)
-						return false;
-				}
+				if ((ToItem == null) && (Segment != -1))
+					return false;
+
+				if ((ToItem != null) && (Segment == -1))
+					return false;
 
 				return true;
 			}
