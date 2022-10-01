@@ -923,10 +923,10 @@ namespace PertNetworkUIExtension
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
 		}
 
-// 		protected override Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
-// 		{
-// 			return CalcConnectionPoints2(fromItem, toItem);
-// 		}
+		protected override Point[] GetConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
+		{
+			return CalcConnectionPoints2(fromItem, toItem);
+		}
 
 		protected Point[] CalcConnectionPoints(NetworkItem fromItem, NetworkItem toItem)
 		{
