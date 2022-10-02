@@ -35,6 +35,7 @@ BEGIN_MESSAGE_MAP(CTDLTaskDependencyEdit, CEnEdit)
 	//{{AFX_MSG_MAP(CTDLTaskDependencyEdit)
 	//}}AFX_MSG_MAP
 	ON_CONTROL_REFLECT_EX(EN_CHANGE, OnChange)
+	ON_WM_CTLCOLOR_REFLECT()
 END_MESSAGE_MAP()
 //////////////////////////////////////////////////////////////////////
 
@@ -125,6 +126,17 @@ BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks,const CTDCImageList& 
 	return FALSE;
 }
 
+HBRUSH CTDLTaskDependencyEdit::CtlColor(CDC* pDC, UINT /*nCtlColor*/)
+{
+	if (m_brCircular.GetSafeHandle())
+	{
+		pDC->SetTextColor(m_crCircularText);
+		pDC->SetBkMode(TRANSPARENT);
+	}
+
+	return (HBRUSH)m_brCircular.GetSafeHandle();
+}
+
 void CTDLTaskDependencyEdit::GetDependencies(CTDCDependencyArray& aDepends) const
 {
 	aDepends.Copy(m_aDepends);
@@ -136,6 +148,20 @@ void CTDLTaskDependencyEdit::SetDependencies(const CTDCDependencyArray& aDepends
 
 	if (GetSafeHwnd())
 		SetWindowText(m_aDepends.Format()); // for display purposes
+}
+
+void CTDLTaskDependencyEdit::SetDependenciesAreCircular(BOOL bCircular, COLORREF crCircular)
+{
+	if (bCircular && !m_brCircular.GetSafeHandle())
+	{
+		m_brCircular.CreateSolidBrush(crCircular);
+		m_crCircularText = GraphicsMisc::GetBestTextColor(crCircular);
+	}
+	else if (!bCircular && m_brCircular.GetSafeHandle())
+	{
+		m_brCircular.DeleteObject();
+		m_crCircularText = CLR_NONE;
+	}
 }
 
 void CTDLTaskDependencyEdit::DDX(CDataExchange* pDX, CTDCDependencyArray& aValues)

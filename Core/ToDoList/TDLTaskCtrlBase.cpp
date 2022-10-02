@@ -3037,7 +3037,13 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 			
 		case TDCC_DEPENDENCY:
 			if (pTDI->aDependencies.GetSize())
-				DrawColumnImage(pDC, nColID, rSubItem, (pTDI->aDependencies.GetSize() > 1));
+			{
+				BOOL bAltImage = (pTDI->aDependencies.GetSize() > 1);
+				DrawColumnImage(pDC, nColID, rSubItem, bAltImage);
+
+				if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
+					GraphicsMisc::DrawRect(pDC, rSubItem, colorRed, CLR_NONE, 0, GMDR_NONE, 128);
+			}
 			break;
 			
 		case TDCC_FILELINK:
@@ -5635,6 +5641,21 @@ BOOL CTDLTaskCtrlBase::SelectionAreAllDone() const
 	}
 
 	return TRUE;
+}
+
+BOOL CTDLTaskCtrlBase::SelectionHasCircularDependencies() const
+{
+	POSITION pos = GetFirstSelectedTaskPos();
+
+	while (pos)
+	{
+		DWORD dwTaskID = GetNextSelectedTaskID(pos);
+
+		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 BOOL CTDLTaskCtrlBase::SelectionHasDependents() const

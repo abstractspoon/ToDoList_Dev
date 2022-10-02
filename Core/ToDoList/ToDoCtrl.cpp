@@ -1852,6 +1852,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 
 		// dependency link button
 		m_eDependency.EnableButton(ID_DEPENDS_LINK, bEnable && m_aDepends.GetSize());
+		m_eDependency.SetDependenciesAreCircular(m_taskTree.SelectionHasCircularDependencies());
 
 		// percent done
 		if (IsSelectedTaskDone())
@@ -4649,6 +4650,8 @@ BOOL CToDoCtrl::SetSelectedTaskDependencies(const CTDCDependencyArray& aDepends,
 			m_aDepends.Copy(aDepends);
 			m_eDependency.SetDependencies(m_aDepends);
 		}
+		
+		m_eDependency.SetDependenciesAreCircular(m_taskTree.SelectionHasCircularDependencies());
 	}
 
 	return TRUE;
@@ -11868,22 +11871,24 @@ void CToDoCtrl::SetUITheme(const CUIThemeFile& theme)
 HBRUSH CToDoCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor) 
 {
 	HBRUSH hbr = CRuntimeDlg::OnCtlColor(pDC, pWnd, nCtlColor);
-	
-	if (CThemed::IsAppThemed() && (nCtlColor == CTLCOLOR_STATIC))
+
+	switch (nCtlColor)
 	{
-	//	if (CWinClasses::IsClass(*pWnd, WC_STATIC) || CWinClasses::IsClass(*pWnd, WC_BUTTON))
+	case CTLCOLOR_STATIC:
+		if (CThemed::IsAppThemed())
 		{
 			if (m_theme.crAppText != CLR_NONE)
 				pDC->SetTextColor(m_theme.crAppText);
-		
+
 			if (m_brUIBack.GetSafeHandle())
 			{
 				pDC->SetBkMode(TRANSPARENT);
 				hbr = m_brUIBack;
 			}
 		}
+		break;
 	}
-
+	
 	return hbr;
 }
 
