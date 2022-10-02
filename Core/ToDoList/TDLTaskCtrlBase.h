@@ -146,6 +146,7 @@ public:
 	BOOL IsSelectedTaskDue() const;
 
 	BOOL SelectionHasDependencies() const;
+	BOOL SelectionHasCircularDependencies() const;
 	BOOL SelectionHasDates(TDC_DATE nDate, BOOL bAll = FALSE) const;
 	BOOL SelectionHasReferences() const;
 	BOOL SelectionHasTask(DWORD dwTaskID, BOOL bIncludeRefs) const;

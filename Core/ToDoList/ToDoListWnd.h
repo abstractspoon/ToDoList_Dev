@@ -335,6 +335,8 @@ protected:
 	afx_msg void OnUpdateEditGotoDependency(CCmdUI* pCmdUI);
 	afx_msg void OnEditRecurrence();
 	afx_msg void OnUpdateEditRecurrence(CCmdUI* pCmdUI);
+	afx_msg void OnEditDependency();
+	afx_msg void OnUpdateEditDependency(CCmdUI* pCmdUI);
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnEditClearAttribute();
 	afx_msg void OnUpdateEditClearAttribute(CCmdUI* pCmdUI);

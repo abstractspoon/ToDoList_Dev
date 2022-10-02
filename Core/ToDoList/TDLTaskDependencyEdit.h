@@ -32,6 +32,7 @@ public:
 
 	void GetDependencies(CTDCDependencyArray& aDepends) const;
 	void SetDependencies(const CTDCDependencyArray& aDepends);
+	void SetDependenciesAreCircular(BOOL bCircular = TRUE, COLORREF crCircular = 255);
 	
 	BOOL DoEdit(const CTaskFile& tasks, const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders);
 	void DDX(CDataExchange* pDX, CTDCDependencyArray& aValues);
@@ -39,6 +40,8 @@ public:
 protected:
 	CTDCDependencyArray m_aDepends;
 	BOOL m_bNotifyingParent;
+	CBrush m_brCircular;
+	COLORREF m_crCircularText;
 
 protected:
 	virtual void PreSubclassWindow();
@@ -50,6 +53,7 @@ protected:
 		// NOTE: the ClassWizard will add member functions here
 	//}}AFX_MSG
 	afx_msg BOOL OnChange();
+	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor);
 
 	DECLARE_MESSAGE_MAP()
 
