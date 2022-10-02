@@ -186,6 +186,8 @@ namespace PertNetworkUIExtension
 
 			// Initialise our fonts
 			OnFontChanged(this, EventArgs.Empty);
+
+			ItemLineCount = 4;
 		}
 
 		protected void OnFontChanged(object sender, EventArgs e)
@@ -880,7 +882,6 @@ namespace PertNetworkUIExtension
 
 		}
 
-/*
 		override protected void OnPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{
 			// Don't paint critical paths until the end
@@ -899,7 +900,6 @@ namespace PertNetworkUIExtension
 			
 			DoPaintConnection(graphics, fromItem, toItem, path);
 		}
-*/
 
 		protected void DoPaintConnection(Graphics graphics, NetworkItem fromItem, NetworkItem toItem, NetworkPath path)
 		{

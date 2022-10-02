@@ -103,23 +103,40 @@ namespace PertNetworkUIExtension
 
 	//////////////////////////////////////////////////////////////////////////////////
 
-	public class LayoutHelper
+	class LayoutHelper
 	{
-		public LayoutHelper(ScrollableControl ctrl)
+		public LayoutHelper(ScrollableControl ctrl, int itemLineCount)
 		{
 			m_Ctrl = ctrl;
+			Font = ctrl.Font;
 
 			using (var graphics = ctrl.CreateGraphics())
 				m_DpiFactor = graphics.DpiX / 96.0;
+
+			SetItemLineCount(itemLineCount);
 		}
 
 		private ScrollableControl m_Ctrl;
 		private double m_DpiFactor = 1.0;
 
+		public int ItemLineCount { get; private set; }
+		public bool SetItemLineCount(int count)
+		{
+			count = Math.Min(Math.Max(count, 1), 10);
+
+			if (count != ItemLineCount)
+			{
+				ItemLineCount = count;
+				return true;
+			}
+
+			return false;
+		}
+		
 		public Font Font;
 		public bool IsSavingToImage = false;
 
-		public int ItemHeight { get { return ((Font.Height + LabelPadding) * 4); } }
+		public int ItemHeight { get { return ((Font.Height + LabelPadding) * ItemLineCount); } }
 		public int ItemWidth { get { return (ItemHeight * 3); } }
 		public int ItemVertSpacing { get { return (ItemHeight / 4); } }
 		public int ItemHorzSpacing { get { return (ItemWidth / 4); } }
@@ -203,11 +220,6 @@ namespace PertNetworkUIExtension
 
 		// Constants ---------------------------------------------------------------------
 
-		protected float ZoomFactor { get; private set; }
-		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
-
-		// Constants ---------------------------------------------------------------------
-
 		protected enum SelectionState
 		{
 			None,
@@ -231,6 +243,9 @@ namespace PertNetworkUIExtension
 		protected NetworkData Data { get; private set; }
 		protected NetworkItemHitTestResult DropPos { get; private set; }
 
+		protected float ZoomFactor { get; private set; }
+		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
+
 		protected int ItemHeight { get { return Layout.ItemHeight; } }
 		protected int ItemWidth { get { return Layout.ItemWidth; } }
 		protected int ItemVertSpacing { get { return Layout.ItemVertSpacing; } }
@@ -239,11 +254,21 @@ namespace PertNetworkUIExtension
 		protected int ColumnWidth { get { return Layout.ColumnWidth; } }
 		protected int GraphBorder { get { return Layout.GraphBorder; } }
 		protected int LabelPadding { get { return Layout.LabelPadding; } }
-		
+
+		protected int ItemLineCount
+		{
+			get { return Layout.ItemLineCount; }
+			set
+			{
+				if (Layout.SetItemLineCount(value))
+					RecalculateGraphSize();
+			}
+		}
+
 		private uint SelectedItemId = 0;
 		private new LayoutHelper Layout;
 		private Timer DragTimer;
-		
+
 		// Public ------------------------------------------------------------------------
 
 		public event SelectionChangeEventHandler SelectionChange;
@@ -254,7 +279,7 @@ namespace PertNetworkUIExtension
 			ConnectionColor = Color.Magenta;
 			Data = new NetworkData();
 			BaseFont = Font;
-			Layout = new LayoutHelper(this);
+			Layout = new LayoutHelper(this, 2);
 
 			DragTimer = new Timer();
 			DragTimer.Interval = (int)GetDoubleClickTime();
