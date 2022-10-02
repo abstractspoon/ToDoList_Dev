@@ -295,7 +295,7 @@ namespace PertNetworkUIExtension
 
 		public void RecalculateGraphSize()
 		{
-			RecalculateGraphSize(Data.Paths.MaxPos);
+			RecalculateGraphSize(Data.AllPaths.MaxPos);
 		}
 
 		private void RecalculateGraphSize(Point maxPos)
@@ -313,7 +313,7 @@ namespace PertNetworkUIExtension
 		public NetworkItem HitTestItem(Point pos)
 		{
 			// Brute force for now
-			foreach (var path in Data.Paths)
+			foreach (var path in Data.AllPaths)
 			{
 				Rectangle pathRect = Rectangle.Empty;
 
@@ -355,7 +355,7 @@ namespace PertNetworkUIExtension
 			// Do the least amount of work possible
 			var closestHit = new NetworkItemHitTestResult();
 
-			foreach (var path in Data.Paths)
+			foreach (var path in Data.AllPaths)
 			{
 				if (!ClientRectangle.IntersectsWith(Layout.CalcPathBounds(path)))
 					continue;
@@ -436,7 +436,7 @@ namespace PertNetworkUIExtension
 		{
 			var drawnItems = new HashSet<NetworkItem>();
 
-			foreach (var path in Data.Paths)
+			foreach (var path in Data.AllPaths)
 			{
 				if (!clipRect.IntersectsWith(Layout.CalcPathBounds(path)))
 					continue;
@@ -509,7 +509,7 @@ namespace PertNetworkUIExtension
 			var itemRect = Layout.CalcItemRectangle(item);
 			graphics.DrawRectangle(Pens.Black, itemRect);
 
-			int iPath = Data.Paths.IndexOf(path) + 1;
+			int iPath = Data.AllPaths.IndexOf(path) + 1;
 			var itemText = String.Format("{0} (id: {1}, p: {2})", item.Title, item.UniqueId, iPath);
 
 			switch (state)
@@ -927,9 +927,7 @@ namespace PertNetworkUIExtension
 				{
 					// 1. Redirect the dragged item's dependents onto 
 					// the first of the dragged item's own dependencies
-					var allDependents = new NetworkDependents();
-					allDependents.Build(Data.Items);
-
+					var allDependents = Data.AllDependents;
 					var srcDependents = allDependents.GetDependents(sourceId);
 
 					if (srcDependents?.Count > 0)
@@ -1108,18 +1106,18 @@ namespace PertNetworkUIExtension
 
 			case Keys.Home:
 				direction = NetworkMatrix.Direction.Up;
-				increment = Data.Matrix.Size.Height;
+				increment = Data.ItemMatrix.Size.Height;
 				break;
 
 			case Keys.End:
 				direction = NetworkMatrix.Direction.Down;
-				increment = Data.Matrix.Size.Height;
+				increment = Data.ItemMatrix.Size.Height;
 				break;
 			}
 
 			if (increment != 0) // sanity check
 			{
-				NetworkItem nextItem = Data.Matrix.GetNextNearestItem(selItem.Position, direction, increment);
+				NetworkItem nextItem = Data.ItemMatrix.GetNextNearestItem(selItem.Position, direction, increment);
 
 				if ((nextItem != null) && (nextItem != selItem))
 				{
@@ -1137,7 +1135,7 @@ namespace PertNetworkUIExtension
 
 		protected bool IsEmpty()
 		{
-			return (Data.Items.Count == 0);
+			return (Data.AllItems.Count == 0);
 		}
 
 		protected NetworkItem SelectedItem

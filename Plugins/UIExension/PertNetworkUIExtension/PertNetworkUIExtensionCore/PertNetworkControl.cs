@@ -844,7 +844,7 @@ namespace PertNetworkUIExtension
 
 			using (var brush = new SolidBrush(textColor))
 			{
-				int iPath = (Data.Paths.IndexOf(path) + 1);
+				int iPath = (Data.AllPaths.IndexOf(path) + 1);
 				graphics.DrawString(String.Format("{0} (id:{1}, pos:{2}, path:{3})", item.Title, item.UniqueId, taskItem.TaskPosition, iPath), GetItemFont(taskItem), brush, titleRect);
 			}
 

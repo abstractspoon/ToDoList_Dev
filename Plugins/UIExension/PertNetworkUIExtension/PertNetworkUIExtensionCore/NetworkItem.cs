@@ -92,21 +92,6 @@ namespace PertNetworkUIExtension
 			Add(item.UniqueId, item);
 			return true;
 		}
-
-		public List<NetworkItem> GetItemDependents(NetworkItem item)
-		{
-			return Values.Where(a => a.DependencyUniqueIds.Contains(item.UniqueId)).ToList();
-		}
-
-		public List<NetworkItem> GetItemDependencies(NetworkItem item)
-		{
-			var dependencies = new List<NetworkItem>();
-
-			foreach (uint dependId in item.DependencyUniqueIds)
-				dependencies.Add(GetItem(dependId));
-
-			return dependencies;
-		}
 	}
 
 	// ------------------------------------------------------------
@@ -277,12 +262,9 @@ namespace PertNetworkUIExtension
 	{
 		public Point MaxPos { get; private set; }
 
-		public int RebuildPaths(NetworkItems allItems)
+		public int RebuildPaths(NetworkItems allItems, NetworkDependents dependents)
 		{
 			Clear(allItems);
-
-			var dependents = new NetworkDependents();
-			dependents.Build(allItems);
 
 			var startIds = GetPathStartIds(allItems, dependents);
 
@@ -420,334 +402,6 @@ namespace PertNetworkUIExtension
 
 	// ------------------------------------------------------------
 
-	/*
-		public class NetworkGroup
-		{
-			public NetworkGroup()
-			{
-				Items = new NetworkItems();
-				Paths = new NetworkPaths();
-			}
-
-			public Point MaxPos { get; private set; }
-			public NetworkItems Items { get; private set; }
-			public NetworkPaths Paths { get; private set; }
-			public NetworkItem EndItem { get; private set; }
-
-			public IEnumerable<NetworkItem> ItemValues
-			{
-				get { return Items.Values; }
-			}
-
-			public bool Build(NetworkItem endItem, NetworkItems allItems, Point startPos)
-			{
-				Clear();
-
-				Point maxPos = startPos;
-
-				if (!AddItem(endItem, allItems, ref maxPos))
-					return false;
-
-				MaxPos = maxPos;
-				EndItem = endItem;
-
-				Paths.BuildPaths(this);
-
-				return true;
-			}
-
-			public List<NetworkItem> GetItemDependencies(NetworkItem item)
-			{
-				return Items.GetItemDependencies(item);
-			}
-
-			// ----------------------------------
-			// Internals
-
-			private void Clear()
-			{
-				Items.Clear();
-				Paths.Clear();
-
-				MaxPos = Point.Empty;
-			}
-
-			private bool AddItem(NetworkItem item, NetworkItems allItems, ref Point maxPos)
-			{
-				if (item == null)
-				{
-					Debug.Assert(false);
-					return false;
-				}
-
-				// Must be unique
-				if (Items.ContainsKey(item.UniqueId))
-				{
-					return false;
-				}
-
-				Items.Add(item.UniqueId, item);
-
-				// Don't modify the vertical position of an item already processed in another group
-				if (!item.HasPosition)
-					item.Position.Y = maxPos.Y;
-
-				// This item's dependencies (can be zero)
-				if (item.DependencyUniqueIds.Count > 0)
-				{
-					bool firstDepend = true;
-
-					foreach (var dependId in item.DependencyUniqueIds)
-					{
-						NetworkItem dependItem = allItems.GetItem(dependId);
-
-						if (dependItem != null)
-						{
-							// First dependency shares same VPos as prior item
-							if (!firstDepend)
-								maxPos.Y++;
-							else
-								firstDepend = false;
-
-							AddItem(dependItem, allItems, ref maxPos); // RECURSIVE call
-
-							item.Position.X = Math.Max(dependItem.Position.X + 1, item.Position.X);
-						}
-					}
-
-					maxPos.X = Math.Max(maxPos.X, item.Position.X);
-				}
-				else // First item in group
-				{
-					item.Position.X = maxPos.X = 0;
-				}
-
-				return true;
-			}
-
-		}
-	*/
-
-	// ------------------------------------------------------------
-
-	/*
-		public class NetworkGroups : List<NetworkGroup>
-		{
-			public Point MaxPos { get; private set; }
-
-			public int RebuildGroups(NetworkItems allItems)
-			{
-				Point maxPos;
-				int numGroups = RebuildGroups(allItems, out maxPos);
-
-				MaxPos = maxPos;
-				return numGroups;
-			}
-
-			// -------------------------------------------
-			// internals
-
-			private new void Clear()
-			{
-				MaxPos = Point.Empty;
-				base.Clear();
-			}
-
-			private int RebuildGroups(NetworkItems allItems, out Point maxPos)
-			{
-				// Clear all item positions
-				foreach (var item in allItems.Values)
-					item.ClearPosition();
-
-				Clear();
-
-				// Get the set of all items on whom other items are dependent
-				HashSet<uint> dependentIds = allItems.GetAllDependentIds();
-
-				// Get the set of all items which have dependencies but 
-				// on whom NO other items are dependent
-				HashSet<uint> endIds = allItems.GetAllEndIds(dependentIds);
-
-				// Build the groups by working backwards from each end item
-				maxPos = Point.Empty;
-
-				foreach (var endId in endIds)
-				{
-					NetworkItem endItem = allItems.GetItem(endId);
-					Point groupMaxPos = new Point(0, maxPos.Y);
-
-					if (Count > 0)
-						groupMaxPos.Y++;
-
-					if (AddGroup(endItem, allItems, ref groupMaxPos))
-					{
-						maxPos.Y = Math.Max(maxPos.Y, groupMaxPos.Y);
-						maxPos.X = Math.Max(maxPos.X, groupMaxPos.X);
-					}
-				}
-
-				BalanceVerticalPositions(allItems);
-
-				return Count;
-			}
-
-			private bool AddGroup(NetworkItem endItem, NetworkItems allItems, ref Point maxPos)
-			{
-				var group = new NetworkGroup();
-
-				if (!group.Build(endItem, allItems, maxPos))
-					return false;
-
-				Add(group);
-				maxPos = group.MaxPos;
-
-				return true;
-			}
-
-			private void BalanceVerticalPositions(NetworkItems allItems)
-			{
-				var allColumns = BuildItemColumns(allItems.Values);
-
-				foreach (var group in this)
-				{
-					// Within each group, move an item towards the centre 
-					// of its dependencies and stop when we hit a position 
-					// already taken.
-					var columns = BuildItemColumns(group.ItemValues);
-					List<NetworkItem> column = null;
-
-					for (int hPos = 1; hPos < columns.Count; hPos++)
-					{
-						if (columns.TryGetValue(hPos, out column))
-						{
-							foreach (var item in column)
-							{
-								var dependencies = group.GetItemDependencies(item);
-								var midY = GetMidVPos(dependencies);
-
-								if (midY < item.Position.Y) // midY is above
-								{
-									for (int vPos = midY; vPos < item.Position.Y; vPos++)
-									{
-										if (!IsPositionTaken(allItems.Values, hPos, vPos))
-										{
-											item.Position.Y = vPos;
-											break;
-										}
-									}
-								}
-								else if (midY > item.Position.Y) // midY is below
-								{
-									for (int vPos = midY; vPos > item.Position.Y; vPos--)
-									{
-										if (!IsPositionTaken(allItems.Values, hPos, vPos))
-										{
-											item.Position.Y = vPos;
-											break;
-										}
-									}
-								}
-								else
-								{
-									// already where we want
-								}
-							}
-						}
-					}
-
-					// For the first column do the same but with its dependents
-					if (columns.TryGetValue(0, out column))
-					{
-						var item = column[0];
-						var dependents = allItems.GetItemDependents(item);
-						var midY = GetMidVPos(dependents);
-
-						if (!IsPositionTaken(allItems.Values, 0, midY))
-							item.Position.Y = midY;
-					}
-					else
-					{
-						Debug.Assert(false);
-					}
-				}
-
-
-				// Recalculate maximum vertical extent
-				int maxY = 0;
-
-				foreach (var item in allItems.Values)
-				{
-					if (item.HasPosition)
-						maxY = Math.Max(maxY, item.Position.Y);
-				}
-
-				MaxPos = new Point(MaxPos.X, maxY);
-			}
-
-			private static Dictionary<int, List<NetworkItem>> BuildItemColumns(IEnumerable<NetworkItem> items)
-			{
-				var columns = new Dictionary<int, List<NetworkItem>>();
-
-				foreach (var item in items)
-				{
-					if (item.HasPosition)
-					{
-						List<NetworkItem> column = null;
-
-						if (!columns.TryGetValue(item.Position.X, out column))
-						{
-							column = new List<NetworkItem>();
-							columns.Add(item.Position.X, column);
-						}
-
-						column.Add(item);
-					}
-				}
-
-				// Sort the columns top-down
-				foreach (var column in columns.Values)
-				{
-					column.Sort((a, b) => (a.Position.Y - b.Position.Y));
-				}
-
-				return columns;
-			}
-
-			private static int GetMidVPos(IEnumerable<NetworkItem> items)
-			{
-				int minY = -1, maxY = -1;
-
-				foreach (var item in items)
-				{
-					if (minY == -1)
-						minY = item.Position.Y;
-					else
-						minY = Math.Min(minY, item.Position.Y);
-
-					if (maxY == -1)
-						maxY = item.Position.Y;
-					else
-						maxY = Math.Max(maxY, item.Position.Y);
-				}
-
-				return ((minY + maxY) / 2);
-			}
-
-			private static bool IsPositionTaken(IEnumerable<NetworkItem> items, int x, int y)
-			{
-				foreach (var item in items)
-				{
-					if ((item.Position.X == x) && (item.Position.Y == y))
-						return true;
-				}
-
-				return false;
-			}
-		}
-	*/
-
-	// ------------------------------------------------------------
-
 	public class NetworkMatrix
 	{
 		public NetworkItem[,] Items { get; private set; }
@@ -756,18 +410,17 @@ namespace PertNetworkUIExtension
 		public bool IsEmpty { get { return (Items == null); } }
 		public Size Size { get; private set; }
 
-/*
-		public bool Populate(NetworkGroups groups)
+		public bool Populate(NetworkPaths paths)
 		{
-			if (groups.MaxPos == Point.Empty)
+			if (paths.MaxPos == Point.Empty)
 				return false;
 
-			Size = new Size(groups.MaxPos);
+			Size = new Size(paths.MaxPos);
 			Items = new NetworkItem[Size.Width + 1, Size.Height + 1];
 
-			foreach (var group in groups)
+			foreach (var path in paths)
 			{
-				foreach (var item in group.ItemValues)
+				foreach (var item in path.Items)
 				{
 					if (item.HasPosition)
 					{
@@ -778,7 +431,6 @@ namespace PertNetworkUIExtension
 
 			return true;
 		}
-*/
 
 		public NetworkItem GetItemAt(Point pos)
 		{
@@ -933,46 +585,73 @@ namespace PertNetworkUIExtension
 
 	public class NetworkData
 	{
+		private NetworkDependents m_Dependents = null;
+
+		// -------------------------
+
 		public NetworkData()
 		{
-			Items = new NetworkItems();
-			Paths = new NetworkPaths();
-			Matrix = new NetworkMatrix();
+			AllItems = new NetworkItems();
+			AllPaths = new NetworkPaths();
+			ItemMatrix = new NetworkMatrix();
 		}
 
-		public NetworkItems Items { get; private set; }
-		public NetworkPaths Paths { get; private set; }
-		public NetworkMatrix Matrix { get; private set; }
+		public NetworkItems AllItems { get; private set; }
+		public NetworkPaths AllPaths { get; private set; }
+		public NetworkMatrix ItemMatrix { get; private set; }
 
-		public IEnumerable<NetworkItem> ItemValues { get { return Items.Values; } }
+		public NetworkDependents AllDependents
+		{
+			get
+			{
+				if (m_Dependents == null)
+				{
+					m_Dependents = new NetworkDependents();
+					m_Dependents.Build(AllItems);
+				}
+
+				return m_Dependents;
+			}
+		}
+
+		public IEnumerable<NetworkItem> ItemValues { get { return AllItems.Values; } }
 
 		public void Clear()
 		{
-			Items.Clear();
-			Paths.Clear();
-			Matrix.Clear();
+			AllItems.Clear();
+			AllPaths.Clear();
+			ItemMatrix.Clear();
 		}
 
 		public NetworkItem GetItem(uint uniqueId)
 		{
-			return Items.GetItem(uniqueId);
+			return AllItems.GetItem(uniqueId);
 		}
 
 		public bool DeleteItem(uint uniqueId)
 		{
-			return Items.DeleteItem(uniqueId);
+			if (!AllItems.DeleteItem(uniqueId))
+				return false;
+
+			m_Dependents = null;
+			return true;
 		}
 
 		public bool AddItem(NetworkItem item)
 		{
-			return Items.AddItem(item);
+			if (!AllItems.AddItem(item))
+				return false;
+
+			m_Dependents = null;
+			return true;
 		}
 
 		public Point RebuildPaths()
 		{
-			Paths.RebuildPaths(Items);
+			AllPaths.RebuildPaths(AllItems, AllDependents);
+			ItemMatrix.Populate(AllPaths);
 
-			return Paths.MaxPos;
+			return AllPaths.MaxPos;
 		}
 	}
 
