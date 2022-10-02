@@ -1126,6 +1126,7 @@ namespace PertNetworkUIExtension
 					EnsureItemVisible(SelectedItem);
 					Invalidate();
 
+					SelectionChange?.Invoke(this, SelectedItem);
 					return true;
 				}
 			}
