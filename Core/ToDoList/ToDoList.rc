@@ -3133,6 +3133,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Edit Task &Recurrence...",    ID_EDIT_RECURRENCE
             MENUITEM SEPARATOR
+            MENUITEM "Edit Task &Dependency...",    ID_EDIT_DEPENDENCY
             MENUITEM "&Go To Task Dependency",      ID_EDIT_GOTODEPENDENCY
             MENUITEM SEPARATOR
             MENUITEM "&Clear Focused Task Attribute", 
@@ -3884,6 +3885,7 @@ BEGIN
             MENUITEM SEPARATOR
             MENUITEM "Edit Task &Recurrence...",    ID_EDIT_RECURRENCE
             MENUITEM SEPARATOR
+            MENUITEM "Edit Task &Dependency...",    ID_EDIT_DEPENDENCY
             MENUITEM "&Go To Task Dependency",      ID_EDIT_GOTODEPENDENCY
             MENUITEM SEPARATOR
             MENUITEM "&Clear Focused Task Attribute", 
@@ -5841,7 +5843,7 @@ BEGIN
     IDS_CONFIRMSAVEAS_TITLE "Confirm Save As"
     IDS_PRINT_TASKVIEW      "Screenshot of active task view (%s)"
     IDS_TASKCOMPLETION      "Task Completion"
-    IDS_CUSTOM_FEATURE_SHOWEDITFIELD "Display checkbox edit field"
+    IDS_CUSTOM_FEATURE_SHOWEDITFIELD "Show edit field"
 END
 
 STRINGTABLE DISCARDABLE 

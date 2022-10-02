@@ -300,6 +300,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_COMMAND(ID_EDIT_CUT, OnEditCut)
 	ON_COMMAND(ID_EDIT_DECTASKPERCENTDONE, OnEditDectaskpercentdone)
 	ON_COMMAND(ID_EDIT_DECTASKPRIORITY, OnEditDectaskpriority)
+	ON_COMMAND(ID_EDIT_DEPENDENCY, OnEditDependency)
 	ON_COMMAND(ID_EDIT_FINDREPLACEINTASKCOMMENTS, OnEditFindReplaceInTaskComments)
 	ON_COMMAND(ID_EDIT_FINDREPLACEINTASKTITLES, OnEditFindReplaceInTaskTitles)
 	ON_COMMAND(ID_EDIT_FINDTASKS, OnFindTasks)
@@ -547,6 +548,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CUT, OnUpdateEditCut)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DECTASKPERCENTDONE, OnUpdateEditDectaskpercentdone)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_DECTASKPRIORITY, OnUpdateEditDectaskpriority)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_DEPENDENCY, OnUpdateEditDependency)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_FINDREPLACEINTASKCOMMENTS, OnUpdateEditFindReplaceInTaskComments)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_FINDREPLACEINTASKTITLES, OnUpdateEditFindReplaceInTaskTitles)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_FLAGTASK, OnUpdateEditFlagtask)
@@ -11704,6 +11706,18 @@ void CToDoListWnd::OnUpdateEditGotoDependency(CCmdUI* pCmdUI)
 	CTDCDependencyArray aDepends;
 
 	pCmdUI->Enable(GetToDoCtrl().GetSelectedTaskDependencies(aDepends) > 0);	
+}
+
+void CToDoListWnd::OnEditDependency()
+{
+	GetToDoCtrl().EditSelectedTaskDependency();
+}
+
+void CToDoListWnd::OnUpdateEditDependency(CCmdUI* pCmdUI)
+{
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+
+	pCmdUI->Enable(tdc.CanEditSelectedTask(TDCA_DEPENDENCY));
 }
 
 void CToDoListWnd::OnEditRecurrence() 

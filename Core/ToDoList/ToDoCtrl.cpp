@@ -11029,21 +11029,7 @@ LRESULT CToDoCtrl::OnEEBtnClick(WPARAM wParam, LPARAM lParam)
 				break;
 
 			case ID_DEPENDS_EDIT:
-				{
-					TDCGETTASKS filter(TDCGT_NOTDONE);
-
-					filter.mapAttribs.Add(TDCA_TASKNAME);
-					filter.mapAttribs.Add(TDCA_ICON);
-
-					CTaskFile tasks;
-					GetTasks(tasks, filter);
-
-					if (m_eDependency.DoEdit(tasks, m_ilTaskIcons, HasStyle(TDCS_SHOWPARENTSASFOLDERS)))
-					{
-						// Check for circular dependencies
-						// TODO
-					}
-				}
+				EditSelectedTaskDependency();
 				break;
 			}
 		}
@@ -11171,6 +11157,30 @@ BOOL CToDoCtrl::GotoSelectedTaskDependency()
 	// else
 	return FALSE;
 }
+
+BOOL CToDoCtrl::EditSelectedTaskDependency()
+{
+	if (CanEditSelectedTask(TDCA_DEPENDENCY))
+	{
+		TDCGETTASKS filter(TDCGT_NOTDONE);
+
+		filter.mapAttribs.Add(TDCA_TASKNAME);
+		filter.mapAttribs.Add(TDCA_ICON);
+
+		CTaskFile tasks;
+		GetTasks(tasks, filter);
+
+		if (m_eDependency.DoEdit(tasks, m_ilTaskIcons, HasStyle(TDCS_SHOWPARENTSASFOLDERS)))
+		{
+			// Check for circular dependencies
+			// TODO
+		}
+	}
+
+	// else
+	return FALSE;
+}
+
 
 BOOL CToDoCtrl::EditSelectedTaskRecurrence()
 {

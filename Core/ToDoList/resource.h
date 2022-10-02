@@ -1569,6 +1569,7 @@
 #define ID_DEBUG_FORMATGETLASTERROR     34746
 #define ID_UDTPREFS_NEWTODO             34747
 #define ID_UDTPREFS_NEWTDL              34748
+#define ID_EDIT_DEPENDENCY              34749
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -2467,7 +2468,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        327
-#define _APS_NEXT_COMMAND_VALUE         34749
+#define _APS_NEXT_COMMAND_VALUE         34750
 #define _APS_NEXT_CONTROL_VALUE         1561
 #define _APS_NEXT_SYMED_VALUE           108
 #endif
