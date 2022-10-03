@@ -10039,7 +10039,7 @@ BOOL CToDoListWnd::CanOverwriteExportFiles(const CStringArray& aExportPaths) con
 
 	while (FileMisc::GetNonWritableFiles(aExistPaths, aLockedPaths))
 	{
-		if (IDCANCEL == CMessageBox::AfxShow(IDS_ERROR_LOCKEDFILES, Misc::FormatArray(aLockedPaths, _T("\n\n")), MB_ICONERROR | MB_OKCANCEL))
+		if (IDCANCEL == CMessageBox::AfxShow(IDS_ERROR_LOCKEDFILES, Misc::FormatArray(aLockedPaths, _T("\n\n")), MB_ICONERROR | MB_RETRYCANCEL))
 			return FALSE;
 	}
 
@@ -12187,7 +12187,7 @@ void CToDoListWnd::OnToolsAnalyseLoggedTime()
 
 				while (FileMisc::GetNonWritableFiles(aLogFiles, aLockedPaths))
 				{
-					if (IDCANCEL == CMessageBox::AfxShow(IDS_ERROR_LOCKEDFILES, Misc::FormatArray(aLockedPaths, _T("\n\n")), MB_ICONERROR | MB_OKCANCEL))
+					if (IDCANCEL == CMessageBox::AfxShow(IDS_ERROR_LOCKEDFILES, Misc::FormatArray(aLockedPaths, _T("\n\n")), MB_ICONERROR | MB_RETRYCANCEL))
 						return;
 				}
 
