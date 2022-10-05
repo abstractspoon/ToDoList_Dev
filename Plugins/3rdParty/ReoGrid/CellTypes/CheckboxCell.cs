@@ -123,7 +123,7 @@ namespace unvell.ReoGrid.CellTypes
 		#region Event
 
 		/// <summary>
-		/// Event raied when user clicked inside check box.
+		/// Event raised when user clicked inside check box.
 		/// </summary>
 		public event EventHandler Click;
 
