@@ -48,7 +48,7 @@ public:
 	BOOL UpdateModifiedTasks(const CFilteredToDoCtrl* pTDC, const CDWordArray& aTaskIDs, const CTDCAttributeMap& mapAttrib);
 	BOOL GetReminderDate(int nRem, COleDateTime& dtRem) const;
 	void CheckReminders();
-	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bIncludeSubtasks);
+	int OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday);
 
 // Attributes
 protected:
@@ -107,7 +107,7 @@ protected:
 	int RemoveDeletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 	int RemoveCompletedTasks(const CFilteredToDoCtrl* pTDC = NULL);
 
-	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits);
+	static BOOL OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday);
 };
 
 /////////////////////////////////////////////////////////////////////////////

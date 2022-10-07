@@ -796,34 +796,40 @@ void CToDoCtrlReminders::OnSysCommand(UINT nID, LPARAM lParam)
 	}
 }
 
-int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bIncludeSubtasks)
+int CToDoCtrlReminders::OffsetReminder(DWORD dwTaskID, double dAmount, TDC_UNITS nUnits, const CFilteredToDoCtrl* pTDC, BOOL bAndSubtasks, BOOL bFromToday)
 {
 	int nRem = FindReminder(dwTaskID, pTDC);
 	int nNumOffset = 0;
 
 	if (nRem != -1)
 	{
-		if (OffsetReminder(m_aReminders[nRem], dAmount, nUnits))
+		if (OffsetReminder(m_aReminders[nRem], dAmount, nUnits, bFromToday))
 			nNumOffset++;
 	}
 
-	if (bIncludeSubtasks)
+	if (bAndSubtasks)
 	{
 		CDWordArray aSubtaskIDs;
 		int nSubtask = pTDC->GetSubTaskIDs(dwTaskID, aSubtaskIDs);
 
 		while (nSubtask--)
-			nNumOffset += OffsetReminder(aSubtaskIDs[nSubtask], dAmount, nUnits, pTDC, TRUE);
+			nNumOffset += OffsetReminder(aSubtaskIDs[nSubtask], dAmount, nUnits, pTDC, TRUE, bFromToday); // RECURSIVE CALL
 	}
 
 	return nNumOffset;
 }
 
-BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits)
+BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UNITS nUnits, BOOL bFromToday)
 {
 	if (rem.bRelative)
 		return FALSE;
 
-	return CDateHelper().OffsetDate(rem.dtAbsolute, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits));
+	COleDateTime date = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : rem.dtAbsolute);
+
+	if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits)))
+		return FALSE;
+
+	rem.dtAbsolute = date;
+	return TRUE;
 }
 

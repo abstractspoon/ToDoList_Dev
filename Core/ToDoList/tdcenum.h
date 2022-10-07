@@ -951,4 +951,13 @@ enum TDLID_IMPORTTO
 
 /////////////////////////////////////////////////////////////////////////////
 
+enum TDC_OFFSETTASKDATES
+{
+	TDCOTD_OFFSETSUBTASKS		= 0x01,
+	TDCOTD_OFFSETFROMTODAY		= 0x02,
+	TDCOTD_FITTORECURRENCSCHEME	= 0x04,
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 #endif // AFX_TDCENUM_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_
