@@ -94,7 +94,7 @@ BOOL CPopupListBoxCtrl::Create(CWnd* pParentWnd, UINT nID, BOOL bSort)
 	m_nID = nID;
 	m_pParent = pParentWnd;
 
-	return CWnd::CreateEx(0, _T("LISTBOX"), NULL, dwStyle, 0, 0, 0, 0, pParentWnd->m_hWnd, (HMENU)NULL);
+	return CWnd::CreateEx(0, _T("ComboLBox"), NULL, dwStyle, 0, 0, 0, 0, pParentWnd->m_hWnd, (HMENU)NULL);
 }
 
 int CPopupListBoxCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct) 
