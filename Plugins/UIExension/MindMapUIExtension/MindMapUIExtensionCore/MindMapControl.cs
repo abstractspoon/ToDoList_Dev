@@ -76,26 +76,13 @@ namespace MindMapUIExtension
 		const int TVM_SETITEMHEIGHT = (0x1100 + 27);
 		const int TVM_GETITEMHEIGHT = (0x1100 + 28);
 
-		// --------------------------
-
-		[DllImport("User32.dll")]
-		static extern UInt32 GetDoubleClickTime();
-		
-		// --------------------------
-
-		[DllImport("User32.dll")]
-		static extern int GetSystemMetrics(int index);
-		
-		const int SM_CXDOUBLECLK = 36;
-		const int SM_CYDOUBLECLK = 37;
-		const int SM_CXDRAG = 68;
-		const int SM_CYDRAG = 69;
-
 		// Constants ---------------------------------------------------------------------
 
-        virtual protected int ScaleByDPIFactor(int value)
+		private double m_DpiFactor = 1.0;
+
+        protected int ScaleByDPIFactor(int value)
         {
-            return value;
+            return (int)(m_DpiFactor * value);
         }
 
 		virtual protected int ItemHorzSeparation { get { return ScaleByDPIFactor(40); } }
@@ -199,6 +186,9 @@ namespace MindMapUIExtension
             m_DropPos = DropPos.None;
 			m_ConnectionColor = Color.Magenta;
 			m_Alignment = RootAlignment.Centre;
+
+			using (var graphics = CreateGraphics())
+				m_DpiFactor = graphics.DpiX / 96.0;
 
 			InitializeComponent();
 		}
@@ -1192,7 +1182,7 @@ namespace MindMapUIExtension
 		private Rectangle GetDoubleClickRect(Point cursor)
 		{
 			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
-			rect.Inflate(GetSystemMetrics(SM_CXDOUBLECLK) / 2, GetSystemMetrics(SM_CYDOUBLECLK) / 2);
+			rect.Inflate(SystemInformation.DoubleClickSize);
 
 			return rect;
 		}
@@ -1202,7 +1192,7 @@ namespace MindMapUIExtension
             Debug.Assert(!ReadOnly);
 
             var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
-			rect.Inflate(GetSystemMetrics(SM_CXDRAG) / 2, GetSystemMetrics(SM_CYDRAG) / 2);
+			rect.Inflate(SystemInformation.DragSize);
 
 			return rect;
 		}
