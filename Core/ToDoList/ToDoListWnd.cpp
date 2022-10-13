@@ -11998,17 +11998,17 @@ void CToDoListWnd::OnEditOffsetDates()
 	
 	if (dialog.DoModal() == IDOK)
 	{
-		TDC_UNITS nUnits = TDCU_NULL;
-		int nAmount = dialog.GetOffsetAmount(nUnits);
-		
-		if (!nAmount)
-			return;
-
-		ASSERT(nUnits != TDCU_NULL);
-		
 		DWORD dwWhat = dialog.GetOffsetWhat();
 		BOOL bSubtasks = dialog.GetOffsetSubtasks();
 		BOOL bFromToday = dialog.GetOffsetFromToday();
+
+		TDC_UNITS nUnits = TDCU_NULL;
+		int nAmount = dialog.GetOffsetAmount(nUnits);
+		
+		if (!nAmount && !bFromToday)
+			return;
+
+		ASSERT(nUnits != TDCU_NULL);
 		
 		// do the offsets
 		CFilteredToDoCtrl& tdc = GetToDoCtrl();

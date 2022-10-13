@@ -824,10 +824,19 @@ BOOL CToDoCtrlReminders::OffsetReminder(TDCREMINDER& rem, double dAmount, TDC_UN
 	if (rem.bRelative)
 		return FALSE;
 
+	if (!dAmount && !bFromToday)
+	{
+		ASSERT(0);
+		return FALSE;
+	}
+
 	COleDateTime date = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : rem.dtAbsolute);
 
-	if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits)))
-		return FALSE;
+	if (dAmount)
+	{
+		if (!CDateHelper().OffsetDate(date, (int)dAmount, TDC::MapUnitsToDHUnits(nUnits)))
+			return FALSE;
+	}
 
 	rem.dtAbsolute = date;
 	return TRUE;

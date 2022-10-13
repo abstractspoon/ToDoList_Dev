@@ -955,7 +955,7 @@ enum TDC_OFFSETTASKDATES
 {
 	TDCOTD_OFFSETSUBTASKS		= 0x01,
 	TDCOTD_OFFSETFROMTODAY		= 0x02,
-	TDCOTD_FITTORECURRENCSCHEME	= 0x04,
+	TDCOTD_FITTORECURRINGSCHEME	= 0x04,
 };
 
 /////////////////////////////////////////////////////////////////////////////
