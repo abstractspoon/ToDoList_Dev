@@ -931,7 +931,7 @@ struct SEARCHPARAM
 	friend struct SEARCHPARAMS;
 
 	SEARCHPARAM(TDC_ATTRIBUTE a = TDCA_NONE, FIND_OPERATOR o = FOP_NONE) : 
-		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(TRUE), nType(FT_NONE) 
+		attrib(TDCA_NONE), op(o), dValue(0), nValue(0), dwFlags(0), bAnd(TRUE), nType(FT_NONE)
 	{
 		SetAttribute(a);
 	}
@@ -1068,16 +1068,21 @@ struct SEARCHPARAM
 			break;
 		}
 
+		FIND_ATTRIBTYPE nPrevType = nType;
+
 		attrib = a;
 		nType = t;
 		
 		// update Attrib type
 		GetAttribType();
 
-		// handle relative dates
-		if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
+		// Reset 'extra' information stored in the union
+		if (nType != nPrevType)
 		{
-			bRelativeDate = (nType == FT_DATERELATIVE);
+			if (nType == FT_DATERELATIVE)
+				bRelativeDate = TRUE;
+			else
+				dwFlags = 0;
 		}
 
 		ValidateOperator();
@@ -1090,10 +1095,13 @@ struct SEARCHPARAM
 	BOOL GetOr() const { return !bAnd; }
 	BOOL IsCustomAttribute() const { return TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib); }
 
-	BOOL IsRelativeDate() const
+	BOOL IsRelativeDate(BOOL bMustHaveValue = TRUE) const
 	{
-		if (sValue.IsEmpty() || (GetAttribType() != FT_DATERELATIVE))
+		if (GetAttribType() != FT_DATERELATIVE)
 			return FALSE;
+
+		if (sValue.IsEmpty() && !bMustHaveValue)
+			return TRUE;
 
 		return CDateHelper::IsValidRelativeDate(sValue, FALSE);
 	}
@@ -1155,23 +1163,6 @@ struct SEARCHPARAM
 				(attrib == TDCA_SELECTION));
 
 		return nType;
-	}
-
-	void SetAttribType(FIND_ATTRIBTYPE nAttribType)
-	{
-		if ((nAttribType == FT_NONE) && !TDCCUSTOMATTRIBUTEDEFINITION::IsCustomAttribute(attrib))
-		{
-			ASSERT(0);
-			return;
-		}
-
-		nType = nAttribType;
-
-		// handle relative dates
-		if ((nType == FT_DATE) || (nType == FT_DATERELATIVE))
-		{
-			bRelativeDate = (nType == FT_DATERELATIVE);
-		}
 	}
 
 	void ClearValue()
@@ -1244,11 +1235,9 @@ struct SEARCHPARAM
 		case TDCA_DUETIME:
 		case TDCA_LASTMODDATE:
 			return (bRelativeDate ? FT_DATERELATIVE : FT_DATE);
-
 		}
 
 		// custom attribute type must be set explicitly by caller
-
 		return FT_NONE;
 	}
 

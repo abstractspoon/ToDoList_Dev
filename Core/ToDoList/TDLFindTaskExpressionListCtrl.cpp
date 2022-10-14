@@ -954,13 +954,6 @@ void CTDLFindTaskExpressionListCtrl::ValidateListData() const
 
 		// check matching attribute text 
 		CString sRuleAttrib = m_cbAttributes.GetAttributeName(rule);
-
-		if (rule.GetAttribType() == FT_DATERELATIVE)
-		{
-			sRuleAttrib += ' ';
-			sRuleAttrib += CEnString(IDS_TDLBC_RELATIVESUFFIX);
-		}
-
 		CString sListAttrib = GetItemText(nRule, ATTRIB_COL);
 		ASSERT (sRuleAttrib == sListAttrib);
 
