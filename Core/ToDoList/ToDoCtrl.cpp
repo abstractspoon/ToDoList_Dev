@@ -3167,7 +3167,7 @@ BOOL CToDoCtrl::SetSelectedTaskDate(TDC_DATE nDate, const COleDateTime& date, BO
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks)
+BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
 {
 	TDC_ATTRIBUTE nAttribID = TDC::MapDateToAttribute(nDate);
 
@@ -3189,6 +3189,10 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nU
 	// Keep track of what we've processed to avoid offsetting
 	// the same task multiple times via references
 	CDWordSet mapProcessed;
+
+	DWORD dwFlags = 0;
+	Misc::SetFlag(dwFlags, TDCOTD_OFFSETFROMTODAY, bFromToday);
+	Misc::SetFlag(dwFlags, TDCOTD_OFFSETSUBTASKS, bAndSubtasks);
 	
 	while (pos)
 	{
@@ -3197,7 +3201,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskDate(TDC_DATE nDate, int nAmount, TDC_UNITS nU
 		if (mapProcessed.Has(dwTaskID))
 			continue;
 
-		if (!HandleModResult(dwTaskID, m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bAndSubtasks, FALSE), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, m_data.OffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, dwFlags), aModTaskIDs))
 			return FALSE;
 
 		mapProcessed.Add(dwTaskID);
@@ -3243,7 +3247,7 @@ BOOL CToDoCtrl::CanOffsetSelectedTaskStartAndDueDates() const
 	return TRUE;
 }
 
-BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks)
+BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday)
 {
 	if (!CanEditSelectedTask(TDCA_STARTDATE))
 		return FALSE;
@@ -3268,7 +3272,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 	{
 		DWORD dwTaskID = GetTrueTaskID(htiSel.GetNext(pos));
 
-		if (!HandleModResult(dwTaskID, OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, bAndSubtasks, mapProcessed), aModTaskIDs))
+		if (!HandleModResult(dwTaskID, OffsetTaskStartAndDueDates(dwTaskID, nAmount, nUnits, bAndSubtasks, bFromToday, mapProcessed), aModTaskIDs))
 			return FALSE;
 	}
 	
@@ -3285,7 +3289,7 @@ BOOL CToDoCtrl::OffsetSelectedTaskStartAndDueDates(int nAmount, TDC_UNITS nUnits
 	return TRUE;
 }
 
-TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, CDWordSet& mapProcessed)
+TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_UNITS nUnits, BOOL bAndSubtasks, BOOL bFromToday, CDWordSet& mapProcessed)
 {
 	ASSERT(CanEditSelectedTask(TDCA_STARTDATE));
 
@@ -3305,21 +3309,22 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 
 	TDC_SET nRes = SET_NOCHANGE;
 
+	// Handle subtasks at the end
+	DWORD dwFlags = (bFromToday ? TDCOTD_OFFSETFROMTODAY : 0);
+
 	// Fallback if either start or due date is not set
 	if (!pTDI->HasStart())
 	{
-		// Handle subtasks at the end
 		if (pTDI->HasDue())
-			nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, FALSE, FALSE);
+			nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, dwFlags);
 	}
 	else if (!pTDI->HasDue())
 	{
-		// Handle subtasks at the end
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, FALSE, FALSE);
+		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, dwFlags);
 	}
 	else // else both are set
 	{
-		COleDateTime dtStart = pTDI->dateStart;
+		COleDateTime dtStart = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->dateStart);
 		CDateHelper().OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
 
 		nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtStart);
@@ -3340,8 +3345,7 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 			{
 				DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
 
-				// RECURSIVE CALL
-				if (SET_CHANGE == OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, TRUE, mapProcessed))
+				if (SET_CHANGE == OffsetTaskStartAndDueDates(dwChildID, nAmount, nUnits, TRUE, bFromToday, mapProcessed)) // RECURSIVE CALL
 					nRes = SET_CHANGE;
 			}
 		}

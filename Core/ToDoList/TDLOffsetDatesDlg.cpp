@@ -48,6 +48,7 @@ CTDLOffsetDatesDlg::CTDLOffsetDatesDlg(CWnd* pParent /*=NULL*/)
 	m_nOffsetBy = prefs.GetProfileInt(m_sPrefsKey, _T("Amount"), 1);
 	m_bOffsetSubtasks = prefs.GetProfileInt(m_sPrefsKey, _T("Subtasks"), TRUE);
 	m_nOffsetByUnits = prefs.GetProfileInt(m_sPrefsKey, _T("AmountPeriod"), WEEKDAYS);
+	m_bOffsetFromToday = prefs.GetProfileInt(m_sPrefsKey, _T("FromToday"), FALSE);
 }
 
 
@@ -63,6 +64,7 @@ void CTDLOffsetDatesDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_BY, m_nOffsetBy);
 	DDX_CBIndex(pDX, IDC_BYUNITS, m_nOffsetByUnits);
 	DDX_Check(pDX, IDC_OFFSETSUBTASKS, m_bOffsetSubtasks);
+	DDX_Check(pDX, IDC_OFFSETFROMTODAY, m_bOffsetFromToday);
 	//}}AFX_DATA_MAP
 }
 
@@ -135,5 +137,6 @@ void CTDLOffsetDatesDlg::OnOK()
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Amount"), m_nOffsetBy);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("AmountPeriod"), m_nOffsetByUnits);
 	prefs.WriteProfileInt(m_sPrefsKey, _T("Subtasks"), m_bOffsetSubtasks);
+	prefs.WriteProfileInt(m_sPrefsKey, _T("FromToday"), m_bOffsetFromToday);
 }
 

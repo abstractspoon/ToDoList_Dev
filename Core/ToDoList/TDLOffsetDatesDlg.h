@@ -32,6 +32,7 @@ public:
 	DWORD GetOffsetWhat() const;
 	int GetOffsetAmount(TDC_UNITS& nUnits) const;
 	BOOL GetOffsetSubtasks() const { return m_bOffsetSubtasks; }
+	BOOL GetOffsetFromToday() const { return m_bOffsetFromToday; }
 
 protected:
 // Dialog Data
@@ -45,6 +46,7 @@ protected:
 	int		m_nOffsetBy;
 	int		m_nOffsetByUnits;
 	BOOL	m_bOffsetSubtasks;
+	BOOL	m_bOffsetFromToday;
 	//}}AFX_DATA
 
 

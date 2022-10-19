@@ -22,8 +22,7 @@ using System.Reflection;
 using System.Linq;
 
 using System.Windows.Forms;
-using RGFloat = System.Single;
-using RGImage = System.Drawing.Image;
+using System.Windows.Forms.VisualStyles;
 
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Rendering;
@@ -87,12 +86,10 @@ namespace unvell.ReoGrid.CellTypes
 		public override bool OnMouseDown(CellMouseEventArgs e)
 		{
 			if (ContentBounds.Contains(e.RelativePosition))
-			{
 				IsPressed = true;
-				return true;
-			}
-			else
-				return false;
+
+			// Always return false so that the cell also gets selected
+			return false;
 		}
 
 		/// <summary>
@@ -123,7 +120,7 @@ namespace unvell.ReoGrid.CellTypes
 		#region Event
 
 		/// <summary>
-		/// Event raied when user clicked inside check box.
+		/// Event raised when user clicked inside check box.
 		/// </summary>
 		public event EventHandler Click;
 
@@ -159,13 +156,70 @@ namespace unvell.ReoGrid.CellTypes
 		/// Paint content of cell body.
 		/// </summary>
 		/// <param name="dc">Platform independency graphics context.</param>
+		/// 
+		protected int ThemedCheckState
+		{
+			get
+			{
+				if (IsChecked)
+				{
+					if (Cell.IsReadOnly)
+						return (int)CheckBoxState.CheckedDisabled;
+
+					if (IsPressed)
+						return (int)CheckBoxState.CheckedPressed;
+
+					return (int)CheckBoxState.CheckedNormal;
+				}
+
+				// else
+				if (Cell.IsReadOnly)
+					return (int)CheckBoxState.UncheckedDisabled;
+
+				if (IsPressed)
+					return (int)CheckBoxState.UncheckedPressed;
+
+				return (int)CheckBoxState.UncheckedNormal;
+			}
+		}
+
+		protected System.Drawing.Point GetThemedCheckPosition(CellDrawingContext dc)
+		{
+			var glyphSize = CheckBoxRenderer.GetGlyphSize(dc.Graphics.PlatformGraphics, CheckBoxState.CheckedNormal);
+			var bounds = (System.Drawing.Rectangle)ContentBounds;
+
+			return new System.Drawing.Point(bounds.Left, bounds.Top + (bounds.Height - glyphSize.Height) / 2);
+		}
+
+		protected ButtonState UnthemedCheckState
+		{
+			get
+			{
+				System.Windows.Forms.ButtonState bs = ButtonState.Normal;
+
+				if (IsPressed)
+					bs |= ButtonState.Pushed;
+				if (IsChecked)
+					bs |= ButtonState.Checked;
+
+				return bs;
+			}
+		}
+
 		protected override void OnContentPaint(CellDrawingContext dc)
 		{
-			System.Windows.Forms.ButtonState bs = ButtonState.Normal;
-			if (IsPressed) bs |= ButtonState.Pushed;
-			if (IsChecked) bs |= ButtonState.Checked;
-
-			ControlPaint.DrawCheckBox(dc.Graphics.PlatformGraphics, (System.Drawing.Rectangle)ContentBounds, bs);
+			if (Application.RenderWithVisualStyles)
+			{
+				CheckBoxRenderer.DrawCheckBox(dc.Graphics.PlatformGraphics, 
+												GetThemedCheckPosition(dc), 
+												(CheckBoxState)ThemedCheckState);
+			}
+			else
+			{
+				ControlPaint.DrawCheckBox(dc.Graphics.PlatformGraphics, 
+											(System.Drawing.Rectangle)ContentBounds, 
+											UnthemedCheckState);
+			}
 		}
 
 		#endregion // Paint
@@ -236,10 +290,13 @@ namespace unvell.ReoGrid.CellTypes
 
 					if (this.Cell != null && ((this.Cell.InnerData as bool?) ?? false) != value)
 					{
-						this.Cell.Data = value;
+						if (Cell.Worksheet != null)
+							Cell.Worksheet.SetSingleCellData(Cell, value);
+						else
+							Cell.Data = value;
 					}
 
-					CheckChanged?.Invoke(this, null);
+					RaiseCheckChangedEvent();
 				}
 			}
 		}

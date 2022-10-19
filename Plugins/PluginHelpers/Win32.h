@@ -35,15 +35,6 @@ namespace Abstractspoon
 				static int GetHScrollPos(IntPtr hWnd);
 				static int GetVScrollPos(IntPtr hWnd);
 
-				static int GetSystemDPI();
-				static int GetMouseHoverDelay();
-				static int GetSystemMetric(int nMetric);
-				static int GetDoubleClickTime();
-
-				static int GetMouseHoverRectSize();
-				static int GetDoubleClickRectSize();
-				static int GetDragRectSize();
-
 				static String^ GetFaceName(HFONT hFont);
 				static int GetPointSize(HFONT hFont);
 				static int GetPixelHeight(HFONT hFont);
@@ -51,9 +42,8 @@ namespace Abstractspoon
 				static float PointsToEms(int nPointSize);
 
 				static bool SetEditCue(IntPtr hWnd, String^ sCueText);
-
 				static void ActivateApp(IntPtr hWnd);
-
+				static int GetSystemDPI();
 
 			protected:
 				static void DoFrameChange(IntPtr hWnd);

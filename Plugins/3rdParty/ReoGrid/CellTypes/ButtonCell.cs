@@ -20,8 +20,7 @@ using System;
 using System.Linq;
 
 using System.Windows.Forms;
-using RGFloat = System.Single;
-using RGImage = System.Drawing.Image;
+using System.Windows.Forms.VisualStyles;
 
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Rendering;
@@ -103,6 +102,21 @@ namespace unvell.ReoGrid.CellTypes
 			dc.DrawCellText();
 		}
 
+		public override Rectangle Bounds
+		{
+			get
+			{
+				var rect = base.Bounds;
+
+				if (Application.RenderWithVisualStyles)
+				{
+					rect.Width++;
+					rect.Height++;
+				}
+				return rect;
+			}
+		}
+		
 		/// <summary>
 		/// Draw button surface.
 		/// </summary>
@@ -110,9 +124,26 @@ namespace unvell.ReoGrid.CellTypes
 		/// <param name="state">Button state.</param>
 		protected virtual void DrawButton(CellDrawingContext dc)
 		{
-			ControlPaint.DrawButton(dc.Graphics.PlatformGraphics, (System.Drawing.Rectangle)Bounds,
-				this.IsPressed ? ButtonState.Pushed :
-				(this.Cell.IsReadOnly ? ButtonState.Inactive : ButtonState.Normal));
+			if (Application.RenderWithVisualStyles)
+			{
+				var btnState = this.IsPressed ? PushButtonState.Pressed :
+								(this.Cell.IsReadOnly ? PushButtonState.Disabled :
+								PushButtonState.Normal);
+
+				ButtonRenderer.DrawButton(dc.Graphics.PlatformGraphics,
+											(System.Drawing.Rectangle)Bounds,
+											btnState);
+			}
+			else
+			{
+				var btnState = this.IsPressed ? ButtonState.Pushed :
+								(this.Cell.IsReadOnly ? ButtonState.Inactive : 
+								ButtonState.Normal);
+
+				ControlPaint.DrawButton(dc.Graphics.PlatformGraphics, 
+										(System.Drawing.Rectangle)Bounds,
+										btnState);
+			}
 		}
 
 		#endregion Draw
@@ -128,12 +159,11 @@ namespace unvell.ReoGrid.CellTypes
 			if (this.Bounds.Contains(e.RelativePosition))
 			{
 				IsPressed = true;
-				return true;
+				Cell.Worksheet.RequestInvalidate();
 			}
-			else
-			{
-				return false;
-			}
+
+			// Always return false so that the cell also gets selected
+			return false;
 		}
 
 		/// <summary>
@@ -148,6 +178,7 @@ namespace unvell.ReoGrid.CellTypes
 				if (Bounds.Contains(e.RelativePosition))
 				{
 					this.PerformClick();
+					Cell.Worksheet.RequestInvalidate();
 				}
 
 				IsPressed = false;

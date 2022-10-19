@@ -620,11 +620,6 @@ namespace MindMapUIExtension
         		
         // Internal ------------------------------------------------------------
 
-        override protected int ScaleByDPIFactor(int value)
-        {
-            return DPIScaling.Scale(value);
-        }
-
         override protected bool RefreshNodeFont(TreeNode node, bool andChildren)
         {
             var taskItem = RealTaskItem(node);

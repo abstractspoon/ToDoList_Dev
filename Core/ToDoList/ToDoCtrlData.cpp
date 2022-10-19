@@ -2268,9 +2268,9 @@ TDC_SET CToDoCtrlData::SetTaskDate(DWORD dwTaskID, TODOITEM* pTDI, TDC_DATE nDat
 	return SET_NOCHANGE;
 }
 
-BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits) const
+BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, BOOL bFromToday) const
 {
-	if (nAmount == 0)
+	if (!nAmount && !bFromToday)
 		return FALSE;
 
 	if (!HasTask(dwTaskID))
@@ -2325,44 +2325,53 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 	return TaskHasDate(dwTaskID, nDate);
 }
 
-TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, 
-										BOOL bAndSubtasks, BOOL bFitToRecurringScheme)
+TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
 {
+	BOOL bFitToRecurringScheme = Misc::HasFlag(dwFlags, TDCOTD_FITTORECURRINGSCHEME);
+	BOOL bAndSubtasks = Misc::HasFlag(dwFlags, TDCOTD_OFFSETSUBTASKS);
+	BOOL bFromToday = Misc::HasFlag(dwFlags, TDCOTD_OFFSETFROMTODAY);
+
 	TDC_SET nRes = SET_NOCHANGE;
 
-	if (CanOffsetTaskDate(dwTaskID, nDate, nAmount, nUnits))
+	if (CanOffsetTaskDate(dwTaskID, nDate, nAmount, nUnits, bFromToday))
 	{
 		TODOITEM* pTDI = NULL;
 		EDIT_GET_TDI(dwTaskID, pTDI);
 
-		COleDateTime date = pTDI->GetDate(nDate);
+		COleDateTime date = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->GetDate(nDate));
+		BOOL bModTimeOnly = ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS));
 
-		if ((nUnits == TDCU_HOURS) || (nUnits == TDCU_MINS))
+		if (nAmount != 0)
 		{
-			// Modify time only
-			ASSERT(date.m_dt < 1.0);
-
-			switch (TDC::MapUnitsToTHUnits(nUnits))
+			if (bModTimeOnly)
 			{
-			case THU_HOURS:
-				date.m_dt += (nAmount / 24.0);
-				break;
+				// Modify time only
+				ASSERT(date.m_dt < 1.0);
 
-			case THU_MINS:
-				date.m_dt += (nAmount / (24.0 * 60));
-				break;
+				switch (TDC::MapUnitsToTHUnits(nUnits))
+				{
+				case THU_HOURS:
+					date.m_dt += (nAmount / 24.0);
+					break;
 
-			default:
-				ASSERT(0);
+				case THU_MINS:
+					date.m_dt += (nAmount / (24.0 * 60));
+					break;
+
+				default:
+					ASSERT(0);
+				}
+			}
+			else // Modify date AND time
+			{
+				VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits)));
 			}
 		}
-		else // Modify date AND time
-		{
-			VERIFY(CDateHelper().OffsetDate(date, nAmount, TDC::MapUnitsToDHUnits(nUnits)));
 
-			// Special case: Task is recurring and therefore must fall on a valid date
-			if (pTDI->IsRecurring() && bFitToRecurringScheme)
-				pTDI->trRecurrence.FitDayToScheme(date);
+		// Special case: Task is recurring and the date was changed -> must fall on a valid date
+		if (bFitToRecurringScheme && pTDI->IsRecurring() && !bModTimeOnly)
+		{
+			pTDI->trRecurrence.FitDayToScheme(date);
 		}
 
 		nRes = SetTaskDate(dwTaskID, pTDI, nDate, date, TRUE); // Recalc time estimate
@@ -2383,7 +2392,7 @@ TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		{
 			DWORD dwChildID = pTDS->GetSubTaskID(nSubTask);
 			
-			if (OffsetTaskDate(dwChildID, nDate, nAmount, nUnits, TRUE, bFitToRecurringScheme) == SET_CHANGE)
+			if (OffsetTaskDate(dwChildID, nDate, nAmount, nUnits, dwFlags) == SET_CHANGE) // RECURSIVE CALL
 				nRes = SET_CHANGE;
 		}
 	}
@@ -4138,7 +4147,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bHasDue)
 			{
 				// Make sure the new date fits the recurring scheme
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TDCOTD_FITTORECURRINGSCHEME | TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 			else
@@ -4154,7 +4163,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bWantInheritStart)
 			{
 				// don't offset children
-				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, FALSE, FALSE) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, 0) == SET_CHANGE)
 				{
 					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_STARTDATE);
 					nRes = SET_CHANGE;
@@ -4162,7 +4171,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			}
 			else // offset children
 			{
-				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 		}
@@ -4184,7 +4193,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bHasStart)
 			{
 				// Make sure the new date fits the recurring scheme
-				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TRUE, TRUE) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_STARTDATE, nOffsetDays, TDCU_DAYS, TDCOTD_FITTORECURRINGSCHEME | TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 			else
@@ -4200,7 +4209,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			if (bWantInheritDue)
 			{
 				// don't update children
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, FALSE, FALSE) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, 0) == SET_CHANGE)
 				{
 					ApplyLastChangeToSubtasks(dwNewTaskID, TDCA_DUEDATE);
 					nRes = SET_CHANGE;
@@ -4208,7 +4217,7 @@ TDC_SET CToDoCtrlData::AdjustNewRecurringTasksDates(DWORD dwPrevTaskID, DWORD dw
 			}
 			else // bump
 			{
-				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TRUE, FALSE) == SET_CHANGE)
+				if (OffsetTaskDate(dwNewTaskID, TDCD_DUEDATE, nOffsetDays, TDCU_DAYS, TDCOTD_OFFSETSUBTASKS) == SET_CHANGE)
 					nRes = SET_CHANGE;
 			}
 		}

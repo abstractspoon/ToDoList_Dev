@@ -89,6 +89,7 @@ namespace SpreadsheetContentControl
 				e.Worksheet.AfterPaste += new EventHandler<RangeEventArgs>(OnAfterPaste);
 				e.Worksheet.AfterCellEdit += new EventHandler<CellAfterEditEventArgs>(OnAfterCellEdit);
 				e.Worksheet.CellBodyChanged += new EventHandler<CellEventArgs>(OnCellBodyChanged);
+				e.Worksheet.CellDataChanged += new EventHandler<CellEventArgs>(OnCellDataChanged);
 				e.Worksheet.CellMouseEnter += new EventHandler<CellMouseEventArgs>(OnCellMouseEnter);
 				e.Worksheet.CellMouseLeave += new EventHandler<CellMouseEventArgs>(OnCellMouseLeave);
 				e.Worksheet.CellMouseMove += new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
@@ -99,6 +100,7 @@ namespace SpreadsheetContentControl
 				e.Worksheet.AfterPaste -= new EventHandler<RangeEventArgs>(OnAfterPaste);
 				e.Worksheet.AfterCellEdit -= new EventHandler<CellAfterEditEventArgs>(OnAfterCellEdit);
 				e.Worksheet.CellBodyChanged -= new EventHandler<CellEventArgs>(OnCellBodyChanged);
+				e.Worksheet.CellDataChanged -= new EventHandler<CellEventArgs>(OnCellDataChanged);
 				e.Worksheet.CellMouseEnter -= new EventHandler<CellMouseEventArgs>(OnCellMouseEnter);
 				e.Worksheet.CellMouseLeave -= new EventHandler<CellMouseEventArgs>(OnCellMouseLeave);
 				e.Worksheet.CellMouseMove -= new EventHandler<CellMouseEventArgs>(OnCellMouseMove);
@@ -158,17 +160,25 @@ namespace SpreadsheetContentControl
 			CurrentWorksheet.FontName = Worksheet.DefaultFontName;
 			CurrentWorksheet.FontSize = Worksheet.DefaultFontSize;
 
-			// Initialise hyperlink cells
+			// Initialise cell callbacks and attributes
 			for (int row = 0; row <= CurrentWorksheet.MaxContentRow; row++)
 			{
 				for (int col = 0; col <= CurrentWorksheet.MaxContentCol; col++)
 				{
-					var link = AsHyperlinkCell(CurrentWorksheet.GetCell(row, col));
+					var cell = CurrentWorksheet.GetCell(row, col);
 
-					if (link != null)
+					if (HasCellBody<HyperlinkCell>(cell))
 					{
+						var link = CellBody<HyperlinkCell>(cell);
+
 						link.AutoNavigate = false;
 						link.Click += new EventHandler<HyperlinkCell.ClickEventArgs>(OnClickHyperlinkCell);
+					}
+					else if (HasCellBody<DropdownCell>(cell))
+					{
+						var drop = CellBody<DropdownCell>(cell);
+
+						drop.PullDownOnClick = false;
 					}
 				}
 			}
@@ -569,9 +579,8 @@ namespace SpreadsheetContentControl
             // After all resizing has occurred, set menu bar height to 
             // match application and make its top-level items full height
             this.MenuBar.AutoSize = false;
-            this.MenuBar.Height = Win32.GetSystemMetric(15); // SM_CYMENU
+			this.MenuBar.Height = SystemInformation.MenuHeight;
 			this.MenuBar.Padding = new Padding(0);
-
 		}
 
 		private void InitialiseFeatures()
@@ -765,25 +774,54 @@ namespace SpreadsheetContentControl
 			}
 		}
 
-		HyperlinkCell AsHyperlinkCell(CellMouseEventArgs e)
+		T CellBody<T>(CellMouseEventArgs e) where T : CellBody
 		{
 			if (e.Cell == null)
 				e.Cell = CurrentWorksheet.GetCell(e.CellPosition);
 
-			return AsHyperlinkCell(e.Cell);
+			return CellBody<T>(e.Cell);
 		}
 
-		HyperlinkCell AsHyperlinkCell(Cell cell)
+		T CellBody<T>(CellEventArgs e) where T : CellBody
+		{
+			if (e.Cell == null)
+				return null;
+
+			return CellBody<T>(e.Cell);
+		}
+
+		static T CellBody<T>(Cell cell) where T : CellBody
 		{
 			if (cell == null)
 				return null;
 
-			return (cell.Body as HyperlinkCell);
+			return (cell.Body as T);
+		}
+
+		bool HasCellBody<T>(CellMouseEventArgs e) where T : CellBody
+		{
+			if (e.Cell == null)
+				e.Cell = CurrentWorksheet.GetCell(e.CellPosition);
+
+			return HasCellBody<T>(e.Cell);
+		}
+
+		static bool HasCellBody<T>(CellEventArgs e) where T : CellBody
+		{
+			return HasCellBody<T>(e.Cell);
+		}
+
+		static bool HasCellBody<T>(Cell cell) where T : CellBody
+		{
+			if (cell == null)
+				return false;
+
+			return (cell.Body is T);
 		}
 
 		private void OnCellMouseEnter(object sender, CellMouseEventArgs e)
 		{
-			var link = AsHyperlinkCell(e);
+			var link = CellBody<HyperlinkCell>(e);
 
 			if ((link != null) && (link.HasLinkURL))
 			{
@@ -811,7 +849,7 @@ namespace SpreadsheetContentControl
 
 		private void OnCellMouseLeave(object sender, CellMouseEventArgs e)
 		{
-			var link = AsHyperlinkCell(e);
+			var link = CellBody<HyperlinkCell>(e);
 
 			if (link != null)
 			{
@@ -822,10 +860,9 @@ namespace SpreadsheetContentControl
 
 		private void OnCellMouseMove(object sender, CellMouseEventArgs e)
 		{
-			var link = AsHyperlinkCell(e);
-
-			if (link != null)
+			if (HasCellBody<HyperlinkCell>(e))
 			{
+				var link = CellBody<HyperlinkCell>(e);
 				var cursor = unvell.ReoGrid.Interaction.CursorStyle.PlatformDefault;
 
 				if (link.HasLinkURL && (Control.ModifierKeys == Keys.Control))
@@ -837,13 +874,27 @@ namespace SpreadsheetContentControl
 
 		private void OnCellBodyChanged(object sender, CellEventArgs e)
 		{
-			var link = AsHyperlinkCell(e.Cell);
-
-			if (link != null)
+			// Initialise cell callbacks and attributes
+			if (HasCellBody<HyperlinkCell>(e))
 			{
+				var link = CellBody<HyperlinkCell>(e.Cell);
+
 				link.AutoNavigate = false;
 				link.Click += new EventHandler<HyperlinkCell.ClickEventArgs>(OnClickHyperlinkCell);
 			}
+			else if (HasCellBody<DropdownCell>(e.Cell))
+			{
+				var drop = CellBody<DropdownCell>(e.Cell);
+
+				drop.PullDownOnClick = false;
+			}
+
+			NotifyParentContentChange();
+		}
+
+		private void OnCellDataChanged(object sender, CellEventArgs e)
+		{
+			NotifyParentContentChange();
 		}
 
 		private void OnClickHyperlinkCell(object sender, HyperlinkCell.ClickEventArgs e)

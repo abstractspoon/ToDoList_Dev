@@ -23,8 +23,7 @@ using System.Linq;
 using unvell.ReoGrid.Graphics;
 
 using System.Windows.Forms;
-using RGFloat = System.Single;
-using RGImage = System.Drawing.Image;
+using System.Windows.Forms.VisualStyles;
 
 using unvell.ReoGrid.Rendering;
 
@@ -167,14 +166,18 @@ namespace unvell.ReoGrid.CellTypes
 		/// <param name="dc">Platform independency graphics context.</param>
 		protected override void OnContentPaint(CellDrawingContext dc)
 		{
-			System.Windows.Forms.ButtonState state = ButtonState.Normal;
-
-			if (this.IsPressed) state |= ButtonState.Pushed;
-			if (this.IsChecked) state |= ButtonState.Checked;
-
-			ControlPaint.DrawRadioButton(dc.Graphics.PlatformGraphics,
-				(System.Drawing.Rectangle)this.ContentBounds, state);
-
+			if (Application.RenderWithVisualStyles)
+			{
+				RadioButtonRenderer.DrawRadioButton(dc.Graphics.PlatformGraphics, 
+													GetThemedCheckPosition(dc), 
+													(RadioButtonState)ThemedCheckState);
+			}
+			else
+			{
+				ControlPaint.DrawRadioButton(dc.Graphics.PlatformGraphics, 
+												(System.Drawing.Rectangle)this.ContentBounds, 
+												UnthemedCheckState);
+			}
 		}
 
 		/// <summary>

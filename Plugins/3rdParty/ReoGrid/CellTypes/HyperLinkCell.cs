@@ -300,7 +300,7 @@ namespace unvell.ReoGrid.CellTypes
 		{
 			public ClickEventArgs(string link, bool byMouse)
 			{
-				LinkURL = link;
+				LinkURL = link.Trim();
 				ByMouse = byMouse;
 			}
 

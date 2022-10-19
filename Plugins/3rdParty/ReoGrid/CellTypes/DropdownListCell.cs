@@ -62,21 +62,6 @@ namespace unvell.ReoGrid.CellTypes
 		}
 
 		/// <summary>
-		/// Get or set the selected item in candidates list
-		/// </summary>
-		public object SelectedItem
-		{
-			get
-			{
-				return this.listBox.SelectedItem;
-			}
-			set
-			{
-				this.listBox.SelectedItem = value;
-			}
-		}
-
-		/// <summary>
 		/// Get or set the selected index in candidates list
 		/// </summary>
 		public int SelectedIndex
@@ -97,7 +82,7 @@ namespace unvell.ReoGrid.CellTypes
 		/// <param name="obj">Selected item to be handled</param>
 		protected virtual void SetSelectedItem(object obj)
 		{
-			Cell.Data = obj;
+			SelectedItem = obj;
 
 			this.SelectedItemChanged?.Invoke(this, null);
 		}
@@ -175,7 +160,7 @@ namespace unvell.ReoGrid.CellTypes
 		private DropdownItemsCollection itemsCollection;
 
 		/// <summary>
-		/// Collection of condidate items
+		/// Collection of candidate items
 		/// </summary>
 		public DropdownItemsCollection Items
 		{

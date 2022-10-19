@@ -205,7 +205,7 @@ void LabelTip::ProcessMessage(Windows::Forms::Message^ msg)
 			{
 				int nOffset = max(abs(m_HoverStartScreenPos.X - pos.X), abs(m_HoverStartScreenPos.Y - pos.Y));
 
-				if (nOffset > Win32::GetMouseHoverRectSize())
+				if (nOffset > SystemInformation::MouseHoverSize.Width)
 				{
 					m_HoverStartScreenPos = pos;
 					m_HoverTimer->Start();
@@ -253,7 +253,7 @@ void LabelTip::CheckShowTip()
 	Point pos = Control::MousePosition;
 	int nOffset = max(abs(m_HoverStartScreenPos.X - pos.X), abs(m_HoverStartScreenPos.Y - pos.Y));
 
-	if (nOffset > Win32::GetMouseHoverRectSize())
+	if (nOffset > SystemInformation::MouseHoverSize.Width)
 	{
 		m_HoverStartScreenPos = pos;
 		return;

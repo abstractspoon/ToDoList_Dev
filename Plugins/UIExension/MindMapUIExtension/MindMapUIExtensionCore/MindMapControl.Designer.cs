@@ -82,7 +82,7 @@ namespace MindMapUIExtension
             this.PerformLayout();
 
 			m_DragTimer = new Timer();
-			m_DragTimer.Interval = (int)GetDoubleClickTime();
+			m_DragTimer.Interval = SystemInformation.DoubleClickTime;
 			m_DragTimer.Tick += new EventHandler(OnDragTimer);
 
 			this.AutoScroll = true;
