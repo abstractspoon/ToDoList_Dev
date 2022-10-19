@@ -579,9 +579,8 @@ namespace SpreadsheetContentControl
             // After all resizing has occurred, set menu bar height to 
             // match application and make its top-level items full height
             this.MenuBar.AutoSize = false;
-            this.MenuBar.Height = Win32.GetSystemMetric(15); // SM_CYMENU
+			this.MenuBar.Height = SystemInformation.MenuHeight;
 			this.MenuBar.Padding = new Padding(0);
-
 		}
 
 		private void InitialiseFeatures()
