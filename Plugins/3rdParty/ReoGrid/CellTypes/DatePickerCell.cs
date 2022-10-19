@@ -28,7 +28,7 @@ using RGImage = System.Drawing.Image;
 namespace unvell.ReoGrid.CellTypes
 {
 	/// <summary>
-	/// Represetns a date picker cell on worksheet.
+	/// Represents a date picker cell on worksheet.
 	/// </summary>
 	[Serializable]
 	public class DatePickerCell : DropdownCell
@@ -55,7 +55,8 @@ namespace unvell.ReoGrid.CellTypes
 
 		private void Calendar_DateSelected(object sender, DateRangeEventArgs e)
 		{
-			if (this.Cell != null) this.Cell.Data = calendar.SelectionStart;
+			SelectedItem = e.Start;
+			PullUp();
 		}
 
 		/// <summary>

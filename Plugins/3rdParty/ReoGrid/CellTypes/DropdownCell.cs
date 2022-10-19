@@ -17,13 +17,14 @@
  ****************************************************************************/
 
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 using System.Windows.Forms;
-using RGFloat = System.Single;
-using RGImage = System.Drawing.Image;
+using System.Windows.Forms.VisualStyles;
 
 using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Graphics;
@@ -38,6 +39,8 @@ namespace unvell.ReoGrid.CellTypes
 	/// </summary>
 	public abstract class DropdownCell : CellBody
 	{
+		protected object SelectedItem = null;
+
 		private DropdownWindow dropdownPanel;
 
 		/// <summary>
@@ -56,7 +59,7 @@ namespace unvell.ReoGrid.CellTypes
 			set { this.pullDownOnClick = value; }
 		}
 
-		private Size dropdownButtonSize = new Size(20, 20);
+		private Size dropdownButtonSize = new Size(SystemInformation.VerticalScrollBarWidth, 20);
 
 		/// <summary>
 		/// Get or set the drop-down button size.
@@ -107,35 +110,47 @@ namespace unvell.ReoGrid.CellTypes
 		/// </summary>
 		protected virtual void OnDropdownControlLostFocus()
 		{
+			// ignore this if it occurred as a consequence of the user
+			// clicking a second time in the cell region
+			if (IsMouseDownWithinControl())
+				return;
+
+			// Ignore if panel already pulled up
+			if (!IsDropdown)
+				return;
+
+			SelectedItem = null;
 			this.PullUp();
 		}
 
-		private bool isDropdown;
+		protected bool IsMouseDownWithinControl()
+		{
+			if (Control.MouseButtons == System.Windows.Forms.MouseButtons.Left)
+			{
+				var cellRect = Cell.Bounds;
+				var btnRect = dropdownButtonRect;
+				btnRect.Offset(cellRect.Left, cellRect.Top);
+
+				var mousePos = Cell.Worksheet.ControlAdapter.PointToClient(Cursor.Position);
+				mousePos.X -= Cell.Worksheet.ViewportController.FocusView.Left;
+				mousePos.Y -= Cell.Worksheet.ViewportController.FocusView.Top;
+				mousePos.X += Cell.Worksheet.ControlAdapter.ScrollBarHorizontalValue;
+				mousePos.Y += Cell.Worksheet.ControlAdapter.ScrollBarVerticalValue;
+
+				if ((PullDownOnClick && cellRect.Contains(mousePos)) ||
+					(btnRect.Contains(mousePos)))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
 
 		/// <summary>
 		/// Get or set whether the drop-down button is pressed. When this value is set to true, the drop-down panel will popped up.
 		/// </summary>
-		public bool IsDropdown
-		{
-			get
-			{
-				return this.isDropdown;
-			}
-			set
-			{
-				if (this.isDropdown != value)
-				{
-					if (value)
-					{
-						PushDown();
-					}
-					else
-					{
-						PullUp();
-					}
-				}
-			}
-		}
+		public bool IsDropdown { get; private set; }
 
 		/// <summary>
 		/// Create custom drop-down cell instance.
@@ -159,28 +174,27 @@ namespace unvell.ReoGrid.CellTypes
 			{
 				this.dropdownButtonRect.Width = 3;
 			}
+			this.dropdownButtonRect.X = Bounds.Right - this.dropdownButtonRect.Width;
 
 			if (this.dropdownButtonAutoHeight)
 			{
 				this.dropdownButtonRect.Height = Bounds.Height - 1;
+				this.dropdownButtonRect.Y = 1;
 			}
 			else
 			{
 				this.dropdownButtonRect.Height = Math.Min(DropdownButtonSize.Height, Bounds.Height - 1);
-			}
 
-			this.dropdownButtonRect.X = Bounds.Right - this.dropdownButtonRect.Width;
+				ReoGridVerAlign valign = ReoGridVerAlign.General;
 
-			ReoGridVerAlign valign = ReoGridVerAlign.General;
+				if (this.Cell != null && this.Cell.InnerStyle != null
+					&& this.Cell.InnerStyle.HasStyle(PlainStyleFlag.VerticalAlign))
+				{
+					valign = this.Cell.InnerStyle.VAlign;
+				}
 
-			if (this.Cell != null && this.Cell.InnerStyle != null
-				&& this.Cell.InnerStyle.HasStyle(PlainStyleFlag.VerticalAlign))
-			{
-				valign = this.Cell.InnerStyle.VAlign;
-			}
-
-			switch (valign)
-			{
+				switch (valign)
+				{
 				case ReoGridVerAlign.Top:
 					this.dropdownButtonRect.Y = 1;
 					break;
@@ -193,6 +207,7 @@ namespace unvell.ReoGrid.CellTypes
 				case ReoGridVerAlign.Middle:
 					this.dropdownButtonRect.Y = Bounds.Top + (Bounds.Height - this.dropdownButtonRect.Height) / 2 + 1;
 					break;
+				}
 			}
 		}
 
@@ -218,15 +233,35 @@ namespace unvell.ReoGrid.CellTypes
 		{
 			if (this.Cell != null)
 			{
-				if (this.Cell.IsReadOnly)
+				if (Application.RenderWithVisualStyles)
 				{
-					ControlPaint.DrawComboButton(dc.Graphics.PlatformGraphics, (System.Drawing.Rectangle)(buttonRect),
-						System.Windows.Forms.ButtonState.Inactive);
+					var btnState = ComboBoxState.Normal;
+
+					if (this.Cell.IsReadOnly)
+					{
+						btnState = ComboBoxState.Disabled;
+					}
+					else if (this.IsDropdown)
+					{
+						btnState = ComboBoxState.Pressed;
+					}
+
+					ComboBoxRenderer.DrawDropDownButton(dc.Graphics.PlatformGraphics, (System.Drawing.Rectangle)buttonRect, btnState);
 				}
 				else
 				{
-					ControlPaint.DrawComboButton(dc.Graphics.PlatformGraphics, (System.Drawing.Rectangle)(buttonRect),
-						this.isDropdown ? System.Windows.Forms.ButtonState.Pushed : System.Windows.Forms.ButtonState.Normal);
+					var btnState = ButtonState.Normal;
+
+					if (this.Cell.IsReadOnly)
+					{
+						btnState = ButtonState.Inactive;
+					}
+					else if (this.IsDropdown)
+					{
+						btnState = ButtonState.Pushed;
+					}
+
+					ControlPaint.DrawComboButton(dc.Graphics.PlatformGraphics, (System.Drawing.Rectangle)(buttonRect), btnState);
 				}
 			}
 		}
@@ -240,19 +275,14 @@ namespace unvell.ReoGrid.CellTypes
 		{
 			if (PullDownOnClick || dropdownButtonRect.Contains(e.RelativePosition))
 			{
-				if (this.isDropdown)
-				{
+				if (IsDropdown)
 					PullUp();
-				}
 				else
-				{
 					PushDown();
-				}
-
-				return true;
 			}
-			else
-				return false;
+
+			// Always return false so that the cell also gets selected
+			return false;
 		}
 
 		/// <summary>
@@ -282,7 +312,7 @@ namespace unvell.ReoGrid.CellTypes
 		}
 
 		/// <summary>
-		/// Event rasied when dropdown-panel is opened.
+		/// Event raised when dropdown-panel is opened.
 		/// </summary>
 		public event EventHandler DropdownOpened;
 
@@ -308,6 +338,8 @@ namespace unvell.ReoGrid.CellTypes
 		/// </summary>
 		public virtual void PushDown()
 		{
+			SelectedItem = null;
+
 			if (this.Cell == null && this.Cell.Worksheet == null) return;
 
 			if (this.Cell.IsReadOnly && this.DisableWhenCellReadonly)
@@ -340,7 +372,7 @@ namespace unvell.ReoGrid.CellTypes
 
 				this.DropdownControl.Focus();
 
-				this.isDropdown = true;
+				this.IsDropdown = true;
 			}
 
 			DropdownOpened?.Invoke(this, null);
@@ -378,21 +410,38 @@ namespace unvell.ReoGrid.CellTypes
 		/// </summary>
 		public virtual void PullUp()
 		{
+			if (!IsDropdown)
+				return;
+
 			if (this.dropdownPanel != null)
 			{
+				// Clear flag first else hiding the panel will trigger another call
+				// which will clear the selected item
+				this.IsDropdown = false;
+
 				this.dropdownPanel.Hide();
-
-				this.isDropdown = false;
-
+				
 				if (this.sheet != null)
 				{
 					this.sheet.RequestInvalidate();
+					this.sheet.ControlAdapter.Focus();
 				}
 			}
 
 			if (DropdownClosed != null)
 			{
 				DropdownClosed(this, null);
+			}
+
+			if ((SelectedItem != null))
+			{
+				if ((Cell.Data == null) || (Cell.Data.ToString() != SelectedItem.ToString()))
+				{
+					if (Cell.Worksheet != null)
+						Cell.Worksheet.SetSingleCellData(Cell, SelectedItem);
+					else
+						Cell.Data = SelectedItem;
+				}
 			}
 		}
 

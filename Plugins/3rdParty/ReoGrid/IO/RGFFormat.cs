@@ -1445,8 +1445,10 @@ namespace unvell.ReoGrid
 									 {
 										 addCell = true;
 
-										 switch (cell.DataFormat)
+										 if (cell.DataFormatArgs != null)
 										 {
+											 switch (cell.DataFormat)
+											 {
 											 case CellDataFormatFlag.Number:
 												 NumberDataFormatter.NumberFormatArgs nargs = (NumberDataFormatter.NumberFormatArgs)cell.DataFormatArgs;
 												 xmlFormatArgs = new RGXmlCellDataFormatArgs();
@@ -1476,6 +1478,7 @@ namespace unvell.ReoGrid
 												 xmlFormatArgs = new RGXmlCellDataFormatArgs();
 												 xmlFormatArgs.decimalPlaces = pargs.DecimalPlaces.ToString();
 												 break;
+											 }
 										 }
 									 }
 									 #endregion // Data Format

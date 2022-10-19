@@ -73,7 +73,7 @@ namespace unvell.ReoGrid.CellTypes
 
 		void listBox_Click(object sender, EventArgs e)
 		{
-			base.Cell.Data = ColumnDropdownListCell.listBox.SelectedItem;
+			SelectedItem = ColumnDropdownListCell.listBox.SelectedItem;
 
 			this.PullUp();
 		}
