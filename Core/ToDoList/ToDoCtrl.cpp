@@ -3312,24 +3312,22 @@ TDC_SET CToDoCtrl::OffsetTaskStartAndDueDates(DWORD dwTaskID, int nAmount, TDC_U
 	// Handle subtasks at the end
 	DWORD dwFlags = (bFromToday ? TDCOTD_OFFSETFROMTODAY : 0);
 
-	// Fallback if either start or due date is not set
-	if (!pTDI->HasStart())
+	if (pTDI->HasStart() && pTDI->HasDue())
 	{
-		if (pTDI->HasDue())
-			nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, dwFlags);
-	}
-	else if (!pTDI->HasDue())
-	{
-		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, dwFlags);
-	}
-	else // else both are set
-	{
+		// Offset as a block
 		COleDateTime dtStart = (bFromToday ? CDateHelper::GetDate(DHD_TODAY) : pTDI->dateStart);
 		CDateHelper().OffsetDate(dtStart, nAmount, TDC::MapUnitsToDHUnits(nUnits));
 
-		nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtStart);
+		if (dtStart != pTDI->dateStart)
+			nRes = m_data.MoveTaskStartAndDueDates(dwTaskID, dtStart);
 	}
-	ASSERT(nRes != SET_FAILED);
+	else
+	{
+		// Offsetting from today will initialise dates if not currently set
+		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_START, nAmount, nUnits, dwFlags);
+		nRes = m_data.OffsetTaskDate(dwTaskID, TDCD_DUE, nAmount, nUnits, dwFlags);
+	}
+	ASSERT((nRes != SET_FAILED) || !bFromToday);
 
 	mapProcessed.Add(dwTaskID);
 

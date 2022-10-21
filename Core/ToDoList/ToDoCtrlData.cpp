@@ -2322,7 +2322,24 @@ BOOL CToDoCtrlData::CanOffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmoun
 		return FALSE;
 	}
 
-	return TaskHasDate(dwTaskID, nDate);
+	if (TaskHasDate(dwTaskID, nDate))
+		return TRUE;
+
+	// Allow start and due dates to be created by offsetting from today
+	if (bFromToday)
+	{
+		switch (nDate)
+		{
+		case TDCD_START:
+		case TDCD_STARTDATE:
+		case TDCD_DUE:
+		case TDCD_DUEDATE:
+			return TRUE;
+		}
+	}
+
+	// all else
+	return FALSE;
 }
 
 TDC_SET CToDoCtrlData::OffsetTaskDate(DWORD dwTaskID, TDC_DATE nDate, int nAmount, TDC_UNITS nUnits, DWORD dwFlags)
