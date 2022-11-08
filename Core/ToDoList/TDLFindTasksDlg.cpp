@@ -1152,10 +1152,14 @@ void CTDLFindTasksDlg::OnSelectall()
 
 void CTDLFindTasksDlg::OnChangeDock(DM_POS nNewPos)
 {
+	BOOL bHadResults = m_lcResults.GetItemCount();
 	DM_POS nOldPos = m_nDockPos;
 
 	if (Create(nNewPos))
 	{
+		if (bHadResults)
+			RefreshSearch();
+
 		AfxGetMainWnd()->SendMessage(WM_FTD_DOCKCHANGE, nOldPos, nNewPos);
 		m_toolbar.RefreshButtonStates();
 	}
