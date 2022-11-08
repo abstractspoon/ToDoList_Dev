@@ -465,12 +465,17 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 
 	m_ctrlComments.SetUITheme(m_theme);
 
-	m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
-	m_toolbar.SetHotColor(m_theme.crToolbarHot);
+	if (m_bShowToolbar)
+	{
+		ASSERT(m_toolbar.GetSafeHwnd());
 
-	// Rescale images because background colour has changed
-	if (GraphicsMisc::WantDPIScaling())
-		m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, colorMagenta);
+		m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
+		m_toolbar.SetHotColor(m_theme.crToolbarHot);
+
+		// Rescale images because we assume background colour has changed
+		if (GraphicsMisc::WantDPIScaling())
+			m_toolbar.SetImage(IDB_DATETIME_TOOLBAR_STD, colorMagenta);
+	}
 
 	Invalidate();
 }
