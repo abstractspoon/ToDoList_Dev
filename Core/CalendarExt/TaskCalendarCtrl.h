@@ -61,6 +61,7 @@ public:
 	void SetOptions(DWORD dwOption);
 	DWORD GetOptions() const { return m_dwOptions; }
 	BOOL HasOption(DWORD dwOption) const { return ((m_dwOptions & dwOption) == dwOption); }
+	void SetHideParentTasks(BOOL bHide, const CString& sTag);
 
 	void SetAlternateWeekColor(COLORREF crAltWeek);
 	void SetGridLineColor(COLORREF crGrid);
@@ -107,6 +108,7 @@ protected:
 	TCC_MONTHSTYLE m_nCellHeaderMonthStyle;
 	COLORREF m_crWeekend, m_crToday, m_crAltWeek; // Grid color handled by base class
 	TCC_SNAPMODE m_nDefSnapMode;
+	CString m_sHideParentTag;
 
 	struct CONTINUOUSDRAWINFO
 	{
@@ -177,6 +179,8 @@ protected:
 	BOOL SetTaskCursor(DWORD dwTaskID, TCC_HITTEST nHit) const;
 	BOOL EnableLabelTips(BOOL bEnable);
 	BOOL HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const;
+	BOOL IsHiddenTask(const TASKCALITEM* pTCI, BOOL bCheckValid) const;
+
 	TCC_SNAPMODE GetSnapMode() const;
 
 	BOOL GetGridCell(DWORD dwTaskID, int &nRow, int &nCol) const;

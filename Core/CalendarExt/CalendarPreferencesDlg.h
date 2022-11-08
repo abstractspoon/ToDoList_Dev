@@ -28,7 +28,7 @@ public:
 	BOOL GetShowMiniCalendar() const { return m_bShowMiniCalendar; }
 	BOOL GetAdjustTaskHeights() const { return m_bAdjustTaskHeights; }
 	BOOL GetTreatOverdueAsDueToday() const { return m_bTreatOverdueAsDueToday; }
-	BOOL GetHideParentTasks() const { return m_bHideParentTasks; }
+	BOOL GetHideParentTasks(CString& sTag) const;
 
 	BOOL GetDisplayAsContinuous() const { return m_bShowTasksContinuous; }
 	BOOL GetDisplayStart() const { return m_bShowStartDates; }
@@ -70,6 +70,8 @@ protected:
 	int		m_nCalcMissingDueDates;
 	BOOL	m_bHideParentTasks;
 	BOOL	m_bShowFutureOcurrences;
+	BOOL	m_bHideParentTasksByTag;
+	CString	m_sHideParentTag;
 	
 	CComboBox m_cbHeatMapAttribute;
 	CColorBrewerComboBox m_cbHeatMapPalette;
@@ -90,12 +92,8 @@ protected:
 
 	// Generated message map functions
 	//{{AFX_MSG(CCalendarPreferencesPage)
-	afx_msg void OnShowTasksContinuous();
-	afx_msg void OnShowStartDates();
-	afx_msg void OnShowDueDates();
-	afx_msg void OnShowMiniCalendar();
+	afx_msg void OnOptionChanged();
 	//}}AFX_MSG
-	afx_msg void OnSelChangeHeatMapPalette();
 	DECLARE_MESSAGE_MAP()
 
 protected:
@@ -114,7 +112,7 @@ public:
 	BOOL GetShowMiniCalendar() const { return m_page.GetShowMiniCalendar(); }
 	BOOL GetAdjustTaskHeights() const { return m_page.GetAdjustTaskHeights(); }
 	BOOL GetTreatOverdueAsDueToday() const { return m_page.GetTreatOverdueAsDueToday(); }
-	BOOL GetHideParentTasks() const { return m_page.GetHideParentTasks(); }
+	BOOL GetHideParentTasks(CString& sTag) const { return m_page.GetHideParentTasks(sTag); }
 
 	BOOL GetDisplayAsContinuous() const { return m_page.GetDisplayAsContinuous(); }
 	BOOL GetDisplayStart() const { return m_page.GetDisplayStart(); }

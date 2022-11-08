@@ -299,7 +299,6 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 	Misc::SetFlag(dwOptions, TCCO_DISPLAYCALCDUE,					m_dlgPrefs.GetDisplayCalcDue());
 	Misc::SetFlag(dwOptions, TCCO_ADJUSTTASKHEIGHTS,				m_dlgPrefs.GetAdjustTaskHeights());
 	Misc::SetFlag(dwOptions, TCCO_TREATOVERDUEASDUETODAY,			m_dlgPrefs.GetTreatOverdueAsDueToday());
-	Misc::SetFlag(dwOptions, TCCO_HIDEPARENTTASKS,					m_dlgPrefs.GetHideParentTasks());
 	Misc::SetFlag(dwOptions, TCCO_SHOWFUTUREITEMS,					m_dlgPrefs.GetDisplayFutureOcurrences());
 
 	// Preserve app preferences
@@ -311,6 +310,9 @@ void CCalendarWnd::UpdateCalendarCtrlPreferences()
 
 	m_BigCalendar.SetOptions(dwOptions);
 	m_MiniCalendar.SetOptions(dwOptions);
+
+	CString sHideParentTag;
+	m_BigCalendar.SetHideParentTasks(m_dlgPrefs.GetHideParentTasks(sHideParentTag), sHideParentTag);
 
 	CDWordArray aHeatMapPalette;
 	TDC_ATTRIBUTE nHeatMapAttrib = TDCA_NONE;

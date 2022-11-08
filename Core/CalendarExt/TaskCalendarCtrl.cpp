@@ -162,6 +162,13 @@ BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
 
 void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 {
+	// Now handled by 'SetHideParentTasks'
+	if (dwOptions & TCCO_HIDEPARENTTASKS)
+	{
+		dwOptions &= ~TCCO_HIDEPARENTTASKS;
+		ASSERT(0);
+	}
+
 	if (m_dwOptions != dwOptions)
 	{
 		DWORD dwPrev = m_dwOptions;
@@ -185,6 +192,29 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 			m_timerMidnight.Disable();
 		}
 	}
+}
+
+void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
+{
+	BOOL bChange = (Misc::StateChanged(bHide, HasOption(TCCO_HIDEPARENTTASKS)) || 
+					(bHide && (m_sHideParentTag != sTag)));
+
+	if (!bChange)
+		return;
+
+	if (bHide)
+	{
+		m_dwOptions |= TCCO_HIDEPARENTTASKS;
+		m_sHideParentTag = sTag;
+	}
+	else
+	{
+		m_dwOptions &= ~TCCO_HIDEPARENTTASKS;
+		m_sHideParentTag.Empty();
+	}
+
+	RecalcTaskDates();
+	RebuildCellTasks();
 }
 
 void CTaskCalendarCtrl::RecalcTaskDates()
@@ -252,6 +282,7 @@ BOOL CTaskCalendarCtrl::WantEditUpdate(TDC_ATTRIBUTE nEditAttrib)
 	case TDCA_DEPENDENCY:
 	case TDCA_ICON:
 	case TDCA_RECURRENCE:
+	case TDCA_TAGS:
 	case TDCA_CUSTOMATTRIB:
 		return true;
 	}
@@ -1669,15 +1700,8 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 		TASKCALITEM* pTCI = mapTasks.GetNextTask(pos);
 		ASSERT(pTCI);
 
-		// ignore tasks with both start and end dates calculated
-		if (!pTCI->IsValid())
-			continue;
-
-		if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
-			continue;
-
-		// ignore completed tasks as required
-		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
+		// Task Visibility
+		if (IsHiddenTask(pTCI, TRUE))
 			continue;
 
 		if (HasOption(TCCO_DISPLAYCONTINUOUS))
@@ -1773,11 +1797,16 @@ DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, 
 	}
 	else // exclude 'More Tasks...' button
 	{
-		CRect rOverflow;
-		CalcOverflowBtnRect(rCell, rOverflow);
+		int nNumItems = CalcEffectiveCellContentItemCount(pCell);
 
-		if (rOverflow.PtInRect(ptClient))
-			return 0;
+		if ((nNumItems * GetTaskHeight()) > rCell.Height())
+		{
+			CRect rOverflow;
+			CalcOverflowBtnRect(rCell, rOverflow);
+
+			if (rOverflow.PtInRect(ptClient))
+				return 0;
+		}
 	}
 
 	const CTaskCalItemArray* pTasks = static_cast<CTaskCalItemArray*>(pCell->pUserData);
@@ -2212,6 +2241,23 @@ TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
 	return pTCI;
 }
 
+BOOL CTaskCalendarCtrl::IsHiddenTask(const TASKCALITEM* pTCI, BOOL bCheckValid) const
+{
+	if (bCheckValid && !pTCI->IsValid())
+		return TRUE;
+
+	if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
+	{
+		if (m_sHideParentTag.IsEmpty() || pTCI->HasTag(m_sHideParentTag))
+			return TRUE;
+	}
+
+	if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
+		return TRUE;
+
+	return FALSE;
+}
+
 BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 {
 	if (dwTaskID == 0)
@@ -2225,17 +2271,8 @@ BOOL CTaskCalendarCtrl::HasTask(DWORD dwTaskID, BOOL bExcludeHidden) const
 		return FALSE;
 	}
 
-	if (bExcludeHidden)
-	{
-		if (!pTCI->IsValid())
-			return FALSE;
-
-		if (pTCI->IsParent() && (HasOption(TCCO_HIDEPARENTTASKS)))
-			return FALSE;
-
-		if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
-			return FALSE;
-	}
+	if (bExcludeHidden && IsHiddenTask(pTCI, TRUE))
+		return FALSE;
 
 	return TRUE;
 }
@@ -2281,18 +2318,10 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 	// Check visibility
 	const TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
 
-	if (!pTCI)
+	if (!pTCI || IsHiddenTask(pTCI, FALSE))
 		return 0;
 
-	if (pTCI->IsParent() && HasOption(TCCO_HIDEPARENTTASKS))
-		return 0;
-
-	if (pTCI->IsDone(TRUE) && !HasOption(TCCO_DISPLAYDONE))
-		return 0;
-
-	if (!pTCI->HasAnyStartDate() && !pTCI->HasAnyEndDate())
-		return 0;
-
+	// Does it have the necessary dates
 	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
 	{
 		BOOL bHasStart = (HasOption(TCCO_DISPLAYSTART) && pTCI->IsStartDateSet());

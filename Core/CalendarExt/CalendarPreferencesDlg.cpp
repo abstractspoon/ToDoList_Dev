@@ -62,6 +62,7 @@ CCalendarPreferencesPage::CCalendarPreferencesPage()
 
 	//}}AFX_DATA_INIT
 	m_bHideParentTasks = TRUE;
+	m_bHideParentTasksByTag = FALSE;
 	m_nCalcMissingStartDates = CALCSTART_ASCREATION;
 	m_nCalcMissingDueDates = CALCDUE_ASLATESTSTARTANDTODAY;
 	m_bShowFutureOcurrences = TRUE;
@@ -82,6 +83,8 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_SHOWDONEDATES, m_bShowDoneDates);
 	DDX_Check(pDX, IDC_SHOWOVERDUEASDUETODAY, m_bTreatOverdueAsDueToday);
 	DDX_Check(pDX, IDC_HIDEPARENTTASKS, m_bHideParentTasks);
+	DDX_Check(pDX, IDC_HIDEPARENTTASKSBYTAG, m_bHideParentTasksByTag);
+	DDX_Text(pDX, IDC_HIDEPARENTTAG, m_sHideParentTag);
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_SHOWFUTUREITEMS, m_bShowFutureOcurrences);
 	DDX_Radio(pDX, IDC_USECREATIONFORSTART, m_nCalcMissingStartDates);
@@ -97,12 +100,14 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 
 BEGIN_MESSAGE_MAP(CCalendarPreferencesPage, CPreferencesPageBase)
 	//{{AFX_MSG_MAP(CCalendarPreferencesPage)
-	ON_BN_CLICKED(IDC_SHOWTASKSCONTINUOUS, OnShowTasksContinuous)
-	ON_BN_CLICKED(IDC_SHOWSTARTDATES, OnShowStartDates)
-	ON_BN_CLICKED(IDC_SHOWDUEDATES, OnShowDueDates)
-	ON_BN_CLICKED(IDC_SHOWMINICALENDAR, OnShowMiniCalendar)
+	ON_BN_CLICKED(IDC_SHOWTASKSCONTINUOUS, OnOptionChanged)
+	ON_BN_CLICKED(IDC_SHOWSTARTDATES, OnOptionChanged)
+	ON_BN_CLICKED(IDC_SHOWDUEDATES, OnOptionChanged)
+	ON_BN_CLICKED(IDC_SHOWMINICALENDAR, OnOptionChanged)
 	//}}AFX_MSG_MAP
-	ON_CBN_SELCHANGE(IDC_HEATMAPPALETTE, OnSelChangeHeatMapPalette)
+	ON_BN_CLICKED(IDC_HIDEPARENTTASKSBYTAG, OnOptionChanged)
+	ON_BN_CLICKED(IDC_HIDEPARENTTASKS, OnOptionChanged)
+	ON_CBN_SELCHANGE(IDC_HEATMAPPALETTE, OnOptionChanged)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -134,6 +139,9 @@ void CCalendarPreferencesPage::EnableDisableControls()
 	GetDlgItem(IDC_HEATMAPPALETTE)->EnableWindow(m_bShowMiniCalendar);
 	GetDlgItem(IDC_HEATMAPATTRIBUTE)->EnableWindow(m_bShowMiniCalendar && m_aSelPalette.GetSize());
 
+	GetDlgItem(IDC_HIDEPARENTTASKSBYTAG)->EnableWindow(m_bHideParentTasks);
+	GetDlgItem(IDC_HIDEPARENTTAG)->EnableWindow(m_bHideParentTasks && m_bHideParentTasksByTag);
+
 	CString sCurLabel;
 	GetDlgItem(IDC_SHOWDONEDATES)->GetWindowText(sCurLabel);
 
@@ -146,25 +154,7 @@ void CCalendarPreferencesPage::EnableDisableControls()
 	}
 }
 
-void CCalendarPreferencesPage::OnShowTasksContinuous() 
-{
-	UpdateData();
-	EnableDisableControls();
-}
-
-void CCalendarPreferencesPage::OnSelChangeHeatMapPalette()
-{
-	UpdateData();
-	EnableDisableControls();
-}
-
-void CCalendarPreferencesPage::OnShowStartDates() 
-{
-	UpdateData();
-	EnableDisableControls();
-}
-
-void CCalendarPreferencesPage::OnShowDueDates() 
+void CCalendarPreferencesPage::OnOptionChanged()
 {
 	UpdateData();
 	EnableDisableControls();
@@ -176,6 +166,8 @@ void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("AdjustTaskHeights"), m_bAdjustTaskHeights);
 	pPrefs->WriteProfileInt(szKey, _T("TreatOverdueAsDueToday"), m_bTreatOverdueAsDueToday);
 	pPrefs->WriteProfileInt(szKey, _T("HideParentTasks"), m_bHideParentTasks);
+	pPrefs->WriteProfileInt(szKey, _T("HideParentTasksByTag"), m_bHideParentTasksByTag);
+	pPrefs->WriteProfileString(szKey, _T("HideParentTag"), m_sHideParentTag);
 
 	pPrefs->WriteProfileInt(szKey, _T("ShowTasksContinuous"), m_bShowTasksContinuous);
 	pPrefs->WriteProfileInt(szKey, _T("ShowStartDates"), m_bShowStartDates);
@@ -200,6 +192,8 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bAdjustTaskHeights = pPrefs->GetProfileInt(szKey, _T("AdjustTaskHeights"), FALSE);
 	m_bTreatOverdueAsDueToday = pPrefs->GetProfileInt(szKey, _T("TreatOverdueAsDueToday"), FALSE);
 	m_bHideParentTasks = pPrefs->GetProfileInt(szKey, _T("HideParentTasks"), TRUE);
+	m_bHideParentTasksByTag = pPrefs->GetProfileInt(szKey, _T("HideParentTasksByTag"), FALSE);
+	m_sHideParentTag = pPrefs->GetProfileString(szKey, _T("HideParentTag"));
 
 	m_bShowTasksContinuous = pPrefs->GetProfileInt(szKey, _T("ShowTasksContinuous"), TRUE);
 	m_bShowStartDates = pPrefs->GetProfileInt(szKey, _T("ShowStartDates"), TRUE);
@@ -249,6 +243,19 @@ BOOL CCalendarPreferencesPage::GetEnableHeatMap(CDWordArray& aPalette, TDC_ATTRI
 	return TRUE;
 }
 
+BOOL CCalendarPreferencesPage::GetHideParentTasks(CString& sTag) const 
+{ 
+	sTag.Empty();
+
+	if (!m_bHideParentTasks)
+		return FALSE;
+
+	if (m_bHideParentTasksByTag)
+		sTag = m_sHideParentTag;
+
+	return TRUE; 
+}
+
 BOOL CCalendarPreferencesPage::GetCalcMissingStartAsCreation() const
 {
 	return (m_nCalcMissingStartDates == CALCSTART_ASCREATION);
@@ -272,12 +279,6 @@ BOOL CCalendarPreferencesPage::GetCalcMissingDueAsStart() const
 BOOL CCalendarPreferencesPage::GetCalcMissingDueAsLatestStartAndToday() const
 {
 	return (m_nCalcMissingDueDates == CALCDUE_ASLATESTSTARTANDTODAY);
-}
-
-void CCalendarPreferencesPage::OnShowMiniCalendar() 
-{
-	UpdateData();
-	EnableDisableControls();
 }
 
 void CCalendarPreferencesPage::SetThemeBkgndColors(COLORREF crLight, COLORREF crDark) 

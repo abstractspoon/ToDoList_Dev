@@ -27,6 +27,8 @@
 #define IDC_ENABLEHEATMAP               1043
 #define IDC_HEATMAPATTRIBUTE            1044
 #define IDC_SHOWFUTUREITEMS             1045
+#define IDC_HIDEPARENTTASKSBYTAG        1046
+#define IDC_HIDEPARENTTAG               1047
 #define IDC_SETWEEKENDCOLOR             1072
 #define IDC_SHOWMINICALENDAR            2001
 #define IDC_SHOWTASKSCONTINUOUS         2002
@@ -68,7 +70,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        32793
 #define _APS_NEXT_COMMAND_VALUE         32799
-#define _APS_NEXT_CONTROL_VALUE         1046
+#define _APS_NEXT_CONTROL_VALUE         1048
 #define _APS_NEXT_SYMED_VALUE           32893
 #endif
 #endif

@@ -467,6 +467,7 @@ TASKCALITEM& TASKCALITEM::operator=(const TASKCALITEM& tci)
 	bRecurring = tci.bRecurring;
 
 	dates = tci.dates;
+	aTags.Copy(tci.aTags);
 	
 	return (*this);
 }
@@ -481,7 +482,8 @@ BOOL TASKCALITEM::operator==(const TASKCALITEM& tci) const
 			(bHasIcon == tci.bHasIcon) &&
 			(bIsParent == tci.bIsParent) &&
 			(bRecurring == tci.bRecurring) &&
-			(dates == tci.dates));
+			(dates == tci.dates) &&
+			Misc::MatchAllT(aTags, tci.aTags, FALSE));
 }
 
 BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const CMapStringToString& mapCustDateAttribIDs, DWORD dwCalcDates)
@@ -505,6 +507,15 @@ BOOL TASKCALITEM::UpdateTask(const ITASKLISTBASE* pTasks, HTASKITEM hTask, const
 
 	if (pTasks->IsAttributeAvailable(TDCA_RECURRENCE))
 		bRecurring = pTasks->IsTaskRecurring(hTask);
+		
+	if (pTasks->IsAttributeAvailable(TDCA_TAGS))
+	{
+		aTags.RemoveAll();
+		int nTag = pTasks->GetTaskTagCount(hTask);
+
+		while (nTag--)
+			aTags.InsertAt(0, pTasks->GetTaskTag(hTask, nTag));
+	}
 
 	dates.Update(pTasks, hTask, mapCustDateAttribIDs, dwCalcDates);
 
@@ -537,6 +548,11 @@ BOOL TASKCALITEM::IsParent() const
 BOOL TASKCALITEM::HasIcon(BOOL bShowParentsAsFolder) const
 {
 	return (bHasIcon || (bIsParent && bShowParentsAsFolder));
+}
+
+BOOL TASKCALITEM::HasTag(LPCTSTR szTag) const
+{
+	return (Misc::Find(szTag, aTags, FALSE, TRUE) != -1);
 }
 
 BOOL TASKCALITEM::IsDone(BOOL bIncGoodAs) const

@@ -98,6 +98,7 @@ public:
 	BOOL IsParent() const;
 	BOOL HasIcon(BOOL bShowParentsAsFolder) const;
 	void DisableIcon() { bHasIcon = FALSE; }
+	BOOL HasTag(LPCTSTR szTag) const;
 
 	// Date wrappers
 	void RecalcDates(DWORD dwCalcDates) { dates.Recalc(dwCalcDates); }
@@ -132,6 +133,7 @@ public:
 
 protected:
 	CString sName, sFormattedName;
+	CStringArray aTags;
 	DWORD dwTaskID;
 	BOOL bHasIcon, bIsParent;
 
