@@ -1732,6 +1732,50 @@ struct SEARCHRESULT
 		return ((dwFlags & dwFlag) == dwFlag) ? 1 : 0;
 	}
 
+	BOOL GetWhatMatched(TDC_ATTRIBUTE nAttribID, const CTDCCustomAttribDefinitionArray& aAttribDefs, CString& sWhatMatched) const
+	{
+		// RECURSIVE CALLS
+		switch (nAttribID)
+		{
+		case TDCA_TASKNAMEORCOMMENTS:
+			return (GetWhatMatched(TDCA_TASKNAME,	aAttribDefs, sWhatMatched) || 
+					GetWhatMatched(TDCA_COMMENTS,	aAttribDefs, sWhatMatched));
+
+		case TDCA_ANYTEXTATTRIBUTE:
+			{
+				if (GetWhatMatched(TDCA_TASKNAME,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_COMMENTS,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_STATUS,		aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_CATEGORY,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_ALLOCBY,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_ALLOCTO,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_VERSION,	aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_TAGS,		aAttribDefs, sWhatMatched) ||
+					GetWhatMatched(TDCA_EXTERNALID, aAttribDefs, sWhatMatched))
+				{
+					return TRUE;
+				}
+
+				int nDef = aAttribDefs.GetSize();
+
+				while (nDef--)
+				{
+					const TDCCUSTOMATTRIBUTEDEFINITION& attribDef = aAttribDefs[nDef];
+
+					if ((attribDef.GetDataType() == TDCCA_STRING) &&
+						GetWhatMatched(attribDef.GetAttributeID(), aAttribDefs, sWhatMatched))
+					{
+						return TRUE;
+					}
+				}
+			}
+			return FALSE;
+		}
+
+		// All else
+		return mapMatched.Lookup(nAttribID, sWhatMatched);
+	}
+	
 	DWORD dwTaskID;
 	DWORD dwFlags;
 	CMap<TDC_ATTRIBUTE, TDC_ATTRIBUTE, CString, CString&> mapMatched;

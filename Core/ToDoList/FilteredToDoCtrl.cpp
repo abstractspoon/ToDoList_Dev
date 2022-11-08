@@ -732,7 +732,9 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 
 		if (bWantTask && pTDS->HasSubTasks())
 		{
-			// To arrive here means we are a parent task with no matching subtasks.
+			// To arrive here means we are a parent task with no matching subtasks
+			// because otherwise the parent will have been automatically added and
+			// will never have needed explicit matching.
 			//
 			// And because parent tasks are often seen purely as containers
 			// (without having explicitly set attributes), certain types of 
@@ -755,7 +757,7 @@ BOOL CFilteredToDoCtrl::WantAddTaskToTree(const TODOITEM* pTDI, const TODOSTRUCT
 				const SEARCHPARAM& rule = pFilter->aRules[nRule];
 								
 				CString sWhatMatched;
-				result.mapMatched.Lookup(rule.GetAttribute(), sWhatMatched);
+				VERIFY(result.GetWhatMatched(rule.GetAttribute(), m_aCustomAttribDefs, sWhatMatched) && !sWhatMatched.IsEmpty());
 
 				switch (rule.GetOperator())
 				{
