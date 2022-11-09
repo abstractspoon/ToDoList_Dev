@@ -10716,15 +10716,7 @@ LRESULT CToDoListWnd::OnFindDlgFind(WPARAM /*wp*/, LPARAM /*lp*/)
 
 				CHoldRedraw hr(hwndHold);
 
-				// use tasklist title from tabctrl
-				CString sTitle = m_mgrToDoCtrls.GetTabItemText(nCtrl);
-				
-				m_dlgFindTasks.AddHeaderRow(sTitle);
-				
-				for (int nResult = 0; nResult < aResults.GetSize(); nResult++)
-				{
-					m_dlgFindTasks.AddResult(aResults[nResult], &tdc, !bMultiAttribFind);
-				}
+				m_dlgFindTasks.AddResults(&tdc, aResults, !bMultiAttribFind, m_mgrToDoCtrls.GetTabItemText(nCtrl));
 			}
 		}
 	}	

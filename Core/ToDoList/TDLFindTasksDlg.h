@@ -60,8 +60,7 @@ public:
 	CString GetActiveSearch() const { return m_sActiveSearch; }
 	int GetSavedSearches(CStringArray& aNames);
 
-	void AddHeaderRow(LPCTSTR szText);
-	void AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly);
+	void AddResults(const CFilteredToDoCtrl* pTDC, const CResultArray& aResults, BOOL bShowValueOnly, LPCTSTR szHeaderText = NULL);
 
 	int GetResultCount() const; // all tasklists
 	int GetResultCount(const CFilteredToDoCtrl* pTDC) const;

@@ -614,53 +614,60 @@ void CTDLFindTasksDlg::SetActiveTasklist(const CString& sTasklist, BOOL bWantDef
 	m_lcFindSetup.SetActiveTasklist(sTasklist, bWantDefaultIcons);
 }
 
-void CTDLFindTasksDlg::AddResult(const SEARCHRESULT& result, const CFilteredToDoCtrl* pTDC, BOOL bShowValueOnly)
+void CTDLFindTasksDlg::AddResults(const CFilteredToDoCtrl* pTDC, const CResultArray& aResults, BOOL bShowValueOnly, LPCTSTR szHeaderText)
 {
-	if (GetSafeHwnd())
+	if (!GetSafeHwnd())
 	{
+		ASSERT(0);
+		return;
+	}
+
+	if (!Misc::IsEmpty(szHeaderText))
+		m_lcResults.AddHeaderRow(szHeaderText);
+
+	int nOrgItemCount = m_lcResults.GetItemCount();
+
+	for (int nResult = 0; nResult < aResults.GetSize(); nResult++)
+	{
+		const SEARCHRESULT& result = aResults[nResult];
+
 		// Don't add what the user doesn't want to see
 		// Unless the current rule set includes TDCA_DONEDATE
 		if (result.HasFlag(RF_DONE) || result.HasFlag(RF_GOODASDONE))
 		{
 			if (!m_lcFindSetup.HasRule(TDCA_DONEDATE) && !IncludeOptionIsChecked(FI_COMPLETED))
 			{
-				return;
+				continue;
 			}
 		}
 
 		if (result.HasFlag(RF_PARENT) && !IncludeOptionIsChecked(FI_PARENT))
 		{
-			return;
+			continue;
 		}
 
-		// else
-		int nIndex = m_lcResults.AddResult(result, pTDC, bShowValueOnly);
+		m_lcResults.AddResult(result, pTDC, bShowValueOnly);
+	}
 
-		if (nIndex != -1)
+	if (m_lcResults.GetItemCount() > nOrgItemCount)
+	{
+		// update 'found' count
+		m_sResultsLabel.Format(IDS_FTD_SOMERESULTS, GetResultCount());
+		UpdateData(FALSE);
+
+		// focus first item added
+		if (!GetDlgItem(IDC_SELECTALL)->IsWindowEnabled())
 		{
-			// update 'found' count
-			m_sResultsLabel.Format(IDS_FTD_SOMERESULTS, GetResultCount());
-			UpdateData(FALSE);
+			SelectItem(0);
+			m_lcResults.SetFocus();
 
-			// focus first item added
-			if (!GetDlgItem(IDC_SELECTALL)->IsWindowEnabled())
-			{
-				SelectItem(nIndex);
-				m_lcResults.SetFocus();
+			// update 'search results' button' state
+			m_toolbar.RefreshButtonStates();
 
-				// update 'search results' button' state
-				m_toolbar.RefreshButtonStates();
-
-				// enable 'select all' button
-				GetDlgItem(IDC_SELECTALL)->EnableWindow(TRUE);
-			}
+			// enable 'select all' button
+			GetDlgItem(IDC_SELECTALL)->EnableWindow(TRUE);
 		}
 	}
-}
-
-void CTDLFindTasksDlg::AddHeaderRow(LPCTSTR szText)
-{
-	m_lcResults.AddHeaderRow(szText);
 }
 
 BOOL CTDLFindTasksDlg::GetSearchAllTasklists()
