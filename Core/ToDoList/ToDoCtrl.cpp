@@ -11825,6 +11825,9 @@ BOOL CToDoCtrl::UndoLastActionItems(const CArrayUndoElements& aElms)
 
 			HTREEITEM htiDestPrevSibling = m_taskTree.GetItem(elm.dwPrevSiblingID); // original previous sibling
 			ASSERT(htiDestPrevSibling || !elm.dwPrevSiblingID);
+
+			if (htiDestPrevSibling == NULL)
+				htiDestPrevSibling = TVI_FIRST;
 			
 			if ((elm.dwParentID && htiDestParent) || (!elm.dwParentID && !htiDestParent))
 			{
