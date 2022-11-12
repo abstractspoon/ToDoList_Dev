@@ -1716,6 +1716,11 @@ BOOL CToDoListWnd::HandleEscapeTabReturn(MSG* pMsg)
 				{
 					 // fall thru to CFrameWnd::PreTranslateMessage(pMsg)
 				}
+				// and the Find Tasks dialog
+				else if (::IsChild(m_dlgFindTasks, pMsg->hwnd))
+				{
+					 // fall thru to CFrameWnd::PreTranslateMessage(pMsg)
+				}
 				else if (Prefs().GetFocusTreeOnEnter())
 				{
 					if (::IsChild(m_filterBar, pMsg->hwnd) && !CtrlWantsEnter(pMsg->hwnd))
