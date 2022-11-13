@@ -123,9 +123,12 @@ public:
 	BOOL Save(const CString& filename);
 	BOOL Load(const CString& filename);
 	
-	CString GetRTF() const; // ansi encoded string
-	int	GetRTFLength() const; // in characters
+	BOOL GetRTF(CString& sRTF) const; // ansi encoded string 
 	void SetRTF(const CString& rtf);
+
+	// Size of buffer must be >= GetRTFLength()
+	int GetRTF(unsigned char* pRTF, int nRTFLen) const; // ansi encoded string 
+	int	GetRTFLength() const; // in bytes
 
 	void DoEditFind(UINT nIDTitle = 0);
 	void DoEditReplace(UINT nIDTitle = 0);

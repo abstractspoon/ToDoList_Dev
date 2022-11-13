@@ -30,6 +30,8 @@ BOOL Compression::Compress(const unsigned char* pContentSrc, int nLenSrc,
 	{
 		// cleanup
 		delete [] pContentDest;
+		pContentDest = NULL;
+
 		nLenDest = 0;
 	}
 	else
@@ -60,10 +62,14 @@ BOOL Compression::Decompress(const unsigned char* pContentSrc, int nLenSrc,
 	if (nRet != Z_OK)
 	{
 		delete [] pContentDest;
+		pContentDest = NULL;
+
 		nLenDest = 0;
 	}
 	else
+	{
 		nLenDest = lDest;
+	}
 
 	return (nRet == Z_OK);
 }

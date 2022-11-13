@@ -604,8 +604,11 @@ BOOL CToDoCtrlReminders::BuildStickiesRTFContent(const TDCREMINDER& rem, CString
 	// Inject a task link inside the brackets after the tak title
 	m_rtfFormatter.SetCaretPos(nTitleLen + 1);
 	m_rtfFormatter.SetSelectedWebLink(rem.pTDC->FormatTaskLink(rem.dwTaskID, TRUE), CEnString(IDS_STICKIES_LINK));
+	
+	if (!m_rtfFormatter.GetRTF(sContent))
+		return FALSE;
 
-	sContent = CString((LPCSTR)(LPCTSTR)m_rtfFormatter.GetRTF());
+	Misc::EncodeAsUnicode(sContent);
 
 #ifdef _DEBUG
 	FileMisc::SaveFile(_T("StickiesContent.rtf"), sContent, SFEF_UTF8WITHOUTBOM);

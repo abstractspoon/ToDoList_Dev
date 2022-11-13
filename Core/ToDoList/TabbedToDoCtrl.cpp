@@ -868,7 +868,9 @@ CString CTabbedToDoCtrl::GetExtensionPrefsSubKey(const IUIExtensionWindow* pExtW
 LRESULT CTabbedToDoCtrl::OnPreTabViewChange(WPARAM nOldTab, LPARAM nNewTab) 
 {
 	EndLabelEdit(FALSE);
-	HandleUnsavedComments();
+	
+	if (!HandleUnsavedComments())
+		return 1L; // prevent tab change
 
 	// notify parent
 	GetParent()->SendMessage(WM_TDCN_VIEWPRECHANGE, nOldTab, nNewTab);
@@ -2198,7 +2200,8 @@ LRESULT CTabbedToDoCtrl::OnUIExtMoveSelectedTask(WPARAM /*wParam*/, LPARAM lPara
 	if (IsReadOnly())
 		return FALSE;
 
-	HandleUnsavedComments();
+	if (!HandleUnsavedComments())
+		return FALSE;
 
 	IMPLEMENT_DATA_UNDO(m_data, TDCUAT_MOVE);
 	
@@ -4373,7 +4376,8 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTaskLink)
 	// comments in case this task will not be visible in the 
 	// active view, causing SetSelectedTaskComments (called by
 	// CToDoCtrl::SelectedTask) to later fail
-	HandleUnsavedComments();
+	if (!HandleUnsavedComments())
+		return FALSE;
 
 	FTC_VIEW nView = GetTaskView();
 	VIEWDATA* pVData = GetViewData(nView);

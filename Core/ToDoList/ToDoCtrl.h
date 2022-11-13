@@ -115,7 +115,7 @@ public:
 	BOOL AddToSourceControl(BOOL bAdd = TRUE);
 	BOOL CanAddToSourceControl(BOOL bAdd = TRUE) const;
 
-	void Flush(); // called to end current editing actions
+	BOOL Flush(); // called to end current editing actions
 	BOOL IsModified() const;
 	void SetModified(BOOL bMod = TRUE);
 	BOOL IsPristine() const;
@@ -539,14 +539,12 @@ protected:
 	CTDCReminderHelper m_reminders;
 
 	CStringArray m_aFileLinks;
-	CString m_sTextComments;
 	CString m_sAllocBy;
 	CString m_sStatus;
 	CString m_sProjectName;
 	CString m_sExternalID;
 	CString m_sOccurrence;
 	CString m_sVersion;
-	CBinaryData m_customComments;
 	double m_dTrackedTimeElapsedHours;
 	int m_nPriority;
 	int m_nRisk;
@@ -594,7 +592,7 @@ protected:
 
 	// Implementation
 protected:
-	void UpdateComments(BOOL bSaveAndValidate); 
+	void UpdateComments(const CString& sTextComments, const CBinaryData& customComments);
 	
 	// private CToDoCtrl messages
 	static UINT WM_TDC_FIXUPPOSTDROPSELECTION;
@@ -893,7 +891,7 @@ protected:
 	CString GetLastSaveFolder() const;
 	BOOL CheckRestoreBackupFile(const CString& sFilePath);
 
-	void HandleUnsavedComments();
+	BOOL HandleUnsavedComments();
 	BOOL UndoLastActionItems(const CArrayUndoElements& aElms);
 	void LoadTaskIcons();
 	void InitEditPrompts();

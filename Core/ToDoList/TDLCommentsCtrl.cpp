@@ -482,10 +482,19 @@ void CTDLCommentsCtrl::SetUITheme(const CUIThemeFile& theme)
 
 BOOL CTDLCommentsCtrl::GetContent(CString& sTextContent, CBinaryData& customContent) const
 {
-	BOOL bRes = (m_ctrlComments.GetTextContent(sTextContent) > 0);
-	bRes |= (m_ctrlComments.GetContent(customContent) > 0);
+	int nTextLen = m_ctrlComments.GetTextContent(sTextContent);
+	int nCustLen = m_ctrlComments.GetContent(customContent);
 
-	return bRes;
+	if ((nTextLen < 0) || (nCustLen < 0))
+	{
+		sTextContent.Empty();
+		customContent.Empty();
+
+		return -1;
+	}
+
+	// else
+	return (nTextLen > 0) || (nCustLen > 0);
 }
 
 BOOL CTDLCommentsCtrl::SetContent(const CString& sTextContent, const CBinaryData& customContent, BOOL bResetSelection)

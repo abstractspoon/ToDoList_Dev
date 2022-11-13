@@ -289,22 +289,37 @@ BOOL CContentCtrl::SetContent(const CBinaryData& content, BOOL bResetSelection)
 
 int CContentCtrl::GetContent(CBinaryData& content) const
 {
-	int nLenBytes = 0;
+	int nBytesCopied = 0;
 	content.Empty();
 	
 	if (m_pContentCtrl)
 	{
-		nLenBytes = m_pContentCtrl->GetContent(NULL);
+		int nBytesReq = m_pContentCtrl->GetContent(NULL);
 		
-		if (nLenBytes) // excludes NULL
+		if (nBytesReq) // excludes NULL
 		{
-			unsigned char* szContent = content.GetBuffer(nLenBytes);
-			nLenBytes = m_pContentCtrl->GetContent(szContent);
-			content.ReleaseBuffer(nLenBytes);
+			try 
+			{
+				unsigned char* szContent = content.GetBuffer(nBytesReq * 2);
+				nBytesCopied = m_pContentCtrl->GetContent(szContent);
+
+				if (nBytesCopied != -1)
+					content.ReleaseBuffer(nBytesCopied);
+				else
+					content.ReleaseBuffer(nBytesReq);
+			}
+			catch (...)
+			{
+				content.ReleaseBuffer(nBytesReq);
+				nBytesCopied = -1;
+			}
+			
+			if (nBytesCopied == -1)
+				content.Empty();
 		}
 	}
 	
-	return nLenBytes;
+	return nBytesCopied;
 }
 
 int CContentCtrl::GetTextContent(CString& sContent) const

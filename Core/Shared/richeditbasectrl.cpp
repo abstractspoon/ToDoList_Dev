@@ -1257,7 +1257,10 @@ DWORD CRichEditBaseCtrl::StreamInCB(DWORD dwCookie, LPBYTE pbBuff, LONG cb, LONG
 
 BOOL CRichEditBaseCtrl::Save(const CString& filename)
 {
-	CString str = GetRTF(); // returns multibyte encoded string
+	CString str;
+	
+	if (!GetRTF(str)) // returns multibyte encoded string
+		return FALSE;
 	
 	// save as multibyte
 	return FileMisc::SaveFile(filename, (LPCSTR)(LPCTSTR)str);
@@ -1283,27 +1286,47 @@ BOOL CRichEditBaseCtrl::Load(const CString& filename)
 	return TRUE;
 }
 
-CString CRichEditBaseCtrl::GetRTF() const
+BOOL CRichEditBaseCtrl::GetRTF(CString& sRTF) const
 {
-	// stream to mem file in big chunks
-	// note: we use a BIG file because it gives us excellent
-	// performance on content containing images
-	CMemFile file(2024 * 1024);
-	EDITSTREAM es = { (DWORD)&file, 0, StreamOutCB };
+	sRTF.Empty();
 
-	const_cast<CRichEditBaseCtrl*>(this)->StreamOut(SF_RTF, es);
-	
-	// then copy to string
-	CString sRTF;
-	int nLen = (int)file.GetLength();
-	
-	LPTSTR szRTF = sRTF.GetBuffer(nLen);
-	
-	file.SeekToBegin();
-	file.Read((void*)szRTF, nLen);
-	
-	sRTF.ReleaseBuffer(nLen);
-	return sRTF;
+	int nReqLen = GetRTFLength();
+	int nStrLen = (nReqLen / sizeof(TCHAR));
+
+	if (nReqLen % sizeof(TCHAR))
+		nStrLen++;
+
+	unsigned char* pRTF = (unsigned char*)sRTF.GetBuffer(nStrLen);
+	int nResult = GetRTF(pRTF, nReqLen);
+
+	sRTF.ReleaseBuffer(nStrLen);
+
+	return (nResult != -1);
+}
+
+int CRichEditBaseCtrl::GetRTF(unsigned char* pRTF, int nRTFLen) const
+{
+	ASSERT(nRTFLen >= GetRTFLength());
+
+	int nBytesCopied = 0;
+	ZeroMemory(pRTF, nRTFLen);
+
+	try
+	{
+		CMemFile file(pRTF, nRTFLen);
+		file.SeekToBegin();
+
+		EDITSTREAM es = { (DWORD)&file, 0, StreamOutCB };
+		const_cast<CRichEditBaseCtrl*>(this)->StreamOut(SF_RTF, es);
+
+		nBytesCopied = (int)file.GetLength();
+	}
+	catch(...)
+	{
+		nBytesCopied = -1;
+	}
+
+	return nBytesCopied;
 }
 
 int CRichEditBaseCtrl::GetRTFLength() const

@@ -126,8 +126,8 @@ protected:
 	void SaveState() const;
 	void LoadState();
 
-	void RefreshFilter(BOOL bExplicit);
-	void RefreshTreeFilter();
+	BOOL RefreshFilter(BOOL bExplicit);
+	BOOL RefreshTreeFilter();
 	void RefreshExtensionFilter(FTC_VIEW nView, BOOL bShowProgress = FALSE);
 
 	void ResetNowFilterTimer();

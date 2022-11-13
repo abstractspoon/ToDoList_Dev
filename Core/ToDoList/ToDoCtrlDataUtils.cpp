@@ -4591,7 +4591,7 @@ BOOL CTDCTaskExporter::ExportMatchingTaskAttributes(const TODOITEM* pTDI, const 
 			{
 				tasks.SetTaskHtmlComments(hTask, sHtml, bTransform);
 
-				// add dummy COMMENTS entry as a temprary fix in 6.8.8
+				// add dummy COMMENTS entry as a temporary fix in 6.8.8
 				// because stylesheets currently require its presence
 				tasks.SetTaskComments(hTask, pTDI->sComments);
 			}

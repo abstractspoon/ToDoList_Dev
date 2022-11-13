@@ -652,7 +652,11 @@ BOOL CRulerRichEdit::CopyToClipboardAsHtml()
 BOOL CRulerRichEdit::Cut() 
 {
 	// snapshot RTF for copying to clipboard as HTML
-	CString sRtf = GetRTF();
+	CString sRtf;
+	
+	if (!GetRTF(sRtf))
+		return FALSE;
+
 	CUrlRichEditCtrl::Cut();	
 	
 	// do the copy

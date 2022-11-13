@@ -5852,6 +5852,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_UDTPREFS_NEWTDL      "\nNew ToDoList Tool"
+    IDS_COMMENTSMEMORYERROR "Memory Allocation Error|The application was unable to allocate enough memory to retrieve the most recently modified comments.\n\nTry creating a separate subtask for any further comments."
 END
 
 #endif    // English (Australia) resources

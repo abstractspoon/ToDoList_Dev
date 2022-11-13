@@ -520,7 +520,7 @@ void CFilteredToDoCtrl::RefreshFilter()
 }
 
 // Internal version
-void CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit) 
+BOOL CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit) 
 {
 	CSaveFocus sf;
 
@@ -528,7 +528,8 @@ void CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit)
 	if (bExplicit && m_filter.HasSelectionFilter())
 		m_taskTree.GetSelectedTaskIDs(m_aSelectedTaskIDsForFiltering, FALSE);
 
-	RefreshTreeFilter(); // always
+	if (!RefreshTreeFilter())
+		return FALSE;
 
 	FTC_VIEW nView = GetTaskView();
 
@@ -568,13 +569,16 @@ void CFilteredToDoCtrl::RefreshFilter(BOOL bExplicit)
 		UpdateSortStates(TDCA_ALL, TRUE);
 		break;
 	}
+
+	return TRUE;
 }
 
-void CFilteredToDoCtrl::RefreshTreeFilter() 
+BOOL CFilteredToDoCtrl::RefreshTreeFilter() 
 {
 	if (m_data.GetTaskCount())
 	{
-		HandleUnsavedComments();
+		if (!HandleUnsavedComments())
+			return FALSE;
 
 		// rebuild the tree
 		RebuildTree();
@@ -596,6 +600,8 @@ void CFilteredToDoCtrl::RefreshTreeFilter()
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_FILTEREDTASKLISTPROMPT));
 	else
 		m_taskTree.SetWindowPrompt(CEnString(IDS_TDC_TASKLISTPROMPT));
+
+	return TRUE;
 }
 
 void CFilteredToDoCtrl::RebuildList(BOOL bChangeGroup, TDC_COLUMN nNewGroupBy, const void* pContext)

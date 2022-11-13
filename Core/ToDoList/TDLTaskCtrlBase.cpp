@@ -58,6 +58,9 @@ const UINT TIMER_BOUNDINGSEL	= 100;
 
 const LPCTSTR APP_ICON			= _T("TDL_APP_ICON");
 
+const float BIGCOMMENTSSIZE		= (5 * 1024); // in KB
+const float VERYBIGCOMMENTSSIZE	= (8 * 1024); // in KB
+
 //////////////////////////////////////////////////////////////////////
 
 enum
@@ -2771,15 +2774,35 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_SUBTASKDONE:
 		case TDCC_TIMEESTIMATE:
 		case TDCC_LASTMODBY:
-		case TDCC_COMMENTSSIZE:
 			DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crText);
 			break;
 			
+		case TDCC_COMMENTSSIZE:
+			{
+				// Highlight large comments
+				float fCommentSize = pTDI->GetCommentsSizeInKB();
+
+				if (fCommentSize >= VERYBIGCOMMENTSSIZE)
+				{
+					crText = colorBlack;
+				}
+				else if (fCommentSize >= BIGCOMMENTSSIZE)
+				{
+					crText = colorRed;
+				}
+
+				DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crText);
+
+				if (fCommentSize >= VERYBIGCOMMENTSSIZE)
+					GraphicsMisc::DrawRect(pDC, rSubItem, colorRed, CLR_NONE, 0, 0, 128);
+			}
+			break;
+
 		case TDCC_TIMESPENT:
 			if (!sTaskColText.IsEmpty())
 			{
 				// show text in red if we're currently tracking
-				COLORREF crTemp = ((m_dwTimeTrackTaskID == dwTrueID) ? 255 : crText);
+				COLORREF crTemp = ((m_dwTimeTrackTaskID == dwTrueID) ? colorRed : crText);
 
 				DrawColumnText(pDC, sTaskColText, rSubItem, pCol->nTextAlignment, crTemp);
 			}
@@ -5882,8 +5905,8 @@ const CBinaryData& CTDLTaskCtrlBase::GetSelectedTaskCustomComments(CONTENTFORMAT
 		}
 	}
 	
-	static CBinaryData content;
-	return content;
+	static CBinaryData emptyContent;
+	return emptyContent;
 }
 
 CString CTDLTaskCtrlBase::FormatSelectedTaskTitles(BOOL bFullPath, TCHAR cSep, int nMaxTasks) const
