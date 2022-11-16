@@ -390,8 +390,8 @@ BOOL CThemed::BuildImageList(CImageList& il, int nPart, const int nStates[], int
 			{
 				rPadding.left += (nPadding / 2);
 				rPadding.right += (nPadding - (nPadding / 2));
-				rPadding.top += (nPadding / 2);
-				rPadding.bottom += (nPadding - (nPadding / 2));
+				rPadding.top += (nPadding - (nPadding / 2));
+				rPadding.bottom += (nPadding / 2);
 			}
 		}
 
