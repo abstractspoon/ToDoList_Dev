@@ -209,16 +209,23 @@ UINT CShortcutManager::ProcessMessage(const MSG* pMsg, DWORD* pShortcut) const
 	case VK_CAPITAL:
 		return FALSE;
 		
-		// don't handle return/cancel keys
 	case VK_RETURN:
 	case VK_CANCEL:
+		// don't handle return/cancel keys
 		return FALSE;
 
 	case VK_MBUTTON:
 		break;
+
+	case VK_UP:
+	case VK_DOWN:
+		// Don't process 'Alt + Up/Down' destined for a date time control
+		if (Misc::IsKeyPressed(VK_MENU) && CWinClasses::IsClass(hFocus, WC_DATETIMEPICK))
+			return FALSE;
+		// else fall through
 		
-		// shortcut keys
 	default: 
+		// shortcut keys
 		{
 			// don't process messages destined for hotkey controls!
 			if (CWinClasses::IsClass(hFocus, WC_HOTKEY))
