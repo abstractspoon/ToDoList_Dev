@@ -48,6 +48,4 @@ void CTDLBrowserDlg::BeforeNavigate2(LPDISPATCH /*pDisp*/, VARIANT* pURL, VARIAN
 	{
 		*pCancel = AFX_OLE_FALSE;
 	}
-
-	//*pCancel = (OnBeforeNavigate(sURL) ? AFX_OLE_FALSE : AFX_OLE_TRUE);
 }
