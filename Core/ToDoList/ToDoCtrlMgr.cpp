@@ -626,12 +626,12 @@ BOOL CToDoCtrlMgr::ShowDueTaskNotification(int nIndex, LPCTSTR szFilePath, BOOL 
 {
 	CHECKVALIDINDEXRET(nIndex, FALSE);
 
-	CBrowserDlg* pBrowser = NULL;
+	CTDLBrowserDlg* pBrowser = NULL;
 	CFilteredToDoCtrl& tdc = GetToDoCtrl(nIndex);
 
 	if (!m_mapBrowsers.Lookup(&tdc, pBrowser))
 	{
-		pBrowser = new CBrowserDlg(bBrowser);
+		pBrowser = new CTDLBrowserDlg(bBrowser);
 		m_mapBrowsers[&tdc] = pBrowser;
 
 		CEnString sTitle(IDS_DUETASKS_TITLE, GetFriendlyProjectName(nIndex));
@@ -893,7 +893,7 @@ int CToDoCtrlMgr::DeleteToDoCtrl(int nIndex)
 	}
 
 	// cleanup browser
-	CBrowserDlg* pBrowser = NULL;
+	CTDLBrowserDlg* pBrowser = NULL;
 
 	if (m_mapBrowsers.Lookup(&tdc, pBrowser))
 	{

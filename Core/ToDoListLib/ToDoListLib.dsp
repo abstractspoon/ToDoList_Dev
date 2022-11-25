@@ -345,6 +345,10 @@ SOURCE=..\ToDoList\TDLAttributeComboBox.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDLBrowserDlg.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDLCleanupIniPreferencesDlg.cpp
 # End Source File
 # Begin Source File
@@ -966,6 +970,10 @@ SOURCE=..\ToDoList\TDLAttribListBox.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDLAttributeComboBox.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDLBrowserDlg.h
 # End Source File
 # Begin Source File
 
