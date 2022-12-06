@@ -37,7 +37,6 @@ namespace DayViewUIExtension
         private string m_HideParentTasksTag;
 
         private bool m_HideParentTasks = true;
-		private bool m_DisplayTasksContinuous = true;
 		private bool m_HideTasksWithoutTimes = true;
         private bool m_HideTasksSpanningWeekends = false;
         private bool m_HideTasksSpanningDays = false;
@@ -340,12 +339,12 @@ namespace DayViewUIExtension
 
 		public bool DisplayTasksContinuous
 		{
-			get { return m_DisplayTasksContinuous; }
+			get { return DisplayLongAppointmentsContinuous; }
 			set
 			{
-				if (value != m_DisplayTasksContinuous)
+				if (value != DisplayLongAppointmentsContinuous)
 				{
-					m_DisplayTasksContinuous = value;
+					DisplayLongAppointmentsContinuous = value;
 					FixupSelection(false, true);
 				}
 			}
@@ -1066,27 +1065,6 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		protected override bool AppointmentsIntersect(Calendar.Appointment appt1, Calendar.Appointment appt2)
-		{
-			if (!appt1.HasValidDates() || !appt2.HasValidDates())
-				return false;
-
-			if (!m_DisplayTasksContinuous)
-			{
-				return ((appt1.StartDate.Date == appt2.StartDate.Date) ||
-						(appt1.StartDate.Date == appt2.EndDate.Date) ||
-						(appt1.EndDate.Date == appt2.EndDate.Date) ||
-						(appt1.EndDate.Date == appt2.StartDate.Date));
-			}
-
-			return base.AppointmentsIntersect(appt1, appt2);
-		}
-
-		protected override void DrawLongAppointments(Graphics g, Rectangle rect)
-		{
-
-		}
-
 		protected override void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected)
 		{
 			var appt = apptView.Appointment;
@@ -1103,38 +1081,30 @@ namespace DayViewUIExtension
 
             if (longAppt)
             {
-				if (m_DisplayTasksContinuous)
+				// If displaying continuous and the start date precedes the 
+				// start of the week then extend the draw rect to the left 
+				// so the edge is clipped and likewise for the end date.
+				if (appt.StartDate < StartDate)
 				{
-					// If displaying continuous and the start date precedes the 
-					// start of the week then extend the draw rect to the left 
-					// so the edge is clipped and likewise for the end date.
-					if (appt.StartDate < StartDate)
-					{
-						rect.X -= 4;
-						rect.Width += 4;
+					rect.X -= 4;
+					rect.Width += 4;
 
-						gripRect.X = rect.X;
-						gripRect.Width = 0;
-					}
-					else if (appt.StartDate > StartDate)
-					{
-						rect.X++;
-						rect.Width--;
-
-						gripRect.X++;
-					}
-
-					if (appt.EndDate >= EndDate)
-					{
-						rect.Width += 5;
-					}
+					gripRect.X = rect.X;
+					gripRect.Width = 0;
 				}
-				else // Discontinuous
+				else if (appt.StartDate > StartDate)
 				{
+					rect.X++;
+					rect.Width--;
 
-
+					gripRect.X++;
 				}
-            }
+
+				if (appt.EndDate >= EndDate)
+				{
+					rect.Width += 5;
+				}
+			}
             else // day appt
             {
                 if (appt.StartDate.TimeOfDay.TotalHours == 0.0)

@@ -185,7 +185,8 @@ namespace Calendar
 		}
 
 		protected bool SavingToImage { get; set; }
-
+		protected bool DisplayLongAppointmentsContinuous { get; set; } = true;
+		
 		private AppHeightDrawMode appHeightMode = AppHeightDrawMode.TrueHeightAll;
 
         public AppHeightDrawMode AppHeightMode
@@ -1868,11 +1869,6 @@ namespace Calendar
             }
         }
 
-		protected virtual bool AppointmentsIntersect(Appointment appt1, Appointment appt2)
-		{
-			return appt1.IntersectsWith(appt2);
-		}
-
         private int RecalcAppointmentLayers(AppointmentList appointments)
         {
             if ((appointments == null) || (appointments.Count == 0))
@@ -1896,7 +1892,7 @@ namespace Calendar
 
 						foreach (var processedAppt in processed)
                         {
-                            if ((processedAppt.Layer == lay) && AppointmentsIntersect(appt, processedAppt))
+                            if ((processedAppt.Layer == lay) && appt.IntersectsWith(processedAppt, DisplayLongAppointmentsContinuous))
                             {
 								// If we find an intersection we update the current
 								// appt's layer and move on to the next layer

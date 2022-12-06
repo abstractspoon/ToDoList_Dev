@@ -230,10 +230,21 @@ namespace Calendar
             return IsLongAppt(startDate, endDate);
         }
 
-		public bool IntersectsWith(Appointment other)
+		public bool IntersectsWith(Appointment other, bool displayLongAppointmentsContinuous)
 		{
 			if (!HasValidDates() || !other.HasValidDates())
 				return false;
+
+			if (IsLongAppt() != other.IsLongAppt())
+				return false;
+
+			if (IsLongAppt() && !displayLongAppointmentsContinuous)
+			{
+				return ((StartDate.Date == other.StartDate.Date) ||
+						(StartDate.Date == other.EndDate.Date) ||
+						(EndDate.Date == other.EndDate.Date) ||
+						(EndDate.Date == other.StartDate.Date));
+			}
 
 			if (StartDate >= other.EndDate)
 				return false;
