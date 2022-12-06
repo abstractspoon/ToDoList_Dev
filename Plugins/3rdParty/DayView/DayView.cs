@@ -1868,6 +1868,11 @@ namespace Calendar
             }
         }
 
+		protected virtual bool AppointmentsIntersect(Appointment appt1, Appointment appt2)
+		{
+			return appt1.IntersectsWith(appt2);
+		}
+
         private int RecalcAppointmentLayers(AppointmentList appointments)
         {
             if ((appointments == null) || (appointments.Count == 0))
@@ -1891,7 +1896,7 @@ namespace Calendar
 
 						foreach (var processedAppt in processed)
                         {
-                            if ((processedAppt.Layer == lay) && appt.IntersectsWith(processedAppt))
+                            if ((processedAppt.Layer == lay) && AppointmentsIntersect(appt, processedAppt))
                             {
 								// If we find an intersection we update the current
 								// appt's layer and move on to the next layer
@@ -1918,7 +1923,7 @@ namespace Calendar
             return layers.Count;
         }
 
-        private void DrawLongAppointments(Graphics g, Rectangle rect)
+        virtual protected void DrawLongAppointments(Graphics g, Rectangle rect)
         {
             AppointmentList appointments = (AppointmentList)cachedAppointments[-1];
 

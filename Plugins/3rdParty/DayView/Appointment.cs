@@ -232,7 +232,7 @@ namespace Calendar
 
 		public bool IntersectsWith(Appointment other)
 		{
-			if (!HasValidDates())
+			if (!HasValidDates() || !other.HasValidDates())
 				return false;
 
 			if (StartDate >= other.EndDate)

@@ -1066,6 +1066,27 @@ namespace DayViewUIExtension
 			return false;
 		}
 
+		protected override bool AppointmentsIntersect(Calendar.Appointment appt1, Calendar.Appointment appt2)
+		{
+			if (!appt1.HasValidDates() || !appt2.HasValidDates())
+				return false;
+
+			if (!m_DisplayTasksContinuous)
+			{
+				return ((appt1.StartDate.Date == appt2.StartDate.Date) ||
+						(appt1.StartDate.Date == appt2.EndDate.Date) ||
+						(appt1.EndDate.Date == appt2.EndDate.Date) ||
+						(appt1.EndDate.Date == appt2.StartDate.Date));
+			}
+
+			return base.AppointmentsIntersect(appt1, appt2);
+		}
+
+		protected override void DrawLongAppointments(Graphics g, Rectangle rect)
+		{
+
+		}
+
 		protected override void DrawAppointment(Graphics g, Calendar.AppointmentView apptView, bool isSelected)
 		{
 			var appt = apptView.Appointment;
@@ -1078,32 +1099,41 @@ namespace DayViewUIExtension
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
 
-            // If the start date precedes the start of the week then extend the
-            // draw rect to the left so the edge is clipped and likewise for the right.
             bool longAppt = IsLongAppt(appt);
 
             if (longAppt)
             {
-                if (appt.StartDate < StartDate)
-                {
-                    rect.X -= 4;
-                    rect.Width += 4;
+				if (m_DisplayTasksContinuous)
+				{
+					// If displaying continuous and the start date precedes the 
+					// start of the week then extend the draw rect to the left 
+					// so the edge is clipped and likewise for the end date.
+					if (appt.StartDate < StartDate)
+					{
+						rect.X -= 4;
+						rect.Width += 4;
 
-                    gripRect.X = rect.X;
-                    gripRect.Width = 0;
-                }
-                else if (appt.StartDate > StartDate)
-                {
-                    rect.X++;
-                    rect.Width--;
+						gripRect.X = rect.X;
+						gripRect.Width = 0;
+					}
+					else if (appt.StartDate > StartDate)
+					{
+						rect.X++;
+						rect.Width--;
 
-                    gripRect.X++;
-                }
+						gripRect.X++;
+					}
 
-                if (appt.EndDate >= EndDate)
-                {
-                    rect.Width += 5;
-                }
+					if (appt.EndDate >= EndDate)
+					{
+						rect.Width += 5;
+					}
+				}
+				else // Discontinuous
+				{
+
+
+				}
             }
             else // day appt
             {

@@ -22,6 +22,9 @@ namespace DayViewUIExtension
 
 		public Rectangle IconRect;
 		public Rectangle TextRect;
+
+		public bool Discontinuous;
+		public Rectangle EndRect;
 	}
 
 	// ---------------------------------------------------------------
