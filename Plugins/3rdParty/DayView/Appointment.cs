@@ -267,16 +267,26 @@ namespace Calendar
 
 	public class AppointmentView
 	{
-		public AppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect)
+		public AppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect,
+								bool isLong, bool drawLongContinuous, int endOfStart, int startOfEnd)
 		{
 			Appointment = appt;
 			Rectangle = rect;
 			GripRect = gripRect;
+			IsLong = isLong;
+			DrawLongContinuous = IsLong ? drawLongContinuous : true;
+			EndOfStart = DrawLongContinuous ? -1 : endOfStart;
+			StartOfEnd = DrawLongContinuous ? -1 : startOfEnd;
 		}
 
 		public Appointment Appointment;
 		public Rectangle Rectangle;
 		public Rectangle GripRect;
+
+		public bool IsLong;
+		public bool DrawLongContinuous;
+		public int EndOfStart;
+		public int StartOfEnd;
 	}
 
 	class AppointmentList : List<Appointment>

@@ -245,9 +245,11 @@ namespace DayViewUIExtension
 			return new TDLSelectionTool();
 		}
 
-		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect)
+		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect,
+																		bool isLong, bool drawLongContinuous,
+																		int endOfStart = -1, int startOfEnd = -1)
 		{
-			return new TDLAppointmentView(appt, rect, gripRect);
+			return new TDLAppointmentView(appt, rect, gripRect, isLong, drawLongContinuous, endOfStart, startOfEnd);
 		}
 
         protected void InitializeComponent()
@@ -1077,7 +1079,7 @@ namespace DayViewUIExtension
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
 
-            bool longAppt = IsLongAppt(appt);
+            bool longAppt = apptView.IsLong;
 
             if (longAppt)
             {
@@ -1119,7 +1121,7 @@ namespace DayViewUIExtension
 			apptView.Rectangle = rect;
 			apptView.GripRect = gripRect;
 
-			m_Renderer.DrawAppointment(g, apptView, longAppt, isSelected);
+			m_Renderer.DrawAppointment(g, apptView, isSelected);
 		}
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)

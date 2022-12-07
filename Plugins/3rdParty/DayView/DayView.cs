@@ -1660,9 +1660,11 @@ namespace Calendar
         private Dictionary<Appointment, AppointmentView> appointmentViews = new Dictionary<Appointment, AppointmentView>();
         private Dictionary<Appointment, AppointmentView> longAppointmentViews = new Dictionary<Appointment, AppointmentView>();
 
-		virtual protected AppointmentView NewAppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect)
+		virtual protected AppointmentView NewAppointmentView(Appointment appt, Rectangle rect, Rectangle gripRect,
+															bool isLong = false, bool drawLongContinuous = true, 
+															int endOfStart = -1, int startOfEnd = -1)
 		{
-			return new AppointmentView(appt, rect, gripRect);
+			return new AppointmentView(appt, rect, gripRect, isLong, drawLongContinuous, endOfStart, startOfEnd);
 		}
 
 		protected AppointmentView GetAppointmentView(Appointment appt)
@@ -1968,14 +1970,20 @@ namespace Calendar
                 Rectangle gripRect = apptRect;
                 gripRect.Width = appointmentGripWidth;
 
-				var apptView = NewAppointmentView(appt, apptRect, gripRect);
+				var apptView = NewAppointmentView(appt, apptRect, gripRect, true, DisplayLongAppointmentsContinuous);
 				longAppointmentViews[appt] = apptView;
 
-                DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
-            }
+				if (!DisplayLongAppointmentsContinuous)
+				{
+					apptView.EndOfStart = (rect.X + (int)((startDay + 1) * dayWidth));
+					apptView.StartOfEnd = (rect.X + (int)((endDay - 1) * dayWidth));
+				}
 
-            // Draw a vertical line to close off the long appointments on the left
-            using (Pen m_Pen = new Pen(Color.DarkGray))
+				DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
+			}
+
+			// Draw a vertical line to close off the long appointments on the left
+			using (Pen m_Pen = new Pen(Color.DarkGray))
                 g.DrawLine(m_Pen, backRectangle.Left, backRectangle.Top, backRectangle.Left, rect.Bottom);
 
             g.SetClip(rect);
@@ -1988,7 +1996,7 @@ namespace Calendar
 
 		protected virtual void DrawAppointment(Graphics g, AppointmentView apptView, bool isSelected)
 		{
-			renderer.DrawAppointment(g, apptView, IsLongAppt(apptView.Appointment), isSelected);
+			renderer.DrawAppointment(g, apptView, isSelected);
 		}
 
 		#endregion
