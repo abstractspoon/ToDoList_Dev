@@ -1985,11 +1985,28 @@ namespace Calendar
 
 				if (!DisplayLongAppointmentsContinuous)
 				{
+					var gSave = g.Save();
+
 					apptView.EndOfStart = (rect.X + (int)((startDay + 1) * dayWidth));
 					apptView.StartOfEnd = (rect.X + (int)((endDay - 1) * dayWidth));
-				}
 
-				DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
+					// Clip out the middle part
+					var middlePart = apptView.Rectangle;
+
+					middlePart.X = apptView.EndOfStart - 1;
+					middlePart.Width = (apptView.StartOfEnd - apptView.EndOfStart) + 2;
+					middlePart.Height += 1;
+
+					g.ExcludeClip(middlePart);
+					
+					DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
+
+					g.Restore(gSave);
+				}
+				else
+				{
+					DrawAppointment(g, apptView, WantDrawAppointmentSelected(appt));
+				}
 			}
 
 			// Draw a vertical line to close off the long appointments on the left

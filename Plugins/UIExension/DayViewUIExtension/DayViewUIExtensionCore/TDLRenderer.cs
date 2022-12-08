@@ -742,7 +742,10 @@ namespace DayViewUIExtension
 				// End Part
 				Rectangle endRect = rect;
 				endRect.X = apptView.StartOfEnd;
-				endRect.Width = rect.Right - apptView.StartOfEnd;
+				endRect.Width = rect.Right - endRect.X;
+
+				if (isSelected)
+					endRect.Offset(1, 0);
 
 				// Draw the background of the appointment
 				DrawTaskBackground(g, endRect, apptView.IsLong, isFutureItem, isSelected, fillColor, borderColor);
