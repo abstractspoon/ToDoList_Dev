@@ -1388,14 +1388,24 @@ namespace Calendar
 			if (GetFullDayApptsRectangle().Contains(x, y))
 			{
 				foreach (AppointmentView view in longAppointmentViews.Values)
+				{
 					if (view.Rectangle.Contains(x, y))
-						return view;
+					{
+						if (DisplayLongAppointmentsContinuous)
+							return view;
+
+						if ((x < view.EndOfStart) || (x > view.StartOfEnd))
+							return view;
+					}
+				}
 			}
 			else
 			{
 				foreach (AppointmentView view in appointmentViews.Values)
+				{
 					if (view.Rectangle.Contains(x, y))
 						return view;
+				}
 			}
 
 			return null;
