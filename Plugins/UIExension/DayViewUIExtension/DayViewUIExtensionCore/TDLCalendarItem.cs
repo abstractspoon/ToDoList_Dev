@@ -18,11 +18,12 @@ namespace DayViewUIExtension
 			: 
 			base(appt, rect, gripRect, isLong, drawLongContinuous, endOfStart, startOfEnd)
 		{
-			IconRect = TextRect = Rectangle.Empty;
+			IconRect = Rectangle.Empty;
+			TextHorzOffset = 0;
 		}
 
 		public Rectangle IconRect;
-		public Rectangle TextRect;
+		public int TextHorzOffset;
 	}
 
 	// ---------------------------------------------------------------

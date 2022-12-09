@@ -1369,7 +1369,7 @@ namespace Calendar
 			return (apptView == null) ? null : apptView.Appointment;
         }
 
-		public Appointment GetAppointmentAt(int x, int y, out Rectangle apptRect)
+		public AppointmentView GetAppointmentViewAt(int x, int y, out Rectangle apptRect)
 		{
 			var apptView = GetAppointmentViewAt(x, y);
 
@@ -1380,7 +1380,21 @@ namespace Calendar
 			}
 
 			apptRect = apptView.Rectangle;
-			return apptView.Appointment;
+
+			if (apptView.IsLong && !apptView.DrawLongContinuous)
+			{
+				if (x < apptView.EndOfStart)
+				{
+					apptRect.Width = (apptView.EndOfStart - apptRect.X);
+				}
+				else
+				{
+					apptRect.Width = (apptRect.Right - apptView.StartOfEnd);
+					apptRect.X = apptView.StartOfEnd;
+				}
+			}
+
+			return apptView;
 		}
 
 		protected AppointmentView GetAppointmentViewAt(int x, int y)

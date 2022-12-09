@@ -116,18 +116,17 @@ namespace DayViewUIExtension
 				return 0;
 
             var pt = PointToClient(ptScreen);
-            Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y, out toolRect);
+            var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out toolRect) as TDLAppointmentView);
 
-            if (appt == null)
-                return 0;
+			if (tdlView == null)
+				return 0;
 
-			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+			bool startPortion = (toolRect.Right < tdlView.Rectangle.Right);
 
-            if ((apptView == null) || !apptView.TextRect.Contains(pt))
-                return 0;
-
-			toolRect = apptView.TextRect;
+			toolRect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_Renderer.TextOffset);
 			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
+
+			var appt = tdlView.Appointment;
 
 			if (appt is TaskExtensionItem)
 			{
@@ -168,7 +167,7 @@ namespace DayViewUIExtension
 				{
 					var availRect = GetTrueRectangle();
 
-					if (apptView.TextRect.Top < availRect.Top)
+					if (toolRect.Top < availRect.Top)
 					{
 						// If the top of the text rectangle is hidden we always 
 						// need a label tip so we just clip to the avail space

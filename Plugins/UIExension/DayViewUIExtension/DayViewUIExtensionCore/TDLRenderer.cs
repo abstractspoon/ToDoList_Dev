@@ -60,6 +60,7 @@ namespace DayViewUIExtension
         public Color GridlineColor { get; set; }
         public UITheme Theme { get; set; }
 		public int TextPadding { get { return 2; } }
+		public int TextOffset { get { return 3; } }
 
         protected override void Dispose(bool mainThread)
         {
@@ -658,15 +659,12 @@ namespace DayViewUIExtension
 					if (apptView.IsLong)
 						format.FormatFlags |= (StringFormatFlags.NoClip | StringFormatFlags.NoWrap);
 
-					rect.Y += 3;
+					rect.Y += TextOffset;
 
 					if (apptView.IsLong)
 						rect.Height = BaseFont.Height;
 					else
-						rect.Height -= 3;
-
-					var tdlView = (apptView as TDLAppointmentView);
-					tdlView.TextRect = rect;
+						rect.Height -= TextOffset;
 
 					g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
 
@@ -723,10 +721,13 @@ namespace DayViewUIExtension
 
 				// draw appointment text
 				DrawTaskText(g, apptView, rect, textColor);
+
+				var tdlView = (apptView as TDLAppointmentView);
+				tdlView.TextHorzOffset = (apptView.Rectangle.X - rect.X);
 			}
 			else // Draw long task discontinuously
 			{
-				// Start Part
+				// Start Part ------------------------------------------
 				Rectangle startRect = rect;
 				startRect.Width = apptView.EndOfStart - rect.Left;
 
@@ -739,7 +740,10 @@ namespace DayViewUIExtension
 				// draw appointment text
 				DrawTaskText(g, apptView, startRect, textColor);
 
-				// End Part
+				var tdlView = (apptView as TDLAppointmentView);
+				tdlView.TextHorzOffset = (startRect.X - apptView.Rectangle.X);
+
+				// End Part --------------------------------------------
 				Rectangle endRect = rect;
 				endRect.X = apptView.StartOfEnd;
 				endRect.Width = rect.Right - endRect.X;
@@ -754,5 +758,5 @@ namespace DayViewUIExtension
 				DrawTaskText(g, apptView, endRect, textColor);
 			}
 		}
-    }
+	}
 }
