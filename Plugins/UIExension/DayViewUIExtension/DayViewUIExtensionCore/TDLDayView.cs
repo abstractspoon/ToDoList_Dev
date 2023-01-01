@@ -37,7 +37,6 @@ namespace DayViewUIExtension
         private string m_HideParentTasksTag;
 
         private bool m_HideParentTasks = true;
-		private bool m_DisplayTasksContinuous = true;
 		private bool m_HideTasksWithoutTimes = true;
         private bool m_HideTasksSpanningWeekends = false;
         private bool m_HideTasksSpanningDays = false;
@@ -117,18 +116,17 @@ namespace DayViewUIExtension
 				return 0;
 
             var pt = PointToClient(ptScreen);
-            Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y, out toolRect);
+            var tdlView = (GetAppointmentViewAt(pt.X, pt.Y, out toolRect) as TDLAppointmentView);
 
-            if (appt == null)
-                return 0;
+			if (tdlView == null)
+				return 0;
 
-			var apptView = (GetAppointmentView(appt) as TDLAppointmentView);
+			bool startPortion = (toolRect.Right < tdlView.Rectangle.Right);
 
-            if ((apptView == null) || !apptView.TextRect.Contains(pt))
-                return 0;
-
-			toolRect = apptView.TextRect;
+			toolRect.Offset(startPortion ? tdlView.TextHorzOffset : 0, m_Renderer.TextOffset);
 			toolRect.Inflate(m_Renderer.TextPadding, m_Renderer.TextPadding);
+
+			var appt = tdlView.Appointment;
 
 			if (appt is TaskExtensionItem)
 			{
@@ -169,7 +167,7 @@ namespace DayViewUIExtension
 				{
 					var availRect = GetTrueRectangle();
 
-					if (apptView.TextRect.Top < availRect.Top)
+					if (toolRect.Top < availRect.Top)
 					{
 						// If the top of the text rectangle is hidden we always 
 						// need a label tip so we just clip to the avail space
@@ -246,9 +244,11 @@ namespace DayViewUIExtension
 			return new TDLSelectionTool();
 		}
 
-		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect)
+		protected override Calendar.AppointmentView NewAppointmentView(Calendar.Appointment appt, Rectangle rect, Rectangle gripRect,
+																		bool isLong, bool drawLongContinuous,
+																		int endOfStart = -1, int startOfEnd = -1)
 		{
-			return new TDLAppointmentView(appt, rect, gripRect);
+			return new TDLAppointmentView(appt, rect, gripRect, isLong, drawLongContinuous, endOfStart, startOfEnd);
 		}
 
         protected void InitializeComponent()
@@ -340,12 +340,12 @@ namespace DayViewUIExtension
 
 		public bool DisplayTasksContinuous
 		{
-			get { return m_DisplayTasksContinuous; }
+			get { return DisplayLongAppointmentsContinuous; }
 			set
 			{
-				if (value != m_DisplayTasksContinuous)
+				if (value != DisplayLongAppointmentsContinuous)
 				{
-					m_DisplayTasksContinuous = value;
+					DisplayLongAppointmentsContinuous = value;
 					FixupSelection(false, true);
 				}
 			}
@@ -1078,33 +1078,34 @@ namespace DayViewUIExtension
 			gripRect.Inflate(-2, -2);
 			gripRect.Width = 5;
 
-            // If the start date precedes the start of the week then extend the
-            // draw rect to the left so the edge is clipped and likewise for the right.
-            bool longAppt = IsLongAppt(appt);
+            bool longAppt = apptView.IsLong;
 
             if (longAppt)
             {
-                if (appt.StartDate < StartDate)
-                {
-                    rect.X -= 4;
-                    rect.Width += 4;
+				// If displaying continuous and the start date precedes the 
+				// start of the week then extend the draw rect to the left 
+				// so the edge is clipped and likewise for the end date.
+				if (appt.StartDate < StartDate)
+				{
+					rect.X -= 4;
+					rect.Width += 4;
 
-                    gripRect.X = rect.X;
-                    gripRect.Width = 0;
-                }
-                else if (appt.StartDate > StartDate)
-                {
-                    rect.X++;
-                    rect.Width--;
+					gripRect.X = rect.X;
+					gripRect.Width = 0;
+				}
+				else if (appt.StartDate > StartDate)
+				{
+					rect.X++;
+					rect.Width--;
 
-                    gripRect.X++;
-                }
+					gripRect.X++;
+				}
 
-                if (appt.EndDate >= EndDate)
-                {
-                    rect.Width += 5;
-                }
-            }
+				if (appt.EndDate >= EndDate)
+				{
+					rect.Width += 5;
+				}
+			}
             else // day appt
             {
                 if (appt.StartDate.TimeOfDay.TotalHours == 0.0)
@@ -1119,7 +1120,7 @@ namespace DayViewUIExtension
 			apptView.Rectangle = rect;
 			apptView.GripRect = gripRect;
 
-			m_Renderer.DrawAppointment(g, apptView, longAppt, isSelected);
+			m_Renderer.DrawAppointment(g, apptView, isSelected);
 		}
 
 		private void OnResolveAppointments(object sender, Calendar.ResolveAppointmentsEventArgs args)
