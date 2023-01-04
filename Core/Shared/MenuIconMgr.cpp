@@ -533,11 +533,17 @@ BOOL CMenuIconMgr::OnDrawItem(int /*nIDCtl*/, LPDRAWITEMSTRUCT lpdis)
         return FALSE; // not for a menu
 	
 	BOOL bDisabled = (lpdis->itemState & (ODS_GRAYED | ODS_DISABLED));
-    HICON hIcon = LoadItemIcon(lpdis->itemID, !bDisabled);
+
+	return DrawImage(lpdis->hDC, MAKELONG(lpdis->rcItem.left, lpdis->rcItem.top), !bDisabled);
+}
+
+BOOL CMenuIconMgr::DrawImage(HDC hDC, UINT nCmdID, const CPoint& ptTopLeft, BOOL bNormal) const
+{
+    HICON hIcon = LoadItemIcon(nCmdID, bNormal);
 	
     if (hIcon)
     {
-        ::DrawIconEx(lpdis->hDC, lpdis->rcItem.left, lpdis->rcItem.top, hIcon, 0, 0, 0, NULL, DI_NORMAL);
+        ::DrawIconEx(hDC, ptTopLeft.x, ptTopLeft.y, hIcon, 0, 0, 0, NULL, DI_NORMAL);
 		return TRUE;
     }
 	
