@@ -882,7 +882,7 @@ void CXHTMLStatic::Draw(HDC hDC)
 				strAnchorText = strText.Mid(9, index-10);
 				strText = strText.Mid(index+1);
 				n = strText.GetLength();
-				crText = RGB(0, 0, 255);
+				crText = GetSysColor(COLOR_HOTLIGHT);
 				m_bInAnchor = TRUE;
 				continue;
 			}

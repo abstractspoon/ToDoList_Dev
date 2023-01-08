@@ -889,7 +889,7 @@ void CKanbanColumnCtrl::DrawItemFileLinks(CDC* pDC, const KANBANITEM* pKI, CRect
 		int nFlags = (DT_LEFT | DT_PATH_ELLIPSIS | DT_NOPREFIX);
 
 		pDC->SetBkMode(TRANSPARENT);
-		pDC->SetTextColor(RGB(0, 0, 255)); // Default link colour
+		pDC->SetTextColor(GetSysColor(COLOR_HOTLIGHT));
 
 		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_UNDERLINED));
 
