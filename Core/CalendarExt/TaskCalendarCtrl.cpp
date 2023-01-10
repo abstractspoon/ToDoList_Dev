@@ -321,7 +321,7 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	// Make sure the selected task remains visible
 	// after any changes if it was visible to start with
 	BOOL bSelTaskWasVisible = IsTaskVisible(m_dwSelectedTaskID);
-	BOOL bChange = FALSE;
+	BOOL bChange = UpdateCustomDateAttributes(pTasks);
 
 	switch (nUpdate)
 	{
@@ -337,12 +337,12 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 		break;
 		
 	case IUI_EDIT:
-		bChange = (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) ||
+		bChange |= (UpdateTask(pTasks, pTasks->GetFirstTask(), nUpdate, TRUE) ||
 					pTasks->IsAttributeAvailable(TDCA_RECURRENCE));
 		break;
 		
 	case IUI_DELETE:
-		bChange = RemoveDeletedTasks(pTasks);
+		bChange |= RemoveDeletedTasks(pTasks);
 		break;
 		
 	default:
@@ -2580,7 +2580,13 @@ TCC_SNAPMODE CTaskCalendarCtrl::GetSnapMode() const
 {
 	if (IsDragging())
 	{
-		// active keys override
+		TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+		ASSERT(pTCI && !IsFutureOccurrence(pTCI));
+
+		if (IsCustomDate(pTCI))
+			return TCCSM_NEARESTDAY;
+		
+		// else active keys override
 		if (Misc::ModKeysArePressed(MKS_CTRL))
 			return TCCSM_NEARESTHOUR;
 
@@ -2884,7 +2890,7 @@ BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 		return FALSE;
 
 	BOOL bCustomDate = IsCustomDate(pTCI);
-	BOOL bHasDepends = (HasOption(TCCO_PREVENTDEPENDENTDRAGGING) && pTCI->bHasDepends);
+	BOOL bHasDepends = (!bCustomDate && HasOption(TCCO_PREVENTDEPENDENTDRAGGING) && pTCI->bHasDepends);
 			
 	switch (nHit)
 	{
