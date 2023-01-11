@@ -532,13 +532,16 @@ COLORREF KANBANITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 		{
 			return GraphicsMisc::GetBestTextColor(color);
 		}
-		else if (!Misc::IsHighContrastActive())
+		else if (bSelected)
 		{
-			if (bSelected)
-				return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
-
-			return color;
+			if (Misc::IsHighContrastActive())
+				return GetSysColor(COLOR_HIGHLIGHTTEXT);
+			else
+ 				return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
 		}
+
+		// else
+		return color;
 	}
 
 	// else

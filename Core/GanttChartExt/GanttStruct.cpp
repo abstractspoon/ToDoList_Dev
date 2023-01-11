@@ -332,9 +332,19 @@ COLORREF GANTTITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 	if (HasColor())
 	{
 		if (bColorIsBkgnd && !bSelected && !IsDone(TRUE))
+		{
 			return GraphicsMisc::GetBestTextColor(color);
-		else
-			return color;
+		}
+		else if (bSelected)
+		{
+			if (Misc::IsHighContrastActive())
+				return GetSysColor(COLOR_HIGHLIGHTTEXT);
+			else
+				return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+		}
+
+		// else
+		return color;
 	}
 	
 	// else
