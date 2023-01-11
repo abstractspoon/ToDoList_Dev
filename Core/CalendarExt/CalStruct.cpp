@@ -583,8 +583,9 @@ COLORREF TASKCALITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 		{
 			if (Misc::IsHighContrastActive())
 				return GetSysColor(COLOR_HIGHLIGHTTEXT);
-			else
-				return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
+			
+			// else
+			return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
 		}
 
 		// else
