@@ -156,7 +156,7 @@ void COwnerdrawComboBoxBase::GetItemColors(int nItem, UINT nItemState, DWORD dwI
 
 	if (IsHeadingItem(nItem))
 	{
-		crBack = GetSysColor(COLOR_3DLIGHT);
+		crBack = GetSysColor(COLOR_3DFACE);
 		crText = GetSysColor(COLOR_WINDOWTEXT);
 	}
 }

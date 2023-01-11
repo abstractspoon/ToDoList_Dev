@@ -256,9 +256,20 @@ void GraphicsMisc::DrawGlassWithGradient(CDC* pDC, LPCRECT pRect, COLORREF crFro
 void GraphicsMisc::DrawSplitBar(CDC* pDC, const CRect& rSplitter, COLORREF crSplitBar, BOOL bEdged)
 {
 	BOOL bVert = (rSplitter.Height() > rSplitter.Width());
-	DWORD dwEdges = (bEdged ? (bVert ? (GMDR_LEFT | GMDR_RIGHT) : (GMDR_TOP | GMDR_BOTTOM)) : 0);
 
-	DrawRect(pDC, rSplitter, crSplitBar, Darker(crSplitBar, 0.2), 0, dwEdges);
+	if (bEdged)
+	{
+		DWORD dwEdges = (bEdged ? (bVert ? (GMDR_LEFT | GMDR_RIGHT) : (GMDR_TOP | GMDR_BOTTOM)) : 0);
+
+		if (Misc::IsHighContrastActive())
+			DrawRect(pDC, rSplitter, crSplitBar, GetBestTextColor(crSplitBar), 0, dwEdges);
+		else
+			DrawRect(pDC, rSplitter, crSplitBar, Darker(crSplitBar, 0.2), 0, dwEdges);
+	}
+	else
+	{
+		DrawRect(pDC, rSplitter, crSplitBar);
+	}
 
 	// draw drag marker (2 x 20)
 	int nSplitWidth = min(rSplitter.Width(), rSplitter.Height());
