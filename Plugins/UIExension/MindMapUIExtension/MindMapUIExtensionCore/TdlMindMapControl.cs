@@ -1073,13 +1073,16 @@ namespace MindMapUIExtension
 
 			if (!isDragImage && !taskItem.TextColor.IsEmpty)
 			{
-				if (m_TaskColorIsBkgnd && !isSelected && !realItem.IsDone(true))
+				if (isSelected)
+				{
+					if (SystemInformation.HighContrast)
+						textColor = SystemColors.HighlightText;
+					else
+						textColor = DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
+				}
+				else if (m_TaskColorIsBkgnd && !realItem.IsDone(true))
 				{
 					textColor = DrawingColor.GetBestTextColor(taskItem.TextColor);
-				}
-				else if (isSelected)
-				{
-					textColor = DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
 				}
                 else
                 {
