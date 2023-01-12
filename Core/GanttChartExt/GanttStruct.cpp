@@ -364,7 +364,7 @@ COLORREF GANTTITEM::GetTextBkColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 	return CLR_NONE;
 }
 
-COLORREF GANTTITEM::GetFillColor() const
+COLORREF GANTTITEM::GetFillColor(BOOL /*bSelected*/) const
 {
 	if (IsDone(TRUE))
 	{
@@ -380,9 +380,13 @@ COLORREF GANTTITEM::GetFillColor() const
 	return CLR_NONE;
 }
 
-COLORREF GANTTITEM::GetBorderColor() const
+COLORREF GANTTITEM::GetBorderColor(BOOL bSelected) const
 {
-	if (IsDone(TRUE))
+	if (bSelected && Misc::IsHighContrastActive())
+	{
+		return GetSysColor(COLOR_HIGHLIGHTTEXT);
+	}
+	else if (IsDone(TRUE))
 	{
 		if (!Misc::IsHighContrastActive())
 			return color;

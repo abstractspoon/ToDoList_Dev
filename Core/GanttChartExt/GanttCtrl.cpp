@@ -3506,8 +3506,8 @@ COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL 
 void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, BOOL bSelected, COLORREF& crBorder, COLORREF& crFill) const
 {
 	// darker shade of the item crText/crBack
-	COLORREF crDefFill = gi.GetFillColor();
-	COLORREF crDefBorder = gi.GetBorderColor();
+	COLORREF crDefFill = gi.GetFillColor(bSelected);
+	COLORREF crDefBorder = gi.GetBorderColor(bSelected);
 
 	if (crDefFill == CLR_NONE)
 	{
@@ -3519,7 +3519,11 @@ void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, BOOL bSelected, COLORREF
 		else
 		{
 			crDefFill = GetSysColor(COLOR_WINDOW);
-			crDefBorder = GetSysColor(COLOR_WINDOWFRAME);
+
+			if (bSelected && Misc::IsHighContrastActive())
+				crDefBorder = GetSysColor(COLOR_HIGHLIGHTTEXT);
+			else
+				crDefBorder = GetSysColor(COLOR_WINDOWFRAME);
 		}
 	}
 
@@ -3927,7 +3931,11 @@ void CGanttCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect&
 
 	if (bDrawStart || bDrawEnd)
 	{
-		pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
+		if (bSelected && Misc::IsHighContrastActive())
+			pDC->SelectObject(GetSysColorBrush(COLOR_HIGHLIGHTTEXT));
+		else
+			pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
+
 		pDC->SelectStockObject(NULL_PEN);
 
 		if (bDrawStart)
@@ -4019,10 +4027,10 @@ void CGanttCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /*nMonth*
 	
 	if (gi.HasColor())
 	{
-		VERIFY(brFill.CreateSolidBrush(gi.GetFillColor()));
+		VERIFY(brFill.CreateSolidBrush(gi.GetFillColor(bSelected)));
 		pOldBrush = pDC->SelectObject(&brFill);
 
-		VERIFY(penBorder.CreatePen(PS_SOLID, 1, gi.GetBorderColor()));
+		VERIFY(penBorder.CreatePen(PS_SOLID, 1, gi.GetBorderColor(bSelected)));
 		poldPen = pDC->SelectObject(&penBorder);
 	}
 	else
