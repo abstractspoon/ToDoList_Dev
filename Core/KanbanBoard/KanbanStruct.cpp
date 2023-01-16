@@ -528,18 +528,11 @@ COLORREF KANBANITEM::GetTextColor(BOOL bSelected, BOOL bColorIsBkgnd) const
 {
 	if (HasColor())
 	{
-		if (bColorIsBkgnd && !bSelected && !IsDone(TRUE))
-		{
-			return GraphicsMisc::GetBestTextColor(color);
-		}
-		else if (bSelected)
-		{
-			if (Misc::IsHighContrastActive())
-				return GetSysColor(COLOR_HIGHLIGHTTEXT);
-			
-			// else
+		if (bSelected)
  			return GraphicsMisc::GetExplorerItemSelectionTextColor(color, GMIS_SELECTED, GMIB_THEMECLASSIC);
-		}
+
+		if (bColorIsBkgnd && !IsDone(TRUE))
+			return GraphicsMisc::GetBestTextColor(color);
 
 		// else
 		return color;
