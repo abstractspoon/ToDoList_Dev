@@ -1476,9 +1476,6 @@ LRESULT CWorkloadCtrl::OnAllocationsListCustomDraw(NMLVCUSTOMDRAW* pLVCD)
 			GraphicsMisc::DrawExplorerItemSelection(pDC, m_list, nState, rItem, (GMIB_THEMECLASSIC | GMIB_CLIPLEFT | GMIB_PREDRAW | GMIB_POSTDRAW));
 
 			// draw row
-			COLORREF crText = GetTreeTextColor(*pWI, (nState != GMIS_NONE), FALSE);
-			pDC->SetTextColor(crText);
-
 			DrawAllocationListItem(pDC, nItem, *pWI, (nState != GMIS_NONE));
 		}
 		return CDRF_SKIPDEFAULT;
@@ -2305,25 +2302,25 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 			rColumn.right--;
 			rColumn.bottom--;
 
-			if (crBack != CLR_NONE)
+			COLORREF crText = GetSysColor(COLOR_WINDOWTEXT);
+
+			if (bSelected)
 			{
-				if (bSelected)
-				{
+				if (Misc::IsHighContrastActive())
+					crText = GetSysColor(COLOR_HIGHLIGHTTEXT);
+
+				if (crBack != CLR_NONE)
 					GraphicsMisc::DrawRect(pDC, rColumn, CLR_NONE, crBack);
-				}
-				else
-				{
-					pDC->FillSolidRect(rColumn, crBack);
-					pDC->SetTextColor(GraphicsMisc::GetBestTextColor(crBack));
-				}
 			}
-			else
+			else if (crBack != CLR_NONE)
 			{
-				pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+				pDC->FillSolidRect(rColumn, crBack);
+				crText = GraphicsMisc::GetBestTextColor(crBack);
 			}
 
 			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
+			pDC->SetTextColor(crText);
 			pDC->DrawText(Misc::Format(dDays, 2), (LPRECT)(LPCRECT)rColumn, DT_CENTER);
 		}
 	}

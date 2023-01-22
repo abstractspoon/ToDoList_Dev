@@ -485,25 +485,40 @@ namespace DayViewUIExtension
 		{
 			TaskItem taskItem = GetTaskItem(appt);
 
-			if (isFutureItem)
+			// Default colours
+			if (isSelected && SystemInformation.HighContrast)
 			{
-				fillColor = SystemColors.Window;
-				textColor = appt.TextColor;
+				textColor = borderColor = SystemColors.HighlightText;
+				fillColor = SystemColors.Highlight;
+
+				barColor = isFutureItem ? SystemColors.Window : appt.TextColor;
 			}
 			else
 			{
-				textColor = taskItem.TaskTextColor;
-				fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
-			}
+				if (isFutureItem)
+				{
+					fillColor = SystemColors.Window;
+					textColor = appt.TextColor;
+				}
+				else
+				{
+					textColor = taskItem.TaskTextColor;
+					fillColor = DrawingColor.SetLuminance(textColor, 0.95f);
+				}
 
-			borderColor = taskItem.DrawBorder ? textColor : Color.Empty;
-			barColor = textColor;
+				borderColor = taskItem.DrawBorder ? textColor : Color.Empty;
+				barColor = textColor;
+			}
 
 			if (taskItem.HasTaskTextColor)
 			{
 				if (isSelected)
 				{
-					textColor = DrawingColor.SetLuminance(textColor, 0.3f);
+					if (!SystemInformation.HighContrast)
+						textColor = DrawingColor.SetLuminance(textColor, 0.3f);
+
+					if (!isFutureItem)
+						barColor = taskItem.TaskTextColor;
 				}
 				else if (TaskColorIsBackground && !taskItem.IsDoneOrGoodAsDone && !isFutureItem)
 				{

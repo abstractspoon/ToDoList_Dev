@@ -2788,8 +2788,8 @@ void CGanttCtrl::DrawListItemMonth(CDC* pDC, const CRect& rMonth,
 			bDrawToday = FALSE; // done
 	}
 
-	DrawGanttBar(pDC, rMonth, nMonth, nYear, gi);
-	DrawGanttDone(pDC, rMonth, nMonth, nYear, gi);
+	DrawGanttBar(pDC, rMonth, nMonth, nYear, gi, bSelected);
+	DrawGanttDone(pDC, rMonth, nMonth, nYear, gi, bSelected);
 }
 
 void CGanttCtrl::DrawListItemWeeks(CDC* pDC, const CRect& rMonth, 
@@ -3003,42 +3003,11 @@ void CGanttCtrl::DrawListItem(CDC* pDC, int nItem, const GANTTITEM& gi, BOOL bSe
 		CRect rItem;
 		VERIFY(m_list.GetItemRect(nItem, rItem, LVIR_BOUNDS));
 
-//		COLORREF crRow = CLR_NONE;//(bSelected ? CLR_NONE : GetRowColor(nItem));
-
-// 		if (htiRollUp)
-// 			DrawListItemRollupText(pDC, htiRollUp, rItem, rClip, crRow);
-// 		else
-			DrawListItemText(pDC, gi, rItem, rClip/*, crRow*/);
+		DrawListItemText(pDC, gi, rItem, rClip, bSelected);
 	}
 }
 
-/*
-void CGanttCtrl::DrawListItemRollupText(CDC* pDC, HTREEITEM htiParent, const CRect& rItem, const CRect& rClip, COLORREF crRow)
-{
-	HTREEITEM htiChild = m_tree.GetChildItem(htiParent);
-
-	while (htiChild)
-	{
-		if (m_tree.ItemHasChildren(htiChild))
-		{
-			DrawListItemRollupText(pDC, htiChild, rItem, rClip, crRow); // RECURSIVE CALL
-		}
-		else
-		{
-			DWORD dwTaskID = GetTaskID(htiChild);
-
-			GANTTITEM* pGIChild = NULL;
-			GET_GI(dwTaskID, pGIChild);
-
-			DrawListItemText(pDC, *pGIChild, rItem, rClip, crRow);
-		}
-
-		htiChild = m_tree.GetNextItem(htiChild, TVGN_NEXT);
-	}
-}
-*/
-
-void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip/*, COLORREF crRow*/)
+void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rItem, const CRect& rClip, BOOL bSelected)
 {
 	BOOL bDrawTitle = HasOption(GTLCF_DISPLAYTRAILINGTASKTITLE);
 	BOOL bDrawAllocTo = (HasOption(GTLCF_DISPLAYTRAILINGALLOCTO) && !gi.sAllocTo.IsEmpty());
@@ -3082,16 +3051,15 @@ void CGanttCtrl::DrawListItemText(CDC* pDC, const GANTTITEM& gi, const CRect& rI
 	rText.top += 2;
 
 	COLORREF crFill, crBorder;
-	GetGanttBarColors(gi, crBorder, crFill);
+	GetGanttBarColors(gi, bSelected, crBorder, crFill);
 
 	HGDIOBJ hFontOld = NULL;
 
 	if (HasOption(GTLCF_STRIKETHRUDONETASKS) && gi.IsDone(FALSE))
 		hFontOld = pDC->SelectObject(m_tree.Fonts().GetHFont(FALSE, FALSE, FALSE, TRUE));
 	
-	pDC->SetBkMode(/*(crRow == CLR_NONE) ?*/ TRANSPARENT /*: OPAQUE*/);
+	pDC->SetBkMode(TRANSPARENT);
 	pDC->SetTextColor(crBorder);
-	//pDC->SetBkColor(crRow);
 	pDC->DrawText(sTrailing, rText, (DT_LEFT | DT_NOPREFIX | GraphicsMisc::GetRTLDrawTextFlags(m_list)));
 
 	pDC->SelectObject(hFontOld);
@@ -3535,11 +3503,11 @@ COLORREF CGanttCtrl::GetTreeTextColor(const GANTTITEM& gi, BOOL bSelected, BOOL 
 	return crText;
 }
 
-void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLORREF& crFill) const
+void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, BOOL bSelected, COLORREF& crBorder, COLORREF& crFill) const
 {
 	// darker shade of the item crText/crBack
-	COLORREF crDefFill = gi.GetFillColor();
-	COLORREF crDefBorder = gi.GetBorderColor();
+	COLORREF crDefFill = gi.GetFillColor(bSelected);
+	COLORREF crDefBorder = gi.GetBorderColor(bSelected);
 
 	if (crDefFill == CLR_NONE)
 	{
@@ -3551,7 +3519,11 @@ void CGanttCtrl::GetGanttBarColors(const GANTTITEM& gi, COLORREF& crBorder, COLO
 		else
 		{
 			crDefFill = GetSysColor(COLOR_WINDOW);
-			crDefBorder = GetSysColor(COLOR_WINDOWFRAME);
+
+			if (bSelected && Misc::IsHighContrastActive())
+				crDefBorder = GetSysColor(COLOR_HIGHLIGHTTEXT);
+			else
+				crDefBorder = GetSysColor(COLOR_WINDOWFRAME);
 		}
 	}
 
@@ -3803,7 +3775,7 @@ BOOL CGanttCtrl::CalcDependencyEndPos(DWORD dwTaskID, int nItem, GANTTDEPENDENCY
 	return TRUE;
 }
 
-void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi)
+void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, BOOL bSelected)
 {
 	int nDaysInMonth = CDateHelper::GetDaysInMonth(nMonth, nYear);
 
@@ -3817,7 +3789,7 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 
 	if (gi.IsMilestone(m_sMilestoneTag))
 	{
-		DrawGanttMilestone(pDC, rMonth, nMonth, nYear, gi);
+		DrawGanttMilestone(pDC, rMonth, nMonth, nYear, gi, bSelected);
 		return;
 	}
 
@@ -3839,7 +3811,7 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 		return;
 
 	COLORREF crBorder = RGB(0, 0, 0), crFill = CLR_NONE;
-	GetGanttBarColors(gi, crBorder, crFill);
+	GetGanttBarColors(gi, bSelected, crBorder, crFill);
 	
 	// adjust bar height
 	rBar.top += GraphicsMisc::ScaleByDPIFactor(2);
@@ -3936,11 +3908,12 @@ void CGanttCtrl::DrawGanttBar(CDC* pDC, const CRect& rMonth, int nMonth, int nYe
 	GraphicsMisc::DrawRect(pDC, rBar, crFill, crBorder, 0, dwBorders);
 	
 	// for parent items draw downward facing pointers at the ends
-	DrawGanttParentEnds(pDC, gi, rBar, dtMonthStart, dtMonthEnd);
+	DrawGanttParentEnds(pDC, gi, rBar, dtMonthStart, dtMonthEnd, bSelected);
 }
 
 void CGanttCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect& rBar, 
-											 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd)
+									 const COleDateTime& dtMonthStart, const COleDateTime& dtMonthEnd, 
+									 BOOL bSelected)
 {
 	if (!gi.bParent || !HasOption(GTLCF_CALCPARENTDATES))
 		return;
@@ -3958,7 +3931,11 @@ void CGanttCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect&
 
 	if (bDrawStart || bDrawEnd)
 	{
-		pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
+		if (bSelected && Misc::IsHighContrastActive())
+			pDC->SelectObject(GetSysColorBrush(COLOR_HIGHLIGHTTEXT));
+		else
+			pDC->SelectObject(GetSysColorBrush(COLOR_WINDOWTEXT));
+
 		pDC->SelectStockObject(NULL_PEN);
 
 		if (bDrawStart)
@@ -3987,7 +3964,7 @@ void CGanttCtrl::DrawGanttParentEnds(CDC* pDC, const GANTTITEM& gi, const CRect&
 	}
 }
 
-void CGanttCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi)
+void CGanttCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nYear, const GANTTITEM& gi, BOOL bSelected)
 {
 	if (!gi.HasDoneDate(HasOption(GTLCF_CALCPARENTDATES)) || gi.IsMilestone(m_sMilestoneTag))
 		return;
@@ -4012,7 +3989,7 @@ void CGanttCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nY
 	
 	// draw done date
 	COLORREF crBorder, crFill;
-	GetGanttBarColors(gi, crBorder, crFill);
+	GetGanttBarColors(gi, bSelected, crBorder, crFill);
 
 	// resize to a square
 	rDone.DeflateRect(0, DONE_BOX, 0, DONE_BOX);
@@ -4022,7 +3999,7 @@ void CGanttCtrl::DrawGanttDone(CDC* pDC, const CRect& rMonth, int nMonth, int nY
 	pDC->FillSolidRect(rDone, crBorder);
 }
 
-void CGanttCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /*nMonth*/, int /*nYear*/, const GANTTITEM& gi)
+void CGanttCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /*nMonth*/, int /*nYear*/, const GANTTITEM& gi, BOOL bSelected)
 {
 	CRect rMilestone;
 
@@ -4050,12 +4027,11 @@ void CGanttCtrl::DrawGanttMilestone(CDC* pDC, const CRect& rMonth, int /*nMonth*
 	
 	if (gi.HasColor())
 	{
-		VERIFY(brFill.CreateSolidBrush(gi.GetFillColor()));
+		VERIFY(brFill.CreateSolidBrush(gi.GetFillColor(bSelected)));
 		pOldBrush = pDC->SelectObject(&brFill);
 
-		VERIFY(penBorder.CreatePen(PS_SOLID, 1, gi.GetBorderColor()));
+		VERIFY(penBorder.CreatePen(PS_SOLID, 1, gi.GetBorderColor(bSelected)));
 		poldPen = pDC->SelectObject(&penBorder);
-
 	}
 	else
 	{

@@ -1,4 +1,6 @@
 using System;
+using System.Drawing;
+using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,8 +57,14 @@ namespace WordCloudUIExtension
         {
             if (!taskTextColor.IsEmpty)
             {
-                if (isSelected)
-                    return DrawingColor.SetLuminance(TextColor, 0.3f);
+				if (isSelected)
+				{
+					if (SystemInformation.HighContrast)
+						return SystemColors.HighlightText;
+
+					// else
+					return DrawingColor.SetLuminance(TextColor, 0.3f);
+				}
 
                 if (taskColorIsBkgnd && !IsDone(true))
                     return DrawingColor.GetBestTextColor(TextColor);

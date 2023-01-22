@@ -10,6 +10,7 @@
 #include "osversion.h"
 #include "icon.h"
 #include "EnImageList.h"
+#include "EnBitmapEx.h"
 
 #include "..\3rdparty\colordef.h"
 #include "..\3rdparty\ShellIcons.h"
@@ -2050,8 +2051,11 @@ BOOL GraphicsMisc::InitCheckboxImageList(HWND hWnd, CImageList& ilCheckboxes, UI
 			BITMAP BM;
 			bitmap.GetBitmap(&BM);
 
-			if (ilCheckboxes.Create(BM.bmWidth / nNumStates, BM.bmHeight, ILC_COLOR32 | ILC_MASK, 0, 1))
-				ilCheckboxes.Add(&bitmap, crBkgnd);
+			if (ilCheckboxes.Create(BM.bmWidth / nNumStates, BM.bmHeight, ILC_COLOR32 | ILC_MASK, 0, 1) &&
+				ilCheckboxes.Add(&bitmap, crBkgnd) == 0)
+			{
+				CEnImageList::ScaleByDPIFactor(ilCheckboxes, crBkgnd);
+			}
 		}
 	}
 
