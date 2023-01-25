@@ -870,22 +870,36 @@ BOOL CUrlRichEditCtrl::OnNotifyLink(NMHDR* pNMHDR, LRESULT* pResult)
 	case WM_LBUTTONDOWN:
 		m_sContextUrl = GetTextRange(pENL->chrg);
 
-		if (!WantFollowLink(bCtrl, bShift) && !SelectionContainsMessagePos())
+		if (!WantFollowLink(bCtrl, bShift))
 		{
-			SetFocus();
+			// If pENL->lParam is zero then this is a synthesized 
+			// message in response to the <enter> key being pressed
+			// when the caret is within a hyperlink
+			if (pENL->lParam == 0)
+			{
+				// Insert a newline at the caret position
+				ReplaceSel(_T("\r\n"), TRUE);
+				return TRUE; // Handled
+			}
+			else if (!SelectionContainsPos(pENL->lParam))
+			{
+				SetFocus();
 			
-			int nPos = CharFromPoint(pENL->lParam);
-			SetSel(nPos, nPos);
+				int nPos = CharFromPoint(pENL->lParam);
+				SetSel(nPos, nPos);
 			
-			// eat
-			m_sContextUrl.Empty();
-			return TRUE; // we handle it
+				// eat
+				m_sContextUrl.Empty();
+				return TRUE; // Handled
+			}
 		}
+		// else default behaviour
 		break;
 
 	case WM_LBUTTONUP:
 		if (WantFollowLink(bCtrl, bShift))
 		{
+			// Verify the same link is beneath the cursor
 			CString sUrl = GetTextRange(pENL->chrg);
 
 			if (!sUrl.IsEmpty() && (m_sContextUrl == sUrl))
