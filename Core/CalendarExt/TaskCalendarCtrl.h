@@ -105,7 +105,7 @@ protected:
 	COleDateTime m_dtMin, m_dtMax;
 	int m_nTaskHeight;
 	TDC_ATTRIBUTE m_nSortBy;
-	CString m_sCellHeaderDateFormat;
+	CString m_sCellDateFormat;
 	COLORREF m_crWeekend, m_crToday, m_crAltWeek; // Grid color handled by base class
 	TCC_SNAPMODE m_nDefSnapMode;
 	CString m_sHideParentTag;
@@ -195,6 +195,7 @@ protected:
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
 	CString CalcCellHeaderDateFormat(CDC* pDC, CFont* pBoldFont) const;
+	CString FormatCellDate(const COleDateTime& date, BOOL bShowMonth) const;
 
 	DWORD GetSelectedTaskID() const;
 	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect = NULL) const;
