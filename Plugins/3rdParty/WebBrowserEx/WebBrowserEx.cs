@@ -50,6 +50,18 @@ namespace WebBrowserEx
 			return IntPtr.Zero;
 		}
 
+		[DllImport("user32.dll", SetLastError = true)]
+		static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
+
+		public IntPtr GetIEServerWindowHandle()
+		{
+			IntPtr hwndFind = FindWindowEx(Handle, IntPtr.Zero, "Shell Embedding", "");
+			hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Shell DocObject View", "");
+			hwndFind = FindWindowEx(hwndFind, IntPtr.Zero, "Internet Explorer_Server", "");
+
+			return hwndFind;
+		}
+
 		#region WebBrowserExSite
 
 		[ClassInterface(ClassInterfaceType.None)]

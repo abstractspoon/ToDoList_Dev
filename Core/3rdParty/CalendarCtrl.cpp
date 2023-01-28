@@ -596,7 +596,7 @@ void CCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, const C
 	
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(csDay, (LPRECT)(LPCRECT)rText, DT_LEFT|DT_VCENTER);
+	pDC->DrawText(csDay, &rText, DT_LEFT|DT_VCENTER);
 
 	// cleanup
 	if (fontBold.GetSafeHandle())

@@ -3459,7 +3459,7 @@ void CGanttCtrl::DrawListHeaderRect(CDC* pDC, const CRect& rItem, const CString&
 		pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
 		const UINT nFlags = (DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | nHorzHAlign | GraphicsMisc::GetRTLDrawTextFlags(m_listHeader));
-		pDC->DrawText(sItem, (LPRECT)(LPCRECT)rDraw, nFlags);
+		pDC->DrawText(sItem, &rDraw, nFlags);
 	}
 }
 
