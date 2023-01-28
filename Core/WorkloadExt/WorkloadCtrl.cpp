@@ -2321,7 +2321,7 @@ void CWorkloadCtrl::DrawAllocationListItem(CDC* pDC, int nItem, const WORKLOADIT
 			rColumn.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
 			pDC->SetTextColor(crText);
-			pDC->DrawText(Misc::Format(dDays, 2), (LPRECT)(LPCRECT)rColumn, DT_CENTER);
+			pDC->DrawText(Misc::Format(dDays, 2), &rColumn, DT_CENTER);
 		}
 	}
 }
@@ -2370,7 +2370,7 @@ void CWorkloadCtrl::DrawTotalsListItem(CDC* pDC, int nItem, const CMapAllocation
 			CRect rText(rColumn);
 			rText.DeflateRect(LV_COLPADDING, 1, LV_COLPADDING, 0);
 
-			pDC->DrawText(sValue, (LPRECT)(LPCRECT)rText, DT_CENTER);
+			pDC->DrawText(sValue, &rText, DT_CENTER);
 		}
 			
 		DrawVertItemDivider(pDC, rColumn, bSelected);
