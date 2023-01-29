@@ -872,15 +872,17 @@ void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, con
 	// Draw the first of any month in bold
 	CFont *pOldFont = NULL;
 
+	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
+	pDC->SetBkMode(TRANSPARENT);
+
 	if (nDay == 1)
 		pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
 
 	CRect rDate(rHeader);
 	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
-	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(FormatCellDate(pCell->date, bShowMonth), &rDate, DT_LEFT | DT_VCENTER);
+	CString sDate = FormatCellDate(pCell->date, (bShowMonth || HasOption(TCCO_SHOWDATEINEVERYCELL)));
+	pDC->DrawText(sDate, &rDate, DT_LEFT | DT_VCENTER);
 
 	// cleanup
 	if (nDay == 1)

@@ -37,6 +37,7 @@ public:
 	BOOL GetDisplayCalcDue() const { return (m_bShowDueDates && m_bShowCalcDueDates); }
 	BOOL GetDisplayDone() const { return m_bShowDoneDates; }
 	BOOL GetDisplayFutureOcurrences() const { return m_bShowFutureOcurrences; }
+	BOOL GetDisplayDateInEveryCell() const { return m_bShowDateInEveryCell; }
 
 	BOOL GetCalcMissingStartAsCreation() const;
 	BOOL GetCalcMissingStartAsDue() const;
@@ -70,6 +71,7 @@ protected:
 	int		m_nCalcMissingDueDates;
 	BOOL	m_bHideParentTasks;
 	BOOL	m_bShowFutureOcurrences;
+	BOOL	m_bShowDateInEveryCell;
 	BOOL	m_bHideParentTasksByTag;
 	CString	m_sHideParentTag;
 	
@@ -121,6 +123,7 @@ public:
 	BOOL GetDisplayCalcDue() const { return m_page.GetDisplayCalcDue(); }
 	BOOL GetDisplayDone() const { return m_page.GetDisplayDone(); }
 	BOOL GetDisplayFutureOcurrences() const { return m_page.GetDisplayFutureOcurrences(); }
+	BOOL GetDisplayDateInEveryCell() const { return m_page.GetDisplayDateInEveryCell(); }
 
 	BOOL GetCalcMissingStartAsCreation() const { return m_page.GetCalcMissingStartAsCreation(); }
 	BOOL GetCalcMissingStartAsDue() const { return m_page.GetCalcMissingStartAsDue(); }
