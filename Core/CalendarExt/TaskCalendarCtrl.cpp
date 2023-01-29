@@ -30,12 +30,12 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-const int TIP_PADDING = 3;
-const int TEXT_PADDING = GraphicsMisc::ScaleByDPIFactor(2);
-const int HEADER_PADDING = GraphicsMisc::ScaleByDPIFactor(3);
-const int IMAGE_SIZE = GraphicsMisc::ScaleByDPIFactor(16);
-const int DEF_TASK_HEIGHT = (IMAGE_SIZE + 3); // Effective height is 1 less
-const int MIN_TASK_HEIGHT = (DEF_TASK_HEIGHT - 6);
+const int TIP_PADDING		= 3;
+const int TEXT_PADDING		= GraphicsMisc::ScaleByDPIFactor(2);
+const int HEADER_PADDING	= GraphicsMisc::ScaleByDPIFactor(3);
+const int IMAGE_SIZE		= GraphicsMisc::ScaleByDPIFactor(16);
+const int DEF_TASK_HEIGHT	= (IMAGE_SIZE + 3); // Effective height is 1 less
+const int MIN_TASK_HEIGHT	= (DEF_TASK_HEIGHT - 6);
 const int OVERFLOWBTN_TIPID = INT_MAX;
 
 /////////////////////////////////////////////////////////////////////////////
@@ -74,8 +74,7 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_bSortAscending(-1),
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crToday(255),
-	m_crAltWeek(CLR_NONE),
-	m_nCellHeaderMonthStyle(TCCMS_LONG)
+	m_crAltWeek(CLR_NONE)
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
@@ -695,7 +694,7 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 	UpdateCellScrollBarVisibility(FALSE);
 	RebuildCellTaskDrawInfo();
 
-	m_nCellHeaderMonthStyle = CalcCellHeaderMonthStyle(pDC, m_fonts.GetFont(GMFS_BOLD));
+	m_sCellDateFormat = CalcCellHeaderDateFormat(pDC, m_fonts.GetFont(GMFS_BOLD));
 
 	// create alternate text font as required
 	int nSize = CalcRequiredTaskFontPointSize();
@@ -789,43 +788,80 @@ void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, cons
 	}
 }
 
-TCC_MONTHSTYLE CTaskCalendarCtrl::CalcCellHeaderMonthStyle(CDC* pDC, CFont* pBoldFont) const
+CString CTaskCalendarCtrl::CalcCellHeaderDateFormat(CDC* pDC, CFont* pBoldFont) const
 {
 	CRect rCells;
 	GetClientRect(rCells);
 
 	int nAvailWidth = ((rCells.Width() / CALENDAR_NUM_COLUMNS) - (2 * HEADER_PADDING));
-	TCC_MONTHSTYLE nMonthStyle = TCCMS_LONG;
 
+	// Note: We use a bold font and the first day of the month 
+	// for our calculations because experience tells that it 
+	// always produces wider text than double digit non-bold text
 	CFont *pOldFont = pDC->SelectObject(pBoldFont);
 	
 	int nMaxDayWidth = pDC->GetTextExtent(_T("1 ")).cx;
-	int nMaxLongWidth = CDateHelper::GetMaxMonthNameWidth(pDC, FALSE);
+	int nLongYearWidth = pDC->GetTextExtent(_T(" 2020")).cx;
+	int nMaxLongMonthWidth = CDateHelper::GetMaxMonthNameWidth(pDC, FALSE);
 
-	if ((nMaxDayWidth + nMaxLongWidth) > nAvailWidth)
+	CString sDateFormat = _T("%e"); // Day only
+
+	CString sShortFormat = Misc::GetShortDateFormat();
+	BOOL bMonthBeforeDay = (sShortFormat.Find('M') < sShortFormat.Find('d'));
+
+	if ((nMaxDayWidth + nMaxLongMonthWidth + nLongYearWidth) <= nAvailWidth)
 	{
-		int nMaxShortWidth = CDateHelper::GetMaxMonthNameWidth(pDC, TRUE);
+		sDateFormat = (bMonthBeforeDay ? _T("%B %e %Y") : _T("%e %B %Y"));
+	}
+	else
+	{
+		int nMaxShortMonthWidth = CDateHelper::GetMaxMonthNameWidth(pDC, TRUE);
 
-		if ((nMaxDayWidth + nMaxShortWidth) <= nAvailWidth)
+		if ((nMaxDayWidth + nMaxShortMonthWidth + nLongYearWidth) <= nAvailWidth)
 		{
-			nMonthStyle = TCCMS_SHORT;
+			sDateFormat = (bMonthBeforeDay ? _T("%b %e %Y") : _T("%e %b %Y"));
 		}
-		else
+		else 
 		{
-			pDC->SelectObject(pOldFont);
+			CString sDateSep = Misc::GetDateSeparator();
+			CString sDayMonthFormat;
 
-			int nMaxNumWidth = pDC->GetTextExtent(_T("31/12")).cx;
-
-			if (nMaxNumWidth <= nAvailWidth)
-				nMonthStyle = TCCMS_NUMBER;
+			if (bMonthBeforeDay)
+				sDayMonthFormat = _T("%m") + sDateSep + _T("%e");
 			else
-				nMonthStyle = TCCMS_NONE;
+				sDayMonthFormat = _T("%e") + sDateSep + _T("%m");
+			
+			if (pDC->GetTextExtent(_T("1/12/2020")).cx <= nAvailWidth)
+			{
+				sDateFormat = sDayMonthFormat + sDateSep + _T("%Y");
+			}
+			else if (pDC->GetTextExtent(_T("1/12/20")).cx <= nAvailWidth)
+			{
+				sDateFormat = sDayMonthFormat + sDateSep + _T("%y");
+			}
+			else if (pDC->GetTextExtent(_T("1/12")).cx <= nAvailWidth)
+			{
+				sDateFormat = sDayMonthFormat;
+			}
+			else // Day only
+			{
+				sDateFormat = _T("%e");
+			}
 		}
 	}
-
 	pDC->SelectObject(pOldFont);
 
-	return nMonthStyle;
+	return sDateFormat;
+}
+
+CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMonth) const
+{
+	ASSERT(m_sCellDateFormat);
+
+	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : _T("%e"));
+	sDate.TrimLeft();
+
+	return sDate;
 }
 
 void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, const CRect& rHeader, BOOL bShowMonth)
@@ -839,39 +875,12 @@ void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, con
 	if (nDay == 1)
 		pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
 
-	CRect rText(rHeader);
-	rText.DeflateRect(HEADER_PADDING, 3);
+	CRect rDate(rHeader);
+	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	CString sText;
-
-	if (bShowMonth)
-	{
-		switch (m_nCellHeaderMonthStyle)
-		{
-		case TCCMS_LONG:
-			sText.Format(_T("%d %s"), nDay, GetMonthName(pCell->date, FALSE));
-			break;
-
-		case TCCMS_SHORT:
-			sText.Format(_T("%d %s"), nDay, GetMonthName(pCell->date, TRUE));
-			break;
-
-		case TCCMS_NUMBER:
-			sText.Format(_T("%d/%d"), nDay, pCell->date.GetMonth());
-			break;
-
-		case TCCMS_NONE:
-			// Handled below
-			break;
-		}
-	}
-
-	if (sText.IsEmpty())
-		sText = Misc::Format(nDay);
-	
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	pDC->SetBkMode(TRANSPARENT);
-	pDC->DrawText(sText, (LPRECT)(LPCRECT)rText, DT_LEFT | DT_VCENTER);
+	pDC->DrawText(FormatCellDate(pCell->date, bShowMonth), &rDate, DT_LEFT | DT_VCENTER);
 
 	// cleanup
 	if (nDay == 1)
