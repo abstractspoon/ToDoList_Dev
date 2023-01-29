@@ -115,18 +115,21 @@ namespace DayViewUIExtension
 			// Day of month
 			if (firstDay || (date.Day == 1))
 			{
+				var dateFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+				bool monthBeforeDay = (dateFormat.IndexOf('M') < dateFormat.IndexOf('d'));
+
 				switch (monthStyle)
 				{
 				case MonthNameStyle.Long:
-					format += "d MMMM";
+					format += (monthBeforeDay ? "MMMM d" : "d MMMM");
 					break;
 
 				case MonthNameStyle.Short:
-					format += "d MMM";
+					format += (monthBeforeDay ? "MMM d" : "d MMM");
 					break;
 
 				case MonthNameStyle.Number:
-					format += "d/M";
+					format += (monthBeforeDay ? "M/d" : "d/M");
 					break;
 				}
 			}
