@@ -52,6 +52,7 @@ static CTRLITEM FILTERCTRLS[] =
 	CTRLITEM(IDC_CATEGORYFILTERCOMBO,	IDC_CATEGORYFILTERLABEL,	TDCA_CATEGORY),
 	CTRLITEM(IDC_TAGFILTERCOMBO,		IDC_TAGFILTERLABEL,			TDCA_TAGS),
 	CTRLITEM(IDC_VERSIONFILTERCOMBO,	IDC_VERSIONFILTERLABEL,		TDCA_VERSION),
+	CTRLITEM(IDC_RECURFILTERCOMBO,		IDC_RECURFILTERLABEL,		TDCA_RECURRENCE),
 	CTRLITEM(IDC_OPTIONFILTERCOMBO,		IDC_OPTIONFILTERLABEL,		TDCA_NONE),
 };
 
@@ -73,6 +74,7 @@ CTDLFilterBar::CTDLFilterBar(CWnd* pParent /*=NULL*/)
 	m_cbTagFilter(TRUE, IDS_TDC_NONE, IDS_TDC_ANY),
 	m_cbPriorityFilter(TRUE),
 	m_cbRiskFilter(TRUE),
+	m_cbRecurrence(TRUE),
 	m_crUIBack(CLR_NONE),
 	m_eStartNextNDays(TRUE, _T("-0123456789")),
 	m_eDueNextNDays(TRUE, _T("-0123456789")),
@@ -110,6 +112,7 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STATUSFILTERCOMBO, m_cbStatusFilter);
 	DDX_Control(pDX, IDC_PRIORITYFILTERCOMBO, m_cbPriorityFilter);
 	DDX_Control(pDX, IDC_RISKFILTERCOMBO, m_cbRiskFilter);
+	DDX_Control(pDX, IDC_RECURFILTERCOMBO, m_cbRecurrence);
 	DDX_Control(pDX, IDC_TITLEFILTERTEXT, m_eTitleFilter);
 	DDX_Control(pDX, IDC_USERSTARTDATE, m_dtcUserStart);
 	DDX_Control(pDX, IDC_USERDUEDATE, m_dtcUserDue);
@@ -121,6 +124,8 @@ void CTDLFilterBar::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_DUENEXTNDAYS, m_filter.nDueNextNDays);
 	DDX_DateTimeCtrl(pDX, IDC_USERSTARTDATE, m_filter.dtUserStart);
 	DDX_DateTimeCtrl(pDX, IDC_USERDUEDATE, m_filter.dtUserDue);
+	
+	CDialogHelper::DDX_CBData(pDX, m_cbRecurrence, m_filter.nRecurrence, TDIR_NONE);
 
 	m_cbPriorityFilter.DDX(pDX, m_filter.nPriority);
 	m_cbRiskFilter.DDX(pDX, m_filter.nRisk);
@@ -191,6 +196,7 @@ BEGIN_MESSAGE_MAP(CTDLFilterBar, CDialog)
 	ON_CBN_SELENDOK(IDC_DUEFILTERCOMBO, OnSelchangeDueDateFilter)
 	ON_CBN_SELENDOK(IDC_PRIORITYFILTERCOMBO, OnSelchangeFilterAttribute)
 	ON_CBN_SELENDOK(IDC_RISKFILTERCOMBO, OnSelchangeFilterAttribute)
+	ON_CBN_SELENDOK(IDC_RECURFILTERCOMBO, OnSelchangeFilterAttribute)
 
 	ON_CBN_SELENDOK(IDC_FILTERCOMBO, OnSelchangeFilter) // separate handler
 	ON_CBN_CLOSEUP(IDC_OPTIONFILTERCOMBO, OnCloseUpOptions)

@@ -544,6 +544,8 @@
 #define IDC_DUEFILTERCOMBO              1201
 #define IDC_STYLESHEET                  1202
 #define IDC_WARNADDDELARCHIVE           1202
+#define IDC_RECURFILTERLABEL            1202
+#define IDC_RECURFILTERCOMBO            1203
 #define IDC_EXCLUSIVETRACKING           1216
 #define IDC_SHOWSUBTASKCOMPLETION       1218
 #define IDC_TRANSFORMTITLE              1219

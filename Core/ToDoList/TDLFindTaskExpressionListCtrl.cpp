@@ -66,7 +66,8 @@ CTDLFindTaskExpressionListCtrl::CTDLFindTaskExpressionListCtrl()
 	m_dtcDate(MCS_WEEKNUMBERS),
 	m_cbPriority(FALSE),
 	m_cbRisk(FALSE),
-	m_cbCustomIcons(m_ilIcons, TRUE, FALSE)
+	m_cbCustomIcons(m_ilIcons, TRUE, FALSE),
+	m_cbRecurrence(FALSE)
 {
 }
 
