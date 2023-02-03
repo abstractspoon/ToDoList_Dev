@@ -3382,7 +3382,7 @@ BOOL CToDoCtrl::CanSetSelectedTasksDone(const CTDCTaskCompletionArray& aTasks, B
 	{
 		DWORD dwTaskID = aToDoIDs[nID];
 
-		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
+		if (m_data.TaskHasCircularLocalDependencies(dwTaskID))
 			aCircularIDs.Add(dwTaskID);
 	}
 

@@ -161,8 +161,9 @@ public:
 	int GetTaskLocalDependents(DWORD dwTaskID, CDWordArray& aDependents, BOOL bImmediateOnly) const;
 	int GetTaskLocalDependents(const CDWordArray& aTaskIDs, CDWordArray& aDependents, BOOL bImmediateOnly) const;
 	int GetTaskLocalDependencies(DWORD dwTaskID, CDWordArray& aDependencies) const;
-	BOOL TaskHasLocalCircularDependencies(DWORD dwTaskID) const;
+	BOOL TaskHasCircularLocalDependencies(DWORD dwTaskID) const;
 	BOOL IsTaskLocallyDependentOn(DWORD dwTaskID, DWORD dwOtherID, BOOL bImmediateOnly) const;
+	BOOL TaskHasBrokenLocalDependencies(DWORD dwTaskID) const;
 
 	BOOL TaskHasIncompleteSubtasks(DWORD dwTaskID, BOOL bExcludeRecurring) const;
 	BOOL TaskHasCompletedSubtasks(DWORD dwTaskID) const;

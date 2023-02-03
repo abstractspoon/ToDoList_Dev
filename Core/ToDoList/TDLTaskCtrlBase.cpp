@@ -3061,11 +3061,17 @@ void CTDLTaskCtrlBase::DrawColumnsRowText(CDC* pDC, int nItem, DWORD dwTaskID, c
 		case TDCC_DEPENDENCY:
 			if (pTDI->aDependencies.GetSize())
 			{
+				if (m_data.TaskHasBrokenLocalDependencies(dwTaskID))
+				{
+					GraphicsMisc::DrawRect(pDC, rSubItem, colorRed, CLR_NONE, 0, GMDR_NONE, 128);
+				}
+				else if (m_data.TaskHasCircularLocalDependencies(dwTaskID))
+				{
+					GraphicsMisc::DrawRect(pDC, rSubItem, colorOrange, CLR_NONE, 0, GMDR_NONE, 128);
+				}
+
 				BOOL bAltImage = (pTDI->aDependencies.GetSize() > 1);
 				DrawColumnImage(pDC, nColID, rSubItem, bAltImage);
-
-				if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
-					GraphicsMisc::DrawRect(pDC, rSubItem, colorRed, CLR_NONE, 0, GMDR_NONE, 128);
 			}
 			break;
 			
@@ -5674,7 +5680,7 @@ BOOL CTDLTaskCtrlBase::SelectionHasCircularDependencies() const
 	{
 		DWORD dwTaskID = GetNextSelectedTaskID(pos);
 
-		if (m_data.TaskHasLocalCircularDependencies(dwTaskID))
+		if (m_data.TaskHasCircularLocalDependencies(dwTaskID))
 			return TRUE;
 	}
 

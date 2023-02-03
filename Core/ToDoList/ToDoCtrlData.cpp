@@ -875,7 +875,7 @@ BOOL CToDoCtrlData::InsertTaskIntoDependencyChain(DWORD dwTaskID, DWORD dwAfterI
 	return TRUE;
 }
 
-BOOL CToDoCtrlData::TaskHasLocalCircularDependencies(DWORD dwTaskID) const
+BOOL CToDoCtrlData::TaskHasCircularLocalDependencies(DWORD dwTaskID) const
 {
 	if (!dwTaskID)
 		return FALSE;
@@ -897,6 +897,22 @@ BOOL CToDoCtrlData::TaskHasLocalCircularDependencies(DWORD dwTaskID) const
 	}
 	
 	// else
+	return FALSE;
+}
+
+BOOL CToDoCtrlData::TaskHasBrokenLocalDependencies(DWORD dwTaskID) const
+{
+	const TODOITEM* pTDI = NULL;
+	GET_TDI(dwTaskID, pTDI, FALSE);
+
+	for (int nDepend = 0; nDepend < pTDI->aDependencies.GetSize(); nDepend++)
+	{
+		const TDCDEPENDENCY& depend = pTDI->aDependencies[nDepend];
+
+		if (depend.IsLocal() && !HasTask(depend.dwTaskID))
+			return TRUE;
+	}
+
 	return FALSE;
 }
 
@@ -1291,6 +1307,7 @@ BOOL CToDoCtrlData::RemoveOrphanTaskReferences(TODOSTRUCTURE* pTDSParent, BOOL b
 
 BOOL CToDoCtrlData::RemoveOrphanTaskLocalDependencies(TODOSTRUCTURE* pTDSParent, BOOL bWithUndo, DWORD dwDependID)
 {
+	return FALSE;
 	ASSERT(pTDSParent && dwDependID);
 	
 	if (!pTDSParent || !dwDependID)
@@ -3895,7 +3912,7 @@ void CToDoCtrlData::FixupTaskLocalDependentsDates(DWORD dwTaskID, TDC_DATE nDate
 		DWORD dwIDDependent = aDependents[nDepend];
 
 		// check for circular dependency before continuing
-		if (TaskHasLocalCircularDependencies(dwIDDependent))
+		if (TaskHasCircularLocalDependencies(dwIDDependent))
 			return;
 	
 		UINT nAdjusted = UpdateTaskLocalDependencyDates(dwIDDependent, nDate);
