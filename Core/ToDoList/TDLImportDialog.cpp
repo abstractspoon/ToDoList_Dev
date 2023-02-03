@@ -433,7 +433,7 @@ TDLID_IMPORTTO CTDLImportDialog::GetImportTo() const
 
 BOOL CTDLImportDialog::GetImportFromText() const
 {
-	return (m_bFromText);
+	return m_bFromText;
 }
 
 CString CTDLImportDialog::GetImportFilePath() const
@@ -443,7 +443,17 @@ CString CTDLImportDialog::GetImportFilePath() const
 
 CString CTDLImportDialog::GetImportText() const
 {
-	return (m_bFromText && IsCurrentImporterFileBased()) ? m_sFromText : _T("");
+	if (!m_bFromText || !IsCurrentImporterFileBased())
+		return _T("");
+
+	// else un-escape typical delimiters
+	CString sText(m_sFromText);
+
+	sText.Replace(_T("\\t"), _T("\t"));
+	sText.Replace(_T("\\r"), _T("\r"));
+	sText.Replace(_T("\\n"), _T("\r"));
+
+	return sText;
 }
 
 void CTDLImportDialog::OnSelchangeFormatoptions() 
