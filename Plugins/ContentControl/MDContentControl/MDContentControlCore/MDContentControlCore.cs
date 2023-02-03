@@ -9,7 +9,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 namespace MDContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
-    public class MDContentControlCore : MarkdownEditor.MarkdownSharpEditorForm, IContentControlWnd
+    public class MDContentControlCore : MarkdownSharpEditorForm, IContentControlWnd
     {
         private IntPtr m_hwndParent;
 
@@ -19,32 +19,32 @@ namespace MDContentControl
 
             InitializeComponent();
 
-            inputTextBox.TextChanged += new System.EventHandler(OnInputTextChanged);
-            inputTextBox.LostFocus += new System.EventHandler(OnInputTextLostFocus);
+            InputText.TextChanged += new System.EventHandler(OnInputTextChanged);
+            InputText.LostFocus += new System.EventHandler(OnInputTextLostFocus);
         }
 
         // ITDLContentControl ------------------------------------------------------------------
 
         public Byte[] GetContent()
         {
-            return System.Text.Encoding.Unicode.GetBytes(InputText);
+            return System.Text.Encoding.Unicode.GetBytes(InputText.Text);
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-            InputText = System.Text.Encoding.Unicode.GetString(content);
+			InputText.Text = System.Text.Encoding.Unicode.GetString(content);
             return true;
         }
 
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return OutputText;
+            return InputText.Text;
         }
 
         public bool SetTextContent(String content, bool bResetSelection)
         {
-            InputText = content;
+			InputText.Text = content;
             return true;
         }
 

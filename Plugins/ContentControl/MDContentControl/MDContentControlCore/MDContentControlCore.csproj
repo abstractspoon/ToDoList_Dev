@@ -52,13 +52,18 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MarkdownSharpEditorForm.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MarkdownSharpEditorForm.Designer.cs" />
+    <Compile Include="MarkdownSharpEditorForm.Designer.cs">
+      <DependentUpon>MarkdownSharpEditorForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MDContentControlCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="MarkdownSharpEditorForm.resx">
+      <DependentUpon>MarkdownSharpEditorForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MDContentControlCore.resx">
       <DependentUpon>MDContentControlCore.cs</DependentUpon>
     </EmbeddedResource>
