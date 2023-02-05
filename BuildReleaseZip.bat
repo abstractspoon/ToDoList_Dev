@@ -61,6 +61,8 @@ SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;HTMLReportExporterCore.dll
+SET TDLFILELIST=%TDLFILELIST%;MDContentControlBridge.dll
+SET TDLFILELIST=%TDLFILELIST%;MDContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionCore.dll
 SET TDLFILELIST=%TDLFILELIST%;PDFExporterBridge.dll
@@ -102,6 +104,7 @@ REM - All other components
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\MarkdownSharp.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
