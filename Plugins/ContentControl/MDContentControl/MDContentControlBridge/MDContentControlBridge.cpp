@@ -89,7 +89,6 @@ IContentControl* CMDContentBridge::CreateCtrl(unsigned short nCtrlID, unsigned l
 void CMDContentBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	// TODO
-
 }
 
 void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
@@ -245,7 +244,7 @@ bool CMDContentControlBridge::Redo()
 
 void CMDContentControlBridge::SetUITheme(const UITHEME* pTheme)
 {
-
+	m_wnd->SetUITheme(gcnew UITheme(pTheme));
 }
 
 void CMDContentControlBridge::SetContentFont(HFONT hFont)
@@ -255,10 +254,10 @@ void CMDContentControlBridge::SetContentFont(HFONT hFont)
 
 void CMDContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
-
+	m_wnd->SavePreferences(gcnew Preferences(pPrefs), gcnew String(szKey));
 }
 
 void CMDContentControlBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
-
+	m_wnd->LoadPreferences(gcnew Preferences(pPrefs), gcnew String(szKey), bAppOnly);
 }

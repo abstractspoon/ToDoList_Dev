@@ -21,11 +21,13 @@ namespace MDContentControl
 
             InputText.TextChanged += new System.EventHandler(OnInputTextChanged);
             InputText.LostFocus += new System.EventHandler(OnInputTextLostFocus);
-        }
 
-        // ITDLContentControl ------------------------------------------------------------------
+			Win32.AddBorder(HtmlPreview.Handle);
+		}
 
-        public Byte[] GetContent()
+		// ITDLContentControl ------------------------------------------------------------------
+
+		public Byte[] GetContent()
         {
             return System.Text.Encoding.Unicode.GetBytes(InputText.Text);
         }
@@ -68,9 +70,10 @@ namespace MDContentControl
 
         public void SetUITheme(UITheme theme)
         {
-            // TODO
+			SetSplitBarColor(theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark));
 
-        }
+
+		}
 
         public void SetReadOnly(bool bReadOnly)
         {
@@ -80,26 +83,30 @@ namespace MDContentControl
 
         public void SavePreferences(Preferences prefs, String key)
         {
-            // TODO
-
+			prefs.WriteProfileInt(key, "SplitPos", SplitPos);
         }
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
-            // TODO
+			SetHtmlFont(prefs.GetProfileString("Preferences", "HtmlFont", "Verdana"),
+						prefs.GetProfileInt("Preferences", "HtmlSize", 2));
+			
+			if (!appOnly)
+			{
+				SplitPos = prefs.GetProfileInt(key, "SplitPos", ClientSize.Height / 2);
+			}
+		}
 
-        }
+		// --------------------------------------------------------------------
 
-        // --------------------------------------------------------------------
-
-        protected override void OnResize(System.EventArgs e)
+		protected override void OnResize(System.EventArgs e)
         {
             base.OnResize(e);
 
             Win32.RemoveClientEdge(Handle);
-        }
+		}
 
-        private void InitializeComponent()
+		private void InitializeComponent()
         {
             this.SuspendLayout();
             // 

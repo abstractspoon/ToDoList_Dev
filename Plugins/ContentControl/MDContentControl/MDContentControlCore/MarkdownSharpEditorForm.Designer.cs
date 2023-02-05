@@ -30,7 +30,7 @@
 		{
 			this.SplitContainer = new System.Windows.Forms.SplitContainer();
 			this.InputText = new System.Windows.Forms.TextBox();
-			this.HtmlPreview = new System.Windows.Forms.WebBrowser();
+			this.HtmlPreview = new WebBrowserEx.WebBrowserEx();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
 			this.SplitContainer.Panel1.SuspendLayout();
 			this.SplitContainer.Panel2.SuspendLayout();
@@ -39,8 +39,10 @@
 			// 
 			// SplitContainer
 			// 
+			this.SplitContainer.BackColor = System.Drawing.SystemColors.Control;
 			this.SplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.SplitContainer.Location = new System.Drawing.Point(0, 0);
+			this.SplitContainer.Margin = new System.Windows.Forms.Padding(2);
 			this.SplitContainer.Name = "SplitContainer";
 			this.SplitContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
 			// 
@@ -52,8 +54,10 @@
 			// SplitContainer.Panel2
 			// 
 			this.SplitContainer.Panel2.Controls.Add(this.HtmlPreview);
-			this.SplitContainer.Size = new System.Drawing.Size(838, 828);
-			this.SplitContainer.SplitterDistance = 412;
+			this.SplitContainer.Panel2MinSize = 1;
+			this.SplitContainer.Size = new System.Drawing.Size(559, 538);
+			this.SplitContainer.SplitterDistance = 267;
+			this.SplitContainer.SplitterWidth = 3;
 			this.SplitContainer.TabIndex = 0;
 			// 
 			// InputText
@@ -62,30 +66,37 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.InputText.Location = new System.Drawing.Point(0, 0);
+			this.InputText.Margin = new System.Windows.Forms.Padding(2);
 			this.InputText.Multiline = true;
 			this.InputText.Name = "InputText";
-			this.InputText.Size = new System.Drawing.Size(835, 409);
+			this.InputText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+			this.InputText.Size = new System.Drawing.Size(558, 266);
 			this.InputText.TabIndex = 0;
 			this.InputText.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
 			// 
 			// HtmlPreview
 			// 
+			this.HtmlPreview.AllowNavigation = false;
+			this.HtmlPreview.AllowWebBrowserDrop = false;
 			this.HtmlPreview.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.HtmlPreview.Location = new System.Drawing.Point(3, 3);
-			this.HtmlPreview.MinimumSize = new System.Drawing.Size(20, 20);
+			this.HtmlPreview.Location = new System.Drawing.Point(0, 0);
+			this.HtmlPreview.Margin = new System.Windows.Forms.Padding(0);
+			this.HtmlPreview.MinimumSize = new System.Drawing.Size(13, 0);
 			this.HtmlPreview.Name = "HtmlPreview";
-			this.HtmlPreview.Size = new System.Drawing.Size(832, 406);
+			this.HtmlPreview.Size = new System.Drawing.Size(558, 268);
 			this.HtmlPreview.TabIndex = 0;
+			this.HtmlPreview.WebBrowserShortcutsEnabled = false;
 			// 
 			// MarkdownSharpEditorForm
 			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.SplitContainer);
+			this.Margin = new System.Windows.Forms.Padding(2);
 			this.Name = "MarkdownSharpEditorForm";
-			this.Size = new System.Drawing.Size(838, 828);
+			this.Size = new System.Drawing.Size(559, 538);
 			this.SplitContainer.Panel1.ResumeLayout(false);
 			this.SplitContainer.Panel1.PerformLayout();
 			this.SplitContainer.Panel2.ResumeLayout(false);
@@ -97,8 +108,8 @@
 
 		#endregion
 
-		private System.Windows.Forms.SplitContainer SplitContainer;
-		public System.Windows.Forms.TextBox InputText;
-		public System.Windows.Forms.WebBrowser HtmlPreview;
+		protected System.Windows.Forms.SplitContainer SplitContainer;
+		protected System.Windows.Forms.TextBox InputText;
+		protected WebBrowserEx.WebBrowserEx HtmlPreview;
 	}
 }
