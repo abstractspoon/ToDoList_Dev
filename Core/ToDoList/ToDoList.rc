@@ -28,7 +28,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_AUS
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 8,1,997,1
+ FILEVERSION 8,1,998,1
  PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -47,7 +47,7 @@ BEGIN
             VALUE "Comments", "\0"
             VALUE "CompanyName", "AbstractSpoon Software\0"
             VALUE "FileDescription", "ToDoList\0"
-            VALUE "FileVersion", "8, 1, 997, 1\0"
+            VALUE "FileVersion", "8, 1, 998, 1\0"
             VALUE "InternalName", "ToDoList\0"
             VALUE "LegalCopyright", "Copyright (c) AbstractSpoon 2003-22\0"
             VALUE "LegalTrademarks", "\0"
@@ -5847,12 +5847,12 @@ BEGIN
     IDS_PRINT_TASKVIEW      "Screenshot of active task view (%s)"
     IDS_TASKCOMPLETION      "Task Completion"
     IDS_CUSTOM_FEATURE_SHOWEDITFIELD "Show edit field"
+    IDS_COMMENTSMEMORYERROR "Memory Allocation Error|The application was unable to allocate enough memory to retrieve the most recently modified comments.\n\nTry creating a separate subtask for any further comments."
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_UDTPREFS_NEWTDL      "\nNew ToDoList Tool"
-    IDS_COMMENTSMEMORYERROR "Memory Allocation Error|The application was unable to allocate enough memory to retrieve the most recently modified comments.\n\nTry creating a separate subtask for any further comments."
 END
 
 #endif    // English (Australia) resources
