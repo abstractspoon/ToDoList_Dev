@@ -57,13 +57,13 @@ namespace MDContentControl
 			}
 		}
 
-		private readonly string m_BaseStyle = "<style>html,body,table{{font: normal {0} {1};}}li{{margin-bottom:7px;}}h1{{font-size:18pt;}}h2{{font-size:14pt;}}</style>";
+		private readonly string m_BaseStyle = "<style>html,body,table{{font: normal {0}pt {1};}}li{{margin-bottom:7px;}}h1{{font-size:18pt;}}h2{{font-size:14pt;}}</style>";
 
 		private string m_Style;
 
-		public void SetHtmlFont(string name, int size)
+		public void SetHtmlFont(string name, int pointSize)
 		{
-			var newStyle = string.Format(m_BaseStyle, name, size);
+			var newStyle = string.Format(m_BaseStyle, pointSize, name);
 
 			if (!newStyle.Equals(m_Style))
 			{

@@ -71,8 +71,6 @@ namespace MDContentControl
         public void SetUITheme(UITheme theme)
         {
 			SetSplitBarColor(theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark));
-
-
 		}
 
         public void SetReadOnly(bool bReadOnly)
@@ -88,8 +86,11 @@ namespace MDContentControl
 
         public void LoadPreferences(Preferences prefs, String key, bool appOnly)
         {
-			SetHtmlFont(prefs.GetProfileString("Preferences", "HtmlFont", "Verdana"),
-						prefs.GetProfileInt("Preferences", "HtmlSize", 2));
+			var fontName = prefs.GetProfileString("Preferences", "HtmlFont", "Verdana");
+			var htmlSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
+			int pointSize = MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(htmlSize);
+
+			SetHtmlFont(fontName, pointSize);
 			
 			if (!appOnly)
 			{
