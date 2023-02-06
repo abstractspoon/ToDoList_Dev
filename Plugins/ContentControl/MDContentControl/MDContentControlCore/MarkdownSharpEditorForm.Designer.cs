@@ -42,7 +42,6 @@
 			this.SplitContainer.BackColor = System.Drawing.SystemColors.Control;
 			this.SplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.SplitContainer.Location = new System.Drawing.Point(0, 0);
-			this.SplitContainer.Margin = new System.Windows.Forms.Padding(2);
 			this.SplitContainer.Name = "SplitContainer";
 			this.SplitContainer.Orientation = System.Windows.Forms.Orientation.Horizontal;
 			// 
@@ -66,7 +65,6 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.InputText.Location = new System.Drawing.Point(0, 0);
-			this.InputText.Margin = new System.Windows.Forms.Padding(2);
 			this.InputText.Multiline = true;
 			this.InputText.Name = "InputText";
 			this.InputText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
@@ -94,9 +92,9 @@
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.Controls.Add(this.SplitContainer);
-			this.Margin = new System.Windows.Forms.Padding(2);
 			this.Name = "MarkdownSharpEditorForm";
 			this.Size = new System.Drawing.Size(559, 538);
+			this.SplitContainer.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.SplitContainer.Panel1.ResumeLayout(false);
 			this.SplitContainer.Panel1.PerformLayout();
 			this.SplitContainer.Panel2.ResumeLayout(false);
