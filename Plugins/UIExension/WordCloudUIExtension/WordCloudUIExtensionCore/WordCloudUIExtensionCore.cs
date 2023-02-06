@@ -694,6 +694,15 @@ namespace WordCloudUIExtension
 			m_TaskMatchesList.Focus();
 		}
 
+		protected override void OnPaintBackground(PaintEventArgs e)
+		{
+			// Exclude main controls first
+			e.Graphics.ExcludeClip(RectangleToClient(m_TaskMatchesList.RectangleToScreen(m_TaskMatchesList.ClientRectangle)));
+			e.Graphics.ExcludeClip(RectangleToClient(m_WordCloud.RectangleToScreen(m_WordCloud.ClientRectangle)));
+
+			base.OnPaintBackground(e);
+		}
+
 		protected override void OnPaint(PaintEventArgs e)
         {
 			// border around Word cloud and Task match list
