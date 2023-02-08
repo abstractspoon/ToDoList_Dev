@@ -5821,6 +5821,14 @@ BOOL CToDoCtrl::SetCustomAttributeDefs(const CTDCCustomAttribDefinitionArray& aA
 	return FALSE;
 }
 
+void CToDoCtrl::NotifyEndPreferencesUpdate() 
+{ 
+	Invalidate(); 
+
+	// Update active comments
+	m_ctrlComments.UpdateAppPreferences();
+}
+
 void CToDoCtrl::UpdateVisibleColumns(const CTDCColumnIDMap& mapChanges)
 {
 	m_taskTree.OnColumnVisibilityChange(mapChanges);
