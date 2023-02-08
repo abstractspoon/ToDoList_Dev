@@ -83,7 +83,7 @@
 			this.HtmlPreview.Margin = new System.Windows.Forms.Padding(0);
 			this.HtmlPreview.MinimumSize = new System.Drawing.Size(13, 0);
 			this.HtmlPreview.Name = "HtmlPreview";
-			this.HtmlPreview.Size = new System.Drawing.Size(558, 268);
+			this.HtmlPreview.Size = new System.Drawing.Size(558, 267);
 			this.HtmlPreview.TabIndex = 0;
 			this.HtmlPreview.WebBrowserShortcutsEnabled = false;
 			// 
