@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace MDContentControl
 {
-	public partial class MarkdownSharpEditorForm : UserControl
+	public partial class MDContentControlForm : UserControl
 	{
-		public MarkdownSharpEditorForm()
+		public MDContentControlForm()
 		{
 			InitializeComponent();
 
@@ -21,11 +21,28 @@ namespace MDContentControl
 			SplitContainer.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		}
 
+		public static string ConvertToHtml(Byte[] content)
+		{
+			if (content.Length == 0)
+				return string.Empty;
+
+			var inputText = System.Text.Encoding.Unicode.GetString(content);
+
+			return ConvertToHtml(inputText);
+		}
+
+		public static string ConvertToHtml(string content)
+		{
+			if (content.Length == 0)
+				return string.Empty;
+
+			var md = new MarkdownSharp.Markdown();
+			return md.Transform(content);
+		}
+
 		public string GetHtmlContent()
 		{
-			var md = new MarkdownSharp.Markdown();
-
-			return md.Transform(InputText.Text);
+			return ConvertToHtml(InputText.Text);
 		}
 
 		private string GetHtmlPage()
@@ -35,27 +52,17 @@ namespace MDContentControl
 
 		private void UpdateOutput()
 		{
-			if (String.IsNullOrWhiteSpace(InputText.Text))
+			if (HtmlPreview.Document != null)
 			{
-				HtmlPreview.Navigate("about:blank");
-			}
-			else
-			{
+				HtmlPreview.Document.OpenNew(false);
 				HtmlPreview.Document.Write(GetHtmlPage());
 				HtmlPreview.Refresh();
 			}
-
-			//			InputText.Focus();
 		}
 
 		private void textBox1_TextChanged(object sender, EventArgs e)
 		{
 			UpdateOutput();
-		}
-
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			//base.OnPaint(e);
 		}
 
 		protected override void OnPaintBackground(PaintEventArgs e)

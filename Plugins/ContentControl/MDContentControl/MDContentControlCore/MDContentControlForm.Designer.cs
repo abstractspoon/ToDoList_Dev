@@ -1,6 +1,6 @@
 ﻿namespace MDContentControl
 {
-	partial class MarkdownSharpEditorForm
+	partial class MDContentControlForm
 	{
 		/// <summary> 
 		/// Required designer variable.
@@ -39,7 +39,7 @@
 			// 
 			// SplitContainer
 			// 
-			this.SplitContainer.BackColor = System.Drawing.SystemColors.Control;
+			this.SplitContainer.BackColor = System.Drawing.SystemColors.Window;
 			this.SplitContainer.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.SplitContainer.Location = new System.Drawing.Point(0, 0);
 			this.SplitContainer.Name = "SplitContainer";
@@ -47,7 +47,7 @@
 			// 
 			// SplitContainer.Panel1
 			// 
-			this.SplitContainer.Panel1.BackColor = System.Drawing.SystemColors.Control;
+			this.SplitContainer.Panel1.BackColor = System.Drawing.SystemColors.Window;
 			this.SplitContainer.Panel1.Controls.Add(this.InputText);
 			// 
 			// SplitContainer.Panel2
@@ -73,20 +73,22 @@
 			// HtmlPreview
 			// 
 			this.HtmlPreview.AllowWebBrowserDrop = false;
-			this.HtmlPreview.CausesValidation = false;
 			this.HtmlPreview.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.HtmlPreview.Location = new System.Drawing.Point(0, 0);
 			this.HtmlPreview.Margin = new System.Windows.Forms.Padding(0);
 			this.HtmlPreview.MinimumSize = new System.Drawing.Size(13, 0);
 			this.HtmlPreview.Name = "HtmlPreview";
+			this.HtmlPreview.ScriptErrorsSuppressed = true;
 			this.HtmlPreview.Size = new System.Drawing.Size(559, 268);
 			this.HtmlPreview.TabIndex = 0;
+			this.HtmlPreview.Url = new System.Uri("about:blank", System.UriKind.Absolute);
 			this.HtmlPreview.WebBrowserShortcutsEnabled = false;
 			// 
 			// MarkdownSharpEditorForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.BackColor = System.Drawing.SystemColors.Window;
 			this.Controls.Add(this.SplitContainer);
 			this.Name = "MarkdownSharpEditorForm";
 			this.Size = new System.Drawing.Size(559, 538);

@@ -4,12 +4,10 @@ using System.Runtime.InteropServices;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-// PLS DON'T ADD OTHER 'USING' STATEMENTS WHILE I AM STILL LEARNING!
-
 namespace MDContentControl
 {
     [System.ComponentModel.DesignerCategory("")]
-    public class MDContentControlCore : MarkdownSharpEditorForm, IContentControlWnd
+    public class MDContentControlCore : MDContentControlForm, IContentControlWnd
     {
         private IntPtr m_hwndParent;
 
@@ -17,23 +15,10 @@ namespace MDContentControl
         {
             m_hwndParent = hwndParent;
 
-            InitializeComponent();
-
             InputText.TextChanged += new System.EventHandler(OnInputTextChanged);
             InputText.LostFocus += new System.EventHandler(OnInputTextLostFocus);
 
 			Win32.AddBorder(HtmlPreview.Handle);
-		}
-
-		public static string ConvertToHtml(Byte[] content)
-		{
-			if (content.Length == 0)
-				return string.Empty;
-
-			var inputText = System.Text.Encoding.Unicode.GetString(content);
-			var md = new MarkdownSharp.Markdown();
-
-			return md.Transform(inputText);
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
@@ -117,19 +102,6 @@ namespace MDContentControl
 
             Win32.RemoveClientEdge(Handle);
 		}
-
-		private void InitializeComponent()
-        {
-            this.SuspendLayout();
-            // 
-            // MDContentControlCore
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.ClientSize = new System.Drawing.Size(603, 716);
-            this.Name = "MDContentControlCore";
-            this.ResumeLayout(false);
-            this.PerformLayout();
-        }
 
         private void OnInputTextChanged(object sender, EventArgs e)
         {
