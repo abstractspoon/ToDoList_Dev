@@ -14,6 +14,11 @@ namespace MDContentControl
 		public MarkdownSharpEditorForm()
 		{
 			InitializeComponent();
+
+			// This line is essential to high DPI system but
+			// the form editor keeps removing it if I put it
+			// in the form designer.cs file
+			SplitContainer.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 		}
 
 		public string GetHtmlContent()
@@ -36,7 +41,6 @@ namespace MDContentControl
 			}
 			else
 			{
-				HtmlPreview.Document.OpenNew(false);
 				HtmlPreview.Document.Write(GetHtmlPage());
 				HtmlPreview.Refresh();
 			}
