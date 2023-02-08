@@ -16,12 +16,32 @@ namespace MDContentControl
 			InitializeComponent();
 		}
 
-		private void UpdateOutput()
+		public string GetHtmlContent()
 		{
 			var md = new MarkdownSharp.Markdown();
 
-			HtmlPreview.DocumentText = m_Style + md.Transform(InputText.Text);
-			InputText.Focus();
+			return md.Transform(InputText.Text);
+		}
+
+		private string GetHtmlPage()
+		{
+			return "<html>" + m_Style + "<body>" + GetHtmlContent() + "</body></html>";
+		}
+
+		private void UpdateOutput()
+		{
+			if (String.IsNullOrWhiteSpace(InputText.Text))
+			{
+				HtmlPreview.Navigate("about:blank");
+			}
+			else
+			{
+				HtmlPreview.Document.OpenNew(false);
+				HtmlPreview.Document.Write(GetHtmlPage());
+				HtmlPreview.Refresh();
+			}
+
+			//			InputText.Focus();
 		}
 
 		private void textBox1_TextChanged(object sender, EventArgs e)
