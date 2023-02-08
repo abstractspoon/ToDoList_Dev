@@ -25,6 +25,17 @@ namespace MDContentControl
 			Win32.AddBorder(HtmlPreview.Handle);
 		}
 
+		public static string ConvertToHtml(Byte[] content)
+		{
+			if (content.Length == 0)
+				return string.Empty;
+
+			var inputText = System.Text.Encoding.Unicode.GetString(content);
+			var md = new MarkdownSharp.Markdown();
+
+			return md.Transform(inputText);
+		}
+
 		// ITDLContentControl ------------------------------------------------------------------
 
 		public Byte[] GetContent()
@@ -41,8 +52,8 @@ namespace MDContentControl
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-            return InputText.Text;
-        }
+			return HtmlPreview.Document.Body.InnerText ?? String.Empty;
+		}
 
         public bool SetTextContent(String content, bool bResetSelection)
         {

@@ -100,8 +100,25 @@ void CMDContentBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey
 int CMDContentBridge::ConvertToHtml(const unsigned char* pContent, int nLength,
 	LPCWSTR szCharSet, LPWSTR& szHtml, LPCWSTR szImageDir)
 {
-	szHtml = nullptr;
-	return 0;
+	cli::array<Byte>^ content = gcnew cli::array<Byte>(nLength);
+
+	for (int i = 0; i < nLength; i++)
+		content[i] = pContent[i];
+
+	String^ html = MDContentControlCore::ConvertToHtml(content);
+
+	if (String::IsNullOrWhiteSpace(html))
+		return 0;
+
+	MarshalledString msHtml(html);
+
+	int nCharLen = ((nLength / 2) + 1);
+	szHtml = new WCHAR[nCharLen];
+	
+	ZeroMemory(szHtml, nCharLen * sizeof(WCHAR));
+	CopyMemory(szHtml, msHtml, nLength);
+
+	return nCharLen;
 }
 
 void CMDContentBridge::FreeHtmlBuffer(LPWSTR& szHtml)
