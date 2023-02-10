@@ -68,12 +68,14 @@ typedef CArray<CFilePath*, CFilePath*> CFilePathArray;
 
 //////////////////////////////////////////////////////////////////////
 
+const UINT WM_FILECHANGEEVENT = ::RegisterWindowMessage(_T("WM_FILECHANGEEVENT")); // wParam = FileAlarm, lParam = LPCTSTR
+
 class CFileChangeEvent  
 {
 public:
 	enum FileAlarm { FA_CHANGED, FA_REMOVED, FA_CREATED };
 
-	CFileChangeEvent();
+	CFileChangeEvent(HWND hwndNotify = NULL);
 	virtual ~CFileChangeEvent();
 
 	void AddFile(const CString &sFileName);
@@ -88,9 +90,12 @@ protected:
 	CMapFileInfo m_FileInfoMap;
 	CFilePathArray m_Paths;
 	bool m_bEvent;
+	HWND m_hwndNotify;
 
 protected:
 	virtual void OnFileAlarm(FileAlarm nAlarm, const CString &sFileName) {}	
+
+	void SetChangeNotification(FileAlarm nAlarm, const CString& sFileName);
 	
 	static UINT ThreadProc(LPVOID lpParam);
 };

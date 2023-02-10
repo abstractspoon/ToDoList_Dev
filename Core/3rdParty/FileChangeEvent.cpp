@@ -50,9 +50,10 @@ FILECHANGEEVENTINFO::FILECHANGEEVENTINFO(const CString& sFilePath)
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CFileChangeEvent::CFileChangeEvent()
+CFileChangeEvent::CFileChangeEvent(HWND hwndNotify)
 {
 	m_bEvent = false;
+	m_hwndNotify = hwndNotify;
 }
 
 CFileChangeEvent::~CFileChangeEvent()
@@ -251,8 +252,8 @@ UINT CFileChangeEvent::ThreadProc(LPVOID lpParam)
 
 					if (f->GetDate().GetStatus() != COleDateTime::valid)
 					{
-						f->SetDate/*it->second->setDate*/(dtCreateDate);
-						pFileChangeEvent->OnFileAlarm(FA_CREATED, f->GetName());
+						f->SetDate(dtCreateDate);
+						pFileChangeEvent->SetChangeNotification(FA_CREATED, f->GetName());
 					}
 					else
 					{
@@ -260,20 +261,35 @@ UINT CFileChangeEvent::ThreadProc(LPVOID lpParam)
 						if (f->GetDate() < dtDate)
 						{
 							f->SetDate(dtDate);
-							pFileChangeEvent->OnFileAlarm(FA_CHANGED, f->GetName());
+							pFileChangeEvent->SetChangeNotification(FA_CHANGED, f->GetName());
 						}
 					}
 				}
 				else
 				{
-					pFileChangeEvent->OnFileAlarm(FA_REMOVED, f->GetName());
+					pFileChangeEvent->SetChangeNotification(FA_REMOVED, f->GetName());
 					pFileChangeEvent->RemoveFile(f->GetName());
 				}
-
 			}
 		}
 	}
 
 	delete[] hChangeHandles;
 	return 0;
+}
+
+void CFileChangeEvent::SetChangeNotification(FileAlarm nAlarm, const CString& sFileName)
+{
+	if (m_hwndNotify)
+	{
+		// Take a copy because we are posting message
+		static CString sFileNameEx;
+		sFileNameEx = sFileName;
+
+		PostMessage(m_hwndNotify, WM_FILECHANGEEVENT, nAlarm, (LPARAM)(LPCTSTR)sFileNameEx);
+	}
+	else
+	{
+		OnFileAlarm(nAlarm, sFileName);
+	}
 }
