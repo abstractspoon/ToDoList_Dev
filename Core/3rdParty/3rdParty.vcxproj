@@ -148,6 +148,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
+    <ClCompile Include="FileChangeEvent.cpp" />
     <ClCompile Include="FileVersionInfo.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Debug|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Unicode Release|Win32'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -272,6 +273,7 @@
     <ClInclude Include="Compression.h" />
     <ClInclude Include="DibData.h" />
     <ClInclude Include="DragDrop.h" />
+    <ClInclude Include="FileChangeEvent.h" />
     <ClInclude Include="FileVersionInfo.h" />
     <ClInclude Include="FontComboBox.h" />
     <ClInclude Include="FPSMiniCalendarCtrl.h" />
