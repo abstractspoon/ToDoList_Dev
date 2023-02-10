@@ -251,12 +251,12 @@ ISpellCheck* CMDContentControlBridge::GetSpellCheckInterface()
 
 bool CMDContentControlBridge::Undo()
 {
-	return false;
+	return m_wnd->Undo();
 }
 
 bool CMDContentControlBridge::Redo()
 {
-	return false;
+	return m_wnd->Redo();
 }
 
 void CMDContentControlBridge::SetUITheme(const UITHEME* pTheme)
@@ -266,7 +266,7 @@ void CMDContentControlBridge::SetUITheme(const UITHEME* pTheme)
 
 void CMDContentControlBridge::SetContentFont(HFONT hFont)
 {
-
+	m_wnd->SetContentFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
 void CMDContentControlBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const

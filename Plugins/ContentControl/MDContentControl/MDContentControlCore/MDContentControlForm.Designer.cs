@@ -29,7 +29,7 @@
 		private void InitializeComponent()
 		{
 			this.SplitContainer = new System.Windows.Forms.SplitContainer();
-			this.InputText = new System.Windows.Forms.TextBox();
+			this.InputText = new System.Windows.Forms.RichTextBox();
 			this.HtmlPreview = new System.Windows.Forms.WebBrowser();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
 			this.SplitContainer.Panel1.SuspendLayout();
@@ -65,9 +65,10 @@
 			this.InputText.Location = new System.Drawing.Point(0, 0);
 			this.InputText.Multiline = true;
 			this.InputText.Name = "InputText";
-			this.InputText.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
 			this.InputText.Size = new System.Drawing.Size(559, 267);
+			this.InputText.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
 			this.InputText.TabIndex = 0;
+			this.InputText.Text = "";
 			this.InputText.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
 			// 
 			// HtmlPreview
@@ -84,16 +85,15 @@
 			this.HtmlPreview.Url = new System.Uri("about:blank", System.UriKind.Absolute);
 			this.HtmlPreview.WebBrowserShortcutsEnabled = false;
 			// 
-			// MarkdownSharpEditorForm
+			// MDContentControlForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Window;
 			this.Controls.Add(this.SplitContainer);
-			this.Name = "MarkdownSharpEditorForm";
 			this.Size = new System.Drawing.Size(559, 538);
+			this.Name = "MDContentControlForm";
 			this.SplitContainer.Panel1.ResumeLayout(false);
-			this.SplitContainer.Panel1.PerformLayout();
 			this.SplitContainer.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).EndInit();
 			this.SplitContainer.ResumeLayout(false);
@@ -104,7 +104,7 @@
 		#endregion
 
 		protected System.Windows.Forms.SplitContainer SplitContainer;
-		protected System.Windows.Forms.TextBox InputText;
+		protected System.Windows.Forms.RichTextBox InputText;
 		protected System.Windows.Forms.WebBrowser HtmlPreview;
 	}
 }

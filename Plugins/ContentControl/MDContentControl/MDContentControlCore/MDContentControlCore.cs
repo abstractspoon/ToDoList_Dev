@@ -54,25 +54,32 @@ namespace MDContentControl
 
         public bool Undo()
         {
-            // TODO
-            return false;
+			if (!InputText.CanUndo)
+				return false;
+
+			// else 
+			InputText.Undo();
+            return true;
         }
 
         public bool Redo()
         {
-            // TODO
-            return false;
-        }
+			if (!InputText.CanRedo)
+				return false;
 
-        public void SetUITheme(UITheme theme)
+			// else 
+			InputText.Redo();
+			return true;
+		}
+
+		public void SetUITheme(UITheme theme)
         {
 			SetSplitBarColor(theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark));
 		}
 
         public void SetReadOnly(bool bReadOnly)
         {
-            // TODO
-
+			InputText.ReadOnly = bReadOnly;
         }
 
         public void SavePreferences(Preferences prefs, String key)
@@ -92,6 +99,11 @@ namespace MDContentControl
 			{
 				SplitPos = prefs.GetProfileInt(key, "SplitPos", ClientSize.Height / 2);
 			}
+		}
+
+		public void SetContentFont(String fontName, int pointSize)
+		{
+			InputText.Font = new System.Drawing.Font(fontName, pointSize);
 		}
 
 		// --------------------------------------------------------------------
