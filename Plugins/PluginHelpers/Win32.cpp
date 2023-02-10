@@ -172,11 +172,43 @@ bool Win32::SetEditCue(IntPtr hWnd, String^ sCueText)
 	return (0 != ::SendMessage(GetHwnd(hWnd), EM_SETCUEBANNER, FALSE, (LPARAM)(LPCWSTR)MS(sCueText)));
 }
 
+bool Win32::SetEditMargins(IntPtr hWnd, int nAllMargins)
+{
+	return SetEditMargins(hWnd, nAllMargins, nAllMargins, nAllMargins, nAllMargins);
+}
+
+bool Win32::SetEditMargins(IntPtr hWnd, int nLeft, int nTop, int nRight, int nBottom)
+{
+	RECT rect = { 0 };
+	::SendMessage(GetHwnd(hWnd), EM_GETRECT, 0, (LPARAM)&rect);
+
+	if (::IsRectEmpty(&rect))
+		return false;
+
+	rect.left += nLeft;
+	rect.top += nTop;
+	rect.right -= nRight;
+	rect.bottom -= nBottom;
+
+	::SendMessage(GetHwnd(hWnd), EM_SETRECT, 0, (LPARAM)&rect);
+	return true;
+}
+
 void Win32::ActivateApp(IntPtr hWnd)
 {
 	HWND hwndApp = GetTopWindow(GetHwnd(hWnd));
 
 	SetForegroundWindow(hwndApp);
+}
+
+int Win32::SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
+{
+	return ::SendMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());
+}
+
+int Win32::PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam)
+{
+	return ::PostMessage(GetHwnd(hWnd), wMsg, (WPARAM)wParam, (LPARAM)lParam.ToInt32());
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

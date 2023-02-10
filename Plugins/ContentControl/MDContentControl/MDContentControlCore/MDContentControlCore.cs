@@ -18,6 +18,7 @@ namespace MDContentControl
             InputText.TextChanged += new System.EventHandler(OnInputTextChanged);
             InputText.LostFocus += new System.EventHandler(OnInputTextLostFocus);
 
+			Win32.SetEditMargins(InputText.Handle, DPIScaling.Scale(4));
 			Win32.AddBorder(HtmlPreview.Handle);
 		}
 

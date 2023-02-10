@@ -42,8 +42,14 @@ namespace Abstractspoon
 				static float PointsToEms(int nPointSize);
 
 				static bool SetEditCue(IntPtr hWnd, String^ sCueText);
+				static bool SetEditMargins(IntPtr hWnd, int nAllMargins);
+				static bool SetEditMargins(IntPtr hWnd, int nLeft, int nTop, int nRight, int nBottom);
+
 				static void ActivateApp(IntPtr hWnd);
 				static int GetSystemDPI();
+
+				static int SendMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
+				static int PostMessage(IntPtr hWnd, UInt32 wMsg, UIntPtr wParam, IntPtr lParam);
 
 			protected:
 				static void DoFrameChange(IntPtr hWnd);
