@@ -55,7 +55,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MDContentControlForm.cs">
-      <SubType>Component</SubType>
+      <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="MDContentControlForm.Designer.cs">
       <DependentUpon>MDContentControlForm.cs</DependentUpon>

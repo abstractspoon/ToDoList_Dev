@@ -13,21 +13,6 @@ using Markdig;
 
 namespace MDContentControl
 {
-	public class RichTextBoxEx : RichTextBox
-	{
-		protected override CreateParams CreateParams
-		{
-			get
-			{
-				CreateParams cp = base.CreateParams;
-				cp.ClassName = "RichEdit50W";
-
-				return cp;
-			}
-		}
-	}
-
-
 	public partial class MDContentControlForm : UserControl
 	{
 		public event EventHandler InputTextChanged;
@@ -290,5 +275,46 @@ namespace MDContentControl
 			CommandHandling.EnableCommand("deleteToolStripMenuItem", enabled && hasText, contextMenuStrip1.Items);
 			CommandHandling.EnableCommand("pasteToolStripMenuItem", InputTextCtrl.CanPaste(DataFormats.GetFormat(DataFormats.Text)), contextMenuStrip1.Items);
 		}
+
+		private void InputTextCtrl_MouseDown(object sender, MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Right)
+			{
+				// Move the Caret to the click location unless
+				// the position is already over some selected text
+				int selStart = InputTextCtrl.SelectionStart;
+				int selEnd = InputTextCtrl.SelectionStart + InputTextCtrl.SelectionLength;
+
+				int charAtPos = InputTextCtrl.GetCharIndexFromPosition(e.Location);
+
+				if (charAtPos < selStart || charAtPos > selEnd)
+				{
+					InputTextCtrl.SelectionStart = charAtPos;
+					InputTextCtrl.SelectionLength = 0;
+				}
+			}
+		}
+
+		protected override void OnGotFocus(EventArgs e)
+		{
+			InputTextCtrl.Focus();
+		}
 	}
+
+	// -----------------------------------------------------------------------
+
+	public class RichTextBoxEx : RichTextBox
+	{
+		protected override CreateParams CreateParams
+		{
+			get
+			{
+				CreateParams cp = base.CreateParams;
+				cp.ClassName = "RichEdit50W";
+
+				return cp;
+			}
+		}
+	}
+
 }
