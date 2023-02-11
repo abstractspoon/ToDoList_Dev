@@ -4325,9 +4325,15 @@ BOOL CTDCTaskExporter::ExportSubTasks(const TODOSTRUCTURE* pTDSParent, CTaskFile
 		if (!pTDS)
 			return FALSE;
 
-		DWORD dwTaskID = pTDS->GetTaskID();
-		const TODOITEM* pTDI = NULL;
-		GET_TDI(dwTaskID, pTDI, FALSE);
+		// DON'T use GET_TDI because that will get the task
+		// pointed to by references and not the reference itself
+		const TODOITEM* pTDI = m_data.GetTask(pTDS->GetTaskID());
+
+		if (!pTDI)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
 
 		// Ignore duplicate 
 		if (!bIncDuplicateCompletedRecurringSubtasks)
@@ -4367,7 +4373,12 @@ HTASKITEM CTDCTaskExporter::ExportTask(DWORD dwTaskID, CTaskFile& tasks, HTASKIT
 	const TODOITEM* pTDI = NULL;
 	const TODOSTRUCTURE* pTDS = NULL;
 
-	GET_TDI_TDS(dwTaskID, pTDI, pTDS, NULL);
+	// DON'T use GET_TDI because that will get the task
+	// pointed to by references and not the reference itself
+	if (!m_data.GetTask(dwTaskID, pTDI, pTDS))
+	{
+		return FALSE;
+	}
 
 	return ExportTaskEx(pTDI, pTDS, tasks, hParentTask, NULL, bIncDuplicateCompletedRecurringSubtasks);
 }
