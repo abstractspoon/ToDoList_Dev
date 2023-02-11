@@ -53,7 +53,7 @@ namespace MDContentControl
 			{
 			case WM_KEYDOWN:
 			case WM_SYSKEYDOWN:
-				return CommandHandling.ProcessMenuShortcut(wParam, MenuBar.Items);
+				return ProcessMenuShortcut(wParam);
 			}
 
 			return false;

@@ -31,7 +31,6 @@
 			this.components = new System.ComponentModel.Container();
 			this.SplitContainer = new System.Windows.Forms.SplitContainer();
 			this.InputTextCtrl = new System.Windows.Forms.RichTextBox();
-			this.PreviewBrowser = new System.Windows.Forms.WebBrowser();
 			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -39,6 +38,7 @@
 			this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
 			this.deleteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.PreviewBrowser = new System.Windows.Forms.WebBrowser();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
 			this.SplitContainer.Panel1.SuspendLayout();
 			this.SplitContainer.Panel2.SuspendLayout();
@@ -80,21 +80,6 @@
 			this.InputTextCtrl.Text = "";
 			this.InputTextCtrl.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
 			// 
-			// PreviewBrowser
-			// 
-			this.PreviewBrowser.AllowWebBrowserDrop = false;
-			this.PreviewBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.PreviewBrowser.Location = new System.Drawing.Point(0, 0);
-			this.PreviewBrowser.Margin = new System.Windows.Forms.Padding(0);
-			this.PreviewBrowser.MinimumSize = new System.Drawing.Size(13, 0);
-			this.PreviewBrowser.Name = "PreviewBrowser";
-			this.PreviewBrowser.ScriptErrorsSuppressed = true;
-			this.PreviewBrowser.Size = new System.Drawing.Size(559, 268);
-			this.PreviewBrowser.TabIndex = 0;
-			this.PreviewBrowser.Url = new System.Uri("about:blank", System.UriKind.Absolute);
-			this.PreviewBrowser.WebBrowserShortcutsEnabled = false;
-			this.PreviewBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
-			// 
 			// contextMenuStrip1
 			// 
 			this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -106,6 +91,7 @@
             this.selectAllToolStripMenuItem});
 			this.contextMenuStrip1.Name = "contextMenuStrip1";
 			this.contextMenuStrip1.Size = new System.Drawing.Size(165, 142);
+			this.contextMenuStrip1.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStrip1_Opening);
 			// 
 			// copyToolStripMenuItem
 			// 
@@ -151,6 +137,21 @@
 			this.deleteToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
 			this.deleteToolStripMenuItem.Text = "&Delete";
 			this.deleteToolStripMenuItem.Click += new System.EventHandler(this.deleteToolStripMenuItem_Click);
+			// 
+			// PreviewBrowser
+			// 
+			this.PreviewBrowser.AllowWebBrowserDrop = false;
+			this.PreviewBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.PreviewBrowser.Location = new System.Drawing.Point(0, 0);
+			this.PreviewBrowser.Margin = new System.Windows.Forms.Padding(0);
+			this.PreviewBrowser.MinimumSize = new System.Drawing.Size(13, 0);
+			this.PreviewBrowser.Name = "PreviewBrowser";
+			this.PreviewBrowser.ScriptErrorsSuppressed = true;
+			this.PreviewBrowser.Size = new System.Drawing.Size(559, 268);
+			this.PreviewBrowser.TabIndex = 0;
+			this.PreviewBrowser.Url = new System.Uri("about:blank", System.UriKind.Absolute);
+			this.PreviewBrowser.WebBrowserShortcutsEnabled = false;
+			this.PreviewBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
 			// 
 			// MDContentControlForm
 			// 

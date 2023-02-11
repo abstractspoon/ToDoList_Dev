@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Command.Handling;
 using Markdig;
 
 namespace MDContentControl
@@ -250,12 +251,29 @@ namespace MDContentControl
 
 		private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
 		{
-			InputTextCtrl.Paste();
+			InputTextCtrl.Paste(DataFormats.GetFormat(DataFormats.Text));
 		}
 
-		public bool WantMenuShortcut(UInt32 keypress)
+		public bool ProcessMenuShortcut(UInt32 keypress)
 		{
-			return (Command.Handling.CommandHandling.GetMenuItem(keypress, contextMenuStrip1.Items) != null);
+			// Return false for deleting to allow default handling
+			if (CommandHandling.GetMenuShortcutFromVirtualKey(keypress) == Keys.Delete)
+				return false;
+
+			return CommandHandling.ProcessMenuShortcut(keypress, contextMenuStrip1.Items);
+		}
+
+		private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
+		{
+			// Set the enabled state of the menu items
+			bool hasSelection = !String.IsNullOrEmpty(InputTextCtrl.SelectedText);
+			bool enabled = (InputTextCtrl.Enabled && !InputTextCtrl.ReadOnly);
+			bool hasText = !string.IsNullOrEmpty(InputText);
+
+			CommandHandling.EnableCommand("cutToolStripMenuItem", enabled && hasSelection, contextMenuStrip1.Items);
+			CommandHandling.EnableCommand("copyToolStripMenuItem", hasSelection, contextMenuStrip1.Items);
+			CommandHandling.EnableCommand("deleteToolStripMenuItem", enabled && hasText, contextMenuStrip1.Items);
+			CommandHandling.EnableCommand("pasteToolStripMenuItem", InputTextCtrl.CanPaste(DataFormats.GetFormat(DataFormats.Text)), contextMenuStrip1.Items);
 		}
 	}
 }
