@@ -46,8 +46,17 @@ namespace MDContentControl
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
-            // TODO
-            return false;
+			const int WM_KEYDOWN = 0x0100;
+			const int WM_SYSKEYDOWN = 0x0104;
+
+			switch (message)
+			{
+			case WM_KEYDOWN:
+			case WM_SYSKEYDOWN:
+				return CommandHandling.ProcessMenuShortcut(wParam, MenuBar.Items);
+			}
+
+			return false;
         }
 
         public new bool Undo()

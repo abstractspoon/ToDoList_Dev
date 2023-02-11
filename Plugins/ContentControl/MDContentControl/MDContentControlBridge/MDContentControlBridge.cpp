@@ -241,7 +241,7 @@ void CMDContentControlBridge::Release()
 
 bool CMDContentControlBridge::ProcessMessage(MSG* pMsg)
 {
-	return false;
+	return m_wnd->ProcessMessage((IntPtr)pMsg->hwnd, pMsg->message, pMsg->wParam, pMsg->lParam, pMsg->time, pMsg->pt.x, pMsg->pt.y);
 }
 
 ISpellCheck* CMDContentControlBridge::GetSpellCheckInterface()

@@ -227,5 +227,35 @@ namespace MDContentControl
 			InputTextCtrl.Redo();
 			return true;
 		}
+
+		private void deleteToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			InputTextCtrl.SelectedText = string.Empty;
+		}
+
+		private void copyToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			InputTextCtrl.Copy();
+		}
+
+		private void cutToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			InputTextCtrl.Cut();
+		}
+
+		private void selectAllToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			InputTextCtrl.SelectAll();
+		}
+
+		private void pasteToolStripMenuItem_Click(object sender, EventArgs e)
+		{
+			InputTextCtrl.Paste();
+		}
+
+		public bool WantMenuShortcut(UInt32 keypress)
+		{
+			return (Command.Handling.CommandHandling.GetMenuItem(keypress, contextMenuStrip1.Items) != null);
+		}
 	}
 }
