@@ -63,10 +63,9 @@
 			// 
 			this.InputText.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.InputText.Location = new System.Drawing.Point(0, 0);
-			this.InputText.Multiline = true;
 			this.InputText.Name = "InputText";
-			this.InputText.Size = new System.Drawing.Size(559, 267);
 			this.InputText.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.InputText.Size = new System.Drawing.Size(559, 267);
 			this.InputText.TabIndex = 0;
 			this.InputText.Text = "";
 			this.InputText.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
@@ -84,6 +83,7 @@
 			this.HtmlPreview.TabIndex = 0;
 			this.HtmlPreview.Url = new System.Uri("about:blank", System.UriKind.Absolute);
 			this.HtmlPreview.WebBrowserShortcutsEnabled = false;
+			this.HtmlPreview.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
 			// 
 			// MDContentControlForm
 			// 
@@ -91,8 +91,8 @@
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.SystemColors.Window;
 			this.Controls.Add(this.SplitContainer);
-			this.Size = new System.Drawing.Size(559, 538);
 			this.Name = "MDContentControlForm";
+			this.Size = new System.Drawing.Size(559, 538);
 			this.SplitContainer.Panel1.ResumeLayout(false);
 			this.SplitContainer.Panel2.ResumeLayout(false);
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).EndInit();

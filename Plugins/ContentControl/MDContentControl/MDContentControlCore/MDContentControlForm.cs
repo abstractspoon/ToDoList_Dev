@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Windows.Forms;
 
 namespace MDContentControl
@@ -50,13 +50,32 @@ namespace MDContentControl
 			return "<html>" + m_Style + "<body>" + GetHtmlContent() + "</body></html>";
 		}
 
+		// We delay the very first update until after 'about:blank'
+		// has finished loading else we get visual artifacts because
+		// we are not eating OnPaintBackground
+		static bool m_Initialised = false;
+
 		private void UpdateOutput()
 		{
+			if (!m_Initialised)
+				return;
+
 			if (HtmlPreview.Document != null)
 			{
 				HtmlPreview.Document.OpenNew(false);
 				HtmlPreview.Document.Write(GetHtmlPage());
 				HtmlPreview.Refresh();
+			}
+		}
+
+		private void HtmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+		{
+			if (!m_Initialised)
+			{
+				Debug.Assert(e.Url.ToString() == "about:blank");
+
+				m_Initialised = true;
+				UpdateOutput();
 			}
 		}
 
