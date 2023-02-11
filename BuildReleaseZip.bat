@@ -97,14 +97,14 @@ FOR %%f IN (%TDLFILELIST%) DO (
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\%%f
 )
 
-REM - All other components
+REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Calendar.DayView.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\CustomComboBox.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Gma.CodeCloud.Controls.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\MarkdownSharp.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\Markdig.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll

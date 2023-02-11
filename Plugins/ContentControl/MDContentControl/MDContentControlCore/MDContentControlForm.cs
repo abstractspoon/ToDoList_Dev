@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Windows.Forms;
 
 using Abstractspoon.Tdl.PluginHelpers;
+using Markdig;
 
 namespace MDContentControl
 {
@@ -58,8 +59,9 @@ namespace MDContentControl
 			if (content.Length == 0)
 				return string.Empty;
 
-			var md = new MarkdownSharp.Markdown();
-			return md.Transform(content);
+			var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+
+			return Markdig.Markdown.ToHtml(content, pipeline);
 		}
 
 		public string OutputHtml
@@ -132,8 +134,6 @@ namespace MDContentControl
 				PreviewBrowser.Document.OpenNew(false);
 				PreviewBrowser.Document.Write(OutputHtmlAsPage);
 				PreviewBrowser.Refresh();
-
-				InputTextCtrl.Focus();
 			}
 		}
 
@@ -146,6 +146,8 @@ namespace MDContentControl
 				m_Initialised = true;
 				UpdateOutput();
 			}
+
+			InputTextCtrl.Focus();
 		}
 
 		private void textBox1_TextChanged(object sender, EventArgs e)

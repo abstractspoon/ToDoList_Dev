@@ -2092,6 +2092,12 @@ void CToDoListApp::CleanupAppFolder(LPCTSTR szPrevVer)
 		// remove old components
 		FileMisc::DeleteFile(sAppFolder + _T("\\LuminousControls.dll"), TRUE);
 	}
+
+	if (FileMisc::CompareVersions(szPrevVer, _T("8.1.998.1")) == 0)
+	{
+		// remove old components
+		FileMisc::DeleteFile(sAppFolder + _T("\\MarkdownSharp.dll"), TRUE);
+	}
 }
 
 void CToDoListApp::FixupExampleTasklistsTaskDates(LPCTSTR szPrevVer)
