@@ -7,10 +7,17 @@ using System.Linq;
 using System.Diagnostics;
 using System.Windows.Forms;
 
+using Abstractspoon.Tdl.PluginHelpers;
+
 namespace MDContentControl
 {
 	public partial class MDContentControlForm : UserControl
 	{
+		public event EventHandler InputTextChanged;
+		public event EventHandler InputLostFocus;
+
+		// -----------------------------------------------------------------
+
 		public MDContentControlForm()
 		{
 			InitializeComponent();
@@ -19,6 +26,19 @@ namespace MDContentControl
 			// the form editor keeps removing it if I put it
 			// in the form designer.cs file
 			SplitContainer.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+
+			Win32.SetEditMargins(InputTextCtrl.Handle, DPIScaling.Scale(4));
+			Win32.AddBorder(PreviewBrowser.Handle);
+
+			InputTextCtrl.TextChanged += (s, e) =>
+			{
+				InputTextChanged?.Invoke(this, new EventArgs());
+			};
+			
+			InputTextCtrl.LostFocus += (s, e) =>
+			{
+				InputLostFocus?.Invoke(this, new EventArgs());
+			};
 		}
 
 		public static string ConvertToHtml(Byte[] content)
@@ -40,14 +60,59 @@ namespace MDContentControl
 			return md.Transform(content);
 		}
 
-		public string GetHtmlContent()
+		public string OutputHtml
 		{
-			return ConvertToHtml(InputText.Text);
+			get
+			{
+				return ConvertToHtml(InputText);
+			}
 		}
 
-		private string GetHtmlPage()
+		private string OutputHtmlAsPage
 		{
-			return "<html>" + m_Style + "<body>" + GetHtmlContent() + "</body></html>";
+			get
+			{
+				return "<html>" + m_Style + "<body>" + OutputHtml + "</body></html>";
+			}
+		}
+
+		public string OutputText
+		{
+			get
+			{
+				return PreviewBrowser.Document.Body.InnerText ?? String.Empty;
+			}
+		}
+
+		public string InputText
+		{
+			get
+			{
+				return InputTextCtrl.Text ?? String.Empty;
+			}
+
+			set
+			{
+				InputTextCtrl.Text = value;
+			}
+		}
+
+		public bool ReadOnly
+		{
+			get
+			{
+				return InputTextCtrl.ReadOnly;
+			}
+
+			set
+			{
+				InputTextCtrl.ReadOnly = value;
+			}
+		}
+
+		public void SetInputFont(string fontName, int pointSize)
+		{
+			InputTextCtrl.Font = new System.Drawing.Font(fontName, pointSize);
 		}
 
 		// We delay the very first update until after 'about:blank'
@@ -60,11 +125,11 @@ namespace MDContentControl
 			if (!m_Initialised)
 				return;
 
-			if (HtmlPreview.Document != null)
+			if (PreviewBrowser.Document != null)
 			{
-				HtmlPreview.Document.OpenNew(false);
-				HtmlPreview.Document.Write(GetHtmlPage());
-				HtmlPreview.Refresh();
+				PreviewBrowser.Document.OpenNew(false);
+				PreviewBrowser.Document.Write(OutputHtmlAsPage);
+				PreviewBrowser.Refresh();
 			}
 		}
 
@@ -89,9 +154,17 @@ namespace MDContentControl
 			//base.OnPaintBackground(e);
 		}
 
-		public void SetSplitBarColor(Color color)
+		public Color SplitBarColor 
 		{
-			SplitContainer.BackColor = color;
+			get
+			{
+				return SplitContainer.BackColor;
+			}
+
+			set
+			{
+				SplitContainer.BackColor = value;
+			}
 		}
 
 		public int SplitPos
@@ -111,7 +184,7 @@ namespace MDContentControl
 
 		private string m_Style;
 
-		public void SetHtmlFont(string name, int pointSize)
+		public void SetPreviewFont(string name, int pointSize)
 		{
 			var newStyle = string.Format(m_BaseStyle, pointSize, name);
 
@@ -120,6 +193,26 @@ namespace MDContentControl
 				m_Style = newStyle;
 				UpdateOutput();
 			}
+		}
+
+		public bool Undo()
+		{
+			if (!InputTextCtrl.CanUndo)
+				return false;
+
+			// else 
+			InputTextCtrl.Undo();
+			return true;
+		}
+
+		public bool Redo()
+		{
+			if (!InputTextCtrl.CanRedo)
+				return false;
+
+			// else 
+			InputTextCtrl.Redo();
+			return true;
 		}
 	}
 }

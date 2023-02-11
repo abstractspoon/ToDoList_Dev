@@ -29,8 +29,8 @@
 		private void InitializeComponent()
 		{
 			this.SplitContainer = new System.Windows.Forms.SplitContainer();
-			this.InputText = new System.Windows.Forms.RichTextBox();
-			this.HtmlPreview = new System.Windows.Forms.WebBrowser();
+			this.InputTextCtrl = new System.Windows.Forms.RichTextBox();
+			this.PreviewBrowser = new System.Windows.Forms.WebBrowser();
 			((System.ComponentModel.ISupportInitialize)(this.SplitContainer)).BeginInit();
 			this.SplitContainer.Panel1.SuspendLayout();
 			this.SplitContainer.Panel2.SuspendLayout();
@@ -48,11 +48,11 @@
 			// SplitContainer.Panel1
 			// 
 			this.SplitContainer.Panel1.BackColor = System.Drawing.SystemColors.Window;
-			this.SplitContainer.Panel1.Controls.Add(this.InputText);
+			this.SplitContainer.Panel1.Controls.Add(this.InputTextCtrl);
 			// 
 			// SplitContainer.Panel2
 			// 
-			this.SplitContainer.Panel2.Controls.Add(this.HtmlPreview);
+			this.SplitContainer.Panel2.Controls.Add(this.PreviewBrowser);
 			this.SplitContainer.Panel2MinSize = 1;
 			this.SplitContainer.Size = new System.Drawing.Size(559, 538);
 			this.SplitContainer.SplitterDistance = 267;
@@ -61,29 +61,29 @@
 			// 
 			// InputText
 			// 
-			this.InputText.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.InputText.Location = new System.Drawing.Point(0, 0);
-			this.InputText.Name = "InputText";
-			this.InputText.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
-			this.InputText.Size = new System.Drawing.Size(559, 267);
-			this.InputText.TabIndex = 0;
-			this.InputText.Text = "";
-			this.InputText.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+			this.InputTextCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.InputTextCtrl.Location = new System.Drawing.Point(0, 0);
+			this.InputTextCtrl.Name = "InputText";
+			this.InputTextCtrl.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
+			this.InputTextCtrl.Size = new System.Drawing.Size(559, 267);
+			this.InputTextCtrl.TabIndex = 0;
+			this.InputTextCtrl.Text = "";
+			this.InputTextCtrl.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
 			// 
 			// HtmlPreview
 			// 
-			this.HtmlPreview.AllowWebBrowserDrop = false;
-			this.HtmlPreview.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.HtmlPreview.Location = new System.Drawing.Point(0, 0);
-			this.HtmlPreview.Margin = new System.Windows.Forms.Padding(0);
-			this.HtmlPreview.MinimumSize = new System.Drawing.Size(13, 0);
-			this.HtmlPreview.Name = "HtmlPreview";
-			this.HtmlPreview.ScriptErrorsSuppressed = true;
-			this.HtmlPreview.Size = new System.Drawing.Size(559, 268);
-			this.HtmlPreview.TabIndex = 0;
-			this.HtmlPreview.Url = new System.Uri("about:blank", System.UriKind.Absolute);
-			this.HtmlPreview.WebBrowserShortcutsEnabled = false;
-			this.HtmlPreview.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
+			this.PreviewBrowser.AllowWebBrowserDrop = false;
+			this.PreviewBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.PreviewBrowser.Location = new System.Drawing.Point(0, 0);
+			this.PreviewBrowser.Margin = new System.Windows.Forms.Padding(0);
+			this.PreviewBrowser.MinimumSize = new System.Drawing.Size(13, 0);
+			this.PreviewBrowser.Name = "HtmlPreview";
+			this.PreviewBrowser.ScriptErrorsSuppressed = true;
+			this.PreviewBrowser.Size = new System.Drawing.Size(559, 268);
+			this.PreviewBrowser.TabIndex = 0;
+			this.PreviewBrowser.Url = new System.Uri("about:blank", System.UriKind.Absolute);
+			this.PreviewBrowser.WebBrowserShortcutsEnabled = false;
+			this.PreviewBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.HtmlPreview_DocumentCompleted);
 			// 
 			// MDContentControlForm
 			// 
@@ -103,8 +103,8 @@
 
 		#endregion
 
-		protected System.Windows.Forms.SplitContainer SplitContainer;
-		protected System.Windows.Forms.RichTextBox InputText;
-		protected System.Windows.Forms.WebBrowser HtmlPreview;
+		private System.Windows.Forms.SplitContainer SplitContainer;
+		private System.Windows.Forms.RichTextBox InputTextCtrl;
+		private System.Windows.Forms.WebBrowser PreviewBrowser;
 	}
 }

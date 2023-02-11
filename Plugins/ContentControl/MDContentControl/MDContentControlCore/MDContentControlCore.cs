@@ -15,35 +15,32 @@ namespace MDContentControl
         {
             m_hwndParent = hwndParent;
 
-            InputText.TextChanged += new System.EventHandler(OnInputTextChanged);
-            InputText.LostFocus += new System.EventHandler(OnInputTextLostFocus);
-
-			Win32.SetEditMargins(InputText.Handle, DPIScaling.Scale(4));
-			Win32.AddBorder(HtmlPreview.Handle);
+            InputTextChanged += new System.EventHandler(OnInputTextChanged);
+            InputLostFocus += new System.EventHandler(OnInputTextLostFocus);
 		}
 
 		// ITDLContentControl ------------------------------------------------------------------
 
 		public Byte[] GetContent()
         {
-            return System.Text.Encoding.Unicode.GetBytes(InputText.Text);
+            return System.Text.Encoding.Unicode.GetBytes(InputText);
         }
 
         public bool SetContent(Byte[] content, bool bResetSelection)
         {
-			InputText.Text = System.Text.Encoding.Unicode.GetString(content);
+			InputText = System.Text.Encoding.Unicode.GetString(content);
             return true;
         }
 
         // text content if supported. return false if not supported
         public String GetTextContent()
         {
-			return HtmlPreview.Document.Body.InnerText ?? String.Empty;
+			return OutputText;
 		}
 
         public bool SetTextContent(String content, bool bResetSelection)
         {
-			InputText.Text = content;
+			InputText = content;
             return true;
         }
 
@@ -53,34 +50,24 @@ namespace MDContentControl
             return false;
         }
 
-        public bool Undo()
+        public new bool Undo()
         {
-			if (!InputText.CanUndo)
-				return false;
-
-			// else 
-			InputText.Undo();
-            return true;
+			return base.Undo();
         }
 
-        public bool Redo()
+        public new bool Redo()
         {
-			if (!InputText.CanRedo)
-				return false;
-
-			// else 
-			InputText.Redo();
-			return true;
+			return base.Redo();
 		}
 
 		public void SetUITheme(UITheme theme)
         {
-			SetSplitBarColor(theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark));
+			SplitBarColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackDark);
 		}
 
         public void SetReadOnly(bool bReadOnly)
         {
-			InputText.ReadOnly = bReadOnly;
+			ReadOnly = bReadOnly;
         }
 
         public void SavePreferences(Preferences prefs, String key)
@@ -94,7 +81,7 @@ namespace MDContentControl
 			var htmlSize = prefs.GetProfileInt("Preferences", "HtmlFontSize", 2);
 			int pointSize = MSDN.Html.Editor.HtmlFontConversion.PointsFromHtml(htmlSize);
 
-			SetHtmlFont(fontName, pointSize);
+			SetPreviewFont(fontName, pointSize);
 			
 			if (!appOnly)
 			{
@@ -104,7 +91,7 @@ namespace MDContentControl
 
 		public void SetContentFont(String fontName, int pointSize)
 		{
-			InputText.Font = new System.Drawing.Font(fontName, pointSize);
+			SetInputFont(fontName, pointSize);
 		}
 
 		// --------------------------------------------------------------------
