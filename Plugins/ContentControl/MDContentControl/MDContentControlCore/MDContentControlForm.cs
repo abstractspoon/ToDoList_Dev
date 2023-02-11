@@ -13,6 +13,21 @@ using Markdig;
 
 namespace MDContentControl
 {
+	public class RichTextBoxEx : RichTextBox
+	{
+		protected override CreateParams CreateParams
+		{
+			get
+			{
+				CreateParams cp = base.CreateParams;
+				cp.ClassName = "RichEdit50W";
+
+				return cp;
+			}
+		}
+	}
+
+
 	public partial class MDContentControlForm : UserControl
 	{
 		public event EventHandler InputTextChanged;

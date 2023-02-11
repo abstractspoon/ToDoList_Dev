@@ -30,7 +30,7 @@
 		{
 			this.components = new System.ComponentModel.Container();
 			this.SplitContainer = new System.Windows.Forms.SplitContainer();
-			this.InputTextCtrl = new System.Windows.Forms.RichTextBox();
+			this.InputTextCtrl = new RichTextBoxEx();
 			this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.copyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.cutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -173,7 +173,7 @@
 		#endregion
 
 		private System.Windows.Forms.SplitContainer SplitContainer;
-		private System.Windows.Forms.RichTextBox InputTextCtrl;
+		private RichTextBoxEx InputTextCtrl;
 		private System.Windows.Forms.WebBrowser PreviewBrowser;
 		private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
 		private System.Windows.Forms.ToolStripMenuItem copyToolStripMenuItem;
