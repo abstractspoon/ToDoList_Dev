@@ -28,6 +28,8 @@ namespace MDContentControl
 			SplitContainer.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 
 			Win32.SetEditMargins(InputTextCtrl.Handle, DPIScaling.Scale(4));
+			Win32.RemoveClientEdge(InputTextCtrl.Handle);
+			Win32.AddBorder(InputTextCtrl.Handle);
 			Win32.AddBorder(PreviewBrowser.Handle);
 
 			InputTextCtrl.TextChanged += (s, e) =>
@@ -130,6 +132,8 @@ namespace MDContentControl
 				PreviewBrowser.Document.OpenNew(false);
 				PreviewBrowser.Document.Write(OutputHtmlAsPage);
 				PreviewBrowser.Refresh();
+
+				InputTextCtrl.Focus();
 			}
 		}
 
@@ -180,13 +184,20 @@ namespace MDContentControl
 			}
 		}
 
-		private readonly string m_BaseStyle = "<style>html,body,table{{font: normal {0}pt {1};}}li{{margin-bottom:7px;}}h1{{font-size:18pt;}}h2{{font-size:14pt;}}</style>";
+		private readonly string m_BaseStyle = 
+			"<style>html,body,table{{font: normal {1}pt {0};}}li{{margin-bottom:7px;}}" +
+			"h1{{font-size:{4}pt;}}h2{{font-size:{3}pt;}}h3{{font-size:{2}pt;}}</style>";
 
 		private string m_Style;
 
 		public void SetPreviewFont(string name, int pointSize)
 		{
-			var newStyle = string.Format(m_BaseStyle, pointSize, name);
+			var newStyle = string.Format(m_BaseStyle,
+										name,
+										pointSize,      // default
+										pointSize + 2,  // H3
+										pointSize + 4,  // H2
+										pointSize + 8);	// H1
 
 			if (!newStyle.Equals(m_Style))
 			{

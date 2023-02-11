@@ -59,25 +59,25 @@
 			this.SplitContainer.SplitterWidth = 3;
 			this.SplitContainer.TabIndex = 0;
 			// 
-			// InputText
+			// InputTextCtrl
 			// 
 			this.InputTextCtrl.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.InputTextCtrl.Location = new System.Drawing.Point(0, 0);
-			this.InputTextCtrl.Name = "InputText";
+			this.InputTextCtrl.Name = "InputTextCtrl";
 			this.InputTextCtrl.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Vertical;
 			this.InputTextCtrl.Size = new System.Drawing.Size(559, 267);
 			this.InputTextCtrl.TabIndex = 0;
 			this.InputTextCtrl.Text = "";
 			this.InputTextCtrl.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
 			// 
-			// HtmlPreview
+			// PreviewBrowser
 			// 
 			this.PreviewBrowser.AllowWebBrowserDrop = false;
 			this.PreviewBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.PreviewBrowser.Location = new System.Drawing.Point(0, 0);
 			this.PreviewBrowser.Margin = new System.Windows.Forms.Padding(0);
 			this.PreviewBrowser.MinimumSize = new System.Drawing.Size(13, 0);
-			this.PreviewBrowser.Name = "HtmlPreview";
+			this.PreviewBrowser.Name = "PreviewBrowser";
 			this.PreviewBrowser.ScriptErrorsSuppressed = true;
 			this.PreviewBrowser.Size = new System.Drawing.Size(559, 268);
 			this.PreviewBrowser.TabIndex = 0;
