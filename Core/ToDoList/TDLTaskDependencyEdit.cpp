@@ -97,11 +97,12 @@ BOOL CTDLTaskDependencyEdit::OnChange()
 	return FALSE; 
 }
 
-BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks,const CTDCImageList& ilTasks, BOOL bShowParentsAsFolders)
+BOOL CTDLTaskDependencyEdit::DoEdit(const CTaskFile& tasks,const CTDCImageList& ilTasks, 
+									BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes)
 {
 	if (IsWindowEnabled())
 	{
-		CTDLTaskDependencyEditDlg dialog(tasks, ilTasks, m_aDepends, bShowParentsAsFolders);
+		CTDLTaskDependencyEditDlg dialog(tasks, ilTasks, m_aDepends, bShowParentsAsFolders, bShowLeadInTimes);
 		
 		if (dialog.DoModal() == IDOK)
 		{
@@ -186,11 +187,12 @@ const UINT COMBO_ID = 1001;
 /////////////////////////////////////////////////////////////////////////////
 
 CTDLTaskDependencyListCtrl::CTDLTaskDependencyListCtrl(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
-													   BOOL bShowParentsAsFolders)
+													   BOOL bShowParentsAsFolders, BOOL bShowLeadInTimes)
 	: 
 	m_tasks(tasks),
 	m_ilTasks(ilTasks),
-	m_bShowParentTasksAsFolders(bShowParentsAsFolders)
+	m_bShowParentTasksAsFolders(bShowParentsAsFolders),
+	m_bShowLeadInTimes(bShowLeadInTimes)
 {
 	m_cbTasks.SetShowParentTasksAsFolders(bShowParentsAsFolders);
 }
@@ -210,9 +212,17 @@ void CTDLTaskDependencyListCtrl::SetDependencies(const CTDCDependencyArray& aDep
 
 	CRect rList;
 	GetClientRect(rList);
+	
+	if (m_bShowLeadInTimes)
+	{
+		AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_DROPLIST);
+		AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (rList.Width() / 3));
+	}
+	else
+	{
+		AddCol(CEnString(IDS_TDLBC_DEPENDS), rList.Width(), ILCT_DROPLIST);
+	}
 
-	AddCol(CEnString(IDS_TDLBC_DEPENDS), ((rList.Width() * 2) / 3), ILCT_DROPLIST);
-	AddCol(CEnString(IDS_DEPENDSLEADIN_COL), (rList.Width() / 3));
 	SetAutoRowPrompt(CEnString(IDS_NEWDEPENDENCY_PROMPT));
 	ShowGrid(TRUE, TRUE);
 	AutoAdd(TRUE, FALSE);
@@ -428,10 +438,11 @@ void CTDLTaskDependencyListCtrl::PopulateTaskCombo(const CTaskFile& tasks, HTASK
 /////////////////////////////////////////////////////////////////////////////
 
 CTDLTaskDependencyEditDlg::CTDLTaskDependencyEditDlg(const CTaskFile& tasks, const CTDCImageList& ilTasks, 
-													 const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, CWnd* pParent /*=NULL*/)
+													 const CTDCDependencyArray& aDepends, BOOL bShowParentsAsFolders, 
+													 BOOL bShowLeadInTimes, CWnd* pParent /*=NULL*/)
 	: 
 	CTDLDialog(IDD_TASKDEPENDENCY_DIALOG, _T("Dependency"), pParent),
-	m_lcDependencies(tasks, ilTasks, bShowParentsAsFolders)
+	m_lcDependencies(tasks, ilTasks, bShowParentsAsFolders, bShowLeadInTimes)
 {
 	//{{AFX_DATA_INIT(CRecurringTaskOptionDlg)
 	//}}AFX_DATA_INIT
