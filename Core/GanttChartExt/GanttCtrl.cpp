@@ -172,7 +172,6 @@ BOOL CGanttCtrl::GetSelectedTaskDependencies(CDWordArray& aDepends) const
 	return TRUE;
 }
 
-/*
 BOOL CGanttCtrl::AddSelectedTaskDependency(DWORD dwDependID)
 {
 	// sanity check
@@ -220,7 +219,6 @@ BOOL CGanttCtrl::DeleteSelectedTaskDependency(DWORD dwDependID)
 
 	return Misc::RemoveItemT(dwDependID, pGI->aDependIDs);
 }
-*/
 
 BOOL CGanttCtrl::GetSelectedTaskDates(COleDateTime& dtStart, COleDateTime& dtDue) const
 {

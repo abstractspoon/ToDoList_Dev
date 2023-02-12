@@ -1313,8 +1313,8 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 		{
-/*
-			// update gantt ctrl
+			// update gantt ctrl because the app will only update our tasks 
+			// if other tasks are affected which is hard to predict
 			switch (wp)
 			{
 			case GCDDM_ADD:
@@ -1333,7 +1333,6 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 				ASSERT(0);
 				return 0L;
 			}
-*/
 		}
 	}
 
