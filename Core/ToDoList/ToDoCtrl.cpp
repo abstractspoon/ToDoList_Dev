@@ -11206,7 +11206,10 @@ BOOL CToDoCtrl::EditSelectedTaskDependency()
 		CTaskFile tasks;
 		GetTasks(tasks, filter);
 
-		if (m_eDependency.DoEdit(tasks, m_ilTaskIcons, HasStyle(TDCS_SHOWPARENTSASFOLDERS)))
+		if (m_eDependency.DoEdit(tasks, 
+								 m_ilTaskIcons, 
+								 HasStyle(TDCS_SHOWPARENTSASFOLDERS), 
+								 HasStyle(TDCS_AUTOADJUSTDEPENDENCYDATES)))
 		{
 			// Check for circular dependencies
 			// TODO
