@@ -16,8 +16,8 @@
 /////////////////////////////////////////////////////////////////////////////////
 
 // latest interface
-#define ITASKLISTBASE	 ITaskList17 
-#define IID_TASKLISTBASE IID_TASKLIST17
+#define ITASKLISTBASE	 ITaskList18 
+#define IID_TASKLISTBASE IID_TASKLIST18
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -38,6 +38,7 @@ static const GUID IID_TASKLIST14 = { 0x0e95dc97, 0x41f7, 0x4d9c, { 0xb4, 0x25, 0
 static const GUID IID_TASKLIST15 = { 0x2a8fd5f0, 0x63ae, 0x485f, { 0xbc, 0x5e, 0xa2, 0xa2, 0xc2, 0xc2, 0x51, 0x5e } };
 static const GUID IID_TASKLIST16 = { 0x66fc35d2, 0xc471, 0x4af6, { 0xbe, 0xfc, 0xf3, 0xba, 0x5f, 0xfd, 0x90, 0xd1 } };
 static const GUID IID_TASKLIST17 = { 0xd44e1030, 0x3c18, 0x41df, { 0xb7, 0x5e, 0x70, 0xcf, 0xd8, 0x62, 0x15, 0x47 } };
+static const GUID IID_TASKLIST18 = { 0x23819c67, 0xc0b1, 0x4c41, { 0x92, 0x61, 0x45, 0x2b, 0x68, 0x20, 0xbe, 0x06 } };
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -45,7 +46,6 @@ static const GUID IID_TASKLIST17 = { 0xd44e1030, 0x3c18, 0x41df, { 0xb7, 0x5e, 0
 const int ITASK_HASHTABLE_SIZE = 5000;
 
 //////////////////////////////////////////////////////////////////////
-
 
 typedef void* HTASKITEM;
 typedef __int64 time64_t;
@@ -427,6 +427,15 @@ public:
 	
 	virtual bool SetTaskCost(HTASKITEM hTask, double dCost, bool bIsRate) = 0;
 	virtual double GetTaskCost(HTASKITEM hTask, bool bCalc, bool& bIsRate) const = 0;
+};
+
+class ITaskList18 : public ITaskList17
+{
+	// new methods
+public:
+	virtual bool AddTaskDependency(HTASKITEM hTask, LPCWSTR szDepends, int nDaysLeanIn = 0) = 0;
+	virtual bool AddTaskDependency(HTASKITEM hTask, unsigned long dwID, int nDaysLeanIn = 0) = 0;
+	virtual LPCWSTR GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeanIn = NULL) const = 0;
 };
 
 #endif // _ITASKLIST_H__5951FDE6_508A_4A9D_A55D_D16EB026AEF7__INCLUDED_

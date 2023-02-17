@@ -249,6 +249,12 @@ public:
 	BOOL IsTaskSelected(DWORD dwTaskID) const;
 
 	//////////////////////////////////////////////////////////////
+	// ITaskList18 implementation 
+	bool AddTaskDependency(HTASKITEM hTask, LPCWSTR szDepends, int nDaysLeadIn);
+	bool AddTaskDependency(HTASKITEM hTask, unsigned long dwID, int nDaysLeadIn);
+	LPCWSTR GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeadIn) const;
+
+	//////////////////////////////////////////////////////////////
 	// ITaskList17 implementation 
 	LPCTSTR GetFileName(bool bFullPath) const;
 
@@ -579,7 +585,8 @@ protected:
 
 	// for handling arrays at *task* level
 	bool AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty);
-	CString GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, int nIndex) const;
+	CString GetTaskArrayItemValue(HTASKITEM hTask, const CString& sItemTag, int nIndex) const;
+	CXmlItem* GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, int nIndex) const;
 	BOOL SetTaskArray(HTASKITEM hTask, const CString& sItemTag, const CStringArray& aItems, BOOL bAllowEmpty);
 	int GetTaskArray(HTASKITEM hTask, const CString& sItemTag, CStringArray& aItems, BOOL bAllowEmpty) const;
 	bool DeleteTaskArray(HTASKITEM hTask, const CString& sItemTag);

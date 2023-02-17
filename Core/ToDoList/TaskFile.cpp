@@ -206,6 +206,11 @@ HRESULT CTaskFile::QueryInterface(REFIID riid, void __RPC_FAR *__RPC_FAR *ppvObj
 		*ppvObject = reinterpret_cast<ITaskList17*>(this);
 		AddRef();
 	}
+	else if (IsEqualIID(riid, IID_TASKLIST18))
+	{
+		*ppvObject = reinterpret_cast<ITaskList18*>(this);
+		AddRef();
+	}
 	else
 	{
 		ASSERT(0);
@@ -2290,15 +2295,43 @@ BOOL CTaskFile::SetTaskAllocatedTo(HTASKITEM hTask, const CStringArray& aAllocTo
 
 bool CTaskFile::AddTaskDependency(HTASKITEM hTask, LPCTSTR szDepends)
 {
-	return AddTaskArrayItem(hTask, TDL_TASKDEPENDENCY, szDepends, FALSE);
+	return AddTaskDependency(hTask, szDepends, 0);
 }
 
 bool CTaskFile::AddTaskDependency(HTASKITEM hTask, unsigned long dwID)
 {
+	return AddTaskDependency(hTask, dwID, 0);
+}
+
+bool CTaskFile::AddTaskDependency(HTASKITEM hTask, LPCTSTR szDepends, int nDaysLeadIn)
+{
+	CXmlItem* pXITask = NULL;
+	GET_TASK(pXITask, hTask, false);
+
+	CXmlItem* pXI = pXITask->GetItem(TDL_TASKDEPENDENCY);
+
+	// check existence before adding
+	if (!pXI || !pXI->FindItem(TDL_TASKDEPENDENCY, szDepends, FALSE))
+	{
+		CXmlItem* pXIDepend = pXITask->AddItem(TDL_TASKDEPENDENCY, szDepends, XIT_ELEMENT);
+		ASSERT(pXIDepend);
+
+		// Attributes
+		if (nDaysLeadIn)
+			pXIDepend->AddItem(TDL_TASKDEPENDENCYLEADIN, nDaysLeadIn, XIT_ATTRIB);
+
+		return true;
+	}
+
+	return false;
+}
+
+bool CTaskFile::AddTaskDependency(HTASKITEM hTask, unsigned long dwID, int nDaysLeadIn)
+{
 	CString sID;
 	sID.Format(_T("%lu"), dwID);
 
-	return AddTaskDependency(hTask, sID);
+	return AddTaskDependency(hTask, sID, nDaysLeadIn);
 }
 
 bool CTaskFile::AddTaskAllocatedTo(HTASKITEM hTask, LPCTSTR szAllocTo)
@@ -2653,7 +2686,7 @@ int CTaskFile::GetTaskCategoryCount(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskCategory(HTASKITEM hTask, int nIndex) const
 {
-	return GetTaskArrayItem(hTask, TDL_TASKCATEGORY, nIndex);
+	return GetTaskArrayItemValue(hTask, TDL_TASKCATEGORY, nIndex);
 }
 
 int CTaskFile::GetTaskTagCount(HTASKITEM hTask) const
@@ -2663,7 +2696,7 @@ int CTaskFile::GetTaskTagCount(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskTag(HTASKITEM hTask, int nIndex) const
 {
-	return GetTaskArrayItem(hTask, TDL_TASKTAG, nIndex);
+	return GetTaskArrayItemValue(hTask, TDL_TASKTAG, nIndex);
 }
 
 int CTaskFile::GetTaskDependencyCount(HTASKITEM hTask) const
@@ -2673,7 +2706,17 @@ int CTaskFile::GetTaskDependencyCount(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskDependency(HTASKITEM hTask, int nIndex) const
 {
-	return GetTaskArrayItem(hTask, TDL_TASKDEPENDENCY, nIndex);
+	return GetTaskDependency(hTask, nIndex, NULL);
+}
+
+LPCTSTR CTaskFile::GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLeadIn) const
+{
+	const CXmlItem* pXI = GetTaskArrayItem(hTask, TDL_TASKDEPENDENCY, nIndex);
+
+	if (pDaysLeadIn)
+		*pDaysLeadIn = pXI->GetItemValueI(TDL_TASKDEPENDENCYLEADIN);
+
+	return pXI->GetValue();
 }
 
 int CTaskFile::GetTaskAllocatedToCount(HTASKITEM hTask) const
@@ -2683,7 +2726,7 @@ int CTaskFile::GetTaskAllocatedToCount(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskAllocatedTo(HTASKITEM hTask, int nIndex) const
 {
-	return GetTaskArrayItem(hTask, TDL_TASKALLOCTO, nIndex);
+	return GetTaskArrayItemValue(hTask, TDL_TASKALLOCTO, nIndex);
 }
 
 int CTaskFile::GetTaskFileLinkCount(HTASKITEM hTask) const
@@ -2693,7 +2736,7 @@ int CTaskFile::GetTaskFileLinkCount(HTASKITEM hTask) const
 
 LPCTSTR CTaskFile::GetTaskFileLink(HTASKITEM hTask, int nIndex) const
 {
-	return GetTaskArrayItem(hTask, TDL_TASKFILELINKPATH, nIndex);
+	return GetTaskArrayItemValue(hTask, TDL_TASKFILELINKPATH, nIndex);
 }
 
 bool CTaskFile::IsTaskGoodAsDone(HTASKITEM hTask) const
@@ -4457,17 +4500,17 @@ int CTaskFile::GetMetaData(const CXmlItem* pXIParent, CMapStringToString& mapMet
 	return mapMetaData.GetCount();
 }
 
-CString CTaskFile::GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, int nIndex) const
+CXmlItem* CTaskFile::GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, int nIndex) const
 {
 	CXmlItem* pXITask = NULL;
-	GET_TASK(pXITask, hTask, _T(""));
+	GET_TASK(pXITask, hTask, NULL);
 	
-	const CXmlItem* pXI = pXITask->GetItem(sItemTag);
+	CXmlItem* pXI = pXITask->GetItem(sItemTag);
 
 	while (pXI)
 	{
 		if (nIndex == 0) // this is the item we want
-			return pXI->GetValue();
+			return pXI;
 
 		// else continue
 		nIndex--;
@@ -4475,7 +4518,14 @@ CString CTaskFile::GetTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, in
 	}
 
 	// not found
-	return _T("");
+	return NULL;
+}
+
+CString CTaskFile::GetTaskArrayItemValue(HTASKITEM hTask, const CString& sItemTag, int nIndex) const
+{
+	CXmlItem* pXI = GetTaskArrayItem(hTask, sItemTag, nIndex);
+
+	return (pXI ? pXI->GetValue() : _T(""));
 }
 
 bool CTaskFile::AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty)
