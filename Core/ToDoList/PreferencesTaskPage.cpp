@@ -176,14 +176,11 @@ void CPreferencesTaskPage::ValidateWorkingWeek()
 
 	double dEndOfWorkdayInHours = (m_dStartOfWorkdayInHours + dHoursInDay);
 
-	if (m_dStartOfLunchInHours > dEndOfWorkdayInHours)
-		m_bHasLunchBreak = FALSE;
-
 	m_dStartOfLunchInHours = max(m_dStartOfWorkdayInHours, m_dStartOfLunchInHours);
 	m_dStartOfLunchInHours = min(dEndOfWorkdayInHours, m_dStartOfLunchInHours);
 
-	m_dEndOfLunchInHours = min(m_dEndOfLunchInHours, (m_dStartOfWorkdayInHours + dHoursInDay));
 	m_dEndOfLunchInHours = max(m_dEndOfLunchInHours, m_dStartOfLunchInHours);
+	m_dEndOfLunchInHours = min(m_dEndOfLunchInHours, dEndOfWorkdayInHours);
 
 	if (GetSafeHwnd())
 		UpdateData(FALSE);
@@ -235,11 +232,14 @@ void CPreferencesTaskPage::LoadPreferences(const IPreferences* pPrefs, LPCTSTR s
 
 	m_nDaysInWeek = pPrefs->GetProfileInt(szKey, _T("DaysInWeek"), 5);
 	m_sHoursInDay = pPrefs->GetProfileString(szKey, _T("HoursInDay"), _T("8.00"));
-	m_bHasLunchBreak = pPrefs->GetProfileInt(szKey, _T("HasLunchBreak"), TRUE);
-	
 	m_dEndOfLunchInHours = pPrefs->GetProfileDouble(szKey, _T("EndOfLunchInHours"), 14.0);
 	m_dStartOfLunchInHours = pPrefs->GetProfileDouble(szKey, _T("StartOfLunchInHours"), 13.0);
 	m_dStartOfWorkdayInHours = pPrefs->GetProfileDouble(szKey, _T("StartOfWorkdayInHours"), 9.0);
+	
+	if (m_dEndOfLunchInHours <= m_dStartOfLunchInHours)
+		m_bHasLunchBreak = FALSE;
+	else
+		m_bHasLunchBreak = pPrefs->GetProfileInt(szKey, _T("HasLunchBreak"), TRUE);
 
 	m_sTrackReminderSoundFile = pPrefs->GetProfileString(_T("Reminders"), _T("SoundFile"), m_sTrackReminderSoundFile);
 
