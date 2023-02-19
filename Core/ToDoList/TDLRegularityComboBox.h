@@ -7,22 +7,27 @@
 // TDLRegularityComboBox.h : header file
 //
 
+#include "..\shared\OwnerdrawComboBoxBase.h"
+
 #include "..\Interfaces\IEnums.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // CTDLRegularityComboBox window
 
-class CTDLRegularityComboBox : public CComboBox
+class CTDLRegularityComboBox : public COwnerdrawComboBoxBase
 {
 // Construction
 public:
-	CTDLRegularityComboBox();
+	CTDLRegularityComboBox(BOOL bIncludeAny);
 	virtual ~CTDLRegularityComboBox();
 
 	TDC_REGULARITY GetSelectedRegularity() const;
 	int SetSelectedRegularity(TDC_REGULARITY nRegularity);
 
 	static CString GetRegularity(TDC_REGULARITY nRegularity);
+
+protected:
+	BOOL m_bIncludeAny;
 
 protected:
 // Overrides
@@ -42,6 +47,9 @@ protected:
 
 protected:
 	void BuildCombo();
+
+	void DrawItemText(CDC& dc, const CRect& rect, int nItem, UINT nItemState,
+					  DWORD dwItemData, const CString& sItem, BOOL bList, COLORREF crText);
 };
 
 /////////////////////////////////////////////////////////////////////////////
