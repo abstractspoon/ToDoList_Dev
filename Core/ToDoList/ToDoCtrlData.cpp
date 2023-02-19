@@ -2469,15 +2469,20 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 		return dtSimpleDue;
 	}
 
+	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+	ASSERT(dRealDuration > 0.0);
+
+	COleDateTime dtNewDue = AddDuration(dtNewStart, dRealDuration, nUnits, FALSE); // Does not update dtNewStart
+	
 	// Tasks whose time estimate has not changed are also kept simple
 	double dCurDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
-	double dNewDuration = CalcDuration(dtNewStart, dtSimpleDue, nUnits);
+	double dNewDuration = CalcDuration(dtNewStart, dtNewDue, nUnits);
 
 	const double ONE_SECOND = (1.0 / (24 * 60 * 60));
 
 	if (fabs(dCurDuration - dNewDuration) < ONE_SECOND)
 	{
-		return dtSimpleDue;
+		return dtNewDue;
 	}
 	
 	// We need to calculate it 'fully'
