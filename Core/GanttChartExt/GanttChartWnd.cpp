@@ -1313,20 +1313,22 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 		if (GetParent()->SendMessage(WM_IUI_MODIFYSELECTEDTASK, 1, (LPARAM)&mod))
 		{
-			// update gantt ctrl because the app will only update our tasks 
-			// if other tasks are affected which is hard to predict
+			// Update gantt ctrl because the app will only update our tasks 
+			// if other tasks are affected which is hard to predict.
+			// Note: These calls will fail if the app has already updated us
+			// so we don't wrap the calls in VERIFY().
 			switch (wp)
 			{
 			case GCDDM_ADD:
-				VERIFY(m_ctrlGantt.AddSelectedTaskDependency(mod.dwDependID));
+				m_ctrlGantt.AddSelectedTaskDependency(mod.dwDependID);
 				break;
 
 			case GCDDM_EDIT:
-				VERIFY(m_ctrlGantt.EditSelectedTaskDependency(mod.dwPrevDependID, mod.dwDependID));
+				m_ctrlGantt.EditSelectedTaskDependency(mod.dwPrevDependID, mod.dwDependID);
 				break;
 
 			case GCDDM_DELETE:
-				VERIFY(m_ctrlGantt.DeleteSelectedTaskDependency(mod.dwPrevDependID));
+				m_ctrlGantt.DeleteSelectedTaskDependency(mod.dwPrevDependID);
 				break;
 
 			default:
