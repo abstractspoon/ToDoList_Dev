@@ -5815,9 +5815,9 @@ BEGIN
     IDS_IMPORTDIALOGTITLE_FILE "Import Tasks from File"
     IDS_EXPORTTITLE_MULTIPLEFILES "<multiple tasklists>"
     IDS_PRINTDLG_LAYOUT     "Layout"
-    IDS_PRINTDLG_TASKSEL    "Task Selection"
+    IDS_PRINTDLG_TASKSEL    "Task/Attribute Selection"
     IDS_EXPORTDLG_EXPORT    "Export"
-    IDS_EXPORTDLG_TASKSEL   "Task Selection"
+    IDS_EXPORTDLG_TASKSEL   "Task/Attribute Selection"
     IDS_MSVCREDIST_MSG      "System File Required|ToDoList requires the 'Microsoft Visual C++ %d (x86) Redistributable Package' to be installed.\n\nClick 'OK' to visit the appropriate download page or 'Cancel' to quit."
 END
 
