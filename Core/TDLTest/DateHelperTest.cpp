@@ -32,6 +32,7 @@ TESTRESULT CDateHelperTest::Run()
 {
 	ClearTotals();
 
+	Test64BitDates();
 	TestDecodeRelativeDate();
 	TestTruncateSeconds();
 	TestGetDateOnly();
@@ -125,6 +126,7 @@ void CDateHelperTest::TestDecodeRelativeDate()
 	
 	EndTest();
 }
+
 void CDateHelperTest::TestTruncateSeconds()
 {
 	BeginTest(_T("CDateHelperTest::TruncateSeconds"));
@@ -248,5 +250,20 @@ void CDateHelperTest::TestCompare()
 
 	// -----------------------------------------------------------------------
 	
+	EndTest();
+}
+
+void CDateHelperTest::Test64BitDates()
+{
+	BeginTest(_T("CDateHelperTest::64BitDates"));
+
+	COleDateTime dtNow = COleDateTime::GetCurrentTime();
+
+	time64_t tNow;
+	ExpectTrue(CDateHelper::GetTimeT64(dtNow, tNow));
+
+	COleDateTime dtNowCheck = CDateHelper::GetDate(tNow);
+	ExpectEQ(dtNow, dtNowCheck);
+
 	EndTest();
 }
