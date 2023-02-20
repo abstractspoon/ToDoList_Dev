@@ -2472,6 +2472,8 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
 	ASSERT(dRealDuration > 0.0);
 
+	return AddDuration(dtNewStart, dRealDuration, nUnits, TRUE); // updates dtNewStart
+/*
 	COleDateTime dtNewDue = AddDuration(dtNewStart, dRealDuration, nUnits, FALSE); // Does not update dtNewStart
 	
 	// Tasks whose time estimate has not changed are also kept simple
@@ -2487,6 +2489,7 @@ COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const
 	
 	// We need to calculate it 'fully'
 	return AddDuration(dtNewStart, dNewDuration, nUnits, TRUE); // updates dtNewStart
+*/
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -3647,16 +3650,23 @@ BOOL CToDoCtrlData::CalcTaskDependencyStartDate(DWORD dwTaskID, const TDCDEPENDE
 	
 	if (CDateHelper::IsDateSet(dtNewStart))
 	{
-		// Add lead-in time
-		if (depend.nDaysLeadIn)
-		{
-			DH_UNITS nDHUnits = (pTDI->timeEstimate.nUnits == TDCU_WEEKDAYS) ? DHU_WEEKDAYS : DHU_DAYS;
+		DH_UNITS nDHUnits = DHU_WEEKDAYS;
 
-			VERIFY(CDateHelper().OffsetDate(dtNewStart, depend.nDaysLeadIn, nDHUnits));
+		switch (pTDI->timeEstimate.nUnits)
+		{
+		case TDCU_DAYS:
+		case TDCU_MONTHS:
+		case TDCU_YEARS:
+			nDHUnits = DHU_DAYS;
+			break;
 		}
 
-		if (pTDI->timeEstimate.nUnits == TDCU_WEEKDAYS)
+		if (nDHUnits = DHU_WEEKDAYS)
 			CWorkingWeek().MakeWeekday(dtNewStart);
+
+		// Add lead-in time
+		if (depend.nDaysLeadIn)
+			VERIFY(CDateHelper().OffsetDate(dtNewStart, depend.nDaysLeadIn, nDHUnits));
 
 		return TRUE;
 	}
