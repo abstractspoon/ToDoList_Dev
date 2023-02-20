@@ -1022,7 +1022,7 @@ BOOL CTaskFile::SetAttributeVisibility(const TDCCOLEDITVISIBILITY& vis)
 	// delete old visibility settings
 	DeleteItem(TDL_ATTRIBVIS);
 
-	CXmlItem *pXIVis = AddItem(TDL_ATTRIBVIS, _T(""), XIT_ELEMENT);
+	CXmlItem *pXIVis = AddItem(TDL_ATTRIBVIS, EMPTY_STR, XIT_ELEMENT);
 	ASSERT(pXIVis);
 
 	// columns
@@ -1448,7 +1448,7 @@ LPCTSTR CTaskFile::GetCustomAttributeValue(int nIndex, LPCTSTR szItem) const
 	ASSERT(nIndex >= 0);
 
 	if (nIndex < 0)
-		return _T("");
+		return EMPTY_STR;
 
 	const CXmlItem* pXIAttribDef = GetCustomAttribDefs(nIndex);
 
@@ -1457,7 +1457,7 @@ LPCTSTR CTaskFile::GetCustomAttributeValue(int nIndex, LPCTSTR szItem) const
 
 	// else
 	ASSERT(0);
-	return _T("");
+	return EMPTY_STR;
 }
 
 LPCTSTR CTaskFile::GetMetaData(LPCTSTR szKey) const
@@ -1465,7 +1465,7 @@ LPCTSTR CTaskFile::GetMetaData(LPCTSTR szKey) const
 	if (Misc::IsEmpty(szKey))
 	{
 		ASSERT(0);
-		return _T("");
+		return EMPTY_STR;
 	}
 
 	// else
@@ -2581,15 +2581,13 @@ LPCTSTR CTaskFile::GetTaskMetaData(HTASKITEM hTask, LPCTSTR szKey) const
 	if (Misc::IsEmpty(szKey))
 	{
 		ASSERT(0);
-		return _T("");
+		return EMPTY_STR;
 	}
 
 	const CXmlItem* pXITask = NULL;
 	GET_TASK(pXITask, hTask, NULLSTRING);
 
 	return pXITask->GetItemValue(TDL_TASKMETADATA, szKey);
-
-//	return GetTaskAttribute(hTask, TDL_TASKMETADATA, szKey);
 }
 
 const CXmlItem* CTaskFile::GetTaskCustomAttribute(HTASKITEM hTask, LPCTSTR szID) const
@@ -2714,9 +2712,14 @@ LPCTSTR CTaskFile::GetTaskDependency(HTASKITEM hTask, int nIndex, int* pDaysLead
 	const CXmlItem* pXI = GetTaskArrayItem(hTask, TDL_TASKDEPENDENCY, nIndex);
 
 	if (pDaysLeadIn)
-		*pDaysLeadIn = pXI->GetItemValueI(TDL_TASKDEPENDENCYLEADIN);
+	{
+		if (pXI)
+			*pDaysLeadIn = pXI->GetItemValueI(TDL_TASKDEPENDENCYLEADIN);
+		else
+			*pDaysLeadIn = 0;
+	}
 
-	return pXI->GetValue();
+	return (pXI ? pXI->GetValue() : EMPTY_STR);
 }
 
 int CTaskFile::GetTaskAllocatedToCount(HTASKITEM hTask) const
@@ -4525,7 +4528,7 @@ CString CTaskFile::GetTaskArrayItemValue(HTASKITEM hTask, const CString& sItemTa
 {
 	CXmlItem* pXI = GetTaskArrayItem(hTask, sItemTag, nIndex);
 
-	return (pXI ? pXI->GetValue() : _T(""));
+	return (pXI ? pXI->GetValue() : EMPTY_STR);
 }
 
 bool CTaskFile::AddTaskArrayItem(HTASKITEM hTask, const CString& sItemTag, const CString& sItem, BOOL bAllowEmpty)
