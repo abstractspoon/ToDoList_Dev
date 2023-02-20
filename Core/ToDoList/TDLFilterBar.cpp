@@ -282,6 +282,15 @@ void CTDLFilterBar::OnSelchangeFilter()
 		m_filter.nShow = nShow;
 		m_sAdvancedFilter = sAdvanced;
 
+		// Update the Options combo with the stored custom flags before notifying the parent
+		if (nShow == FS_ADVANCED)
+		{
+			DWORD dwCustomFlags = 0;
+			m_mapCustomFlags.Lookup(sAdvanced, dwCustomFlags);
+
+			m_cbOptions.SetSelectedOptions(dwCustomFlags);
+		}
+		
 		NotifyParentFilterChange();
 	}
 }
