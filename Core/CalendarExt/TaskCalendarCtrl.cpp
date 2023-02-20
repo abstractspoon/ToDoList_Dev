@@ -74,7 +74,8 @@ CTaskCalendarCtrl::CTaskCalendarCtrl()
 	m_bSortAscending(-1),
 	m_crWeekend(RGB(224, 224, 224)),
 	m_crToday(255),
-	m_crAltWeek(CLR_NONE)
+	m_crAltWeek(CLR_NONE),
+	m_sCellDateFormat(_T("%#d"))
 {
 	GraphicsMisc::CreateFont(m_DefaultFont, _T("Tahoma"));
 
@@ -804,14 +805,14 @@ CString CTaskCalendarCtrl::CalcCellHeaderDateFormat(CDC* pDC, CFont* pBoldFont) 
 	int nLongYearWidth = pDC->GetTextExtent(_T(" 2020")).cx;
 	int nMaxLongMonthWidth = CDateHelper::GetMaxMonthNameWidth(pDC, FALSE);
 
-	CString sDateFormat = _T("%e"); // Day only
+	CString sDateFormat = _T("%#d"); // Day only
 
 	CString sShortFormat = Misc::GetShortDateFormat();
 	BOOL bMonthBeforeDay = (sShortFormat.Find('M') < sShortFormat.Find('d'));
 
 	if ((nMaxDayWidth + nMaxLongMonthWidth + nLongYearWidth) <= nAvailWidth)
 	{
-		sDateFormat = (bMonthBeforeDay ? _T("%B %e %Y") : _T("%e %B %Y"));
+		sDateFormat = (bMonthBeforeDay ? _T("%B %#d %Y") : _T("%#d %B %Y"));
 	}
 	else
 	{
@@ -819,7 +820,7 @@ CString CTaskCalendarCtrl::CalcCellHeaderDateFormat(CDC* pDC, CFont* pBoldFont) 
 
 		if ((nMaxDayWidth + nMaxShortMonthWidth + nLongYearWidth) <= nAvailWidth)
 		{
-			sDateFormat = (bMonthBeforeDay ? _T("%b %e %Y") : _T("%e %b %Y"));
+			sDateFormat = (bMonthBeforeDay ? _T("%b %#d %Y") : _T("%#d %b %Y"));
 		}
 		else 
 		{
@@ -827,9 +828,9 @@ CString CTaskCalendarCtrl::CalcCellHeaderDateFormat(CDC* pDC, CFont* pBoldFont) 
 			CString sDayMonthFormat;
 
 			if (bMonthBeforeDay)
-				sDayMonthFormat = _T("%m") + sDateSep + _T("%e");
+				sDayMonthFormat = _T("%m") + sDateSep + _T("%#d");
 			else
-				sDayMonthFormat = _T("%e") + sDateSep + _T("%m");
+				sDayMonthFormat = _T("%#d") + sDateSep + _T("%m");
 			
 			if (pDC->GetTextExtent(_T("1/12/2020")).cx <= nAvailWidth)
 			{
@@ -845,7 +846,7 @@ CString CTaskCalendarCtrl::CalcCellHeaderDateFormat(CDC* pDC, CFont* pBoldFont) 
 			}
 			else // Day only
 			{
-				sDateFormat = _T("%e");
+				sDateFormat = _T("%#d");
 			}
 		}
 	}
@@ -858,7 +859,7 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 {
 	ASSERT(m_sCellDateFormat);
 
-	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : _T("%e"));
+	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : _T("%#d"));
 	sDate.TrimLeft();
 
 	return sDate;
