@@ -956,7 +956,7 @@ END
 IDD_FILTER_BAR DIALOGEX 0, 0, 406, 169
 STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN
 EXSTYLE WS_EX_CONTROLPARENT
-FONT 8, "Tahoma"
+FONT 8, "Tahoma", 0, 0, 0x1
 BEGIN
     LTEXT           "Sh&ow",IDC_FILTERLABEL,9,8,19,12,SS_CENTERIMAGE
     COMBOBOX        IDC_FILTERCOMBO,37,7,151,112,CBS_DROPDOWNLIST | 
@@ -5774,6 +5774,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_CMDLINE_STARTEMPTY  "-e\tStarts ToDoList without reloading any previously open tasklists"
     IDS_CMDLINE_TASKLINK    "-l <task link>\tOpens the specified tasklist and selects the specified task"
+    IDS_CMDLINE_MASTERPASSWORD 
+                            "-mp\tUses the password of the first decrypted tasklist as a master password for decrypting subsequent tasklists. Requires password prompting to be turned off (-x)   "
     IDS_CMDLINE_SAVEUIVISINTASKLIST 
                             "-z\tStores attribute visibility settings within each tasklist"
     IDS_CMDLINE_NEWTASK     "-nt <title>\tCreates a new task in the active tasklist with the specified title"

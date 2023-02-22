@@ -883,6 +883,10 @@ BOOL CToDoListWnd::Create(const CTDCStartupOptions& startup)
 	m_bSaveUIVisInTaskList = startup.HasFlag(TLD_SAVEUIVISINTASKLIST);
 	m_bAllowForcedCheckOut = startup.HasFlag(TLD_ALLOWFORCEDCHECKOUT);
 	m_bPasswordPrompting = startup.HasFlag(TLD_PASSWORDPROMPTING);
+	m_bMasterPasswordEnabled = startup.HasFlag(TLD_MASTERPASSWORDENABLED);
+
+	// Sanity check - Master passwords only work with password prompting disabled
+	ASSERT(!m_bMasterPasswordEnabled || !m_bPasswordPrompting);
 
 	if (startup.HasFlag(TLD_LOGGING) && EnableLogging())
 		m_bLogCommands = startup.HasFlag(TLD_LOGCOMMANDS);
@@ -1269,37 +1273,40 @@ LRESULT CToDoListWnd::OnFocusChange(WPARAM wp, LPARAM /*lp*/)
 // 			}
 // #endif
 			const CFilteredToDoCtrl& tdc = GetToDoCtrl();
+			CEnString sFocus;
 
 			if (CDialogHelper::IsChildOrSame(tdc.GetSafeHwnd(), (HWND)wp))
 			{
-				m_sCurrentFocus.LoadString(IDS_FOCUS_TASKS);
-				m_sCurrentFocus += ": ";
-				m_sCurrentFocus += tdc.GetControlDescription(pFocus);
+				sFocus.LoadString(IDS_FOCUS_TASKS);
+				sFocus += ": ";
+				sFocus += tdc.GetControlDescription(pFocus);
 			}
 			else if (m_cbQuickFind.GetSafeHwnd() && m_cbQuickFind.IsChild(pFocus))
 			{
-				m_sCurrentFocus.LoadString(IDS_QUICKFIND);
+				sFocus.LoadString(IDS_QUICKFIND);
 			}
 			else if (m_dlgFindTasks.GetSafeHwnd() && m_dlgFindTasks.IsChild(pFocus))
 			{
-				m_sCurrentFocus.LoadString(IDS_FINDTASKS);
+				sFocus.LoadString(IDS_FINDTASKS);
 			}
 			else if (m_filterBar.GetSafeHwnd() && m_filterBar.IsChild(pFocus))
 			{
-				m_sCurrentFocus.LoadString(IDS_FOCUS_FILTERBAR);
+				sFocus.LoadString(IDS_FOCUS_FILTERBAR);
 			}
 			else if (m_dlgTimeTracker.GetSafeHwnd() && m_dlgTimeTracker.IsChild(pFocus))
 			{
-				m_sCurrentFocus.LoadString(IDS_FOCUS_TIMETRACKER);
+				sFocus.LoadString(IDS_FOCUS_TIMETRACKER);
 			}
 			else if (m_dlgReminders.GetSafeHwnd() && m_dlgReminders.IsChild(pFocus))
 			{
-				m_sCurrentFocus.LoadString(IDS_FOCUS_REMINDERS);
+				sFocus.LoadString(IDS_FOCUS_REMINDERS);
 			}		
 
 			// limit length of string
-			if (m_sCurrentFocus.GetLength() > 22)
-				m_sCurrentFocus = m_sCurrentFocus.Left(20) + _T("...");
+			if (sFocus.GetLength() > 22)
+				m_sCurrentFocus = sFocus.Left(20) + _T("...");
+			else
+				m_sCurrentFocus = sFocus;
 
 			m_statusBar.UpdateFocusedControl(m_sCurrentFocus);
 		
@@ -4583,7 +4590,7 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 	ASSERT(FileMisc::FileExists(sFilePath));
 
 	BOOL bWasDelayed = pTDC->IsDelayLoaded();
-	TDC_FILE nOpen = pTDC->Load(sFilePath, tasks);
+	TDC_FILE nOpen = pTDC->Load(sFilePath, tasks, m_sMasterPassword);
 
 	// cleanup temp storage file
 	if (nType == TDCPP_STORAGE)
@@ -4632,6 +4639,10 @@ TDC_FILE CToDoListWnd::OpenTaskList(CFilteredToDoCtrl* pTDC, LPCTSTR szFilePath,
 			if (pInfo)
 				*pInfo = storageInfo;
 		}
+
+		// Set master password once only
+		if (m_bMasterPasswordEnabled && m_sMasterPassword.IsEmpty() && pTDC->IsEncrypted())
+			m_sMasterPassword = pTDC->GetPassword();
 
 		// Delay task expansion until we're finished
 		if (userPrefs.GetExpandTasksOnLoad())

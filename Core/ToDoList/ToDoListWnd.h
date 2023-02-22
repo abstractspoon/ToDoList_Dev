@@ -139,7 +139,8 @@ protected:
 	CString m_sQuickFind;
 	CString m_sTaskViewImageExt;
 	CString m_sTitlePrefix;
-	CEnString m_sCurrentFocus;
+	CString m_sMasterPassword;
+	CString m_sCurrentFocus;
 
 	BOOL m_bVisible;
 	BOOL m_bShowFilterBar;
@@ -157,6 +158,7 @@ protected:
 	BOOL m_bFindShowing;
 	BOOL m_bQueryOpenAllow;
 	BOOL m_bPasswordPrompting;
+	BOOL m_bMasterPasswordEnabled;
 	BOOL m_bReloading; // on startup
 	BOOL m_bStartHidden;
 	BOOL m_bLogCommands;
