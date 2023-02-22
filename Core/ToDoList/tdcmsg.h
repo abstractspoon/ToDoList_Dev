@@ -54,6 +54,7 @@ const UINT WM_FTD_ADDSEARCH					= ::RegisterWindowMessage(_T("WM_FTD_ADDSEARCH")
 const UINT WM_FTD_SAVESEARCH				= ::RegisterWindowMessage(_T("WM_FTD_SAVESEARCH"));				// lParam = LPCTSTR
 const UINT WM_FTD_DELETESEARCH				= ::RegisterWindowMessage(_T("WM_FTD_DELETESEARCH"));			// lParam = LPCTSTR
 const UINT WM_FTD_GETLISTITEMS				= ::RegisterWindowMessage(_T("WM_FTD_GETLISTITEMS"));			// wParam = <TDC_ATTRIBUTE>, lParam = CStringArray*
+const UINT WM_FTD_DOCKCHANGE				= ::RegisterWindowMessage(_T("WM_FTD_DOCKCHANGE"));				// wparam = Old 'DM_POS', lParam = New 'DM_POS'
 
 // CTDCTimeTrackerDlg
 const UINT WM_TDLTTN_STARTTRACKING			= ::RegisterWindowMessage(_T("WM_TDLTTN_STARTTRACKING"));		// wParam = hwnd, lParam = TaskID

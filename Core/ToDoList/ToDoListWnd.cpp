@@ -477,7 +477,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_FTD_APPLYASFILTER, OnFindApplyAsFilter)
 	ON_REGISTERED_MESSAGE(WM_FTD_CLOSE, OnFindDlgClose)
 	ON_REGISTERED_MESSAGE(WM_FTD_DELETESEARCH, OnFindDeleteSearch)
-	ON_REGISTERED_MESSAGE(WM_FTD_DOCKCHANGE, OnNotifyFindTasksDockChange)
+	ON_REGISTERED_MESSAGE(WM_FTD_DOCKCHANGE, OnFindDlgDockChange)
 	ON_REGISTERED_MESSAGE(WM_FTD_FIND, OnFindDlgFind)
 	ON_REGISTERED_MESSAGE(WM_FTD_SAVESEARCH, OnFindSaveSearch)
 	ON_REGISTERED_MESSAGE(WM_FTD_SELECTALL, OnFindSelectAll)
@@ -10570,7 +10570,7 @@ BOOL CToDoListWnd::InitFindDialog()
 	return TRUE;
 }
 
-LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
+LRESULT CToDoListWnd::OnFindDlgDockChange(WPARAM wp, LPARAM lp)
 {
 	// Modify our size to accept or release the 
 	// space needed to dock the find tasks dialog

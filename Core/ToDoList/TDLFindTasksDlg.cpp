@@ -308,6 +308,15 @@ BOOL CTDLFindTasksDlg::InitializeToolbar()
 
 	if (!m_toolbar.LoadToolBar(IDR_FIND_TOOLBAR, IDB_FIND_TOOLBAR_STD, colorMagenta))
 		return FALSE;
+
+	if (!IsDocked())
+	{
+		// Delete close button and separator
+		int nClose = m_toolbar.CommandToIndex(ID_FIND_CLOSE);
+
+		m_toolbar.DeleteItem(nClose); // Close button
+		m_toolbar.DeleteItem(nClose); // Separator
+	}
 	
 	m_toolbar.SetBorders(4, 4, 0, 0);
 
