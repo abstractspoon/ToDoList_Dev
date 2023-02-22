@@ -477,7 +477,7 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_REGISTERED_MESSAGE(WM_FTD_APPLYASFILTER, OnFindApplyAsFilter)
 	ON_REGISTERED_MESSAGE(WM_FTD_CLOSE, OnFindDlgClose)
 	ON_REGISTERED_MESSAGE(WM_FTD_DELETESEARCH, OnFindDeleteSearch)
-	ON_REGISTERED_MESSAGE(WM_FTD_DOCKCHANGE, OnNotifyFindTasksDockChange)
+	ON_REGISTERED_MESSAGE(WM_FTD_DOCKCHANGE, OnFindDlgDockChange)
 	ON_REGISTERED_MESSAGE(WM_FTD_FIND, OnFindDlgFind)
 	ON_REGISTERED_MESSAGE(WM_FTD_SAVESEARCH, OnFindSaveSearch)
 	ON_REGISTERED_MESSAGE(WM_FTD_SELECTALL, OnFindSelectAll)
@@ -2564,7 +2564,10 @@ LRESULT CToDoListWnd::OnPostOnCreate(WPARAM /*wp*/, LPARAM /*lp*/)
 	// find tasks dialog
 	if (prefs.GetProfileInt(SETTINGS_KEY, _T("FindTasksVisible"), 0))
 	{
-		OnFindTasks();
+		// If the find dialog was previously visible then the 
+		// app window will already be the right size so we must
+		// make sure it's not enlarged further
+		ShowFindDialog(FALSE);
 		
 		if (userPrefs.GetRefreshFindOnLoad())
 			m_dlgFindTasks.RefreshSearch();
@@ -3030,7 +3033,7 @@ BOOL CToDoListWnd::OnEraseBkgnd(CDC* pDC)
 
 BOOL CToDoListWnd::GetFindTasksDialogSplitterRect(CRect& rSplitter) const
 {
-	if (!m_dlgFindTasks.IsDocked())
+	if (!m_bFindShowing || !m_dlgFindTasks.IsDocked())
 		return FALSE;
 
 	rSplitter = GetChildRect(&m_dlgFindTasks);
@@ -6354,7 +6357,7 @@ void CToDoListWnd::ReposToolbars(CDeferWndMove* pDwm, CRect& rAvailable)
 
 void CToDoListWnd::ReposFindTasksDialog(CDeferWndMove* pDwm, CRect& rAvailable)
 {
-	if (m_dlgFindTasks.IsDocked())
+	if (m_bFindShowing && m_dlgFindTasks.IsDocked())
 	{
 		CRect rFindTasks(rAvailable);
 
@@ -6408,7 +6411,7 @@ void CToDoListWnd::ReposFilterBar(CDeferWndMove* pDwm, CRect& rAvailable)
 
 int CToDoListWnd::CalcEditFieldInset() const
 {
-	if (m_dlgFindTasks.GetDockPosition() == DMP_LEFT)
+	if (m_bFindShowing && (m_dlgFindTasks.GetDockPosition() == DMP_LEFT))
 		return 0;
 
 	return (CThemed::IsNonClientThemed() ? BORDER : BEVEL);
@@ -6470,23 +6473,26 @@ void CToDoListWnd::ReposTaskList(CDeferWndMove* pDwm, CRect& rAvailable)
 		// shrink slightly so that edit controls do not merge with window border
 		int nIndent = (CThemed::IsNonClientThemed() ? BORDER : BEVEL);
 
-		switch (m_dlgFindTasks.GetDockPosition())
+		if (!m_bFindShowing || !m_dlgFindTasks.IsDocked())
 		{
-		case DMP_LEFT:
-			rAvailable.DeflateRect(0, nIndent, nIndent, nIndent);
-			break;
-
-		case DMP_RIGHT:
-			rAvailable.DeflateRect(nIndent, nIndent, 0, nIndent);
-			break;
-
-		case DMP_BELOW:
-			rAvailable.DeflateRect(nIndent, nIndent, nIndent, 0);
-			break;
-
-		case DMP_UNDOCKED:
 			rAvailable.DeflateRect(nIndent, nIndent, nIndent, nIndent);
-			break;
+		}
+		else
+		{
+			switch (m_dlgFindTasks.GetDockPosition())
+			{
+			case DMP_LEFT:
+				rAvailable.DeflateRect(0, nIndent, nIndent, nIndent);
+				break;
+
+			case DMP_RIGHT:
+				rAvailable.DeflateRect(nIndent, nIndent, 0, nIndent);
+				break;
+
+			case DMP_BELOW:
+				rAvailable.DeflateRect(nIndent, nIndent, nIndent, 0);
+				break;
+			}
 		}
 
 		if (pDwm)
@@ -10570,7 +10576,7 @@ BOOL CToDoListWnd::InitFindDialog()
 	return TRUE;
 }
 
-LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
+LRESULT CToDoListWnd::OnFindDlgDockChange(WPARAM wp, LPARAM lp)
 {
 	// Modify our size to accept or release the 
 	// space needed to dock the find tasks dialog
@@ -10631,6 +10637,12 @@ LRESULT CToDoListWnd::OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp)
 
 void CToDoListWnd::OnFindTasks() 
 {
+	ShowFindDialog(TRUE);
+}
+
+void CToDoListWnd::ShowFindDialog(BOOL bAllowResizeApp)
+{
+	// Create the find dialog first time only
 	InitFindDialog();
 
 	if (IsWindowVisible())
@@ -10639,8 +10651,6 @@ void CToDoListWnd::OnFindTasks()
 		// active tasklist
 		if (!m_dlgFindTasks.IsWindowVisible())
 		{
-			ASSERT(!m_dlgFindTasks.IsDocked());
-
 			int nSelTDC = GetSelToDoCtrl();
 			int nTDC = GetTDCCount();
 
@@ -10656,19 +10666,31 @@ void CToDoListWnd::OnFindTasks()
 		}
 		else if (m_dlgFindTasks.IsDocked())
 		{
-			Resize();
-
 			if (!IsChildOrSame(m_dlgFindTasks, ::GetFocus()))
 				m_dlgFindTasks.SetFocus();
 		}
+
+		// If the find dialog was docked, fake a re-docking
+		// event to enlarge the app window appropriately
+		if (!m_bFindShowing && bAllowResizeApp && m_dlgFindTasks.IsDocked())
+			OnFindDlgDockChange(DMP_UNDOCKED, m_dlgFindTasks.GetDockPosition());
 	}
 	
 	m_bFindShowing = TRUE;
+
+	Resize();
+	InvalidateAllCtrls(this);
 }
 
 LRESULT CToDoListWnd::OnFindDlgClose(WPARAM /*wp*/, LPARAM /*lp*/)
 {
 	m_bFindShowing = FALSE;
+
+	// If the find dialog is still docked, fake an un-docking
+	// to remove the find dialog from the app's borders
+	if (m_dlgFindTasks.IsDocked())
+		OnFindDlgDockChange(m_dlgFindTasks.GetDockPosition(), DMP_UNDOCKED);
+	
 	GetToDoCtrl().SetFocusToTasks();
 
 	return 0L;
