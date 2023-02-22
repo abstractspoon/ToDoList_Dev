@@ -658,6 +658,7 @@ protected:
 	BOOL CanImportPasteFromClipboard() const;
 	BOOL CanImportDropText(const CString& sText) const;
 
+	void ShowFindDialog(BOOL bAllowResizeApp);
 	BOOL ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup);
 	BOOL HasTaskFile(const CTDCStartupOptions& startup) const;
 	void MinimizeToTray();
