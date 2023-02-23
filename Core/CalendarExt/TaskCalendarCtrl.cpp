@@ -2300,7 +2300,7 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible)
 // internal version
 BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNotify)
 {
-	if (!HasTask(dwTaskID, FALSE)) // don't exclude hidden tasks
+	if (!HasTask(dwTaskID, FALSE)) // Don't exclude hidden tasks
 		return FALSE;
 
 	DWORD dwSelTaskID = GetSelectedTaskID();
@@ -2330,7 +2330,7 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 	// Check visibility
 	const TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
 
-	if (!pTCI || IsHiddenTask(pTCI, FALSE))
+	if (!pTCI || IsHiddenTask(pTCI, TRUE)) // Exclude hidden tasks
 		return 0;
 
 	// Does it have the necessary dates
