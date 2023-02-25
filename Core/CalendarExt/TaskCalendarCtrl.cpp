@@ -160,19 +160,21 @@ BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
 	return ((dwOld & TCCO_DATEDISPLAYOPTIONS) == (dwNew & TCCO_DATEDISPLAYOPTIONS));
 }
 
-void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
+void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 {
 	// Now handled by 'SetHideParentTasks'
-	if (dwOptions & TCCO_HIDEPARENTTASKS)
+	if (dwNewOptions & TCCO_HIDEPARENTTASKS)
 	{
-		dwOptions &= ~TCCO_HIDEPARENTTASKS;
+		dwNewOptions &= ~TCCO_HIDEPARENTTASKS;
 		ASSERT(0);
 	}
 
-	if (m_dwOptions != dwOptions)
+	DWORD dwCurOptions = (m_dwOptions & ~TCCO_HIDEPARENTTASKS);
+
+	if (dwCurOptions != dwNewOptions)
 	{
 		DWORD dwPrev = m_dwOptions;
-		m_dwOptions = dwOptions;
+		m_dwOptions = dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS); // preserve parent status
 
 		RecalcTaskDates();
 		RebuildCellTasks();
@@ -196,25 +198,30 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwOptions)
 
 void CTaskCalendarCtrl::SetHideParentTasks(BOOL bHide, const CString& sTag)
 {
-	BOOL bChange = (Misc::StateChanged(bHide, HasOption(TCCO_HIDEPARENTTASKS)) || 
+	BOOL bIsHidden = HasOption(TCCO_HIDEPARENTTASKS);
+	BOOL bChange = (Misc::StateChanged(bHide, bIsHidden) || 
 					(bHide && (m_sHideParentTag != sTag)));
 
-	if (!bChange)
-		return;
-
-	if (bHide)
+	if (bChange)
 	{
-		m_dwOptions |= TCCO_HIDEPARENTTASKS;
-		m_sHideParentTag = sTag;
-	}
-	else
-	{
-		m_dwOptions &= ~TCCO_HIDEPARENTTASKS;
-		m_sHideParentTag.Empty();
-	}
+		if (bHide)
+		{
+			m_dwOptions |= TCCO_HIDEPARENTTASKS;
+			m_sHideParentTag = sTag;
+		}
+		else
+		{
+			m_dwOptions &= ~TCCO_HIDEPARENTTASKS;
+			m_sHideParentTag.Empty();
+		}
 
-	RecalcTaskDates();
-	RebuildCellTasks();
+		RecalcTaskDates();
+		RebuildCellTasks();
+
+		// Scroll to task is hidden parent is being reshown
+		BOOL bScrollToTask = (!bHide && m_mapData.IsParentTask(GetSelectedTaskID()));
+		FixupSelection(bScrollToTask);
+	}
 }
 
 void CTaskCalendarCtrl::RecalcTaskDates()
@@ -592,6 +599,7 @@ BOOL CTaskCalendarCtrl::SetVisibleWeeks(int nWeeks)
 		if (HasOption(TCCO_ADJUSTTASKHEIGHTS))
 			GraphicsMisc::VerifyDeleteObject(m_fontAltText);
 
+		FixupSelection(TRUE);
 		UpdateCellScrollBarVisibility(TRUE); // scroll to selected task
 		return TRUE;
 	}
@@ -1960,7 +1968,7 @@ BOOL CTaskCalendarCtrl::EnsureSelectionVisible()
 	// Does the selected cell already have this task?
 	int nRow, nCol;
 
-	if (GetLastSelectedGridCell(nRow, nCol))
+	if (GetLastSelectedGridCell(nRow, nCol) && (nRow < m_nVisibleWeeks))
 	{
 		const CTaskCalItemArray* pTasks = GetCellTasks(nRow, nCol);
 		ASSERT(pTasks);
