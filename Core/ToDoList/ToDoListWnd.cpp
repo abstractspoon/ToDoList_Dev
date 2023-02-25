@@ -5049,10 +5049,8 @@ BOOL CToDoListWnd::DoPreferences(int nInitPage, UINT nInitCtrlID)
 			GraphicsMisc::VerifyDeleteObject(m_fontComments);
 		
 		// topmost
-#ifndef _DEBUG
 		BOOL bTopMost = (newPrefs.GetAlwaysOnTop() && !IsZoomed());
 		SetWindowPos(bTopMost ? &wndTopMost : &wndNoTopMost, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-#endif
 		
 		// tray icon
 		m_trayIcon.ShowTrayIcon(newPrefs.GetUseSysTray());
@@ -6182,13 +6180,11 @@ void CToDoListWnd::OnSize(UINT nType, int cx, int cy)
 		
 		// if not maximized then set topmost if that's the preference
 		// do nothing if no change
-#ifndef _DEBUG
 		BOOL bTopMost = (Prefs().GetAlwaysOnTop() && (nType != SIZE_MAXIMIZED)) ? 1 : 0;
 		BOOL bIsTopMost = (GetExStyle() & WS_EX_TOPMOST) ? 1 : 0;
 		
 		if (bTopMost != bIsTopMost)
 			SetWindowPos(bTopMost ? &wndTopMost : &wndNoTopMost, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
-#endif
 	}
 }
 
