@@ -807,6 +807,7 @@ BOOL CCalendarCtrl::SelectDate(const COleDateTime& dtDate, BOOL bAutoScroll)
 	}
 	else // just select
 	{
+		m_DateCurrent = WholeDays(dtDate);
 		m_SingleSelection.RemoveAll();
 		
 		m_SelectionRange[2] = 0;
@@ -815,7 +816,7 @@ BOOL CCalendarCtrl::SelectDate(const COleDateTime& dtDate, BOOL bAutoScroll)
 		
 		// Scrolling pos
 		COleDateTime today = WholeDays(COleDateTime::GetCurrentTime());
-		m_nVscrollPos = (m_nVscrollMax/2) + (WholeDays(dtDate) -today).GetDays()/7;
+		m_nVscrollPos = (m_nVscrollMax/2) + (m_DateCurrent -today).GetDays()/7;
 		
 		SetScrollPos(SB_VERT, m_nVscrollPos, TRUE);
 		Invalidate(FALSE);
