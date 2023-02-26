@@ -2359,6 +2359,8 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	
 	if (dwSelID)
 	{
+		m_tooltip.Pop();
+
 		if (!IsCustomDate(dwSelID))
 			dwSelID = GetRealTaskID(dwSelID);
 
