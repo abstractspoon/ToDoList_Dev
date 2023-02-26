@@ -163,11 +163,7 @@ BOOL CTaskCalendarCtrl::HasSameDateDisplayOptions(DWORD dwOld, DWORD dwNew)
 void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 {
 	// Now handled by 'SetHideParentTasks'
-	if (dwNewOptions & TCCO_HIDEPARENTTASKS)
-	{
-		dwNewOptions &= ~TCCO_HIDEPARENTTASKS;
-		ASSERT(0);
-	}
+	dwNewOptions &= ~TCCO_HIDEPARENTTASKS;
 
 	DWORD dwCurOptions = (m_dwOptions & ~TCCO_HIDEPARENTTASKS);
 
