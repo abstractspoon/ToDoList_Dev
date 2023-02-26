@@ -1224,7 +1224,6 @@ int CTaskCalendarCtrl::CalcEffectiveCellContentItemCount(const CCalendarCell* pC
 		const TASKCALITEM* pTCILast = pTasks->GetAt(nLastTask);
 
 		int nMaxPos = GetTaskVertPos(pTCILast->GetTaskID(), nLastTask, pCell, FALSE);
-
 		nNumItems = (nMaxPos + 1);
 	}
 
