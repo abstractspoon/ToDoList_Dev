@@ -1235,8 +1235,9 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 	// First determine if we need to show a vertical scrollbar
 	CRect rCell;
 	const CCalendarCell* pCell = NULL;
-	int  nRow = -1, nCol = -1, nNumItems = 0;
+	int  nRow = -1, nCol = -1, nNumItems = 0, nMaxVisItems = 0;
 	BOOL bShowScrollbar = FALSE;
+
 
 	if (CDialogHelper::IsChildOrSame(this, GetFocus()) && 
 		GetLastSelectedGridCell(nRow, nCol) &&
@@ -1245,8 +1246,9 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 		pCell = GetCell(nRow, nCol);
 		ASSERT(pCell);
 
+		nMaxVisItems = (rCell.Height() / GetTaskHeight());
 		nNumItems = CalcEffectiveCellContentItemCount(pCell);
-		bShowScrollbar = ((nNumItems * GetTaskHeight()) > rCell.Height());
+		bShowScrollbar = (nNumItems > nMaxVisItems);
 
 		// And scroll selected task into view
 		if (bEnsureSelVisible && m_dwSelectedTaskID)
@@ -1258,7 +1260,10 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 				int nFind = pTasks->FindItem(m_dwSelectedTaskID);
 
 				if (nFind != -1)
-					m_nCellVScrollPos = GetTaskVertPos(m_dwSelectedTaskID, nFind, pCell, FALSE);
+				{
+					int nPos = GetTaskVertPos(m_dwSelectedTaskID, nFind, pCell, FALSE);
+					m_nCellVScrollPos = min(nPos, (nNumItems - nMaxVisItems));
+				}
 			}
 		}
 	}
@@ -1312,9 +1317,9 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 
 			si.nMin = 0;
 			si.nMax = (nNumItems - 1);
-			si.nPage = min((rCell.Height() / GetTaskHeight()), nNumItems);
+			si.nPage = nMaxVisItems;
 
-			m_nCellVScrollPos = min(m_nCellVScrollPos, (nNumItems - (int)si.nPage));
+			m_nCellVScrollPos = min(m_nCellVScrollPos, (nNumItems - nMaxVisItems));
 			si.nPos = m_nCellVScrollPos;
 
 			m_sbCellVScroll.EnableWindow(TRUE);
@@ -2892,6 +2897,9 @@ BOOL CTaskCalendarCtrl::GetDateFromPoint(const CPoint& ptCursor, COleDateTime& d
 BOOL CTaskCalendarCtrl::CanDragTask(DWORD dwTaskID, TCC_HITTEST nHit) const
 {
 	ASSERT((nHit == TCCHT_NOWHERE) || (dwTaskID != 0));
+
+	if (nHit == TCCHT_NOWHERE)
+		return FALSE;
 	
 	const TASKCALITEM* pTCI = GetTaskCalItem(dwTaskID);
 
