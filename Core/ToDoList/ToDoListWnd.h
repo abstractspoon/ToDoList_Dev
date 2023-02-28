@@ -139,7 +139,8 @@ protected:
 	CString m_sQuickFind;
 	CString m_sTaskViewImageExt;
 	CString m_sTitlePrefix;
-	CEnString m_sCurrentFocus;
+	CString m_sMasterPassword;
+	CString m_sCurrentFocus;
 
 	BOOL m_bVisible;
 	BOOL m_bShowFilterBar;
@@ -157,6 +158,7 @@ protected:
 	BOOL m_bFindShowing;
 	BOOL m_bQueryOpenAllow;
 	BOOL m_bPasswordPrompting;
+	BOOL m_bMasterPasswordEnabled;
 	BOOL m_bReloading; // on startup
 	BOOL m_bStartHidden;
 	BOOL m_bLogCommands;
@@ -426,7 +428,7 @@ protected:
 	afx_msg LRESULT OnToDoListPasswordRestore(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnToDoListShowWindow(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnNotifyReminderModified(WPARAM wp, LPARAM lp);
-	afx_msg LRESULT OnNotifyFindTasksDockChange(WPARAM wp, LPARAM lp);
+	afx_msg LRESULT OnFindDlgDockChange(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnClose(WPARAM /*wp*/, LPARAM bForUpdate);
 	afx_msg void OnAbout();
 	afx_msg void OnArchiveCompletedtasks();
@@ -658,6 +660,7 @@ protected:
 	BOOL CanImportPasteFromClipboard() const;
 	BOOL CanImportDropText(const CString& sText) const;
 
+	void ShowFindDialog(BOOL bAllowResizeApp);
 	BOOL ProcessStartupOptions(const CTDCStartupOptions& startup, BOOL bStartup);
 	BOOL HasTaskFile(const CTDCStartupOptions& startup) const;
 	void MinimizeToTray();

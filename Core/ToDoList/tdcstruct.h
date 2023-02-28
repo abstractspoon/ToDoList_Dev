@@ -952,8 +952,16 @@ struct SEARCHPARAM
 
 		nType = GetAttribType();
 
-		if (nType == FT_DOUBLE || nType == FT_DATE)
+		switch (nType)
+		{
+		case FT_DOUBLE:
+		case FT_DATE:
 			dValue = d;
+			break;
+
+		default:
+			ASSERT(0);
+		}
 	}
 	
 	SEARCHPARAM(TDC_ATTRIBUTE a, FIND_OPERATOR o, int n, BOOL and = TRUE) : 
@@ -963,8 +971,17 @@ struct SEARCHPARAM
 
 		nType = GetAttribType();
 
-		if (nType == FT_INTEGER || nType == FT_BOOL)
+		switch (nType)
+		{
+		case FT_INTEGER:
+		case FT_BOOL:
+		case FT_RECURRENCE:
 			nValue = n;
+			break;
+
+		default:
+			ASSERT(0);
+		}
 	}
 
 	BOOL operator!=(const SEARCHPARAM& rule) const
@@ -1127,8 +1144,16 @@ struct SEARCHPARAM
 		sCustAttribID = id;
 
 		// handle relative dates
-		if ((nType == FT_DATE) || (nType == FT_DATERELATIVE)) 
-			SetRelativeDate(nType == FT_DATERELATIVE);
+		switch (nType)
+		{
+		case FT_DATE:
+			SetRelativeDate(FALSE);
+			break;
+
+		case FT_DATERELATIVE:
+			SetRelativeDate(TRUE);
+			break;
+		}
 
 		ValidateOperator();
 		return TRUE;
@@ -1822,8 +1847,8 @@ struct TDCFILTER
 		dwFlags(FO_ATTRIBUTES), 
 		nTitleOption(FT_FILTERONTITLEONLY),
 		nStartNextNDays(7), 
-		nDueNextNDays(7)
-
+		nDueNextNDays(7),
+		nRecurrence(TDIR_NONE)
 	{
 		dtUserStart = dtUserDue = COleDateTime::GetCurrentTime();
 	}
@@ -1847,6 +1872,7 @@ struct TDCFILTER
 		dwFlags = filter.dwFlags;
 		nStartNextNDays = filter.nStartNextNDays; 
 		nDueNextNDays = filter.nDueNextNDays;
+		nRecurrence = filter.nRecurrence;
 
 		aAllocTo.Copy(filter.aAllocTo);
 		aStatus.Copy(filter.aStatus);
@@ -2037,6 +2063,7 @@ struct TDCFILTER
 	DWORD dwFlags;
 	COleDateTime dtUserStart, dtUserDue;
 	int nStartNextNDays, nDueNextNDays;
+	TDC_REGULARITY nRecurrence;
 
 	CTDCCustomAttributeDataMap mapCustomAttrib;
 
@@ -2049,6 +2076,7 @@ protected:
 			(filter1.nDueBy != filter2.nDueBy) ||
 			(filter1.nPriority != filter2.nPriority) ||
 			(filter1.nRisk != filter2.nRisk) ||
+			(filter1.nRecurrence != filter2.nRecurrence) ||
 			(filter1.sTitle != filter2.sTitle) ||
 			((filter1.nTitleOption != filter2.nTitleOption) && !filter1.sTitle.IsEmpty()))
 		{
@@ -2950,6 +2978,7 @@ struct TDCCOLEDITFILTERVISIBILITY : public TDCCOLEDITVISIBILITY
 		case TDCA_RISK:			
 		case TDCA_VERSION:		
 		case TDCA_TAGS:
+		case TDCA_RECURRENCE:
 			return TRUE;
 		}
 

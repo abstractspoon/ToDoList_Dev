@@ -204,7 +204,7 @@ public:
 
 	DWORD GetNextTaskID(POSITION& pos) const;
 	BOOL HasTask(DWORD dwTaskID) const;
-
+	BOOL IsParentTask(DWORD dwTaskID) const;
 };
 
 /////////////////////////////////////////////////////////////////////////////

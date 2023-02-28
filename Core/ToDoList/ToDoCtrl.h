@@ -86,8 +86,8 @@ public:
 	BOOL SaveTaskViewToImage(const CString& sFilePath);
 	BOOL CanSaveTaskViewToImage() const { return m_taskTree.CanSaveToImage(); }
 
-	TDC_FILE Load(const CString& sFilePath);
-	TDC_FILE Load(const CString& sFilePath, CTaskFile& tasks/*out*/);
+	TDC_FILE Load(const CString& sFilePath, LPCTSTR szDefaultPassword /*= NULL*/);
+	TDC_FILE Load(const CString& sFilePath, CTaskFile& tasks/*out*/, LPCTSTR szDefaultPassword /*= NULL*/);
 
 	BOOL DelayLoad(const CString& sFilePath, COleDateTime& dtEarliestDue);
 	BOOL IsDelayLoaded() const { return m_bDelayLoaded; }

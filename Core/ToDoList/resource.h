@@ -544,6 +544,8 @@
 #define IDC_DUEFILTERCOMBO              1201
 #define IDC_STYLESHEET                  1202
 #define IDC_WARNADDDELARCHIVE           1202
+#define IDC_RECURFILTERLABEL            1202
+#define IDC_RECURFILTERCOMBO            1203
 #define IDC_EXCLUSIVETRACKING           1216
 #define IDC_SHOWSUBTASKCOMPLETION       1218
 #define IDC_TRANSFORMTITLE              1219
@@ -1570,6 +1572,7 @@
 #define ID_UDTPREFS_NEWTODO             34747
 #define ID_UDTPREFS_NEWTDL              34748
 #define ID_EDIT_DEPENDENCY              34749
+#define ID_FIND_CLOSE                   34750
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -1582,6 +1585,7 @@
 #define IDS_CMDLINE_STARTEMPTY          50608
 #define IDS_CMDLINE_TASKLINK            50609
 #define IDS_CMDLINE_RESTART             50610
+#define IDS_CMDLINE_MASTERPASSWORD      50610
 #define IDS_CMDLINE_SAVEINTERMEDIATE    50611
 #define IDS_CMDLINE_RANDOMISE           50612
 #define IDS_CMDLINE_SAVEUIVISINTASKLIST 50613
@@ -2469,7 +2473,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        327
-#define _APS_NEXT_COMMAND_VALUE         34750
+#define _APS_NEXT_COMMAND_VALUE         34751
 #define _APS_NEXT_CONTROL_VALUE         1561
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

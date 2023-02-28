@@ -13,6 +13,7 @@
 #include "tdlprioritycombobox.h"
 #include "tdlriskcombobox.h"
 #include "tdlfilterdatecombobox.h"
+#include "tdlregularitycombobox.h"
 #include "TDLDialog.h"
 
 #include "..\shared\encheckcombobox.h"
@@ -53,6 +54,7 @@ protected:
 	CTDLFilterDateComboBox		m_cbDueFilter;
 	CTDLPriorityComboBox		m_cbPriorityFilter;
 	CTDLRiskComboBox			m_cbRiskFilter;
+	CTDLRegularityComboBox		m_cbRecurrence;
 	CDateTimeCtrlEx				m_dtcUserStart, m_dtcUserDue;
 	CEnEdit						m_eStartNextNDays, m_eDueNextNDays;
 	CTDLFilterOptionComboBox	m_cbOptions;

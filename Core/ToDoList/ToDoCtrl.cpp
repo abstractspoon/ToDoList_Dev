@@ -6251,13 +6251,13 @@ BOOL CToDoCtrl::CheckRestoreBackupFile(const CString& sFilePath)
 }
 
 // thin wrapper
-TDC_FILE CToDoCtrl::Load(const CString& sFilePath)
+TDC_FILE CToDoCtrl::Load(const CString& sFilePath, LPCTSTR szDefaultPassword)
 {
 	CTaskFile file;
-	return Load(sFilePath, file);
+	return Load(sFilePath, file, szDefaultPassword);
 }
 
-TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
+TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/, LPCTSTR szDefaultPassword)
 {
 	ASSERT (GetSafeHwnd());
 	
@@ -6299,6 +6299,9 @@ TDC_FILE CToDoCtrl::Load(const CString& sFilePath, CTaskFile& tasks/*out*/)
 			// Clear flag if check-out failed
 			bWantCheckout = (m_sourceControl.CheckOut(tasks, CString(), FALSE, sFilePath) == TDCF_SUCCESS);
 		}
+
+		if (m_sPassword.IsEmpty())
+			m_sPassword = szDefaultPassword;
 
 		if (tasks.Decrypt(m_sPassword))
 		{

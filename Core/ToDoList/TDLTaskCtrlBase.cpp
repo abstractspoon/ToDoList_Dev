@@ -5085,6 +5085,11 @@ void CTDLTaskCtrlBase::GetAttributesAffectedByMod(TDC_ATTRIBUTE nAttrib, CTDCAtt
 		break;
 
 	case TDCA_TIMEESTIMATE: // ----------------------------------------------------
+		if (bWantUpdateDependentDates)
+		{
+			mapAttribIDs.Add(TDCA_DEPENDENCY);
+		}
+
 		if (HasStyle(TDCS_AUTOCALCPERCENTDONE))
 		{
 			mapAttribIDs.Add(TDCA_PERCENT);
