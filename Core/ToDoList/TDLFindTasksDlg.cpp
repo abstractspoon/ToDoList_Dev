@@ -204,29 +204,6 @@ void CTDLFindTasksDlg::BuildOptionCombos()
 	m_cbInclude.EnableTooltip();
 }
 
-BOOL CTDLFindTasksDlg::SetSearchFlags(LPCTSTR szName, DWORD dwFlags)
-{
-	// Update both the option combobox and the saved search
-	BOOL bIncludeDone = !Misc::HasFlag(dwFlags, FO_HIDEDONE);
-
-	if (GetSafeHwnd())
-	{
-		if (Misc::Find(szName, m_aSavedSearches, FALSE, TRUE) == -1)
-		{
-			ASSERT(0);
-			return FALSE;
-		}
-
-		if (m_sActiveSearch.CompareNoCase(szName) == 0)
-			CheckIncludeOption(FI_COMPLETED, bIncludeDone);
-	}
-	
-	CString sKey = Misc::MakeKey(_T("FindTasks\\Searches\\%s"), szName);
-	CPreferences().WriteProfileInt(sKey, _T("IncludeDoneTasks"), bIncludeDone);
-
-	return TRUE;
-}
-
 BOOL CTDLFindTasksDlg::IncludeOptionIsChecked(FIND_INCLUDE nOption) const
 {
 	if (m_cbInclude.GetSafeHwnd())
@@ -688,6 +665,40 @@ BOOL CTDLFindTasksDlg::GetSearchAllTasklists()
 	return m_bAllTasklists;
 }
 
+BOOL CTDLFindTasksDlg::GetSearchIncludesCompletedTasks(LPCTSTR szName) const
+{
+	if (m_sActiveSearch.CompareNoCase(szName) == 0)
+		return IncludeOptionIsChecked(FI_COMPLETED);
+
+	// else
+	CSearchParamArray aUnused;
+	BOOL bWantDone, bUnused;
+
+	VERIFY(LoadSearch(szName, aUnused, bWantDone, bUnused, bUnused));
+
+	return bWantDone;
+}
+
+BOOL CTDLFindTasksDlg::SetSearchIncludesCompletedTasks(LPCTSTR szName, BOOL bIncDone)
+{
+	if (GetSafeHwnd())
+	{
+		if (Misc::Find(szName, m_aSavedSearches, FALSE, TRUE) == -1)
+		{
+			ASSERT(0);
+			return FALSE;
+		}
+
+		if (m_sActiveSearch.CompareNoCase(szName) == 0)
+			CheckIncludeOption(FI_COMPLETED, bIncDone);
+	}
+
+	CString sKey = Misc::MakeKey(_T("FindTasks\\Searches\\%s"), szName);
+	CPreferences().WriteProfileInt(sKey, _T("IncludeDoneTasks"), bIncDone);
+
+	return TRUE;
+}
+
 int CTDLFindTasksDlg::GetSearchParams(LPCTSTR szName, TDCADVANCEDFILTER& filter) const
 {
 	if (GetSearchParams(szName, filter.params))
@@ -1123,6 +1134,13 @@ BOOL CTDLFindTasksDlg::PreTranslateMessage(MSG* pMsg)
 				OnFind();
 				return TRUE;
 			}
+			else if (IsChildOrSame(m_cbSearches, pMsg->hwnd))
+			{
+				if (m_cbSearches.GetWindowTextLength())
+					OnSaveSearch();
+
+				return TRUE;
+			}
 			break;
 
 		case VK_TAB:
@@ -1348,7 +1366,7 @@ void CTDLFindTasksDlg::EnableApplyAsFilterButton()
 	GetDlgItem(IDC_APPLYASFILTER)->EnableWindow(GetSearchParams(params));
 }
 
-int CTDLFindTasksDlg::GetSavedSearches(CStringArray& aNames)
+int CTDLFindTasksDlg::GetSavedSearches(CStringArray& aNames) const
 {
 	aNames.Copy(m_aSavedSearches);
 

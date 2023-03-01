@@ -48,12 +48,15 @@ public:
 	void RefreshSearch();
 
 	BOOL GetSearchAllTasklists();
+	BOOL GetSearchIncludesCompletedTasks(LPCTSTR szName) const;
+	BOOL SetSearchIncludesCompletedTasks(LPCTSTR szName, BOOL bIncDone);
+
 	int GetSearchParams(SEARCHPARAMS& params);
 	int GetSearchParams(TDCADVANCEDFILTER& filter);
 	int GetSearchParams(LPCTSTR szName, TDCADVANCEDFILTER& filter) const;
 
 	CString GetActiveSearch() const { return m_sActiveSearch; }
-	int GetSavedSearches(CStringArray& aNames);
+	int GetSavedSearches(CStringArray& aNames) const;
 
 	void AddResults(const CFilteredToDoCtrl* pTDC, const CResultArray& aResults, BOOL bShowValueOnly, LPCTSTR szHeaderText = NULL);
 
@@ -66,14 +69,12 @@ public:
 	void DeleteResults(const CFilteredToDoCtrl* pTDC);
 	void DeleteAllResults();
 
-	void RefreshUserPreferences() { m_lcResults.RefreshUserPreferences(); }
-	BOOL SetSearchFlags(LPCTSTR szName, DWORD dwFlags);
-
 	void SetCustomAttributes(const CTDCCustomAttribDefinitionArray& aActiveTasklistAttribDefs,
 							const CTDCCustomAttribDefinitionArray& aAllTasklistsAttribDefs);
 	void SetAttributeListData(const TDCAUTOLISTDATA& tldActive, const TDCAUTOLISTDATA& tldAll, TDC_ATTRIBUTE nAttribID);
 	void SetActiveTasklist(const CString& sTasklist, BOOL bWantDefaultIcons);
 	
+	void RefreshUserPreferences() { m_lcResults.RefreshUserPreferences(); }
 	void SetUITheme(const CUIThemeFile& theme);
 
 	BOOL IsDocked() const { return IsDocked(m_nDockPos); }

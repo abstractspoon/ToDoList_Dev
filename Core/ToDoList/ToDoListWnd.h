@@ -26,6 +26,7 @@
 #include "TDLCustomToolbar.h"
 #include "TDCMainMenu.h"
 #include "TDLStatusBar.h"
+#include "TDCFindFilterHelper.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -135,6 +136,7 @@ protected:
 	CWndPromptManager m_mgrPrompts;
 	CMenuIconMgr m_mgrMenuIcons;
 	CUIExtensionMgr m_mgrUIExtensions;
+	CTDCFindFilterHelper m_findFilterHelper;
 
 	CString m_sQuickFind;
 	CString m_sTaskViewImageExt;
@@ -704,7 +706,7 @@ protected:
 	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID);
 	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
-	void RefreshFilterBarAdvancedFilterNames();
+	void RefreshFilterBarAdvancedFilters();
 	void RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilters, const CStringArray& aNewFilters);
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);

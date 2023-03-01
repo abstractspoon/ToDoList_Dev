@@ -241,6 +241,10 @@ SOURCE=..\ToDoList\TDCFilter.cpp
 # End Source File
 # Begin Source File
 
+SOURCE=..\ToDoList\TDCFindFilterHelper.cpp
+# End Source File
+# Begin Source File
+
 SOURCE=..\ToDoList\TDCFindReplace.cpp
 # End Source File
 # Begin Source File
@@ -846,6 +850,10 @@ SOURCE=..\ToDoList\TDCEnumContainers.h
 # Begin Source File
 
 SOURCE=..\ToDoList\TDCFilter.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\ToDoList\TDCFindFilterHelper.h
 # End Source File
 # Begin Source File
 
