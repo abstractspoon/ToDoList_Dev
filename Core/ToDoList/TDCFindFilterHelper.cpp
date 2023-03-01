@@ -3,8 +3,8 @@
 
 #include "stdafx.h"
 #include "TDCFindFilterHelper.h"
-
-//#include "..\Shared\AutoFlag.h"
+#include "TDLFindTasksDlg.h"
+#include "TDLFilterBar.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -14,10 +14,62 @@ static char THIS_FILE[] = __FILE__;
 
 /////////////////////////////////////////////////////////////////////////////
 
-CTDCFindFilterHelper::CTDCFindFilterHelper() 
+CTDCFindFilterHelper::CTDCFindFilterHelper(CTDLFindTasksDlg& findDlg, CTDLFilterBar& filterBar)
+	:
+	m_filterBar(filterBar),
+	m_findDlg(findDlg)
 {
 }
 
 CTDCFindFilterHelper::~CTDCFindFilterHelper()
 {
+}
+
+void CTDCFindFilterHelper::InitialiseFilterBarAdvancedFilters()
+{
+	RefreshFilterBarAdvancedFilters();
+}
+
+void CTDCFindFilterHelper::RefreshFilterBarAdvancedFilters()
+{
+	CStringArray aFilters;
+	m_findDlg.GetSavedSearches(aFilters);
+
+	// check/add unnamed filter
+	if (m_findDlg.GetSafeHwnd())
+	{
+		CEnString sUnNamed(IDS_UNNAMEDFILTER);
+
+		if (m_findDlg.GetActiveSearch().IsEmpty() && !Misc::Contains(sUnNamed, aFilters, FALSE, TRUE))
+			aFilters.Add(sUnNamed);
+	}
+
+	m_filterBar.AddAdvancedFilters(aFilters);
+
+	int nFilter = aFilters.GetSize();
+
+	while (nFilter--)
+		UpdateFilterBarAdvancedFilter(aFilters[nFilter]);
+}
+
+void CTDCFindFilterHelper::AddFilterBarAdvancedFilter(LPCTSTR szFilter)
+{
+	RefreshFilterBarAdvancedFilters();
+}
+
+void CTDCFindFilterHelper::UpdateFilterBarAdvancedFilter(LPCTSTR szFilter)
+{
+	BOOL bIncDone = m_findDlg.GetSearchIncludesCompletedTasks(szFilter);
+
+	VERIFY(m_filterBar.SetAdvancedFilterIncludesDoneTasks(szFilter, bIncDone));
+}
+
+void CTDCFindFilterHelper::DeleteFilterBarAdvancedFilter(LPCTSTR szFilter)
+{
+	RefreshFilterBarAdvancedFilters();
+}
+
+BOOL CTDCFindFilterHelper::UpdateFindDlgAdvancedFilter(LPCTSTR szFilter, DWORD dwFilterFlags)
+{
+	return m_findDlg.SetSearchIncludesCompletedTasks(szFilter, !Misc::HasFlag(dwFilterFlags, FO_HIDEDONE));
 }

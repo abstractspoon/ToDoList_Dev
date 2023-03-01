@@ -26,6 +26,7 @@
 #include "TDLCustomToolbar.h"
 #include "TDCMainMenu.h"
 #include "TDLStatusBar.h"
+#include "TDCFindFilterHelper.h"
 
 #include "..\shared\trayicon.h"
 #include "..\shared\toolbarhelper.h"
@@ -135,6 +136,7 @@ protected:
 	CWndPromptManager m_mgrPrompts;
 	CMenuIconMgr m_mgrMenuIcons;
 	CUIExtensionMgr m_mgrUIExtensions;
+	CTDCFindFilterHelper m_findFilterHelper;
 
 	CString m_sQuickFind;
 	CString m_sTaskViewImageExt;

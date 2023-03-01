@@ -9,8 +9,8 @@
 
 /////////////////////////////////////////////////////////////////////////////
 
-// class CToDoCtrl;
-// class CPreferences;
+class CTDLFindTasksDlg;
+class CTDLFilterBar;
 
 /////////////////////////////////////////////////////////////////////////////
 // 
@@ -19,12 +19,21 @@ class CTDCFindFilterHelper
 {
 // Construction
 public:
-	CTDCFindFilterHelper();
+	CTDCFindFilterHelper(CTDLFindTasksDlg& findDlg, CTDLFilterBar& m_filterBar);
 	virtual ~CTDCFindFilterHelper();
 
-protected:
+	void InitialiseFilterBarAdvancedFilters();
+	void RefreshFilterBarAdvancedFilters();
+	void AddFilterBarAdvancedFilter(LPCTSTR szFilter);
+	void UpdateFilterBarAdvancedFilter(LPCTSTR szFilter);
+	void DeleteFilterBarAdvancedFilter(LPCTSTR szFilter);
 
-	// Implementation
+	BOOL UpdateFindDlgAdvancedFilter(LPCTSTR szFilter, DWORD dwFilterFlags);
+
+protected:
+	CTDLFindTasksDlg& m_findDlg;
+	CTDLFilterBar& m_filterBar;
+
 protected:
 };
 

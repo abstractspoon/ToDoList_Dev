@@ -48,8 +48,7 @@ public:
 
 	void AddAdvancedFilters(const CStringArray& aFilters);
 	const CStringArray& GetAdvancedFilterNames() const;
-	void RemoveAdvancedFilters();
-	BOOL SetAdvancedFilterFlags(const CString& sCustom, DWORD dwFlags);
+	BOOL SetAdvancedFilterIncludesDoneTasks(const CString& sCustom, BOOL bIncDone);
 
 	void ShowDefaultFilters(BOOL bShow);
 	void RefreshFilterControls(const CFilteredToDoCtrl& tdc, TDC_ATTRIBUTE nAttribID = TDCA_ALL);
@@ -151,6 +150,7 @@ protected:
 	void OnSelchangeDateFilter(FILTER_DATE nPrevFilter, const CTDLFilterDateComboBox& combo);
 
 protected:
+	void RemoveAdvancedFilters();
 	int ReposControls(int nWidth = -1, BOOL bCalcOnly = FALSE);
 	BOOL WantShowFilter(TDC_ATTRIBUTE nType) const;
 	void RefreshUIBkgndBrush();
