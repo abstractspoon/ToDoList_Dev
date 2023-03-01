@@ -998,9 +998,12 @@ void CTDLFindTaskExpressionListCtrl::OnAttribEditOK()
 			if (rule.OperatorIs(FOP_NONE))
 				SetItemText(nRow, OPERATOR_COL, _T(""));
 
-			// Always clear the text value
-			rule.SetValue(_T(""));
-			UpdateValueColumnText(nRow);
+			// Clear the text value if the attribute type has changed
+			if (rule.GetAttribType() != ruleNew.GetAttribType())
+			{
+				rule.SetValue(_T(""));
+				UpdateValueColumnText(nRow);
+			}
 			
 			ValidateListData();
 		}

@@ -505,13 +505,18 @@ FILTER_SHOW CTDLFilterBar::GetFilter(TDCFILTER& filter, CString& sCustom, DWORD&
 	return filter.nShow;
 }
 
-BOOL CTDLFilterBar::SetAdvancedFilterFlags(const CString& sCustom, DWORD dwFlags)
+BOOL CTDLFilterBar::SetAdvancedFilterIncludesDoneTasks(const CString& sCustom, BOOL bIncDone)
 {
 	if (!m_cbTaskFilter.HasAdvancedFilter(sCustom))
 	{
 		ASSERT(0);
 		return FALSE;
 	}
+
+	DWORD dwFlags = 0;
+	m_mapCustomFlags.Lookup(sCustom, dwFlags);
+
+	Misc::SetFlag(dwFlags, FO_HIDEDONE, !bIncDone);
 
 	CString sActive;
 

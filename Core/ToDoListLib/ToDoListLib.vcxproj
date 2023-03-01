@@ -150,6 +150,7 @@
     <ClCompile Include="..\ToDoList\TDCDialogHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCEnumContainers.cpp" />
     <ClCompile Include="..\ToDoList\TDCFilter.cpp" />
+    <ClCompile Include="..\ToDoList\TDCFindFilterHelper.cpp" />
     <ClCompile Include="..\ToDoList\TDCFindReplace.cpp" />
     <ClCompile Include="..\ToDoList\TDCImageList.cpp" />
     <ClCompile Include="..\ToDoList\TDCImportExportMgr.cpp" />
@@ -303,6 +304,7 @@
     <ClInclude Include="..\ToDoList\tdcenum.h" />
     <ClInclude Include="..\ToDoList\TDCEnumContainers.h" />
     <ClInclude Include="..\ToDoList\TDCFilter.h" />
+    <ClInclude Include="..\ToDoList\TDCFindFilterHelper.h" />
     <ClInclude Include="..\ToDoList\TDCFindReplace.h" />
     <ClInclude Include="..\ToDoList\TDCImageList.h" />
     <ClInclude Include="..\ToDoList\TDCImportExportMgr.h" />

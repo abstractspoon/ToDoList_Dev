@@ -224,7 +224,8 @@ CToDoListWnd::CToDoListWnd()
 	m_bFirstEraseBkgnd(TRUE),
 	m_bLogCommands(FALSE),
 	m_bSplitting(FALSE),
-	m_statusBar(m_tdiDefault)
+	m_statusBar(m_tdiDefault),
+	m_findFilterHelper(m_dlgFindTasks, m_filterBar)
 {
 	TDL_FILEFILTER.LoadString(IDS_TDLFILEFILTER);
 	
@@ -1344,7 +1345,7 @@ BOOL CToDoListWnd::InitFilterbar()
 	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
 	m_filterBar.SetUITheme(m_theme);
 
-	RefreshFilterBarAdvancedFilterNames();
+	RefreshFilterBarAdvancedFilters();
 
 	return TRUE;
 }
@@ -8313,7 +8314,7 @@ void CToDoListWnd::RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClear
 	{
 		if (nAttribID == TDCA_ALL)
 		{
-			RefreshFilterBarAdvancedFilterNames();
+			RefreshFilterBarAdvancedFilters();
 
 			m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
 			m_filterBar.RefreshFilterControls(GetToDoCtrl(), nAttribID);
@@ -8395,22 +8396,9 @@ void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilter
 	}
 }
 
-void CToDoListWnd::RefreshFilterBarAdvancedFilterNames()
+void CToDoListWnd::RefreshFilterBarAdvancedFilters()
 {
-	CStringArray aFilters;
-
-	m_dlgFindTasks.GetSavedSearches(aFilters);
-
-	// check for unnamed filter
-	if (m_dlgFindTasks.GetSafeHwnd())
-	{
-		CEnString sUnNamed(IDS_UNNAMEDFILTER);
-
-		if (m_dlgFindTasks.GetActiveSearch().IsEmpty() && !Misc::Contains(sUnNamed, aFilters, FALSE, TRUE))
-			aFilters.Add(sUnNamed);
-	}
-
-	m_filterBar.AddAdvancedFilters(aFilters);
+	m_findFilterHelper.RefreshFilterBarAdvancedFilters();
 
 	CRect rFilter;
 
@@ -10843,15 +10831,17 @@ LRESULT CToDoListWnd::OnFindApplyAsFilter(WPARAM /*wp*/, LPARAM lp)
 
 LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM lp)
 {
-	RefreshFilterBarAdvancedFilterNames();
+	ASSERT(lp);
+	LPCTSTR szFilter = (LPCTSTR)lp;
+
+	// Notify the filter bar
+	RefreshFilterBarAdvancedFilters();
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
-	ASSERT(lp);
-
 	CStringArray aPrevFilters;
 	aPrevFilters.Copy(m_filterBar.GetAdvancedFilterNames());
 
-	VERIFY(Misc::RemoveItem((LPCTSTR)lp, aPrevFilters));
+	VERIFY(Misc::RemoveItem(szFilter, aPrevFilters));
 
 	RemapAdvancedFilterMenuItemIDs(aPrevFilters, m_filterBar.GetAdvancedFilterNames());
 
@@ -10868,7 +10858,8 @@ LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
 	if (tdc.GetAdvancedFilterName().CompareNoCase(szFilter) == 0)
 		OnViewClearfilter();
 
-	RefreshFilterBarAdvancedFilterNames();
+	// Notify the filter bar
+	RefreshFilterBarAdvancedFilters();
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
 	CStringArray aPrevFilters;
@@ -10885,17 +10876,17 @@ LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
 LRESULT CToDoListWnd::OnFindSaveSearch(WPARAM /*wp*/, LPARAM lp)
 {
 	ASSERT(lp);
-
-	CString sActive;
 	LPCTSTR szSearch = (LPCTSTR)lp;
+
+	// Notify the filter bar
+	VERIFY(m_findFilterHelper.UpdateFilterBarAdvancedFilter(szSearch));
 
 	TDCADVANCEDFILTER filter;
 	m_dlgFindTasks.GetSearchParams(szSearch, filter);
 
-	// Synchronise filter bar flags
-	VERIFY(m_filterBar.SetAdvancedFilterFlags(szSearch, filter.dwFlags));
-
 	// Update Filter
+	CString sActive;
+
 	if ((m_filterBar.GetFilter(sActive) == FS_ADVANCED) && (sActive == szSearch))
 	{
 		GetToDoCtrl().SetAdvancedFilter(filter);
@@ -11869,7 +11860,7 @@ void CToDoListWnd::OnChangeFilter(TDCFILTER& filter, const CString& sCustom, DWO
 	if (!sCustom.IsEmpty())
 	{
 		// Synchronise 'Find Tasks' dialog flags
-		VERIFY(m_dlgFindTasks.SetSearchFlags(sCustom, dwCustomFlags));
+		VERIFY(m_findFilterHelper.UpdateFindDlgAdvancedFilter(sCustom, dwCustomFlags));
 
 		// Update filter
 		TDCADVANCEDFILTER filter(sCustom, dwCustomFlags);
