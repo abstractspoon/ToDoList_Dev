@@ -706,7 +706,7 @@ protected:
 	void UpdateFilterBarListData(TDC_ATTRIBUTE nAttribID);
 	void RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClearCheckboxHistory = FALSE);
 	void RefreshFindTasksListData(TDC_ATTRIBUTE nAttribID);
-	void RefreshFilterBarAdvancedFilterNames();
+	void RefreshFilterBarAdvancedFilters();
 	void RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilters, const CStringArray& aNewFilters);
 
 	void Resize(int cx = 0, int cy = 0, BOOL bMaximized = FALSE);

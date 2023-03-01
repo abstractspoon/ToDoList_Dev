@@ -1345,7 +1345,7 @@ BOOL CToDoListWnd::InitFilterbar()
 	m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
 	m_filterBar.SetUITheme(m_theme);
 
-	RefreshFilterBarAdvancedFilterNames();
+	RefreshFilterBarAdvancedFilters();
 
 	return TRUE;
 }
@@ -8314,7 +8314,7 @@ void CToDoListWnd::RefreshFilterBarControls(TDC_ATTRIBUTE nAttribID, BOOL bClear
 	{
 		if (nAttribID == TDCA_ALL)
 		{
-			RefreshFilterBarAdvancedFilterNames();
+			RefreshFilterBarAdvancedFilters();
 
 			m_filterBar.SetTitleFilterOption(Prefs().GetTitleFilterOption());
 			m_filterBar.RefreshFilterControls(GetToDoCtrl(), nAttribID);
@@ -8396,7 +8396,7 @@ void CToDoListWnd::RemapAdvancedFilterMenuItemIDs(const CStringArray& aOldFilter
 	}
 }
 
-void CToDoListWnd::RefreshFilterBarAdvancedFilterNames()
+void CToDoListWnd::RefreshFilterBarAdvancedFilters()
 {
 	m_findFilterHelper.RefreshFilterBarAdvancedFilters();
 
@@ -10835,7 +10835,7 @@ LRESULT CToDoListWnd::OnFindAddSearch(WPARAM /*wp*/, LPARAM lp)
 	LPCTSTR szFilter = (LPCTSTR)lp;
 
 	// Notify the filter bar
-	m_findFilterHelper.AddFilterBarAdvancedFilter(szFilter);
+	RefreshFilterBarAdvancedFilters();
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
 	CStringArray aPrevFilters;
@@ -10859,7 +10859,7 @@ LRESULT CToDoListWnd::OnFindDeleteSearch(WPARAM /*wp*/, LPARAM lp)
 		OnViewClearfilter();
 
 	// Notify the filter bar
-	m_findFilterHelper.DeleteFilterBarAdvancedFilter(szFilter);
+	RefreshFilterBarAdvancedFilters();
 
 	// See RemapAdvancedFilterMenuItemIDs for more detail
 	CStringArray aPrevFilters;
@@ -10879,7 +10879,7 @@ LRESULT CToDoListWnd::OnFindSaveSearch(WPARAM /*wp*/, LPARAM lp)
 	LPCTSTR szSearch = (LPCTSTR)lp;
 
 	// Notify the filter bar
-	m_findFilterHelper.UpdateFilterBarAdvancedFilter(szSearch);
+	VERIFY(m_findFilterHelper.UpdateFilterBarAdvancedFilter(szSearch));
 
 	TDCADVANCEDFILTER filter;
 	m_dlgFindTasks.GetSearchParams(szSearch, filter);

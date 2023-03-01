@@ -25,10 +25,6 @@ CTDCFindFilterHelper::~CTDCFindFilterHelper()
 {
 }
 
-void CTDCFindFilterHelper::InitialiseFilterBarAdvancedFilters()
-{
-	RefreshFilterBarAdvancedFilters();
-}
 
 void CTDCFindFilterHelper::RefreshFilterBarAdvancedFilters()
 {
@@ -52,24 +48,17 @@ void CTDCFindFilterHelper::RefreshFilterBarAdvancedFilters()
 		UpdateFilterBarAdvancedFilter(aFilters[nFilter]);
 }
 
-void CTDCFindFilterHelper::AddFilterBarAdvancedFilter(LPCTSTR szFilter)
-{
-	RefreshFilterBarAdvancedFilters();
-}
-
-void CTDCFindFilterHelper::UpdateFilterBarAdvancedFilter(LPCTSTR szFilter)
+BOOL CTDCFindFilterHelper::UpdateFilterBarAdvancedFilter(LPCTSTR szFilter)
 {
 	BOOL bIncDone = m_findDlg.GetSearchIncludesCompletedTasks(szFilter);
 
-	VERIFY(m_filterBar.SetAdvancedFilterIncludesDoneTasks(szFilter, bIncDone));
+	return m_filterBar.SetAdvancedFilterIncludesDoneTasks(szFilter, bIncDone);
 }
 
-void CTDCFindFilterHelper::DeleteFilterBarAdvancedFilter(LPCTSTR szFilter)
-{
-	RefreshFilterBarAdvancedFilters();
-}
 
 BOOL CTDCFindFilterHelper::UpdateFindDlgAdvancedFilter(LPCTSTR szFilter, DWORD dwFilterFlags)
 {
-	return m_findDlg.SetSearchIncludesCompletedTasks(szFilter, !Misc::HasFlag(dwFilterFlags, FO_HIDEDONE));
+	BOOL bIncDone = !Misc::HasFlag(dwFilterFlags, FO_HIDEDONE);
+
+	return m_findDlg.SetSearchIncludesCompletedTasks(szFilter, bIncDone);
 }

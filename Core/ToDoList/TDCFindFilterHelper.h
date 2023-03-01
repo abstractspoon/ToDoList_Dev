@@ -22,11 +22,8 @@ public:
 	CTDCFindFilterHelper(CTDLFindTasksDlg& findDlg, CTDLFilterBar& m_filterBar);
 	virtual ~CTDCFindFilterHelper();
 
-	void InitialiseFilterBarAdvancedFilters();
 	void RefreshFilterBarAdvancedFilters();
-	void AddFilterBarAdvancedFilter(LPCTSTR szFilter);
-	void UpdateFilterBarAdvancedFilter(LPCTSTR szFilter);
-	void DeleteFilterBarAdvancedFilter(LPCTSTR szFilter);
+	BOOL UpdateFilterBarAdvancedFilter(LPCTSTR szFilter);
 
 	BOOL UpdateFindDlgAdvancedFilter(LPCTSTR szFilter, DWORD dwFilterFlags);
 
@@ -34,7 +31,6 @@ protected:
 	CTDLFindTasksDlg& m_findDlg;
 	CTDLFilterBar& m_filterBar;
 
-protected:
 };
 
 //{{AFX_INSERT_LOCATION}}
