@@ -38,6 +38,7 @@ public:
 	BOOL GetDisplayDone() const { return m_bShowDoneDates; }
 	BOOL GetDisplayFutureOcurrences() const { return m_bShowFutureOcurrences; }
 	BOOL GetDisplayDateInEveryCell() const { return m_bShowDateInEveryCell; }
+	BOOL GetDisplayWeekNumberInCell() const { return m_bShowWeekNumInCell; }
 
 	BOOL GetCalcMissingStartAsCreation() const;
 	BOOL GetCalcMissingStartAsDue() const;
@@ -72,6 +73,7 @@ protected:
 	BOOL	m_bHideParentTasks;
 	BOOL	m_bShowFutureOcurrences;
 	BOOL	m_bShowDateInEveryCell;
+	BOOL	m_bShowWeekNumInCell;
 	BOOL	m_bHideParentTasksByTag;
 	CString	m_sHideParentTag;
 	
@@ -124,6 +126,7 @@ public:
 	BOOL GetDisplayDone() const { return m_page.GetDisplayDone(); }
 	BOOL GetDisplayFutureOcurrences() const { return m_page.GetDisplayFutureOcurrences(); }
 	BOOL GetDisplayDateInEveryCell() const { return m_page.GetDisplayDateInEveryCell(); }
+	BOOL GetDisplayWeekNumberInCell() const { return m_page.GetDisplayWeekNumberInCell(); }
 
 	BOOL GetCalcMissingStartAsCreation() const { return m_page.GetCalcMissingStartAsCreation(); }
 	BOOL GetCalcMissingStartAsDue() const { return m_page.GetCalcMissingStartAsDue(); }

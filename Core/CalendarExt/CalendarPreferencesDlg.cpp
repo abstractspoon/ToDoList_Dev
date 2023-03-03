@@ -89,6 +89,7 @@ void CCalendarPreferencesPage::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 	DDX_Check(pDX, IDC_SHOWFUTUREITEMS, m_bShowFutureOcurrences);
 	DDX_Check(pDX, IDC_SHOWDATEINEVERYCELL, m_bShowDateInEveryCell);
+	DDX_Check(pDX, IDC_SHOWWEEKNUMINCELL, m_bShowWeekNumInCell);
 	DDX_Radio(pDX, IDC_USECREATIONFORSTART, m_nCalcMissingStartDates);
 	DDX_Radio(pDX, IDC_USESTARTFORDUE, m_nCalcMissingDueDates);
 	DDX_Control(pDX, IDC_HEATMAPPALETTE, m_cbHeatMapPalette);
@@ -179,6 +180,7 @@ void CCalendarPreferencesPage::SavePreferences(IPreferences* pPrefs, LPCTSTR szK
 	pPrefs->WriteProfileInt(szKey, _T("ShowCalcDueDates"), m_bShowCalcDueDates);
 	pPrefs->WriteProfileInt(szKey, _T("ShowFutureOcurrences"), m_bShowFutureOcurrences);
 	pPrefs->WriteProfileInt(szKey, _T("ShowDateInEveryCell"), m_bShowDateInEveryCell);
+	pPrefs->WriteProfileInt(szKey, _T("ShowWeekNumInCell"), m_bShowWeekNumInCell);
 
 	pPrefs->WriteProfileInt(szKey, _T("CalcMissingStartDates"), m_nCalcMissingStartDates);
 	pPrefs->WriteProfileInt(szKey, _T("CalcMissingDueDates"), m_nCalcMissingDueDates);
@@ -206,6 +208,7 @@ void CCalendarPreferencesPage::LoadPreferences(const IPreferences* pPrefs, LPCTS
 	m_bShowCalcDueDates = pPrefs->GetProfileInt(szKey, _T("ShowCalcDueDates"), TRUE);
 	m_bShowFutureOcurrences = pPrefs->GetProfileInt(szKey, _T("ShowFutureOcurrences"), TRUE);
 	m_bShowDateInEveryCell = pPrefs->GetProfileInt(szKey, _T("ShowDateInEveryCell"), FALSE);
+	m_bShowWeekNumInCell = pPrefs->GetProfileInt(szKey, _T("ShowWeekNumInCell"), FALSE);
 
 	m_nCalcMissingStartDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingStartDates"), CALCSTART_ASCREATION);
 	m_nCalcMissingDueDates = pPrefs->GetProfileInt(szKey, _T("CalcMissingDueDates"), CALCDUE_ASLATESTSTARTANDTODAY);
