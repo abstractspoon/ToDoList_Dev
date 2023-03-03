@@ -64,6 +64,8 @@
 #define IDS_DISPLAYTASKDONEDATES        57679
 #define IDS_CUSTOMDATE_TOOLTIP          57680
 #define IDS_FUTUREOCCURRENCE_TOOLTIP    57681
+#define IDS_LONGWEEK                    57682
+#define IDS_SHORTWEEK                   57683
 
 // Next default values for new objects
 // 

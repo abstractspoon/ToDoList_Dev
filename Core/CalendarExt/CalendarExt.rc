@@ -67,6 +67,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     IDS_CUSTOMDATE_TOOLTIP  "%s (Custom)"
     IDS_FUTUREOCCURRENCE_TOOLTIP "Future Occurrence"
+    IDS_LONGWEEK            "Week"
+    IDS_SHORTWEEK           "W"
 END
 
 #endif    // English (U.S.) resources

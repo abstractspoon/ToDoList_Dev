@@ -84,6 +84,7 @@ namespace Misc
 	CString GetTimeSeparator();
 	CString GetTimeFormat(BOOL bIncSeconds = TRUE);
 	CString GetShortDateFormat(BOOL bIncDOW = FALSE);
+	BOOL ShortDateFormatHasMonthBeforeDay();
 	CString GetDateSeparator();
 
 	BOOL MatchAll(const CStringArray& array1, const CStringArray& array2, BOOL bOrderSensitive = FALSE, BOOL bCaseSensitive = FALSE);

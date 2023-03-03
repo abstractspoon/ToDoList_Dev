@@ -1533,6 +1533,13 @@ CString Misc::GetShortDateFormat(BOOL bIncDOW)
 	return sFormat;
 }
 
+BOOL Misc::ShortDateFormatHasMonthBeforeDay()
+{
+	CString sFormat = Misc::GetShortDateFormat();
+	
+	return (sFormat.Find('M') < sFormat.Find('d'));
+}
+
 CString Misc::GetDecimalSeparator()
 {
 	const int BUFLEN = 10;
