@@ -120,6 +120,7 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
 	ON_REGISTERED_MESSAGE(WM_MIDNIGHT, OnMidnight)
+	ON_WM_SIZE()
 
 END_MESSAGE_MAP()
 
@@ -146,6 +147,7 @@ LRESULT CTaskCalendarCtrl::OnSetFont(WPARAM wp, LPARAM /*lp*/)
 
 	SetHeaderHeight(m_nTaskHeight + 2);
 	SetDayHeaderHeight(m_nTaskHeight);
+	RecalcCellHeaderDateFormats();
 
 	return 0L;
 }
@@ -172,6 +174,7 @@ void CTaskCalendarCtrl::SetOptions(DWORD dwNewOptions)
 		DWORD dwPrev = m_dwOptions;
 		m_dwOptions = dwNewOptions | (dwPrev & TCCO_HIDEPARENTTASKS); // preserve parent status
 
+		RecalcCellHeaderDateFormats();
 		RecalcTaskDates();
 		RebuildCellTasks();
 
@@ -699,8 +702,6 @@ void CTaskCalendarCtrl::DrawCells(CDC* pDC)
 	UpdateCellScrollBarVisibility(FALSE);
 	RebuildCellTaskDrawInfo();
 
-	CalcCellHeaderDateFormats(pDC, m_fonts.GetFont(GMFS_BOLD), m_sCellDateFormat, m_sCellDateWeekNumFormat);
-
 	// create alternate text font as required
 	int nSize = CalcRequiredTaskFontPointSize();
 
@@ -793,7 +794,14 @@ void CTaskCalendarCtrl::DrawCellBkgnd(CDC* pDC, const CCalendarCell* pCell, cons
 	}
 }
 
-void CTaskCalendarCtrl::CalcCellHeaderDateFormats(CDC* pDC, CFont* pBoldFont, CString& sDateFormat, CString& sWeekNumFormat) const
+void CTaskCalendarCtrl::OnSize(UINT nType, int cx, int cy)
+{
+	CCalendarCtrlEx::OnSize(nType, cx, cy);
+
+	RecalcCellHeaderDateFormats();
+}
+
+void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 {
 	CRect rCells;
 	GetClientRect(rCells);
@@ -803,41 +811,42 @@ void CTaskCalendarCtrl::CalcCellHeaderDateFormats(CDC* pDC, CFont* pBoldFont, CS
 	// Note: We use a bold font and the first day of the month 
 	// for our calculations because experience tells that it 
 	// always produces wider text than double digit non-bold text
-	CFont *pOldFont = pDC->SelectObject(pBoldFont);
+	CClientDC dc(this);
+	CFont *pOldFont = dc.SelectObject(m_fonts.GetFont(GMFS_BOLD));
 	
 	BOOL bMonthBeforeDay = Misc::ShortDateFormatHasMonthBeforeDay();
-	int nMaxDayWidth = pDC->GetTextExtent(_T("1 ")).cx;
-	int nMaxLongMonthWidth = CDateHelper::GetMaxMonthNameWidth(pDC, FALSE);
-	int nLongYearWidth = pDC->GetTextExtent(_T(" 2020")).cx;
+	int nMaxDayWidth = dc.GetTextExtent(_T("1 ")).cx;
+	int nMaxLongMonthWidth = CDateHelper::GetMaxMonthNameWidth(&dc, FALSE);
+	int nLongYearWidth = dc.GetTextExtent(_T(" 2020")).cx;
 
 	int nWeekWidth = 0;
 
 	if (HasOption(TCCO_SHOWWEEKNUMINCELLDATE))
 	{
-		sWeekNumFormat = Misc::Format(_T(" (%s.%%d)"), CEnString(IDS_SHORTWEEK));
-		nWeekWidth = pDC->GetTextExtent(Misc::Format(m_sCellDateWeekNumFormat, 52)).cx;
+		m_sCellDateWeekNumFormat = Misc::Format(_T(" (%s.%%d)"), CEnString(IDS_SHORTWEEK));
+		nWeekWidth = dc.GetTextExtent(Misc::Format(m_sCellDateWeekNumFormat, 52)).cx;
 	}
 	else
 	{
-		sWeekNumFormat.Empty();
+		m_sCellDateWeekNumFormat.Empty();
 	}
 
-	sDateFormat = _T("%#d"); // Day only
+	m_sCellDateFormat = _T("%#d"); // Day only
 
 	// Note: we include the week number width in the calculation
 	// but leave it out of the format string because we need to
 	// use our corrected week number not Windows'
 	if ((nMaxDayWidth + nMaxLongMonthWidth + nLongYearWidth + nWeekWidth) <= nAvailWidth)
 	{
-		sDateFormat = (bMonthBeforeDay ? _T("%B %#d %Y") : _T("%#d %B %Y"));
+		m_sCellDateFormat = (bMonthBeforeDay ? _T("%B %#d %Y") : _T("%#d %B %Y"));
 	}
 	else
 	{
-		int nMaxShortMonthWidth = CDateHelper::GetMaxMonthNameWidth(pDC, TRUE);
+		int nMaxShortMonthWidth = CDateHelper::GetMaxMonthNameWidth(&dc, TRUE);
 
 		if ((nMaxDayWidth + nMaxShortMonthWidth + nLongYearWidth + nWeekWidth) <= nAvailWidth)
 		{
-			sDateFormat = (bMonthBeforeDay ? _T("%b %#d %Y") : _T("%#d %b %Y"));
+			m_sCellDateFormat = (bMonthBeforeDay ? _T("%b %#d %Y") : _T("%#d %b %Y"));
 		}
 		else
 		{
@@ -849,35 +858,35 @@ void CTaskCalendarCtrl::CalcCellHeaderDateFormats(CDC* pDC, CFont* pBoldFont, CS
 			else
 				sDayMonthFormat = _T("%#d") + sDateSep + _T("%m");
 
-			if ((pDC->GetTextExtent(_T("1/12/2020")).cx + nWeekWidth) <= nAvailWidth)
+			if ((dc.GetTextExtent(_T("1/12/2020")).cx + nWeekWidth) <= nAvailWidth)
 			{
-				sDateFormat = sDayMonthFormat + sDateSep + _T("%Y");
+				m_sCellDateFormat = sDayMonthFormat + sDateSep + _T("%Y");
 			}
-			else if ((pDC->GetTextExtent(_T("1/12/20")).cx + nWeekWidth) <= nAvailWidth)
+			else if ((dc.GetTextExtent(_T("1/12/20")).cx + nWeekWidth) <= nAvailWidth)
 			{
-				sDateFormat = sDayMonthFormat + sDateSep + _T("%y");
+				m_sCellDateFormat = sDayMonthFormat + sDateSep + _T("%y");
 			}
-			else if ((pDC->GetTextExtent(_T("1/12")).cx + nWeekWidth) <= nAvailWidth)
+			else if ((dc.GetTextExtent(_T("1/12")).cx + nWeekWidth) <= nAvailWidth)
 			{
-				sDateFormat = sDayMonthFormat;
+				m_sCellDateFormat = sDayMonthFormat;
 			}
 			else if ((nMaxDayWidth + nWeekWidth) <= nAvailWidth)
 			{
 				// Day Only + week
 			}
-			else if (pDC->GetTextExtent(_T("1/12")).cx <= nAvailWidth)
+			else if (dc.GetTextExtent(_T("1/12")).cx <= nAvailWidth)
 			{
-				sDateFormat = sDayMonthFormat;
-				sWeekNumFormat.Empty();
+				m_sCellDateFormat = sDayMonthFormat;
+				m_sCellDateWeekNumFormat.Empty();
 			}
 			else 
 			{
 				// Day only
-				sWeekNumFormat.Empty();
+				m_sCellDateWeekNumFormat.Empty();
 			}
 		}
 	}
-	pDC->SelectObject(pOldFont);
+	dc.SelectObject(pOldFont);
 }
 
 CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMonth) const

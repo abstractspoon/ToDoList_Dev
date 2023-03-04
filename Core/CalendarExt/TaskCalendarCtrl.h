@@ -148,6 +148,7 @@ protected:
 	afx_msg LRESULT OnGetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 
 	DECLARE_MESSAGE_MAP()
 	
@@ -194,7 +195,7 @@ protected:
 	void CalcScrollBarRect(const CRect& rCell, CRect& rScrollbar) const;
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
-	void CalcCellHeaderDateFormats(CDC* pDC, CFont* pBoldFont, CString& sDateFormat, CString& sWeekNumFormat) const;
+	void RecalcCellHeaderDateFormats();
 	CString FormatCellDate(const COleDateTime& date, BOOL bShowMonth) const;
 
 	DWORD GetSelectedTaskID() const;
