@@ -2457,31 +2457,42 @@ TDC_SET CToDoCtrlData::MoveTaskStartAndDueDates(DWORD dwTaskID, const COleDateTi
 
 COleDateTime CToDoCtrlData::CalcNewDueDate(const COleDateTime& dtCurStart, const COleDateTime& dtCurDue, TDC_UNITS nUnits, COleDateTime& dtNewStart)
 {
-	// Tasks whose current and new dates fall wholly within a single day are kept simple
 	double dSimpleDuration = CalcDuration(dtCurStart, dtCurDue, TDCU_DAYS);
 	ASSERT(dSimpleDuration > 0.0);
 
-	COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
-	
-	if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) &&
-		CDateHelper::IsSameDay(dtNewStart, dtSimpleDue))
+	double dRealDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
+
+	if (dRealDuration == 0.0)
 	{
-		return dtSimpleDue;
+		// If the real duration is zero then it means that the task
+		// falls wholly within the weekend, which means that the user
+		// has performed some trickery so we fall back on the simple 
+		// duration instead
+		ASSERT((nUnits == TDCU_MINS) ||
+				(nUnits == TDCU_HOURS) ||
+				(nUnits == TDCU_WEEKDAYS) ||
+				(nUnits == TDCU_WEEKS));
+
+		ASSERT(CDateHelper().WorkingWeek().HasWeekend());
+
+		return AddDuration(dtNewStart, dSimpleDuration, TDCU_WEEKDAYS, TRUE);
 	}
 
-	// Tasks whose time estimate has not changed are also kept simple
-	double dCurDuration = CalcDuration(dtCurStart, dtCurDue, nUnits);
-	double dNewDuration = CalcDuration(dtNewStart, dtSimpleDue, nUnits);
-
-	const double ONE_SECOND = (1.0 / (24 * 60 * 60));
-
-	if (fabs(dCurDuration - dNewDuration) < ONE_SECOND)
+	// Tasks whose current and new dates fall wholly within a single day 
+	// and where at least one of dates has a time component are kept simple
+	if (CDateHelper::DateHasTime(dtCurStart) || CDateHelper::DateHasTime(dtCurDue))
 	{
-		return dtSimpleDue;
+		COleDateTime dtSimpleDue = AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, FALSE); // Does not update dtNewStart
+
+		if (CDateHelper::IsSameDay(dtCurStart, dtCurDue) &&
+			CDateHelper::IsSameDay(dtNewStart, dtSimpleDue))
+		{
+			return AddDuration(dtNewStart, dSimpleDuration, TDCU_DAYS, TRUE);
+		}
 	}
-	
-	// We need to calculate it 'fully'
-	return AddDuration(dtNewStart, dNewDuration, nUnits, TRUE); // updates dtNewStart
+
+	// else
+	return AddDuration(dtNewStart, dRealDuration, nUnits, TRUE);
 }
 
 TDC_SET CToDoCtrlData::InitMissingTaskDate(DWORD dwTaskID, TDC_DATE nDate, const COleDateTime& date)
@@ -3642,16 +3653,23 @@ BOOL CToDoCtrlData::CalcTaskDependencyStartDate(DWORD dwTaskID, const TDCDEPENDE
 	
 	if (CDateHelper::IsDateSet(dtNewStart))
 	{
-		// Add lead-in time
-		if (depend.nDaysLeadIn)
-		{
-			DH_UNITS nDHUnits = (pTDI->timeEstimate.nUnits == TDCU_WEEKDAYS) ? DHU_WEEKDAYS : DHU_DAYS;
+		DH_UNITS nDHUnits = DHU_WEEKDAYS;
 
-			VERIFY(CDateHelper().OffsetDate(dtNewStart, depend.nDaysLeadIn, nDHUnits));
+		switch (pTDI->timeEstimate.nUnits)
+		{
+		case TDCU_DAYS:
+		case TDCU_MONTHS:
+		case TDCU_YEARS:
+			nDHUnits = DHU_DAYS;
+			break;
 		}
 
-		if (pTDI->timeEstimate.nUnits == TDCU_WEEKDAYS)
+		if (nDHUnits = DHU_WEEKDAYS)
 			CWorkingWeek().MakeWeekday(dtNewStart);
+
+		// Add lead-in time
+		if (depend.nDaysLeadIn)
+			VERIFY(CDateHelper().OffsetDate(dtNewStart, depend.nDaysLeadIn, nDHUnits));
 
 		return TRUE;
 	}
@@ -3849,18 +3867,15 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	switch (nUnits)
 	{
 	case TDCU_DAYS:
+		return (dateEnd.m_dt - dateStart.m_dt);
+
 	case TDCU_MONTHS:
 	case TDCU_YEARS:
 		{
+			CTwentyFourSevenWeek week;
 			double dDuration = (dateEnd.m_dt - dateStart.m_dt); // in days
 
-			if (nUnits != TDCU_DAYS)
-			{
-				CTwentyFourSevenWeek week;
-				dDuration = CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
-			}
-
-			return dDuration;
+			return CTimeHelper(week).Convert(dDuration, THU_DAYS, TDC::MapUnitsToTHUnits(nUnits));
 		}
 		break;
 
@@ -3868,13 +3883,7 @@ double CToDoCtrlData::CalcDuration(const COleDateTime& dateStart, const COleDate
 	case TDCU_HOURS:
 	case TDCU_WEEKDAYS:
 	case TDCU_WEEKS:
-		{
-			CWorkingWeek week;
-			double dDuration = week.CalculateDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
-
-			return dDuration;
-		}
-		break;
+		return CWorkingWeek().CalculateDuration(dateStart, dateEnd, TDC::MapUnitsToWWUnits(nUnits));
 	}
 
 	ASSERT(0);
