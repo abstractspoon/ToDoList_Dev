@@ -4418,7 +4418,7 @@ BOOL CTabbedToDoCtrl::SelectTask(DWORD dwTaskID, BOOL bTaskLink)
 			if (pExtWnd)
 			{
 				ASSERT(pVData);
-				pVData->bHasSelectedTask = pExtWnd->SelectTask(dwTaskID);
+				pVData->bHasSelectedTask = pExtWnd->SelectTask(dwTaskID, (bTaskLink != FALSE));
 			}
 		}
 		break;
@@ -5818,11 +5818,10 @@ BOOL CTabbedToDoCtrl::ViewSupportsTaskSelection(FTC_VIEW nView) const
 	case FTCV_UIEXTENSION15:
 	case FTCV_UIEXTENSION16:
 		{
-			const IUIExtensionWindow* pExt = GetExtensionWnd(nView);
-			ASSERT(pExt);
+			int nExtension = (nView - FTCV_FIRSTUIEXTENSION);
+			ASSERT(nExtension < m_aExtViews.GetSize());
 
-			if (pExt)
-				return (pExt->CanDoAppCommand(IUI_SELECTTASK) ? TRUE : FALSE);
+			return (m_mgrUIExt.SupportsTaskSelection(nExtension) ? TRUE : FALSE);
 		}
 		break;
 	}
@@ -6470,7 +6469,7 @@ void CTabbedToDoCtrl::SyncExtensionSelectionToTree(FTC_VIEW nView)
 		ASSERT((cache.aSelTaskIDs.GetSize() > 1) || 
 				(cache.dwFocusedTaskID == cache.aSelTaskIDs[0]));
 
-		pVData->bHasSelectedTask = pExt->SelectTask(cache.dwFocusedTaskID);
+		pVData->bHasSelectedTask = pExt->SelectTask(cache.dwFocusedTaskID, false);
 
 		if (pVData->bHasSelectedTask)
 		{

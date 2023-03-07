@@ -35,7 +35,6 @@ CUIExtensionAppCmdData::CUIExtensionAppCmdData(TDC_ATTRIBUTE nSortCol, BOOL bAsc
 	bSortAscending = ((bAscending == -1) ? true : (bAscending != FALSE));
 }
 
-// IUI_SELECTTASK
 // IUI_GETNEXTTASK
 // IUI_GETNEXTTOPLEVELTASK
 // IUI_GETPREVTASK
