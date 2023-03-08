@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
@@ -36,6 +37,7 @@ namespace DayViewUIExtension
 
 		private Color m_TaskTextColor = Color.Empty;
 		private List<string> m_Tags = null;
+		private List<Tuple<DateTime, DateTime>> m_TimeBlocks;
 
 		// --------------------
 
@@ -46,6 +48,11 @@ namespace DayViewUIExtension
 		public Dictionary<string, DateTime> CustomDates
 		{
 			get; private set;
+		}
+
+		public IEnumerable<Tuple<DateTime, DateTime>> TimeBlocks
+		{
+			get { return m_TimeBlocks; }
 		}
 
 		public Boolean HasTaskTextColor
@@ -249,6 +256,7 @@ namespace DayViewUIExtension
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
 
 				UpdateCustomDateAttributes(task, dateAttribs);
+				DecodeTimeBlocks(task.GetMetaDataValue(DayViewUIExtensionCore.TypeId));
 			}
 			else
 			{
@@ -323,6 +331,63 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		public string EncodeTimeBlocks()
+		{
+			string timeBlocks = String.Empty;
+
+			if (m_TimeBlocks != null)
+			{
+				foreach (var block in m_TimeBlocks)
+				{
+					timeBlocks = timeBlocks + string.Format("{0}#{1}$", block.Item1, block.Item2);
+				}
+			}
+
+			return timeBlocks;
+		}
+
+		public void DecodeTimeBlocks(string blocks)
+		{
+			if (string.IsNullOrWhiteSpace(blocks))
+			{
+				m_TimeBlocks = null;
+			}
+			else
+			{
+				var pairs = blocks.Split('$');
+
+				foreach (var pair in pairs)
+				{
+					var dates = pair.Split('#');
+
+					if (dates.Length == 2)
+					{
+						DateTime start, end;
+
+						if (DateTime.TryParse(dates[0], out start) &&
+							DateTime.TryParse(dates[1], out end))
+						{
+							AddTimeBlock(start, end);
+						}
+					}
+				}
+			}
+		}
+
+		public bool AddTimeBlock(DateTime start, DateTime end)
+		{
+			if (start >= end)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
+			InitTimeBlocks();
+			m_TimeBlocks.Add(new Tuple<DateTime, DateTime>(start, end));
+
+			return true;
+		}
+
 		static public DateTime CheckGetEndOfDay(DateTime date)
 		{
 			if ((date != NullDate) && (date == date.Date))
@@ -330,6 +395,12 @@ namespace DayViewUIExtension
 
 			// else
 			return date;
+		}
+
+		private void InitTimeBlocks()
+		{
+			if (m_TimeBlocks == null)
+				m_TimeBlocks = new List<Tuple<DateTime, DateTime>>();
 		}
 	}
 
@@ -389,6 +460,24 @@ namespace DayViewUIExtension
 
 		public string AttributeId { get; private set; }
 		public DateTime OriginalDate { get; private set; }
+	}
+
+	// ---------------------------------------------------------------
+
+	public class TimeBlock : TaskExtensionItem
+	{
+		public TimeBlock(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
+		{
+			Locked = false; // Never
+
+			StartDate = start;
+			EndDate = TaskItem.CheckGetEndOfDay(end);
+		}
+
+		public override bool IsLongAppt(DateTime start, DateTime end)
+		{
+			return false; // Always
+		}
 	}
 
 }

@@ -390,26 +390,29 @@ namespace DayViewUIExtension
             }
         }
 
-        public uint GetSelectedTaskID()
+        public uint SelectedTaskID
         {
-            if (!IsTaskDisplayable(m_SelectedTaskID))
-                return 0;
+			get
+			{
+				if (!IsTaskDisplayable(m_SelectedTaskID))
+					return 0;
 
-			// If an extension item is selected, return the 'real' task Id
-			TaskExtensionItem extItem;
+				// If an extension item is selected, return the 'real' task Id
+				TaskExtensionItem extItem;
 
-			if (m_ExtensionItems.TryGetValue(m_SelectedTaskID, out extItem))
-				return extItem.RealTaskId;
+				if (m_ExtensionItems.TryGetValue(m_SelectedTaskID, out extItem))
+					return extItem.RealTaskId;
 
-			// else
-			return m_SelectedTaskID;
+				// else
+				return m_SelectedTaskID;
+			}
         }
 
 		public bool GetSelectedTaskDates(out DateTime from, out DateTime to)
 		{
 			from = to = Calendar.Appointment.NullDate;
 
-			uint selTaskID = GetSelectedTaskID();
+			uint selTaskID = SelectedTaskID;
 
 			if (selTaskID == 0)
 				return false;
@@ -498,7 +501,7 @@ namespace DayViewUIExtension
 			// Our base class clears the selected appointment whenever
 			// the week changes so we can't always rely on 'SelectedAppointmentId'
             uint prevSelTaskID = m_VisibleSelectedTaskID;
-            uint selTaskID = GetSelectedTaskID();
+            uint selTaskID = SelectedTaskID;
 
 			m_VisibleSelectedTaskID = selTaskID;
 			
@@ -534,7 +537,7 @@ namespace DayViewUIExtension
 			}
 			
 			// Notify parent of changes
-			if (allowNotify && (GetSelectedTaskID() != prevSelTaskID))
+			if (allowNotify && (SelectedTaskID != prevSelTaskID))
 			{
 				TaskItem item = null;
 				m_Items.TryGetValue(m_VisibleSelectedTaskID, out item);
@@ -550,9 +553,22 @@ namespace DayViewUIExtension
             m_SelectedTaskID = dwTaskID;
             FixupSelection(true, false);
 
-			return (GetSelectedTaskID() != 0);
+			return (SelectedTaskID != 0);
 		}
 
+		public bool CreateNewTaskBlock(uint taskID)
+		{
+			if (SelectionStart >= SelectionEnd)
+				return false;
+
+			var task = (GetAppointment(taskID) as TaskItem);
+
+			if (task == null)
+				return false;
+
+			return task.AddTimeBlock(SelectionStart, SelectionEnd);
+		}
+		
         public void GoToToday()
         {
             StartDate = DateTime.Now;
@@ -813,7 +829,7 @@ namespace DayViewUIExtension
 
 			m_MaxTaskID = Math.Max(m_MaxTaskID, taskID); // needed for extension occurrences
 
-			// Built-in of attributes
+			// Built-in attributes
 			if (m_Items.TryGetValue(taskID, out item))
 			{
 				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false);
@@ -1054,7 +1070,7 @@ namespace DayViewUIExtension
 
 			if (!(selAppt is CustomDateAttribute))
 			{
-				var selRealID = GetSelectedTaskID();
+				var selRealID = SelectedTaskID;
 
 				if (appt is FutureOccurrence)
 					return (selRealID == (appt as FutureOccurrence).RealTaskId);
@@ -1183,6 +1199,20 @@ namespace DayViewUIExtension
 								m_ExtensionItems[nextExtId++] = customDate;
 								appts.Add(customDate);
 							}
+						}
+					}
+				}
+
+				if (item.TimeBlocks != null)
+				{
+					foreach (var block in item.TimeBlocks)
+					{
+						var timeBlock = new TimeBlock(item, nextExtId, block.Item1, block.Item2);
+
+						if (IsItemWithinRange(timeBlock, start, end))
+						{
+							m_ExtensionItems[nextExtId++] = timeBlock;
+							appts.Add(timeBlock);
 						}
 					}
 				}

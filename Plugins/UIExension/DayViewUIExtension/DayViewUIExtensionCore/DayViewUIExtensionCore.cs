@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Drawing;
 using System.Windows.Forms;
@@ -17,17 +18,19 @@ namespace DayViewUIExtension
 		private IntPtr m_HwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView = null;
 		private Translator m_Trans = null;
-		private String m_TypeId, m_UiName;
+		private String m_UiName;
 		private WorkingWeek m_WorkWeek = null;
 
-		// --------------------------------------------------------------------------------------
-
 		private const string FontName = "Tahoma";
-        private static Color DefGridColor = Color.FromArgb(192, 192, 192);
+
+		private static Color DefGridColor = Color.FromArgb(192, 192, 192);
         private static int LabelTop = DPIScaling.Scale(2);
         private static int ComboTop = (LabelTop + DPIScaling.Scale(2));
+		private static string s_TypeId;
 
-        private bool m_SettingMonthYear = false;
+		internal static string TypeId { get { return s_TypeId; } }
+		
+		private bool m_SettingMonthYear = false;
 		private bool m_SettingDayViewStartDate = false;
 		private bool m_AllowModifyTimeEstimate = false;
 
@@ -41,22 +44,26 @@ namespace DayViewUIExtension
 		private UIThemeToolbarRenderer m_TBRenderer;
 		private LinkLabelEx.LinkLabelEx m_SelectedTaskDatesLabel;
 		private Font m_ControlsFont;
-
+		
 		// --------------------------------------------------------------------------------------
 
 		public DayViewUIExtensionCore(String typeID, String uiName, IntPtr hwndParent, Translator trans)
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
-            m_TypeId = typeID;
 			m_UiName = uiName;
+
+			if (s_TypeId == null)
+				s_TypeId = typeID;
+			else
+				Debug.Assert(typeID.Equals(s_TypeId));
 
 			InitializeComponent();
 		}
 		
 		public bool SelectTask(UInt32 dwTaskID)
 		{
-            if (m_DayView.GetSelectedTaskID() == dwTaskID)
+            if (m_DayView.SelectedTaskID == dwTaskID)
                 return true;
 
 			bool selected = m_DayView.SelectTask(dwTaskID);
@@ -303,7 +310,7 @@ namespace DayViewUIExtension
 										new UIExtension.TaskRecurrences(m_HwndParent),
 										DPIScaling.Scale(5));
 
-			m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(OnDayViewNewAppointment);
+//			m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(OnDayViewNewAppointment);
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
 			m_DayView.AppointmentMove += new TDLAppointmentEventHandler(OnDayViewAppointmentChanged);
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
@@ -435,14 +442,23 @@ namespace DayViewUIExtension
 
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
+			var btn7 = new ToolStripButton();
+			btn7.Name = "NewTimeBlock";
+			btn7.ImageIndex = 6;
+			btn7.Click += new EventHandler(OnNewTimeBlock);
+			btn7.ToolTipText = m_Trans.Translate("New Time Block");
+			m_Toolbar.Items.Add(btn7);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
 			var btn9 = new ToolStripButton();
-			btn9.ImageIndex = 6;
+			btn9.ImageIndex = 7;
 			btn9.Click += new EventHandler(OnPreferences);
 			btn9.ToolTipText = m_Trans.Translate("Preferences");
 			m_Toolbar.Items.Add(btn9);
 
 			var btn10 = new ToolStripButton();
-			btn10.ImageIndex = 7;
+			btn10.ImageIndex = 8;
 			btn10.Click += new EventHandler(OnHelp);
 			btn10.ToolTipText = m_Trans.Translate("Online Help");
 			m_Toolbar.Items.Add(btn10);
@@ -499,6 +515,27 @@ namespace DayViewUIExtension
             UpdatedSelectedTaskDatesPosition();
 		}
 
+		private void OnNewTimeBlock(object sender, EventArgs e)
+		{
+			// Display a dialog to retrieve the task ID from a list
+			// to support tasks without dates
+			var taskID = m_DayView.SelectedTaskID;
+
+			// TODO 
+
+
+			if (taskID != 0)
+			{
+				if (m_DayView.CreateNewTaskBlock(taskID))
+				{
+					var notify = new UIExtension.ParentNotify(m_HwndParent);
+					var task = (m_DayView.SelectedAppointment as TaskItem);
+
+					notify.NotifyMod(Task.Attribute.MetaData, task.EncodeTimeBlocks());
+				}
+			}
+		}
+
 		private void UpdateToolbarButtonStates()
 		{
 			(m_Toolbar.Items["Show1DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 1);
@@ -506,7 +543,9 @@ namespace DayViewUIExtension
             (m_Toolbar.Items["Show7DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 7);
 			(m_Toolbar.Items["Show14DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 14);
             (m_Toolbar.Items["Show28DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 28);
-        }
+
+			m_Toolbar.Items["NewTimeBlock"].Enabled = (m_DayView.SelectionStart < m_DayView.SelectionEnd);
+		}
 
         private void OnPreferences(object sender, EventArgs e)
 		{
@@ -550,7 +589,7 @@ namespace DayViewUIExtension
 		{
             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
-            notify.NotifyDoHelp(m_TypeId);
+            notify.NotifyDoHelp(s_TypeId);
 		}
 
 		private void CreateMonthYearCombos()
@@ -650,19 +689,25 @@ namespace DayViewUIExtension
 			}
 		}
 
-		private void OnDayViewNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
-		{
-		}
+// 		private void OnDayViewNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
+// 		{
+// 		}
 
 		private void OnDayViewSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			if (m_DayView.Selection != Calendar.SelectionType.None)
+			switch (m_DayView.Selection)
 			{
+			case Calendar.SelectionType.Appointment:
 				UpdatedSelectedTaskDatesText();
 
-				notify.NotifySelChange(m_DayView.GetSelectedTaskID());
+				notify.NotifySelChange(m_DayView.SelectedTaskID);
+				break;
+
+			case Calendar.SelectionType.DateRange:
+				UpdateToolbarButtonStates();
+				break;
 			}
 		}
 
@@ -732,14 +777,21 @@ namespace DayViewUIExtension
                 return;
             }
 
-			var item = args.Appointment as TaskItem;
+			if (args.Appointment is TimeBlock)
+			{
 
-			if (item == null)
-				return;
+			}
+			else
+			{
+				var item = args.Appointment as TaskItem;
 
-			ProcessTaskAppointmentChange(item, args.CustomAttributeId, args.Mode);
-			UpdatedSelectedTaskDatesText();
-        }
+				if (item == null)
+					return;
+
+				ProcessTaskAppointmentChange(item, args.CustomAttributeId, args.Mode);
+				UpdatedSelectedTaskDatesText();
+			}
+		}
 
 		private bool PrepareTaskNotify(TaskItem item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
 		{
