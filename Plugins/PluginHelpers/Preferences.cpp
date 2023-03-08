@@ -83,7 +83,13 @@ bool Preferences::DeleteProfileEntry(String^ sSection, String^ sEntry)
 	return (m_pPrefs ? m_pPrefs->DeleteProfileEntry(MS(sSection), MS(sEntry)) : false);
 }
 
-bool Preferences::DeleteProfileSection(String^ sSection)
+bool Preferences::DeleteProfileSection(String^ sSection, bool bIncSubSections)
 {
-	return (m_pPrefs ? m_pPrefs->DeleteProfileSection(MS(sSection)) : false);
+	return (m_pPrefs ? m_pPrefs->DeleteProfileSection(MS(sSection), bIncSubSections) : false);
+}
+
+bool Preferences::HasProfileSection(String^ sSection)
+{
+	return (m_pConstPrefs ? m_pConstPrefs->HasProfileSection(MS(sSection)) : 
+			(m_pPrefs ? m_pPrefs->HasProfileSection(MS(sSection)) : false));
 }

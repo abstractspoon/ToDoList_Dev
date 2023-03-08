@@ -148,7 +148,9 @@ private:
 		bool WriteProfileDouble(LPCWSTR lpszSection, LPCWSTR lpszEntry, double dValue);
 		
 		bool DeleteProfileEntry(LPCWSTR lpszSection, LPCWSTR lpszEntry);
-		bool DeleteProfileSection(LPCWSTR lpszSection);
+		bool DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections);
+
+		bool HasProfileSection(LPCTSTR lpszSection) const;
 
 	protected:
 		CPreferences& m_prefs;

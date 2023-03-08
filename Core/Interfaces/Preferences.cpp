@@ -999,9 +999,14 @@ bool CPreferences::CIPreferencesImpl::DeleteProfileEntry(LPCWSTR lpszSection, LP
 	return (m_prefs.DeleteProfileEntry(lpszSection, lpszEntry) != FALSE);
 }
 
-bool CPreferences::CIPreferencesImpl::DeleteProfileSection(LPCWSTR lpszSection)
+bool CPreferences::CIPreferencesImpl::DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections)
 {
-	return (m_prefs.DeleteProfileSection(lpszSection) != FALSE);
+	return (m_prefs.DeleteProfileSection(lpszSection, bIncSubSections ? TRUE : FALSE) != FALSE);
+}
+
+bool CPreferences::CIPreferencesImpl::HasProfileSection(LPCWSTR lpszSection) const
+{
+	return (m_prefs.HasProfileSection(lpszSection) != FALSE);
 }
 
 //////////////////////////////////////////////////////////////////////
