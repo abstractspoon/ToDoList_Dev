@@ -139,7 +139,7 @@ LPCWSTR CWordCloudUIExtensionBridgeWindow::GetTypeID() const
 	return WORDCLOUD_GUID;
 }
 
-bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
+bool CWordCloudUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -190,11 +190,6 @@ bool CWordCloudUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPP
 	{
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
-
-	case IUI_SELECTTASK:
-		if (pData)
-			return m_wnd->SelectTask(pData->dwTaskID);
-		break;
 
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
@@ -273,7 +268,6 @@ bool CWordCloudUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, con
 		}
 		break;
 
-	case IUI_SELECTTASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:

@@ -133,7 +133,7 @@ LPCWSTR CSampleUIExtensionBridgeWindow::GetTypeID() const
 	return SAMPLE_GUID;
 }
 
-bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
+bool CSampleUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -182,8 +182,6 @@ bool CSampleUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND /*nCmd*/, IUIAP
 {
 // 	switch (nCmd)
 // 	{
-// 	case IUI_SELECTTASK:
-// 		return m_wnd->SelectTask(dwExtra);
 // 
 // 	}
 
@@ -195,8 +193,6 @@ bool CSampleUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND /*nCmd*/, co
 {
 // 	switch (nCmd)
 // 	{
-// 	case IUI_SELECTTASK:
-// 		return true;
 // 
 // 	}
 

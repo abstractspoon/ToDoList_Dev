@@ -486,7 +486,7 @@ DWORD CKanbanWnd::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
 	return m_ctrlKanban.HitTestTask(ptScreen);
 }
 
-bool CKanbanWnd::SelectTask(DWORD dwTaskID)
+bool CKanbanWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -595,11 +595,6 @@ bool CKanbanWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlKanban.SetFocus();
 		return true;
 		
-	case IUI_SELECTTASK:
-		if (pData)
-			return SelectTask(pData->dwTaskID);
-		break;
-		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -666,9 +661,6 @@ bool CKanbanWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* p
 	case IUI_SETFOCUS:
 		return (CDialogHelper::IsChildOrSame(this, GetFocus()) == FALSE);
 
-	case IUI_SELECTTASK:
-		return true;
-		
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVVISIBLETASK:

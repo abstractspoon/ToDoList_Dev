@@ -492,7 +492,7 @@ DWORD CGanttChartWnd::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
 	return m_ctrlGantt.HitTestTask(ptScreen, bTitleColumnOnly);
 }
 
-bool CGanttChartWnd::SelectTask(DWORD dwTaskID)
+bool CGanttChartWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -609,11 +609,6 @@ bool CGanttChartWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlGantt.ResizeListColumnsToFit(TRUE);
 		return true;
 		
-	case IUI_SELECTTASK:
-		if (pData)
-			return SelectTask(pData->dwTaskID);
-		break;
-		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -687,7 +682,6 @@ bool CGanttChartWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDAT
 		return (m_ctrlGantt.CanCollapseAll() != FALSE);
 
 	case IUI_RESIZEATTRIBCOLUMNS:
-	case IUI_SELECTTASK:
 		return true;
 
 	case IUI_SAVETOIMAGE:
@@ -1280,7 +1274,7 @@ LRESULT CGanttChartWnd::OnGanttDependencyDlgClose(WPARAM wp, LPARAM lp)
 
 		if (m_ctrlGantt.GetSelectedTaskID() != dwFromTaskID)
 		{
-			SelectTask(dwFromTaskID);
+			SelectTask(dwFromTaskID, false);
 
 			// explicitly update parent because SelectTask will not
 			SendParentSelectionUpdate();

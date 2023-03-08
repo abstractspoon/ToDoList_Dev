@@ -144,7 +144,7 @@ LPCWSTR CMindMapUIExtensionBridgeWindow::GetTypeID() const
 	return MINDMAP_GUID;
 }
 
-bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
+bool CMindMapUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -228,11 +228,6 @@ bool CMindMapUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 			if (Map(nCmd, expand))
 				return m_wnd->Expand(expand);
 		}
-		break;
-
-	case IUI_SELECTTASK:
-		if (pData)
-			return m_wnd->SelectTask(pData->dwTaskID);
 		break;
 
 	case IUI_SETFOCUS:
@@ -332,7 +327,6 @@ bool CMindMapUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 		}
 		break;
 
-	case IUI_SELECTTASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:

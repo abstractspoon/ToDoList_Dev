@@ -126,6 +126,8 @@ public:
 	
 	virtual void SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const = 0;
 	virtual void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey) = 0;
+
+	virtual bool SupportsTaskSelection() const = 0;
 };
 
 //////////////////////////////////////////////////////////////////////
@@ -152,7 +154,6 @@ enum IUI_APPCOMMAND
 	IUI_SORT,						// IUIAPPCOMMANDDATA::nSortBy		[in]
 	IUI_TOGGLABLESORT_DEPRECATED,	// IUIAPPCOMMANDDATA::nSortBy		[in]
 	IUI_SETFOCUS,
-	IUI_SELECTTASK,					// IUIAPPCOMMANDDATA::dwTaskID		[in]
 	IUI_RESIZEATTRIBCOLUMNS,		   
 	IUI_GETNEXTVISIBLETASK,			// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
 	IUI_GETNEXTTOPLEVELTASK,		// IUIAPPCOMMANDDATA::dwTaskID		[in/out]
@@ -337,7 +338,7 @@ public:
 	virtual LPCWSTR GetMenuText() const = 0; // caller must copy result only
 	virtual LPCWSTR GetTypeID() const = 0; // caller must copy result only
 
-	virtual bool SelectTask(DWORD dwTaskID) = 0;
+	virtual bool SelectTask(DWORD dwTaskID, bool bTaskLink) = 0;
 	virtual bool SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount) = 0;
 
 	virtual void UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate) = 0;
