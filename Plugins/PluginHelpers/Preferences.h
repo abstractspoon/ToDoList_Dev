@@ -42,7 +42,9 @@ namespace Abstractspoon
 				bool WriteProfileDouble(String^ sSection, String^ sEntry, double dValue);
 
 				bool DeleteProfileEntry(String^ sSection, String^ sEntry);
-				bool DeleteProfileSection(String^ sSection);
+				bool DeleteProfileSection(String^ sSection, bool bIncSubSections);
+
+				bool HasProfileSection(String^ sSection);
 
 			private:
 				IPreferences* m_pPrefs;

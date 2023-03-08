@@ -222,7 +222,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask)
+		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey)
 		{
 			if (!task.IsValid())
 				return false;
@@ -256,7 +256,7 @@ namespace DayViewUIExtension
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
 
 				UpdateCustomDateAttributes(task, dateAttribs);
-				DecodeTimeBlocks(task.GetMetaDataValue(DayViewUIExtensionCore.TypeId));
+				DecodeTimeBlocks(task.GetMetaDataValue(metaDataKey));
 			}
 			else
 			{

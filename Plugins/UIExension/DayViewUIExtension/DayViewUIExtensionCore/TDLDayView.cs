@@ -773,7 +773,7 @@ namespace DayViewUIExtension
             return true;
 		}
 
-		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type)
+		public void UpdateTasks(TaskList tasks,	UIExtension.UpdateType type, string metaDataKey)
 		{
 			// Make sure the selected task remains visible
 			// after any changes if it was visible to start with
@@ -806,7 +806,7 @@ namespace DayViewUIExtension
 			// Update the tasks
 			Task task = tasks.GetFirstTask();
 
-			while (task.IsValid() && ProcessTaskUpdate(task, type))
+			while (task.IsValid() && ProcessTaskUpdate(task, type, metaDataKey))
 				task = task.GetNextTask();
 
 			// Scroll to the selected item if it was modified and was 'visible'
@@ -819,7 +819,7 @@ namespace DayViewUIExtension
             Invalidate();
         }
 
-		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type)
+		private bool ProcessTaskUpdate(Task task, UIExtension.UpdateType type, string metaDataKey)
 		{
 			if (!task.IsValid())
 				return false;
@@ -832,12 +832,12 @@ namespace DayViewUIExtension
 			// Built-in attributes
 			if (m_Items.TryGetValue(taskID, out item))
 			{
-				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false);
+				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, false, metaDataKey);
 			}
 			else
 			{
 				item = new TaskItem();
-				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, true);
+				item.UpdateTaskAttributes(task, m_CustomDateDefs, type, true, metaDataKey);
 			}
 
 			m_Items[taskID] = item;
@@ -845,7 +845,7 @@ namespace DayViewUIExtension
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, type, metaDataKey))
 				subtask = subtask.GetNextTask();
 
 			return true;

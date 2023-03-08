@@ -82,7 +82,13 @@ public:
 		return (FALSE != m_aValues.RemoveKey(MakeKey(lpszSection, lpszEntry)));
 	}
 	
-	bool DeleteProfileSection(LPCWSTR lpszSection)
+	bool DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections)
+	{
+		ASSERT(0);
+		return false;
+	}
+
+	bool HasProfileSection(LPCWSTR lpszSection) const
 	{
 		ASSERT(0);
 		return false;

@@ -18,7 +18,7 @@ namespace DayViewUIExtension
 		private IntPtr m_HwndParent = IntPtr.Zero;
 		private TDLDayView m_DayView = null;
 		private Translator m_Trans = null;
-		private String m_UiName;
+		private String m_TypeId, m_UiName;
 		private WorkingWeek m_WorkWeek = null;
 
 		private const string FontName = "Tahoma";
@@ -26,10 +26,7 @@ namespace DayViewUIExtension
 		private static Color DefGridColor = Color.FromArgb(192, 192, 192);
         private static int LabelTop = DPIScaling.Scale(2);
         private static int ComboTop = (LabelTop + DPIScaling.Scale(2));
-		private static string s_TypeId;
 
-		internal static string TypeId { get { return s_TypeId; } }
-		
 		private bool m_SettingMonthYear = false;
 		private bool m_SettingDayViewStartDate = false;
 		private bool m_AllowModifyTimeEstimate = false;
@@ -51,12 +48,8 @@ namespace DayViewUIExtension
 		{
 			m_HwndParent = hwndParent;
 			m_Trans = trans;
+			m_TypeId = typeID;
 			m_UiName = uiName;
-
-			if (s_TypeId == null)
-				s_TypeId = typeID;
-			else
-				Debug.Assert(typeID.Equals(s_TypeId));
 
 			InitializeComponent();
 		}
@@ -89,7 +82,7 @@ namespace DayViewUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			m_DayView.UpdateTasks(tasks, type);
+			m_DayView.UpdateTasks(tasks, type, m_TypeId);
 		}
 
 		public bool WantTaskUpdate(Task.Attribute attrib)
@@ -589,7 +582,7 @@ namespace DayViewUIExtension
 		{
             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
-            notify.NotifyDoHelp(s_TypeId);
+            notify.NotifyDoHelp(m_TypeId);
 		}
 
 		private void CreateMonthYearCombos()
