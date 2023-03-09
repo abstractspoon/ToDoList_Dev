@@ -142,6 +142,10 @@ namespace DayViewUIExtension
 
 					tipText = string.Format(m_Trans.Translate("{0} (Custom)"), custAttrib.Label);
 				}
+				else if (appt is TimeBlock)
+				{
+					tipText = m_Trans.Translate("Time Block");
+				}
 				else
 				{
 					Debug.Assert(false);
