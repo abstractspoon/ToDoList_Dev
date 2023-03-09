@@ -580,7 +580,11 @@ namespace DayViewUIExtension
 			if (task == null)
 				return false;
 
-			return task.AddTimeBlock(SelectionStart, SelectionEnd);
+			if (!task.AddTimeBlock(SelectionStart, SelectionEnd))
+				return false;
+
+			Invalidate();
+			return true;
 		}
 		
         public void GoToToday()
@@ -1330,6 +1334,39 @@ namespace DayViewUIExtension
 			}
 
 			return false;
+		}
+
+		public bool DeleteSelectedAppointment()
+		{
+			bool handled = false;
+
+			if (SelectedAppointment is CustomDateAttribute)
+			{
+				var custDate = (SelectedAppointment as CustomDateAttribute);
+				custDate.ClearDate();
+
+				// Notify parent of change
+				if (AppointmentMove != null)
+					AppointmentMove(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
+
+				handled = true;
+			}
+			else if (SelectedAppointment is TimeBlock)
+			{
+				var block = (SelectedAppointment as TimeBlock);
+				block.DeleteBlock();
+
+				// Notify parent of change
+				if (AppointmentMove != null)
+					AppointmentMove(this, new TDLMoveAppointmentEventArgs(block.RealTask, true, Calendar.SelectionTool.Mode.None, true));
+
+				handled = true;
+			}
+
+			if (handled)
+				Invalidate();
+
+			return handled;
 		}
 
 		private bool CanModifyAppointmentDates(Calendar.Appointment appt, Calendar.SelectionTool.Mode mode)

@@ -141,6 +141,9 @@ namespace DayViewUIExtension
 
 					if (keyPress == Keys.Escape)
 						return m_DayView.CancelAppointmentResizing();
+
+					if (keyPress == Keys.Delete)
+						return m_DayView.DeleteSelectedAppointment();
 				}
 				break;
 			}
@@ -766,6 +769,54 @@ namespace DayViewUIExtension
 			ProcessTaskAppointmentChange(args);
 		}
 
+		private void ProcessTaskAppointmentChange(TDLMoveAppointmentEventArgs args)
+		{
+            if (!args.Finished && !args.IsTimeBlock)
+            {
+                UpdatedSelectedTaskDatesText();
+                return;
+            }
+
+			var item = args.Appointment as TaskItem;
+
+			if (item == null)
+				return;
+
+			var notify = new UIExtension.ParentNotify(m_HwndParent);
+
+			if (args.IsTimeBlock)
+			{
+				notify.NotifyMod(Task.Attribute.MetaData, item.EncodeTimeBlocks());
+				return;
+			}
+
+			// else
+			if (!string.IsNullOrEmpty(args.CustomAttributeId))
+			{
+				notify.NotifyMod(args.CustomAttributeId, item.CustomDates[args.CustomAttributeId].ToString());
+				return;
+			}
+
+			// Start/Due change
+			if (PrepareTaskNotify(item, args.Mode, notify))
+			{
+				bool modifyTimeEst = WantModifyTimeEstimate(item);
+
+				if (notify.NotifyMod())
+				{
+					item.UpdateOriginalDates();
+
+					if (modifyTimeEst)
+						item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
+
+					return;
+				}
+			}
+
+			item.RestoreOriginalDates();
+			m_DayView.Invalidate();
+		}
+
 		private bool PrepareTaskNotify(TaskItem item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
 		{
 			switch (mode)
@@ -835,54 +886,6 @@ namespace DayViewUIExtension
 			}
 
 			return false;
-		}
-
-		private void ProcessTaskAppointmentChange(TDLMoveAppointmentEventArgs args)
-		{
-            if (!args.Finished && !args.IsTimeBlock)
-            {
-                UpdatedSelectedTaskDatesText();
-                return;
-            }
-
-			var item = args.Appointment as TaskItem;
-
-			if (item == null)
-				return;
-
-			var notify = new UIExtension.ParentNotify(m_HwndParent);
-
-			if (args.IsTimeBlock)
-			{
-				notify.NotifyMod(Task.Attribute.MetaData, item.EncodeTimeBlocks());
-				return;
-			}
-
-			// else
-			if (!string.IsNullOrEmpty(args.CustomAttributeId))
-			{
-				notify.NotifyMod(args.CustomAttributeId, item.CustomDates[args.CustomAttributeId].ToString());
-				return;
-			}
-
-			// Start/Due change
-			if (PrepareTaskNotify(item, args.Mode, notify))
-			{
-				bool modifyTimeEst = WantModifyTimeEstimate(item);
-
-				if (notify.NotifyMod())
-				{
-					item.UpdateOriginalDates();
-
-					if (modifyTimeEst)
-						item.TimeEstimate = item.LengthAsTimeEstimate(m_WorkWeek, false);
-
-					return;
-				}
-			}
-
-			item.RestoreOriginalDates();
-			m_DayView.Invalidate();
 		}
 
         private bool WantModifyTimeEstimate(TaskItem item)

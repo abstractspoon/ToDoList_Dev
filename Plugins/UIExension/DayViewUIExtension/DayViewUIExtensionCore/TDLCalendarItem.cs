@@ -387,6 +387,14 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		public bool DeleteTimeBlock(Calendar.AppointmentDates dates)
+		{
+			if (m_TimeBlocks != null)
+				return m_TimeBlocks.Remove(dates);
+
+			return false;
+		}
+
 		static public DateTime CheckGetEndOfDay(DateTime date)
 		{
 			if ((date != NullDate) && (date == date.Date))
@@ -467,6 +475,11 @@ namespace DayViewUIExtension
 			RealTask.CustomDates[AttributeId] = StartDate;
 		}
 
+		public void ClearDate()
+		{
+			RealTask.CustomDates[AttributeId] = DateTime.MinValue;
+		}
+
 		public string AttributeId { get; private set; }
 		public DateTime OriginalDate { get; private set; }
 	}
@@ -505,6 +518,11 @@ namespace DayViewUIExtension
 		{
 			m_Dates.Start = StartDate;
 			m_Dates.End = EndDate;
+		}
+
+		public void DeleteBlock()
+		{
+			RealTask.DeleteTimeBlock(m_Dates);
 		}
 	}
 
