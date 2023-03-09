@@ -553,7 +553,7 @@ namespace DayViewUIExtension
 				if (isLong)
 					rect.Height++;
 
-				if (isFutureItem)
+				if (isFutureItem || isTimeBlock)
 				{
 					UIExtension.SelectionRect.Draw(m_hWnd,
 													g,
