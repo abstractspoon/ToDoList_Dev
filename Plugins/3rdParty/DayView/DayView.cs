@@ -162,6 +162,8 @@ namespace Calendar
 			return false;
 		}
 
+		public int HScrollStep { get { return Math.Min(DaysShowing, 7); } }
+
 		public String HScrollTooltipText
 		{
 			get { return tooltip.GetToolTip(hscroll); }
@@ -837,11 +839,11 @@ namespace Calendar
         {
             if (e.NewValue > e.OldValue)
             {
-                StartDate = StartDate.AddDays(daysToShow);
+                StartDate = StartDate.AddDays(HScrollStep);
             }
             else if (e.NewValue < e.OldValue)
             {
-                StartDate = StartDate.AddDays(-daysToShow);
+                StartDate = StartDate.AddDays(-HScrollStep);
             }
 			else
 			{
