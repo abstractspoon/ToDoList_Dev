@@ -140,7 +140,7 @@ LPCWSTR CDayViewUIExtensionBridgeWindow::GetTypeID() const
 	return DAYVIEW_GUID;
 }
 
-bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID)
+bool CDayViewUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
@@ -189,11 +189,6 @@ bool CDayViewUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCO
 {
 	switch (nCmd)
 	{
-	case IUI_SELECTTASK:
-		if (pData)
-			return m_wnd->SelectTask(pData->dwTaskID);
-		break;
-
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -246,7 +241,6 @@ bool CDayViewUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const
 {
 	switch (nCmd)
 	{
-	case IUI_SELECTTASK:
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:

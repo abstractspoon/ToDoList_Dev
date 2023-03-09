@@ -37,6 +37,8 @@ public:
 	void SavePreferences(IPreferences* pPrefs, LPCTSTR szKey) const;
 	void LoadPreferences(const IPreferences* pPrefs, LPCTSTR szKey);
 
+	bool SupportsTaskSelection(int nExtension) const;
+
 protected:
 	BOOL m_bInitialized;
 	CArray<IUIExtension*, IUIExtension*> m_aUIExtensions;

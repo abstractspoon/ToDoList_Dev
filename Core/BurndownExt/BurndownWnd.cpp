@@ -323,7 +323,7 @@ DWORD CBurndownWnd::HitTestTask(POINT /*ptScreen*/, bool /*bTitleColumnOnly*/) c
 	return 0L;
 }
 
-bool CBurndownWnd::SelectTask(DWORD /*dwTaskID*/)
+bool CBurndownWnd::SelectTask(DWORD /*dwTaskID*/, bool /*bTaskLink*/)
 {
 //	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -572,7 +572,6 @@ bool CBurndownWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 	case IUI_GETNEXTTOPLEVELTASK:
 	case IUI_GETPREVVISIBLETASK:
 	case IUI_GETPREVTOPLEVELTASK:
-	case IUI_SELECTTASK:
 		// not handled
 		break;
 	}

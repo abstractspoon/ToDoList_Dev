@@ -166,6 +166,12 @@ HICON CUIExtensionMgr::GetUIExtensionIcon(int nExtension) const
 	return (pExt ? pExt->GetIcon() : NULL);
 }
 
+bool CUIExtensionMgr::SupportsTaskSelection(int nExtension) const 
+{
+	IUIExtension* pExt = GetUIExtension(nExtension);
+	return (pExt ? pExt->SupportsTaskSelection() : false);
+}
+
 int CUIExtensionMgr::FindUIExtension(LPCTSTR szTypeID) const
 {
 	Initialize(); // initialize on demand

@@ -423,7 +423,7 @@ DWORD CWorkloadWnd::HitTestTask(POINT ptScreen, bool bTitleColumnOnly) const
 	return m_ctrlWorkload.HitTestTask(ptScreen, bTitleColumnOnly);
 }
 
-bool CWorkloadWnd::SelectTask(DWORD dwTaskID)
+bool CWorkloadWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	AFX_MANAGE_STATE(AfxGetStaticModuleState());
 	
@@ -516,11 +516,6 @@ bool CWorkloadWnd::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 		m_ctrlWorkload.ResizeListColumnsToFit(TRUE);
 		return true;
 		
-	case IUI_SELECTTASK:
-		if (pData)
-			return SelectTask(pData->dwTaskID);
-		break;
-		
 	case IUI_GETNEXTTASK:
 	case IUI_GETNEXTVISIBLETASK:
 	case IUI_GETNEXTTOPLEVELTASK:
@@ -594,7 +589,6 @@ bool CWorkloadWnd::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA*
 		return (m_ctrlWorkload.CanCollapseAll() != FALSE);
 		
 	case IUI_RESIZEATTRIBCOLUMNS:
-	case IUI_SELECTTASK:
 		return true;
 
 	case IUI_SAVETOIMAGE:
