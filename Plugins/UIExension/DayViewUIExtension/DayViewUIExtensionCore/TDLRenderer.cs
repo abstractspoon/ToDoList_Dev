@@ -484,9 +484,10 @@ namespace DayViewUIExtension
 			return (appt as TaskItem);
 		}
 
-		void GetTaskColors(Calendar.Appointment appt, bool isFutureItem, bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
+		void GetTaskColors(Calendar.AppointmentView apptView,bool isSelected, out Color textColor, out Color fillColor, out Color borderColor, out Color barColor)
 		{
-			TaskItem taskItem = GetTaskItem(appt);
+			TaskItem taskItem = GetTaskItem(apptView.Appointment);
+			bool isFutureItem = (apptView.Appointment is FutureOccurrence); 
 
 			// Default colours
 			if (isSelected && SystemInformation.HighContrast)
@@ -494,14 +495,14 @@ namespace DayViewUIExtension
 				textColor = borderColor = SystemColors.HighlightText;
 				fillColor = SystemColors.Highlight;
 
-				barColor = isFutureItem ? SystemColors.Window : appt.TextColor;
+				barColor = isFutureItem ? SystemColors.Window : apptView.Appointment.TextColor;
 			}
 			else
 			{
 				if (isFutureItem)
 				{
 					fillColor = SystemColors.Window;
-					textColor = appt.TextColor;
+					textColor = apptView.Appointment.TextColor;
 				}
 				else
 				{
@@ -536,15 +537,23 @@ namespace DayViewUIExtension
 			}
 		}
 
-		void DrawTaskBackground(Graphics g, Rectangle rect, bool isLong, bool isFuture, bool isSelected,
-								Color fillColor, Color borderColor)
+		void DrawTaskBackground(Graphics g, 
+								Rectangle rect,
+								Calendar.AppointmentView apptView,
+								bool isSelected,
+								Color fillColor, 
+								Color borderColor)
 		{
+			bool isLong = apptView.IsLong;
+			bool isFutureItem = (apptView.Appointment is FutureOccurrence);
+			bool isTimeBlock = (apptView.Appointment is TimeBlock);
+
 			if (isSelected)
 			{
 				if (isLong)
 					rect.Height++;
 
-				if (isFuture)
+				if (isFutureItem)
 				{
 					UIExtension.SelectionRect.Draw(m_hWnd,
 													g,
@@ -553,7 +562,7 @@ namespace DayViewUIExtension
 													rect.Width,
 													rect.Height,
 													UIExtension.SelectionRect.Style.DropHighlighted,
-													false); // opaque
+													isTimeBlock);
 				}
 				else
 				{
@@ -563,11 +572,14 @@ namespace DayViewUIExtension
 													rect.Top,
 													rect.Width,
 													rect.Height,
-													false); // opaque
+													isTimeBlock);
 				}
 			}
 			else
 			{
+				if (isTimeBlock)
+					fillColor = Color.FromArgb(128, fillColor);
+
 				using (SolidBrush brush = new SolidBrush(fillColor))
 					g.FillRectangle(brush, rect);
 
@@ -581,7 +593,7 @@ namespace DayViewUIExtension
 
 					using (Pen pen = new Pen(borderColor, 1))
 					{
-						if (isFuture)
+						if (isFutureItem)
 							pen.DashStyle = DashStyle.Dash;
 
 						g.DrawRectangle(pen, rect);
@@ -647,6 +659,9 @@ namespace DayViewUIExtension
 
 			if (gripRect.Width > 0)
 			{
+				if (apptView.Appointment is TimeBlock)
+					barColor = Color.FromArgb(128, barColor);
+
 				using (SolidBrush brush = new SolidBrush(barColor))
 					g.FillRectangle(brush, gripRect);
 
@@ -722,17 +737,16 @@ namespace DayViewUIExtension
 				return;
 
 			var appt = apptView.Appointment;
-			bool isFutureItem = (appt is FutureOccurrence);
 
 			Color textColor, fillColor, borderColor, barColor;
-			GetTaskColors(appt, isFutureItem, isSelected, out textColor, out fillColor, out borderColor, out barColor);
+			GetTaskColors(apptView, isSelected, out textColor, out fillColor, out borderColor, out barColor);
 
 			g.SmoothingMode = SmoothingMode.None;
 
 			if (!apptView.IsLong || apptView.DrawLongContinuous)
 			{
 				// Draw the background of the appointment
-				DrawTaskBackground(g, rect, apptView.IsLong, isFutureItem, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, rect, apptView, isSelected, fillColor, borderColor);
 
 				// Draw appointment icon and gripper
 				DrawTaskIconAndGripper(g, apptView, barColor, ref rect);
@@ -750,7 +764,7 @@ namespace DayViewUIExtension
 				startRect.Width = apptView.EndOfStart - rect.Left;
 
 				// Draw the background of the appointment
-				DrawTaskBackground(g, startRect, apptView.IsLong, isFutureItem, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, startRect, apptView, isSelected, fillColor, borderColor);
 
 				// Draw appointment icon and gripper
 				DrawTaskIconAndGripper(g, apptView, barColor, ref startRect);
@@ -770,7 +784,7 @@ namespace DayViewUIExtension
 					endRect.Offset(1, 0);
 
 				// Draw the background of the appointment
-				DrawTaskBackground(g, endRect, apptView.IsLong, isFutureItem, isSelected, fillColor, borderColor);
+				DrawTaskBackground(g, endRect, apptView, isSelected, fillColor, borderColor);
 
 				// draw appointment text
 				DrawTaskText(g, apptView, endRect, textColor);

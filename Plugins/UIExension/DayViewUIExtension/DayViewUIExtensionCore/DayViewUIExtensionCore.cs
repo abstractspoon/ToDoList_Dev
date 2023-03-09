@@ -763,27 +763,7 @@ namespace DayViewUIExtension
 
         private void OnDayViewAppointmentChanged(object sender, TDLMoveAppointmentEventArgs args)
 		{
-            // Whilst move is in progress only update selected task dates 
-            if (!args.Finished)
-            {
-                UpdatedSelectedTaskDatesText();
-                return;
-            }
-
-			if (args.Appointment is TimeBlock)
-			{
-
-			}
-			else
-			{
-				var item = args.Appointment as TaskItem;
-
-				if (item == null)
-					return;
-
-				ProcessTaskAppointmentChange(item, args.CustomAttributeId, args.Mode);
-				UpdatedSelectedTaskDatesText();
-			}
+			ProcessTaskAppointmentChange(args);
 		}
 
 		private bool PrepareTaskNotify(TaskItem item, Calendar.SelectionTool.Mode mode, UIExtension.ParentNotify notify, bool includeTimeEstimate = true)
@@ -857,20 +837,36 @@ namespace DayViewUIExtension
 			return false;
 		}
 
-		private void ProcessTaskAppointmentChange(TaskItem item, string customAttribId, Calendar.SelectionTool.Mode mode)
+		private void ProcessTaskAppointmentChange(TDLMoveAppointmentEventArgs args)
 		{
+            if (!args.Finished && !args.IsTimeBlock)
+            {
+                UpdatedSelectedTaskDatesText();
+                return;
+            }
+
+			var item = args.Appointment as TaskItem;
+
+			if (item == null)
+				return;
+
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			if (!string.IsNullOrEmpty(customAttribId))
+			if (args.IsTimeBlock)
 			{
-				notify.AddMod(customAttribId, item.CustomDates[customAttribId].ToString());
-				notify.NotifyMod();
+				notify.NotifyMod(Task.Attribute.MetaData, item.EncodeTimeBlocks());
+				return;
+			}
 
+			// else
+			if (!string.IsNullOrEmpty(args.CustomAttributeId))
+			{
+				notify.NotifyMod(args.CustomAttributeId, item.CustomDates[args.CustomAttributeId].ToString());
 				return;
 			}
 
 			// Start/Due change
-			if (PrepareTaskNotify(item, mode, notify))
+			if (PrepareTaskNotify(item, args.Mode, notify))
 			{
 				bool modifyTimeEst = WantModifyTimeEstimate(item);
 

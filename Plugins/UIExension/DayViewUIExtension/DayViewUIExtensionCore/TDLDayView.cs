@@ -15,10 +15,16 @@ namespace DayViewUIExtension
 	public class TDLMoveAppointmentEventArgs : Calendar.MoveAppointmentEventArgs
 	{
 		public string CustomAttributeId { get; private set; }
+		public bool IsTimeBlock { get; private set; }
 
 		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, string attribId, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
 		{
 			CustomAttributeId = attribId;
+		}
+
+		public TDLMoveAppointmentEventArgs(Calendar.Appointment appointment, bool timeBlock, Calendar.SelectionTool.Mode mode, bool finished) : base(appointment, mode, finished)
+		{
+			IsTimeBlock = timeBlock;
 		}
 	}
 
@@ -212,9 +218,13 @@ namespace DayViewUIExtension
 					if (args.Appointment is CustomDateAttribute)
 					{
 						custAttribId = (args.Appointment as CustomDateAttribute).AttributeId;
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
 					}
-
-					AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, custAttribId, move.Mode, move.Finished));
+					else
+					{
+						bool isTimeBlock = (args.Appointment is TimeBlock);
+						AppointmentMove(this, new TDLMoveAppointmentEventArgs(taskItem, isTimeBlock, move.Mode, move.Finished));
+					}
 				}
 			}
 		}
@@ -1211,7 +1221,7 @@ namespace DayViewUIExtension
 				{
 					foreach (var block in item.TimeBlocks)
 					{
-						var timeBlock = new TimeBlock(item, nextExtId, block.Item1, block.Item2);
+						var timeBlock = new TimeBlock(item, nextExtId, block);
 
 						if (IsItemWithinRange(timeBlock, start, end))
 						{
@@ -1306,7 +1316,12 @@ namespace DayViewUIExtension
 				else if (SelectedAppointment is CustomDateAttribute)
 				{
 					var custDate = (SelectedAppointment as CustomDateAttribute);
-					custDate.RealTask.CustomDates[custDate.AttributeId] = custDate.OriginalDate;
+					custDate.RestoreOriginalDate();
+				}
+				else if (SelectedAppointment is TimeBlock)
+				{
+					var block = (SelectedAppointment as TimeBlock);
+					block.RestoreOriginalDates();
 				}
 
 				Invalidate();

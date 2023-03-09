@@ -7,6 +7,22 @@ using System.Drawing;
 
 namespace Calendar
 {
+	public class AppointmentDates
+	{
+		public DateTime Start;
+		public DateTime End;
+
+		public AppointmentDates()
+		{
+		}
+
+		public AppointmentDates(DateTime start, DateTime end)
+		{
+			Start = start;
+			End = end;
+		}
+	}
+
     public class Appointment
     {
         public Appointment(string t = "New Appointment")
@@ -22,8 +38,8 @@ namespace Calendar
                 return;
 
 			title = appt.title;
-			startDate = appt.startDate;
-			endDate = appt.endDate;
+			dates.Start = appt.dates.Start; // copy
+			dates.End = appt.dates.End; // copy
 			locked = appt.locked;
 
 			Id = appt.Id;
@@ -51,17 +67,17 @@ namespace Calendar
 					(EndDate > StartDate));
 		}
 		
-		private DateTime startDate;
+		private AppointmentDates dates = new AppointmentDates();
 
         public virtual DateTime StartDate
         {
             get
             {
-                return startDate;
+                return dates.Start;
             }
             set
             {
-                startDate = value;
+                dates.Start = value;
                 OnStartDateChanged();
             }
         }
@@ -71,17 +87,15 @@ namespace Calendar
 			// for derived classes
 		}
 
-		private DateTime endDate;
-
         public virtual DateTime EndDate
         {
             get
             {
-                return endDate;
+                return dates.End;
             }
             set
             {
-                endDate = value;
+                dates.End = value;
                 OnEndDateChanged();
             }
         }
@@ -93,7 +107,7 @@ namespace Calendar
 
 		public virtual TimeSpan Length
         {
-            get { return (endDate - startDate); }
+            get { return (dates.End - dates.Start); }
         }
 
         private bool locked;
@@ -227,7 +241,7 @@ namespace Calendar
 
 		public virtual bool IsLongAppt()
         {
-            return IsLongAppt(startDate, endDate);
+            return IsLongAppt(dates.Start, dates.End);
         }
 
 		public bool IntersectsWith(Appointment other, bool displayLongAppointmentsContinuous)

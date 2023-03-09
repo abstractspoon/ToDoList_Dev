@@ -31,13 +31,12 @@ namespace DayViewUIExtension
 
 	public class TaskItem : Calendar.Appointment
 	{
-		private DateTime m_OrgStartDate = NullDate;
-		private DateTime m_OrgEndDate = NullDate;
+		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
 		private DateTime m_PrevDueDate = NullDate;
 
 		private Color m_TaskTextColor = Color.Empty;
 		private List<string> m_Tags = null;
-		private List<Tuple<DateTime, DateTime>> m_TimeBlocks;
+		private List<Calendar.AppointmentDates> m_TimeBlocks;
 
 		// --------------------
 
@@ -50,7 +49,7 @@ namespace DayViewUIExtension
 			get; private set;
 		}
 
-		public IEnumerable<Tuple<DateTime, DateTime>> TimeBlocks
+		public IEnumerable<Calendar.AppointmentDates> TimeBlocks
 		{
 			get { return m_TimeBlocks; }
 		}
@@ -74,24 +73,24 @@ namespace DayViewUIExtension
 
 		public void UpdateOriginalDates()
 		{
-			m_OrgStartDate = StartDate;
-			m_OrgEndDate = EndDate;
+			m_OrgDates.Start = StartDate;
+			m_OrgDates.End = EndDate;
 		}
 
 		public void RestoreOriginalDates()
 		{
-			StartDate = m_OrgStartDate;
-			EndDate = m_OrgEndDate;
+			StartDate = m_OrgDates.Start;
+			EndDate = m_OrgDates.End;
 		}
 
 		public bool EndDateDiffersFromOriginal()
 		{
-			return ((EndDate - m_OrgEndDate).TotalSeconds != 0.0);
+			return ((EndDate - m_OrgDates.End).TotalSeconds != 0.0);
 		}
 
 		public bool StartDateDiffersFromOriginal()
 		{
-			return ((StartDate - m_OrgStartDate).TotalSeconds != 0.0);
+			return ((StartDate - m_OrgDates.Start).TotalSeconds != 0.0);
 		}
 
 		public String AllocTo { get; set; }
@@ -130,10 +129,10 @@ namespace DayViewUIExtension
             get
             {
                 // Handle 'end of day'
-                if (IsEndOfDay(m_OrgEndDate))
-                    return (m_OrgEndDate.Date.AddDays(1) - m_OrgStartDate);
+                if (IsEndOfDay(m_OrgDates.End))
+                    return (m_OrgDates.End.Date.AddDays(1) - m_OrgDates.Start);
 
-                return (m_OrgEndDate - m_OrgStartDate);
+                return (m_OrgDates.End - m_OrgDates.Start);
             }
         }
 
@@ -150,7 +149,7 @@ namespace DayViewUIExtension
 			double hours = 0.0;
 
 			if (original)
-				hours = workWeek.CalculateDurationInHours(m_OrgStartDate, m_OrgEndDate);
+				hours = workWeek.CalculateDurationInHours(m_OrgDates.Start, m_OrgDates.End);
 			else
 				hours = workWeek.CalculateDurationInHours(StartDate, EndDate);
 
@@ -339,7 +338,7 @@ namespace DayViewUIExtension
 			{
 				foreach (var block in m_TimeBlocks)
 				{
-					timeBlocks = timeBlocks + string.Format("{0}#{1}$", block.Item1, block.Item2);
+					timeBlocks = timeBlocks + string.Format("{0}#{1}$", block.Start, block.End);
 				}
 			}
 
@@ -383,7 +382,7 @@ namespace DayViewUIExtension
 			}
 
 			InitTimeBlocks();
-			m_TimeBlocks.Add(new Tuple<DateTime, DateTime>(start, end));
+			m_TimeBlocks.Add(new Calendar.AppointmentDates(start, end));
 
 			return true;
 		}
@@ -400,7 +399,7 @@ namespace DayViewUIExtension
 		private void InitTimeBlocks()
 		{
 			if (m_TimeBlocks == null)
-				m_TimeBlocks = new List<Tuple<DateTime, DateTime>>();
+				m_TimeBlocks = new List<Calendar.AppointmentDates>();
 		}
 	}
 
@@ -458,6 +457,16 @@ namespace DayViewUIExtension
 			return true; // always 24 hours
 		}
 
+		public void RestoreOriginalDate()
+		{
+			RealTask.CustomDates[AttributeId] = OriginalDate;
+		}
+
+		public void UpdateTaskDate()
+		{
+			RealTask.CustomDates[AttributeId] = StartDate;
+		}
+
 		public string AttributeId { get; private set; }
 		public DateTime OriginalDate { get; private set; }
 	}
@@ -466,17 +475,36 @@ namespace DayViewUIExtension
 
 	public class TimeBlock : TaskExtensionItem
 	{
-		public TimeBlock(TaskItem item, UInt32 id, DateTime start, DateTime end) : base(item, id)
+		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
+		private Calendar.AppointmentDates m_Dates = null; // Reference back to task 
+
+		public TimeBlock(TaskItem item, UInt32 id, Calendar.AppointmentDates dates) : base(item, id)
 		{
 			Locked = false; // Never
 
-			StartDate = start;
-			EndDate = TaskItem.CheckGetEndOfDay(end);
+			// Copy dates
+			StartDate = m_OrgDates.Start = dates.Start;
+			EndDate = m_OrgDates.End = TaskItem.CheckGetEndOfDay(dates.End);
+
+			// Reference back to original
+			m_Dates = dates;
 		}
 
 		public override bool IsLongAppt(DateTime start, DateTime end)
 		{
 			return false; // Always
+		}
+
+		public void RestoreOriginalDates()
+		{
+			m_Dates.Start = m_OrgDates.Start;
+			m_Dates.End = m_OrgDates.End;
+		}
+
+		public void UpdateTaskDates()
+		{
+			m_Dates.Start = StartDate;
+			m_Dates.End = EndDate;
 		}
 	}
 
