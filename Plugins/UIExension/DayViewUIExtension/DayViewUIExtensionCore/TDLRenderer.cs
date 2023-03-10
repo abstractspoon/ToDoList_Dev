@@ -729,7 +729,7 @@ namespace DayViewUIExtension
 
 			g.SmoothingMode = SmoothingMode.None;
 
-			if (!apptView.IsLong || apptView.DrawLongContinuous)
+			if (!apptView.IsLong || apptView.DrawLongContinuous || (apptView.StartOfEnd == apptView.EndOfStart))
 			{
 				// Draw the background of the appointment
 				DrawTaskBackground(g, rect, apptView.IsLong, isFutureItem, isSelected, fillColor, borderColor);
