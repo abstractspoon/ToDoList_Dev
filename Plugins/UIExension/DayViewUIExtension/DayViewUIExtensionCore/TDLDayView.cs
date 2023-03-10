@@ -586,8 +586,27 @@ namespace DayViewUIExtension
 			Invalidate();
 			return true;
 		}
-		
-        public void GoToToday()
+
+		public bool DuplicateSelectedTimeBlock()
+		{
+			var block = (SelectedAppointment as TimeBlock);
+
+			if (block == null)
+				return false;
+
+			var task = block.RealTask;
+
+			if (task == null)
+				return false;
+
+			if (!task.AddTimeBlock(block.StartDate, block.EndDate))
+				return false;
+
+			Invalidate();
+			return true;
+		}
+
+		public void GoToToday()
         {
             StartDate = DateTime.Now;
 

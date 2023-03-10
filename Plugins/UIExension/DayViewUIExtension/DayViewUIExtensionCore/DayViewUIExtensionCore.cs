@@ -306,7 +306,6 @@ namespace DayViewUIExtension
 										new UIExtension.TaskRecurrences(m_HwndParent),
 										DPIScaling.Scale(5));
 
-//			m_DayView.NewAppointment += new Calendar.NewAppointmentEventHandler(OnDayViewNewAppointment);
 			m_DayView.SelectionChanged += new Calendar.AppointmentEventHandler(OnDayViewSelectionChanged);
 			m_DayView.AppointmentMove += new TDLAppointmentEventHandler(OnDayViewAppointmentChanged);
 			m_DayView.WeekChange += new Calendar.WeekChangeEventHandler(OnDayViewWeekChanged);
@@ -445,16 +444,23 @@ namespace DayViewUIExtension
 			btn7.ToolTipText = m_Trans.Translate("New Time Block");
 			m_Toolbar.Items.Add(btn7);
 
+			var btn8 = new ToolStripButton();
+			btn8.Name = "DuplicateTimeBlock";
+			btn8.ImageIndex = 7;
+			btn8.Click += new EventHandler(OnDuplicateTimeBlock);
+			btn8.ToolTipText = m_Trans.Translate("Duplicate Time Block");
+			m_Toolbar.Items.Add(btn8);
+
 			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn9 = new ToolStripButton();
-			btn9.ImageIndex = 7;
+			btn9.ImageIndex = 8;
 			btn9.Click += new EventHandler(OnPreferences);
 			btn9.ToolTipText = m_Trans.Translate("Preferences");
 			m_Toolbar.Items.Add(btn9);
 
 			var btn10 = new ToolStripButton();
-			btn10.ImageIndex = 8;
+			btn10.ImageIndex = 9;
 			btn10.Click += new EventHandler(OnHelp);
 			btn10.ToolTipText = m_Trans.Translate("Online Help");
 			m_Toolbar.Items.Add(btn10);
@@ -537,6 +543,22 @@ namespace DayViewUIExtension
 			}
 		}
 
+		private void OnDuplicateTimeBlock(object sender, EventArgs e)
+		{
+			if (m_DayView.DuplicateSelectedTimeBlock())
+			{
+				var notify = new UIExtension.ParentNotify(m_HwndParent);
+				TaskItem task = null;
+
+				if (m_DayView.SelectedAppointment is TaskExtensionItem)
+					task = (m_DayView.SelectedAppointment as TaskExtensionItem).RealTask;
+				else
+					task = (m_DayView.SelectedAppointment as TaskItem);
+
+				notify.NotifyMod(Task.Attribute.MetaData, task.EncodeTimeBlocks());
+			}
+		}
+
 		private void UpdateToolbarButtonStates()
 		{
 			(m_Toolbar.Items["Show1DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 1);
@@ -546,9 +568,10 @@ namespace DayViewUIExtension
             (m_Toolbar.Items["Show28DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 28);
 
 			m_Toolbar.Items["NewTimeBlock"].Enabled = (m_DayView.SelectionStart < m_DayView.SelectionEnd);
+			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = (m_DayView.SelectedAppointment is TimeBlock);
 		}
 
-        private void OnPreferences(object sender, EventArgs e)
+		private void OnPreferences(object sender, EventArgs e)
 		{
 			m_PrefsDlg.StartPosition = FormStartPosition.CenterParent;
 
@@ -702,6 +725,7 @@ namespace DayViewUIExtension
 			{
 			case Calendar.SelectionType.Appointment:
 				UpdatedSelectedTaskDatesText();
+				UpdateToolbarButtonStates();
 
 				notify.NotifySelChange(m_DayView.SelectedTaskID);
 				break;
