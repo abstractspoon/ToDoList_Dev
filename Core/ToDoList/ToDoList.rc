@@ -3950,7 +3950,7 @@ BEGIN
         MENUITEM "Paste &Below",                ID_EDIT_PASTEAFTER
         MENUITEM "Paste as &Reference",         ID_EDIT_PASTEASREF
         MENUITEM SEPARATOR
-        MENUITEM "&Delete",                     ID_DELETETASK
+        MENUITEM "&Delete Task",                ID_DELETETASK
         MENUITEM SEPARATOR
         MENUITEM "Select A&ll",                 ID_EDIT_SELECTALL
         MENUITEM SEPARATOR
