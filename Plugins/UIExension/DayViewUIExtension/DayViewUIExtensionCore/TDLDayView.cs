@@ -617,7 +617,8 @@ namespace DayViewUIExtension
 
 			if (appt != null)
 			{
-				return UIExtension.HitResult.Task;
+				if (!(appt is TimeBlock))
+					return UIExtension.HitResult.Task;
 			}
 			else if (GetTrueRectangle().Contains(pt))
 			{
@@ -633,7 +634,7 @@ namespace DayViewUIExtension
 			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-			if (appt != null)
+			if ((appt != null) && !(appt is TimeBlock))
 			{
 				if (appt is TaskExtensionItem)
 					return (appt as TaskExtensionItem).RealTaskId;
@@ -1116,7 +1117,7 @@ namespace DayViewUIExtension
 
             if (longAppt)
             {
-				// If displaying continuous and the start date precedes the 
+				// If and the start date precedes the 
 				// start of the week then extend the draw rect to the left 
 				// so the edge is clipped and likewise for the end date.
 				if (appt.StartDate < StartDate)
