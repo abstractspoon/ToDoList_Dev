@@ -29,6 +29,86 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
+	public class TimeBlockHelper
+	{
+		private const long TicksPerMinute = (60 * 10000000);
+		private const long MinutesPerDay = (60 * 24);
+
+		private static string EncodeTimeBlock(Calendar.AppointmentDates block)
+		{
+			long startMin = (block.Start.Ticks / TicksPerMinute);
+			long lenMinutes = (block.Length.Ticks / TicksPerMinute);
+
+			return string.Format("{0}:{1}", startMin, lenMinutes);
+		}
+
+		public static string EncodeTimeBlocks(List<Calendar.AppointmentDates> blocks)
+		{
+			string timeBlocks = String.Empty;
+
+			if (blocks != null)
+			{
+				foreach (var block in blocks)
+				{
+					timeBlocks = timeBlocks + EncodeTimeBlock(block) + '|';
+				}
+			}
+
+			return timeBlocks;
+		}
+
+		private static Calendar.AppointmentDates DecodeTimeBlock(string block)
+		{
+			var parts = block.Split(':');
+
+			if (parts.Length != 2)
+				return null;
+
+			long startMin = 0, lenMinutes = 0;
+
+			if (!long.TryParse(parts[0], out startMin) || !long.TryParse(parts[1], out lenMinutes))
+				return null;
+
+			if ((startMin < 0) || (lenMinutes <= 0))
+				return null;
+
+			var startDate = new DateTime(startMin * TicksPerMinute);
+			var endDate = new DateTime((startMin + lenMinutes) * TicksPerMinute);
+
+			if (endDate <= startDate)
+				return null;
+
+			return new Calendar.AppointmentDates(startDate, endDate);
+		}
+
+		public static List<Calendar.AppointmentDates> DecodeTimeBlocks(string blocks)
+		{
+			List<Calendar.AppointmentDates> timeBlocks = null;
+
+			if (!string.IsNullOrWhiteSpace(blocks))
+			{
+				var pairs = blocks.Split(new char[1] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+
+				foreach (var pair in pairs)
+				{
+					var dates = DecodeTimeBlock(pair);
+
+					if (dates != null)
+					{
+						if (timeBlocks == null)
+							timeBlocks = new List<Calendar.AppointmentDates>();
+
+						timeBlocks.Add(dates);
+					}
+				}
+			}
+
+			return timeBlocks;
+		}
+	}
+
+	// ---------------------------------------------------------------
+
 	public class TaskItem : Calendar.Appointment
 	{
 		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
@@ -132,7 +212,7 @@ namespace DayViewUIExtension
                 if (IsEndOfDay(m_OrgDates.End))
                     return (m_OrgDates.End.Date.AddDays(1) - m_OrgDates.Start);
 
-                return (m_OrgDates.End - m_OrgDates.Start);
+                return m_OrgDates.Length;
             }
         }
 
@@ -255,7 +335,7 @@ namespace DayViewUIExtension
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
 
 				UpdateCustomDateAttributes(task, dateAttribs);
-				DecodeTimeBlocks(task.GetMetaDataValue(metaDataKey));
+				m_TimeBlocks = TimeBlockHelper.DecodeTimeBlocks(task.GetMetaDataValue(metaDataKey));
 			}
 			else
 			{
@@ -330,49 +410,6 @@ namespace DayViewUIExtension
 			return true;
 		}
 
-		public string EncodeTimeBlocks()
-		{
-			string timeBlocks = String.Empty;
-
-			if (m_TimeBlocks != null)
-			{
-				foreach (var block in m_TimeBlocks)
-				{
-					timeBlocks = timeBlocks + string.Format("{0}#{1}$", block.Start, block.End);
-				}
-			}
-
-			return timeBlocks;
-		}
-
-		public void DecodeTimeBlocks(string blocks)
-		{
-			if (string.IsNullOrWhiteSpace(blocks))
-			{
-				m_TimeBlocks = null;
-			}
-			else
-			{
-				var pairs = blocks.Split('$');
-
-				foreach (var pair in pairs)
-				{
-					var dates = pair.Split('#');
-
-					if (dates.Length == 2)
-					{
-						DateTime start, end;
-
-						if (DateTime.TryParse(dates[0], out start) &&
-							DateTime.TryParse(dates[1], out end))
-						{
-							AddTimeBlock(start, end);
-						}
-					}
-				}
-			}
-		}
-
 		public bool AddTimeBlock(DateTime start, DateTime end)
 		{
 			if (start >= end)
@@ -381,7 +418,9 @@ namespace DayViewUIExtension
 				return false;
 			}
 
-			InitTimeBlocks();
+			if (m_TimeBlocks == null)
+				m_TimeBlocks = new List<Calendar.AppointmentDates>();
+
 			m_TimeBlocks.Add(new Calendar.AppointmentDates(start, end));
 
 			return true;
@@ -404,10 +443,9 @@ namespace DayViewUIExtension
 			return date;
 		}
 
-		private void InitTimeBlocks()
+		public string EncodeTimeBlocks()
 		{
-			if (m_TimeBlocks == null)
-				m_TimeBlocks = new List<Calendar.AppointmentDates>();
+			return TimeBlockHelper.EncodeTimeBlocks(m_TimeBlocks);
 		}
 	}
 

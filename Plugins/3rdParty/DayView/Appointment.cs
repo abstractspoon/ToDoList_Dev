@@ -21,6 +21,8 @@ namespace Calendar
 			Start = start;
 			End = end;
 		}
+
+		public TimeSpan Length { get { return (End - Start); } }
 	}
 
     public class Appointment
@@ -107,7 +109,7 @@ namespace Calendar
 
 		public virtual TimeSpan Length
         {
-            get { return (dates.End - dates.Start); }
+            get { return dates.Length; }
         }
 
         private bool locked;

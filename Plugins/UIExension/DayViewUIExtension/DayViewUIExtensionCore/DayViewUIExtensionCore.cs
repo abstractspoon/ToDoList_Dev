@@ -525,7 +525,12 @@ namespace DayViewUIExtension
 				if (m_DayView.CreateNewTaskBlock(taskID))
 				{
 					var notify = new UIExtension.ParentNotify(m_HwndParent);
-					var task = (m_DayView.SelectedAppointment as TaskItem);
+					TaskItem task = null;
+
+					if (m_DayView.SelectedAppointment is TaskExtensionItem)
+						task = (m_DayView.SelectedAppointment as TaskExtensionItem).RealTask;
+					else
+						task = (m_DayView.SelectedAppointment as TaskItem);
 
 					notify.NotifyMod(Task.Attribute.MetaData, task.EncodeTimeBlocks());
 				}
