@@ -502,66 +502,71 @@ void CTabbedToDoCtrl::EndSelectedTaskEdit()
 
 BOOL CTabbedToDoCtrl::LoadTasks(const CTaskFile& tasks)
 {
-	if (!CToDoCtrl::LoadTasks(tasks))
-		return FALSE;
-
-	m_taskList.SetTasklistFolder(FileMisc::GetFolderFromFilePath(m_sLastSavePath));
-
-	// reload last view
-	CPreferences prefs;
-	
-	if (!IsViewSet())
+	// Prevent certain operations being performed until 
+	// after the views have been updated
 	{
-		LoadState();
+		CAutoFlag af(m_bLoadingTasks, TRUE);
+
+		if (!CToDoCtrl::LoadTasks(tasks))
+			return FALSE;
 	}
-	else
-	{
-		FTC_VIEW nView = GetTaskView();
 
-		// handle extension views
-		switch (nView)
+	FTC_VIEW nView = GetTaskView();
+
+	switch (nView)
+	{
+	case FTCV_UNSET:
+		LoadState(); // reload last view
+		break;
+
+	case FTCV_TASKTREE:
+		SetViewNeedsTaskUpdate(FTCV_TASKLIST, TRUE);
+		SetExtensionsNeedTaskUpdate(TRUE);
+		break;
+
+	case FTCV_TASKLIST:
+		RebuildList();
+		SetExtensionsNeedTaskUpdate(TRUE);
+		break;
+
+	case FTCV_UIEXTENSION1:
+	case FTCV_UIEXTENSION2:
+	case FTCV_UIEXTENSION3:
+	case FTCV_UIEXTENSION4:
+	case FTCV_UIEXTENSION5:
+	case FTCV_UIEXTENSION6:
+	case FTCV_UIEXTENSION7:
+	case FTCV_UIEXTENSION8:
+	case FTCV_UIEXTENSION9:
+	case FTCV_UIEXTENSION10:
+	case FTCV_UIEXTENSION11:
+	case FTCV_UIEXTENSION12:
+	case FTCV_UIEXTENSION13:
+	case FTCV_UIEXTENSION14:
+	case FTCV_UIEXTENSION15:
+	case FTCV_UIEXTENSION16:
 		{
-		case FTCV_TASKTREE:
-		case FTCV_TASKLIST:
-			SetExtensionsNeedTaskUpdate(TRUE);
-			break;
+			CWaitCursor cursor;
 
-		case FTCV_UIEXTENSION1:
-		case FTCV_UIEXTENSION2:
-		case FTCV_UIEXTENSION3:
-		case FTCV_UIEXTENSION4:
-		case FTCV_UIEXTENSION5:
-		case FTCV_UIEXTENSION6:
-		case FTCV_UIEXTENSION7:
-		case FTCV_UIEXTENSION8:
-		case FTCV_UIEXTENSION9:
-		case FTCV_UIEXTENSION10:
-		case FTCV_UIEXTENSION11:
-		case FTCV_UIEXTENSION12:
-		case FTCV_UIEXTENSION13:
-		case FTCV_UIEXTENSION14:
-		case FTCV_UIEXTENSION15:
-		case FTCV_UIEXTENSION16:
-			{
-				CWaitCursor cursor;
-				
-				VIEWDATA* pVData = NULL;
-				IUIExtensionWindow* pExtWnd = NULL;
-				
-				if (!GetExtensionWnd(nView, pExtWnd, pVData))
-					return FALSE;
+			VIEWDATA* pVData = NULL;
+			IUIExtensionWindow* pExtWnd = NULL;
 
-				pVData->bNeedFullTaskUpdate = FALSE;
-				
-				UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
-				SyncExtensionSelectionToTree(nView);
+			if (!GetExtensionWnd(nView, pExtWnd, pVData))
+				return FALSE;
 
-				// mark rest of extensions needing update
-				SetExtensionsNeedTaskUpdate(TRUE, nView);
-			}
-			break;
+			pVData->bNeedFullTaskUpdate = FALSE;
+
+			UpdateExtensionView(pExtWnd, tasks, IUI_ALL);
+			RefreshExtensionViewSort(nView);
+
+			SetExtensionsNeedTaskUpdate(TRUE, nView);
+			SyncExtensionSelectionToTree(nView);
 		}
+		break;
 	}
+
+	UpdateSelectedTaskPath();
+	m_taskList.SetTasklistFolder(FileMisc::GetFolderFromFilePath(m_sLastSavePath));
 
 	return TRUE;
 }
@@ -4786,6 +4791,10 @@ int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 
 void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 {
+	// Prevent resorting until after the load is complete
+	if (m_bLoadingTasks)
+		return;
+
 	FTC_VIEW nView = GetTaskView();
 	
 	switch (nView)
@@ -6770,6 +6779,11 @@ BOOL CTabbedToDoCtrl::GetLabelEditRect(CRect& rScreen)
 
 void CTabbedToDoCtrl::UpdateSelectedTaskPath()
 {
+	// Disable updating the task path until after
+	// loading because the task may no longer exist
+	if (m_bLoadingTasks)
+		return;
+
 	CToDoCtrl::UpdateSelectedTaskPath();
 
 	// extra processing

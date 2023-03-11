@@ -790,6 +790,7 @@ void CToDoCtrl::OnSize(UINT nType, int cx, int cy)
 	
 	EndLabelEdit(TRUE);
 	Resize(cx, cy);
+	UpdateWindow();
 }
 
 void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
@@ -835,7 +836,6 @@ void CToDoCtrl::Resize(int cx, int cy, BOOL bSplitting)
 			ReposTaskTree(&dwm, rAvailable);
 		}
 
-		UpdateWindow();
 		UpdateSelectedTaskPath();
 	}
 }

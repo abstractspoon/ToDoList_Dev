@@ -172,11 +172,12 @@ protected:
 	BOOL m_bUpdatingExtensions;
 	BOOL m_bRecreatingRecurringTasks;
 	BOOL m_bTreeNeedResort;
-	DWORD m_dwListOptions;
+	BOOL m_bLoadingTasks;
 	
 	TDC_COLUMN m_nListViewGroupBy;
 	TDC_ATTRIBUTE m_nExtModifyingAttrib;
 	CDWordArray m_aRecreatedRecurringTasks;
+	DWORD m_dwListOptions;
 
 	static CStringArray s_aDefTaskViews;
 	static UINT WM_TDC_RESTORELASTTASKVIEW;	// private message
