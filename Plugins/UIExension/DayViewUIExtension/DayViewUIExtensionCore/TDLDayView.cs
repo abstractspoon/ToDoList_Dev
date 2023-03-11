@@ -576,6 +576,11 @@ namespace DayViewUIExtension
 			Invalidate();
         }
 
+		private bool AppointmentSupportsTaskContextMenu(Calendar.Appointment appt)
+		{
+			return ((appt != null) && ((appt is TaskItem) || (appt is FutureOccurrence)));
+		}
+
 		public UIExtension.HitResult HitTest(Int32 xScreen, Int32 yScreen)
 		{
 			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
@@ -583,7 +588,8 @@ namespace DayViewUIExtension
 
 			if (appt != null)
 			{
-				return UIExtension.HitResult.Task;
+				if (AppointmentSupportsTaskContextMenu(appt))
+					return UIExtension.HitResult.Task;
 			}
 			else if (GetTrueRectangle().Contains(pt))
 			{
@@ -599,7 +605,7 @@ namespace DayViewUIExtension
 			System.Drawing.Point pt = PointToClient(new System.Drawing.Point(xScreen, yScreen));
 			Calendar.Appointment appt = GetAppointmentAt(pt.X, pt.Y);
 
-			if (appt != null)
+			if (AppointmentSupportsTaskContextMenu(appt))
 			{
 				if (appt is TaskExtensionItem)
 					return (appt as TaskExtensionItem).RealTaskId;

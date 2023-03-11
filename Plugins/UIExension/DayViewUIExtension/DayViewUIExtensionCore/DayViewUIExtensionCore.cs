@@ -819,7 +819,13 @@ namespace DayViewUIExtension
 
 			if (!string.IsNullOrEmpty(customAttribId))
 			{
-				notify.AddMod(customAttribId, item.CustomDates[customAttribId].ToString());
+				var date = item.CustomDates[customAttribId];
+
+				if (date == DateTime.MinValue)
+					notify.NotifyMod(customAttribId, string.Empty);
+				else
+					notify.NotifyMod(customAttribId, date.ToString());
+
 				notify.NotifyMod();
 
 				return;
