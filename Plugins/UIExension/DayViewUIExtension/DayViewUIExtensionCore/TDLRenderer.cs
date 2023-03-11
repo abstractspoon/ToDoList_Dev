@@ -578,7 +578,7 @@ namespace DayViewUIExtension
 			else
 			{
 				if (isTimeBlock)
-					fillColor = Color.FromArgb(128, fillColor);
+					fillColor = Color.FromArgb(64, fillColor);
 
 				using (SolidBrush brush = new SolidBrush(fillColor))
 					g.FillRectangle(brush, rect);
