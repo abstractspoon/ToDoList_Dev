@@ -387,6 +387,11 @@ namespace DayViewUIExtension
 			return true; // always 24 hours
 		}
 
+		public void ClearDate()
+		{
+			RealTask.CustomDates[AttributeId] = DateTime.MinValue;
+		}
+
 		public string AttributeId { get; private set; }
 		public DateTime OriginalDate { get; private set; }
 	}

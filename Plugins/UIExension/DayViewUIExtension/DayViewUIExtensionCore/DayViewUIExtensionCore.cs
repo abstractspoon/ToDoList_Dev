@@ -142,6 +142,9 @@ namespace DayViewUIExtension
 
 					if (keyPress == Keys.Escape)
 						return m_DayView.CancelAppointmentResizing();
+
+					if (keyPress == Keys.Delete)
+						return m_DayView.DeleteSelectedAppointment();
 				}
 				break;
 			}
@@ -825,8 +828,6 @@ namespace DayViewUIExtension
 					notify.NotifyMod(customAttribId, string.Empty);
 				else
 					notify.NotifyMod(customAttribId, date.ToString());
-
-				notify.NotifyMod();
 
 				return;
 			}
