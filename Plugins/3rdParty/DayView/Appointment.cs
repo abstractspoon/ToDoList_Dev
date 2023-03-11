@@ -14,6 +14,8 @@ namespace Calendar
 
 		public AppointmentDates()
 		{
+			Start = new System.DateTime(0L);
+			End = new System.DateTime(0L);
 		}
 
 		public AppointmentDates(DateTime start, DateTime end)
@@ -101,6 +103,13 @@ namespace Calendar
                 OnEndDateChanged();
             }
         }
+
+		public bool DatesMatch(AppointmentDates other)
+		{
+			return ((other != null) &&
+					(other.Start == StartDate) &&
+					(other.End == EndDate));
+		}
 
         protected virtual void OnEndDateChanged()
         {

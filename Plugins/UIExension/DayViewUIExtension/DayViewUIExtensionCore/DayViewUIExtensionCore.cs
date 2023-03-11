@@ -114,11 +114,11 @@ namespace DayViewUIExtension
 		public bool PrepareNewTask(ref Task task)
 		{
             // Set the start/due dates to match the current selection
-            if (m_DayView.SelectionStart < m_DayView.SelectionEnd)
+            if (m_DayView.SelectedDates.Start < m_DayView.SelectedDates.End)
 			{
-                task.SetStartDate(m_DayView.SelectionStart);
+                task.SetStartDate(m_DayView.SelectedDates.Start);
 
-                DateTime endDate = m_DayView.SelectionEnd;
+                DateTime endDate = m_DayView.SelectedDates.End;
 
                 if (TaskItem.IsStartOfDay(endDate))
                     endDate = endDate.AddSeconds(-1);
@@ -327,7 +327,6 @@ namespace DayViewUIExtension
                 m_DayView.BorderStyle = BorderStyle.Fixed3D;
 
             Controls.Add(m_DayView);
-
 		}
 
 		private void CreateWeekLabel()
@@ -567,8 +566,8 @@ namespace DayViewUIExtension
 			(m_Toolbar.Items["Show14DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 14);
             (m_Toolbar.Items["Show28DayView"] as ToolStripButton).Checked = (m_DayView.DaysShowing == 28);
 
-			m_Toolbar.Items["NewTimeBlock"].Enabled = (m_DayView.SelectionStart < m_DayView.SelectionEnd);
-			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = (m_DayView.SelectedAppointment is TimeBlock);
+			m_Toolbar.Items["NewTimeBlock"].Enabled = m_DayView.CanCreateNewTimeBlock();
+			m_Toolbar.Items["DuplicateTimeBlock"].Enabled = m_DayView.CanDuplicateTimeBlock();
 		}
 
 		private void OnPreferences(object sender, EventArgs e)
@@ -713,15 +712,11 @@ namespace DayViewUIExtension
 			}
 		}
 
-// 		private void OnDayViewNewAppointment(object sender, Calendar.NewAppointmentEventArgs args)
-// 		{
-// 		}
-
 		private void OnDayViewSelectionChanged(object sender, Calendar.AppointmentEventArgs args)
 		{
             UIExtension.ParentNotify notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			switch (m_DayView.Selection)
+			switch (m_DayView.SelectionType)
 			{
 			case Calendar.SelectionType.Appointment:
 				UpdatedSelectedTaskDatesText();
