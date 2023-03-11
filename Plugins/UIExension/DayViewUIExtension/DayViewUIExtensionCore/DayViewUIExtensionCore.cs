@@ -89,17 +89,18 @@ namespace DayViewUIExtension
 		{
 			switch (attrib)
 			{
-				case Task.Attribute.Title:
-				case Task.Attribute.DoneDate:
-				case Task.Attribute.DueDate:
-				case Task.Attribute.StartDate:
-				case Task.Attribute.AllocatedTo:
-				case Task.Attribute.Icon:
-                case Task.Attribute.TimeEstimate:
-				case Task.Attribute.Dependency:
-				case Task.Attribute.Recurrence:
-				case Task.Attribute.Tags:
-					return true;
+			case Task.Attribute.Title:
+			case Task.Attribute.DoneDate:
+			case Task.Attribute.DueDate:
+			case Task.Attribute.StartDate:
+			case Task.Attribute.AllocatedTo:
+			case Task.Attribute.Icon:
+			case Task.Attribute.TimeEstimate:
+			case Task.Attribute.Dependency:
+			case Task.Attribute.Recurrence:
+			case Task.Attribute.Tags:
+			case Task.Attribute.CustomAttribute:
+				return true;
 			}
 
 			// all else
