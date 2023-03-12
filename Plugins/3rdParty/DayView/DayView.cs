@@ -162,6 +162,8 @@ namespace Calendar
 			return false;
 		}
 
+		public int HScrollStep { get { return Math.Min(DaysShowing, 7); } }
+
 		public String HScrollTooltipText
 		{
 			get { return tooltip.GetToolTip(hscroll); }
@@ -346,14 +348,14 @@ namespace Calendar
             Invalidate();
         }
 
-        private SelectionType selection;
+        private SelectionType selectionType;
 
         [System.ComponentModel.Browsable(false)]
-        public SelectionType Selection
+        public SelectionType SelectionType
         {
             get
             {
-                return selection;
+                return selectionType;
             }
         }
 
@@ -400,7 +402,7 @@ namespace Calendar
 
             selectedAppointment = null;
             selectedAppointmentIsNew = false;
-            selection = SelectionType.DateRange;
+            selectionType = SelectionType.DateRange;
 
             Invalidate();
 			RaiseWeekChange(new WeekChangeEventArgs(StartDate));
@@ -463,7 +465,7 @@ namespace Calendar
 						{
                             // Initialise selection tool
 							selectedAppointment = appt;
-							selection = SelectionType.Appointment;
+							selectionType = SelectionType.Appointment;
                             ActiveTool = selectionTool;
 
 							// Ensure short appointments are at least partly visible
@@ -554,23 +556,19 @@ namespace Calendar
             }
         }
 
-        private DateTime selectionStart;
+		private AppointmentDates selectedDates = new AppointmentDates();
 
-        public DateTime SelectionStart
-        {
-            get { return selectionStart; }
-            set { selectionStart = value; }
-        }
+		public AppointmentDates SelectedDates
+		{
+			get { return selectedDates; }
+		}
 
-        private DateTime selectionEnd;
+		public bool HasSelection
+		{
+			get { return (SelectedDates.Length.Ticks > 0); }
+		}
 
-        public DateTime SelectionEnd
-        {
-            get { return selectionEnd; }
-            set { selectionEnd = value; }
-        }
-
-        private ITool activeTool;
+		private ITool activeTool;
 
         [System.ComponentModel.Browsable(false)]
         public ITool ActiveTool
@@ -837,11 +835,11 @@ namespace Calendar
         {
             if (e.NewValue > e.OldValue)
             {
-                StartDate = StartDate.AddDays(daysToShow);
+                StartDate = StartDate.AddDays(HScrollStep);
             }
             else if (e.NewValue < e.OldValue)
             {
-                StartDate = StartDate.AddDays(-daysToShow);
+                StartDate = StartDate.AddDays(-HScrollStep);
             }
 			else
 			{
@@ -938,20 +936,20 @@ namespace Calendar
 						if (e.Y < HeaderHeight && e.Y > DayHeaderHeight)
 						{
 							newTool = drawTool;
-							selection = SelectionType.None;
+							selectionType = SelectionType.None;
 
 							base.OnMouseDown(e);
 							return;
 						}
 
 						newTool = drawTool;
-						selection = SelectionType.DateRange;
+						selectionType = SelectionType.DateRange;
 					}
 					else
 					{
 						newTool = selectionTool;
 						selectedAppointment = appt;
-						selection = SelectionType.Appointment;
+						selectionType = SelectionType.Appointment;
 
 						Invalidate();
 					}
@@ -982,16 +980,16 @@ namespace Calendar
 							redraw = true;
 
 						selectedAppointment = null;
-						selection = SelectionType.Appointment;
+						selectionType = SelectionType.Appointment;
 						RaiseSelectionChanged(new AppointmentEventArgs(null));
 
 						DateTime click = GetDateTimeAt(e.X, e.Y);
-						selection = SelectionType.DateRange;
+						selectionType = SelectionType.DateRange;
 
-						if ((click < SelectionStart) || (click > SelectionEnd))
+						if ((click < SelectedDates.Start) || (click > SelectedDates.End))
 						{
-							SelectionStart = new DateTime(click.Year, click.Month, click.Day, click.Hour, 0, 0);
-							SelectionEnd = SelectionStart.AddMinutes(60);
+							SelectedDates.Start = new DateTime(click.Year, click.Month, click.Day, click.Hour, 0, 0);
+							SelectedDates.End = SelectedDates.Start.AddMinutes(60);
 
 							redraw = true;
 						}
@@ -999,7 +997,7 @@ namespace Calendar
 					else if (appt != selectedAppointment)
 					{
 						selectedAppointment = appt;
-						selection = SelectionType.Appointment;
+						selectionType = SelectionType.Appointment;
 
 						RaiseSelectionChanged(new AppointmentEventArgs(selectedAppointment));
 						redraw = true;
@@ -1121,7 +1119,7 @@ namespace Calendar
         {
             if ((allowNew) && char.IsLetterOrDigit(e.KeyChar))
             {
-                if ((this.Selection == SelectionType.DateRange))
+                if ((this.SelectionType == SelectionType.DateRange))
                 {
                     if (!selectedAppointmentIsNew)
                         EnterNewAppointmentMode(e.KeyChar);
@@ -1132,8 +1130,8 @@ namespace Calendar
         private void EnterNewAppointmentMode(char key)
         {
             Appointment appt = new Appointment();
-            appt.StartDate = selectionStart;
-            appt.EndDate = selectionEnd;
+            appt.StartDate = SelectedDates.Start;
+            appt.EndDate = SelectedDates.End;
             appt.Title = key.ToString();
 
             selectedAppointment = appt;
@@ -1591,9 +1589,9 @@ namespace Calendar
 
 		protected void DrawDaySelection(PaintEventArgs e, Rectangle rect, DateTime time)
 		{
-			if (Focused && (selection == SelectionType.DateRange) && (time.Date == selectionStart.Date))
+			if (Focused && (selectionType == SelectionType.DateRange) && (time.Date == SelectedDates.Start.Date))
 			{
-				Rectangle selectionRectangle = GetHourRangeRectangle(selectionStart, selectionEnd, rect);
+				Rectangle selectionRectangle = GetHourRangeRectangle(SelectedDates.Start, SelectedDates.End, rect);
 
 				selectionRectangle.X += (dayGripWidth + 1);
 				selectionRectangle.Width -= (dayGripWidth + 1);

@@ -5,7 +5,7 @@
 #include <tchar.h>
 #include <msclr\auto_gcroot.h>
 
-#include "stdafx.h"
+#include "stdafx.h" 
 #include "DayViewUIExtensionBridge.h"
 #include "resource.h"
 
@@ -30,9 +30,9 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-// REPLACE THIS WITH NEW GUID!
+const LPCWSTR DAYVIEW_OLDGUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
 
-const LPCWSTR DAYVIEW_GUID = L"4CBCF4EA-7B02-41E1-BE65-3E03025E1FFE";
+const LPCWSTR DAYVIEW_GUID = L"AD05F169-0203-4962-92CD-6E28F8E1A35B";
 const LPCWSTR DAYVIEW_NAME = L"Week Planner";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,7 +97,7 @@ void CDayViewUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCW
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 CDayViewUIExtensionBridgeWindow::CDayViewUIExtensionBridgeWindow(ITransText* pTT)
-	: m_pTT(pTT)
+	: m_pTT(pTT), m_hasOldSettings(false)
 {
 
 }
@@ -342,6 +342,13 @@ void CDayViewUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCW
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
 	m_wnd->SavePreferences(prefs.get(), key.get());
+
+	// Delete old settings
+	if (m_hasOldSettings)
+	{
+		auto oldKey = key->Replace(gcnew String(DAYVIEW_GUID), gcnew String(DAYVIEW_OLDGUID));
+		prefs->DeleteProfileSection(oldKey, true);
+	}
 }
 
 void CDayViewUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
@@ -349,6 +356,15 @@ void CDayViewUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
 
+	// Backwards compatibility because of TypeID change
+	auto oldKey = key->Replace(gcnew String(DAYVIEW_GUID), gcnew String(DAYVIEW_OLDGUID));
+	
+	if (prefs->HasProfileSection(oldKey))
+	{
+		m_hasOldSettings = true;
+		key = oldKey;
+	}
+	
 	m_wnd->LoadPreferences(prefs.get(), key.get(), bAppOnly);
 }
 

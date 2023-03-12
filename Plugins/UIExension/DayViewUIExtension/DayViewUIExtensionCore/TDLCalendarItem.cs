@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Text;
 using System.Drawing;
@@ -28,14 +29,94 @@ namespace DayViewUIExtension
 
 	// ---------------------------------------------------------------
 
+	public class TimeBlockHelper
+	{
+		private const long TicksPerMinute = (60 * 10000000);
+		private const long MinutesPerDay = (60 * 24);
+
+		private static string EncodeTimeBlock(Calendar.AppointmentDates block)
+		{
+			long startMin = (block.Start.Ticks / TicksPerMinute);
+			long lenMinutes = (block.Length.Ticks / TicksPerMinute);
+
+			return string.Format("{0}:{1}", startMin, lenMinutes);
+		}
+
+		public static string EncodeTimeBlocks(List<Calendar.AppointmentDates> blocks)
+		{
+			string timeBlocks = String.Empty;
+
+			if (blocks != null)
+			{
+				foreach (var block in blocks)
+				{
+					timeBlocks = timeBlocks + EncodeTimeBlock(block) + '|';
+				}
+			}
+
+			return timeBlocks;
+		}
+
+		private static Calendar.AppointmentDates DecodeTimeBlock(string block)
+		{
+			var parts = block.Split(':');
+
+			if (parts.Length != 2)
+				return null;
+
+			long startMin = 0, lenMinutes = 0;
+
+			if (!long.TryParse(parts[0], out startMin) || !long.TryParse(parts[1], out lenMinutes))
+				return null;
+
+			if ((startMin < 0) || (lenMinutes <= 0))
+				return null;
+
+			var startDate = new DateTime(startMin * TicksPerMinute);
+			var endDate = new DateTime((startMin + lenMinutes) * TicksPerMinute);
+
+			if (endDate <= startDate)
+				return null;
+
+			return new Calendar.AppointmentDates(startDate, endDate);
+		}
+
+		public static List<Calendar.AppointmentDates> DecodeTimeBlocks(string blocks)
+		{
+			List<Calendar.AppointmentDates> timeBlocks = null;
+
+			if (!string.IsNullOrWhiteSpace(blocks))
+			{
+				var pairs = blocks.Split(new char[1] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+
+				foreach (var pair in pairs)
+				{
+					var dates = DecodeTimeBlock(pair);
+
+					if (dates != null)
+					{
+						if (timeBlocks == null)
+							timeBlocks = new List<Calendar.AppointmentDates>();
+
+						timeBlocks.Add(dates);
+					}
+				}
+			}
+
+			return timeBlocks;
+		}
+	}
+
+	// ---------------------------------------------------------------
+
 	public class TaskItem : Calendar.Appointment
 	{
-		private DateTime m_OrgStartDate = NullDate;
-		private DateTime m_OrgEndDate = NullDate;
+		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
 		private DateTime m_PrevDueDate = NullDate;
 
 		private Color m_TaskTextColor = Color.Empty;
 		private List<string> m_Tags = null;
+		private List<Calendar.AppointmentDates> m_TimeBlocks;
 
 		// --------------------
 
@@ -46,6 +127,11 @@ namespace DayViewUIExtension
 		public Dictionary<string, DateTime> CustomDates
 		{
 			get; private set;
+		}
+
+		public IEnumerable<Calendar.AppointmentDates> TimeBlocks
+		{
+			get { return m_TimeBlocks; }
 		}
 
 		public Boolean HasTaskTextColor
@@ -67,24 +153,24 @@ namespace DayViewUIExtension
 
 		public void UpdateOriginalDates()
 		{
-			m_OrgStartDate = StartDate;
-			m_OrgEndDate = EndDate;
+			m_OrgDates.Start = StartDate;
+			m_OrgDates.End = EndDate;
 		}
 
 		public void RestoreOriginalDates()
 		{
-			StartDate = m_OrgStartDate;
-			EndDate = m_OrgEndDate;
+			StartDate = m_OrgDates.Start;
+			EndDate = m_OrgDates.End;
 		}
 
 		public bool EndDateDiffersFromOriginal()
 		{
-			return ((EndDate - m_OrgEndDate).TotalSeconds != 0.0);
+			return ((EndDate - m_OrgDates.End).TotalSeconds != 0.0);
 		}
 
 		public bool StartDateDiffersFromOriginal()
 		{
-			return ((StartDate - m_OrgStartDate).TotalSeconds != 0.0);
+			return ((StartDate - m_OrgDates.Start).TotalSeconds != 0.0);
 		}
 
 		public String AllocTo { get; set; }
@@ -123,10 +209,10 @@ namespace DayViewUIExtension
             get
             {
                 // Handle 'end of day'
-                if (IsEndOfDay(m_OrgEndDate))
-                    return (m_OrgEndDate.Date.AddDays(1) - m_OrgStartDate);
+                if (IsEndOfDay(m_OrgDates.End))
+                    return (m_OrgDates.End.Date.AddDays(1) - m_OrgDates.Start);
 
-                return (m_OrgEndDate - m_OrgStartDate);
+                return m_OrgDates.Length;
             }
         }
 
@@ -143,7 +229,7 @@ namespace DayViewUIExtension
 			double hours = 0.0;
 
 			if (original)
-				hours = workWeek.CalculateDurationInHours(m_OrgStartDate, m_OrgEndDate);
+				hours = workWeek.CalculateDurationInHours(m_OrgDates.Start, m_OrgDates.End);
 			else
 				hours = workWeek.CalculateDurationInHours(StartDate, EndDate);
 
@@ -215,7 +301,7 @@ namespace DayViewUIExtension
 			}
 		}
 
-		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask)
+		public bool UpdateTaskAttributes(Task task, List<CustomAttributeDefinition> dateAttribs, UIExtension.UpdateType type, bool newTask, string metaDataKey)
 		{
 			if (!task.IsValid())
 				return false;
@@ -249,6 +335,7 @@ namespace DayViewUIExtension
 				EndDate = (IsDone ? CheckGetEndOfDay(task.GetDoneDate()) : m_PrevDueDate);
 
 				UpdateCustomDateAttributes(task, dateAttribs);
+				m_TimeBlocks = TimeBlockHelper.DecodeTimeBlocks(task.GetMetaDataValue(metaDataKey));
 			}
 			else
 			{
@@ -323,6 +410,30 @@ namespace DayViewUIExtension
 			return true;
 		}
 
+		public bool AddTimeBlock(DateTime start, DateTime end)
+		{
+			if (start >= end)
+			{
+				Debug.Assert(false);
+				return false;
+			}
+
+			if (m_TimeBlocks == null)
+				m_TimeBlocks = new List<Calendar.AppointmentDates>();
+
+			m_TimeBlocks.Add(new Calendar.AppointmentDates(start, end));
+
+			return true;
+		}
+
+		public bool DeleteTimeBlock(Calendar.AppointmentDates dates)
+		{
+			if (m_TimeBlocks != null)
+				return m_TimeBlocks.Remove(dates);
+
+			return false;
+		}
+
 		static public DateTime CheckGetEndOfDay(DateTime date)
 		{
 			if ((date != NullDate) && (date == date.Date))
@@ -330,6 +441,11 @@ namespace DayViewUIExtension
 
 			// else
 			return date;
+		}
+
+		public string EncodeTimeBlocks()
+		{
+			return TimeBlockHelper.EncodeTimeBlocks(m_TimeBlocks);
 		}
 	}
 
@@ -387,6 +503,16 @@ namespace DayViewUIExtension
 			return true; // always 24 hours
 		}
 
+		public void RestoreOriginalDate()
+		{
+			RealTask.CustomDates[AttributeId] = OriginalDate;
+		}
+
+		public void UpdateTaskDate()
+		{
+			RealTask.CustomDates[AttributeId] = StartDate;
+		}
+
 		public void ClearDate()
 		{
 			RealTask.CustomDates[AttributeId] = DateTime.MinValue;
@@ -394,6 +520,48 @@ namespace DayViewUIExtension
 
 		public string AttributeId { get; private set; }
 		public DateTime OriginalDate { get; private set; }
+	}
+
+	// ---------------------------------------------------------------
+
+	public class TimeBlock : TaskExtensionItem
+	{
+		private Calendar.AppointmentDates m_OrgDates = new Calendar.AppointmentDates();
+		private Calendar.AppointmentDates m_Dates = null; // Reference back to task 
+
+		public TimeBlock(TaskItem item, UInt32 id, Calendar.AppointmentDates dates) : base(item, id)
+		{
+			Locked = false; // Never
+
+			// Copy dates
+			StartDate = m_OrgDates.Start = dates.Start;
+			EndDate = m_OrgDates.End = TaskItem.CheckGetEndOfDay(dates.End);
+
+			// Reference back to original
+			m_Dates = dates;
+		}
+
+		public override bool IsLongAppt(DateTime start, DateTime end)
+		{
+			return false; // Always
+		}
+
+		public void RestoreOriginalDates()
+		{
+			m_Dates.Start = m_OrgDates.Start;
+			m_Dates.End = m_OrgDates.End;
+		}
+
+		public void UpdateTaskDates()
+		{
+			m_Dates.Start = StartDate;
+			m_Dates.End = EndDate;
+		}
+
+		public void DeleteBlock()
+		{
+			RealTask.DeleteTimeBlock(m_Dates);
+		}
 	}
 
 }

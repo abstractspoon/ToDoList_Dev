@@ -81,6 +81,7 @@ public:
 protected:
    gcroot<DayViewUIExtensionCore^> m_wnd;
    ITransText* m_pTT;
+   bool m_hasOldSettings;
 
 protected:
 	bool DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select);

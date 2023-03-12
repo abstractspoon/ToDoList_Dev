@@ -30,13 +30,13 @@ namespace Calendar
 
                     if (time < m_SelectionStart.Item1)
                     {
-                        m_DayView.SelectionStart = time;
-                        m_DayView.SelectionEnd = m_SelectionStart.Item2;
+                        m_DayView.SelectedDates.Start = time;
+                        m_DayView.SelectedDates.End = m_SelectionStart.Item2;
                     }
                     else
                     {
-						m_DayView.SelectionStart = m_SelectionStart.Item1;
-						m_DayView.SelectionEnd = time/*.AddMinutes(60 / m_DayView.SlotsPerHour)*/;
+						m_DayView.SelectedDates.Start = m_SelectionStart.Item1;
+						m_DayView.SelectedDates.End = time;
 					}
 
 					m_DayView.Invalidate();
@@ -72,8 +72,8 @@ namespace Calendar
 
 				m_SelectionStart = new Tuple<DateTime, DateTime>(time, time.AddMinutes(60 / m_DayView.SlotsPerHour));
 
-                m_DayView.SelectionStart = m_SelectionStart.Item1;
-                m_DayView.SelectionEnd = m_SelectionStart.Item2;
+                m_DayView.SelectedDates.Start = m_SelectionStart.Item1;
+                m_DayView.SelectedDates.End = m_SelectionStart.Item2;
 
                 m_SelectionStarted = true;
 
