@@ -1302,6 +1302,9 @@ namespace DayViewUIExtension
 				if (AppointmentMove != null)
 					AppointmentMove(this, new TDLMoveAppointmentEventArgs(custDate.RealTask, custDate.AttributeId, Calendar.SelectionTool.Mode.None, true));
 
+				// Move selection to 'real' task
+				SelectTask(custDate.RealTaskId);
+
 				handled = true;
 			}
 
