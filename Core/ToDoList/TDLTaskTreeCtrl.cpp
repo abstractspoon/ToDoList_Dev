@@ -2195,6 +2195,11 @@ int CTDLTaskTreeCtrl::CacheSelection(TDCSELECTIONCACHE& cache, BOOL bIncBreadcru
 	return !cache.IsEmpty();
 }
 
+BOOL CTDLTaskTreeCtrl::RestorePreviousSelection(BOOL bRedraw)
+{
+	return TSH().PrevSelection(m_mapTaskIDToHTI, bRedraw);
+}
+
 BOOL CTDLTaskTreeCtrl::RestoreSelection(const TDCSELECTIONCACHE& cache)
 {
 	if (!cache.IsEmpty())
