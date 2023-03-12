@@ -5424,6 +5424,14 @@ LRESULT CToDoCtrl::OnLabelEditCancel(WPARAM /*wParam*/, LPARAM lParam)
 		ASSERT (lParam);
 		UNREFERENCED_PARAMETER(lParam);
 
+		// Revert selection to previous task and if that fails then next task
+		if (!m_taskTree.RestorePreviousSelection(FALSE) &&
+			!GotoNextTask(TDCG_PREV) &&
+			!GotoNextTask(TDCG_NEXT))
+		{
+			TSH().RemoveAll();
+		}
+
 		UndoLastAction(TRUE);
 		m_data.ClearRedoStack(); // Not undoable
 	}

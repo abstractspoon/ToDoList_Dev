@@ -823,7 +823,7 @@ void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 
 	if (HasOption(TCCO_SHOWWEEKNUMINCELLDATE))
 	{
-		m_sCellDateWeekNumFormat = Misc::Format(_T(" (%s.%%d)"), CEnString(IDS_SHORTWEEK));
+		m_sCellDateWeekNumFormat = Misc::Format(_T(" %s%%d"), CEnString(IDS_SHORTWEEK));
 		nWeekWidth = dc.GetTextExtent(Misc::Format(m_sCellDateWeekNumFormat, 52)).cx;
 	}
 	else
@@ -889,15 +889,22 @@ void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 	dc.SelectObject(pOldFont);
 }
 
-CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMonth) const
+CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMonth, CString& sWeekNum) const
 {
 	ASSERT(m_sCellDateFormat);
 
 	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : _T("%#d"));
-	sDate.TrimLeft();
+
+	// Show the week number on the first of the week -> First column
+	sWeekNum.Empty();
 
 	if (!m_sCellDateWeekNumFormat.IsEmpty())
-		sDate += Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekofYear(date));
+	{
+		int nUnused = -1, nCol = -1;
+		
+		if (CCalendarCtrl::GetGridCell(date, nUnused, nCol) && (nCol == 0))
+			sWeekNum = Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekofYear(date));
+	}
 
 	return sDate;
 }
@@ -919,8 +926,13 @@ void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, con
 	CRect rDate(rHeader);
 	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	CString sDate = FormatCellDate(pCell->date, (bShowMonth || HasOption(TCCO_SHOWDATEINEVERYCELL)));
+	bShowMonth |= HasOption(TCCO_SHOWDATEINEVERYCELL);
+
+	CString sWeekNum, sDate = FormatCellDate(pCell->date, bShowMonth, sWeekNum);
 	pDC->DrawText(sDate, &rDate, DT_LEFT | DT_VCENTER);
+
+	if (!sWeekNum.IsEmpty())
+		pDC->DrawText(sWeekNum, &rDate, DT_RIGHT | DT_VCENTER);
 
 	// cleanup
 	if (nDay == 1)
@@ -1800,15 +1812,17 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient) const
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	DWORD dwTaskID = HitTestTask(ptClient, nHit);
 
 	if (nHit == TCCHT_NOWHERE)
 		return 0;
-	
-	if (!IsCustomDate(dwTaskID))
+
+	bCustomDate = IsCustomDate(dwTaskID);
+
+	if (!bCustomDate)
 		dwTaskID = GetRealTaskID(dwTaskID);
 
 	return dwTaskID;
@@ -2392,14 +2406,15 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	DWORD dwSelID = HitTestTask(point);
+	BOOL bCustomDate = FALSE;
+	DWORD dwSelID = HitTestTask(point, bCustomDate);
 	
 	if (dwSelID)
 	{
 		m_tooltip.Pop();
 
-		if (!IsCustomDate(dwSelID))
-			dwSelID = GetRealTaskID(dwSelID);
+// 		if (!IsCustomDate(dwSelID))
+// 			dwSelID = GetRealTaskID(dwSelID);
 
 		SetFocus();
 		SelectTask(dwSelID, FALSE, TRUE);
@@ -3169,7 +3184,9 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 
 void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	DWORD dwTaskID = HitTestTask(point);
+	BOOL bUnused;
+	DWORD dwTaskID = HitTestTask(point, bUnused);
+
 	SelectTask(dwTaskID, FALSE, TRUE);
 	
 	CCalendarCtrlEx::OnRButtonDown(nFlags, point);
@@ -3211,8 +3228,41 @@ BOOL CTaskCalendarCtrl::EnableLabelTips(BOOL bEnable)
 	return TRUE;
 }
 
-BOOL CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/) 
+BOOL CTaskCalendarCtrl::ProcessMessage(MSG* pMsg) 
 {
+	// Handle 'Delete' on a custom date
+	switch (pMsg->message)
+	{
+	case WM_KEYDOWN:
+		if (pMsg->wParam == VK_DELETE)
+		{
+			TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+
+			if (IsCustomDate(pTCI))
+			{
+				const TASKCALCUSTOMDATE* pTCIDate = dynamic_cast<TASKCALCUSTOMDATE*>(pTCI);
+				ASSERT(pTCIDate);
+
+				pTCI = GetTaskCalItem(GetRealTaskID(m_dwSelectedTaskID));
+				ASSERT(pTCI);
+
+				pTCI->ClearCustomDate(pTCIDate->sCustomAttribID);
+				NotifyParentDateChange(TCCHT_MIDDLE, pTCIDate->sCustomAttribID);
+
+				// Move the selection to the real task
+				m_dwSelectedTaskID = 0;
+				SelectTask(pTCI->GetTaskID(), TRUE, TRUE);
+				
+				RebuildCellTasks();
+				Invalidate(TRUE);
+
+				return true;
+			}
+		}
+		break;
+	}
+	
+	// All else
 	return false;
 }
 

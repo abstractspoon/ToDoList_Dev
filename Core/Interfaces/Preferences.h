@@ -150,7 +150,7 @@ private:
 		bool DeleteProfileEntry(LPCWSTR lpszSection, LPCWSTR lpszEntry);
 		bool DeleteProfileSection(LPCWSTR lpszSection, bool bIncSubSections);
 
-		bool HasProfileSection(LPCTSTR lpszSection) const;
+		bool HasProfileSection(LPCWSTR lpszSection) const;
 
 	protected:
 		CPreferences& m_prefs;
