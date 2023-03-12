@@ -43,7 +43,7 @@ public:
 	BOOL CanSaveToImage() const;
 	
 	BOOL CancelDrag();
-	DWORD HitTestTask(const CPoint& ptClient) const;
+	DWORD HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const;
 	void SetReadOnly(BOOL bReadOnly) { m_bReadOnly = bReadOnly; }
 	BOOL SetVisibleWeeks(int nWeeks);
 	void SetStrikeThruDoneTasks(BOOL bStrikeThru);

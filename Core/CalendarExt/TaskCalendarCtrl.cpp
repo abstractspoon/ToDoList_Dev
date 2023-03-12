@@ -1812,15 +1812,17 @@ void CTaskCalendarCtrl::AddTasksToCell(const CTaskCalItemMap& mapTasks, const CO
 	}
 }
 
-DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient) const
+DWORD CTaskCalendarCtrl::HitTestTask(const CPoint& ptClient, BOOL& bCustomDate) const
 {
 	TCC_HITTEST nHit = TCCHT_NOWHERE;
 	DWORD dwTaskID = HitTestTask(ptClient, nHit);
 
 	if (nHit == TCCHT_NOWHERE)
 		return 0;
-	
-	if (!IsCustomDate(dwTaskID))
+
+	bCustomDate = IsCustomDate(dwTaskID);
+
+	if (!bCustomDate)
 		dwTaskID = GetRealTaskID(dwTaskID);
 
 	return dwTaskID;
@@ -2404,14 +2406,15 @@ DWORD CTaskCalendarCtrl::GetSelectedTaskID() const
 
 void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point) 
 {
-	DWORD dwSelID = HitTestTask(point);
+	BOOL bCustomDate = FALSE;
+	DWORD dwSelID = HitTestTask(point, bCustomDate);
 	
 	if (dwSelID)
 	{
 		m_tooltip.Pop();
 
-		if (!IsCustomDate(dwSelID))
-			dwSelID = GetRealTaskID(dwSelID);
+// 		if (!IsCustomDate(dwSelID))
+// 			dwSelID = GetRealTaskID(dwSelID);
 
 		SetFocus();
 		SelectTask(dwSelID, FALSE, TRUE);
@@ -3181,7 +3184,9 @@ void CTaskCalendarCtrl::CancelDrag(BOOL bReleaseCapture)
 
 void CTaskCalendarCtrl::OnRButtonDown(UINT nFlags, CPoint point) 
 {
-	DWORD dwTaskID = HitTestTask(point);
+	BOOL bUnused;
+	DWORD dwTaskID = HitTestTask(point, bUnused);
+
 	SelectTask(dwTaskID, FALSE, TRUE);
 	
 	CCalendarCtrlEx::OnRButtonDown(nFlags, point);

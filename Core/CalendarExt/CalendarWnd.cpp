@@ -502,8 +502,10 @@ IUI_HITTEST CCalendarWnd::HitTest(POINT ptScreen) const
 	CPoint ptBigCal(ptScreen);
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	if (m_BigCalendar.HitTestTask(ptBigCal))
-		return IUI_TASK;
+	BOOL bCustomDate = FALSE;
+
+	if (m_BigCalendar.HitTestTask(ptBigCal, bCustomDate))
+		return (bCustomDate ? IUI_NOWHERE : IUI_TASK);
 
 	// else try rest of big cal
 	CRect rCal;
@@ -519,7 +521,9 @@ DWORD CCalendarWnd::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
 	CPoint ptBigCal(ptScreen);
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	return m_BigCalendar.HitTestTask(ptBigCal);
+	BOOL bUnused = FALSE;
+
+	return m_BigCalendar.HitTestTask(ptBigCal, bUnused);
 }
 
 bool CCalendarWnd::SelectTask(DWORD dwTaskID, bool bTaskLink)
@@ -703,7 +707,8 @@ void CCalendarWnd::OnBigCalendarNotifyDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult
 	CPoint ptBigCal(GetMessagePos());
 	m_BigCalendar.ScreenToClient(&ptBigCal);
 
-	DWORD dwTaskID = m_BigCalendar.HitTestTask(ptBigCal);
+	BOOL bUnused = FALSE;
+	DWORD dwTaskID = m_BigCalendar.HitTestTask(ptBigCal, bUnused);
 
 	if (dwTaskID)
 		GetParent()->SendMessage(WM_IUI_EDITSELECTEDTASKTITLE, dwTaskID);
