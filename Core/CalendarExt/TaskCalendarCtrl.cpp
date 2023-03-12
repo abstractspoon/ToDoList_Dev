@@ -823,7 +823,7 @@ void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 
 	if (HasOption(TCCO_SHOWWEEKNUMINCELLDATE))
 	{
-		m_sCellDateWeekNumFormat = Misc::Format(_T(" (%s.%%d)"), CEnString(IDS_SHORTWEEK));
+		m_sCellDateWeekNumFormat = Misc::Format(_T(" %s%%d"), CEnString(IDS_SHORTWEEK));
 		nWeekWidth = dc.GetTextExtent(Misc::Format(m_sCellDateWeekNumFormat, 52)).cx;
 	}
 	else
@@ -889,15 +889,22 @@ void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 	dc.SelectObject(pOldFont);
 }
 
-CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMonth) const
+CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMonth, CString& sWeekNum) const
 {
 	ASSERT(m_sCellDateFormat);
 
 	CString sDate = date.Format(bShowMonth ? m_sCellDateFormat : _T("%#d"));
-	sDate.TrimLeft();
+
+	// Show the week number on the first of the week -> First column
+	sWeekNum.Empty();
 
 	if (!m_sCellDateWeekNumFormat.IsEmpty())
-		sDate += Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekofYear(date));
+	{
+		int nUnused = -1, nCol = -1;
+		
+		if (CCalendarCtrl::GetGridCell(date, nUnused, nCol) && (nCol == 0))
+			sWeekNum = Misc::Format(m_sCellDateWeekNumFormat, CDateHelper::GetWeekofYear(date));
+	}
 
 	return sDate;
 }
@@ -919,8 +926,13 @@ void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, con
 	CRect rDate(rHeader);
 	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	CString sDate = FormatCellDate(pCell->date, (bShowMonth || HasOption(TCCO_SHOWDATEINEVERYCELL)));
+	bShowMonth |= HasOption(TCCO_SHOWDATEINEVERYCELL);
+
+	CString sWeekNum, sDate = FormatCellDate(pCell->date, bShowMonth, sWeekNum);
 	pDC->DrawText(sDate, &rDate, DT_LEFT | DT_VCENTER);
+
+	if (!sWeekNum.IsEmpty())
+		pDC->DrawText(sWeekNum, &rDate, DT_RIGHT | DT_VCENTER);
 
 	// cleanup
 	if (nDay == 1)

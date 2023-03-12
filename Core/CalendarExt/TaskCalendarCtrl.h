@@ -196,7 +196,7 @@ protected:
 	void CalcOverflowBtnRect(const CRect& rCell, CRect& rOverflowBtn) const;
 	int CalcEffectiveCellContentItemCount(const CCalendarCell* pCell) const;
 	void RecalcCellHeaderDateFormats();
-	CString FormatCellDate(const COleDateTime& date, BOOL bShowMonth) const;
+	CString FormatCellDate(const COleDateTime& date, BOOL bShowMonth, CString& sWeekNum) const;
 
 	DWORD GetSelectedTaskID() const;
 	DWORD HitTestTask(const CPoint& ptClient, TCC_HITTEST& nHit, LPRECT pRect = NULL) const;
