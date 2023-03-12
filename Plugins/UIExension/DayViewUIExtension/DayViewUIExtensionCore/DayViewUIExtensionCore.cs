@@ -818,12 +818,12 @@ namespace DayViewUIExtension
 			// else
 			if (!string.IsNullOrEmpty(args.CustomAttributeId))
 			{
-				var date = item.CustomDates[customAttribId];
+				var date = item.CustomDates[args.CustomAttributeId];
 
 				if (date == DateTime.MinValue)
-					notify.NotifyMod(customAttribId, string.Empty);
+					notify.NotifyMod(args.CustomAttributeId, string.Empty);
 				else
-					notify.NotifyMod(customAttribId, date.ToString());
+					notify.NotifyMod(args.CustomAttributeId, date.ToString());
 
 				return;
 			}

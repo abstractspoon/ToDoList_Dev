@@ -1404,6 +1404,7 @@ namespace DayViewUIExtension
 				// Move selection to 'real' task
 				SelectTask((SelectedAppointment as TaskExtensionItem).RealTaskId);
 				Invalidate();
+			}
 
 			return handled;
 		}
