@@ -772,17 +772,17 @@ LRESULT CCalendarWnd::OnBigCalendarNotifyDateChange(WPARAM wp, LPARAM /*lp*/)
 	else
 	{
 		COleDateTime date;
+		BOOL bHasDate = m_BigCalendar.GetSelectedTaskCustomDate(notify->sCustAttribID, date);
 
-		if (m_BigCalendar.GetSelectedTaskCustomDate(notify->sCustAttribID, date))
-		{
-			ASSERT(notify->nHit == TCCHT_MIDDLE);
+		ASSERT(!bHasDate || (notify->nHit == TCCHT_MIDDLE));
 
-			mod.szCustomAttribID = notify->sCustAttribID;
-			mod.nAttrib = TDCA_CUSTOMATTRIB;
-			
+		mod.szCustomAttribID = notify->sCustAttribID;
+		mod.nAttrib = TDCA_CUSTOMATTRIB;
+
+		if (bHasDate)		
 			sCustAttribValue = CDateHelper::FormatDate(date, DHFD_TIME);
-			mod.szValue = sCustAttribValue;
-		}
+
+		mod.szValue = sCustAttribValue;
 	}
 
 	if (mod.nAttrib != TDCA_NONE)

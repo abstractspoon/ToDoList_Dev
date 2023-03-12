@@ -400,7 +400,12 @@ void TASKCALITEMDATES::SetCustomDate(const CString& sCustAttribID, const COleDat
 	if (CDateHelper::IsDateSet(date))
 		mapCustomDates[Misc::ToUpper(sCustAttribID)] = date;
 	else
-		mapCustomDates.RemoveKey(Misc::ToUpper(sCustAttribID));
+		ClearCustomDate(sCustAttribID);
+}
+
+void TASKCALITEMDATES::ClearCustomDate(const CString& sCustAttribID)
+{
+	mapCustomDates.RemoveKey(Misc::ToUpper(sCustAttribID));
 }
 
 void TASKCALITEMDATES::SetCustomDates(const CMapCustomDates& dates)

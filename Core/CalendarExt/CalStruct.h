@@ -53,6 +53,7 @@ public:
 	const CMapCustomDates& Custom() const { return mapCustomDates; }
 	COleDateTime GetCustomDate(const CString& sCustAttribID) const;
 	void SetCustomDate(const CString& sCustAttribID, const COleDateTime& date);
+	void ClearCustomDate(const CString& sCustAttribID);
 	void SetCustomDates(const CMapCustomDates& dates);
 
 	void MinMax(COleDateTime& dtMin, COleDateTime& dtMax) const;
@@ -124,6 +125,7 @@ public:
 
 	COleDateTime GetCustomDate(const CString& sCustAttribID) const { return dates.GetCustomDate(sCustAttribID); }
 	void SetCustomDate(const CString& sCustAttribID, const COleDateTime& date) { dates.SetCustomDate(sCustAttribID, date); }
+	void ClearCustomDate(const CString& sCustAttribID) { dates.ClearCustomDate(sCustAttribID); }
 	void SetCustomDates(const CMapCustomDates& other) { dates.SetCustomDates(other); }
 
 public:

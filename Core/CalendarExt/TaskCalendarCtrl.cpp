@@ -3228,8 +3228,41 @@ BOOL CTaskCalendarCtrl::EnableLabelTips(BOOL bEnable)
 	return TRUE;
 }
 
-BOOL CTaskCalendarCtrl::ProcessMessage(MSG* /*pMsg*/) 
+BOOL CTaskCalendarCtrl::ProcessMessage(MSG* pMsg) 
 {
+	// Handle 'Delete' on a custom date
+	switch (pMsg->message)
+	{
+	case WM_KEYDOWN:
+		if (pMsg->wParam == VK_DELETE)
+		{
+			TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+
+			if (IsCustomDate(pTCI))
+			{
+				const TASKCALCUSTOMDATE* pTCIDate = dynamic_cast<TASKCALCUSTOMDATE*>(pTCI);
+				ASSERT(pTCIDate);
+
+				pTCI = GetTaskCalItem(GetRealTaskID(m_dwSelectedTaskID));
+				ASSERT(pTCI);
+
+				pTCI->ClearCustomDate(pTCIDate->sCustomAttribID);
+				NotifyParentDateChange(TCCHT_MIDDLE, pTCIDate->sCustomAttribID);
+
+				// Move the selection to the real task
+				m_dwSelectedTaskID = 0;
+				SelectTask(pTCI->GetTaskID(), TRUE, TRUE);
+				
+				RebuildCellTasks();
+				Invalidate(TRUE);
+
+				return true;
+			}
+		}
+		break;
+	}
+	
+	// All else
 	return false;
 }
 
