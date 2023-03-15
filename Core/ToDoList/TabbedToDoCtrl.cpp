@@ -4791,8 +4791,9 @@ int CTabbedToDoCtrl::GetSortableColumns(CTDCColumnIDMap& mapColIDs) const
 
 void CTabbedToDoCtrl::Resort(BOOL bAllowToggle)
 {
-	// Prevent resorting until after the load is complete
-	if (m_bLoadingTasks)
+	// Don't resort the list view or extensions 
+	// until after their load is complete
+	if (m_bLoadingTasks && !InTreeView())
 		return;
 
 	FTC_VIEW nView = GetTaskView();
