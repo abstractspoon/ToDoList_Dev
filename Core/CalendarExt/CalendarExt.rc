@@ -235,7 +235,7 @@ BEGIN
                     WS_TABSTOP,7,216,334,10
     CONTROL         "Show full date in each cell",IDC_SHOWDATEINEVERYCELL,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,231,334,10
-    CONTROL         "Show the 'Week Number' after the cell date",
+    CONTROL         "Show the 'Week Number' on the first day of the week",
                     IDC_SHOWWEEKNUMINCELL,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,7,245,334,10
     GROUPBOX        "Calculate missing 'Start' dates as:",IDC_STATIC,7,261,
