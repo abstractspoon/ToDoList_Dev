@@ -137,7 +137,7 @@ TDC_FILE CTDCSourceControl::CheckOut(CTaskFile& tasks, CString& sCheckedOutTo, B
 	}
 
 	// Always backup before overwriting
-	CTempFileBackup backup(sTaskfilePath, FBS_RENAME);
+	CTempFileBackup backup(sTaskfilePath);
 
 	// snap shot mod time so we can restore it
 	FILETIME ftMod = { 0 };
