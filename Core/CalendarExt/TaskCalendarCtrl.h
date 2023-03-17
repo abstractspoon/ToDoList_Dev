@@ -149,6 +149,7 @@ protected:
 	afx_msg LRESULT OnSetFont(WPARAM wp, LPARAM lp);
 	afx_msg LRESULT OnMidnight(WPARAM wp, LPARAM lp);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint pos);
 
 	DECLARE_MESSAGE_MAP()
 	
@@ -219,6 +220,7 @@ protected:
 	BOOL SelectGridCell(int nRow, int nCol);
 	BOOL GetTaskLabelRect(DWORD dwTaskID, CRect& rLabel) const;
 	BOOL IsTaskVisible(DWORD dwTaskID) const;
+	BOOL ClearSelectedCustomDate();
 
 	DWORD GetRealTaskID(DWORD dwTaskID) const;
 	BOOL IsExtensionItem(DWORD dwTaskID) const;

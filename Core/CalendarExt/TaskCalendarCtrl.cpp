@@ -116,6 +116,7 @@ BEGIN_MESSAGE_MAP(CTaskCalendarCtrl, CCalendarCtrlEx)
 	ON_WM_SETCURSOR()
 	ON_WM_KILLFOCUS()
 	ON_WM_MOUSEWHEEL()
+	ON_WM_CONTEXTMENU()
 	ON_NOTIFY(TTN_SHOW, 0, OnShowTooltip)
 	ON_MESSAGE(WM_GETFONT, OnGetFont)
 	ON_MESSAGE(WM_SETFONT, OnSetFont)
@@ -2360,11 +2361,11 @@ BOOL CTaskCalendarCtrl::SelectTask(DWORD dwTaskID, BOOL bEnsureVisible, BOOL bNo
 
 	DWORD dwSelTaskID = GetSelectedTaskID();
 
-	if ((dwTaskID != dwSelTaskID) && (dwTaskID != GetRealTaskID(dwSelTaskID)))
+	if (dwTaskID != dwSelTaskID)
 	{
 		m_dwSelectedTaskID = dwTaskID;
 
-		if (bNotify)
+		if (bNotify && (dwTaskID != GetRealTaskID(dwSelTaskID)))
 			GetParent()->SendMessage(WM_CALENDAR_SELCHANGE, 0, GetRealTaskID(GetSelectedTaskID()));
 
 		if (bEnsureVisible)
@@ -2412,9 +2413,6 @@ void CTaskCalendarCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	if (dwSelID)
 	{
 		m_tooltip.Pop();
-
-// 		if (!IsCustomDate(dwSelID))
-// 			dwSelID = GetRealTaskID(dwSelID);
 
 		SetFocus();
 		SelectTask(dwSelID, FALSE, TRUE);
@@ -3138,6 +3136,48 @@ void CTaskCalendarCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CCalendarCtrlEx::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
+void CTaskCalendarCtrl::OnContextMenu(CWnd* pWnd, CPoint pos)
+{
+	if (GetSelectedTaskID() == 0)
+		return ;
+
+	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+	ASSERT(pTCI);
+
+	if (pTCI && IsCustomDate(pTCI))
+	{
+		CMenu menu;
+
+		if (menu.LoadMenu(IDR_CUSTOMDATE_POPUP))
+		{
+			CMenu* pPopup = menu.GetSubMenu(0);
+
+			if (pPopup)
+			{
+				// check pos
+				if (pos.x == -1 && pos.y == -1)
+				{
+					pos = GetCaretPos();
+					::ClientToScreen(*this, &pos);
+				}
+
+				UINT nCmdID = pPopup->TrackPopupMenu(TPM_LEFTALIGN | TPM_LEFTBUTTON | TPM_RETURNCMD, pos.x, pos.y, this);
+
+				switch (nCmdID)
+				{
+				case ID_CAL_CLEARCUSTOMDATE:
+					ClearSelectedCustomDate();
+					break;
+				}
+			}
+		}
+
+		return;
+	}
+
+	CCalendarCtrlEx::OnContextMenu(pWnd, pos);
+}
+
 BOOL CTaskCalendarCtrl::IsCellScrollBarActive() const
 {
 	return (m_sbCellVScroll.GetSafeHwnd() && 
@@ -3234,35 +3274,41 @@ BOOL CTaskCalendarCtrl::ProcessMessage(MSG* pMsg)
 	{
 	case WM_KEYDOWN:
 		if (pMsg->wParam == VK_DELETE)
-		{
-			TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
-
-			if (IsCustomDate(pTCI))
-			{
-				const TASKCALCUSTOMDATE* pTCIDate = dynamic_cast<TASKCALCUSTOMDATE*>(pTCI);
-				ASSERT(pTCIDate);
-
-				pTCI = GetTaskCalItem(GetRealTaskID(m_dwSelectedTaskID));
-				ASSERT(pTCI);
-
-				pTCI->ClearCustomDate(pTCIDate->sCustomAttribID);
-				NotifyParentDateChange(TCCHT_MIDDLE, pTCIDate->sCustomAttribID);
-
-				// Move the selection to the real task
-				m_dwSelectedTaskID = 0;
-				SelectTask(pTCI->GetTaskID(), TRUE, TRUE);
-				
-				RebuildCellTasks();
-				Invalidate(TRUE);
-
-				return true;
-			}
-		}
+			return ClearSelectedCustomDate();
 		break;
 	}
 	
 	// All else
 	return false;
+}
+
+BOOL CTaskCalendarCtrl::ClearSelectedCustomDate()
+{
+	TASKCALITEM* pTCI = GetTaskCalItem(m_dwSelectedTaskID);
+
+	if (IsCustomDate(pTCI))
+	{
+		const TASKCALCUSTOMDATE* pTCIDate = dynamic_cast<TASKCALCUSTOMDATE*>(pTCI);
+		ASSERT(pTCIDate);
+
+		pTCI = GetTaskCalItem(GetRealTaskID(m_dwSelectedTaskID));
+		ASSERT(pTCI);
+
+		pTCI->ClearCustomDate(pTCIDate->sCustomAttribID);
+		NotifyParentDateChange(TCCHT_MIDDLE, pTCIDate->sCustomAttribID);
+
+		// Move the selection to the real task
+		m_dwSelectedTaskID = 0;
+		SelectTask(pTCI->GetTaskID(), TRUE, TRUE);
+
+		RebuildCellTasks();
+		Invalidate(TRUE);
+
+		return TRUE;
+	}
+
+	// else
+	return FALSE;
 }
 
 void CTaskCalendarCtrl::FilterToolTipMessage(MSG* pMsg) 

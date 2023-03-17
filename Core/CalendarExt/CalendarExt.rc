@@ -380,6 +380,22 @@ END
 
 IDR_TOOLBAR             BITMAP  DISCARDABLE     "res\\toolbar.bmp"
 IDB_TOOLBAR_STD         BITMAP  MOVEABLE PURE   "RES\\toolbar_std.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_CUSTOMDATE_POPUP MENU DISCARDABLE 
+BEGIN
+    POPUP "Custom Dates"
+    BEGIN
+        MENUITEM "Clear Custom Date\t   Del",   ID_CAL_CLEARCUSTOMDATE
+        MENUITEM SEPARATOR
+        MENUITEM "Cancel",                      ID_CANCEL
+    END
+END
+
 #endif    // English (Australia) resources
 /////////////////////////////////////////////////////////////////////////////
 

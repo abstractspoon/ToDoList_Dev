@@ -2,6 +2,7 @@
 // Microsoft Developer Studio generated include file.
 // Used by CalendarExt.rc
 //
+#define IDR_CUSTOMDATE_POPUP            1
 #define IDB_TOOLBAR_STD                 245
 #define IDI_HELP_BUTTON                 293
 #define IDR_CALENDAR                    1000
@@ -54,6 +55,8 @@
 #define ID_CAL_PREFS                    32775
 #define IDS_SNAP_FREE                   32790
 #define ID_GOTOTODAY                    32795
+#define ID_CAL_CLEARCUSTOMDATE          32799
+#define ID_CANCEL                       32800
 #define IDS_NOHEATMAP                   57671
 #define IDS_MINICAL_TOOLTIP             57672
 #define IDS_HEATMAP_NUMDONE             57673
@@ -72,8 +75,8 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        32793
-#define _APS_NEXT_COMMAND_VALUE         32799
+#define _APS_NEXT_RESOURCE_VALUE        2
+#define _APS_NEXT_COMMAND_VALUE         32801
 #define _APS_NEXT_CONTROL_VALUE         1048
 #define _APS_NEXT_SYMED_VALUE           32893
 #endif
