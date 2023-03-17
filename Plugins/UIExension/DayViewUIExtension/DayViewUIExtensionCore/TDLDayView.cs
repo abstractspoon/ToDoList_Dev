@@ -56,6 +56,7 @@ namespace DayViewUIExtension
 		private LabelTip m_LabelTip;
 		private UIExtension.TaskRecurrences m_TaskRecurrences;
 		private Translator m_Trans;
+		private UIThemeToolbarRenderer m_ToolbarRenderer;
 
 		private int LabelTipBorder
 		{
@@ -92,6 +93,7 @@ namespace DayViewUIExtension
 
 			m_Trans = trans;
 			m_Renderer = new TDLRenderer(Handle, taskIcons);
+			m_ToolbarRenderer = new UIThemeToolbarRenderer();
 			m_UserMinSlotHeight = minSlotHeight;
 			m_LabelTip = new LabelTip(this);
 			m_TaskRecurrences = taskRecurrences;
@@ -969,6 +971,8 @@ namespace DayViewUIExtension
    		public void SetUITheme(UITheme theme)
 		{
             m_Renderer.Theme = theme;
+			m_ToolbarRenderer.SetUITheme(theme);
+
             Invalidate(true);
 		}
 
@@ -1325,6 +1329,61 @@ namespace DayViewUIExtension
 					CancelAppointmentResizing();
 				}
 			}
+		}
+
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
+			if ((e.Button == MouseButtons.Right) &&
+				!AppointmentSupportsTaskContextMenu(SelectedAppointment))
+			{
+				var menu = new ContextMenuStrip();
+
+				if (SelectedAppointment is CustomDateAttribute)
+				{
+					var item = new ToolStripMenuItem(m_Trans.Translate("Clear Custom Date"));
+					item.ShortcutKeys = Keys.Delete;
+					item.ShowShortcutKeys = true;
+
+					item.Click += (s, a) =>
+					{
+						DeleteSelectedAppointment();
+					};
+
+					menu.Items.Add(item);
+				}
+				else if (SelectedAppointment is TimeBlock)
+				{
+					var item = new ToolStripMenuItem(m_Trans.Translate("Delete Time Block"));
+					item.ShortcutKeys = Keys.Delete;
+					item.ShowShortcutKeys = true;
+
+					item.Click += (s, a) =>
+					{
+						DeleteSelectedAppointment();
+					};
+
+					menu.Items.Add(item);
+
+					item = new ToolStripMenuItem(m_Trans.Translate("Duplicate Time Block"));
+
+					item.Click += (s, a) =>
+					{
+						DuplicateSelectedTimeBlock();
+					};
+
+					menu.Items.Add(item);
+				}
+
+				menu.Items.Add(new ToolStripSeparator());
+				menu.Items.Add(m_Trans.Translate("Cancel"));
+
+				menu.Renderer = m_ToolbarRenderer;
+				menu.Show(this, e.Location);
+
+				return; // always
+			}
+			
+			base.OnMouseClick(e);
 		}
 
 		private Calendar.SelectionTool.Mode GetMode(Calendar.Appointment appt, Point mousePos)
