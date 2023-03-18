@@ -358,6 +358,13 @@ BOOL CTaskCalendarCtrl::UpdateTasks(const ITaskList* pTaskList, IUI_UPDATETYPE n
 	
 	if (bChange)
 	{
+		// clear selection if necessary
+		if (!HasTask(m_dwSelectedTaskID, FALSE))
+		{
+			m_dwSelectedTaskID = 0;
+			bSelTaskWasVisible = FALSE;
+		}
+
 		RecalcDataRange();
 		RebuildCellTasks();
 
@@ -445,11 +452,6 @@ BOOL CTaskCalendarCtrl::RemoveDeletedTasks(const ITASKLISTBASE* pTasks)
 		if (!mapIDs.Has(dwTaskID))
 		{
 			m_mapData.RemoveKey(dwTaskID);
-
-			// clear selection if necessary
-			if (m_dwSelectedTaskID == dwTaskID)
-				m_dwSelectedTaskID = 0;
-
 			bChange = TRUE;
 		}
 	}
@@ -1283,8 +1285,7 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 	const CCalendarCell* pCell = NULL;
 	int  nRow = -1, nCol = -1, nNumItems = 0, nMaxVisItems = 0;
 	BOOL bShowScrollbar = FALSE;
-
-
+	
 	if (CDialogHelper::IsChildOrSame(this, GetFocus()) && 
 		GetLastSelectedGridCell(nRow, nCol) &&
 		GetGridCellRect(nRow, nCol, rCell, TRUE))
@@ -1308,7 +1309,11 @@ BOOL CTaskCalendarCtrl::UpdateCellScrollBarVisibility(BOOL bEnsureSelVisible)
 				if (nFind != -1)
 				{
 					int nPos = GetTaskVertPos(m_dwSelectedTaskID, nFind, pCell, FALSE);
-					m_nCellVScrollPos = min(nPos, (nNumItems - nMaxVisItems));
+
+					if (bShowScrollbar)
+						m_nCellVScrollPos = min(nPos, (nNumItems - nMaxVisItems));
+					else
+						m_nCellVScrollPos = 0;
 				}
 			}
 		}
@@ -1698,13 +1703,14 @@ void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 			CTaskCalItemArray* pTasks = GetCellTasks(i, u);
 			ASSERT(pTasks);
 
-			if (pTasks)
+			if (pTasks && pTasks->GetSize())
 			{
-				// now go thru the list and set the position of each item 
-				// if not already done
 				if (HasOption(TCCO_DISPLAYCONTINUOUS))
 				{
-					int nMaxPos = 0;
+					// Find the first task whose position is already set
+					// This will determine the number of free slots that
+					// exist before it
+					int nCurFreeSlot = 0, nMaxFreeSlot = -1;
 
 					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
 					{
@@ -1714,8 +1720,48 @@ void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 						DWORD dwTaskID = pTCI->GetTaskID();
 						CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
 
+						if (cdi.nVertPos != -1)
+						{
+							nMaxFreeSlot = cdi.nVertPos - 1;
+							nCurFreeSlot = 0;
+
+							break;
+						}
+					}
+
+					// Now go thru the list and set the position of each item 
+					// if not already done keeping track of the maximum vpos
+					int nMaxPos = 0;
+
+					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
+					{
+						TASKCALITEM* pTCI = pTasks->GetAt(nTask);
+						ASSERT(pTCI);
+
+						DWORD dwTaskID = pTCI->GetTaskID();
+						CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
+
 						if (cdi.nVertPos == -1)
-							cdi.nVertPos = max(nMaxPos, nTask);
+						{
+							// Use the first available position and add it to the list
+							if (nMaxFreeSlot >= 0)
+							{
+								// Move the task to reflect its vertical position
+								ASSERT(nCurFreeSlot <= nTask);
+
+								pTasks->RemoveAt(nTask);
+								pTasks->InsertAt(nCurFreeSlot, pTCI);
+
+								cdi.nVertPos = nCurFreeSlot++;
+
+								if (nCurFreeSlot > nMaxFreeSlot)
+									nMaxFreeSlot = -1;
+							}
+							else
+							{
+								cdi.nVertPos = nMaxPos;
+							}
+						}
 
 						nMaxPos = max(nMaxPos, (cdi.nVertPos + 1));
 					}
