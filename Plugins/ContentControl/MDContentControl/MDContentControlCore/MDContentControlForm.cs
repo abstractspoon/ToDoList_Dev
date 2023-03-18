@@ -112,6 +112,7 @@ namespace MDContentControl
 			set
 			{
 				InputTextCtrl.ReadOnly = value;
+				InputTextCtrl.BackColor = (value ? SystemColors.ButtonFace : SystemColors.Window);
 			}
 		}
 
@@ -122,7 +123,7 @@ namespace MDContentControl
 
 		// We delay the very first update until after 'about:blank'
 		// has finished loading else we get visual artifacts because
-		// we are not eating OnPaintBackground
+		// we are eating OnPaintBackground
 		static bool m_Initialised = false;
 
 		private void UpdateOutput()
@@ -147,6 +148,9 @@ namespace MDContentControl
 				m_Initialised = true;
 				UpdateOutput();
 			}
+
+			if (PreviewBrowser.Document != null)
+				PreviewBrowser.Document.BackColor = (InputTextCtrl.ReadOnly ? SystemColors.ButtonFace : SystemColors.Window);
 
 			InputTextCtrl.Focus();
 		}

@@ -220,7 +220,7 @@ bool CMDContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, 
 
 void CMDContentControlBridge::SetReadOnly(bool bReadOnly)
 {
-
+	m_wnd->ReadOnly = bReadOnly;
 }
 
 void CMDContentControlBridge::Enable(bool bEnable)
