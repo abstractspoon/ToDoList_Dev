@@ -826,7 +826,7 @@ void CTaskCalendarCtrl::RecalcCellHeaderDateFormats()
 
 	if (HasOption(TCCO_SHOWWEEKNUMINCELLDATE))
 	{
-		m_sCellDateWeekNumFormat = Misc::Format(_T(" %s%%d"), CEnString(IDS_SHORTWEEK));
+		m_sCellDateWeekNumFormat = Misc::Format(_T(" %s%%d "), CEnString(IDS_SHORTWEEK));
 		nWeekWidth = dc.GetTextExtent(Misc::Format(m_sCellDateWeekNumFormat, 52)).cx;
 	}
 	else
