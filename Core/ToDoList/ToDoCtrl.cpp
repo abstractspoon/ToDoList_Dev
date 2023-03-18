@@ -1911,9 +1911,6 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 		CONTENTFORMAT cfComments;
 		const CBinaryData& customComments = (hti ? m_taskTree.GetSelectedTaskCustomComments(cfComments) : emptyComments);
 		
-		if (!hti)
-			m_ctrlComments.GetSelectedFormat(cfComments);
-		
 		CString sTextComments = (hti ? m_taskTree.GetSelectedTaskComments() : sEmptyComments);
 		
 		// if more than one comments type is selected then sCommentsType
