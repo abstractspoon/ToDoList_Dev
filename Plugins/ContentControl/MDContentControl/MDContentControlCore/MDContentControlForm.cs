@@ -113,6 +113,9 @@ namespace MDContentControl
 			{
 				InputTextCtrl.ReadOnly = value;
 				InputTextCtrl.BackColor = (value ? SystemColors.ButtonFace : SystemColors.Window);
+
+				if (PreviewBrowser.Document != null)
+					PreviewBrowser.Document.BackColor = (InputTextCtrl.ReadOnly ? SystemColors.ButtonFace : SystemColors.Window);
 			}
 		}
 
