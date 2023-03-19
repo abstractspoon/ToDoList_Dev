@@ -69,7 +69,8 @@ public:
 	static CString FormatClockTime(const COleDateTime& dtTime, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static CString FormatClockTime(int nHour, int nMin, int nSec = 0, BOOL bIncSeconds = FALSE, BOOL bISO = FALSE);
 	static double DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds = FALSE); // returns 0-24
-	
+	static double RoundHoursToNearestSecond(double dHours);
+
 protected:
 	CWorkingWeek m_week;
 

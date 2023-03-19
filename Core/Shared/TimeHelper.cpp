@@ -270,6 +270,11 @@ double CTimeHelper::DecodeClockTime(LPCTSTR szTime, BOOL bIncSeconds)
 	return min(max(dTime, 0.0), 24.0);
 }
 
+double CTimeHelper::RoundHoursToNearestSecond(double dHours)
+{
+	return (Misc::Round(dHours * 60 * 60) / 3600.0);
+}
+
 BOOL CTimeHelper::RemovePM(CString& sTime)
 {
 	Misc::Trim(sTime); // remove whitespace

@@ -335,7 +335,7 @@ void CWorkingDay::AddDurationInHours(COleDateTime& date, double& dHours) const
 
 double CWorkingDay::GetTimeOfDayInHours(const COleDateTime& date)
 {
-	return (CDateHelper::GetTimeOnly(date).m_dt * 24);
+	return CTimeHelper::RoundHoursToNearestSecond(CDateHelper::GetTimeOnly(date).m_dt * 24);
 }
 
 COleDateTime CWorkingDay::GetDateAtTimeInHours(const COleDateTime& date, double dHourOfDay)
@@ -606,7 +606,7 @@ double CWorkingWeek::CalculateDurationInHours(const COleDateTime& dtFrom, const 
 	}
 
 	// round to the nearest second
-	dHoursDuration = (Misc::Round(dHoursDuration * 60 * 60) / 3600.0);
+	dHoursDuration = CTimeHelper::RoundHoursToNearestSecond(dHoursDuration);
 
 	return dHoursDuration;
 }

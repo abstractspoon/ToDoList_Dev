@@ -1705,10 +1705,18 @@ double Misc::Round(double dValue, int nDecimals)
 	if (dValue == 0)
 		return 0.0;
 
-	if (nDecimals == 0)
+	if (nDecimals <= 0)
 		return Round(dValue);
 
-	return _ttof(Misc::Format(dValue, 2));
+	double dMulDiv = 10;
+	nDecimals--;
+
+	while (nDecimals--)
+		dMulDiv *= 10;
+
+	dValue = Round(dValue * dMulDiv);
+
+	return (dValue / dMulDiv);
 }
 
 int Misc::GetNextValue(int nValue, int nIncrement)
