@@ -126,12 +126,9 @@ namespace DetectiveUIExtension
 		public bool IsSavingToImage = false;
 
 		public int NodeHeight { get { return ((Font.Height + LabelPadding) * NodeLineCount); } }
-		public int NodeWidth { get { return (NodeHeight * 3); } }
+		public int NodeWidth { get { return NodeHeight; } }
 		public int NodeVertSpacing { get { return (NodeHeight / 4); } }
 		public int NodeHorzSpacing { get { return (NodeWidth / 4); } }
-
-		public int RowHeight { get { return (NodeHeight + NodeVertSpacing); } }
-		public int ColumnWidth { get { return (NodeWidth + NodeHorzSpacing); } }
 
 		public int GraphBorder { get { return NodeVertSpacing; } }
 		public int LabelPadding { get { return (int)(2 * m_DpiFactor); } }
@@ -148,8 +145,8 @@ namespace DetectiveUIExtension
 		{
 			Rectangle nodeRect = new Rectangle(GraphBorder, GraphBorder, 0, 0);
 
-			nodeRect.X += ((ColumnWidth) * x);
-			nodeRect.Y += ((RowHeight) * y);
+			nodeRect.X += x;
+			nodeRect.Y += y;
 
 			nodeRect.Width = NodeWidth;
 			nodeRect.Height = NodeHeight;
@@ -226,8 +223,6 @@ namespace DetectiveUIExtension
 		protected int NodeWidth { get { return Layout.NodeWidth; } }
 		protected int NodeVertSpacing { get { return Layout.NodeVertSpacing; } }
 		protected int NodeHorzSpacing { get { return Layout.NodeHorzSpacing; } }
-		protected int RowHeight { get { return Layout.RowHeight; } }
-		protected int ColumnWidth { get { return Layout.ColumnWidth; } }
 		protected int GraphBorder { get { return Layout.GraphBorder; } }
 		protected int LabelPadding { get { return Layout.LabelPadding; } }
 
@@ -999,10 +994,10 @@ namespace DetectiveUIExtension
 			// TODO
 		}
 
-		protected int PageSize
-		{
-			get { return Math.Max(1, (VerticalScroll.LargeChange / Layout.RowHeight)); }
-		}
+// 		protected int PageSize
+// 		{
+// 			get { return Math.Max(1, (VerticalScroll.LargeChange / Layout.RowHeight)); }
+// 		}
 
 		protected bool HandleCursorKey(Keys key)
 		{

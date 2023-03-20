@@ -106,14 +106,8 @@ namespace DetectiveUIExtension
 			Locked = task.IsLocked(true);
             GoodAsDone = task.IsGoodAsDone();
 			TopLevel = (task.GetParentID() == 0);
-			TaskPosition = task.GetPositionString();
 
 			return true;
-		}
-
-		public override int CompareTo(object other)
-		{
-			return TaskPosition.CompareTo(((DetectiveNode)other).TaskPosition);
 		}
 
 	}
@@ -371,52 +365,52 @@ namespace DetectiveUIExtension
 				return false;
 
 			/*
-						TreeNode node = null; // start node
-						bool forward = true;
+			TreeNode node = null; // start node
+			bool forward = true;
 
-						switch (selectTask)
-						{
-						case UIExtension.SelectTask.SelectFirstTask:
-							node = RootNode.Nodes[0];
-							break;
+			switch (selectTask)
+			{
+			case UIExtension.SelectTask.SelectFirstTask:
+				node = RootNode.Nodes[0];
+				break;
 
-						case UIExtension.SelectTask.SelectNextTask:
-							node = TreeCtrl.GetNextNode(SelectedNode);
-							break;
+			case UIExtension.SelectTask.SelectNextTask:
+				node = TreeCtrl.GetNextNode(SelectedNode);
+				break;
 
-						case UIExtension.SelectTask.SelectNextTaskInclCurrent:
-							node = SelectedNode;
-							break;
+			case UIExtension.SelectTask.SelectNextTaskInclCurrent:
+				node = SelectedNode;
+				break;
 
-						case UIExtension.SelectTask.SelectPrevTask:
-							node = TreeCtrl.GetPrevNode(SelectedNode);
+			case UIExtension.SelectTask.SelectPrevTask:
+				node = TreeCtrl.GetPrevNode(SelectedNode);
 
-							if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
-								node = LastNode;
+				if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
+					node = LastNode;
 
-							forward = false;
-							break;
+				forward = false;
+				break;
 
-						case UIExtension.SelectTask.SelectLastTask:
-							node = LastNode;
-							forward = false;
-							break;
-						}
+			case UIExtension.SelectTask.SelectLastTask:
+				node = LastNode;
+				forward = false;
+				break;
+			}
 
-						// Avoid recursion
-						while (node != null)
-						{ 
-							if (StringUtil.Find(node.Text, text, caseSensitive, wholeWord))
-							{
-								SelectedNode = node;
-								return true;
-							}
+			// Avoid recursion
+			while (node != null)
+			{ 
+				if (StringUtil.Find(node.Text, text, caseSensitive, wholeWord))
+				{
+					SelectedNode = node;
+					return true;
+				}
 
-							if (forward)
-								node = TreeCtrl.GetNextNode(node);
-							else
-								node = TreeCtrl.GetPrevNode(node);
-						}
+				if (forward)
+					node = TreeCtrl.GetNextNode(node);
+				else
+					node = TreeCtrl.GetPrevNode(node);
+			}
 			*/
 
 			return false;
@@ -425,69 +419,69 @@ namespace DetectiveUIExtension
 		public bool GetTask(UIExtension.GetTask getTask, ref uint taskID)
 		{
 			/*
-						TreeNode node = FindNode(taskID);
+			TreeNode node = FindNode(taskID);
 
-						if (node == null)
-							return false;
+			if (node == null)
+				return false;
 
-						switch (getTask)
+			switch (getTask)
+			{
+				case UIExtension.GetTask.GetNextTask:
+					if (node.NextNode != null)
+					{
+						taskID = UniqueID(node.NextNode);
+						return true;
+					}
+					break;
+
+				case UIExtension.GetTask.GetPrevTask:
+					if (node.PrevVisibleNode != null)
+					{
+						taskID = UniqueID(node.PrevNode);
+						return true;
+					}
+					break;
+
+				case UIExtension.GetTask.GetNextVisibleTask:
+					if (node.NextVisibleNode != null)
+					{
+						taskID = UniqueID(node.NextVisibleNode);
+						return true;
+					}
+					break;
+
+				case UIExtension.GetTask.GetPrevVisibleTask:
+					if (node.PrevVisibleNode != null)
+					{
+						taskID = UniqueID(node.PrevVisibleNode);
+						return true;
+					}
+					break;
+
+				case UIExtension.GetTask.GetNextTopLevelTask:
+					{
+						var topLevelParent = TopLevelParent(node);
+
+						if ((topLevelParent != null) && (topLevelParent.NextNode != null))
 						{
-							case UIExtension.GetTask.GetNextTask:
-								if (node.NextNode != null)
-								{
-									taskID = UniqueID(node.NextNode);
-									return true;
-								}
-								break;
-
-							case UIExtension.GetTask.GetPrevTask:
-								if (node.PrevVisibleNode != null)
-								{
-									taskID = UniqueID(node.PrevNode);
-									return true;
-								}
-								break;
-
-							case UIExtension.GetTask.GetNextVisibleTask:
-								if (node.NextVisibleNode != null)
-								{
-									taskID = UniqueID(node.NextVisibleNode);
-									return true;
-								}
-								break;
-
-							case UIExtension.GetTask.GetPrevVisibleTask:
-								if (node.PrevVisibleNode != null)
-								{
-									taskID = UniqueID(node.PrevVisibleNode);
-									return true;
-								}
-								break;
-
-							case UIExtension.GetTask.GetNextTopLevelTask:
-								{
-									var topLevelParent = TopLevelParent(node);
-
-									if ((topLevelParent != null) && (topLevelParent.NextNode != null))
-									{
-										taskID = UniqueID(topLevelParent.NextNode);
-										return true;
-									}
-								}
-								break;
-
-							case UIExtension.GetTask.GetPrevTopLevelTask:
-								{
-									var topLevelParent = TopLevelParent(node);
-
-									if ((topLevelParent != null) && (topLevelParent.PrevNode != null))
-									{
-										taskID = UniqueID(topLevelParent.PrevNode);
-										return true;
-									}
-								}
-								break;
+							taskID = UniqueID(topLevelParent.NextNode);
+							return true;
 						}
+					}
+					break;
+
+				case UIExtension.GetTask.GetPrevTopLevelTask:
+					{
+						var topLevelParent = TopLevelParent(node);
+
+						if ((topLevelParent != null) && (topLevelParent.PrevNode != null))
+						{
+							taskID = UniqueID(topLevelParent.PrevNode);
+							return true;
+						}
+					}
+					break;
+			}
 			*/
 
 			// all else
