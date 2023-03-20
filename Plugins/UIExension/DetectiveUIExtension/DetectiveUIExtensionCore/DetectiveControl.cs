@@ -18,7 +18,7 @@ namespace DetectiveUIExtension
 
 	// -----------------------------------------------------------------
 
-	class DetectiveItem : Node
+	class DetectiveNode : Node
 	{
 		// Data
 		public Color TextColor { get; private set; }
@@ -35,7 +35,7 @@ namespace DetectiveUIExtension
 
 		// -----------------------------------------------------------------
 
-		public DetectiveItem(Task task) 
+		public DetectiveNode(Task task) 
 			: 
 			base(task.GetTitle(), task.GetID(), task.GetLocalDependency())
 		{
@@ -61,7 +61,7 @@ namespace DetectiveUIExtension
 			// TODO
 		}
 
-		public bool HasLocalDependencies {  get { return (DependencyUniqueIds != null) && (DependencyUniqueIds.Count > 0); } }
+		public bool HasLocalDependencies {  get { return (LinkIds != null) && (LinkIds.Count > 0); } }
 
 		public bool IsDone(bool includeGoodAsDone) 
         { 
@@ -97,8 +97,10 @@ namespace DetectiveUIExtension
             if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
                 Done = task.IsDone();
 
-			if (task.IsAttributeAvailable(Task.Attribute.Dependency))
-				DependencyUniqueIds = task.GetLocalDependency();
+			if (task.IsAttributeAvailable(Task.Attribute.MetaData))
+			{
+				// TODO
+			}
 
 			Parent = task.IsParent();
 			Locked = task.IsLocked(true);
@@ -111,7 +113,7 @@ namespace DetectiveUIExtension
 
 		public override int CompareTo(object other)
 		{
-			return TaskPosition.CompareTo(((DetectiveItem)other).TaskPosition);
+			return TaskPosition.CompareTo(((DetectiveNode)other).TaskPosition);
 		}
 
 	}
@@ -146,7 +148,7 @@ namespace DetectiveUIExtension
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 //		private Size CheckboxSize;
-		private Node m_PreviouslySelectedItem;
+		private Node m_PreviouslySelectedNode;
 
 		private DragImage m_DragImage;
 		private Point m_LastDragPos;
@@ -161,7 +163,6 @@ namespace DetectiveUIExtension
 			None				= 0x00,
 			Selected			= 0x01,
 			DropHighlighted		= 0x02,
-			Critical			= 0x04,
 			DragImage			= 0x08,
 		}
 
@@ -187,7 +188,7 @@ namespace DetectiveUIExtension
 			// Initialise our fonts
 			OnFontChanged(this, EventArgs.Empty);
 
-			ItemLineCount = 4;
+			NodeLineCount = 4;
 		}
 
 		protected void OnFontChanged(object sender, EventArgs e)
@@ -227,7 +228,7 @@ namespace DetectiveUIExtension
 
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
-				Data.Clear();
+				Nodes.Clear();
 				break;
 
 			case UIExtension.UpdateType.Unknown:
@@ -323,8 +324,7 @@ namespace DetectiveUIExtension
 			case Task.Attribute.DoneDate:
 			case Task.Attribute.Position:
 			case Task.Attribute.SubtaskDone:
-			case Task.Attribute.ProjectName:
-			case Task.Attribute.Dependency:
+			case Task.Attribute.MetaData:
 				return true;
 			}
 
@@ -335,16 +335,16 @@ namespace DetectiveUIExtension
 		public uint HitTest(Point screenPos)
 		{
 			var clientPos = PointToClient(screenPos);
-			var item = HitTestItem(clientPos);
+			var node = HitTestNode(clientPos);
 
-			return item?.UniqueId ?? 0;
+			return node?.UniqueId ?? 0;
 		}
 
-		public Rectangle GetSelectedItemLabelRect()
+		public Rectangle GetSelectedNodeLabelRect()
 		{
-			EnsureItemVisible(SelectedItem);
+			EnsureNodeVisible(SelectedNode);
 
-			var labelRect = GetSelectedItemRect();
+			var labelRect = GetSelectedNodeRect();
 
 			// 			labelRect.X -= LabelPadding;
 			// 			labelRect.X += GetExtraWidth(SelectedNode);
@@ -381,7 +381,7 @@ namespace DetectiveUIExtension
 							break;
 
 						case UIExtension.SelectTask.SelectNextTask:
-							node = TreeCtrl.GetNextItem(SelectedNode);
+							node = TreeCtrl.GetNextNode(SelectedNode);
 							break;
 
 						case UIExtension.SelectTask.SelectNextTaskInclCurrent:
@@ -389,7 +389,7 @@ namespace DetectiveUIExtension
 							break;
 
 						case UIExtension.SelectTask.SelectPrevTask:
-							node = TreeCtrl.GetPrevItem(SelectedNode);
+							node = TreeCtrl.GetPrevNode(SelectedNode);
 
 							if ((node == null) || ((node == RootNode) && !NodeIsTask(RootNode)))
 								node = LastNode;
@@ -413,9 +413,9 @@ namespace DetectiveUIExtension
 							}
 
 							if (forward)
-								node = TreeCtrl.GetNextItem(node);
+								node = TreeCtrl.GetNextNode(node);
 							else
-								node = TreeCtrl.GetPrevItem(node);
+								node = TreeCtrl.GetPrevNode(node);
 						}
 			*/
 
@@ -529,16 +529,16 @@ namespace DetectiveUIExtension
 			if (!task.IsValid())
 				return false;
 
-			Node item = Data.GetItem(task.GetID());
+			Node node = Nodes.GetNode(task.GetID());
 
-			if (item == null)
+			if (node == null)
 			{
-				Data.AddItem(new DetectiveItem(task));
+				Nodes.AddNode(new DetectiveNode(task));
 			}
 			else
 			{
-				DetectiveItem taskItem = (item as DetectiveItem);
-				taskItem.Update(task);
+				DetectiveNode taskNode = (node as DetectiveNode);
+				taskNode.Update(task);
 			}
 
 			// Process children
@@ -550,95 +550,95 @@ namespace DetectiveUIExtension
 			return true;
 		}
 
-		protected Color GetItemBackgroundColor(DetectiveItem taskItem, bool selected)
+		protected Color GetNodeBackgroundColor(DetectiveNode taskNode, bool selected)
 		{
 			if (selected)
 				return Color.Empty;
 
-			if ((taskItem.TextColor != Color.Empty) && !taskItem.IsDone(true))
+			if ((taskNode.TextColor != Color.Empty) && !taskNode.IsDone(true))
 			{
 				if (m_TaskColorIsBkgnd && !selected)
-					return taskItem.TextColor;
+					return taskNode.TextColor;
 
 				// else
-				return DrawingColor.SetLuminance(taskItem.TextColor, 0.95f);
+				return DrawingColor.SetLuminance(taskNode.TextColor, 0.95f);
 			}
 
 			// all else
 			return Color.Empty;
 		}
 
-		protected Color GetItemTextColor(DetectiveItem taskItem, DrawState state)
+		protected Color GetNodeTextColor(DetectiveNode taskNode, DrawState state)
 		{
 			if (state.HasFlag(DrawState.DragImage))
 				return SystemColors.WindowText;
 
-			if (taskItem.TextColor != Color.Empty)
+			if (taskNode.TextColor != Color.Empty)
 			{
 				bool selected = state.HasFlag(DrawState.Selected);
 
-				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
-					return DrawingColor.GetBestTextColor(taskItem.TextColor);
+				if (m_TaskColorIsBkgnd && !selected && !taskNode.IsDone(true))
+					return DrawingColor.GetBestTextColor(taskNode.TextColor);
 
 				if (selected)
-					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
+					return DrawingColor.SetLuminance(taskNode.TextColor, 0.3f);
 
 				// else
-				return taskItem.TextColor;
+				return taskNode.TextColor;
 			}
 
 			// All else
 			return SystemColors.WindowText;
 		}
 
-		protected Color GetItemBorderColor(DetectiveItem taskItem, bool selected)
+		protected Color GetNodeBorderColor(DetectiveNode taskNode, bool selected)
 		{
 			if (selected)
 				return Color.Empty;
 
-			if (taskItem.TextColor != Color.Empty)
+			if (taskNode.TextColor != Color.Empty)
 			{
-				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
-					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
+				if (m_TaskColorIsBkgnd && !selected && !taskNode.IsDone(true))
+					return DrawingColor.SetLuminance(taskNode.TextColor, 0.3f);
 
 				// else
-				return taskItem.TextColor;
+				return taskNode.TextColor;
 			}
 
 			// All else
 			return SystemColors.ControlDarkDark;
 		}
 
-		protected Color GetItemLineColor(DetectiveItem taskItem, DrawState state)
+		protected Color GetNodeLineColor(DetectiveNode taskNode, DrawState state)
 		{
 			if (state.HasFlag(DrawState.DragImage))
 				return SystemColors.WindowText;
 
-			if (taskItem.TextColor != Color.Empty)
+			if (taskNode.TextColor != Color.Empty)
 			{
-				if (state.HasFlag(DrawState.Selected) || (m_TaskColorIsBkgnd && !taskItem.IsDone(true)))
-					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
+				if (state.HasFlag(DrawState.Selected) || (m_TaskColorIsBkgnd && !taskNode.IsDone(true)))
+					return DrawingColor.SetLuminance(taskNode.TextColor, 0.3f);
 
 				// else
-				return taskItem.TextColor;
+				return taskNode.TextColor;
 			}
 
 			// All else
 			return SystemColors.ControlDarkDark;
 		}
 
-		protected Font GetItemFont(DetectiveItem taskItem)
+		protected Font GetNodeFont(DetectiveNode taskNode)
 		{
 			Font font = null;
 
-			if (taskItem.TopLevel)
+			if (taskNode.TopLevel)
 			{
-				if (taskItem.Done)
+				if (taskNode.Done)
 					font = m_BoldDoneLabelFont;
 				else
 					font = m_BoldLabelFont;
 			}
-			else if (taskItem.Done)
+			else if (taskNode.Done)
 			{
 				font = m_DoneLabelFont;
 			}
@@ -665,39 +665,10 @@ namespace DetectiveUIExtension
 		override protected void DoPaint(Graphics graphics, Rectangle clipRect)
 		{
 			base.DoPaint(graphics, clipRect);
-/*
-			foreach (var path in CriticalPaths)
-			{
-				Node prevItem = null;
-
-				foreach (var item in path.Items)
-				{
-					if (WantDrawItem(item, clipRect))
-						DoPaintItem(graphics, item, path, WantDrawItemSelected(item), true);
-
-					if ((prevItem != null) && WantDrawConnection(item, prevItem, clipRect))
-						DoPaintConnection(graphics, item, prevItem, path, true);
-
-					prevItem = item;
-				}
-			}
-*/
 		}
 
-		override protected void OnPaintItem(Graphics graphics, Node item, NodePath path, SelectionState selState)
+		override protected void OnPaintNode(Graphics graphics, Node node, SelectionState selState)
 		{
-			// Don't paint critical paths until the end
-			/*
-			if ((CriticalPaths.Contains(path)))
-				return;
-
-			foreach (var critPath in CriticalPaths)
-			{
-				if (critPath.Contains(item))
-					return;
-			}
-			*/
-
 			DrawState drawState = DrawState.None;
 
 			switch (selState)
@@ -711,30 +682,29 @@ namespace DetectiveUIExtension
 				break;
 			}
 
-			DoPaintItem(graphics, item, path, drawState);
+			DoPaintNode(graphics, node, drawState);
 		}
 
-		protected void DoPaintItem(Graphics graphics, Node item, NodePath path, DrawState drawState)
+		protected void DoPaintNode(Graphics graphics, Node node, DrawState drawState)
 		{
 			graphics.SmoothingMode = SmoothingMode.None;
 
 			bool selected = drawState.HasFlag(DrawState.Selected);
 			bool dropHighlight = drawState.HasFlag(DrawState.DropHighlighted);
-			bool critical = drawState.HasFlag(DrawState.Critical);
 			bool dragImage = drawState.HasFlag(DrawState.DragImage);
 
-			var itemRect = CalcItemRectangle(item);
+			var nodeRect = CalcNodeRectangle(node);
 
 			if (dragImage)
-				itemRect.Offset(-itemRect.Left, -itemRect.Top);
+				nodeRect.Offset(-nodeRect.Left, -nodeRect.Top);
 
-			var taskItem = (item as DetectiveItem);
+			var taskNode = (node as DetectiveNode);
 
 			// Figure out the required colours
-			Color backColor = GetItemBackgroundColor(taskItem, selected);
-			Color borderColor = GetItemBorderColor(taskItem, selected);
-			Color lineColor = GetItemLineColor(taskItem, drawState);
-			Color textColor = GetItemTextColor(taskItem, drawState);
+			Color backColor = GetNodeBackgroundColor(taskNode, selected);
+			Color borderColor = GetNodeBorderColor(taskNode, selected);
+			Color lineColor = GetNodeLineColor(taskNode, drawState);
+			Color textColor = GetNodeTextColor(taskNode, drawState);
 
 			// Draw background
 			if (selected)
@@ -743,10 +713,10 @@ namespace DetectiveUIExtension
 
 				UIExtension.SelectionRect.Draw(Handle,
 												graphics,
-												itemRect.X,
-												itemRect.Y,
-												itemRect.Width,
-												itemRect.Height,
+												nodeRect.X,
+												nodeRect.Y,
+												nodeRect.Width,
+												nodeRect.Height,
 												style,
 												false); // opaque
 
@@ -756,10 +726,10 @@ namespace DetectiveUIExtension
 			{
 				UIExtension.SelectionRect.Draw(Handle,
 												graphics,
-												itemRect.X,
-												itemRect.Y,
-												itemRect.Width,
-												itemRect.Height,
+												nodeRect.X,
+												nodeRect.Y,
+												nodeRect.Width,
+												nodeRect.Height,
 												UIExtension.SelectionRect.Style.DropHighlighted,
 												false); // opaque
 
@@ -768,7 +738,7 @@ namespace DetectiveUIExtension
 			else if (backColor != Color.Empty)
 			{
 				using (var brush = new SolidBrush(backColor))
-					graphics.FillRectangle(brush, itemRect);
+					graphics.FillRectangle(brush, nodeRect);
 			}
 			else
 			{
@@ -779,38 +749,21 @@ namespace DetectiveUIExtension
 			if (borderColor != Color.Empty)
 			{
 				// Pens behave weirdly
-				itemRect.Width--;
-				itemRect.Height--;
+				nodeRect.Width--;
+				nodeRect.Height--;
 
-				using (var pen = new Pen(borderColor, critical ? 2f : 0f))
-					graphics.DrawRectangle(pen, itemRect);
-			}
-
-			// PERT Lines
-			using (var pen = new Pen(lineColor))
-			{
-				if (borderColor == Color.Empty)
-				{
-					// Pens behave weirdly
-					itemRect.Width--;
-					itemRect.Height--;
-				}
-
-				int midY = ((itemRect.Top + itemRect.Bottom) / 2);
-				int midX = ((itemRect.Left + itemRect.Right) / 2);
-
-				graphics.DrawLine(pen, itemRect.Left, midY, itemRect.Right, midY);
-				graphics.DrawLine(pen, midX, midY, midX, itemRect.Bottom);
+				using (var pen = new Pen(borderColor, 0f))
+					graphics.DrawRectangle(pen, nodeRect);
 			}
 
 			// Icon
-			var titleRect = itemRect;
+			var titleRect = nodeRect;
 
-			if (TaskHasIcon(taskItem))
+			if (TaskHasIcon(taskNode))
 			{
-				var iconRect = CalcIconRect(itemRect);
+				var iconRect = CalcIconRect(nodeRect);
 
-				if (m_TaskIcons.Get(item.UniqueId))
+				if (m_TaskIcons.Get(node.UniqueId))
 				{
 					if (!IsZoomed)
 					{
@@ -842,12 +795,6 @@ namespace DetectiveUIExtension
 			titleRect.Inflate(-LabelPadding, -LabelPadding);
 			titleRect.Height /= 2;
 
-			using (var brush = new SolidBrush(textColor))
-			{
-				int iPath = (Data.AllPaths.IndexOf(path) + 1);
-				graphics.DrawString(String.Format("{0} (id:{1}, pos:{2}, path:{3})", item.Title, item.UniqueId, taskItem.TaskPosition, iPath), GetItemFont(taskItem), brush, titleRect);
-			}
-
 			/*
 			// Checkbox
 			Rectangle checkRect = CalcCheckboxRect(rect);
@@ -856,7 +803,7 @@ namespace DetectiveUIExtension
 			{
 				if (!IsZoomed)
 				{
-					CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetItemCheckboxState(realItem));
+					CheckBoxRenderer.DrawCheckBox(graphics, checkRect.Location, GetNodeCheckboxState(realNode));
 				}
 				else
 				{
@@ -864,7 +811,7 @@ namespace DetectiveUIExtension
 
 					using (var gTemp = Graphics.FromImage(tempImage))
 					{
-						CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetItemCheckboxState(realItem));
+						CheckBoxRenderer.DrawCheckBox(gTemp, new Point(0, 0), GetNodeCheckboxState(realNode));
 
 						DrawZoomedImage(tempImage, graphics, checkRect);
 					}
@@ -882,30 +829,16 @@ namespace DetectiveUIExtension
 
 		}
 
-		override protected void OnPaintConnection(Graphics graphics, Node fromItem, Node toItem, NodePath path)
+		override protected void OnPaintLink(Graphics graphics, Node fromNode, Node toNode)
 		{
-			// Don't paint critical paths until the end
-// 			if ((CriticalPaths.Contains(path)))
-// 				return;
-// 
-// 			foreach (var critPath in CriticalPaths)
-// 			{
-// 				if (critPath.Contains(fromItem) &&
-// 					critPath.Contains(toItem) &&
-// 					toItem.IsDependency(fromItem))
-// 				{
-// 					return;
-// 				}
-// 			}
-			
-			DoPaintConnection(graphics, fromItem, toItem, path);
+			DoPaintLink(graphics, fromNode, toNode);
 		}
 
-		protected void DoPaintConnection(Graphics graphics, Node fromItem, Node toItem, NodePath path)
+		protected void DoPaintLink(Graphics graphics, Node fromNode, Node toNode)
 		{
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
-			Point[] points = GetConnectionPoints(fromItem, toItem);
+			Point[] points = GetConnectionPoints(fromNode, toNode);
 
 			using (var pen = new Pen(Color.DarkGray, 0f))
 				graphics.DrawLines(pen, points);
@@ -923,188 +856,12 @@ namespace DetectiveUIExtension
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
 		}
 
-		protected override Point[] GetConnectionPoints(Node fromItem, Node toItem)
+		private bool TaskHasIcon(DetectiveNode taskNode)
 		{
-			return CalcConnectionPoints2(fromItem, toItem);
-		}
-
-		protected Point[] CalcConnectionPoints(Node fromItem, Node toItem)
-		{
-			var fromRect = CalcItemRectangle(fromItem);
-			var toRect = CalcItemRectangle(toItem);
-
-			Point[] points = null;
-
-			if (toItem.Position.Y == fromItem.Position.Y)
-			{
-				// 'To' on same level as 'From'
-				// +------+                    +------+
-				// |      +------------------->|      |
-				// +------+                    +------+
-				//
-				points = new Point[2];
-
-				points[0] = new Point(fromRect.Right, ((fromRect.Top + fromRect.Bottom) / 2) - 1);
-				points[1] = new Point(toRect.Left, ((toRect.Top + toRect.Bottom) / 2) - 1);
-			}
-			else
-			{
-				Point firstPt, lastPt;
-
-				if (toItem.Position.Y < fromItem.Position.Y)
-				{
-					firstPt = new Point(fromRect.Right, fromRect.Top);
-					lastPt = new Point(toRect.Left, toRect.Bottom);
-				}
-				else // below
-				{
-					firstPt = new Point(fromRect.Right, fromRect.Bottom);
-					lastPt = new Point(toRect.Left, toRect.Top);
-				}
-
-				if (toItem.Position.X == fromItem.Position.X + 1)
-				{
-					// 'To' one column to the right of 'From'
-					// and anywhere above or below 'From'
-					// +------+             
-					// |      +
-					// +------+             
-					//         \
-					//          ---->+------+
-					//               |      |
-					//               +------+
-					points = new Point[3];
-					points[0] = firstPt;
-					points[2] = lastPt;
-
-					if (toItem.Position.Y < fromItem.Position.Y)
-					{
-						// above
-						points[1] = new Point((fromRect.Right + toRect.Left) / 2, toRect.Bottom);
-					}
-					else
-					{
-						// below
-						points[1] = new Point((fromRect.Right + toRect.Left) / 2, toRect.Top);
-					}
-				}
-				else
-				{
-					// 'To' more than one column to the right of 'From'
-					// and anywhere above or below 'From'
-					// +------+      +------+       
-					// |      +		 |      |
-					// +------+      +------+       
-					//         \---------------\
-					//               +------+   -->+------+
-					//               |      |      |      |
-					//               +------+      +------+
-					points = new Point[5];
-					points[0] = firstPt;
-					points[4] = lastPt;
-
-					if (toItem.Position.Y < fromItem.Position.Y)
-					{
-						// above
-						points[1] = new Point(firstPt.X + ItemHorzSpacing / 2, firstPt.Y - ItemVertSpacing / 2);
-						points[2] = new Point(lastPt.X - ItemHorzSpacing / 2, points[1].Y);
-						points[3] = new Point(points[2].X + ItemVertSpacing / 2, lastPt.Y);
-					}
-					else
-					{
-						// below
-						points[1] = new Point(firstPt.X + ItemHorzSpacing / 2, firstPt.Y + ItemVertSpacing / 2);
-						points[2] = new Point(lastPt.X - ItemHorzSpacing / 2, points[1].Y);
-						points[3] = new Point(points[2].X + ItemVertSpacing / 2, lastPt.Y);
-					}
-				}
-			}
-
-			return points;
-		}
-
-		protected Point[] CalcConnectionPoints2(Node fromItem, Node toItem)
-		{
-			var fromRect = CalcItemRectangle(fromItem);
-			var toRect = CalcItemRectangle(toItem);
-
-			Point[] points = null;
-
-			int midFromHeight = ((fromRect.Top + fromRect.Bottom) / 2);
-			int midToHeight = ((toRect.Top + toRect.Bottom) / 2);
-
-			Point firstPt = new Point(fromRect.Right, midFromHeight);
-
-			if (toItem.Position.Y == fromItem.Position.Y)
-			{
-				// 'To' on same level as 'From'
-				// +------+        +------+
-				// |    0 +------->| 1    |
-				// +------+        +------+
-				//
-				Point lastPt = new Point(toRect.Left, midToHeight);
-
-				points = new Point[2] { firstPt, lastPt };
-			}
-			else
-			{
-				bool toAboveFrom = (toItem.Position.Y < fromItem.Position.Y);
-				Point lastPt = new Point(toRect.Left, toAboveFrom ? toRect.Bottom : toRect.Top);
-
-				int halfHorzSpacing = (ItemHorzSpacing / 2);
-				int quarterHorzSpacing = (ItemHorzSpacing / 4);
-
-				if (toItem.Position.X == fromItem.Position.X + 1)
-				{
-					// 'To' one column to the right of 'From'
-					// and anywhere above or below 'From'
-					// +------+             
-					// |    0 +-+ 1
-					// +------+  \            
-					//            \    3
-					//             +->+------+
-					//            2   |      |
-					//                +------+
-
-					points = new Point[4];
-					points[0] = firstPt;
-					points[1] = new Point(points[0].X + halfHorzSpacing, firstPt.Y);
-					points[2] = new Point(lastPt.X - quarterHorzSpacing, lastPt.Y);
-					points[3] = lastPt;
-				}
-				else
-				{
-					// 'To' more than one column to the right of 'From'
-					// and anywhere above or below 'From'
-					// +------+      +------+       
-					// |    0 +-+  1 |      |
-					// +------+  \   +------+  3      
-					//            +-----------+ 
-					//           2             \    5
-					//               +------+   +->+------+
-					//               |      |  4   |      |
-					//               +------+      +------+
-					int halfRowHeight = (RowHeight / 2);
-
-					points = new Point[6];
-					points[0] = firstPt;
-					points[1] = new Point(points[0].X + halfHorzSpacing, firstPt.Y);
-					points[2] = new Point(points[1].X + quarterHorzSpacing, (firstPt.Y + (toAboveFrom ? -halfRowHeight : halfRowHeight)));
-					points[3] = new Point(lastPt.X - halfHorzSpacing - quarterHorzSpacing, points[2].Y);
-					points[4] = new Point(points[3].X + halfHorzSpacing, lastPt.Y);
-					points[5] = lastPt;
-				}
-			}
-
-			return points;
-		}
-
-		private bool TaskHasIcon(DetectiveItem taskItem)
-		{
-			if ((m_TaskIcons == null) || (taskItem == null))
+			if ((m_TaskIcons == null) || (taskNode == null))
 				return false;
 
-			return (taskItem.HasIcon || (m_ShowParentAsFolder && taskItem.Parent));
+			return (taskNode.HasIcon || (m_ShowParentAsFolder && taskNode.Parent));
 		}
 
         private Rectangle CalcIconRect(Rectangle labelRect)
@@ -1123,8 +880,8 @@ namespace DetectiveUIExtension
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
 		{
-			if (HitTestItem(e.Location) != null)
-				EditTaskLabel(this, SelectedItem.UniqueId);
+			if (HitTestNode(e.Location) != null)
+				EditTaskLabel(this, SelectedNode.UniqueId);
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)
@@ -1134,25 +891,25 @@ namespace DetectiveUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			var taskItem = (HitTestItem(e.Location) as DetectiveItem);
+			var taskNode = (HitTestNode(e.Location) as DetectiveNode);
 
-			if (taskItem == null)
+			if (taskNode == null)
 				return;
 
-			if (!ReadOnly && !taskItem.Locked)
+			if (!ReadOnly && !taskNode.Locked)
 			{
 /*
 				if (HitTestCheckbox(node, e.Location))
 				{
 					if (EditTaskDone != null)
-						EditTaskDone(this, taskItem.ID, !taskItem.IsDone(false));
+						EditTaskDone(this, taskNode.ID, !taskNode.IsDone(false));
 				}
-				else*/ if (HitTestIcon(taskItem, e.Location))
+				else*/ if (HitTestIcon(taskNode, e.Location))
 				{
 					if (EditTaskIcon != null)
-					    EditTaskIcon(this, taskItem.UniqueId);
+					    EditTaskIcon(this, taskNode.UniqueId);
 				}
-				else if (SelectedItemWasPreviouslySelected)
+				else if (SelectedNodeWasPreviouslySelected)
 				{
 					if (EditTaskLabel != null)
 						m_EditTimer.Start();
@@ -1160,26 +917,26 @@ namespace DetectiveUIExtension
 			}
 		}
 
-		private bool SelectedItemWasPreviouslySelected
+		private bool SelectedNodeWasPreviouslySelected
 		{
-			get { return ((SelectedItem != null) && (SelectedItem == m_PreviouslySelectedItem)); }
+			get { return ((SelectedNode != null) && (SelectedNode == m_PreviouslySelectedNode)); }
 		}
 
-		private bool HitTestIcon(Node item, Point point)
+		private bool HitTestIcon(Node node, Point point)
         {
-			var taskItem = (item as DetectiveItem);
+			var taskNode = (node as DetectiveNode);
 			
-			if (taskItem.Locked || !TaskHasIcon(taskItem))
+			if (taskNode.Locked || !TaskHasIcon(taskNode))
 				return false;
 			
 			// else
-			return CalcIconRect(CalcItemRectangle(item)).Contains(point);
+			return CalcIconRect(CalcNodeRectangle(node)).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			m_EditTimer.Stop();
-			m_PreviouslySelectedItem = Focused ? SelectedItem : null;
+			m_PreviouslySelectedNode = Focused ? SelectedNode : null;
 
 			base.OnMouseDown(e);
 		}
@@ -1189,24 +946,24 @@ namespace DetectiveUIExtension
 			m_EditTimer.Stop();
 
 			if (EditTaskLabel != null)
-				EditTaskLabel(this, SelectedItem?.UniqueId ?? 0);
+				EditTaskLabel(this, SelectedNode?.UniqueId ?? 0);
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
  			base.OnMouseMove(e);
 
-			var taskItem = (HitTestItem(e.Location) as DetectiveItem);
+			var taskNode = (HitTestNode(e.Location) as DetectiveNode);
 
-			if (!ReadOnly && (taskItem != null))
+			if (!ReadOnly && (taskNode != null))
 			{
 				Cursor cursor = null;
 
-				if (taskItem.Locked)
+				if (taskNode.Locked)
 				{
 					cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 				}
-				else if (TaskHasIcon(taskItem) && HitTestIcon(taskItem, e.Location))
+				else if (TaskHasIcon(taskNode) && HitTestIcon(taskNode, e.Location))
 				{
 					cursor = UIExtension.HandCursor();
 				}
@@ -1244,10 +1001,10 @@ namespace DetectiveUIExtension
 
 			m_DragImage.Begin(Handle, 
 								this, 
-								SelectedItem, 
-								ItemWidth, 
-								ItemHeight, 
-								ItemWidth / 2,          // Middle of task
+								SelectedNode, 
+								NodeWidth, 
+								NodeHeight, 
+								NodeWidth / 2,          // Middle of task
 								-DPIScaling.Scale(16)); // below the cursor
 
 			m_LastDragPos = PointToClient(new Point(e.X, e.Y));
@@ -1255,9 +1012,8 @@ namespace DetectiveUIExtension
 
 		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
 		{
-			DoPaintItem(graphics, 
+			DoPaintNode(graphics, 
 						(obj as Node), 
-						null, 
 						DrawState.Selected | DrawState.DragImage);
 		}
 
@@ -1273,15 +1029,15 @@ namespace DetectiveUIExtension
 			if (!base.IsAcceptableDropTarget(e))
 				return false;
 
-			return !(e.DraggedItem as DetectiveItem).Locked;
+			return !(e.DraggedNode as DetectiveNode).Locked;
 		}
 
-		override protected bool IsAcceptableDragSource(Node item)
+		override protected bool IsAcceptableDragSource(Node node)
 		{
-			if (!base.IsAcceptableDragSource(item))
+			if (!base.IsAcceptableDragSource(node))
 				return false;
 
-			return !(item as DetectiveItem).Locked;
+			return !(node as DetectiveNode).Locked;
 		}
 
 		override protected bool DoDrop(NodeDragEventArgs e)
@@ -1292,36 +1048,6 @@ namespace DetectiveUIExtension
 			return base.DoDrop(e);
 		}
 
-		List<NodePath> UpdateCriticalPaths()
-		{
-			var criticalPaths = new List<NodePath>();
-
-/*
-			// TODO
-			// Test by picking the greatest aggregated segment length
-			double maxLength = 0;
-			NodePath criticalPath = null;
-
-			foreach (var group in Data.Groups)
-			{
-				foreach (var path in group.Paths)
-				{
-					double pathLen = path.Length;
-
-					if (pathLen > maxLength)
-					{
-						maxLength = pathLen;
-						criticalPath = path;
-					}
-				}
-			}
-
-			if (criticalPath != null)
-				criticalPaths.Add(criticalPath);
-*/
-
-			return criticalPaths;
-		}
 
 	}
 }

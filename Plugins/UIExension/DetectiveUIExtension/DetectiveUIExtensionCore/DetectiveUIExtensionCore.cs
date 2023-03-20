@@ -26,7 +26,7 @@ namespace DetectiveUIExtension
         private UIExtension.TaskIcon m_TaskIcons;
         //private System.Drawing.Font m_ControlsFont;
 
-        private DetectiveControl m_Detective;
+        private DetectiveControl m_Control;
 
 		// ----------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ namespace DetectiveUIExtension
 
         public bool SelectTask(UInt32 dwTaskID)
         {
-			return m_Detective.SetSelectedItem(dwTaskID);
+			return m_Control.SetSelectedNode(dwTaskID);
         }
 
         public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -54,17 +54,17 @@ namespace DetectiveUIExtension
 
         public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
         {
-            return m_Detective.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
+            return m_Control.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
         }
 
         public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
         {
-			m_Detective.UpdateTasks(tasks, type);
+			m_Control.UpdateTasks(tasks, type);
         }
 
         public bool WantTaskUpdate(Task.Attribute attrib)
         {
-            return m_Detective.WantTaskUpdate(attrib);
+            return m_Control.WantTaskUpdate(attrib);
         }
 
         public bool WantSortUpdate(Task.Attribute attrib)
@@ -84,12 +84,12 @@ namespace DetectiveUIExtension
 
         public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
         {
-			Rectangle labelRect = m_Detective.GetSelectedItemLabelRect();
+			Rectangle labelRect = m_Control.GetSelectedNodeLabelRect();
 
 			if (labelRect.IsEmpty)
 				return false;
 
-			labelRect = m_Detective.RectangleToScreen(labelRect);
+			labelRect = m_Control.RectangleToScreen(labelRect);
 
 			left = labelRect.Left;
 			top = labelRect.Top;
@@ -101,7 +101,7 @@ namespace DetectiveUIExtension
 
         public UIExtension.HitResult HitTest(Int32 xPos, Int32 yPos)
         {
-			UInt32 taskId = m_Detective.HitTest(new Point(xPos, yPos));
+			UInt32 taskId = m_Control.HitTest(new Point(xPos, yPos));
 
 			if (taskId != 0)
 				return UIExtension.HitResult.Task;
@@ -112,7 +112,7 @@ namespace DetectiveUIExtension
 
         public UInt32 HitTestTask(Int32 xPos, Int32 yPos)
         {
-			return m_Detective.HitTest(new Point(xPos, yPos));
+			return m_Control.HitTest(new Point(xPos, yPos));
         }
 
         public void SetUITheme(UITheme theme)
@@ -123,22 +123,22 @@ namespace DetectiveUIExtension
 			var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 
             // Make sure it's dark enough
-            m_Detective.ConnectionColor = DrawingColor.SetLuminance(color, 0.6f);
+            m_Control.ConnectionColor = DrawingColor.SetLuminance(color, 0.6f);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
 		{
-			m_Detective.SetFont(faceName, pointSize);
+			m_Control.SetFont(faceName, pointSize);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
         {
-            m_Detective.ReadOnly = bReadOnly;
+            m_Control.ReadOnly = bReadOnly;
         }
 
         public void SavePreferences(Preferences prefs, String key)
         {
-			prefs.WriteProfileInt(key, "Options", (int)m_Detective.Options);
+			prefs.WriteProfileInt(key, "Options", (int)m_Control.Options);
 		}
 
 		public void LoadPreferences(Preferences prefs, String key, bool appOnly)
@@ -148,10 +148,10 @@ namespace DetectiveUIExtension
 				// private settings
 			}
 
-			m_Detective.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
-			m_Detective.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
-            m_Detective.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeItem", false);
-			m_Detective.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
+			m_Control.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);
+			m_Control.ShowParentsAsFolders = prefs.GetProfileBool("Preferences", "ShowParentsAsFolders", false);
+            m_Control.ShowCompletionCheckboxes = prefs.GetProfileBool("Preferences", "AllowCheckboxAgainstTreeNode", false);
+			m_Control.SetStrikeThruDone(prefs.GetProfileBool("Preferences", "StrikethroughDone", true));
         }
 
 		public new bool Focus()
@@ -160,37 +160,37 @@ namespace DetectiveUIExtension
 				return false;
 
 			// else
-			return m_Detective.Focus();
+			return m_Control.Focus();
 		}
 
 		public new bool Focused
 		{
-			get { return m_Detective.Focused; }
+			get { return m_Control.Focused; }
 		}
 
 		public bool CanMoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
-			return m_Detective.CanMoveTask(taskId, destParentId, destPrevSiblingId);
+			return m_Control.CanMoveTask(taskId, destParentId, destPrevSiblingId);
 		}
 
 		public bool MoveTask(UInt32 taskId, UInt32 destParentId, UInt32 destPrevSiblingId)
 		{
-			return m_Detective.MoveTask(taskId, destParentId, destPrevSiblingId);
+			return m_Control.MoveTask(taskId, destParentId, destPrevSiblingId);
 		}
 
 		public bool GetTask(UIExtension.GetTask getTask, ref UInt32 taskID)
 		{
-			return m_Detective.GetTask(getTask, ref taskID);
+			return m_Control.GetTask(getTask, ref taskID);
 		}
 
         public Bitmap SaveToImage()
         {
-            return m_Detective.SaveToImage();
+            return m_Control.SaveToImage();
         }
 
         public bool CanSaveToImage()
         {
-            return m_Detective.CanSaveToImage();
+            return m_Control.CanSaveToImage();
         }
         		
         // Message handlers ---------------------------------------------------------------------
@@ -199,7 +199,7 @@ namespace DetectiveUIExtension
 		{
 			base.OnGotFocus(e);
 
-			m_Detective.Focus();
+			m_Control.Focus();
 		}
 
         // PRIVATE ------------------------------------------------------------------------------
@@ -209,22 +209,22 @@ namespace DetectiveUIExtension
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             //m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-			m_Detective = new DetectiveControl(m_Trans, m_TaskIcons);
-			m_Detective.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            m_Detective.SetFont(FontName, 8);
+			m_Control = new DetectiveControl(m_Trans, m_TaskIcons);
+			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
+            m_Control.SetFont(FontName, 8);
 
             if (VisualStyleRenderer.IsSupported)
-                m_Detective.BorderStyle = BorderStyle.FixedSingle;
+                m_Control.BorderStyle = BorderStyle.FixedSingle;
             else
-                m_Detective.BorderStyle = BorderStyle.Fixed3D;
+                m_Control.BorderStyle = BorderStyle.Fixed3D;
 
-			m_Detective.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
-			m_Detective.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
-			m_Detective.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveEditTaskLabel);
-            m_Detective.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
-            m_Detective.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveEditTaskCompletion);
+			m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
+			m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
+			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveEditTaskLabel);
+            m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
+            m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveEditTaskCompletion);
 
-            this.Controls.Add(m_Detective);
+            this.Controls.Add(m_Control);
 		}
 
 		bool OnDetectiveEditTaskLabel(object sender, UInt32 taskId)
@@ -260,7 +260,7 @@ namespace DetectiveUIExtension
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			// 			if (e.copyItem)
+			// 			if (e.copyNode)
 			// 				return notify.NotifyCopy(e.dragged.uniqueID, 
 			// 										 e.targetParent.uniqueID, 
 			// 										 e.afterSibling.uniqueID);
@@ -276,7 +276,7 @@ namespace DetectiveUIExtension
         {
             base.OnSizeChanged(e);
 
-            m_Detective.Bounds = ClientRectangle;
+            m_Control.Bounds = ClientRectangle;
 
             Invalidate(true);
         }

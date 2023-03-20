@@ -14,31 +14,23 @@ using System.Windows.Forms.VisualStyles;
 
 namespace DetectiveUIExtension
 {
-	public delegate void SelectionChangeEventHandler(object sender, Node item);
+	public delegate void SelectionChangeEventHandler(object sender, Node node);
 	public delegate bool DragDropChangeEventHandler(object sender, NodeDragEventArgs e);
 
 	//////////////////////////////////////////////////////////////////////////////////
 
 	public class NodeHitTestResult
 	{
-		public NodePath Path;
-		public Node FromItem, ToItem;
-		public int Segment = -1;
+		public Node FromNode, ToNode;
 
 		public bool IsValid
 		{
 			get
 			{
-				if (FromItem == null)
+				if ((FromNode == null) && (ToNode == null))
 					return false;
 
-				if (FromItem == ToItem)
-					return false;
-
-				if ((ToItem == null) && (Segment != -1))
-					return false;
-
-				if ((ToItem != null) && (Segment == -1))
+				if (FromNode == ToNode)
 					return false;
 
 				return true;
@@ -50,10 +42,7 @@ namespace DetectiveUIExtension
 			if (other == null)
 				return false;
 
-			return ((Path == other.Path) &&
-					(FromItem == other.FromItem) &&
-					(ToItem == other.ToItem) &&
-					(Segment == other.Segment));
+			return ((FromNode == other.FromNode) &&	(ToNode == other.ToNode));
 		}
 
 		public static bool Match(NodeHitTestResult pos1, NodeHitTestResult pos2)
@@ -72,9 +61,9 @@ namespace DetectiveUIExtension
 
 	public class NodeDragEventArgs : EventArgs
 	{
-		public NodeDragEventArgs(Node draggedItem, NodeHitTestResult dropPos, bool copy)
+		public NodeDragEventArgs(Node draggedNode, NodeHitTestResult dropPos, bool copy)
 		{
-			DraggedItem = draggedItem;
+			DraggedNode = draggedNode;
 			DropPos = dropPos;
 			Copy = copy;
 		}
@@ -83,20 +72,20 @@ namespace DetectiveUIExtension
 		{
 			get
 			{
-				if ((DraggedItem == null) || (DropPos == null))
+				if ((DraggedNode == null) || (DropPos == null))
 					return false;
 
 				if (!DropPos.IsValid)
 					return false;
 
-				if ((DropPos.FromItem == DraggedItem) || (DropPos.ToItem == DraggedItem))
+				if ((DropPos.FromNode == DraggedNode) || (DropPos.ToNode == DraggedNode))
 					return false;
 
 				return true;
 			}
 		}
 
-		public Node DraggedItem;
+		public Node DraggedNode;
 		public NodeHitTestResult DropPos;
 		public bool Copy;
 	}
@@ -105,7 +94,7 @@ namespace DetectiveUIExtension
 
 	class LayoutHelper
 	{
-		public LayoutHelper(ScrollableControl ctrl, int itemLineCount)
+		public LayoutHelper(ScrollableControl ctrl, int nodeLineCount)
 		{
 			m_Ctrl = ctrl;
 			Font = ctrl.Font;
@@ -113,20 +102,20 @@ namespace DetectiveUIExtension
 			using (var graphics = ctrl.CreateGraphics())
 				m_DpiFactor = graphics.DpiX / 96.0;
 
-			SetItemLineCount(itemLineCount);
+			SetNodeLineCount(nodeLineCount);
 		}
 
 		private ScrollableControl m_Ctrl;
 		private double m_DpiFactor = 1.0;
 
-		public int ItemLineCount { get; private set; }
-		public bool SetItemLineCount(int count)
+		public int NodeLineCount { get; private set; }
+		public bool SetNodeLineCount(int count)
 		{
 			count = Math.Min(Math.Max(count, 1), 10);
 
-			if (count != ItemLineCount)
+			if (count != NodeLineCount)
 			{
-				ItemLineCount = count;
+				NodeLineCount = count;
 				return true;
 			}
 
@@ -136,55 +125,42 @@ namespace DetectiveUIExtension
 		public Font Font;
 		public bool IsSavingToImage = false;
 
-		public int ItemHeight { get { return ((Font.Height + LabelPadding) * ItemLineCount); } }
-		public int ItemWidth { get { return (ItemHeight * 3); } }
-		public int ItemVertSpacing { get { return (ItemHeight / 4); } }
-		public int ItemHorzSpacing { get { return (ItemWidth / 4); } }
+		public int NodeHeight { get { return ((Font.Height + LabelPadding) * NodeLineCount); } }
+		public int NodeWidth { get { return (NodeHeight * 3); } }
+		public int NodeVertSpacing { get { return (NodeHeight / 4); } }
+		public int NodeHorzSpacing { get { return (NodeWidth / 4); } }
 
-		public int RowHeight { get { return (ItemHeight + ItemVertSpacing); } }
-		public int ColumnWidth { get { return (ItemWidth + ItemHorzSpacing); } }
+		public int RowHeight { get { return (NodeHeight + NodeVertSpacing); } }
+		public int ColumnWidth { get { return (NodeWidth + NodeHorzSpacing); } }
 
-		public int GraphBorder { get { return ItemVertSpacing; } }
+		public int GraphBorder { get { return NodeVertSpacing; } }
 		public int LabelPadding { get { return (int)(2 * m_DpiFactor); } }
 		public double HitTestTolerance { get { return (10 * m_DpiFactor); } }
 
 		// ------------------------------
 
-		public Rectangle CalcItemRectangle(Node item)
+		public Rectangle CalcNodeRectangle(Node node)
 		{
-			return CalcItemRectangle(item.Position.X, item.Position.Y, !IsSavingToImage);
+			return CalcNodeRectangle(node.Position.X, node.Position.Y, !IsSavingToImage);
 		}
 
-		public Rectangle CalcPathBounds(NodePath path)
+		public Rectangle CalcNodeRectangle(int x, int y, bool scrolled)
 		{
-			if (path.Count == 0)
-				return Rectangle.Empty;
+			Rectangle nodeRect = new Rectangle(GraphBorder, GraphBorder, 0, 0);
 
-			var pathRect = CalcItemRectangle(path.Items[0]);
+			nodeRect.X += ((ColumnWidth) * x);
+			nodeRect.Y += ((RowHeight) * y);
 
-			for (int i = 1; i < path.Count; i++)
-				pathRect = Rectangle.Union(pathRect, CalcItemRectangle(path.Items[i]));
-
-			return pathRect;
-		}
-
-		public Rectangle CalcItemRectangle(int x, int y, bool scrolled)
-		{
-			Rectangle itemRect = new Rectangle(GraphBorder, GraphBorder, 0, 0);
-
-			itemRect.X += ((ColumnWidth) * x);
-			itemRect.Y += ((RowHeight) * y);
-
-			itemRect.Width = ItemWidth;
-			itemRect.Height = ItemHeight;
+			nodeRect.Width = NodeWidth;
+			nodeRect.Height = NodeHeight;
 
 			if (scrolled)
 			{
 				var scrollPos = ScrollPos;
-				itemRect.Offset(-scrollPos.X, -scrollPos.Y);
+				nodeRect.Offset(-scrollPos.X, -scrollPos.Y);
 			}
 
-			return itemRect;
+			return nodeRect;
 		}
 
 		private Point ScrollPos
@@ -240,32 +216,32 @@ namespace DetectiveUIExtension
 			}
 		}
 		protected Font BaseFont { get; private set; }
-		protected NodeData Data { get; private set; }
+		protected Nodes Nodes { get; private set; }
 		protected NodeHitTestResult DropPos { get; private set; }
 
 		protected float ZoomFactor { get; private set; }
 		protected bool IsZoomed { get { return (ZoomFactor < 1.0f); } }
 
-		protected int ItemHeight { get { return Layout.ItemHeight; } }
-		protected int ItemWidth { get { return Layout.ItemWidth; } }
-		protected int ItemVertSpacing { get { return Layout.ItemVertSpacing; } }
-		protected int ItemHorzSpacing { get { return Layout.ItemHorzSpacing; } }
+		protected int NodeHeight { get { return Layout.NodeHeight; } }
+		protected int NodeWidth { get { return Layout.NodeWidth; } }
+		protected int NodeVertSpacing { get { return Layout.NodeVertSpacing; } }
+		protected int NodeHorzSpacing { get { return Layout.NodeHorzSpacing; } }
 		protected int RowHeight { get { return Layout.RowHeight; } }
 		protected int ColumnWidth { get { return Layout.ColumnWidth; } }
 		protected int GraphBorder { get { return Layout.GraphBorder; } }
 		protected int LabelPadding { get { return Layout.LabelPadding; } }
 
-		protected int ItemLineCount
+		protected int NodeLineCount
 		{
-			get { return Layout.ItemLineCount; }
+			get { return Layout.NodeLineCount; }
 			set
 			{
-				if (Layout.SetItemLineCount(value))
+				if (Layout.SetNodeLineCount(value))
 					RecalculateGraphSize();
 			}
 		}
 
-		private uint SelectedItemId = 0;
+		private uint SelectedNodeId = 0;
 		private new LayoutHelper Layout;
 		private Timer DragTimer;
 
@@ -277,7 +253,7 @@ namespace DetectiveUIExtension
 		public NodeControl()
 		{
 			ConnectionColor = Color.Magenta;
-			Data = new NodeData();
+			Nodes = new Nodes();
 			BaseFont = Font;
 			Layout = new LayoutHelper(this, 2);
 
@@ -290,53 +266,37 @@ namespace DetectiveUIExtension
 
 		public void RebuildPaths()
 		{
-			RecalculateGraphSize(Data.RebuildPaths());
+			//RecalculateGraphSize(Nodes.RebuildPaths());
 		}
 
 		public void RecalculateGraphSize()
 		{
-			RecalculateGraphSize(Data.AllPaths.MaxPos);
+			//RecalculateGraphSize(Nodes.AllPaths.MaxPos);
 		}
 
 		private void RecalculateGraphSize(Point maxPos)
 		{
-			Rectangle maxItemRect = Layout.CalcItemRectangle(maxPos.X, maxPos.Y, false);
+			Rectangle maxNodeRect = Layout.CalcNodeRectangle(maxPos.X, maxPos.Y, false);
 
-			AutoScrollMinSize = new Size(maxItemRect.Right + Layout.GraphBorder, maxItemRect.Bottom + Layout.GraphBorder);
+			AutoScrollMinSize = new Size(maxNodeRect.Right + Layout.GraphBorder, maxNodeRect.Bottom + Layout.GraphBorder);
 
-			HorizontalScroll.SmallChange = Layout.ItemHeight;
-			VerticalScroll.SmallChange = Layout.ItemWidth;
+			HorizontalScroll.SmallChange = Layout.NodeHeight;
+			VerticalScroll.SmallChange = Layout.NodeWidth;
 
 			Invalidate();
 		}
 
-		public Node HitTestItem(Point pos)
+		public Node HitTestNode(Point pos)
 		{
 			// Brute force for now
-			foreach (var path in Data.AllPaths)
+			foreach (var node in Nodes.Values)
 			{
-				Rectangle pathRect = Rectangle.Empty;
+				var nodeRect = Layout.CalcNodeRectangle(node);
 
-				foreach (var item in path.Items)
-				{
-					var itemRect = Layout.CalcItemRectangle(item);
-
-					// We can stop once we are beyond the rightmost visible items
-					if (itemRect.Left > ClientRectangle.Right)
-						break;
-
-					if (itemRect.Contains(pos))
-						return item;
-
-					pathRect = Rectangle.Union(pathRect, itemRect);
-				}
-
-				// We can stop when we've passed the bottom of the visible items
-				if (pathRect.Bottom > ClientRectangle.Bottom)
-					break;
+				if (nodeRect.Contains(pos))
+					return node;
 			}
 
-			// else
 			return null;
 		}
 
@@ -344,8 +304,10 @@ namespace DetectiveUIExtension
 		{
 			var hitTest = DragHitTest(PointToClient(new Point(e.X, e.Y)));
 
+/*
 			if ((hitTest != null) && !GetNodeDragEventArgs(e, hitTest).IsValid)
 				hitTest.Segment = -1;
+*/
 
 			return hitTest;
 		}
@@ -355,62 +317,64 @@ namespace DetectiveUIExtension
 			// Do the least amount of work possible
 			var closestHit = new NodeHitTestResult();
 
-			foreach (var path in Data.AllPaths)
+/*
+			foreach (var path in Nodes.AllPaths)
 			{
 				if (!ClientRectangle.IntersectsWith(Layout.CalcPathBounds(path)))
 					continue;
 
-				var prevItemRect = Layout.CalcItemRectangle(path.Items[0]);
+				var prevNodeRect = Layout.CalcNodeRectangle(path.Nodes[0]);
 
-				if (prevItemRect.Contains(pos))
+				if (prevNodeRect.Contains(pos))
 				{
 					closestHit.Path = path;
-					closestHit.FromItem = path.Items[0];
+					closestHit.FromNode = path.Nodes[0];
 
 					break;
 				}
 
 				for (int i = 1; i < path.Count; i++)
 				{
-					var itemRect = Layout.CalcItemRectangle(path.Items[i]);
+					var nodeRect = Layout.CalcNodeRectangle(path.Nodes[i]);
 
-					if (itemRect.Contains(pos))
+					if (nodeRect.Contains(pos))
 					{
 						closestHit.Path = path;
-						closestHit.FromItem = path.Items[i];
+						closestHit.FromNode = path.Nodes[i];
 
 						break;
 					}
 
-					if (Rectangle.Union(prevItemRect, itemRect).Contains(pos))
+					if (Rectangle.Union(prevNodeRect, nodeRect).Contains(pos))
 					{
-						var points = GetConnectionPoints(path.Items[i - 1], path.Items[i]);
+						var points = GetConnectionPoints(path.Nodes[i - 1], path.Nodes[i]);
 						int segment = Geometry2D.HitTest(points, pos, Layout.HitTestTolerance);
 
 						if (segment != -1)
 						{
 							closestHit.Path = path;
-							closestHit.FromItem = path.Items[i - 1];
-							closestHit.ToItem = path.Items[i];
+							closestHit.FromNode = path.Nodes[i - 1];
+							closestHit.ToNode = path.Nodes[i];
 							closestHit.Segment = segment;
 
 							break;
 						}
 					}
 
-					prevItemRect = itemRect;
+					prevNodeRect = nodeRect;
 				}
 
 				if (closestHit.IsValid)
 					break;
 			}
+*/
 
 			return (closestHit.IsValid ? closestHit : null);
 		}
 
-		protected Rectangle CalcItemRectangle(Node item)
+		protected Rectangle CalcNodeRectangle(Node node)
 		{
-			return Layout.CalcItemRectangle(item);
+			return Layout.CalcNodeRectangle(node);
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
@@ -418,15 +382,15 @@ namespace DetectiveUIExtension
 			DoPaint(e.Graphics, e.ClipRectangle);
 		}
 
-		protected SelectionState GetItemSelectionState(Node item)
+		protected SelectionState GetNodeSelectionState(Node node)
 		{
 			if (Layout.IsSavingToImage)
 				return SelectionState.None;
 
-			if (item.UniqueId == SelectedItemId)
+			if (node.UniqueId == SelectedNodeId)
 				return SelectionState.Selected;
 
-			if ((DropPos != null) && DropPos.IsValid && (DropPos.Segment == -1) && (DropPos.FromItem == item))
+			if ((DropPos != null) && DropPos.IsValid && (DropPos.FromNode == node))
 				return SelectionState.DropHighlighted;
 
 			return SelectionState.None;
@@ -434,111 +398,83 @@ namespace DetectiveUIExtension
 
 		protected virtual void DoPaint(Graphics graphics, Rectangle clipRect)
 		{
-			var drawnItems = new HashSet<Node>();
-
-			foreach (var path in Data.AllPaths)
+			foreach (var node in Nodes.Values)
 			{
-				if (!clipRect.IntersectsWith(Layout.CalcPathBounds(path)))
-					continue;
-
-				Node prevItem = null;
-
-				foreach (var item in path.Items)
+				if (WantDrawNode(node, clipRect))
 				{
-					if (!drawnItems.Contains(item))
-					{
-						if (WantDrawItem(item, clipRect))
-						{
-							OnPaintItem(graphics, item, path, GetItemSelectionState(item));
-						}
-						else
-						{
-							//int breakpoint = 0;
-						}
+					OnPaintNode(graphics, node, GetNodeSelectionState(node));
 
-						drawnItems.Add(item);
-					}
-
-					if (prevItem != null)
-					{
-						if (WantDrawConnection(item, prevItem, clipRect))
-						{
-							graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-							OnPaintConnection(graphics, prevItem, item, path);
-						}
-						else
-						{
-							//int breakpoint = 0;
-						}
-					}
-
-					prevItem = item;
+					// Draw Links
+				}
+				else
+				{
+					//int breakpoint = 0;
 				}
 			}
 
+/*
 			// Draw the current drop pos
 			if ((DropPos != null) && (DropPos.Segment != -1))
 			{
-				var points = GetConnectionPoints(DropPos.FromItem, DropPos.ToItem);
+				var points = GetConnectionPoints(DropPos.FromNode, DropPos.ToNode);
 				DrawDragInsertionPoint(graphics, points, DropPos.Segment);
 			}
+*/
 		}
 
-		protected bool WantDrawItem(Node item, Rectangle clipRect)
+		protected bool WantDrawNode(Node node, Rectangle clipRect)
 		{
 			if (Layout.IsSavingToImage)
 				return true;
 
-			return clipRect.IntersectsWith(Layout.CalcItemRectangle(item));
+			return clipRect.IntersectsWith(Layout.CalcNodeRectangle(node));
 		}
 
-		protected bool WantDrawConnection(Node fromItem, Node toItem, Rectangle clipRect)
+		protected bool WantDrawLink(Node fromNode, Node toNode, Rectangle clipRect)
 		{
 			if (Layout.IsSavingToImage)
 				return true;
 
-			var fromRect = Layout.CalcItemRectangle(fromItem);
-			var toRect = Layout.CalcItemRectangle(toItem);
+			var fromRect = Layout.CalcNodeRectangle(fromNode);
+			var toRect = Layout.CalcNodeRectangle(toNode);
 
 			return clipRect.IntersectsWith(Rectangle.Union(fromRect, toRect));
 		}
 
-		virtual protected void OnPaintItem(Graphics graphics, Node item, NodePath path, SelectionState state)
+		virtual protected void OnPaintNode(Graphics graphics, Node node, SelectionState state)
 		{
-			var itemRect = Layout.CalcItemRectangle(item);
-			graphics.DrawRectangle(Pens.Black, itemRect);
+			var nodeRect = Layout.CalcNodeRectangle(node);
+			graphics.DrawRectangle(Pens.Black, nodeRect);
 
-			int iPath = Data.AllPaths.IndexOf(path) + 1;
-			var itemText = String.Format("{0} (id: {1}, p: {2})", item.Title, item.UniqueId, iPath);
+			var nodeText = node.Title;
 
 			switch (state)
 			{
 			case SelectionState.DropHighlighted:
-				graphics.DrawRectangle(SystemPens.Highlight, itemRect);
-				graphics.DrawString(itemText, Font, Brushes.Blue, itemRect);
+				graphics.DrawRectangle(SystemPens.Highlight, nodeRect);
+				graphics.DrawString(nodeText, Font, Brushes.Blue, nodeRect);
 				break;
 
 			case SelectionState.Selected:
-				graphics.FillRectangle(SystemBrushes.Highlight, itemRect);
-				graphics.DrawString(itemText, Font, SystemBrushes.HighlightText, itemRect);
+				graphics.FillRectangle(SystemBrushes.Highlight, nodeRect);
+				graphics.DrawString(nodeText, Font, SystemBrushes.HighlightText, nodeRect);
 				break;
 
 			case SelectionState.None:
-				graphics.DrawString(itemText, Font, Brushes.Blue, itemRect);
+				graphics.DrawString(nodeText, Font, Brushes.Blue, nodeRect);
 				break;
 			}
 		}
 
-		virtual protected void OnPaintConnection(Graphics graphics, Node fromItem, Node toItem, NodePath path)
+		virtual protected void OnPaintLink(Graphics graphics, Node fromNode, Node toNode)
 		{
-			graphics.DrawLines(Pens.Blue, GetConnectionPoints(fromItem, toItem));
+			graphics.DrawLines(Pens.Blue, GetConnectionPoints(fromNode, toNode));
 		}
 
-		virtual protected Point[] GetConnectionPoints(Node fromItem, Node toItem)
+		virtual protected Point[] GetConnectionPoints(Node fromNode, Node toNode)
 		{
-			var fromRect = Layout.CalcItemRectangle(fromItem);
-			var toRect = Layout.CalcItemRectangle(toItem);
+			var fromRect = Layout.CalcNodeRectangle(fromNode);
+			var toRect = Layout.CalcNodeRectangle(toNode);
 
 			Point[] points = new Point[2];
 
@@ -568,29 +504,29 @@ namespace DetectiveUIExtension
 		public Color ConnectionColor;
 		public bool ReadOnly;
 
-		public bool SetSelectedItem(uint uniqueID)
+		public bool SetSelectedNode(uint uniqueID)
 		{
-			var item = Data.GetItem(uniqueID);
+			var node = Nodes.GetNode(uniqueID);
 
-			if (item == null)
+			if (node == null)
 				return false;
 
-			SelectedItemId = uniqueID;
+			SelectedNodeId = uniqueID;
 
-			EnsureItemVisible(item);
+			EnsureNodeVisible(node);
 			Invalidate();
 			Update();
 
 			return true;
 		}
 
-		public Rectangle GetSelectedItemRect()
+		public Rectangle GetSelectedNodeRect()
 		{
-			var selItem = SelectedItem;
+			var selNode = SelectedNode;
 
-			return ((selItem == null) ? 
+			return ((selNode == null) ? 
 						new Rectangle(0, 0, 0, 0) : 
-						Layout.CalcItemRectangle(selItem));
+						Layout.CalcNodeRectangle(selNode));
 		}
 
 		public Bitmap SaveToImage()
@@ -627,16 +563,16 @@ namespace DetectiveUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			var item = HitTestItem(e.Location);
+			var node = HitTestNode(e.Location);
 
-			if (item == null)
+			if (node == null)
 				return;
 
-			if (item.UniqueId != SelectedItemId)
+			if (node.UniqueId != SelectedNodeId)
 			{
-				SetSelectedItem(item.UniqueId);
+				SetSelectedNode(node.UniqueId);
 
-				SelectionChange?.Invoke(this, SelectedItem);
+				SelectionChange?.Invoke(this, SelectedNode);
 			}
 
 			if (!ReadOnly && (e.Button == MouseButtons.Left))
@@ -734,15 +670,17 @@ namespace DetectiveUIExtension
 		{
 			if ((hitTest != null) && hitTest.IsValid)
 			{
+/*
 				if (hitTest.Segment == -1)
 				{
-					Invalidate(Layout.CalcItemRectangle(hitTest.FromItem));
+					Invalidate(Layout.CalcNodeRectangle(hitTest.FromNode));
 				}
 				else
 				{
-					Invalidate(Rectangle.Union(Layout.CalcItemRectangle(hitTest.FromItem),
-												Layout.CalcItemRectangle(hitTest.ToItem)));
+					Invalidate(Rectangle.Union(Layout.CalcNodeRectangle(hitTest.FromNode),
+												Layout.CalcNodeRectangle(hitTest.ToNode)));
 				}
+*/
 			}
 		}
 
@@ -768,7 +706,7 @@ namespace DetectiveUIExtension
 			if (GetDragRect(ptOrg).Contains(cursor))
 				return false;
 
-			Node hit = HitTestItem(ptOrg);
+			Node hit = HitTestNode(ptOrg);
 
 			if (IsAcceptableDragSource(hit))
 			{
@@ -784,9 +722,9 @@ namespace DetectiveUIExtension
 			return e.IsValid;
 		}
 
-		virtual protected bool IsAcceptableDragSource(Node item)
+		virtual protected bool IsAcceptableDragSource(Node node)
 		{
-			return (item != null);
+			return (node != null);
 		}
 
 		private Rectangle GetDragRect(Point cursor)
@@ -861,7 +799,7 @@ namespace DetectiveUIExtension
 		{
 			uint dragId = (uint)e.Data.GetData(typeof(uint));
 
-			return new NodeDragEventArgs(Data.GetItem(dragId), 
+			return new NodeDragEventArgs(Nodes.GetNode(dragId), 
 											hitTest, 
 											((e.KeyState & 8) == 8));
 		}
@@ -891,6 +829,7 @@ namespace DetectiveUIExtension
 
 		protected void DrawDragInsertionPoint(Graphics graphics, Point[] points, int segment)
 		{
+/*
 			Point ptMid = Geometry2D.SegmentMidPoint(points, DropPos.Segment);
 			Rectangle circle = new Rectangle(ptMid.X - 3, ptMid.Y - 3, 6, 6);
 			var state = graphics.Save();
@@ -898,6 +837,7 @@ namespace DetectiveUIExtension
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 			graphics.FillEllipse(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), circle);
 			graphics.Restore(state);
+*/
 		}
 
 		protected virtual bool DoDrop(NodeDragEventArgs e)
@@ -905,57 +845,59 @@ namespace DetectiveUIExtension
 			if (!e.IsValid)
 				return false;
 
-			uint sourceId = e.DraggedItem.UniqueId;
-			uint targetId = e.DropPos.FromItem.UniqueId;
+			uint sourceId = e.DraggedNode.UniqueId;
+			uint targetId = e.DropPos.FromNode.UniqueId;
 
 			if (e.Copy)
 			{
-				// Add the target item to the source item's dependency list
-				if (e.DraggedItem.DependencyUniqueIds.IndexOf(targetId) != -1)
+				// Add the target node to the source node's dependency list
+				if (e.DraggedNode.LinkIds.IndexOf(targetId) != -1)
 					return false;
 
-				e.DraggedItem.DependencyUniqueIds.Add(targetId);
+				e.DraggedNode.LinkIds.Add(targetId);
 			}
 			else // move
 			{
+/*
 				if (e.DropPos.Segment == -1)
 				{
-					e.DraggedItem.DependencyUniqueIds.Clear();
-					e.DraggedItem.DependencyUniqueIds.Add(targetId);
+					e.DraggedNode.LinkIds.Clear();
+					e.DraggedNode.LinkIds.Add(targetId);
 				}
 				else
 				{
-					// 1. Redirect the dragged item's dependents onto 
-					// the first of the dragged item's own dependencies
-					var allDependents = Data.AllDependents;
+					// 1. Redirect the dragged node's dependents onto 
+					// the first of the dragged node's own dependencies
+					var allDependents = Nodes.AllDependents;
 					var srcDependents = allDependents.GetDependents(sourceId);
 
 					if (srcDependents?.Count > 0)
 					{
-						uint firstDependencyId = (e.DraggedItem.HasDependencies ? e.DraggedItem.DependencyUniqueIds[0] : 0);
+						uint firstDependencyId = (e.DraggedNode.HasLinks ? e.DraggedNode.LinkIds[0] : 0);
 
 						foreach (var id in srcDependents)
 						{
-							var localDependent = Data.GetItem(id);
+							var localDependent = Nodes.GetNode(id);
 
 							if (localDependent != null)
 							{
-								localDependent.DependencyUniqueIds.Remove(sourceId);
+								localDependent.LinkIds.Remove(sourceId);
 
 								if (firstDependencyId != 0)
-									localDependent.DependencyUniqueIds.Add(firstDependencyId);
+									localDependent.LinkIds.Add(firstDependencyId);
 							}
 						}
 					}
 
-					// 2. Replace all the source item's dependencies with the target id
-					e.DraggedItem.DependencyUniqueIds.Clear();
-					e.DraggedItem.DependencyUniqueIds.Add(targetId);
+					// 2. Replace all the source node's dependencies with the target id
+					e.DraggedNode.LinkIds.Clear();
+					e.DraggedNode.LinkIds.Add(targetId);
 
-					// 3. Replace e.DropPos.ToItem's dependency on the target id with the source id
-					e.DropPos.ToItem.DependencyUniqueIds.Remove(targetId);
-					e.DropPos.ToItem.DependencyUniqueIds.Add(sourceId);
+					// 3. Replace e.DropPos.ToNode's dependency on the target id with the source id
+					e.DropPos.ToNode.LinkIds.Remove(targetId);
+					e.DropPos.ToNode.LinkIds.Add(sourceId);
 				}
+*/
 			}
 
 			RebuildPaths();
@@ -973,14 +915,14 @@ namespace DetectiveUIExtension
 		{
 			base.OnGotFocus(e);
 
-			Invalidate(GetSelectedItemRect());
+			Invalidate(GetSelectedNodeRect());
 		}
 
 		protected override void OnLostFocus(EventArgs e)
 		{
 			base.OnLostFocus(e);
 
-			Invalidate(GetSelectedItemRect());
+			Invalidate(GetSelectedNodeRect());
 		}
 
 		protected override void OnKeyDown(KeyEventArgs e)
@@ -998,27 +940,27 @@ namespace DetectiveUIExtension
 
 		// Internals -----------------------------------------------------------
 
-		protected void EnsureItemVisible(Node item)
+		protected void EnsureNodeVisible(Node node)
 		{
-			if (item == null)
+			if (node == null)
 				return;
 
-			Rectangle itemRect = Layout.CalcItemRectangle(item);
+			Rectangle nodeRect = Layout.CalcNodeRectangle(node);
 
-			if (ClientRectangle.Contains(itemRect))
+			if (ClientRectangle.Contains(nodeRect))
 				return;
 
 			if (HorizontalScroll.Visible)
 			{
 				int xOffset = 0;
 
-				if (itemRect.Left < ClientRectangle.Left)
+				if (nodeRect.Left < ClientRectangle.Left)
 				{
-					xOffset = (itemRect.Left - ClientRectangle.Left - (Layout.ItemHorzSpacing / 2));
+					xOffset = (nodeRect.Left - ClientRectangle.Left - (Layout.NodeHorzSpacing / 2));
 				}
-				else if (itemRect.Right > ClientRectangle.Right)
+				else if (nodeRect.Right > ClientRectangle.Right)
 				{
-					xOffset = (itemRect.Right - ClientRectangle.Right + (Layout.ItemHorzSpacing / 2));
+					xOffset = (nodeRect.Right - ClientRectangle.Right + (Layout.NodeHorzSpacing / 2));
 				}
 
 				if (xOffset != 0)
@@ -1032,13 +974,13 @@ namespace DetectiveUIExtension
 			{
 				int yOffset = 0;
 
-				if (itemRect.Top < ClientRectangle.Top)
+				if (nodeRect.Top < ClientRectangle.Top)
 				{
-					yOffset = (itemRect.Top - ClientRectangle.Top - (Layout.ItemVertSpacing / 2));
+					yOffset = (nodeRect.Top - ClientRectangle.Top - (Layout.NodeVertSpacing / 2));
 				}
-				else if (itemRect.Bottom > ClientRectangle.Bottom)
+				else if (nodeRect.Bottom > ClientRectangle.Bottom)
 				{
-					yOffset = (itemRect.Bottom - ClientRectangle.Bottom + (Layout.ItemVertSpacing / 2));
+					yOffset = (nodeRect.Bottom - ClientRectangle.Bottom + (Layout.NodeVertSpacing / 2));
 				}
 
 				if (yOffset != 0)
@@ -1064,11 +1006,12 @@ namespace DetectiveUIExtension
 
 		protected bool HandleCursorKey(Keys key)
 		{
-			Node selItem = SelectedItem;
+			Node selNode = SelectedNode;
 
-			if (selItem == null)
+			if (selNode == null)
 				return false;
 
+/*
 			var direction = NodeMatrix.Direction.Left;
 			int increment = 0;
 
@@ -1106,44 +1049,45 @@ namespace DetectiveUIExtension
 
 			case Keys.Home:
 				direction = NodeMatrix.Direction.Up;
-				increment = Data.ItemMatrix.Size.Height;
+				increment = Nodes.NodeMatrix.Size.Height;
 				break;
 
 			case Keys.End:
 				direction = NodeMatrix.Direction.Down;
-				increment = Data.ItemMatrix.Size.Height;
+				increment = Nodes.NodeMatrix.Size.Height;
 				break;
 			}
 
 			if (increment != 0) // sanity check
 			{
-				Node nextItem = Data.ItemMatrix.GetNextNearestItem(selItem.Position, direction, increment);
+				Node nextNode = Nodes.NodeMatrix.GetNextNearestNode(selNode.Position, direction, increment);
 
-				if ((nextItem != null) && (nextItem != selItem))
+				if ((nextNode != null) && (nextNode != selNode))
 				{
-					SelectedItemId = nextItem.UniqueId;
+					SelectedNodeId = nextNode.UniqueId;
 
-					EnsureItemVisible(SelectedItem);
+					EnsureNodeVisible(SelectedNode);
 					Invalidate();
 
-					SelectionChange?.Invoke(this, SelectedItem);
+					SelectionChange?.Invoke(this, SelectedNode);
 					return true;
 				}
 			}
+*/
 
 			return false;
 		}
 
 		protected bool IsEmpty()
 		{
-			return (Data.AllItems.Count == 0);
+			return (Nodes.Count == 0);
 		}
 
-		protected Node SelectedItem
+		protected Node SelectedNode
 		{
 			get
 			{
-				return Data.GetItem(SelectedItemId);
+				return Nodes.GetNode(SelectedNodeId);
 			}
 		}
 
