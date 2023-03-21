@@ -226,16 +226,6 @@ namespace DetectiveUIExtension
 		protected int GraphBorder { get { return Layout.GraphBorder; } }
 		protected int LabelPadding { get { return Layout.LabelPadding; } }
 
-		protected int NodeLineCount
-		{
-			get { return Layout.NodeLineCount; }
-			set
-			{
-				if (Layout.SetNodeLineCount(value))
-					RecalculateGraphSize();
-			}
-		}
-
 		private uint SelectedNodeId = 0;
 		private new LayoutHelper Layout;
 		private Timer DragTimer;
@@ -257,16 +247,6 @@ namespace DetectiveUIExtension
 			DragTimer.Tick += new EventHandler(OnDragTimer);
 
 			InitializeComponent();
-		}
-
-		public void RebuildPaths()
-		{
-			//RecalculateGraphSize(Nodes.RebuildPaths());
-		}
-
-		public void RecalculateGraphSize()
-		{
-			//RecalculateGraphSize(Nodes.AllPaths.MaxPos);
 		}
 
 		private void RecalculateGraphSize(Point maxPos)
@@ -491,7 +471,7 @@ namespace DetectiveUIExtension
 			BaseFont = new Font(fontName, fontSize, FontStyle.Regular);
 			Font = BaseFont;
 
-			RecalculateGraphSize();
+			//RecalculateGraphSize();
 
 			return true;
 		}
@@ -628,7 +608,7 @@ namespace DetectiveUIExtension
 						Font = new Font(BaseFont.FontFamily, BaseFont.Size * ZoomFactor, BaseFont.Style);
 
 					Layout.Font = Font;
-					RecalculateGraphSize();
+					//RecalculateGraphSize();
 
 					// Scroll the view to keep the mouse located in the 
 					// same relative position as before
@@ -895,7 +875,7 @@ namespace DetectiveUIExtension
 */
 			}
 
-			RebuildPaths();
+			//RebuildPaths();
 			Invalidate();
 
 			return true;

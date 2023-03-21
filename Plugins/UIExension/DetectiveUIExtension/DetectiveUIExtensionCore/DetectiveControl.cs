@@ -37,7 +37,7 @@ namespace DetectiveUIExtension
 
 		public DetectiveNode(Task task) 
 			: 
-			base(task.GetTitle(), task.GetID(), task.GetLocalDependency())
+			base(task.GetTitle(), task.GetID(), task.GetParentID(), task.GetLocalDependency())
 		{
 			TextColor = task.GetTextDrawingColor();
 			HasIcon = (task.GetIcon().Length > 0);
@@ -181,8 +181,6 @@ namespace DetectiveUIExtension
 
 			// Initialise our fonts
 			OnFontChanged(this, EventArgs.Empty);
-
-			NodeLineCount = 4;
 		}
 
 		protected void OnFontChanged(object sender, EventArgs e)
@@ -214,6 +212,8 @@ namespace DetectiveUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
+			TreeView tree = null;
+
 			switch (type)
 			{
 			case UIExtension.UpdateType.Edit:
@@ -223,15 +223,15 @@ namespace DetectiveUIExtension
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
 				Nodes.Clear();
+				tree = new TreeView() { Visible = false };
 				break;
 
 			case UIExtension.UpdateType.Unknown:
 				return;
 			}
 
-			UpdateTaskAttributes(tasks);
-
-			//CriticalPaths = UpdateCriticalPaths();
+			UpdateTaskAttributes(tasks, tree.Nodes);
+			RebuildDiagram(tree);
 		}
 
 		public DetectiveOption Options
@@ -495,30 +495,29 @@ namespace DetectiveUIExtension
 
 		// Internal ------------------------------------------------------------
 
+		private void RebuildDiagram(TreeView tree)
+		{ 
+}
+
 		protected int ScaleByDPIFactor(int value)
 		{
 			return DPIScaling.Scale(value);
 		}
 
-		private void UpdateTaskAttributes(TaskList tasks)
+		private void UpdateTaskAttributes(TaskList tasks, TreeNodeCollection parent)
 		{
 			Task task = tasks.GetFirstTask();
 
-			bool dependencyChanges = false;
-
 			while (task.IsValid())
 			{
-				dependencyChanges |= ProcessTaskUpdate(task);
+				ProcessTaskUpdate(task, parent);
 				task = task.GetNextTask();
 			}
 
-			if (dependencyChanges)
-				RebuildPaths();
-			else
-				Invalidate();
+			Invalidate();
 		}
 
-		private bool ProcessTaskUpdate(Task task)
+		private bool ProcessTaskUpdate(Task task, TreeNodeCollection parent)
 		{
 			if (!task.IsValid())
 				return false;
@@ -527,7 +526,14 @@ namespace DetectiveUIExtension
 
 			if (node == null)
 			{
-				Nodes.AddNode(new DetectiveNode(task));
+				node = new DetectiveNode(task);
+				Nodes.AddNode(node);
+
+				var treeNode = new TreeNode();
+				treeNode.Tag = node;
+
+				parent.Add(treeNode);
+				parent = treeNode.Nodes;
 			}
 			else
 			{
@@ -538,7 +544,7 @@ namespace DetectiveUIExtension
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, parent))
 				subtask = subtask.GetNextTask();
 
 			return true;
