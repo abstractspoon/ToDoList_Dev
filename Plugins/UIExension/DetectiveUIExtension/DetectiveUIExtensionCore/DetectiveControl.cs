@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
 
+using Microsoft.Msagl.Core.Layout;
+
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -212,8 +214,6 @@ namespace DetectiveUIExtension
 
 		public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
 		{
-			TreeView tree = null;
-
 			switch (type)
 			{
 			case UIExtension.UpdateType.Edit:
@@ -223,15 +223,14 @@ namespace DetectiveUIExtension
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
 				Nodes.Clear();
-				tree = new TreeView() { Visible = false };
 				break;
 
 			case UIExtension.UpdateType.Unknown:
 				return;
 			}
 
-			UpdateTaskAttributes(tasks, tree.Nodes);
-			RebuildDiagram(tree);
+			UpdateTaskAttributes(tasks);
+			RebuildDiagram();
 		}
 
 		public DetectiveOption Options
@@ -495,7 +494,7 @@ namespace DetectiveUIExtension
 
 		// Internal ------------------------------------------------------------
 
-		private void RebuildDiagram(TreeView tree)
+		private void RebuildDiagram()
 		{ 
 }
 
@@ -504,20 +503,20 @@ namespace DetectiveUIExtension
 			return DPIScaling.Scale(value);
 		}
 
-		private void UpdateTaskAttributes(TaskList tasks, TreeNodeCollection parent)
+		private void UpdateTaskAttributes(TaskList tasks)
 		{
 			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid())
 			{
-				ProcessTaskUpdate(task, parent);
+				ProcessTaskUpdate(task);
 				task = task.GetNextTask();
 			}
 
 			Invalidate();
 		}
 
-		private bool ProcessTaskUpdate(Task task, TreeNodeCollection parent)
+		private bool ProcessTaskUpdate(Task task)
 		{
 			if (!task.IsValid())
 				return false;
@@ -528,12 +527,6 @@ namespace DetectiveUIExtension
 			{
 				node = new DetectiveNode(task);
 				Nodes.AddNode(node);
-
-				var treeNode = new TreeNode();
-				treeNode.Tag = node;
-
-				parent.Add(treeNode);
-				parent = treeNode.Nodes;
 			}
 			else
 			{
@@ -544,7 +537,7 @@ namespace DetectiveUIExtension
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, parent))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask))
 				subtask = subtask.GetNextTask();
 
 			return true;
