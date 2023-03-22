@@ -51,7 +51,7 @@ namespace DetectiveUIExtension
 			SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
 			SetStyle(ControlStyles.ResizeRedraw, true);
 
-			base.BorderStyle = BorderStyle.None;
+//			base.BorderStyle = BorderStyle.None;
 		}
 
 		#endregion

@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
 
-using Microsoft.Msagl.Core.Layout;
+//using Microsoft.Msagl.Drawing;
 
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
@@ -20,37 +20,42 @@ namespace DetectiveUIExtension
 
 	// -----------------------------------------------------------------
 
-	class DetectiveNode : Node
+	class TaskNode : Node
 	{
 		// Data
 		public Color TextColor { get; private set; }
 
 		public bool HasIcon { get; private set; }
-		public bool Flagged { get; private set; }
-		public bool Parent { get; private set; }
-		public bool TopLevel { get; private set; }
-		public bool Done { get; private set; }
-		public bool GoodAsDone { get; private set; }
+		public bool IsFlagged { get; private set; }
+		public bool IsParent { get; private set; }
+		public bool IsTopLevel { get; private set; }
 		public bool SomeSubtasksDone { get; private set; }
-		public bool Locked { get; private set; }
-		public string TaskPosition { get; private set; }
+		public bool IsLocked { get; private set; }
+
+		public List<uint> ChildIds { get; private set; }
+
+		private bool Done;
+		private bool GoodAsDone;
+		private uint ParentId;
 
 		// -----------------------------------------------------------------
 
-		public DetectiveNode(Task task) 
+		public TaskNode(Task task) 
 			: 
-			base(task.GetTitle(), task.GetID(), task.GetParentID(), task.GetLocalDependency())
+			base(task.GetTitle(), task.GetID(), task.GetLocalDependency())
 		{
 			TextColor = task.GetTextDrawingColor();
 			HasIcon = (task.GetIcon().Length > 0);
-			Flagged = task.IsFlagged(false);
-			Parent = task.IsParent();
-			TopLevel = (task.GetParentID() == 0);
+			IsFlagged = task.IsFlagged(false);
+			IsParent = task.IsParent();
+			IsTopLevel = (task.GetParentID() == 0);
 			Done = task.IsDone();
             GoodAsDone = task.IsGoodAsDone();
             SomeSubtasksDone = task.HasSomeSubtasksDone();
-			Locked = task.IsLocked(true);
-			TaskPosition = task.GetPositionString();
+			IsLocked = task.IsLocked(true);
+			ParentId = task.GetParentID();
+
+			ChildIds = new List<uint>();
 		}
 
 		public override string ToString() 
@@ -88,7 +93,7 @@ namespace DetectiveUIExtension
 				HasIcon = (task.GetIcon().Length > 0);
 
 			if (task.IsAttributeAvailable(Task.Attribute.Flag))
-				Flagged = task.IsFlagged(false);
+				IsFlagged = task.IsFlagged(false);
 
 			if (task.IsAttributeAvailable(Task.Attribute.Color))
 				TextColor = task.GetTextDrawingColor();
@@ -104,10 +109,12 @@ namespace DetectiveUIExtension
 				// TODO
 			}
 
-			Parent = task.IsParent();
-			Locked = task.IsLocked(true);
+			IsParent = task.IsParent();
+			IsLocked = task.IsLocked(true);
             GoodAsDone = task.IsGoodAsDone();
-			TopLevel = (task.GetParentID() == 0);
+
+			Debug.Assert(task.GetParentID() == ParentId);
+			IsTopLevel = (task.GetParentID() == 0);
 
 			return true;
 		}
@@ -125,7 +132,7 @@ namespace DetectiveUIExtension
 	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-	class DetectiveControl : NodeControl, IDragRenderer
+	class TDLNodeControl : NodeControl, IDragRenderer
 	{
 		public event EditTaskLabelEventHandler      EditTaskLabel;
         public event EditTaskIconEventHandler       EditTaskIcon;
@@ -139,6 +146,7 @@ namespace DetectiveUIExtension
 		private bool m_TaskColorIsBkgnd = false;
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
+
 		private DetectiveOption m_Options;
 
 		private Timer m_EditTimer;
@@ -148,6 +156,7 @@ namespace DetectiveUIExtension
 
 		private DragImage m_DragImage;
 		private Point m_LastDragPos;
+
 
 		//private List<NodePath> CriticalPaths;
 
@@ -164,7 +173,7 @@ namespace DetectiveUIExtension
 
 		// -------------------------------------------------------------------------
 
-		public DetectiveControl(Translator trans, UIExtension.TaskIcon icons)
+		public TDLNodeControl(Translator trans, UIExtension.TaskIcon icons)
 		{
 			m_Trans = trans;
 			m_TaskIcons = icons;
@@ -495,8 +504,38 @@ namespace DetectiveUIExtension
 		// Internal ------------------------------------------------------------
 
 		private void RebuildDiagram()
-		{ 
-}
+		{
+			var graph = new Microsoft.Msagl.Drawing.Graph();
+
+			foreach (var node in Nodes.Values)
+			{
+				foreach (var id in node.LinkIds)
+				{
+					var edge = graph.AddEdge(node.UniqueId.ToString(), id.ToString());
+					edge.GeometryEdge = new Microsoft.Msagl.Core.Layout.Edge();
+				}
+			}
+
+			graph.CreateGeometryGraph();
+
+			foreach (var graphNode in graph.Nodes)
+			{
+				graphNode.GeometryNode = new Microsoft.Msagl.Core.Layout.Node();
+				graphNode.GeometryNode.BoundaryCurve = Microsoft.Msagl.Core.Geometry.Curves.CurveFactory.CreateRectangle(NodeWidth, NodeHeight, new Microsoft.Msagl.Core.Geometry.Point());
+				int breakpoint = 0;
+			}
+
+			var settings = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings();
+			var layout = new Microsoft.Msagl.Layout.Initial.InitialLayout(graph.GeometryGraph, settings);
+			layout.Run();
+
+			graph.GeometryGraph.UpdateBoundingBox();
+
+			foreach (var graphNode in graph.Nodes)
+			{
+				int breakpoint = 0;
+			}
+		}
 
 		protected int ScaleByDPIFactor(int value)
 		{
@@ -521,29 +560,33 @@ namespace DetectiveUIExtension
 			if (!task.IsValid())
 				return false;
 
-			Node node = Nodes.GetNode(task.GetID());
+			var node = (Nodes.GetNode(task.GetID()) as TaskNode);
 
 			if (node == null)
 			{
-				node = new DetectiveNode(task);
+				node = new TaskNode(task);
 				Nodes.AddNode(node);
 			}
 			else
 			{
-				DetectiveNode taskNode = (node as DetectiveNode);
-				taskNode.Update(task);
+				node.Update(task);
 			}
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
 			while (subtask.IsValid() && ProcessTaskUpdate(subtask))
+			{
+				node.ChildIds.Add(subtask.GetID());
+				node.LinkIds.Add(subtask.GetID());
+
 				subtask = subtask.GetNextTask();
+			}
 
 			return true;
 		}
 
-		protected Color GetNodeBackgroundColor(DetectiveNode taskNode, bool selected)
+		protected Color GetNodeBackgroundColor(TaskNode taskNode, bool selected)
 		{
 			if (selected)
 				return Color.Empty;
@@ -561,7 +604,7 @@ namespace DetectiveUIExtension
 			return Color.Empty;
 		}
 
-		protected Color GetNodeTextColor(DetectiveNode taskNode, DrawState state)
+		protected Color GetNodeTextColor(TaskNode taskNode, DrawState state)
 		{
 			if (state.HasFlag(DrawState.DragImage))
 				return SystemColors.WindowText;
@@ -584,7 +627,7 @@ namespace DetectiveUIExtension
 			return SystemColors.WindowText;
 		}
 
-		protected Color GetNodeBorderColor(DetectiveNode taskNode, bool selected)
+		protected Color GetNodeBorderColor(TaskNode taskNode, bool selected)
 		{
 			if (selected)
 				return Color.Empty;
@@ -602,7 +645,7 @@ namespace DetectiveUIExtension
 			return SystemColors.ControlDarkDark;
 		}
 
-		protected Color GetNodeLineColor(DetectiveNode taskNode, DrawState state)
+		protected Color GetNodeLineColor(TaskNode taskNode, DrawState state)
 		{
 			if (state.HasFlag(DrawState.DragImage))
 				return SystemColors.WindowText;
@@ -620,18 +663,18 @@ namespace DetectiveUIExtension
 			return SystemColors.ControlDarkDark;
 		}
 
-		protected Font GetNodeFont(DetectiveNode taskNode)
+		protected Font GetNodeFont(TaskNode taskNode)
 		{
 			Font font = null;
 
-			if (taskNode.TopLevel)
+			if (taskNode.IsTopLevel)
 			{
-				if (taskNode.Done)
+				if (taskNode.IsDone(false))
 					font = m_BoldDoneLabelFont;
 				else
 					font = m_BoldLabelFont;
 			}
-			else if (taskNode.Done)
+			else if (taskNode.IsDone(false))
 			{
 				font = m_DoneLabelFont;
 			}
@@ -691,7 +734,7 @@ namespace DetectiveUIExtension
 			if (dragImage)
 				nodeRect.Offset(-nodeRect.Left, -nodeRect.Top);
 
-			var taskNode = (node as DetectiveNode);
+			var taskNode = (node as TaskNode);
 
 			// Figure out the required colours
 			Color backColor = GetNodeBackgroundColor(taskNode, selected);
@@ -849,12 +892,12 @@ namespace DetectiveUIExtension
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
 		}
 
-		private bool TaskHasIcon(DetectiveNode taskNode)
+		private bool TaskHasIcon(TaskNode taskNode)
 		{
 			if ((m_TaskIcons == null) || (taskNode == null))
 				return false;
 
-			return (taskNode.HasIcon || (m_ShowParentAsFolder && taskNode.Parent));
+			return (taskNode.HasIcon || (m_ShowParentAsFolder && taskNode.IsParent));
 		}
 
         private Rectangle CalcIconRect(Rectangle labelRect)
@@ -884,12 +927,12 @@ namespace DetectiveUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			var taskNode = (HitTestNode(e.Location) as DetectiveNode);
+			var taskNode = (HitTestNode(e.Location) as TaskNode);
 
 			if (taskNode == null)
 				return;
 
-			if (!ReadOnly && !taskNode.Locked)
+			if (!ReadOnly && !taskNode.IsLocked)
 			{
 /*
 				if (HitTestCheckbox(node, e.Location))
@@ -917,9 +960,9 @@ namespace DetectiveUIExtension
 
 		private bool HitTestIcon(Node node, Point point)
         {
-			var taskNode = (node as DetectiveNode);
+			var taskNode = (node as TaskNode);
 			
-			if (taskNode.Locked || !TaskHasIcon(taskNode))
+			if (taskNode.IsLocked || !TaskHasIcon(taskNode))
 				return false;
 			
 			// else
@@ -946,13 +989,13 @@ namespace DetectiveUIExtension
 		{
  			base.OnMouseMove(e);
 
-			var taskNode = (HitTestNode(e.Location) as DetectiveNode);
+			var taskNode = (HitTestNode(e.Location) as TaskNode);
 
 			if (!ReadOnly && (taskNode != null))
 			{
 				Cursor cursor = null;
 
-				if (taskNode.Locked)
+				if (taskNode.IsLocked)
 				{
 					cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 				}
@@ -1022,7 +1065,7 @@ namespace DetectiveUIExtension
 			if (!base.IsAcceptableDropTarget(e))
 				return false;
 
-			return !(e.DraggedNode as DetectiveNode).Locked;
+			return !(e.DraggedNode as TaskNode).IsLocked;
 		}
 
 		override protected bool IsAcceptableDragSource(Node node)
@@ -1030,7 +1073,7 @@ namespace DetectiveUIExtension
 			if (!base.IsAcceptableDragSource(node))
 				return false;
 
-			return !(node as DetectiveNode).Locked;
+			return !(node as TaskNode).IsLocked;
 		}
 
 		override protected bool DoDrop(NodeDragEventArgs e)

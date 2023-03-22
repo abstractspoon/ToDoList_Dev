@@ -8,23 +8,16 @@ namespace DetectiveUIExtension
 {
 	public class Node : IComparable
 	{
-		public Node(string title, uint uniqueId, uint parentId, List<uint> linkIds)
+		public Node(string title, uint uniqueId, List<uint> linkIds)
 		{
 			Title = title;
 			UniqueId = uniqueId;
-			ParentId = parentId;
 
 			Position = NullPoint;
 			LinkIds = linkIds;
 		}
 
 		public uint UniqueId
-		{
-			get;
-			private set;
-		}
-
-		public uint ParentId
 		{
 			get;
 			private set;
