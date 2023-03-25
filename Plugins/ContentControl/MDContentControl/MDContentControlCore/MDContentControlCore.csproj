@@ -38,6 +38,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Markdig">
+      <HintPath>..\..\..\3rdParty\Markdig\Markdig.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -51,20 +54,35 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MarkdownSharpEditorForm.cs" />
-    <Compile Include="MarkdownSharpEditorForm.Designer.cs" />
+    <Compile Include="MDContentControlForm.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MDContentControlForm.Designer.cs">
+      <DependentUpon>MDContentControlForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MDContentControlCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="MDContentControlForm.resx">
+      <DependentUpon>MDContentControlForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MDContentControlCore.resx">
       <DependentUpon>MDContentControlCore.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\3rdParty\MarkdownSharp\MarkdownSharp.csproj">
-      <Project>{37619116-cce8-465a-8b1f-081ca53364bb}</Project>
-      <Name>MarkdownSharp</Name>
+    <ProjectReference Include="..\..\..\3rdParty\CommandHandling\CommandHandling.csproj">
+      <Project>{3733d8e0-4b87-42a6-9b9d-5e16bb15c8d8}</Project>
+      <Name>CommandHandling</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\MSHtmlEditorControl\MSHTMLEditorControl.csproj">
+      <Project>{5873de0f-6853-4c8e-91a4-7a6861069a9a}</Project>
+      <Name>MSHTMLEditorControl</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\3rdParty\WebBrowserEx\WebBrowserEx.csproj">
+      <Project>{21776543-c563-42fe-8884-0eb3938477fb}</Project>
+      <Name>WebBrowserEx</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\PluginHelpers\PluginHelpers.vcxproj">
       <Project>{85db2caf-cc78-4ca9-b948-ec2ac25f13e8}</Project>
@@ -79,7 +97,7 @@ mkdir "$(SolutionDir)..\Core\ToDoList"
 mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
 copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"
-</PostBuildEvent>
+copy $(SolutionDir)3rdParty\Markdig\Markdig.dll "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)\"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
