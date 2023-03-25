@@ -219,7 +219,7 @@ namespace DetectiveUIExtension
 //                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
 			m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
-			m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
+	//		m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
             m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveEditTaskCompletion);
@@ -256,6 +256,7 @@ namespace DetectiveUIExtension
 			notify.NotifySelChange(item.UniqueId);
 		}
 
+/*
 		bool OnDetectiveDragDrop(object sender, NodeDragEventArgs e)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
@@ -271,6 +272,7 @@ namespace DetectiveUIExtension
 			// 									 e.afterSibling.uniqueID);
 			return false;
 		}
+*/
 
         protected override void OnSizeChanged(EventArgs e)
         {

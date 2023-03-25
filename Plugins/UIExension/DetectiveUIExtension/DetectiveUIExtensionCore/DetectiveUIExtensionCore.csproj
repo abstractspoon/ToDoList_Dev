@@ -37,12 +37,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Msagl">
-      <HintPath>..\..\..\3rdParty\Microsoft\Microsoft.Msagl.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Msagl.Drawing">
-      <HintPath>..\..\..\3rdParty\Microsoft\Microsoft.Msagl.Drawing.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -57,7 +51,9 @@
   <ItemGroup>
     <Compile Include="Geometry2D.cs" />
     <Compile Include="Node.cs" />
-    <Compile Include="NodeControl.cs" />
+    <Compile Include="NodeControl.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="NodeControl.Designer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -69,6 +65,18 @@
     <Compile Include="TDLNodeControl.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\automatic-graph-layout\GraphLayout\Drawing\DrawingPort.csproj">
+      <Project>{4489dcc1-879d-49cf-8fca-991d2cf1f10f}</Project>
+      <Name>DrawingPort</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\automatic-graph-layout\GraphLayout\MSAGL\MsaglPort.csproj">
+      <Project>{b96ba716-ee36-417e-a9ef-819e7fa4eefe}</Project>
+      <Name>MsaglPort</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\..\automatic-graph-layout\GraphLayout\tools\GraphViewerGDI\GdiViewerPort.csproj">
+      <Project>{e48e16d7-be38-4a4f-b06a-bbbd6d827462}</Project>
+      <Name>GdiViewerPort</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\3rdParty\CustomComboBox\CustomComboBox.csproj">
       <Project>{5563f985-67ac-4b91-a2c4-1fc9bafe7d49}</Project>
       <Name>CustomComboBox</Name>
@@ -91,6 +99,10 @@
   <PropertyGroup>
     <PostBuildEvent>mkdir "$(SolutionDir)$(ConfigurationName)"
 copy $(TargetPath) "$(SolutionDir)$(ConfigurationName)\"
+
+copy "$(SolutionDir)..\..\automatic-graph-layout\GraphLayout\tools\GraphViewerGDI\bin\Debug\Core.dll" "$(SolutionDir)$(ConfigurationName)\"
+copy "$(SolutionDir)..\..\automatic-graph-layout\GraphLayout\tools\GraphViewerGDI\bin\Debug\Drawing.dll" "$(SolutionDir)$(ConfigurationName)\"
+copy "$(SolutionDir)..\..\automatic-graph-layout\GraphLayout\tools\GraphViewerGDI\bin\Debug\Core.dll" "$(SolutionDir)$(ConfigurationName)\"
 
 mkdir "$(SolutionDir)..\Core\ToDoList"
 mkdir "$(SolutionDir)..\Core\ToDoList\unicode_$(ConfigurationName)"

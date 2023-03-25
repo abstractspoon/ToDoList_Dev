@@ -7,8 +7,6 @@ using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
 
-//using Microsoft.Msagl.Drawing;
-
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
@@ -239,7 +237,7 @@ namespace DetectiveUIExtension
 			}
 
 			UpdateTaskAttributes(tasks);
-			RebuildDiagram();
+			//RebuildDiagram();
 		}
 
 		public DetectiveOption Options
@@ -336,25 +334,27 @@ namespace DetectiveUIExtension
 
 		public uint HitTest(Point screenPos)
 		{
-			var clientPos = PointToClient(screenPos);
-			var node = HitTestNode(clientPos);
-
-			return node?.UniqueId ?? 0;
+			// 			var clientPos = PointToClient(screenPos);
+			// 			var node = HitTestNode(clientPos);
+			// 
+			// 			return node?.UniqueId ?? 0;
+			return 0;
 		}
 
 		public Rectangle GetSelectedNodeLabelRect()
 		{
-			EnsureNodeVisible(SelectedNode);
-
-			var labelRect = GetSelectedNodeRect();
-
-			// 			labelRect.X -= LabelPadding;
-			// 			labelRect.X += GetExtraWidth(SelectedNode);
+			// 			EnsureNodeVisible(SelectedNode);
 			// 
-			// Make sure the rect is big enough for the unscaled font
-			labelRect.Height = (BaseFont.Height + (2 * LabelPadding)); 
-
-			return labelRect;
+			// 			var labelRect = GetSelectedNodeRect();
+			// 
+			// 			// 			labelRect.X -= LabelPadding;
+			// 			// 			labelRect.X += GetExtraWidth(SelectedNode);
+			// 			// 
+			// 			// Make sure the rect is big enough for the unscaled font
+			// 			labelRect.Height = (BaseFont.Height + (2 * LabelPadding)); 
+			// 
+			// 			return labelRect;
+			return Rectangle.Empty;	
 		}
 
 		public bool CanMoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
@@ -369,8 +369,8 @@ namespace DetectiveUIExtension
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
-			if ((text == String.Empty) || IsEmpty())
-				return false;
+// 			if ((text == String.Empty) || IsEmpty())
+// 				return false;
 
 			/*
 			TreeNode node = null; // start node
@@ -498,44 +498,11 @@ namespace DetectiveUIExtension
 
 		public bool CanSaveToImage()
 		{
-			return !IsEmpty();
+			//return !IsEmpty();
+			return false;
 		}
 
 		// Internal ------------------------------------------------------------
-
-		private void RebuildDiagram()
-		{
-			var graph = new Microsoft.Msagl.Drawing.Graph();
-
-			foreach (var node in Nodes.Values)
-			{
-				foreach (var id in node.LinkIds)
-				{
-					var edge = graph.AddEdge(node.UniqueId.ToString(), id.ToString());
-					edge.GeometryEdge = new Microsoft.Msagl.Core.Layout.Edge();
-				}
-			}
-
-			graph.CreateGeometryGraph();
-
-			foreach (var graphNode in graph.Nodes)
-			{
-				graphNode.GeometryNode = new Microsoft.Msagl.Core.Layout.Node();
-				graphNode.GeometryNode.BoundaryCurve = Microsoft.Msagl.Core.Geometry.Curves.CurveFactory.CreateRectangle(NodeWidth, NodeHeight, new Microsoft.Msagl.Core.Geometry.Point());
-				int breakpoint = 0;
-			}
-
-			var settings = new Microsoft.Msagl.Layout.Incremental.FastIncrementalLayoutSettings();
-			var layout = new Microsoft.Msagl.Layout.Initial.InitialLayout(graph.GeometryGraph, settings);
-			layout.Run();
-
-			graph.GeometryGraph.UpdateBoundingBox();
-
-			foreach (var graphNode in graph.Nodes)
-			{
-				int breakpoint = 0;
-			}
-		}
 
 		protected int ScaleByDPIFactor(int value)
 		{
@@ -698,6 +665,7 @@ namespace DetectiveUIExtension
 			graphics.Restore(gSave);
 		}
 
+/*
 		override protected void DoPaint(Graphics graphics, Rectangle clipRect)
 		{
 			base.DoPaint(graphics, clipRect);
@@ -721,8 +689,10 @@ namespace DetectiveUIExtension
 			DoPaintNode(graphics, node, drawState);
 		}
 
+*/
 		protected void DoPaintNode(Graphics graphics, Node node, DrawState drawState)
 		{
+/*
 			graphics.SmoothingMode = SmoothingMode.None;
 
 			bool selected = drawState.HasFlag(DrawState.Selected);
@@ -830,6 +800,7 @@ namespace DetectiveUIExtension
 			// Title
 			titleRect.Inflate(-LabelPadding, -LabelPadding);
 			titleRect.Height /= 2;
+*/
 
 			/*
 			// Checkbox
@@ -861,17 +832,19 @@ namespace DetectiveUIExtension
 			}
 			*/
 
-			// PERT specific info
 
 		}
 
+/*
 		override protected void OnPaintLink(Graphics graphics, Node fromNode, Node toNode)
 		{
 			DoPaintLink(graphics, fromNode, toNode);
 		}
+*/
 
 		protected void DoPaintLink(Graphics graphics, Node fromNode, Node toNode)
 		{
+/*
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
 			Point[] points = GetConnectionPoints(fromNode, toNode);
@@ -890,6 +863,7 @@ namespace DetectiveUIExtension
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);
 			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
+*/
 		}
 
 		private bool TaskHasIcon(TaskNode taskNode)
@@ -916,8 +890,8 @@ namespace DetectiveUIExtension
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
 		{
-			if (HitTestNode(e.Location) != null)
-				EditTaskLabel(this, SelectedNode.UniqueId);
+// 			if (HitTestNode(e.Location) != null)
+// 				EditTaskLabel(this, SelectedNode.UniqueId);
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)
@@ -927,7 +901,8 @@ namespace DetectiveUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			var taskNode = (HitTestNode(e.Location) as TaskNode);
+			TaskNode taskNode = null;
+			//(HitTestNode(e.Location) as TaskNode);
 
 			if (taskNode == null)
 				return;
@@ -955,7 +930,7 @@ namespace DetectiveUIExtension
 
 		private bool SelectedNodeWasPreviouslySelected
 		{
-			get { return ((SelectedNode != null) && (SelectedNode == m_PreviouslySelectedNode)); }
+			get { return false; /*((SelectedNode != null) && (SelectedNode == m_PreviouslySelectedNode));*/ }
 		}
 
 		private bool HitTestIcon(Node node, Point point)
@@ -964,15 +939,15 @@ namespace DetectiveUIExtension
 			
 			if (taskNode.IsLocked || !TaskHasIcon(taskNode))
 				return false;
-			
+
 			// else
-			return CalcIconRect(CalcNodeRectangle(node)).Contains(point);
+			return false;//			CalcIconRect(CalcNodeRectangle(node)).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			m_EditTimer.Stop();
-			m_PreviouslySelectedNode = Focused ? SelectedNode : null;
+// 			m_EditTimer.Stop();
+// 			m_PreviouslySelectedNode = Focused ? SelectedNode : null;
 
 			base.OnMouseDown(e);
 		}
@@ -981,10 +956,11 @@ namespace DetectiveUIExtension
 		{
 			m_EditTimer.Stop();
 
-			if (EditTaskLabel != null)
-				EditTaskLabel(this, SelectedNode?.UniqueId ?? 0);
+// 			if (EditTaskLabel != null)
+// 				EditTaskLabel(this, SelectedNode?.UniqueId ?? 0);
 		}
 
+/*
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
  			base.OnMouseMove(e);
@@ -1045,14 +1021,14 @@ namespace DetectiveUIExtension
 
 			m_LastDragPos = PointToClient(new Point(e.X, e.Y));
 		}
-
+*/
 		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
 		{
 			DoPaintNode(graphics, 
 						(obj as Node), 
 						DrawState.Selected | DrawState.DragImage);
 		}
-
+/*
 		protected override void DoDragCleanUp()
 		{
 			base.DoDragCleanUp();
@@ -1084,6 +1060,7 @@ namespace DetectiveUIExtension
 			return base.DoDrop(e);
 		}
 
+*/
 
 	}
 }

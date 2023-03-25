@@ -6,14 +6,13 @@ using System.Diagnostics;
 
 namespace DetectiveUIExtension
 {
-	public class Node : IComparable
+	public class Node
 	{
 		public Node(string title, uint uniqueId, List<uint> linkIds)
 		{
 			Title = title;
 			UniqueId = uniqueId;
 
-			Position = NullPoint;
 			LinkIds = linkIds;
 		}
 
@@ -24,9 +23,6 @@ namespace DetectiveUIExtension
 		}
 
 		public string Title;
-		public Point Position;
-		public bool HasPosition { get { return (Position != NullPoint); } }
-
 		public List<uint> LinkIds;
 		public bool HasLinks { get { return LinkIds.Count > 0; } }
 
@@ -35,26 +31,6 @@ namespace DetectiveUIExtension
 			return (LinkIds.Contains(item.UniqueId) || item.LinkIds.Contains(UniqueId));
 		}
 
-		public double Distance(Node item)
-		{
-			return Distance(Position, item.Position);
-		}
-
-		// Statics 
-		public static Point NullPoint { get { return new Point(-1, -1); } }
-
-		public static double Distance(Point pos1, Point pos2)
-		{
-			int diffX = (pos1.X - pos2.X);
-			int diffY = (pos1.Y - pos2.Y);
-
-			return Math.Sqrt((diffX * diffX) + (diffY * diffY));
-		}
-
-		public virtual int CompareTo(object other)
-		{
-			return ((int)UniqueId - (int)((Node)other).UniqueId);
-		}
 	}
 
 	// ------------------------------------------------------------
