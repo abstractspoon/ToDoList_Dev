@@ -1710,9 +1710,9 @@ void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 					// Find the first task whose position is already set
 					// This will determine the number of free slots that
 					// exist before it
-					int nCurFreeSlot = 0, nMaxFreeSlot = -1;
+					int nCurFreeSlot = 0, nMaxFreeSlot = -1, nTask;
 
-					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
+					for (nTask = 0; nTask < pTasks->GetSize(); nTask++)
 					{
 						const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 						ASSERT(pTCI);
@@ -1733,7 +1733,7 @@ void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 					// if not already done keeping track of the maximum vpos
 					int nMaxPos = 0;
 
-					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
+					for (nTask = 0; nTask < pTasks->GetSize(); nTask++)
 					{
 						TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 						ASSERT(pTCI);
