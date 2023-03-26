@@ -260,6 +260,30 @@ protected:
 
 /////////////////////////////////////////////////////////////////////////////
 
+struct CONTINUOUSDRAWINFO
+{
+	CONTINUOUSDRAWINFO(DWORD dwID = 0);
+
+	void Reset();
+
+	DWORD dwTaskID;
+	int nIconOffset;
+	int nTextOffset;
+	int nVertPos;
+};
+
+class CCalContinuousDrawInfo : public CMap<DWORD, DWORD, CONTINUOUSDRAWINFO*, CONTINUOUSDRAWINFO*&>
+{
+public:
+	CCalContinuousDrawInfo() {}
+	virtual ~CCalContinuousDrawInfo();
+
+	void RemoveAll();
+	CONTINUOUSDRAWINFO& GetTaskInfo(DWORD dwTaskID);
+};
+
+/////////////////////////////////////////////////////////////////////////////
+
 //{{AFX_INSERT_LOCATION}}
 // Microsoft Visual C++ will insert additional declarations immediately before the previous line.
 

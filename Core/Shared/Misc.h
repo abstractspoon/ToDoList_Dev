@@ -347,7 +347,20 @@ namespace Misc
 		aValues.RemoveAt(nFind);
 		return TRUE;
 	}
-	
+
+	template <class T, class S>
+	BOOL RemoveAllT(const S& item, T& aValues)
+	{
+		int nNumItems = aValues.GetSize(), nItem = nNumItems;
+
+		while (nItem--)
+		{
+			if (item == GetItemT(aValues, nItem))
+				aValues.RemoveAt(nItem);
+		}
+
+		return (aValues.GetSize() < nNumItems);
+	}
 /*
 	template <class T> 
 	T IncrementItemT(CArray<T, T&>& aValues, int nItem)
@@ -393,12 +406,12 @@ namespace Misc
 	}
 
 	template <class T, class S> 
-	int FindT(const S& toFind, const T& aValues)
+	int FindT(const S& toFind, const T& aValues, int nStart = 0)
 	{
-		int nItem = aValues.GetSize();
+		int nNumItems = aValues.GetSize();
 		const S* pData = aValues.GetData();
 
-		while (nItem--)
+		for (int nItem = nStart; nItem < nNumItems; nItem++)
 		{
 			if (pData[nItem] == toFind)
 				return nItem;
