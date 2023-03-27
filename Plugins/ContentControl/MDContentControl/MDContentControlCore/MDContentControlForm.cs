@@ -144,6 +144,8 @@ namespace MDContentControl
 
 		private void HtmlPreview_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
 		{
+			bool hadFocus = InputTextCtrl.Focused;
+
 			if (!m_Initialised)
 			{
 				Debug.Assert(e.Url.ToString() == "about:blank");
@@ -155,7 +157,8 @@ namespace MDContentControl
 			if (PreviewBrowser.Document != null)
 				PreviewBrowser.Document.BackColor = (InputTextCtrl.ReadOnly ? SystemColors.ButtonFace : SystemColors.Window);
 
-			InputTextCtrl.Focus();
+			if (hadFocus)
+				InputTextCtrl.Focus();
 		}
 
 		private void textBox1_TextChanged(object sender, EventArgs e)
