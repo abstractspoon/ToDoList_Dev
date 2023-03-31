@@ -44,7 +44,7 @@ namespace DetectiveUIExtension
 
         public bool SelectTask(UInt32 dwTaskID)
         {
-			return m_Control.SetSelectedNode(dwTaskID);
+			return true;// m_Control.SetSelectedNode(dwTaskID);
         }
 
         public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -123,17 +123,17 @@ namespace DetectiveUIExtension
 			var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
 
             // Make sure it's dark enough
-            m_Control.ConnectionColor = DrawingColor.SetLuminance(color, 0.6f);
+           // m_Control.ConnectionColor = DrawingColor.SetLuminance(color, 0.6f);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
 		{
-			m_Control.SetFont(faceName, pointSize);
+			//m_Control.SetFont(faceName, pointSize);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
         {
-            m_Control.ReadOnly = bReadOnly;
+            //m_Control.ReadOnly = bReadOnly;
         }
 
         public void SavePreferences(Preferences prefs, String key)
@@ -185,7 +185,7 @@ namespace DetectiveUIExtension
 
         public Bitmap SaveToImage()
         {
-            return m_Control.SaveToImage();
+			return null;// m_Control.SaveToImage();
         }
 
         public bool CanSaveToImage()
@@ -211,14 +211,14 @@ namespace DetectiveUIExtension
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            m_Control.SetFont(FontName, 8);
+            //m_Control.SetFont(FontName, 8);
 
 //             if (VisualStyleRenderer.IsSupported)
 //                 m_Control.BorderStyle = BorderStyle.FixedSingle;
 //             else
 //                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
-			m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
+	//		m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
 	//		m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
@@ -249,7 +249,7 @@ namespace DetectiveUIExtension
             return notify.NotifyEditIcon();
         }
 
-		void OnDetectiveSelectionChange(object sender, Node item)
+		void OnDetectiveSelectionChange(object sender, TaskNode item)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 

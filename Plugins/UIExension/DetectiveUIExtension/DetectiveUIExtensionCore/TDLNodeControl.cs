@@ -18,9 +18,10 @@ namespace DetectiveUIExtension
 
 	// -----------------------------------------------------------------
 
-	class TaskNode : Node
+	public class TaskNode
 	{
 		// Data
+		public string Title { get;  private set;}
 		public Color TextColor { get; private set; }
 
 		public bool HasIcon { get; private set; }
@@ -30,18 +31,24 @@ namespace DetectiveUIExtension
 		public bool SomeSubtasksDone { get; private set; }
 		public bool IsLocked { get; private set; }
 
+		public uint UniqueId { get; private set; }
+		public uint ParentId { get; private set; }
+
 		public List<uint> ChildIds { get; private set; }
+		public List<uint> DependIds { get; private set; }
 
 		private bool Done;
 		private bool GoodAsDone;
-		private uint ParentId;
 
 		// -----------------------------------------------------------------
 
-		public TaskNode(Task task) 
-			: 
-			base(task.GetTitle(), task.GetID(), task.GetLocalDependency())
+		public TaskNode()
 		{
+		}
+		
+		public TaskNode(Task task)
+		{
+			Title = task.GetTitle();
 			TextColor = task.GetTextDrawingColor();
 			HasIcon = (task.GetIcon().Length > 0);
 			IsFlagged = task.IsFlagged(false);
@@ -51,9 +58,12 @@ namespace DetectiveUIExtension
             GoodAsDone = task.IsGoodAsDone();
             SomeSubtasksDone = task.HasSomeSubtasksDone();
 			IsLocked = task.IsLocked(true);
+
 			ParentId = task.GetParentID();
+			UniqueId = task.GetID();
 
 			ChildIds = new List<uint>();
+			DependIds = task.GetLocalDependency();
 		}
 
 		public override string ToString() 
@@ -66,7 +76,7 @@ namespace DetectiveUIExtension
 			// TODO
 		}
 
-		public bool HasLocalDependencies {  get { return (LinkIds != null) && (LinkIds.Count > 0); } }
+		public bool HasLocalDependencies {  get { return (DependIds != null) && (DependIds.Count > 0); } }
 
 		public bool IsDone(bool includeGoodAsDone) 
         { 
@@ -150,12 +160,13 @@ namespace DetectiveUIExtension
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 //		private Size CheckboxSize;
-		private Node m_PreviouslySelectedNode;
+		private TaskNode m_PreviouslySelectedNode;
 
 		private DragImage m_DragImage;
 		private Point m_LastDragPos;
 
-
+		private Nodes m_Nodes;
+		
 		//private List<NodePath> CriticalPaths;
 
 		// -------------------------------------------------------------------------
@@ -183,6 +194,9 @@ namespace DetectiveUIExtension
 			m_DragImage = new DragImage();
 			m_LastDragPos = Point.Empty;
 
+			m_Nodes = null;
+
+
 			// 			using (Graphics graphics = Graphics.FromHwnd(Handle))
 			// 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 
@@ -190,6 +204,8 @@ namespace DetectiveUIExtension
 
 			// Initialise our fonts
 			OnFontChanged(this, EventArgs.Empty);
+
+			base.AutoCalculateRadialIncrement = true;
 		}
 
 		protected void OnFontChanged(object sender, EventArgs e)
@@ -225,19 +241,19 @@ namespace DetectiveUIExtension
 			{
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
+				UpdateTaskAttributes(tasks);
+				RecalcLayout();
 				break;
 
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
-				Nodes.Clear();
+				m_Nodes = new Nodes();
+				UpdateTaskAttributes(tasks);
 				break;
 
 			case UIExtension.UpdateType.Unknown:
 				return;
 			}
-
-			UpdateTaskAttributes(tasks);
-			//RebuildDiagram();
 		}
 
 		public DetectiveOption Options
@@ -511,41 +527,52 @@ namespace DetectiveUIExtension
 
 		private void UpdateTaskAttributes(TaskList tasks)
 		{
+			RadialTree.TreeNode<uint> rootNode = base.RootNode;
+
+			if (m_Nodes.Count == 0)
+			{
+				rootNode = new RadialTree.TreeNode<uint>(0);
+			}
+
 			Task task = tasks.GetFirstTask();
 
 			while (task.IsValid())
 			{
-				ProcessTaskUpdate(task);
+				ProcessTaskUpdate(task, rootNode);
 				task = task.GetNextTask();
 			}
+
+			base.RootNode = rootNode;
 
 			Invalidate();
 		}
 
-		private bool ProcessTaskUpdate(Task task)
+		private bool ProcessTaskUpdate(Task task, RadialTree.TreeNode<uint> parentNode)
 		{
 			if (!task.IsValid())
 				return false;
 
-			var node = (Nodes.GetNode(task.GetID()) as TaskNode);
+			var taskNode = (m_Nodes.GetNode(task.GetID()) as TaskNode);
 
-			if (node == null)
+			if (taskNode == null)
 			{
-				node = new TaskNode(task);
-				Nodes.AddNode(node);
+				taskNode = new TaskNode(task);
+				m_Nodes.AddNode(taskNode);
+
+				parentNode = parentNode.AddChild(task.GetID());
 			}
 			else
 			{
-				node.Update(task);
+				taskNode.Update(task);
 			}
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, parentNode))
 			{
-				node.ChildIds.Add(subtask.GetID());
-				node.LinkIds.Add(subtask.GetID());
+				taskNode.ChildIds.Add(subtask.GetID());
+				taskNode.DependIds.Add(subtask.GetID());
 
 				subtask = subtask.GetNextTask();
 			}
@@ -690,7 +717,7 @@ namespace DetectiveUIExtension
 		}
 
 */
-		protected void DoPaintNode(Graphics graphics, Node node, DrawState drawState)
+		protected void DoPaintNode(Graphics graphics, TaskNode node, DrawState drawState)
 		{
 /*
 			graphics.SmoothingMode = SmoothingMode.None;
@@ -842,7 +869,7 @@ namespace DetectiveUIExtension
 		}
 */
 
-		protected void DoPaintLink(Graphics graphics, Node fromNode, Node toNode)
+		protected void DoPaintLink(Graphics graphics, TaskNode fromNode, TaskNode toNode)
 		{
 /*
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -907,7 +934,7 @@ namespace DetectiveUIExtension
 			if (taskNode == null)
 				return;
 
-			if (!ReadOnly && !taskNode.IsLocked)
+			if (/*!ReadOnly &&*/ !taskNode.IsLocked)
 			{
 /*
 				if (HitTestCheckbox(node, e.Location))
@@ -933,7 +960,7 @@ namespace DetectiveUIExtension
 			get { return false; /*((SelectedNode != null) && (SelectedNode == m_PreviouslySelectedNode));*/ }
 		}
 
-		private bool HitTestIcon(Node node, Point point)
+		private bool HitTestIcon(TaskNode node, Point point)
         {
 			var taskNode = (node as TaskNode);
 			
@@ -1025,7 +1052,7 @@ namespace DetectiveUIExtension
 		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
 		{
 			DoPaintNode(graphics, 
-						(obj as Node), 
+						(obj as TaskNode), 
 						DrawState.Selected | DrawState.DragImage);
 		}
 /*

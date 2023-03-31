@@ -6,6 +6,7 @@ using System.Diagnostics;
 
 namespace DetectiveUIExtension
 {
+/*
 	public class Node
 	{
 		public Node(string title, uint uniqueId, List<uint> linkIds)
@@ -32,14 +33,15 @@ namespace DetectiveUIExtension
 		}
 
 	}
+*/
 
 	// ------------------------------------------------------------
 
-	public class Nodes : Dictionary<uint, Node>
+	public class Nodes : Dictionary<uint, TaskNode>
 	{
-		public Node GetNode(uint uniqueId)
+		public TaskNode GetNode(uint uniqueId)
 		{
-			Node item = null;
+			TaskNode item = null;
 			TryGetValue(uniqueId, out item);
 
 			return item;
@@ -54,7 +56,7 @@ namespace DetectiveUIExtension
 			return true;
 		}
 
-		public bool AddNode(Node node)
+		public bool AddNode(TaskNode node)
 		{
 			if (ContainsKey(node.UniqueId))
 				return false;
