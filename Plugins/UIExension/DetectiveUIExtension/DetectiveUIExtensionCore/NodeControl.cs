@@ -206,36 +206,56 @@ namespace DetectiveUIExtension
 			}
 		}
 
-		protected void DrawNode(Graphics graphics, RadialTree.TreeNode<uint> node, Size offset)
+		protected bool WantDrawNode(RadialTree.TreeNode<uint> node, Size offset, out Rectangle nodeRect)
 		{
-			// Draw children first so that nodes get drawn over lines
+			nodeRect = node.GetRectangle(ZoomedNodeSize, offset);
+
+			return nodeRect.IntersectsWith(ClientRectangle);
+		}
+
+		protected bool WantDrawConnection(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode, 
+										  Size offset, out Point fromPos, out Point toPos)
+		{
+			if ((fromNode == null) || (toNode == null))
+			{
+				fromPos = toPos = Point.Empty;
+				return false;
+			}
+
+			fromPos = fromNode.GetPosition(offset);
+			toPos = toNode.GetPosition(offset);
+
+			var lineBounds = Rectangle.FromLTRB(Math.Min(toPos.X, fromPos.X),
+												Math.Min(toPos.Y, fromPos.Y),
+												Math.Max(toPos.X, fromPos.X),
+												Math.Max(toPos.Y, fromPos.Y));
+
+			return lineBounds.IntersectsWith(ClientRectangle);
+		}
+
+		protected void DrawChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node, Size offset)
+		{
 			foreach (var child in node.Children)
 			{
 				DrawNode(graphics, child, offset);
 			}
+		}
+
+		protected virtual void DrawNode(Graphics graphics, RadialTree.TreeNode<uint> node, Size offset)
+		{
+			// Draw children first so that nodes get drawn over lines
+			DrawChildNodes(graphics, node, offset);
 
 			// Draw lines first
-			var nodePos = node.GetPosition(offset);
+			Point nodePos, parentPos;
 
-			if (node.Parent != null)
-			{
-				var parentPos = node.Parent.GetPosition(offset);
-
-				var lineBounds = Rectangle.FromLTRB(Math.Min(parentPos.X, nodePos.X),
-													Math.Min(parentPos.Y, nodePos.Y),
-													Math.Max(parentPos.X, nodePos.X),
-													Math.Max(parentPos.Y, nodePos.Y));
-
-				if (lineBounds.IntersectsWith(ClientRectangle))
-				{
-					graphics.DrawLine(Pens.Gray, nodePos, parentPos);
-				}
-			}
+			if (WantDrawConnection(node, node.Parent, offset, out nodePos, out parentPos))
+				graphics.DrawLine(Pens.Gray, nodePos, parentPos);
 
 			// Then node itself
-			var nodeRect = node.GetRectangle(ZoomedNodeSize, offset);
+			Rectangle nodeRect;
 
-			if (nodeRect.IntersectsWith(ClientRectangle))
+			if (WantDrawNode(node, offset, out nodeRect))
 			{
 				graphics.FillRectangle(SystemBrushes.Window, nodeRect);
 				graphics.DrawRectangle(Pens.Gray, nodeRect);

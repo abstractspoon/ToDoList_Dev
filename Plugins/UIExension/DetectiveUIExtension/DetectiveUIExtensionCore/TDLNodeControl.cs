@@ -573,7 +573,7 @@ namespace DetectiveUIExtension
 			if (!task.IsValid())
 				return false;
 
-			var taskNode = (m_Nodes.GetNode(task.GetID()) as TaskNode);
+			var taskNode = m_Nodes.GetNode(task.GetID());
 
 			if (taskNode == null)
 			{
