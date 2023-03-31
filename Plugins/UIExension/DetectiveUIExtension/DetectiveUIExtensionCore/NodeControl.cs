@@ -221,14 +221,25 @@ namespace DetectiveUIExtension
 			{
 				var parentPos = node.Parent.GetPosition(offset);
 
-				graphics.DrawLine(Pens.Gray, nodePos, parentPos);
+				var lineBounds = Rectangle.FromLTRB(Math.Min(parentPos.X, nodePos.X),
+													Math.Min(parentPos.Y, nodePos.Y),
+													Math.Max(parentPos.X, nodePos.X),
+													Math.Max(parentPos.Y, nodePos.Y));
+
+				if (lineBounds.IntersectsWith(ClientRectangle))
+				{
+					graphics.DrawLine(Pens.Gray, nodePos, parentPos);
+				}
 			}
 
 			// Then node itself
 			var nodeRect = node.GetRectangle(ZoomedNodeSize, offset);
 
-			graphics.FillRectangle(SystemBrushes.Window, nodeRect);
-			graphics.DrawRectangle(Pens.Gray, nodeRect);
+			if (nodeRect.IntersectsWith(ClientRectangle))
+			{
+				graphics.FillRectangle(SystemBrushes.Window, nodeRect);
+				graphics.DrawRectangle(Pens.Gray, nodeRect);
+			}
 		}
 
 		public Rectangle Extents
