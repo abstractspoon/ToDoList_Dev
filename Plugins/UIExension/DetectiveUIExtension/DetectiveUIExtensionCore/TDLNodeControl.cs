@@ -229,7 +229,17 @@ namespace DetectiveUIExtension
 			int nodeHeight = (2 * newFont.Height + 4);
 			int nodeWidth = (4 * nodeHeight);
 
+			base.EnableLayoutUpdates = false;
+
 			base.NodeSize = new Size(nodeWidth, nodeHeight);
+
+			if (RootNode != null)
+			{
+				base.InitialRadius = (float)((RootNode.Count * NodeSize.Width) / (2 * Math.PI));
+				base.RadialIncrementOrSpacing = NodeSize.Width;
+			}
+
+			base.EnableLayoutUpdates = true;
 		}
 
 		public void SetStrikeThruDone(bool strikeThruDone)
