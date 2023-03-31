@@ -15,7 +15,9 @@ namespace DetectiveUIExtension
 
 		float m_InitialRadius = 50f;
 		float m_RadialIncrementOrSpacing = 50f;
+
 		float m_ZoomFactor = 1f;
+		int m_ZoomLevel = 0;
 
 		Size m_NodeSize;
 
@@ -153,23 +155,19 @@ namespace DetectiveUIExtension
 		}
 
 		protected float ZoomFactor { get { return m_ZoomFactor; } }
+		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
 
-		protected bool IsZoomed { get { return (m_ZoomFactor < 1.0f); } }
-
-		public bool CanZoomIn { get { return (m_ZoomFactor < 1.0f); } }
-		public bool CanZoomOut { get { return (m_ZoomFactor > 0.01f); } }
+		public bool CanZoomIn { get { return (m_ZoomLevel > 0); } }
+		public bool CanZoomOut { get { return (HorizontalScroll.Visible || VerticalScroll.Visible);	} }
 
 		public bool ZoomIn()
 		{
 			if (CanZoomIn)
 			{
-				if (m_ZoomFactor < 0.1f)
-					m_ZoomFactor += 0.01f;
-				else
-					m_ZoomFactor += 0.1f;
+				m_ZoomLevel--;
+				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
 
 				RecalcLayout();
-
 				return true;
 			}
 
@@ -180,10 +178,8 @@ namespace DetectiveUIExtension
 		{
 			if (CanZoomOut)
 			{
-				if (m_ZoomFactor <= 0.1f)
-					m_ZoomFactor -= 0.01f;
-				else
-					m_ZoomFactor -= 0.1f;
+				m_ZoomLevel++;
+				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
 
 				RecalcLayout();
 				return true;
@@ -201,7 +197,7 @@ namespace DetectiveUIExtension
 				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
 				var extents = Extents;
-				var offset = new Size((extents.Width / 2), (extents.Height / 2));
+				var offset = new Size(-m_MinExtents.X, -m_MinExtents.Y);
 
 				offset.Width -= HorizontalScroll.Value;
 				offset.Height -= VerticalScroll.Value;
