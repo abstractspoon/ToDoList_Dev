@@ -142,9 +142,9 @@ namespace DetectiveUIExtension
 	[System.ComponentModel.DesignerCategory("")]
 	class TDLNodeControl : NodeControl, IDragRenderer
 	{
-		public event EditTaskLabelEventHandler      EditTaskLabel;
-        public event EditTaskIconEventHandler       EditTaskIcon;
-        public event EditTaskCompletionEventHandler EditTaskDone;
+		public event EditTaskLabelEventHandler EditTaskLabel;
+		public event EditTaskIconEventHandler EditTaskIcon;
+		public event EditTaskCompletionEventHandler EditTaskDone;
 
 		// From Parent
 		private Translator m_Trans;
@@ -159,7 +159,7 @@ namespace DetectiveUIExtension
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
-//		private Size CheckboxSize;
+		//		private Size CheckboxSize;
 		private TaskNode m_PreviouslySelectedNode;
 
 		private DragImage m_DragImage;
@@ -209,6 +209,9 @@ namespace DetectiveUIExtension
 			base.AutoCalculateRadialIncrement = true;
 		}
 
+		protected int NodeHeight { get { return (2 * Font.Height) + 4; } }
+		protected int NodeWidth {  get {return (4 * NodeHeight); } }
+
 		protected void OnFontChanged(object sender, EventArgs e)
 		{
 			var newFont = Font;
@@ -226,12 +229,8 @@ namespace DetectiveUIExtension
 				m_DoneLabelFont = null;
 			}
 
-			int nodeHeight = (2 * newFont.Height + 4);
-			int nodeWidth = (4 * nodeHeight);
-
 			base.EnableLayoutUpdates = false;
-
-			base.NodeSize = new Size(nodeWidth, nodeHeight);
+			base.NodeSize = new Size(NodeWidth, NodeHeight);
 
 			if (RootNode != null)
 			{
