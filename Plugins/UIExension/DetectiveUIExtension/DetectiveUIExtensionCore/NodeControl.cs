@@ -53,10 +53,6 @@ namespace DetectiveUIExtension
 			}
 		}
 
-		protected float ZoomFactor { get { return m_ZoomFactor; } }
-
-		protected bool IsZoomed { get { return (m_ZoomFactor < 1.0f); } }
-
 		protected Size ZoomedNodeSize
 		{
 			get { return new Size((int)(m_NodeSize.Width * m_ZoomFactor), (int)(m_NodeSize.Height * m_ZoomFactor)); }
@@ -156,14 +152,22 @@ namespace DetectiveUIExtension
 			}
 		}
 
+		protected float ZoomFactor { get { return m_ZoomFactor; } }
+
+		protected bool IsZoomed { get { return (m_ZoomFactor < 1.0f); } }
+
 		public bool CanZoomIn { get { return (m_ZoomFactor < 1.0f); } }
-		public bool CanZoomOut { get { return (m_ZoomFactor > 0.1f); } }
+		public bool CanZoomOut { get { return (m_ZoomFactor > 0.01f); } }
 
 		public bool ZoomIn()
 		{
 			if (CanZoomIn)
 			{
-				m_ZoomFactor += 0.1f;
+				if (m_ZoomFactor < 0.1f)
+					m_ZoomFactor += 0.01f;
+				else
+					m_ZoomFactor += 0.1f;
+
 				RecalcLayout();
 
 				return true;
@@ -176,9 +180,12 @@ namespace DetectiveUIExtension
 		{
 			if (CanZoomOut)
 			{
-				m_ZoomFactor -= 0.1f;
-				RecalcLayout();
+				if (m_ZoomFactor <= 0.1f)
+					m_ZoomFactor -= 0.01f;
+				else
+					m_ZoomFactor -= 0.1f;
 
+				RecalcLayout();
 				return true;
 			}
 
