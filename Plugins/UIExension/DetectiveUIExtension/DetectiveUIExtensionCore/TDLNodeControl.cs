@@ -197,13 +197,14 @@ namespace DetectiveUIExtension
 			m_Nodes = null;
 
 
+
 			// 			using (Graphics graphics = Graphics.FromHwnd(Handle))
 			// 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 
 			FontChanged += new EventHandler(OnFontChanged);
 
 			// Initialise our fonts
-			OnFontChanged(this, EventArgs.Empty);
+			Font = new Font("Tahoma", 8.25f);
 
 			base.AutoCalculateRadialIncrement = true;
 		}
@@ -224,6 +225,11 @@ namespace DetectiveUIExtension
 				m_BoldDoneLabelFont = m_BoldLabelFont;
 				m_DoneLabelFont = null;
 			}
+
+			int nodeHeight = (2 * newFont.Height + 4);
+			int nodeWidth = (4 * nodeHeight);
+
+			base.NodeSize = new Size(nodeWidth, nodeHeight);
 		}
 
 		public void SetStrikeThruDone(bool strikeThruDone)
@@ -542,7 +548,13 @@ namespace DetectiveUIExtension
 				task = task.GetNextTask();
 			}
 
+			base.EnableLayoutUpdates = false;
+
+			base.InitialRadius = (float)((rootNode.Count * NodeSize.Width) / (2 * Math.PI));
+			base.RadialIncrementOrSpacing = NodeSize.Width;
 			base.RootNode = rootNode;
+
+			base.EnableLayoutUpdates = true;
 
 			Invalidate();
 		}
