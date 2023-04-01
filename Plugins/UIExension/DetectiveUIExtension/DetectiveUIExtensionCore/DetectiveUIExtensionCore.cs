@@ -28,6 +28,9 @@ namespace DetectiveUIExtension
 
         private TDLNodeControl m_Control;
 
+		private Label m_OptionsLabel;
+		private DetectiveOptionsComboBox m_OptionsCombo;
+
 		// ----------------------------------------------------------------------------
 
 		public DetectiveUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
@@ -213,7 +216,7 @@ namespace DetectiveUIExtension
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             m_Control.SetFont(FontName, 8);
 
-            if (VisualStyleRenderer.IsSupported)
+			if (VisualStyleRenderer.IsSupported)
                 m_Control.BorderStyle = BorderStyle.FixedSingle;
             else
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
@@ -224,7 +227,50 @@ namespace DetectiveUIExtension
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
             m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveEditTaskCompletion);
 
-            this.Controls.Add(m_Control);
+			this.Controls.Add(m_Control);
+
+			// Options combo and label
+			m_OptionsLabel = CreateLabel("Options", null);
+			this.Controls.Add(m_OptionsLabel);
+
+			m_OptionsCombo = new DetectiveOptionsComboBox(m_Trans);
+			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
+			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
+
+			InitialiseCombo(m_OptionsCombo as ComboBox, m_OptionsLabel, 150);
+			this.Controls.Add(m_OptionsCombo);
+		}
+
+		Label CreateLabel(string untranslatedText, Control prevControl)
+		{
+			var label = new Label();
+
+			label.Font = m_ControlsFont;
+			label.Text = m_Trans.Translate(untranslatedText);
+			label.AutoSize = true;
+
+			if (prevControl != null)
+				label.Location = new Point((prevControl.Bounds.Right + 20), 8);
+			else
+				label.Location = new Point(-2, 8);
+
+			return label;
+		}
+
+		void InitialiseCombo(ComboBox combo, Label prevLabel, int width)
+		{
+			combo.Font = m_ControlsFont;
+			combo.Width = DPIScaling.Scale(width);
+			combo.Height = DPIScaling.Scale(200);
+			combo.Location = new Point(prevLabel.Right + 5, 4);
+			combo.DropDownStyle = ComboBoxStyle.DropDownList;
+			combo.Sorted = true;
+		}
+
+		void OnOptionsComboClosed(object sender, EventArgs e)
+		{
+			if (!m_OptionsCombo.Cancelled)
+				m_Control.Options = m_OptionsCombo.SelectedOptions;
 		}
 
 		bool OnDetectiveEditTaskLabel(object sender, UInt32 taskId)
@@ -274,14 +320,18 @@ namespace DetectiveUIExtension
 
         protected override void OnSizeChanged(EventArgs e)
         {
-            base.OnSizeChanged(e);
+			base.OnSizeChanged(e);
 
-            m_Control.Bounds = ClientRectangle;
+			Rectangle rect = ClientRectangle;
+			rect.Y = m_OptionsCombo.Bottom + 6;
+			rect.Height -= (m_OptionsCombo.Bottom + 6);
 
-            Invalidate(true);
-        }
+			m_Control.Bounds = rect;
+
+			Invalidate(true);
+		}
 
 
-    }
+	}
 
 }

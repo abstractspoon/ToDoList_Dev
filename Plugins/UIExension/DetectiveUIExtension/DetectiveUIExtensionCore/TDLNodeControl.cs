@@ -24,6 +24,7 @@ namespace DetectiveUIExtension
 		None = 0x00,
 		ShowParentChildLinks = 0x01,
 		ShowDependencies = 0x02,
+		ShowRootNode = 0x04,
 	}
 
 	// ------------------------------------------------------------
@@ -97,9 +98,6 @@ namespace DetectiveUIExtension
 			// 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 
 			FontChanged += new EventHandler(OnFontChanged);
-
-			// Initialise our fonts
-			//Font = new Font("Tahoma", 8.25f);
 
 			base.AutoCalculateRadialIncrement = true;
 		}

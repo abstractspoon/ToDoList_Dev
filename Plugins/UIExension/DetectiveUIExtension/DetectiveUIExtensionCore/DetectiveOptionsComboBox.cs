@@ -33,8 +33,10 @@ namespace DetectiveUIExtension
 		public DetectiveOptionsComboBox(Translator trans)
 		{
 			None = trans.Translate("<none>");
+
 			Items.Add(new DetectiveOptionItem(trans.Translate("Show dependencies"), DetectiveOption.ShowDependencies));
 			Items.Add(new DetectiveOptionItem(trans.Translate("Show parent/child connections"), DetectiveOption.ShowParentChildLinks));
+			Items.Add(new DetectiveOptionItem(trans.Translate("Show root node"), DetectiveOption.ShowRootNode));
 		}
 
 		public DetectiveOption SelectedOptions
