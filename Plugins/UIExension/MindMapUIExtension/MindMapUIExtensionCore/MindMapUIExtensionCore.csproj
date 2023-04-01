@@ -47,9 +47,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MindMapComboBoxes.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="MindMapComboBoxes.cs" />
     <Compile Include="MindMapControl.cs" />
     <Compile Include="MindMapControl.Designer.cs">
       <DependentUpon>MindMapControl.cs</DependentUpon>
