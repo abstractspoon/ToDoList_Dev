@@ -9,8 +9,13 @@ using System.Windows.Forms;
 
 namespace DetectiveUIExtension
 {
+	public delegate void SelectionChangeEventHandler(object sender, uint itemId);
+	public delegate void DragDropChangeEventHandler(object sender, uint itemId);
+
 	public partial class NodeControl : UserControl
 	{
+		// -------------------------------------------------------------------
+
 		public int NodeSpacing = 5;
 
 		float m_InitialRadius = 50f;
@@ -30,7 +35,14 @@ namespace DetectiveUIExtension
 		Point m_MinExtents = Point.Empty;
 		Point m_MaxExtents = Point.Empty;
 
+		uint m_SelectedNodeId = 0;
+
+		public const uint NullId = uint.MaxValue;
+
 		// -------------------------------------------------------------------
+
+		public event SelectionChangeEventHandler SelectionChange;
+		public event DragDropChangeEventHandler DragDropChange;
 
 		public NodeControl()
 		{
@@ -53,6 +65,24 @@ namespace DetectiveUIExtension
 					RecalcLayout();
 				}
 			}
+		}
+
+		public uint SelectedNodeId { get { return m_SelectedNodeId; } }
+
+		public bool SelectNode(uint nodeId)
+		{
+			if ((nodeId != m_SelectedNodeId) || 
+				(nodeId == NullId) || 
+				(nodeId == RootNode.Data) || 
+				RootNode.HasChild(nodeId))
+			{
+				m_SelectedNodeId = nodeId;
+				Invalidate();
+
+				return true;
+			}
+
+			return false;
 		}
 
 		protected Size ZoomedNodeSize
@@ -188,6 +218,19 @@ namespace DetectiveUIExtension
 			return false;
 		}
 
+		protected Size DrawOffset
+		{
+			get
+			{
+				var offset = new Size(-m_MinExtents.X, -m_MinExtents.Y);
+
+				offset.Width -= HorizontalScroll.Value;
+				offset.Height -= VerticalScroll.Value;
+
+				return offset;
+			}
+		}
+
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
@@ -195,26 +238,56 @@ namespace DetectiveUIExtension
 			if (RootNode != null)
 			{
 				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-				var extents = Extents;
-				var offset = new Size(-m_MinExtents.X, -m_MinExtents.Y);
-
-				offset.Width -= HorizontalScroll.Value;
-				offset.Height -= VerticalScroll.Value;
-
-				DrawNode(e.Graphics, RootNode, offset);
+				DrawNode(e.Graphics, RootNode);
 			}
 		}
 
-		protected bool WantDrawNode(RadialTree.TreeNode<uint> node, Size offset, out Rectangle nodeRect)
+		protected RadialTree.TreeNode<uint> HitTestNode(Point ptClient)
 		{
-			nodeRect = node.GetRectangle(ZoomedNodeSize, offset);
+			return HitTestNode(RootNode, ptClient);
+		}
+
+
+		protected RadialTree.TreeNode<uint> HitTestNode(RadialTree.TreeNode<uint> node, Point ptClient)
+		{
+			Rectangle rect;
+
+			if (IsNodeVisible(node, out rect) && rect.Contains(ptClient))
+			{
+				return node;
+			}
+
+			// check children
+			foreach (var child in node.Children)
+			{
+				var hit = HitTestNode(child, ptClient);
+
+				if (hit != null)
+					return hit;
+			}
+
+			return null;
+		}
+
+		protected bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
+		{
+			nodeRect = GetNodeRectangle(node);
 
 			return nodeRect.IntersectsWith(ClientRectangle);
 		}
 
-		protected bool WantDrawConnection(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode, 
-										  Size offset, out Point fromPos, out Point toPos)
+		protected Point GetNodePosition(RadialTree.TreeNode<uint> node)
+		{
+			return node.GetPosition(DrawOffset);
+		}
+
+		protected Rectangle GetNodeRectangle(RadialTree.TreeNode<uint> node)
+		{
+			return node.GetRectangle(ZoomedNodeSize, DrawOffset);
+		}
+
+		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode, 
+										  out Point fromPos, out Point toPos)
 		{
 			if ((fromNode == null) || (toNode == null))
 			{
@@ -222,8 +295,8 @@ namespace DetectiveUIExtension
 				return false;
 			}
 
-			fromPos = fromNode.GetPosition(offset);
-			toPos = toNode.GetPosition(offset);
+			fromPos = GetNodePosition(fromNode);
+			toPos = GetNodePosition(toNode);
 
 			var lineBounds = Rectangle.FromLTRB(Math.Min(toPos.X, fromPos.X),
 												Math.Min(toPos.Y, fromPos.Y),
@@ -233,32 +306,41 @@ namespace DetectiveUIExtension
 			return lineBounds.IntersectsWith(ClientRectangle);
 		}
 
-		protected void DrawChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node, Size offset)
+		protected void DrawChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			foreach (var child in node.Children)
 			{
-				DrawNode(graphics, child, offset);
+				DrawNode(graphics, child);
 			}
 		}
 
-		protected virtual void DrawNode(Graphics graphics, RadialTree.TreeNode<uint> node, Size offset)
+		protected virtual void DrawNode(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			// Draw children first so that nodes get drawn over lines
-			DrawChildNodes(graphics, node, offset);
+			DrawChildNodes(graphics, node);
 
 			// Draw lines first
 			Point nodePos, parentPos;
 
-			if (WantDrawConnection(node, node.Parent, offset, out nodePos, out parentPos))
+			if (IsConnectionVisible(node, node.Parent, out nodePos, out parentPos))
 				graphics.DrawLine(Pens.Gray, nodePos, parentPos);
 
 			// Then node itself
 			Rectangle nodeRect;
 
-			if (WantDrawNode(node, offset, out nodeRect))
+			if (IsNodeVisible(node, out nodeRect))
 			{
-				graphics.FillRectangle(SystemBrushes.Window, nodeRect);
-				graphics.DrawRectangle(Pens.Gray, nodeRect);
+				if (node.Data == m_SelectedNodeId)
+				{
+					graphics.FillRectangle(SystemBrushes.Highlight, nodeRect);
+					graphics.DrawString(node.Data.ToString(), Font, SystemBrushes.HighlightText, nodeRect);
+				}
+				else
+				{
+					graphics.FillRectangle(SystemBrushes.Window, nodeRect);
+					graphics.DrawRectangle(Pens.Gray, nodeRect);
+					graphics.DrawString(node.Data.ToString(), Font, SystemBrushes.WindowText, nodeRect);
+				}
 			}
 		}
 
@@ -343,6 +425,21 @@ namespace DetectiveUIExtension
 
 			if (se.Type == ScrollEventType.ThumbPosition)
 				Update();
+		}
+
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
+			base.OnMouseClick(e);
+
+			var hit = HitTestNode(e.Location);
+
+			if (hit != null)
+			{
+				m_SelectedNodeId = hit.Data;
+				Invalidate();
+
+				SelectionChange?.Invoke(this, m_SelectedNodeId);
+			}
 		}
 
 		protected override void OnMouseWheel(MouseEventArgs e)

@@ -44,7 +44,7 @@ namespace DetectiveUIExtension
 
         public bool SelectTask(UInt32 dwTaskID)
         {
-			return true;// m_Control.SetSelectedNode(dwTaskID);
+			return m_Control.SelectNode(dwTaskID);
         }
 
         public bool SelectTasks(UInt32[] pdwTaskIDs)
@@ -219,7 +219,7 @@ namespace DetectiveUIExtension
 //             else
 //                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
-	//		m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
+			m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
 	//		m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
@@ -250,11 +250,11 @@ namespace DetectiveUIExtension
             return notify.NotifyEditIcon();
         }
 
-		void OnDetectiveSelectionChange(object sender, TaskNode item)
+		void OnDetectiveSelectionChange(object sender, uint nodeId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			notify.NotifySelChange(item.UniqueId);
+			notify.NotifySelChange(nodeId);
 		}
 
 /*

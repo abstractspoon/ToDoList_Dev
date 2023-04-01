@@ -398,6 +398,15 @@ namespace DetectiveUIExtension
 			return false;
 		}
 
+		public new bool SelectNode(uint taskId)
+		{
+			if (base.SelectNode(taskId))
+				return true;
+
+			base.SelectNode(NodeControl.NullId);
+			return false;
+		}
+
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 // 			if ((text == String.Empty) || IsEmpty())
