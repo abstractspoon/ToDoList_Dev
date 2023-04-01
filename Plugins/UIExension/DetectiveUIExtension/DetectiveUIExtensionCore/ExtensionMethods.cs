@@ -51,5 +51,27 @@ namespace DetectiveUIExtension
 		{
 			return node.Point.GetRectangle(size, offset);
 		}
+
+		public static System.Drawing.Rectangle Multiply(this System.Drawing.Rectangle rect, float mult)
+		{
+			return new System.Drawing.Rectangle(rect.Location.Multiply(mult), rect.Size.Multiply(mult));
+		}
+
+		public static System.Drawing.Size Multiply(this System.Drawing.Size size, float mult)
+		{
+			return new System.Drawing.Size((int)(size.Width * mult), (int)(size.Height * mult));
+		}
+
+		public static System.Drawing.Point Multiply(this System.Drawing.Point pt, float mult)
+		{
+			return new System.Drawing.Point((int)(pt.X * mult), (int)(pt.Y * mult));
+		}
+
+		public static System.Drawing.Point Divide(this System.Drawing.Point pt, float div)
+		{
+			return new System.Drawing.Point((int)(pt.X / div), (int)(pt.Y / div));
+		}
+
+
 	}
 }

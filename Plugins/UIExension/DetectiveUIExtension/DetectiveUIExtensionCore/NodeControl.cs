@@ -115,21 +115,6 @@ namespace DetectiveUIExtension
 			return false;
 		}
 
-		protected Size ZoomedNodeSize
-		{
-			get { return new Size((int)(m_NodeSize.Width * m_ZoomFactor), (int)(m_NodeSize.Height * m_ZoomFactor)); }
-		}
-
-		protected float ZoomedInitialRadius
-		{
-			get { return (m_InitialRadius * m_ZoomFactor); }
-		}
-
-		protected float ZoomedRadialIncrementOrSpacing
-		{
-			get { return (m_RadialIncrementOrSpacing * m_ZoomFactor); }
-		}
-
 		public bool AutoCalculateRadialIncrement
 		{
 			get { return m_AutoCalcRadialIncrement; }
@@ -224,10 +209,7 @@ namespace DetectiveUIExtension
 		{
 			if (CanZoomIn)
 			{
-				m_ZoomLevel--;
-				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
-
-				RecalcLayout();
+				SetZoomLevel(m_ZoomLevel - 1);
 				return true;
 			}
 
@@ -238,37 +220,22 @@ namespace DetectiveUIExtension
 		{
 			if (CanZoomOut)
 			{
-				m_ZoomLevel++;
-				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
-
-				RecalcLayout();
+				SetZoomLevel(m_ZoomLevel + 1);
 				return true;
 			}
 
 			return false;
 		}
 
-		protected Size DrawOffset
+		protected void SetZoomLevel(int level)
 		{
-			get
+			if (level != m_ZoomLevel)
 			{
-				var offset = new Size(-m_MinExtents.X, -m_MinExtents.Y);
+				m_ZoomLevel = level;
+				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
 
-				offset.Width -= HorizontalScroll.Value;
-				offset.Height -= VerticalScroll.Value;
-
-				return offset;
-			}
-		}
-
-		protected override void OnPaint(PaintEventArgs e)
-		{
-			base.OnPaint(e);
-
-			if (RootNode != null)
-			{
-				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-				DrawNode(e.Graphics, RootNode);
+				AutoScrollMinSize = ZoomedExtents.Size;
+				Invalidate();
 			}
 		}
 
@@ -308,12 +275,24 @@ namespace DetectiveUIExtension
 
 		protected Point GetNodePosition(RadialTree.TreeNode<uint> node)
 		{
-			return node.GetPosition(DrawOffset);
+			var point = node.GetPosition().Multiply(m_ZoomFactor);
+			var minExtents = m_MinExtents.Multiply(m_ZoomFactor);
+
+			point.Offset(-minExtents.X, -minExtents.Y);
+			point.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
+
+			return point;
 		}
 
 		protected Rectangle GetNodeRectangle(RadialTree.TreeNode<uint> node)
 		{
-			return node.GetRectangle(ZoomedNodeSize, DrawOffset);
+			var rect = node.GetRectangle(NodeSize).Multiply(m_ZoomFactor);
+			var minExtents = m_MinExtents.Multiply(m_ZoomFactor);
+
+			rect.Offset(-minExtents.X, -minExtents.Y);
+			rect.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
+
+			return rect;
 		}
 
 		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
@@ -336,11 +315,14 @@ namespace DetectiveUIExtension
 			return lineBounds.IntersectsWith(ClientRectangle);
 		}
 
-		protected void DrawChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected override void OnPaint(PaintEventArgs e)
 		{
-			foreach (var child in node.Children)
+			base.OnPaint(e);
+
+			if (RootNode != null)
 			{
-				DrawNode(graphics, child);
+				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+				DrawNode(e.Graphics, RootNode);
 			}
 		}
 
@@ -374,11 +356,30 @@ namespace DetectiveUIExtension
 			}
 		}
 
+		protected void DrawChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
+		{
+			foreach (var child in node.Children)
+			{
+				DrawNode(graphics, child);
+			}
+		}
+
 		public Rectangle Extents
 		{
 			get
 			{
-				return Rectangle.FromLTRB(m_MinExtents.X, m_MinExtents.Y, m_MaxExtents.X, m_MaxExtents.Y);
+				return Rectangle.FromLTRB(m_MinExtents.X, 
+											m_MinExtents.Y, 
+											m_MaxExtents.X, 
+											m_MaxExtents.Y);
+			}
+		}
+
+		public Rectangle ZoomedExtents
+		{
+			get
+			{
+				return Extents.Multiply(m_ZoomFactor);
 			}
 		}
 
@@ -405,9 +406,9 @@ namespace DetectiveUIExtension
 			if (m_EnableLayoutUpdates && (m_RadialTree != null))
 			{
 				if (AutoCalculateRadialIncrement)
-					m_RadialTree.CalculatePositions(ZoomedInitialRadius, -ZoomedRadialIncrementOrSpacing);
+					m_RadialTree.CalculatePositions(m_InitialRadius, -m_RadialIncrementOrSpacing);
 				else
-					m_RadialTree.CalculatePositions(ZoomedInitialRadius, ZoomedRadialIncrementOrSpacing);
+					m_RadialTree.CalculatePositions(m_InitialRadius, m_RadialIncrementOrSpacing);
 
 				AutoScrollMinSize = RecalcExtents();
 				Invalidate();
@@ -419,11 +420,11 @@ namespace DetectiveUIExtension
 			m_MinExtents = m_MaxExtents = Point.Empty;
 			RecalcExtents(RootNode);
 
-			int Border = (int)(50 * m_ZoomFactor);
-			m_MinExtents -= new Size(Border, Border);
-			m_MaxExtents += new Size(Border, Border);
+			const int Border = 50;
+			m_MinExtents.Offset(-Border, -Border);
+			m_MaxExtents.Offset(Border, Border);
 
-			return Extents.Size;
+			return ZoomedExtents.Size;
 		}
 
 		protected void RecalcExtents<T>(RadialTree.TreeNode<T> node)
@@ -577,11 +578,9 @@ namespace DetectiveUIExtension
 			{
 				Point dragPt = PointToClient(new Point(e.X, e.Y));
 
-				dragPt.X += HorizontalScroll.Value;
-				dragPt.Y += VerticalScroll.Value;
-
-				dragPt.X += m_MinExtents.X;
-				dragPt.Y += m_MinExtents.Y;
+				dragPt.Offset(HorizontalScroll.Value, VerticalScroll.Value);
+				dragPt = dragPt.Divide(m_ZoomFactor);
+				dragPt.Offset(m_MinExtents);
 
 				var point = node.Point;
 				point.X = dragPt.X;
