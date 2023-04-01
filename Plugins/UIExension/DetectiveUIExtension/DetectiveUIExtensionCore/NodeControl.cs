@@ -352,11 +352,11 @@ namespace DetectiveUIExtension
 			if (RootNode != null)
 			{
 				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-				DrawNode(e.Graphics, RootNode);
+				DrawNodeAndChildren(e.Graphics, RootNode);
 			}
 		}
 
-		protected virtual void DrawNode(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected virtual void DrawNodeAndChildren(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			// Draw children first so that nodes get drawn over lines
 			DrawChildNodes(graphics, node);
@@ -372,33 +372,38 @@ namespace DetectiveUIExtension
 
 			if (IsNodeVisible(node, out nodeRect))
 			{
-				Brush fill = SystemBrushes.Window, text = SystemBrushes.WindowText;
-				Pen border = Pens.Gray;
-
-				if (node.Data == m_SelectedNodeId)
-				{
-					if (Focused)
-					{
-						fill = SystemBrushes.Highlight;
-						text = SystemBrushes.HighlightText;
-					}
-					else
-					{
-						fill = Brushes.LightGray;
-					}
-				}
-
-				graphics.FillRectangle(fill, nodeRect);
-				graphics.DrawRectangle(border, nodeRect);
-				graphics.DrawString(node.Data.ToString(), Font, text, nodeRect);
+				DrawNode(graphics, node.Data, nodeRect);
 			}
 		}
+
+		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
+		{
+			Brush fill = SystemBrushes.Window, text = SystemBrushes.WindowText;
+			Pen border = Pens.Gray;
+
+			if (nodeId == m_SelectedNodeId)
+			{
+				if (Focused)
+				{
+					fill = SystemBrushes.Highlight;
+					text = SystemBrushes.HighlightText;
+				}
+				else
+				{
+					fill = Brushes.LightGray;
+				}
+			}
+
+			graphics.FillRectangle(fill, rect);
+			graphics.DrawRectangle(border, rect);
+			graphics.DrawString(nodeId.ToString(), Font, text, rect);
+	}
 
 		protected void DrawChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			foreach (var child in node.Children)
 			{
-				DrawNode(graphics, child);
+				DrawNodeAndChildren(graphics, child);
 			}
 		}
 

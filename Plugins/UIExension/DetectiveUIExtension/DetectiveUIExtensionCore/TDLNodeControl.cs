@@ -625,41 +625,28 @@ namespace DetectiveUIExtension
 			graphics.Restore(gSave);
 		}
 
-/*
-		override protected void DoPaint(Graphics graphics, Rectangle clipRect)
+		protected override void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
 		{
-			base.DoPaint(graphics, clipRect);
-		}
+			var taskNode = m_TaskNodes.GetNode(nodeId);
 
-		override protected void OnPaintNode(Graphics graphics, Node node, SelectionState selState)
-		{
-			DrawState drawState = DrawState.None;
-
-			switch (selState)
+			if (taskNode != null)
 			{
-			case SelectionState.DropHighlighted:
-				drawState = DrawState.DropHighlighted;
-				break;
-
-			case SelectionState.Selected:
-				drawState = DrawState.Selected;
-				break;
+				var drawState = ((nodeId == SelectedNodeId) ? DrawState.Selected : DrawState.None);
+				DoPaintNode(graphics, taskNode, rect, drawState);
 			}
-
-			DoPaintNode(graphics, node, drawState);
+			else
+			{
+				base.DrawNode(graphics, nodeId, rect);
+			}
 		}
 
-*/
-		protected void DoPaintNode(Graphics graphics, TaskNode node, DrawState drawState)
+		protected void DoPaintNode(Graphics graphics, TaskNode node, Rectangle nodeRect, DrawState drawState)
 		{
-/*
 			graphics.SmoothingMode = SmoothingMode.None;
 
 			bool selected = drawState.HasFlag(DrawState.Selected);
 			bool dropHighlight = drawState.HasFlag(DrawState.DropHighlighted);
 			bool dragImage = drawState.HasFlag(DrawState.DragImage);
-
-			var nodeRect = CalcNodeRectangle(node);
 
 			if (dragImage)
 				nodeRect.Offset(-nodeRect.Left, -nodeRect.Top);
@@ -760,7 +747,6 @@ namespace DetectiveUIExtension
 			// Title
 			titleRect.Inflate(-LabelPadding, -LabelPadding);
 			titleRect.Height /= 2;
-*/
 
 			/*
 			// Checkbox
@@ -792,38 +778,7 @@ namespace DetectiveUIExtension
 			}
 			*/
 
-
-		}
-
-/*
-		override protected void OnPaintLink(Graphics graphics, Node fromNode, Node toNode)
-		{
-			DoPaintLink(graphics, fromNode, toNode);
-		}
-*/
-
-		protected void DoPaintLink(Graphics graphics, TaskNode fromNode, TaskNode toNode)
-		{
-/*
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-			Point[] points = GetConnectionPoints(fromNode, toNode);
-
-			using (var pen = new Pen(Color.DarkGray, 0f))
-				graphics.DrawLines(pen, points);
-
-			// Draw Arrow head and box without smoothing to better match core app
-			graphics.SmoothingMode = SmoothingMode.None;
-
-			Point arrow = points[points.Length - 1];
-			arrow.X--;
-
-			UIExtension.TaskDependency.DrawHorizontalArrowHead(graphics, arrow.X, arrow.Y, Font, false);
-
-			// Draw 3x3 box at 'to' end
-			Rectangle box = new Rectangle(points[0].X - 2, points[0].Y - 1, 3, 3);
-			graphics.FillRectangle(new SolidBrush(Color.FromArgb(0x4f, 0x4f, 0x4f)), box);
-*/
 		}
 
 		private bool TaskHasIcon(TaskNode taskNode)
@@ -1039,9 +994,9 @@ namespace DetectiveUIExtension
 */
 		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
 		{
-			DoPaintNode(graphics, 
-						(obj as TaskNode), 
-						DrawState.Selected | DrawState.DragImage);
+// 			DoPaintNode(graphics, 
+// 						(obj as TaskNode), 
+// 						DrawState.Selected | DrawState.DragImage);
 		}
 
 	}
