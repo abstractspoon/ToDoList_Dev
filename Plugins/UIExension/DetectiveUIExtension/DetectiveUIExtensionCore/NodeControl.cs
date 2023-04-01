@@ -127,6 +127,13 @@ namespace DetectiveUIExtension
 			}
 		}
 
+		public Rectangle GetSelectedNodeRect()
+		{
+			var node = SelectedNode;
+
+			return ((node != null) ? GetNodeRectangle(node) : Rectangle.Empty);
+		}
+
 		public bool SelectNode(uint nodeId)
 		{
 			if ((nodeId != m_SelectedNodeId) ||
@@ -619,7 +626,7 @@ namespace DetectiveUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
-			var node = e.Data.GetData(typeof(RadialTree.TreeNode<uint>)) as RadialTree.TreeNode<uint>;
+			var node = SelectedNode;
 
 			if (node == null)
 			{

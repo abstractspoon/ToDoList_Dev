@@ -128,13 +128,12 @@ namespace DetectiveUIExtension
 
 		public void SetTaskFont(String faceName, int pointSize)
 		{
-			//m_Control.SetFont(faceName, pointSize);
-			m_Control.Font = new Font(faceName, pointSize);
+			m_Control.SetFont(faceName, pointSize);
 		}
 
 		public void SetReadOnly(bool bReadOnly)
         {
-            //m_Control.ReadOnly = bReadOnly;
+            m_Control.ReadOnly = bReadOnly;
         }
 
         public void SavePreferences(Preferences prefs, String key)

@@ -33,6 +33,12 @@ namespace DetectiveUIExtension
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
 
+		// -------------------------------------------------------------------------
+
+		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
+
+		// -------------------------------------------------------------------------
+
 		// From Parent
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
@@ -252,27 +258,24 @@ namespace DetectiveUIExtension
 
 		public uint HitTest(Point screenPos)
 		{
-			// 			var clientPos = PointToClient(screenPos);
-			// 			var node = HitTestNode(clientPos);
-			// 
-			// 			return node?.UniqueId ?? 0;
-			return 0;
+			var node = HitTestNode(PointToClient(screenPos));
+			
+			return node?.Data ?? 0;
 		}
 
 		public Rectangle GetSelectedNodeLabelRect()
 		{
-			// 			EnsureNodeVisible(SelectedNode);
-			// 
-			// 			var labelRect = GetSelectedNodeRect();
-			// 
-			// 			// 			labelRect.X -= LabelPadding;
-			// 			// 			labelRect.X += GetExtraWidth(SelectedNode);
-			// 			// 
-			// 			// Make sure the rect is big enough for the unscaled font
-			// 			labelRect.Height = (BaseFont.Height + (2 * LabelPadding)); 
-			// 
-			// 			return labelRect;
-			return Rectangle.Empty;	
+			//EnsureNodeVisible(SelectedNode);
+			
+			var labelRect = GetSelectedNodeRect();
+			
+			labelRect.X -= LabelPadding;
+			//labelRect.X += GetExtraWidth(SelectedNode);
+					 
+			// Make sure the rect is big enough for the unscaled font
+			labelRect.Height = (Font.Height + (2 * LabelPadding)); 
+			
+			return labelRect;
 		}
 
 		public bool CanMoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
