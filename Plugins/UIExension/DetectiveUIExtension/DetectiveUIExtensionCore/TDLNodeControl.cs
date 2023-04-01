@@ -19,9 +19,11 @@ namespace DetectiveUIExtension
 	// ------------------------------------------------------------
 
 	[Flags]
-	enum DetectiveOptions
+	enum DetectiveOption
 	{
 		None = 0x00,
+		ShowParentChildLinks = 0x01,
+		ShowDependencies = 0x02,
 	}
 
 	// ------------------------------------------------------------
@@ -48,7 +50,7 @@ namespace DetectiveUIExtension
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
 
-		private DetectiveOptions m_Options;
+		private DetectiveOption m_Options;
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -164,7 +166,7 @@ namespace DetectiveUIExtension
 			}
 		}
 
-		public DetectiveOptions Options
+		public DetectiveOption Options
 		{
 			get { return m_Options; }
 		

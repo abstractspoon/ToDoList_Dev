@@ -49,6 +49,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DetectiveOptionsComboBox.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Geometry2D.cs" />
     <Compile Include="Node.cs" />
