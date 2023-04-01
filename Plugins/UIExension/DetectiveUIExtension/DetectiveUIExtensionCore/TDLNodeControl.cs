@@ -900,7 +900,7 @@ namespace DetectiveUIExtension
 				return false;
 
 			// else
-			return CalcIconRect(GetNodeRectangle(node)).Contains(point);
+			return CalcIconRect(GetNodeClientRect(node)).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)

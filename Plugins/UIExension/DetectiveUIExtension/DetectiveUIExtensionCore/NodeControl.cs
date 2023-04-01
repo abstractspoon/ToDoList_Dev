@@ -118,7 +118,7 @@ namespace DetectiveUIExtension
 				if (m_SelectedNodeId == RootNode.Data)
 					return m_RootNode;
 
-				var node = RootNode.FindInChildren(m_SelectedNodeId);
+				var node = RootNode.FindTreeNode(x => (x.Data == m_SelectedNodeId));
 
 				if (node == null)
 					m_SelectedNodeId = NullId;
@@ -131,7 +131,7 @@ namespace DetectiveUIExtension
 		{
 			var node = SelectedNode;
 
-			return ((node != null) ? GetNodeRectangle(node) : Rectangle.Empty);
+			return ((node != null) ? GetNodeClientRect(node) : Rectangle.Empty);
 		}
 
 		public bool SelectNode(uint nodeId)
@@ -303,31 +303,26 @@ namespace DetectiveUIExtension
 
 		protected bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
 		{
-			nodeRect = GetNodeRectangle(node);
+			nodeRect = GetNodeClientRect(node);
 
 			return nodeRect.IntersectsWith(ClientRectangle);
 		}
 
-		protected Point GetNodePosition(RadialTree.TreeNode<uint> node)
+		protected Point GetNodeClientPos(RadialTree.TreeNode<uint> node)
 		{
-			var point = node.GetPosition().Multiply(m_ZoomFactor);
-			var minExtents = m_MinExtents.Multiply(m_ZoomFactor);
+			var pos = node.GetPosition();
 
-			point.Offset(-minExtents.X, -minExtents.Y);
-			point.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
-
-			return point;
+			return GraphToClient(pos);
 		}
 
-		protected Rectangle GetNodeRectangle(RadialTree.TreeNode<uint> node)
+		protected Rectangle GetNodeClientRect(RadialTree.TreeNode<uint> node)
 		{
-			var rect = node.GetRectangle(NodeSize).Multiply(m_ZoomFactor);
-			var minExtents = m_MinExtents.Multiply(m_ZoomFactor);
+			var pos = GetNodeClientPos(node);
+			var size = NodeSize.Multiply(m_ZoomFactor);
 
-			rect.Offset(-minExtents.X, -minExtents.Y);
-			rect.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
+			pos.Offset(-size.Width / 2, -size.Height / 2);
 
-			return rect;
+			return new Rectangle(pos, size);
 		}
 
 		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
@@ -339,8 +334,8 @@ namespace DetectiveUIExtension
 				return false;
 			}
 
-			fromPos = GetNodePosition(fromNode);
-			toPos = GetNodePosition(toNode);
+			fromPos = GetNodeClientPos(fromNode);
+			toPos = GetNodeClientPos(toNode);
 
 			var lineBounds = Rectangle.FromLTRB(Math.Min(toPos.X, fromPos.X),
 												Math.Min(toPos.Y, fromPos.Y),
@@ -622,6 +617,48 @@ namespace DetectiveUIExtension
 				CheckStartDragging(MousePosition);
 		}
 
+		protected Point GraphToClient(Point ptGraph)
+		{
+			var ptClient = ptGraph;
+
+			ptClient = ptClient.Multiply(m_ZoomFactor);
+			var minExtents = m_MinExtents.Multiply(m_ZoomFactor);
+
+			ptClient.Offset(-minExtents.X, -minExtents.Y);
+
+			if (HorizontalScroll.Visible)
+				ptClient.X -= HorizontalScroll.Value;
+			else
+				ptClient.X += (ClientRectangle.Width - AutoScrollMinSize.Width) / 2;
+
+			if (VerticalScroll.Visible)
+				ptClient.Y -= VerticalScroll.Value;
+			else
+				ptClient.Y += (ClientRectangle.Height - AutoScrollMinSize.Height) / 2;
+
+			return ptClient;
+		}
+
+		protected Point ClientToGraph(Point ptClient)
+		{
+			var ptGraph = ptClient;
+
+			if (HorizontalScroll.Visible)
+				ptGraph.X += HorizontalScroll.Value;
+			else
+				ptGraph.X -= (ClientRectangle.Width - AutoScrollMinSize.Width) / 2;
+
+			if (VerticalScroll.Visible)
+				ptGraph.Y += VerticalScroll.Value;
+			else
+				ptGraph.Y -= (ClientRectangle.Height - AutoScrollMinSize.Height) / 2;
+
+			ptGraph = ptGraph.Divide(m_ZoomFactor);
+			ptGraph.Offset(m_MinExtents);
+
+			return ptGraph;
+		}
+
 		protected override void OnDragOver(DragEventArgs e)
 		{
 			Debug.Assert(!ReadOnly);
@@ -635,17 +672,13 @@ namespace DetectiveUIExtension
 			else
 			{
 				Point dragPt = PointToClient(new Point(e.X, e.Y));
-
-				dragPt.Offset(HorizontalScroll.Value, VerticalScroll.Value);
-				dragPt = dragPt.Divide(m_ZoomFactor);
-				dragPt.Offset(m_MinExtents);
+				dragPt = ClientToGraph(dragPt);
 
 				var point = node.Point;
 				point.X = dragPt.X;
 				point.Y = dragPt.Y;
 
 				node.Point = point;
-
 				e.Effect = DragDropEffects.Move;
 
 				Invalidate();
@@ -659,6 +692,11 @@ namespace DetectiveUIExtension
 			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeId))
 			{
 				RevertDrag();
+			}
+			else
+			{
+				AutoScrollMinSize = RecalcExtents();
+				Invalidate();
 			}
 		}
 
