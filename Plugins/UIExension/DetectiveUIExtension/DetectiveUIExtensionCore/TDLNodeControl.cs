@@ -16,123 +16,10 @@ namespace DetectiveUIExtension
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
 
-	// -----------------------------------------------------------------
-
-	public class TaskNode
-	{
-		// Data
-		public string Title { get;  private set;}
-		public Color TextColor { get; private set; }
-
-		public bool HasIcon { get; private set; }
-		public bool IsFlagged { get; private set; }
-		public bool IsParent { get; private set; }
-		public bool IsTopLevel { get; private set; }
-		public bool SomeSubtasksDone { get; private set; }
-		public bool IsLocked { get; private set; }
-
-		public uint UniqueId { get; private set; }
-		public uint ParentId { get; private set; }
-
-		public List<uint> ChildIds { get; private set; }
-		public List<uint> DependIds { get; private set; }
-
-		private bool Done;
-		private bool GoodAsDone;
-
-		// -----------------------------------------------------------------
-
-		public TaskNode()
-		{
-		}
-		
-		public TaskNode(Task task)
-		{
-			Title = task.GetTitle();
-			TextColor = task.GetTextDrawingColor();
-			HasIcon = (task.GetIcon().Length > 0);
-			IsFlagged = task.IsFlagged(false);
-			IsParent = task.IsParent();
-			IsTopLevel = (task.GetParentID() == 0);
-			Done = task.IsDone();
-            GoodAsDone = task.IsGoodAsDone();
-            SomeSubtasksDone = task.HasSomeSubtasksDone();
-			IsLocked = task.IsLocked(true);
-
-			ParentId = task.GetParentID();
-			UniqueId = task.GetID();
-
-			ChildIds = new List<uint>();
-			DependIds = task.GetLocalDependency();
-		}
-
-		public override string ToString() 
-		{
-			return Title;
-		}
-
-		public void Update(Task task, HashSet<Task.Attribute> attribs)
-		{
-			// TODO
-		}
-
-		public bool HasLocalDependencies {  get { return (DependIds != null) && (DependIds.Count > 0); } }
-
-		public bool IsDone(bool includeGoodAsDone) 
-        { 
-            if (includeGoodAsDone && GoodAsDone)
-                return true;
-
-            return Done; 
-        }
-
-		public bool Update(Task task)
-		{
-			if (task.GetID() != UniqueId)
-				return false;
-
-			if (task.GetReferenceID() != 0)
-				return false;
-
-			if (task.IsAttributeAvailable(Task.Attribute.Title))
-				Title = task.GetTitle();
-
-			if (task.IsAttributeAvailable(Task.Attribute.Icon))
-				HasIcon = (task.GetIcon().Length > 0);
-
-			if (task.IsAttributeAvailable(Task.Attribute.Flag))
-				IsFlagged = task.IsFlagged(false);
-
-			if (task.IsAttributeAvailable(Task.Attribute.Color))
-				TextColor = task.GetTextDrawingColor();
-
-            if (task.IsAttributeAvailable(Task.Attribute.SubtaskDone))
-                SomeSubtasksDone = task.HasSomeSubtasksDone();
-
-            if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
-                Done = task.IsDone();
-
-			if (task.IsAttributeAvailable(Task.Attribute.MetaData))
-			{
-				// TODO
-			}
-
-			IsParent = task.IsParent();
-			IsLocked = task.IsLocked(true);
-            GoodAsDone = task.IsGoodAsDone();
-
-			Debug.Assert(task.GetParentID() == ParentId);
-			IsTopLevel = (task.GetParentID() == 0);
-
-			return true;
-		}
-
-	}
-
 	// ------------------------------------------------------------
 
 	[Flags]
-	enum DetectiveOption
+	enum DetectiveOptions
 	{
 		None = 0x00,
 	}
@@ -155,7 +42,7 @@ namespace DetectiveUIExtension
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
 
-		private DetectiveOption m_Options;
+		private DetectiveOptions m_Options;
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -165,7 +52,7 @@ namespace DetectiveUIExtension
 		private DragImage m_DragImage;
 		private Point m_LastDragPos;
 
-		private Nodes m_Nodes;
+		private TaskNodes m_TaskNodes;
 		
 		//private List<NodePath> CriticalPaths;
 
@@ -194,7 +81,7 @@ namespace DetectiveUIExtension
 			m_DragImage = new DragImage();
 			m_LastDragPos = Point.Empty;
 
-			m_Nodes = null;
+			m_TaskNodes = null;
 
 
 
@@ -262,7 +149,7 @@ namespace DetectiveUIExtension
 
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
-				m_Nodes = new Nodes();
+				m_TaskNodes = new TaskNodes();
 				UpdateTaskAttributes(tasks);
 				break;
 
@@ -271,7 +158,7 @@ namespace DetectiveUIExtension
 			}
 		}
 
-		public DetectiveOption Options
+		public DetectiveOptions Options
 		{
 			get { return m_Options; }
 		
@@ -553,7 +440,7 @@ namespace DetectiveUIExtension
 		{
 			RadialTree.TreeNode<uint> rootNode = base.RootNode;
 
-			if (m_Nodes.Count == 0)
+			if (m_TaskNodes.Count == 0)
 			{
 				rootNode = new RadialTree.TreeNode<uint>(0);
 			}
@@ -582,12 +469,12 @@ namespace DetectiveUIExtension
 			if (!task.IsValid())
 				return false;
 
-			var taskNode = m_Nodes.GetNode(task.GetID());
+			var taskNode = m_TaskNodes.GetNode(task.GetID());
 
 			if (taskNode == null)
 			{
 				taskNode = new TaskNode(task);
-				m_Nodes.AddNode(taskNode);
+				m_TaskNodes.AddNode(taskNode);
 
 				parentNode = parentNode.AddChild(task.GetID());
 			}
