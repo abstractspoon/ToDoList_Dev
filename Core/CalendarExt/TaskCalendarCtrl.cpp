@@ -39,20 +39,6 @@ const int MIN_TASK_HEIGHT	= (DEF_TASK_HEIGHT - 6);
 const int OVERFLOWBTN_TIPID = INT_MAX;
 
 /////////////////////////////////////////////////////////////////////////////
-
-CTaskCalendarCtrl::CONTINUOUSDRAWINFO::CONTINUOUSDRAWINFO(DWORD dwID) : dwTaskID(dwID) 
-{ 
-	Reset();
-}
-
-void CTaskCalendarCtrl::CONTINUOUSDRAWINFO::Reset() 
-{ 
-	nIconOffset = 0;
-	nTextOffset = 0;
-	nVertPos = -1; 
-}
-
-/////////////////////////////////////////////////////////////////////////////
 // CTaskCalendarCtrl
 
 CTaskCalendarCtrl::CTaskCalendarCtrl()
@@ -1691,7 +1677,7 @@ void CTaskCalendarCtrl::RebuildCustomDates(DWORD& dwNextExtID)
 void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 {
 	m_nMaxDayTaskCount = 0;
-	m_aContinuousDrawInfo.RemoveAll();
+	m_ContinuousDrawInfo.RemoveAll();
 
 	if (m_mapData.GetCount() == 0)
 		return;
@@ -1707,33 +1693,36 @@ void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 			{
 				if (HasOption(TCCO_DISPLAYCONTINUOUS))
 				{
-					// Find the first task whose position is already set
-					// This will determine the number of free slots that
-					// exist before it
-					int nCurFreeSlot = 0, nMaxFreeSlot = -1;
+					// Determine which slots are already used
+					CTaskCalItemArray aUsedSlots;
+					int nTask;
 
-					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
+					for (nTask = 0; nTask < pTasks->GetSize(); nTask++)
 					{
-						const TASKCALITEM* pTCI = pTasks->GetAt(nTask);
+						TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 						ASSERT(pTCI);
 
 						DWORD dwTaskID = pTCI->GetTaskID();
-						CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
+						const CONTINUOUSDRAWINFO& cdi = GetTaskContinuousDrawInfo(dwTaskID);
 
 						if (cdi.nVertPos != -1)
 						{
-							nMaxFreeSlot = cdi.nVertPos - 1;
-							nCurFreeSlot = 0;
+							if (cdi.nVertPos >= aUsedSlots.GetSize())
+								aUsedSlots.SetSize(cdi.nVertPos + 1);
 
-							break;
+							aUsedSlots[cdi.nVertPos] = pTCI;
 						}
 					}
 
 					// Now go thru the list and set the position of each item 
-					// if not already done keeping track of the maximum vpos
-					int nMaxPos = 0;
+					// (if not already done) keeping track of the next available slot
+					int nNextSlot = Misc::FindT((TASKCALITEM*)NULL, aUsedSlots);
+					BOOL bHadEmptySlots = (nNextSlot != -1);
 
-					for (int nTask = 0; nTask < pTasks->GetSize(); nTask++)
+					if (nNextSlot == -1)
+						nNextSlot = aUsedSlots.GetSize();
+
+					for (nTask = 0; nTask < pTasks->GetSize(); nTask++)
 					{
 						TASKCALITEM* pTCI = pTasks->GetAt(nTask);
 						ASSERT(pTCI);
@@ -1743,30 +1732,44 @@ void CTaskCalendarCtrl::RebuildCellTaskDrawInfo()
 
 						if (cdi.nVertPos == -1)
 						{
-							// Use the first available position and add it to the list
-							if (nMaxFreeSlot >= 0)
+							cdi.nVertPos = nNextSlot;
+
+							if (nNextSlot == aUsedSlots.GetSize())
 							{
-								// Move the task to reflect its vertical position
-								ASSERT(nCurFreeSlot <= nTask);
-
-								pTasks->RemoveAt(nTask);
-								pTasks->InsertAt(nCurFreeSlot, pTCI);
-
-								cdi.nVertPos = nCurFreeSlot++;
-
-								if (nCurFreeSlot > nMaxFreeSlot)
-									nMaxFreeSlot = -1;
+								// We've passed the end of the allocated slots
+								// so just keep adding to the end
+								aUsedSlots.Add(pTCI);
+								nNextSlot++;
 							}
 							else
 							{
-								cdi.nVertPos = nMaxPos;
+								ASSERT(aUsedSlots[nNextSlot] == NULL);
+
+								aUsedSlots[nNextSlot] = pTCI;
+
+								int nNextAvailSlot = Misc::FindT((TASKCALITEM*)NULL, aUsedSlots, nNextSlot + 1);
+
+								// If no further slots are available we start adding to the end
+								if (nNextAvailSlot == -1)
+									nNextSlot = aUsedSlots.GetSize();
+								else
+									nNextSlot = nNextAvailSlot;
 							}
 						}
-
-						nMaxPos = max(nMaxPos, (cdi.nVertPos + 1));
 					}
 
-					m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, nMaxPos);
+					m_nMaxDayTaskCount = max(m_nMaxDayTaskCount, aUsedSlots.GetSize());
+
+					// Copy the reordered tasks after removing any remaining empty slots
+					if (bHadEmptySlots)
+					{
+						if (aUsedSlots.GetSize() > pTasks->GetSize())
+							Misc::RemoveAllT((TASKCALITEM*)NULL, aUsedSlots);
+						else
+							ASSERT(Misc::FindT((TASKCALITEM*)NULL, aUsedSlots) == -1);
+
+						pTasks->Copy(aUsedSlots);
+					}
 				}
 				else
 				{
@@ -2312,11 +2315,11 @@ BOOL CTaskCalendarCtrl::CalcTaskCellRect(int nTask, const CCalendarCell* pCell, 
 	return TRUE;
 }
 
-CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawInfo(DWORD dwTaskID) const
+CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawInfo(DWORD dwTaskID) const
 {
 	ASSERT(dwTaskID);
 
-	if (!HasOption(TCCO_DISPLAYCONTINUOUS))
+	if (!HasOption(TCCO_DISPLAYCONTINUOUS) || !dwTaskID)
 	{
 		static CONTINUOUSDRAWINFO nullDrawInfo;
 		nullDrawInfo.Reset();
@@ -2324,21 +2327,7 @@ CTaskCalendarCtrl::CONTINUOUSDRAWINFO& CTaskCalendarCtrl::GetTaskContinuousDrawI
 		return nullDrawInfo;
 	}
 
-	int nItem, nNumItem = m_aContinuousDrawInfo.GetSize();
-
-	for (nItem = 0; nItem < nNumItem; nItem++)
-	{
-		if (m_aContinuousDrawInfo[nItem].dwTaskID == dwTaskID)
-			break;
-	}
-
-	if (nItem == nNumItem) // not found
-	{
-		CONTINUOUSDRAWINFO cdi(dwTaskID);
-		nItem = m_aContinuousDrawInfo.Add(cdi);
-	}
-
-	return m_aContinuousDrawInfo[nItem];
+	return m_ContinuousDrawInfo.GetTaskInfo(dwTaskID);
 }
 
 TASKCALITEM* CTaskCalendarCtrl::GetTaskCalItem(DWORD dwTaskID) const
@@ -2910,6 +2899,7 @@ BOOL CTaskCalendarCtrl::EndDragging(const CPoint& ptCursor)
 	if (!NotifyParentDateChange(nDragWhat, sCustAttribID))
 	{
 		*pTCI = m_tcidPreDrag;
+		RebuildCellTasks();
 	}
 	else if (m_mapRecurringTaskIDs.Has(m_dwSelectedTaskID) || bExtItem)
 	{

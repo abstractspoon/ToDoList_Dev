@@ -109,21 +109,9 @@ protected:
 	COLORREF m_crWeekend, m_crToday, m_crAltWeek; // Grid color handled by base class
 	TCC_SNAPMODE m_nDefSnapMode;
 	CString m_sHideParentTag;
+	int m_nMaxDayTaskCount;
 
-	struct CONTINUOUSDRAWINFO
-	{
-		CONTINUOUSDRAWINFO(DWORD dwID = 0);
-
-		void Reset();
-
-		DWORD dwTaskID;
-		int nIconOffset;
-		int nTextOffset;
-		int nVertPos;
-	};
-	
-	mutable CArray<CONTINUOUSDRAWINFO, CONTINUOUSDRAWINFO&> m_aContinuousDrawInfo;
-	mutable int m_nMaxDayTaskCount;
+	mutable CCalContinuousDrawInfo m_ContinuousDrawInfo;
 
 protected:
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;

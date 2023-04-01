@@ -1071,3 +1071,54 @@ COLORREF CHeatMap::GetColor(const COleDateTime& date) const
 }
 
 /////////////////////////////////////////////////////////////////////////////
+
+CONTINUOUSDRAWINFO::CONTINUOUSDRAWINFO(DWORD dwID) : dwTaskID(dwID)
+{
+	Reset();
+}
+
+void CONTINUOUSDRAWINFO::Reset()
+{
+	nIconOffset = 0;
+	nTextOffset = 0;
+	nVertPos = -1;
+}
+
+CCalContinuousDrawInfo::~CCalContinuousDrawInfo()
+{
+	RemoveAll();
+}
+
+void CCalContinuousDrawInfo::RemoveAll()
+{
+	CONTINUOUSDRAWINFO* pInfo = NULL;
+	DWORD dwTaskID;
+
+	POSITION pos = GetStartPosition();
+
+	while (pos)
+	{
+		GetNextAssoc(pos, dwTaskID, pInfo);
+		delete pInfo;
+	}
+
+	CMap<DWORD, DWORD, CONTINUOUSDRAWINFO*, CONTINUOUSDRAWINFO*&>::RemoveAll();
+}
+
+CONTINUOUSDRAWINFO& CCalContinuousDrawInfo::GetTaskInfo(DWORD dwTaskID)
+{
+	ASSERT(dwTaskID);
+
+	CONTINUOUSDRAWINFO* pInfo = NULL;
+	Lookup(dwTaskID, pInfo);
+
+	if (!pInfo)
+	{
+		pInfo = new CONTINUOUSDRAWINFO(dwTaskID);
+		SetAt(dwTaskID, pInfo);
+	}
+
+	return *pInfo;
+}
+
+/////////////////////////////////////////////////////////////////////////////
