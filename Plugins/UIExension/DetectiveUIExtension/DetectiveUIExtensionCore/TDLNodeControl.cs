@@ -47,7 +47,7 @@ namespace DetectiveUIExtension
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 		//		private Size CheckboxSize;
-		private TaskNode m_PreviouslySelectedNode;
+		private TaskNode m_PreviouslySelectedTaskNode;
 
 		private DragImage m_DragImage;
 		private Point m_LastDragPos;
@@ -91,7 +91,7 @@ namespace DetectiveUIExtension
 			FontChanged += new EventHandler(OnFontChanged);
 
 			// Initialise our fonts
-			Font = new Font("Tahoma", 8.25f);
+			//Font = new Font("Tahoma", 8.25f);
 
 			base.AutoCalculateRadialIncrement = true;
 		}
@@ -294,6 +294,19 @@ namespace DetectiveUIExtension
 			return false;
 		}
 
+		public TaskNode SelectedTaskNode
+		{
+			get
+			{
+				var node = base.SelectedNode;
+
+				if (node == null)
+					return null;
+
+				return m_TaskNodes.GetNode(node.Data);
+			}
+		}
+
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
 		{
 // 			if ((text == String.Empty) || IsEmpty())
@@ -425,8 +438,7 @@ namespace DetectiveUIExtension
 
 		public bool CanSaveToImage()
 		{
-			//return !IsEmpty();
-			return false;
+			return (m_TaskNodes.Count != 0);
 		}
 
 		// Internal ------------------------------------------------------------
@@ -457,8 +469,9 @@ namespace DetectiveUIExtension
 
 			base.InitialRadius = (float)((rootNode.Count * NodeSize.Width) / (2 * Math.PI));
 			base.RadialIncrementOrSpacing = NodeSize.Width;
-			base.RootNode = rootNode;
 
+			// If the root only has one task, make it the root
+			base.RootNode = ((rootNode.Count == 1) ? rootNode.Children[0] : rootNode);
 			base.EnableLayoutUpdates = true;
 
 			Invalidate();
@@ -834,8 +847,8 @@ namespace DetectiveUIExtension
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
 		{
-// 			if (HitTestNode(e.Location) != null)
-// 				EditTaskLabel(this, SelectedNode.UniqueId);
+			if (HitTestNode(e.Location) != null)
+				EditTaskLabel(this, SelectedNode.Data);
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)
@@ -845,13 +858,12 @@ namespace DetectiveUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			TaskNode taskNode = null;
-			//(HitTestNode(e.Location) as TaskNode);
+			TaskNode taskNode = SelectedTaskNode;
 
 			if (taskNode == null)
 				return;
 
-			if (/*!ReadOnly &&*/ !taskNode.IsLocked)
+			if (!ReadOnly && !taskNode.IsLocked)
 			{
 /*
 				if (HitTestCheckbox(node, e.Location))
@@ -859,7 +871,7 @@ namespace DetectiveUIExtension
 					if (EditTaskDone != null)
 						EditTaskDone(this, taskNode.ID, !taskNode.IsDone(false));
 				}
-				else*/ if (HitTestIcon(taskNode, e.Location))
+				else*/ if (HitTestIcon(SelectedNode, e.Location))
 				{
 					if (EditTaskIcon != null)
 					    EditTaskIcon(this, taskNode.UniqueId);
@@ -874,24 +886,24 @@ namespace DetectiveUIExtension
 
 		private bool SelectedNodeWasPreviouslySelected
 		{
-			get { return false; /*((SelectedNode != null) && (SelectedNode == m_PreviouslySelectedNode));*/ }
+			get { return ((SelectedTaskNode != null) && (SelectedTaskNode == m_PreviouslySelectedTaskNode)); }
 		}
 
-		private bool HitTestIcon(TaskNode node, Point point)
+		private bool HitTestIcon(RadialTree.TreeNode<uint> node, Point point)
         {
-			var taskNode = (node as TaskNode);
+			var taskNode = GetTaskNode(node);
 			
 			if (taskNode.IsLocked || !TaskHasIcon(taskNode))
 				return false;
 
 			// else
-			return false;//			CalcIconRect(CalcNodeRectangle(node)).Contains(point);
+			return CalcIconRect(GetNodeRectangle(node)).Contains(point);
         }
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
-// 			m_EditTimer.Stop();
-// 			m_PreviouslySelectedNode = Focused ? SelectedNode : null;
+			m_EditTimer.Stop();
+			m_PreviouslySelectedTaskNode = (Focused ? SelectedTaskNode : null);
 
 			base.OnMouseDown(e);
 		}
@@ -900,33 +912,57 @@ namespace DetectiveUIExtension
 		{
 			m_EditTimer.Stop();
 
-// 			if (EditTaskLabel != null)
-// 				EditTaskLabel(this, SelectedNode?.UniqueId ?? 0);
+			EditTaskLabel?.Invoke(this, SelectedNode?.Data ?? 0);
 		}
 
-/*
+		protected TaskNode HitTestTask(Point ptClient)
+		{
+			var node = HitTestNode(ptClient);
+
+			return ((node == null) ? null : m_TaskNodes.GetNode(node.Data));
+		}
+
+		protected TaskNode GetTaskNode(RadialTree.TreeNode<uint> node)
+		{
+			return ((node == null) ? null : m_TaskNodes.GetNode(node.Data));
+		}
+
+		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
+		{
+			return (base.IsAcceptableDragSource(node) && (node != RootNode));
+		}
+
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
  			base.OnMouseMove(e);
 
-			var taskNode = (HitTestNode(e.Location) as TaskNode);
+			var node = HitTestNode(e.Location);
+			var taskNode = GetTaskNode(node);
 
-			if (!ReadOnly && (taskNode != null))
+			if (!ReadOnly && (node != null))
 			{
-				Cursor cursor = null;
+				if (taskNode != null)
+				{
+					Cursor cursor = null;
 
-				if (taskNode.IsLocked)
-				{
-					cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-				}
-				else if (TaskHasIcon(taskNode) && HitTestIcon(taskNode, e.Location))
-				{
-					cursor = UIExtension.HandCursor();
-				}
+					if (taskNode.IsLocked)
+					{
+						cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+					}
+					else if (TaskHasIcon(taskNode) && HitTestIcon(node, e.Location))
+					{
+						cursor = UIExtension.HandCursor();
+					}
 
-				if (cursor != null)
+					if (cursor != null)
+					{
+						Cursor = cursor;
+						return;
+					}
+				}
+				else // it must be the root node
 				{
-					Cursor = cursor;
+					Cursor = UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 					return;
 				}
 			}
@@ -934,7 +970,6 @@ namespace DetectiveUIExtension
 			// all else
 			Cursor = Cursors.Arrow;
 		}
-*/
 
 /*
 		protected override void OnDragOver(DragEventArgs e)

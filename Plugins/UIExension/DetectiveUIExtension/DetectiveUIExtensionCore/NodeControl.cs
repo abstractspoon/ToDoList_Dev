@@ -57,6 +57,14 @@ namespace DetectiveUIExtension
 			InitializeComponent();
 		}
 
+		public void SetFont(String fontName, int fontSize)
+		{
+			if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
+				return;
+
+			this.Font = new Font(fontName, fontSize, FontStyle.Regular);
+		}
+
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
@@ -362,17 +370,25 @@ namespace DetectiveUIExtension
 
 			if (IsNodeVisible(node, out nodeRect))
 			{
+				Brush fill = SystemBrushes.Window, text = SystemBrushes.WindowText;
+				Pen border = Pens.Gray;
+
 				if (node.Data == m_SelectedNodeId)
 				{
-					graphics.FillRectangle(SystemBrushes.Highlight, nodeRect);
-					graphics.DrawString(node.Data.ToString(), Font, SystemBrushes.HighlightText, nodeRect);
+					if (Focused)
+					{
+						fill = SystemBrushes.Highlight;
+						text = SystemBrushes.HighlightText;
+					}
+					else
+					{
+						fill = Brushes.LightGray;
+					}
 				}
-				else
-				{
-					graphics.FillRectangle(SystemBrushes.Window, nodeRect);
-					graphics.DrawRectangle(Pens.Gray, nodeRect);
-					graphics.DrawString(node.Data.ToString(), Font, SystemBrushes.WindowText, nodeRect);
-				}
+
+				graphics.FillRectangle(fill, nodeRect);
+				graphics.DrawRectangle(border, nodeRect);
+				graphics.DrawString(node.Data.ToString(), Font, text, nodeRect);
 			}
 		}
 
@@ -476,6 +492,20 @@ namespace DetectiveUIExtension
 
 			if (se.Type == ScrollEventType.ThumbPosition)
 				Update();
+		}
+
+		protected override void OnGotFocus(EventArgs e)
+		{
+			base.OnGotFocus(e);
+
+			Invalidate();
+		}
+
+		protected override void OnLostFocus(EventArgs e)
+		{
+			base.OnLostFocus(e);
+
+			Invalidate();
 		}
 
 		protected override void OnMouseDown(MouseEventArgs e)

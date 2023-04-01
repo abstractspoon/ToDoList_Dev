@@ -24,7 +24,7 @@ namespace DetectiveUIExtension
 
         private Translator m_Trans;
         private UIExtension.TaskIcon m_TaskIcons;
-        //private System.Drawing.Font m_ControlsFont;
+        private System.Drawing.Font m_ControlsFont;
 
         private TDLNodeControl m_Control;
 
@@ -186,12 +186,12 @@ namespace DetectiveUIExtension
 
         public Bitmap SaveToImage()
         {
-			return null;// m_Control.SaveToImage();
+			return null;//m_Control.SaveToImage();
         }
 
         public bool CanSaveToImage()
         {
-            return m_Control.CanSaveToImage();
+            return false;//m_Control.CanSaveToImage();
         }
         		
         // Message handlers ---------------------------------------------------------------------
@@ -208,16 +208,16 @@ namespace DetectiveUIExtension
         private void InitializeComponent()
         {
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
-            //m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
+            m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
 			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
-            //m_Control.SetFont(FontName, 8);
+            m_Control.SetFont(FontName, 8);
 
-//             if (VisualStyleRenderer.IsSupported)
-//                 m_Control.BorderStyle = BorderStyle.FixedSingle;
-//             else
-//                 m_Control.BorderStyle = BorderStyle.Fixed3D;
+            if (VisualStyleRenderer.IsSupported)
+                m_Control.BorderStyle = BorderStyle.FixedSingle;
+            else
+                m_Control.BorderStyle = BorderStyle.Fixed3D;
 
 			m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
 			m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
@@ -270,7 +270,7 @@ namespace DetectiveUIExtension
 // 			return notify.NotifyMove(e.dragged.uniqueID,
 // 									 e.targetParent.uniqueID,
 // 									 e.afterSibling.uniqueID);
-			return false;
+			return true;
 		}
 
         protected override void OnSizeChanged(EventArgs e)
