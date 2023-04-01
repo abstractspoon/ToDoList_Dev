@@ -55,7 +55,6 @@
     <Compile Include="NodeControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="NodeControl.Designer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -38,6 +39,8 @@ namespace DetectiveUIExtension
 		uint m_SelectedNodeId = 0;
 
 		public const uint NullId = uint.MaxValue;
+		private IContainer components;
+		private Timer m_DragTimer;
 
 		// -------------------------------------------------------------------
 
@@ -51,6 +54,32 @@ namespace DetectiveUIExtension
 			m_NodeSize = DefaulttNodeSize;
 
 			InitializeComponent();
+		}
+
+		private void InitializeComponent()
+		{
+			this.components = new System.ComponentModel.Container();
+			this.m_DragTimer = new System.Windows.Forms.Timer(this.components);
+			this.SuspendLayout();
+			// 
+			// m_DragTimer
+			// 
+			this.m_DragTimer.Interval = 500;
+			this.m_DragTimer.Tick += new System.EventHandler(this.OnDragTimer);
+			// 
+			// NodeControl
+			// 
+			this.AllowDrop = true;
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+			this.AutoScrollMargin = new System.Drawing.Size(20, 20);
+			this.BackColor = System.Drawing.SystemColors.Window;
+			this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.DoubleBuffered = true;
+			this.Name = "NodeControl";
+			this.Size = new System.Drawing.Size(516, 422);
+			this.ResumeLayout(false);
+
 		}
 
 		public Size NodeSize
@@ -67,13 +96,14 @@ namespace DetectiveUIExtension
 			}
 		}
 
+		public bool ReadOnly = false;
 		public uint SelectedNodeId { get { return m_SelectedNodeId; } }
 
 		public bool SelectNode(uint nodeId)
 		{
-			if ((nodeId != m_SelectedNodeId) || 
-				(nodeId == NullId) || 
-				(nodeId == RootNode.Data) || 
+			if ((nodeId != m_SelectedNodeId) ||
+				(nodeId == NullId) ||
+				(nodeId == RootNode.Data) ||
 				RootNode.HasChild(nodeId))
 			{
 				m_SelectedNodeId = nodeId;
@@ -188,7 +218,7 @@ namespace DetectiveUIExtension
 		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
 
 		public bool CanZoomIn { get { return (m_ZoomLevel > 0); } }
-		public bool CanZoomOut { get { return (HorizontalScroll.Visible || VerticalScroll.Visible);	} }
+		public bool CanZoomOut { get { return (HorizontalScroll.Visible || VerticalScroll.Visible); } }
 
 		public bool ZoomIn()
 		{
@@ -286,7 +316,7 @@ namespace DetectiveUIExtension
 			return node.GetRectangle(ZoomedNodeSize, DrawOffset);
 		}
 
-		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode, 
+		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
 										  out Point fromPos, out Point toPos)
 		{
 			if ((fromNode == null) || (toNode == null))
@@ -427,9 +457,9 @@ namespace DetectiveUIExtension
 				Update();
 		}
 
-		protected override void OnMouseClick(MouseEventArgs e)
+		protected override void OnMouseDown(MouseEventArgs e)
 		{
-			base.OnMouseClick(e);
+			base.OnMouseDown(e);
 
 			var hit = HitTestNode(e.Location);
 
@@ -439,6 +469,9 @@ namespace DetectiveUIExtension
 				Invalidate();
 
 				SelectionChange?.Invoke(this, m_SelectedNodeId);
+
+				m_DragTimer.Tag = e;
+				m_DragTimer.Start();
 			}
 		}
 
@@ -460,42 +493,141 @@ namespace DetectiveUIExtension
 				base.OnMouseWheel(e);
 			}
 		}
-
-		private void InitializeComponent()
+		protected override void OnMouseMove(MouseEventArgs e)
 		{
-			this.SuspendLayout();
-			// 
-			// NodeControl
-			// 
-			this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
-			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.BackColor = System.Drawing.SystemColors.Window;
-			this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.DoubleBuffered = true;
-			this.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-			this.Name = "NodeControl";
-			this.Size = new System.Drawing.Size(774, 649);
-			this.ResumeLayout(false);
+			base.OnMouseMove(e);
+
+			if ((e.Button == MouseButtons.Left) && m_DragTimer.Enabled)
+			{
+				Debug.Assert(!ReadOnly);
+
+				if (CheckStartDragging(e.Location))
+					m_DragTimer.Stop();
+			}
+		}
+
+		private bool CheckStartDragging(Point cursor)
+		{
+			Debug.Assert(!ReadOnly);
+
+			// Check for drag movement
+			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
+
+			if (GetDragRect(ptOrg).Contains(cursor))
+				return false;
+
+			var hit = HitTestNode(ptOrg);
+
+			if (IsAcceptableDragSource(hit))
+			{
+				// DoDragDrop is a modal loop so we can't use a timer
+				// to implement auto-expansion of dragged-over parent nodes
+				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
+				return true;
+			}
+
+			return false;
+		}
+
+		protected virtual bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
+		{
+			return ((node != null) && (node.Data != NullId));
+		}
+
+		private Rectangle GetDragRect(Point cursor)
+		{
+			Debug.Assert(!ReadOnly);
+
+			var rect = new Rectangle(cursor.X, cursor.Y, 0, 0);
+			rect.Inflate(SystemInformation.DragSize);
+
+			return rect;
+		}
+		
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			m_DragTimer.Stop();
+
+			base.OnMouseUp(e);
+		}
+
+		protected void OnDragTimer(object sender, EventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
+
+			m_DragTimer.Stop();
+
+			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
+
+			if (mouseDown)
+				CheckStartDragging(MousePosition);
+		}
+
+		protected override void OnDragOver(DragEventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
+
+			var node = e.Data.GetData(typeof(RadialTree.TreeNode<uint>)) as RadialTree.TreeNode<uint>;
+
+			if (node == null)
+			{
+				e.Effect = DragDropEffects.None;
+			}
+			else
+			{
+				Point dragPt = PointToClient(new Point(e.X, e.Y));
+
+				dragPt.X += HorizontalScroll.Value;
+				dragPt.Y += VerticalScroll.Value;
+
+				dragPt.X += m_MinExtents.X;
+				dragPt.Y += m_MinExtents.Y;
+
+				var point = node.Point;
+				point.X = dragPt.X;
+				point.Y = dragPt.Y;
+
+				node.Point = point;
+
+				e.Effect = DragDropEffects.Move;
+
+				Invalidate();
+			}
+		}
+
+		protected override void OnDragDrop(DragEventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
+
+			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(RadialTree.TreeNode<uint>));
+
+			Point dropPt = PointToClient(new Point(e.X, e.Y));
 
 		}
 
-	}
-/*
+// 		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
+// 		{
+// 			Debug.Assert(!ReadOnly);
+// 
+// 			base.OnQueryContinueDrag(e);
+// 
+// 			if (e.EscapePressed)
+// 			{
+// 				e.Action = DragAction.Cancel;
+// 
+// 				Invalidate();
+// 			}
+// 		}
 
-	public class CustomType
-	{
-		public CustomType(uint id, Pen nodePen = null, Brush nodeBrush = null, Pen linePen = null)
-		{
-			Id = id;
-			NodePen = nodePen;
-			NodeBrush = nodeBrush;
-			LinePen = linePen;
-		}
+// 		protected override void OnDragLeave(EventArgs e)
+// 		{
+// 			Debug.Assert(!ReadOnly);
+// 
+// 			base.OnDragLeave(e);
+// 
+// 			Invalidate();
+// 		}
 
-		public readonly uint Id;
-		public Brush NodeBrush;
-		public Pen NodePen, LinePen;
 	}
-*/
 
 }

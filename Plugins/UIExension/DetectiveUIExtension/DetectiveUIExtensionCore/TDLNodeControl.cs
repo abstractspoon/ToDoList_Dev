@@ -1047,7 +1047,9 @@ namespace DetectiveUIExtension
 			// all else
 			Cursor = Cursors.Arrow;
 		}
+*/
 
+/*
 		protected override void OnDragOver(DragEventArgs e)
 		{
 			var hitTest = DragHitTest(e);
@@ -1078,14 +1080,6 @@ namespace DetectiveUIExtension
 
 			m_LastDragPos = PointToClient(new Point(e.X, e.Y));
 		}
-*/
-		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
-		{
-			DoPaintNode(graphics, 
-						(obj as TaskNode), 
-						DrawState.Selected | DrawState.DragImage);
-		}
-/*
 		protected override void DoDragCleanUp()
 		{
 			base.DoDragCleanUp();
@@ -1118,6 +1112,12 @@ namespace DetectiveUIExtension
 		}
 
 */
+		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
+		{
+			DoPaintNode(graphics, 
+						(obj as TaskNode), 
+						DrawState.Selected | DrawState.DragImage);
+		}
 
 	}
 }
