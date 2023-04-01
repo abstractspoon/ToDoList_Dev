@@ -8,6 +8,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace MindMapUIExtension
 {
+	[System.ComponentModel.DesignerCategory("")]
 	class MindMapAlignmentComboBox : ComboBox
 	{
 		class MindMapAlignmentItem
@@ -67,6 +68,7 @@ namespace MindMapUIExtension
 
 	// -------------------------------------------------------------------
 
+	[System.ComponentModel.DesignerCategory("")]
 	class MindMapOptionsComboBox : CustomComboBox.CheckedComboBox
 	{
 		class MindMapOptionItem
