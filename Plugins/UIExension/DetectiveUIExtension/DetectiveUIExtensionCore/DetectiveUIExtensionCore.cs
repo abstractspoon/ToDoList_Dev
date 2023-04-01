@@ -220,7 +220,7 @@ namespace DetectiveUIExtension
 //                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
 			m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
-	//		m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
+			m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
             m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveEditTaskCompletion);
@@ -257,23 +257,21 @@ namespace DetectiveUIExtension
 			notify.NotifySelChange(nodeId);
 		}
 
-/*
-		bool OnDetectiveDragDrop(object sender, NodeDragEventArgs e)
+		bool OnDetectiveDragDrop(object sender, uint nodeId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			// 			if (e.copyNode)
-			// 				return notify.NotifyCopy(e.dragged.uniqueID, 
-			// 										 e.targetParent.uniqueID, 
-			// 										 e.afterSibling.uniqueID);
-			// 
-			// 			// else
-			// 			return notify.NotifyMove(e.dragged.uniqueID,
-			// 									 e.targetParent.uniqueID,
-			// 									 e.afterSibling.uniqueID);
+// 			if (e.copyNode)
+// 				return notify.NotifyCopy(e.dragged.uniqueID, 
+// 										 e.targetParent.uniqueID, 
+// 										 e.afterSibling.uniqueID);
+// 			
+// 			// else
+// 			return notify.NotifyMove(e.dragged.uniqueID,
+// 									 e.targetParent.uniqueID,
+// 									 e.afterSibling.uniqueID);
 			return false;
 		}
-*/
 
         protected override void OnSizeChanged(EventArgs e)
         {

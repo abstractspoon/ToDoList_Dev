@@ -11,7 +11,7 @@ using System.Windows.Forms;
 namespace DetectiveUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, uint itemId);
-	public delegate void DragDropChangeEventHandler(object sender, uint itemId);
+	public delegate bool DragDropChangeEventHandler(object sender, uint itemId);
 
 	public partial class NodeControl : UserControl
 	{
@@ -37,10 +37,11 @@ namespace DetectiveUIExtension
 		Point m_MaxExtents = Point.Empty;
 
 		uint m_SelectedNodeId = 0;
-
 		public const uint NullId = uint.MaxValue;
-		private IContainer components;
 		private Timer m_DragTimer;
+		private PointF m_DragStart;
+
+		private IContainer components = null;
 
 		// -------------------------------------------------------------------
 
@@ -98,6 +99,25 @@ namespace DetectiveUIExtension
 
 		public bool ReadOnly = false;
 		public uint SelectedNodeId { get { return m_SelectedNodeId; } }
+
+		public RadialTree.TreeNode<uint> SelectedNode
+		{
+			get
+			{
+				if (m_SelectedNodeId == NullId)
+					return null;
+
+				if (m_SelectedNodeId == RootNode.Data)
+					return m_RootNode;
+
+				var node = RootNode.FindInChildren(m_SelectedNodeId);
+
+				if (node == null)
+					m_SelectedNodeId = NullId;
+
+				return node;
+			}
+		}
 
 		public bool SelectNode(uint nodeId)
 		{
@@ -473,6 +493,7 @@ namespace DetectiveUIExtension
 
 				m_DragTimer.Tag = e;
 				m_DragTimer.Start();
+				m_DragStart = new PointF(hit.Point.X, hit.Point.Y);
 			}
 		}
 
@@ -598,34 +619,45 @@ namespace DetectiveUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
-			TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(RadialTree.TreeNode<uint>));
-
-			Point dropPt = PointToClient(new Point(e.X, e.Y));
-
+			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeId))
+			{
+				RevertDrag();
+			}
 		}
 
-// 		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
-// 		{
-// 			Debug.Assert(!ReadOnly);
-// 
-// 			base.OnQueryContinueDrag(e);
-// 
-// 			if (e.EscapePressed)
-// 			{
-// 				e.Action = DragAction.Cancel;
-// 
-// 				Invalidate();
-// 			}
-// 		}
+		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
+		{
+			Debug.Assert(!ReadOnly);
 
-// 		protected override void OnDragLeave(EventArgs e)
-// 		{
-// 			Debug.Assert(!ReadOnly);
-// 
-// 			base.OnDragLeave(e);
-// 
-// 			Invalidate();
-// 		}
+			base.OnQueryContinueDrag(e);
+
+			if (e.EscapePressed)
+			{
+				e.Action = DragAction.Cancel;
+				RevertDrag();
+			}
+		}
+
+		private void RevertDrag()
+		{
+			var node = SelectedNode;
+
+			if (node != null)
+			{
+				node.Point.X = m_DragStart.X;
+				node.Point.Y = m_DragStart.Y;
+				Invalidate();
+			}
+		}
+
+		// 		protected override void OnDragLeave(EventArgs e)
+		// 		{
+		// 			Debug.Assert(!ReadOnly);
+		// 
+		// 			base.OnDragLeave(e);
+		// 
+		// 			Invalidate();
+		// 		}
 
 	}
 
