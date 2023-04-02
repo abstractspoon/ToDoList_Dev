@@ -609,7 +609,7 @@ namespace DetectiveUIExtension
 			return (font == null) ? Font : font;
 		}
 
-		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect)
+		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)
 		{
 			Debug.Assert(IsZoomed);
 
@@ -621,6 +621,7 @@ namespace DetectiveUIExtension
 			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
 			graphics.SmoothingMode = SmoothingMode.HighQuality;
 
+			graphics.IntersectClip(clipRect);
 			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attrib);
 			graphics.Restore(gSave);
 		}
@@ -695,6 +696,7 @@ namespace DetectiveUIExtension
 			}
 			else
 			{
+				graphics.FillRectangle(SystemBrushes.Window, nodeRect);
 				backColor = SystemColors.Window;
 			}
 
@@ -734,7 +736,7 @@ namespace DetectiveUIExtension
 								gTemp.Clear(backColor);
 								m_TaskIcons.Draw(gTemp, 0, 0);
 
-								DrawZoomedIcon(tempImage, graphics, iconRect);
+								DrawZoomedIcon(tempImage, graphics, iconRect, nodeRect);
 							}
 						}
 					}
@@ -746,8 +748,7 @@ namespace DetectiveUIExtension
 
 			// Title
 			titleRect.Inflate(-LabelPadding, -LabelPadding);
-			titleRect.Height /= 2;
-
+			graphics.DrawString(taskNode.Title, GetNodeFont(taskNode), new SolidBrush(textColor), titleRect);
 			/*
 			// Checkbox
 			Rectangle checkRect = CalcCheckboxRect(rect);
