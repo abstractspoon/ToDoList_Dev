@@ -11260,6 +11260,8 @@ LRESULT CToDoCtrl::OnMidnight(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 void CToDoCtrl::IncrementTrackedTime(BOOL bEnding)
 {
+	AF_NOREENTRANT;
+
 	// if we are editing the title of the task being tracked then 
 	// leave immediately and wait until the editing has ended
 	if (!bEnding && IsTaskLabelEditing() && m_timeTracking.IsTracking(GetSelectedTaskID()))
