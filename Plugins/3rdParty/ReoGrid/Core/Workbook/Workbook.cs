@@ -120,17 +120,17 @@ namespace unvell.ReoGrid
 		public static readonly Dictionary<FileFormat, IFileFormatProvider> FileFormatProviders =
 			new Dictionary<FileFormat, IFileFormatProvider>();
 
-		public void Save(string path)
+		public void SaveToFile(string path)
 		{
-			this.Save(path, FileFormat._Auto);
+			this.SaveToFile(path, FileFormat._Auto);
 		}
 
-		public void Save(string path, IO.FileFormat fileFormat)
+		public void SaveToFile(string path, IO.FileFormat fileFormat)
 		{
-			this.Save(path, fileFormat, Encoding.Default);
+			this.SaveToFile(path, fileFormat, Encoding.Default);
 		}
 
-		public void Save(string path, IO.FileFormat fileFormat, Encoding encoding)
+		public void SaveToFile(string path, IO.FileFormat fileFormat, Encoding encoding)
 		{
 			if (fileFormat == IO.FileFormat._Auto)
 			{
@@ -192,17 +192,17 @@ namespace unvell.ReoGrid
 			}
 		}
 
-		public void Load(string path)
+		public void LoadFromFile(string path)
 		{
-			this.Load(path, IO.FileFormat._Auto);
+			this.LoadFromFile(path, IO.FileFormat._Auto);
 		}
 
-		public void Load(string path, IO.FileFormat fileFormat)
+		public void LoadFromFile(string path, IO.FileFormat fileFormat)
 		{
-			this.Load(path, fileFormat, Encoding.Default);
+			this.LoadFromFile(path, fileFormat, Encoding.Default);
 		}
 
-		public void Load(string path, IO.FileFormat fileFormat, Encoding encoding)
+		public void LoadFromFile(string path, IO.FileFormat fileFormat, Encoding encoding)
 		{
 			if (fileFormat == IO.FileFormat._Auto)
 			{

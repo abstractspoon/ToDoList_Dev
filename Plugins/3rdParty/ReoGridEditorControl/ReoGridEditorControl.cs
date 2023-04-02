@@ -1403,7 +1403,7 @@ namespace unvell.ReoGrid.Editor
 
 			try
 			{
-				grid.Load(path, IO.FileFormat._Auto, encoding);
+				grid.LoadFromFile(path, IO.FileFormat._Auto, encoding);
 				success = true;
 			}
 			catch (FileNotFoundException ex)
@@ -1503,7 +1503,7 @@ namespace unvell.ReoGrid.Editor
 
 			try
 			{
-				this.grid.Save(path, fm);
+				this.grid.SaveToFile(path, fm);
 
 				this.SetCurrentDocumentFile(path);
 

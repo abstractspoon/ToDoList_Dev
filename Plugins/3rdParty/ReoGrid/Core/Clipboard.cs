@@ -24,6 +24,9 @@ using unvell.ReoGrid.Events;
 using unvell.ReoGrid.Actions;
 using unvell.ReoGrid.Main;
 using unvell.ReoGrid.Interaction;
+using unvell.ReoGrid.Utility;
+using unvell.ReoGrid.IO.OpenXML;
+using unvell.ReoGrid.IO.OpenXML.Schema;
 
 using DataObject = System.Windows.Forms.DataObject;
 using Clipboard = System.Windows.Forms.Clipboard;
@@ -280,10 +283,47 @@ namespace unvell.ReoGrid
 					{
 						partialGrid = data.GetData(ClipBoardDataFormatIdentify) as PartialGrid;
 
-						if (data.GetDataPresent("FileNameW"))
+						if ((partialGrid == null) && data.GetDataPresent("XML Spreadsheet"))
+						{
+							var xmlData = (data.GetData("XML Spreadsheet") as System.IO.Stream);
+							var xmlSerializer = new System.Xml.Serialization.XmlSerializer(typeof(OpenXMLFile));
+							var tempWorkbook = new Workbook(null);
+
+							try
+							{
+								// This doesn't current work because the clipboard data is not compressed
+								// tempWorkbook.Load(xmlContent, IO.FileFormat.Excel2007);
+
+								var obj = xmlSerializer.Deserialize(xmlData);
+//								var obj = XMLHelper.LoadXML<object>(xmlReader) as OpenXMLFile;
+
+								if (obj is OpenXMLFile)
+								{
+// 									var objectPath = RelativePathUtility.GetPathWithoutFilename(finalPath);
+// 									var objectName = RelativePathUtility.GetFileNameFromPath(finalPath);
+// 
+									var entryFile = obj as OpenXMLFile;
+// 									entryFile._path = objectPath;
+// 									this.LoadRelationShipsFile(entryFile, objectName);
+								}
+
+							}
+							catch (Exception e)
+							{
+
+							}
+
+							int breakpoint = 0;
+
+						}
+						else if (data.GetDataPresent("FileNameW"))
+						{
 							clipboardText = (data.GetData("FileNameW") as string[])[0];
+						}
 						else
+						{
 							clipboardText = data.GetText();
+						}
 
 						//image = data.GetImage();
 					}

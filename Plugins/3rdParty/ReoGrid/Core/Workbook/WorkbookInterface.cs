@@ -21,14 +21,14 @@ namespace unvell.ReoGrid
 		/// Save workbook into file.
 		/// </summary>
 		/// <param name="path">File path to create file and save workbook data.</param>
-		void Save(string path);
+		void SaveToFile(string path);
 
 		/// <summary>
 		/// Save workbook into file.
 		/// </summary>
 		/// <param name="path">File path to create file and save workbook data.</param>
 		/// <param name="fileFormat">Specified file format used to write data of workbook.</param>
-		void Save(string path, IO.FileFormat fileFormat);
+		void SaveToFile(string path, IO.FileFormat fileFormat);
 
 		/// <summary>
 		/// Save workbook into file.
@@ -36,7 +36,7 @@ namespace unvell.ReoGrid
 		/// <param name="path">File path to create file and save workbook data.</param>
 		/// <param name="fileFormat">Specified file format used to write data of workbook.</param>
 		/// <param name="encoding">Encoding used to write plain-text format file data. (Optional)</param>
-		void Save(string path, IO.FileFormat fileFormat, Encoding encoding);
+		void SaveToFile(string path, IO.FileFormat fileFormat, Encoding encoding);
 
 		/// <summary>
 		/// Save workbook into stream.
@@ -57,14 +57,14 @@ namespace unvell.ReoGrid
 		/// Load workbook from file by specified path.
 		/// </summary>
 		/// <param name="path">Path to locate the file and read workbook data from the file.</param>
-		void Load(string path);
+		void LoadFromFile(string path);
 
 		/// <summary>
 		/// Load workbook from file by specified path.
 		/// </summary>
 		/// <param name="path">Path to locate the file and read workbook data from the file.</param>
 		/// <param name="fileFormat">Specified file format used to read data of workbook.</param>
-		void Load(string path, IO.FileFormat fileFormat);
+		void LoadFromFile(string path, IO.FileFormat fileFormat);
 
 		/// <summary>
 		/// Load workbook from file by specified path.
@@ -72,7 +72,7 @@ namespace unvell.ReoGrid
 		/// <param name="path">Path to locate the file and read workbook data from the file.</param>
 		/// <param name="fileFormat">Specified file format used to read data of workbook.</param>
 		/// <param name="encoding">Encoding used to read plain-text format workbook data from stream. (Optional)</param>
-		void Load(string path, IO.FileFormat fileFormat, Encoding encoding);
+		void LoadFromFile(string path, IO.FileFormat fileFormat, Encoding encoding);
 
 		/// <summary>
 		/// Load workbook from specified stream.
