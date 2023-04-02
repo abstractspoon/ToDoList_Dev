@@ -149,6 +149,8 @@ namespace DetectiveUIExtension
             if (!appOnly)
             {
 				// private settings
+				m_Control.Options = (DetectiveOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
+				m_OptionsCombo.SelectedOptions = m_Control.Options;
 			}
 
 			m_Control.TaskColorIsBackground = prefs.GetProfileBool("Preferences", "ColorTaskBackground", false);

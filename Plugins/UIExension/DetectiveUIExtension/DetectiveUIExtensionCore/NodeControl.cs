@@ -365,7 +365,9 @@ namespace DetectiveUIExtension
 			Point nodePos, parentPos;
 
 			if (IsConnectionVisible(node, node.Parent, out nodePos, out parentPos))
-				graphics.DrawLine(Pens.Gray, nodePos, parentPos);
+			{
+				DrawConnection(graphics, node.Data, nodePos, parentPos);
+			}
 
 			// Then node itself
 			Rectangle nodeRect;
@@ -374,6 +376,11 @@ namespace DetectiveUIExtension
 			{
 				DrawNode(graphics, node.Data, nodeRect);
 			}
+		}
+
+		protected virtual void DrawConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
+		{
+			graphics.DrawLine(Pens.Gray, nodePos, parentPos);
 		}
 
 		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
@@ -515,13 +522,18 @@ namespace DetectiveUIExtension
 			Invalidate();
 		}
 
+		protected virtual bool IsSelectableNode(uint nodeId)
+		{
+			return true;
+		}
+
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
 
 			var hit = HitTestNode(e.Location);
 
-			if (hit != null)
+			if ((hit != null) && IsSelectableNode(hit.Data))
 			{
 				m_SelectedNodeId = hit.Data;
 				Invalidate();

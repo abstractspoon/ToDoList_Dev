@@ -51,7 +51,7 @@ namespace DetectiveUIExtension
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
 
-		private DetectiveOption m_Options;
+		private DetectiveOption m_Options = (DetectiveOption.ShowRootNode | DetectiveOption.ShowParentChildLinks | DetectiveOption.ShowDependencies);
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -609,6 +609,11 @@ namespace DetectiveUIExtension
 			return (font == null) ? Font : font;
 		}
 
+		protected override bool IsSelectableNode(uint nodeId)
+		{
+			return (nodeId != 0);
+		}
+
 		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)
 		{
 			Debug.Assert(IsZoomed);
@@ -635,9 +640,26 @@ namespace DetectiveUIExtension
 				var drawState = ((nodeId == SelectedNodeId) ? DrawState.Selected : DrawState.None);
 				DoPaintNode(graphics, taskNode, rect, drawState);
 			}
-			else
+			else if (m_Options.HasFlag(DetectiveOption.ShowRootNode))
 			{
-				base.DrawNode(graphics, nodeId, rect);
+				rect.X += (rect.Width - rect.Height) / 2;
+				rect.Width = rect.Height;
+
+				graphics.FillEllipse(SystemBrushes.Window, rect);
+				graphics.DrawEllipse(Pens.Gray, rect);
+			}
+		}
+
+		protected override void DrawConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
+		{
+			if (m_Options.HasFlag(DetectiveOption.ShowParentChildLinks))
+			{
+				var taskNode = m_TaskNodes.GetNode(nodeId);
+
+				if ((taskNode?.ParentId != 0) || m_Options.HasFlag(DetectiveOption.ShowRootNode))
+				{
+					graphics.DrawLine(Pens.Gray, nodePos, parentPos);
+				}
 			}
 		}
 
