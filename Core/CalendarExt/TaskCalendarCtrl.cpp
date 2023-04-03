@@ -900,32 +900,32 @@ CString CTaskCalendarCtrl::FormatCellDate(const COleDateTime& date, BOOL bShowMo
 
 void CTaskCalendarCtrl::DrawCellHeader(CDC* pDC, const CCalendarCell* pCell, const CRect& rHeader, BOOL bShowMonth)
 {
-	// draw day/month numbers
-	int nDay = pCell->date.GetDay();
+	bShowMonth |= HasOption(TCCO_SHOWDATEINEVERYCELL);
 
-	// Draw the first of any month in bold
-	CFont *pOldFont = NULL;
+	CString sWeekNum, sDate = FormatCellDate(pCell->date, bShowMonth, sWeekNum);
 
 	pDC->SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 	pDC->SetBkMode(TRANSPARENT);
 
-	if (nDay == 1)
-		pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
-
 	CRect rDate(rHeader);
 	rDate.DeflateRect(HEADER_PADDING, 3);
 
-	bShowMonth |= HasOption(TCCO_SHOWDATEINEVERYCELL);
+	if (pCell->date.GetDay() == 1)
+	{
+		// Draw the first of any month in bold
+		CFont* pOldFont = pDC->SelectObject(m_fonts.GetFont(GMFS_BOLD));
 
-	CString sWeekNum, sDate = FormatCellDate(pCell->date, bShowMonth, sWeekNum);
-	pDC->DrawText(sDate, &rDate, DT_LEFT | DT_VCENTER);
+		pDC->DrawText(sDate, &rDate, DT_LEFT | DT_VCENTER);
+		pDC->SelectObject(pOldFont);
+	}
+	else
+	{
+		pDC->DrawText(sDate, &rDate, DT_LEFT | DT_VCENTER);
+	}
 
+	// Draw week always in non-bold font
 	if (!sWeekNum.IsEmpty())
 		pDC->DrawText(sWeekNum, &rDate, DT_RIGHT | DT_VCENTER);
-
-	// cleanup
-	if (nDay == 1)
-		pDC->SelectObject(pOldFont);
 }
 
 void CTaskCalendarCtrl::DrawCellContent(CDC* pDC, const CCalendarCell* pCell, const CRect& rCell, 
