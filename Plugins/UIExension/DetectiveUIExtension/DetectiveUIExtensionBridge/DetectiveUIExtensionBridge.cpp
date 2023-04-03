@@ -32,7 +32,7 @@ using namespace Abstractspoon::Tdl::PluginHelpers;
 
 // REPLACE THIS WITH NEW GUID!
 const LPCWSTR DETECTIVE_GUID = L"FA40B83E-E934-D494-8FB3-8EC9748FA4E8";
-const LPCWSTR DETECTIVE_NAME = L"Detective Diagram";
+const LPCWSTR DETECTIVE_NAME = L"String Board";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
