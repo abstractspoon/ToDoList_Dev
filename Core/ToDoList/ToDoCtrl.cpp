@@ -1928,7 +1928,7 @@ void CToDoCtrl::UpdateControls(BOOL bIncComments, HTREEITEM hti)
 			ASSERT(!m_ctrlComments.IsUpdatingFormat());
 
 			m_bPendingUpdateControls = FALSE;
-			UpdateControls(TRUE);
+			UpdateControls();
 		}
 		
 		UpdateComments(sTextComments, customComments);
@@ -5206,7 +5206,7 @@ BOOL CToDoCtrl::DeleteSelectedTask(BOOL bWarnUser, BOOL bResetSel)
 	if (dwNextID)
 		SelectTask(dwNextID, FALSE);
 	else
-		UpdateControls(FALSE); // don't update comments
+		UpdateControls(); // update comments
 
 	// restore focus
 	if (!focus.RestoreFocus())
@@ -12289,7 +12289,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, TDC_ATT
 		}
 	}
 
-	UpdateControls(FALSE);
+	UpdateControls(FALSE); // Don't update comments
 
 	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
 	{
@@ -12332,7 +12332,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(TDC_ATTRIBUTE nFromAttrib, const C
 		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
 		SetModified(nAttrib, aModTaskIDs);
 		
-		UpdateControls(FALSE);
+		UpdateControls(FALSE); // Don't update comments
 	}
 
 	return TRUE;
@@ -12372,7 +12372,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 		}
 	}
 
-	UpdateControls(FALSE);
+	UpdateControls(FALSE); // Don't update comments
 
 	if (aTasksForCompletion.GetSize() && SetSelectedTaskCompletion(aTasksForCompletion))
 	{
@@ -12422,7 +12422,7 @@ BOOL CToDoCtrl::CopySelectedTaskAttributeData(const CString& sFromCustomAttribID
 		TDC_ATTRIBUTE nAttrib = m_aCustomAttribDefs.GetAttributeID(sToCustomAttribID);
 		SetModified(nAttrib, aModTaskIDs);
 
-		UpdateControls(FALSE);
+		UpdateControls(FALSE); // Don't update comments
 	}
 
 	return TRUE;
