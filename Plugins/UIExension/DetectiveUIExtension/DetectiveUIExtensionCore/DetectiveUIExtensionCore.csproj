@@ -52,7 +52,7 @@
     <Compile Include="DetectiveOptionsComboBox.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Geometry2D.cs" />
-    <Compile Include="Node.cs" />
+    <Compile Include="TaskNodes.cs" />
     <Compile Include="NodeControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
