@@ -25,6 +25,12 @@ namespace DetectiveUIExtension
 		float m_ZoomFactor = 1f;
 		int m_ZoomLevel = 0;
 
+		const int m_BaseFontSize = 8; // in points
+		float m_BaseFontHeight;
+		float m_FontScaleFactor = 1f;
+
+		Font m_TextFont;
+
 		Size m_NodeSize;
 
 		RadialTree.TreeNode<uint> m_RootNode = null;
@@ -53,16 +59,10 @@ namespace DetectiveUIExtension
 			m_InitialRadius = DefaultInitialRadius;
 			m_RadialIncrementOrSpacing = DefaultInitialRadius;
 			m_NodeSize = DefaulttNodeSize;
+			m_TextFont = new Font("Tahoma", 8);
+			m_BaseFontHeight = m_TextFont.Height;
 
 			InitializeComponent();
-		}
-
-		public void SetFont(String fontName, int fontSize)
-		{
-			if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
-				return;
-
-			this.Font = new Font(fontName, fontSize, FontStyle.Regular);
 		}
 
 		private void InitializeComponent()
@@ -104,6 +104,9 @@ namespace DetectiveUIExtension
 				}
 			}
 		}
+
+		protected float BaseFontHeight { get { return m_BaseFontHeight; } }
+		protected Font TextFont { get { return ((m_TextFont == null) ? Font : m_TextFont); } }
 
 		public bool ReadOnly = false;
 		public uint SelectedNodeId { get { return m_SelectedNodeId; } }
@@ -234,6 +237,19 @@ namespace DetectiveUIExtension
 			}
 		}
 
+		protected override void OnFontChanged(EventArgs e)
+		{
+			float newFactor = (Font.Height / m_BaseFontHeight);
+
+			if (newFactor != m_FontScaleFactor)
+			{
+				m_FontScaleFactor = newFactor;
+
+				RecalcTextFont();
+				Invalidate();
+			}
+		}
+
 		protected float ZoomFactor { get { return m_ZoomFactor; } }
 		protected bool IsZoomed { get { return (m_ZoomLevel > 0); } }
 
@@ -262,14 +278,37 @@ namespace DetectiveUIExtension
 			return false;
 		}
 
-		protected void SetZoomLevel(int level)
+		private float OverallScaleFactor { get { return (m_ZoomFactor * m_FontScaleFactor); } }
+
+		private void RecalcZoomFactor()
+		{
+			m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
+			AutoScrollMinSize = ZoomedExtents.Size;
+		}
+
+		private void RecalcTextFont()
+		{
+			if (m_ZoomFactor < 1f)
+				m_TextFont = new Font(Font.Name, (Font.Size * m_ZoomFactor));
+			else
+				m_TextFont = Font;
+
+			AutoScrollMinSize = ZoomedExtents.Size;
+		}
+
+		protected virtual void OnTextFontChanged()
+		{
+			// for derived classes
+		}
+
+		private void SetZoomLevel(int level)
 		{
 			if (level != m_ZoomLevel)
 			{
 				m_ZoomLevel = level;
-				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
 
-				AutoScrollMinSize = ZoomedExtents.Size;
+				RecalcZoomFactor();
+				RecalcTextFont();
 				Invalidate();
 			}
 		}
@@ -318,7 +357,7 @@ namespace DetectiveUIExtension
 		protected Rectangle GetNodeClientRect(RadialTree.TreeNode<uint> node)
 		{
 			var pos = GetNodeClientPos(node);
-			var size = NodeSize.Multiply(m_ZoomFactor);
+			var size = NodeSize.Multiply(OverallScaleFactor);
 
 			pos.Offset(-size.Width / 2, -size.Height / 2);
 
@@ -403,7 +442,7 @@ namespace DetectiveUIExtension
 
 			graphics.FillRectangle(fill, rect);
 			graphics.DrawRectangle(border, rect);
-			graphics.DrawString(nodeId.ToString(), Font, text, rect);
+			graphics.DrawString(nodeId.ToString(), m_TextFont, text, rect);
 	}
 
 		protected void DrawChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
@@ -429,7 +468,7 @@ namespace DetectiveUIExtension
 		{
 			get
 			{
-				return Extents.Multiply(m_ZoomFactor);
+				return Extents.Multiply(OverallScaleFactor);
 			}
 		}
 
@@ -638,8 +677,8 @@ namespace DetectiveUIExtension
 		{
 			var ptClient = ptGraph;
 
-			ptClient = ptClient.Multiply(m_ZoomFactor);
-			var minExtents = m_MinExtents.Multiply(m_ZoomFactor);
+			ptClient = ptClient.Multiply(OverallScaleFactor);
+			var minExtents = m_MinExtents.Multiply(OverallScaleFactor);
 
 			ptClient.Offset(-minExtents.X, -minExtents.Y);
 
@@ -670,7 +709,7 @@ namespace DetectiveUIExtension
 			else
 				ptGraph.Y -= (ClientRectangle.Height - AutoScrollMinSize.Height) / 2;
 
-			ptGraph = ptGraph.Divide(m_ZoomFactor);
+			ptGraph = ptGraph.Divide(OverallScaleFactor);
 			ptGraph.Offset(m_MinExtents);
 
 			return ptGraph;

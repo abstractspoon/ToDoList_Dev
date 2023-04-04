@@ -21,10 +21,11 @@ namespace DetectiveUIExtension
 	[Flags]
 	enum DetectiveOption
 	{
-		None = 0x00,
-		ShowParentChildLinks = 0x01,
-		ShowDependencies = 0x02,
-		ShowRootNode = 0x04,
+		None					= 0x00,
+		ShowParentChildLinks	= 0x01,
+		ShowDependencies		= 0x02,
+		ShowRootNode			= 0x04,
+		DrawLinksOnTop			= 0x08,
 	}
 
 	// ------------------------------------------------------------
@@ -92,22 +93,23 @@ namespace DetectiveUIExtension
 
 			m_TaskNodes = null;
 
+			int nodeHeight = (int)(2 * BaseFontHeight) + 4;
+			int nodeWidth  = (4 * nodeHeight);
+
+			NodeSize = new Size(nodeWidth, nodeHeight);
+
+			RebuildFonts();
 
 
 			// 			using (Graphics graphics = Graphics.FromHwnd(Handle))
 			// 				CheckboxSize = CheckBoxRenderer.GetGlyphSize(graphics, CheckBoxState.UncheckedNormal);
 
-			FontChanged += new EventHandler(OnFontChanged);
-
 			base.AutoCalculateRadialIncrement = true;
 		}
 
-		protected int NodeHeight { get { return (2 * Font.Height) + 4; } }
-		protected int NodeWidth {  get {return (4 * NodeHeight); } }
-
-		protected void OnFontChanged(object sender, EventArgs e)
+		private void RebuildFonts()
 		{
-			var newFont = Font;
+			var newFont = TextFont;
 
 			m_BoldLabelFont = new Font(newFont.Name, newFont.Size, FontStyle.Bold);
 
@@ -121,17 +123,21 @@ namespace DetectiveUIExtension
 				m_BoldDoneLabelFont = m_BoldLabelFont;
 				m_DoneLabelFont = null;
 			}
+		}
 
-			base.EnableLayoutUpdates = false;
-			base.NodeSize = new Size(NodeWidth, NodeHeight);
+		protected override void OnTextFontChanged()
+		{
+			base.OnTextFontChanged();
 
-			if (RootNode != null)
-			{
-				base.InitialRadius = (float)((RootNode.Count * NodeSize.Width) / (2 * Math.PI));
-				base.RadialIncrementOrSpacing = NodeSize.Width;
-			}
+			RebuildFonts();
+		}
 
-			base.EnableLayoutUpdates = true;
+		public void SetFont(String fontName, int fontSize)
+		{
+			if ((this.Font.Name == fontName) && (this.Font.Size == fontSize))
+				return;
+
+			this.Font = new Font(fontName, fontSize, FontStyle.Regular);
 		}
 
 		public void SetStrikeThruDone(bool strikeThruDone)
@@ -139,7 +145,7 @@ namespace DetectiveUIExtension
 			if (m_StrikeThruDone != strikeThruDone)
 			{
 				m_StrikeThruDone = strikeThruDone;
-				OnFontChanged(EventArgs.Empty);
+				RebuildFonts();
 			}
 		}
 
@@ -592,21 +598,19 @@ namespace DetectiveUIExtension
 
 		protected Font GetNodeFont(TaskNode taskNode)
 		{
-			Font font = null;
-
 			if (taskNode.IsTopLevel)
 			{
 				if (taskNode.IsDone(false))
-					font = m_BoldDoneLabelFont;
-				else
-					font = m_BoldLabelFont;
+					return m_BoldDoneLabelFont;
+
+				// else
+				return m_BoldLabelFont;
 			}
-			else if (taskNode.IsDone(false))
-			{
-				font = m_DoneLabelFont;
-			}
-			
-			return (font == null) ? Font : font;
+
+			if (taskNode.IsDone(false))
+				return m_DoneLabelFont;
+
+			return TextFont;
 		}
 
 		protected override bool IsSelectableNode(uint nodeId)
