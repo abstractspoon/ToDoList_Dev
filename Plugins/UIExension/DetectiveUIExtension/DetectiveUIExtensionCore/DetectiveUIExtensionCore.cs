@@ -214,7 +214,7 @@ namespace DetectiveUIExtension
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
+			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons, m_TypeId);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             m_Control.SetFont(FontName, 8);
 
@@ -224,7 +224,7 @@ namespace DetectiveUIExtension
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
 			m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
-			m_Control.DragDropChange += new DragDropChangeEventHandler(OnDetectiveDragDrop);
+			m_Control.TaskDragDrop += new TaskDragDropEventHandler(OnDetectiveDragDrop);
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
             m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveEditTaskCompletion);
@@ -308,6 +308,9 @@ namespace DetectiveUIExtension
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
+			return notify.NotifyMod(Task.Attribute. MetaData, m_Control.SelectedTaskNode.EncodeMetaData());
+
+
 // 			if (e.copyNode)
 // 				return notify.NotifyCopy(e.dragged.uniqueID, 
 // 										 e.targetParent.uniqueID, 
@@ -317,7 +320,7 @@ namespace DetectiveUIExtension
 // 			return notify.NotifyMove(e.dragged.uniqueID,
 // 									 e.targetParent.uniqueID,
 // 									 e.afterSibling.uniqueID);
-			return true;
+//			return true;
 		}
 
         protected override void OnSizeChanged(EventArgs e)

@@ -26,9 +26,12 @@ namespace DetectiveUIExtension
 
 		public List<uint> ChildIds { get; private set; }
 		public List<uint> DependIds { get; private set; }
+		public List<uint> LinkIds { get; private set; }
 
 		private bool Done;
 		private bool GoodAsDone;
+
+		public Point DragOffset;
 
 		// -----------------------------------------------------------------
 
@@ -36,7 +39,7 @@ namespace DetectiveUIExtension
 		{
 		}
 
-		public TaskNode(Task task)
+		public TaskNode(Task task, string metaDataKey)
 		{
 			Title = task.GetTitle();
 			TextColor = task.GetTextDrawingColor();
@@ -54,6 +57,9 @@ namespace DetectiveUIExtension
 
 			ChildIds = new List<uint>();
 			DependIds = task.GetLocalDependency();
+			LinkIds = null;
+
+			DecodeMetaData(task.GetMetaDataValue(metaDataKey));
 		}
 
 		public override string ToString()
@@ -74,6 +80,75 @@ namespace DetectiveUIExtension
 				return true;
 
 			return Done;
+		}
+
+		public string EncodeMetaData()
+		{
+			string metaData = string.Format("{0},{1}|", DragOffset.X, DragOffset.Y);
+
+			if (LinkIds?.Count > 0)
+			{
+				metaData = metaData + string.Join(",", LinkIds);
+			}
+
+			return metaData;
+		}
+
+		public void DecodeMetaData(string metaData)
+		{
+			DragOffset = new Point(0, 0);
+			LinkIds = new List<uint>();
+
+			if (string.IsNullOrWhiteSpace(metaData))
+				return;
+
+			string[] parts = metaData.Split(new char[1] { '|' }, StringSplitOptions.RemoveEmptyEntries);
+
+			if (parts.Count() > 0)
+			{
+				string[] offsets = parts[0].Split(',');
+
+				if (offsets.Count() == 2)
+				{
+					int x, y;
+
+					if (int.TryParse(offsets[0], out x) && int.TryParse(offsets[1], out y))
+					{
+						DragOffset.X = x;
+						DragOffset.Y = y;
+					}
+					else
+					{
+						Debug.Assert(false);
+						return;
+					}
+				}
+				else
+				{
+					Debug.Assert(false);
+					return;
+				}
+
+				if (parts.Count() == 2)
+				{
+					string[] linkIds = parts[1].Split(',');
+
+					foreach (var linkId in linkIds)
+					{
+						uint id;
+
+						if (uint.TryParse(linkId, out id))
+							LinkIds.Add(id);
+						else
+							Debug.Assert(false);
+					}
+				}
+			}
+			else
+			{
+				Debug.Assert(false);
+				return;
+			}
 		}
 
 		public bool Update(Task task)

@@ -15,6 +15,7 @@ namespace DetectiveUIExtension
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
+	public delegate bool TaskDragDropEventHandler(object sender, uint taskId);
 
 	// ------------------------------------------------------------
 
@@ -36,6 +37,7 @@ namespace DetectiveUIExtension
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
+		public event TaskDragDropEventHandler TaskDragDrop;
 
 		// -------------------------------------------------------------------------
 
@@ -46,6 +48,7 @@ namespace DetectiveUIExtension
 		// From Parent
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
+		private string m_MetaDataKey;
 
 		private bool m_ShowParentAsFolder = false;
 		private bool m_TaskColorIsBkgnd = false;
@@ -79,10 +82,11 @@ namespace DetectiveUIExtension
 
 		// -------------------------------------------------------------------------
 
-		public TDLNodeControl(Translator trans, UIExtension.TaskIcon icons)
+		public TDLNodeControl(Translator trans, UIExtension.TaskIcon icons, string metaDataKey)
 		{
 			m_Trans = trans;
 			m_TaskIcons = icons;
+			m_MetaDataKey = metaDataKey;
 
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
@@ -97,6 +101,8 @@ namespace DetectiveUIExtension
 			int nodeWidth  = (4 * nodeHeight);
 
 			NodeSize = new Size(nodeWidth, nodeHeight);
+
+			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
 
 			RebuildFonts();
 
@@ -170,6 +176,26 @@ namespace DetectiveUIExtension
 			}
 		}
 
+		protected override void OnAfterRecalcLayout()
+		{
+			AddDragOffset(RootNode);
+		}
+
+		private void AddDragOffset(RadialTree.TreeNode<uint> node)
+		{
+			var task = m_TaskNodes.GetNode(node.Data);
+
+			if (task != null)
+			{
+				node.Point.X += task.DragOffset.X;
+				node.Point.Y += task.DragOffset.Y;
+			}
+
+			// children
+			foreach (var child in node.Children)
+				AddDragOffset(child);
+		}
+		
 		public DetectiveOption Options
 		{
 			get { return m_Options; }
@@ -495,7 +521,7 @@ namespace DetectiveUIExtension
 
 			if (taskNode == null)
 			{
-				taskNode = new TaskNode(task);
+				taskNode = new TaskNode(task, m_MetaDataKey);
 				m_TaskNodes.AddNode(taskNode);
 
 				parentNode = parentNode.AddChild(task.GetID());
@@ -511,7 +537,6 @@ namespace DetectiveUIExtension
 			while (subtask.IsValid() && ProcessTaskUpdate(subtask, parentNode))
 			{
 				taskNode.ChildIds.Add(subtask.GetID());
-				taskNode.DependIds.Add(subtask.GetID());
 
 				subtask = subtask.GetNextTask();
 			}
@@ -915,6 +940,18 @@ namespace DetectiveUIExtension
 		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
 		{
 			return (base.IsAcceptableDragSource(node) && (node != RootNode));
+		}
+
+		protected bool OnDragDrop(object sender, uint nodeId, PointF orgPosition)
+		{
+			// Update the task offset
+			var newPos = new PointF(SelectedNode.Point.X, SelectedNode.Point.Y);
+			var offset = new PointF(newPos.X - orgPosition.X, newPos.Y - orgPosition.Y);
+
+			SelectedTaskNode.DragOffset.Offset((int)offset.X, (int)offset.Y);
+
+			// Notify parent
+			return ((TaskDragDrop == null) ? false : TaskDragDrop(this, nodeId));
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)

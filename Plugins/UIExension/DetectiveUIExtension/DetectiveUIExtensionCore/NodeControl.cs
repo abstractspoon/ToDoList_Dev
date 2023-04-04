@@ -11,7 +11,7 @@ using System.Windows.Forms;
 namespace DetectiveUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, uint itemId);
-	public delegate bool DragDropChangeEventHandler(object sender, uint itemId);
+	public delegate bool DragDropChangeEventHandler(object sender, uint itemId, PointF originalPos);
 
 	public partial class NodeControl : UserControl
 	{
@@ -294,6 +294,8 @@ namespace DetectiveUIExtension
 				m_TextFont = Font;
 
 			AutoScrollMinSize = ZoomedExtents.Size;
+
+			OnTextFontChanged();
 		}
 
 		protected virtual void OnTextFontChanged()
@@ -499,9 +501,16 @@ namespace DetectiveUIExtension
 				else
 					m_RadialTree.CalculatePositions(m_InitialRadius, m_RadialIncrementOrSpacing);
 
+				OnAfterRecalcLayout();
+
 				AutoScrollMinSize = RecalcExtents();
 				Invalidate();
 			}
+		}
+
+		protected virtual void OnAfterRecalcLayout()
+		{
+			// For derived class
 		}
 
 		protected Size RecalcExtents()
@@ -745,7 +754,7 @@ namespace DetectiveUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
-			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeId))
+			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeId, m_DragStart))
 			{
 				RevertDrag();
 			}
