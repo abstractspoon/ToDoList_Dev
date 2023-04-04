@@ -112,6 +112,11 @@ namespace DetectiveUIExtension
 
 			return MidPoint(points[segment], points[segment + 1]);
 		}
+
+		public static Point Centroid(Rectangle rect)
+		{
+			return new Point(rect.Left + (rect.Width / 2), rect.Top + (rect.Height / 2));
+		}
 	}
 
 }

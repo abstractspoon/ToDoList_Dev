@@ -643,21 +643,30 @@ namespace DetectiveUIExtension
 			return (nodeId != 0);
 		}
 
-		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)
+		protected override void DrawNodeAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
-			Debug.Assert(IsZoomed);
+			base.DrawNodeAndChildConnections(graphics, node);
 
-			var gSave = graphics.Save();
+			// Draw dependencies
+			if (m_Options.HasFlag(DetectiveOption.ShowDependencies))
+			{
+				var taskNode = m_TaskNodes.GetNode(node.Data);
 
-			var attrib = new ImageAttributes();
-			attrib.SetWrapMode(WrapMode.TileFlipXY);
+				if (taskNode?.DependIds?.Count > 0)
+				{
+					Point fromPos = GetNodeClientPos(node);
 
-			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-			graphics.SmoothingMode = SmoothingMode.HighQuality;
+					foreach (var dependId in taskNode.DependIds)
+					{
+						Point toPos;
 
-			graphics.IntersectClip(clipRect);
-			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attrib);
-			graphics.Restore(gSave);
+						if (IsConnectionVisible(fromPos, dependId, out toPos))
+						{
+							graphics.DrawLine(Pens.Blue, fromPos, toPos);
+						}
+					}
+				}
+			}
 		}
 
 		protected override void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
@@ -677,6 +686,21 @@ namespace DetectiveUIExtension
 				graphics.FillEllipse(SystemBrushes.Window, rect);
 				graphics.DrawEllipse(Pens.Gray, rect);
 			}
+		}
+
+		protected bool IsConnectionVisible(Point fromPos, uint toId, out Point toPos)
+		{
+			var toNode = GetNode(toId);
+
+			if (toNode == null)
+			{
+				toPos = Point.Empty;
+				return false;
+			}
+
+			toPos = GetNodeClientPos(toNode);
+
+			return base.IsConnectionVisible(fromPos, toPos);
 		}
 
 		protected override void DrawConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
@@ -831,6 +855,23 @@ namespace DetectiveUIExtension
 			*/
 
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+		}
+
+		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)
+		{
+			Debug.Assert(IsZoomed);
+
+			var gSave = graphics.Save();
+
+			var attrib = new ImageAttributes();
+			attrib.SetWrapMode(WrapMode.TileFlipXY);
+
+			graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+			graphics.SmoothingMode = SmoothingMode.HighQuality;
+
+			graphics.IntersectClip(clipRect);
+			graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attrib);
+			graphics.Restore(gSave);
 		}
 
 		private bool TaskHasIcon(TaskNode taskNode)

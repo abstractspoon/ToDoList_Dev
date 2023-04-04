@@ -121,7 +121,7 @@ namespace DetectiveUIExtension
 				if (m_SelectedNodeId == RootNode.Data)
 					return m_RootNode;
 
-				var node = RootNode.FindTreeNode(x => (x.Data == m_SelectedNodeId));
+				var node = GetNode(m_SelectedNodeId);
 
 				if (node == null)
 					m_SelectedNodeId = NullId;
@@ -378,12 +378,25 @@ namespace DetectiveUIExtension
 			fromPos = GetNodeClientPos(fromNode);
 			toPos = GetNodeClientPos(toNode);
 
+			return IsConnectionVisible(fromPos, toPos);
+		}
+
+		protected bool IsConnectionVisible(Point fromPos, Point toPos)
+		{
 			var lineBounds = Rectangle.FromLTRB(Math.Min(toPos.X, fromPos.X),
 												Math.Min(toPos.Y, fromPos.Y),
 												Math.Max(toPos.X, fromPos.X),
 												Math.Max(toPos.Y, fromPos.Y));
 
 			return lineBounds.IntersectsWith(ClientRectangle);
+		}
+
+		protected RadialTree.TreeNode<uint> GetNode(uint id)
+		{
+			if (id == RootNode?.Data)
+				return RootNode;
+
+			return RootNode.FindTreeNode(x => (x.Data == id));
 		}
 
 		protected override void OnPaint(PaintEventArgs e)
@@ -393,16 +406,14 @@ namespace DetectiveUIExtension
 			if (RootNode != null)
 			{
 				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-				DrawNodeAndChildren(e.Graphics, RootNode);
+
+				DrawNodeAndChildConnections(e.Graphics, RootNode);
+				DrawNodeAndChildNodes(e.Graphics, RootNode);
 			}
 		}
 
-		protected virtual void DrawNodeAndChildren(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected virtual void DrawNodeAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
-			// Draw children first so that nodes get drawn over lines
-			DrawChildNodes(graphics, node);
-
-			// Draw lines first
 			Point nodePos, parentPos;
 
 			if (IsConnectionVisible(node, node.Parent, out nodePos, out parentPos))
@@ -410,12 +421,24 @@ namespace DetectiveUIExtension
 				DrawConnection(graphics, node.Data, nodePos, parentPos);
 			}
 
-			// Then node itself
+			foreach (var child in node.Children)
+			{
+				DrawNodeAndChildConnections(graphics, child);
+			}
+		}
+
+		protected virtual void DrawNodeAndChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
+		{
 			Rectangle nodeRect;
 
 			if (IsNodeVisible(node, out nodeRect))
 			{
 				DrawNode(graphics, node.Data, nodeRect);
+			}
+
+			foreach (var child in node.Children)
+			{
+				DrawNodeAndChildNodes(graphics, child);
 			}
 		}
 
@@ -445,15 +468,8 @@ namespace DetectiveUIExtension
 			graphics.FillRectangle(fill, rect);
 			graphics.DrawRectangle(border, rect);
 			graphics.DrawString(nodeId.ToString(), m_TextFont, text, rect);
-	}
-
-		protected void DrawChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
-		{
-			foreach (var child in node.Children)
-			{
-				DrawNodeAndChildren(graphics, child);
-			}
 		}
+
 
 		public Rectangle Extents
 		{
