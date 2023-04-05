@@ -12,6 +12,7 @@ namespace DetectiveUIExtension
 	{
 		// Data
 		public string Title { get; private set; }
+		public string ImagePath { get; private set; }
 		public Color TextColor { get; private set; }
 
 		public bool HasIcon { get; private set; }
@@ -26,12 +27,13 @@ namespace DetectiveUIExtension
 
 		public List<uint> ChildIds { get; private set; }
 		public List<uint> DependIds { get; private set; }
-		public List<uint> LinkIds { get; private set; }
+		public List<uint> UserLinkIds { get; private set; }
 
 		private bool Done;
 		private bool GoodAsDone;
 
 		public Point UserPosition;
+		public Image Image;
 
 		// -----------------------------------------------------------------
 
@@ -57,19 +59,15 @@ namespace DetectiveUIExtension
 
 			ChildIds = new List<uint>();
 			DependIds = task.GetLocalDependency();
-			LinkIds = null;
+			UserLinkIds = null;
 
+			UpdateImage(task);
 			DecodeMetaData(task.GetMetaDataValue(metaDataKey));
 		}
 
 		public override string ToString()
 		{
 			return Title;
-		}
-
-		public void Update(Task task, HashSet<Task.Attribute> attribs)
-		{
-			// TODO
 		}
 
 		public bool HasLocalDependencies { get { return (DependIds != null) && (DependIds.Count > 0); } }
@@ -86,9 +84,9 @@ namespace DetectiveUIExtension
 		{
 			string metaData = string.Format("{0},{1}|", UserPosition.X, UserPosition.Y);
 
-			if (LinkIds?.Count > 0)
+			if (UserLinkIds?.Count > 0)
 			{
-				metaData = metaData + string.Join(",", LinkIds);
+				metaData = metaData + string.Join(",", UserLinkIds);
 			}
 
 			return metaData;
@@ -97,7 +95,7 @@ namespace DetectiveUIExtension
 		public void DecodeMetaData(string metaData)
 		{
 			UserPosition = new Point(0, 0);
-			LinkIds = new List<uint>();
+			UserLinkIds = new List<uint>();
 
 			if (string.IsNullOrWhiteSpace(metaData))
 				return;
@@ -138,7 +136,7 @@ namespace DetectiveUIExtension
 						uint id;
 
 						if (uint.TryParse(linkId, out id))
-							LinkIds.Add(id);
+							UserLinkIds.Add(id);
 						else
 							Debug.Assert(false);
 					}
@@ -148,6 +146,33 @@ namespace DetectiveUIExtension
 			{
 				Debug.Assert(false);
 				return;
+			}
+		}
+
+		private void UpdateImage(Task task)
+		{
+			var filePaths = task.GetFileLink(true);
+
+			foreach (var path in filePaths)
+			{
+				try
+				{
+					if (path != ImagePath)
+					{
+						var image = Image.FromFile(path);
+
+						if (image != null)
+						{
+							ImagePath = path;
+							Image = image;
+							break;
+						}
+					}
+				}
+				catch (Exception e)
+				{
+					// keep going
+				}
 			}
 		}
 
@@ -176,6 +201,9 @@ namespace DetectiveUIExtension
 
 			if (task.IsAttributeAvailable(Task.Attribute.DoneDate))
 				Done = task.IsDone();
+
+			if (task.IsAttributeAvailable(Task.Attribute.FileLink))
+				UpdateImage(task);
 
 			if (task.IsAttributeAvailable(Task.Attribute.MetaData))
 			{

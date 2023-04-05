@@ -291,6 +291,7 @@ namespace DetectiveUIExtension
 			case Task.Attribute.Position:
 			case Task.Attribute.SubtaskDone:
 			case Task.Attribute.MetaData:
+			case Task.Attribute.FileLink:
 				return true;
 			}
 
