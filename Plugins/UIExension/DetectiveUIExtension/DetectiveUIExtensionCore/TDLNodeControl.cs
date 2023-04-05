@@ -340,15 +340,7 @@ namespace DetectiveUIExtension
 
 		public TaskNode SelectedTaskNode
 		{
-			get
-			{
-				var node = base.SelectedNode;
-
-				if (node == null)
-					return null;
-
-				return m_TaskNodes.GetNode(node.Data);
-			}
+			get	{ return GetTaskNode(base.SelectedNode); }
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
@@ -556,7 +548,7 @@ namespace DetectiveUIExtension
 		protected override Size GetNodeSize(RadialTree.TreeNode<uint> node)
 		{
 			var size = base.GetNodeSize(node);
-			var taskNode = m_TaskNodes.GetNode(node.Data);
+			var taskNode = GetTaskNode(node);
 
 			if ((taskNode != null) && (taskNode.Image != null))
 			{
@@ -672,7 +664,7 @@ namespace DetectiveUIExtension
 			// Draw dependencies
 			if (m_Options.HasFlag(DetectiveOption.ShowDependencies))
 			{
-				var taskNode = m_TaskNodes.GetNode(node.Data);
+				var taskNode = GetTaskNode(node);
 
 				if (taskNode?.DependIds?.Count > 0)
 				{
@@ -944,8 +936,18 @@ namespace DetectiveUIExtension
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
 		{
-			if (HitTestNode(e.Location) != null)
-				EditTaskLabel(this, SelectedNode.Data);
+			var hit = HitTestNode(e.Location);
+			
+			if (hit != null)
+			{
+				var taskNode = GetTaskNode(hit);
+				var imageRect = CalcImageRect(taskNode, GetNodeClientRect(hit), false);
+
+				if (imageRect.Contains(e.Location))
+					Process.Start(taskNode.ImagePath);
+				else
+					EditTaskLabel(this, SelectedNode.Data);
+			}
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)
@@ -1016,7 +1018,7 @@ namespace DetectiveUIExtension
 		{
 			var node = HitTestNode(ptClient);
 
-			return ((node == null) ? null : m_TaskNodes.GetNode(node.Data));
+			return GetTaskNode(node);
 		}
 
 		protected TaskNode GetTaskNode(RadialTree.TreeNode<uint> node)
