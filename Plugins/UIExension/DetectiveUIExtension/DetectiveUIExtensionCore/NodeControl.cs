@@ -109,6 +109,7 @@ namespace DetectiveUIExtension
 		protected Font TextFont { get { return ((m_TextFont == null) ? Font : m_TextFont); } }
 
 		public bool ReadOnly = false;
+		public bool DrawNodesOnTop = true;
 		public uint SelectedNodeId { get { return m_SelectedNodeId; } }
 
 		public RadialTree.TreeNode<uint> SelectedNode
@@ -407,8 +408,16 @@ namespace DetectiveUIExtension
 			{
 				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-				DrawNodeAndChildConnections(e.Graphics, RootNode);
-				DrawNodeAndChildNodes(e.Graphics, RootNode);
+				if (DrawNodesOnTop)
+				{
+					DrawNodeAndChildConnections(e.Graphics, RootNode);
+					DrawNodeAndChildNodes(e.Graphics, RootNode);
+				}
+				else // Connections on top
+				{
+					DrawNodeAndChildNodes(e.Graphics, RootNode);
+					DrawNodeAndChildConnections(e.Graphics, RootNode);
+				}
 			}
 		}
 

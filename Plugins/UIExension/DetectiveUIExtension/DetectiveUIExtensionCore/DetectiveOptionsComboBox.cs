@@ -37,6 +37,7 @@ namespace DetectiveUIExtension
 			Items.Add(new DetectiveOptionItem(trans.Translate("Show dependencies"), DetectiveOption.ShowDependencies));
 			Items.Add(new DetectiveOptionItem(trans.Translate("Show parent/child connections"), DetectiveOption.ShowParentChildLinks));
 			Items.Add(new DetectiveOptionItem(trans.Translate("Show root node"), DetectiveOption.ShowRootNode));
+			Items.Add(new DetectiveOptionItem(trans.Translate("Draw links on top"), DetectiveOption.DrawLinksOnTop));
 		}
 
 		public DetectiveOption SelectedOptions

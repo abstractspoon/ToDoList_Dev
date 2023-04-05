@@ -41,6 +41,12 @@ namespace DetectiveUIExtension
 
 		// -------------------------------------------------------------------------
 
+		const DetectiveOption DefaultOptions = (DetectiveOption.ShowRootNode |
+												DetectiveOption.ShowParentChildLinks |
+												DetectiveOption.ShowDependencies |
+												DetectiveOption.DrawLinksOnTop);
+		// -------------------------------------------------------------------------
+
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
 
 		// -------------------------------------------------------------------------
@@ -55,7 +61,7 @@ namespace DetectiveUIExtension
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
 
-		private DetectiveOption m_Options = (DetectiveOption.ShowRootNode | DetectiveOption.ShowParentChildLinks | DetectiveOption.ShowDependencies);
+		private DetectiveOption m_Options;
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -102,6 +108,9 @@ namespace DetectiveUIExtension
 
 			NodeSize = new Size(nodeWidth, nodeHeight);
 
+			m_Options = DefaultOptions;
+			DrawNodesOnTop = (m_Options.HasFlag(DetectiveOption.DrawLinksOnTop) == false);
+			
 			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
 
 			RebuildFonts();
@@ -205,6 +214,8 @@ namespace DetectiveUIExtension
 				if (value != m_Options)
 				{
 					m_Options = value;
+					base.DrawNodesOnTop = (m_Options.HasFlag(DetectiveOption.DrawLinksOnTop) == false);
+
 					Invalidate();
 				}
 			}
