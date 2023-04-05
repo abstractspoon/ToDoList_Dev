@@ -171,13 +171,13 @@ namespace DetectiveUIExtension
 			case UIExtension.UpdateType.Edit:
 			case UIExtension.UpdateType.New:
 				UpdateTaskAttributes(tasks);
-				RecalcLayout();
 				break;
 
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
 				m_TaskNodes = new TaskNodes();
 				UpdateTaskAttributes(tasks);
+				RecalcLayout();
 				break;
 
 			case UIExtension.UpdateType.Unknown:
@@ -192,9 +192,9 @@ namespace DetectiveUIExtension
 
 		private void ApplyUserPositions(RadialTree.TreeNode<uint> node)
 		{
-			var task = m_TaskNodes.GetNode(node.Data);
+			var task = GetTaskNode(node);
 
-			if (task != null)
+			if ((task != null) && task.HasUserPosition)
 				node.Point.SetPosition(task.UserPosition);
 
 			// children
@@ -518,24 +518,27 @@ namespace DetectiveUIExtension
 			if (!task.IsValid())
 				return false;
 
-			var taskNode = m_TaskNodes.GetNode(task.GetID());
+			uint taskId = task.GetID();
+			var taskNode = m_TaskNodes.GetNode(taskId);
+			RadialTree.TreeNode<uint> node = null;
 
 			if (taskNode == null)
 			{
 				taskNode = new TaskNode(task, m_MetaDataKey);
 				m_TaskNodes.AddNode(taskNode);
 
-				parentNode = parentNode.AddChild(task.GetID());
+				node = parentNode.AddChild(taskId);
 			}
 			else
 			{
 				taskNode.Update(task);
+				node = GetNode(taskId);
 			}
 
 			// Process children
 			Task subtask = task.GetFirstSubtask();
 
-			while (subtask.IsValid() && ProcessTaskUpdate(subtask, parentNode))
+			while (subtask.IsValid() && ProcessTaskUpdate(subtask, node))
 			{
 				taskNode.ChildIds.Add(subtask.GetID());
 

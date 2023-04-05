@@ -10,7 +10,10 @@ namespace DetectiveUIExtension
 {
 	public class TaskNode
 	{
-		// Data
+		public readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
+
+		// -----------------------------------------------------------------
+
 		public string Title { get; private set; }
 		public string ImagePath { get; private set; }
 		public Color TextColor { get; private set; }
@@ -33,6 +36,7 @@ namespace DetectiveUIExtension
 		private bool GoodAsDone;
 
 		public Point UserPosition;
+		public bool HasUserPosition { get { return (UserPosition != NullPoint); } }
 		public Image Image;
 
 		public int CalcImageHeight(int width)
@@ -102,7 +106,7 @@ namespace DetectiveUIExtension
 
 		public void DecodeMetaData(string metaData)
 		{
-			UserPosition = new Point(0, 0);
+			UserPosition = NullPoint;
 			UserLinkIds = new List<uint>();
 
 			if (string.IsNullOrWhiteSpace(metaData))
