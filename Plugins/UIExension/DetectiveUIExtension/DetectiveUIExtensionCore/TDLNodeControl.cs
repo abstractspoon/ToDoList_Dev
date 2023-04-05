@@ -965,7 +965,7 @@ namespace DetectiveUIExtension
 			if (taskNode == null)
 				return;
 
-			if (!ReadOnly && !taskNode.IsLocked)
+			if (!ReadOnly && !taskNode.IsLocked && (HitTestTask(e.Location) == taskNode))
 			{
 /*
 				if (HitTestCheckbox(node, e.Location))
