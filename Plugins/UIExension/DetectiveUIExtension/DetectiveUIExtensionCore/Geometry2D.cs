@@ -30,17 +30,17 @@ namespace DetectiveUIExtension
 			return ((ptDiff.X * ptDiff.X) + (ptDiff.Y * ptDiff.Y));
 		}
 
-		public static bool DistanceFromPointToSegment(Point pt, Point ptStart, Point ptEnd, ref double distance, ref Point ptIntersection)
+		public static bool DistanceFromPointToSegment(Point pt, Point segStart, Point segEnd, ref double distance, ref Point ptIntersection)
 		{
-			double distSqrd = DistanceSquared(ptStart, ptEnd);
+			double distSqrd = DistanceSquared(segStart, segEnd);
 
 			if (distSqrd == 0.0)
 			{
 				return false;
 			}
 
-			double U = ((pt.X - ptStart.X) * (ptEnd.X - ptStart.X)) +
-					   ((pt.Y - ptStart.Y) * (ptEnd.Y - ptStart.Y));
+			double U = ((pt.X - segStart.X) * (segEnd.X - segStart.X)) +
+					   ((pt.Y - segStart.Y) * (segEnd.Y - segStart.Y));
 
 			U /= distSqrd;
 
@@ -50,8 +50,8 @@ namespace DetectiveUIExtension
 				return false;
 			}
 
-			ptIntersection.X = (int)(ptStart.X + (U * (ptEnd.X - ptStart.X)));
-			ptIntersection.Y = (int)(ptStart.Y + (U * (ptEnd.Y - ptStart.Y)));
+			ptIntersection.X = (int)(segStart.X + (U * (segEnd.X - segStart.X)));
+			ptIntersection.Y = (int)(segStart.Y + (U * (segEnd.Y - segStart.Y)));
 
 			distance = Distance(pt, ptIntersection);
 
