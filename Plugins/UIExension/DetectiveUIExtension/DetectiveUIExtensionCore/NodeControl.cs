@@ -789,7 +789,7 @@ namespace DetectiveUIExtension
 			else
 			{
 				Point dragPt = PointToClient(new Point(e.X, e.Y));
-				dragPt.Offset(m_DragOffset.X, m_DragOffset.Y);
+				dragPt.Offset(m_DragOffset);
 
 				dragPt = ClientToGraph(dragPt);
 
