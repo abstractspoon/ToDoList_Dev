@@ -46,7 +46,8 @@ namespace DetectiveUIExtension
 		uint m_SelectedNodeId = 0;
 		public const uint NullId = uint.MaxValue;
 		private Timer m_DragTimer;
-		private PointF m_DragStart;
+		private Point m_DragOffset;
+		private PointF m_PreDragNodePos;
 
 		private IContainer components = null;
 
@@ -637,7 +638,11 @@ namespace DetectiveUIExtension
 
 				m_DragTimer.Tag = e;
 				m_DragTimer.Start();
-				m_DragStart = new PointF(hit.Point.X, hit.Point.Y);
+
+				m_DragOffset = GetNodeClientPos(hit);
+				m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
+
+				m_PreDragNodePos = new PointF(hit.Point.X, hit.Point.Y);
 			}
 		}
 
@@ -784,6 +789,8 @@ namespace DetectiveUIExtension
 			else
 			{
 				Point dragPt = PointToClient(new Point(e.X, e.Y));
+				dragPt.Offset(m_DragOffset.X, m_DragOffset.Y);
+
 				dragPt = ClientToGraph(dragPt);
 
 				node.Point.X = dragPt.X;
@@ -829,8 +836,8 @@ namespace DetectiveUIExtension
 
 			if (node != null)
 			{
-				node.Point.X = m_DragStart.X;
-				node.Point.Y = m_DragStart.Y;
+				node.Point.X = m_PreDragNodePos.X;
+				node.Point.Y = m_PreDragNodePos.Y;
 				Invalidate();
 			}
 		}

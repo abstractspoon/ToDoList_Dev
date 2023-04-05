@@ -880,20 +880,7 @@ namespace DetectiveUIExtension
 			// Image
 			if (taskNode.Image != null)
 			{
-				var imageRect = nodeRect;
-				
-				imageRect = CalcImageRect(taskNode, imageRect, selected || dropHighlight);
-// 				imageRect.X++;
-// 				imageRect.Width--;
-// 
-// 				imageRect.Y = (nodeRect.Top + base.NodeSize.Height);
-// 				imageRect.Height = CalcImageRect(taskNode, nodeRect).Height;
-// 
-// 				if (selected || dropHighlight)
-// 				{
-// 					imageRect.Width--;
-// 					imageRect.Height--;
-// 				}
+				var imageRect = CalcImageRect(taskNode, nodeRect, selected || dropHighlight);
 
 				graphics.DrawImage(taskNode.Image, imageRect);
 			}
