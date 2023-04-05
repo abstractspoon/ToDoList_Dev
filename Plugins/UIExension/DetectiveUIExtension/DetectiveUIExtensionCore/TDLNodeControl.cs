@@ -189,22 +189,19 @@ namespace DetectiveUIExtension
 
 		protected override void OnAfterRecalcLayout()
 		{
-			AddDragOffset(RootNode);
+			ApplyUserPositions(RootNode);
 		}
 
-		private void AddDragOffset(RadialTree.TreeNode<uint> node)
+		private void ApplyUserPositions(RadialTree.TreeNode<uint> node)
 		{
 			var task = m_TaskNodes.GetNode(node.Data);
 
 			if (task != null)
-			{
-				node.Point.X += task.DragOffset.X;
-				node.Point.Y += task.DragOffset.Y;
-			}
+				node.Point.SetPosition(task.UserPosition);
 
 			// children
 			foreach (var child in node.Children)
-				AddDragOffset(child);
+				ApplyUserPositions(child);
 		}
 		
 		public DetectiveOption Options
@@ -996,13 +993,10 @@ namespace DetectiveUIExtension
 			return (base.IsAcceptableDragSource(node) && (node != RootNode));
 		}
 
-		protected bool OnDragDrop(object sender, uint nodeId, PointF orgPosition)
+		protected bool OnDragDrop(object sender, uint nodeId)
 		{
-			// Update the task offset
-			var newPos = new PointF(SelectedNode.Point.X, SelectedNode.Point.Y);
-			var offset = new PointF(newPos.X - orgPosition.X, newPos.Y - orgPosition.Y);
-
-			SelectedTaskNode.DragOffset.Offset((int)offset.X, (int)offset.Y);
+			// Update the task
+			SelectedTaskNode.UserPosition = SelectedNode.Point.GetPosition();
 
 			// Notify parent
 			return ((TaskDragDrop == null) ? false : TaskDragDrop(this, nodeId));

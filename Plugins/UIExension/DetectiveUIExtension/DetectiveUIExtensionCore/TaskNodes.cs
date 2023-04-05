@@ -31,7 +31,7 @@ namespace DetectiveUIExtension
 		private bool Done;
 		private bool GoodAsDone;
 
-		public Point DragOffset;
+		public Point UserPosition;
 
 		// -----------------------------------------------------------------
 
@@ -84,7 +84,7 @@ namespace DetectiveUIExtension
 
 		public string EncodeMetaData()
 		{
-			string metaData = string.Format("{0},{1}|", DragOffset.X, DragOffset.Y);
+			string metaData = string.Format("{0},{1}|", UserPosition.X, UserPosition.Y);
 
 			if (LinkIds?.Count > 0)
 			{
@@ -96,7 +96,7 @@ namespace DetectiveUIExtension
 
 		public void DecodeMetaData(string metaData)
 		{
-			DragOffset = new Point(0, 0);
+			UserPosition = new Point(0, 0);
 			LinkIds = new List<uint>();
 
 			if (string.IsNullOrWhiteSpace(metaData))
@@ -106,16 +106,16 @@ namespace DetectiveUIExtension
 
 			if (parts.Count() > 0)
 			{
-				string[] offsets = parts[0].Split(',');
+				string[] coords = parts[0].Split(',');
 
-				if (offsets.Count() == 2)
+				if (coords.Count() == 2)
 				{
 					int x, y;
 
-					if (int.TryParse(offsets[0], out x) && int.TryParse(offsets[1], out y))
+					if (int.TryParse(coords[0], out x) && int.TryParse(coords[1], out y))
 					{
-						DragOffset.X = x;
-						DragOffset.Y = y;
+						UserPosition.X = x;
+						UserPosition.Y = y;
 					}
 					else
 					{

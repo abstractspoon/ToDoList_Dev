@@ -11,7 +11,7 @@ using System.Windows.Forms;
 namespace DetectiveUIExtension
 {
 	public delegate void SelectionChangeEventHandler(object sender, uint itemId);
-	public delegate bool DragDropChangeEventHandler(object sender, uint itemId, PointF originalPos);
+	public delegate bool DragDropChangeEventHandler(object sender, uint itemId);
 
 	public partial class NodeControl : UserControl
 	{
@@ -796,7 +796,7 @@ namespace DetectiveUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
-			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeId, m_DragStart))
+			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeId))
 			{
 				RevertDrag();
 			}

@@ -12,6 +12,12 @@ namespace DetectiveUIExtension
 			return new System.Drawing.Point((int)point.X, (int)point.Y);
 		}
 
+		public static void SetPosition(this RadialTree.Point point, System.Drawing.Point dPoint)
+		{
+			point.X = dPoint.X;
+			point.Y = dPoint.Y;
+		}
+
 		public static System.Drawing.Point GetPosition(this RadialTree.Point point, System.Drawing.Size offset)
 		{
 			return new System.Drawing.Point((int)point.X + offset.Width, (int)point.Y + offset.Height);
