@@ -73,8 +73,6 @@ namespace DetectiveUIExtension
 
 		private TaskNodes m_TaskNodes;
 		
-		//private List<NodePath> CriticalPaths;
-
 		// -------------------------------------------------------------------------
 
 		[Flags]
@@ -555,6 +553,19 @@ namespace DetectiveUIExtension
 			return true;
 		}
 
+		protected override Size GetNodeSize(RadialTree.TreeNode<uint> node)
+		{
+			var size = base.GetNodeSize(node);
+			var taskNode = m_TaskNodes.GetNode(node.Data);
+
+			if ((taskNode != null) && (taskNode.Image != null))
+			{
+				size.Height += taskNode.CalcImageHeight(base.NodeSize.Width);
+			}
+
+			return size;
+		}
+
 		protected Color GetNodeBackgroundColor(TaskNode taskNode, bool selected)
 		{
 			if (selected)
@@ -835,6 +846,7 @@ namespace DetectiveUIExtension
 			// Title
 			titleRect.Inflate(-LabelPadding, -LabelPadding);
 			graphics.DrawString(taskNode.Title, GetNodeFont(taskNode), new SolidBrush(textColor), titleRect);
+
 			/*
 			// Checkbox
 			Rectangle checkRect = CalcCheckboxRect(rect);
@@ -865,7 +877,43 @@ namespace DetectiveUIExtension
 			}
 			*/
 
+			// Image
+			if (taskNode.Image != null)
+			{
+				var imageRect = nodeRect;
+				
+				imageRect = CalcImageRect(taskNode, imageRect, selected || dropHighlight);
+// 				imageRect.X++;
+// 				imageRect.Width--;
+// 
+// 				imageRect.Y = (nodeRect.Top + base.NodeSize.Height);
+// 				imageRect.Height = CalcImageRect(taskNode, nodeRect).Height;
+// 
+// 				if (selected || dropHighlight)
+// 				{
+// 					imageRect.Width--;
+// 					imageRect.Height--;
+// 				}
+
+				graphics.DrawImage(taskNode.Image, imageRect);
+			}
+
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
+		}
+
+		private Rectangle CalcImageRect(TaskNode taskNode, Rectangle nodeRect, bool selected)
+		{
+			nodeRect.Inflate(-1, -1);
+
+			if (!selected)
+			{
+				nodeRect.Width++;
+				nodeRect.Height++;
+			}
+
+			int height = taskNode.CalcImageHeight(nodeRect.Width);
+
+			return new Rectangle(nodeRect.X, nodeRect.Bottom - height, nodeRect.Width, height);
 		}
 
 		protected void DrawZoomedIcon(Image image, Graphics graphics, Rectangle destRect, Rectangle clipRect)

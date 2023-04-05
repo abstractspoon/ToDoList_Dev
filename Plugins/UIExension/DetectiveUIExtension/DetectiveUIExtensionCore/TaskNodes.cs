@@ -35,6 +35,14 @@ namespace DetectiveUIExtension
 		public Point UserPosition;
 		public Image Image;
 
+		public int CalcImageHeight(int width)
+		{
+			if (Image == null)
+				return 0;
+
+			return ((width * Image.Height) / Image.Width);
+		}
+
 		// -----------------------------------------------------------------
 
 		public TaskNode()

@@ -106,6 +106,11 @@ namespace DetectiveUIExtension
 			}
 		}
 
+		protected virtual Size GetNodeSize(RadialTree.TreeNode<uint> node)
+		{
+			return NodeSize;
+		}
+
 		protected float BaseFontHeight { get { return m_BaseFontHeight; } }
 		protected Font TextFont { get { return ((m_TextFont == null) ? Font : m_TextFont); } }
 
@@ -280,7 +285,7 @@ namespace DetectiveUIExtension
 			return false;
 		}
 
-		private float OverallScaleFactor { get { return (m_ZoomFactor * m_FontScaleFactor); } }
+		protected float OverallScaleFactor { get { return (m_ZoomFactor * m_FontScaleFactor); } }
 
 		private void RecalcZoomFactor()
 		{
@@ -361,7 +366,7 @@ namespace DetectiveUIExtension
 		protected Rectangle GetNodeClientRect(RadialTree.TreeNode<uint> node)
 		{
 			var pos = GetNodeClientPos(node);
-			var size = NodeSize.Multiply(OverallScaleFactor);
+			var size = GetNodeSize(node).Multiply(OverallScaleFactor);
 
 			pos.Offset(-size.Width / 2, -size.Height / 2);
 
@@ -567,9 +572,9 @@ namespace DetectiveUIExtension
 			return ZoomedExtents.Size;
 		}
 
-		protected void RecalcExtents<T>(RadialTree.TreeNode<T> node)
+		protected void RecalcExtents(RadialTree.TreeNode<uint> node)
 		{
-			var nodeRect = node.GetRectangle(NodeSize);
+			var nodeRect = node.GetRectangle(GetNodeSize(node));
 
 			m_MinExtents.X = Math.Min(m_MinExtents.X, (int)nodeRect.Left);
 			m_MinExtents.Y = Math.Min(m_MinExtents.Y, (int)nodeRect.Top);
@@ -781,11 +786,9 @@ namespace DetectiveUIExtension
 				Point dragPt = PointToClient(new Point(e.X, e.Y));
 				dragPt = ClientToGraph(dragPt);
 
-				var point = node.Point;
-				point.X = dragPt.X;
-				point.Y = dragPt.Y;
+				node.Point.X = dragPt.X;
+				node.Point.Y = dragPt.Y;
 
-				node.Point = point;
 				e.Effect = DragDropEffects.Move;
 
 				Invalidate();
