@@ -18,6 +18,7 @@ namespace DetectiveUIExtension
 		// -------------------------------------------------------------------
 
 		public int NodeSpacing = 5;
+		public int PinRadius = 2;
 
 		float m_InitialRadius = 50f;
 		float m_RadialIncrementOrSpacing = 50f;
@@ -410,33 +411,33 @@ namespace DetectiveUIExtension
 
 				if (DrawNodesOnTop)
 				{
-					DrawNodeAndChildConnections(e.Graphics, RootNode);
-					DrawNodeAndChildNodes(e.Graphics, RootNode);
+					DrawParentAndChildConnections(e.Graphics, RootNode);
+					DrawParentAndChildNodes(e.Graphics, RootNode);
 				}
 				else // Connections on top
 				{
-					DrawNodeAndChildNodes(e.Graphics, RootNode);
-					DrawNodeAndChildConnections(e.Graphics, RootNode);
+					DrawParentAndChildNodes(e.Graphics, RootNode);
+					DrawParentAndChildConnections(e.Graphics, RootNode);
 				}
 			}
 		}
 
-		protected virtual void DrawNodeAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected virtual void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			Point nodePos, parentPos;
 
 			if (IsConnectionVisible(node, node.Parent, out nodePos, out parentPos))
 			{
-				DrawConnection(graphics, node.Data, nodePos, parentPos);
+				DrawParentConnection(graphics, node.Data, nodePos, parentPos);
 			}
 
 			foreach (var child in node.Children)
 			{
-				DrawNodeAndChildConnections(graphics, child);
+				DrawParentAndChildConnections(graphics, child);
 			}
 		}
 
-		protected virtual void DrawNodeAndChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected virtual void DrawParentAndChildNodes(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			Rectangle nodeRect;
 
@@ -447,13 +448,29 @@ namespace DetectiveUIExtension
 
 			foreach (var child in node.Children)
 			{
-				DrawNodeAndChildNodes(graphics, child);
+				DrawParentAndChildNodes(graphics, child);
 			}
 		}
 
-		protected virtual void DrawConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
+		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
 			graphics.DrawLine(Pens.Gray, nodePos, parentPos);
+		}
+
+		protected void DrawConnection(Graphics graphics, Point node1Pos, Point node2Pos, Pen linePen, Brush pinBrush)
+		{
+			graphics.DrawLine(linePen, node1Pos, node2Pos);
+
+			if (DrawNodesOnTop == false)
+			{
+				DrawPin(graphics, node1Pos, pinBrush);
+				DrawPin(graphics, node2Pos, pinBrush);
+			}
+		}
+
+		protected void DrawPin(Graphics graphics, Point pos, Brush pinBrush)
+		{
+			graphics.FillEllipse(pinBrush, (pos.X - PinRadius), (pos.Y - PinRadius), (2 * PinRadius), (2 * PinRadius));
 		}
 
 		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)

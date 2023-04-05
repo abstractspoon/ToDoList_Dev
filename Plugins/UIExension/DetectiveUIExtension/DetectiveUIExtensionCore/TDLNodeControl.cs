@@ -109,8 +109,10 @@ namespace DetectiveUIExtension
 			NodeSize = new Size(nodeWidth, nodeHeight);
 
 			m_Options = DefaultOptions;
-			DrawNodesOnTop = (m_Options.HasFlag(DetectiveOption.DrawLinksOnTop) == false);
-			
+			base.DrawNodesOnTop = (m_Options.HasFlag(DetectiveOption.DrawLinksOnTop) == false);
+
+			base.PinRadius = ScaleByDPIFactor(4);
+
 			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
 
 			RebuildFonts();
@@ -654,9 +656,9 @@ namespace DetectiveUIExtension
 			return (nodeId != 0);
 		}
 
-		protected override void DrawNodeAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected override void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
-			base.DrawNodeAndChildConnections(graphics, node);
+			base.DrawParentAndChildConnections(graphics, node);
 
 			// Draw dependencies
 			if (m_Options.HasFlag(DetectiveOption.ShowDependencies))
@@ -673,7 +675,7 @@ namespace DetectiveUIExtension
 
 						if (IsConnectionVisible(fromPos, dependId, out toPos))
 						{
-							graphics.DrawLine(Pens.Blue, fromPos, toPos);
+							DrawConnection(graphics, fromPos, toPos, Pens.Blue, Brushes.Blue);
 						}
 					}
 				}
@@ -714,7 +716,7 @@ namespace DetectiveUIExtension
 			return base.IsConnectionVisible(fromPos, toPos);
 		}
 
-		protected override void DrawConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
+		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
 			if (m_Options.HasFlag(DetectiveOption.ShowParentChildLinks))
 			{
@@ -722,7 +724,7 @@ namespace DetectiveUIExtension
 
 				if ((taskNode?.ParentId != 0) || m_Options.HasFlag(DetectiveOption.ShowRootNode))
 				{
-					graphics.DrawLine(Pens.Gray, nodePos, parentPos);
+					DrawConnection(graphics, nodePos, parentPos, Pens.Gray, Brushes.Gray);
 				}
 			}
 		}
