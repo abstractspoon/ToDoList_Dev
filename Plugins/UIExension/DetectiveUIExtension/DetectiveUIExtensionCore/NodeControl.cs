@@ -30,6 +30,8 @@ namespace DetectiveUIExtension
 		float m_BaseFontHeight;
 		float m_FontScaleFactor = 1f;
 
+		float m_DpiFactor = 1f;
+
 		Font m_TextFont;
 
 		Size m_NodeSize;
@@ -63,6 +65,9 @@ namespace DetectiveUIExtension
 			m_NodeSize = DefaulttNodeSize;
 			m_TextFont = new Font("Tahoma", 8);
 			m_BaseFontHeight = m_TextFont.Height;
+
+			using (var graphics = CreateGraphics())
+				m_DpiFactor = graphics.DpiX / 96f;
 
 			InitializeComponent();
 		}
@@ -286,7 +291,7 @@ namespace DetectiveUIExtension
 			return false;
 		}
 
-		protected float OverallScaleFactor { get { return (m_ZoomFactor * m_FontScaleFactor); } }
+		protected float OverallScaleFactor { get { return (m_ZoomFactor * m_FontScaleFactor * m_DpiFactor); } }
 
 		private void RecalcZoomFactor()
 		{
