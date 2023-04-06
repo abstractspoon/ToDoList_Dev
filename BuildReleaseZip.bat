@@ -65,6 +65,8 @@ SET TDLFILELIST=%TDLFILELIST%;MDContentControlBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;MDContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionCore.dll
+SET TDLFILELIST=%TDLFILELIST%;PinBoardUIExtensionBridge.dll
+SET TDLFILELIST=%TDLFILELIST%;PinBoardUIExtensionCore.dll
 SET TDLFILELIST=%TDLFILELIST%;PDFExporterBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;PDFExporterCore.dll
 SET TDLFILELIST=%TDLFILELIST%;PluginHelpers.dll
@@ -107,6 +109,7 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Markdig.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\RadialTree.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Rtf2HtmlBridge.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\ToolStripToolTip.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\UIComponents.dll

@@ -10,7 +10,7 @@ using System.Windows.Forms.VisualStyles;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace DetectiveUIExtension
+namespace PinBoardUIExtension
 {
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
@@ -20,7 +20,7 @@ namespace DetectiveUIExtension
 	// ------------------------------------------------------------
 
 	[Flags]
-	enum DetectiveOption
+	enum PinBoardOption
 	{
 		None					= 0x00,
 		ShowParentChildLinks	= 0x01,
@@ -41,10 +41,10 @@ namespace DetectiveUIExtension
 
 		// -------------------------------------------------------------------------
 
-		const DetectiveOption DefaultOptions = (DetectiveOption.ShowRootNode |
-												DetectiveOption.ShowParentChildLinks |
-												DetectiveOption.ShowDependencies |
-												DetectiveOption.DrawLinksOnTop);
+		const PinBoardOption DefaultOptions = (PinBoardOption.ShowRootNode |
+												PinBoardOption.ShowParentChildLinks |
+												PinBoardOption.ShowDependencies |
+												PinBoardOption.DrawLinksOnTop);
 		// -------------------------------------------------------------------------
 
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
@@ -61,7 +61,7 @@ namespace DetectiveUIExtension
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
 
-		private DetectiveOption m_Options;
+		private PinBoardOption m_Options;
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -107,7 +107,7 @@ namespace DetectiveUIExtension
 			NodeSize = new Size(nodeWidth, nodeHeight);
 
 			m_Options = DefaultOptions;
-			base.DrawNodesOnTop = (m_Options.HasFlag(DetectiveOption.DrawLinksOnTop) == false);
+			base.DrawNodesOnTop = (m_Options.HasFlag(PinBoardOption.DrawLinksOnTop) == false);
 
 			base.PinRadius = ScaleByDPIFactor(4);
 
@@ -202,7 +202,7 @@ namespace DetectiveUIExtension
 				ApplyUserPositions(child);
 		}
 		
-		public DetectiveOption Options
+		public PinBoardOption Options
 		{
 			get { return m_Options; }
 		
@@ -211,7 +211,7 @@ namespace DetectiveUIExtension
 				if (value != m_Options)
 				{
 					m_Options = value;
-					base.DrawNodesOnTop = (m_Options.HasFlag(DetectiveOption.DrawLinksOnTop) == false);
+					base.DrawNodesOnTop = (m_Options.HasFlag(PinBoardOption.DrawLinksOnTop) == false);
 
 					Invalidate();
 				}
@@ -665,7 +665,7 @@ namespace DetectiveUIExtension
 			base.DrawParentAndChildConnections(graphics, node);
 
 			// Draw dependencies
-			if (m_Options.HasFlag(DetectiveOption.ShowDependencies))
+			if (m_Options.HasFlag(PinBoardOption.ShowDependencies))
 			{
 				var taskNode = GetTaskNode(node);
 
@@ -695,7 +695,7 @@ namespace DetectiveUIExtension
 				var drawState = ((nodeId == SelectedNodeId) ? DrawState.Selected : DrawState.None);
 				DoPaintNode(graphics, taskNode, rect, drawState);
 			}
-			else if (m_Options.HasFlag(DetectiveOption.ShowRootNode))
+			else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
 			{
 				rect.X += (rect.Width - rect.Height) / 2;
 				rect.Width = rect.Height;
@@ -722,11 +722,11 @@ namespace DetectiveUIExtension
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			if (m_Options.HasFlag(DetectiveOption.ShowParentChildLinks))
+			if (m_Options.HasFlag(PinBoardOption.ShowParentChildLinks))
 			{
 				var taskNode = m_TaskNodes.GetNode(nodeId);
 
-				if ((taskNode?.ParentId != 0) || m_Options.HasFlag(DetectiveOption.ShowRootNode))
+				if ((taskNode?.ParentId != 0) || m_Options.HasFlag(PinBoardOption.ShowRootNode))
 				{
 					DrawConnection(graphics, nodePos, parentPos, Pens.Gray, Brushes.Gray);
 				}

@@ -8,15 +8,15 @@
 #include <Interfaces\IUIExtension.h>
 
 #include <vcclr.h>
-using namespace DetectiveUIExtension;
+using namespace PinBoardUIExtension;
 
 /////////////////////////////////////////////////////////////////////////////////
-// This class is exported from DetectiveUIExtensionBridge.dll
+// This class is exported from PinBoardUIExtensionBridge.dll
 
-class CDetectiveUIExtensionBridge : public IUIExtension
+class CPinBoardUIExtensionBridge : public IUIExtension
 {
 public:
-	CDetectiveUIExtensionBridge();
+	CPinBoardUIExtensionBridge();
 
    void Release(); // releases the interface
 
@@ -39,12 +39,12 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////////////////////////
-// This class is exported from DetectiveUIExtensionBridge.dll
+// This class is exported from PinBoardUIExtensionBridge.dll
 
-class CDetectiveUIExtensionBridgeWindow : public IUIExtensionWindow
+class CPinBoardUIExtensionBridgeWindow : public IUIExtensionWindow
 {
 public:
-	CDetectiveUIExtensionBridgeWindow(ITransText* pTT);
+	CPinBoardUIExtensionBridgeWindow(ITransText* pTT);
 
    void Release(); // releases the interface
    BOOL Create(UINT nCtrlID, DWORD nStyle, 
@@ -81,7 +81,7 @@ public:
    void LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly = FALSE);
    
 protected:
-   gcroot<DetectiveUIExtensionCore^> m_wnd;
+   gcroot<PinBoardUIExtensionCore^> m_wnd;
    ITransText* m_pTT;
 
 protected:
@@ -97,6 +97,6 @@ DLL_DECLSPEC int GetInterfaceVersion()
 
 DLL_DECLSPEC IUIExtension* CreateUIExtensionInterface()
 {
-   return new CDetectiveUIExtensionBridge();
+   return new CPinBoardUIExtensionBridge();
 }
 

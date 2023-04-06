@@ -10,10 +10,10 @@ using System.Windows.Forms.VisualStyles;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace DetectiveUIExtension
+namespace PinBoardUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	public class DetectiveUIExtensionCore : Panel, IUIExtension
+	public class PinBoardUIExtensionCore : Panel, IUIExtension
     {
         private const string FontName = "Tahoma";
 
@@ -29,11 +29,11 @@ namespace DetectiveUIExtension
         private TDLNodeControl m_Control;
 
 		private Label m_OptionsLabel;
-		private DetectiveOptionsComboBox m_OptionsCombo;
+		private PinBoardOptionsComboBox m_OptionsCombo;
 
 		// ----------------------------------------------------------------------------
 
-		public DetectiveUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
+		public PinBoardUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
         {
             m_TypeId = typeId;
 			m_UiName = uiName;
@@ -149,7 +149,7 @@ namespace DetectiveUIExtension
             if (!appOnly)
             {
 				// private settings
-				m_Control.Options = (DetectiveOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
+				m_Control.Options = (PinBoardOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
 				m_OptionsCombo.SelectedOptions = m_Control.Options;
 			}
 
@@ -223,11 +223,11 @@ namespace DetectiveUIExtension
             else
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
-			m_Control.SelectionChange += new SelectionChangeEventHandler(OnDetectiveSelectionChange);
-			m_Control.TaskDragDrop += new TaskDragDropEventHandler(OnDetectiveDragDrop);
-			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveEditTaskLabel);
-            m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveEditTaskIcon);
-            m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveEditTaskCompletion);
+			m_Control.SelectionChange += new SelectionChangeEventHandler(OnPinBoardSelectionChange);
+			m_Control.TaskDragDrop += new TaskDragDropEventHandler(OnPinBoardDragDrop);
+			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnPinBoardEditTaskLabel);
+            m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnPinBoardEditTaskIcon);
+            m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnPinBoardEditTaskCompletion);
 
 			this.Controls.Add(m_Control);
 
@@ -235,7 +235,7 @@ namespace DetectiveUIExtension
 			m_OptionsLabel = CreateLabel("Options", null);
 			this.Controls.Add(m_OptionsLabel);
 
-			m_OptionsCombo = new DetectiveOptionsComboBox(m_Trans);
+			m_OptionsCombo = new PinBoardOptionsComboBox(m_Trans);
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 
@@ -275,14 +275,14 @@ namespace DetectiveUIExtension
 				m_Control.Options = m_OptionsCombo.SelectedOptions;
 		}
 
-		bool OnDetectiveEditTaskLabel(object sender, UInt32 taskId)
+		bool OnPinBoardEditTaskLabel(object sender, UInt32 taskId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			return notify.NotifyEditLabel();
 		}
 
-        bool OnDetectiveEditTaskCompletion(object sender, UInt32 taskId, bool completed)
+        bool OnPinBoardEditTaskCompletion(object sender, UInt32 taskId, bool completed)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -290,21 +290,21 @@ namespace DetectiveUIExtension
                                     (completed ? DateTime.Now : DateTime.MinValue));
         }
 
-        bool OnDetectiveEditTaskIcon(object sender, UInt32 taskId)
+        bool OnPinBoardEditTaskIcon(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyEditIcon();
         }
 
-		void OnDetectiveSelectionChange(object sender, uint nodeId)
+		void OnPinBoardSelectionChange(object sender, uint nodeId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			notify.NotifySelChange(nodeId);
 		}
 
-		bool OnDetectiveDragDrop(object sender, uint nodeId)
+		bool OnPinBoardDragDrop(object sender, uint nodeId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 

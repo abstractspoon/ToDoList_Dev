@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace DetectiveUIExtension
+namespace PinBoardUIExtension
 {
 	public class TaskNode
 	{
