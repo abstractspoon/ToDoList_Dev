@@ -322,6 +322,18 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
+		public void ZoomToFit()
+		{
+			while (ClientRectangle.Width < ZoomedExtents.Size.Width ||
+					ClientRectangle.Height < ZoomedExtents.Size.Height)
+			{
+				m_ZoomLevel++;
+				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
+			}
+
+			Invalidate();
+		}
+
 		protected float OverallScaleFactor { get { return (m_ZoomFactor * m_FontScaleFactor * m_DpiFactor); } }
 
 		private void RecalcZoomFactor()
