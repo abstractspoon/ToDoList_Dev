@@ -58,6 +58,7 @@ namespace PinBoardUIExtension
 		Point m_MaxExtents = Point.Empty;
 
 		IList<uint> m_SelectedNodeIds = new List<uint>();
+		Rectangle m_SelectionBox = Rectangle.Empty;
 
 		Timer m_DragTimer;
 		Point m_DragOffset;
@@ -403,7 +404,6 @@ namespace PinBoardUIExtension
 			return HitTestNode(RootNode, ptClient);
 		}
 
-
 		protected RadialTree.TreeNode<uint> HitTestNode(RadialTree.TreeNode<uint> node, Point ptClient)
 		{
 			Rectangle rect;
@@ -423,6 +423,26 @@ namespace PinBoardUIExtension
 			}
 
 			return null;
+		}
+
+		protected IList<RadialTree.TreeNode<uint>> HitTestNodes(Rectangle rectClient)
+		{
+			IList<RadialTree.TreeNode<uint>> hits = new List<RadialTree.TreeNode<uint>>();
+
+			HitTestNodes(RootNode, rectClient, ref hits);
+			return hits;
+		}
+
+		protected void HitTestNodes(RadialTree.TreeNode<uint> node, Rectangle rectClient, ref IList<RadialTree.TreeNode<uint>> hits)
+		{
+			Rectangle rect;
+
+			if (IsNodeVisible(node, out rect) && rect.IntersectsWith(rectClient))
+				hits.Add(node);
+
+			// check children
+			foreach (var child in node.Children)
+				HitTestNodes(child, rectClient, ref hits);
 		}
 
 		protected bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
@@ -509,6 +529,12 @@ namespace PinBoardUIExtension
 					DrawParentAndChildNodes(e.Graphics, RootNode);
 					DrawParentAndChildConnections(e.Graphics, RootNode);
 				}
+			}
+
+			// Draw new selection box
+			if (m_DragMode == DragMode.SelectionBox)
+			{
+				DrawSelectionBox(e.Graphics, m_SelectionBox);
 			}
 		}
 
@@ -757,12 +783,14 @@ namespace PinBoardUIExtension
 					{
 						// Task is deselected
 						Invalidate();
+						SelectionChange?.Invoke(this, m_SelectedNodeIds);
+
 						return;
 					}
 				}
 				else if (!ModifierKeys.HasFlag(Keys.Control))
 				{
-					m_SelectedNodeIds = new List<uint>();
+					m_SelectedNodeIds.Clear();
 				}
 
 				// else (re)insert at head because that'll be 
@@ -944,14 +972,17 @@ namespace PinBoardUIExtension
 			case DragMode.SelectionBox:
 				{
 					Point orgPt = (Point)e.Data.GetData(typeof(Point));
-					var selRect = Geometry2D.RectFromPoints(orgPt, dragPt);
+					m_SelectionBox = Geometry2D.RectFromPoints(orgPt, dragPt);
 
-					Refresh();
+					// Select intersecting nodes
+					var hits = HitTestNodes(m_SelectionBox);
+					m_SelectedNodeIds.Clear();
 
-					using (Graphics g = CreateGraphics())
-						DrawSelectionBox(g, selRect);
+					foreach (var hit in hits)
+						m_SelectedNodeIds.Add(hit.Data);
 
 					e.Effect = DragDropEffects.Move;
+					Invalidate();
 				}
 				break;
 
@@ -999,16 +1030,34 @@ namespace PinBoardUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
-			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeIds))
+			switch (m_DragMode)
 			{
-				RevertDrag();
-			}
-			else
-			{
-				RecalcExtents();
+			case DragMode.SelectionBox:
 				Invalidate();
+				SelectionChange?.Invoke(this, SelectedNodeIds);
+				break;
 
-				AutoScrollMinSize = ZoomedSize;
+			case DragMode.Node:
+				if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeIds))
+				{
+					RevertDrag();
+				}
+				else
+				{
+					RecalcExtents();
+					Invalidate();
+
+					AutoScrollMinSize = ZoomedSize;
+				}
+				break;
+
+			case DragMode.ConnectionStart:
+				// TODO
+				break;
+
+			case DragMode.ConnectionEnd:
+				// TODO
+				break;
 			}
 
 			m_DragMode = DragMode.None;
