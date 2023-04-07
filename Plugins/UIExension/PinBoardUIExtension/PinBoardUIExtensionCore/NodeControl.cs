@@ -13,12 +13,26 @@ namespace PinBoardUIExtension
 	public delegate void SelectionChangeEventHandler(object sender, IList<uint> itemIds);
 	public delegate bool DragDropChangeEventHandler(object sender, IList<uint> itemIds);
 
+	// -------------------------------------------------------------------
+
+	public enum DragMode
+	{
+		None = -1,
+		Node,
+		ConnectionStart,
+		ConnectionEnd,
+		SelectionBox,
+	}
+
+	// -------------------------------------------------------------------
+
 	public partial class NodeControl : UserControl
 	{
-		// -------------------------------------------------------------------
 
 		public int NodeSpacing = 5;
 		public int PinRadius = 2;
+
+		public const uint NullId = uint.MaxValue;
 
 		float m_InitialRadius = 50f;
 		float m_RadialIncrementOrSpacing = 50f;
@@ -29,13 +43,10 @@ namespace PinBoardUIExtension
 		const int m_BaseFontSize = 8; // in points
 		float m_BaseFontHeight;
 		float m_FontScaleFactor = 1f;
-
 		float m_DpiFactor = 1f;
-
-		Font m_TextFont;
-
 		Size m_NodeSize;
-
+		Font m_TextFont;
+		
 		RadialTree.TreeNode<uint> m_RootNode = null;
 		RadialTree.RadialTree<uint> m_RadialTree = null;
 
@@ -46,10 +57,11 @@ namespace PinBoardUIExtension
 		Point m_MaxExtents = Point.Empty;
 
 		IList<uint> m_SelectedNodeIds = new List<uint>();
-		public const uint NullId = uint.MaxValue;
-		private Timer m_DragTimer;
-		private Point m_DragOffset;
-		private PointF m_PreDragNodePos;
+
+		Timer m_DragTimer;
+		Point m_DragOffset;
+		PointF m_PreDragNodePos;
+		DragMode m_DragMode = DragMode.None;
 
 		private IContainer components = null;
 
@@ -119,6 +131,7 @@ namespace PinBoardUIExtension
 
 		protected float BaseFontHeight { get { return m_BaseFontHeight; } }
 		protected Font TextFont { get { return ((m_TextFont == null) ? Font : m_TextFont); } }
+		protected DragMode DragMode { get { return m_DragMode; } }
 
 		public bool ReadOnly = false;
 		public bool DrawNodesOnTop = true;
@@ -439,12 +452,9 @@ namespace PinBoardUIExtension
 
 		protected bool IsConnectionVisible(Point fromPos, Point toPos)
 		{
-			var lineBounds = Rectangle.FromLTRB(Math.Min(toPos.X, fromPos.X),
-												Math.Min(toPos.Y, fromPos.Y),
-												Math.Max(toPos.X, fromPos.X),
-												Math.Max(toPos.Y, fromPos.Y));
+			var lineBounds = Geometry2D.RectFromPoints(fromPos, toPos);
 
-			return lineBounds.IntersectsWith(ClientRectangle);
+			return ClientRectangle.IntersectsWith(lineBounds);
 		}
 
 		protected RadialTree.TreeNode<uint> GetNode(uint id)
@@ -474,6 +484,13 @@ namespace PinBoardUIExtension
 					DrawParentAndChildConnections(e.Graphics, RootNode);
 				}
 			}
+		}
+
+		protected virtual void DrawSelectionBox(Graphics g, Rectangle rect)
+		{
+			Debug.Assert(m_DragMode == DragMode.SelectionBox);
+
+			g.FillRectangle(SystemBrushes.Highlight, rect);
 		}
 
 		protected virtual void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
@@ -697,7 +714,13 @@ namespace PinBoardUIExtension
 
 			var hit = HitTestNode(e.Location);
 
-			if ((hit != null) && IsSelectableNode(hit.Data))
+			if (hit == null)
+			{
+				// Start a selection box drag
+				m_DragTimer.Tag = e;
+				m_DragTimer.Start();
+			}
+			else if (IsSelectableNode(hit.Data))
 			{
 				if (m_SelectedNodeIds.Contains(hit.Data))
 				{
@@ -740,13 +763,9 @@ namespace PinBoardUIExtension
 			if ((ModifierKeys & Keys.Control) == Keys.Control)
 			{
 				if (e.Delta > 0)
-				{
 					ZoomIn();
-				}
 				else
-				{
 					ZoomOut();
-				}
 			}
 			else
 			{
@@ -770,6 +789,9 @@ namespace PinBoardUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
+			if (RootNode.Children.Count == 0)
+				return false;
+
 			// Check for drag movement
 			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
 
@@ -778,14 +800,22 @@ namespace PinBoardUIExtension
 
 			var hit = HitTestNode(ptOrg);
 
-			if (IsAcceptableDragSource(hit))
+			if (hit == null)
 			{
-				// DoDragDrop is a modal loop so we can't use a timer
-				// to implement auto-expansion of dragged-over parent nodes
+				m_DragMode = DragMode.SelectionBox;
+				DoDragDrop(ptOrg, DragDropEffects.Copy | DragDropEffects.Move);
+
+				return true;
+			}
+			else if (IsAcceptableDragSource(hit))
+			{
+				m_DragMode = DragMode.Node;
 				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
+
 				return true;
 			}
 
+			m_DragMode = DragMode.None;
 			return false;
 		}
 
@@ -867,35 +897,63 @@ namespace PinBoardUIExtension
 
 		protected override void OnDragOver(DragEventArgs e)
 		{
-			Debug.Assert(!ReadOnly);
+			Debug.Assert(RootNode.Children.Count > 0);
 
-			if (SelectedNodeIds.Count == 0)
+			Point dragPt = PointToClient(new Point(e.X, e.Y));
+
+			switch (m_DragMode)
 			{
-				e.Effect = DragDropEffects.None;
-			}
-			else
-			{
-				Point dragPt = PointToClient(new Point(e.X, e.Y));
-
-				dragPt.Offset(m_DragOffset);
-				dragPt = ClientToGraph(dragPt);
-
-				var dragNode = DraggedNode;
-				var offset = new PointF(dragPt.X - dragNode.Point.X, dragPt.Y - dragNode.Point.Y);
-
-				foreach (var nodeId in m_SelectedNodeIds)
+			case DragMode.SelectionBox:
 				{
-					var node = GetNode(nodeId);
+					Point orgPt = (Point)e.Data.GetData(typeof(Point));
+					var selRect = Geometry2D.RectFromPoints(orgPt, dragPt);
 
-					if (node != null)
-					{
-						node.Point.X += offset.X;
-						node.Point.Y += offset.Y;
-					}
+					Refresh();
+
+					using (Graphics g = CreateGraphics())
+						DrawSelectionBox(g, selRect);
+
+					e.Effect = DragDropEffects.Move;
 				}
+				break;
 
-				e.Effect = DragDropEffects.Move;
-				Invalidate();
+			case DragMode.Node:
+				{
+					Debug.Assert(!ReadOnly);
+
+					dragPt.Offset(m_DragOffset);
+					dragPt = ClientToGraph(dragPt);
+
+					var dragNode = DraggedNode;
+					var offset = new PointF(dragPt.X - dragNode.Point.X, dragPt.Y - dragNode.Point.Y);
+
+					foreach (var nodeId in m_SelectedNodeIds)
+					{
+						var node = GetNode(nodeId);
+
+						if (node != null)
+						{
+							node.Point.X += offset.X;
+							node.Point.Y += offset.Y;
+						}
+					}
+
+					e.Effect = DragDropEffects.Move;
+					Invalidate();
+				}
+				break;
+
+			case DragMode.ConnectionStart:
+				{
+					Debug.Assert(!ReadOnly);
+				}
+				break;
+
+			case DragMode.ConnectionEnd:
+				{
+					Debug.Assert(!ReadOnly);
+				}
+				break;
 			}
 		}
 
@@ -912,6 +970,8 @@ namespace PinBoardUIExtension
 				AutoScrollMinSize = RecalcExtents();
 				Invalidate();
 			}
+
+			m_DragMode = DragMode.None;
 		}
 
 		protected override void OnQueryContinueDrag(QueryContinueDragEventArgs e)
@@ -923,7 +983,9 @@ namespace PinBoardUIExtension
 			if (e.EscapePressed)
 			{
 				e.Action = DragAction.Cancel;
-				RevertDrag();
+
+				if (m_DragMode != DragMode.SelectionBox)
+					RevertDrag();
 			}
 		}
 

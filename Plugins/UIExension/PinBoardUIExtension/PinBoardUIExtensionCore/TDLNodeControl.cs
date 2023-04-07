@@ -883,6 +883,20 @@ namespace PinBoardUIExtension
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
 		}
 
+		protected override void DrawSelectionBox(Graphics graphics, Rectangle rect)
+		{
+			Debug.Assert(DragMode == DragMode.SelectionBox);
+
+			UIExtension.SelectionRect.Draw(Handle,
+											graphics,
+											rect.X,
+											rect.Y,
+											rect.Width,
+											rect.Height,
+											UIExtension.SelectionRect.Style.DropHighlighted,
+											true); // transparent
+		}
+
 		private Rectangle CalcImageRect(TaskNode taskNode, Rectangle nodeRect, bool selected)
 		{
 			nodeRect.Inflate(-1, -1);

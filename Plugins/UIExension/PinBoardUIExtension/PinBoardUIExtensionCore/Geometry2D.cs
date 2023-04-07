@@ -8,6 +8,14 @@ namespace PinBoardUIExtension
 {
 	public class Geometry2D
 	{
+		public static Rectangle RectFromPoints(Point pt1, Point pt2)
+		{
+			return Rectangle.FromLTRB(Math.Min(pt1.X, pt2.X),
+									  Math.Min(pt1.Y, pt2.Y),
+									  Math.Max(pt1.X, pt2.X),
+									  Math.Max(pt1.Y, pt2.Y));
+		}
+
 		public static Point Difference(Point ptStart, Point ptEnd)
 		{
 			return new Point(ptEnd.X - ptStart.X, ptEnd.Y - ptStart.Y);
