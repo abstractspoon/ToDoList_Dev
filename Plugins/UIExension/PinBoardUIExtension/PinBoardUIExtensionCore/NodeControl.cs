@@ -615,9 +615,10 @@ namespace PinBoardUIExtension
 					m_RadialTree.CalculatePositions(m_InitialRadius, m_RadialIncrementOrSpacing);
 
 				OnAfterRecalcLayout();
-
-				AutoScrollMinSize = RecalcExtents();
 				Invalidate();
+
+				RecalcExtents();
+				AutoScrollMinSize = ZoomedExtents.Size;
 			}
 		}
 
@@ -626,7 +627,7 @@ namespace PinBoardUIExtension
 			// For derived class
 		}
 
-		protected Size RecalcExtents()
+		protected void RecalcExtents()
 		{
 			m_MinExtents = m_MaxExtents = Point.Empty;
 			RecalcExtents(RootNode);
@@ -634,8 +635,6 @@ namespace PinBoardUIExtension
 			const int Border = 50;
 			m_MinExtents.Offset(-Border, -Border);
 			m_MaxExtents.Offset(Border, Border);
-
-			return ZoomedExtents.Size;
 		}
 
 		protected void RecalcExtents(RadialTree.TreeNode<uint> node)
@@ -756,6 +755,13 @@ namespace PinBoardUIExtension
 
 				m_PreDragNodePos = new PointF(hit.Point.X, hit.Point.Y);
 			}
+#if DEBUG
+			else if (hit == RootNode)
+			{
+				Point ptGraph = ClientToGraph(e.Location);
+				int breakpoint = 0;
+			}
+#endif
 		}
 
 		protected override void OnMouseWheel(MouseEventArgs e)
@@ -855,11 +861,9 @@ namespace PinBoardUIExtension
 
 		protected Point GraphToClient(Point ptGraph)
 		{
-			var ptClient = ptGraph;
+			var ptClient = ptGraph.Multiply(OverallScaleFactor);
 
-			ptClient = ptClient.Multiply(OverallScaleFactor);
 			var minExtents = m_MinExtents.Multiply(OverallScaleFactor);
-
 			ptClient.Offset(-minExtents.X, -minExtents.Y);
 
 			if (HorizontalScroll.Visible)
@@ -967,8 +971,10 @@ namespace PinBoardUIExtension
 			}
 			else
 			{
-				AutoScrollMinSize = RecalcExtents();
+				RecalcExtents();
 				Invalidate();
+
+				AutoScrollMinSize = ZoomedExtents.Size;
 			}
 
 			m_DragMode = DragMode.None;
