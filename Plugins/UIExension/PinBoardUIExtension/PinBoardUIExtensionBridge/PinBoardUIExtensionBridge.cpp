@@ -201,6 +201,9 @@ bool CPinBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPC
 		}
 		break;
 
+	case IUI_SELECTALL:
+		return m_wnd->SelectAll();
+
 	case IUI_SETFOCUS:
 		return m_wnd->Focus();
 
@@ -294,14 +297,12 @@ bool CPinBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, cons
 		}
 		break;
 
-	case IUI_SELECTALL:
-		return m_wnd->SelectAll();
-
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:
 	case IUI_SELECTPREVTASK:
 	case IUI_SELECTLASTTASK:
+	case IUI_SELECTALL:
 		return true;
 
 	case IUI_SETFOCUS:

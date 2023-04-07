@@ -673,6 +673,8 @@ namespace PinBoardUIExtension
 					m_SelectedNodeIds.Add(hit.Data);
 
 					Invalidate();
+
+					SelectionChange?.Invoke(this, m_SelectedNodeIds);
 				}
 			}
 		}
