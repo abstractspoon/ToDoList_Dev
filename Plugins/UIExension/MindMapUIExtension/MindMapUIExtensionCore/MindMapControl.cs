@@ -530,14 +530,14 @@ namespace MindMapUIExtension
 				PostDraw(e.Graphics, m_TreeView.Nodes);
 
 #if DEBUG
-				int xOffset = (DebugMode() ? m_TreeView.Width : 0);
-				int yOffset = 0;
-
-				e.Graphics.DrawString(String.Format("OnPaint took {0} ms", Environment.TickCount - startTick), this.Font, Brushes.Black, xOffset, yOffset);
-				e.Graphics.DrawString(String.Format("RecalcPositions took {0} ms", m_RecalcDuration), this.Font, Brushes.Black, xOffset, yOffset + 16);
-				e.Graphics.DrawString(String.Format("Font Height = {0}", m_TreeView.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
-				e.Graphics.DrawString(String.Format("Item Height = {0}", m_TreeView.ItemHeight), this.Font, Brushes.Black, xOffset, yOffset + 48);
-				e.Graphics.DrawString(String.Format("Zoom = {0}", m_ZoomFactor), this.Font, Brushes.Black, xOffset, yOffset + 64);
+// 				int xOffset = (DebugMode() ? m_TreeView.Width : 0);
+// 				int yOffset = 0;
+// 
+// 				e.Graphics.DrawString(String.Format("OnPaint took {0} ms", Environment.TickCount - startTick), this.Font, Brushes.Black, xOffset, yOffset);
+// 				e.Graphics.DrawString(String.Format("RecalcPositions took {0} ms", m_RecalcDuration), this.Font, Brushes.Black, xOffset, yOffset + 16);
+// 				e.Graphics.DrawString(String.Format("Font Height = {0}", m_TreeView.Font.Height), this.Font, Brushes.Black, xOffset, yOffset + 32);
+// 				e.Graphics.DrawString(String.Format("Item Height = {0}", m_TreeView.ItemHeight), this.Font, Brushes.Black, xOffset, yOffset + 48);
+// 				e.Graphics.DrawString(String.Format("Zoom = {0}", m_ZoomFactor), this.Font, Brushes.Black, xOffset, yOffset + 64);
 #endif
 			}
 		}
@@ -634,6 +634,20 @@ namespace MindMapUIExtension
 			}
         }
 
+		const float MaxZoom = 1f;
+		const float MinZoom = 0.4f;
+		const float ZoomIncrement = 0.1f;
+
+		protected bool CanZoomIn
+		{
+			get { return (m_ZoomFactor < MaxZoom); }
+		}
+
+		protected bool CanZoomOut
+		{
+			get { return (HorizontalScroll.Visible || VerticalScroll.Visible) && (m_ZoomFactor > MinZoom); }
+		}
+
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{
 			if ((ModifierKeys & Keys.Control) == Keys.Control)
@@ -642,13 +656,17 @@ namespace MindMapUIExtension
 
 				if (e.Delta > 0)
 				{
-					newFactor += 0.1f;
-					newFactor = Math.Min(newFactor, 1.0f);
+					if (!CanZoomIn)
+						return;
+
+					newFactor += ZoomIncrement;
 				}
 				else
 				{
-					newFactor -= 0.1f;
-					newFactor = Math.Max(newFactor, 0.4f);
+					if (!CanZoomOut)
+						return;
+
+					newFactor -= ZoomIncrement;
 				}
 
 				if (newFactor != m_ZoomFactor)
@@ -2004,6 +2022,8 @@ namespace MindMapUIExtension
                     availSpace = Rectangle.FromLTRB(m_TreeView.Width, ClientRectangle.Top, ClientRectangle.Right, ClientRectangle.Bottom);
 
 				Rectangle graphRect = RootItem.TotalBounds;
+				graphRect.Inflate(GraphPadding, GraphPadding);
+
 				Point ptOffset = CalculateCentreToCentreOffset(graphRect, availSpace);
 
                 if (availSpace.Height < graphRect.Height)
@@ -2453,7 +2473,6 @@ namespace MindMapUIExtension
 
 			drawPos.Offset(m_DrawOffset);
             drawPos.Offset(-HorizontalScroll.Value, -VerticalScroll.Value);
-            drawPos.Offset(GraphPadding, GraphPadding);
 			
 			return drawPos;
 		}
