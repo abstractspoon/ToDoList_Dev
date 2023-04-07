@@ -887,14 +887,21 @@ namespace PinBoardUIExtension
 		{
 			Debug.Assert(DragMode == DragMode.SelectionBox);
 
-			UIExtension.SelectionRect.Draw(Handle,
-											graphics,
-											rect.X,
-											rect.Y,
-											rect.Width,
-											rect.Height,
-											UIExtension.SelectionRect.Style.DropHighlighted,
-											true); // transparent
+			if (VisualStyleRenderer.IsSupported)
+			{
+				UIExtension.SelectionRect.Draw(Handle,
+												graphics,
+												rect.X,
+												rect.Y,
+												rect.Width,
+												rect.Height,
+												UIExtension.SelectionRect.Style.DropHighlighted,
+												true); // transparent
+			}
+			else
+			{
+				base.DrawSelectionBox(graphics, rect);
+			}
 		}
 
 		private Rectangle CalcImageRect(TaskNode taskNode, Rectangle nodeRect, bool selected)

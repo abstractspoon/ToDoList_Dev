@@ -538,11 +538,11 @@ namespace PinBoardUIExtension
 			}
 		}
 
-		protected virtual void DrawSelectionBox(Graphics g, Rectangle rect)
+		protected virtual void DrawSelectionBox(Graphics graphics, Rectangle rect)
 		{
 			Debug.Assert(m_DragMode == DragMode.SelectionBox);
 
-			g.FillRectangle(SystemBrushes.Highlight, rect);
+			ControlPaint.DrawFocusRectangle(graphics, rect);
 		}
 
 		protected virtual void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
