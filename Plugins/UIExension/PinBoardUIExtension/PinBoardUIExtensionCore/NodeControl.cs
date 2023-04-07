@@ -39,13 +39,14 @@ namespace PinBoardUIExtension
 
 		float m_ZoomFactor = 1f;
 		int m_ZoomLevel = 0;
+		float m_DpiFactor = 1f;
 
 		const int m_BaseFontSize = 8; // in points
 		float m_BaseFontHeight;
 		float m_FontScaleFactor = 1f;
-		float m_DpiFactor = 1f;
 		Size m_NodeSize;
 		Font m_TextFont;
+		Color m_WallColor = SystemColors.ControlDark;
 		
 		RadialTree.TreeNode<uint> m_RootNode = null;
 		RadialTree.RadialTree<uint> m_RadialTree = null;
@@ -120,6 +121,20 @@ namespace PinBoardUIExtension
 				{
 					m_NodeSize = value;
 					RecalcLayout();
+				}
+			}
+		}
+
+		public Color WallColor
+		{
+			get { return m_WallColor; }
+
+			set
+			{
+				if (value != m_WallColor)
+				{
+					m_WallColor = value;
+					Invalidate();
 				}
 			}
 		}
@@ -337,8 +352,8 @@ namespace PinBoardUIExtension
 
 		public void ZoomToFit()
 		{
-			while (ClientRectangle.Width < ZoomedExtents.Size.Width ||
-					ClientRectangle.Height < ZoomedExtents.Size.Height)
+			while (ClientRectangle.Width < ZoomedSize.Width ||
+					ClientRectangle.Height < ZoomedSize.Height)
 			{
 				m_ZoomLevel++;
 				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
@@ -352,7 +367,7 @@ namespace PinBoardUIExtension
 		private void RecalcZoomFactor()
 		{
 			m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
-			AutoScrollMinSize = ZoomedExtents.Size;
+			AutoScrollMinSize = ZoomedSize;
 		}
 
 		private void RecalcTextFont()
@@ -362,8 +377,7 @@ namespace PinBoardUIExtension
 			else
 				m_TextFont = Font;
 
-			AutoScrollMinSize = ZoomedExtents.Size;
-
+			AutoScrollMinSize = ZoomedSize;
 			OnTextFontChanged();
 		}
 
@@ -468,6 +482,18 @@ namespace PinBoardUIExtension
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
+
+			// Draw the wall colour behind the graph if the 
+			// graph is smaller than the client rect
+			var graphRect = GraphToClient(Extents);
+
+			if (!graphRect.Contains(ClientRectangle))
+			{
+				using (var brush = new SolidBrush(m_WallColor))
+					e.Graphics.FillRectangle(brush, ClientRectangle);
+
+				e.Graphics.FillRectangle(SystemBrushes.Window, graphRect);
+			}
 
 			if (RootNode != null)
 			{
@@ -579,11 +605,11 @@ namespace PinBoardUIExtension
 			}
 		}
 
-		public Rectangle ZoomedExtents
+		public Size ZoomedSize
 		{
 			get
 			{
-				return Extents.Multiply(OverallScaleFactor);
+				return Extents.Multiply(OverallScaleFactor).Size;
 			}
 		}
 
@@ -618,7 +644,7 @@ namespace PinBoardUIExtension
 				Invalidate();
 
 				RecalcExtents();
-				AutoScrollMinSize = ZoomedExtents.Size;
+				AutoScrollMinSize = ZoomedSize;
 			}
 		}
 
@@ -879,6 +905,14 @@ namespace PinBoardUIExtension
 			return ptClient;
 		}
 
+		protected Rectangle GraphToClient(Rectangle rectGraph)
+		{
+			var ptClient = GraphToClient(rectGraph.Location);
+			var sizeClient = rectGraph.Multiply(OverallScaleFactor).Size;
+
+			return new Rectangle(ptClient, sizeClient);
+		}
+
 		protected Point ClientToGraph(Point ptClient)
 		{
 			var ptGraph = ptClient;
@@ -974,7 +1008,7 @@ namespace PinBoardUIExtension
 				RecalcExtents();
 				Invalidate();
 
-				AutoScrollMinSize = ZoomedExtents.Size;
+				AutoScrollMinSize = ZoomedSize;
 			}
 
 			m_DragMode = DragMode.None;
