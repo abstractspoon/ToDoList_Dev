@@ -355,7 +355,7 @@ namespace Misc
 
 		while (nItem--)
 		{
-			if (item == GetItemT(aValues, nItem))
+			if (item == aValues.GetData()[nItem])
 				aValues.RemoveAt(nItem);
 		}
 
