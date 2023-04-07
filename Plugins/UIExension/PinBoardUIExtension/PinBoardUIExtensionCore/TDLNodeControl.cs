@@ -15,7 +15,7 @@ namespace PinBoardUIExtension
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
-	public delegate bool TaskDragDropEventHandler(object sender, uint taskId);
+	public delegate bool TaskDragDropEventHandler(object sender, IList<uint> taskIds);
 
 	// ------------------------------------------------------------
 
@@ -308,7 +308,7 @@ namespace PinBoardUIExtension
 		{
 			//EnsureNodeVisible(SelectedNode);
 			
-			var labelRect = GetSelectedNodeRect();
+			var labelRect = GetSingleSelectedNodeRect();
 			
 			labelRect.X -= LabelPadding;
 			//labelRect.X += GetExtraWidth(SelectedNode);
@@ -338,9 +338,9 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
-		public TaskNode SelectedTaskNode
+		public TaskNode SingleSelectedTaskNode
 		{
-			get	{ return GetTaskNode(base.SelectedNode); }
+			get	{ return GetTaskNode(base.SingleSelectedNode); }
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
@@ -692,7 +692,7 @@ namespace PinBoardUIExtension
 
 			if (taskNode != null)
 			{
-				var drawState = ((nodeId == SelectedNodeId) ? DrawState.Selected : DrawState.None);
+				var drawState = (SelectedNodeIds.Contains(nodeId) ? DrawState.Selected : DrawState.None);
 				DoPaintNode(graphics, taskNode, rect, drawState);
 			}
 			else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
@@ -949,7 +949,7 @@ namespace PinBoardUIExtension
 				if (imageRect.Contains(e.Location))
 					Process.Start(taskNode.ImagePath);
 				else
-					EditTaskLabel(this, SelectedNode.Data);
+					EditTaskLabel(this, SingleSelectedNode.Data);
 			}
 		}
 
@@ -960,35 +960,35 @@ namespace PinBoardUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-			TaskNode taskNode = SelectedTaskNode;
-
-			if (taskNode == null)
-				return;
-
-			if (!ReadOnly && !taskNode.IsLocked && (HitTestTask(e.Location) == taskNode))
-			{
-/*
-				if (HitTestCheckbox(node, e.Location))
-				{
-					if (EditTaskDone != null)
-						EditTaskDone(this, taskNode.ID, !taskNode.IsDone(false));
-				}
-				else*/ if (HitTestIcon(SelectedNode, e.Location))
-				{
-					if (EditTaskIcon != null)
-					    EditTaskIcon(this, taskNode.UniqueId);
-				}
-				else if (SelectedNodeWasPreviouslySelected)
-				{
-					if (EditTaskLabel != null)
-						m_EditTimer.Start();
-				}
-			}
+// 			TaskNode taskNode = SelectedTaskNode;
+// 
+// 			if (taskNode == null)
+// 				return;
+// 
+// 			if (!ReadOnly && !taskNode.IsLocked && (HitTestTask(e.Location) == taskNode))
+// 			{
+// /*
+// 				if (HitTestCheckbox(node, e.Location))
+// 				{
+// 					if (EditTaskDone != null)
+// 						EditTaskDone(this, taskNode.ID, !taskNode.IsDone(false));
+// 				}
+// 				else*/ if (HitTestIcon(SelectedNode, e.Location))
+// 				{
+// 					if (EditTaskIcon != null)
+// 					    EditTaskIcon(this, taskNode.UniqueId);
+// 				}
+// 				else if (SelectedNodeWasPreviouslySelected)
+// 				{
+// 					if (EditTaskLabel != null)
+// 						m_EditTimer.Start();
+// 				}
+// 			}
 		}
 
 		private bool SelectedNodeWasPreviouslySelected
 		{
-			get { return ((SelectedTaskNode != null) && (SelectedTaskNode == m_PreviouslySelectedTaskNode)); }
+			get { return ((SingleSelectedTaskNode != null) && (SingleSelectedTaskNode == m_PreviouslySelectedTaskNode)); }
 		}
 
 		private bool HitTestIcon(RadialTree.TreeNode<uint> node, Point point)
@@ -1005,7 +1005,7 @@ namespace PinBoardUIExtension
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			m_EditTimer.Stop();
-			m_PreviouslySelectedTaskNode = (Focused ? SelectedTaskNode : null);
+			m_PreviouslySelectedTaskNode = (Focused ? SingleSelectedTaskNode : null);
 
 			base.OnMouseDown(e);
 		}
@@ -1014,7 +1014,7 @@ namespace PinBoardUIExtension
 		{
 			m_EditTimer.Stop();
 
-			EditTaskLabel?.Invoke(this, SelectedNode?.Data ?? 0);
+			EditTaskLabel?.Invoke(this, SingleSelectedNode?.Data ?? 0);
 		}
 
 		protected TaskNode HitTestTask(Point ptClient)
@@ -1026,7 +1026,12 @@ namespace PinBoardUIExtension
 
 		protected TaskNode GetTaskNode(RadialTree.TreeNode<uint> node)
 		{
-			return ((node == null) ? null : m_TaskNodes.GetNode(node.Data));
+			return (node == null) ? null : GetTaskNode(node.Data);
+		}
+
+		public TaskNode GetTaskNode(uint nodeId)
+		{
+			return m_TaskNodes.GetNode(nodeId);
 		}
 
 		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
@@ -1034,13 +1039,22 @@ namespace PinBoardUIExtension
 			return (base.IsAcceptableDragSource(node) && (node != RootNode));
 		}
 
-		protected bool OnDragDrop(object sender, uint nodeId)
+		protected bool OnDragDrop(object sender, IList<uint> nodeIds)
 		{
-			// Update the task
-			SelectedTaskNode.UserPosition = SelectedNode.Point.GetPosition();
+			// Update the tasks
+			foreach (uint nodeId in nodeIds)
+			{
+				var node = GetNode(nodeId);
+				var taskNode = GetTaskNode(nodeId);
+
+				if ((node != null) && (taskNode != null))
+				{
+					taskNode.UserPosition = node.Point.GetPosition();
+				}
+			}
 
 			// Notify parent
-			return ((TaskDragDrop == null) ? false : TaskDragDrop(this, nodeId));
+			return ((TaskDragDrop == null) ? false : TaskDragDrop(this, nodeIds));
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)

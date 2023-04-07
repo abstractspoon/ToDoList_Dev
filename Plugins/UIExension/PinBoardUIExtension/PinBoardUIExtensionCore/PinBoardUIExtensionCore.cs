@@ -3,6 +3,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Windows.Forms.VisualStyles;
@@ -45,14 +46,20 @@ namespace PinBoardUIExtension
 
         // IUIExtension ------------------------------------------------------------------
 
-        public bool SelectTask(UInt32 dwTaskID)
+        public bool SelectTask(uint dwTaskID)
         {
 			return m_Control.SelectNode(dwTaskID);
         }
 
-        public bool SelectTasks(UInt32[] pdwTaskIDs)
+        public bool SelectAll()
         {
-            return false;
+			m_Control.SelectAllNodes();
+			return true;
+        }
+
+        public bool SelectTasks(uint[] pdwTaskIDs)
+        {
+			return m_Control.SelectNodes(new List<uint>(pdwTaskIDs));
         }
 
         public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
@@ -297,18 +304,42 @@ namespace PinBoardUIExtension
             return notify.NotifyEditIcon();
         }
 
-		void OnPinBoardSelectionChange(object sender, uint nodeId)
+		void OnPinBoardSelectionChange(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			notify.NotifySelChange(nodeId);
+			switch (nodeIds.Count)
+			{
+			case 0:
+				notify.NotifySelChange(0);
+				break;
+
+			case 1:
+				notify.NotifySelChange(nodeIds[0]);
+				break;
+
+			default:
+				{
+					uint[] pdwTaskIds = new uint[nodeIds.Count];
+					nodeIds.CopyTo(pdwTaskIds, 0);
+
+					notify.NotifySelChange(pdwTaskIds);
+				}
+				break;
+			}
 		}
 
-		bool OnPinBoardDragDrop(object sender, uint nodeId)
+		bool OnPinBoardDragDrop(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
-			return notify.NotifyMod(Task.Attribute. MetaData, m_Control.SelectedTaskNode.EncodeMetaData());
+			foreach (var nodeId in nodeIds)
+			{
+				var taskNode = m_Control.GetTaskNode(nodeId);
+				notify.AddMod(nodeId, Task.Attribute.MetaData, taskNode.EncodeMetaData());
+			}
+
+			return notify.NotifyMod();
 
 
 // 			if (e.copyNode)

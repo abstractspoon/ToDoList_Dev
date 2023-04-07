@@ -294,6 +294,9 @@ bool CPinBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, cons
 		}
 		break;
 
+	case IUI_SELECTALL:
+		return m_wnd->SelectAll();
+
 	case IUI_SELECTFIRSTTASK:
 	case IUI_SELECTNEXTTASK:
 	case IUI_SELECTNEXTTASKINCLCURRENT:

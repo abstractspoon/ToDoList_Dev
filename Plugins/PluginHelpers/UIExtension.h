@@ -125,6 +125,14 @@ namespace Abstractspoon
 					bool AddMod(Task::Attribute nAttribute, String^ value);
 					bool AddMod(String^ sCustAttribID, String^ value);
 
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, DateTime value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, double value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, double time, Task::TimeUnits units);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, int value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, bool value);
+					bool AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value);
+					bool AddMod(UInt32 taskID, String^ sCustAttribID, String^ value);
+
 					bool NotifyMod();
 					bool NotifyMod(Task::Attribute nAttribute, DateTime value);
 					bool NotifyMod(Task::Attribute nAttribute, double value);
@@ -159,6 +167,15 @@ namespace Abstractspoon
 						IUITaskMod(Task::Attribute attrib, String^ value);
 
 						IUITaskMod(String^ customAttribId, String^ value);
+
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, DateTime value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, double value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, bool value);
+						IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value);
+
+						IUITaskMod(UInt32 taskID, String^ customAttribId, String^ value);
 
 						bool CopyTo(IUITASKMOD& mod);
 

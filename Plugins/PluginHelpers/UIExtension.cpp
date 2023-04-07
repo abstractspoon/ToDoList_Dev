@@ -185,8 +185,84 @@ UIExtension::ParentNotify::IUITaskMod::IUITaskMod(String^ customAttribId, String
 {
 }
 
+// ---------------------------------------------------------------------------
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, DateTime value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Date),
+	tValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, double value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Double),
+	dValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, double time, Task::TimeUnits units)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Time),
+	dValue(time),
+	nTimeUnits(units)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, int value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Integer),
+	nValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, bool value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Bool),
+	bValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, Task::Attribute attrib, String^ value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(attrib),
+	dataType(DataType::Text),
+	szValue(value)
+{
+
+}
+
+UIExtension::ParentNotify::IUITaskMod::IUITaskMod(UInt32 taskID, String^ customAttribId, String^ value)
+	:
+	dwSelectedTaskID(taskID),
+	nAttrib(Task::Attribute::CustomAttribute),
+	dataType(DataType::Custom),
+	szCustomAttribID(customAttribId),
+	szValue(value)
+{
+}
+
+// ---------------------------------------------------------------------------
+
 bool UIExtension::ParentNotify::IUITaskMod::CopyTo(IUITASKMOD& mod)
 {
+	mod.dwSelectedTaskID = dwSelectedTaskID;
 	mod.nAttrib = Task::MapAttribute(nAttrib);
 
 	switch (dataType)
@@ -249,6 +325,8 @@ UIExtension::ParentNotify::ParentNotify(IntPtr hwndParent)
 	m_hwndParent = static_cast<HWND>(hwndParent.ToPointer());
 	m_TaskMods = gcnew List<IUITaskMod^>();
 }
+
+// -----------------------------------------------------------------------------------
 
 bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, DateTime date)
 {
@@ -313,6 +391,72 @@ bool UIExtension::ParentNotify::AddMod(Task::Attribute nAttribute, String^ value
 	return true;
 }
 
+// -----------------------------------------------------------------------------------
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, DateTime date)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, date));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, double value)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, double time, Task::TimeUnits units)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, time, units));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, int value)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, bool value)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, String^ sCustAttribID, String^ value)
+{
+	if (sCustAttribID->IsNullOrEmpty(sCustAttribID))
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, sCustAttribID, value));
+	return true;
+}
+
+bool UIExtension::ParentNotify::AddMod(UInt32 taskID, Task::Attribute nAttribute, String^ value)
+{
+	if (Task::MapAttribute(nAttribute) == TDCA_NONE)
+		return false;
+
+	m_TaskMods->Add(gcnew IUITaskMod(taskID, nAttribute, value));
+	return true;
+}
+
+// -----------------------------------------------------------------------------------
 // External
 bool UIExtension::ParentNotify::NotifyMod()
 {
@@ -469,7 +613,7 @@ bool UIExtension::ParentNotify::NotifySelChange(cli::array<UInt32>^ pdwTaskIDs)
 		return false;
 
 	pin_ptr<UInt32> p = &pdwTaskIDs[0];
-	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, pdwTaskIDs->Length, (LPARAM)p);
+	BOOL bRet = ::SendMessage(m_hwndParent, WM_IUI_SELECTTASK, (WPARAM)p, pdwTaskIDs->Length);
 
 	return (bRet != FALSE);
 }

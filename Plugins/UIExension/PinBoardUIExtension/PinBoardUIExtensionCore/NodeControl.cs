@@ -10,8 +10,8 @@ using System.Windows.Forms;
 
 namespace PinBoardUIExtension
 {
-	public delegate void SelectionChangeEventHandler(object sender, uint itemId);
-	public delegate bool DragDropChangeEventHandler(object sender, uint itemId);
+	public delegate void SelectionChangeEventHandler(object sender, IList<uint> itemIds);
+	public delegate bool DragDropChangeEventHandler(object sender, IList<uint> itemIds);
 
 	public partial class NodeControl : UserControl
 	{
@@ -45,7 +45,7 @@ namespace PinBoardUIExtension
 		Point m_MinExtents = Point.Empty;
 		Point m_MaxExtents = Point.Empty;
 
-		uint m_SelectedNodeId = 0;
+		IList<uint> m_SelectedNodeIds = new List<uint>();
 		public const uint NullId = uint.MaxValue;
 		private Timer m_DragTimer;
 		private Point m_DragOffset;
@@ -122,48 +122,79 @@ namespace PinBoardUIExtension
 
 		public bool ReadOnly = false;
 		public bool DrawNodesOnTop = true;
-		public uint SelectedNodeId { get { return m_SelectedNodeId; } }
+		public IList<uint> SelectedNodeIds { get { return m_SelectedNodeIds; } }
 
-		public RadialTree.TreeNode<uint> SelectedNode
+		protected RadialTree.TreeNode<uint> SingleSelectedNode
 		{
 			get
 			{
-				if (m_SelectedNodeId == NullId)
+				if (m_SelectedNodeIds.Count != 1)
 					return null;
 
-				if (m_SelectedNodeId == RootNode.Data)
-					return m_RootNode;
-
-				var node = GetNode(m_SelectedNodeId);
-
-				if (node == null)
-					m_SelectedNodeId = NullId;
-
-				return node;
+				return GetNode(m_SelectedNodeIds[0]);
 			}
 		}
 
-		public Rectangle GetSelectedNodeRect()
+		public Rectangle GetSingleSelectedNodeRect()
 		{
-			var node = SelectedNode;
+			var node = SingleSelectedNode;
 
 			return ((node != null) ? GetNodeClientRect(node) : Rectangle.Empty);
 		}
 
+		protected uint DraggedNodeId
+		{
+			get { return ((m_SelectedNodeIds.Count > 0) ? m_SelectedNodeIds[0] : NullId); }
+		}
+
+		protected RadialTree.TreeNode<uint> DraggedNode
+		{
+			get { return GetNode(DraggedNodeId); }
+		}
+
 		public bool SelectNode(uint nodeId)
 		{
-			if ((nodeId != m_SelectedNodeId) ||
-				(nodeId == NullId) ||
-				(nodeId == RootNode.Data) ||
-				RootNode.HasChild(nodeId))
+			if (IsSelectableNode(nodeId))
 			{
-				m_SelectedNodeId = nodeId;
+				m_SelectedNodeIds = new List<uint>();
+				m_SelectedNodeIds.Add(nodeId);
 				Invalidate();
 
 				return true;
 			}
 
 			return false;
+		}
+
+		public bool SelectNodes(IList<uint> nodeIds)
+		{
+			foreach (var nodeId in nodeIds)
+			{
+				if (!IsSelectableNode(nodeId))
+					return false;
+			}
+
+			m_SelectedNodeIds = nodeIds;
+			Invalidate();
+
+			return true;
+		}
+
+		public void SelectAllNodes()
+		{
+			m_SelectedNodeIds.Clear();
+
+			SelectAllNodes(RootNode);
+			Invalidate();
+		}
+
+		public void SelectAllNodes(RadialTree.TreeNode<uint> node)
+		{
+			if (IsSelectableNode(node.Data))
+				m_SelectedNodeIds.Add(node.Data);
+
+			foreach (var child in node.Children)
+				SelectAllNodes(child);
 		}
 
 		public bool AutoCalculateRadialIncrement
@@ -489,7 +520,7 @@ namespace PinBoardUIExtension
 			Brush fill = SystemBrushes.Window, text = SystemBrushes.WindowText;
 			Pen border = Pens.Gray;
 
-			if (nodeId == m_SelectedNodeId)
+			if (m_SelectedNodeIds.Contains(nodeId))
 			{
 				if (Focused)
 				{
@@ -628,6 +659,24 @@ namespace PinBoardUIExtension
 			return true;
 		}
 
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
+			base.OnMouseClick(e);
+
+			if (!ModifierKeys.HasFlag(Keys.Control))
+			{
+				var hit = HitTestNode(e.Location);
+
+				if ((hit != null) && IsSelectableNode(hit.Data))
+				{
+					m_SelectedNodeIds.Clear();
+					m_SelectedNodeIds.Add(hit.Data);
+
+					Invalidate();
+				}
+			}
+		}
+
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
@@ -636,11 +685,32 @@ namespace PinBoardUIExtension
 
 			if ((hit != null) && IsSelectableNode(hit.Data))
 			{
-				m_SelectedNodeId = hit.Data;
+				if (m_SelectedNodeIds.Contains(hit.Data))
+				{
+					// Always remove it because we'll be re-adding
+					// it at the head if we still need it
+					m_SelectedNodeIds.Remove(hit.Data);
+
+					if (ModifierKeys.HasFlag(Keys.Control))
+					{
+						// Task is deselected
+						Invalidate();
+						return;
+					}
+				}
+				else if (!ModifierKeys.HasFlag(Keys.Control))
+				{
+					m_SelectedNodeIds = new List<uint>();
+				}
+
+				// else (re)insert at head because that'll be 
+				// the reference node when we are dragging
+				m_SelectedNodeIds.Insert(0, hit.Data);
 				Invalidate();
 
-				SelectionChange?.Invoke(this, m_SelectedNodeId);
+				SelectionChange?.Invoke(this, m_SelectedNodeIds);
 
+				// Initialise a drag operation
 				m_DragTimer.Tag = e;
 				m_DragTimer.Start();
 
@@ -785,24 +855,32 @@ namespace PinBoardUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
-			var node = SelectedNode;
-
-			if (node == null)
+			if (SelectedNodeIds.Count == 0)
 			{
 				e.Effect = DragDropEffects.None;
 			}
 			else
 			{
 				Point dragPt = PointToClient(new Point(e.X, e.Y));
-				dragPt.Offset(m_DragOffset);
 
+				dragPt.Offset(m_DragOffset);
 				dragPt = ClientToGraph(dragPt);
 
-				node.Point.X = dragPt.X;
-				node.Point.Y = dragPt.Y;
+				var dragNode = DraggedNode;
+				var offset = new PointF(dragPt.X - dragNode.Point.X, dragPt.Y - dragNode.Point.Y);
+
+				foreach (var nodeId in m_SelectedNodeIds)
+				{
+					var node = GetNode(nodeId);
+
+					if (node != null)
+					{
+						node.Point.X += offset.X;
+						node.Point.Y += offset.Y;
+					}
+				}
 
 				e.Effect = DragDropEffects.Move;
-
 				Invalidate();
 			}
 		}
@@ -811,7 +889,7 @@ namespace PinBoardUIExtension
 		{
 			Debug.Assert(!ReadOnly);
 
-			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeId))
+			if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeIds))
 			{
 				RevertDrag();
 			}
@@ -837,12 +915,23 @@ namespace PinBoardUIExtension
 
 		private void RevertDrag()
 		{
-			var node = SelectedNode;
+			var dragNode = DraggedNode;
 
-			if (node != null)
+			if (dragNode != null)
 			{
-				node.Point.X = m_PreDragNodePos.X;
-				node.Point.Y = m_PreDragNodePos.Y;
+				var offset = new PointF((dragNode.Point.X - m_PreDragNodePos.X), (dragNode.Point.Y - m_PreDragNodePos.Y));
+
+				foreach (var nodeId in m_SelectedNodeIds)
+				{
+					var node = GetNode(nodeId);
+
+					if (node != null)
+					{
+						node.Point.X -= offset.X;
+						node.Point.Y -= offset.Y;
+					}
+				}
+
 				Invalidate();
 			}
 		}
