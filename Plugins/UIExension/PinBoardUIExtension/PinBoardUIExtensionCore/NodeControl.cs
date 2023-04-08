@@ -152,6 +152,7 @@ namespace PinBoardUIExtension
 		public bool ReadOnly = false;
 		public bool DrawNodesOnTop = true;
 		public IList<uint> SelectedNodeIds { get { return m_SelectedNodeIds; } }
+		public int SelectedNodeCount { get { return m_SelectedNodeIds.Count; } }
 
 		protected RadialTree.TreeNode<uint> SingleSelectedNode
 		{
@@ -351,16 +352,23 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
-		public void ZoomToFit()
+		public void ZoomToExtents()
 		{
-			while (ClientRectangle.Width < ZoomedSize.Width ||
-					ClientRectangle.Height < ZoomedSize.Height)
+			if (ClientRectangle.Width < ZoomedSize.Width ||
+				ClientRectangle.Height < ZoomedSize.Height)
 			{
-				m_ZoomLevel++;
-				m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
-			}
+				do
+				{
+					m_ZoomLevel++;
+					m_ZoomFactor = (float)Math.Pow(0.8, m_ZoomLevel);
+				}
+				while (ClientRectangle.Width < ZoomedSize.Width ||
+						ClientRectangle.Height < ZoomedSize.Height);
 
-			Invalidate();
+				AutoScrollMinSize = ZoomedSize;
+				RecalcTextFont();
+				Invalidate();
+			}
 		}
 
 		protected float OverallScaleFactor { get { return (m_ZoomFactor * m_FontScaleFactor * m_DpiFactor); } }

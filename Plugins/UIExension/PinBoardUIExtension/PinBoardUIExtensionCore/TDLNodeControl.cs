@@ -507,7 +507,14 @@ namespace PinBoardUIExtension
 			base.RadialIncrementOrSpacing = NodeSize.Width;
 
 			// If the root only has one task, make it the root
-			base.RootNode = ((rootNode.Count == 1) ? rootNode.Children[0] : rootNode);
+// 			if (rootNode.Count == 1)
+// 			{
+// 				var newRoot = rootNode.Children[0];
+// 				rootNode.RemoveChild(newRoot);
+// 				rootNode = newRoot;
+// 			}
+
+			base.RootNode = rootNode;
 			base.EnableLayoutUpdates = true;
 
 			Invalidate();

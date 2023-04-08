@@ -144,7 +144,11 @@ namespace RadialTree
         /// <returns>true if item successfully removed.</returns>
         public bool RemoveChild(TreeNode<T> node)
         {
-            return _children.Remove(node);
+			if (!_children.Remove(node))
+				return false;
+
+			node._parent = null;
+			return true;
         }
 
         public void Traverse(TraversalDataDelegate handler)

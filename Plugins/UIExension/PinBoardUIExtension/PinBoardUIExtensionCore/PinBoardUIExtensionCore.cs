@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Reflection;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
@@ -31,6 +32,9 @@ namespace PinBoardUIExtension
 
 		private Label m_OptionsLabel;
 		private PinBoardOptionsComboBox m_OptionsCombo;
+		private IIControls.ToolStripEx m_Toolbar;
+		private ImageList m_TBImageList;
+		private UIThemeToolbarRenderer m_TBRenderer;
 
 		// ----------------------------------------------------------------------------
 
@@ -48,23 +52,38 @@ namespace PinBoardUIExtension
 
         public bool SelectTask(uint dwTaskID)
         {
-			return m_Control.SelectNode(dwTaskID);
+			bool success = m_Control.SelectNode(dwTaskID);
+
+			UpdateToolbarButtonStates();
+
+			return success;
         }
 
         public bool SelectAll()
         {
 			m_Control.SelectAllNodes();
+
+			UpdateToolbarButtonStates();
+
 			return true;
         }
 
         public bool SelectTasks(uint[] pdwTaskIDs)
         {
-			return m_Control.SelectNodes(new List<uint>(pdwTaskIDs));
-        }
+			bool success = m_Control.SelectNodes(new List<uint>(pdwTaskIDs));
 
-        public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
+			UpdateToolbarButtonStates();
+
+			return success;
+		}
+
+		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
         {
-            return m_Control.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
+            bool success = m_Control.SelectTask(text, selectTask, caseSensitive, wholeWord, findReplace);
+
+			UpdateToolbarButtonStates();
+
+			return success;
         }
 
         public void UpdateTasks(TaskList tasks, UIExtension.UpdateType type)
@@ -129,11 +148,8 @@ namespace PinBoardUIExtension
         {
 			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 
-			// Connection colour
-			var color = theme.GetAppDrawingColor(UITheme.AppColor.AppLinesDark);
-
-            // Make sure it's dark enough
-           // m_Control.ConnectionColor = DrawingColor.SetLuminance(color, 0.6f);
+			m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_TBRenderer.SetUITheme(theme);
 		}
 
 		public void SetTaskFont(String faceName, int pointSize)
@@ -248,6 +264,9 @@ namespace PinBoardUIExtension
 
 			InitialiseCombo(m_OptionsCombo as ComboBox, m_OptionsLabel, 150);
 			this.Controls.Add(m_OptionsCombo);
+
+			CreateToolbar();
+			UpdateToolbarButtonStates();
 		}
 
 		Label CreateLabel(string untranslatedText, Control prevControl)
@@ -327,6 +346,8 @@ namespace PinBoardUIExtension
 				}
 				break;
 			}
+
+			UpdateToolbarButtonStates();
 		}
 
 		bool OnPinBoardDragDrop(object sender, IList<uint> nodeIds)
@@ -358,15 +379,138 @@ namespace PinBoardUIExtension
         {
 			base.OnSizeChanged(e);
 
+			m_Toolbar.Location = new Point(m_OptionsCombo.Right + 10, 0);
+
 			Rectangle rect = ClientRectangle;
 			rect.Y = m_OptionsCombo.Bottom + 6;
 			rect.Height -= (m_OptionsCombo.Bottom + 6);
-
+			
 			m_Control.Bounds = rect;
 
 			Invalidate(true);
+			UpdateToolbarButtonStates();
 		}
 
+		private void CreateToolbar()
+		{
+			var assembly = Assembly.GetExecutingAssembly();
+			var images = new Bitmap(assembly.GetManifestResourceStream("PinBoardUIExtension.toolbar_std.bmp"));
+
+			m_TBImageList = new ImageList();
+			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
+			m_TBImageList.ImageSize = new System.Drawing.Size(16, 16);
+			m_TBImageList.TransparentColor = Color.Magenta;
+			m_TBImageList.Images.AddStrip(images);
+
+			m_Toolbar = new IIControls.ToolStripEx();
+			m_Toolbar.Anchor = AnchorStyles.None;
+			m_Toolbar.GripStyle = ToolStripGripStyle.Hidden;
+			m_Toolbar.ImageList = m_TBImageList;
+
+			int imageSize = DPIScaling.Scale(16);
+
+			m_Toolbar.ImageScalingSize = new Size(imageSize, imageSize);
+			m_Toolbar.Height = (imageSize + 7); // MFC
+
+			m_TBRenderer = new UIThemeToolbarRenderer();
+			m_Toolbar.Renderer = m_TBRenderer;
+
+			var btn1 = new ToolStripButton();
+			btn1.Name = "ZoomToExtents";
+			btn1.ImageIndex = 0;
+			btn1.Click += new EventHandler(OnZoomToExtents);
+			btn1.ToolTipText = m_Trans.Translate("Zoom to Extents");
+			m_Toolbar.Items.Add(btn1);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			var btn2 = new ToolStripButton();
+			btn2.Name = "NewConnection";
+			btn2.ImageIndex = 1;
+			btn2.Click += new EventHandler(OnNewConnection);
+			btn2.ToolTipText = m_Trans.Translate("New Connection");
+			m_Toolbar.Items.Add(btn2);
+
+			var btn3 = new ToolStripButton();
+			btn3.Name = "EditConnection";
+			btn3.ImageIndex = 2;
+			btn3.Click += new EventHandler(OnEditConnection);
+			btn3.ToolTipText = m_Trans.Translate("Edit Connection");
+			m_Toolbar.Items.Add(btn3);
+
+			var btn4 = new ToolStripButton();
+			btn4.Name = "DeleteConnection";
+			btn4.ImageIndex = 3;
+			btn4.Click += new EventHandler(OnDeleteConnection);
+			btn4.ToolTipText = m_Trans.Translate("Delete Connection");
+			m_Toolbar.Items.Add(btn4);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			var btn9 = new ToolStripButton();
+			btn9.ImageIndex = 4;
+			btn9.Click += new EventHandler(OnPreferences);
+			btn9.ToolTipText = m_Trans.Translate("Preferences");
+			m_Toolbar.Items.Add(btn9);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
+			var btn10 = new ToolStripButton();
+			btn10.ImageIndex = 5;
+			btn10.Click += new EventHandler(OnHelp);
+			btn10.ToolTipText = m_Trans.Translate("Online Help");
+			m_Toolbar.Items.Add(btn10);
+
+			Toolbars.FixupButtonSizes(m_Toolbar);
+
+			Controls.Add(m_Toolbar);
+		}
+
+		private void UpdateToolbarButtonStates()
+		{
+			(m_Toolbar.Items["ZoomToExtents"] as ToolStripButton).Enabled = m_Control.CanZoomOut;
+
+			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Enabled = (m_Control.SelectedNodeCount == 2);
+			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Checked = false;
+
+			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Enabled = false;
+			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Checked = false;
+
+			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Enabled = false;
+			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Checked = false;
+		}
+
+		void OnZoomToExtents(object sender, EventArgs e)
+		{
+			m_Control.ZoomToExtents();
+
+			UpdateToolbarButtonStates();
+		}
+
+		void OnNewConnection(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
+		void OnEditConnection(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
+		void OnDeleteConnection(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
+		void OnPreferences(object sender, EventArgs e)
+		{
+			// TODO
+		}
+
+		void OnHelp(object sender, EventArgs e)
+		{
+			// TODO
+		}
 
 	}
 

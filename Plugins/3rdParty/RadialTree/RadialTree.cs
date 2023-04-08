@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
 
@@ -190,6 +191,8 @@ namespace RadialTree
 
 		private static int BreadthFirstSearch(TreeNode<T> root)
         {
+			Debug.Assert(root != null);
+
             var visited = new List<TreeNode<T>>();
             var queue = new Queue<TreeNode<T>>();
             int leaves = 0;
