@@ -8,6 +8,84 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace PinBoardUIExtension
 {
+
+	public class TaskLink
+	{
+		public enum EndArrows
+		{
+			None,
+			Start,
+			Finish,
+			Both
+		}
+
+		private Color m_Color = Color.Empty;
+
+		public static Color DefaultColor = Color.Red;
+
+		public uint TargetId { get; private set; } = 0;
+		public Color Color
+		{
+			get { return (m_Color == Color.Empty) ? DefaultColor : m_Color; }
+			set { m_Color = value; }
+		} 
+		public int Thickness = 0;
+		public EndArrows Arrows = EndArrows.None;
+
+		static private char[] Delimiter = new char[] {':'};
+
+		public TaskLink(uint id)
+		{
+			TargetId = id;
+		}
+
+		public override string ToString()
+		{
+			return Encode();
+		}
+
+		public static bool TryParse(string text, out TaskLink link)
+		{
+			link = null;
+			string[] parts = text.Split(Delimiter);
+
+			if (parts.Count() == 4)
+			{
+				uint id;
+				int argb, thickness, arrows;
+
+				if (uint.TryParse(parts[0], out id) &&
+					int.TryParse(parts[1], out argb) &&
+					int.TryParse(parts[2], out thickness) &&
+					int.TryParse(parts[3], out arrows))
+				{
+					// some validation
+					if ((id > 0) && (thickness >= 0) && (arrows >= 0 && arrows < 4))
+					{
+						link = new TaskLink(id);
+						link.Color = ((argb <= 0) ? Color.Empty : Color.FromArgb(argb));
+						link.Thickness = thickness;
+						link.Arrows = (EndArrows)arrows;
+
+						return true;
+					}
+				}
+			}
+
+			// all else
+			return false;
+		}
+
+		public string Encode()
+		{
+			return string.Format("{0}:{1}:{2}:{3}", 
+								TargetId.ToString(), 
+								(Color.IsEmpty ? -1 : Color.ToArgb()), 
+								Thickness.ToString(), 
+								((int)Arrows).ToString());
+		}
+	}
+
 	public class TaskNode
 	{
 		public readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
@@ -25,12 +103,12 @@ namespace PinBoardUIExtension
 		public bool SomeSubtasksDone { get; private set; }
 		public bool IsLocked { get; private set; }
 
-		public uint UniqueId { get; private set; }
+		public uint TaskId { get; private set; }
 		public uint ParentId { get; private set; }
 
 		public List<uint> ChildIds { get; private set; }
 		public List<uint> DependIds { get; private set; }
-		public List<uint> UserLinkIds { get; private set; }
+		public List<TaskLink> UserLinks { get; private set; }
 
 		private bool Done;
 		private bool GoodAsDone;
@@ -67,11 +145,11 @@ namespace PinBoardUIExtension
 			IsLocked = task.IsLocked(true);
 
 			ParentId = task.GetParentID();
-			UniqueId = task.GetID();
+			TaskId = task.GetID();
 
 			ChildIds = new List<uint>();
 			DependIds = task.GetLocalDependency();
-			UserLinkIds = null;
+			UserLinks = null;
 
 			UpdateImage(task);
 			DecodeMetaData(task.GetMetaDataValue(metaDataKey));
@@ -96,9 +174,9 @@ namespace PinBoardUIExtension
 		{
 			string metaData = string.Format("{0},{1}|", UserPosition.X, UserPosition.Y);
 
-			if (UserLinkIds?.Count > 0)
+			if (UserLinks?.Count > 0)
 			{
-				metaData = metaData + string.Join(",", UserLinkIds);
+				metaData = metaData + string.Join(",", UserLinks);
 			}
 
 			return metaData;
@@ -107,7 +185,7 @@ namespace PinBoardUIExtension
 		public void DecodeMetaData(string metaData)
 		{
 			UserPosition = NullPoint;
-			UserLinkIds = new List<uint>();
+			UserLinks = new List<TaskLink>();
 
 			if (string.IsNullOrWhiteSpace(metaData))
 				return;
@@ -145,10 +223,10 @@ namespace PinBoardUIExtension
 
 					foreach (var linkId in linkIds)
 					{
-						uint id;
+						TaskLink link;
 
-						if (uint.TryParse(linkId, out id))
-							UserLinkIds.Add(id);
+						if (TaskLink.TryParse(linkId, out link))
+							UserLinks.Add(link);
 						else
 							Debug.Assert(false);
 					}
@@ -190,7 +268,7 @@ namespace PinBoardUIExtension
 
 		public bool Update(Task task)
 		{
-			if (task.GetID() != UniqueId)
+			if (task.GetID() != TaskId)
 				return false;
 
 			if (task.GetReferenceID() != 0)
@@ -256,10 +334,10 @@ namespace PinBoardUIExtension
 
 		public bool AddNode(TaskNode node)
 		{
-			if (ContainsKey(node.UniqueId))
+			if (ContainsKey(node.TaskId))
 				return false;
 
-			Add(node.UniqueId, node);
+			Add(node.TaskId, node);
 			return true;
 		}
 	}

@@ -15,7 +15,7 @@ namespace PinBoardUIExtension
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
 	public delegate bool EditTaskCompletionEventHandler(object sender, uint taskId, bool completed);
-	public delegate bool TaskDragDropEventHandler(object sender, IList<uint> taskIds);
+	public delegate bool TaskModifiedEventHandler(object sender, IList<uint> taskIds);
 
 	// ------------------------------------------------------------
 
@@ -37,7 +37,7 @@ namespace PinBoardUIExtension
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
-		public event TaskDragDropEventHandler TaskDragDrop;
+		public event TaskModifiedEventHandler TaskModified;
 
 		// -------------------------------------------------------------------------
 
@@ -326,6 +326,41 @@ namespace PinBoardUIExtension
 
 		public bool MoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
 		{
+			return false;
+		}
+
+		public bool CreateNewConnection(uint fromId, uint toId, Color color, int thickness, TaskLink.EndArrows arrows)
+		{
+			var fromTask = GetTaskNode(fromId);
+
+			if (fromTask != null)
+			{
+				// task must be selected
+				if (!SelectedNodeIds.Contains(fromId))
+				{
+					Debug.Assert(false);
+					return false;
+				}
+				
+				// If link already exists we just update it
+				var link = fromTask.UserLinks.Find(x => (x.TargetId == toId));
+
+				if (link == null)
+				{
+					link = new TaskLink(toId);
+					fromTask.UserLinks.Add(link);
+				}
+
+				link.Color = color;
+				link.Thickness = thickness;
+				link.Arrows = arrows;
+
+				Invalidate();
+
+				// Notify parent
+				return ((TaskModified == null) ? false : TaskModified(this, new List<uint>() { fromId }));
+			}
+
 			return false;
 		}
 
@@ -671,7 +706,12 @@ namespace PinBoardUIExtension
 		{
 			base.DrawParentAndChildConnections(graphics, node);
 
-			// Draw dependencies
+			DrawTaskDependencies(graphics, node);
+			DrawTaskUserLinks(graphics, node);
+		}
+
+		protected void DrawTaskDependencies(Graphics graphics, RadialTree.TreeNode<uint> node)
+		{
 			if (m_Options.HasFlag(PinBoardOption.ShowDependencies))
 			{
 				var taskNode = GetTaskNode(node);
@@ -688,6 +728,26 @@ namespace PinBoardUIExtension
 						{
 							DrawConnection(graphics, fromPos, toPos, Pens.Blue, Brushes.Blue);
 						}
+					}
+				}
+			}
+		}
+
+		protected void DrawTaskUserLinks(Graphics graphics, RadialTree.TreeNode<uint> node)
+		{
+			var taskNode = GetTaskNode(node);
+
+			if (taskNode?.UserLinks?.Count > 0)
+			{
+				Point fromPos = GetNodeClientPos(node);
+
+				foreach (var link in taskNode.UserLinks)
+				{
+					Point toPos;
+
+					if (IsConnectionVisible(fromPos, link.TargetId, out toPos))
+					{
+						DrawConnection(graphics, fromPos, toPos, new Pen(link.Color, link.Thickness), new SolidBrush(link.Color));
 					}
 				}
 			}
@@ -817,7 +877,7 @@ namespace PinBoardUIExtension
 			{
 				var iconRect = CalcIconRect(nodeRect);
 
-				if (m_TaskIcons.Get(node.UniqueId))
+				if (m_TaskIcons.Get(node.TaskId))
 				{
 					if (!IsZoomed)
 					{
@@ -1004,7 +1064,7 @@ namespace PinBoardUIExtension
 // 				else*/ if (HitTestIcon(SelectedNode, e.Location))
 // 				{
 // 					if (EditTaskIcon != null)
-// 					    EditTaskIcon(this, taskNode.UniqueId);
+// 					    EditTaskIcon(this, taskNode.TaskId);
 // 				}
 // 				else if (SelectedNodeWasPreviouslySelected)
 // 				{
@@ -1082,7 +1142,7 @@ namespace PinBoardUIExtension
 			}
 
 			// Notify parent
-			return ((TaskDragDrop == null) ? false : TaskDragDrop(this, nodeIds));
+			return ((TaskModified == null) ? false : TaskModified(this, nodeIds));
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)

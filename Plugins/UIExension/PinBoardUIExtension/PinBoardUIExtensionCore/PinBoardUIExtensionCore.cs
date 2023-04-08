@@ -247,10 +247,15 @@ namespace PinBoardUIExtension
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
 			m_Control.SelectionChange += new SelectionChangeEventHandler(OnPinBoardSelectionChange);
-			m_Control.TaskDragDrop += new TaskDragDropEventHandler(OnPinBoardDragDrop);
+			m_Control.TaskModified += new TaskModifiedEventHandler(OnPinBoardTaskModified);
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnPinBoardEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnPinBoardEditTaskIcon);
             m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnPinBoardEditTaskCompletion);
+
+			m_Control.ZoomChange += (s, e) =>
+			{
+				UpdateToolbarButtonStates();
+			};
 
 			this.Controls.Add(m_Control);
 
@@ -350,7 +355,7 @@ namespace PinBoardUIExtension
 			UpdateToolbarButtonStates();
 		}
 
-		bool OnPinBoardDragDrop(object sender, IList<uint> nodeIds)
+		bool OnPinBoardTaskModified(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -483,13 +488,14 @@ namespace PinBoardUIExtension
 		void OnZoomToExtents(object sender, EventArgs e)
 		{
 			m_Control.ZoomToExtents();
-
-			UpdateToolbarButtonStates();
 		}
 
 		void OnNewConnection(object sender, EventArgs e)
 		{
-			// TODO
+			if (m_Control.SelectedNodeCount == 2)
+			{
+				m_Control.CreateNewConnection(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1], Color.Empty, 0, TaskLink.EndArrows.None);
+			}
 		}
 
 		void OnEditConnection(object sender, EventArgs e)

@@ -71,6 +71,9 @@ namespace PinBoardUIExtension
 
 		public event SelectionChangeEventHandler SelectionChange;
 		public event DragDropChangeEventHandler DragDropChange;
+		public EventHandler ZoomChange;
+
+		// -------------------------------------------------------------------
 
 		public NodeControl()
 		{
@@ -335,6 +338,8 @@ namespace PinBoardUIExtension
 			if (CanZoomIn)
 			{
 				SetZoomLevel(m_ZoomLevel - 1);
+				ZoomChange?.Invoke(this, new EventArgs());
+
 				return true;
 			}
 
@@ -346,6 +351,8 @@ namespace PinBoardUIExtension
 			if (CanZoomOut)
 			{
 				SetZoomLevel(m_ZoomLevel + 1);
+				ZoomChange?.Invoke(this, new EventArgs());
+
 				return true;
 			}
 
@@ -368,6 +375,8 @@ namespace PinBoardUIExtension
 				AutoScrollMinSize = ZoomedSize;
 				RecalcTextFont();
 				Invalidate();
+
+				ZoomChange?.Invoke(this, new EventArgs());
 			}
 		}
 
