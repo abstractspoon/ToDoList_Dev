@@ -459,6 +459,8 @@ namespace DayViewUIExtension
 			btn9.ToolTipText = m_Trans.Translate("Preferences");
 			m_Toolbar.Items.Add(btn9);
 
+			m_Toolbar.Items.Add(new ToolStripSeparator());
+
 			var btn10 = new ToolStripButton();
 			btn10.ImageIndex = 9;
 			btn10.Click += new EventHandler(OnHelp);
