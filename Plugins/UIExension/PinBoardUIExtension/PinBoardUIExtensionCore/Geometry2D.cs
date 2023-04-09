@@ -100,9 +100,7 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
-		public static int HitTest(Point[] points, 
-									Point point, 
-									double tolerance)
+		public static int HitTest(Point[] points, Point point, double tolerance)
 		{
 			int segment = -1;
 			Point ptUnused = Point.Empty;
@@ -111,6 +109,21 @@ namespace PinBoardUIExtension
 				return segment;
 
 			return -1;
+		}
+
+		public static bool HitTestSegment(Point ptStart, Point ptEnd, Point point, double tolerance)
+		{
+			double distance = double.MaxValue;
+			Point ptOnSeg = Point.Empty;
+
+			if (Geometry2D.DistanceFromPointToSegment(point, ptStart, ptEnd,
+														ref distance, ref ptOnSeg))
+			{
+				return (distance <= tolerance);
+			}
+
+			// else
+			return false;
 		}
 
 		public static Point SegmentMidPoint(Point[] points, int segment)

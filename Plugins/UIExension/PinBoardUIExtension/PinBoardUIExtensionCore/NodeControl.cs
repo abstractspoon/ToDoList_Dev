@@ -462,7 +462,7 @@ namespace PinBoardUIExtension
 				HitTestNodes(child, rectClient, ref hits);
 		}
 
-		protected bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
+		protected virtual bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
 		{
 			nodeRect = GetNodeClientRect(node);
 
@@ -486,7 +486,7 @@ namespace PinBoardUIExtension
 			return new Rectangle(pos, size);
 		}
 
-		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+		protected virtual bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
 										  out Point fromPos, out Point toPos)
 		{
 			if ((fromNode == null) || (toNode == null))

@@ -787,6 +787,17 @@ namespace PinBoardUIExtension
 			return base.IsConnectionVisible(fromPos, toPos);
 		}
 
+		protected override bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
+		{
+			return base.IsNodeVisible(node, out nodeRect);
+		}
+
+		protected override bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+										  out Point fromPos, out Point toPos)
+		{
+			return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
+		}
+
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
 			if (m_Options.HasFlag(PinBoardOption.ShowParentChildLinks))
@@ -1090,12 +1101,57 @@ namespace PinBoardUIExtension
 			return CalcIconRect(GetNodeClientRect(node)).Contains(point);
         }
 
+		protected Tuple<RadialTree.TreeNode<uint>, TaskLink> HitTestConnection(Point ptClient)
+		{
+			return HitTestConnection(RootNode, ptClient);
+		}
+
+		protected Tuple<RadialTree.TreeNode<uint>, TaskLink> HitTestConnection(RadialTree.TreeNode<uint> node, Point ptClient)
+		{
+			var fromTask = GetTaskNode(node.Data);
+
+			if (fromTask?.UserLinks?.Count > 0)
+			{
+				foreach (var link in fromTask.UserLinks)
+				{
+					var toNode = GetNode(link.TargetId);
+					Point fromPos, toPos;
+
+					if (IsConnectionVisible(node, toNode, out fromPos, out toPos))
+					{
+						if (Geometry2D.HitTestSegment(fromPos, toPos, ptClient, 5))
+							return new Tuple<RadialTree.TreeNode<uint>, TaskLink>(node, link);
+					}
+				}
+			}
+
+			// check children
+			foreach (var child in node.Children)
+			{
+				var hit = HitTestConnection(child, ptClient);
+
+				if (hit != null)
+					return hit;
+			}
+
+			return null;
+		}
+
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			m_EditTimer.Stop();
 			m_PreviouslySelectedTaskNode = (Focused ? SingleSelectedTaskNode : null);
 
-			base.OnMouseDown(e);
+			// Check for connection first to simplify logic
+			var conn = HitTestConnection(e.Location);
+
+			if (conn != null)
+			{
+			}
+			else
+			{
+				base.OnMouseDown(e);
+			}
 		}
 
 		private void OnEditLabelTimer(object sender, EventArgs e)
