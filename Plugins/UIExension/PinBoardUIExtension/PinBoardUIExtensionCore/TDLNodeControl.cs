@@ -376,22 +376,45 @@ namespace PinBoardUIExtension
 		}
 
 		public bool HasSelectedUserLink { get { return (m_SelectedTaskLink != null); } }
-		public bool CanEditSelectedUserLink { get { return CanDeleteSelectedUserLink; } }
+		public bool CanDeleteSelectedUserLink { get { return CanEditSelectedUserLink; } }
 
-		public bool CanDeleteSelectedUserLink
+		public bool CanEditSelectedUserLink
 		{
 			get
 			{
-				if (HasSelectedUserLink)
-				{
-					if (SingleSelectedNode?.Data == m_SelectedTaskLink.FromId)
-						return true;
+				if (!HasSelectedUserLink)
+					return false;
 
+				if (SingleSelectedNode == null)
+					return false;
+
+				if ((SingleSelectedNode.Data != m_SelectedTaskLink.FromId))
+				{
 					Debug.Assert(false);
+					return false;
 				}
 
-				return false;
+				var task = m_TaskItems.GetTask(SingleSelectedNode.Data);
+
+				return ((task != null) && !task.IsLocked);
 			}
+		}
+
+		public bool EditSelectedUserLink(Color color, int thickness, TaskLink.EndArrows arrows)
+		{
+			if (!CanEditSelectedUserLink)
+				return false;
+
+			m_SelectedTaskLink.Color = color;
+			m_SelectedTaskLink.Thickness = thickness;
+			m_SelectedTaskLink.Arrows = arrows;
+			
+			// Clear selection so the changes are visible
+			m_SelectedTaskLink = null;
+			Invalidate();
+
+			TaskModified?.Invoke(this, SelectedNodeIds);
+			return true;
 		}
 
 		public bool DeleteSelectedUserLink()
@@ -399,16 +422,14 @@ namespace PinBoardUIExtension
 			if (!CanDeleteSelectedUserLink)
 				return false;
 
-			uint fromId = m_SelectedTaskLink.FromId;
-
-			bool result = m_TaskItems.DeleteUserLink(m_SelectedTaskLink);
+			if (!m_TaskItems.DeleteUserLink(m_SelectedTaskLink))
+				return false;
 
 			m_SelectedTaskLink = null;
-
 			Invalidate();
-			TaskModified?.Invoke(this, SelectedNodeIds);
 
-			return result;
+			TaskModified?.Invoke(this, SelectedNodeIds);
+			return true;
 		}
 
 		public new bool SelectTask(uint taskId)

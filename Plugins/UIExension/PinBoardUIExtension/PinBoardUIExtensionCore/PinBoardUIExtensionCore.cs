@@ -487,9 +487,9 @@ namespace PinBoardUIExtension
 		{
 			(m_Toolbar.Items["ZoomToExtents"] as ToolStripButton).Enabled = m_Control.CanZoomOut;
 
+			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Checked = false;
 			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Enabled = ((m_Control.SelectedNodeCount == 2) &&
 																			m_Control.CanCreateUserLink(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1]));
-			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Checked = false;
 
 			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Enabled = m_Control.HasSelectedUserLink;
 			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Checked = false;
@@ -514,6 +514,7 @@ namespace PinBoardUIExtension
 		void OnEditConnection(object sender, EventArgs e)
 		{
 			// TODO
+			m_Control.EditSelectedUserLink(Color.Green, 0, TaskLink.EndArrows.None);
 		}
 
 		void OnDeleteConnection(object sender, EventArgs e)

@@ -43,6 +43,15 @@ namespace PinBoardUIExtension
 			ToId = toId;
 		}
 
+		public bool ChangeToId(uint toId)
+		{
+			if ((toId == 0) || (toId == FromId))
+				return false;
+
+			ToId = toId;
+			return true;
+		}
+
 		public bool IdsMatch(uint fromId, uint toId)
 		{
 			return ((FromId == fromId) && (ToId == toId));
@@ -397,6 +406,14 @@ namespace PinBoardUIExtension
 				return false;
 
 			return task.DeleteUserLink(link);
+		}
+
+		public bool ChangeUserLinkTarget(TaskLink link, uint newToId)
+		{
+			var fromTask = GetTask(link.FromId);
+			var toTask = GetTask(newToId);
+
+			return ((fromTask != null) && (toTask != null) && link.ChangeToId(newToId));
 		}
 
 		public bool HasDependency(uint id1, uint id2)
