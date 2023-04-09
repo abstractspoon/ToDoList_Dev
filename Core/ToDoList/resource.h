@@ -2467,6 +2467,7 @@
 #define IDS_TASKCOMPLETION              51626
 #define IDS_CUSTOM_FEATURE_SHOWEDITFIELD 51627
 #define IDS_COMMENTSMEMORYERROR         51628
+#define IDS_FIND_TASKS                  51629
 
 // Next default values for new objects
 // 
