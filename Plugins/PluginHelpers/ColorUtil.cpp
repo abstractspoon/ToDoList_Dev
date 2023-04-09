@@ -114,11 +114,7 @@ Drawing::Color ColorUtil::DrawingColor::ToColor(COLORREF rgbColor, unsigned char
 
 Drawing::Color ColorUtil::DrawingColor::GetBestTextColor(Drawing::Color backColor)
 {
-	if (GetLuminance(backColor) > 0.5)
-		return Drawing::Color::Black;
-
-	// else
-	return Drawing::Color::White;
+	return ToColor(GraphicsMisc::GetBestTextColor(ToRgb(backColor)));
 }
 
 float ColorUtil::DrawingColor::GetLuminance(Drawing::Color color)
