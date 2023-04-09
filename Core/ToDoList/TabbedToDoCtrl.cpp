@@ -2542,6 +2542,7 @@ void CTabbedToDoCtrl::SelectAll()
 					aTaskIDs.Add(m_taskList.GetTaskID(nItem));
 
 				m_taskList.SelectTasks(aTaskIDs);
+				CToDoCtrl::SelectTasks(aTaskIDs);
 			}
 		}
 		break;
@@ -2566,8 +2567,8 @@ void CTabbedToDoCtrl::SelectAll()
 			IUIExtensionWindow* pExtWnd = GetExtensionWnd(nView);
 			ASSERT(pExtWnd);
 
-			if (pExtWnd)
-				pExtWnd->DoAppCommand(IUI_SELECTALL);
+			if (pExtWnd && pExtWnd->DoAppCommand(IUI_SELECTALL))
+				CToDoCtrl::SelectAll();
 		}
 		break;
 
