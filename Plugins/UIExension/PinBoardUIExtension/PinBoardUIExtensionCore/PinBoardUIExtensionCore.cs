@@ -51,7 +51,7 @@ namespace PinBoardUIExtension
 
         public bool SelectTask(uint dwTaskID)
         {
-			bool success = m_Control.SelectNode(dwTaskID);
+			bool success = m_Control.SelectTask(dwTaskID);
 
 			UpdateToolbarButtonStates();
 
@@ -112,7 +112,7 @@ namespace PinBoardUIExtension
 
         public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
         {
-			Rectangle labelRect = m_Control.GetSelectedNodeLabelRect();
+			Rectangle labelRect = m_Control.GetSelectedTaskLabelRect();
 
 			if (labelRect.IsEmpty)
 				return false;
@@ -360,7 +360,7 @@ namespace PinBoardUIExtension
 
 			foreach (var nodeId in nodeIds)
 			{
-				var taskNode = m_Control.GetTaskNode(nodeId);
+				var taskNode = m_Control.GetTaskItem(nodeId);
 				notify.AddMod(nodeId, Task.Attribute.MetaData, taskNode.EncodeMetaData());
 			}
 
@@ -493,7 +493,7 @@ namespace PinBoardUIExtension
 		{
 			if (m_Control.SelectedNodeCount == 2)
 			{
-				m_Control.CreateNewConnection(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1], Color.Empty, 0, TaskLink.EndArrows.None);
+				m_Control.CreateUserLink(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1], Color.Empty, 0, TaskLink.EndArrows.None);
 			}
 		}
 

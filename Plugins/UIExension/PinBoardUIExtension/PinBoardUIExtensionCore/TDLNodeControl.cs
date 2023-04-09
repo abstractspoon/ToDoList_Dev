@@ -67,7 +67,7 @@ namespace PinBoardUIExtension
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 		//		private Size CheckboxSize;
 
-		private TaskItem m_PreviouslySelectedTaskNode;
+		private TaskItem m_PreviouslySelectedTask;
 		private TaskLink m_SelectedTaskLink;
 
 		private DragImage m_DragImage;
@@ -106,7 +106,7 @@ namespace PinBoardUIExtension
 			int nodeHeight = (int)(2 * BaseFontHeight) + 4;
 			int nodeWidth  = (4 * nodeHeight);
 
-			NodeSize = new Size(nodeWidth, nodeHeight);
+			base.NodeSize = new Size(nodeWidth, nodeHeight);
 
 			m_Options = DefaultOptions;
 			base.DrawNodesOnTop = (m_Options.HasFlag(PinBoardOption.DrawLinksOnTop) == false);
@@ -194,7 +194,7 @@ namespace PinBoardUIExtension
 
 		private void ApplyUserPositions(RadialTree.TreeNode<uint> node)
 		{
-			var task = GetTaskNode(node);
+			var task = GetTaskItem(node);
 
 			if ((task != null) && task.HasUserPosition)
 				node.Point.SetPosition(task.UserPosition);
@@ -302,16 +302,16 @@ namespace PinBoardUIExtension
 
 		public uint HitTest(Point screenPos)
 		{
-			var node = HitTestNode(PointToClient(screenPos));
+			var node = base.HitTestNode(PointToClient(screenPos));
 			
 			return node?.Data ?? 0;
 		}
 
-		public Rectangle GetSelectedNodeLabelRect()
+		public Rectangle GetSelectedTaskLabelRect()
 		{
 			//EnsureNodeVisible(SelectedNode);
 			
-			var labelRect = GetSingleSelectedNodeRect();
+			var labelRect = base.GetSingleSelectedNodeRect();
 			
 			labelRect.X -= LabelPadding;
 			//labelRect.X += GetExtraWidth(SelectedNode);
@@ -332,9 +332,9 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
-		public bool CreateNewConnection(uint fromId, uint toId, Color color, int thickness, TaskLink.EndArrows arrows)
+		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, TaskLink.EndArrows arrows)
 		{
-			var fromTask = GetTaskNode(fromId);
+			var fromTask = GetTaskItem(fromId);
 
 			if (fromTask != null)
 			{
@@ -367,18 +367,20 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
-		public new bool SelectNode(uint taskId)
+		public new bool SelectTask(uint taskId)
 		{
-			if (base.SelectNode(taskId))
+			m_SelectedTaskLink = null;
+
+			if (base.SelectTask(taskId))
 				return true;
 
-			base.SelectNode(NodeControl.NullId);
+			base.SelectTask(NodeControl.NullId);
 			return false;
 		}
 
-		public TaskItem SingleSelectedTaskNode
+		public TaskItem SingleSelectedTask
 		{
-			get	{ return GetTaskNode(base.SingleSelectedNode); }
+			get	{ return GetTaskItem(base.SingleSelectedNode); }
 		}
 
 		public bool SelectTask(String text, UIExtension.SelectTask selectTask, bool caseSensitive, bool wholeWord, bool findReplace)
@@ -596,7 +598,7 @@ namespace PinBoardUIExtension
 		protected override Size GetNodeSize(RadialTree.TreeNode<uint> node)
 		{
 			var size = base.GetNodeSize(node);
-			var task = GetTaskNode(node);
+			var task = GetTaskItem(node);
 
 			if ((task != null) && (task.Image != null))
 			{
@@ -708,7 +710,7 @@ namespace PinBoardUIExtension
 		{
 			if (m_Options.HasFlag(PinBoardOption.ShowDependencies))
 			{
-				var taskItem = GetTaskNode(node);
+				var taskItem = GetTaskItem(node);
 
 				if (taskItem?.DependIds?.Count > 0)
 				{
@@ -735,7 +737,7 @@ namespace PinBoardUIExtension
 
 		protected void DrawTaskUserLinks(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
-			var taskItem = GetTaskNode(node);
+			var taskItem = GetTaskItem(node);
 
 			if (taskItem?.UserLinks?.Count > 0)
 			{
@@ -1053,7 +1055,7 @@ namespace PinBoardUIExtension
 			
 			if (hit != null)
 			{
-				var task = GetTaskNode(hit);
+				var task = GetTaskItem(hit);
 				var imageRect = CalcImageRect(task, GetNodeClientRect(hit), false);
 
 				if (imageRect.Contains(e.Location))
@@ -1098,12 +1100,12 @@ namespace PinBoardUIExtension
 
 		private bool SelectedNodeWasPreviouslySelected
 		{
-			get { return ((SingleSelectedTaskNode != null) && (SingleSelectedTaskNode == m_PreviouslySelectedTaskNode)); }
+			get { return ((SingleSelectedTask != null) && (SingleSelectedTask == m_PreviouslySelectedTask)); }
 		}
 
 		private bool HitTestIcon(RadialTree.TreeNode<uint> node, Point point)
         {
-			var task = GetTaskNode(node);
+			var task = GetTaskItem(node);
 			
 			if (task.IsLocked || !TaskHasIcon(task))
 				return false;
@@ -1119,7 +1121,7 @@ namespace PinBoardUIExtension
 
 		protected TaskLink HitTestConnection(RadialTree.TreeNode<uint> node, Point ptClient)
 		{
-			var fromTask = GetTaskNode(node.Data);
+			var fromTask = GetTaskItem(node.Data);
 
 			if (fromTask?.UserLinks?.Count > 0)
 			{
@@ -1153,7 +1155,7 @@ namespace PinBoardUIExtension
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			m_EditTimer.Stop();
-			m_PreviouslySelectedTaskNode = (Focused ? SingleSelectedTaskNode : null);
+			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
 			// Check for connection first to simplify logic
 			var conn = HitTestConnection(e.Location);
@@ -1184,15 +1186,15 @@ namespace PinBoardUIExtension
 		{
 			var node = HitTestNode(ptClient);
 
-			return GetTaskNode(node);
+			return GetTaskItem(node);
 		}
 
-		protected TaskItem GetTaskNode(RadialTree.TreeNode<uint> node)
+		protected TaskItem GetTaskItem(RadialTree.TreeNode<uint> node)
 		{
-			return (node == null) ? null : GetTaskNode(node.Data);
+			return (node == null) ? null : GetTaskItem(node.Data);
 		}
 
-		public TaskItem GetTaskNode(uint nodeId)
+		public TaskItem GetTaskItem(uint nodeId)
 		{
 			return m_TaskItems.GetTask(nodeId);
 		}
@@ -1208,7 +1210,7 @@ namespace PinBoardUIExtension
 			foreach (uint nodeId in nodeIds)
 			{
 				var node = GetNode(nodeId);
-				var task = GetTaskNode(nodeId);
+				var task = GetTaskItem(nodeId);
 
 				if ((node != null) && (task != null))
 				{
@@ -1225,7 +1227,7 @@ namespace PinBoardUIExtension
  			base.OnMouseMove(e);
 
 			var node = HitTestNode(e.Location);
-			var task = GetTaskNode(node);
+			var task = GetTaskItem(node);
 
 			if (!ReadOnly && (node != null))
 			{

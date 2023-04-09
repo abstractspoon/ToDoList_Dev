@@ -185,7 +185,7 @@ namespace PinBoardUIExtension
 			get { return GetNode(DraggedNodeId); }
 		}
 
-		public bool SelectNode(uint nodeId)
+		public bool SelectTask(uint nodeId)
 		{
 			if (IsSelectableNode(nodeId))
 			{
