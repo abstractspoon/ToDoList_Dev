@@ -89,7 +89,7 @@ namespace PinBoardUIExtension
 					if ((toId > 0) && (thickness >= 0) && (arrows >= 0 && arrows < 4))
 					{
 						link = new TaskLink(taskId, toId);
-						link.Color = ((argb <= 0) ? Color.Empty : Color.FromArgb(argb));
+						link.Color = ((argb == 0) ? Color.Empty : Color.FromArgb(argb));
 						link.Thickness = thickness;
 						link.Arrows = (EndArrows)arrows;
 
@@ -106,7 +106,7 @@ namespace PinBoardUIExtension
 		{
 			return string.Format("{0}:{1}:{2}:{3}", 
 								ToId.ToString(), 
-								(Color.IsEmpty ? -1 : Color.ToArgb()), 
+								Color.ToArgb(), 
 								Thickness.ToString(), 
 								((int)Arrows).ToString());
 		}

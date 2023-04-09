@@ -420,16 +420,16 @@ namespace PinBoardUIExtension
 			}
 		}
 
-		protected RadialTree.TreeNode<uint> HitTestNode(Point ptClient)
+		protected RadialTree.TreeNode<uint> HitTestNode(Point ptClient, bool excludeRoot = false)
 		{
-			return HitTestNode(RootNode, ptClient);
+			return HitTestNode(RootNode, ptClient, excludeRoot);
 		}
 
-		protected RadialTree.TreeNode<uint> HitTestNode(RadialTree.TreeNode<uint> node, Point ptClient)
+		protected RadialTree.TreeNode<uint> HitTestNode(RadialTree.TreeNode<uint> node, Point ptClient, bool excludeRoot)
 		{
 			Rectangle rect;
 
-			if (IsNodeVisible(node, out rect) && rect.Contains(ptClient))
+			if (IsNodeVisible(node, out rect) && rect.Contains(ptClient) && (!excludeRoot || !node.IsRoot))
 			{
 				return node;
 			}
@@ -437,7 +437,7 @@ namespace PinBoardUIExtension
 			// check children
 			foreach (var child in node.Children)
 			{
-				var hit = HitTestNode(child, ptClient);
+				var hit = HitTestNode(child, ptClient, excludeRoot);
 
 				if (hit != null)
 					return hit;
@@ -618,9 +618,14 @@ namespace PinBoardUIExtension
 			}
 		}
 
+		protected Rectangle GetPinRect(Point pos)
+		{
+			return new Rectangle((pos.X - PinRadius), (pos.Y - PinRadius), (2 * PinRadius), (2 * PinRadius));
+		}
+
 		protected void DrawPin(Graphics graphics, Point pos, Brush pinBrush)
 		{
-			graphics.FillEllipse(pinBrush, (pos.X - PinRadius), (pos.Y - PinRadius), (2 * PinRadius), (2 * PinRadius));
+			graphics.FillEllipse(pinBrush, GetPinRect(pos));
 		}
 
 		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)

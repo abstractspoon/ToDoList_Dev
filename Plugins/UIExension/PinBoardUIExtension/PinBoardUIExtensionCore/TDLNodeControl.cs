@@ -305,7 +305,7 @@ namespace PinBoardUIExtension
 
 		public uint HitTest(Point screenPos)
 		{
-			var node = base.HitTestNode(PointToClient(screenPos));
+			var node = base.HitTestNode(PointToClient(screenPos), true);
 			
 			return node?.Data ?? 0;
 		}
@@ -404,6 +404,8 @@ namespace PinBoardUIExtension
 		{
 			if (!CanEditSelectedUserLink)
 				return false;
+
+			var task = SingleSelectedTask;
 
 			m_SelectedTaskLink.Color = color;
 			m_SelectedTaskLink.Thickness = thickness;
@@ -754,11 +756,23 @@ namespace PinBoardUIExtension
 			return (nodeId != 0);
 		}
 
+		protected override void OnAfterDrawNodes(Graphics graphics)
+		{
+			if (!m_Options.HasFlag(PinBoardOption.DrawLinksOnTop))
+				DrawSelectedUserLink(graphics);
+		}
+
 		protected override void OnAfterDrawConnections(Graphics graphics)
 		{
 			DrawTaskDependencies(graphics, RootNode);
 			DrawTaskUserLinks(graphics, RootNode);
 
+			if (m_Options.HasFlag(PinBoardOption.DrawLinksOnTop))
+				DrawSelectedUserLink(graphics);
+		}
+
+		protected void DrawSelectedUserLink(Graphics graphics)
+		{
 			if (m_SelectedTaskLink != null)
 			{
 				Point fromPos, toPos;
@@ -767,7 +781,19 @@ namespace PinBoardUIExtension
 				var toNode = GetNode(m_SelectedTaskLink.ToId);
 
 				if (IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
-					DrawConnection(graphics, fromPos, toPos, Pens.Black, Brushes.Black);
+				{
+					graphics.DrawLine(SystemPens.WindowText, fromPos, toPos);
+
+					// Draw regular pin at the 'from end'
+					var pin = GetPinRect(fromPos);
+					graphics.FillEllipse(SystemBrushes.Window, pin);
+					graphics.DrawEllipse(SystemPens.WindowText, pin);
+
+					// Draw a box at the 'to end' which can be moved
+					pin = GetPinRect(toPos);
+					graphics.FillRectangle(SystemBrushes.Window, pin);
+					graphics.DrawRectangle(SystemPens.WindowText, pin);
+				}
 			}
 		}
 
@@ -1116,7 +1142,7 @@ namespace PinBoardUIExtension
 
 		protected override void OnMouseDoubleClick(MouseEventArgs e)
 		{
-			var hit = HitTestNode(e.Location);
+			var hit = HitTestNode(e.Location, true);
 			
 			if (hit != null)
 			{
@@ -1249,7 +1275,7 @@ namespace PinBoardUIExtension
 
 		protected TaskItem HitTestTask(Point ptClient)
 		{
-			var node = HitTestNode(ptClient);
+			var node = HitTestNode(ptClient, true);
 
 			return GetTaskItem(node);
 		}
@@ -1291,7 +1317,7 @@ namespace PinBoardUIExtension
 		{
  			base.OnMouseMove(e);
 
-			var node = HitTestNode(e.Location);
+			var node = HitTestNode(e.Location, true);
 			var task = GetTaskItem(node);
 
 			if (!ReadOnly && (node != null))
@@ -1315,8 +1341,9 @@ namespace PinBoardUIExtension
 						return;
 					}
 				}
-				else // it must be the root node
+				else if (m_Options.HasFlag(PinBoardOption.ShowRootNode)) 
 				{
+					// it must be the root node
 					Cursor = UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 					return;
 				}
