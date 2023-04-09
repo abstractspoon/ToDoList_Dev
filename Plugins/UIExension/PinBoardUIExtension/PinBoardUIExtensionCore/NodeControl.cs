@@ -454,7 +454,7 @@ namespace PinBoardUIExtension
 		{
 			Rectangle rect;
 
-			if (IsNodeVisible(node, out rect) && rect.IntersectsWith(rectClient))
+			if (IsSelectableNode(node.Data) && IsNodeVisible(node, out rect) && rect.IntersectsWith(rectClient))
 				hits.Add(node);
 
 			// check children
@@ -785,6 +785,8 @@ namespace PinBoardUIExtension
 			if (hit == null)
 			{
 				// Start a selection box drag
+				m_DragMode = DragMode.SelectionBox;
+
 				m_DragTimer.Tag = e;
 				m_DragTimer.Start();
 			}
@@ -818,6 +820,8 @@ namespace PinBoardUIExtension
 				SelectionChange?.Invoke(this, m_SelectedNodeIds);
 
 				// Initialise a drag operation
+				m_DragMode = DragMode.Node;
+
 				m_DragTimer.Tag = e;
 				m_DragTimer.Start();
 
@@ -857,14 +861,24 @@ namespace PinBoardUIExtension
 			{
 				Debug.Assert(!ReadOnly);
 
-				if (CheckStartDragging(e.Location))
+				object data = null;
+				DragDropEffects dde = DragDropEffects.None;
+
+				if (WantStartDragging(ref data, ref dde))
+				{
 					m_DragTimer.Stop();
+					DoDragDrop(data, dde);
+				}
 			}
 		}
 
-		private bool CheckStartDragging(Point cursor)
+		private bool WantStartDragging(ref object data, ref DragDropEffects dde)
 		{
-			Debug.Assert(!ReadOnly);
+			data = null;
+			dde = DragDropEffects.None;
+
+			if (!MouseButtons.HasFlag(MouseButtons.Left))
+				return false;
 
 			if (RootNode.Children.Count == 0)
 				return false;
@@ -872,28 +886,24 @@ namespace PinBoardUIExtension
 			// Check for drag movement
 			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
 
-			if (GetDragRect(ptOrg).Contains(cursor))
+			if (GetDragRect(ptOrg).Contains(MousePosition))
 				return false;
 
-			var hit = HitTestNode(ptOrg);
-
-			if (hit == null)
+			switch (m_DragMode)
 			{
-				m_DragMode = DragMode.SelectionBox;
-				DoDragDrop(ptOrg, DragDropEffects.Copy | DragDropEffects.Move);
+			case DragMode.SelectionBox:
+				data = ptOrg;
+				dde = DragDropEffects.Move;
+				break;
 
-				return true;
-			}
-			else if (IsAcceptableDragSource(hit))
-			{
-				m_DragMode = DragMode.Node;
-				DoDragDrop(hit, DragDropEffects.Copy | DragDropEffects.Move);
-
-				return true;
+			case DragMode.Node:
+				Debug.Assert(!ReadOnly);
+				data = this;
+				dde = DragDropEffects.Copy | DragDropEffects.Move;
+				break;
 			}
 
-			m_DragMode = DragMode.None;
-			return false;
+			return (data != null);
 		}
 
 		protected virtual bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
@@ -924,10 +934,11 @@ namespace PinBoardUIExtension
 
 			m_DragTimer.Stop();
 
-			bool mouseDown = ((MouseButtons & MouseButtons.Left) == MouseButtons.Left);
+			object data = null;
+			DragDropEffects dde = DragDropEffects.None;
 
-			if (mouseDown)
-				CheckStartDragging(MousePosition);
+			if (WantStartDragging(ref data, ref dde))
+				DoDragDrop(this, dde);
 		}
 
 		protected Point GraphToClient(Point ptGraph)
