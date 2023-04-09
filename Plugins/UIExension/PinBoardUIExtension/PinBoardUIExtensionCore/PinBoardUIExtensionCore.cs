@@ -39,7 +39,8 @@ namespace PinBoardUIExtension
 
 		public PinBoardUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
         {
-            m_TypeId = typeId;
+			TaskItem.MetaDataKey = typeId;
+
 			m_UiName = uiName;
 			m_HwndParent = hwndParent;
             m_Trans = trans;
@@ -107,10 +108,24 @@ namespace PinBoardUIExtension
 
         public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
-            return false;
-        }
+			const int WM_KEYDOWN = 0x0100;
 
-        public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
+			switch (message)
+			{
+			case WM_KEYDOWN:
+				{
+					Keys keyPress = (Keys)wParam;
+
+					if (keyPress == Keys.Delete)
+						return m_Control.DeleteSelectedUserLink();
+				}
+				break;
+			}
+
+			return false;
+		}
+
+		public bool GetLabelEditRect(ref Int32 left, ref Int32 top, ref Int32 right, ref Int32 bottom)
         {
 			Rectangle labelRect = m_Control.GetSelectedTaskLabelRect();
 
@@ -236,7 +251,7 @@ namespace PinBoardUIExtension
             m_TaskIcons = new UIExtension.TaskIcon(m_HwndParent);
             m_ControlsFont = new Font(FontName, 8, FontStyle.Regular);
 
-			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons, m_TypeId);
+			m_Control = new TDLNodeControl(m_Trans, m_TaskIcons);
 			m_Control.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             m_Control.SetFont(FontName, 8);
 
@@ -245,16 +260,14 @@ namespace PinBoardUIExtension
             else
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
-			m_Control.SelectionChange += new SelectionChangeEventHandler(OnPinBoardSelectionChange);
+			m_Control.NodeSelectionChange += new NodeSelectionChangeEventHandler(OnPinBoardSelectionChange);
 			m_Control.TaskModified += new TaskModifiedEventHandler(OnPinBoardTaskModified);
 			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnPinBoardEditTaskLabel);
             m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnPinBoardEditTaskIcon);
             m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnPinBoardEditTaskCompletion);
 
-			m_Control.ZoomChange += (s, e) =>
-			{
-				UpdateToolbarButtonStates();
-			};
+			m_Control.ZoomChange += (s, e) => { UpdateToolbarButtonStates(); };
+			m_Control.UserLinkSelectionChange += (s, e) => { UpdateToolbarButtonStates(); };
 
 			this.Controls.Add(m_Control);
 
@@ -474,13 +487,14 @@ namespace PinBoardUIExtension
 		{
 			(m_Toolbar.Items["ZoomToExtents"] as ToolStripButton).Enabled = m_Control.CanZoomOut;
 
-			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Enabled = (m_Control.SelectedNodeCount == 2);
+			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Enabled = ((m_Control.SelectedNodeCount == 2) &&
+																			m_Control.CanCreateUserLink(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1]));
 			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Checked = false;
 
-			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Enabled = false;
+			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Enabled = m_Control.HasSelectedUserLink;
 			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Checked = false;
 
-			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Enabled = false;
+			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Enabled = m_Control.HasSelectedUserLink;
 			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Checked = false;
 		}
 
@@ -504,7 +518,7 @@ namespace PinBoardUIExtension
 
 		void OnDeleteConnection(object sender, EventArgs e)
 		{
-			// TODO
+			m_Control.DeleteSelectedUserLink();
 		}
 
 		void OnPreferences(object sender, EventArgs e)

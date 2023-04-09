@@ -105,9 +105,8 @@ namespace PinBoardUIExtension
 
 	public class TaskItem
 	{
-		public readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
-
-		// -----------------------------------------------------------------
+		public static readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
+		public static string MetaDataKey = string.Empty;
 
 		public string Title { get; private set; }
 		public string ImagePath { get; private set; }
@@ -148,8 +147,10 @@ namespace PinBoardUIExtension
 		{
 		}
 
-		public TaskItem(Task task, string metaDataKey)
+		public TaskItem(Task task)
 		{
+			Debug.Assert(!string.IsNullOrWhiteSpace(MetaDataKey));
+
 			Title = task.GetTitle();
 			TextColor = task.GetTextDrawingColor();
 			HasIcon = (task.GetIcon().Length > 0);
@@ -169,7 +170,7 @@ namespace PinBoardUIExtension
 			UserLinks = null;
 
 			UpdateImage(task);
-			DecodeMetaData(task.GetMetaDataValue(metaDataKey));
+			DecodeMetaData(task.GetMetaDataValue(MetaDataKey));
 		}
 
 		public override string ToString()
@@ -261,6 +262,15 @@ namespace PinBoardUIExtension
 			return UserLinks?.Find(x => (x.ToId == toId));
 		}
 
+		public bool DeleteUserLink(TaskLink link)
+		{
+			if (UserLinks.Remove(link))
+				return true;
+
+			Debug.Assert(FindUserLink(link.ToId) == null);
+			return false;
+		}
+
 		private void UpdateImage(Task task)
 		{
 			var filePaths = task.GetFileLink(true);
@@ -321,9 +331,7 @@ namespace PinBoardUIExtension
 				DependIds = task.GetLocalDependency();
 
 			if (task.IsAttributeAvailable(Task.Attribute.MetaData))
-			{
-				// TODO
-			}
+				DecodeMetaData(task.GetMetaDataValue(MetaDataKey));
 
 			IsParent = task.IsParent();
 			IsLocked = task.IsLocked(true);
@@ -379,6 +387,16 @@ namespace PinBoardUIExtension
 		public bool HasUserLink(uint id1, uint id2)
 		{
 			return (FindUserLink(id1, id2) != null);
+		}
+
+		public bool DeleteUserLink(TaskLink link)
+		{
+			var task = GetTask(link.FromId);
+			
+			if (task == null)
+				return false;
+
+			return task.DeleteUserLink(link);
 		}
 
 		public bool HasDependency(uint id1, uint id2)

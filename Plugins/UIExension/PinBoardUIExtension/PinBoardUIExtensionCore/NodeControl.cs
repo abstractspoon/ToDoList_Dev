@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace PinBoardUIExtension
 {
-	public delegate void SelectionChangeEventHandler(object sender, IList<uint> itemIds);
+	public delegate void NodeSelectionChangeEventHandler(object sender, IList<uint> itemIds);
 	public delegate bool DragDropChangeEventHandler(object sender, IList<uint> itemIds);
 
 	// -------------------------------------------------------------------
@@ -69,7 +69,7 @@ namespace PinBoardUIExtension
 
 		// -------------------------------------------------------------------
 
-		public event SelectionChangeEventHandler SelectionChange;
+		public event NodeSelectionChangeEventHandler NodeSelectionChange;
 		public event DragDropChangeEventHandler DragDropChange;
 		public EventHandler ZoomChange;
 
@@ -185,13 +185,17 @@ namespace PinBoardUIExtension
 			get { return GetNode(DraggedNodeId); }
 		}
 
-		public bool SelectTask(uint nodeId)
+		public bool SelectTask(uint nodeId, bool notify = false)
 		{
 			if (IsSelectableNode(nodeId))
 			{
-				m_SelectedNodeIds = new List<uint>();
+				m_SelectedNodeIds.Clear();
 				m_SelectedNodeIds.Add(nodeId);
+
 				Invalidate();
+
+				if (notify)
+					NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
 
 				return true;
 			}
@@ -787,7 +791,7 @@ namespace PinBoardUIExtension
 
 					Invalidate();
 
-					SelectionChange?.Invoke(this, m_SelectedNodeIds);
+					NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
 				}
 			}
 		}
@@ -818,7 +822,7 @@ namespace PinBoardUIExtension
 					{
 						// Task is deselected
 						Invalidate();
-						SelectionChange?.Invoke(this, m_SelectedNodeIds);
+						NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
 
 						return;
 					}
@@ -833,7 +837,7 @@ namespace PinBoardUIExtension
 				m_SelectedNodeIds.Insert(0, hit.Data);
 				Invalidate();
 
-				SelectionChange?.Invoke(this, m_SelectedNodeIds);
+				NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
 
 				// Initialise a drag operation
 				m_DragMode = DragMode.Node;
@@ -1078,7 +1082,7 @@ namespace PinBoardUIExtension
 			{
 			case DragMode.SelectionBox:
 				Invalidate();
-				SelectionChange?.Invoke(this, SelectedNodeIds);
+				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
 				break;
 
 			case DragMode.Node:

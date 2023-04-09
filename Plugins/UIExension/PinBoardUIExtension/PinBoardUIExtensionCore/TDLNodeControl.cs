@@ -38,6 +38,7 @@ namespace PinBoardUIExtension
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
 		public event TaskModifiedEventHandler TaskModified;
+		public EventHandler UserLinkSelectionChange;
 
 		// -------------------------------------------------------------------------
 
@@ -54,7 +55,6 @@ namespace PinBoardUIExtension
 		// From Parent
 		private Translator m_Trans;
 		private UIExtension.TaskIcon m_TaskIcons;
-		private string m_MetaDataKey;
 
 		private bool m_ShowParentAsFolder = false;
 		private bool m_TaskColorIsBkgnd = false;
@@ -88,11 +88,10 @@ namespace PinBoardUIExtension
 
 		// -------------------------------------------------------------------------
 
-		public TDLNodeControl(Translator trans, UIExtension.TaskIcon icons, string metaDataKey)
+		public TDLNodeControl(Translator trans, UIExtension.TaskIcon icons)
 		{
 			m_Trans = trans;
 			m_TaskIcons = icons;
-			m_MetaDataKey = metaDataKey;
 
 			m_EditTimer = new Timer();
 			m_EditTimer.Interval = 500;
@@ -114,6 +113,10 @@ namespace PinBoardUIExtension
 			base.PinRadius = ScaleByDPIFactor(4);
 
 			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
+			NodeSelectionChange += (s, ids) =>
+			{
+				m_SelectedTaskLink = null;
+			};
 
 			RebuildFonts();
 
@@ -332,6 +335,11 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
+		public bool CanCreateUserLink(uint fromId, uint toId)
+		{
+			return !m_TaskItems.HasUserLink(fromId, toId);
+		}
+
 		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, TaskLink.EndArrows arrows)
 		{
 			var fromTask = GetTaskItem(fromId);
@@ -365,6 +373,42 @@ namespace PinBoardUIExtension
 			}
 
 			return false;
+		}
+
+		public bool HasSelectedUserLink { get { return (m_SelectedTaskLink != null); } }
+		public bool CanEditSelectedUserLink { get { return CanDeleteSelectedUserLink; } }
+
+		public bool CanDeleteSelectedUserLink
+		{
+			get
+			{
+				if (HasSelectedUserLink)
+				{
+					if (SingleSelectedNode?.Data == m_SelectedTaskLink.FromId)
+						return true;
+
+					Debug.Assert(false);
+				}
+
+				return false;
+			}
+		}
+
+		public bool DeleteSelectedUserLink()
+		{
+			if (!CanDeleteSelectedUserLink)
+				return false;
+
+			uint fromId = m_SelectedTaskLink.FromId;
+
+			bool result = m_TaskItems.DeleteUserLink(m_SelectedTaskLink);
+
+			m_SelectedTaskLink = null;
+
+			Invalidate();
+			TaskModified?.Invoke(this, SelectedNodeIds);
+
+			return result;
 		}
 
 		public new bool SelectTask(uint taskId)
@@ -571,7 +615,7 @@ namespace PinBoardUIExtension
 
 			if (taskItem == null)
 			{
-				taskItem = new TaskItem(task, m_MetaDataKey);
+				taskItem = new TaskItem(task);
 				m_TaskItems.AddTask(taskItem);
 
 				node = parentNode.AddChild(taskId);
@@ -1158,15 +1202,15 @@ namespace PinBoardUIExtension
 			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
 			// Check for connection first to simplify logic
-			var conn = HitTestConnection(e.Location);
+			var link = HitTestConnection(e.Location);
 
-			if (conn != null)
+			if (link != null)
 			{
-				m_SelectedTaskLink = conn;
+				// Set the owning node first because that will clear the selected connection
+				SelectTask(link.FromId, true);
+				m_SelectedTaskLink = link;
 
-				SelectedNodeIds.Clear();
-				SelectedNodeIds.Add(conn.FromId);
-
+				UserLinkSelectionChange?.Invoke(this, new EventArgs());
 				Invalidate();
 			}
 			else
@@ -1218,8 +1262,8 @@ namespace PinBoardUIExtension
 				}
 			}
 
-			// Notify parent
-			return ((TaskModified == null) ? false : TaskModified(this, nodeIds));
+			TaskModified?.Invoke(this, nodeIds);
+			return true;
 		}
 
 		protected override void OnMouseMove(MouseEventArgs e)

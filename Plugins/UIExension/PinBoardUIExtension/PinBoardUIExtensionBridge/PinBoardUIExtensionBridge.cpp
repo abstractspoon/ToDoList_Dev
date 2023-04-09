@@ -97,7 +97,6 @@ void CPinBoardUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPC
 
 CPinBoardUIExtensionBridgeWindow::CPinBoardUIExtensionBridgeWindow(ITransText* pTT) : m_pTT(pTT)
 {
-
 }
 
 void CPinBoardUIExtensionBridgeWindow::Release()
@@ -112,7 +111,7 @@ BOOL CPinBoardUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
 	msclr::auto_gcroot<String^> typeID = gcnew String(PINBOARD_GUID);
 	msclr::auto_gcroot<String^> uiName = gcnew String(PINBOARD_NAME);
-
+	
 	m_wnd = gcnew PinBoardUIExtension::PinBoardUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
