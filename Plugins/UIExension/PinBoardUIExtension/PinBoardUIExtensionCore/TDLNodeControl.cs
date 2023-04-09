@@ -66,12 +66,14 @@ namespace PinBoardUIExtension
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
 		//		private Size CheckboxSize;
-		private TaskNode m_PreviouslySelectedTaskNode;
+
+		private TaskItem m_PreviouslySelectedTaskNode;
+		private TaskLink m_SelectedTaskLink;
 
 		private DragImage m_DragImage;
 		private Point m_LastDragPos;
 
-		private TaskNodes m_TaskNodes;
+		private TaskItems m_TaskItems;
 		
 		// -------------------------------------------------------------------------
 
@@ -99,7 +101,7 @@ namespace PinBoardUIExtension
 			m_DragImage = new DragImage();
 			m_LastDragPos = Point.Empty;
 
-			m_TaskNodes = null;
+			m_TaskItems = null;
 
 			int nodeHeight = (int)(2 * BaseFontHeight) + 4;
 			int nodeWidth  = (4 * nodeHeight);
@@ -175,7 +177,7 @@ namespace PinBoardUIExtension
 
 			case UIExtension.UpdateType.Delete:
 			case UIExtension.UpdateType.All:
-				m_TaskNodes = new TaskNodes();
+				m_TaskItems = new TaskItems();
 				UpdateTaskAttributes(tasks);
 				RecalcLayout();
 				break;
@@ -290,6 +292,7 @@ namespace PinBoardUIExtension
 			case Task.Attribute.SubtaskDone:
 			case Task.Attribute.MetaData:
 			case Task.Attribute.FileLink:
+			case Task.Attribute.Dependency:
 				return true;
 			}
 
@@ -342,12 +345,12 @@ namespace PinBoardUIExtension
 					return false;
 				}
 				
-				// If link already exists we just update it
-				var link = fromTask.UserLinks.Find(x => (x.TargetId == toId));
+				// If link (or its reverse) already exists we just update it
+				var link = m_TaskItems.FindUserLink(fromId, toId);
 
 				if (link == null)
 				{
-					link = new TaskLink(toId);
+					link = new TaskLink(fromId, toId);
 					fromTask.UserLinks.Add(link);
 				}
 
@@ -373,7 +376,7 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
-		public TaskNode SingleSelectedTaskNode
+		public TaskItem SingleSelectedTaskNode
 		{
 			get	{ return GetTaskNode(base.SingleSelectedNode); }
 		}
@@ -509,7 +512,7 @@ namespace PinBoardUIExtension
 
 		public bool CanSaveToImage()
 		{
-			return (m_TaskNodes.Count != 0);
+			return (m_TaskItems.Count != 0);
 		}
 
 		// Internal ------------------------------------------------------------
@@ -523,7 +526,7 @@ namespace PinBoardUIExtension
 		{
 			RadialTree.TreeNode<uint> rootNode = base.RootNode;
 
-			if (m_TaskNodes.Count == 0)
+			if (m_TaskItems.Count == 0)
 			{
 				rootNode = new RadialTree.TreeNode<uint>(0);
 			}
@@ -561,19 +564,19 @@ namespace PinBoardUIExtension
 				return false;
 
 			uint taskId = task.GetID();
-			var taskNode = m_TaskNodes.GetNode(taskId);
+			var taskItem = m_TaskItems.GetTask(taskId);
 			RadialTree.TreeNode<uint> node = null;
 
-			if (taskNode == null)
+			if (taskItem == null)
 			{
-				taskNode = new TaskNode(task, m_MetaDataKey);
-				m_TaskNodes.AddNode(taskNode);
+				taskItem = new TaskItem(task, m_MetaDataKey);
+				m_TaskItems.AddTask(taskItem);
 
 				node = parentNode.AddChild(taskId);
 			}
 			else
 			{
-				taskNode.Update(task);
+				taskItem.Update(task);
 				node = GetNode(taskId);
 			}
 
@@ -582,7 +585,7 @@ namespace PinBoardUIExtension
 
 			while (subtask.IsValid() && ProcessTaskUpdate(subtask, node))
 			{
-				taskNode.ChildIds.Add(subtask.GetID());
+				taskItem.ChildIds.Add(subtask.GetID());
 
 				subtask = subtask.GetNextTask();
 			}
@@ -593,105 +596,87 @@ namespace PinBoardUIExtension
 		protected override Size GetNodeSize(RadialTree.TreeNode<uint> node)
 		{
 			var size = base.GetNodeSize(node);
-			var taskNode = GetTaskNode(node);
+			var task = GetTaskNode(node);
 
-			if ((taskNode != null) && (taskNode.Image != null))
+			if ((task != null) && (task.Image != null))
 			{
-				size.Height += taskNode.CalcImageHeight(base.NodeSize.Width);
+				size.Height += task.CalcImageHeight(base.NodeSize.Width);
 			}
 
 			return size;
 		}
 
-		protected Color GetNodeBackgroundColor(TaskNode taskNode, bool selected)
+		protected Color GetTaskBackgroundColor(TaskItem taskItem, bool selected)
 		{
 			if (selected)
 				return Color.Empty;
 
-			if ((taskNode.TextColor != Color.Empty) && !taskNode.IsDone(true))
+			if ((taskItem.TextColor != Color.Empty) && !taskItem.IsDone(true))
 			{
 				if (m_TaskColorIsBkgnd && !selected)
-					return taskNode.TextColor;
+					return taskItem.TextColor;
 
 				// else
-				return DrawingColor.SetLuminance(taskNode.TextColor, 0.95f);
+				return DrawingColor.SetLuminance(taskItem.TextColor, 0.95f);
 			}
 
 			// all else
 			return Color.Empty;
 		}
 
-		protected Color GetNodeTextColor(TaskNode taskNode, DrawState state)
+		protected Color GetTaskTextColor(TaskItem taskItem, DrawState state)
 		{
 			if (state.HasFlag(DrawState.DragImage))
 				return SystemColors.WindowText;
 
-			if (taskNode.TextColor != Color.Empty)
+			if (taskItem.TextColor != Color.Empty)
 			{
 				bool selected = state.HasFlag(DrawState.Selected);
 
-				if (m_TaskColorIsBkgnd && !selected && !taskNode.IsDone(true))
-					return DrawingColor.GetBestTextColor(taskNode.TextColor);
+				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
+					return DrawingColor.GetBestTextColor(taskItem.TextColor);
 
 				if (selected)
-					return DrawingColor.SetLuminance(taskNode.TextColor, 0.3f);
+					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
 
 				// else
-				return taskNode.TextColor;
+				return taskItem.TextColor;
 			}
 
 			// All else
 			return SystemColors.WindowText;
 		}
 
-		protected Color GetNodeBorderColor(TaskNode taskNode, bool selected)
+		protected Color GetTaskBorderColor(TaskItem taskItem, bool selected)
 		{
 			if (selected)
 				return Color.Empty;
 
-			if (taskNode.TextColor != Color.Empty)
+			if (taskItem.TextColor != Color.Empty)
 			{
-				if (m_TaskColorIsBkgnd && !selected && !taskNode.IsDone(true))
-					return DrawingColor.SetLuminance(taskNode.TextColor, 0.3f);
+				if (m_TaskColorIsBkgnd && !selected && !taskItem.IsDone(true))
+					return DrawingColor.SetLuminance(taskItem.TextColor, 0.3f);
 
 				// else
-				return taskNode.TextColor;
+				return taskItem.TextColor;
 			}
 
 			// All else
 			return SystemColors.ControlDarkDark;
 		}
 
-		protected Color GetNodeLineColor(TaskNode taskNode, DrawState state)
+		protected Font GetTaskLabelFont(TaskItem taskItem)
 		{
-			if (state.HasFlag(DrawState.DragImage))
-				return SystemColors.WindowText;
-
-			if (taskNode.TextColor != Color.Empty)
+			if (taskItem.IsTopLevel)
 			{
-				if (state.HasFlag(DrawState.Selected) || (m_TaskColorIsBkgnd && !taskNode.IsDone(true)))
-					return DrawingColor.SetLuminance(taskNode.TextColor, 0.3f);
-
-				// else
-				return taskNode.TextColor;
-			}
-
-			// All else
-			return SystemColors.ControlDarkDark;
-		}
-
-		protected Font GetNodeFont(TaskNode taskNode)
-		{
-			if (taskNode.IsTopLevel)
-			{
-				if (taskNode.IsDone(false))
+				if (taskItem.IsDone(false))
 					return m_BoldDoneLabelFont;
 
 				// else
 				return m_BoldLabelFont;
 			}
 
-			if (taskNode.IsDone(false))
+			if (taskItem.IsDone(false))
 				return m_DoneLabelFont;
 
 			return TextFont;
@@ -702,65 +687,86 @@ namespace PinBoardUIExtension
 			return (nodeId != 0);
 		}
 
-		protected override void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected override void OnAfterDrawConnections(Graphics graphics)
 		{
-			base.DrawParentAndChildConnections(graphics, node);
+			DrawTaskDependencies(graphics, RootNode);
+			DrawTaskUserLinks(graphics, RootNode);
 
-			DrawTaskDependencies(graphics, node);
-			DrawTaskUserLinks(graphics, node);
+			if (m_SelectedTaskLink != null)
+			{
+				Point fromPos, toPos;
+				
+				var fromNode = GetNode(m_SelectedTaskLink.FromId);
+				var toNode = GetNode(m_SelectedTaskLink.ToId);
+
+				if (IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
+					DrawConnection(graphics, fromPos, toPos, Pens.Black, Brushes.Black);
+			}
 		}
 
 		protected void DrawTaskDependencies(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			if (m_Options.HasFlag(PinBoardOption.ShowDependencies))
 			{
-				var taskNode = GetTaskNode(node);
+				var taskItem = GetTaskNode(node);
 
-				if (taskNode?.DependIds?.Count > 0)
+				if (taskItem?.DependIds?.Count > 0)
 				{
 					Point fromPos = GetNodeClientPos(node);
 
-					foreach (var dependId in taskNode.DependIds)
+					foreach (var dependId in taskItem.DependIds)
 					{
 						Point toPos;
 
-						if (IsConnectionVisible(fromPos, dependId, out toPos))
+						// Don't draw a dependency which is overlaid by a user link
+						if (!m_TaskItems.HasUserLink(taskItem.TaskId, dependId) &&
+							IsConnectionVisible(fromPos, dependId, out toPos))
 						{
 							DrawConnection(graphics, fromPos, toPos, Pens.Blue, Brushes.Blue);
 						}
 					}
 				}
+
+				// Children
+				foreach (var child in node.Children)
+					DrawTaskDependencies(graphics, child);
 			}
 		}
 
 		protected void DrawTaskUserLinks(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
-			var taskNode = GetTaskNode(node);
+			var taskItem = GetTaskNode(node);
 
-			if (taskNode?.UserLinks?.Count > 0)
+			if (taskItem?.UserLinks?.Count > 0)
 			{
 				Point fromPos = GetNodeClientPos(node);
 
-				foreach (var link in taskNode.UserLinks)
+				foreach (var link in taskItem.UserLinks)
 				{
-					Point toPos;
+					Point toPos = Point.Empty;
 
-					if (IsConnectionVisible(fromPos, link.TargetId, out toPos))
+					// Don't draw the selected connection until the very end
+					if (IsConnectionVisible(fromPos, link.ToId, out toPos) &&
+						!link.IdsMatch(m_SelectedTaskLink))
 					{
 						DrawConnection(graphics, fromPos, toPos, new Pen(link.Color, link.Thickness), new SolidBrush(link.Color));
 					}
 				}
 			}
-		}
 
+			// Children
+			foreach (var child in node.Children)
+				DrawTaskUserLinks(graphics, child);
+		}
+		
 		protected override void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
 		{
-			var taskNode = m_TaskNodes.GetNode(nodeId);
+			var taskItem = m_TaskItems.GetTask(nodeId);
 
-			if (taskNode != null)
+			if (taskItem != null)
 			{
 				var drawState = (SelectedNodeIds.Contains(nodeId) ? DrawState.Selected : DrawState.None);
-				DoPaintNode(graphics, taskNode, rect, drawState);
+				DoPaintNode(graphics, taskItem, rect, drawState);
 			}
 			else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
 			{
@@ -793,7 +799,7 @@ namespace PinBoardUIExtension
 		}
 
 		protected override bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
-										  out Point fromPos, out Point toPos)
+													out Point fromPos, out Point toPos)
 		{
 			return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
 		}
@@ -802,16 +808,24 @@ namespace PinBoardUIExtension
 		{
 			if (m_Options.HasFlag(PinBoardOption.ShowParentChildLinks))
 			{
-				var taskNode = m_TaskNodes.GetNode(nodeId);
+				var taskItem = m_TaskItems.GetTask(nodeId);
 
-				if ((taskNode?.ParentId != 0) || m_Options.HasFlag(PinBoardOption.ShowRootNode))
+				// Don't draw parent/child connections if they are
+				// overlaid either by dependencies or user links
+				if (m_TaskItems.HasDependency(nodeId, taskItem.ParentId)) 
+					return;
+
+				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
+					return;
+				
+				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(PinBoardOption.ShowRootNode))
 				{
 					DrawConnection(graphics, nodePos, parentPos, Pens.Gray, Brushes.Gray);
 				}
 			}
 		}
 
-		protected void DoPaintNode(Graphics graphics, TaskNode node, Rectangle nodeRect, DrawState drawState)
+		protected void DoPaintNode(Graphics graphics, TaskItem taskItem, Rectangle taskRect, DrawState drawState)
 		{
 			graphics.SmoothingMode = SmoothingMode.None;
 
@@ -820,15 +834,12 @@ namespace PinBoardUIExtension
 			bool dragImage = drawState.HasFlag(DrawState.DragImage);
 
 			if (dragImage)
-				nodeRect.Offset(-nodeRect.Left, -nodeRect.Top);
-
-			var taskNode = (node as TaskNode);
+				taskRect.Offset(-taskRect.Left, -taskRect.Top);
 
 			// Figure out the required colours
-			Color backColor = GetNodeBackgroundColor(taskNode, selected);
-			Color borderColor = GetNodeBorderColor(taskNode, selected);
-			Color lineColor = GetNodeLineColor(taskNode, drawState);
-			Color textColor = GetNodeTextColor(taskNode, drawState);
+			Color backColor = GetTaskBackgroundColor(taskItem, selected);
+			Color borderColor = GetTaskBorderColor(taskItem, selected);
+			Color textColor = GetTaskTextColor(taskItem, drawState);
 
 			// Draw background
 			if (selected)
@@ -837,10 +848,10 @@ namespace PinBoardUIExtension
 
 				UIExtension.SelectionRect.Draw(Handle,
 												graphics,
-												nodeRect.X,
-												nodeRect.Y,
-												nodeRect.Width,
-												nodeRect.Height,
+												taskRect.X,
+												taskRect.Y,
+												taskRect.Width,
+												taskRect.Height,
 												style,
 												false); // opaque
 
@@ -850,10 +861,10 @@ namespace PinBoardUIExtension
 			{
 				UIExtension.SelectionRect.Draw(Handle,
 												graphics,
-												nodeRect.X,
-												nodeRect.Y,
-												nodeRect.Width,
-												nodeRect.Height,
+												taskRect.X,
+												taskRect.Y,
+												taskRect.Width,
+												taskRect.Height,
 												UIExtension.SelectionRect.Style.DropHighlighted,
 												false); // opaque
 
@@ -862,11 +873,11 @@ namespace PinBoardUIExtension
 			else if (backColor != Color.Empty)
 			{
 				using (var brush = new SolidBrush(backColor))
-					graphics.FillRectangle(brush, nodeRect);
+					graphics.FillRectangle(brush, taskRect);
 			}
 			else
 			{
-				graphics.FillRectangle(SystemBrushes.Window, nodeRect);
+				graphics.FillRectangle(SystemBrushes.Window, taskRect);
 				backColor = SystemColors.Window;
 			}
 
@@ -874,21 +885,21 @@ namespace PinBoardUIExtension
 			if (borderColor != Color.Empty)
 			{
 				// Pens behave weirdly
-				nodeRect.Width--;
-				nodeRect.Height--;
+				taskRect.Width--;
+				taskRect.Height--;
 
 				using (var pen = new Pen(borderColor, 0f))
-					graphics.DrawRectangle(pen, nodeRect);
+					graphics.DrawRectangle(pen, taskRect);
 			}
 
 			// Icon
-			var titleRect = nodeRect;
+			var titleRect = taskRect;
 
-			if (TaskHasIcon(taskNode))
+			if (TaskHasIcon(taskItem))
 			{
-				var iconRect = CalcIconRect(nodeRect);
+				var iconRect = CalcIconRect(taskRect);
 
-				if (m_TaskIcons.Get(node.TaskId))
+				if (m_TaskIcons.Get(taskItem.TaskId))
 				{
 					if (!IsZoomed)
 					{
@@ -906,7 +917,7 @@ namespace PinBoardUIExtension
 								gTemp.Clear(backColor);
 								m_TaskIcons.Draw(gTemp, 0, 0);
 
-								DrawZoomedIcon(tempImage, graphics, iconRect, nodeRect);
+								DrawZoomedIcon(tempImage, graphics, iconRect, taskRect);
 							}
 						}
 					}
@@ -918,7 +929,7 @@ namespace PinBoardUIExtension
 
 			// Title
 			titleRect.Inflate(-LabelPadding, -LabelPadding);
-			graphics.DrawString(taskNode.Title, GetNodeFont(taskNode), new SolidBrush(textColor), titleRect);
+			graphics.DrawString(taskItem.Title, GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
 
 			/*
 			// Checkbox
@@ -951,11 +962,11 @@ namespace PinBoardUIExtension
 			*/
 
 			// Image
-			if (taskNode.Image != null)
+			if (taskItem.Image != null)
 			{
-				var imageRect = CalcImageRect(taskNode, nodeRect, selected || dropHighlight);
+				var imageRect = CalcImageRect(taskItem, taskRect, selected || dropHighlight);
 
-				graphics.DrawImage(taskNode.Image, imageRect);
+				graphics.DrawImage(taskItem.Image, imageRect);
 			}
 
 			graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -982,7 +993,7 @@ namespace PinBoardUIExtension
 			}
 		}
 
-		private Rectangle CalcImageRect(TaskNode taskNode, Rectangle nodeRect, bool selected)
+		private Rectangle CalcImageRect(TaskItem task, Rectangle nodeRect, bool selected)
 		{
 			nodeRect.Inflate(-1, -1);
 
@@ -992,7 +1003,7 @@ namespace PinBoardUIExtension
 				nodeRect.Height++;
 			}
 
-			int height = taskNode.CalcImageHeight(nodeRect.Width);
+			int height = task.CalcImageHeight(nodeRect.Width);
 
 			return new Rectangle(nodeRect.X, nodeRect.Bottom - height, nodeRect.Width, height);
 		}
@@ -1014,12 +1025,12 @@ namespace PinBoardUIExtension
 			graphics.Restore(gSave);
 		}
 
-		private bool TaskHasIcon(TaskNode taskNode)
+		private bool TaskHasIcon(TaskItem task)
 		{
-			if ((m_TaskIcons == null) || (taskNode == null))
+			if ((m_TaskIcons == null) || (task == null))
 				return false;
 
-			return (taskNode.HasIcon || (m_ShowParentAsFolder && taskNode.IsParent));
+			return (task.HasIcon || (m_ShowParentAsFolder && task.IsParent));
 		}
 
         private Rectangle CalcIconRect(Rectangle labelRect)
@@ -1042,11 +1053,11 @@ namespace PinBoardUIExtension
 			
 			if (hit != null)
 			{
-				var taskNode = GetTaskNode(hit);
-				var imageRect = CalcImageRect(taskNode, GetNodeClientRect(hit), false);
+				var task = GetTaskNode(hit);
+				var imageRect = CalcImageRect(task, GetNodeClientRect(hit), false);
 
 				if (imageRect.Contains(e.Location))
-					Process.Start(taskNode.ImagePath);
+					Process.Start(task.ImagePath);
 				else
 					EditTaskLabel(this, SingleSelectedNode.Data);
 			}
@@ -1059,23 +1070,23 @@ namespace PinBoardUIExtension
 			if (e.Button != MouseButtons.Left)
 				return;
 
-// 			TaskNode taskNode = SelectedTaskNode;
+// 			TaskNode task = SelectedTaskNode;
 // 
-// 			if (taskNode == null)
+// 			if (task == null)
 // 				return;
 // 
-// 			if (!ReadOnly && !taskNode.IsLocked && (HitTestTask(e.Location) == taskNode))
+// 			if (!ReadOnly && !task.IsLocked && (HitTestTask(e.Location) == task))
 // 			{
 // /*
 // 				if (HitTestCheckbox(node, e.Location))
 // 				{
 // 					if (EditTaskDone != null)
-// 						EditTaskDone(this, taskNode.ID, !taskNode.IsDone(false));
+// 						EditTaskDone(this, task.ID, !task.IsDone(false));
 // 				}
 // 				else*/ if (HitTestIcon(SelectedNode, e.Location))
 // 				{
 // 					if (EditTaskIcon != null)
-// 					    EditTaskIcon(this, taskNode.TaskId);
+// 					    EditTaskIcon(this, task.TaskId);
 // 				}
 // 				else if (SelectedNodeWasPreviouslySelected)
 // 				{
@@ -1092,21 +1103,21 @@ namespace PinBoardUIExtension
 
 		private bool HitTestIcon(RadialTree.TreeNode<uint> node, Point point)
         {
-			var taskNode = GetTaskNode(node);
+			var task = GetTaskNode(node);
 			
-			if (taskNode.IsLocked || !TaskHasIcon(taskNode))
+			if (task.IsLocked || !TaskHasIcon(task))
 				return false;
 
 			// else
 			return CalcIconRect(GetNodeClientRect(node)).Contains(point);
         }
 
-		protected Tuple<RadialTree.TreeNode<uint>, TaskLink> HitTestConnection(Point ptClient)
+		protected TaskLink HitTestConnection(Point ptClient)
 		{
 			return HitTestConnection(RootNode, ptClient);
 		}
 
-		protected Tuple<RadialTree.TreeNode<uint>, TaskLink> HitTestConnection(RadialTree.TreeNode<uint> node, Point ptClient)
+		protected TaskLink HitTestConnection(RadialTree.TreeNode<uint> node, Point ptClient)
 		{
 			var fromTask = GetTaskNode(node.Data);
 
@@ -1114,13 +1125,15 @@ namespace PinBoardUIExtension
 			{
 				foreach (var link in fromTask.UserLinks)
 				{
-					var toNode = GetNode(link.TargetId);
+					Debug.Assert(node.Data == link.FromId);
+
+					var toNode = GetNode(link.ToId);
 					Point fromPos, toPos;
 
-					if (IsConnectionVisible(node, toNode, out fromPos, out toPos))
+					if (IsConnectionVisible(node, toNode, out fromPos, out toPos) && 
+						Geometry2D.HitTestSegment(fromPos, toPos, ptClient, 5))
 					{
-						if (Geometry2D.HitTestSegment(fromPos, toPos, ptClient, 5))
-							return new Tuple<RadialTree.TreeNode<uint>, TaskLink>(node, link);
+						return link;
 					}
 				}
 			}
@@ -1147,6 +1160,12 @@ namespace PinBoardUIExtension
 
 			if (conn != null)
 			{
+				m_SelectedTaskLink = conn;
+
+				SelectedNodeIds.Clear();
+				SelectedNodeIds.Add(conn.FromId);
+
+				Invalidate();
 			}
 			else
 			{
@@ -1161,21 +1180,21 @@ namespace PinBoardUIExtension
 			EditTaskLabel?.Invoke(this, SingleSelectedNode?.Data ?? 0);
 		}
 
-		protected TaskNode HitTestTask(Point ptClient)
+		protected TaskItem HitTestTask(Point ptClient)
 		{
 			var node = HitTestNode(ptClient);
 
 			return GetTaskNode(node);
 		}
 
-		protected TaskNode GetTaskNode(RadialTree.TreeNode<uint> node)
+		protected TaskItem GetTaskNode(RadialTree.TreeNode<uint> node)
 		{
 			return (node == null) ? null : GetTaskNode(node.Data);
 		}
 
-		public TaskNode GetTaskNode(uint nodeId)
+		public TaskItem GetTaskNode(uint nodeId)
 		{
-			return m_TaskNodes.GetNode(nodeId);
+			return m_TaskItems.GetTask(nodeId);
 		}
 
 		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
@@ -1189,11 +1208,11 @@ namespace PinBoardUIExtension
 			foreach (uint nodeId in nodeIds)
 			{
 				var node = GetNode(nodeId);
-				var taskNode = GetTaskNode(nodeId);
+				var task = GetTaskNode(nodeId);
 
-				if ((node != null) && (taskNode != null))
+				if ((node != null) && (task != null))
 				{
-					taskNode.UserPosition = node.Point.GetPosition();
+					task.UserPosition = node.Point.GetPosition();
 				}
 			}
 
@@ -1206,19 +1225,19 @@ namespace PinBoardUIExtension
  			base.OnMouseMove(e);
 
 			var node = HitTestNode(e.Location);
-			var taskNode = GetTaskNode(node);
+			var task = GetTaskNode(node);
 
 			if (!ReadOnly && (node != null))
 			{
-				if (taskNode != null)
+				if (task != null)
 				{
 					Cursor cursor = null;
 
-					if (taskNode.IsLocked)
+					if (task.IsLocked)
 					{
 						cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
 					}
-					else if (TaskHasIcon(taskNode) && HitTestIcon(node, e.Location))
+					else if (TaskHasIcon(task) && HitTestIcon(node, e.Location))
 					{
 						cursor = UIExtension.HandCursor();
 					}

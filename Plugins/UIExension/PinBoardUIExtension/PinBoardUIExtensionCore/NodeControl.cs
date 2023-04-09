@@ -539,12 +539,18 @@ namespace PinBoardUIExtension
 				if (DrawNodesOnTop)
 				{
 					DrawParentAndChildConnections(e.Graphics, RootNode);
+					OnAfterDrawConnections(e.Graphics);
+
 					DrawParentAndChildNodes(e.Graphics, RootNode);
+					OnAfterDrawNodes(e.Graphics);
 				}
 				else // Connections on top
 				{
 					DrawParentAndChildNodes(e.Graphics, RootNode);
+					OnAfterDrawNodes(e.Graphics);
+
 					DrawParentAndChildConnections(e.Graphics, RootNode);
+					OnAfterDrawConnections(e.Graphics);
 				}
 			}
 
@@ -696,6 +702,16 @@ namespace PinBoardUIExtension
 			// For derived class
 		}
 
+		protected virtual void OnAfterDrawNodes(Graphics graphics)
+		{
+			// For derived class
+		}
+
+		protected virtual void OnAfterDrawConnections(Graphics graphics)
+		{
+			// For derived class
+		}
+
 		protected void RecalcExtents()
 		{
 			m_MinExtents = m_MaxExtents = Point.Empty;
@@ -834,7 +850,7 @@ namespace PinBoardUIExtension
 			else if (hit == RootNode)
 			{
 				Point ptGraph = ClientToGraph(e.Location);
-				int breakpoint = 0;
+				//int breakpoint = 0;
 			}
 #endif
 		}

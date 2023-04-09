@@ -8,7 +8,6 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace PinBoardUIExtension
 {
-
 	public class TaskLink
 	{
 		public enum EndArrows
@@ -23,7 +22,9 @@ namespace PinBoardUIExtension
 
 		public static Color DefaultColor = Color.Red;
 
-		public uint TargetId { get; private set; } = 0;
+		public uint FromId { get; private set; } = 0;
+		public uint ToId { get; private set; } = 0;
+
 		public Color Color
 		{
 			get { return (m_Color == Color.Empty) ? DefaultColor : m_Color; }
@@ -34,9 +35,25 @@ namespace PinBoardUIExtension
 
 		static private char[] Delimiter = new char[] {':'};
 
-		public TaskLink(uint id)
+		public TaskLink(uint fromId, uint toId)
 		{
-			TargetId = id;
+			Debug.Assert((fromId != 0) && (toId != 0) && (fromId != toId));
+
+			FromId = fromId;
+			ToId = toId;
+		}
+
+		public bool IdsMatch(uint fromId, uint toId)
+		{
+			return ((FromId == fromId) && (ToId == toId));
+		}
+
+		public bool IdsMatch(TaskLink other)
+		{
+			if (other == null)
+				return false;
+
+			return ((FromId == other.FromId) && (ToId == other.ToId));
 		}
 
 		public override string ToString()
@@ -44,25 +61,25 @@ namespace PinBoardUIExtension
 			return Encode();
 		}
 
-		public static bool TryParse(string text, out TaskLink link)
+		public static bool TryParse(string text, uint taskId, out TaskLink link)
 		{
 			link = null;
 			string[] parts = text.Split(Delimiter);
 
 			if (parts.Count() == 4)
 			{
-				uint id;
+				uint toId;
 				int argb, thickness, arrows;
 
-				if (uint.TryParse(parts[0], out id) &&
+				if (uint.TryParse(parts[0], out toId) &&
 					int.TryParse(parts[1], out argb) &&
 					int.TryParse(parts[2], out thickness) &&
 					int.TryParse(parts[3], out arrows))
 				{
 					// some validation
-					if ((id > 0) && (thickness >= 0) && (arrows >= 0 && arrows < 4))
+					if ((toId > 0) && (thickness >= 0) && (arrows >= 0 && arrows < 4))
 					{
-						link = new TaskLink(id);
+						link = new TaskLink(taskId, toId);
 						link.Color = ((argb <= 0) ? Color.Empty : Color.FromArgb(argb));
 						link.Thickness = thickness;
 						link.Arrows = (EndArrows)arrows;
@@ -79,14 +96,14 @@ namespace PinBoardUIExtension
 		public string Encode()
 		{
 			return string.Format("{0}:{1}:{2}:{3}", 
-								TargetId.ToString(), 
+								ToId.ToString(), 
 								(Color.IsEmpty ? -1 : Color.ToArgb()), 
 								Thickness.ToString(), 
 								((int)Arrows).ToString());
 		}
 	}
 
-	public class TaskNode
+	public class TaskItem
 	{
 		public readonly Point NullPoint = new Point(int.MinValue, int.MinValue);
 
@@ -127,11 +144,11 @@ namespace PinBoardUIExtension
 
 		// -----------------------------------------------------------------
 
-		public TaskNode()
+		public TaskItem()
 		{
 		}
 
-		public TaskNode(Task task, string metaDataKey)
+		public TaskItem(Task task, string metaDataKey)
 		{
 			Title = task.GetTitle();
 			TextColor = task.GetTextDrawingColor();
@@ -219,13 +236,13 @@ namespace PinBoardUIExtension
 
 				if (parts.Count() == 2)
 				{
-					string[] linkIds = parts[1].Split(',');
+					string[] linkDatas = parts[1].Split(',');
 
-					foreach (var linkId in linkIds)
+					foreach (var linkData in linkDatas)
 					{
 						TaskLink link;
 
-						if (TaskLink.TryParse(linkId, out link))
+						if (TaskLink.TryParse(linkData, TaskId, out link))
 							UserLinks.Add(link);
 						else
 							Debug.Assert(false);
@@ -237,6 +254,11 @@ namespace PinBoardUIExtension
 				Debug.Assert(false);
 				return;
 			}
+		}
+
+		public TaskLink FindUserLink(uint toId)
+		{
+			return UserLinks?.Find(x => (x.ToId == toId));
 		}
 
 		private void UpdateImage(Task task)
@@ -259,7 +281,7 @@ namespace PinBoardUIExtension
 						}
 					}
 				}
-				catch (Exception e)
+				catch (Exception /*e*/)
 				{
 					// keep going
 				}
@@ -295,6 +317,9 @@ namespace PinBoardUIExtension
 			if (task.IsAttributeAvailable(Task.Attribute.FileLink))
 				UpdateImage(task);
 
+			if (task.IsAttributeAvailable(Task.Attribute.Dependency))
+				DependIds = task.GetLocalDependency();
+
 			if (task.IsAttributeAvailable(Task.Attribute.MetaData))
 			{
 				// TODO
@@ -313,17 +338,17 @@ namespace PinBoardUIExtension
 
 	// ------------------------------------------------------------
 
-	public class TaskNodes : Dictionary<uint, TaskNode>
+	public class TaskItems : Dictionary<uint, TaskItem>
 	{
-		public TaskNode GetNode(uint uniqueId)
+		public TaskItem GetTask(uint uniqueId)
 		{
-			TaskNode item = null;
+			TaskItem item = null;
 			TryGetValue(uniqueId, out item);
 
 			return item;
 		}
 
-		public bool DeleteNode(uint uniqueId)
+		public bool DeleteTask(uint uniqueId)
 		{
 			if (!ContainsKey(uniqueId))
 				return false;
@@ -332,7 +357,7 @@ namespace PinBoardUIExtension
 			return true;
 		}
 
-		public bool AddNode(TaskNode node)
+		public bool AddTask(TaskItem node)
 		{
 			if (ContainsKey(node.TaskId))
 				return false;
@@ -340,6 +365,48 @@ namespace PinBoardUIExtension
 			Add(node.TaskId, node);
 			return true;
 		}
+
+		public TaskLink FindUserLink(uint id1, uint id2)
+		{
+			var link = GetTask(id1)?.FindUserLink(id2);
+
+			if (link == null)
+				link = GetTask(id2)?.FindUserLink(id1);
+
+			return link;
+		}
+
+		public bool HasUserLink(uint id1, uint id2)
+		{
+			return (FindUserLink(id1, id2) != null);
+		}
+
+		public bool HasDependency(uint id1, uint id2)
+		{
+			// Check one way
+			var task1 = GetTask(id1);
+
+			if ((task1 != null) && task1.DependIds.Contains(id2))
+				return true;
+
+			// then the other
+			var task2 = GetTask(id2);
+
+			return ((task2 != null) && task2.DependIds.Contains(id1));
+		}
+
+		public bool AddUserLink(TaskLink link)
+		{
+			var fromTask = GetTask(link.FromId);
+			var toTask = GetTask(link.ToId);
+
+			if ((fromTask == null) || (toTask == null))
+				return false;
+
+			fromTask.UserLinks.Add(link);
+			return true;
+		}
+
 	}
 
 

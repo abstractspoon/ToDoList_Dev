@@ -52,7 +52,7 @@
     <Compile Include="PinBoardOptionsComboBox.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Geometry2D.cs" />
-    <Compile Include="TaskNodes.cs" />
+    <Compile Include="TaskItems.cs" />
     <Compile Include="NodeControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
