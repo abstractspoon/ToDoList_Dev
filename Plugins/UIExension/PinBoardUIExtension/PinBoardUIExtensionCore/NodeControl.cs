@@ -827,6 +827,14 @@ namespace PinBoardUIExtension
 			}
 		}
 
+		protected override void OnMouseUp(MouseEventArgs e)
+		{
+			m_DragTimer.Stop();
+			m_DragMode = DragMode.None;
+
+			base.OnMouseUp(e);
+		}
+
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			base.OnMouseDown(e);
@@ -904,6 +912,7 @@ namespace PinBoardUIExtension
 				base.OnMouseWheel(e);
 			}
 		}
+
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
 			base.OnMouseMove(e);
@@ -937,7 +946,7 @@ namespace PinBoardUIExtension
 			// Check for drag movement
 			Point ptOrg = (m_DragTimer.Tag as MouseEventArgs).Location;
 
-			if (GetDragRect(ptOrg).Contains(MousePosition))
+			if (GetDragRect(ptOrg).Contains(PointToClient(MousePosition)))
 				return false;
 
 			switch (m_DragMode)
@@ -970,13 +979,6 @@ namespace PinBoardUIExtension
 			rect.Inflate(SystemInformation.DragSize);
 
 			return rect;
-		}
-		
-		protected override void OnMouseUp(MouseEventArgs e)
-		{
-			m_DragTimer.Stop();
-
-			base.OnMouseUp(e);
 		}
 
 		protected void OnDragTimer(object sender, EventArgs e)
@@ -1075,14 +1077,17 @@ namespace PinBoardUIExtension
 					var dragNode = DraggedNode;
 					var offset = new PointF(dragPt.X - dragNode.Point.X, dragPt.Y - dragNode.Point.Y);
 
-					foreach (var nodeId in m_SelectedNodeIds)
+					if (!offset.IsEmpty)
 					{
-						var node = GetNode(nodeId);
-
-						if (node != null)
+						foreach (var nodeId in m_SelectedNodeIds)
 						{
-							node.Point.X += offset.X;
-							node.Point.Y += offset.Y;
+							var node = GetNode(nodeId);
+
+							if (node != null)
+							{
+								node.Point.X += offset.X;
+								node.Point.Y += offset.Y;
+							}
 						}
 					}
 
@@ -1100,21 +1105,34 @@ namespace PinBoardUIExtension
 			switch (m_DragMode)
 			{
 			case DragMode.SelectionBox:
-				Invalidate();
-				NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+				{
+					ClearDragState();
+					Invalidate();
+
+					NodeSelectionChange?.Invoke(this, SelectedNodeIds);
+				}
 				break;
 
 			case DragMode.Node:
-				if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeIds))
 				{
-					RevertDrag();
-				}
-				else
-				{
-					RecalcExtents();
-					Invalidate();
+					// Check that a move actually occurred
+					Point finalPos = DraggedNode.GetPosition();
 
-					AutoScrollMinSize = ZoomedSize;
+					if (finalPos != Point.Round(m_PreDragNodePos))
+					{
+						if ((DragDropChange != null) && !DragDropChange(this, SelectedNodeIds))
+						{
+							CancelNodeDrag();
+						}
+						else
+						{
+							ClearDragState();
+							RecalcExtents();
+							Invalidate();
+
+							AutoScrollMinSize = ZoomedSize;
+						}
+					}
 				}
 				break;
 			}
@@ -1133,31 +1151,44 @@ namespace PinBoardUIExtension
 				e.Action = DragAction.Cancel;
 
 				if (m_DragMode != DragMode.SelectionBox)
-					RevertDrag();
+					CancelNodeDrag();
 			}
 		}
 
-		private void RevertDrag()
+		private void CancelNodeDrag()
 		{
-			var dragNode = DraggedNode;
-
-			if (dragNode != null)
+			if (m_DragMode == DragMode.Node)
 			{
-				var offset = new PointF((dragNode.Point.X - m_PreDragNodePos.X), (dragNode.Point.Y - m_PreDragNodePos.Y));
+				var dragNode = DraggedNode;
 
-				foreach (var nodeId in m_SelectedNodeIds)
+				if (dragNode != null)
 				{
-					var node = GetNode(nodeId);
+					var offset = new PointF((dragNode.Point.X - m_PreDragNodePos.X), (dragNode.Point.Y - m_PreDragNodePos.Y));
 
-					if (node != null)
+					foreach (var nodeId in m_SelectedNodeIds)
 					{
-						node.Point.X -= offset.X;
-						node.Point.Y -= offset.Y;
-					}
-				}
+						var node = GetNode(nodeId);
 
-				Invalidate();
+						if (node != null)
+						{
+							node.Point.X -= offset.X;
+							node.Point.Y -= offset.Y;
+						}
+					}
+
+					Invalidate();
+				}
 			}
+
+			ClearDragState();
+		}
+
+		private void ClearDragState()
+		{
+			m_DragMode = DragMode.None;
+			m_DragOffset = Point.Empty;
+			m_SelectionBox = Rectangle.Empty;
+			m_PreDragNodePos = PointF.Empty;
 		}
 
 		// 		protected override void OnDragLeave(EventArgs e)
