@@ -1065,14 +1065,10 @@ namespace PinBoardUIExtension
 
 			if (VisualStyleRenderer.IsSupported)
 			{
-				UIExtension.SelectionRect.Draw(Handle,
-												graphics,
-												rect.X,
-												rect.Y,
-												rect.Width,
-												rect.Height,
-												UIExtension.SelectionRect.Style.DropHighlighted,
-												true); // transparent
+				using (var brush = new SolidBrush(Color.FromArgb(96, SystemColors.Highlight)))
+					graphics.FillRectangle(brush, rect);
+
+				graphics.DrawRectangle(SystemPens.Highlight, rect);
 			}
 			else
 			{
