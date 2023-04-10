@@ -46,9 +46,19 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
+    <Reference Include="UIComponents, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Debug\UIComponents.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="PinBoardAddEditLinkDlg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="PinBoardAddEditLinkDlg.Designer.cs">
+      <DependentUpon>PinBoardAddEditLinkDlg.cs</DependentUpon>
+    </Compile>
     <Compile Include="PinBoardOptionsComboBox.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Geometry2D.cs" />
@@ -86,6 +96,9 @@
   <ItemGroup>
     <EmbeddedResource Include="NodeControl.resx">
       <DependentUpon>NodeControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PinBoardAddEditLinkDlg.resx">
+      <DependentUpon>PinBoardAddEditLinkDlg.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="TDLNodeControl.resx">
       <DependentUpon>TDLNodeControl.cs</DependentUpon>

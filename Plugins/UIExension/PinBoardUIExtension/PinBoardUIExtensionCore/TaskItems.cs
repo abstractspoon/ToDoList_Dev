@@ -8,7 +8,7 @@ using Abstractspoon.Tdl.PluginHelpers;
 
 namespace PinBoardUIExtension
 {
-	public class TaskLink
+	public class UserLink
 	{
 		public enum EndArrows
 		{
@@ -18,7 +18,16 @@ namespace PinBoardUIExtension
 			Both
 		}
 
+		// ---------------------------------------------------
+
+		static private char[] Delimiter = new char[] {':'};
+
+		// ---------------------------------------------------
+
 		private Color m_Color = Color.Empty;
+		private int m_Thickness = 1;
+
+		// ---------------------------------------------------
 
 		public static Color DefaultColor = Color.Red;
 
@@ -30,12 +39,16 @@ namespace PinBoardUIExtension
 			get { return (m_Color == Color.Empty) ? DefaultColor : m_Color; }
 			set { m_Color = value; }
 		} 
-		public int Thickness = 0;
+
+		public int Thickness
+		{
+			get { return m_Thickness; }
+			set { m_Thickness = Math.Min(Math.Max(1, value), 5); }
+		}
+
 		public EndArrows Arrows = EndArrows.None;
 
-		static private char[] Delimiter = new char[] {':'};
-
-		public TaskLink(uint fromId, uint toId)
+		public UserLink(uint fromId, uint toId)
 		{
 			Debug.Assert((fromId != 0) && (toId != 0) && (fromId != toId));
 
@@ -57,7 +70,7 @@ namespace PinBoardUIExtension
 			return ((FromId == fromId) && (ToId == toId));
 		}
 
-		public bool IdsMatch(TaskLink other)
+		public bool IdsMatch(UserLink other)
 		{
 			if (other == null)
 				return false;
@@ -70,7 +83,7 @@ namespace PinBoardUIExtension
 			return Encode();
 		}
 
-		public static bool TryParse(string text, uint taskId, out TaskLink link)
+		public static bool TryParse(string text, uint taskId, out UserLink link)
 		{
 			link = null;
 			string[] parts = text.Split(Delimiter);
@@ -88,9 +101,9 @@ namespace PinBoardUIExtension
 					// some validation
 					if ((toId > 0) && (thickness >= 0) && (arrows >= 0 && arrows < 4))
 					{
-						link = new TaskLink(taskId, toId);
+						link = new UserLink(taskId, toId);
 						link.Color = ((argb == 0) ? Color.Empty : Color.FromArgb(argb));
-						link.Thickness = thickness;
+						link.Thickness = ((thickness == 0) ? 1 : thickness);
 						link.Arrows = (EndArrows)arrows;
 
 						return true;
@@ -133,7 +146,7 @@ namespace PinBoardUIExtension
 
 		public List<uint> ChildIds { get; private set; }
 		public List<uint> DependIds { get; private set; }
-		public List<TaskLink> UserLinks { get; private set; }
+		public List<UserLink> UserLinks { get; private set; }
 
 		private bool Done;
 		private bool GoodAsDone;
@@ -216,7 +229,7 @@ namespace PinBoardUIExtension
 		public void DecodeMetaData(string metaData)
 		{
 			UserPosition = NullPoint;
-			UserLinks = new List<TaskLink>();
+			UserLinks = new List<UserLink>();
 
 			if (string.IsNullOrWhiteSpace(metaData))
 				return;
@@ -254,9 +267,9 @@ namespace PinBoardUIExtension
 
 					foreach (var linkData in linkDatas)
 					{
-						TaskLink link;
+						UserLink link;
 
-						if (TaskLink.TryParse(linkData, TaskId, out link))
+						if (UserLink.TryParse(linkData, TaskId, out link))
 							UserLinks.Add(link);
 						else
 							Debug.Assert(false);
@@ -270,12 +283,12 @@ namespace PinBoardUIExtension
 			}
 		}
 
-		public TaskLink FindUserLink(uint toId)
+		public UserLink FindUserLink(uint toId)
 		{
 			return UserLinks?.Find(x => (x.ToId == toId));
 		}
 
-		public bool DeleteUserLink(TaskLink link)
+		public bool DeleteUserLink(UserLink link)
 		{
 			if (UserLinks.Remove(link))
 				return true;
@@ -387,7 +400,7 @@ namespace PinBoardUIExtension
 			return true;
 		}
 
-		public TaskLink FindUserLink(uint id1, uint id2)
+		public UserLink FindUserLink(uint id1, uint id2)
 		{
 			var link = GetTask(id1)?.FindUserLink(id2);
 
@@ -402,7 +415,7 @@ namespace PinBoardUIExtension
 			return (FindUserLink(id1, id2) != null);
 		}
 
-		public bool DeleteUserLink(TaskLink link)
+		public bool DeleteUserLink(UserLink link)
 		{
 			var task = GetTask(link.FromId);
 			
@@ -412,7 +425,7 @@ namespace PinBoardUIExtension
 			return task.DeleteUserLink(link);
 		}
 
-		public bool ChangeUserLinkTarget(TaskLink link, uint newToId)
+		public bool ChangeUserLinkTarget(UserLink link, uint newToId)
 		{
 			var fromTask = GetTask(link.FromId);
 			var toTask = GetTask(newToId);
@@ -434,7 +447,7 @@ namespace PinBoardUIExtension
 			return ((task2 != null) && task2.DependIds.Contains(id1));
 		}
 
-		public bool AddUserLink(TaskLink link)
+		public bool AddUserLink(UserLink link)
 		{
 			var fromTask = GetTask(link.FromId);
 			var toTask = GetTask(link.ToId);

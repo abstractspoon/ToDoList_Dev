@@ -1,9 +1,8 @@
 ﻿
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.Drawing.Drawing2D;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -116,8 +115,19 @@ namespace PinBoardUIExtension
 				{
 					Keys keyPress = (Keys)wParam;
 
-					if (keyPress == Keys.Delete)
+					switch (keyPress)
+					{
+					case Keys.Delete:
 						return m_Control.DeleteSelectedUserLink();
+
+					case Keys.F2:
+						if (m_Control.HasSelectedUserLink)
+						{
+							OnEditUserLink(this, null);
+							return true;
+						}
+						break;
+					}
 				}
 				break;
 			}
@@ -268,6 +278,7 @@ namespace PinBoardUIExtension
 
 			m_Control.ZoomChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.UserLinkSelectionChange += (s, e) => { UpdateToolbarButtonStates(); };
+			m_Control.DoubleClickUserLink += new EventHandler(OnEditUserLink);
 
 			this.Controls.Add(m_Control);
 
@@ -444,21 +455,21 @@ namespace PinBoardUIExtension
 			var btn2 = new ToolStripButton();
 			btn2.Name = "NewConnection";
 			btn2.ImageIndex = 1;
-			btn2.Click += new EventHandler(OnNewConnection);
+			btn2.Click += new EventHandler(OnNewTaskLink);
 			btn2.ToolTipText = m_Trans.Translate("New Connection");
 			m_Toolbar.Items.Add(btn2);
 
 			var btn3 = new ToolStripButton();
 			btn3.Name = "EditConnection";
 			btn3.ImageIndex = 2;
-			btn3.Click += new EventHandler(OnEditConnection);
+			btn3.Click += new EventHandler(OnEditUserLink);
 			btn3.ToolTipText = m_Trans.Translate("Edit Connection");
 			m_Toolbar.Items.Add(btn3);
 
 			var btn4 = new ToolStripButton();
 			btn4.Name = "DeleteConnection";
 			btn4.ImageIndex = 3;
-			btn4.Click += new EventHandler(OnDeleteConnection);
+			btn4.Click += new EventHandler(OnDeleteTaskLink);
 			btn4.ToolTipText = m_Trans.Translate("Delete Connection");
 			m_Toolbar.Items.Add(btn4);
 
@@ -503,21 +514,38 @@ namespace PinBoardUIExtension
 			m_Control.ZoomToExtents();
 		}
 
-		void OnNewConnection(object sender, EventArgs e)
+		void OnNewTaskLink(object sender, EventArgs e)
 		{
 			if (m_Control.SelectedNodeCount == 2)
 			{
-				m_Control.CreateUserLink(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1], Color.Empty, 0, TaskLink.EndArrows.None);
+				var dlg = new PinBoardAddEditLinkDlg(m_Trans.Translate("New Connection"), null);
+
+				if (dlg.ShowDialog() == DialogResult.OK)
+				{
+					m_Control.CreateUserLink(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1], dlg.Color, dlg.Thickness, dlg.Arrows);
+					UpdateToolbarButtonStates();
+				}
 			}
 		}
 
-		void OnEditConnection(object sender, EventArgs e)
+		void OnEditUserLink(object sender, EventArgs e)
 		{
-			// TODO
-			m_Control.EditSelectedUserLink(Color.Green, 0, TaskLink.EndArrows.None);
+			Debug.Assert(m_Control.HasSelectedUserLink);
+
+			var dlg = new PinBoardAddEditLinkDlg(m_Trans.Translate("Edit Connection"), m_Control.SelectedUserLink);
+
+			if (dlg.ShowDialog() == DialogResult.OK)
+			{
+				m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows);
+				UpdateToolbarButtonStates();
+			}
+			else
+			{
+				m_Control.ClearUserLinkSelection();
+			}
 		}
 
-		void OnDeleteConnection(object sender, EventArgs e)
+		void OnDeleteTaskLink(object sender, EventArgs e)
 		{
 			m_Control.DeleteSelectedUserLink();
 		}

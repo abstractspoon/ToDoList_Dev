@@ -38,7 +38,9 @@ namespace PinBoardUIExtension
 		public event EditTaskIconEventHandler EditTaskIcon;
 		public event EditTaskCompletionEventHandler EditTaskDone;
 		public event TaskModifiedEventHandler TaskModified;
+
 		public EventHandler UserLinkSelectionChange;
+		public EventHandler DoubleClickUserLink;
 
 		// -------------------------------------------------------------------------
 
@@ -68,7 +70,7 @@ namespace PinBoardUIExtension
 		//		private Size CheckboxSize;
 
 		private TaskItem m_PreviouslySelectedTask;
-		private TaskLink m_SelectedTaskLink;
+		private UserLink m_SelectedUserLink;
 
 		private DragImage m_DragImage;
 		private Point m_LastDragPos;
@@ -110,10 +112,7 @@ namespace PinBoardUIExtension
 			base.PinRadius = ScaleByDPIFactor(4);
 
 			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
-			NodeSelectionChange += (s, ids) =>
-			{
-				m_SelectedTaskLink = null;
-			};
+			NodeSelectionChange += (s, ids) => { ClearUserLinkSelection(); };
 
 			RebuildFonts();
 
@@ -337,7 +336,7 @@ namespace PinBoardUIExtension
 			return !m_TaskItems.HasUserLink(fromId, toId);
 		}
 
-		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, TaskLink.EndArrows arrows)
+		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, UserLink.EndArrows arrows)
 		{
 			var fromTask = GetTaskItem(fromId);
 
@@ -355,7 +354,7 @@ namespace PinBoardUIExtension
 
 				if (link == null)
 				{
-					link = new TaskLink(fromId, toId);
+					link = new UserLink(fromId, toId);
 					fromTask.UserLinks.Add(link);
 				}
 
@@ -372,45 +371,53 @@ namespace PinBoardUIExtension
 			return false;
 		}
 
-		public bool HasSelectedUserLink { get { return (m_SelectedTaskLink != null); } }
-		public bool CanDeleteSelectedUserLink { get { return CanEditSelectedUserLink; } }
-
-		public bool CanEditSelectedUserLink
+		public UserLink SelectedUserLink
 		{
 			get
 			{
-				if (!HasSelectedUserLink)
-					return false;
+				if (ReadOnly)
+					return null;
 
-				if (SingleSelectedNode == null)
-					return false;
+				if ((SingleSelectedNode == null) || (m_SelectedUserLink == null))
+					return null;
 
-				if ((SingleSelectedNode.Data != m_SelectedTaskLink.FromId))
+				if ((SingleSelectedNode.Data != m_SelectedUserLink.FromId))
 				{
 					Debug.Assert(false);
-					return false;
+					return null;
 				}
 
-				var task = m_TaskItems.GetTask(SingleSelectedNode.Data);
+				if (m_TaskItems.IsTaskLocked(m_SelectedUserLink.FromId))
+					return null;
 
-				return ((task != null) && !task.IsLocked);
+				return m_SelectedUserLink;
 			}
 		}
 
-		public bool EditSelectedUserLink(Color color, int thickness, TaskLink.EndArrows arrows)
+		public bool HasSelectedUserLink { get { return (SelectedUserLink != null); } }
+
+		public void ClearUserLinkSelection()
 		{
-			if (!CanEditSelectedUserLink)
+			if (HasSelectedUserLink)
+			{
+				m_SelectedUserLink = null;
+				Invalidate();
+
+				UserLinkSelectionChange?.Invoke(this, null);
+			}
+		}
+		
+		public bool EditSelectedUserLink(Color color, int thickness, UserLink.EndArrows arrows)
+		{
+			if (!HasSelectedUserLink)
 				return false;
 
-			var task = SingleSelectedTask;
+			m_SelectedUserLink.Color = color;
+			m_SelectedUserLink.Thickness = thickness;
+			m_SelectedUserLink.Arrows = arrows;
 
-			m_SelectedTaskLink.Color = color;
-			m_SelectedTaskLink.Thickness = thickness;
-			m_SelectedTaskLink.Arrows = arrows;
-			
 			// Clear selection so the changes are visible
-			m_SelectedTaskLink = null;
-			Invalidate();
+			ClearUserLinkSelection();
 
 			TaskModified?.Invoke(this, SelectedNodeIds);
 			return true;
@@ -418,22 +425,21 @@ namespace PinBoardUIExtension
 
 		public bool DeleteSelectedUserLink()
 		{
-			if (!CanDeleteSelectedUserLink)
+			if (!HasSelectedUserLink)
 				return false;
 
-			if (!m_TaskItems.DeleteUserLink(m_SelectedTaskLink))
+			if (!m_TaskItems.DeleteUserLink(m_SelectedUserLink))
 				return false;
 
-			m_SelectedTaskLink = null;
-			Invalidate();
+			ClearUserLinkSelection();
 
 			TaskModified?.Invoke(this, SelectedNodeIds);
 			return true;
 		}
 
-		public new bool SelectTask(uint taskId)
+		public bool SelectTask(uint taskId)
 		{
-			m_SelectedTaskLink = null;
+			ClearUserLinkSelection();
 
 			if (base.SelectTask(taskId))
 				return true;
@@ -774,11 +780,11 @@ namespace PinBoardUIExtension
 
 		protected void DrawSelectedUserLink(Graphics graphics)
 		{
-			if (m_SelectedTaskLink != null)
+			if (HasSelectedUserLink)
 			{
 				Point fromPos, toPos;
 				
-				if (IsConnectionVisible(m_SelectedTaskLink, out fromPos, out toPos))
+				if (IsConnectionVisible(m_SelectedUserLink, out fromPos, out toPos))
 				{
 					graphics.DrawLine(SystemPens.WindowText, fromPos, toPos);
 
@@ -833,7 +839,7 @@ namespace PinBoardUIExtension
 					Point fromPos, toPos;
 
 					// Don't draw the selected connection until the very end
-					if (!link.IdsMatch(m_SelectedTaskLink) &&
+					if (!link.IdsMatch(m_SelectedUserLink) &&
 						IsConnectionVisible(node, link.ToId, out fromPos, out toPos))
 					{
 						DrawConnection(graphics, fromPos, toPos, new Pen(link.Color, link.Thickness), new SolidBrush(link.Color));
@@ -880,7 +886,7 @@ namespace PinBoardUIExtension
 			return base.IsConnectionVisible(fromNode, GetNode(toId), out fromPos, out toPos);
 		}
 
-		protected bool IsConnectionVisible(TaskLink link, out Point fromPos, out Point toPos)
+		protected bool IsConnectionVisible(UserLink link, out Point fromPos, out Point toPos)
 		{
 			return IsConnectionVisible(GetNode(link.FromId), link.ToId, out fromPos, out toPos);
 		}
@@ -1142,6 +1148,13 @@ namespace PinBoardUIExtension
 				else
 					EditTaskLabel(this, SingleSelectedNode.Data);
 			}
+			else
+			{
+				var link = HitTestUserLink(e.Location);
+
+				if (link != null)
+					DoubleClickUserLink?.Invoke(this, null);
+			}
 		}
 
 		protected override void OnMouseClick(MouseEventArgs e)
@@ -1193,12 +1206,12 @@ namespace PinBoardUIExtension
 			return CalcIconRect(GetNodeClientRect(node)).Contains(point);
         }
 
-		protected TaskLink HitTestUserLink(Point ptClient)
+		protected UserLink HitTestUserLink(Point ptClient)
 		{
 			return HitTestUserLink(RootNode, ptClient);
 		}
 
-		protected TaskLink HitTestUserLink(RadialTree.TreeNode<uint> node, Point ptClient)
+		protected UserLink HitTestUserLink(RadialTree.TreeNode<uint> node, Point ptClient)
 		{
 			var fromTask = GetTaskItem(node.Data);
 
@@ -1237,24 +1250,28 @@ namespace PinBoardUIExtension
 			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
 			// Check for connection first to simplify logic
-			var link = HitTestUserLink(e.Location);
-
-			if (link != null)
+			if (!ReadOnly)
 			{
-				// Set the owning node first because that will clear the selected connection
-				SelectTask(link.FromId, true);
-				Invalidate();
+				var link = HitTestUserLink(e.Location);
 
-				if (!m_TaskItems.IsTaskLocked(link.FromId))
+				if ((link != null) && !m_TaskItems.IsTaskLocked(link.FromId))
 				{
-					m_SelectedTaskLink = link;
-					UserLinkSelectionChange?.Invoke(this, new EventArgs());
+					// Set the owning node first because that will clear the selected connection
+					SelectTask(link.FromId, true);
+					Invalidate();
+
+					m_SelectedUserLink = link;
+					UserLinkSelectionChange?.Invoke(this, null);
+
+					return;
+				}
+				else if (HasSelectedUserLink)
+				{
+					ClearUserLinkSelection();
 				}
 			}
-			else
-			{
-				base.OnMouseDown(e);
-			}
+
+			base.OnMouseDown(e);
 		}
 
 		private void OnEditLabelTimer(object sender, EventArgs e)
@@ -1341,7 +1358,7 @@ namespace PinBoardUIExtension
 			{
 				Point fromPos, toPos;
 
-				if (IsConnectionVisible(m_SelectedTaskLink, out fromPos, out toPos))
+				if (IsConnectionVisible(m_SelectedUserLink, out fromPos, out toPos))
 				{
 					// Check for pin ends of selected link
 					if (GetPinRect(fromPos).Contains(ptClient))
