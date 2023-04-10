@@ -662,6 +662,10 @@ namespace PinBoardUIExtension
 		protected override Size GetNodeSize(RadialTree.TreeNode<uint> node)
 		{
 			var size = base.GetNodeSize(node);
+
+			if (node == RootNode)
+				return new Size(size.Width / 2, size.Width / 2); // smaller square
+
 			var task = GetTaskItem(node);
 
 			if ((task != null) && (task.Image != null))
@@ -762,7 +766,7 @@ namespace PinBoardUIExtension
 		protected override void OnAfterDrawConnections(Graphics graphics)
 		{
 			DrawTaskDependencies(graphics, RootNode);
-			DrawTaskUserLinks(graphics, RootNode);
+			DrawUserLinks(graphics, RootNode);
 
 			if (!DrawNodesOnTop)
 				DrawSelectedUserLink(graphics);
@@ -774,10 +778,7 @@ namespace PinBoardUIExtension
 			{
 				Point fromPos, toPos;
 				
-				var fromNode = GetNode(m_SelectedTaskLink.FromId);
-				var toNode = GetNode(m_SelectedTaskLink.ToId);
-
-				if (IsConnectionVisible(fromNode, toNode, out fromPos, out toPos))
+				if (IsConnectionVisible(m_SelectedTaskLink, out fromPos, out toPos))
 				{
 					graphics.DrawLine(SystemPens.WindowText, fromPos, toPos);
 
@@ -802,15 +803,13 @@ namespace PinBoardUIExtension
 
 				if (taskItem?.DependIds?.Count > 0)
 				{
-					Point fromPos = GetNodeClientPos(node);
-
 					foreach (var dependId in taskItem.DependIds)
 					{
-						Point toPos;
+						Point fromPos, toPos;
 
 						// Don't draw a dependency which is overlaid by a user link
 						if (!m_TaskItems.HasUserLink(taskItem.TaskId, dependId) &&
-							IsConnectionVisible(fromPos, dependId, out toPos))
+							IsConnectionVisible(node, dependId, out fromPos, out toPos))
 						{
 							DrawConnection(graphics, fromPos, toPos, Pens.Blue, Brushes.Blue);
 						}
@@ -823,21 +822,19 @@ namespace PinBoardUIExtension
 			}
 		}
 
-		protected void DrawTaskUserLinks(Graphics graphics, RadialTree.TreeNode<uint> node)
+		protected void DrawUserLinks(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			var taskItem = GetTaskItem(node);
 
 			if (taskItem?.UserLinks?.Count > 0)
 			{
-				Point fromPos = GetNodeClientPos(node);
-
 				foreach (var link in taskItem.UserLinks)
 				{
-					Point toPos = Point.Empty;
+					Point fromPos, toPos;
 
 					// Don't draw the selected connection until the very end
-					if (IsConnectionVisible(fromPos, link.ToId, out toPos) &&
-						!link.IdsMatch(m_SelectedTaskLink))
+					if (!link.IdsMatch(m_SelectedTaskLink) &&
+						IsConnectionVisible(node, link.ToId, out fromPos, out toPos))
 					{
 						DrawConnection(graphics, fromPos, toPos, new Pen(link.Color, link.Thickness), new SolidBrush(link.Color));
 					}
@@ -846,7 +843,7 @@ namespace PinBoardUIExtension
 
 			// Children
 			foreach (var child in node.Children)
-				DrawTaskUserLinks(graphics, child);
+				DrawUserLinks(graphics, child);
 		}
 		
 		protected override void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
@@ -860,38 +857,32 @@ namespace PinBoardUIExtension
 			}
 			else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
 			{
-				rect.X += (rect.Width - rect.Height) / 2;
-				rect.Width = rect.Height;
-
-				graphics.FillEllipse(SystemBrushes.Window, rect);
-				graphics.DrawEllipse(Pens.Gray, rect);
+				base.DrawNode(graphics, nodeId, rect);
+// 				graphics.FillRectangle(SystemBrushes.Window, rect);
+// 				graphics.DrawRectangle(Pens.Gray, rect);
+// 
+// 				rect.X += (rect.Width - rect.Height) / 2;
+// 				rect.Width = rect.Height;
+// 
+// 				graphics.FillEllipse(SystemBrushes.Window, rect);
+// 				graphics.DrawEllipse(Pens.Gray, rect);
 			}
 		}
 
-		protected bool IsConnectionVisible(Point fromPos, uint toId, out Point toPos)
+		protected override void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
-			var toNode = GetNode(toId);
-
-			if (toNode == null)
-			{
-				toPos = Point.Empty;
-				return false;
-			}
-
-			toPos = GetNodeClientPos(toNode);
-
-			return base.IsConnectionVisible(fromPos, toPos);
+			if (m_Options.HasFlag(PinBoardOption.ShowParentChildLinks))
+				base.DrawParentAndChildConnections(graphics, node);
 		}
 
-		protected override bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
+		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, uint toId, out Point fromPos, out Point toPos)
 		{
-			return base.IsNodeVisible(node, out nodeRect);
+			return base.IsConnectionVisible(fromNode, GetNode(toId), out fromPos, out toPos);
 		}
 
-		protected override bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
-													out Point fromPos, out Point toPos)
+		protected bool IsConnectionVisible(TaskLink link, out Point fromPos, out Point toPos)
 		{
-			return base.IsConnectionVisible(fromNode, toNode, out fromPos, out toPos);
+			return IsConnectionVisible(GetNode(link.FromId), link.ToId, out fromPos, out toPos);
 		}
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
@@ -1019,7 +1010,7 @@ namespace PinBoardUIExtension
 
 			// Title
 			titleRect.Inflate(-LabelPadding, -LabelPadding);
-			graphics.DrawString(taskItem.Title, GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
+			graphics.DrawString(taskItem.ToString(), GetTaskLabelFont(taskItem), new SolidBrush(textColor), titleRect);
 
 			/*
 			// Checkbox
@@ -1217,11 +1208,11 @@ namespace PinBoardUIExtension
 				{
 					Debug.Assert(node.Data == link.FromId);
 
-					var toNode = GetNode(link.ToId);
 					Point fromPos, toPos;
+					const double Tolerance = 5.0;
 
-					if (IsConnectionVisible(node, toNode, out fromPos, out toPos) && 
-						Geometry2D.HitTestSegment(fromPos, toPos, ptClient, 5))
+					if (IsConnectionVisible(node, link.ToId, out fromPos, out toPos) && 
+						Geometry2D.HitTestSegment(fromPos, toPos, ptClient, Tolerance))
 					{
 						return link;
 					}
@@ -1348,35 +1339,20 @@ namespace PinBoardUIExtension
 		{
 			if (HasSelectedUserLink)
 			{
-				// Check for pin ends of selected link
-				if (GetUserLinkStartPinRect(m_SelectedTaskLink).Contains(ptClient))
-					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+				Point fromPos, toPos;
 
-				if (GetUserLinkEndPinRect(m_SelectedTaskLink).Contains(ptClient))
-					return Cursors.SizeAll;
+				if (IsConnectionVisible(m_SelectedTaskLink, out fromPos, out toPos))
+				{
+					// Check for pin ends of selected link
+					if (GetPinRect(fromPos).Contains(ptClient))
+						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+
+					if (GetPinRect(toPos).Contains(ptClient))
+						return Cursors.SizeAll;
+				}
 			}
 
 			return null;
-		}
-
-		protected Rectangle GetUserLinkStartPinRect(TaskLink link)
-		{
-			var fromNode = GetNode(link.FromId);
-
-			if (fromNode == null)
-				return Rectangle.Empty;
-
-			return GetPinRect(GetNodeClientPos(fromNode));
-		}
-
-		protected Rectangle GetUserLinkEndPinRect(TaskLink link)
-		{
-			var toNode = GetNode(m_SelectedTaskLink.ToId);
-
-			if (toNode == null)
-				return Rectangle.Empty;
-
-			return GetPinRect(GetNodeClientPos(toNode));
 		}
 
 		protected Cursor GetNodeCursor(Point ptClient)
@@ -1395,11 +1371,11 @@ namespace PinBoardUIExtension
 					if (TaskHasIcon(task) && HitTestIcon(node, ptClient))
 						return UIExtension.HandCursor();
 				}
-				else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
-				{
-					if (HitTestNode(ptClient) == RootNode)
-						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-				}
+			}
+			else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
+			{
+				if (HitTestNode(ptClient) == RootNode)
+					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 			}
 
 			return null;

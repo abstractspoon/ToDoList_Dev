@@ -19,8 +19,6 @@ namespace PinBoardUIExtension
 	{
 		None = -1,
 		Node,
-		ConnectionStart,
-		ConnectionEnd,
 		SelectionBox,
 	}
 
@@ -466,7 +464,7 @@ namespace PinBoardUIExtension
 				HitTestNodes(child, rectClient, ref hits);
 		}
 
-		protected virtual bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
+		protected bool IsNodeVisible(RadialTree.TreeNode<uint> node, out Rectangle nodeRect)
 		{
 			nodeRect = GetNodeClientRect(node);
 
@@ -490,7 +488,7 @@ namespace PinBoardUIExtension
 			return new Rectangle(pos, size);
 		}
 
-		protected virtual bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
 										  out Point fromPos, out Point toPos)
 		{
 			if ((fromNode == null) || (toNode == null))
@@ -502,8 +500,39 @@ namespace PinBoardUIExtension
 			fromPos = GetNodeClientPos(fromNode);
 			toPos = GetNodeClientPos(toNode);
 
+			if (DrawNodesOnTop)
+			{
+				// Intersect line segment with node rectangles
+				Rectangle fromRect = GetNodeClientRect(fromNode);
+				Point[] fromIntersect;
+
+				if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, fromRect, out fromIntersect) > 0)
+					fromPos = fromIntersect[0];
+
+				Rectangle toRect = GetNodeClientRect(toNode);
+				Point[] toIntersect;
+
+				if (Geometry2D.IntersectLineSegmentWithRectangle(fromPos, toPos, toRect, out toIntersect) > 0)
+					toPos = toIntersect[0];
+			}
+
 			return IsConnectionVisible(fromPos, toPos);
 		}
+// 
+// 		protected bool IsConnectionVisible(RadialTree.TreeNode<uint> fromNode, RadialTree.TreeNode<uint> toNode,
+// 										  out Rectangle fromRect, out Rectangle toRect)
+// 		{
+// 			if ((fromNode == null) || (toNode == null))
+// 			{
+// 				fromRect = toRect = Rectangle.Empty;
+// 				return false;
+// 			}
+// 
+// 			fromRect = GetNodeClientRect(fromNode);
+// 			toRect = GetNodeClientRect(toNode);
+// 
+// 			return IsConnectionVisible(fromPos, toPos);
+// 		}
 
 		protected bool IsConnectionVisible(Point fromPos, Point toPos)
 		{
@@ -540,15 +569,15 @@ namespace PinBoardUIExtension
 			{
 				e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-				if (DrawNodesOnTop)
-				{
-					DrawParentAndChildConnections(e.Graphics, RootNode);
-					OnAfterDrawConnections(e.Graphics);
-
-					DrawParentAndChildNodes(e.Graphics, RootNode);
-					OnAfterDrawNodes(e.Graphics);
-				}
-				else // Connections on top
+// 				if (DrawNodesOnTop)
+// 				{
+// 					DrawParentAndChildConnections(e.Graphics, RootNode);
+// 					OnAfterDrawConnections(e.Graphics);
+// 
+// 					DrawParentAndChildNodes(e.Graphics, RootNode);
+// 					OnAfterDrawNodes(e.Graphics);
+// 				}
+// 				else // Connections on top
 				{
 					DrawParentAndChildNodes(e.Graphics, RootNode);
 					OnAfterDrawNodes(e.Graphics);
@@ -604,18 +633,15 @@ namespace PinBoardUIExtension
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			graphics.DrawLine(Pens.Gray, nodePos, parentPos);
+			DrawConnection(graphics, nodePos, parentPos, Pens.Gray, Brushes.Gray);
 		}
 
 		protected void DrawConnection(Graphics graphics, Point node1Pos, Point node2Pos, Pen linePen, Brush pinBrush)
 		{
 			graphics.DrawLine(linePen, node1Pos, node2Pos);
 
-			if (!DrawNodesOnTop)
-			{
-				DrawPin(graphics, node1Pos, pinBrush);
-				DrawPin(graphics, node2Pos, pinBrush);
-			}
+			DrawPin(graphics, node1Pos, pinBrush);
+			DrawPin(graphics, node2Pos, pinBrush);
 		}
 
 		protected Rectangle GetPinRect(Point pos)
@@ -1064,18 +1090,6 @@ namespace PinBoardUIExtension
 					Invalidate();
 				}
 				break;
-
-			case DragMode.ConnectionStart:
-				{
-					Debug.Assert(!ReadOnly);
-				}
-				break;
-
-			case DragMode.ConnectionEnd:
-				{
-					Debug.Assert(!ReadOnly);
-				}
-				break;
 			}
 		}
 
@@ -1102,14 +1116,6 @@ namespace PinBoardUIExtension
 
 					AutoScrollMinSize = ZoomedSize;
 				}
-				break;
-
-			case DragMode.ConnectionStart:
-				// TODO
-				break;
-
-			case DragMode.ConnectionEnd:
-				// TODO
 				break;
 			}
 

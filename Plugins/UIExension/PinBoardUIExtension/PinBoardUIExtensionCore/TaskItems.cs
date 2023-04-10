@@ -142,14 +142,6 @@ namespace PinBoardUIExtension
 		public bool HasUserPosition { get { return (UserPosition != NullPoint); } }
 		public Image Image;
 
-		public int CalcImageHeight(int width)
-		{
-			if (Image == null)
-				return 0;
-
-			return ((width * Image.Height) / Image.Width);
-		}
-
 		// -----------------------------------------------------------------
 
 		public TaskItem()
@@ -184,7 +176,19 @@ namespace PinBoardUIExtension
 
 		public override string ToString()
 		{
+#if DEBUG
+			return string.Format("{0} ({1})", Title, TaskId);
+#else
 			return Title;
+#endif
+		}
+
+		public int CalcImageHeight(int width)
+		{
+			if (Image == null)
+				return 0;
+
+			return ((width * Image.Height) / Image.Width);
 		}
 
 		public bool HasLocalDependencies { get { return (DependIds != null) && (DependIds.Count > 0); } }
