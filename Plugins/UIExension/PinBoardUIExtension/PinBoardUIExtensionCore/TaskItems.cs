@@ -442,6 +442,13 @@ namespace PinBoardUIExtension
 			return true;
 		}
 
+		public bool IsTaskLocked(uint id)
+		{
+			var task = GetTask(id);
+
+			return ((task == null) || task.IsLocked);
+		}
+
 	}
 
 

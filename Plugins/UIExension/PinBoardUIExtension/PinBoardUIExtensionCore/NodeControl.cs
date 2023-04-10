@@ -611,7 +611,7 @@ namespace PinBoardUIExtension
 		{
 			graphics.DrawLine(linePen, node1Pos, node2Pos);
 
-			if (DrawNodesOnTop == false)
+			if (!DrawNodesOnTop)
 			{
 				DrawPin(graphics, node1Pos, pinBrush);
 				DrawPin(graphics, node2Pos, pinBrush);

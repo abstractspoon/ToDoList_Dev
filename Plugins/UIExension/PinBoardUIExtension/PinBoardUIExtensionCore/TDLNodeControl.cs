@@ -61,7 +61,7 @@ namespace PinBoardUIExtension
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
 
-		private PinBoardOption m_Options;
+		private PinBoardOption m_Options = PinBoardOption.None;
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -99,6 +99,7 @@ namespace PinBoardUIExtension
 
 			m_DragImage = new DragImage();
 			m_LastDragPos = Point.Empty;
+			m_Options = DefaultOptions;
 
 			m_TaskItems = null;
 
@@ -106,10 +107,6 @@ namespace PinBoardUIExtension
 			int nodeWidth  = (4 * nodeHeight);
 
 			base.NodeSize = new Size(nodeWidth, nodeHeight);
-
-			m_Options = DefaultOptions;
-			base.DrawNodesOnTop = (m_Options.HasFlag(PinBoardOption.DrawLinksOnTop) == false);
-
 			base.PinRadius = ScaleByDPIFactor(4);
 
 			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
@@ -216,7 +213,7 @@ namespace PinBoardUIExtension
 				if (value != m_Options)
 				{
 					m_Options = value;
-					base.DrawNodesOnTop = (m_Options.HasFlag(PinBoardOption.DrawLinksOnTop) == false);
+					base.DrawNodesOnTop = !m_Options.HasFlag(PinBoardOption.DrawLinksOnTop);
 
 					Invalidate();
 				}
@@ -758,7 +755,7 @@ namespace PinBoardUIExtension
 
 		protected override void OnAfterDrawNodes(Graphics graphics)
 		{
-			if (!m_Options.HasFlag(PinBoardOption.DrawLinksOnTop))
+			if (DrawNodesOnTop)
 				DrawSelectedUserLink(graphics);
 		}
 
@@ -767,7 +764,7 @@ namespace PinBoardUIExtension
 			DrawTaskDependencies(graphics, RootNode);
 			DrawTaskUserLinks(graphics, RootNode);
 
-			if (m_Options.HasFlag(PinBoardOption.DrawLinksOnTop))
+			if (!DrawNodesOnTop)
 				DrawSelectedUserLink(graphics);
 		}
 
@@ -1205,12 +1202,12 @@ namespace PinBoardUIExtension
 			return CalcIconRect(GetNodeClientRect(node)).Contains(point);
         }
 
-		protected TaskLink HitTestConnection(Point ptClient)
+		protected TaskLink HitTestUserLink(Point ptClient)
 		{
-			return HitTestConnection(RootNode, ptClient);
+			return HitTestUserLink(RootNode, ptClient);
 		}
 
-		protected TaskLink HitTestConnection(RadialTree.TreeNode<uint> node, Point ptClient)
+		protected TaskLink HitTestUserLink(RadialTree.TreeNode<uint> node, Point ptClient)
 		{
 			var fromTask = GetTaskItem(node.Data);
 
@@ -1234,7 +1231,7 @@ namespace PinBoardUIExtension
 			// check children
 			foreach (var child in node.Children)
 			{
-				var hit = HitTestConnection(child, ptClient);
+				var hit = HitTestUserLink(child, ptClient);
 
 				if (hit != null)
 					return hit;
@@ -1249,16 +1246,19 @@ namespace PinBoardUIExtension
 			m_PreviouslySelectedTask = (Focused ? SingleSelectedTask : null);
 
 			// Check for connection first to simplify logic
-			var link = HitTestConnection(e.Location);
+			var link = HitTestUserLink(e.Location);
 
 			if (link != null)
 			{
 				// Set the owning node first because that will clear the selected connection
 				SelectTask(link.FromId, true);
-				m_SelectedTaskLink = link;
-
-				UserLinkSelectionChange?.Invoke(this, new EventArgs());
 				Invalidate();
+
+				if (!m_TaskItems.IsTaskLocked(link.FromId))
+				{
+					m_SelectedTaskLink = link;
+					UserLinkSelectionChange?.Invoke(this, new EventArgs());
+				}
 			}
 			else
 			{
@@ -1313,44 +1313,128 @@ namespace PinBoardUIExtension
 			return true;
 		}
 
+		protected bool SelectedTasksAreAllEditable
+		{
+			get
+			{
+				foreach (var id in SelectedNodeIds)
+				{
+					var task = GetTaskItem(id);
+
+					if ((task == null) || task.IsLocked)
+						return false;
+				}
+
+				return true;
+			}
+		}
+
+		protected Cursor GetUserLinkCursor(Point ptClient)
+		{
+			Cursor cursor = GetSelectedUserLinkCursor(ptClient);
+
+			if (cursor == null)
+			{
+				var link = HitTestUserLink(ptClient);
+
+				if ((link != null) && m_TaskItems.IsTaskLocked(link.FromId))
+					cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+			}
+
+			return cursor;			
+		}
+
+		protected Cursor GetSelectedUserLinkCursor(Point ptClient)
+		{
+			if (HasSelectedUserLink)
+			{
+				// Check for pin ends of selected link
+				if (GetUserLinkStartPinRect(m_SelectedTaskLink).Contains(ptClient))
+					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+
+				if (GetUserLinkEndPinRect(m_SelectedTaskLink).Contains(ptClient))
+					return Cursors.SizeAll;
+			}
+
+			return null;
+		}
+
+		protected Rectangle GetUserLinkStartPinRect(TaskLink link)
+		{
+			var fromNode = GetNode(link.FromId);
+
+			if (fromNode == null)
+				return Rectangle.Empty;
+
+			return GetPinRect(GetNodeClientPos(fromNode));
+		}
+
+		protected Rectangle GetUserLinkEndPinRect(TaskLink link)
+		{
+			var toNode = GetNode(m_SelectedTaskLink.ToId);
+
+			if (toNode == null)
+				return Rectangle.Empty;
+
+			return GetPinRect(GetNodeClientPos(toNode));
+		}
+
+		protected Cursor GetNodeCursor(Point ptClient)
+		{
+			var node = HitTestNode(ptClient, true); // exclude root node
+
+			if (node != null)
+			{
+				var task = GetTaskItem(node.Data);
+
+				if (task != null)
+				{
+					if (task.IsLocked)
+						return UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
+
+					if (TaskHasIcon(task) && HitTestIcon(node, ptClient))
+						return UIExtension.HandCursor();
+				}
+				else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
+				{
+					if (HitTestNode(ptClient) == RootNode)
+						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+				}
+			}
+
+			return null;
+		}
+
 		protected override void OnMouseMove(MouseEventArgs e)
 		{
  			base.OnMouseMove(e);
 
-			var node = HitTestNode(e.Location, true);
-			var task = GetTaskItem(node);
+			Cursor cursor = null;
 
-			if (!ReadOnly && (node != null))
+			if (!ReadOnly)
 			{
-				if (task != null)
+				if (DrawNodesOnTop)
 				{
-					Cursor cursor = null;
+					// Selected link ends overlap node edges
+					// so they take precedent
+					cursor = GetSelectedUserLinkCursor(e.Location);
 
-					if (task.IsLocked)
-					{
-						cursor = UIExtension.AppCursor(UIExtension.AppCursorType.LockedTask);
-					}
-					else if (TaskHasIcon(task) && HitTestIcon(node, e.Location))
-					{
-						cursor = UIExtension.HandCursor();
-					}
+					if (cursor == null)
+						cursor = GetNodeCursor(e.Location);
 
-					if (cursor != null)
-					{
-						Cursor = cursor;
-						return;
-					}
+					if (cursor == null)
+						cursor = GetUserLinkCursor(e.Location);
 				}
-				else if (m_Options.HasFlag(PinBoardOption.ShowRootNode)) 
+				else
 				{
-					// it must be the root node
-					Cursor = UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-					return;
+					cursor = GetUserLinkCursor(e.Location);
+
+					if (cursor == null)
+						cursor = GetNodeCursor(e.Location);
 				}
 			}
 
-			// all else
-			Cursor = Cursors.Arrow;
+			Cursor = ((cursor != null) ? cursor : Cursors.Arrow);
 		}
 
 /*
