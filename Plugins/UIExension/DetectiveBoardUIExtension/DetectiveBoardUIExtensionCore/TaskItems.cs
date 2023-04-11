@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 using Abstractspoon.Tdl.PluginHelpers;
 
-namespace PinBoardUIExtension
+namespace DetectiveBoardUIExtension
 {
 	public class UserLink
 	{

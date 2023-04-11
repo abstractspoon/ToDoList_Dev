@@ -7,11 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace PinBoardUIExtension
+namespace DetectiveBoardUIExtension
 {
-	public partial class PinBoardAddEditLinkDlg : Form
+	public partial class DetectiveBoardAddEditLinkDlg : Form
 	{
-		public PinBoardAddEditLinkDlg(string title, UserLink link)
+		public DetectiveBoardAddEditLinkDlg(string title, UserLink link)
 		{
 			InitializeComponent();
 

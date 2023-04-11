@@ -7,7 +7,7 @@
 
 #include "stdafx.h"
 #include "resource.h"
-#include "PinBoardUIExtensionBridge.h"
+#include "DetectiveBoardUIExtensionBridge.h"
 
 #include <Interfaces\ITasklist.h>
 #include <Interfaces\ITransText.h>
@@ -25,54 +25,54 @@ using namespace System::Drawing;
 using namespace System::Collections::Generic;
 using namespace System::Runtime::InteropServices;
 
-using namespace PinBoardUIExtension;
+using namespace DetectiveBoardUIExtension;
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
 // REPLACE THIS WITH NEW GUID!
-const LPCWSTR PINBOARD_GUID = L"FA40B83E-E934-D494-8FB3-8EC9748FA4E8";
-const LPCWSTR PINBOARD_NAME = L"Pin Board";
+const LPCWSTR DETECTIVEBOARD_GUID = L"FA40B83E-E934-D494-8FB3-8EC9748FA4E8";
+const LPCWSTR DETECTIVEBOARD_NAME = L"Detective Board";
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CPinBoardUIExtensionBridge::CPinBoardUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
+CDetectiveBoardUIExtensionBridge::CDetectiveBoardUIExtensionBridge() : m_hIcon(NULL), m_pTT(nullptr)
 {
-	HMODULE hMod = LoadLibrary(L"PinBoardUIExtensionBridge.dll"); // us
+	HMODULE hMod = LoadLibrary(L"DetectiveBoardUIExtensionBridge.dll"); // us
 
-	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_PINBOARD), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
+	m_hIcon = (HICON)::LoadImage(hMod, MAKEINTRESOURCE(IDI_DETECTIVEBOARD), IMAGE_ICON, 16, 16, LR_LOADMAP3DCOLORS);
 }
 
-void CPinBoardUIExtensionBridge::Release()
+void CDetectiveBoardUIExtensionBridge::Release()
 {
 	delete this;
 }
 
-void CPinBoardUIExtensionBridge::SetLocalizer(ITransText* pTT)
+void CDetectiveBoardUIExtensionBridge::SetLocalizer(ITransText* pTT)
 {
 	if (m_pTT == nullptr)
 		m_pTT = pTT;
 }
 
-LPCWSTR CPinBoardUIExtensionBridge::GetMenuText() const
+LPCWSTR CDetectiveBoardUIExtensionBridge::GetMenuText() const
 {
-	return PINBOARD_NAME;
+	return DETECTIVEBOARD_NAME;
 }
 
-HICON CPinBoardUIExtensionBridge::GetIcon() const
+HICON CDetectiveBoardUIExtensionBridge::GetIcon() const
 {
 	return m_hIcon;
 }
 
-LPCWSTR CPinBoardUIExtensionBridge::GetTypeID() const
+LPCWSTR CDetectiveBoardUIExtensionBridge::GetTypeID() const
 {
-	return PINBOARD_GUID;
+	return DETECTIVEBOARD_GUID;
 }
 
-IUIExtensionWindow* CPinBoardUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
+IUIExtensionWindow* CDetectiveBoardUIExtensionBridge::CreateExtWindow(UINT nCtrlID, 
 	DWORD nStyle, long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
-	CPinBoardUIExtensionBridgeWindow* pExtWnd = new CPinBoardUIExtensionBridgeWindow(m_pTT);
+	CDetectiveBoardUIExtensionBridgeWindow* pExtWnd = new CDetectiveBoardUIExtensionBridgeWindow(m_pTT);
 
 	if (!pExtWnd->Create(nCtrlID, nStyle, nLeft, nTop, nWidth, nHeight, hwndParent))
 	{
@@ -83,36 +83,36 @@ IUIExtensionWindow* CPinBoardUIExtensionBridge::CreateExtWindow(UINT nCtrlID,
 	return pExtWnd;
 }
 
-void CPinBoardUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+void CDetectiveBoardUIExtensionBridge::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	// TODO
 }
 
-void CPinBoardUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
+void CDetectiveBoardUIExtensionBridge::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey)
 {
 	// TODO
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-CPinBoardUIExtensionBridgeWindow::CPinBoardUIExtensionBridgeWindow(ITransText* pTT) : m_pTT(pTT)
+CDetectiveBoardUIExtensionBridgeWindow::CDetectiveBoardUIExtensionBridgeWindow(ITransText* pTT) : m_pTT(pTT)
 {
 }
 
-void CPinBoardUIExtensionBridgeWindow::Release()
+void CDetectiveBoardUIExtensionBridgeWindow::Release()
 {
 	::DestroyWindow(GetHwnd());
 	delete this;
 }
 
-BOOL CPinBoardUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
+BOOL CDetectiveBoardUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle, 
 	long nLeft, long nTop, long nWidth, long nHeight, HWND hwndParent)
 {
 	msclr::auto_gcroot<Translator^> trans = gcnew Translator(m_pTT);
-	msclr::auto_gcroot<String^> typeID = gcnew String(PINBOARD_GUID);
-	msclr::auto_gcroot<String^> uiName = gcnew String(PINBOARD_NAME);
+	msclr::auto_gcroot<String^> typeID = gcnew String(DETECTIVEBOARD_GUID);
+	msclr::auto_gcroot<String^> uiName = gcnew String(DETECTIVEBOARD_NAME);
 	
-	m_wnd = gcnew PinBoardUIExtension::PinBoardUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
+	m_wnd = gcnew DetectiveBoardUIExtension::DetectiveBoardUIExtensionCore(typeID.get(), uiName.get(), static_cast<IntPtr>(hwndParent), trans.get());
 
 	HWND hWnd = GetHwnd();
 
@@ -128,27 +128,27 @@ BOOL CPinBoardUIExtensionBridgeWindow::Create(UINT nCtrlID, DWORD nStyle,
 	return false;
 }
 
-HICON CPinBoardUIExtensionBridgeWindow::GetIcon() const
+HICON CDetectiveBoardUIExtensionBridgeWindow::GetIcon() const
 {
 	return NULL;
 }
 
-LPCWSTR CPinBoardUIExtensionBridgeWindow::GetMenuText() const
+LPCWSTR CDetectiveBoardUIExtensionBridgeWindow::GetMenuText() const
 {
-	return PINBOARD_NAME;
+	return DETECTIVEBOARD_NAME;
 }
 
-LPCWSTR CPinBoardUIExtensionBridgeWindow::GetTypeID() const
+LPCWSTR CDetectiveBoardUIExtensionBridgeWindow::GetTypeID() const
 {
-	return PINBOARD_GUID;
+	return DETECTIVEBOARD_GUID;
 }
 
-bool CPinBoardUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
+bool CDetectiveBoardUIExtensionBridgeWindow::SelectTask(DWORD dwTaskID, bool bTaskLink)
 {
 	return m_wnd->SelectTask(dwTaskID);
 }
 
-bool CPinBoardUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
+bool CDetectiveBoardUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int nTaskCount)
 {
 	array<UInt32>^ taskIDs = gcnew array<UInt32>(nTaskCount);
 
@@ -158,26 +158,26 @@ bool CPinBoardUIExtensionBridgeWindow::SelectTasks(const DWORD* pdwTaskIDs, int 
 	return m_wnd->SelectTasks(taskIDs);
 }
 
-void CPinBoardUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
+void CDetectiveBoardUIExtensionBridgeWindow::UpdateTasks(const ITaskList* pTasks, IUI_UPDATETYPE nUpdate)
 {
 	msclr::auto_gcroot<TaskList^> tasks = gcnew TaskList(pTasks);
 
 	m_wnd->UpdateTasks(tasks.get(), UIExtension::Map(nUpdate));
 }
 
-bool CPinBoardUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
+bool CDetectiveBoardUIExtensionBridgeWindow::WantTaskUpdate(TDC_ATTRIBUTE nAttribute) const
 {
 	return m_wnd->WantTaskUpdate(Task::MapAttribute(nAttribute));
 }
 
-bool CPinBoardUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
+bool CDetectiveBoardUIExtensionBridgeWindow::PrepareNewTask(ITaskList* pTask) const
 {
 	msclr::auto_gcroot<TaskList^> task = gcnew TaskList(pTask);
 
 	return m_wnd->PrepareNewTask(task.get()->GetFirstTask());
 }
 
-bool CPinBoardUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
+bool CDetectiveBoardUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 {
 	return m_wnd->ProcessMessage(IntPtr(pMsg->hwnd), 
 										pMsg->message, 
@@ -188,7 +188,7 @@ bool CPinBoardUIExtensionBridgeWindow::ProcessMessage(MSG* pMsg)
 										pMsg->pt.y);
 }
 
-bool CPinBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
+bool CDetectiveBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPCOMMANDDATA* pData)
 {
 	switch (nCmd)
 	{
@@ -257,7 +257,7 @@ bool CPinBoardUIExtensionBridgeWindow::DoAppCommand(IUI_APPCOMMAND nCmd, IUIAPPC
 	return false;
 }
 
-DWORD CPinBoardUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
+DWORD CDetectiveBoardUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD dwFromTaskID) const
 {
 	UIExtension::GetTask getTask;
 
@@ -272,7 +272,7 @@ DWORD CPinBoardUIExtensionBridgeWindow::GetNextTask(IUI_APPCOMMAND nCmd, DWORD d
 	return taskID;
 }
 
-bool CPinBoardUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
+bool CDetectiveBoardUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, const IUISELECTTASK& select)
 {
 	UIExtension::SelectTask selectWhat;
 
@@ -284,7 +284,7 @@ bool CPinBoardUIExtensionBridgeWindow::DoAppSelectCommand(IUI_APPCOMMAND nCmd, c
 	return m_wnd->SelectTask(sWords, selectWhat, select.bCaseSensitive, select.bWholeWord, select.bFindReplace);
 }
 
-bool CPinBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
+bool CDetectiveBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, const IUIAPPCOMMANDDATA* pData) const
 {
 	switch (nCmd)
 	{
@@ -332,44 +332,44 @@ bool CPinBoardUIExtensionBridgeWindow::CanDoAppCommand(IUI_APPCOMMAND nCmd, cons
 	return false;
 }
 
-bool CPinBoardUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
+bool CDetectiveBoardUIExtensionBridgeWindow::GetLabelEditRect(LPRECT pEdit)
 {
 	return m_wnd->GetLabelEditRect((Int32&)pEdit->left, (Int32&)pEdit->top, (Int32&)pEdit->right, (Int32&)pEdit->bottom);
 }
 
-IUI_HITTEST CPinBoardUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
+IUI_HITTEST CDetectiveBoardUIExtensionBridgeWindow::HitTest(POINT ptScreen) const
 {
 	return UIExtension::Map(m_wnd->HitTest(ptScreen.x, ptScreen.y));
 }
 
-DWORD CPinBoardUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
+DWORD CDetectiveBoardUIExtensionBridgeWindow::HitTestTask(POINT ptScreen, bool /*bTitleColumnOnly*/) const
 {
 	return m_wnd->HitTestTask(ptScreen.x, ptScreen.y);
 }
 
-void CPinBoardUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
+void CDetectiveBoardUIExtensionBridgeWindow::SetUITheme(const UITHEME* pTheme)
 {
 	msclr::auto_gcroot<UITheme^> theme = gcnew UITheme(pTheme);
 
 	m_wnd->SetUITheme(theme.get());
 }
 
-void CPinBoardUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
+void CDetectiveBoardUIExtensionBridgeWindow::SetReadOnly(bool bReadOnly)
 {
 	m_wnd->SetReadOnly(bReadOnly);
 }
 
-void CPinBoardUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
+void CDetectiveBoardUIExtensionBridgeWindow::SetTaskFont(HFONT hFont)
 {
 	m_wnd->SetTaskFont(Win32::GetFaceName(hFont), Win32::GetPointSize(hFont));
 }
 
-HWND CPinBoardUIExtensionBridgeWindow::GetHwnd() const
+HWND CDetectiveBoardUIExtensionBridgeWindow::GetHwnd() const
 {
 	return static_cast<HWND>(m_wnd->Handle.ToPointer());
 }
 
-void CPinBoardUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
+void CDetectiveBoardUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPCWSTR szKey) const
 {
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);
@@ -377,7 +377,7 @@ void CPinBoardUIExtensionBridgeWindow::SavePreferences(IPreferences* pPrefs, LPC
 	m_wnd->SavePreferences(prefs.get(), key.get());
 }
 
-void CPinBoardUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
+void CDetectiveBoardUIExtensionBridgeWindow::LoadPreferences(const IPreferences* pPrefs, LPCWSTR szKey, bool bAppOnly)
 {
 	msclr::auto_gcroot<Preferences^> prefs = gcnew Preferences(pPrefs);
 	msclr::auto_gcroot<String^> key = gcnew String(szKey);

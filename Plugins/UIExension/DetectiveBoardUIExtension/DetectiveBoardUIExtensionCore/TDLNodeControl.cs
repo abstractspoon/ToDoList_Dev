@@ -10,7 +10,7 @@ using System.Windows.Forms.VisualStyles;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace PinBoardUIExtension
+namespace DetectiveBoardUIExtension
 {
     public delegate bool EditTaskLabelEventHandler(object sender, uint taskId);
     public delegate bool EditTaskIconEventHandler(object sender, uint taskId);
@@ -20,7 +20,7 @@ namespace PinBoardUIExtension
 	// ------------------------------------------------------------
 
 	[Flags]
-	enum PinBoardOption
+	enum DetectiveBoardOption
 	{
 		None					= 0x00,
 		ShowParentChildLinks	= 0x01,
@@ -44,10 +44,10 @@ namespace PinBoardUIExtension
 
 		// -------------------------------------------------------------------------
 
-		const PinBoardOption DefaultOptions = (PinBoardOption.ShowRootNode |
-												PinBoardOption.ShowParentChildLinks |
-												PinBoardOption.ShowDependencies |
-												PinBoardOption.DrawLinksOnTop);
+		const DetectiveBoardOption DefaultOptions = (DetectiveBoardOption.ShowRootNode |
+												DetectiveBoardOption.ShowParentChildLinks |
+												DetectiveBoardOption.ShowDependencies |
+												DetectiveBoardOption.DrawLinksOnTop);
 		// -------------------------------------------------------------------------
 
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
@@ -63,7 +63,7 @@ namespace PinBoardUIExtension
 		private bool m_StrikeThruDone = true;
 		private bool m_ShowCompletionCheckboxes = true;
 
-		private PinBoardOption m_Options = PinBoardOption.None;
+		private DetectiveBoardOption m_Options = DetectiveBoardOption.None;
 
 		private Timer m_EditTimer;
 		private Font m_BoldLabelFont, m_DoneLabelFont, m_BoldDoneLabelFont;
@@ -203,7 +203,7 @@ namespace PinBoardUIExtension
 				ApplyUserPositions(child);
 		}
 		
-		public PinBoardOption Options
+		public DetectiveBoardOption Options
 		{
 			get { return m_Options; }
 		
@@ -212,7 +212,7 @@ namespace PinBoardUIExtension
 				if (value != m_Options)
 				{
 					m_Options = value;
-					base.DrawNodesOnTop = !m_Options.HasFlag(PinBoardOption.DrawLinksOnTop);
+					base.DrawNodesOnTop = !m_Options.HasFlag(DetectiveBoardOption.DrawLinksOnTop);
 
 					Invalidate();
 				}
@@ -808,7 +808,7 @@ namespace PinBoardUIExtension
 
 		protected void DrawTaskDependencies(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
-			if (m_Options.HasFlag(PinBoardOption.ShowDependencies))
+			if (m_Options.HasFlag(DetectiveBoardOption.ShowDependencies))
 			{
 				var taskItem = GetTaskItem(node);
 
@@ -866,7 +866,7 @@ namespace PinBoardUIExtension
 				var drawState = (SelectedNodeIds.Contains(nodeId) ? DrawState.Selected : DrawState.None);
 				DoPaintNode(graphics, taskItem, rect, drawState);
 			}
-			else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
+			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 			{
 				base.DrawNode(graphics, nodeId, rect);
 // 				graphics.FillRectangle(SystemBrushes.Window, rect);
@@ -882,7 +882,7 @@ namespace PinBoardUIExtension
 
 		protected override void DrawParentAndChildConnections(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
-			if (m_Options.HasFlag(PinBoardOption.ShowParentChildLinks))
+			if (m_Options.HasFlag(DetectiveBoardOption.ShowParentChildLinks))
 				base.DrawParentAndChildConnections(graphics, node);
 		}
 
@@ -898,7 +898,7 @@ namespace PinBoardUIExtension
 
 		protected override void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			if (m_Options.HasFlag(PinBoardOption.ShowParentChildLinks))
+			if (m_Options.HasFlag(DetectiveBoardOption.ShowParentChildLinks))
 			{
 				var taskItem = m_TaskItems.GetTask(nodeId);
 
@@ -910,7 +910,7 @@ namespace PinBoardUIExtension
 				if (m_TaskItems.HasUserLink(nodeId, taskItem.ParentId))
 					return;
 				
-				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(PinBoardOption.ShowRootNode))
+				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 				{
 					DrawConnection(graphics, nodePos, parentPos, Pens.Gray, Brushes.Gray);
 				}
@@ -1408,7 +1408,7 @@ namespace PinBoardUIExtension
 						return UIExtension.HandCursor();
 				}
 			}
-			else if (m_Options.HasFlag(PinBoardOption.ShowRootNode))
+			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 			{
 				if (HitTestNode(ptClient) == RootNode)
 					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);

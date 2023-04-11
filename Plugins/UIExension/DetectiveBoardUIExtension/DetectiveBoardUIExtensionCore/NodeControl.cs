@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace PinBoardUIExtension
+namespace DetectiveBoardUIExtension
 {
 	public delegate void NodeSelectionChangeEventHandler(object sender, IList<uint> itemIds);
 	public delegate bool DragDropChangeEventHandler(object sender, IList<uint> itemIds);

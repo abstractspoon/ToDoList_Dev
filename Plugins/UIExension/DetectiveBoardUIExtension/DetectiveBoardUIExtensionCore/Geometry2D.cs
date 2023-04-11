@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 
-namespace PinBoardUIExtension
+namespace DetectiveBoardUIExtension
 {
 	public class Geometry2D
 	{

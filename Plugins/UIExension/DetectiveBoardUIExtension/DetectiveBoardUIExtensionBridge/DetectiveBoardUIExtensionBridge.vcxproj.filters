@@ -21,7 +21,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PinBoardUIExtensionBridge.cpp">
+    <ClCompile Include="DetectiveBoardUIExtensionBridge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,17 +35,17 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PinBoardUIExtensionBridge.h">
+    <ClInclude Include="DetectiveBoardUIExtensionBridge.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\PinBoard.ico">
+    <None Include="res\DetectiveBoard.ico">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="PinBoardUIExtensionBridge.rc">
+    <ResourceCompile Include="DetectiveBoardUIExtensionBridge.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

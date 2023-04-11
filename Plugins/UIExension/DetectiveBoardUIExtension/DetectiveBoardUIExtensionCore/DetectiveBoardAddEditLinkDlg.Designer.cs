@@ -1,6 +1,6 @@
-﻿namespace PinBoardUIExtension
+﻿namespace DetectiveBoardUIExtension
 {
-	partial class PinBoardAddEditLinkDlg
+	partial class DetectiveBoardAddEditLinkDlg
 	{
 		/// <summary>
 		/// Required designer variable.
@@ -113,7 +113,7 @@
 			this.label1.TabIndex = 1;
 			this.label1.Text = "Link colour";
 			// 
-			// PinBoardAddEditLinkDlg
+			// DetectiveBoardAddEditLinkDlg
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -127,7 +127,7 @@
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.label1);
 			this.Controls.Add(this.m_ColorButton);
-			this.Name = "PinBoardAddEditLinkDlg";
+			this.Name = "DetectiveBoardAddEditLinkDlg";
 			this.ShowIcon = false;
 			this.ShowInTaskbar = false;
 			this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;

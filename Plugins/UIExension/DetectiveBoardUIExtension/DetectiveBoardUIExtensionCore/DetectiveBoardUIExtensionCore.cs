@@ -10,10 +10,10 @@ using System.Windows.Forms.VisualStyles;
 using Abstractspoon.Tdl.PluginHelpers;
 using Abstractspoon.Tdl.PluginHelpers.ColorUtil;
 
-namespace PinBoardUIExtension
+namespace DetectiveBoardUIExtension
 {
 	[System.ComponentModel.DesignerCategory("")]
-	public class PinBoardUIExtensionCore : Panel, IUIExtension
+	public class DetectiveBoardUIExtensionCore : Panel, IUIExtension
     {
         private const string FontName = "Tahoma";
 
@@ -29,14 +29,14 @@ namespace PinBoardUIExtension
         private TDLNodeControl m_Control;
 
 		private Label m_OptionsLabel;
-		private PinBoardOptionsComboBox m_OptionsCombo;
+		private DetectiveBoardOptionsComboBox m_OptionsCombo;
 		private IIControls.ToolStripEx m_Toolbar;
 		private ImageList m_TBImageList;
 		private UIThemeToolbarRenderer m_TBRenderer;
 
 		// ----------------------------------------------------------------------------
 
-		public PinBoardUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
+		public DetectiveBoardUIExtensionCore(String typeId, String uiName, IntPtr hwndParent, Translator trans)
         {
 			TaskItem.MetaDataKey = typeId;
 
@@ -196,7 +196,7 @@ namespace PinBoardUIExtension
             if (!appOnly)
             {
 				// private settings
-				m_Control.Options = (PinBoardOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
+				m_Control.Options = (DetectiveBoardOption)prefs.GetProfileInt(key, "Options", (int)m_Control.Options);
 				m_OptionsCombo.SelectedOptions = m_Control.Options;
 			}
 
@@ -270,11 +270,11 @@ namespace PinBoardUIExtension
             else
                 m_Control.BorderStyle = BorderStyle.Fixed3D;
 
-			m_Control.NodeSelectionChange += new NodeSelectionChangeEventHandler(OnPinBoardSelectionChange);
-			m_Control.TaskModified += new TaskModifiedEventHandler(OnPinBoardTaskModified);
-			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnPinBoardEditTaskLabel);
-            m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnPinBoardEditTaskIcon);
-            m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnPinBoardEditTaskCompletion);
+			m_Control.NodeSelectionChange += new NodeSelectionChangeEventHandler(OnDetectiveBoardSelectionChange);
+			m_Control.TaskModified += new TaskModifiedEventHandler(OnDetectiveBoardTaskModified);
+			m_Control.EditTaskLabel += new EditTaskLabelEventHandler(OnDetectiveBoardEditTaskLabel);
+            m_Control.EditTaskIcon += new EditTaskIconEventHandler(OnDetectiveBoardEditTaskIcon);
+            m_Control.EditTaskDone += new EditTaskCompletionEventHandler(OnDetectiveBoardEditTaskCompletion);
 
 			m_Control.ZoomChange += (s, e) => { UpdateToolbarButtonStates(); };
 			m_Control.UserLinkSelectionChange += (s, e) => { UpdateToolbarButtonStates(); };
@@ -286,7 +286,7 @@ namespace PinBoardUIExtension
 			m_OptionsLabel = CreateLabel("Options", null);
 			this.Controls.Add(m_OptionsLabel);
 
-			m_OptionsCombo = new PinBoardOptionsComboBox(m_Trans);
+			m_OptionsCombo = new DetectiveBoardOptionsComboBox(m_Trans);
 			m_OptionsCombo.DropDownClosed += new EventHandler(OnOptionsComboClosed);
 			m_OptionsCombo.DrawMode = DrawMode.OwnerDrawFixed;
 
@@ -329,14 +329,14 @@ namespace PinBoardUIExtension
 				m_Control.Options = m_OptionsCombo.SelectedOptions;
 		}
 
-		bool OnPinBoardEditTaskLabel(object sender, UInt32 taskId)
+		bool OnDetectiveBoardEditTaskLabel(object sender, UInt32 taskId)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
 			return notify.NotifyEditLabel();
 		}
 
-        bool OnPinBoardEditTaskCompletion(object sender, UInt32 taskId, bool completed)
+        bool OnDetectiveBoardEditTaskCompletion(object sender, UInt32 taskId, bool completed)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -344,14 +344,14 @@ namespace PinBoardUIExtension
                                     (completed ? DateTime.Now : DateTime.MinValue));
         }
 
-        bool OnPinBoardEditTaskIcon(object sender, UInt32 taskId)
+        bool OnDetectiveBoardEditTaskIcon(object sender, UInt32 taskId)
         {
             var notify = new UIExtension.ParentNotify(m_HwndParent);
 
             return notify.NotifyEditIcon();
         }
 
-		void OnPinBoardSelectionChange(object sender, IList<uint> nodeIds)
+		void OnDetectiveBoardSelectionChange(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -378,7 +378,7 @@ namespace PinBoardUIExtension
 			UpdateToolbarButtonStates();
 		}
 
-		bool OnPinBoardTaskModified(object sender, IList<uint> nodeIds)
+		bool OnDetectiveBoardTaskModified(object sender, IList<uint> nodeIds)
 		{
 			var notify = new UIExtension.ParentNotify(m_HwndParent);
 
@@ -422,7 +422,7 @@ namespace PinBoardUIExtension
 		private void CreateToolbar()
 		{
 			var assembly = Assembly.GetExecutingAssembly();
-			var images = new Bitmap(assembly.GetManifestResourceStream("PinBoardUIExtension.toolbar_std.bmp"));
+			var images = new Bitmap(assembly.GetManifestResourceStream("DetectiveBoardUIExtension.toolbar_std.bmp"));
 
 			m_TBImageList = new ImageList();
 			m_TBImageList.ColorDepth = ColorDepth.Depth32Bit;
@@ -565,7 +565,7 @@ namespace PinBoardUIExtension
 						}
 					}
 
-					var dlg = new PinBoardAddEditLinkDlg(m_Trans.Translate("New Connection"), null);
+					var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans.Translate("New Connection"), null);
 
 					if (dlg.ShowDialog() == DialogResult.OK)
 					{
@@ -581,7 +581,7 @@ namespace PinBoardUIExtension
 		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
 
-			var dlg = new PinBoardAddEditLinkDlg(m_Trans.Translate("Edit Connection"), m_Control.SelectedUserLink);
+			var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans.Translate("Edit Connection"), m_Control.SelectedUserLink);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
