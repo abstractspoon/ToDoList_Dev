@@ -101,7 +101,7 @@ namespace PinBoardUIExtension
 
 			m_DragImage = new DragImage();
 			m_LastDragPos = Point.Empty;
-			m_Options = DefaultOptions;
+			Options = DefaultOptions;
 
 			m_TaskItems = null;
 
@@ -321,6 +321,11 @@ namespace PinBoardUIExtension
 			return labelRect;
 		}
 
+		public bool IsTaskLocked(uint taskId)
+		{
+			return m_TaskItems.IsTaskLocked(taskId);
+		}
+
 		public bool CanMoveTask(uint taskId, uint destParentId, uint destPrevSiblingId)
 		{
 			return false;
@@ -333,7 +338,7 @@ namespace PinBoardUIExtension
 
 		public bool CanCreateUserLink(uint fromId, uint toId)
 		{
-			return !m_TaskItems.HasUserLink(fromId, toId);
+			return !(m_TaskItems.IsTaskLocked(fromId) || m_TaskItems.HasUserLink(fromId, toId));
 		}
 
 		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, UserLink.EndArrows arrows)
@@ -381,7 +386,7 @@ namespace PinBoardUIExtension
 				if ((SingleSelectedNode == null) || (m_SelectedUserLink == null))
 					return null;
 
-				if ((SingleSelectedNode.Data != m_SelectedUserLink.FromId))
+				if (!SingleSelectedNode.Data.Equals(m_SelectedUserLink.FromId))
 				{
 					Debug.Assert(false);
 					return null;
@@ -1130,62 +1135,6 @@ namespace PinBoardUIExtension
             return new Rectangle(topLeft.X, topLeft.Y, width, height);
 		}
 
-		protected override void OnMouseDoubleClick(MouseEventArgs e)
-		{
-			var hit = HitTestNode(e.Location, true);
-			
-			if (hit != null)
-			{
-				var task = GetTaskItem(hit);
-				var imageRect = CalcImageRect(task, GetNodeClientRect(hit), false);
-
-				if (imageRect.Contains(e.Location))
-					Process.Start(task.ImagePath);
-				else
-					EditTaskLabel(this, SingleSelectedNode.Data);
-			}
-			else
-			{
-				var link = HitTestUserLink(e.Location);
-
-				if (link != null)
-					DoubleClickUserLink?.Invoke(this, null);
-			}
-		}
-
-		protected override void OnMouseClick(MouseEventArgs e)
-		{
-			base.OnMouseClick(e);
-
-			if (e.Button != MouseButtons.Left)
-				return;
-
-// 			TaskNode task = SelectedTaskNode;
-// 
-// 			if (task == null)
-// 				return;
-// 
-// 			if (!ReadOnly && !task.IsLocked && (HitTestTask(e.Location) == task))
-// 			{
-// /*
-// 				if (HitTestCheckbox(node, e.Location))
-// 				{
-// 					if (EditTaskDone != null)
-// 						EditTaskDone(this, task.ID, !task.IsDone(false));
-// 				}
-// 				else*/ if (HitTestIcon(SelectedNode, e.Location))
-// 				{
-// 					if (EditTaskIcon != null)
-// 					    EditTaskIcon(this, task.TaskId);
-// 				}
-// 				else if (SelectedNodeWasPreviouslySelected)
-// 				{
-// 					if (EditTaskLabel != null)
-// 						m_EditTimer.Start();
-// 				}
-// 			}
-		}
-
 		private bool SelectedNodeWasPreviouslySelected
 		{
 			get { return ((SingleSelectedTask != null) && (SingleSelectedTask == m_PreviouslySelectedTask)); }
@@ -1252,6 +1201,54 @@ namespace PinBoardUIExtension
 
 				if ((link != null) && !m_TaskItems.IsTaskLocked(link.FromId))
 				{
+					// Cache the link to be checked in OnMouseClick
+					m_SelectedUserLink = link;
+					return;
+				}
+				else if (HasSelectedUserLink)
+				{
+					ClearUserLinkSelection();
+				}
+			}
+
+			base.OnMouseDown(e);
+		}
+
+		protected override void OnMouseDoubleClick(MouseEventArgs e)
+		{
+			var hit = HitTestNode(e.Location, true);
+
+			if (hit != null)
+			{
+				var task = GetTaskItem(hit);
+				var imageRect = CalcImageRect(task, GetNodeClientRect(hit), false);
+
+				if (imageRect.Contains(e.Location))
+					Process.Start(task.ImagePath);
+				else
+					EditTaskLabel(this, SingleSelectedNode.Data);
+			}
+			else
+			{
+				var link = HitTestUserLink(e.Location);
+
+				if (link != null)
+					DoubleClickUserLink?.Invoke(this, null);
+			}
+		}
+
+		protected override void OnMouseClick(MouseEventArgs e)
+		{
+			if (e.Button != MouseButtons.Left)
+				return;
+
+			// Check for connection first to simplify logic
+			if (!ReadOnly)
+			{
+				var link = HitTestUserLink(e.Location);
+
+				if ((link != null) && (link == m_SelectedUserLink))
+				{
 					// Set the owning node first because that will clear the selected connection
 					SelectTask(link.FromId, true);
 					Invalidate();
@@ -1267,8 +1264,34 @@ namespace PinBoardUIExtension
 				}
 			}
 
-			base.OnMouseDown(e);
+			base.OnMouseClick(e);
+
+			// 			TaskNode task = SelectedTaskNode;
+			// 
+			// 			if (task == null)
+			// 				return;
+			// 
+			// 			if (!ReadOnly && !task.IsLocked && (HitTestTask(e.Location) == task))
+			// 			{
+			// /*
+			// 				if (HitTestCheckbox(node, e.Location))
+			// 				{
+			// 					if (EditTaskDone != null)
+			// 						EditTaskDone(this, task.ID, !task.IsDone(false));
+			// 				}
+			// 				else*/ if (HitTestIcon(SelectedNode, e.Location))
+			// 				{
+			// 					if (EditTaskIcon != null)
+			// 					    EditTaskIcon(this, task.TaskId);
+			// 				}
+			// 				else if (SelectedNodeWasPreviouslySelected)
+			// 				{
+			// 					if (EditTaskLabel != null)
+			// 						m_EditTimer.Start();
+			// 				}
+			// 			}
 		}
+
 
 		private void OnEditLabelTimer(object sender, EventArgs e)
 		{

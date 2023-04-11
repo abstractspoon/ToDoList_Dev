@@ -499,8 +499,7 @@ namespace PinBoardUIExtension
 			(m_Toolbar.Items["ZoomToExtents"] as ToolStripButton).Enabled = m_Control.CanZoomOut;
 
 			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Checked = false;
-			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Enabled = ((m_Control.SelectedNodeCount == 2) &&
-																			m_Control.CanCreateUserLink(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1]));
+			(m_Toolbar.Items["NewConnection"] as ToolStripButton).Enabled = CanCreateNewConnection;
 
 			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Enabled = m_Control.HasSelectedUserLink;
 			(m_Toolbar.Items["EditConnection"] as ToolStripButton).Checked = false;
@@ -509,26 +508,76 @@ namespace PinBoardUIExtension
 			(m_Toolbar.Items["DeleteConnection"] as ToolStripButton).Checked = false;
 		}
 
-		void OnZoomToExtents(object sender, EventArgs e)
+		private void OnZoomToExtents(object sender, EventArgs e)
 		{
 			m_Control.ZoomToExtents();
 		}
 
-		void OnNewTaskLink(object sender, EventArgs e)
+		private bool CanCreateNewConnection
 		{
-			if (m_Control.SelectedNodeCount == 2)
+			get
 			{
-				var dlg = new PinBoardAddEditLinkDlg(m_Trans.Translate("New Connection"), null);
+				if (m_Control.ReadOnly)
+					return false;
 
-				if (dlg.ShowDialog() == DialogResult.OK)
+				if (m_Control.SelectedNodeCount > 2)
+					return false;
+
+				if ((m_Control.SelectedNodeCount == 2))
 				{
-					m_Control.CreateUserLink(m_Control.SelectedNodeIds[0], m_Control.SelectedNodeIds[1], dlg.Color, dlg.Thickness, dlg.Arrows);
-					UpdateToolbarButtonStates();
+					uint task1Id = m_Control.SelectedNodeIds[0], task2Id = m_Control.SelectedNodeIds[1];
+
+					if (m_Control.IsTaskLocked(task1Id) && m_Control.IsTaskLocked(task2Id))
+						return false;
 				}
+
+				return true;
 			}
 		}
 
-		void OnEditUserLink(object sender, EventArgs e)
+		private void OnNewTaskLink(object sender, EventArgs e)
+		{
+			switch (m_Control.SelectedNodeCount)
+			{
+			case 0:
+			case 1:
+				MessageBox.Show(m_Trans.Translate("To create a new connection you need to preselect two tasks"), m_UiName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+				break;
+
+			case 2:
+				{
+					uint firstId = m_Control.SelectedNodeIds[0], secondId = m_Control.SelectedNodeIds[1];
+
+					if (!m_Control.CanCreateUserLink(firstId, secondId))
+					{
+						// Try the reverse
+						if (m_Control.CanCreateUserLink(secondId, firstId))
+						{
+							uint temp = firstId;
+
+							firstId = secondId;
+							secondId = temp;
+						}
+						else
+						{
+							MessageBox.Show(m_Trans.Translate("A connection already exists between the two selected tasks"), m_UiName, MessageBoxButtons.OK, MessageBoxIcon.Hand);
+							return;
+						}
+					}
+
+					var dlg = new PinBoardAddEditLinkDlg(m_Trans.Translate("New Connection"), null);
+
+					if (dlg.ShowDialog() == DialogResult.OK)
+					{
+						m_Control.CreateUserLink(firstId, secondId, dlg.Color, dlg.Thickness, dlg.Arrows);
+						UpdateToolbarButtonStates();
+					}
+				}
+				break;
+			}
+		}
+
+		private void OnEditUserLink(object sender, EventArgs e)
 		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
 
@@ -545,17 +594,17 @@ namespace PinBoardUIExtension
 			}
 		}
 
-		void OnDeleteTaskLink(object sender, EventArgs e)
+		private void OnDeleteTaskLink(object sender, EventArgs e)
 		{
 			m_Control.DeleteSelectedUserLink();
 		}
 
-		void OnPreferences(object sender, EventArgs e)
+		private void OnPreferences(object sender, EventArgs e)
 		{
 			// TODO
 		}
 
-		void OnHelp(object sender, EventArgs e)
+		private void OnHelp(object sender, EventArgs e)
 		{
 			// TODO
 		}
