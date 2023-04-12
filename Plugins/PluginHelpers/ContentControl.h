@@ -95,6 +95,7 @@ namespace Abstractspoon
 				// text content if supported. return false if not supported
 				String^ GetTextContent();
 				bool SetTextContent(String^ content, bool bResetSelection);
+				bool InsertTextContent(String^ text, bool bInsertAtEnd);
 
 				bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos);
 

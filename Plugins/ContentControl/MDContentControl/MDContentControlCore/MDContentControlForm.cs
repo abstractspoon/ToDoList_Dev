@@ -102,6 +102,19 @@ namespace MDContentControl
 			}
 		}
 
+		public bool InsertTextContent(String content, bool bAtEnd)
+		{
+			if (ReadOnly || !InputTextCtrl.Enabled)
+				return false;
+
+			if (bAtEnd)
+				InputText += content;
+
+			// else
+			InputTextCtrl.SelectedText = content;
+			return true;
+		}
+
 		public bool ReadOnly
 		{
 			get

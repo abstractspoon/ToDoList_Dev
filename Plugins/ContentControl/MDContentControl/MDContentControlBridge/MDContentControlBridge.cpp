@@ -208,8 +208,9 @@ bool CMDContentControlBridge::SetTextContent(LPCWSTR szContent, bool bResetSelec
 
 bool CMDContentControlBridge::InsertTextContent(LPCWSTR szContent, bool bAtEnd)
 {
-	// TODO
-	return false;
+	msclr::auto_gcroot<String^> content = gcnew String(szContent);
+
+	return m_wnd->InsertTextContent(content.get(), bAtEnd);
 }
 
 bool CMDContentControlBridge::FindReplaceAll(LPCWSTR szFind, LPCWSTR szReplace, bool bCaseSensitive, bool bWholeWord)
