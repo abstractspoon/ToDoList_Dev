@@ -2721,7 +2721,7 @@ BOOL CToDoCtrl::CanPasteText() const
 
 	// Special case
 	if (nAttribID == TDCA_COMMENTS)
-		return m_ctrlComments.HasFocus();
+		return CommentsHaveFocus();
 
 	return FALSE;
 }

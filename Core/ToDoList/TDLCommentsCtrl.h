@@ -34,6 +34,7 @@ public:
 	virtual ~CTDLCommentsCtrl();
 
 	BOOL Create(CWnd* pParent, UINT nID, const CRect& rPos = CRect(0, 0, 0, 0));
+	BOOL IsCommentsEditable() const;
 
 	void SetUITheme(const CUIThemeFile& theme);
 	void SetContentFont(HFONT hFont);
@@ -78,7 +79,7 @@ protected:
 	CString m_sCommentsPrompt, m_sComboPrompt;
 
 	CString m_sPrefsFilePath;
-	BOOL m_bReadOnly;
+	BOOL m_bReadOnlyComments;
 	BOOL m_bShowLabel, m_bShowToolbar;
 
 	CONTENTFORMAT m_cfLastCustom;
@@ -112,6 +113,10 @@ protected:
 	afx_msg LRESULT OnCommentsFailedLink(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsGetTooltip(WPARAM wParam, LPARAM lParam);
 	afx_msg LRESULT OnCommentsGetAttributeList(WPARAM wParam, LPARAM lParam);
+
+	afx_msg void OnInsertDate();
+	afx_msg void OnInsertTime();
+	afx_msg void OnInsertDateAndTime();
 
 protected:
 	void CalcCommentsCtrlRect(CRect& rCtrl, int cx = 0, int cy = 0) const;

@@ -529,6 +529,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_ARCHIVE_SELECTEDTASKS, OnUpdateArchiveSelectedCompletedTasks)
 	ON_UPDATE_COMMAND_UI(ID_CLOSEALL, OnUpdateCloseall)
 	ON_UPDATE_COMMAND_UI(ID_CLOSEALLBUTTHIS, OnUpdateCloseallbutthis)
+	ON_UPDATE_COMMAND_UI(ID_COMMENTS_INSERTDATE, OnUpdateCommentsInsertDateAndOrTime)
+	ON_UPDATE_COMMAND_UI(ID_COMMENTS_INSERTDATETIME, OnUpdateCommentsInsertDateAndOrTime)
+	ON_UPDATE_COMMAND_UI(ID_COMMENTS_INSERTTIME, OnUpdateCommentsInsertDateAndOrTime)
 	ON_UPDATE_COMMAND_UI(ID_DELETEALLTASKS, OnUpdateDeletealltasks)
 	ON_UPDATE_COMMAND_UI(ID_DELETETASK, OnUpdateDeletetask)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_CLEARFIELD, OnUpdateEditClearAttribute)
@@ -556,9 +559,9 @@ BEGIN_MESSAGE_MAP(CToDoListWnd, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_GOTODEPENDENCY, OnUpdateEditGotoDependency)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INCTASKPERCENTDONE, OnUpdateEditInctaskpercentdone)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_INCTASKPRIORITY, OnUpdateEditInctaskpriority)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTDATE, OnUpdateEditInsertdate)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTDATETIME, OnUpdateEditInsertdatetime)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTTIME, OnUpdateEditInserttime)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTDATE, OnUpdateEditInsertDateAndOrTime)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTDATETIME, OnUpdateEditInsertDateAndOrTime)
+	ON_UPDATE_COMMAND_UI(ID_EDIT_INSERTTIME, OnUpdateEditInsertDateAndOrTime)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_LOCKTASK, OnUpdateEditLocktask)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_OFFSETDATES, OnUpdateEditOffsetDates)
 	ON_UPDATE_COMMAND_UI(ID_EDIT_OPENFILELINK1, OnUpdateEditOpenFileLink)
@@ -12796,19 +12799,16 @@ void CToDoListWnd::DoInsertDateAndTime(BOOL bDate, BOOL bTime)
 	GetToDoCtrl().PasteText(sInsert);
 }
 
-void CToDoListWnd::OnUpdateEditInsertdatetime(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateEditInsertDateAndOrTime(CCmdUI* pCmdUI) 
 {
 	pCmdUI->Enable(CanInsertDateAndTime());
 }
 
-void CToDoListWnd::OnUpdateEditInserttime(CCmdUI* pCmdUI) 
+void CToDoListWnd::OnUpdateCommentsInsertDateAndOrTime(CCmdUI* pCmdUI)
 {
-	pCmdUI->Enable(CanInsertDateAndTime());
-}
+	const CFilteredToDoCtrl& tdc = GetToDoCtrl();
 
-void CToDoListWnd::OnUpdateEditInsertdate(CCmdUI* pCmdUI) 
-{
-	pCmdUI->Enable(CanInsertDateAndTime());
+	pCmdUI->Enable(tdc.CommentsHaveFocus() && tdc.CanPasteDateTime());
 }
 
 BOOL CToDoListWnd::CanInsertDateAndTime() const
