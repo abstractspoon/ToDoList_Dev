@@ -184,15 +184,16 @@ namespace DayViewUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-            m_DayView.SetUITheme(theme);
-			m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			m_TBRenderer.SetUITheme(theme);
-            m_SelectedTaskDatesLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
-            m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_Toolbar.BackColor = BackColor;
 
-            BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			m_DayView.SetUITheme(theme);
+			m_TBRenderer.SetUITheme(theme);
+
+			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
 		}
-		
+
 		public void SetTaskFont(String faceName, int pointSize)
 		{
 			m_DayView.SetFont(faceName, pointSize);
