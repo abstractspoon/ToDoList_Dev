@@ -364,15 +364,20 @@ CString CTDCTaskTimeLog::GetLogPath() const
 
 CString CTDCTaskTimeLog::GetLogPath(DWORD dwTaskID, BOOL bLogSeparately) const
 {
-	CString sLogPath, sDrive, sFolder, sFileName;
+	CString sLogPath;
 
 	// use ref filename as the basis for the log filename
-	FileMisc::SplitPath(m_sRefPath, &sDrive, &sFolder, &sFileName);
-	
-	if (bLogSeparately)
-		sLogPath.Format(_T("%s%s%s\\%lu_Log.csv"), sDrive, sFolder, sFileName, dwTaskID);
-	else
-		sLogPath.Format(_T("%s%s%s_Log.csv"), sDrive, sFolder, sFileName);
+	if (!m_sRefPath.IsEmpty())
+	{
+		CString sLogPath, sDrive, sFolder, sFileName;
+
+		FileMisc::SplitPath(m_sRefPath, &sDrive, &sFolder, &sFileName);
+
+		if (bLogSeparately)
+			sLogPath.Format(_T("%s%s%s\\%lu_Log.csv"), sDrive, sFolder, sFileName, dwTaskID);
+		else
+			sLogPath.Format(_T("%s%s%s_Log.csv"), sDrive, sFolder, sFileName);
+	}
 
 	return sLogPath;
 }
