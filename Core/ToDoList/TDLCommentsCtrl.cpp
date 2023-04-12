@@ -256,6 +256,8 @@ BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 		if (m_bShowLabel)
 			ExcludeCtrl(this, IDC_COMBOLABEL, pDC);
 
+		ExcludeChild(&m_toolbar, pDC);
+
 		CRect rClient;
 		GetClientRect(rClient);
 
