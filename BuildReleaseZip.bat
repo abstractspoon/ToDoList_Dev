@@ -65,8 +65,8 @@ SET TDLFILELIST=%TDLFILELIST%;MDContentControlBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;MDContentControlCore.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;MindMapUIExtensionCore.dll
-SET TDLFILELIST=%TDLFILELIST%;PinBoardUIExtensionBridge.dll
-SET TDLFILELIST=%TDLFILELIST%;PinBoardUIExtensionCore.dll
+SET TDLFILELIST=%TDLFILELIST%;DetectiveBoardUIExtensionBridge.dll
+SET TDLFILELIST=%TDLFILELIST%;DetectiveBoardUIExtensionCore.dll
 SET TDLFILELIST=%TDLFILELIST%;PDFExporterBridge.dll
 SET TDLFILELIST=%TDLFILELIST%;PDFExporterCore.dll
 SET TDLFILELIST=%TDLFILELIST%;PluginHelpers.dll
@@ -106,6 +106,7 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\HtmlAgilityPack.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Itenso.*.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\iTextSharp.dll
+%PATH7ZIP% a %OUTZIP% %OUTDIR%\LinkLabelEx.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Markdig.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\Microsoft.VisualStudio.OLE.Interop.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\MSDN.HtmlEditorControl.dll
@@ -115,7 +116,6 @@ REM - All other components which we don't own
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\UIComponents.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGrid.dll
 %PATH7ZIP% a %OUTZIP% %OUTDIR%\unvell.ReoGridEditorControl.dll
-%PATH7ZIP% a %OUTZIP% %OUTDIR%\LinkLabelEx.dll
 
 REM - Manifest for XP only (Updater will delete for other OSes)
 %PATH7ZIP% a %OUTZIP% %REPO%\Core\ToDoList\res\ToDoList.exe.XP.manifest

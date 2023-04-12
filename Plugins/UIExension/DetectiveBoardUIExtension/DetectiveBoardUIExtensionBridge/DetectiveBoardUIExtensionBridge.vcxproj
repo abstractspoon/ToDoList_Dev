@@ -124,12 +124,12 @@ copy $(TargetDir)$(TargetName).pdb "$(SolutionDir)..\Core\ToDoList\unicode_$(Con
     <ResourceCompile Include="DetectiveBoardUIExtensionBridge.rc" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\DetectiveBoard.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\DetectiveBoardUIExtensionCore\DetectiveBoardUIExtensionCore.csproj">
       <Project>{d03aa054-9987-44dc-b03f-691d79506da9}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\Detective.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
