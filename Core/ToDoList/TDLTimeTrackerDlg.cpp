@@ -1213,6 +1213,7 @@ void CTDLTimeTrackerDlg::CollapseWindow(BOOL bCollapse)
 		}
 		
 		MoveWindow(rWindow);
+		UpdatePlayButton();
 		RefreshCaptionText();
 	}
 }

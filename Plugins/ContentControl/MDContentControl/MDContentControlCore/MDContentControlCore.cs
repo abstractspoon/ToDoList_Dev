@@ -44,7 +44,7 @@ namespace MDContentControl
             return true;
         }
 
-        public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
+		public bool ProcessMessage(IntPtr hwnd, UInt32 message, UInt32 wParam, UInt32 lParam, UInt32 time, Int32 xPos, Int32 yPos)
         {
 			const int WM_KEYDOWN = 0x0100;
 			const int WM_SYSKEYDOWN = 0x0104;

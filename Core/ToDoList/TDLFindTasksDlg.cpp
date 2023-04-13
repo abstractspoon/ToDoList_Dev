@@ -409,7 +409,7 @@ BOOL CTDLFindTasksDlg::Create(DM_POS nPos)
 		dwExStyle = RTD_DEFEXSTYLE;
 	}
 
-	return CRuntimeDlg::Create(_T("Find Tasks"), dwStyle, dwExStyle, rect, AfxGetMainWnd(), IDC_STATIC);
+	return CRuntimeDlg::Create(CEnString(IDS_FIND_TASKS), dwStyle, dwExStyle, rect, AfxGetMainWnd(), IDC_STATIC);
 }
 
 BOOL CTDLFindTasksDlg::Create()

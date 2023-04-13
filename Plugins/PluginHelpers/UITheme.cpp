@@ -395,11 +395,18 @@ bool UIThemeToolbarRenderer::ValidColours()
 			!ColorUtil::DrawingColor::IsTransparent(m_PressedFillColor, false));
 }
 
-void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
+void UIThemeToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar)
 {
-	UITheme::DrawHorizontalBar(g, rowRect, m_BkgndLightColor, m_BkgndDarkColor, m_Style);
+	if ((COSVersion() >= OSV_WIN10) && !SystemInformation::HighContrast && isMenuBar)
+	{
+		g->FillRectangle(Drawing::Brushes::White, *rowRect);
+	}
+	else
+	{
+		UITheme::DrawHorizontalBar(g, rowRect, m_BkgndLightColor, m_BkgndDarkColor, m_Style);
 
-	DrawRowSeparator(g, rowRect, firstRow, lastRow);
+		DrawRowSeparator(g, rowRect, firstRow, lastRow);
+	}
 }
 
 void UIThemeToolbarRenderer::DrawDropArrow(Drawing::Graphics^ g, Drawing::Rectangle^ arrowRect)

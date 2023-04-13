@@ -526,8 +526,12 @@ void CToDoCtrlMgr::SetLoaded(int nIndex)
 void CToDoCtrlMgr::RefreshTimeTracking(int nIndex)
 {
 	CHECKVALIDINDEX(nIndex);
-	ASSERT(GetTDCItem(nIndex).bLoaded);
-	
+
+#ifdef _DEBUG
+	const TDCITEM& tdci = GetTDCItem(nIndex);
+	ASSERT(tdci.bLoaded || !tdci.HasFilePath());
+#endif
+
 	UpdateTabItemImage(nIndex);
 }
 

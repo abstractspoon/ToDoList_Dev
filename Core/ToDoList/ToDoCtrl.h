@@ -397,6 +397,7 @@ public:
 	BOOL IsTaskLabelEditing() const;
 
 	virtual BOOL TasksHaveFocus() const { return m_taskTree.HasFocus(); }
+	virtual BOOL CommentsHaveFocus() const { return m_ctrlComments.HasFocus(); }
 	virtual void SetFocusToTasks();
 	virtual void SetFocusToComments();
 	virtual CString GetControlDescription(const CWnd* pCtrl) const;

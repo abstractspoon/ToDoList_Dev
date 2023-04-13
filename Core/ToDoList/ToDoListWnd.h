@@ -269,6 +269,7 @@ protected:
 	afx_msg void OnUpdateAddtimetologfile(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateArchiveSelectedCompletedTasks(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCloseallbutthis(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateCommentsInsertDateAndOrTime(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCopyTaskasDependency(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCopyTaskasDependencyFull(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateCopyTaskasPath(CCmdUI* pCmdUI);
@@ -283,9 +284,7 @@ protected:
 	afx_msg void OnUpdateEditLocktask(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditInctaskpercentdone(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditInctaskpriority(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateEditInsertdate(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateEditInsertdatetime(CCmdUI* pCmdUI);
-	afx_msg void OnUpdateEditInserttime(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateEditInsertDateAndOrTime(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOffsetDates(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOffsetDatesForwards(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateEditOffsetDatesBackwards(CCmdUI* pCmdUI);

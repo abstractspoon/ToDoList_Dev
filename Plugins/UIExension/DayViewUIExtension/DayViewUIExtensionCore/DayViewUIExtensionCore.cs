@@ -184,15 +184,20 @@ namespace DayViewUIExtension
 
 		public void SetUITheme(UITheme theme)
 		{
-            m_DayView.SetUITheme(theme);
-			m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
-			m_TBRenderer.SetUITheme(theme);
-            m_SelectedTaskDatesLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
-            m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 
-            BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			// Set the toolbar colors to be the same as the back color
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
+			m_Toolbar.BackColor = BackColor;
+
+			m_DayView.SetUITheme(theme);
+			m_TBRenderer.SetUITheme(theme);
+
+			m_WeekLabel.ForeColor = theme.GetAppDrawingColor(UITheme.AppColor.AppText);
+			m_SelectedTaskDatesLabel.ForeColor = m_WeekLabel.ForeColor;
 		}
-		
+
 		public void SetTaskFont(String faceName, int pointSize)
 		{
 			m_DayView.SetFont(faceName, pointSize);
@@ -458,6 +463,8 @@ namespace DayViewUIExtension
 			btn9.Click += new EventHandler(OnPreferences);
 			btn9.ToolTipText = m_Trans.Translate("Preferences");
 			m_Toolbar.Items.Add(btn9);
+
+			m_Toolbar.Items.Add(new ToolStripSeparator());
 
 			var btn10 = new ToolStripButton();
 			btn10.ImageIndex = 9;

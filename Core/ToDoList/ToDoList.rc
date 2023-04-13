@@ -2774,7 +2774,7 @@ IDB_TIMETRACK_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\timetrack_toolbar_std.bm
 IDB_UDTPREFS_TOOLBAR_STD BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar_std.bmp"
 IDR_UDTPREFS_TOOLBAR    BITMAP  MOVEABLE PURE   "res\\udtprefs_toolbar.bmp"
 IDB_OUTLOOKTYPES        BITMAP  MOVEABLE PURE   "res\\outlooktypes.bmp"
-IDR_DATETIME_TOOLBAR    BITMAP  DISCARDABLE     "res\\datetime_toolbar.bmp"
+IDR_COMMENTS_DATETIME_TOOLBAR BITMAP  DISCARDABLE     "res\\datetime_toolbar.bmp"
 IDB_TDLUPDATE_WIZ_HEADER BITMAP  DISCARDABLE     "..\\TDLUpdate\\res\\TDLUpdate_wiz_header.bmp"
 IDB_DATETIME_TOOLBAR_STD BITMAP  DISCARDABLE     "res\\datetime_toolbar_std.bmp"
 
@@ -2883,11 +2883,11 @@ BEGIN
     BUTTON      ID_UDTPREFS_MOVEDOWN
 END
 
-IDR_DATETIME_TOOLBAR TOOLBAR DISCARDABLE  16, 15
+IDR_COMMENTS_DATETIME_TOOLBAR TOOLBAR DISCARDABLE  16, 15
 BEGIN
-    BUTTON      ID_EDIT_INSERTDATE
-    BUTTON      ID_EDIT_INSERTTIME
-    BUTTON      ID_EDIT_INSERTDATETIME
+    BUTTON      ID_COMMENTS_INSERTDATE
+    BUTTON      ID_COMMENTS_INSERTTIME
+    BUTTON      ID_COMMENTS_INSERTDATETIME
 END
 
 
@@ -5861,12 +5861,20 @@ BEGIN
     IDS_TASKCOMPLETION      "Task Completion"
     IDS_CUSTOM_FEATURE_SHOWEDITFIELD "Show edit field"
     IDS_COMMENTSMEMORYERROR "Memory Allocation Error|The application was unable to allocate enough memory to retrieve the most recently modified comments.\n\nTry creating a separate subtask for any further comments."
+    IDS_FIND_TASKS          "Find Tasks"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_UDTPREFS_NEWTDL      "\nNew ToDoList Tool"
     ID_FIND_CLOSE           "\nClose"
+    ID_COMMENTS_INSERTDATE  "\nInsert Date"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_COMMENTS_INSERTTIME  "\nInsert Time"
+    ID_COMMENTS_INSERTDATETIME "\nInsert Date and Time"
 END
 
 #endif    // English (Australia) resources

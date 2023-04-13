@@ -138,6 +138,7 @@
 #define IDI_TRAY_LIGHT                  316
 #define IDI_TRAY_TIMETRACK_LIGHT        317
 #define IDR_DATETIME_TOOLBAR            318
+#define IDR_COMMENTS_DATETIME_TOOLBAR   318
 #define IDB_DATETIME_TOOLBAR_STD        319
 #define IDD_TASKDEPENDENCY_DIALOG       321
 #define IDI_QUICKFIND_NEXT              322
@@ -1573,6 +1574,9 @@
 #define ID_UDTPREFS_NEWTDL              34748
 #define ID_EDIT_DEPENDENCY              34749
 #define ID_FIND_CLOSE                   34750
+#define ID_COMMENTS_INSERTDATE          34751
+#define ID_COMMENTS_INSERTTIME          34752
+#define ID_COMMENTS_INSERTDATETIME      34753
 #define IDS_FIRSTSTRING                 50601
 #define IDS_CMDLINE_FIRST               50601
 #define IDS_CMDLINE_INIFILE             50601
@@ -2467,13 +2471,14 @@
 #define IDS_TASKCOMPLETION              51626
 #define IDS_CUSTOM_FEATURE_SHOWEDITFIELD 51627
 #define IDS_COMMENTSMEMORYERROR         51628
+#define IDS_FIND_TASKS                  51629
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        327
-#define _APS_NEXT_COMMAND_VALUE         34751
+#define _APS_NEXT_COMMAND_VALUE         34754
 #define _APS_NEXT_CONTROL_VALUE         1561
 #define _APS_NEXT_SYMED_VALUE           108
 #endif

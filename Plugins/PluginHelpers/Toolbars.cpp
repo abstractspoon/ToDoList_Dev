@@ -197,13 +197,21 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 		if (numItems > 0)
 		{
 			auto prevItemRect = Drawing::Rectangle::Empty;
-			int rowTop = toolbar->Top, rowBottom = 0;
+			bool isMenuBar = false;
+
+			int rowTop = 0, rowBottom = 0;
 			bool firstRow = true;
 
 			for (int i = 0; i < numItems; i++)
 			{
 				auto item = toolbar->Items[i];
-
+				
+				if (!isMenuBar && ISTYPE(item, ToolStripMenuItem))
+				{
+					auto menuItem = ASTYPE(item, ToolStripMenuItem);
+					isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
+				}
+				
 				if (!ISTYPE(item, ToolStripSeparator) && item->Visible)
 				{
 					if (prevItemRect.IsEmpty)
@@ -219,8 +227,8 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 						{
 							rowBottom = ((itemRect.Top + prevItemRect.Bottom) / 2);
 							
-							auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, (rowTop - toolbar->Top), toolbar->Width, (rowBottom - rowTop));
-							DrawRowBackground(e->Graphics, rowRect, firstRow, false);
+							auto rowRect = gcnew Drawing::Rectangle(0, rowTop, toolbar->Width, (rowBottom - rowTop));
+							DrawRowBackground(e->Graphics, rowRect, firstRow, false, isMenuBar);
 							
 							prevItemRect = itemRect;
 							rowTop = rowBottom + 1;
@@ -231,8 +239,8 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 			}
 
 			// Last row
-			auto rowRect = gcnew Drawing::Rectangle(toolbar->Left, (rowTop - toolbar->Top), toolbar->Width, (toolbar->Bottom - rowTop));
-			DrawRowBackground(e->Graphics, rowRect, firstRow, true);
+			auto rowRect = gcnew Drawing::Rectangle(0, rowTop, toolbar->Width, (toolbar->Height - rowTop));
+			DrawRowBackground(e->Graphics, rowRect, firstRow, true, isMenuBar);
 		}
 	}
 
@@ -261,9 +269,10 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 	}
 }
 
-void BaseToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)
+void BaseToolbarRenderer::DrawRowBackground(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow, bool isMenuBar)
 {
-	DrawRowSeparator(g, rowRect, firstRow, lastRow);
+	if (!isMenuBar)
+		DrawRowSeparator(g, rowRect, firstRow, lastRow);
 }
 
 void BaseToolbarRenderer::DrawRowSeparator(Drawing::Graphics^ g, Drawing::Rectangle^ rowRect, bool firstRow, bool lastRow)

@@ -42,7 +42,7 @@ CTDLCommentsCtrl::CTDLCommentsCtrl(BOOL bShowLabel, BOOL bShowToolbar, int nComb
 	m_pMgrShortcuts(pMsgShortcuts),
 	m_cbCommentsFmt(pMgrContent, IDI_NULL),
 	m_hContentFont(NULL),
-	m_bReadOnly(FALSE),
+	m_bReadOnlyComments(FALSE),
 	m_bShowLabel(bShowLabel),
 	m_bShowToolbar(bShowToolbar),
 	m_bUpdatingFormat(FALSE)
@@ -94,6 +94,9 @@ BEGIN_MESSAGE_MAP(CTDLCommentsCtrl, CRuntimeDlg)
 	ON_REGISTERED_MESSAGE(WM_ICC_GETATTRIBUTELIST, OnCommentsGetAttributeList)
 	ON_WM_DESTROY()
 	ON_WM_ENABLE()
+	ON_COMMAND(ID_COMMENTS_INSERTDATE, OnInsertDate)
+	ON_COMMAND(ID_COMMENTS_INSERTTIME, OnInsertTime)
+	ON_COMMAND(ID_COMMENTS_INSERTDATETIME, OnInsertDateAndTime)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -127,7 +130,7 @@ BOOL CTDLCommentsCtrl::OnInitDialog()
 			m_toolbar.SetBackgroundColor(m_theme.crAppBackLight);
 			m_toolbar.SetHotColor(m_theme.crToolbarHot);
 
-			VERIFY(m_toolbar.LoadToolBar(IDR_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
+			VERIFY(m_toolbar.LoadToolBar(IDR_COMMENTS_DATETIME_TOOLBAR, IDB_DATETIME_TOOLBAR_STD, colorMagenta));
 
 			if (m_pMgrShortcuts)
 				m_tbHelper.Initialize(&m_toolbar, this, m_pMgrShortcuts);
@@ -187,6 +190,7 @@ void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCom
 		case RTCS_ENABLED:
 			m_ctrlComments.EnableWindow(TRUE);
 			m_ctrlComments.SetReadOnly(FALSE);
+			m_bReadOnlyComments = FALSE;
 			break;
 
 		case RTCS_DISABLED:
@@ -199,6 +203,7 @@ void CTDLCommentsCtrl::SetCtrlStates(RT_CTRLSTATE nComboState, RT_CTRLSTATE nCom
 		case RTCS_READONLY:
 			m_ctrlComments.EnableWindow(TRUE);
 			m_ctrlComments.SetReadOnly(TRUE);
+			m_bReadOnlyComments = TRUE;
 			break;
 	}
 }
@@ -255,6 +260,8 @@ BOOL CTDLCommentsCtrl::OnEraseBkgnd(CDC* pDC)
 
 		if (m_bShowLabel)
 			ExcludeCtrl(this, IDC_COMBOLABEL, pDC);
+
+		ExcludeChild(&m_toolbar, pDC);
 
 		CRect rClient;
 		GetClientRect(rClient);
@@ -600,7 +607,7 @@ void CTDLCommentsCtrl::OnEnable(BOOL bEnable)
 	::EnableWindow(m_ctrlComments, bEnable);
 
 	if (bEnable)
-		m_ctrlComments.SetReadOnly(m_bReadOnly);
+		m_ctrlComments.SetReadOnly(m_bReadOnlyComments);
 }
 
 void CTDLCommentsCtrl::SetPreferencesFilePath(LPCTSTR szFilePath) 
@@ -620,4 +627,24 @@ void CTDLCommentsCtrl::OnSetFocus(CWnd* /*pOldWnd*/)
 void CTDLCommentsCtrl::UpdateAppPreferences()
 {
 	LoadPreferences(TRUE);
+}
+
+void CTDLCommentsCtrl::OnInsertDate()
+{
+	SendMessage(WM_COMMAND, ID_EDIT_INSERTDATE);
+}
+
+void CTDLCommentsCtrl::OnInsertTime()
+{
+	SendMessage(WM_COMMAND, ID_EDIT_INSERTTIME);
+}
+
+void CTDLCommentsCtrl::OnInsertDateAndTime()
+{
+	SendMessage(WM_COMMAND, ID_EDIT_INSERTDATETIME);
+}
+
+BOOL CTDLCommentsCtrl::IsCommentsEditable() const
+{
+	return (!m_bReadOnlyComments && IsWindowEnabled() && ::IsWindowEnabled(m_ctrlComments));
 }
