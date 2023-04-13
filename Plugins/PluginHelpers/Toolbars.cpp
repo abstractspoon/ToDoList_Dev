@@ -197,20 +197,13 @@ void BaseToolbarRenderer::OnRenderToolStripBackground(ToolStripRenderEventArgs^ 
 		if (numItems > 0)
 		{
 			auto prevItemRect = Drawing::Rectangle::Empty;
-			bool isMenuBar = false;
 
 			int rowTop = 0, rowBottom = 0;
-			bool firstRow = true;
+			bool firstRow = true, isMenuBar = ISTYPE(toolbar, MenuStrip);
 
 			for (int i = 0; i < numItems; i++)
 			{
 				auto item = toolbar->Items[i];
-				
-				if (!isMenuBar && ISTYPE(item, ToolStripMenuItem))
-				{
-					auto menuItem = ASTYPE(item, ToolStripMenuItem);
-					isMenuBar = (menuItem->OwnerItem == nullptr && !ISTYPE(e->ToolStrip, ContextMenuStrip));
-				}
 				
 				if (!ISTYPE(item, ToolStripSeparator) && item->Visible)
 				{
