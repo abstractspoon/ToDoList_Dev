@@ -78,6 +78,22 @@ namespace DetectiveBoardUIExtension
 			return new System.Drawing.Point((int)(pt.X / div), (int)(pt.Y / div));
 		}
 
+		public static void MoveToHead<T>(this IList<T> list, T item)
+		{
+			list.Remove(item);
+			list.Insert(0, item);
+		}
 
+		public static void Add<T>(this IList<T> list, IList<T> other)
+		{
+			foreach (T val in other)
+				list.Add(val);
+		}
+
+		public static void Remove<T>(this IList<T> list, IList<T> other)
+		{
+			foreach (T val in other)
+				list.Remove(val);
+		}
 	}
 }

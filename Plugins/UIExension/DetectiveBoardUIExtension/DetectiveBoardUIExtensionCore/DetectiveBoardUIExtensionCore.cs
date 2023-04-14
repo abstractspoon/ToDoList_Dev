@@ -51,7 +51,7 @@ namespace DetectiveBoardUIExtension
 
         public bool SelectTask(uint dwTaskID)
         {
-			bool success = m_Control.SelectTask(dwTaskID);
+			bool success = m_Control.SelectNode(dwTaskID);
 
 			UpdateToolbarButtonStates();
 

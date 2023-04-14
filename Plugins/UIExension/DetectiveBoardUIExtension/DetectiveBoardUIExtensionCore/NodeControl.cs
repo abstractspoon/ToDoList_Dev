@@ -183,7 +183,7 @@ namespace DetectiveBoardUIExtension
 			get { return GetNode(DraggedNodeId); }
 		}
 
-		public bool SelectTask(uint nodeId, bool notify = false)
+		public bool SelectNode(uint nodeId, bool notify = false)
 		{
 			if (IsSelectableNode(nodeId))
 			{
@@ -201,7 +201,7 @@ namespace DetectiveBoardUIExtension
 			return false;
 		}
 
-		public bool SelectNodes(IList<uint> nodeIds)
+		public bool SelectNodes(IList<uint> nodeIds, bool notify = false)
 		{
 			foreach (var nodeId in nodeIds)
 			{
@@ -212,15 +212,21 @@ namespace DetectiveBoardUIExtension
 			m_SelectedNodeIds = nodeIds;
 			Invalidate();
 
+			if (notify)
+				NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
+
 			return true;
 		}
 
-		public void SelectAllNodes()
+		public void SelectAllNodes(bool notify = false)
 		{
 			m_SelectedNodeIds.Clear();
 
 			SelectAllNodes(RootNode);
 			Invalidate();
+
+			if (notify)
+				NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
 		}
 
 		public void SelectAllNodes(RadialTree.TreeNode<uint> node)
@@ -549,6 +555,19 @@ namespace DetectiveBoardUIExtension
 			return RootNode.FindTreeNode(x => (x.Data == id));
 		}
 
+		protected bool GetChildIds(RadialTree.TreeNode<uint> node, bool recursive, ref IList<uint> ids)
+		{
+			foreach (var child in node.Children)
+			{
+				ids.Add(child.Data);
+
+				if (recursive)
+					GetChildIds(child, true, ref ids);
+			}
+
+			return (ids.Count > 0);
+		}
+
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
@@ -811,18 +830,14 @@ namespace DetectiveBoardUIExtension
 		{
 			base.OnMouseClick(e);
 
-			if (!ModifierKeys.HasFlag(Keys.Control))
+			if (!ModifierKeys.HasFlag(Keys.Control) &&
+				!ModifierKeys.HasFlag(Keys.Alt))
 			{
 				var hit = HitTestNode(e.Location);
 
 				if ((hit != null) && IsSelectableNode(hit.Data))
 				{
-					m_SelectedNodeIds.Clear();
-					m_SelectedNodeIds.Add(hit.Data);
-
-					Invalidate();
-
-					NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
+					SelectNode(hit.Data, true);
 				}
 			}
 		}
@@ -851,20 +866,107 @@ namespace DetectiveBoardUIExtension
 			}
 			else if (IsSelectableNode(hit.Data))
 			{
+				IList<uint> childIds = null;
+
+				if (ModifierKeys.HasFlag(Keys.Alt))
+				{
+					childIds = new List<uint>();
+					GetChildIds(hit, true, ref childIds);
+				}
+
+				if (ModifierKeys.HasFlag(Keys.Control))
+				{
+					if (m_SelectedNodeIds.Contains(hit.Data))
+					{
+						// Deselect
+						m_SelectedNodeIds.Remove(hit.Data);
+
+						if (childIds?.Count > 0)
+							m_SelectedNodeIds.Remove(childIds);
+					}
+					else
+					{
+						// Select
+						m_SelectedNodeIds.MoveToHead(hit.Data);
+
+						if (childIds?.Count > 0)
+							m_SelectedNodeIds.Add(childIds);
+					}
+				}
+				else
+				{
+					if (!m_SelectedNodeIds.Contains(hit.Data))
+					{
+						m_SelectedNodeIds.Clear();
+						m_SelectedNodeIds.Insert(0, hit.Data);
+					}
+
+					if (childIds?.Count > 0)
+						m_SelectedNodeIds.Add(childIds);
+
+					// Initialise a drag operation
+					m_DragMode = DragMode.Node;
+
+					m_DragTimer.Tag = e;
+					m_DragTimer.Start();
+
+					m_DragOffset = GetNodeClientPos(hit);
+					m_DragOffset.Offset(-e.Location.X, -e.Location.Y);
+
+					m_PreDragNodePos = new PointF(hit.Point.X, hit.Point.Y);
+				}
+
+				Invalidate();
+				NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
+			}
+#if DEBUG
+			else if (hit == RootNode)
+			{
+				Point ptGraph = ClientToGraph(e.Location);
+				//int breakpoint = 0;
+			}
+#endif
+		}
+		/*protected override void OnMouseDown(MouseEventArgs e)
+		{
+			base.OnMouseDown(e);
+
+			var hit = HitTestNode(e.Location);
+
+			if (hit == null)
+			{
+				// Start a selection box drag
+				m_DragMode = DragMode.SelectionBox;
+
+				m_DragTimer.Tag = e;
+				m_DragTimer.Start();
+			}
+			else if (IsSelectableNode(hit.Data))
+			{
+				if (ModifierKeys.HasFlag(Keys.Control))
+				{
+					if (m_SelectedNodeIds.Contains(hit.Data))
+					{
+						m_SelectedNodeIds.Remove(hit.Data);
+					}
+					else
+					{
+						m_SelectedNodeIds.MoveToHead(hit.Data);
+					}
+
+					Invalidate();
+					NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
+
+					return;
+				}
+
 				if (m_SelectedNodeIds.Contains(hit.Data))
 				{
+
 					// Always remove it because we'll be re-adding
 					// it at the head if we still need it
 					m_SelectedNodeIds.Remove(hit.Data);
 
-					if (ModifierKeys.HasFlag(Keys.Control))
-					{
-						// Task is deselected
-						Invalidate();
-						NodeSelectionChange?.Invoke(this, m_SelectedNodeIds);
-
-						return;
-					}
 				}
 				else if (!ModifierKeys.HasFlag(Keys.Control))
 				{
@@ -896,7 +998,7 @@ namespace DetectiveBoardUIExtension
 				//int breakpoint = 0;
 			}
 #endif
-		}
+		}*/
 
 		protected override void OnMouseWheel(MouseEventArgs e)
 		{

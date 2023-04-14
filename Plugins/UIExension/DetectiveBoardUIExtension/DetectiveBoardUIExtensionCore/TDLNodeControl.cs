@@ -442,14 +442,14 @@ namespace DetectiveBoardUIExtension
 			return true;
 		}
 
-		public bool SelectTask(uint taskId)
+		public bool SelectNode(uint taskId)
 		{
 			ClearUserLinkSelection();
 
-			if (base.SelectTask(taskId))
+			if (base.SelectNode(taskId))
 				return true;
 
-			base.SelectTask(NodeControl.NullId);
+			base.SelectNode(NodeControl.NullId);
 			return false;
 		}
 
@@ -1250,7 +1250,7 @@ namespace DetectiveBoardUIExtension
 				if ((link != null) && (link == m_SelectedUserLink))
 				{
 					// Set the owning node first because that will clear the selected connection
-					SelectTask(link.FromId, true);
+					SelectNode(link.FromId, true);
 					Invalidate();
 
 					m_SelectedUserLink = link;
