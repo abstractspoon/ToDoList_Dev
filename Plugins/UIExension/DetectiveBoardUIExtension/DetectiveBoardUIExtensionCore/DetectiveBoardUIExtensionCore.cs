@@ -170,9 +170,12 @@ namespace DetectiveBoardUIExtension
 
         public void SetUITheme(UITheme theme)
         {
-			BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
+			BackColor = m_Toolbar.BackColor = theme.GetAppDrawingColor(UITheme.AppColor.AppBackLight);
 
-			m_Toolbar.BackColor = BackColor;
+			// Set the toolbar colors to be the same as the back color
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarDark, BackColor);
+			theme.SetAppDrawingColor(UITheme.AppColor.ToolbarLight, BackColor);
+
 			m_TBRenderer.SetUITheme(theme);
 		}
 
