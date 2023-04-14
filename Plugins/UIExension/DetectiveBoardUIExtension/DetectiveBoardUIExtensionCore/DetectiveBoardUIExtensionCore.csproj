@@ -55,6 +55,9 @@
     <Compile Include="DetectiveBoardAddEditLinkDlg.Designer.cs">
       <DependentUpon>DetectiveBoardAddEditLinkDlg.cs</DependentUpon>
     </Compile>
+    <Compile Include="DetectiveBoardLinkArrowsComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DetectiveBoardOptionsComboBox.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Geometry2D.cs" />

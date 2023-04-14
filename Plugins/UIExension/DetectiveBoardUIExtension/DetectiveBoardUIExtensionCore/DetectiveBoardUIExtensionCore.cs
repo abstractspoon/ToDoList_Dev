@@ -568,7 +568,7 @@ namespace DetectiveBoardUIExtension
 						}
 					}
 
-					var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans.Translate("New Connection"), null);
+					var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, false, null);
 
 					if (dlg.ShowDialog() == DialogResult.OK)
 					{
@@ -584,7 +584,7 @@ namespace DetectiveBoardUIExtension
 		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
 
-			var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans.Translate("Edit Connection"), m_Control.SelectedUserLink);
+			var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, true, m_Control.SelectedUserLink);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
