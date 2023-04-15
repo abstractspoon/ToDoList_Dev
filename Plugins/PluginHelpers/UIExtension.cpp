@@ -881,7 +881,7 @@ List<Tuple<DateTime, DateTime>^>^ UIExtension::TaskRecurrences::Get(UInt32 dwTas
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-cli::array<Point>^ UIExtension::TaskDependency::CalcHorizontalArrowHead(int x, int y, Font^ font, bool left)
+cli::array<Point>^ UIExtension::ArrowHeads::CalcArrowHead(int x, int y, Font^ font, Direction dir)
 {
 	auto arrow = gcnew cli::array<Point>(3);
 
@@ -894,25 +894,63 @@ cli::array<Point>^ UIExtension::TaskDependency::CalcHorizontalArrowHead(int x, i
 	// Size to match Gantt Chart
 	const int nSize = ((font->Height / 4) + 1);
 
-	if (left)
+	switch (dir)
 	{
-		// <----
-		//
+	case Direction::Left:
 		arrow[0].Offset(nSize, -nSize);
 		arrow[2].Offset(nSize, nSize);
-	}
-	else // right
-	{
-		// --->
-		//
+		break;
+
+	case Direction::Up:
+		arrow[0].Offset(-nSize, nSize);
+		arrow[2].Offset(nSize, nSize);
+		break;
+
+	case Direction::Right:
 		arrow[0].Offset(-nSize, -nSize);
 		arrow[2].Offset(-nSize, nSize);
+		break;
+
+	case Direction::Down:
+		arrow[0].Offset(-nSize, -nSize);
+		arrow[2].Offset(nSize, -nSize);
+		break;
+
+	default:
+		arrow = nullptr;
 	}
 
 	return arrow;
 }
 
-cli::array<Point>^ UIExtension::TaskDependency::CalcVerticalArrowHead(int x, int y, Font^ font, bool up)
+cli::array<Drawing::Point>^ UIExtension::ArrowHeads::OffsetArrowHead(cli::array<Drawing::Point>^ arrow, Direction dir)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		switch (dir)
+		{
+		case Direction::Left:
+			arrow[i].Offset(1, 0);
+			break;
+
+		case Direction::Up:
+			arrow[i].Offset(0, -1);
+			break;
+
+		case Direction::Right:
+			arrow[i].Offset(-1, 0);
+			break;
+
+		case Direction::Down:
+			arrow[i].Offset(0, 1);
+			break;
+		}
+	}
+
+	return arrow;
+}
+
+cli::array<Point>^ UIExtension::ArrowHeads::CalcArrowHead(int x, int y, Font^ font, float dirRadians)
 {
 	auto arrow = gcnew cli::array<Point>(3);
 
@@ -925,46 +963,40 @@ cli::array<Point>^ UIExtension::TaskDependency::CalcVerticalArrowHead(int x, int
 	// Size to match Gantt Chart
 	const int nSize = ((font->Height / 4) + 1);
 
-	if (up)
-	{
-		//  ^
-		//  |
-		//
-		arrow[0].Offset(-nSize, nSize);
-		arrow[2].Offset(nSize, nSize);
-	}
-	else // down
-	{
-		//  |
-		//  V
-		//
-		arrow[0].Offset(-nSize, -nSize);
-		arrow[2].Offset(nSize, -nSize);
-	}
+	// TODO
 
 	return arrow;
 }
 
-void UIExtension::TaskDependency::DrawHorizontalArrowHead(Graphics^ graphics, int x, int y, Font^ font, bool left)
+cli::array<Drawing::Point>^ UIExtension::ArrowHeads::OffsetArrowHead(cli::array<Drawing::Point>^ arrow, float angleRadians)
 {
-	auto arrow = CalcHorizontalArrowHead(x, y, font, left);
-	graphics->DrawLines(Pens::Black, arrow);
+	// TODO
 
-	// Offset and draw again
-	for (int i = 0; i < 3; i++)
-		arrow[i].Offset(left ? 1 : -1, 0);
-
-	graphics->DrawLines(Pens::Black, arrow);
+	return arrow;
 }
 
-void UIExtension::TaskDependency::DrawVerticalArrowHead(Graphics^ graphics, int x, int y, Font^ font, bool up)
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, Font^ font, Direction dir)
 {
-	auto arrow = CalcHorizontalArrowHead(x, y, font, up);
-	graphics->DrawLines(Pens::Black, arrow);
+	auto arrow = CalcArrowHead(x, y, font, dir);
 
-	// Offset and draw again
-	for (int i = 0; i < 3; i++)
-		arrow[i].Offset(0, up ? 1 : -1);
+	if (arrow != nullptr)
+	{
+		graphics->DrawLines(pen, arrow);
 
-	graphics->DrawLines(Pens::Black, arrow);
+		// Offset and draw again
+		graphics->DrawLines(pen, OffsetArrowHead(arrow, dir));
+	}
+}
+
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, Font^ font, float dirRadians)
+{
+	auto arrow = CalcArrowHead(x, y, font, dirRadians);
+
+	if (arrow != nullptr)
+	{
+		graphics->DrawLines(pen, arrow);
+
+		// Offset and draw again
+		graphics->DrawLines(pen, OffsetArrowHead(arrow, dirRadians));
+	}
 }

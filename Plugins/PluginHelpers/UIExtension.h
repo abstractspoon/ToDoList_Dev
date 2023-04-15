@@ -285,15 +285,27 @@ namespace Abstractspoon
 
 				// -----------------------------------------------
 
-				ref class TaskDependency
+				ref class ArrowHeads
 				{
 				public:
-					static void DrawHorizontalArrowHead(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, bool left);
-					static void DrawVerticalArrowHead(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, bool up);
+					enum class Direction
+					{
+						None = -1,
+						Left,
+						Up,
+						Right,
+						Down,
+					};
+
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, Drawing::Font^ font, Direction dir);
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, Drawing::Font^ font, float dirRadians);
 
 				private:
-					static cli::array<Drawing::Point>^ CalcHorizontalArrowHead(int x, int y, Drawing::Font^ font, bool left);
-					static cli::array<Drawing::Point>^ CalcVerticalArrowHead(int x, int y, Drawing::Font^ font, bool up);
+					static cli::array<Drawing::Point>^ CalcArrowHead(int x, int y, Drawing::Font^ font, Direction dir);
+					static cli::array<Drawing::Point>^ CalcArrowHead(int x, int y, Drawing::Font^ font, float angleRadians);
+
+					static cli::array<Drawing::Point>^ OffsetArrowHead(cli::array<Drawing::Point>^ arrow, Direction dir);
+					static cli::array<Drawing::Point>^ OffsetArrowHead(cli::array<Drawing::Point>^ arrow, float angleRadians);
 				};
 
 				// -----------------------------------------------
