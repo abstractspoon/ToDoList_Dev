@@ -27,7 +27,6 @@ namespace DetectiveBoardUIExtension
 
 	public partial class NodeControl : UserControl
 	{
-
 		public int NodeSpacing = 5;
 		public int PinRadius = 2;
 
@@ -674,7 +673,8 @@ namespace DetectiveBoardUIExtension
 
 		protected void DrawPin(Graphics graphics, Brush brush, Point pos)
 		{
-			//graphics.FillEllipse(brush, GetPinRect(pos));
+			if (PinRadius > 0)
+				graphics.FillEllipse(brush, GetPinRect(pos));
 		}
 
 		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)

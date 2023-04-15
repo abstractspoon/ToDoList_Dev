@@ -27,6 +27,7 @@ namespace DetectiveBoardUIExtension
 		ShowDependencies		= 0x02,
 		ShowRootNode			= 0x04,
 		DrawLinksOnTop			= 0x08,
+		DrawPins				= 0x10,
 	}
 
 	// ------------------------------------------------------------
@@ -45,12 +46,14 @@ namespace DetectiveBoardUIExtension
 		// -------------------------------------------------------------------------
 
 		const DetectiveBoardOption DefaultOptions = (DetectiveBoardOption.ShowRootNode |
-												DetectiveBoardOption.ShowParentChildLinks |
-												DetectiveBoardOption.ShowDependencies |
-												DetectiveBoardOption.DrawLinksOnTop);
+													DetectiveBoardOption.ShowParentChildLinks |
+													DetectiveBoardOption.ShowDependencies |
+													DetectiveBoardOption.DrawLinksOnTop |
+													DetectiveBoardOption.DrawPins);
 		// -------------------------------------------------------------------------
 
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
+		protected int DefaultPinSize { get { return ScaleByDPIFactor(4); } }
 
 		// -------------------------------------------------------------------------
 
@@ -109,7 +112,7 @@ namespace DetectiveBoardUIExtension
 			int nodeWidth  = (4 * nodeHeight);
 
 			base.NodeSize = new Size(nodeWidth, nodeHeight);
-			base.PinRadius = ScaleByDPIFactor(4);
+			base.PinRadius = DefaultPinSize;
 
 			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
 			NodeSelectionChange += (s, ids) => { ClearUserLinkSelection(); };
@@ -212,7 +215,9 @@ namespace DetectiveBoardUIExtension
 				if (value != m_Options)
 				{
 					m_Options = value;
+
 					base.DrawNodesOnTop = !m_Options.HasFlag(DetectiveBoardOption.DrawLinksOnTop);
+					base.PinRadius = (m_Options.HasFlag(DetectiveBoardOption.DrawPins) ? DefaultPinSize : 0);
 
 					Invalidate();
 				}
@@ -924,19 +929,20 @@ namespace DetectiveBoardUIExtension
 			{
 				using (var pen = new Pen(color, thickness))
 				{
-					int size = UIExtension.DependencyArrows.Size(Font) + 2;
+					int size = UIExtension.DependencyArrows.Size(TextFont) + thickness;
+					int offset = (PinRadius + 1);
 
 					if ((arrows == UserLink.EndArrows.Start) || (arrows == UserLink.EndArrows.Both))
 					{
 						var degrees = Geometry2D.AngleFromVertical(toPos, fromPos, true);
-						UIExtension.ArrowHeads.Draw(graphics, pen, fromPos.X, fromPos.Y, size, PinRadius, degrees);
+						UIExtension.ArrowHeads.Draw(graphics, pen, fromPos.X, fromPos.Y, size, offset, degrees);
 
 					}
 
 					if ((arrows == UserLink.EndArrows.Finish) || (arrows == UserLink.EndArrows.Both))
 					{
 						var degrees = Geometry2D.AngleFromVertical(fromPos, toPos, true);
-						UIExtension.ArrowHeads.Draw(graphics, pen, toPos.X, toPos.Y, size, PinRadius, degrees);
+						UIExtension.ArrowHeads.Draw(graphics, pen, toPos.X, toPos.Y, size, offset, degrees);
 					}
 				}
 			}
