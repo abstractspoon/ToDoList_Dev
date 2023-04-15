@@ -918,7 +918,10 @@ namespace DetectiveBoardUIExtension
 				
 				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 				{
+					// Draw the line first
 					DrawConnection(graphics, Pens.Gray, Brushes.Gray, nodePos, parentPos);
+
+					// Then the arrow
 				}
 			}
 		}

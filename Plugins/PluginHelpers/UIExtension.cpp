@@ -990,6 +990,28 @@ void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, F
 
 void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, Font^ font, float dirRadians)
 {
+/*
+	var arrow = UIExtension.ArrowHeads.Calculate(0, -2, Font, UIExtension.ArrowHeads.Direction.Down);
+
+	using (var path = new GraphicsPath())
+	{
+		path.AddLine(arrow[0], arrow[1]);
+		path.AddLine(arrow[1], arrow[2]);
+
+		using (var pen = new Pen(Color.Gray, 1))
+		{
+			using (var cap = new CustomLineCap(null, path))
+			{
+				pen.CustomEndCap = cap;
+				base.DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
+
+				// Offset and draw again
+				arrow = UIExtension.ArrowHeads.Offset(arrow, UIExtension.ArrowHeads.Direction.Down);
+				base.DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
+			}
+		}
+	}
+*/
 	auto arrow = CalcArrowHead(x, y, font, dirRadians);
 
 	if (arrow != nullptr)

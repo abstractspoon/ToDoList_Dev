@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -652,7 +653,10 @@ namespace DetectiveBoardUIExtension
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			DrawConnection(graphics, Pens.Gray, Brushes.Gray, nodePos, parentPos);
+			var pen = new Pen(Color.Gray);
+			pen.CustomEndCap = new AdjustableArrowCap(5, 5);
+
+			DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
 		}
 
 		protected void DrawConnection(Graphics graphics, Pen linePen, Brush pinBrush, Point node1Pos, Point node2Pos)
