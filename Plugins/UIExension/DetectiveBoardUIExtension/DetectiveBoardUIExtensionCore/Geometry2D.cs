@@ -9,6 +9,20 @@ namespace DetectiveBoardUIExtension
 {
 	public class Geometry2D
 	{
+		public static float AngleFromVertical(Point ptFrom, Point ptTo, bool degrees)
+		{
+			var diff = Difference(ptTo, ptFrom);
+			var radians = (Math.Atan2(diff.Y, diff.X) - (Math.PI / 2));
+
+			while (radians < 0)
+				radians += (2 * Math.PI);
+
+			if (degrees)
+				return (float)((radians * 180) / Math.PI);
+
+			return (float)radians;
+		}
+
 		public static Rectangle RectFromPoints(Point pt1, Point pt2)
 		{
 			return Rectangle.FromLTRB(Math.Min(pt1.X, pt2.X),

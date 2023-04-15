@@ -674,7 +674,7 @@ namespace DetectiveBoardUIExtension
 
 		protected void DrawPin(Graphics graphics, Brush brush, Point pos)
 		{
-			graphics.FillEllipse(brush, GetPinRect(pos));
+			//graphics.FillEllipse(brush, GetPinRect(pos));
 		}
 
 		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)

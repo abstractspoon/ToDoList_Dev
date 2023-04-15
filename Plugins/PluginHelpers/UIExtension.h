@@ -297,15 +297,25 @@ namespace Abstractspoon
 						Down,
 					};
 
-					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, Drawing::Font^ font, Direction dir);
-					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, Drawing::Font^ font, float dirRadians);
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, int size, Direction dir);
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, int size, float angleDegrees);
 
-				private:
-					static cli::array<Drawing::Point>^ CalcArrowHead(int x, int y, Drawing::Font^ font, Direction dir);
-					static cli::array<Drawing::Point>^ CalcArrowHead(int x, int y, Drawing::Font^ font, float angleRadians);
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, int size, int offset, Direction dir);
+					static void Draw(Drawing::Graphics^ graphics, Drawing::Pen^ pen, int x, int y, int size, int offset, float angleDegrees);
 
-					static cli::array<Drawing::Point>^ OffsetArrowHead(cli::array<Drawing::Point>^ arrow, Direction dir);
-					static cli::array<Drawing::Point>^ OffsetArrowHead(cli::array<Drawing::Point>^ arrow, float angleRadians);
+				protected:
+					static cli::array<Drawing::Point>^ Calculate(int x, int y, int size, int offset, Direction dir);
+					static cli::array<Drawing::Point>^ Offset(cli::array<Drawing::Point>^ arrow, int amount, Direction dir);
+				};
+
+				// -----------------------------------------------
+
+				ref class DependencyArrows : ArrowHeads
+				{
+				public:
+					static void Draw(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, Direction dir);
+					static int Size(Drawing::Font^ font);
+
 				};
 
 				// -----------------------------------------------

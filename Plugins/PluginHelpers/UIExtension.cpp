@@ -25,6 +25,7 @@ using namespace System::IO;
 using namespace System::Windows::Forms;
 using namespace System::Windows::Forms::VisualStyles;
 using namespace System::Drawing;
+using namespace System::Drawing::Drawing2D;
 
 using namespace Abstractspoon::Tdl::PluginHelpers;
 
@@ -881,7 +882,7 @@ List<Tuple<DateTime, DateTime>^>^ UIExtension::TaskRecurrences::Get(UInt32 dwTas
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-cli::array<Point>^ UIExtension::ArrowHeads::CalcArrowHead(int x, int y, Font^ font, Direction dir)
+cli::array<Point>^ UIExtension::ArrowHeads::Calculate(int x, int y, int size, int offset, Direction dir)
 {
 	auto arrow = gcnew cli::array<Point>(3);
 
@@ -891,134 +892,118 @@ cli::array<Point>^ UIExtension::ArrowHeads::CalcArrowHead(int x, int y, Font^ fo
 		arrow[i].Y = y;
 	}
 
-	// Size to match Gantt Chart
-	const int nSize = ((font->Height / 4) + 1);
-
 	switch (dir)
 	{
 	case Direction::Left:
-		arrow[0].Offset(nSize, -nSize);
-		arrow[2].Offset(nSize, nSize);
+		arrow[0].Offset(size, -size);
+		arrow[2].Offset(size, size);
 		break;
 
 	case Direction::Up:
-		arrow[0].Offset(-nSize, nSize);
-		arrow[2].Offset(nSize, nSize);
+		arrow[0].Offset(-size, size);
+		arrow[2].Offset(size, size);
 		break;
 
 	case Direction::Right:
-		arrow[0].Offset(-nSize, -nSize);
-		arrow[2].Offset(-nSize, nSize);
+		arrow[0].Offset(-size, -size);
+		arrow[2].Offset(-size, size);
 		break;
 
 	case Direction::Down:
-		arrow[0].Offset(-nSize, -nSize);
-		arrow[2].Offset(nSize, -nSize);
+		arrow[0].Offset(-size, -size);
+		arrow[2].Offset(size, -size);
 		break;
 
 	default:
 		arrow = nullptr;
 	}
 
-	return arrow;
+	return Offset(arrow, offset, dir);
+}
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, int size, Direction dir)
+{
+	Draw(graphics, pen, x, y, size, 0, dir);
 }
 
-cli::array<Drawing::Point>^ UIExtension::ArrowHeads::OffsetArrowHead(cli::array<Drawing::Point>^ arrow, Direction dir)
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, int size, float angleDegrees)
 {
-	for (int i = 0; i < 3; i++)
-	{
-		switch (dir)
-		{
-		case Direction::Left:
-			arrow[i].Offset(1, 0);
-			break;
-
-		case Direction::Up:
-			arrow[i].Offset(0, -1);
-			break;
-
-		case Direction::Right:
-			arrow[i].Offset(-1, 0);
-			break;
-
-		case Direction::Down:
-			arrow[i].Offset(0, 1);
-			break;
-		}
-	}
-
-	return arrow;
+	Draw(graphics, pen, x, y, size, 0, angleDegrees);
 }
 
-cli::array<Point>^ UIExtension::ArrowHeads::CalcArrowHead(int x, int y, Font^ font, float dirRadians)
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, int size, int offset, Direction dir)
 {
-	auto arrow = gcnew cli::array<Point>(3);
-
-	for (int i = 0; i < 3; i++)
-	{
-		arrow[i].X = x;
-		arrow[i].Y = y;
-	}
-
-	// Size to match Gantt Chart
-	const int nSize = ((font->Height / 4) + 1);
-
-	// TODO
-
-	return arrow;
+	auto arrow = Calculate(x, y, size, offset, dir);
+	
+	if (arrow != nullptr)
+		graphics->DrawLines(pen, arrow);
 }
 
-cli::array<Drawing::Point>^ UIExtension::ArrowHeads::OffsetArrowHead(cli::array<Drawing::Point>^ arrow, float angleRadians)
+void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, int size, int offset, float angleDegrees)
 {
-	// TODO
-
-	return arrow;
-}
-
-void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, Font^ font, Direction dir)
-{
-	auto arrow = CalcArrowHead(x, y, font, dir);
+	// Calculate arrow at the origin
+	auto arrow = Calculate(0, 0, size, offset, Direction::Up);
 
 	if (arrow != nullptr)
 	{
-		graphics->DrawLines(pen, arrow);
+		// Calculate the rotation matrix
+		auto matrix = gcnew Matrix();
 
-		// Offset and draw again
-		graphics->DrawLines(pen, OffsetArrowHead(arrow, dir));
+		matrix->Rotate(angleDegrees, MatrixOrder::Append);
+		matrix->Translate((float)x, (float)y, MatrixOrder::Append);
+
+		graphics->Transform = matrix;
+		graphics->DrawLines(pen, arrow);
+		graphics->ResetTransform();
 	}
 }
 
-void UIExtension::ArrowHeads::Draw(Graphics^ graphics, Pen^ pen, int x, int y, Font^ font, float dirRadians)
+cli::array<Drawing::Point>^ UIExtension::ArrowHeads::Offset(cli::array<Drawing::Point>^ arrow, int amount, Direction dir)
 {
-/*
-	var arrow = UIExtension.ArrowHeads.Calculate(0, -2, Font, UIExtension.ArrowHeads.Direction.Down);
-
-	using (var path = new GraphicsPath())
+	if (amount != 0)
 	{
-		path.AddLine(arrow[0], arrow[1]);
-		path.AddLine(arrow[1], arrow[2]);
+		amount = abs(amount);
 
-		using (var pen = new Pen(Color.Gray, 1))
+		for (int i = 0; i < 3; i++)
 		{
-			using (var cap = new CustomLineCap(null, path))
+			switch (dir)
 			{
-				pen.CustomEndCap = cap;
-				base.DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
+			case Direction::Left:
+				arrow[i].Offset(-amount, 0);
+				break;
 
-				// Offset and draw again
-				arrow = UIExtension.ArrowHeads.Offset(arrow, UIExtension.ArrowHeads.Direction.Down);
-				base.DrawConnection(graphics, pen, Brushes.Gray, nodePos, parentPos);
+			case Direction::Up:
+				arrow[i].Offset(0, amount);
+				break;
+
+			case Direction::Right:
+				arrow[i].Offset(amount, 0);
+				break;
+
+			case Direction::Down:
+				arrow[i].Offset(0, -amount);
+				break;
 			}
 		}
 	}
-*/
-	auto arrow = CalcArrowHead(x, y, font, dirRadians);
 
-	if (arrow != nullptr)
-	{
-		graphics->DrawLines(pen, arrow);
-
-		// Offset and draw again
-		graphics->DrawLines(pen, OffsetArrowHead(arrow, dirRadians));
-	}
+	return arrow;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+void UIExtension::DependencyArrows::Draw(Drawing::Graphics^ graphics, int x, int y, Drawing::Font^ font, Direction dir)
+{
+	auto arrow = Calculate(x, y, Size(font), 0, dir);
+
+	graphics->DrawLines(Pens::Black, arrow);
+
+	// Offset and draw again
+	graphics->DrawLines(Pens::Black, Offset(arrow, 1, dir));
+}
+
+int UIExtension::DependencyArrows::Size(Drawing::Font^ font)
+{
+	// Size to match Gantt Chart
+	return ((font->Height / 4) + 1);
+}
+

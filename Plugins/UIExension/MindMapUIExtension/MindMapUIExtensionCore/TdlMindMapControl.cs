@@ -1377,7 +1377,7 @@ namespace MindMapUIExtension
 			var prevSmoothing = graphics.SmoothingMode;
 			graphics.SmoothingMode = SmoothingMode.None;
 			
-			UIExtension.ArrowHeads.Draw(graphics, Pens.Black, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), dir);
+			UIExtension.DependencyArrows.Draw(graphics, ptFrom.X, ptFrom.Y, GetNodeFont(nodeFrom), dir);
 
 			// Draw 3x3 box at 'to' end
 			Rectangle box = new Rectangle(ptTo.X - 1, ptTo.Y - 1, 3, 3);

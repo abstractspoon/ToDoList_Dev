@@ -829,6 +829,7 @@ namespace DetectiveBoardUIExtension
 							IsConnectionVisible(node, dependId, out fromPos, out toPos))
 						{
 							DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
+							DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, Color.Blue, fromPos, toPos);
 						}
 					}
 				}
@@ -854,6 +855,7 @@ namespace DetectiveBoardUIExtension
 						IsConnectionVisible(node, link.ToId, out fromPos, out toPos))
 					{
 						DrawConnection(graphics, new Pen(link.Color, link.Thickness), new SolidBrush(link.Color), fromPos, toPos);
+						DrawConnectionArrows(graphics, link.Arrows, link.Thickness + 1, link.Color, fromPos, toPos);
 					}
 				}
 			}
@@ -875,14 +877,6 @@ namespace DetectiveBoardUIExtension
 			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 			{
 				base.DrawNode(graphics, nodeId, rect);
-// 				graphics.FillRectangle(SystemBrushes.Window, rect);
-// 				graphics.DrawRectangle(Pens.Gray, rect);
-// 
-// 				rect.X += (rect.Width - rect.Height) / 2;
-// 				rect.Width = rect.Height;
-// 
-// 				graphics.FillEllipse(SystemBrushes.Window, rect);
-// 				graphics.DrawEllipse(Pens.Gray, rect);
 			}
 		}
 
@@ -918,10 +912,32 @@ namespace DetectiveBoardUIExtension
 				
 				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 				{
-					// Draw the line first
 					DrawConnection(graphics, Pens.Gray, Brushes.Gray, nodePos, parentPos);
+					DrawConnectionArrows(graphics, UserLink.EndArrows.Finish, 2, Color.Gray, nodePos, parentPos);
+				}
+			}
+		}
 
-					// Then the arrow
+		protected void DrawConnectionArrows(Graphics graphics, UserLink.EndArrows arrows, int thickness, Color color, Point fromPos, Point toPos)
+		{
+			if (arrows != UserLink.EndArrows.None)
+			{
+				using (var pen = new Pen(color, thickness))
+				{
+					int size = UIExtension.DependencyArrows.Size(Font) + 2;
+
+					if ((arrows == UserLink.EndArrows.Start) || (arrows == UserLink.EndArrows.Both))
+					{
+						var degrees = Geometry2D.AngleFromVertical(toPos, fromPos, true);
+						UIExtension.ArrowHeads.Draw(graphics, pen, fromPos.X, fromPos.Y, size, PinRadius, degrees);
+
+					}
+
+					if ((arrows == UserLink.EndArrows.Finish) || (arrows == UserLink.EndArrows.Both))
+					{
+						var degrees = Geometry2D.AngleFromVertical(fromPos, toPos, true);
+						UIExtension.ArrowHeads.Draw(graphics, pen, toPos.X, toPos.Y, size, PinRadius, degrees);
+					}
 				}
 			}
 		}
