@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-using Abstractspoon.Tdl.PluginHelpers;
-
 namespace DetectiveBoardUIExtension
 {
 	class DetectiveBoardLinkArrowsComboBox : ComboBox
@@ -35,15 +33,6 @@ namespace DetectiveBoardUIExtension
 			Items.Add(new DetectiveBoardArrowsItem("Start", UserLink.EndArrows.Start));
 			Items.Add(new DetectiveBoardArrowsItem("End", UserLink.EndArrows.Finish));
 			Items.Add(new DetectiveBoardArrowsItem("Both", UserLink.EndArrows.Both));
-		}
-
-		public void Translate(Translator trans)
-		{
-			for (int index = 0; index < Items.Count; index++)
-			{
-				var item = (Items[index] as DetectiveBoardArrowsItem);
-				item.Label = trans.Translate(item.Label);
-			}
 		}
 
 		public UserLink.EndArrows SelectedOption

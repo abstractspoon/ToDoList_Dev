@@ -341,7 +341,8 @@ namespace DetectiveBoardUIExtension
 			return !(m_TaskItems.IsTaskLocked(fromId) || m_TaskItems.HasUserLink(fromId, toId));
 		}
 
-		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, UserLink.EndArrows arrows)
+		public bool CreateUserLink(uint fromId, uint toId, Color color, int thickness, 
+									UserLink.EndArrows arrows, string text, string type)
 		{
 			var fromTask = GetTaskItem(fromId);
 
@@ -366,6 +367,8 @@ namespace DetectiveBoardUIExtension
 				link.Color = color;
 				link.Thickness = thickness;
 				link.Arrows = arrows;
+				link.Label = text;
+				link.Type = type;
 
 				Invalidate();
 
@@ -412,7 +415,8 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 		
-		public bool EditSelectedUserLink(Color color, int thickness, UserLink.EndArrows arrows)
+		public bool EditSelectedUserLink(Color color, int thickness, UserLink.EndArrows arrows,
+										string text, string type)
 		{
 			if (!HasSelectedUserLink)
 				return false;
@@ -420,6 +424,8 @@ namespace DetectiveBoardUIExtension
 			m_SelectedUserLink.Color = color;
 			m_SelectedUserLink.Thickness = thickness;
 			m_SelectedUserLink.Arrows = arrows;
+			m_SelectedUserLink.Label = text;
+			m_SelectedUserLink.Type = type;
 
 			// Clear selection so the changes are visible
 			ClearUserLinkSelection();

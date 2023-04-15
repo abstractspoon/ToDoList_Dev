@@ -37,7 +37,7 @@
 			this.label1 = new System.Windows.Forms.Label();
 			this.label3 = new System.Windows.Forms.Label();
 			this.m_TextBox = new System.Windows.Forms.TextBox();
-			this.m_LinkType = new CustomComboBox.CheckedComboBox();
+			this.m_LinkType = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
 			this.m_LinkArrows = new DetectiveBoardUIExtension.DetectiveBoardLinkArrowsComboBox();
@@ -137,15 +137,9 @@
 			// 
 			// m_LinkType
 			// 
-			this.m_LinkType.AllowResizeDropDown = false;
-			this.m_LinkType.ControlSize = new System.Drawing.Size(120, 96);
-			this.m_LinkType.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
-			this.m_LinkType.DropDownSizeMode = CustomComboBox.CustomComboBox.SizeMode.UseDropDownSize;
-			this.m_LinkType.DropSize = new System.Drawing.Size(121, 106);
 			this.m_LinkType.FormattingEnabled = true;
 			this.m_LinkType.Location = new System.Drawing.Point(123, 103);
 			this.m_LinkType.Name = "m_LinkType";
-			this.m_LinkType.None = "<none>";
 			this.m_LinkType.Size = new System.Drawing.Size(173, 21);
 			this.m_LinkType.TabIndex = 6;
 			// 
@@ -179,6 +173,7 @@
 			// 
 			// DetectiveBoardAddEditLinkDlg
 			// 
+			this.AcceptButton = this.okBtn;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.CancelButton = this.cancelBtn;
@@ -219,7 +214,7 @@
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.Label label3;
 		private System.Windows.Forms.TextBox m_TextBox;
-		private CustomComboBox.CheckedComboBox m_LinkType;
+		private System.Windows.Forms.ComboBox m_LinkType;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label5;
 		private DetectiveBoardLinkArrowsComboBox m_LinkArrows;

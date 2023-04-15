@@ -568,11 +568,11 @@ namespace DetectiveBoardUIExtension
 						}
 					}
 
-					var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, false, null);
+					var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, null);
 
 					if (dlg.ShowDialog() == DialogResult.OK)
 					{
-						m_Control.CreateUserLink(firstId, secondId, dlg.Color, dlg.Thickness, dlg.Arrows);
+						m_Control.CreateUserLink(firstId, secondId, dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
 						UpdateToolbarButtonStates();
 					}
 				}
@@ -584,11 +584,11 @@ namespace DetectiveBoardUIExtension
 		{
 			Debug.Assert(m_Control.HasSelectedUserLink);
 
-			var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, true, m_Control.SelectedUserLink);
+			var dlg = new DetectiveBoardAddEditLinkDlg(m_Trans, m_Control.SelectedUserLink);
 
 			if (dlg.ShowDialog() == DialogResult.OK)
 			{
-				m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows);
+				m_Control.EditSelectedUserLink(dlg.Color, dlg.Thickness, dlg.Arrows, dlg.Label, dlg.Type);
 				UpdateToolbarButtonStates();
 			}
 			else

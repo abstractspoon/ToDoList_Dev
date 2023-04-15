@@ -47,6 +47,8 @@ namespace DetectiveBoardUIExtension
 		}
 
 		public EndArrows Arrows = EndArrows.None;
+		public string Label = string.Empty;
+		public string Type = string.Empty;
 
 		public UserLink(uint fromId, uint toId)
 		{
@@ -83,45 +85,60 @@ namespace DetectiveBoardUIExtension
 			return Encode();
 		}
 
-		public static bool TryParse(string text, uint taskId, out UserLink link)
+		const int IdIndex = 0;
+		const int ColorIndex = 1;
+		const int ThicknessIndex = 2;
+		const int ArrowsIndex = 3;
+		const int LabelIndex = 4;
+		const int TypeIndex = 5;
+
+		public static bool TryParse(string input, uint taskId, out UserLink link)
 		{
 			link = null;
-			string[] parts = text.Split(Delimiter);
+			string[] parts = input.Split(Delimiter);
 
-			if (parts.Count() == 4)
+			if (parts.Count() <= ArrowsIndex)
+				return false;
+
+			uint toId;
+			int argb, thickness, arrows;
+			string text, type;
+
+			if (!uint.TryParse(parts[IdIndex], out toId) ||
+				!int.TryParse(parts[ColorIndex], out argb) ||
+				!int.TryParse(parts[ThicknessIndex], out thickness) ||
+				!int.TryParse(parts[ArrowsIndex], out arrows))
 			{
-				uint toId;
-				int argb, thickness, arrows;
-
-				if (uint.TryParse(parts[0], out toId) &&
-					int.TryParse(parts[1], out argb) &&
-					int.TryParse(parts[2], out thickness) &&
-					int.TryParse(parts[3], out arrows))
-				{
-					// some validation
-					if ((toId > 0) && (thickness >= 0) && (arrows >= 0 && arrows < 4))
-					{
-						link = new UserLink(taskId, toId);
-						link.Color = ((argb == 0) ? Color.Empty : Color.FromArgb(argb));
-						link.Thickness = ((thickness == 0) ? 1 : thickness);
-						link.Arrows = (EndArrows)arrows;
-
-						return true;
-					}
-				}
+				return false;
 			}
 
-			// all else
-			return false;
+			// some validation
+			if ((toId <= 0) || (thickness < 0) || (arrows < 0) || (arrows >= 4))
+				return false;
+
+			link = new UserLink(taskId, toId);
+			link.Color = ((argb == 0) ? Color.Empty : Color.FromArgb(argb));
+			link.Thickness = ((thickness == 0) ? 1 : thickness);
+			link.Arrows = (EndArrows)arrows;
+
+			if (parts.Count() > LabelIndex)
+				link.Label = parts[LabelIndex];
+
+			if (parts.Count() > TypeIndex)
+				link.Type = parts[TypeIndex];
+
+			return true;
 		}
 
 		public string Encode()
 		{
-			return string.Format("{0}:{1}:{2}:{3}", 
+			return string.Format("{0}:{1}:{2}:{3}:{4}:{5}", 
 								ToId.ToString(), 
 								Color.ToArgb(), 
 								Thickness.ToString(), 
-								((int)Arrows).ToString());
+								((int)Arrows).ToString(),
+								Label,
+								Type);
 		}
 	}
 
