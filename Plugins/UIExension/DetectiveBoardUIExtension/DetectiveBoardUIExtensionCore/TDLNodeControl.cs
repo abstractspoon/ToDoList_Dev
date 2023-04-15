@@ -828,7 +828,7 @@ namespace DetectiveBoardUIExtension
 						if (!m_TaskItems.HasUserLink(taskItem.TaskId, dependId) &&
 							IsConnectionVisible(node, dependId, out fromPos, out toPos))
 						{
-							DrawConnection(graphics, fromPos, toPos, Pens.Blue, Brushes.Blue);
+							DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
 						}
 					}
 				}
@@ -853,7 +853,7 @@ namespace DetectiveBoardUIExtension
 					if (!link.IdsMatch(m_SelectedUserLink) &&
 						IsConnectionVisible(node, link.ToId, out fromPos, out toPos))
 					{
-						DrawConnection(graphics, fromPos, toPos, new Pen(link.Color, link.Thickness), new SolidBrush(link.Color));
+						DrawConnection(graphics, new Pen(link.Color, link.Thickness), new SolidBrush(link.Color), fromPos, toPos);
 					}
 				}
 			}
@@ -918,7 +918,7 @@ namespace DetectiveBoardUIExtension
 				
 				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 				{
-					DrawConnection(graphics, nodePos, parentPos, Pens.Gray, Brushes.Gray);
+					DrawConnection(graphics, Pens.Gray, Brushes.Gray, nodePos, parentPos);
 				}
 			}
 		}

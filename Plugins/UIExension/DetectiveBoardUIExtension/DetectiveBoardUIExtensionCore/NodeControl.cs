@@ -652,15 +652,15 @@ namespace DetectiveBoardUIExtension
 
 		protected virtual void DrawParentConnection(Graphics graphics, uint nodeId, Point nodePos, Point parentPos)
 		{
-			DrawConnection(graphics, nodePos, parentPos, Pens.Gray, Brushes.Gray);
+			DrawConnection(graphics, Pens.Gray, Brushes.Gray, nodePos, parentPos);
 		}
 
-		protected void DrawConnection(Graphics graphics, Point node1Pos, Point node2Pos, Pen linePen, Brush pinBrush)
+		protected void DrawConnection(Graphics graphics, Pen linePen, Brush pinBrush, Point node1Pos, Point node2Pos)
 		{
 			graphics.DrawLine(linePen, node1Pos, node2Pos);
 
-			DrawPin(graphics, node1Pos, pinBrush);
-			DrawPin(graphics, node2Pos, pinBrush);
+			DrawPin(graphics, pinBrush, node1Pos);
+			DrawPin(graphics, pinBrush, node2Pos);
 		}
 
 		protected Rectangle GetPinRect(Point pos)
@@ -668,9 +668,9 @@ namespace DetectiveBoardUIExtension
 			return new Rectangle((pos.X - PinRadius), (pos.Y - PinRadius), (2 * PinRadius), (2 * PinRadius));
 		}
 
-		protected void DrawPin(Graphics graphics, Point pos, Brush pinBrush)
+		protected void DrawPin(Graphics graphics, Brush brush, Point pos)
 		{
-			graphics.FillEllipse(pinBrush, GetPinRect(pos));
+			graphics.FillEllipse(brush, GetPinRect(pos));
 		}
 
 		protected virtual void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
