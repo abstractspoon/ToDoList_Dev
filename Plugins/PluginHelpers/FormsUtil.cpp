@@ -58,6 +58,22 @@ bool FormsUtil::SetEditCue(Control^ parent, String^ childName, String^ sCueText,
 	return SetEditCue(Find(parent, childName, recursiveSearch), sCueText);
 }
 
+bool FormsUtil::SetComboBoxCue(Windows::Forms::ComboBox^ combo, String^ sCueText)
+{
+	if ((combo != nullptr) && (sCueText != nullptr))
+		return Win32::SetComboBoxCue(combo->Handle, sCueText);
+
+	// else
+	return false;
+}
+
+bool FormsUtil::SetComboBoxCue(Windows::Forms::Control^ parent, String^ childName, String^ sCueText, bool recursiveSearch)
+{
+	auto combo = ASTYPE(Find(parent, childName, recursiveSearch), Windows::Forms::ComboBox);
+
+	return SetComboBoxCue(combo, sCueText);
+}
+
 void FormsUtil::RecalcDropWidth(ComboBox^ combo)
 {
 	int maxWidth = CalcWidestItem(combo);

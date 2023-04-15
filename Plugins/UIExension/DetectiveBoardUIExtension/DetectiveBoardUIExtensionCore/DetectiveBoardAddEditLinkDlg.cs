@@ -32,8 +32,9 @@ namespace DetectiveBoardUIExtension
 			}
 
 			Text = trans.Translate(edit ? "Edit Connection" : "New Connection");
-			m_LinkArrows.Translate(trans);
-			Win32.SetEditCue(m_TextBox.Handle, trans.Translate("<none>"));
+
+			FormsUtil.SetEditCue(m_TextBox, trans.Translate("<none>"));
+			FormsUtil.SetComboBoxCue(m_LinkType, trans.Translate("<none>"));
 		}
 
 		public Color Color { get { return m_ColorButton.Color; } }
