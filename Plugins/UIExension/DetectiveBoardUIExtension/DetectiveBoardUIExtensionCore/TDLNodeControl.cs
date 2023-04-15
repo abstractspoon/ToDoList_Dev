@@ -53,7 +53,7 @@ namespace DetectiveBoardUIExtension
 		// -------------------------------------------------------------------------
 
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
-		protected int DefaultPinSize { get { return ScaleByDPIFactor(4); } }
+		protected int DefaultPinRadius { get { return ScaleByDPIFactor(4); } }
 
 		// -------------------------------------------------------------------------
 
@@ -112,7 +112,7 @@ namespace DetectiveBoardUIExtension
 			int nodeWidth  = (4 * nodeHeight);
 
 			base.NodeSize = new Size(nodeWidth, nodeHeight);
-			base.PinRadius = DefaultPinSize;
+			base.PinRadius = DefaultPinRadius;
 
 			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
 			NodeSelectionChange += (s, ids) => { ClearUserLinkSelection(); };
@@ -217,7 +217,7 @@ namespace DetectiveBoardUIExtension
 					m_Options = value;
 
 					base.DrawNodesOnTop = !m_Options.HasFlag(DetectiveBoardOption.DrawLinksOnTop);
-					base.PinRadius = (m_Options.HasFlag(DetectiveBoardOption.DrawPins) ? DefaultPinSize : 0);
+					base.PinRadius = (m_Options.HasFlag(DetectiveBoardOption.DrawPins) ? DefaultPinRadius : 0);
 
 					Invalidate();
 				}
@@ -794,27 +794,10 @@ namespace DetectiveBoardUIExtension
 				DrawSelectedUserLink(graphics);
 		}
 
-		protected void DrawSelectedUserLink(Graphics graphics)
+		private Rectangle GetSelectedUserLinkPinRect(Point pos)
 		{
-			if (HasSelectedUserLink)
-			{
-				Point fromPos, toPos;
-				
-				if (IsConnectionVisible(m_SelectedUserLink, out fromPos, out toPos))
-				{
-					graphics.DrawLine(SystemPens.WindowText, fromPos, toPos);
-
-					// Draw regular pin at the 'from end'
-					var pin = GetPinRect(fromPos);
-					graphics.FillEllipse(SystemBrushes.Window, pin);
-					graphics.DrawEllipse(SystemPens.WindowText, pin);
-
-					// Draw a box at the 'to end' which can be moved
-					pin = GetPinRect(toPos);
-					graphics.FillRectangle(SystemBrushes.Window, pin);
-					graphics.DrawRectangle(SystemPens.WindowText, pin);
-				}
-			}
+			// Always the unzoomed size
+			return new Rectangle((pos.X - DefaultPinRadius), (pos.Y - DefaultPinRadius), (2 * DefaultPinRadius), (2 * DefaultPinRadius));
 		}
 
 		protected void DrawTaskDependencies(Graphics graphics, RadialTree.TreeNode<uint> node)
@@ -834,7 +817,7 @@ namespace DetectiveBoardUIExtension
 							IsConnectionVisible(node, dependId, out fromPos, out toPos))
 						{
 							DrawConnection(graphics, Pens.Blue, Brushes.Blue, fromPos, toPos);
-							DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, Color.Blue, fromPos, toPos);
+							DrawConnectionArrows(graphics, UserLink.EndArrows.Start, 2, Color.Blue, fromPos, toPos, (PinRadius + 1));
 						}
 					}
 				}
@@ -845,6 +828,11 @@ namespace DetectiveBoardUIExtension
 			}
 		}
 
+		protected void DrawSelectedUserLink(Graphics graphics)
+		{
+			DrawUserLink(graphics, m_SelectedUserLink, true);
+		}
+
 		protected void DrawUserLinks(Graphics graphics, RadialTree.TreeNode<uint> node)
 		{
 			var taskItem = GetTaskItem(node);
@@ -852,24 +840,54 @@ namespace DetectiveBoardUIExtension
 			if (taskItem?.UserLinks?.Count > 0)
 			{
 				foreach (var link in taskItem.UserLinks)
-				{
-					Point fromPos, toPos;
-
-					// Don't draw the selected connection until the very end
-					if (!link.IdsMatch(m_SelectedUserLink) &&
-						IsConnectionVisible(node, link.ToId, out fromPos, out toPos))
-					{
-						DrawConnection(graphics, new Pen(link.Color, link.Thickness), new SolidBrush(link.Color), fromPos, toPos);
-						DrawConnectionArrows(graphics, link.Arrows, link.Thickness + 1, link.Color, fromPos, toPos);
-					}
-				}
+					DrawUserLink(graphics, link, false);
 			}
 
 			// Children
 			foreach (var child in node.Children)
 				DrawUserLinks(graphics, child);
 		}
-		
+
+		protected void DrawUserLink(Graphics graphics, UserLink link, bool selected)
+		{
+			if (selected && !HasSelectedUserLink)
+				return;
+
+			if (selected && (link != m_SelectedUserLink))
+				return;
+
+			if (!selected && (link == m_SelectedUserLink))
+				return;
+
+			Point fromPos, toPos;
+
+			if (IsConnectionVisible(link, out fromPos, out toPos))
+			{
+				var color = (selected ? SystemColors.WindowText : link.Color);
+				var thickness = (selected ? 2 : link.Thickness + 1);
+				var offset = (selected ? (DefaultPinRadius + 2) : PinRadius);
+				var size = UIExtension.DependencyArrows.Size(TextFont);
+				var pinBrush = (selected ? null : new SolidBrush(color));
+
+				DrawConnection(graphics, new Pen(color, thickness), pinBrush, fromPos, toPos);
+				DrawConnectionArrows(graphics, link.Arrows, thickness, color, fromPos, toPos, offset);
+
+				// Draw special pins
+				if (selected)
+				{
+					// Draw regular pin at the 'from end'
+					var pin = GetSelectedUserLinkPinRect(fromPos);
+					graphics.FillEllipse(SystemBrushes.Window, pin);
+					graphics.DrawEllipse(SystemPens.WindowText, pin);
+
+					// Draw a box at the 'to end' which can be moved
+					pin = GetSelectedUserLinkPinRect(toPos);
+					graphics.FillRectangle(SystemBrushes.Window, pin);
+					graphics.DrawRectangle(SystemPens.WindowText, pin);
+				}
+			}
+		}
+
 		protected override void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
 		{
 			var taskItem = m_TaskItems.GetTask(nodeId);
@@ -918,19 +936,18 @@ namespace DetectiveBoardUIExtension
 				if ((taskItem?.ParentId != 0) || m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 				{
 					DrawConnection(graphics, Pens.Gray, Brushes.Gray, nodePos, parentPos);
-					DrawConnectionArrows(graphics, UserLink.EndArrows.Finish, 2, Color.Gray, nodePos, parentPos);
+					DrawConnectionArrows(graphics, UserLink.EndArrows.Finish, 2, Color.Gray, nodePos, parentPos, (PinRadius + 1));
 				}
 			}
 		}
 
-		protected void DrawConnectionArrows(Graphics graphics, UserLink.EndArrows arrows, int thickness, Color color, Point fromPos, Point toPos)
+		protected void DrawConnectionArrows(Graphics graphics, UserLink.EndArrows arrows, int thickness, Color color, Point fromPos, Point toPos, int offset)
 		{
 			if (arrows != UserLink.EndArrows.None)
 			{
 				using (var pen = new Pen(color, thickness))
 				{
 					int size = UIExtension.DependencyArrows.Size(TextFont) + thickness;
-					int offset = (PinRadius + 1);
 
 					if ((arrows == UserLink.EndArrows.Start) || (arrows == UserLink.EndArrows.Both))
 					{
@@ -1411,10 +1428,10 @@ namespace DetectiveBoardUIExtension
 				if (IsConnectionVisible(m_SelectedUserLink, out fromPos, out toPos))
 				{
 					// Check for pin ends of selected link
-					if (GetPinRect(fromPos).Contains(ptClient))
+					if (GetSelectedUserLinkPinRect(fromPos).Contains(ptClient))
 						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
 
-					if (GetPinRect(toPos).Contains(ptClient))
+					if (GetSelectedUserLinkPinRect(toPos).Contains(ptClient))
 						return Cursors.SizeAll;
 				}
 			}

@@ -28,7 +28,30 @@ namespace DetectiveBoardUIExtension
 	public partial class NodeControl : UserControl
 	{
 		public int NodeSpacing = 5;
-		public int PinRadius = 2;
+
+		int m_PinRadius = 2;
+
+		public int PinRadius
+		{
+			get
+			{
+				if (m_PinRadius == 0)
+					return 0;
+
+				// else
+				return (int)Math.Max(2f, (m_PinRadius * OverallScaleFactor));
+			}
+
+			set
+			{
+				if (value != m_PinRadius)
+				{
+					m_PinRadius = value;
+					Invalidate();
+				}
+			}
+		}
+
 
 		public const uint NullId = uint.MaxValue;
 
@@ -673,7 +696,7 @@ namespace DetectiveBoardUIExtension
 
 		protected void DrawPin(Graphics graphics, Brush brush, Point pos)
 		{
-			if (PinRadius > 0)
+			if ((PinRadius > 0) && (brush != null))
 				graphics.FillEllipse(brush, GetPinRect(pos));
 		}
 
