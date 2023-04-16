@@ -691,7 +691,7 @@ namespace DetectiveBoardUIExtension
 
 		protected Rectangle GetPinRect(Point pos)
 		{
-			return new Rectangle((pos.X - PinRadius), (pos.Y - PinRadius), (2 * PinRadius), (2 * PinRadius));
+			return Geometry2D.GetCentredRect(pos, (PinRadius * 2));
 		}
 
 		protected void DrawPin(Graphics graphics, Brush brush, Point pos)

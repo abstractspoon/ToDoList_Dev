@@ -9,6 +9,11 @@ namespace DetectiveBoardUIExtension
 {
 	public class Geometry2D
 	{
+		public static Rectangle GetCentredRect(Point pos, int sideLength)
+		{
+			return new Rectangle((pos.X - (sideLength / 2)), (pos.Y - (sideLength / 2)), sideLength, sideLength);
+		}
+
 		public static float AngleFromVertical(Point ptFrom, Point ptTo, bool degrees)
 		{
 			var diff = Difference(ptTo, ptFrom);

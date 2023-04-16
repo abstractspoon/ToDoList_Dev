@@ -797,7 +797,7 @@ namespace DetectiveBoardUIExtension
 		private Rectangle GetSelectedUserLinkPinRect(Point pos)
 		{
 			// Always the unzoomed size
-			return new Rectangle((pos.X - DefaultPinRadius), (pos.Y - DefaultPinRadius), (2 * DefaultPinRadius), (2 * DefaultPinRadius));
+			return Geometry2D.GetCentredRect(pos, (DefaultPinRadius * 2));
 		}
 
 		protected void DrawTaskDependencies(Graphics graphics, RadialTree.TreeNode<uint> node)
@@ -1237,6 +1237,61 @@ namespace DetectiveBoardUIExtension
 
 			return null;
 		}
+		
+		protected UserLink HitTestUserLinkEnds(Point ptClient, ref bool from)
+		{
+			return HitTestUserLink(RootNode, ptClient);
+		}
+
+		protected UserLink HitTestUserLinkEnds(RadialTree.TreeNode<uint> node, Point ptClient, ref bool from)
+		{
+			var fromTask = GetTaskItem(node.Data);
+
+			if (fromTask?.UserLinks?.Count > 0)
+			{
+				foreach (var link in fromTask.UserLinks)
+				{
+					Debug.Assert(node.Data == link.FromId);
+
+					if (HitTestUserLinkEnds(link, ptClient, ref from))
+						return link;
+				}
+			}
+
+			// check children
+			foreach (var child in node.Children)
+			{
+				var hit = HitTestUserLinkEnds(child, ptClient, ref from);
+
+				if (hit != null)
+					return hit;
+			}
+
+			return null;
+		}
+
+		protected bool HitTestUserLinkEnds(UserLink link, Point ptClient, ref bool from)
+		{
+			Point fromPos, toPos;
+
+			if (IsConnectionVisible(link, out fromPos, out toPos))
+			{
+				// Check for pin ends of selected link
+				if (Geometry2D.GetCentredRect(fromPos, (DefaultPinRadius * 2)).Contains(ptClient))
+				{
+					from = true;
+					return true;
+				}
+
+				if (Geometry2D.GetCentredRect(toPos, (DefaultPinRadius * 2)).Contains(ptClient))
+				{
+					from = false;
+					return true;
+				}
+			}
+
+			return false;
+		}
 
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
@@ -1422,19 +1477,14 @@ namespace DetectiveBoardUIExtension
 
 		protected Cursor GetSelectedUserLinkCursor(Point ptClient)
 		{
-			if (HasSelectedUserLink)
+			bool from = false;
+
+			if (HasSelectedUserLink && HitTestUserLinkEnds(m_SelectedUserLink, ptClient, ref from))
 			{
-				Point fromPos, toPos;
-
-				if (IsConnectionVisible(m_SelectedUserLink, out fromPos, out toPos))
-				{
-					// Check for pin ends of selected link
-					if (GetSelectedUserLinkPinRect(fromPos).Contains(ptClient))
-						return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
-
-					if (GetSelectedUserLinkPinRect(toPos).Contains(ptClient))
-						return Cursors.SizeAll;
-				}
+				if (from)
+					return UIExtension.AppCursor(UIExtension.AppCursorType.NoDrag);
+				else
+					return Cursors.SizeAll;
 			}
 
 			return null;
