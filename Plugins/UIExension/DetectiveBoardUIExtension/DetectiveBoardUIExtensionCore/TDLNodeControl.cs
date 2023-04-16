@@ -1421,29 +1421,6 @@ namespace DetectiveBoardUIExtension
 			return m_TaskItems.GetTask(nodeId);
 		}
 
-		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
-		{
-			return (base.IsAcceptableDragSource(node) && (node != RootNode));
-		}
-
-		protected bool OnDragDrop(object sender, IList<uint> nodeIds)
-		{
-			// Update the tasks
-			foreach (uint nodeId in nodeIds)
-			{
-				var node = GetNode(nodeId);
-				var task = GetTaskItem(nodeId);
-
-				if ((node != null) && (task != null))
-				{
-					task.UserPosition = node.Point.GetPosition();
-				}
-			}
-
-			TaskModified?.Invoke(this, nodeIds);
-			return true;
-		}
-
 		protected bool SelectedTasksAreAllEditable
 		{
 			get
@@ -1548,69 +1525,48 @@ namespace DetectiveBoardUIExtension
 			Cursor = ((cursor != null) ? cursor : Cursors.Arrow);
 		}
 
-/*
 		protected override void OnDragOver(DragEventArgs e)
 		{
-			var hitTest = DragHitTest(e);
-			bool segChange = !NodeHitTestResult.Match(hitTest, DropPos);
-
-			if (segChange)
-				m_DragImage.ShowNoLock(false);
-
-			base.OnDragOver(e);
-
-			if (segChange)
-				m_DragImage.ShowNoLock(true);
-
-			m_DragImage.Move(e.X, e.Y);
 		}
 
 		protected override void OnDragEnter(DragEventArgs e)
 		{
-			base.OnDragEnter(e);
-
-			m_DragImage.Begin(Handle, 
-								this, 
-								SelectedNode, 
-								NodeWidth, 
-								NodeHeight, 
-								NodeWidth / 2,          // Middle of task
-								-DPIScaling.Scale(16)); // below the cursor
-
-			m_LastDragPos = PointToClient(new Point(e.X, e.Y));
 		}
-		protected override void DoDragCleanUp()
+
+		protected bool IsAcceptableDropTarget(RadialTree.TreeNode<uint> node)
 		{
-			base.DoDragCleanUp();
-
-			m_DragImage.End();
+			return false;
 		}
 
-		override protected bool IsAcceptableDropTarget(NodeDragEventArgs e)
+		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
 		{
-			if (!base.IsAcceptableDropTarget(e))
-				return false;
-
-			return !(e.DraggedNode as TaskNode).IsLocked;
+			return (base.IsAcceptableDragSource(node) && (node != RootNode));
 		}
 
-		override protected bool IsAcceptableDragSource(Node node)
+		protected bool OnDragDrop(object sender, IList<uint> nodeIds)
 		{
-			if (!base.IsAcceptableDragSource(node))
-				return false;
+			// Update the tasks
+			foreach (uint nodeId in nodeIds)
+			{
+				var node = GetNode(nodeId);
+				var task = GetTaskItem(nodeId);
 
-			return !(node as TaskNode).IsLocked;
+				if ((node != null) && (task != null))
+				{
+					task.UserPosition = node.Point.GetPosition();
+				}
+			}
+
+			TaskModified?.Invoke(this, nodeIds);
+			return true;
 		}
 
-		override protected bool DoDrop(NodeDragEventArgs e)
+		override protected void OnDragDrop(DragEventArgs e)
 		{
-			m_DragImage.End();
-			// TODO
 
-			return base.DoDrop(e);
+			base.OnDragDrop(e);
 		}
 
-*/
 		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
 		{
 // 			DoPaintNode(graphics, 
