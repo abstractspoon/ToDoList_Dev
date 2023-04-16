@@ -74,7 +74,7 @@ namespace DetectiveBoardUIExtension
 
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
-		private uint m_DropHighlightedTaskId;
+		private uint m_DropHighlightedTaskId, m_HitTaskId;
 
 		private bool m_DraggingSelectedUserLink = false;
 		private Point m_DraggedUserLinkEnd = Point.Empty;
@@ -901,16 +901,28 @@ namespace DetectiveBoardUIExtension
 				// Draw special pins
 				if (selected)
 				{
-					// Draw regular pin at the 'from end'
-					var pin = GetSelectedUserLinkPinRect(fromPos);
-					graphics.FillEllipse(SystemBrushes.Window, pin);
-					graphics.DrawEllipse(SystemPens.WindowText, pin);
-
-					// Draw a box at the 'to end' which can be moved
-					pin = GetSelectedUserLinkPinRect(toPos);
-					graphics.FillRectangle(SystemBrushes.Window, pin);
-					graphics.DrawRectangle(SystemPens.WindowText, pin);
+					DrawSelectionPin(graphics, fromPos, false);
+					DrawSelectionPin(graphics, toPos, true);
 				}
+			}
+		}
+
+		void DrawSelectionPin(Graphics graphics, Point pos, bool draggable)
+		{
+			var pin = GetSelectedUserLinkPinRect(pos);
+
+			if (draggable)
+			{
+				// Draw a box
+				graphics.FillRectangle(SystemBrushes.Window, pin);
+				graphics.DrawRectangle(SystemPens.WindowText, pin);
+
+			}
+			else
+			{
+				// Draw circle
+				graphics.FillEllipse(SystemBrushes.Window, pin);
+				graphics.DrawEllipse(SystemPens.WindowText, pin);
 			}
 		}
 
@@ -933,6 +945,12 @@ namespace DetectiveBoardUIExtension
 			if (taskItem != null)
 			{
 				DoPaintNode(graphics, taskItem, rect, GetTaskDrawState(taskItem));
+
+				if (m_HitTaskId == nodeId)
+				{
+					// Draw a temporary 'pin' for initiating a new user link
+					DrawSelectionPin(graphics, Geometry2D.Centroid(rect), true);
+				}
 			}
 			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 			{
@@ -1572,9 +1590,24 @@ namespace DetectiveBoardUIExtension
  			base.OnMouseMove(e);
 
 			Cursor cursor = null;
+			m_HitTaskId = 0;
 
 			if (!ReadOnly)
 			{
+				// Keep track of the 'hot' task so we can display a 
+				// 'pin' for initiating a new link drag
+				var node = HitTestNode(e.Location);
+
+				if ((node != null) && (m_HitTaskId != node.Data))
+				{
+					Invalidate();
+					m_HitTaskId = node.Data;
+				}
+				else if ((node == null) && (m_HitTaskId != 0))
+				{
+					Invalidate();
+				}
+
 				if (DrawNodesOnTop)
 				{
 					// Selected link ends overlap node edges
