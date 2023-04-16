@@ -53,7 +53,7 @@ namespace DetectiveBoardUIExtension
 		// -------------------------------------------------------------------------
 
 		protected int LabelPadding { get { return ScaleByDPIFactor(2); } }
-		protected int DefaultPinRadius { get { return ScaleByDPIFactor(4); } }
+		protected int DefaultPinRadius { get { return ScaleByDPIFactor(3); } }
 
 		// -------------------------------------------------------------------------
 
@@ -864,13 +864,14 @@ namespace DetectiveBoardUIExtension
 			if (IsConnectionVisible(link, out fromPos, out toPos))
 			{
 				var color = (selected ? SystemColors.WindowText : link.Color);
-				var thickness = (selected ? 2 : link.Thickness + 1);
+				var lineThickness = (selected ? 2 : link.Thickness);
+				var arrowThickness = Math.Max(2, lineThickness);
 				var offset = (selected ? (DefaultPinRadius + 2) : PinRadius);
 				var size = UIExtension.DependencyArrows.Size(TextFont);
 				var pinBrush = (selected ? null : new SolidBrush(color));
 
-				DrawConnection(graphics, new Pen(color, thickness), pinBrush, fromPos, toPos);
-				DrawConnectionArrows(graphics, link.Arrows, thickness, color, fromPos, toPos, offset);
+				DrawConnection(graphics, new Pen(color, lineThickness), pinBrush, fromPos, toPos);
+				DrawConnectionArrows(graphics, link.Arrows, arrowThickness, color, fromPos, toPos, offset);
 
 				// Draw special pins
 				if (selected)
