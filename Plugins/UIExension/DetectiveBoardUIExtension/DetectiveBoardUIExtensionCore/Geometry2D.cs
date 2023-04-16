@@ -14,18 +14,44 @@ namespace DetectiveBoardUIExtension
 			return new Rectangle((pos.X - (sideLength / 2)), (pos.Y - (sideLength / 2)), sideLength, sideLength);
 		}
 
-		public static float AngleFromVertical(Point ptFrom, Point ptTo, bool degrees)
+		public enum AngleAxis
+		{
+			FromHorizontal,
+			FromVertical
+		}
+
+		public static double DegreesToRadians(double degrees)
+		{
+			return ((degrees * Math.PI) / 180);
+		}
+
+		public static double RadiansToDegrees(double radians)
+		{
+			return ((radians * 180) / Math.PI);
+		}
+
+		public static float BestTextAngleInDegrees(Point ptFrom, Point ptTo, AngleAxis axis)
+		{
+			if (ptFrom.X <= ptTo.X)
+				return DegreesBetween(ptTo, ptFrom, axis);
+
+			// else
+			return DegreesBetween(ptFrom, ptTo, axis);
+		}
+
+		public static float DegreesBetween(Point ptFrom, Point ptTo, AngleAxis axis)
 		{
 			var diff = Difference(ptTo, ptFrom);
-			var radians = (Math.Atan2(diff.Y, diff.X) - (Math.PI / 2));
+			var radians = Math.Atan2(diff.Y, diff.X);
+			var degrees = RadiansToDegrees(radians);
 
-			while (radians < 0)
-				radians += (2 * Math.PI);
+			if (axis == AngleAxis.FromVertical)
+				degrees -= 90;
 
-			if (degrees)
-				return (float)((radians * 180) / Math.PI);
+			while (degrees < 0)
+				degrees += 360;
 
-			return (float)radians;
+			return (float)degrees;
 		}
 
 		public static Rectangle RectFromPoints(Point pt1, Point pt2)

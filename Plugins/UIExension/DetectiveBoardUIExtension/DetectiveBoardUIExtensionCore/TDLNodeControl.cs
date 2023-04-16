@@ -878,6 +878,26 @@ namespace DetectiveBoardUIExtension
 				DrawConnection(graphics, new Pen(color, lineThickness), pinBrush, fromPos, toPos);
 				DrawConnectionArrows(graphics, link.Arrows, arrowThickness, color, fromPos, toPos, offset);
 
+				if (!string.IsNullOrWhiteSpace(link.Label))
+				{
+					var matrix = new Matrix();
+					var textOffset = Geometry2D.MidPoint(fromPos, toPos);
+					float angle = Geometry2D.BestTextAngleInDegrees(fromPos, toPos, Geometry2D.AngleAxis.FromHorizontal);
+					var format = new StringFormat()
+					{
+						Alignment = StringAlignment.Center,
+						LineAlignment = StringAlignment.Far
+					};
+
+					matrix.Rotate(angle, MatrixOrder.Append);
+					matrix.Translate(textOffset.X, textOffset.Y, MatrixOrder.Append);
+
+					graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+					graphics.Transform = matrix;
+					graphics.DrawString(link.Label, TextFont, SystemBrushes.WindowText/*new SolidBrush(color)*/, Point.Empty, format);
+					graphics.ResetTransform();
+				}
+
 				// Draw special pins
 				if (selected)
 				{
@@ -968,14 +988,13 @@ namespace DetectiveBoardUIExtension
 
 					if ((arrows == UserLink.EndArrows.Start) || (arrows == UserLink.EndArrows.Both))
 					{
-						var degrees = Geometry2D.AngleFromVertical(toPos, fromPos, true);
+						var degrees = Geometry2D.DegreesBetween(toPos, fromPos, Geometry2D.AngleAxis.FromVertical);
 						UIExtension.ArrowHeads.Draw(graphics, pen, fromPos.X, fromPos.Y, size, offset, degrees);
-
 					}
 
 					if ((arrows == UserLink.EndArrows.Finish) || (arrows == UserLink.EndArrows.Both))
 					{
-						var degrees = Geometry2D.AngleFromVertical(fromPos, toPos, true);
+						var degrees = Geometry2D.DegreesBetween(fromPos, toPos, Geometry2D.AngleAxis.FromVertical);
 						UIExtension.ArrowHeads.Draw(graphics, pen, toPos.X, toPos.Y, size, offset, degrees);
 					}
 				}
@@ -1189,7 +1208,7 @@ namespace DetectiveBoardUIExtension
         private Rectangle CalcIconRect(Rectangle labelRect)
 		{
             Point topLeft = labelRect.Location;
-			topLeft.Offset(1, 1);
+			topLeft.Offset(2, 2);
             
 //             if (ShowCompletionCheckboxes)
 //                 left += (int)(CheckboxSize.Width * ImageZoomFactor);
@@ -1309,6 +1328,17 @@ namespace DetectiveBoardUIExtension
 			return false;
 		}
 
+		private void SelectUserLink(UserLink link)
+		{
+			if ((link != null) && (link != m_SelectedUserLink))
+			{
+				SelectNode(link.FromId, true);
+				Invalidate();
+			}
+			
+			m_SelectedUserLink = link;
+		}
+
 		protected override void OnMouseDown(MouseEventArgs e)
 		{
 			m_EditTimer.Stop();
@@ -1323,11 +1353,7 @@ namespace DetectiveBoardUIExtension
 
 				if (link != null)
 				{
-					if (link != m_SelectedUserLink)
-					{
-						SelectNode(link.FromId, true);
-						m_SelectedUserLink = link;
-					}
+					SelectUserLink(link);
 
 					m_DraggingSelectedUserLink = true;
 					m_DraggedUserLinkEnd = GetNodeClientPos(GetNode(link.FromId));
@@ -1375,7 +1401,12 @@ namespace DetectiveBoardUIExtension
 				var link = HitTestUserLink(e.Location);
 
 				if (link != null)
+				{
+					SelectNode(link.FromId, true);
+					m_SelectedUserLink = link;
+
 					DoubleClickUserLink?.Invoke(this, null);
+				}
 			}
 		}
 
@@ -1391,13 +1422,10 @@ namespace DetectiveBoardUIExtension
 
 				if ((link != null) && (link == m_SelectedUserLink))
 				{
-					// Set the owning node first because that will clear the selected connection
-					SelectNode(link.FromId, true);
-					Invalidate();
+					m_SelectedUserLink = null;
+					SelectUserLink(link);
 
-					m_SelectedUserLink = link;
 					UserLinkSelectionChange?.Invoke(this, null);
-
 					return;
 				}
 				else if (HasSelectedUserLink)
