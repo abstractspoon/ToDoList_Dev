@@ -862,18 +862,18 @@ namespace DetectiveBoardUIExtension
 
 			if (IsConnectionVisible(link, out fromPos, out toPos))
 			{
+				if (selected && m_DraggingSelectedUserLink)
+				{
+					fromPos = GetNodeClientPos(GetNode(link.FromId));
+					toPos = m_DraggedUserLinkEnd;
+				}
+
 				var color = (selected ? SystemColors.WindowText : link.Color);
 				var lineThickness = (selected ? 2 : link.Thickness);
 				var arrowThickness = Math.Max(2, lineThickness);
 				var offset = (selected ? (DefaultPinRadius + 2) : PinRadius);
 				var size = UIExtension.DependencyArrows.Size(TextFont);
 				var pinBrush = (selected ? null : new SolidBrush(color));
-
-				if (selected && m_DraggingSelectedUserLink)
-				{
-					fromPos = GetNodeClientPos(GetNode(link.FromId));
-					toPos = m_DraggedUserLinkEnd;
-				}
 
 				DrawConnection(graphics, new Pen(color, lineThickness), pinBrush, fromPos, toPos);
 				DrawConnectionArrows(graphics, link.Arrows, arrowThickness, color, fromPos, toPos, offset);
@@ -891,9 +891,6 @@ namespace DetectiveBoardUIExtension
 					graphics.FillRectangle(SystemBrushes.Window, pin);
 					graphics.DrawRectangle(SystemPens.WindowText, pin);
 				}
-				else
-				{
- }
 			}
 		}
 
