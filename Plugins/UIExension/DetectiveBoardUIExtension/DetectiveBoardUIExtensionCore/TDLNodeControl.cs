@@ -33,7 +33,7 @@ namespace DetectiveBoardUIExtension
 	// ------------------------------------------------------------
 
 	[System.ComponentModel.DesignerCategory("")]
-	class TDLNodeControl : NodeControl, IDragRenderer
+	class TDLNodeControl : NodeControl
 	{
 		public event EditTaskLabelEventHandler EditTaskLabel;
 		public event EditTaskIconEventHandler EditTaskIcon;
@@ -74,9 +74,10 @@ namespace DetectiveBoardUIExtension
 
 		private TaskItem m_PreviouslySelectedTask;
 		private UserLink m_SelectedUserLink;
+		private uint m_DropHighlightedTaskId;
 
-		private DragImage m_DragImage;
-		private Point m_LastDragPos;
+		private bool m_DraggingSelectedUserLink = false;
+		private Point m_DraggedUserLinkEnd = Point.Empty;
 
 		private TaskItems m_TaskItems;
 		
@@ -102,8 +103,6 @@ namespace DetectiveBoardUIExtension
 			m_EditTimer.Interval = 500;
 			m_EditTimer.Tick += new EventHandler(OnEditLabelTimer);
 
-			m_DragImage = new DragImage();
-			m_LastDragPos = Point.Empty;
 			Options = DefaultOptions;
 
 			m_TaskItems = null;
@@ -114,7 +113,7 @@ namespace DetectiveBoardUIExtension
 			base.NodeSize = new Size(nodeWidth, nodeHeight);
 			base.PinRadius = DefaultPinRadius;
 
-			DragDropChange += new DragDropChangeEventHandler(OnDragDrop);
+			DragDropChange += new NodeDragDropChangeEventHandler(OnDragDropNodes);
 			NodeSelectionChange += (s, ids) => { ClearUserLinkSelection(); };
 
 			RebuildFonts();
@@ -870,6 +869,12 @@ namespace DetectiveBoardUIExtension
 				var size = UIExtension.DependencyArrows.Size(TextFont);
 				var pinBrush = (selected ? null : new SolidBrush(color));
 
+				if (selected && m_DraggingSelectedUserLink)
+				{
+					fromPos = GetNodeClientPos(GetNode(link.FromId));
+					toPos = m_DraggedUserLinkEnd;
+				}
+
 				DrawConnection(graphics, new Pen(color, lineThickness), pinBrush, fromPos, toPos);
 				DrawConnectionArrows(graphics, link.Arrows, arrowThickness, color, fromPos, toPos, offset);
 
@@ -886,7 +891,22 @@ namespace DetectiveBoardUIExtension
 					graphics.FillRectangle(SystemBrushes.Window, pin);
 					graphics.DrawRectangle(SystemPens.WindowText, pin);
 				}
+				else
+				{
+ }
 			}
+		}
+
+		DrawState GetTaskDrawState(TaskItem task)
+		{
+			if (m_DraggingSelectedUserLink && (m_DropHighlightedTaskId == task.TaskId))
+				return DrawState.DropHighlighted;
+
+			if (SelectedNodeIds.Contains(task.TaskId))
+				return DrawState.Selected;
+
+			// all else
+			return DrawState.None;
 		}
 
 		protected override void DrawNode(Graphics graphics, uint nodeId, Rectangle rect)
@@ -895,8 +915,7 @@ namespace DetectiveBoardUIExtension
 
 			if (taskItem != null)
 			{
-				var drawState = (SelectedNodeIds.Contains(nodeId) ? DrawState.Selected : DrawState.None);
-				DoPaintNode(graphics, taskItem, rect, drawState);
+				DoPaintNode(graphics, taskItem, rect, GetTaskDrawState(taskItem));
 			}
 			else if (m_Options.HasFlag(DetectiveBoardOption.ShowRootNode))
 			{
@@ -1240,14 +1259,14 @@ namespace DetectiveBoardUIExtension
 		
 		protected UserLink HitTestUserLinkEnds(Point ptClient, ref bool from)
 		{
-			return HitTestUserLink(RootNode, ptClient);
+			return HitTestUserLinkEnds(RootNode, ptClient, ref from);
 		}
 
 		protected UserLink HitTestUserLinkEnds(RadialTree.TreeNode<uint> node, Point ptClient, ref bool from)
 		{
 			var fromTask = GetTaskItem(node.Data);
 
-			if (fromTask?.UserLinks?.Count > 0)
+			if ((fromTask != null) && !fromTask.IsLocked && (fromTask?.UserLinks?.Count > 0))
 			{
 				foreach (var link in fromTask.UserLinks)
 				{
@@ -1301,17 +1320,36 @@ namespace DetectiveBoardUIExtension
 			// Check for connection first to simplify logic
 			if (!ReadOnly)
 			{
-				var link = HitTestUserLink(e.Location);
+				bool from = false;
 
-				if ((link != null) && !m_TaskItems.IsTaskLocked(link.FromId))
+				var link = HitTestUserLinkEnds(e.Location, ref from);
+
+				if (link != null)
 				{
-					// Cache the link to be checked in OnMouseClick
-					m_SelectedUserLink = link;
-					return;
+					if (link != m_SelectedUserLink)
+						m_SelectedUserLink = link;
+
+					m_DraggingSelectedUserLink = true;
+					m_DraggedUserLinkEnd = GetNodeClientPos(GetNode(link.FromId));
+
+					DoDragDrop(this, DragDropEffects.Move);
+
+					return; // Prevent base class handling
 				}
-				else if (HasSelectedUserLink)
+				else
 				{
-					ClearUserLinkSelection();
+					link = HitTestUserLink(e.Location);
+
+					if ((link != null) && !m_TaskItems.IsTaskLocked(link.FromId))
+					{
+						// Cache the link to be checked in OnMouseClick
+						m_SelectedUserLink = link;
+						return;
+					}
+					else if (HasSelectedUserLink)
+					{
+						ClearUserLinkSelection();
+					}
 				}
 			}
 
@@ -1527,15 +1565,42 @@ namespace DetectiveBoardUIExtension
 
 		protected override void OnDragOver(DragEventArgs e)
 		{
-		}
+			if (m_DraggingSelectedUserLink)
+			{
+				var ptClient = m_DraggedUserLinkEnd = PointToClient(new Point(e.X, e.Y));
+				var node = HitTestNode(ptClient, true);
 
-		protected override void OnDragEnter(DragEventArgs e)
-		{
+				if (IsAcceptableDropTarget(node))
+				{
+					m_DropHighlightedTaskId = node.Data;
+					e.Effect = DragDropEffects.Move;
+				}
+				else
+				{
+					m_DropHighlightedTaskId = 0;
+					e.Effect = DragDropEffects.None;
+				}
+
+				Invalidate();
+			}
+			else
+			{
+				base.OnDragOver(e);
+			}
 		}
 
 		protected bool IsAcceptableDropTarget(RadialTree.TreeNode<uint> node)
 		{
-			return false;
+			if (node == null)
+				return false;
+
+			var taskItem = GetTaskItem(node.Data);
+
+			if (taskItem == null)
+				return false;
+
+			// TODO
+			return true;
 		}
 
 		protected override bool IsAcceptableDragSource(RadialTree.TreeNode<uint> node)
@@ -1543,7 +1608,7 @@ namespace DetectiveBoardUIExtension
 			return (base.IsAcceptableDragSource(node) && (node != RootNode));
 		}
 
-		protected bool OnDragDrop(object sender, IList<uint> nodeIds)
+		protected bool OnDragDropNodes(object sender, IList<uint> nodeIds)
 		{
 			// Update the tasks
 			foreach (uint nodeId in nodeIds)
@@ -1563,15 +1628,21 @@ namespace DetectiveBoardUIExtension
 
 		override protected void OnDragDrop(DragEventArgs e)
 		{
+			if (m_DraggingSelectedUserLink)
+			{
+				if (m_DropHighlightedTaskId != 0)
+					m_SelectedUserLink.ChangeToId(m_DropHighlightedTaskId);
 
-			base.OnDragDrop(e);
-		}
+				m_DraggingSelectedUserLink = false;
+				m_DropHighlightedTaskId = 0;
 
-		public void DrawDragImage(Graphics graphics, Object obj, int width, int height)
-		{
-// 			DoPaintNode(graphics, 
-// 						(obj as TaskNode), 
-// 						DrawState.Selected | DrawState.DragImage);
+				Invalidate();
+				TaskModified?.Invoke(this, SelectedNodeIds);
+			}
+			else
+			{
+				base.OnDragDrop(e);
+			}
 		}
 
 	}

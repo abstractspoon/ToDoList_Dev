@@ -12,7 +12,7 @@ using System.Windows.Forms;
 namespace DetectiveBoardUIExtension
 {
 	public delegate void NodeSelectionChangeEventHandler(object sender, IList<uint> itemIds);
-	public delegate bool DragDropChangeEventHandler(object sender, IList<uint> itemIds);
+	public delegate bool NodeDragDropChangeEventHandler(object sender, IList<uint> itemIds);
 
 	// -------------------------------------------------------------------
 
@@ -91,7 +91,7 @@ namespace DetectiveBoardUIExtension
 		// -------------------------------------------------------------------
 
 		public event NodeSelectionChangeEventHandler NodeSelectionChange;
-		public event DragDropChangeEventHandler DragDropChange;
+		public event NodeDragDropChangeEventHandler DragDropChange;
 		public EventHandler ZoomChange;
 
 		// -------------------------------------------------------------------
